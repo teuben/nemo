@@ -4,14 +4,18 @@ include $(NEMOLIB)/makedefs
 
 #  note that xyzview NEEDS to be in singleprecision (or whatever GL default is)
 #  you probably don't want to touch this flag
-#  For older VOGL's (pre 1.3.0 ??) you may need an addition -DOLDVOGL
+#  For older VOGL's (pre 1.3.0 ??) you may need an addition -DOLD_VOGL
 #  Could perhaps also use -DXMAXSCREEN=512 -DYMAXSCREEN=512
 XYZFLAG = -DXYZVEL 
 
 #  for SGI you probably need to use:
 #		VOGLINC= VOGLLIB=-lgl
 VOGLINC = -I$(NEMOINC)/vogl
-VOGLLIB = $(NEMOLIB)/libvogl.a $(XLIBS)
+VOGLLIB = $(NEMOLIB)/libvogl.a $(NEMOXLIBS)
+
+MESA = $(HOME)/code/Mesa-6.0.1
+MESAINC = -DMESA -I$(MESA)/include
+MESALIB = -L$(MESA)/lib -lGL -lGLU -lglut $(NEMOXLIB)
 
 
 #	NEMO Library, and make it a precious one
@@ -95,5 +99,11 @@ xyzview:  xyzview.c
 	$(CC) -DSINGLEPREC $(CFLAGS)  $(XYZFLAG)  $(VOGLINC) \
 		-o xyzview xyzview.c \
 		$(NEMO_LIBS) $(VOGLLIB) $(EL) -lm
+
+
+mesa:	
+	$(CC) -DSINGLEPREC $(CFLAGS)  $(XYZFLAG)  $(MESAINC) \
+		-o xyzview xyzview.c \
+		$(NEMO_LIBS) $(MESALIB) $(EL) -lm
 
 
