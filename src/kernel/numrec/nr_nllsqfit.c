@@ -7,6 +7,7 @@
  *    16-jul-2002  Created                                  Peter Teuben
  *    17-jul-2002  added lfit() call for linear fits                 PJT
  *    18-jul-2000  added support for xdim > 1                        PJT
+ *    18-apr-2004  weights were computed wrong                       PJT
  */
 
 
@@ -133,7 +134,7 @@ int nr_nllsqfit(
   for (i=0; i<ndat; i++) {          /* copy our input data into NumRec ones */
     y[i+1] = ydat[i];
     if (wdat)
-      sig[i+1] = wdat[i];
+      sig[i+1] = 1/sqrt(wdat[i]);           /* mrqmin uses errors, not weights .... */
     else
       sig[i+1] = 1.0;
   }
