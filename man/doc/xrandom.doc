@@ -1,0 +1,18 @@
+%N xrandom
+%D Return seed for random numbers and optionally random numbers
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man xrandom' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A seed
+	Seed [0=seconds_1970, -1=centisec_boot -2=pid [0]
+%A n
+	Number of random numbers to draw [0]
+%A gauss
+	gaussian or uniform noise? [f]
+%A report
+	Report mean/dispersian/skewness/kurtosis? [f]
+%A tab
+	Tabulate all random numbers? [t]
+%A VERSION
+	20-jan-99 PJT [1.1]

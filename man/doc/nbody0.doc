@@ -1,0 +1,22 @@
+%N nbody0
+%D NEMO driver for nbody0
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man nbody0' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input (snapshot) file [???]
+%A out
+	Output (snapshot) file [???]
+%A eta
+	Accuracy parameter - determines timesteps [0.02]
+%A deltat
+	When to dump major output [0.25]
+%A tcrit
+	When to stop integrating [2]
+%A eps
+	Softening length [0.05]
+%A options
+	Optional output of 'step' into AUX []
+%A VERSION
+	11-feb-98 PJT [1.3a]
