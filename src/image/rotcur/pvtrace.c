@@ -5,6 +5,7 @@
  *      6-may-01    V1.1    added clip=, center= and linear interpolation
  *                          to get the trace velocity
  *                    a     fixed RPD !!
+ *     29-dec-01      b     added extra security
  *
  */
 
@@ -22,10 +23,10 @@ string defv[] = {
   "sign=1\n      1: Rotation largest for positive coordinates, -1: reverse",
   "sigma=0\n	 Velocity dispersion correction factor",
   "clip=\n       One (for -clip:clip) or Two clipping values",
-  "vsys=0\n      System velocity",
-  "inc=90\n      Inclination of disk",
-  "center=0\n    Center of galaxy along position axis",
-  "VERSION=1.1a\n 7-may-01 PJT",
+  "vsys=0\n       System velocity",
+  "inc=90\n       Inclination of disk",
+  "center=0\n     Center of galaxy along position axis",
+  "VERSION=1.1b\n 29-dec-01 PJT",
   NULL,
 };
 
@@ -100,12 +101,13 @@ local void pv_trace(imageptr iptr, int vsign,
   it = sqrt(sqr(eta*imax)+sqr(ilc));
   dprintf(0,"Map [%d POS x %d VEL] I_t=%g vsys=%g sini=%g\n",
 	  nx,ny,it,vsys,sini);
+  if (it<=0.0) error("I_t = %g too small",it);
 
-  for (ix=0; ix<nx; ix++) {
+  for (ix=0; ix<nx; ix++) {                 /* loop over all positions in P's */
     pos = ix*Dx(iptr) + Xmin(iptr) - psys;
     v0 = Ymin(iptr);
     dv = Dy(iptr);
-    if (pos*vsign > 0.0) {
+    if (pos*vsign > 0.0) {                 /* extract spectrum that always runs 'up' */
       for (iy=0; iy<ny; iy++) {
 	vel[iy] = v0 + iy*dv;
 	spec[iy] = MapValue(iptr,ix,iy);
@@ -116,11 +118,11 @@ local void pv_trace(imageptr iptr, int vsign,
 	spec[ny-iy-1] = MapValue(iptr,ix,iy);
       }
     }
-    if (pos*vsign < 0.0) {           /* fix up */
+    if (pos*vsign < 0.0) {           /* fix up our mini WCS header */
       v0 = v0 + (ny-1)*dv;     
       dv = -dv;
     }
-    nv = get_vels(ny,spec,v0,dv,it,clip,vels);
+    nv = get_vels(ny,spec,v0,dv,it,clip,vels);    /* get the vel's */
     printf("%g ",pos);
     vel_corr = (vels[0]-vsys)/sini;
     if (vel_corr > 0)
@@ -138,6 +140,13 @@ local void pv_trace(imageptr iptr, int vsign,
   free(spec);
 }
 
+
+/* get_vels:
+ *    this spectrum is always sorted such that we're looking for
+ *    a peak at the upper end of the array, the sign of 'dv' will
+ *    say where this is in velocity, but the array is always running
+ *    "up"
+ */
 
 local int get_vels(int n, real *s, real v0, real dv, real smin, real *clip, real *vels)
 {
@@ -158,9 +167,10 @@ local int get_vels(int n, real *s, real v0, real dv, real smin, real *clip, real
     v += dv;
   }
 
-  for (i=n-1; i>=0; i--) {      /* find the first pixels above smin */
+  for (i=n-1; i>=0; i--) {      /* find the highest pixels above smin */
     if (itrace < 0 && s[i] > smin) {
       itrace = i;
+      break;
     }
   }
 
