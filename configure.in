@@ -93,12 +93,14 @@ AC_MSG_RESULT($prec_flag)
 
 
 
-AC_ARG_ENABLE(lfs,  [  --enable-lfs            large-file-size], ok=$enableval, ok=no)
+AC_ARG_ENABLE(lfs,  [  --enable-lfs            large-file-size], ok=$enableval, ok=yes)
 if test "$ok" = "yes"; then
   CFLAGS="$CFLAGS -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE"
   echo "LFS selected, note that some filesystems may not support Large File anyways"
   echo "Test this with the NEMO command:"
   echo "     mkspiral s000 1000000 nmodel=40"
+else
+  echo "LFS not selected, be aware the largest filesize may be just 2GB"
 fi
 
 
@@ -559,6 +561,13 @@ fi
 AC_SUBST(GSL_CFLAGS)
 AC_SUBST(GSL_LIBS)
 
+dnl##-----------------------------------------------------------------------
+dnl##
+dnl## Flogger library (set of sorting routines)
+dnl##
+dnl##-----------------------------------------------------------------------
+
+AC_ARG_ENABLE(flogger, [  --enable-flogger        use Flogger], ok=$enableval, ok=no)
 
 dnl##-----------------------------------------------------------------------
 dnl##
@@ -580,6 +589,7 @@ fi
 
 AC_SUBST(TCL_CFLAGS)
 AC_SUBST(TCL_LIBS)
+
 
 dnl##--------------------------------------------------------------------
 dnl##

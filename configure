@@ -882,6 +882,7 @@ Optional Features:
   --enable-cfitsio       don't use CFITSIO
   --enable-gsl            use GSL
   --disable-gsltest       Do not try to compile and run a test GSL program
+  --enable-flogger        use Flogger
   --enable-tcl            use TCL
 
 Optional Packages:
@@ -5670,13 +5671,15 @@ if test "${enable_lfs+set}" = set; then
   enableval="$enable_lfs"
   ok=$enableval
 else
-  ok=no
+  ok=yes
 fi;
 if test "$ok" = "yes"; then
   CFLAGS="$CFLAGS -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE"
-  echo "Note that some filesystems may not support Large File anyways"
+  echo "LFS selected, note that some filesystems may not support Large File anyways"
   echo "Test this with the NEMO command:"
   echo "     mkspiral s000 1000000 nmodel=40"
+else
+  echo "LFS not selected, be aware the largest filesize may be just 2GB"
 fi
 
 
@@ -7723,7 +7726,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:7726:" \
+echo "$as_me:7729:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -7893,7 +7896,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_verb"
-(eval echo $as_me:7896: \"$ac_link\") >&5
+(eval echo $as_me:7899: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -7972,7 +7975,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_cv_prog_f77_v"
-(eval echo $as_me:7975: \"$ac_link\") >&5
+(eval echo $as_me:7978: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -9086,6 +9089,14 @@ fi
 
 
 
+# Check whether --enable-flogger or --disable-flogger was given.
+if test "${enable_flogger+set}" = set; then
+  enableval="$enable_flogger"
+  ok=$enableval
+else
+  ok=no
+fi;
+
 # Check whether --enable-tcl or --disable-tcl was given.
 if test "${enable_tcl+set}" = set; then
   enableval="$enable_tcl"
@@ -9109,6 +9120,7 @@ else
   { echo "$as_me:$LINENO: WARNING: TCL disabled" >&5
 echo "$as_me: WARNING: TCL disabled" >&2;}
 fi
+
 
 
 
