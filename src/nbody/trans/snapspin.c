@@ -14,6 +14,7 @@
  *	28-apr-98	V2.0 also allow radial inflow/outflow	PJT
  *	mar-94 ansi
  *      23-may-02       V2.0a  nemo_file_lines                  pjt
+ *      23-nov-03           b  carry over Key and Aux if present pjt
  */
 
 #include <stdinc.h>
@@ -35,7 +36,7 @@ string defv[] = {
     "sign=1\n           Sign of rotcur",
     "outflow=f\n        Outflow or Rotation/Spin",
     "times=all\n	times of snapshots to copy",
-    "VERSION=2.0a\n	23-may-02 PJT",
+    "VERSION=2.0b\n	23-nov-03 PJT",
     NULL,
 };
 
@@ -54,7 +55,7 @@ nemo_main()
     string times;
     Body *btab = NULL, *bp;
     int i, nbody, bits, nrscale, nvscale;
-    bool Qrotcur, Qphi, Qacc, Qflow;
+    bool Qrotcur, Qphi, Qacc, Qflow, Qkey, Qaux;
 
     instr = stropen (getparam("in"), "r");
     omega=getdparam("omega");
@@ -89,6 +90,8 @@ nemo_main()
         dprintf (1,"Snapshot time=%f spun\n",tsnap);
         Qphi = bits & PotentialBit;
         Qacc = bits & AccelerationBit;
+	Qkey = bits & KeyBit;
+	Qaux = bits & AuxBit;
         for (bp = btab; bp < btab+nbody; bp++) {
             if (Qrotcur) {
                 r = sqrt(sqr(Pos(bp)[0])+sqr(Pos(bp)[1]));
@@ -112,7 +115,7 @@ nemo_main()
             }
 #endif
         }
-        bits = bits & (TimeBit | MassBit | PhaseSpaceBit);
+        bits = bits & (TimeBit | MassBit | PhaseSpaceBit | KeyBit | AuxBit);
         put_snap(outstr, &btab, &nbody, &tsnap, &bits);
     }
 }
