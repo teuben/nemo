@@ -26,8 +26,9 @@
 #include <image.h>
 #include <table.h>
 #include <extstring.h>
+#include <spline.h>
 
-#define VERSION "flowcode:vrtm51 V1.8a 7-feb-04"
+#define VERSION "flowcode:vrtm51 V1.8b 21-jul-04"
 
 local double omega = 0.0;		/*   pattern speed  */
 local double pitch = 10.0;              /*    pitch angle   */
@@ -52,9 +53,6 @@ local bool Qconst = FALSE;     /* testing */
 #define MAXCOL  4
 
 extern int nemo_file_lines(string,int);
-extern void spline (double *coef, double *x, double *y, int n);
-extern double seval(double x0, double *x, double *y, double *coef, int n);
-
 extern string *burststring(string,string);
 
 /* 

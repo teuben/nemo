@@ -172,8 +172,17 @@ int getdat(real x[], real y[], real w[], int idx[], real res[], int *n, int nmax
 real bmcorr(real xx[2], real p[], int l, int m);
 int perform_init(real *p, real *c);
 
-rproc vobs;
-proc vobsd, vcor;			/* pointers to the correct functions */
+
+typedef real (*my_proc1)(real *, real *, int);
+typedef void (*my_proc2)(real *, real *, real *, int);
+typedef void (*my_proc3)(real *, real *, real *, real *);
+ 
+extern int nllsqfit(real *xdat, int xdim, real *ydat, real *wdat, real *ddat, int ndat, real *fpar, real *epar, int *mpar, int npar, real tol, int its, real lab, my_proc1 f, my_proc2 df);
+
+
+my_proc1 vobs;
+my_proc2 vobsd;
+my_proc3 vcor;			/* pointers to the correct functions */
 
 extern string *burststring(string,string);
 extern void freestrings(string *);
