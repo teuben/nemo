@@ -9,6 +9,7 @@
 # 11-jan-02     also allow pgplot directory in $NEMO/local/pgplot
 #  9-apr-02     fixed caltech links
 #  5-dec-02     added tcl/tk driver for carma
+# 29-jun-03     added darwin (tested w/ MacOSX 10.2)
 
 
 #			 	.. command line keywords ..
@@ -72,6 +73,9 @@ rm old.list
 
 # Solaris
 switch ($host)
+  case *darwin*:
+    $NEMO/local/pgplot/makemake   $NEMO/local/pgplot darwin g77_gcc
+    breaksw
   case solaris*:
   case sparc*:
   case sun5:

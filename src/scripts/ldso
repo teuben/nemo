@@ -9,6 +9,7 @@
 #    1-apr-01   changed .o to .so for shared objects now (NEMO V3)
 #   20-jun-01   sgi better detected
 #    1-jul-01   documented -G for solaris
+#   30-jun-03   finally some info on darwin's 'bundles'
 
 if ($#argv == 0) then
   echo "Usage: $0 <BASENAME>"
@@ -31,6 +32,10 @@ switch ($NEMOHOST)
     if ($status) goto error1
     # remove temp file
     rm -f so_locations
+    breaksw
+  case *darwin*:
+    cc -flat_namespace -bundle -undefined suppress -o $1.so $1.o >& $log
+    if ($status) goto error1
     breaksw
   case *sgi* :
     ld -shared $1.o -o $1.so >& $log
