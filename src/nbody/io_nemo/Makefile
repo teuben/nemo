@@ -19,7 +19,7 @@ LIBNEMO = -lnemo
 #--------------------------------------------------------
 # compilers options
 FC     = g77
-FFLAGS = -O -fno-second-underscore -fwritable-strings -Wno-globals
+FFLAGS = -O -fno-second-underscore -Wno-globals
 OPT    = -Wall -g
 #--------------------------------------------------------
 # Absoft f77's options
