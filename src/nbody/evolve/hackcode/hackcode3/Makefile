@@ -1,10 +1,10 @@
-# nbody/evolve/hackcode/hackcode3/Makefile: 
+# $NEMO/src/nbody/evolve/hackcode/hackcode3/Makefile: 
 include $(NEMOLIB)/makedefs
 
 #	experimental cloned off hackcode1 - add external potential(5NEMO)
 
-CFLAGS = -O
-LDFLAGS =
+#CFLAGS = -O
+#DFLAGS =
 
 L = $(NEMOLIB)/libnemo.a 
 
@@ -22,6 +22,8 @@ SRCDIR = $(NEMO)/src/nbody/evolve/hackcode/hackcode3
 
 # Targets used to export files to Nemo.
 
+install:
+
 install_bin: $(BINFILES)
 	cp $? $(NEMOBIN)
 	@touch .install_bin
@@ -29,7 +31,7 @@ install_bin: $(BINFILES)
 install_src: .install_man  .install_src
 
 .install_man: $(MANFILES)
-	cp $? $(NEMOPATH)/man/man1
+	cp $? $(NEMO)/man/man1
 	@touch .install_man
 
 .install_src: $(SRCFILES) Makefile
@@ -60,18 +62,22 @@ tidy:
 #
 hackcode3: code.o code_io.o load_mp.o grav_mp.o util.o
 	$(CC) $(LDFLAGS) -o hackcode3 \
-	   code.o code_io.o load_mp.o grav_mp.o util.o $(L) -lm
+	   code.o code_io.o load_mp.o grav_mp.o util.o \
+	$(NEMO_LIBS) $(LOCAL_LIBS) $(FORLIBS)
 
 hackcode3_qp: code.o code_io.o load_qp.o grav_qp.o util.o
 	$(CC) $(LDFLAGS) -o hackcode3_qp \
-	   code.o code_io.o load_qp.o grav_qp.o util.o $(L) -lm
+	   code.o code_io.o load_qp.o grav_qp.o util.o \
+	$(NEMO_LIBS) $(LOCAL_LIBS) $(FORLIBS)
 
 hackforce: hackforce.c defs.h load_mp.o grav_mp.o
-	$(CC) $(CFLAGS) -o hackforce hackforce.c load_mp.o grav_mp.o $(L) -lm
+	$(CC) $(CFLAGS) -o hackforce hackforce.c load_mp.o grav_mp.o \
+	$(NEMO_LIBS) $(LOCAL_LIBS) $(FORLIBS)
 
 hackforce_qp: hackforce.c defs.h load_qp.o grav_qp.o
 	$(CC) $(CFLAGS) -DQUADPOLE -o hackforce_qp \
-	   hackforce.c load_qp.o grav_qp.o $(L) -lm
+	   hackforce.c load_qp.o grav_qp.o \
+	$(NEMO_LIBS) $(LOCAL_LIBS) $(FORLIBS)
 
 code.o: code.c defs.h code.h
 
@@ -104,7 +110,7 @@ util.o: util.c defs.h
 hackcode3_2d: code_2d.o code_io_2d.o load_2d.o grav_2d.o util_2d.o
 	$(CC) $(LDFLAGS) -o hackcode3_2d \
 	   code_2d.o code_io_2d.o load_2d.o grav_2d.o util_2d.o \
-	   $(L) -lm
+	   $(NEMO_LIBS)
 
 code_2d.o: code.c defs.h code.h
 	$(CC) $(CFLAGS) -DTWODIM -c code.c
@@ -128,12 +134,12 @@ util_2d.o: util.c defs.h
 
 hackforce_2d: hackforce.c defs.h load_2d.o grav_2d.o
 	$(CC) $(CFLAGS) -DTWODIM -o hackforce_2d hackforce.c load_2d.o grav_2d.o \
-	   $(L) -lm
+	   $(NEMO_LIBS) $(LOCAL_LIBS) $(FORLIBS)
 
 # Misc. test versions.
 
 hackforce_hex: hackforce.c defs.h load.o grav_hex.o
 	$(CC) $(CFLAGS) -o hackforce_hex hackforce.c load.o grav_hex.o \
-	   $(L) -lm
+	   $(NEMO_LIBS) $(LOCAL_LIBS) $(FORLIBS)
 
 grav_hex.o: grav_hex.c defs.h
