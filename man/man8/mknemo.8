@@ -1,4 +1,4 @@
-.TH MKNEMO 8NEMO "20 June 2003"
+.TH MKNEMO 8NEMO "16 December 2003"
 .SH NAME
 mknemo \- attempt to find NEMO programs and install them
 .SH SYNOPSIS
@@ -30,6 +30,7 @@ to be updated.
   -d        also make doc file (only for true NEMO programs)
   -t        cleanup after having made the binaries
   -u        update your NEMO cvs tree before (re)making
+  -l        recompile the library before (re)making 
 .fi
 .SH "SEE ALSO"
 mkbin(8NEMO)
@@ -53,4 +54,5 @@ $NEMO/adm/install/mknemo.lock	lockfile, to prevent multiple usage
 25-jun-91	V1.1: added lockfile     	PJT
 4-apr-01	V1.3: added extension making for NEMO V3	PJT
 20-jun-03	V1.4: added -u flag	PJT
+16-dec-03	V1.5: added -l flag, also cloned sbin/mkstarlab	PJT
 .fi
