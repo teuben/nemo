@@ -8,6 +8,8 @@ DIRS = cores cores/bodysub io io_nemo tools init evolve trans reduc \
 TARNAME = stuff.tar
 CHKFILE = Last_update
 
+#.IGNORE:  glnemo
+
 help:
 	@echo NEMO V2.2 NEMO/src/nbody
 
@@ -26,6 +28,7 @@ install:
 bins:
 	-@for i in $(DIRS); do\
 	(cd $$i;$(MAKE) bins); done
+	-(cd glnemo; qmake; make install)
 
 update:
 	-@for i in $(DIRS); do\
@@ -47,3 +50,6 @@ newtar:
 
 newdir:
 	@find . -newer $(CHKFILE) -type f -exec ls -l '{}' \;
+
+glnemo:
+	@(cd glnemo; qmake; make)
