@@ -1,4 +1,4 @@
-.TH MKPLUMMER 1NEMO "19 October 2001"
+.TH MKPLUMMER 1NEMO "21 March 2004"
 .SH NAME
 mkplummer \- generates a snapshot according to a truncated Plummer model
 .SH SYNOPSIS
@@ -24,6 +24,10 @@ Output data is written into \fIsnapfile\fP, in standard snapshot format.
 \fBnbody=\fP\fIinteger\fP
 Number of particles \fInobj\fP in Nbody snapshot realization of the
 Plummer model.
+.TP
+\fBmlow=\fP\fIreal\fP
+inner core mass fraction within which no stars will be populated.
+(Default: 0)
 .TP
 \fBmfrac=\fP\fIreal\fP
 mass fraction of the (infinitely extended) Plummer model;
@@ -78,7 +82,7 @@ the \fBmassname\fP it may contain any variables contained in the
 List of parameters and their values. They can be used by name in the
 \fBmassexpr\fP specified before. [default: \fBp,0.0\fP].
 .TP
-\fBmassrange=\fImlow:mhigh\fP
+\fBmassrange=\fImlow,mhigh\fP
 Valid massrange. A lower and higher cutoff must be supplied. The massrange
 has arbitrary units, since all masses will be rescaled to set the total
 mass M=1. [default: \fB1,1\fP].
@@ -89,6 +93,10 @@ file, the next item being the snapshot itself. [default: not used].
 .SH BUGS
 A non-delta function mass-spectrum will not create a properly
 virialized system yet. See \fIsnapvirial(1NEMO)\fP
+.PP
+For very large (>1000) ratio in the mass ranges the spline
+interpolation, used in \fIfrandom(3NEMO)\fP, can fail
+using a valid [0,1] range.
 .SH SEE ALSO
 snapvirial(1NEMO), mkplummer(3NEMO)
 .PP
@@ -112,3 +120,4 @@ xx-xxx-88	V1.2: zerocm keyword added	PJT
 xx-Mar-89	V2.0: full new snapshot version	+ doc PJT
 15-nov-90	V2.3: mass-spectrum and cleanup	for NEMO 2.x	PJT
 6-jun-96	V2.5d: report total mass before scaling  	PJT
+21-mar-04	V2.7: added mlow=	PJT+NCM
