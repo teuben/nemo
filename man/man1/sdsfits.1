@@ -1,4 +1,4 @@
-.TH SDSFITS 1NEMO "14 January 2003"
+.TH SDSFITS 1NEMO "11 December 2004"
 .SH NAME
 sdsfits \- convert selected plane or coordinate descriptor of SDS HDF4 to FITS
 .SH SYNOPSIS
@@ -44,6 +44,19 @@ Reorder the axes. Normally the data is transferred to the FITS file
 and in FITS normally plotted horizontally). With \fBreorder=t\fP
 all data is reordered, which can take large resources for large SDS
 files.
+.TP
+\fPdummy=t|f\fP
+Write dummy axis that have dimension 1 also?
+[Default: \fBt\fP]
+.TP
+\fPwcs=t|f\fP
+Add a WCS to the fits file, as much as that is possible. By default
+(there is no keyword to change this yet) the first pixel (1,1,1) will
+be the reference pixel, and CDELT will be computed by the difference
+to the 2nd pixel along the appropriate axis. If there is no 2nd
+pixel, CDELT will be 1. If there is a 3rd pixel and the CDELT is
+different, a warning is posted. 
+[Default: \fBt\fP]
 .SH BUGS
 No known bugs, but there are some limitations in the current version:
 .PP
@@ -102,4 +115,6 @@ Peter Teuben
 13-apr-95	V1.1 added select=, fixed bug in 2D conversion	PJT
 13-apr-96	V1.2 added axis=	PJT
 14-jan-03	V1.4 added reorder=	PJT
+2-dec-04	V1.5 added dummy=, and fixed some 3D data bugs	PJT
+11-dec-04	V1.6 added wcs=, fixed some more bugs with 3D data		PJT
 .fi
