@@ -13,7 +13,7 @@
 
 #define NMAX  10
 
-void main(int argc,char *argv[])
+int main(int argc,char *argv[])
 {
     float a;
     int   i, nmax;
@@ -29,4 +29,8 @@ void main(int argc,char *argv[])
     }
 
     printf("The sum is %20.10f\n",a);
+#ifdef WARNING
+    warning("Trying a warning message");
+#endif
+    return 0;
 }
