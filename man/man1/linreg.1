@@ -1,0 +1,51 @@
+.TH LINREG 1NEMO "23 May 1996"
+.SH NAME
+linreg \- six linear regressions
+.SH SYNOPSIS
+\fBlinreg\fP [parameter=value]
+.SH DESCRIPTION
+\fIlinreg\fP computes the slope (\fBa\fP) and intercept coefficients 
+(\fBb\fP) for
+for OLS(Y/X) (1), OLS(X/Y) (2), OLS bisector(3), orthogonal(4),
+reduced major axis (5) and mean OLS (6) methods. The dispersions are 
+returned in the arrays \fBsiga\fP and \fBsigb\fP.
+.PP
+The dispersions for OLS are the general form provided by 
+T. Isobe, E. D. Feigelson, M. G. Akritas and G. J. Babu, 
+Ap.J. 364, 104.
+.PP
+mean OLS is 0.5*[OLS(X/Y) + OLS(Y/X)]
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input ascii table     
+.TP 20
+\fBxcol=\fP
+Column for X coordinates    
+.TP 20
+\fBycol=\fP
+Column for Y coordinates    
+.TP 20
+\fBmode=\fP
+Output mode (0=all, 1..6=various methods   
+.TP 20
+\fBmaxline=\fP
+Maximum size of columns    
+.SH SEE ALSO
+linreg(3NEMO), gaussfit(1NEMO)
+.nf
+T. Isobe,  E. D. Feigelson, M. G. Akritas and G. J. Babu,  (1990)
+Ap.J. 364, 104.
+Pogge and Peterson, (1992)
+A.J. 103, 1084 - Appendix
+http://www.astro.psu.edu/users/edf/research/stat.html (Astrostatistics)
+.fi
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+23-May-96	V0.0 Created by mkman	NEMO
+.fi
