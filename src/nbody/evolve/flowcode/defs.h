@@ -18,6 +18,7 @@ int mode;			/* integrator: RK, PC or PC1 */
 
 real eta;			/* fractional dissipation [0..1] */
 real sigma;                     /* diffusion angle (in radians) */
+real freqdiff;                  /* diffusion frequency */
 real fheat;                     /* diffusion/dissipation */
 vector dr;			/* cell size for dissipation */
 real rmax;                      /* max. gridsize for dissipation */

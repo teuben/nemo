@@ -32,9 +32,10 @@ string defv[] = {
     "rmax=-1\n            Maximum allowed gridsize -rmax:rmax in all directions",
     "fheat=0\n            diffusion/dissipation ratio",
     "sigma=0\n            diffusion angle (degrees) per timestep",
+    "freqdiff=\n          frequency of diffusion [freq]",
     "seed=0\n		  random seed",
     "headline=\n          random verbiage",
-    "VERSION=0.4\n	  3-feb-04 PJT",
+    "VERSION=0.5\n	  3-feb-04 PJT",
     NULL,
 };
 
@@ -53,11 +54,6 @@ void nemo_main()
     output();
     while (tnow + 0.1/freq < tstop) {
 	orbstep(bodytab, nbody, &tnow, force, 1.0/freq, mode);
-#if 0
-	/* totally useless here */
-	dissipate(bodytab, nbody, NDIM, dr, eta, rmax, fheat);
-	diffuse(bodytab, nbody, NDIM, sigma);
-#endif
 	output();
     }
     stopoutput();
@@ -84,6 +80,11 @@ void setparams()
     options = getparam("options");
     eta = getdparam("eta");
     sigma = getdparam("sigma") * PI/180.0;	
+    if (hasvalue("freqdiff"))
+      freqdiff = getdparam("freqdiff");
+    else
+      freqdiff = freq;
+    if (freqdiff > freq) warning("Cannot use freqdiff > freq");
     dr[0] = getdparam("cell");
     dr[1] = dr[2] = dr[0];		/* square cells in dissipate */
     rmax = getdparam("rmax");
@@ -107,9 +108,7 @@ real time;			/* current time */
     vector lacc,lpos;
     real   lphi;
     int    ndim=NDIM;
-
-
-    diffuse(bodytab, nb, NDIM, sigma);
+    static real time_next_diff = 0.0;
 
     for (p = btab; p < btab+nb; p++) {		/* loop over bodies */
         SETV(lpos,Pos(p));
@@ -117,8 +116,9 @@ real time;			/* current time */
         Phi(p) = lphi;
         SETV(Acc(p),lacc);
     }
-    if (sigma > 0) 
+
+    if (time > time_next_diff && nb > 1) {
       diffuse(btab, nb, NDIM, sigma);
-
-
+      time_next_diff += 1.0/freqdiff;
+    }
 }

@@ -21,8 +21,8 @@ real  sigma;
     Body *b;
     bool Qspin = ome != 0.0;
     
-    if (sigma==0.0) return 1;          /* no work to do ... */
-    dprintf(1,"diffuse %d\n",nb);
+    if (sigma<=0.0) return 1;          /* no work to do ... */
+    dprintf(0,"diffuse %d\n",nb);
 
     for (b=btab; b<btab+nb; b++) {              /* loop over all bodies */
         p = grandom(0.0,sigma);         /* get random angle +/- sigma */
