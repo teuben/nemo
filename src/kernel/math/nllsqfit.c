@@ -126,6 +126,7 @@ Updates:      May  7, 1990: KGB, Document created.
               Oct 15, 1999: PJT  Added residual computations
               Jun 20, 2001: PJT  gcc3 prototpypes 
 	      Jul 12, 2002: PJT  allow wdat to be NULL, in which case all weights = 1 (deja vu???)
+              Apr 18, 2004: PJT  fixed wdat normalization error for chi2 computation
 
 */
 
@@ -466,7 +467,15 @@ int nllsqfit(
             chi1 = sqrt( chi1 / (real) (nuse - nfree) );
             for (i = 0; i < nfree; i++) {
                if ((matrix1[i][i] <= 0.0) || (matrix2[i][i] <= 0.0)) return( -7);
+#if 1
+	       /* original */
                epar[parptr[i]] = chi1 * sqrt( matrix2[i][i] ) / sqrt( matrix1[i][i] );
+#else
+	       /* somewhat like the nr_ version */
+               epar[parptr[i]] = sqrt( matrix2[i][i] ) / sqrt( matrix1[i][i] );
+	       if (wdat == NULL)
+		 epar[parptr[i]] *= chi1;
+#endif
             }
             found = 1;                  /* we found a solution */
          }
@@ -477,9 +486,9 @@ int nllsqfit(
      real w;
      for (n = 0; n < ndat; n++) {
        w = wdat ? wdat[i] : 1.0;
-       chisq += sqr(ddat[i]/w);
+       chisq += sqr(ddat[i])*w;
      }
-     dprintf(1,"chisq:=%g\n",chisq);
+     dprintf(1,"chisq=%g chi1,2=%g %g\n",chisq,chi1,chi2);
    }
    return itc;                       /* return number of iterations (0 for linear) */
 }
