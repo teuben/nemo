@@ -68,6 +68,7 @@
 # include <stdlib.h>
 # include <string.h>
 # include <math.h>
+extern void warning(char *,...), error(char *,...);
 #endif
 
 #include <ctype.h>
