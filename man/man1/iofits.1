@@ -1,0 +1,44 @@
+.TH IOFITS 1NEMO "30 Apr 2003"
+.SH NAME
+iofits \- convert FITS from a pixel depth to another without rescaling
+.SH SYNOPSIS
+\fBiofits\fP [parameter=value]
+.SH DESCRIPTION
+iofits converts FITS files of any  pixel  depth  to  another
+pixel  depth (bits per pixel). Depth is given as in the FITS
+norm :
+.nf
+     *     8 bits per pixel, unsigned.
+
+     *     16 bits per pixel, signed
+
+     *     32 bits per pixel, signed
+
+     *     -32 IEEE floating point
+
+     *     -64 IEEE double precision floating point
+.fi
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input FITS file. No default.
+.TP 20
+\fBout=\fP
+Output FITS file. No default.
+.TP 20
+\fBbitpix=\fP
+requested output BITPIX value. Valid are 8, 16, 32, -32 or -64.
+No default.
+.SH EXAMPLES
+.SH SEE ALSO
+ccdfits(1NEMO), fitsccd(1NEMO)
+.SH FILES
+.SH AUTHOR
+N. Devillard (ESO), P. Teuben (NEMO adaptation)
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+30-Apr-03	V1.1 NEMO adaptation	PJT
+.fi
