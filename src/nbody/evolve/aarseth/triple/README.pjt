@@ -1,0 +1,41 @@
+TRIPLE: merged PGPLOT and X windows version. 
+    (Peter Teuben, January 1998).
+
+History:
+
+  - 01-Jul-1998:    fixed bug reported by Sverre
+  - 25-sep-1998:    fixed quitting bug, added sun-earth-jupiter example (sej.in)
+
+Incompatible things with Sverre's January 1998 version:
+
+  - merge code base for pgplot and Xtc versions using a different movie.f
+	ptriple comes from linking with moviep.f (+ pgplot)
+	xtriple comes from linking with moviex.f (+ Xtc based files)
+
+  - pgplot's window size is set via the PGPLOT_XW_WIDTH environment variable
+    however, in Sverre's version an extra line was read that reads the size
+    of the X windows plot in 'xtriple'. This has now been hardcoded in
+    moviex.f (to 512), in favor of keeping the two programs symmetric. 
+
+    A good solution would be to use X resources for this (as PGPLOT does too)
+    See the ptriple.xrdb for an example of this
+
+
+
+Not finished yet:
+
+  - figure out difference between g77 (BENCH) and f2c (BENCH1) compiler	results
+
+  - either use the g77/f2c compile flag "-fno-second-underscore", or hardcode
+    the double underscore for g77/f2c ?
+    See xmovie.c
+
+  - merge in Sverre's last additional parameter to the first line (to control
+    the delay times for the movie)
+
+
+Some other things to note:
+
+  - xtriple only works in 8 bit X windows, not in  16/24/32.
+    It needs a fair number of colors, so better not have netscape or an 
+    old version of pgplot.
