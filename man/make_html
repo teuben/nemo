@@ -12,32 +12,40 @@
 if ($#argv == 0) then
   set copy=0
 else
-  set html_dir=$1
-  if (-e $html_dir) then
-    set copy=1
-  else
-    set copy=0
-    echo Warning: WWW directory $html_dir does not exist
+  set copy=1
+  if (X$1 == X-h) then
+    echo "Usage $0 [public man_html directory for WWW  site]"
+    echo "Examples: (both scp and cp are supported)"
+    echo "  $0 /apus1/teuben/www/nemo/man_html"
+    echo "  $0 /n/apus1/teuben/www/nemo/man_html"
+    echo "  $0 apus:/apus1/teuben/www/nemo/man_html"
+    exit 0
   endif
+  set html_dir=$1
 endif
 
 set manlevels=(1 3 5 6 8 l)
+set log=/tmp/make_html.$$.log
 
 cd $NEMO/man
 if (! -e html) mkdir html
 
 #				this method uses rman
 
+echo "Running rman on all levels ($manlevels)"
 foreach d ($manlevels)
  set dir=man$d
  foreach file ($dir/*.$d)
    set base=$file:t
-   rman -f HTML $file  >  html/$base.html
+   (rman -f HTML $file  >  html/$base.html ) >>& $log
  end
-make_man.csh $d > html/index$d.html
+ (make_man.csh $d > html/index$d.html) >>& $log
+ if ($status) echo Some error during make_man, inspect your $log
 end
 
-make_whatis.csh > html/whatis.html
+echo "Running make_whatis"
+(make_whatis.csh > html/whatis.html) >>& $log
+if ($status) echo Some error during make_whatit, inspect your $log
 
 set o=html/index.html
 
@@ -67,8 +75,20 @@ Automatically created by make_html on $host $date <P>
 EOF_HTML
 
 if ($copy) then
-  echo Copying html files to $html_dir
-  cp html/* $html_dir
+  echo $html_dir | grep -qs :
+  if ($status) then
+    if (-e $html_dir) then
+        echo Using cp to copy html files to $html_dir
+        cp html/* $html_dir >>& $log
+	if ($status) echo Some error during copy, inspect your $log
+    else
+        echo Directory $html_dir does not exist
+    endif
+  else
+    echo Using scp to copy html files to $html_dir
+    scp html/* $html_dir >>& $log
+    if ($status) echo Some error during copy, inspect your $log
+  endif
 else
   echo No copy made of html directory
 endif
