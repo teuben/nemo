@@ -1,0 +1,71 @@
+.TH TSF 1NEMO "21 March 2001"
+.SH NAME
+tsf \- type a structured file
+.SH SYNOPSIS
+\fBtsf in=\fPfile [parameter=value] .\|.\|.
+.SH DESCRIPTION
+\fItsf\fP types the contents of a structured binary file
+(see \fIfilestruct\fP(3NEMO)) on the standard output.
+The type, tag, dimensions (if any) and contents of all items are listed.
+The contents of \fICharType\fP items are printed directly; 
+\fIFloatType\fP and \fIDoubleType\fP
+items are printed in floating-point notation; all other types are printed in 
+octal for portability reasons. XML format can optionally be selected.
+.SH PARAMETERS
+The following parameters are recognized.
+.TP 24
+\fBin=\fP\fIfile\fP
+Input data is read from \fIfile\fP, which must be a structured binary file.
+No default.
+.TP
+\fBmaxprec==t|f\fP
+If true, print float and double item data with maximum precision.
+[Default: \fBf\fP].
+.TP
+\fBmaxline=\fP\fIlines\fP
+Limits the number of lines of data typed for each item to \fIlines\fP.
+[Default: \fB4\fP].
+.TP
+\fBallline=t|f\fP
+Print all lines, it overrides any value of \fBmaxline\fP.
+If xml format selected, allline will always be set to t.
+[Default: \fBf\fP].
+.TP
+\fBindent=\fP\fIset-indent\fP
+Amount to indent contents of item-sets.
+[Default: \fB2\fP].
+.TP
+\fBmargin=\fP\fIright-margin\fP
+Righthand margin for output. Set this to a high value to prevent
+possible string problems if file needs to be read by \fIrsf\fP.
+[Default: \fB72\fP].
+.TP
+\fBitem=\fP\fIitem-name\fP
+select only this item for output. Default: all items selected.
+.TP
+\fBxml=t|f\fP
+Output in xml mode? 
+If not, old-style human readable tsf mode is selected.
+[Default: \fBf\fP].
+.SH SEE ALSO
+ls(1v), file(1), rsf(1NEMO), filestruct(3NEMO).
+.SH DEBUG
+\fBdebug=2\fP reports values of \fIMaxSetLen\fP
+as defined in "\fBfilestruct.h\fP".
+For \fIMaxTagLen\fP and \fIMaxVecDim\fP see \fIrsf(1NEMO)\fP.
+.SH BUGS
+The algorithm for implementing \fBmaxline\fP is crude.
+.PP
+If \fBindent=\fP and \fBmargin=\fP are choosen too large, resp. too
+small, they can bump into each other and cause illegable output, which
+cannot be read by \fIrsf\fP either.
+.SH AUTHOR
+Joshua E. Barnes.
+.SH HISTORY
+.ta +1i +4i
+.nf
+xx-xxx-86	V1.0 original version	JEB
+xx-apr-88	V2.0 new filestruct package	JEB
+9-dec-90	V2.3 helpvec and other minor things	PJT
+21-mar-01	V2.7 experimental xml output option	PJT
+.fi
