@@ -1,4 +1,4 @@
-.TH CCDVEL 1NEMO "3 May 2001"
+.TH CCDVEL 1NEMO "4 November 2001"
 .SH NAME
 ccdvel \- create a velocity field; grid or retrace
 .SH SYNOPSIS
@@ -6,19 +6,19 @@ ccdvel \- create a velocity field; grid or retrace
 .SH DESCRIPTION
 \fIccdvel\fP creates a velocity field for a disk with material
 in circular orbits. The user supplies the
-program with a rotation curve with number of radii and associated 
+program with a rotation curve with a number of radii and 
 rotation velocities. The position
-angle and inclination of each 'ring' can also be varied to simulate a 
-galactic warp. 
+angle and inclination of each 'ring' can also be varied to simulate 
+geometrical warps.
 .PP
 Two gridding methods exist: 
 .PP
 \fIretracing:\fP the GIPSY 
 method retraces each pixel in the sky plane to its (smallest) 
-radius in the (warped) galactic disk: it's ring parameters 
+radius in the (warped) galactic disk: its ring parameters 
 (velocity, position angle, and inclination) are then
-linearly \fIinterpolated\fP from the input arrays, and that point is
-appropriately projected into that pixel (\fIhmmm, it might then
+(linearly) \fIinterpolated\fP from the input arrays, and that point is
+appropriately projected into that pixel (\fI bug? it might still
 wind up in the next pixel\fP)
 .PP
 \fIgridding:\fP the NEMO method places particles in rings, as prescribed
