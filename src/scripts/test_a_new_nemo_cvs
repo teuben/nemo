@@ -2,6 +2,8 @@
 #
 #  P600/     116.510u 17.390s 2:41.66 82.8%     0+0k 0+0io 778435pf+0w
 # P1600/
+#
+#  History:     19-mar-2004   finally recording history of this file
 
 set pgplot=1
 set intel=0
