@@ -49,6 +49,9 @@ INC         = -I${IONT} -I${IONS}
 #--------------------------------------------------------
 # Main targets
 #
+
+clean:    allclean
+
 allclean  : clean_obj clean_test
 
 clean_obj :
