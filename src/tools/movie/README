@@ -1,0 +1,28 @@
+This package contains a program called movie, which is a realtime
+playback program for a set of SUN rasterfiles.  The code works on
+both SUN-2 and SUN-3 bitmap displays.  It is something like framedemo,
+but it uses rasterfile(5) files.  IT DOES NOT RUN UNDER SUN WINDOWS.
+	(but see later)
+SUNwindows does not provide enough control of the screen or enough
+speed to do this kind of stuff.  It provides single frame, forward
+and backward loops with variable speed, mouse-stepped playback, and
+other miscellaneous features.
+
+I think the code is reasonable,  It tries to avoid magic as much as
+possible.  I must warn you, however, that the whole thing was written
+in a week, and there may be a few ugly and/or mysterious sections.
+I'm sending it out because I probably won't be adding much more to it,
+or spending much time cleaning it up.
+
+Included are a makefile and a manual.
+
+Happy Graphics!
+
+---
+Marc Majka  -  UBC Laboratory for Computational Vision
+
+====
+There is a clone of movie, called movie_sv, still under development,
+which runs under suntools. Is really intended for small images, see e.g.
+snapplot_sv (commonly called: cp) from ~pjt/nbody. 
+
