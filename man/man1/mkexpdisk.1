@@ -1,4 +1,4 @@
-.TH MKEXPDISK 1NEMO "31 march 1989"
+.TH MKEXPDISK 1NEMO "29 May 2001"
 .SH NAME
 mkexpdisk \- make an exponential disk
 .SH SYNOPSIS
@@ -44,10 +44,16 @@ Usual random number seed. Default: \fB12345\fP.
 \fBmode=\fP\fIcreation-mode\fP
 Creation mode. 1=As original\fBmkbaredisk\fP, 2=testing. [default: \fB1\fP].
 .TP
+\fBtime=\fP
+If given,  this will be the time tagged with this snapshot. [default: not used].
+.TP
 \fBtab=\fP\fIt|f\fP
 Logical set if additional table output is wanted. If so, its printing
 \fIr,m,v_c,omega,kappa,Aoort,mu,sig_r,sig_t,sig_z,v_eff,Qtoomre,\fP
 \fIsig_t/sig_r,sig_z/sig_r\fP. [default: \fBf\fP].
+.TP
+\fBzerocm=\fP\fIt|f\fP
+Center the snapshot? [Default: \fBt\fP].
 .TP
 \fBheadline=\fP\fImessage\fP
 Text headline for output. Default: \fInone\fP.
@@ -55,6 +61,11 @@ Text headline for output. Default: \fInone\fP.
 mktestdisk(1NEMO)
 .SH AUTHOR
 Joshua E. Barnes
+.SH HISTORY
+.nf
+.ta +1.0i +4.0i
+29-may-01	added time=	PJT
+.fi
 
 
 

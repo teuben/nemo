@@ -7,6 +7,7 @@
  *	24-mar-94	ansi fix
  *	24-mar-97	proto fixes	pjt
  *	29-mar-97	SINGLEPREC fixed, ndisk= now nbody=	pjt
+ *      29-may-01       Add optional time      PJT
  */
 
 #include <stdinc.h>
@@ -31,10 +32,11 @@ string defv[] = {	/* DEFAULT INPUT PARAMETERS */
     "z0=0.025\n	          vertical scaleheight (softening) ",
     "seed=12345\n	  usual random number seed ",
     "mode=1\n             creation mode: 1=josh 2=kruit/searle ",
+    "time=\n              tag a time, normally skipped",
     "tab=f\n		  table output also? ",
     "zerocm=t\n           center the snapshot?",
     "headline=\n	  text headline for output ",
-    "VERSION=1.1c\n	  29-mar-97 PJT",
+    "VERSION=1.2\n	  29-may-01 PJT",
     NULL,
 };
 
@@ -213,6 +215,11 @@ string headline;
     stream outstr;
     real tzero = 0.0;
     int bits = MassBit | PhaseSpaceBit;
+
+    if (hasvalue("time")) {
+      tzero = getdparam("time");
+      bits |= TimeBit;
+    }
 
     if (! streq(headline, ""))
 	set_headline(headline);

@@ -148,6 +148,41 @@ Brief overview of a Version 3.x.y INSTALLATION
 	% rehash
 	% make libs
 
+
+3) Run the testsuite, which also installs a pretty basic set of NEMO executables:
+
+	%  setenv YAPP /vps			## only needed if you're on a remote link,
+						## otherwise leave it as /xs 
+
+	%  ( cd src/scripts ; need -m `testsuite -s` ; mknemo -c history hisf ; testsuite )
+
+
+   Study the output of the lines that do not contain the word 'OK' at the end, e.g.
+
+Working on /home/teuben/nemo_3.0.4/src/image/fits OK
+Working on /home/teuben/nemo_3.0.4/src/image/io OK
+Working on /home/teuben/nemo_3.0.4/src/image/misc OK
+Working on /home/teuben/nemo_3.0.4/src/image/trans OK
+Working on /home/teuben/nemo_3.0.4/src/kernel/fortran OK
+Working on /home/teuben/nemo_3.0.4/src/kernel/io OK
+Working on /home/teuben/nemo_3.0.4/src/kernel/misc OK
+Working on /home/teuben/nemo_3.0.4/src/kernel/tab Problems				<<------
+Working on /home/teuben/nemo_3.0.4/src/nbody/cores OK
+Working on /home/teuben/nemo_3.0.4/src/nbody/evolve/aarseth/nbody0 Problems		<<------
+Working on /home/teuben/nemo_3.0.4/src/nbody/evolve/aarseth/tools OK
+Working on /home/teuben/nemo_3.0.4/src/nbody/evolve/hackcode/hackcode1 OK
+Working on /home/teuben/nemo_3.0.4/src/nbody/evolve/scfm OK
+Working on /home/teuben/nemo_3.0.4/src/nbody/image OK
+Working on /home/teuben/nemo_3.0.4/src/nbody/init OK
+Working on /home/teuben/nemo_3.0.4/src/nbody/io OK
+Working on /home/teuben/nemo_3.0.4/src/nbody/io/starlab OK
+Working on /home/teuben/nemo_3.0.4/src/nbody/reduc OK
+Working on /home/teuben/nemo_3.0.4/src/nbody/trans OK
+Working on /home/teuben/nemo_3.0.4/src/nbody/xyz OK
+Working on /home/teuben/nemo_3.0.4/src/orbit/potential Problems				<<------
+Results in /home/teuben/nemo_3.0.4/tmp/test22005/testsuite.log
+
+
 *) Installing PGPLOT within NEMO is a bit cumbersome, but not
    impossible
 
@@ -155,6 +190,7 @@ Brief overview of a Version 3.x.y INSTALLATION
 	% source nemo_start
 	% make dirs 
 	% make config_clean				<==
+	% rm NEMORC.local
 	% src/scripts/pgplot.install dir=/tmp		<==
 	% ./configure --with-pgplot-prefix=$NEMOLIB --with-yapp=pgplot
 	% make dirs config_extra scripts
