@@ -13,6 +13,7 @@ typedef struct _command {
   string cmd[MAXCMD];   /* name of the valid commands */
   char *type[MAXCMD];   /* i=int d=double s=string .=optional */
   int nargs[MAXCMD];    /* number of required arguments of each command (0=void) */
+  string help[MAXCMD];  /* help string */
   
 } command;
 
@@ -20,7 +21,7 @@ typedef struct _command {
 
 /* command.c */
 command *command_init(string name);
-void command_register(command *c, string cmd, string argtypes);
+void command_register(command *c, string cmd, string argtypes, string help);
 string *command_get(command *c);
 void command_close(command *c);
 

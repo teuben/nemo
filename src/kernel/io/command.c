@@ -1,6 +1,9 @@
 /*
  * COMMAND:   interactive command parser
  *
+ *  #define's
+ *  READLINE:      use GNU readline (-lreadline)      
+ *  MIR_READLINE:  use miriad's save/load feature (not implemented)
  *
  */
 
@@ -11,6 +14,16 @@
 extern string *burststring(string,string);
 extern void freestrings(string *);
 
+#define VALID_TYPES "irs."
+
+/* #define READLINE 1 */
+
+static int todo_readline=0;
+static char prompt[64];
+
+/*
+ *
+ */
 
 command *command_init(string name) 
 {
@@ -18,12 +31,26 @@ command *command_init(string name)
   c = (command *) allocate(sizeof(command));
   c->name = strdup(name);
   c->ncmd = 0;
+#if (READLINE)
+    dprintf(0,"[readline library installed]\n");
+#endif
+#if (MIR_READLINE==1)
+  if (todo_readline==0)
+    dprintf(0,"[readline library installed]\n");
+  if (todo_readline) {
+    todo_readline=1;
+    ini_readline();
+  } else
+    todo_readline++;
+#endif
   return c;
 }
 
-#define VALID_TYPES "irs."
+/*
+ *
+ */
 
-void command_register(command *c, string cmd, string type)
+void command_register(command *c, string cmd, string type, string help)
 {
   int i, clen, n = c->ncmd;
   char *cp;
@@ -34,6 +61,7 @@ void command_register(command *c, string cmd, string type)
   }
   if (n==MAXCMD) error("Too many commands (%d)",MAXCMD);
   c->cmd[n] = strdup(cmd);
+  c->help[n] = strdup(help);
   c->type[n] = strdup(type);
   c->nargs[n] = strlen(type);
   c->ncmd++;
@@ -54,47 +82,100 @@ void command_register(command *c, string cmd, string type)
   }
 }
 
+/*
+ *
+ */
+
 string *command_get(command *c)
 {
-  char line[1024];
-  string *sp;
+  char *s, line[1024];
+  string *argv;
   int i, na;
+
+  sprintf(prompt,"%s> ",c->name);
   
  again:
-  printf("%s> ",c->name);
+#if (READLINE==1)
+  for(;;) {
+    if ((s=readline(prompt)) != (char *)NULL) {
+      /* stripwhite(s); */
+      if (*s) {
+	strcpy(line,s);
+	free(s);
+	s=0;
+	break;
+      }
+    }
+    if (s) free(s);
+  }
+  add_history(line);
+#else
+  printf("%s> ",prompt);
   fflush(stdout);
   clearerr(stdin);
   if (fgets(line,1024,stdin) == NULL)
     return NULL;
-  if (line[0] == '?') {
-    dprintf(0,"Valid commands: ");
+#endif
+
+  if (line[0] == ".")                           /* internal quit command */
+    return NULL;
+
+  if (line[0] == '?') {                         /* internal help command */
+    dprintf(0,"Internal commands: \n");
+    dprintf(0,"?          this help\n");
+    dprintf(0,"!CMD       shell escape\n");
+    dprintf(0,".          quit\n");
+    dprintf(0,"<FILE      read commands from FILE\n\n"); 
+    dprintf(0,"Registered commands: \n");
     for (i=0; i<c->ncmd; i++) 
-      dprintf(0,"%s ",c->cmd[i]);
+      dprintf(0,"%-10s %s\n",c->cmd[i],c->help[i]);
     dprintf(0,"\n");
     goto again;
   }
 
-  sp = burststring(line," \n");
-  na = xstrlen(sp,sizeof(string))-2;
+  if (line[0] == '<') {                         /* internal read command */
+    dprintf(0,"< COMMANDS -- not implemented yet\n");
+    goto again;
+  }
+
+  if (line[0] == '!') {                         /* shell escape */
+    system(&line[1]);
+    goto again;
+  }
+
+  /* having come here, parse input into an argv[] vector of strings */
+
+  argv = burststring(line," \n");
+  na = xstrlen(argv,sizeof(string))-2;
   for (i=0; i<c->ncmd; i++) {
-    if (streq(c->cmd[i],sp[0])) {
+    if (streq(c->cmd[i],argv[0])) {
       dprintf(0,"Found matching command %s, needs %d, got %d\n",
-	      sp[0],c->nargs[i],na);
+	      argv[0],c->nargs[i],na);
       if (na < c->nargs[i]) {
-	warning("Not enough arguments for %s (need %d)",sp[0],c->nargs[i]);
-	freestrings(sp);
+	warning("Not enough arguments for %s (need %d)",argv[0],c->nargs[i]);
+	freestrings(argv);
 	goto again;
       }
-      return sp;
+      return argv;         /* return this argv[] vector to the user */
     }
   }
-  warning("%s: not a valid command",sp[0]);
-  freestrings(sp);
+  warning("%s: not a valid command",argv[0]);
+  freestrings(argv);
   goto again;
 }
 
+/*
+ *
+ */
+
 void command_close(command *c)
 {
+  dprintf(1,"Closing command[%s]\n",c->name);
+#if (MIR_READLINE==1)
+  todo_readline--;
+  if (todo_readline==0)
+    end_readline();
+#endif
 }
 
 
@@ -146,12 +227,12 @@ nemo_main()
   string *argv;
   
   cmd = command_init(name);
-  command_register(cmd,"a","i");
-  command_register(cmd,"b","ir");
-  command_register(cmd,"c","s");
-  command_register(cmd,"d","i.");
-  command_register(cmd,"e","");
-  command_register(cmd,"quit","");
+  command_register(cmd,"a","i",   "needs just an integer");
+  command_register(cmd,"b","ir",  "needs integer and real");
+  command_register(cmd,"c","s",   "just a string");
+  command_register(cmd,"d","i.",  "integer, and optional remaining");
+  command_register(cmd,"e","",    "needs nothing");
+  command_register(cmd,"quit","", "a long quit");
 
   while((argv=command_get(cmd))) {                  /* loop getting arguments */
     na = xstrlen(argv,sizeof(string))-1;

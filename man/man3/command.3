@@ -6,7 +6,7 @@ command_init, command_register, command_get, command_close - command parser
 .B #include <command.h>
 .PP
 .B command *command_init(string name);
-.B void command_register(command *c, string cmd, string argtypes);
+.B void command_register(command *c, string cmd, string argtypes, string help);
 .B string *command_get(command *c);
 .B void command_close(command *c);
 .fi
@@ -47,14 +47,14 @@ brief outline:
   string *argv;
   ..
   command cmd = command_init(name);                 /* initialize */
-  command_register(cmd,"a","i");                    /* register commands */
-  command_register(cmd,"b","ir");
-  command_register(cmd,"quit","");
+  command_register(cmd,"a","i",  "foo bar");        /* register commands */
+  command_register(cmd,"b","ir", "fum bar");
+  command_register(cmd,"quit","","alternate form of quit");
 
   while((argv=command_get(cmd))) {                  /* loop getting arguments */
     na = xstrlen(argv,sizeof(string))-1;
     if (streq(argv[0],"quit")) {
-	break
+	break;
     } else if (streq(argv[0],"a")) {
       do_a(natoi(argv[1]));
     } else if (streq(argv[0],"b")) {
@@ -70,7 +70,8 @@ NEMO/src/kernel/io/command.c
 .SH SEE ALSO
 getparam(3NEMO), promptparam(3NEMO)
 .SH CAVEATS
-There is no programming language associates with this command parser
+There is no programming language associates with this command parser.
+The user is responsible to correctly matching commands to actions.
 .SH HISTORY
 .nf
 .ta +1i +3i
