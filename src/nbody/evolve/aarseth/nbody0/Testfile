@@ -24,7 +24,7 @@ RESET = 1
 
 
 
-all: $(BIN) compare
+all: $(BIN) compare figure8
 
 nbody0.in:
 	@echo Creating nbody0.in
@@ -48,3 +48,6 @@ nbody0_ff:	nbody0.in
 
 compare: 
 	snapcmp nbody0.out nbody00.out
+
+figure8:
+	nbody0 $(NEMODAT)/figure8.dat - | tsf - | tail -13 
