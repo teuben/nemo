@@ -1,0 +1,18 @@
+%N ccdcmp
+%D Student T and F test for mean and variance comparisons
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man ccdcmp' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in1
+	First image dataset [???]
+%A in2
+	Second image dataset [???]
+%A xmin
+	In case minimum used (need both minmax) []
+%A xmax
+	In case maximum used (need both minmax) []
+%A bins
+	Bins (number in min-max range, or boundaries) [16]
+%A VERSION
+	11-jan-99 PJT [0.3]
