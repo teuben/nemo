@@ -85,8 +85,21 @@ pushd nemo
   echo NEMOBIN-COUNT: `ls $NEMOBIN|wc -l`
 popd
 
-#
-pushd nemo/usr/kuijken/GalactICS-exp/src
+# firstn
+pushd $NEMO/usr/aarseth/firstn
+  make firstn
+  cp firstn $NEMOBIN
+popd
+
+# nbody6
+mkdir $NEMO/usr/aarseth/nbody6
+pushd $NEMO/usr/aarseth/nbody6
+  tar zxf $pkg/aarseth/nbody6/nbody6.tar.Z
+  (cd Ncode ; make nbody6 ; cp nbody6 $NEMOBIN)
+popd
+
+# GalactICS
+pushd $NEMO/usr/kuijken/GalactICS-exp/src
    make all
    cp dbh genhalo genbulge gendisk diskdf tobinary getfreqs dbh vcirc plothalo plotforce mergerv $NEMOBIN
 popd
