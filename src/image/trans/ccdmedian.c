@@ -31,7 +31,7 @@ string defv[] = {
 
 string usage = "median filter of an image";
 
-string cvsid = "$Id";
+string cvsid = "$Id$";
 
 
 
