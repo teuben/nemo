@@ -1,0 +1,19 @@
+#! /bin/csh -f 
+#
+#
+set u=$1
+if (! -f $u) then
+   echo No usage file $u
+   exit 0
+endif
+
+set h=(`zcat $u|head -1`)
+set t=(`zcat $u|tail -1`)
+echo "# Usage log. From: $h[4-] To: $t[4-]"
+
+echo "# Programs:"
+zcat $u| awk '{print $1}' | sort | uniq -c | awk \
+	'{printf("%6d %s\n",$1,$2)}' | sort -r
+echo "# Users:"
+zcat $u| awk '{print $2}' | sort | uniq -c | awk \
+	'{printf("%6d %s\n",$1,$2)}' | sort -r
