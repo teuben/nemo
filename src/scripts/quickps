@@ -5,6 +5,7 @@
 #  linux:   src/scripts/quickps
 #  sol:     src/scripts/quickps cc=gcc f77=f77          ok
 #           src/scripts/quickps cc=gcc f77=g77          bad
+#           src/scripts/quickps cc=cc                   bad
 #  sgi:     src/scripts/quickps cc=cc  f77=f90          ok
 
 #			set defaults for command line arguments
@@ -27,7 +28,7 @@ if ("x$f77" != "x") setenv F77 $f77
 
 
 
-set log=/tmp/nemo_quick.log
+set log=quick.log
 
 echo "### Start:"
 echo "### Configure"

@@ -105,5 +105,3 @@ snaptipsy: snaptipsy.c
 
 tipsysnap: tipsysnap.c
 	$(CC) $(CFLAGS) -o tipsysnap tipsysnap.c  $(NEMO_LIBS)
-
-
