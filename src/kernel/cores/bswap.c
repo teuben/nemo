@@ -74,7 +74,7 @@ string defv[] = {
     "len=2\n        Itemlength in bytes during swapping",
     "oneswap=t\n    One swap call? (or many) - for testing only", 
     "offset=0\n     Offset (in bytes) before which no swapping done",
-    "VERSION=1.4\n  15-dec-98 PJT",
+    "VERSION=1.4a\n 12-sep-01 PJT",
     NULL,
 };
 
