@@ -4,6 +4,7 @@
 /* Copyright (c) 2001 by Joshua E. Barnes, Honolulu, Hawai`i.               */
 /* 22-jun-01  adapted for NEMO                                              */
 /* 22-feb-04  dtime->dtimes                                                 */
+/* 25-apr-04  USE_NEMO_IO option
 /****************************************************************************/
 
 #include <stdinc.h>
@@ -16,6 +17,11 @@
 #include <sys/stat.h>
 #include <strings.h>
 
+#if defined(USE_NEMO_IO)
+#include <filestruct.h>
+#include <history.h>
+#include <snapshot/snapshot.h>
+#endif
 /*
  * Prototypes for local routines.
  */
@@ -48,10 +54,53 @@ local vector amvec;                             /* angular momentum vector  */
 void inputdata(void)
 {
     stream instr;
-    int ndim;
+    int i, ndim;
     bodyptr p;
+    real *bsca;
+    vector *bvec;
 
     instr = stropen(infile, "r");               /* open input stream        */
+#if defined(USE_NEMO_IO)
+    get_history(instr);
+    get_set(instr,SnapShotTag);
+      get_set(instr,ParametersTag);
+        get_data(instr,NobjTag,IntType,&nbody,0);
+	if (get_tag_ok(instr,TimeTag))
+	  get_data(instr,TimeTag,RealType,&tnow,0);
+	else
+	  tnow = 0.0;
+      get_tes(instr,ParametersTag);
+      get_set(instr,ParticlesTag);
+        bsca = (real *) allocate(nbody*sizeof(real));
+	bodytab = (bodyptr) allocate(nbody * sizeof(body));
+
+	get_data(instr,MassTag,RealType,bsca,nbody,0);
+        for (p = bodytab, i=0; p < bodytab+nbody; p++, i++)
+	  Mass(p) = bsca[i];
+
+	if (get_tag_ok(instr,PhaseSpaceTag)) {
+	  bvec = (vector *) allocate(nbody*sizeof(vector)*2);
+	  get_data(instr,PhaseSpaceTag,RealType,bvec,nbody,2,NDIM,0);
+	  for (p = bodytab, i=0; p < bodytab+nbody; p++, i++) {
+	    SETV(Pos(p),bvec[i]);
+	    i++;
+	    SETV(Vel(p),bvec[i]);
+	  }	  
+	} else {
+	  bvec = (vector *) allocate(nbody*sizeof(vector));
+	  get_data(instr,PosTag,RealType,bvec,nbody,NDIM,0);
+	  for (p = bodytab, i=0; p < bodytab+nbody; p++, i++)
+	    SETV(Pos(p),bvec[i]);
+	  
+	  get_data(instr,VelTag,RealType,bvec,nbody,NDIM,0);
+	  for (p = bodytab, i=0; p < bodytab+nbody; p++, i++)
+	    SETV(Vel(p),bvec[i]);
+	}
+	free(bvec);
+	free(bsca);
+      get_tes(instr,ParticlesTag);
+    get_tes(instr,SnapShotTag);
+#else
     in_int(instr, &nbody);                      /* read number of bodies    */
     if (nbody < 1)
         error("inputdata: nbody = %d is absurd\n", nbody);
@@ -67,7 +116,8 @@ void inputdata(void)
         in_vector(instr, Pos(p));               /* read position of each    */
     for (p = bodytab; p < bodytab+nbody; p++)
         in_vector(instr, Vel(p));               /* read velocity of each    */
-    fclose(instr);                              /* close input stream       */
+#endif
+    strclose(instr);                            /* close input stream       */
     if (scanopt(options, "reset-time"))         /* reset starting time?     */
         tnow = 0.0;                             /* then set it to zero      */
     for (p = bodytab; p < bodytab+nbody; p++)   /* loop over new bodies     */
@@ -157,16 +207,65 @@ void output(void)
 
 void outputdata(void)
 {
-    char namebuf[256];
+    char namebuf[256], io_options[100];
     struct stat buf;
     stream outstr;
     bodyptr p;
-
+    int i;
+    static int first=1;
+    real *bsca;
+    vector *bvec, cm[2];
+    
     sprintf(namebuf, outfile, nstep);           /* construct output name    */
+
     if (stat(namebuf, &buf) != 0)               /* no output file exists?   */
         outstr = stropen(namebuf, "w");         /* create & open for output */
     else                                        /* else file already exists */
         outstr = stropen(namebuf, "a");         /* reopen and append output */
+#if defined(USE_NEMO_IO)
+    if (first)
+      put_history(outstr);
+    put_set(outstr,SnapShotTag);
+      put_set(outstr,ParametersTag);
+        put_data(outstr,NobjTag,IntType,&nbody,0);
+	put_data(outstr,TimeTag,RealType,&tnow,0);
+      put_tes(outstr,ParametersTag);
+      put_set(outstr,ParticlesTag);
+        bsca = (real *) allocate(nbody*sizeof(real));
+        bvec = (vector *) allocate(nbody*sizeof(vector));
+        for (p = bodytab, i=0; p < bodytab+nbody; p++, i++)
+	  bsca[i] = Mass(p);
+	if (first)
+	  put_data(outstr,MassTag,RealType,bsca,nbody,0);
+        for (p = bodytab, i=0; p < bodytab+nbody; p++, i++)
+	  SETV(bvec[i],Pos(p));
+	put_data(outstr,PosTag,RealType,bvec,nbody,NDIM,0);
+        for (p = bodytab, i=0; p < bodytab+nbody; p++, i++)
+	  SETV(bvec[i],Vel(p));
+	put_data(outstr,VelTag,RealType,bvec,nbody,NDIM,0);
+	if (scanopt(options, "out-phi")) {
+	  for (p = bodytab, i=0; p < bodytab+nbody; p++, i++)
+	    bsca[i] = Phi(p);
+	  put_data(outstr,PotentialTag,RealType,bsca,nbody,0);
+	}
+	if (scanopt(options, "out-acc")) {
+	  for (p = bodytab, i=0; p < bodytab+nbody; p++, i++)
+	    SETV(bvec[i],Acc(p));
+	  put_data(outstr,AccelerationTag,RealType,bvec,nbody,NDIM,0);
+	}
+      put_tes(outstr,ParticlesTag);
+      put_set(outstr,DiagnosticsTag);
+        put_data(outstr,EnergyTag,RealType,etot,3,0);
+	SETV(cm[0],cmpos);
+	SETV(cm[1],cmvel);
+        put_data(outstr,CMPhaseSpaceTag,RealType,cm,2,NDIM,0);
+      put_tes(outstr,DiagnosticsTag);
+    put_tes(outstr,SnapShotTag);
+    if (first) first = 0;
+    free(bsca);
+    free(bvec);
+    strclose(outstr);
+#else
     out_int(outstr, nbody);                     /* write number of bodies   */
     out_int(outstr, NDIM);                      /* number of dimensions     */
     out_real(outstr, tnow);                     /* and current time value   */
@@ -182,7 +281,9 @@ void outputdata(void)
     if (scanopt(options, "out-acc"))            /* accelerations requested? */
         for (p = bodytab; p < bodytab+nbody; p++)
             out_vector(outstr, Acc(p));         /* output accelerations     */
-    fclose(outstr);                             /* close up output file     */
+    strclose(outstr);                           /* close up output file     */
+#endif
+
     printf("\n\tdata output to file %s at time %f\n", namebuf, tnow);
 #if defined(USEFREQ)
     tout += 1.0 / freqout;                      /* schedule next output     */

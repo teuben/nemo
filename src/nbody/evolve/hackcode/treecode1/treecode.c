@@ -3,6 +3,7 @@
 /* Copyright (c) 2001 by Joshua E. Barnes, Honolulu, Hawai`i.               */
 /* 22-jun-01   NEMOfied for NEMO V3                                         */
 /* 22-feb-04   dtime->dtimes                                                */
+/* 25-apr-04   implemented USE_NEMO_IO                                      */ 
 /****************************************************************************/
 
 #include <stdinc.h>
@@ -17,8 +18,13 @@
  */
 
 string defv[] = {
+#if defined(USE_NEMO_IO)
+    "in=\n                       Input file with initial conditions (snapshot format)",
+    "out=\n                      Output file of N-body frames (snapshot format)",
+#else
     "in=\n                       Input file with initial conditions",
     "out=\n                      Output file of N-body frames",
+#endif
 #if defined(USEFREQ)
     "freq=32.0\n                 Leapfrog integration frequency",
 #else
@@ -40,7 +46,7 @@ string defv[] = {
     "seed=123\n                  Random number seed for test run",
     "save=\n                     Write state file as code runs",
     "restore=\n                  Continue run from state file",
-    "VERSION=1.4a\n              22-feb-04 PJT",
+    "VERSION=1.4.2\n             25-apr-04 PJT",
     NULL,
 };
 

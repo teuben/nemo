@@ -2,8 +2,8 @@ include $(NEMOLIB)/makedefs
 
 # adapted from 'treecode 1.4' for NEMO V3
 
-#	choose from:  -DQUICKSCAN, -DUSEFREQ, -DBINARYIO
-TFLAGS = -DLINUX
+#	choose from:  -DQUICKSCAN, -DUSEFREQ, -DBINARYIO -DUSE_NEMO_IO
+TFLAGS = -DUSE_NEMO_IO
 
 L= $(NEMOLIB)/libnemo.a
 LIBN = $(L)
@@ -17,6 +17,12 @@ SRCFILES = treecode.c  treegrav.c  treeio.c  treeload.c
 SRCDIR = $(NEMO)/src/nbody/evolve/hackcode/treecode1
 
 all:	$(BINFILES)
+
+bins:	all
+	mv $(BINFILES) $(NEMOBIN)
+
+libs:
+	@echo Nothing to libs in $(SRCDIR)	
 
 install:
 	@echo Nothing to install in $(SRCDIR)

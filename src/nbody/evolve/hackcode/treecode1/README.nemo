@@ -1,0 +1,4 @@
+June 2001:	added the code 'as is' from Josh Barnes, 
+		over the years a few minor things were changed to keep up with 
+		compilers and operating systems
+April 2004:	added USE_NEMO_IO capabilities
