@@ -1,0 +1,20 @@
+%N tablst
+%D list a (binary) table
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man tablst' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	input table (filestruct)  [???]
+%A set
+	set name table  []
+%A col
+	names of columns  [???]
+%A skip
+	skip in front  [0]
+%A stride
+	stride through table  [1]
+%A format
+	format for printf  [%f]
+%A VERSION
+	9-jan-95 PJT [1.3]
