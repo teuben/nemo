@@ -25,9 +25,10 @@
 // v 2.0.1  13/11/2002  WD typo in tabfile output corrected                    |
 // v 2.1    19/04/2004  WD made it work again using nsam.h                     |
 // v 2.2    04/05/2004  WD happy icc 8.0; new body.h; new make                 |
+// v 2.3    17/05/2004  WD some options renamed                                |
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "2.2"
-#define falcON_VERSION_D "04-may-2004 Walter Dehnen                          "
+#define falcON_VERSION   "2.3"
+#define falcON_VERSION_D "17-may-2004 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile mkcdm
@@ -78,10 +79,10 @@ namespace {
 string defv[] = {
   "out=???\n          output file                                        ",
   "nbody=???\n        number of bodies                                   ",
-  "g=???\n            inner density exponent                             ",
-  "v=1\n              maximum circular speed                             ",
-  "a=1\n              scale radius:      rho_0 = C/[r^g(r+a)^(3-g)]      ",
-  "b=10\n             truncation radius: rho   = rho_0 sech(r/b)         ",
+  "gamma=???\n        inner density exponent                             ",
+  "vcmax=1\n          maximum circular speed                             ",
+  "r_s=1\n            scale radius:      rho_0 = C/[r^g(r+r_s)^(3-g)]    ",
+  "r_t=10\n           truncation radius: rho   = rho_0 sech(r/r_t)       ",
   "beta=0\n           anisotropy; -1.5 <= beta <= g/2                    ",
 //   "r_a=\n             Ossipkov-Merritt anisotropy radius                 ",
   "seed=0\n           seed for the randum number generator               ",
@@ -101,9 +102,9 @@ string defv[] = {
 string usage =
 "mkcdm -- construct a truncated CDM model with density\n"
 "\n"
-"                          sech(r/b)\n"
+"                          sech(r/r_t)\n"
 "           rho(r) = C ----------------\n"
-"                       r^g (r+a)^(2-g)\n"
+"                       r^g (r+r_s)^(3-g)\n"
 "\n"
 "         and constant anisotropy beta = 1-(sigma_theta/sigma_r)^2\n"
 "\n";
@@ -115,7 +116,7 @@ void nbdy::main()
   //----------------------------------------------------------------------------
   // 1. set some parameters                                                     
   //----------------------------------------------------------------------------
-  if(getdparam("v")<= 0.) error("max v_circ <= 0\n");
+  if(getdparam("vcmax")<= 0.) error("max v_circ <= 0\n");
   const bool   WD (getbparam("WD_units"));         // using WD_units?           
   const Random Ran(getparam("seed"),6);
   const io data= hasvalue("epar")? io::mxv | io::e : io::mxv;
@@ -132,10 +133,10 @@ void nbdy::main()
   //----------------------------------------------------------------------------
   // 2. create initial conditions from a Dehnen model using mass adaption       
   //----------------------------------------------------------------------------
-  TruncCDMSampler TS(getdparam("g"),
-		     getdparam("a"),
-		     getdparam("b"),
-		     WD? getdparam("v")/vf : getdparam("v"),
+  TruncCDMSampler TS(getdparam("gamma"),
+		     getdparam("r_s"),
+		     getdparam("r_t"),
+		     WD? getdparam("vcmax")/vf : getdparam("vcmax"),
 		     getdparam("beta"),
 		     Rad,nb,
 		     getdparam("fac"),
@@ -163,43 +164,43 @@ void nbdy::main()
       "#";
     if(getbparam("WD_units"))
       std::clog
-	<<"\n# g      = "<<setw(13)<<CDM.inner_slope()
-	<<"\n# C      = "<<setw(13)<<CDM.mass_normal()
+	<<"\n# gamma    = "<<setw(13)<<CDM.inner_slope()
+	<<"\n# C        = "<<setw(13)<<CDM.mass_normal()
 	<<" = "<<setw(13)<<mf*CDM.mass_normal()   <<" M_sun"
-	<<"\n# M_tot  = "<<setw(13)<<CDM.total_mass()
+	<<"\n# M_tot    = "<<setw(13)<<CDM.total_mass()
 	<<" = "<<setw(13)<<mf*CDM.total_mass()    <<" M_sun"
-	<<"\n# M(r<a) = "<<setw(13)<<CDM.cum(CDM.break_radius())
+	<<"\n# M(r<r_s) = "<<setw(13)<<CDM.cum(CDM.break_radius())
 	<<" = "<<setw(13)<<mf*CDM.cum(CDM.break_radius()) <<" M_sun"
-	<<"\n# M(r<b) = "<<setw(13)<<CDM.cum(CDM.trunc_radius())
+	<<"\n# M(r<r_t) = "<<setw(13)<<CDM.cum(CDM.trunc_radius())
 	<<" = "<<setw(13)<<mf*CDM.cum(CDM.trunc_radius()) <<" M_sun"
-	<<"\n# a      = "<<setw(13)<<CDM.break_radius()
+	<<"\n# r_s      = "<<setw(13)<<CDM.break_radius()
 	<<"                 kpc"
-	<<"\n# b      = "<<setw(13)<<CDM.trunc_radius()
+	<<"\n# r_t      = "<<setw(13)<<CDM.trunc_radius()
 	<<"                 kpc"
-	<<"\n# Phi_0  = "<<setw(13)<<CDM.central_pot()
+	<<"\n# Phi_0    = "<<setw(13)<<CDM.central_pot()
 	<<" = "<<setw(13)<<vf*vf*CDM.central_pot()<<" (km/s)^2"
-	<<"\n# vc_max = "<<setw(13)<<sqrt(CDM.vcirc_square())
+	<<"\n# vc_max   = "<<setw(13)<<sqrt(CDM.vcirc_square())
 	<<" = "<<setw(13)<<vf*sqrt(CDM.vcirc_square())<<" km/s"
-	<<"\n# W_tot  =" <<setw(13)<<CDM.pot_energy()
+	<<"\n# W_tot    =" <<setw(13)<<CDM.pot_energy()
 	<<" =" <<setw(13)<<vf*vf*mf*CDM.pot_energy()<<" M_sun(km/s)^2"
-	<<"\n# K_tot  = "<<setw(13)<<CDM.kin_energy()
+	<<"\n# K_tot    = "<<setw(13)<<CDM.kin_energy()
 	<<" = "<<setw(13)<<vf*vf*mf*CDM.kin_energy()<<" M_sun(km/s)^2"
-	<<"\n# E_tot  =" <<setw(13)<<CDM.total_energy()
+	<<"\n# E_tot    =" <<setw(13)<<CDM.total_energy()
 	<<" =" <<setw(13)<<vf*vf*mf*CDM.total_energy()<<" M_sun(km/s)^2";
     else
       std::clog
-	<<"\n# g      = "<<     CDM.inner_slope()
-	<<"\n# C      = "<<     CDM.mass_normal()
-	<<"\n# M_tot  = "<<     CDM.total_mass()
-	<<"\n# M(r<a) = "<<     CDM.cum(CDM.break_radius())
-	<<"\n# M(r<b) = "<<     CDM.cum(CDM.trunc_radius())
-	<<"\n# a      = "<<     CDM.break_radius()
-	<<"\n# b      = "<<     CDM.trunc_radius()
-	<<"\n# Phi_0  =" <<     CDM.central_pot()
-	<<"\n# vc_max = "<<sqrt(CDM.vcirc_square())
-	<<"\n# W_tot  =" <<     CDM.pot_energy()
-	<<"\n# K_tot  = "<<     CDM.kin_energy()
-	<<"\n# E_tot  =" <<     CDM.total_energy();
+	<<"\n# gamma    = "<<     CDM.inner_slope()
+	<<"\n# C        = "<<     CDM.mass_normal()
+	<<"\n# M_tot    = "<<     CDM.total_mass()
+	<<"\n# M(r<r_s) = "<<     CDM.cum(CDM.break_radius())
+	<<"\n# M(r<r_t) = "<<     CDM.cum(CDM.trunc_radius())
+	<<"\n# r_s      = "<<     CDM.break_radius()
+	<<"\n# r_t      = "<<     CDM.trunc_radius()
+	<<"\n# Phi_0    =" <<     CDM.central_pot()
+	<<"\n# vc_max   = "<<sqrt(CDM.vcirc_square())
+	<<"\n# W_tot    =" <<     CDM.pot_energy()
+	<<"\n# K_tot    = "<<     CDM.kin_energy()
+	<<"\n# E_tot    =" <<     CDM.total_energy();
     std::clog<<"\n# ------------------------------------------------------"
 	     <<std::endl;
   }

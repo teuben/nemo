@@ -125,16 +125,36 @@ void nbdy::find_centre(const bodies*const&B,       // I  : bodies
 }
 ////////////////////////////////////////////////////////////////////////////////
 namespace { using namespace nbdy;
-  const double ferrers_norm = FPi / 13.125; 
-  inline void ferrers(double const&m, double const&xq, double D[3])
-  {
-    D[2] = 8. * m;
-    register double tmp = 1 - xq;
-    D[1] =-times<4>(tmp) * m;
-    D[0] = power<2>(tmp) * m;
-  }
+  template<int N=2> struct ferrers;
+  template<> struct ferrers<2> {
+    static double norm() { return FPi / 13.125; }
+    static void   diff(double const&m, double const&xq, double D[3]) {
+      D[2] = 8. * m;
+      register double tmp = 1 - xq;
+      D[1] =-times<4>(tmp) * m;
+      D[0] = power<2>(tmp) * m;
+    }
+  };
+  template<> struct ferrers<3> {
+    static double norm() { return FPi / 19.6875; }
+    static void   diff(double const&m, double const&xq, double D[3]) {
+      register double t = 1.-xq, d=m*t, d2=d*t, d3=d2*t;
+      D[2] = 24*d;
+      D[1] =-6*d2;
+      D[0] = d3;
+    }
+    static void   diff1(double const&m, double const&xq, double D[2]) {
+      register double t = 1.-xq, d2=m*t*t, d3=d2*t;
+      D[1] =-6*d2;
+      D[0] = d3;
+    }
+    static double d1(double const&m, double const&xq) {
+      return -6*m*square(1.-xq);
+    }
+  };
 }
 ////////////////////////////////////////////////////////////////////////////////
+#if (0)
 void nbdy::find_centre(const bodies*const&B,       // I  : bodies               
 		       uint         const&Nmin,    // I  : min #bodies in center
 		       vect              &xc,      // I/O: center position      
@@ -148,8 +168,8 @@ void nbdy::find_centre(const bodies*const&B,       // I  : bodies
   const double FACMAX = 1.;
   int    N;
   double RHO = 0., RH  = 0., d2RH, FAC=0.5;
-  vect_d dRH = 1., Vc, dXO, dX;
-  for(int iter=0; ;++iter) {
+  vect_d dRH = 1., Xc=xc, Vc, dXO, dX;
+  for(int iter=0; iter<miter; ++iter) {
     N   = 0;
     RH  = 0.;
     dRH = 0.;
@@ -157,11 +177,11 @@ void nbdy::find_centre(const bodies*const&B,       // I  : bodies
     Vc  = 0.;
     const double hq=hc*hc, ihq=1./hq;
     LoopBodiesRange(bodies,B,Bi,b0,bn) {
-      register vect_d R(xc); R -= pos(Bi);
+      register vect_d R(Xc); R -= pos(Bi);
       register double Rq = norm(R);
       if(Rq < hq) {
 	register double D[3];
-	ferrers(mass(Bi),Rq*ihq,D);
+	ferrers<2>::diff(mass(Bi),Rq*ihq,D);
 	RH   += D[0];
 	dRH  += R *= D[1];
 	d2RH += times<3>(hq*D[1]) + Rq*D[2];
@@ -169,35 +189,178 @@ void nbdy::find_centre(const bodies*const&B,       // I  : bodies
 	++N;
       }
     }
-    Vc /= RH;
-    RH  /= ferrers_norm * power<3>(hc);
-    dRH /= ferrers_norm * power<5>(hc);
-    d2RH/= ferrers_norm * power<7>(hc);
+    Vc  /= RH;
+    RH  /= ferrers<2>::norm() * power<3>(hc);
+    dRH /= ferrers<2>::norm() * power<5>(hc);
+    d2RH/= ferrers<2>::norm() * power<7>(hc);
     dX   =-dRH / d2RH;
-//     // TEST
-//     std::cerr<<std::setw(2)<<iter<<": X="<<xc<<" H="<<hc
-// 	     <<" N="<<N<<" |drho|="<<abs(dRH)<<" rho="<<RH<<'\n';
-//     // TSET
-    if(N == 0) {
-      hc *= 3.;
-    } else if(RH > RHO) {
-      RHO = RH;
-      dXO = dX;
+    // TEST
+    std::cerr<<std::setw(2)<<iter<<": X="<<xc<<" H="<<hc
+	     <<" N="<<N<<" drho="<<dRH<<" d2rho="<<d2RH
+	     <<" rho="<<RH<<" dX="<<dX<<'\n';
+    // TSET
+    if(N == 0 || RH < RHO) {
+      // new position wasn't better
+      Xc  = xc;                         // goto old position
+      RH  = RHO;                        // and old density 
+      dX  = dXO;                        // and old dX
+      FAC*= 0.5;                        // shrink factor
+      if(N==0) hc += hc;                // IF N=0 increase hc
+    } else if(RH > RHO) { 
+      // found a position with higher density
+      xc  = Xc;                         // remember it     
+      dXO = dX;                         // remember dX
+      RHO = RH;                         // remember density 
+      if(rhc) *rhc = RH;                // update output
+      if(vc)  *vc  = Vc;                // update output
+      if(abs(dRH)*hc < 1.e-3*RH  && N == Nmin) return;
+                                        // converged? then return
       hc *= 0.7+0.3*pow(double(Nmin)/double(N),0.33333333333333333);
-      if(FAC < FACMAX) FAC *= 1.1;
-    } else {
-      RH  = RHO;
-      dX  = dXO;
-      xc -= FAC * dX;
-      FAC*= 0.5;
+                                        // adapt radius
+      FAC = min(FACMAX, 1.1*FAC);       // adjust factor
     }
-    if(abs(dRH)*hc <  1.e-3*RH  &&
-       N           == Nmin      ||
-       iter        >  miter        ) break;
-    xc += FAC * dX;
+    Xc += FAC * dX * hc/sqrt(hc*hc+norm(dX)); // new guess for X_c
   }
-  if(rhc) *rhc = RH;
-  if(vc)  *vc  = Vc;
+  return;
+}
+#endif
+////////////////////////////////////////////////////////////////////////////////
+namespace {
+  using namespace nbdy;
+  void gr(const bodies*const&B,                    // I: bodies                 
+	  uint         const&b0,                   // I: begin of bodies        
+	  uint         const&bn,                   // I: end   of bodies        
+	  vect_d       const&x,                    // I: trial position         
+	  double       const&r,                    // I: trial radius           
+	  uint              &n,                    // O: N(|r-x|<h)             
+	  double            &rho,                  // O: rho_h(r)               
+	  vect_d            &g,                    // O: - drho/dr              
+	  vect_d            &v)                    // O: velocity               
+  {
+    const double rq = r*r, irq=1./rq;
+    n   = 0;
+    rho = 0.;
+    v   = 0.;
+    g   = 0.;
+    LoopBodiesRange(bodies,B,Bi,b0,bn) {
+      register vect_d R(x); R -= pos(Bi);
+      register double Rq = norm(R);
+      if(Rq < rq) {
+	register double D[2];
+	ferrers<3>::diff1(mass(Bi),Rq*irq,D);
+	rho  += D[0];
+	v.add_times(vel(Bi),D[0]);
+	g.add_times(R,D[1]);
+	++n;
+      }
+    }
+    register double tmp = 1. / ( ferrers<3>::norm()*power<3>(r) );
+    v   /= rho;
+    rho *= tmp;
+    tmp *= irq;
+    g   *= tmp;
+  }
+
+  void di(const bodies*const&B,                    // I: bodies                 
+	  uint         const&b0,                   // I: begin of bodies        
+	  uint         const&bn,                   // I: end   of bodies        
+	  vect_d       const&x,                    // I: trial position         
+	  double       const&r,                    // I: trial radius           
+	  vect_d       const&h,                    // I: trial direction        
+	  double            &d1,                   // O: directional deriv ->h  
+	  double            &d2)                   // O: 2nd ---                
+  {
+    const double rq = r*r, irq=1./rq;
+    const double hqirq = norm(h) * irq;
+    register double _d1 = 0.;
+    register double _d2 = 0.;
+    LoopBodiesRange(bodies,B,Bi,b0,bn) {
+      register vect_d R(x); R -= pos(Bi);
+      register double tmp = norm(R);
+      if(tmp < rq) {
+	register double D[3];
+	ferrers<3>::diff(mass(Bi),tmp*irq,D);
+	tmp  = h * R * irq;
+	_d1 += tmp * D[1];
+	_d2 += hqirq  * D[1] +  tmp * tmp * D[2];
+      }
+    }
+    register double tmp = 1. / ( ferrers<3>::norm()*power<3>(r) );
+    d1 = _d1 * tmp;
+    d2 = _d2 * tmp;
+  }
+}
+void nbdy::find_centre(const bodies*const&B,       // I  : bodies               
+		       uint         const&N,       // I  : #bodies in center    
+		       vect              &xc,      // I/O: center position      
+		       real              &hc,      // I/O: centre radius        
+		       vect              *vc,      //[O  : center velocity]     
+		       real              *rhc,     //[O  : estimate: rho(xc)]   
+		       uint         const&b0,      //[I  : begin of bodies]     
+		       uint         const&bn)      //[I  : end   of bodies]     
+{
+  // we use a conjugate gradient method, whereby approximating the line
+  // maximisation by the 1st and 2nd directional derivatives.
+  // Near the maximum, the 2nd derivative should be negative.
+  // If it isn't, we cannot use it for line maximisation, but simply go
+  // in the direction of h at most the size of the current radius far.
+  // 
+  // It seems that the algorithm converges, even if initially set off by more
+  // than the initial radius (which already was 3 times the expectation).
+
+//   // TEST
+//   {
+//     vect_d dX;
+//     std::cerr<<" give offset "<<std::endl;
+//     std::cin >> dX;
+//     xc += dX;
+//   }
+//   // TSET
+  const int max_i = 100;
+  uint              n;
+  double            rh,r(hc),d1,d2;
+  vect_d            x(xc), g, go, h, v;
+  // initialize
+  gr(B,b0,bn,x,r,n,rh,g,v);
+  while(n==0) {
+    r += r;
+    gr(B,b0,bn,x,r,n,rh,g,v);
+  }
+  h = g;
+//   // TEST
+//   std::cerr<<" i: x="<<x<<" r="<<r<<" rh="<<rh<<" g="<<g<<" n="<<n<<'\n';
+//   // TSET
+  // iterate using cg method
+  for(int i=0; i < max_i; ++i) {
+    go = g;
+    di(B,b0,bn,x,r,h,d1,d2);
+    register vect_d dx(h);
+    if(d2*r >=-abs(d1))    // 2nd derivate not really negative -> cannot use it
+      dx *= r*sign(d1) / sqrt(norm(h)+square(r*d1));
+    else                   // 2nd derivative < 0 as it should be near maximum  
+      dx *= -d1/d2;
+    x += dx;
+    r *= 0.7+0.3*cbrt(double(N)/double(n));
+    gr(B,b0,bn,x,r,n,rh,g,v);
+    while(n==0) {
+      r += r;
+      gr(B,b0,bn,x,r,n,rh,g,v);
+    }
+//     // TEST
+//     std::cerr<<std::setw(2)<<i
+// 	     <<": x="<<x<<" r="<<r<<" rh="<<rh<<" g="<<g<<" h="<<h
+// 	     <<" d1="<<d1
+// 	     <<" d2="<<d2
+// 	     <<" dx="<<dx
+// 	     <<" n="<<n<<'\n';
+//     // TSET
+    if(abs(g)*r<1.e-8*rh && n==N) break;
+    h  = g + h * (((g-go)*g)/(go*go));
+  }
+  xc = x;
+  hc = r;
+  if(rhc) *rhc = rh;
+  if(vc)  *vc  = v;
 }
 ////////////////////////////////////////////////////////////////////////////////
 namespace { using namespace nbdy;
@@ -400,10 +563,12 @@ namespace {
     q[1] = q[0] = norm(B->pos(0));
     for(int b=0; b!=B->N_bodies(); ++b) {
       t = norm(B->pos(b));
+      if(std::isnan(t)) error("body position contains nan\n");
       update_min(q[0],t);
       update_max(q[1],t);
       PointsA[b].q = t;
       t            = B->mass(b);
+      if(std::isnan(t)) error("body mass is nan\n");
       PointsA[b].m = t;
       Mtot        += t;
     }

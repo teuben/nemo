@@ -51,7 +51,7 @@ string defv[] = {
   "WD_units=f\n       input:  kpc, M_Sun\n"
   "                   output: kpc, kpc/Gyr, G=1 (-> mass unit)           ",
   falcON_DEFV, NULL };
-string usage = "mkplum -- construct a Plummer model\n";
+string usage = "mkplum -- initial conditions from a Plummer model";
 ////////////////////////////////////////////////////////////////////////////////
 void nbdy::main()
 {

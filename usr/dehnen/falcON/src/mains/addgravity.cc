@@ -29,13 +29,15 @@
 #define falcON_VERSION   "1.4"
 #define falcON_VERSION_D "06-may-2004 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
-#ifndef falcON_NEMO
-#error You need NEMO to compile "addgravity.cc"
+#ifndef falcON_NEMO                                // this is a NEMO program    
+#error You need NEMO to compile addgravity
 #endif
-#include <body.h>                                     // bodies etc..           
-#include <falcON.h>                                   // falcON                 
-#include <public/nmio.h>                              // WDs C++ NEMO I/O       
-#include <main.h>                                     // main & NEMO stuff      
+#define falcON_RepAction 0                         // no action reporting       
+//-----------------------------------------------------------------------------+
+#include <body.h>                                  // bodies etc..              
+#include <falcON.h>                                // falcON                    
+#include <public/nmio.h>                           // WDs C++ NEMO I/O          
+#include <main.h>                                  // main & NEMO stuff         
 //------------------------------------------------------------------------------
 string defv[] = {
   "in=???\n           input file                                         ",
@@ -50,8 +52,7 @@ string defv[] = {
   "\n                 max # bodies in un-split cells                     ",
   falcON_DEFV, NULL };
 //------------------------------------------------------------------------------
-string usage = "addgravity -- adds pot & acc to a snapshot using\n"
-               "falcON = Force ALgorithm with Complexity O(N)\n";
+string usage = "addgravity -- adds gravity to a snapshot; using falcON";
 //------------------------------------------------------------------------------
 void nbdy::main()
 {

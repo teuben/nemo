@@ -4,7 +4,15 @@
 # Makefile for the falcON project
 #
 ################################################################################
-install		: all
+default		: all
+ifdef NEMO
+tonemo		: all
+			cp $(LIB)/libfalcON.so $(NEMOLIB)
+			cp $(BIN)/* $(NEMOBIN) >& /dev/null
+install		: tonemo man
+else
+install		: all man
+endif
 
 COMPILER	:= gcc
 #COMPILER	:= pgcc
@@ -18,7 +26,5 @@ include make.defs
 include make.public
 
 ################################################################################
-################################################################################
-
-# pjt
+# pjt (probably not needed anymore now)
 include Makefile.nemo

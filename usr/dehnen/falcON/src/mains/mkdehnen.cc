@@ -69,7 +69,7 @@ string defv[] = {
   "                   output: kpc, kpc/Gyr, G=1 (-> mass unit)           ",
   falcON_DEFV, NULL };
 ////////////////////////////////////////////////////////////////////////////////
-string usage = "mkdehnen -- construct a Dehnen (1993, MNRAS, 265, 250) model"
+string usage = "mkdehnen -- initial conditions from a Dehnen (1993) model"
 #ifdef falcON_PROPER
                "\n            possibly with Osipkov-Merritt anisotropy"
                "\n            and mass adaption (proprietary version only)"

@@ -68,6 +68,8 @@ namespace meta {
        sX v_min (cX*a)           { return min(a[I], M::v_min(a)); }
        sX v_max (cX*a)           { return max(a[I], M::v_max(a)); }
        sX v_amax(cX*a)           { return max(abs(a[I]), M::v_amax(a)); }
+       sb v_nan (cX*a)           { return isnan(a[I]) || M::v_nan(a); }
+       sb v_inf (cX*a)           { return isinf(a[I]) || M::v_inf(a); }
        sv v_uma ( X*a,cX*b)      { update_max(a[I],b[I]); M::v_uma(a,b); } 
        sv v_umi ( X*a,cX*b)      { update_min(a[I],b[I]); M::v_umi(a,b); } 
        sv v_umax( X*a,cX*b,cX&x) { update_max(a[I],b[I],x); M::v_umax(a,b,x);}
@@ -118,6 +120,8 @@ namespace meta {
        sX v_min (cX*a)           { return a[I]; }
        sX v_max (cX*a)           { return a[I]; }
        sX v_amax(cX*a)           { return abs(a[I]); }
+       sb v_nan (cX*a)           { return isnan(a[I]); }
+       sb v_inf (cX*a)           { return isinf(a[I]); }
        sv v_uma ( X*a,cX*b)      { update_max(a[I],b[I]); } 
        sv v_umi ( X*a,cX*b)      { update_min(a[I],b[I]); } 
        sv v_umax( X*a,cX*b,cX&x) { update_max(a[I],b[I],x); }
@@ -139,17 +143,6 @@ namespace meta {
     tP sv v_appt(P &p, cX*a,cX&x){ p[I] = x*a[I]; }
     tP sv v_apat(P &p, cX*a,cX&x){ p[I]+= x*a[I]; }
     tP sv v_apst(P &p, cX*a,cX&x){ p[I]-= x*a[I]; }
-  };
-  //----------------------------------------------------------------------------
-  template<typename X> class taux<X,0,0> {
-    typedef const X      cX;
-  public:
-    sX v_cr2  (cX*a, cX*b)       { return a[0]*b[1] - a[1]*b[0]; }
-    sv v_cr3  ( X*z, cX*a, cX*b) {
-      z[0] = a[1]*b[2] - a[2]*b[1];
-      z[1] = a[2]*b[0] - a[0]*b[2];
-      z[2] = a[0]*b[1] - a[1]*b[0];
-    }
   };
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //

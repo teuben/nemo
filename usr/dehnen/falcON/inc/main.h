@@ -195,7 +195,11 @@ namespace nbdy { namespace defv_info {
 	     compile_info::compiler());
   };
 } }
-#  define falcON_DEFV nbdy::defv_info::version, nbdy::defv_info::compiled
+#  if defined(falcON_PROPER) && !defined(falcON_NOT_USING_PROPER)
+#    define falcON_DEFV nbdy::defv_info::version, nbdy::defv_info::compiled, "STATUS=\nproprietary version; usage restricted"
+#  else
+#    define falcON_DEFV nbdy::defv_info::version, nbdy::defv_info::compiled, "STATUS=\npublic version"
+#  endif
 #endif
 
 //------------------------------------------------------------------------------

@@ -279,30 +279,38 @@ namespace {
     //--------------------------------------------------------------------------
     // protected methods                                                        
     //--------------------------------------------------------------------------
-    bool do_direct_pre (cell_iter const&A, leaf_iter const&B) const {
+    bool do_direct_pre (cell_iter const&A, leaf_iter const&B) const
+    {
       return number(A) < N_PRE[0];
     }
     //--------------------------------------------------------------------------
-    bool do_direct_post(cell_iter const&A, leaf_iter const&B) const {
+    bool do_direct_post(cell_iter const&A, leaf_iter const&B) const
+    {
       return is_twig(A) || number(A) < N_POST[0];
     }
     //--------------------------------------------------------------------------
-    bool do_direct_post(cell_iter const&A, cell_iter const&B) const {
+    bool do_direct_post(cell_iter const&A, cell_iter const&B) const
+    {
       return (is_twig(A) && is_twig(B)) ||
 	     (number(A) < N_POST[1] && number(B) < N_POST[1]);
     }
     //--------------------------------------------------------------------------
-    bool do_direct(cell_iter const&A) const { 
+    bool do_direct(cell_iter const&A) const
+    { 
       return is_twig(A) || number(A) < N_PRE[2];
     }
     //--------------------------------------------------------------------------
     static bool well_separated(cell_iter const&A, cell_iter const&B,
 			       real      const&Rq)
-    { return Rq > square(rcrit(A)+rcrit(B)); }
+    { 
+      return Rq > square(rcrit(A)+rcrit(B));
+    }
     //--------------------------------------------------------------------------
     static bool well_separated(cell_iter const&A, leaf_iter const&B,
 			       real      const&Rq)
-    { return Rq > rcrit2(A); }
+    { 
+      return Rq > rcrit2(A);
+    }
     //--------------------------------------------------------------------------
   protected:
     grav_iact_base(
@@ -319,7 +327,8 @@ namespace {
     }
     //--------------------------------------------------------------------------
   public:
-    bool split_first(cell_iter const&A, cell_iter const&B) const {
+    bool split_first(cell_iter const&A, cell_iter const&B) const
+    {
       return is_twig(B) || (!is_twig(A) && rmax(A) > rmax(B));
     }
   };

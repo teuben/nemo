@@ -135,3 +135,8 @@ MAKE_EXE	= $(CXX) -o $@ $< -I$(INC) $(INEMO) $(CXXFLAGS)
 MAKE_EXE_C	= $(CC)  -o $@ $< -I$(INC) $(CFLAGS)
 MAKE_EXE_F	= $(FC)  -o $@ $< -I$(INC) $(OPTFLAGS)
 NEMO_EXE_FLGS	= $(NBDYFLAGS) $(LFALCON) -lm
+
+
+.PHONY		: 	all
+.PHONY		: 	man
+

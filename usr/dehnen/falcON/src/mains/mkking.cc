@@ -35,14 +35,17 @@
 // v 1.3.1 17/06/2003  WD added option eps                                     |
 // v 1.4   28/10/2003  WD automatic version; quasi-random numbers              |
 // v 1.4.1 30/04/2004  WD abandoned zerocm; new body.h; happy icc 8.0          |
+// v 1.4.2 18/05/2004  WD rearranged options                                   |
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "1.4.1"
-#define falcON_VERSION_D "30-apr-2004 Walter Dehnen                          "
+#define falcON_VERSION   "1.4.2"
+#define falcON_VERSION_D "18-may-2004 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
-#error You need NEMO to compile "src/mains/mkking.cc"
+#error You need NEMO to compile "mkking"
 #endif
 #define falcON_RepAction 0                         // no action reporting       
+#define falcON_NOT_USING_PROPER                    // not using PROPRIETARY code
+//-----------------------------------------------------------------------------+
 #include <public/Pi.h>                             // my Pi                     
 #include <public/king.h>                           // my king model             
 #include <body.h>                                  // my bodies                 
@@ -63,14 +66,14 @@ string defv[] = {
   "r_c=1\n            core radius                                        ",
   "r_t=\n             tidal radius (don't use r_c)                       ",
   "eps=\n             output softening length eps with every body        ",
+  "q-ran=f\n          use quasi- instead of pseudo-random numbers        ",
   "WD_units=f\n       input:  kpc, solar masses\n"
   "                   output: kpc, kpc/Gyr, G=1 (-> mass unit)           ",
-  "q-ran=f\n          use quasi- instead of pseudo-random numbers        ",
   "outputs=f\n        give some global quantities to stderr              ",
   "table=\n           file for table of r,Phi,rho,M(<r)                  ",
   falcON_DEFV, NULL };
 //------------------------------------------------------------------------------
-string usage = "mkking -- construct a King model";
+string usage = "mkking -- initial conditions from a King model";
 //------------------------------------------------------------------------------
 void nbdy::main()
 {

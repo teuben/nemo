@@ -1390,6 +1390,8 @@ namespace {
       if(is_in_tree(BB->flg(b))                    //   IF body is in tree      
 	 && SP==0 | is_set(BB->flg(b),SP)) {       //      AND specified        
 	Di->set_up(BB,b);                          //     initialize dot        
+	if(isnan(Di->pos()))                       //     test for nan          
+	  error("tree building: body position contains nan\n");
 	XMAX.up_max(Di->pos());                    //     update X_max          
 	XMIN.up_min(Di->pos());                    //     update X_min          
 	XAVE += Di->pos();                         //     sum up X              
@@ -1418,6 +1420,8 @@ namespace {
       if(is_in_tree(BB->flg(b))                    //   IF body is in tree      
 	 && SP==0 | is_set(BB->flg(b),SP)) {       //      AND specified        
 	Di->set_up(BB,b);                          //     initialize dot        
+	if(isnan(Di->pos()))                       //     test for nan          
+	  error("tree building: body position contains nan\n");
 	XAVE += Di->pos();                         //     sum up X              
 	Di++;                                      //     incr current dot      
       }                                            // END LOOP                  

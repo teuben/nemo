@@ -43,8 +43,7 @@ string defv[] = {
   "\n                  max # bodies in un-split cells  ",
   falcON_DEFV, NULL };
 //------------------------------------------------------------------------------
-string usage = "getgravity -- computes gravity at test positions using\n"
-               "falcON = Force ALgorithm with Complexity O(N)\n";
+string usage="getgravity -- computes gravity at sink positions; using falcON";
 //------------------------------------------------------------------------------
 void nbdy::main()
 {

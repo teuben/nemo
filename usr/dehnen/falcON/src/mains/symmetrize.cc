@@ -21,14 +21,17 @@
 // v 0.4   23/10/2003  WD automated version, compiler in version etc           |
 // v 0.5   01/05/2004  WD happy icc 8.0; new body.h & changes in this file     |
 // v 0.6   01/05/2004  WD removed bug (Seg fault) made at v 0.5; acceleration  |
+// v 1.0   19/05/2004  WD removed bug (v0.6); allowed for missing x,v, or a    |
 //-----------------------------------------------------------------------------+
 #define falcON_VERSION   "0.6"
 #define falcON_VERSION_D "10-may-2004 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
-#  error You need NEMO to compile "src/mains/symmetrize.cc"
+#  error You need NEMO to compile "symmetrize"
 #endif
 #define falcON_RepAction 0                         // no action reporting       
+#define falcON_NOT_USING_PROPER                    // not using PROPRIETARY code
+//-----------------------------------------------------------------------------+
 #include <iostream>                                // C++ I/O                   
 #include <fstream>                                 // C++ file I/O              
 #include <iomanip>                                 // C++ I/O formatting        
@@ -97,47 +100,31 @@ void nbdy::main()
 	  copy_data<1>::c(BIN,BOUT,READ,i,j);
 	}
       } else if(COPY==1) {
-	if(READ & io::a) {
-	  for(register int i=0,j=0; i<BIN.N_bodies(); i+=USE, j+=2) {
-	    copy_data<2>::c(BIN,BOUT,READ,i,j);
-	    BOUT.pos(j+1) *=-one;                  // -x,-y,-z                  
-	    BOUT.vel(j+1) *=-one;                  // -u,-v,-w                  
-	    BOUT.acc(j+1) *=-one;                  // -ax,-ay,-az               
-	  }
-	} else {
-	  for(register int i=0,j=0; i<BIN.N_bodies(); i+=USE, j+=2) {
-	    copy_data<2>::c(BIN,BOUT,READ,i,j);
-	    BOUT.pos(j+1) *=-one;                  // -x,-y,-z                  
-	    BOUT.vel(j+1) *=-one;                  // -u,-v,-w                  
-	  }
+	for(register int i=0,j=0; i<BIN.N_bodies(); i+=USE, j+=2) {
+	  copy_data<2>::c(BIN,BOUT,READ,i,j);
+	  if(READ & io::x) BOUT.pos(j+1) *=-one;   // -x,-y,-z                  
+	  if(READ & io::v) BOUT.vel(j+1) *=-one;   // -u,-v,-w                  
+	  if(READ & io::a) BOUT.acc(j+1) *=-one;   // -ax,-ay,-az               
 	}
       } else {
-	if(READ & io::a) {
-	  for(register int i=0,j=0; i<BIN.N_bodies(); i+=USE, j+=4) {
-	    copy_data<4>::c(BIN,BOUT,READ,i,j);
+	for(register int i=0,j=0; i<BIN.N_bodies(); i+=USE, j+=4) {
+	  copy_data<4>::c(BIN,BOUT,READ,i,j);
+	  if(READ & io::x) {
 	    BOUT.pos(j+1)    *=-one;               // -x,-y,-z                  
-	    BOUT.vel(j+1)    *=-one;               // -u,-v,-w                  
 	    BOUT.pos(j+2)[2] *=-one;               //  x, y,-z                  
-	    BOUT.vel(j+2)[2] *=-one;               //  u, v,-w                  
 	    BOUT.pos(j+3)[0] *=-one;               // -x                        
-	    BOUT.vel(j+3)[0] *=-one;               // -u                        
 	    BOUT.pos(j+3)[1] *=-one;               // -y                        
+	  }
+	  if(READ & io::v) {
+	    BOUT.vel(j+1)    *=-one;               // -u,-v,-w                  
+	    BOUT.vel(j+2)[2] *=-one;               //  u, v,-w                  
+	    BOUT.vel(j+3)[0] *=-one;               // -u                        
 	    BOUT.vel(j+3)[1] *=-one;               // -v                        
 	  }
-	} else {
-	  for(register int i=0,j=0; i<BIN.N_bodies(); i+=USE, j+=4) {
-	    copy_data<4>::c(BIN,BOUT,READ,i,j);
-	    BOUT.pos(j+1)    *=-one;               // -x,-y,-z                  
-	    BOUT.vel(j+1)    *=-one;               // -u,-v,-w                  
+	  if(READ & io::a) {
 	    BOUT.acc(j+1)    *=-one;               // -ax,-ay,-az               
-	    BOUT.pos(j+2)[2] *=-one;               //  x, y,-z                  
-	    BOUT.vel(j+2)[2] *=-one;               //  u, v,-w                  
 	    BOUT.acc(j+2)[2] *=-one;               // ax,ay,-az                 
-	    BOUT.pos(j+3)[0] *=-one;               // -x                        
-	    BOUT.vel(j+3)[0] *=-one;               // -u                        
 	    BOUT.acc(j+3)[0] *=-one;               // -ax                       
-	    BOUT.pos(j+3)[1] *=-one;               // -y                        
-	    BOUT.vel(j+3)[1] *=-one;               // -v                        
 	    BOUT.acc(j+3)[1] *=-one;               // -ay                       
 	  }
 	}

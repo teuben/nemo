@@ -57,7 +57,6 @@ namespace nbdy {
   private:
     const double Mt;
     const double ibt;
-#ifdef falcON_PROPER
     typedef tupel<2,double> pair_d;
     //--------------------------------------------------------------------------
     const bool   adapt_masses, Peri, OM, beta;
@@ -72,6 +71,7 @@ namespace nbdy {
     //--------------------------------------------------------------------------
     // private methods                                                          
     //--------------------------------------------------------------------------
+#ifdef falcON_PROPER
     inline void setis();
 #endif
   public:

@@ -257,15 +257,12 @@ namespace nbdy {
   tNXY i_ tupel<N,X> op*(Y c_&y, tupel<N,X> c_&v) { return v*y; }
   // cross product for 2D and 3D, coded as operator^                            
   tX   i_ X          op^(tupel<2,X> c_&x, tupel<2,X> c_&y) {
-    return meta::taux<X,0>::v_cr2(static_cast<c_ X*>(x),
-				  static_cast<c_ X*>(y));
+    return x[0]*y[1] - x[1]*y[0];
   }
   tX   i_ tupel<3,X> op^(tupel<3,X> c_&x, tupel<3,X> c_&y) {
-    register tupel<3,X> z;
-    meta::taux<X,0>::v_cr3(static_cast<   X*>(z),
-			   static_cast<c_ X*>(x), 
-			   static_cast<c_ X*>(y));
-    return z;
+    return tupel<3,X>(x[1]*y[2] - x[2]*y[1],
+		      x[2]*y[0] - x[0]*y[2],
+		      x[0]*y[1] - x[1]*y[0]);
   }
   tX   i_ X          op^(const_pseudo_tupel<2,X> c_&x,
 			 const_pseudo_tupel<2,X> c_&y) {
@@ -277,6 +274,14 @@ namespace nbdy {
 		      x[2]*y[0] - x[0]*y[2],
 		      x[0]*y[1] - x[1]*y[0]);
   }
+  // test for nan & inf (new 19-May-2004)                                       
+  tNX i_ bool isnan(tupel<N,X> c_&x) {
+    return meta::taux<X,N-1>::v_nan(static_cast<c_ X*>(x));
+  }
+  tNX i_ bool isinf(tupel<N,X> c_&x) {
+    return meta::taux<X,N-1>::v_inf(static_cast<c_ X*>(x));
+  }
+  //                                                                            
 #undef  tX
 #undef  tNX
 #undef  tNXY

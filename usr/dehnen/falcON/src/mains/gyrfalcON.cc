@@ -14,81 +14,81 @@
 //                                                                             |
 // history:                                                                    |
 //                                                                             |
-// v 1.0.0   28/05/2001  WD created with the help of PJT, based on YANC        |
-// v 1.0.1   01/06/2001  WD bug in this file removed, added history output     |
-// v 1.0.2   13/06/2001  WD Ncrit option added (before Ncrit==1)               |
-// v 1.0.3   20/06/2001  WD tree::make() back to adding-leafs algorithm        |
-//                          Coordinatesystem given with snapshot               |
-// v 1.0.4   25/06/2001  WD bug (builder::link_tree()) removed (thanks to PJT) |
-// v 1.0.5   28/06/2001  WD changes in tree::grow(). Avoid box overflow.       |
-//                          bug (in builder) removed                           |
-// v 1.0.6   01/08/2001  WD substantial code upgrade in the tree (falcON)      |
-// v 1.0.7   02/08/2001  WD Nreuse option added (before Nreuse==0)             |
-// v 1.0.8   08/08/2001  WD new data lay-out for bodies, enabling special      |
-//                          treatment for leap-frog, saves memory & time (?)   |
-// v 1.0.9   17/09/2001  WD added support for dynamically linked external      |
-//                          potential (potential.h)                            |
-// v 1.0.10  20/09.2001  WD added option ("resume") for resuming an old or     |
-//                          interrupted simulation. Appends to input file      |
-// v 1.0.11  21/09/2001  WD improved handling of nemo I/O; can now also read   |
-//                          PosTag & VelTag instead of PhaseSpaceTag           |
-// v 1.0.12  21/09/2001  WD added parameter give_acc                           |
-// v 1.0.13  11/10/2001  WD changed give_pot option to allow only N-body pot   |
-//                          added option startout                              |
-// v 1.0.14  18/10/2001  WD interweaving interaction & evaluation phase of     |
-//                          gravity approximation: saves about 20b/body        |
-// v 1.0.15  23/10/2001  WD some changes in I/O handling (body, yanc)          |
-// v 1.0.16  23/11/2001  WD added option logout (to allow output pipe)         |
-// v 1.0.17  08/01/2002  WD changed body lay-out (gives 2% speed-up)           |
-// v 1.1.0   21/01/2002  WD minor changes                                      |
-// v 1.1.1   25/01/2002  WD minor changes                                      |
-// v 1.1.2   29/01/2002  WD minor changes (1.5% speed-up)                      |
-// v 1.1.3   26/02/2002  WD time-symmetric stepping criterion tau=fac/acc      |
-// v 1.1.4   27/02/2002  WD added options: out2, step2                         |
-// v 1.1.5   01/03/2002  WD added time stepping criterion tau=fp/pot           |
-// v 1.1.6   05/03/2002  WD added time stepping criterion tau=fc*sqrt(pot)/acc |
-// v 1.2     07/06/2002  WD replaced giveacc,givepot,giverho with give, give2  |
-// v 1.2.1   11/06/2002  WD support for kernels Fn and Kn withdrawn            |
-// v 1.2.2   14/06/2002  WD added output option for flag & level               |
-// v 1.2.3   17/06/2002  WD allow for individual adaptive softening lengths    |
-//                          changed option Nreuse -> hgrow                     |
-// v 1.2.4   26/08/2002  WD bug in MAC removed,                                |
-//                          tree re-build (saves 40% CPU time on build)        |
-// v 1.2.5   28/08/2002  WD bug with hgrow removed                             |
-// v 1.2.6   29/08/2002  WD improved initialization of external potential      |
-// v 1.2.7   30/08/2002  WD adapted this file for usage of MPI otherwise       |
-// v 1.2.8   09/09/2002  WD further adaption to MPI usage                      |
-// v 1.2.9   05/11/2002  WD added option Grav (for comparison with GADGET)     |
-// v 1.3.0   15/11/2002  WD various updates (SSE code, eps_i treatment)        |
-// v 1.4     20/11/2002  WD splitted between public and proprietary code       |
-// v 1.4.1   26/11/2002  WD debugged some features                             |
-// v 1.5     04/12/2002  WD re-named "gyrfalcON" (previously "YancNemo")       |
-//                          several changes in file layout for public version  |
-// v 1.5.1   09/01/2003  WD saver C-macros, default parameters                 |
-// v 1.5.2   13/01/2003  WD never ending; logstep; stopfile                    |
-// v 1.5.3   24/01/2003  WD option lastout added.                              |
-// v 1.5.4   03/03/2003  WD debugged: handling of external pot in total energy |
-// v 1.5.5   13/03/2003  WD added check for over-using of stdout/pipe          |
-// v 1.5.6   17/03/2003  WD options emin, fea, limits on |eps_new/eps_old|     |
-// v 1.5.7   20/03/2003  WD changes in gravity, action reporting (proper only) |
-// v 1.6     02/06/2003  WD allow for individual but fixed eps_i by eps<0      |
-// v 1.6.1   28/07/2003  WD happy gcc 3.3 (about 6% faster than gcc 3.2)       |
-// v 1.6.2   08/08/2003  WD version provides compiler info, automated          |
-// v 1.6.3   13/08/2003  WD fixed bug with individual_fixed; thanks to J.Bailin|
-// v 1.7.0   05/09/2003  WD individual eps made public; changes in tensors     |
-// v 1.7.1   17/09/2003  WD changes in tree: avoiding template specs           |
-// v 1.7.2   07/10/2003  WD changes in gravity: using common basic_tree        |
-// v 1.7.3   23/10/2003  WD changes in design of gravity, tree, kernel, falcON |
-// v 1.8     05/11/2003  WD changes in grav; changed io::P to io::q            |
-// v 1.8.1   10/02/2004  WD minor change in this file (logfile)                |
-// v 1.8.2   11/02/2004  WD allow for Grav=0 (Grav now handled in grav.h)      |
-// v 1.8.3   18/02/2004  WD bug with Grav=0 fixed; avoid tree building if G=0  |
-// v 1.9     19/02/2004  WD added option root_center                           |
-// v 1.9.1   23/02/2004  WD improved diagnose output (new T, V_in, [V_ex,] W)  |
-// v 1.9.2   27/02/2004  WD use nemo::error() instead of nbdy::error()         |
-// v 2.0     11/03/2004  WD elimated yanc.h & yanc.cc                          |
-// v 2.0.1   31/03/2004  WD log format changed slightly; change in ext pot     |
-// v 2.1     30/04/2004  WD happy icc 8.0; new body.h;                         |
+// v 1.0.0  28/05/2001  WD created with the help of PJT, based on YANC         |
+// v 1.0.1  01/06/2001  WD bug in this file removed, added history output      |
+// v 1.0.2  13/06/2001  WD Ncrit option added (before Ncrit==1)                |
+// v 1.0.3  20/06/2001  WD tree::make() back to adding-leafs algorithm         |
+//                         Coordinatesystem given with snapshot                |
+// v 1.0.4  25/06/2001  WD bug (builder::link_tree()) removed (thanks to PJT)  |
+// v 1.0.5  28/06/2001  WD changes in tree::grow(). Avoid box overflow.        |
+//                         bug (in builder) removed                            |
+// v 1.0.6  01/08/2001  WD substantial code upgrade in the tree (falcON)       |
+// v 1.0.7  02/08/2001  WD Nreuse option added (before Nreuse==0)              |
+// v 1.0.8  08/08/2001  WD new data lay-out for bodies, enabling special       |
+//                         treatment for leap-frog, saves memory & time (?)    |
+// v 1.0.9  17/09/2001  WD added support for dynamically linked external       |
+//                         potential (potential.h)                             |
+// v 1.0.10 20/09.2001  WD added option ("resume") for resuming an old or      |
+//                         interrupted simulation. Appends to input file       |
+// v 1.0.11 21/09/2001  WD improved handling of nemo I/O; can now also read    |
+//                         PosTag & VelTag instead of PhaseSpaceTag            |
+// v 1.0.12 21/09/2001  WD added parameter give_acc                            |
+// v 1.0.13 11/10/2001  WD changed give_pot option to allow only N-body pot    |
+//                         added option startout                               |
+// v 1.0.14 18/10/2001  WD interweaving interaction & evaluation phase of      |
+//                         gravity approximation: saves about 20b/body         |
+// v 1.0.15 23/10/2001  WD some changes in I/O handling (body, yanc)           |
+// v 1.0.16 23/11/2001  WD added option logout (to allow output pipe)          |
+// v 1.0.17 08/01/2002  WD changed body lay-out (gives 2% speed-up)            |
+// v 1.1.0  21/01/2002  WD minor changes                                       |
+// v 1.1.1  25/01/2002  WD minor changes                                       |
+// v 1.1.2  29/01/2002  WD minor changes (1.5% speed-up)                       |
+// v 1.1.3  26/02/2002  WD time-symmetric stepping criterion tau=fac/acc       |
+// v 1.1.4  27/02/2002  WD added options: out2, step2                          |
+// v 1.1.5  01/03/2002  WD added time stepping criterion tau=fp/pot            |
+// v 1.1.6  05/03/2002  WD added time stepping criterion tau=fc*sqrt(pot)/acc  |
+// v 1.2    07/06/2002  WD replaced giveacc,givepot,giverho with give, give2   |
+// v 1.2.1  11/06/2002  WD support for kernels Fn and Kn withdrawn             |
+// v 1.2.2  14/06/2002  WD added output option for flag & level                |
+// v 1.2.3  17/06/2002  WD allow for individual adaptive softening lengths     |
+//                         changed option Nreuse -> hgrow                      |
+// v 1.2.4  26/08/2002  WD bug in MAC removed,                                 |
+//                         tree re-build (saves 40% CPU time on build)         |
+// v 1.2.5  28/08/2002  WD bug with hgrow removed                              |
+// v 1.2.6  29/08/2002  WD improved initialization of external potential       |
+// v 1.2.7  30/08/2002  WD adapted this file for usage of MPI otherwise        |
+// v 1.2.8  09/09/2002  WD further adaption to MPI usage                       |
+// v 1.2.9  05/11/2002  WD added option Grav (for comparison with GADGET)      |
+// v 1.3.0  15/11/2002  WD various updates (SSE code, eps_i treatment)         |
+// v 1.4    20/11/2002  WD splitted between public and proprietary code        |
+// v 1.4.1  26/11/2002  WD debugged some features                              |
+// v 1.5    04/12/2002  WD re-named "gyrfalcON" (previously "YancNemo")        |
+//                         several changes in file layout for public version   |
+// v 1.5.1  09/01/2003  WD saver C-macros, default parameters                  |
+// v 1.5.2  13/01/2003  WD never ending; logstep; stopfile                     |
+// v 1.5.3  24/01/2003  WD option lastout added.                               |
+// v 1.5.4  03/03/2003  WD debugged: handling of external pot in total energy  |
+// v 1.5.5  13/03/2003  WD added check for over-using of stdout/pipe           |
+// v 1.5.6  17/03/2003  WD options emin, fea, limits on |eps_new/eps_old|      |
+// v 1.5.7  20/03/2003  WD changes in gravity, action reporting (proper only)  |
+// v 1.6    02/06/2003  WD allow for individual but fixed eps_i by eps<0       |
+// v 1.6.1  28/07/2003  WD happy gcc 3.3 (about 6% faster than gcc 3.2)        |
+// v 1.6.2  08/08/2003  WD version provides compiler info, automated           |
+// v 1.6.3  13/08/2003  WD fixed bug with individual_fixed; thanks to J.Bailin |
+// v 1.7.0  05/09/2003  WD individual eps made public; changes in tensors      |
+// v 1.7.1  17/09/2003  WD changes in tree: avoiding template specs            |
+// v 1.7.2  07/10/2003  WD changes in gravity: using common basic_tree         |
+// v 1.7.3  23/10/2003  WD changes in design of gravity, tree, kernel, falcON  |
+// v 1.8    05/11/2003  WD changes in grav; changed io::P to io::q             |
+// v 1.8.1  10/02/2004  WD minor change in this file (logfile)                 |
+// v 1.8.2  11/02/2004  WD allow for Grav=0 (Grav now handled in grav.h)       |
+// v 1.8.3  18/02/2004  WD bug with Grav=0 fixed; avoid tree building if G=0   |
+// v 1.9    19/02/2004  WD added option root_center                            |
+// v 1.9.1  23/02/2004  WD improved diagnose output (new T, V_in, [V_ex,] W)   |
+// v 1.9.2  27/02/2004  WD use nemo::error() instead of nbdy::error()          |
+// v 2.0    11/03/2004  WD elimated yanc.h & yanc.cc                           |
+// v 2.0.1  31/03/2004  WD log format changed slightly; change in ext pot      |
+// v 2.1    30/04/2004  WD happy icc 8.0; new body.h;                          |
 //-----------------------------------------------------------------------------+
 #define falcON_VERSION   "2.1"
 #define falcON_VERSION_D "30-apr-2004 Walter Dehnen                          "

@@ -228,6 +228,8 @@ symmetrize	:	$(falcON) $(BIN)symmetrize
 all_pub		:	TestGrav gyrfalcON addgravity getgravity \
 			density_centre lagrange_radii mkdehnen mkking \
 			mkplum scale_eps symmetrize
+man_pub	:
+			cp man/man1/* $(NEMO)/man/man1/
 
 else
 
@@ -256,7 +258,6 @@ all_pub		:	TestGrav
 
 endif
 
-
 # --------
 # cleaning
 # --------
@@ -270,10 +271,10 @@ clean:
 			rm -f $(INC)*~ $(INC)*/*~ $(SRC)*/*~ \
 				$(LIB)* $(SRC)mains/*.f
 
+
 ifndef PROPER
 
-.PHONY		: 	all
-
 all		:	all_pub
+man		:	man_pub
 
 endif

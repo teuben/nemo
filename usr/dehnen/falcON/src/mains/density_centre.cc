@@ -25,14 +25,19 @@
 // v 2.1   20/04/2004  WD abolish XXX, pre-center using tree                   |
 // v 2.2   21/04/2004  WD abandon alpha & fac, use SPH type density estimate   |
 // v 2.3   12/05/2004  WD made PUBLIC; renamed (original: "center")            |
+// v 2.4   19/05/2004  WD change of give: if not given, we write all we got    |
+//                        added option step to reduce snapshot outputs         |
+// v 2.5   20/05/2004  WD improved iterative algorithm (cg)                    |
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "2.3"
-#define falcON_VERSION_D "12-may-2004 Walter Dehnen                          "
+#define falcON_VERSION   "2.5"
+#define falcON_VERSION_D "20-may-2004 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
-#  error You need NEMO to compile "src/mains/density_centre.cc"
+#  error You need NEMO to compile "density_centre"
 #endif
 #define falcON_RepAction 0                         // no action reporting       
+#define falcON_NOT_USING_PROPER                    // not using PROPRIETARY code
+//-----------------------------------------------------------------------------+
 #include <iostream>                                // C++ I/O                   
 #include <fstream>                                 // C++ file I/O              
 #include <iomanip>                                 // C++ I/O formatting        
@@ -44,18 +49,17 @@
 //------------------------------------------------------------------------------
 string defv[] = {
   "in=???\n           input file                                         ",
-  "out=\n             output file                                        ",
+  "out=\n             output file for snapshots                          ",
+  "give=\n            output only these; if not given, output all we got ",
+  "step=0\n           step between snapshot outputs                      ",
   "times=all\n        times to process                                   ",
   "Ncen=200\n         # bodies in center                                 ",
   "centrefile=-\n     file to write center position & velocity to        ",
   "centerfile=\n      same as centrefile                                 ",
-  "give=\n            what to give to out                                ",
   falcON_DEFV, NULL };
 //------------------------------------------------------------------------------
 string
-usage = "density_centre -- determine density centre & centers snapshots\n"
-        "The center is defined as the position of the density maximum\n"
-        "If that is not well-defined, the routine may fail\n";
+usage = "density_centre -- find the global density maximum; center snapshots\n";
 //------------------------------------------------------------------------------
 void nbdy::main()
 {
@@ -64,8 +68,8 @@ void nbdy::main()
   const unsigned NCEN(getiparam("Ncen"));
   const nemo_in  IN  (getparam("in"));
   const nemo_out OUT (SOUT? getparam("out") : ".");
-  const io       GIVE(getioparam_z("give"));
-  const io       NEED(io::mxv | GIVE);
+  const io       GIVE(hasvalue("give")? getioparam("give") : io::all);
+  const io       WANT(SOUT? GIVE : io::mxv);
   // open output for center position                                            
   std::ostream  *COUT(0);
   std::ofstream  CFILE;
@@ -83,7 +87,7 @@ void nbdy::main()
 		   getparam("centerfile") : getparam("centrefile"));
     COUT  = &CFILE;
   }
-  if(stdout > 1) error("more than one output to \"-\", ie. stdout\n");
+  if(stdout > 1) ::error("more than one output to \"-\", ie. stdout\n");
   if(COUT)
     (*COUT) << "#\n"
 	    << "# \""<< (*(ask_history())) <<"\"\n"
@@ -91,16 +95,27 @@ void nbdy::main()
 	    << "# t x y z vx vy vz rho"<<std::endl;
   // loop snapshots & process them                                              
   bodies   BODIES;
+  char     WORD[30];
   int      NOLD = 0u;
   oct_tree*TREE = 0;
   io       READ;
   real     RHO,RAD(zero);
   double   TIME;
   vect     XCEN(zero),VCEN(zero);
+  bool     FIRST = true;
+  double   TOUT, STEP(getdparam("step"));
   while(IN.is_present(nemo_io::snap)) {
-    if(! BODIES.read_nemo_snapshot(IN,READ,&TIME,NEED,getparam("times"),0))
-      continue;
-    if(! READ.contains(NEED)) error("insufficient data");
+    // read time, read snapshot if in times                                     
+    bool IN_TIMES = BODIES.read_nemo_snapshot(IN,READ,&TIME,WANT,
+					      getparam("times"),0);
+    if(FIRST) {
+      TOUT  = TIME - 1.e-10*STEP;
+      FIRST = false;
+    }
+    if(! IN_TIMES ) continue;
+    // build tree & find first estimate for density centre                      
+    if(! READ.contains(io::mx))
+      ::error("insufficient data: need mx, got %s", READ.make_word(WORD));
     if(TREE==0 || NOLD != BODIES.N_bodies()) {
       if(TREE) delete TREE;
       TREE = new oct_tree(&BODIES,NCEN/4);
@@ -109,7 +124,14 @@ void nbdy::main()
     }
     estimate_density_peak(TREE,0u,NCEN,XCEN,RAD);
     RAD *= 3;
-    find_centre(&BODIES,NCEN,XCEN,RAD,&VCEN,&RHO);
+    // iterator to improve density centre                                       
+    if(READ.contains(io::v))
+      find_centre(&BODIES,NCEN,XCEN,RAD,&VCEN,&RHO);
+    else {
+      find_centre(&BODIES,NCEN,XCEN,RAD,0,&RHO);
+      VCEN = zero;
+    }
+    // output of density centre: position & velocity                            
     if(COUT)
       (*COUT)<<"  "
 	     <<std::setw(15)<<std::setprecision(8)<<TIME   <<"  "
@@ -120,12 +142,14 @@ void nbdy::main()
 	     <<std::setw(15)<<std::setprecision(8)<<VCEN[1]<<" "
 	     <<std::setw(15)<<std::setprecision(8)<<VCEN[2]<<"  "
 	     <<std::setw(15)<<std::setprecision(8)<<RHO    <<std::endl;
-    if(SOUT) {
+    // output of snapshot                                                       
+    if(SOUT && TIME >= TOUT) {
       LoopBodies(bodies,&BODIES,Bi) {
 	Bi.pos() -= XCEN;
 	Bi.vel() -= VCEN;
       }
-      BODIES.write_nemo_snapshot(OUT,&TIME,READ);
+      BODIES.write_nemo_snapshot(OUT,&TIME,READ&GIVE);
+      TOUT += STEP;
     }
   }
   if(TREE) delete TREE;
