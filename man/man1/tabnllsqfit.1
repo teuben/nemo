@@ -1,0 +1,155 @@
+.TH TABNLLSQFIT 1NEMO "12 July 2002"
+.SH NAME
+tabnllsqfit \- general purpose non-linear least squares fitting program
+.SH SYNOPSIS
+.PP
+\fBtabnllsqfit in=\fPtable-file [parameter=value]
+.SH DESCRIPTION
+\fBtabnllsqfit\fP takes a non-linear least squares fit (minimized ChiSquared)
+of a set of datapoints (x(i),y(i)) where a functional
+form y=f(x;a1,a2,...,an) is assumed. The functional form to be
+fitted has to be specified by name at this stage. A number of
+options are possible.
+.PP
+The inputfile is an ascii file in a tabular format, where on every line
+there must be an assigned column for the X- and Y-coordinate(s). 
+An optional column can be assigned to the errors in Y 
+(the DY-coordinates, the inverse square of these being used as
+a weight column). If no
+DY-column is assigned, it is assumed that the errors in Y are all the
+same and equal to 1. Lines starting with the '#' symbol are comment 
+lines. Certain models (see \fBfit=\fP below) allow multiple X or Y
+columns. 
+.PP
+Each fit can also produce an output file with an additional column
+computing the difference between the data and the model (in that order).
+.PP
+Functionally, this program is very similaar to GIPSY's \fPfit\fP program,
+except \fBtabnllsqfit\fP cannot handle arbitrary functions yet.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 20
+\fBin=\fIin-file\fP
+(ascii) input file, a table of values from which data is taken. No default.
+.TP
+\fBxcol=\fIcol,...\fP
+The column(s) from which the (independant) 
+X-values are taken. The first column
+is called 1 by definition [default: \fB1\fP].
+.TP
+\fBycol=\fIcol,...\fP
+The column(s) from which the (dependant) 
+Y-values are taken [default: \fB2\fP].
+.TP
+\fBdycol=\fIint\fP
+Optional column from which the DY-values (errors in Y) are taken. The
+inverse square of the errors are uses as weights for those fits where
+these are used 
+[default: none assigned].
+.TP
+\fBxrange=\fIxmin:xmax\fP
+Range in X-values for which the fit is done. If only one number is
+given, the other one is considered zero.
+[default: no entry, i.e. all].
+.TP
+\fBfit=\fP\fImodel\fP
+Model name what to fit. Currently implemented are \fIline\fP, \fIplane\fP,
+\fIpoly\fP, and \fIgauss\fP.
+[default: \fBline\fP].
+.TP
+\fBorder=\fP\fIorder\fP
+Highest order of the polynomial fit (\fBfit=poly\fP) or 
+number of dimension of the hyper-plane fit (\fBfit=plane\fP). 0 would fit
+a constant. 
+
+[Default: \fB0\fP].
+.TP
+\fPout=\fIfilename\fP
+Optional output filename
+where the data and residuals are stored.
+The first few columns contain the X and Y columns, the last
+column contains the residual Y-F(X)
+[default: no output file created].
+.TP
+\fPnsigma=\fIsigma_factor\fP
+** A positive number will delete points more than \fIsigma_factor\fP from the fit,
+and fit again. [Default: \fB-1\fP].
+.TP
+\fBpar=\fP
+Initial estimates for the parameters. For non-linear fits, or linear fits where
+certain parameters are fixed (see \fBfree=\fP below) they need to be given here.
+By default they are all 0.
+.TP
+\fBfree=\fP
+A list of 1's and 0's to set which parameters are to be kept free (1) and which
+are fixed (0). By default all parameters are free, i.e. fitted. If any
+parameter is fixed, initial estimates for all need to be given (see \fBpar=\fP).
+Default: all parameters free.
+.TP
+\fBnmax=\fP\fImax_lines\fP
+Maximum number of lines allocated if the input file was being read
+from a pipe. If not, the routine \fIfile_lines(3NEMO)\fP is used
+to allocate space for the table.
+[Default: \fB10000\fP].
+.SH FITS
+Parameters are referred to as p0,p1,p2,p3,.....
+.nf
+.ta +1i
+line     	y=p0+p1*x                        (same as poly,order=1)
+plane       	z=p0+p1*x+p2*y                   (example order=2)
+polynomial  	y=p0+p1*x+p2*x^2+p3*x^3...       (example order=3)
+gauss       	y=p0+p1*exp(-(x-p2)^2/(2*p3^2))
+.fi
+.SH EXAMPLE
+Here is an example of a linear fit: a straight 
+line, with some added noise and random weights between 1 and 2:
+.nf
+% nemoinp 1:100 |\\
+	tabmath - - "%1+rang(0,10),ranu(1,2)" seed=123 |\\
+	tabnllsqfit - 1 2 3
+nrt=0
+a+bx:  
+a= 1.87458 2.29818 
+b= 0.961672 0.0398614
+.fi
+Here is an example of a 2D plane  in 3D: (1+2x+3y)
+.nf
+% ccdmath "" - '1+2*%x+3*%y+rang(0,0.1)' 5,5 seed=123 |\\
+	ccdprint - x= y= label=x,y newline=t |\\
+	tabnllsqfit - 1,2 3 fit=plane order=2
+nrt=0
+a+bx+cy:  
+a= 1.02123 0.042143 
+b= 2.00953 0.0133268 
+c= 2.99027  0.0133268
+.fi
+And a fit to a gaussian:
+.nf
+% nemoinp 1:100 |\\
+	tabmath - - '4+exp(-(%1-50)**2/(200)+ranu(0,1)' seed=123 |\\
+	tabnllsqfit - fit=gauss par=4,1,50,10
+nrt=13
+a+b*exp(-(x-c)^2/(2*d^2)):  
+a= 4.01317 0.0306607 
+b= 1.84855 0.0708969 
+c= 50.0317 0.381753
+d= 9.05587  0.43685
+.fi
+.SH SEE ALSO
+tablsqfit(1NEMO), tabhist(1NEMO), tabmath(1NEMO), 
+gaussfit(1NEMO), linreg(1NEMO), nllsqfit(3NEMO), fit(DC1)
+\fINumerical Recipies in C, Ch.14\fP
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+~/src/kernel/tab	tablsqfit.c
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+12-jul-02	V1.0 cloned off tablsqfit	PJT
+.fi
+

@@ -5,8 +5,9 @@
  *
  *
  *  line       a+bx
- *  plane      p0+p1*x1+p2*x2+p3*x3+.....  up to 'order'   (2d plane has order=2)
- *  poly       p0+p1*x+p2*x^2+p3*x^3+..... up to 'order'   (paraboloid has order=2)
+ *  plane      p0+p1*x1+p2*x2+p3*x3+.....     up to 'order'   (2d plane has order=2)
+ *  poly       p0+p1*x+p2*x^2+p3*x^3+.....    up to 'order'   (paraboloid has order=2)
+ *  gauss      p0+p1*exp(-(x-p2)^2/(2*p3^2))
  */
 
 #include <stdinc.h>  
@@ -20,14 +21,12 @@ string defv[] = {
     "xrange=\n          ** in case restricted range is used (1D only)",
     "fit=line\n         fitmode (line, plane, poly, gauss)",
     "order=\n		Order of plane/poly fit",
-    "out=\n             ** optional output file for some fit modes",
+    "out=\n             output file for some fit modes",
     "nsigma=-1\n        ** delete points more than nsigma away?",
-    "par=\n             initial estimates of parameters, if truely non-linear fit",
-    "free=\n            free(1) or fixed(0) parameters?",
-    "npar=\n            override number of parameters",
+    "par=\n             initial estimates of parameters (p0,p1,p2,...)",
+    "free=\n            free(1) or fixed(0) parameters? [1,1,1,1,....]",
     "nmax=10000\n       Default max allocation",
-    "tab=f\n            ** short one-line output?",
-    "VERSION=0.9\n      12-jul-02 PJT",
+    "VERSION=1.0\n      13-jul-02 PJT",
     NULL
 };
 
@@ -54,7 +53,7 @@ a_column            xcol[MAXCOL],   ycol[MAXCOL],   dycol;
 
 real xrange[MAXCOL*2];      /* ??? */
 
-string method;              /* fit method (line, ellipse, ....) */
+string method;              /* fit method (line, poly, ....) */
 stream instr, outstr;       /* input / output file */
 
 
@@ -208,7 +207,6 @@ setparams()
     nsigma = getdparam("nsigma");
     order = getiparam("order");
     if (order<0) error("order=%d of %s cannot be negative",order,method);
-    Qtab = getbparam("tab");
 
     if (hasvalue("free")) {
       int nfree;
@@ -227,8 +225,6 @@ setparams()
 	par[i] = 0.0;
     } else
       npar = 0;
-    if (hasvalue("npar"))
-      npar = getiparam("npar");
 }
 
 setrange(real *rval, string rexp)
@@ -293,20 +289,6 @@ read_data()
     if (npt==0) error("No data");
 }
 
-
-write_data(outstr)              /* only for straight line fit */
-stream outstr;
-{
-#if 0    
-    int i;
-    real d;
-
-    for (i=0; i<npt; i++) {
-        d = y[i] - a*x[i] - b;
-        fprintf (outstr,"%f %f %f\n",x[i],y[i],d);
-    }
-#endif    
-}
 
 
 /*
@@ -341,8 +323,9 @@ do_line()
   nrt = nllsqfit(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,its,lab, fitfunc,fitderv);
   printf("nrt=%d\n",nrt);
   printf("a+bx:  \na= %g %g \nb= %g %g\n", fpar[0],epar[0],fpar[1],epar[1]);
-  for (i=0; i<npt; i++)
-    dprintf(1,"%g %g %g\n",x[i],y[i],d[i]);
+  if (outstr)
+    for (i=0; i<npt; i++)
+      fprintf(outstr,"%g %g %g\n",x[i],y[i],d[i]);
 
 }
 
@@ -387,8 +370,9 @@ do_plane()
   printf("nrt=%d\n",nrt);
   printf("a+bx+cy:  \na= %g %g \nb= %g %g \nc= %g  %g\n",
 	 fpar[0],epar[0],fpar[1],epar[1],fpar[2],epar[2]);
-  for (i=0; i<npt; i++)
-    dprintf(1,"%g %g %g %g\n",x1[i],x2[i],y[i],d[i]);
+  if (outstr)
+    for (i=0; i<npt; i++)
+      fprintf(outstr,"%g %g %g %g\n",x1[i],x2[i],y[i],d[i]);
 
 #if 0
   outdparam("a",fpar[0]);
@@ -433,8 +417,9 @@ do_gauss()
   printf("nrt=%d\n",nrt);
   printf("a+b*exp(-(x-c)^2/(2*d^2)):  \na= %g %g \nb= %g %g \nc= %g %g\nd= %g  %g\n",
 	 fpar[0],epar[0],fpar[1],epar[1],fpar[2],epar[2],fpar[3],epar[3]);
-  for (i=0; i<npt; i++)
-    dprintf(1,"%g %g %g\n",x[i],y[i],d[i]);
+  if (outstr)
+    for (i=0; i<npt; i++)
+      fprintf(outstr,"%g %g %g\n",x[i],y[i],d[i]);
 
 }
 
