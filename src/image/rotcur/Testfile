@@ -17,6 +17,7 @@ clean:
 R = 0:100:5
 PA = 30
 INC = 60
+SIG = 1
 
 all:	$(BIN) 
 
@@ -25,7 +26,7 @@ all:	$(BIN)
 map1.vel:
 	@echo Creating $@
 	@nemoinp $(R) > map1.r
-	@nemoinp $(R) | tabmath - - '100*%1/(20+%1)' all > map1.v
+	@nemoinp $(R) | tabmath - - "100*%1/(20+%1)+rang(0,$(SIG))" all > map1.v
 	ccdvel map1.vel radii=@map1.r vrot=@map1.v pa=$(PA) inc=$(INC)
 
 map1.den:
@@ -48,3 +49,10 @@ rotcurshape: map1.vel
 	rotcurshape in=map1.vel radii=0,60 pa=$(PA) inc=$(INC) vsys=0 \
 	   tab=map1.rotcurshape units=sec,1 rotcur1=core1,100,20,1,1 > /dev/null
 	@tail -11 map1.rotcurshape
+
+
+power: map1.vel
+	rotcurshape in=map1.vel radii=0,60 pa=$(PA) inc=$(INC) vsys=0 \
+	   tab=map1.rotcurshape units=sec,1 rotcur1=power,100,20,1,1,1,1
+	@tail -11 map1.rotcurshape
+
