@@ -1,5 +1,6 @@
 DIR = src/nbody/evolve/aarseth/nbody0
-BIN = nbody0 nbody00 nbody0_ff
+BIN = nbody0 nbody00 
+# nbody0_ff
 NEED = $(BIN) mkplummer snaptrim snapcmp snapprint
 
 help:
