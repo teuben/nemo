@@ -1,0 +1,25 @@
+%N hackforce
+%D ### NEMO program with unknown intent...(usage)
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man hackforce' for more online help
+%A in
+	Input file with mass coordinates [???]
+%A out
+	Output file with f.c. results [???]
+%A test
+	Input file with test coordinates (if blank, mass coords are used) []
+%A tol
+	Cell subdivision tolerence [1.0]
+%A eps
+	Standard softening parameter [0.05]
+%A rsize
+	Side-length of initial box [4.0]
+%A rmin
+	Lower left corner of initial box [default is -rsize/2 (centered) []
+%A options
+	Output options: phase and/or mass [mass,phase]
+%A fcells
+	Cell/body allocation ratio [0.75]
+%A VERSION
+	PJT 13-feb-91 [1.4b]

@@ -1,0 +1,21 @@
+%N orbfour
+%D ### NEMO program with unknown intent...(usage)
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man orbfour' for more online help
+%A in
+	Input filename (an orbit) [???]
+%A cos
+	List of noj-zero cos(m.phi) terms [0:4:1]
+%A sin
+	List of non-zero sin(m.phi) terms [1:4:1]
+%A xvar
+	X variable [x]
+%A yvar
+	Y variable [y]
+%A fvar
+	Fourier Observable to be decomposed (vx,vy,vr,vt) [vy]
+%A amode
+	Display amps or amp/phase if possible? [t]
+%A VERSION
+	20-dec-90 PJT [1.1a]
