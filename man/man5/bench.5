@@ -1,4 +1,4 @@
-.TH DATA 5NEMO "26 November 2003"
+.TH DATA 5NEMO "17 February 2004"
 .SH NAME
 bench \- NEMO benchmarks in NemoStones
 .SH DESCRIPTION
@@ -6,11 +6,14 @@ Nemo Benchmarks (a.k.a. NemoStones)
 .PP
 \fBbench1\fP tests the classic Barnes and Hut code in C, without
 quadruople corrections, for 10240 particles and 128 timesteps.
-\fBbench2\fP tests 
+\fBbench2\fP tests. \fBbench0\fP has been added to compare a
+direct with tree based N-body code, but is not part of the
+NemoStone.
 .SH DATA
 Here are the benchmarks
 .ta +1i
 .nf
+\fBbench0\fP:	\fItime directcode nbody=10240\fP
 \fBbench1\fP:	\fItime hackcode1 nbody=10240\fP
 \fBbench2\fP:	\fItime mkplummer p1 10240; time gyrfalcON p1 . tstop=2\fB
 \fBbench3\fP:	\fItime mkspiral s000 1000000 nmodel=40\fP
@@ -20,6 +23,10 @@ and the data :
 .PP
 .nf
 .ta +2i
+bench0
+       P4/3.0	342.7
+       G5/2.0	472.8
+       AMD64/2.0	300.3
 bench1
        P4/3.0	13.4
        G5/2.0	13.1
@@ -49,4 +56,5 @@ Peter Teuben
 .ta +1.0i +4.0i
 12-may-97	created  	PJT
 26-nov-03	finally added some data		PJT
+17-feb-04	added bench0 comparison  	PJT
 .fi

@@ -137,6 +137,14 @@ Since \fBcell\fP is a fixed number throughout the execution,
 is doesn't deal well with systems who's lenght-scale changes,
 in particular, expanding systems will allocate more and more
 space to hold the dissipation grid.
+.SH CONCEPTS
+Normally a distinction is made between a \fIstreamline\fP and
+\fIstreakline\fP. A \fIstreamline\fP is what we compute here:
+with a "frozen" field we compute how a tracer particle would
+have flown through space. A \fIstreamline\fP also takes into 
+account that the flow could be a function of time, and
+now it computes how a tracer particle would have streamed 
+through space in the fluid that changed its flow.
 .SH DISSIPATION
 Various schemes of dissipation can be invoked. Here's one, see
 also Lin & Pringle (1974):

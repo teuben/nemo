@@ -63,11 +63,12 @@ Default: \fBf\fP.
 tabmath(1NEMO), nemoinp(3NEMO), getrange(3NEMO)
 .SH EXAMPLES
 .nf
-   nemoinp 4.2+3.1
-   nemoinp 'sqrt(2)'
-   nemoinp 2:20:2
-   set n=10
-   nemoinp 2:${n}:2
+   nemoinp 4.2+3.1          simple math
+   nemoinp 'sqrt(2)'        math functions
+   nemoinp 2:20:4           from 2 to 20 in steps of 4
+   set n=20	            a C-shell variable
+   nemoinp 2:${n}:4         as before, now using a shell variable
+   nemoinp 2::4             repeat the value 4 times
 .SH AUTHOR
 Peter Teuben
 .SH "UPDATE HISTORY"

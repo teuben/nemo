@@ -1,4 +1,4 @@
-.TH ATOS 1NEMO "15 May 1997"
+.TH ATOS 1NEMO "10 February 2004"
 .SH NAME
 atos, atos_sp atosph, atosph_sp \-
 convert ascii N-body file to structured binary format
@@ -11,6 +11,9 @@ convert output files produced on remote supercomputers.  \fIatos_sp\fP
 is similar, but uses single precision.  Finally, \fIatosph\fP and
 \fIatosph_sp\fP convert ascii Smoothed Particle Hydrodynamics data
 files to binary format.
+.PP
+The NEMO convention is to store the SPH particles first in arrays where
+SPH and pure N-body particles are stored.
 .SH PARAMETERS
 The following parameters are recognized.
 .TP 25
@@ -67,7 +70,7 @@ NOBJ NGAS               	number of bodies, gas particles [integer]
 NDIM                    	number of dimensions [integer]
 TIME                    	time of snapshot [real]
 MASS(i)                 	particle masses, i = 1...NOBJ [real]
-  . . . . .
+  . . . . .                        (the first NGAS particles are the SPH particles)
 X(i) Y(i) Z(i)          	particle positions, i = 1...NOBJ [real]
   . . . . .
 VX(i) VY(i) VZ(i)       	particle velocities, i = 1...NOBJ [real]
