@@ -1,0 +1,38 @@
+#! /bin/csh -f
+#
+set prog=$0
+if ($#argv < 1) then
+  echo "Usage: $prog:t man_page name1 name2 ..."
+  echo "Link or more manual pages to an existing manual page"
+  echo "The link files contain nothing more than a "
+  echo "	.so manX/name.X"
+  echo "line. Note that X is the section number (e.g. 1,3,5,8,l)"
+  exit 0
+endif
+
+set fullname=$1
+shift argv
+
+if (! -e $fullname) then
+  echo $fullname does not exist
+  exit 0
+endif
+
+set dir=$fullname:h
+set name=$fullname:t
+set sect=$name:e
+set man=$name:r
+
+if ("$dir" == "$name") set dir="."
+
+
+foreach file ($*)
+  set out=$dir/$file.$sect
+  set l=".so man$sect/$name"
+  if (-e $out) then
+    echo "File $out already exists"
+  else 
+    echo "Creating $out"
+    echo "$l" > $out
+  endif
+end

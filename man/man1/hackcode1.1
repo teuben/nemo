@@ -1,0 +1,127 @@
+.TH HACKCODE1 1NEMO "6 March 1994"
+.SH NAME
+hackcode1, hackcode1_qp \- hierarchical N-body code
+.SH SYNOPSIS
+\fBhackcode1\fP [\fIparameter\fP=\fIvalue\fP] .\|.\|.
+.SH DESCRIPTION
+\fIhackcode1\fP is an equal-timestep implementation of a hierarchical
+N-body code (J. Barnes and P. Hut, \fINature\fP \fB324\fP, 446).
+It uses an adaptave Eulerian tree to reduce the number of interactions
+per time-step to \fIO\fP(\fIN\fPlog\fIN\fP).
+\fIhackcode1_qp\fP is similar, but includes quadrupole corrections to
+body-cell interactions (L. Hernquist, \fIApp. J. Suppl.\fP, \fB64\fI, 715, 
+1987).
+.PP
+Particles with zero mass will not be included in building the 
+tree structure, and hence in effect produce a restricted N-body code.
+.SH PARAMETERS
+The following parameters are recognized; they may be given in any order.
+.TP 24
+\fBin\fP=\fIin-file\fP
+If given, initial conditions will be read from \fIin-file\fP in
+snapshot format.
+At most one of \fBin\fP, \fBrestart\fP, or \fBcontinue\fP may be specified.
+.TP
+\fBout\fP=\fIout-file\fP
+If given, results are written to \fIout-file\fP in snapshot format.
+.TP
+\fBrestart\fP=\fIstate-file\fP
+If given, the system state will be read from \fIstate-file\fP.
+New values are accepted for the following parameters:
+\fBout\fP, \fBsave\fP, \fBeps\fP, \fBtol\fP, \fBoptions\fP,
+\fBfcells\fP, \fBtstop\fP, \fBfreqout\fP, \fBminor_freqout\fP,
+and \fBdebug\fP.
+At most one of \fBin\fP, \fBrestart\fP, or \fBcontinue\fP may be specified.
+.TP
+\fBcontinue\fP=\fIstate-file\fP
+If given, the system state will be read from \fIstate-file\fP.
+New values are accepted for the following parameters:
+\fBout\fP, \fBsave\fP, and \fBdebug\fP.
+At most one of \fBin\fP, \fBrestart\fP, or \fBcontinue\fP may be specified.
+.TP
+\fBsave\fP=\fIstate-file\fP
+If given, the system state will be saved in \fIstate-file\fP after each
+timestep.
+.TP
+\fBnbody\fP=\fInbody-value\fP
+Number of bodies for test data, generated only if none of
+\fBin\fP, \fBrestart\fP, or \fBcontinue\fP are specified.
+Default is \fB128\fP.
+.TP
+\fBseed\fP=\fIrandom-seed\fP
+Random number seed used in generating initial conditions.
+Default is \fB123\fP.
+.TP
+\fBcencon\fP=\fIcencon-flag\fP
+If \fBtrue\fP, generate centrally concentrated test system.
+Default is \fBfalse\fP.
+.TP
+\fBfreq\fP=\fIinteg-freq\fP
+Inverse time-step, to be used with a leap-frog integrator.
+Default is \fB32.0\fP (32 steps per unit time).
+.TP
+\fBeps\fP=\fIsoft-length\fP
+Force softening parameter.
+Default is \fB0.05\fP.
+.TP
+\fBtol\fP=\fItheta-value\fP
+Opening-angle tolerence parameter.
+Default is \fB1.0\fP.
+.TP
+\fBfcells\fP=\fIfcells-value\fP
+Ratio of cells to bodies, used when allocating cells.
+Default is \fB0.75\fP.
+.TP
+\fBoptions\fP=\fIoption-string\fP
+Miscellaneous control options, specified as a comma-separated list
+of keywords.
+Currently recognized keywords are:
+\fBreset_time\fP: when reading initial data, set \fItnow\fP to zero;
+\fBnew_tout\fP: when restarting, set new output times;
+\fBmass\fP, \fBphi\fP, \fBacc\fP: output mass, potential,
+acceleration data with major data outputs. The phase space coordinates
+are always output.  It also seems that the reset_time and new_tout
+options have not been implemented yet.
+Default: \fBmass,phase\fP.
+.TP
+\fBtstop\fP=\fIstop-time\fP
+Time to stop integration in N-body model units.
+Default is \fB2.0\fP.
+.TP
+\fBfreqout\fP=\fIout-freq\fP
+Frequency of major N-body data outputs.
+Default is \fB4.0\fP (4 frames per unit time).
+.TP
+\fBminor_freqout\fP=\fIout-freq\fP
+Frequency of minor diagnostic outputs.
+If this frequency is not a simple fraction of \fBfreq\fP (see above),
+the program can waiste significant amounts of time.
+Default is \fB32.0\fP (32 diagnostic measurements per unit time).
+.TP
+\fBdebug\fP=\fIdebug-flag\fP
+Debugging switch; generates lots of output.
+Default is \fBfalse\fP.
+.SH SEE ALSO
+newton0(1NEMO).
+.SH BUGS
+When a \fBrestart\fP is specified, values must be given for \fBALL\fP
+legal parameters which do not take default values.
+.PP
+\fIcontinue=\fP does not seem to work. Use \fIrestart=\fP
+.SH AUTHOR
+Joshua E. Barnes.
+.SH FILES
+.ta +1.5i
+.nf
+src/nbody/evol/hackcode/source1/*	original source code
+usr/josh/hackcode/export/*       	self-contained export version
+.fi
+.SH HISTORY
+.nf
+.ta +1i +4i
+1-jul-87	V1.0  man written	JEB
+11-jul-89	V1.2  using getparam()'s debug keyword + doc impr. 	PJT
+8-jun-90	V1.2  corrected error in man page	PJT
+13-may-91	added undocumented feature of restricted Nbody  	PJT
+6-mar-94	added link to export version	PJT
+.fi
