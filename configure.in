@@ -1,0 +1,580 @@
+dnl Process this file with autoconf to produce a configure script
+dnl ---------------------------------------------------------------------------------
+
+AC_MSG_CHECKING([NEMO config])
+
+AC_INIT(NEMORC)
+AC_CONFIG_HEADER(config.h)
+
+dnl -- checks for programs
+dnl -- checks for libraries
+dnl -- checks for header files
+dnl -- checks for typedefs
+dnl -- checks for structures
+dnl -- checks for compiler characteristics
+dnl -- checks for library functions
+dnl -- checks for system services
+
+dnl			Nemo version - just for fun for now
+NEMOVER="256"
+AC_SUBST(NEMOVER)
+
+
+AC_HEADER_STDC
+AC_CHECK_FUNCS(strchr memcpy)
+
+dnl AC_PROG_CPP
+
+AC_PROG_CC
+AC_PROG_CXX
+AC_PROG_AWK
+AC_PROG_INSTALL
+AC_PROG_LN_S
+AC_PROG_MAKE_SET
+AC_PROG_RANLIB
+
+AC_ARG_PROGRAM
+
+dnl AC_ARG_ASSIGN(pgplot-incl-flags,   [  --pgplot-incl-flags=flags   PGPLOT include flags])
+dnl AC_ARG_ASSIGN(pgplot-link-flags,   [  --pgplot-link-flags=flags   PGPLOT link flags])
+dnl AC_ARG_ASSIGN(pgplot-link-search,  [  --pgplot-link-search=flags  PGPLOT search flags])
+
+
+AC_ARG_ENABLE(debug, [  --enable-debug          compile for debugging], ok=$enableval, ok=yes)
+if test "$ok" = "yes"; then
+        CFLAGS="-g"
+        FFLAGS="-g"
+        LDFLAGS="-g"
+        # should we define DEBUG too?
+fi
+
+
+AC_ARG_ENABLE(fortran, [ --disable-fortran   don't use any Fortran], enable_fortran=$enableval, enable_fortran=yes)
+
+AC_ARG_WITH(mesa, [  --with-mesa        force the use of Mesa instead of other graphics libs], with_mesa=$withval, with_mesa=maybe)
+AC_ARG_WITH(hdf, [  --with-hdf          force the use of HDF], with_hdf=$withval, with_hdf=maybe)
+
+
+dnl ---------------------------------------------------------------------
+dnl             Check for basic X windows stuff
+AC_PATH_X
+AC_PATH_XTRA
+CFLAGS="$CFLAGS $X_CFLAGS"
+XLIBS="$X_LIBS $X_PRE_LIBS -lXext -lX11 $X_EXTRA_LIBS"
+AC_SUBST(XLIBS)
+
+
+dnl ---------------------------------------------------------------------
+dnl 3D Graphics Libraries (see also vis5d's configure.in)
+
+GLLIBS=""
+
+# First, look for OpenGL or Mesa:
+if test "$with_mesa" != "yes"; then
+        AC_CHECK_LIB(GL, glBegin,
+            AC_CHECK_LIB(GLU, gluProject, GLLIBS="-lGLU -lGL",
+                         :, -lGL $XLIBS), :, $XLIBS)
+fi
+if test -z "$GLLIBS" -a "$with_mesa" != "no"; then
+        AC_CHECK_LIB(MesaGL, glBegin,
+            AC_CHECK_LIB(MesaGLU, gluProject, GLLIBS="-lMesaGLU -lMesaGL",
+                         :, -lMesaGL $XLIBS), :, $XLIBS)
+fi
+if test "$with_mesa" = "yes"; then
+        AC_CHECK_LIB(GL, glBegin,
+            AC_CHECK_LIB(GLU, gluProject, GLLIBS="-lGLU -lGL",
+                         :, -lGL $XLIBS), :, $XLIBS)
+fi
+if test -n "$GLLIBS"; then
+        AC_DEFINE(HAVE_OPENGL)
+else
+        echo "couldn't find OpenGL libraries!"
+        if test "$with_mesa" = "yes"; then
+                AC_MSG_ERROR([couldn't find Mesa library])
+        fi
+fi
+
+# Next, look for SGI IrisGL:
+if test -z "$GLLIBS"; then
+        AC_CHECK_LIB(gl_s, bgnqstrip, ok=yes,ok=no, $XLIBS)
+        if test "$ok" = "yes"; then
+                AC_CHECK_LIB(fm, fminit, GLLIBS="-lfm -lgl_s",:,-lgl_s $XLIBS)
+                if test -z "$GLLIBS"; then
+                        AC_CHECK_LIB(fm_s, fminit, 
+                                GLLIBS="-lfm_s -lgl_s",:,-lgl_s $XLIBS)
+                fi
+        fi
+        if test -n "$GLLIBS"; then
+                AC_DEFINE(HAVE_SGI_GL)
+                OPT_UTILS="$OPT_UTILS listfonts"
+        fi
+fi
+# Finally, look for PEX (crufty old 3d extensions for X):
+# (do these even work in Vis5d anymore?)
+if test -z "$GLLIBS"; then
+        # first, check for possible include & lib directory locations:
+        if test -d /usr/lib/PEX5/utilities; then
+                CPPFLAGS="$CPPFLAGS -I/usr/lib/PEX5/utilities"
+        elif test -d /opt/graphics/PEX5/include/X11R6; then
+                CPPFLAGS="$CPPFLAGS -I/opt/graphics/PEX5/include/X11R6"
+        fi
+        if test -d /opt/graphics/PEX5/lib; then
+                LDFLAGS="$LDFLAGS -L/opt/graphics/PEX5/lib"
+        fi
+
+        # now, check for the actual library:
+        save_LDFLAGS="$LDFLAGS"; LDFLAGS="$LDFLAGS $X_LIBS"
+        AC_CHECK_LIB(PEX5, PEXInitialize, GLLIBS="$X_LIBS -lPEX5", :, $XLIBS)
+        LDFLAGS="$save_LDFLAGS"
+
+        if test -n "$GLLIBS"; then
+                # finally, look for the pexut.a library
+                AC_MSG_CHECKING([for pexut.a library])
+                if test -z "$PEXUT_LIB"; then
+                        if test -r /usr/lib/PEX5/utilities/pexut.a; then
+                                PEXUT_LIB="/usr/lib/PEX5/utilities/pexut.a"
+                        elif test -r /var/opt/PEX5/pexut.a; then
+                                PEXUT_LIB="/var/opt/PEX5/pexut.a"
+                        fi
+                fi
+                AC_MSG_RESULT(${PEXUT_LIB-no})
+                if test -z "$PEXUT_LIB"; then
+                        AC_MSG_WARN([pexut.a is required when using PEX])
+                        GLLIBS=""
+                elif test -r "$PEXUT_LIB"; then
+                        GLLIBS="$PEXUT_LIB $GLLIBS"
+                else
+                        # this could happen if the user specified a bogus
+                        # PEXUT_LIB environment variable:
+                        AC_MSG_ERROR($PEXUT_LIB is not readable)
+                fi
+        fi
+
+        if test -n "$GLLIBS"; then
+                AC_DEFINE(HAVE_PEX)
+        fi
+fi
+
+if test -z "$GLLIBS"; then
+        echo "****************************************************"
+        echo "You need to install a 3D graphics library, preferably"
+        echo "the free OpenGL replacement, Mesa.  You can download"
+        echo "Mesa from the Mesa home page:"
+        echo "              http://www.mesa3d.org/"
+        echo "and install it by running:"
+        echo "       ./configure && make && su -c 'make install'"
+        echo "in the Mesa directory."
+
+        if test -r /sbin/ldconfig; then
+                echo "You may also need to run /sbin/ldconfig as root"
+                echo "to update the system after installing Mesa."
+                if test -r /etc/ld.so.conf; then
+                if test -z "`grep /usr/local/lib /etc/ld.so.conf`"; then
+                echo "(First, add '/usr/local/lib' to /etc/ld.so.conf if"
+                echo "you installed Mesa under /usr/local, the default.)"
+                fi
+                fi
+        fi
+        echo "****************************************************"
+dnl        AC_MSG_ERROR([couldn't find 3D graphics library])
+fi
+AC_SUBST(GLLIBS)
+
+dnl -- Check for any particular functions in the GL libs:
+save_LIBS="$LIBS"
+LIBS="$GLLIBS $XLIBS $LIBS"
+AC_CHECK_FUNCS(XMesaGetBackBuffer)
+LIBS="$save_LIBS"
+
+dnl ----
+  
+dnl ---------------------------------------------------------------------
+
+
+AC_MSG_CHECKING(whether we have a FORTRAN 77 compiler)
+AC_CHECK_PROGS(F77, f77 g77 xlf xlf77 fl32 fort77 fc cf77 frt f90 xlf90)
+AC_PROG_F77
+if test -n "$F77"; then
+  if test -n "$GCC"; then
+    AC_F77_LIBRARY_LDFLAGS
+    ACX_F77_FUNC_MANGLE
+    AC_CANONICAL_HOST
+    case $host_os in
+      ultrix*)
+        CC="$CC -Dmain=MAIN_"
+        ;;
+      osf*)
+        CC="$CC -Dmain=MAIN__"
+        ;;
+      sunos*)
+        CC="$CC -Dmain=MAIN_"
+        ;;
+    esac
+  fi
+else
+  F77="$CC"
+  fortran=no
+  AC_MSG_WARN(no FORTRAN compiler)
+fi
+
+AC_MSG_CHECKING(whether we have PGPLOT)
+AC_ARG_WITH(pgplot-prefix, 
+        [  --with-pgplot-prefix=PFX     Prefix where PGPLOT was installed], 
+        pgplot_config_prefix="$withval", 
+        pgplot_config_prefix="/usr/lib/pgplot")
+
+if test x$pgplot_config_prefix != x; then
+        if test -f ${pgplot_config_prefix}/grfont.dat ; then
+                PGPLOT_INCLUDE="-I$pgplot_config_prefix"
+                PGPLOT_LIB="-L$pgplot_config_prefix"
+                PGPLOT_LIB="$PGPLOT_LIB -lcpgplot -lpgplot"
+                CFLAGS="$PGPLOT_INCLUDE $CFLAGS"
+dnl             LIBS="$PGPLOT_LIB $LIBS"
+                AC_DEFINE(_WITH_PGPLOT) 
+                graphtype=pgplot
+                AC_MSG_RESULT(yes)
+        else
+                AC_MSG_RESULT(no)
+                AC_MSG_WARN(could not find PGPLOT library)
+        fi
+
+fi
+
+
+dnl ---------------------------------------------------------------------
+
+dnl check if we have the Fortran (sigh) idate function:  == doesn't work == 
+dnl == doesn't work - confusion with pgplot stuff ==
+
+dnl if test -n "$F77"; then
+dnl         AC_LANG_SAVE
+dnl         AC_LANG_FORTRAN77
+dnl         AC_MSG_CHECKING([for Fortran idate function])
+dnl         AC_TRY_LINK(,[idate(imon,iday,iyear)],[AC_DEFINE(HAVE_IDATE)
+dnl                 AC_MSG_RESULT(yes)],AC_MSG_RESULT(no))
+dnl         AC_LANG_RESTORE
+dnl fi        
+
+dnl ---------------------------------------------------------------------
+
+
+case $host_os in
+      ultrix*)
+	LOADOBJ_MACH =
+        ;;
+      osf*)
+	LOADOBJ_MACH =
+        ;;
+      sunos*)
+	LOADOBJ_MACH =
+	;;
+      sparc*)
+	LOADOBJ_MACH = 
+        ;;
+esac
+
+LOADOBJ_MACH="$LOADOBJ_MACH -Dlinux -DSYSV"
+LOADOBJ_LIBS=-ldl
+
+AC_SUBST(LOADOBJ_MACH)
+AC_SUBST(LOADOBJ_LIBS)
+
+dnl ---------------------------------------------------------------------
+
+
+AC_MSG_CHECKING(whether we have HDF)
+AC_ARG_WITH(hdf-prefix, 
+        [  --with-hdf-prefix=PFX     Prefix where hdf was installed], 
+        hdf_config_prefix="$withval", 
+        hdf_config_prefix="/usr/local")
+
+if test -f $hdf_config_prefix/hdf.h -o -f $hdf_config_prefix/include/hdf.h; then
+                HDF_INC="-I$hdf_config_prefix -I$hdf_config_prefix/include"
+                HDF_LIB="-L$hdf_config_prefix/lib -ldf -ljpeg -lz"
+                CFLAGS="$HDF_INCLUDE $CFLAGS"
+                LIBS="$HDF_LIB $LIBS"
+                AC_DEFINE(_WITH_HDF) 
+                AC_MSG_RESULT(yes)
+else
+                HDF_INC=""
+                HDF_LIB=""
+                AC_MSG_RESULT(no)
+                AC_MSG_WARN(could not find HDF library)
+fi
+AC_SUBST(HDF_INC)
+AC_SUBST(HDF_LIB)
+
+dnl##--------------------------------------------------------------------
+
+AC_MSG_CHECKING(whether we have CFITSIO)
+AC_ARG_WITH(cfitsio-prefix, 
+        [  --with-cfitsio-prefix=PFX     Prefix where CFITSIO was installed], 
+        cfitsio_config_prefix="$withval", 
+        cfitsio_config_prefix="/usr/local/")
+
+if test x$cfitsio_config_prefix != x; then
+        if test -f ${cfitsio_config_prefix}/include/fitsio.h ; then
+                CFITSIO_INCLUDE="-I$cfitsio_config_prefix/include"
+                CFITSIO_LIB="-L$cfitsio_config_prefix"
+                CFITSIO_LIB="$CFITSIO_LIB -lcfitsio"
+                CFLAGS="$CFITSIO_INCLUDE $CFLAGS"
+                LIBS="$CFITSIO_LIB $LIBS"
+                AC_DEFINE(_WITH_CFITSIO) 
+                AC_MSG_RESULT(yes)
+        else
+                AC_MSG_RESULT(no)
+                AC_MSG_WARN(could not find CFITSIO library...)
+        fi
+
+fi
+
+dnl##--------------------------------------------------------------------
+
+AC_MSG_CHECKING(whether we have MIRIAD)
+AC_ARG_WITH(miriad-prefix, 
+        [  --with-miriad-prefix=MIRIAD    Directory where MIRIAD was installed], 
+        miriad_config_prefix="$withval", 
+        miriad_config_prefix="/usr/local/miriad/current")
+if test -f ${miriad_config_prefix}/src/inc/maxdim.h ; then
+        MIRIAD_INC="-I$miriad_config_prefix/src/inc -I$miriad_config_prefix/src/subs"
+        MIRIAD_LIB="-L$miriad_config_prefix/lib"
+        MIRIAD_LIB="$MIRIAD_LIB -lmir"
+        AC_DEFINE(_WITH_MIRIAD) 
+        AC_MSG_RESULT(yes)
+else
+        MIRIAD_INC=""
+        MIRIAD_LIB=""
+        AC_MSG_RESULT(no)
+        AC_MSG_WARN(could not find MIRIAD library...)
+fi
+AC_SUBST(MIRIAD_INC)
+AC_SUBST(MIRIAD_LIB)
+
+
+dnl##--------------------------------------------------------------------
+dnl##
+dnl## PGPLOT parameters
+dnl##
+dnl##--------------------------------------------------------------------
+if test -n "$option_pgplot_link_flags"; then
+    PGPLOTINCLFLAGS="$option_pgplot_incl_flags"
+    PGPLOTLINKFLAGS="$option_pgplot_link_flags"
+    if test -n "$option_pgplot_link_search"; then
+        PGPLOTLINKSEARCH="$option_pgplot_link_search"
+    else
+        PGPLOTLINKSEARCH=""
+    fi
+else
+    PGPLOTINCLFLAGS=""
+    PGPLOTLINKFLAGS=""
+    PGPLOTLINKSEARCH=""
+fi
+
+
+dnl AC_CHECK_FUNC(vprintf, AC_DEFINE(HAVE_VPRINTF))
+dnl if test "$ac_cv_func_vprintf" != yes; then
+
+
+dnl AC_CHECK_FUNC(_doprnt, AC_DEFINE(HAVE_DOPRNT))
+dnl fi
+dnl ---------------------------------------------------------------------
+
+
+dnl Checks for libraries.
+dnl Replace `main' with a function in -lAccessx:
+dnl AC_CHECK_LIB(Accessx, main)
+dnl Replace `main' with a function in -lDXm:
+dnl AC_CHECK_LIB(DXm, main)
+dnl Replace `main' with a function in -lF77:
+dnl AC_CHECK_LIB(F77, main)
+dnl Replace `main' with a function in -lI77:
+dnl AC_CHECK_LIB(I77, main)
+dnl Replace `main' with a function in -lMrm:
+dnl === AC_CHECK_LIB(g2c, s_stop)
+dnl Replace `main' with a function in -lMrm:
+dnl AC_CHECK_LIB(Mrm, main)
+dnl Replace `main' with a function in -lU77:
+dnl AC_CHECK_LIB(U77, main)
+dnl Replace `main' with a function in -lX11:
+dnl == AC_CHECK_LIB(X11, XDestroyWindow)
+dnl Replace `main' with a function in -lXIE:
+dnl AC_CHECK_LIB(XIE, main)
+dnl Replace `main' with a function in -lXTrap:
+dnl AC_CHECK_LIB(XTrap, main)
+dnl Replace `main' with a function in -lXau:
+dnl AC_CHECK_LIB(Xau, main)
+dnl Replace `main' with a function in -lXaw:
+dnl AC_CHECK_LIB(Xaw, main)
+dnl Replace `main' with a function in -lXbsd:
+dnl AC_CHECK_LIB(Xbsd, main)
+dnl Replace `main' with a function in -lXdmcp:
+dnl AC_CHECK_LIB(Xdmcp, main)
+dnl Replace `main' with a function in -lXext:
+dnl AC_CHECK_LIB(Xext, main)
+dnl Replace `main' with a function in -lXi:
+dnl AC_CHECK_LIB(Xi, main)
+dnl Replace `main' with a function in -lXie:
+dnl AC_CHECK_LIB(Xie, main)
+dnl Replace `main' with a function in -lXm:
+dnl AC_CHECK_LIB(Xm, main)
+dnl Replace `main' with a function in -lXmu:
+dnl AC_CHECK_LIB(Xmu, main)
+dnl Replace `main' with a function in -lXt:
+dnl AC_CHECK_LIB(Xt, main)
+dnl Replace `main' with a function in -lXtst:
+dnl AC_CHECK_LIB(Xtst, main)
+dnl Replace `main' with a function in -latex2html:
+dnl AC_CHECK_LIB(atex2html, main)
+dnl Replace `main' with a function in -lbkr:
+dnl AC_CHECK_LIB(bkr, main)
+dnl Replace `main' with a function in -lcda:
+dnl AC_CHECK_LIB(cda, main)
+dnl Replace `main' with a function in -lcgi:
+dnl AC_CHECK_LIB(cgi, main)
+dnl Replace `main' with a function in -lcgi77:
+dnl AC_CHECK_LIB(cgi77, main)
+dnl Replace `main' with a function in -lchf:
+dnl AC_CHECK_LIB(chf, main)
+dnl Replace `main' with a function in -lcore:
+dnl AC_CHECK_LIB(core, main)
+dnl Replace `main' with a function in -lcore68881:
+dnl AC_CHECK_LIB(core68881, main)
+dnl Replace `main' with a function in -ld:
+dnl AC_CHECK_LIB(d, main)
+dnl Replace `main' with a function in -ldbm:
+dnl AC_CHECK_LIB(dbm, main)
+dnl Replace `main' with a function in -ldevices:
+dnl AC_CHECK_LIB(devices, main)
+dnl Replace `main' with a function in -ldf:
+AC_CHECK_LIB(df, DFSDndataset)
+dnl Replace `main' with a function in -ldnet_stub:
+dnl AC_CHECK_LIB(dnet_stub, main)
+dnl Replace `main' with a function in -ldps:
+dnl AC_CHECK_LIB(dps, main)
+dnl Replace `main' with a function in -ldpstk:
+dnl AC_CHECK_LIB(dpstk, main)
+dnl Replace `main' with a function in -ldvr:
+dnl AC_CHECK_LIB(dvr, main)
+dnl Replace `main' with a function in -ldvs:
+dnl AC_CHECK_LIB(dvs, main)
+dnl Replace `main' with a function in -ldwi18n:
+dnl AC_CHECK_LIB(dwi18n, main)
+dnl Replace `main' with a function in -ldyn:
+dnl AC_CHECK_LIB(dyn, main)
+AC_CHECK_LIB(f2c, s_stop)
+AC_CHECK_LIB(g2c, s_stop)
+dnl Replace `main' with a function in -lgdi:
+dnl AC_CHECK_LIB(gdi, main)
+dnl Replace `main' with a function in -lids:
+dnl AC_CHECK_LIB(ids, main)
+dnl Replace `main' with a function in -lids_nox:
+dnl AC_CHECK_LIB(ids_nox, main)
+dnl Replace `main' with a function in -lieee:
+dnl AC_CHECK_LIB(ieee, main)
+dnl Replace `main' with a function in -limg:
+dnl AC_CHECK_LIB(img, main)
+dnl Replace `main' with a function in -lips:
+dnl AC_CHECK_LIB(ips, main)
+dnl Replace `main' with a function in -litcl:
+dnl AC_CHECK_LIB(itcl, main)
+dnl Replace `main' with a function in -ll:
+dnl AC_CHECK_LIB(l, main)
+dnl Replace `main' with a function in -llwkdxm:
+dnl AC_CHECK_LIB(lwkdxm, main)
+dnl Replace `main' with a function in -lm:
+dnl AC_CHECK_LIB(m, main)
+dnl Replace `main' with a function in -lnemo:
+dnl AC_CHECK_LIB(nemo, main)
+dnl Replace `main' with a function in -lnode:
+dnl AC_CHECK_LIB(node, main)
+dnl Replace `main' with a function in -loldX:
+dnl AC_CHECK_LIB(oldX, main)
+dnl Replace `main' with a function in -lolgx:
+dnl AC_CHECK_LIB(olgx, main)
+dnl Replace `main' with a function in -lpgplot:
+dnl AC_CHECK_LIB(pgplot, grflun)
+dnl Replace `main' with a function in -lphigs:
+dnl AC_CHECK_LIB(phigs, main)
+dnl Replace `main' with a function in -lpixrect:
+dnl AC_CHECK_LIB(pixrect, main)
+dnl Replace `main' with a function in -lplotsub:
+dnl AC_CHECK_LIB(plotsub, main)
+dnl Replace `main' with a function in -lplplotftk:
+dnl AC_CHECK_LIB(plplotftk, main)
+dnl Replace `main' with a function in -lpsres:
+dnl AC_CHECK_LIB(psres, main)
+dnl Replace `main' with a function in -lreadline:
+AC_CHECK_LIB(readline, read_history)
+dnl Replace `main' with a function in -lstd:
+dnl AC_CHECK_LIB(std, main)
+dnl Replace `main' with a function in -lsuntool:
+dnl AC_CHECK_LIB(suntool, main)
+dnl Replace `main' with a function in -lsunwindow:
+dnl AC_CHECK_LIB(sunwindow, main)
+dnl Replace `main' with a function in -ltcl:
+dnl AC_CHECK_LIB(tcl, main)
+dnl Replace `main' with a function in -ltermcap:
+dnl AC_CHECK_LIB(termcap, main)
+dnl Replace `main' with a function in -ltk:
+dnl AC_CHECK_LIB(tk, main)
+dnl Replace `main' with a function in -lutils:
+dnl AC_CHECK_LIB(utils, main)
+dnl Replace `main' with a function in -lvogl:
+AC_CHECK_LIB(vogl, foreground)
+dnl Replace `main' with a function in -lxview:
+dnl AC_CHECK_LIB(xview, main)
+dnl Replace `main' with a function in -lyapp_x:
+dnl AC_CHECK_LIB(yapp_x, main)
+dnl Replace `main' with a function in -lz:
+AC_CHECK_LIB(z, inflate)
+
+AC_CHECK_LIB(dl, dlopen)	# Dynamic linking for SunOS/Solaris and SYSV
+AC_CHECK_LIB(dld, shl_load)	# Dynamic linking for HP-UX
+
+
+dnl AC_CHECK_LIB(c, strsignal)
+
+dnl Checks for header files.
+
+
+AC_HEADER_DIRENT
+AC_HEADER_STDC
+AC_HEADER_SYS_WAIT
+AC_CHECK_HEADERS(fcntl.h limits.h malloc.h sgtty.h strings.h sys/file.h sys/ioctl.h sys/time.h unistd.h)
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+AC_C_CONST
+AC_C_INLINE
+AC_TYPE_OFF_T
+AC_TYPE_SIZE_T
+AC_HEADER_TIME
+AC_STRUCT_TM
+
+dnl Checks for library functions.
+AC_TYPE_GETGROUPS
+AC_PROG_GCC_TRADITIONAL
+AC_FUNC_MEMCMP
+AC_FUNC_MMAP
+AC_TYPE_SIGNAL
+AC_FUNC_VFORK
+AC_FUNC_VPRINTF
+AC_CHECK_FUNCS(ftime gethostname gettimeofday getwd mkdir select strdup strtod strtol strtoul)
+
+AC_C_BIGENDIAN
+
+
+dnl AC_OUTPUT(Makefile makedefs test/Makefile)
+AC_OUTPUT(Makefile makedefs)
+
+echo "
+
+All done, continue with your installation now as described in the
+output from the command
+
+     make install
+
+Note that this command actually does not install NEMO yet, but merely
+tells you what to do in which order. The recommended procedure is using
+the bootstrap script in NEMO/src/scripts.
+"
+
