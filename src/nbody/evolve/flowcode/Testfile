@@ -30,7 +30,7 @@ all: flowcode
 flowcode: bench.in
 	@echo Running $@
 	@rm -f bench.dat bench.log
-	make vxy.so vrtm51.so
+	@(cp $(NEMO)/$(DIR)/vrtm51.c .; make vrtm51.so)
 	flowcode in=bench.in out=bench.dat \
 		freq=100 mode=4 tstop=1 \
 		$(PAR1) \
