@@ -1,13 +1,23 @@
-/* -------------------------------------------------------------- *\
-|* $Id$
-|* 
-|* Get/Put selected Data from io_nemo
-|*
-\* -------------------------------------------------------------- */
+/* =================================================================
+|  Copyright Jean-Charles LAMBERT - 2005                            
+|  e-mail:   Jean-Charles.Lambert@oamp.fr                           
+|  address:  Dynamique des galaxies                                 
+|            Laboratoire d'Astrophysique de Marseille               
+|            2, place Le Verrier                                    
+|            13248 Marseille Cedex 4, France                        
+|            CNRS U.M.R 6110                                        
+| ==================================================================
+|* Get/Put selected Data from io_nemo                               
+| ==================================================================
+| 03-Mar-05 : a) critical memory bug corrected which could corrupt  
+|                memory in case of using io_nemo with several       
+|                snapshots.                                         
+|             b) nemo keybits added.                                
++----------------------------------------------------------------- */
 
-/* -------------------------------------------------------------- *\
-|* Nemo include files
-\* -------------------------------------------------------------- */
+/* -----------------------------------------------------------------
+|  Nemo include files                                               
++----------------------------------------------------------------- */
 #include <stdinc.h>
 #include <getparam.h>
 #include <vectmath.h>		
@@ -17,9 +27,9 @@
 #include <snapshot/body.h>
 #include <history.h>
 
-/* -------------------------------------------------------------- *\
-|* Local include files
-\* -------------------------------------------------------------- */
+/* ----------------------------------------------------------------
+|  Local include files                                             
++---------------------------------------------------------------- */
 #include "io_get_put.h"
 #include "check_file.h"
 #include "io_nemo_tools.h"
@@ -42,23 +52,25 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
-/* -------------------------------------------------------------- *\ 
-|* put_data_select :
-|* Save the snapshot in NEMO format.
-\* -------------------------------------------------------------- */
+
+/* -----------------------------------------------------------------
+|  put_data_select :                                                
+|  Save the snapshot in NEMO format.                                
++----------------------------------------------------------------- */
 int put_data_select(char * outfile,
 		    int    rtype,
 		    char * io_out[],
 		    bool * save_one,
 		    FILE * outstr[],
-		    int    MAXIO)
+		    int    MAXIO,
+		    t_ion_data * ion)
 {
   int coordsys =    CSCode(Cartesian, NDIM, 2),
-    i,j,k,no_io;
-  char * phasep;    /* Phase space coordinates */
+    no_io;
+  /*char * phasep;*/    /* Phase space coordinates */
   /* char * accptr; */   /* Acceleration array */
 	
-  int jump = rtype*4,jump3=3*jump,jump6=6*jump;
+  /*int jump = rtype*4;*/
   char *  OutType;
 	
   if (rtype==1)
@@ -78,7 +90,7 @@ int put_data_select(char * outfile,
   /* memory allocation for positions and velocities */
 #if 0
   if (XV_io) {
-    phasep = (char *) malloc(sizeof(char)*2*NDIM*(*nbody)*jump);
+    phasep = (char *) malloc(sizeof(char)*2*NDIM*(*ion->nbody)*jump);
 
     if (phasep == NULL) {
       fprintf(stderr,"Memory error ## [put_data_select]\n");
@@ -86,18 +98,19 @@ int put_data_select(char * outfile,
     }
 		
     /* store positions and velocities in phasep pointer */
-    for(i=0; i<*nbody; i++) {
+    for(i=0; i<*ion->nbody; i++) {
       if (X_io)
 	memcpy((char *) (phasep+i*jump6),
-	       (char *) (pos+i*jump3),jump3);
+	       (char *) (ion->pos+i*jump3),jump3);
 			
       if (V_io)
 	memcpy((char *) (phasep+i*jump6+jump3),
-	       (char *) (vel+i*jump3),
+	       (char *) (ion->vel+i*jump3),
 	       jump3);
     }  
   }
 #endif
+
   /* set up the history */
   if (!set_history[no_io]) {
     /* set TRUE to history */
@@ -116,44 +129,97 @@ int put_data_select(char * outfile,
     /* put the history */
     put_history(outstr[no_io]);
   }
-	
+
   /* Save the snapshot  */ 
   put_set(outstr[no_io], SnapShotTag);	
 	
   put_set(outstr[no_io], ParametersTag);
-  if (T_io)
-    put_data(outstr[no_io], TimeTag, OutType, timu, 0);
-  put_data(outstr[no_io], NobjTag, IntType, nbody, 0);
+  if (T_io) {
+    if ( (B_io && ( *ion->bits & TimeBit)) || !B_io) {
+      put_data(outstr[no_io], TimeTag, OutType, ion->timu, 0);
+    } 
+    else {
+      fprintf(stderr,"WARNING ### TimeBit control does not exist.\n");
+    }
+  }
+  put_data(outstr[no_io], NobjTag, IntType, ion->nbody, 0);
   put_tes(outstr[no_io], ParametersTag);
 	
   put_set(outstr[no_io], ParticlesTag); /*   start particle output  */
   put_data(outstr[no_io], CoordSystemTag,IntType,&coordsys,0);
 
-  if (M_io)      /* Masses */
-    put_data(outstr[no_io],MassTag,OutType,mass,*nbody,0);
-
-  if (XV_io) {   /* PhaseSpace */
-    put_data(outstr[no_io],PhaseSpaceTag,OutType,phase,*nbody,2,NDIM,0); 
-    free(phasep); 
+  if (M_io) {      /* Masses */
+    if ( (B_io && ( *ion->bits & MassBit)) || !B_io) {
+      put_data(outstr[no_io],MassTag,OutType,ion->mass,*ion->nbody,0);
+    } 
+    else {
+      fprintf(stderr,"WARNING ### MassBit control does not exist.\n");
+    }
   }
 
-  if (X_io)     /* Positions */
-    put_data(outstr[no_io],PosTag,OutType,pos,*nbody,NDIM,0);
+  if (XV_io) {   /* PhaseSpace */
+    if ( (B_io && ( *ion->bits & PhaseSpaceBit)) || !B_io) {
+      put_data(outstr[no_io],PhaseSpaceTag,OutType,ion->phase,*ion->nbody,2,NDIM,0); 
+      /* free(phasep); */
+    }
+    else {
+      fprintf(stderr,"WARNING ### PhaseSpaceBit control does not exist.\n");
+    }
+  }
 
-  if (V_io)     /* Velocities */
-    put_data(outstr[no_io],VelTag,OutType,vel,*nbody,NDIM,0);
+  if (X_io) {     /* Positions */
+    if ( (B_io && ( *ion->bits & PosBit)) || !B_io) {
+      put_data(outstr[no_io],PosTag,OutType,ion->pos,*ion->nbody,NDIM,0);
+    }
+    else {
+      fprintf(stderr,"WARNING ### PosBit control does not exist.\n");
+    }
+  }
 
-  if (P_io)     /* Potentials */
-    put_data(outstr[no_io], PotentialTag,OutType,pot,*nbody,0);
+  if (V_io) {     /* Velocities */
+    if ( (B_io && ( *ion->bits & VelBit)) || !B_io) {
+      put_data(outstr[no_io],VelTag,OutType,ion->vel,*ion->nbody,NDIM,0);
+    }
+    else {
+      fprintf(stderr,"WARNING ### VelBit control does not exist.\n");
+    }
+  }
 
-  if (A_io)     /* Accelerations */
-    put_data(outstr[no_io], AccelerationTag,OutType,acc,*nbody,NDIM, 0);
+  if (P_io) {     /* Potentials */
+    if ( (B_io && ( *ion->bits & PotentialBit)) || !B_io) {
+      put_data(outstr[no_io], PotentialTag,OutType,ion->pot,*ion->nbody,0);
+    }
+    else {
+      fprintf(stderr,"WARNING ### PotentialBit control does not exist.\n");
+    }
+  }
 
-  if (K_io)     /* Keys */
-    put_data(outstr[no_io],KeyTag,IntType,keys,*nbody,0);
+  if (A_io) {     /* Accelerations */
+    if ( (B_io && ( *ion->bits & AccelerationBit)) || !B_io) {
+      put_data(outstr[no_io], AccelerationTag,OutType,ion->acc,*ion->nbody,NDIM, 0);
+    }
+    else {
+      fprintf(stderr,"WARNING ### AccelerationBit control does not exist.\n");
+    }
+  }
 
-  if (EPS_io)   /* EPS */
-    put_data(outstr[no_io],EpsTag,OutType,eps,*nbody,0);
+  if (K_io) {     /* Keys */
+    if ( (B_io && ( *ion->bits & KeyBit)) || !B_io) {
+      put_data(outstr[no_io],KeyTag,IntType,ion->keys,*ion->nbody,0);
+    }
+    else {
+      fprintf(stderr,"WARNING ### KeyBit control does not exist.\n");
+    }
+  }
+
+  if (EPS_io) {   /* EPS */
+    if ( (B_io && ( *ion->bits & EpsBit)) || !B_io) {
+      put_data(outstr[no_io],EpsTag,OutType,ion->eps,*ion->nbody,0);
+    }
+    else {
+      fprintf(stderr,"WARNING ### EpsBit control does not exist.\n");
+    }
+  }
 
   put_tes(outstr[no_io], ParticlesTag);
 	
@@ -167,22 +233,25 @@ int put_data_select(char * outfile,
   return 1;
 	
 }
-/* -------------------------------------------------------------- *\ 
-|* get_data_select :
-|* Read the snapshot in NEMO format.
-\* -------------------------------------------------------------- */
+/* -----------------------------------------------------------------
+|  get_data_select :                                                
+|  Read the snapshot in NEMO format.                                
++----------------------------------------------------------------- */
 int get_data_select(char * infile,
 		    int    rtype,/* real type : 1=real*4 | 2=real*8 */
 		    char * io_in[],
 		    bool   read_one[],
 		    FILE * instr[],
-		    int    MAXIO) 
+		    int    MAXIO,
+		    t_ion_data * ion) 
 {
+  int keybits=0;   /* store control bits     */
+  int status=1;    /* return function status */
   char * phaseptr = NULL;
   int  * nbodyptr = NULL;
-  int i,j,k, no_io,i_jump,jump=rtype*4,jump3=3*jump,jump6=6*jump;
+  int i, no_io,i_jump,jump=rtype*4,jump3=3*jump,jump6=6*jump;
     
-  string headline, * histo;
+  string headline;
   char *  OutType;
 	
   double real_time; /*, char2double();*/
@@ -216,14 +285,13 @@ int get_data_select(char * infile,
     fprintf(stderr,"histo : <%s>\n",histo[i]);
   }
 #endif
-
   for (;;) {
 
     get_history(instr[no_io]);
-		
+
     while (get_tag_ok(instr[no_io],HeadlineTag))
       headline = get_string(instr[no_io],HeadlineTag);
-		
+
     if (!get_tag_ok(instr[no_io], SnapShotTag)) {
       if (!read_one[no_io]) {
 	fprintf(stderr,"SnapshotTag error ## [get_data_select]\n");
@@ -231,7 +299,7 @@ int get_data_select(char * infile,
 	exit(1);
       }
       /* end of snapshot reached */
-      fprintf(stderr,"WARNING!! end of snapshot reached.\n");
+      dprintf(1,"WARNING!! end of snapshot reached.\n");
 
       return 0;
     } /* !get_tag_ok(instr[no_io], SnapShotTag)... */
@@ -242,22 +310,28 @@ int get_data_select(char * infile,
 		
     get_set(instr[no_io], ParametersTag);
     if (T_io) {  /* time step */
-      get_data_time(instr[no_io], OutType, rtype*4, &timu);
+      if (!get_data_time(instr[no_io], OutType, rtype*4, &ion->timu)) {
+	fprintf(stderr,"### Snapshot WARNING ### No Time\n");
+	status = -1;
+      }
+      else {
+	keybits |= TimeBit;   /* got Time */
+      }
 			
     }
 
     get_data_nbody(instr[no_io], IntType, sizeof(int),/*(int*)*/ &nbodyptr);
 
     if (SP_io) {
-      if ( strcmp(SelectionString123,"all")) {
+      if ( strcmp(ion->SelectionString123,"all")) {
 	SelectedPart=(int*) allocate(*nbodyptr*sizeof(int));
 	/*create index list */
-	nBodySelected=nemoinpi(SelectionString123,
+	nBodySelected=nemoinpi(ion->SelectionString123,
 			       SelectedPart,*nbodyptr); 
 	if (nBodySelected < 0) {
 	  fprintf(stderr,"Failed to select particles's range <%s>"
 		  " *nemoinpi* function return code = [%d],"
-		  " aborted.....\n",SelectionString123,nBodySelected);
+		  " aborted.....\n",ion->SelectionString123,nBodySelected);
 	  exit(1);
 	}
       }
@@ -266,15 +340,15 @@ int get_data_select(char * infile,
       }
     }
     if (N_io) { /* nbody */
-      nbody = (int *) allocate_pointer((char *)nbody,4);
-      *nbody = *nbodyptr;
+      ion->nbody = (int *) allocate_pointer((char *)ion->nbody,4);
+      *ion->nbody = *nbodyptr;
     }
-    if (ST_io) { /* selected time */
+    if (ST_io && (keybits & TimeBit) ) { /* selected time */
 				/* get the real value of the selected time */
-      real_time= char2double(timu,rtype);
+      real_time= char2double(ion->timu,rtype);
 			
-      if (!streq(selt,"all") && !within(real_time,selt,TIMEFUZZ)) {
-	fprintf(stderr,"Info : skipping time step [%.4f]\n",real_time);
+      if (!streq(ion->selt,"all") && !within(real_time,ion->selt,TIMEFUZZ)) {
+	dprintf(1,"Info : skipping time step [%.4f]\n",real_time);
 	get_tes(instr[no_io], ParametersTag);
 	get_tes(instr[no_io], SnapShotTag);
 	continue; /* go to the next time step */
@@ -287,47 +361,54 @@ int get_data_select(char * infile,
       get_set(instr[no_io], ParticlesTag);
 			
       /* get masses */
-      if (M_io)
-	if (!get_data_mass(instr[no_io],OutType,*nbodyptr,rtype*4,&mass)) {
-	  fprintf(stderr,"Snap error ### No Mass\n");
-	  exit(1);
+      if (M_io) {
+	if (!get_data_mass(instr[no_io],OutType,*nbodyptr,rtype*4,&ion->mass)) {
+	  fprintf(stderr,"### Snapshot WARNING ### No Mass\n");
+	  status = -1;
+	  /*exit(1);*/
 	}
-	else 
+	else {
+	  keybits |= MassBit;   /* got Mass */
 	  if (SP_io) {
 	    for (i=0;i<nBodySelected;i++) {
-	      memcpy ((char *) (mass+i*jump),
-		      (char *) (mass+SelectedPart[i]*jump),
+	      memcpy ((char *) (ion->mass+i*jump),
+		      (char *) (ion->mass+SelectedPart[i]*jump),
 		      jump);
 	    }
 	  }
-
+	}
+      }
       /* get positions and velocities */
       if (X_io || V_io || XV_io) {
 
 	/* test PHASE SPACE Coordinates */
 	if ( get_data_phase(instr[no_io],OutType,*nbodyptr, rtype*4,&phaseptr,NDIM)) {
-	  
-	  if (X_io)
-	    pos = (char *) allocate_pointer(pos,*nbody*3*4*rtype);
-	  if (V_io)
-	    vel = (char *) allocate_pointer(vel,*nbody*3*4*rtype);
+	  keybits |= PhaseSpaceBit;   /* got PhaseSpace */
+	  if (X_io) {
+	    keybits |= PosBit;   /* got Pos */
+	    ion->pos = (char *) allocate_pointer(ion->pos,*ion->nbody*3*4*rtype);
+	  }
+	  if (V_io) {
+	    keybits |= VelBit;   /* got Vel */
+	    ion->vel = (char *) allocate_pointer(ion->vel,*ion->nbody*3*4*rtype);
+	  }
 					
 	  if (SP_io) {
 	    if (X_io)
 	      for (i=0;i<nBodySelected;i++) {
-		memcpy((char *) (pos+i*jump3),
+		memcpy((char *) (ion->pos+i*jump3),
 		       (char *) (phaseptr+SelectedPart[i]*jump6),
 		       jump3);
 	      }
 	    if (V_io)
 	      for (i=0;i<nBodySelected;i++) {
-		memcpy((char *) (vel+i*jump3),
+		memcpy((char *) (ion->vel+i*jump3),
 		       (char *) (phaseptr+SelectedPart[i]*jump6+jump3),
 		       jump3);
 	      }
 	    if (XV_io)
 	      for (i=0;i<nBodySelected;i++) {
-		memcpy((char *) (phase+i*jump6),
+		memcpy((char *) (ion->phase+i*jump6),
 		       (char *) (phaseptr+SelectedPart[i]*jump6),
 		       jump6);
 	      }
@@ -336,124 +417,141 @@ int get_data_select(char * infile,
 	    
 	    for(i=0; i<*nbodyptr; i++) {
 		if (X_io)
-		  memcpy((char *) (pos+i*jump3),
+		  memcpy((char *) (ion->pos+i*jump3),
 			 (char *) (phaseptr+i*jump6),
 			 jump3);
 		if (V_io)
-		  memcpy((char *) (vel+i*jump3),
+		  memcpy((char *) (ion->vel+i*jump3),
 			 (char *) (phaseptr+i*jump6+jump3),
 			 jump3);		
 	    } /* for */                         
 	    if (XV_io)
-	      memcpy((char *) phase,
+	      memcpy((char *) ion->phase,
 		     (char *) phaseptr,
 		     (*nbodyptr)*jump6);
 	  }
 	  free(phaseptr);
 
 	} /* if (get_data_phase */
-	
 	else { /* PosTag and VelTag */
 	  
 	  if (X_io) {
 
 	    /* test PosTag */
-	    if ( get_data_pos(instr[no_io],OutType,*nbodyptr, rtype*4,&pos,NDIM)) {
+	    if ( get_data_pos(instr[no_io],OutType,*nbodyptr, rtype*4,&(ion->pos),NDIM)) {
+	      keybits |= PosBit;   /* got Pos */
 	      if (SP_io) {
 		for (i=0;i<nBodySelected;i++) {
-		  memcpy ((char *) (pos+i*jump3),
-			  (char *) (pos+SelectedPart[i]*jump3),
+		  memcpy ((char *) (ion->pos+i*jump3),
+			  (char *) (ion->pos+SelectedPart[i]*jump3),
 			  jump3);
 		}
 	      }
 	    }
 	    else {
-	      fprintf(stderr,"Snap error ### No Positions\n");
-	      exit(1);
+	      fprintf(stderr,"### Snapshot WARNING ### No Positions\n");
+	      status = -1;
+	      /*exit(1);*/
 	    }
 	  } /* if (X_io) */
 
 	  if (V_io) {
 	    /* test VelTag */
-	    if ( get_data_vel(instr[no_io],OutType,*nbodyptr, rtype*4,&vel,NDIM)) {
+	    if ( get_data_vel(instr[no_io],OutType,*nbodyptr, rtype*4,&ion->vel,NDIM)) {
+	      keybits |= VelBit;   /* got Vel */
 	      if (SP_io) {
 		for (i=0;i<nBodySelected;i++) {
-		  memcpy ((char *) (vel+i*jump3),
-			  (char *) (vel+SelectedPart[i]*jump3),
+		  memcpy ((char *) (ion->vel+i*jump3),
+			  (char *) (ion->vel+SelectedPart[i]*jump3),
 			  jump3);
 		}
 	      }
 	    }
 	    else {
-	      fprintf(stderr,"Snap error ### No Velocities\n");
-	      exit(1);
+	      fprintf(stderr,"### Snapshot WARNING ### No Velocities\n");
+	      status = -1;
+	      /*exit(1);*/
 	    }
 	  } /* if (V_io)             */
 	} /* else PosTag and VelTag */
       } /* if  (X_io || V_io)      */
     
       /* get potential array */
-      if (P_io)
-	if (!get_data_pot(instr[no_io],OutType,*nbodyptr, rtype*4,&pot)) {
-	  fprintf(stderr,"Snap error ### No Potential\n");
-	  exit(1);
+      if (P_io) {
+	if (!get_data_pot(instr[no_io],OutType,*nbodyptr, rtype*4,&ion->pot)) {
+	  fprintf(stderr,"### Snapshot WARNING ### No Potential\n");
+	  status = -1;
+	  /*exit(1);*/
 	}  
-	else 
+	else {
+	  keybits |= PotentialBit;   /* got Potential */
 	  if (SP_io) {
 	    for (i=0;i<nBodySelected;i++) {
-	      memcpy ((char *) (pot+i*jump),
-		      (char *) (pot+SelectedPart[i]*jump),
+	      memcpy ((char *) (ion->pot+i*jump),
+		      (char *) (ion->pot+SelectedPart[i]*jump),
 		      jump);
 	    }
 	  }
-      /* get acceleration array */
-      if (A_io)
-	if (!get_data_acc(instr[no_io],OutType,*nbodyptr, rtype*4,&acc,NDIM)) {
-	  fprintf(stderr,"Snap error ### No Acceleration\n");
-	  exit(1);                    
 	}
-	else 
+      }
+      /* get acceleration array */
+      if (A_io) {
+	if (!get_data_acc(instr[no_io],OutType,*nbodyptr, rtype*4,&ion->acc,NDIM)) {
+	  fprintf(stderr,"### Snapshot WARNING ### No Acceleration\n");
+	  status = -1;
+	  /*exit(1);*/
+	}
+	else {
+	  keybits |= AccelerationBit;   /* got Pos */
 	  if (SP_io) {
 	    for (i=0;i<nBodySelected;i++) {
-	      memcpy((char *) (acc+i*jump3),
-		     (char *) (acc+SelectedPart[i]*jump3),
+	      memcpy((char *) (ion->acc+i*jump3),
+		     (char *) (ion->acc+SelectedPart[i]*jump3),
 		     jump3);
 	    }
 	  }
+	}
+      }
       /* get keys array */
-      if (K_io)
-	if (!get_data_keys(instr[no_io],IntType,*nbodyptr, rtype*4,&keys)) {
-	  fprintf(stderr,"Snap error ### No Keys\n");
-	  exit(1);
+      if (K_io) {
+	if (!get_data_keys(instr[no_io],IntType,*nbodyptr, rtype*4,&ion->keys)) {
+	  fprintf(stderr,"### Snapshot WARNING ### No Keys\n");
+	  status = -1;
+	  /*exit(1);*/
 	}  
-	else 
+	else {
+	  keybits |= KeyBit;   /* got Keys */
 	  if (SP_io) {
 	    for (i=0;i<nBodySelected;i++) {
-	      memcpy ((char *) (keys+i*i_jump),
-		      (char *) (keys+SelectedPart[i]*i_jump),
+	      memcpy ((char *) (ion->keys+i*i_jump),
+		      (char *) (ion->keys+SelectedPart[i]*i_jump),
 		      i_jump);
 	    }
 	  }
-
-      /* get epses */
-      if (EPS_io)
-	if (!get_data_eps(instr[no_io],OutType,*nbodyptr,rtype*4,&eps)) {
-	  fprintf(stderr,"Snap error ### No Eps\n");
-	  exit(1);
 	}
-	else 
+      }
+      /* get epses */
+      if (EPS_io) {
+	if (!get_data_eps(instr[no_io],OutType,*nbodyptr,rtype*4,&ion->eps)) {
+	  fprintf(stderr,"### Snapshot WARNING ### No Eps\n");
+	  status = -1;
+	  /*exit(1);*/
+	}
+	else {
+	  keybits |= EpsBit;   /* got Eps */
 	  if (SP_io) {
 	    for (i=0;i<nBodySelected;i++) {
-	      memcpy ((char *) (eps+i*jump),
-		      (char *) (eps+SelectedPart[i]*jump),
+	      memcpy ((char *) (ion->eps+i*jump),
+		      (char *) (ion->eps+SelectedPart[i]*jump),
 		      jump);
 	    }
 	  }
-
+	}
+      }
       get_tes(instr[no_io], ParticlesTag);
     } /*  get_tag_ok(instr[no_io], ParticlesTag */
     else {
-      fprintf(stderr,"Snap error ### no Particles\n");
+      fprintf(stderr,"Snap error ### no ParticlesTag\n");
       exit(1);
     } 
     
@@ -465,13 +563,18 @@ int get_data_select(char * infile,
   /* get_tes(instr[no_io], SnapShotTag); */
   free(nbodyptr);
   
-  if (SP_io) {
+  if (SP_io) {  /* stuff on Selected Particles */
     free(SelectedPart);
-    *nbody=nBodySelected;
+    *ion->nbody=nBodySelected;
   }
-  return 1;
+  
+  if (B_io) {   /* stuff on snapshot control bit */
+    ion->bits = (int *) allocate_pointer((char *) ion->bits,sizeof(int));
+    *ion->bits = keybits;
+  }
+  return status;
 
 }
-/* -------------------------------------------------------------- *\
-|* End of io_get_put.c
-\* -------------------------------------------------------------- */
+/* ----------------------------------------------------------------
+|  End of io_get_put.c                                             
++---------------------------------------------------------------- */
