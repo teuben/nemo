@@ -9,7 +9,9 @@
 #include <getparam.h>
 #include <vectmath.h>
 #include <filestruct.h>
+#include <history.h>
 #include <potential.h>
+#include <mathfns.h>
 
 #include <snapshot/snapshot.h>
 #include <snapshot/body.h>
@@ -23,10 +25,11 @@ string defv[] = {
     "potfile=\n           optional data file with potential",
     "rmin=0.0\n	          inner disk radius",
     "rmax=1.0\n		  outer cutoff radius",
+    "rref=\n              reference radius for spiral phase (defaults to rmax)",
     "mass=0\n             total mass of disk",
     "uniform=t\n          uniform surface density, or use density from potfile?",
-    "k=1\n                spiral wavenumber  (> 0 trailing spirals)",
-    "pitch=10\n           pitch angle for log spirals",
+    "k=\n                 spiral wavenumber for linear spirals (> 0 trailing spirals)",
+    "pitch=\n             pitch angle for log spirals",
     "phase=0\n            phase offset of spiral at rmax (in degrees)",
     "seed=0\n		  random number seed",
     "nmodel=1\n           number of models",
@@ -39,23 +42,24 @@ string defv[] = {
 string usage = "toy spiral density perturbation in a uniform disk";
 
 
-local real rmin, rmax;
+local real rmin, rmax, rref;
 local int  ndisk, nmodel;
 local real SPk;     /* spiral parameters */
 local real pitch;
-local real width;
 local real totmass;
 local real offset;
 local bool Qtest;
+local bool Qlinear;
 
 local Body *disk = NULL;
+local real theta[361], dens[361];
 
 local proc potential;
 
 extern double xrandom(double, double);
 extern double grandom(double, double);
 
-nemo_main()
+void nemo_main()
 {
     stream outstr;
     
@@ -63,14 +67,23 @@ nemo_main()
                     getparam("potpars"), getparam("potfile"));
     rmin = getdparam("rmin");
     rmax = getdparam("rmax");
+    rref = rmax;
+    if (hasvalue("rref")) rref = getdparam("rref");
+
     ndisk = getiparam("nbody");
     nmodel = getiparam("nmodel");
     totmass = getdparam("mass");
     offset = getdparam("phase") * PI / 180.0;    
     Qtest = getbparam("test");
-    pitch = getdparam("pitch");
-    
-    SPk = - getdparam("k");	/* corrected for rot counter clock wise */
+
+
+    Qlinear = hasvalue("k");
+    if (Qlinear)
+      SPk = -getdparam("k");	/* corrected for rot counter clock wise */
+    else if (hasvalue("pitch"))
+      pitch = -getdparam("pitch"); /* corrected for rot counter clock wise */
+    else
+      error("Either k= (linear) or pitch= (logarithmic) spiral indicator needed");
     
     init_xrandom(getparam("seed"));
 
@@ -78,6 +91,7 @@ nemo_main()
     put_history(outstr);
     if (hasvalue("headline"))
 	set_headline(getparam("headline"));
+    setdensity();
     
     while (nmodel--) {
         testdisk(nmodel);
@@ -98,6 +112,60 @@ writegalaxy(stream outstr)
 
     put_snap(outstr, &disk, &ndisk, &tsnap, &bits);
 }
+
+setdensity(void) 
+{
+  int i, ndim=NDIM;
+  double pos_d[NDIM], vel_d[NDIM], den_d, time_d = 0.0;
+  double t;
+
+
+  dprintf(1,"setdensity - 0:360:1 steps at rmax=%g\n",rmax);
+  for (i=0; i<=360; i++) {
+    theta[i] = i;
+    t = i * PI/180.0;
+    pos_d[0] = rmax * cos(t);
+    pos_d[1] = rmax * sin(t);
+    pos_d[2] = 0.0;
+    (*potential)(&ndim,pos_d,vel_d,&den_d,&time_d);
+    dens[i] = den_d;
+    dprintf(1,"DEN: %g   %g %g  %g %g   %g\n",theta[i],pos_d[0],pos_d[1],vel_d[0],vel_d[1],den_d);
+  }
+}
+
+/* see also: spline.c(interval) */
+ 
+local int binsearch(real u, real *x, int n)
+{
+    int i, j, k;
+ 
+    if (u < x[0])                   /* check below left edge */
+        return 0;
+    else if (u >= x[n-1])           /* and above right edge */
+        return n;
+    else {
+        i = 0;
+        k = n;
+        while (i+1 < k) {
+            j = (i+k)/2;
+            if (x[j] <= u)
+                i = j;
+            else
+                k = j;
+        }
+        return i;
+    }
+}
+
+double density(double t)
+{
+  int i;
+
+  i = binsearch(t, theta, 361);
+  return dens[i];
+}
+
+
 
 /*
  * TESTDISK: use forces due to a potential to make a uniform
@@ -107,11 +175,10 @@ writegalaxy(stream outstr)
 testdisk(int n)
 {
     Body *dp;
-    real rmin2, rmax2, r_i, theta_i, msph_i, vcir_i, pot_i, mass_i;
-    real uni, gau, unifrac, f;
+    real rmin2, rmax2, r_i, theta_i, mass_i;
     real cost, sint;
     int i, ndim=NDIM;
-    double pos_d[NDIM], acc_d[NDIM], vel_d[NDIM], pot_d, time_d = 0.0;
+    double pos_d[NDIM], vel_d[NDIM], pot_d, time_d = 0.0;
     double tani = tan(pitch*PI/180.0);
 
     if (disk == NULL) disk = (Body *) allocate(ndisk * sizeof(Body));
@@ -124,13 +191,13 @@ testdisk(int n)
         r_i = sqrt(rmin2 + xrandom(0.0,1.0) * (rmax2 - rmin2));
 	if (Qtest)
 	  theta_i = 0.0;
-	else
-	  theta_i = grandom(0.0,TWO_PI);
+	else 
+	  theta_i = frandom(0.0,360.0,density) * PI / 180.0;
 	theta_i += offset;
-	if (pitch < 0) {
-	  theta_i -= SPk * (r_i-rmax) * TWO_PI;    /* positive SPk is trailing SP  */
+	if (Qlinear) {
+	  theta_i -= SPk * (r_i-rref) * TWO_PI;    /* positive SPk is trailing SP  */
 	} else {
-	  theta_i -= log(r_i)/tani;
+	  theta_i -= log(r_i/rref)/tani;
 	}
         cost = cos(theta_i);
         sint = sin(theta_i);
