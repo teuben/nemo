@@ -6,6 +6,9 @@
 #  one from http://www.oac.uci.edu/indiv/ehood/man2html.html
 #  the other one comes with the linux man package (author unknown)
 #
+#  Other places to check:
+#      http://man2web.sourceforge.net/
+#
 #  I personally prefer gman (a Gnome utility), though tkman and xman
 #  are also not bad
 
@@ -13,7 +16,7 @@ if ($#argv == 0) then
   set copy=0
 else
   set copy=1
-  if (X$1 == X-h) then
+  if (X$1 == X-h || X$1 == X--h || X$1 == X-help || X$1 == X--help) then
     echo "Usage $0 [public man_html directory for WWW  site]"
     echo "Examples: (both scp and cp are supported)"
     echo "  $0 /apus1/teuben/www/nemo/man_html"

@@ -36,7 +36,7 @@ on this line) of a multi-snapshot (albeit with the same fake time) file:
 
    % mkspiral - 4 nmodel=2 | snapatlas - format=%g header=t
 
-.# i m x y z vx vy vz phi aux key 
+# i m x y z vx vy vz phi aux key 
 4
 0 
 0 0.25 -0.319825 -0.676624 0 0.48471 -0.229111 0 0 0 0 
@@ -51,8 +51,18 @@ on this line) of a multi-snapshot (albeit with the same fake time) file:
 2 0.25 0.779421 -0.276075 0 0.186778 0.527316 0 0 0 0 
 3 0.25 0.103361 0.516519 0 -0.429855 0.0860186 0 0 0 0 
 .fi
+Note however that the 3 last columns (potential, density and nearest
+neighbor) would need to be added by an integrator or other program.
+In this example they are not present in the snapshot, and will all
+appear as 0 in the output column.
+.PP
+The reverse, to read an atlas file back into NEMO, 
+\fItabtos(1NEMO)\fP can be used. From the previous example:
+.nf
+  % tabtos atlas.tab atlas.dat nbody,time skip,m,x,y,z,vx,vy,vz,phi,aux,key
+.fi
 .SH SEE ALSO
-snapprint(1NEMO), snapshot(5NEMO)
+snapprint(1NEMO), tabtos(1NEMO), bodytrans(1NEMO), snapshot(5NEMO), atlas(5NEMO)
 .SH FILES
 src/nbody/reduc/snapatlas.c
 .SH AUTHOR
