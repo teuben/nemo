@@ -1,0 +1,6 @@
+  33   33  33  # number of grid cells in (x,y,z)
+ 15.           # number of grid cells per length unit
+ 0.05          # time step length
+ 0.5           # time between particle outputs
+ 0.1           # time between integral checks
+ 1.00          # end time
