@@ -1,5 +1,6 @@
 /*
- *  preprocessor to run (a series of) CMHOG:
+ *  runcmhog: preprocessor to run (a series of) CMHOG:
+ *  (the original version is in NEMO/src/image/hdf/cmhog)
  *
  *  it expects the 'cmhogin' input file to be present in the local
  *  directory, uses that, but any variables can be overridden via
@@ -14,6 +15,7 @@
  *        no new keywords to be added, must be in replace mode
  *
  *  14-may-2003   also be able to create a directory hierarchy in one call
+ *  21-jul-2003   fix namelist/key=val documentation
  */
 
 #include <stdio.h>
@@ -33,7 +35,7 @@ static int ncards = 0;
 
 static char *haskey(char *, char *);
 
-static char *program_version = "runcmhog:  Version 1.2 14-may-2003";
+static char *program_version = "runcmhog:  Version 1.3 21-jul-2003";
 
 static int Qdebug = 0;                  /* -d (debug toggle) */
 
@@ -86,7 +88,7 @@ int main(int argc, char *argv[])
 int usage(char *name)
 {
   fprintf(stderr,"%s\n", program_version);
-  fprintf(stderr,"Usage: %s [-d] [-e exe] [-n namelist] run_directory [[namelist:][key=val]]\n",name);
+  fprintf(stderr,"Usage: %s [-d] [-e exe] [-n namelist] run_directory [[namelist/][key=val]]\n",name);
   exit(0);
 }
 
