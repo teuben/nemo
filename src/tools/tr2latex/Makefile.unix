@@ -1,0 +1,69 @@
+# Makefile for tr2latex on *NIX machines
+# $Id$
+
+# CC chooses the compiler
+CC = gcc
+
+# choose compiling options in CFLAGS:
+# The -O flag causes long compilation time but experience has shown that it is
+# unnecessary for this package; time saved in running time is extremely small
+# in the computers I used.
+# The -g flag produces symbolic information for debugging.
+# Add -DUCB if you're running under Berkley UNIX.
+# Add -systype bsd43 on MIPS M/2000, running RISCos
+#     (recommended by David Osborne, cczdao@mips.ccc.nottingham.ac.uk).
+# Add -Dtops20 to CFLAGS if you're running it under tops20.
+# Add -DDEBUG for some additional debugging code.
+CFLAGS = -O -DDEBUG
+
+LINTFLAGS = -abchnpux
+CFILES = tr2latex.c tr.c subs.c version.c
+HFILES = protos.h setups.h simil.h greek.h macros.h maths.h flip.h forbid.h
+STYFILES = troffman.sty troffms.sty
+OTHERS = Makefile.msc Makefile.unix Makefile.tc Makefile.vms Makefile.mms \
+         make_tr2latex.com README diffs.tex testfile \
+         tr2latex.man tr2latex.hlp vaxcrtl.opt
+SOURCES = $(CFILES) $(HFILES) $(STYFILES) $(OTHERS)
+DISTRIB = $(SOURCES) tr2latex.man.tex-orig testfile.tex-orig History
+
+# BINDIR gives the path where the executable should be placed after
+# installation.
+BINDIR = /usr/local/bin
+
+# TEXDIR gives the path where the tex library resides (fonts, macros ...)
+TEXDIR = /usr/lib/tex
+
+# MANSECTION gives the section number of the online manual pages where to
+# place the tr2latex manual page.
+# MANDIR gives the path of your online manual pages.
+# If you have a directory for local manual pages, for instance /usr/local/man,
+# then set MANDIR to this path and MANSECTION to 1. Otherwise you should
+# place the manual page into the local section by giving MANSECTION as
+# l (``ell'') and setting MANDIR to /usr/man
+MANSECTION = 1
+MANDIR = /usr/local/man
+
+
+tr2latex: tr2latex.o tr.o subs.o version.o
+	$(CC) $(CFLAGS) tr2latex.o tr.o subs.o version.o -o tr2latex
+
+tr2latex.o: tr2latex.c setups.h protos.h
+tr.o: tr.c setups.h protos.h
+subs.o: subs.c $(HFILES)
+version.o: version.c
+
+
+lint:
+	lint $(LINTFLAGS) $(CFILES) > lint.lst
+
+install: tr2latex
+	install -c -m 0755 tr2latex $(BINDIR)/tr2latex
+	install -c -m 0444 tr2latex.man \
+			$(MANDIR)/man$(MANSECTION)/tr2latex.$(MANSECTION)
+	install -c -m 0444 troffman.sty troffms.sty $(TEXDIR)/macros
+
+clean:
+	\rm -f *.o core *junk* tr2latex lint.lst *~ TAGS tags
+rm:
+	\rm -f *.o core *junk* tr2latex lint.lst *~ \
+	       *.c* *.h Makefile.* *.sty* README* *.tex testfile* *man*
