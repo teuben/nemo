@@ -375,6 +375,50 @@ Both routines return negative error return codes, see {\it nemoinp(3NEMO)}.
 More complex parsing is also done by calling {\tt burststring} first
 to break a string in pieces, followed by a variety of functions.
 
+\subsection{Alternatives to nemo\_main}
+
+It is not required for your program to define with {\tt nemo\_main()}. There
+are cases where the user needs more control.  An example of this is the
+{\tt falcON}\index{falcON} N-body code in {\tt \$NEMO/use/dehnen/falcON}.
+A header file (see e.g. {\tt inc/main.h}) now defines main, instead of
+through the NEMO library:
+
+\begin{verbatim}
+// in main.h:
+
+extern string defv[];
+extern string usage;
+
+namespace nbdy {
+  char version [200];                             // to hold version info
+  extern void main();                             // to be defined by user
+};
+
+int main(int argc, char *argv[])                  // ::main()
+{
+  snprintf(nbdy::version,200,"VERSION=" /*..*/ ); // write version info
+  initparam(argv,defv);                           // start NEMO
+  nbdy::main();                                   // call nbdy::main()
+  finiparam();                                    // finish NEMO
+}
+\end{verbatim}
+
+and the application includes this header file, and defines the keyword list
+in the usual way :
+
+\begin{verbatim}
+// in application.cc
+
+#include <main.h>
+
+string defv[] = { /*...*/, nbdy::version, NULL }; // use version info
+string usage  = /*...*/ ;
+
+void nbdy::main() { /*...*/ }                     // nbdy::main()
+
+\end{verbatim}
+
+
 \subsection{filestruct.h}
 
 \mylabel{ss-filestr}
