@@ -166,6 +166,18 @@
 /* Define this if your machine is big endian (like Sparcs) */
 #undef WORDS_BIGENDIAN
 
+/* The size of a `float', as computed by sizeof. */
+#undef SIZEOF_FLOAT
+
+/* The size of a `int', as computed by sizeof. */
+#undef SIZEOF_INT
+
+/* The size of a `long', as computed by sizeof. */
+#undef SIZEOF_LONG
+
+/* The size of a `long long', as computed by sizeof. */
+#undef SIZEOF_LONG_LONG
+
 
 /* define to specify how to mangle identifiers for the Fortran linker: */
 #define FORTRANIZE_LOWERCASE 0
