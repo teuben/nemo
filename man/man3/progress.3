@@ -1,0 +1,57 @@
+.TH PROGRESS 3NEMO "30 June 2004"
+.SH NAME
+progress \- write progress strings
+.SH SYNOPSIS
+.nf
+\fB#include <stdinc.h>\fP
+.PP
+\fBvoid progress(double dcpusec, string format, ... )\fP
+.fi
+.SH DESCRIPTION
+\fIprogress\fP prints out a user-controlled formatted
+string to \fIstderr\fP, automatically terminated with the
+carriage-return (\\r) symbol, so it overwrites the previous
+string.
+.PP
+It is the users control to
+make sure the string length does not descrease, since
+pieces of the previous string would still be visible. This
+means a string like
+.nf
+    progress(0.0,"Done %d/%d",i,n);
+.fi
+is not a good idea if \fi\fP is decreasing, and it would be better to
+write
+.nf
+    progress(0.0,"Done %3d/%d",i,n);
+.fi
+instead.
+.PP
+There are currently two ways to call \fPprogress\fP, 
+by cpu time used, e.g.
+.nf
+
+    do {
+        progress(10.0,"Working on line %3d",n);
+	n = do_something();
+    } while (n>0);
+
+.fi
+or under full control of the user, as show in this example:
+.nf
+
+    while (n-- > 0) {
+        if (n%100) progress(0.0,"Still %3d to go",n);
+	do_something();
+    }
+
+.fi
+.SH SEE ALSO
+dprintf(3NEMO), warning(3NEMO), 
+.SH AUTHOR
+Peter Teuben
+.SH HISTORY
+.nf
+.ta +1i +4i
+30-jun-04	created 	PJT
+.fi
