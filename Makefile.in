@@ -420,10 +420,10 @@ cvsu:
 	cvsu | grep ^M
 
 cvsq:
-	cvs -n -q | grep ^U
+	cvs -n -q update | grep ^U
 
 cvsc:
-	cvs -n -q | grep ^C
+	cvs -n -q update | grep ^C
 
 ACVSROOT = :pserver:anonymous@cvs.astro.umd.edu:/home/cvsroot
 
