@@ -35,6 +35,7 @@
  *                          d printf -> dprintf
  *      18-dec-01        4.0  convert to use fitsio_nemo.h and optional CFITSIO
  *      12-aug-02           a NaN problems with miriad
+ *      14-apr-03           b fix NaN problems with FITS files
  */
 
 #include <stdinc.h>
@@ -59,7 +60,7 @@ string defv[] = {
     "bzero=0\n          Offset conversion factor in raw mode (0)",
     "blank=\n           Blank value re-substitution value?",
     "relcoords=f\n      Use relative (to crpix) coordinates instead abs",
-    "VERSION=4.0a\n	12-aug-02 PJT",
+    "VERSION=4.0b\n	14-apr-03 PJT",
     NULL,
 };
 
@@ -155,12 +156,18 @@ void nemo_main()
             fitread(fitsfile,j,buffer);     /* read it from fits file */
             for (i=0, bp=buffer; i<nx; i++, bp++) {   /* stuff it in memory */
                 if (Qblank) {
-		  if (is_feq(bp,&bval_in)) {
+		  if (is_feq((int *)bp,(int *)&bval_in)) {
+		    nbval++;
+		    *bp = bval_out;
+		  } else if (isnan(*bp)) {
 		    nbval++;
 		    *bp = bval_out;
 		  }
                 } else {
-		  if (is_feq(bp,&fnan)) {
+		  if (is_feq((int *)bp,(int *)&fnan)) {
+		    nbval++;
+		    *bp = bval_out;
+		  } else if (isnan(*bp)) {
 		    nbval++;
 		    *bp = bval_out;
 		  }
