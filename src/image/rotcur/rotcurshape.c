@@ -11,24 +11,9 @@
  * 
  *     and a functional parameterized form for VROT(r)
  *
- *    Here  v(x,y)  denotes  the  radial  velocity  at  rectangular sky
- *    coordinates  x and y ,  VSYS  the  systemic  velocity,  VROT  the
- *    rotational velocity,  INC  the  inclination angle  and  theta the
- *    azimuthal  distance from  the major  axis  in the  plane  of  the
- *    galaxy.  Theta is a function  of the  inclination  (INC)  and the
- *    position angle (PA) of the major axis.  XPOS and  YPOS denote the
- *    position of  the rotation centre in grids.  This program will fit
- *    for each ring the parameters  VSYS, VROT, INC, PA, XPOS and YPOS.
- *    The position  angle PA of the major axis is defined as the angle,
- *    taken in anti-clockwise  direction between the north direction on
- *    the sky and the major axis of the receding half of the galaxy.
- *
- *    Author:  P.J. Teuben
- *
  *     History: 19/jul/02 : cloned off rotcur                       pjt
  *
  ******************************************************************************/
-
 
 #include <stdinc.h>
 #include <getparam.h>
@@ -39,44 +24,53 @@
 #define nllsqfit nr_nllsqfit
 #endif
 
-#define PARAMS  6           /* number of parameters */
+#define PARAMS  6           /* number of geometry parameters */
+#define MAXMOD  5           /* number of rotation curve models */
+#define MAXPAR  5           /* number of parameters per model */
 
-#define RING        500     /* maximum number of rings (17 arrays) */
+#define RING         10     /* maximum number of rings (17 arrays) */
 #define MAXPTS    10000     /* maximum number of pixels per ring (4 arrays) */
 
 #define DEF_TOL   0.001     /* tolerance for fit */
 #define DEF_LAB   0.001     /* mixing parameter */
 #define DEF_T     50        /* maximum number of iterations for fit */
 
-#define F 0.0174532925  /* deg to rad conversion */
-#define G 0.4246609001  /* FWHM to sigma conversion */
+#define F 0.0174532925  /* deg to rad conversion     a.k.a. pi / 180 */
+#define G 0.4246609001  /* FWHM to sigma conversion, a.k.a. 1 / 2sqrt(2ln2))  */
 
 string defv[] = {
     "in=???\n        Input image velocity field",
     "radii=\n        Radii of rings (arcsec)",
-    "vrot=\n         Rotation velocity",
+    "vrot=\n         ** Rotation velocity",
     "pa=\n           Position angle (degrees)",
     "inc=\n          Inclination (degrees)",
     "vsys=\n         Systemic velocity",
     "center=\n       Rotation center (grids w.r.t. 0,0) [center of map]",
-    "frang=20\n      Free angle around minor axis (degrees)",
+    "frang=0\n       Free angle around minor axis (degrees)",
     "side=\n         Side to fit: receding, approaching or [both]",
-    "weight=\n       Weighting function: {uniform,[cosine],cos-squared}",
+    "weight=u\n      Weighting function: {uniform,[cosine],cos-squared}",
     "fixed=\n        Parameters to be kept fixed {vsys,vrot,pa,inc,xpos,ypos}",
-    "ellips=\n       Parameters for which to plot error ellips",
-    "beam=\n         Beam (arcsec) for beam correction [no correction]",
-    "dens=\n         Image containing containing density map",
+    "ellips=\n       ** Parameters for which to plot error ellips",
+    "beam=\n         ** Beam (arcsec) for beam correction [no correction]",
+    "dens=\n         ** Image containing containing density map",
     "tab=\n          If specified, this output table is used in append mode",
     "resid=\n        Output of residuals in a complicated plot",
     "tol=0.001\n     Tolerance for convergence of nllsqfit",
     "lab=0.001\n     Mixing parameter for nllsqfit",
     "itmax=50\n      Maximum number of allowed nllsqfit iterations",
     "units=deg,1\n   Units of input {deg, arcmin, arcsec, rad, #},{#} for length and velocity",
-    "blank=0.0\n     Value of the blank pixel to be ignored",
-    "inherit=t\n     Inherit initial conditions from previous ring",
-    "fitmode=cos,1\n Basic Fitmode: cos(n*theta) or sin(n*theta)",
+    "blank=0.0\n     Value of the blank (pixel) value to be ignored",
+    "inherit=t\n     ** Inherit initial conditions from previous ring",
+    "fitmode=cos,1\n ** Basic Fitmode: cos(n*theta) or sin(n*theta)",
     "nsigma=-1\n     Iterate once by rejecting points more than nsigma resid",
     "imagemode=t\n   Input image mode? (false means ascii table)",
+    "rotcurmode=f\n  Full velocity field, or rotcur (r,v) fit only",
+    "load=\n         Load rotcur object file",
+    "rotcur1=\n      Rotation curve name, parameters and set of free(1)/fixed(0) values",
+    "rotcur2=\n      Rotation curve name, parameters and set of free(1)/fixed(0) values",
+    "rotcur3=\n      Rotation curve name, parameters and set of free(1)/fixed(0) values",
+    "rotcur4=\n      Rotation curve name, parameters and set of free(1)/fixed(0) values",
+    "rotcur5=\n      Rotation curve name, parameters and set of free(1)/fixed(0) values",
     "VERSION=1.0\n   20-jul-02 PJT",
     NULL,
 };
@@ -93,12 +87,23 @@ real  dx,dy;      /* grid separation in x and y */
 real  undf;       /* undefined value in map */
 real  pamp;       /* position angle of map */
 
-real  *xpos_vel, *ypos_vel, *vrad_vel;
-int  n_vel = 0;
+int   npar[MAXMOD];            /* active number of parameters per model */
+int   ipar[MAXMOD];
+real  mpar[MAXMOD][MAXPAR];    /* parameters per model */
+int   mmsk[MAXMOD][MAXPAR];    /* mask per model (1=free 0=fixed) */
+int   nmod = 0;                /* number of models actually used */
+
+typedef real (*rcproc)(real, int, real *, real *);
+
+rcproc rcfn[MAXMOD];
+
+
+bool Qimage;                             /* input mode (false means tables are used) */
+real  *xpos_vel, *ypos_vel, *vrad_vel;   /* pointer to tabular information */
+int  n_vel = 0;                          /* length of tabular arrays */
 
 real tol,lab;     /* parameters that go into nllsqfit */
 int  itmax;
-bool Qimage;      /* input mode */   
 
 /* Compute engine, derivative and beam smearing correction functions:
  * _c1 = cos(theta)	
@@ -134,6 +139,16 @@ int perform_init(real *p, real *c);
 
 rproc vobs;
 proc vobsd, vcor;			/* pointers to the correct functions */
+
+/* a bunch of rotation curves */
+
+
+
+real rotcur_linear(real r, int n, real *p, real *d)
+{
+  d[0] = r;
+  return p[0] * r;
+}
 
 
 /******************************************************************************/
@@ -624,7 +639,7 @@ stream lunres;   /* file for residuals */
     }
     r=0.5*(ri+ro);                                     /* mean radius of ring */
 
-    printf(" radius of ring: %g \" \n",r); 
+    printf(" Disk range: %g %g\n",ri,ro); 
     printf("  iter.  systemic rotation position incli- ");
     printf("x-center y-center points  sigma\n");
     printf("  number velocity velocity   angle  nation ");
@@ -633,7 +648,7 @@ stream lunres;   /* file for residuals */
     getdat(x,y,w,&n,MAXPTS,p,ri,ro,thf,wpow,&q,side,&full,nfr);  /* this ring */
     for (i=0;i<n;i++) iblank[i] = 1;
 
-    h=0;                                           /* reset itegration counter */
+    h=0;                                          /* reset itegration counter */
     nblank=0;
 
     perform_out(h,p,n,q);                             /* show first iteration */
@@ -812,28 +827,20 @@ stream lunpri;
   if (lunpri==NULL) return;         /* determine if work to be done */
   if (ifit<0) return;               /* else return right now */
 
-  fprintf(lunpri,"  radius   systemic   error  rotation   error");
-  fprintf(lunpri," position    error   inclination  error   ");
-  fprintf(lunpri,"x-position   error   y-position   error\n");
-
-  fprintf(lunpri,"          velocity           velocity        ");
-  fprintf(lunpri,"   angle               angle              ");
-  fprintf(lunpri," of center            of center\n");
-
-  fprintf(lunpri," (arcsec)   (km/s)   (km/s)   (km/s)    (km/s)");
-  fprintf(lunpri,"(degrees)  (degrees)  (degrees)   (degrees) ");
-  fprintf(lunpri,"(grids w.r.t. (0,0))  (grids w.r.t. (0,0))\n");
-    
+  fprintf(lunpri,"\n");
   for (i=0; i<ifit; i++) {
-    fprintf(lunpri," %8.2f  %8.2f   %6.2f  %8.2f  %6.2f  %7.2f     ",
-                         rad[i],vsy[i], evs[i],vro[i],evr[i],pan[i]);
-    fprintf(lunpri," %5.2f     %6.2f     %6.2f   %8.2f  %8.2f   %8.2f  %8.2f",
-                     epa[i],   inc[i],   ein[i], xce[i],exc[i], yce[i],eyc[i]);
-    fprintf(lunpri," %d",npt[i]);
-    fprintf(lunpri,"\n");
+    fprintf(lunpri,"VSYS: %g %g\n",vsy[i],evs[i]);
+    fprintf(lunpri,"XPOS: %g %g\n",xce[i],exc[i]);
+    fprintf(lunpri,"YPOS: %g %g\n",yce[i],eyc[i]);
+    fprintf(lunpri,"PA:   %g %g\n",pan[i],epa[i]);
+    fprintf(lunpri,"INC:  %g %g\n",inc[i],ein[i]);
+    fprintf(lunpri,"VROT: %g %g\n",vro[i],evr[i]);
+    fprintf(lunpri,"NPT:  %d\n",npt[i]);
   }
   fprintf(lunpri,"\n");
   fprintf(lunpri," Error correction factor: : %g\n",factor);
+
+  if (ifit < 2) return;
    
   stat2(inc,ifit,&mean,&sig);
   fprintf(lunpri," average inclination      : %8.2f  (%8.3f)  degrees\n",
@@ -857,15 +864,19 @@ stream lunpri;
 void stat2(real *a,int n,real *mean,real *sig)
 {
     real s=0, sx=0, sxx=0;
+    int i;
 
     if (n<=0) return;
-    while (n--) {
+    for (i=0; i<n; i++) {
         s += 1.0;
         sx += *a;
         sxx += sqr(*a++);
     }
     *mean = sx/s;
-    *sig = sqrt(sxx-s*sqr(*mean)) / MAX(1.0,s-1);
+    if (n > 1)
+      *sig = sqrt(sxx-s*sqr(*mean)) / MAX(1.0,s-1);
+    else
+      *sig = 0.0;
 }
 
 /* 
@@ -1116,6 +1127,8 @@ real x,y;                                                  /* sky coordinates */
 real cost1,cost2,sint1,sint2,xx1,yy1,r,r1;  /* coordinates in plane of galaxy */
 real fc,t[5],q[5],bx1,bx2,by1,by2;    /* vars for calculating beam-correction */
 real vn,v2;                                  /* correction to radial velocity */
+real rcderv[MAXPAR*MAXMOD];
+int nrcpar = 0;
 
 /*
  *
@@ -1158,12 +1171,19 @@ void vobsd_c1(real *c,real *p,real *d,int m)
 {
     perform_init(p,c);
 
+    /* disk geometry parameters (Vsys,X0,Y0,PA,INC) */
+
     d[0]=1.0;                    /* partial derivative with respect to Vsys */
     d[1]= grid[0]*vc*(sint1*sinp1-cost1*cosp1/cosi1)*sint1*sini1*r1;  /* X0 */
     d[2]=-grid[1]*vc*(sint1*cosp1+cost1*sinp1/cosi1)*sint1*sini1*r1;  /* Y0 */
     d[3]=F*vc*(cosi2+sini2*cost2)*sint1*sini1/cosi1;                  /* PA */
     d[4]=F*vc*(cosi2-sini2*sint2)*cost1/cosi1;                       /* Inc */
-    d[5]=sini1*cost1;                                               /* Vrot */
+
+    /* the remainder are rotation curve parameters */
+
+    /* linear rotation curve */
+    d[5]=r*sini1*cost1;                                             /* Vrot */
+
 }
 
 void vcor_c1(real *c,real *p,real *vd,real *dn)
@@ -1309,32 +1329,47 @@ void vcor_s1(real *c,real *p,real *vd,real *dn)
 
 perform_init(real *p,real *c)
 {
-    vs=p[0];                 /* systemic velocity */
-    vc=p[5];                 /* circular velocity */
-    if (p[3] != phi) {   /* new position angle ? */
-       phi=p[3];               /* position angle */
-       cosp1=cos(F*phi);       /* cosine */
-       cosp2=cosp1*cosp1;      /* cosine squared */
-       sinp1=sin(F*phi);       /* sine */
-       sinp2=sinp1*sinp1;      /* sine squared */
-    }
-    if (p[4] != inc) {   /* new inclination ?  */
-       inc=p[4];               /* inclination */
-       cosi1=cos(F*inc);       /* cosine */
-       cosi2=cosi1*cosi1;      /* cosine squared */
-       sini1=sin(F*inc);       /* sine */
-       sini2=sini1*sini1;      /* sine squared */
-    }
-    x=c[0]-p[1]*grid[0];          /* calculate x */
-    y=c[1]-p[2]*grid[1];          /* calcualte y */
-    xx1=(-x*sinp1+y*cosp1);        /* x in plane of galaxy */
-    yy1=(-x*cosp1-y*sinp1)/cosi1;  /* y in plane of galaxy */
-    r=sqrt(xx1*xx1+yy1*yy1);          /* distance from center */
-    r1=1/r;                         /* save inverse for speed */
-    cost1=xx1*r1;         /* cosine of angle in plane of galaxy */
-    sint1=yy1*r1;         /* sine of angle in plane of galaxy */
-    cost2=cost1*cost1;     /* cosine squared */
-    sint2=sint1*sint1;     /* sine squared */
+  int i;
+
+  vs=p[0];                 /* systemic velocity */
+  if (p[3] != phi) {   /* new position angle ? */
+    phi=p[3];               /* position angle */
+    cosp1=cos(F*phi);       /* cosine */
+    cosp2=cosp1*cosp1;      /* cosine squared */
+    sinp1=sin(F*phi);       /* sine */
+    sinp2=sinp1*sinp1;      /* sine squared */
+  }
+  if (p[4] != inc) {   /* new inclination ?  */
+    inc=p[4];               /* inclination */
+    cosi1=cos(F*inc);       /* cosine */
+    cosi2=cosi1*cosi1;      /* cosine squared */
+    sini1=sin(F*inc);       /* sine */
+    sini2=sini1*sini1;      /* sine squared */
+  }
+  x=c[0]-p[1]*grid[0];          /* calculate x */
+  y=c[1]-p[2]*grid[1];          /* calcualte y */
+  xx1=(-x*sinp1+y*cosp1);        /* x in plane of galaxy */
+  yy1=(-x*cosp1-y*sinp1)/cosi1;  /* y in plane of galaxy */
+  r=sqrt(xx1*xx1+yy1*yy1);          /* distance from center */
+  r1=1/r;                         /* save inverse for speed */
+  cost1=xx1*r1;         /* cosine of angle in plane of galaxy */
+  sint1=yy1*r1;         /* sine of angle in plane of galaxy */
+  cost2=cost1*cost1;     /* cosine squared */
+  sint2=sint1*sint1;     /* sine squared */
+
+#if 1 
+  /* assume linear rotation curve  with p[5] for now as dV/dR */
+  vc=p[5]*r;
+#else
+  /*  nmod of these are needed: rpar[]   ipar[]  npar[] */
+  if (nmod > 1) {
+    vc = 0;
+    for (i=0; i<nmod; i++)
+      vc += sqr( (*rcfn[0])(r,npar[i],&p[5+ipar[i]],&rcderv[ipar[i]]) );
+    vc = sqrt(vc);
+  } else
+    vc = (*rcfn[0])(r,npar[0],&p[5],&rcderv[0]);
+#endif
 }
 
 
