@@ -1,0 +1,29 @@
+.TH HISTID 3NEMO "20 June 1989"
+.SH NAME
+histid \- find histogram index of a value in an array
+.SH SYNOPSIS
+.nf
+.B int histid (na, xa, x)
+.B int     na;
+.B double *xa;
+.B double  x;
+.fi
+.SH DESCRIPTION
+\fIhistid\fP returns the histogram index of a value \fBx\fP in an array
+\fBxa\fP with \fBna\fP entries (xa[0]..xa[na-1]), such that
+xa[histid] < x < xa[histid+1]. Hence \fBhistid\fP is in the range
+0..na-2.
+.PP
+\fIhistid\fP returns -1 when \fBx\fP is outside the two extremes.
+.PP
+
+.SH LIMITATIONS
+It is assumed that the the array is an ordered array, the first
+element being the lowest value.
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4i
+20-jun-89	created  	PJT
+.fi
