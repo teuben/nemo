@@ -1,4 +1,4 @@
-.TH POTCODE 1NEMO "24 October 1992"
+.TH POTCODE 1NEMO "5 March 2003"
 .SH NAME
 potcode \- non-selfconsistent N-body code with options to dissipate/diffuse orbits
 .SH SYNOPSIS
@@ -17,6 +17,14 @@ a certain ``box'' size (\fBcell\fP)), and turn it into mean orbital motion.
 .PP
 Orbits can also be diffused: each timestep the velocity vector 
 can be rotated over the randomly gaussian distributed angle (\fBsigma\fP).
+.PP
+A special integration mode (mode=-1) will advance particles assuming their orbits
+are epicycles, and launched with velocities deviating from the angular
+velocity consistent with rotation. The supplied potential should be
+axisymmetric and numerical derivatives are used to calculate the 
+angular, radial and vertical frequencies such that the orbital motions can
+be solved for analytically.
+from their guidance
 .SH PARAMETERS
 The following parameters are recognized; they may be given in any order.
 .TP 24
@@ -60,6 +68,7 @@ Integration mode number: 0=simpel Eulerian,
 2=modified PC algorithm, 
 3=Runge-Kutta (JEB modified)
 4=4th order Runge-Kutta.
+-1=special epicyclic motions
 [default: \fB3\fp].
 .TP
 \fBtstop\fP=\fIstop-time\fP
@@ -164,4 +173,5 @@ Peter Teuben
 19-jun-92	V3.2 added diffusion	PJT
 6-oct-92	V4.0 added rmax=, made options= same as hackcode1	PJT
 24-oct-92	V4.1 added fheat=        	PJT
+5-mar-03	V5.0 added mode=-1 to "integrate" orbits numerically on epicyclic orbits	PJT
 .fi
