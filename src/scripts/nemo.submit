@@ -1,5 +1,6 @@
 #! /bin/csh -fb
 #  -- totally deprecated code--
+exit 1
 set version="csh-shell script; 7-feb-95"
 #
 #+
