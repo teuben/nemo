@@ -22,17 +22,22 @@ Turn debugging on.
 show brief options reminder/help message
 .TP 
 \fB-n\fP \fInamelist\fP
-Optional name of the \fInamelist\fP file. Default: \fBcmhogin\fP.
+Optional name of the \fInamelist\fP file.
+Default: \fBcmhogin\fP.
 .TP
 \fB-e\fP \fIexecutable\fP
-Optional name of the executable name. Default: \fBcmhog\fP.
+Optional name of the executable name. By default the users search path will
+be consulted, for relative references remember this will be run
+from within the run_directory.
+Default: \fBcmhog\fP.
 .SH CAVEAT
 There is no provision for the same key in multiple namelists yet
 The solution would be to precede the keyword with "name/"
 .PP
 Cannot add new keywords, they must already have an entry in the
-\fIcmhogin\fP
-template
+\fIcmhogin\fP template file.
+.PP
+the directory name cannot contain an equals sign
 .SH EXAMPLE
 Here is a shell script running a series of models from a template \fIcmhogin\fP
 in the current directory.
