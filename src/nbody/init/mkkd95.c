@@ -9,16 +9,19 @@
 
 #include <stdinc.h>
 #include <getparam.h>
+#include <history.h>
 
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <fcntl.h>
 #include <unistd.h>
 
 string defv[] = {
   "out=???\n        output snapshot (a rundirectory $out.tmpdir is also created)",
-  "nbulge=4000\n    Number of particles in bulge",
-  "ndisk=8000\n     Number of particles in disk",
-  "nhalo=6000\n     Number of particles in halo",
+ 
+  "nbulge=4000\n    Number of particles in bulge (use 0 to skip this component)",
+  "ndisk=8000\n     Number of particles in disk  (use 0 to skip this component)",
+  "nhalo=6000\n     Number of particles in halo  (use 0 to skip this component)",
 
   "psi0=-4.6\n       in.dbh: Psi0    (HALO)",
   "v0=1.42\n         in.dbh: v0",
@@ -36,9 +39,9 @@ string defv[] = {
   "psicut=-2.3\n     in.dbh: psi_cut",
   "sigb=0.714\n      in.dbh: sib_b",
 
-  "deltar=0.01\n     in.dbh: delta_r",
+  "dr=0.01\n         in.dbh: delta_r",
   "nr=2400\n         in.dbh: nr",
-  "nharm=10\n        in.dbh: number of harmonics",
+  "lmax=10\n         in.dbh: number of harmonics (even)",
 
   "sigvr0=0.47\n     in.diskdf: central radial velocity dispersion",
   "sigr0=1.0\n       in.diskdf: scalelength of sig_r^2",
@@ -49,34 +52,40 @@ string defv[] = {
   "fstreamb=0.75\n   in.bulge:",
   "fstreamh=0.5\n    in.halo:",
   
-  "seed=0\n          in.- Random Seed ",
+  "iseed=-1\n        in.- Random Seed (kd95 style) ",
   "zerocm=t\n        in.- Center the snapshot?",
 
   "bin=.\n           directory in which KD95 binaries live",
   "model=A\n         Select base model A, B, C or D",
 
-  "VERSION=1.0\n     6-mar-04 PJT",
+  "VERSION=1.1\n     6-mar-04 PJT",
   NULL,
 };
 
 string usage="Kuijken-Dubinsky-95 composite bulge-disk-halo model";
 
+void goto_rundir(string name);
+void make_rundir(string name);
+void run_program(string cmd);
+void model(char *m);
 
-nemo_main()
+
+void nemo_main(void)
 {
+    char rundir[256];
+    stream datstr, histr;
     string out=getparam("out");
     string kd_bindir = getparam("bin");
-    char fullname[256], runcmd[256], rundir[256];
-    stream datstr, histr;
+    int iseed, zerocm, nbulge, ndisk, nhalo;
 
-    int iseed = getiparam("seed");
-    int zerocm = getbparam("zerocm") ? 1 : 0;
+    model(getparam("model"));           /*  patch up (putparam) if needed */
 
-    int nbulge = getiparam("nbulge");
-    int ndisk  = getiparam("ndisk");
-    int nhalo  = getiparam("nhalo");
-
-    model(getparam("model"));
+    iseed = getiparam("iseed");
+    zerocm = getbparam("zerocm") ? 1 : 0;
+ 
+    nbulge = getiparam("nbulge");
+    ndisk  = getiparam("ndisk");
+    nhalo  = getiparam("nhalo");
 
     datstr = stropen(out,"w");           /* a dummy write ; should not fail */
     strclose(datstr);
@@ -111,10 +120,10 @@ nemo_main()
 	    getdparam("psicut"),
 	    getdparam("sigb"));
     fprintf(datstr,"%g %d\n",
-	    getdparam("deltar"),
+	    getdparam("dr"),
 	    getiparam("nr"));
     fprintf(datstr,"%d\n",
-	    getiparam("nharm"));
+	    getiparam("lmax"));
     fprintf(datstr,"%s\n",
 	    "dbh.ps/ps");
     strclose(datstr);
@@ -183,7 +192,7 @@ nemo_main()
     fprintf(datstr,"%s/genbulge < in.bulge  > bulge\n",kd_bindir);
     fprintf(datstr,"%s/gendisk  < in.disk   > disk\n",kd_bindir);
     fprintf(datstr,"%s/genhalo  < in.halo   > halo\n",kd_bindir);
-    fprintf(datstr,"%s/mergerv disk bulge halo > galaxy\n");
+    fprintf(datstr,"%s/mergerv disk bulge halo > galaxy\n",kd_bindir);
     fprintf(datstr,"rm ../%s\n",out);
     fprintf(datstr,"tabtos galaxy ../%s nbody,time mass,pos,vel\n",out);
     strclose(datstr);
@@ -191,19 +200,19 @@ nemo_main()
     run_program("chmod +x make-it; ./make-it");   /* run it ! */
 }
 
-goto_rundir(string name)
+void goto_rundir(string name)
 {
     if (chdir(name))
         error("Cannot change directory to %s",name);
 }
 
-make_rundir(string name)
+void make_rundir(string name)
 {
     if (mkdir(name, 0755))
         error("Run directory %s already exists",name);
 }
 
-run_program(string cmd)
+void run_program(string cmd)
 {
     system(cmd);
 }
@@ -214,12 +223,45 @@ typedef struct _mpar {
 
 
 mpar ModelPars[] = {
-  { "nbulge",   "4000", "1000",  "2000", "3000" },
-  { "ndisk",    "8000", "1000",  "1000", "1000" },
-  { "nhalo",   "6000", "1000",  "1000", "1000" },
+  { "nbulge",  { "4000", "1000",  "2000", "2000" }},
+  { "ndisk",   { "8000", "1000",  "4000", "1000" }},
+  { "nhalo",   { "6000", "1000",  "1000", "1000" }},
+  { "fstreamb",{ "0.75", "0.5",   "0.5",  "0.5" }},
+  { "fstreamh",{ "0.5",  "0.5",   "0.5",  "0.5" }},
+
+
+  {  "psi0",   { "-4.6", "-5.202", "-6.0", "-7.0"}},
+  {  "v0",     { "1.42", "1.36",   "1.32", "1.30"}},
+  /* q     always 1   */
+  /* rck2  always 0.1 */
+  /* ra    always 0.8 */
+  /* md    always 0.867 */
+  /* rd    always 1 */
+  /* router always 5 */
+  /* zd     always 0.1 */
+  /* drtrunc always 0.5 */
+
+
+
+  /* rhob    always 14.45 */
+  { "psicut",   { "-2.3",  "-2.89",  "-3.7",  "-4.7"}},
+  /* sigb    always 0.714 */
+
+  /* deltar  always 0.01 */
+  { "nr",       {  "2400", "3200", "5000", "7500"}},
+
+
+  /* lmax    always 10 */
+
+  /* sigvr0   always 0.47 */
+  /* sigr0    always 1.0 */
+  
+  /* ncorr    always 50 */
+  /* niter    always 10 */
+
 };
 
-model(char *m)
+void model(char *m)
 {
   int idx, i, n = sizeof(ModelPars)/sizeof(mpar);
 
