@@ -36,6 +36,7 @@
  *              7-apr-01 gcc warnings                     pjt
  *             20-jun-01 gcc3                             pjt
  *             26-aug-01 added sind/cosd/tand             pjt
+ *             27-nov-01 fixed cosd(), it was sind()	  pjt
  *
  */
 #include <stdinc.h>   /* stdinc is NEMO's stdio =- uses real{float/double} */
@@ -680,7 +681,7 @@ void dofie(real *data, int *nop, real *results, real *errorval)
 			  	   else fie_push(fie_ranp(arg[0])); 
 			  	   break;
 			  case 44: fie_push(sin(PI*arg[0]/180.0)); break;
-			  case 45: fie_push(sin(PI*arg[0]/180.0)); break;
+			  case 45: fie_push(cos(PI*arg[0]/180.0)); break;
 			  case 46: fie_push(tan(PI*arg[0]/180.0)); break;
 			  default: opc = err; break;
 			  }
