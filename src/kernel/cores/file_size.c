@@ -86,7 +86,9 @@ int nemo_file_lines(char *name, int deflen)
             if (*cp++ == '\n')
                 cnt++;
     }
+    dprintf(1,"Expensive count=%d on %s\n",cnt,name);
     free(buf);
+    strclose(str);
     return cnt;
 }
 
