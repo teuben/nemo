@@ -56,6 +56,11 @@ mkexpdisk:
 	mkexpdisk mkexpdisk.out $(NBODY) seed=123 ; nemo.coverage mkexpdisk.c
 	tsf mkexpdisk.out
 
+mkommod:
+	@echo Running $@
+	mkommod $(NEMODAT)/k5isot.dat mkommod.out $(NBODY) seed=123
+	tsf mkommod.out
+
 mkhomsph:
 	@echo Running $@
 	mkhomsph mkhomsph.out $(NBODY) seed=123
