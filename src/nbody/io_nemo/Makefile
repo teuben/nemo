@@ -4,7 +4,6 @@
 #	NEMO/src/nbody/io_nemo   - for NEMO V3
 #
 #--------------------------------------------------------
-SHELL = /bin/csh
 
 # Nemo's definitions
 include $(NEMOLIB)/makedefs

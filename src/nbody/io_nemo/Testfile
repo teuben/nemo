@@ -1,7 +1,6 @@
 # $Id$
 #
 
-SHELL = /bin/csh
 DIR = src/nbody/io_nemo
 BIN = testc testf
 NEED = mkplummer snapmask hackforce
