@@ -15,8 +15,10 @@
 #define fits_open_data      ffdopn
 #define fits_open_table     fftopn
 #define fits_open_image     ffiopn
+#define fits_open_diskfile  ffdkopn
 #define fits_reopen_file    ffreopen
 #define fits_create_file    ffinit
+#define fits_create_diskfile ffdkinit
 #define fits_create_memfile ffimem
 #define fits_create_template fftplt
 #define fits_flush_file     ffflus
