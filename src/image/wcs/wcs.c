@@ -2,6 +2,7 @@
  * WCS: wrapper to worldpos/xypix WCS
  *
  *	2-mar-03	1.1	fixed pos->pix- conversion
+ *      7-may-04        1.2     added hms=
  */
 
 #include <stdinc.h>
@@ -17,7 +18,8 @@ string defv[] = {
     "format=%g\n Output format",
     "pix=\n     (optional) Input Pixel number coordinates",
     "pos=\n     (optional) Input Coordinates",
-    "VERSION=1.2\n  4-mar-03",
+    "hms=t\n    Should Longitude in HMS (else DMS) ?",
+    "VERSION=1.3\n  7-may-04",
     NULL,
 };
 
@@ -29,9 +31,11 @@ nemo_main()
 {
     double pix[2], pos[2], ref[2], refpix[2], inc[2], rot, ss, *outval;
     char proj[10];
-    bool Qworldpos;
+    bool Qworldpos, Qhms;
     string type, fmt = getparam("format"), sexa;
     int  n, hh,dd,mm;
+
+    Qhms = getbparam("hms");
     
 
     if (!hasvalue("pix") && !hasvalue("pos")) error("Need pix= or pos=");
@@ -93,8 +97,13 @@ nemo_main()
     printf(fmt,outval[1]);
     printf(" ");
     if (Qworldpos) {
-      to_hms(outval[0],&hh,&mm,&ss);
-      printf("%3d:%02d:%06.3f ",hh,mm,ss);
+      if (Qhms) {
+	to_hms(outval[0],&hh,&mm,&ss);
+	printf("%3d:%02d:%06.3f ",hh,mm,ss);
+      } else {
+	to_dms(outval[0],&hh,&mm,&ss);
+	printf("%03d:%02d:%06.3f ",hh,mm,ss);
+      }
       to_dms(outval[1],&dd,&mm,&ss);
       printf("%03d:%02d:%06.3f",dd,mm,ss);
     }
