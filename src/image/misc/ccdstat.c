@@ -6,6 +6,7 @@
  *      16-sep-95  V1.2 added min/max
  *       9-may-03  V1.3 added bad=, and added #points,
  *       5-jun-03  V1.4 added win=, a weight map
+ *      14-nov-04   1.5 provide nppb= correction for chi2 computation   PJT
  *
  */
 
@@ -21,11 +22,13 @@ string defv[] = {
     "max=\n         Maximum overrride",
     "bad=\n         Use this as masking value to ignore data",
     "win=\n         Optional input map for weights",
-    "VERSION=1.4\n  5-jun-03 PJT",
+    "npar=0\n       Number of fitting parameters assumed for chi2 calc",
+    "nppb=1\n       Optional correction 'number of points per beam' for chi2 calc",
+    "VERSION=1.5\n  14-nov-04 PJT",
     NULL,
 };
 
-string usage="basic statistics of an image";
+string usage="basic statistics of an image, optional chi2 calculation";
 
 string	infile;	        		/* file names */
 stream  instr;				/* file streams */
@@ -47,6 +50,8 @@ nemo_main()
     real x, xmin, xmax, mean, sigma, skew, kurt, bad, w;
     Moment m;
     bool Qmin, Qmax, Qbad, Qw;
+    real nu, nppb = getdparam("nppb");
+    int npar = getiparam("npar");
     
     instr = stropen (getparam("in"), "r");
     read_image (instr,&iptr);
@@ -86,16 +91,22 @@ nemo_main()
         }
       }
     }
-    nsize = nx * ny * nz;
+    if (npar > 0) {
+      nu = n_moment(&m) / nppb - npar - 1;
+      if (nu < 1) error("%g: No degrees of freedom",nu);
+      printf("chi2= %g\n", show_moment(&m,2)/nu);
+    } else {
+      nsize = nx * ny * nz;
     
-    mean = mean_moment(&m);
-    sigma = sigma_moment(&m);
-    skew = skewness_moment(&m);
-    kurt = kurtosis_moment(&m);
-          
-    printf ("Min=%f  Max=%f\n",min_moment(&m), max_moment(&m));
-    printf ("Number of points     : %d\n",n_moment(&m));
-    printf ("Mean and dispersion  : %f %f\n",mean,sigma);
-    printf ("Skewness and kurtosis: %f %f\n",skew,kurt);
-    printf ("%d/%d out-of-range points discarded\n",nsize-n_moment(&m), nsize);
+      mean = mean_moment(&m);
+      sigma = sigma_moment(&m);
+      skew = skewness_moment(&m);
+      kurt = kurtosis_moment(&m);
+      
+      printf ("Min=%f  Max=%f\n",min_moment(&m), max_moment(&m));
+      printf ("Number of points     : %d\n",n_moment(&m));
+      printf ("Mean and dispersion  : %f %f\n",mean,sigma);
+      printf ("Skewness and kurtosis: %f %f\n",skew,kurt);
+      printf ("%d/%d out-of-range points discarded\n",nsize-n_moment(&m), nsize);
+    }
 }

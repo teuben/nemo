@@ -1,4 +1,4 @@
-.TH CCDSTAT 1NEMO "5 June 2003"
+.TH CCDSTAT 1NEMO "14 November 2004"
 .SH NAME
 ccdstat \- statistics (1st through 4th moment)
 .SH SYNOPSIS
@@ -9,6 +9,11 @@ This program will calculate all moments (up to fourt order) of the mapvalues,
 and calculate some human understandable numbers (mean, dispersion, skewness,
 curtosis) from them. It can optionally use a weighting map, in case the 
 map needs to weighted per pixel.
+.PP
+If the map contains an error normalized difference between an
+observation and model, it can also compute the chi2 if the number of 
+of fitting parameters (\fBnpar\fP, must be > 0 to trigger this option)
+is given, as well as the number of independant points per beam (\fBnppb\fP).
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword is also
 given:
@@ -34,6 +39,13 @@ optional input file, in \fIImage(5)\fP format, of which the mapvalues
 are used as a relative weight factor. Should be all positive, with 0
 meaning no weight.
 [no default]
+.TP
+\fBnpar=\fP
+Number of fitting parameters. If given > 0, this will trigger the
+computation of chi2 goodness of fit, instead of the normal statistics.
+.TP
+\fBnppb=\fP
+Number of (independant) points per beam.
 .SH "EXAMPLE"
 .nf
   % ccdstat image.ccd min=-2
@@ -70,4 +82,5 @@ src/image/misc	ccdstat.c
  4-Oct-88	V1.0: Created		PJT
 9-may-03	V1.3: added bad=	PJT
 5-jun-03	V1.4: added win=	PJT
+14-nov-04	V1.5: added the chi2 trigger with npar= and nppb=	PJT
 .fi
