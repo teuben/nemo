@@ -30,6 +30,7 @@
  *       8-apr-01      a fixed SINGLEPREC operation
  *      23-may-01  V3.1  added dummy= to be able to not write dummy axes  PJT
  *                        NOT WORKING YET
+ *	 7-aug-01  
  *
  *  TODO:
  *      reference mapping has not been well tested, especially for 2D
@@ -58,7 +59,8 @@ string defv[] = {
 	"refpix=\n       reference pixel, if different from default",
 	"radecvel=f\n    Enforce reasonable RA/DEC/VEL axis descriptor",
 	"dummy=t\n       Write dummy axes also ? ",
-        "VERSION=3.1\n   23-may-01 PJT",
+	"nfill=0\n	 Add some dummy comment cards to test fitsio",
+        "VERSION=3.2\n   7-aug-01 PJT",
         NULL,
 };
 
@@ -78,7 +80,7 @@ bool Qradecvel;         /* fake astronomy WCS header */
 bool Qrefmap;
 bool Qdummy;            /* write dummy axes ? */
 
-int   nref = 0;
+int   nref = 0, nfill = 0;
 FLOAT ref_crval[3], ref_crpix[3], ref_cdelt[3];
 char  ref_ctype[3][80];
 
@@ -135,6 +137,7 @@ void setparams(void)
     }
   }
   Qdummy = getbparam("dummy");
+  nfill = getiparam("nfill");
 }
 
 static string ctypes[3] = { "CTYPE1", "CTYPE2", "CTYPE3" };
@@ -285,6 +288,9 @@ void write_fits(string name,imageptr iptr)
     	stuffit(fitsfile,cp);
         cp = hitem[i+1];
     }
+
+    for(i=0; i<nfill; i++)
+        fitwra(fitsfile,"COMMENT","Dummy filler space");
 
     buffer = (float *) allocate(nx*sizeof(float));  /* MEMLEAK */
 
