@@ -5,8 +5,9 @@
  *	21-may-91  2.1 Allow addition of all-massless snapshots
  *	23-may-91  2.1a Be aware of massless snapshots
  *	13-may-92  2.2 Allow concurrent adding; default zerocm=false now
- *	22-nov-92  2.3 options= to be able to erad phi,acc also
+ *	22-nov-92  2.3 options= to be able to also read phi,acc 
  *	mar-94 ansi
+ *      20-nov-03  2.5 add sync option
  *
  * Some limitations:
  *  snapshots should be not change in size, or else reallocate perhaps
@@ -27,12 +28,13 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "out=???\n		output file name",
     "zerocm=false\n	zero new center of mass",
     "options=\n         Forced output of: {acc, phi}",
+    "sync=f\n           Force time sync, based on first file in list",
     "headline=\n	random verbiage",
-    "VERSION=2.3a\n	8-mar-94 PJT",
+    "VERSION=2.4\n	20-nov-03 PJT",
     NULL,
 };
 
-string usage="add N-body systems on top of each other.";
+string usage="add N-body systems on top of each other";
 
 #if !defined(MAXSNAP)
 # define MAXSNAP 32
@@ -44,9 +46,13 @@ real *masstot=NULL, *mass[MAXSNAP];
 real *phasetot=NULL, *phase[MAXSNAP];
 real *phitot=NULL, *phi[MAXSNAP];
 real *acctot=NULL, *acc[MAXSNAP];
-bool Qmass, Qzerocm, needphi, needacc;
+bool Qmass, Qzerocm, Qsync, needphi, needacc;
 real tsnap;
 int nsnap;
+
+extern string *burststring(string,string);
+extern bool scanopt(string,string);
+extern string  strname(stream);
 
 
 void nemo_main() 
@@ -62,9 +68,9 @@ void nemo_main()
 
 setparams()
 {
-    string *burststring(), *pp, options;
+    string *pp, options;
     int i, offset;
-    bool scanopt();
+
 
     Qzerocm = getbparam("zerocm");
     options = getparam("options");
@@ -81,14 +87,15 @@ setparams()
         warning("Maximum snapshots MAXSNAP=%d",MAXSNAP);
         nsnap = MAXSNAP;
     }
+    Qsync = getbparam("sync");
     for (i=0; i<nsnap; i++)                     /* open all files */
         instr[i] = stropen(pp[i], "r");
 }
 
 int readdata()
 {
-    char *strname();
     int i, offset, n=0;
+    real tsnapi;
 
     Qmass = FALSE;  /* reset mass output flag */
 
@@ -104,12 +111,15 @@ int readdata()
             get_set(instr[i], SnapShotTag);
             get_set(instr[i], ParametersTag);
             get_data(instr[i], NobjTag, IntType, &nbody[i], 0);
-            if (i==0) {
-                if(get_tag_ok(instr[i],TimeTag))
-                    get_data(instr[i], TimeTag, RealType, &tsnap, 0);
-                else
-                    tsnap=0.0;
-            }
+	    if(get_tag_ok(instr[i],TimeTag))
+	      get_data(instr[i], TimeTag, RealType, &tsnapi, 0);
+	    else
+	      tsnapi=0.0;
+            if (i>0) {
+	      if (tsnapi != tsnap) 
+		warning("Times %g and %g do not match for file %d",tsnap,tsnapi,i+1);
+            } else
+	      tsnap = tsnapi;
             get_tes(instr[i], ParametersTag);
             if (get_tag_ok(instr[i],ParticlesTag)) {
                 get_set(instr[i],ParticlesTag);
