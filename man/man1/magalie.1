@@ -117,7 +117,7 @@ Cleanup runtime working directory?
 [Default: t]
 .SH INPUTFILE
 \fBmagalie\fP calls the actual \fBmagalie.exe\fP by reading an input file
-of parameters. Here is an annotation example of such a file (the comments
+of parameters. Here is an annotated example of such a file (the comments
 can be left in when read)
 .nf
 543216789       ! Random generator seed (ran1)
@@ -177,10 +177,14 @@ nbody           ! formatted as LH, nbody
 roundbulge      ! name of dataset (note - truncated at cr character)
 .fi
 .SH PERFORMANCE
-.nf
-
-20/5/40:  47.530u 
-.fi
+The bulk of the CPU is in creating the disk particles, the bulge and halo are 
+a minor fraction of the cpu. On a 3 GHz Pentium-4 the cpu cost is
+about (Ndisk/630) secs. for the gnu compiler.
+.SH BUGS
+There have been reported cases where magalie just seems to continue to
+compute in an infinite loop.
+.PP
+Does not work on the linux/intel compiler yet.
 .SH SEE ALSO
 .nf
 mkkd95(1NEMO), tabtos(1NEMO), unfio(1NEMO)
