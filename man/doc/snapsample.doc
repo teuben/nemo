@@ -1,0 +1,18 @@
+%N snapsample
+%D sub-sample of a snapshot
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man snapsample' for more extensive online help
+  Defaults of program keywords are listed between square brackets
+%A in
+	input file name [???]
+%A out
+	output file name [???]
+%A nsamp
+	number of particles to sample [32]
+%A offset
+	select sampling to use [0]
+%A besort
+	if true, sort by binding energy [false]
+%A VERSION
+	22 Jan 1989 [1.2]
