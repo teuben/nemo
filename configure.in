@@ -32,6 +32,10 @@ AC_CHECK_FUNCS(strchr memcpy)
 
 dnl AC_PROG_CPP
 
+# Use native cc if present
+AC_MSG_CHECKING([for vendor's cc to be used instead of gcc])
+AC_CHECK_PROG(CC, cc, cc)
+
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_AWK
@@ -654,6 +658,10 @@ AC_FUNC_VFORK
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS(ftime gethostname gettimeofday getwd mkdir select strdup strtod strtol strtoul)
 
+
+AC_CHECK_SIZEOF(float, 0)
+AC_CHECK_SIZEOF(int, 0)
+AC_CHECK_SIZEOF(signed char, 0)
 AC_C_BIGENDIAN
 
 dnl -- some final YAPP stuff
