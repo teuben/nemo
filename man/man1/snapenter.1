@@ -1,0 +1,78 @@
+.TH SNAPENTER 1NEMO "24 March 1994"
+.SH NAME
+snapenter \- enter an N-body snapshot interactively into a file
+.SH SYNOPSIS
+\fBsnapenter\fP [\fBout=\fPsnapfile] [\fBnbody=\fPnbody]
+[\fBtime=\fPtime] [\fBheadline=\fPstring]
+.SH DESCRIPTION
+\fIsnapenter\fP prompts for input from the screen of the basic data
+describing a snapshot file: masses, positions and velocities of each
+particle in an N-body system. 
+The data are written into a file
+\fIsnap-file\fP, in a standard N-body snapshot format. 
+If not provided on the command line, \fIsnapenter\fP will prompt for
+the name of \fIsnap-file\fP and \fInbody\fP, the number of particles.
+.PP
+To still enter snapshots interactively, but for a larger amount
+of bodies, the ``205'' format (see \fIatos(1NEMO)\fP) can be used.
+An ascii file with masses, positions and velocities can be created
+with an editor, and \fIatos(1NEMO)\fP is used to convert this file
+to a proper snapshot(5NEM0) file.
+.PP
+Coordinates are not transformated to the center-of-mass coordinate system,
+for this the program \fIsnapcenter\fP needs to be used.
+.SH PARAMETERS
+The following parameters are recognized; they may be given in any order.
+.TP 25
+\fBout=\fP\fIsnap-file\fP
+Output data is written into \fIsnap-file\fP, in standard snapshot format.
+.TP
+\fBnbody=\fP\fInbody\fP
+Number of particles \fInbody\fP in Nbody snapshot. 
+.TP
+\fBtime=\fP\fItime\fP
+Time at which the snapshot applies (default: \fItime\fP=0.0).
+.TP
+\fBheadline=\fP\fIstring\fP
+Optional headline, which is written as the first item in the snapshot
+file, the next item being the snapshot itself.
+.TP
+\fBverbose=t|f\fP
+In interactive mode you should set this to \fBtrue\fP, but in a case 
+\fBsnapenter\fP was used in a pipe (see EXAMPLE below), it cuts down
+a large number of messages.
+[Default: \fBfalse\fP].
+.SH EXAMPLE
+A cleverly formatted ASCII table can also be piped into snapenter,
+if they only contain masses, positions and velocities in the following
+format:
+.nf
+
+  N
+  m1 x1 y1 z1 vx1 vy1 vz1
+  m2 x2 y2 z2 vx2 vy2 vz2
+  ...
+  mN xN yN zN vxN vyN vzN
+
+.fi
+where the first number, N, is the number of particles. If that is not
+available in the file, specify it via the commandline.
+.SH SEE ALSO
+atos(1NEMO), snapprint(1NEMO), snapcenter(1NEMO), snapshot(5NEMO).
+.SH AUTHOR
+Piet Hut
+.SH FILES
+.nf
+.ta +2.0i
+~/src/nbody/init	snapenter.c
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1i +4i
+28-Nov-86	V1.0: created         	PIET
+23-Apr-87	V1.1: created         	PIET
+10-Jun-88	V1.2: created         	PIET
+10-jul-89	V2.0: updated for new filestruct()	PJT
+21-nov-90	V2.1: some defaults changed, NEMO 2.x	PJT
+24-mar-94	added verbose= and the example	PJT
+.fi
