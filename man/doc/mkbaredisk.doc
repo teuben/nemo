@@ -1,0 +1,28 @@
+%N mkbaredisk
+%D ### NEMO program with unknown intent...(missing usage)
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man mkbaredisk' for more extensive online help
+  Defaults of program keywords are listed between square brackets
+%A out
+	output file name  [???]
+%A alpha
+	inverse exponential scale length  [4.0]
+%A rcut
+	outer cutoff radius  [1.25]
+%A mdisk
+	disk mass  [1.0]
+%A Qtoomre
+	Toomre's Q parameter  [1.0]
+%A gamma
+	fudge factor for v_eff(r)  [1.0]
+%A ndisk
+	usual number of particles  [1024]
+%A epsi
+	softening (sets vert. scale)  [0.025]
+%A seed
+	usual random number seed  [0]
+%A headline
+	text headline for output  []
+%A VERSION
+	15-nov-90 PJT [1.2]
