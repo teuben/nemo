@@ -1,0 +1,7 @@
+#! /bin/csh -f
+#
+foreach file ($*)
+  ls -l $file
+  qsf $file
+  if ($status == 0) hisf $file
+end  
