@@ -85,7 +85,7 @@ bool   need_phi, need_acc, need_rad, Qacc;
 real x1,testy1,z1,x2,y2,z2;               /* buffers used in stat analysis */
 real u1,v1,w1,u2,v2,w2;
 int    n1;
-real r2min;
+real r2min = -1;
 
 real ucm, vcm, wcm;                   /* center of mass motion */
 real etot;                                    /* total energy */
@@ -267,7 +267,6 @@ snap_alloc()
 exact()                         /* exact potential and forces */
 {
     int i,j,k;
-    double sqrt(), sqr();
     real rij;
 
     dprintf (2,"Doing an exact potential calculation\n");    
@@ -297,14 +296,12 @@ exact()                         /* exact potential and forces */
  *    -  total energy = kinetic + potential energy
  */
 
-analysis(nbody)
-int nbody;
+analysis(int nbody)
 {
         int i,j;
         real x,y,z,u,v,w;
         real inv_rad, pmass, tmp, r2;
         real xdir, ydir, zdir, artmp, axtmp, aytmp, aztmp;
-        double sqrt(), sqr();
 
         ini_analysis();
         if (nbody>200 && Qpot && verbose)
@@ -483,8 +480,7 @@ real  *mean,*sigma;           /*  output: mean X and dispersion in X     */
  *
  */
  
-radii(n)
-int n;
+radii(int n)
 {
 /*      real halfmass_radius();                               */
         real radius, dr, drmin, r2, sum, half_sur_den_0;
@@ -582,8 +578,7 @@ int n;
  *   depending how rad[] was filled in (see: project_radius)
  */
  
-mass_radii (mf, mr)
-real mf[], mr[];
+mass_radii (real *mf, real *mr)
 {
         real cmass, fmass;
         int i, k;
