@@ -345,13 +345,14 @@ rotcurparse()
   }
 
   nmod = 0;
-  for (i=0; i<MAXMOD; i++) {
+  for (i=0; i<MAXMOD; i++) {                 /* process all rotcur#= keywords */
     sprintf(keyname,"rotcur%d",i+1);
     if (hasvalue(keyname)) {
       sp = burststring(getparam(keyname),", ");
       nsp = xstrlen(sp,sizeof(string))-2;
       if (nsp % 2) warning("%s= needs an even number of parameters",keyname);
-      if (streq(sp[0],"linear")) {
+
+      if (streq(sp[0],"linear")) {                     /* first check for predefined ones */
 	if (nsp != 2) error("linear needs 2 numbers");
 	npar[nmod] = 1;
 	mpar[nmod][0] = natof(sp[1]);
@@ -389,7 +390,7 @@ rotcurparse()
 	if (mmsk[nmod][0] && mmsk[nmod][1]) 
 	  error("Polynomial needs at least one of P1 and P2 fixed");
 	rcfn[nmod] = rotcur_poly;
-      } else {
+      } else {                           /* else, if load= was used, try and find it there */
 	if (Qext) {
 	  sprintf(func_name,"rotcur_%s",sp[0]);
 	  rcfn[nmod] = (rcproc) findfn(func_name);
@@ -401,7 +402,7 @@ rotcurparse()
 	    mpar[nmod][j] = natof(sp[j+1]);
 	    mmsk[nmod][j] = natoi(sp[j+1+npar[nmod]]);
 	  }
-	} else 
+	} else
 	  error("Cannot find %s, perhaps need load=",sp[0]);
       }
       dprintf(0,"ROTCUR%d: name=%s parameters=",i+1,sp[0]);
@@ -644,15 +645,16 @@ stream  lunpri;       /* LUN for print output */
     iret=match(getparam("fixed"),"vsys,xpos,ypos,pa,inc,all",&fixed);
     if (iret<0) error("Illegal option in fixed=%s",getparam("fixed"));
     dprintf(1,"MASK: 0x%x ",fixed);
-    if (fixed && (1<<GPARAM)) {
+    if (fixed & (1<<GPARAM)) {
       for (i=0; i<GPARAM; i++) mask[i] = 0;
     } else {
       for (i=0; i<GPARAM; i++) {
 	mask[i] = (fixed & (1<<i)) ? 0 : 1;
-	dprintf(1,"%d ",mask[i]);
       }
-      dprintf(1,"\n");
     }
+    for (i=0; i<GPARAM; i++)
+      dprintf(1,"%d ",mask[i]);
+    dprintf(1,"\n");
 
     for (i=0; i<nmod; i++) {
       /* count fixed/free for models -- fix this */
