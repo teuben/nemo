@@ -30,7 +30,7 @@ static int ncards = 0;
 
 static char *haskey(char *, char *);
 
-static char *program_version = "runcmhog:  Version 1.1 9-feb-2002";
+static char *program_version = "runcmhog:  Version 1.1 7-apr-2002";
 
 static int Qdebug = 0;                  /* -d (debug toggle) */
 
@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
     int i;
     char *cp;
     char *namelist = "cmhogin";		/* -n name */
-    char *exefile = "cmhog";		/* -r name */
+    char *exefile = "cmhog";		/* -e name */
     char *rundir;			/* no flag */
 
     if (argc < 2) usage(argv[0]);
@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
 	i++;  if (i==argc) usage(argv[0]);
 	namelist = argv[i++];
 	break;
-      case 'r' :
+      case 'e' :
 	i++;  if (i==argc) usage(argv[0]);
 	exefile = argv[i++];
 	break;
@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
 int usage(char *name)
 {
   fprintf(stderr,"%s\n", program_version);
-  fprintf(stderr,"Usage: %s [-e exe] [-n namelist] run_directory [[namelist:][key=val]]\n",name);
+  fprintf(stderr,"Usage: %s [-d] [-e exe] [-n namelist] run_directory [[namelist:][key=val]]\n",name);
   exit(0);
 }
 
