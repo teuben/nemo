@@ -32,6 +32,7 @@
  *  8-dec-01    added errno.h
  *  7-may-02    removed some old starlab crap, added strneq
  * 13-mar-03    macros MIN,MAX deleted before redefinition
+ * 12-jul-03    WD's macro name changed backfitted
  */
 
 #ifndef _stdinc_h      /* protect against re-entry */
@@ -297,8 +298,8 @@ typedef real (*rproc)();
  *  SGN: returns the sign of its argument
  *  MIN: returns the argument with the lowest value
  *  MAX: returns the argument with the highest value
- *  RND: roundup a number
- *  RNG: range a number between a low and high value
+ *  RND: roundup a number (now: ROUNDUP)
+ *  RNG: range a number between a low and high value (now: RANGE)
  *
  *  Note: be aware of side effects here
  */
@@ -314,7 +315,9 @@ typedef real (*rproc)();
 #endif
 #define   MAX(x,y)     (((x) > (y)) ? (x) : (y))
 #define   RND(x,y)     ((y)*(((x)+(y)-1)/(y)))
+#define   ROUNDUP(x,y)     ((y)*(((x)+(y)-1)/(y)))
 #define   RNG(x,l,h)   (((x) > (h)) ? (h) : (((x) < (l)) ? (l) : (x)))
+#define   RANGE(x,l,h)   (((x) > (h)) ? (h) : (((x) < (l)) ? (l) : (x)))
 
 
 
