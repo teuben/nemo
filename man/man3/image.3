@@ -1,0 +1,56 @@
+.TH IMAGE 3NEMO "27 January 1989"
+.SH NAME
+image, read_image, write_image, create_image, create_cube, free_image - high level image i/o
+.SH SYNOPSIS
+.nf
+.B #include <stdinc.h>
+.B #include <image.h>
+.PP
+.B int read_image(instr, iptr)
+.B stream instr;
+.B imageptr *iptr;
+.PP
+.B int write_image (outstr, iptr)
+.B stream outstr;
+.B imageptr iptr;
+.PP
+.B int create_image (iptr, nx, ny)
+.B imageptr *iptr;
+.B int nx,ny;
+.PP
+.B int create_cube (iptr, nx, ny, nz)
+.B imageptr *iptr;
+.B int nx,ny,nz;
+.PP
+.B int free_image (iptr)
+.B imageptr iptr;
+.SH DESCRIPTION
+These routines provide a high-level interface to a CCD-like image  structure.
+\fIread_image()\fP reads in a full image (which may be a cube), pointed
+to by the pointer \fBiptr\fP from a file pointed to by the stream
+\fBinstr\fP.
+It returns 0 in case of an error (allocation), 1 if OK.
+On success \fBiptr\fP contains a valid address for an image.
+\fBiptr\fP is allocated using \fImalloc(3)\fP, and
+\fIfree_image()\fP can be used to free the space (\fIfree(3)\fP) used
+by an image.
+\fIwrite_image()\fP writes the image pointed to by \fBiptr\fP to a
+file \fBoutstr\fP.
+\fIcreate_image()\fP is like \fIread_image\fP, but only allocates space
+and sets most image header (except the size) variables to zero.
+\fIcreate_cube()\fP is the extension of \fIcreate_image()\fP for 3D images.
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +1.5i
+~/src/pjt/image         image.c image.h image.3 image.5
+.fi
+.SH UPDATE HISTORY
+.nf
+.ta +1i +4i
+xx-jul-87       original version        PJT
+23-dec-88       V2.3 velocity added     PJT
+18-jan-89       V3.0 3D implemented     PJT
+27-jun-89       V4.1 added free_image   PJT
+.fi
