@@ -1,0 +1,175 @@
+.TH XYZVIEW 1NEMO "4 September 2000"
+.SH NAME
+xyzview \- Display 3-D point (velocity) and time data 
+.SH SYNOPSIS
+\fBxyzview\fP [parameter=value]
+.SH DESCRIPTION
+\fIxyzview\fP is an program with which 3-D
+point data can be interactively displayed. It was initially developed
+on an SGI using the gl(3) library, but using e.g. the VOGL emulator
+library (available on most unix platforms) is quite an acceptable
+alternative if you don't have an SGI workstation.  
+.PP
+It can also create a set of shadow particles that represent the
+orbit of a selected star (see \fBorbit=\fP).
+.SH INTERACTIVE KEYS/MOUSE BUTTONS
+.TP 20
+ESC
+quit
+.TP
+SPACE
+advance to next frame
+.TP
+RETURN
+write \fBviewfile\fP with viewing parameters
+.TP
+LEFTMOUSE 
+Viewing angles (xrot,yrot) are controlled by 
+the X and Y cursor position. 
+In most VOGL library versions you will
+have to depress the '1' key to get the same effect as on the SGI.
+.TP
+MIDDLEMOUSE
+Viewing scene (z viewing distance and field of view) are controlled by the X
+and Y cursor position.
+In most VOGL library versions you will
+have to depress the '2' key to get the same effect as on the SGI.
+.TP
+RIGHTMOUSE
+Velocity vectors (vscale and vskip) are controlled by the X and Y cursor
+position. 
+In most VOGL library versions you will
+have to depress the '3' key to get the same effect as on the SGI.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Point data to display. This file must be in \fBxyzc\fP or
+\fBxyzuvwc\fP format, usually created with \fIsnapxyz(1NEMO)\fP.
+No default.
+.TP
+\fBtimes=\fP
+Range of times to display. [Default: \fBall\fP].
+.TP
+\fBscale=\fP
+Scale factor for data.
+.TP
+\fBnfast=\fP
+Max number of points to draw in fast mode.
+.TP
+\fBshowbox=\fP
+Draw a cube, scale units high.
+.TP
+\fBmaxpoint=\fP
+Process at least this many points.
+.TP
+\fBcolormap=\fP
+File with color table (binary) . Default: no colormap.
+.TP
+\fBfullscreen=\fP
+Use full screen (no border). [Default: \fIfalse\fP]. 
+.TP
+\fBposition=\fP
+If given, set screen position. 
+.TP
+\fBaspect=\fP
+If given, set aspect ratio.
+.TP
+\fBnoborder=\fP
+Disable drawing window border.
+.TP
+\fBtextsize=\fP
+Size of text in points. Default: 20
+.TP
+\fBident=\fP
+ID message for display.
+.TP
+\fBviewfile=\fP
+Output viewing parameters     
+.TP
+\fBmaxframe=\fP
+Maximum number of frames to store for movies. [1000]
+.TP
+\fBorbit=\fP
+Star number (0=first) to be selected to view the complete orbit
+of. This is done by creating pseudo-particles, and hence is
+somewhat memory consumptive if a lot of snapshots are used. If
+this option is used, all particles are loaded automatically.
+[Default: -1]
+.SH COLORS
+The standard color indices on the SGI GL are:
+.nf
+BLACK           0   (background)
+RED             1
+GREEN           2
+YELLOW          3
+BLUE            4
+MAGENTA         5
+CYAN            6
+WHITE           7
+.fi
+.SH BUGS
+in VOGL switching between 1,2 and 3 mousebuttons does not preserve the setting
+in the other frames. (orientation, zoom factor)
+.SH EXAMPLE
+Here is a simple example of loading a movie when using the VOGL
+version (i.e. on most non-SGI machines). First create a simulation
+with 33 frames using hackcode1, then convert the snapshots to
+xyz frames, and startup xyzview (note you need to set 
+an environment variable VDEVICE):
+.nf
+    hackcode1 out=r 64.dat tstop=4 freqout=8 > /dev/null
+    snapxyz r64.dat r64.xyz
+    setenv VDEVICE X11			(if not set yet)
+    xyzview r64.xyz
+.fi
+now move the cursor in the window and depresss the '1' button and move
+the cursor around. You will now interactively roam around in 3D-space.
+Unfortunately (?) the cursor position is bound to a viewing angle
+in absolute screen coordinates, and not where you last left it. This
+often confuses users when they switch between buttons (keys) 1, 2 and 3.
+.PP
+Now switch to the '2' button and instead of roaming around, you now
+zoom in and out of the picture. '3' is somewhat specialized, and attempts
+to visualize the velocity vectors at the same time, for a subset of the
+particles.
+.PP
+Now we we load in all the frames using the 'l' key. If you like to do this
+under a certain zoom factor and viewing angle, you can set those first
+with the 1,2,3 keys/cursor positions and then 'l' (load) all frames.
+With the 'm' key you can switch between movie mode and display mode.
+After the frames were loaded, you are still in display mode.
+In display mode the 1/2/3 keys/buttons are bound to orientation/zoom/velocity
+as you have seen before, in movie mode those are bound to 
+backwards/continues/forwards motion of the frames. The most useful mode
+is the continues mode. So, first hit 'm' (the '4' key is actually equivalent to
+the 'm' key) to switch to movie
+mode and then hit the '2' key and keep it depressed, and move the mouse
+back and forth: the position is now bound to which frame will be displayed.
+If you like to play with this movie at another viewing angle, hit 'm'
+and play with '1', '2' and '3' to select another viewing, then hit 'm'
+again and with '2' roam around in time. Happy roaming.
+.SH SEE ALSO
+snapxyz(1NEMO), snapcopy(1NEMO), snapplot(1NEMO)
+.SH ENVIRONMENT
+.nf
+.ta +1i
+VDEVICE  	set the display device (X11,postscript,ppostscript,cps,pcps)
+.fi
+.SH FILES
+.nf
+.ta +1i
+src/nbody/xyz	source code
+.fi
+.SH AUTHOR
+Josh Barnes
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+xx-xxx-90	V1.0 Created                      	JEB
+20-jan-93	V1.x minor mods for VOGL emulator	PJT
+30-mar-97	V2.0b formally released, added examples	PJT
+4-apr-97	V2.1a made the '4' key equivalent to 'm'	PJT
+3-sep-00	V2.2 added orbit=  orbit viewing	PJT
+.fi
