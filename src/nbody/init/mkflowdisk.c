@@ -5,6 +5,7 @@
  *   18-nov-03   1.0 cloned off mkspiral - 	Peter Teuben - Maryland
  *   20-nov-03   1.1 changed meaning of angles, and thus signs of k/pitch
  *   21-nov-03   1.2 changed signs once again, make is consistent w/ vrtm51.c
+ *   23-nov-03   1.3 add key=
  *
  */
 
@@ -34,11 +35,12 @@ string defv[] = {
     "k=\n                 spiral wavenumber for linear spirals (> 0 trailing spirals)",
     "pitch=\n             pitch angle for log spirals",
     "phase=0\n            phase offset of spiral at rmax (in degrees)",
+    "key=\n               Add a key, if present",
     "seed=0\n		  random number seed",
     "nmodel=1\n           number of models",
     "test=f\n             test shape of spiral",
     "headline=\n	  text headline for output ",
-    "VERSION=1.2\n	  21-nov-03 PJT",
+    "VERSION=1.3\n	  23-nov-03 PJT",
     NULL,
 };
 
@@ -46,13 +48,14 @@ string usage = "toy spiral density perturbation in a uniform disk";
 
 
 local real rmin, rmax, rref;
-local int  ndisk, nmodel;
+local int  ndisk, nmodel, key;
 local real SPk;     /* linear spiral wavenumber */
 local real pitch;   /* log spiral pitch */
 local real totmass;
 local real offset;  /* phase offset at rref */
 local bool Qtest;
 local bool Qlinear;
+local bool Qkey;
 
 local Body *disk = NULL;
 local real theta[361], dens[361];
@@ -70,6 +73,8 @@ void nemo_main()
     rmax = getdparam("rmax");
     rref = rmax;
     if (hasvalue("rref")) rref = getdparam("rref");
+    Qkey = hasvalue("key");
+    if (Qkey) key = getiparam("key");
 
     ndisk = getiparam("nbody");
     nmodel = getiparam("nmodel");
@@ -110,6 +115,7 @@ writegalaxy(stream outstr)
 {
     real tsnap = 0.0;
     int bits = MassBit | PhaseSpaceBit | TimeBit;
+    if (Qkey) bits |= KeyBit;
 
     put_snap(outstr, &disk, &ndisk, &tsnap, &bits);
 }
@@ -190,6 +196,7 @@ testdisk(int n)
 
     for (dp=disk, i = 0; i < ndisk; dp++, i++) {
 	Mass(dp) = mass_i;
+	if (Qkey) Key(dp) = key;
         r_i = sqrt(rmin2 + xrandom(0.0,1.0) * (rmax2 - rmin2));
 	if (Qtest)
 	  theta_i = 0.0;
