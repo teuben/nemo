@@ -1,0 +1,32 @@
+%N snapxyz
+%D Convert snapshot to xyzc data
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man snapxyz' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input file of snapshot data [???]
+%A out
+	Output file of xyzc data [???]
+%A times
+	Range of times to convert [all]
+%A xvar
+	Expression for x-axis variable [x]
+%A yvar
+	Expression for y-axis variable [y]
+%A zvar
+	Expression for z-axis variable [z]
+%A vxvar
+	Expression for vx-axis variable [vx]
+%A vyvar
+	Expression for vy-axis variable [vy]
+%A vzvar
+	Expression for vz-axis variable [vz]
+%A vel
+	Should velocitied be output at all? [t]
+%A color
+	Expression for point color [1]
+%A visib
+	Expression for point visibility [1]
+%A VERSION
+	30-mar-97 PJT [2.1]
