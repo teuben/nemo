@@ -1,9 +1,11 @@
-- don't call this file BUGS anymore , it's insane, but...
-  MacOS-X cannot handle multiple mixed-case filenames!
+* this file is called BUGLETS, not BUGS anymore , it's insane, but...
+  MacOS-X cannot handle multiple mixed-case filenames! WTF....
 
-- intel 8.0 - main.o is now a multiply defined object when
-  linking fortran with C and nemo..... i don't see a good
-  solution. I think intel screwed up here.
+- intel 8.0 - some linkeage problems left with loadobj based
+  routines
+
+- intel 7.1 also has some remaining problems. Linking needs to
+  be done with fortran and the -Vaxlib library
 
 - gcc3:  when using c++ NEMO's "string" will now collide with the 
          default C++ type 'string'....
