@@ -22,7 +22,7 @@ setenv NEMOSITE `hostname`
 #  those cases you will need to tailor various path elements.
 
 #  Here's a PGPLOT YAPP, uncomment and suit your needs
-setenv YAPPLIB     "$NEMOLIB/yapp_pgplot.o -lpgplot @XLIBS@ @FORLIBS@"
+setenv YAPPLIB     "$NEMOLIB/yapp_pgplot.o -lpgplot @XLIBS@ @FLIBS@"
 setenv YAPP        /xs
 setenv PGPLOT_DIR  @PGPLOT_DIR@
 setenv PGPLOT_LIB  @PGPLOT_DIR@
