@@ -34,7 +34,8 @@ help:
 
 # Targets used to install multipole codes in Nemo.
 
-install: .install_inc .install_bin .install_src
+#install: .install_inc .install_bin .install_src
+install:
 
 .install_man: $(MAN1FILES)
 	cp $(MAN1FILES) $(NEMO)/man/man1
