@@ -12,7 +12,9 @@
 #include <stdinc.h>
 #include <spline.h>
 
+#ifndef MAXN
 #define MAXN 1000
+#endif
 
 local int n = 0;
 local rproc lastfun=NULL;
