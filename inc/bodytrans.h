@@ -5,14 +5,31 @@
  *			relies on CFLAGS environment variable
  *	 1-mar-94       <math.h> loaded - don't declare them again
  *	12-apr-95	no more ARGS  - defer math stuff to stdinc.h
+ *      31-dec-02       gcc3/SINGLEPREC
  */
+
+#ifndef _bodytrans_h
+#define _bodytrans_h
 
 #include <stdinc.h>
 #include <vectmath.h>
 #include <snapshot/body.h>
 
 /*
- * Macros for standard components of a body b.
+ * Better prototypes for the 'proc's (C++ needs is, gcc3 also for -DSINGLEPREC)
+ */
+
+typedef real (*rproc_body)(Body *, real, int);
+typedef int  (*iproc_body)(Body *, real, int);
+
+extern rproc_body btrtrans(string expr);
+extern iproc_body btitrans(string expr);
+
+#ifndef _bodytransc_h
+/*
+ * Macros for standard components of a body b.-- only needed in true bodytrans
+ * routines, never never in nemo_main() applications, unless you promise not
+ * to use the variable names that we macro-fied below here
  */
 
 #define m     Mass(b)
@@ -48,3 +65,5 @@
 
 #define eps   Eps(b)
 
+#endif /* _bodytransc_h */
+#endif /* _bodytrans_h  */
