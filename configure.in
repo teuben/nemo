@@ -261,14 +261,16 @@ dnl fi
 
 dnl ---------------------------------------------------------------------
 
+LOADOBJ_MACH = ""
+LOADOBJ_LIBS = ""
 
 case $host_os in
       *linux*)
-	LOADOBJ_MACH = "-Dlinux -DSYSV"
+	LOADOBJ_MACH="-Dlinux -DSYSV"
 	LOADOBJ_LIBS=-ldl
 	;;
       sparc*)
-	LOADOBJ_MACH = "-Dsun4 -DSOLARIS -DSYSV"
+	LOADOBJ_MACH="-Dsun4 -DSOLARIS -DSYSV"
 	LOADOBJ_LIBS=-ldl
         ;;
 esac

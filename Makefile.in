@@ -545,9 +545,10 @@ install:
 	@echo "      source nemo_start  -- load the NEMO environment"
 	@echo "      make dirs          -- creates directory structure and admin stuff"
 	@echo "      make config_extra  -- copy configure created files into dirs"
-	@echo "      make scripts       -- destribute basic scripts to NEMOBIN"
+	@echo "      make scripts       -- distribute basic scripts to NEMOBIN"
 	@echo "      source NEMORC.local   -- any last minute local changes"
-	@echo "      cd src;make install"
+	@echo "      rehash                -- update search path" 
+	@echo "      make libs             -- install the libraries"
 
 helpconfig:
 	@echo config, configure, config_extra, config_clean

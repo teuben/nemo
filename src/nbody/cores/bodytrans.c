@@ -116,6 +116,12 @@ string fname;                   /* optional filename for object file */
     stream cdstr;
     proc result;
 
+#if defined(LOADOBJ3)
+    dprintf(1,"bodytrans: V3 .so for %s\n",expr);
+#else
+    dprintf(1,"bodytrans: V2 .o for %s\n",expr);
+#endif
+
     if (! havesyms) {
         mysymbols(getargv0());
         ini_bt();
@@ -126,7 +132,7 @@ string fname;                   /* optional filename for object file */
     else
         hexpr = expr;                  /* point to expr to try first */
     if ((int)strlen(hexpr) < 15) {
-#if 1
+#if defined(LOADOBJ3)
         sprintf(file, "bt%c_%s.so", type[0], hexpr);     /* make filename */
 #else
         sprintf(file, "bt%c_%s.o", type[0], hexpr);     /* make filename */
@@ -149,7 +155,11 @@ string fname;                   /* optional filename for object file */
 	strcpy(file, getenv("NEMOOBJ"));             /* and found one */
 	strcat(file, "/bodytrans/");
 	strcat(file, cp);		 /* cp points to 'btX_NAME */
+#if defined(LOADOBJ3)
+        strcat(file, ".so");
+#else
         strcat(file, ".o");
+#endif
 	loadobj(file);
         sprintf(func, "%s", cp);               /* generic symbol name */
         mapsys(func);                                     /* remap it */
@@ -178,7 +188,7 @@ string fname;                   /* optional filename for object file */
         fprintf(cdstr, "{\n    return (%s);\n}\n", expr);
         fclose(cdstr);
 	cflags = getenv("CFLAGS");
-#if 1
+#if defined(LOADOBJ3)
         sprintf(cmmd, "cd /tmp;make -f $NEMOLIB/Makefile.lib %s.so",name);
 #else
         sprintf(cmmd, "cd /tmp;cc %s -c %s.c",
@@ -192,7 +202,7 @@ string fname;                   /* optional filename for object file */
 #endif
             error("bodytrans(): could not compile\n");
 	}
-#if 1
+#if defined(LOADOBJ3)
         sprintf(file, "/tmp/%s.so", name);
 #else
 	sprintf(cmmd,"ldso /tmp/%s",name);
@@ -205,7 +215,7 @@ string fname;                   /* optional filename for object file */
 
 #if defined(SAVE_OBJ)
         if (!Qflock) {      /* copy when no file locking encountered */
-#if 0
+#if defined(LOADOBJ3)
             sprintf(cmmd, 
             "cp /tmp/%s.so $NEMOOBJ/bodytrans/%s.so;chmod a+w %s",
              name,sname,edbbak);
@@ -286,7 +296,7 @@ string expr;
             return(cp);
         }
 #endif
-    return(NULL);    			/* return as if nothing was found */
+    return NULL;    			/* return as if nothing was found */
 }
 
 /* 
