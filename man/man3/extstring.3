@@ -1,0 +1,60 @@
+.TH EXTSTRING 3NEMO "24 July 1995"
+.SH NAME
+getxstr, putxstr, copxstr, xstrlen, xstreq \- extended string functions
+.SH SYNOPSIS
+.nf
+.B #include <stdinc.h>
+.B #include <extstring.h>
+.PP
+.B char *getxstr(str, nbyt)
+.B stream str;
+.B int nbyt;
+.PP
+.B bool putxstr(str, xstr, nbyt)
+.B stream str;
+.B char *xstr;
+.B int nbyt;
+.PP
+.B char *copxstr(xstr, nbyt)
+.B char *xstr;
+.B int nbyt;
+.PP
+.B int xstrlen(xstr, nbyt)
+.B char *xstr;
+.B int nbyt;
+.PP
+.B bool xstreq(xstr1, xstr2, nbyt)
+.B char *xstr1, *xstr2;
+.B int nbyt;
+.fi
+.SH DESCRIPTION
+These routines extend the usual C notion of NULL-terminated character
+strings to strings of \fInbyt\fP-byte values, terminated by \fInbyt\fP
+NULL bytes.
+For example, on a 32-bit machine, an \fBint\fP takes 4 bytes, so an
+extended string of ints is a sequence of 4-byte values, terminated by
+4 NULL bytes.
+
+\fIgetxstr\fP and \fIputxstr\fP perform I/O of extended strings via the
+usual \fIstdio\fP(3) primatives.
+\fIgetxstr\fP reads \fInbyt\fP-long values from the input stream \fIstr\fP
+until it encounters \fInbyt\fP NULL bytes.
+It stores the values in space dynamically allocated using \fImalloc\fP(3)
+and returns a pointer to the extended string, or NULL on end of file or error.
+\fIputxstr\fP writes an extended string \fIxstr\fP of \fInbyt\fP-long
+values, including the terminating NULLs, to an output stream \fIstr\fP.
+It returns TRUE unless an I/O error occured.
+
+\fIcopxstr\fP copies its extended string argument \fIxstr\fP to space
+allocated using \fImalloc\fP.
+
+\fIxstrlen\fP counts the number of \fInbyt\fP-long values in \fIxstr\fP,
+including the terminating NULL-value.
+
+\fIxstreq\fP compares extended strings, and returns TRUE if they are equal.
+.SH SEE ALSO
+stdio(3), malloc(3)
+.SH DIAGNOSTICS
+Low-level catastrophies (eg, running out of memory) generate messages via
+\fIerror\fP(3).
+
