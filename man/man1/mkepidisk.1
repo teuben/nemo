@@ -1,0 +1,41 @@
+.TH MKEPIDISK 1NEMO "17 December 1990"
+.SH NAME
+mkepidisk \- uniform-ring-density test disk on epicycles
+.SH SYNOPSIS
+\fBmkepidisk out=\fPsnapshot [parameters=values ...]
+.SH DESCRIPTION
+\fImkepidisk\fP sets up a cold disk of test particles orbiting 
+clockwise on elliptical orbits.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 25
+\fBout=\fIout_file\fP
+The data are written to this file in \fISnapShot(5NEMO)\fP 
+format [no default].
+\fBrmin=\fImin_disk_radius\fP
+Inner cutoff radius of test-particle disk. [Default: \fB0.0\fP].
+.TP
+\fBrmax=\fImax_disk_radius\fP
+Outer cutoff radius of test-particle disk. [Default: \fB1.0\fP].
+.TP
+\fBnring=\fIn-rings\fP
+.TP
+\fBdr=\fIseparation\fP
+.TP
+\fBaxirat=\fP
+.TP
+\fBomega=\fP
+.TP
+\fBseed=\fP
+.TP
+\fBheadline=\fImessage\fP
+Text headline for output file [default: not used].
+.SH "SEE ALSO"
+mktestdisk(1NEMO), mkdisk(1NEMO)
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.5i
+28-aug-90	V1.0: coded for class	PJT
+19-dec-90	V1.1: some mods	PJT
+.fi
