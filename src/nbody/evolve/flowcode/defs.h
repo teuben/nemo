@@ -8,33 +8,41 @@
 #include <vectmath.h>
 #include <potential.h>
 
-string infile;			/* input file with initial conds */
-string outfile;			/* output file for simulation results */
+/*
+ * GLOBAL: pseudo-keyword for storage class.
+ */
+  
+#if !defined(global)
+#  define global extern
+#endif
 
-real freq;			/* fundamental integration frequency */
+global string infile;			/* input file with initial conds */
+global string outfile;			/* output file for simulation results */
 
-int mode;			/* integrator: RK, PC or PC1 */
+global real freq;			/* fundamental integration frequency */
 
-real eta;			/* fractional dissipation [0..1] */
-real sigma;                     /* diffusion angle (in radians) */
-real freqdiff;                  /* diffusion frequency */
-real fheat;                     /* diffusion/dissipation */
-vector dr;			/* cell size for dissipation */
-real rmax;                      /* max. gridsize for dissipation */
+global int mode;			/* integrator: RK, PC or PC1 */
 
-real freqout, minor_freqout;	/* major, minor output frequencies */
+global real eta;			/* fractional dissipation [0..1] */
+global real sigma;                     /* diffusion angle (in radians) */
+global real freqdiff;                  /* diffusion frequency */
+global real fheat;                     /* diffusion/dissipation */
+global vector dr;			/* cell size for dissipation */
+global real rmax;                      /* max. gridsize for dissipation */
 
-real tstop;			/* time to stop integration */
+global real freqout, minor_freqout;	/* major, minor output frequencies */
 
-string options;			/* misc. options */
+global real tstop;			/* time to stop integration */
 
-string headline;		/* identification message */
+global string options;			/* misc. options */
 
-real tnow;			/* time state is defined */
+global string headline;		/* identification message */
 
-real tout, minor_tout;		/* time of next major, minor output */
+global real tnow;			/* time state is defined */
 
-real ome, ome2, half_ome2, two_ome;	/* pattern speed + handy numbers */
+global real tout, minor_tout;		/* time of next major, minor output */
+
+global real ome, ome2, half_ome2, two_ome;	/* pattern speed + handy numbers */
 
 
 
@@ -65,9 +73,9 @@ typedef struct {
 #  define MBODY 4096		/* max number of bodies */
 #endif
 
-int nbody;			/* number of bodies simulated */
+global int nbody;			/* number of bodies simulated */
 
-body bodytab[MBODY];		/* array representing state */
+global body bodytab[MBODY];		/* array representing state */
 
 typedef void (*fproc)(bodyptr p, int np, real time, bool Qnew);
 

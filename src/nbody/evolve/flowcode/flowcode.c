@@ -4,6 +4,7 @@
  *	10-apr-96 V0.1 cloned off potcode
  *      20-jan-04  0.3 diffusion/sigma
  *       3-feb-04  0.4 major CVS version skew fix
+ *      24-dec-04  0.6b global fix for MacOSX 
  *
  * To improve:  use allocate() for number of particles; not static
  *
@@ -12,6 +13,7 @@
  *    http://www.amara.com/ftpstuff/streamlines2.txt
  */
 
+#define global
 #include "defs.h"
 
 string defv[] = {	
@@ -34,7 +36,7 @@ string defv[] = {
     "freqdiff=\n          frequency of diffusion [freq]",
     "seed=0\n		  random seed",
     "headline=\n          random verbiage",
-    "VERSION=0.6a\n	  7-feb-04 PJT",
+    "VERSION=0.6b\n	  24-dec-04 PJT",
     NULL,
 };
 
