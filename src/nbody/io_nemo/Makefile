@@ -11,8 +11,11 @@ include $(NEMOLIB)/makedefs
 #--------------------------------------------------------
 # Library path
 LIBPATH = -L$(NEMOLIB) -L.
-L    = $(NEMOLIB)/libnemo.a 
-Lg77 = $(NEMOLIB)/libnemomaing77.a 
+L       = $(NEMOLIB)/libnemo.a 
+Lg77    = $(NEMOLIB)/libnemomaing77.a 
+Ldummyc = $(NEMOLIB)/libio_nemo.a
+Ldummyf = $(NEMOLIB)/libio_nemo_f.a
+
 LIBNEMO = -lnemo
 #--------------------------------------------------------
 # g77's options
@@ -43,6 +46,8 @@ LIB_IO_NEMO = ${IONO}/parameters.o    ${IONO}/check_file.o       ${IONO}/io_init
               ${IONO}/io_nemo_f.o     ${IONO}/io_get_put_f.o
 
 LIB_IO_NEMOF= ${IONO}/nemo_g77.o      $(LIB_IO_NEMO)
+
+LIB_DUMMY_IO_NEMO = ${IONO}/dummy.o
 
 # Includes
 INC         = -I${IONT} -I${IONS}
@@ -76,7 +81,7 @@ testf : dirs 						       \
         ${IONB}/nemo_fortran_f_n3  ${IONB}/nemo_fortran_d_n3   \
 	${IONB}/snapmask_s         ${IONB}/snapmask_d
 
-install:  dirs	.install_lib .install_lib_maing77
+install:  dirs	.install_lib .install_lib_maing77 .install_lib_dummy test testf
 
 .install_lib: $(LIB_IO_NEMO)
 	ar ruv $(L) $?
@@ -85,6 +90,10 @@ install:  dirs	.install_lib .install_lib_maing77
 .install_lib_maing77: ${IONO}/nemo_g77.o
 	ar ruv $(Lg77) $?
 	ranlib $(Lg77)
+
+.install_lib_dummy : $(LIB_DUMMY_IO_NEMO)
+	ar ruv $(Ldummyc) $?
+	ar ruv $(Ldummyf) $?
 
 package :
 	find . -type f \( -name "*.[f,F,c,h,3]"   -o -name "Makefile"  -o -name "*.ps"  -o -name "README*" -o -name "*.csh"  -o -name "Testfile" \) -exec tar uvf io_nemo.tar {} \;
@@ -225,5 +234,10 @@ ${IONB}/snapmask_d   : ${IONO}/snapmask_d.o
 ${IONO}/snapmask_d.o : ${IONT}/snapmask2.c
 	$(CC) $(CFLAGS) $(INC) -c ${IONT}/snapmask2.c                       \
                                -o ${IONO}/snapmask_d.o
+#
+# Dummy function
+#
+${IONO}/dummy.o : ${IONS}/dummy.c
+	$(CC) $(CFLAGS) $(INC) -c ${IONS}/dummy.c -o ${IONO}/dummy.o
 #--------------------------------------------------------
 #
