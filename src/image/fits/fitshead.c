@@ -7,6 +7,8 @@
  *	22-feb-94       V1.1a ansi headers			pjt
  *	 5-apr-94	V1.2  use out= to force header conversion	PJT
  *      23-may-95       V1.2b fixed bug in convert_to_header		pjt
+ *	 7-aug-01       V1.3  added counter=t|f
+ *                            -- oops, needs a library change --
  */
 
 #include <stdinc.h>
@@ -18,7 +20,8 @@ string defv[] = {	/* Standard NEMO keyword+help */
     "hdu=0\n               Which HDU (0=all, 1=1st etc.)",
     "blocking=1\n          Blocking factor (blocking/2880)",
     "out=\n                Convert input text to output fits header",
-    "VERSION=1.2b\n        23-may-95 PJT",
+    "counter=f\n           Add line counter to output?",
+    "VERSION=1.3\n         7-aug-01 PJT",
     NULL,
 };
 
@@ -38,11 +41,11 @@ nemo_main()
 read_fits_header()
 {
     stream instr, outstr;
-    int    i,n,nfile, sel_data, sel_head, blocking;
+    int    i,n,nfile, sel_data, sel_head, blocking, counter;
     string outfile, select, *fix, *delete, *keep, *print;
     char   basename[128];
     struct fits_header fh;
-    bool   split;
+    bool   split, Qcount = getbparam("counter");
 
 
     instr = stropen(getparam("in"),"r");    /* open input */
