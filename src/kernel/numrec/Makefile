@@ -14,15 +14,19 @@ MAN3FILES =
 MAN5FILES = 
 INCFILES = nrutil.h nr.h
 SRCFILES= eigsrt.c   jacobi.c nrutil.c \
-	  eigsrt_d.c jacobi_d.c ran3.c beta.c gamma.c pearsn.c
+	  eigsrt_d.c jacobi_d.c ran3.c beta.c gamma.c pearsn.c \
+	  polint.c trapzd.c qromb.c
+
 
 OBJFILES= eigsrt.o jacobi.o nrutil.o \
 	  eigsrt_d.o jacobi_d.o ran3.o beta.o gamma.o pearsn.o \
-	  probks.o kstwo.o
+	  probks.o kstwo.o \
+	  polint.o trapzd.o qromb.o
 
 LOBJFILES= $L(eigsrt.o)   $L(jacobi.o) $L(nrutil.o) \
 	   $L(eigsrt_d.o) $L(jacobi_d.o) $L(ran3.o) \
-	   $L(beta.o) $L(gamma.o) $L(pearsn.o)
+	   $L(beta.o) $L(gamma.o) $L(pearsn.o) \
+	  $L(polint.o) $L(trapzd.o) $L(qromb.o)
 
 BINFILES = 
 TESTFILES =
