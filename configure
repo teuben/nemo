@@ -5531,12 +5531,15 @@ echo "configure:5531: checking looking for a reasonable YAPP" >&5
 case $yapp_name in
         ps)
           YAPP_LIBS=""
+	  YAPP_DEF="yapp.ps"
           ;;
 	pgplot)
 	  YAPP_LIBS="-L$PGPLOT_DIR -lpgplot $XLIBS $FLIBS"
+	  YAPP_DEF="/xs"
           ;;
 esac
 echo "$ac_t""$YAPP_NAME" 1>&6
+
 
 
 
@@ -5715,6 +5718,7 @@ s%@MIRIAD_LIB@%$MIRIAD_LIB%g
 s%@LIBOBJS@%$LIBOBJS%g
 s%@YAPP_NAME@%$YAPP_NAME%g
 s%@YAPP_LIBS@%$YAPP_LIBS%g
+s%@YAPP_DEF@%$YAPP_DEF%g
 s%@NEMO_FFLAGS@%$NEMO_FFLAGS%g
 s%@NEMO_CFLAGS@%$NEMO_CFLAGS%g
 

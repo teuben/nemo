@@ -20,8 +20,9 @@ setenv NEMOSITE `hostname`
 
 #  Here's your default YAPP library
 setenv YAPPLIB     "$NEMOLIB/yapp_@YAPP_NAME@.o @YAPP_LIBS@"
-setenv YAPP        /xs
+setenv YAPP        @YAPP_DEF@
 setenv PGPLOT_DIR  @PGPLOT_DIR@
+#  not sure if the next two are really needed
 setenv PGPLOT_LIB  @PGPLOT_DIR@
 setenv PGPLOT_FONT @PGPLOT_DIR@/grfont.dat
 

@@ -638,15 +638,18 @@ AC_MSG_CHECKING(looking for a reasonable YAPP)
 case $yapp_name in
         ps)
           YAPP_LIBS=""
+	  YAPP_DEF="yapp.ps"
           ;;
 	pgplot)
 	  YAPP_LIBS="-L$PGPLOT_DIR -lpgplot $XLIBS $FLIBS"
+	  YAPP_DEF="/xs"
           ;;
 esac
 AC_MSG_RESULT($YAPP_NAME)
 
 AC_SUBST(YAPP_NAME)
 AC_SUBST(YAPP_LIBS)
+AC_SUBST(YAPP_DEF)
 
 AC_SUBST(NEMO_FFLAGS)
 AC_SUBST(NEMO_CFLAGS)
