@@ -8,12 +8,18 @@
  *	mar94 - ansi
  *	 6-aug-96  1.1d printf -> dprintf
  *	30-dec-97  1.1e ansi 
+ *      20-jun-03  1.2  using modern get_snap and put_snap
  */
 #include <stdinc.h>
 #include <getparam.h>
 #include <vectmath.h>
 #include <filestruct.h>
+
 #include <snapshot/snapshot.h>
+#include <snapshot/body.h>
+#include <snapshot/get_snap.c>
+#include <snapshot/put_snap.c>
+
 
 string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "in1=???\n			  input file name ",
@@ -23,7 +29,7 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "deltav=0.0,0.0,0.0\n	  velocity of in1 wrt in2 ",
     "zerocm=true\n		  zero center of mass ",
     "headline=\n		  random verbiage ",
-    "VERSION=1.1e\n		  30-dec-97 PJT",
+    "VERSION=1.2\n		  20-jun-03 PJT",
     NULL,
 };
 
@@ -39,10 +45,9 @@ nemo_main()
 }
 
 int nbody, nbody1, nbody2;
-
-real *mass, *mass1, *mass2;
-
-real *phase, *phase1, *phase2;
+int bits,  bits1,  bits2;
+Body *btab, *btab1, *btab2;
+real tsnap, tsnap1, tsnap2;
 
 readdata()
 {
@@ -52,51 +57,32 @@ readdata()
     get_history(instr1);
     instr2 = stropen(getparam("in2"), "r");
     get_history(instr2);
-    get_set(instr1, SnapShotTag);
-    get_set(instr2, SnapShotTag);
-    get_set(instr1, ParametersTag);
-    get_set(instr2, ParametersTag);
-    get_data(instr1, NobjTag, IntType, &nbody1, 0);
-    get_data(instr2, NobjTag, IntType, &nbody2, 0);
-    get_tes(instr1, ParametersTag);
-    get_tes(instr2, ParametersTag);
+
+    get_snap(instr1, &btab1, &nbody1, &tsnap, &bits1);
+    get_snap(instr2, &btab2, &nbody2, &tsnap, &bits2);
+
     dprintf(1,"nbody1 = %d    nbody2 = %d\n", nbody1, nbody2);
-    nbody = nbody1 + nbody2;
-    mass = (real *) allocate(sizeof(real) * nbody);
-    phase = (real *) allocate(sizeof(real) * 2*NDIM * nbody);
-    mass1 = mass;
-    mass2 = mass + nbody1;
-    phase1 = phase;
-    phase2 = phase + 2 * NDIM * nbody1;
-    get_set(instr1, ParticlesTag);
-    get_set(instr2, ParticlesTag);
-    get_data_coerced(instr1, MassTag, RealType, mass1, nbody1, 0);
-    get_data_coerced(instr2, MassTag, RealType, mass2, nbody2, 0);
-    get_data_coerced(instr1, PhaseSpaceTag, RealType, phase1,
-		     nbody1, 2, NDIM, 0);
-    get_data_coerced(instr2, PhaseSpaceTag, RealType, phase2,
-		     nbody2, 2, NDIM, 0);
-    get_tes(instr1, ParticlesTag);
-    get_tes(instr2, ParticlesTag);
-    get_tes(instr1, SnapShotTag);
-    get_tes(instr2, SnapShotTag);
 }
 
 snapstack()
 {
     vector deltar, deltav;
-    real *pp;
+    Body *bp;
 
     setvect(deltar, getparam("deltar"));
     setvect(deltav, getparam("deltav"));
-    for (pp = phase1; pp < phase2; ) {
-	ADDV(pp, pp, deltar);
-	pp += NDIM;
-	ADDV(pp, pp, deltav);
-	pp += NDIM;
+
+    btab1 = (body *) reallocate(btab1, sizeof(body)*(nbody1+nbody2));
+    btab = btab1;
+    nbody = nbody1 + nbody2;
+    tsnap = tsnap1;
+    bits = (bits1 & bits2);
+    memcpy(&btab[nbody1],btab2,sizeof(body)*nbody2);
+    for (bp=&btab[nbody1]; bp<btab+nbody; bp++) {
+      ADDV(Pos(bp),Pos(bp),deltar);
+      ADDV(Vel(bp),Vel(bp),deltav);
     }
-    if (getbparam("zerocm"))
-	zerocms(phase, 2*NDIM, mass, nbody, nbody);
+    if (getbparam("zerocm")) snapcenter();
 }
 
 setvect(vec, str)
@@ -120,14 +106,31 @@ writedata()
 	set_headline(getparam("headline"));
     outstr = stropen(getparam("out"), "w");
     put_history(outstr);
-    put_set(outstr, SnapShotTag);
-    put_set(outstr, ParametersTag);
-    put_data(outstr, NobjTag, IntType, &nbody, 0);
-    put_tes(outstr, ParametersTag);
-    put_set(outstr, ParticlesTag);
-    put_data(outstr, CoordSystemTag, IntType, &cscode, 0);
-    put_data(outstr, MassTag, RealType, mass, nbody, 0);
-    put_data(outstr, PhaseSpaceTag, RealType, phase, nbody, 2, NDIM, 0);
-    put_tes(outstr, ParticlesTag);
-    put_tes(outstr, SnapShotTag);
+    put_snap(outstr, &btab, &nbody, &tsnap, &bits);
+}
+
+snapcenter() 
+{
+    real w_i, w_sum;
+    vector tmpv, w_pos, w_vel;
+    Body *bp;
+
+    w_sum = 0.0;
+    CLRV(w_pos);
+    CLRV(w_vel);
+    for (bp = btab; bp < btab+nbody;  bp++) {
+      w_i = Mass(bp);
+      w_sum += w_i;
+      MULVS(tmpv, Pos(bp), w_i);
+      ADDV(w_pos, w_pos, tmpv);
+      MULVS(tmpv, Vel(bp), w_i);
+      ADDV(w_vel, w_vel, tmpv);
+    }
+    SDIVVS(w_pos, w_sum);
+    SDIVVS(w_vel, w_sum);
+ 
+    for (bp = btab; bp < btab+nbody; bp++) {
+        SSUBV(Pos(bp), w_pos);
+        SSUBV(Vel(bp), w_vel);
+    }
 }
