@@ -7,19 +7,25 @@
  *              29-dec-03       also added phi into the output stream, key as well
  *               2-jan-04       attempt to get some UBV info for nvodemo2004
  *               5-jan-04  1.6b fixed taking log's the right way !!!
+ *               8-jan-04  1.7  options to select what to get and where it goes
+ *
+ * TODO:  somehow the dynamic_cast() in ubvri.C is not recognized in this mode,
+ *        but a simple HelloWorld program has.
  */
 
+/* #include <iostream> */             
 #include <stdinc.h>                 /* NEMO */
 #include <getparam.h>
 #include <history.h>
 #include <extstring.h>
 
 #include "stod_subs.h"	            /* NEMO to STARLAB interface */
+#include <snapshot/snapshot.h>       /* merely for setting the attribute bits */
 
 #include "pdyn.h"	            /* STARLAB */
 
 #if 1
-/* my own test version, that doesn't need -lsstar */
+/* my own test version, that doesn't need -lsstar ; which gave linking problems */
 #include "ubvri.C"
 #endif
 
@@ -28,7 +34,8 @@ typedef char *nemo_string;
 nemo_string defv[] = {
     "out=???\n          Output snapshot file (input dyn from stdin)",
     "headline=\n        Random verbiage for user",
-    "VERSION=1.6a\n     5-jan-04 PJT",
+    "options=\n         Optional starlab things to write out ",
+    "VERSION=2.0\n      8-jan-04 PJT",
     NULL,
 };
 
@@ -44,11 +51,19 @@ void nemo_main(void)
   double m,logl,logt;
   int *key, *kptr;
   vec temp;
-  int first = 1;
+  int bits, first = 1;
   char *fname = getparam("out");
   char *hline = getparam("headline");
+  string options = getparam("options");
     
   check_real(sizeof(real));   /* make sure real==double */
+#if 0
+  bits = TimeBit | MassBit | PhaseSpaceBit;
+#endif
+  if (scanopt(options,"aux") bits |= AuxBit;
+  if (scanopt(options,"phi") bits |= PotentialBit;
+  if (scanopt(options,"acc") bits |= AccelerationBit;
+  if (scanopt(options,"key") bits |= KeyBit;
 
   while ((proot = getpdyn(cin)) != NULL) {
     
