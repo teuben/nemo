@@ -1,0 +1,744 @@
+.TH TkMan 1
+.SH NAME
+TkMan, tkman \- a graphical manual page browser, with hypertext
+.SH "A BIRD? A PLANE? TKMAN! (TKPERSON?) "
+by Tom Phelps written in Tcl 7.0/Tk 3.3 
+\.br
+Compatible with Hewlett-Packard HP-UX, AT&T System V, SunOS, 
+Sun Solaris, OSF/1, DEC Ultrix, SGI IRIX, Linux, SCO, IBM AIX 
+.PP
+Copyright \251 1993-1994 T. A. Phelps 
+\.br
+All Rights Reserved. 
+\.br
+University of California, Berkeley 
+\.br
+Department of Electrical Engineering and Computer Science 
+\.br
+Computer Science Division 
+.PP
+The latest version of TkMan is always available by anonymous 
+FTP \fR at \fIftp.cs.Berkeley.EDU \fR in the \fI/ucb/people/phelps/tcltk \fR
+directory. 
+.PP
+PERMISSION IS GRANTED TO DISTRIBUTE THIS SOFTWARE FREELY, BUT 
+ONE MAY NOT CHARGE FOR IT OR INCLUDE IT WITH SOFTWARE WHICH IS 
+SOLD. \fR
+.PP
+If you send me bug reports and/or suggestions for new features, 
+include the versions of TkMan, Tcl, Tk, X, and UNIX, your machine 
+and X window manager names, and a copy of your \fI~/.tkman \fR
+file. First check that values changed in the Makefile or source 
+code aren't being unexpectedly overridden in the \fI~/.tkman \fR
+startup script. 
+.SH "INTRODUCTION "
+A manual page browser, TkMan offers two major advantages over 
+xman : hypertext links to other man pages (click on a word in 
+the text which corresponds to a man page, and you jump there), 
+and better navigation within long man pages with searches (both 
+incremental and regular expression) and jumps to section headers. 
+TkMan also offers some convenience features, like a user-configurable 
+list of commonly used man pages, a one-click printout, and integration 
+of whatis  and apropos . Further, one may highlight, as if with 
+a yellow marker, arbitrary passages of text in man pages and 
+subsequently jump directly to these passages by selecting an 
+identifying excerpt from a pulldown menu. Finally, TkMan gives 
+one control over the directory-to-menu volume mapping of man 
+pages with a capability similar to but superior to \fIxman \fR's 
+mandesc in that rather than forcing all who share a man directory 
+to follow a single organization, TkMan gives control to the individual. 
+In fact, one may decide he has no use for a large set of man 
+pages--say for instance the programmer routines in volumes 2, 3, 4, 8--and 
+eliminate them from his personal database. 
+.PP
+Since man page formatting follows conventions but not rigid standards, 
+not all man pages can be parsed fully. However, most yield their 
+section titles and SEE ALSO \fRs and their emphasized words. 
+TkMan also tries to filter out the unsightly page footers and 
+headers put in by \fInroff \fR, but nonstandard formatting can 
+slip by. 
+.PP
+First I'll describe how to use TkMan, although I hope that the 
+use of most features is intuitive. At the end are my address 
+and UC's disclaimer and licensing information. 
+.SH "USING TKMAN "
+.SS "Locating a man page "
+There are several ways to specify the manual page you desire. 
+You can type its name into the entry box at the top of the screen 
+and press Return or click the \fIman \fR button. The name may 
+be just the name of the command or may include a \fI. \fR\fIn \fR
+or \fI( \fR\fIn \fR\fI) \fR at the end where \fIn \fR specifies 
+in which section to look. Man pages are matched using regular 
+expressions, so you can use \fI. \fR to match any single character, \fI* \fR
+to match any (zero or more) of the previous regular expression, \fI[ \fR.. \fI] \fR
+to match any single character in the enclosed class; see Tcl 's 
+regexp(n)  for more information. For instance, \fI.*mail.*\\.1 \fR
+searches section 1 (user commands) for commands with "mail" anywhere 
+in their names. Likewise, one can collect all the various manual 
+pages relating to Perl 5 with \fIperl.* \fR. If you're running 
+TkMan from a shell and giving it an initial man page name to 
+load up as an argument, use this syntax (adequately quoted for 
+protection from the shell), as opposed to the syntax of the standard \fI
+man \fR command (which is \fIman \fR\fIsection \fR\fIname \fR--that 
+is, the section number comes first, whereas in TkMan it is part 
+of the name). Usually TkMan searches the directories in your 
+MANPATH \fR environment variable for the man page, but you may 
+instead provide a path name for the man page by beginning it 
+with `~', `/', `.' or `..'; this is the way to access a man page 
+which isn't installed in a MANPATH \fR man directory. Further, 
+other Tcl interpreters may display a man page in TkMan by \fI
+send \fRing a message to the function \fImanShowMan \fR with 
+the name of the desired man page, e.g. \fIsend tkman manShowMan 
+tcl.n \fR. If multiple man page names match the specification, 
+the first match (as searched for in MANPATH \fR order) is shown 
+and a pulldown menu appears which contains a list of the other 
+matches. Return from reading help or a volume listing to the 
+last man page seen with \fIC-m \fR when the focus is in the main 
+text display area. 
+.PP
+\fIapropos \fR information is available by typing the name and 
+clicking \fIapropos \fR or hitting Shift-Return. The output of \fI
+apropos \fR is piped through \fIsort \fR and \fIuniq \fR to remove 
+duplicates. To pass the matches through additional filters, simply 
+give the pipe as in a shell, e.g., ` \fIsearch | grep ^g \fR' (each 
+space character is significant) returns all the search-related 
+commands which begin with the letter \fIg \fR. The results of 
+the last apropos query are available under the \fIVolumes \fR
+menu. 
+.PP
+You may also see a button for \fIglimpse \fR, a full text search 
+program that requires only small index files (typically 2-5% 
+the size of the original text), written by Udi Manber, Sun Wu, 
+and Burra Gopal, Department of Computer Science, University of 
+Arizona. In their performance measurements, "a search for Schwarzkopf 
+allowing two misspelling errors in 5600 files occupying 77MB 
+took 7 seconds on a SUN IPC." For example, one may search for 
+the string `WWW' anywhere in any manual page by typing in `WWW' 
+in the entry line at the top of the screen and clicking on the \fI
+glimpse \fR button or typing \fIMeta-Return \fR (for meta-information, 
+of course). \fIEscape \fR and \fIC-g \fR can interrupt a search 
+after the current directory is done. To employ \fIglimpse \fR's 
+command line options, simply place them before the search pattern 
+in the entry box, or add them to the default options by editing 
+the \fIman(glimpse) \fR variable in your \fI~/.tkman \fR startup 
+file (see Customizing TkMan, below). For instance, to search 
+for "perl" as a word and not part of another word (as in "properly"), 
+glimpse for \fI-w perl \fR. Glimpse supports an \fIAND \fR operation 
+denoted by the symbol \fI`;' \fR and an \fIOR \fR operation denoted 
+by the symbol \fI`,' \fR. Refer to the glimpse  manual page for 
+more information. The regular expression used by \fIglimpse \fR
+automatically sets the intrapage search expression. (Glimpse 
+searches are done case insensitively, whereas intrapage searches 
+can be done with case sensitively also, and so you may wish to 
+turn off the \fIRegexp Search Case Sensitive \fR option under \fI
+Occasionals \fR so it matches \fIglimpse \fR's setting.) A complete 
+set of matches from the last full text search is available under 
+the \fIVolumes \fR menu. 
+.PP
+The \fIPaths \fR pulldown gives you complete control over which 
+directory hierarchies of your MANPATH \fR are searched for man 
+pages and apropos information. You can call up a listing of all 
+man pages in a volume through the \fIVolumes \fR pulldown menu 
+and then select one to view by double-clicking on its name. New `pseudo-volumes' 
+can be added, and arbitrary directories may be added to or deleted 
+from a volume listing using tkmandesc commands, described below. 
+In a volume listing, typing a letter jumps to the line in the 
+listing starting with that letter (capital and lower case letters 
+are distinct). Return to the last volume seen with \fIC-d \fR
+when the focus is in the main text display area. 
+.PP
+Whenever you have a man page name in the text display box, whether 
+from apropos, a volume listing or a reference within another 
+man page, you can double-click on it to hypertext-jump to it. 
+.PP
+The last few man pages you looked at can be accessed directly 
+through the \fIHistory \fR pulldown menu. \fIShortcuts \fR lists 
+your personal favorites and is used just like \fIHistory \fR, 
+with the additional options of adding the current man page (by 
+clicking \fI+ \fR) or removing it ( \fI- \fR) from the list. 
+.PP
+(Man pages specified as above are processed through an \fInroff \fR
+filter. TkMan can also read raw text from a file or from a command 
+pipeline, which can then be read, searched and highlighted same 
+as a man page. To read from a file, make the first character 
+in the name a \fI< \fR, as in \fI<~/foo.txt \fR. To open a pipe, 
+make the first character a \fI| \fR (vertical bar), as in ` \fI|gzcat 
+foo.txt.gz \fR' or ` \fI|cat ../foo.txt | grep bar \fR' (that's 
+no space after the first \fI| \fR, a space before and after any 
+subsequent ones). After reading a file in this way, the current 
+directory is set to its directory. Commands are not processed 
+by a shell, but the metacharacters \fI. \fR, \fI.. \fR, \fI~ \fR
+and \fI$ \fR (for environment variables), are expanded nonetheless. 
+Typing is eased further by file name completion, bound to \fI
+Escape \fR. Lone files (i.e., not part of a pipe) are automatically 
+uncompressed--no need to read compressed files through a \fIzcat \fR
+pipe. It is not expected that reading raw text will be done much; 
+it is included so the occasional non-man page documentation may 
+be read from the same environment. For more sophisticated file 
+browsing, use NBT, my Tcl/Tk-based file browser, which is available 
+from TkMan's home FTP site, given above.) 
+.SS "Working within a man page "
+The full pathname of the current manual page is shown at the 
+top of the screen. Via the Preferences dialog, this can be changed 
+to the whatis  information for the page. 
+.PP
+To the extent it follows convention, a manual page is parsed 
+to yield its section and subsection titles (which are directly 
+available from the \fISections \fR pulldown) and references to 
+other man pages from its SEE ALSO \fR section ( \fILinks \fR 
+pulldown). One may jump directly to a section within a man page 
+or a man page referenced in the SEE ALSO \fR section, respectively, 
+by selecting the corresponding entry from one of these pulldowns. 
+It may be handy to tear off the \fISections \fR and \fILinks \fR
+menus (by dragging the menu title with mouse button 2 pressed; 
+restore them as pulldowns by clicking with button 1 on the menu 
+title). 
+.PP
+Within a man page or raw text file or pipe, you may add ad hoc 
+highlighting, as though with a yellow marker (underlining on 
+monochrome monitors). Highlighted regions may then be scrolled 
+to directly through the \fIHighlights \fR pulldown menu. To highlight 
+a region, select the desired text by clicking button 1, dragging 
+to the far extent of the desired region and releasing the button, 
+then click on the \fI+ \fR next to \fIHighlights \fR. To remove 
+any highlights or portions thereof in a region, select it as 
+before but then click on \fI- \fR. Highlighting information is 
+persistent across executions of TkMan. A complete set of pages 
+with highlighting is available under the \fIVolumes \fR menu. 
+.PP
+You can move about the man page by using the scrollbar or typing 
+a number of key combinations familiar to Emacs aficionados. Space 
+and \fIC-v \fR page down, and delete and \fIM-v \fR page up. \fI
+C-n \fR and \fIC-p \fR scroll up and down, respectively, by a 
+single line ( \fIvi \fR fans will be happy to hear that \fIC-f \fR
+and \fIC-b \fR also page down and page up, respectively). \fI
+M-< \fR goes to the head and \fIM-> \fR to the tail of the text. 
+One may "scan" the page, which is to say scroll it up and down 
+with the mouse but without the use of the scrollbar, by dragging 
+on the text display with the middle mouse button pressed. Like 
+Emacs, \fIC-space \fR will mark one's current location, which 
+can be returned to later with \fIC-x \fR, which exchanges the 
+then-current position with the saved mark; a second \fIC-x \fR
+swaps back. 
+.PP
+\fIC-s \fR initiates a search. Subsequently typing a few letters 
+attempts to find a line with that string, starting its search 
+with at the current match, if any, or otherwise the topmost visible 
+line. A second \fIC-s \fR finds the next match of the string 
+typed so far. (If the current search string is empty, a second \fI
+C-s \fR retrieves the previous search pattern.) \fIC-r \fR is 
+similar to \fIC-s \fR but searches backwards. This incremental 
+search can be used to quickly locate a particular command-line 
+option or a particular command in a group (as in \fIcsh \fR with 
+its long list of internal commands). At the bottom of the screen, 
+type in a regular expression to search for and hit return or 
+click \fISearch \fR to begin a search. Hit \fINext \fR or keep 
+hitting return to search for the next occurance. [ \fIPrev \fR
+will be added when Tk supports a \fItag prevrange \fR command.] \fI
+Escape \fR or \fIC-g \fR cancels searching, both incremental 
+and regular expression types. 
+.PP
+The \fITab \fR key moves the focus from the man page type-in 
+line to the text view of the man page to the search line and 
+back around. \fIShift-Tab \fR jumps about in the opposite direction. 
+.SS "Other commands "
+The \fIOccasionals \fR menu holds commands and options which 
+you probably won't use much. The first group in this menu is 
+comprised of commands which you may invoke several times in a 
+single TkMan session. \fIHelp \fR returns to this information 
+screen. Although virtually made obsolete by TkMan, \fIPrint \fR
+makes a copy of the current man page on dead trees, helping to 
+starve the planet of life-giving oxygen. (If the \fI[tn]roff \fR
+source is not available, TkMan asks if it should try to reverse 
+compile the man page. If successful, this produces much more 
+appealing output than an ASCII \fR dump.) By default, incremental 
+searching is not case sensitive, but regular expression searching 
+is; these settings can be toggled with the next two menu checkboxes. 
+With proportional fonts giving a ragged right margin, any change 
+bars in the right margin will form an uneven line; by opting 
+for \fIChangebars on left \fR, they will form a straight line 
+at the left margin. 
+.PP
+As with \fIxman \fR one may instantiate multiple viewers. When 
+there is more than one viewer you may choose man pages in one 
+viewer and have their contents shown in another. Use the \fIOutput \fR
+pulldown (which appears and disappears as relevant) to direct 
+one viewer's output destination to another. With this feature 
+one may easily compare two similar man pages for differences, 
+keep one man page always visible, or examine several man pages 
+from a particular volume listing or a SEE ALSO \fR section. \fI
+Output \fR only affects the display destination of man pages. 
+TkMan uses a database of all manual page names in searching for 
+a match for a particular name. This database is constructed automatically 
+if it doesn't exist (this includes the first time TkMan is run 
+for a particular user) and whenever it is out of date due to 
+pages being added or changed, or changes in one's MANPATH \fR
+or tkmandesc commands. (If you want to add paths to your MANPATH \fR, 
+or edit \fI~/.tkman \fR, you will have to restart to see any 
+changes take effect, however.) If you install new manual pages, 
+invoking \fIRebuild Database \fR will permit them to show up 
+in the next search or volume listing without the bother of quitting 
+and re-executing TkMan. \fIRebuild Glimpse Database \fR creates 
+and then maintains the index that is used for full text searches. 
+The Glimpse database is not maintained automatically. When exited 
+via the \fIQuit \fR button TkMan saves its state. One may guard 
+against losing highlighting, shortcuts and other what-should-be 
+persistent information without quitting by by invoking \fICheckpoint 
+state to .tkman \fR. \fIQuit, don't update \fR performs the opposite 
+operation. 
+.PP
+At the bottom right corner of the screen, \fIMono \fR toggles 
+between the proportionally-spaced font and a monospaced one, 
+for use in those man pages that rely on a fixed-width font to 
+align columns. \fIQuit \fR exits TkMan, of course, after saving 
+some state information (see below). To exit without saving status 
+information, select the \fIQuit \fR option from the \fIOccasionals \fR
+pulldown. 
+.SS "Preferences "
+The \fIPreferences... \fR choice in the \fIOccasionals \fR pulldown 
+menu brings up a graphical user interface to setting various 
+attributes of TkMan, including fonts, colors, and icons. Click 
+on a checkbutton at the top of the window to bring up the corresponding 
+group of choices. After making a set of choices, the \fIApply \fR
+button manipulates the running application to show these changes, \fI
+OK \fR sets the changes for use now and in the future, \fICancel \fR
+quits the dialog and sets all choices to their settings as of 
+the time Preferences was called up, and \fIDefaults \fR sets 
+all choices (not just those of the current group) to those set 
+by TkMan out of the box. 
+.PP
+The first line in the Fonts group specifies the font to use for 
+the general user interface, which amounts to the labels on buttons 
+and the text in menus. The first menu in the line labeled \fI
+Interface \fR sets the font family, the next menu sets the font 
+size, and the last the font styling (normal, bold, italics, bold-italics). \fI
+Text display \fR makes these settings for the text box in which 
+the manual pages contents are displayed. \fIScreen DPI \fR specifies 
+the right set of fonts to use for your monitor. 
+.PP
+Colors sets the foreground and background colors to use for the 
+manual page text display box, the general user interface, and 
+the buttons of the user interface. In addition it sets the color (or 
+font) in which to show various classes of text in the text box, 
+including manual page references, incremental search hits, regular 
+expression search hits, and highlighted regions. 
+.PP
+The See group specifies what and how much information to show. 
+Usually manual page headers and footers are uninteresting and 
+therefore are stripped out, but a canonical header and footer (along 
+the date the page was installed in the \fIman/man \fR\fIn \fR
+directory or formatted to the \fIman/cat \fR\fIn \fR directory) 
+to be shown at the bottom of every page can be requested. TkMan 
+can extract section headers from all manual pages, but only some 
+manual page macros format \fIsub \fRsection headers in a way 
+that can be distinguished from ordinary text; if your macros 
+do, turn this option on to add subsections to the Sections menu. 
+Proportional spacing wrecks the spacing used to set tables in 
+columns, hence the \fIMono \fR(space) button on the bottom line 
+of the main screen. Setting the \fIAggressive table parsing \fR
+option on will try to identify tables and format them in a fixed-width 
+font while keeping the rest of the text proportionally spaced. 
+It is quite difficult to identify tables with the single-pass 
+filter that TkMan uses, however, so you'll probably want to leave 
+it off. The information bar at the top of the window can display 
+either the short, one-line description from a manual page's NAME 
+section or the pathname of the page. The \fIHistory \fR pulldown 
+must balance depth of the list against ease of finding an entry; 
+set your own inflection point with this menu. The \fIVolumes \fR
+listing's \fI(recent) \fR choice will show all manual pages that 
+have been added or changed \fIn \fR days, where \fIn \fR is set 
+with this next menu. Glimpse works best when searching for relatively 
+uncommon words; guard against getting too many hits on common 
+words with the last menu in this group. 
+.PP
+The Icon group sets all the options relating to iconification. 
+The pathnames of the icon bitmap and icon mask should be the 
+full pathnames (beginning with a `/'). 
+.PP
+If a man page has not been formatted by \fInroff \fR, TkMan must 
+first pipe the source text through \fInroff \fR. By turing on \fI
+Cache formatted (nroff'ed) pages \fR in the Misc(ellaneous) group, 
+the \fInroff \fR-formatted text is saved to disk (if possible), 
+thereby eliminating this time-consuming step the next time the 
+man page is read. The \fIon & compress \fR setting will compress 
+the page, which saves on disk space (often substantially as much 
+of a formatted page is whitespace), but will make it unavailable 
+to other manual pagers that don't handle compression. When a 
+highlighted passage is jumped to via the \fIHighlights \fR menu, 
+some number of lines of back context are included; the exact 
+number of lines is configurable. Tk deviates from Motif behavior 
+slightly, as for instance in highlighting buttons when they're 
+under the cursor, but you can observe strict Motif behavior. 
+.SH "CUSTOMIZING TKMAN "
+There are four levels of configuration to TkMan. 
+.PP
+(1) Transparent. Simply use TkMan and it will remember your window 
+size and placement, short cuts, and highlights (if you quit out 
+of TkMan via the \fIQuit \fR button). 
+.PP
+(2) Preferences editor (see Preferences above). 
+.PP
+(3) Configuration file. Most interesting settings, like the command(s) 
+used to print the man page and some key bindings, can be changed 
+by editing one's own \fI~/.tkman \fR. Thus, a single copy of 
+TkMan (i.e., the executable \fItkman \fR) can be shared, but 
+each user can have his own customized setup. (The file \fI~/.tkman \fR
+is created/rewritten every time one quits TkMan via the \fIQuit \fR
+button in the lower right corner. Therefore, to get a \fI~/.tkman \fR
+to edit, first run and quit TkMan. Do not create one from scratch 
+as it will not have the proper format used for saving other persistent 
+information, and your work will be overwritten, which is to say 
+lost.) Be careful not to edit a ~/.tkman file only to have it 
+overwritten when a currently-running TkMan quits. 
+.PP
+Options that match the defaults are commented out (i.e., preceded 
+by a \fI# \fR). This is so that any changes in the defaults will 
+propagate nicely, while the file still lists all interesting 
+variables. To override the default settings for these options, 
+first comment in the line. 
+.PP
+The ~/.tkman save file is the place to add or delete colors to 
+the default set, which will subsequently become menu choices 
+in Preferences, by \fBediting in place \fR the variable \fIman(colors) \fR. 
+One may also edit the order of Shortcuts in the \fIman(shortcuts) \fR
+variable. Other interesting variables include \fIman(highlight) \fR, 
+which can be edited to change the background in place of the 
+foreground, or both the foreground \fIand \fR background, or 
+a color \fIand \fR the font as with the following setting: 
+\.br
+\fIset man(highlight) {bold-italics -background #ffd8ffffb332} \fR
+.PP
+Arbitrary Tcl commands, including tkmandesc commands (described 
+below), can be appended to \fI~/.tkman \fR (after the \fI### 
+your additions go below \fR line). For instance, to force the 
+color model to be monochrome even though you have a color screen, 
+add this line: 
+\.br
+\fItk colormodel . monochrome \fR
+.PP
+To set absolutely the volume names for which all directories 
+should be searched, \fBedit \fR the parallel arrays on these \fB
+existing \fR lines: 
+\.br
+\fIset man(manList) ... \fR
+\.br
+\fIset man(manTitleList) ... \fR
+\.br
+Changing the order volumes in these lists (make sure to keep 
+the two lists in parallel correspondence) changes the precedence 
+of matches when two or more pages have the same name: the page 
+found in the earlier volume in this list is show first. 
+.PP
+Additional useful commands include wm(n) , which deals with the 
+window manager; bind(n) , which changes keyboard and mouse bindings 
+not related to the text display window; and text(n)  which describes 
+the text widget. 
+.PP
+(4) Source code. Of course, but if you make generally useful 
+changes or have suggestions for some, please report them back 
+to me so I may share the wealth with the next release. 
+.SS "Command line options "
+The environment variable named TKMAN \fR, if it exists, is used 
+to set command line options. Any options specified explicitly (as 
+from a shell or in a script) override the settings in TKMAN \fR. 
+Any settings made with command-line options apply for the current 
+execution only. Many of these options can be set persistently 
+via the Preferences dialog (under the \fIOccasionals \fR menu). 
+.TP 15
+\fI-title \fR\fItitle \fR
+Place \fI\fR\fItitle \fR in the window's title bar. 
+.TP 15
+\fI-geometry \fR\fIgeometry \fR
+Specify the geometry for this invocation only. To assign a persistent 
+geometry, start up TkMan, size and place the window as desired, 
+then (this is important) quit via the \fIQuit \fR button in the 
+lower right corner. 
+.TP 15
+\fI-iconify \fR and \fI--iconify \fR
+Start up iconified or uniconified (the default), respectively. 
+.TP 15
+\fI-iconname \fR\fIname \fR
+Use \fI\fR\fIname \fR in place of the uniconified window's title 
+for the icon name. 
+.TP 15
+\fI-iconbitmap \fR\fIbitmap-path \fR and \fI-iconmask \fR\fIbitmap-path \fR
+Specify the icon bitmap and its mask. 
+.TP 15
+\fI-iconposition (+|-)x(+|-)y \fR
+Place the icon at the given position; \fI-iconposition "" "" \fR
+cancels any such hints to the window manager. 
+.TP 15
+\fI-startup \fR\fIfilename \fR
+Use \fI\fR\fIfilename \fR in place of \fI~/.tkman \fR as the 
+startup file; "" indictates no startup file. 
+.TP 15
+\fI-database \fR\fIfilename \fR
+Use \fI\fR\fIfilename \fR in place of \fI~/.tkmandatabase \fR
+as the name of the file in which to create the database of man 
+page names. This can point to a shared file to save disk space 
+or share a custom design, or to an OS-specific file for systems 
+with multiple machine architectures that share home directories. 
+.TP 15
+\fI-rebuildandquit \fR
+Simply rebuild the database and quit. This option may be useful 
+in a cron script. 
+.TP 15
+\fI-quit save \fR and \fI-quit nosave \fR
+Specify that the startup file (usually \fI~/.tkman \fR) should 
+be updated ( \fIsave \fR) or not ( \fInosave \fR) when quitting 
+by the \fIQuit \fR button. 
+.TP 15
+\fI-v \fR
+Show the current version of TkMan and exit immediately thereafter. 
+.TP 15
+\fI-M \fR\fIpath-list \fR
+\.br
+or \fI-M+ \fR\fIpath-list \fR
+\.br
+or \fI-+M \fR\fIpath-list \fR
+As with \fIman \fR, change the search path for manual pages to 
+the given colon-separated list of directory subtrees. \fI-M+ \fR
+appends and \fI-+M \fR prepends these directories to the current 
+list. 
+.TP 15
+\fI-now \fR
+Start up TkMan without checking to see if the database is out 
+of date. 
+.SS "Key bindings "
+Key bindings related to the text display box are kept in the \fI
+sb \fR array in \fI~/.tkman \fR (for more information on Tcl's 
+arrays, refer to the array(n)  man page. In editing the \fIsb(key,...) \fR
+keyboard bindings, modifiers MUST be listed in the following 
+order: \fIM \fR (for meta), \fIC \fR (control), \fIA \fR (alt). 
+DO NOT USE SHIFT. It is not a general modifier: Some keyboards 
+require shift for different characters, resulting in incompatibilities 
+in bindings. For this reason, the status of the shift key is 
+supressed in matching for bindings. For instance, \fIset sb(key,M-less) 
+pagestart \fR is a valid binding on keyboards worldwide, whereas \fI
+set sb(key,MS-less) \fR is not. To make a binding without a modifier 
+key, precede the character by `-', as in \fIset sb(key,-space) 
+pagedown \fR. 
+.SS "tkmandesc "
+Like \fIxman \fR, TkMan gives you directory-by-directory control 
+over named volume contents. Unlike and superior to \fIxman \fR, 
+however, each individual user controls directory-to-volume placement, 
+rather than facing a single specification for each directory 
+tree that must be observed by all. 
+.PP
+By default a matrix is created by taking the product of directories 
+in the MANPATH \fR crossed with volume names, with the yield 
+of each volume containing all the corresponding subdirectories 
+in the MANPATH \fR. By adding Tcl commands to your \fI~/.tkman \fR(see 
+above), you may add new volume names and add, move, copy and 
+delete directories to/from/among directories. 
+.PP
+The interface to this functionality takes the form of Tcl commands, 
+so you may need to learn Tcl--particularly the commands that 
+deal with Tcl lists (including lappend(n) , linsert(n) , lrange(n) , 
+lreplace(n) ) and string matching ( string(n) , \fImatch \fR 
+subcommand)--to use this facility to its fullest. tkmandesc commands 
+are used to handle the nonstandard format of SGI's manual page 
+directories, and the \fIsgi_bindings.tcl \fR in the \fIcontrib \fR
+directory is a good source of examples in the use of tkmandesc 
+commands. 
+.PP
+Directory titles and abbrevations are kept in lists. Abbreviations 
+MUST be unique (capital letters are distinct from lower case), 
+but need not correspond to actual directories. In fact, volume 
+letters specified here supercede the defaults in identifying 
+a volume in man page searches. COMMANDS 
+.PP
+The following commands are \fBappended \fR to the file \fI~/.tkman \fR(see 
+Customizing TkMan, above). 
+.PP
+To recreate a cross product of current section lists: 
+\.br
+\fImanDescDefaults \fR
+\.br
+This cross product is made implicitly before other tkmandesc 
+commands. Almost always this is what one expects. If it is not, 
+one may supress the cross product by setting the variable \fI
+manx(defaults) \fR to a non-null, non-zero value before other 
+tkmandesc commands are invoked. 
+.PP
+To add "pseudo" sections to the current volume name list, at 
+various positions including at end of the list, in alphabetical 
+order, or before or after a specific volume: 
+\.br
+\fImanDescAddSects \fR\fIlist of (letter, title pairs) \fR
+\.br
+or \fImanDescAddSects \fR\fIlist of (letter, title) pairs \fR
+sort 
+\.br
+or \fImanDescAddSects \fR\fIlist of (letter, title) pairs \fR
+before \fIsect-letter \fR
+\.br
+or \fImanDescAddSects \fR\fIlist of (letter, title) pairs \fR
+after \fIsect-letter \fR
+\.br
+In manual page searches that produce multiple matches, the page 
+found in the earlier volume is the one shown by default. 
+.PP
+To move/copy/delete/add directories: 
+\.br
+\fImanDescMove \fR\fIfrom-list \fR\fIto-list \fR\fIdir-patterns-list \fR
+\.br
+\fImanDescCopy \fR\fIfrom-list \fR\fIto-list \fR\fIdir-patterns-list \fR
+\.br
+\fImanDescDelete \fR\fIfrom-list \fR\fIdir-patterns-list \fR
+\.br
+\fImanDescAdd \fR\fIto-list \fR\fIdir-list \fR
+.PP
+The \fIdir-patterns-list \fR uses the same meta characters as 
+man page searching (see above). It is matched against MANPATH \fR
+directories with volume subdirectory appended, as in \fI/usr/man/man3 \fR, 
+where \fI/usr/man \fR is a component of the MANPATH \fR and \fI
+man3 \fR is a volume subdirectory. \fIfrom-list \fR and \fIto-list \fR
+are Tcl lists of the unique volume abbreviations (like \fI1 \fR
+or \fI3X \fR); \fI* \fR is an abbreviation for all volumes. 
+.PP
+Adding directories with \fImanDescAdd \fR also makes them available 
+to Glimpse for its indexing. 
+.PP
+Warning: Moving directories from their natural home slightly 
+impairs searching speed when following a reference within a man 
+page. For instance, say you've moved man pages for X Windows 
+subroutines from their natural home in volume 3 to their own 
+volume called `X'. Following a reference in \fIXButtonEvent \fR
+to \fIXAnyEvent(3X11) \fR first searches volume 3; not finding 
+it, TkMan searches all volumes and finally finds it in volume 
+X. With no hint to look in volume 3 (as given by the \fI3X11 \fR
+suffix), the full volume search would have begun straight away. (Had 
+you double-clicked in the volume listing for volume X or specified 
+the man page as \fIXButtonEvent.X \fR, volume X would have been 
+searched first, successfully.) 
+.PP
+To help debug tkmandesc scripts, invoke \fImanDescShow \fR to 
+dump to stdout the current correspondence of directories to volumes 
+names. EXAMPLES 
+.PP
+(1) To collect together all man pages in default volumes 2 and 3 
+in all directories into a volume called "Programmer Subroutines", 
+add these lines to the tail of \fI~/.tkman \fR: 
+\.br
+\fImanDescAddSects {{p "Programmer Subroutines"}} \fR
+\.br
+\fImanDescMove {2 3} p * \fR
+.PP
+To place the new section at the same position in the volume pulldown 
+list as volumes 2 and 3: 
+\.br
+\fImanDescAddSects {{p "Programmer Subroutines"}} after 2 \fR
+\.br
+\fImanDescMove {2 3} p * \fR
+.PP
+To move only a selected set of directories: 
+\.br
+\fImanDescAddSects {{p "Programmer Subroutines"}} \fR
+\.br
+\fImanDescMove * p {/usr/man/man2 /usr/local/man/man3} \fR
+.PP
+(2) To have a separate volume with all of your and a friend's 
+personal man pages, keeping a duplicate in their default locations: 
+\.br
+\fImanDescAddSects {{t "Man Pages du Tom"} {b "Betty Page(s)"}} \fR
+\.br
+\fImanDescCopy *phelps* t * \fR
+\.br
+\fImanDescCopy *page* t * \fR
+.PP
+(3) To collect the X windows man pages into two sections of their 
+own, one for programmer subroutines and another for the others: 
+\.br
+\fImanDescAddSects {{x "X Windows"}} after 1 \fR
+\.br
+\fImanDescAddSects {{X "X Subroutines"}} after 3 \fR
+\.br
+\fImanDescMove * x *X11* \fR
+\.br
+\fImanDescMove x X *3 \fR
+.PP
+(4) If you never use the programmer subroutines, why not save 
+time and memory by not reading them into the database? 
+\.br
+\fImanDescDelete * {*[2348]} \fR (braces prevent Tcl from trying 
+to execute [2348] as a command) 
+.PP
+Alternatively but not equivalently: 
+\.br
+\fImanDescDelete {2 3 4 8} * \fRtkmandesc vs. xman and SGI 
+.PP
+TkMan's tkmandesc capability is patterned after \fIxman \fR's 
+mandesc files. By placing a mandesc file at the root of a man 
+page directory tree, one may create pseudo volumes and move and 
+copy subdirectories into them. Silicon Graphics has modified \fI
+xman \fR so that simply by creating a subdirectory in a regular 
+man subdirectory one creates a new volume. This is evil. It violates 
+the individual user's rights to arrange the directory-volume 
+mapping as he pleases, as the mandesc file or subdirectory that 
+spontaneously creates a volume is set a single place and must 
+be observed by all who read that directory. By contrast, TkMan 
+places the directory-to-volume mapping control in an individual's 
+own \fI~/.tkman \fR file. This gives the individual complete 
+control and inflicts no pogrom on others who share man page directories. 
+Therefore, mandesc files are not supported in any way by TkMan. 
+.PP
+One may still share custom setups, however, by sharing the relevant 
+lines of \fI~/.tkman \fR. In fact, a tkmandesc version of the 
+standard SGI man page directory setup is included in the \fIcontrib \fR
+directory of the TkMan distribution. For assistance with SGI-specific 
+directory manipulation, contact Paul Raines ( \fIraines@bohr.physics.upenn.edu \fR). 
+.SH "ADDRESSES "
+Tom Phelps 
+\.br
+University of California, Berkeley 
+\.br
+Computer Science Division 
+\.br
+387 Soda Hall 
+\.br
+Berkeley, CA 94720 
+\.br
+USA 
+.PP
+\fIphelps@cs.Berkeley.EDU \fR
+.SH "MORE INFORMATION "
+My article "TkMan: A Man Born Again" appears in \fIThe X Resource \fR, 
+issue 10, pages 33--46. Here are the section titles: Introduction, 
+Availability, The User Interface, Navigating among Man Pages, 
+Inspecting Individual Man Pages, Customization, Logical Volumes 
+with tkmandesc, Persistency, The RosettaMan Filter, Extensions, 
+Problems, Future Work, Acknowledgements, Bibliography. 
+.PP
+A World Wide Web page that lists other Tcl/Tk software and a 
+related Berkeley Computer Science Division technical report, 
+CSD-94-802, can be found at \fIhttp://http.cs.berkeley.edu/~phelps/ \fR. 
+.SH "DISCLAIMER "
+Permission to use, copy, modify, and distribute this software 
+and its documentation for educational, research and non-profit 
+purposes, without fee, and without a written agreement is hereby 
+granted, provided that the above copyright notice and the following 
+three paragraphs appear in all copies. 
+.PP
+Permission to incorporate this software into commercial products 
+may be obtained from the Office of Technology Licensing, 2150 
+Shattuck Avenue, Suite 510, Berkeley, CA 94704. 
+.PP
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY 
+PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL 
+DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, 
+EVEN IF THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE 
+POSSIBILITY OF SUCH DAMAGE. \fR
+.PP
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES, 
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
+AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER 
+IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS 
+NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, 
+OR MODIFICATIONS. \fR
+.PP
+Without permission from the Office of Technology Licensing, commerical 
+organizations are free to use TkMan for internal use and internal 
+use only. 
+.PP
+Help page last revised on $Date$ 
