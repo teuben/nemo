@@ -1,0 +1,131 @@
+.TH ROTCURVES 1NEMO "27 January 1998"
+.SH NAME
+rotcurves \- rotation curve of a composite potential
+.SH SYNOPSIS
+\fBrotcurves name1=\fIpotential\fP [parameter=value] .\|.\|.
+.SH DESCRIPTION
+\fIrotcurves\fP  computes the rotation curve of a composite mass model.
+Each component must be supplied in the form of a potential (see
+\fIpotential(5NEMO)\fP) from which the forces determine a rotation
+curves assuming centrifugal balance.
+Optionally a Lindblad diagram can be selected
+for viewing using \fBmode=omega\fP, and the location of Lindblad 
+resonances is determined. A choice is also
+given between a plot and a table for further processing.
+An experimental LV option can be used for radial velocity table along the line
+of sight distance.
+.PP
+In case a true rotation curve is requested (\fBmode=velocity\fP) the table
+contains \fIr, v, v1, v2, ...\fP, whereas the Lindblad option
+with \fBmode=omega\fP tabulates \fIr, v, omega, kappa, omega+kappa/2,
+omega-kappa/2\fP.
+.SH PARAMETERS
+The following parameters are recognized:
+.TP 24
+\fBname1=\fIpotname\fP
+Name of first potential. No default allowed.
+.TP
+\fBpars1=\fIpotpars\fP
+Parameters for first potential. Defaults as defined by the potential itself.
+.TP
+\fBfile1=\fIpotfile\fP
+Optional file for first potential. Defaults as defined by the 
+potential itself.
+.TP
+<etc> for \fBname2, name3, name4\fP.
+.TP
+\fBradii=\fIr1,r2,...\fP
+Radii where to compute the rotation curve.
+[default: \fB0:2:0.1\fP].
+.TP
+\fBaxis=x|y|z\fP
+Choice of axis to compute rotation curve along. The rotation curve is
+defined from circular orbits balancing the local gravitational force.
+[default: \fBx\fP].
+.TP
+\fBmode=\fIoption\fP
+Mode can be \fBvelocity\fP or \fBomega\fP, the former selecting the
+true rotation curve, the latter a Lindblad diagram. In a Lindblad diagram
+only the total curve is given, not the individual components. If a finite
+pattern speed is given, it also computes the lindblad resonances, but make
+sure the OLR is included, else the program will abort.
+[default: \fBvelocity\fP].
+.TP
+\fBn=\fP
+For angular velocity diagrams (\fBmode=omega\fP) this gives the Lindblad
+resonance to be computed. By default the classical \fBn=2\fP is used,
+from which the ILR and OLR can be derived. For \fBn=4\fP the two UHR
+can be determined etc.
+[Default: \fB2\fP]
+.TP
+\fBr0l=\fIr0,l,radii\fP
+Solar radius, galactic longitude and a list of radii (distances 
+along the line of sight) to calculate radial velocity for.
+\fI Experimental, only in \fBlv\fP mode\fP
+.TP
+\fBplot=t|f\fP
+Select viewing in form of a plot. [Default: \fBt\fP]
+.TP
+\fBtab=t|f\fP
+Select viewing in form of a table. [Default: \fBf\fP]
+.TP
+\fBxrange=\fIxmin,xmax|xmin\fP
+Range in plot for X-axis, always radius. Two (min and max), one (min)
+or zero (autoscaling) values can be given.
+[default: autoscaling]
+.TP
+\fByrange=\fIymin,ymax|ymin\fP
+Range in plot for Y-axis, either velocity or omega. See also \fBxrange=\fP.
+[default: autoscaling]
+.TP
+\fBheadline=\fIplotlabel_text\fP
+Any optional text, plotted at the top of the plot for identification
+purposes. The default is a list of \fInameX(parsX)...\fP.
+.TP
+\fBin=\fItable_file\fP
+If supplied, it should be a table (a file) 
+consisting of velocities (colum 2) vs. radius (column 1)
+to be checking with the composite model supplied earlier. Some kind
+of statistics will be calculated from which the goodness of fit can
+be derived. [default: not used].
+.TP
+\fBcols=\fIrcol,vcol,drcol,dvcol\fP
+The columns must be provided here in which columns the radius, velocity,
+error in radius and error in velocity can be found. The error columns
+are optional, and if provided error bars will be plotted on top of the data.
+A 0 can be used if an column is not present in the data, although radius
+and velocity must always be present.
+[Default: \fB1,2\fP].
+.SH "SEE ALSO"
+potlist(1NEMO), potential(5NEMO), perorb(1NEMO), ROTMAS(1GIPSY)
+.SH BUGS
+Sometimes Lindblad diagrams require more resolution in radius near the 
+center, so \fBradii=0.0001,0.001,0.01,0.02:1:0.02\fP may do a better job
+than \fBradii=0:1:0.02\fP.
+.PP
+Although not really a bug, but a limitation,  then
+program assumes symmetric potentials, and that circular orbits exist in
+the selected plane. For non-axisymmetric potentials the obtained rotation
+curve is bogus, and one has to resort to a periodic orbit searching
+program such as \fIperorb(1NEMO)\fP.
+.PP
+.PP
+Rotating potentials are not implemented, except for the search for
+Lindblad resonances in \fBmode=omega\fP.
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +3.0i
+~/src/orbit/potential   rotcurves.c
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+xx-oct-90       V1.0 derived from potlist               PJT
+28-oct-90       V1.1 spline fit -> lindblad option      PJT
+8-nov-90        V1.2 in= table implemented              PJT
+16-nov-90	V1.3 cols= to select optional error colums	PJT
+12-nov-93	V1.4 added n=	PJT
+8-apr-97	V1.6 search for lindblad resonances if omega>0	PJT 
+.fi
