@@ -116,3 +116,6 @@ fitstiff: fitstiff.c
 
 ccd_cfitsio.o:		ccd_cfitsio.c
 	$(CC) $(OPT) $(CFITSIOINC) -c $*.c
+
+
+fitsio_nemo.o:	fitsio.c fitsio_nemo.c
