@@ -7,6 +7,7 @@
  *	29-mar-94   V1.4 process all snapshots - added time to output  pjt
  *	27-jan-00   V1.4b  more usefule error messages                 pjt
  *       9-apr-01       c  added header in output   pjt
+ *      14-apr-04   V1.5  added headline= to plots                     pjt
  */
 
 #include <stdinc.h>
@@ -48,8 +49,9 @@ string defv[] = {			/* DEFAULT INPUT PARAMETERS         */
     "xbox=2.5:17.5\n			  extent of graph in x direction",
     "ybox=5.0:15.0\n			  extent of graph in y direction",
     "formal=false\n			  if true, make publication plot",
+    "headline=\n                          header",
 #endif
-    "VERSION=1.4c\n			  9-apr-01 PJT",
+    "VERSION=1.5\n			  14-apr-04 PJT",
     NULL,
 };
 
@@ -64,8 +66,11 @@ bool relative;
 real xrange[2], yrange[2];
 real xbox[2], ybox[2];
 real xtrans(real), ytrans(real);
+string headline;
 
 #endif
+
+
 
 
 local real *snapcmp(Body*, Body*, int, real);
@@ -93,6 +98,10 @@ void nemo_main()
     obsfunc = btrtrans(getparam("obs"));
     diffpart = getbparam("diffpart");
     relative = getbparam("relative");
+#if HISTOGRAM || SCATTERPLOT
+    headline = getparam("headline");
+#endif
+
     for(;;) {
       do {
 	if (!get_snap_by_t(instr1, &btab1, &nbody1, &tsnap1, &bits1, time1))
@@ -209,6 +218,7 @@ int nbody;
     xlabel = getparam(streq(getparam("xlabel"), "") ? "obs" : "xlabel");
     ylabel = getparam("ylabel");
     axisplot(xlabel, ylabel);
+    pltext(headline,18.0,18.2,0.24,0.0);
     for (i = 1; i <= nbins; i++) {
 	x = xrange[0] + (i - 1.0) * (xrange[1] - xrange[0]) / nbins;
 	y = hgram[i];
@@ -296,6 +306,7 @@ real tsnap;
     ylabel = getparam("ylabel");
     plinit("", 0.0, 20.0, 0.0, 20.0);
     axisplot(xlabel, ylabel);
+    pltext(headline,18.0,18.2,0.24,0.0);
     for (i = 0, bp = btab; i < nbody; i++, bp++) {
 	x = xtrans((*indfunc)(bp, tsnap, i));
 	y = ytrans(result[i]);
