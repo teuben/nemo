@@ -6,10 +6,10 @@
 #   feb-2004            both -t and -T flag
 #   mar-2004            no more NEMOBIN bug; added -d flag to cvs update
 #   apr-2004            handle make vs. gmake and other names of make
+#   nov-2004            be more generous if full filenames are used: chop them off
 #
-#  BIG BUG: 'mknemo mkplummer.c' would remove the sourcecode and put it into $NEMOBIN !!!!!
 #
-set version="MKNEMO Version 2.5 11-jun-04"
+set version="MKNEMO Version 2.6 11-nov-04"
 if ($#argv == 0) goto usage
 set old_argv=($*)
 
@@ -152,8 +152,8 @@ endif
 
 foreach f ($argv)
  if (X$f:e != X) then
-   echo "Cannot handle arguments that appear like full filenames - skipping $f"
-   continue
+   echo "Cannot handle arguments that appear like full filenames - trying $f:r"
+   set f=$f:r
  endif
  # strip any extensions from the arguments, we're looking to make executables
  set ft=$f:t
