@@ -11,6 +11,7 @@
  *	   d   9-aug-95         fixed beyond() for new # syntax in times=
  *	   e  16-feb-97		SINGLEPREC support
  *      V1.6   5-mar-98         supporting time=first and time=last
+ *	      15-jun-02         debug output
  */
 
 /* #define INTERACT */
@@ -80,6 +81,7 @@ nemo_main()
 	    if (get_tag_ok(instr, TimeTag)) {
 		timeflag = TRUE;
 		get_data_coerced(instr, TimeTag, RealType, &time, 0);
+		dprintf(1,"Found Time=%g\n",time);
 	    }
 	    get_tes(instr, ParametersTag);
 	}

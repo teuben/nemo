@@ -13,6 +13,7 @@
  *       1-feb-93       V1.7 Phi/Acc corrections too            PJT
  *	28-apr-98	V2.0 also allow radial inflow/outflow	PJT
  *	mar-94 ansi
+ *      23-may-02       V2.0a  nemo_file_lines                  pjt
  */
 
 #include <stdinc.h>
@@ -34,7 +35,7 @@ string defv[] = {
     "sign=1\n           Sign of rotcur",
     "outflow=f\n        Outflow or Rotation/Spin",
     "times=all\n	times of snapshots to copy",
-    "VERSION=2.0\n	28-apr-98 PJT",
+    "VERSION=2.0a\n	23-may-02 PJT",
     NULL,
 };
 
@@ -122,7 +123,7 @@ local int nrad;
 /* 
  * The rotation curve must be an ascii table(5NEMO) with 
  * radius in the first column and velocity in the second.
- * Currently one cannot use pipes yet, since the file_lines
+ * Currently one cannot use pipes yet, since nemo_file_lines
  * would return a < 0 number.
  */
 
@@ -132,7 +133,7 @@ void get_rotcur(string name)
     int  i,colnr[2], nmax;
     real *coldat[2];
 
-    nmax = file_lines(name);
+    nmax = nemo_file_lines(name);
     if (nmax<1) error("No data to read from %s",name);
     rad = (real *) allocate(nmax*sizeof(real));
     vel = (real *) allocate(nmax*sizeof(real));
