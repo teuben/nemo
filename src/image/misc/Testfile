@@ -1,0 +1,49 @@
+DIR = src/image/misc
+BIN = ccdplot ccdstat ccdmom
+NEED = $(BIN)  ccdmath
+
+help:
+	@echo $(DIR)
+
+need:
+	@echo $(NEED)
+
+clean:
+	@echo Cleaning $(DIR)
+	@rm -f ccd.in ccdmom.in
+
+#	power of function and contour levels to plot with
+P = 1.1
+C=0.01,0.1,1:9,9.9,9.99 
+
+all:	$(BIN)
+
+ccd.in:
+	@echo Creating $@
+	ccdmath out=ccd.in "fie=10/sqrt((abs(%x-31.5))**$(P)+(abs(%y-31.5))**$(P))" size=64,64,1
+
+N = 2
+ccdmom.in:
+	@echo Creating $@
+	ccdmath out=ccdmom.in "fie=%x+2*%y+4*%z" size=$(N),$(N),$(N)
+
+
+ccdplot: ccd.in
+	@echo Running $@
+	ccdplot ccd.in $(C) yapp=$(YAPP)
+
+ccdstat: ccd.in
+	@echo Running $@
+	ccdstat ccd.in
+
+ccdsub: ccd.in
+	@echo Running $@
+	ccdsub ccd.in
+
+ccdmom: ccdmom.in
+	@echo Running $@
+	ccdmom ccdmom.in - 1 | ccdstat -
+	ccdmom ccdmom.in - 2 | ccdstat -
+	ccdmom ccdmom.in - 3 | ccdstat -
+
+
