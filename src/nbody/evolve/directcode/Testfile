@@ -1,0 +1,29 @@
+DIR = src/nbody/evolve/directcode
+BIN = directcode
+NEED = $(BIN) 
+
+.PHONY: directcode
+
+help:
+	@echo $(DIR)
+
+need:
+	@echo $(NEED)
+
+clean:
+	@echo Cleaning $(DIR)
+	@rm -fr core bench.dat bench.log
+
+NBODY = 10
+
+all: directcode
+
+directcode:
+	@echo Running $@
+	@rm -f bench.dat bench.log
+	directcode out=bench.dat > bench.log; nemo.coverage code.c
+	@head -14 bench.log
+	@echo "..."
+	@tail -8 bench.log
+
+
