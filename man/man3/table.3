@@ -1,4 +1,4 @@
-.TH TABLE 3NEMO "6 August 1992"
+.TH TABLE 3NEMO "12 July 2003"
 .SH NAME
 get_atable, get_ftable, get_line, parse, strinsert \- table manipulator routines
 .SH SYNOPSIS
@@ -48,14 +48,20 @@ Other common parameters to both routines
 are \fIcoldat, ncol\fP and \fIndat\fP:
 \fIcoldat\fP is an array of \fIncol\fP pointers to 
 previously allocated data, each of them \fIndat\fP \fBreal\fP elements.
-The number of valid rows read is then returned.
+The number of valid rows read is then returned. If this number is negative,
+it means more data is available, but could not be read because 
+\fIndat\fP was exhausted. Upon the next call \fIndat\fP must be set to
+negative, to recover the last line read on the previous call, and continue
+reading the table without missing a line. CAVEAT: this only works if
+\fIinstr\fP has not changed. 
 .PP
 \fIget_atable\fP parses the table in free format.
 \fIcolnr\fP an array of length \fIncol\fP
 of the column numbers to read (1 being the first column),
 If any of the \fIcolnr\fP is 0, it is 
 interpreted as referring to the line number in the
-original input file (including comment lines), 1 being the first line, and the
+original input file (including/excluding comment and empty lines), 
+1 being the first line, and the
 corresponding entry in \fIcoldat\fP is set as such.
 Columns are separated by whitespace or commas.
 .PP
@@ -99,5 +105,6 @@ Peter Teuben
 .ta +1.0i +3i
 xx-sep-88	V1.0 written	PJT
 6-aug-92	documented get_Xtable functions  	PJT
-1-sep-95	added iscomment()	pjt
+1-sep-95	added iscomment()	PJT
+12-jul-03	fixed reading large table buffereing	PJT
 .fi
