@@ -2,7 +2,7 @@
 include $(NEMOLIB)/makedefs
 
 #	Directories to be visited, in this order
-DIRS = cores io misc trans fits
+DIRS = cores io misc trans fits wcs
 
 
 TARNAME = stuff.tar
