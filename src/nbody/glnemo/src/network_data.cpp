@@ -90,6 +90,8 @@ NetworkData::~NetworkData()
 int NetworkData::loadPos(ParticlesRangeVector * prv)
 {
   int n; // happy red hat
+  if (n) ; // remove compiler warning
+  
   if (clientMB) {
     try {
       // send selected string to the server
