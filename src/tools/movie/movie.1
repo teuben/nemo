@@ -1,0 +1,196 @@
+.TH MOVIE 1NEMO "10 April 1989"
+.SH NAME
+movie, movie_sv - realtime playback of SUN rasterfiles
+.SH SYNOPSIS
+.B movie
+[-p r c] [-s file]
+.PP
+.B movie_sv
+.SH DESCRIPTION
+.B movie
+reads a set of rasterfiles (see
+.I rasterfile(5)\fR)
+and stores them in memory.  It provides a number of functions for
+animating the sequence of rasters on the SUN bitmap display.  These
+functions are described in the
+.B Playback Functions
+section below.
+.sp
+.B movie
+.I does not
+run under SUN-Windows.
+It uses the mouse for frame and speed control,
+as well as menu selection of playback functions.
+.sp
+\fBmovie_sv\fP is a special version which \fIcan\fP run under SUN-windows, but
+is really intended for small (say 256 pixels square) images because
+of memory limitations. It's user interface is also rather limited: a keyboard
+command interface instead of mouse control.
+.sp
+In \fBmovie\fP the screen is divided into 5 areas.  The left square part of the screen
+(900 * 900 pixels) is the frame area. All rasters are displayed here.
+The right part of the screen comprises a single information line at the
+top of the screen, a mouse button line, a menu area, and a menu page
+selection area.
+.sp
+The information line displays the currently displayed frame number,
+the number of the last frame, and a speed indicator.  The speed
+controls the frame presentation rate during playback.  The speed is
+shown as a number between 0 and 100.  A speed of 0 indicates no motion.
+A speed of 100 indicates the maximum possible redisplay rate.  When
+frames are being presented in reverse sequence, as in a
+.B Backward Loop,
+the speed is shown as a negative number.
+.sp
+The mouse button line shows the status of the three mouse buttons.
+The line is divided into 3 areas, corresponding to the left,
+centre, and right mouse buttons.  The effect of pressing one of
+the buttons is indicated in the appropriate area.
+.sp
+The menu is displayed below the mouse button line.  Each menu
+item is shown in a reverse video line.  The menu cursor moves
+up and down through the menu, and reverses the bits in the line
+under the cursor.
+.sp
+The menu page selection area is at the bottom of the menu.  It has
+two areas, labeled \*(lq+\*(rq and \*(lq-\*(rq, which will switch to the next
+or previous menu page.  This feature unnecessary for
+.B movie,
+as only the first menu page has any \*(lqlive\*(rq entries, but is
+there for future expansion.  The menu contains 16 pages, each
+of 32 menu items.  The current page number is displayed to
+the right of the \*(lq-\*(rq selector.
+.sp
+Mouse motion is up/down to select menu items.  Playback functions
+generally take up/down motions to cause increase/decrease in playback
+speed, and left/right motions to indicate previous/next frame selection.
+.sp
+The position of the upper left corner of displayed frames may be
+set by the command line
+.B -p
+option.  The following two integers are taken as row and column offsets.
+.sp
+By default
+.B movie
+will read rasterfiles from the current directory. Files with names of the
+form
+.I frame.#
+(where # is a number) are read into memory.  The files must be numbered
+sequentially, beginning with frame.0.  This is similar to the convention
+used by the SUN demo program
+.B framedemo,
+but note that in this case the files are in
+.I rasterfile
+format.
+The
+.B -s
+option overrides the reading of the \*(lqframe.#\*(rq files.  The argument
+following the
+.B -s
+option indicates a file to be read, which contains a list of
+rasterfiles to read in sequence.
+.SH "PLAYBACK FUNCTIONS"
+.B First Frame
+.br
+Displays the first frame
+.sp
+.B Next Frame
+.br
+Displays the next frame in the sequence, without wrap-around.
+.sp
+.B Previous Frame
+.br
+Displays the previous frame in the sequence, without wrap-around.
+.sp
+.B Last Frame
+.br
+Displays the last frame in the sequence.
+.sp
+.B Single Frame
+.br
+Single frame playback. The left and right mouse
+buttons select the previous and next frames.
+.sp
+.B Forward Play Once
+.br
+Plays the sequence from first to last frame once, at the current
+frame speed.
+.sp
+.B Backward Play Once
+.br
+Plays the sequence from last to first frame once, at the current
+frame speed.
+.sp
+.B Forward Loop
+.br
+Play the sequence continually, from first to last frame.  The
+playback speed may be adjusted with up/down mouse motion, or
+with the left and right mouse buttons.
+.sp
+.B Backward Loop
+.br
+Play the sequence continually, from last to first frame.  The
+playback speed may be adjusted with up/down mouse motion, or
+with the left and right mouse buttons.
+.sp
+.B Back and Forth Loop
+.br
+Play the sequence continually, from first to last, then last to first
+frame.  The playback speed may be adjusted with up/down mouse motion, or
+with the left and right mouse buttons.
+.sp
+.B Variable Speed Loop
+.br
+Play the sequence continually, The
+playback speed may be adjusted with up/down mouse motion, or
+with the left and right mouse buttons. The playback direction
+may be changed by moving the speed through 0.  Negative
+speed indicates reverse playback.
+.sp
+.B Scroll With Mouse
+.br
+Frames are displayed one at a time.  Left/right mouse motion displays
+previous/next frames.
+.sp
+.B Position Frame
+.br
+Allows the upper left starting position of displayed frames
+to be adjusted interactively.  A box is drawn around the frame,
+and moved within the frame area with mouse motion.  Pressing
+the left mouse button causes frame display to take place at the
+new position.
+.sp
+.B Reverse Frame Video
+.br
+Reverses the black/white sense of displayed frames.
+.sp
+.B Quit
+.br
+Exits the
+.B movie
+program.
+.SH ACKNOWLEDGEMENT
+The playback functions in
+.B movie
+are similar to the
+.B S-Dynamics
+animation playback program on our
+.B Symbolics 3650.
+I thank the authors of that software for giving me the idea
+to write this one.   This program is, however, in no way
+copied or translated from that code.
+.SH BUGS
+movie_sv does not work well on colour monitors, however by closing
+to movie window into an icon and opening it again, it seems to work...
+This is a native suntools bug.
+.SH SEE ALSO
+movie(8NEM0), rasterfile(5)
+.SH AUTHOR
+Marc Majka, Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1i +4i
+xx-xxx-87	MOVIE Program added to NEMO                     	Majka
+xx-xxx-87	some bugs removed                               	JEB
+16-dec-88	suntools version as movie_sv tryout-simple menu  	PJT
+.fi
