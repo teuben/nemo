@@ -1,7 +1,8 @@
 /* NEMO version of nrutil.c */
 
 #include <stdinc.h>
-#include <malloc.h>
+
+/* #include <malloc.h>    <-- stdlib.h, included by stdinc.h  */
 
 
 void nrerror(error_text)
