@@ -32,6 +32,7 @@
  *       6-oct-01  V2.4  : fixed Y autoscale if all Y's have the same value
  *       2-aug-02  V2.5  : allow multiple X columns, forces pairwise xcol,ycol plotting
  *                     b : fix old semi-autoscaling bug while fixing it for multicol
+ *      31-dec-03  V2.6  : option to do layout first
  *
  */
 
@@ -85,7 +86,8 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "fullscale=f\n       Use full autoscale in one axis if other autoscaled?",
     "cursor=\n           Optional output file to retrieve cursor coordinates",
     "layout=\n           Optional input layout file",
-    "VERSION=2.5b\n	 3-aug-02 PJT",
+    "first=f\n           Layout first or last?",
+    "VERSION=2.6\n	 31-dec-03 PJT",
     NULL
 };
 
@@ -129,6 +131,7 @@ local int nxticks, nyticks;                   /*& number of tickmarks */
 local int ncolors;
 
 local plcommand *layout;
+local bool layout_first;
 
 void setparams(), plot_data();
 
@@ -268,6 +271,7 @@ void setparams()
         layout = pl_fread(getparam("layout"));
     else
         layout = NULL;
+    layout_first = getbparam("first");
     
 }
 
@@ -429,6 +433,7 @@ void plot_data()
     }
     
     plinit("***",0.0,20.0,0.0,20.0);                 /*	PLOTTING */	
+    if (layout && layout_first) pl_exec(layout);
 
     xplot[0] = xmin;        /* set scales for xtrans() */
     xplot[1] = xmax;
@@ -478,7 +483,7 @@ void plot_data()
         }
         if (cstr) strclose(cstr);
     }
-    if (layout) pl_exec(layout);
+    if (layout && !layout_first) pl_exec(layout);
 
     plstop();
 }
