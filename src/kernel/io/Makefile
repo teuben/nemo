@@ -13,14 +13,14 @@ MAN1FILES =
 MAN3FILES = 
 MAN5FILES = 
 INCFILES = story.h
-SRCFILES = dprintf.c command.c convert.c defv.c extstring.c \
+SRCFILES = dprintf.c command.c convert.c cvsid.c defv.c extstring.c \
 	   filesecret.[ch] getparam.[ch] history.[ch] memio.c outdefv.c \
 	   story.[ch] stropen.c mstropen.c usage.c \
 	   filestruct.h Makefile
-OBJFILES=  dprintf.o command.o convert.o defv.o extstring.o \
+OBJFILES=  dprintf.o command.o convert.o cvsid.o defv.o extstring.o \
 	   filesecret.o getparam.o history.o memio.o outdefv.o \
 	   stropen.o mstropen.o usage.o 
-LOBJFILES= $L(dprintf.o) $L(command.o) $L(convert.o) $L(defv.o) $L(extstring.o) \
+LOBJFILES= $L(dprintf.o) $L(command.o) $L(convert.o) $L(cvsid.o) $L(defv.o) $L(extstring.o) \
            $L(filesecret.o) $L(getparam.o) $L(history.o) $L(memio.o) $L(outdefv.o) \
 	   $L(stropen.o) $L(mstropen(.o) $L(usage.o)
 BINFILES = csf tsf rsf qsf hisf 

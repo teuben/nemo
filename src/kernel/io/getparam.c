@@ -123,6 +123,7 @@
  * 13-may-04       h  add cpu/real time reporting for help=c 
  * 23-jun-04       i  fix bug free's version_  (JC Lambert)
  * 20-sep-04       j  disabled the version checking by default
+ * 18-oct-04       j  support for the CVS ID (cvsid)
 
   TODO:
       - what if there is no VERSION=
@@ -166,7 +167,7 @@
 	opag      http://www.zero-based.org/software/opag/
  */
 
-#define GETPARAM_VERSION_ID  "3.4j 20-sep-04 PJT"
+#define GETPARAM_VERSION_ID  "3.4k 18-oct-04 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -313,6 +314,7 @@ typedef struct keyword_out {  /* a simple keyword, only meant for outkeys=   */
 extern int debug_level; /* see dprintf.c   from DEBUG env.var. */
 extern int error_level; /* see error.c     from ERROR env.var. */
 extern string usage;    /* see program.c or usage.c */
+extern string cvsid;    /* see program.c or cvsid.c */
 extern string defv[];   /* see program.c or defv.c */
 extern string outdefv[];/* see program.c or outdefv.c */
 extern char **environ;  /* environment variables */
@@ -925,6 +927,7 @@ local void printhelp(string help)
         printf("  i       >> show some internal variables\n");
 	printf("  o       >> show the output key names\n");
 	printf("  c       >> show cpu usage at the end of the run\n");
+	printf("  r       >> cvs id\n");
         printf("  ?       >> this help (always quits)\n\n");
         printf("Numeric helplevels determine degree and type of assistence:\n");
         printf("They can be added to give combined functionality\n");
@@ -958,6 +961,11 @@ local void printhelp(string help)
                 printf("%s  %s (%s)\n",
                        keys[0].val,keys[i].val,keys[i].help);
 
+        local_exit(0);
+        /*NOTREACHED*/
+    }
+    if (strchr(help,'I')) {
+      printf("%s\n",cvsid);
         local_exit(0);
         /*NOTREACHED*/
     }
