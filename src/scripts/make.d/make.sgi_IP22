@@ -1,0 +1,3 @@
+#! /bin/sh
+#  the SGI needs this!!!!              
+SHELL=/bin/sh /bin/make "$@"
