@@ -32,6 +32,7 @@
  *                        NOT WORKING YET
  *	 7-aug-01  
  *      18-dec-01  V4.0  work with new fitsio_nemo.h
+ *       2-may-02      a fix dummy=f
  *
  *  TODO:
  *      reference mapping has not been well tested, especially for 2D
@@ -59,9 +60,10 @@ string defv[] = {
 	"refmap=\n       reference map to inherit WCS from",
 	"refpix=\n       reference pixel, if different from default",
 	"radecvel=f\n    Enforce reasonable RA/DEC/VEL axis descriptor",
-	"dummy=t\n       Write dummy axes also ? ",
+	"dummy=t\n       Write dummy axes also ?",
 	"nfill=0\n	 Add some dummy comment cards to test fitsio",
-        "VERSION=4.0\n   18-dec-01 PJT",
+	"ndim=\n         Testing if only that many dimensions need to be written",
+        "VERSION=4.0a\n  5-may-02 PJT",
         NULL,
 };
 
@@ -89,6 +91,7 @@ void setparams(void);
 void write_fits(string,imageptr);
 void stuffit(FITS *, char *);
 void set_refmap(string);
+void permute(int *x ,int *idx, int n);
 
 void nemo_main()
 {
@@ -141,44 +144,59 @@ void setparams(void)
   nfill = getiparam("nfill");
 }
 
-static string ctypes[3] = { "CTYPE1", "CTYPE2", "CTYPE3" };
-static string cdelts[3] = { "CDELT1", "CDELT2", "CDELT3" };
-static string crvals[3] = { "CRVAL1", "CRVAL2", "CRVAL3" };
-static string crpixs[3] = { "CRPIX1", "CRPIX2", "CRPIX3" };
+static string ctypes[3] = { "CTYPE1",   "CTYPE2",   "CTYPE3" };
+static string cdelts[3] = { "CDELT1",   "CDELT2",   "CDELT3" };
+static string crvals[3] = { "CRVAL1",   "CRVAL2",   "CRVAL3" };
+static string crpixs[3] = { "CRPIX1",   "CRPIX2",   "CRPIX3" };
+static string radeve[3] = { "RA---SIN", "DEC--SIN", "VELO-LSR" };
+static string xyz[3]    = { "X",        "Y",        "Z" };
 
 void write_fits(string name,imageptr iptr)
 {
-    int  nx, ny, nz, i, j, k, bitpix;
-    FLOAT tmpr,xmin,ymin,zmin,dx,dy,dz,mapmin,mapmax;   /* fitsio FLOAT !!! */
-    char *cp;
+    FLOAT tmpr,xmin[3],dx[3],mapmin,mapmax;   /* fitsio FLOAT !!! */
     FITS *fitsfile;
-    string *hitem;
+    char *cp;
+    string *hitem, axname[3];
     float *buffer, *bp;
-    int ndim, keepaxis[3], naxis[3];   /* at most 3D cubes for now */
+    int i, j, k, bitpix, keepaxis[3], nx[3], p[3], nx_out[3], ndim=3;
     double bscale, bzero;
-
     
-    nx = naxis[0] = Nx(iptr);
-    ny = naxis[1] = Ny(iptr);
-    nz = naxis[2] = Nz(iptr);   if (nz <= 0) nz = 1;
-    xmin = Xmin(iptr)*scale[0];
-    ymin = Ymin(iptr)*scale[1];
-    zmin = Zmin(iptr)*scale[2];
-    dx = Dx(iptr)*scale[0];
-    dy = Dy(iptr)*scale[1];
-    dz = Dz(iptr)*scale[2];
+    if (hasvalue("ndim")) ndim = getiparam("ndim");
+    nx[0] = Nx(iptr);
+    nx[1] = Ny(iptr);
+    nx[2] = Nz(iptr);   if (nx[2] <= 0) nx[2] = 1;
+    xmin[0] = Xmin(iptr)*scale[0];
+    xmin[1] = Ymin(iptr)*scale[1];
+    xmin[2] = Zmin(iptr)*scale[2];
+    dx[0] = Dx(iptr)*scale[0];
+    dx[1] = Dy(iptr)*scale[1];
+    dx[2] = Dz(iptr)*scale[2];
+    axname[0] = (Namex(iptr) ? Namex(iptr) : xyz[0]);
+    axname[1] = (Namey(iptr) ? Namey(iptr) : xyz[1]);
+    axname[2] = (Namez(iptr) ? Namez(iptr) : xyz[2]);
     mapmin = MapMin(iptr);
     mapmax = MapMax(iptr);
-    for (i=0; i<3; i++) {
-      keepaxis[i] = ((naxis[i] > 1) ? 1 : 0);
-      if (Qdummy) keepaxis[i] = 1;
+    if (Qdummy) 
+      for (i=0; i<3; i++) p[i] = i;
+    else {
+      if (Qrefmap) warning("dummy=f and usage of refmap will result in bad headers");
+      permute(nx,p,3);
+      dprintf(0,"Reordering axes: %d %d %d\n",p[0],p[1],p[2]);
     }
+#if 1
+    for (i=0; i<3; i++)  nx_out[i] = nx[p[i]];
+    /* fix this so CubeValue works */
+    Nx(iptr) = nx_out[0];
+    Ny(iptr) = nx_out[1];
+    Nz(iptr) = nx_out[2];
+#else
+    for (i=0; i<3; i++)  nx_out[i] = nx[i];
+#endif
 
     dprintf(1,"NEMO Image file written to FITS disk file\n");
     dprintf(1,"%d %d %d   %f %f %f   %f %f %f   %f %f \n",
-        nx,ny,nz,xmin,ymin,zmin,dx,dy,dz,mapmin,mapmax);
-
-    ndim = (nz > 1 ? 3 : 2);    /* Make it 2D or real 3D map/cube */
+        nx[0],nx[1],nx[2],xmin[0],xmin[1],xmin[2],dx[0],dx[1],dx[2],mapmin,mapmax);
+    dprintf(1,"keepaxis(%d,%d,%d)\n",keepaxis[0],keepaxis[1],keepaxis[2]);
 
     fit_setblocksize(2880*getiparam("blocking"));
     bitpix = getiparam("bitpix");
@@ -198,68 +216,58 @@ void write_fits(string name,imageptr iptr)
     }
     dprintf(1,"bscale,bzero=%g %g\n",bscale,bzero);
 
-    fitsfile = fitopen(name,"new",ndim,naxis);
+    fitsfile = fitopen(name,"new",ndim,nx_out);
     if (fitsfile==NULL) error("Could not open fitsfile %s for writing\n",name);
 
     if (Qrefmap) {
       fitwrhdr(fitsfile,"CRPIX1",ref_crpix[0]);       
       fitwrhdr(fitsfile,"CRPIX2",ref_crpix[1]);       
-      if (nz>1) fitwrhdr(fitsfile,"CRPIX3",ref_crpix[2]);
+      fitwrhdr(fitsfile,"CRPIX3",ref_crpix[2]);
     } else {
       fitwrhdr(fitsfile,"CRPIX1",1.0);        /* CRPIX = 1 by Nemo definition */
       fitwrhdr(fitsfile,"CRPIX2",1.0);
-      if (nz>1) fitwrhdr(fitsfile,"CRPIX3",1.0);
+      fitwrhdr(fitsfile,"CRPIX3",1.0);
     }
     if (Qrefmap) {
       fitwrhdr(fitsfile,"CRVAL1",ref_crval[0]);
       fitwrhdr(fitsfile,"CRVAL2",ref_crval[1]);
-      if (nz>1) fitwrhdr(fitsfile,"CRVAL3",ref_crval[2]);
+      fitwrhdr(fitsfile,"CRVAL3",ref_crval[2]);
     } else {
-      fitwrhdr(fitsfile,"CRVAL1",xmin);
-      fitwrhdr(fitsfile,"CRVAL2",ymin);
-      if (nz>1) fitwrhdr(fitsfile,"CRVAL3",zmin);
+      fitwrhdr(fitsfile,"CRVAL1",xmin[p[0]]);
+      fitwrhdr(fitsfile,"CRVAL2",xmin[p[1]]);
+      fitwrhdr(fitsfile,"CRVAL3",xmin[p[2]]);
     }
 
     if (Qcdmatrix) {
-      fitwrhdr(fitsfile,"CD1_1",dx);    
-      fitwrhdr(fitsfile,"CD2_2",dy);    
-      if (nz>1) fitwrhdr(fitsfile,"CD3_3",dz);    
+      fitwrhdr(fitsfile,"CD1_1",dx[p[0]]);    
+      fitwrhdr(fitsfile,"CD2_2",dx[p[1]]);    
+      fitwrhdr(fitsfile,"CD3_3",dx[p[2]]);    
     } else {
       if (Qrefmap) {
 	fitwrhdr(fitsfile,"CDELT1",ref_cdelt[0]*scale[0]);
 	fitwrhdr(fitsfile,"CDELT2",ref_cdelt[1]*scale[1]);
-	if (nz>1) fitwrhdr(fitsfile,"CDELT3",ref_cdelt[2]*scale[2]);
+	fitwrhdr(fitsfile,"CDELT3",ref_cdelt[2]*scale[2]);
       } else {
-	fitwrhdr(fitsfile,"CDELT1",dx);    
-	fitwrhdr(fitsfile,"CDELT2",dy);    
-	if (nz>1) fitwrhdr(fitsfile,"CDELT3",dz);
+	fitwrhdr(fitsfile,"CDELT1",dx[p[0]]);    
+	fitwrhdr(fitsfile,"CDELT2",dx[p[1]]);    
+	fitwrhdr(fitsfile,"CDELT3",dx[p[2]]);
       }
     }
     if (Qradecvel) {
-      dprintf(0,"[Axes names written as RA-SIN, DEC-SIN, VELO-LSR]\n");
-      fitwrhda(fitsfile,"CTYPE1","RA---SIN");
-      fitwrhda(fitsfile,"CTYPE2","DEC--SIN");
-      if (nz>1) fitwrhda(fitsfile,"CTYPE3","VELO-LSR");
+      dprintf(0,"[Axes names written as %s, %s, %s\n",
+	      radeve[p[0]],radeve[p[1]],radeve[p[2]]);
+      fitwrhda(fitsfile,"CTYPE1",radeve[p[0]]);
+      fitwrhda(fitsfile,"CTYPE2",radeve[p[1]]);
+      fitwrhda(fitsfile,"CTYPE3",radeve[p[2]]);
     } else {
       if (Qrefmap) {
         fitwrhda(fitsfile,"CTYPE1",ref_ctype[0]);
         fitwrhda(fitsfile,"CTYPE2",ref_ctype[1]);
-        if (nz>1) fitwrhda(fitsfile,"CTYPE3",ref_ctype[2]);
+        fitwrhda(fitsfile,"CTYPE3",ref_ctype[2]);
       } else {
-        if (Namex(iptr))
-            fitwrhda(fitsfile,"CTYPE1",Namex(iptr));
-        else
-    	    fitwrhda(fitsfile,"CTYPE1","X");
-        if (Namey(iptr))
-            fitwrhda(fitsfile,"CTYPE2",Namey(iptr));
-        else
-    	    fitwrhda(fitsfile,"CTYPE2","Y");
-        if (nz>1) {
-            if (Namez(iptr))
-                fitwrhda(fitsfile,"CTYPE3",Namez(iptr));
-            else
-      	        fitwrhda(fitsfile,"CTYPE3","Z");
-      	}
+	fitwrhda(fitsfile,"CTYPE1",axname[p[0]]);
+	fitwrhda(fitsfile,"CTYPE2",axname[p[1]]);
+	fitwrhda(fitsfile,"CTYPE3",axname[p[2]]);
       }
     }
 
@@ -293,12 +301,12 @@ void write_fits(string name,imageptr iptr)
     for(i=0; i<nfill; i++)
         fitwra(fitsfile,"COMMENT","Dummy filler space");
 
-    buffer = (float *) allocate(nx*sizeof(float));  /* MEMLEAK */
+    buffer = (float *) allocate(nx[p[0]]*sizeof(float));
 
-    for (k=0; k<nz; k++) {          /* loop over all planes */
+    for (k=0; k<nx_out[2]; k++) {          /* loop over all planes */
         fitsetpl(fitsfile,1,&k);
-        for (j=0; j<ny; j++) {      /* loop over all rows */
-            for (i=0, bp=buffer; i<nx; i++, bp++)
+        for (j=0; j<nx_out[1]; j++) {      /* loop over all rows */
+            for (i=0, bp=buffer; i<nx_out[0]; i++, bp++)
                 *bp =  iscale[0] * CubeValue(iptr,i,j,k) + iscale[1];
             fitwrite(fitsfile,j,buffer);
         }
@@ -378,4 +386,29 @@ void set_refmap(string name)
   fitclose(fitsfile);
 
 
+}
+
+
+/* return a reverse order index array  */
+/* if done to an array 1 2 3, it will result in buggy data */
+/* this routine should just shift the 1's to the end , not sort */
+
+/* right now this is a silly bubble sort !!! */
+
+void permute (int *x ,int *idx, int n)
+{
+    int    gap, i, j;
+    int    tmp;
+    for (i=0; i<n; i++)
+        idx[i]=i;               /*  one-to-one */
+                
+    for (gap=n/2; gap>0; gap /= 2)
+        for (i=gap; i<n; i++)
+            for (j=i-gap; j>=0; j -= gap) {
+                if (x[idx[j]] > x[idx[j+gap]])
+                    break;          /* in order */
+                tmp = idx[j];
+                idx[j]    = idx[j+gap];
+                idx[j+gap]= tmp;
+            }
 }
