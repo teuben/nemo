@@ -1,12 +1,13 @@
 .TH CCDPOT 1NEMO "26 Jul 2002"
 .SH NAME
-ccdpot \- potential of a density disk
+ccdpot \- potential of an infinitesimally thin disk
 .SH SYNOPSIS
 \fBccdpot\fP [parameter=value]
 .SH DESCRIPTION
-Computes the potential in the plane of an infinitesimal disk. The method
-here is VERY slow, since it evaluates the integral
-given as Eq. 2-3 in the 1987 book Galactic Dynamics by
+Computes the potential in the plane of an infinitesimally thin
+disk. The method
+here is VERY slow, since it evaluates the integral exactly
+given as Eq. 2-3 in the 1987 book \fIGalactic Dynamics\fP by
 Binney and Tremaine.  A faster way is to use FFT's, as described by
 Hockney & Eastwood (1978), and implemented in MIRIAD's potfft program.
 .SH PARAMETERS
