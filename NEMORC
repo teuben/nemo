@@ -132,6 +132,7 @@ if (-d $NEMO/host) then
   echo '*** This is not fool proof and may require you to edit NEMORC.local and/or   ***'
   echo '*** $NEMOLIB/makedefs manually                                               ***'
   echo '***                                                                          ***'
+  echo '*** See also: http://www.astro.umd.edu/nemo/nemo32.html for more info        ***'
 endif
 
 end:
