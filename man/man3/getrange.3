@@ -1,0 +1,41 @@
+.TH GETRANGE 3NEMO "20 June 1989"
+.SH NAME
+getdrange, getirange \- parse string into an array of values of unknown size (slow)
+.SH SYNOPSIS
+.nf
+.B int getdrange (expr, x, xlen)
+.B char    *expr
+.B double  **x;
+.B int     *xlen;
+.PP
+.B int getirange (expr, i, ilen)  \fInot written yet\fP
+.B char    *expr
+.B double  **i;
+.B int     *ilen;
+.fi
+.SH DESCRIPTION
+The \fIgetXrange\fP routines parse a string \fIexpr\fP 
+containing a list of numbers into
+an array \fIx,i\fP of \fIxlen,ilen\fP values. If the list is not long enough,
+an attempt is made to allocate a new array and fit the values in there.
+It is possible that the new array is larger than the actual numbers 
+parsed into the array. \fIgetXrange\fP returns the actual initialized numbers
+in the array, whereas \fIXlen\fP is updated with the actual allocated length
+of the array.
+.PP
+Parsing is done through \fInemoinp(3NEMO)\fP.
+.SH EXAMPLE
+The string \fI1,10:20:2,100::2\fP gets parsed into an array of values
+\fI1 10 12 14 16 18 20 100 100\fP.
+.SH SEE ALSO
+nemoinp(3NEMO)
+.SH DIAGNOSTICS
+Low-level catastrophies (eg, parsing errors, wrong delimiters)
+generate messages via \fIerror\fP(3).
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+20-jun-89	created  	(PJT)
+.fi
