@@ -10,20 +10,18 @@
 
 $nemop1 ="@NEMO@";
 $ENV{'NEMO'}="$nemop1";
-$nemop2="@NEMOHOST@";
-$ENV{'NEMOHOST'}="$nemop2";
-$nemo_path = "${nemop1}/bin/${nemop2}/";
+$nemo_path = "${nemop1}/bin/";
 
 $ENV{'PATH'} = "/usr/bin:/bin:${nemo_path}";   #Needed?
-$ENV{'NEMOOBJ'}= "${nemop1}/obj/${nemop2}";
-$ENV{'NEMOLIB'}= "${nemop1}/lib/${nemop2}";
+$ENV{'NEMOOBJ'}= "${nemop1}/obj";
+$ENV{'NEMOLIB'}= "${nemop1}/lib";
 $ENV{'NEMOINC'}= "${nemop1}/inc";
 $ENV{'NEMODAT'}= "${nemop1}/data";
 
-$ENV{'BTRPATH'}= "${nemop1}/obj/${nemop2}/bodytrans";
-$ENV{'POTPATH'}= "${nemop1}/obj/${nemop2}/potential";
+$ENV{'BTRPATH'}= "${nemop1}/obj/bodytrans";
+$ENV{'POTPATH'}= "${nemop1}/obj/potential";
 
 ## $ENV{'PGPLOT_FONT'} = "/usr/local/astromake/opt/pgplot/grfont.dat";
-## $ENV{'LD_LIBRARY_PATH'} = "${nemop1}/lib/${nemop2}:/usr/local/astromake/opt/pgplot";$ENV{'PGPLOT_BACKGROUND'} = "white";$ENV{'PGPLOT_FOREGROUND'} = "black";
+## $ENV{'LD_LIBRARY_PATH'} = "${nemop1}/lib/:/usr/local/astromake/opt/pgplot";$ENV{'PGPLOT_BACKGROUND'} = "white";$ENV{'PGPLOT_FOREGROUND'} = "black";
 
 
