@@ -3,6 +3,8 @@
  *       This is simply a driver that runs the GalactICS routines
  *	
  *  6-mar-04    Created              PJT
+ *  11-mar-04   NEMO style seed=  instead of iseed=    pjt
+ *              added nmodel=
  *
  *
  */
@@ -52,13 +54,14 @@ string defv[] = {
   "fstreamb=0.75\n   in.bulge:",
   "fstreamh=0.5\n    in.halo:",
   
-  "iseed=-1\n        in.- Random Seed (kd95 style) ",
+  "seed=0\n          in.- Random Seed (NEMO style) ",
   "zerocm=t\n        in.- Center the snapshot?",
 
-  "bin=.\n           directory in which KD95 binaries live",
-  "model=A\n         Select base model A, B, C or D",
+  "bin=\n            directory in which KD95 binaries live (otherwise assume $PATH)",
+  "model=\n          Select base model A, B, C or D ** not properly implemented yet **",
+  "nmodel=1\n        Number of models to make",
 
-  "VERSION=1.1a\n    7-mar-04 PJT",
+  "VERSION=1.3\n     11-mar-04 PJT",
   NULL,
 };
 
@@ -72,20 +75,27 @@ void model(char *m);
 
 void nemo_main(void)
 {
-    char rundir[256];
+    char rundir[256], comment;
     stream datstr, histr;
     string out=getparam("out");
     string kd_bindir = getparam("bin");
-    int iseed, zerocm, nbulge, ndisk, nhalo;
+    int seed, zerocm, nbulge, ndisk, nhalo;
+    int imodel, nmodel = getiparam("nmodel");
 
-    model(getparam("model"));           /*  patch up (putparam) if needed */
+    if (hasvalue("model"))
+      model(getparam("model"));           /*  patch up (putparam) if needed */
 
-    iseed = getiparam("iseed");
+    seed =   -init_xrandom(getparam("seed"));  /* make sure it's negative */
     zerocm = getbparam("zerocm") ? 1 : 0;
  
     nbulge = getiparam("nbulge");
     ndisk  = getiparam("ndisk");
     nhalo  = getiparam("nhalo");
+
+#if 0
+    dprintf(0,"D=%d B=%d H=%d\n",ndisk,nbulge,nhalo);
+    stop(0);
+#endif
 
     datstr = stropen(out,"w");           /* a dummy write ; should not fail */
     strclose(datstr);
@@ -141,63 +151,84 @@ void nemo_main(void)
 	    "diskdf.ps/ps");
     strclose(datstr);
 
-    datstr = stropen("in.bulge","w"); /* create input file */
-    fprintf(datstr,"%g\n",
-	    getdparam("fstreamb"));
-    fprintf(datstr,"%d\n",
-	    getiparam("nbulge"));
-    fprintf(datstr,"%d\n",
-	    iseed);
-    fprintf(datstr,"%d\n",
-	    zerocm);
-    fprintf(datstr,"%s\n",
-	    "dbh.dat");
-    strclose(datstr);
-
-    datstr = stropen("in.disk","w"); /* create input file */
-    fprintf(datstr,"%d\n",
-	    getiparam("ndisk"));
-    fprintf(datstr,"%d\n",
-	    iseed);
-    fprintf(datstr,"%d\n",
-	    zerocm);
-    fprintf(datstr,"%s\n",
-	    "dbh.dat");
-    strclose(datstr);
-
-    datstr = stropen("in.halo","w"); /* create input file */
-    fprintf(datstr,"%g\n",
-	    getdparam("fstreamh"));
-    fprintf(datstr,"%d\n",
-	    getiparam("nhalo"));
-    fprintf(datstr,"%d\n",
-	    iseed);
-    fprintf(datstr,"%d\n",
-	    zerocm);
-    fprintf(datstr,"%s\n",
-	    "dbh.dat");
-    strclose(datstr);
-
-
     histr = stropen("history","w");/* maintain history */
     put_history(histr);
     strclose(histr);
 
-    datstr = stropen("make-it","w"); /* create shell script to be run */
-    fprintf(datstr,"#! /bin/sh\n");
-    fprintf(datstr,"# created by NEMO's mkkd95 program\n");
-    fprintf(datstr,"%s/dbh < in.dbh\n",kd_bindir);
-    fprintf(datstr,"%s/getfreqs\n",kd_bindir);
-    fprintf(datstr,"%s/diskdf < in.diskdf\n",kd_bindir);
-    fprintf(datstr,"%s/genbulge < in.bulge  > bulge\n",kd_bindir);
-    fprintf(datstr,"%s/gendisk  < in.disk   > disk\n",kd_bindir);
-    fprintf(datstr,"%s/genhalo  < in.halo   > halo\n",kd_bindir);
-    fprintf(datstr,"%s/mergerv disk bulge halo > galaxy\n",kd_bindir);
-    fprintf(datstr,"rm ../%s\n",out);
-    fprintf(datstr,"tabtos galaxy ../%s nbody,time mass,pos,vel\n",out);
-    strclose(datstr);
+    for (imodel=0; imodel<nmodel; imodel++) {
+      comment = (imodel==0) ? ' ' : '#';
 
-    run_program("chmod +x make-it; ./make-it");   /* run it ! */
+      datstr = stropen("in.bulge","w!"); /* create input file */
+      fprintf(datstr,"%g\n",
+	      getdparam("fstreamb"));
+      fprintf(datstr,"%d\n",
+	      nbulge);
+      fprintf(datstr,"%d\n",
+	      seed);
+      fprintf(datstr,"%d\n",
+	      zerocm);
+      fprintf(datstr,"%s\n",
+	      "dbh.dat");
+      strclose(datstr);
+      
+      datstr = stropen("in.disk","w!"); /* create input file */
+      fprintf(datstr,"%d\n",
+	      ndisk);
+      fprintf(datstr,"%d\n",
+	      seed);
+      fprintf(datstr,"%d\n",
+	      zerocm);
+      fprintf(datstr,"%s\n",
+	      "dbh.dat");
+      strclose(datstr);
+      
+      datstr = stropen("in.halo","w!"); /* create input file */
+      fprintf(datstr,"%g\n",
+	      getdparam("fstreamh"));
+      fprintf(datstr,"%d\n",
+	      nhalo);
+      fprintf(datstr,"%d\n",
+	      seed);
+      fprintf(datstr,"%d\n",
+	      zerocm);
+      fprintf(datstr,"%s\n",
+	      "dbh.dat");
+      strclose(datstr);
+      
+      
+      datstr = stropen("make-it","w!"); /* create shell script to be run */
+      fprintf(datstr,"#! /bin/sh\n");
+      fprintf(datstr,"# created by NEMO's mkkd95 program\n");
+      if (*kd_bindir) {
+	fprintf(datstr,"%c %s/dbh < in.dbh\n",comment,kd_bindir);
+	fprintf(datstr,"%c %s/getfreqs\n",comment,kd_bindir);
+	fprintf(datstr,"%c %s/diskdf < in.diskdf\n",comment,kd_bindir);
+	fprintf(datstr,"%s/genbulge < in.bulge  > bulge\n",kd_bindir);
+	fprintf(datstr,"%s/gendisk  < in.disk   > disk\n",kd_bindir);
+	fprintf(datstr,"%s/genhalo  < in.halo   > halo\n",kd_bindir);
+	fprintf(datstr,"%s/mergerv disk bulge halo > galaxy\n",kd_bindir);
+      } else {
+	fprintf(datstr,"%c dbh < in.dbh\n",comment);
+	fprintf(datstr,"%c getfreqs\n",comment);
+	fprintf(datstr,"%c diskdf < in.diskdf\n",comment);
+	fprintf(datstr,"genbulge < in.bulge  > bulge\n");
+	fprintf(datstr,"gendisk  < in.disk   > disk\n");
+	fprintf(datstr,"genhalo  < in.halo   > halo\n");
+	fprintf(datstr,"mergerv disk bulge halo > galaxy\n");
+      }
+      if (imodel==0) {
+	fprintf(datstr,"rm ../%s\n",out);
+	fprintf(datstr,"tabtos galaxy ../%s nbody,time mass,pos,vel headline=%d\n",out,seed);
+      } else {
+	fprintf(datstr,"tabtos galaxy - nbody,time mass,pos,vel headline=%d>> ../%s\n",seed,out);
+      }
+      fprintf(datstr,"echo DEBUG; cat in.bulge\n");
+      strclose(datstr);
+      
+      run_program("chmod +x make-it; ./make-it");   /* run it ! */
+      
+      seed = -init_xrandom(getparam("seed"));  /* make sure it's negative again */
+    } /* imodel */
 }
 
 void goto_rundir(string name)
@@ -226,12 +257,13 @@ mpar ModelPars[] = {
   { "nbulge",  { "4000", "1000",  "2000", "1000" }},
   { "ndisk",   { "8000", "1000",  "4000", "1000" }},
   { "nhalo",   { "6000", "1000", "10000", "1000" }},
+
   { "fstreamb",{ "0.75", "0.5",   "0.5",  "0.5" }},
   { "fstreamh",{ "0.5",  "0.5",   "0.5",  "0.5" }},
 
-
   {  "psi0",   { "-4.6", "-5.202", "-6.0", "-7.0"}},
   {  "v0",     { "1.42", "1.36",   "1.32", "1.30"}},
+
   /* q     always 1   */
   /* rck2  always 0.1 */
   /* ra    always 0.8 */
@@ -240,7 +272,6 @@ mpar ModelPars[] = {
   /* router always 5 */
   /* zd     always 0.1 */
   /* drtrunc always 0.5 */
-
 
 
   /* rhob    always 14.45 */
@@ -260,6 +291,15 @@ mpar ModelPars[] = {
   /* niter    always 10 */
 
 };
+
+/*
+ *  model: this sets new default values for a number
+ *
+ *    there is a bug in getparam.c - putparam() should
+ *    only be done if the commandline version wasn't 
+ *    used!!! 
+ *         
+ */
 
 void model(char *m)
 {
