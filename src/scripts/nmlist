@@ -1,0 +1,23 @@
+#! /bin/csh -f
+#
+set lib=$1
+set manl=(1 3 5 8)
+nm $lib | grep T | awk '{ print substr($3,2,100)}' > tmp.nmlist
+@ nbad=0
+@ ngood=0
+foreach entr (`cat tmp.nmlist`)
+ @ m=0
+ foreach l ($manl)
+   if (-e $NEMO/man/man$l/$entr.$l) then
+	 @ m++
+   endif
+ end
+ if ($m == 0) then
+  echo ${lib}: $entr has NO manual entry
+  @ nbad++
+ else
+  echo "${lib}: $entr has A manual entry ($m)"
+  @ ngood++
+ endif
+end
+echo ${lib}: There were $ngood proper refs, $nbad not found in man
