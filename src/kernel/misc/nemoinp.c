@@ -23,6 +23,7 @@
  *  31-may-01   V1.8 added natof, natoi                             pjt
  *   7-jun-01       a:  added casting to shut up compiler           pjt
  *   8-sep-01       b:  init_xrandom
+ *   4-mar-03   V1.9: added nemoinpx for sexa decoding into degrees pjt
  */
 
 #include <stdinc.h>
@@ -124,6 +125,7 @@ int nemoinpf(
     }
     return(nret);
 }
+
 
 #else
 extern void herinp(char *expr, int *nchr, char *type, int *length,
@@ -223,6 +225,37 @@ int nemoinpf(
 }
 #endif
 
+
+int nemoinpx(
+	     char *expr,
+	     double *a,
+	     int     na)
+{
+  int i, nret, ncomp;
+  string *vals, *comp;
+
+  vals = burststring(expr,",");
+  for (nret=0; vals[nret] != NULL; nret++) {
+    if (nret>=na)
+      return -23;
+    comp = burststring(vals[nret],":");
+    ncomp = xstrlen(comp,sizeof(string))-1;
+    if (ncomp < 1 || ncomp > 3)
+      return -13;
+    a[nret] = atof(comp[0]);
+    if (ncomp==1) continue;
+    a[nret] += atof(comp[1])/60.0;
+    if (ncomp==2) continue;
+    a[nret] += atof(comp[2])/3600.0;
+    freestrings(comp);
+  }
+  freestrings(vals);
+  return nret;
+}
+    
+
+
+
 double natof(char *expr)
 {
   double x;
@@ -250,7 +283,8 @@ string defv[] = {
     "tab=\n             Optional table output",
     "seed=0\n		Seed for xrandom",
     "atof=\n            test (n)atof single value expression",
-    "VERSION=1.8b\n	8-sep-01 PJT",
+    "dms=f\n            Use D:M:S.SS parsing instead of regular",
+    "VERSION=1.9\n	4-mar-03 PJT",
     NULL,
 };
 
@@ -261,10 +295,11 @@ string usage = "expression parser and evaluator; also does lists";
 nemo_main()
 {
     char   fmt1[20], fmt2[20], *cp;
+    real   dms[32];
     double *x;
     int    *ix;
     int    i,nret, nx, seed;
-    bool   Qnl, Qint;
+    bool   Qnl, Qint,Qdms;
     stream outstr;
 
     if (hasvalue("tab"))
@@ -283,6 +318,14 @@ nemo_main()
     }
     seed = init_xrandom(getparam("seed"));
     dprintf(1,"init_xrandom: seed=%d\n",seed);
+    Qdms = getbparam("dms");
+    if (Qdms) {
+      nret = nemoinpx(getparam("expression"),dms,32);
+      if (nret < 0) error("Parsing dms expression");
+      for (i=0; i<nret; i++)
+	printf("%g\n",dms[i]);
+      return;  /* for now */
+    }
 
     strcpy (fmt1,cp);                   /* store it in 'fmt' */
     strcpy (fmt2,cp);                   /* and here */
