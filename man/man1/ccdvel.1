@@ -1,4 +1,4 @@
-.TH CCDVEL 1NEMO "6 February 2003"
+.TH CCDVEL 1NEMO "11 September 2003"
 .SH NAME
 ccdvel \- create a velocity field; grid or retrace
 .SH SYNOPSIS
@@ -158,6 +158,12 @@ for defaults. Default: 0
 \fBin=\fP\fIccd-file\fP
 Template (2d) image to provide the WCS for a cube. (deprecated)
 .TP
+\fBintpol=linear|constant\fP
+Interpolation method used for rings in retrace method.
+For \fBlinear\fP each computed galactic radius has linearly interpolated
+values for the rotation curve, inclincation, position angle etc., whereas
+for \fBconstant\fP the starting value of ring is used. Default: \fBlinear\fP.
+.TP
 \fBheadline=\fP\fIcomments\fP
 Random verbiage added to the output image [Default: none].
 .SH EXAMPLE
@@ -223,4 +229,5 @@ apr-01		V1.5b added in=, but deprecated it		PJT
 3-may-01	V1.7 added vexp=                            	PJT
 29-jun-02	V1.8 added blc= keyword (Joshua Simon)		PJT
 6-feb-03	V2.0 modulated orbits (mexp,phexp,mrot,phrot)	PJT
+11-sep-03	V2.1 added intpol=				PJT
 .fi

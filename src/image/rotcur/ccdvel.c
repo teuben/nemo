@@ -53,6 +53,7 @@
  *  29-jun-02   V1.8  add blc= for "BLC"                            PJT
  *  20-jul-02      a  fix error message if too many array elements   pjt
  *   6-feb-03   V2.0  add phases and fourier components to vel's for Rahul    pjt
+ *  11-sep-03   V2.1  add intpol=    PJT
  */
 
 #include <stdinc.h>
@@ -97,8 +98,9 @@ string defv[] = {
 	"amp=f\n        Create density maps instead of velocity?",
         "seed=0\n       Initial random seed",
 	"in=\n          Template 2D image for cube generation",
+	"intpol=linear\n Interpolation: linear or constant",
 	"headline=\n	Optional random verbiage",
-        "VERSION=2.0a\n 7-feb-03 PJT",
+        "VERSION=2.1\n  11-sep-03 PJT",
         NULL,
 };
 
@@ -130,6 +132,7 @@ local real Qamp;   /* use amplitudes instead of velocities */
 
 local real undef = 0.0;            /* could also use IEEE NaN ??? set_fblank ? */
 local bool Qcube = FALSE;
+local bool Qlinear = TRUE;         /* really: intpol=linear or const */
 
 #define MAXCOL    7     /* columns to read from rotcur table file */
 #if !defined(MAXRAD)
@@ -171,6 +174,7 @@ setparams()
     int i,n, ifix, colnr[MAXCOL];
     real *coldat[MAXCOL];
     stream tstr;
+    string intpol;
 
     Qcube = hasvalue("in");
     if (Qcube) {
@@ -381,6 +385,14 @@ setparams()
    if (hasvalue("headline")) set_headline(getparam("headline"));
 
    Qamp = getbparam("amp");
+
+   intpol = getparam("intpol");
+   if (*intpol == 'l')
+     Qlinear = TRUE;
+   else if (*intpol == 'c')
+     Qlinear = FALSE;
+   else
+     error("intpol=%s should be l(inear) or c(onstant)",intpol);
 }
 
 
@@ -554,7 +566,10 @@ local real radius(real r, real sinp, real cosp, real cosi, real x, real y)
  
 local real linfit(real *f, real *x, real x0, int m, int n)
 {
+  if (Qlinear)
     return  ((x0-x[n])*f[m]-(x0-x[m])*f[n])/(x[m]-x[n]);
+  else
+    return  f[m];
 }
 
 /*
