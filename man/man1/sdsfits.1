@@ -1,0 +1,60 @@
+.TH SDSFITS 1NEMO "10 March 1997"
+.SH NAME
+sdsfits \- convert selected plane or coordinate descriptor of SDS HDF to FITS
+.SH SYNOPSIS
+\fBsdsfits\fP [parameter=value]
+.SH DESCRIPTION
+\fBsdsfits\fP converts an \fIhdf(1)\fP SDS dataset into 
+\fIfits(5NEMO)\fP image format. 
+The current version was written to fit a particular
+purpose, and will only properly convert a single 2D or 3D SDS
+dataset into a FITS image/cube. Selection must be made wich SDS dataset
+is converted (1=first) and optional the coordinate values can be written
+instead of the SDS values.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP\fIsds_file\fP
+Input file (SDS HDF file)   
+.TP
+\fBout=\fP\fIfits_file\fP
+Optional output FITS file. If no filename given, the input dataset
+is merely scanned and it's rank and size are reported.
+.TP
+\fPselect=\fP\fIfile_number\fP
+Select a \fIfile_number\fP (1 being the first) for output. Currently
+only one \fIfits\fP file at a time can be extracted.
+[Default: \fB1\fP].
+.TP
+\fPaxis=\fP\fIaxis_number\fP
+If non-zero, this coordinate axis will be dumped as a 1D array 
+in the fits file.
+Note the first axis is the one that described the fasted running
+index in the data-array (i.e. fortran array notation). A 0 is used if
+the 2/3D array is written.
+Default: 0.
+.SH BUGS
+No known bugs, but there are some limitations in the current version:
+.PP
+1) input SDS must be a 2D or 3D - output will be the corresponding FITS
+image map/cube
+.PP
+2) the whole SDS is read into memory, no slicing.  Although this is fast,
+it limits the size of the cube to the (virtual) memory you have.
+.PP
+3) Only the required FITS header keywords NAXIS, NAXIS1, NAXIS2 and NAXIS3
+are written out.
+.PP
+.SH SEE ALSO
+snaphdf(1NEMO), hdf(1), lshdf(1), fitssds(1NEMO), tsd(1NEMO)
+.SH FILES
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+19-Jan-95	V1.0 Created 	PJT
+13-apr-95	V1.1 added select=, fixed bug in 2D conversion	PJT
+13-apr-96	V1.2 added axis=	PJT
+.fi
