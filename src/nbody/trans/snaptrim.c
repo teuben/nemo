@@ -12,6 +12,7 @@
  *	   e  16-feb-97		SINGLEPREC support
  *      V1.6   5-mar-98         supporting time=first and time=last
  *	      15-jun-02         debug output
+ *      V2.0  14-sep-02         Multiple output names allowed via mstropen
  */
 
 /* #define INTERACT */
@@ -21,7 +22,7 @@
 #include <filestruct.h>
 #include <snapshot/snapshot.h>
 
-string defv[] = {               /* DEFAULT INPUT PARAMETERS		    */
+string defv[] = {
     "in=???\n                     input file name",
     "out=???\n			  output file name",
     "times=all\n		  time range to scan through",
@@ -32,7 +33,7 @@ string defv[] = {               /* DEFAULT INPUT PARAMETERS		    */
 #if defined(INTERACT)
     "more=y\n                     needs interactive SETPARAM part",
 #endif
-    "VERSION=1.6\n		  5-mar-98 PJT",
+    "VERSION=2.0\n		  14-sep-02 PJT",
     NULL,
 };
 
@@ -45,7 +46,8 @@ extern bool beyond(real, string, real);
 
 nemo_main()
 {
-    stream instr, outstr;
+    stream instr, outstr = NULL;
+    mstr *mp;
     string times;
     int partcyc, diagcyc, npart, ndiag;
     bool pramflag, timeflag, partflag, diagflag;
@@ -56,12 +58,15 @@ nemo_main()
 
     instr = stropen(getparam("in"), "r");
     get_history(instr);
-    outstr = stropen(getparam("out"), "w");
+    mp = mstr_init(getparam("out"));
+#if 0
+    outstr = mstr_open(mp,"w");
     if (! getbparam("amnesia"))
-	put_history(outstr);
+      put_history(outstr);
+#endif
     times = getparam("times");
-        Qfirst = streq(times,"first");
-        Qlast = streq(times,"last");
+    Qfirst = streq(times,"first");
+    Qlast = streq(times,"last");
     partcyc = getiparam("partcyc");
     diagcyc = getiparam("diagcyc");
     checkall = getbparam("checkall");
@@ -123,10 +128,12 @@ nemo_main()
 	        dprintf(0,"time =%8.3f\tnpart =%4d\tndiag =%4d\toutputing %s\n",
 		   timeflag ? time : 0.0, npart, ndiag,
 		   partflag ? "particles" : "diagnostics");
+	    outstr = mstr_open(mp,"w");
 	    if (Qlast) {
                 rewind(outstr);
 	        put_history(outstr);
-            }
+            } else if (mstr_count(mp)==1 || mstr_multi(mp))
+	        put_history(outstr);
 	    put_set(outstr, SnapShotTag);
 	    if (pramflag)
 		copy_item(outstr, instr, ParametersTag);
@@ -138,7 +145,6 @@ nemo_main()
             if (Qfirst) Qdone=TRUE;
 	}
 	get_tes(instr, SnapShotTag);
-	fflush(outstr);
 	if (Qdone) break;
     }
     strclose(instr);
@@ -147,7 +153,7 @@ nemo_main()
                     timeflag ? time : 0.0, npart, ndiag,
                     partflag ? "particles" : "diagnostics");
     if (!something) warning("Nothing was ever written out");
-    strclose(outstr);
+    mstr_close(mp);
 }
 
 /*

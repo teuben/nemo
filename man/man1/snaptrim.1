@@ -1,4 +1,4 @@
-.TH SNAPTRIM 1NEMO "5 March 1998"
+.TH SNAPTRIM 1NEMO "14 September 2002"
 .SH NAME
 snaptrim \- select a subset of the snapshot frames in a file
 .SH SYNOPSIS
@@ -21,7 +21,10 @@ Input data is read from \fIin_file\fP, in \fIsnapshot\fP(5NEMO)
 format.  Default: none.
 .TP
 \fBout=\fIout_file\fP
-Selected frames are written to \fIout_file\fP.  Default: none.
+Selected frames are written to \fIout_file\fP.  If the name contains
+a valid \fImstropen(3NEMO)\fP formatted name, the output file
+will be split over multiple files.
+Default: none.
 .TP
 \fBtimes=\fItime_range\fP
 Select frames with time values within \fItime_range\fP, which is of a
@@ -67,5 +70,6 @@ Joshua E. Barnes
 xx-xxx-8x	V1.0 Created	JEB
 xx-mar-89	V1.2 keyword amnesia= added	JEB
 12-apr-89	V1.3 keyword checkall= added	PJT
-5-maar-98	V1.6 added first/last times	PJT
+5-maa-98	V1.6 added first/last times	PJT
+14-sep-02	V2.0 support multiple output files	PJT
 .fi
