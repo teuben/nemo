@@ -1,0 +1,14 @@
+%N orblist
+%D ### NEMO program with unknown intent...(missing usage)
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man orblist' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input filename (an orbit) [???]
+%A n
+	stride in time through the orbit [1]
+%A maxsteps
+	Maximum number of steps allowed [10000]
+%A VERSION
+	24-jul-92 PJT [2.3]
