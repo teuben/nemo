@@ -1,0 +1,23 @@
+%N ccddisplay
+
+This doc file has been produces with help=t option
+No further help is available, try 'man ccddisplay'
+
+%A in
+     Input file (image)
+
+%A cms
+     Size of color map segment
+
+%A mini
+     Minimum displayed (relative)
+
+%A maxi
+     Maximum displayed (relative)
+
+%A every
+     Plot 'every' pixel
+
+%A VERSION
+     {JT modified
+
