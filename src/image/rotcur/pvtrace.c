@@ -7,6 +7,10 @@
  *                    a     fixed RPD !!
  *     29-dec-01      b     added extra security
  *
+ * Shane, W.W. \& Bieger-Smith, G.P. 1966 B.A.N. 18, 263
+ *      v_x = v_m + 1/Y_m \int_(v_M)^(V+T) { Y(v) dv }
+ *  or
+ *      v_x = v_M - DV/2 + 1/YM sum { Y(v) DV }
  */
 
 
