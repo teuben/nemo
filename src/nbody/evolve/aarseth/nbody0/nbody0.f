@@ -22,13 +22,14 @@ C                   tested using IMPLICIT NONE and compile with -u
 C       15-nov-91   Connection Machine testing in nbody0.fcm file
 C       11-feb-98   Fixed array index for f2dot(k)  a(16)->a(15)
 C       22-jan-00   Fixed reset time > tnext after datadumps
+C       21-feb-04   stop if d2test is 0
 C***********************************************************************
       INCLUDE 'fdefs.inc'
       INCLUDE 'nmax.inc'
 CSED	The next statement can be modified with SED to toggle type
       DOUBLE PRECISION
      -    time,tnext,dt,s,deltat,tcrit,e,eta,eps2,
-     -    t1pr,t2pr,t3pr,dt1,dt2,dt3,
+     -    t1pr,t2pr,t3pr,dt1,dt2,dt3,d2test,
      -    x(NDIM,NMAX),x0(NDIM,NMAX),x0dot(NDIM,NMAX),t0(NMAX),
      -    body(NMAX),step(NMAX),
      -    f(NDIM,NMAX),fdot(NDIM,NMAX),
@@ -96,6 +97,8 @@ C              form second and third derivative
 C              initialize integration steps and convert to force differences
 
       DO 50 i=1,n
+         d2test = d2(1,i)**2 + d2(2,i)**2 + d2(3,i)**2
+         if (d2test.eq.0) RETURN
          step(i) = sqrt(eta*sqrt ((f(1,i)**2 + f(2,i)**2 + f(3,i)**2)/
      -              (d2(1,i)**2 + d2(2,i)**2 + d2(3,i)**2)))
          t0(i) = time
