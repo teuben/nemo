@@ -14,6 +14,7 @@
  *     History: 19/jul/02 : cloned off rotcur                       pjt
  *              10-sep-02 : implemented resid= for images, more pts for disk   pjt
  *              19-sep-02 : added a few more rotcur's (exp, nfw)               pjt
+ *              12-dec-02 : power law rotation curve for Josh Simon            pjt
  *
  ******************************************************************************/
 
@@ -74,7 +75,7 @@ string defv[] = {
     "rotcur3=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur4=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur5=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
-    "VERSION=1.0d\n  19-sep-02 PJT",
+    "VERSION=1.0f\n  12-dec-02 PJT",
     NULL,
 };
 
@@ -100,8 +101,6 @@ int    mmsk[MAXMOD][MAXPAR];    /* mask per model (1=free 0=fixed) */
 rcproc rcfn[MAXMOD];
 int    nmod = 0;                /* number of models actually used */
 int    nparams = 0;             /* total number of parameters (5 + # for models) */
-
-
 
 
 bool Qimage;                             /* input mode (false means tables are used) */
@@ -250,10 +249,14 @@ real rotcur_tanh(real r, int np, real *p, real *d)
 }
 
 /*
- * softened iso-thermal sphere:
+ * softened iso-thermal sphere: (a.k.a. pseudo-isothermal)
  *    rho  = rho0/(1+x^2)                    x = r/r0
  *    vrot = vrot0*(1-atan(x)/x)^(1/2)   ,   vrot0 = sqrt(4.pi.G.rho0*r0^2)
  *    
+
+In[1]:= Integrate[x^2/(1+x^2),x]
+
+Out[1]= x - ArcTan[x]
 
 
 In[7]:=D[Sqrt[1-ArcTan[x]/x],x]
@@ -318,6 +321,49 @@ real rotcur_nfw(real r, int np, real *p, real *d)
   return p[0] * d[0];
 }
 
+/*
+ * Moore et al (1999, MNRAS 310, 1147:
+ *
+ * rho \propto  r^{-3/2}
+ * i.e.
+ * v   \propto  r^{1/4}
+ */
+
+real rotcur_moore(real r, int np, real *p, real *d)
+{
+  return 0.0;
+}
+
+
+/*
+ * Brandt, J.C. (1960, ApJ 131, 293)
+ *
+ * v = v_0   x /   (1/3 + 3/2*x^n)^(3/2n)
+ * 
+ * 
+ */
+
+real rotcur_brandt(real r, int np, real *p, real *d)
+{
+  return 0.0;
+}
+
+/* 
+ * simple Power Law rotation curve
+ *
+ *  v = v_0 x^a
+ */
+
+real rotcur_power(real r, int np, real *p, real *d)
+{
+  real x = r/p[1];
+  real a = p[2];
+  real v = pow(x,a);
+  d[0] = v;
+  d[1] = -a*p[0]*v/p[1];
+  d[2] = 0.0;         /* fix that !! */
+  return p[0] * d[0];
+}
 
 
 
@@ -505,6 +551,16 @@ rotcurparse()
 	mmsk[nmod][0] = natoi(sp[3]);
 	mmsk[nmod][1] = natoi(sp[4]);
 	rcfn[nmod] = rotcur_iso;
+      } else if (streq(sp[0],"core")) {
+	if (nsp != 6) error("iso needs 3 numbers");
+	npar[nmod] = 3;
+	mpar[nmod][0] = natof(sp[1]);
+	mpar[nmod][1] = natof(sp[2]);
+	mpar[nmod][2] = natof(sp[3]);
+	mmsk[nmod][0] = natoi(sp[4]);
+	mmsk[nmod][1] = natoi(sp[5]);
+	mmsk[nmod][2] = natoi(sp[6]);
+	rcfn[nmod] = rotcur_power;
       } else if (streq(sp[0],"exp")) {
 	if (nsp != 4) error("exp needs 2 numbers");
 	npar[nmod] = 2;
