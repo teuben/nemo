@@ -48,13 +48,18 @@ one can limit the number using this keyword. (0=all). [0]
 Output format in C format (\fIprintf(3)\fP) notation.
 [Default: \fB%g\fP]
 .TP
-\fBformat=\fP\fIspline-type\fP
+\fBtype=\fP\fIspline-type\fP
 The spline type for interpolations. Currently GSL supports:
 \fBlinear\fP, 
 \fBcspline\fP, 
 \fBcspline_periodic\fP, 
 \fBakima\fP,  and
 \fBakima_periodic\fP.
+.TP
+\fBnder=\fP
+Number of derivates that will be returned. Only 1 and 2 are supported,
+and currently only GSL enabled programs can compute derivates.
+Default : 0
 .SH EXAMPLES
 Here is an cute way to estimate sqrt(2):
 .nf
@@ -96,4 +101,5 @@ Peter Teuben
 23-jan-01	V2.1 added x=,y= arrays for Mousumi	PJT
 5-apr-01	V2.2: added format=	PJT
 9-sep-01	V3.0: GSL enabled, can use spline options	PJT
+22-jul-02	V3.1 documented nder		PJT
 .fi

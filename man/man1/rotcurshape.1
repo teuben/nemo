@@ -257,19 +257,20 @@ ccdvel, and analysing it with rotcur:
     % set r=`nemoinp 0:60`
     % set v=`nemoinp 0:60 | tabmath - - "100*%1/(20+%1)" all`
     % ccdvel out=map1.vel rad="$r" vrot="$v" pa=30 inc=60
-    % rotcurshape in=map1.vel radii=0,50 pa=30 inc=60 vsys=0 units=arcsec,1 \\
+    % rotcurshape in=map1.vel radii=0,60 pa=30 inc=60 vsys=0 units=arcsec,1 \\
          rotcur1=core1,100,20,1,1 tab=-
 ....
 
-VSYS: -1.48853e-18 5.80432e-05
-XPOS: 63.5 3.59896e-05
-YPOS: 63.5 4.78336e-05
-PA:   30 5.77529e-05
-INC:  60 0.000127084
-P1:  100.022 0.000459549
-P2:  20.0142 0.000246391
-NPT:  3926
+VSYS: 2.36846e-18 0.00110072
+XPOS: 63.5 0.000759475
+YPOS: 63.5 0.00100543
+PA:   30 0.0010416
+INC:  60.0001 0.00229122
+P1:  100.392 0.00757645
+P2:  20.2883 0.0045192
+NPT:  5658
 
+		(this is also the Testfile version)
 .SH CAVEAT
 Parameters and fix/free masks to rotation curve parameters should be all set, in order
 for the respective routines to figure out the number of parameters. For example,
