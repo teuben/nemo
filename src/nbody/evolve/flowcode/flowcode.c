@@ -4,6 +4,10 @@
  *	10-apr-96 V0.1 cloned off potcode
  *
  * To improve:  use allocate() for number of particles; not static
+ *
+ * See also:
+ *    http://www.amara.com/ftpstuff/streamlines1.txt
+ *    http://www.amara.com/ftpstuff/streamlines2.txt
  */
 
 #include "defs.h"
