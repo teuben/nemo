@@ -77,7 +77,7 @@ string defv[] = {
     "estimate=\n        optional estimates (e.g. for ellipse center)",
     "nmax=10000\n       Default max allocation",
     "tab=f\n            short one-line output?",
-    "VERSION=3.3a\n     30-oct-02 PJT",
+    "VERSION=3.3b\n     30-oct-02 PJT",
     NULL
 };
 
@@ -679,7 +679,7 @@ do_poly()
 do_fourier()
 {
   real mat[(MAXCOL+1)*(MAXCOL+1)], vec[MAXCOL+1], sol[MAXCOL+1], a[MAXCOL+2];
-  real sum, theta, amp, pha;
+  real sum, theta, amp, pha, sigma;
   int i, j, dim = 2*order+1;
 
   if (dim > MAXCOL) error("order=%d too high",order);
@@ -698,8 +698,9 @@ do_fourier()
   }
   lsq_solve(dim,mat,vec,sol);
   printf("fourier fit of order %d:\n", order);
+  printf("\ncos/sin amplitudes:\n");
   for (j=0; j<=2*order; j++) printf("%g ",sol[j]);
-  printf("phase/amp solutions:\n");
+  printf("\ncos amp/phase solutions:\n");
   printf("%g ",sol[0]);
   for (j=0; j<order; j++) {
     amp = sqrt(sqr(sol[2*j+1])+sqr(sol[2*j+2]));
@@ -709,16 +710,18 @@ do_fourier()
   printf("\n");
 
 
-  if (outstr) {           /* output fitted values, if need be */
-    for(i=0; i<npt; i++) {
-      sum=sol[0];
-      for (j=0; j<order; j++) {
-	theta =  xcol[0].dat[i] * PI/180;
-	sum += sol[2*j+1]*cos((j+1)*theta) + sol[2*j+2]*sin((j+1)*theta);
-      }
-      fprintf(outstr,"%g %g %g\n",xcol[0].dat[i], ycol[0].dat[i], sum);
+  sigma = 0.0;
+  for(i=0; i<npt; i++) {
+    sum=sol[0];
+    for (j=0; j<order; j++) {
+      theta =  xcol[0].dat[i] * PI/180;
+      sum += sol[2*j+1]*cos((j+1)*theta) + sol[2*j+2]*sin((j+1)*theta);
     }
+    if (outstr) fprintf(outstr,"%g %g %g\n",xcol[0].dat[i], ycol[0].dat[i], sum);
+    sigma += sqr(ycol[0].dat[i]-sum);
   }
+  sigma = sqrt(sigma/(npt-2*order-1));
+  printf("chisq=%g\n",sigma);
 
 }
 
