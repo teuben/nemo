@@ -1,0 +1,81 @@
+#! /bin/csh -f
+#
+#	Shell script to do a bit of NEMO protection. Input and output
+#	datafiles will be NEMO snapshot format, plus filelocking for
+#	treecode because of peculiar way of fortran i/o.
+#
+#	This scripts assumes presence of NEMO - if you run it standalone
+#	on a machine which doesn't have NEMO installed, you'll have to
+#	do all this administration on your own.
+#	Note: The ascii outfile (TREEBOA) should be compressed afterwards,
+#	while in ftp at the machine which has NEMO running the following
+#	binary ftp command might be a disk-sapce-saver:
+#
+#	ftp> binary
+#	ftp> get treeboa.Z "| zcat | tr D e | atos - run.dat mass,phase,phi"
+#
+#	which stores compressed data on the other end immediately into
+#	local snapshot format. Furthermore, using a .netrc file this process 
+#	can be automated without user intervention.
+#
+#	Another example, when comma's appear inbetween the numbers. 
+#
+#	gunzip -c TREEBOA.gz | tr "," " " | atos - outfile mass,phase,phi
+#
+onintr unlock
+
+if ($#argv != 3) then
+  echo "Usage: $0 input-snapshot output-snapshot pars-file"
+  goto err
+endif
+
+set bodi=$1
+set run=$2
+set pars=$3
+
+if (! -e $pars) then
+  echo "Parameter file $pars does not exist"
+  exit 0
+endif
+
+if (! -e $bodi) then
+  echo "Input snapshot file $bodi does not exist"
+  exit 0
+endif
+
+if (-e $run) then
+  echo "Output snapshot $run already exists"
+  exit 0
+endif
+
+if (-e TREELOCK) then
+  echo "Lockfile TREELOCK exists - cannot run treecode right now"
+  exit 0
+endif
+
+#	prepare for run
+echo "TREECODE `date` on `hostname` by `whoami`" >> TREELOCK
+cp $pars TREEPAR
+rm -f TREEBI TREEBO TREEBOA TREELOG
+stoa $bodi TREEBI
+treecode2
+tr D e < TREEBOA | atos - $run mass,phase,phi
+mv TREELOG $run.log
+rm TREEBO
+goto unlock
+
+err:
+  echo "The parameter file needs, one per line, the following items:"
+  echo "   - text		any comments this for run"
+  echo "   - nsteps		total # steps for this run"
+  echo "   - noutbod            # steps before major output of mas,phase,phi"
+  echo "   - noutlog            # steps before output in logfile"
+  echo "   - dt                 timestep"
+  echo "   - tol                tolerance"
+  echo "   - eps                softening length"
+  echo "   - usequad            logical (.TRUE./.FALSE.) if to use quadr. corr."
+  exit 0
+
+unlock:
+  rm -f TREELOCK
+
