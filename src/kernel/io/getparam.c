@@ -109,6 +109,7 @@
  * 10-dec-01       f  indexing now based at 0, not 1 (for wasp)
  * 16-jan-02       g  wrote findakey to fix various indexing shortcomings
  * 17-jan-02       h  fix minor indexing, fix khoros output
+ * 18-jan-02       i  fix reading indexed from keyword (.def) files
 
   TODO:
       - what if there is no VERSION=
@@ -131,8 +132,6 @@
   	        allows to process it - and of course dies
       - ESC go key in help=2 prompting mode does not work
       - @macro and $key references get expanded as strings.
-      - keyword I/O broken with indexing: writing is now OK, but
-        does not read old ones yet
 
   SOME ALTERNATIVE RESOURCES
 	argtable  http://argtable.sourceforge.net/doc/html/index.html
@@ -432,6 +431,9 @@ void initparam(string argv[], string defv[])
 	      keys[j].count++;
 	    } else if (j=set_indexed(name,&idx)) {       /* enter indexed keywords */
 	      // process this indexed keyword
+#if 1
+	      addindexed(j,argv[i],idx);
+#else
        	      dprintf(1,"Entering indexed %s, j=%d\n",argv[i],j);
 	      kw = &keys[j];       /* start at the indexed (base) keyword */
 	      while (kw->next) {        /* link through all previously indexed ones */
@@ -446,11 +448,11 @@ void initparam(string argv[], string defv[])
 	      kw->key = scopy(parname(argv[i]));
 	      kw->val = scopy(parvalue(argv[i]));
 	      kw->help = 0;
-	      kw->count = 0;
+	      kw->count = 1;   // indexed keywords are never 'original'
 	      kw->upd = 0;
 	      kw->indexed = idx+1;
 	      kw->next = NULL;
-	      dprintf(1,"Link List new keyword %s, idx=%d\n",argv[i],idx);
+#endif
             } else {                            /*     not listed in defv?  */
 	      if (streq(name, "help"))       /* got system help keyword?  */
 		set_help(parvalue(argv[i]));
@@ -1799,7 +1801,7 @@ local int set_indexed(string name, int *idx)
 }
 
 /*
- * addindexed:  not in use 
+ * addindexed: 
  */
 local int addindexed(int i, string keyval, int idx)
 {
@@ -1809,7 +1811,14 @@ local int addindexed(int i, string keyval, int idx)
   while (kw->next) {        /* link through all indexed ones */
     dprintf(1,"Link List Skipping %s\n",kw->key);
     kw = kw->next;
-    if (kw->indexed == idx+1) error("Duplicated indexed keyword %s",keyval);
+    if (kw->indexed == idx+1) {
+      if (kw->count) {
+        kw->count++;
+	dprintf(1,"Skipping entering duplicated indexed keyword %s",keyval);
+	return 0;
+      }
+      error("Duplicated indexed keyword %s",keyval);
+    }
   }
   kw->next = (keyword *) allocate(sizeof(keyword));
   kw = kw->next;
@@ -1817,10 +1826,11 @@ local int addindexed(int i, string keyval, int idx)
   kw->key = scopy(parname(keyval));
   kw->val = scopy(parvalue(keyval));
   kw->help = 0;
-  kw->count = 0;
+  kw->count = 1;
   kw->upd = 0;
   kw->indexed = idx+1;
   kw->next = NULL;
+  dprintf(1,"Link List new keyword %s, idx=%d\n",keyval,idx);
   return 0;
 }
 
@@ -1913,8 +1923,7 @@ local void readkeys(string mesg, bool first)
         if (i<=0) {                                  /* illegal keyword ? */
 	  i = set_indexed(parname(keybuf),&idx);
 	  if (i)
-	    warning("Found indexed keyword, but not implemented yet");
-	  warning("initparam: ignoring erroneous keyword %s",keybuf);
+	      addindexed(i,keybuf,idx);
 	  continue;
         }
         if (keys[i].count && first) {
