@@ -1,11 +1,11 @@
-.TH ROTCURSHAPE 1NEMO "26 July 2002"
+.TH ROTCURSHAPE 1NEMO "28 July 2002"
 .SH NAME
 rotcurshape \- fit parameters to a velocity field using shaped rotation curves in a co-planar disk
 .SH SYNOPSIS
 \fBrotcurshape in=\fPvelfie [parameters=values ...]
 .SH DESCRIPTION
 \fIrotcurshape\fP derives the kinematical parameters from an observed
-velocity field of a coplanar galactic disk by fitting a rotation curve shape.
+velocity field of a coplanar galactic disk by fitting a (set of) rotation curve shape(s).
 Instead of dividing the galactic disk in a set of rings (see \fIrotcur(1NEMO)\fP)
 it fits the shape of the rotation curve to a single plane. This is particularly
 useful for low inclination galaxies and/or for central regions of a galaxy where
@@ -13,7 +13,7 @@ normally the rotation curve would vary accross the ring.
 
 
 .PP
-Much like \fIrotcur\fP, this program does a non-linear least-squares-fitting to the function:
+Much like \fIrotcur\fP, this program does a non-linear least-squares-fit to the function:
 .PP
 .cs 1 20
 .ss 20
@@ -37,8 +37,8 @@ and where the radius \fIr\fP is measured in the plane of the galaxy:
 
 .cs 1
 .fi
-and the rotation curve VROT(r) can be selected from a number of predefined
-shapes or dynamically loaded from a C-coded routine.
+The parameterized  rotation curve VROT(r;p1,p2,...pN) can be selected from a number of predefined
+shapes or dynamically loaded from a C-coded routine (see ROTCUR FUNCTIONS below).
 .PP
 In the above formula
 \fIv(x,y)\fP denotes the radial velocity at rectangular sky
@@ -96,7 +96,8 @@ Systemic velocity.
 .TP
 \fBcenter\fP=\fIx0,y0\fP
 Rotation center (grid units w.r.t. lower left corner being
-0,0 for NEMO maps). Two numbers are required.
+0,0 for NEMO maps). Two numbers are required. For tabular input
+the units must be the same as those used in the table.
 Default: center of map.
 .TP
 \fBfrang\fP=
@@ -115,7 +116,8 @@ or \fBboth\fP side(s). [Default: \fBboth\fP].
 Choice of weighting function with which points are weighed into
 the least squares solution as a function of galactic angle away
 from the major axis. Valid options are: \fBuniform\fP, \fBcosine\fP,
-and \fBcos-squared\fP.
+and \fBcos-squared\fP.  If a density is given (see \fBdens=\fP),
+the weight function is multiplied by this geometric weight factor.
 [Default: \fBcosine\fP].
 .TP
 \fBfixed\fP=
@@ -125,7 +127,7 @@ following: \fBvsys,pa,inc,xpos,ypos\fP, although \fBall\fP can also
 be use to fix all geometric parameters.
 [Default: none, i.e. all parameters free]
 .TP
-\fBellips\fP=
+** \fBellips\fP=
 The names of two parameters for which to calculate an error ellips. 
 (see \fBfixed=\fP). For the two parameters it shows the major
 and minor axis, position angle of the one sigma deviation ellipse.
@@ -137,12 +139,12 @@ Currently these are only used to correct error bars for the number
 of independant points per beam. If not given, each point is assumed
 independant. [no correction].
 .TP
-** \fBdens\fP=\fIimage_den\fP
-Image containing the density. From this local derivatives
-\fI(dN/dx)/N\fP and 
-\fI(dN/dy)/N\fP are computed numerically, and used for an 
-estimate of beam smearing corrections.
-[Default: required if a beam is supplied].
+\fBdens\fP=\fIimage_den\fP
+Image containing the density. Currently only used as an additional
+weight factor. If a map of velocity dispersions would be available,
+a density map would need to be contstructed from its inverse square,
+i.e. dens=1/sigma^2.
+Default: not used.
 .TP
 \fBtab\fP=
 If specified, this output table is used in \fIappend\fP mode!
@@ -172,7 +174,9 @@ in which case your image pixel separation from the
 image header is multiplied by this
 number to get to the ``arcsec'' that will be quoted in
 the tables. The units for velocity can only be numeric, and will be the
-factor by which the velocities in the map are multiplied.
+factor by which the velocities in the map are multiplied. For tabular input
+the spatial scaling factor is ignored, since all spatial coordinates
+need to be in the same coordinate system.
 [Default: \fBdeg\fP]
 .TP
 \fBblank=\fP
@@ -181,18 +185,23 @@ Value of the blank pixel that needs to be ignored. [Default: \fB0.0\fP].
 \fBnsigma=\fP
 Reject outlier points will fall outside nsigma times the dispersion 
 away from the mean velocity in a ring. By default, it will not reject any outliers.
-**not re-implemented yet**
+Use with care, only useful if close enough to a solution and just a few outliers
+need to be removed.
 .TP
 \fBimagemode=t|f\fP
 Image input file mode? By default the input file is an image, alternatively a simple
 ascii table with X and Y positions in columns 1 and 2, and radial velocities
 in column 3 can be used by the \fIxyv_tab\fP (see in=).
+The units of the spatial coordinates now need to be the same as center=,
+and the units= factor is ignored in this case.
 Future expansion will likely allow weight factors to be added
 in other columns.
 [Default: t]
 .TP
 \fBrotcurmode=t|f\fP
-Input table is just a rotation curve (R,V) instead. ** not implemented yet **
+Input table is a rotation curve (R,V) in columns 1 and 2. Radius is allowed
+to be negative, as this option is implemted as a special version of XYV where
+we fix XPOS=0,INC=90,PA=90. The center can therefore be fitted via YPOS.
 Note that \fItabnllsqfit(1NEMO)\fP is also quite efficient to use, except
 the rotation curve functions would need to be re-written in their
 function interface. See also func_rotcur.c for a useful helper routine.
