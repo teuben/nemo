@@ -132,7 +132,18 @@ Brief overview of a Version 3.x.y INSTALLATION
 	% make dirs config_extra scripts
 	% source NEMORC.local			(or look at $NEMO/src/scripts/NEMORC)
 	% rehash
-	% make install
+	% make libs
+
+
+*) Installation problems:
+
+	- edit *.in
+		make config config_extra
+		
+	- edit NEMORC.local (came from NEMORC.gen.in)
+		source NEMORC.local
+
+	- edit $NEMOLIB/makedefs (but danger, configure/config_extra can overwrite this)
 
 
 2) Copy the NEMORC.gen file to NEMORC.local, and edit it to reflect your

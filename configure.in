@@ -1,4 +1,6 @@
-dnl Process this file with autoconf to produce a configure script
+dnl Process this file with autoconf to produce a new configure script
+dnl if it has changed. See also the Makefile in $NEMO  how to automate
+dnl this.
 dnl ---------------------------------------------------------------------------------
 
 AC_MSG_CHECKING([NEMO config])
@@ -200,6 +202,7 @@ AC_PROG_F77
 if test -n "$F77"; then
   if test -n "$GCC"; then
     AC_F77_LIBRARY_LDFLAGS
+    dnl -- next one doesn't work on our solaris??
     ACX_F77_FUNC_MANGLE
     AC_CANONICAL_HOST
     case $host_os in
@@ -226,6 +229,7 @@ AC_ARG_WITH(pgplot-prefix,
         pgplot_config_prefix="$withval", 
         pgplot_config_prefix="/usr/lib/pgplot")
 
+
 if test x$pgplot_config_prefix != x; then
         if test -f ${pgplot_config_prefix}/grfont.dat ; then
 		PGPLOT_DIR="$pgplot_config_prefix"
@@ -245,6 +249,9 @@ dnl             LIBS="$PGPLOT_LIB $LIBS"
 
 fi
 
+echo ""
+echo "PGPLOT_CONFIG_PREFIX: $pgplot_config_prefix"
+
 
 dnl ---------------------------------------------------------------------
 
@@ -262,11 +269,10 @@ dnl fi
 
 dnl ---------------------------------------------------------------------
 
-
 LOADOBJ_MACH=""
 LOADOBJ_LIBS=""
 
-echo "HOST_OS: $host_os"
+echo "HOSTOS: $host_os"
 
 case $host_os in
       linux*)

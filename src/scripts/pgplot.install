@@ -4,20 +4,30 @@
 #  this is known to work under:
 #	linux redhat 6.0		(dec 1999)
 #
-#			command line keywords
-#
+#  3-apr-01	allowed final directory also to be configurable
+#		and some NEMO V3 support added
+
+
+
+#			 	.. command line keywords ..
 set version=5.2
 set ftp=astro.caltech.edu
 set dir=$NEMO/local
+set lib=$NEMOLIB
 set drivers=GIDRIV,NUDRIV,PGDRIV,PPDRIV,PSDRIV,WDDRIV,XWDRIV
 set host=$NEMOHOST
 
+#				.. parse command line ..
 foreach arg ($*)
    set check = `echo $argv[1] | awk -F= '{print NF}'`
    if ("$check" == 1) break
    echo Setting: $arg
    set $arg
 end
+
+
+if (! -e $lib) mkdir $lib
+if ($status) exit 1
 
 cd $NEMO/local/
 
@@ -30,9 +40,9 @@ else
 endif
 gunzip -dc $dir/pgplot${version}.tar.gz | tar xf -
 cd pgplot
-cp drivers.list $NEMOLIB
-cd $NEMOLIB
+cp drivers.list $lib
 
+cd $lib
 
 cp drivers.list new.list
 cp drivers.list old.list
@@ -50,19 +60,26 @@ rm old.list
 
 
 # Solaris
-if ($host == sun5) then
-  $NEMO/local/pgplot/makemake  $NEMO/local/pgplot sol2 f77_cc
-else if ($host == linux) then
-  $NEMO/local/pgplot/makemake  $NEMO/local/pgplot linux g77_elf
-  if (! -e /usr/X11) then
-    echo You may need to patch your Linux distribution:
-    echo ln -s /usr/X11R6 /usr/X11
-  endif
-else if ($host == sgi) then
-  $NEMO/local/pgplot/makemake  $NEMO/local/pgplot irix
-else
-  echo NEMOHOST=$NEMOHOST not supported yet
-endif
+switch ($host)
+  case solaris*:
+  case sun5:
+    $NEMO/local/pgplot/makemake  $NEMO/local/pgplot sol2 f77_cc
+    breaksw
+  case linux:
+  case *linux-gnu:
+    $NEMO/local/pgplot/makemake  $NEMO/local/pgplot linux g77_elf
+    if (! -e /usr/X11) then
+        echo You may need to patch your Linux distribution:
+        echo ln -s /usr/X11R6 /usr/X11
+    endif
+    breaksw
+  case sgi:
+    $NEMO/local/pgplot/makemake  $NEMO/local/pgplot irix
+    breaksw
+  default:
+    echo host=$host not supported yet
+    exit 1
+endsw
 
 make
 make clean

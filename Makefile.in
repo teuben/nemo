@@ -1,4 +1,4 @@
-VERSION = NEMO V3.0 1-apr-01 PJT
+VERSION = NEMO V3.0 3-apr-01 PJT
 ################################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 ################################################################################
@@ -38,10 +38,10 @@ MAKEDIRS = src
 SRC = src
 USR =
 #
-ASCIIFILES = COPYING MANIFEST NEMORC NEMORC.gen PORTING README VERSION \
-	     Makefile src/Makefile \
+ASCIIFILES = COPYING MANIFEST NEMORC PORTING README VERSION \
+	     src/Makefile \
 	     configure configure.in \
-	     Makefile.in makedefs.in config.h.in makedefs.in \
+	     Makefile.in makedefs.in config.h.in makedefs.in NEMORC.gen.in nemo_start.in \
              install-sh config.sub config.guess \
 	     nemo.rc nemo_end \
 	     man/tmac.an man/whatis man/Makefile 
