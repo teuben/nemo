@@ -115,6 +115,7 @@
  * 24-apr-02    3.4   added placeholder for new outparam() stuff
  *  1-aug-02       a  try and free() some allocated local data
  *  2-aug-02       b  write kiddy version of outkeys= processing
+ *  4-dec-02       c  use MAXBUF for keys
 
   TODO:
       - what if there is no VERSION=
@@ -126,7 +127,7 @@
         errors when nemo_main() is not used, perhaps for nkeys==0
 	should do a magic init with a dummy defv[] array
         such that getargv0() does not recurse....
- 
+
   BUGS/FEATURES
 
       - no filelocking for keyword file I/O
@@ -136,6 +137,17 @@
       - ESC go key in help=2 prompting mode does not work
       - @macro and $key references get expanded as strings.
 
+      - handle long arguments better. It seems the shell can only
+        do 256, but macros (key=@macro instead of key=value) can
+	do much more (up to our liking really). getparam should
+	warn for this and  suggest a fix for the user
+
+	C-shell variables and command line argument handling all
+	have different maxima, however 2000 seems to be ok. Much
+	higher, C-shell seems to die around  4000, argv[] around
+	10000 on linux-20002.  On solaris they both seem to be 
+	around 1000
+ 
   SOME ALTERNATIVE RESOURCES
 	argtable  http://argtable.sourceforge.net/doc/html/index.html
 	clig	  http://wsd.iitb.fhg.de/~kir/clighome/
@@ -146,7 +158,7 @@
 	gengetopt http://www.gnu.org/software/gengetopt/gengetopt.html
  */
 
-#define VERSION_ID  "3.4b 3-aug-02 PJT"
+#define VERSION_ID  "3.4c 4-dec-02 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -225,7 +237,7 @@
 #endif /* INTERACT */
 
 #ifndef MAXBUF
-# define MAXBUF 256
+# define MAXBUF 1024
 #endif
 
 #define MAXKEYLEN 16
@@ -1170,7 +1182,7 @@ local string get_macro(char *mname)
 local void eval_keys(void)
 {
     int i, j;
-    char *c1,*c2,*c3,*c4, *cd, check, newval[256], key[MAXKEYLEN];
+    char *c1,*c2,*c3,*c4, *cd, check, newval[MAXBUF], key[MAXKEYLEN];
     bool more = TRUE;
 
     while (more) {                   /* loop until no more $ references found */
@@ -1808,7 +1820,7 @@ local string parvalue(string arg)
     permanent char *valbuf = NULL;      /* dynamic array, with (re)allocate */
     permanent int size = 0;
 #else
-    permanent char valbuf[256];         /* static array: dangerous */
+    permanent char valbuf[MAXBUF];         /* static array: dangerous */
 #endif
 
     char *ap;
@@ -2132,7 +2144,7 @@ local void readkeys(string mesg, bool first)
         error("%s Cannot read keyfile \"%s\" ",mesg,key_filename);
     if (keyfile==NULL) return;
     dprintf(5,"Reading from keyfile %s\n",key_filename);
-    while (fgets(keybuf,256,keyfile) != NULL) {
+    while (fgets(keybuf,MAXBUF,keyfile) != NULL) {
         if (keybuf[0]=='#' || keybuf[0]=='\n' || keybuf[0]==' ')  /* skip */
             continue;
         if (keybuf[strlen(keybuf)-1] != '\n')
@@ -2313,7 +2325,7 @@ local int check_syskey(char *cmd,char *syskey,int *value)
 
 local void review_help(char *cmd)
 {
-    char command[256], *pager, *getenv();
+    char command[MAXBUF], *pager, *getenv();
     
     pager = getenv("PAGER");
 
