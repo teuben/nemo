@@ -53,6 +53,7 @@
  *   5-apr-01   increased buffersize for filenames (NEMO3 uses longer $NEMOHOST names)
  *  13-jun-02   fix permissions problem (Jean-Charles Lambert)
  *  31-dec-02   gcc3/SINGLEPREC; allow longer filenames (should use autoconf?)
+ *  14-feb-04   proper prototypes
  *
  *  Used environment variables (normally set through .cshrc/NEMORC files)
  *      NEMO        used in case NEMOOBJ was not available
@@ -475,7 +476,8 @@ string defv[] = {
 
 string usage = "bodytrans manipulator";
 
-local void getvparam();
+local void getvparam(vector,string);
+extern string *burststring(string,string);
 
 void
 nemo_main()
@@ -485,8 +487,8 @@ nemo_main()
     Body b;
     real t;
     int i;
-    rproc rtrans;
-    iproc itrans;
+    rproc_body rtrans;
+    iproc_body itrans;
 
     if (hasvalue("btnames")) {
         make_bt(getparam("btnames"));
@@ -506,22 +508,20 @@ nemo_main()
     fname = getparam("file");
 
     if (type[0] == 'r') {
-        rtrans = (rproc) bodytrans("real", expr, fname);
+        rtrans = (rproc_body) bodytrans("real", expr, fname);
         cp = get_bt(expr);
         printf("%s = %g (%s)\n", expr, (*rtrans)(&b,t,i), (cp)?(cp):(""));
     } else if (type[0] == 'i') {
-        itrans = (iproc) bodytrans("int", expr, fname);
+        itrans = (iproc_body) bodytrans("int", expr, fname);
         cp = get_bt(expr);
         printf("%s = %d (%s)\n", expr, (*itrans)(&b,t,i), (cp)?(cp):(""));
     } else
         dprintf(0,"Warning: not a valid type, must be real or int\n");
 }
 
-local void getvparam(vec, name)
-vector vec;
-string name;
+local void getvparam(vector vec, string name)
 {
-    string *burststring(), *cmpt;
+    string *cmpt;
     int i;
 
     cmpt = burststring(getparam(name), ", ");
