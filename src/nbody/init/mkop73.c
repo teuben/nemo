@@ -46,11 +46,13 @@ string defv[] = {
     "potpars=0,0\n	  .. with potential parameters",
     "potfile=\n		  .. and optional potential datafile name",    
     "headline=\n	  text headline for output",
-    "VERSION=1.0e\n	  8-sep-01 PJT",
+    "VERSION=1.0f\n	  2-feb-05 PJT",
     NULL,
 };
 
 string usage = "Set up a Mestel disk using 1973 Ostriker & Peebles' method";
+
+string cvsid = "$Id$";
 
 #define MAXRING   1000
 
@@ -373,7 +375,7 @@ makedisk()
         T1[iring] += sqr(nvsq);
     }
     dprintf(1,"Rescaling velocity factors per ring:\n");
-    ini_moment(&m,4);
+    ini_moment(&m,4,0);
     for (i=0; i<nbody/nring; i++) {      /* compute scale factors per ring */
         f = sqrt(T1[i] / T0[i]);
         accum_moment(&m,f,1.0);
