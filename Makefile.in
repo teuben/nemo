@@ -419,6 +419,12 @@ cvsnew:
 cvsu:
 	cvsu | grep ^M
 
+cvsq:
+	cvs -n -q | grep ^U
+
+cvsc:
+	cvs -n -q | grep ^C
+
 ACVSROOT = :pserver:anonymous@cvs.astro.umd.edu:/home/cvsroot
 
 cvslogin:
