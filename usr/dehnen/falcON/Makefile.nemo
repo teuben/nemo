@@ -1,0 +1,10 @@
+#
+#
+
+BINS = addgravity density_centre getgravity gyrfalcON lagrange_radii \
+	mkdehnen mkking mkplum scale_eps symmetrize TestGrav
+
+nemo_bins: $(BINS)
+	make 
+	(cd $(HOS); cp $(BINS) $(NEMOBIN))
+	cp $(LIB)/lib*.so $(NEMOLIB)
