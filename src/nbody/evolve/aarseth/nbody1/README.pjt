@@ -1,0 +1,7 @@
+November 1997:	imported "as is" from SJA with one important change:
+		Sverre's "Makefile" is "Makefile.sja"
+		Nemo's Makefile is	Makefile.nemo
+			(so you can clean, nmax, etc.etc.)
+		Makefile itself is now a symlink to Makefile.nemo
+
+6-mar-98	added call to VERIFY in input.f
