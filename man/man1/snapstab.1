@@ -1,0 +1,39 @@
+.TH SNAPSTAB 1NEMO "30 March 1989"
+.SH NAME
+snapstab \- report on stability of a stellar system
+.SH SYNOPSIS
+\fBsnapstab in=\fIin_file\fP [parameter=value] .\|.\|.
+.SH DESCRIPTION
+\fIsnapstab\fP calculates total binding energy
+(for the potential energy it needs potential energy of each
+star - see \fIhackforce(1NEMO)\fP or \fIquadforce\fP) and reports
+deviation from Virial equilibrium as 2*KE+PE. For disk systems the 
+Ostriker-Peebles t=KE(orbital)/PE, which must be smaller than about 0.14
+in order for the disk to be stable, is reported
+.PP
+\fIThis program is still under development - use at your risk.\fP
+.SH PARAMETERS
+The following parameters are recognized:
+.TP 24
+\fBin=\fIin_file\fP
+input file, in \fIsnapshot\fP(5NEMO) format.  Default: none.
+.TP
+\fBtimes=\fItime-ranges\fP
+Only snapshots with time values within \fItimes-ranges\fP, which is
+of the form \fBts[:te],...\fP, will be used [default: \fBall\fP].
+.SH "SEE ALSO"
+snapshot(5NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +3.0i
+~/src/pjt/nbody   	snapstab.c snapstab.1
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+ 30-March-89	V1.0: created          	PJT
+.fi
+
+
