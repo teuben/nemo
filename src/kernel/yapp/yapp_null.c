@@ -6,14 +6,16 @@
  */
 
 #include <stdinc.h>
+#include <yapp.h>
 
-plinit(string pltdev, real xmin, real xmax, real ymin, real ymax)
+int plinit(string pltdev, real xmin, real xmax, real ymin, real ymax)
 {
  dprintf(0,"[YAPP_NULL: no graphics output]\n");
+ return 0;
 }
 
-plswap() 
-{}
+int plswap() 
+{ return 0;}
 
 real plxscale(real x, real y)
 { return 1.0;}
@@ -22,64 +24,60 @@ real plyscale(real x, real y)
 { return 1.0;}
 
 
-plltype(int lwid, int lpat)
-{}
+int plltype(int lwid, int lpat)
+{ return 0;}
 
-plline(real x, real y)
-{}
+int plline(real x, real y)
+{ return 0;}
 
-plmove(real x, real y)
-{}
+int plmove(real x, real y)
+{ return 0;}
 
-plpoint(real x, real y)
-{}
+int plpoint(real x, real y)
+{ return 0;}
 
-plcircle(real x, real y, real r)
-{}
+int plcircle(real x, real y, real r)
+{ return 0;}
 
-plcross(real x, real y, real s)
-{}
+int plcross(real x, real y, real s)
+{ return 0;}
 
-plbox(real x, real y, real s)
-{}
+int plbox(real x, real y, real s)
+{ return 0;}
 
-pljust(int jus)
-{}
+int pljust(int jus)
+{ return 0;}
 
-pltext(string msg, real x, real y, real hgt, real ang)
-{}
+int pltext(string msg, real x, real y, real hgt, real ang)
+{ return 0;}
 
-plflush() 
-{}
+int plflush() 
+{ return 0;}
 
-plframe()
-{}
+int plframe()
+{ return 0;}
 
-plstop()
-{}
+int plstop()
+{ return 0;}
 
-plcolor(int color)
-{}
+void plcolor(int color)
+{ }
 
-pl_matrix(real *frame,int nx,int ny,real xmin,real ymin,
+int pl_matrix(real *frame,int nx,int ny,real xmin,real ymin,
 	  real cell,real fmin,real fmax,real findex)
-{}
+{ return 0;}
 
-pl_contour(real *frame,int nx,int ny, int nc, real *c)
-{}
+int pl_contour(real *frame,int nx,int ny, int nc, real *c)
+{ return 0;}
 
-pl_screendump(string fname)
-{}
+int pl_screendump(string fname)
+{ return 0;}
 
-pl_getpoly(float *x,float *y,int n)
-{
- return 0;
-}
+int pl_getpoly(float *x,float *y,int n)
+{ return 0;}
 
-pl_cursor(float *x,float *y, char *c)
-{
- return 0;
-}
+int pl_cursor(real *x,real *y, char *c)
+{ return 0;}
 
-pl_interp(string cmd)
-{}
+int pl_interp(string cmd)
+{ return 0;}

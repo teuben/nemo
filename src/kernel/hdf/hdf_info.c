@@ -3,10 +3,15 @@
  *
  * Since including <hdf.h> within NEMO programs can cause
  * collisions, this file needs to be compiled without -I$NEMOINC,
- * or at least not include NEMO include files.
+ * or at least not include NEMO include files, just a few pure
+ * ANSI headers
  *
  * 12-mar-97   hardcoded the relevant things from hdf.h
+ * 24-nov-03   prototypes gcc3
  */
+
+#include <stdio.h>
+#include <string.h>
 
 #if defined(HAVE_HDF)
 
@@ -35,7 +40,7 @@
 
 #endif
 
-hdf_type_info(int type, char *msg)
+void hdf_type_info(int type, char *msg)
 {
     switch (type) {
         case DFNT_FLOAT32:  strcpy(msg,"FLOAT32");  break;
