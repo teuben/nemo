@@ -21,6 +21,7 @@
  *      24-apr-03       V1.7  added vp and vm as gridding options        pjt
  *       3-dec-04       V2.0  fixed MAXRANK->3 so it can do fake2d from zeus3d    pjt
  *                            changed order of symmetry/mirror, changed some dprintf's
+ *       4-dec-04       V2.0a fixed serious bug for rank=3 datasets
  */
 
  
@@ -48,7 +49,8 @@ string defv[] = {
     "mirror=t\n                 Mirror all points?",
     "symmetry=auto\n		Override otherwise automated symmetry properties (odd|even|auto) **unused**",
     "it0=0\n			Shift THETA array (i.e. rotate grid)",
-    "VERSION=2.0\n		3-dec-04 PJT",
+    "phi0=0\n                   Shift THETA values (*test*)",
+    "VERSION=2.0a\n		4-dec-04 PJT",
     NULL,
 };
 
@@ -75,13 +77,13 @@ void nemo_main()
          dmin, dmax, phi1, phi2, rad1, rad2;
     float *buffer1, *buffer2, *buffer3;
     float **image1, **image2;
-    int i, j, k, ret, size, type, nsds, isel, nx, ny;
+    int i0, i1, i, j, k, ret, size, type, nsds, isel, nx, ny;
     int ir, ip, jr, jp, nr, np, n1, n2, is;
     char **output, *cbuff;
     char ntype[32];
     string filter, zvar, infile = getparam("in");
     stream outstr;
-    real xrange[3], yrange[3], cosp, sinp;
+    real xrange[3], yrange[3], cosp, sinp, phi0;
     real x, y, a1, a2, c1,c2,c3,c4, cmin, cmax, dcon, tmp, vr, vt;
     real sds_time = -1.0;
     imageptr iptr;
@@ -89,6 +91,7 @@ void nemo_main()
         Qmirror  = getbparam("mirror");
 
     it0 = getiparam("it0");
+    phi0 = getdparam("phi0");
     nsds = DFSDndatasets(infile);
     if (nsds<0) 
         error("%s is probably not an HDF scientific dataset",infile);
@@ -126,8 +129,16 @@ void nemo_main()
             sds_time = string_real(label,"AT TIME=");
 
     	if (k==0) {				/* first time: allocate */
+	    if (rank == 3) {
+	      if (shape[0] == 1) 
+		i0=1;    /* skip this first dummy dimension */
+	      else
+		error("Rank=%d shape[0]=%d not 2D map",rank,shape[0]);
+	    } else
+	      i0=0;      /* start at the first dummy dimension */
+	    i1=i0+1;     /* radius dim is always one higher than angle */
             coord = (float **) allocate(rank*sizeof(float *));
-            for (i=0, size=1; i<rank; i++) {
+            for (i=0, size=1; i<rank; i++) {     /*  process all axes */
     	        size *= shape[i];
                 coord[i] = (float *) allocate(shape[i] * sizeof(float));
                 ret = DFSDgetdimscale(i+1, shape[i],coord[i]);
@@ -137,7 +148,9 @@ void nemo_main()
 		  cmin = MIN(cmin, coord[i][j]);
 		  cmax = MAX(cmax, coord[i][j]);
 		}
-                dprintf(0,"Dimension %d  Size %d Min %g Max %g\n",i+1,shape[i],cmin,cmax);
+                dprintf(0,"Dimension %d  Size %d Min %g Max %g %s\n",
+			i+1,shape[i],cmin,cmax,
+			shape[i] == 1 ? "(** dimension will be skipped **)" : "");
             }
             buffer1 = (float *) allocate(size * sizeof(float));
             if (both) buffer2 = (float *) allocate(size * sizeof(float));
@@ -161,50 +174,48 @@ void nemo_main()
                 break;
         }
     }
-    image1 = (float **) allocate(shape[0] *sizeof(float *));
-    for (i=0; i<shape[0]; i++) {
-    	image1[i] = &buffer1[i*shape[1]];
-    }
+    image1 = (float **) allocate(shape[i0] *sizeof(float *));
+    for (i=0; i<shape[i0]; i++)
+    	image1[i] = &buffer1[i*shape[i1]];
     if (both) {
-        image2 = (float **) allocate(shape[0] *sizeof(float *));
-        for (i=0; i<shape[0]; i++) {
-            image2[i] = &buffer2[i*shape[1]];
-        }
+        image2 = (float **) allocate(shape[i0] *sizeof(float *));
+        for (i=0; i<shape[i0]; i++)
+            image2[i] = &buffer2[i*shape[i1]];
         if (streq(zvar,"vx")) {
-            for (i=0; i<shape[0]; i++) {    /* phi */
-            	cosp = cos((double)coord[0][i]);
-            	sinp = sin((double)coord[0][i]);
-	        for (j=0; j<shape[1]; j++) {     /* rad */
+            for (i=0; i<shape[i0]; i++) {    /* phi */
+            	cosp = cos((double)coord[i0][i]);
+            	sinp = sin((double)coord[i0][i]);
+	        for (j=0; j<shape[i1]; j++) {     /* rad */
                     vr = image1[i][j];
                     vt = image2[i][j];
                     image1[i][j] = vr*cosp-vt*sinp;
                 }
             }
         } else if (streq(zvar,"vy")) {
-            for (i=0; i<shape[0]; i++) {    /* phi */
-            	cosp = cos((double)coord[0][i]);
-            	sinp = sin((double)coord[0][i]);
-	        for (j=0; j<shape[1]; j++) {     /* rad */
+            for (i=0; i<shape[i0]; i++) {    /* phi */
+            	cosp = cos((double)coord[i0][i]);
+            	sinp = sin((double)coord[i0][i]);
+	        for (j=0; j<shape[i1]; j++) {     /* rad */
                     vr = image1[i][j];
                     vt = image2[i][j];
                     image1[i][j] = vr*sinp+vt*cosp;
                 }
             }
         } else if (streq(zvar,"vm")) {
-            for (i=0; i<shape[0]; i++) {    /* phi */
-            	cosp = cos((double)coord[0][i]);
-            	sinp = sin((double)coord[0][i]);
-	        for (j=0; j<shape[1]; j++) {     /* rad */
+            for (i=0; i<shape[i0]; i++) {    /* phi */
+            	cosp = cos((double)coord[i0][i]);
+            	sinp = sin((double)coord[i0][i]);
+	        for (j=0; j<shape[i1]; j++) {     /* rad */
                     vr = image1[i][j];
                     vt = image2[i][j];
                     image1[i][j] = ((vr-vt)*cosp - (vr+vt)*sinp)*OOST;
                 }
             }
         } else if (streq(zvar,"vp")) {
-            for (i=0; i<shape[0]; i++) {    /* phi */
-            	cosp = cos((double)coord[0][i]);
-            	sinp = sin((double)coord[0][i]);
-	        for (j=0; j<shape[1]; j++) {     /* rad */
+            for (i=0; i<shape[i0]; i++) {    /* phi */
+            	cosp = cos((double)coord[i0][i]);
+            	sinp = sin((double)coord[i0][i]);
+	        for (j=0; j<shape[i1]; j++) {     /* rad */
                     vr = image1[i][j];
                     vt = image2[i][j];
                     image1[i][j] = ((vr+vt)*cosp + (vr-vt)*sinp)*OOST;
@@ -213,21 +224,21 @@ void nemo_main()
         }
     }
     if (it0) {
-        dprintf(0,"New feature: shifting theta by %d/%d pixels\n",it0,shape[0]);
-    	/* nt=shape[0]  nr=shape[1] */
-        buffer3 = (float *) allocate(sizeof(float)*shape[0]);
-    	for (i=0; i<shape[0]; i++) dprintf(3,"before: %d %g\n",i,image1[i][0]);
-	for (j=0; j<shape[1]; j++) {
-            for (i=0; i<shape[0]; i++) buffer3[i] = image1[i][j];
-            fshift(shape[0], buffer3, it0);
-            for (i=0; i<shape[0]; i++) image1[i][j] = buffer3[i];
+        dprintf(0,"New feature: shifting theta by %d/%d pixels\n",it0,shape[i0]);
+    	/* nt=shape[i0]  nr=shape[i1] */
+        buffer3 = (float *) allocate(sizeof(float)*shape[i0]);
+    	for (i=0; i<shape[i0]; i++) dprintf(3,"before: %d %g\n",i,image1[i][i0]);
+	for (j=0; j<shape[i1]; j++) {
+            for (i=0; i<shape[i0]; i++) buffer3[i] = image1[i][j];
+            fshift(shape[i0], buffer3, it0);
+            for (i=0; i<shape[i0]; i++) image1[i][j] = buffer3[i];
             if (both) {
-                for (i=0; i<shape[0]; i++) buffer3[i] = image2[i][j];
-                fshift(shape[0], buffer3, it0);
-                for (i=0; i<shape[0]; i++) image2[i][j] = buffer3[i];
+                for (i=0; i<shape[i0]; i++) buffer3[i] = image2[i][j];
+                fshift(shape[i0], buffer3, it0);
+                for (i=0; i<shape[i0]; i++) image2[i][j] = buffer3[i];
             }
     	}
-    	for (i=0; i<shape[0]; i++) dprintf(3,"after: %d %g\n",i,image1[i][0]);    	
+    	for (i=0; i<shape[i0]; i++) dprintf(3,"after: %d %g\n",i,image1[i][i0]);    	
     }
     image = image1;
     /* the image can now be referred to as in:  image[phi][rad]  */
@@ -237,11 +248,16 @@ void nemo_main()
     ny = getiparam("ny");
     setrange(xrange,getparam("xrange"),nx);
     setrange(yrange,getparam("yrange"),ny);
-    nr = shape[1];
-    np = shape[0];
-    rads = coord[1];
-    phis = coord[0];
+    nr = shape[i1];
+    np = shape[i0];
+    rads = coord[i1];
+    phis = coord[i0];
     create_image(&iptr, nx, ny);
+    for (j=0; j<np; j++)
+      phis[j] -= phi0;
+
+    dprintf(1,"Radius: %g %g\n",rads[0],rads[nr-1]);
+    dprintf(1,"Theta:  %g %g\n",phis[0],phis[np-1]);
 
     n1 = n2 = 0;
     for (j=0; j<ny; j++) {                  /* loop over all rows */
@@ -286,7 +302,7 @@ void nemo_main()
 		flip = TRUE;
                 if (mirror) {                   /* 3rd Quadrant */
                     ip = np-1;
-                    jp = 0;
+		    jp = 0;
                     phi1 = phis[np-1] - PI;
                     phi2 = phis[0];
                     phi = phi_orig;
