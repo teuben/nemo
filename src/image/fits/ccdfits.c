@@ -35,6 +35,7 @@
  *       6-may-02      b implemented dummy=f
  *       6-jul-02   5.0  changed ref*= to crval/cdelt/crpix=
  *      10-jul-02   5.1  better handling of long COMMENT fields
+ *       4-feb-04   5.2  also listen to changed crval/cdelt/crpix= without refmap
  *
  *  TODO:
  *      reference mapping has not been well tested, especially for 2D
@@ -67,7 +68,7 @@ string defv[] = {
 	"dummy=t\n       Write dummy axes also ?",
 	"nfill=0\n	 Add some dummy comment cards to test fitsio",
 	"ndim=\n         Testing if only that many dimensions need to be written",
-        "VERSION=5.0\n   6-jul-02 PJT",
+        "VERSION=5.2\n   4-feb-04 PJT",
         NULL,
 };
 
@@ -85,6 +86,7 @@ string headline;         /* optional NEMO headline, added as COMMENT */
 bool Qcdmatrix;         /* writing out new-style cdmatrix ? */
 bool Qradecvel;         /* fake astronomy WCS header */
 bool Qrefmap;
+bool Qcrval, Qcdelt, Qcrpix;
 bool Qdummy;            /* write dummy axes ? */
 
 int   nref = 0, nfill = 0;
@@ -136,23 +138,26 @@ void setparams(void)
   Qcdmatrix = getbparam("cdmatrix");
   Qradecvel = getbparam("radecvel");
   Qrefmap = hasvalue("refmap");
-  if (Qrefmap) {
+  if (Qrefmap)
     set_refmap(getparam("refmap"));
-    if (hasvalue("crpix")) {
-      nref =  nemoinpr(getparam("crpix"),tmpr,3);
-      for (i=0; i<nref; i++)
-	ref_crpix[i] = tmpr[i];
-    }
-    if (hasvalue("crval")) {
-      nref =  nemoinpr(getparam("crval"),tmpr,3);
-      for (i=0; i<nref; i++)
-	ref_crval[i] = tmpr[i];
-    }
-    if (hasvalue("cdelt")) {
-      nref =  nemoinpr(getparam("cdelt"),tmpr,3);
-      for (i=0; i<nref; i++)
-	ref_cdelt[i] = tmpr[i];
-    }
+
+  Qcrpix = hasvalue("crpix");
+  if (Qcrpix) {
+    nref =  nemoinpr(getparam("crpix"),tmpr,3);
+    for (i=0; i<nref; i++)
+      ref_crpix[i] = tmpr[i];
+  }
+  Qcrval = hasvalue("crval");
+  if (Qcrval) {
+    nref =  nemoinpr(getparam("crval"),tmpr,3);
+    for (i=0; i<nref; i++)
+      ref_crval[i] = tmpr[i];
+  }
+  Qcdelt = hasvalue("cdelt");
+  if (Qcdelt) {
+    nref =  nemoinpr(getparam("cdelt"),tmpr,3);
+    for (i=0; i<nref; i++)
+      ref_cdelt[i] = tmpr[i];
   }
   Qdummy = getbparam("dummy");
   nfill = getiparam("nfill");
@@ -211,7 +216,7 @@ void write_fits(string name,imageptr iptr)
     dprintf(1,"%d %d %d   %f %f %f   %f %f %f   %f %f \n",
         nx[0],nx[1],nx[2],xmin[0],xmin[1],xmin[2],dx[0],dx[1],dx[2],mapmin,mapmax);
     dprintf(1,"keepaxis(%d,%d,%d)\n",keepaxis[0],keepaxis[1],keepaxis[2]);
-
+    
     fit_setblocksize(2880*getiparam("blocking"));
     bitpix = getiparam("bitpix");
     fit_setbitpix(bitpix);
@@ -233,38 +238,38 @@ void write_fits(string name,imageptr iptr)
     fitsfile = fitopen(name,"new",ndim,nx_out);
     if (fitsfile==NULL) error("Could not open fitsfile %s for writing\n",name);
 
-    if (Qrefmap) {
+    if (Qrefmap || Qcrpix) {
       fitwrhdr(fitsfile,"CRPIX1",ref_crpix[0]);       
       fitwrhdr(fitsfile,"CRPIX2",ref_crpix[1]);       
-      fitwrhdr(fitsfile,"CRPIX3",ref_crpix[2]);
+      if (ndim>2) fitwrhdr(fitsfile,"CRPIX3",ref_crpix[2]);
     } else {
       fitwrhdr(fitsfile,"CRPIX1",1.0);        /* CRPIX = 1 by Nemo definition */
       fitwrhdr(fitsfile,"CRPIX2",1.0);
-      fitwrhdr(fitsfile,"CRPIX3",1.0);
+      if (ndim>2) fitwrhdr(fitsfile,"CRPIX3",1.0);
     }
-    if (Qrefmap) {
+    if (Qrefmap || Qcrval) {
       fitwrhdr(fitsfile,"CRVAL1",ref_crval[0]);
       fitwrhdr(fitsfile,"CRVAL2",ref_crval[1]);
-      fitwrhdr(fitsfile,"CRVAL3",ref_crval[2]);
+      if (ndim>2) fitwrhdr(fitsfile,"CRVAL3",ref_crval[2]);
     } else {
       fitwrhdr(fitsfile,"CRVAL1",xmin[p[0]]);
       fitwrhdr(fitsfile,"CRVAL2",xmin[p[1]]);
-      fitwrhdr(fitsfile,"CRVAL3",xmin[p[2]]);
+      if (ndim>2) fitwrhdr(fitsfile,"CRVAL3",xmin[p[2]]);
     }
 
     if (Qcdmatrix) {
       fitwrhdr(fitsfile,"CD1_1",dx[p[0]]);    
       fitwrhdr(fitsfile,"CD2_2",dx[p[1]]);    
-      fitwrhdr(fitsfile,"CD3_3",dx[p[2]]);    
+      if (ndim>2) fitwrhdr(fitsfile,"CD3_3",dx[p[2]]);    
     } else {
-      if (Qrefmap) {
+      if (Qrefmap || Qcdelt) {
 	fitwrhdr(fitsfile,"CDELT1",ref_cdelt[0]*scale[0]);
 	fitwrhdr(fitsfile,"CDELT2",ref_cdelt[1]*scale[1]);
-	fitwrhdr(fitsfile,"CDELT3",ref_cdelt[2]*scale[2]);
+	if (ndim>2) fitwrhdr(fitsfile,"CDELT3",ref_cdelt[2]*scale[2]);
       } else {
 	fitwrhdr(fitsfile,"CDELT1",dx[p[0]]);    
 	fitwrhdr(fitsfile,"CDELT2",dx[p[1]]);    
-	fitwrhdr(fitsfile,"CDELT3",dx[p[2]]);
+	if (ndim>2) fitwrhdr(fitsfile,"CDELT3",dx[p[2]]);
       }
     }
     if (Qradecvel) {
@@ -272,16 +277,16 @@ void write_fits(string name,imageptr iptr)
 	      radeve[p[0]],radeve[p[1]],radeve[p[2]]);
       fitwrhda(fitsfile,"CTYPE1",radeve[p[0]]);
       fitwrhda(fitsfile,"CTYPE2",radeve[p[1]]);
-      fitwrhda(fitsfile,"CTYPE3",radeve[p[2]]);
+      if (ndim>2) fitwrhda(fitsfile,"CTYPE3",radeve[p[2]]);
     } else {
       if (Qrefmap) {
         fitwrhda(fitsfile,"CTYPE1",ref_ctype[0]);
         fitwrhda(fitsfile,"CTYPE2",ref_ctype[1]);
-        fitwrhda(fitsfile,"CTYPE3",ref_ctype[2]);
+        if (ndim>2) fitwrhda(fitsfile,"CTYPE3",ref_ctype[2]);
       } else {
 	fitwrhda(fitsfile,"CTYPE1",axname[p[0]]);
 	fitwrhda(fitsfile,"CTYPE2",axname[p[1]]);
-	fitwrhda(fitsfile,"CTYPE3",axname[p[2]]);
+	if (ndim>2) fitwrhda(fitsfile,"CTYPE3",axname[p[2]]);
       }
     }
 
