@@ -1,0 +1,28 @@
+#! /bin/csh -f
+#
+#  check the running and 'last archived' version of a program
+#
+if ($#argv != 2) then
+  echo Usage: $0 program version
+  echo " Checks if 'program' is available under version 'version'"
+  echo " mostly being run by programs in debug mode"
+  exit 0
+endif
+
+set program=$1
+set version=$2
+set doc=$NEMODOC/$program.doc
+
+if (-e $doc) then
+  set ver="`tail -2 $doc | head -1`"
+  if ("$ver" == "%A VERSION") then
+    set ver=`tail -1 $doc|awk '{print $NF}' |sed 's/\[//'|sed 's/\]//'`
+    if ($ver != $version) then
+       echo "### Warning: nemo.version running $version, archived $ver"
+    endif
+  else
+    echo "### Warning: nemo.version found no VERSION keyword for $program"
+  endif
+else
+  echo "### Warning: nemo.version found no $NEMODOC/$program.doc"
+endif
