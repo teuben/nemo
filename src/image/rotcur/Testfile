@@ -1,5 +1,5 @@
 DIR = src/image/rotcur
-BIN = ccdvel rotcur
+BIN = ccdvel rotcur rotcurshape
 NEED = $(BIN) nemoinp
 
 DATA = map1.vel map1.den map1.rotcur map1.r map1.v map1.d
@@ -25,7 +25,7 @@ all:	$(BIN)
 map1.vel:
 	@echo Creating $@
 	@nemoinp $(R) > map1.r
-	@nemoinp $(R) | tabmath - - '1*%1/(20+%1)' all > map1.v
+	@nemoinp $(R) | tabmath - - '100*%1/(20+%1)' all > map1.v
 	ccdvel map1.vel radii=@map1.r vrot=@map1.v pa=$(PA) inc=$(INC)
 
 map1.den:
@@ -41,5 +41,10 @@ ccdvel:	map1.den
 rotcur: map1.vel
 	@echo Running $@
 	rotcur in=map1.vel radii=$(R) vrot=10,100 pa=$(PA) inc=$(INC) vsys=0 \
-	   tab=map1.rotcur units=sec,100 > /dev/null
+	   tab=map1.rotcur units=sec,1 > /dev/null
 	@tail -7 map1.rotcur
+
+rotcurshape: map1.vel
+	rotcurshape in=map1.vel radii=0,60 pa=$(PA) inc=$(INC) vsys=0 \
+	   tab=map1.rotcurshape units=sec,1 rotcur1=core1,100,20,1,1 > /dev/null
+	@tail -11 map1.rotcurshape

@@ -1,4 +1,4 @@
- /*******************************************************************************
+/*******************************************************************************
  *    ROTCURSHAPE derives the kinematical parameters from the observed
  *    velocity field by fitting tilted-rings to the velocity field.  It
  *    does a least-squares-fitting to the function:
@@ -18,6 +18,7 @@
 #include <stdinc.h>
 #include <getparam.h>
 #include <image.h>
+#include <filefn.h>
 
 /*     Set this appropriate if you want to use NumRec's mrqmin() based engine */
 #if 0
@@ -60,8 +61,6 @@ string defv[] = {
     "itmax=50\n      Maximum number of allowed nllsqfit iterations",
     "units=deg,1\n   Units of input {deg, arcmin, arcsec, rad, #},{#} for length and velocity",
     "blank=0.0\n     Value of the blank (pixel) value to be ignored",
-    "inherit=t\n     ** Inherit initial conditions from previous ring",
-    "fitmode=cos,1\n ** Basic Fitmode: cos(n*theta) or sin(n*theta)",
     "nsigma=-1\n     Iterate once by rejecting points more than nsigma resid",
     "imagemode=t\n   Input image mode? (false means ascii table)",
     "rotcurmode=f\n  Full velocity field, or rotcur (r,v) fit only",
@@ -127,9 +126,9 @@ void vcor_s1 (real *c, real *p, real *vd, real *dn);
 
 int rotinp(real *rad, real pan[], real inc[], real vro[], int *nring, int ring, real *vsys, 
 	   real *x0, real *y0, real *thf, int *wpow, int mask[], int *side, int cor[], 
-	   int *inh, int *fitmode, real *nsigma, stream lunpri);
+	   real *nsigma, stream lunpri);
 int rotfit(real ri, real ro, real p[], real e[], int mask[], int wpow, int side, real thf, 
-	   real elp4[], int cor[], int *npt, int fitmode, real nsigma, stream lunres);
+	   real elp4[], int cor[], int *npt, real nsigma, stream lunres);
 int perform_out(int h, real p[6], int n, real q);
 int rotplt(real rad[], real vsy[], real evs[], real pan[], real epa[], 
 	   real inc[], real ein[], real xce[], real exc[], real yce[], real eyc[], 
@@ -244,8 +243,6 @@ nemo_main()
     int  npt[RING];	      /* array containing number of points in ring */
     real p[PARAMS],e[PARAMS]; /* arrays containing resp. pars and the errors */
     real ri,ro,r;     /* vars denoting inner, outer and mean radius */
-    int  inherit;
-    int  fitmode;
     real x0,y0,vsys;  /* vars for init. estim. of xpos, ypos and vsys */
     real thf;     /* var  denoting free angle around minor axis */
     real nsigma;
@@ -259,7 +256,6 @@ nemo_main()
 
     for (i=0, nparams=GPARAM; i<nmod; i++)     /* count total number of parameters */
       nparams += npar[i];
-    printf("Total of %d parameters to be fitted\n",nparams);
 
     if (hasvalue("tab"))
         lunpri=stropen(getparam("tab"),"a");  /* pointer to table stream output */
@@ -274,7 +270,7 @@ nemo_main()
 
     rotinp(rad,pan,inc,vro,&nring,RING,     /* get input parameters */
            &vsys,&x0,&y0,&thf,
-           &wpow,mask,&side,cor,&inherit,&fitmode,&nsigma,lunpri);
+           &wpow,mask,&side,cor,&nsigma,lunpri);
 
     old_factor = sqrt((beam[0]+grid[0])*(beam[1]+grid[1])/(grid[0]*grid[1]));
     if (beam[0] > 0 && beam[1] > 0)
@@ -289,11 +285,11 @@ nemo_main()
          ro=rad[irng+1];        /* outer radius of ring */
          r=0.5*(ri+ro);         /* mean radius of ring */
 
-         p[0] = (mask[0] && ifit>0 && inherit) ? vsy[ifit-1] : vsys;
-         p[1] = (mask[1] && ifit>0 && inherit) ? xce[ifit-1] : x0;
-         p[2] = (mask[2] && ifit>0 && inherit) ? yce[ifit-1] : y0;
-         p[3] = (mask[3] && ifit>0 && inherit) ? pan[ifit-1] : pan[irng];
-         p[4] = (mask[4] && ifit>0 && inherit) ? inc[ifit-1] : inc[irng];
+         p[0] = vsys;
+         p[1] = x0;
+         p[2] = y0;
+         p[3] = pan[irng];
+         p[4] = inc[irng];
 	 for (i=0, k=0; i<nmod; i++) {
 	   for (j=0; j<npar[i]; j++, k++) {
 	     p[GPARAM+k] = mpar[i][j];
@@ -301,9 +297,9 @@ nemo_main()
 	   }
 	 }
 
-         ier = rotfit(ri,ro,p,e,mask,wpow,side,thf,elp4,cor,&n,fitmode,-1.0,lunres);
+         ier = rotfit(ri,ro,p,e,mask,wpow,side,thf,elp4,cor,&n,-1.0,lunres);
 	 if (ier > 0 && nsigma > 0)
-	   ier = rotfit(ri,ro,p,e,mask,wpow,side,thf,elp4,cor,&n,fitmode,nsigma,lunres);
+	   ier = rotfit(ri,ro,p,e,mask,wpow,side,thf,elp4,cor,&n,nsigma,lunres);
          if (ier>0) {           /* only if fit OK, store fit */
             rad[ifit]=r;            /*  radius of ring */
             vsy[ifit]=p[0];         /*  systemic velocity */
@@ -334,9 +330,19 @@ nemo_main()
 
 rotcurparse()
 {
-  string *sp;
+  string *sp, fname, path;
   char keyname[30];
   int i, j, nsp;
+  bool Qext = hasvalue("load");
+  char func_name[80];
+
+  if (Qext) {
+    fname = getparam("load");
+    mysymbols(getargv0());
+    path = pathfind(".",fname);
+    if (path == NULL) error("Cannot open %s",fname);
+    loadobj(path);
+  }
 
   nmod = 0;
   for (i=0; i<MAXMOD; i++) {
@@ -384,7 +390,19 @@ rotcurparse()
 	  error("Polynomial needs at least one of P1 and P2 fixed");
 	rcfn[nmod] = rotcur_poly;
       } else {
-	error("Don't have rotcur code for %s yet, you can supply your own",sp[0]);
+	if (Qext) {
+	  sprintf(func_name,"rotcur_%s",sp[0]);
+	  rcfn[nmod] = (rcproc) findfn(func_name);
+	  if (rcfn[nmod]==NULL) error("Could not find %s in %s",func_name,fname);
+
+	  if (nsp % 2) error("%s really needs an even number of parameters",sp[0]);
+	  npar[nmod] = nsp/2;
+	  for (j=0; j<npar[nmod]; j++) {
+	    mpar[nmod][j] = natof(sp[j+1]);
+	    mmsk[nmod][j] = natoi(sp[j+1+npar[nmod]]);
+	  }
+	} else 
+	  error("Cannot find %s, perhaps need load=",sp[0]);
       }
       dprintf(0,"ROTCUR%d: name=%s parameters=",i+1,sp[0]);
       for (j=0; j<npar[nmod]; j++) {
@@ -414,19 +432,15 @@ rotcurparse()
  *    MASK     integer array    keep parameters fixed(0) or free(1)
  *    SIDE     integer          receding, approaching or both sides
  *    COR      integer array    plot error ellipses ?
- *    INH      integer          inherit initial cond from previous ring?
- *    FITMODE  integer          fitmode: >0 cos-factor; <0 sin-factor
  *    LUNPRI   integer          LUN for print output
  */
 
-rotinp(rad,pan,inc,vro,nring,ring,vsys,x0,y0,thf,wpow,mask,side,cor,inh,fitmode,nsigma,lunpri)
+rotinp(rad,pan,inc,vro,nring,ring,vsys,x0,y0,thf,wpow,mask,side,cor,nsigma,lunpri)
 int  *wpow;           /* weighting function to be applied */
 int  ring, *nring;    /* max. number of rings and wanted number of rings */
 int  mask[];          /* mask to define free and fixed parameters */
 int  *side;           /* variable denotes which part of galaxy to fit */
 int  cor[];           /* plot error ellipses ? */
-int  *inh;            /* inherit initial conditions from old ring? */
-int  *fitmode;        /* fitmode: cos/sin and multiplicity */
 real *rad;            /* user defined radii of rings */
 real *vsys,vro[],pan[],inc[],*x0,*y0;  /* initial estimates (pars. 1 <--> PARAMS ) */
 real *thf;            /* user defined free angle around minor axis */
@@ -438,7 +452,6 @@ stream  lunpri;       /* LUN for print output */
     int iret, i, j, n, nfixed, fixed, ninputs;
     real center[2], toarcsec, tokms;
     stream velstr, denstr;
-    string *fmode;
     real *coldat[3];
     int colnr[3];
 
@@ -671,6 +684,12 @@ stream  lunpri;       /* LUN for print output */
         printf("       - Inclination \n");
         if (lunpri) fprintf(lunpri," inc");
     }
+    for (i=GPARAM; i<nparams; i++) {
+      if (mask[i]) {
+	printf("       - P%d \n",i-GPARAM+1);
+	if (lunpri) fprintf(lunpri," P%d",i-GPARAM+1);
+      }
+    }
     if (lunpri) fprintf(lunpri,"\n");
 
     /*******  FIX THIS OLD ROTCUR CODE **********/
@@ -695,29 +714,9 @@ stream  lunpri;       /* LUN for print output */
 
     if (lunpri) fprintf(lunpri,"\n\n\n\n"); /* space space space... */
 
-    *inh = (getbparam("inherit") ? 1 : 0);
-
-    fmode = burststring(getparam("fitmode")," ,");
-    if (fmode[0]==NULL || fmode[1]==NULL) 
-        error("fitmode: %s needs {cos|sin},{#}",getparam("fitmode"));
-    *fitmode = atoi(fmode[1]);
-    switch (*fmode[0]) {
-      case 's': *fitmode *= -1; break;
-      case 'c': break;
-      default: warning("Illegal fitmode: cos(%d*theta) assumed\n",*fitmode);
-               break;
-    }
-
-    switch (*fitmode) {
-      case 1:
-        vobs  = vobs_c1;    vobsd = vobsd_c1;   vcor  = vcor_c1;    
-        break;
-      case -1:
-        vobs  = vobs_s1;    vobsd = vobsd_s1;   vcor  = vcor_s1;
-        break;
-      default:
-        error("fitmode %d not supported",*fitmode);
-    }
+    vobs  = vobs_c1;    
+    vobsd = vobsd_c1;   
+    vcor  = vcor_c1;    
 
     *nsigma = getdparam("nsigma");
 }
@@ -736,14 +735,13 @@ stream  lunpri;       /* LUN for print output */
  *    THT      real            free angle around minor axis
  *    COR      integer         plot error ellipses ?
  *    ELP4     real array      for ellipse parameters
- *    FITMODE  integer         fitmode cos/sin(#)
  *
  *  returns:
  *    IER      integer         result of fit (good or bad)
  *    NPT      integer         number of points in ring
  */
 
-rotfit(ri, ro, p, e, mask, wpow, side, thf, elp4, cor, npt, fitmode, nsigma, lunres)
+rotfit(ri, ro, p, e, mask, wpow, side, thf, elp4, cor, npt, nsigma, lunres)
 real ri,ro;      /* inner and outer radius of ring */
 int mask[];      /* mask for free/fixed parameters */
 int wpow;        /* weighting function */
@@ -753,7 +751,6 @@ real elp4[];     /* array for ellipse parameters */
 real p[],e[];    /* initial estimates (I), results and erros (O) */
 real thf;        /* free angle around minor axis (I) */
 int *npt;	 /* number of points in ring (0) */
-int fitmode;     /* basic fitmode (I) */
 real nsigma;     /* if positive, remove outliers and fit again */
 stream lunres;   /* file for residuals */
 {
