@@ -42,8 +42,7 @@ string defv[] = {
     "out=\n         Filename for output table",
     "options=i,x,y,data\n   Output options",
     "maxstat=1\n    Max amount of statistics printed out",
-    "interact=f\n   Fully (cursor) interactive?",
-    "VERSION=1.0\n  1-jul-03 PJT",
+    "VERSION=1.0a\n  2-jul-03 PJT",
     NULL,
 };
 
@@ -391,16 +390,17 @@ int zoom(void)
  *                             >0 if slider (interact()-1) needs updated
  */
 
-string interact_help = "Menu of commands:\n\n\
+string interact_help = "Menu of commands   (* requires cursor interaction ADX=left/middle/right):\n\n\
     l <num>     modify 'lo' slider\n\
     h <num>     modify 'hi' slider\n\
     l s <step>  set step in 'lo' slider\n\
     h s <step>  set step in 'hi' slider\n\
     b <step>    step both 'lo' and 'hi' slider\n\
-    <digit>     change slider to interact with\n\
-    c           cursor mode (EXP)\n\
-    z           zoom with a box (EXP)\n\
+    <digits>    change to this slider # to interact with\n\
+    c         * cursor mode (NEW)\n\
+    z         * zoom with a box (NEW)\n\
     Z           zoom reset to original setting\n\
+    f         * cursor flagging (EXPERIMENTAL)\n\
     r           reset lo/hi to min/max for this slider\n\
     s           show min/lo/hi/max for all sliders\n\
     u		update screen new\n\
@@ -409,6 +409,7 @@ string interact_help = "Menu of commands:\n\n\
     q           quit\n\
     !cmd        execute a shell command 'cmd'\n\
     |cmd        pipe visible data as ascii table to 'cmd'\n\
+    <RETURN>    stepper mode\n\
     ?           this help plus status";
 
 interact()
@@ -514,6 +515,9 @@ interact()
     case '?':  
       printf("%s\n\n",interact_help);
       printf("Xvar=%s Yvar=%s\n",xname,yname);
+      printf("!cmd:   %s\n",cmd_system);
+      printf("|cmd:   %s\n",cmd_popen);
+      printf("action: %s\n",action);
       break;
     case 'q':  
       return -1;
@@ -575,7 +579,7 @@ interact()
       ini_display();
       re_display(0);
       break;
-    case '\0':
+    case '\0':     /* this is when you hit the RETURN key */
       if (sliders[s].stepper == 1) {
 	sliders[s].slo += sliders[s].step;
 	done = TRUE;
