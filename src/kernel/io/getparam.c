@@ -120,6 +120,7 @@
  * 12-jul-03       e  allow -- to stop parsing
  * 15-oct-03       f  fix for version.h to give multiple static's in g++ 
  * 23-jan-04       g  fix prototypes for intel compiler
+ * 13-may-04       h  add cpu/real time reporting for help=c 
 
   TODO:
       - what if there is no VERSION=
@@ -163,7 +164,7 @@
 	opag      http://www.zero-based.org/software/opag/
  */
 
-#define GETPARAM_VERSION_ID  "3.4g 23-jan-04 PJT"
+#define GETPARAM_VERSION_ID  "3.4h 13-may-04 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -201,6 +202,7 @@
 #include <history.h>
 
 #include <sys/types.h>
+#include <sys/times.h>
 #include <sys/stat.h>
 #include <sys/file.h>
 #include <fcntl.h>
@@ -320,10 +322,14 @@ int help_level = 0;     /* hidden keyword help for interactive prompting */
 int bell_level = 0;     /* noisy terminal when prompted */
 int review_flag = 0;    /* review keywords and optional help=8 chaining ? */
 int tcl_flag = 0;       /* go into TCL when all parameters set before go */
+int report_cpu = 0;     /* report time and cpu usage; activated with help=T */
 string yapp_string = NULL;  /* once only ? */
 string help_string = NULL;  /* cumulative ? */
 string argv_string = NULL;  /* cumulative ? */
 string error_string = NULL;
+
+local clock_t clock1, clock2;
+local struct tms tms1, tms2;
 
 #if defined(TCL7)
   Tcl_Interp *tcl_interp;
@@ -442,6 +448,7 @@ void initparam(string argv[], string defv[])
         }
     }
 
+
 
 #if defined(KEYVAL)
     posflag = FALSE;                            /* force key=val args       */
@@ -556,6 +563,7 @@ void initparam(string argv[], string defv[])
 #endif /* INTERACT */
 
 
+
     if (help_level & HELP_PROMPT) {
 #if defined(INTERACT)
         string key, val;
@@ -621,8 +629,8 @@ void initparam(string argv[], string defv[])
 #endif /* INTERACT */
 
     if (help_string) {
-        if (  strpbrk(help_string,"oiapdqntkvh?")!=NULL ||
-              ( strpbrk(help_string,"oiapdqntkvh?")==NULL && 
+        if (  strpbrk(help_string,"oiapdqntkvhc?")!=NULL ||
+              ( strpbrk(help_string,"oiapdqntkvhc?")==NULL && 
                 strpbrk(help_string,"0123456789")==NULL
               )  )
             printhelp(help_string);     /* give some help and possibly */
@@ -663,6 +671,8 @@ void initparam(string argv[], string defv[])
             warning("No VERSION keyword");
     }
     initparam_out();
+    clock1 = times(&tms1);
+
 } /* initparam */
 
 local void initparam_out()
@@ -688,6 +698,21 @@ local void initparam_out()
 void finiparam()
 {
     int i, n=0;
+    float ticks;
+
+    if (report_cpu) {
+      clock2 = times(&tms2);
+      ticks = (float) sysconf(_SC_CLK_TCK);
+      dprintf(0,"CPU_USAGE %s : %.2f    %.2f %.2f  %.2f %.2f  %ld\n",
+	      progname, 
+	      (clock2-clock1)/ticks,
+	      (tms2.tms_utime-tms1.tms_utime)/ticks,
+	      (tms2.tms_stime-tms1.tms_stime)/ticks,
+	      (tms2.tms_cutime-tms1.tms_cutime)/ticks,
+	      (tms2.tms_cstime-tms1.tms_cstime)/ticks,
+	      clock1);
+    }
+
     for (i=1; i<nkeys; i++)
         n += keys[i].upd ? 1 : 0;
 
@@ -894,6 +919,7 @@ local void printhelp(string help)
         printf("  z       >> show as KHOROS pane file\n");
         printf("  i       >> show some internal variables\n");
 	printf("  o       >> show the output key names\n");
+	printf("  c       >> show cpu usage at the end of the run\n");
         printf("  ?       >> this help (always quits)\n\n");
         printf("Numeric helplevels determine degree and type of assistence:\n");
         printf("They can be added to give combined functionality\n");
@@ -909,6 +935,7 @@ local void printhelp(string help)
         local_exit(0);
         /*NOTREACHED*/
     }
+
     if (strchr(help,'i')) {
     	printf("NEMO version: %s\n",NEMO_VERSION);
         printf("help: %s yapp: %s error: %s\n",
@@ -939,7 +966,7 @@ local void printhelp(string help)
 
     numl = ((strchr(help,'n')) ? 1 : 0);    /* add newlines between key=val ? */
 
-    if (strchr(help,'a') || strpbrk(help,"oapdqntvkzu")==NULL) { /* arguments */
+    if (strchr(help,'a') || strpbrk(help,"oapdqntvkzuc")==NULL) { /* arguments */
         printf("%s", progname);
         for (i=1; i<nkeys; i++) {
             newline(numl);
@@ -1048,6 +1075,9 @@ local void printhelp(string help)
     if (strchr(help,'q')) {
         local_exit(0);                        /* quit - don't run program */
         /*NOTREACHED*/
+    }
+    if (strchr(help,'c')) {
+        report_cpu = 1;
     }
 }
 
