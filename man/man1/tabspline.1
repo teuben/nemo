@@ -1,20 +1,28 @@
-.TH TABSPLINE 1NEMO "5 April 2001"
+.TH TABSPLINE 1NEMO "9 September 2001"
 .SH NAME
 tabspline \- interpolate in a table
 .SH SYNOPSIS
 \fBtabspline\fP [parameter=value]
 .SH DESCRIPTION
-\fBtabspline\fP interpolates any function y=f(x) in tabular format.
-It actually is not required that x in monotonically increasing or
+\fBtabspline\fP interpolates any function y=f(x) that 
+was given in (ascii) tabular format.
+It actually is not required that x is monotonically increasing or
 decreasing, the function could be a parametrized table (x=f(t),y=g(t)).
-The interpolation can occur in X as well as Y. It is currently linear,
-but spline is to be added.
+The interpolation can occur in X as well as Y. It is currently linear
+if GSL is not enabled.
+.PP
+If GSL is enabled, various spline interpolations can be selected
+(including linear), as well as
+computation of the first two derivates. Note that with ascii tables
+enough precision must be given to give the higher order derivatives
+a change to be computed accurately enough. This means %20.16f or
+something better should be given in all tab* programs. See example below.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBin=\fP
-Input file      
+Input file, a standard ASCII table. No default.
 .TP
 \fBxcol=\fP
 X column [1].
@@ -39,11 +47,35 @@ one can limit the number using this keyword. (0=all). [0]
 \fBformat=\fP\fIC-fmt\fP
 Output format in C format (\fIprintf(3)\fP) notation.
 [Default: \fB%g\fP]
+.TP
+\fBformat=\fP\fIspline-type\fP
+The spline type for interpolations. Currently GSL supports:
+\fBlinear\fP, 
+\fBcspline\fP, 
+\fBcspline_periodic\fP, 
+\fBakima\fP,  and
+\fBakima_periodic\fP.
 .SH EXAMPLES
 Here is an cute way to estimate sqrt(2):
 .nf
 % nemoinp 1:2:0.001 | tabmath - - '%1*%1' | tabspline - y=2
 1.41421 2
+.fi
+
+or a little more serious to check the accuracy of the GSL interpolation types, use
+100 values between 1 and 2 to evaluate the accuracy of dermining sqrt(2):
+.nf
+% nemoinp 1:2:0.01 format=%20.16f | tabmath - - '%1*%1' format=%20.16f |\\
+	tabspline - y=2 format=%20.16f type=linear  | tabmath - - '%1-sqrt(2)'
+ 1.4142049469964664   2.0000000000000000 -8.61538e-06
+
+% nemoinp 1:2:0.01 format=%20.16f | tabmath - - '%1*%1' format=%20.16f |\\
+	tabspline - y=2 format=%20.16f type=akima   | tabmath - - '%1-sqrt(2)'
+ 1.4142135470218800   2.0000000000000000 -1.53512e-08
+
+% nemoinp 1:2:0.01 format=%20.16f | tabmath - - '%1*%1' format=%20.16f |\\
+	tabspline - y=2 format=%20.16f type=cspline | tabmath - - '%1-sqrt(2)'
+ 1.4142135625037890   2.0000000000000000 1.30694e-10
 .fi
 .SH SEE ALSO
 .nf
@@ -63,4 +95,5 @@ Peter Teuben
 16-apr-98	split code and placed in src/kernel/tab 	PJT
 23-jan-01	V2.1 added x=,y= arrays for Mousumi	PJT
 5-apr-01	V2.2: added format=	PJT
+9-sep-01	V3.0: GSL enabled, can use spline options	PJT
 .fi

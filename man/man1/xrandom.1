@@ -1,4 +1,4 @@
-.TH XRANDOM 1NEMO "8 September 2001"
+.TH XRANDOM 1NEMO "9 September 2001"
 .SH NAME
 xrandom \- Return seed for random numbers and optionally random numbers
 .SH SYNOPSIS
@@ -40,8 +40,13 @@ Report mean/dispersion/skewness/kurtosis?
 Tabulate all random numbers [t]
 .TP
 \fBgsl=\fP
+Name of the random number distribution requested. They follow the name convention
+of the same-name functions \fIgsl_random_xxx\fP in the \fIgsl(3)\fP library.
+No default.
 .TP
 \fBpars=\fP
+Parameters belonging to the selected \fBgsl\fP name. They need to match
+exactly (0, 1, 2 or 3 currently). No default.
 .SH EXAMPLES
 Here is an example script, \fBgrandom.csh\fP, 
 to test if the error in the mean scales
@@ -74,6 +79,50 @@ Mean and dispersion  : 0.0120416 0.102367
 Skewness and kurtosis: -0.0528344 1.19066
 Median               : 0.000425562
 
+.fi
+.SH GSL
+If the GNU Scientific Library (GSL) has been enabled during installation, the
+\fBgsl=\fP and \fBpars\fP keyword will appear in the keyword list of xrandom.
+The following random number distribution names are implemented, 
+and the names of their parameters. Note that
+the number of parameters, as given in \fBpars=\fP has to match exactly,  there are no
+defaults.
+.nf
+gaussian               sigma
+gaussian_ratio_method  sigma
+gaussian_tail          a sigma
+exponential            mu
+laplace                a
+exppow                 a b
+cauchy                 a
+rayleigh               sigma
+rayleigh_tail          a sigma
+landau                 N/A   
+levy                   c alpha
+levy_skey              c alpha beta
+gamma                  a b
+flat                   a b
+lognormal              zeta sigma
+chisq                  nu
+fdist                  nu1 nu2
+tdist                  nu
+beta                   a b
+logistic               a
+pareto                 a b
+weibull                a b
+gumbel1                a b
+gumbel2                a b
+.fi
+The following functions are discrete random number distributions, and return integers:
+.nf
+poisson                mu
+bernoulli              p
+binomial               p n
+negative_binomial      p n
+pascal                 p k
+geometric              p
+hypergeometric         n1 n2 nt
+logarithmic            sigma
 .fi
 .SH AUTHOR
 Peter Teuben
