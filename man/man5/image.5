@@ -1,4 +1,4 @@
-.TH IMAGE 5NEMO "19 May 2003"
+.TH IMAGE 5NEMO "8 May 2004"
 .SH NAME
 image \- binary format for 2D and 3D image/cube files
 .SH SYNOPSIS
@@ -41,6 +41,7 @@ typedef struct {
     real   *frame;	 /* pointer to datablock */
     real   **matrix;     /* 2D special case: pointers to pointers */
     real   ***cube;      /* 3D special case: ptr to ptr to ptr's  */
+    int    axis;         /* axis type (0=old, no ref; 1=with ref */
     int    nx;		 /* number of pixels along x-axis */
     int    ny;		 /* number of pixels along y-axis */
     int    nz;           /* number of pixels along z-axis */
@@ -50,6 +51,9 @@ typedef struct {
     real   dx;		 /* step in x-pixel */
     real   dy;		 /* step in y_pixel */
     real   dz;		 /* step in z_pixel */
+    real   xref;         /* reference pixel in X */
+    real   yref;         /* reference pixel in Y */
+    real   zref;         /* reference pixel in Z */
     real   map_min;		/* minimum map value */
     real   map_max;		/* maximum map value */
     int    beamtype;		/* type of beam used for beam smoothing */
@@ -73,12 +77,16 @@ pre-define macros (in \fBimage.h\fP):
 #define Nx(iptr)	((iptr)->nx)
 #define Ny(iptr)	((iptr)->ny)
 #define Nz(iptr)	((iptr)->nz)
+#define Axis(iptr)	((iptr)->axis)
 #define Xmin(iptr) 	((iptr)->xmin)
 #define Ymin(iptr) 	((iptr)->ymin)
 #define Zmin(iptr) 	((iptr)->zmin)
 #define Dx(iptr)	((iptr)->dx)
 #define Dy(iptr)	((iptr)->dy)
 #define Dz(iptr)	((iptr)->dz)
+#define Xref(iptr) 	((iptr)->xref)
+#define Yref(iptr) 	((iptr)->yref)
+#define Zref(iptr) 	((iptr)->zref)
 #define MapMin(iptr)	((iptr)->map_min)
 #define MapMax(iptr)	((iptr)->map_max)
 #define BeamType(iptr)	((iptr)->beamtype)
@@ -135,4 +143,5 @@ Peter Teuben
 1-feb-89	V4.0: compile switch for FORDEF and CDEF matrix storage	PJT
 21-feb-00	A[i][j] usage        	PJT
 19-may-03	improved documentation	PJT
+8-may-04	V5.0: added reference pixel for axis type 1	PJT
 .fi

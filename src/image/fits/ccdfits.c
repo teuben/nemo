@@ -36,6 +36,7 @@
  *       6-jul-02   5.0  changed ref*= to crval/cdelt/crpix=
  *      10-jul-02   5.1  better handling of long COMMENT fields
  *       4-feb-04   5.2  also listen to changed crval/cdelt/crpix= without refmap
+ *       8-may-05   5.3  deal with the new  axis type 1 images          PJT
  *
  *  TODO:
  *      reference mapping has not been well tested, especially for 2D
@@ -68,7 +69,7 @@ string defv[] = {
 	"dummy=t\n       Write dummy axes also ?",
 	"nfill=0\n	 Add some dummy comment cards to test fitsio",
 	"ndim=\n         Testing if only that many dimensions need to be written",
-        "VERSION=5.2\n   4-feb-04 PJT",
+        "VERSION=5.3\n   8-may-04 PJT",
         NULL,
 };
 
@@ -172,12 +173,12 @@ static string xyz[3]    = { "X",        "Y",        "Z" };
 
 void write_fits(string name,imageptr iptr)
 {
-    FLOAT tmpr,xmin[3],dx[3],mapmin,mapmax;   /* fitsio FLOAT !!! */
+    FLOAT tmpr,xmin[3],xref[3],dx[3],mapmin,mapmax;   /* fitsio FLOAT !!! */
     FITS *fitsfile;
     char *cp;
     string *hitem, axname[3];
     float *buffer, *bp;
-    int i, j, k, bitpix, keepaxis[3], nx[3], p[3], nx_out[3], ndim=3;
+    int i, j, k, axistype, bitpix, keepaxis[3], nx[3], p[3], nx_out[3], ndim=3;
     double bscale, bzero;
     
     if (hasvalue("ndim")) ndim = getiparam("ndim");
@@ -190,6 +191,10 @@ void write_fits(string name,imageptr iptr)
     dx[0] = Dx(iptr)*scale[0];
     dx[1] = Dy(iptr)*scale[1];
     dx[2] = Dz(iptr)*scale[2];
+    xref[0] = Xref(iptr);
+    xref[1] = Yref(iptr);
+    xref[2] = Zref(iptr);
+    axistype = Axis(iptr);
     axname[0] = (Namex(iptr) ? Namex(iptr) : xyz[0]);
     axname[1] = (Namey(iptr) ? Namey(iptr) : xyz[1]);
     axname[2] = (Namez(iptr) ? Namez(iptr) : xyz[2]);
@@ -213,8 +218,9 @@ void write_fits(string name,imageptr iptr)
 #endif
 
     dprintf(1,"NEMO Image file written to FITS disk file\n");
-    dprintf(1,"%d %d %d   %f %f %f   %f %f %f   %f %f \n",
-        nx[0],nx[1],nx[2],xmin[0],xmin[1],xmin[2],dx[0],dx[1],dx[2],mapmin,mapmax);
+    dprintf(1,"%d %d %d   %f %f %f   %f %f %f  %f %f %f   %f %f \n",
+	    nx[0],nx[1],nx[2],xmin[0],xmin[1],xmin[2],dx[0],dx[1],dx[2],xref[0],xref[1],xref[2],
+	    mapmin,mapmax);
     dprintf(1,"keepaxis(%d,%d,%d)\n",keepaxis[0],keepaxis[1],keepaxis[2]);
     
     fit_setblocksize(2880*getiparam("blocking"));
@@ -243,9 +249,15 @@ void write_fits(string name,imageptr iptr)
       fitwrhdr(fitsfile,"CRPIX2",ref_crpix[1]);       
       if (ndim>2) fitwrhdr(fitsfile,"CRPIX3",ref_crpix[2]);
     } else {
-      fitwrhdr(fitsfile,"CRPIX1",1.0);        /* CRPIX = 1 by Nemo definition */
-      fitwrhdr(fitsfile,"CRPIX2",1.0);
-      if (ndim>2) fitwrhdr(fitsfile,"CRPIX3",1.0);
+      if (axistype==1) {
+	fitwrhdr(fitsfile,"CRPIX1",xref[0]);      
+	fitwrhdr(fitsfile,"CRPIX2",xref[1]);
+	if (ndim>2) fitwrhdr(fitsfile,"CRPIX3",xref[2]);
+      } else {
+	fitwrhdr(fitsfile,"CRPIX1",1.0);        /* CRPIX = 1 by Nemo definition */
+	fitwrhdr(fitsfile,"CRPIX2",1.0);
+	if (ndim>2) fitwrhdr(fitsfile,"CRPIX3",1.0);
+      }
     }
     if (Qrefmap || Qcrval) {
       fitwrhdr(fitsfile,"CRVAL1",ref_crval[0]);
@@ -272,6 +284,7 @@ void write_fits(string name,imageptr iptr)
 	if (ndim>2) fitwrhdr(fitsfile,"CDELT3",dx[p[2]]);
       }
     }
+
     if (Qradecvel) {
       dprintf(0,"[Axes names written as %s, %s, %s\n",
 	      radeve[p[0]],radeve[p[1]],radeve[p[2]]);

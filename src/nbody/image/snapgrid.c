@@ -1,6 +1,6 @@
 /* 
  *  SNAPGRID:  program grids a snapshot into a 3D image-cube
- *             can do amission as well as absorbtion
+ *             can do emission as well as absorbtion
  *             generalization of snapccd
  *
  *	19-jan-89  V1.0 -- derived from snapccd	PJT
@@ -24,6 +24,7 @@
  *      18-jun-98   4.4 added optional overridden {x,y,z}lab's
  *      30-jul-98      a  fixed gridding bug introduced in 4.4
  *       7-oct-02      c  atof -> natof
+ *       7-may-04   5.0 sky projections using proj= and new Image(5NEMO) format
  *
  * Todo: - mean=t may not be correct for nz>1 
  */
@@ -32,6 +33,7 @@
 #include <getparam.h>
 #include <vectmath.h>
 #include <filestruct.h>
+#include <strlib.h>
 
 #include <snapshot/body.h>      /* snapshot's */
 #include <snapshot/snapshot.h>
@@ -62,7 +64,8 @@ string defv[] = {		/* keywords/default values/help */
 	"moment=0\n			  moment in zvar (-2,-1,0,1,2...)",
 	"mean=f\n			  mean (moment=0) or sum per cell",
 	"stack=f\n			  Stack all selected snapshots?",
-	"VERSION=4.4d\n			  8-nov-02 PJT",
+	"proj=\n                          Sky projection (SIN, TAN, ARC, NCP, GLS, MER, AIT)",
+	"VERSION=5.0\n			  7-may-04 PJT",
 	NULL,
 };
 
@@ -105,6 +108,10 @@ local bool   Qmean;			/* adding or taking mean for image ?? */
 local bool   Qstack;                  /* stacking snapshots ?? */
 local bool   Qdepth;                  /* need dfunc/tfunc for depth integration */
 local bool   Qsmooth;                 /* (variable) smoothing */
+
+local bool   Qwcs;                      /* use a real astronomical WCS in "fits" degrees */
+local string proj;         
+local double xref, yref, xrefpix, yrefpix, xinc, yinc, rot;
 
 extern string  *burststring(string,string);
 extern rproc   btrtrans(string);
@@ -159,6 +166,48 @@ nemo_main ()
     strclose(outstr);
 }
 
+
+void wcs(real *x, real *y)
+{
+  double xpix, ypix;
+  double xpos = *x,
+         ypos = *y;
+  if (xypix(xpos, ypos, xref, yref, xrefpix, yrefpix, xinc, yinc, rot, proj, &xpix, &ypix))
+    error("problem-1 with WCS conversion");
+  *x = xpix;
+  *y = ypix;
+}
+
+
+void to_dms(double dval, int *dd, int *mm, double *ss)
+{
+  int sign = SGN(dval);
+  dval = ABS(dval);
+  *dd = (int) floor(dval);
+  dval = (dval-(*dd))*60.0;
+  *mm = (int) floor(dval);
+  *ss = (dval-(*mm))*60.0;
+  *dd *= sign;
+}
+
+void show_wcs(string id, real longitude, real latitude)
+{
+    int d1,m1,d2,m2;
+    double s1,s2;
+    double xpos = longitude, ypos = latitude;
+    double xpix, ypix;
+
+    if (worldpos(xpos, ypos, xref, yref, xrefpix, yrefpix, xinc, yinc, rot, proj, &xpix, &ypix))
+      error("problem-2 with WCS conversion");
+
+    to_dms(xpix,&d1,&m1,&s1);
+    to_dms(ypix,&d2,&m2,&s2);
+    dprintf(0,"%03d:%02d:%06.3f %03d:%02d:%06.3f   %s\n",d1,m1,s1,d2,m2,s2,id);
+}
+
+
+
+
 void setparams()
 {
     char  *cp;
@@ -166,7 +215,7 @@ void setparams()
     times = getparam("times");
     Qmean = getbparam("mean");
     Qstack = getbparam("stack");
-
+      
     nx = getiparam("nx");
     ny = getiparam("ny");
     nz = getiparam("nz");
@@ -177,6 +226,43 @@ void setparams()
 
     setaxis(getparam("yrange"), yrange, ny, &yedge, &ybeam);
     if (ybeam > 0.0) error("No convolve in Y allowed yet");
+
+    Qwcs = hasvalue("proj");
+    if (Qwcs) {  /* X and Y are now interpreted as a LONGITUDE / LATITUDE paid, in degrees */
+      proj = getparam("proj");
+      rot = 0.0;                   /* we can only handle non-rotated frames */
+
+      /* first save the astro WCS */
+      /* note we're forcing the center pixel as the reference pixel */
+
+      xrefpix = 0.5*(nx-1);
+      yrefpix = 0.5*(ny-1);
+      xref = 0.5*(xrange[0] + xrange[1]);
+      yref = 0.5*(yrange[0] + yrange[1]);
+      xinc = (xrange[1] - xrange[0])/nx;
+      yinc = (yrange[1] - yrange[0])/ny;
+
+      dprintf(0,"WCS: ref: %g %g refpix: %g %g  inc: %g %g proj: %s\n",
+	      xref,yref,xrefpix,yrefpix,xinc,yinc,proj);
+      
+
+      /* and now replace the pixel coordinates */
+
+      xrange[0] = 0.0;
+      yrange[0] = 0.0;
+      xrange[1] = nx-1.0;
+      yrange[1] = ny-1.0;
+      xrange[2] = (xrange[1] - xrange[0])/nx;
+      yrange[2] = (yrange[1] - yrange[0])/ny;
+
+      show_wcs("center pixel",xrefpix,yrefpix);
+      show_wcs("lower left", xrange[0],yrange[0]);
+      show_wcs("lower right",xrange[1],yrange[0]);
+      show_wcs("upper right",xrange[1],yrange[1]);
+      show_wcs("upper left", xrange[0],yrange[1]);
+
+
+    }
 
     setaxis(getparam("zrange"), zrange, nz, &zedge, &zbeam);
     if (zbeam > 0.0) {                          /* with convolve */
@@ -219,6 +305,7 @@ void setparams()
     outstr = stropen (getparam("out"),"w");
 }
 
+
 void compfuncs()
 {
     int i;
@@ -284,19 +371,39 @@ allocate_image()
         if (iptr2==NULL) 
             error("No memory to allocate third image - try moment>0");
     }
+    if (Qwcs) {
+      Axis(iptr) = 1;
 
-    Xmin(iptr) = xrange[0] + 0.5*xrange[2];
-    Ymin(iptr) = yrange[0] + 0.5*yrange[2];
-    Zmin(iptr) = zrange[0] + 0.5*zrange[2];
+      Xmin(iptr) = xref;
+      Ymin(iptr) = yref;
+      Zmin(iptr) = zrange[0] + 0.5*zrange[2];
+      
+      Dx(iptr) = xinc;
+      Dy(iptr) = yinc;
+      Dz(iptr) = zrange[2];
 
-    Dx(iptr) = xrange[2];
-    Dy(iptr) = yrange[2];
-    Dz(iptr) = zrange[2];
-	
-    Namex(iptr) = xlab;
-    Namey(iptr) = ylab;
-    Namez(iptr) = zlab;
-
+      Xref(iptr) = xrefpix;
+      Yref(iptr) = yrefpix;
+      Zref(iptr) = 0.0;
+      
+      Namex(iptr) = sconc("RA---",proj);
+      Namey(iptr) = sconc("DEC--",proj);
+      Namez(iptr) = zlab;
+      
+    } else {
+      Xmin(iptr) = xrange[0] + 0.5*xrange[2];
+      Ymin(iptr) = yrange[0] + 0.5*yrange[2];
+      Zmin(iptr) = zrange[0] + 0.5*zrange[2];
+      
+      Dx(iptr) = xrange[2];
+      Dy(iptr) = yrange[2];
+      Dz(iptr) = zrange[2];
+      
+      Namex(iptr) = xlab;
+      Namey(iptr) = ylab;
+      Namez(iptr) = zlab;
+      
+    }
     Beamx(iptr) = 0.0;  /* we don't allow smooth in the image plane for now */
     Beamy(iptr) = 0.0;
     Beamz(iptr) = (zsig>0.0 ? zsig : 0.0);
@@ -364,6 +471,7 @@ bin_data(int ivar)
     for (i=0, bp=btab; i<nobj; i++, bp++) {
         x = xfunc(bp,tnow,i);            /* transform */
 	y = yfunc(bp,tnow,i);
+	if (Qwcs) wcs(&x,&y);            /* convert to an astronomical WCS, if requested */
         z = zfunc(bp,tnow,i);
         flux = efunc[ivar](bp,tnow,i);
         if (Qdepth) {
@@ -621,7 +729,7 @@ int zbox(real z)
         return 0;                       /* always inside */
     if (zedge==0x01 && z<zrange[1])	/* left edge at infinity */
         return 0;
-    if (zedge==0x02 && z>zrange[0])	/* rigth side at infinity */
+    if (zedge==0x02 && z>zrange[0])	/* right side at infinity */
         return 0;
     if (zedge)
         return -1;                      /* remaining cases outside */
@@ -655,8 +763,10 @@ setaxis (string rexp, real range[3], int n, int *edge, real *beam)
     if (strncmp(rexp,"-inf",4)==0) {
         range[0] = -HUGE;
         *edge |= 0x01;              /* set left edge at inifinity */	
-    } else
+    } else {
+        *cp = 0;
         range[0] = natof(rexp);
+    }
     cp++;
     if (strncmp(cp,"inf",3)==0) {
         range[1] = HUGE;
@@ -664,6 +774,8 @@ setaxis (string rexp, real range[3], int n, int *edge, real *beam)
     } else
         range[1] = natof(cp);
     range[2] = (range[1]-range[0])/(real)n;       /* step */
+    if (range[2] < 0)
+      warning("%s: This axis %d has negative step",rexp,n);
     cp = strchr(cp,',');
     if (cp)
         *beam = natof(++cp);                  /* convolution beam */

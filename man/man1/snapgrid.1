@@ -1,4 +1,4 @@
-.TH SNAPGRID 1NEMO "18 June 1998"
+.TH SNAPGRID 1NEMO "8 May 2004"
 .SH NAME
 snapgrid \- grid a snapshot into a 2D or 3D image (cube)
 .SH SYNOPSIS
@@ -7,7 +7,8 @@ snapgrid \- grid a snapshot into a 2D or 3D image (cube)
 .SH DESCRIPTION
 \fIsnapgrid\fP grids three arbitrary bodytrans expressions 
 (default: \fBx\fP, \fBy\fPand \fB-vz\fP) of a snapshot into a datacube
-(or image plane).
+(or image plane), with optional astronomical projection for direct
+comparision with astronomical images.
 .PP
 The X and Y coordinates of the datacube can only
 be reularly gridded in histogram fashion 
@@ -111,6 +112,12 @@ to compare images of different cell sizes.
 \fBstack=t|f\fP
 Should all snapshots from the input file be stacked, or write one
 image per selected (see \fBtimes=\fP) time? [default: \fBf\fP].
+.TP
+\fBproj=\fP
+If a valid projection type (SIN, TAN, ARC, NCP, GLS, MER, AIT)
+but see also \fIwcs(1NEMO), the input coordinates are interpreted
+in angular degrees, and griddes with the appropriate sky projection.
+Default: no sky projection.
 .SH EXAMPLES
 The following example makes three moment images from an N-body snapshot,
 then smooths
@@ -172,8 +179,10 @@ problems since both the snapshot and the image(s) must fit into memory
 to obtain turbo speeds. Use non-negative \fBmoment\fPs to avoid
 having to allocate one or two extra images in addition to the
 snapshot and the image. 
+.PP
+Sky projections do not guaranetee flux conservation. 
 .SH "SEE ALSO"
-snaprotate(1NEMO), snapslit(1NEMO), snapsmooth(1NEMO), snapaxsym(1NEMO), 
+snaprotate(1NEMO), snapslit(1NEMO), snapsmooth(1NEMO), snapaxsym(1NEMO), wcs(1NEMO),
 tsf(1NEMO), snapccd(1NEMO), ccdintpol(1NEMO)
 .PP
 http://www.iinet.com.au/~watson/nngridr.html
@@ -195,4 +204,5 @@ src/nbody/image  	snapgrid.c
 18-jul-92	V3.2: fixed bug when moment<0 and stacked snapshots	PJT
 30-jul-93	V4.0: allow multiple  evar's - default is now stack=f	PJT
 18-jun-98	V4.4: added xlab/ylab/zlab and allow range[0]>range[1]	PJT
+8-may-04	V5.0: added proj= to optionallaly allow sky projections	PJT
 .fi

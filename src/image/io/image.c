@@ -26,7 +26,8 @@
  *                   in header image.h
  *  21-feb-00   V6.1 mapX_image() routines, cleaned up code a bit PJT
  *   9-sep-02   V6.2 added copy_image()
- *  13-nov-02   V7.0 added boolean images for masking operations  PJT
+ *  13-nov-02   V??? added boolean images for masking operations  PJT
+ *   7-may-04   V7.0 (optional) proper astronomical axes          PJT
  *			
  *
  *  Note: bug in TESTBED section; new items (Unit) not filled in
@@ -81,6 +82,9 @@ int write_image (stream outstr, imageptr iptr)
       put_data (outstr,DxTag,  RealType, &(Dx(iptr)),   0);
       put_data (outstr,DyTag,  RealType, &(Dy(iptr)),   0);
       put_data (outstr,DzTag,  RealType, &(Dz(iptr)),   0);
+      put_data (outstr,XrefTag,RealType, &(Xref(iptr)), 0);
+      put_data (outstr,YrefTag,RealType, &(Yref(iptr)), 0);
+      put_data (outstr,ZrefTag,RealType, &(Zref(iptr)), 0);
       put_data (outstr,MapMinTag, RealType, &(MapMin(iptr)), 0);
       put_data (outstr,MapMaxTag, RealType, &(MapMax(iptr)), 0);
       put_data (outstr,BeamTypeTag, IntType, &(BeamType(iptr)), 0);
@@ -97,6 +101,7 @@ int write_image (stream outstr, imageptr iptr)
          put_string (outstr,UnitTag,Unit(iptr));
       put_data (outstr,TimeTag,  RealType, &(Time(iptr)), 0);
       put_string(outstr,StorageTag,matdef[idef]);
+      put_data (outstr,AxisTag,  IntType, &(Axis(iptr)), 0);
     put_tes (outstr, ParametersTag);
          
     put_set (outstr,MapTag);
@@ -143,6 +148,20 @@ int read_image (stream instr, imageptr *iptr)
             get_data (instr,NxTag,IntType, &(Nx(*iptr)), 0);
             get_data (instr,NyTag,IntType, &(Ny(*iptr)), 0);
             get_data (instr,NzTag,IntType, &(Nz(*iptr)), 0);
+	    if (get_tag_ok(instr,AxisTag))
+	      get_data (instr,AxisTag,IntType, &(Axis(*iptr)), 0);
+	    else
+	      Axis(*iptr) = 0;
+	    if (Axis(*iptr) == 1) {
+	      get_data_coerced (instr,XrefTag,RealType, &(Xref(*iptr)), 0);
+	      get_data_coerced (instr,YrefTag,RealType, &(Yref(*iptr)), 0);
+	      get_data_coerced (instr,ZrefTag,RealType, &(Zref(*iptr)), 0);
+	    } else {
+	      Xref(*iptr) = 0.0;
+	      Yref(*iptr) = 0.0;
+	      Zref(*iptr) = 0.0;
+	    }
+
             get_data_coerced (instr,XminTag,RealType, &(Xmin(*iptr)), 0);
             get_data_coerced (instr,YminTag,RealType, &(Ymin(*iptr)), 0);
             get_data_coerced (instr,ZminTag,RealType, &(Zmin(*iptr)), 0);
@@ -245,6 +264,7 @@ int create_image (imageptr *iptr, int nx, int ny)
         printf ("CREATE_IMAGE: Not enough memory to allocate image\n");
         return 0;
     }
+    Axis(*iptr) = 0;            /* old style axis with no reference pixel */
     Nx(*iptr) = nx;             /* old style ONE map, no cube */
     Ny(*iptr) = ny;
     Nz(*iptr) = 1;
@@ -254,6 +274,9 @@ int create_image (imageptr *iptr, int nx, int ny)
     Dx(*iptr) = 1.0;            /* unity pixels */
     Dy(*iptr) = 1.0;
     Dz(*iptr) = 1.0;
+    Xref(*iptr) = 0.0;
+    Yref(*iptr) = 0.0;
+    Zref(*iptr) = 0.0;
     MapMin(*iptr) = 0.0;
     MapMax(*iptr) = 0.0;
     BeamType(*iptr) = 0;
@@ -266,6 +289,7 @@ int create_image (imageptr *iptr, int nx, int ny)
     Unit(*iptr)  = NULL;        /* no units */
     Time(*iptr)  = 0.0;
     Storage(*iptr) = matdef[idef];
+    Axis(*iptr) = 0;
     Mask(*iptr) = NULL;
 
     return 1;		/* succes return code  */
@@ -322,7 +346,11 @@ int copy_image (imageptr iptr, imageptr *optr)
   Namex(*optr) = mystrcpy(Namex(iptr));
   Namey(*optr) = mystrcpy(Namey(iptr));
   Namez(*optr) = mystrcpy(Namez(iptr));
+  Xref(*optr) = Xref(iptr);
+  Yref(*optr) = Yref(iptr);
+  Zref(*optr) = Zref(iptr);
   Storage(*optr) = matdef[idef];
+  Axis(*optr) = Axis(iptr);
   
   return 1;		/* succes return code  */
 }
@@ -351,6 +379,9 @@ int create_cube (imageptr *iptr, int nx, int ny, int nz)
     Xmin(*iptr) = 0.0;          /* start lower left corner at 0.0 */
     Ymin(*iptr) = 0.0;
     Zmin(*iptr) = 0.0;
+    Xref(*iptr) = 0.0;
+    Yref(*iptr) = 0.0;
+    Zref(*iptr) = 0.0;
     Dx(*iptr) = 1.0;            /* unity pixels */
     Dy(*iptr) = 1.0;
     Dz(*iptr) = 1.0;
@@ -366,6 +397,7 @@ int create_cube (imageptr *iptr, int nx, int ny, int nz)
     Unit(*iptr)  = NULL;        /* no units */
     Time(*iptr)  = 0.0;
     Storage(*iptr) = matdef[idef];
+    Axis(*iptr) = 0;
     Mask(*iptr) = NULL;
     
     return 1;		/* succes return code  */

@@ -1,4 +1,4 @@
-.TH IMAGE 3NEMO "9 September 2002"
+.TH IMAGE 3NEMO "8 May 2004"
 .SH NAME
 image, read_image, write_image, create_image, create_cube, copy_image, free_image - high level image i/o
 .SH SYNOPSIS
@@ -47,6 +47,8 @@ and sets most image header (except the size) variables to zero.
 elements are copied.
 .SH AUTHOR
 Peter Teuben
+.SH SEE ALSO
+image(5NEMO), fits(5NEMO)
 .SH FILES
 .nf
 .ta +1.5i
@@ -60,4 +62,5 @@ xx-jul-87       original version        PJT
 18-jan-89       V3.0 3D implemented     PJT
 27-jun-89       V4.1 added free_image   PJT
 9-sep-02    	V6.2 added copy_image	PJT
+8-may-05	V5.0 added reference pixel to datafiles, no API impact yet here 	PJT
 .fi

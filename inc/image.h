@@ -18,6 +18,9 @@
  *  21-feb-00    V6.1 added mapX_image() routines to return pointer arrays 
  *   9-sep-02    V6.2 added copy_image()
  *  13-nov-02    V6.3 added image masks as a boolean image
+ *   7-may-04    V7.0 added the notion of a reference point and value
+ *                    by (for now optionally) using
+ *                    why was i so lazy and didn't do this in 1987.....
  */
 #ifndef _h_image
 #define _h_image
@@ -32,7 +35,7 @@ typedef struct {
     int  beamtype;
     real beamsize;
 
-    int   type;		/* axis type: linear, array */
+    int   type;		    /* axis type: 0 not defined, 1 linear, 2 array */
     
     real  rmin;             /* 'crval' at 0 ; linear axis */
     real  dr;               /* 'cdelt' */
@@ -40,7 +43,7 @@ typedef struct {
     real  refval;           /* normally rmin, but like 'crval' in FITS */
 
     real *val;              /* array of length 'nr' for coordinates */
-} image_ax, *image_axptr;
+} image_axis, *image_axisptr;
 
 typedef struct {
     bool  *frame;	/* pointer to a contiguous block of data */
@@ -56,6 +59,9 @@ typedef struct {
     real  *frame;	/* pointer to a contiguous block of data */
     real  **matrix;     /* 2D special case: pointers to pointers */
     real  ***cube;      /* 3D special case: ptr to ptr to ptr's  */
+
+    int   axis;         /* new style axis (image_axis x,y,z) ??  */
+
     int   nx;		/* dimensions in X, Y and Z */
     int   ny;
     int   nz;
@@ -65,6 +71,16 @@ typedef struct {
     real  dx;           /* grid spacing */
     real  dy;
     real  dz;
+    real  xref;         /* fake corner (normally 0,0,0 in lower left) */
+    real  yref;         /* for new style axis */
+    real  zref;
+#if 0
+    image_axis  x;      /* new optional axis descriptors */
+    image_axis  y;
+    image_axis  z;
+#endif
+    char proj[16];      /* standard WCS projection types */
+
 #if 0
     matrix cd;          /* note, this can only handle NDIM by NDIM */
 #endif
@@ -91,11 +107,9 @@ typedef struct {
 
     int	type;		/* data-type of the data */
 
-    image_ax  x;        /* axis descriptors */
-    image_ax  y;
-    image_ax  z;
-
-    
+    image_axis  x;        /* axis descriptors */
+    image_axis  y;
+    image_axis  z;
 
     real  map_min;	/* data min and max in cube */
     real  map_max;
@@ -107,6 +121,7 @@ typedef struct {
 
 
 #define Frame(iptr)	((iptr)->frame)
+#define Axis(iptr)      ((iptr)->axis)
 #define Nx(iptr)	((iptr)->nx)
 #define Ny(iptr)	((iptr)->ny)
 #define Nz(iptr)	((iptr)->nz)
@@ -116,6 +131,9 @@ typedef struct {
 #define Dx(iptr)	((iptr)->dx)
 #define Dy(iptr)	((iptr)->dy)
 #define Dz(iptr)	((iptr)->dz)
+#define Xref(iptr)      ((iptr)->xref)
+#define Yref(iptr)      ((iptr)->yref)
+#define Zref(iptr)      ((iptr)->zref)
 #define MapMin(iptr)	((iptr)->map_min)
 #define MapMax(iptr)	((iptr)->map_max)
 #define BeamType(iptr)	((iptr)->beamtype)
@@ -177,6 +195,9 @@ typedef struct {
 #define     DxTag		"Dx"
 #define	    DyTag		"Dy"
 #define	    DzTag		"Dz"
+#define	    XrefTag		"Xrefpix"
+#define	    YrefTag		"Yrefpix"
+#define	    ZrefTag		"Zrefpix"
 #define	    MapMinTag		"MapMin"
 #define	    MapMaxTag		"MapMax"
 #define	    BeamTypeTag		"BeamType"
@@ -189,6 +210,7 @@ typedef struct {
 #define     UnitTag             "Unit"
 #define	    TimeTag		"Time"		/* note: from snapshot.h  */
 #define     StorageTag	        "Storage"
+#define     AxisTag             "Axis"
 
 #define     MapTag		"Map"
 #define     MapValuesTag	"MapValues"
@@ -202,5 +224,10 @@ int copy_image   ( imageptr, imageptr *);
 
 real **map2_image( imageptr );
 real ***map3_image( imageptr );
+
+/* worldpos.c */
+int worldpos(double xpix, double ypix, double xref, double yref, double xrefpix, double yrefpix, double xinc, double yinc, double rot, char *type, double *xpos, double *ypos);
+int xypix(double xpos, double ypos, double xref, double yref, double xrefpix, double yrefpix, double xinc, double yinc, double rot, char *type, double *xpix, double *ypix);
+
 
 #endif
