@@ -1,0 +1,46 @@
+.TH MKISOSPH 1NEMO "6 April 1989"
+.SH NAME
+mkisosph \- make finite isothermal sphere
+.SH SYNOPSIS
+\fBmkisosph out=\fPsnapshot [parameters=values ...]
+.SH DESCRIPTION
+\fImkisosph\fP creates an isothermal sphere with unity mass,
+.PP
+Models are not exactly stable, but fun to play with. Use King models
+with mkommod(1NEMO) is you need more stable models.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 25
+\fBout=\fIout_file\fP
+The data are written to this file in \fISnapShot(5NEMO)\fP 
+format [no default].
+.TP
+\fBnbody=\fInum_bodies\fP
+Number of stars in sphere [default: \fB2048\fP]
+.TP
+\fBrmax=\fImax_radius\fP
+Outer cutoff radius of the sphere. [Default: \fB2.0\fP]. 
+\fIThe default radius of 2.0 results in virial units \fP.
+.TP
+\fB2t/w=\fIratio\fP
+Virial ratio which measures deviation from virial equilibrium
+(two times the ratio of kinetic to potential energy, \fB2t/w\fP
+must be positive). [default: \fB1\fP].
+.TP
+\fBseed=\fIrandom_seed\fP
+Use random number seed. [default: \fB0\fP].
+.TP
+\fBzerocm=\fBt|f\fP
+Center coordinates on center of mass after generation? [default: \fBt\fP].
+.TP
+\fBheadline=\fImessage\fP
+Text headline for output file [default: not used].
+.SH "SEE ALSO"
+mkommod(1NEMO)
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.5i
+4-apr-89	V1.0 created  	PJT
+6-apr-89	V1.1 zerocm keyword added	PJT
+.fi
