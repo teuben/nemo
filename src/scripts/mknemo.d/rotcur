@@ -1,0 +1,14 @@
+#! /bin/csh -f
+#
+#  
+
+set dir=$NEMO/src/image/rotcur
+
+if (-e $dir) then
+  cd $dir
+  make rotcur
+  mv rotcur $NEMOBIN
+else
+  echo mknemo.d: $dir does not exist
+endif
+
