@@ -1,0 +1,212 @@
+#! /bin/csh -f
+#
+#
+set version="MKNEMO Version 1.2  31-mar-01"
+if ($#argv == 0) goto usage
+
+onintr error
+
+set newbins=0
+set errs=0
+set logfile=$NEMO/adm/install/mknemo.log
+if (! -w $logfile) then
+  echo "MKNEMO> Warning: you have no write permission on $logfile; using /dev/null instead"
+  set logfile=/dev/null
+endif
+
+set lockfile=$NEMO/adm/install/mknemo.lock
+if ("$argv[1]" == "-r") then
+  rm -f $lockfile >& /dev/null
+  echo "MKNEMO> $lockfile removed beforehand"
+endif
+if (-e $lockfile) then
+  echo "MKNEMO> Lockfile exists; cannot run mknemo:"
+  cat $lockfile
+  exit 0
+else
+  set bywhom=`whoami`@`hostname`
+  echo "`date` | $bywhom | $*" > $lockfile
+endif
+
+#if ($?CFLAGS == 0) setenv CFLAGS "-g"
+
+# set defaults which can be modified by command line options
+
+set src=$NEMO/src
+set n=1
+set d=0
+set code=""
+
+# process command line options
+loop:
+ switch ($argv[1])
+  case -c:
+    shift argv
+    if ($#argv == 0) goto noargs
+    set code=$argv[1]
+    shift argv
+    breaksw
+  case -d:
+    shift argv
+    if ($#argv == 0) goto noargs
+    set d=1
+    breaksw
+  case -n:
+    shift argv
+    if ($#argv == 0) goto noargs
+    set n=$argv[1]
+    shift argv
+    breaksw
+  case -s:
+    shift argv
+    if ($#argv == 0) goto noargs
+    if (! -d $argv[1]) then
+      echo "MKNEMO> Directory $argv[1] not found."
+      goto error
+    else
+      set src=$argv[1]
+      echo "MKNEMO> Resetting root for find to $src"
+    endif
+    shift argv
+    breaksw
+  case -r:
+    shift argv
+    breaksw
+  case -*:
+    echo "MKNEMO> Option $argv[1] not understood"
+    shift argv
+    breaksw
+  default:
+    goto process
+ endsw
+ if ($#argv == 0) goto noargs
+ goto loop
+
+process:
+
+if ($#argv == 0) goto noargs
+
+foreach f ($argv)
+ # strip any extensions from the arguments, we're looking to make executables
+ set ft=$f:t
+ set file=$ft:r
+ echo FILE=$file F=$f
+ set err=0
+ # if a local file, use that to compile, don't search for it
+ if (-e $file.c) then
+   echo -n "MKNEMO> Using local ${file}.c: "
+   set l=./$file.c
+ else
+   if ("$code" == "") then
+      set ccode=$file
+   else
+      set ccode=$code
+   endif
+   foreach e (c cc cxx C f F for )
+     echo "MKNEMO> Searching ${ccode}.${e}: "
+     set l=(`find $src -name $ccode.$e -type f -print`)
+     if ($#l) break
+   end
+ endif
+ set mk="#"
+ set err=0
+
+ if ($n > 1) then
+    if ($n > $#l) then
+    echo Too few elements in the list for your selection
+      @ errs++
+      continue
+    else
+      set l=$l[$n]
+    endif
+ endif
+
+ if ($#l > 1) then
+   echo "Cannot handle multiple files yet:"
+   echo $l
+ else if ($#l == 0) then
+   echo " .. trying directories..."
+   set l=(`find $src -name $file -type d -print`)
+   if ($#l == 1) then
+     if (-e $l/Makefile) then
+       set mk=$ft
+       if (! -e $NEMOBIN/$mk) set newbins=1
+       (cd $l;make $mk; set err=$status; mv $mk $NEMOBIN; make clean)
+       @ errs += $status
+       if ($d) then
+           mkpdoc $mk
+	   @ errs += $status
+       endif
+     else
+       @ errs += 1
+       echo "Cannot install $file without a Makefile"
+     endif
+   else if ($#l > 1) then
+     @ errs += 1
+     echo "Cannot handle multiple directories yet:"
+     echo $l
+   else
+     @ errs += 1
+     echo "Nothing found"
+   endif
+ else
+   echo "found one: $l"
+   set dir=$l:h
+   set t=$file:t
+   set mk=$t:r
+   if (! -e $dir/Makefile) then
+      echo "### Warning: using funny template Makefile"
+      set mf="-f $NEMO/src/nbody/trans/Makefile"
+   else 
+      set mf=""
+   endif
+   if (! -e $NEMOBIN/$mk) set newbins=1
+#   (cd $dir ; make $mf $mk CFLAGS="$CFLAGS"; set err=$status; mv $mk $NEMOBIN)
+   (cd $dir ; make $mf $mk; set err=$status; mv $mk $NEMOBIN)
+   @ errs += $err
+   # see if new doc file needed...
+   if ($d) then
+	mkpdoc $mk
+        @ errs += $status
+   endif
+ endif
+ if ($mk != "#") then
+   if ($err == 0) then
+      echo "`date`: $mk installed $bywhom" >> $logfile
+   else
+      echo "`date`: $mk ###error### $bywhom >> $logfile
+   endif
+ endif
+end
+
+end:
+  if ($newbins == 1) then
+    echo ""; echo ""
+    echo "### Warning: Use rehash for access to the new programs"
+  else
+    echo "";
+  endif
+  rm -f $lockfile
+  exit $errs
+
+error:
+  echo "MKNEMO> Interrupted, or some error occured. Removing lockfile."
+  rm -f $lockfile
+  exit 1
+
+noargs:
+  rm -f $lockfile
+  echo "MKNEMO> Not enough arguments"
+usage:
+  echo "$version"
+  echo "Usage: $0 program-name(s)"
+  echo ""
+  echo "Attempts to find NEMO sourcecode, install NEMO programs "
+  echo "and update the doc file if needed"
+  echo "Options: "
+  echo "  -c CODE   search for CODE.c to set the directory for target(s)"
+  echo "  -n N      selection of N-th element from unresolved list [1]"
+  echo "  -s DIR    root directory to start search [$NEMO]"
+  echo "  -r        remove lockfile before starting"
+  echo "  -d        also make doc file (only for true NEMO programs)"
+  exit 1
