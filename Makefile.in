@@ -433,10 +433,10 @@ cvslogin:
 cvstar:
 	cvs -Q -d $(ACVSROOT) co -d nemo_cvs nemo
 	date > nemo_cvs/VERSION_cvs
+	cp nemo_cvs/VERSION_cvs /tmp
 	gtar zcf nemo_cvs.tar.gz nemo_cvs
 	rm -rf nemo_cvs
-	scp nemo_cvs.tar.gz apus:/home/ftp/pub/nemo
-
+	scp nemo_cvs.tar.gz /tmp/VERSION_cvs apus:/home/ftp/pub/nemo
 
 # The following 'ftp' targets only supposed to work at the master site
 # Warning:  (COMPRESS) .gz extensions have been hardcoded here
