@@ -1,5 +1,5 @@
 /*
- * TABHIST: a general histogram plotter program for ascii data in tabular format
+ * TABHIST: histogram plotter program for ascii data in tabular format
  *          
  *
  *	17-Mar-88  V1.0 :  created by P.J.Teuben
@@ -33,6 +33,12 @@
  *       3-jun-01   3.2 : added nsigma=                         pjt
  *	23-sep-01      b: ->nemo_file_lines
  *       7-may-03   4.0 : allow multiple columns                pjt
+ *      12-nov-04   4.1 : added Sum
+ *      28-jan-05   5.0 : major overhaul:
+ *                        allow either xmin or xmax set, 
+ *                        sortidx -> sort selected by name
+ *                        fixed median & histogram if nsigma outliers 
+ *                        
  * 
  * TODO:
  *     option to do dual-pass to subtract the mean before computing
@@ -54,13 +60,13 @@
 string defv[] = {
     "in=???\n                     Input file name",
     "xcol=1\n			  Column(s) to use",
-    "xmin=\n			  In case minimum used (need both minmax)",
-    "xmax=\n			  In case maximum used (need both minmax)",
+    "xmin=\n			  Set minimum, if no autoscale needed",
+    "xmax=\n			  Set maximum, if no autoscale needed",
     "bins=16\n			  Number of bins",
     "maxcount=0\n		  Maximum along count-axis",
     "nmax=100000\n		  maximum number of data to be read if pipe",
     "ylog=f\n			  log scaling in Y?",
-    "xlab=value\n	          Optional Label along X",
+    "xlab=$in[$xcol]\n	          Optional Label along X",
     "ylab=N\n			  Optional Label along Y",
     "headline=\n		  Optional headline in graph",
     "tab=f\n			  Table (t) or Plot( f)",
@@ -69,11 +75,15 @@ string defv[] = {
     "cumul=f\n                    Override and do cumulative histogram instead",
     "median=t\n			  Compute median too (can be time consuming)",
     "nsigma=-1\n                  delete points more than nsigma",
-    "VERSION=4.0a\n		  12-may-04 PJT",
+    "sort=qsort\n                 Sort mode {qsort;...}",
+    "dual=f\n                     Dual pass for large number",
+    "VERSION=5.0\n		  28-jan-05 PJT",
     NULL
 };
 
 string usage = "General tabular 1D statistics and histogram plotter";
+
+string cvsid = "$Id$";
 
 /**************** SOME GLOBAL VARIABLES ************************/
 
@@ -93,28 +103,34 @@ local int col[MAXCOL];			/* histogram column number(s) */
 local real   xrange[2];			/* range of  histogram values */
 local int    nsteps;			/* number of divisions */
 
-local real   *x = NULL;			/* pointer to array of nmax points */
-local int    *ix = NULL;		/* pointer to index array */
+local real   *x = NULL;			/* pointer to array of nmax*ncol points */
 local int    *iq = NULL;                /* boolean masking array */
 local int    nmax;			/* lines to use at all */
 local int    npt;			/* actual number of points */
 local real   xmin, xmax;		/* actual min and max as computed */
 local real   nsigma;                    /* outlier rejection attempt */
 local bool   Qauto;			/* autoscale ? */
+local bool   Qmin, Qmax;                /* denotes if xmin or xmax were specified */
 local bool   Qgauss;                    /* gaussian overlay ? */
 local bool   Qresid;                    /* gaussian residual overlay ? */
 local bool   Qtab;                      /* table output ? */
 local bool   Qcumul;                    /* cumulative histogram ? */
 local bool   Qmedian;			/* compute median also ? */
+local bool   Qdual;                     /* dual pass ? */
 local int    maxcount;
+local int    Nunder, Nover;             /* number of data under or over min/max */
+local real   dual_mean;                 /* mean value, if dual pass used */
 
 local string headline;			/* text string above plot */
 local string xlab, ylab;		/* text string along axes */
 local bool   ylog;			/* count axis in logarithmic scale? */
 local real   xplot[2],yplot[2];		/* borders of plot */
 
+local iproc  mysort, getsort();
+
 local real xtrans(real), ytrans(real);
 local void setparams(void), read_data(void), histogram(void);
+local iproc getsort(string name);
 
 
 
@@ -127,6 +143,11 @@ nemo_main()
     histogram();
 }
 
+local int compar_real(real *a, real *b)
+{
+  return *a < *b ? -1 : *a > *b ? 1 : 0;
+}
+
 local void setparams()
 {
     input = getparam("in");
@@ -136,16 +157,13 @@ local void setparams()
     nsteps=getiparam("bins");
     if (nsteps > MAXHIST) 
         error("bins=%d too large; MAXHIST=%d",nsteps,MAXHIST);
-    if (hasvalue("xmin") && hasvalue("xmax")) {
-	Qauto=FALSE;
-    	xrange[0] = getdparam("xmin");
-    	xrange[1] = getdparam("xmax");
-	dprintf (2,"fixed plotrange %g : %g\n",xrange[0],xrange[1]);
-	if (xrange[0] >= xrange[1]) error("Need xmin < xmax");
-    } else {
-	Qauto=TRUE;
-	dprintf (2,"auto plotscaling\n");
-    }
+    Qmin = hasvalue("xmin");
+    Qmax = hasvalue("xmax");
+    if (Qmin) xrange[0] = getdparam("xmin");
+    if (Qmax) xrange[1] = getdparam("xmax");
+    if (Qmin && Qmax && xrange[0] >= xrange[1]) error("Need xmin < xmax");
+    Qauto = (!Qmin || !Qmax) ;
+
     maxcount=getiparam("maxcount");
     headline = getparam("headline");
     ylog=getbparam("ylog");
@@ -161,12 +179,13 @@ local void setparams()
     }
     Qmedian = getbparam("median");
     if (ylog && streq(ylab,"N")) ylab = scopy("log(N)");
+    Qdual = getbparam("dual");
 
     nmax = nemo_file_lines(input,getiparam("nmax"));
     if (nmax<1) error("Problem reading from %s",input);
 
     nsigma = getdparam("nsigma");
-
+    mysort = getsort(getparam("sort"));
     instr = stropen (input,"r");
 }
 
@@ -178,7 +197,7 @@ local void read_data()
     int   i,j,k;
     mdarray2 md2 = allocate_mdarray2(ncol,nmax);
 
-    dprintf(0,"Reading %d columns\n",ncol);
+    dprintf(0,"Reading %d column(s)\n",ncol);
     for (i=0; i<ncol; i++)
       coldat[i] = md2[i];
     npt = get_atable(instr,ncol,col,coldat,nmax);        /* read it */
@@ -187,35 +206,49 @@ local void read_data()
     	npt = nmax;
     }
     x = (real *) allocate(npt*ncol*sizeof(real));
-    for (i=0, k=0; i<ncol; i++)
-      for (j=0; j<npt; j++)
+    if (Qdual) {
+      warning("dual=t is a new test option");
+      /* pass over the data, finding the mean */
+      for (i=0, k=0; i<ncol; i++)
+	for (j=0; j<npt; j++) {
+	  dual_mean += md2[i][j];
+      }
+      dual_mean /= (ncol*npt);
+      dprintf(0,"Dual pass mean       : %g\n",dual_mean);
+    } else
+      dual_mean = 0.0;
+
+    for (i=0, k=0; i<ncol; i++) {
+      for (j=0; j<npt; j++) {
+	md2[i][j] -= dual_mean;
+	if (Qmin && md2[i][j] < xrange[0]) continue;
+	if (Qmax && md2[i][j] > xrange[1]) continue;
 	x[k++] = md2[i][j];
-    npt *= ncol;
+      }
+    }
+    npt = k;
+
     free_mdarray2(md2,ncol,nmax);
 
     minmax(npt, x, &xmin, &xmax);
-    if (Qauto) {
-	xrange[0] = xmin;
-	xrange[1] = xmax;
-    }
+    if (!Qmin) xrange[0] = xmin;
+    if (!Qmax) xrange[1] = xmax;
     /*  allocate index arrray , and compute sorted index for median */
-    if (Qmedian) {
-        ix = (int *) allocate(sizeof(int)*npt);
-        sortptr(x,ix,npt);
-    } 
+    if (Qmedian) 
+      (mysort)(x,npt,sizeof(real),compar_real);
 }
 
 
 local void histogram(void)
 {
-        int i,j,k, l, kmin, kmax, lcount;
+        int i,j,k, l, kmin, kmax, lcount = 0;
 	real count[MAXHIST], under, over;
 	real xdat,ydat,xplt,yplt,dx,r,sum,sigma2, q, qmax;
 	real mean, sigma, skew, kurt, lmin, lmax, median;
 	Moment m;
 
 	dprintf (0,"read %d values\n",npt);
-	dprintf (0,"min and max value in column(s)  %d: [%g : %g]\n",col[0],xmin,xmax);
+	dprintf (0,"min and max value in column(s)  %s: [%g : %g]\n",getparam("xcol"),xmin,xmax);
 	if (!Qauto) {
 	    xmin = xrange[0];
 	    xmax = xrange[1];
@@ -249,6 +282,11 @@ local void histogram(void)
 		dprintf (4,"%d : %f %d\n",i,x[i],k);
 		accum_moment(&m,x[i],1.0);
 	}
+	if (under > 0) error("bug: under = %d",under);
+	if (over  > 0) error("bug: over = %d",over);
+	under = Nunder;
+	over  = Nover;
+
 	mean = mean_moment(&m);
 	sigma = sigma_moment(&m);
 	skew = skewness_moment(&m);
@@ -283,7 +321,7 @@ local void histogram(void)
 	      sigma = sigma_moment(&m);
 	      skew = skewness_moment(&m);
 	      kurt = kurtosis_moment(&m);
-	      dprintf(0,"%d/%d: removing point %d, m/s=%g %g qmax=%g\n",
+	      dprintf(1,"%d/%d: removing point %d, m/s=%g %g qmax=%g\n",
 		      lcount,npt,l,mean,sigma,qmax);
 	      if (sigma <= 0) {
 		/* RELATED TO presetting MINMAX */
@@ -293,65 +331,69 @@ local void histogram(void)
 		sigma = sigma_moment(&m);
 		skew = skewness_moment(&m);
 		kurt = kurtosis_moment(&m);
-		dprintf(0,"%d/%d: LAST removing point %d, m/s=%g %g qmax=%g\n",
+		dprintf(1,"%d/%d: LAST removing point %d, m/s=%g %g qmax=%g\n",
 		      lcount,npt,l,mean,sigma,qmax);
 		break;
 		
 	      }
 
 	    } else
-	      dprintf(0,"%d/%d: keeping point %d, m/s=%g %g qmax=%g\n",
+	      dprintf(1,"%d/%d: keeping point %d, m/s=%g %g qmax=%g\n",
 		      lcount,npt,l,mean,sigma,qmax);
 
 	    /* if (lcount > npt/2) break; */
 	  } while (qmax > nsigma);
-	  free(iq);
-	}
+	  dprintf(0,"Removed %d/%d points for nsigma=%g\n",lcount,npt,nsigma);
 
-	dprintf (0,"Number of points     : %d\n",n_moment(&m));
+	  /* @algorithm      left shift array values from mask array */
+	  /* now shift all points into the array, decreasing npt */
+	  /* otherwise the median is not correctly computed */
+	  for (i=0, k=0; i<npt; i++) {
+	    dprintf(1,"iq->%d\n",iq[i]);
+	    if (iq[i]) k++;
+	    if (k==0) continue;  /* ?? */
+	    if (i-k < 0) continue;
+	    dprintf(1,"SHIFT: %d <= %d\n",i-k,i);
+	    x[i-k] = x[i];
+	  }
+	  npt -= lcount;   /* correct for outliers */
+	  free(iq);
+	} /* nsigma > 0 */
+
+	if (npt != n_moment(&m))
+	  error("Counting error, probably in removing outliers...");
+	dprintf (0,"Number of points     : %d\n",npt);
 	dprintf (0,"Mean and dispersion  : %g %g\n",mean,sigma);
 	dprintf (0,"Skewness and kurtosis: %g %g\n",skew,kurt);
 	if (Qmedian) {
-#if 0
-        if (npt % 2) 
-            median = x[ix[(npt-1)/2]];
-        else
-            median = 0.5 * (x[ix[npt/2]] + x[ix[npt/2-1]]);
-        dprintf (0,"Median               : %g\n",median);
-#else
-	if (npt != n_moment(&m)) {
-            kmin = kmax = -1;
-            for (k=0; k<npt; k++) {
-                if (x[ix[k]] >= xmin) {
-                    kmin = k;
-                    break;
-                }   
-            }
-            for (k=npt-1; k>=0; k--) {
-                if (x[ix[k]] <= xmax) {
-                    kmax = k;
-                    break;
-		}   
-            }
-            if (kmin == -1)
-                error("New median search: kmin=%d, no data in range?",kmin);
-            if (kmax == -1)
-                error("New median search: kmax=%d, no data in range?",kmax);
-        } else {
-            kmin = 0;
-            kmax = npt-1;
-        }
-        if ((kmax-kmin+1)%2) {
-                median = x[ix[kmin+(kmax-kmin)/2]];
-        } else {
-                median = 0.5 * (x[ix[kmin+(kmax-kmin+1)/2]] +
-                                x[ix[kmin+(kmax-kmin+1)/2-1]]);
 
-        }
-        dprintf (0,"Median               : %g\n",median);
-        dprintf (0,"Range for median     : %d %d \n",kmin,kmax);
-#endif
-        }
+	  if (npt % 2) 
+            median = x[(npt-1)/2];
+	  else
+            median = 0.5 * (x[npt/2] + x[npt/2-1]);
+	  dprintf (0,"Median               : %g\n",median);
+	}
+	dprintf (0,"Sum                  : %g\n",show_moment(&m,1));
+
+	if (lcount > 0) {
+	  warning("Recompute histogram because of outlier removals");
+	  /* recompute histogram if we've lost some outliers */
+	  for (k=0; k<nsteps; k++)
+	    count[k] = 0;		/* init histogram */
+	  under = over = 0;
+	  for (i=0; i<npt; i++) {
+	    if (xmax != xmin)
+	      k = (int) floor((x[i]-xmin)/(xmax-xmin)*nsteps);
+	    else
+	      k = 0;
+	    if (k==nsteps && x[i]==xmax) k--;     /* include upper edge */
+	    if (k<0)       { under++; continue; }
+	    if (k>=nsteps) { over++;  continue; }
+	    count[k] = count[k] + 1;
+	    dprintf (4,"%d : %f %d\n",i,x[i],k);
+	  }
+	  if (under > 0 || over > 0) error("under=%d over=%d in recomputed histo",under,over);
+	}
 
 	dprintf (3,"Histogram values : \n");
         dx=(xmax-xmin)/nsteps;
@@ -485,4 +527,63 @@ local real xtrans(real x)
 local real ytrans(real y)
 {
 	return (2.0 + 16.0*(y-yplot[0])/(yplot[1]-yplot[0]));
+}
+
+/*
+ *  Tabulate the valid sort names, plus their associated external
+ *  routines. The accompanying getsort() routine returns the
+ *  appropriate sort routine
+ */
+ 
+typedef struct sortmode {
+    string name;
+    iproc   fie;
+} sortmode;
+ 
+#define SortName(x)  x->name
+#define SortProc(x)  x->fie
+ 
+ 
+/* List of externally available sort routines */
+ 
+/* extern int qsort();         /* Standard Unix : stdlib.h */
+/* or:  void qsort(void *base, size_t nmemb, size_t size,
+ *                 int(*compar)(const void *, const void *));
+ */
+
+#ifdef FLOGGER
+                   
+extern int bubble_sort();          /* Flogger library routines */
+extern int heap_sort();
+extern int insertion_sort();
+extern int merge_sort();
+extern int quick_sort();
+extern int shell_sort();
+
+#endif
+
+local sortmode smode[] = {
+#ifdef FLOGGER
+    "bubble",   bubble_sort,        /* cute flogger routines */
+    "heap",     heap_sort,
+    "insert",   insertion_sort,
+    "merge",    merge_sort,
+    "quick",    quick_sort,
+    "shell",    shell_sort,
+#endif
+    "qsort",    (iproc) qsort,      /* standard Unix qsort() */
+    NULL, NULL,
+};
+                                                                                
+local iproc getsort(string name)
+{
+    sortmode *s;
+                                                                                
+    for (s=smode; SortName(s); s++)  {
+        dprintf(1,"GETSORT: Trying %s\n",SortName(s));
+        if (streq(SortName(s),name))
+            return SortProc(s);
+    }
+    error("%s: no valid sortname",name);
+    return NULL;     /* better not get here ... */
 }
