@@ -4,11 +4,13 @@ bench \- NEMO benchmarks in NemoStones
 .SH DESCRIPTION
 Nemo Benchmarks (a.k.a. NemoStones)
 .PP
-\fBbench1\fP tests the classic Barnes and Hut code in C, without
-quadruople corrections, for 10240 particles and 128 timesteps.
-\fBbench2\fP tests. \fBbench0\fP has been added to compare a
-direct with tree based N-body code, but is not part of the
-NemoStone.
+\fBbench1\fP tests the classic (1986) Barnes and Hut code in C, without
+quadrupole corrections, for 10240 particles and 128 timesteps.
+\fBbench2\fP tests a more modern Treecode, this one is the
+O(N) version from Dehnen (2002?).
+\fBbench0\fP has been added to compare a tree code with a 
+direct N-body code, but is not part of the NemoStone.
+\fBbench3\fP benchmarks the creation of a large (>2GB) snapshot.
 .SH DATA
 Here are the benchmarks
 .ta +1i

@@ -8,9 +8,16 @@ image \- binary format for 2D and 3D image/cube files
 \fB#include <image.h>\fP
 .fi
 .SH DESCRIPTION
-\fIimage\fP files is a dataformat that describes a rectangular 
-2-dimensional matrix or 3-dimensional cube,
-although the coordinate transformation 
+\fIimage\fP implement a rectangular 
+2-dimensional matrix or 3-dimensional cube in a 
+\fIfilestruct(5NEMO)\fP datafile. 
+The current implementation restricts
+images to well known 2- and 3-dimensional cases, as well 
+as the restriction that the whole image must be in memory.
+See \fImdarray(3NEMO)\fP for a more general 
+multi-dimensional array interface (though there is no special
+I/O interface for this data structure). The
+coordinate transformation 
 to world coordinates is by no means restricted to a simple linear
 equation of the form:
 .nf
@@ -18,11 +25,6 @@ equation of the form:
 .fi
 where \fIi\fP runs from 0 to N-1, the dimension of the matrix in
 any of its coordinates.
-We have restricted images to 2- and 3-dimensional cases, as well 
-as the restriction that the whole image must be in memory at the
-same time. See \fImdarray(3NEMO)\fP for a more general 
-multi-dimensional array interface (though there is no special
-I/O interface for this data structure).
 .PP
 \fIImage\fP files are used in 2D and 3D images, i.e. a matrix of
 values of any kind (intensity, velocity etc.).
