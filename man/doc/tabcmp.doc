@@ -1,0 +1,18 @@
+%N tabcmp
+%D Student T and F test for mean and variance comparisons
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man tabcmp' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in1
+	First dataset [???]
+%A in2
+	Second dataset [???]
+%A col1
+	Column from 1st dataset [1]
+%A col2
+	Column from 2nd dataset [1]
+%A nmax
+	Max lines in data [10000]
+%A VERSION
+	8-oct-97 PJT [0.2]
