@@ -1,0 +1,17 @@
+#! /bin/csh -f
+#
+
+#  search for combinations of '#ifndef VAR' / '#if !defined(VAR)'
+#  and their definition '#define VAR ...'
+#
+
+set tmp=/tmp/tmp$0.$$
+
+foreach file ($*)
+  egrep '(ifndef|\!defined)' $file > $tmp.1
+  if (! -z $tmp.1) then
+    echo $file
+  endif
+end
+
+rm $tmp.*
