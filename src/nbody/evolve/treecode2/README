@@ -1,0 +1,18 @@
+BENCH:
+------
+standard seed=123 input model with 128 particles in 
+hackcode1 results in (eps=0.05, tol=1)
+
+                etot(t=0)
+
+hackcode1       -0.2943
+treecode2       -0.29796
+
+
+
+
+	I.e. there may be a problem....
+
+RUN:
+----
+
