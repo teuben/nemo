@@ -17,6 +17,7 @@
  *     26-jan-00   0.4b  fix code for new pl_cursor in yapp_pgplot
  *
  *      1-jul-03   1.0 cloned from tabview --- or should we stick to tabview --
+ *     21-oct-03   1.2 added xlab= ylab=
  */
 
 #include <stdinc.h>
@@ -37,13 +38,15 @@ string defv[] = {
     "ptype=0\n      Type of displayed points (not used)",
     "xrange=\n      Range in X [autoscale]",
     "yrange=\n      Range in Y [autoscale]",
+    "xlab=\n        Fix the label along X axis to this",
+    "ylab=\n        Fix the label along Y axis to this",
     "layout=\n      Filename with layout to be added to plot?",
     "action=\n      (optional) Clicked Point action",
     "out=\n         Filename for output table",
     "options=i,x,y,data\n   Output options",
     "maxstat=1\n    Max amount of statistics printed out",
     "cursor=t\n     Go into cursor mode directly?",
-    "VERSION=1.1a\n  8-jul-03 PJT",
+    "VERSION=1.2\n  21-oct-03 PJT",
     NULL,
 };
 
@@ -98,7 +101,7 @@ int maxstat;
 
 real gxmin, gxmax, gymin, gymax;
 real xmin, xmax, ymin, ymax, xplot[2], yplot[2];
-string xname, yname;
+string xname, yname, xlab, ylab;
 plcommand *layout;
 string action;
 bool Qcursor;
@@ -254,6 +257,7 @@ gettable()
 
 
     xname = getparam("xvar");    
+    xlab = hasvalue("xlab") ? getparam("xlab") : xname;
     inifie(xname);                     /* parse the X expression */
     for (i=0; i<npoints; i++) {         /* set X for all points */
         dofie(points[i].par, &one, &points[i].x, &errval);
@@ -280,6 +284,7 @@ gettable()
     dprintf(0,"Xvar %s: displayed min= %g max= %g\n",xname,xmin,xmax);
 
     yname = getparam("yvar");    
+    ylab = hasvalue("ylab") ? getparam("ylab") : yname;
     inifie(yname);                       /* parse the Y expression */
     for (i=0; i<npoints; i++) {           /* set Y for all points */
         dofie(points[i].par, &one, &points[i].y, &errval);
@@ -765,9 +770,9 @@ ini_display()
 box_display()
 {
     plcolor(1);
-    xaxis ( 2.0,  2.0, 16.0, xplot, -7, xtrans, xname);
+    xaxis ( 2.0,  2.0, 16.0, xplot, -7, xtrans, xlab);
     xaxis ( 2.0, 18.0, 16.0, xplot, -7, xtrans, NULL);
-    yaxis ( 2.0,  2.0, 16.0, yplot, -7, ytrans, yname);
+    yaxis ( 2.0,  2.0, 16.0, yplot, -7, ytrans, ylab);
     yaxis (18.0,  2.0, 16.0, yplot, -7, ytrans, NULL);
     
 }
