@@ -1,0 +1,149 @@
+.TH FITSCCD 1NEMO "7 November 2000"
+.SH NAME
+fitsccd \- read a (fits) image file from disk
+.SH SYNOPSIS
+.PP
+\fBfitsccd in=\fPimage \fBout=\fPfits [parameter=value]
+.SH DESCRIPTION
+\fBfitsccd\fP reads a (fits) image file from disk. The input is normally in 
+\fIfits(5NEMO)\fP format, although certain foreign data formats can 
+also be read in a limited form of \fIraw\fP mode
+(see \fBFOREIGN FORMATS\fP below). This effectively
+allows you to read formats such as Miriad, Gipsy, Iraf, Zodiac and Aips data, 
+given the right parameters... The output will always be in 
+standard \fIimage(5NEMO)\fP format.
+.PP
+See notes in \fIccdfits(1NEMO)\fP how to process fits files from
+tape instead disk.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 20
+\fBin=\fIfits-file\fP
+input file, must be \fIfits(5)\fP format unless \fBmode=raw\fP (see below)
+[no default].
+.TP
+\fBout=\fIimage-file\fP
+output file, will be in \fIimage(5)\fP format [no default].
+.TP
+\fBplanes=\fIp1,p2..\fP
+List of planes to be read from the fits file in case a cube was
+processed. If no list supplied, all are used. Planes count
+from 0 upwards. 
+[Default: all].
+.TP
+\fBblocking=\fIfactor\fP
+Integer that denotes the blocking factor with which file was written.
+It is the multiple of blocks of 2880 bytes.
+[default: \fB1\fP].
+.TP
+\fBmode=\fImode\fP
+Format mode of input file. Choises are \fIfits\fP and \fIraw\fP. In raw
+mode various relevant header parameters must be given using remaining
+keywords listed below. All keyword following this one are only
+effective in \fIraw\fP mode.
+[Default: \fBfits\fP].
+.TP
+\fBblocksize=\fIblocksize\fP
+Basic blocksize of a raw input file. The actual blocksize applied
+includes padding, and is hence \fIblocksize*blocking\fP. 
+It is only used in \fIraw\fP mode.
+[default: \fB1\fP].
+.TP
+\fBoffset=\fIoffset\fP
+Byte offset where the data starts in the file. 
+It is only used in \fIraw\fP mode.
+[Default: \fB0\fP]
+.TP
+\fBbitpix=\fIbitpix\fP
+FITS Bitpix used in conversion. Allowed are 16, 32 and -32, denoting
+16 and 32 bit integers, and 32 bit IEEE floating point resp.
+It is only used in \fIraw\fP mode.
+[Default \fB-32\fP].
+.TP
+\fBnaxis=\fInz,ny,nz\fP
+Size of all relevant axes in the data-"cube".
+It is only used in \fIraw\fP mode.
+No default!
+.TP
+\fBcdelt=\fIr1,r2,r3\fP
+Pixel separation.
+It is only used in \fIraw\fP mode.
+[Default: \fI2/nx,2/ny,2/nz\fP]
+.TP
+\fBcrpix=\fIr1,r2,r3\fP
+Reference pixel.
+It is only used in \fIraw\fP mode.
+[Default: \fB0,0,0\fP].
+.TP
+\fBcrval=\fIr1,r2,r3\fP
+Value at reference pixel.
+It is only used in \fIraw\fP mode.
+[Default: \fB0,0,0\fP].
+.TP
+\fBbscale=\fIbscale\fP
+Scaling constant from raw data to internal data.
+It is only used in \fIraw\fP mode.
+[Default: \fB1\fP].
+.TP
+\fBbzero=\fIbzero\fP
+Offset constant from raw data to internal data.
+It is only used in \fIraw\fP mode.
+[Default: \fB0\fP].
+.TP
+\fBblank=\fPblank_value\fP
+If a magic value from the input dataset needs to be 
+replaced in the output image, give that value here.
+It is not yet possible to use the FITS \fBBLANK\fP keyword
+for this.
+[Default: not used].
+.TP
+\fBrelcoords=f|t\fP
+Use relative coordinates instead of absolute coordinates? 
+[false]
+.SH FOREIGN FORMATS
+An \fIAIPS\fP dataset...
+.PP
+An \fIIRAF\fP dataset...
+.PP
+A \fIGIPSY\fP dataset uses offset=0 and bitpix=-32. Dataset name 
+normally has extension ".IMAGE". Use the GIPSY 
+program \fIgds\fP or \fIheader\fP
+to find out relevant header parameters.
+.nf
+    % \fBfitsccd in=10.IMAGE out=10.ccd mode=raw offset=0 bitpix=-32 ...\fP
+.fi
+.PP
+A \fIMIRIAD\fP dataset is converted using an offset of
+4 bytes and bitpix of -32 into the \fIdataset/image\fP file.
+Various header parameters must be retrieved from the 
+header using the Miriad program \fIitemize\fP:
+.nf
+    % \fBfitsccd in=dat.mir/image out=dat.ccd mode=raw offset=4 bitpix=-32 ...\fP
+.fi
+.PP
+A \fIZODIAC\fP dataset uses offset=0 and bitpix=-32. Dataset names
+are preceded with an underscore. For a zodiac image with 
+.nf
+    % \fBfitsccd in=_zim out=zim.ccd mode=raw offset=0 bitpix=-32 ...\fP
+.fi
+.SH "SEE ALSO"
+ccdfits(1NEMO), snapccd(1NEMO), image(5NEMO), fits(5NEMO), dd(1)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+~/src/image/fits  	fitsccd.c fitsccd.1
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+7-mar-90	V1.0 Written	PJT
+1-oct-90	V3.0 New fitsio routines from Sault	PJT
+11-oct-90	V3.1 Added 'raw' mode  	PJT
+10-sep-91	V3.3 Added blank= keyword, more doc  	PJT
+18-may-99	V3.6 added support to read CD_i_j based files	PJT
+21-mar-00	V3.6a fixed offset bug for raw cubes	PJT
+7-nov-00	V3.7 added relcoords=	PJT
+.fi
