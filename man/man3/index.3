@@ -1,0 +1,246 @@
+.TH INDEX 3NEMO "29 October 1990"
+.SH NAME
+index \- index of all library functions in NEMO's $NEMOLIB
+.SH DESCRIPTION
+This section describes the library functions in NEMO.
+In addition to the main library, \fIlibnemo.a\fP, there may be additional
+user contributed libraries, such as:
+\fIlibNbody\fP, \fIlibJ.a\fP, \fIlibP.a\fP and \fIlibT.a\fP, 
+and some separate \fI*.o\fP files, which can be linked separately. A typical
+non-graphics NEMO program can be linked as follows:
+.nf
+\fB   cc -o prg prg.c $NEMOLIB/libnemo.a -lm\fP
+.fi
+.SH NEW STYLE FILES
+.nf
+.ta +3.0i
+$NEMOLIB/libnemo.a	New style (NEMO V2.x) library
+$NEMOLIB/libNEMO.a	Bundling of all object files from old style file list
+.fi
+.SH OLD STYLE FILES
+.nf
+.ta +3.0i
+$NEMOLIB/libJ.a       	Joshua Barnes (JEB)
+$NEMOLIB/libP.a       	Piet Hut (PH)
+$NEMOLIB/libT.a       	Peter Teuben (PJT)
+$NEMOLIB/libNbody.a  	filestructure for N-body snapshots (JEB)
+$NEMOLIB/libMongo.a	MONGO under sunwindows (PJT)
+$NEMOLIB/libNumrec.a	Numerical Recipies (PJT)
+$NEMOLIB/libOrbit.a	Orbit library (PJT)
+$NEMOLIB/libwerong.a	werong routines (purely for FITS) (PJT)
+$NEMOLIB/old_filestr.o	old (pre april 1988) filestr (JEB)
+$NEMOLIB/old_filestruct.o	old (pre april 1988) filestruct (JEB)
+$NEMOLIB/contour.o   	contour program, calls yapp (PJT)
+$NEMOLIB/image.o      	image "library" (PJT)
+$NEMOLIB/filestruct.o	new filestructure (JEB)
+$NEMOLIB/yapp.o     	yapp, standard suntools (JEB)
+$NEMOLIB/yapp_cgi.o   	yapp, using cgi instead of suncore (PJT)
+$NEMOLIB/yapp_cg.o  	yapp, for color graphics monitors (JEB)
+$NEMOLIB/yapp_ps.o   	yapp, using PostScript for laserprinter (PJT/JEB)
+$NEMOLIB/yapp_ps_new.o   	yapp, using PostScript for laserprinter (JEB)
+.SH "LIST OF FUNCTIONS"
+.sp 2
+.nf
+.ta \w'vtimes'u+6n +\w'vtimes.3c'u+10n
+\fIName\fP	\fIAppears on Page\fP	\fIDescription\fP
+.ta \w'vtimes'u+8n +\w'vtimes.3c'u+8n
+.sp 5p
+_absv_d  	vectmath.3  	horrible macros
+_absv_f  	vectmath.3
+_mappath	filefn.3	a perhaps useful utility for filefn's
+a2unit   	libNbody.a
+aarseth0	libP.a
+add_history	history.3
+allocate	libJ.a   	allocate memory with error checking
+allocate_orbit	orbit.3
+ask_headline	history.3
+ask_history	history.3
+axvar      	libJ: axis.3	specify general parameters for axis subroutines
+bessi0   	besselfunc.3	modified bessel function I0(x)
+bessi1   	besselfunc.3	modified bessel function I1(x)
+bessk0   	besselfunc.3	modified bessel function K0(x)
+bessk1   	besselfunc.3	modified bessel function K1(x)
+btitrans	libNbody.a
+btrtrans	libNbody.a
+burststring	burststring.3	separate a string into tokens (libJ.a)
+contour  	contour.3	simple contour routine
+contour_setdef	contour.3	optional define undefined value for contour
+copy_item	filestruct.3
+copxstr 	extstring.3	copy extended string
+create_cube	image.3   	allocate and create an 3D image cube 
+create_image	image.3  	allocate and create an 2D image map
+cputime    	libJ.a  	compute CPU time in minutes
+defext     	filefn.3	add extension to filename if none already exists
+dex      	libNbody.a
+dmpfien   	nemofie.3	
+dofien   	nemofie.3	expression parser
+dprintf  	dprintf.3
+drange  	range.3   	parse string of values into a double array
+dummy_for_malloc	libOrbit.a
+dynamem   	libT.a
+erf     	libT.a
+erfc    	libT.a
+error   	error.3  	give error message and die quickly
+extension	filefn.3	return extension of pathfilename
+f        	libT.a
+findcms  	libNbody.a
+findfn   	loadobj.3	return function pointer 
+findstr   	strlib.3	finds index of pattern in text
+finiparam	getparam.3	finish up NEMO program and unbind cmdln parameters
+fit_setbitpix	fitsio.3	optional setting bitpix for fits output
+fit_setscale	fitsio.3	optional setting scale/offset for fits output
+fitclose	fitsio.3
+fitopen  	fitsio.3
+fitread  	fitsio.3
+fitrdhda  	fitsio.3
+fitrdhdi  	fitsio.3
+fitrdhdr  	fitsio.3
+fitsetpl  	fitsio.3
+fitwrhda  	fitsio.3
+fitwrhdi  	fitsio.3
+fitwrhdr  	fitsio.3
+fitwrite  	fitsio.3
+frandom 	xrandom.3     	arbitrary fie random number generator
+free_image	image.3     	free an image
+freesnip	libP.a
+freeup    	libT.a
+get_data  	filestruct.3
+get_data_coerced	filestruct.3
+get_data_sub	filestruct.3
+get_dims    	filestruct.3
+get_dlen   	filestruct.3
+get_history	history.3
+get_line	table.3   	get a line from a file
+get_potential	potential.3
+get_set    	filestruct.3
+get_string  	filestruct.3
+get_tag_ok	filestruct.3
+get_tes         filestruct.3
+get_type	filestruct.3
+getbparam	getparam.3	get value of boolean parameter (cmdln processing)
+getdparam	getparam.3	get value of real (double) parameter (cmdln processing)
+getdrange	getrange.3	parse string of unknown itemlength
+getiparam	getparam.3	get value of int parameter (cmdln processing)
+getirange	getrange.3	parse string of unknown itemlength
+getlparam	getparam.3	get value of long parameter (cmdln processing)
+getmem     	strlib.3	memory allocater with error checking
+getparam	getparam.3	get value of string parameter (cmdln processing)
+getrfunc	getfunc.3	arbitrary function parser/evaluator
+getxstr 	extstring.3	read extended string from file
+grandom     	xrandom.3   	normally distributed random number generator
+head    	filefn.3	return head of a pathfilename
+herinp_  	herinp.3	low level interface to nemoinpX
+inifien   	nemofie.3
+initparam	getparam.3	set up command line parameters in program (cmdln processing)
+irange  	range.3   	parse string of values into an int array
+linreg   	linreg.3	linear regression: all six methods
+list_orbit	orbit.3
+list_tags	filestruct.3
+loadfuns	libNbody.a
+loadobj   	loadobj.3	load object file into memory
+log2         	libJ.a     	log to the base two
+lsq_accum	lsq.3    	least square accumulator
+lsq_solve	lsq.3    	least square solver
+lsq_zero	lsq.3    	reset least square matrices
+makedisk	makedisk.3	construct a disk of test particles
+mkplummer	libP.a
+mode       	libT.a
+mysymbols	loadobj.3	declare current symbols (of main program)
+nemoinpb    	nemoinp.3	parse boolean 
+nemoinpd    	nemoinp.3	parse double
+nemoinpi    	nemoinp.3	parse integer
+nemoinpl    	nemoinp.3	parse long
+newextn   	libJ.a   	append new extension to a filename (static)
+odeint    	libT.a
+ordinal  	ordinal.3	supplies the English suffix to make an ordinal number
+parse     	table.3     	parse a line into items
+pathfind	filefn.3	search for first file within specified search path
+pathopen	filefn.3	open file within specified search path
+pickball	libNbody.a
+pickbox  	libNbody.a
+pickshell	libNbody.a
+plbox   	yapp.3  	graphics: plot a box
+plcircle	yapp.3   	graphics: plot a circle
+plcross  	yapp.3  	graphics: plot a cross
+plflush  	yapp.3*
+plframe  	yapp.3  	graphics: advance for next plot-frame
+pljust  	yapp.3  	graphics: change text justifacation mode
+plinit  	yapp.3  	graphics: initialize graphics package
+plline  	yapp.3  	graphics: draw a line
+plltype  	yapp.3  	graphics: set line type & line width
+pl_matrix	yapp.3*
+plmove  	yapp.3  	graphics: move the pen without drawing
+plpoint  	yapp.3  	graphics: plot a point
+plstop  	yapp.3  	graphics: closes plotting
+plswap    	yapp.3*
+pltext  	yapp.3  	graphics: plot text
+plxscale	yapp.3*
+plyscale	yapp.3*
+put_data  	filestruct.3
+put_data_sub	filestruct.3
+put_history	history.3
+put_set    	filestruct.3
+put_string  	filestruct.3
+put_tes   	filestruct.3
+putparam	getparam.3	set new value to keyword
+putxstr   	extstring.3	write extended string to a file
+qbe      	libJ: sqr.3	qube 
+read_image	image.3    	read an image(5) from a structured file
+read_orbit	libOrbit.a
+reallocate	allocate.3
+reset_history	history.3
+rk4       	libT.a
+rkqc     	libT.a
+root     	filefn.3	return root of a pathfilename
+rotatev  	rotatev.3 	applies a rotation to a 3-dimensional vector
+scanopt   	scanopt.3	scan string of words for match of a word
+sconc     	strlib.3	catenate two string into newly allocted memory
+scopy    	strlib.3	copy a string into newly allocted memory
+set_headline	history.3
+seval     	libJ.a   	evaluate cubic spline interpolation
+skip_item	libJ.a
+snapdiff	snapdiff.3	compute metric (6N)-distance between two snapshots (libP.a)
+snapdist	libP.a
+sort       	libT.a
+sortptr   	libT.a
+spldif    	spline.3     	evaluate derivative of cubic spline
+spldif2    	spline.3     	evaluate derivative of cubic spline
+spline    	spline.3     	compute cubic spline coefficients
+splsub    	spline.3    	aid in compute cubic spline coefficients (never called?)
+sqr      	libJ: sqr.3	square
+stop      	getparam.3	exit program, but not before calling finiparam()
+strclose	stropen.3	close a file
+strdelete	stropen.3	delete a file associated with a stream
+strinsert	table.3     	insert a string into another one
+strname  	stropen.3	return original filename of a stream
+stropen  	stropen.3	stream-open enhancement of fopen function
+substr    	strlib.3	return substring into newly allocated memory
+tail        	filefn.3	return tail of a pathfilename
+this_will_make_math_loaded	libOrbit.a
+transkepler	libP.a
+within  	libJ.a   	determine if a number is within a range
+write_image	image.3     	write an image(5) to a structured file
+write_orbit	orbit.3
+yaxis       	libJ: axis.3	draw an y axis
+yaxvar     	libJ: axis.3	specify parameters for yaxis
+xaxis        	libJ: axis.3	draw an x axis
+xaxvar     	libJ: axis.3	specify parameters for xaxis
+xrand    	libJ.a   	(louzy) uniform random number generator 
+xrandom     	xrandom.3   	uniformly distributed random number generator
+xstreq   	extstring.3	compare extended string
+xstrlen  	extstring.3	count elements of extended string
+zerocms  	libNbody.a
+.fi
+.SH BUGS
+This file should have a different name; because there is an intro(1)
+either intro(3) or intro(3NEMO) cannot be accessed through the
+man(1) command.
+.SH "UPDATE HISTORY"
+.nf
+.ta +1i +4i
+23-Nov-86	created  	PJT
+16-Mar-87	updated 	PJT
+2-jun-88	updated  	PJT
+12-jul-89	names updated	PJT
+8-oct-90	new style libraries - renamed intro.3 to index.3	PJT
+.fi

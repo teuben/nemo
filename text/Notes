@@ -1,0 +1,390 @@
+<< Notes on the Release 2.0 - partially to be integrated into nemo.tex >>
+
+                   Micro Nemo ($NEMO)         4-oct-90
+
+
+lint:
+=====
+  complaines about far too much:
+    - despite #include <math.h> is complains e.g. 'sqrt used, but not defined'
+
+
+basic library ($NUNEMO/src/kernel/...)
+==============
+                (still a few missing in this listings)
+allocate.c
+    allocate()    allocate memory + err check (like getmem)
+
+axis.c
+    axvar()
+    xaxis()
+    xaxvar()
+    yaxis() 
+    yaxvar()
+
+besselfunc.c
+    bessi0()
+    bessi1()
+    bessk0()
+    bessk0()
+
+burststring.c
+    burststring()   tokenize string
+
+cputime.c:
+    cputime()
+
+date_id.c:
+    date_id()
+
+dprintf.c:
+    dprintf()           <like warning>
+    set_debug()
+    get_debug()
+
+erf.c:
+    erf()
+    erfc()
+    fdawson()
+
+error.c:
+    error()
+    warning()           <but see also: dprintf>
+
+extstring.c:
+    copxstr()
+    getxstr()
+    putxstr()
+    xstreq()
+    xstrlen()
+
+
+fie.c:
+    dmpfie
+    dofie
+    inifie
+    savefie     save current fie in slot X
+    loadfie     reload current fie from slot X
+
+filefn.c:
+    root        :r
+    extension   :e
+    head        :h
+    tail        :t
+    pathfind
+    pathopen
+    _mappath
+    defext
+
+getparam.c
+    - include only HISTORY and HELPVEC - rest is only excess luggage
+
+    initparam   start up
+    finiparam   finish off
+    getparam    get keywords
+    getbparam   "
+    getdparam   "
+    getiparam   "
+    getlparam   "
+    setparam    set keywords (not functional in MICRO)
+    stop        nemo's exit, but cleans up; usually called by error
+
+    bell_level
+    debug_level
+    help_level
+    help_string
+    history
+    review_flag
+    yapp_dev
+    yapp_string
+
+herinp.c:
+                All the Gipsy parsing routines, similar to FIE
+log2.c:
+    log2()
+
+nemoinp.c:
+                Nemo (c) interface to more horrendous herinp()
+
+
+spline.c:
+    spline      setting up a cubic spline for interpolation
+    seval       f(x)  (an improved interpolation)
+    spldif      f'(x) (dangerous)
+    spldif2     f"(x) (even more dangerous)
+stropen.c:
+    - note that strclose() is in filestruct(5)
+
+    stropen()
+
+vectmath.c:
+    - depending on precision mode the routine names end in _f or _d
+
+    absv_d/f
+    distv_d/f
+    dotvp_d/f
+    tracem_d/f
+
+within.c:
+    - needs a more general mechanism, like 'all', 'first', 'last',
+      or other ordinals. See snaptrim.c?
+
+    within()
+    without()    ? doesn't seem to exist anymore
+
+xrand.c:
+    xrand()
+
+xrandom.c:
+    - if NUMREC is defined, a portable one can be used...(ran3)
+
+    xrandom()       uniform [l,h]
+    grandom()       gaussian [m,s]
+    set_xrandom()   [0 to use time(0), any other to seed !!!]
+
+Include files:
+==============
+stdinc.h        standard include all Nemo programs need
+  options.h     machine/site dependant options include file,
+                    file is not advertised, and is automatically
+                    inluded by stdinc.h
+
+getparam.h      defines functions used in user interface (getparam, etc.)
+
+
+Yapp:
+=====
+
+See yapp.c which contains the directive such than any yapp_xxx.c can be
+loaded into libunemo.a. Other ones should be dumped as yapp_xxx.o into
+the $NEMOLIB directory.
+The standard choice for XXX can be made by the installer inside 
+<options.h> :  one of the YAPP_XXX symbolss needs to be defined. If
+none is defined, yapp_null.c is taken.
+compilations will be something like:
+
+    cc -o prg prg.c $NEMOLIB/libunemo.a $YAPPLIB
+
+other ones can be done with e.g.
+
+    cc -o prg_ps prg.c $NEMOLIB/yapp_ps.o $NEMOLIB/libunemo.a $YAPPLIB_PS
+
+
+
+If you like a very private version, e.g.  yapp_pjt.c, as default, copy 
+it to a 'free slot file' yapp_xxx.c and define YAPP_XXX in <options.h>
+Make sure the YAPPLIB environment variables is set accordingly
+somewhere.
+
+Numerical Recipes:
+==================
+It's use intended to be optional by the following mechanism:
+
+1) <options.h> must contain NUMREC #defined
+2) $(CC) in the Makefile must use switch -I$NUMREC_DIR 
+                    (usually done in the $NEMOBIN/cc script)
+
+We keep the essential ones used in a 'secret' subdirectory:
+    setenv NUMREC_DIR $NEMO/inc/numrec
+
+Used are:
+  - some portable random number generator in xrandom
+
+
+Not part of Micro Nemo (yet?)
+-----------------------------
+
+  contour.c     not so useful, image specific
+  match.c       useful, needs to be debugged?
+
+
+ToDo:
+=====
+
+- throw out all <math.h> from source code
+- advertise <options.h>
+- add MACHINE to Makefile ..
+- some of the _PI's have disappeared...
+- unicos: why the f.... are rand and srand not available?
+- vectmath.c: always one double for the functions?
+- vectmath.h: merge
+
+- What about the Gipsy stuff (nemoinp, herinp, setfblank) not in MICRO?
+
+- loadobj.c: what about .sa files when initialized data is used???
+- malloc/realloc =>
+  smarter allocate/reallocate
+
+In Makefiles:
+
+        FLAGS = -O -D'MACHINE="$(MACHINE)"'
+doesn't work on machines that do not import the environment
+(standard BSD doesn't). Solution normally done is the cc script in
+$NEMOBIN.
+
+
+        .PRECIOUS for the library
+
+- in filesecret.c (testfs.c) :  limits MaxSetLen
+
+
+libnemo.a:
+==========
+
+$NEMO/src/kernel/core:		<<< essential utilities needed for IO >>
+ 
+	allocate.c			<< allocate memory >>
+			allocate
+			reallocate
+	burststring.c			<< tokenize string >>
+			burststring
+	error.c				<< handle (fatal) errors >>
+			error
+			warning
+			recover
+	extstring.c			<< null terminated arrays >>
+			copxstr
+			getxstr
+			putxstr
+			xstreq
+			xstrlen
+	file_size.c			<< file size >>
+			file_size
+	filefn.[ch]			<< file utilities >>
+			root
+			extension
+			head
+			tail
+			defext
+			pathopen
+			pathfile
+			_mappath
+	nemo.h				<< global nemo.h header >>
+	options.h			<< included by stdinc.h >>
+	stdinc.h			<< standard basic NEMO defs >>
+	strlib.[ch]			<< dynamic string alloc utilities >>
+			getmem
+			scopy
+			sconc
+			substr
+			findstr
+	stropen.c			<< file stream utilities >>
+			stropen
+			strdelete
+			strname
+
+$NEMO/src/kernel/io:		  <<< Essential IO routines >>>
+	dprintf.c                       <<debug printf>>
+			dprintf
+	filesecret.[ch]			<<file structure>>
+			copy_item
+			get_tag_ok
+			get_type
+			get_dims
+			get_dlen
+			get_data_sub
+			put_data_sub
+			get_set
+			put_set
+			list_tags
+			get_tes
+			put_tes
+			put_data
+			put_string
+			get_data
+			get_data_coerced
+			get_string
+			skip_item
+			strclose
+	filestruct.h
+	getparam.[ch]			<<user interface>>
+			initparam
+			getparam
+			getdparam
+			getiparam
+			getlparam
+			getbparam
+			finiparam
+			putparam
+			promptparam
+			stop
+	history.c                       <<data history utilities>>
+			get_history
+			put_history
+			add_history
+			ask_history
+			reset_history
+			set_headline
+			ask_headline
+							
+
+$NEMO/src/kernel/misc:		<<<LESS ESSENTIAL - not for Micro Nemo>>>
+   (to name a few:)
+	cputime                 ?
+	date_id                 ?
+	nemomain                ?
+	newextn                 ?
+	scanopt                 ?
+	vectmath                ?
+	xrand                   ?
+	xrandom                 ?
+
+==============================================================================
+        New Directory Structure for NEMO V2.x
+==============================================================================
+$NEMO/src/                   The Big Source directory
+         kernel/            All of these needed for full NEMO implementation
+             core/            independant essential utilities for IO
+             io/              getparam & filestruct (user interface)
+             misc/            miscellaneous library utilities
+             yapp/            YAPP plotting 
+         nbody/             Nbody
+             core/          essential utilities for Nbody
+             io/            I/O get_snap etc.
+             init/          create models
+             evolve/        Evolve (integrate) models
+                hackcode/    Treecode
+                   export/   --export version - no bells and whistles
+                   source1/  Barnes and Hut (official c version)
+                   source3/
+                   treecode/ Lars Hernquist fortran version of treecode
+                multicode/   Simon White`s multipole expansion (Barnes version)
+                aarseth/     Sverre Aarseth
+                   nbody0/
+                   nbody1/
+                   nbody2/
+                silly/       
+             trans/           
+             reduc/
+         image/             2- and 3D image analysis
+             io/
+             nbody/
+             tools/
+         orbit/             Orbit analysis
+             io/
+             core/
+             potential/
+         tools/             Tools, independant and mostly public domain
+             movie/          movie for sun raster files (PD)
+             movietool/      movietool for sun raster files (PD)
+             fitsmovie/      movie'tool' for fits files (PD - Bell Labs)
+             ds/             image display program (Sebok)
+	 tutorial/	    Example programs and Makefile 
+       man/                 Manual pages
+       inc/                 Standard include files
+       lib/$HOSTTYPE        Libraries (.a/.o files)
+       bin/$HOSTTYPE        Executable files
+       obj/$HOSTTYPE        Machine dept. object files 
+       tmp/                 Temporary space for scripts, utilities...
+       text/                Documentation, random Notes... 
+                                    (old doc)
+       data/                Various tables - machine independant format
+                                    (old dat)
+       demo/                Demo's - shell scripts etc.
+       adm/                 Administrativia, system logfile
+          import/            imported code, not yet merged
+          export/            exported code, temporary
+          submit/            logfiles
+       etc/                 Etceterata
+........................................................................  
+........................................................................  
