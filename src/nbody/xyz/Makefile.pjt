@@ -1,0 +1,83 @@
+#  temporary Makefile for xyzview - 
+#  it usually requires quite some hacks to the -L/-R and other
+#  compile flags. Typical X11 stuff.
+#
+#  also assumes your $NEMOBIN/cc script understands the -L$NEMOLIB flag
+
+CFLAGS = -g
+
+# VIS5D specific distribution of VOGL
+VOGL5D = $(NEMO)/usr/lib/vogl/vogl5d
+
+EXPORT = snapxyz.c snapxyz.1 xyzview.c xyzview.1 Makefile
+
+help:
+	@echo xyz programs
+	@echo "   sun: SUN version of xyzview using VOGL"
+	@echo "   sgi: SGI version of xyzview using GL"
+	@echo "	  tar: tar export in xyz.tar"
+	@echo "	  shar: shar export in xyz.shar"
+
+clean:
+	rm -f *.o core xyzview snapxyz
+
+# old suns that don't need special -L or -R flags
+
+sun:	xyzview.c
+	$(CC) $(CFLAGS) -DSINGLEPREC -DXYZVEL -I$(NEMOINC)/vogl \
+             -o xyzview xyzview.c \
+             -lnemo -lvogl -lX11 -lm
+
+# Sebok's wonderful sun4 world
+sun4:	xyzview.c
+	$(CC) $(CFLAGS) -DSINGLEPREC -DXYZVEL -I$(NEMOINC)/vogl \
+             -o xyzview xyzview.c \
+	-L/usr/Local/lib/X11R6 -L/local/lib/X11R6 \
+             -lnemo -lvogl -lX11 -lm
+
+# our Solaris at Maryland (note the funny -R flags)
+
+sun5:	xyzview.c
+	$(CC) $(CFLAGS) -DSINGLEPREC -DXYZVEL -DVOGL -I$(NEMOINC)/vogl \
+             -o xyzview xyzview.c \
+             -lnemo -lvogl \
+	-L/usr/Local/lib/X11R6 -L/local/lib/X11R6 \
+	-R /usr/Local/lib/X11R6:/local/lib/X11R6 -lX11 -lsocket -lnsl -lm
+
+sun5d:	xyzview.c
+	$(CC) $(CFLAGS) -DSINGLEPREC -DXYZVEL -DVOGL -I$(NEMOINC)/vogl \
+	     -I$(VOGL5D) -DOLD_VOGL -DVOGL5D \
+             -o xyzview xyzview.c \
+             -lnemo $(VOGL5D)/libvogl.a \
+	-L/usr/Local/lib/X11R6 -L/local/lib/X11R6 \
+	-R /usr/Local/lib/X11R6:/local/lib/X11R6 -lX11 -lsocket -lnsl -lm
+
+# parview  is a testbed for an interactive table browser , and not exported
+
+parview: parview.c
+	$(CC) $(CFLAGS) -DSINGLEPREC -I$(NEMOINC)/vogl \
+             -o parview parview.c \
+             -lnemo -lvogl -lX11 -lm
+
+# note that the last linking order is a bit peculiar, something
+# weird is going on, on my SGI at least (IRIX Release 4.0.5F System V)
+
+sgi:	xyzview.c
+	$(CC) $(CFLAGS) -DSINGLEPREC -DXYZVEL \
+            -o xyzview xyzview.c \
+            -lnemo -lgl -lfm -lX11 -lgl
+
+
+#  export 
+
+tar:    xyz.tar
+
+xyz.tar:    $(EXPORT)
+	@tar cvf xyz.tar $(EXPORT)
+
+
+shar:   xyz.shar
+
+xyz.shar:   $(EXPORT)
+	@shar -oxyz.shar $(EXPORT)
+	@echo File xyz.shar has been created
