@@ -5,6 +5,7 @@
  *	 5-nov-93  V1.1 nemo V2, and using moment.h
  *      16-sep-95  V1.2 added min/max
  *       9-may-03  V1.3 added bad=, and added #points,
+ *       5-jun-03  V1.4 added win=, a weight map
  *
  */
 
@@ -19,7 +20,8 @@ string defv[] = {
     "min=\n         Minimum overrride",
     "max=\n         Maximum overrride",
     "bad=\n         Use this as masking value to ignore data",
-    "VERSION=1.3\n  9-may-03 PJT",
+    "win=\n         Optional input map for weights",
+    "VERSION=1.4\n  5-jun-03 PJT",
     NULL,
 };
 
@@ -29,6 +31,7 @@ string	infile;	        		/* file names */
 stream  instr;				/* file streams */
 
 imageptr iptr=NULL;			/* will be allocated dynamically */
+imageptr wptr=NULL;                     /* optional weight map */
 
 
 int    nx,ny,nz,nsize;			/* actual size of map */
@@ -41,13 +44,24 @@ double cell;				/* cell or pixel size (square) */
 nemo_main()
 {
     int  i, j, k;
-    real x, xmin, xmax, mean, sigma, skew, kurt, bad;
+    real x, xmin, xmax, mean, sigma, skew, kurt, bad, w;
     Moment m;
-    bool Qmin, Qmax, Qbad;
+    bool Qmin, Qmax, Qbad, Qw;
     
     instr = stropen (getparam("in"), "r");
     read_image (instr,&iptr);
     strclose(instr);
+
+    if (hasvalue("win")) {
+      instr = stropen (getparam("win"), "r");
+      read_image (instr,&wptr);
+      strclose(instr);
+      if (Nx(iptr) != Nx(wptr)) error("X sizes of in/win don't match");
+      if (Ny(iptr) != Ny(wptr)) error("X sizes of in/win don't match");
+      if (Nz(iptr) != Nz(wptr)) error("X sizes of in/win don't match");
+      Qw = TRUE;
+    } else
+      Qw = FALSE;
 
     nx = Nx(iptr);	
     ny = Ny(iptr);
@@ -59,7 +73,6 @@ nemo_main()
     Qbad = hasvalue("bad");
     if (Qbad) bad = getdparam("bad");
 
-
     ini_moment(&m,4);
     for (i=0; i<nx; i++) {
       for (j=0; j<ny; j++) {
@@ -68,7 +81,8 @@ nemo_main()
             if (Qmin && x<xmin) continue;
             if (Qmax && x>xmax) continue;
             if (Qbad && x==bad) continue;
-            accum_moment(&m,x,1.0);
+	    w = Qw ? CubeValue(wptr,i,j,k) : 1.0;
+            accum_moment(&m,x,w);
         }
       }
     }
