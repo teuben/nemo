@@ -48,7 +48,7 @@ BINFILES = nemoinp nemoshow layout xrandom scanopt
 
 TESTFILES = vecttest axistest splinetest withintest \
 	matchtest linreg momenttest gridtest unwraptest frandomtest \
-	mdarraytest
+	mdarraytest timerstest
 
 #	update the library: direct comparison with modules inside L
 help:
@@ -200,6 +200,9 @@ gridtest: grid.c
 
 unwraptest: unwrap.c
 	$(CC) $(CFLAGS) -o unwraptest -DTESTBED unwrap.c $(NEMO_LIBS)
+
+timerstest: timers.c
+	$(CC) $(CFLAGS) -o timerstest -DTESTBED timers.c $(NEMO_LIBS)
 
 
 # special targets
