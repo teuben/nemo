@@ -29,6 +29,7 @@ typedef struct {
     int negativemass;      /* if TRUE, particles may have negative mass */
     double pprad;          /* sphere radius on which pseudo particles are distributed */
     int npp;               /* # of pseudo particles */
+    int tdesign;               /* spherical t-design */
     double (*pppos)[3];    /* position of pseudo particles */
     int full_dof;          /* use modified P2M2 if p<=2 */
     Calculator calculator; /* HOST, GRAPE, GRAPE_FORCEONLT, etc. */
@@ -45,6 +46,9 @@ void vtc_get_force_direct(Forceinfo *tr, Nbodyinfo *nb);
 void vtc_get_default_tree_params(Forceinfo *fi);
 void vtc_get_force_tree(Forceinfo *tr, Nbodyinfo *nb);
 void vtc_set_scale(double xmax, double mmin); /* fixed-point format hardware specific */
+int vtc_set_rscale(double rscale); /* not used for normal operation */
+void vtc_set_mac_margin(double margin);
+double vtc_get_mac_margin(void);
 
 /* timing analysis tools */
 void vtc_init_cputime(void);
@@ -58,5 +62,10 @@ void vtc_viewtree(int n, double (*bpos)[3],
 		  int nc, double (*cpos)[3], double *csize);
 void vtc_viewlist(int nall, double (*ballpos)[3], int n, double (*bpos)[3],
 		  int nc, double (*cpos)[3], double *csize, int ni);
+void vtc_plotstar(char *fname, Nbodyinfo *nb, char *msg, double scale, double center[2], double cmass, double *xheavy, double *xmin);
+
+/* GRAPE relevant funcs */
+int vtc_does_include_self_interaction(int calculator);
+void vtc_close_grape(void);
 
 #endif /* __VTC_H__ */

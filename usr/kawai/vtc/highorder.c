@@ -64,12 +64,22 @@ m2m_1storder_md(Cell c0, Forceinfo *fi, Nbodyinfo *nb)
 	    Cnnegative[c0] += Cnnegative[c1];
 	}
     }
-    if (Ccmmass[c0] != 0.0) {
+    if (Ccmmass[c0] == 0.0) {
+	for (k = 0; k < 3; k++) {
+	    Ccmpos[c0][k] = 0.0;
+	}
+    }
+    else {
 	for (k = 0; k < 3; k++) {
 	    Ccmpos[c0][k] /= Ccmmass[c0];
 	}
     }
-    if (Ccmmass2[c0] != 0.0) {
+    if (Ccmmass2[c0] == 0.0) {
+	for (k = 0; k < 3; k++) {
+	  Ccmpos2[c0][k] = 0.0;
+	}
+    }
+    else {
 	for (k = 0; k < 3; k++) {
 	    Ccmpos2[c0][k] /= Ccmmass2[c0];
 	}
@@ -196,7 +206,10 @@ err_2ndorder(Nbodyinfo *nb, int sign, int c0, double q[3][3],
 }
 
 static void
-copy_pppos_2ndorder(Nbodyinfo *nb, Cell c0, int off, int nparticle, int sign, int npp)
+copy_pppos(Nbodyinfo *nb, Cell c0, int off, int nparticle, int sign,
+	   int npp, /* # of pseudoparticles per cell */
+	   int npe) /* # of pseudoparticles per expansion
+		       (npp==2*npe if fi->negativemass, otherwise npp==npe)*/
 {
     int i, k, s;
     int index = 0;
@@ -221,7 +234,7 @@ copy_pppos_2ndorder(Nbodyinfo *nb, Cell c0, int off, int nparticle, int sign, in
 	    if (NOCELL == c1) {
 		continue;
 	    }
-	    for (i = 0; i < 3; i++) {
+	    for (i = 0; i < npe; i++) {
 		mchild = Cppmass[npp*c1+i+off];
 		if (mchild == 0.0) {
 		    continue;
@@ -234,11 +247,11 @@ copy_pppos_2ndorder(Nbodyinfo *nb, Cell c0, int off, int nparticle, int sign, in
 	    }
 	}
 	if (index != nparticle) {
-	    fprintf(stderr, "index: %d nparticle: %d", index, nparticle);
+	    fprintf(stderr, "copy_pppos: index: %d != nparticle: %d", index, nparticle);
 	    exit(1);
 	}
     }
-    for (i = index; i < 3; i++) {
+    for (i = index; i < npe; i++) {
 	Cppmass[npp*c0+i+off] = 0.0;
 	for (k = 0; k < 3; k++) {
 	    Cpppos[npp*c0+i+off][k] = 0.0;
@@ -305,10 +318,15 @@ m2m_2ndorder(Cell c0, Forceinfo *fi, Nbodyinfo *nb)
 	    }
 	}
     }
-
-    if (Cndescendant[c0] <= 3) { /* do not apply quadpole expansion.
-				    (c0 contains not more than 3 particles) */
-	copy_pppos_2ndorder(nb, c0, 0, Cndescendant[c0], +1, npp);
+    if (Ccmmass[c0] == 0.0) {
+        for (k = 0; k < 3; k++) {
+	    for (j = 0; j < 3; j++) {
+	        Cpppos[npp*c0+j][k] = 0.0;
+	    }
+	}
+    } else if (Cndescendant[c0] <= 3) { /* do not apply quadpole expansion.
+					   (c0 contains not more than 3 particles) */
+	copy_pppos(nb, c0, 0, Cndescendant[c0], +1, npp, npp);
     }
     else { /* apply quadpole expansion */
 	q[0][0] = xx-0.5*yy-0.5*zz;
@@ -441,10 +459,17 @@ m2m_2ndorder_md(Cell c0, Forceinfo *fi, Nbodyinfo *nb)
 	}
     }
 
-    if (Cnpositive[c0] <= 3) { /* do not apply quadpole expansion
+    if (Ccmmass[c0] == 0.0) {
+	for (k = 0; k < 3; k++) {
+	    for (j = 0; j < 3; j++) {
+		Cpppos[npp*c0+j][k] = 0.0;
+	    }
+	}
+    }
+    else if (Cnpositive[c0] <= 3) { /* do not apply quadpole expansion
 				  (c0 contains not more than 3 positive-mass
 				  particles) */
-	copy_pppos_2ndorder(nb, c0, 0, Cnpositive[c0], +1, npp);
+	copy_pppos(nb, c0, 0, Cnpositive[c0], +1, npp, npp/2);
     }
     else { /* process positive-mass particles */
 	q[0][0] = xx-0.5*yy-0.5*zz;
@@ -468,10 +493,17 @@ m2m_2ndorder_md(Cell c0, Forceinfo *fi, Nbodyinfo *nb)
 	}
     }
 
-    if (Cnnegative[c0] <= 3) { /* do not apply quadpole expansion
+    if (Ccmmass2[c0] == 0.0) {
+	for (k = 0; k < 3; k++) {
+	    for (j = 0; j < 3; j++) {
+		Cpppos[npp*c0+j+3][k] = 0.0;
+	    }
+	}
+    }
+    else if (Cnnegative[c0] <= 3) { /* do not apply quadpole expansion
 				  (c0 contains not more than 3 negative-mass
 				  particles) */
-	copy_pppos_2ndorder(nb, c0, 3, Cnnegative[c0], -1, npp);
+	copy_pppos(nb, c0, 3, Cnnegative[c0], -1, npp, npp/2);
     }
     else { /* process negative-mass particles */
 	q[0][0] = (xx2-0.5*yy2-0.5*zz2);
@@ -496,12 +528,122 @@ m2m_2ndorder_md(Cell c0, Forceinfo *fi, Nbodyinfo *nb)
     }
 }
 
+
+/* 
+ * form p2m2 expansion at c0 from the one at c1.
+ * if c1 == NOCELL, form p2m2 expansion from physical particles inside c0.
+ */
+static void
+expand_by_pp(Forceinfo *fi, Nbodyinfo *nb, Cell c0, Cell c1, double *dm)
+{
+    int i, j, k, q;
+    int npp = fi->npp;
+    double rr, cosg;
+    double r1, m1;
+    double x1[3]; /* physical particle pos */
+    static double x0[NPPMAX][3]; /* pseudoparticle pos */
+    static double r0[NPPMAX];
+    static double pln[TDESIGNMAX/2+1];
+
+    for (j = 0; j < npp; j++) {
+	dm[j] = 0.0;
+	r0[j] = 0.0;
+	for (k = 0; k < 3; k++) {
+	    x0[j][k] = fi->pppos[j][k] * Csize[c0];
+	    r0[j] += x0[j][k]*x0[j][k];
+	}
+	r0[j] = sqrt(r0[j]);
+    }
+    if (NOCELL == c1) { /* form expansion from physical particles inside c0 */
+	for (i = 0; i < Cnbody[c0]; i++) {
+	    Body b = Cbody[c0][i];
+	    m1 = nb->m[b];
+	    r1 = 0.0;
+	    for (k = 0; k < 3; k++) {
+		x1[k] = nb->x[b][k] - Ccmpos[c0][k];
+		r1 += x1[k]*x1[k];
+	    }
+	    r1 = sqrt(r1);
+	    for (j = 0; j < npp; j++) {
+		rr = r1/r0[j];
+		cosg = (x0[j][0]*x1[0]+x0[j][1]*x1[1]+x0[j][2]*x1[2])/r0[j]/r1;
+		plgndr0(fi->tdesign/2+1, cosg, pln);
+		for (q = 0; q < fi->tdesign/2+1; q++) {
+		    dm[j] = dm[j] + pow(rr, (double)q)*m1*(2*q+1)*pln[q];
+		}
+	    }
+	}
+    }
+    else { /* form expansion from the one at c1 */
+	for (i = 0; i < npp; i++) {
+	    m1 = Cppmass[npp*c1+i];
+	    r1 = 0.0;
+	    for (k = 0; k < 3; k++) {
+		x1[k] = Cpppos[npp*c1+i][k] - Ccmpos[c0][k];
+		r1 += x1[k]*x1[k];
+	    }
+	    r1 = sqrt(r1);
+	    for (j = 0; j < npp; j++) {
+		rr = r1/r0[j];
+		cosg = (x0[j][0]*x1[0]+x0[j][1]*x1[1]+x0[j][2]*x1[2])/r0[j]/r1;
+		plgndr0(fi->tdesign/2+1, cosg, pln);
+		for (q = 0; q < fi->tdesign/2+1; q++) {
+		    dm[j] = dm[j] + pow(rr, (double)q)*m1*(2*q+1)*pln[q];
+		}
+	    }
+	}
+    }
+    for (j = 0; j < npp; j++) {
+	dm[j] /= npp;
+    }
+}
+
 static void
 m2m_anyorder(Cell c0, Forceinfo *fi, Nbodyinfo *nb)
 {
-    fprintf(stderr, "m2m_anyorder not implemented yet\n");
-    fprintf(stderr, "requested expansion order: %d\n", fi->p);
-    exit(1);
+    Cell c1;
+    int i, k, s;
+    int npp = fi->npp;
+    double dm[NPPMAX];
+
+    for (s = 0; s < 8; s++) {
+	c1 = Cchild[c0][s];
+	if (NOCELL == c1) {
+	    continue;
+	}
+	m2m_anyorder(c1, fi, nb);
+    }
+
+    if (Cndescendant[c0] <= npp) { /* do not apply p2m2 expansion.
+				    (c0 contains not more than npp particles) */
+	copy_pppos(nb, c0, 0, Cndescendant[c0], +1, npp, npp);
+    }
+    else { /* apply p2m2 expansion */
+	for (i = 0; i < npp; i++) {
+	    for (k = 0; k < 3; k++) {
+		Cpppos[npp*c0+i][k] = Ccmpos[c0][k] + fi->pppos[i][k] * Csize[c0];
+	    }
+	    Cppmass[npp*c0+i] = 0.0;
+	}
+	if (Cisleaf[c0]) {
+	    expand_by_pp(fi, nb, c0, NOCELL, dm);
+	    for (i = 0; i < npp; i++) {
+		Cppmass[npp*c0+i] += dm[i];
+	    }
+	}
+	else {
+	    for (s = 0; s < 8; s++) {
+		c1 = Cchild[c0][s];
+		if (NOCELL == c1) {
+		    continue;
+		}
+		expand_by_pp(fi, nb, c0, c1, dm);
+		for (i = 0; i < npp; i++) {
+		    Cppmass[npp*c0+i] += dm[i];
+		}
+	    }
+	}
+    }
 }
 
 static void

@@ -1,66 +1,85 @@
+# CC = icc
 CC = gcc
-
+# if you have io_nemo lib (written by JCL)
+# IONEMOFLAGS = -DIONEMO
+# IONEMOLIB = -L$(NEMOLIB) -lio_nemo -lnemo
+#
+# use pob format for file I/O
+# POBLIB = -lpob -lz
+# POBFLAGS = -DUSEPOB=1
 # 
-# USEX11: use animation and viewtree tools.
-# USEGD: use GIF-image-creation library.
-# VECTORIZED: activate functions in treev.c. faster on vector processor.
+# 
+# USEX11: use animation tools.
+# VECTORIZED: activate functions in treev.c. faster on vector
+#             processor and some other platforms.
 # BFLOAD: activate functions in treebfl.c. performs breadth-first
 #         tree construction. may be slightly faster on vector processor.
 # DYNMEM: use dynamic memory allocation. should be set to 1 unless you
 #         have any special reason.
+
+STDOBJS = tree.o direct.o sort.o cputime.o viewtree.o p2m2.o mr1interface.o
+
+# for icc
+#LDFLAGS = -tpp7 -xW -O3 -L. -L/home/atsushi/lib -L/home/atsushi/pub/lib
 #
-# activate this part if you have io_nemo lib (written by JCL in Marseilles Observatory)
-# IONEMOFLAGS = -DIONEMO
-# IONEMOLIB = -L$(NEMOLIB) -lio_nemo -lnemo
-#
-# acticate this part if USEX11 == 1
+# forgcc
+LDFLAGS = -O2 -L. -L/home0/atsushi/lib -L/home/atsushi/pub/lib
+
+LIBS = $(POBLIB) $(IONEMOLIB) -lgd -lm
 # AOBJS = animation.o Xtc.o
 # ALIBS = -lX11
-# ALIBPATH = -L/usr/X11/lib
+# ALIBPATH = /usr/X11R6/lib
 # AFLAGS = -DANIM
-#
-# activate this part if USEGD == 1
-# GDLIBS = -lgd
 
-# host only
-LIBOBJS = $(STDOBJS) force_host.o
-GFLAGS = -DNOGRAPE=1
+# for host only
+LIBOBJS = $(STDOBJS) force_md2.o
+GFLAGS = -DNOGRAPE
 #
 # for MDGRAPE-2
 # LIBOBJS = $(STDOBJS) force_md2.o
-# GLIBPATH = -L/home/atsushi/pub/lib
-# GLIBS = -lmd1pcim
-# GFLAGS = -DMDGRAPE2=1
-#
+# GLIBPATH = /usr/local/lib
+# GLIBS = -lm2
+# GFLAGS = -DMDGRAPE2
+
+# for MDGRAPE-2 connected via Myrinet
+# LIBOBJS = $(STDOBJS) force_md2.o
+# GLIBPATH = /home/atsushi/src/md2libGM
+# GLIBS = -lmd1pcim -lgm
+# GLIBPATH = /home/atsushi/pub/lib
+# GLIBS = -lmd1pcimGMg -lgm
+# GMLIBPATH = 
+# GMFLAGS = -DUSE_GM_API=1 -L/usr/local/gm/lib
+# GFLAGS = -DMDGRAPE2
+
 # for GRAPE-5
 # LIBOBJS = $(STDOBJS) force_g5.o
-# GLIBPATH = -L/home/atsushi/pub/lib
+# GLIBPATH = /home/atsushi/pub/lib
 # GLIBS = -lg5a -lphibdma
-# GFLAGS = -DGRAPE5=1
 
-INCPATH = -I/home/atsushi/pub/include
-LIBPATH = -L/home/atsushi/pub/lib
-CFLAGS = -O3 -I. $(INCPATH) $(GFLAGS) $(AFLAGS)\
-         $(IONEMOFLAGS) -DUSEX11=0 -DUSEGD=0 -DVECTORIZED=0 -DBFLOAD=0 -DDYNMEM=1
-STDOBJS = tree.o direct.o sort.o cputime.o viewtree.o p2m2.o mr1interface.o
-LDFLAGS = -O3 -L. $(LIBPATH)
-LIBS = $(IONEMOLIB) $(GDLIBS) -lm
+# for icc
+#CFLAGS = -tpp7 -xW -O3 -I. -I/home0/atsushi/include -I/usr/local/include -o $@ \
+#         $(IONEMOFLAGS) $(POBFLAGS) -DUSEX11=0 -DVECTORIZED=0 -DBFLOAD=0\
+#        -DDYNMEM=1 $(GMFLAGS)
+
+# for gcc
+CFLAGS = -O2 -I. -I/home0/atsushi/include -I/usr/local/include -o $@ \
+         $(IONEMOFLAGS) $(POBFLAGS) -DUSEX11=0 -DVECTORIZED=0 -DBFLOAD=0\
+        -DDYNMEM=1 $(GMFLAGS)
 
 all:	vtc libvtc.a
 
 vtc:	vtc.c $(GOBJS) $(AOBJS) libvtc.a
-	$(CC) -o $@ $(CFLAGS) $(ALIBPATH) $(GLIBPATH) $(LDFLAGS) $< \
+	$(CC) $(GFLAGS) $(CFLAGS) $(AFLAGS) -L$(ALIBPATH) -L$(GLIBPATH) $(LDFLAGS) $< \
 	$(GOBJS) $(AOBJS) libvtc.a $(GLIBS) $(ALIBS) $(LIBS)
 
 libvtc.a: $(LIBOBJS)
 	ar ruv $@ $?
-	ranlib $@
 
 force_md2.o:	force_md2.c
-	$(CC) -o $@ $(CFLAGS) -c $<
+	$(CC) $(CFLAGS) $(GFLAGS) -c $<
 
 force_g5.o:	force_g5.c
-	$(CC) -o $@ $(CFLAGS) -c $<
+	$(CC) $(CFLAGS) $(GFLAGS) -c $<
 
 tree.o:			tree.c treev.c treebfl.c highorder.c debug.c
 
@@ -68,5 +87,5 @@ clean:
 	\rm *.o *.a
 
 bak:
-	tar cvf bak.tar ./Makefile*[a-zA-Z0-9] ./*.[hcCfF] ./*.table ./INSTALL
+	tar cvf bak.tar ./Makefile*[a-zA-Z0-9] ./*.[hcCfF] ./*.table ./00README
 	gzip bak.tar

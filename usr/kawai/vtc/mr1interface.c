@@ -1,22 +1,13 @@
-/*
- * interface to MR1 functions
- * necessary to link libvtc.a to AMBER_MDGRAPE2
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include "vtc.h"
 #include "vtclocal.h"
 
+/* interface to MR1 functions */
+
 static Forceinfo mr1fi;
 static Nbodyinfo mr1nb;
 static int params_initialized = FALSE;
-
-#ifdef __linux__
-#define FNAME(x) (x ## __)
-#else
-#define FNAME(x) (x ## _)
-#endif
 
 static void
 mr1calccoulomb_init(int n, double eps, double theta, int ncrit,
@@ -118,10 +109,16 @@ MR1calccoulomb_tree(double *x, int n, double *chg,
     vtc_close_grape();
     switch (tblno) {
     case 0:
-    case 2:
 	for (i = 0; i < n; i++) {
 	    for (k = 0; k < 3; k++) {
 		force[i*3+k] = mr1nb.a[i][k];
+	    }
+	}
+	break;
+    case 2:
+	for (i = 0; i < n; i++) {
+	    for (k = 0; k < 3; k++) {
+		force[i*3+k] = -mr1nb.a[i][k];
 	    }
 	}
 	break;
@@ -136,6 +133,18 @@ MR1calccoulomb_tree(double *x, int n, double *chg,
 	exit(1);
     }
     cnt++;
+}
+
+void
+FNAME(mr1calccoulomb_set_tree_margin)(double *margin)
+{
+    vtc_set_mac_margin(*margin);
+}
+
+double
+FNAME(mr1calccoulomb_get_tree_margin)(void)
+{
+    return(vtc_get_mac_margin());
 }
 
 void
@@ -156,4 +165,12 @@ FNAME(mr1calccoulomb_set_tree_param)(double *eps, double *theta, int *ncrit,
     mr1calccoulomb_set_tree_param(*eps, *theta, *ncrit,
 				  *node_div_crit, *me_order,
 				  *test_id);
+}
+
+void
+FNAME(mr1gm_finalize)(void)
+{
+#if USE_GM_API
+    m2_gm_finalize();
+#endif /* USE_GM_API */
 }

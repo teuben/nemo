@@ -1,0 +1,33 @@
+To vtc (Vectorizable Treecode written in C) users...
+
+1) To compile the code, choose an appropriate makefile from the
+follwing list:
+
+    Makefile.linux:    for Linux
+    Makefile.solaris:  for SUN Solaris
+    Makefile.tru64:    for COMPAQ Tru64
+    Makefile.vpp5k:    for Fujitsu UXP/V on VPP5000
+
+and modify Makefile.XXX so that it would suit your environment. Then
+type
+
+    make -f Makefile.XXX
+
+This will generate executable 'vtc' and library 'libvtc.a'. Here
+'Makefile.XXX' denotes the makefile you have chosen. 'XXX' other than
+'linux' may not be up to date. If you have trouble during compilation,
+you may want to modify the 'Makefile.XXX' consulting 'Makefile.linux'.
+
+2a) To use 'vtc' executable, run 'vtc' with '-h' option. You will see
+a brief description for option switches.
+
+2b) To use 'libvtc.a' library, include 'vtc.h' into your code before
+linking 'libvtc.a'. The function prototypes are defined in it.
+
+If you have any question, please do not hesitate to email me at:
+atsushi@atlas.riken.go.jp
+
+enjoy,
+
+Atsushi Kawai
+Comput. Sci. Div., Advanced Computing Center, RIKEN, JAPAN

@@ -1,12 +1,11 @@
 #pragma global noalias
-
-#if MDGRAPE2
-/* in a single call MDGRAPE2 calculate one of force and potential,
-   and thus we need to call it twice to obtain total energy */
 #define CALCPOTENTIAL (1)
-#else
-#define CALCPOTENTIAL (0)
-#endif
+
+#define COSMO (0) /* timestep increases as dt=(t0+t)/t0. */
+#define DIRECT (0) /* use direct summation algorithm instead of tree. */
+#define NOFORCE (0) /* do not perform force calculation. only for timing measurement. */
+
+int md2_mpi_rank; /* dummy */
 
 #include <stdio.h>
 #include <string.h>
@@ -16,6 +15,11 @@
 #include "vtc.h"
 #include "vtclocal.h"
 
+#if USEPOB
+#include <zlib.h>
+#include "pob.h"
+#endif /* USEPOB */
+
 /* parameter for file I/O etc */
 static int snapin_flag = 0;
 static int snapout_flag = 0;
@@ -24,6 +28,7 @@ static char snapoutfile[255]={'?'};
 static int snapout_acc_flag = 0;
 static int snapio_binary_flag = 0;
 static int ionemo_flag = 0;
+static int usepob_flag = 0;
 static int command_exec_flag = 0;
 static char command_name[255]={'?'};
 static int outlogstep = 1;
@@ -43,6 +48,10 @@ static double tend = 10.0;
 static double  dtimageout = 1;
 static int imageout_flag = 0;
 static double image_scale = 0.3;
+#if COSMO
+static double dt0 = 0.01;
+static double eps0 = 0.02;
+#endif /* COSMO */
 
 /* parameter for force calculation */
 static double mmin = 0.0;
@@ -71,12 +80,22 @@ show_usage(char *command)
 #endif /* IONEMO */
     fprintf(stderr, "    -c            output timing info\n");
     fprintf(stderr, "    -D num        snapshot output interval [1]\n");
+#if COSMO
+    fprintf(stderr, "    -d num        final timestep [0.01]\n");
+    fprintf(stderr, "    -E num        initial softening [0.02]\n");
+    fprintf(stderr, "    -e num        final softening [0.02]\n");
+    fprintf(stderr, "    -f num        initial timestep [0.01]\n");
+#else /* COSMO */
     fprintf(stderr, "    -d num        timestep [0.01]\n");
     fprintf(stderr, "    -e num        softening [0.02]\n");
+#endif /* COSMO */
     fprintf(stderr, "    -F            never use 'modified' P2M2 (i.e. use regular P2M2 for p=2)\n");
 #ifndef NOGRAPE
     fprintf(stderr, "    -G            use GRAPE if available\n");
 #endif /* NOGRAPE */
+#ifdef USEPOB
+    fprintf(stderr, "    -g            use gzipped particle oriented binary (.pob) format\n");
+#endif /* USEPOB */
     fprintf(stderr, "    -i fname      input file [?]\n");
     fprintf(stderr, "    -I num        use num-particle homo sphere as initial distribution\n");
     fprintf(stderr, "    -l num        log output interval [1]\n");
@@ -123,6 +142,18 @@ show_usage(char *command)
 #define TESTOPTS ""
 #endif /* USEX11 */
 
+#if COSMO
+#define COSMOOPTS "E:f:"
+#else
+#define COSMOOPTS ""
+#endif /* COSMO */
+
+#if USEPOB
+#define POBOPTS "g"
+#else
+#define POBOPTS ""
+#endif /* USEPOB */
+
 extern char *optarg;
 extern int optind;
 static void
@@ -130,7 +161,7 @@ parse_argv(int argc, char **argv)
 {
     int c;
     char *infile = NULL;
-    char* param = "acD:d:e:FI:i:l:N:n:o:p:r:s:T:t:W:X:zh" GRAPEOPTS IONEMOOPTS ANIMOPTS TESTOPTS;
+    char* param = "acD:d:e:FI:i:l:N:n:o:p:r:s:T:t:W:X:zh" GRAPEOPTS IONEMOOPTS ANIMOPTS TESTOPTS COSMOOPTS POBOPTS;
 
     while ((c = getopt(argc, argv, param)) != EOF) {
 	switch (c) {
@@ -159,6 +190,19 @@ parse_argv(int argc, char **argv)
 	case 'e':
 	    eps = atof(optarg);
 	    break;
+#if USEPOB
+	case 'g':
+	    usepob_flag = 1;
+	    break;
+#endif /* USEPOB */
+#if COSMO
+	case 'E':
+	    eps0 = atof(optarg);
+	    break;
+	case 'f':
+	    dt0 = atof(optarg);
+	    break;
+#endif /* COSMO */
 	case 'F':
 	    full_dof_flag = FALSE;
 	    break;
@@ -220,12 +264,10 @@ parse_argv(int argc, char **argv)
 	    strcpy(command_name, optarg);
 	    command_exec_flag = 1;
 	    break;
-#if USEGD
 	case 'W':
 	    dtimageout = atof(optarg);
 	    imageout_flag = 1;
 	    break;
-#endif /* USEGD */
 	case 'z':
 	    negativemass = TRUE;
 	    break;
@@ -236,6 +278,8 @@ parse_argv(int argc, char **argv)
 	}
     }
 }
+
+#if 1 /* NEMO ascii */
 
 static void
 write_ascii(char *fname, double time, Nbodyinfo *nb)
@@ -278,11 +322,51 @@ write_ascii(char *fname, double time, Nbodyinfo *nb)
     fclose(fp);
 }
 
+#else /* one particle per line */
+
+static void
+write_ascii(char *fname, double time, Nbodyinfo *nb)
+{
+    FILE *fp;
+    int i, k;
+    int n = nb->n;
+
+    fprintf(stderr, "will write %s...", fname);
+    fp = fopen(fname, "w");
+    if (fp == NULL) {
+	perror("weite_ascii");
+	exit(1);
+    }
+    fprintf(fp, "%d\n", n);
+    fprintf(fp, "% 15.13E\n", time);
+    for (i = 0; i < n; i++) {
+	fprintf(fp, " % 15.13E ", nb->m[i]);
+	fprintf(fp, " % 15.13E % 15.13E % 15.13E ",
+		nb->x[i][0], nb->x[i][1], nb->x[i][2]);
+	fprintf(fp, " % 15.13E % 15.13E % 15.13E ",
+		nb->v[i][0], nb->v[i][1], nb->v[i][2]);
+	if (snapout_acc_flag == 1) {
+	    fprintf(fp, " % 15.13E ", nb->p[i]);
+	    fprintf(fp, " % 15.13E % 15.13E % 15.13E ",
+		    nb->a[i][0], nb->a[i][1], nb->a[i][2]);
+	}
+	fprintf(fp, "\n");
+    }
+    fprintf(stderr, "done\n");
+    fclose(fp);
+}
+
+#endif
+
 static void
 create_initcond(Nbodyinfo *nb, int n)
 {
     int i, k;
     double m = 1.0/n;
+
+    // !!!
+    m = 0.0;
+
 
     nb->n = n;
     nb->m = (double *)malloc(sizeof(double)*n);
@@ -307,16 +391,9 @@ create_initcond(Nbodyinfo *nb, int n)
     i = 0;
     while (i < n) {
 	double x, y, z;
-#ifndef __APPLE__
 	x = 2.0*drand48()-1.0;
 	y = 2.0*drand48()-1.0;
 	z = 2.0*drand48()-1.0;
-#else /* no drand48 can be found on Mac OS X system */
-	x = (double)random()/(1<<30)-1.0;
-	y = (double)random()/(1<<30)-1.0;
-	z = (double)random()/(1<<30)-1.0;
-#endif
-	Cfprintf(stderr, "i: %d %f %f %f\n", i, x, y, z);
 	if (x*x+y*y+z*z<1.0) {
 	    nb->x[i][0] = x;
 	    nb->x[i][1] = y;
@@ -348,7 +425,7 @@ read_binary(char *fname, double *timep, Nbodyinfo *nb)
     fprintf(stderr, "done.\n");
 
 #else /* IONEMO */
-    fprintf(stderr, "binary I/O is not supported\n");
+    fprintf(stderr, "binary file I/O is not supported\n");
     exit(1);
 #endif /* IONEMO */
 }
@@ -377,9 +454,85 @@ write_binary(char *fname, double time, Nbodyinfo *nb)
     io_nemo(fname,"close");
 
 #else /* IONEMO */
-    fprintf(stderr, "binary I/O is not supported\n");
+    fprintf(stderr, "binary file I/O is not supported\n");
     exit(1);
 #endif /* IONEMO */
+}
+
+
+static void
+write_pob(char *fname, double time, Nbodyinfo *nb)
+{
+#if USEPOB
+    gzFile fp;
+    unsigned long long n, i, bits;
+
+    n = nb->n;
+
+    if (snapout_acc_flag == 1) {
+	bits = MassBit | PosBit | VelBit | PotBit | AccBit;
+	fp = pob_write_open(fname, n, time, bits);
+	if (fp == NULL) {
+	    perror("write_pob");
+	    exit(1);
+	}
+	pob_write(fp, n, bits, nb->m, nb->x, nb->v, nb->p, nb->a);
+	pob_close(fp);
+    }
+    else {
+	bits = MassBit | PosBit | VelBit | PotBit;
+	fp = pob_write_open(fname, n, time, bits);
+	if (fp == NULL) {
+	    perror("write_pob");
+	    exit(1);
+	}
+	pob_write(fp, n, bits, nb->m, nb->x, nb->v, nb->p);
+	pob_close(fp);
+    }
+#else /* USEPOB */
+    fprintf(stderr, ".pob file I/O is not supported\n");
+    exit(1);
+#endif /* USEPOB */
+}
+
+static void
+read_pob(char *fname, double *timep, Nbodyinfo *nb)
+{
+#if USEPOB
+    gzFile fp;
+    unsigned long long n, i, bits, rbits;
+
+    fp = pob_read_open(fname, &n, timep, &bits);
+    if (fp == NULL) {
+	perror("read_pob");
+        exit(1);
+    }
+    nb->n = n;
+    fprintf(stderr, "%s opened. n: %lld time: %f bits: 0x%08x\n",
+        fname, n, *timep, bits);
+    if (!(bits&MassBit && bits&PosBit && bits&VelBit)) {
+	fprintf(stderr, "one or more of mass, position, and velocity fields are missing.\n");
+	exit(1);
+    }
+    nb->m = (double *)malloc(sizeof(double)*n);
+    if (NULL == nb->m) {
+	perror("read_pob");
+	exit(1);
+    }
+    nb->x = (double (*)[3])malloc(sizeof(double)*3*n);
+    nb->v = (double (*)[3])malloc(sizeof(double)*3*n);
+    if (NULL == nb->m || NULL == nb->x || NULL == nb->v) {
+	perror("read_pob");
+	exit(1);
+    }
+    rbits = (MassBit | PosBit | VelBit);
+    fprintf(stderr, "bits: 0x%08llx rbits: 0x%08llx\n", bits, rbits);
+    pob_read(fp, n, bits, rbits, nb->m, nb->x, nb->v);
+    pob_close(fp);
+#else /* USEPOB */
+    fprintf(stderr, ".pob file I/O is not supported\n");
+    exit(1);
+#endif /* USEPOB */
 }
 
 static void
@@ -522,9 +675,9 @@ get_cmterms(Nbodyinfo *nb, double cm[3], double cmv[3])
 	cm[k] = 0.0;
 	cmv[k] = 0.0;
     }
-    for (k = 0; k < 3; k++) {
-	for (i = 0; i < n; i++) {
-	    totm += nb->m[i];
+    for (i = 0; i < n; i++) {
+	totm += nb->m[i];
+	for (k = 0; k < 3; k++) {
 	    cm[k] += nb->x[i][k]*nb->m[i];
 	    cmv[k] += nb->v[i][k]*nb->m[i];
 	}
@@ -555,34 +708,61 @@ time_integration_loop(Forceinfo *fi, Nbodyinfo *nb)
     }
     vtc_init_cputime();
     vtc_print_cputime("initial vtc_get_force start at");
-#if 0 /* direct sum */
-    vtc_get_default_direct_params(fi);
+
+#if DIRECT /* direct sum */
     if (grape_flag) {
-	fi->calculator = GRAPE;
-	vtc_set_scale(32.0, nb->m[0]);
-    }
-    vtc_get_force_direct(fi, nb);
-#else /* tree */
-    if (grape_flag) {
+	vtc_set_scale(512.0, nb->m[0]);
+#if MDGRAPE2
 	fi->calculator = GRAPE_FORCEONLY;
+#else
 	fi->calculator = GRAPE;
-	vtc_get_force_tree(fi, nb);
-#if CALCPOTENTIAL
+#endif /* MDGRAPE2 */
+	vtc_get_force_direct(fi, nb);
+#if CALCPOTENTIAL && MDGRAPE2
         fi->calculator = GRAPE_POTENTIALONLY;
-        vtc_get_force_tree(fi, nb);
-#endif
+        vtc_get_force_direct(fi, nb);
+	fi->calculator = GRAPE_FORCEONLY;
+#endif /* CALCPOTENTIAL && MDGRAPE2 */
     }
     else {
+#if CALCPOTENTIAL
+        fi->calculator = HOST;
+#endif /* CALCPOTENTIAL */
+	vtc_get_force_direct(fi, nb);
+    }
+#else /* tree */
+    if (grape_flag) {
+#if NOFORCE
+	fi->calculator = NOCALCULATOR;
+#elif MDGRAPE2
+	fi->calculator = GRAPE_FORCEONLY;
+#else
+	fi->calculator = GRAPE;
+#endif /* NOFORCE */
+	vtc_get_force_tree(fi, nb);
+#if CALCPOTENTIAL && MDGRAPE2
+        fi->calculator = GRAPE_POTENTIALONLY;
+        vtc_get_force_tree(fi, nb);
+	fi->calculator = GRAPE_FORCEONLY;
+#endif /* CALCPOTENTIAL && MDGRAPE2 */
+    }
+    else {
+#if CALCPOTENTIAL
+        fi->calculator = HOST;
+#endif /* CALCPOTENTIAL */
 	vtc_get_force_tree(fi, nb);
     }
 #endif
     vtc_print_cputime("initial vtc_get_force end at");
     fprintf(stderr, "ninteraction: %e list_len_avg: %6.5f nwalk: %d\n",
 	    fi->ninteraction, (double)fi->ninteraction/nb->n, fi->nwalk);
-    W = get_potential_energy(nb);
     K = get_kinetic_energy(nb);
+#if CALCPOTENTIAL
+    W = get_potential_energy(nb);
     E = E0 = W+K;
-    PR(E0, f); PR(W, f); PRL(K, f);
+    PR(E0, 20.17f); PR(W, 20.17f);
+#endif
+    PRL(K, f);
     plot_nbody(t, nb);
 
     /* calculate force at T=0 and quit */
@@ -595,11 +775,18 @@ time_integration_loop(Forceinfo *fi, Nbodyinfo *nb)
 	if (ionemo_flag) {
 	    write_binary(fn, t, nb);
 	}
+	else if (usepob_flag) {
+	    write_pob(fn, t, nb);
+	}
 	else {
 	    write_ascii(fn, t, nb);
 	}
 	vtc_print_cputime("exit at");
-	exit(0);
+#if USE_GM_API
+	fprintf(stderr, "will m2_gm_finalize...\n");
+	m2_gm_finalize();
+	fprintf(stderr, "done m2_gm_finalize.\n");
+#endif /* USE_GM_API */
     }
     for (i = 0; i < nstep; i++) {
  	if (i%outlogstep == outlogstep - 1 && cputime_flag) {
@@ -609,30 +796,17 @@ time_integration_loop(Forceinfo *fi, Nbodyinfo *nb)
 	    vtc_turnoff_cputime();
 	}
 
+	fprintf(stderr, "step %d\n", i);
         push_velocity(0.5*dt, nb);
         push_position(dt, nb);
 	t = tstart+(i+1)*dt;
 	vtc_init_cputime();
-#if 0 /* direct sum */
-	if (grape_flag) {
-	    fi->calculator = GRAPE;
-	}
+#if DIRECT /* direct sum */
 	vtc_get_force_direct(fi, nb);
 #else /* tree */
-	if (grape_flag) {
-	    fi->calculator = GRAPE_FORCEONLY;
-	    fi->calculator = GRAPE;
-	    vtc_get_force_tree(fi, nb);
-#if CALCPOTENTIAL
-	    fi->calculator = GRAPE_POTENTIALONLY;
-	    vtc_get_force_tree(fi, nb);
+	vtc_get_force_tree(fi, nb);
 #endif
-	}
-	else {
-	    vtc_get_force_tree(fi, nb);
-	}
 	vtc_print_cputime("vtc_get_force end at");
-#endif
         push_velocity(0.5*dt, nb);
 	vtc_print_cputime("integration end at");
 
@@ -640,12 +814,27 @@ time_integration_loop(Forceinfo *fi, Nbodyinfo *nb)
  	if (i%outlogstep == outlogstep - 1) {
 	    fprintf(stderr, "ninteraction: %e list_len_avg: %6.5f nwalk: %d\n",
 		    fi->ninteraction, fi->ninteraction/nb->n, fi->nwalk);
-	    W = get_potential_energy(nb);
 	    K = get_kinetic_energy(nb);
+#if CALCPOTENTIAL
+#if MDGRAPE2
+	    if (grape_flag) {
+		fi->calculator = GRAPE_POTENTIALONLY;
+#if DIRECT /* direct sum */
+		vtc_get_force_direct(fi, nb);
+#else /* tree */
+		vtc_get_force_tree(fi, nb);
+#endif /* direct/tree */
+		fi->calculator = GRAPE_FORCEONLY;
+	    }
+#endif /* MDGRAPE2 */
+	    W = get_potential_energy(nb);
 	    E = W+K;
 	    Q = K/(K-E);
-	    fprintf(stderr, "\nT= %f K= %f Q= %f E= %f Eerr= %f Eabserr= %f\n",
+	    fprintf(stderr, "\nT= %f K= %20.17f Q= %20.17f E= %20.17f Eerr= %20.17f Eabserr= %20.17f\n",
 		    t, K, Q, E, (E0-E)/E0, E0-E);
+#else /* CALCPOTENTIAL */
+	    fprintf(stderr, "\nT= %f K= %20.17f\n", t, K);
+#endif /* CALCPOTENTIAL */
 	    fprintf(stderr, "step: %d\n", i);
 	    get_cmterms(nb, cm, cmv);
 	    fprintf(stderr, "CM  %15.13e %15.13e %15.13e\n",
@@ -663,6 +852,9 @@ time_integration_loop(Forceinfo *fi, Nbodyinfo *nb)
 	    if (ionemo_flag) {
 		write_binary(fn, t, nb);
 	    }
+	    else if (usepob_flag) {
+		write_pob(fn, t, nb);
+	    }
 	    else {
 		write_ascii(fn, t, nb);
 	    }
@@ -675,8 +867,215 @@ time_integration_loop(Forceinfo *fi, Nbodyinfo *nb)
 	    nout++;
 	    PR(t, f); PRL(fn, s);
 	}
-#if USEGD
 	if (i%outimagestep == outimagestep - 1 && imageout_flag) {
+	    static int nout = 0;
+	    char fn[255];
+	    char cmd[255];
+	    char msg[255];
+	    double center[2];
+
+	    sprintf(fn, snapoutfile, nout);
+	    strcat(fn, ".gif");
+	    PRL(fn, s);
+
+	    sprintf(msg, "t: %5.3f", t);
+	    center[0] = 0.0;
+	    center[1] = 0.0;
+	    // vtc_plotstar(fn, nb, msg, image_scale, center, 1e10, NULL, NULL);
+	    // vtc_plotstar(nb->x, nb->m, nb->n, t, image_scale, fn);
+	    nout++;
+	    PR(t, f); PRL(fn, s);
+	}
+	vtc_print_cputime("exit at");
+    } /* i loop */
+}
+
+#if COSMO
+
+static void
+time_integration_loop_hubble(Forceinfo *fi, Nbodyinfo *nb)
+{
+    double zval; /* red shift at T=0 */
+    double tmpzz;
+    double t, t0, dt1, tpresent;
+    double W, K, E0, E, Q;
+    double cm[3], cmv[3];
+    int step = 0;
+    double tsnapout, timageout;
+
+    t = 0.0;
+    tpresent = 16.0; /* present time must be 16.0 */
+    zval = 24.0;
+    tmpzz = pow(1.0/(zval+1), 3.0/2.0);
+    t0 = tmpzz/(1.0-tmpzz)*tpresent;
+    fi->eps = (zval+1)*pow(t0/(tpresent+t0), 2.0/3.0)*eps0;
+    dt1 = dt0;
+
+    tsnapout = dtsnapout;
+    timageout = dtimageout;
+
+    PR(t0, f); PR(dt0, f); PRL(dt1, f);
+
+    PR(tstart,f); PR(tpresent,f); PR(dt,f); PRL(dtsnapout,f); PRL(dtimageout,f);
+
+    if (cputime_flag) {
+	vtc_turnon_cputime();
+    }
+    vtc_init_cputime();
+    vtc_print_cputime("initial vtc_get_force start at");
+
+#if DIRECT /* direct sum */
+    if (grape_flag) {
+	vtc_set_scale(512.0, nb->m[0]);
+	fi->calculator = GRAPE_FORCEONLY;
+	vtc_get_force_direct(fi, nb);
+#if CALCPOTENTIAL
+        fi->calculator = GRAPE_POTENTIALONLY;
+	vtc_get_force_direct(fi, nb);
+	fi->calculator = GRAPE_FORCEONLY;
+#endif
+    }
+    else {
+	vtc_get_force_direct(fi, nb);
+    }
+#else /* tree */
+    if (grape_flag) {
+	fi->calculator = GRAPE_FORCEONLY;
+	vtc_get_force_tree(fi, nb);
+#if CALCPOTENTIAL
+        fi->calculator = GRAPE_POTENTIALONLY;
+        vtc_get_force_tree(fi, nb);
+	fi->calculator = GRAPE_FORCEONLY;
+#endif
+    }
+    else {
+	vtc_get_force_tree(fi, nb);
+    }
+#endif /* direct/tree */
+    vtc_print_cputime("initial vtc_get_force end at");
+    fprintf(stderr, "ninteraction: %e list_len_avg: %6.5f nwalk: %d\n",
+	    fi->ninteraction, (double)fi->ninteraction/nb->n, fi->nwalk);
+    K = get_kinetic_energy(nb);
+#if CALCPOTENTIAL
+    W = get_potential_energy(nb);
+    E = E0 = W+K;
+    PR(E0, f); PR(W, f);
+#endif
+    PRL(K, f);
+    plot_nbody(t, nb);
+
+    /* calculate force at T=0 and quit */
+    if (snapout_flag && dtsnapout == 0.0) {
+	static int nout = 0;
+	char fn[255];
+	snapout_acc_flag = 1;
+	sprintf(fn, snapoutfile, nout);
+	PRL(fn, s);
+	if (ionemo_flag) {
+	    write_binary(fn, t, nb);
+	}
+	else if (usepob_flag) {
+	    write_pob(fn, t, nb);
+	}
+	else {
+	    write_ascii(fn, t, nb);
+	}
+	vtc_print_cputime("exit at");
+	return;
+    }
+
+    while (t < tend) {
+	if (fi->eps < eps) {
+	    double eps1;
+	    eps1 = (zval+1)*pow((t+t0)/(tpresent+t0), 2.0/3.0)*eps0;
+	    fi->eps = (eps1 < eps ? eps1 : eps);
+	}
+	else {
+	    fi->eps = eps;
+	}
+	if (dt1 < dt) {
+	    dt1 = dt0*(t+t0)/t0;
+	}
+	else {
+	    dt1 = dt;
+	}
+ 	if (step%outlogstep == outlogstep - 1 && cputime_flag) {
+	    vtc_turnon_cputime();
+	}
+	else {
+	    vtc_turnoff_cputime();
+	}
+        push_velocity(0.5*dt1, nb);
+        push_position(dt1, nb);
+	vtc_init_cputime();
+#if DIRECT /* direct sum */
+	vtc_get_force_direct(fi, nb);
+#else /* tree */
+	vtc_get_force_tree(fi, nb);
+#endif /* direct/tree */
+	vtc_print_cputime("vtc_get_force end at");
+        push_velocity(0.5*dt1, nb);
+	vtc_print_cputime("integration end at");
+
+	plot_nbody(t, nb);
+ 	if (step%outlogstep == outlogstep - 1) {
+	    fprintf(stderr, "ninteraction: %e list_len_avg: %6.5f nwalk: %d\n",
+		    fi->ninteraction, fi->ninteraction/nb->n, fi->nwalk);
+	    K = get_kinetic_energy(nb);
+#if CALCPOTENTIAL
+	    if (grape_flag) {
+		fi->calculator = GRAPE_POTENTIALONLY;
+#if DIRECT /* direct sum */
+		vtc_get_force_direct(fi, nb);
+#else /* tree */
+		vtc_get_force_tree(fi, nb);
+#endif /* direct/tree */
+		fi->calculator = GRAPE_FORCEONLY;
+	    }
+	    W = get_potential_energy(nb);
+	    E = W+K;
+	    Q = K/(K-E);
+	    fprintf(stderr, "\nT= %f K= %f Q= %f E= %f Eerr= %f Eabserr= %f\n",
+		    t, K, Q, E, (E0-E)/E0, E0-E);
+#else
+	    fprintf(stderr, "\nT= %f K= %f\n", t, K);
+#endif
+	    fprintf(stderr, "step: %d\n", step);
+	    fprintf(stderr, "T: %f current eps: %f dt: %f\n",
+		    t, fi->eps, dt1);
+	    get_cmterms(nb, cm, cmv);
+	    fprintf(stderr, "CM  %15.13e %15.13e %15.13e\n",
+		    cm[0], cm[1], cm[2]);
+	    fprintf(stderr, "CMV %15.13e %15.13e %15.13e\n",
+		    cmv[0], cmv[1], cmv[2]);
+ 	}
+	if (tsnapout < t && snapout_flag) {
+	    static int nout = 0;
+	    char fn[255];
+	    char cmd[255];
+
+	    sprintf(fn, snapoutfile, nout);
+	    PRL(fn, s);
+	    if (ionemo_flag) {
+		write_binary(fn, t, nb);
+	    }
+	    else if (usepob_flag) {
+		write_pob(fn, t, nb);
+	    }
+	    else {
+		write_ascii(fn, t, nb);
+	    }
+
+	    if (command_exec_flag) {
+		sprintf(cmd, "%s %s %03d", command_name, fn, nout);
+		fprintf(stderr, "execute %s\n", cmd);
+		system(cmd);
+	    }
+	    nout++;
+	    PR(t, f); PRL(fn, s);
+	    tsnapout += dtsnapout;
+	}
+	if (timageout < t && imageout_flag) {
 	    static int nout = 0;
 	    char fn[255];
 	    char cmd[255];
@@ -687,12 +1086,15 @@ time_integration_loop(Forceinfo *fi, Nbodyinfo *nb)
 	    vtc_plotstar(nb->x, nb->n, t, image_scale, fn);
 	    nout++;
 	    PR(t, f); PRL(fn, s);
+	    timageout += dtimageout;
 	}
-#endif /* USEGD */
+	t += dt1;
+	step++;
 	vtc_print_cputime("exit at");
-    } /* i loop */
-    exit(0);
+    } /* main loop */
 }
+
+#endif /* COSMO */
 
 static void
 init_nbodyinfo(Nbodyinfo *nb)
@@ -730,6 +1132,9 @@ main(int argc, char**argv)
 	if (ionemo_flag) {
 	    read_binary(snapinfile, &tstart, &nbody);
 	}
+	else if (usepob_flag) {
+	    read_pob(snapinfile, &tstart, &nbody);
+	}
 	else {
 	    read_ascii(snapinfile, &tstart, &nbody);
 	}
@@ -746,7 +1151,12 @@ main(int argc, char**argv)
 		tstart, tend);
 	exit(1);
     }
+#if DIRECT /* direct sum */
+    vtc_get_default_direct_params(&force); /* get current values */
+#else /* tree */
     vtc_get_default_tree_params(&force); /* get current values */
+#endif /* direct/tree */
+
     /* modify some of them */
     force.theta = theta;
     force.eps = eps;
@@ -765,6 +1175,28 @@ main(int argc, char**argv)
     PR(snapinfile,s); PRL(snapoutfile,s);
     PRL(n,d); 
     PR(eps, f); PR(theta, f); PR(ncrit, d); PRL(node_div_crit, d); 
+
+
+    {
+	double mmin = 1e10;
+	double mmax = 0.0;
+	for (i = 0; i < nbody.n; i++) {
+	    if (mmin > nbody.m[i]) mmin = nbody.m[i];
+	    if (mmax < nbody.m[i]) mmax = nbody.m[i];
+	}
+	fprintf(stderr, "mmin: %e mmax: %e\n", mmin, mmax);
+    }
+
+
+#if COSMO
+    time_integration_loop_hubble(&force, &nbody);
+#else
     time_integration_loop(&force, &nbody);
+#endif
+#if USE_GM_API
+    fprintf(stderr, "will m2_gm_finalize...\n");
+    m2_gm_finalize();
+    fprintf(stderr, "done m2_gm_finalize.\n");
+#endif /* USE_GM_API */
     exit(0);
 }

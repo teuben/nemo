@@ -129,7 +129,7 @@ vtc_get_default_tree_params(Forceinfo *tr)
     tr->npp = 1;
     tr->pppos = NULL;
     tr->full_dof = TRUE;
-    tr->calculator = HOST;
+    tr->calculator = HOST_FORCEONLY;
     tr->test_id = -1;
 }
 
@@ -148,11 +148,16 @@ void vtc_get_force_tree(Forceinfo *fi, Nbodyinfo *nb)
 	else {
 	    usep2m2 = TRUE;
 	    load_design(fi->p, fi->pprad, fi->full_dof, fi->negativemass,
-			&(fi->npp), &(fi->pppos));
+			&(fi->npp), &(fi->tdesign), &(fi->pppos));
 	}
-#if 0
-	fprintf(stderr, "p: %d pprad: %f full_dof: %d npp: %d\n",
-		fi->p, fi->pprad, fi->full_dof, fi->npp);
+#if 1
+	if (usep2m2) {
+	    fprintf(stderr, "p: %d pprad: %f full_dof: %d npp: %d t-design: %d\n",
+		    fi->p, fi->pprad, fi->full_dof, fi->npp, fi->tdesign);
+	}
+	else {
+	    fprintf(stderr, "p: %d npp: %d\n", fi->p, fi->npp);
+	}
 	if (fi->p > 2 || !(fi->full_dof)) {
 	    for (i = 0; i < fi->npp; i++) {
 		fprintf(stderr, "pp%03d: % 20.18f % 20.18f % 20.18f\n",
@@ -183,6 +188,7 @@ void vtc_get_force_tree(Forceinfo *fi, Nbodyinfo *nb)
     }
     vtc_print_cputime("traverse_tree start at");
     traverse_tree(root, root, fi, nb);
+    vtc_print_cputime("traverse_tree end at");
 }
 
 /*
@@ -221,10 +227,10 @@ create_root_cell(Forceinfo *fi, Nbodyinfo *nb)
 	    }
 	}
     }
-    while (posmax*2 > cs) {
+    while (posmax*2 >= cs) {
 	cs *= 2.0;
     }
-    while (posmax*2 <= cs*0.5) {
+    while (posmax*2 < cs*0.5) {
 	cs *= 0.5;
     }
     if (cs != csold) {/* necessary only for GRAPE-3,5 and MDGRAPE-2 */
@@ -395,7 +401,7 @@ create_tree(Forceinfo *fi, Nbodyinfo *nb)
     create_key(Bindex, Bkey, nb, Csize[root]);
     sort_body(Bindex, Bkey, n);
     create_tree_dfl(root, n, 0, MORTONKEY_LENGTH,
-		    fi->node_div_crit, (fi->theta)*(fi->theta), nb);
+		    fi->node_div_crit*fi->npp, (fi->theta)*(fi->theta), nb);
     return(root);
 }
 
@@ -510,8 +516,10 @@ m2m_1storder(Cell c0, Forceinfo *fi, Nbodyinfo *nb)
 	    Cndescendant[c0] += Cndescendant[c1];
 	}
     }
-    for (k = 0; k < 3; k++) {
+    if (Ccmmass[c0] != 0.0) {
+      for (k = 0; k < 3; k++) {
 	Ccmpos[c0][k] /= Ccmmass[c0];
+      }
     }
 }
 
@@ -535,8 +543,8 @@ process_m2m(Cell root, Forceinfo *fi, Nbodyinfo *nb)
 	    m2m_2ndorder_md(root, fi, nb);
 	}
 	else {
-	    fprintf(stderr, "process_m2m: order %d invalid\n", fi->p);
-	    exit(1);
+	    m2m_1storder_md(root, fi, nb);
+	    m2m_anyorder_md(root, fi, nb);
 	}
     }
     else { /* particle mass is always positive */
@@ -552,8 +560,8 @@ process_m2m(Cell root, Forceinfo *fi, Nbodyinfo *nb)
 	    m2m_2ndorder(root, fi, nb);
 	}
 	else {
-	    fprintf(stderr, "process_m2m: order %d invalid\n", fi->p);
-	    exit(1);
+	    m2m_1storder(root, fi, nb);
+	    m2m_anyorder(root, fi, nb);
 	}
     }
 }
@@ -662,49 +670,6 @@ pack_interaction_list(Nbodyinfo *nb, int jlen, int npp, int usenegativemass,
     return (pplen);
 }
 
-static int /* length of the list excluding i-particles */
-get_interaction_list(Cell icell, Cell jcell0, double theta2, Nbodyinfo *nb,
-		     Body *list, int *iscell, int npp)
-{
-    int i, s;
-    int len0 = 0;
-    Cell jcell1;
-
-    if (icell == jcell0) { /* self interaction is already taken into account */
-	len0 = 0;
-    }
-    else if (get_separation(Csize[icell], Cpos[icell], jcell0) * theta2 > (Csize[jcell0])*(Csize[jcell0])) {
-	/*
-	  else if (get_separation(Csize[icell], Cpos[icell], jcell0) > Ccrit[jcell0]) {
-	*/
-	/* apply multipole expansion */
-	list[0] = jcell0;
-	iscell[0] = TRUE;
-	len0 = 1;
-    }
-    else { /* not well separated */
-	if (Cisleaf[jcell0] || Cndescendant[jcell0] <= npp) { /* handle particle force directly */
-	    Body *cb = Cbody[jcell0];
-	    len0 = Cnbody[jcell0];
-	    for (i = 0; i < len0; i++) {
-		list[i] = cb[i];
-		iscell[i] = FALSE;
-	    }
-	}
-	else { /* descend the tree */
-	    for (s = 0; s < 8; s++) {
-		jcell1 = Cchild[jcell0][s];
-		if (NOCELL == jcell1) {
-		    continue;
-		}
-		len0 += get_interaction_list(icell, jcell1, theta2, nb,
-					     list+len0, iscell+len0, npp);
-	    }
-	}
-    }
-    return (len0);
-}
-
 static double /* (separation)^2 */
 get_separation(double isize, double ipos[3], Cell jcell)
 {
@@ -747,7 +712,117 @@ get_separation(double isize, double ipos[3], Cell jcell)
     return (dr2);
 }
 
+static double /* (separation)^2 */
+get_separation_with_margin(double isize, double ipos[3], Cell jcell)
+{
+    int k;
+    double dx, dy, dz, dr2;
+    double xmin, jsize;
+
+    jsize = Csize[jcell];
+#if 1
+    xmin = (isize)*0.5; /* i & j are guaranteed not to be overlaped */
+#else
+    /* you may want to use more strict criterion */
+    xmin = (isize+jsize)*0.5;
+#endif
+    if (negativemass) { /* use distance from geometric center of jcell */
+	dx = fabs(ipos[0]-Cpos[jcell][0]);
+	dy = fabs(ipos[1]-Cpos[jcell][1]);
+	dz = fabs(ipos[2]-Cpos[jcell][2]);
+    }
+    else {  /* use distance from center of mass of jcell.
+	       this works more better for lower order expansion */
+       dx = fabs(ipos[0]-Ccmpos[jcell][0]);
+       dy = fabs(ipos[1]-Ccmpos[jcell][1]);
+       dz = fabs(ipos[2]-Ccmpos[jcell][2]);
+    }
+    dx -= xmin;
+    dy -= xmin;
+    dz -= xmin;
+    if (dx < 0.0) {
+	dx = 0.0;
+    }
+    if (dy < 0.0) {
+	dy = 0.0;
+    }
+    if (dz < 0.0) {
+	dz = 0.0;
+    }
+    dr2 = dx*dx+dy*dy+dz*dz;
+    dr2 = sqrt(dr2) - vtc_get_mac_margin();
+    dr2 = dr2 > 0.0 ? dr2 : 0.0;
+    dr2 = dr2 * dr2;
+    /*
+     *  i.e. dr2 = (sqrt(dx*dx+dy*dy+dz*dz)-margin)^2
+     */
+    return (dr2);
+}
+
+
+static double mac_margin = 0.0; /* margin for max acceptable criterion */
+static double (*separation_func)(double isize, double ipos[3], Cell jcell) = get_separation;
+
+void
+vtc_set_mac_margin(double margin)
+{
+    mac_margin = margin;
+    separation_func = get_separation_with_margin;
+}
+
+double
+vtc_get_mac_margin(void)
+{
+    return (mac_margin);
+}
+
+static int /* length of the list excluding i-particles */
+get_interaction_list(Cell icell, Cell jcell0, double theta2, Nbodyinfo *nb,
+		     Body *list, int *iscell, int npp)
+{
+    int i, s;
+    int len0 = 0;
+    Cell jcell1;
+
+    if (icell == jcell0) { /* self interaction is already taken into account */
+	len0 = 0;
+    }
+    else if ((*separation_func)(Csize[icell], Cpos[icell], jcell0) * theta2 > (Csize[jcell0])*(Csize[jcell0])) {
+	/*
+	  else if ((*separation_func)(Csize[icell], Cpos[icell], jcell0) > Ccrit[jcell0]) {
+	*/
+	/* apply multipole expansion */
+	list[0] = jcell0;
+	iscell[0] = TRUE;
+	len0 = 1;
+    }
+    else { /* not well separated */
+	if (Cisleaf[jcell0] || Cndescendant[jcell0] <= npp) { /* handle particle force directly */
+	    Body *cb = Cbody[jcell0];
+	    len0 = Cnbody[jcell0];
+	    for (i = 0; i < len0; i++) {
+		list[i] = cb[i];
+		iscell[i] = FALSE;
+	    }
+	}
+	else { /* descend the tree */
+	    for (s = 0; s < 8; s++) {
+		jcell1 = Cchild[jcell0][s];
+		if (NOCELL == jcell1) {
+		    continue;
+		}
+		len0 += get_interaction_list(icell, jcell1, theta2, nb,
+					     list+len0, iscell+len0, npp);
+	    }
+	}
+    }
+    return (len0);
+}
+
 #endif /* VECTORIZED */
+
+#define NJMAX (1000000) /* probably 1M is too much.
+			   100k is enough for typical accuracy, say p=2 theta=0.3 */
 
 static void
 traverse_tree(Cell c0, Cell root, Forceinfo *fi, Nbodyinfo *nb)
@@ -806,6 +881,11 @@ traverse_tree(Cell c0, Cell root, Forceinfo *fi, Nbodyinfo *nb)
 	pplen = pack_interaction_list(nb, jlen, npp, fi->negativemass, nodelist, iscell, mlist, xlist);
 	if (pplen > NJMAX) {
 	    fprintf(stderr, "too long interaction list (%d)\n", pplen);
+#if USE_GM_API
+	    fprintf(stderr, "will m2_gm_finalize...\n");
+	    m2_gm_finalize();
+	    fprintf(stderr, "done m2_gm_finalize.\n");
+#endif /* USE_GM_API */
 	    exit(1);
 	}
 	if (pplen > pplenmax) {
@@ -819,7 +899,7 @@ traverse_tree(Cell c0, Cell root, Forceinfo *fi, Nbodyinfo *nb)
 					       pplen, xlist, mlist, fi->eps,
 					       alist, plist);
 	nwalk++;
-	pptot += ilen*pplen;
+	pptot += (double)ilen*(double)pplen;
 
 	if (fi->eps != 0.0) { 
 	    epsinv = 1.0/fi->eps;
@@ -845,19 +925,24 @@ traverse_tree(Cell c0, Cell root, Forceinfo *fi, Nbodyinfo *nb)
 	    nbm = nb->m;
 	    for (i = 0; i < ilen; i++) {
 		node = nodelist[i];
-		nbp[node] = plist[i] + nbm[node] * epsinv;
-		/* MD2 does not calc self interaction
-		   nbp[node] = plist[i];
-		*/
-		/* but on vpp5k this correction seems to be necessary
-		 * I don't know why... */
+		if (vtc_does_include_self_interaction(fi->calculator)) {
+		    /* no correction is necessary
+		     * MD2 automatically eliminate self interaction
+		     * (but on vpp5k this correction seems to be necessary
+		     *  I don't know why...)
+		     */
+		    nbp[node] = plist[i];
+		}
+		else {
+		    nbp[node] = plist[i] + nbm[node] * epsinv;
+		}
 	    }
 	}
     }
     if (c0 == root) {
 	fi->ninteraction = pptot;
 	fi->nwalk = nwalk;
-	fprintf(stderr, "pplenmax: %d amax: %f\n", pplenmax, amax);
+	Cfprintf(stderr, "pplenmax: %d amax: %f\n", pplenmax, amax);
     }
 }
 
@@ -938,16 +1023,19 @@ make_cell(void)
     return (cellp);
 }
 
+#define INITCELLP_RATIO (2.2)
 static void
 reset_cellbuf(int n, int npp)
 {
     /* guess necessary # of cells from n & npp */
-    if (cellpmax < (int)(n*0.6/npp)) {
+    if (cellpmax < (int)(n*INITCELLP_RATIO/npp)) {
 	fprintf(stderr, "reset_cellbuf ");
-	cellpmax = n*0.6/npp+100;
+	cellpmax = n*INITCELLP_RATIO/npp+100;
+	fprintf(stderr, "cellpmax: %d\n", cellpmax);
 	reallocate_cellbuf(npp);
     }
     cellp = -1;
 }
+#undef INITCELLP_RATIO
 
 #include "debug.c"

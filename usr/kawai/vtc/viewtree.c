@@ -3,16 +3,20 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <math.h>
+#include "vtc.h"
+
 #if USEX11
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #endif /* USEX11 */
+
 #if USEGD
 #include <gd.h>
 #include <gdfontg.h>
 #include <gdfonts.h>
 #include <gdfontmb.h>
 #endif /* USEGD */
+
 #include <vtclocal.h>
 
 #define BORDER (2)
@@ -65,6 +69,7 @@ typedef struct
     double *csize; /* side len */
 } Snapshot;
 
+
 typedef struct imgcontext_t
 {
 #if USEX11
@@ -99,44 +104,212 @@ static void mainLoop1(ImgContext *ic, Polyh *ballp, Polyh *bip, Polyh *bjp, Poly
 static void exposeEvent1(ImgContext *ic, Polyh *ballp, Polyh *bip, Polyh *bjp, Polyh *cip, Polyh *cjp);
 static void keypressEvent(ImgContext *ic);
 static void projectPolyh(ImgContext *ic, Polyh *p, double zoom);
-static void clearDrawable(ImgContext *ic);
-static void body2polyh(Snapshot *t, Polyh *p);
-static void treenode2polyh(Snapshot *t, Polyh *p);
-static void freepolyh(Polyh *p);
-static void dumpimage0(ImgContext *ic, Polyh *bp, Polyh *cp);
-static void dumpimage1(ImgContext *ic, Polyh *ballp, Polyh *bip, Polyh *bjp, Polyh *cip, Polyh *cjp);
 #if USEX11
 static void displayAxis(ImgContext *ic, Polyh *p, GC gc);
 static void displayPolyh(ImgContext *ic, Polyh *p, GC gc);
 #endif /* USEX11 */
+
+static void clearDrawable(ImgContext *ic);
+static void body2polyh(Snapshot *t, Polyh *p);
+static void treenode2polyh(Snapshot *t, Polyh *p);
+static void freepolyh(Polyh *p);
+
 #if USEGD
+static void dumpimage0(ImgContext *ic, Polyh *bp, Polyh *cp);
+static void dumpimage1(ImgContext *ic, Polyh *ballp, Polyh *bip, Polyh *bjp, Polyh *cip, Polyh *cjp);
 static void dumpAxis(gdImagePtr im, ImgContext *ic, Polyh *p, int c);
 static void dumpPolyh(gdImagePtr im, ImgContext *ic, Polyh *p, int c);
 #endif /* USEGD */
 
+
 static int ilen, jlen;
 
 #if USEGD
+
+#if 1 /* high quality image */
+
+#define IMG_WIDTH (768)
+#define IMG_HEIGHT (768)
+#define IMG_NCOLORS (256)
+void
+vtc_plotstar(char *fname, Nbodyinfo *nb, char *msg, double scale, double center[2], double cmass,
+	      double *xheavy, double *xmin)
+{
+    FILE *fp, *fpw;
+    double pixelvalmax, pixelvalmin, logmax, logmin;
+    int pe, i, i0, j, jmax, k;
+    int n = nb->n;
+    double *buf = NULL;
+    int nparticle;
+    int bufsize;
+    double r[3];
+    double x, y, w;
+    gdImagePtr im;
+    int ix, iy;
+    static double pixelval[IMG_HEIGHT][IMG_WIDTH];
+    static int color[IMG_NCOLORS];
+    char textbuf[255];
+
+    /* project mass to a 2D plane */
+    for (ix = 0; ix < IMG_WIDTH; ix ++) {
+	for (iy = 0; iy < IMG_HEIGHT; iy ++) {
+	    pixelval[iy][ix] = 0.0;
+	}
+    }
+    i0 = 0;
+    for (i = 0; i < n; i++) {
+	if (i > i0) {
+	    fprintf(stderr, "%d particles done\n", i);
+	    i0 += 1000000;
+	}
+	r[0] = nb->x[i][0] - center[0];
+	r[1] = nb->x[i][1] - center[1];
+	r[2] = nb->x[i][2];
+	x = (r[0]*scale*0.5+0.5)*IMG_WIDTH;
+	y = (r[1]*scale*0.5+0.5)*IMG_HEIGHT;
+	if (0 <= x && x < IMG_WIDTH && 0 <= y && y < IMG_HEIGHT) {
+	    if (nb->m[i] < cmass) {
+		pixelval[(int)y][(int)x] += nb->m[i];
+	    }
+	}
+    }
+
+    /* assign color to each pixel */
+    im = gdImageCreate(IMG_WIDTH, IMG_HEIGHT);
+    for (i = 0; i < IMG_NCOLORS/2; i++) {
+	color[i] = gdImageColorAllocate(im, 0, 0, i);
+    }
+    for (i = 0; i < IMG_NCOLORS/2; i++) {
+	color[i+IMG_NCOLORS/2] = gdImageColorAllocate(im, i*2, i*2, i+IMG_NCOLORS/2);
+    }
+    gdImageFill(im, IMG_WIDTH, IMG_HEIGHT, color[0]);
+    pixelvalmax = 0.0;
+    pixelvalmin = 1e30;
+    for (ix = 0; ix < IMG_WIDTH; ix ++) {
+	for (iy = 0; iy < IMG_HEIGHT; iy ++) {
+	    if (pixelvalmax < pixelval[iy][ix]) {
+		pixelvalmax = pixelval[iy][ix];
+	    }
+	    if (pixelval[iy][ix] > 0.0 && pixelvalmin > pixelval[iy][ix]) {
+		pixelvalmin = pixelval[iy][ix];
+	    }
+	}
+    }
+    fprintf(stderr, "pixelval max: %f  min: %f\n", pixelvalmax, pixelvalmin);
+    logmax = log(pixelvalmax);
+    logmin = log(pixelvalmin);
+    fprintf(stderr, "logmax: %f  logmin: %f\n", logmax, logmin);
+    for (ix = 0; ix < IMG_WIDTH; ix ++) {
+	for (iy = 0; iy < IMG_HEIGHT; iy ++) {
+	    int cindex;
+	    double p = pixelval[iy][ix];
+	    if (p > 0.0) {
+		cindex = (log(p)-logmin)/(logmax-logmin)*IMG_NCOLORS;
+	    }
+	    else {
+		cindex = 0;
+	    }
+	    cindex = (cindex < IMG_NCOLORS ? cindex : IMG_NCOLORS-1);
+	    gdImageSetPixel(im, ix, iy, color[cindex]);
+	}
+    }
+
+    /* point the position of the heavy particle closest to the center */
+    if (xheavy != NULL) {
+	r[0] = xheavy[0] - center[0];
+	r[1] = xheavy[1] - center[1];
+	r[2] = xheavy[2];
+	ix = (r[0]*scale*0.5+0.5)*IMG_WIDTH;
+	iy = (r[1]*scale*0.5+0.5)*IMG_HEIGHT;
+	gdImageLine(im, ix-2, iy, ix+2, iy, IMG_NCOLORS-1);
+	gdImageLine(im, ix, iy-2, ix, iy+2, IMG_NCOLORS-1);
+
+	r[0] = xmin[0] - center[0];
+	r[1] = xmin[1] - center[1];
+	r[2] = xmin[2];
+	ix = (r[0]*scale*0.5+0.5)*IMG_WIDTH;
+	iy = (r[1]*scale*0.5+0.5)*IMG_HEIGHT;
+	gdImageLine(im, ix-2, iy-2, ix+2, iy+2, IMG_NCOLORS-1);
+	gdImageLine(im, ix-2, iy+2, ix+2, iy-2, IMG_NCOLORS-1);
+    }
+
+    /* draw a gauge */
+    w = 0.1;
+    sprintf(textbuf, "%4.2f Mpc", 2.0*w/scale);
+    gdImageLine(im,
+		IMG_WIDTH*0.1, IMG_HEIGHT-45+7,
+		IMG_WIDTH*(0.1+w), IMG_HEIGHT-45+7,
+		color[IMG_NCOLORS-1]);
+    gdImageLine(im,
+		IMG_WIDTH*0.1, IMG_HEIGHT-45-2+7,
+		IMG_WIDTH*0.1, IMG_HEIGHT-45+2+7,
+		color[IMG_NCOLORS-1]);
+    gdImageLine(im,
+		IMG_WIDTH*(0.1+w), IMG_HEIGHT-45-2+7,
+		IMG_WIDTH*(0.1+w), IMG_HEIGHT-45+2+7,
+		color[IMG_NCOLORS-1]);
+    gdImageString(im,
+		  gdFontMediumBold,
+		  IMG_WIDTH*(0.1+w)+10, IMG_HEIGHT-45,
+		  textbuf, color[IMG_NCOLORS-1]);
+
+    /* put a text in msg */
+    gdImageString(im,
+		  gdFontMediumBold,
+		  IMG_WIDTH*3.0/4.0, IMG_HEIGHT-45,
+		  msg, color[IMG_NCOLORS-1]);
+
+    fpw = fopen(fname, "w");
+    if (!fpw) {
+	perror(__FILE__ " write_image");
+	exit (2);
+    }
+    gdImageGif(im, fpw);
+    gdImageDestroy(im);
+    fclose(fpw);
+}
+
+#else /* poor image */
+
 void
 vtc_plotstar(double (*pos)[3], int n, double time, double ratio, char *fname)
 {
-    int i;
+    int i, ii;
     gdImagePtr im;
-    int black, yellow;
+    int black, yellow, red;
     double x, y;
     FILE *fp;
     static int imgno = 0;
 
+    ratio *= 4.0;
     im = gdImageCreate(WIDTH, HEIGHT);
     black = gdImageColorAllocate(im, 0, 0, 0);
     yellow = gdImageColorAllocate(im, 255, 255, 0);
+    red = gdImageColorAllocate(im, 255, 0, 0);
     gdImageFill(im, WIDTH, HEIGHT, black);
 
+#if 1 /* plot all */
     for (i = 0; i < n; i++) {
 	x = (pos[i][0]*ratio*0.5+0.5)*WIDTH;
 	y = (pos[i][1]*ratio*0.5+0.5)*HEIGHT;
 	gdImageSetPixel(im, x, y, yellow);
     }
+#elif 1 /* plot -5.0<z<5.0 slice */
+    for (i = 0; i < n; i++) {
+	if (pos[i][2] < -5.0 || 5.0 < pos[i][2]) continue;
+	x = (pos[i][0]*ratio*0.5+0.5)*WIDTH;
+	y = (pos[i][1]*ratio*0.5+0.5)*HEIGHT;
+	gdImageSetPixel(im, x, y, yellow);
+    }
+#else /* plot randomlt chosen 100000 particles */
+    for (i = 0, ii = 0; i < n; i++) {
+	if (i > 100000 && i%(n/100000) != 1)  continue;
+	x = (pos[ii][0]*ratio*0.5+0.5)*WIDTH;
+	y = (pos[ii][1]*ratio*0.5+0.5)*HEIGHT;
+	gdImageSetPixel(im, x, y, yellow);
+	ii++;
+    }
+#endif
 
     imgno++;
     fp = fopen(fname, "w");
@@ -148,6 +321,7 @@ vtc_plotstar(double (*pos)[3], int n, double time, double ratio, char *fname)
     gdImageDestroy(im);
     fclose(fp);
 }
+#endif /* image quality */
 
 #endif /* USEGD */
 
@@ -397,7 +571,9 @@ mainLoop0(ImgContext *ic, Polyh *bp, Polyh *cp)
 	    keypressEvent(ic);
 	    if (will_dump) {
 		will_dump = 0;
+#if USEGD
 		dumpimage0(ic, bp, cp);
+#endif /* USEGD */
 	    }
 	    exposeEvent0(ic, bp, cp);
 	    break;
@@ -424,7 +600,9 @@ mainLoop1(ImgContext *ic, Polyh *ballp, Polyh *bip, Polyh *bjp, Polyh *cpi, Poly
 	    keypressEvent(ic);
 	    if (will_dump) {
 		will_dump = 0;
+#if USEGD
 		dumpimage1(ic, ballp, bip, bjp, cpi, cpj);
+#endif /* USEGD */
 	    }
 	    exposeEvent1(ic, ballp, bip, bjp, cpi, cpj);
 	    break;
@@ -434,6 +612,8 @@ mainLoop1(ImgContext *ic, Polyh *ballp, Polyh *bip, Polyh *bjp, Polyh *cpi, Poly
 	}
     }
 }
+
+#if USEGD
 
 static void
 dumpimage0(ImgContext *ic, Polyh *bp, Polyh *cp)
@@ -560,6 +740,7 @@ dumpimage1(ImgContext *ic, Polyh *ballp, Polyh *bip, Polyh *bjp,
     imgno++;
 }
 
+#endif /* USEGD */
 
 static void
 exposeEvent0(ImgContext *ic, Polyh *bp, Polyh *cp)
@@ -714,6 +895,8 @@ projectPolyh(ImgContext *ic, Polyh *p, double zoom)
     }
 }
 
+#if USEGD
+
 static void
 dumpAxis(gdImagePtr im, ImgContext *ic, Polyh *p, int c)
 {
@@ -815,6 +998,8 @@ dumpPolyh(gdImagePtr im, ImgContext *ic, Polyh *p, int c)
 	}
     }
 }
+
+#endif /* USEGD */
 
 static void
 displayAxis(ImgContext *ic, Polyh *p, GC gc)

@@ -20,33 +20,23 @@
 #define PR(x,c)  fprintf(stderr, #x" = %"#c" ", x);
 #define PRL(x,c)  fprintf(stderr, #x" = %"#c"\n", x);
 
+#ifdef __linux__
+#define FNAME(x) (x ## __)
+#else
+#define FNAME(x) (x ## _)
+#endif
+
 #define TRUE (1)
 #define FALSE (0)
 
-#if (GRAPE5+MDGRAPE2+NOGRAPE) != 1
-#error specify one of GRAPE5, MDGRAPE2, and NOGRAPE
-#endif
+#define NBOARDMAX (32) /* max # of GRAPE processor board */
+#define NPPMAX (500) /* max # of pseudoparticles per expansion */
+#define TDESIGNMAX (100) /* largest t-design */
 
-#define NBOARDMAX (8) /* max # of GRAPE processor board */
-
-/* max # of j-particles can be stored on a single board */
-
-#if GRAPE5
-#include <gp5util.h>
-#define NJMAX (JMEMSIZE)
-#endif /* GRAPE5 */
-
-#if MDGRAPE2
-#include <mdgp2defs.h>
-#define NJMAX (MDGP2_BOARD_MAXJ)
-#endif /* MDGRAPE2 */
-
-#if NOGRAPE
-#define NJMAX (20000)
-#endif /* JMEMSIZE */
+#define JMEMMAX (450000)
 
 /* body attrs */
-#if defined(__APPLE__) || defined(__i386__) || defined(__SVR4) /* 32-bit long platform (ex. Darwin, Linux, Solaris) */
+#if defined(__i386__) || defined(__SVR4) /* 32-bit long platform (ex. Linux Solaris) */
 typedef long long Mortonkey;
 #else /* 64-bit long platform (ex. Tru64, UXP/V on VPP5k) */
 typedef long Mortonkey;
@@ -66,6 +56,10 @@ typedef int Node;
 extern void (*vtc_force_calculator[])(int ni, double (*xi)[3], int nj,
 				      double (*xj)[3], double *mj,
 				      double eps, double (*a)[3], double *p);
+extern void (*vtc_force_calculatorMB[])(int nboard,
+					int *ni, double (**xi)[3],
+					int *nj, double (**xj)[3], double **mj,
+					double eps, double (**a)[3], double **p);
 #endif /* _FORCE_C_ */
 
 extern int vtc_get_grape(void);
@@ -76,7 +70,7 @@ double get_cputime(void);
 
 /* P2M2 */
 void load_design(int order, double ss, int full_dof, int negativemass,
-		 int *npp, double (**pppos)[3]);
+		 int *npp, int *tdesign, double (**pppos)[3]);
 void plgndr0(int n, double x, double *pln);
 double plgndr(int l, int m, double x);
 void ylm(int l, int m, double theta, double phi, double *re, double *im);

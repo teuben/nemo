@@ -1,5 +1,3 @@
-/* sorting algorithms */
-
 #pragma global noalias
 #include <stdio.h>
 #include "vtc.h"
@@ -49,7 +47,7 @@ sort_body(Body *b, Mortonkey *key, int n)
     bitonicsort_hybrid(b, key, 0, n, ASCENDING);
 #endif
     /*
-    sort_sanity_check(key, n);
+      sort_sanity_check(key, n);
     */
 }
 
@@ -309,7 +307,7 @@ ispow2(int n)
     int bitset = 0;
 
     for (i = 0; i < 32; i++) {
-	if (n & (1<<i)) {
+	if (n && (1<<i)) {
 	    bitset++;
 	}
 	if (bitset > 1) {

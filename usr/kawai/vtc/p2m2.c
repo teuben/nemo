@@ -12,7 +12,7 @@
 
 void
 load_design(int order, double ss, int full_dof, int negativemass,
-	    int *npp, double (**pppos)[3])
+	    int *npp, int *tdesign, double (**pppos)[3])
 {
     int i, k, n;
 
@@ -48,6 +48,7 @@ load_design(int order, double ss, int full_dof, int negativemass,
 	exit(1);
     }
     *npp = n = des[order].n;
+    *tdesign = des[order].d;
     if (negativemass) {
 	(*npp) *= 2;
     }
