@@ -1,4 +1,4 @@
-.TH ROTCURSHAPE 1NEMO "26 May 2004"
+.TH ROTCURSHAPE 1NEMO "13 June 2004"
 .SH NAME
 rotcurshape \- fit parameters to a velocity field using shaped rotation curves in a co-planar disk
 .SH SYNOPSIS
@@ -153,6 +153,12 @@ Note for \fBnsigma>0\fP the residual map will be two maps, and
 you will need \fIcsf(1NEMO)\fP to get access to the 2nd (supposedly improved)
 residual map.
 [Default: not used].
+.TP
+\fBtol=t|f\fP
+Controls if the residual output map (\fBresid=\fP should contain the
+residuals [the default], or the fitted map. If the fit is selected,
+the mask values are ignored and the map is filled with the fitted values.
+[Default: \fBf\fP]
 .TP
 \fBtol\fP=
 Tolerance for convergence of \fInllsqfit\fP [Default: \fB0.001\fP].
@@ -380,4 +386,5 @@ Peter Teuben
 13-dec-02 	1.0h added (corrected) power law rotcur	PJT
 11-oct-03	fixed up for adass 2003  	PJT
 26-may-04	1.2e fixed sqrt(n) bug in sigma, improved nsigma>0 iterations	PJT
+13-jun-04	1.3: added fit= option to save a fitted map	PJT
 .fi
