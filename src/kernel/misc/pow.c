@@ -1,4 +1,11 @@
 
+/*
+ *   pow:  some specialized & optimized versions of the pow() function
+ *
+ *   powi(double,int)      especially for low order
+ *     
+ */
+
 #include <stdinc.h>
 
 /* 
@@ -6,7 +13,6 @@
  *    this has the advantage that:
  *     1) x < 0  and it does the right thing. For odd p's  sign(powi) = sign(x)
  *     2) p < 1  
- * 
  *  Note: returns 0.0 if x=0 and p<0
  *        returns 1.0 if p=0
  *     
