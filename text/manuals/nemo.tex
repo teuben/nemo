@@ -19,7 +19,7 @@
 %% NEMO:   if true, manual may contain some NEMO specific stuff
 %% DOPLOT: if true, implicitly insert postscript commands for plots.
 \debugfalse
-\bimafalse	
+\bimafalse
 \indextrue
 \nemotrue	% some .inc files may be shared with miriad (bima)
 \doplottrue
@@ -75,6 +75,7 @@
 %       13-jun-88 : back at UIUC again
 %       30-may-88 : repair lost version from UIUC
 %       28-mar-88 : initial shitty document converted to LaTeX
+%	17-may-01 : style->class for latex2e
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \ifindex
    % do nothing, \index definition from latex is used
@@ -99,20 +100,14 @@
 %   \input psinsert.inc                          % Insert plot command definitions
 % \fi
 
-\ifdebug
- \ifindex
-  \documentstyle[nemo,twoside,makeidx,showidx,html,epsf]{report} % Debug;add [lablst]??
- \else
-  \documentstyle[nemo,twoside,lablst,showlabels,html,epsf]{report} % Debug, no index
- \fi
-\else
- \ifindex
-  \documentstyle[nemo,twoside,makeidx,html,epsf]{report}           % Final w/index
- \else 
-  \documentstyle[nemo,twoside,html,epsf]{report}                   % Final no index
- \fi
-\fi
+\documentclass[headsepline,normalheadings]{book}
 
+\usepackage{epsfig}
+\usepackage{html}
+\usepackage{nemo}
+\usepackage{makeidx}
+\usepackage[english]{babel}
+% \usepackage{ahpage}
 
 \makeindex
 
@@ -129,15 +124,6 @@
  {University of Maryland} \\
  {College Park, MD 20742}
        }
-%               of course these chaps were all part of it, 
-%		Josh write the initial version of chapter 6
-% {J. E. Barnes} \\
-% {Institute for Astronomy, University of Hawaii} \\
-% {Honolulu, HI 96822}
-%\and
-% {P. Hut} \\
-% {Institute for Advanced Study} \\
-% {Princeton, NJ 08540}
 
 \date{{\small Version 3.0-MD} \\
       {\small Spring 2001} \\
@@ -147,8 +133,13 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{document}
 \pagenumbering{roman}
+%\setlength{\oddsidemargin}{0.0in}
+%\setlength{\evensidemargin}{0.0in}
+%\setlength{\textwidth}{6.5in}
+
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{2.5mm}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % First page : title, author and date
 \maketitle
@@ -207,7 +198,7 @@ LINPACK is courtesy of SIAM.
 
 \begin{center}
 \vspace{2 in}
-Copyright \copyright\ 1987,1992\\
+Copyright \copyright\ 1987,2001\\
 Institute for Advanced Study, Princeton, NJ\\
 University of Maryland, College Park, MD\\
 all rights reserved

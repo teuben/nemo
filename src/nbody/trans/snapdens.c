@@ -12,6 +12,7 @@
  *     14-apr-91        V1.4 6D search + tfactor        PJT
  *     18-apr-91            a   more general non-equal mass model   PJT
  *	1-apr-01 	    b   compiler warning
+ *     23-may-01            c   cleanup code a bit (sleepy in mexico)
  */
 
 #include <stdinc.h>
@@ -33,15 +34,18 @@ string defv[] = {
     "tab=f\n                      get an ascii table of all ",
     "format=%e\n                  format for numbers in table ",
     "tfactor=-1.0\n               conversion factor v->r [virial=sqrt(2)]",
-    "VERSION=1.4b\n		  1-apr-01 PJT",
+    "VERSION=1.4c\n		  23-may-01 PJT",
     NULL,
 };
+
+string usage="density estimator using Kth-nearest neighbor";
+
 
 #define FAC1   4.188790203	/* 3.pi/4 */
 #define FAC2   15.74960994	/* (2.pi)^(3/2) */
 #define FAC3   1.644934067	/* pi^2/6 */
 
-#define MAXK   128
+#define MAXK   256
 
 int   iindex[MAXK+1];              /* pointer to nearest neighbours */
 Body  *bindex[MAXK+1];            /* pointer to body */
@@ -54,26 +58,28 @@ bool  Qdens, Qtab;
 char  *fmt;
 real  tfactor;
 
+local void density(void);
+local real raddif(Body *, Body *);
+local void stat_nn(Body *);
 
 
 nemo_main()
 {
     stream instr, outstr;
     real   tsnap, dm;
-    string headline=NULL, outfile;
+    string headline=NULL;
     int i, bits;
     double sqr();
     Body   *bi, *bj;
 					
     instr =  stropen(getparam("in"),  "r");
-    outfile = getparam("out");
-    if (outfile == NULL || *outfile==0)
-        outstr = NULL;
+    if (hasvalue("out"))
+        outstr = stropen(getparam("out"), "w");   
     else
-        outstr = stropen(outfile, "w");   
+        outstr = NULL;
     kmax = getiparam("kmax");
     if (kmax > MAXK)
-        error("parameter kmax too large");
+        error("parameter kmax=%d too large (%d)",kmax,MAXK);
     Qdens = getbparam("dens"); 
     Qtab = getbparam("tab");  
     fmt = getparam("format");
@@ -81,42 +87,41 @@ nemo_main()
     if (Qdens && tfactor>0)
         warning("tfactor & Qdens incomplete");
 
-/* only do one (the first) snapshot */
+    /* only do one (the first) snapshot */
 
     	get_history(instr);
         while (get_tag_ok(instr, HeadlineTag))
-        	headline = get_string(instr, HeadlineTag);
+	  headline = get_string(instr, HeadlineTag);
         if (!get_tag_ok(instr, SnapShotTag))
-		printf ("Input file not a snapshot\n");
+	  dprintf (0,"Input file not a snapshot\n");
         get_snap(instr, &btab, &nbody, &tsnap, &bits);
 	if ( (bits & PhaseSpaceBit)==0)
-		error("need phasespace in snapshot");
+	  error("need phasespace in snapshot");
 	if ( (bits & MassBit)==0) {
-	    warning("no masses in snapshot, assume M=1, m_i=1/%d",nbody);
-            dm = 1.0 / (double) nbody;
-	    for (i=0, bi=btab; i<nbody; i++, bi++)
-                Mass(bi) = dm;
-            bits |= MassBit;        /* turn Mass bit on */
+	  warning("no masses in snapshot, assume M=1, m_i=1/%d",nbody);
+	  dm = 1.0 / (double) nbody;
+	  for (i=0, bi=btab; i<nbody; i++, bi++)
+	    Mass(bi) = dm;
+	  bits |= MassBit;        /* turn Mass bit on */
         }
         density();   /* compute density for all stars, put result in Aux(bp) */
         if (outstr) {
-            put_history(outstr);
-            bits |= AuxBit;         /* turn Aux bit on */
-            put_snap(outstr,&btab,&nbody,&tsnap,&bits);
+	  put_history(outstr);
+	  bits |= AuxBit;         /* turn Aux bit on */
+	  put_snap(outstr,&btab,&nbody,&tsnap,&bits);
         }
-                
+	
     strclose(instr);
     if (outstr)
-        strclose(outstr);
+      strclose(outstr);
 }
 
 
-density()
+local void density(void)
 {
     double tmp2, drmin, mtot, m2tot, rdtot, com[NDIM], rmtot[NDIM], mmax;
     Body  *bi, *bj;
     int    i, j, k, kk;
-    double raddif();
     
     drmin = HUGE;       /* init minimum interparticle distance */
     mmax = -HUGE;       /* init maximum density */
@@ -189,12 +194,12 @@ density()
         
 }
 
-real raddif(bi,bj)              /* calculate distance squared between 2 stars */
-Body *bi, *bj;                  /* saving a sqrt() for now if DISTV was used */
+/* calculate distance squared between 2 stars */
+
+local real raddif(Body *bi, Body *bj)
 {
     int i, j;
     real rtmp;
-    double sqr();
     
     rtmp = 0.0;
     for (i=0; i<NDIM; i++)
@@ -204,19 +209,17 @@ Body *bi, *bj;                  /* saving a sqrt() for now if DISTV was used */
             rtmp += sqr((Vel(bi)[i] - Vel(bj)[i])*tfactor);
     }
     
-    return(rtmp);
+    return rtmp;
 }
 
 /*  stat_nn:   some statistics on the K nearest neighbors of a star
  *
  */
-stat_nn(bi)
-Body *bi;
+local void stat_nn(Body *bi)
 {
     real sigma, sigma2, rad, dens, fc, fc2, radius;
     real v1[NDIM], v2[NDIM], s[NDIM];
     int i, k;
-    double sqr(), qbe();
     Body *bp;
     
     dens = sigma = sigma2 = 0.0;
@@ -262,3 +265,6 @@ Body *bi;
 
     }
 }
+
+
+

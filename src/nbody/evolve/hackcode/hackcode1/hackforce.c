@@ -34,7 +34,7 @@
 string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "in=???\n       Input (snapshot) file with mass coordinates",
     "out=???\n      Output (snapshot) file with f.c. results",
-    "test=\n        Input file with test coordinates (if blank, mass coords are used)",
+    "test=\n        Input file with test coordinates (if blank, in= coords are used)",
     "tol=1.0\n      Cell subdivision tolerence",
     "eps=0.05\n     Standard softening parameter",
     "rsize=4.0\n    Side-length of initial box",

@@ -558,29 +558,38 @@ do_poly()
 
 my_poly(bool Qpoly)
 {
-    real mat[(MAXCOL+1)*(MAXCOL+1)], vec[MAXCOL+1], sol[MAXCOL+1], a[MAXCOL+2];
-    int i, j;
+  real mat[(MAXCOL+1)*(MAXCOL+1)], vec[MAXCOL+1], sol[MAXCOL+1], a[MAXCOL+2], sum;
+  int i, j;
 
-    if (nycol<1) error("Need 1 value for ycol=");
-    if (nxcol<order && !Qpoly) error("Need %d value(s) for xcol=",order);
+  if (nycol<1) error("Need 1 value for ycol=");
+  if (nxcol<order && !Qpoly) error("Need %d value(s) for xcol=",order);
 
-    lsq_zero(order+1, mat, vec);
-    for (i=0; i<npt; i++) {
-        a[0] = 1.0;
-        for (j=0; j<order; j++) {
-            if (Qpoly)
-                a[j+1] = a[j] * xcol[0].dat[i];     /* polynomial */
-            else
-                a[j+1] = xcol[j].dat[i];            /* plane */
-        }
-        a[order+1] = ycol[0].dat[i];
-        lsq_accum(order+1,mat,vec,a,1.0);
+  lsq_zero(order+1, mat, vec);
+  for (i=0; i<npt; i++) {
+    a[0] = 1.0;
+    for (j=0; j<order; j++) {
+      if (Qpoly)
+	a[j+1] = a[j] * xcol[0].dat[i];     /* polynomial */
+      else
+	a[j+1] = xcol[j].dat[i];            /* plane */
     }
-    if (order==0) printf("TEST = %g %g\n",mat[0], vec[0]);
-    lsq_solve(order+1,mat,vec,sol);
-    printf("%s fit of order %d:\n", Qpoly ? "Polynomial" : "Planar" , order);
-    for (j=0; j<=order; j++) printf("%g ",sol[j]);
-    printf("\n");
+    a[order+1] = ycol[0].dat[i];
+    lsq_accum(order+1,mat,vec,a,1.0);
+  }
+  if (order==0) printf("TEST = %g %g\n",mat[0], vec[0]);
+  lsq_solve(order+1,mat,vec,sol);
+  printf("%s fit of order %d:\n", Qpoly ? "Polynomial" : "Planar" , order);
+  for (j=0; j<=order; j++) printf("%g ",sol[j]);
+  printf("\n");
+
+  if (outstr && Qpoly) {           /* output fitted values, if need be */
+    for(i=0; i<npt; i++) {
+      sum=sol[order];
+      for (j=order-1; j>=0; j--)
+	sum = (xcol[0].dat[i] * sum + sol[j]);
+      fprintf(outstr,"%g %g %g\n",xcol[0].dat[i], ycol[0].dat[i], sum);
+    }
+  }
 }
 
 

@@ -35,11 +35,13 @@
  *	22-mar-00    open scratch file in 'w' mode, not 'w+' and ensure
  *		     it does not exist yet				pjt
  *	28-nov-00    casted fdopen so compilers don't complain
+ *      19-may-01    mktemp -> mkstemp 					pjt
  */
-#include <sys/stat.h>
 #include <stdinc.h>
 #include <getparam.h>
 #include <strlib.h>
+
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -100,7 +102,7 @@ stream stropen(string name,string mode)
         if (streq(mode,"s")) {          /* scratch mode */
             if (*name != '/') {     /* ignore name: make a new one */
                 strcpy(tempname,"/tmp/scrNemo.XXXXXX");
-                mktemp(tempname);
+                mktemp(tempname);    /* should become mkstemp !!  */
             } 
             if (stat(tempname,&buf)==0)
                 error("stropen: scratch file \"%s\" already exists", tempname);

@@ -21,7 +21,7 @@ static double x1[3] = {  0.0, 0.0, 0.0 };
 static double m2 = 0.1;                         /* particle 2 */
 static double x2[3] = { -1.5, 0.0, 0.0 };
 
-extern double sqr();
+extern double sqr(double);
 
 /*------------------------------------------------------------------------------
  * INIPOTENTIAL: initializes the potential.

@@ -1,11 +1,13 @@
-.TH HELLERSNAP 1NEMO "28 June 1998"
+.TH HELLERSNAP 1NEMO "
 .SH NAME
 hellersnap \- convert Heller's SPH dumps to snapshot
 .SH SYNOPSIS
 \fBhellersnap\fP [parameter=value]
 .SH DESCRIPTION
 Converts Clayton Heller's NBODY+SPH dump files  into standard 
-\fIsnapshot(5NEMO)\fP format.
+\fIsnapshot(5NEMO)\fP format. 
+.PP
+Note that there are different versions around.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -16,6 +18,23 @@ Input dump file. No default.
 \fBout=\fP
 Output snapshot file. No default.
 .TP
+\fPkey=class\fP
+.TP
+\fPaux=\fP
+.TP
+\fPphi=\fP
+.TP
+\fPacc=\fP
+.TP
+\fBlsfm=\fI
+If given, you can override the boolean (fortran) value of the
+lsfm parameter (last one in the first record of the data).
+You may need to set this to false, if you want to read certain
+types of old data.
+.TP
+\fBversion=\fP
+If given, override any internal versioning that may be used.
+.TP
 \fBheadline=\fP
 Random verbiage      
 .SH FORMAT
@@ -24,10 +43,10 @@ Dump files are unformatted FORTRAN, that can also be inspected with NEMO's
 .nf
     1. dmpindx,date,ndim,eqnindx,version,gamma,poly,lsfm    (64 bytes)
     2. tframe,n1,n2 (16 bytes)
-    3. class(n0)
-    4. state(n0)
-    5. mass(n0)
-    6. x(n0)
+    3. class(n0)		** Key **
+    4. state(n0)		
+    5. mass(n0)			** Mass **
+    6. x(n0)			** PhaseSpace **
     7. y(n0)
     8. z(n0)
     9. vx(n0)
@@ -35,17 +54,24 @@ Dump files are unformatted FORTRAN, that can also be inspected with NEMO's
     11. vz(n0)
         
         12. eps(n0)    : dmpindx > 1
-        13. phi(n0)
-        14. ax(n0)
+        13. phi(n0)			** Potential **
+        14. ax(n0)			** Acc **
         15. ay(n0)
         16. az(n0)
+        17.	smft(n0)    [only if lsfm is TRUE)
+        18.	smfz(n0)    [only if lsfm is TRUE)
 
-        17. u(n2)      : dmpindx > 2 && n2 > 0
-        18. d(n2)
-        19. divv(n2)
-        20. udot1(n2)
-        21. udot2(n2)
-        22. h(n2)
+        19. u(n2)      : dmpindx > 2 && n2 > 0
+        20. d(n2)
+        21. divv(n2)
+        22. udot1(n2)
+        23. udot2(n2)
+        24. udot3(n2)		[only in version 2]
+        25. udot4(n2)		[only in version 2]
+        26. h(n2)
+        27. wgtmol(n2)		[only in version 2]
+        28. frcneu(n2)		[only in version 2]
+        29. tau(n2)		[only in version 2]
 
 .fi
 .SH SEE ALSO
@@ -60,5 +86,6 @@ Peter Teuben
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
-26-jun-98	V1.0 Created	NEMO
+26-jun-98	V1.0 Created, for version=1	NEMO
+23-may-01	V2.0 included new options, for version=2	PJT
 .fi

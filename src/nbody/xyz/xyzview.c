@@ -11,6 +11,7 @@
  *	22-aug-00     b  ansi cc				  pjt
  *	 4-sep-00  V2.2  select some point always visible	  pjt
  *                       with orbit=
+ *      19-may-00  V2.3  if input is SnapShot, autoconvert to PointData
  *
  *
  *  Bugs: VOGL has an event stack which is only one deep, reason
@@ -24,7 +25,7 @@
 
 #include <stdinc.h>
 #include <getparam.h>
-#ifdef ZEMO
+#ifdef ZENO
 # include <vectdefs.h>
 #else
 # include <vectmath.h>		 /* NEMO */
@@ -210,11 +211,19 @@ bool save;          /* save it too ? */
 {
     bool done;
     string times;
+    char cmd[128];
 
-    if (instr == NULL) {
+    if (instr == NULL) {         /* first time around, open file */
 	instr = stropen(getparam("in"), "r");
 	get_history(instr);
-        if (hasparam("orbit"))
+	if (get_tag_ok(instr,"SnapShot")) {     /* ieck, convert via pipe */
+            warning("stropen CANNOT YET read from popen");
+	    strclose(instr);            /* note this program never strclose's */
+            sprintf(cmd,"snapxyz %s -",getparam("in"));
+            instr = stropen(cmd,"rp");
+	}
+
+        if (hasvalue("orbit"))
             orbit = getiparam("orbit");
         else
             orbit = -1;
@@ -706,8 +715,10 @@ loadkey() {
         if (orbit >= npoint) error("no such particle number %d",orbit);
 
 
-        if (maxpoint < npoint + iframe + 1)
-            error("not enough space to hold buffers for extra orbit");
+        if (maxpoint < npoint + iframe + 1) {
+            error("not enough space to hold buffers for extra orbit: %d < %d",
+                maxpoint, npoint+iframe+1);
+        }
 
         for (i=0; i<iframe; i++) {
             saved[i].npoint = npoint + iframe;

@@ -75,6 +75,8 @@ $(F).dvi: $(TEX) $(INC) $(STY)
 
 $(F).ps:  $(F).dvi
 	dvips $(F) -o
+	@echo Also making a 2-page-on-1 version
+	psnup -2 nemo.ps > nemo2.ps
 
 
 tar:

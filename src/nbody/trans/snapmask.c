@@ -12,6 +12,7 @@
  *       18-nov-90      V1.7 helpvec                                PJT
  *       20-may-94      V1.8 - nemo V2.x ; also warn only once      pjt
  *	  8-aug-96      local var                                   pjt
+ *       20-may-01      warning->dprintf
  */
 
 #include <stdinc.h>
@@ -33,7 +34,7 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "times=all\n		  times select string ",
     "keyfile=\n			  file with Key field to select from ",
     "keyoffset=0\n                offsets to be applied extra to outkey ",
-    "VERSION=1.7b\n		  8-aug-96",
+    "VERSION=1.7c\n		  20-may-01",
     NULL,
 };
 
@@ -147,7 +148,7 @@ nemo_main()
         dprintf (1,"Snapshot time=%f masked\n",tsnap);
 	if ((bits & KeyBit) == 0) {		/* if Key not set */
 	    bits |= KeyBit;			/* set it for output */
-            if (first) warning("Keys field initialized to order in file");
+            if (first) dprintf(0,"Keys field initialized to order in file");
 	    for (i=0, bp=btab; i<nbody; i++, bp++)
                 Key(bp) = i;			/* and initialize Key's */
         }

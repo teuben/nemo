@@ -24,6 +24,7 @@
  *				linux! - also did the prototypesm
  *
  *	 6-may-95       V2.3    (hisf) allow item=headline         	PJT
+ *	21-may-01	V2.4    history <old history_level> back here   PJT
  *
  *  ToDo: not all local variables free up memory, despite that some
  *        have clearly come from allocate'd memory. 
@@ -50,7 +51,7 @@ local int nhist = 0;			/* count history data stored so far */
 local string histbuf[MAXHIST+1];	/* history string array             */
 local string headline = NULL;		/* last headline read in            */
 
-extern int history;            /* 1=history is auto-mode  0=no history done */
+int history = 1;               /* 1=history is auto-mode  0=no history done */
                                /* this item should eventually disappear     */
                                /* it is defined by the user interface,      */
                                /* see getparam.c                            */

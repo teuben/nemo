@@ -1,6 +1,9 @@
 /*
  * KPRINTF.C: store output "parameters" for optional output
  *
+ *	real eps = 0.025;
+ *	kprintf("eps","%6.3f", eps);
+ *
  */
 
 #include <stdinc.h>

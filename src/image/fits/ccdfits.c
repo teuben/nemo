@@ -28,6 +28,8 @@
  *      15-oct-99  V2.9  force a more silly RA---SIN/DEC--SIN axis      pjt
  *      23-mar-01  V3.0  allow fits reference image to inherit WCS from PJT
  *       8-apr-01      a fixed SINGLEPREC operation
+ *      23-may-01  V3.1  added dummy= to be able to not write dummy axes  PJT
+ *                        NOT WORKING YET
  *
  *  TODO:
  *      reference mapping has not been well tested, especially for 2D
@@ -55,7 +57,8 @@ string defv[] = {
 	"refmap=\n       reference map to inherit WCS from",
 	"refpix=\n       reference pixel, if different from default",
 	"radecvel=f\n    Enforce reasonable RA/DEC/VEL axis descriptor",
-        "VERSION=3.0a\n  8-apr-01 PJT",
+	"dummy=t\n       Write dummy axes also ? ",
+        "VERSION=3.1\n   23-may-01 PJT",
         NULL,
 };
 
@@ -73,6 +76,7 @@ char *headline;         /* optional NEMO headline, added as COMMENT */
 bool Qcdmatrix;         /* writing out new-style cdmatrix ? */
 bool Qradecvel;         /* fake astronomy WCS header */
 bool Qrefmap;
+bool Qdummy;            /* write dummy axes ? */
 
 int   nref = 0;
 FLOAT ref_crval[3], ref_crpix[3], ref_cdelt[3];
@@ -130,7 +134,13 @@ void setparams(void)
 	ref_crpix[i] = tmpr[i];
     }
   }
+  Qdummy = getbparam("dummy");
 }
+
+static string ctypes[3] = { "CTYPE1", "CTYPE2", "CTYPE3" };
+static string cdelts[3] = { "CDELT1", "CDELT2", "CDELT3" };
+static string crvals[3] = { "CRVAL1", "CRVAL2", "CRVAL3" };
+static string crpixs[3] = { "CRPIX1", "CRPIX2", "CRPIX3" };
 
 void write_fits(string name,imageptr iptr)
 {
@@ -140,8 +150,9 @@ void write_fits(string name,imageptr iptr)
     FITS *fitsfile;
     string *hitem;
     float *buffer, *bp;
-    int ndim, naxis[3];   /* at most 3D cubes for now */
+    int ndim, keepaxis[3], naxis[3];   /* at most 3D cubes for now */
     double bscale, bzero;
+
     
     nx = naxis[0] = Nx(iptr);
     ny = naxis[1] = Ny(iptr);
@@ -154,7 +165,10 @@ void write_fits(string name,imageptr iptr)
     dz = Dz(iptr)*scale[2];
     mapmin = MapMin(iptr);
     mapmax = MapMax(iptr);
-
+    for (i=0; i<3; i++) {
+      keepaxis[i] = ((naxis[i] > 1) ? 1 : 0);
+      if (Qdummy) keepaxis[i] = 1;
+    }
 
     dprintf(1,"NEMO Image file written to FITS disk file\n");
     dprintf(1,"%d %d %d   %f %f %f   %f %f %f   %f %f \n",

@@ -20,6 +20,7 @@
  *	V3.3  added crange= keyword to simply color= usage		  pjt
  *	V3.4  11-feb-98 added trak=					  pjt
  *      V3.4a 21-jan-00 fixed acc/phi bug				  pjt
+ *          b 23-may-01 setrange() now using nemoinp()			  PJT
  */
 
 #include <stdinc.h>
@@ -60,7 +61,7 @@ string defv[] = {
 #endif
     "frame=\n			  base filename for rasterfiles(5)",
     "trak=\n                      alternative for trakplot (t|f)",
-    "VERSION=3.4\n		  21-jan-00 PJT",
+    "VERSION=3.4b\n		  23-may-01 PJT",
     NULL,
 };
 
@@ -214,7 +215,7 @@ setparams()
     else
         frame = NULL;
 }
-
+#if 0
 setrange(rval, rexp)
 real rval[];
 string rexp;
@@ -231,6 +232,33 @@ string rexp;
     }
     rval[2] = rval[1] - rval[0];
 }
+#else
+setrange(real *rval, string rexp)
+{
+    char *cptr, *tmpstr;
+    double dpar;
+
+    cptr = strchr(rexp, ':');
+    if (cptr != NULL) {
+        tmpstr = allocate(cptr-rexp+1);
+        strncpy(tmpstr,rexp,cptr-rexp);
+        if (nemoinpd(tmpstr,&dpar,1) != 1)
+            error("setrange: parsing error %s",tmpstr);
+        free(tmpstr);
+        rval[0] = dpar;
+
+        if (nemoinpd(cptr+1,&dpar,1) != 1)
+            error("setrange: parsing error %s",cptr+1);
+	rval[1] = dpar;
+    } else {
+        rval[0] = 0.0;
+        if (nemoinpd(rexp,&dpar,1) != 1)
+            error("setrange: parsing error %s",rexp);
+	rval[1] = dpar;
+    }
+    rval[2] = rval[1] - rval[0];
+}
+#endif
 
 extern btrproc btrtrans(string);	/* in reality: rproc */
 extern btiproc btitrans(string);	/* in reality: iproc */

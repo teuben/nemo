@@ -93,6 +93,7 @@
  *                    also use 'help' and '-h' to give help.
  *                 e  gcc warnings
  *  8-apr-01    3.2   added getfparam()
+ * 21-may-01       a  returned 'int history' to history.c for 'uNEMO'
  *
   TODO:
       - what if there is no VERSION=
@@ -113,7 +114,7 @@
       - @macro and $key references get expanded as strings.
  */
 
-#define VERSION_ID  "3.2 8-apr-01 PJT"
+#define VERSION_ID  "3.2a 21-mar-01 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -228,7 +229,7 @@ extern string usage;    /* see program.c or usage.c */
 extern string defv[];   /* see program.c or defv.c */
 extern char **environ;  /* environment variables */
 
-int history=1;          /* 0=no history written; see history.c */
+extern int history;     /* 0=no history written; see history.c */
 
 int yapp_dev = 0;       /* interface hidden keyword yapp to plotting pkg */
 int help_level = 0;     /* hidden keyword help for interactive prompting */
