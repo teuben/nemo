@@ -1,0 +1,25 @@
+%N mktestdisk
+%D ### NEMO program with unknown intent...(missing usage)
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man mktestdisk' for more online help
+%A in
+	spheroid snapshot file  [???]
+%A out
+	output file name  [???]
+%A rmin
+	inner disk radius  [0.1]
+%A rmax
+	outer cutoff radius  [0.4]
+%A eps
+	softening (use w/ central point)  [0.0]
+%A ndisk
+	number of disk particles  [2048]
+%A ncenter
+	particles used to center disk  [0]
+%A seed
+	usual random number seed  [54321]
+%A headline
+	text headline for output  []
+%A VERSION
+	15-nov-90 PJT [1.3]
