@@ -1,7 +1,7 @@
 
 /*
- * ORBSTEP.C: general-purpose orbit-integration routines
- *            for flowcode
+ * ORBSTEP.C: general-purpose orbit-integration routines for flowcode
+ *            
  *
  * Defines: initstep(), orbstep().
  * Requires: MBODY, body, bodyptr, Pos(), Vel(), Acc().
@@ -13,6 +13,7 @@
  *             potentials.					PJT
  *  11-apr-96  adapted for flowcode from the potcode version    PJT
  *   6-feb-04  overhauled the code and defined diffusion angles in Aux()  PJT
+ *
  */
 
 #include "defs.h"
@@ -30,7 +31,7 @@ local real abak3[MCOR];
 
 
 /*
- * RKSTEP: (some kind of) Runge-Kutta step
+ * RKSTEP: (some kind of) Runge-Kutta step - mode=1
  */
 static void rkstep(btab, nb, tptr, force, dt, atmp1)
 bodyptr btab;		/* array of bodies */
@@ -69,28 +70,28 @@ real atmp1[];		/* scratch accelerations */
 	vptr = Acc(p);
 	aptr = Acc(p);
 	for (k = 0; k < NDIM; k++, i++) {	/*   loop over coords */
-	    *pptr++ += dt2 * (*vptr++) + dts4 * (2*atmp1[i] - abak0[i]);
-	    					/*     set position x_3 */
+	    *pptr++ += dt2 * (*vptr++);         /*     set position x_3 */
 	    atmp2[i] = *aptr++;			/*     save accel a_2 */
 	}
     }
     (*force)(btab, nb, *tptr + dt, TRUE);	/* get accel a_3 */
     dt6 = dt / 6;
     dts6 = dt * dt6;
+#if 0
     for (p = btab, i = 0; p < btab+nb; p++) {	/* loop over bodies */
         pptr = Pos(p);				/*   get body coords */
 	vptr = Acc(p);
 	aptr = Acc(p);
 	for (k = 0; k < NDIM; k++, i++) {	/*   loop over coords */
-	    *vptr++ += dt6 * (abak0[i] + 2*atmp1[i] + 2*atmp2[i] + *aptr++);
 	    *pptr++ += dts6 * (abak0[i] - 2*atmp1[i] + atmp2[i]);
 	}
     }
+#endif
     *tptr += dt;
 }
 
 /* 
- * PCSTEP: Predictor-Corrector step
+ * PCSTEP: Predictor-Corrector step  (mode=2,3)
  */
 static void pcstep(btab, nb, tptr, force, dt)
 bodyptr btab;		/* array of bodies */
@@ -134,6 +135,9 @@ real dt;		/* integration time step */
     *tptr += dt;				/* advance time */
 }
 
+/*
+ *   EULER: a simple first order integration method (mode=0)
+ */
 static void eulerstep(btab, nb, tptr, force, dt)
 bodyptr btab;		/* array of bodies */
 int nb;			/* number of bodies */
@@ -156,6 +160,9 @@ real dt;		/* integration time step */
     }
     *tptr += dt;
 }
+/*
+ *   LEAPFROG:   mode=5
+ */
 
 static void leapfrogstep(btab, nb, tptr, force, dt)
 bodyptr btab;		/* array of bodies */
@@ -167,6 +174,10 @@ real dt;		/* integration time step */
     error("leapfrog stepping not implemented");
 }
 
+
+/*
+ * RK4: mode=4
+ */
 static void rk4step(btab, nb, tptr, force, dt)
 bodyptr btab;		/* array of bodies */
 int nb;			/* number of bodies */

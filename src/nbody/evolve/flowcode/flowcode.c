@@ -20,7 +20,6 @@ string defv[] = {
     "potname=???\n        name of flow_potential(5)",
     "potpars=\n           parameters to flow_potential",
     "potfile=\n           optional filename to flow_potential",
-    "save=\n		  state file name",
     "freq=64.0\n	  fundamental frequency (inv delta-t)",
     "mode=0\n		  integrator: 0=> Euler 1 => RK, 2 => PC, 3 => PC1 4=>RK4 5=> Leapfrog",
     "tstop=2.0\n	  time to stop integration",
@@ -35,7 +34,7 @@ string defv[] = {
     "freqdiff=\n          frequency of diffusion [freq]",
     "seed=0\n		  random seed",
     "headline=\n          random verbiage",
-    "VERSION=0.6\n	  6-feb-04 PJT",
+    "VERSION=0.6a\n	  7-feb-04 PJT",
     NULL,
 };
 
@@ -61,7 +60,6 @@ void setparams(void)
 {
     infile = getparam("in");
     outfile = getparam("out");
-    savefile = getparam("save");
 
     pot = get_potential (getparam("potname"),
        			 getparam("potpars"), 
