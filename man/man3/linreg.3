@@ -1,0 +1,37 @@
+.TH LINREG 3NEMO "29 October 1990"
+.SH NAME
+linreg \- linear regression: all six methods
+.SH SYNOPSIS
+.nf
+.B void linreg(n,x,y,a,siga,b,sigb)
+.B int n;
+.B double x[n], y[n];
+.B double a[6], siga[6], b[6], sigb[6];
+.fi
+.SH DESCRIPTION
+\fIlinreg\fP computes the slope (\fBa\fP) and intercept coefficients 
+(\fBb\fP) for
+for OLS(Y/X) (1), OLS(X/Y) (2), OLS bisector(3), orthogonal(4),
+reduced major axis (5) and mean OLS (6) methods. The dispersions are 
+returned in the arrays \fBsiga\fP and \fBsigb\fP.
+.PP
+The dispersions for OLS are the general form provided by 
+T. Isobe, E. D. Feigelson, M. G. Akritas and G. J. Babu, 
+Ap.J. 364, 104.
+.PP
+mean OLS is 0.5*[OLS(X/Y) + OLS(Y/X)]
+.SH FILES
+.nf
+~/src/kernel/math  linreg.c
+.fi
+.SH AUTHOR
+T. Isobe (fortran), P. Teuben(C)
+.SH SEE ALSO
+linreg(1NEMO), tablsqfit(1NEMO), gaussfit(1NEMO)
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4i
+xx-jul-90   Created   Isobe
+13-aug-90   Ported into NEMO    PJT
+28-oct-90   upgraded from Feigelstein's official rel. 1.0	PJT
+.fi
