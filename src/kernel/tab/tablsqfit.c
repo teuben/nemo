@@ -62,10 +62,8 @@ or
 #include <getparam.h>
 
 /*    we don't allow this code with GSL yet, output is
- *    not unified with older version
+ *    not unified with older version - compile tablsqfit_gsl
  */
-
-#undef HAVE_GSL
 
 #if HAVE_GSL
 #include <gsl/gsl_fit.h>
@@ -84,7 +82,7 @@ string defv[] = {
     "estimate=\n        optional estimates (e.g. for ellipse center)",
     "nmax=10000\n       Default max allocation",
     "tab=f\n            short one-line output?",
-    "VERSION=3.4a\n     4-oct-03 PJT",
+    "VERSION=3.4b\n     17-apr-04 PJT",
     NULL
 };
 

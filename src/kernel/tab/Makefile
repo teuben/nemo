@@ -103,8 +103,14 @@ tabhist: tabhist.c
 		$(NEMO_LIBS) $(YAPPLIB) $(EL) -lm
 
 tablsqfit: tablsqfit.c
-	$(CC) $(CFLAGS) -o tablsqfit tablsqfit.c \
+	$(CC) -UHAVE_GSL $(CFLAGS) -o tablsqfit tablsqfit.c \
 		$(NEMO_LIBS) $(EL) -lm
+
+MY_GSL = -lgsl -lgslcblas 
+
+tablsqfit_gsl: tablsqfit.c
+	$(CC) -DHAVE_GSL $(CFLAGS) -o tablsqfit_gsl tablsqfit.c \
+		$(NEMO_LIBS) $(GSL_LIBS) $(EL) -lm
 
 tabnllsqfit: tabnllsqfit.c
 	$(CC) $(CFLAGS) -o tabnllsqfit tabnllsqfit.c \
