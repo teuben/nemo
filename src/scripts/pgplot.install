@@ -12,7 +12,12 @@
 # 29-jun-03     added darwin (tested w/ MacOSX 10.2)
 # 23-jan-04     fixed linux when CC and F77 present (e.g. intel compiler)
 # 27-mar-04     force rebuilding some executables upon reload (+typo fix)
+# 28-jun-04     debug option
 
+
+# TODO:
+#   $F77 and $CC should be obtained from NEMO's configure process
+#
 
 #			 	.. command line keywords ..
 set version=522
@@ -21,6 +26,7 @@ set dir=$NEMO/local
 set lib=$NEMOLIB
 set drivers=CGDRIV,GIDRIV,NUDRIV,PGDRIV,PPDRIV,PSDRIV,WDDRIV,XWDRIV,TKDRIV
 set host=$NEMOHOST
+set debug=0
 
 #  dir:  where the source code will be extracted
 #  lib:  where the library (PGPLOT_DIR) will be placed
@@ -111,8 +117,10 @@ endsw
 
 make -i
 make -i cpg
-make -i clean
-\rm -fr pgdemo*
+if ($debug == 0) then
+  make -i clean
+  \rm -fr pgdemo*
+endif
 
 #  may also need to change LD_LIBRARY_PATH with $NEMOLIB
 
