@@ -1,4 +1,4 @@
-.TH ELLIPSE 1NEMO "24 April 2003"
+.TH ELLIPSE 1NEMO "27 August 2003"
 .SH NAME
 ellipse \- ellipse (de)projection properties
 .SH SYNOPSIS
@@ -34,6 +34,11 @@ is done.
 \fBtheta=\fP
 Angle between bar and disk in galax plane. Again an array is allowed.
 .TP
+\fBa=\fP
+Length of the bar (currently only projected) bar. If this option is used,
+the stick formulae (ba=0) will be applied, and errors can be computed
+using \fBdphi=\fP.
+.TP
 \fBdba=\fP
 Error term in b/a. 
 Useful if you want to compute errors in (de)projected
@@ -64,9 +69,12 @@ b/a inc phi    b/a'    theta   phi_kin
 0.3 45 28    0.343591 39.2183 -42.5507
 0.3 45 30    0.335325 41.4834 -41.2693
 .fi
+.SH CAVEATS
+For the stick formulae (a= used) only projection is done.
 .SH SEE ALSO
 .nf
 Skillman et al. A&A 198, 33 (1988), p39.
+Arnaboldi et al. 1995AJ....110..199A
 .fi
 .SH FILES
 src/orbit/misc	ellipse.c
@@ -77,4 +85,5 @@ Peter Teuben
 .ta +1.0i +4.0i
 fall-1986	V0.0 formulae derived for Skillman et al paper	PJT
 23-Apr-03	V0.3 added phi_kin	PJT 
+28-aug-03	V0.4 added a= for stick formulae of bars, +errors	PJT
 .fi
