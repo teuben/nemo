@@ -400,6 +400,8 @@ stream  lunpri;       /* LUN for print output */
       pamp=0.0;          /* position angle of map */
     } else {
       printf("Mapsize unkown for point data, but toarcsec = %g\n",toarcsec);
+      grid[0]=1.0;
+      grid[1]=1.0;
       pamp=0.0;
     }
 
