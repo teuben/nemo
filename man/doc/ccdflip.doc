@@ -1,0 +1,14 @@
+%N ccdflip
+%D flip an image
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man ccdflip' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input image file [???]
+%A out
+	Output file [???]
+%A flip
+	Flip in x,y  or allow xy for square images [x]
+%A VERSION
+	22-feb-97 PJT [1.2]
