@@ -1,6 +1,8 @@
 #! /bin/csh -f
 #
-#  version control in NEMO
+#  script to centralize version information in NEMO in the following files:
+#       VERSION
+#       inc/version.h
 #
 set v=$NEMO/VERSION
 set h=$NEMOINC/version.h
@@ -55,7 +57,7 @@ echo updating $v
 echo $version                                             >! $v
 
 echo updating $h
-echo "/* do not edit - created by the version script */"  >! $h
+echo "/* do not edit - created by the src/scripts/version script */"  >! $h
 echo "#if defined(GETPARAM_VERSION_ID)"                   >>! $h
 echo -n 'static char *version_h = "$'                    >>! $h
 echo 'Id: $";'                                           >>! $h
