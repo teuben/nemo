@@ -54,6 +54,7 @@
 /*              seems bitpix=-64 is working ok                          */
 /*    12-oct-01 new standard added FITS reference                       */
 /*    23-jul-02 add fitresize                                           */
+/*    14-nov-02 add dummy DATASUM and CHECKSUM                          */
 /* ToDo:                                                                */
 /*  - BLANK substitution                                                */
 /************************************************************************/
@@ -196,6 +197,8 @@ FITS *fitopen(string name,string status,int naxis,int *nsize)
     f->bzero  = w_bzero;
     fitwra(f,"COMMENT",cfits1);
     fitwra(f,"COMMENT",cfits2);
+    fitwrhda(f,"DATASUM", "0000000000000000");
+    fitwrhda(f,"CHECKSUM","0000000000000000");
 
 /* Handle an old file. */
 
