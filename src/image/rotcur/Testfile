@@ -57,7 +57,7 @@ ccdvel:	map1.den
 
 rotcur: map1.vel
 	@echo Running $@
-	rotcur in=map1.vel radii=$(R) vrot=10,100 pa=$(PA) inc=$(INC) vsys=0 \
+	rotcur in=map1.vel radii=$(R) vrot=10,100 pa=$(PA) inc=$(INC) vsys=0 reuse=f \
 	   tab=map1.rotcur units=sec,1 > $(NULL) ; nemo.coverage rotcur.c
 	@tail -7 map1.rotcur
 
