@@ -1,0 +1,66 @@
+.TH STRLIB 3NEMO "8 October 1990"
+.SH NAME
+getmem, scopy, sconc, substr, findstr \- string utilities
+.SH SYNOPSIS
+.nf
+.B #include <stdinc.h>
+.B #include <strlib.h>
+.PP
+.B char *getmem(nbytes)      
+.B string scopy(source)
+.B string sconc(s1,s2)       
+.B string substr(s, p1, p2)  
+.B int findstr(text, pat) 
+.PP
+\fBint nbytes, p1, p2;\fP
+\fBstring filename, ext, mode, path, source, s1, s2, text, pat\fP
+.SH DESCRIPTION
+The \fIstrlib\fP package contains the implementations for     
+several routines that use dynamically-allocated string      
+storage.  Since these routines tend to fill up memory,      
+this package is not suitable for use in applications        
+which will run for extended periods or which require        
+tight memory control.  Nonetheless, this package does       
+provide an easy-to-use interface which is applicable        
+to a wide range of programs.                                
+.PP
+\fIgetmem()\fP is exactly like \fImalloc(3)\fP except that (1) it  
+checks for no memory errors, and (2) it is defined to take  
+an integer rather than an unsigned to keep \fIlint(1)\fP happier.
+If no memory could be allocated, \fIerror(3NEMO)\fP is
+called.
+.PP
+\fIscopy()\fP copies the string \fBsource\fP into 
+dynamically-allocated storage. 
+.PP
+\fIsconc\fP  concatenates two strings \fBs1\fP and \fBs2\fP
+and returns the result in dynamically-allocated storage.
+.PP
+\fIsubstr()\fP returns the substring of \fBs\fP extending from the integer   
+indices \fBp1\fP and \fBp2\fP (inclusive).  The following edge cases    
+apply:                                                      
+.nf                                                             
+      if p1 < 0 then p1 <- 0;                                
+      if p2 > strlen(s) then p2 <- strlen(s);                
+      if p1 > p2 then return "";                             
+.fi
+.PP
+\fIfindstr\fP  searches for the string \fBpat\fP in \fBtext\fP
+and returns the first index at which it appears, or -1 if no match is
+found.  This function executes a simple compare and
+advance algorithm (see e.g. K&R1 p.67),
+and is inappropriate if text contains a very long string.
+.SH AUTHOR
+Eric Roberts
+.SH FILES
+.nf
+.ta +1.5i
+~/src/kernel/core        filefn.c
+.fi
+.SH UPDATE HISTORY
+.nf
+.ta +1i +4i
+4-dec-86	Last modified   	Roberts
+6-dec-86	Updated for Nemo	Josh
+7-oct-90	Manual page written	Peter
+.fi
