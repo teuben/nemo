@@ -20,7 +20,8 @@ input file, in \fIImage(5)\fP format [no default]
 output file, will be in \fIImage(5)\fP format [no default]
 .TP
 \fBgauss=\fIvalue\fP
-Beam size (FWHM, note FWM = 2.355 * sigma) of a gaussian smoothing
+Beam size (FWHM, note FWM = 2*sqrt(2*ln(2)) = 2.355 * sigma) of a 
+gaussian smoothing
 kernel. Note this is size of the used smoothing kernel, NOT the resulting
 beam in the output map.
 If this parameter is used, the parameter \fBsmooth\fP is
@@ -76,7 +77,7 @@ src/image/trans     	ccdsmooth.c ccdsmooth.1
 .ta +1.0i +4.0i
 29-jun-87	V1.0: Created as module from CCD program	PJT
 30-Jun-87	V1.1: improved 'struct' filestructure      	PJT
- 9-jul-87	V1.2: keyword 'dir' adn keyword order changed	PJT
+ 9-jul-87	V1.2: keyword 'dir' and keyword order changed	PJT
  1-jun-88	V2.0: new filestruct, although code is same	PJT
  5-feb-89	V2.2: general 3D smoothing                	PJT
 11-sep-91	some additional comments                	PJT

@@ -35,9 +35,9 @@ string defv[] = {	/* DEFAULT INPUT PARAMETERS */
     "seed=0\n		Usual random number seed",
     "sign=1\n           Sign of Z-angular momentum vector of disk",
     "in=\n              If given, these are initial positions",
-    "vr=0\n             radial velocity",
+    "vrad=0\n           radial velocity",
     "headline=\n	Text headline for output",
-    "VERSION=4.2c\n	10-oct-00 PJT",
+    "VERSION=4.2d\n	11-may-01 PJT",
     NULL,
 };
 

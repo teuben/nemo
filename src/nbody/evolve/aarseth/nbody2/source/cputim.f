@@ -28,3 +28,14 @@
       RETURN
 *
       END
+**
+** uncomment this if you need a dummy ETIME; not all compilers have this
+**
+      REAL FUNCTION ETIME(TARRAY)
+      REAL TARRAY(2)
+      TARRAY(1) = 1.0
+      TARRAY(2) = 2.0
+      ETIME = 1.0
+      RETURN
+      END
+

@@ -98,7 +98,7 @@ cc:
 	@grep -v '#' `which $(CC)`
 
 count:
-	wc */*.[fch] */*/*.[fch] */*/*/*.[fch] */*/*/*/*.[fch] */*/*/*/*/*.[fch]
+	wc */*.[fcCh] */*/*.[fcCh] */*/*/*.[Cfch] */*/*/*/*.[Cfch] */*/*/*/*/*.[Cfch] */*/*/*/*/*/*.[Cfch]
 
 count1:
 	cat `find . -name \*.c -o -name \*.h -o -name \*.f -o -name \*.C `| wc -l 

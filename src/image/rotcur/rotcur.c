@@ -52,7 +52,10 @@
  *              15-oct-99 : 2.4  added residual computations        
  *                               to nllsqfit using resid=           pjt
  *              14-mar-01 : 2.5  added nsigma=                      pjt 
- *              23-apr-01 : 2.6  added central dv/dr estimator      pjt
+ *              23-apr-01 : 2.6  added central dv/dr estimator 
+ *                               -- WORK NOT COMPLETED --     
+ *                               see C-script 'rotcurcen' instead
+ *               9-may-01 : 2.6a fixed error correction factor      pjt
  ******************************************************************************/
 
 #include <stdinc.h>
@@ -96,7 +99,7 @@ string defv[] = {
     "inherit=t\n     Inherit initial conditions from previous ring",
     "fitmode=cos,1\n Basic Fitmode: cos(n*theta) or sin(n*theta)",
     "nsigma=-1\n     Iterate once by rejecting points more than nsigma resid",
-    "VERSION=2.6\n   23-apr-01 PJT",
+    "VERSION=2.6a\n  9-may-01 PJT",
     NULL,
 };
 
@@ -159,7 +162,7 @@ nemo_main()
     real x0,y0,vsys;  /* vars for init. estim. of xpos, ypos and vsys */
     real thf;     /* var  denoting free angle around minor axis */
     real nsigma;
-    real factor;    /* factor > 1, by which errors need be multiplied */
+    real old_factor, factor;    /* factor > 1, by which errors need be multiplied */
 
     if (hasvalue("tab"))
         lunpri=stropen(getparam("tab"),"a");  /* pointer to table stream output */
@@ -175,8 +178,10 @@ nemo_main()
            &vsys,&x0,&y0,&thf,
            &wpow,mask,&side,cor,&inherit,&fitmode,&nsigma,lunpri);
 
-    factor = sqrt((beam[0]+grid[0])*(beam[1]+grid[1])/(grid[0]*grid[1]));
-    dprintf(1,"Error multiplication factor=%g\n",factor);
+    old_factor = sqrt((beam[0]+grid[0])*(beam[1]+grid[1])/(grid[0]*grid[1]));
+    factor = sqrt(FOUR_PI*beam[0]*beam[1]/(grid[0]*grid[1]));  /* Sicking 1997 !!! */
+    dprintf(1,"Sicking (1997)'s error multiplication factor=%g  (old_factor=%g)\n",
+	    factor,old_factor);
 
     for (irng=0; irng<nring-1; irng++) {  /* loop for each ring */
          ri=rad[irng];          /* inner radius of ring */
