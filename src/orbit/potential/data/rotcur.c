@@ -86,6 +86,8 @@ void potential_double (int *ndim, double *pos,double *acc,double *pot,double *ti
         r2 += sqr(pos[i]);
     r=sqrt(r2);
     if (r<rad[0] || r>rad[nrad-1]) {
+	*pot = 0.0;
+	acc[0] = acc[1] = acc[2] = 0.0;
         return;
     } 
 
