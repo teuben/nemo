@@ -27,10 +27,7 @@ OBJFILES = io_nemo.o parameters.o check_file.o io_init.o \
 lib : libio_nemo.a
 
 clean :
-	rm -f *.o core
-
-cleanall : 
-	/bin/rm -f *.o $(TARGET_BIN) *.a plum*
+	rm -f *.o core  $(TARGET_BIN) 
 
 test  : $(TARGET_BIN)
 

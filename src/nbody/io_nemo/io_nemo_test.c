@@ -1,17 +1,20 @@
 /* -------------------------------------------------------------- *\ 
 |* NEMO program test using 'io_nemo()' function
+|*    16-April-97 jcl	original version
+|*    16-jul-01   pjt   added maxio.h
 \* -------------------------------------------------------------- */
 #include <stdinc.h>
 #include <getparam.h>
 
+#include "maxio.h"
 #include "io_nemo.h"
 
 string defv[]=  
 { "in=???\n       input snapshot",
   "out=???\n      output snapshot",
-  "select=all\n    selected particles",
+  "select=all\n   selected particles",
   "times=all\n    selected time",
-  "VERSION=1.0\n  16-April-97 jcl",
+  "VERSION=1.0a\n 16-jul-01 PJT",
   NULL
 };
 
