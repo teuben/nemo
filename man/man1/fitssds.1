@@ -1,0 +1,47 @@
+.TH SDSFITS 1NEMO "13 April 1995"
+.SH NAME
+fitssds \- convert FITS to SDS HDF 
+.SH SYNOPSIS
+\fBfitssds\fP [parameter=value]
+.SH DESCRIPTION
+\fBfitssds\fP converts a \fIfits(5NEMO)\fP image file to
+an \fIhdf(1)\fP SDS dataset.
+.PP
+This current version was written to fit a particular
+purpose, and will only properly convert  a FITS image/cube
+into a single 2D or 3D SDS
+dataset.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP\fIfits_file\fP
+Input FITS file. No default.
+.TP
+\fBout=\fP\fIsds_file\fP
+Output file (SDS HDF file). No default.
+.SH BUGS
+No known bugs, but there are some limitations in the current version:
+.PP
+1) output SDS dataset will contain only one SDS, namely the one derived
+from the primary HDU. It will also be in single precision (IEEE-float32)
+.PP
+2) the whole dataset is read into memory, no slicing.  Although this is fast,
+it limits the size of the cube to the (virtual) memory you have.
+.PP
+3) No fancy annotations or axis labelling.
+.PP
+.SH SEE ALSO
+snaphdf(1NEMO), hdf(1), lshdf(1), sdsfits(1NEMO), tsd(1NEMO)
+.SH FILES
+.ta +2i
+.nf
+~/src/image/fits	fitssds.c sdsfits.c - NEMO source code
+.fi
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+19-Jan-95	V1.0 Created 	PJT
+.fi
