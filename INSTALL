@@ -1,0 +1,13 @@
+Alaf, installation instructions are in the file README.install.
+
+Basically, the sequence is that if most autoconf based software:
+
+	./configure
+	make install
+
+however, make install does not actuall install the software,
+but merely prints out the instructions what to do. See the
+README.install for more details.
+
+- Peter Teuben
+
