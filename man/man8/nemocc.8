@@ -1,0 +1,34 @@
+.TH CC 8NEMO "6 November 1993"
+.SH NAME
+nemocc, cc \- NEMO's C compiler
+.SH SYNOPSIS
+\fBcc\fP \fI[options]\fP ... \fIsourcefile ...\fP
+.SH DESCRIPTION
+The \fBcc\fP command (see also \fIcc(1)\fP)
+is normally available as a shell script in
+the \fB$NEMOBIN\fP directory, which should be part of your
+search path, and be found before any of the C compilers on
+your local system is found. In this way we isolate system
+dependant compiler flags into this script. The script
+then calls the system compiler (e.g. /bin/cc, /usr/lang/acc etc.)
+with the flags set. The flags we most commonly we use are:
+.PP
+.nf
+.ta +2i
+\fB-I\fP\fIdir\fP	add \fIdir\fP to include files search path
+\fB-L\fP\fIdir\fP	add \fIdir\fP to \fB-l\fPlibrary\fP files search path
+.fi
+.SH FILES
+.nf
+.ta +2i
+$NEMO/src/scripts	Various \fIcc.*\fP shell script examples
+.fi
+.SH "SEE ALSO"
+B. W. Kernighan and D. M. Ritchie,
+\fI"The C Programming Language" ,\fP Prentice-Hall, 1978
+.PP
+\fINEMO Users and Programmers Guide\fP.
+.SH HISTORY
+.nf
+.ta +1i +4i
+6-nov-93	document written	PJT
