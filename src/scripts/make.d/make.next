@@ -1,0 +1,5 @@
+#! /bin/csh -f
+# You probably need to install the gnu make program, the 
+# stock make on NeXT doesn't seem to handle our Makefiles
+# with the admittedly funny rules
+gmake $*
