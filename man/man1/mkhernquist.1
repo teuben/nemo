@@ -1,0 +1,56 @@
+.TH MKHERNQUIST 1NEMO "27 March 2003"
+.SH NAME
+mkhernquist \- create a two-component, isotropic, spherical galaxy+halo Hernquist model
+.SH SYNOPSIS
+\fBmkhernquist\fP [parameter=value]
+.SH DESCRIPTION
+\fBmkhernquist\fP
+generates a two-component, isotropic, spherical galaxy/halo model using a
+superposition of two Hernquist models.  The galaxy is assumed to be a
+unit Hernquist model with M=a=1 while the halo mass and scale radius are
+free parameters specified on the command line.  The distribution
+function is calculated on the fly using Eddington's formula and then
+sampled to generate a N-body realization of a galaxy.  The galaxy and
+halo particles are dumped in succession -- first half are galaxy
+particles.  
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBout=\fP
+Output file name. No default.
+.TP
+\fBnbody=\fP
+Total number of particles for both components. No default.
+.TP
+\fBm=\fP
+Mass of Halo (where the galaxy has mass=1) [1]   
+.TP
+\fBa=\fP
+Scale length of Halo (where the galaxy has radius=1) [1]  
+.TP
+\fBseed=\fP
+Standard seed [0]     
+.TP
+\fBaddphi=\fP
+Add potentials to snapshot [f]   
+.TP
+\fBzerocm=\fP
+Centrate snapshot (t/f)? [t]    
+.TP
+\fBheadline=\fP
+Optional verbiage []     
+.SH CAVEATS
+Due to the relatively large number of particles at large radii,
+setting zerocm=t will cause the center to be significantly 
+shifted from the origin.
+.SH SEE ALSO
+mkplummer(1NEMO)
+.SH FILES
+.SH AUTHOR
+Peter Teuben, John Dubinski (original version)
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+27-Mar-03	V1.1 man pages finally created  	PJT
+.fi
