@@ -1,15 +1,15 @@
-.TH MOMENT 3NEMO "17 April 2004"
+.TH MOMENT 3NEMO "2 February 2005"
 .SH NAME
 ini_moment, accum_moment, decr_moment, 
 reset_moment, show_moment, n_moment, sum_moment,
 mean_moment, sigma_moment, skewness_moment, kurtosis_moment,
-min_moment, max_moment \- various moment and minmax routines
+min_moment, max_moment \- various (moving) moment and minmax routines
 .SH SYNOPSIS
 .nf
 .B
 #include <moment.h>
 .PP
-.B void ini_moment(m, mom)
+.B void ini_moment(m, mom, ndat)
 .B void accum_moment(m, x, w)
 .B void decr_moment(m, x, w)
 .B void reset_moment(m)
@@ -18,6 +18,7 @@ min_moment, max_moment \- various moment and minmax routines
 .B int n_moment(m)
 .B real sum_moment(m)
 .B real mean_moment(m)
+.B real median_moment(m)
 .B real sigma_moment(m)
 .B real skewness_moment(m)
 .B real kurtosis_moment(m)
@@ -26,17 +27,27 @@ min_moment, max_moment \- various moment and minmax routines
 .B real max_moment(m);
 .PP
 .B Moment *m;
-.B int mom;
+.B int mom, ndat;
 .B real x, w;
 .fi
 .SH DESCRIPTION
 \fImoment\fP is a set of routines to compute the moments of 
 a set of real values, and also keep track of the actual datamin
 and datamax. The routines are written in C but in 
-an object-oriented fashion as to isolate the user from the internal
-data-structure. The \fBMoment\fP can (and should) be treated as an
+an object-oriented fashion as to try and keep the use from the internal
+data-structures. The \fBMoment\fP can (and should) be treated as an
 opaque datastructure. All information should be obtained through interface
 routines.
+.PP
+If only a datamin/max is needed, \fBmom<0\fP can be used to prevent
+expensive moment calculations.
+.PP
+Moving or running averages (or moments) can be done by supplying \fBndat>0\fP
+to ini_moment. It will keep a memory of the last \fBndat\fP data values
+and the moments now become running moments.
+.PP
+Note that the \fImedian_moment\fP can only be used in \fBx\fP (the weights are
+ignored) and moving moment where \fBndat>0\fP.
 .SH MOMENT STRUCTURE
 A simple data structure (referred to as \fImoment\fP in the above
 SYNOPSIS) is used to communicate between different routines:
@@ -48,6 +59,11 @@ typedef struct {
 	int n;
 	real *sum;
 	real datamin, datamax;
+
+	int ndat;
+	int idat;
+	real *dat;
+	real *sum;
 } Moment;
 
 .fi
@@ -69,4 +85,5 @@ Peter Teuben
 30-oct-93	Created   	PJT
 8-nov-93	fixed init bug 	PJT
 13-jun-95	added decr_moment	PJT
+2-feb-05	added moving moments	PJT
 .fi
