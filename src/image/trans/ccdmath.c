@@ -20,15 +20,13 @@
  *	24-feb-98	V2.6 added seed=				PJT
  *	 8-sep-01	a    init_xrandom
  *      24-jul-02       2.7  allow nz=0, so it does not make a 3rd axis  PJT
- *       1-mar-03       3.0  new keywords to set/change WCS              PJT
+ *       1-mar-03       3.0  new keywords to set/change WCS              PJT 
+ *      19-jun-03       3.1  allow %w, %r for 2d/3d radii; allow crpix offset     PJT
  *
  *       because of the float/real conversions and
  *       to eliminate excessive memory usage, operations 'fie' are
  *       done on a column by column basis.
  *                      
- * TODO:
- *     - allow a %r  to refer to a radius, instead of using %x and %y
- *
  */
 
 #include <stdinc.h>
@@ -42,13 +40,13 @@
 string defv[] = {
   "in=\n           Input file(s), separated by comma's (optional)",
   "out=???\n       Output file",
-  "fie=???\n       Expression %1,%2,.. for input maps; %x,%y for new map",
+  "fie=???\n       Expression %1,%2,.. for input maps; %x,%y,%z, %w,%r for new map/cube",
   "size=10,10,1\n  2- or 3D dimensions of map/cube",
   "crpix=\n        Override/Set crpix (1,1,1)",
   "crval=\n        Override/Set crval (0,0,0)",
   "cdelt=\n        Override/Set cdelt (1,1,1)",
   "seed=0\n        Random seed",
-  "VERSION=3.0\n   1-mar-03 PJT",
+  "VERSION=3.1\n   19-jun-03 PJT",
   NULL,
 };
 
@@ -255,6 +253,7 @@ local void wcs_i2f(image *iptr, int ndim, double *crpix, double *crval, double *
  *  after a %, i.e. %1, %2... when map_create==false
  *  In case map_create==true % can only be followed by
  *  an 'x', 'y' or 'z' - in this case x -> 1, y -> 2, z -> 3
+ *  'w' is sqrt(x*x+y*y),   'r' is sqrt(x*x+y*y+z*z).
  *  Returns 0 on success, -1 on some failure
  */
 
@@ -271,6 +270,10 @@ local int fie_remap(char *fie, bool map_create)
             *fie = '2';
         else if (*fie=='z' && map_create)       /* z */
             *fie = '3';
+        else if (*fie=='w' && map_create)       /* w (2d) */
+            *fie = '4';
+        else if (*fie=='r' && map_create)       /* r (3D) */
+            *fie = '5';
         else if (isdigit(*fie) && !map_create)
             ;                                   /* ignore */
         else {
@@ -288,7 +291,7 @@ local int fie_remap(char *fie, bool map_create)
 local void do_create(int nx, int ny,int nz)
 {
     double m_min, m_max, total;
-    real   fin[3], fout;
+    real   fin[5], fout;
     int    ix, iy, iz;
     int    badvalues;
     
@@ -302,11 +305,13 @@ local void do_create(int nx, int ny,int nz)
       wcs_f2i(3,crpix,crval,cdelt,iptr[0]);
 
       for (iz=0; iz<nz; iz++) {
-        fin[2] = iz;
+        fin[2] = iz-crpix[2]-1;   /* crpix is 1 for first pixel (FITS convention) */
         for (iy=0; iy<ny; iy++) {
-	  fin[1] = iy;
+	  fin[1] = iy-crpix[1]-1;
 	  for (ix=0; ix<nx; ix++) {
-	    fin[0] = ix;
+	    fin[0] = ix-crpix[0]-1;
+	    fin[3] = sqrt(sqr(fin[0])+sqr(fin[1]));              /* w */
+	    fin[4] = sqrt(sqr(fin[0])+sqr(fin[1])+sqr(fin[2]));  /* r */
 	    dofien (fin, 1, &fout, 0.0);   /* do the work --- see: fie.3 */
 	    CubeValue(iptr[0],ix,iy,iz) = fout;
 	    m_min = MIN(m_min,fout);         /* and check for new minmax */

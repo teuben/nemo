@@ -1,4 +1,4 @@
-.TH CCDMATH 1NEMO "1 March 2003" 
+.TH CCDMATH 1NEMO "19 June 2003" 
 .SH NAME
 ccdmath \- map arithmetic using function expressions
 .SH SYNOPSIS
@@ -13,10 +13,12 @@ is the ordinal number of the input maps (1 being the first one),
 in the function expression \fBfie\fP.
 .PP
 The program can also be used in creation mode: when no input files are
-given, parameters \fB%x\fP and \fB%y\fP in \fBfie=\fP 
-can be used to refer to the X and
-Y pixel coordinates in the map to be created, (0,0) being the lower left
-corner.
+given, parameters \fB%x\fP, \fB%y\fP and \fB%z\fP in \fBfie=\fP 
+can be used to refer to the X, 
+Y and Z pixel coordinates in the map to be created, (0,0,0) 
+in pixel coordinates w.r.t. reference pixel.
+\fB%w\fP and \fB%r\fP can be used for 2D and 3D radius w.r.t. reference pixel, again
+in pixel coordinates.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword is also
 given:
@@ -107,5 +109,6 @@ src/image/trans  	ccdmath.c ccdmath.1
 18-dec-88	V2.1: new keyword structure, fie() used.         	PJT
 22-jan-89	V2.3: can make map from scratch using %x, %y and %z	PJT
 1-mar-03	V3.0: set/change the WCS				PJT
+19-jun-03	V3.1: allow %w and %r, and use offset from crpix	PJT
 .fi
 
