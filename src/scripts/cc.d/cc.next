@@ -1,0 +1,9 @@
+#! /bin/csh -f
+#  cc script for sun4's
+#  unfortunately the -static/-Bstatic switch causes the compiler to
+#  ignore sharable libraries, and hence create larger executables -
+#  For SunOS < 4.1 this is needed because of shaky loadobj which cannot
+#  deal with sharable libraries.
+#	optional GNU compiler
+exec /bin/cc -I$NEMOINC -L$NEMOLIB -Dsun4 -static -fwritable-strings $*
+
