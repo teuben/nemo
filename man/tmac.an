@@ -8,7 +8,7 @@
 .\"               2-apr-97 for NEMO 2.4
 .\" NEMO <--- this you can use to search for NEMO specific lines in this file
 .\" NEMO
-.ds ]W Nemo Release 3.0
+.ds ]W Nemo Release 3.1
 '	# month name
 .  \".if "\nd"0" .nr m \n(mo-1
 .  \".if "\nm"0" .ds ]m January
