@@ -27,6 +27,7 @@
  *	21-may-01	V2.4    history <old history_level> back here   PJT
  *       1-aug-02       V2.5    increased memory a bit 256->1024        
  *                              and free up memory in reset_history     PJT
+ *      28-dec-04       V2.5a   tag headline properly when free'd       PJT
  *
  *  ToDo: not all local variables free up memory, despite that some
  *        have clearly come from allocate'd memory. 
@@ -147,7 +148,10 @@ void reset_history()
   int i;
   for (i=0; i<nhist; i++)
     if (freeup[i]) free(histbuf[i]);
-  if (headline) free(headline);
+  if (headline) {
+    free(headline);
+    headline=0;
+  }
   nhist = 0;
 }
 
