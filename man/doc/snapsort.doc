@@ -1,0 +1,18 @@
+%N snapsort
+%D sort particles according to a user-specified ranking
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man snapsort' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input file name (snapshot) [???]
+%A out
+	Output file name (snapshot) [???]
+%A rank
+	Value used in ranking particles [etot]
+%A times
+	Range of times to process  [all]
+%A sort
+	Sort mode {qsort;...} [qsort]
+%A VERSION
+	10-jun-95 PJT  [1.4]
