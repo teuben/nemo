@@ -6,6 +6,7 @@
  *      oct-90  created (though never made working)     PJT
  *	mar-92  happy gcc2.0 - actually made it work 	pjt
  *	oct-93  get_pattern
+ *      jun-01  fixed potential un-initialized r=0 variables    PJT
  *
  */
 
@@ -60,21 +61,23 @@ void potential (int *ndim, double *pos, double *acc, double *pot, double *time)
         rad += sqr(pos[i]);
 
     if (rad>rh2) {                  /* OUTSIDE the halo: Newton */
-        r = sqrt(rad);
-        f = mh/(rad*r);             /* radial force / r */
-        for (i=0; i<*ndim; i++)     /* cartesian acc's */
-            acc[i] = -f*pos[i];
-        *pot = -mh/r;               /* potential */
+      r = sqrt(rad);
+      f = mh/(rad*r);             /* radial force / r */
+      for (i=0; i<*ndim; i++)     /* cartesian acc's */
+	acc[i] = -f*pos[i];
+      *pot = -mh/r;               /* potential */
     } else {                        /* INSIDE the halo:  O&P */
-        if (rad==0.0)
-            f = 0.0;
-        else {
-            r = sqrt(rad);
-            f = mhc / sqr( r + rc );
-            for (i=0; i<*ndim; i++)  /* cartesian acc's */            
-                acc[i] = -f*pos[i];
-        }
-        *pot = -mh/rh * ( 1 - rhc*(log((r+rc)/(rh+rc)) + 
-                                    rc*(rh-r)/(rh+rc)/(r+rc)) );
+      if (rad==0.0) {
+	r = f = 0.0;
+	for (i=0; i<*ndim; i++)  /* cartesian acc's */            
+	  acc[i] = 0.0;
+      } else {
+	r = sqrt(rad);
+	f = mhc / sqr( r + rc );
+	for (i=0; i<*ndim; i++)  /* cartesian acc's */            
+	  acc[i] = -f*pos[i];
+      }
+      *pot = -mh/rh * ( 1 - rhc*(log((r+rc)/(rh+rc)) + 
+				 rc*(rh-r)/(rh+rc)/(r+rc)) );
     }
 }

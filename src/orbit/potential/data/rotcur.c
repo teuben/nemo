@@ -7,6 +7,7 @@
  *    19-jul-92 finished for Bikram     PJT
  *	 oct-93 get_pattern
  *	15-apr-98  oops, made forces now negative
+ *      23-jun-01  gcc warnings
  */
 
 /*CTEX
@@ -20,21 +21,17 @@
 #include <spline.h>
 #include <table.h>
 
-extern double sqr();
+extern int file_lines(string);
  
 local double omega = 0.0;           /* just put to zero until implemented */
-local double maxrad = -1.0;	    /* maximum radius --  ***not used*** */
 
 local real *rad, *vel, *coef;
 local int nrad, nmax;
 local int entries=0;
 
-void inipotential (npar, par, name)
-int    *npar;
-double par[];
-char *name;
+void inipotential (int *npar, double *par, string name)
 {
-    int i, n, colnr[2];
+    int n, colnr[2];
     real *coldat[2];
     stream instr;
 
@@ -73,9 +70,7 @@ char *name;
         dprintf(2,"rotcur[%d]: %g %g\n",nrad,rad[nrad-1],vel[nrad-1]);
 }
     
-void potential (ndim,pos,acc,pot,time)
-int    *ndim;
-double pos[], acc[], *pot, *time;
+void potential (int *ndim, double *pos,double *acc,double *pot,double *time)
 {
     real r, r2, v, f;
     int    i;

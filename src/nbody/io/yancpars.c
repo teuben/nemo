@@ -1,9 +1,12 @@
 /*
  * yancpars:	add YANC parameters to a snapshot, so YANC has (some
  *		better) values for its integration parameters
- *              Not sure if this will be the official way to setup YANC runs
+ *
+ *		now deprecated, ince YancNemo is now the official way
+ *		but we keep this code since the method is rather unique
  * 
  *	26-may-2001	Written in Mexico, for Walter Dehnen's YANC code  PJT
+ *      30-jun-2001	1.0a now declared it deprecated
  */
 
 #if 0
@@ -14,6 +17,7 @@
 #include <stdinc.h>
 #include <getparam.h>
 #include <filestruct.h>
+#include <history.h>
 
 #include <snapshot/snapshot.h>
 
@@ -25,16 +29,16 @@ string defv[] = {
     "theta=0.5\n        Treecode opening angle",
     "hmin=5\n           Timestep dt=2^-hmin",
     "convert=d2f\n      Conversion options",
-    "VERSION=1.0\n	26-may-01 PJT",
+    "VERSION=1.0a\n	30-jun-01 PJT",
     NULL,
 };
 
-string usage = "Copy a binary structured file";
+string usage = "Add (yanc) parameter to a snapshot";
 
 
 extern string *burststring(string,string);
 
-nemo_main()
+void nemo_main()
 {
     stream outstr, instr = stropen(getparam("in"),"r");
     int    i;
@@ -45,7 +49,8 @@ nemo_main()
     int kernel = getiparam("kernel");
     string *cvt = burststring(getparam("convert"),", ");
 
-    dprintf(0,"eps=%g theta=%g hmin=%g kernel=%d\n",eps,theta,hmin,kernel);
+    dprintf(1,"eps=%g theta=%g hmin=%g kernel=%d\n",eps,theta,hmin,kernel);
+    dprintf(1,"using conversion %s\n",cvt[0]);
     
     get_history(instr);
     if (!get_tag_ok(instr,SnapShotTag))

@@ -1,11 +1,13 @@
-.TH MARTELSNAP 1NEMO "19 March 1999"
+.TH MARTELSNAP 1NEMO "30 June 2001"
 .SH NAME
 martelsnap \- convert Martel "pos-vel" dump files to snapshot
 .SH SYNOPSIS
 \fBmartelsnap\fP [parameter=value]
 .SH DESCRIPTION
-\Efmartelsnap\fP converts a simple dump of phase space coordinates
-into a \fPsnapshot(5NEMO)\fP.
+\fBmartelsnap\fP converts a simple binary (fortran) dump of 
+phase space coordinates into a standard \fPsnapshot(5NEMO)\fP
+formatted file. These files are amongst created by Hugo Martel's
+software, although are generally useful for any N-body code.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -22,12 +24,30 @@ Max number of particles. Default: 262144.
 \fBheadline=\fP
 Random verbiage      
 .TP
+\fBswap=t|f\fP
+Swap the real (float) numbers. This is needed if the data were produced on
+a machine with a different endianism from where you are processing it.
+[Default: f]
 .SH SEE ALSO
+unfio(1NEMO), bswap(1NEMO)
+.PP
 http://xxx.lanl.gov/abs/astro-ph/9903210
+.SH FORMAT
+Data format is a simple binary dump of the single precision
+coordinates and velocities of all particles. The order in
+the file is X(1),Y(1),Z(1),VX(1),VY(1),VZ(1),X(2),....., and
+the following snippet of fortran-77 code would produce such files:
+.nf
+    REAL posvel(6,NP)
+    OPEN(10,FILE='posvel.dat',STATUS='new',FORM='unformatted')
+    WRITE(10) ((posvel(i,j),i=1,6),j=1,NP)
+    CLOSE(10)
+.fi
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
 19-Mar-99	V1.0 Created   	PJT
+29-jun-01	V1.1 added swap=	PJT
 .fi
