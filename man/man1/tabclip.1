@@ -1,4 +1,4 @@
-.TH TABCLIP 1NEMO "23 November 2002"
+.TH TABCLIP 1NEMO "27 November 2002"
 .SH NAME
 tabclip \- clip a table
 .SH SYNOPSIS
@@ -12,18 +12,23 @@ is also given:
 .TP 20
 \fBin=\fP
 Input file name (an ascii table) [???] 
-.TP 20
+.TP
 \fBout=\fP
 Output table [???]     
-.TP 20
+.TP
 \fBxcol=\fP
 x coordinate column [1]    
-.TP 20
+.TP
 \fBycol=\fP
 y coordinate column [2]    
-.TP 20
+.TP
 \fBderiv=\fP
 Clipping if abs(derivative) exceeds this value [] 
+.TP
+\fBeta=\fP
+Clipping if the 2nd order polynomial value predicted Y of a point 
+from both sides is more than \fBeta\fP.
+Default: not used.
 .TP 20
 \fBnmax=\fP
 Hardcoded allocation space, if needed for piped data
@@ -35,4 +40,5 @@ Peter Teuben
 .nf
 .ta +1.0i +4.0i
 23-Nov-02	V0.1 Created	PJT
+27-nov-02	V0.3 added eta=	PJT
 .fi
