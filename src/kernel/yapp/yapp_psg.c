@@ -15,6 +15,7 @@
  *      30-mar-97   2.0 resurrection from yapp_ps_old.c since nothing else 
  *			has greyscales
  *		    greyscale is ok for SINGLEPREC, but contours not !!!
+ *      16-mar-05   added blankval for pl_matrix
  *		    
  *
  */
@@ -354,10 +355,11 @@ pl_screendump(string fname)
  *	fmin = what should be white (if fmin<fmax)
  *	fmax = what should be black 
  *	findex = power of transfer function (0,infinity) 1=linear
+ *      blankval = value where no paint is applied
  */
 
 pl_matrix (real *frame, int nx, int ny,
-           real xmin, real ymin, real cell, real fmin, real fmax, real findex)
+           real xmin, real ymin, real cell, real fmin, real fmax, real findex, real blankval)
 {
 	real x,y,f,grayscale,ds;
 	int    ix,iy;
@@ -376,6 +378,7 @@ pl_matrix (real *frame, int nx, int ny,
 	for (ix=0, x=xmin-0.5*cell; ix<nx; ix++, x+=cell) {
 	   for (iy=0, y=ymin-0.5*cell; iy<ny; iy++, y+=cell) {
 		f = *(frame + ix*ny + iy);
+		if (f==blankval) continue;
 		
 					/* apply linear grayscale + cutoff */
 		if (grayscale>0.0)

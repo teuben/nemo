@@ -307,7 +307,7 @@ int plstop()
 }
 
 int pl_matrix(real *frame,int nx,int ny,real xmin,real ymin,
-	  real cell,real fmin,real fmax,real findex)
+	      real cell,real fmin,real fmax,real findex, real blankval)
 {
     int ix,iy,ix0,ix1,iy0,iy1;
     float gray0, gray1, tr[6], *data, *dp;
@@ -344,16 +344,20 @@ int pl_matrix(real *frame,int nx,int ny,real xmin,real ymin,
     for(iy=0, dp=data; iy<ny; iy++)
         for(ix=0; ix<nx; ix++) {
             dval =  *(frame + ix*ny + iy);
-            if (fmin < fmax) {
+	    if (dval == blankval) {
+	      *dp++ = pow(fmin,findex)-1;   /* could it be +1 if fmin>fmax ?? */
+            } else {
+	      if (fmin < fmax) {
                 if (dval < fmin) dval=fmin;
                 if (dval > fmax) dval=fmax;
                 dval = (dval-fmin)*dfac;
-            } else {
+	      } else {
                 if (dval < fmax) dval=fmax;
                 if (dval > fmin) dval=fmin;
                 dval = (dval-fmax)*dfac + 1.0;
-            }
-            *dp++ = pow(dval,findex);
+	      }
+	      *dp++ = pow(dval,findex);
+	    }
         }
     cpggray(data,nx,ny,ix0,ix1,iy0,iy1,gray1,gray0,tr);
     free(data);

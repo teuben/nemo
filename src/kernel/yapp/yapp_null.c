@@ -64,7 +64,7 @@ void plcolor(int color)
 { }
 
 int pl_matrix(real *frame,int nx,int ny,real xmin,real ymin,
-	  real cell,real fmin,real fmax,real findex)
+	      real cell,real fmin,real fmax,real findex, real blankval)
 { return 0;}
 
 int pl_contour(real *frame,int nx,int ny, int nc, real *c)

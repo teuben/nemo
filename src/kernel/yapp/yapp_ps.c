@@ -396,7 +396,8 @@ pl_matrix(
     real xmin, real ymin,	/* lower-left corner */
     real cell,		/* pixel size in user units */
     real fmin, real fmax,	/* values mapped to white, black */
-    real findex)
+    real findex,
+    real blankval)
 {
     static bool virgin = TRUE;
 

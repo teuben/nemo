@@ -341,7 +341,8 @@ plstop()
 }
 
 pl_matrix(real *frame,int nx,int ny,real xmin,real ymin,
-	  real cell,real fmin,real fmax,real findex)
+	  real cell,real fmin,real fmax,real findex,real blankval)
+
 {
     int ix,iy,ix0,ix1,iy0,iy1;
     float gray0, gray1, tr[6], *data, *dp;
@@ -349,7 +350,7 @@ pl_matrix(real *frame,int nx,int ny,real xmin,real ymin,
     
     if (iterm==0) return 0;       /* no graphics output requested */
 
-    dprintf(0,"PL_MATRIX development version for YAPP_PGPLOT\n");
+    dprintf(1,"PL_MATRIX development version for YAPP_PGPLOT\n");
     if (findex < 0.0) {
         dprintf(0,"Swapping min and max to : %g %g\n",fmax,fmin);
         findex = -findex;
@@ -378,16 +379,20 @@ pl_matrix(real *frame,int nx,int ny,real xmin,real ymin,
     for(iy=0, dp=data; iy<ny; iy++)
         for(ix=0; ix<nx; ix++) {
             dval =  *(frame + ix*ny + iy);
-            if (fmin < fmax) {
+	    if (dval == blankval) {
+	      *dp++ = pow(fmin,findex) - 1;
+	    } else {
+	      if (fmin < fmax) {
                 if (dval < fmin) dval=fmin;
                 if (dval > fmax) dval=fmax;
                 dval = (dval-fmin)*dfac;
-            } else {
+	      } else {
                 if (dval < fmax) dval=fmax;
                 if (dval > fmin) dval=fmin;
                 dval = (dval-fmax)*dfac + 1.0;
-            }
+	      }
             *dp++ = pow(dval,findex);
+	    }
         }
     pggray_(data,&nx,&ny,&ix0,&ix1,&iy0,&iy1,&gray1,&gray0,tr);
     free(data);

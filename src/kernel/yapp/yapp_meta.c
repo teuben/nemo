@@ -115,9 +115,8 @@ void plpalette(real *r, real *g, real *b, int n)
 }
 
 
-pl_matrix(frame,nx,ny,xmin,ymin,cell,fmin,fmax,findex)
-real *frame, xmin, ymin, cell, fmin, fmax, findex;
-int nx, ny;
+pl_matrix(real *frame,int nx,int ny,real xmin,real ymin, real cell,
+	  real fmin,real fmax,real findex, real blankval)
 {
     fprintf(yappstr,"pl_matrix\n");
 }

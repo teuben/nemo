@@ -304,7 +304,7 @@ plstop()
 }
 
 pl_matrix(real *frame,int nx,int ny,
-	real xmin,real ymin,real cell,real fmin,real fmax,real findex)
+	  real xmin,real ymin,real cell,real fmin,real fmax,real findex, real blankval)
 {
     real x,y,f,grayscale,ds;
     int ix,iy;
