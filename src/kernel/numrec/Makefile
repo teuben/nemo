@@ -1,0 +1,137 @@
+#	Makefile for NEMO/src/kernel/numrec (subset of Numerical Recipes)
+include $(NEMOLIB)/makedefs
+#	some routines exist in single as well as double precision
+
+
+#	NUNEMO Library, and make it a precious one
+L = $(NEMOLIB)/libnemo.a
+.PRECIOUS: $(L)
+
+# Files etc. in this directory
+
+MAN1FILES = 
+MAN3FILES = 
+MAN5FILES = 
+INCFILES = nrutil.h nr.h
+SRCFILES= eigsrt.c   jacobi.c nrutil.c \
+	  eigsrt_d.c jacobi_d.c ran3.c beta.c gamma.c pearsn.c
+
+OBJFILES= eigsrt.o jacobi.o nrutil.o \
+	  eigsrt_d.o jacobi_d.o ran3.o beta.o gamma.o pearsn.o \
+	  probks.o kstwo.o
+
+LOBJFILES= $L(eigsrt.o)   $L(jacobi.o) $L(nrutil.o) \
+	   $L(eigsrt_d.o) $L(jacobi_d.o) $L(ran3.o) \
+	   $L(beta.o) $L(gamma.o) $L(pearsn.o)
+ 
+BINFILES = 
+TESTFILES =
+
+#	update the library: direct comparison with modules inside L
+help:
+	@echo Nemo makefile in `pwd`
+
+
+clean:
+	rm -f *.o *.a core $(BINFILES) $(TESTFILES)
+
+cleanlib:
+	ar dv $(L) $(OBJFILES)
+
+all:	$(BINFILES) $(TESTFILES)
+
+#	update the library: direct comparison with modules inside L
+update:  .update_inc .update_lib 
+
+.update_lib: $(L)
+	@touch .update_lib
+
+.update_inc: .install_inc
+
+$(L):	$(LOBJFILES)
+	echo "*** Now updating all members ***"
+	ar ruv $(L) $?
+	$(RANLIB) $(L)
+	rm -f $?
+
+#	install the library: can be (re)done from scratch by removing .o files
+install:   .install_inc .install_lib 
+
+.install_lib: $(OBJFILES)
+	ar ruv $(L) $?
+	$(RANLIB) $(L)
+	@touch .install_lib
+
+.install_inc: $(INCFILES)
+	cp $? $(NEMOINC)
+	@touch .install_inc
+
+# Targets used by Nemo to update libraries and bins.
+
+all:
+
+nemo_lib: $(LIBFILE)
+
+
+nemo_sublibs:
+	-@for i in $(SUBDIRS); do \
+	(cd $$i; echo SUBSUBDIR $$i; $(MAKE) nemo_lib); done
+
+nemo_bin: nemo_subbins $(BINFILES)
+	mv $(BINFILES) $(NEMOBIN)
+	rm -f *.o
+
+nemo_subbins:
+	-@for i in $(SUBDIRS); do \
+	(cd $$i; echo SUBSUBDIR $$i; $(MAKE) nemo_bin); done
+
+nemo_src:
+	-@for i in $(SUBDIRS); do \
+	(cd $$i; $(MAKE) nemo_src); done
+	-@for i in $(BINFILES); do \
+	echo `pwd` $$i ; done 
+
+# Targets used to assemble object library.
+
+vectmath_d.o: vectmath.h vectmath.c
+	$(CC) $(CFLAGS) -USINGLEPREC -c vectmath.c
+	mv vectmath.o vectmath_d.o
+
+vectmath_f.o: vectmath.h vectmath.c
+	$(CC) $(CFLAGS) -DSINGLEPREC -c vectmath.c
+	mv vectmath.o vectmath_f.o
+
+# Nostandard targets
+
+nemoinp: nemoinp.c
+	$(CC) $(CFLAGS) -o nemoinp nemoinp.c -DTOOLBOX $(L) -lm
+
+tests: $(TESTFILES) 
+
+vecttest: vecttest.c vectmath.h vectmath.c
+	$(CC) $(CFLAGS) -o vecttest vecttest.c $(L)-lm
+
+xrandomtest: xrandom.c 
+	$(CC) $(CFLAGS) -o xrandomtest -DTESTBED xrandom.c $(L) -lm
+
+frandomtest: frandom.c 
+	$(CC) $(CFLAGS) -o frandomtest -DTESTBED frandom.c $(L) -lm
+			
+axistest: axis.c
+	$(CC) $(CFLAGS) -o axistest -DTESTBED axis.c $(L) -lm
+
+axistest_ps: axis.c
+	$(CC) $(CFLAGS) -o axistest_ps -DTESTBED axis.c $(L) -lm
+
+splinetest: spline.c
+	$(CC) $(CFLAGS) -o splinetest -DTESTBED spline.c $(L) -lm
+
+withintest: within.c
+	$(CC) $(CFLAGS) -o withintest -DTESTBED within.c $(L) -lm
+
+scanopttest: scanopt.c
+	$(CC) $(CFLAGS) -o scanopttest -DTESTBED scanopt.c $(L) -lm
+
+besseltest: besselfunc.c
+	$(CC) $(CFLAGS) -o besseltest -DTESTBED besselfunc.c $(L) -lm
+
