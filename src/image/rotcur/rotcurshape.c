@@ -47,7 +47,7 @@
 #define MAXPAR  5           /* number of parameters per model (can be made larger) */
 
 #define RING         10     /* maximum number of rings (17 arrays) */
-#define MAXPTS   100000     /* maximum number of pixels per ring (4 arrays) */
+#define MAXPTS   100000     /* maximum number of pixels per ring (9 arrays) - only for tabular info*/
 
 #define DEF_TOL   0.001     /* tolerance for fit */
 #define DEF_LAB   0.001     /* mixing parameter */
@@ -90,7 +90,7 @@ string defv[] = {
     "rotcur3=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur4=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur5=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
-    "VERSION=1.3\n   13-jun-04 PJT",
+    "VERSION=1.3a\n  13-jun-04 PJT",
     NULL,
 };
 
@@ -416,7 +416,10 @@ real rotcur_power(real r, int np, real *p, real *d)
 
 real rotcur_disk1(real r, int np, real *p, real *d)
 {
+  /* this #if 0 is needed for the 2.96 compiler on mdk81 :-) */
+#if 0
   error("disk1 not implemented yet");
+#endif
 }
 
 
@@ -426,10 +429,10 @@ nemo_main()
     int  ier;            /* error return code */
     int  ifit=0;         /* counter for number of succesful fits */
     int  n;		 /* number of points in a ring */
-    int  irng;   /* loop-counter */
+    int  irng;           /* loop-counter */
     stream lunpri;       /* file for table output */
     stream lunres;       /* file for residual output */
-    int  mask[PARAMS];/* mask to define the free(1) or fixed(0) parameters */
+    int  mask[PARAMS];   /* mask to define the free(1) or fixed(0) parameters */
     int  nring;  /* number of rings defined by users */
     int  side;   /* denotes which side of galaxy to be used */
     int  wpow;   /* denotes weigthing funtion to be used */
@@ -1099,11 +1102,6 @@ stream lunres;   /* file for residuals */
     int   nfr;                                   /* number of free parameters */
     int   h, k;                                              /* loop counters */
     int   nrt;                       /* error return code from subroutine FIT */
-    real  x[2*MAXPTS],y[MAXPTS],w[MAXPTS];/* arrays for coords, vels and wgts */
-    real  wb[MAXPTS];
-    int   idx[2*MAXPTS];
-    int   iblank[MAXPTS];
-    real  res[MAXPTS];                        /* array for y-x, the residuals */
     real  pf[PARAMS];               /* array for storing intermediate results */
     real  df[PARAMS];                 /* array which stores difference vector */
     real  b[PARAMS];                         /* array for partial derivatives */
@@ -1116,7 +1114,35 @@ stream lunres;   /* file for residuals */
     real  resmean, ressig, ratio;
     int   nblank;
     int   i, j, n;                            /* n=number of points in a ring */
-    static int first = 1;
+#if 0
+    real  x[2*MAXPTS],y[MAXPTS],w[MAXPTS];/* arrays for coords, vels and wgts */
+    real  wb[MAXPTS];
+    int   idx[2*MAXPTS];
+    int   iblank[MAXPTS];
+    real  res[MAXPTS];                        /* array for y-x, the residuals */
+#else
+    /* if MAXPTS too large, most OS won't allow this amount on stack/heap     */
+    /* so lets allocate() it                                                  */
+    static real  *x, *y, *w, *wb, *res;
+    static int   *idx, *iblank;
+    static int npts = 0;
+
+    if (npts==0) {
+      if (Qimage) 
+	npts = Nx(velptr)*Ny(velptr);
+      else
+	npts = MAXPTS;
+      dprintf(0,"rotfit: scratch arrays with npts=%d\n",npts);
+      x = (real *) allocate(2*npts*sizeof(real));
+      y = (real *) allocate(npts*sizeof(real));
+      w = (real *) allocate(npts*sizeof(real));
+      wb = (real *) allocate(npts*sizeof(real));
+      res = (real *) allocate(npts*sizeof(real));
+      idx = (int *) allocate(2*npts*sizeof(int));
+      iblank = (int *) allocate(npts*sizeof(int));
+    } 
+
+#endif
 
 #if 0
     /* Qrotcur */
@@ -1147,7 +1173,7 @@ stream lunres;   /* file for residuals */
     printf("  (nfr=%d)\n",nfr);
 #endif
 
-    getdat(x,y,w,idx,res,&n,MAXPTS,p,ri,ro,thf,wpow,&q,side,&full,nfr,0);
+    getdat(x,y,w,idx,res,&n,npts,p,ri,ro,thf,wpow,&q,side,&full,nfr,0);
     for (i=0;i<n;i++) iblank[i] = 1;  /* 1 means pixel is ok, 0 means flagged */
 
     h=0;                                          /* reset itegration counter */
@@ -1188,7 +1214,7 @@ stream lunres;   /* file for residuals */
             for(k=0; k<nparams; k++)       /* loop to calculate new parameters */
                pf[k]=flip*df[k]+p[k];                       /* new parameters */
             pf[4]=MIN(pf[4],180.0-pf[4]);         /* in case inclination > 90 */
-            getdat(x,y,w,idx,res,&n,MAXPTS,pf,ri,ro,thf,wpow,&q,side,&full,nfr,0);
+            getdat(x,y,w,idx,res,&n,npts,pf,ri,ro,thf,wpow,&q,side,&full,nfr,0);
 #if 0
 	    for (i=0;i<n;i++) iblank[i] = 1; 
 	    for (i=0;i<n;i++) w[i] *= iblank[i];            /* apply blanking */
@@ -1267,7 +1293,7 @@ stream lunres;   /* file for residuals */
       }
       if (Qfit) {
 	warning("One more fit iteration for full fit field map, old map=%d points",n);
-	getdat(x,y,w,idx,res,&n,MAXPTS,p,ri,ro,thf,wpow,&q,side,&full,nfr,1);
+	getdat(x,y,w,idx,res,&n,npts,p,ri,ro,thf,wpow,&q,side,&full,nfr,1);
 	warning("Found %d points",n);
       } else
 	warning("Old map Found %d points",n);
@@ -1528,10 +1554,17 @@ int   mode;          /* fit mode */
     if (Qimage) {                         /* Image input data */
       /* BUG:  need to fix this, there is a rounding problem near center */
       /*       although this is where rotcur isn't quite all that valid  */
-      llo=MAX(lmin,(int)(x0-a*ro/dx));        /* square around ellipse */
-      mlo=MAX(mmin,(int)(y0-b*ro/dy));
-      lhi=MIN(lmax,(int)(x0+a*ro/dx));
-      mhi=MIN(mmax,(int)(y0+b*ro/dy));
+      if (mode) {
+	llo = lmin;                             /* the whole map */
+	mlo = mmin;
+	lhi = lmax;
+	mhi = mmax;
+      } else {
+	llo=MAX(lmin,(int)(x0-a*ro/dx));        /* square around ellipse */
+	mlo=MAX(mmin,(int)(y0-b*ro/dy));
+	lhi=MIN(lmax,(int)(x0+a*ro/dx));
+	mhi=MIN(mmax,(int)(y0+b*ro/dy));
+      }
       if (llo > lhi || mlo > mhi) {
 	error("ring not inside map [%d %d %d %d]",llo,mlo,lhi,mhi);
 	*n = 0;                        /* continue here ??? */
@@ -1574,7 +1607,7 @@ int   mode;          /* fit mode */
 		theta=atan2(yr,xr)/F;
 	      costh=ABS(cos(F*theta));       /* calculate |cos(theta)| */
 	      dprintf(5,"@ %d,%d : r=%g cost=%g xr=%g yr=%g\n",l,m,r,costh,xr,yr);
-	      if (r>ri && r<ro && costh>free) {     /* point inside ring ? */
+	      if (mode || (r>ri && r<ro && costh>free)) {     /* point inside ring ? */
 		dprintf(5," ** adding this point\n");
 		if (denptr) 
 		  wi = MapValue(denptr,l,m);
