@@ -1,4 +1,4 @@
-Remaining MacOSX problems:
+Remaining MacOSX problems: (a special macosx.html web page dedicated to this)
   - configure leaves -lcrt.o etc. in, so they need manual removal
     from makedefs and NEMORC.gen before continuing on
 
@@ -9,21 +9,27 @@ Remaining MacOSX problems:
     release of hackcode1 with the multiple externs included by the
     linker
 
+  - xyzview is too slow to be useful, we should recode it such that
+    OpenGL (and thus Mesa) can be linked. This would also remove the
+    immediate need for vogl.
 
 -------------------------------------------------------------------------------
 
-
-for 3.2.0
+general things for 3.2.x
   - make sure cfitsio stuff is ok in configure
   - the change in get_atable() should mean routines need to work
     on buffered table read better
   - ccdmath WCS is broken
-
   - fix installation if no fortran is available
 	(fmath in potential not needed)
 	(some potential/data not needed)
   - intel linker problems (use different technique to force loading?)
   - get a mini-NEMO going (Dehnen, BIMA/CARMA)
+  - remove environment variables from NEMORC.local that are needed in Makefiles
+    and move them into makedefs
+
+  => a NEMO install for gyrfalcON, so we don't have to figure the funky NEMOHOST
+     in Walter's tree  (he is using make's MACHTYPE and OSTYPE internal variables)
 
 --------------------------------------------------------------------------------
 
@@ -35,14 +41,14 @@ some other help on configure:
 - add the self-exploding problem for treecodes (Salmon ...)
   into NEMODAT
 
-- clean code so it can write > 2GB datafiles
+- clean code so it can write > 2GB datafiles		[mostly done]
   Testing can be done with:
 	mkspiral s000 1000000 nmodel=40
   which creates a file just over the famous 2GB limits
   testing reading
 	tsf s000
 
-- install on solaris is broken:
+- install on solaris is broken:				[fixed w/ gcc, cc/f77 minor patch needed]
 
 	- FORLIBS needs the 
 	  -R /opt/SUNWspro/lib -L/opt/SUNWspro/lib -lF77 -lM77 -lV77 -lsunmath 
@@ -54,11 +60,6 @@ some other help on configure:
 - compile under cygwin
 
 - fix for pgplot  when libpng is needed, or tcl/tk for that matter....
-
-- fix for gcc3 where the libraries have changed. It's now a lot easier:
-	/opt/gcc/3.2.1/lib
-  vs.
-	/opt/gcc/2.95.3/lib/gcc-lib/i686-pc-linux-gnu/2.95.3/
 
 - if the code has to be C++ friendly, i.e. the nemo_main() be compiled
   by c++, but the rest with CC,  all extern's must be wrapped in
@@ -74,8 +75,14 @@ some other help on configure:
 
 - getparam:  an option to produce an iraf .par file?
 
-
 - many integrators use conflicting designations for tstop,freq,freqout
 
-
 - getparam:  finish the outkeys= stuff
+
+- fortran-to-C
+   some fortran compilers need -nofor_main to prevent main getting
+   linked in from the fortran library
+   
+   some linkers want to link with gcc, not g77 or vice versa? This
+   may require a configure macro in the makefiles
+
