@@ -6,9 +6,14 @@
 #	cvs co nemo
 #	cd nemo
 #	mkdir local; cd local; cvs co pgplot; cd ..
+# And an optional CFITSIO directory in a similar way:
+#       cd local; wget -q ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio2500.tar.gz
+#       tar zxf cfitsio2500.tar.gz
+#       cd ..
+#
 #       source AAA_SOURCE_ME
 #
-# to clean up the cloest approach is:
+# to clean up the closest approach is:
 #	make distclean          # cleans most of the things created
 #	omen                    # remove NEMO* and YAPP* things, cleans the path
 #
@@ -30,6 +35,7 @@
 # 17-jun-03  PJT                better path, rehash for immediate use
 # 15-oct-03  PJT                added gyfalcON
 # 23-mar-04  PJT                for NEMO 3.2 - no more NEMOHOST
+# 29-jul-04  PJT                make PGPLOT and CFITSIO optional bootstrappable
 
 rm -f install.log >& /dev/null
 touch install.log
@@ -37,25 +43,33 @@ touch install.log
 set stat = 0
 echo \(Sending output to install.log\)
 
+set copts=()
+
 if (-d local/pgplot) then
-    echo "Running configure, assuming we're using the local pgplot"
-    ./configure --with-yapp=pgplot --with-pgplot-prefix=`pwd`/lib >>& install.log
-    echo Initializing NEMO environment
-    source nemo_start >>& install.log
-    echo Postconfig
-    make postconfig >>& install.log
-    source NEMORC.local
+  echo "Assuming we're using the local pgplot"
+  set copts=($copts --with-yapp=pgplot --with-pgplot-prefix=`pwd`/lib)
+  set pgplot=1
+else 
+  set pgplot=0
+endif
+
+if (-e local/cfitsio) then
+  echo "Installing from the local cfitsio source"
+  set copts=($copts --enable-cfitsio --with-cfitsio-prefix=`pwd`)
+  if (! -e include) ln -s inc include
+  src/scripts/cfitsio.install >& install.cfitsio.log
+endif
+
+./configure $copts >>& install.log
+
+echo Initializing NEMO environment
+source nemo_start >>& install.log
+echo Postconfig
+make postconfig >>& install.log
+source NEMORC.local
+if ($pgplot) then
     echo Installing pgplot library
     make pgplot >>& install.log
-else
-    echo "Running configure with full autodetection (good luck)"
-    echo "    [hint: you may be better off by putting pgplot in NEMO/local/pgplot]"
-    ./configure >>& install.log
-    echo Initializing NEMO environment
-    source nemo_start >>& install.log
-    echo Postconfig
-    make postconfig >>& install.log
-    source NEMORC.local
 endif
 
 rehash
