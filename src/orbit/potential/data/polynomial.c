@@ -2,7 +2,7 @@
  * polynomial.c:  (spherical) polynomial potential
  *
  *	jul-2002b	created for N4313 (Apj 437,162)
- *
+ *      jan-2003        MAXN -> MAXPOW
  */
 
 /*CTEX
