@@ -33,6 +33,8 @@
  *	 7-aug-01  
  *      18-dec-01  V4.0  work with new fitsio_nemo.h
  *       6-may-02      b implemented dummy=f
+ *       6-jul-02   5.0  changed ref*= to crval/cdelt/crpix=
+ *      10-jul-02   5.1  better handling of long COMMENT fields
  *
  *  TODO:
  *      reference mapping has not been well tested, especially for 2D
@@ -58,12 +60,14 @@ string defv[] = {
 	"cdmatrix=f\n    Use standard CD matrix instead of CDELT?",
 	"blocking=1\n	 Blocking factor for output (blocksize/2880)",
 	"refmap=\n       reference map to inherit WCS from",
-	"refpix=\n       reference pixel, if different from default",
+	"crpix=\n        reference pixel, if different from default",
+	"crval=\n        reference value, if different from default",
+	"cdelt=\n        pixel value increment, if different from default",
 	"radecvel=f\n    Enforce reasonable RA/DEC/VEL axis descriptor",
 	"dummy=t\n       Write dummy axes also ?",
 	"nfill=0\n	 Add some dummy comment cards to test fitsio",
 	"ndim=\n         Testing if only that many dimensions need to be written",
-        "VERSION=4.0b\n  6-may-02 PJT",
+        "VERSION=5.0\n   6-jul-02 PJT",
         NULL,
 };
 
@@ -75,9 +79,9 @@ imageptr iptr=NULL;                     /* image, allocated dynamically */
 
 double scale[3];        /* scale conversion for FITS (CDELT) */
 double iscale[2];	/* intensity rescale */
-char *object;           /* name of object in FITS header */
-char *comment;          /* extra comments */
-char *headline;         /* optional NEMO headline, added as COMMENT */
+string object;           /* name of object in FITS header */
+string comment;          /* extra comments */
+string headline;         /* optional NEMO headline, added as COMMENT */
 bool Qcdmatrix;         /* writing out new-style cdmatrix ? */
 bool Qradecvel;         /* fake astronomy WCS header */
 bool Qrefmap;
@@ -85,11 +89,11 @@ bool Qdummy;            /* write dummy axes ? */
 
 int   nref = 0, nfill = 0;
 FLOAT ref_crval[3], ref_crpix[3], ref_cdelt[3];
-char  ref_ctype[3][80];
+char  ref_ctype[3][80], ref_cunit[3][80];
 
 void setparams(void);
 void write_fits(string,imageptr);
-void stuffit(FITS *, char *);
+void stuffit(FITS *, string, string);
 void set_refmap(string);
 void permute(int *x ,int *idx, int n);
 
@@ -134,10 +138,20 @@ void setparams(void)
   Qrefmap = hasvalue("refmap");
   if (Qrefmap) {
     set_refmap(getparam("refmap"));
-    if (hasvalue("refpix")) {
-      nref =  nemoinpr(getparam("refpix"),tmpr,3);
+    if (hasvalue("crpix")) {
+      nref =  nemoinpr(getparam("crpix"),tmpr,3);
       for (i=0; i<nref; i++)
 	ref_crpix[i] = tmpr[i];
+    }
+    if (hasvalue("crval")) {
+      nref =  nemoinpr(getparam("crval"),tmpr,3);
+      for (i=0; i<nref; i++)
+	ref_crval[i] = tmpr[i];
+    }
+    if (hasvalue("cdelt")) {
+      nref =  nemoinpr(getparam("cdelt"),tmpr,3);
+      for (i=0; i<nref; i++)
+	ref_cdelt[i] = tmpr[i];
     }
   }
   Qdummy = getbparam("dummy");
@@ -276,29 +290,27 @@ void write_fits(string name,imageptr iptr)
     fitwrhda(fitsfile,"ORIGIN","NEMO");
 
     cp = getenv("USER");                                /* AUTHOR */
-    if (cp && *cp)
+    if (cp)
         fitwrhda(fitsfile,"AUTHOR",cp);
     else
         fitwrhda(fitsfile,"AUTHOR","NEMO");
 
-    if (*object)                                        /* OBJECT */
+    if (object)                                        /* OBJECT */
         fitwrhda(fitsfile,"OBJECT",object);
 
-    if (*comment)                                       /* COMMENT */
-        fitwra(fitsfile,"COMMENT",comment);
-#if 1
-    if (headline && *headline)
-        fitwra(fitsfile,"COMMENT",headline);
-#endif
+    if (comment)                                       /* COMMENT */
+        stuffit(fitsfile,"COMMENT",comment);
+    if (headline)
+        stuffit(fitsfile,"COMMENT",headline);
 
     hitem = ask_history();                              /* HISTORY */
     fitwra(fitsfile,"HISTORY","NEMO: History in reversed order");
     for (i=0, cp=hitem[0]; cp != NULL; i++) {
-    	stuffit(fitsfile,cp);
+    	stuffit(fitsfile,"HISTORY",cp);
         cp = hitem[i+1];
     }
 
-    for(i=0; i<nfill; i++)
+    for(i=0; i<nfill; i++)   /* debugging header I/O */
         fitwra(fitsfile,"COMMENT","Dummy filler space");
 
     buffer = (float *) allocate(nx[p[0]]*sizeof(float));
@@ -317,8 +329,9 @@ void write_fits(string name,imageptr iptr)
 
 
 /*
- * stuff a character string accross the 80-line boundary
- * NOTE: the exact implementation of this routines is still controversial
+
+ stuff a character string accross the 80-line boundary
+ NOTE: the exact implementation of this routines is still controversial
 
  From: pence@tetra.gsfc.nasa.gov Sat May 15, 1993 10:37 "Continuation Keywords"
 
@@ -333,55 +346,66 @@ void write_fits(string name,imageptr iptr)
          'continues over several lines\'
                  ' of the FITS header.'
 
- *
  */
                  
-void stuffit(FITS *fitsfile, char *cp)
+void stuffit(FITS *fitsfile, string fkey, string cp)
 {
-    char line[81], *hp;
-    int i;
-    int maxlen = 69;	/* could be 71 if you want to fill the whole card */
-			/* but for the sake of CR-LDF patchers we do 69 */
-
-    hp = cp;
+  char line[81], *hp;
+  int i;
+  int maxlen = 70;	/* comment field , minus 1 */
+  
+  hp = cp;
+  strncpy(line,hp,maxlen);
+  line[maxlen] = 0;
+  fitwra(fitsfile,fkey,line);
+  while ((int)strlen(hp) > maxlen) {
+    hp += maxlen;
     strncpy(line,hp,maxlen);
     line[maxlen] = 0;
-    fitwra(fitsfile,"HISTORY",line);
-    while ((int)strlen(hp) > maxlen) {
-        hp += maxlen;
-        strncpy(line,hp,maxlen);
-        line[maxlen] = 0;
-        fitwra(fitsfile," ",line);
-    }
+    fitwra(fitsfile," ",line);
+  }
 }
+
+/* refmap stuff */
 
 void set_refmap(string name)
 {
   FITS *fitsfile;
-  FLOAT tmpr, one = 1.0;
+  FLOAT tmpr, defval;
   int ndim = 3;
   int naxis[3], tmpi;
-
+  int wcsaxes = -1;
 
   fitsfile = fitopen(name,"old",ndim,naxis);
-  dprintf(0,"[Reading reference map %s [%d,%d,%d]\n",
-	  name,naxis[0],naxis[1],naxis[2]);
+  dprintf(0,"[Reading reference map %s [%d,%d,%d]\n",name,naxis[0],naxis[1],naxis[2]);
 
-  fitrdhdr(fitsfile,"CDELT1",&ref_cdelt[0], one);
-  fitrdhdr(fitsfile,"CDELT2",&ref_cdelt[1], one);
-  fitrdhdr(fitsfile,"CDELT3",&ref_cdelt[2], one);
+  /* set defaults according to Greisen & Calabretta 2002 WCS paper-I */
+  defval = 1.0;
+  fitrdhdr(fitsfile,"CDELT1",&ref_cdelt[0], defval);
+  fitrdhdr(fitsfile,"CDELT2",&ref_cdelt[1], defval);
+  fitrdhdr(fitsfile,"CDELT3",&ref_cdelt[2], defval);
+  /* ieck; what if no CDELT's present, but all in CD matrix */
 
-  fitrdhdr(fitsfile,"CRPIX1",&ref_crpix[0], one);
-  fitrdhdr(fitsfile,"CRPIX2",&ref_crpix[1], one);
-  fitrdhdr(fitsfile,"CRPIX3",&ref_crpix[2], one);
+  defval = 0.0;
+  fitrdhdr(fitsfile,"CRPIX1",&ref_crpix[0], defval);
+  fitrdhdr(fitsfile,"CRPIX2",&ref_crpix[1], defval);
+  fitrdhdr(fitsfile,"CRPIX3",&ref_crpix[2], defval);
 
-  fitrdhdr(fitsfile,"CRVAL1",&ref_crval[0], one);
-  fitrdhdr(fitsfile,"CRVAL2",&ref_crval[1], one);
-  fitrdhdr(fitsfile,"CRVAL3",&ref_crval[2], one);
+  defval = 0.0;
+  fitrdhdr(fitsfile,"CRVAL1",&ref_crval[0], defval);
+  fitrdhdr(fitsfile,"CRVAL2",&ref_crval[1], defval);
+  fitrdhdr(fitsfile,"CRVAL3",&ref_crval[2], defval);
 
   fitrdhda(fitsfile,"CTYPE1",ref_ctype[0],"");
   fitrdhda(fitsfile,"CTYPE2",ref_ctype[1],"");
   fitrdhda(fitsfile,"CTYPE3",ref_ctype[2],"");
+
+  fitrdhda(fitsfile,"CUNIT1",ref_cunit[0],"");
+  fitrdhda(fitsfile,"CUNIT2",ref_cunit[1],"");
+  fitrdhda(fitsfile,"CUNUT3",ref_cunit[2],"");
+
+  fitrdhdi(fitsfile,"WCSAXES",&wcsaxes, -1);
+  if (wcsaxes != -1) warning("WCSAXES = %d\n",wcsaxes);
 
   fitclose(fitsfile);
 
