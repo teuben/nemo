@@ -6,6 +6,7 @@
  *   5-apr-01	 2.2 : added format=					    pjt
  *   8-apr-01       a: fixed SINGLEPREC operation
  *   9-sep-01    3.0   GSL enabled
+ *  23-sep-01       a  ->nemo_file_lines
  *
  *   TODO:
  *      - spline vs. linear
@@ -61,7 +62,7 @@ nemo_main()
     if (nzero > MAXZERO)
         error("MAXZERO=%d: Too many zero's to search for",MAXZERO);
 
-    nmax = file_lines(getparam("in"),MAXLINES);
+    nmax = nemo_file_lines(getparam("in"),MAXLINES);
     xdat = coldat[0] = (real *) allocate(nmax*sizeof(real));
     ydat = coldat[1] = (real *) allocate(nmax*sizeof(real));
     colnr[0] = getiparam("xcol");

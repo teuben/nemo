@@ -28,6 +28,7 @@
  *                         other coordinate
  *	28-jul-99  V2.2  : add color=
  *      21-jul-00  V2.3  : allow autoscaling on half (min OR max) an axis
+ *      23-sep-01      a : ->nemo_file_lines
  *
  */
 
@@ -150,7 +151,7 @@ void setparams()
     nycol = nemoinpi(getparam("ycol"),ycol,MAXYCOL);
     if (nycol < 1) error("Error parsing ycol=%s",getparam("ycol"));
 
-    nmax = file_lines(input,getiparam("nmax"));
+    nmax = nemo_file_lines(input,getiparam("nmax"));
     dprintf(0,"Allocated %d lines for table\n",nmax);
     x = (real *) allocate(sizeof(real) * (nmax+1));          /* X data */
     for (j=0; j<nycol; j++)

@@ -17,6 +17,7 @@
  *          5-mar-94    use MAXLINES from header
  *     	    4-sep-97    1.1  added linear, made it default (spline has bug) PJT
  *         20-jun-01	gcc 3
+ *	   23-sep-01    nemo_file_line
  */
 
 
@@ -26,7 +27,7 @@
 #include <funtab.h>
 #include <spline.h>
 
-extern int file_lines(string, int);
+extern int nemo_file_lines(string, int);
 extern int get_atable(stream, int, int*, real **, int);
 
 FunctionTable *ft_open(string fname, int mode, int xcol, int ycol)
@@ -40,7 +41,7 @@ FunctionTable *ft_open(string fname, int mode, int xcol, int ycol)
     ftp->name = scopy(fname);
     ftp->mode  = mode;
     
-    n = file_lines(fname,MAXLINES);  /* initial guess for number of points */
+    n = nemo_file_lines(fname,MAXLINES);  /* initial guess for number of points */
     if (n < 1) {
         warning("ft_open: No data can be read from %s",fname);
         return NULL;

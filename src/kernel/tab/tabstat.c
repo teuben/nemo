@@ -25,7 +25,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "median=t\n          Compute median too? (can be time consuming)",
     "method=0\n          Method to remove outliers (0=fast 1=slow)",
     "nmax=10000\n        maximum number of data to be read if pipe",
-    "VERSION=1.1\n	 6-jun-01 PJT",
+    "VERSION=1.1a\n	 23-sep-01 PJT",
     NULL
 };
 

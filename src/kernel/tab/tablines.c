@@ -16,7 +16,7 @@ string defv[] = {
         "select=all\n           lines to select",
 	"comment=t\n		count comment lines too?",
         "nmax=10000\n           Default max allocation",
-	"VERSION=1.1\n		14-oct-99 PJT",
+	"VERSION=1.1a\n		23-sep-01 PJT",
 	NULL,
 };
 
@@ -39,7 +39,7 @@ nemo_main()
     string iname = getparam("in");
 
     if (Qsel) {
-        nmax = file_lines(iname,getiparam("nmax"));
+        nmax = nemo_file_lines(iname,getiparam("nmax"));
         if (nmax<0) error("Error opening %s",iname);
         if (nmax==0) error("No data in %s?",iname);
         dprintf(1,"NMAX=%d\n",nmax);

@@ -31,6 +31,7 @@
  *	15-feb-99   3.1:  median can be turned off now		pjt
  *	22-dec-99   3.1a: fix reporting bug when 1 point read	pjt
  *       3-jun-01   3.2 : added nsigma=                         pjt
+ *	23-sep-01      b: ->nemo_file_lines
  * 
  * TODO:
  *     option to do dual-pass to subtract the mean before computing
@@ -66,7 +67,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "cumul=f\n                    Override and do cumulative histogram instead",
     "median=t\n			  Compute median too (can be time consuming)",
     "nsigma=-1\n                  delete points more than nsigma",
-    "VERSION=3.2a\n		  7-jun-01 PJT",
+    "VERSION=3.2b\n		  23-sep-01 PJT",
     NULL
 };
 
@@ -158,7 +159,7 @@ local void setparams()
     Qmedian = getbparam("median");
     if (ylog && streq(ylab,"N")) ylab = scopy("log(N)");
 
-    nmax = file_lines(input,getiparam("nmax"));
+    nmax = nemo_file_lines(input,getiparam("nmax"));
     if (nmax<1) error("Problem reading from %s",input);
     x = (real *) allocate(sizeof(real)*(nmax+1));
 

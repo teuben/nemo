@@ -29,6 +29,7 @@
  *	25-mar-97	b   SINGLEPREC fix				pjt
  *       7-jul-98       c   fixed bug skipping blocks                   pjt
  *      19-aug-00       d   fixed TABs correctly                        pjt
+ *	23-sep-01       e   ->nemo_file_lines
  */
 
 #include <stdinc.h>
@@ -59,7 +60,7 @@ string defv[] = {
     "options=\n    Other processing options (scan|comment|wrap|spill)",
     "nskip=0\n     Number of lines skipped before each (header+block1+...)",
     "headline=\n   Random mumblage for humans",
-    "VERSION=1.3d\n 19-aug-00 PJT",
+    "VERSION=1.3e\n 23-sep-01 PJT",
     NULL,
 };
 
@@ -434,7 +435,7 @@ local int get_nbody(void)
 {
     if (hasvalue("header"))
         error("Need value for nbody=, or specify it in header=");
-    nbody = file_lines(getparam("in"));
+    nbody = nemo_file_lines(getparam("in"));
     if (nbody <= 0) 
         error("Cannot determine nbody, try nbody= or header=");
     if (nblocks == 0) 

@@ -15,7 +15,7 @@ string defv[] = {
     "col1=1\n           Column from 1st dataset",
     "col2=1\n           Column from 2nd dataset",
     "nmax=10000\n       Max lines in data, if pipe",
-    "VERSION=0.3a\n	23-mar-01 PJT",
+    "VERSION=0.3b\n	23-sep-01 PJT",
     NULL,
 };
 
@@ -62,9 +62,9 @@ nemo_main()
         instr2 = NULL;
     }
 
-    npt1 = file_lines(input1,nmax);
+    npt1 = nemo_file_lines(input1,nmax);
     if (instr2)
-      npt2 = file_lines(input2,nmax);
+      npt2 = nemo_file_lines(input2,nmax);
     else
       npt2 = npt1;
     x1 = (real *) allocate(npt1 * sizeof(real));
