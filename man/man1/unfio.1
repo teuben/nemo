@@ -1,0 +1,63 @@
+.TH UNFIO 1NEMO "19 March 1999"
+.SH NAME
+unfio \- access fortran unformatted I/O files
+.SH SYNOPSIS
+\fBunfio\fP \fBin=\fP\fIinput_file\fP [parameter=value]
+.SH DESCRIPTION
+\fBunfio\fP scans (and optionally dumps) a binary file, created with a 
+FORTRAN program with the \fIform='unformatted'\fP OPEN statement.
+.PP
+It is currently only implemented for BSD-type fortran compilers with
+arbitrary endianism of the bytes (i.e. probably excluding 
+VMS and Cray compilers).
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+input file. No default.
+.TP
+\fBout=\fP
+output file. Fortran headers and trailers have been stripped off.
+Default: no output.
+.TP
+\fBblock=\fP
+which block to display (0=all, default: scan). By default it will scan
+the file and report the blocksize.
+.TP
+\fBtype=\fP
+Format (valid are: {int, float, double}) of the data-item. This
+assumes all data in a block has the same type.
+.TP
+\fBselect=\fP
+Which items to select in a block. The default is all. Any 
+\fInemoinp(3NEMO)\fP  expression can be given.
+Default: all.
+.TP
+\fBformat=\fP
+The \fIprintf(3)\fP format to use when displaying a block display [%d,%g].
+.TP
+\fBcount=t|f\fP
+A logical denoting if to display an element counter too?.
+.TP
+\fBmaxbuf=\fP
+buffersize in bytes, to read a block.
+.TP 20
+\fBswap=\fP
+Swap bytes after low level read? This only applies to the header, not to
+the actual data. Programmers must still do this themselves. If using a
+specific block to display, the data bytes are swapped based on the
+data type given by \fBtype=\fP.
+.SH EXAMPLES
+.SH SEE ALSO
+bswap(1NEMO), unfio(3NEMO), bswap(3NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+9-Aug-95	V1.1 Documented 	PJT
+21-jun-97	V1.2 added select=	PJT
+7-feb-98	V2.0 added out=    	PJT
+19-mar-99	V2.1 out= also uses select= now 	PJT
+.fi
