@@ -1,0 +1,55 @@
+.TH CCDDUMP 1NEMO "9 December 1989" 
+.SH NAME
+ccddump \- dump contents of an image
+.SH SYNOPSIS
+.PP
+\fBccddump in=\fPimage  \fBou=\fPdump [parameter = value ...]
+.SH DESCRIPTION
+\fBccddump\fP dumps the contents of an image file on a user selected
+format. A number of formats are available, and costumization is
+easy.
+.PP
+\fBccddump\fP was used for a local test, but may find useful applications,
+and was as such kept in the distribution set.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 20
+\fBin=\fIimage-file\fP
+input file name, in \fIimage(5NEMO)\fP format. 
+[no default].
+.TP
+\fBout=\fIdump-file\fP
+output file, will be in one of the selected dump formats (se below)
+[no default]
+.TP
+\fBoption=\fIoption-string\fP
+Dump option. Currently available are \fBfloat\fP and \fBbyte\fP.
+Both dumps are straight dumps in the local system format.
+[default: \fBfloat\fP].
+.TP
+\fBrange=\fIlow:high\fP
+Range of input map used in output map. This option is only active
+when the output format is some fixed length integer type.
+When \fBoption\fP is left blank, autoscaling is used.
+[default: blank]
+.TP
+\fBmode=\fImode-string\fP
+Output mode, rows first or columns first. [default: row]
+.TP
+\fBswap=\fIbool\fP
+Swap the bytes? [default: \fBtrue\fP].
+.SH "SEE ALSO"
+ccdfits(1NEMO), ccdprint(1NEMO), image(5NEMO), tsf(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+~/src/pjt/image  	ccddump.c ccddump.1
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+30-Jul-89	V1.0: Created	PJT
+.fi
