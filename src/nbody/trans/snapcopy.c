@@ -28,7 +28,7 @@ string defv[] = {
     "times=all\n        Times to select",
     "precision=double\n Precision of results to store (double/single) [unused]",
     "keep=all\n         Items to copy in snapshot",
-    "VERSION=1.1d\n     1-apr-01 PJT",
+    "VERSION=1.1e\n     25-nov-02 PJT",
     NULL,
 };
 
@@ -51,6 +51,10 @@ nemo_main()
     instr = stropen(getparam("in"), "r");
     outstr = stropen(getparam("out"), "w");
     precision = getparam("precision");	/* unused */
+    if (!strcmp(precision,"double")) {
+        warning("Precision %s not supported yet, use csf convert=d2f/f2d",
+            precision);
+    }
     keep = getparam("keep");
     bitso = 0;
     if (scanopt(keep,"all")) {
