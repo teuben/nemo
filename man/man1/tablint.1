@@ -1,0 +1,77 @@
+.TH TABLINT 1NEMO "13 January 1995"
+.SH NAME
+tablint \- \fIprototype\fP table syntax checker
+.SH SYNOPSIS
+\fBtablint\fP in= lint= [parameter=value]
+.SH DESCRIPTION
+\fItablint\fP checks tables and can optionally apply selections and output
+this in the same format.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+input file name     
+.TP 20
+\fBlint=\fP\fIlint_form\fP
+lint specification      
+.TP
+\fBout=\fP
+For those rows that pass the criteria specified in \fIlint_form\fP
+.SH LINT FORMAT
+The \fIlint_form\fP is a simple ASCII file that describes the table
+is some uniform way. You can also apply checks on any column, set
+validity intervals, and use it to output a new table with these
+selections applied. Here is an example
+.nf
+# this is an example 'lint' specification for tablint
+#
+\fBmaxcol\fP 10
+
+\fBcol\fP 1 {
+    \fBname\fP id		# name of a column (optional)
+    \fBtype\fP int
+    \fBrange\fP -10:10 
+    \fBblank\fP -999		# although outside range, this signifies BLANK ???
+}
+
+col 2 {
+    name town
+    type char
+    length 1:10		# a string 1-10 characters in length
+}
+
+col 3 {
+    name zipcode
+    type char
+    length 2		# all strings must be 2 chars length
+    match DC|MD|VA	# example of exclusive OR-ed
+}
+
+col 4 {
+    name any
+    type char
+}
+
+col 5 {
+    name bad		
+    type float		# example of a non-existent type
+    john doe		# example of a non-existent 
+}
+
+col 6 {
+    name good
+    type real
+    range 0:		# example of a half-infinite range interval
+}
+
+.fi
+.SH SEE ALSO
+tabmath(1NEMO), table(5NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+13-Jan-95	V0.1 Prototype created  	PJT
+.fi
