@@ -51,7 +51,7 @@ string defv[] = {
     "bootstrap=0\n      Bootstrapping to estimate errors",
     "seed=0\n           Random seed initializer",
     "numrec=f\n         Try the numrec routine instead?",
-    "VERSION=1.7\n      21-mar-03 PJT",
+    "VERSION=1.7a\n     23-mar-03 PJT",
     NULL
 };
 
@@ -551,9 +551,14 @@ int remove_data(real *x, int nx, real *y, real *dy, real *d, int npt, real nsigm
 
 /*
  *  random_permute:  make a new random permutation
+ *
+ *  pick two random slots, and exchange them. repeat this N times
+ *  
  */
 
-random_permute(int n, int *idx) 
+#define random_permute random_permute1
+
+random_permute1(int n, int *idx) 
 {
   int i, j, k, tmp;
   double xn = n;
@@ -561,10 +566,46 @@ random_permute(int n, int *idx)
   for (i=0; i<n; i++) {
     j = (int) xrandom(0.0,xn);
     k = (int) xrandom(0.0,xn);
+    if (j < 0 || j >= n) error("Error random_permute: %d %d",i,j);
     tmp = idx[j];
     idx[j] = idx[k];
     idx[k] = tmp;
   }
+}
+
+/*
+ * iter:
+ *   0     pick between 1...n-1 to permute  (n-1)
+ *   1     pick between 2...n-1 to permute  (n-2)
+ *
+ *  n-3    pick between n-2..n-1 to permute (2)
+
+# exp   nboot    mean    sigma
+100     1000     3.08964 0.0035
+1000    1000         962     30
+                     987
+1000    1000
+         100         976    100
+                     
+
+*/
+
+random_permute2(int n, int *idx) 
+{
+  int i, j, k, tmp;
+  double xn = n;
+
+  for (i=0; i<n-2; i++) {
+    j = (int) xrandom(i+1.0,n+0.0);
+    if (j <= i || j >= n) error("Error random_permute: %d %d",i,j);
+    dprintf(1,"permuting (%d,%d)\n",i,j);
+    tmp = idx[j];
+    idx[j] = idx[i];
+    idx[i] = tmp;
+  }
+  for (i=0; i<n; i++)
+    dprintf(1,"%d ",idx[i]);
+  dprintf(1,"\n");
 }
 
 /* 
