@@ -25,7 +25,7 @@ string defv[] = {               /* DEFAULT INPUT PARAMETERS */
     "exactpot=false\n		if true, compute O(N^2) PE",
     "eps=0.05\n			using this softening",
     "formal=false\n		publication-style plot",
-    "VERSION=1.4c\n		16-feb-97 PJT",
+    "VERSION=1.4d\n		15-jul-04 PJT",
     NULL,
 };
 
@@ -72,6 +72,7 @@ local real Erange[2]  = { -1.00, 1.00 };
 
 real ttrans(real), drtrans(real), Etrans(real), dEtrans(real);
 
+
 #define NXTICK  5			/* ### changed from 7  24/9/87 */
 #define NYTICK  3
 
@@ -95,12 +96,35 @@ setparams()
     formal = getbparam("formal");
 }
 
+
+real poten(phsp, mass, nobj)
+real phsp[][2][NDIM];
+real mass[];
+int nobj;
+{
+    int i, j;
+    real epssq, petot, *posi, pei, dpos[NDIM], dpossq;
+
+    epssq = eps * eps;
+    petot = 0.0;
+    for (i = 1; i < nobj; i++) {
+	posi = phsp[i][0];
+	pei = 0.0;
+	for (j = 0; j < i; j++) {
+	    SUBV(dpos, posi, phsp[j][0]);
+	    DOTVP(dpossq, dpos, dpos);
+	    pei = pei - mass[j] / sqrt(dpossq + epssq);
+	}
+	petot += mass[i] * pei;
+    }
+    return (petot);
+}
+
 readinput(stream instr)
 {
     int nobj;
     real etot[3], cmphase[2][3];
-    real *mptr, *pptr, poten();
-    bool within();
+    real *mptr, *pptr;
 
     mptr = NULL;
     while (get_tag_ok(instr, SnapShotTag)) {
@@ -142,28 +166,6 @@ readinput(stream instr)
     printf("%d diagnostic frames read\n", ndiagfr);
 }
 
-real poten(phsp, mass, nobj)
-real phsp[][2][NDIM];
-real mass[];
-int nobj;
-{
-    int i, j;
-    real epssq, petot, *posi, pei, dpos[NDIM], dpossq;
-
-    epssq = eps * eps;
-    petot = 0.0;
-    for (i = 1; i < nobj; i++) {
-	posi = phsp[i][0];
-	pei = 0.0;
-	for (j = 0; j < i; j++) {
-	    SUBV(dpos, posi, phsp[j][0]);
-	    DOTVP(dpossq, dpos, dpos);
-	    pei = pei - mass[j] / sqrt(dpossq + epssq);
-	}
-	petot += mass[i] * pei;
-    }
-    return (petot);
-}
 
 diagplot()
 {
