@@ -295,8 +295,8 @@ typedef struct keyword_out {  /* a simple keyword, only meant for outkeys=   */
    local string progname=NULL;          /* is really pointer to keys[0].val   */
    local int nkeys, maxkeys;
    local keyword *keys = NULL;          /* point to array of program keywords */
-   local int getparam_argc = 0;		/* count commmand line args */
-   local int dd_argc = 0;               /* location (if >0) of -- on cmdline  */
+   local int getparam_argc = 0;		/* count commmand line args           */
+   local int dd_argc = 0;      /* number of arguments after and including  -- */
    local string *dd_argv = NULL;        /* starts at "--" if present          */
 
 /* global variables - must be visible to the outside world */
