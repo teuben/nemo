@@ -1,0 +1,30 @@
+#! /bin/csh -f
+#
+#  make sure this is executed from the $NEMO directory
+#
+
+set cc=""
+set f77=""
+
+foreach arg ($*)
+  set $arg
+end
+
+if (! -e nemo_start) then
+   exit 1
+endif
+
+if ($cc  != x$cc) setenv CC $cc
+if ($f77 != x$f77) setenv F77 $f77
+
+./configure --with-yapp=ps
+source nemo_end
+source nemo_start
+make dirs config_extra scripts
+source NEMORC.local
+rehash
+make libs
+src/scripts/testsuite -b
+
+
+
