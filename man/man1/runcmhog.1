@@ -1,8 +1,8 @@
-.TH RUNCMHOG 1NEMO "14 May 2003"
+.TH RUNCMHOG 1NEMO "21 July 2003"
 .SH NAME
 runcmhog \- preprocess a CMHOG namelist and run program in a new directory
 .SH SYNOPSIS
-\fBruncmhog\fP \fI[-options]\fP \fIrun_directory\fP \fI[[namelist:][key=val]]\fP
+\fBruncmhog\fP \fI[-options]\fP \fIrun_directory\fP \fI[[namelist/][key=val]]\fP
 .SH DESCRIPTION
 \fBruncmhog\fP is a preprocessor to run (a series of) CMHOG programs.
 It expects the 'cmhogin' input file to be present in the local
@@ -31,13 +31,13 @@ be consulted, for relative references remember this will be run
 from within the run_directory.
 Default: \fBcmhog\fP.
 .SH CAVEAT
-There is no provision for the same key in multiple namelists yet
-The solution would be to precede the keyword with "name/"
-.PP
 Cannot add new keywords, they must already have an entry in the
 \fIcmhogin\fP template file.
 .PP
-the directory name cannot contain an equals sign
+since run-directories are created, entries like "pgrid/pot0" contain
+file references that thus have to be properly relative, or absolute.
+.PP
+a directory name cannot contain an equals sign
 .SH EXAMPLE
 Here is a shell script running a series of models from a template \fIcmhogin\fP
 in the current directory.
@@ -47,6 +47,7 @@ in the current directory.
     runcmhog run003 aob=2.0
     runcmhog run004 aob=3.0 qm=5.5e4
     runcmhog run005 aob=3.0 qm=3.5e4
+    runcmhog run101 ggen2/nbl=200
 .fi
 .SH SEE ALSO
 hdfgrid(1NEMO), sdsfits(1NEMO)
@@ -64,4 +65,5 @@ Peter Teuben
 19-feb-97	implemented -e and -n flags	PJT
 29-jun-02	documented some more flags	PJT
 14-may-03	rundir can be in a hierarchy now	PJT
+21-jul-03	fix documentation bug about namelist specification	PJT
 .fi
