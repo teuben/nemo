@@ -1,0 +1,112 @@
+.TH TABLSQFIT 1NEMO "14 August 2000"
+.SH NAME
+tablsqfit \- general purpose least squares fitting program
+.SH SYNOPSIS
+.PP
+\fBtablsqfit in=\fPtable-file [parameter=value]
+.SH DESCRIPTION
+\fBtablsqfit\fP takes a least squares fit (minimized ChiSquared)
+of a set of datapoints (x(i),y(i)) where a functional
+form y=f(x;a1,a2,...,an) is assumed. The functional form to be
+fitted has to be specified by name at this stage. A number of
+options are possible.
+.PP
+The inputfile is an ascii file in a tabular format, where on every line
+there must be an assigned column for the X- and Y-coordinates. An optional
+column can be assigned to the errors in Y (the DY-coordinates). If no
+DY-column is assigned, it is assumed that the errors in Y are all the
+same and equal to 1. Lines starting with the '#' symbol are comment 
+lines. Certain models (see \fBfit=\fP below) allow multiple X or Y
+columns. For \fBfit=line\fP a proper goodness-of-fit is also 
+computed in a second fit an error column (\fBdycol=\fP) is given.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 20
+\fBin=\fIin-file\fP
+(ascii) input file, a table of values from which data is taken. No default.
+.TP
+\fBxcol=\fIcol,...\fP
+The column(s) from which the X-values are taken. The first column
+is called 1 by definition [default: \fB1\fP].
+.TP
+\fBycol=\fIcol,...\fP
+The column(s) from which the Y-values are taken [default: \fB2\fP].
+.TP
+\fBdycol=\fIint\fP
+Optional column from which the DY-values (errors in Y) are taken. 
+[default: none assigned].
+.TP
+\fBxrange=\fIxmin:xmax\fP
+Range in X-values for which the fit is done. If only one number is
+given, the other one is considered zero.
+[default: no entry, i.e. all].
+.TP
+\fBfit=\fP\fImodel\fP
+Model name what to fit. Currently implemented are \fIline\fP, \fIplane\fP,
+\fIpoly\fP, \fIellipse\fP, \fIpeak\fP, and \fIimageshift\fP
+[default: \fBline\fP].
+.TP
+\fBorder=\fP\fIorder\fP
+Highest order of the polynomial fit (\fBfit=poly\fP) or 
+dimension of the hyper-plane fit (\fBfit=plane\fP). 0 would fit
+a constant. 0 and 1 would have the same meaning in both the
+\fBplane\fP and \fBpoly\fP cases [Default: \fB0\fP].
+.TP
+\fPout=\fIfilename\fP
+Optional output filename (only active under certain options)
+where the data and residuals are stored.
+Column 1, 2 and 3 will contain the X, Y and residuals F(X)-Y
+respectively. A future
+release will also store the errors (if it was given, see 
+keyword \fBdycol\fP above) in the 4th column.
+[default: empty, no output file created].
+.TP
+\fPnsigma=\fIsigma_factor\fP
+A positive number will delete points more than \fIsigma_factor\fP from the fit,
+and fit again. [Default: \fB-1\fP].
+.TP
+\fBestimate=\fP
+Optional estimate for parameters of non-linear fits
+.TP
+\fBnmax=\fP\fImax_lines\fP
+Maximum number of lines allocated if the input file was being read
+from a pipe. If not, the routine \fIfile_lines(3NEMO)\fP is used
+to allocate space for the table.
+[Default: \fB10000\fP].
+.TP
+\fBtab=t|f\fP
+Output results in simple tabular format.
+Default: false.
+.SH EXAMPLE
+Here is an example of creating an on-the-fly table with a straight
+line, with some added noise and random weights between 1 and 2:
+.nf
+nemoinp 1:100 | tabmath - - "%1+rang(0,10),ranu(1,2)" | tablsqfit -
+.fi
+.SH SEE ALSO
+tabhist(1NEMO), tabmath(1NEMO), gaussfit(1NEMO), 
+\fINumerical Recipies in C, Ch.14\fP
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+~/src/kernel/tab	tablsqfit.c
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+ 5-Aug-87	V1.0 created                     	PJT
+18-May-88	V1.4 various new options        	PJT
+31-May-88	V2.0 'float'-> 'double' for NumRec	PJT
+14-nov-91	V2.4 ellips fit and various others 	PJT
+13-Mar-92	V2.5 added imageshift option    	PJT
+15-nov-93	V2.6 added nmax=                	PJT
+13-jun-94	V2.7 code overhaul to add line/poly	PJT
+8-jun-95 	V2.8 added option fit=peak      	PJT
+26-jan-98	V2.9 added goodness-of-fit for fit=line 	PJT
+4-feb-98	V2.9a compute r (corr.coeff.) for line fit	PJT
+14-aug-00	V3.0 added tab=                            	PJT
+.fi
+
