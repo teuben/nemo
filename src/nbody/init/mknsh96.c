@@ -17,6 +17,8 @@
 #include <snapshot/body.h>
 #include <snapshot/put_snap.c>
 
+#include <potential.h>
+
 #include <math.h>
 #include <mathfns.h>
 #include <spline.h>
@@ -28,7 +30,6 @@ string defv[] = {
     "potpars=\n           Potential parameters",
     "potfile=\n           Potential data",
     "Qtoomre=1.0\n	  Toomre's Q parameter ",
-    "gamma=1.0\n	  fudge factor for v_eff(r) if > 0 ",
     "seed=0\n      	  usual random number seed ",
     "mode=1\n             Disk mode (0,1)",
     "rmax=6\n             Cutoff radius",
@@ -36,13 +37,13 @@ string defv[] = {
     "tab=f\n		  table output also? ",
     "zerocm=t\n           center the snapshot?",
     "headline=\n	  text headline for output ",
-    "VERSION=0.1\n	  5-may-02 PJT",
+    "VERSION=0.2\n	  6-may-02 PJT",
     NULL,
 };
 
 string usage="set up a Kuzmin disk in an external potential (NSH96)";
 
-local real alpha, r_cut, Qtoomre, gammas, z0;
+local real r_cut, Qtoomre, z0;
 
 local bool Qtab;
 local int  ndisk;
@@ -50,6 +51,7 @@ local int  cmode;
 local int  Kuzmin_only = 1;    /* sigma = M/(2.pi) (1+r^2)^{-3/2} */
 
 local Body *disktab;
+local potproc_double mypot;    /* pointer to potential calculator function */
 
 
 local real gdisk(real);
@@ -67,12 +69,17 @@ nemo_main()
 
     r_cut = getdparam("rmax");
     Qtoomre = getdparam("Qtoomre");
-    gammas = getdparam("gamma");
     ndisk = getiparam("nbody");
     z0 = 0.0;   // or should we getdparam("z0"); ??
     cmode = getiparam("mode");
     seed = init_xrandom(getparam("seed"));
     Qtab = getbparam("tab");
+    mypot = get_potential(getparam("potname"), 
+			  getparam("potpars"), 
+			  getparam("potfile"));
+
+    if (mypot==NULL) error("Potential could not be loaded");
+
     inittables();
     makedisk();
     writesnap(getparam("out"), getparam("headline"));
@@ -104,10 +111,18 @@ local void inittables()
 
 local real gdisk(real rad)
 {
+  double pos[3], acc[3], pot, time;
+  int maxdim = 3;
+  int probe = 0;   /* along X axis */
+
   if (Kuzmin_only)
     return rad/qbe(sqrt(1+rad*rad));     /* pure simple Kuzmin disk */
-  else
-    error("potential not implemented");
+  else {
+    pos[0] = pos[1] = pos[2] = 0;
+    pos[probe] = rad;
+    (*mypot)(&maxdim,pos,acc,&pot,&time);
+    return sqrt(-acc[0]*rad);
+  }
 }
 
 
