@@ -10,33 +10,41 @@ The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBin=\fP
-Input image filename [???]    
+Input image filename. Must be a \fIimage(5NEMO)\fP. Currently the
+3rd dimension is ignored, and for datacubes the first slice is
+taken. See \fIccdsub(5NEMO)\fP to select a plane. No default.
 .TP 20
 \fBout=\fP
-Output PPM filename [???]    
+Output PPM filename. No default.
 .TP 20
 \fBmin=\fP
-Minimum overrride []     
+Overrride data minimum used in scaling. By default it will look for
+the minimum.
 .TP 20
 \fBmax=\fP
-Maximum overrride []     
+Overrride data maximum used in scaling. By default it will look for
+the minimum.
 .TP 20
 \fBbad=\fP
-Use this as masking value to ignore data
+Use this as masking value to ignore data. By default no data is 
+considered bad.
 .TP 20
 \fBlut=\fP
-optional selection of a lut from NEMODAT/lut []
-.TP 20
-\fBVERSION=\fP
-16-dec-03 PJT [1.0]     
+optional selection of a lut from NEMODAT/lut. Currently the full path
+to the file must be given. Currently 
 .SH EXAMPLES
+Here is an example to take the 5th plane from a fits file into a PPM file:
+.nf
+    % fitsccd cube.fits - | ccdsub - - z=4 | ccdppm - plane4.ppm lut=$NEMODAT/lut/ronekers.lut
+.fi
 .SH SEE ALSO
-fitstiff(1NEMO)
+fitstiff(1NEMO), lut(5NEMO)
 .SH FILES
+$NEMODAT/lut   :  repository of \fIlut(5NEMO)\fP color lookup tables.
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
-17-Dec-03	V1.0 Created	PJT
+17-Dec-03	V1.0 Created (100 year Wright first flight anniversary)	PJT
 .fi
