@@ -6,6 +6,7 @@
  *     17-dec-2004    V0.1 Initial version, only deals with select=
  *                         no copies of data made, so zvar= does not work
  *                         periodic=f does not work either
+ *     20-dec-2004    V0.2 patched up too wide edges for non-integral 2pi intervals
  *
  * TODO
  *  - check the interpolation on the 2nd and 3rd quadrant, this this is where
@@ -13,6 +14,7 @@
  *    but with the jp=idx[ip+1] it's bad (rounding or higher) all over the plane
  *  - enable zvar=
  *  - see if messy data where the integral number of data in TWO_PI doesn't quite match
+ *    ** sort of fixed in 0.2 **
  *
  */
 
@@ -40,7 +42,7 @@ string defv[] = {
     "yrange=-16:16\n		Range in Y",
     "zvar=\n                    Optional selections: {vr,vt,den,vx,vy}",
     "periodic=t\n               Attempt to fill the plan by cloning the wedge N times",
-    "VERSION=0.1\n		17-dec-04 PJT",
+    "VERSION=0.2\n		20-dec-04 PJT",
     NULL,
 };
 
@@ -285,9 +287,17 @@ void nemo_main()
     phisf[npf+1] = phisf[1]   + TWO_PI;
 
     n = idx[1]-idx[0];
-    if (n != 1) warning("First shadow cell covers %d",n);
+    if (n != 1) {
+      warning("First shadow cell covers %d, trying to fix it",n);
+      dprintf(0,"idx[1] = %d idx[0] was : %d  is: %d\n", idx[1],idx[0],idx[1]-1);
+      idx[0] = idx[1]-1;
+    }
     n = idx[npf+1]-idx[npf];
-    if (n != 1) warning("Last shadow cell covers %d",n);
+    if (n != 1) {
+      warning("Last shadow cell covers %d",n);
+      dprintf(0,"idx[N] = %d idx[N+1] was : %d  is: %d\n", idx[npf],idx[npf+1],idx[npf]+1);
+      idx[npf+1] = idx[npf]+1;
+    }
   } else {
     warning("should not have to do this section ?? ");
     idx[0] = np-1;
