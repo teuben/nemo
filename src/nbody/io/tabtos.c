@@ -34,6 +34,7 @@
  *       3-feb-02       g   fixed bug if time in header, nbody not      pjt 
  *      11-may-02       h   longer lines to deal with DCR's 'ss2bt' files   PJT
  *      28-may-03       i   allow 'm' also for 'mass', also allow - for skip  pjt
+ *      21-sep-03       j   fixed bug in calling nemo_file_lines              pjt
  */
 
 #include <stdinc.h>
@@ -65,7 +66,7 @@ string defv[] = {
     "options=\n    Other processing options (scan|comment|wrap|spill)",
     "nskip=0\n     Number of lines skipped before each (header+block1+...)",
     "headline=\n   Random mumblage for humans",
-    "VERSION=1.3g\n 28-may-02 PJT",
+    "VERSION=1.3j\n 21-sep-03 PJT",
     NULL,
 };
 
@@ -449,7 +450,7 @@ local int get_nbody(void)
 {
     if (hasvalue("header"))
         error("Need value for nbody=, or specify it in header=");
-    nbody = nemo_file_lines(getparam("in"));
+    nbody = nemo_file_lines(getparam("in"),0);
     if (nbody <= 0) 
         error("Cannot determine nbody, try nbody= or header=");
     if (nblocks == 0) 
