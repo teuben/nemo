@@ -102,6 +102,7 @@
  * 15-sep-01    3.3   indexed keywords, but oops, can't do MINMATCH
  *                    and does not do keyword file I/O yet, no macroread 
  * 16              a  fixed macroread
+ * 19-oct-01       b  fixed recursion for those not using nemo_main
 
   TODO:
       - what if there is no VERSION=
@@ -123,7 +124,7 @@
       - indexing can't handle macros
  */
 
-#define VERSION_ID  "3.3a 16-sep-01 PJT"
+#define VERSION_ID  "3.3b 19-oct-01 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -291,6 +292,7 @@ local void set_help(string);
 local void set_review(string);
 local void set_tcl(string);
 local void set_yapp(string);
+local void local_error(string);
 
 /* external NEMO functions */
 
@@ -1073,7 +1075,7 @@ int cntparam(void)
 
 bool isaparam(string name)
 {
-    if (nkeys==0) error("isaparam: called before initparam");
+    if (nkeys==0) local_error("isaparam: called before initparam");
     return (findkey(name) >= 0);
 }
 
@@ -1105,7 +1107,7 @@ string getparam(string name)
     int i;
     char *cp, *cp1;
 
-    if (nkeys == 0)  error("(getparam) called before initparam");
+    if (nkeys == 0) local_error("(getparam) called before initparam");
     i = findkey(name);
     if (i<0) error("(getparam) \"%s\" unknown keyword", name);
     keys[i].upd = 0;        /* mark it as read */
@@ -1126,7 +1128,7 @@ string getparam_idx(string name, int idx)
     char *cp, *cp1, key[MAXKEYLEN+1];
     keyword *kw;
 
-    if (nkeys == 0)  error("(getparam) called before initparam");
+    if (nkeys == 0)  local_error("(getparam) called before initparam");
     strcpy(key,name);
     strcat(key,"#");
     i = findkey(key);
@@ -1157,7 +1159,7 @@ int indexparam(string name)
     char *cp, key[MAXKEYLEN+1];
     keyword *kw;
 
-    if (nkeys == 0)  error("(getparam) called before initparam");
+    if (nkeys == 0)  local_error("(getparam) called before initparam");
     strcpy(key,name);
     strcat(key,"#");
     i = findkey(key);
@@ -1259,9 +1261,9 @@ bool getbparam(string par)
     val = getparam(par);                        /* obtain value of param */
 #if !defined(NEMOINP)
     if (*val=='.') val++;                       /* catch .TRUE. .FALSE. */
-    if (strchr("tTyY1jJ", *val) != NULL)        /* is value true? */
+    if (strchr("1tTyYjJ", *val) != NULL)        /* is value true? */
         return TRUE;
-    if (strchr("fFnN0", *val) != NULL)          /* is value false? */
+    if (strchr("0fFnN", *val) != NULL)          /* is value false? */
         return FALSE;
 
     error("getbparam: %s=%s not bool", par, val);
@@ -1388,7 +1390,7 @@ local void setparam (string par, string val, string prompt)
     if (par==NULL || *par==0)
         error("setparam: no parameter supplied?");
     if (nkeys==0)
-        error("setparam: called before initparam");
+        local_error("setparam: called before initparam");
     i=findkey(par);        /* find entry of keyword in table */
     if (i<0)
         error("setparam: parameter \"%s\" unknown",par);
@@ -2269,6 +2271,12 @@ local void set_tcl(string arg)
 local void set_error(string arg)
 {
     error_level = atoi(arg);
+}
+
+local void local_error(string msg)
+{
+    fprintf(stderr,"### Fatal error [UNKNOWN]: %s\n", msg);
+    exit(-1);
 }
 
 #if defined(TESTBED)
