@@ -108,8 +108,8 @@ void potential(int *ndim,double *pos,double *acc,double *pot,double *time)
 
 
         mirror = x < 0;
+	phi_orig = phi;
         if (mirror) {
-            phi_orig = phi;
             if (phi >  HALF_PI) phi -= PI;
 	    if (phi < -HALF_PI) phi += PI;
         } 

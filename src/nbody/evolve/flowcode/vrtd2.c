@@ -10,13 +10,14 @@
  *          1D T-axis descriptor
  *
  *	 2-dec-03  cloned off vxyd.c, since it's very similar
+ *      11-dec-03  fixed
  */
 
 #include <stdinc.h>
 #include <filestruct.h>
 #include <image.h>
 
-#define CCD_VERSION "flowcode:vrtd2 V1.0 2-dec-03"
+#define CCD_VERSION "flowcode:vrtd2 V1.0 11-dec-03"
 
 local double   omega = 0.0;		/* pattern speed */
 local double   vscale = 100.0;		/* rescale velocity unit */
@@ -103,10 +104,9 @@ void potential(int *ndim,double *pos,double *acc,double *pot,double *time)
     } else {
 
         mirror = y < 0;
-        if (mirror) {
-            phi_orig = phi;
+	phi_orig = phi;
+        if (mirror)
 	    phi += PI;
-        } 
 
         for (ir=0; ir<nr-1; ir++)           /* simple search in Rad */
             if (rads[ir+1] > rad) break;
@@ -115,26 +115,26 @@ void potential(int *ndim,double *pos,double *acc,double *pot,double *time)
         rad2 = rads[jr];
             
         if(phi<phis[0]) {                   /* special search in Phi */
-                if (mirror) {                   /* 2nd Quadrant */
+                if (mirror) {                   /* 3rd Quadrant */
                     ip = 0;
                     jp = np-1;
-                    phi1 = phis[0] + PI;
-                    phi2 = phis[np-1];
+                    phi1 = phis[0] - PI;
+                    phi2 = phis[np-1] - TWO_PI;
                     phi = phi_orig;
-                } else {                        /* 4th Quadrant */
+                } else {                        /* 1st Quadrant */
                     ip = np-1;
                     jp = 0;
                     phi1 = phis[np-1] - PI;
                     phi2 = phis[0];
                 }
         } else if (phi>phis[np-1]) {        /* because of half-symmetry */
-                if (mirror) {                   /* 3rd Quadrant */
+                if (mirror) {                   /* 4th Quadrant */
                     ip = np-1;
                     jp = 0;
                     phi1 = phis[np-1] - PI;
                     phi2 = phis[0];
                     phi = phi_orig;
-                } else {                        /* 1st Quadrant */
+                } else {                        /* 2nd Quadrant */
                     ip = 0;
                     jp = np-1;
                     phi1 = phis[0] + PI;
@@ -147,7 +147,10 @@ void potential(int *ndim,double *pos,double *acc,double *pot,double *time)
                 phi1 = phis[ip];
                 phi2 = phis[jp];
                 if (ip>=np-1 || ir>=nr-1) {     /* should never happen */
-                    error("### POTENTIAL: Odd: %d %d: ip=%d ir=%d",i,j,ip,ir);
+		  dprintf(0,"x,y=%g %g\n",x,y);
+		  dprintf(0,"Phi1,2=%g %g  phi=%g  phi_orig=%g\n",
+			  phi1,phi2,phi,phi_orig);
+		  error("### POTENTIAL: Odd: %d %d: ip=%d/%d ir=%d/%d",i,j,ip,np,ir,nr);
                 }
         }
         dprintf(2,"(x,y)%d %d (r,p) %g %g [@ %d %d] LL: %g %g\n",
