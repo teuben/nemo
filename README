@@ -4,7 +4,7 @@ tabular data manipulation.
 
 This is the 3rd major release of NEMO, and although data are compatible
 with earlier releases, source code will generally need to be tweaked a
-bit to compile and link in the newer releases.
+bit to compile and link in the newer releases. 
 
 NEMO V1:	IAS release (Barnes, Hut & Teuben; appr. 1987)
 NEMO V2:	UMD release (Teuben 1994)

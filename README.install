@@ -1,23 +1,27 @@
 Installation overview:
 ----------------------
 
-The aim of easing the installation in NEMO V3.x was to follow the
-installation of most of GNU utilities by using autoconf. This would
-basically be a 'configure;make;make install' except that NEMO does not
-install binaries in some directory like /usr/local/bin, but keeps them
-"in-place" and bootstraps an environment by sourcing a NEMORC file.
-Hence the basic scheme is more like 'configure; source NEMORC; make'. 
+Installation of NEMO V3.x now follows that of most open source 
+packages.. Although this would basically be a
 
-Installation details are now following, although it may be handy to
-pre-install a few libraries and packages on your system.
+	configure
+	make
+	make install
 
+except that NEMO does not install binaries in some directory like
+/usr/local/bin, but keeps them "in-place" and bootstraps an
+environment by sourcing a NEMORC file where the search path
+and other NEMOisms are defined for your shell.
+Hence the basic scheme is more one of
+	configure
+	source NEMORC
+	make
 
+It may be handy to pre-install a few libraries and packages on your
+system, if they do not exist yet.
 
 Preconditions to INSTALLATION
 =============================
-
-The default installation installs NEMO but may have some features you
-really don't want.
 
 a) Installing PGPLOT
 
@@ -43,7 +47,7 @@ a) Installing PGPLOT
 
 b) Installing HDF
     
-   You only need the HDF library if you plan to work with CMHOG (hydrocode).
+   You only need the HDF library if you plan to work with ZEUS or CMHOG (hydrocode)
 	
    This requires:
 	libdf.a
@@ -55,9 +59,9 @@ b) Installing HDF
 c) Installing CFITSIO  (pending work on configure.in)
  
    NEMO has two internal routines (fits.c and fitsio.c) that handle various
-   types of fits I/O. Optionally the CFITSIO library can be used, e.g.
-   fitsio_nemo.c implements the fitsio.c file by providing a wrapping layer
-   that actually calls the CFITSIO library.
+   types of fits I/O. Optionally the CFITSIO library can also be used, e.g.
+   fitsio_nemo.c implements the fitsio.c file by providing a wrapper
+   that actually calls the CFITSIO library (courtesy Bill Pence)
 
    wget ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio2420.tar.gz
    (see http://heasarc.gsfc.nasa.gov/docs/software/fitsio/fitsio.html)
@@ -186,8 +190,7 @@ Results in /home/teuben/nemo_3.0.4/tmp/test22005/testsuite.log
    impossible. The following sessions assumes you have an official
    tar release from the Caltech site ftp://astro.caltech.edu/pub/pgplot
 
-	% setenv F77 f77 ; setenv CC cc			<== optional
-	% ./configure 
+	% ./configure F77=/opt/f77 CC=/opt/cc     (F77 and CC optional)
 	% source nemo_start
 	% make dirs 
 	% make config_clean				<==
@@ -561,7 +564,12 @@ before the
 
 	make truehost TRUEHOST=....
 
-  or if you want to give an exist host other aliases, use
+  this situation can occur if you installed NEMO on e.g. solaris2.7 and 
+  suddenly the OS is new and you hav solaris2.8. If you are sure the
+  2.7 binaries will work under 2.8, you can truehost it.
+
+
+  or if you want to give an existing host other aliases, use
 
 	make fakehost FAKEHOST=....
 

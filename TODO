@@ -52,6 +52,4 @@ some other help on configure:
   }
   #endif
 
-
-	
 - getparam:  an option to produce an iraf .par file?
