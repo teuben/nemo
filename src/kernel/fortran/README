@@ -1,0 +1,37 @@
+
+===> This is not part of official NEMO yet, but read ftoc(1NEMO)
+
+1. To call NEMO C routines, in particular, to steal NEMO's user interface:
+    Create a comment section between C+ and C- of an array of
+    defv strings, one on each line, much line the C program
+    e.,g.
+    Anywhere before the C+ / C- section, a oneliner 'usage' should
+    appear on the C: line.
+    An example can be found in the test.f file, which can be compiled.
+
+
+2.  Be very careful about the use of underscores *within* FORTRAN modules.
+    Since this is not part of the ANSI standard, various systems have odd
+    behavior. On line a fortran symbol "A_B" becomes "A_B__", whereas
+    "AB" becomes "AB_".
+
+    E.g., in the g77 compilers you may need the following compiler options:
+
+	-fno-underscoring  and/or  -fno-second-underscore
+
+3. for odd MAIN linking behavoir:
+
+    sometimes may need to add a dummy in C or C++, e.g.
+
+	extern "C" int MAIN__(){ assert(0); return 0; }
+
+
+4. some routines need timers  to return the number of CPU seconds.
+   See e.g. nbody1/2 (uses cputime.f), scfm (uses second.f),
+   treecode2; this is currently not handled here, but in the 
+   respective routines. See $NEMOLIB/makedefs for some comments
+   on how it can also be solved.
+
+
+
+January 2000:	converted to use the more generic F77_FUNC macros
