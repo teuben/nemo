@@ -1,0 +1,16 @@
+%N snaptipsy
+%D ### NEMO program with unknown intent...(missing usage)
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man snaptipsy' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input file (snapshot) [???]
+%A out
+	Output file (tipsy binary format) [-]
+%A times
+	Times to select snapshot [all]
+%A mode
+	Output mode (dark|gas|star) [dark]
+%A VERSION
+	23-dec-94 [1.1]
