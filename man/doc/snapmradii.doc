@@ -1,0 +1,14 @@
+%N snapmradii
+%D Langrangian mass-fraction radii of a snapshot
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man snapmradii' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input file name (snapshot) [???]
+%A fraction
+	Fractional masses to print radii of [0.1:0.9:0.1]
+%A tab
+	Full table of r,m(r) ?  [f]
+%A VERSION
+	25-mar-97 PJT [1.3a]
