@@ -19,6 +19,7 @@
  *				fie() is now in real, not float
  *	24-feb-98	V2.6 added seed=				PJT
  *	 8-sep-01	a    init_xrandom
+ *      24-jul-02       2.7  allow nz=0, so it does not make a 3rd axis  PJT
  *
  *       because of the float/real conversions and
  *       to eliminate excessive memory usage, operations 'fie' are
@@ -39,7 +40,7 @@ string defv[] = {
 	"fie=???\n       Expression %1,%2,.. for input maps; %x,%y for new map",
 	"size=10,10,1\n  2- or 3D dimensions of map/cube",
 	"seed=0\n        Random seed",
-	"VERSION=2.6a\n  15-feb-99 PJT",
+	"VERSION=2.7\n   25-jul-02 PJT",
 	NULL,
 };
 
@@ -59,6 +60,9 @@ int fie_remap();
 void do_create(), do_combine();
 
 extern  int debug_level;		/* see initparam() */
+extern    void    dmpfien();
+extern    int     inifien();
+extern    void    dofien();
 
 
 void nemo_main ()
@@ -68,8 +72,6 @@ void nemo_main ()
     stream  outstr;                     /* output file */
     int     size[3], nx, ny, nz;        /* size of scratch map */
     int     noper;                      /* number of images needed from oper */
-    void    dmpfien();
-    int     inifien();
 
     init_xrandom(getparam("seed"));
     fie = getparam("in");
@@ -179,43 +181,58 @@ bool map_create;
             return(-1);
         }
     }
-    return(0);
+    return 0;
 }
 
 /*
  *  create new map from scratch, using %x and %y as position parameters 
  *		0..nx-1 and 0..ny-1
  */
-void do_create(nx,ny,nz)
-int nx,ny,nz;
+void do_create(int nx, int ny,int nz)
 {
     double m_min, m_max, total;
     real   fin[3], fout;
     int    ix, iy, iz;
     int    badvalues;
-    void   dofien();
     
     m_min = HUGE; m_max = -HUGE;
     total = 0.0;		/* count total intensity in new map */
     badvalues = 0;		/* count number of bad operations */
 
-    if (!create_cube (&iptr[0], nx, ny, nz))	/* create default empty image */
-        error("Could not create image from scratch");
+    if (nz > 0) {
+      if (!create_cube (&iptr[0], nx, ny, nz))	/* create default empty image */
+        error("Could not create 3D image from scratch");
 
-    for (iz=0; iz<nz; iz++) {
+      for (iz=0; iz<nz; iz++) {
         fin[2] = iz;
         for (iy=0; iy<ny; iy++) {
-            fin[1] = iy;
-            for (ix=0; ix<nx; ix++) {
-                fin[0] = ix;
-                dofien (fin, 1, &fout, 0.0);   /* do the work --- see: fie.3 */
-                CubeValue(iptr[0],ix,iy,iz) = fout;
-                m_min = MIN(m_min,fout);         /* and check for new minmax */
-                m_max = MAX(m_max,fout);
-                total += fout;                   /* add up totals */
-            }
+	  fin[1] = iy;
+	  for (ix=0; ix<nx; ix++) {
+	    fin[0] = ix;
+	    dofien (fin, 1, &fout, 0.0);   /* do the work --- see: fie.3 */
+	    CubeValue(iptr[0],ix,iy,iz) = fout;
+	    m_min = MIN(m_min,fout);         /* and check for new minmax */
+	    m_max = MAX(m_max,fout);
+	    total += fout;                   /* add up totals */
+	  }
         }
-    }
+      }
+    } else {
+      if (!create_image (&iptr[0], nx, ny))	
+        error("Could not create 2D image from scratch");
+
+      for (iy=0; iy<ny; iy++) {
+	fin[1] = iy;
+	for (ix=0; ix<nx; ix++) {
+	  fin[0] = ix;
+	  dofien (fin, 1, &fout, 0.0);   /* do the work --- see: fie.3 */
+	  MapValue(iptr[0],ix,iy) = fout;
+	  m_min = MIN(m_min,fout);         /* and check for new minmax */
+	  m_max = MAX(m_max,fout);
+	  total += fout;                   /* add up totals */
+	}
+      }
+    } 
     
     MapMin(iptr[0]) = m_min;
     MapMax(iptr[0]) = m_max;
@@ -236,7 +253,6 @@ void do_combine()
     real  *fin, *fout;
     int    k, ix, iy, iz, nx, ny, nz, offset;
     int    badvalues;
-    void   dofien();
     
     m_min = HUGE; m_max = -HUGE;
     total = 0.0;		/* count total intensity in new map */
