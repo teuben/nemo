@@ -1,0 +1,34 @@
+.TH SNAPADDBH 1NEMO "22 March 2004"
+.SH NAME
+snapaddbh \- procedures to add a black hole to a snapshot
+.SH SYNOPSIS
+\fBsnapaddbh\fP [parameter=value]
+.SH DESCRIPTION
+\fBsnapaddbh\fP will add a black hole (a single particle with
+given mass) to the center of the snapshot. There are options to
+modify the velocity distribution of the stars to keep the new
+system roughly in equilibrium (assuming the input system was
+in that state).
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input snapshot filename      (no default)
+.TP
+\fBout=\fP
+Output snapshot filename     (no default)
+.TP
+\fBbh=\fP
+Mass of the black hole.
+[Default: 1]
+.SH EXAMPLES
+.SH AUTHOR
+Nelly Mouawad
+.SH SEE ALSO
+snapadd(1NEMO), snapenter(1NEMO), snapspin(1NEMO), snapvirial(1NEMO)
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+22-mar-04	V1.0 man page written in rainy (Modest4a) Strasbourg	Peter Teuben
+.fi
