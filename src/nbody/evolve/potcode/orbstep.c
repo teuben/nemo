@@ -335,15 +335,15 @@ real dt;		/* integration time step */
     Acc(p)[1] = dy;
     r = sqrt(dx*dx+dy*dy);
 
-    xi =  -p->xiv0*coskt/(2*p->B) + 
-           p->etav0*(p->A*kt - (p->A - p->B)*sinkt)/(p->kappa * p->B);
-    eta =  p->xiv0*sinkt/p->kappa + 
+    xi =  p->xiv0*sinkt/p->kappa + 
            p->etav0*coskt/(2*p->B);
+    eta =  -p->xiv0*coskt/(2*p->B) + 
+           p->etav0*(p->A*kt - (p->A - p->B)*sinkt)/(p->kappa * p->B);
 
     phi = eta/r;        /* eta is positive in direction of motion */
     cosp = cos(phi);
     sinp = sin(phi);
-    f = 1-xi/r;         /* xi is positive if poiting inward */
+    f = 1-xi/r;         /* xi is positive if pointing inward */
     Pos(p)[0] = (cosp * dx - sinp * dy)*f;    /* check sign */
     Pos(p)[1] = (sinp * dx + cosp * dy)*f;
   }
