@@ -1,0 +1,68 @@
+#! /bin/csh -f
+#
+#  remove all data files which are in structured file format
+#   PjT - dec 1990
+
+#
+if ($#argv == 0) goto usage
+#
+set name=$0
+set rmflags=()
+set verbo=0
+
+#	get flags for rm, they must be first in argument list
+loop:
+ if ($#argv == 0) goto usage
+    switch ($argv[1])
+    case -v:
+        set verbo=1
+        breaksw
+    case -i:
+    case -f:
+        set rmflags=($rmflags $argv[1])
+        breaksw
+    case -*:
+        echo "Unknown flag $argv[1]"
+        goto usage
+        exit 0
+    default:
+        goto loop_done
+    endsw
+    shift argv
+    goto loop
+
+loop_done:
+ if ($#argv == 0) goto usage
+ foreach i ($argv)
+    if (-d $i) then
+        echo "Skipping directory $i, $name cannot do recursion (-r)"
+    else if (-e $i) then
+        if ($verbo == 1) echo -n "${i}:"
+        tsf $i >& /dev/null
+        if ($status == 0) then
+	    echo "Deleting $i "
+            /bin/rm $rmflags $i
+            if ($verbo == 1) echo " deleted"
+        else
+            if ($verbo == 1) echo " skipped"
+        endif
+    else
+        echo Skipping non-existent $i or of unknown nature...
+    endif
+ end
+
+end:
+ exit 0
+
+usage:
+ echo "Usage: $0 [-v] [-i] [-f] file ..."
+ echo ""
+ echo " Flags (passed to /bin/rm"
+ echo "  -v   verbose"
+ echo "  -i   allow interactive deletion"
+ echo "  -f   dont ask for confirmation in case of permissions"
+ echo ""
+ echo "  A wildcard can be used for <file>, but only NEMO binary"
+ echo "  structured files will be deleted"
+ exit 0
+
