@@ -32,7 +32,7 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "options=\n         Forced output of: {acc, phi}",
     "sync=f\n           Force time sync, based on first file in list",
     "headline=\n	random verbiage",
-    "VERSION=2.5a\n	23-nov-03 PJT",
+    "VERSION=2.5b\n	2-dec-03 PJT",
     NULL,
 };
 
