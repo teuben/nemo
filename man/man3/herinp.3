@@ -3,10 +3,11 @@
 herinp \- decode string into reals, integers, logicals, characters or bytes
 .SH SYNOPSIS
 .nf
-CALL HERINP(EXPR,TYPE,LENGTH,OUTV,NOUT,NRET,IER)
+CALL HERINP(EXPR,NCHR,TYPE,LENGTH,OUTV,NOUT,NRET,IER)
           arg.   I/O type  description
           EXPR    I  A**   Byte array containing the expressions to
                            evaluate. Last byte should be a 0.
+	  NCHR    I  I*4   length of input expression string
           TYPE    I  A*1   Byte denoting type of conversion wanted.
                            Possible types are: 'F'   reals
                                                'I'   integers

@@ -1,4 +1,4 @@
-.TH FITSIO 3NEMO "18 December 2001"
+.TH FITSIO 3NEMO "23 July 2002"
 .SH NAME
 fitopen, fitclose, fitread, fitwrite, fitsetpl, fitrdhdr, fitrdhdi,
 fitwrhdr, fitwrhdi, fitwrhdl, fitwrhda  \- simple image fits I/O routines
@@ -167,11 +167,14 @@ No BLANK value substitution.
 .PP
 No provisions to read (or write) FITS files with multiple HDUs. Use
 \fIscanfits(1NEMO)\fP to extract the required HDU.
+.PP
+If the same (even if mandatory or reserved) keyword is written again,
+it will appear multiple times in the header, probably violating the standard.
 .SH CAVEATS
 "fitsio.h" is a poorly choosen name, as the name conflicts with at least one
-other package (Pence' cfitsio library). As of 18-dec-01 the name was changed
-to "fitsio_nemo.h" and depending on HAVE_LIBCFITSIO (as determined by
-configure in the config.h file) it will use CFITSIO emulation
+other package (Pence' cfitsio library). As of 18-dec-2001 the name was changed
+to "fitsio_nemo.h" and depending on a C define \fBHAVE_LIBCFITSIO\fP
+(as determined by configure in the config.h file) it will use CFITSIO emulation.
 .SH SEE ALSO
 fits(3NEMO), fits(5NEMO), cfitsio
 .SH AUTHOR
@@ -192,4 +195,5 @@ xx-jul-90       While sweating it out in India  RJS
 9-jul-00	fixed offset bug if fitsetpl called before fitwrite	PJT
 29-sep-01	added experimental BITPIX 64, removed some lies	PJT
 18-dec-01	changed name of header file to fitsio_nemo.h	PJT
+23-jul-02	attempted to add fitresize	PJT
 .fi
