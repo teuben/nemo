@@ -61,3 +61,9 @@ real:
 snapfit: cube.in hack.out
 	@echo Running $@
 	snapfit hack.out cube.in theta1=-30:30:10 theta2=-30:30:10
+
+snapprint: snap.in
+	@echo Running $@
+	snapprint snap.in x+y,x+z,y+z
+	snapprint snap.in x-y | head -1
+	

@@ -1,5 +1,6 @@
 DIR = src/nbody/trans
-BIN = snapcenter snaprotate snaprect snapinert snapsplit snapcopy snapadd
+BIN = snapcenter snaprotate snaprect snapinert snapsplit snapcopy snapadd \
+      snapdens
 NEED = $(BIN) mkplummer snapprint
 
 help:
@@ -51,3 +52,8 @@ snapcopy:
 snapadd:
 	@echo Running $*
 	snapadd snap.in,snap.in - | tsf -; nemo.coverage snapadd.c
+
+snapdens: snap.in
+	@echo Running $*
+	snapdens snap.in - | tsf -; nemo.coverage snapdens.c
+
