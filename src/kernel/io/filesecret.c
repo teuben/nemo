@@ -1,6 +1,9 @@
 /*
  * FILESECRET.C: binary file structure package.
  *
+ *  Warning: ZENO's version is labeled version 3, our version 3
+ *           has nothing to do with their version 3.
+ *
  *  Input is done through:      Output through:
  *      fread()                     fwrite()
  *      getxstr() -> getc()         putxstr() ->  putc()    (see extstring.c)
