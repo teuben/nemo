@@ -1,0 +1,142 @@
+.TH SCFM 1NEMO "18 December 1999"
+.SH NAME
+scfm - N-body integrator using the self-consistent field method
+.SH SYNOPSIS
+scfm
+.SH DESCRIPTION
+\fBscfm\fP is
+a code to evolve self-gravitating systems using a self-consistent
+field approach.  This version has been optimized for supercomputers
+and is fully vectorized.  The code is written in standard FORTRAN,
+although some CRAY-specific vector intrinsic routines have been
+used.
+.PP
+The computational system of units is determined by the input data.
+No explicit assumtions about the value of the gravitational 
+constant have been made; it is read in as a parameter.
+Particles are not required to have identical masses.
+.SH PARAMETERS
+Two files (both in ascii) determine the input parameters and input
+condition, and must be present at the start of the program.
+.PP
+The first one is the
+input parameter file with the name \fBSCFPAR\fP. It 
+contains, line by line, the input parameters for this run. In the table 
+below the values for the benchmark input parameter file are given
+in square brackets:
+.PP
+.nf
+.ta +0.5i +1i
+
+	\fB Comment\fP  	Private comment. (cannot be a null string)
+	\fB headline\fP  	Identification string for the run (max 50 char) [\fBtest\fP]
+	\fB nsteps\fP    	Number of timesteps [\fB100\fP]
+	\fB noutbod\fP   	Output system state (file \fBSNAP\fP\fIxxx\fP) once every noutbod steps [\fB100\fP]
+	\fB noutlog\fP   	Output logfile data (file \fBSCFMLOG\fP) once every noutlog steps [\fB10\fP]
+	\fB dtime\fP     	Integration timestep [\fB0.01\fP]
+	\fB gravconst\fP	Gravitional Constant [\fB1\fP]
+	\fB selfgrav\fP   	[\fB.TRUE.\fP]
+	\fB inptcoef\fP   	[\fB.FALSE.\fP]
+	\fB outpcoef\fP      	[\fB.FALSE.\fP]
+	\fB zeroodd\fP   	[\fB.FALSE.\fP]
+	\fB zeroeven\fP   	[\fB.FALSE.\fP]
+	\fB fixacc\fP   	[\fB.FALSE.\fP]
+.fi
+Note that the first line is a redundant comment not used by the program,
+but needs to be present.
+.PP
+The second file has to be named \fBSCFBI\fP, and contains the input 
+bodies. The first line must contain the number of bodies, and the
+time of this snapshot, followed by 
+.PP
+Output files created are \fBSNAP\fP\fIxxx\fP, which contains all the
+requested (see \fBnoutbod\fP) output snapshots, one for each 
+requested output time in ascii \fIntmpv(5NEMO)\fP format.
+
+which contains a log (see \fBnoutlog\fP)
+of the run and \fBSCFBO\fP, which contains
+a binary (machine dependable) dump of the last snapshot.
+\fINote that these output files must not be present when the 
+program is to be run.\fP (ANSI FORTRAN) 
+.PP
+To avoid excessive overhead, \fBnoutlog\fP should be larger than 1,
+typically ~ 10, depending on total number of steps though.
+.SH RUNNING
+A shell script \fBrunscfm\fP is available to ease running this
+program slightly, and also prevents you from running two versions of
+\fBscfm\fP in the same directory.
+Script usage:
+.PP
+\fBrunscfm\fP \fIinput_snapshot output_snapshot pars_file\fP
+.PP
+The \fIinput_snapshot\fP and 
+\fIoutput_snapshot\fP are now in \fIsnapshot(5NEMO)\fP
+format, whereas the \fIpars_file\fP is in the format described in
+the previous \fBPARAMETERS\fP section.
+.SH EXAMPLES
+Preparing an input dataset for scfm can be done as follows:
+.nf
+    \fIsnapprint in=i.snap options=m,x,y,z,vx,vy,vz header=t > i.tab\fP
+.fi
+.PP
+Converting output tables made by scfm into \fIsnapshot(5NEMO)\fP can be
+done as follows:
+.nf
+tabtos in=p.tab out=o.snap header=nbody,time block1=mass,pos,vel
+.fi
+.SH MAKE
+May need another version of second.f on some systems. See also
+the source code directory of \fBtreecode3\fP.
+.SH BENCHMARKS
+Timings are from 1000 integration steps.
+.nf
+.ta +1i +1i +2i +1i
+machine 	cpu	N-body
+US-140     	143"	1000
+US-140     	269"	2000
+US-140     	611"	4000
+US-140    	1072"	8000
+US-140       	....	16000
+
+US-2           	380	8000
+.fi
+.SH AUTHOR
+Lars Hernquist
+.SH FILES
+.nf
+.ta +2i
+SCFPAR                    	input parameters (ascii)
+SCFBI                    	input bodies (ascii)
+SCFLOG                    	output logfile
+SCFOUT                    	output something ('termfile')
+SCFELxxx                  	output something (1/body)
+SNAPxxx                  	output bodies
+SCFICOEF                 	input coefficients file
+SCFOCOEF                 	output coefficients file
+.PP
+~/usr/lars/scfm/        	original LARS version
+~/src/nbody/evolve/scfm/     	original LARS version
+.fi
+.SH BENCHMARK
+Some timings for the standard benchmark (100 timesteps, 1024 particles):
+.nf
+Pentium-333	6.93"
+Pentium-500	4.58
+Ultra-10/300	9.64	(g77 -O)
+		7.20	(f77 -O)
+		7.33	(f77 -fast)
+.fi
+.SH SEE ALSO
+runscfm(1NEMO), snapshot(5NEMO), snapprint(1NEMO), ntmpv(5NEMO)
+.PP
+Hernquist, L. & Ostriker, J. (1992)
+\fIA Self-Constistent Field Method for Galactic Dynamics\fP,
+ApJ. 386, 375.
+.SH HISTORY
+.nf
+.ta +1i +4i
+1-jan-91	V1 Public release created	Lars Hernquist (@UCB)
+7-jul-97	integrated in NEMO/usr tree         	PJT
+20-jan-98	integrated in NEMO/src tree          	PJT
+18-dec-99	fixed some Makefile bugs, added bench timings	PJT
+.fi
