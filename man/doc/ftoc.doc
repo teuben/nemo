@@ -1,0 +1,13 @@
+%N /smc/teuben/nemo/bin/sun4/ftoc
+This doc file has been produced with help=t option
+No further help is available, try 'man ftoc'
+%A in
+	Input source code to extract defv[] from [???]
+%A out
+	Output nemo_main module [- means stdout] [-]
+%A call
+	You fortran main subroutine (no args!) [nemomain]
+%A machine
+	machine for symbols name conversions []
+%A VERSION
+	27-jun-91 PJT [1.0]
