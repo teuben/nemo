@@ -3,6 +3,9 @@
  *
  *  MIR_READLINE:  use miriad's save/load feature (not implemented)
  *
+ *
+ * TODO:
+ *    - command_read
  */
 
 
@@ -92,8 +95,14 @@ static int curcmd = 0;
 void command_read(string fname)
 {
   stream instr;
-  int n = nemo_file_lines(fname,0);
+  int n;
+  if (fname==0 || *fname==0) {
+    warning("command_read: blank filename");
+    return;
+  }
 
+  n = nemo_file_lines(fname,0);
+  dprintf(0,"Found %d lines in %s\n",n,fname);
   if (n < 1) return;
 
   instr = stropen(fname,"r");
@@ -107,14 +116,15 @@ void command_read(string fname)
 }
 
 /*
- *
+ *  TODO:
+ *   - breaking up line into argv[] should listen to quotes
  */
 
 string *command_get(command *c)
 {
   char *s, line[1024];
   string *argv;
-  int i, n, na;
+  int i, icmd, n, na;
 
   sprintf(prompt,"%s> ",c->name);
   
@@ -125,7 +135,7 @@ string *command_get(command *c)
     curcmd++;
     dprintf(0,"COMMAND_READ-%d> %s\n",curcmd,line);
     if (curcmd==ncmds) {
-      dprintf(0,"This was the last command; freeing buffers\n");
+      dprintf(1,"This was the last command; freeing buffers\n");
       for (i=0; i<ncmds; i++)
 	free(cmds[i]);
       curcmd = ncmds = 0;
@@ -181,7 +191,12 @@ string *command_get(command *c)
   }
 
   if (line[0] == '<') {                         /* internal read command */
-    dprintf(0,"< COMMANDS -- not implemented yet\n");
+    for (i=1; line[i]; i++)
+      if (!isspace(line[i])) break;
+    icmd = i;
+    for (; line[i]; i++)
+      if (isspace(line[i])) line[i] = 0;
+    command_read(&line[icmd]);
     goto again;
   }
 
@@ -197,7 +212,7 @@ string *command_get(command *c)
   if (na<0) goto again;
   for (i=0; i<c->ncmd; i++) {
     if (streq(c->cmd[i],argv[0])) {
-      dprintf(0,"Found matching command %s, needs %d, got %d\n",
+      dprintf(1,"Found matching command %s, needs %d, got %d\n",
 	      argv[0],c->nargs[i],na);
       if (na < c->nargs[i]) {
 	warning("Not enough arguments for %s (need %d)",argv[0],c->nargs[i]);
