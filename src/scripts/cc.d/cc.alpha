@@ -1,0 +1,13 @@
+#! /bin/csh -f
+#
+# care: -Dalpha would redefine the occasionally used variable 'alpha'
+#       hence the somewhat odd definition here
+
+
+# OSF1 merlot.physics.drexel.edu V4.0 564 alpha
+# the new dec alpha w/ digital unix defines these in c89:
+#	__unix__  __osf__  __alpha
+
+exec /usr/ucb/c89 -I$NEMOINC -L$NEMOLIB -Dalpha=alpha  $*
+
+# Have not tried /usr/bin/cc yet.
