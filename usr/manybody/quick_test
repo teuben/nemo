@@ -1,0 +1,56 @@
+#! /bin/csh -f
+#
+#  this command checks out a few of the manybody commands
+#  Notice that these should reflect what the GettingStarted guide for
+#  MANYBODY says in Appendix A
+#
+
+if ($?MANYBODY == 0) then
+  echo The env.var. MANYBODY is not present
+  exit 1
+endif
+
+echo mozilla $MANYBODY/index.html
+
+# NEMO
+
+mkplummer p1 1000
+
+snapplot p1 color=x
+
+gyrfalcON p1 . tstop=0.1
+
+mkkd95 a0.dat
+
+snapplot a0.dat color='i<8000?2.0/16.0:(i<12000?3.0/16.0:4.0/16.0)' yvar=z xrange=-8:8 yrange=-8:8
+
+snapxyz a0.dat - color='i<8000?1:(i<12000?2:4)' | xyzview - maxpoint=18000 nfast=18000 scale=8 fullscreen=t
+
+snapgrid a0.dat - xrange=-8:8 yrange=-8:8 nx=128 ny=128 yvar=z | ccdsmooth - - 0.1 | ccdfits - a0.fits
+
+ds9 a0.fits
+
+# kira
+
+makeplummer -n 32 > p32.dyn
+
+makeplummer -n 10 | dtos - | snapprint -
+
+makeplummer -n 32 | kira -D 0.1 -t 2 | xstarplot
+
+# partiview
+
+make -f $MANYBODY/partiview/data/primbin16.mk
+
+partiview  $MANYBODY/partiview/data/primbin16.cf
+
+# fewbody
+
+binsingle -D 1 | glstarview
+
+# ACS code
+
+if (-e $MANYBODY/ACS/chap3/forward_euler1.C) then
+  g++ -o forward_euler1 $MANYBODY/ACS/chap3/forward_euler1.C 
+  forward_euler1
+endif
