@@ -1,4 +1,4 @@
-.TH SQR 3NEMO "5 March 1989"
+.TH SQR 3NEMO "9 January 2005"
 .SH NAME
 sqr, qbe, log2, dex \- some additional math functions: square, cube, log
 .SH SYNOPSIS
@@ -9,12 +9,16 @@ sqr, qbe, log2, dex \- some additional math functions: square, cube, log
 .B double qbe(double x)
 .B double log2(double x)
 .B double dec(double x)
+.B double powi(double x, int p)
+.B double powd(double x, double p)
 .fi
 .SH DESCRIPTION
 .IX sqr() "" "\fLsqr()\fR \(em square function"
 .IX qbr() "" "\fLqbe()\fR \(em cube function"
 .IX dex() "" "\fLdec()\fR \(em power-10 function"
 .IX log2() "" "\fLqbe()\fR \(em cube function"
+.IX powi() "" "\fLpowi()\fR \(em integer power function"
+.IX powd() "" "\fLpowd()\fR \(em forgiving power function"
 .LP
 .BI sqr( x )
 returns the square of \fBx\fP,
@@ -24,8 +28,15 @@ returns the cube root of \fBx\fP,
 returns 10 to the power of \fBx\fP, and
 .BI log2 (x)
 returns the log to the base two of \fBx\fP.
+.BI powi (x,p)
+return the x^p, where p is any integer, including negative, and
+the sign of x is taken into account properly
+.BI powd (x,p)
+return the x^p, where for x<0 a value of 0 is returned
+(some machines return NaN, others may fail).
 .SH CAVEAT
-some systems may actually implement some of these functions in their math (-lm) library
+some systems may actually implement some of these functions 
+in their own math (-lm) library
 .SH FILES
 .ta +1i
 .nf
@@ -37,4 +48,5 @@ src/kernel/misc  	log2.c sqr.c
 .ta +1i +4i
 .nf
 4-mar-94	documented	pjt
+9-jan-05	added powi,powd	pjt
 .fi
