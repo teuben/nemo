@@ -595,6 +595,7 @@ install:
 	@echo ""
 	@echo "If you want, test to compile two basic routines:"
 	@echo "      mknemo tsf tabhist nemoinp"
+	@echo "      rehash"
 	@echo "      nemoinp 1:10 | tabhist -"
 	@echo ""
 	@echo "Else go and compile and test the NEMO standard suite of binaries:"
