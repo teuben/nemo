@@ -7,6 +7,15 @@
 set pgplot=1
 set gcc=0
 set falcon=1
+set cvs=1
+
+#  things that have versions
+set gsl=1.4
+set fewbody=0.21
+set glstarview=0.6-devel
+set hnbody=1.0.3-linux-x86
+
+set pkg=/home/manybody_pkg/
 
 foreach _a ($*)
   set $_a
@@ -16,25 +25,32 @@ if (-d /astromake) then
   source /astromake/astromake_start
 endif
 
-set fltk=`pwd`/fltk-1.1.4-source.tar.gz
+set fltk=$pkg/fltk/fltk-1.1.4-source.tar.gz
 
 # remove the old manybody
 rm -rf manybody
 
-# get all the new stuff via CVS and tarballs
-echo CVS: manybody/starcluster
-cvs -Q co manybody/starcluster
-echo CVS: manybody/starlab
-cvs -Q co manybody/starlab
-cd manybody
-echo CVS: partiview
-cvs -Q co partiview
-echo CVS: nemo
-cvs -Q co nemo
-echo CVS: pgplot
-(cd nemo; mkdir local; cvs -Q co pgplot)
-echo TAR: $fltk
-tar -C partiview/src -zxf $fltk
+# get all the new stuff via CVS and/or tarballs
+if ($cvs) then
+  echo CVS: manybody/starcluster
+  cvs -Q co manybody/starcluster
+  echo CVS: manybody/starlab
+  cvs -Q co manybody/starlab
+  cd manybody
+  echo CVS: partiview
+  cvs -Q co partiview
+  echo CVS: nemo
+  cvs -Q co nemo
+  echo CVS: pgplot
+  (cd nemo; mkdir local; cvs -Q co pgplot)
+  echo TAR: $fltk
+  tar -C partiview/src -zxf $fltk
+else 
+  echo TAR: 
+  tar zxf $pkg/nemo/nemo.tar.gz
+  tar zxf $pkg/starlab/starlab.tar.gz
+  tar zxf $pkg/partiview/partiview.tar.gz
+endif
 
 
 #                                                   starlab
@@ -59,4 +75,34 @@ pushd nemo
   source AAA_SOURCE_ME
 popd
 
+#                                                   GSL
+pushd $NEMO/local
+  tar zxf $pkg/gsl/gsl-$gsl.tar.gz
+  cd gsl-$gsl
+  ./configure --prefix=$NEMO/host/$NEMOHOST
+  make
+  make install
+popd
 
+#                                                   fewbody, glstarview
+pushd $NEMO/usr/fregeau
+  tar zxf $pkg/fregeau/fewbody-$fewbody.tar.gz
+  pushd fewbody-$fewbody
+    make all  LIBFLAGS="-L$NEMOLIB -lgsl -lgslcblas -lm"
+    cp cluster triplebin binbin binsingle $NEMOBIN
+  popd
+  tar zxf $pkg/fregeau/glstarview-$glstarview.tar.gz
+  pushd glstarview-$glstarview
+    make -f Makefile.rh9 all
+    cp glstarview $NEMOBIN
+  popd
+popd
+
+#                                                   HNbody (binary only)
+pushd $NEMO/usr
+  tar zxf $pkg/hnbody/hnbody-$hnbody.tgz
+  ln -s hnbody-$hnbody hnbody
+  foreach bin (ems  hnarith  hnbody  hnconvert  hnpaste  hnstats  hntac  lunar)
+    ln -s `pwd`/hnbody-$hnbody/bin/$bin $NEMOBIN
+  end
+popd
