@@ -180,6 +180,7 @@ help:
     echo "    -f    forced install of the binaries needed for all tests"
     echo "    -b    bootstrap mode"
     echo "    -q    show all binaries that have not been installed yet"
+    echo "    -v    run programs through valgrind --tool=memcheck"
     echo "    -h    this help"
     echo ""
     echo "Useful keywords, and their defaults:"
