@@ -36,7 +36,7 @@
  * 
  * TODO:
  *     option to do dual-pass to subtract the mean before computing
- *     the higher order moments.
+ *     the higher order moments - needed for accuracy
  */
 
 /**************** INCLUDE FILES ********************************/ 
@@ -58,7 +58,7 @@ string defv[] = {
     "xmax=\n			  In case maximum used (need both minmax)",
     "bins=16\n			  Number of bins",
     "maxcount=0\n		  Maximum along count-axis",
-    "nmax=10000\n		  maximum number of data to be read if pipe",
+    "nmax=100000\n		  maximum number of data to be read if pipe",
     "ylog=f\n			  log scaling in Y?",
     "xlab=value\n	          Optional Label along X",
     "ylab=N\n			  Optional Label along Y",
@@ -69,7 +69,7 @@ string defv[] = {
     "cumul=f\n                    Override and do cumulative histogram instead",
     "median=t\n			  Compute median too (can be time consuming)",
     "nsigma=-1\n                  delete points more than nsigma",
-    "VERSION=4.0\n		  7-may-03 PJT",
+    "VERSION=4.0a\n		  12-may-04 PJT",
     NULL
 };
 

@@ -38,14 +38,14 @@ string defv[] = {
     "format=%g\n    Format used to print numbers",
     "ndim=3\n       Poission test in 3-dim  (XYZ) or 2-dim (XY)",
     "double=\n      float or double, or automatic detection",
-    "VERSION=4.0\n  18-sep-01 PJT",
+    "VERSION=4.0a\n  19-sep-04 PJT",
     NULL,
 };
 
 string usage = "show a NEMO potential";
 
 #ifndef MAXPT
-#define MAXPT 10001
+#define MAXPT 100001
 #endif
 
 local potproc_double mypotd;     /* pointer to potential calculator function : double */
