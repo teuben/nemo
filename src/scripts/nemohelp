@@ -1,0 +1,39 @@
+#! /bin/csh -f
+#
+#  give help about nemo tasks, there is a choice
+#  of helper program...
+#  setenv WEB_BROWSER if you want to use mosaic/netscape/arena
+
+if ($#argv != 1) then
+  echo Usage: $0 topic
+  echo Help on NEMO tasks, currently no support for subroutines etc.
+  exit 0
+endif
+
+set name=$1
+set level=1
+
+# helpfile=$www/$name.$level.html
+set www=http://www.astro.umd.edu/nemo/man_html/
+
+#MAN:   man [$level] $name
+#TKMAN: tkman_client [$level] $name
+#XMAN:	xman -notopbox -helpfile $NEMO/man/cat$level/$name.$level
+
+#NETSCAPE:	
+netscape -remote openURL\($www/$name.$level.html\)
+exit 0
+
+#MOSAIC: set up a /tmp file and send a certain signal to mosaic..
+#	 details to be worked out
+# 
+#		<-- need to get the correct PID for mosaic here -->
+set pid=$$
+#
+set tmp=/tmp/Mosaic.$pid
+echo "goto" > $tmp
+echo $url >> $tmp
+kill -SIGUSR1 $pid
+  
+
+
