@@ -1,0 +1,127 @@
+% -*-LaTeX-*-
+% TROFFMAN.STY for tr2latex - troff to latex translator
+% $Id$
+% These macros are intended to be referenced by a LaTeX
+% \documentstyle[troffman,twoside]{article}
+% command.  You can insert an 11pt or 12pt option if you like larger
+% type--sizes set here are computed from the LaTeX point size setting.
+% Size values have been chosen to closely match Unix manual page
+% documents, which are actually too wide and too high for good
+% typographic taste and readability.
+% I would very much want better macros for the headers and footers.
+% Please pass your suggestions to me.		-Christian
+%
+\typeout{TROFFMAN.STY for tr2latex version $Revision$ by $Author$}
+
+\hbadness=10000                 % do not want underfull box messages--there are
+                                % usually lots in man pages
+\hfuzz=\maxdimen                % no overfull box messages either
+\voffset=-0.8in                 % man pages start high on page
+\textheight=9in                 % and are long
+\textwidth=6.5in                % troff man pages have very wide text
+\parindent=0pt
+\oddsidemargin=.0in
+\evensidemargin=.0in
+\newdimen\singlespacing
+\singlespacing=10pt                     % LaTeX has (10+\@ptsize)pt
+\addtolength{\singlespacing}{\@ptsize pt} % get size from \documentstyle[??pt]{}
+
+% Use conventional typesetting baselineskip spacing for 10pt type
+\normalbaselineskip=1.2\singlespacing
+\newlength{\parmargin}  % whole paragraphs indented this much on man pages
+\parskip=1ex
+\parmargin=3\normalbaselineskip 
+\baselineskip=\normalbaselineskip
+
+\def\empty{}
+
+% page heading/footing
+% NB: we need \hfill, not \hfil, here; otherwise box is filled only to current
+%     paragraph width
+\newcommand{\phead}[5]{%
+   \def\f{#4}\def\x{#5}
+   \renewcommand{\@oddhead}{%\@setpar{\hangindent=0pt\hangafter=0\@@par}
+     {\makebox[\textwidth]{\ifx\x\empty #1(#2) \else \x \fi \hfill
+                           \rm UNIX Programmer's Manual \hfill
+                           #1(#2)}}}%
+   \renewcommand{\@evenhead}{%\@setpar{\hangindent=0pt\hangafter=0\@@par}
+     {\makebox[\textwidth]{#1(#2) \hfill
+                           \rm UNIX Programmer's Manual \hfill
+                           \ifx\x\empty #1(#2) \else \x \fi}}}%
+   \renewcommand{\@oddfoot}{%\@setpar{\hangindent=0pt\hangafter=0\@@par}
+      {\makebox[\textwidth]{4th Berkeley distribution \hfill #3%
+         \hfill \rm\thepage}}}%
+   \renewcommand{\@evenfoot}{%\@setpar{\hangindent=0pt\hangafter=0\@@par}
+      {\makebox[\textwidth]{\thepage \hfill #3%
+         \hfill \rm 4th Berkeley distribution}}}%
+}
+% multi-line left-justified subheading
+\def\shead#1{
+        \par % force out previous paragraph with its \hangindent values
+        \@setpar{\hangindent=0pt\hangafter=0\@@par}
+        \typeout{[#1]}  % maybe temporary, but nice for progress report
+        \subsubsection*{#1}
+        \@setpar{\hangindent=\parmargin\hangafter=0\@@par}
+}
+
+\newcommand{\bs}{$\backslash$}
+\def\under{\underline}
+\def\dotdot{\ddot}
+\def\nwl{\hfill\break}          % similar to LaTex's \newline but does not
+                                % complain if there is no line to break
+\def\ind#1{\par\everypar{\hangindent=#1\hangafter=0\hskip-\parindent}}
+\def\tmpind#1{\par\hskip#1}
+\newenvironment{SEPcntr}{\begin{center}}{\end{center}}
+\def\cntr#1{\begin{SEPcntr} #1 \end{SEPcntr}}
+% displayed text, indented, justification off
+\def\displaybegin{\par\begingroup\medskip\narrower\narrower\noindent
+                  \obeylines\obeyspaces}
+\def\displayend{\endgroup\smallskip\noindent}
+% fill and nofill
+\def\nofill{\par\begingroup\noindent\obeylines\parskip=0ex
+    \frenchspacing\@vobeyspaces\linepenalty10000}
+{\catcode`\ =\active\gdef\@vobeyspaces{\catcode`\ \active \let \@xobeysp}}
+\def\@xobeysp{\leavevmode{} }
+\def\fill{\endgroup\noindent}
+
+\def\beginnotec#1{\par\medskip\centerline{#1}\vskip-2ex\nopagebreak[4]
+\begin{quote}\advance\leftskip by \parmargin}
+\def\beginnote#1{\par\medskip#1\vskip-2ex\nopagebreak[4]
+\begin{quote}\advance\leftskip by \parmargin}
+\def\endnote{\end{\quote}}
+
+% define a boxing macro
+\def\boxit#1{\vbox{\hrule\hbox{\vrule\kern10pt\vbox{\medskip\kern5pt#1\bigskip
+\kern5pt}\kern10pt\vrule}\hrule}}
+
+
+% try this IPlist environment
+\newcommand{\deflabel}[1]{#1\hfill}
+\newenvironment{IPlist}%
+{\par\vspace{-1ex}\begin{list}{}%
+{\setlength{\itemsep}{\parsep}%
+\setlength{\labelwidth}{\parmargin}%
+\addtolength{\leftmargin}{2em}%
+\addtolength{\leftmargin}{\labelwidth}%
+\addtolength{\leftmargin}{\labelsep}%
+\renewcommand{\makelabel}{\deflabel}}}%
+{\end{list}}
+
+\newlength{\IPitemlength}
+\newcommand{\IPitem}[1]{\item[#1]
+\settowidth{\IPitemlength}{#1}
+\ifdim\IPitemlength>\parmargin \nwl \fi
+}
+
+% try this TPlist environment
+\newcommand{\TPlistlabel}[1]{\mbox{#1}\hfil}
+\newenvironment{TPlist}[1]{
+\begin{list}{}
+    {
+      \let\makelabel\TPlistlabel
+      \settowidth{\labelwidth}{#1mm}
+      \setlength{\leftmargin}{\parmargin}       % all paragraphs have this much
+      \addtolength{\leftmargin}{\labelwidth}    % space for label
+    }
+  }{\end{list}}
+
