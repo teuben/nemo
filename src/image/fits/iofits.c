@@ -2,11 +2,11 @@
 /*---------------------------------------------------------------------------
    
    File name	:	iofits.c
-   Author		:	N. Devillard
-   Created on	:	July 1998
+   Author	:	N. Devillard / P. Teuben (NEMO adaptation)
+   Created on	:	July 1998    / April 2003
    Description	:	convert FITS from a pixel depth to another
-					no rescaling is done
-   Notice		:	stand-alone: does not need eclipse to compile
+			no rescaling is done
+   Notice	:	now needs NEMO to compile
 
    About this program:
 
@@ -61,6 +61,7 @@
 /*---------------------------------------------------------------------------
 								Includes
  ---------------------------------------------------------------------------*/
+#include <stdinc.h>    /* NEMO */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -106,7 +107,7 @@
 typedef short			short16 ;
 typedef unsigned short	ushort16 ;
 typedef int				long32 ;
-typedef unsigned char	byte ;
+/* typedef unsigned char	byte ;                      /* same as NEMO */
 
 /*---------------------------------------------------------------------------
 							Function prototypes
@@ -141,29 +142,26 @@ static unsigned compat_flags ;
 								main()	
  ---------------------------------------------------------------------------*/
 
+string defv[] = {
+  "in=???\n           Input FITS file",
+  "out=???\n          Output FITS file",
+  "bitpix=???\n       requested output BITPIX value (8|16|32|-32|-64)",
+  "VERSION=1.0\n      29-apr-03 PJT",
+  NULL,
+};
 
-int main(int argc, char *argv[])
+string usage = "convert FITS from a pixel depth to another without rescaling";
+
+int nemo_main()
 {
-	int		ptype ;
-
-	if (argc!=4) {
-		printf("\n\n") ;
-		printf("use: %s <in> <out> <8|16|32|-32|-64>\n", argv[0]) ;
-		printf("\n") ;
-		printf("\t<in> is a valid FITS file in the current directory\n") ;
-		printf("\t<out> is the name of the output file\n") ;
-		printf("\t<8|16|32|-32|-64> is the output file pixel type\n") ;
-		printf("\n\n") ;
-		return 0 ;
-	}
-	ptype = (int)atoi(argv[3]) ;
-	check_all_types(ptype) ;
-	if (!strcmp(argv[1], argv[2])) {
-		fprintf(stderr, "cannot convert a file to itself\n") ;
-		fprintf(stderr, "specify another name for the output\n") ;
-		return -1 ;
-	}
-	return convert_fits_pixel_depth(argv[1], argv[2], ptype) ;
+  int	p = getiparam("bitpix");
+  char *i = (char *)getparam("in");
+  char *o = (char* )getparam("out");
+  
+  check_all_types(p);
+  if (streq(i,o))
+    error("Cannot convert file to itself, change in= and/or out= ");
+  return convert_fits_pixel_depth(i,o,p);
 }
 
 
