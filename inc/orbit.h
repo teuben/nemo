@@ -102,4 +102,4 @@ int  read_orbit     ( stream, orbitptr * );
 void free_orbit     ( orbitptr );
 int  allocate_orbit ( orbitptr *, int, int );
 void copy_orbit     ( orbitptr, orbitptr );
-void list_orbit     ( orbitptr, double, double, int );
+void list_orbit     ( orbitptr, double, double, int, string );

@@ -6,6 +6,7 @@
  *	 2-jun-87  V2.1  small mod, alsao new filestruct	PJT
  *	22-may-90  V2.2  minor improvement for new getparam()	PJT
  *	24-jul-92  V2.3  new NEMO - etc. PJT
+ *      15-feb-03  V2.4  added format=				PJT
  */
 
 #include <stdinc.h>		/* also gets <stdio.h	*/
@@ -19,30 +20,31 @@ string defv[] = {
 	"in=???\n           Input filename (an orbit)",
 	"n=1\n              stride in time through the orbit",
         "maxsteps=10000\n   Maximum number of steps allowed",
-	"VERSION=2.3\n      24-jul-92 PJT",
+	"format=%g\n        Format for output",
+	"VERSION=2.4\n      15-feb-03 PJT",
 	NULL,
 };
 
-#define HPI  1.5702
-#define RPD (3.1415/360.0)
+string usage = "list an orbit path";
+
 #ifndef HUGE
 # define HUGE 1.0e20
 #endif
-#define UNDEF HUGE
 #define EPS  0.00001
 
-string	infile;			/* file names */
-stream  instr;			/* file streams */
+local string	infile;			/* file names */
+local stream  instr;			/* file streams */
 
-orbitptr optr;
+local orbitptr optr;
 
-int    n;
-double trange[2];	/* future expansion will allow timerange */
-int maxsteps;
+local int    n;
+local double trange[2];   /* time range to plot */
+local int maxsteps;
 
 nemo_main ()
 {
 	int ndim;
+	string format = getparam("format");
 
 	infile = getparam("in");
 	n = getiparam("n");
@@ -56,10 +58,9 @@ nemo_main ()
 #endif
 
 	while (read_orbit(instr,&optr)) {
-	    list_orbit(optr, -HUGE,  HUGE, n);
+	    list_orbit(optr, -HUGE,  HUGE, n, format);
             Nsteps(optr) = maxsteps;        /* reset */
         }
 	strclose(instr);
-
 }
 

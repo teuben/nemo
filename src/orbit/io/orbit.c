@@ -196,9 +196,12 @@ void copy_orbit(orbitptr iptr, orbitptr optr)
  *------------------------------------------------------------------------------
  */
  
-void list_orbit (orbitptr optr, double tstart, double tend, int n)
+void list_orbit (orbitptr optr, double tstart, double tend, int n, string f)
 {
     int i, kount;
+    char fmt[256];
+
+    sprintf(fmt,"%%d %s %s %s %s %s %s %s\n",f,f,f,f,f,f,f);
         
     dprintf (0,"Total number of steps = %d\n",Nsteps(optr));
     dprintf (0,"Mass = %f \n",Masso(optr));
@@ -212,7 +215,7 @@ void list_orbit (orbitptr optr, double tstart, double tend, int n)
     for (i=0; i<Nsteps(optr); i++) {
         if ((tstart<Torb(optr,i)) && (Torb(optr,i)<tend)) {
             if (kount++ == 0)
-                printf ("%d %f %f %f %f %f %f %f\n",
+                printf (fmt,
                     i,Torb(optr,i),Xorb(optr,i),Yorb(optr,i),Zorb(optr,i),
                       Uorb(optr,i),Vorb(optr,i),Worb(optr,i));
             if (kount==n)
@@ -253,7 +256,7 @@ nemo_main()
         printf ("READING test\n");
         instr = stropen (fname,"r");
         while (read_orbit(instr,&optr)) {
-                list_orbit(optr,-10.0,10.0,1);
+                list_orbit(optr,-10.0,10.0,1,"%g");
         }
         strclose(instr);
     }
