@@ -1,0 +1,14 @@
+%N ccdsharp
+%D enhance/sharpen an image
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man ccdsharp' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input image file [???]
+%A out
+	Output image file [???]
+%A mode
+	Modes (laplace, aregan, pregan, divergence, vorticity) [laplace]
+%A VERSION
+	11-apr-96 PJT [0.2a]
