@@ -1,0 +1,14 @@
+C**********Basic input parameters**********
+expansion test   headline
+ 100             nsteps
+ 100             noutbod
+ 10              noutlog
+ 0.01            dtime
+ 1.0             G
+ .TRUE.          selfgrav
+.FALSE.          inptcoef
+.FALSE.          outpcoef
+.FALSE.          zeroodd
+.FALSE.          zeroeven
+.FALSE.          fixacc
+C******************************************
