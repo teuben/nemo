@@ -123,7 +123,8 @@
  * 13-may-04       h  add cpu/real time reporting for help=c 
  * 23-jun-04       i  fix bug free's version_  (JC Lambert)
  * 20-sep-04       j  disabled the version checking by default
- * 18-oct-04       j  support for the CVS ID (cvsid)
+ * 18-oct-04       k  support for the CVS ID (cvsid)
+ * 28-dec-04       l  help/report CVS ID properly (help=I)
 
   TODO:
       - what if there is no VERSION=
@@ -167,7 +168,7 @@
 	opag      http://www.zero-based.org/software/opag/
  */
 
-#define GETPARAM_VERSION_ID  "3.4k 18-oct-04 PJT"
+#define GETPARAM_VERSION_ID  "3.4l 28-dec-04 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -927,7 +928,7 @@ local void printhelp(string help)
         printf("  i       >> show some internal variables\n");
 	printf("  o       >> show the output key names\n");
 	printf("  c       >> show cpu usage at the end of the run\n");
-	printf("  r       >> cvs id\n");
+	printf("  I       >> cvs id\n");
         printf("  ?       >> this help (always quits)\n\n");
         printf("Numeric helplevels determine degree and type of assistence:\n");
         printf("They can be added to give combined functionality\n");
