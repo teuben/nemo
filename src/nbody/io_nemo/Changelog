@@ -1,0 +1,28 @@
+io_nemo ChangeLog
+
+03-Mar-2005 (Version 1.30)
+==========================
+
+in CVS:
+
+- Changelog file created.
+- a lot of code cleaning.
+- new stress test program to deeply test the code.
+- code is valgrind safe (memory and leak).
+- "-Wall" compiler option turned on.
+- happy gcc 3.4.
+	
+- in io_nemo:
+	- a critical memory bug has been fixed.
+	- manual updated.
+	- program example io_nemo_test.c updated.
+	- nemo control bit added.
+	- new return function values.
+
+- in io_nemo_f:
+	- manual updated.
+	- minor fixes.
+	- "-Wno-globals" compiler option added to compile fortram program with g77 to
+	  prevent useless and annoying warnings.
+	
+	
