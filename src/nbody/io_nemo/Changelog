@@ -22,7 +22,6 @@ in CVS:
 - in io_nemo_f:
 	- manual updated.
 	- minor fixes.
-	- "-Wno-globals" compiler option added to compile fortram program with g77 to
-	  prevent useless and annoying warnings.
-	
-	
+	- "-Wno-globals" compiler option added to compile fortram program
+          with g77  to prevent useless and annoying warnings.
+	- "-fwritable-strings" option compilation removed. (=> happy MacOSX compilation)
