@@ -10,6 +10,7 @@
  *     28-jan-94  V1.2b srandom -> set_xrandom for Solaris  PJT
  *                      also use nemo_main now
  *     24-mar-94  V1.2c ansi + using allocate()
+ *	8-sep-01	init_xrandom
  */
 
 #include "code.h"
@@ -48,7 +49,7 @@ string defv[] = {		/* DEFAULT PARAMETER VALUES */
     "potfile=\n			Filename for potential(5)",
 
     "debug=false\n		Turn on debugging messages",
-    "VERSION=1.2b\n		28-jan-94 PJT",
+    "VERSION=1.2c\n		8-sep-01 PJT",
     NULL,
 };
 
@@ -105,7 +106,7 @@ startrun()
 	    nbody = getiparam("nbody");		/*     get nbody parameter  */
 	    if (nbody < 1)			/*     is value absurd?     */
 		error("startrun: absurd nbody\n");
-	    set_xrandom(getiparam("seed"));	/*     set random generator */
+	    init_xrandom(getparam("seed"));	/*     set random generator */
 	    testdata(getbparam("cencon"));	/*     make test model      */
 	}
 	freq = getdparam("freq");		/*   get various parameters */

@@ -18,7 +18,7 @@ include $(NEMOLIB)/makedefs
 #LDFLAGS = -DSINGLEPREC -O4 -fsingle
 
 L= $(NEMOLIB)/libnemo.a
-LIBN = $(L)
+LIBN = $(NEMO_LIBS)
 # Files exported to Nemo.
 
 MANFILES = hackcode1.1

@@ -8,6 +8,7 @@
  *     15-aug-92  V1.2b  nemo_main such to return 0 to shell(PJT)
  *     18-jan-94  V1.3   srandom -> set_xrandom()	     pjt 
  *     28-nov-00  documented a memory leak
+ *      8-sep-01  init_xrandom
  */
 
 #include "code.h"
@@ -40,7 +41,7 @@ string defv[] = {		/* DEFAULT PARAMETER VALUES */
     "minor_freqout=32.0\n	  minor data-output frequency ",
 
     "debug=false\n		  turn on debugging messages ",
-    "VERSION=1.3\n		  18-jan-94 PJT",
+    "VERSION=1.3a\n		  8-sep-01 PJT",
     NULL,
 };
 
@@ -98,7 +99,7 @@ startrun()
 	    nbody = getiparam("nbody");		/*     get nbody parameter  */
 	    if (nbody < 1)			/*     is value absurd?     */
 		error("startrun: absurd nbody\n");
-	    set_xrandom(getiparam("seed"));	/*     set random generator */
+	    init_xrandom(getparam("seed"));	/*     set random generator */
 	    testdata(getbparam("cencon"));	/*     make test model      */
 	}
 	freq = getdparam("freq");		/*   get various parameters */
