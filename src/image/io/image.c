@@ -28,6 +28,7 @@
  *   9-sep-02   V6.2 added copy_image()
  *  13-nov-02   V??? added boolean images for masking operations  PJT
  *   7-may-04   V7.0 (optional) proper astronomical axes          PJT
+ *  16-mar-05   V7.1 protection to re-use a pointer for different images PJT
  *			
  *
  *  Note: bug in TESTBED section; new items (Unit) not filled in
@@ -128,11 +129,14 @@ int write_image (stream outstr, imageptr iptr)
  *	To improve:	One cannot use a external buffer for iptr, iptr
  *			is always assumed to be initialized by one of
  *			the XXX_image() routines here. 
+ *                    It will refuse to read an image that doesn't have
+ *                    the same shape [nx,ny,nz] as the old one
  */
  
 int read_image (stream instr, imageptr *iptr)
 {
     string read_matdef;
+    int nx=0, ny=0, nz=0;
 
     get_history(instr);         /* accumulate history */
 
@@ -144,14 +148,22 @@ int read_image (stream instr, imageptr *iptr)
 	dprintf (DLEV,"Allocated image @ %d ",*iptr);
 	if (*iptr == NULL) return 0;	/* no memory available */
 	Frame(*iptr) = NULL;
-    } else
-    	dprintf (DLEV,"Image already allocated @ %d\n",*iptr);
+    } else {
+        nx = Nx(*iptr);
+        ny = Ny(*iptr);
+        nz = Nz(*iptr);
+    	dprintf (DLEV,"Image %dx%dx%d already allocated @ %d\n",
+		 nx,ny,nz,*iptr);
+    }
     	
     get_set (instr,ImageTag);
         get_set (instr,ParametersTag);
             get_data (instr,NxTag,IntType, &(Nx(*iptr)), 0);
             get_data (instr,NyTag,IntType, &(Ny(*iptr)), 0);
             get_data (instr,NzTag,IntType, &(Nz(*iptr)), 0);
+	    if ((nx>0 || ny>0 || nz>0) &&
+		(nx != Nx(*iptr) || ny != Ny(*iptr) || nz != Nz(*iptr)))
+	      error("Cannot read different sized images in old pointer yet");
 	    if (get_tag_ok(instr,AxisTag))
 	      get_data (instr,AxisTag,IntType, &(Axis(*iptr)), 0);
 	    else
