@@ -1,0 +1,69 @@
+.TH ORBIT 3NEMO "24 May 1992" 
+.SH NAME
+read_orbit, write_orbit, allocate_orbit, list_orbit \- basic orbit i/o routines
+.SH SYNOPSIS
+.nf
+.B #include <stdinc.h>
+.B #include <potential.h>
+.B #include <orbit.h>
+.PP
+.B allocate_orbit(optr,ndim,nsteps)
+.B orbitptr *optr;
+.B int ndim;
+.B int nsteps;
+.PP
+.B write_orbit(outstr,optr)
+.B stream outstr;
+.B orbitptr optr;
+.PP
+.B read_orbit(instr,optr)
+.B stream instr;
+.B orbitptr *optr;
+.PP
+.B list_orbit(optr,tstart,tend,n)
+.B orbitptr optr;
+.B double tstart;
+.B double tend;
+.B int n;
+.fi
+.SH DESCRIPTION
+\fIorbit(3NEMO)\fP provide a few utility functions which handle the i/o of
+\fIorbit(5NEMO)\fP datafile. They subsequently call lower level filestructure 
+routines, as described in \fIfilestruct(3NEMO)\fP.
+.PP
+\fIwrite_orbit\fP writes an orbit to an output stream, using standard
+binary filestructure.
+.PP
+\fIread_orbit\fP reads an orbit from an input stream into a pointer
+to an orbit. If that pointer is NULL, i.e. has not been initialized,
+this routine will take care of the allocation too.
+.PP
+\fIallocate_orbit\fP allocates an orbit. Note that \fIoptr\fP is
+a pointer to an orbit, on entry normally initialized to NULL
+to signal that a new orbit must be allocated. If  \fIoptr\fP was already
+assigned a value (previous allocation), \fIallocate_orbit\fP checks if
+this one contains enough space. If not, new space is claimed and old
+space may be freed. Normally application programs do not need
+to call this routine, since \fIread_orbit\fP takes care of the allocation.
+.PP
+\fIlist_orbit\fP lists the coordinates of an orbit between two given
+times.
+.SH "SEE ALSO"
+\fIorbit(5NEMO)\fP
+.SH BUGS
+No proper dynamic allocation of orbits yet; space has to be allocated
+before it's used in the orbit calculation.
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+~/src/pjt/orbit  	authors original sources
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+13-Jul-87	V1.0: Original created	PJT
+28-jul-87	V2.0: new orbit(5) structure	PJT
+24-may-92	V3.0: added potential to orbit	PJT
+.fi

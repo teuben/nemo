@@ -1,0 +1,34 @@
+.TH GET_SNAP 3NEMO "22 Jan 1989"
+.SH NAME
+get_snap \- input method for standardized snapshot files
+.SH SYNOPSIS
+.nf
+\fB#include <snapshot/snapshot.h>\fP
+\fB#include <snapshot/get_snap.c>\fP
+.PP
+\fBget_snap(instr, btab, nbody, tsnap, bits)\fP
+\fBstream instr;\fP
+\fBBody **btab;\fP
+\fBint *nbody, *bits;\fP
+\fBreal *tsnap;\fP
+.SH DESCRIPTION
+\fIget_snap\fP is a generic method for reading snapshot data from a file,
+to be included by the preprocessor in an application program.
+It assumes that a body structure with standard declaration and accessor
+macros \fBBody\fP, \fBMass()\fP, \fBPhase()\fP, etc has been defined
+(see \fIbody\fP(3NEMO)).
+.PP
+Notes: (1) if \fB*btab == NULL\fP, a new body array of length \fBnbody\fP
+will be allocated, which may be accessed when \fIget_snap\fP returns, while
+if \fB*btab != NULL\fP, it must point to an array of length \fBnbody\fP,
+and any new data in the input stream replaces the data in the body table.
+(2) \fBbits\fP is the logical OR of the bit flags for the individual
+components, defined in \fIsnapshot/snapshot.h\fP. (3) The name \fIget_snap\fP
+is a macro, defined by \fIget_snap.c\fP, so the include statement must come
+before the first usage. (4) The vanilla \fIget_snap\fP or any subsidiary
+routine may be replaced by giving the macro name a definition before
+including \fIget_snap.c\fP.
+.SH SEE ALSO
+put_snap(3NEMO), body(3NEMO), snapshot(5NEMO).
+.SH AUTHOR
+Joshua E. Barnes.

@@ -1,0 +1,220 @@
+.TH VECTMATH 3NEMO "27 April 1992"
+.SH NAME
+vectmath.h \- vector and matrix math package
+.SH SYNOPSIS
+.cs 1 24
+.ss 24
+.nf
+\fB#include <vectmath.h>\fP
+.PP
+CLRV(v)                 v  = 0
+                         i
+.PP
+UNITV(v,j)              v  = delta
+                         i        ij
+.PP
+SETV(v,u)               v  = u
+                         i    i
+.PP
+ADDV(v,u,w)             v  = u  + w
+                         i    i    i
+.PP
+SUBV(v,u,w)             v  = u  - w
+                         i    i    i
+.PP
+MULVS(v,u,s)            v  = u  s
+                         i    i
+.PP
+DIVVS(v,u,s)            v  = u  / s
+                         i    i
+.PP
+DOTVP(s,v,u)            s = v  u
+                             i  i
+.PP
+dotvp(v,u)              v  u
+                         i  i
+.PP
+ABSV(s,v)               s = sqrt(v  v )
+                                  i  i
+.PP
+absv(v)                 sqrt(v  v )
+                              i  i
+.PP
+DISTV(s,v,u)            s = sqrt((v  - u ) (v  - u ))
+                                   i    i    i    i
+.PP
+distv(v,u)              sqrt((v  - u ) (v  - u ))
+                               i    i    i    i
+.PP
+CROSSVP(s,v,u)          s = eps  v  u                   [only in 2-D]
+                               ij i  j
+.PP
+CROSSVP(v,u,w)          v  = eps   u  w                 [only in 3-D]
+                         i      ijk j  k
+.PP
+CLRM(p)                 p   = 0
+                         ij
+.PP
+SETMI(p)                p   = delta
+                         ij        ij
+.PP
+SETM(p,q)               p   = q
+                         ij    ij
+.PP
+TRANM(p,q)              p   = q
+                         ij    ji
+.PP
+ADDM(p,q,r)             p   = q   + r
+                         ij    ij    ij
+.PP
+SUBM(p,q,r)             p   = q   - r
+                         ij    ij    ij
+.PP
+MULM(p,q,r)             p   = q   r
+                         ij    ik  kj
+.PP
+MULMS(p,q,s)            p   = q   s
+                         ij    ij
+.PP
+DIVMS(p,q,s)            p   = q   / s
+                         ij    ij
+.PP
+MULMV(v,p,u)            v  = p   u
+                         i    ij  j
+.PP
+OUTVP(p,v,u)            p   = v  u
+                         ij    i  j
+.PP
+TRACEM(s,p)             s = Tr(p)
+.PP
+tracem(p)               Tr(p)
+.PP
+SETVS(v,s)              v  = s
+                         i
+.PP
+ADDVS(v,u,s)            v  = u  + s
+                         i    i
+.PP
+SETMS(p,s)              p   = s
+                         ij
+.PP
+MULVV(w,v,u)            w  = v  * u
+                         i    i    i
+.PP
+SADDV(v,u)              v  = v  + u
+                         i    i    i
+.PP
+SSUBV(v,u)              v  = v  - u
+                         i    i    i
+.PP
+SMULVS(v,s)             v  = v * s
+                         i    i    
+.PP
+SDIVVS(v,s)             v  = v / s
+                         i    i   
+.PP
+SMULVV(v,u)             v  = v  * u
+                         i    i    i
+.PP
+real s;
+vector v, u, w;
+matrix p, q, r;
+.fi
+.SH DESCRIPTION
+\fIvectmath.h\fP provides various arithmetic operations on vectors and
+matricies, represented as arrays of numbers.
+These operations allow programmers to concentrate on the mathematical
+content of an algorithm while abstracting away the details of how vectors
+and matricies are represented and accessed.
+.PP
+To specify how many dimensions vectors have, define ONE of the
+following symbols to the C preprocessor:
+.nf
+        \fBTWODIM\fP                    - for 2-D vectors
+        \fBTHREEDIM\fP                  - for 3-D vectors
+        \fBNDIM\fP                      - for N-D vectors
+.fi
+The symbols \fBTWODIM\fP and \fBTHREEDIM\fP are flags, and may be
+defined with any value whatsoever.
+\fBNDIM\fP is used as a value, namely (of course) the number of dimensions.
+If either \fBTWODIM\fP or \fBTHREEDIM\fP are defined, \fIvectmath.h\fP
+will define \fBNDIM\fP to be 2 or 3 respectively, incase \fBNDIM\fP
+is subsequently needed.
+If none of these symbols is defined when \fIvectmath.h\fP is included,
+the default is \fBTHREEDIM\fP.
+Note that \fICROSSVP\fP is defined only for \fBTWODIM\fP and \fBTHREEDIM\fP.
+.PP
+Unless the symbol \fBNOTYPEDEF\fP is defined when \fIvectmath.h\fP is
+included, \fBvector\fP and \fBmatrix\fP will be defined as \fBNDIM\fP
+and \fBNDIM\fP by \fBNDIM\fP arrays of \fBreal\fP numbers, respectively
+(see \fIstdinc\fP(3NEMO) for a description of \fBreal\fP).
+These may be used to declare vector and matrix objects to be manipulated.
+.PP
+The exact definitions of these operations correspond to the index
+language expressions given above.  Some of these definitions imply
+restrictions on placing the same object on both sides of the
+assignment operation.  For example, 
+.nf
+        ADDV(v, v, u);
+.fi
+does exactly the right thing, but
+.nf
+        CROSSVP(v, v, u);
+.fi
+puts garbage into \fBv\fP, instead of the cross-product of \fBv\fP
+and \fBu\fP.
+.PP
+Most of these operations are implemented as macros which expand in line.
+A subtle point connected with this is that syntactically, a reference
+to of one of these macros is a statement, not an expression.  This means
+that, for example, the code fragment
+.nf
+        if (foobar)
+            ADDV(x, y, z);
+        else
+            SUBV(x, y, z);
+.fi
+will not compile, because the terminating semi-colon following the
+ADDV is seen as a seperate (null) statement.  The best way to solve
+this problem is to code the above example as follows:
+.nf
+        if (foobar) {
+            ADDV(x, y, z);
+        } else {
+            SUBV(x, y, z);
+        }
+.fi
+The enclosing curly-brackets insure that the code is syntactically
+correct both before and after macro expansion.
+.PP
+Those operators which return a scalar value instead of storing it
+(currently, \fIdotvp, absv, distv, and tracem\fP) are implemented
+by functions which are called from macro expansions.  These functions
+need to know if their arguments are floating or double arrays;
+\fIvectmath.h\fP uses the preprocessor symbol \fBSINGLEPREC\fP to
+determine the precision in use.  Mixed-precision expressions
+yield incorrect results; for example,
+.nf
+	float x[NDIM];
+	double y[NDIM];
+
+	... dotvp(x,y);
+.nf
+will fail.  Consistent use of the abstractions \fIreal\fP, \fIvector\fP,
+and \fImatrix\fP is suggested.
+.PP
+Some impure, but useful, vector and matrix operations are also defined. 
+For example, \fIADDVS\fP sets each element of a vector to a scalar,
+and \fIMULVV\fP multiplies two vectors with each other, element by
+element.
+.SH BUGS
+You cannot (easily) 
+mix vectors and matrices of different dimensionality within
+the same source code.
+.SH HISTORY
+.nf
+.ta +1i +4i
+30-nov-86	(man) Created                                 	JEB
+22-oct-90	Merged in some starlab macros           	PJT
+27-apr-92	Added SMULVV and documented starlab macros	PJT
+.fi

@@ -1,0 +1,47 @@
+.TH BODY 3NEMO "30 March 1988"
+.SH NAME
+body, barebody \- point-mass particle structures
+.SH SYNOPSIS
+.nf
+\fB#include <snapshot/body.h>\fP
+\fB#include <snapshot/barebody.h>\fP
+.SH DESCRIPTION
+\fIbody.h\fP contains the definition of a standardized structure used to
+represent a point-mass particle, including several useful auxiliary fields.
+\fIbarebody.h\fP defines a more minimal structure containing only mass
+and phase-space information.
+The details of the actual representation are hidden behind the following
+preprocessor macros, which completely define the structures from the point
+of view of an applications programmer.
+.TP 24
+\fBBody\fP
+A typedef struct used to declare an instance of a body.
+.TP
+\fBMass(b)\fP
+Mass of body \fBb\fP, a real value.
+.TP
+\fBPhase(b)\fP
+Phase-space coordinates of \fBb\fP, an array of two vectors
+(see \fIvectmath.h\fP(3NEMO)).
+.TP
+\fBPos(b)\fP
+Position coordinates of \fBb\fP, a vector.
+.TP
+\fBVel(b)\fP
+Velocity coordinates of \fBb\fP, a vector.
+.TP
+\fBPhi(b)\fP
+Gravitational potential at position of \fBb\fP, a real value.
+.TP
+\fBAcc(b)\fP
+Gravitational acceleration of \fBb\fP, a vector.
+.TP
+\fBAux(b)\fP
+Auxiliary real value for \fBb\fP.
+.TP
+\fBKey(b)\fP
+Auxiliary integer value for \fBb\fP.
+.SH SEE ALSO
+get_snap(3NEMO), put_snap(3NEMO), snapshot(5NEMO).
+.SH AUTHOR
+Joshua E. Barnes.

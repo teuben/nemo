@@ -1,0 +1,246 @@
+.TH FILESTRUCT 3NEMO "5 March 1994"
+.SH NAME
+filestruct \- primitives for structured binary file I/O
+.SH SYNOPSIS
+.nf
+\fB#include <stdinc.h>\fP
+\fB#include <filestruct.h>\fP
+.PP
+\fBbool get_tag_ok(str, tag)\fP
+\fBvoid get_data(str, tag, typ, dat, dimN, ..., dim1, 0)\fP
+\fBvoid get_data_coerced(str, tag, typ, dat, dimN, ..., dim1, 0)\fP
+\fBstring get_string(str, tag)\fP
+\fBvoid get_set(str, tag)\fP
+\fBvoid get_tes(str, tag)\fP
+\fBvoid put_data(str, tag, typ, dat, dimN, ..., dim1, 0)\fP
+\fBvoid put_string(str, tag, msg)\fP
+\fBvoid put_set(str, tag)\fP
+\fBvoid put_tes(str, tag)\fP
+.PP
+\fBvoid get_data_set(str, tag, typ, dat, dimN, ..., dim1, 0)\fP
+\fBvoid get_data_ran(str, tag, dat, offset, length)\fP
+\fBvoid get_data_tes(str, tag)\fP
+\fBvoid put_data_set(str, tag, typ, dat, dimN, ..., dim1, 0)\fP
+\fBvoid put_data_ran(str, tag, dat, offset, length)\fP
+\fBvoid put_data_tes(str, tag)\fP
+.PP
+\fBvoid strclose(str)\fP
+\fBbool qsf(str)\fP
+.PP
+\fBstream str;\fP
+\fBstring tag;\fP
+\fBint typ;\fP
+\fBbyte *dat;\fP
+\fBint dimN, ..., dim1;\fP
+\fBstring msg;\fP
+\fBint offset, length\fP
+.fi
+.SH DESCRIPTION
+These routines provide a simple yet reasonably general mechanism for
+the structured input and output of binary data.  A structured binary
+file may be viewed as a sequence of tagged data items; special symbols
+are introduced to group items hierarchically into sets.  Data items
+are typically scalar values or homogeneous arrays constructed from the
+elementary C data types: \fBchar, short, int, long, float, double\fP.
+\fIfilestruct.h\fP defines the following symbolic names for these types:
+.TP 12
+\fBCharType\fP
+standard C characters, assumed printable.
+.TP 12
+\fBByteType\fP
+like C characters, but unsigned and unprintable.
+.TP 12
+\fBAnyType\fP
+anything at all; see below.
+.TP 12
+\fBShortType\fP
+standard C short integers.
+.TP 12
+\fBIntType\fP
+standard C integers.
+.TP 12
+\fBLongType\fP
+standard C long integers.
+.TP 12
+\fBFloatType\fP
+standard C floating point.
+.TP 12
+\fBDoubleType\fP
+standard C double-precision.
+.PP
+The first three types are all synonyms for \fBCharType\fP, but the
+meanings conveyed are quite different.  \fBCharType\fP is reserved
+for strings of legible characters, while \fBByteType\fP identifies
+data in 8-bit binary chunks.  \fBAnyType\fP, while operationally
+identical, implies that data (typically in an array) may not
+naturally divide on 8-bit boundaries; this type currently provides
+an escape hatch for structure I/O (see the example below).
+
+\fIget_tag_ok(str, tag)\fP is used to determine if a subsequent
+\fIget_data()\fP, \fIget_string()\fP, or \fIget_set()\fP call will
+succeed in finding an item named \fItag\fP in the structured binary
+input stream \fIstr\fP.  The algorithm used to determine this depends
+on whether the structured input point is at top level or within a set.
+At top level, the next item must match the specified \fItag\fP.
+Within a set, the input point is effectively rewound to the first item
+of the set, and the entire set is scanned for the \fItag\fP.
+\fIget_tag_ok()\fP returns \fBFALSE\fP on end of file.
+
+\fIget_data(str, tag, typ, dat, dimN, ..., dim1, 0)\fP
+transfers data from a structured binary input stream \fIstr\fP to a
+scalar or homogeneous array at address \fIdat\fP.  First an item named
+\fItag\fP is found with the algorithm described above.  The type of
+the item is checked against \fItyp\fP, and the dimensions (if any) are
+checked against arguments \fIdimN, ..., dim1\fP.  If they match, the
+item data is copied to the specified address.
+
+\fIget_data_coerced(str, tag, typ, dat, dimN, ..., dim1, 0)\fP
+performs the same function as \fIget_data()\fP except that the types
+of the item may be \fIFloatType\fP and the type specified by the
+parameter \fItyp\fP may be \fIDoubleType\fP  or the other way around.
+If \fItyp\fP matches the type of the item, this function is identical
+to \fIget_data()\fP; if a conversion other than Float->Double or
+Double->Float is attempted, an error is signaled.
+
+\fIget_string(str, tag)\fP searches as above for an item named
+\fItag\fP, which must contain a null-terminated array of characters.
+The data is copied to space allocated using \fImalloc\fP(3) and a
+pointer is returned.
+
+\fIget_set(str, tag)\fP searches as above for a set named \fItag\fP
+(in fact, the \fItag\fP is carried by a special symbol used to mark
+the start of the set).  The contents of this set are then taken as the
+scope of subsequent \fIget_tag_ok()\fP, \fIget_data()\fP,
+\fIget_string()\fP and \fIget_set()\fP calls.
+
+\fIget_tes(str, tag)\fP terminates the scan of the current input set,
+and returns to the scope which was in effect before the set was
+accessed.  If \fItag\fP is not NULL, it must match the tag of the
+corresponding \fIget_set()\fP call.  When input is from the top level,
+the input pointer is left before the next item in the input stream.
+(Note: \fItes\fP is set backwards).
+
+\fIput_data(str, tag, typ, dat, dimN, ..., dim1, 0)\fP
+is effectively the inverse of \fIget_data()\fP above: the data
+pointed to by \fIdat\fP, which is of type \fItyp\fP and dimensions
+\fIdimN, ..., dim1\fP, is emitted to the structured output stream
+\fIstr\fP as an item named \fItag\fP.
+
+\fIput_string(str, tag, msg)\fP is the inverse of \fIget_string()\fP
+above.
+
+\fIput_set(str, tag)\fP begins the output of a set named \fItag\fP.
+The contents of the set are supplied by subsequent calls to
+\fIput_data()\fP, \fIput_string()\fP, and \fIput_set()\fP.
+
+\fIput_tes(str, tag)\fP terminates the output of a set.
+
+\fIstrclose(str)\fP is the preferred way to close binary streams used
+in the above operations; it need not be called unless the stream must
+be explicitly closed (for example, for later reuse). In case the stream
+was opened as a special one (e.g. a scratch stream, see 
+\fIstropen(3NEMO)\fP), \fIstrclose\fP is the only means to properly
+clean up.
+
+\fIqsf(str)\fP queries if an input
+stream is a binary structured one. Since this
+requires data to be read (which may be needed later on), this function
+cannot be used with pipes. \fIqsf\fP always returns FALSE in this case.
+Also, it is left to the application programmer to properly
+place the filepointer (\fIrewind(3)\fP) in case that stream has to be
+used for input.
+
+\fIget_data_set\fP and \fPget_data_tes\fP bracket random data access,
+which is achieved by \fIget_data_ran\fP. \fIoffset\fP and \fIlength\fP
+are both in units of the item-length.
+.SH EXAMPLES
+The following code fragment reads and later writes some data to
+structured binary files.
+.nf
+\ \ \ \ 
+\ \ \ \ \fBstream instr, outstr;\fP
+\ \ \ \ \fBint nobj;\fP
+\ \ \ \ \fBdouble time, mass[4096], phase[4096][2][3];\fP
+\ \ \ \ \ \ \ \ \fB*\fP
+\ \ \ \ \ \ \ \ \fB*\fP
+\ \ \ \ \fBget_set(instr, "SnapShot");\fP
+\ \ \ \ \fBget_set(instr, "Parameters");\fP
+\ \ \ \ \fBget_data(instr, "Time", DoubleType, &time, 0);\fP
+\ \ \ \ \fBget_data(instr, "Nobj", IntType, &nobj, 0);\fP
+\ \ \ \ \fBget_tes(instr,"Parameters");\fP
+\ \ \ \ \fBget_set(instr, "Particles");\fP
+\ \ \ \ \fBif (get_tag_ok(instr, "Mass"))\fP
+\ \ \ \ \ \ \ \ \fBget_data(instr, "Mass", DoubleType, mass, nobj, 0);\fP
+\ \ \ \ \fBget_data(instr, "PhaseSpace", DoubleType, phase,\fP
+\ \ \ \ \ \ \ \0\0\0\0\0\0\fBnobj, 2, 3, 0);\fP
+\ \ \ \ \fBget_tes(instr, "Particles");\fP
+\ \ \ \ \fBget_tes(instr, "SnapShot");\fP
+\ \ \ \ \ \ \ \ \fB*\fP
+\ \ \ \ \ \ \ \ \fB*\fP
+\ \ \ \ \fBput_set(outstr, "SnapShot");\fP
+\ \ \ \ \fBput_set(outstr, "Parameters");\fP
+\ \ \ \ \fBput_data(outstr, "Time", DoubleType, &time, 0);\fP
+\ \ \ \ \fBput_data(outstr, "Nobj", IntType, &nobj, 0);\fP
+\ \ \ \ \fBput_tes(outstr, "Parameters");\fP
+\ \ \ \ \fBput_set(outstr, "Particles");\fP
+\ \ \ \ \fBput_data(outstr, "Mass", DoubleType, mass, nobj, 0);\fP
+\ \ \ \ \fBput_data(outstr, "PhaseSpace", DoubleType, phase,\fP
+\ \ \ \ \ \ \0\0\0\0\0\0\0\fBnobj, 2, 3, 0);\fP
+\ \ \ \ \fBput_tes(outstr, "Particles");\fP
+\ \ \ \ \fBput_tes(outstr, "SnapShot");\fP
+\ \ \ \ 
+.fi
+Notes: the first two calls to \fIget_data()\fP and \fIput_data()\fP
+illustrate the I/O of scalar data: although no dimensions are listed,
+the terminating \fB0\fP (zero) must appear in the arg list.  Later
+calls show how arrays are specified.  The \fBMass\fP item will only be
+input if it appears in the \fBParticles\fP set.
+
+Structures which do not contain pointer data can be handled using the
+\fBAnyType\fP, but with somewhat limited functionality: a structure of
+type \fBfoo\fP is treated as an array of \fBsizeof(foo)\fP objects of
+type \fBAnyType\fP.  This means, alas, that the contents of structures
+are hidden to utilities like \fItsf\fP(1). The following example shows
+how to handle structures:
+.nf
+\ \ \ \ 
+\ \ \ \ \fBstruct foo {\fP
+\ \ \ \ \ \ \ \ \fBint erupt;\fP
+\ \ \ \ \ \ \ \ \fBchar actor;\fP
+\ \ \ \ \ \ \ \ \fBdouble trouble;\fP
+\ \ \ \ \fB} footab[64];\fP
+\ \ \ \ \ \ \ \ \fB*\fP
+\ \ \ \ \ \ \ \ \fB*\fP
+\ \ \ \ \fBget_data(instr, "FooTab", AnyType, footab,\fP
+\ \ \ \ \ \ \0\0\0\0\0\0\0\fB64, sizeof(struct foo), 0);\fP
+\ \ \ \ \ \ \ \ \fB*\fP
+\ \ \ \ \ \ \ \ \fB*\fP
+\ \ \ \ \fBput_data(outstr, "FooTab", AnyType, footab,\fP
+\ \ \ \ \ \ \0\0\0\0\0\0\0\fB64, sizeof(struct foo), 0);\fP
+\ \ \ \ 
+.fi
+.SH DIAGNOSTICS
+Exceptional conditions (eg, unexpected EOF), invalid arguments (eg,
+types out of range) and low-level catastrophies (eg, running out of
+memory) generate messages via \fIerror\fP(3), which will, in general,
+return the program to the operating system.
+This error-checking is
+implemented with the goal of freeing applications programmers from
+the responsibility of checking for I/O errors other than end-of-file.
+.SH BUGS
+Whenever pipes are used, all data is read into memory, as opposed to
+being deferred for input.
+This may lead to large memory consuption.
+.SH AUTHOR
+Joshua E. Barnes, Lyman P. Hurd, Peter Teuben
+.SH SEE ALSO
+filestruct(5NEMO), \fINEMO Users/Programmers Guide\fP
+.SH "UPDATE HISTORY"
+.nf
+.ta +2.0i +2.0i
+4-Apr-87	original implementation		JEB
+30-Aug-87	type coersion, deferred input	LPH
+16-Apr-88	new types, operators, etc	JEB
+16-May-92	random access to data   	PJT
+5-mar-94	documented qsf          	PJT
+.fi
