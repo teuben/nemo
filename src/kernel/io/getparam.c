@@ -1114,10 +1114,11 @@ bool hasvalue(string name)
     idx = atoi(cp+1);
     cp++;
     *cp = 0;
+    n = findkey(name);
+    if (n > 0) return !streq(getparam(name), "");    /* catch non-indexed keywords */
   } else {              /* keyword was definitely not indexed */
     return !streq(getparam(name), "");
   }
-
 
   n = indexparam(key,idx);
   dprintf(1,"Re-Checking indexparam(%s,%d) -> %d\n",key,idx,n);
@@ -1194,7 +1195,7 @@ string getparam_idx(string name, int idx)
 
 /*
  * indexparam: return largest index available in an indexed parameter
- *       return -1 if the parameter is not index at all
+ *       return -1 if the parameter is not indexed at all
  *
  *       if IDX > 0 is given, it will check for that index
  */
