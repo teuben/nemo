@@ -1,0 +1,59 @@
+/* yapp_pgplot.c */
+string yapp_string = "?";
+main(argc, argv)
+int argc;
+string argv[];
+{
+    int i, j;
+ 
+    plinit(argv[1], 0.0, 20.0, 0.0, 20.0);
+    plmove(0.0, 0.0);
+    plline(20.0, 0.0);
+    plline(20.0, 20.0);
+    plline(0.0, 20.0);
+    plline(0.0, 0.0);
+    plline(20.0, 20.0);
+    plmove(20.0, 0.0);
+    plline(0.0, 20.0);
+    plltype(12, 0);
+    plmove(4.0, 18.0);
+    plline(16.0, 18.0);
+    plltype(-6, 0);
+    plmove(6.0, 18.0);
+    plline(14.0, 18.0);
+    for (i = 1; i <= 4; i++) {
+        plltype(i, 1);
+        plmove(1.0, 13.0 - i);
+        plline(3.0, 13.0 - i);
+        plpoint(3.5, 13.0 - i);
+        plltype(1, i);
+        for (j = 1; j <= 4; j++) {
+            plmove(1.5, 13.0 - i - 0.2*j);
+            plline(1.5 + j, 13.0 - i - 0.2*j);
+        }
+    }
+    plltype(1, 1);
+    plcircle(15.0, 9.0, 0.5);
+    plcircle(16.0, 9.0, 0.25);
+    plcircle(17.0, 9.0, 0.125);
+    plcircle(18.0, 9.0, 0.0625);
+    plbox(16.0, 8.0, 0.4);
+    plbox(17.0, 8.0, 0.2);
+    plbox(18.0, 8.0, -0.2);
+    plcross(16.0, 7.0, 0.4);
+    plcross(17.0, 7.0, 0.2);
+    plcross(18.0, 7.0, -0.2);
+    pltext("Foo Bar!", 8.0, 5.0, 0.5, 0.0);
+    pltext("Fum Bar!", 8.0, 3.0, 0.25, 0.0);
+    for (i = 0; i <= 4; i++)
+        pltext(" testing angles", 16.0, 10.0, 0.2, 45.0*i);
+    plmove(10.0, 8.5);
+    plline(10.0, 11.5);
+    pljust(-1);
+    pltext("left justified",  10.0,  9.0, 0.25, 0.0);
+    pljust(0);
+    pltext("centered",        10.0, 10.0, 0.25, 0.0);
+    pljust(1);
+    pltext("right justified", 10.0, 11.0, 0.25, 0.0);
+    plstop();
+}
