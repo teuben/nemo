@@ -419,6 +419,17 @@ cvsnew:
 cvsu:
 	cvsu | grep ^M
 
+ACVSROOT = :pserver:anonymous@cvs.astro.umd.edu:/home/cvsroot
+
+cvslogin:
+	cvs -d $(ACVSROOT) login
+
+cvstar:
+	cvs -Q -d $(ACVSROOT) co -d nemo_cvs nemo
+	gtar zcf nemo_cvs.tar.gz nemo_cvs
+	rm -rf nemo_cvs
+	scp nemo_cvs.tar.gz apus:/home/ftp/pub/nemo
+
 
 # The following 'ftp' targets only supposed to work at the master site
 # Warning:  (COMPRESS) .gz extensions have been hardcoded here
