@@ -40,6 +40,8 @@
  *                     a: add out= for fourier
  *      24-feb-03  V3.4  add fit=zero
  *       4-oct-03      a fix nsigma>0 for fit=line
+ *
+ * TODO:   check 'r', wip gives slightly different numbers
  */
 
 /*
@@ -50,6 +52,9 @@
 or
     A.Fitzbibbon, M. Pilu and R.B.Fisher, "Direct Least Square Fitting of Ellipse",
     IEEE Tran. Pattern Analysis and Maschine Intelligence, Vol.21, No.5, pp.476-480, May 1999
+
+    http://www.mai.liu.se/~akbjo/NMbook.html
+	ch.11 has a section on fitting circles and ellipses
 
  */
 
