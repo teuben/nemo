@@ -79,3 +79,7 @@ nemo_src:
 mkplummer: mkplummer.c
 	$(CC) $(CFLAGS) -DTOOLBOX -o mkplummer mkplummer.c \
 			$(NEMO_LIBS) $(EL) -lm
+
+
+kd95:
+	(cd $(NEMO)/usr/kuijken/GalactICS/src; make -f Makefile.nemo install)
