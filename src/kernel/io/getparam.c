@@ -110,6 +110,7 @@
  * 16-jan-02       g  wrote findakey to fix various indexing shortcomings
  * 17-jan-02       h  fix minor indexing, fix khoros output
  * 18-jan-02       i  fix reading indexed from keyword (.def) files
+ * 20-jan-02       j  putparam
 
   TODO:
       - what if there is no VERSION=
@@ -1460,16 +1461,31 @@ local void setparam (string par, string val, string prompt)
 {
 #if defined(PUTPARAM) && defined(INTERACT)
     char line[80];      
-    int  i;
+    keyword *kw;
+    int  i, idx;
 
     if (par==NULL || *par==0)
         error("setparam: no parameter supplied?");
     if (nkeys==0)
         local_error("setparam: called before initparam");
-    i=findkey(par);        /* find entry of keyword in table */
-    if (i<0)
-        error("setparam: parameter \"%s\" unknown",par);
-    if (prompt!=NULL && *prompt!=0) {        /* interactive entry */
+
+    kw = findakey(par);
+    if (kw == NULL) {
+      // check if it's an indexed keyword, we'll allow a new one to be entered
+      char *keyval;
+      i=set_indexed(par,&idx);
+      if (i==0)
+	error("setparam: parameter \"%s\" unknown",par);
+      keyval = allocate(strlen(par)+strlen(val)+2);
+      strcpy(keyval,par);
+      strcat(keyval,"=");
+      strcat(keyval,val);
+      addindexed(i, keyval, idx);    /* create this new indexed key */
+      free(keyval);
+      return;
+    }
+
+    if (prompt && *prompt!=0) {        /* interactive entry */
         beep();
         fprintf (stderr,"%s: %s=",par, prompt);     /* DPRINTF ??? */
         fflush(stderr);
@@ -1477,12 +1493,13 @@ local void setparam (string par, string val, string prompt)
 #if 0
         if (gets(line) == NULL) error("Null input");
 #else
-        if (fgets(line,80,stdin) == NULL) error("Null input");
+        // if (fgets(line,80,stdin) == NULL) error("Null input");
+	error("Can't do prompting anymore until fgets() is fixed");
 #endif
         val = line;
     }
-    keys[i].val = scopy(val);
-    keys[i].upd = 2;            /* mark it as being updated */
+    kw->val = scopy(val);
+    kw->upd = 2;              /* mark it as being updated */
 #else
     error("setparam: not compiled into getparam.c");
 #endif /* PUTPARAM && INTERACT */
