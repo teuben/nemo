@@ -1,0 +1,36 @@
+%N runscfm
+%D Self Consistent Field Method N-body code
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man runscfm' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	input file (standard snapshot) [???]
+%A outdir
+	output run directory (required) [???]
+%A nsteps
+	Number of timesteps   [100]
+%A noutbod
+	Output system state (on SNAPxxx) [100]
+%A noutlog
+	Output logfile data (on SCFLOG) [10]
+%A dtime
+	Integration timestep  [0.01]
+%A gravconst
+	Gravitional Constant  [1.0]
+%A selfgrav
+	include selfgravity? [t]
+%A inptcoef
+	 [f]
+%A outpcoef
+	 [f]
+%A zeroodd
+	 [f]
+%A zeroeven
+	 [f]
+%A fixacc
+	 [f]
+%A headline
+	run comment []
+%A VERSION
+	22-jan-98 PJT [1.0]
