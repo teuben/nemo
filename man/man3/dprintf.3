@@ -23,6 +23,13 @@ or setting an environment variable \fBDEBUG\fP (this is done by
 \fBformat\fP is the
 string to be encoded. The optional remaining arguments \fBarg\fP are handled
 through a variable argument mechanism (see also \fIprintf(3)\fP).
+.SH SNPRINTFV
+Note dprintf(int,char *,...) is now used by the snprintfv package
+see http://www.gnu.org/software/autogen/
+The official name for NEMO's function is now nemo_dprintf()
+although a macro will accept dprintf() since their prototype
+\fbhappens\fP to be the same as ours. You just don't have acccess
+to their code.
 .SH SEE ALSO
 getparam(3NEMO), printf(3)
 .SH FILES
@@ -36,4 +43,4 @@ Peter Teuben
 .nf
 .ta +1i +4i
 xx-mar-88	added to getparam.c	Peter Teuben
-
+26-sep-01	official name now nemo_dprintf()	PJT
