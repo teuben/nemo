@@ -3,6 +3,7 @@
  *               a potential flow (see also flowcode)
  *
  *	original version: 18-nov-03	Peter Teuben - Maryland
+ *                        20-nov-03     changed meaning of angles, and thus signs of k/pitch
  */
 
 #include <stdinc.h>
@@ -35,7 +36,7 @@ string defv[] = {
     "nmodel=1\n           number of models",
     "test=f\n             test shape of spiral",
     "headline=\n	  text headline for output ",
-    "VERSION=1.0\n	  19-nov-03 PJT",
+    "VERSION=1.1\n	  20-nov-03 PJT",
     NULL,
 };
 
@@ -129,7 +130,8 @@ setdensity(void)
     pos_d[2] = 0.0;
     (*potential)(&ndim,pos_d,vel_d,&den_d,&time_d);
     dens[i] = den_d;
-    dprintf(1,"DEN: %g   %g %g  %g %g   %g\n",theta[i],pos_d[0],pos_d[1],vel_d[0],vel_d[1],den_d);
+    dprintf(1,"DEN: %g   %g %g  %g %g   %g\n",
+	    theta[i],pos_d[0],pos_d[1],vel_d[0],vel_d[1],den_d);
   }
 }
 
@@ -195,14 +197,14 @@ testdisk(int n)
 	  theta_i = frandom(0.0,360.0,density) * PI / 180.0;
 	theta_i += offset;
 	if (Qlinear) {
-	  theta_i -= SPk * (r_i-rref) * TWO_PI;    /* positive SPk is trailing SP  */
+	  theta_i += SPk * (r_i-rref) * TWO_PI;    /* positive SPk is trailing SP  */
 	} else {
-	  theta_i -= log(r_i/rref)/tani;
+	  theta_i += log(r_i/rref)/tani;
 	}
         cost = cos(theta_i);
         sint = sin(theta_i);
-	Phase(dp)[0][0] = pos_d[0] = r_i * sint;        /* set positions      */
-	Phase(dp)[0][1] = pos_d[1] = r_i * cost;
+	Phase(dp)[0][0] = pos_d[0] = r_i * cost;        /* set positions      */
+	Phase(dp)[0][1] = pos_d[1] = r_i * sint;
 	Phase(dp)[0][2] = pos_d[2] = 0.0;
         (*potential)(&ndim,pos_d,vel_d,&pot_d,&time_d);      /* get flow    */
 	Phase(dp)[1][0] = vel_d[0];
