@@ -1,0 +1,46 @@
+.TH ATLAS 5NEMO "8 April 2003"
+.SH NAME
+atlas \- ASCII format for N-body snapshot files
+.SH DESCRIPTION
+\fIatlas\fP  is an ASCII format used to store 
+multi-snapshot N-body particle data for \Ithe atlas\fP 
+in the following form, in ASCII (double precision):
+.fi
+  time
+  N
+  particle-data-line-1
+  particle-data-line-2
+  ...
+  particle-data-line-N
+.fi
+where a particle-data-line contains the following numbers:
+.nf
+ id  mass x y z  v_x v_y v_z  phi rho id_near
+.fi
+The symbols used here are:
+.nf
+  time     (real) the time of the snapshot (in standard Heggie N-body units)
+  N        (int)  the number of particles in a snapshot
+  id       (int)  identification number (name) of the particle
+  mass     (real) the mass of the particle
+  x,y,z    (real) the three position coordinates of the particle
+  v_x,etc. (real) the three position coordinates of the particle
+  phi      (real) the potential energy per unit mass of the particle (NEGATIVE)
+  rho      (real) the density at the particle
+  id_near  (int)  the identification number (name) of the nearest neighbor
+.fi
+Each file may contain more than one snapshot, multiple snapshots should
+be separated by a blank line.
+.SH "SEE ALSO"
+snapatlas(1NEMO), snapshot(5NEMO)
+.PP
+.nf
+Atlas of the Gravitational Many-Body Problem, 
+.fi
+.SH AUTHOR
+Peter Teuben
+.SH "UPDATE HISTORY"
+.nf
+.ta +2.0i +2.0i
+8-apr-03	created 	PJT
+.fi
