@@ -1,4 +1,4 @@
-.TH ROTCURSHAPE 1NEMO "10 September 2002"
+.TH ROTCURSHAPE 1NEMO "19 September 2002"
 .SH NAME
 rotcurshape \- fit parameters to a velocity field using shaped rotation curves in a co-planar disk
 .SH SYNOPSIS
@@ -279,6 +279,8 @@ core2	v0,a		v=v0*x/(1+x^2)^(1/2)			-
 core	v0,a,c		v=v0*x/(1+x^c)^(1/c)			-
 poly	v0,a,p2,p3,..	v=v0*(x+p2*x^2+p3*x^3+.....pN*x^N)	a needs to be fixed !
 iso	v0,a		v=v0*(1-atan(x)/x)			-
+exp     v0,a         	v=v0*(1-exp(-x))                 	-
+nfw	v0,a,c		v=v0*(ln(1+cx)-cx/(1+cx))/x/(ln(1+c)-c/(1+1))	needs a fixed 'c' 	
 .fi
 .SH EXAMPLE
 Here is an example of creating a synthetic velocity field with
@@ -347,4 +349,6 @@ Peter Teuben
 .ta +1i +4i
 20-jul-02	0.9 cloned off rotcur		PJT
 10-sep-02	1.0 implemented an image version for resid=	PJT
+18-sep-02	1.0c added exp (vMoorsel&Wells 1985)	PJT
+19-sep-02	1.0d added nfw	PJT
 .fi

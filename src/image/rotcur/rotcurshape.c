@@ -13,6 +13,7 @@
  *
  *     History: 19/jul/02 : cloned off rotcur                       pjt
  *              10-sep-02 : implemented resid= for images, more pts for disk   pjt
+ *              19-sep-02 : added a few more rotcur's (exp, nfw)               pjt
  *
  ******************************************************************************/
 
@@ -73,7 +74,7 @@ string defv[] = {
     "rotcur3=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur4=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur5=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
-    "VERSION=1.0b\n  11-sep-02 PJT",
+    "VERSION=1.0d\n  19-sep-02 PJT",
     NULL,
 };
 
@@ -249,7 +250,7 @@ real rotcur_tanh(real r, int np, real *p, real *d)
 }
 
 /*
- * iso-thermal sphere:
+ * softened iso-thermal sphere:
  *    rho  = rho0/(1+x^2)                    x = r/r0
  *    vrot = vrot0*(1-atan(x)/x)^(1/2)   ,   vrot0 = sqrt(4.pi.G.rho0*r0^2)
  *    
@@ -271,11 +272,54 @@ Out[7]= -------------------------
 real rotcur_iso(real r, int np, real *p, real *d)
 {
   real x = r/p[1];
-  real v = 1-atan(x)/x;
+  real v = sqrt(1-atan(x)/x);
   d[0] = v;
   d[1] = -p[0]/p[1]*(1/(1+x*x) - v);
   return p[0] * v;
 }
+
+/*
+ * used in van Moorsel & Wells, AJ 90, 1038 (1985)
+ *
+ *    V/Vmax = 1 - e^{-ln{100) R/Rmax}
+ *  or as we write:
+ *    V = Vmax ( 1 - e^{R/Rmax} )
+ *
+ *   !!! NOT CHECKED !!!
+ */
+
+real rotcur_exp(real r, int np, real *p, real *d)
+{
+  real x = r/p[1];
+  real y = exp(-x);
+  d[0] = 1-y;
+  d[1] = p[0]*y/p[1];
+  return p[0] * d[0];
+}
+
+/*
+ *  NFW profile:  pars = V_200,R_200,c
+ *  V_c^2(x)=V_{200}^2 \frac{\ln(1+cx)-cx(1+cx)^{-1}}
+ *           {x[\ln(1+c)-c(1+c)^{-1}]}
+ *
+ *  In[7]:=D[ (Log[1+c*x]-c*x/(1+c*x))/x ,x]
+ */
+
+real rotcur_nfw(real r, int np, real *p, real *d)
+{
+  real x = r/p[1];
+  real c = p[2];
+  real cx = x*c;
+  real lncx = log(1+cx);
+  real v = (lncx - cx/(1+cx))/(log(1+c)-c/(1+c))/x;
+  d[0] = v;
+  d[1] = p[0]/p[1]*c*c/((1+cx)*(1+cx))*(lncx-cx/(1+cx))/(x*x);
+  d[2] = 0.0;  /* Note, don't allow derivatives w.r.t. c */
+  return p[0] * d[0];
+}
+
+
+
 
 
 /******************************************************************************/
@@ -461,6 +505,24 @@ rotcurparse()
 	mmsk[nmod][0] = natoi(sp[3]);
 	mmsk[nmod][1] = natoi(sp[4]);
 	rcfn[nmod] = rotcur_iso;
+      } else if (streq(sp[0],"exp")) {
+	if (nsp != 4) error("exp needs 2 numbers");
+	npar[nmod] = 2;
+	mpar[nmod][0] = natof(sp[1]);
+	mpar[nmod][1] = natof(sp[2]);
+	mmsk[nmod][0] = natoi(sp[3]);
+	mmsk[nmod][1] = natoi(sp[4]);
+	rcfn[nmod] = rotcur_exp;
+      } else if (streq(sp[0],"nfw")) {
+	if (nsp != 6) error("nfw needs 3 numbers, although 3rd cannot be varied");
+	npar[nmod] = 3;
+	mpar[nmod][0] = natof(sp[1]);
+	mpar[nmod][1] = natof(sp[2]);
+	mpar[nmod][2] = natof(sp[3]);
+	mmsk[nmod][0] = natoi(sp[4]);
+	mmsk[nmod][1] = natoi(sp[5]);
+	mmsk[nmod][2] = natoi(sp[6]);
+	rcfn[nmod] = rotcur_nfw;
       } else if (streq(sp[0],"core")) {
 	if (nsp != 6) error("core needs 3 numbers");
 	npar[nmod] = 3;
