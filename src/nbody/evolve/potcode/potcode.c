@@ -151,7 +151,7 @@ real time;			/* current time */
   vector lpos,a1,a2;
   real   lphi,r2,r,ome1,ome2, eps, f1,f2,kap2,kap1, A, B, oldkap, tol, tolmin;
   real   vr, vt, vz, lz, eps2, tol2, nu, oldnu;
-  int    iter, iter2, ndim=NDIM;
+  int    iter1, iter2, ndim=NDIM;
   
   if (ome!=0.0) error("Force-1 does not work in rotating potentials");
 
@@ -173,7 +173,7 @@ real time;			/* current time */
     /* should do iteration until converging, for now slightly asymmetric results */
     tolmin = 1e-7;   /*  tolerance to achieve */
     eps = 0.01;       /*  first small fractional step in radius */
-    for (iter=0; iter<15; iter++) {                  /* iterate to find kappa */
+    for (iter1=0; iter1<15; iter1++) {                  /* iterate to find kappa */
       MULVS(lpos,Pos(p), 1+eps);
       (*pot)(&ndim,lpos,a1,&lphi,&time);
       MULVS(lpos,Pos(p), 1-eps);
@@ -184,19 +184,19 @@ real time;			/* current time */
       kap2 = (f1-f2)/(2*eps) + 4*ome2;     /* Kappa^2 = R d(Omega^2)/dR + 4 Omega^2 */
       kap1 = sqrt(kap2);
       
-      if (iter==0) {
+      if (iter1==0) {
 	oldkap = kap1;
-	eps = eps/2;
+	eps /= 2.0;
 	continue;
       } else {
 	tol = (kap1-oldkap)/kap1;
 	tol = ABS(tol);
-	if (iter>1 && tol < tolmin) break;
-	eps = eps/2;
-	dprintf(1,"%g : iter1 %d %g %g %g\n",r,iter,eps,kap1,tol);
+	dprintf(1,"%g : iter1 %d %g %g %g\n",r,iter1,eps,kap1,tol);
+	if (iter1>1 && tol < tolmin) break;
+	eps /= 2.0;
       }
     }
-    eps2 = 0.001;
+    eps2 = 0.01;
     SETV(lpos,Pos(p));
     for (iter2=0; iter2<10; iter2++) {                  /* iterate to find nu */
       lpos[2] = eps2*r;
@@ -210,9 +210,9 @@ real time;			/* current time */
       } else {
 	tol2 = (nu-oldnu)/nu;
 	tol2 = ABS(tol2);
+	dprintf(1,"%g : iter2 %d %g %g %g\n",r,iter2,eps2,nu,tol2);
 	if (iter2>1 && tol2 < tolmin) break;
 	eps2 /= 2.0;
-	dprintf(1,"%g : iter2 %d %g %g %g\n",r,iter2,eps2,nu,tol2);
       }
     }
     A = -0.25*(f1-f2)/(2*eps)/ome1;     /*  A = -1/2 R d(Omega)/dR   */
@@ -221,7 +221,7 @@ real time;			/* current time */
 #endif
     B = A - ome1;
     printf("%g %g %g %g %g %g %g %d %d %g %g  %g %g %g %g\n",
-	   r,ome1,kap1,A,B,ome1-kap1/2.0,nu,iter,iter2,tol,tol2,vr,vt,vz,lz);
+	   r,ome1,kap1,A,B,ome1-kap1/2.0,nu,iter1,iter2,tol,tol2,vr,vt,vz,lz);
     p->A = A;
     p->B = B;
     p->kappa = kap1;
