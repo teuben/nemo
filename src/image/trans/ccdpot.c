@@ -1,5 +1,5 @@
 /* 
- * CCDPOT: potential of an infinitesimally thin disk
+ * CCDPOT: potential of an infinitesimally thin disk - the slow way for now
  *
  *	26-jul-02   q&d, from Gipsy's potential.dc1  (the slow coffee way)  pjt
  *                  dumb coding:  128*128 takes 47.8" on a P600 (pjt's laptop)
@@ -16,11 +16,11 @@
 string defv[] = {
         "in=???\n       Input image file",
 	"out=???\n      Output image file",
-	"VERSION=0.1\n  26-jul-02 PJT",
+	"VERSION=0.2\n  22-oct-02 PJT",
 	NULL,
 };
 
-string usage = "potential of a density disk";
+string usage = "potential of a density disk - the slow way";
 
 
 
