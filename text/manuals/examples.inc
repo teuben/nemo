@@ -263,7 +263,7 @@ name        	&  type & expression \\
 0	& int	& 0 \\
 1	& int   & 1 \\
 i 	& int 	& i \\
-key	& int   & key \\
+key	& int   & key (see also {\it real} version below)\\
 0	& real  & 0.0 \\
 1	& real  & 1.0 \\
 ar	& real  & (x*ax+y*ay+z*az)/sqrt(x*x+y*y+z*z) \\
@@ -277,7 +277,7 @@ etot	& real 	& phi+0.5*(vx*vx+vy*vy+vz*vz) \\
 i	& real	& i \\
 jtot	& real  & sqrt(sqr(x*vy-y*vx)+sqr(y*vz-z*vy)+sqr(z*vx-x*vz)) \\
         &       & \ \   or: $|$\rvec$\times$\vvec$|$ \\
-key	& real	& key \\
+key	& real	& key  (see also {\it int} version above)\\
 m	& real	& m \\
 phi	& real	& phi \\
 r	& real  & sqrt(x*x+y*y+z*z) \\
@@ -295,8 +295,10 @@ vz	& real	& vz \\
 x	& real	& x \\
 y	& real	& y \\
 z	& real	& z \\ 
-glon    & real  & 57.2958*atan2(y,x) [-180,180] \\
-glat    & real  & 57.2958*atan2(z,sqrt(x*x+y*y)) [-90,90] \\
+glon    & real  & $l$, atan2(y,x)*180/PI              [-180,180] \\
+glat    & real  & $b$, atan2(z,sqrt(x*x+y*y))*180/PI  [-90,90] \\
+mul     & real  & $(-vx\sin{l} + vx\cos{l})/r$ \\
+mub     & real  & $(-vx\cos{l}\sin{b} - vy\sin{l}\sin{b}+vz\cos{b})/r$ \\
 xait    & real  & Aitoff projection x [-2,2] T.B.A. \\
 yait    & real  & Aitoff projection y [-1,1] T.B.A. \\
 \hline
@@ -478,6 +480,9 @@ N-body data.
     snapprint in=snap.out times=10 | xgobi
 \end{verbatim}
 
+You will need to obtain {\tt xgobi} via independant means, it does not come with
+NEMO. A new version of xgobi is under development, see {\tt http://www.ggobi.org/}. 
+
 \subsection{Advanced Analysis}
 
 Determine position of the proper "dynamical center of mass" of a system,
@@ -501,7 +506,7 @@ tabplot.
 
 \begin{verbatim}
     set rad=0.01,0.05:0.95:0.05,0.99
-    set nrad=`nemoinp $rad | wc -w`
+    set nrad=(`nemoinp $rad | wc -w`)
     @ nrad++
 
     snapcenter r001.dat - '-phi*phi*phi' report=f |\
