@@ -13,6 +13,7 @@
  *      16-feb-97       d SINGLEPREC fix                                pjt
  *	 8-jul-98	e fixed copying other input bodyparts		pjt
  *      21-nov-98   V5.0  Added tscale= parameter to scale with time    Pjt
+ *      24-dec-04    5.0a fixed problem with uninitialized tscale       pjt
  */
 
 #include <stdinc.h>
@@ -31,7 +32,7 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "order=\n       Order to do rotations (zyz=eulerian)",
     "invert=false\n Invert transformation?",
     "tscale=\n      If used, scalefactor for angles with time of snapshot",
-    "VERSION=5.0\n  21-nov-98 PJT",
+    "VERSION=5.0a\n 24-dec-04 PJT",
     NULL,
 };
 
@@ -69,7 +70,7 @@ nemo_main()
         error("Did not specify enough rotation axes: order=");
     else if (nopt<nop)
         error("Did not specify enough rotation angles: theta=");
-    if (Qtscale) tscale = getdparam("tscale");
+    tscale = Qtscale ? getdparam("tscale") : 1.0;
 
     invert = getbparam("invert");
     outstr = stropen(getparam("out"), "w");
@@ -84,7 +85,7 @@ nemo_main()
             	ang = theta;        /* reset angle pointer */
                 for (i=0; i<nop; i++) {
                     dprintf(2,"Rotating %g around %c\n",*ang,*op);
-                    rotate(*op++, *ang++, btab, nbody, Qtscale, tscale*tsnap);
+                    rotate(*op++, *ang++, btab, nbody, Qtscale, tscale*tsnap);  /* VALGRIND error */
                 }
 	    } else {
                 op = &order[nop-1];	/* reset: start at end */
