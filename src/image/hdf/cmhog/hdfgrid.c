@@ -22,6 +22,7 @@
  *       3-dec-04       V2.0  fixed MAXRANK->3 so it can do fake2d from zeus3d    pjt
  *                            changed order of symmetry/mirror, changed some dprintf's
  *       4-dec-04       V2.0a fixed serious bug for rank=3 datasets
+ *                          b toy with quadmaps
  */
 
  
@@ -50,11 +51,14 @@ string defv[] = {
     "symmetry=auto\n		Override otherwise automated symmetry properties (odd|even|auto) **unused**",
     "it0=0\n			Shift THETA array (i.e. rotate grid)",
     "phi0=0\n                   Shift THETA values (*test*)",
-    "VERSION=2.0a\n		4-dec-04 PJT",
+    "scale0=1\n                 Scale THETA values after shift (*test*)",
+    "VERSION=2.0b\n		8-dec-04 PJT",
     NULL,
 };
 
 string usage="Regrid a CMHOG polar HDF SDS image to a cartesian NEMO image";
+
+string cvsid="$Id$";
 
 /* 3rd dimension is ignored though.... */
 #define MAXRANK 3
@@ -83,15 +87,16 @@ void nemo_main()
     char ntype[32];
     string filter, zvar, infile = getparam("in");
     stream outstr;
-    real xrange[3], yrange[3], cosp, sinp, phi0;
+    real xrange[3], yrange[3], cosp, sinp, phi0, scale0;
     real x, y, a1, a2, c1,c2,c3,c4, cmin, cmax, dcon, tmp, vr, vt;
     real sds_time = -1.0;
     imageptr iptr;
     bool mirror, first = TRUE, both = FALSE, flip=FALSE, Qrot,
-        Qmirror  = getbparam("mirror");
+    Qmirror  = getbparam("mirror");
 
     it0 = getiparam("it0");
     phi0 = getdparam("phi0");
+    scale0 = getdparam("scale0");
     nsds = DFSDndatasets(infile);
     if (nsds<0) 
         error("%s is probably not an HDF scientific dataset",infile);
@@ -253,8 +258,10 @@ void nemo_main()
     rads = coord[i1];
     phis = coord[i0];
     create_image(&iptr, nx, ny);
-    for (j=0; j<np; j++)
+    for (j=0; j<np; j++) {
       phis[j] -= phi0;
+      phis[j] *= scale0;
+    }
 
     dprintf(1,"Radius: %g %g\n",rads[0],rads[nr-1]);
     dprintf(1,"Theta:  %g %g\n",phis[0],phis[np-1]);
