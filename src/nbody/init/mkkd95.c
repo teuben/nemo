@@ -6,6 +6,7 @@
  *  11-mar-04   NEMO style seed=  instead of iseed=    pjt
  *              added nmodel=
  *
+ *  22-mar-04   V1.4  stdout/err from kd95 routines now to logfile     PJT
  *
  */
 
@@ -21,8 +22,8 @@
 string defv[] = {
   "out=???\n        output snapshot (a rundirectory $out.tmpdir is also created)",
  
-  "nbulge=4000\n    Number of particles in bulge (use 0 to skip this component)",
   "ndisk=8000\n     Number of particles in disk  (use 0 to skip this component)",
+  "nbulge=4000\n    Number of particles in bulge (use 0 to skip this component)",
   "nhalo=6000\n     Number of particles in halo  (use 0 to skip this component)",
 
   "psi0=-4.6\n       in.dbh: Psi0    (HALO)",
@@ -60,8 +61,9 @@ string defv[] = {
   "bin=\n            directory in which KD95 binaries live (otherwise assume $PATH)",
   "model=\n          Select base model A, B, C or D ** not properly implemented yet **",
   "nmodel=1\n        Number of models to make",
+  "cleanup=t\n       Cleanup the temporary rundir?",
 
-  "VERSION=1.3\n     11-mar-04 PJT",
+  "VERSION=1.4\n     22-mar-04 PJT",
   NULL,
 };
 
@@ -81,6 +83,7 @@ void nemo_main(void)
     string kd_bindir = getparam("bin");
     int seed, zerocm, nbulge, ndisk, nhalo;
     int imodel, nmodel = getiparam("nmodel");
+    bool Qcleanup = getbparam("cleanup");
 
     if (hasvalue("model"))
       model(getparam("model"));           /*  patch up (putparam) if needed */
@@ -92,10 +95,7 @@ void nemo_main(void)
     ndisk  = getiparam("ndisk");
     nhalo  = getiparam("nhalo");
 
-#if 0
-    dprintf(0,"D=%d B=%d H=%d\n",ndisk,nbulge,nhalo);
-    stop(0);
-#endif
+    dprintf(0,"mkkd95: Ndisk=%d Nbulge=%d Nhalo=%d\n",ndisk,nbulge,nhalo);
 
     datstr = stropen(out,"w");           /* a dummy write ; should not fail */
     strclose(datstr);
@@ -155,10 +155,11 @@ void nemo_main(void)
     put_history(histr);
     strclose(histr);
 
-    for (imodel=0; imodel<nmodel; imodel++) {
-      comment = (imodel==0) ? ' ' : '#';
+    for (imodel=0; imodel<nmodel; imodel++) {   /* loop over making nmodel of them */
+      dprintf(1,"Creating model %d\n",imodel+1);
+      comment = (imodel==0) ? ' ' : '#';        /* comment out this out beyond 1st model */
 
-      datstr = stropen("in.bulge","w!"); /* create input file */
+      datstr = stropen("in.bulge","w!"); /* create input file for genbulge */
       fprintf(datstr,"%g\n",
 	      getdparam("fstreamb"));
       fprintf(datstr,"%d\n",
@@ -171,7 +172,7 @@ void nemo_main(void)
 	      "dbh.dat");
       strclose(datstr);
       
-      datstr = stropen("in.disk","w!"); /* create input file */
+      datstr = stropen("in.disk","w!"); /* create input file for gendisk*/
       fprintf(datstr,"%d\n",
 	      ndisk);
       fprintf(datstr,"%d\n",
@@ -182,7 +183,7 @@ void nemo_main(void)
 	      "dbh.dat");
       strclose(datstr);
       
-      datstr = stropen("in.halo","w!"); /* create input file */
+      datstr = stropen("in.halo","w!"); /* create input file for genhalo */
       fprintf(datstr,"%g\n",
 	      getdparam("fstreamh"));
       fprintf(datstr,"%d\n",
@@ -217,7 +218,7 @@ void nemo_main(void)
 	fprintf(datstr,"mergerv disk bulge halo > galaxy\n");
       }
       if (imodel==0) {
-	fprintf(datstr,"rm ../%s\n",out);
+	fprintf(datstr,"rm -f ../%s\n",out);
 	fprintf(datstr,"tabtos galaxy ../%s nbody,time mass,pos,vel headline=%d\n",out,seed);
       } else {
 	fprintf(datstr,"tabtos galaxy - nbody,time mass,pos,vel headline=%d>> ../%s\n",seed,out);
@@ -225,10 +226,16 @@ void nemo_main(void)
       fprintf(datstr,"echo DEBUG; cat in.bulge\n");
       strclose(datstr);
       
-      run_program("chmod +x make-it; ./make-it");   /* run it ! */
+      run_program("chmod +x make-it; ./make-it > kd95.log 2>&1");   /* run it ! */
       
-      seed = -init_xrandom(getparam("seed"));  /* make sure it's negative again */
+      seed = -init_xrandom(getparam("seed"));  /* make sure seed is negative again for KD95 */
     } /* imodel */
+    if (Qcleanup) {     /* remove the run directory */
+      dprintf(0,"Removing the run directory %s.tmpdir\n",out);  
+      sprintf(rundir,"cd ..; rm -rf %s.tmpdir",out);  
+      run_program(rundir);   
+    }
+      
 }
 
 void goto_rundir(string name)
