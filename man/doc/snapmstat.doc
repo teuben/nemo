@@ -1,0 +1,14 @@
+%N snapmstat
+%D report some statistics of the masses in a snapshot
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man snapmstat' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input file name [???]
+%A sort
+	Sort masses before processing? [t]
+%A species
+	Maximum number of species [100]
+%A VERSION
+	15-mar-95 PJT [1.2]
