@@ -9,6 +9,9 @@
 #   20-jun-01   -b added
 #   17-jul-01   kludge hackforce
 #
+#
+# BUG:  -b  does not remove executable, so you never know if new binary did
+#		not compile
 
 set testdir=$NEMO/tmp/test$$
 set log=testsuite.log
