@@ -1,4 +1,4 @@
-.TH GETPARAM 3NEMO "6 January 1995"
+.TH GETPARAM 3NEMO "16 September 2001"
 .SH NAME
 getXparam, initparam, finiparam, stop \- main startup and command line processing.
 .SH SYNOPSIS
@@ -30,6 +30,12 @@ getXparam, initparam, finiparam, stop \- main startup and command line processin
 .B long getlparam(string name)
 .B double getdparam(string name)
 .B bool getbparam(string name)
+.PP
+.B string getparam_idx(string name,int idx)
+.B int getiparam_idx(string name,int idx)
+.B long getlparam_idx(string name,int idx)
+.B double getdparam_idx(string name,int idx)
+.B bool getbparam_idx(string name,int idx)
 .PP
 .B void putparam(string name,string value)
 .B void promptparam(string name,string prompt)

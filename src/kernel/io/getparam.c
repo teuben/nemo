@@ -99,13 +99,14 @@
  * 23-jun-01       d  PRECISION now in ZENO mode
  *  3-jul-01       e  keybuf always present, not just in INTERACT mode
  * 12-sep-01       f  nemo_file_size now
+ * 15-sep-01    3.3   indexed keywords, but oops, can't do MINMATCH
+ *                    and does not do keyword files, nor macroread
 
   TODO:
       - what if there is no VERSION=
       - process system keywords in readkeys()
       - write out selected results in a keywords database using
 	a new system keyword
-      - allow indexed keywords, e.g. using "naxis#="
       - allow a (file) keyword to not signify a pipe
         (-) but a popen() based process (POPENIO)
  
@@ -117,9 +118,11 @@
   	        allows to process it - and of course dies
       - ESC go key in help=2 prompting mode does not work
       - @macro and $key references get expanded as strings.
+      - indexing can't handle minmatch
+      - indexing can't handle macros
  */
 
-#define VERSION_ID  "3.2f 12-sep-01 PJT"
+#define VERSION_ID  "3.3 15-sep-01 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -133,6 +136,11 @@
 #define POPENIO         /* ability to use <popenr or >popenw      */
 #define HISTORY         /* have history.c implemented ?           */
 #define MINMATCH	/* allow keywords to be minimum matched?  */
+#define INDEXED         /* allow keywords to be dynamically indexed */
+
+#ifdef INDEXED
+#undef MINMATCH         /* for now, we can't minmatch on indexed yet */
+#endif
 
 #if 0
 #define TCL		/* TCL support?				  */
@@ -142,6 +150,7 @@
 #if 0
 # define INTERRUPT       /* reset when you don't want REVIEW interrupt */
 #endif
+
 
 /*************** END CONFIGURATION TABLE ***********************/
 
@@ -204,6 +213,8 @@ typedef struct keyword {    /* holds old all keyword information             */
     int count;                  /* update count; 0=original default          */
     int upd;                    /* 0=read 1=unread original 2=unread updated */
     int flag;                   /* zeno flags (unused)                       */
+    int indexed;                /* indexed keyword ?                         */
+    struct keyword *next;       /* pointer to next indexed keyword           */
 } keyword;
 
 /*      *       *       *       variables        *       *       */
@@ -268,6 +279,7 @@ local string parname(string arg);
 local string parvalue(string arg);
 local string parhelp(string arg);
 local int findkey(string name);
+local int isindexed(string name, int *idx);
 local void writekeys(char *mesg);
 local void readkeys(string mesg, bool first);
 local void set_argv(string);
@@ -302,9 +314,10 @@ extern string date_id(void);
 
 void initparam(string argv[], string defv[])
 {
-    int i, j, nzeno;
+    int i, j, nzeno, idx;
     bool posflag, useflag, defflag;
     string name;
+    keyword *kw;
 
     scan_environment();              /* scan env.var and set what is needed */
 #if defined(sun) && defined(USE_IEEE)
@@ -336,8 +349,12 @@ void initparam(string argv[], string defv[])
         keys[i].help = scopy(parhelp(defv[j]));
         keys[i].count = 0;
         keys[i].upd = 1;
-        if (streq(keys[i].key,"VERSION")) {
-            version_i = scopy(keys[i].val);
+	keys[i].indexed = keys[i].key[strlen(keys[i].key)-1] == '#';
+	keys[i].next = NULL;
+	if (keys[i].indexed)
+	  warning("new feature: indexed keyword %s",keys[i].key);
+        if (streq(keys[i].key,"VERSION")) {      /* special (last?) keyword */
+            version_i = scopy(keys[i].val);            
             keys[i].upd = 0;
             maxkeys--;
         }
@@ -356,43 +373,62 @@ void initparam(string argv[], string defv[])
             getparam_argc++;			/* count keywords */
             if (i > maxkeys) error("Too many un-named arguments");
             if (streq(argv[i],"-help") || streq(argv[i],"--help") ||
-		   streq(argv[i],"-h") || streq(argv[i],"help")) {
-                set_help("");
+		streq(argv[i],"-h") || streq(argv[i],"help")) {
+	      set_help("");
             } else if (streq(argv[i],"-version") || streq(argv[i],"--version")) {
-                printhelp("V");    /* will also exit */
+	      printhelp("V");    /* will also exit */
             } else {
-                free(keys[i].val);
-                keys[i].val = scopy(argv[i]);
-                keys[i].count++;
+	      if (keys[i].indexed) error("Cannot match indexed keywords by position");
+	      free(keys[i].val);
+	      keys[i].val = scopy(argv[i]);
+	      keys[i].count++;
             }
         } else {                                /*   match by name?         */
             if (name == NULL)
                 error("Arg \"%s\" must be named", argv[i]);
             j = findkey(name);                  /*     find index in keys   */
             if (j >= 0) {                       /*     was name found?      */
-                getparam_argc++;			/* count keywords */
-                if (keys[j].count)
-                    error("Parameter \"%s\" duplicated", name);
-                free(keys[j].val);
-                keys[j].val = scopy(parvalue(argv[i]));        /* get value */
-                keys[j].count++;
+	      getparam_argc++;			/* count keywords */
+	      if (keys[j].count)
+		error("Parameter \"%s\" duplicated", name);
+	      free(keys[j].val);
+	      keys[j].val = scopy(parvalue(argv[i]));        /* get value */
+	      keys[j].count++;
+	    } else if (j=isindexed(name,&idx)) {       /* enter indexed keywords */
+       	      dprintf(1,"Entering indexed %s, j=%d",argv[i],j);
+	      kw = &keys[j];       /* start at the indexed (base) keyword */
+	      while (kw->next) {        /* link through all indexed ones */
+		dprintf(1,"Link List Skipping %s\n",kw->key);
+		kw = kw->next;
+	      }
+	      kw->next = (keyword *) allocate(sizeof(keyword));
+	      kw = kw->next;
+	      kw->keyval = scopy(argv[i]);
+	      kw->key = scopy(parname(argv[i]));
+	      kw->val = scopy(parvalue(argv[i]));
+	      kw->help = 0;
+	      kw->count = 0;
+	      kw->upd = 0;
+	      kw->indexed = idx;
+	      kw->next = NULL;
+	      dprintf(1,"Link List new keyword %s, idx=%d\n",argv[i],idx);
             } else {                            /*     not listed in defv?  */
-                if (streq(name, "help"))       /* got system help keyword?  */
-                    set_help(parvalue(argv[i]));
-                else if (streq(name, "argv")) /* arbitrary bypassed argv */
-                    set_argv(parvalue(argv[i]));
-                else if (streq(name, "debug"))   /*    got debug keyword? */
-                    set_debug(parvalue(argv[i]));
-                else if (streq(name, "yapp"))   /*     got yapp keyword?  */
-                    set_yapp(parvalue(argv[i]));
-                else if (streq(name, "review"))   /*    go into review ?  */
-                    set_review(parvalue(argv[i]));
-                else if (streq(name, "tcl"))      /*    go into tcl ?  */
-                    set_tcl(parvalue(argv[i]));
-                else if (streq(name, "error")) /*    allowed error count? */
-                    set_error(parvalue(argv[i]));
-                else
-                    error("Parameter \"%s\" unknown", name);
+	      if (streq(name, "help"))       /* got system help keyword?  */
+		set_help(parvalue(argv[i]));
+	      else if (streq(name, "argv")) /* arbitrary bypassed argv */
+		set_argv(parvalue(argv[i]));
+	      else if (streq(name, "debug"))   /*    got debug keyword? */
+		set_debug(parvalue(argv[i]));
+	      else if (streq(name, "yapp"))   /*     got yapp keyword?  */
+		set_yapp(parvalue(argv[i]));
+	      else if (streq(name, "review"))   /*    go into review ?  */
+		set_review(parvalue(argv[i]));
+	      else if (streq(name, "tcl"))      /*    go into tcl ?  */
+		set_tcl(parvalue(argv[i]));
+	      else if (streq(name, "error")) /*    allowed error count? */
+		set_error(parvalue(argv[i]));
+	      else
+		error("Parameter \"%s\" unknown", name);
             } /* j>0 (i.e. program/system keyword) */
         } /* if(posflag) */
     } /* for (i) */
@@ -874,6 +910,13 @@ local void showconfig()
 #else
     printf("off\n");
 #endif
+    printf("INDEXED    ");
+#if defined(INDEXED)
+    printf("on\n");
+#else
+    printf("off\n");
+#endif
+
     printf("Precision: %s\n",Precision);
 }
 /*
@@ -1069,6 +1112,53 @@ string getparam(string name)
 #endif
     return keys[i].val;                     /* return value part */
 }
+
+string getparam_idx(string name, int idx)
+{
+    int i;
+    char *cp, key[MAXKEYLEN+1];
+    keyword *kw;
+
+    if (nkeys == 0)  error("(getparam) called before initparam");
+    strcpy(key,name);
+    strcat(key,"#");
+    i = findkey(key);
+    if (i<0) error("(getparam) \"%s\" unknown keyword", name);
+    kw = &keys[i];
+    if (kw->indexed == 0) error("%s is not an indexed keyword",name);
+    while (kw->next) {
+      dprintf(1,"Checking linked list w/ %s for %d, %d\n",kw->key,kw->indexed,idx);
+      kw = kw->next;
+      if (kw->indexed == idx) {
+	return kw->val;
+      }
+    }
+    return NULL;
+}
+
+int indexparam(string name)
+{
+    int i, idxmax = 0;
+    char *cp, key[MAXKEYLEN+1];
+    keyword *kw;
+
+    if (nkeys == 0)  error("(getparam) called before initparam");
+    strcpy(key,name);
+    strcat(key,"#");
+    i = findkey(key);
+    if (i<0) {
+      i = findkey(name);
+      if (i < 0) error("(getparam) \"%s\" unknown indexed keyword", name);
+      return 0;
+    }
+    kw = &keys[i];
+    if (kw->indexed == 0) error("%s is not an indexed keyword",name);
+    while (kw->next) {
+      kw = kw->next;
+      idxmax = MAX(idxmax, kw->indexed);
+    }
+    return idxmax;
+}
 
 /*
  * GETIPARAM, ..., GETDPARAM: get int, long, bool, or double parameters.
@@ -1092,6 +1182,23 @@ int getiparam(string par)
 #endif /* !NEMOINP */
 }
 
+int getiparam_idx(string par, int idx)
+{
+    string val;
+    int    ipar, nret;
+
+    val = getparam_idx(par,idx);                /* obtain value of param */
+#if !defined(NEMOINP)
+    return atoi(val);                           /* convert to an integer */
+#else
+    nret = nemoinpi(val,&ipar,1);
+    if (nret < 0)
+        warning("getiparam_idx(%s=%s,%d) parsing error %d, assumed %d\n",
+                    par,val,idx,nret,ipar);
+    return (nret==0) ? 0 : ipar;
+#endif /* !NEMOINP */
+}
+
 long getlparam(string par)
 {
     string val;
@@ -1099,6 +1206,24 @@ long getlparam(string par)
     int nret;
 
     val = getparam(par);                        /* obtain value of param */
+#if !defined(NEMOINP)
+    return atol(val);                           /* convert to an integer */
+#else
+    nret = nemoinpl(val,&lpar,1);
+    if (nret < 0)
+        warning("getlparam(%s=%s) parsing error %d assumed %l\n",
+                    par,val,nret,lpar);
+    return (nret==0) ? 0 : lpar;
+#endif /* !NEMOINP */
+}
+
+long getlparam_idx(string par, int idx)
+{
+    string val;
+    long lpar;
+    int nret;
+
+    val = getparam_idx(par,idx);                        /* obtain value of param */
 #if !defined(NEMOINP)
     return atol(val);                           /* convert to an integer */
 #else
@@ -1135,6 +1260,31 @@ bool getbparam(string par)
 #endif /* !NEMOINP */
 }
 
+bool getbparam_idx(string par, int idx)
+{
+    char *val;
+    bool bpar;
+    int  nret;
+
+    val = getparam_idx(par,idx);                /* obtain value of param */
+#if !defined(NEMOINP)
+    if (*val=='.') val++;                       /* catch .TRUE. .FALSE. */
+    if (strchr("tTyY1jJ", *val) != NULL)        /* is value true? */
+        return TRUE;
+    if (strchr("fFnN0", *val) != NULL)          /* is value false? */
+        return FALSE;
+
+    error("getbparam: %s=%s not bool", par, val);
+    return 0;   /*turboc*/
+#else
+    nret = nemoinpb(val,&bpar,1);
+    if (nret < 0)
+        warning("getbparam(%s=%s) parsing error %d, assumed %d (FALSE)",
+                        par,val,nret,bpar);
+    return (nret<=0) ? FALSE : bpar;
+#endif /* !NEMOINP */
+}
+
 double getdparam(string par)
 {
     string val;
@@ -1153,9 +1303,32 @@ double getdparam(string par)
 #endif /* !NEMOINP */
 }
 
+double getdparam_idx(string par, int idx)
+{
+    string val;
+    double dpar;
+    int    nret;
+
+    val = getparam_idx(par,idx);                        /* obtain value of param */
+#if !defined(NEMOINP)
+    return atof(val);                         /* convert to a double */
+#else
+    nret = nemoinpd(val,&dpar,1);
+    if (nret < 0)
+        warning("getdparam(%s=%s) parsing error %d, assumed %g",
+                            par,val,nret,dpar);
+    return (nret==0) ? 0.0 : dpar;
+#endif /* !NEMOINP */
+}
+
 float getfparam(string par)
 {
     return (float) getdparam(par);
+}
+
+float getfparam_idx(string par, int idx)
+{
+    return (float) getdparam_idx(par,idx);
 }
 
 /*
@@ -1404,6 +1577,28 @@ local int findkey(string name)
 #endif
 
     return -1;          /* if all else fails: return -1 */
+}
+
+local int isindexed(string name, int *idx)
+{
+  char *cp, key[MAXKEYLEN+1], keyidx[MAXKEYLEN];
+  int j;
+
+  strcpy(key,name);
+  dprintf(1,"isindexed: Checking %s",key);
+  cp = &key[strlen(key)-1];
+  if (!isdigit(*cp)) return 0;
+  while (isdigit(*cp))
+    *cp--;
+  cp++;
+  strcpy(keyidx,cp);
+  *idx = atoi(keyidx);
+  *cp = 0;
+  strcat(key,"#");
+  j = findkey(key);
+  dprintf(1,"isindexed: now at %c, base=%s j=%d idx=%s -> %d\n",*cp,key,j,keyidx,*idx);
+  if (j>0) return j;
+  return 0;
 }
 
 #if defined(INTERACT)
