@@ -1,0 +1,13 @@
+21-nov-97   V0.1 submitted, tested on Tcl/Tk 7.6 and 8.0p1 and on
+		Solaris 5.5 and Linux 2.0, but lots of things to clean
+		up.
+
+27-nov-97   V0.2a  fixed resetting the buttons in CHECK widgets
+
+25-nov-00   put this under control of CVS; note that submission now should
+	    go to  /incoming/Linux , not  /pub/Linux/Incoming on the old
+	    ftp.sunsite.edu, then metalab.unc.edu, now www.ibiblio.org
+	    Minor stylistic changes to some files, merely for me to learn
+	    to deal with CVS conflicts
+
+11-dec-00   moved CVS over to another machine (grus)
