@@ -65,7 +65,7 @@ string defv[] = {		/* keywords/default values/help */
 	"mean=f\n			  mean (moment=0) or sum per cell",
 	"stack=f\n			  Stack all selected snapshots?",
 	"proj=\n                          Sky projection (SIN, TAN, ARC, NCP, GLS, MER, AIT)",
-	"VERSION=5.0\n			  7-may-04 PJT",
+	"VERSION=5.0a\n			  8-may-04 PJT",
 	NULL,
 };
 
