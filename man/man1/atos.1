@@ -1,0 +1,109 @@
+.TH ATOS 1NEMO "15 May 1997"
+.SH NAME
+atos, atos_sp atosph, atosph_sp \-
+convert ascii N-body file to structured binary format
+.SH SYNOPSIS
+\fBatos in=\fPascii_file \fBout=\fPsnap_file [parameter=value] .\|.\|.
+.SH DESCRIPTION
+\fIatos\fP converts an ascii file containing one or more N-body frames
+into structured binary format.  Most commonly, \fIatos\fP is used to
+convert output files produced on remote supercomputers.  \fIatos_sp\fP
+is similar, but uses single precision.  Finally, \fIatosph\fP and
+\fIatosph_sp\fP convert ascii Smoothed Particle Hydrodynamics data
+files to binary format.
+.SH PARAMETERS
+The following parameters are recognized.
+.TP 25
+\fBin=\fIascii_file\fP
+Input data is read from \fIascii_file\fP, which must be in the format
+described below.  Default: none.
+.TP
+\fBout=\fIsnap_file\fP
+Converted output data is appended to \fIsnap_file\fP in
+\fIsnapshot\fP(5NEMO) format. If \fIsnap_file\fP does not exist,
+it is created.  Default: none.
+.TP
+\fBoptions=\fIoption_list\fP
+Specifies data expected in input file; one or more of \fBmass\fP,
+\fBpos\fP, \fBvel\fP, \fBphase\fP, \fBphi\fP, and \fBacc\fP.  Also,
+\fIatosph\fP recognizes \fBrho\fP, \fBtemp\fP, and \fBhsph\fP.  Note
+that if \fBpos\fP or \fBvel\fP is specified, \fBphase\fP may not be,
+and vise versa.  Default: \fBmass,phase\fP (for \fIatos\fP),
+\fBmass,phase,rho,temp,hsph,phi\fP (for \fIatosph\fP).
+.TP
+\fBhexpack=\fIflag\fP
+If \fBtrue\fP, read particle data in packed hexadecimal format as
+output by \fItreecode\fP(1NEMO).  Default: \fBfalse\fP.
+.TP
+\fBheadline=\fIstring\fP
+Random verbiage written before first snapshot. Only if a headline is
+given will a headline and history be written to the output file.
+Default: none.
+.SH "INPUT FILE FORMATS"
+The standard ascii N-body file format is as follows:
+.sp 1
+.nf
+.ta +1.5i
+NOBJ                    	number of bodies [integer]
+NDIM                    	number of dimensions [integer]
+TIME                    	time of snapshot [real]
+MASS(i)                 	particle masses, i = 1...NOBJ [real]
+  . . . . .
+X(i) Y(i) Z(i)          	particle positions, i = 1...NOBJ [real]
+  . . . . .
+VX(i) VY(i) VZ(i)       	particle velocities, i = 1...NOBJ [real]
+  . . . . .
+PSI(i)                  	particle potentials, i = 1...NOBJ [real]
+  . . . . .
+AX(i) AY(i) AZ(i)       	particle accelerations, i = 1..NOBJ [real]
+  . . . . .
+.fi
+.sp 1
+The SPH file format is as follows:
+.sp 1
+.nf
+.ta +1.5i
+NOBJ NGAS               	number of bodies, gas particles [integer]
+NDIM                    	number of dimensions [integer]
+TIME                    	time of snapshot [real]
+MASS(i)                 	particle masses, i = 1...NOBJ [real]
+  . . . . .
+X(i) Y(i) Z(i)          	particle positions, i = 1...NOBJ [real]
+  . . . . .
+VX(i) VY(i) VZ(i)       	particle velocities, i = 1...NOBJ [real]
+  . . . . .
+RHO(i)                  	gas densities, i = 1...NGAS [real]
+  . . . . .
+TEMP(i)                 	gas temperatures, i = 1...NGAS [real]
+  . . . . .
+HSPH(i)                 	gas smoothings, i = 1...NGAS [real]
+  . . . . .
+PSI(i)                  	particle potentials, i = 1...NOBJ [real]
+  . . . . .
+AX(i) AY(i) AZ(i)       	particle accelerations, i = 1..NOBJ [real]
+  . . . . .
+.fi
+.sp 1
+Subsets of these full data files may be read by setting the right
+combination of \fBoptions\fP.  However, all data arrays present in the
+input must be specified, and the ordering is fixed as shown here.
+These formats may be repeated until end-of-file.
+.PP
+For upward compatibility the header elements (NOBJ [NGAS] NDIM and TIME) can 
+now appear in the order, 
+.SH "SEE ALSO"
+stoa(1NEMO), rsf(1NEMO), tsf(1NEMO), filestruct(3NEMO), snapshot(5NEMO).
+.SH AUTHOR
+Joshua E. Barnes, Peter Teuben
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.5i +3.5i
+23-Mar-87	V 1.0: created    	PJT
+11-May-88	V 2.0: created    	JEB
+01-July-88	V 2.1: hexpack flag	JEB
+27-Sep-88	V 2.2: options phi, acc	PJT
+01-Dec-88	V 2.3: SPH options	JEB
+28-Mar-89	V 2.4: error checking	JEB
+17-sep-90	V 2.6: header logic improved	PJT
+15-may-97	V3.0: added binary= keywords	PJT
+.fi
