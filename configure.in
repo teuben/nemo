@@ -20,10 +20,12 @@ dnl -- checks for system services
 
 dnl ---			NEMO base directory
 NEMO="`pwd`"
+NEMOHOST="`./config.guess`"
 NEMO_LIBS=""
 NEMO_CFLAGS=""
 NEMO_FFLAGS=""
 AC_SUBST(NEMO)
+AC_SUBST(NEMOHOST)
 AC_SUBST(NEMO_LIBS)
 AC_SUBST(NEMO_CFLAGS)
 AC_SUBST(NEMO_FFLAGS)
@@ -690,7 +692,7 @@ if test -d "$NEMODAT"; then
 fi
 
 
-AC_OUTPUT(NEMORC.gen Makefile makedefs nemo_start)
+AC_OUTPUT(NEMORC.gen Makefile makedefs nemo_start nemo.pl)
 
 echo "
 -------------------------------------------------------------------------

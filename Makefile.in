@@ -655,6 +655,7 @@ configure:	configure.in
 
 config_extra:
 	cp config.h makedefs $(NEMOLIB)
+	cp nemo.pl $(NEMOBIN)
 
 DIFF = diff
 
