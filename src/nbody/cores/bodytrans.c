@@ -59,6 +59,10 @@
  *      NEMOOBJ     normally points to $NEMO/obj/bodytrans
  *      BTRPATH     path of directories where to look for object files
  *	CFLAGS      if present, used in on-the-fly C compilation (only < V3)
+ *
+ * TODO:
+ *   shared objects are mostly .so, but HP uses .sl, and cygwin .dll
+ *   (see the swig configure.in)
  */
 
 #include <stdinc.h>
