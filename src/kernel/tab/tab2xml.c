@@ -1,0 +1,166 @@
+/*
+ * TAB2XML: table into XML, mostly to produce a VOTable
+ *
+ *      13-feb-04   created
+ */
+
+#include <stdinc.h>
+#include <getparam.h>
+#include <table.h>
+#include <extstring.h>
+#include <ctype.h>
+
+string defv[] = {
+    "in=???\n           input file name(s)",
+    "col=\n             column numbers to select",
+    "colnames=\n        Column names",
+    "VERSION=1.0\n      13-feb-04 PJT",
+    NULL
+};
+
+string usage = "Select columns from a table and convert to VOTable/XML";
+
+
+string input, output;			/* file names */
+stream instr, outstr;			/* file streams */
+int   ninput;				/* number of input files */
+
+#ifndef MAX_COL
+#define MAX_COL 256
+#endif
+
+#ifndef MAX_LINELEN
+#define MAX_LINELEN  2048
+#endif
+
+
+#define MNEWDAT          80		/* space needed for one number */
+
+int    keep[MAX_COL+1];                 /* column numbers to keep */
+int    nkeep;                           /* actual number of skip columns */
+int    maxcol = 0;                      /* largest column number */
+char   colsep;                          /* character to separate columns */
+string colname[MAX_COL+1];
+bool   Qall;
+
+local void setparams(void);
+local void convert(stream , stream);
+local void tab2space(char *);
+
+extern  string *burststring(string, string);
+
+local vot_header=
+"<?xml version='1.0'?>
+<!DOCTYPE VOTABLE SYSTEM 'http://us-vo.org/xml/VOTable.dtd'>
+<VOTABLE version='1.0'>
+<!--
+ !  VOTable written by NEMO's tab2xml program
+ !-->
+<RESOURCE>";
+
+local string vot_trailer=
+"</TABLEDATA>
+</DATA>
+</TABLE>
+</RESOURCE>
+</VOTABLE>";
+
+
+nemo_main()
+{
+  setparams();
+  instr  = stropen(input,"r");
+  outstr = stropen("-","w");
+  convert (instr,outstr);
+}
+
+local void setparams(void)
+{
+  string select;                          /* which columns not to write */
+  int i;
+  
+  input = getparam("in");
+  
+  if (hasvalue("col")) {
+    Qall = FALSE;
+    nkeep = nemoinpi(select,keep,MAX_COL);
+    if (nkeep<=0 || nkeep>MAX_COL)
+      error("Too many columns given (%d) to keep (MAX_COL %d)",
+	    nkeep,MAX_COL);
+    for (i=0; i<nkeep; i++){
+      if (keep[i]<=0) error("Illegal column number %d",keep[i]);
+      maxcol = MAX(maxcol,keep[i]);
+    }
+  } else {
+    Qall = TRUE;
+    nkeep = -1;   /* trigger that nkeep needs to be set */
+    for (i=0; i<=MAX_COL; i++) keep[i] = i;
+  }
+}
+
+
+local void convert(stream instr, stream outstr)
+{
+  char   line[MAX_LINELEN];          /* input linelength */
+  int    i, nlines, noutv;
+  string *outv;                   /* pointer to vector of strings to write */
+  char   *seps=", \t";       /* column separators  */
+  static bool first = TRUE;
+  
+  nlines=0;               /* count lines read so far */
+  
+  fprintf(outstr,"%s\n",vot_header);
+  fprintf(outstr,"<TABLE name=\"%s\">\n",input);
+ 
+  for (;;) {
+    if (get_line(instr, line) < 0)      /* EOF */
+      break;
+    
+    dprintf(3,"LINE: (%s)\n",line);
+    if (iscomment(line)) continue;
+    
+    nlines++;
+    tab2space(line);                  /* work around a Gipsy (?) problem */
+    
+    outv = burststring(line,seps);
+    noutv = xstrlen(outv,sizeof(string)) - 1;
+    if (noutv < maxcol)
+      error("Too few columns in input file (%d < %d)",noutv,maxcol);
+    if (Qall) { 
+      if (first) {
+	for (i=0; i<noutv; i++)
+	  fprintf(outstr,"<FIELD datatype=\"double\" name=\"col%d\"/>\n",i+1);
+	fprintf(outstr,"<DATA>\n");
+	fprintf(outstr,"<TABLEDATA>\n");
+	first = FALSE;
+      }
+      nkeep = noutv;
+    } else if (first) {
+      for (i=0; i<nkeep; i++)
+	fprintf(outstr,"<FIELD datatype=\"double\" name=col%s\"/>\n",i+1);
+      fprintf(outstr,"<DATA>\n");
+      fprintf(outstr,"<TABLEDATA>\n");
+      first = FALSE;
+    }
+    fprintf(outstr,"  <TR>\n");	
+    for (i=0; i<nkeep; i++)
+      fprintf(outstr,"    <TD>%s</TD>\n",outv[keep[i]]);
+    fprintf(outstr,"  </TR>\n");	
+  }
+  fprintf(outstr,"%s\n",vot_trailer);
+}
+/*
+ * small helper function, replaces tabs by spaces before processing.
+ * this prevents me from diving into gipsy parsing routines and  fix
+ * the problem there 
+ * PJT - June 1998.
+ */
+
+local void tab2space(char *cp)
+{
+    while (*cp) {
+        if (*cp == '\t') *cp = ' ';
+        cp++;
+    }
+}
+
