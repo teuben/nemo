@@ -10,8 +10,9 @@ rules as given by \fInemoinp(3NEMO)\fP. The output format can be
 defined too, separators, newlines etc. can be choosen at will.
 .PP
 It may come in handy to set an array in a shell variable or to
-initialize tables, e.g. \fBset x=(`nemoinp 1:10:2`)\fI will then
-result in \fBx\fP having \fB1 3 5 7 9\fP.
+initialize tables, e.g. \fBset x=(`nemoinp 1:10:2`)\fP will then
+result in \fBx\fP having \fB1 3 5 7 9\fP.   (this is unfortunately different
+from the matlab convention, where this would be written 1:2:10 instead)
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword is also
 given:

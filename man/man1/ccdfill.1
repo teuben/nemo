@@ -1,4 +1,4 @@
-.TH CCDFILL 1NEMO "22 February 1997"
+.TH CCDFILL 1NEMO "19 February 2002"
 .SH NAME
 ccdfill \- patch up the holes in an image
 .SH SYNOPSIS
@@ -16,23 +16,35 @@ is also given:
 \fBin=\fP\fIin_ccd\fP
 Input \fIimage(3NEMO)\fP file.
 No default.
-.TP 20
+.TP
 \fBout=\fP\fIout_ccd\fP
 Output image file.
 No default.
-.TP 20
+.TP
 \fBn=\fP
 Number of neighbor cells at one side to use in interpolation/fit.
 The total number of cells used in the fit will hence be at most
 \fB4*n*(n+1)\fP
 (this already exclude the central pixel).
 [Default: \fB1\fP].
-.TP 20
+.TP
 \fBbad=\fP\fIzvalue\fP
 Value in the map that should be patched.
 [Default: \fB0.0\fP].
+.TP
+\fBall=t|f\fP
+Normally only bad pixels are patches. By setting \fBall=t\fP all pixels
+are re-fitted with a planar fit, effectively smoothing the map.
+Default: f
+.TP
+\fBm=\fP
+Minimum number of neighbors needed to allow a fit. Normally 3 is enough.
+Default: 3
+.SH CAVEATS
+With m=3 you will see some singular matrix warnings, and patched values
+will be bogus. It is better to set m=4.
 .SH SEE ALSO
-image(3NEMO), ccdmath(1NEMO)
+image(3NEMO), ccdmath(1NEMO), ccdsmooth(1NEMO)
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
@@ -40,4 +52,5 @@ Peter Teuben
 .ta +1.0i +4.0i
 10-Dec-93	V1.0 Created	PJT
 22-feb-97	V1.1 added bad=	PJT
+19-feb-02	V1.2 added all=, m=	PJT
 .fi

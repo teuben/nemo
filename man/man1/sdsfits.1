@@ -10,7 +10,8 @@ The current version was written to fit a particular
 purpose, and will only properly convert a single 2D or 3D SDS
 dataset into a FITS image/cube. Selection must be made wich SDS dataset
 is converted (1=first) and optional the coordinate values can be written
-instead of the SDS values.
+instead of the SDS values. The \fIfitsbrowser\fP toolset in HDF can also
+convert SDS from/to a FITS file (primary HDU).
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -47,7 +48,11 @@ it limits the size of the cube to the (virtual) memory you have.
 are written out.
 .PP
 .SH SEE ALSO
-snaphdf(1NEMO), hdf(1), lshdf(1), fitssds(1NEMO), tsd(1NEMO)
+snaphdf(1NEMO), hdf(1), lshdf(1), fitssds(1NEMO), tsd(1NEMO), fits2sds(1HDF), phdu2sds(1HDF)
+.nf
+
+http://hdf.ncsa.uiuc.edu/fits/index.html (fitsbrowser::fits2sds,phdu2shs)
+.fi
 .SH FILES
 .SH AUTHOR
 Peter Teuben
