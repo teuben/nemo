@@ -21,6 +21,8 @@
 #define sum3 m->sum[3]
 #define sum4 m->sum[4]
 
+extern real median(int,real*);
+
 void ini_moment(Moment *m, int mom, int ndat)
 {
     int i;
@@ -62,23 +64,29 @@ void accum_moment(Moment *m, real x, real w)
         m->sum[i] += sum;
         sum *= x;
     }
-    if (m->ndat > 0) {
+    if (m->ndat > 0) {     /* if moving moments .... */
       if (m->idat < 0)            /* first time around */
 	m->idat=0;
-      else if (m->n < m->ndat)    /* buffer not full yet */
+      else if (m->n <= m->ndat)    /* buffer not full yet */
 	m->idat++;
       else {                      /* buffer full, first remove old */
-	i = m->idat;
-	if (i==0)  i = m->ndat-1;
 	m->idat++;
 	if (m->idat == m->ndat) m->idat = 0;
-	xx = m->dat[i];
+	i = m->idat + 1;
+	if (i == m->ndat)  i = 0;
+
+	dprintf(1,"del: %d\n",i);
+	xx = m->dat[i];                  /* remove the old point */
 	sum = m->wgt[i];
 	for (i=0; i<= m->mom; i++) {
 	  m->sum[i] -= sum;
 	  sum *= xx;
 	}
+#if 0
+	m->n--;
+#endif
       }
+      dprintf(1,"add: %d\n",m->idat);
 
       m->dat[m->idat] = x;
       m->wgt[m->idat] = w;
@@ -112,6 +120,7 @@ void reset_moment(Moment *m)
     int i;
     
     m->n = 0;
+    m->idat = -1;
     if (m->mom < 0) return;
     for (i=0; i <= m->mom; i++)
         m->sum[i] = 0.0;
@@ -152,6 +161,17 @@ real mean_moment(Moment *m)
     if (m->n == 0) return 0;
     return sum1/sum0;
 }
+
+
+real median_moment(Moment *m)
+{
+  int n;
+  if (m->ndat==0)
+    error("median_moment cannot be computed with ndat=%d",m->ndat);
+  n = MIN(m->n, m->ndat);
+  return median(n,m->dat);
+}
+
 
 real sigma_moment(Moment *m)
 {
@@ -217,6 +237,7 @@ string defv[] = {
     "in=???\n       Table with values in column 1",
     "moment=-1\n    Moment to compute (-4..-1 special, 0,1,2,...)",
     "minmax=f\n     Show datamin & max instead ? ",
+    "median=t\n     Show median ?",
     "maxsize=0\n    If > 0, size for moving moments instead\n",
     "VERSION=0.2\n  2-feb-05 PJT",
     NULL,
@@ -232,21 +253,27 @@ void nemo_main(void)
     int maxsize = getiparam("maxsize");
     real x;
     Moment m;
+    bool Qminmax = getbparam("minmax");
+    bool Qmedian = getbparam("median");
 
     ini_moment(&m,ABS(mom),maxsize);
     while (fgets(line,80,instr) != NULL) {
       x = atof(line);
       accum_moment(&m,x,1.0);
       if (maxsize > 0) {
-	if (getbparam("minmax"))
+	if (Qminmax)
 	  printf("%g %g\n",min_moment(&m), max_moment(&m));
+	else if (Qmedian)
+	  printf("%d %g\n",n_moment(&m),median_moment(&m));
 	else
-	  printf("%g\n",show_moment(&m,mom));
+	  printf("%d %g\n",n_moment(&m),show_moment(&m,mom));
       }
     }
     if (maxsize == 0) {
-      if (getbparam("minmax"))
+      if (Qminmax)
         printf("%g %g\n",min_moment(&m), max_moment(&m));
+      else if (Qmedian)
+	printf("%d %g\n",n_moment(&m),median_moment(&m));
       else
         printf("%g\n",show_moment(&m,mom));
     }
