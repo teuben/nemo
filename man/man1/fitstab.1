@@ -58,6 +58,19 @@ no magic blanking substitution, no scaling TSCALnnn, TZEROnnn ?
 column names are treated case sensitive. 
 .PP
 X format not understood yet
+.SH EXAMPLES
+Show the random group parameters of the first 4 record:
+.nf
+% fitstab sim0.fts hdu=1 row=1:4 select=group,data
+Working on FITS file 1
+Random Group printing:
+RANDOM GROUP: 4950 rows with 10 (4-byte) length each; 7 pars
+# UU VV WW DATE DATE BASELINE FREQSEL Data(1..)
+ -8.12176e-07 1.32065e-07 0 2.47447e+06 0.572593 258 1 858.081 199.085 7.5
+ 5.68985e-08 -4.70039e-07 0 2.47447e+06 0.572593 259 1 1251.84 -22.7329 7.5
+ -3.45473e-07 6.32915e-07 0 2.47447e+06 0.572593 260 1 893.396 27.1245 7.5
+ -8.36404e-07 -5.8816e-07 0 2.47447e+06 0.572593 261 1 518.19 129.551 7.5
+.fi
 .SH "SEE ALSO"
 ccdfits(1NEMO), fits(5NEMO), dd(1), FTB (\fIADC Fits Table Browser\fP)
 .SH AUTHOR
