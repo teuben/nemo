@@ -1,0 +1,74 @@
+.TH POTROT 1NEMO "07 February 2005"
+.SH NAME
+potrot \- query a NEMO potential in the XY plane, and derive a rotation curve 
+.SH SYNOPSIS
+\fBpotrot\fP [parameter=value]
+.SH DESCRIPTION
+  I've tried out the alternative approach to get a rotation curve from  
+a potential. I might move this over into the potq program, but for now
+it's implemented in potrot (it should have a manual page by the time
+you read this). Basically it uses the grid to derive a radial force,
+which can be averaged over a number of angles (but e.g. by using p=0
+or p=90 you can get a major or minor axis ration curve),from whidhc then
+the averages rotation curve is derived   v=sqrt(<force>*r)
+Looks nice and smooth for N4303 which i tried, as attached. I've done
+this:
+
+
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBpotname=\fP
+Name of potential [???]    
+.TP
+\fBpotpars=\fP
+Parameters for potential (1st one is pattern speed)
+.TP
+\fBpotfile=\fP
+Any optional data file associated with potential []
+.TP
+\fBr=\fP
+Radii to sample [0:2:0.1]    
+.TP
+\fBp=\fP
+Angles to sample (degrees) [0]   
+.TP
+\fBt=\fP
+Time to test potential at, if relevant [0.0]
+.TP
+\fBomega=\fP
+Use this instead of any returned pattern speed
+.TP
+\fBformat=\fP
+Format used to print numbers [%g]  
+**not used yet**
+.TP
+\fBniter=\fP
+Iteration max [10]     
+**not used yet**
+.TP
+\fBeps=\fP
+Accuracy [0.001]      
+**not used yet**
+.SH EXAMPLES
+
+Here is an example of taking a "rotation curve" along the major, minor and force average
+of a Pfenniger(1984) bar. The three tables are then cut into a simpler form
+and plotted using tabplot. With the default pgplot interface for 
+\fIyapp\fP they are colored rsp. red, green and blue.
+.nf
+potrot pfenniger84 r=0.1:10:0.1 p=0      > tab1
+potrot pfenniger84 r=0.1:10:0.1 p=90     > tab2
+potrot pfenniger84 r=0.1:10:0.1 p=0:90:2 > tab3
+tabmath tab1,tab2,tab3 - %1,%3,%6,%9 all | tabplot - 1 2,3,4 line=1,1 color=2,3,4
+.fi
+.SH SEE ALSO
+potq(1NEMO), rotcurves(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+07-Feb-05	V0.1 Created	PJT
+.fi
