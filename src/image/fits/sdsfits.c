@@ -9,6 +9,7 @@
  *       2-dec-03       V1.5  add dummy=                          pjt
  *      11-dec-04       V1.6  add wcs=
  *      16-dec-04       V1.6a fixed up reorder=f for wcs          pjt
+ *       4-jsn-05       V1.6b fixed bug writing out 2D data       pjt
  */
 
 #include <stdinc.h>
@@ -26,7 +27,7 @@ string defv[] = {
     "reorder=f\n                Reorder the axes (true means memory intensive)",
     "dummy=t\n                  Write dummy axes also ?",
     "wcs=f\n                    Write a WCS of some sort",
-    "VERSION=1.6a\n	        16-dec-03 PJT",
+    "VERSION=1.6b\n	        4-jan-05 PJT",
     NULL,
 };
 
@@ -57,6 +58,9 @@ void nemo_main()
 
   /*
    *  Open SDS and read and display it's header how many SDS# we have
+   *  the array maxsize[rank] gives the size of an SDS, recall however
+   *  that in 'fits' (fortran) order, dimsizes[rank-1] is the X axis,
+   *  and dimsizes[0] the last (Y or Z in our case)
    */
 
   infile = getparam("in");
@@ -125,8 +129,8 @@ void nemo_main()
         buff = (float *) allocate(sizeof(float)*size);
         ret = DFSDgetdata(infile, rank, dimsizes, buff);   /* get all data */
         if (ret) error("%d: Error reading data from SDS %s",ret,infile);
-	for (i=0; i<rank; i++) {
-	  j = rank-i-1;
+	for (i=0; i<rank; i++) {      /* i counts the HDF ("c") order */
+	  j = rank-i-1;               /* j counts the FITS ("fortran") order */
 	  crpix[j] = 1.0;
 	  crval[j] = coord[i][0];
 	  if (dimsizes[i] == 1) {
@@ -144,21 +148,19 @@ void nemo_main()
 	    }
 	  }
 	}
-
-
-        /*
-         *  revert axes for output FITS file (HDF is native C, so by default
-	 *  it reverts the axis; our keyword reorder=t restores the C order)
-	 *
-         */
+	if (rank==2) {      /* fill in a dummy 3rd axis */
+	  crpix[2] = 1.0;
+	  crval[2] = 0.0;
+	  cdelt[2] = 1.0;
+	}
 
     	outfile = getparam("out");
         dprintf(0,"%s: writing as FITS file\n",outfile);
 	if (Qreorder) {                    /* Reordering can be a lot of work */
+	  warning("if wcs=t and/or rank=3 be warned output may be flawed");
 	  strcpy(ctype[0],"XREV");   /* by lack of anything better....*/
 	  strcpy(ctype[1],"YREV");
 	  strcpy(ctype[2],"ZREV");
-	  warning("if wcs=t and/or rank=3 be warned output may be flawed");
 	  buff = reorder_array(buff, size, rank, dimsizes);
 	  if (rank==2) {
      	    nz = 1;
@@ -170,6 +172,39 @@ void nemo_main()
             nx = dimsizes[0];
 	  } else
             error("(%d) Cannot deal with rank != 2 or 3",rank);
+
+	  for (i=0; i<rank; i++) {
+	    idx[i] = i;
+	  }
+	  if (!Qdummy) {
+	      new_rank = 0;
+	      for (i=0; i<rank; i++) {
+		if (dimsizes[i] > 1) new_rank++;
+		idx[i] = i;
+	      }
+	      if (new_rank != rank) {
+		warning("trying to dummyfy %d axes",rank-new_rank);
+		for (i=0; i<rank; i++) {         /* loop over all dimensions */
+		  if (dimsizes[idx[i]] == 1) {   /* shift the remaining ones to the left */
+		    dprintf(0,"Dummy axis %d\n",idx[i]);
+		    for (j=i+1; j<rank; j++) {
+		      idx[j-1] = idx[j];
+		    }
+		  }
+		}
+		for (i=0; i<new_rank; i++) {
+		  dimsizes[i] = dimsizes[idx[i]];
+		  dprintf(0,"dummyfied idx[%d] = %d\n",i,idx[i]);
+		}
+		for (i=new_rank; i<rank; i++)
+		  dimsizes[i] = 1;
+		rank = new_rank;
+	      }
+	  }
+	  nx = dimsizes[0];
+	  ny = dimsizes[1];
+	  nz = dimsizes[2];
+
 	} else {               /* this should be the default with minimal data shuffling */
 	  strcpy(ctype[0],"X");   /* by lack of anything better....*/
 	  strcpy(ctype[1],"Y");
@@ -186,7 +221,7 @@ void nemo_main()
             nx = dimsizes[0];
 	  } else
             error("(%d) Cannot deal with rank != 2 or 3 yet",rank);
-	  /* note, reordering doesn't deal with dummyfying axes yet */
+
 	  for (i=0; i<rank; i++) {
 	    idx[i] = i;
 	  }
@@ -219,7 +254,8 @@ void nemo_main()
 	  ny = dimsizes[1];
 	  nz = dimsizes[2];
 	}
-	dprintf(0,"FITOPEN:  %d x %d x %d ; with rank=%d\n",nx,ny,nz,rank);
+	dprintf(0,"FITOPEN:  %d x %d x %d ; with rank=%d (first dim=%d)\n",
+		nx,ny,nz,rank,dimsizes[0]);
 	ff = fitopen(outfile,"new",rank, dimsizes);
 
 	for (i=0; i<rank; i++) {                         /* WCS header */
@@ -257,6 +293,7 @@ void nemo_main()
         fitwrhdr(ff,"DATAMIN", fmin);
         fitwrhdr(ff,"DATAMAX", fmax);
 	fp = buff;
+	if (rank==2) nz=1;        /* nasty hack to get around pure 2D maps like cmhog */
 	for (k=0; k<nz; k++) {
             fitsetpl(ff, 1, &k);
             for (j=0; j<ny; j++) {
@@ -325,7 +362,10 @@ void invert_array(int n, int *idx)
     }
 }
 
-/* reorder the array/matrix: brute force approach (only 2D and 3D) */
+/* 
+ * reorder the array/matrix: brute force approach (only 2D and 3D) 
+ * this means any a[nx][ny]nz] will become a[nz][ny][nx]           
+ */
 
 float *reorder_array(float *a, int size, int n, int *idx)
 {
