@@ -21,7 +21,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "deriv=\n            Clipping if abs(derivative) exceeds this value",
     "nmax=100000\n       Hardcoded allocation space, if needed for piped data",
     "comment=f\n         Keep clipped points as commented lines?",
-    "VERSION=0.1\n	 23-nov-02 PJT",
+    "VERSION=0.2\n	 25-nov-02 PJT",
     NULL
 };
 
@@ -106,20 +106,38 @@ deriv_data()
 {
   int    i;
   real d1, d2, dmin = getdparam("deriv");
+  real d_min, d_max;
+  bool first = TRUE;
 
-  for (i=0; i<npt; i++) {
-    if (i>1 ) 
+  for (i=0; i<npt; i++) {                  /* loop over all points */
+    if (i>1 ) {
       d1 = (y[i]-y[i-1])/(x[i]-x[i-1]);
-    else
+      if (first) {
+	d_min = d_max = ABS(d1);
+	first = FALSE;
+      }
+    } else
       d1 = dmin+1;
-    if (i<npt-1)
+    if (i<npt-1) {
       d2 = (y[i]-y[i+1])/(x[i]-x[i+1]);
-    else
+      if (first) {
+	d_min = d_max = ABS(d1);
+	first = FALSE;
+      }
+    } else
       d2 = dmin+1;
     d1 = ABS(d1);  
     d2 = ABS(d2);  
+    if (d1 < dmin) {
+      d_min = MIN(d_min,d1);
+      d_min = MIN(d_min,d2);
+    }
+    if (d2 < dmin) {
+      d_max = MAX(d_max,d1);
+      d_max = MAX(d_max,d2);}
     if (d1 > dmin && d2 > dmin) ok[i] = FALSE;
   }
+  dprintf(0,"Min/Max for deriv = %g %g (dmin=%g)\n",d_min,d_max,dmin);
 }
 
 write_data()
