@@ -1,0 +1,12 @@
+%N rsf
+%D Read an ascii structured file into binary structured file
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man rsf' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	input file name (ascii structured file) [???]
+%A out
+	output file name (binary structured file) [???]
+%A VERSION
+	5-feb-95 PJT [2.3e]
