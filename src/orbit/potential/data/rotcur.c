@@ -51,7 +51,7 @@ void inipotential (int *npar, double *par, string name)
     dprintf (1,"  Parameters : Pattern Speed = %f\n",omega);
     dprintf (1,"  Table = %s\n",name);
 
-    nmax = file_lines(name);
+    nmax = nemo_file_lines(name);
     if (nmax<=0) error("file_lines returned %d lines in %s\n",
              nmax,name);
     rad = (real *) allocate(nmax * sizeof(real));
