@@ -1,0 +1,58 @@
+.TH MKBAREDISK 1NEMO "
+.SH NAME
+mkbaredisk \- make an exponential disk
+.SH SYNOPSIS
+\fBmkbaredisk out=\fPout_file [parameter=value] .\|.\|.
+.SH DESCRIPTION
+\fImkbaredisk\fP makes an N-body realization of an exponential disk,
+assuming no other mass distribution is present.  Such disks are wildly
+unstable, but fun to play with.
+.SH PARAMETERS
+The following parameters are recognized.
+.TP 24
+\fBout=\fP\fIout_file\fP
+Write to \fIout_file\fP in \fIsnapshot\fP(5NEMO) form.
+Default: \fIrequired\fP.
+.TP
+\fBnbody=\fP\fInum_bodies\fP
+Usual number of particles. Default: \fB1024\fP.
+.TP
+\fBalpha=\fP\fIdisk_alpha\fP
+Inverse exponential scale length of disk. Default: \fB4.0\fP.
+.TP
+\fBrcut=\fP\fIdisk_cutoff\fP
+Outer cutoff radius of disk. Default: \fB1.25\fP.
+.TP
+\fBmdisk=\fP\fIdisk_mass\fP
+Total disk mass. Default: \fB1.0\fP.
+.TP
+\fBQtoomre=\fP\fIdisk_Q_value\fP
+Toomre's Q parameter for disk. Default: \fB1.0\fP.
+.TP
+\fBgamma=\fP\fIfudge_factor\fP
+Used when correcting for pressure support. Default: \fB1.0\fP.
+.TP
+\fBepsi=\fP\fIsoftening_parameter\fP
+Softening, which sets the vertical scale of the disk.
+Default: \fB0.025\fP.
+.TP
+\fBseed=\fP\fIrandom_seed\fP
+Usual random number seed. Default: \fB12345\fP.
+.TP
+\fBheadline=\fP\fImessage\fP
+Text headline for output. Default: \fInone\fP.
+.SH "SEE ALSO"
+mktestdisk(1NEMO), mkexpdisk(1NEMO), mkexphot(1NEMO)
+.SH AUTHOR
+Joshua E. Barnes
+.SH HISTORY
+.nf
+.ta +1i +2i
+2-jun-88	V1.0 original version       	JEB
+29-mar-97	V2.0 SINGLEPREC, ndisk= now nbody=	PJT
+
+
+
+
+
+
