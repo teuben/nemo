@@ -4,6 +4,11 @@ CC = /usr/bin/gcc
 # PGINCLUDE =  -I$(PGPLOT_DIR)
 G5INCLUDE = -I/home/atsushi/pub/include
 
+#	if not using IO_NEMO, comment these macros  (NEMO/V3 version of io_nemo)
+IONEMOFLAGS = -DIONEMO
+IONEMOLIB = -L$(NEMOLIB) -lnemo
+
+
 #
 # Add -DNOGRAPHICS for installation without PGPLOT
 #
@@ -32,9 +37,9 @@ G5INCLUDE = -I/home/atsushi/pub/include
 # for g++ & gcc
 # CPPFLAGS = -DNOGRAPHICS $(PGINCLUDE) -O3 -ffast-math -funroll-loops
 # CPPFLAGS = -DNOGRAPHICS -DTREE $(PGINCLUDE) -O3 -ffast-math -funroll-loops -DPAR_TRAV -pthread
-CPPFLAGS = -DNOGRAPHICS -DTREE $(PGINCLUDE) -O3 -DP2M2
+CPPFLAGS = -DNOGRAPHICS -DTREE $(PGINCLUDE) -O3 -DP2M2 $(IONEMOFLAGS)
 
-# IONEMO = -L$(NEMOLIB) -lio_nemo -lnemo
+
 # PGLIB     =  -L$(PGPLOT_DIR) -O4 -lcpgplot -lpgplot -lX11 -lUfor -lfor -lFutil -lm -lprof1 -lpdf
 
 G5LIB =  -L/home/atsushi/test1.5/g5pkg/lib -lg5a -lphibdma
@@ -97,21 +102,21 @@ library_g4.o:	library.C nbody_particle.h
 nbody.o : nbody.C  nbody_particle.h design.c
 	$(CPP)  -c    $(CPPFLAGS)  nbody.C 
 nbody : nbody.C  nbody_particle.h $(LIBOBJS) design.c
-	$(CPP) -DEVOLVE    $(CPPFLAGS) -o nbody nbody.C $(LIBOBJS) $(IONEMO) $(PGLIB) -lm
+	$(CPP) -DEVOLVE    $(CPPFLAGS) -o nbody nbody.C $(LIBOBJS) $(IONEMOLIB) $(PGLIB) -lm
 
 # nbody_g5 : nbody.C  nbody_particle.h $(LIBOBJSG5)
 #	$(CPP)  -p -DEVOLVE -DGRAPE5 $(CPPFLAGS) $(G5INCLUDE) -o nbody_g5 nbody.C\
-#	$(LIBOBJSG5) $(IONEMO) $(PGLIB) $(G5LIB) -lm
+#	$(LIBOBJSG5) $(IONEMOLIB) $(PGLIB) $(G5LIB) -lm
 
 nbody_g5 : nbody.C  nbody_particle.h $(LIBOBJSG5)
 	$(CPP) -DEVOLVE -DGRAPE5 $(CPPFLAGS) $(G5INCLUDE) -o nbody_g5 nbody.C\
-	$(LIBOBJSG5) $(IONEMO) $(PGLIB) $(G5LIB) -lm
+	$(LIBOBJSG5) $(IONEMOLIB) $(PGLIB) $(G5LIB) -lm
 
 nbody_g4 : nbody.C  nbody_particle.h $(LIBOBJSG4)
-	$(CPP) -DEVOLVE $(CPPFLAGS) -o nbody_g4 nbody.C $(LIBOBJSG4) $(IONEMO) $(PGLIB) $(G4LIB) -lm
+	$(CPP) -DEVOLVE $(CPPFLAGS) -o nbody_g4 nbody.C $(LIBOBJSG4) $(IONEMOLIB) $(PGLIB) $(G4LIB) -lm
 
 nbody_h3 : nbody.C  nbody_particle.h $(LIBOBJSG4)
-	$(CPP) -DEVOLVE    $(CPPFLAGS) -o nbody_h3 nbody.C $(LIBOBJSG4) $(IONEMO) $(H3LIB) -lm
+	$(CPP) -DEVOLVE    $(CPPFLAGS) -o nbody_h3 nbody.C $(LIBOBJSG4) $(IONEMOLIB) $(H3LIB) -lm
 
 BHtree.o : BHtree.C  nbody_particle.h BHtree.h 
 	$(CPP)    $(CPPFLAGS) -c BHtree.C 
@@ -131,7 +136,7 @@ samplelog_g5:  nbody_g5
 	nbody_g5 -i samplein > samplelog_g5
 
 clean:
-	rm *.o
+	rm -f *.o nbody
 
 bak:	export.tar.gz
 	mv export.tar.gz nbody.tar.gz
