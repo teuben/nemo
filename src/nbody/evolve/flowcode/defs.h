@@ -10,7 +10,6 @@
 
 string infile;			/* input file with initial conds */
 string outfile;			/* output file for simulation results */
-string savefile;		/* output file for system state */
 
 real freq;			/* fundamental integration frequency */
 

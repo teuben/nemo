@@ -79,8 +79,6 @@ void initoutput(void)
     if (*options != 0)
 	printf("\toptions: %s\n\n", options);
     minor_tout = tout = tnow;			/* schedule 1st outputs     */
-    if (*savefile != 0)	          		/* restart file enabled?    */
-	savestate(savefile);			/*   save inital state      */
 }
 
 /*
@@ -152,9 +150,6 @@ void output(void)
 	if (bits & PhaseSpaceBit)
 	    printf("\n\tparticle data written\n");
     }
-
-    if (*savefile != 0)			        /* state file specified?    */
-	savestate(savefile);			/*   save system data       */
 }
 
 /*
