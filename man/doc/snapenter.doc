@@ -1,0 +1,18 @@
+%N snapenter
+%D enter an nbody snapshot interactively
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man snapenter' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A out
+	Output file name []
+%A nbody
+	Number of particles [0]
+%A time
+	Time at which snapshot taken [0.0]
+%A headline
+	Verbiage for output []
+%A verbose
+	Be verbose when input requested [t]
+%A VERSION
+	1-apr-94 PJT [2.2a]
