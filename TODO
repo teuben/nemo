@@ -12,6 +12,7 @@ Remaining MacOSX problems: (a special macosx.html web page dedicated to this)
   - xyzview is too slow to be useful, we should recode it such that
     OpenGL (and thus Mesa) can be linked. This would also remove the
     immediate need for vogl.
+    (try JCL's new program 'glnemo')
 
 problems with gcc4: (as tested on FC3)
   - pgplot: grfont.dat cannot be built, some runtime problem with fortran
@@ -40,6 +41,16 @@ general things for 3.2.x
 
   => a NEMO install for gyrfalcON, so we don't have to figure the funky NEMOHOST
      in Walter's tree  (he is using make's MACHTYPE and OSTYPE internal variables)
+    gyrfalcON:
+        3.2.2 compiles ok on linux
+	3.2.3 ok
+	3.3.1 ok
+	3.3.2 ok
+	3.3.4 fails
+        3.3.4 breaks eventually   [macosX also dies here]
+        3.4.2 dies very quickly (fc3)
+	3.4.3 
+    
 
 things for 3.4
 
@@ -53,6 +64,10 @@ things for 3.4
 
 some other help on configure:
 	http://www.airs.com/ian/configure/
+	
+code & line coverage: (gcov, lcov)
+  http://ltp.sourceforge.net/coverage/lcov.php
+  
 
 - io_nemo library written by JCL in Marseille
 	has problems in -DSINGLEPREC
