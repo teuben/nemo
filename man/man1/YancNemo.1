@@ -1,4 +1,4 @@
-.TH YANCNEMO 1NEMO "16 November 2001"
+.TH YANCNEMO 1NEMO "13 June 2002"
 .SH NAME
 YancNemo \- Yet Another N-body Code (NEMO version)
 .SH SYNOPSIS
@@ -36,6 +36,15 @@ Aarseth's nbody* series. [10]
 Output integration step. Some other codes use 1/freqout, or \fBdeltat\fP for this
  [1]    
 .TP
+\fBlogout=\fP
+file for log output (default: stderr)
+.TP
+\fBout2=\fP
+file for secondary output stream (see \fBgive2=\fP below).
+.TP
+\fBstep2=\fP
+time between secondary outputs; 0 -> every step  [0]    
+.TP
 \fBtheta=\fP
 tolerance parameter at M=M_tot
 [0.6]
@@ -62,11 +71,15 @@ Timestep indicator such that tau_min = (1/2)^hmin. [Default: 6]
 \fBNlev=\fP
 Number of time step levels [1].
 .TP
-\fBNref=\fP
-Number of bodies in cell for density estimate    [16]
-.TP
 \fBfac=\fP
-factor in tau < fac / rho. Only used if Nlev > 1. []
+tau = fac/acc. If more than one of \fBfac=\fP, \fBfph=\fP or 
+\fBfpa=\fP is non-zero, we use the minimum tau.
+.TP
+\fBfph=\fP
+tau = fph/pot
+.TP
+\fBfpa=\fP
+tau = fpa*sqrt(pot)/acc
 .TP
 \fBresume=\fP
 resume old simulation?  that implies:
@@ -74,19 +87,15 @@ resume old simulation?  that implies:
 2) append to input file (unless out given)          
 [f].
 .TP
-\fBgive_pot=\fP
-Output potentials? Valid values are 0/1/2/3, which outputs
-no/N-body/extern/sum.
-Potentials are returned in the usual \fBPotential\fP slot of a \fISnapShot(5NEMO)\fP.
-[0]    
+\fBgive=\fP
+List of output specifications. Recognizing
+m (mass), x (position), v (velocity), a (acceleration), p (N-body potential),
+P (external potential) and r (density estimate).
+[Default: mxv]
 .TP
-\fBgive_acc=t|f\fP
-Output accelerations. [f]
-.TP
-\fBgive_rho=t|f\fP
-Output densities? 
-Densities are returned in the \fBAux\fP slot of a \fISnapShot(5NEMO)\fP.
-[Default: 0].
+\fBgive2=\fP
+list of specifications for secondary output.
+[Default: mxv]
 .TP
 \fBpotname=\fP
 Name of external potential
@@ -105,9 +114,9 @@ linearly for larger systems. The following little benchmark
 .nf
 	mkplummer - $N | YancNemo - . tstop=1
 .fi
-Will take about 150" for N=100,000 on a 933MHz Pentium-iii. It
-scales logarithmically, i.e. for N=1,000,000 it will take almost
-1400".
+Will take about 78" for N=100,000 on a 2GHz Pentium-iv. It
+scales slightly better than linear, for N=1,000,000 it takes
+about 728".
 .SH EXAMPLES
 .SH SEE ALSO
 hackcode1(1NEMO)
@@ -122,6 +131,7 @@ Walter Dehnen
 29-May-01	V1.0 manual written, at GH-2001 workshop at INAOE 	PJT
 13-jun-01	1.0.2: added Ncrit
 16-nov-01	1.0.15: aligned man page with actual code	PJT
-3-jun-02	added theta=	PJT
+4-jun-02	added theta=, and corrected log/linear statement	PJT
+13-jun-02	1.2: imported into NEMO 	PJT
 .fi
 
