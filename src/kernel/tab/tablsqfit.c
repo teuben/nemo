@@ -32,8 +32,9 @@
  *      23-mar-01     a fixed xrange=  for singular column files
  *      14-apr-01  V3.1 added convex hull computation as 'area'
  *      18-jun-01     b fixed boundary check for xrange, also use natof now in setxrange
- *       8-aug-01     c compute error in axis ratio for ellipses
+ *       8-aug-01     c compute error in axis ratio for ellipses (w/ Mousumi Das)
  *      10-sep-01  V3.2 GSL enabled for linear fit
+ *                      figuring out error bars?
  */
 
 /*
@@ -73,7 +74,7 @@ string defv[] = {
     "estimate=\n        optional estimates (e.g. for ellipse center)",
     "nmax=10000\n       Default max allocation",
     "tab=f\n            short one-line output?",
-    "VERSION=3.2\n      10-sep-01 PJT",
+    "VERSION=3.2a\n     18-sep-01 PJT",
     NULL
 };
 
@@ -92,28 +93,25 @@ typedef struct column {
     int ndat;       /* actual length of data */             /* not used */
     real *dat;      /* pointer to data */
     int colnr;      /* column number this data came from */ /* not used */
-} column;
+} a_column;
 
 int nxcol, nycol, xcolnr[MAXCOL], ycolnr[MAXCOL], dycolnr; 
-column            xcol[MAXCOL],   ycol[MAXCOL],   dycol;
+a_column            xcol[MAXCOL],   ycol[MAXCOL],   dycol;
 
-real xrange[MAXCOL*2]; /* ??? */
+real xrange[MAXCOL*2];      /* ??? */
 
-string method;
-stream instr, outstr;                            /* input file */
+string method;              /* fit method (line, ellipse, ....) */
+stream instr, outstr;       /* input / output file */
 
 
-int    nmax;                         /* allocated space */
-int    npt;                          /* actual number of points from table */
-real   nsigma;                       /* fractional sigma removal */
+int    nmax;                /* allocated space */
+int    npt;                 /* actual number of points from table */
+real   nsigma;              /* fractional sigma removal */
 
-real  a,b;                           /* fit parameters in: y=ax+b  */
+real  a,b;                  /* fit parameters in: y=ax+b  */
 int order;
 
-bool Qtab;
-
-extern bool scanopt();
-extern real natof();
+bool Qtab;                  /* do table output ? */
 
 
 /****************************** START OF PROGRAM **********************/
@@ -148,7 +146,7 @@ nemo_main()
 setparams()
 {
     string inname = getparam("in");
-    nmax = file_lines(inname,getiparam("nmax"));
+    nmax = nemo_file_lines(inname,getiparam("nmax"));
     if (nmax<0) error("Error opening %s",inname);
     if (nmax==0) error("No data?");
     instr = stropen (inname,"r");
@@ -426,7 +424,7 @@ do_ellipse()
     sigfac /= (npt-5);
     sigfac = sqrt(sigfac);
     dprintf(1,"Sigma factor=%g\n",sigfac);
-    siga = sigfac * sqrt(mat[0]);
+    siga = sigfac * sqrt(mat[0]);     /* trace elements are errors */
     sigb = sigfac * sqrt(mat[6]);
     sigc = sigfac * sqrt(mat[12]);
     sigd = sigfac * sqrt(mat[18]);
@@ -486,11 +484,22 @@ do_ellipse()
         ab = (2/(sol[0]+sol[2] + 2*sol[1]/sinpp));
 
     /* compute error in axis ratio : for this one we only need 3 partial derivitives */
+#if 1
+    /* first Mousumi version */
+    warning("old math");
     dr1da = 4*bb*(sinpp-(2*bb*(aa+cc)*cospp)/fac3)/sqr(fac2);
     dr1dc = 4*bb*(sinpp+(2*bb*(aa+cc)*cospp)/fac3)/sqr(fac2);
-    dr1db = (8*bb*cospp*(sqr(aa)-sqr(cc))+4*sinpp*(aa+cc)*fac3)/(fac3*sqr(fac2));
+#else
+    /* new version, but it's really the same math, just refactorized:-) */
+    warning("new math");
+    dr1da = 4*bb*(sinpp-((aa+cc)*(aa-cc)*sinpp)/fac3)/sqr(fac2);
+    dr1dc = 4*bb*(sinpp+((aa+cc)*(aa-cc)*sinpp)/fac3)/sqr(fac2);
+#endif
+    dr1db = (8*bb*cospp*(sqr(aa)-sqr(cc))+4*sinpp*(aa+cc)*fac3)/(fac3*sqr(fac2)); 
     sigr  = sqrt((sqr(siga*dr1da)+sqr(sigb*dr1db)+sqr(sigc*dr1dc))/(2*r));
     dprintf(1,"sigr=%g\n",sigr);
+    dprintf(2,"aa,bb,cc,sinpp,cospp=%g %g %g %g %g\n",
+  	       aa,bb,cc,sinpp,cospp);
 
     pa *= 180/PI;           /* PA is now in degrees */
     dprintf(1,"Before re-arranging: ab, r, pa = %f %f %f\n",ab,r,pa);
