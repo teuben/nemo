@@ -1,0 +1,102 @@
+.TH XYIO 3NEMO "7 January 1999"
+.SH NAME
+xyopen, xyclose, xyread, xywrite, xysetpl \- line based image I/O
+.SH SYNOPSIS
+.nf
+.B #include <stdinc.h>
+.B #include <xyio.h>
+.PP
+.B image *xyopen(handle, name, mode, naxis, axes)
+.B int handle, naxis, axes[naxis];
+.B string name, mode;
+.PP
+.B void xyclose(handle)
+.B int handle;
+.PP
+.B void xyclose(handle)
+.B int handle;
+.PP
+.B void xyread(handle, index, array)
+.B int handle, index;
+.B real array[];
+.PP
+.B void xywrite(handle, index, array)
+.B int handle, index;
+.B real array[];
+.PP
+.B void xysetpl(handle, naxis, nsize)
+.B int handle, naxis, nsize[];
+.SH DESCRIPTION
+\fIxyopen\fP opens an image file. For an input file, it
+determines the size of each axis. For a output 
+file, it writes out this info.
+\fIname\fP is the name of the file to be opened,
+\fImode\fP the access mode. It can be \fB"r"\fP or
+\fB"w"\fP to open the file in read or write mode, although the
+strings \fB"old"\fP and \fB"new"\fP are also supported.
+\fInaxis\fP is the maximum number of axes that the calling program can
+handle. For an input file, if the data file has fewer
+than \fInaxis\fP axes, the higher dimensions are treated as having
+only one element. If the data file has more than \fInaxis\fP
+axes, and the higher dimensions are more than 1 element
+deep, xyopen will call \fIerror\fP and die.
+\fIaxes\fP is an input array when writing and output for reading.
+It gives the number of elements along each axis.
+\fIxyopen\fP returns a \fIhandle\fP of the file, which
+is used in subsequent operations. 
+.PP
+\fIxyclose\fP closes a previously opened image file.
+.PP
+\fIxyread\fP reads a single row from an image. This accesses the plane given
+by the last call to \fIxysetpl\fP(see below).
+\fIindex\fP is the row number to read. This varies from 0 to \fBaxes[1]\fP-1.
+\fIarray\fP is the read row.  \fBaxes[0]\fP elements are returned.
+\fIxywrite\fP is the inverse of \fIxyread\fP.
+.PP
+\fIxysetpl\fP sets up which (hyper) plane of a cube is to be 
+accessed. 
+By default, if not called, the first plane will be accessed.
+\fInaxis\fP is the size of the modified \fInsize\fP array.
+\fInsize\fP gives the indices, along the 3rd, 4th, 5th, etc
+dimensions, of the plane that is to be accessed. \fBnsize[0]\fP
+corresponds to the index along the 3rd dimension, and can take
+values from 0 to \fBaxes[2]-1\fP etc.
+.SH EXAMPLE
+The following example shows how to sum all the pixel values in an
+an image:
+.nf
+    real *data, sum=0;
+    int  i, j, k, h, axes[3];
+
+    xyopen(&h,"ccd","r",3,axes);
+    data = (real *) allocate(axes[0] * sizeof(real);
+    for(k=0; k<axes[2]; k++) {
+        xysetpl(h,1,&k);
+        for(j=0; j<axes[1]; j++) {
+            xyread(h,j,data);
+            for(i=0; i<axes[0]; i++) sum += data[i];
+        }
+    }
+    printf("Sum = %g\n",sum);
+.fi
+.SH LIMITATIONS
+Although the interface specification is the same as those of MIRIAD,
+images in NEMO are implemented only as 2- or 3D dimensional. Also, note
+that \fBindex\fP and \fBnsize\fP are 0 based in NEMO, not 1 based as they
+are in MIRIAD.
+.SH SEE ALSO
+image(3NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +1.5i
+~/src/image/io  	xyio.c
+.fi
+.SH UPDATE HISTORY
+.nf
+.ta +1i +4i
+15-may-92	V1.0 Created       	PJT
+7-jan-99	V1.1 Fixed documentation bug	PJT
+.fi
+
