@@ -7,11 +7,12 @@ tabplot \- general table plotter
 .SH DESCRIPTION
 \fItabplot\fP plots datapoints from an ascii table, and optionally
 connects the datapoints by lines. It can also bin the data, and plot
-error-bars in X and Y derived from the dispersion within the bins.
+error-bars in X and Y derived from the dispersion within those bins.
 .PP
 \fItabplot\fP is intended for quick and dirty display of the data. 
 For more complicated plots, full plotting packages should be used
-(Mongo, SM, WIP, gnuplot, Grace etc.)
+(Mongo, SM, WIP, gnuplot, Grace etc.), though moderately sophisticated
+plots can be made using \fBlayout=\fP.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword is also
 given:
@@ -45,10 +46,13 @@ Maximum value along y-axis to include [default: maximum of datapoints].
 .TP
 \fBxbin=\fIboundaries\fP
 When used either the number of datapoints used to average to a plotted
-datapoint or the bin boundaries (in X-worldcoordinates) must be given.
+datapoint or the bin boundaries (in X-world-coordinates) must be given.
 The program can distinguish from both cases by the number of variables
 given to this keyword. One means fixed number of datapoints used in
-averaging, more than one means the numbers are bin boundaries.
+averaging, more than one means the numbers are bin boundaries. The output
+it controlled using \fBtab=\fP and contains the
+mean X, Y followed by the dispersion in X and Y and the number of
+points in that bin.
 [default: not used, datapoints from file are used].
 .TP
 \fBpoint=\fP\fItype,size\fP
@@ -104,8 +108,8 @@ Random verbiage, will be plotted along right top of plot for id. [default: none]
 The left top will contain the filename \fIinfile\fP.
 .TP
 \fBtab=\fP
-If binning is used, this keyword can be use to supply an optional
-output filename. Default: none.
+If binning is used, this keyword is used to 
+output filename. Default: false;
 .TP
 \fBcursor=\fP
 This will be the name of an ascii file that will contain coordinates

@@ -23,6 +23,6 @@ src/tools/misc/accudate.c
 .SH HISTORY
 .nf
 .ta +1i +2i
-4-jan-2003    imported into NEMO   PJT
+4-jan-2003    imported into NEMO  PJT
 8-jan-2005    man page written    PJT
 .fi

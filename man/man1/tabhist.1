@@ -1,4 +1,4 @@
-.TH TABHIST 1NEMO "7 May 2003"
+.TH TABHIST 1NEMO "29 January 2004"
 .SH NAME
 tabhist \- histogram plotter and gaussian fit for tabular data
 .SH SYNOPSIS
@@ -6,17 +6,23 @@ tabhist \- histogram plotter and gaussian fit for tabular data
 \fBtabhist in=\fPinfile [parameter=value]
 .SH DESCRIPTION
 \fItabhist\fP plots a histogram and computes the first 
-4 moments of a number of points, obtained
-from an (set of) column(s) from an (ascii) file in tabular format. 
+4 moments of points obtained from an (set of) column(s) from an ascii 
+\fItable(5NEMO)\fP.
 It calculates the mean, dispersion,
 skewness and kurtosis. It then plots the data in the form of a histogram,
 optionally with a 'best' gaussian fit and residuals. It can also plot
-a cumulative histogram of the data.
+a cumulative histogram of the data. 
+.PP
+The median is also optionally computed, for which an 
+alternate sorting routine can be selected (if available). 
 .PP
 If multiple columns are used, they are appended to each other and
 treated like a single long column.
 If you need simple statistics for multiple columns, use \fBtabstat\fP 
-instead. It can also remove outliers and re-compute the statistics.
+instead. 
+.PP
+Using the \fBnsigma\fP keyword, outliers can be removed
+and statistics re-computed.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword is also
 given:
@@ -26,15 +32,16 @@ input file, in tabular format [no default].
 .TP
 \fBxcol=\fIcolumn\fP
 column(s) from which the (X) values are taken. 
-Multiple columns can be given. [default \fB1\fP].
+Multiple columns can be given in the usual \fInemoinp(3NEMO)\fP notation
+for integers. [default \fB1\fP].
 .TP
 \fBxmin=\fIx_min\fP
-Minimum value along X-axis to include [default: minimum of datapoints].
+Minimum value along X-axis to include 
+[default: autoscaling on minimum of datapoints].
 .TP
 \fBxmax=\fIx_max\fP
-Maximum value along X-axis to include [default: maximum of datapoints].
-Note: One cannot specify only a min or max, either both, or none have to
-be specified. 
+Maximum value along X-axis to include 
+[default: autoscaling on maximum of datapoints].
 .TP
 \fBbins=\fIn_bins\fP
 Number of (equal size) bins the data is split up in [default: \fB16\fP].
@@ -90,16 +97,23 @@ and ylog are automatically re-set to false.
 Compute median too? This can be timeconsuming for large numbers of points.
 [Default: \fBt\fP].
 .TP
+\fBdual=t|f\fP
+Dual pass over the data, subtracting the mean. This can be important
+if the data have a large average value with a small spread around the mean.
+Notice that in this mode the mean is subtracted but never added to
+the min/max/mean/median etc. 
+Default: f
+.TP
 \fBnsigma=\fI
 Delete points more than nsigma times the sigma from the mean. After each
 point sigma and mean are recomputed. [Default: none]
-.SH BUGS
-Cannot autoscale with only xmin or xmax set.
+.TP
+\fBsort=\fP\fIsort_mode\fP
 .SH BUGS
 Points that fall exactly on the boundary of a bin, are added to the
 right side. Another way of saying is that a cell includes the left side,
-but is open ended on the right side, i.e. [---). This behavior is
-opposite that of SM's behavior.
+but is open ended on the right side, i.e. [---). Note this behavior is
+exactly opposite that of SM's behavior, which was used to compare results.
 .SH "SEE ALSO"
 tablsqfit(1NEMO), tabmath(1NEMO), tabstat(1NEMO)
 .PP
@@ -124,7 +138,8 @@ xx-mar-88	V1.0: created          	PJT
 24-apr-98	V3.0a: fix median calculation for restricted range	PJT
 22-dec-99	V3.1a: optional median, fix N=1 reporting bug	PJT
 24-jan-00	documentation updated with program	PJT
-7-jun-01   	3.2: added nsigma, corrected man page options	PJT
+7-jun-01	3.2: added nsigma, corrected man page options	PJT
 7-may-03	4.0: multiple columns allowed	PJT
+28-jan-05	5.0: separate xmin/xmax=, added sort=, fix median if nsigma 	PJT
 .fi
 

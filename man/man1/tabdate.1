@@ -30,10 +30,16 @@ No default.
 .SH EXAMPLES
 
 .nf
-echo '2001-11-12 18:31:01' | tabtime - - '%Y-%m-%d %H:%M:%S' '%c'
+  echo '2001-11-12 18:31:01' | tabtime - - '%Y-%m-%d %H:%M:%S' '%c'
 
-date +%s | tabtime - - %s %c
+  date +%s | tabtime - - %s %c
 .fi
+and a contrived way to turn time into seconds
+.nf
+  tabdate tab0 - %T "1970 %T" | tabdate - - "%Y %T" %s
+.fi
+.SH BUGS
+Cannot handle fractional seconds.
 .SH SEE ALSO
 date(1), strptime(3), strftime(3)
 .SH FILES

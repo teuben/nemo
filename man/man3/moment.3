@@ -32,7 +32,7 @@ min_moment, max_moment \- various (moving) moment and minmax routines
 .fi
 .SH DESCRIPTION
 \fImoment\fP is a set of routines to compute the moments of 
-a set of real values, and also keep track of the actual datamin
+a set of real values, and also keep track of the datamin
 and datamax. The routines are written in C but in 
 an object-oriented fashion as to try and keep the use from the internal
 data-structures. The \fBMoment\fP can (and should) be treated as an
@@ -40,7 +40,7 @@ opaque datastructure. All information should be obtained through interface
 routines.
 .PP
 If only a datamin/max is needed, \fBmom<0\fP can be used to prevent
-expensive moment calculations.
+the more expensive moment calculations. 
 .PP
 Moving or running averages (or moments) can be done by supplying \fBndat>0\fP
 to ini_moment. It will keep a memory of the last \fBndat\fP data values
@@ -69,7 +69,9 @@ typedef struct {
 .fi
 from the standard include file \fImoment.h\fP.
 .SH BUGS
-Does not do a whole lot of sanity checks.
+When \fIdecr_moment\fP is used, the data min/max is not correct. 
+Only with \fBndat>0\fP for moving moments can it be recomputed
+correctly.
 .SH SEE ALSO
 grid(3NEMO)
 .SH AUTHOR
