@@ -31,7 +31,9 @@
  *      19-aug-00       d   fixed TABs correctly                        pjt
  *	23-sep-01       e   ->nemo_file_lines
  *      24-jan-02       f   to block10, time to use indexed parameter   pjt
- *       3-feb-02       g   fixed bug if time in header, nbody not      pjt
+ *       3-feb-02       g   fixed bug if time in header, nbody not      pjt 
+ *      11-may-02       h   longer lines to deal with DCR's 'ss2bt' files   PJT
+ *      28-may-03       i   allow 'm' also for 'mass', also allow - for skip  pjt
  */
 
 #include <stdinc.h>
@@ -46,7 +48,7 @@
 string defv[] = {
     "in=???\n      Input file name - ascii (structured) table",
     "out=\n        Output file name - snapshot",
-    "header=\n     Header scalars (nbody, ndim, time, skip)",
+    "header=\n     Header scalars (nbody, ndim, time, skip, -)",
     "block1=\n     What's in first block of nbody lines - mass",
     "block2=\n     - pos(ndim)",
     "block3=\n     - vel(ndim)",
@@ -63,16 +65,16 @@ string defv[] = {
     "options=\n    Other processing options (scan|comment|wrap|spill)",
     "nskip=0\n     Number of lines skipped before each (header+block1+...)",
     "headline=\n   Random mumblage for humans",
-    "VERSION=1.3g\n 3-feb-02 PJT",
+    "VERSION=1.3g\n 28-may-02 PJT",
     NULL,
 };
 
 string usage = "convert ASCII tabular information to snapshot format";
 
 
-#define MAXLINE  256
-#define MAXTIMES 256
-#define MAXVALS   32
+#define MAXLINE  1024
+#define MAXTIMES 1024
+#define MAXVALS    32
 
 local stream instr, outstr;
 
@@ -234,6 +236,8 @@ local bool get_header(void)
                 ndim = dvals[i];
             else if (streq(header[i],"skip"))
                 dval = dvals[i];
+            else if (streq(header[i],"-"))
+                dval = dvals[i];
             else
                 warning("Skipping unknown header name %s",header[i]);
         }
@@ -271,9 +275,11 @@ local bool get_block(int id,string options)
 
     need = 0;
     for (i=0; i<n; i++) {
-        if (streq(o[i], "skip")) {
+        if (streq(o[i], "skip") || streq(o[i], "-")) {
             need += 1;
         } else if (streq(o[i], "mass")) { 
+            colmass = need+1;   need += 1;      bits |= MassBit;
+        } else if (streq(o[i], "m")) { 
             colmass = need+1;   need += 1;      bits |= MassBit;
         } else if (streq(o[i], "phase")){ 
             colphase= need+1;   need += 2*NDIM; bits |= PhaseSpaceBit;
@@ -355,7 +361,10 @@ local bool get_block(int id,string options)
             } else                      /* else always spill */
                 nvals = 0;
         } else if (nvals < need) {
-            error("Line %d (%d) Not enough values (need %d for %s) - try wrap",
+	  dprintf(0," bad line:%s\n",line);
+          fgets(line, MAXLINE, instr);
+	  dprintf(0,"next line:%s\n",line);
+            error("Bad line %d (%d) Not enough values (need %d for %s) - try wrap",
                           linecnt,nvals,need,options);
         } else  /* exact match : nvals == need */
             nvals = 0;
