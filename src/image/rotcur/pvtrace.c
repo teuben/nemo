@@ -7,6 +7,8 @@
  *                    a     fixed RPD !!
  *     29-dec-01      b     added extra security
  *
+ *     13-jul-02    V1.2    If input file is a cube, reduce the cube to a velocity field
+ *
  * Shane, W.W. \& Bieger-Smith, G.P. 1966 B.A.N. 18, 263
  *      v_x = v_m + 1/Y_m \int_(v_M)^(V+T) { Y(v) dv }
  *  or
@@ -21,16 +23,17 @@
 #include <image.h>
 
 string defv[] = {
-  "in=???\n      Input image file - must be an PV diagram",
-  "eta=0.2\n	 [0..1] weight factor for I_max adding to I_lc",
-  "ilc=0\n       Lowest Contour value",
-  "sign=1\n      1: Rotation largest for positive coordinates, -1: reverse",
-  "sigma=0\n	 Velocity dispersion correction factor",
-  "clip=\n       One (for -clip:clip) or Two clipping values",
-  "vsys=0\n       System velocity",
-  "inc=90\n       Inclination of disk",
+  "in=???\n       Input image file - must be an PV diagram",
+  "eta=0.2\n	  [0..1] weight factor for I_max adding to I_lc",
+  "ilc=0\n        Lowest Contour value",
+  "sign=1\n       1: Rotation largest for positive coordinates, -1: reverse",
+  "sigma=0\n	  Velocity dispersion correction factor",
+  "clip=\n        One (for -clip:clip) or Two clipping values",
+  "vsys=0\n       Systemic velocity",
+  "inc=90\n       Inclination of disk (ignored for cubes)",
   "center=0\n     Center of galaxy along position axis",
-  "VERSION=1.1b\n 29-dec-01 PJT",
+  "out=\n         Output velocity field if input was cube",
+  "VERSION=1.2\n  13-jul-02 PJT",
   NULL,
 };
 
@@ -44,6 +47,9 @@ string usage="PV diagram envelope tracing ";
 local void pv_trace(imageptr iptr, int vsign, 
 		    real eta, real ilc, real sigma, real vsys, real sini, real psys,
                     real *clip);
+local void xyv_trace(imageptr iptr, int vsign, 
+		    real eta, real ilc, real sigma, real xsys, real ysys, real vsys,
+                    real *clip);
 local int get_vels(int n, real *s, real v, real dv, real it, real *clip,
 		   real *vels);
 
@@ -52,7 +58,7 @@ nemo_main()
 {
     stream  instr;
     imageptr iptr = NULL;
-    real vel, eta, ilc, sigma, sini, vsys, psys, clip[2];
+    real vel, eta, ilc, sigma, sini, vsys, psys, clip[2], center[2], xsys, ysys;
     int nc, vsign = getiparam("sign");
     string mode;
 
@@ -65,7 +71,6 @@ nemo_main()
     sigma = getdparam("sigma");
     vsys = getdparam("vsys");
     sini = sin(RPD * getdparam("inc"));
-    psys = getdparam("center");
     nc = nemoinpd(getparam("clip"),clip,2);
     if (nc == 1) {
       clip[1] = clip[0];
@@ -76,7 +81,23 @@ nemo_main()
       error("Syntax error; need 0, 1 or 2 numbers for clip=%s",
 	    getparam("clip"));
 
-    pv_trace(iptr, vsign, eta, ilc, sigma, vsys, sini, psys, clip);
+    if (Nz(iptr)==1) {
+      psys = getdparam("center");
+      pv_trace(iptr, vsign, eta, ilc, sigma, vsys, sini, psys, clip);
+    } else {
+      nc = nemoinpd(getparam("center"),center,2);
+      if (nc == 2) {
+	xsys = center[0];
+	ysys = center[1];
+      } else if (nc == 1) {
+	xsys = ysys = center[0];
+      } else if (nc == 0) {
+	xsys = ysys = 0.0;
+      } else if (nc != 2)
+	error("Syntax error; need 0, 1 or 2 numbers for center=%s",
+	      getparam("center"));      
+      xyv_trace(iptr, vsign, eta, ilc, sigma, xsys, ysys, vsys, clip);
+    }
 }
 
 /*
@@ -144,7 +165,66 @@ local void pv_trace(imageptr iptr, int vsign,
   free(spec);
 }
 
+
+local void xyv_trace(imageptr iptr, int vsign, 
+		    real eta, real ilc, real sigma, 
+		    real xsys, real ysys, real vsys, 
+		    real *clip)
+{
+  int  ix, iy, iz, j, nx, ny, nz, nv;
+  real xpos, ypos, v0, dv, it, imax, vel_corr, vmin,vmax, dmin, dmax;
+  real *spec, *vel, vels[MAXV];
+  imageptr optr = NULL;
+  stream ostr = stropen(getparam("out"),"w");
+    
+  nx = Nx(iptr);     /* assumed to be x-position for now */
+  ny = Ny(iptr);     /* assumed to be y-position for now */
+  nz = Nz(iptr);     /* assumed to be velocity for now */
+  spec = (real *) allocate(nz*sizeof(real));
+  vel  = (real *) allocate(nz*sizeof(real));
 
+  create_cube(&optr,nx,ny,1);    /* trace 'velocity' field */
+  dmin = dmax = 0.0;
+
+  imax = MapMax(iptr);
+
+  it = sqrt(sqr(eta*imax)+sqr(ilc));
+  vmin = Zmin(iptr);
+  vmax = vmin + (nz-1)*Dz(iptr);
+  dprintf(0,"Map [%d x %d POS x %d VEL] I_t=%g vsys=%g (vrange: %g %g)\n",
+	  nx,ny,nz,it,vsys,vmin,vmax);
+  if (it<=0.0) error("I_t = %g too small",it);
+
+  v0 = Zmin(iptr);
+  dv = Dz(iptr);
+  for (iz=0; iz<nz; iz++)
+    vel[iz] = v0 + iz*dv;
+
+  for (ix=0; ix<nx; ix++) {                 /* loop over all positions in P's */
+    xpos = ix*Dx(iptr) + Xmin(iptr) - xsys;
+    for (iy=0; iy<ny; iy++) {
+      ypos = iy*Dy(iptr) + Ymin(iptr) - ysys;
+      for (iz=0; iz<nz; iz++)
+	spec[iz] = CubeValue(iptr,ix,iy,iz);
+      nv = get_vels(nz,spec,v0,dv,it,clip,vels);    /* get the vel's */
+      vel_corr = (vels[0]-vsys);
+      if (vel_corr > 0)
+	vel_corr -= sigma;
+      else
+	vel_corr += sigma;
+    }
+    vel_corr /= 1000.0;
+    CubeValue(optr,ix,iy,1) = vel_corr;
+    dmin = MIN(dmin, vel_corr);
+    dmax = MAX(dmax, vel_corr);
+  }
+  free(spec);
+  MapMin(optr) = dmin;
+  MapMax(optr) = dmax;
+  write_image(ostr,optr);
+}
+
+
 /* get_vels:
  *    this spectrum is always sorted such that we're looking for
  *    a peak at the upper end of the array, the sign of 'dv' will
