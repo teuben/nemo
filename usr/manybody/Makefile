@@ -2,6 +2,9 @@
 CVS1 = partiview  
 CVS2 = staratlas  starcluster  stardata  starlab
 
+CVSROOT = :pserver:anonymous@cvs.astro.umd.edu:/home/cvsroot
+COPT = -Q -d $(CVSROOT)
+
 echo:
 	@echo This directory is a placeholder for the manybody tools,
 	@echo sans NEMO of course. 
@@ -32,12 +35,12 @@ cvstar: cvstar1 cvstar2 cvstar3 cvstar4
 
 cvstar1: 
 	rm -rf nemo
-	cvs -Q co  nemo;  (cd nemo; mkdir local; cd local; cvs -Q co pgplot)
+	cvs $(COPT) co  nemo;  (cd nemo; mkdir local; cd local; cvs $(COPT) co pgplot)
 	gtar zcf nemo.tar.gz nemo
 
 cvstar2: 
 	rm -rf partiview
-	cvs -Q co  partiview; gtar zcf partiview.tar.gz partiview
+	cvs $(COPT) co  partiview; gtar zcf partiview.tar.gz partiview
 
 cvstar3: 
 	rm -rf starlab
