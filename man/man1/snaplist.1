@@ -1,0 +1,45 @@
+.TH SNAPLIST 1NEMO "7 July 1989"
+.SH NAME
+snaplist \- makes a listing of an N-body snapshot file
+.SH SYNOPSIS
+\fBsnaplist in=\fPsnap-file [\fBverbose=\fPchoice] [\fBmaxnum=\fPnumber] 
+.SH DESCRIPTION
+\fIsnaplist\fP lists the basic information about all snapshots it
+encounters in a file containing standard N-body snapshots.
+After each particle-containing-snapshot listing the user is prompted
+for a choice whether or not to continue; when encountering
+snapsnots without particle listings, their existence is mentioned while
+continueing the search.
+.PP
+\fIsnaplist\fP is not a true NEMO program, since after displaying the
+appropriate information, it goes into interactive mode, and prompts
+the user interactively. See \fIsnaprint(1NEMO)\fP for a version able
+to create tables of arbitrary \fIbodytrans(3NEMO)\fP expressions.
+.SH PARAMETERS
+The following parameters are recognized; they may be given in any order.
+.TP 25
+\fBin=\fP\fIsnap-file\fP
+Input data is read from \fIsnap-file\fP, which must be in 
+\fIsnapshot(5NEMO)\fP format
+[no default].
+.TP
+\fBmaxnumber=\fP\fInum\fP
+The maximum number of particles whose mass, position and velocity is
+displaced [default: \fB4\fP].
+.SH SEE ALSO
+snapprint(1NEMO), snapenter(1NEMO), snapplot(1NEMO), snapshot(5NEMO).
+.SH AUTHOR
+Piet Hut
+.SH FILES
+.nf
+.ta +3.0i
+~src/piet/clib/snaplist.c
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.5i
+28-Nov-86	V1.0: created         	PIET
+23-Apr-87	V1.1: updated         	PIET
+10-Jun-88	V1.2: updated      	PIET
+ 7-jul-89	V1.3: updated for new get_snap, keyword verbose gone	PJT
+.fi

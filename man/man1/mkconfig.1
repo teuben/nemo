@@ -1,0 +1,43 @@
+.TH MKCONFIG 1NEMO "2 June 1988"
+.SH NAME
+mkconfig \- make a static configuration of particles.
+.SH SYNOPSIS
+\fBmkconfig out=\fPin_file [parameter=value] .\|.\|.
+.SH DESCRIPTION
+\fImkconfig\fP creates a configuration of particles with specified
+shape in position space and zero velocities.
+.SH PARAMETERS
+The following parameters are recognized:
+.TP 24
+\fBout=\fP\fIout_file\fP
+Output file,  in \fIsnapshot\fP format.  Default: \fIrequired\fP.
+.TP
+\fBshape=\fP\fIconfiguration\fP
+Name of configuration to generate; currently \fBshell\fP, \fBball\fP,
+\fBcusp\fP, \fBline\fP, or \fBring\fP.  Default: \fBshell\fP.
+.TP
+\fBradius=\fP\fIconfig_radius\fP
+Specify size of configuration.  Default: \fB1.0\fP.
+.TP
+\fBnbody=\fP\fInum_bodies\fP
+Number of particles in configuration.  Default: \fB512\fP.
+.TP
+\fBseed=\fP\fIrandom_seed\fP
+Seed used to initialize random number generator. Default: \fB123\fP.
+.TP
+\fBzerocm=\fP\fIzero_cm_flag\fP
+If set, translate origin to center of mass of configuration.
+Default: \fBfalse\fP.
+.TP
+\fBheadline=\fP\fImessage\fP
+Message prepended to \fIout_file\fP.
+.SH "SEE ALSO"
+mkommod(1NEMO), snapshot(5NEMO)
+.SH AUTHOR
+Joshua E. Barnes
+.SH HISTORY
+.nf
+.ta +1i +4i
+2-jun-88	document created?	JEB
+8-jul-90	V1.1 nobj->nbody, new snapshot macro's  	PJT
+.fi

@@ -1,0 +1,57 @@
+.TH SNAPDIST 1NEMO "7 July 1989"
+.SH NAME
+snapdist \- gives a measure for the distance between two snapshots, with
+and without sliding in time to minimize the distance.
+.SH SYNOPSIS
+\fBsnapdist in1=\fPsnap-file1 \fBin2=\fPsnap-file2
+.SH DESCRIPTION
+\fIsnapdist\fP computes the 3-dimensional Euclidean distances
+between the positions of corresponding particles in the two snapshots.
+It reports five of these \fIN\fP values: the minimum value, the first
+quartile, the median, the third quartile, the maximum value; in this
+order, on a single line on the screen. On the second line it reports
+similar but smaller values, obtained by a linear shift of all
+particles in one of the two snapshots along their velocity vectors, in
+such a way as to minimize their combined 3\fIN\fP-dimensional distance
+in positions. In other words, the distance vector between the two
+snapshots in 3\fIN\fP-dimensional configuration space is decomposed into 
+two components, one parallel to the 3\fIN\fP-dimensional velocity
+vector of one of the systems, and one perpendicular. The perpendicular
+distance serves as a basis for the max/min and quartile information on
+the second line of output, and on the third line the amount of time
+sliding is given: \fI dt = drpar/v \fP, where \fIdrpar\fP
+and \fIv\fP are the absolute values of the 3\fIN\fP-dimensional
+vectors of the parallel component of the distance between the
+snapshots, and the velocity of one the snapshots, respectively.
+.PP
+Another way of comparing snapshots is described in \fIsnapcmp(1NEMO)\fP.
+.SH PARAMETERS
+The following parameters are recognized; they may be given in any order.
+.TP 25
+\fBin1=\fP\fIsnap-file1\fP
+Input data is read from \fIsnap-file1\fP, which must be in SnapShot format.
+.TP
+\fBin2=\fP\fIsnap-file2\fP
+Input data is read from \fIsnap-file2\fP, which must be in SnapShot format.
+.SH SEE ALSO
+snaplist(1NEMO)
+.SH BUGS
+An extended version could use acceleration information as well, either
+to provide information in velocity space, or to make a quadratic
+(rather than linear) sliding in time possible to give a more accurate
+decomposition in distances along and perpendicular to worldlines.
+.SH SEE ALSO
+snapcmp(1NEMO), snapcmphist(1NEMO)
+.SH AUTHOR
+Piet Hut
+.SH FILES
+.nf
+.ta +3.0i
+~src/piet/clib/snapdist.c
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.5i
+10-Jun-88	V1.0: created         	PIET
+8-jul-89	V1.1: updated for get_snap()	PJT
+.fi

@@ -1,0 +1,42 @@
+.TH SNAPKINEM 1NEMO "11 June 1992"
+.SH NAME
+snapkinem \- compute kinematic diagnostics for snapshot
+.SH SYNOPSIS
+\fBsnapkinem in=\fPsnap_file [parameter=value] .\|.\|.
+.SH DESCRIPTION
+\fIsnapkinem\fP computes various kinematic diagnostics from the input
+N-body snapshot.  These include the center of mass position and
+velocity, angular momentum about the center of mass, moment of inertia
+tensor, and kinetic energy tensor.  An arbitrary weighting may be
+specified for each particle.
+.SH PARAMETERS
+The following parameters are recognized.
+.TP 24
+\fBin=\fP\fIsnap_file\fP
+Input data is read from \fIsnap_file\fP, which must be in
+\fIsnapshot\fP(5NEMO) format.  Default: \fIrequired\fP.
+.TP
+\fBtimes=\fP\fItime_range\fP
+Only frames within \fItime_range\fP will be analyzed.  Default: \fBall\fP.
+.TP
+\fBweight=\fP\fIbody_weight\fP
+Expression used to compute the weight of each body.
+See \fIbodytrans\fP(1NEMO) for the form of \fIbody_weight\fP.
+Default: \fB1.0\fP.
+.TP
+\fBrcut=\fP\fIcutoff_radius\fP
+If \fIcutoff_radius\fP is greater than zero, only particles within
+\fIcutoff_radius\fP of the \fIbody_weight\fPed centroid will be used
+to compute the final diagnostics.
+Default: \fB0.0\fP.
+.SH SEE ALSO
+snaprect(1NEMO), snapplot(1NEMO), snapshot(5NEMO)
+.SH AUTHOR
+Joshua E. Barnes.
+.SH HISTORY
+.nf
+.ta +1.0i +4.0i
+5-mar-89	V1.2 	JEB
+2-may-92	V1.3: helpvec/usage for new NEMO	PJT
+11-jun-92	V2.0: angular momentum as r.v, not v.r	PJT
+.fi

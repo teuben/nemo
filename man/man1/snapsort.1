@@ -1,0 +1,68 @@
+.TH SNAPSORT 1NEMO "21 December 1992"
+.SH NAME
+snapsort \- sort particles of an N-body snapshot
+.SH SYNOPSIS
+\fBsnapsort in=\fPin_file \fBout=\fPout_file [parameter=value] .\|.\|.
+.SH DESCRIPTION
+\fIsnapsort\fP sorts the bodies of a snapshot by a user-specified
+ranking. Optionally, a different sort engine can be invoked.
+.SH PARAMETERS
+The following parameters are recognized.
+.TP 24
+\fBin=\fP\fIin_file\fP
+Input data is read from \fIin_file\fP, which must be in
+\fIsnapshot\fP(5NEMO) format.  Default: \fIrequired\fP.
+.TP
+\fBout=\fP\fIout_file\fP
+Sorted output data is written to \fIout_file\fP. No default.
+.TP
+\fBrank=\fP\fIbody_rank\fP
+Expression used to compute the rank of each body.
+See \fIbodytrans\fP(1NEMO) for the form of \fIbody_rank\fP.
+Default: \fBetot\fP.
+.TP
+\fBtimes=\fP\fItime_range\fP
+Only frames within \fItime_range\fP will be sorted.  Default: \fBall\fP.
+.TP
+\fBsort=\fP\fIsort_engine\fP
+Select the sort engine to use. Sorry, no minimum match here. 
+If the code has been compiled with 
+standard the flogger software (see $NEMO/usr/lib/sort), a number
+of sort engines are available (see below).
+Else, only the standard \fIqsort(3)\fP
+is available. Default: [\fBqsort\fP].
+.SH SORT ENGINES
+The default UNIX engine \fIqsort\fP (a quick sort) is always available.
+If your friendly NEMO manager has compiled in a number of additional
+ones, the following list may be a complete one: (to get your
+current local list, run \fIsnapsort\fP with \fIdebug=1\fP, which will
+display the names it's trying. Use some foolish name for \fIsort=\fP
+to get it to display all of them, and then fail.
+.nf
+.ta +1i
+
+  \fIsort=\fP	\fIcomments\fP
+
+  qsort       	Standard UNIX \fIsqort(3)\fP
+
+  bubble      	any 1st semester course in CS
+  heap     	contributed by der Mouse
+  insert 	insertion sort, any 1st semester course in CS
+  merge     	roughly patterned after Knuth Vol. 3
+  quick       	C.A.R. Hoare's recursive sort as given in K&R 2 pg 87
+  shell       	D.L. Shell as given in K&R 2 pg 62
+
+.fi
+.SH SEE ALSO
+snapshot(5NEMO), qsort(3)
+.SH AUTHOR
+Joshua E. Barnes.
+.SH FILES
+~src/nbody/trans/snapsort.c	program code
+~usr/lib/sort/*_sort.c     	additional sort routines; 
+.SH HISTORY
+.nf
+.ta +1i +4i
+2-jun-88	V1.0 original version      	JEB
+21-dec-92	V1.4 selectable sort engine (sort=)	PJT
+.fi

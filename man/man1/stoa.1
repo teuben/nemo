@@ -1,0 +1,65 @@
+.TH STOA 1NEMO "9 November 1992"
+.SH NAME
+stoa, stoa_sp \- convert structured binary N-body file to ascii format
+.SH SYNOPSIS
+\fBstoa in=\fPsnap_file \fBout=\fPascii_file [parameter=value] .\|.\|.
+.SH DESCRIPTION
+\fIstoa\fP converts a structured binary file containing one or more
+N-body frames into an ascii format.  Most commonly, \fIstoa\fP is used
+to generate input files for remote supercomputers.  \fIstoa_sp\fP is
+similar, but uses single precision.
+.PP
+Snapshots which contain diagnostics are ignored.
+.SH PARAMETERS
+The following parameters are recognized.
+.TP 25
+\fBin=\fIsnap_file\fP
+Input data is read from \fIsnap_file\fP, which must be 
+in \fIsnapshot\fP(5NEMO) format.  Default: none.
+.TP
+\fBout=\fIascii_file\fP
+Converted output data is written to \fIascii_file\fP.  Default: none.
+.TP
+\fBoptions=\fIoption_list\fP
+Specifies what data are written to output file; currently one or more
+of \fBmass\fP, \fBphase\fP, or \fBphi\fP.  Default: \fBmass,phase\fP.
+.TP
+\fBiformat=\fIformat_string\fP
+Specify output format for integers. Note the
+extra space in front of the format. Default: \fB%d\fP.
+.TP
+\fBrformat=\fIformat_string\fP
+Specify output format for real numbers. Note the
+extra space in front of the format. Default: \fB%21.13E\fP.
+.SH "ASCII-205 FILE FORMAT"
+The ascii output file will have the following format:
+.sp 1
+.nf
+.ta +1.5i
+NOBJ                    	number of particles [integer]
+NDIM                    	number of dimensions [integer]
+TIME                    	time of snapshot [real]
+MASS(i)                 	particle masses, i = 1...NOBJ [real]
+  . . . . .
+X(i) Y(i) Z(i)          	particle positions, i = 1...NOBJ [real]
+  . . . . .
+U(i) V(i) W(i)          	particle velocities, i = 1...NOBJ [real]
+  . . . . .
+PSI(i)                  	particle potentials, i = 1...NOBJ [real]
+  . . . . .
+.fi
+.sp 1
+Note that the masses, phase-space coordinates, and potentials are all
+optional, enabled by the \fBoptions\fP parameter. This format may be
+repeated until end-of-file.
+.SH "SEE ALSO"
+atos(1NEMO), rsf(1NEMO), tsf(1NEMO), filestruct(3NEMO), snapshot(5NEMO).
+.SH AUTHOR
+Joshua E. Barnes, Peter Teuben
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.5i +3.5i
+ 7-Apr-87	V 1.0: created    	PJT
+11-May-88	V 2.0: created    	JEB
+9-nov-92	V2.3 make it skip diagnostics	PJT
+.fi

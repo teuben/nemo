@@ -1,0 +1,169 @@
+.TH SNAPPLOTEDIT 1NEMO "20 August 1988"
+.ds e =\h'-0.0m'
+.SH NAME
+snapplotedit \- display and edit an N-body snapshot file
+.SH SYNOPSIS
+\fBsnapplotedit in\*e\fPsnap-file out\*e
+[parameter\*evalue] .\|.\|.
+.SH DESCRIPTION
+\fIsnapplot\fP and its relatives plot a sequence of frames from a
+standard N-body snapshot file.
+\fItrakplot\fP is very similar to snapplot, but does not erase and
+redraw the screen after each frame plotted.
+\fIeditplot\fP has the same plotting capabilities as \fIsnapplot\fP,
+but allows the user to define polygonic areas (using a mouse device),
+within which all stars are written out to a file.
+Arbitrary (algebraic) transformations from particle coordinates to
+plotting coordinates may be specified; the visibility, point type,
+and color may be controled in the same way.
+.SH PARAMETERS
+The following parameters are recognized; they may be given in any order.
+.TP 24
+\fBin\*e\fP\fIsnap-file\fP
+Input data is read from \fIsnap-file\fP, which must be in snapshot format.
+No default.
+.TP
+\fBout\*e\fP\fIsnapshot-file\fP
+The output file, in case \fIeditplot\fP was used. It is best to be in a
+graphics window, in order to see regular output, such as menus.
+No default.
+.TP
+\fBtimes\*e\fP\fItime-range\fP
+Only plot frames with time values within \fItime-range\fP,
+which is of the form, eg, "1.0:1.5,2.5,3.0". 
+The default is "all".
+.TP
+\fBxvar\*e\fP\fIx-expression\fP
+The value of \fIx-expression\fP is plotted along the X axis.
+\fIx-expression\fP is a real-valued C language expression over the
+real values \fBx\fP, \fBy\fP, \fBz\fP, \fBvx\fP, \fBvy\fP, \fBvz\fP,
+\fBphi\fP, \fBt\fP, and the integer value \fBi\fP.
+The default is \fBx\fP.
+.TP
+\fBxlabel\*e\fP\fIx-axis-label\fP
+Label for the X axis.
+The default is the expression given for \fBxvar\fP.
+.TP
+\fBxrange\*e\fP\fIx-axis-range\fP
+Range of values for the X axis, specified either as a single number
+(in which case the lower bound is zero) or a pair of numbers separated
+by a colon.
+The default range is \fB-2.0:2.0\fP.
+.TP
+\fByvar\*e\fP\fIy-expression\fP
+See above.
+The default is \fBy\fP.
+.TP
+\fBylabel\*e\fP\fIy-axis-label\fP
+.TP
+\fByrange\*e\fP\fIy-axis-range\fP
+.TP
+\fBvisib\*e\fP\fIexpression\fP
+Determines the visibility of particles.
+\fIexpression\fP is a integer expression in the above variables;
+only points with non-zero values are plotted.
+The default is \fB1\fP.
+.TP
+\fBpsize\*e\fP\fIexpression\fP
+Determines the point type and size.
+\fIexpression\fP is a real expression in the above variables;
+zero means plot a point, positive (negative) means plot a circle (cross)
+with size controled by absolute value.
+The default is \fB0\fP.
+.TP
+\fBcolor\*e\fP\fIexpression\fP
+Determines the point color.
+\fIexpression\fP is a real expression in the above variables;
+values between 0 and 1 produce a sequence of saturated colors starting
+with red, running through the spectrum, and wrapping back to red.
+The default is \fB0\fP.
+.TP
+\fBframe\*e\fP\fIname\fP
+If supplied, this will be the basename of SUN screendumps stored in
+\fIrasterfile(5)\fP format. Various utilities exist to manipulate
+rasterfiles, e.g. \fImovie(1NEMO)\fP. Note that \fIsnapplot\fP
+will in general be used in sunwindows mode, whereas \fImovie\fP can
+only run in native SUN fullscreen mode. Because movie expects the
+rasterfiles to have basename \fBframe\fP, \fIname\fP must always be
+\fBframe\fP if the frame option is used. The default is no
+frame  rastefiles stored.
+.SH TRANSFORMATIONS
+\fIsnapplot\fP handles arbitrary C expressions by invoking the compiler,
+which is general but rather slow.
+To speed things up, the expressions are first treated as names and
+checked against a collection of precompiled expressions stored as
+".o" files.
+If a match is found, the precompiled object is used instead.
+Precompiled transformations include: \fBx\fP, \fBy\fP, \fBz\fP,
+\fBvx\fP, \fBvy\fP, \fBvz\fP, \fBr\fP, \fBv\fP, \fBvr\fP, \fBvt\fP,
+\fBjtot\fP, \fBphi\fP, \fBetot\fP, \fBt\fP, and \fBi\fP.
+A complete list may be deduced by looking in \fB.../nemo/obj/bodytrans/\fP,
+which is the default repository.
+It is possible to customize your own transformations and mantain alternate
+collections; see \fIbodytrans\fP(1NEMO) for more information.
+.SH EDITPLOT
+When editplot was invoked, after the usual display has been
+initialized, the mouse can be used to define a polygon. 
+At the start of every new polygon the program
+should beep for your attention. The LEFT button can then be
+used to start and continue entering vertices, 
+and they will also be shown on the screen; the RIGHT button is used
+to close the polygon. The MIDDLE button can be used to 'erase' previous
+vertices (as far back as erasing the initial point, although the already
+drawn lines cannot be erased from the screen).
+.PP
+After each polygon is closed, the program makes sure all stars within that
+polygon are flagged to be copied to the output file at the end of
+your session. You can define new polygons in a loop, until you close
+a polygon with zero length (using the RIGHT button as initial and
+last point of the polygon). The program then copies all stars within all
+polygons to the output file.
+.SH EXAMPLES
+Plot snapshot file "r100.dat" frame-by-frame, with default transformations:
+.RS
+.nf
+% \fBsnapplot r100.dat\fP
+.fi
+.RE
+Plot radius vs radial velocity at times 2.0 through 6.0:
+.RS
+.nf
+% \fBsnapplot r100.dat xvar\*er xrange\*e0:2 yvar\*evr times\*e2:6\fP
+.fi
+.RE
+Plot binding energy vs angular momentum, showing only the
+first 1000 particles:
+.RS
+.nf
+% \fBsnapplot r100.dat xvar\*eetot xrange\*e-4:0 \\
+\ \ xlabel\*e"Binding energy" yvar\*ejtot yrange\*e0:0.8 \\
+\ \ ylabel\*e"Angular momentum" visib\*e"i < 1000"\fP
+.fi
+.RE
+NB: this last example assumes that "r100.dat" includes potential
+data in addition to the usual phase-space data.
+The expression specified for \fIvisib\fP will be passed to the
+C compiler.
+.SH SEE ALSO
+bodytrans(1NEMO), movie(1NEMO), snapshot(5NEMO).
+.SH BUGS
+The default ranges should depend on the variables plotted.
+.PP
+The basename for rasterfiles for use with \fImovie\fP must always be
+\fBframe\fP. See also \fImovie(1NEMO)\fP.
+.PP
+In \fIeditplot\fP all snapshots can be edited, but many programs
+bomb when subsequent snapshots have more particles than the first
+one. It is not advised to use this mode with multiple snapshots in
+the output file.
+\fIData files with unequal snapshot size have now been taken care of\fP
+.SH AUTHOR
+Joshua E. Barnes.
+.SH UPDATE HISTORY
+.nf
+.ta +1i +4i
+xx-xxx-86	Original program	JEB
+xx-jul-87	V1.3  various color updates	JEB
+23-oct-87	V1.3f added frame= option for movies	PJT
+xx-xxx-88	V2.0  new filestruct	JEB
+13-aug-88	V2.1  editplot added to the snapplot family	PJT

@@ -1,0 +1,47 @@
+.TH MKPOLYTROPE 1NEMO "13 December 1994"
+.SH NAME
+mkpolytrope \- make N-body model of generalized polytrope
+.SH SYNOPSIS
+\fBmkpolytrope  out=\fPout_file [parameter=value] .\|.\|.
+.SH DESCRIPTION
+\fImkpolytrope\fP generates an N-body realization of one of Henon's
+generalized polytropes.  At present, only the polytrope \fIn = 1,
+m = -1\fP is supported.
+.SH PARAMETERS
+The following parameters are recognized.
+.TP 24
+\fBout=\fIout_file\fI
+Write to \fIout_file\fP in \fIsnapshot\fP(5NEMO) format.
+No default.
+.TP
+\fBnbody=\fP\fInum_bodies\fP
+Number of particles to generate.  Default: \fB512\fP.
+.TP
+\fBn=\fP\fIE_exponent\fP
+Exponent of energy in distribution function.  This can be a real-valued
+expression. Default: \fB1\fP.
+.TP
+\fBm=\fP\fIJ_exponent\fP
+Exponent of angular momentum.  This can be a real-valued 
+expression. Default: \fB-1\fP.
+.TP
+\fBseed=\fP\fIrandom_seed\fP
+Seed for random number generator.  Default: \fB0\fP.
+.TP
+\fBheadline=\fP\fImessage\fP
+Message prepended to \fIout_file\fP.  Default: \fInone\fP.
+.SH SEE ALSO
+mkommod(1NEMO)
+.PP
+"\fIStability of Collisionless Stellar Dynamics\fP", P.L.Palmer
+(Kluwer, Dordrecht, 1994) - Appendix A.
+.SH AUTHOR
+Joshua E. Barnes
+.SH HISTORY
+.nf
+.ta +1i +4i
+2-Jun-88	created?	Josh
+22-jan-89	V1.1 some more	Josh
+15-nov-90	V1.2 NEMO 2.x upgrades	PJT
+13-dec-94	V1.3 keyword nobj= renamed to nbody=	PJT
+.fi

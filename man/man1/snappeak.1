@@ -1,0 +1,44 @@
+.TH SNAPPEAK 1NEMO "6 June 1988"
+.SH NAME
+snappeak \- find peak in each phase space coordinate using a mode analysis
+.SH SYNOPSIS
+\fBsnappeak in=\fIin_file\fP [parameter=value] .\|.\|.
+.SH DESCRIPTION
+\fIsnappeak\fP finds the peak in the distribution of points in phase space.
+When the coordinate system is cartesian, the peaks in position actually
+correspond to the density center. 
+.PP
+This method is an application of the general problem of the statistical
+analysis of a (probablity) distribution function. One can 
+determine the \fImedian\fP, position
+where there is equal chance (half) of being to the left or right,
+the \fImean\fP being the averaged position of a distribution function and
+the \fImode\fP where the distribution function takes its maximum value 
+(probability). This program computes the maximum \fBpeak\fP value of
+the distribution function in each coordinate independantly.
+.SH PARAMETERS
+The following parameters are recognized:
+.TP 24
+\fBin=\fIin_file\fP
+input file, in \fIsnapshot\fP(5NEMO) format.  Default: none.
+.TP
+\fBwindow=\fInumber\fP
+The \fInumber\fP of particles used in the sliding window of the mode analysis.
+It is a kind of smoothing parameter. [default: \fB100\fP].
+.TP
+\fBtimes=\fItime-ranges\fP
+Only snapshots with time values within \fItimes-ranges\fP, which is
+of the form \fBts[:te],...\fP, will be 
+copied. [default: \fBall\fP].
+.SH AUTHOR
+Peter Teuben
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+xx-nov-86	V1.0: original version   	Peter Teuben
+15-jan-87	V1.0a: improvements	PJT
+10-jun-87	V1.0b: some cleanup	PJT
+6-jun-88	V1.1: new filestruct	PJT
+.fi
+
+

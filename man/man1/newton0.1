@@ -1,0 +1,341 @@
+.!.EQ
+.!delim ##
+.!.EN
+.TH NEWTON0 1NEMO "25 June 1987"
+.SH NAME
+newton0, newton0tree, newton0reg \- nbody codes with equal time steps
+.SH SYNOPSIS
+\fBnewton0\fP
+[\fBin=\fPinfile]
+[\fBlastout=\fPlastoutfile]
+[\fBout=\fPoutfile]
+[\fBsave=\fPsavefile]
+[\fBrestore=\fPrestorefile]
+[\fBresume=\fPresumefile]
+[\fBrestart=\fPrestartfile]
+[\fBnbody=\fPinteger]
+[\fBseed=\fPinteger]
+[\fBt_begin=\fPreal]
+[\fBt_end=\fPreal]
+[\fBdt_minor=\fPreal]
+[\fBdt_major=\fPreal]
+[\fBdt_save=\fPreal]
+[\fBdt_max=\fPreal]
+[\fBnstep=\fPinteger]
+[\fBmin_pairdist=\fPreal]
+[\fBde_max=\fPreal]
+[\fBnstep_de=\fPinteger]
+[\fBcpu_max=\fPreal]
+[\fBcpu_last_call=\fPreal]
+[\fBeta_acc=\fPreal]
+[\fBr0_soft=\fPreal]
+[\fBsoft_focus=\fPsofteningtype]
+[\fBtimestep=\fPtimestepcriterion]
+[\fBdiagnostics=\fPdiagnosticstype]
+[\fBscheme=\fPintegrationscheme]
+[\fBheadline=\fPstring]
+
+\fBnewton0tree\fP
+[...same as in newton0...]
+[\fBtol=\fPreal]
+[\fBcelldivision=\fPcelldivisionmethod]
+
+\fBnewton0reg\fP
+[...same as in newton0...]
+[\fBniter=\fPinteger]
+
+.SH DESCRIPTION
+
+\fInewton0\fP is a simple type of gravitational many-body code: simple
+in the sense of giving all particles equal time steps at any given
+time (although the length of this shared time step does change in time
+in an adaptive fashion; see below). Apart from this limitation the
+code is rather flexible: it gives a choice of a number of integration
+schemes which can be invoked on the command line; a choice of various
+softening procedures; a choice of time step criterion; a choice of
+diagnostics provided during the run; and it has a wide choice of
+start-up options, from a snapshot, or a previously saved system state,
+or from scratch in which case newton0 produces a Plummer model.
+
+\fInewton0tree\fP is an extension to \fInewton0\fP in which a
+hierarchical force calculation is performed using an adaptive Eulerian
+tree scheme (J. Barnes and P. Hut 1986, \fINature \fB324\fR, 446),
+which reduces the number of pairwise force calculations per timestep
+from order #N sup 2# to order #N log N# .
+
+\fInewton0reg\fP is an extension to \fInewton0\fP in which a full
+pairwise regularization scheme is implemented, based on the
+Kustaanheimo_Stiefel four-dimensional regularization, as generalized
+by D.C. Heggie, \fICelestial Mechanics \fB10\fR, 217 (1974); and
+implemented following the recipes given by S. Mikkola, \fI Mon. Not.
+R. astr. Soc.  \fB215\fR, 171 (1985). The order of the system of
+equations is raised from the usual #6 N# to #4N(N-1)+1#.
+
+The code has been written in a highly structured, modular and flexible
+way (see the \fINewton0 Primer\fP). It can thus serve as a blueprint
+for more advanced gravitational many-body integration modules.  Its
+generality makes it suitable for experimentation with different
+integration, softening, timestep and diagnostics schemes.  When using
+\fInewton0\fP in production runs it may be advisable to throw out some
+of the unneeded embellishments, and to optimize the inner loops -- but
+remember: \fIpremature optimization is the root of all evil\fP (or at
+least of most).  
+.SH PARAMETERS
+The following parameters are recognized; they may be given in any order.
+.TP 25
+\fBin=\fP\fIinfile\fP
+If \fIinfile\fP is specified, a nbody snapshot is read in from this file
+(a quick way of preparing a simple system for testing purposes is to
+use \fI snapenter(1NEMO)\fP).
+The command line parameters are used to determine the type and
+duration of the integration, and the modes of output. Only one of the
+files \fIinputfile\fP, \fIrestorefile\fP, \fIresumefile\fP may be
+specified: if none are specified, a new Plummer model is generated
+(Default: no file specification).
+.TP
+\fBlastout=\fP\fIlastoutfile\fP
+If \fIlastoutfile\fP is specified, then output data are written into this
+file in standard snapshot format at the end of the integration. Since
+only one output is performed, the integration can be viewed as a black
+box which maps an in-state to an out-state without any clutter of
+intermediate information.  This option is useful for testing purposes,
+since the \fIlastoutfile\fPs of two different runs can be compared
+directly, for example using \fIsnapdiff(1NEMO)\fP; using snapdiff on
+two \fIoutfile\fPs would only compare the echos of the initial states,
+and later states would have to be extracted using \fIsnaptrim(1NEMO)\P
+before passing them to \fIsnapdiff(1NEMO)\fP (Default: no file specification).
+.TP
+\fBout=\fP\fIoutfile\fP
+If \fIoutfile\fP is specified, then output data are written into this
+file in standard snapshot format, at time intervals regulated by
+\fIdt_min_out\fP and \fIdt_maj_out\fP (see below; Default: no file
+specification). 
+.TP
+\fBsave=\fP\fIsavefile\fP
+If \fIsavefile\fP is specified, the whole system state is saved
+periodically at time intervals \fIdt_save\fP. (Default: no file
+specification). 
+.TP
+\fBrestore=\fP\fIrestorefile\fP
+If \fIrestorefile\fP is specified, a previously saved system state is
+read in from this file.  The command line parameters are ignored (in
+contrast to the following option below), and the system is run to
+completion solely according to the information contained in
+\fIrestorefile\fP. Thus, unless \fIrestorefile\fP contains an
+interrupted run, no integration will take place since \fIt_end\fP will
+already have been reached. Only one of the files \fIinputfile\fP,
+\fIrestorefile\fP, \fIresumefile\fP may be specified: if none are
+specified, a new Plummer model is generated (Default: no file
+specification). 
+.TP
+\fBresume=\fP\fIresumefile\fP
+If \fIresumefile\fP is specified, a previously saved system state is
+read in from this file.  The command line parameters are used (in
+contrast to the previous option above)
+to determine the type and duration of the integration, and the modes of
+output. Only one of the files \fIinputfile\fP, \fIrestorefile\fP,
+\fIresumefile\fP may be specified: if none are specified, a new
+Plummer model is generated (Default: no file specification).
+.TP
+\fBrestart=\fP\fIrestartfile\fP
+If \fIrestartfile\fP is specified, newton0 will deposit into this file
+a command which will continue the present run after a systemcrash as
+if nothing had happened. Specifying a \fIrestartfile\fP will be
+ignored if no  \fIsavefile\fP is specified as well. If both files are
+given, then the system is supposed to execute the \fIrestartfile\fP
+automatically at reboot time (through some sort of specification in
+some sort of system file), and all will be well again, one hopes
+(Default: no file specification).
+.TP
+\fBnbody=\fP\fIinteger\fP
+number of particles in a newly generated Plummer model (Default:
+\fInbody\fP=3).
+.TP
+\fBseed=\fP\fIinteger\fP
+seed for the random number generator used in generating a new Plummer model
+(default: a value 0, which will
+be converted into a unique new value using UNIX's clock time, in
+seconds since once-upon-a-time-in-the-seventies).
+.TP
+\fBt_begin=\fP\fIreal\fP
+time at which the integration starts (Default: \fBt_begin=\fP0.0).
+.TP
+\fBt_end=\fP\fIreal\fP
+time at which the integration will halt (Default: \fBt_end=\fP1.0).
+.TP
+\fBdt_minor=\fP\fIreal\fP
+time intervals between minor outputs, when diagnostics are
+printed on the standard output channel and diagnostics are added to
+\fIoutfile\fP in snapshot format (Default: \fBdt_minor=\fP0.5).
+.TP
+\fBdt_major=\fP\fIreal\fP
+time intervals between major outputs, when diagnostics are
+printed on the standard output channel and diagnostics as well as a
+complete set of particle data are added to \fIoutfile\fP in snapshot
+format (Default: \fBdt_major=\fP1.0).
+.TP
+\fBdt_save=\fP\fIreal\fP
+time intervals between saving a complete system state (Default:
+\fBdt_save=\fP0.5). 
+.TP
+\fBdt_max=\fP\fIreal\fP
+maximum length of the allowed integration time step which is shared
+between all particles (Default: \fBdt_max=\fP1000).
+.TP
+\fBnstep=\fP\fIinteger\fP
+maximum number of integration steps, after which execution of the
+program is halted immediately (Default: \fBnstep=\fP10000000).
+.TP
+\fBmin_pairdist=\fP\fIreal\fP
+minimum allowed (softened) pair distance. If any pair of particles
+anywhere in the system attains a (softened) separation smaller than
+\fImin_pairdist\fP integration is halted. Note: when using softening,
+the pair distance measured is the softened distance between two
+particles. Specifying a minimum allowed pair distance smaller than the
+effective softening length therefore cannot halt integration (Default:
+\fBmin_pairdist=\fP0.0).
+.TP
+\fBde_max=\fP\fIreal\fP
+maximum amount of drift allowed in the total energy of the system. If
+the total energy changes by more than this amount, integration is
+halted. The frequency with which this test is applied is governed by
+the parameter \fInstep_de\fP as described below (Default:
+\fBde_max=\fP10000000). 
+.TP
+\fBnstep_de=\fP\fIinteger\fP
+indicates the number of time steps after which the total energy value
+is checked against \fIde_macs\fR. 
+(Default: \fBnstep_de=\fP10000000).
+.TP
+\fBcpu_max=\fP\fIreal\fP
+maximum amount of CPU time allowed (expressed in minutes),
+after which execution of the
+program is halted immediately (Default: \fBcpu_max=\fP10000000).
+.TP
+\fBcpu_last_call=\fP\fIreal\fP
+soft limit on the amount of CPU time used (expressed in minutes):
+after this amount has been exceeded, execution of the program will be
+halted at the time of the next major output. This allows a more
+graceful exit than the above hard option of \fIcpu_max\fP. Notice,
+however, that it may be prudent to give suitable limits for both these
+parameters, since an extreme condition such as a very close encounter
+may slow down simulated time to such an extent that the time of the
+next scheduled major output may "never" be reached (Default:
+\fBcpu_last_call=\fP10000000).
+.TP
+\fBeta_acc=\fP\fIreal\fP
+dimensionless integration accuracy parameter, 
+used in determining the size of the integration time step: the step
+length is taken as the small fraction \fIeta_acc\fP of the projected
+collision time. The latter is defined as follows: the relative
+distance and speed in each particle pair is determined, and from these
+the time scale of change defined as the ratio of the relative speed
+and the relative distance; the minimum of all these time scales is the
+projected collision time (Default: \fBeta_acc=\fP0.01).
+.TP
+\fBr0_soft=\fP\fIreal\fP
+softening length used to soften the potential of a point mass
+according to the type of softening specified by \fIsoft_focus\fP (see
+below; Default: \fBr0_soft=\fP0.0).
+.TP
+\fBsoft_focus=\fP\fIsofteningtype\fP
+type of softening used to soften the potential of a point mass. The
+following options are implemented: \fIplummer\fP specifies the
+traditional softening in which each point particle assumes the
+potential of a density distribution according to a small Plummer model;
+\fIpower4\fP is a generalization of the previous one in which the
+square of the softening length is replaced by the fourth power, giving
+a shorter range for the softening; \fIpower8\fP is a similar
+generalization to the eight power; \fIexponential\fP is again similar,
+but has an exponentially short range; \fIsphere\fP replaces each point
+particle by a homogeneous sphere; \fIshell\fP replaces each point
+particle by a homogeneous shell; \fIspline\fP replaces each point
+particle by a cubic spline with compact support
+(Default: \fBsoft_focus=\fPplummer).
+.TP
+\fBtimestep=\fP\fItimestepcriterion\fP
+criterion for determinening the next timestep. Currently only two
+criteria are provided: \fIconstant\fR implies a constant time step
+equal to the value of \fIeta_acc\fR; and \fIcollision_time\fR which
+adaptively determines the timestep as the fraction \fIeta_acc\fR of
+the timescale on which the first pair configuration changes
+significantly. Expressed more accurately: the relative distance and
+speed in each particle pair is determined, and from these the time
+scale of change which would be the time scale for a collision if
+position and velocity would be parallel and opposite; hence the name
+(Default: \fBtimestep=\fPconstant).
+.TP
+\fBdiagnostics=\fP\fIdiagnosticstype\fP
+choice of diagnostics output, in binary as well as in ascii. This will
+be a place where a large variety of types of diagnostics can be
+offered in future versions. Presently only one type is implemented
+(Default: \fBdiagnostics=\fPstandard).
+.TP
+\fBscheme=\fP\fIintegrationscheme\fP
+integration scheme used to integration Newton's equations of motion
+for the whole system state (modeled as a set of 2*nbody*NDIM
+simultaneous nonlinear ordinary differential equations). The
+following options are implemented: \fIforward_euler\fP,
+\fIbackward_euler\fP, \fIrunge_kutta_2\fP, \fIrunge_kutta_4\fP,
+\fIrunge_kutta_6\fP, \fIrk_fehlberg_45\fP. The first two are forward
+Euler and backwards Euler schemes, respectively; the next three are
+Runge-Kutta schemes of 2nd, 4th and 6th order, respectively; and the
+last one is a Runge-kutta-Fehlberg scheme of combined 4th and 5th
+order (the present implementation uses only the final, 5th order
+Runge-Kutta information of this last scheme) (Default:
+\fBscheme=\fPrunge_kutta_4 for NEWTON0 and NEWTON0REG;
+\fBscheme=\fPleapfrog for NEWTON0TREE).
+.TP
+\fBheadline=\fP\fIstring\fP
+Optional headline, which is written as the first item in the snapshot
+file, the next item being the snapshot itself (Default for NEWTON0:
+"Newton0code: equal time steps"; for NEWTON0REG: "Newton0 code: equal
+time steps & regularization"; for NEWTON0TREE: "Newton0 code: equal
+time steps & hierarchical tree forces").
+.TP
+\fBtol=\fP\fIreal\fP
+ONLY for NEWTON0TREE: the tolerance parameter, which determines which
+cells are subdivided: for example, in the simplest \fIcelldivisonmethod\fP
+(see below), whenever the ratio of cell size over cell distance
+to a body is smaller than \fItol\fR, the interaction between the cell
+and the body is computed directly without further subdivision
+(Default: \fBtol=\fR1.0).
+.TP
+\fBcelldivision=\fP\fIcelldivisonmethod\fP
+ONLY for NEWTON0TREE: the method used to decide when to subdivide a
+cell from which one wants to compute the gravitational attraction on
+an individual particle. The simplest method, \fIconstant_theta\fR,
+applies a constant opening-angle criterion
+(Default: \fBcelldivision=\fRconstant_theta).
+.TP
+\fBniter=\fP\fIinteger\fP
+ONLY for NEWTON0REG: number of iterations performed in trying to
+arrive at the correct time to end the integration (since integration is
+with respect to pseudo-time, the end of an integration time step can
+only be predicted roughly with respect to real time; iterating with
+increasing smaller timestep helps to zoom in on the correct end-time;
+Default: \fBniter=\fR3).
+.SH SEE ALSO
+mkplummer(1NEMO).
+.SH BUGS
+Running the code with a file named \fIsavefile\fP lying around tricks
+poor newton0 into assuming that it has just been restored to the land
+of the living and that it should resume the task of its previous
+reincarnation left undone according to the contents of \fIsavefile\fP.
+Another bug: if intended to be restored automatically this way, simply
+reissuing the original command will revive the last saved system as
+advertised, but only after removing (or better: renaming) the old
+\fIoutfile\fP, since \fInewton0\fP is civilized enough to refuse to
+overwrite the contents of the old \fIoutfile\fP. One can then manually
+concatenate the new and old \fIoutfile\fP after completion of the run.
+.SH AUTHOR
+Piet Hut
+.SH FILES
+.nf
+.ta +3.0i
+kirin:/usr/piet/newton/*.c
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.5i
+25-May-87	Version 1.0: created         	PIET
