@@ -1,0 +1,10 @@
+# Program: tabfits
+# keyword file written by nemo (help level=1)
+in=wolfire1.tab
+out=wolfire1.fits
+dcol=1
+nxy=
+nmax=100000
+VERSION=1.1
+#### end of keywords - Save file and exit editor to execute program
+#### To get more help on keywords use help=h command line option
