@@ -1,0 +1,203 @@
+%       30-aug-93  Created                          Peter Teuben
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentstyle[nemo]{report}
+
+\title{NEMO PROGRAMMERS GUIDELINES}
+
+\date{Version 2.1 \\
+ August 1993 \\
+ Document revised: \today\ by P. Teuben}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{2.5mm}
+
+\section*{GUIDELINES - SUMMARY}
+
+\centerline{\underline{Programmers Guidelines - source code}}
+
+If you modify existing NEMO source code, please consider the
+following checklist:
+
+\begin{itemize}
+\item 
+
+add/update a history trail with the modifications done (and perhaps
+why) to this file. If you clone a program, don't copy the old trail,
+say that you cloned it from program XXX on this day. For example:
+
+\footnotesize\begin{verbatim}
+/*
+ *  History:   12-aug-93    V0.1    Cloned from snapplot.c              PJT
+ *             30-aug-93    V1.0    added times= and select=, released  PJT
+ *
+ */
+\end{verbatim}\normalsize
+
+\item 
+    
+The {\tt VERSION=} keyword (always the last keyword) in the
+{\tt string defv[]} array should under most circumstances be updated.
+This is because it will appear in the datastreams created by  your program,
+and at later times help anybody recover from reported bugs in programs.
+Use {\tt 0.x} for alpha and beta-versions, and start with {\tt 1.0}
+in a formal release. You can also use {\tt 1.4b} etc. for really
+minor fixes. Major modifications, e.g. when keywords are added,
+or their defaults have changed, you should change the major version
+number, e.g. {\tt 2.0}.
+
+\item  
+
+Do you have a proper description in the now expected
+{\tt string usage="..."} variable? If not, your program will now
+inherite a vague description (a not so nice one)
+from {\tt \$NEMO/src/kernel/io/usage.c}.
+
+\end{itemize}
+
+\centerline{\underline{Programmers Guidelines - manual page}}
+
+Although programs can be submitted without a manual page, they will
+not be accepted anymore in the {\tt \$NEMO/src/} without one!
+
+\begin{itemize}
+\item
+
+If no man page is present, you can 
+\begin{enumerate}
+
+\item
+create a template with ``{\tt mkman program > program.1}'' and edit
+that template. Note that your {\tt program} must have been compiled
+already for this to work.
+
+\item
+copy an existing one from {\tt \$NEMO/man/man1}
+and edit it.
+
+\end{enumerate}
+
+
+\item
+Append to the {\tt HISTORY UPDATE} at the end of the man page.
+
+\item
+Are all keywords up to date, do the defaults agree with those
+in the program? They can be easily out of sync, since they
+are in different files.
+
+\item
+Don't be shy about referencing other related manual pages in the
+NEMO (or unix) manual tree, since this gives great power
+to interactive hypertext man readers (such as {\tt hman} and
+{\tt tkman}).
+
+\end{itemize}
+
+\centerline{\underline{Programmers Guidelines - Makefile}}
+
+Note all programs need a makefile, but many can be compiled with
+the template one.
+
+\begin{itemize}
+\item
+Is {\tt bake} (i.e. {\tt make -f \$NEMOLIB/Makefile})  enough, or
+do you realy need a special makefile? Multi-source programs
+almost always need a special makefile.
+
+\item
+If you do need a special makefile, try and use macros that
+are automatically imported to make. (NEMOLIB, YAPPLIB etc.)
+
+\end{itemize}
+
+\centerline{\underline{Converting source code to NEMO?}}
+
+For many more details Chapter 6 in the {\tt NEMO Users Guide} will
+tell you most of what you need to know, but here is a short
+summary of the modifications needed to modify existing C programs
+to NEMO.
+
+\begin{itemize}
+
+\item
+
+Change the standard {\tt \#include <stdio.h>} to 
+{\tt \#include <nemo.h>}\footnote{formally
+{\tt stdinc.h} and, if the user interface is used,
+{\tt getparam.h}}
+
+\item
+
+Change {\tt main(argc, argv)} to
+{\tt nemo\_main()} (while linking, various proper start and finish
+code will be executed by a {\tt main(argc,argv)} supplied by the
+NEMO library).
+
+\item
+
+If you need values from the command line, use
+{\tt getparam, getdparam, getiparam, getbparam} calls to obtain
+resp. string, double, integer and boolean single valued keywords.
+For arrays, or mixed types, more advanced routines, like
+the {\tt nemoinpX} routines, are needed. They are beyond the scope
+of this document.
+
+
+\item
+
+Replace {\tt fopen()} by {\tt stropen}, and 
+{\tt fclose()} by {\tt strclose}, and 
+This will not only give you
+pipes, but also forces files in create-mode to be absent. 
+Otherwise a fatal error message is given and the program
+will exit.
+
+\item
+
+If you use NEMO's {\it filestruct(3NEMO)} in output mode,
+be sure not to use {\tt printf} since it will interfere and
+confuse the next program in a pipe. Replace it with
+the equivalent {\tt dprintf(int debug\_level,...}, where
+{\tt debug\_level} is a number 0 or larger. 
+This output goes to {\it stderr}.
+
+\item
+
+Warning and fatal error messages should be issued with
+{\tt warning(char *format, ...)}
+and
+{\tt error(char *format, ...)}. They operate much like
+{\it printf(3)} and use the standard {\it varargs}
+mechanism. The format string need not have a terminating
+newline, it is automatically supplied.
+This output also goes to {\it stderr}.
+
+\item
+
+If you want, you can change some types, e.g. {\tt char *} to
+{\tt string} (unless they are used as pointers), {\tt real}
+instead of {\tt double/float}, {\tt bool} instead of
+{\tt int} (where appropriate). All this is defined in
+{\tt stdinc.h}.
+
+\item
+
+If you can, device some standard kind of benchmark, of which
+you know the answer (and keeping times along, this is also a
+nice way to see improvements as hardware gets better). If you
+do, comment it is the manual page how to perform the benchmark,
+and perhaps even place a benchmark script in {\tt \$NEMO/csh}.
+See also Appendix E in the {\it NEMO Users Guide}.
+
+\end{itemize}
+
+\footnotesize
+\verbatimfile{example.src}
+\normalsize
+
+\end{document}
+
+
