@@ -17,7 +17,7 @@ of fitting parameters is given
 (\fBnpar\fP, must be > 0 to trigger this option),
 as well as the number of independant points per beam (\fBnppb\fP):
 .nf
-    chi2 = sum_{i,j}(map(i,j)^2)/(N/nppb-npar-1)
+    chi2 = sum_{i,j}(map(i,j)^2)/nppb/(N/nppb-npar-1)
 .fi
 where N is the number of non-bad values in the map. The input 
 map is now assumed to contain a dimensionless \fI(obs-mod)/sigma\fP
@@ -80,7 +80,8 @@ a gaussian distribution:
 .nf
   % ccdmath "" - "rang(0,1)" | ccdstat - npar=1	
 Generating a map from scratch
-chi2= 0.821026
+chi2= 1.03431
+df= 98
 .fi
 .SH "SEE ALSO"
 snapccd(1NEMO), image(5NEMO)

@@ -92,9 +92,10 @@ nemo_main()
       }
     }
     if (npar > 0) {
-      nu = n_moment(&m) / nppb - npar - 1;
+      nu = n_moment(&m)/nppb - npar - 1;
       if (nu < 1) error("%g: No degrees of freedom",nu);
-      printf("chi2= %g\n", show_moment(&m,2)/nu);
+      printf("chi2= %g\n", show_moment(&m,2)/nu/nppb);
+      printf("df= %g\n", nu);
     } else {
       nsize = nx * ny * nz;
     
