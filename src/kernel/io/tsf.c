@@ -42,6 +42,8 @@ string defv[] = {
 
 string usage="type contents of a (binary) structured file";
 
+string cvsid="$Id";
+
 local stream instr;			/* input stream from struct. file   */
 local bool maxprec;			/* if true, use max precision forms */
 local bool allline;			/* if true, disable maxline limit   */
