@@ -1,0 +1,333 @@
+Movietool (L)		- a display tool for sequences of .I Sun rasterfiles providing "video animation" in a Sun window.
+RosettaMan, rman (1)	- reverse compile man pages from formatted form	 to a number of source formats 
+TkMan, tkman (1)	- a graphical manual page browser, with hypertext
+VOGL (3)		- A very ordinary GL Library. 
+addlib (8NEMO)		- add module(s) to a library
+afof (1)		- Find groups in N\-body simulations using an approximate friends\-of\-friends method.
+allocate, reallocate (3NEMO)	- memory allocation with error control.
+anisot (1NEMO)		- tabulate models for spherical galaxies
+atos, atos_sp atosph, atosph_sp (1NEMO) - convert ascii N-body file to structured binary format
+badman (8NEMO)		- create reference to non-existing documentation
+badman (XNEMO)		- reference to non-existing documentation
+badman (XNEMO)		- reference to non-existing documentation
+badnews (1NEMO)		- display bad news for user
+body, barebody (3NEMO)	- point-mass particle structures
+bodytrans (1NEMO)	- test and optionally save body to scalar mapping
+bodytrans (5NEMO)	- dataformat for body to scalar mapping functions
+bswap (1NEMO)		- swap bytes in a file
+btrtrans, btitrans (3NEMO)  - obtain pointer to body-scalar mapping function
+bug (1NEMO)		- add bug reports to NEMO
+bugs (1NEMO)		- show NEMO's bug reports
+burststring (3NEMO)	- separate a string into tokens, and free them
+calc (1)		- arbitrary precision calculator
+cc (8NEMO)		- NEMO's C compiler
+ccddisplay (1NEMO)	- displays an Image(5NEMO) file onto a color Sun screen
+ccddump (1NEMO)		- dump contents of an image
+ccdfft (1NEMO)		- 2D fourier transform of a map
+ccdfill (1NEMO)		- patch up the holes in an image
+ccdfits (1NEMO)		- write a fits file to disk
+ccdmath (1NEMO)		- map arithmetic using function expressions
+ccdmom (1NEMO)		- moment along an axis of an image
+ccdplot (1NEMO)		- display program for 2D image maps (contour and/or gray-scale)
+ccdprint (1NEMO)	- print out map values
+ccdsharp (1NEMO)	- enhance/sharpen an image
+ccdslice (1NEMO)	- takes slices and/or re-orient an image cube
+ccdsmooth (1NEMO)	- smoothing of an image map (2D or 3D)
+ccdstat (1NEMO)		- statistics (1st through 4th moment)
+ccdvel (1NEMO)		- create a velocity field; grid or retrace
+contour (3NEMO)		- simple contour routine
+conv123 (1)		- The ASCII to Lotus(TM) spreadsheet converter 
+cookbook (8NEMO)	- a quick list of what to do to run treecode on the 205
+cproto (1)		- generate C function prototypes from C source code
+csf (1NEMO)		- copy structured file
+ctex (1NEMO)		- extract tex comments from C/C++ source code
+data (5NEMO)		- list of various data file online with NEMO. 
+denmax (1.1)		- Find gravitationally bound groups in N-body simulations.
+doc (5MIR)		- documentation format for miriad
+dprintf (3NEMO)		- debug level dependant formatted output conversion
+drange, irange (3NEMO)	- parser of ascii string into an array of values
+ds (1)			- a window and mouse-based utility for displaying a picture
+ds (1)			- a window and mouse-based utility for displaying a picture
+dynamem, freeup (3)	- multidimensional dynamic array handling
+error, warning, recover, stop (3NEMO)	- handle errors and warnings and system exit
+example (8NEMO)		- example skeleton file for manual writers 
+export (8NEMO)		- export new files as a tar file to remote sites
+file_size, file_lines (3NEMO)	- get size (in bytes/lines) of a file
+files (8NEMO)		- summary of all special files, environment variables, programmers etc.
+filestruct (3NEMO)	- primitives for structured binary file I/O
+filestruct (5NEMO)	- binary structured file format 
+findsrc (1l)		- walk directories, trying to find source files
+fitopen, fitclose, fitread, fitwrite, fitsetpl, fitrdhdr, fitrdhdi, fitwrhdr, fitwrhdi, fitwrhdl, fitwrhda  (3NEMO) - simple fits I/O routines
+fits (5NEMO)		- standard astronomical data interchange format 
+fitsccd (1NEMO)		- read a (fits) image file from disk
+fitsgids, mirgids (1NEMO)   - display an image on the GIDS display server
+fitsgrid (1NEMO)	- convert fits binary table to regular fits image by gridding
+fitshead (1NEMO)	- dump the header of a fits file, or convert ascii to fits header
+fitssds (1NEMO)		- convert FITS to SDS HDF 
+fitstab (1NEMO)		- convert fits table to ascii table
+fitstiff (1NEMO)	- convert FITS file into TIFF file
+fof (1.1)		- Find groups in N\-body simulations using the friends\-of\-friends method.
+ft_open, ft_spline, ft_close (3NEMO)	- function table processing routines
+ftoc (1NEMO)		- nemo_main() builder from fortran source code
+fts_rhead, fts_whead, fts_rdata, fts_wdata, fts_sdata, fts_zero, fts_dsize (3NEMO)  - fits I/O routines
+functions (5NEMO)	- math functions in various packages
+funtab (1NEMO)		- Function Table lookup
+gaussfit (1NEMO)	- Least Squares and Robust Estimation
+getXparam, initparam, finiparam, stop (3NEMO)	- main startup and command line processing.
+get_atable, get_ftable, get_line, parse, strinsert (3NEMO)  - table manipulator routines
+get_history, put_history, app_history , ask_history, reset_history, ask_headline, set_headline (3NEMO) - data history utilities 
+get_potential (3NEMO)	- obtain potential descriptor and pattern speed
+get_snap (3NEMO)	- input method for standardized snapshot files
+getdrange, getirange (3NEMO)	- parse string into an array of values of unknown size (slow)
+getmem, scopy, sconc, substr, findstr (3NEMO)	- string utilities
+getrfunc (3NEMO)	- arbitrary function parser
+gettab (1NEMO)		- extract real table from a table
+getxstr, putxstr, copxstr, xstrlen, xstreq (3NEMO)  - extended string functions
+gids (1NEMO)		- Groningen Image Display Server
+gravsim0 (1NEMO)	- NEMO frontend for the GRAVSIM family of programs
+hackcode1, hackcode1_qp (1NEMO) - hierarchical N-body code
+hackcode3, hackcode3_qp (1NEMO) - hierarchical N-body code (3)
+hackdens (1NEMO)	- local density estimator using tree algorithm
+hackforce, hackforce_qp (1NEMO) - hierarchical force calculation
+hd (1)			- dump the contents of a file in hex
+hdfgrid (1NEMO)		- Regrid a polar HDF SDS to cartesian image
+henyey (1NEMO)		- search for periodic orbits in a potential (Henyey's method)
+herinp (3NEMO)		- decode string into reals, integers, logicals, characters or bytes
+hi (5NEMO)		- ascii format for (ADC and other) HI surveys
+himap (1NEMO)		- Construct galactic XY/TR MAP from an LV diagram
+hisf (1NEMO)		- display and manipulate history of datafiles.
+hispectrum (1NEMO)	- HI spectrum extraction and gridder
+histid (3NEMO)		- find histogram index of a value in an array
+histogramidx (3NEMO)	- find histogram index of a value in an array
+hugh (5NEMO)		- binary format for N-body snapshot files
+icsccu, icsevu, dcsevu (3NEMO)	- IMSL emulator routines for interpolation and differentiation
+icsccu, icsevu, dcsevu (3NEMO)	- IMSL emulator routines for interpolation and differentiation
+image (5NEMO)		- binary format for 2D and 3D image files
+import (8NEMO)		- import new files as a tar file from remote sites
+index (1NEMO)		- index of NEMO commands and utilities
+index (3NEMO)		- index of all library functions in NEMO's $NEMOLIB
+ini_moment, accum_moment, decr_moment,	reset_moment, show_moment, n_moment, sum_moment, mean_moment, sigma_moment, skewness_moment, kurtosis_moment, min_moment, max_moment (3NEMO) - various moment and minmax routines
+inifie, dofie, dmpfie (3NEMO)	- expression parser
+inifien, dofien, dmpfien (3NEMO)    - expression parser (C)
+inil_grid, inia_grid, inip_grid, index_grid, value_grid (3NEMO) - various (1D) gridding routines
+init_Hash_Table, get_hash, put_hash, next_hash (3NEMO)	- hash functions
+intro (LNEMO)		- introduction to local NEMO tools
+ipick (1)		- A screen-based filter to .IR i nteractively .I pick lines
+kep2kep (1NEMO)		- interactive transformations between kepler orbit coordinates
+keywords (5NEMO)	- list of standard keywords in NEMO. 
+king (1NEMO)		- tabulate Osipkov-Merritt generalization of King model
+layout (5NEMO)		- layout command for YAPP interpreter
+linreg (3NEMO)		- linear regression: all six methods
+loadobj, findfn, mysymbols (3NEMO)  - dynamic object file loader
+lsq_zero, lsq_accum, lsq_solve (3NEMO)	- least squares fitting utilities
+makekit (1l)		- split files up into shell archive packages
+match, partialstreq (3NEMO) - minimal match of sub-strings 
+mcstrip, cyclo (1)	- tools for analysing cyclomatic complexity
+memopen, memclose, memseek, memfread, memdread, memiread (3NEMO)    -  memory operations to aid casting/parsing misaligned data
+miller (1NEMO)		- convert Miller's (ascii) plot file to snapshot format
+miller (5NEMO)		- ascii (plot) format for Miller's N-body snapshot files
+mkbaredisk (1NEMO)	- make an exponential disk
+mkbin (8NEMO)		- compile and link a NEMO program
+mkconfig (1NEMO)	- make a static configuration of particles.
+mkcube (1NEMO)		- create a uniform cube of equal massive stars
+mkdisk (1NEMO)		- create a uniform-density test disk in an external potential
+mkepidisk (1NEMO)	- uniform-ring-density test disk on epicycles
+mkexpdisk (1NEMO)	- make an exponential disk
+mkexphot (1NEMO)	- make an exponential disk (hot) embedded in a halo
+mkhomsph (1NEMO)	- make homogeneous sphere
+mkisosph (1NEMO)	- make finite isothermal sphere
+mklib (8NEMO)		- update main NEMO library
+mkmestel (1NEMO)	- make a finite Mestel disk
+mknbody5 (1NEMO)	- Create initial conditions using the NBODY5 program
+mknemo (8NEMO)		- attempt to find NEMO programs and install them
+mkommod (1NEMO)		- generate N-body system with anisotropic distribution function
+mkop73 (1NEMO)		- set up a Mestel disk using 1973 Ostriker & Peebles' method
+mkorbit (1NEMO)		- make an orbit with initial conditions
+mkpdoc (8NEMO)		- update doc files
+mkplummer (1NEMO)	- generates a snapshot according to a truncated Plummer model
+mkplummer (3NEMO)	- generates a snapshot according to a truncated Plummer model
+mkpolytrope (1NEMO)	- make N-body model of generalized polytrope
+mksphere (1NEMO)	- construct an arbitrary spherical mass distribution
+mkspiral (1NEMO)	- uniform-density test disk plus spiral in spherical potential
+mktestdisk (1NEMO)	- make uniform-density test disk in spheroid
+movie, movie_sv (1NEMO) - realtime playback of SUN rasterfiles
+nbody0 (1NEMO)		- direct summation Aarseth N-body integrator
+nbody1 (1NEMO)		- direct summation N-body integrator with variable timestep
+nbody2 (1NEMO)		- direct summation N-body integrator with Ahmad-Cohen scheme
+nbody5 (1NEMO)		- Regularized AC N-body code with triple & binary collisions.
+nemo_main (3NEMO)	- preferred main entry point for NEMO C and C++ programs
+nemodir (8NEMO)		- introduction to NEMO directory structure
+nemoinp (1NEMO)		- parse a user supplied number string
+nemoinp (3NEMO)		- decode and parse string into reals, integers, logicals
+nemoshow (1NEMO)	- overview of current NEMO environment
+new (1NEMO)		- add improvements/additions reports to NEMO
+news (1NEMO)		- shell scripts to interact with nemo's news facility
+newton0, newton0tree, newton0reg (1NEMO)    - nbody codes with equal time steps
+nllsqfit (3NEMO)	- (non)linear least squares fit
+orbdim (1NEMO)		- compute dimensionaly of phase space for an orbit
+orbfour (1NEMO)		- show geometric fourier coefficients of an orbit
+orbint (1NEMO)		- integrating single stellar orbit
+orbit (5NEMO)		- binary format for stellar orbits 
+orblist (1NEMO)		- list an orbit
+orbname (1NEMO)		- Orbit classification and plotting
+orbplot (1NEMO)		- plot an orbit
+orbsos (1NEMO)		- compute SOS coordinates from an orbit
+orbstat (1NEMO)		- tabulate some orbital statistics
+orbwood (1NEMO)		- Orbit Spectral Analysis 
+otos (1NEMO)		- convert and combine orbits to a snapshot 
+perorb (1NEMO)		- interactive/iterative search for XY-periodic orbits in symmetric  potentials
+pl_fread, pl_lread, pl_exec (3NEMO) - ASCII interpreter of YAPP commands
+plummer (1NEMO)		- tabulate Osipkov-Merritt generalization of Plummer model
+potccd (1NEMO)		- Create an image with potentials or densities from a potential
+potcode (1NEMO)		- non-selfconsistent N-body code with options to dissipate/diffuse orbits
+potlist (1NEMO)		- list potential value and forces of a potential descriptor
+programs (8NEMO)	- list of currently available nemo(1NEMO)  commands, ordered thematically
+prun (1NEMO)		- cosmological particle-mesh (AP3M) integration code
+pspeed (1NEMO)		- calculate the pattern speed of a stellar system.
+pstart (1NEMO)		- initialization routines for cosmological particle-mesh (AP3M) code
+qsf (1NEMO)		- query a structured file
+quadcode (1NEMO)	- global quadrupole-order N-body code integrator
+quadforce (1NEMO)	- quadrupole-order force calculation of an N-body system.
+quadinter (1NEMO)	- quadrupole-order force calculation from tabulated field.
+radprof (1NEMO)		- tabulate or display radial profiles of an N-body snapshot
+read_image, write_image (3NEMO) - high level image i/o
+read_orbit, write_orbit, allocate_orbit, list_orbit (3NEMO) - basic orbit i/o routines
+recipes (3NEMO)		- selection of Numerical Recipes routines
+redir (1)		- redirect standard output and/or standard error (diagnostic output)
+root, extension, head, tail, defext, pathopen, pathfind, _mappath, (3NEMO)  - file operations
+rostat (1NEMO)		- ROSTAT statistical routines
+rotcur (1NEMO)		- fit kinematic parameters from velocity field
+rotcurves (1NEMO)	- rotation curve of a composite potential
+rsf (1NEMO)		- read a structured file
+rtfm (1NEMO)		- read the fucking manual
+rv (5NEMO)		- binary format for N-body snapshot files
+rvc (5NEMO)		- binary format for N-body snapshot files
+rvcsnap (1NEMO)		- convert Couchman's rvc files to snapshot format
+scanfits (1NEMO)	- scan a fits file, optionally extract and convert.
+scanopt (3NEMO)		- scan a string of the form "word1,word2,..." for word match
+sdsfits (1NEMO)		- convert SDS HDF to FITS
+set_xrandom, xrandom, grandom, frandom (3NEMO)	- random number generators
+shar (1l)		- create shell archive file for extraction by /bin/sh
+shell (1l)		- Interpreter for shell archives
+smooth (2.01)		- Calculate smoothed quantities over all particles
+snap - (fortran binary) format for N-body simulations (5NEMO)	- version 2
+snap3dv (NEMO)		- create ascii file for 3D viewing from a snapshot
+snapadd (1NEMO)		- adds N-body systems on top of each other
+snapaxsym (1NEMO)	- generates an around-axis integrated ccd-like frame of an N-body snapshot
+snapccd (1NEMO)		- top view integrated velocity moment ccd-like image
+snapcenter (1NEMO)	- translate snapshot data to coordinates centered on subset of bodies
+snapcmp (1NEMO)		- compare two N-body snapshots
+snapcmphist (1NEMO)	- compare two N-body snapshots and plot histogram
+snapcomove (1NEMO)	- scale cosmological simulations to/from comoving coordinates
+snapcopy (1NEMO)	- copy particles of snapshot subject to conditions
+snapdens (1NEMO)	- local density estimator in an N-body snapshot
+snapdiagplot (1NEMO)	- plot diagnostics of an N-body run
+snapdist (1NEMO)	- gives a measure for the distance between two snapshots, with and without sliding in time to minimize the distance.
+snapenter (1NEMO)	- enter an N-body snapshot interactively into a file
+snapfit (1NEMO)		- fit a (6D) snapshot to a (3D) data cube ** in development ** 
+snapfits (1NEMO)	- convert a snapshot file to a fits file.
+snapfour (1NEMO)	- fourier analyze a snapshot
+snapgrid (1NEMO)	- grid a snapshot into a 2D or 3D image (cube)
+snaphdf (1NEMO)		- convert snapshot to HDF SD
+snaphist (1NEMO)	- histogram of projected radii and radial velocities of a snapshot
+snapinert (1NEMO)	- calculate  momentum of inertia of a snapshot
+snapkinem (1NEMO)	- compute kinematic diagnostics for snapshot
+snaplist (1NEMO)	- makes a listing of an N-body snapshot file
+snapmask (1NEMO)	- mask out certain particles while copying particles from an N-body system
+snapmass (1NEMO)	- add or modify masses in a snapshot
+snapmerge (1NEMO)	- merge N-body snapshots together
+snapmnmx (1NEMO)	- show statistics of snapshot variables
+snapmradii (1NEMO)	- print mass radii in a snapshot
+snapmstat (1NEMO)	- statistics of the masses in a snapshot
+snapopt (1NEMO)		- Special Ostriker-Peebles 't' calculator
+snappeak (1NEMO)	- find peak in each phase space coordinate using a mode analysis
+snapplot, trakplot (1NEMO)  - display an N-body snapshot file
+snapplotedit (1NEMO)	- display and edit an N-body snapshot file
+snapplotv (1NEMO)	- display an N-body snapshot file as a vector field
+snapprint (1NEMO)	- print out items of a snapshot in table format
+snaprect (1NEMO)	- diagonalize moment-of-inertia of snapshot
+snaprotate (1NEMO)	- rotate N-body snapshot file about principle axes.
+snapsample (1NEMO)	- select a subset particles in snapshot
+snapscale (1NEMO)	- re-scale an N-body system
+snapshift (1NEMO)	- shifts the phase space coordinates of an N-body system
+snapshot (5NEMO)	- format for N-body snapshot files
+snapslit (1NEMO)	- slit spectrum of an N-body snapshot
+snapsmooth (1NEMO)	- adaptive variable length smoothing
+snapsort (1NEMO)	- sort particles of an N-body snapshot
+snapsphere (1NEMO)	- copy a phase space sphere of particles from an N-body system
+snapspin (1NEMO)	- add Z-angular momentum to an N-body snapshot
+snapsplit (1NEMO)	- split a snapshot into pieces
+snapstab (1NEMO)	- report on stability of a stellar system
+snapstack (1NEMO)	- superimpose two N-body snapshots
+snapstat ()		- compute various statistics of an N-body snapshot
+snaptipsy (1NEMO)	- convert a snapshot to tipsy binary format
+snaptrans (1NEMO)	- coordinate transformations of a snapshot
+snaptrim (1NEMO)	- select a subset of the snapshot frames in a file
+snapvirial (1NEMO)	- scale snapshots while retaining virial ratio
+snapvratio (1NEMO)	- compute various global virials (clausius, newton)
+snapxyz, snapxyzvel (1NEMO) - Convert snapshot to xyzc data
+software (8NEMO)	- list of things which need improvements
+spline, seval (3NEMO)	- cubic spline fit interpolation and derivatives
+sqr, qbe, log2, dex (3NEMO) - some additional math functions: square, cube, log
+status (3NEMO)		- write out status-line information
+stoa, stoa_sp (1NEMO)	- convert structured binary N-body file to ascii format
+stod (1NEMO)		- convert a NEMO snapshot to a STARLAB dyn (node/story)
+stoo (1NEMO)		- convert snapshot to orbit: choose one particle
+stou4 (1NEMO)		- convert snapshot to unit-4 for NBODYx
+stropen, strclose, strdelete, strname, strseek (3NEMO)	- file-stream enhanced utilities
+tabcomment (1NEMO)	- Add comments to a table, or comment certain lines
+tabhist (1NEMO)		- histogram plotter and gaussian fit for tabular data
+table (TABLE)		- table format
+tablint (1NEMO)		- prototype table syntax checker
+tablovas (1NEMO)	- Lovas spectral line catalogue manipulator (**preliminary**)
+tablsqfit (1NEMO)	- general purpose least squares fitting program
+tablst (1NEMO)		- list a (binary) table
+tabmath (1NEMO)		- general table manipulator
+tabplot (1NEMO)		- general table plotter
+tabpp (1NEMO)		- Poynter-Pickett spectral line catalogue manipulator
+tabs (1NEMO)		- table format converter
+tabsplit (1NEMO)	- split the input table file into two tables
+tabtos (1NEMO)		- convert structured ASCII tables into snapshot format
+tabview (1NEMO)		- prototype dynamic query table viewer
+tipsy (5NEMO)		- formats used in TIPSY package
+tipsysnap (1NEMO)	- convert tipsy ascii file to snapshot
+tr2latex (1)		- convert a document from troff to LaTeX
+transkepler (3NEMO)	- transforms a Kepler orbit to a different representation
+treecode (1NEMO)	- fortran version of hackcode
+treecode0 (1NEMO)	- NEMO frontend for the TREECODE family of programs
+treecode2 (1NEMO)	- fortran version of hackcode, with Cray optimizations and  no recursion
+treesfr (1NEMO)		- treecode with sticky particle ISM model and star formation
+tricks (8NEMO)		- some tricks (and bugs) when using NEMO
+tsd (1NEMO)		- scan and report contents of an HDF SDS
+tsf (1NEMO)		- type a structured file
+u3tos (1NEMO)		- Convert NBODY unit 3 output data to snapshot
+u4tos (1NEMO)		- Convert NBODY unit-4 file to snapshot
+unbind (1NEMO)		- find unbound stars to a stellar system
+unfio (1NEMO)		- access fortran unformatted I/O files
+unfscan, unfread, unfswap (3NEMO)   - unformatted FORTRAN I/O data access from C
+units (1NEMO)		- units conversion utility
+unproto (1)		- compile ANSI C with traditional UNIX C compiler
+unshar (1l)		- unpack shell archives from news, mail, notes, etc.
+update (1NEMO)		- combine multiple fortran source files for CYBER 205's UPDATE
+usage205 (8NEMO)	- a very short and simple instruction list for Cyber 205 users.
+usageeta10 (8NEMO)	- a very short and simple instruction list for ETA 10 users.
+uuexplode (1L)		- decode multiple and/or multipart uuencoded files to their target files
+vectmath.h (3NEMO)	- vector and matrix math package
+vmsfix (1NEMO)		- attempt to fix up mangled VMS FITS files
+waisindex (1)		- Indexes files
+waissearch (1)		- Simple shell user interface for making WAIS requests 
+waisserver (1)		- serves WAIS requests 
+worldpos, xypix (3NEMO) - astronomical coordinate conversions
+x3d (1)			- interactive (X-windows based) 3d viewer
+xaxis, yaxis, axvar, xaxvar, yaxvar (3NEMO) - routines to draw various kinds of axes
+xcps (1)		- Colour PostScript dump facility for X11.4
+xrastool (n)		- animate rasterfiles in an XView window
+xvp, xvm (5NEMO)	- direct access binary format for N-body data
+xvpsnap (1NEMO)		- convert xvp NBODY files to snapshot format files
+xwais (1)		- X interface to the WAIS system
+xwaisq (1)		- X interface to the WAIS questions
+xyopen, xyclose, xyread, xywrite, xysetpl (3NEMO)   - line based image I/O
+xyzc (5NEMO)		- binary format for colorized point data, with optional velocities
+xyzview, xyzvelview (1NEMO) - Display 3-D point (velocity) data
+yapp (3NEMO)		- yet another plotting package
+yapp (5NEMO)		- Yet Another Plotting Package
