@@ -111,7 +111,7 @@ to compare images of different cell sizes.
 \fBstack=t|f\fP
 Should all snapshots from the input file be stacked, or write one
 image per selected (see \fBtimes=\fP) time? [default: \fBf\fP].
-.SH EXAMPLE
+.SH EXAMPLES
 The following example makes three moment images from an N-body snapshot,
 then smooths
 and combines them into an 'intensity' (\fBint\fP), 'mean velocity' (\fBvel\fP)
@@ -138,12 +138,27 @@ also use (assuming no smoothing implemented):
     % \fBsnapgrid in=nbody.dat out=vel moment=-1\fP
     % \fBsnapgrid in=nbody.dat out=sig moment=-2\fP
 .fi
+Consider now the situation where a coordinate is regularly sampled,
+with N values between A and B. In order to grid these, one would
+normally use a range=A-dx/2:B+dx/2, where dx=(B-A)/(N-1).  One
+can also make a grid with N cells with emission, 
+and K blank cells between
+each valued cell (K would be typically small, perhaps 1 or 2). With
+NK=(K+1)N-K and dx=(B-A)/(NK-1), a
+range=A-dx/2:B+dx/2 is used.  If this is done
+in both the X and Y dimension, the program
+\fIccdintpol(1NEMO)\fP can be used to create a bi-linearly
+interpolated grid with more pixels for a seemingly higher
+sampled map. Most likely the option \fBmean=t\fP will have
+to be used to conserve units between runs with different
+values of K.
 .SH UNITS
 Units are maintained in the same way as in snapshots, they don't have
 a specific name, but carry their normal meaning 'length', 'velocity'
 and 'mass'. Since \fIsnapgrid\fP calculates (surface/space) densities,
 its units are formally 'mass' per square 'length' times 'velocity'
-to the power \fBmoment\fP. 
+to the power \fBmoment\fP. Notice the \fBmean=\fP keyword,
+which prevents division by the cellsize.
 .PP
 When channel maps are produced (\fBmoment=0\fP), 
 the data are not normalized w.r.t. the
@@ -159,7 +174,7 @@ having to allocate one or two extra images in addition to the
 snapshot and the image. 
 .SH "SEE ALSO"
 snaprotate(1NEMO), snapslit(1NEMO), snapsmooth(1NEMO), snapaxsym(1NEMO), 
-tsf(1NEMO), snapccd(1NEMO)
+tsf(1NEMO), snapccd(1NEMO), ccdintpol(1NEMO)
 .PP
 http://www.iinet.com.au/~watson/nngridr.html
 .SH AUTHOR
