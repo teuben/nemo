@@ -87,6 +87,10 @@ tabview: tabview.c
 	$(CC) $(CFLAGS) -o tabview tabview.c \
 		$(NEMO_LIBS) $(YAPPLIB) $(EL) -lm
 
+tabzoom: tabzoom.c
+	$(CC) $(CFLAGS) -o tabzoom tabzoom.c \
+		$(NEMO_LIBS) $(YAPPLIB) $(EL) -lm
+
 tabhist: tabhist.c
 	$(CC) $(CFLAGS) -DYAPP -o tabhist tabhist.c \
 		$(NEMO_LIBS) $(YAPPLIB) $(EL) -lm
