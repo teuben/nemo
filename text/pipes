@@ -15,9 +15,8 @@ into the stream a little earlier, like a feedback loop.
 Here is an example of how to feedback some data earlier in the stream. 
 
 
-   mksnapshot - |\
+   mkplummer  - 1000 |\
       gyrfalcON - - potname=plummerv potpars=0,1,1,0.1 potfile=plummerv.dat |\
-      analyze - - |\
       snapcore - potfile=plummerv.dat
 
 
@@ -38,3 +37,9 @@ To study this example, look at
 	new plummer parameters and write them into a "plummerv" binary structured
 	datafile.
 
+
+
+Potential problems:
+  - the reader could try to open when the writer is "in the middle", causing bad
+    data to be read. Could do file locking, or use a shared memory segment instead.
+    since it's via stropen(), stropen should offer that as an option.
