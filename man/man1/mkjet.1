@@ -1,0 +1,73 @@
+.TH MKJET 1NEMO "29 March 1996"
+.SH NAME
+mkjet \- create a toy model for a jet
+.SH SYNOPSIS
+\fBmkjet\fP \fBout=\fP\fIsnapshot\fP [parameter=value]
+.SH DESCRIPTION
+\fBmkjet\fP creates a toy model of a jet, with particles
+distributed uniformely along a cone with given (constant) opening
+angle \fBtheta\fP. The outflow velocity can be varied using an
+expansion curve, that gives expansion velocity as function of
+radius.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBout=\fP
+Output snapshot file name. No default./
+.TP
+\fBnbody=\fP
+Number of particles.
+[Default: 256].
+.TP
+\fBtheta=\fP
+(full) Opening angle of jet, in degrees. Default: 10.
+.TP
+\fBr=\fP
+Sample radii along jet. A number of radii have to be given,
+for which expansion velocities will have to be given.
+.TP
+\fBv=\fP
+Expansion velocities along jet radii, as given by \fBrad=\fP.
+Each radius must have a matching velocity, although if fewer
+velocities are given, the last ones are simply repeated.
+.TP
+\fBrmin=\fP
+Inner radius if the jet. [Default: 0].
+.TP
+\fBrmax=\fP
+Outer radius of the jet.  [Default: 2].
+.TP
+\fBnmodel=\fP
+Number of models to write. [Default: 1].
+.TP
+\fBseed=\fP
+Random seed. 0 is taken as the current time of the day, and as such
+a good choice for fully random samples. [Default: 0]
+.TP
+\fBheadline=\fP
+Random verbiage added to the snapshot . By default none.
+.SH EXAMPLE
+Since there is no table input for the radial expansion curve yet,
+you have to provide a series of radii and velocities through the
+\fBr=\fP and \fBv=\fP keywords. Although it requires you to use 
+two temporary files, one for each column, 
+the following NEMO shortcut may
+be handy in this case (assuming you have a table with radius and
+velocity in the first two columns)
+.nf
+    tabmath table1 tab.r %1 all
+    tabmath table1 tab.v %2 all
+    mkjet ....  r=@tab.r v=@tab.v
+.fi
+.SH SEE ALSO
+snapshot(5NEMO)
+.SH FILES
+(still private)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+29-mar-96	V0.1 Created 	PJT
+.fi
