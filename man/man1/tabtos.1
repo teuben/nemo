@@ -202,7 +202,7 @@ if it really gets stuck, the program is aborted.
 \fIwarning(3NEMO)\fP messages should not be discarded, check
 them to see if they make sense. Otherwise what you think is
 correct data, may not have been parsed correctly. That's life
-in the ASCII lane. 
+in the fast ASCII lane. 
 .PP
 If no \fBtimes\fP specified, and the \fBheader=\fP has no 
 associated time, all snapshots will 
@@ -220,8 +220,10 @@ if the first snapshot is not the largest one in that file.
 .SH BUGS
 This is a complicated program to understand, but can often read complicated
 ascii files.
+.PP
+This program cannot parse fixed column files
 .SH SEE ALSO
-atos(1NEMO), atosph(1NEMO), snapprint(1NEMO), snapshot(5NEMO)
+atos(1NEMO), atosph(1NEMO), snapprint(1NEMO), snapshot(5NEMO), unfio(1NEMO)
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
