@@ -1,0 +1,23 @@
+#! /bin/csh -f
+#
+#  sample script to convert a NEMO snapshot to an ASCII input file for GALAXY
+if ($#argv !=  1) then
+  echo "Usage: $0 file "
+  echo "convert a NEMO snapshot to an ASCII input file for GALAXY"
+  exit 0
+endif
+
+set file=$1
+set tmp=tmp$$
+
+snapprint $file x,y,z,vx,vy,vz format=%12.7e > $tmp.1
+snapstat $file > $tmp.2
+set t=`grep ^Time  $tmp.2 | awk '{print $4}'`
+set m=`grep ^Total $tmp.2 | awk '{print $4}'`
+set n=`grep ^Nobj  $tmp.2 | awk '{print $2}'`
+
+echo $t $m $n 
+cat $tmp.1
+
+rm $tmp.*
+
