@@ -1,0 +1,43 @@
+.TH BURSTSTRING 3NEMO "26 December 1994"
+.SH NAME
+burststring \- separate a string into tokens, and free them
+.SH SYNOPSIS
+.nf
+.B #include <stdinc.h>
+.PP
+.B string *burststring(str, sep)
+.B string *burst2string(str, sep)
+.B string str;
+.B string sep;
+.PP 
+.B void freestrings(strptr)
+.B string *strptr;
+.fi
+.SH DESCRIPTION
+\fIburststring()\fP breaks a string \fPstr\fP of words separated by characters
+in \fPsep\fP into individual strings, and returns them as an extended string
+(ie, a NULL-terminated sequence of string pointers; see \fIextstring\fP).
+For example, if \fBstr\fP is the string "foo, bar, fum" and \fBsep\fP is
+the string ", " (note the space after the comma), the result is an array of
+four pointers; the first three point to strings "foo", "bar", and "fum",
+and the last one is NULL.  \fIburststring\fP calls \fImalloc\fP(3) to obtain
+memory to hold the results.
+.PP
+\fIburst2string\fP works exactly like \fIburststring\fP, except it now
+also returns the \fIsep\fP portions. This allows the user to exactly
+reconstruct the original input string by catenating all the array
+elements. Useful for editing.
+.PP
+\fIfreestrings\fP can be used to free all memory associated with an
+array of strings, as e.g. allocated by \fIburststring\fP.
+.SH SEE ALSO
+extstring(3NEMO)
+.SH AUTHOR
+Joshua Barnes, Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1i +4i
+2-dec-86	Dark ages version	JEB
+16-oct-90	Added freestrings	PJT
+26-dec-94	Added burst2string	PJT
+.fi
