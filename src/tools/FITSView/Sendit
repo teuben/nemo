@@ -1,0 +1,16 @@
+#!/bin/sh
+if test $# -eq 0
+then
+	echo usage:  Sendit person1 person2 ... personN
+	exit 1
+fi
+mail $* < mesg
+mail $* < FITSView.package
+r=$*;
+set `grep VERSION ql.h`; v=$3
+set `date`; d=$3; m=$2; y=$6
+for i in $r
+do
+echo $i \\t\\tVersion $v $m $d $y 
+echo $i \\t\\tVersion $v $m $d $y >> Distribution
+done
