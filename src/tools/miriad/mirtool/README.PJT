@@ -1,0 +1,100 @@
+Comments on the 'nemo' version of EXECTOOL:
+
+Since the EXECTOOL needs a doc file with the list of valid
+parameters, a special help= option has been invented for
+this in nemo:
+	nemotask help=t
+produces a list like
+ -------------------------------
+| %N nemotask			|
+|				|
+|				|
+| %A keyword-1			|
+|	keyword-1 expl		|
+| %A keyword-2			|
+|				|
+| ....				|
+ -------------------------------
+on standard output. This file will, for the moment, be the only
+'online help' in nemotool. Perhaps a 'man' or 'help' button
+should be installed next to the QUIT, RUN and SAVE buttons.
+For now the the user has to open a separate window and run 'man'
+in there:
+
+
+
+- The keyword file is allowed to have comment lines, they MUST start
+  with a #. Is useful for NEMO, but can't hurt MIRTH or GIPSY.
+  See code for recover() and save().
+
+- For symmetry reasons both MirthTool and NemoTool (including the
+  parsing of keywords in nemo's initparam()) must be able to handle
+  extra spaces, i.e.
+		' key = value'
+  space around the 'key' and before the 'value'.
+  This is now handled nicely in save() and restore() with a little
+  extra coding.
+  The first non-blank after the first '=' is start of value however!!
+
+KNOWN DEFICIENCES:
+- when X-DEF (the one directory where the keyword file will be written
+  to) is a public area, or you would have multiple processes (X-tools)
+  running, it screws up obviously.
+
+- the list a files has to be resorted
+
+KNOWN BUGS:
+
+- if the X-BIN directory is too large (can't fit in the static area)
+  program crashes. At 99 files it crashes, although there is space
+  for 100? (NJOBS?)
+  Program should also check if those file are executable, although 
+  this may result in a somewhat larger startup time.
+
+- HELP button is still buggy 
+
+- LOCAL/REMOTE is a toggle button, works together with the 'hostname'
+  blank, where a remote hostname must be filled in, or pulled up
+  from a menu. When the menu is pulled up, perhaps this table 
+  should be regenerated, since not all machines may be up.
+  Currently at startup it reads the /usr/spool/rwhod directory,
+  and extracts the available machines (some may be down).
+
+
+
+There is a bug in the sunwindows tty software which causes a crash on the
+fifth creation of a tty window.  In Menu, a tty window is created whenever
+the logfile is changed or erased.
+
+---------------------------------------------------------------------------
+
+The output to the logfile is buffered for stderr (Fortran unit 0) even
+though it should not be.  This means that the user cannot see the error
+output until the buffer fills or the program exits.  I suppose even
+regular output should not be buffered either.
+
+---------------------------------------------------------------------------
+
+It is not obvious to the user when and when not to use a carriage return
+after filling in a blank.  I believe that some of the string blanks do
+require one.
+
+---------------------------------------------------------------------------
+
+There is some flakiness witht the logfile/tail -f interaction.  I think
+that sometimes tail is at the end of the file, while the menu has been
+reset to be writing at the beginning.
+
+---------------------------------------------------------------------------
+TODO:
+
+    1) Multiple directories
+    2) Search in .doc files should be case-insensitive
+    3) Help window should be 80 characters (now ~76 from scroll-bar)
+
+---------------------------------------------------------------------------
+dirlist.c and lsearch.c in this directory are not used.
+
+
+---
+lexec.c:	<tty.h> gave error message in SUN OS 4.0
