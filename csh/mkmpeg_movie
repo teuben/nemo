@@ -1,0 +1,62 @@
+#! /bin/csh -f
+#
+#
+# mpeg_encode parfile
+# with a parfile with something like:
+#   ### ### ### ### ### ### ### ### ### ### ### ### ### ###
+### PATTERN IBBPBBPBBPBBPB
+### OUTPUT  test1.mpg
+### INPUT_DIR .
+### INPUT
+### try*.ppm [000-055]
+### END_INPUT
+### BASE_FILE_FORMAT PNM
+### INPUT_CONVERT *
+### GOP_SIZE 1
+### SLICES_PER_FRAME 1
+### PIXEL HALF
+### RANGE 8
+### PSEARCH_ALG LOGARITHMIC
+### BSEARCH_ALG SIMPLE
+### IQSCALE 6
+### PQSCALE 6
+### BQSCALE 6
+### REFERENCE_FRAME ORIGINAL
+#   ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
+
+# set these to control the size of a PPM window from PGPLOT 
+setenv PGPLOT_PPM_WIDTH 256
+setenv PGPLOT_PPM_HEIGHT 256
+
+# files to process
+set files=(/scratch4/teuben/tmp.out \
+	   /scratch2/teuben/tmp2.out \
+	   /scratch2/teuben/tmp3.out \
+	   /scratch4/teuben/tmp5.out)
+
+# times for each above mentioned file (nemoinp(1NEMO) expression for times)
+set times=(0:2:1 \
+	  3:20:1 \
+	  21:40:1 \
+          41:55:1)
+
+set n=0
+
+foreach f ($files)
+foreach t (`nemoinp $times[1]`)
+   set nnn=`nemoinp $n format=%03.f`
+   set out=try$nnn.ppm
+
+   echo ${n}: File: $f frame: $nnn time: $t
+   if (! -e $out) then
+     snaptrim $f - times=$t |\
+        snapplot_cg xrange=-40:40 yrange=-40:40 \
+	visib='i<32768' color='i<16384?0.1:0.2' \
+	in=- yapp=$out/ppm
+   else
+     echo SKIPPING
+   endif
+   @ n++
+end
+shift times
+end
