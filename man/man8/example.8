@@ -1,0 +1,87 @@
+.TH EXAMPLE 8NEMO "9 October 1990"  "Left?" "Middle" "Right?" 
+.SH NAME
+example \- example skeleton file for manual writers 
+.SH SYNOPSIS
+This section should  contain a short synopis of the command including
+its options and arguments. In case of main programs (1) one could say:
+.PP
+\fBsnapadd in1=\fPsnap1 \fBin2=\fPsnap2 \fBout=\fPsnapo [\fBcut=\fPcutoff]
+.PP
+In case of library routines (3) it will probably look like:
+.PP
+.nf
+.B #include <example.h>
+.PP
+.B void example(msg)
+.B char *msg;
+.fi
+.SH "SIDE EFFECTS"
+This should list if there are any expected external variables or routines
+which will be moderated:
+.PP
+.nf
+.B extern int nobj;
+.B extern int mass[MOBJ];
+.B extern int phase[MOBJ][6];
+.fi
+.SH AUTHOR
+Peter Teuben, the guy who wrote it or deserved the credit or:
+.SH PERSON RESPONSIBLE
+John Doe, the guy who is now responsible of keeping this particluar piece of
+software up to date.
+.SH FILES
+This should contain a reference to files needed to be included at compilation
+or linked at linking time. Note that a <TAB> must be included for proper 
+allignment at 2.5 inches
+.nf
+.ta +3.0i
+/usr/lib/tmac/tmac.an   	This file contains the MAN macros
+.fi
+.SH DESCRIPTION
+This is a simple skeleton file for authors of manual pages
+and shows e.g. the
+possibilities of text in \fBbold\fP as well as \fIItalics\fP typeface.
+It is better studied by directly looking at the source file, than by viewing
+the roffed-output. This file contains about all the possible SECTIONS
+we are using, in practice you would use a subset of them, but never leave
+out the NAME section.
+.SH PARAMETERS
+This list of options is usually added in case of a \fIlevel(1)\fP program
+.TP 25
+\fBin1=\fIsnap1\fP
+Input data is read from \fIsnap1\fP, which must be in \fISnapShot(5)\fP
+format.
+.TP
+\fBin2=\fIsnap2\fP
+Input data is read from \fIsnap2\fP, which must be in \fISnapShot(5)\fP
+format.
+.SH "LIST OF FUNCTIONS"
+.sp 10
+.nf
+.ta \w'vtimes'u+6n +\w'vtimes.3c'u+10n
+\fIName\fP	\fIAppears on Page\fP	\fIDescription\fP
+.ta \w'vtimes'u+8n +\w'vtimes.3c'u+8n
+.sp 5p
+example 	example.0	skeleton for manual page with simple columns
+.fi
+.SH "SEE ALSO"
+This secion gives a list if \fIother(0)\fP routines and manuals
+which are relevant to this command. 
+In case you want to know more than you possibly ever wanted
+to know about writing manuals, consult one of the following:
+.PP
+The \fB-man\fP Macro Package (upper case directives in this file)
+.PP 
+Text processing with NROFF and TROFF (lower case directives in this file)
+.SH BUGS
+After certain roff commands a space is forced into the output, e.g.
+the space in \fBin1=\fPsnap1.
+.PP
+The MAN macro file needs special NEMO entry, to prevent the clumsy
+header 'Unknown section of the manual'.(see FILES caption on this manual page)
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.5i
+16-Mar-87	created         	PJT
+18-Mar-87	PARAMETERS added	PJT
+01-Aug-87	John Doe takes over	JXD

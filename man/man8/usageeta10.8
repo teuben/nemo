@@ -1,0 +1,39 @@
+.TH USAGEETA10 8NEMO "3 June 1988"
+.SH NAME
+usageeta10 \- a very short and simple instruction list for ETA 10 users.
+.SH DESCRIPTION
+After having read \fIusage205(8NEMO)\fP you can continue with this
+document, as the submission of jobs is very much like that on the ETA10.
+.PP
+A special command file \fBHACK_ETA.COM\fP, written by the JVNC staff, will
+do the job for the moment. It operates much like a pep-file,
+except that the VAX file names of the input files to 
+the treecode (\fBTREEPARS\fP for the 
+parameters and \fBTREEBODI\fP for the initial conditions of the N bodies)
+will be given to the command file. No \fBPEPPUT\fP is required here
+(this was just a matter of how the command file was written).
+.PP
+At the moment of writing, being in \fIfriendly user period\fP you have
+to ask the operators to submit the job for you. This is still a highly
+personalized way of working, and I shall not further discuss it here
+until a more independant way of submitting jobs has been announced.
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +3.3i
+JVNCC::DISK27:[TEUBEN1P.ETA]*.COM	eta submit command file(s)
+JVNCC::DISK27:[TEUBEN1P]LOGIN.COM	handy symbols, MicroEmacs (MEM) etc.
+JVNCC::DISK27:[TEUBEN1P]EMACSVARS.	useful rebindings for Emacs
+JVNCC::DISK27:[TEUBEN1P.CODE]CODE*.COM	private edited PEP command files
+JVNCC::DISK27:[TEUBEN1P]JVNC.COM	-just have a look at this one
+.fi
+.SH BUGS
+JVNC went out of business in 1990. Manual page kept for historical reasons.
+.SH "SEE ALSO"
+usage205(8NEMO)
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.5i
+3-jun-88	created after first ETA10 tryout	PJT
+9-oct-90	JVNC went out of business        	PJT
