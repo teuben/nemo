@@ -142,7 +142,7 @@
         getopt
  */
 
-#define VERSION_ID  "3.3h 17-jan-02 PJT"
+#define VERSION_ID  "3.3i 18-jan-02 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
