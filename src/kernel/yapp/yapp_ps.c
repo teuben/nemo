@@ -102,7 +102,7 @@ plinit(string opt, real x0, real x1, real y0, real y1)
     } else {
       dprintf(0,"YAPP_PS %s:\n do \'lpr %s\' to print\n", VERSIONID, yappfile);
     }
-    if (streq(yappfile,"yapp.ps")
+    if (streq(yappfile,"yapp.ps"))
         psst = stropen(yappfile, "w!");
     else
         psst = stropen(yappfile, "w");
