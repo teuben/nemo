@@ -1,7 +1,12 @@
 #! /bin/csh -f
 #
-#   Generic command that searches for and prints out manual
-#   pages.
+#   Generic command that searches for and prints out manual pages.
+#
+#   The linux "gman" program is probably a much better way to
+#   print out man pages in good quality. Try:
+#   http://homex.coolconnect.com/user/xkwang/gman
+#   http://homex.s-one.net.sg/user/xkwang/gman   
+#
 #   If troff doesn't work on your system, try setting MANLASER
 #   to 'groff -M$NEMO/man -man' or 'ditroff -man'   
 #   If the script sees the existence of that environment variable,
@@ -11,6 +16,8 @@
 #  groff -t -e -mandoc -Tascii manpage.1 | col -bx > manpage.txt
 # to get high quality ps files:
 #  groff -t -e -mandoc -Tps manpage.1 > manpage.ps
+# or try
+# groff -man -Tps manpage.1 > manpage.ps
 
 set manext=(1 2 3 4 5 6 7 8 l man)
 
