@@ -1,0 +1,58 @@
+%N tabplot
+%D general table plotter
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man tabplot' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input file name (table) [???]
+%A xcol
+	x coordinate column [1]
+%A ycol
+	y coordinate column [2]
+%A xmin
+	in case x(min/max) used []
+%A xmax
+	in case x(min/max) used []
+%A ymin
+	in case y(min/max) used []
+%A ymax
+	in case y(min/max) used []
+%A xbin
+	binning data in x? []
+%A point
+	point type and size [1,0.1]
+%A line
+	line width and style [0,0]
+%A color
+	colors for the symbols/lines []
+%A errors
+	xy error bars ? []
+%A xlab
+	Label along X []
+%A ylab
+	Label along Y []
+%A xcoord
+	Draw additional coordinate lines along these X []
+%A ycoord
+	Draw additional coordinate lines along these Y []
+%A nxticks
+	Number of ticks on X axis [7]
+%A nyticks
+	Number of ticks on Y axis [7]
+%A nmax
+	Hardcoded allocation space, if needed [10000]
+%A median
+	Use median in computing binning averages [f]
+%A headline
+	headline in graph  []
+%A tab
+	Table output also if binning is used? [f]
+%A fullscale
+	Use full autoscale in one axis if other autoscaled? [f]
+%A cursor
+	Optional file to retrieve cursor coordinates []
+%A layout
+	Optional layout file []
+%A VERSION
+	28-jul-99 PJT [2.2]
