@@ -7,7 +7,7 @@
 #   19-dec-99   -i added (doesn't seem to work?)
 #    6-apr-01   -f added
 #   20-jun-01   -b added
-#   17-jul-01   kludge hackforce
+#   17-jul-01   kludge hackforce, and rotcur
 #
 #
 # BUG:  -b  does not remove executable, so you never know if new binary did
@@ -72,7 +72,7 @@ end
 if ($bootstrap) then
   set blog=/tmp/testsuite_b.log
   echo Rebuilding testsuite executables, hang on.....see $blog 
-  (cd $NEMO/src/scripts; ./need -m `./testsuite -s`; mknemo -c history hisf; mknemo -n 1 hackforce) >& $blog
+  (cd $NEMO/src/scripts; ./need -m `./testsuite -s`; mknemo -c history hisf; mknemo -n 1 rotcur; mknemo -n 1 hackforce) >& $blog
 endif
 
 mkdir $testdir
