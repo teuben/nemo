@@ -1,12 +1,12 @@
-.TH GYRFALCON 1NEMO "5 April 2004"
+.TH GYRFALCON 1NEMO "11 April 2004"
 .SH NAME
 gyrfalcON \- GalaxY simulatoR using falcON (NEMO version)
 .SH SYNOPSIS
 \fBgyrfalcON\fP [parameter=value]
 .SH DESCRIPTION
-\fBgyrfalcON\fP (formerly called YancNemo) is a 
-NEMO adaptation of Walter Dehnen's version of the 
-tree code, where the approximate evaluation of gravitational forces is
+\fBgyrfalcON\fP (versions before 1.5 were called YancNemo) is the
+NEMO version of Walter Dehnen's tree code, 
+where the approximate evaluation of gravitational forces is
 extended and substantially accelerated by including mutual cell-cell
 interactions. These are computed by a Taylor series in Cartesian coordinates
 and in a completely symmetric fashion, such that Newton's third law is now
@@ -19,7 +19,8 @@ with N, which can also be supported by a theoretical argument, and the
 advantage over the tree code increases with ever larger N.
 .PP
 The (NEMO) programs \fIaddgravity\fP and  \fIgetgravity\fP can be used
-to obtain \fIfalcON\fP forces without the need of going through the integrator.
+to obtain \fIfalcON\fP forces without the need of going through the integrator,
+though \fBgyrfalcON\fP can also be used with \fBtstop=0\fP.
 .PP
 For a detailed description of usage, see also the \fIUser Guide for falcON\fP.
 .SH PARAMETERS
@@ -31,29 +32,37 @@ Input file, needs to be in \fIsnapshot(5NEMO)\fP format.
 [No default]
 .TP
 \fBout=\fP
-Output file, will be in \fIsnapshot(5NEMO)\fP format. 
-[No default, although \fB.\fP can be used for a data sink,see \fPstropen(3NEMO)\fP]
+Output file, will be in \fIsnapshot(5NEMO)\fP format. Only required
+if resume=f, which is the default.
 .TP
 \fBtstop=\fP
-Time at which integration is stopped. Also called \fBtcrit\fP in
-Aarseth's nbody* series. [10]     
+Time at which integration is stopped. The default is never!
+(but notice \fBstopfile=\fP below).
 .TP
 \fBstep=\fP
-Output integration step. Some other codes use 1/freqout, or \fBdeltat\fP for this.
+Primary output step.
 The value of 0 can be used if output at every timestep is requested.
-[1]    
+[1]
 .TP
 \fBlogfile=\fP
-file for log output (default: stderr). Formerly called logout=
+file for log output (default: stderr). 
+.TP
+\fBstopfile=\fP
+stop the simulation as soon as this file exists. Default: none.
+.TP
+\fBlogstep=\fP
+Number of blocksteps between log outputs
+[1]
 .TP
 \fBout2=\fP
-file for secondary output stream (see \fBgive2=\fP below).
+Output file for secondary output stream (controlled by \fBstep2=\fP and \fBgive2=\fP).
 .TP
 \fBstep2=\fP
-time between secondary outputs; Again 0 signifies output at every step  [0]    
+Secondary output step.
+Again 0 signifies output at every step  [0]    
 .TP
 \fBtheta=\fP
-tolerance parameter at M=M_tot [0.6]
+tolerance parameter at M=M_tot
 [0.6]
 .TP
 \fBhgrow=\fP
@@ -81,8 +90,8 @@ Timestep indicator such that tau_min = (1/2)^hmin. [Default: 6]
 Number of time step levels [1].
 .TP
 \fBfac=\fP
-tau = fac/acc. If more than one of \fBfac=\fP, \fBfph=\fP or 
-\fBfpa=\fP is non-zero, we use the minimum tau.
+tau = fac/acc. If more than one of \fBfac=\fP, \fBfph=\fP,
+\fBfpa=\fP, or \fBfea=\fP  is non-zero, we use the minimum tau of these.
 .TP
 \fBfph=\fP
 tau = fph/pot
@@ -90,17 +99,20 @@ tau = fph/pot
 \fBfpa=\fP
 tau = fpa*sqrt(pot)/acc
 .TP
+\fBfea=\fP
+tau = fpa*sqrt(eps)/acc
+.TP
 \fBresume=\fP
 resume old simulation?  that implies:
 1) read last snapshot from input file
-2) append to input file (unless out given)          
+2) append to input file (unless \fBout=\fP given)          
 [f].
 .TP
 \fBgive=\fP
 List of output specifications. Recognizing
-m (mass), x (position), v (velocity), a (acceleration), p (N-body potential),
-P (external potential, deprecated), r (density estimate, deprecated). 
-l (time-step level, if they exist), f (body flag).
+\fBm\fP (mass), \fBx\fP (position), \fBv\fP (velocity), \fBa\fP (acceleration), \fBp\fP (N-body potential),
+\fBP\fP (external potential, added to pot before output), 
+\fBl\fP (time-step level, if they exist), \fBf\fP (body flag).
 [Default: mxv]
 .TP
 \fBgive2=\fP
@@ -120,7 +132,10 @@ Parameters of external potential, if required.
 Filename, if required by external potential.
 .TP
 \fBstartout=t|f\fP
-give snapshot for t=tstart? [t]
+Primary output for t=tstart? [t]
+.TP
+\fBlastout=t|f\fP
+Primary output for t=tstop? [t]
 .SH RESOURCES
 For a 128k run, memory usage is about 18MB (was: 27MB?). This will scale roughly
 linearly for larger systems. The following little benchmark 
@@ -169,12 +184,13 @@ NEMO/usr/dehnen/falcON/doc/user_guide_pub.pdf	\fIUser Guide for falcON\fP.
 Walter Dehnen
 .SH UPDATE HISTORY
 .nf
-.ta +1.0i +4.0i
+.ta +1.0i +5.0i
 29-May-01	V1.0 manual written, at GH-2001 workshop at INAOE 	PJT
 13-jun-01	1.0.2: added Ncrit
 16-nov-01	1.0.15: aligned man page with actual code	PJT
 4-jun-02	added theta=, and corrected log/linear statement	PJT
 13-jun-02	1.2: imported into NEMO 	PJT
-2-jan-03		1.5: renamed YancNemo to gyrfalcON, (WD version 091202) 	PJT
+2-jan-03	1.5: renamed YancNemo to gyrfalcON, (WD version 091202) 	PJT
 28-jul-03	1.6.1: also for gcc 3.3 (WD version 280703)	PJT
+11-apr-04	aligned documentation, removed Yanc from NEMO   	PJT
 .fi
