@@ -48,6 +48,10 @@ if (1) then
   endif
 endif
 
+if (-e $NEMO/usr/zeno/ZENORC) then
+  source $NEMO/usr/zeno/ZENORC
+endif
+
 
 #### NOTE: The order of reading the "nemorc" startup files is:
 #### 	1)  	$NEMO/NEMORC
