@@ -1,0 +1,53 @@
+FFLAGS = -O
+FC = f77
+#	on some linux systems you may need LIBS=$(NEMOLIB)/etime.o
+LIBS =
+
+SOURCE = \
+nbody2.f block.f bodies.f cmcorr.f \
+check.f core.f cputim.f data.f define.f \
+energy.f escape.f fpcorr.f fpoly1.f fpoly2.f \
+input.f insert.f intgrt.f lagr.f merge.f \
+modify.f mydump.f nbint.f nblist.f \
+output.f ran2.f regint.f remove.f scale.f \
+sort2.f start.f stepi.f steps.f subsys.f \
+verify.f xtrnl1.f xtrnl2.f xvpred.f zero.f
+
+OBJECTS = $(SOURCE:.f=.o)
+
+nbody2:	$(OBJECTS)
+	$(FC) $(FFLAGS) $(OBJECTS) -o nbody2 $(LIBS)
+
+print:
+	@- \rm -f NBODY2.TEXT
+	@cat $(SOURCE) > NBODY2.TEXT
+
+install: nbody2
+	mv nbody2 $(NEMOBIN)
+
+clean:
+	\rm -f core nbody2 *.o
+
+
+PARAMS = params.h
+NMAX = 2500
+LMAX = 80
+
+nmax:	.dummy
+
+lmax:	.dummy
+
+.dummy:
+	@echo "Creating new $(PARAMS) with NMAX=$(NMAX) LMAX=$(LMAX)"
+	@echo "*       NBODY2 parameters." > $(PARAMS)
+	@echo "*       ------------------" >> $(PARAMS)
+	@echo "*" 				>> $(PARAMS)
+	@echo "      PARAMETER  (NMAX=$(NMAX),LMAX=$(LMAX))" >> $(PARAMS)
+	@echo "*" 				>> $(PARAMS)
+	@echo "*" 				>> $(PARAMS)
+	@echo "*       ----------------------------------------" >> $(PARAMS)
+	@echo "*       NMAX    Maximum number of bodies." >> $(PARAMS)
+	@echo "*       LMAX    Maximum size of neighbour lists." >> $(PARAMS)
+	@echo "*       ----------------------------------------" >> $(PARAMS)
+	@echo "*" 						>> $(PARAMS)
+
