@@ -1,0 +1,63 @@
+#! /bin/csh -f
+#
+#  list all data files which are in structured file format
+#   PjT - jun 1991
+
+#
+if ($#argv == 0) goto usage
+#
+set name=$0
+set flags=()
+set verbo=0
+
+#	get flags for rm, they must be first in argument list
+loop:
+ if ($#argv == 0) goto usage
+    switch ($argv[1])
+    case -v:
+        set verbo=1
+        breaksw
+    case -*:
+
+        set flags=($flags $argv[1])
+        breaksw
+
+
+
+
+    default:
+        goto loop_done
+    endsw
+    shift argv
+    goto loop
+
+loop_done:
+ if ($#argv == 0) goto usage
+ foreach i ($argv)
+    if (-d $i) then
+        echo "Skipping directory $i, $name cannot do recursion (-r)"
+    else if (-e $i) then
+        hisf $i >& /dev/null
+        if ($status == 0) then
+            /bin/lm $flags $i
+        endif
+    else
+        echo Skipping non-existent $i or of unknown nature...
+    endif
+ end
+
+end:
+ exit 0
+
+usage:
+ echo "Usage: $0 [-<ls-flags>] file(s)"
+ echo ""
+
+
+
+
+
+ echo "  A wildcard can be used for <file>, but only NEMO binary"
+ echo "  structured files will be listed"
+ exit 0
+
