@@ -1,0 +1,45 @@
+\magnification=1200
+\nopagenumbers
+\hsize=6.0truein
+\vsize=9.5truein
+\font\big=cmr10 scaled \magstep1
+\noindent
+\centerline { NBODY1 ROUTINES}
+\bigskip
+\settabs\+&XXXXXXXx&xXXXXXXXXXXXXX&XXXXXXX  \cr
+\+&Routine &Called by &Description  \cr
+\smallskip
+\hrule
+\smallskip
+\+&BLOCK &        &Block data initialization of local labelled COMMON. \cr
+\+&BODIES &OUTPUT &Output of binaries \& single particles (options 6 \& 9). \cr
+\+&CHECK  &OUTPUT &Error control and restart (options 2 \& 11). \cr
+\+&CMCORR &OUTPUT &Correction of c.m. coordinates \& velocities (option 14). \cr
+\+&CPUTIM &OUTPUT \& INTGRT &Elapsed CPU time in minutes (initialized in MAIN). \cr
+\+&DATA   &START  &Generation of initial conditions. \cr
+\+&DEFINE  &INPUT  &Definition of input parameters, options \& counters. \cr
+\+&ENERGY &OUTPUT \& SCALE &Total energy. \cr
+\+&ESCAPE &OUTPUT &Removal of escaping particles (option 13). \cr
+\+&FPOLY1 &START  &Total force \& first derivatives. \cr
+\+&FPOLY2 &START  &Second \& third force derivatives. \cr
+\+&FRAME  &INTGRT &Output of movie frames (option 7). \cr
+\+&INPUT  &START  &Main parameter input. \cr
+\+&INTGRT &MAIN   &Decision-making \& integrator flow control. \cr
+\+&MAIN  &        &Master control flow. \cr
+\+&MODIFY  &MAIN  &Reading modified parameters at restart. \cr
+\+&MYDUMP &MAIN \& INTGRT &COMMON save or copy for restart (options 1 \& 2). \cr
+\+&NBINT  &INTGRT &N-body integrator. \cr
+\+&OUTPUT &MAIN   &Main output \& optional data save. \cr
+\+&RAN2  &DATA  &Portable random number generator. \cr
+\+&REMOVE &ESCAPE &Removal of particle from COMMON tables. \cr
+\+&SCALE &START &Scaling to new units. \cr
+\+&START  &MAIN  &Initial setup. \cr
+\+&STEPI  &INTGRT &Time-step for force polynomial. \cr
+\+&STEPS   &START &Initialization of time-steps \& differences. \cr
+\+&SUBSYS  &START  &Initial subsystems in binary orbit (option 8). \cr
+\+&VERIFY  &INPUT  &Validation of main input parameters. \cr
+\+&XVPRED  &OUTPUT &Prediction of coordinates and velocities. \cr
+\+&ZERO  &START  &Initialization of global scalars. \cr
+\smallskip
+\hrule
+\bye
