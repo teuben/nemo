@@ -1,0 +1,277 @@
+.TH NBODY5 1NEMO "23 May 1995"
+.SH NAME
+nbody5 - Regularized AC N-body code with triple & binary collisions.
+.SH SYNOPSIS
+\fBnbody5  <  parameter_file > log_file\fP
+.SH DESCRIPTION
+\fInbody5\fP is a regularized Ahmed-Cohen N-body code with 
+triple & binary collisions.
+.PP
+.SH PARAMETERS
+The input parameters are given in a small ASCII \fBparameter_file\fP
+(which can also be read from standard input) in the 
+order as detailed below
+.PP
+Example input \fBparameter_file\fP for the standard 
+internal benchmark
+(a 100-body problem integrated for 20 crossing times):
+.nf
+.ta +3i
+1 1000.0                            	\fBKSTART TCOMP\fP
+100 5 10 30 35 1                    	\fBN NFIX NCRIT NRAND NNBMAX NRUN\fP
+0.02 0.03 0.4 1.0 1.0 20.0 5.0e-05 1.0 0.6	\fBETAI ETAR RS0 DTADJ DELTAT TCRIT QE RBAR ZMBAR\fP
+1 2 0 0 1 0 1 0 0 0                         	\fBKZ(J), J=1,40\fP
+0 0 0 1 1 1 1 0 0 1
+1 0 2 0 0 1 0 0 0 1
+0 1 0 0 0 0 0 0 0 0
+2.0e-05 1.0e-03 0.1 1.0 1.0e-06 0.01       	\fBDTMIN RMIN ETAU ECLOSE GMIN GMAX\fP
+2.3 1.1 0.1 0                             	\fBALPHAS, BODY1, BODYN, NBIN0\fP
+0.5 0.0 0.0 0.0                            	\fBQ VXROT VZROT RSPH2\fP
+
+.fi
+(for comparison the original NBODY1 default parameter set:)
+.nf
+.ta +3i
+
+1 1.0                             	\fBKSTART TCOMP\fP
+25 1 10 1                           	\fBN NFIX NRAND NRUN\fP
+0.02 1.0 5.0 2.0E-05 0.03            	\fBETA DELTAT TCRIT QE EPS\fP
+1 0 0 0 1 1 0 0 0 0 0 0 0 0 0      	\fBKZ(J), J=1,15\fP
+2.5 5.0 1.0                        	\fBALPHAS BODY1 BODYN\fP
+0.5 0.0 0.0 1.0 1.0                 	\fBQ VXROT VZROT RBAR ZMBAR\fP
+
+.fi
+Note: the order of input lines may change
+depending on previous ones (\fBKSTART\fP and \fBKZ\fP's in particular)
+.PP
+Here are, for completeness,the READ statements from the source code
+.PP
+.nf
+binpop.f:      READ (5,*)  NBIN, SEMI0, ECC0, RATIO, RANGE, NSKIP, IDORM
+cloud0.f:      READ (5,*)  NCL, RB2, VCL, SIGMA, (CLM(J),J=1,NCL),
+data.f:        READ (10,*)  BODY(I), (X(K,I),K=1,3), (XDOT(K,I),K=1,3)
+data.f:       - READ (5,*)  ALPHAS, BODY1, BODYN, NBIN0
+hotsys.f:      READ (5,*)  SIGMA0
+input.f:       READ (5,*)  N, NFIX, NCRIT, NRAND, NNBMAX, NRUN
+input.f:      - READ (5,*)  ETAI, ETAR, RS0, DTADJ, DELTAT, TCRIT, QE, RBAR, ZMBAR
+input.f:      - READ (5,*)  (KZ(J),J=1,40)
+input.f:      - READ (5,*)  DTMIN, RMIN, ETAU, ECLOSE, GMIN, GMAX
+input.f:       READ (5,*)  DELTAS, ORBITS(1), (GPRINT(J),J=1,K)
+intide.f:      READ (5,*)  RSTAR, RTSTAR, RSYNC, EPOCH0
+intide.f:      READ (5,*)  IMS, IEV, RMS, REV, IMF
+modify.f:      READ (5,*)  DTA, DT, TA, TN, TC, QE1, J, K
+modify.f:      READ (5,*)  ETA1, ETA2, ETA3, DTM, RM
+mydump.f:     - READ (J,ERR=10,END=10)  DUMMY
+mydump.f:     - READ (J)   A, B, IC, ID, E, F, G, H, IR
+nbody5.f:     - READ (5,*)  KSTART, TCOMP
+scale.f:      - READ (5,*)  Q, VXROT, VZROT, RSPH2
+scale.f:       READ (5,*)  (X(J,I),J=1,3), (XDOT(J,I),J=1,3)
+.fi
+
+.PP
+\fIDefinition of input parameters:\fP (parameters with 
+a \fB*\fP start on a new line;
+their type is the implicit FORTRAN specification:
+[I-N] for integers, [A-H,O-Z] for floating point parameters)
+.PP
+.TP 15
+\fB* KSTART\fP
+Control index (1: new run; >1: restart; >2: new params).
+.TP
+\fB  TCOMP   \fP
+Maximum computing time in minutes, if the software knows how to compute it.
+.TP
+\fB* N       \fP
+Total particle number (the program is compiled with a maximum, NMAX)
+.TP
+\fB  NFIX    \fP
+Output frequency, in terms of \fBDELTAT\fP,
+of data save or binaries (option 3 & 6).
+.TP
+\fB  NRAND   \fP
+Random number sequence skip.
+.TP
+\fB  NRUN    \fP
+Run identification index.
+.TP
+\fB* ETA     \fP
+Time-step accuracy parameter for total force polynomial.
+.TP
+\fB  DELTAT  \fP
+Output time interval in units of the crossing time.
+.TP
+\fB  TCRIT   \fP
+Termination time in units of the crossing time.
+.TP
+\fB  QE      \fP
+Energy tolerance (stop if DE/E > 5*QE & KZ(2) <= 1; restart if KZ(2) > 1)
+.\" Energy tolerance (stop if DE/E > 5*QE & KZ(2) > 0).
+.TP
+\fB  EPS     \fP
+Softening parameter.
+.TP
+\fB* KZ(J)   \fP
+Non-zero options for alternative paths (see table below).
+.TP
+\fB* ALPHAS  \fP
+Power-law index for initial mass function. (option 4 not 2)
+.TP
+\fB  BODY1   \fP
+Maximum particle mass (before scaling, if scaling option KJ(10) choosen).
+.TP
+\fB  BODYN   \fP
+Minimum particle mass before scaling.
+.TP
+\fB* Q       \fP
+Virial ratio (Q = 0.5 for equilibrium).
+.TP
+\fB  VXROT   \fP
+XY-velocity scaling factor (> 0 for solid-body rotation).
+.TP       
+\fB  VZROT   \fP
+Z-velocity scaling factor (not used if VXROT = 0).
+.TP       
+\fB  RBAR    \fP
+Virial radius in pc (for scaling to physical units).
+.TP       
+\fB  ZMBAR   \fP
+Mean mass in solar units.
+.TP       
+\fB* NFRAME  \fP
+Maximum number of movie frames (option 7).
+.TP       
+\fB  DELTAF  \fP
+Time interval for movie output (in units of crossing time).
+.TP       
+\fB* XCM     \fP
+Displacement for subsystem (option 8).
+.TP       
+\fB  ECC     \fP
+Eccentricity of relative motion for subsystem (ECC =< 1).
+.TP       
+\fB* SEMI    \fP
+Semi-major axis of binary orbit (options 10 & 12).
+.TP       
+\fB  ECC     \fP
+Eccentricity of binary.
+.PP
+\fIDefinition of options KZ:\fP
+.TP 
+\fBKZ(J)   \fP
+.nf
+  1  COMMON save on unit 1 if TCOMP > CPU or if TIME > TCRIT.
+  2  COMMON save on unit 2 at output (=1); restart if DE/E > 5*QE <=2).
+  3  Basic data written to unit 3 at output time (frequency NFIX). File: \fBOUT3\fP
+  4  Initial conditions on unit 4 (=1: output; =2: input; 3=input+output).
+  5  Initial conditions (=0: uniform & isotropic; =1: Plummer law).
+  6  Output of significant binaries on printout.
+  7  Output of movie frames on unit 7 (read \fBNFRAME, DELTAF\fP).
+  8  Generation of two subsystems (merger experiment) (read \fBXCM, ECC\fP).
+  9  Individual bodies printed at output time (MIN(5**KZ9,N)).
+ 10  No scaling of initial conditions to physical units.
+ 11  Modification of ETA by tolerance QE.
+ 12  Initial parameters for binary orbit (read \fBSEMI, ECC\fP).
+ 13  Escaper removal (R > 2*RTIDE; RTIDE = 10*RSCALE).
+ 14  Adjustment of coordinates & velocities to c.m. condition.
+ 15  --read but not used--
+.fi
+.br
+.SH INPUT ORDER
+The order of the input lines is very important, 
+and can depend on previous lines. Here's
+a sketch that hopefully helps you in creating input parameter
+files. Basically there are two types of input files: 1) a new run,
+and 2) restart of an unfinished run.
+.nf
+.ta +5i
+
+read: KSTART, TCOMP
+if KSTART=1 then          \fInew run\fP
+    read: N, NFIX, NRAND, NRUN                        	input.f
+    read: ETA, DELTAT, TCRIT, QE, EPS                 	input.f
+    read: KZ(J),J=1,15                                	input.f
+
+    if KZ(4)=2 then
+        read(unit 4)                                  	data.f
+    else
+        read: ALPHAS, BODY1, BODYN                    	data.f
+    endif
+
+    if KZ(12)>0 then
+        read: SEMI, ECC                               	data.f
+    endif
+    read: Q, VXROT, VZROT, RBAR, ZMBAR                	scale.f
+
+    if KZ(7)>0 then
+        read: NFRAME, DELTAF                          	scale.f
+    endif
+    
+    if KZ(8)>0 then
+        read: XCM, ECC                                	subsys.f
+    endif
+else 
+    read (unit=1)       \fIrestart\fP             	nbody1.f
+    if (KSTART>2)       \fIrestart with new parameters\fP
+        if KSTART=4 then
+            ...
+        else
+            read: DELTAT, TNEXT, TCRIT, QE, J, KZ(J)   	modify.f
+        endif
+        if KSTART>=4 then
+            read: ETA                                 	modify.f
+        endif
+    endif
+endif
+.fi
+.SH BENCHMARK
+The above benchmark 100-body 20 crossing time experiment takes:
+.nf
+.ta +2i +i
+486dx2-66 linux 1.2.3      	433"	-O
+sparc 10/30 (bootes)      	250"	-O
+sparc 20/50? (phoenix)      	 90"	-O
+sparc 20/50? (phoenix)      	 96"!!	-O4 -libmil -cg92 (bizarre!)
+.fi
+.SH NEMO
+For NEMO the following modifications would have to be made in order
+for other programs to work:
+.TP 20
+\fBNcode/output.f\P
+The INTEGER*2 NAME(NMAX) array, defined in common5.h should not be
+output to OUT3, instead a local INTEGER NAMEO(NMAX) is used for this.
+This in order for \fIu3tos(1NEMO)\fP to work.
+.TP
+xxx
+Various as yet undocumented changes by pjtl (and es).
+.SH AUTHOR
+Sverre Aarseth - sverre@mail.ast.cam.ac.uk
+.SH FILES
+.nf
+.ta +0.5i
+fort.1	common block restart dump file (option 1)
+fort.2	common block restart dump file (option 2)
+OUT3	output file (option 3)
+fort.4	initial conditions input or output file  (option 4) *** not in nbody5 ***
+fort.7	formatted frame files (option 7) *** not in nbody5 ***
+OUT9	???
+ESC	ascii file containing the times of each escaper
+STOP	control file, when exists, program will prematurely stop.
+.fi
+.SH SEE ALSO
+u1tos(1NEMO), u3tos(1NEMO), u4tos(1NEMO), stou4(1NEMO)
+.PP
+\fIDirect Methods for N-Body
+Simulations\fP by S.J. Aarseth in: 
+\fIMultiple Time Scales\fP, eds. J.U. Brackbill & B.L. Cohen, 
+Academic Press, p. 377 (1984).
+.PP
+NBODY0 source code in Binney & Tremaine's \fIGalactic Dynamics\fP 
+(Princeton University Press, 1987). pp.678.
+.PP
+\fISmall-N Systems\fP by S.J. Aarseth in: \fIXXX\fP
+eds. Benz, Barnes and XXX (\fIto be published\fP, 1994)
+.SH HISTORY
+.nf
+.ta +1i +4i
+22-may-95	manual page written	PJT
+.fi

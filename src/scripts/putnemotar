@@ -1,0 +1,61 @@
+#! /bin/csh -f
+#
+
+set site=ftp.astro.umd.edu
+set dir=pub/nemo
+set import=$NEMO/adm/import
+
+if ($#argv == 0) then
+  echo "Usage: $0 file(s)"
+  echo "  Get nemo tar files from the mother site"
+  echo ""
+  echo " This script logs into the mothersite $site and fetches all files"
+  echo " listed on the command line from the remote directory $dir into"
+  echo " the $import directory."
+  echo " They can then be installed into your version of NEMO"
+  echo ""
+  echo " Note: you need an $HOME/.netrc file with an"
+  echo " anonymous entry for $site; something like"
+  echo ""
+  echo "machine $site login anonymous password nemo@astro.umd.edu"
+  exit 0
+endif
+
+
+set files=($*)
+foreach f ($files)
+  if (-e $import/$f) then
+    echo File $f already exists in $import, will not overwrite
+    exit 0
+  endif
+end
+
+set tmp=/tmp/tmp$$
+
+#
+cd $import
+
+echo "cd $dir"                   >> $tmp.1
+echo "dir"                       >> $tmp.1
+echo "bin"	                 >> $tmp.1
+if ($#argv > 0) then
+  foreach f ($*)
+   echo "get $f"                  >> $tmp.1
+  end
+  echo "quit"                     >> $tmp.1
+endif
+cat $tmp.1
+
+#
+
+ftp -v $site < $tmp.1
+
+echo "----------------------------------------------------------"
+foreach f ($files)
+  ls -l $f
+end
+echo "----------------------------------------------------------"
+echo "These files have all been stored in $import"
+
+
+rm -f $tmp.*

@@ -1,0 +1,4 @@
+#! /bin/csh -f
+#  list external symbols for SUN OS 4.x and BSD systems
+
+nm $1 | egrep '(T|D)' | awk '{print $3}' | cut -c2-
