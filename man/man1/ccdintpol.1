@@ -1,0 +1,46 @@
+.TH CCDINTPOL 1NEMO "8 July 2003"
+.SH NAME
+ccdintpol \- image bi-linear interpolation
+.SH SYNOPSIS
+\fBccdintpol\fP [parameter=value]
+.SH DESCRIPTION
+Interpolate an image where data match a magic (bad) value. There
+are currently severe limitations to this pro
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input image file in standard \fIimage(5NEMO)\fP 
+format. No default.
+.TP 20
+\fBout=\fP
+Output image file. No default.
+.TP 20
+\fBbad=\fP
+Value of a bad pixel to be patched. 
+.TP 20
+\fBgoodx=\fP
+array of columns in X that have good.  
+By default the first row that contains good data will be checked for good columns.
+.TP 20
+\fBgoody=\fP
+array of rows in Y that have good data.
+By default the first column that contains good data will be checked for good rows.
+.SH EXAMPLES
+
+.SH CAVEATS
+Currently this program only works when the image contains \fImostly\fP bad data,
+but the good data are on a regular pattern with the crossings of certain
+columns and rows (see the goodx= and goody= keywords).
+.SH SEE ALSO
+ccdfill(1NEMO), image(5NEMO)
+.SH FILES
+src/image/trans
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+8-Jul-03	V0.1 Created for the IAU poster     PJT
+.fi
