@@ -7,6 +7,8 @@ help:
 
 install:
 
+libs:
+
 bins:
 
 clean:
