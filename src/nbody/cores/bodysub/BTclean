@@ -1,0 +1,39 @@
+#! /bin/csh -f
+#
+#	clean up all BTNAMES files, usually in $BTRPATH, for regeneration
+#	using bodytrans(1)
+#
+if ($#argv != 1) then
+ goto usage
+endif
+set iname=$1
+set oname=tmp$$.$iname
+if (! -e $iname) then
+  echo InFile $iname does not exist
+  echo ""
+  goto usage
+endif
+if (-e $oname) then
+  echo OutFile $oname does exist
+  echo ""
+  goto usage
+endif
+set f=(`awk '{ print $NF }' $iname`)
+set n=0
+foreach file ($f)
+  @ n++
+  rm -i $file.o
+  if (-e $file.o) then
+     awk '{ if (NR=='$n') print $0}' $iname >> $oname
+  endif
+end
+mv $oname $iname
+exit 0
+
+usage:
+ echo Usage: $0 BTNAMES-file
+ echo Cleans directory of BTNAMES object files, a new BTNAMES
+ echo is created from the ones that were not deleted.
+ echo Script is interactive.
+ exit 0
+
