@@ -1,0 +1,50 @@
+.TH TABSLIDE 1NEMO "11 June 2003"
+.SH NAME
+tabslide \- template sliding through large ascii datasets
+.SH SYNOPSIS
+\fBtabslide in=-\fP [parameter=value]
+.SH DESCRIPTION
+This programs does nothing useful yet, is meant as a template to slide
+through large ASCII tables and doing useful work on sections of
+data. The template simply sums all the listed columns and rows.
+.PP
+Warning: for data not in a pipe, the \fBnmax=\fP parameter is
+ignored, since \fInemo_file_lines\fP is used (see
+\fIfile_lines(3NEMO)\fP).
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+input (table) file name (should be a pipe, ie. "-"). No default
+.TP
+\fBxcol=\fP
+column(s) to be read, multiple columns are allowed. 
+[Default: 1]. 
+.TP
+\fBnmax=\fP
+Default max allocation for data in a pipe. [10000]    
+.SH EXAMPLE
+For a compressed table \fI5body0.dat.gz\fP (63MB), which has 2808998 rows
+and 8 columns, the following measurements were obtained on a P4/1.6GHz 
+laptop (nominal peak I/O around 20MB/sec)
+.nf
+.ta +4i
+zcat 5body0.dat.gz | sum					10"
+zcat 5body0.dat.gz | wc						56"
+zcat 5body0.dat.gz | awk 'END{print NF,NR}'			35"
+zcat 5body0.dat.gz | awk '{sum+=$1}END{print sum,NF,NR}'	40"
+zcat 5body0.dat.gz | tabslide -					34"
+zcat 5body0.dat.gz | tabslide -  nmax=100000			35"
+.fi
+.SH SEE ALSO
+table(5NEMO)
+.SH FILES
+src/kernel/tab/tabslide.c
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+11-Jun-03	V0.1 Created at template for Vanessa	PJT
+.fi
