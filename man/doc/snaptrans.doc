@@ -1,0 +1,26 @@
+%N snaptrans
+%D coordinate transformations of a snapshot
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man snaptrans' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input snapshot filename [???]
+%A out
+	Output snapshot filename [???]
+%A ctypei
+	Input coordinate system (cart,sph,cyl) []
+%A ctypeo
+	Output coordinate system (cart,sph,cyl) []
+%A projpi
+	Input projection parameters, if needed []
+%A projpo
+	Output projection parameters, if needed []
+%A scale
+	Items to scale (phase,pos,vel,acc) **not used** [phase,acc]
+%A ndim
+	Force dimensionality, if it can be overriden []
+%A times
+	Times to select snapshots from [all]
+%A VERSION
+	27-may-95 PJT [1.0a]
