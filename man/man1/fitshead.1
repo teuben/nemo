@@ -1,0 +1,91 @@
+.TH FITSHEAD 1NEMO "13 July 1995"
+.SH NAME
+fitshead \- dump the header of a fits file, or convert ascii to fits header
+.SH SYNOPSIS
+.PP
+\fBfitshead in=\fPfits_file  [parameter=value]
+.SH DESCRIPTION
+\fIfitshead\fP reads FITS file(s) from disk and dumps the
+headers. Since \fIfits(3NEMO)\fP routines are
+used, various FITS (mis)interpretations may be reported. Try using 
+\fIscanfits(1NEMO)\fP if really stuck.
+.PP
+FITS Header-Data Unit's (HDU) can be extracted individually by
+using the \fIhdu=\fP keyword.
+.PP
+Since fitshead can only process disk FITS files, FITS files on
+tape have to be extracted from tape using \fIdd(1)\fP or
+similar programs. See also notes in \fIccdfits(1NEMO)\fP how 
+to process fits files from tape.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is 
+also given:
+.TP 20
+\fBin=\fIinput_file\fP
+An input file. It can either be a fits file, or, if \fBout=\fP is also
+specified, a regular ascii file which is assumed to be in 
+fits-header format. If the input file is in fits format, it may contain
+several HDU's, and the \fBhdu=\fP keyword can be used to make 
+sub-selections.
+[no default]. 
+.TP
+\fBhdu=\fIinteger_list\fP
+List of file numbers of the FITS file that need to be worked
+on. For now each Header+Data counts as a FITS file,
+which is not perhaps meant to be its true meaning. 
+Extensions would be counted as a separate FITS file:
+in such cases \fBfile=1,2\fP would
+have to be supplied to copy both the primary HDU and its
+first extension. Using a value of 0 will cause all FITS files
+to be read. [default: \fB0\fP].
+.TP
+\fBblocking=\fIfactor\fP
+Positive integer that denotes the blocking factor with which the input 
+file was written. It is the multiple of blocks of 2880 bytes.
+The FITS standard allows the blocking factor to be from 1 to 10.
+[default: \fB1\fP]. \fINot supported yet\fP
+.TP
+\fBout=\fP
+Optional output if conversion from ascii text to FITS header format
+is needed. If given, the input file should must be an ascii file,
+and not contain strange control characters. (a NULL can trigger
+erroneous conversions). However, no
+checking is done if the input file is properly 
+formatted (see fits(5NEMO)).
+.SH EXAMPLE
+Consider fixing the CTYPE1 and CTYPE2 keywords of a large number of
+FITS files from 'LL','MM' to 'RA---TAN','DEC--TAN':
+.nf
+    % fitshead map1.fits | grep -i ctype > ctype.fix
+    % $EDITOR ctype.fix
+    % foreach f (*.fits)
+        scanfits $f $f.new delete=CTYPE1,CTYPE2 fix=ctype.fix
+      end
+.fi
+.PP
+Generic editing of a FITS header can be done in the following way
+(assuming there is only one HDU in the FITS file):
+.nf 
+    % fitshead map1.fits > map1.txt
+    % $EDITOR map1.txt
+    % fitshead map1.txt out=map1.head
+    % scanfits map1.fits map1.data select=data
+    % cat map1.head map1.data > map2.fits
+.fi
+.SH "SEE ALSO"
+scanfits(1NEMO), dd(1), fits(5NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+~/src/image/fits         fitshead.c
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+12-apr-91	V1.0 Written, cloned off scanfits - and docced    	PJT
+13-apr-92	V1.1 Renamed file= to hdu=                       	PJT
+13-apr-94	V1.2a added out= to convert ascii to fits header	PJT
+23-may-95	V1.2b fixed bug in conversion to header format      	PJT
+.fi
