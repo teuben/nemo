@@ -12,6 +12,7 @@
              * pot_f,
              * acc_f,
              * mass_f,
+             * eps_f,
              * keys_f,
              * timu_f,
              * selt_f,

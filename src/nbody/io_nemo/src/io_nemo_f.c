@@ -17,6 +17,7 @@
 \* -------------------------------------------------------------- */
 #include <stdinc.h>
 #include <stdarg.h>
+#include <history.h>
 
 /* -------------------------------------------------------------- *\
 |* Local include files
@@ -59,6 +60,7 @@ char
   * pot_f  ,   /* potential          */
   * acc_f  ,   /* acceleration       */
   * mass_f ,   /* mass               */
+  * eps_f  ,   /* softening          */
   * keys_f ,   /* keys               */
   * timu_f ,   /* time steps         */
   * selt_f ,   /* selected time      */
@@ -140,6 +142,10 @@ int IO_NEMO_F(char * iofile,
 
     case 9  : XV_io = 1;
       phase_f= va_arg(pa, char *);
+      break;
+
+    case 10  : EPS_io = 1;
+      eps_f= va_arg(pa, char *);
       break;
 
     case 57 : ST_io = 1;
@@ -237,6 +243,8 @@ int CLOSE_IO_NEMO_F(char * iofile,int * lg)
     free((char *) io_in[no_io]);
     code=1;
   }
+
+  reset_history();
   return code;
 }
 /* -------------------------------------------------------------- *\ 

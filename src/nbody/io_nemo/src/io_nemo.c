@@ -17,6 +17,7 @@
 #include <snapshot/snapshot.h>	
 #include <snapshot/body.h>
 
+#include <stdio.h>
 #include <stdarg.h>
 
 #include "io_init.h" 
@@ -57,6 +58,7 @@ char
   * acc,   ** acc_p,      /* acceleration       */
   * mass,  ** mass_p,     /* mass               */
   * keys,  ** keys_p,     /* keys               */
+  * eps,   ** eps_p,      /* softening          */
   * timu,  ** time_p,     /* time steps         */
   * selt,  ** selt_p,     /* selected time      */
   *SelectionString123;    /* selected particles */
@@ -79,6 +81,7 @@ void reajust_ptr()
   if (P_io)    *pot_p      = pot;
   if (A_io)    *acc_p      = acc; 
   if (K_io)    *keys_p     = keys; 
+  if (EPS_io)  *eps_p      = eps; 
   /*  if (ST_io)   *selt_p     = selt; */
 }
 
@@ -155,6 +158,11 @@ int io_nemo(char * iofile,
     case 8 : K_io = 1;
       keys_p   = va_arg(pa, char **);
       keys     = *keys_p; /* match local and parameter pointer */
+      break;
+
+    case 10 : EPS_io = 1;
+      eps_p   = va_arg(pa, char **);
+      eps     = *eps_p; /* match local and parameter pointer */
       break;
 
     case 57 : ST_io = 1;
@@ -259,6 +267,7 @@ int close_io_nemo(char * iofile)
     free((char *) io_in[no_io]);
     code=1;
   }
+  reset_history();
   return code;
 }
 /* -------------------------------------------------------------- *\ 

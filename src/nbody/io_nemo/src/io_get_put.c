@@ -152,6 +152,9 @@ int put_data_select(char * outfile,
   if (K_io)     /* Keys */
     put_data(outstr[no_io],KeyTag,IntType,keys,*nbody,0);
 
+  if (EPS_io)   /* EPS */
+    put_data(outstr[no_io],EpsTag,OutType,eps,*nbody,0);
+
   put_tes(outstr[no_io], ParticlesTag);
 	
   put_tes(outstr[no_io], SnapShotTag);
@@ -228,7 +231,7 @@ int get_data_select(char * infile,
 	exit(1);
       }
       /* end of snapshot reached */
-      fprintf(stderr,"WARNING!! end of snapshot reached\n");
+      fprintf(stderr,"WARNING!! end of snapshot reached, automatically closed\n");
       read_one[no_io] = FALSE;
       free(io_in[no_io]);
       strclose(instr[no_io]);
@@ -433,6 +436,22 @@ int get_data_select(char * infile,
 		      i_jump);
 	    }
 	  }
+
+      /* get epses */
+      if (EPS_io)
+	if (!get_data_eps(instr[no_io],OutType,*nbodyptr,rtype*4,&eps)) {
+	  fprintf(stderr,"Snap error ### No Eps\n");
+	  exit(1);
+	}
+	else 
+	  if (SP_io) {
+	    for (i=0;i<nBodySelected;i++) {
+	      memcpy ((char *) (eps+i*jump),
+		      (char *) (eps+SelectedPart[i]*jump),
+		      jump);
+	    }
+	  }
+
       get_tes(instr[no_io], ParticlesTag);
     } /*  get_tag_ok(instr[no_io], ParticlesTag */
     else {

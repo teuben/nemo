@@ -20,21 +20,22 @@
 
 /* flags parameters (EXPORTED) */
 int 
-  N_io ,  /* nbody              */
-  T_io ,  /* time               */
-  M_io ,  /* mass               */
-  X_io ,  /* position           */
-  V_io ,  /* velocity           */ 
-  P_io ,  /* potential          */
-  A_io ,  /* acceleration       */
-  K_io ,  /* key                */
-  XV_io,  /* phasespace         */
-  C_io ,  /* close              */
-  I_io ,  /* info               */
-  H_io ,  /* history            */
-  ST_io,  /* selected time      */
-  SP_io,  /* selected particles */
-  F_dim;  /* fortran array      */
+  N_io   ,  /* nbody              */
+  T_io   ,  /* time               */
+  M_io   ,  /* mass               */
+  X_io   ,  /* position           */
+  V_io   ,  /* velocity           */ 
+  P_io   ,  /* potential          */
+  A_io   ,  /* acceleration       */
+  K_io   ,  /* key                */
+  EPS_io ,  /* softening          */
+  XV_io  ,  /* phasespace         */
+  C_io   ,  /* close              */
+  I_io   ,  /* info               */
+  H_io   ,  /* history            */
+  ST_io  ,  /* selected time      */
+  SP_io  ,  /* selected particles */
+  F_dim  ;  /* fortran array      */
 
 /* -------------------------------------------------------------- *\ 
 |* init_io_one :
@@ -46,7 +47,7 @@ void init_io_one(bool * read_one,
 		 char **history_prog,
 		 int    MAXIO)
 { 
-  string defv[] = { "none=none","VERSION=1.3",NULL };
+  string defv[] = { "none=none","VERSION=1.21",NULL };
   string argv[] = { "IO_NEMO",NULL };
   int i;
   string * histo;
@@ -77,7 +78,7 @@ void init_io_one(bool * read_one,
 void init_flag_io()
 {
   N_io= T_io= M_io= X_io= V_io= P_io= A_io= C_io = H_io=0;
-  K_io= XV_io = F_dim= ST_io= SP_io= I_io= 0;
+  K_io= XV_io = F_dim= ST_io= SP_io= I_io= EPS_io= 0;
 }
 /* -------------------------------------------------------------- *\
 |* End of io_init.c

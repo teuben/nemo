@@ -37,6 +37,7 @@ int get_case(char * field)
     "a"     ,   7, "acc"      ,   7,   /* acc   */
     "k"     ,   8, "key"      ,   8,   /* keys  */
     "xv"    ,   9, "phase"    ,   9,   /* phase */
+    "e"     ,  10, "eps"      ,   10,  /* eps   */
     "f"     ,  50, "n3"       ,  50,   /* n3    */
     "c"     ,  51, "3n"       ,  51,   /* 3n    */
     "s"     ,  52, "save"     ,  52,   /* save  */
@@ -150,6 +151,8 @@ int chk_parameters(bool io_op,int size_array, int rtype)
      fprintf(stderr," p");
   if (A_io)
      fprintf(stderr," a");
+  if (EPS_io)
+     fprintf(stderr," e");
   if (K_io)
      fprintf(stderr," k");
 
@@ -163,7 +166,6 @@ int chk_parameters(bool io_op,int size_array, int rtype)
   }
   else                  /* 'io_nemo' mode (C)          */
     fprintf(stderr," <%s> ]\n",tab_info_real[rtype-1]);
-  return 0;
 }
 
 /* -------------------------------------------------------------- *\

@@ -246,6 +246,9 @@ int put_data_select_f(char * outfile,
   if (K_io)
     put_data(outstr[no_io], KeyTag, IntType, keys_f, *nbody_f, 0);
 
+  if (EPS_io)
+    put_data(outstr[no_io], EpsTag, OutType, eps_f, *nbody_f, 0);
+
   put_tes(outstr[no_io], ParticlesTag);
 	   
   put_tes(outstr[no_io], SnapShotTag);
@@ -274,6 +277,7 @@ int get_data_select_f(char * infile,
     * accptr   = NULL,
     * massptr  = NULL,
     * keysptr  = NULL,
+    * epsptr   = NULL,
     * SelString= NULL;
   int 
     * nbodyptr = NULL;	
@@ -299,9 +303,9 @@ int get_data_select_f(char * infile,
     OutType=DoubleType;
 	
   /* Open the file for reading */
-  if ((no_io = get_old_file(infile,io_in,read_one,instr,MAXIO)) < 0) 
+  if ((no_io = get_old_file(infile,io_in,read_one,instr,MAXIO)) < 0) {
     no_io = get_new_file(infile,io_in,read_one,instr,"r",MAXIO);
-	
+  }
   /* print out what it's doing */
   if (I_io)
     chk_parameters(TRUE,*size_array,rtype);
@@ -326,8 +330,8 @@ int get_data_select_f(char * infile,
       }
 
       /* end of snapshot reached */
-      fprintf(stderr,"WARNING!! end of snapshot reached\n");
-      read_one[no_io] = TRUE;
+      fprintf(stderr,"WARNING!! end of snapshot reached, automatically closed\n");
+      read_one[no_io] = FALSE;
       free(io_in[no_io]);
       strclose(instr[no_io]);
       
@@ -427,8 +431,8 @@ int get_data_select_f(char * infile,
 	    memcpy((char *) (mass_f),
 		   (char *) (massptr),
 		   *nbodyptr * jump);
-						
-	  free(massptr);
+	  /*fprintf(stderr,"\n\nmass adress[%x]\n\n",massptr);*/
+	  free((char *) massptr);
 	}  
       /* pos or/and vel selected */
       if (X_io || V_io  )
@@ -504,7 +508,7 @@ int get_data_select_f(char * infile,
 
 	  if (X_io) {
 	    if (!get_data_pos(instr[no_io],OutType,*nbodyptr,
-			      sizeof(real),&posptr,NDIM)) {
+			      rtype*4,&posptr,NDIM)) {
 	      fprintf(stderr,"Snap error ### No Positions array\n");
 	      exit(1);					
 	    }
@@ -550,7 +554,7 @@ int get_data_select_f(char * infile,
 	  }
 	  if (V_io) {
 	    if (!get_data_vel(instr[no_io],OutType,*nbodyptr,
-			      sizeof(real),&velptr,NDIM)) {
+			      rtype*4,&velptr,NDIM)) {
 	      fprintf(stderr,"Snap error ### No Velocities array\n");
 	      exit(1);					
 	    }
@@ -598,7 +602,7 @@ int get_data_select_f(char * infile,
       /* get potentials */
       if (P_io)
 	if (!get_data_pot(instr[no_io],OutType,*nbodyptr,
-			  sizeof(real),&potptr)) {
+			  rtype*4,&potptr)) {
 	  fprintf(stderr,"Snap error ### No Potential\n");
 	  exit(1);
 	} 	
@@ -619,7 +623,7 @@ int get_data_select_f(char * infile,
       /* get accelerations */
       if (A_io)
 	if (!get_data_acc(instr[no_io],OutType,*nbodyptr,
-			  sizeof(real),&accptr,NDIM)) {
+			  rtype*4,&accptr,NDIM)) {
 	  fprintf(stderr,"Snap error ### No Acceleration array\n");
 	  exit(1);					
 	}
@@ -684,7 +688,30 @@ int get_data_select_f(char * infile,
 						
 	  free(keysptr);
 	}  
-				
+
+      /* get Eps data */
+      if (EPS_io)
+	if (!get_data_eps(instr[no_io],OutType,*nbodyptr,
+			   rtype*4,&epsptr)) {
+	  fprintf(stderr,"Snap error ### No EpsTag\n");
+	  exit(1);
+	} 	
+	else {
+	  if (SP_io)
+	    for (i=0; i<nBodySelected; i++) {
+	      memcpy((char*)(eps_f+i_jump*i),
+		     (char*)(epsptr+(i_jump*SelectedPart[i])),
+		     i_jump);
+	    }
+	  else
+	    memcpy((char *) (eps_f),
+		   (char *) (epsptr),
+		   *nbodyptr * i_jump);
+						
+	  free(epsptr);
+	}  
+
+      /* garbage collecting */
       free((int *) nbodyptr); 
       free((char *) timeptr);
       get_tes(instr[no_io], ParticlesTag);

@@ -11,6 +11,7 @@ extern char
   * pot,   ** pot_p,    /* potential */
   * acc,   ** acc_p,    /* acceleration */
   * mass,  ** mass_p,   /* mass */
+  * eps,   ** eps_p,    /* softening */
   * keys,  ** keys_p,   /* keys */
   * timu,  ** time_p,   /* time steps */
   * selt,  ** selt_p,   /* selected time */

@@ -26,6 +26,8 @@ int get_data_gen(stream instr, char * TypeTag,char * DataType,
 {
   if (*genptr == NULL)
     *genptr = ( void **) allocate(size_alloc);
+  if (*genptr == NULL)
+    error("Pas assez de memoire dans \"get_data_gen\"\n");
   get_data_coerced(instr, TypeTag, DataType,*genptr, nbody,
                    dim1,dim2,0);
   return 0;
@@ -214,6 +216,27 @@ int get_data_keys(stream instr, char * DataType, int nbody, int size_type,
       if (*keysptr == NULL)
 	*keysptr = (void **) allocate(size_type * nbody);
       get_data_coerced(instr, KeyTag, DataType, *keysptr,
+		       nbody, 0);
+      status = 1; 
+    }
+  else
+    status = 0;
+  return status;
+}
+/* -------------------------------------------------------------- *\ 
+|* get_data_eps :
+|* Get Eps from a NEMO snapshot
+\* -------------------------------------------------------------- */
+int get_data_eps(stream instr, char * DataType, int nbody, int size_type,
+		  void ** epsptr)
+{
+  int status;
+
+  if (get_tag_ok(instr, EpsTag))
+    { 
+      if (*epsptr == NULL)
+	*epsptr = (void **) allocate(size_type * nbody);
+      get_data_coerced(instr, EpsTag, DataType, *epsptr,
 		       nbody, 0);
       status = 1; 
     }
