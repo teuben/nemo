@@ -1,0 +1,39 @@
+#! /bin/csh -f
+#
+#	this tests if running Nbody0 with different data-dump rates
+#	influences the final result: it should not of course
+#
+#
+set nbody=10
+set tstop=20
+set obs=r
+set clean=1
+
+rm plum.in
+mkplummer plum.in $nbody
+
+set deltat=(5 2 1 0.5 0.1 0.05 0.01)
+
+foreach i (`nemoinp 1:$#deltat`)
+  rm -r run$i run$i.last
+  nbody0 plum.in run$i tcrit=$tstop deltat=$deltat[$i] > run$i.log
+  snaptrim run$i run$i.last times=last
+end
+
+foreach i (`nemoinp 1:$#deltat`)
+  echo SNAPCMP 1 $i
+  snapcmp run1.last run$i.last obs=$obs
+end
+
+foreach i (`nemoinp 2:$#deltat`)
+  @ j = $i - 1
+  echo SNAPCMP $i $j
+  snapcmp run$i.last run$j.last obs=$obs
+end
+
+if ($clean) then
+  rm plum.in
+  foreach i (`nemoinp 1:$#deltat`)
+    rm -r run$i run$i.last run$i.log
+  end
+endif
