@@ -1,5 +1,5 @@
 /*   nemoinp (archaic), nemoinpd, nemoinpf, nemoinpi, nemoinpl, nemoinpb
- *                      natof, natod
+ *                      natof, natoi
  *
  * NEMOINP:	derivatives of herinp(), more c-user friendly
  *		interface of the same
@@ -26,6 +26,7 @@
  *   4-mar-03   V1.9: added nemoinpx for sexa decoding into degrees pjt
  *  28-jun-03       a: fixed prototype for darwin :-)               pjt
  *  24-nov-03       b: fixed another prototype for gcc3             pjt
+ *  28-jan-04       c: recognize nan or NaN and return same         pjt
  */
 
 #include <stdinc.h>
@@ -265,6 +266,7 @@ double natof(char *expr)
 {
   double x;
   int n;
+  if (streq(expr,"nan") || streq(expr,"NaN")) return atof("nan");
   n = nemoinpd(expr,&x,1);
   return x;
 }

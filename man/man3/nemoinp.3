@@ -1,4 +1,4 @@
-.TH NEMOINP 3NEMO "4 March 2003"
+.TH NEMOINP 3NEMO "28 January 2004"
 .SH NAME
 nemoinp, natof, natoi \- decode and parse string into reals, integers, logicals
 .SH SYNOPSIS
@@ -44,7 +44,8 @@ For convenience, NEMO parsing
 versions of the standard C library \fIatof(3)\fP and \fIatoi(3)\fP
 are provided as natof() and natoi(), but they do not provide any
 error checking (most importantly if the string contains non-number
-parts.
+parts, except for the string "NaN" or "nan" in \fInatof()\fP where
+it will return the appropriate IEEE \fBnan\fP value).
 .PP
 An expression can have basic mathematical functions, such as addition,
 most transcendental functions and  even some mathematical and physical
@@ -170,4 +171,5 @@ xx-feb-89	nemoinp made archaic - must now call nemoinpX	PJT
 4-mar-94	added nemoinpf/r	PJT
 31-may-01	added natof/natoi	PJT
 4-mar-03	1.9 added nemoinpx()	PJT
+28-jan-04	recognize nan's in natof	PJT
 .fi
