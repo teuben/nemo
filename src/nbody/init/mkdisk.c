@@ -164,11 +164,12 @@ testdisk()
 	Pos(dp)[2] = pos_d[2] = 0.0;                      /* it's a DISK */
         (*potential)(&ndim,pos_d,acc_d,&pot_d,&time_d); /* get forces    */
         SETV(acc_i,acc_d);
+	vcir_i = sqrt(r_i * absv(acc_i));
+
         sigma_r = grandom(0.0,frac[0]*vcir_i);
         sigma_t = grandom(0.0,frac[1]*vcir_i);
         sigma_z = grandom(0.0,frac[2]*vcir_i);
 
-	vcir_i = sqrt(r_i * absv(acc_i));
         dv_t = sigma_t;
         dv_r = sigma_t * took(r_i) + vrad;
         cost = cos(theta_i);  
