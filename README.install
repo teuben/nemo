@@ -318,6 +318,26 @@ Results in /home/teuben/nemo_3.0.4/tmp/test22005/testsuite.log
 
 
 
+Darwin:  a few minor patches needed:
+
+1) -ldl does not exist, but with FINK you can install proj/dlcompat, e.g.
+
+cd $NEMO/local
+cvs -d :pserver:anonymous@anoncvs.opendarwin.org:/cvs/od login
+cvs -d :pserver:anonymous@anoncvs.opendarwin.org:/cvs/od co -d dlcompat proj/dlcompat
+cd dlcompat
+autoconf
+configure --prefix=$NEMO/host/$NEMOHOST
+make
+make install
+
+2) in $NEMOLIB/makedefs 
+ 
+  a) need to set -Ddarwin in NEMO_CFLAGS
+  b) remove "-lcrt1.o -lcrtbegin.o" to FLIBS,
+  c) add -ldl to  NEMO_LIBS and NEMO_LIBSPP
+
+in some subsequent release these will be automatically taken care of..
 
 	
 
