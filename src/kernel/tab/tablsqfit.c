@@ -268,7 +268,7 @@ do_line()
 #if 1
                 if ( (mwt>0) && (dycolnr==0) )
                         continue;               /* break off */
-                fit1(x,y,npt,dy,mwt,&b,&a,&sigb,&siga,&chi2,&q);
+                fit(x,y,npt,dy,mwt,&b,&a,&sigb,&siga,&chi2,&q);
 #else
 		if (mwt==0)
                     fit(x,y,npt,dy,mwt,&b,&a,&sigb,&siga,&chi2,&q);
