@@ -45,8 +45,8 @@ void inipotential (int *npar, double *par, string name)
         free(rad);
         free(vel);
         free(coef);
-        entries++;
     }
+    entries++;
 
     dprintf (1,"INIPOTENTIAL Rotcur potential %s\n",name);
     dprintf (1,"  Parameters : Pattern Speed = %f\n",omega);
