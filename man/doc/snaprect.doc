@@ -1,0 +1,20 @@
+%N snaprect
+%D rectify a snapshot using selected particles and weight
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man snaprect' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	input file name [???]
+%A out
+	output file name [???]
+%A weight
+	weighting for particles [1]
+%A rcut
+	cutoff radius effective if > 0.0 [0.0]
+%A times
+	range of times to transform [all]
+%A test
+	Use this snapshot instead, to transform []
+%A VERSION
+	4-jul-94 PJT [1.3a]
