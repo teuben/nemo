@@ -1,0 +1,24 @@
+From umd5!haven.umd.edu!darwin.sura.net!wupost!think.com!ames!decwrl!pa.dec.com!vixie Sat Dec 14 15:05:20 EST 1991
+Article 1746 of comp.sources.unix:
+Path: umd5!haven.umd.edu!darwin.sura.net!wupost!think.com!ames!decwrl!pa.dec.com!vixie
+>From: vixie@pa.dec.com (Paul Vixie)
+Newsgroups: comp.sources.unix
+Subject: v25i029: ile - an input line editor
+Message-ID: <1991Dec14.035858.28352@PA.dec.com>
+Date: 14 Dec 91 03:58:58 GMT
+Sender: news@PA.dec.com (News)
+Organization: DEC Palo Alto
+Lines: 3795
+Approved: vixie@pa.dec.com
+
+Submitted-By: Robert C. Pendleton <bobp@hal.com>
+Posting-Number: Volume 25, Issue 29
+Archive-Name: ile
+
+[ This program gives you interactive line editing similar to tcsh or ksh,
+  except that it will run any program as its subprocess, so although you
+  don't get to carry the `history' context from program to program, you
+  can get fancy editing in programs that don't neccessarily support it.
+  Running "ile /bin/csh" is a lot like tcsh, and "ile /bin/sh" is a lot
+  like ksh.  I wrote the Makefile.                                 --vix ]
+
