@@ -1,0 +1,4 @@
+      SUBROUTINE WAIT(KK,ZZ)
+C      ZZ = ZZ + SQRT(FLOAT(KK)/SQRT(FLOAT(KK+1)))
+      RETURN
+      END
