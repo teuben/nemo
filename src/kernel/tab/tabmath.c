@@ -10,7 +10,7 @@
  *      28-oct-88  V1.4 multiple new columns in 'newcol' now possible, 
  *			%0=linenr. 
  *      10-nov-88  V1.5 allow tab's also as column separators
- *                     a:  changed herinp to nemoinp call
+ *                     a:  changed herinp to nemoinp
  *       5-jul-89      c:  changed nemoinp to nemoinpd
  *	13-nov-90  V1.6 all Xrange -> nemoinpX
  *
@@ -30,6 +30,9 @@
  *      19-apr-01  V3.1  added comments=
  *       8-sep-01     a  init_xrandom
  *       1-aug-02     b  using nemo_debug()
+ *      13-nov-03  V3.3  handle null's (now that herinp sort of knows what to do?)  [unfinished]
+ *      31-dec-03  V3.4  added colname=
+ *
  */
 
 /**************** INCLUDE FILES ********************************/ 
@@ -52,8 +55,9 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "format=%g\n        format for new output columns",
     "select=all\n	Select lines",
     "seed=0\n           Initial random number",
+    "colname=\n         (unchecked) commented column names to add into output",
     "comments=f\n       Pass through comments?",
-    "VERSION=3.1b\n     1-aug-02 PJT",
+    "VERSION=3.4\n      31-dec-03 PJT",
     NULL
 };
 
@@ -79,6 +83,7 @@ int    ndelc;                           /* actual number of skip columns */
 string *fies, selfie;                   /* fie pointers */
 int    nfies;                           /* number of fie pointers */
 bool   Qfie;				/* boolean if multiple fie's loaded */
+string *colname=NULL;                   /* names of columns */
 
 bool   Qcomment;
 
@@ -88,7 +93,6 @@ local string *burstfie(string);
 local void tab2space(char *);
 
 extern  string *burststring(string, string);
-
 
 /****************************** START OF PROGRAM **********************/
 
@@ -155,6 +159,8 @@ local void setparams(void)
     }
     init_xrandom(getparam("seed"));
     Qcomment = getbparam("comments");
+    if (hasvalue("colname"))
+      colname = burststring(getparam("colname"),",");
 }
 
 
@@ -169,6 +175,15 @@ local void convert(int ninput, stream *instr, stream outstr)
     string *outv;                   /* pointer to vector of strings to write */
     char   *cp, *seps=", \t";       /* column separators  */
     real   errval=0.0;
+
+    if (colname) {
+      nval = xstrlen(colname,sizeof(string))-1;
+      fprintf(outstr,"#");
+      for (i=0; i<nval; i++)
+	fprintf(outstr," %s",colname[i]);
+
+      fprintf(outstr,"\n");
+    }
         
     nlines=0;               /* count lines read so far */
 
@@ -198,6 +213,7 @@ local void convert(int ninput, stream *instr, stream outstr)
         tab2space(line);	          /* work around a Gipsy (?) problem */
         if (nfies>0 || *selfie) {              	/* if a new column requested */
             nval = nemoinpr(line,dval,MAXCOL);         /* split into numbers */
+	    /* this could contain some NULL's, so how do we measure this ??? */
             dprintf (3,"nval=%d \n",nval);
             if (nval>MAXCOL)
                 error ("Too many numbers: %s",line);
@@ -275,7 +291,7 @@ local string *burstfie(string lst)
 
 /*
  * small helper function, replaces tabs by spaces before processing.
- * this prevents me from diving into gipsy parsing routines and  fix
+ * this prevents me from diving into gipsy parsing routines and fix
  * the problem there 
  * PJT - June 1998.
  */
