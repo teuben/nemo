@@ -1,0 +1,79 @@
+.TH SNAPROTATE 1NEMO "21 November 1998"
+.SH NAME
+snaprotate \- rotate N-body snapshot file about principle axes.
+.SH SYNOPSIS
+\fBsnaprotate in=\fPsnap-file \fBout=\fPsnap-file [parameter=value] .\|.\|.
+.SH DESCRIPTION
+\fIsnaprotate\fP rotates the positions and velocities of an
+N-body snapshot file. A maximum of 3 rotations around either the x, y or
+z axes can be applied in any order. An Eulerian rotation
+is a rotation around the z, y and z axes respectively.
+.PP
+The rotation is counter clock-wise (i.e., mathematically positive, unless 
+\fBinvert=f\fP is used) as seen from the right-handed \fIxyz\fP-axes;
+a \fBz\fP rotation will rotate the \fBx\fP axis towards the \fBy\fP axis;
+a \fBy\fP rotation will rotate the \fBz\fP axis towards the \fBx\fP axis;
+a \fBx\fP rotation will rotate the \fBy\fP axis towards the \fBz\fP axis.
+.SH PARAMETERS
+The following parameters are recognized; they may be given in any order.
+.TP 24
+\fBin=\fP\fIsnap-file\fP
+Input data is read from \fIsnap-file\fP, which must be in snapshot format.
+.TP
+\fBout=\fP\fIsnap-file\fP
+Output data is written to \fIsnap-file\fP.
+.TP
+\fBtheta=\fP\fIx-angle\fP
+Angles (in degrees) to rotate particles about the specified axes in the
+\fBorder=\fP keyword. Up to 3 rotations can be applied. 
+Default: none.
+.TP
+\fBorder=\fP\fItrans-order\fP
+Order to apply the rotations about the three coordinate axes.
+An Eulerian rotation would be \fBorder=zyz\fP. Default is none.
+.TP
+\fBinvert=\fP\fIinvert-flag\fP
+If \fBtrue\fP, invert specified transformation.
+Useful for rotating something back to original coordinate system.
+Default is \fBfalse\fP.
+.TP
+\fBtscale=\fP\fIt-scale-factor\fP
+If used, this is the degrees per time-unit that the \fBtheta\fP angles
+are multiplied with in order to calculate the actual rotation angle.
+This can give interesting effects if used for simulations.
+Default not used.
+.SH EXAMPLES
+Suppose you have a barred galaxy model, \fIbar.dat\fP, 
+with the galactic plane at z=0
+and the bar along the y axis (position angle=0), 
+and want to project this (such that z=0 will be the sky plane,
+and the positive z-axis pointed towards the observer) with given final 
+position angle ($pa), inclination ($inc) and angle from line of nodes
+to bar ($phi) the following rotations will do the job:
+.nf
+    set pa=39
+    set inc=-45
+    set phi=-34
+    snaprotate bar.dat n7476.dat "atand(tand($phi)/cosd($inc)),$inc,$pa" zyz
+    snapplot n7476 psize="z>0?0.03:0.0"
+.fi
+where \fBpsize\fP was choosen such that ``near'' (z>0) 
+particles were plotted a bit bigger to accentuate
+the near side of the model. Flipping the sign if $inc will flip the near
+and far side.
+.SH SEE ALSO
+snapshift(1NEMO), snapshot(5NEMO)
+.SH AUTHOR
+Joshua E. Barnes, Peter Teuben
+.SH HISTORY
+.nf
+.ta +1i +4i
+xx-jan-88	V1.0 original                   	JEB
+3-oct-88	V2.1 eulerian angles (order=zyz)	PJT
+17-feb-89:      V2.1a new get+snap macros redef's	PJT
+27-nov-89:	V2.1b cosmetic defv[]             	PJT
+15-nov-90	V3.0 theta is now an array keyword	PJT
+1-jun-92	documented the rotation manner bit more precise     	PJT
+11-jun-92	V4.0 rotation now defined in math sense             	PJT
+21-nov-98	V5.0 added tscale= keyword	PJT
+.fi
