@@ -384,6 +384,15 @@ dist:
 	cvs -q export -D tomorrow -d $(DIST_DIR) nemo 2>&1 > /tmp/nemodist.log
 	tar -zcf $(DIST_DIR).tar.gz $(DIST_DIR)
 	rm -rf $(DIST_DIR)
+	@echo 'TODO: ----------------------------------------------------'
+	@echo Date: `date`
+	@echo 'Change this date in:  www/nemo/lastftp'
+	@echo 'Change: whatsnew.html'
+	@echo 'Change: nemo.html'
+	@echo 'scp $(DIST_DIR).tar.gz apus:/home/ftp/pub/nemo'
+	@echo 'src/scripts/version inc'
+	@echo 'cvs commit VERSION inc/version.h'
+	@echo 'DONE: ----------------------------------------------------'
 
 distcvs:
 	make dist DIST_DIR=nemo_cvs
