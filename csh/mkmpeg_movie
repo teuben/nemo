@@ -21,9 +21,9 @@ set out=test1.mpg
 
 # poor man's command line parser
 
-    foreach arg ($*)
-	set $arg
-    end
+foreach arg ($*)
+    set $arg
+end
 # 
 
 # set these to control the size of a PPM window from PGPLOT 
