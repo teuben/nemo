@@ -1,0 +1,13 @@
+- on sun4:
+   CFLAGS '-Bstatic' needed when loadobj() used, this is for 
+   CFLAGS '-Dsun4'   needed for loadobj.c
+  
+- GCC:
+      -fwritable-strings for a lot of things, since we write
+	in 'constant' strings. Need a way to explicitely (in ansi
+	notation) declare it as variable, such that these things
+	wind up in text space, not in data space
+
+	lot of routines have their local (static) routines not declared
+	as such at beginnning of file; this generates a lot of warning
+	messages.
