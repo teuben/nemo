@@ -97,8 +97,8 @@ int nemo_file_lines(char *name, int deflen)
 
 string defv[] = {
     "in=file_size.c\n       File to test file_size/lines on",
-    "nmax=10000\n           Default size for files on pipes",
-    "VERSION=1.4\n          12-sep-01 PJT",
+    "nmax=-10000\n          Default size for files on pipes",
+    "VERSION=1.5\n          21-sep-03 PJT",
     NULL,
 };
 string usage="file_size.c testbed";
