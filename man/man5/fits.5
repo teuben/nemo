@@ -1,0 +1,113 @@
+.TH FITS 5NEMO "3 July 1994" 
+.SH NAME
+fits \- standard astronomical data interchange format 
+.SH DESCRIPTION
+\fIfits\fP is \fBTHE\fP standard format for the interchange
+of astronomical images and other digital arrays (ascii and binary 
+tables, random groups).
+A \fIfits\fP file consists of several, not necceseraly related,
+Header-Data-Units (HDUs), of which the Data part may be absent.
+.PP
+The header has an unlimited number of parameters in the form
+\fIkey=value / comment\fP that may be associated with 
+and describe the data. The header consists of 
+ASCII records of 80 characters (without line separators) each; 
+both header and data have a blocksize of a 2880 bytes (or a small integer (1-10)
+factor thereof - the blocking factor). All major astronomical
+data reduction packages (AIPS, GIPSY, MIRIAD, IRAF, MIDAS etc.).
+can import/export their data from/to FITS format in some extent. 
+However, there are some FITS ``dialects''.
+.PP
+The FITS format was originally described in a classic paper by D.H. Wells, 
+E.W. Greisen and R.H. Harten in \fIAstronomy and Astrophysics 
+Supplement Series, Vol. 44 (1981), pp. 363-370\fP.
+A number of addenda have been published since then, which describe
+various extensions to the format. There is often information
+in the manuals of packages like AIPS and IRAF.
+.PP
+NEMO has two library routines available to process \fIfits\fP
+files: \fIfits(3NEMO)\fP and \fIfitsio(3NEMO)\fP, the latter
+more specialized to read and write images.
+.SH KEYWORDS
+The following header keywords describe the most important
+facts about the data (or at least enables a reader to skip data)
+.nf
+.ta +1i
+SIMPLE	T (standard FITS file)
+BITPIX	Number of bits per datum [choice of 8, 16, 32, -32, -64)
+	(-32,-64 IEEE floating point, 8 unsigned, 16,32 twos-complement ints)
+NAXIS	total number of axes (0, 1, 2, ... 999) in cube
+NAXISn	size of a particular axis (n=1 through NAXIS) in cube
+PCOUNT	number of extra parameters associated with cube [0 if not present]
+GCOUNT	number of repetitions of the cube+parameter [1 if not present]
+.PP
+CRVALn	value of the coordinate at the reference pixel
+CRPIXn	the reference pixel (often in range 1..NAXISn)
+CDELTn	increment per pixel
+CTYPEn	coordinate type (an ascii string)
+.PP
+HISTORY  	history records (no '=' needed)
+COMMENT  	comment cards (no '=' needed)
+.PP
+END  	last keyword in header
+.fi
+For SIMPLE=T fits file the size of the data section (in bytes) 
+can always be computed from the following formula:
+.nf
+        |BITPIX/8| * GCOUNT * (PCOUNT + NAXIS1*NAXIS2* ... *NAXIS\fIm\fP)  
+.fi
+where \fIm\fP is the value of NAXIS. This size must of course be rounded
+up to the nearest multiple of 2880 bytes. After this, either there is no
+more information on the medium, or another HDU can be read.
+.SH COORDINATE SYSTEMS
+World Coordinate Systems are described in detail in
+draft by E.W. Greisen and M. Calabretta (AIPS memo 99?) titled
+\fIRepresentations of Celestial Coordinates in FITS\fP.
+.PP
+Some common coordinate systems:
+.nf
+GLON, GLAT      Galactic
+ELON, ELAT      Ecliptic
+RA, DEC         Equatorial
+.fi
+.PP
+Some common coordinate system projections:
+.nf
+    RP  Name
+___ __  ___________________________________
+AZP 90  Zenithal perspective                
+TAN 90  Gnomic (AZP w/ mu = 0)             
+SIN 90  Orthographic (AZP w/ mu = infty)  
+STG 90  Stereographic (AZP w/ mu = 1)      
+ARC 90  Zenithal equidistant                 
+ZPN 90  Zenithal polynomial                 
+ZEA 90  Zenithal equal-area                  
+AIR 90  Airy                                
+CYP  0  Cylindrical perspective             
+CAR  0  Cartesian                            
+MER  0  Mercator                             
+CEA  0  Cylindrical equal area              
+COP 90  Conical perspective                 
+COD 90  Conical equidistant                 
+COE 90  Conical equal-area                  
+COO 90  Conical orthomorphic                
+BON 90  Bonne's equal area                  
+PCO  0  Polyconic                            
+GLS  0  Sinusoidal                           
+PAR  0  Parabolic                            
+AIT  0  Hammer-Aitoff                        
+MOL  0  Molweide                             
+CSC  0  Cobe Quadrilateralized Spherical Cube  
+QSC  0  Quadrilateralized Spherical Cube     
+TSC  0  Tangential Spherical Cube           
+.fi
+.SH SEE ALSO
+ccdfits(1NEMO), fitsccd(1NEMO), fitssnap(1NEMO), fitstab(1NEMO),
+fitsio(3NEMO), fits(3NEMO), image(5NEMO)
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+30-may-88	written  	PJT
+20-mar-90	Nemo's FITS I/O library is being tested  	PJT
+3-jul-94	doc updated with PCOUNT/GCOUNT	PJT
+.fi
