@@ -1,0 +1,81 @@
+.TH NEMOMAIN 3NEMO "28 November 1994"
+.SH NAME
+nemo_main \- preferred main entry point for NEMO C and C++ programs
+.SH SYNOPSIS
+.nf
+.ta +0.5i
+\fB 
+#include <stdinc.h>
+#include <getparam.h>
+.PP
+string defv[] = {
+	"key=val\\n       helpstring",
+	...
+	"VERSION=x.y\\n   mm-ddd-yy  AUTHOR",
+	NULL,
+};
+
+string usage="Usage message ... ";
+.PP
+nemo_main()
+{
+	stropen(getparam("in"),"r");
+	stropen(getparam("out"),"w");
+	...
+}
+.fi
+.SH DESCRIPTION
+\fInemo_main\fP can be called to free the programmer of calling
+the standard startup and shutdown code which deals with the
+user interface. This also allows the future NEMO libraries 
+to have a different setup for startup and/or shutdown of a single
+task.
+.PP
+Instead of starting a program with \fBmain(argc,argv)\fP a NEMO program
+should be started with \fBnemo_main()\fP, but see LIMITATIONS below.
+.PP
+The code for \fInemo_main\fP looks something like:
+.nf
+
+   #include <stdinc.h>
+   #include <getparam.h>
+
+   extern string defv[];           /* defv MUST be defined in user program ! */
+
+   void main(argc,argv)
+   int argc;                               /* number of arguments + 1 */
+   char *argv[];                           /* pointer to arguments */
+   {
+      if(argv[argc] != NULL)
+         warning("Your C compiler seems to have an old-style (short) argv[]");
+      initparam(argv,defv);               /* start  */
+      nemo_main();                        /* call program */
+      finiparam();                        /* end */
+      exit(0);                            /* return normal status to shell */
+   }
+
+.fi
+.SH LIMITATIONS
+The pointer to the array of \fBkey=value\fP default keywords
+(see \fIgetparam(3NEMO)\fP) MUST be called by name \fBdefv\fP as shown in the
+SYNOPSIS section above, since nemo_main defines this as 
+\fIextern string defv[]\fP. Stubbed code exist within the NEMO
+library in \fIdefv.c\fP and \fIusage.c\fP, to ensure that programs
+will still link. They will however have no controlled access to
+the commandline arguments.
+.SH SEE ALSO
+getparam(3NEMO)
+.SH FILES
+.nf
+.ta +2.0i +3i
+~/src/kernel/misc	nemomain.c nemomain.cc	\fIc and c++ versions\fP
+~/src/kernel/io  	defv.c usage.c		\fIstubs for missing extern\fP
+.fi
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4i
+29-jun-89	created  	PJT
+28-nov-94	doc         	PJT
+.fi
