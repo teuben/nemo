@@ -1,0 +1,154 @@
+.TH NLLSQFIT 3NEMO "20 August 1992"
+.SH NAME
+nllsqfit \- (non)linear least squares fit
+.SH SYNOPSIS
+.nf
+\fBint nllsqfit(xdat, xdim, ydat, wdat, ndat, fpar, epar,
+                mpar, npar, tol, its, lab, f, df)
+
+  real *xdat, f*ydat, *wdat, *fpar, *epar, tol, lab;
+  int  xdim, ndat, *mpar, npar, its;
+  rproc f;
+  iproc df;\fP
+.fi
+.SH DESCRIPTION
+\fInllsqfit\fP is a routine for making a least-squares fit of a
+function to a set of data points. The method used is
+described in: Marquardt, \fIJ.Soc.Ind.Appl.Math.\fP \fB11\fP, 431 (1963).
+(see also \fINumerical Recipes\fP, Ch. 14)
+This method is a mixture of the steepest descent method and
+the Taylor method.
+.PP
+\fInllsqfit\fP returns number of iterations needed to achieve
+convergence according to \fBtol\fP. 
+When this number is negative, the fitting was not
+continued because a fatal error occurred:
+.nf
+
+    -1     Too many free parameters, maximum "#define MAXPAR 32".
+    -2     No free parameters.
+    -3     Not enough degrees of freedom.
+    -4     Too many iterations to get a solution which satisfies \fBtol\fP.
+    -5     Diagonal of matrix contains elements which are zero, or less.
+    -6     Determinant of the coefficient matrix is zero.
+    -7     Square root of negative number.
+
+.fi
+A linear fit (\fBlab=0\fP) returns 0.
+.SH PARAMETERS
+.TP 20
+\fBxdat\fP      
+contains the coordinates of the data points.
+\fBxdat\fP is two-dimensional: \fBxdat(xdim,ndatf\fP) in FORTRAN
+notation or \fBxdat[ndat][xdim]\fP in C.
+sense.
+.TP
+\fBxdim\fP      
+is the dimension of the fit.
+.TP
+\fBydat\fP      
+contains the data points.
+.TP
+\fBwdat\fP      
+contains the weigths for the data points.
+.TP
+\fBndat\fP      
+is the number of data points.
+.TP
+\fBfpar\fP      
+On input contains initial estimates of the
+parameters for non-linear fits, on output the fitted parameters.
+.TP
+\fBepar\fP      
+contains estimates of errors in fitted parameters. 
+.TP
+\fBmpar\fP      
+logical mask telling which parameters are
+free (\fBmpar[j]\fP=non-zero) and which parameters
+are fixed (\fBmpar[j]\fP=0).
+.TP
+\fBnpar\fP
+number of parameters (free+fixed).
+.TP
+\fBtol\fP       
+relative tolerance. \fInllsqfit\fP stops when
+successive iterations fail to produce a
+decrement in reduced chi-squared less than
+\fBtol\fP. If \fBtol\fP is less than the minimum tolerance
+possible, \fBtol\fP will be set to this value. This
+means that maximum accuracy can be obtained by
+setting \fBtol\fP=0.0.
+.TP
+\fBits\fP      
+maximum number of iterations.
+.TP
+\fBlab\fP      
+mixing parameter, \fBlab\fP determines the initial
+weight of steepest descent method relative to
+the Taylor method. \fBlab\fP should be a small
+value (i.e. 0.01). \fBlab\fP can only be zero when
+the partial derivatives are independent of
+the parameters. In fact in this case \fBlab\fP
+should be exactly equal to zero, in which case the
+fit can (or is assumed to) be done linear.
+.TP
+\fBf\fP	        
+external function, must return a real value, see below.
+.TP
+\fBdf\fP	
+external function, returns the partial
+deriviates to the fitted parameters, see below
+.SH NOTES
+The following routines have to be defined by the user:
+.nf
+      real func(xdat, fpar, npar)
+
+      func          returns the function value of the function to be fitted.
+      real xdat[]   (input) coordinate(s) of data point.
+      real fpar[]   (input) parameter list.
+      int  npar     (input) number of parameters.
+.fi
+.PP              
+      void derv(xdat, fpar, dpar, npar)
+
+      real xdat[]   (input) coordinate(s) of data point.
+      real fpar[]   (input) parameter list.
+      real dpar[]   (output) partial derivatives to the parameters of the
+                             function to be fitted.
+      int  npar     (input) number of parameters.
+.fi             
+.SH EXAMPLE
+Fitting a straight line \fI y(x) = a * x + b \fP:
+.PP
+.nf
+    real func( xdat, fpar, npar)
+    real *xdat, fpar[];
+    int npar;
+    {
+        return fpar[0] * (*xdat) + fpar[1];
+    }
+              
+    void derv( xdat, fpar, dpar, npar)
+    real *xdat, fpar[], dpar[];
+    int npar;
+    {
+        dpar[0] = *xdat;
+        dpar[1] = 1.0;
+    }
+.SH FILES
+nllsqfit.c
+.SH SEE ALSO
+linreg(3NEMO), matinv(3NEMO), FIT.DC2(GIPSY)
+.SH AUTHOR
+K.G. Begeman (originally named FIT.SHL, in Sheltran), P.J. Teuben (C)
+.SH COPYRIGHT
+Copyright (c) Kapteyn Laboratorium Groningen 1990; 
+All Rights Reserved.
+.SH HISTORY
+.nf
+.ta +1.5i
+May  7, 1990    Document created(KGB), document refereed(MXV)
+Apr 30, 1991    NEMO version written for rotcur, as old PJT
+July 23, 1992   manual page written PJT
+Aug 20, 1992    turbocharged getvec() considerably  PJT
+.fi
