@@ -18,6 +18,7 @@
  *	 3-nov-00  V2.7 added blankval=		PJT
  * 	 7-may-01     a cleaned up some superfluous #define's	PJT
  *      19-feb-02  V2.8 added ltype=				pjt
+ *      16-mar-05  V3.0 loop over all images if more found      pJT
  *	
  */
 
@@ -53,11 +54,13 @@ string defv[] = {
 	"cmode=0\n	Contour mode (0=orginal 1=pgplot)",
 	"blankval=\n	if used, use this as blankval",
 	"ltype=\n	width and type for contour",
-	"VERSION=2.8\n	19-feb-02 PJT",
+	"VERSION=3.0\n	16-mar-05 PJT",
 	NULL,
 };
 
 string usage = "display an image using contours and/or gray-scales";
+
+string cvsid = "$Id$";
 
 #define UNDEF HUGE
 
@@ -102,22 +105,22 @@ nemo_main()
     setparams();                    /* set globals */
 
     instr = stropen (infile, "r");
-    read_image(instr,&iptr);
+    while (read_image(instr,&iptr)) {
+      nx=Nx(iptr);			/* get stuff from header of image */
+      ny=Ny(iptr);
+      xmin=Xmin(iptr);
+      ymin=Ymin(iptr);
+      dx=Dx(iptr);
+      dy=Dy(iptr);
+
+      xsize = nx * dx;
+      ysize = ny * dy;
+      
+      plinit ("***", 0.0, 20.0, 0.0, 20.0);       /* init yapp */
+      plot_map();                                 /* plot the map */
+      plstop();                                   /* end of yapp */
+    }
     strclose(instr);
-
-    nx=Nx(iptr);			/* get stuff from header of image */
-    ny=Ny(iptr);
-    xmin=Xmin(iptr);
-    ymin=Ymin(iptr);
-    dx=Dx(iptr);
-    dy=Dy(iptr);
-
-    xsize = nx * dx;
-    ysize = ny * dy;
-
-    plinit ("***", 0.0, 20.0, 0.0, 20.0);       /* init yapp */
-    plot_map();                                 /* plot the map */
-    plstop();                                   /* end of yapp */
 }
 
 setparams()
