@@ -1,6 +1,6 @@
-.TH COMMAND 3NEMO "24 December 2003"
+.TH COMMAND 3NEMO "18 February 2004"
 .SH NAME
-command_init, command_register, command_get, command_close - command parser
+command_init, command_register, command_get, command_read, command_close - command parser
 .SH SYNOPSIS
 .nf
 .B #include <command.h>
@@ -62,7 +62,8 @@ brief outline:
     } 
     freestrings(argv);
   }
-  
+
+  command_close(cmd);
 
 .fi
 .SH FILES
@@ -76,5 +77,6 @@ The user is responsible to correctly matching commands to actions.
 .nf
 .ta +1i +3i
 24-dec-2003	V1.0 - written for SIRTF's map2 project		PJT
+18-feb-2004	V1.1 - implemented command_read			PJT
 .fi
 

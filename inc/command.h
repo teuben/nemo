@@ -5,7 +5,7 @@
  *
  */
 
-#define MAXCMD 128
+#define MAXCMD 1024
 
 typedef struct _command {
   string name;          /* name of the command parser */
@@ -23,5 +23,6 @@ typedef struct _command {
 command *command_init(string name);
 void command_register(command *c, string cmd, string argtypes, string help);
 string *command_get(command *c);
+void command_read(string filename);
 void command_close(command *c);
 

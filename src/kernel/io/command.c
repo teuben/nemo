@@ -8,6 +8,7 @@
 
 #include <nemo.h>
 #include <extstring.h>
+#include <table.h>
 #include <command.h>
 #ifdef HAVE_LIBREADLINE
 #include <readline/readline.h>
@@ -16,6 +17,7 @@
 
 extern string *burststring(string,string);
 extern void freestrings(string *);
+extern int nemo_file_lines(string, int);
 
 #define VALID_TYPES "irs."
 
@@ -83,6 +85,27 @@ void command_register(command *c, string cmd, string type, string help)
   }
 }
 
+static string cmds[MAXCMD];
+static int ncmds = 0;
+static int curcmd = 0;
+
+void command_read(string fname)
+{
+  stream instr;
+  int n = nemo_file_lines(fname,0);
+
+  if (n < 1) return;
+
+  instr = stropen(fname,"r");
+  ncmds = curcmd = 0;
+  while ( (cmds[ncmds] = getaline(instr) )) {
+    ncmds++;
+    if (ncmds == MAXCMD) error("Too many commands in file for now: %d",MAXCMD);
+  }
+  strclose(instr);
+  dprintf(0,"Read %d command lines from %s\n",ncmds,fname);
+}
+
 /*
  *
  */
@@ -96,32 +119,48 @@ string *command_get(command *c)
   sprintf(prompt,"%s> ",c->name);
   
  again:
-#ifdef HAVE_LIBREADLINE
-  for(;;) {
-    if ((s=readline(prompt)) != (char *)NULL) {
-      /* stripwhite(s); */
-      if (*s) {
-	strcpy(line,s);
-	free(s);
-	s=0;
-	break;
-      }
+
+  if (ncmds) {
+    strcpy(line,cmds[curcmd]);
+    curcmd++;
+    dprintf(0,"COMMAND_READ-%d> %s\n",curcmd,line);
+    if (curcmd==ncmds) {
+      dprintf(0,"This was the last command; freeing buffers\n");
+      for (i=0; i<ncmds; i++)
+	free(cmds[i]);
+      curcmd = ncmds = 0;
     }
-    if (s) free(s);
-  }
-  add_history(line);
+  } else {
+#ifdef HAVE_LIBREADLINE
+    for(;;) {
+      if ((s=readline(prompt)) != (char *)NULL) {
+	/* stripwhite(s); */
+	if (*s) {
+	  strcpy(line,s);
+	  free(s);
+	  s=0;
+	  break;
+	}
+      }
+      if (s) free(s);
+    }
+    add_history(line);
 #else
-  printf("%s",prompt);
-  fflush(stdout);
-  clearerr(stdin);
-  if (fgets(line,1024,stdin) == NULL)
-    return NULL;
+    printf("%s",prompt);
+    fflush(stdout);
+    clearerr(stdin);
+    if (fgets(line,1024,stdin) == NULL)
+      return NULL;
 #endif
+  }
   n = strlen(line);
   if (n>0 && line[n-1]=='\n')
     line[n-1]=0;
 
-  if (line[0] == 0)
+  if (line[0] == 0)                             /* empty line */
+    goto again;
+
+  if (line[0] == '#')                           /* comment line */
     goto again;
 
   if (line[0] == '.')                           /* internal quit command */
@@ -131,6 +170,7 @@ string *command_get(command *c)
     dprintf(0,"Internal commands: \n");
     dprintf(0,"?          this help\n");
     dprintf(0,"!CMD       shell escape\n");
+    dprintf(0,"#          comment line\n");
     dprintf(0,".          quit\n");
     dprintf(0,"<FILE      read commands from FILE\n\n"); 
     dprintf(0,"Registered commands: \n");
