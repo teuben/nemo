@@ -20,11 +20,15 @@
  *	24-feb-98	V2.6 added seed=				PJT
  *	 8-sep-01	a    init_xrandom
  *      24-jul-02       2.7  allow nz=0, so it does not make a 3rd axis  PJT
+ *       1-mar-03       3.0  new keywords to set/change WCS              PJT
  *
  *       because of the float/real conversions and
  *       to eliminate excessive memory usage, operations 'fie' are
  *       done on a column by column basis.
  *                      
+ * TODO:
+ *     - allow a %r  to refer to a radius, instead of using %x and %y
+ *
  */
 
 #include <stdinc.h>
@@ -36,16 +40,19 @@
 #include <image.h>
 
 string defv[] = {
-        "in=\n           Input file(s), separated by comma's (optional)",
-	"out=???\n       Output file",
-	"fie=???\n       Expression %1,%2,.. for input maps; %x,%y for new map",
-	"size=10,10,1\n  2- or 3D dimensions of map/cube",
-	"seed=0\n        Random seed",
-	"VERSION=2.8\n   4-dec-02 PJT",
-	NULL,
+  "in=\n           Input file(s), separated by comma's (optional)",
+  "out=???\n       Output file",
+  "fie=???\n       Expression %1,%2,.. for input maps; %x,%y for new map",
+  "size=10,10,1\n  2- or 3D dimensions of map/cube",
+  "crpix=\n        Override/Set crpix (1,1,1)",
+  "crval=\n        Override/Set crval (0,0,0)",
+  "cdelt=\n        Override/Set cdelt (1,1,1)",
+  "seed=0\n        Random seed",
+  "VERSION=3.0\n   1-mar-03 PJT",
+  NULL,
 };
 
-string usage = "image arithmetic";
+string usage = "image arithmetic and wcs";
 
 #ifndef HUGE
 # define HUGE 1.0e20
@@ -57,9 +64,19 @@ imageptr iptr[MAXIMAGE];	/* pointers to (input) images */
 int      nimage;                /* actual number of input images */
 bool     mapgen = FALSE;	/* no input files: create from scratch ? */
 
-int fie_remap(char *fie, bool map_create);
-void do_create(int nx, int ny,int nz);
-void do_combine(void);
+#define MAXNAX 3
+
+double crval[MAXNAX], crpix[MAXNAX], cdelt[MAXNAX];
+int nwcs = 0;
+
+
+
+local int set_axis(string var, int n, double *xvar, double defvar);
+local int fie_remap(char *fie, bool map_create);
+local void do_create(int nx, int ny, int nz);
+local void do_combine(void);
+local void wcs_f2i(             int ndim, double *crpix, double *crval, double *cdelt, image *iptr);
+local void wcs_i2f(image *iptr, int ndim, double *crpix, double *crval, double *cdelt);
 
 extern  int debug_level;		/* see initparam() */
 extern    void    dmpfien();
@@ -78,6 +95,9 @@ void nemo_main ()
     int     noper;                      /* number of images needed from oper */
 
     init_xrandom(getparam("seed"));
+    nwcs += set_axis(getparam("crpix"),MAXNAX,crpix,1.0);
+    nwcs += set_axis(getparam("crval"),MAXNAX,crval,0.0);
+    nwcs += set_axis(getparam("cdelt"),MAXNAX,cdelt,1.0);
     fie = getparam("in");
     if (fie==NULL || *fie==0)
         mapgen = TRUE;      /* no input files: create maps from scratch */
@@ -155,6 +175,81 @@ void nemo_main ()
     strclose(outstr);
 }
 
+
+local int set_axis(string var, int n, double *xvar, double defvar)
+{
+  int i, nret;
+  if (var == 0 || *var == 0) {
+    for (i=0; i<n; i++) 
+      xvar[i] = defvar;
+    return 0;
+  } else {
+    nret = nemoinpd(var,xvar,n);
+    if (nret < 0) error("Parsing error %d in %s",nret,var);
+    for (i=nret; i<n; i++)
+      xvar[i] = defvar;
+    return 1;
+  }
+  return 999;
+}
+
+/*
+ *    FITS: x = (i-crpix)*cdelt + crval        lower/left is 1 (i=1...naxis)
+ *    NEMO: x = i*Dx + Xmin                    lower/left is 0 (i=0...naxis-1)
+ */
+
+local void wcs_f2i(int ndim, double *crpix, double *crval, double *cdelt, image *iptr)
+{
+  int i;
+  if (ndim<1) return;
+
+  for (i=0; i<ndim; i++)
+    dprintf(1,"axis %d: %g %g %g\n",i+1,crpix[i],crval[i],cdelt[i]);
+  
+  Dx(iptr) = cdelt[0];
+  Xmin(iptr) = (1.0-crpix[0])*cdelt[0] + crval[0];
+  if (ndim==1) return;
+  
+  Dy(iptr) = cdelt[1];
+  Ymin(iptr) = (1.0-crpix[1])*cdelt[1] + crval[1];
+  if (ndim==2) return;
+
+  Dz(iptr) = cdelt[2];
+  Zmin(iptr) = (1.0-crpix[2])*cdelt[2] + crval[2];
+
+  dprintf(1,"XYZMin/Dxyz: %g %g %g %g 5g 5g\n",
+	  Xmin(iptr),Ymin(iptr),Zmin(iptr),Dx(iptr),Dy(iptr),Dz(iptr));
+
+}
+
+local void wcs_i2f(image *iptr, int ndim, double *crpix, double *crval, double *cdelt)
+{
+  int i;
+  if (ndim<1) return;
+
+  dprintf(1,"XYZMin/Dxyz: %g %g %g %g 5g 5g\n",
+	  Xmin(iptr),Ymin(iptr),Zmin(iptr),Dx(iptr),Dy(iptr),Dz(iptr));
+
+  crpix[0] = 1.0;
+  crval[0] = Xmin(iptr);
+  cdelt[0] = Dx(iptr);
+  if (ndim==1) return;
+  
+  crpix[1] = 1.0;
+  crval[1] = Ymin(iptr);
+  cdelt[1] = Dy(iptr);
+  if (ndim==2) return;
+
+  crpix[2] = 1.0;
+  crval[2] = Ymin(iptr);
+  cdelt[2] = Dy(iptr);
+
+  for (i=0; i<ndim; i++)
+    dprintf(1,"axis %d: %g %g %g\n",i+1,crpix[i],crval[i],cdelt[i]);
+
+}
+
+
 /* 
  *  Checks if string 'fie' has nothing but numbers
  *  after a %, i.e. %1, %2... when map_create==false
@@ -163,7 +258,7 @@ void nemo_main ()
  *  Returns 0 on success, -1 on some failure
  */
 
-int fie_remap(char *fie, bool map_create)
+local int fie_remap(char *fie, bool map_create)
 {
     for(;*fie;fie++) {
         fie = strpbrk(fie,"%$");                /* look for a $ or % */
@@ -190,7 +285,7 @@ int fie_remap(char *fie, bool map_create)
  *  create new map from scratch, using %x and %y as position parameters 
  *		0..nx-1 and 0..ny-1
  */
-void do_create(int nx, int ny,int nz)
+local void do_create(int nx, int ny,int nz)
 {
     double m_min, m_max, total;
     real   fin[3], fout;
@@ -204,6 +299,7 @@ void do_create(int nx, int ny,int nz)
     if (nz > 0) {
       if (!create_cube (&iptr[0], nx, ny, nz))	/* create default empty image */
         error("Could not create 3D image from scratch");
+      wcs_f2i(3,crpix,crval,cdelt,iptr[0]);
 
       for (iz=0; iz<nz; iz++) {
         fin[2] = iz;
@@ -222,6 +318,7 @@ void do_create(int nx, int ny,int nz)
     } else {
       if (!create_image (&iptr[0], nx, ny))	
         error("Could not create 2D image from scratch");
+      wcs_f2i(2,crpix,crval,cdelt,iptr[0]);
 
       for (iy=0; iy<ny; iy++) {
 	fin[1] = iy;
@@ -249,7 +346,7 @@ void do_create(int nx, int ny,int nz)
 /* 
  *  combine input maps into an output map  -- still 2D only
  */
-void do_combine()
+local void do_combine()
 {
     double m_min, m_max, total;
     real  *fin, *fout;
@@ -263,6 +360,12 @@ void do_combine()
     nx = Nx(iptr[0]);
     ny = Ny(iptr[0]);
     nz = Nz(iptr[0]);
+    if (nwcs) {
+      if (nwcs==3) 
+	wcs_f2i(2,crpix,crval,cdelt,iptr[0]);
+      else
+	warning("Not enough WCS information given (%d/3 keywords) to replace it",nwcs);
+    }
 
     fin = (real *) allocate(nimage*ny*sizeof(real)); 
     fout = (real *) allocate(ny*sizeof(real));

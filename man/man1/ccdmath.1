@@ -1,4 +1,4 @@
-.TH CCDMATH 1NEMO "11 September 1991" 
+.TH CCDMATH 1NEMO "1 March 2003" 
 .SH NAME
 ccdmath \- map arithmetic using function expressions
 .SH SYNOPSIS
@@ -37,10 +37,35 @@ in creation mode position is referred to by \fB%x\fP and \fB%y\fP
 .TP
 \fBsize=\fInx,ny,nz\fP
 Size of the output map in case program is in creation mode [default: 10,10,1].
+.TP
+\fBcrpix=\fIr1,r2,r3\fP
+(New) values for the reference pixel. Note these are in FITS notation,
+i.e. (1,1,1) is the lower left of the first plane in a cube.
+By default the WCS is transferred from the first input image to the output
+image, however, by using all 3 keywords 
+\fBcrpix=,crval=,cdelt=\fP the WCS of the output image can be overwritten.
+[Default: \fB1,1,1\fP for image creation].
+.TP
+\fBcrval=\fIr1,r2,r3\fP
+(New) values for the reference pixel.
+[Default: \fB0,0,0\fP for image creation].
+.TP
+\fBcdelt=\fIr1,r2,r3\fP
+(New) values for the pixel separation. 
+[Default: \fI1,1,1\fP for image creation].
+.TP
+\fBseed=\fP\fIinteger\fP
+seed for the random number generator (default: a value 0, which will
+be converted into a unique new value using UNIX's clock time, in
+seconds since once-upon-a-time-in-the-seventies).
 .SH EXAMPLE
 Create a 'difference' map from two input maps:
 .nf
    % \fBccdmath inmap1,inmap2 outmap "abs(%1-%2)"\fP
+.fi
+create the maximum of two maps:
+.nf
+   % \fBccdmath inmap1,inmap2 outmap "ifgt(%1,%2,%1,%2)"\fP
 .fi
 create a map from scratch:
 .nf
@@ -49,6 +74,11 @@ create a map from scratch:
 create a cube from scratch:
 .nf
   % \fBccdmath "" cube0 "%x+10*%y+100*%z" 4,4,4\fP
+.fi
+create a new WCS for an existing cube, with reference value (0,0,0) in the center of the cube,
+assuming you know the size of the cube (nx,ny,nz) and pixel sizes (dx,dy,dz):
+.nf
+  % \fBccdmath cube0 cube1 %1 crpix=$nx/2+0.5,$ny/2+0.5,$nz/2+0.5 crval=0,0,0 cdelt=$dx,$dy,$dz\fP
 .fi
 .SH TIMING
 Performance on Rigel (SUN 3/160, 16Mhz):
@@ -75,7 +105,7 @@ src/image/trans  	ccdmath.c ccdmath.1
  6-jul-87	V1.1: order keywords changed for future enhancements	PJT
  1-jun-88	V2.0: new filestruct, although code is same         	PJT
 18-dec-88	V2.1: new keyword structure, fie() used.         	PJT
-22-jan-89	V2.3: can make map from scratch using %x, %y and %z 
-11-sep-91	comments                                           	PJT
+22-jan-89	V2.3: can make map from scratch using %x, %y and %z	PJT
+1-mar-03	V3.0: set/change the WCS				PJT
 .fi
 
