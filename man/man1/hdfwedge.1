@@ -1,15 +1,15 @@
-.TH HDFGRID 1NEMO "17 December 2004"
+.TH HDFGRID 1NEMO "20 December 2004"
 .SH NAME
 hdfwedge \- Regrid a polar HDF4 SDS wedge to cartesian image
 .SH SYNOPSIS
 \fBhdfwedge\fP [parameter=value]
 .SH DESCRIPTION
-\fBhdfwedge\fP regrids HDF (SDS) output files that are assumed to
+\fBhdfwedge\fP regrids HDF (SDS) files that are assumed to
 be in polar (rad-phi) coordinates, but can contain any size wedge
 (ideally an integer fraction of 2.PI). It was cloned off
 \fPhdfgrid(1NEMO)\fP in December 2004, so a number of their 
 comments on the assumptions on the input format also apply to
-this program.
+this program. See also CAVEATS below for some important notes.
 .PP
 The first two dimension must be radius and angle, there can be
 an optional 3rd dimension, but it must be 1 slice in Z only.
@@ -61,10 +61,12 @@ that \fBvm\fP and \fBvp\fP are special cases of
 a linear combination of \fBvx\fP, \fBvy\fP
 \fIvm =  (vx-vy)/sqrt(2)\fP and \fIvp = (vx+vy)/sqrt(2)\fP, just
 to get an idea of the velocity field under a "middle" position angle.
+** currently not implemented yet **
 Default: not used, select= is used.
 .TP
 \fBperiodic=t|f\P
 Attempt to fill the plane by making the data periodic.
+** currently only periodic=t works **
 [Default: \fBt\fP].
 .TP
 \fBsymmetry=odd|even|automatic\fP
@@ -77,6 +79,13 @@ Here is ....
   hdfwedge hdf010aa den010.ccd select=4 nx=256 ny=256 xrange=-8:8 yrange=-8:8
 
 .fi
+.SH CAVEATS
+The current version is under development, and a few things should be noted:
+.PP
+zvar= and periodic= do not work yet.
+.PP
+wedges that are close to, but not exactly, whole fractionals of 2.pi can result
+in a shadow zone
 .SH FILES
 src/image/hdf/cmhog  	hdfwedge.c
 .SH SEE ALSO
@@ -87,4 +96,5 @@ Peter Teuben
 .nf
 .ta +1.0i +4.0i
 17-dec-04	V0.1 created	PJT
+20-dec-04	V0.2 repair files with 2-step shadow zones	PJT
 .fi

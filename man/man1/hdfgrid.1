@@ -4,7 +4,7 @@ hdfgrid \- Regrid a polar HDF4 SDS to cartesian image
 .SH SYNOPSIS
 \fBhdfgrid\fP [parameter=value]
 .SH DESCRIPTION
-\fBhdfgrid\fP regrids HDF (SDS) output files that are assumed to
+\fBhdfgrid\fP regrids HDF (SDS) files that are assumed to
 be in polar (rad-phi) coordinates. This program was initially developed 
 for the bar-hydro project (Piner, Stone & Teuben, ApJ - nov 1995)
 using a version of \fBcmhog\fP, though it can now also handle
@@ -25,7 +25,10 @@ from the phantom "mirror" points (recall that the files are
 assumed to contain X>0 information only, the X<0 plane is assumed
 from point symmetry around the origin). 
 .PP
-It is also possible to simply average the polar grid values 
+It is also possible to simply average the polar grid values into
+cartesian cells, using the \fBpic=t\fP method, but this will generally
+result in variable amount of smoothing and depending on the distribution
+of points in Rad-Phi can cause moire patterns.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -90,7 +93,7 @@ for double bars and manually rotating the frame of reference
 .TP
 \fBphi1=\fP
 The first operation is a rotation. This angle (in radians) will be added to the 
-angles. 
+angles. Do not ues for serious work, as it only applies to density fields.
 Default: 0
 .TP
 \fBscale2=\fP
@@ -124,6 +127,8 @@ twice, because of a bug in combining the two; \fBifeq(%1,0.0,$dmin,log(%1))\fP
 could not be used. (2) fitstiff cannot read from a pipe,  hence the extra
 annoying disk file \fBtmp$$\fP. (3) Lookup RGB color tables are in 
 \fB$NEMODAT/lut\fP.
+.SH SEE ALSO
+hdfwedge(1NEMO)
 .SH FILES
 src/image/hdf/cmhog  	hdfgrid.c
 .SH AUTHOR
