@@ -1,5 +1,5 @@
 #!/bin/csh -f
-# $Id$
+#
 #
 
 # Check necessary nemo binaries
@@ -12,12 +12,12 @@ foreach i ( hackforce snapmask snapprint mkplummer )
 end
 rehash
 
-# Create 'run_test' directory
-if ( ! -d run_test ) then
-    mkdir run_test
-endif
+set RT=/tmp/.io_nemo_run_test
 
-set RT=run_test
+# Create 'run_test' directory
+if ( ! -d ${RT} ) then
+    mkdir -p ${RT}
+endif
 
 # Set io_nemo test programs path
 set IONB=${OSTYPE}/bin

@@ -1,5 +1,5 @@
 #!/bin/csh -f
-# $Id$
+#
 #
 
 # Check necessary nemo binaries
@@ -11,12 +11,12 @@ foreach i ( hackforce snapmask snapprint mkplummer )
 end
 rehash
 
-# Create 'run_test' directory
-if ( ! -d run_test ) then
-    mkdir run_test
-endif
+set RT=/tmp/.io_nemo_run_test
 
-set RT=run_test
+# Create 'run_test' directory
+if ( ! -d ${RT} ) then
+    mkdir -p ${RT}
+endif
 
 # Set io_nemo test programs path
 set IONB=${OSTYPE}/bin
@@ -55,9 +55,9 @@ foreach j ( $prog )
 	printf "Testing with seltp = [$i]\n"
 	${run} < ${RT}/in.txt >& /dev/null
 
-	( snapprint  ${RT}/plum.30k.for options=m,x,y,z,vx,vy,vz,ax,ay,az,phi,key > ${RT}/plum.30k.res) >& /dev/null
+	( snapprint  ${RT}/plum.30k.for options=m,x,y,z,vx,vy,vz,ax,ay,az,phi,key >! ${RT}/plum.30k.res) >& /dev/null
 
-	($snpmsk ${RT}/plum.30k - select=$i | snapprint - options=m,x,y,z,vx,vy,vz,ax,ay,az,phi,key > ${RT}/plum.30k.mask) >& ! /dev/null
+        ($snpmsk ${RT}/plum.30k - select=$i | snapprint - options=m,x,y,z,vx,vy,vz,ax,ay,az,phi,key >! ${RT}/plum.30k.mask) >& ! /dev/null
 
 
 	@ bad=`diff ${RT}/plum.30k.res ${RT}/plum.30k.mask | wc -l`
@@ -68,5 +68,5 @@ foreach j ( $prog )
     end  # for i
 end  # for j
 
-
+#/bin/rm -rf /tmp/.io_nemo_run_test
 #
