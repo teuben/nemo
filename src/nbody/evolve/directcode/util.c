@@ -1,0 +1,27 @@
+/*
+ * UTIL.C: various useful routines and functions.
+ *
+ *      17-feb-94 fixed bug with -DSINGLEPREC               pjt
+ *      16-feb-04 for directcode                            pjt
+ */
+
+#include "defs.h"
+
+extern  double xrandom(real,real);
+
+/*
+ * PICKVEC: generate random coordinates within a unit sphere.
+ *  vector x;                             coord vector to generate 
+ *  bool cf;                              pick from 1/r^2 profile 
+ */
+
+void pickvec(vector x, bool cf)
+{
+
+  dprintf(1,"pickvec: cf = %d\t", cf);
+  if (cf)					/* cent. concentrated?      */
+    pickshell(x, NDIM, xrandom(0.0, 1.0));	/*   pick from M(r) = r     */
+  else
+    pickball(x, NDIM, 1.0);		/*   use uniform distr.     */
+  dprintf(1,"x = [%8.4f,%8.4f,%8.4f]\n", x[0], x[1], x[2]);
+}
