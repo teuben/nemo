@@ -27,7 +27,7 @@ initstep(btab, nb, tptr, force)
 Body *btab;		/* array of bodies */
 int nb;			/* number of bodies */
 real *tptr;		/* initial time */
-proc force;		/* acceleration calculation */
+force_proc force;	/* acceleration calculation */
 {
     nstep = 0;					/* start counting steps     */
     (*force)(btab, nb, *tptr);			/* compute (t-dep) force    */
@@ -42,7 +42,7 @@ orbstep(btab, nb, tptr, force, dt, mode)
 Body *btab;		/* array of bodies */
 int nb;			/* number of bodies */
 real *tptr;		/* current time */
-proc force;		/* acceleration calculation */
+force_proc force;	/* acceleration calculation */
 real dt;		/* integration time step */
 int mode;		/* select integration algorithm */
 {
@@ -64,7 +64,7 @@ rkstep(btab, nb, tptr, force, dt, atmp1)
 Body *btab;		/* array of bodies */
 int nb;			/* number of bodies */
 real *tptr;		/* current time */
-proc force;		/* acceleration calculation */
+force_proc force;	/* acceleration calculation */
 real dt;		/* integration time step */
 real atmp1[];		/* scratch accelerations */
 {
@@ -117,12 +117,12 @@ real atmp1[];		/* scratch accelerations */
     *tptr += dt;
 }
 
-pcstep(btab, nb, tptr, force, dt)
-Body *btab;		/* array of bodies */
-int nb;			/* number of bodies */
-real *tptr;		/* current time */
-proc force;		/* acceleration calculation */
-real dt;		/* integration time step */
+pcstep(
+       Body *btab,		/* array of bodies */
+       int nb,			/* number of bodies */
+       real *tptr,		/* current time */
+       force_proc force,	/* acceleration calculation */
+       real dt)		        /* integration time step */
 {
     Body *p;
     int i, k;
@@ -159,9 +159,8 @@ real dt;		/* integration time step */
     *tptr += dt;				/* advance time */
 }
 
-moveaccel(btab, nb)
-Body *btab;		/* array of bodies */
-int nb;			/* number of bodies */
+
+moveaccel(Body *btab, int nb)
 {
     Body *p;
     int i, k;
