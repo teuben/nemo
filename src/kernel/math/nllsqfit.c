@@ -375,7 +375,12 @@ int nllsqfit(
          parptr[nfree++] = i;           /* a free parameter */
       }
    }
-   if (nfree == 0) return( -2 );        /* no free parameters */
+   if (nfree == 0) {
+     if (labda == 0.0) 
+       warning("Not computing differences properly");
+     getmat( xdat, xdim, ydat, wdat, ddat, ndat, fpar, epar, npar ); /* get diff */
+     return -2;           /* no free parameters */
+   }
    for (n = 0; n < ndat; n++) {
      if (wdat && wdat[n] > 0.0) nuse++;        /* legal weight */
      else nuse++;
