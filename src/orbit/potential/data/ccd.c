@@ -20,14 +20,17 @@
 
 /*CTEX
  *  {\bf potname=ccd
- *	 potpars={\it $\Omega,I_scale,Xcen,Ycen,Dx,Dy$}
+ *	 potpars={\it $\Omega,Iscale,Xcen,Ycen,Dx,Dy$}
  *	 potfile={\it image(5NEMO)}}
  *
  *  The lower left pixel of an image in NEMO is defined as (0,0), with WCS values
  *  Xmin,Ymin derived from the header. If (Xcen,Ycen) are used, these are the 
  *  0-based pixel coordinates of the center pixel. If (Dx,Dy) are used, these are
  *  the pixel separations.
- *  To aid astronomical images where Dx<0, these are interpreted as positive.
+ *  To aid astronomical images where Dx$<$0, these are interpreted as positive.
+ *  Also note that potentials are generally negative, so it is not uncommon to need
+ *  $Iscale = -1$. Programs such as {\it potccd} can create such a {\bf ccd} grid 
+ *  potential from a regular potential.
  */
 
 #include <stdinc.h>
@@ -119,6 +122,7 @@ void inipotential (int *npar, double par[], char *name)
             xmin,ymin,idx,idy);
     dprintf(1,"Formal full pixel X-range: %g %g\n",xmin-0.5*dx,xmax+0.5*dx);
     dprintf(1,"Formal full pixel Y-range: %g %g\n",ymin-0.5*dy,ymax+0.5*dy);
+    dprintf(1,"Ranges: %g %g %g %g\n",xmin,xmax,ymin,ymax);
 
     par[0] = omega;
 }

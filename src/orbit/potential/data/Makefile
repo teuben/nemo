@@ -22,26 +22,27 @@ MAN1FILES =
 MAN3FILES = 
 MAN5FILES = 
 INCFILES = 
-SRCFILES= Makefile \
-	athan92.f \
+
+POT_CC = \
 	bar83.c bulge1.c ccd.c cp80.c dehnen.c dublinz.c expdisk.c flatz.c halo.c \
-	Combined.cc Dehnen.cc Hernquist.cc NFW.cc GalPot.cc MiyamotoNagai.cc \
-	Plummer.cc \
 	grow_plum.c grow_plum2.c \
-	harmonic.c harmonicf.f hernquist.c hom.c hubble.c kuzmindisk.c \
+	harmonic.c hernquist.c hom.c hubble.c kuzmindisk.c \
 	isochrone.c jaffe.c log.c mestel.c miyamoto.c nfw.c null.c \
-	op73.c pfenniger84.f piner94.f plummer.c plummer2.c rh84.c rotcur0.c rotcur.c teusan85.c triax.c \
+	op73.c plummer.c plummer2.c rh84.c rotcur0.c rotcur.c teusan85.c triax.c \
 	twofixed.c plummer4.c vertdisk.c tidaldisk.c polynomial.c wada94.c
-OBJFILES=\
-	athan92.so \
-	bar83.so bulge1.so ccd.so cp80.so dehnen.so dublinz.so expdisk.so flatz.so halo.so \
-	Combined.so \
-	Dehnen.so Hernquist.so NFW.so GalPot.so MiyamotoNagai.so Plummer.so \
-	grow_plum.so grow_plum2.so \
-	harmonic.so harmonicf.so hernquist.so hom.so hubble.so kuzmindisk.so \
-	isochrone.so jaffe.so log.so mestel.so miyamoto.so nfw.so null.so \
-	op73.so pfenniger84.so piner94.so plummer.so plummer2.so rh84.so rotcur0.so rotcur.so teusan85.so triax.so \
-	twofixed.so plummer4.so vertdisk.so tidaldisk.so polynomial.so wada94.so
+
+POT_F77 = \
+	athan92.f harmonicf.f pfenniger84.f piner94.f 
+
+POT_CXX = \
+	Dehnen.cc Hernquist.cc NFW.cc GalPot.cc MiyamotoNagai.cc Plummer.cc 
+# c++ bug?
+#	Combined.cc 
+
+SRCFILES= Makefile \
+	$(POT_CC) $(POT_F77) $(POT_CXX)
+
+OBJFILES= $(POT_CC:c=o) $(POT_CXX:cc=o) $(POT_F77:f=o)
 
 BINFILES = 
 
@@ -52,7 +53,7 @@ help:
 clean:
 	rm -f *.o *.so *.a core $(BINFILES) $(TESTFILES) ctextest.*
 
-all:	
+# all:	
 
 obj:	$(OBJFILES)
 
@@ -104,6 +105,9 @@ nemo_src:
 
 tests: 
 
+potctex.inc: $(POT_CC)
+	$(NEMO)/src/scripts/ctex -latex -section -nohead -nofoot $(POT_CC) > potctex.inc
+	-diff potctex.inc $(NEMO)/text/manuals
 
 ctex:
 	$(NEMO)/src/scripts/ctex -latex -section $(TEST) > ctextest.tex

@@ -8,7 +8,7 @@
 
 /*CTEX
  *  {\bf potname=rotcur0
- *       potpars={\it $\Omega$},r0,v0
+ *       potpars={\it $\Omega$},r0,v0}
  *	 
  */
  

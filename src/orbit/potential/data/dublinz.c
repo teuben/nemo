@@ -9,7 +9,7 @@
 
 /*CTEX
  *  {\bf potname=dublinz
- *       potpars={\it $\Omega$},r0,r1,v1,dvdr,s,h
+ *       potpars={\it $\Omega$},r0,r1,v1,dvdr,s,h}
  *	 
  */
  

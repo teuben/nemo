@@ -11,7 +11,7 @@
 
 /*CTEX
  *  {\bf potname=flatz
- *       potpars={\it $\Omega$},r0,v0,s,h
+ *       potpars={\it $\Omega$},r0,v0,s,h}
  *	 
  */
  

@@ -8,21 +8,26 @@
 
 /*CTEX
  *	{\bf potname=polynomial
- *       potpars={\it $\Omega,a0,a1,a2,a3,....}
+ *       potpars={\it $\Omega,a0,a1,a2,a3,....$}}
  *
  *  Polynomial potential
  *
  * $$
  *    \Phi =  a_0 + a_1 r + a_2 r^2 + ....  a_N r^N
  * $$
+ *
+ *  where any unused coefficients will be set to 0. Up to 16 (defined
+ *  as MAXPOW) can be used.
  */                     
   
 #include <stdinc.h>
 #include <vectmath.h>
 #include <potential_float.h>
 
+#ifndef MAXPOW
 #define MAXPOW  16
- 
+#endif
+
 local double omega = 0.0;
 
 local double a[MAXPOW];
