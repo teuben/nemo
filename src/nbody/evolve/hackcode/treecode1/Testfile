@@ -1,0 +1,27 @@
+DIR = src/nbody/evolve/hackcode/treecode1
+BIN = treecode1 
+NEED = $(BIN) 
+
+help:
+	@echo $(DIR)
+
+need:
+	@echo $(NEED)
+
+clean:
+	@echo Cleaning $(DIR)
+	@rm -fr core bench.dat bench.log
+
+NBODY = 128
+
+all: treecode1
+
+treecode1:
+	@echo Running $@
+	@rm -f bench.dat bench.log
+	treecode1 out=bench.dat nbody=$(NBODY) > bench.log; nemo.coverage treecode.c
+	@head -14 bench.log
+	@echo "..."
+	@tail -8 bench.log
+
+
