@@ -1,7 +1,12 @@
 /* 
  * CCDPPM:   create a PPM from a CCD image
  *
- *	16-dec-03  V1.0 created
+ *	17-dec-03  V1.0 created   (Wright's 100 year first flight anniversary!)
+ *                  1.1 added 8bit=
+ *
+ *  TODO
+ *    - handle LUT's that are not 256 in size (e.g. ds9 uses 200 mostly)
+ *    - handle lut='sls' to '$NEMODAT/lut/sls.lut' type translation
  */
 
 #include <stdinc.h>
@@ -17,7 +22,8 @@ string defv[] = {
     "max=\n         Maximum overrride",
     "bad=\n         Use this as masking value to ignore data",
     "lut=\n         optional selection of a lut from NEMODAT/lut",
-    "VERSION=1.0\n  16-dec-03 PJT",
+    "8bit=f\n       24bit or 8bit\n",
+    "VERSION=1.1\n  17-dec-03 PJT",
     NULL,
 };
 
@@ -28,21 +34,26 @@ stream  instr, outstr;			/* file streams */
 imageptr iptr=NULL;			/* will be allocated dynamically */
 int    nx,ny,nz;			/* actual size of map */
 
-real Red[256], Green[256], Blue[256];
+#define MAXCOL   256
 
-void get_rgb(real data, real min, real max, int *pR, int *pG, int *pB);
+int  ncol;
+real  Red[MAXCOL],  Green[MAXCOL],  Blue[MAXCOL];
+real dRed[MAXCOL], dGreen[MAXCOL], dBlue[MAXCOL];
+
+void get_rgb(real data, real min, real max, int *R, int *G, int *B, bool);
 int  get_lut(string, int, real*, real*, real*);
 
 void nemo_main()
 {
-  int  i, j, red, green, blue, ncol;
+  int  i, j, red, green, blue;
   real x, xmin, xmax, bad, low;
-  bool Qmin, Qmax, Qbad;
+  bool Qmin, Qmax, Qbad, Q8bit;
   
   instr = stropen (getparam("in"), "r");
   read_image (instr,&iptr);
   strclose(instr);
   outstr = stropen(getparam("out"), "w");
+  Q8bit = getbparam("8bit");
   
   nx = Nx(iptr);	
   ny = Ny(iptr);
@@ -54,11 +65,13 @@ void nemo_main()
   if (Qbad) bad = getdparam("bad");
 
   if (hasvalue("lut"))
-    ncol = get_lut(getparam("lut"),256,Red,Green,Blue);
+    ncol = get_lut(getparam("lut"),MAXCOL,Red,Green,Blue);
   else {
     ncol = 256;
-    for (i=0; i<ncol; i++)
+    for (i=0; i<ncol; i++) {
       Red[i] = Green[i] = Blue[i] = i/255.0;
+      dRed[i] = dGreen[i] = dBlue[i] = 1.0/255.0;
+    }
   }
 
   if (!Qmin || !Qmax) {                      /* loop over data to get xmin, xmax */
@@ -92,7 +105,7 @@ void nemo_main()
   for (j=ny-1; j>=0; j--) {
     for (i=0; i<nx; i++) {
       x = MapValue(iptr,i,j);
-      get_rgb(x,xmin,xmax,&red,&green,&blue);
+      get_rgb(x,xmin,xmax,&red,&green,&blue,Q8bit);
       fputc(red,outstr);
       fputc(green,outstr);
       fputc(blue,outstr);
@@ -103,50 +116,58 @@ void nemo_main()
 int  get_lut(string fn, int n, real *r, real *g, real *b)
 {
   real *coldat[3];
-  int ncol, colnum[3];
+  int i, ncol, colnum[3];
   stream instr = stropen(fn,"r");
 
   colnum[0] = 1;    coldat[0] = r;
   colnum[1] = 2;    coldat[1] = g;
   colnum[2] = 3;    coldat[2] = b;
-  ncol = get_atable(instr,3,colnum,coldat,256);
-  if (ncol < 0) error("Problem %d reading %s",ncol,fn);
+  ncol = get_atable(instr,3,colnum,coldat,MAXCOL);
+  if (ncol < 0) 
+    error("Problem %d reading %s; MAXCOL=%d",ncol,fn,MAXCOL);
+  for (i=1; i<ncol; i++) {
+    dRed[i-1]   = Red[i]   - Red[i-1];
+    dGreen[i-1] = Green[i] - Green[i-1];
+    dBlue[i-1]  = Blue[i]  - Blue[i-1];
+  }
   return ncol;
 }
 
 
-void get_rgb(real data, double min, double max, int *R, int *G, int *B)
+void get_rgb(real data, double min, double max, int *R, int *G, int *B, bool Q8bit)
 {
   int i;
+  real x;
   
   if (min==max) {
     *R = *G = *B = (data > max ? 255 : 0);    
     return;
   }
-#if 0
-  x = (data-min)*255.0/(max-min);
-  if (x<=0.0 || x>=255.0) {         /* out of bounds */
-    i=  (x <= 0.0 ? 0 : 255);
+
+  if (!Q8bit) {
+    x = (data-min)*255.0/(max-min);
+    if (x<=0.0 || x>=255.0) {         /* out of bounds */
+      i=  (x <= 0.0 ? 0 : 255);
+      *R = (int) (Red[i] * 255.0);
+      *G = (int) (Green[i] * 255.0);
+      *B = (int) (Blue[i] * 255.0);
+      return;
+    }
+    i = (int) x;
+    *R = (int)  ((Red[i]   + (x-i)*dRed[i])*255.0);
+    *G = (int)  ((Green[i] + (x-i)*dGreen[i])*255.0);
+    *B = (int)  ((Blue[i]  + (x-i)*dBlue[i])*255.0);
+  } else {
+    i = (int) ((data-min)*255.0/(max-min));
+    x = i;
+    if (i<0) i=0;
+    if (i>255) i=255;
     *R = (int) (Red[i] * 255.0);
     *G = (int) (Green[i] * 255.0);
     *B = (int) (Blue[i] * 255.0);
-    return;
   }
-  i = (int) x;
-  *R = (int)  (rgb[i*3+0] + (x-i)*der[i*3+0])*255.0;
-  *G = (int)  (rgb[i*3+1] + (x-i)*der[i*3+1])*255.0;
-  *B = (int)  (rgb[i*3+2] + (x-i)*der[i*3+2])*255.0;
-#else
-  i = (int) ((data-min)*255.0/(max-min));
-  if (i<0) i=0;
-  if (i>255) i=255;
-  *R = (int) (Red[i] * 255.0);
-  *G = (int) (Green[i] * 255.0);
-  *B = (int) (Blue[i] * 255.0);
-#endif
-#if 0
-  printf("%g [%g %g] -> %d %d %d %d\n",data,min,max,i,*R, *G, *B);
-#endif
+  dprintf(1,"%g [%g %g] -> (%g,%d) %d %d %d\n",data,min,max,x,i,*R, *G, *B);
+  dprintf(2,"%g %g   %g %g    %g %g\n",Red[i],dRed[i],  Green[i],dGreen[i], Blue[i],dBlue[i]);
 }
 
 void stern_special(real data, real min, real max, int *pRed, int *pGreen, int *pBlue)
