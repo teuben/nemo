@@ -18,6 +18,7 @@
  *	Oct 93  - get_pattern
  *	Aug 96  - changed order of pars to improve readability  Dave Shone/pjt
  *                prototyped and #ifdeffed the NEED3D a bit too.
+ *	Jun 01  - dprintf level 0->1
  */
 
 /*CTEX
@@ -83,9 +84,9 @@ void inipotential (int *npar, double *par, string name)
     M_c /= (1+fm);
 
 #if defined(NEED3D)
-    dprintf (0,"INI_POTENTIAL TeuSan85 [Full 3D] \n");
+    dprintf (1,"INI_POTENTIAL TeuSan85 [Full 3D] \n");
 #else
-    dprintf (0,"INI_POTENTIAL TeuSan85 [optimzed 2D] \n");
+    dprintf (1,"INI_POTENTIAL TeuSan85 [optimzed 2D] \n");
 #endif
     dprintf (1,"Parameters : \nPattern Speed = %f \n",omega);
     dprintf (1,"fm=%f   fx=%f  ca=%f\n\n",fm,fx,ca);

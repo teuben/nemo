@@ -35,9 +35,9 @@ void inipotential (int *npar, double *par, string name)
     if (n>3) warning("plummer: npar=%d only 3 parameters accepted",n);
 
 #if defined(TWODIM)
-    dprintf (0,"INIPOTENTIAL Plummer: [2d opt]\n");
+    dprintf (1,"INIPOTENTIAL Plummer: [2d opt]\n");
 #else
-    dprintf (0,"INIPOTENTIAL Plummer: [3d version]\n");
+    dprintf (1,"INIPOTENTIAL Plummer: [3d version]\n");
 #endif
     dprintf (1,"  Parameters : Pattern Speed = %f\n",omega);
     dprintf (1,"  mass, radius = %f %f \n",plummer_mass,plummer_radius);
