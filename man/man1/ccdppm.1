@@ -4,7 +4,14 @@ ccdppm \- convert image to a PPM file, with optional color cable
 .SH SYNOPSIS
 \fBccdppm\fP [parameter=value]
 .SH DESCRIPTION
-No description available. This manual page was created by mkman
+\fBccdppm\fP converts a NEMO image to a 24bit PPM file.
+A color table can be optionally added, also in 8bit mode.
+.PP
+ppm files are probably the most versatile output graphics 
+format, since it is very easy to write (no special library
+is needed) and they can be easily converted to other formats
+(gif, jpg,....) and are understood by most image processing
+systems.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -13,27 +20,34 @@ is also given:
 Input image filename. Must be a \fIimage(5NEMO)\fP. Currently the
 3rd dimension is ignored, and for datacubes the first slice is
 taken. See \fIccdsub(5NEMO)\fP to select a plane. No default.
-.TP 20
+.TP
 \fBout=\fP
 Output PPM filename. No default.
-.TP 20
+.TP
 \fBmin=\fP
 Overrride data minimum used in scaling. By default it will look for
 the minimum.
-.TP 20
+.TP
 \fBmax=\fP
 Overrride data maximum used in scaling. By default it will look for
 the minimum.
-.TP 20
+.TP
 \fBbad=\fP
 Use this as masking value to ignore data. By default no data is 
 considered bad.
-.TP 20
+.TP
 \fBlut=\fP
 optional selection of a lut from NEMODAT/lut. Currently the full path
-to the file must be given. Currently 
+to the file must be given. By default it will be using a grey scale
+(red=green=blue).
+.TP
+\fB8bit=t|f\fP
+Force up to 256 discrete colors. This can be useful if you want to convert
+the normally 24bit ppms to 8bit images and not 'loose' any colors
+in the conversion. 
+[\fBfalse\fP].
 .SH EXAMPLES
-Here is an example to take the 5th plane from a fits file into a PPM file:
+Here is an example to take the 5th plane from a fits file into a 24bit PPM file:
 .nf
     % fitsccd cube.fits - | ccdsub - - z=4 | ccdppm - plane4.ppm lut=$NEMODAT/lut/ronekers.lut
 .fi
