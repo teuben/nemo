@@ -1,0 +1,18 @@
+%N snapsplit
+%D cut an N-body snapshot in pieces for serial processing
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man snapsplit' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input snapshot [???]
+%A out
+	Output snapshot [???]
+%A nbody
+	Size of one (or more) snapshot(s) []
+%A nsnap
+	Number of pieces to cut a snapshot into []
+%A times
+	Series of times-ranges to select [all]
+%A VERSION
+	28-jan-94 (22/dec/95) PJT [1.1]
