@@ -33,6 +33,10 @@
 #include <yapp.h>
 #include <axis.h>
 
+#ifdef HAVE_LIBPGPLOT
+#define COLOR
+#endif
+
 string defv[] = {
     "in=???\n                     input file name",
     "times=all\n		  range of times to plot",
