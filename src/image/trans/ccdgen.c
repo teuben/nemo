@@ -1,7 +1,8 @@
 /* 
  * CCDGEN:   create 2D 'astronomical' type objects, modeled after MIRIAD'd imgen
  *
- *      4-jan-05        V0.1: for Kartik's bars modeling experiment (IMGEN is just tooooo cumbersome)
+ *      4-jan-05        V0.1: for Kartik's bars modeling experiment 
+ *                      (IMGEN is just tooooo cumbersome, and so is ccdmath)
  *                      
  */
 
@@ -69,6 +70,7 @@ local void object_flat(int npars, real *pars);
 local void object_exp(int npars, real *pars);
 local void object_gauss(int npars, real *pars);
 local void object_bar(int npars, real *pars);
+local void object_ferrers(int npars, real *pars);
 local void object_spiral(int npars, real *pars);
 local void object_noise(int npars, real *pars);
 
@@ -153,6 +155,8 @@ void nemo_main ()
     object_gauss(npar,spar);
   else if (streq(object,"bar"))
     object_bar(npar,spar);
+  else if (streq(object,"ferrers"))
+    object_ferrers(npar,spar);
   else if (streq(object,"spiral"))
     object_spiral(npar,spar);
   else if (streq(object,"noise"))
@@ -431,6 +435,69 @@ local void object_bar(int npars, real *pars)
   }
 }
 
+
+local void object_ferrers(int npars, real *pars)
+{
+  int i,nx = Nx(iptr);
+  int j,ny = Ny(iptr);
+  int l, lmax;
+  real A = 1.0;   /* peak */
+  real h = 1.0;   /* size */
+  real e = 0.0;   /* 1-b/a */
+  real b = 0.0;   /* phi */
+  real p = 1.0;   /* power factor */
+  real x1,y1,x2,y2,x3,y3,r,arg;
+  real amp,phi,value,sum;
+  real sinb,cosb;
+
+  if (npar > 0) A = pars[0];
+  if (npar > 1) h = pars[1];
+  if (npar > 2) e = pars[2];
+  if (npar > 3) b = pars[3];
+  if (npar > 4) p = pars[4];
+  dprintf(0,"ferrers: %g %g %g %g %g %g\n",A,h,b,p,e);
+
+  if (A==0) return;
+
+  lmax = Qtotflux ? 2 : 1;
+
+  sinb = sin(b*PI/180.0);
+  cosb = cos(b*PI/180.0);
+
+  for (l=0; l<lmax; l++) {     /* 1st loop: sum up the flux   if in 2nd loop: normalize */
+    if (l==0) 
+      sum = 0.0;
+    else {
+      A /= sum;
+      dprintf(0,"ferrers: A->%g\n",A);
+    } 
+    for (j=0; j<ny; j++) {
+      y1 = (j-center[1])*Dy(iptr) + Ymin(iptr);
+      for (i=0; i<nx; i++) {
+	x1 = (i-center[0])*Dx(iptr) + Xmin(iptr);
+	
+	x2 =  -x1*sinp - y1*cosp;
+	y2 =  (x1*cosp - y1*sinp)/cosi;
+
+	x3 =   x2*cosb - y2*sinb;
+	y3 = (x2*sinb  + y2*cosb)/(1-e);
+
+	r = (x3*x3+y3*y3)/(h*h);
+	if (r > 1) continue;
+
+	value = A * pow(1.0-r, p);
+	if (Qtotflux) {   
+	  if (l==0) 
+	    sum += value;
+	  else
+	    MapValue(iptr,i,j) += value;
+	} else
+	  MapValue(iptr,i,j) += value;
+      } /* i */
+    } /* j */
+  } /* k */
+}
+
 local void object_spiral(int npars, real *pars)
 {
   int i,nx = Nx(iptr);
@@ -506,7 +573,7 @@ local void object_noise(int npars, real *pars)
 
   dprintf(0,"noise:%g %g\n",m,s);
 
-  if (m==0) return;
+  if (s==0) return;
 
   if (Qtotflux) {
     m /= (nx*ny);
