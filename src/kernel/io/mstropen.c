@@ -5,6 +5,7 @@
  *
  *    8-may-2002  created on Amtrak,  Amar suggesting this for the 2GB problem   PJT
  *   21-may-2002  oops, template is a reserved word in C++ :-)                   pjt
+ *   23-may-2002  added mode to mstr_open; though currently only write allowed
  */
 
 #include <stdinc.h>
@@ -31,7 +32,7 @@ mstr *mstr_init(string tmplate)
   return mp;
 }
 
-stream mstr_open(mstr *mp)
+stream mstr_open(mstr *mp, string mode)
 {
   if (mp->count == 0) {
     mp->count++;
@@ -78,7 +79,7 @@ nemo_main()
 
   mp = mstr_init(getparam("out"));
   for (i=0; i<n; i++) {
-    stream ostr = mstr_open(mp);
+    stream ostr = mstr_open(mp,"w");
     fprintf(ostr,"Hello world, i=%d\n",i);
   }
   mstr_close(mp);

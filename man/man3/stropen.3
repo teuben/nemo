@@ -5,15 +5,11 @@ stropen, strclose, strdelete, strname, strseek \- file-stream enhanced utilities
 .nf
 .B #include <stdinc.h>
 .PP
-.B stream stropen(filename,mode)
-.B void strclose(str)
-.B void strdelete(str,scratch)
-.B string strname(str)
-.B bool strseek(str)
-.PP
-.B stream str;
-.B stream str;
-.B bool scratch;
+.B stream stropen(string filename, string mode)
+.B void strclose(stream str)
+.B void strdelete(stream str, bool scratch)
+.B string strname(stream str)
+.B bool strseek(stream str)
 .SH DESCRIPTION
 \fIstropen()\fP opens a file by filename and associates a stream
 with it, much like \fIfopen(3)\fP does. It has a few additional
