@@ -118,7 +118,7 @@ string defv[] = {
     "fitmode=cos,1\n Basic Fitmode: cos(n*theta) or sin(n*theta)",
     "nsigma=-1\n     Iterate once by rejecting points more than nsigma resid",
     "imagemode=t\n   Input image mode? (false means ascii table)",
-    "VERSION=2.8\n   26-jun-02 PJT",
+    "VERSION=2.8a\n  26-jun-02 PJT",
     NULL,
 };
 
@@ -407,6 +407,7 @@ stream  lunpri;       /* LUN for print output */
       pamp=0.0;          /* position angle of map */
     } else {
       printf("Mapsize unkown for point data, but toarcsec = %g\n",toarcsec);
+      undf=getdparam("blank");        /* the undefined value */
       grid[0]=1.0;
       grid[1]=1.0;
       pamp=0.0;
@@ -1111,6 +1112,7 @@ real  *q;             /* output sigma */
 	rx = xpos_vel[i];
 	ry = ypos_vel[i];
 	v  = vrad_vel[i];
+	if (v == undf) continue;
 	xr=(-(rx-x0)*sinp+(ry-y0)*cosp);     /* X position in galplane */
 	yr=(-(rx-x0)*cosp-(ry-y0)*sinp)/cosi;/* Y position in galplane */
 	r=sqrt(xr*xr+yr*yr);                       /* distance from center */
