@@ -9,6 +9,7 @@
  *           20-may-97  added vmax, power for rho=r^{-p}  PJT
  *            9-sep-01  gsl/xrandom
  *           21-mar-04  forgotten initialization  pjt
+ *           25-mar-05  time was never written    pjt
  */
 
 
@@ -33,11 +34,14 @@ string defv[] = {	/* DEFAULT INPUT PARAMETERS */
     "seed=0\n       Random number seed",
     "zerocm=t\n     Center c.o.m. ?",
     "headline=\n    Text headline for output",
-    "VERSION=1.4a\n 21-mar-04",
+    "VERSION=1.4b\n 24-mar-05",
     NULL,
 };
 
 string usage = "create a uniform sphere of equal massive stars";
+
+string cvsid="$Id$";
+
 
 local real rmin, rmax;
 local real virial, power, vmax;
@@ -82,7 +86,7 @@ void writegalaxy(string name, string headline)
 {
     stream outstr;
     real tsnap = 0.0;
-    int bits = MassBit | PhaseSpaceBit;
+    int bits = MassBit | PhaseSpaceBit | TimeBit;
 
     if (! streq(headline, ""))
 	set_headline(headline);
