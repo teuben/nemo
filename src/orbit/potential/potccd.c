@@ -9,6 +9,7 @@
  *      12-jun-98       made ndim=3 the default, like potlist           pjt
  *	13-sep-01	better prototype for proc			pjt
  *       4-dec-01       also compute min/max
+ *      12-sep-02       optionally output a force                       pjt
  *	
  */
 
@@ -26,16 +27,18 @@ string defv[] = {
     "y=0\n          Y-coordinate(s) to test potential at",
     "z=0\n          Z-coordinate(s) to test potential at",
     "t=0.0\n        Time to test potential at",
+    "mode=pot\n     Output pot,ax,ay,az",
     "dr=\n          Differential step for (Poisson) density map",
     "ndim=3\n       Poisson map using 2D or 3D derivatives",
-    "VERSION=1.2b\n 4-dec-01 PJT",
+    "VERSION=1.3\n  12-sep-02 PJT",
     NULL,
 };
 
 string usage = "Create potential or density image from a NEMO potential";
 
+/*                     this code uses double[3*MAXPT] */
 #ifndef MAXPT
-# define MAXPT 2048
+# define MAXPT 4096
 #endif
 
 local potproc_double mypot;    /* pointer to potential calculator function */
@@ -49,7 +52,8 @@ void nemo_main(void)
     double fourpi = FOUR_PI;
     double omega, dmin, dmax;
     char *fmt, s[20], pfmt[256];
-    int idim, ndim, maxdim = 3, first=1;
+    string mode = getparam("mode");
+    int idim, ndim, maxdim = 3, first=1, idx = 0;
     imageptr iptr;
     stream ostr;
 
@@ -79,7 +83,19 @@ void nemo_main(void)
     } else
         dr = -1.0;
     time = getdparam("t");
-
+    if (streq(mode,"pot"))
+      idx = 0;
+    else if (streq(mode,"ax"))
+      idx = 1;
+    else if (streq(mode,"ay"))
+      idx = 2;
+    else if (streq(mode,"az"))
+      idx = 3;
+    else if (streq(mode,"den")) {
+      idx = 0;
+      if (dr < 0) error("Need to supply a small positive value for dr=");
+    } else
+      error("bad mode=%s",mode);
     mypot = get_potential(getparam("potname"), 
 			  getparam("potpars"), 
 			  getparam("potfile"));
@@ -119,11 +135,12 @@ void nemo_main(void)
 	      pos[idim] += dr;
 	    }
 	    pot = den/dr;
-	  } else {                                        /* Potential */
+	  } else if (idx==0) {                                        /* Potential */
 	    if (omega != 0.0) {
 	      pot -= 0.5*sqr(omega)*(sqr(pos[0])+sqr(pos[1]));
 	    }
-	  }
+	  } else 
+	    pot = acc[idx-1];
 	  CubeValue(iptr,ix,iy,iz) = pot;
 	  if (first) {
 	    dmin = dmax = pot;

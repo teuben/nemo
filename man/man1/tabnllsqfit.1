@@ -1,4 +1,4 @@
-.TH TABNLLSQFIT 1NEMO "18 July 2002"
+.TH TABNLLSQFIT 1NEMO "11 September 2002"
 .SH NAME
 tabnllsqfit \- general purpose non-linear least squares fitting program
 .SH SYNOPSIS
@@ -164,6 +164,15 @@ d= 8.70728  0.959347
 
 
 .fi
+Here is a contrived example of plotting the function to be plotted, by fixing all
+parameters and computing a residual table from 0s:
+.nf
+
+% nemoinp 0:10:0.1 | tabmath - tab0 0
+% tabnllsqfit tab0 1 2 fit=gauss par=1,2,5,1 free=0,0,0,0 out=tab0.d
+% tabmath tab0.d - %1,-%3 | tabplot -
+
+.fi
 .SH LOAD FUNCTIONS
 With the \fBload=\fP keyword dynamic object files can be loaded using the
 \fIloadobj(3NEMO)\fP mechanism. The convention is that two functions
@@ -214,5 +223,6 @@ Peter Teuben
 .ta +1.0i +4.0i
 12-jul-02	V1.0 cloned off tablsqfit	PJT
 17-jul-02	V1.1 added load=, x=, numrec=		PJT
+11-sep-02	V1.1e  changes error/warning to accomodate residual writen	PJT
 .fi
 

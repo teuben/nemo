@@ -1,4 +1,4 @@
-.TH POTCCD 1NEMO "23 March 1995"
+.TH POTCCD 1NEMO "12 September 2002"
 .SH NAME
 potccd \- Create an image with potentials or densities from a potential
 .SH SYNOPSIS
@@ -18,13 +18,13 @@ is also given:
 Output file (image). No default.
 .TP
 \fBpotname=\fP
-Name of potential. No default
+Name of the \fIpotential(5NEMO)\fP. No default
 .TP
 \fBpotpars=\fP
-Parameters for potential.
+Parameters for the potential.
 .TP
 \fBpotfile=\fP
-Any optional data file associated with potential.
+Any optional data file associated with the potential.
 .TP
 \fBx=\fP
 X-coordinate(s) to test potential at. This should be a regular
@@ -39,10 +39,14 @@ Z-coordinate(s) to test potential at. Default: 0.
 \fBt=\fP
 Time to test potential at   
 .TP
+\fBmode=pot|ax|ay|az|den\fP
+Output mode. Choices are potential, accelerations in X, Y or Z, and
+density (which needs dr>0).
+Default: \fBpot\fP.
+.TP
 \fBdr=\fP
 Difference step used to compute numerical force derivates that
-are used to compute Poissonian densities. If no value given, the
-potential is output, a value will trigger density computation.
+are used to compute Poissonian densities. 
 .TP
 \fBndim=\fP
 Number of dimensions used in Poissonian density computation. Should
@@ -59,4 +63,5 @@ Peter Teuben
 .ta +1.0i +4.0i
 10-Jun-92	V1.0 Created       	PJT
 30-mar-94	V1.1 added density options (dr=, ndim=)	PJT
+12-sep-02	V1.2 added mode=	PJT
 .fi
