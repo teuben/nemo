@@ -143,7 +143,7 @@
         getopt
  */
 
-#define VERSION_ID  "3.4 24-apr-02 PJT"
+#define VERSION_ID  "3.4 25-apr-02 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -279,7 +279,7 @@ extern int debug_level; /* see dprintf.c   from DEBUG env.var. */
 extern int error_level; /* see error.c     from ERROR env.var. */
 extern string usage;    /* see program.c or usage.c */
 extern string defv[];   /* see program.c or defv.c */
-extern string outdefv;  /* see program.c or outdefv.c */
+extern string outdefv[];/* see program.c or outdefv.c */
 extern char **environ;  /* environment variables */
 
 extern int history;     /* 0=no history written; see history.c */
@@ -578,8 +578,8 @@ void initparam(string argv[], string defv[])
 #endif /* INTERACT */
 
     if (help_string) {
-        if (  strpbrk(help_string,"iapdqntkvh?")!=NULL ||
-              ( strpbrk(help_string,"iapdqntkvh?")==NULL && 
+        if (  strpbrk(help_string,"oiapdqntkvh?")!=NULL ||
+              ( strpbrk(help_string,"oiapdqntkvh?")==NULL && 
                 strpbrk(help_string,"0123456789")==NULL
               )  )
             printhelp(help_string);     /* give some help and possibly */
@@ -796,6 +796,7 @@ local void printhelp(string help)
         printf("  t       >> show as MIRIAD doc file\n");
         printf("  z       >> show as KHOROS pane file\n");
         printf("  i       >> show some internal variables\n");
+	printf("  o       >> show the output key names\n");
         printf("  ?       >> this help (always quit)\n\n");
         printf("Numeric helplevels determine degree and type of assistence:\n");
         printf("They can be added to give combined functionality\n");
@@ -840,14 +841,14 @@ local void printhelp(string help)
 
     numl = ((strchr(help,'n')) ? 1 : 0);    /* add newlines between key=val ? */
 
-    if (strchr(help,'a') || strpbrk(help,"apdqntvkzu")==NULL) { /* arguments */
+    if (strchr(help,'a') || strpbrk(help,"oapdqntvkzu")==NULL) { /* arguments */
         printf("%s", progname);
         for (i=1; i<nkeys; i++) {
             newline(numl);
             printf(" %s=%s",keys[i].key, keys[i].val);
         }
         newline(1);
-        if (strpbrk(help,"apdqntvkzu")==NULL) {
+        if (strpbrk(help,"oapdqntvkzu")==NULL) {
             exit(0);
             /*NOTREACHED*/
         }
@@ -874,6 +875,21 @@ local void printhelp(string help)
     if (strchr(help,'u')) {
         printf("%s\n",usage);
     } /* 'u' */
+
+    if (strchr(help,'o')) {
+      string *sp = outdefv;
+
+      warning("New option o in the user interface\nUnformatted output");
+      if (sp) {
+	while (*sp) {
+	  printf("%s\n",*sp++);
+	}
+      } else {
+	warning("No output keys defined for this program");
+      }
+      exit(0);
+      /*NOTREACHED*/
+    }
 
     if (strchr(help,'t')) {     /* nemotool - special doc file output */
         printf("%%N %s\n",progname);

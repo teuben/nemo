@@ -1,4 +1,4 @@
-.TH OUTPARAM 3NEMO "24 April 2002"
+.TH OUTPARAM 3NEMO "25 April 2002"
 .SH NAME
 outXparam \- output key processing routines for the NEMO user interface 
 .SH SYNOPSIS
@@ -7,8 +7,8 @@ outXparam \- output key processing routines for the NEMO user interface
 .B #include <getparam.h>
 .PP
 string outdefv[]={
-	"key1=d\n     Example double",
-	"key2=2i\n	Example 2 integers",
+	"key1=d\\n     Example double",
+	"key2=2i\\n	Example 2 integers",
 	NULL,
 };
 .PP
@@ -27,44 +27,48 @@ string outdefv[]={
 .fi
 .SH DESCRIPTION
 These functions provide a simple and uniform mechanism for 
-passing small amount of information in a persistent database
+passing small amounts of information in a persistent database
 between NEMO programs. It is part of the command line processing
 package (see also \fIgetparam(3NEMO)\fP), and activated
 by the user
-by passing a set of named output-keywords to the 
-\fIsystem keyword\fP  \fBoutkeys=\fP. 
+by passing a set of output-keywords to the 
+\fIsystem keyword\fP \fBoutkeys=\fP. 
 These names must be selected from a set of pre-registered 
 output-keyword names that the programmer has defined for 
 each program, much like the program keywords. In fact, 
 much like the \fBdefv[]\fP array of strings, the output
 keys are stored in the \fBoutdefv[]\fP array of strings,
-which the same "\fIkey=value\\nhelp\fP" syntax, expect
-the default value now encodes the type of the parameter
-(double,int,long,bool), preceded by an optional number
-of elements in case it is an array.
+which the same 
+"\fIkey\fP\fB=\fP\fIvalue\fP\fB\\n\fP\fIhelp\fP" 
+syntax, except the default value now encodes the type of the parameter
+(double,float,long,int,bool), preceded by an optional number
+count in case it is an array.
 .PP
-For example \fBoutdparam("rms",3.0)\fP would store
-a named value of 3.0 (in double precision) in the
-"rms" slot.
+For example \fBoutdparam("rms",3.0)\fP would store 
+a single value of 3.0 (in double precision) in the
+"rms" slot. \fBoutfparams("a",4,a)\fP would store 
+4 floats in the "a" keyword.
 .SH SEE ALSO
 getparam(3NEMO), nemokeys(1NEMO)
 .SH EXAMPLES
-In this example the noise in a map is used as an input parameter
-in another program. Previously we would have to parse the
+In this example the rms noise in a map is used as an input parameter
+for another program. Previously we would have to parse the
 ascii output of a program, e.g.
 .nf
   % set noise=`ccdstat in=map1.ccd  | grep dispersion | awk '{print $6}'`
 .fi
-but instead request the 'rms' and 'mean' to be exported in a
-small parameter database
+but if the programmer of ccdstat made the \fIrms\fP and
+\fImean\fP legal output keys, these can now be
+requested to be exported in a small parameter database, viz.
 .nf
   % ccdstat in=map1.ccd    outkeys=rms,mean
   % set noise=`nemokeys rms format=%10.5f`
   % ccdmom in=map1.ccd clip=$noise
 .fi
-this example still shows that data values is transferred in ascii mode ($noise)
+this example still shows that data values are transferred in ascii mode (rms to $noise)
 and passed into another program. More ideal would be to allow the user interface
-to directly input data, e.g. (note this has not been implemented)
+to directly input data in their (now even type checked) native format,
+e.g. (note this has not been implemented)
 .nf
   % ccdmom in=map1.ccd clip=\\$rms
 .fi
