@@ -1,264 +1,206 @@
-
-
-
-NBODY0(1NEMO)             NEMO COMMANDS             NBODY0(1NEMO)
+NBODY0(1NEMO)                                       NBODY0(1NEMO)
 
 
 
 NNAAMMEE
-     nbody0 - direct summation Aarseth N-body integrator
+       nbody0, nbody00 - direct summation Aarseth N-body integra-
+       tor
 
 SSYYNNOOPPSSIISS
-     nbody0 in=snap_in out=snap_out [keyword=value ...]
+       nbody0 in=snap_in out=snap_out [keyword=value ...]
 
 DDEESSCCRRIIPPTTIIOONN
-     nnbbooddyy00  is  the  NEMO  adaptation  of  version 0 (the _"_M_i_c_k_y
-     _M_o_u_s_e_" version) of Aarseth's N-body integrator as  published
-     in:  Binney  & Tremaine (1987).  It is a direct N-body inte-
-     grator, _i_._e_. for each particle it computes the force due  to
-     all  other N-1 particles, hence the computational time grows
-     approximately as N*N.  Although also being referred to as  a
-     'toy version', it is a fully functional N-body integrator.
+       nnbbooddyy00 is the NEMO adaptation  of  version  0  (the  _M_i_c_k_y
+       _M_o_u_s_e  version)  of  Aarseth's  N-body integrator, as pub-
+       lished in: Binney & Tremaine (1987).  It is  a  direct  N-
+       body  integrator,  _i_._e_.  for each particle it computes the
+       force due to all other N-1 particles, hence  the  computa-
+       tional  time  grows  approximately  as N*N.  Although also
+       being referred to as a 'toy version', it is a fully  func-
+       tional N-body integrator.
 
-     Each particle is followed with its own integration step - an
-     essential feature when the dynamical times of different par-
-     ticles vary a lot.  A complete description is given in: S.J.
-     Aarseth, "Multiple Time Scales", ed. U.J. Brackhill  &  B.I.
-     Cohen, pp377. Orlando: Academic Press. (1985).
+       Each  particle is followed with its own integration step -
+       an essential feature when the dynamical times of different
+       particles vary a lot.  A complete description is given in:
+       S.J. Aarseth, "Multiple Time Scales", ed. U.J. Brackhill &
+       B.I. Cohen, pp377. Orlando: Academic Press. (1985).
 
-     An  important input parameter to the program is the accuracy
-     parameter _e_t_a (see also eettaa== below).  The timestep, _d_t, cho-
-     sen for a given particle is related to the force, _F, and its
-     time derivatives by _d_t _= _s_q_r_t_(_e_t_a _* _F _/ _(_d_2_F_d_t_2_)_), which  is
-     a  slight  modification of the criterion given by Aarseth in
-     the above mentioned reference.
+       An  important  input parameter to the program is the accu-
+       racy parameter _e_t_a (see also eettaa== below).   The  timestep,
+       _d_t,  chosen  for a given particle is related to the force,
+       _F, and its time  derivatives  by  _d_t  _=  _s_q_r_t_(_e_t_a  _*  _F  _/
+       _(_d_2_F_d_t_2_)_), which is a slight modification of the criterion
+       given by Aarseth in the above mentioned reference (but see
+       also BBUUGGSS below on academic cases like the _f_i_g_u_r_e_8 orbit).
 
-     A typical value of _e_t_a _= _0_._0_2 usually conserves  the  energy
-     better than one part in 10000 over one crossing time, in the
-     absence of close encounters.
+       A typical value of _e_t_a _= _0_._0_2 usually conserves the energy
+       better  than  one part in 10000 over one crossing time, in
+       the absence of close encounters.
+
+       nnbbooddyy0000 is the C version  of  nnbbooddyy00,  based  on  the  f2c
+       translater  code  (and  hence  will  look  odd and ugly in
+       places).  It has more debug output  (debug=1  and  higher)
+       and also fixed problems with orbits like the figure8 orbit
+       (see BUGS below).
 
 PPAARRAAMMEETTEERRSS
-     The following parameters are recognized in  any  order  when
-     the keyword is also given
+       The following parameters are recognized in any order  when
+       the keyword is also given
 
-     iinn==_i_n___n_a_m_e               Input  file in _s_n_a_p_s_h_o_t_(_5_N_E_M_O_) for-
-                              mat. Depending on  how  nnbbooddyy00  was
-                              compiled,  other  input formats are
-                              supported.  [no default].
+       iinn==_i_n___n_a_m_e               Input   file  in  _s_n_a_p_s_h_o_t_(_5_N_E_M_O_)
+                                format. Depending on  how  nnbbooddyy00
+                                was compiled, other input formats
+                                are supported.  [no default].
 
-     oouutt==_o_u_t___n_a_m_e             Output file in snapshot format  [no
-                              default].
+       oouutt==_o_u_t___n_a_m_e             Output file  in  snapshot  format
+                                [no default].
 
-     eettaa==_v_a_l_u_e                Accurracy  parameter,  which deter-
-                              mines  the  integration  step.  For
-                              small  enough values of ddeellttaatt how-
-                              ever  determines  the   integration
-                              step. [0.02].
+       eettaa==_v_a_l_u_e                Accurracy parameter, which deter-
+                                mines the integration  step.  For
+                                small  enough  values  of  ddeellttaatt
+                                however determines  the  integra-
+                                tion step. [0.02].
 
-     ddeellttaatt==_v_a_l_u_e             Time  interval  of  a major output.
-                              Although the timestep is determined
+       ddeellttaatt==_v_a_l_u_e             Time  interval of a major output.
+                                Although the timestep  is  deter-
+                                mined  from  eettaa,  the  accurracy
+                                parameter, for small enough  val-
+                                ues  of  ddeellttaatt==  this  parameter
+                                will  determine  the  integration
+                                step,    and    hence   accuracy.
+                                [Default: 0.25].
 
+       ttccrriitt==_v_a_l_u_e              Final integration time [2.0].
 
+       eeppss==_v_a_l_u_e                Gravitational  softening   length
+                                [0.05].
 
-Nemo Release 2.4   Last change: 22 January 2000                 1
+       rreesseett==tt||ff                Selects  if  the integration time
+                                of  the  next  particle   to   be
+                                advanced    be   reset   to   the
+                                requested  output  time  if  that
+                                preceded   the  integration  time
+                                (see ddeellttaatt==).   This  is  highly
+                                recommended,  as  for high output
+                                frequencies  (small  ddeellttaatt==  cf.
+                                the _e_t_a-derived timestep _d_t) [t].
 
-
-
-
-
-
-NBODY0(1NEMO)             NEMO COMMANDS             NBODY0(1NEMO)
-
-
-
-                              from  eettaa, the accurracy parameter,
-                              for small enough values of  ddeellttaatt==
-                              this  parameter  will determine the
-                              integration step, and  hence  accu-
-                              racy.  [Default: 0.25].
-
-     ttccrriitt==_v_a_l_u_e              Final integration time [2.0].
-
-     eeppss==_v_a_l_u_e                Gravitational    softening   length
-                              [0.05].
-
-     rreesseett==tt||ff                Selects if the integration time  of
-                              the next particle to be advanced be
-                              reset to the requested output  time
-                              if  that  preceded  the integration
-                              time (see ddeellttaatt==).  This is highly
-                              recommended,  as  for  high  output
-                              frequencies (small ddeellttaatt== cf.  the
-                              _e_t_a-derived timestep _d_t) [t].
-
-     ooppttiioonnss==sstteepp             Miscellaneous    control   options,
-                              specified as a comma separated list
-                              of  keywords. Currently implemented
-                              are:  sstteepp,  outputs  the   current
-                              timestep  per  particle  in the _A_u_x
-                              array   of    a    _s_n_a_p_s_h_o_t_(_5_N_E_M_O_).
-                              Default: none.
+       ooppttiioonnss==sstteepp             Miscellaneous  control   options,
+                                specified  as  a  comma separated
+                                list   of   keywords.   Currently
+                                implemented  are:  sstteepp,  outputs
+                                the current timestep per particle
+                                in  the  _A_u_x  array  of  a  _s_n_a_p_-
+                                _s_h_o_t_(_5_N_E_M_O_).  Default: none.
 
 LLIIMMIITTAATTIIOONNSS
-     The  code has a hardcoded maximum number of particles in the
-     fortran and C  code  (File:  _n_m_a_x_._h),  change  the  relevant
-     PARAMETER  statement  to  whatever  is  required. Using NEMO
-     install the Makefile macro NMAX can also be used to do  this
-     automatically and hence easily generate a new version with a
-     different value for NMAX, _e_._g_. mmaakkee  nnmmaaxx  NNMMAAXX==225566  nnbbooddyy00.
-     The  NDIM parameter should not be changed, and remains at 3.
+       The code has a hardcoded maximum number  of  particles  in
+       the fortran and C code (File: _n_m_a_x_._h), change the relevant
+       PARAMETER statement to whatever is  required.  Using  NEMO
+       install  the  Makefile  macro  NMAX can also be used to do
+       this automatically and hence easily generate a new version
+       with  a  different value for NMAX, _e_._g_. mmaakkee nnmmaaxx NNMMAAXX==225566
+       nnbbooddyy00. The NDIM parameter  should  not  be  changed,  and
+       remains at 3.
 
-     Close encounters are not treated in any  special  way.   See
-     any   of   the   modified   versions  of  the  Aarseth  code
-     (_n_b_o_d_y_2_(_1_N_E_M_O_)) or in case  regularization  is  needed  (see
-     also newton0_reg in: _n_e_w_t_o_n_0_(_1_N_E_M_O_)).
+       Close  encounters are not treated in any special way.  See
+       any  of  the  modified  versions  of  the   Aarseth   code
+       (_n_b_o_d_y_2_(_1_N_E_M_O_))  or  in case regularization is needed (see
+       also newton0_reg in: _n_e_w_t_o_n_0_(_1_N_E_M_O_)).
 
-     Timesteps  are not recomputed until the current timestep has
-     expired.
+       Timesteps are not recomputed until  the  current  timestep
+       has expired.
 
-     A side-effect of the variable and particle-unique  timesteps
-     is that the final snapshot will not be exactly identical for
-     two runs with different choices of ddeellttaatt.
+       A   side-effect   of   the  variable  and  particle-unique
+       timesteps is that the final snapshot will not  be  exactly
+       identical for two runs with different choices of ddeellttaatt.
 
-     In order to save time, all calculations in the fortran  code
-     (nbody0.f)  can  be  done  in single precision.  A different
-     version of  nbody0.f  is  needed  in  this  case.  See  code
+       In  order  to  save  time, all calculations in the fortran
+       code (nbody0.f) can be done in single precision.   A  dif-
+       ferent  version  of  nbody0.f  is needed in this case. See
+       code comments labeled ``_S_E_D''.
 
-
-
-Nemo Release 2.4   Last change: 22 January 2000                 2
-
-
-
-
-
-
-NBODY0(1NEMO)             NEMO COMMANDS             NBODY0(1NEMO)
-
-
-
-     comments ``SED''.
-
-     A C version is also available, as nbody0.c, though the Make-
-     file needs the target nnbbooddyy0000 to install it. The user inter-
-     face is the same as that of nbody0.
+       A C version is also available,  as  nbody0.c,  though  the
+       Makefile  needs the target nnbbooddyy0000 to install it. The user
+       interface is the same as that of nbody0.
 
 BBUUGGSS
-     Starting time of initial conditions is (re)set to 0, even if
-     the snapshot had another time.
+       Starting time of initial conditions is (re)set to 0,  even
+       if the snapshot had another time.
+
+       nbody0  has  a  simple version of the time step criterion,
+       which can fail in "academic" situations. For example,  for
+       the  nice  symmetric  _"_f_i_g_u_r_e_8  _o_r_b_i_t_"  (see $NEMODAT/fig-
+       ure8.dat), the integration will fail  since  the  timestep
+       for  the 3rd particle blows up. Interestingly enough, some
+       compilers (e.g. gnu) will  happily  work  around  this  if
+       optimization  is  turned  on, but fail with pure debugging
+       (OPT=-g) since only in this case the expression will  com-
+       pute as exactly 0.
 
 SSTTOORRAAGGEE
-     A total of order _6_0_0_._N_M_A_X bytes is needed, for a given maxi-
-     mum of _N_M_A_X particles. This breaks down as follows:
+       A  total  of  order  _6_0_0_._N_M_A_X bytes is needed, for a given
+       maximum of _N_M_A_X particles. This breaks down as follows:
 
-     The  FFOORRTTRRAANN  I/O  code  uses  _1_0_._N_M_A_X  double precision and
-     _2_0_._N_M_A_X real storage units for a maximum compiled number  of
-     _N_M_A_X  particles.  On  most machines this adds up to _1_6_0_._N_M_A_X
-     bytes.
+       The FFOORRTTRRAANN I/O code uses  _1_0_._N_M_A_X  double  precision  and
+       _2_0_._N_M_A_X  real  storage units for a maximum compiled number
+       of _N_M_A_X particles.  On  most  machines  this  adds  up  to
+       _1_6_0_._N_M_A_X bytes.
 
-     The CC I/O code allocates space dynamically; and through lim-
-     itations of the fortran code, a maximum of _1_0_0_._N_M_A_X double's
-     are needed, which means _4_0_0_._N_M_A_X bytes.
+       The  CC  I/O  code allocates space dynamically; and through
+       limitations of the fortran code,  a  maximum  of  _1_0_0_._N_M_A_X
+       double's are needed, which means _4_0_0_._N_M_A_X bytes.
 
 AAUUTTHHOORR
-     Sverre Aarseth (F77), Peter Teuben (C)
+       Sverre Aarseth (F77), Peter Teuben (C)
 
 GGEENNEEAALLOOGGYY
-     The nnbbooddyy** series of NBODY integrators were  all  originally
-     written  by Sverre Aarseth, and exist in many forms through-
-     out the scientific community.  The  list  below  is  a  mere
-     zeroth order approximation to the current state of affairs:
-     nbody0    Binney & Tremaine's toy version, with NEMO interface
-     nbody1       variable timestep
-               * email version sent on Fri, 15 Oct 93 17:52 GMT
-     nbody2     with Ahmad-Cohen scheme - (see also Benz et al, 1997)
-                   * email version 17-mar-93
-     nbody3          XXX
-     nbody4    ... for HARP
-     nbody5    with regularization handling triples & binaries
-     nbody6     ... for new parallel machine
+       The nnbbooddyy** series of NBODY integrators were all originally
+       written  by  Sverre  Aarseth,  and  exist  in  many  forms
+       throughout  the  scientific community. The list below is a
+       mere zeroth order approximation to the  current  state  of
+       affairs:
+       nbody0    Binney & Tremaine's toy version, with NEMO interface
+       nbody1       variable timestep
+                 * email version sent on Fri, 15 Oct 93 17:52 GMT
+       nbody2     with Ahmad-Cohen scheme - (see also Benz et al, 1997)
+                     * email version 17-mar-93
+       nbody3          XXX
+       nbody4    ... for HARP
+       nbody5    with regularization handling triples & binaries
+       nbody6     ... for new parallel machine
 
 FFIILLEESS
-     ~/src/nbody/evolve/aarseth/nbody0official source code within NEMO
-     ~/usr/aarseth/                      SJA's other nbodyX versions (not exported)
-     nb0.f                              Sverre's version
+       ~/src/nbody/evolve/aarseth/nbody0official source code within NEMO
+       ~/usr/aarseth/                      SJA's other nbodyX versions (not all exported)
+       nb0.f                              Sverre's version
 
 SSEEEE AALLSSOO
-     hackcode1(1NEMO),      runbody2(1NEMO),     snapshot(5NEMO),
-     atos(1NEMO), stoa(1NEMO)
+       hackcode1(1NEMO),     runbody2(1NEMO),    snapshot(5NEMO),
+       atos(1NEMO), stoa(1NEMO)
 
-     Binney, J. &  Tremaine,  S.  _G_a_l_a_c_t_i_c  _D_y_n_a_m_i_c_s.   Princeton
-     Unversity Press (1987), pp678.
+       Binney, J. & Tremaine, S.  _G_a_l_a_c_t_i_c  _D_y_n_a_m_i_c_s.   Princeton
+       Unversity Press (1987), pp678.
 
+       S.J.Aarseth,  1972,  p.373 in: "Gravitational N-Body Prob-
+       lem", IAU Colloquium  #10,  M.Lecar  (Ed.),  Reidel,  Dor-
+       drecht.
 
-
-Nemo Release 2.4   Last change: 22 January 2000                 3
-
-
-
-
-
-
-NBODY0(1NEMO)             NEMO COMMANDS             NBODY0(1NEMO)
-
-
-
-     S.J.Aarseth, 1972, p.373 in: "Gravitational N-Body Problem",
-     IAU Colloquium #10, M.Lecar (Ed.), Reidel, Dordrecht.
-
-     S.J.Aarseth, 1985, p.377 in: "Multiple  Time  Scales",  U.J.
-     Brackbill & B.I. Cohen (Eds.), Academic Press, Orlando.
+       S.J.Aarseth,  1985, p.377 in: "Multiple Time Scales", U.J.
+       Brackbill & B.I. Cohen (Eds.), Academic Press, Orlando.
 
 HHIISSTTOORRYY
-     30-jun-89 V1.0 created + NEMO interfaces to fortran sourcePJT
-     3-jul-89  V1.1 mods to f2c interface, name of keywords       PJT
-     24-jan-90 V1.2 all in double precision                     PJT
-     15-nov-91 fixed up pure nbody0_ff version                 PJT
-     20-may-92 -- also made the C (f2c) version available            PJT
-     2-apr-97  documentation updated for NEMO 2.4                 PJT
-     6-aug-97  V1.3 added options=                                  PJT
-     11-feb-98 V1.3a fixed array index bug for higher order termPJT
-     21-jan-00 V1.4 added reset= to fix small deltat problem/bugPJT
+       30-jun-89 V1.0 created + NEMO interfaces to fortran sourcePJT
+       3-jul-89  V1.1 mods to f2c interface, name of keywords       PJT
+       24-jan-90 V1.2 all in double precision                     PJT
+       15-nov-91 fixed up pure nbody0_ff version                 PJT
+       20-may-92 -- also made the C (f2c) version available            PJT
+       2-apr-97  documentation updated for NEMO 2.4                 PJT
+       6-aug-97  V1.3 added options=                                  PJT
+       11-feb-98 V1.3a fixed array index bug for higher order termPJT
+       21-jan-00 V1.4 added reset= to fix small deltat problem/bugPJT
+       24-feb-04 V1.5 documented the academic figure8 orbit problem, fixed in nbody00PJT
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Nemo Release 2.4   Last change: 22 January 2000                 4
-
-
-
+                         24 February 2004           NBODY0(1NEMO)
