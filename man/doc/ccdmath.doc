@@ -1,0 +1,18 @@
+%N ccdmath
+%D image arithmetic
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man ccdmath' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input file(s), separated by comma's (optional) []
+%A out
+	Output file [???]
+%A fie
+	Expression %1,%2,.. for input maps; %x,%y for new map [???]
+%A size
+	2- or 3D dimensions of map/cube [10,10,1]
+%A seed
+	Random seed [0]
+%A VERSION
+	15-feb-99 PJT [2.6a]
