@@ -36,11 +36,13 @@
  *      18-dec-01        4.0  convert to use fitsio_nemo.h and optional CFITSIO
  *      12-aug-02           a NaN problems with miriad
  *      14-apr-03           b fix NaN problems with FITS files
+ *      23-nov-04        4.9  deal with axistype 1 images, but forced keyword   pjt
  */
 
 #include <stdinc.h>
 #include <getparam.h>
 #include <image.h>
+#include <strlib.h>
 #include <fitsio_nemo.h>
 
 string defv[] = {
@@ -60,7 +62,8 @@ string defv[] = {
     "bzero=0\n          Offset conversion factor in raw mode (0)",
     "blank=\n           Blank value re-substitution value?",
     "relcoords=f\n      Use relative (to crpix) coordinates instead abs",
-    "VERSION=4.0c\n	2-mar-04 PJT",
+    "axistype=0\n       Force axistype 0 (old, crpix==1) or 1 (new, crpix as is)",
+    "VERSION=4.9\n	23-nov-04 PJT",
     NULL,
 };
 
@@ -68,7 +71,7 @@ string usage = "convert (near)fits files into ccd images";
 
 #define MAXPLANES 512
 
-void make_fitheader(FITS *fitsfile, imageptr iptr, bool Qrel, FLOAT *, FLOAT *);
+void make_fitheader(FITS *fitsfile, imageptr iptr, bool Qrel, int, FLOAT *, FLOAT *);
 void make_rawheader(FITS *fitsfile, imageptr iptr, bool Qrel);
 FITS *rawopen(string name, string status, int naxis, int *nsize);
 int is_feq(int *a, int *b);
@@ -86,6 +89,7 @@ void nemo_main()
     imageptr iptr;
     string mode, blankval;
     bool   Qblank, Qrel;
+    int axistype = getiparam("axistype");
 
     outstr = stropen(getparam("out"),"w");   /* open image file for output */
     npl = nemoinpi(getparam("planes"),planes,MAXPLANES);
@@ -122,7 +126,7 @@ void nemo_main()
     if (iptr==NULL) error("No memory to allocate image");
 
     if (streq(mode,"fits")) {
-      make_fitheader(fitsfile,iptr,Qrel,&fdata_min, &fdata_max);
+      make_fitheader(fitsfile,iptr,Qrel,axistype, &fdata_min, &fdata_max);
       dprintf(1,"Datamin/max read: %g - %g\n",fdata_min, fdata_max);
     } else if (streq(mode,"raw"))
       make_rawheader(fitsfile,iptr,Qrel);
@@ -266,13 +270,13 @@ void make_rawheader(FITS *fitsfile, imageptr iptr, bool Qrel)
 
 }
 #endif
-void make_fitheader(FITS *fitsfile, imageptr iptr, bool Qrel, 
+void make_fitheader(FITS *fitsfile, imageptr iptr, bool Qrel, int axistype,
 		    FLOAT *data_min, FLOAT *data_max)
 {
     int nz, tmpi, i, j;
     real crpix1, crpix2, crpix3;
     FLOAT tmpr, cd[3][3];
-    char cdname[10], ctype[32], *scopy();
+    char cdname[10], ctype[32];
 
     nz = Nz(iptr);
 
@@ -303,14 +307,26 @@ void make_fitheader(FITS *fitsfile, imageptr iptr, bool Qrel,
 	
     fitrdhdr(fitsfile,"CRPIX1",&tmpr,1.0); crpix1 = tmpr;
     fitrdhdr(fitsfile,"CRPIX2",&tmpr,1.0); crpix2 = tmpr;
-    if (nz>1) fitrdhdr(fitsfile,"CRPIX3",&tmpr,1.0); crpix3 = tmpr;
+    if (nz>1) {
+      fitrdhdr(fitsfile,"CRPIX3",&tmpr,1.0); crpix3 = tmpr;
+    } else
+      crpix3 = 0.0;
 
-    if (crpix1 != 1.0)
+    if (axistype==0) {
+      Axis(iptr) = 0;
+      if (crpix1 != 1.0)
         Xmin(iptr) -= (crpix1-1.0)*Dx(iptr);
-    if (crpix2 != 1.0)
+      if (crpix2 != 1.0)
         Ymin(iptr) -= (crpix2-1.0)*Dy(iptr);
-    if (nz>1 && crpix3 != 1.0)
+      if (nz>1 && crpix3 != 1.0)
         Zmin(iptr) -= (crpix3-1.0)*Dz(iptr);
+    } else if (axistype==1) {
+      Axis(iptr) = 1;
+      Xref(iptr) = crpix1-1;
+      Yref(iptr) = crpix2-1;
+      Zref(iptr) = crpix3-1;
+    } else
+      error("Illegal axistype=%d",axistype);
 
     fitrdhda(fitsfile,"CTYPE1",ctype,"");
     Namex(iptr) = scopy(ctype);
