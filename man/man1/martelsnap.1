@@ -1,4 +1,4 @@
-.TH MARTELSNAP 1NEMO "30 June 2001"
+.TH MARTELSNAP 1NEMO "1 July 2001"
 .SH NAME
 martelsnap \- convert Martel "pos-vel" dump files to snapshot
 .SH SYNOPSIS
@@ -34,13 +34,12 @@ unfio(1NEMO), bswap(1NEMO)
 http://xxx.lanl.gov/abs/astro-ph/9903210
 .SH FORMAT
 Data format is a simple binary dump of the single precision
-coordinates and velocities of all particles. The order in
-the file is X(1),Y(1),Z(1),VX(1),VY(1),VZ(1),X(2),....., and
+coordinates and velocities of all particles,
 the following snippet of fortran-77 code would produce such files:
 .nf
-    REAL posvel(6,NP)
+    REAL x(N),y(N),z(N),vx(N),vy(N),vz(N),
     OPEN(10,FILE='posvel.dat',STATUS='new',FORM='unformatted')
-    WRITE(10) ((posvel(i,j),i=1,6),j=1,NP)
+    WRITE(10) x,y,z,vx,vy,vx
     CLOSE(10)
 .fi
 .SH AUTHOR
@@ -50,4 +49,5 @@ Peter Teuben
 .ta +1.0i +4.0i
 19-Mar-99	V1.0 Created   	PJT
 29-jun-01	V1.1 added swap=	PJT
+1-jul-01	V1.1a   major bug: posvel matrix was never transposed...	PJT
 .fi
