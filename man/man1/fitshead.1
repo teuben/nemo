@@ -72,8 +72,14 @@ Generic editing of a FITS header can be done in the following way
     % scanfits map1.fits map1.data select=data
     % cat map1.head map1.data > map2.fits
 .fi
+.PP
+The unix command \fIfold(1)\fP can also - with some limitations - be used to view
+a FITS header by specifying the width to be 80 characters, viz.
+.nf
+    % fold -80 map1.fits | more
+.fi
 .SH "SEE ALSO"
-scanfits(1NEMO), dd(1), fits(5NEMO)
+scanfits(1NEMO), dd(1), fits(5NEMO), fold(1)
 .SH AUTHOR
 Peter Teuben
 .SH FILES
