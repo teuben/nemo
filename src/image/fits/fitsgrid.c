@@ -21,7 +21,7 @@
 
 #include <nemo.h>
 #include <history.h>
-#include <fitsio.h> /* for processing output file */
+#include <nemo_fitsio.h> /* for processing output file */
 #include <fits.h>   /* for processing input file */
 
 string defv[] = {
@@ -36,7 +36,7 @@ string defv[] = {
     "ncell=0\n             Number of neighbor cells to use",
     "sigma=0\n             Core weighting scale (if >0) for neighbor cells",
     "moment=1\n            Moment 1 (mean in cell) or 2 (dispersion) map? ",
-    "VERSION=1.3b\n        22-nov-94 PJT",
+    "VERSION=1.3c\n        12-apr-04 PJT",
     NULL,
 };
 
