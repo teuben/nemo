@@ -12,7 +12,6 @@
 #include <getparam.h>
 #include <vectmath.h>		
 #include <filestruct.h>
-#include <string.h>
 
 #include <snapshot/snapshot.h>	
 #include <snapshot/body.h>

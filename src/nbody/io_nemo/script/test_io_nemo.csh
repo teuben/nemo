@@ -5,6 +5,7 @@
 # Check necessary nemo binaries
 foreach i ( hackforce snapmask snapprint mkplummer )
     set x=""`$NEMOSRC/scripts/need $i`
+    echo "$i [$x]"
     if ( $x != "" ) then
 	$NEMOSRC/scripts/need -m  $i
     endif

@@ -17,8 +17,6 @@
 #include <snapshot/snapshot.h>	
 #include <snapshot/body.h>
 
-#include <string.h>
-#include <stdio.h>
 #include <stdarg.h>
 
 #include "io_init.h" 
