@@ -1,0 +1,399 @@
+/*
+ * GET_SNAP.C: generic method for snapshot input.
+ * Joshua E. Barnes  23-May-88  Princeton NJ.
+ */
+
+/*
+ * GetSnap is a generic method for reading snapshot data from a file,
+ * to be #included in the compilation of an application program:
+ *
+ *	#define Body      ...
+ *	#define Mass(b)   ...
+ *	#define Phase(b)  ...
+ *
+ *	#include <snapshot/snapshot.h>
+ *	#include <snapshot/get_snap.c>
+ *
+ * The simplest way to use GetSnap is probably as follows:
+ *
+ *	stream instr;
+ *	Body *btab = NULL;
+ *	int nbody, bits;
+ *	real tsnap;
+ *
+ *	GetSnap(instr, &btab, &nbody, &tsnap, &bits);
+ *	if ((bits & <required_bits>) == <required_bits>)
+ *	    <process_input_data>;
+ *
+ * Notes: (1) if *btab == NULL, a new body array of length nbody will be
+ * allocated, which the programmer may access when get_snap returns, while
+ * if *btab != NULL, then it must point to an array of length nbody, and
+ * any new data in the input stream replaces the data in the body table.
+ * (2) bits is the logical OR of the bit flags for the individual
+ * components, defined in snapshot/snapshot.h. (3) The name GetSnap is
+ * a macro, defined by get_snap.c, so the include statement must come
+ * before the first usage. (4) The vanilla GetSnap or any subsidiary
+ * routine may be replaced by giving the macro name a definition before
+ * including get_snap.c.  For example, to supply your own definition of
+ * the mass-input routine, do the following:
+ *
+ *	#define GetMass  my_get_mass
+ *
+ *	#include <snapshot/get_snap.c>
+ *
+ *	local my_get_mass(....) {....}
+ *
+ * Look at the definition of the standard function(s) you are replacing to
+ * find out what arguments to expect.
+ */
+
+/*
+ * GetSnapParameters: working routine to input snapshot parameters.
+ */
+
+#ifndef GetSnapParameters
+
+#define GetSnapParameters  _get_snap_parameters
+
+local _get_snap_parameters(instr, btptr, nbptr, tsptr, ifptr)
+stream instr;			/* input stream, of course */
+Body **btptr;			/* pointer to body array */
+int *nbptr;			/* pointer to number of bodies */
+real *tsptr;			/* pointer to time of input */
+int *ifptr;			/* pointer to input bit flags */
+{
+    int nbody;
+
+    if (get_tag_ok(instr, ParametersTag)) {
+	get_set(instr, ParametersTag);
+	get_data(instr, NobjTag, IntType, &nbody, 0);
+	if (*btptr != NULL && nbody > *nbptr)	/* bigger than expected? */
+	    error("get_snap_parameters: %s = %d is too big\n",
+		  NobjTag, nbody);
+	*nbptr = nbody;				/* set input value */
+	if (get_tag_ok(instr, TimeTag)) {	/* time data specified? */
+	    get_data_coerced(instr, TimeTag, RealType, tsptr, 0);
+	    *ifptr |= TimeBit;			/*   set time bit */
+	}
+	get_tes(instr, ParametersTag);
+    }
+}
+
+#endif
+
+/*
+ * GetSnapCsys: worker routine to check coordinate system.
+ */
+
+#ifndef GetSnapCsys
+
+#define GetSnapCsys  _get_snap_csys
+
+local _get_snap_csys(instr, ifptr)
+stream instr;			/* input stream, of course */
+int *ifptr;			/* pointer to input bit flags */
+{
+    int cs;
+
+    if (get_tag_ok(instr, CoordSystemTag)) {
+	get_data(instr, CoordSystemTag, IntType, &cs, 0);
+	if (cs != CSCode(Cartesian, NDIM, 2))
+	    error("get_snap_csys: cant handle %s = %#o\n",
+		  CoordSystemTag, cs);
+    } else
+	printf("get_snap_csys: assuming %s = %#o\n",
+	       CoordSystemTag, CSCode(Cartesian, NDIM, 2));
+}
+
+#endif
+
+/*
+ * GetSnapMass: worker routine to input mass data.
+ */
+
+#ifndef GetSnapMass
+
+#define GetSnapMass  _get_snap_mass
+
+local _get_snap_mass(instr, btptr, nbptr, ifptr)
+stream instr;			/* input stream, of course */
+Body **btptr;			/* pointer to body array */
+int *nbptr;			/* pointer to number of bodies */
+int *ifptr;			/* pointer to input bit flags */
+{
+#ifdef Mass
+    char *malloc();
+    real *mbuf, *mp;
+    Body *bp;
+
+    if (get_tag_ok(instr, MassTag)) {
+	mbuf = (real *) malloc(*nbptr * sizeof(real));
+	if (mbuf == NULL)
+	    error("get_snap_mass: not enuf memory\n");
+	get_data_coerced(instr, MassTag, RealType, mbuf, *nbptr, 0);
+	for (bp = *btptr, mp = mbuf; bp < *btptr + *nbptr; bp++)
+	    Mass(bp) = *mp++;
+	free(mbuf);
+	*ifptr |= MassBit;
+    }
+#endif
+}
+
+#endif
+
+/*
+ * GetSnapPhase: worker routine to input phasespace data.
+ */
+
+#ifndef GetSnapPhase
+
+#define GetSnapPhase  _get_snap_phase
+
+local _get_snap_phase(instr, btptr, nbptr, ifptr)
+stream instr;			/* input stream, of course */
+Body **btptr;			/* pointer to body array */
+int *nbptr;			/* pointer to number of bodies */
+int *ifptr;			/* pointer to input bit flags */
+{
+#ifdef Phase
+    char *malloc();
+    real *rvbuf, *rvp;
+    Body *bp;
+
+    if (get_tag_ok(instr, PhaseSpaceTag)) {
+	rvbuf = (real *) malloc(*nbptr * 2 * NDIM * sizeof(real));
+	if (rvbuf == NULL)
+	    error("get_snap_phase: not enuf memory\n");
+	get_data_coerced(instr, PhaseSpaceTag, RealType, rvbuf,
+			 *nbptr, 2, NDIM, 0);
+	for (bp = *btptr, rvp = rvbuf; bp < *btptr + *nbptr; bp++) {
+	    SETV(Phase(bp)[0], rvp);
+	    rvp += NDIM;
+	    SETV(Phase(bp)[1], rvp);
+	    rvp += NDIM;
+	}
+	free(rvbuf);
+	*ifptr |= PhaseSpaceBit;
+    }
+#endif
+}
+
+#endif
+
+/*
+ * GetSnapPhi: worker routine to input potential data.
+ */
+
+#ifndef GetSnapPhi
+
+#define GetSnapPhi  _get_snap_phi
+
+local _get_snap_phi(instr, btptr, nbptr, ifptr)
+stream instr;			/* input stream, of course */
+Body **btptr;			/* pointer to body array */
+int *nbptr;			/* pointer to number of bodies */
+int *ifptr;			/* pointer to input bit flags */
+{
+#ifdef Phi
+    char *malloc();
+    real *pbuf, *pp;
+    Body *bp;
+
+    if (get_tag_ok(instr, PotentialTag)) {
+	pbuf = (real *) malloc(*nbptr * sizeof(real));
+	if (pbuf == NULL)
+	    error("get_snap_phi: not enuf memory\n");
+	get_data_coerced(instr, PotentialTag, RealType, pbuf, *nbptr, 0);
+	for (bp = *btptr, pp = pbuf; bp < *btptr + *nbptr; bp++)
+	    Phi(bp) = *pp++;
+	free(pbuf);
+	*ifptr |= PotentialBit;
+    }
+#endif
+}
+
+#endif
+
+/*
+ * GetSnapAcc: worker routine to input accelerations.
+ */
+
+#ifndef GetSnapAcc
+
+#define GetSnapAcc  _get_snap_acc
+
+local _get_snap_acc(instr, btptr, nbptr, ifptr)
+stream instr;			/* input stream, of course */
+Body **btptr;			/* pointer to body array */
+int *nbptr;			/* pointer to number of bodies */
+int *ifptr;			/* pointer to input bit flags */
+{
+#ifdef Acc
+    char *malloc();
+    real *abuf, *ap;
+    Body *bp;
+
+    if (get_tag_ok(instr, AccelerationTag)) {
+	abuf = (real *) malloc(*nbptr * NDIM * sizeof(real));
+	if (abuf == NULL)
+	    error("get_snap_acc: not enuf memory\n");
+	get_data_coerced(instr, AccelerationTag, RealType, abuf,
+			 *nbptr, NDIM, 0);
+	for (bp = *btptr, ap = abuf; bp < *btptr + *nbptr; bp++) {
+	    SETV(Acc(bp), ap);
+	    ap += NDIM;
+	}
+	free(abuf);
+	*ifptr |= AccelerationBit;
+    }
+#endif
+ }
+
+#endif
+
+/*
+ * GetSnapAux: worker routine to input aux values.
+ */
+
+#ifndef GetSnapAux
+
+#define GetSnapAux  _get_snap_aux
+
+local _get_snap_aux(instr, btptr, nbptr, ifptr)
+stream instr;			/* input stream, of course */
+Body **btptr;			/* pointer to body array */
+int *nbptr;			/* pointer to number of bodies */
+int *ifptr;			/* pointer to input bit flags */
+{
+#ifdef Aux
+    char *malloc();
+    real *abuf, *ap;
+    Body *bp;
+
+    if (get_tag_ok(instr, AuxTag)) {
+	abuf = (real *) malloc(*nbptr * sizeof(real));
+	if (abuf == NULL)
+	    error("get_snap_aux: not enuf memory\n");
+	get_data_coerced(instr, AuxTag, RealType, abuf, *nbptr, 0);
+	for (bp = *btptr, ap = abuf; bp < *btptr + *nbptr; bp++)
+	    Aux(bp) = *ap++;
+	free(abuf);
+	*ifptr |= AuxBit;
+    }
+#endif
+ }
+
+#endif
+
+/*
+ * GetSnapKey: worker routine to input key values.
+ */
+
+#ifndef GetSnapKey
+
+#define GetSnapKey  _get_snap_key
+
+local _get_snap_key(instr, btptr, nbptr, ifptr)
+stream instr;			/* input stream, of course */
+Body **btptr;			/* pointer to body array */
+int *nbptr;			/* pointer to number of bodies */
+int *ifptr;			/* pointer to input bit flags */
+{
+#ifdef Key
+    char *malloc();
+    int *kbuf, *kp;
+    Body *bp;
+
+    if (get_tag_ok(instr, KeyTag)) {
+	kbuf = (int *) malloc(*nbptr * sizeof(int));
+	if (kbuf == NULL)
+	    error("get_snap_key: not enuf memory\n");
+	get_data(instr, KeyTag, IntType, kbuf, *nbptr, 0);
+	for (bp = *btptr, kp = kbuf; bp < *btptr + *nbptr; bp++)
+	    Key(bp) = *kp++;
+	free(kbuf);
+	*ifptr |= KeyBit;
+    }
+#endif
+}
+
+#endif
+
+/*
+ * GetSnapParticles: managing routine for input of particle data.
+ */
+
+#ifndef GetSnapParticles
+
+#define GetSnapParticles  _get_snap_particles
+
+local _get_snap_particles(instr, btptr, nbptr, ifptr)
+stream instr;			/* input stream, of course */
+Body **btptr;			/* pointer to body array */
+int *nbptr;			/* pointer to number of bodies */
+int *ifptr;			/* pointer to input bit flags */
+{
+    char *malloc();
+
+    if (get_tag_ok(instr, ParticlesTag)) {
+	if (*btptr == NULL) {
+	    *btptr = (Body *) malloc(*nbptr * sizeof(Body));
+	    if (*btptr == NULL)
+		error("get_snap_particles: not enuf memory\n");
+	}
+	get_set(instr, ParticlesTag);
+	GetSnapCsys(instr, ifptr);
+	GetSnapMass(instr, btptr, nbptr, ifptr);
+	GetSnapPhase(instr, btptr, nbptr, ifptr);
+	GetSnapPhi(instr, btptr, nbptr, ifptr);
+	GetSnapAcc(instr, btptr, nbptr, ifptr);
+	GetSnapAux(instr, btptr, nbptr, ifptr);
+	GetSnapKey(instr, btptr, nbptr, ifptr);
+	get_tes(instr, ParticlesTag);
+    }
+}
+
+#endif
+
+/*
+ * GetSnapDiagnostics: drone routine does nothing.
+ */
+
+#ifndef GetSnapDiagnostics
+
+#define GetSnapDiagnostics  _get_snap_diagnostics
+
+local _get_snap_diagnostics(instr, ifptr)
+stream instr;			/* input stream, of course */
+int *ifptr;			/* pointer to input bit flags */
+{
+}
+
+#endif
+
+/*
+ * GetSnap: controling routine for snapshot input.
+ */
+
+#ifndef GetSnap
+
+#define GetSnap  _get_snap
+
+local _get_snap(instr, btptr, nbptr, tsptr, ifptr)
+stream instr;			/* input stream, of course */
+Body **btptr;			/* pointer to body array */
+int *nbptr;			/* pointer to number of bodies */
+real *tsptr;			/* pointer to time of input */
+int *ifptr;			/* pointer to input bit flags */
+{
+    *ifptr = 0;
+    if (get_tag_ok(instr, SnapShotTag)) {
+	get_set(instr, SnapShotTag);
+	GetSnapParameters(instr, btptr, nbptr, tsptr, ifptr);
+	GetSnapParticles(instr, btptr, nbptr, ifptr);
+	GetSnapDiagnostics(instr, ifptr);
+	get_tes(instr, SnapShotTag);
+    }
+}
+
+#endif
