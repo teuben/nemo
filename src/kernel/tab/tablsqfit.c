@@ -35,6 +35,8 @@
  *       8-aug-01     c compute error in axis ratio for ellipses (w/ Mousumi Das)
  *      10-sep-01  V3.2 GSL enabled for linear fit
  *                      figuring out error bars?
+ *      29-oct-02  V3.2c: ellipse fit cleanup (still bug in ellipse semi major axis?)
+ *                 V3.3: add fourier mode (see also snapfour)
  */
 
 /*
@@ -74,7 +76,7 @@ string defv[] = {
     "estimate=\n        optional estimates (e.g. for ellipse center)",
     "nmax=10000\n       Default max allocation",
     "tab=f\n            short one-line output?",
-    "VERSION=3.2b\n     30-sep-01 PJT",
+    "VERSION=3.3\n      29-oct-02 PJT",
     NULL
 };
 
@@ -86,7 +88,7 @@ string usage="a linear least square fitting program";
 #define HUGE 1e20
 #endif
 
-#define MAXCOL 10
+#define MAXCOL 16
 
 typedef struct column {
     int maxdat;     /* allocated length of data */          /* not used */
@@ -136,6 +138,8 @@ nemo_main()
         do_area();
     } else if (scanopt(method,"peak")) {
     	do_peak();
+    } else if (scanopt(method,"fourier")) {
+    	do_fourier();
     } else
         error("fit=%s invalid; try [line,ellipse,imageshift,plane,poly,peak,area]",
 	      getparam("fit"));
@@ -478,22 +482,24 @@ do_ellipse()
     vec[2] = cc;
     lsq_solve(3,mat,vec,sol);
     dprintf(1,"Real A,B,C = %f %f %f \n",sol[0],sol[1],sol[2]);
+#if 1
     if (ABS(cospp) > ABS(sinpp))    /* two ways to find ab: which is a^2 now */
         ab = (2/(sol[0]+sol[2] + (sol[0]-sol[2])/cospp));
     else                            /* use the biggest divisor */
         ab = (2/(sol[0]+sol[2] + 2*sol[1]/sinpp));
-
-    /* compute error in axis ratio : for this one we only need 3 partial derivitives */
-	/* see also:  http://iraf.noao.edu/ADASS/adass_proc/adass_95/buskoi/buskoi.html */
-	/* and the Jedrzejewski, R. 1987, MNRAS, 226, 747 reference */
-#if 1
+#else
+    /* solve bug  that Kartik and I both identified Oct 2002 ? */
+    ab = (2/(sol[0]+sol[2] + (sol[0]-sol[2])/cospp));
+#endif
+    /* compute error in axis ratio : for this one we only need 3 partial derivitives*/
+    /* see also:  http://iraf.noao.edu/ADASS/adass_proc/adass_95/buskoi/buskoi.html */
+    /* and the Jedrzejewski, R. 1987, MNRAS, 226, 747 reference                     */
+#if 0
     /* first Mousumi version */
-    warning("old math");
     dr1da = 4*bb*(sinpp-(2*bb*(aa+cc)*cospp)/fac3)/sqr(fac2);
     dr1dc = 4*bb*(sinpp+(2*bb*(aa+cc)*cospp)/fac3)/sqr(fac2);
 #else
     /* new version, but it's really the same math, just refactorized:-) */
-    warning("new math");
     dr1da = 4*bb*(sinpp-((aa+cc)*(aa-cc)*sinpp)/fac3)/sqr(fac2);
     dr1dc = 4*bb*(sinpp+((aa+cc)*(aa-cc)*sinpp)/fac3)/sqr(fac2);
 #endif
@@ -667,6 +673,51 @@ do_poly()
 {
     my_poly(TRUE);
 }
+
+
+do_fourier()
+{
+  real mat[(MAXCOL+1)*(MAXCOL+1)], vec[MAXCOL+1], sol[MAXCOL+1], a[MAXCOL+2];
+  real sum, theta, amp, pha;
+  int i, j, dim = 2*order+1;
+
+  if (dim > MAXCOL) error("order=%d too high",order);
+
+  lsq_zero(dim, mat, vec);
+
+  for (i=0; i<npt; i++) {
+    a[0] = 1.0;
+    for (j=0; j<order; j++) {
+      theta = xcol[0].dat[i] * PI/180;
+      a[2*j+1] = cos((j+1)*theta);
+      a[2*j+2] = sin((j+1)*theta);
+    }
+    a[dim] = ycol[0].dat[i];
+    lsq_accum(dim,mat,vec,a,1.0);
+  }
+  lsq_solve(dim,mat,vec,sol);
+  printf("fourier fit of order %d:\n", order);
+  for (j=0; j<=2*order; j++) printf("%g ",sol[j]);
+  printf("phase/amp solutions:\n");
+  printf("%g ",sol[0]);
+  for (j=0; j<order; j++) {
+    amp = sqrt(sqr(sol[2*j+1])+sqr(sol[2*j+2]));
+    pha = atan2( sol[2*j+2] , sol[2*j+1]) * 180 / PI;
+    printf("%g %g ",amp,pha);
+  }
+  printf("\n");
+
+#if 0
+  if (outstr && Qpoly) {           /* output fitted values, if need be */
+    for(i=0; i<npt; i++) {
+      sum=sol[order];
+      for (j=order-1; j>=0; j--)
+	sum = (xcol[0].dat[i] * sum + sol[j]);
+      fprintf(outstr,"%g %g %g\n",xcol[0].dat[i], ycol[0].dat[i], sum);
+    }
+  }
+#endif
+}
 
 
 
@@ -717,6 +768,7 @@ do_peak()
             x[j] - sol[1]/(2*sol[2]),
             sol[0]+sqr(sol[1])/(2*sol[2]));
 }
+
 
 do_area()
 {
