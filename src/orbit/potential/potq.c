@@ -17,10 +17,9 @@ string defv[] = {
     "t=0.0\n        Time to test potential at, if relevant",
     "omega=\n       Use this instead of any returned pattern speed",
     "format=%g\n    Format used to print numbers",
-    "ndim=3\n       Poission test in 3-dim  (XYZ) or 2-dim (XY)",
-    "niter=10\n     #iterations",
-    "eps=0.001\n    #or minimal change",
-    "VERSION=1.0\n  23-feb-02 PJT",
+    "niter=10\n     max #iterations to ",
+    "eps=0.001\n    minimal fractional change in qt to abort iterations",
+    "VERSION=1.0a\n 23-feb-02 PJT",
     NULL,
 };
 
@@ -38,7 +37,7 @@ local double report_q(int,double);
 
 void nemo_main(void)
 {
-  int    i, j, k, ndim, nr,nstep;
+  int    i, j, k, nr,nstep;
   double pos[3],acc[3],pot, time;
   real   radii[MAXPT],xarr[MAXPT],yarr[MAXPT],zarr[MAXPT];
   double dr, dphi, phi;
@@ -66,8 +65,6 @@ void nemo_main(void)
   strcpy(s,fmt);    /* use format from command line */
   if (strchr(fmt,' ')==NULL && strchr(fmt,',')==NULL)
     strcat(s," ");      /* append separator if none specified */
-  ndim = getiparam("ndim");
-  if (ndim != 3 && ndim != 2) error("NDIM=%d must be 2 or 3",ndim);
   
   for (i=0;i<nr;i++) {
     reset_q();
@@ -82,6 +79,7 @@ void nemo_main(void)
       for (k=0, phi = dphi/2.0; k<nstep-1; k++, phi += dphi) {
 	add_q(radii[i], phi);
       }
+      qt0 = qt;
       qt = report_q(1,qt0);
       dq = (qt-qt0)/qt;
       dq = ABS(dq);
@@ -89,11 +87,10 @@ void nemo_main(void)
 	// warning("Early convergence after %d iterations",j);
 	break;
       }
-      qt0 = qt;
       nstep *= 2;
       dphi  /= 2.0;
     }
-    qt = report_q(0,dq);
+    qt = report_q(0,qt0);
   }
 }
 
