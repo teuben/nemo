@@ -1,8 +1,18 @@
-This is:	A blurb on NEMO V3, what it is, how to install and use 
-Last updated:   20-jun-2001
-By:		Peter Teuben
+This directory contains source code and documentation for NEMO, a
+toolbox for stellar dynamics, particle simulations, image processing and
+tabular data manipulation.
 
-______________________________________________________________________________
+This is the 3rd major release of NEMO, and although data are compatible
+with earlier releases, source code will generally need to be tweaked a
+bit to compile and link in the newer releases.
+
+NEMO V1:	IAS release (Barnes, Hut & Teuben; appr. 1987)
+NEMO V2:	UMD release (Teuben 1994)
+NEMO V3:	UMD release (Teuben 2001) with autoconf support and
+		hooks into manybody.org modules starlab and partiview
 
 
-README.install		read this if you need some guidance on installing
+See README.install for installation guidelines.
+
+
+
