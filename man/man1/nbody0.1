@@ -1,11 +1,11 @@
-.TH NBODY0 1NEMO "24 February 2004"
+.TH NBODY0 1NEMO "14 March 2004"
 .SH NAME
 nbody0, nbody00 - direct summation Aarseth N-body integrator
 .SH SYNOPSIS
 nbody0 in=snap_in out=snap_out [keyword=value ...]
 .SH DESCRIPTION
 \fBnbody0\fP is the NEMO adaptation of version 0 (the \fIMicky Mouse\fP version)
-of Aarseth's N-body integrator, as published in: Binney & Tremaine (1987).
+of Aarseth's N-body integrator, as published in Appendix 4B of Binney & Tremaine (1987).
 It is a direct N-body integrator, \fIi.e.\fP for
 each particle it computes the force due to all other N-1 particles,
 hence the computational time grows approximately as N*N.
@@ -32,9 +32,9 @@ one part in 10000 over one crossing time, in the absence of close
 encounters.
 .PP
 \fBnbody00\fP is the C version of \fBnbody0\fP, 
-based on the f2c translater code (and hence will look odd and ugly in places).
-It has more debug output (debug=1 and higher) and also fixed problems with
-orbits like the figure8 orbit (see BUGS below).
+based on the f2c translated code (and hence will look odd and ugly in places).
+It has more debug output (debug=1 and higher) and also fixes problems with
+orbits like the Figure8 orbit (see BUGS below).
 .SH PARAMETERS
 The following parameters are recognized in any order when the keyword
 is also given
@@ -48,9 +48,10 @@ was compiled, other input formats are supported.
 Output file in snapshot format [no default].
 .TP
 \fBeta=\fIvalue\fP
-Accurracy parameter, which determines the integration step. For
-small enough values of \fBdeltat\fP however determines the integration
-step. [0.02].
+Accurracy parameter, which automatically determines the integration step. 
+For small enough values of \fBdeltat\fP the Heisenberg principle
+applies and the accuracy is determined by the integration
+step itself! [0.02].
 .TP
 \fBdeltat=\fIvalue\fP
 Time interval of a major output. Although the timestep is determined from
@@ -74,6 +75,17 @@ This is highly recommended,
 as for high output frequencies (small \fBdeltat=\fP cf. the 
 \fIeta\fP-derived timestep \fIdt\fP)
 [t].
+.TP
+\fBf3dot=t|f\fP
+Use higher order terms to determine the timestep from \fIeta\fP.
+In the determination of the timestep a simplified formulae
+using just F and F2DOT is used, which is what the original
+BT87 code uses. By setting this keyword higher order terms
+F3DOT (and also FDOT) are used, which mimic the behavior
+of \fInbody1(1NEMO)\fP. This keyword was introduced to
+integrate nice orbits like the Figure8 orbit, in which
+both F and FDOT were 0 for the central particle.
+[f].
 .TP
 \fBoptions=\fP\fBstep\fP
 Miscellaneous control options, specified as a comma separated list of
@@ -108,7 +120,7 @@ needed in this case. See code comments labeled ``\fISED\fP''.
 .PP
 A C version is also available, as nbody0.c, though the Makefile
 needs the target \fBnbody00\fP to install it. The user interface is
-the same as that of nbody0.
+as that of nbody0, except the keyword \fBf3dot=\fP was added.
 .SH BUGS
 Starting time of initial conditions is (re)set to 0, even if the snapshot
 had another time.
@@ -143,21 +155,19 @@ below is a mere zeroth order approximation to the current state of affairs:
 .nf
 .ta +1i
 nbody0    	Binney & Tremaine's toy version, with NEMO interface 
-nbody1       	variable timestep
-          	* email version sent on Fri, 15 Oct 93 17:52 GMT
-nbody2     	with Ahmad-Cohen scheme - (see also Benz et al, 1997)
-              	* email version 17-mar-93
+nbody1       	variable timestep; runbody1
+nbody2     	with Ahmad-Cohen scheme - (see also Benz et al, 1997); runbody2
 nbody3          XXX
 nbody4    	... for HARP
 nbody5    	with regularization handling triples & binaries  
 nbody6     	... for new parallel machine
+nbody7		... secret
 .fi
 .SH FILES
 .nf
 .ta +2i
-~/src/nbody/evolve/aarseth/nbody0	official source code within NEMO
-~/usr/aarseth/                      	SJA's other nbodyX versions (not all exported)
-nb0.f                              	Sverre's version
+NEMO/src/nbody/evolve/aarseth/nbody0	official source code within NEMO
+NEMO/usr/aarseth/                      	SJA's other nbodyX versions (not all exported)
 .fi
 .SH SEE ALSO
 hackcode1(1NEMO), runbody2(1NEMO), snapshot(5NEMO), atos(1NEMO), stoa(1NEMO)
@@ -170,6 +180,11 @@ IAU Colloquium #10, M.Lecar (Ed.), Reidel, Dordrecht.
 .PP
 S.J.Aarseth, 1985, p.377 in: "Multiple Time Scales",
 U.J. Brackbill & B.I. Cohen (Eds.), Academic Press, Orlando.
+.PP
+S.J. Aarseth, 2003,
+"Gravitational N-Body Simulations : Tools and Algorithms"
+(Cambridge Univ. Press).
+
 .SH HISTORY
 .nf
 .ta +1i +4i
