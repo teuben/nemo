@@ -64,6 +64,9 @@ FLIBS = @FLIBS@
 FORLIBS = $(FLIBS)
 F77_CMAIN_FFLAGS = @F77_CMAIN_FFLAGS@
 
+# YAPPLIB: was removed from NEMORC.{gen,local}
+YAPPLIB = $(NEMOLIB)/yapp_@YAPP_NAME@.o @YAPP_LIBS@
+
 # Solaris 2.6+: -R /opt/SUNWspro/lib -L/opt/SUNWspro/lib -lF77 -lM77 -lV77 -lsunmath  
 
 ## C compiler:
