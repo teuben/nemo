@@ -19,6 +19,7 @@
  *	23-jul-97	V3.0 Added k= for # neighbors	   pjt
  *      28-jul-97           a check if first particle at 0,0,0  pjt
  *      20-jun-01           c gcc3 pr
+ *      20-jun-02        V3.1 read PhaseSpace as well as Pos/Vel data
  */
 
 #include <stdinc.h>
@@ -41,7 +42,7 @@ string defv[] = {
     "kmax=1\n			  number of nearest 'radial' neighbors",
     "tab=f\n			  need a table ? ",
     "headline=\n                  random verbiage for plot",
-    "VERSION=3.0c\n		  20-jun-01 PJT",
+    "VERSION=3.1\n		  20-jun-02 PJT",
     NULL,
 };
 
@@ -50,10 +51,10 @@ string usage = "radial profile of an N-body system";
 local string headline;		/* random text message */
 local string iname;		/* input file  name */
 
-local real pos0[NDIM];		/* center */
+local real pos0[NDIM];		/* assumed center */
 
 #ifndef MOBJ
-#define MOBJ 8192               /* maximum particles */
+#define MOBJ 100000             /* maximum particles */
 #endif
 
 local int  nobj;		/* globals for writesnap */
@@ -118,6 +119,7 @@ local void setparams()
     n = nemoinpr(getparam("center"),pos0,NDIM);
     if (n!=NDIM)
        error("keyword center= must have exactly %d entries",NDIM);
+    if (NDIM!=2 && NDIM!=3) error("NDIM needs to be 2 or 3");
     rmax = getdparam("rmax");
     dmax = getdparam("dmax");
     mmax = getdparam("mmax");
@@ -129,7 +131,7 @@ local void setparams()
 local void read_snap(string name)		
 {				
     stream instr;
-    int    i;
+    int    i,j;
     
     instr = stropen(name, "r");			/* open input file */
 
@@ -139,19 +141,36 @@ local void read_snap(string name)
       get_set(instr, ParametersTag);
         get_data(instr, NobjTag, IntType, &nobj, 0);
 	if (nobj>MOBJ)
-		error("read_snap: not enough space to get data MOBJ=%d",MOBJ);
+	  error("read_snap: not enough space to get data MOBJ=%d",MOBJ);
       get_tes(instr,ParametersTag);
       
       get_set(instr, ParticlesTag);
          if (get_tag_ok(instr,MassTag)) {
-           get_data(instr, MassTag, RealType, mass, nobj, 0);
+           get_data_coerced(instr, MassTag, RealType, mass, nobj, 0);
          }
          else {
-	   dprintf (0,"WARNING: no masses provided, will assume 1/%d\n",nobj);
+	   warning("no masses provided, will assume 1/%d",nobj);
 	   for (i=0; i<nobj; i++)
 	      mass[i] = 1/(double)nobj;
 	 }
-         get_data(instr, PhaseSpaceTag, RealType, phase, nobj, 2, NDIM, 0);
+	 if (get_tag_ok(instr,PhaseSpaceTag)) {    	   /* PhaseSpace */
+	   get_data_coerced(instr, PhaseSpaceTag, RealType, phase, nobj, 2, NDIM, 0);
+	 } else if (get_tag_ok(instr,PosTag)) {     	   /* Position and Velocity both better be present now */
+	   real *ptmp = (real *) allocate(sizeof(real)*nobj*NDIM);
+	   get_data_coerced(instr, PosTag, RealType, ptmp, nobj, NDIM, 0);
+	   for (i=0, j=0; i<nobj; i++) {
+	     phase[i][0] = ptmp[j++];
+	     phase[i][1] = ptmp[j++];
+	     if (NDIM==3) phase[i][2] = ptmp[j++];
+	   }
+	   get_data_coerced(instr, VelTag, RealType, ptmp, nobj, NDIM, 0);
+	   for (i=0, j=0; i<nobj; i++) {
+	     phase[i][NDIM+0] = ptmp[j++];
+	     phase[i][NDIM+1] = ptmp[j++];
+	     if (NDIM==3) phase[i][NDIM+2] = ptmp[j++];
+	   }
+	   free(ptmp);
+	 }
       get_tes(instr,ParticlesTag);
     get_tes(instr,SnapShotTag);
 
@@ -161,7 +180,7 @@ local void read_snap(string name)
 /*	Some lower level plot utilities for YAPP 	*/
 
 local real xplot[2],   yplot[2];		/* ranges in plot variables */
-local char   xlabel[80], ylabel[80], plabel[80];	/* labels */
+local char xlabel[80], ylabel[80], plabel[80];	/* labels */
 
 local real xtrans(real x)
 {
@@ -222,20 +241,12 @@ local void sort_rad(void)
             else
                 dens[0] = FRTHRD_PI * cum_mass / qbe(radius);
         } else if (i<nobj-1) {
-#if 1
             l = MAX(i-k,0);
             u = MIN(i+k,nobj-1);
 
             for (j=l, mtot=0.0; j<=u; j++) mtot += mass[irad[j]];
             mtot -= 0.5 * (mass[irad[l]] + mass[irad[u]]);
             dens[i] = mtot/FRTHRD_PI/(qbe(rad[irad[u]])-qbe(rad[irad[l]]));
-
-                
-#else                
-            dens[i]=(mass[irad[i]]+0.5*(mass[irad[i-1]]+mass[irad[i+1]]))/
-                       (FOUR_PI * sqr(rad[irad[i]]) * 
-                        (rad[irad[i+1]] - rad[irad[i-1]]));
-#endif                        
         } else
             dens[i] = 0;        /* don't know anything better yet */
 
