@@ -1,37 +1,80 @@
-.TH ELLIPSE 1NEMO "23 April 2003"
+.TH ELLIPSE 1NEMO "24 April 2003"
 .SH NAME
 ellipse \- ellipse (de)projection properties
 .SH SYNOPSIS
 \fBellipse\fP [parameter=value]
 .SH DESCRIPTION
-No description available. This manual page was created by mkman
+\fBellipse\fP de-projects ellipses, and computes the intrinsic properties,
+and vice versa. It also computes kinematic properties, assuming flow is
+along the ellipses, such as the kinematic minor axis (the major axis
+cannot be defined, since the flow-velocity along the ellipse is not
+defined with this routine. 
+.PP
+Apart from giving the eccentricity of the ellipse ("bar") in the disk,
+and the inclination of the disk, the two angles in this routine are
+\fBtheta\fP and \fBphi\fP, of which only one needs to be given.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBba=\fP
-Axis ratio of bar. An array is allowed. [???]   
-.TP 20
+Axis ratio of bar. An array is allowed, in \fInemoinp(1NEMO)\fP 
+notation. No default.
+.TP
 \fBinc=\fP
-Inclination of galaxy. An array is allowed [???]    
-.TP 20
+Inclination of disk in which the ellipse ("bar") is located. 
+An array is allowed. No default.
+.TP
 \fBphi=\fP
 Angle between bar and disk in sky plane. An array is allowed.
 Either phi or theta (not both) are required. It determines if
-projection (theta) or deprojection (phi given) is done.
-.TP 20
+projection (\fBtheta\fP given) or deprojection (\fBphi\fP given) 
+is done. 
+.TP
 \fBtheta=\fP
-Angle between bar and disk in galax plane. An array is allowed.
-.TP 20
-\fBVERSION=\fP
-28-oct-02 PJT [0.1]     
+Angle between bar and disk in galax plane. Again an array is allowed.
+.TP
+\fBdba=\fP
+Error term in b/a. 
+Useful if you want to compute errors in (de)projected
+parameters using nsim=
+.TP
+\fBdphi=\fP
+Error term in phi.
+.TP
+\fBnsim=\fP
+Number of monte carlo to perform to compute an error term. [0]
+.TP
+\fBseed=\fP
+Seed for random number generator. [0]
 .SH EXAMPLES
+Here for a set of apparent position angles w.r.t. line of notes, and given
+apparent b/a and inc, the intrinsic b/a, angle between bar and line of nodes
+and the (sky plane) kinematic major axis (assumed perpendicular to the 
+kinematic minor axis) are computed:
+.nf
+
+% ellipse 0.3 45 20:30:2
+De-projecting ellipse:
+b/a inc phi    b/a'    theta   phi_kin
+0.3 45 20    0.376558 29.4085 -46.4712
+0.3 45 22    0.368488 31.9773 -45.7525
+0.3 45 24    0.360246 34.4675 -44.8267
+0.3 45 26    0.351921 36.8805 -43.7464
+0.3 45 28    0.343591 39.2183 -42.5507
+0.3 45 30    0.335325 41.4834 -41.2693
+.fi
 .SH SEE ALSO
+.nf
+Skillman et al. A&A 198, 33 (1988), p39.
+.fi
 .SH FILES
+src/orbit/misc	ellipse.c
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
-23-Apr-03	V0.3 finally created	PJT 
+fall-1986	V0.0 formulae derived for Skillman et al paper	PJT
+23-Apr-03	V0.3 added phi_kin	PJT 
 .fi
