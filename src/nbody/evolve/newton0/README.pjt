@@ -1,0 +1,19 @@
+converting from old-style K&R-C to prototyped C:
+
+- define all static's at the top of each source code, use
+
+	cproto -S -I$NEMOINC -I$NEMOLIB file.c
+
+- define all global functions in proto.h:
+
+	cproto -e -I$NEMOINC -I$NEMOLIB *.c > proto.h
+
+  and include this in newton0.h
+
+
+- care with the following compile options,
+    -DTREE                  ok
+    -DTREE -DQUADPOLE       ok
+    -DREGULARIZATION
+    -DEXTRAPOLATION 
+
