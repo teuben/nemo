@@ -54,6 +54,13 @@ function does not perform any error checking and can return the wrong
 number. 
 .SH SEE ALSO
 tabmath(1NEMO), nemoinp(3NEMO), getrange(3NEMO)
+.SH EXAMPLES
+.nf
+   nemoinp 4.2+3.1
+   nemoinp 'sqrt(2)'
+   nemoinp 2:20:2
+   set n=10
+   nemoinp 2:${n}:2
 .SH AUTHOR
 Peter Teuben
 .SH "UPDATE HISTORY"
