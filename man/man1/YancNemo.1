@@ -1,4 +1,4 @@
-.TH YANCNEMO 1NEMO "29 May 2001"
+.TH YANCNEMO 1NEMO "16 November 2001"
 .SH NAME
 YancNemo \- Yet Another N-body Code (NEMO version)
 .SH SYNOPSIS
@@ -36,8 +36,8 @@ Aarseth's nbody* series. [10]
 Output integration step. Some other codes use 1/freqout, or \fBdeltat\fP for this
  [1]    
 .TP
-\fBtheta=\fP
-Opening angle parameter at M=M_root [0.5]   
+\fBNreuse=\fP
+Max number of subsequent tree re-uses [0].
 .TP
 \fBNcrit=\fP
 Maximum number of bodies a cell must
@@ -55,25 +55,46 @@ future. [21]
 \fBhmin=\fP
 Timestep indicator such that tau_min = (1/2)^hmin. [Default: 6] 
 .TP
-\fBgive_pot=\fP
-Output potentials? Valid values are 0/1, which output none or all
-potentials. 
-Potentials are returned in the usual \fBPotential\fP slot of a \fISnapShot(5NEMO)\fP.
-[0]    
-.TP
-\fBgive_rho=\fP
-Output densities? Valid values are 0/1/2, which output none/density/surface density.
-Densities are returned in the \fBAux\fP slot of a \fISnapShot(5NEMO)\fP.
-[Default: 0].
-.TP
 \fBNlev=\fP
-# time-step levels [1]    
+Number of time step levels [1].
 .TP
 \fBNref=\fP
-# bodies in cell for density estimate [16]
+Number of bodies in cell for density estimate    [16]
 .TP
 \fBfac=\fP
 factor in tau < fac / rho. Only used if Nlev > 1. []
+.TP
+\fBresume=\fP
+resume old simulation?  that implies:
+1) read last snapshot from input file
+2) append to input file (unless out given)          
+[f].
+.TP
+\fBgive_pot=\fP
+Output potentials? Valid values are 0/1/2/3, which outputs
+no/N-body/extern/sum.
+Potentials are returned in the usual \fBPotential\fP slot of a \fISnapShot(5NEMO)\fP.
+[0]    
+.TP
+\fBgive_acc=t|f\fP
+Output accelerations. [f]
+.TP
+\fBgive_rho=t|f\fP
+Output densities? 
+Densities are returned in the \fBAux\fP slot of a \fISnapShot(5NEMO)\fP.
+[Default: 0].
+.TP
+\fBpotname=\fP
+Name of external potential
+.TP
+\fBpotpars=\fP
+parameters of external potential
+.TP
+\fBpotfile=\fP
+Filename, if required by external potential.
+.TP
+\fBstartout=t|f\fP
+give snapshot for t=tstart? [t]
 .SH MEMORY USAGE
 For a 128k run, memory usage is about 27MB. This will scale roughly
 linearly for larger systems.
@@ -88,5 +109,6 @@ Walter Dehnen
 .ta +1.0i +4.0i
 29-May-01	V1.0 manual written, at GH-2001 workshop at INAOE 	PJT
 13-jun-01	1.0.2: added Ncrit
+16-nov-01	1.0.15: aligned man page with actual code	PJT
 .fi
 

@@ -1,41 +1,100 @@
-.TH SNAPKINEM 1NEMO "13 November 2001"
+.TH SNAPSHELL 1NEMO "15 November 2001"
 .SH NAME
-snapshell \- compute various diagnostics on a set of shells
+snapshell \- compute statistics of bodyvariables in a set of shells
 .SH SYNOPSIS
 \fBsnapshell in=\fPsnap_file [parameter=value] .\|.\|.
 .SH DESCRIPTION
-\fIsnapshell\fP computes various kinematic diagnostics from the input
-N-body snapshot on a set of shells. The snapshot must have been
-properly centered using other tools (e.g. \fIsnapcenter(1NEMO)\fP or
-\fIsnaprect(1NEMO)\fP or
+\fIsnapshell\fP computes various selected diagnostics and their statistics 
+from the input
+N-body snapshot in a set of shells. The snapshot must have been
+properly centered and oriented using 
+other tools (e.g. \fIsnapcenter(1NEMO)\fP and/or
+\fIsnaprect(1NEMO)\fP). The analysis can be done in shell selected
+in configuration space (if svar= is not selected), or in the
+normalized space (0-1) of any body variable (if svar= is selected)
+.PP
 An arbitrary weighting may be specified for each particle.
+.PP
+The output will be an ascii table, in which for each variable it will
+print a
+selected set of statistics (mean, dispersion, min, max, skewness, kurtosis,
+number of particles) can be selected for printout.
+
 .SH PARAMETERS
 The following parameters are recognized.
 .TP 24
 \fBin=\fP\fIsnap_file\fP
 Input data is read from \fIsnap_file\fP, which must be in
-\fIsnapshot\fP(5NEMO) format.  Notice only the first snapshot
+\fIsnapshot\fP(5NEMO) format.  Note that only the first snapshot
 found in this file will be used. Default: \fIrequired\fP.
+.TP
+\fBradii=\fP\fIr0,r1,r2,...\fP
+A set of radii in \fInemoinp(3NEMO)\fP format, representing the
+edges of the shell.
+They need to be normalized to 1 when selected via \fBsvar=\fP.
+.TP
+\fBpvar=\fP\fIvariable\fP
+The \fIbodytrans\fP(1NEMO) variable selected for statistics. 
+[Default: \fBvt\fP].
+.TP
+\fBsvar=\fP\fIsort_variable\fP
+If selected, this \fIbodytrans\fP(1NEMO)
+variable will be used to sort the particles by, the
+normalized radii (between 0 and 1) will then be used to define the shells
+within which the diagnostics are computed. Default: not used.
 .TP
 \fBweight=\fP\fIbody_weight\fP
 Expression used to compute the weight of each body.
 See \fIbodytrans\fP(1NEMO) for the form of \fIbody_weight\fP.
 Default: \fB1.0\fP.
 .TP
-\fBradii=\fP\fIshell_radii\fP
-A set of radii in \fInemoinp(3NEMO)\fP format
-(normalized to 1 when selected by 
+\fBaxes=\fP\fIx,y,z\fP
+Normalization values in X,Y and Z to compute (re-shape) radii. Only used
+if shells are given in configuration space (i.e. svar= is not used) and
+need to be ellipsoidal in shape. [Default: 1,1,1]
 .TP
-\fBsvar=\fP\fIsort_variable\fP
-If selected, this variable will be used to sort the particles by, the
-normalized radii (between 0 and 1) will then be used as the shells
-within which the diagnostics are computed. Default: not used.
+\fBstats=\fP\fIprint_stats\fP
+Statistics selected to print. Allowed values are
+\fBmean, dispersion, min, max, median, kurt, skew, n\fP. 
+[Default: \fBmean,disp,n\fP].
+.TP
+\fBformat=\fIstring\fP
+Valid C-format descriptor, as used in \fIprintf(3)\fP, for tabular output.
+[default: \fB%g\fP].
 .SH SEE ALSO
 snapkinem(1NEMO), snaprect(1NEMO), snapshot(5NEMO)
+.SH EXAMPLES
+To get a mean rotation speed in the disk, and the velocity dispersion, for a set of
+rings:
+.nf
+    % \fBmkdisk - rmax=10 | snapsort - - r | snapshell - 0.01:10:0.1 pvar=vt\fP
+    0.221025 0 1 : 0.213258 0
+    0.347701 0.035125 2 : 0.318487 0.0270184
+    0.468138 0.0260884 2 : 0.403087 0.0164231
+    ...
+    9.65953 0.0284596 39 : 0.319191 0.000455262
+    9.7589 0.0288926 40 : 0.317613 0.00045552
+    9.85975 0.0293125 41 : 0.316035 0.000455434
+.fi
+This results in rings with different numbers of particles (3rd column). By using
+a sort variable (svar=), one can also divide the particle in equal numbers, and compute the
+properties of the shells (which now have varying spatial width). The radii are now
+normalized and must not exceed the interval 0-1:
+.nf
+    % \fBmkdisk - rmax=10 | snapsort - - r | snapshell - 0:1:0.01 svar=r\fP
+.fi
+or in case the particles are sorted by potential from an N-body simulation:
+.nf
+    % \fBsnapsort run01.dat - -phi times=4.0 | snapshell - 0:1:0.01 svar=-phi\fP
+.fi
+.SH CAVEAT
+Ellipsoidal shells may need reshape/sort/reshape?
+.PP
+Sorting should be done inside this program, not in the pipe?
 .SH AUTHOR
 Peter Teuben
 .SH HISTORY
 .nf
 .ta +1.0i +4.0i
-13-nov-01	V1.0	new program for Lia	PJT
+13-nov-01	V1.0 created    PJT
 .fi

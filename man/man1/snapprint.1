@@ -26,6 +26,11 @@ List of data-items which will be listed, any of the \fIbodytrans(3NEM0)\fP
 functions can be used in an arbitry expression.
 [default: \fBx,y,z,vx,vy,vz\fP].
 .TP
+\fBformat=\fIstring\fP
+Valid C-format descriptor used in \fIprintf(3)\fP to output
+the numbers. 
+[default: \fB%g\fP].
+.TP
 \fBsepar=\fInsep\fP
 \fInsep\fP will for any non-zero value turn off all above options
 and produce a single table of the logarithm of the separations
