@@ -1,0 +1,154 @@
+.TH MKOP73 1NEMO "4 November 1993"
+.SH NAME
+mkop73 \- set up a Mestel disk using 1973 Ostriker & Peebles' method
+.SH SYNOPSIS
+\fBmkop73\fP \fBout=\fP\fIsnapshot\fP [parameter=value]
+.SH DESCRIPTION
+\fImkop73\fP sets up a Mestel disk,
+with an optional static background potential,
+in close virial equilibrium. The procedure how exactly 
+the initial velocities are computed is involved, and details can
+be found in the original
+Ostriker & Peebles 1973 paper or as detailed in the code.
+Although the disk is flat, there will be an initial velocity dispersion
+in Z, which will quickly evolve into a finite thickness disk.
+.PP
+These disks are known to be dynamically unstable against bar formation in the
+absence of a sizeable halo, and are fun to play with.
+.PP
+The program defaults are set such as to as closely as possible
+reproduce (apart from the
+random number generation) the ``standard'' model 1 in Ostriker &
+Peebles. Some parameters below are related; so be aware that 
+changing one parameter in the OP73 notation, may require
+you changing two in this program, for example scaling the masses:
+\fBnbody\fP, \fBmdisk\fP and \fBpotpars(2)\fP are related, and 
+scaling the lengths: \fBrcut\fP, \fBc\fP, and \fBpotpars(3)\fP are
+related.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBout=\fP
+output file name, will be in \fIsnapshot(5NEMO)\fP format.
+No default.
+.TP
+\fBnbody=\fP\fIN\fP
+Number of particles in the disk
+[Default: \fB300\fP].
+.TP
+\fBmdisk=\fP\fIM_d\fP
+Total disk mass. Normally each particle has unity mass, hence \fBmdisk\fP
+should be the same as \fBnbody\fP
+[Default: \fB300.0\fP].
+.TP
+\fBrcut=\fP\fIR\fP
+outer cutoff radius of the disk (the halo cutoff radius is determined with
+the appropriate paramter in the \fPpotpars=\fP series of parameters.
+[Default: \fB1\fP].
+.TP
+\fBsigma=\fP\fIsigma\fP
+Dimensionless scaling parameter \fIsigma\fP for velocity dispersion
+in Toomre's Q parameter (see eq. (7) and (8) in OP73). Toomre's Q=1
+corresponds to \fIsigma=0.378\fP.
+[Default: \fB0.454\fP].
+.TP
+\fBnring=\fP
+number of particles per ring; should divide \fBnbody\fP.
+Each ring will be divided into \fBnring\fP segments, and one
+particle will be placed randomly within that segment. There
+will be \fBnbody/nring\fP rings.
+[Default: \fB10\fP].
+.TP
+\fBnvel=\fP
+number of measurements used to determine the circular velocity. Note
+that OP73 do not quote the exact value of this parameter. Although
+particles are randomly rotated to compute the average circular
+velocity, the first measurement is not, as to be able to compute
+the potential and forces in case \fBoptions=\fP would want to output
+them.
+[Default: \fB10\fP].
+.TP
+\fBnderiv=\fP
+number of rings (zones) used to determine dv/dr (used to calculate
+the velocity dispersion). Should probably be an integer fraction of
+\fBnbody/nring\fP.
+[Default: \fB10\fP].
+.TP
+\fBseed=\fP
+usual random number seed    
+[Default: \fB0\fP].
+.TP
+\fBeps=\fP\fIc\fP
+softening for force calculation, called \fIc\fP in OP73.
+[Default: \fB0.05\fP].
+.TP
+\fBzerocm=t|f\fP
+Center the snapshot? Note this option was not mentioned in OP73.
+[Default: \fBt\fP].
+.TP
+\fBmode=1|2\fP
+Creation mode: 1=OP73 method. 2=theoretical Mestel disk rotation curve.
+[Default: \fB1\fP].
+\fImode=2 not fully implemented\fP
+.TP
+\fBoptions=\fP
+Options for additional snapshot output (\fBphi,acc,rot,sig\fP). 
+\fBphi\fP and \fBacc\fP output potential and forces in their
+usual \fIPhi\fP and \fIAcc\fP slots, whereas
+\fBsig\fP stores the three velocity dispersions (radial, tangential
+and vertical) in the \fIAcc\fP slots, and \fBrot\fP stores
+the pre-dispersion rotational velocities in the \fIAux\fP slot
+(see snapshot(5NEMO) for an explanation on these slots).
+Default: no extra output.
+.TP
+\fBpotname=\fP
+External static potential, in standard \fIpotential(5NEMO)\fP format.
+[Default: \fBop73\fP, i.e. the standard OP73 potential].
+.TP
+\fBpotpars=\fP\fI0,M_h,0.1*R,R\fP
+Potential parameters. 
+Default: \fB0,0\fP, i.e. with 0 mass (the first 0 is the pattern
+speed of the potential, and is not used in this application. The
+standard order of the OP73 potential parameters are:
+omega [0.0], mass [1.0],  
+core radius [0.1] and outer cutoff radius [1.0].
+In general the default value depends on \fPpotname=\fP.
+.TP
+\fBpotfile=\fP
+Optional datafile name for potential. OP73 doesn't use this parameter.
+In general the default value depends on \fPpotname=\fP.
+.TP
+\fBheadline=\fP
+Additional text for output file.
+Default: none.
+.SH BUGS
+Some parameters are related, and the program may not always deal
+well with cases where they deviate from OP73. For example, changing
+the disk-radius (\fBrcut\fP) has dubious 
+side-effects on a variety of length-scale
+parameters (c, potpars(3)).
+.PP
+The original OP73 paper is vague or unclear in a few places in the
+exact procedures implemented in the program. See source code for
+more comments.
+.SH FILES
+.ta +3i
+~src/orbit/potential/data/op73.c	The 'OP73' potential(5NEMO) code
+~src/nbody/init/mkop73.c              	Nbody initializers
+.SH SEE ALSO
+snapopt(1NEMO), snapshot(5NEMO), ctex(1NEMO)
+.PP
+J.P. Ostriker & P.J.E. Peebles - ApJ \fB186\fP, 467-480, 1973.
+\fIA numerical study of the stability of flattened galaxies: or,
+can cold galaxies survive?\fP (OP73)
+.SH AUTHOR
+Jeffrey Newman, Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+xx-jul-93	V0.4 Created as MKOP	JAN
+3-nov-93	V0.9 Fixed bugs, added more features and CTEX notes	PJT
+4-nov-93	V1.0 formal realase as MKOP73	PJT
+.fi
+
