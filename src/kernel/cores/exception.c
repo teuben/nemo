@@ -354,9 +354,6 @@ RaiseException (int errNumber)
     				// by Nemo user
 #if 0
     nemoErrorAction.sa_handler = (sa_handler)ExceptionHandler;
-#else
-	error("RaiseException: can't get here....");
-#endif
     sigfillset (&sigMask);
     nemoErrorAction.sa_mask = sigMask;
     nemoErrorAction.sa_flags = SA_ONESHOT;
@@ -367,6 +364,10 @@ RaiseException (int errNumber)
 
     // never returns here
     assert (FALSE);
+#else
+	error("RaiseException: can't get here....");
+#endif
+
 }
 
 
