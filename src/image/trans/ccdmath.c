@@ -22,6 +22,7 @@
  *      24-jul-02       2.7  allow nz=0, so it does not make a 3rd axis  PJT
  *       1-mar-03       3.0  new keywords to set/change WCS              PJT 
  *      19-jun-03       3.1  allow %w, %r for 2d/3d radii; allow crpix offset     PJT
+ *      26-aug-04       3.2  fix bad error in setting crpix for cube generation   PJT
  *
  *       because of the float/real conversions and
  *       to eliminate excessive memory usage, operations 'fie' are
@@ -46,7 +47,7 @@ string defv[] = {
   "crval=\n        Override/Set crval (0,0,0)",
   "cdelt=\n        Override/Set cdelt (1,1,1)",
   "seed=0\n        Random seed",
-  "VERSION=3.1\n   19-jun-03 PJT",
+  "VERSION=3.2\n   26-aug-04 PJT",
   NULL,
 };
 
@@ -305,11 +306,11 @@ local void do_create(int nx, int ny,int nz)
       wcs_f2i(3,crpix,crval,cdelt,iptr[0]);
 
       for (iz=0; iz<nz; iz++) {
-        fin[2] = iz-crpix[2]-1;   /* crpix is 1 for first pixel (FITS convention) */
+        fin[2] = iz-crpix[2]+1;   /* crpix is 1 for first pixel (FITS convention) */
         for (iy=0; iy<ny; iy++) {
-	  fin[1] = iy-crpix[1]-1;
+	  fin[1] = iy-crpix[1]+1;
 	  for (ix=0; ix<nx; ix++) {
-	    fin[0] = ix-crpix[0]-1;
+	    fin[0] = ix-crpix[0]+1;
 	    fin[3] = sqrt(sqr(fin[0])+sqr(fin[1]));              /* w */
 	    fin[4] = sqrt(sqr(fin[0])+sqr(fin[1])+sqr(fin[2]));  /* r */
 	    dofien (fin, 1, &fout, 0.0);   /* do the work --- see: fie.3 */
