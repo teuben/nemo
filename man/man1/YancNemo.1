@@ -4,7 +4,7 @@ YancNemo \- Yet Another N-body Code (NEMO version)
 .SH SYNOPSIS
 \fBYancNemo\fP [parameter=value]
 .SH DESCRIPTION
-\fBYancNemo\fP is Dehnen's version of the 
+\fBYancNemo\fP is a NEMO adaptation of Walter Dehnen's version of the 
 tree code, where the approximate evaluation of gravitational forces is
 extended and substantially accelerated by including mutual cell-cell
 interactions. These are computed by a Taylor series in Cartesian coordinates
@@ -16,17 +16,17 @@ same level of accuracy, the new code is about four times faster than the tree
 code. For large N, the computational costs are found to scale almost linearly
 with N, which can also be supported by a theoretical argument, and the
 advantage over the tree code increases with ever larger N.
-.PP
-\fBYancNemo\fP is the NEMOfied version, the barebone version is named YANC.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBin=\fP
-Input file, needs to be in \fIsnapshot(5NEMO)\fP format. [???]
+Input file, needs to be in \fIsnapshot(5NEMO)\fP format. 
+[No default]
 .TP
 \fBout=\fP
-Output file, will be in \fIsnapshot(5NEMO)\fP format. [???]     
+Output file, will be in \fIsnapshot(5NEMO)\fP format. 
+[No default, although \fB.\fP can be used for a data sink,see \fPstropen(3NEMO)\fP]
 .TP
 \fBtstop=\fP
 Time at which integration is stopped. Also called \fBtcrit\fP in
@@ -61,9 +61,11 @@ stage of the code. [6]
 Softening length [0.05]     
 .TP
 \fBkernel=\fP
-Type of softening kernel. This is an integer, with n/(10+n)/20/21
-for Fn/Kn/Plummer/Improved, and will likely add more kernels in the
-future. [21]
+Type of softening kernel. This is an integer, for 0 the Plummer (old 20)
+1 the Improved Plummer (old 21), 2 and 3 also valid improvements as 
+discussed in the paper. Invalid entries will fall back to
+Newtonion (with a warning message). 
+[Default: 1]
 .TP
 \fBhmin=\fP
 Timestep indicator such that tau_min = (1/2)^hmin. [Default: 6] 
