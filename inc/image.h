@@ -16,6 +16,7 @@
  *  13-apr-96    V5.0 support for non-linear axes
  *  18-may-99	 V6.0 placement for the CD_i_j matrix used in FITS
  *  21-feb-00    V6.1 added mapX_image() routines to return pointer arrays 
+ *   9-sep-02    V6.2 added copy_image()
  */
 #ifndef _h_image
 #define _h_image
@@ -183,6 +184,7 @@ int read_image   ( stream, imageptr * );
 int free_image   ( imageptr );
 int create_image ( imageptr *, int, int );
 int create_cube  ( imageptr *, int, int, int );
+int copy_image   ( imageptr, imageptr *);
 
 real **map2_image( imageptr );
 real ***map3_image( imageptr );
