@@ -45,16 +45,16 @@ c get selected particles
       do while (i.ne.0) 
 
 c read the snapshot until there is not time steps ( i <= 0 )
-         i=io_nemo_f(infile,80,MAXBODY,"real8,3n,read,n,m,x,v,t,k,
-     $        info,p,st,sp,acc\0",
+         i=io_nemo_f(infile,80,MAXBODY,
+     $        "real8,3n,read,n,m,x,v,t,k,info,p,st,sp,acc\0",
      $        nbody,mass,pos,vel,ts,keys,pot,st,sp,acc)
 
 
 c save the snapshot 
          if (i.gt.0) then
-            j=io_nemo_f(outfile,80,MAXBODY,"real8,3n,save,n,m,x,v,t,k, 
-     $           info,p,acc\0",nbody,mass,pos,vel,ts,keys,pot,acc)
-
+            j=io_nemo_f(outfile,80,MAXBODY,
+     $          "real8,3n,save,n,m,x,v,t,k,info,p,acc\0", 
+     $           nbody,mass,pos,vel,ts,keys,pot,acc)
 
          endif
 
