@@ -16,12 +16,13 @@
 string defv[] = {
     "in=???\n		Input orbit",
     "ellipse=f\n        Check on how well ellipsoidal",
-    "VERSION=1.1\n  	21-feb-03 PJT",
+    "VERSION=1.1a\n  	2-feb-05 PJT",
     NULL,
 };
 
 string usage="Tabulate some statistics of orbit(s)";
 
+string cvsid="$Id$";
 
 string	infile;			/* file name */
 stream  instr;			/* file stream */
@@ -54,13 +55,13 @@ void stat_orbit(orbitptr o, bool Qell)
   int i;
   permanent bool first = TRUE;
     
-  ini_moment(&xm,-1);
-  ini_moment(&ym,-1);
-  ini_moment(&um,-1);
-  ini_moment(&vm,-1);
-  ini_moment(&jm,2);
-  ini_moment(&r2m,2);
-  ini_moment(&v2m,2);
+  ini_moment(&xm,-1,0);
+  ini_moment(&ym,-1,0);
+  ini_moment(&um,-1,0);
+  ini_moment(&vm,-1,0);
+  ini_moment(&jm,2,0);
+  ini_moment(&r2m,2,0);
+  ini_moment(&v2m,2,0);
   
   for (i=0; i<Nsteps(o); i++) {
     accum_moment(&xm,Xorb(o,i),1.0);
