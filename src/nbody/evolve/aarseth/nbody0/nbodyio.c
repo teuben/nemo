@@ -4,6 +4,7 @@
  *		22-nov-91  fixed aix interface
  *		 6-jan-00  converted to F77_FUNC macros
  *		21-jan-00  added reset option 
+ *		 9-apr-01  fixed some -DSINGLEPREC errors
  */
 
 #include <stdinc.h>
@@ -45,7 +46,7 @@ extern double cputime(void);
 
 pars_2_aarseth()
 {
-    double time;
+    real time;
     
     l_eta = (double) getdparam("eta");
     l_deltat = (double) getdparam("deltat");
@@ -162,12 +163,12 @@ void outene (tnext, nsteps, e)
 double *tnext, *e;
 int   *nsteps;
 {
-    double time;
+    real time;
 
     printf("time = %g   steps = %d   energy = %g cpu = %10.3g min\n",
             *tnext, *nsteps, *e, cputime());
 
-    time = (double) *tnext;
+    time = (real) *tnext;
     put_snap (outstr, &btab, &nbody, &time, &bits);
 }
 

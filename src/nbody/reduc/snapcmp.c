@@ -6,6 +6,7 @@
  *	23-mar-94   V1.3a
  *	29-mar-94   V1.4 process all snapshots - added time to output  pjt
  *	27-jan-00   V1.4b  more usefule error messages                 pjt
+ *       9-apr-01       c  added header in output   pjt
  */
 
 #include <stdinc.h>
@@ -48,7 +49,7 @@ string defv[] = {			/* DEFAULT INPUT PARAMETERS         */
     "ybox=5.0:15.0\n			  extent of graph in y direction",
     "formal=false\n			  if true, make publication plot",
 #endif
-    "VERSION=1.4b\n			  27-jan-00 PJT",
+    "VERSION=1.4c\n			  9-apr-01 PJT",
     NULL,
 };
 
@@ -161,8 +162,14 @@ local real *snapcmp(Body *btab1, Body *btab2, int nbody, real tsnap)
 
 local void printquart(real result[], int nbody, real tsnap)
 {
-    qsort(result, nbody, sizeof(real), cmpreal);
-    printf("%g %g %g %g %g %g\n",
+  static int Qheader = 1;
+
+  if (Qheader) {
+    printf("# time  Min  Qlow Median Qhigh  Max\n");
+    Qheader = 0;
+  }
+  qsort(result, nbody, sizeof(real), cmpreal);
+  printf("%g   %g %g %g %g %g\n",
            tsnap,
 	   result[0],
 	   result[nbody/4],
