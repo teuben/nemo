@@ -70,8 +70,9 @@ stat_orbit(orbitptr o)
     	dprintf(0,"# T\tE\tx_max\ty_max\tu_max\tv_max\tj_mean\tj_sigma\n");
     	first=FALSE;
     }
-    printf("%g %g %g %g %g %g %g %g\n",t,e,
-    	max_moment(&xm), max_moment(&ym),
-    	max_moment(&um), max_moment(&vm),
-    	mean_moment(&jm), sigma_moment(&jm));
+    printf("%g %g %g %g %g %g %g %g\n",
+	   t,e,
+	   max_moment(&xm), max_moment(&ym),
+	   max_moment(&um), max_moment(&vm),
+	   mean_moment(&jm), sigma_moment(&jm));
 }
