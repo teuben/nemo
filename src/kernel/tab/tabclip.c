@@ -20,6 +20,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "ycol=2\n		 y coordinate column",
     "deriv=\n            Clipping if abs(derivative) exceeds this value",
     "nmax=100000\n       Hardcoded allocation space, if needed for piped data",
+    "comment=f\n         Keep clipped points as commented lines?",
     "VERSION=0.1\n	 23-nov-02 PJT",
     NULL
 };
@@ -110,11 +111,11 @@ deriv_data()
     if (i>1 ) 
       d1 = (y[i]-y[i-1])/(x[i]-x[i-1]);
     else
-      d1 = 0.0;
+      d1 = dmin+1;
     if (i<npt-1)
       d2 = (y[i]-y[i+1])/(x[i]-x[i+1]);
     else
-      d2 = 0.0;
+      d2 = dmin+1;
     d1 = ABS(d1);  
     d2 = ABS(d2);  
     if (d1 > dmin && d2 > dmin) ok[i] = FALSE;
@@ -124,12 +125,14 @@ deriv_data()
 write_data()
 {
   int i, nok=0;
+  bool Qcomment = getbparam("comment");
 
   for(i=0; i<npt; i++) {
     if (ok[i]) {
       fprintf(outstr,"%g %g\n",x[i],y[i]);
       nok++;
-    }
+    } else if (Qcomment)
+      fprintf(outstr,"# %g %g\n",x[i],y[i]);
   }
   dprintf(0,"Wrote %d/%d points\n",nok,npt);
 }
