@@ -1,0 +1,73 @@
+.TH MKOMMOD 1NEMO "5 July 1997"
+.SH NAME
+mkommod \- generate N-body system with anisotropic distribution function
+.SH SYNOPSIS
+\fBmkommod in=\fPin_file \fBout=\fPout_file [parameter=value] .\|.\|.
+.SH DESCRIPTION
+\fImkommod\fP generates N-body realizations of a spherical system with
+a spheroidal anisotropic distribution function a la Osipkov-Merritt,
+using tables of radius, mass, potential, and distribution function.
+.SH PARAMETERS
+The following parameters are recognized.
+.TP 24
+\fBin=\fP\fIin_file\fP
+Read input tables in binary from \fIin_file\fP, which should contain
+an \fBOsipkovMerrittModel\fP data set.  Default: \fIrequired\fP.
+.TP
+\fBout=\fP\fIout_file\fP
+Write snapshot(s) to \fIout_file\fP in \fIsnapshot\fP(5NEMO)
+form.  Default: \fIrequired\fP.
+.TP
+\fBnbody=\fP\fInum_bodies\fP
+Number of particles to generate per model. Default: \fB512\fP.
+.TP
+\fBseed=\fP\fIrandom_seed\fP
+Seed used to initialize random number generator. Default: \fB123\fP.
+.TP
+\fBftrun=\fP\fImass_frac\fP
+To save time in the rejection phase, all particles generated will lie
+within the radius containing a fraction \fImass_frac\fP of the total
+mass.  Since the d.f. is not truncated in energy, this amounts to a
+slight bias in the orbital phases of a few outlying particles.
+Default: \fB0.999\fP.
+.TP
+\fBzerocm=\fP\fIzero_flag\fP
+If true, zero center of mass of generated model(s).
+Default: \fBtrue\fP.
+.TP
+\fBnmodel=\fP\fInum_models\fP
+Number of models to generate, written one after the other to
+\fIout_file\fP.  Default: \fB1\fP.
+.TP
+\fBheadline=\fP\fImessage\fP
+Message prepended to \fIout_file\fP.
+.TP
+\fBepsilon=\fP\fIepsilon\fP
+Small number that controls potential roundoff problems in f(E)
+[Default: \fB1.0e-10\fP].
+.SH "SEE ALSO"
+snapshot(5NEMO)
+.PP
+.nf
+Binney & Tremaine (1987), pp.240
+Osipkov, L.P. 1979, Soviet Astron Lett, 5, 42.
+Merritt, D. 1985, AJ, 90, 1027.
+.fi
+.SH FILES
+.TP 36
+\fB$(NEMOPATH)/dat/k?isot.dat\fP
+isotropic King models
+.TP
+\fB$(NEMOPATH)/dat/k?an??.dat\fP
+anisotropic King models
+.TP
+\fB$(NEMOPATH)/dat/plum.dat\fP
+isotropic Plummer model
+.SH AUTHOR
+Joshua E. Barnes
+.SH HISTORY
+.nf
+.ta +1i +4i
+22-may-88	V1.x created/documented   	JEB
+5-jul-97	V2.0 added epsilon, some code cleanup	PJT
+.fi
