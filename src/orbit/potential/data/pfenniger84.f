@@ -8,7 +8,15 @@ C!     D. Pfenniger, Observatoire de Geneve, 2002
 C
 C      21-feb-2002   for NEMO's potential(5) format:            PJT
 C                    - added Miyamoto disk
+C
+C	References:
+C	1984A&A...134..373P Pfenniger, D.
+C	1998A&A...334..829O Olle, M. & Pfenniger, D.
 C                    
+C
+C   For related potentials, see also: 
+C	pfenniger92	- added a 2nd Miyamoto disk
+C	skokos02	- added a plummer bulge
 C
 C Caveats:
 C      - pattern speed is still fixed, so don't change 'a'
