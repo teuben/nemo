@@ -2,12 +2,14 @@
  *  MAIN.C: NEMO driver for nbody1
  *	
  *  4-mar-98    cloned off runbody2, added KZ_ parameters     PJT
+ *  17-mar-04   using in= didn't enable kz(4) properly        PJT
  *
  *
  */
 
 #include <stdinc.h>
 #include <getparam.h>
+#include <history.h>
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -61,7 +63,7 @@ string defv[] = {
     "kstart=1\n       Running mode (1=new 2=restart 3,4,5=restart w/ new par",
     "tcomp=40.0\n     Maximum allowed running time (minutes)",
 
-    "VERSION=1.0\n    5-mar-98 PJT",
+    "VERSION=1.1a\n   17-mar-04 PJT",
     NULL,
 };
 
@@ -77,7 +79,7 @@ string usage="N-body code";
 #define KZ_BIN  12
 #define KZ_COM  14
 
-nemo_main()
+void nemo_main(void)
 {
     int nbody, nfix, nrand, nrun, kstart;
     real eta, deltat, tcrit, qe, eps, tcomp;
@@ -133,6 +135,11 @@ nemo_main()
     fprintf(datstr,"%d %g\n",kstart,tcomp);
     fprintf(datstr,"%d %d %d %d\n",nbody,nfix,nrand,nrun);
     fprintf(datstr,"%g %g %g %g %g\n",eta,deltat,tcrit,qe,eps);
+
+    if (hasvalue("in") && kz[KZ_INI-1] != 2) {
+      warning("Using in= and setting kz(%d)=2",KZ_INI);
+      kz[KZ_INI-1] = 2;
+    }
 
     for (k=0; k<KZ_MAX; k++) fprintf(datstr,"%d ",kz[k]);
     fprintf(datstr,"\n");
