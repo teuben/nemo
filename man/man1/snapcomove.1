@@ -1,0 +1,48 @@
+.TH SNAPCOMOVE 1NEMO "19 September 1990"
+.SH NAME
+snapcomove \- scale cosmological simulations to/from comoving coordinates
+.SH SYNOPSIS
+\fBsnapcomove in=\fP\fIin_file\fP\fBout=\fP\fIin_file\fP [parameter=value] .\|.\|.
+.SH DESCRIPTION
+\fIsnapcomove\fP scale the coordinates and velocities to comoving coordinates.
+In a future version one should also be able to scale back to real-world
+coordinates. Input parameters are (\fBt0\fP), the reference time 
+(or alternatively \fBH0\fP, the Hubble constant at the reference time)
+and \fBomega\fP, the density parameter of the universe.
+Scaling at the reference time is 1 by convention. The velocities are
+scaled in the same means, after subtraction of the local Hubble flow.
+.SH PARAMETERS
+The following parameters are recognized:
+.TP 24
+\fBin=\fIin_file\fP
+input file, in \fIsnapshot\fP(5NEMO) format.  Default: none.
+.TP
+\fBout=\fIout_file\fP
+output file, in \fIsnapshot\fP(5NEMO) format.  Default: none.
+.TP
+\fBt0=\fBref_time\fP
+Reference time, usually taken to be the first snapshot though.
+[default: \fBfirst\fP].
+.TP
+\fBomega=\fIomega\fP
+Density parameter of the cosmology. 
+[default: \fB1\fP].
+.SH BUGS
+The density parameter \fBomega\fP is not implemented yet. It's value
+is always taken to be 1.
+.SH "SEE ALSO"
+snapscale(1NEMO), snapcopy(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +3.0i
+~/src/pjt/nbody   	snapcomove.c snapcomove.1
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+19-Sep-90	V1.0: created          	PJT/George Rhee
+.fi
+
+
