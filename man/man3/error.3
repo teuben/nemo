@@ -1,0 +1,51 @@
+.TH ERROR 3NEMO "5 March 1994"
+.SH NAME
+error, warning, recover, stop \- handle errors and warnings and system exit
+.SH SYNOPSIS
+.nf
+\fB#include <stdinc.h>\fP
+.PP
+\fBvoid error(string format, ... )\fP
+\fBvoid warning(string format, arg ... )\fP
+\fBvoid recover(proc cleanup)\fP
+.fi
+.SH DESCRIPTION
+\fIerror\fP prints out an error 
+string to \fIstderr\fP and calls \fIstop\fP, which normally
+exit's the program (see also \fIexit(3)\fP). A program
+can have recoverable errors by supplying the pointer to
+a user defined function,  \fBcleanup()\fP, to \fIrecover\fP.
+This functionality is 
+similar to the \fIsignal(2)\fP concept. No arguments can
+be given to the \fBcleanup()\fP function. After \fIcleanup\fP
+has been called the program continues. (hmmm)
+.PP
+\fIwarning\fP prints out a warning string to \fIstderr\fP,
+but always continues the program.
+.PP
+Each of these functions converts, formats,  and  prints  its
+\fBargs\fP under control of the \fBformat\fP, as described in
+\fIprintf(3)\fP.
+.PP
+When \fBdebug_level\fP is larger than 5 (see \fIgetparam(3NEMO)\fP)
+\fIabort(3)\fP is called, instead of \fIexit(3)\fP. This should create
+a coredump, if your \fIcoredumpsize\fP is large enough.
+.PP
+\fIstop\fP exits to the system, similar to \fIexit(3)\fP, but
+performs some standard NEMO cleanup functions, for example, if
+the error count is non-zero (using the \fBerror=\fP system keyword,
+see getparam(3NEMO)), this function will return to the caller.
+If not, it exits to the sytem, using \fIexit(3)\fP, but also properly
+closes NEMOs parameter files using \fPfiniparam(3NEMO)\fP
+.SH SEE ALSO
+dprintf(3NEMO), getparam(3NEMO), exit(3), abort(3), varargs(3), stdarg(3)
+.SH AUTHOR
+Joshua Barnes, Peter Teuben
+.SH HISTORY
+.nf
+.ta +1i +4i
+xx-xxx-86	Created in the dark ages	Josh
+4-oct-90	Upgraded with warning() and recover()	Peter
+29-oct-90	abort for large enough debug_level	Peter
+5-mar-94	documented stop                     	peter
+.fi
