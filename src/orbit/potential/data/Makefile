@@ -43,7 +43,9 @@ POT_CXX = \
 SRCFILES= Makefile \
 	$(POT_CC) $(POT_F77) $(POT_CXX)
 
-OBJFILES= $(POT_CC:c=o) $(POT_CXX:cc=o) $(POT_F77:f=o)
+O_FILES= $(POT_CC:c=o) $(POT_CXX:cc=o) $(POT_F77:f=o)
+
+OBJFILES= $(O_FILES:o=so)
 
 BINFILES = 
 
