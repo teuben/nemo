@@ -11,9 +11,6 @@ set src=$NEMO/local/gcc
 set prefix=$NEMO/opt
 set version=3.3.5
 
-
-
-
 #				.. parse command line ..
 foreach arg ($*)
    set check = `echo $argv[1] | awk -F= '{print NF}'`
@@ -36,6 +33,11 @@ if (! -e $src) then
   echo " wget $url"
   echo " tar jxf $file"
   echo " ../src/scripts/gcc.install"
+  echo ""
+  echo "Known keywords to this script (and their current defaults):"
+  echo "  set src=$src"
+  echo "  set prefix=$prefix"
+  echo "  set version=$version"
   exit 1
 endif
 
