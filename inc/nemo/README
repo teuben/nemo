@@ -1,0 +1,9 @@
+
+This directory is merely for convenience; you can place packages
+in here (e.g. <nemo/kernel.h> would automatically give you access to
+all the kernel routines, <nemo/snapshot.h> for Nbody, <nemo/image.h>
+for Images etc. They normally contain simple include or symbolic
+links; this directory can also be copied/mounted in your /usr/local/include
+or anything of that kind.
+
+	PJT  - november 1992
