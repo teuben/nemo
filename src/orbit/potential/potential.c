@@ -34,6 +34,7 @@
  *      13-sep-01     V5.4  support for potential_double and potential_float   pjt
  *      18-sep-01           auto-detecting which type is present
  *      17-may-02     V5.4a fix ambiguity about float/double if generic present WD
+ *      25-apr-04         b fool optimizing compilers                           PJT
  *------------------------------------------------------------------------------
  */
 
@@ -52,6 +53,8 @@ local proc l_potential=NULL;    /* actual storage of pointer to exter worker */
 local proc l_inipotential=NULL; /* actual storage of pointer to exter inits  */
 local bool Qfortran = FALSE;    /* was a fortran routine used ? -- a hack -- */
 local bool first = TRUE;        /* see if first time called for mysymbols()  */
+
+void local dummy_for_c(void);
 
 /* forward declarations */
 
@@ -121,6 +124,7 @@ local proc load_potential(string fname, string parameters, string dataname, char
     char  name[256], cmd[256], path[256], pname[32];
     char  *fullname, *nemopath, *potpath;
     proc  pot, ini_pot;
+    int never=0;
 
     if (parameters!=NULL && *parameters!=0) {              /* get parameters */
 	local_npar = nemoinpd(parameters,local_par,MAXPAR);
@@ -261,6 +265,7 @@ local proc load_potential(string fname, string parameters, string dataname, char
     	local_omega = local_par[0];
     	dprintf(1,"get_potential: modified omega=%g\n",local_omega);
     }
+    if (pot==NULL) dummy_for_c();    /* should never be called */
     return pot;
 }
 /* endof: potential.c */
@@ -270,7 +275,7 @@ local proc load_potential(string fname, string parameters, string dataname, char
 #include <mathlinker.h>		/* extra math */
 #include <fslinker.h>		/* extra routines from filestruct() */
 
-void local dummy_for_c()
+void local dummy_for_c(void)
 {
     double a,b,c;
     int spline();
