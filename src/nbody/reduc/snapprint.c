@@ -19,6 +19,7 @@
  *       9-oct-01          a  toying with time selection pjt
  *      31-dec-02       V2.1 gcc3/SINGLEPREC             pjt
  *       4-sep-03       V2.2 allow CSV output based      pjt
+ *      24-feb-04       V2.4 add newline=t               pjt
  */
 
 #include <stdinc.h>
@@ -40,10 +41,11 @@ string defv[] = {
     "separ=0\n			Special table of interparticle distances",
     "times=all\n		Times to select snapshot",
     "tab=\n			Standard output or table file?",
-    "header=f\n			Add header to output?",
+    "header=f\n			Add header (nbody,time)to output?",
+    "newline=f\n                add newline in the header?",
     "csv=f\n                    Use Comma Separated Values format",
     "comment=f\n                Add table columns as common, instead of debug",
-    "VERSION=2.3\n		29-dec-03 PJT",
+    "VERSION=2.4\n		24-feb-04 PJT",
     NULL,
 };
 
@@ -59,9 +61,10 @@ void nemo_main()
     real   tsnap, dr, aux;
     string times;
     Body *btab = NULL, *bp, *bq;
-    bool   Qsepar, Qhead;
+    bool   Qsepar, Qhead = getbparam("header");
     bool   Qcsv = getbparam("csv");
     bool   Qcomment = getbparam("comment");
+    bool   Qnewline = getbparam("newline");
     int i, n, nbody, bits, nsep, isep, nopt, ParticlesBit;
     char fmt[20],*pfmt;
     string *opt;
@@ -70,7 +73,6 @@ void nemo_main()
     ParticlesBit = (MassBit | PhaseSpaceBit | PotentialBit | AccelerationBit |
             AuxBit | KeyBit | DensBit | EpsBit);
     instr = stropen(getparam("in"), "r");	/* open input file */
-    Qhead = getbparam("header");
 
     opt = burststring(getparam("options"),", ");
     nopt = 0;					/* count options */
@@ -129,7 +131,11 @@ void nemo_main()
         if ( (bits & ParticlesBit) == 0)
             continue;                   /* skip work, only diagnostics here */
 	if (!Qsepar) {				/* printf options */
-	    if (Qhead) fprintf(tabstr,"%d %g\n",nbody,tsnap);
+	    if (Qhead) {
+	      fprintf(tabstr,"%d ",nbody);
+	      if (Qnewline) fprintf(tabstr,"\n");
+	      fprintf(tabstr,"%g\n",tsnap);
+	    }
             for (bp = btab, i=0; bp < btab+nbody; bp++, i++) {
                 for (n=0; n<nopt; n++) {
                     aux = fopt[n](bp,tsnap,i);
