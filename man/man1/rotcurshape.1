@@ -5,10 +5,12 @@ rotcurshape \- fit parameters to a velocity field using shaped rotation curves
 \fBrotcurshape in=\fPvelfie [parameters=values ...]
 .SH DESCRIPTION
 \fIrotcurshape\fP derives the kinematical parameters from an observed
-velocity field of a galactic disk by fitting a rotation curve shape.
+velocity field of a coplanar galactic disk by fitting a rotation curve shape.
 Instead of dividing the galactic disk in a set of rings (see \fIrotcur(1NEMO)\fP)
 it fits the shape of the rotation curve to a single plane. This is particularly
 useful for low inclination galaxies and/or for central regions of a galaxy.
+
+
 .PP
 It does a non-linear least-squares-fitting to the function:
 .PP
@@ -248,6 +250,7 @@ flat	v0		v=v0
 plummer	v0,a		v=v0*x/(1+x^2)^(3/4)
 core1	v0,a		v=v0*x/(1+x)
 core2	v0,a		v=v0*x/(1+x^2)^(1/2)
+core	v0,a,c		v=v0*x/(1+x^c)^(1/c)
 poly	v0,a,p2,p3,..	v=v0*(x+p2*x^2+p3*x^3+.....pN*x^N)
 .fi
 .SH EXAMPLE
