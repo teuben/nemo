@@ -3,6 +3,10 @@
  *
  * $Header$
  * $Log$
+ * Revision 1.3  2001/08/28 21:37:06  pteuben
+ * fix reading binary data, got rid of hardcoded TIPSY_NEEDPAD
+ * and warn when header size is not 28.
+ *
  * Revision 1.2  2001/04/02 05:18:51  teuben
  * more fixing of the linux install
  *
@@ -21,6 +25,7 @@
  *  2-sep-94	For NEMO conversion to snapshot
  * 18-aug-00    also allow binary files..., with padding and optional swap
  *  1-apr-01    compiler warnings - pjt
+ * 26-aug-01    fix problems with mass99 data that have nsph=ndark=0
  */
  
 #include <stdinc.h>
@@ -41,14 +46,15 @@ string defv[] = {
     "options=gas,dark,star\n    Output which particles?",
     "mode=ascii\n		Input mode (ascii, binary)",
     "swap=f\n                   Swap bytes?",
-    "VERSION=2.0a\n             1-apr-01 pjt",
+    "offset=0\n                 Offset data from header?",
+    "VERSION=2.1\n              28-aug-01 pjt",
     NULL,
 };
 
 string usage="convert tipsy ascii/binary file to snapshot";
 
 extern bswap(char *, int, int);
-    
+
 nemo_main()
 {
     int ndim ;
@@ -62,16 +68,16 @@ nemo_main()
     float *tform  = NULL;
     float *tf ;
     float last_tform ;
-    struct gas_particle *gp, *lastgp;
+    struct  gas_particle *gp, *lastgp;
     struct dark_particle *dp, *lastdp ;
     struct star_particle *sp, *lastsp, *last_old_sp ;
 
     /* NEMO */
     bool Qgas, Qdark, Qstar, Qascii, Qbinary, Qswap;
     string options, mode;
-    int i, j, n, nbody, bits;
+    int i, j, n, nbody, bits, offset;
     real tsnap;
-    Body *btab, *bp;
+    Body *btab = NULL, *bp;
     stream instr, outstr;
     
     instr = stropen(getparam("in"),"r");
@@ -88,6 +94,8 @@ nemo_main()
     Qbinary  = scanopt(mode,"binary");
 
     Qswap = getbparam("swap");
+    
+    offset = getiparam("offset");
 
     last_nstar = 0 ;
     last_tform = -1.e30 ;
@@ -220,7 +228,7 @@ nemo_main()
 		sp < lastsp ; sp++,tf++) {
 	    fscanf(instr,"%f%*[, \t\n]",tf);
 	    if(*tf < last_tform){
-		warning("error in star formation time");
+	        warning("error in star formation time: %g < %g", *tf,last_tform); 
 		return ;
 	    }
 	    sp->tform = *tf ;
@@ -279,7 +287,13 @@ nemo_main()
     if (Qbinary) for(;;) {
         n = fread((char *)&header,sizeof(header),1,instr) ;
         if (n <= 0) break;
-
+	if (sizeof(header) != 28)
+	  warning("TIPSY header = %d bytes, not 28. You may need offset=",sizeof(header));
+#ifdef TIPSY_NEEDPAD
+	dprintf(1,"TIPSY_NEEDPAD was defined; header=%d bytes\n",sizeof(header));
+#else
+	dprintf(1,"TIPSY_NEEDPAD was not defined; header=%d bytes\n",sizeof(header));
+#endif	
         if (Qswap) {
             bswap((void *)&header.time,    sizeof(double), 1);
             bswap((void *)&header.nbodies, sizeof(int),    1);
@@ -288,6 +302,13 @@ nemo_main()
             bswap((void *)&header.ndark,   sizeof(int),    1);
             bswap((void *)&header.nstar,   sizeof(int),    1);
         }
+
+	ndim=header.ndim;
+
+	nbodies=header.nbodies;
+	ngas=header.nsph;
+	nstar = header.nstar ;
+	ndark = header.ndark = nbodies - nstar - ngas ;
 
         switch(header.ndim) {
             case 3:
@@ -302,25 +323,84 @@ nemo_main()
                 header.time, header.nbodies,
                 header.nsph, header.ndark, header.nstar);
 
+	if (offset) {
+	  n = fseek(instr, offset, SEEK_CUR);
+	  warning("Stupid TIPSY, offsetting data by %d bytes....: %d",n);
+	}
 
         if (header.nsph > 0) {
             gp = allocate(header.nsph*sizeof(*gp));
             n = fread((char *)gp, sizeof(*gp), header.nsph, instr);
             if (n <= 0) error("Problem reading gas data");            
+	    dprintf(1,"Found %d gas particles\n",n);
+
+	    if (Qgas) {
+	      nbody = ngas;
+	      if (btab != NULL) free(btab);
+	      btab = (Body *) allocate(nbody*sizeof(Body));
+	      bp=btab;
+	      for (i=0; i<nbody; i++) {
+	        Mass(bp) = gp[i].mass;
+	        for (j=0; j<ndim; j++) {
+		  Pos(bp)[j] = gp[i].pos[j];
+		  Vel(bp)[j] = gp[i].vel[j];
+	        }
+	        bp++;
+	      }
+	      bits = (TimeBit | MassBit | PhaseSpaceBit);	    
+	      put_snap(outstr, &btab, &nbody, &tsnap, &bits);
+
+	    }
         }
 
         if (header.ndark > 0) {
             dp = allocate(header.ndark*sizeof(*dp));
             n = fread((char *)dp, sizeof(*dp), header.ndark, instr);
             if (n <= 0) error("Problem reading dark data");            
+	    dprintf(1,"Found %d dark matter particles\n",n);
+
+	    if (Qdark) {
+	      nbody = ndark;
+	      if (btab != NULL) free(btab);
+	      btab = (Body *) allocate(nbody*sizeof(Body));
+	      bp=btab;
+	      for (i=0; i<nbody; i++) {
+	        Mass(bp) = dp[i].mass;
+	        for (j=0; j<ndim; j++) {
+		  Pos(bp)[j] = dp[i].pos[j];
+		  Vel(bp)[j] = dp[i].vel[j];
+	        }
+	        bp++;
+	      }
+	      bits = (TimeBit | MassBit | PhaseSpaceBit);	    
+	      put_snap(outstr, &btab, &nbody, &tsnap, &bits);
+	    }
         }
 
         if (header.nstar > 0) {
             sp = allocate(header.nstar*sizeof(*sp));
             n = fread((char *)sp, sizeof(*sp), header.nstar, instr);
             if (n <= 0) error("Problem reading star data");            
-        }
+	    dprintf(1,"Found %d star particles\n",n);
 
+	    if (Qstar) {
+	      nbody = nstar;
+	      if (btab != NULL) free(btab);
+	      btab = (Body *) allocate(nbody*sizeof(Body));
+	      bp=btab;
+	      for (i=0; i<nbody; i++) {
+	        Mass(bp) = sp[i].mass;
+	        for (j=0; j<ndim; j++) {
+		  Pos(bp)[j] = sp[i].pos[j];
+		  Vel(bp)[j] = sp[i].vel[j];
+	        }
+	        bp++;
+	      }
+	      bits = (TimeBit | MassBit | PhaseSpaceBit);	    
+	      put_snap(outstr, &btab, &nbody, &tsnap, &bits);
+
+	    }
+        }
     }
 
     if(tform) free(tform);

@@ -1,4 +1,4 @@
-.TH TIPSYSNAP 1NEMO "19 august 2000"
+.TH TIPSYSNAP 1NEMO "28 august 2001"
 .SH NAME
 tipsysnap \- convert tipsy file to snapshot
 .SH SYNOPSIS
@@ -29,6 +29,18 @@ Read ascii or binary TIPSY file format. Default: ascii
 Swap bytes. This is needed if you want to be able to read
 standard (XDR, big endian) or native binary files.
 Default: false.
+.TP
+\fBoffset=0\fP
+Number of bytes to offset the data portion from the header. Normally
+this would be 0, but the header strcture (tipsydefs.h) containing
+one double and 5 integers, some architectures may read this as
+32 bytes, whereas it was meant to be 28 bytes. By using offset=-4
+in this case, data with 28 byte headers can still be read. Equally
+so, the opposite can also happen, in which case offset=4 is needed.
+Default: 0
+.SH BUGS
+In \fBmode=binary\fP the gas, dark and star particles are output
+in separate snapshots.
 .SH SEE ALSO
 snaptipsy(1NEMO)
 .SH AUTHOR
@@ -38,4 +50,5 @@ Peter Teuben
 .ta +1.0i +4.0i
 02-Sep-94	V1.0 Created 	PJT
 19-aug-00	V2.0 add mode= to allow binary files, added swap= 	PJT
+28-aug-01	V2.1 process binary data, added offset= (replaces shortlives fix32=t|f)	PJT
 .fi

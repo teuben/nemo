@@ -4,10 +4,11 @@
  *	2-sep-94	my last mod			PJT
  *	17-aug-00	fixed padding byte problem	PJT
  *			-DNEEDPAD  for now .....
+ *      28-aug-01       no NEEDPAD but warn if sizeof() not 32.....????
  */
 
 #define MAXDIM 3
-#define TIPSY_NEEDPAD
+/*   #define TIPSY_NEEDPAD  */
 #define forever for(;;)
 
 typedef float Real;
