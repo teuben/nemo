@@ -1,0 +1,42 @@
+%N mkspiral
+%D toy spiral density perturbation in a uniform disk
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man mkspiral' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A out
+	output file name [???]
+%A nbody
+	number of particles [2048]
+%A potname
+	name of background potential [plummer]
+%A potpars
+	optional parameters to potential []
+%A potfile
+	optional data file with potential []
+%A rmin
+	inner disk radius [0.0]
+%A rmax
+	outer cutoff radius [1.0]
+%A mass
+	total mass of disk [0]
+%A a
+	relative spiral perturbation w.r.t. disk [1]
+%A k
+	spiral wavenumber  (> 0 trailing spirals) [1]
+%A w
+	gaussian width of spiral - in degrees [15]
+%A angular
+	constant angular width [t]
+%A seed
+	random number seed [0]
+%A sign
+	sign of angular momentum of disk [1]
+%A sigma
+	1D velocity dispersion in plane of disk [0]
+%A nmodel
+	number of models [1]
+%A headline
+	text headline for output  []
+%A VERSION
+	27-mar-97 PJT [1.6]
