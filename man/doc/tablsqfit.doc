@@ -1,0 +1,30 @@
+%N tablsqfit
+%D a linear least square fitting program
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man tablsqfit' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	input (table) file name [???]
+%A xcol
+	column(s) for x [1]
+%A ycol
+	column(s) for y [2]
+%A dycol
+	column for sigma-y, if used []
+%A xrange
+	in case restricted range is used (1D only) []
+%A fit
+	fitmode (line, ellipse, imageshift, plane, poly, peak) [line]
+%A order
+	Order of plane/poly fit [0]
+%A out
+	optional output file for some fit modes []
+%A nsigma
+	delete points more than nsigma away? [-1]
+%A estimate
+	optional estimates (e.g. for ellipse center) []
+%A nmax
+	Default max allocation [10000]
+%A VERSION
+	14-feb-98 PJT [2.9c]
