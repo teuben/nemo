@@ -35,7 +35,7 @@ string defv[] = {
     "coord=f\n                  Add coordinates?",
     "select=all\n               Select which SDS# for display? (all|1..)",
     "dummy=t\n                  Also print out dummy axis (axis with length 1)",
-    "VERSION=1.5\n		10-dec-04 PJT",
+    "VERSION=1.5a\n		10-dec-04 PJT",
     NULL,
 };
 
@@ -69,6 +69,7 @@ scan_sd(string infile)		/* this is the fancy new version */
     string format, sselect;
     stream outstr;
     bool Qdummy = getbparam("dummy");
+    bool Qout = hasvalue("out");
 
     if (!Qdummy) warning("dummy may not be working so well");
 
@@ -155,11 +156,11 @@ scan_sd(string infile)		/* this is the fancy new version */
 	  for (i=0; i<rank; i++) old_shape[i] = shape[i];
 	} else {                   /* make sure subsequent ones have the same size for display */
 	  if (old_size != size) {
-	    warning("bad shape for SDS #%d, removing from selection list",k+1);
+	    if (Qout) warning("bad shape for SDS #%d, removing from selection list",k+1);
 	    visib[k] = FALSE;
 	    size = old_size;
 	  } else if (old_rank != rank) {
-	    warning("bad rank for SDS #%d, removing from selection list",k+1);
+	    if (Qout) warning("bad rank for SDS #%d, removing from selection list",k+1);
 	    visib[k] = FALSE;
 	    rank = old_rank;
 	  }
