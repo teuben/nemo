@@ -56,6 +56,7 @@
  *  28-mar-04   V3.2 added extra counter to random name to work around loadobj() problem
  *                   redirect output of make to a logfile for pipes to work in NEMO
  *   7=may-04   fixed permission problem
+ *  14-jul-04   fix K&R style code which can give problems for -DSINGLE_PREC code
  *
  *  Used environment variables (normally set through .cshrc/NEMORC files)
  *      NEMO        used in case NEMOOBJ was not available
@@ -200,8 +201,7 @@ local proc bodytrans(string type, string expr, string fname)
         sprintf(file, "/tmp/%s.c", name);
         cdstr = fopen(file, "w");
         fprintf(cdstr, "#include <bodytrans.h>\n\n");
-        fprintf(cdstr, "%s %s(b,t,i)\n", type, sname);/* use generic name */
-        fprintf(cdstr, "Body *b;\nreal t;\nint i;\n");
+        fprintf(cdstr, "%s %s(Body *b,real t,int i)\n", type, sname);/* use generic name */
         fprintf(cdstr, "{\n    return (%s);\n}\n", expr);
         fclose(cdstr);
 	cflags = getenv("CFLAGS");
