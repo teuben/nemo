@@ -1,0 +1,46 @@
+.TH BSWAP 1NEMO "15 December 1998"
+.SH NAME
+bswap \- swap bytes in a file
+.SH SYNOPSIS
+\fBbswap\fP [parameter=value]
+.SH DESCRIPTION
+\fBbswap\fP swaps the bytes in a file. This can be
+useful if the file was copied between different endian machines,
+and consists of a homogeneous datatype (\fIfilestruct(5NEMO)\fP is
+a notable example where you cannot use this technique, but NEMO's
+binary files swap on-the-fly if need be).
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input file to read and swap bytes of. No default.
+.TP
+\fBout=\fP
+Output filename for which all the bytes have been swapped.
+If no filename given, data will not be written, and CPU
+usage will be reported. Default: no output.
+.TP
+\fBlen=\fP
+Itemlength in bytes during swapping . Common are 2, 4 and 8, for
+which the code is optimized. Any other (even) number can be handled
+too though. [Default: \fB2\fP].
+.TP
+\fBoneswap=t|f\fP
+One swap call? Only useful to set false under benchmark circumstances.
+[Default: \fBt\fP].
+.TP
+\fBoffset=\fP
+Offset (in bytes) before which no swapping is done.
+[Default: \fB0\fP].
+.SH SEE ALSO
+filestruct(5NEMO), dd(1)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+27-Feb-94	V1.1b Documented	PJT
+23-feb-97	V1.3 allow offset before swapping starts	PJT
+15-dec-98	V1.4 add streaming mode to I/O    	PJT
+.fi
