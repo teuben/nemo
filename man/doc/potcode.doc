@@ -1,0 +1,37 @@
+%N potcode
+%D ### NEMO program with unknown intent...(usage)
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man potcode' for more online help
+%A in
+	input file name (snapshot) [???]
+%A out
+	output file name (snapshot) []
+%A potname
+	name of potential(5) [???]
+%A potpars
+	parameters to potential []
+%A potfile
+	optional filename to potential []
+%A save
+	state file name []
+%A freq
+	fundamental frequency (inv delta-t) [64.0]
+%A mode
+	integrator: 1 => RK, 2 => PC, 3 => PC1 [3]
+%A tstop
+	time to stop integration [2.0]
+%A freqout
+	major data-output frequency [4.0]
+%A minor_freqout
+	minor data-output frequency [32.0]
+%A options
+	misc options []
+%A eta
+	fractional dissipation per timestep [0]
+%A cell
+	cell size [0.1]
+%A headline
+	random mumble for humans [PotCode]
+%A VERSION
+	1-nov-91 PJT [2.2]
