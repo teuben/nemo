@@ -92,6 +92,17 @@ Maximum number of lines allocated if the input file was being read
 from a pipe. If not, the routine \fIfile_lines(3NEMO)\fP is used
 to allocate space for the table.
 [Default: \fB10000\fP].
+.TP
+\fBtol\fP=
+Tolerance for convergence of \fInllsqfit\fP
+[Default: \fB0.0\fP].
+.TP
+\fBlab\fP=
+Mixing parameter for \fInllsqfit\fP [Default: \fB0.0\fP for linear,
+\fB0.1\fP for non-linear fits].
+.TP
+\fBitmax\fP=
+Maximum number of allowed \fInllsqfit\fP iterations [Default: \fB50\fP]
 .SH FITS
 Parameters are referred to as p0,p1,p2,p3,.....
 .nf
