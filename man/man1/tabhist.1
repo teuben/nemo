@@ -1,0 +1,119 @@
+.TH TABHIST 1NEMO "22 December 1999"
+.SH NAME
+tabhist \- histogram plotter and gaussian fit for tabular data
+.SH SYNOPSIS
+.PP
+\fBtabhist in=\fPinfile [parameter=value]
+.SH DESCRIPTION
+\fItabhist\fP plots a histogram and computes the first 
+4 moments of a number of points, obtained
+from an column from an (ascii) file in tabular format. 
+It calculates the mean, dispersion,
+skewness and kurtosis. It then plots the data in the form of a histogram,
+optionally with a 'best' gaussian fit and residuals. It can also plot
+a cumulative histogram of the data.
+.PP
+If you need simple statistics for multiple columns, use \fBtabstat\fP 
+instead. It can also remove outliers and re-compute the statistics.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 20
+\fBin=\fIinfile\fP
+input file, in tabular format [no default].
+.TP
+\fBxcol=\fIcolumn\fP
+column from which the (X) values are taken [default \fB1\fP].
+.TP
+\fBxmin=\fIx_min\fP
+Minimum value along X-axis to include [default: minimum of datapoints].
+.TP
+\fBxmax=\fIx_max\fP
+Maximum value along X-axis to include [default: maximum of datapoints].
+Note: One cannot specify only a min or max, either both, or none have to
+be specified. 
+.TP
+\fBbins=\fIn_bins\fP
+Number of (equal size) bins the data is split up in [default: \fB16\fP].
+.TP
+\fBmaxcount=\fIcount\fP
+Maximum count value per bin plotted along the Y-axis
+[default: autoscaling].
+.TP
+\fBnmax=\fImax_lines\fP
+Maximum number of lines allowed to read from datafile, if the data
+comes from a pipe as supposed from file.  
+[Default: \fB10000\fP].
+.TP
+\fBylog=t|f\fP
+Take log of Y-axis? This option is really redundant, since
+\fItabmath(1NEMO)\fP can handle any transformation
+[default: \fBf\fP].
+.TP
+\fBxlab=\fIx-label\fP
+Label along the X-axis [default: \fBvalue\fP].
+.TP
+\fBylab=\fIy-label\fP
+Label along the Y-axis [default: \fBN\fP or \fBlog(N)\fP].
+.TP
+\fBheadline=\fItext\fP
+Random verbiage, will be plotted along right top of plot for identification
+[default: none].
+The left top will contain the filename \fIinfile\fP.
+.TP
+\fBtab=t|f\fP
+Table output? If false, a plot using your current \fIyapp(5NEMO)\fP
+device will be given. If true, a simple ascii version of a histogram
+is shown. The default choice of \fBbins=16\fP keeps all the information
+on a simple 80*24 screen.
+[Default: \fBf\fP]
+.TP
+\fBgauss=t|f\fP
+If true, plot output will contain
+a gaussian fit. The "best" gaussian fit is the
+one that has the same mean, dispersion and integrated area
+as the data. [Default: \fBt\fP].
+.TP
+\fBresidual=t|f\fP
+If true, the residual (data - fit) will be plotted as a dashed line.
+[Default: \fBt\fP].
+.TP
+\fBcumul=t|f\fP
+Plot a cumulative histogram instead. If set, the keywords gauss, residual,
+and ylog are automatically re-set to false. 
+[Default: \fBf\fP].
+.TP
+\fBcumul=t|f\fP
+Compute median too? This can be timeconsuming for large numbers of points.
+[Default: \fBf\fP].
+.SH BUGS
+Cannot autoscale with only xmin or xmax set.
+.SH BUGS
+Points that fall exactly on the boundary of a bin, are added to the
+right side. Another way of saying is that a cell includes the left side,
+but is open ended on the right side, i.e. [---). This behavior is
+opposite that of SM's behavior.
+.SH "SEE ALSO"
+tablsqfit(1NEMO), tabmath(1NEMO), tabstat(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +3.0i
+~/src/kernel/tab	sources
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+xx-mar-88	V1.0: created          	PJT
+15-Apr-88	V1.1: higher order moments, Y scale  	PJT
+1-jun-88	V2.0: new name, code same	PJT
+28-oct-88	V2.0a: updated doc + labels plotting done	PJT
+13-nov-93	V2.7: added gaussian model + residuals	PJT
+11-jul-96	V2.8: log scale is now 10-based, not e	PJT
+12-apr-97	V3.0: added cumulative option	PJT
+24-apr-98	V3.0a: fix median calculation for restricted range	PJT
+22-dec-99	V3.1a: optional median, fix N=1 reporting bug	PJT
+24-jan-00	documentation updated with program	PJT
+.fi
+
