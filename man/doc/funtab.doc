@@ -1,0 +1,22 @@
+%N funtab
+%D Function Table lookup
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man funtab' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input table with Y=f(X) [???]
+%A xcol
+	Column for X [1]
+%A ycol
+	Column for Y [2]
+%A x
+	X values to lookup (Y to return) []
+%A y
+	Y values to lookup (X to return) []
+%A format
+	Output format [%g]
+%A mode
+	Lookup mode (spline, linear, near) [linear]
+%A VERSION
+	4-sep-97 PJT [1.1]
