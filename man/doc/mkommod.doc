@@ -1,0 +1,26 @@
+%N mkommod
+%D spherical system with anisotropic distribution function a la Osipkov-Merritt
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man mkommod' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	file with tables of mass, ... vs radius [???]
+%A out
+	snapshot output file name [???]
+%A nbody
+	number of particles to generate [512]
+%A seed
+	seed for random number generator [0]
+%A ftrun
+	fractional mass truncation paramete [0.999]
+%A zerocm
+	if true, zero center of mass [true]
+%A nmodel
+	number of copies to generate [1]
+%A headline
+	random verbiage for output file []
+%A epsilon
+	roundoff control parameter [1.0e-10]
+%A VERSION
+	21-jul-97 PJT [2.0a]
