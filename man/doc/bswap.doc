@@ -1,0 +1,18 @@
+%N bswap
+%D swap bytes in a file
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man bswap' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	File to read and swap bytes of [???]
+%A out
+	Filename if the swapped file to be output []
+%A len
+	Itemlength in bytes during swapping [2]
+%A oneswap
+	One swap call? (or many) - for testing only [t]
+%A offset
+	Offset (in bytes) before which no swapping done [0]
+%A VERSION
+	23-feb-97 PJT [1.3]
