@@ -17,7 +17,7 @@ of fitting parameters is given
 (\fBnpar\fP, must be > 0 to trigger this option),
 as well as the number of independant points per beam (\fBnppb\fP):
 .nf
-    chi2 = sum_{i,j}(map(i,j)^2)/nppb/(N/nppb-npar-1)
+    chi2 = sum_{i,j}(map(i,j)^2)/nppb/(N/nppb-npar)
 .fi
 where N is the number of non-bad values in the map. The input 
 map is now assumed to contain a dimensionless \fI(obs-mod)/sigma\fP
