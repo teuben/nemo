@@ -1,0 +1,59 @@
+%N hackcode1_qp
+
+This doc file has been produces with help=t option
+No further help is available, try 'man hackcode1_qp'
+
+%A in
+     
+
+%A out
+     
+
+%A restart
+     
+
+%A continue
+     
+
+%A save
+     
+
+%A nbody
+     
+
+%A seed
+     
+
+%A cencon
+     
+
+%A freq
+     
+
+%A eps
+     
+
+%A tol
+     
+
+%A fcells
+     
+
+%A options
+     
+
+%A tstop
+     
+
+%A freqout
+     
+
+%A minor_freqout
+     
+
+%A debug
+     
+
+%A VERSION
+     
+
