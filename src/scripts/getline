@@ -1,0 +1,23 @@
+#! /bin/csh -f
+#
+if ($#argv < 2) then
+  echo "Usage: $0 file line_number"
+  echo "   or:"
+  echo "       $0 file start_line end_line"
+  exit 0
+endif
+
+set file=$1
+if (! -e $file) then
+  echo File $file does not exist
+  exit 1
+endif
+
+if ($#argv == 2) then
+  set line=$2
+  awk '{if (NR == '$line') {print $0; exit 0}}' $file
+else
+  set start=$2
+  set end=$3
+  awk '{if ('$start'<=NR && NR<='$end') print $0}' $file
+endif
