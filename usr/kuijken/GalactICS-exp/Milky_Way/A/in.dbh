@@ -1,0 +1,9 @@
+y                   #yes we want a halo
+-4.6 1.42 1 .1 0.8  #psi0, v0, q, (rc/rk)^2, ra
+y                   #yes we want a disk
+.867 1 5 .1 .5      #M_d, R_d, R_outer, z_d, dR_trunc
+y                   #yes we want a bulge
+14.45 -2.3 .714     #rho_b, psi_cut, sig_b
+.01 2400            #delta_r, nr
+10                  #number of harmonics (even number)
+dbh.ps/ps

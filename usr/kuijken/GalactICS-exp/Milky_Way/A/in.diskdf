@@ -1,0 +1,4 @@
+.47 1.0   #central radial velocity dispersion, scale length of sig_r^2
+50        #number of intervals for correction functions
+10        #number of iterations
+diskdf.ps/ps

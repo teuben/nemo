@@ -1,0 +1,21 @@
+#!/bin/csh -f
+set nd=0
+set nb=0
+set nh=0
+set ng=0
+if( -f disk ) set nd=`head -1 disk | awk '{print $1}'`
+if( -f bulge ) set nb=`head -1 bulge | awk '{print $1}'`
+if( -f halo ) set nh=`head -1 halo | awk '{print $1}'`
+if( -f globs) set ng=`head -1 globs | awk '{print $1}'`
+set nt=0
+set nt=`expr $nt + $nd`
+set nt=`expr $nt + $nb`
+set nt=`expr $nt + $nh`
+set nt=`expr $nt + $ng`
+echo $nt particles in total
+rm -f galaxy
+echo $nt 0.0 >> galaxy
+if( -f disk )tail +2 disk >> galaxy
+if( -f bulge )tail +2 bulge >> galaxy
+if( -f halo )tail +2 halo >> galaxy
+if( -f globs) tail +2 globs >> galaxy

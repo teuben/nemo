@@ -1,0 +1,5 @@
+0.75      #streaming fraction
+4000      #number of particles
+-1        #negative integer seed
+1         #center the data 1=yes
+dbh.dat   #harmonics file

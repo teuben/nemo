@@ -1,0 +1,5 @@
+0.5      #streaming fraction
+6000     #number of particles
+-1       #negative integer seed for random number generator
+1        #1=yes we want to center
+dbh.dat  #multipole expansion data file
