@@ -7,7 +7,9 @@ mknemo \- attempt to find NEMO programs and install them
 .SH DESCRIPTION
 \fImknemo\fP attempts to find the source code of the program(s)
 specified on the command line, and tries to compile them.
-If successfull, the binary will be placed in \fB$NEMOBIN\fP
+If successfull, the binary will be placed in \fB$NEMOBIN\fP.
+Add the '-u' flag if your NEMO is under CVS control, so you can
+force an update before the build.
 .PP
 On a first pass a single
 source file \fIprogram.c\fP is looked for, which is
