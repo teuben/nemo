@@ -1,0 +1,22 @@
+%N hdfgrid
+%D Regrid a CMHOG polar HDF SDS image to a cartesian image
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man hdfgrid' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input file (HDF SD) [???]
+%A out
+	8bit dump file [???]
+%A select
+	Select which SDS from the file (1=first) [1]
+%A nx
+	Number of pixels in X [256]
+%A ny
+	Number of pixels in Y [256]
+%A xrange
+	Range in X [-16:16]
+%A yrange
+	Range in Y [-16:16]
+%A VERSION
+	26-may-95 PJT [1.0a]
