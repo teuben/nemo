@@ -15,6 +15,7 @@
  *      21-mar-03  1.7  optional bootstrapping to check on errors
  *       4-apr-03  1.8  added dypow= keyword, and fixed bug in handling dycol=
  *      10-mar-04  1.8b added Lorentzian fitting, fixed setting lab= for loadable functions
+ *      16-apr-04  1.9  added printing out the chi-squared or RMS or whatever it can do
  *
  *  line       a+bx
  *  plane      p0+p1*x1+p2*x2+p3*x3+.....     up to 'order'   (a 2D plane in 3D has order=2)
@@ -23,7 +24,7 @@
  *  exp        p0+p1*exp(-(x-p2)/p3)  
  *  arm        p0+p1*cos(x)+p2*sin(x)         special version for rahul 
  *  arm3       p0+p1*cos(x)+p2*sin(x)+p3*cos(3*x)+p4*sin(3*x) 
- *  loren      (p1/PI) / ( (x-p0)^2 - p1^2 )
+ *  loren      (p1/PI) / ( (x-p0)^2 + p1^2 )
  */ 
 
 #include <stdinc.h>  
@@ -55,7 +56,7 @@ string defv[] = {
     "bootstrap=0\n      Bootstrapping to estimate errors",
     "seed=0\n           Random seed initializer",
     "numrec=f\n         Try the numrec routine instead?",
-    "VERSION=1.8c\n     15-mar-04 PJT,RS",
+    "VERSION=1.9\n      16-mar-04 PJT",
     NULL
 };
 
@@ -125,6 +126,8 @@ extern int    nllsqfit(real *, int, real *, real *, real *, int, real *, real *,
 		       int, real, int, real, my_proc1, my_proc2);
 
 extern double  xrandom(double a, double b);
+
+
 
 my_proc3 my_nllsqfit;    /* set via numrec= to be the Gipsy or NumRec routine */
 
@@ -265,9 +268,11 @@ static real func_loren(real *x, real *p, int np)
 
 static void derv_loren(real *x, real *p, real *e, int np)
 {
-  e[0]=(2/PI)*(x[0]-p[0])*p[1]/(((x[0]-p[0])*(x[0]-p[0])+p[1]*p[1])*((x[0]-p[0])*(x[0]-p[0])+p[1]*p[1]));
+  real tmp = (x[0]-p[0])*(x[0]-p[0]) + p[1]*p[1];
 
-  e[1]=(1/PI)*((x[0]-p[0])*(x[0]-p[0])-p[1]*p[1])/(((x[0]-p[0])*(x[0]-p[0])+p[1]*p[1])*((x[0]-p[0])*(x[0]-p[0])+p[1]*p[1]));
+  tmp = 1.0/(tmp*tmp*PI);
+  e[0] =  2*(x[0]-p[0])*p[1]*tmp;
+  e[1] =   ((x[0]-p[0])*(x[0]-p[0])-p[1]*p[1])*tmp;
 }
 
 static real func_arm3(real *x, real *p, int np)
@@ -288,7 +293,17 @@ static void derv_arm3(real *x, real *p, real *e, int np)
   e[4] = sin(3*y);
 }
 
+real data_rms(int n, real *d)
+{
+  int i;
+  Moment m;
 
+  ini_moment(&m, 2);
+  for (i=0; i<n; i++)
+    accum_moment(&m,d[i],1.0);
+  return sigma_moment(&m);
+    
+}
 
 
 /****************************** START OF PROGRAM **********************/
@@ -440,7 +455,7 @@ read_data()
        	warning("Could only read %d data",npt);
     }
     if (dycolnr>0 && dypow != 1) {
-      warning("New feature dypow=: weights are dycol**(%g)",dypow);
+      dprintf(1,"New feature dypow=: weights are dycol**(%g)",dypow);
       ncount = 0;
       for(i=0; i<npt; i++) {
 	if (dycol.dat[i] < 0) 
@@ -641,7 +656,7 @@ random_permute2(int n, int *idx)
 
 /* 
  * bootstrap:  take a number of new samples of the errors and distribute them 
- *             on the first fit. then refit and see what the distrubution of
+ *             on the first fit. then refit and see what the distribution of
  *             the errors is.
  */
 
@@ -867,7 +882,7 @@ do_gauss()
   if (outstr)
     for (i=0; i<npt; i++)
       fprintf(outstr,"%g %g %g\n",x[i],y[i],d[i]);
-
+  printf("rms = %g\n",data_rms(npt,d));
 }
 
 
@@ -1094,6 +1109,7 @@ do_loren()
   if (outstr)
     for (i=0; i<npt; i++)
       fprintf(outstr,"%g %g %g\n",x[i],y[i],d[i]);
+  printf("rms = %g\n",data_rms(npt,d));
   free(d);
 
 }
