@@ -36,7 +36,7 @@ string defv[] = {
     "item=\n                      Select specific item",
     "xml=f\n                      output data in XML format? (experimental)",
     "octal=f\n                    Force integer output in octal again?",
-    "VERSION=3.1c\n		  26-nov-03 PJT ",
+    "VERSION=3.1d\n		  15-mar-05 PJT ",
     NULL,
 };
 
@@ -63,6 +63,8 @@ string find_fmt     (string);
 bool   outstr       (string);
 void   end_line     (void);
 void   change_indent(int);
+
+#define BUFLEN   256
 
 
 void nemo_main()
@@ -123,7 +125,7 @@ void print_item(string tag)
 
 void print_set(string tag)
 {
-    char buf[128];
+    char buf[BUFLEN];  /* danger: buffer overflow */
 
     if (xml)
       sprintf(buf, "<%s>", tag);
@@ -136,7 +138,7 @@ void print_set(string tag)
     
 void print_tes(string tag)
 {
-    char buf[128];
+    char buf[BUFLEN];  /* danger: buffer overflow */
 
     change_indent(- indent);
     if (xml)
@@ -149,7 +151,7 @@ void print_tes(string tag)
 
 void print_header(string tag, string type, int *dims)
 {
-    char buf[128];
+    char buf[BUFLEN];  /* danger: buffer overflow */
     int *dp;
     
     if (xml)
@@ -182,7 +184,7 @@ void print_data(string tag, string type, int *dims)
 {
     string fmt;
     int dlen;
-    char buf[128];
+    char buf[BUFLEN];  /* danger: buffer overflow */
     byte *dat, *dp;
     bool Qprint;
 
@@ -190,7 +192,7 @@ void print_data(string tag, string type, int *dims)
 
     fmt = find_fmt(type);
     dlen = get_dlen(instr, tag);
-    dat = allocate(dlen);
+    dat = (byte*) allocate(dlen);
     get_data_sub(instr, tag, type, dat, dims, FALSE);
     if (streq(type, CharType) && Qprint)
 	(void) outstr(dims != NULL ? "\"" : "\'");
