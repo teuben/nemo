@@ -19,20 +19,21 @@ CXX = @CXX@
 #  if your solaris system requires that
 #HDFLIB=-ldf -ljpeg -lz
 
-HDFINC = @HDF_INC@
-HDFLIB = @HDF_LIB@
+HDF_INC = @HDF_INC@
+HDF_LIB = @HDF_LIB@
 
 #  PVM library
 
-PVMINC = @PVM_INC@
-PVMLIB = @PVM_LIB@
+PVM_INC = @PVM_INC@
+PVM_LIB = @PVM_LIB@
 
 
 #  CFITSIO library
-CFITSIOINC = @CFITSIO_INC@
-CFITSIOLIB = @CFITSIO_LIB@
 
-#			miriad 
+CFITSIO_INC = @CFITSIO_INC@
+CFITSIO_LIB = @CFITSIO_LIB@
+
+#  MIRIAD library
 #	(could also depend on $(MIR) and $(MIRLIB) if you don't like these)
 MIRIAD_INC = @MIRIAD_INC@
 MIRIAD_LIB = @MIRIAD_LIB@
@@ -40,8 +41,6 @@ MIRIAD_LIB = @MIRIAD_LIB@
 #	GSL
 GSL_CFLAGS = @GSL_CFLAGS@
 GSL_LIBS   = @GSL_LIBS@
-
-
 
 # LOADOBJ stuff; -DMACH=.....
 
