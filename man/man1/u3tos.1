@@ -1,0 +1,65 @@
+.TH U3TOS 1NEMO "8 August 1995"
+.SH NAME
+u3tos \- Convert NBODY unit 3 output data to snapshot
+.SH SYNOPSIS
+\fBu3tos\fP \fBin=\fP\fIOUT3\fP \fBout=\fP\fIsnapshot_file\fP [parameter=value]
+.SH DESCRIPTION
+\fIu3tos\fP converts the output of one of the Aarseth
+NBODY integrators (see e.g. \fInbody1(1NEMO)\fP) to a 
+snapshot file for further manipulation wihtin NEMO.
+.PP
+The binary output file (normally called \fBOUT3\fP) normally
+has to be converted on the host machine where the simulations
+have been run, although some support exists for cross-platform
+usage, in particular when only endianism is the issue.
+.PP
+It is strongly recommended to 
+use \fIunfio(1NEMO)\fP and check if a dataset looks ok. You may also 
+need to set \fBswap=t\fP in this program.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input file (in NBODY's OUT3 binary format). Is known to work with OUT3
+files from NBODY1, NBODY2 and NBODY5. No default.
+.TP
+\fBout=\fP
+Output file (snapshot(5NEMO) format). No default.
+.TP
+\fBframe=\fP
+Frames to read (0=all). Currently only 1 frame, or all, can be selected
+for output. Default: 0.
+.TP
+\fBalen=\fP
+Use this if you need to override the length of the \fBA\fP array
+that is present in the data dumps. Normally the header I/O routine
+will figure this out for you. There are some older format
+dumps that do not contain this variable. Use 0 to process old
+datafiles that do not have an A array.
+By default this variable is not set (autodetection via header).
+.TP
+\fBswap=t|f\fP
+Should bytes be swapped upon reading? This allows
+reading data that were created on a machine that had the
+opposite endianism from the one you're using this program one.
+By default no byte swapping is performed.
+.TP
+\fBinteger=2|4\fP
+Signal the reader what kind of INTEGERs were used in the output dataset.
+Older data may have used INTEGER*2, which limits the number of particles
+to 32767, patched programs (and presumably later official versions from Sverre)
+will always write INTEGER*4 (or having the same size as a REAL),
+[Default: \fB4\fP].
+.SH AUTHOR
+Peter Teuben
+.SH SEE ALSO
+nbody1(NEMO), unfio(1NEMO), u4tos(1NEMO) stou4(1NEMO), snapshot(5NEMO)
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+07-Apr-93	V1.0 Created	PJT
+29-mar-94	V1.1 added optional override alen=, deleted mode=	PJT
+10-jun-95	V1.1c  bug in alen implementation fixed   	PJT
+.fi
+
