@@ -1,0 +1,41 @@
+.TH SNAPPLOTV 1NEMO "4 October 1995"
+.SH NAME
+snapplotv \- display an N-body snapshot file as a vector field
+.SH SYNOPSIS
+\fBsnapplot in=\fPsnap-file [parameter=value] .\|.\|.
+.SH DESCRIPTION
+\fIsnapplotv\fP is derived from \fIsnapplot(1NEMO)\fP, i.e.
+plots a 
+standard N-body snapshot file on a selected graphics device, but
+in addition two \fIbodytrans(1NEMO)\fP variables are selected
+that respresent a vector field. 
+.SH PARAMETERS
+The following additional parameters to \fIsnapplot\fP have been defined:
+.TP 24
+\fBvxvar=\fP\fIvx-expression\fP
+The value of \fIvx-expression\fP is plotted determines the
+length of the vector along the X axis.
+\fIvx-expression\fP is a real-valued C language expression over the
+real values \fBx\fP, \fBy\fP, \fBz\fP, \fBvx\fP, \fBvy\fP, \fBvz\fP,
+\fBphi\fP, \fBt\fP, and the integer value \fBi\fP.
+The default is \fBvx\fP.
+.TP
+\fBvyvar=\fP\fIy-expression\fP
+See above.
+The default is \fBvy\fP.
+.TP
+\fBscale=\fP\fIfactor\fP
+The factor with which each vector is multiplied to make unit velocity
+come out as 1/20 (1cm for \fIyapp\fP) of the plot.
+[Default is \fB1\fP].
+.SH SEE ALSO
+snapplot(1NEMO), bodytrans(1NEMO), snapshot(5NEMO).
+.SH BUGS
+There is no autoscaling.
+.SH AUTHOR
+Peter Teuben
+.SH HISTORY
+.nf
+.ta +1i +4i
+4-oct-95	V1.0 cloned from snapplot	PJT
+.fi
