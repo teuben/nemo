@@ -1,4 +1,4 @@
-.TH TABSPLINE 1NEMO "9 September 2001"
+.TH TABSPLINE 1NEMO "31 August 2002"
 .SH NAME
 tabspline \- interpolate in a table
 .SH SYNOPSIS
@@ -8,8 +8,9 @@ tabspline \- interpolate in a table
 was given in (ascii) tabular format.
 It actually is not required that x is monotonically increasing or
 decreasing, the function could be a parametrized table (x=f(t),y=g(t)).
-The interpolation can occur in X as well as Y. It is currently linear
-if GSL is not enabled.
+The interpolation can occur in X as well as Y, and uses
+either the GSL library, if present, or \fIspline(3NEMO)\fP
+if not.
 .PP
 If GSL is enabled, various spline interpolations can be selected
 (including linear), as well as
@@ -32,12 +33,16 @@ Y Column [2].
 .TP
 \fBx=\fP
 For this X, find the corresponding Y. 
-Can be an array using \fInemoinp(3NEMO)\fP notation.
+Can be an array using \fInemoinp(3NEMO)\fP notation. 
+The mnemonic \fBall\fP can be used to for the same values as
+obtained from \fBxcol=\fP.
 [default: not used]
 .TP
 \fBy=\fP
 For this Y, find the corresponding X 
 Can be an array using \fInemoinp(3NEMO)\fP notation.
+The mnemonic \fBall\fP can be used to for the same values as
+obtained from \fBycol=\fP.
 [default: not used]
 .TP
 \fBn=\fP
@@ -84,7 +89,7 @@ or a little more serious to check the accuracy of the GSL interpolation types, u
 .fi
 .SH SEE ALSO
 .nf
-table(5NEMO)
+table(5NEMO), spline(3NEMO)
 .fi
 .SH FILES
 .nf
@@ -101,5 +106,6 @@ Peter Teuben
 23-jan-01	V2.1 added x=,y= arrays for Mousumi	PJT
 5-apr-01	V2.2: added format=	PJT
 9-sep-01	V3.0: GSL enabled, can use spline options	PJT
-22-jul-02	V3.1 documented nder		PJT
+22-jul-02	V3.1: documented nder		PJT
+31-aug-02	V3.2: allow x=all and y=all	PJT
 .fi

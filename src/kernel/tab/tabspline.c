@@ -8,6 +8,8 @@
  *   9-sep-01    3.0   GSL enabled
  *  23-sep-01       a  ->nemo_file_lines
  *  26-may-02    3.1   add derivatives (old TOOLBOX from spline.c) for non-GSL
+ *  27-jul-02    3.2   implement nder= using spline.c if GSL not present    PJT
+ *  28-aug-02    3.3   allow to use 'all' for  x= or y= ?
  *
  *   TODO:
  *      - spline vs. linear
@@ -21,26 +23,31 @@
 #if HAVE_GSL
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_spline.h>
+#else
+extern void spline(real *coef, real *x, real *y, int n);
+extern real seval(real x0, real *x, real *y, real *coef, int n);
+extern real spldif(real x0, real *x, real *y, real *coef, int n);
+extern real spldif2(real x0, real *x, real *y, real *coef, int n);
 #endif
 
 string defv[] = {
     "in=???\n       Input table file",
-    "xcol=1\n       X column",
+    "xcol=1\n       X column (1=first)",
     "ycol=2\n       Y Column",
-    "x=\n           For these X's, find Y",
-    "y=\n           For these Y's, find X",
+    "x=\n           For these X's, find Y; 'all' uses all xcol's",
+    "y=\n           For these Y's, find X; 'all' uses all ycol's",
     "n=0\n          Which roots one to find (0=all) - not used in GSL",
     "format=%g\n    Output format",
 #if HAVE_GSL
     "type=cspline\n Spline interpolation type (only for GSL)",
 #endif
     "nder=0\n       Number of derivates to show (0,1,2)",
-    "VERSION=3.1\n  25-may-02 PJT",
+    "VERSION=3.3\n  31-aug-02 PJT",
     NULL,
 
 };
 
-string usage="first and second derivatives of a table";
+string usage="interpolation and first two derivatives of a function table";
 
 #define MAXZERO     64
 #define MAXDATA  16384
@@ -56,12 +63,12 @@ nemo_main()
     int i, j, n, nx, ny, nmax, izero;
     int nzero = getiparam("n");
     int nder = getiparam("nder");
-    bool Qx, Qy;
+    bool Qx, Qy, Qxall, Qyall;
 #if HAVE_GSL
     gsl_interp_accel *acc = gsl_interp_accel_alloc();
     gsl_spline *spline;
 #else
-    if (nder > 0) warning("non-GSL enabled :  can't computer derivatives yet");
+    real *sdat;
 #endif
 
     if (nzero > MAXZERO)
@@ -78,7 +85,8 @@ nemo_main()
     sprintf(fmt2,"%s %s",fmt,fmt);
     sprintf(fmt1," %s",fmt,fmt);
     dprintf(1,"Using format=\"%s\"\n",fmt2);
-
+    Qxall = (Qx && streq("all",getparam("x")));
+    Qyall = (Qy && streq("all",getparam("y")));
 
     instr = stropen(getparam("in"),"r");
     n = get_atable(instr,2,colnr,coldat,nmax);
@@ -119,8 +127,13 @@ nemo_main()
     if (Qx) {
       dprintf(1,"Evaluating Y(x) using GSL\n");
       gsl_spline_init(spline, xdat, ydat, n);
-      nx = nemoinpr(getparam("x"),xp,MAXDATA);
-      if (nx<0) error("Parsing x=%s",getparam("x"));
+      if (Qxall ) {
+	nx = n;
+	for (i=0; i<nx; i++) xp[i] = xdat[i];
+      } else {
+	nx = nemoinpr(getparam("x"),xp,MAXDATA);
+	if (nx<0) error("Parsing x=%s",getparam("x"));
+      }
       for (j=0; j<nx; j++) {
         x = xp[j];
         if (x<xmin || x>xmax) error("x=%g out of range %g : %g",x,xmin,xmax);
@@ -142,8 +155,13 @@ nemo_main()
     if (Qy) {
       dprintf(1,"Evaluating X(y) using GSL\n");
       gsl_spline_init(spline, ydat, xdat, n);
-      ny = nemoinpr(getparam("y"),yp,MAXDATA);
-      if (ny<0) error("Parsing y=%s",getparam("y"));
+      if (Qyall ) {
+	ny = n;
+	for (i=0; i<ny; i++) yp[i] = ydat[i];
+      } else {
+	ny = nemoinpr(getparam("y"),yp,MAXDATA);
+	if (ny<0) error("Parsing y=%s",getparam("y"));
+      }
       for (j=0; j<ny; j++) {
         y = yp[j];
         if (y<ymin || y>ymax) error("y=%g out of range %g : %g",y,ymin,ymax);
@@ -163,16 +181,24 @@ nemo_main()
     }
     gsl_interp_accel_free(acc);
 #else
-    strcat(fmt2,"\n");
 
     if (Qx) {
       dprintf(1,"Evaluating Y(x)\n");
-      nx = nemoinpr(getparam("x"),xp,MAXDATA);
-      if (nx<0) error("Parsing x=%s",getparam("x"));
+      if (Qxall ) {
+	nx = n;
+	for (i=0; i<nx; i++) xp[i] = xdat[i];
+      } else {
+	nx = nemoinpr(getparam("x"),xp,MAXDATA);
+	if (nx<0) error("Parsing x=%s",getparam("x"));
+      }
+      dprintf(0,"[Using spline.c]\n");
+      sdat = (real *) allocate(sizeof(real)*n*3);
+      spline(sdat,xdat,ydat,n);
       for (j=0; j<nx; j++) {
         x = xp[j];
         if (x<xmin || x>xmax) error("x=%g out of range %g : %g",x,xmin,xmax);
         izero = 0;
+#if 0
         for (i=1; i<n; i++) {
             if (xdat[i-1] <= x && x < xdat[i] ||
                 xdat[i] <= x && x < xdat[i-1]) {
@@ -185,13 +211,31 @@ nemo_main()
             }
         }
         dprintf(1,"# Found %d zero's\n",izero);
+#else
+	y = seval(x,xdat,ydat,sdat,n);
+        printf(fmt2,x,y);
+	if (nder > 0) {
+	  yd = spldif(x,xdat,ydat,sdat,n);
+	  printf(fmt1,yd);
+	  if (nder > 1) {
+	    yd = spldif2(x,xdat,ydat,sdat,n);
+	    printf(fmt1,yd);
+	  }
+	}
+	printf("\n");
+#endif
       }
     }
 
     if (Qy) {
       dprintf(1,"Evaluating X(y)\n");
-      ny = nemoinpr(getparam("y"),yp,MAXDATA);
-      if (ny<0) error("Parsing y=%s",getparam("y"));
+      if (Qyall ) {
+	ny = n;
+	for (i=0; i<ny; i++) yp[i] = ydat[i];
+      } else {
+	ny = nemoinpr(getparam("y"),yp,MAXDATA);
+	if (ny<0) error("Parsing y=%s",getparam("y"));
+      }
       for (j=0; j<ny; j++) {
         y = yp[j];
         if (y<ymin || y>ymax) error("y=%g out of range %g : %g",y,ymin,ymax);
