@@ -32,7 +32,7 @@ echo "Created on `hostname`: `date` <P>"
 if (1) then
 
 echo "Apologies for the formatting bug"
-echo "See also: <A HREF=whatis.html>whatis</A> pages."
+echo "See also the alphabatized <A HREF=whatis.html>whatis</A> pages."
 
 echo "<PRE>"
 # ok for sunos
