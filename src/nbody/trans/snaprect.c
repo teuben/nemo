@@ -8,6 +8,7 @@
  *  4-jul-94    V1.3b also output theta,phi of principle axes		pjt
  *			only now implemented test=
  * 22-aug-00        c bit more ansi cc					pjt
+ * 15-mat=02        d added option log to allow piping of output        WD 
  */
 
 #include <stdinc.h>
@@ -26,8 +27,9 @@ string defv[] = {
     "weight=1\n			  weighting for particles",
     "rcut=0.0\n			  cutoff radius effective if > 0.0",
     "times=all\n		  range of times to transform",
+    "log=\n                       write to this file instead of stdout",
     "test=\n                      Use this snapshot instead, to transform",
-    "VERSION=1.3c\n		  22-aug-00 PJT",
+    "VERSION=1.3d\n		  15-Mar-02 WD",
     NULL,
 };
 
@@ -48,7 +50,7 @@ extern  rproc btrtrans();
 
 nemo_main()
 {
-    stream instr, outstr;
+    stream instr, outstr, logstr;
     string times;
     int bits;
 
@@ -67,6 +69,7 @@ nemo_main()
     instr = stropen(getparam("in"), "r");
     get_history(instr);
     outstr = stropen(getparam("out"), "w");
+    logstr = hasvalue("log")? stropen(getparam("log"), "w!") : stdout;
     put_history(outstr);
     rcut = getdparam("rcut");
     times = getparam("times");
@@ -76,7 +79,7 @@ nemo_main()
             roughcenter(btab);
             findcenter(btab);
             if (!Qtest) findmoment(btab);
-            snaptransform();
+            snaptransform(logstr);
 	    put_snap(outstr, &btab, &nbody, &tsnap, &bits);
 	}
     } while (bits != 0);
@@ -175,7 +178,8 @@ vector oldframe[3] = {
     { 0.0, 0.0, 1.0, },
 };
 
-snaptransform()
+snaptransform(out)
+stream out;
 {
     vector frame[3], pos_b, vel_b, acc_b;
     Body *b;
@@ -187,9 +191,9 @@ snaptransform()
     if (dotvp(oldframe[2], frame[2]) < 0.0)
 	MULVS(frame[2], frame[2], -1.0);
     CROSSVP(frame[1], frame[2], frame[0]);
-    printvec("e_x:", frame[0]);
-    printvec("e_y:", frame[1]);
-    printvec("e_z:", frame[2]);
+    printvec("e_x:", frame[0], out);
+    printvec("e_y:", frame[1], out);
+    printvec("e_z:", frame[2], out);
     for (b = btab; b < btab+nbody; b++) {
 	SUBV(Pos(b), Pos(b), w_pos);
 	SUBV(Vel(b), Vel(b), w_vel);
@@ -228,16 +232,16 @@ matrix mat;
 	    frame[i-1][j-1] = v[j][i];
 }
 
-printvec(name, vec)
+printvec(name, vec, out)
 string name;
 vector vec;
+stream out;
 {
     vector rtp;	/* radius - theta - phi */
-
     xyz2rtp(vec,rtp);
-    printf("%12s  %10.5f  %10.5f  %10.5f  %10.5f   %5.1f %6.1f\n",
-	   name, rtp[0], vec[0], vec[1], vec[2],
-		rtp[1]*180.0/PI, rtp[2]*180.0/PI);
+    fprintf(out,"%12s  %10.5f  %10.5f  %10.5f  %10.5f   %5.1f %6.1f\n",
+	    name, rtp[0], vec[0], vec[1], vec[2],
+	    rtp[1]*180.0/PI, rtp[2]*180.0/PI);
 }
 
 xyz2rtp( xyz, rtp)
