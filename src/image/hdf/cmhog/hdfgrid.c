@@ -23,6 +23,7 @@
  *                            changed order of symmetry/mirror, changed some dprintf's
  *       4-dec-04       V2.0a fixed serious bug for rank=3 datasets
  *                          b toy with quadmaps
+ *      14-dec-04           c fixed feature that phi's were subtracted, not added
  */
 
  
@@ -53,7 +54,7 @@ string defv[] = {
     "phi1=0\n                   Shift THETA values first (*test*)",
     "scale2=1\n                 Scale THETA values after shift (*test*)",
     "phi3=0\n                   Shift THETA values after scale (*test*)",
-    "VERSION=2.0c\n		10-dec-04 PJT",
+    "VERSION=2.0d\n		14-dec-04 PJT",
     NULL,
 };
 
@@ -260,12 +261,16 @@ void nemo_main()
     rads = coord[i1];
     phis = coord[i0];
     create_image(&iptr, nx, ny);
-    for (j=0; j<np; j++) {
-      phis[j] -= sumphi1;
-      phis[j] *= scalephi2;
-      phis[j] -= sumphi3;
-    }
 
+    /* shift/scale/shift the angles a bit */
+    dprintf(1,"Radius: %g %g\n",rads[0],rads[nr-1]);
+    dprintf(1,"Theta:  %g %g\n",phis[0],phis[np-1]);
+    for (j=0; j<np; j++) {
+      phis[j] += sumphi1;
+      phis[j] *= scalephi2;
+      phis[j] += sumphi3;
+    }
+    dprintf(1,"phi1=%g scale2=%g phi3=%g\n",sumphi1,scalephi2,sumphi3);
     dprintf(1,"Radius: %g %g\n",rads[0],rads[nr-1]);
     dprintf(1,"Theta:  %g %g\n",phis[0],phis[np-1]);
 
@@ -375,9 +380,9 @@ void nemo_main()
     write_image(outstr,iptr);
     strclose(outstr);
 #if 0
-    dprintf(0,"%d points outside grid ;datamin/max: %g %g\n",n1,n2,domin,domax);
+    dprintf(0,"%d/%d points outside grid ;datamin/max: %g %g\n",n1,n2,domin,domax);
 #else
-    dprintf(0,"%d points outside grid\n",n1,n2);
+    dprintf(0,"%d/%d points outside grid\n",n1,n2);
 #endif
     dprintf(0,"Datamin/max written: %g %g\n",dmin,dmax);
 }
