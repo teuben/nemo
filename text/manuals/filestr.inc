@@ -11,24 +11,28 @@ the disk format. The popular memory (object) models,
 and how they interact with persistent data on disk, are discussed in
 Chapter~\ref{c:progr}}.
 Most of the data handled by NEMO is in the form of a
-specially designed XML-like binary format, 
+specially designed\footnote{note this was back in 1986, well before XML was conceived}
+XML-like binary format, 
 although exceptions like ASCII files/tables will also be discussed. 
 Ample examples
 illustrate creation, manipulation and data transfer.
-We close this chapter with two examples that make use of
-the native object file format of your operating system ({\it a.out(5)}).
+We close this chapter with a few examples of function descriptions, 
+a dataformat that make use of
+the native object file format of your operating system ({\it a.out(5)}
+and {\it dlopen(3)}).
 
 \section{Binary Structured Files}
 
 Most of the data files used by NEMO share a common low level binary file
 structure, which can be viewed as a sequence of tagged data items.  Special
-symbols are defined to group items hierarchically into sets.  Data items
+symbols are defined to group these items hierarchically into sets.  Data items
 are typically scalar values or homogeneous arrays constructed from
 elementary C data types, but the programmer can also add more complex
 structures, such as C's {\tt struct} structure definition, or any user
 defined data structure. In this last case tagging by type is not 
 possible anymore, and support for a machine independent format
-is not guaranteed.
+is not guaranteed. Using such constructs is not recommended if the
+data needs to be portable accross platforms.
 
 The hierarchical structure of a binary file in this general format can
 be viewed in human-readable format at the terminal using a special 
@@ -43,8 +47,8 @@ into binary structured files
 In principle it is hence
 possible to transfer data files between different types of computers
 using {\tt rsf} and {\tt tsf} (see examples in Section~\ref{s:exch-data}).
-\footnote{Note however that currently NEMO's binary files have limited support
-for machine-independancies.
+\footnote{Note however that currently NEMO's binary files have some limited support
+for machine-independancies, e.g. simple endian swap.
 Some portability notes about this can be found in Appendix~\ref{sifs}}
 
 Let us start with a small example: With the NEMO
@@ -111,7 +115,7 @@ although the inline help (system {\tt help=} keyword)
 \index{help, inline} is most of the times sufficient enough
 to remind a novice user of the keywords and their meaning.
 The {\tt man} command is a last resort, if more detailed information
-is needed. 
+and examples are needed. 
 
 \begin{verbatim}
     3% man tsf
@@ -151,27 +155,31 @@ gets a list of misspelled (or unknown) words from a document:
 NEMO programs can also pass data via UNIX pipes, although with a
 slightly different syntax: a dataset that is going to be part of a pipe
 (either input or output) has to be designated with  the {\tt -}
-(``dash'') symbol. Also, and this is very important, the receiving task
+(``dash'') symbol for their filename.
+Also, and this is very important, the receiving task
 at the other end of the pipe should get data from only one source
 of course. If
 the task at the sending end of the pipe wants to send binary data over
 that pipe, but in addition the same task would also write ``normal''
 standard
-output, the pipe would be  corrupted with two incompatible sources of
+output, the pipe would be corrupted with two incompatible sources of
 data. An example of this is the program 
 {\tt snapcenter}\index{snapcenter}. The keyword {\tt report} must be set to
-{\tt false} instead. So, for example, the output of a previous N-body
+{\tt false} instead, which is actually the default now.
+So, for example, the output of a previous N-body
 integration is re-centered on it's center of mass, and subsequently
 rectified and stacked into a single image as follows:
 
 \begin{verbatim}
+    % snapcenter r001.dat . report=t  | tabplot - 0 1,2,3
+    
     % snapcenter r001.dat - report=f       |\
         snaprect - - 'weight=-phi*phi*phi' |\
         snapgrid - r001.sum stack=t
 \end{verbatim}
 
-If the keyword {\tt report=f} would not have been used (the default
-is {\tt true}), {\tt snaprect}\index{snaprect}
+If the keyword {\tt report=f} would not have been set properly,
+{\tt snaprect}\index{snaprect}
 would not have been able to process it's convoluted
 input. Some other examples
 are discussed in Section~\ref{ss:data}.
@@ -183,9 +191,9 @@ like {\tt tsf}, {\tt rsf}, {\tt csf} and {\tt hisf}}
 in NEMO will automatically keep track of the history of
 their data-files in a self-describing and self-documenting
 way.\index{history} If a program modifies an input file and produces an
-output file, it will pre-append the
-command-line with which it was invoked to it's data history.  The
-data-history is normally located at the beginning of a data file. 
+output file, it will prepend the
+command-line with which it was invoked to its data history.  The
+data history is normally located at the beginning of a data file. 
 Comments entered using the frequently used program keyword {\tt
 headline=} will also appear in the history section of your data file. 
 \index{HISTORY, environment}
@@ -203,7 +211,6 @@ could also be used by scanning its output for the string\index{headline}
     5% tsf r001.dat | grep History
 \end{verbatim}
 
-({\tt grep} is a standard UNIX utility)
 which shows that {\tt tsf}, together with it's counterpart {\tt rsf} has
 virtually
 the same functionality as {\tt hisf}. 
@@ -243,9 +250,9 @@ for analysis and histogram
 plotting, {\tt tablsqfit} \index{tablsqfit(1)} 
 for checking correlations between two columns and
 {\tt tabmath} \index{tabmath(1)} for general table handling).  
-Commercial packages such as (S)Mongo \index{mongo} \index{sm}
-and Lotus 1-2-3 \index{Lotus 1-2-3}
-may also come in very handy here and easily read table files.
+% Commercial packages such as (S)Mongo \index{mongo} \index{sm}
+% and Lotus 1-2-3 \index{Lotus 1-2-3}
+% may also come in very handy here and easily read table files.
 The manual 
 pages of the relevant NEMO programs should inform you how to get nice
 tabular output, but sometimes it is also necessary to write a shell/awk
@@ -254,8 +261,9 @@ script or parser to do the job. {\it Note: the {\tt tab=} keyword
 hints at the existence of such features}.
 
 A usefull (public domain) program {\it redir(1NEMO)}\index{redirection}
-has been included in NEMO
-to be able split the two standard UNIX output channels {\it stdout} and
+has been included in NEMO\footnote{see also the {\tt tpipe} tool}
+to be\index{tpipe}
+able split the two standard UNIX output channels {\it stdout} and
 {\it stderr} to separate files. \index{stdout} \index{stderr}
 \index{redir}
 
@@ -271,7 +279,7 @@ shell ({\tt /bin/sh})\index{bourne shell} this is accomplished much
 easier:
 
 \begin{verbatim}
-    7% tsf r001.dat debug=2 2>debug.out
+    7$ tsf r001.dat debug=2 2>debug.out
 \end{verbatim} 
 
 One last word of caution regarding tables: tables can also be used
@@ -293,18 +301,26 @@ are always able to find the correct amount to allocate for their
 internal buffers by scanning over the file once. For very large tables
 this does introduce a little extra overhead.
 
+\section{Dynamically Loadable Functions}
 
-\section{Potential Descriptors}
+A very peculiar data file format encountered in NEMO is that of the 
+function descriptors. They present themselves to the user through
+one or more keywords, and in reality point to a compiled\index{loadobj}
+piece of code that will get loaded by NEMO (using {\tt loadobj(3NEMO)}).
+We currently have 4 of these in NEMO:
 
-A very peculiar data file format encountered in NEMO is that of the potential
-\index{potential descriptor} \index{orbit} descriptor which is used in orbit
+\subsection{Potential Descriptors}
+
+
+The potential
+\index{potential descriptor} \index{orbit} descriptor is used in orbit
 calculations and a few N-body programs.  These are actually binary
 object files (hence extremely system dependent!!), and 
 used by the dynamic object loader \index{dynamic loader, loadobj}
 during runtime. Potentials are 
 supplied to NEMO programs as an input variable ({\it i.e.} a set of 
 keywords\footnote{Normally called {\tt potname=, potpars=} 
-and {\tt potfile=}}).
+and {\tt potfile=}, but see also {\tt rotcurves}}).
 For this, a mechanism is needed to dynamically load 
 the code which calculates the potential. This is done by a
 dynamic object loader that comes with NEMO. 
@@ -322,7 +338,7 @@ potential(5NEMO)} The program {\it potlist(1NEMO)} \index{potlist(1)}
 can be used to test potential descriptors. See Section~\ref{s:potential}
 for examples.
 
-\section{Bodytrans Functions}
+\subsection{Bodytrans Functions}
 
 Another family of object files used by the dynamic
 object loader are the {\it bodytrans(5NEMO)} functions. These were
@@ -342,3 +358,22 @@ to test and save new expressions. Examples are given in
 Section~\ref{s-dispanal}, a table of the 
 precompiled ones are in Table~\ref{t:bodytrans}.
 
+\subsection{Nonlinear Least Squares Fitting Functions}
+
+The program {\tt tabnllsqfit} can fit (linear or non-linear, depending
+on the parameters) a function to a set of datapoints from an ASCII table.
+The keyword {\tt fit=} describes the model (e.g. a line, plane, gaussian, circle,
+etc.), of which a few common ones have been pre-compiled with the program.
+In that sense this is different from the previous two function descriptors,
+which always get loaded from a directory with precompiled object files.
+The keyword {\tt load=} can be used to feed a user defined function to
+this program. The manual page has a lot more details.
+
+\subsection{Rotation Curves Fitting Functions}
+
+Very similar to the Nonlinear Least Squares Fitting Functions are the
+Rotation Curves Fitting Functions, except they are peculiar to the
+1- and 2-dimensional rotation curves one find in galaxies as the 
+result of a projected circular streaming model. The program
+{\tt rotcurshape} is the only program that uses these functions, the
+manual page has a lot more details.

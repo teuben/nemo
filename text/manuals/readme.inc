@@ -10,10 +10,10 @@ In order to prevent disappointment and frustration this section
 should be carefully read and understood before you endeavor into 
 NEMO.
 
-Use the list below as a checklist, it will help you to decide if NEMO is
+You can use the list below as a checklist, it will help you to decide if NEMO is
 really the right way for you to solve your particular problem.  In the
 end it may be helpful to have the manual pages {\it programs(8NEMO)}
-and/or \index{index, programs} {\it index(1NEMO)} nearby for names of
+and/or \index{index, programs} {\it index(1NEMO)} for names of
 specific programs and utilities that you may want to use. The items in
 the list below are in approximate order of importance, the most
 important ones listed first. The further down the list you come, the
@@ -94,7 +94,7 @@ minimal and system dependant. (See Chapter~\ref{c:progr}).
 you realize what it means to install NEMO if this has not been done yet.
 You need to carefully read Appendix~\ref{a:install} in detail; any
 experience you have had with the UNIX shell, and utilities like 
-``{\it make}'' will be useful.
+``{\it make}''  and ``{\it autoconf}'' will be useful.
 
 \end{enumerate}
 
@@ -110,7 +110,11 @@ Other information on NEMO can be found in the following places:
 
 \item[$\bullet$] manual pages, in {\tt \$NEMO/man} and below, using the
 UNIX {\it man} or NEMO {\it nemoman}/{\it manlaser}
-commands\index{nemoman}\index{manlaser}.
+commands\index{nemoman}\index{manlaser}. For a graphical
+interface programs like\index{manual pages, html}
+{\it tkman}\index{tkman} and {\it gman}\index{gman} can be very useful
+(hypertext) browsers of manual page. We also automatically maintain a
+fully hyperlinked version formatted in html.\index{html, manual pages}
 
 \item[$\bullet$] The {\tt README} file in NEMO's home directory will
 always contain ``last minute'' information that has perhaps not found
@@ -125,10 +129,16 @@ overviews NEMO's usage.
 \item[$\bullet$] {\tt survival.texi}, a short texinfo\index{texinfo}
 introduction with basic survival techniques to get around.
 
-\item[$\bullet$] The World Wide Web home page, currently at
+\item[$\bullet$] The NEMO home page, currently at
 \htmladdnormallink{\tt http://www.astro.umd.edu/nemo/}
 {http://www.astro.umd.edu/nemo/}, contains many
-pointers to a variety of helpful pages.
+pointers to a variety of helpful pages, and sometimes
+contradicts information written down in this manual.
+
+\item[$\bullet$] The ManyBody compendium, putting together an introduction
+to NEMO, starlab and other N-body software, originally written for
+the first N-body School (Strasbourg, 2004)\index{manybody}\index{Strasbourg}.
+
 
 
 \end{description}

@@ -29,8 +29,9 @@ Aarseth, for his hard work on the industry standard series "{\bf
 NBODY*}", which has also become a part of NEMO, and Lars Hernquist,
 \index{Hernquist L.} for providing a fortran version of the treecode. 
 Mark Bellon \index{Bellon M.} has contributed his optimized C version of
-treecode which specifically runs well on some parallel processors.  Bill
-Sebok \index{Sebok W.L.} contributed the {\tt ds} image display tool. 
+treecode which specifically runs well on some parallel processors.  
+% ds disappeared in release 3
+% Bill Sebok \index{Sebok W.L.} contributed the {\tt ds} image display tool. 
 The {\tt GIPSY} and {\tt MIRIAD} \index{GIPSY} programming
 \index{miriad} groups are also continuesly supplying us with software.
 Being one of the early
@@ -52,6 +53,7 @@ references.
 {\it College Park, Maryland}\\
 {\it November ,1991}\\
 {\it August, 1994}
+{\it April, 2004}
 \end{flushleft}
 
 \normalsize

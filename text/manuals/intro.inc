@@ -7,7 +7,8 @@
 NEMO is a collection of programs, running under a standard UNIX 
 shell\footnote{We will assume some basic knowledge of the UNIX operating
 system}, capable of running various stellar dynamical
-codes and related utilities (initialization, analysis).  It can be
+codes and related utilities (initialization, analysis, gridding, orbits).  
+It can be
 thought of as a collection of various ``groups'' (packages) 
 of programs, a group being defined by their common file structure.  
 % A
@@ -15,18 +16,20 @@ of programs, a group being defined by their common file structure.
 % groups.  This lowest file structure eventually interacts directly with
 % the data on disk.  
 In addition, a common user interface is defined with which the user
-communicates with a program.  There are also experimental 
-master control programs available, their operation similar to the
-ones used in so many other astronomical data reduction packages,
-({\it e.g.}  
-AIPS\index{AIPS}, and MIDAS\index{MIDAS}
-).
-For Sun workstations a sunview (windows) based 
-menu interface is available under
-the name {\tt mirtool} \index{mirtool, shell} and an
-{\tt AIPS}-like interface, under the\index{miriad, shell} name\index{miriad} 
-{\tt miriad}, which works on any UNIX platform. User interfaces 
-will be described in much more detail in the next chapter and 
+communicates with a program.  
+% 
+% There are also experimental 
+% master control programs available, their operation similar to the
+% ones used in so many other astronomical data reduction packages,
+% ({\it e.g.}  
+% AIPS\index{AIPS}, and MIDAS\index{MIDAS}
+% ).
+% For Sun workstations a sunview (windows) based 
+% menu interface is available under
+% the name {\tt mirtool} \index{mirtool, shell} and an
+% {\tt AIPS}-like interface, under the\index{miriad, shell} name\index{miriad} 
+% {\tt miriad}, which works on any UNIX platform. 
+User interfaces will be described in much more detail in the next chapter and 
 Appendix~\ref{a:iface}.
 
 In order to run NEMO programs, your UNIX environment has to be modified
@@ -44,7 +47,7 @@ In this group we find various programs to create N-body
 systems (spherical, disk), methods to
 compute the gravitational field (softened Newtonian, hierarchical,
 Fourier expansion), and time-integrators (leapfrog, Runge-Kutta).  Many
-utilities exist to manipulate, analyze and display the data. 
+utilities exist to manipulate, analyze and display these data. 
 
    The {\it orbit group} is defined by a common file structure of ``orbits''
 \index{orbits, data group}.  
@@ -53,7 +56,8 @@ orbit in a static potential and then analyze it.  This group is closely
 related to the before mentioned N-body group, and utilities in both
 groups can interact with each other.  For example, it is possible to
 freeze the potential of an N-body snapshot, and calculate the path of a
-specific star in it, now conserving energy exactly.
+specific star in it, now conserving energy exactly. Or to extract
+the path of a selected star, and extract an orbit from it.
 
    The {\it image group} is defined by a common file structure of
 ``images'' \index{image, data group}, {\it i.e.} two dimensional
@@ -65,7 +69,7 @@ two-(and three-) dimensional images from snapshots, FITS files
 \index{FITS} of such images can be created, which can then be exported
 to other familiar astronomical data reduction packages.  There exists a
 variety of programs in the astronomical community to manipulate
-databases through FITS format. 
+data through FITS format. 
 
     The {\it table group} appears quite commonly among application
 programs in all of the above mentioned groups.  Most of the time it is a
@@ -77,12 +81,14 @@ functionality. It is mostly through these table files that we leave the
 NEMO environment, and persue analysis in a different environment/package.
 The obvious advantage of storing tables in binary form is the
 self-documenting nature of NEMO's binary files. For historical reasons,
-most tables are displayed and created in ASCII though.
+most tables are displayed and created in ASCII,  though you
+will find a few binary tables in NEMO.
 
 
     More groups and intermediate file structures are readily defined, as
-NEMO is also a development system.  We encourage users to define their
-own data structures if the need arises.  In Chapter \ref{c:progr} we
+NEMO is also an excellent development system.  We encourage users to define 
+their own (or extend existing) data structures as 
+the need arises.  In Chapter \ref{c:progr} we
 will detail some 'rules' how to incorporate/add new software into the
 package, and extend your NEMO environment. 
 
@@ -91,7 +97,8 @@ concepts that you will find necessary to work with NEMO.
 Chapter~\ref{c:iface} outlines the user interface (commandline, shells
 etc.), details  are deferred to Appendix~\ref{a:iface}.
 Chapter~\ref{c:filestr} explains how data is stored on disk and can be
-manipulated. Chapter~\ref{c:graphics} details how data can be
+manipulated, including the concept of function descriptors in NEMO.
+Chapter~\ref{c:graphics} details how data can be
 graphically displayed, either using NEMO itself or external programs.
 
 The second part of the manual is a cookbook: Chapter~\ref{c:examples}

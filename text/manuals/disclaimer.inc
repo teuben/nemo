@@ -4,22 +4,22 @@
 \myfile{disclaimer.inc}
 \small
 
-Because the present preliminary version of NEMO is passed around free of
+Because the present version of NEMO is passed around free of
 charge, we provide absolutely no warranty whatsoever. 
 
 You are of course free to pass this package on to your friends and
-enemies, as long as we receive a mailing address of/from that new user. 
+enemies, but we really prefer to receive a 
+mailing address of/from that new user.
 This is not only to keep us informed of any new users, but also to
-enable to send out updates\footnote{read: self-service 
-through anonymous ftp\index{ftp}:  try
-``{\tt finger nemo@astro.umd.edu}''\index{finger}}
- 
+enable to send out information about updates.
+
+%  
 While we very much appreciate receiving bug \index{bug} 
 reports\footnote{{\tt nemo@astro.umd.edu}},
 presently we\index{Teuben P.}
 do not have anyone officially
-assigned to the task of maintaining NEMO. Therefore we cannot
-guarantee speedy reply. 
+assigned to the task of maintaining NEMO. 
+Therefore we cannot guarantee speedy reply. 
 
 % Hopefully we will be able to release a more
 % official release of NEMO in the future, and with a little bit of
@@ -38,7 +38,8 @@ The name NEMO:\index{NEMO, the name}
 originally we had set up directories owned by "{\tt nobody}", 
 however it turned out that this is already a name with a predetermined
 functionality in UNIX. Subsequently the latin \index{Keitao}
-analog, {\it nemo}, was adopted\footnote{It's greek analog is KEITAO.}.
+analog, {\it nemo}, was adopted\footnote{It's 
+greek analog is KEITAO, Zeno is a NEMO descendant}.
 Not meant to be used as an acronym, we owe the following one to
 Luis Aguilar: {\it Not Everyone Must Observe}. \index{Aguilar L.}
 Another nice one is hidden in this manual, which we leave
