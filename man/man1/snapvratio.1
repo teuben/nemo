@@ -1,0 +1,70 @@
+.TH SNAPVRATIO 1NEMO "31 July 1997"
+.SH NAME
+snapvratio \- compute various global virials (clausius, newton)
+.SH SYNOPSIS
+\fBsnapvratio\fP \fBin=\fIsnapshot\fP [parameter=value] 
+.SH DESCRIPTION
+\fIsnapvratio\fP computes the global virial of a snapshot. It works
+best if the snapshot has potentials as well as forces are present.
+They are normally created by the N-body integrator, but see also
+e.g. \fIhackforce(1NEMO)\fP.
+.PP
+Currently a table is produced with the following entries:
+.nf
+        \fItime, -2T/W,  T+W,  T,  W,  W_1,  W_2, Mass\fP
+.fi
+where \fIW\fP is the potential energy (which one depends on the
+selected \fBwmode\fP). \fBwmode=phi\fP is the potential
+as obtained from appropriately
+summing the product of masses and potentials in the snapshot, 
+\fBwmode=acc\fP gets the Clausius virial:
+.nf
+        \fIWacc = sum_(m \fP\fBr.f\fP)
+.fi
+(sum over all masses (\fIm\fP), position (\fBr\fP) and forces (\fBf\fP)),
+and \fBwmode=exact\fP the Newtonian (m/r) potential.
+.PP
+\fIW_1\fP and \fPW_2\fP in the table
+are the other two potentials not selected
+as the prime potential, the original order of the potentials is
+\fBacc, phi, exact\fP. The choosen one comes first, the others ones
+follow in the order left from this array.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP\fIInFile\fP
+Input file name (snapshot). No default.
+.TP
+\fBtimes=\fP\fIt1:t2,t3:t4,...\fP
+Times to select snapshot. [Default: all].
+.TP
+\fBwmode=\fP\fIW_mode\fP
+Mode how to compute the prime potential: choice is between
+\fBacc\fP (forces from the snapshot, hence Clausius virial),
+\fBphi\fP (potentials from the snapshot),
+and \fBexact\fP (computed exact newtonian potential m/r [\fIexpensive!\fP]).
+The remaining unchoosen ones are listed as W_1 resp. W_2 in the output
+table. [Default: \fBacc\fP]
+.TP
+\fBnewton=t|f\fP
+Do an N^2 newtonian calculation too?  If true, an N^2 algorithm will
+be used and
+[Default: \fBf\fP]
+.TP
+\fBeps=\fP
+Standard gravitational softening for \fBmode=exact\fP. 
+[Default: \fB0.05\fP]
+.SH SEE ALSO
+snapstat(1NEMO), hackforce(1NEMO), snapvirial(1NEMO)
+.SH AUTHOR
+Scott Foster
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+05-nov-91	V0.0 Created	SMF
+27-Mar-92	V0.1 added clausius - changed columns and names  	PJT
+3-apr-92	V0.2 added wmode= keyword  	PJT
+13-mar-97	V0.4 added total mass to the output	PJT
+30-jul-97	V0.5 added eps= 	PJT
+.fi
