@@ -53,6 +53,7 @@ string defv[] = {
   "zerocm=t\n        in.- Center the snapshot?",
 
   "bin=.\n           directory in which KD95 binaries live",
+  "model=A\n         Select base model A, B, C or D",
 
   "VERSION=1.0\n     6-mar-04 PJT",
   NULL,
@@ -63,14 +64,11 @@ string usage="Kuijken-Dubinsky-95 composite bulge-disk-halo model";
 
 nemo_main()
 {
-    int nbody, nfix, nrand, nrun, kstart;
-    real eta, deltat, tcrit, qe, eps, tcomp;
-    real alphas, body1, bodyn;
-    real q, vxrot, vzrot, rbar, zmbar;
     string out=getparam("out");
-    string infile, kd_bindir = getparam("bin");
+    string kd_bindir = getparam("bin");
     char fullname[256], runcmd[256], rundir[256];
     stream datstr, histr;
+
     int iseed = getiparam("seed");
     int zerocm = getbparam("zerocm") ? 1 : 0;
 
@@ -78,13 +76,16 @@ nemo_main()
     int ndisk  = getiparam("ndisk");
     int nhalo  = getiparam("nhalo");
 
-    sprintf(rundir,"%s.tmpdir",out);
+    model(getparam("model"));
 
+    datstr = stropen(out,"w");           /* a dummy write ; should not fail */
+    strclose(datstr);
+
+    sprintf(rundir,"%s.tmpdir",out);     /* create and change to (tmp) rundir */
     make_rundir(rundir);
     goto_rundir(rundir);
 
-
-    datstr = stropen("in.dbh","w"); 
+    datstr = stropen("in.dbh","w");      /* create input file */
     fprintf(datstr,"%s\n",  
 	    nhalo > 0 ? "y" : "n");
     fprintf(datstr,"%g %g %g %g %g\n",
@@ -119,7 +120,7 @@ nemo_main()
     strclose(datstr);
 
 
-    datstr = stropen("in.diskdf","w"); 
+    datstr = stropen("in.diskdf","w"); /* create input file */
     fprintf(datstr,"%g %g\n",
 	    getdparam("sigvr0"),
 	    getdparam("sigr0"));
@@ -131,7 +132,7 @@ nemo_main()
 	    "diskdf.ps/ps");
     strclose(datstr);
 
-    datstr = stropen("in.bulge","w"); 
+    datstr = stropen("in.bulge","w"); /* create input file */
     fprintf(datstr,"%g\n",
 	    getdparam("fstreamb"));
     fprintf(datstr,"%d\n",
@@ -144,7 +145,7 @@ nemo_main()
 	    "dbh.dat");
     strclose(datstr);
 
-    datstr = stropen("in.disk","w"); 
+    datstr = stropen("in.disk","w"); /* create input file */
     fprintf(datstr,"%d\n",
 	    getiparam("ndisk"));
     fprintf(datstr,"%d\n",
@@ -155,7 +156,7 @@ nemo_main()
 	    "dbh.dat");
     strclose(datstr);
 
-    datstr = stropen("in.halo","w"); 
+    datstr = stropen("in.halo","w"); /* create input file */
     fprintf(datstr,"%g\n",
 	    getdparam("fstreamh"));
     fprintf(datstr,"%d\n",
@@ -169,13 +170,13 @@ nemo_main()
     strclose(datstr);
 
 
-    histr = stropen("history","w");
+    histr = stropen("history","w");/* maintain history */
     put_history(histr);
     strclose(histr);
 
-    datstr = stropen("make-it","w"); 
+    datstr = stropen("make-it","w"); /* create shell script to be run */
     fprintf(datstr,"#! /bin/sh\n");
-    fprintf(datstr,"# created by NEMO\n");
+    fprintf(datstr,"# created by NEMO's mkkd95 program\n");
     fprintf(datstr,"%s/dbh < in.dbh\n",kd_bindir);
     fprintf(datstr,"%s/getfreqs\n",kd_bindir);
     fprintf(datstr,"%s/diskdf < in.diskdf\n",kd_bindir);
@@ -183,13 +184,12 @@ nemo_main()
     fprintf(datstr,"%s/gendisk  < in.disk   > disk\n",kd_bindir);
     fprintf(datstr,"%s/genhalo  < in.halo   > halo\n",kd_bindir);
     fprintf(datstr,"%s/mergerv disk bulge halo > galaxy\n");
+    fprintf(datstr,"rm ../%s\n",out);
     fprintf(datstr,"tabtos galaxy ../%s nbody,time mass,pos,vel\n",out);
     strclose(datstr);
 
-    run_program("chmod +x make-it; ./make-it");
-
+    run_program("chmod +x make-it; ./make-it");   /* run it ! */
 }
-
 
 goto_rundir(string name)
 {
@@ -200,7 +200,7 @@ goto_rundir(string name)
 make_rundir(string name)
 {
     if (mkdir(name, 0755))
-        warning("Run directory %s already exists",name);
+        error("Run directory %s already exists",name);
 }
 
 run_program(string cmd)
@@ -208,21 +208,30 @@ run_program(string cmd)
     system(cmd);
 }
 
+typedef struct _mpar {
+  string name, par[4];
+} mpar;
 
-/*
- *	Order of input lines in "nbody1.in" for a new run (KSTART=1)
- *
- *          variables                   condition               where
- *  ----------------------------    -------------------
- *  KSTART TCOMP                                            nbody1.f    MAIN
- *  Nbody NFIX NRAND NRUN                                   input.f     INPUT
- *  ETA DELTAT TCRIT QE EPS                                 input.f     INPUT
- *  KZ(1..15)                                               input.f     INPUT
- *      ALPHAS BODY1 BODYN          KZ(4).NE.2              data.f      DATA
- *      SEMI ECC                    KZ(12).NE.0             data.f      DATA
- *  Q VXROT VZROT RBAR ZMBAR                                scale.f     SCALE
- *      NFRAME DELTAF               KZ(7).GT.0              scale.f     SCALE
- *      XCM ECC                     KZ(8).GT.0              subsys.f    SUBSYS
- *
- */
- 
+
+mpar ModelPars[] = {
+  { "nbulge",   "4000", "1000",  "2000", "3000" },
+  { "ndisk",    "8000", "1000",  "1000", "1000" },
+  { "nhalo",   "6000", "1000",  "1000", "1000" },
+};
+
+model(char *m)
+{
+  int idx, i, n = sizeof(ModelPars)/sizeof(mpar);
+
+  idx = -1;
+  if (*m == 'A') idx=0;
+  if (*m == 'B') idx=1;
+  if (*m == 'C') idx=2;
+  if (*m == 'D') idx=3;
+  if (idx < 0) error("invalid model=%s\n",m);
+
+  printf("We found %d; idx=%d\n",n,idx);
+  for (i=0; i<n; i++)
+    putparam(ModelPars[i].name, ModelPars[i].par[idx]);
+
+}
