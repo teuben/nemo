@@ -3,7 +3,7 @@
 ccdstat \- statistics (1st through 4th moment)
 .SH SYNOPSIS
 .PP
-\fBccd in=\fPimage [parameter=value]
+\fBccdstat in=\fPimage [parameter=value]
 .SH DESCRIPTION
 This program will calculate all moments (up to fourt order) of the mapvalues,
 and calculate some human understandable numbers (mean, dispersion, skewness,
@@ -42,6 +42,12 @@ Number of points     : 95
 Mean and dispersion  : 0.097891 0.956030
 Skewness and kurtosis: -0.059936 -0.654776
 5/100 out-of-range points discarded
+.fi
+Here is an example how to created a weight file which is a circular annulus:
+.nf
+  % ccdmath out=map1 "fie=iflt(%r,50,1,0)" size=200,200 crpix=100,100
+  % ccdmath out=map2 "fie=iflt(%r,20,1,0)" size=200,200 crpix=100,100
+  % ccdmath map1,map2 map3 %1-%2
 .fi
 .SH "SEE ALSO"
 snapccd(1NEMO), image(5NEMO)
