@@ -1,0 +1,13 @@
+#! /bin/csh -f
+#
+#  
+
+set dir=$NEMO/usr/dehnen/falcON
+
+if (-e $dir) then
+  cd $dir
+  make nemo_bins
+else
+  echo mknemo.d: $dir does not exist
+endif
+
