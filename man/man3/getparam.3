@@ -1,4 +1,4 @@
-.TH GETPARAM 3NEMO "13 May 2004"
+.TH GETPARAM 3NEMO "29 December 2004"
 .SH NAME
 getXparam, hasvalue, isaparam, initparam, finiparam, stop \- main startup and command line processing.
 .SH SYNOPSIS
@@ -14,6 +14,10 @@ string defv[]={
 };
 
 string usage="Example usage for program";
+.fi
+string cvsid="$Id:
+$";
+.nf
 .PP
 .B void initparam(string *argv, string *defv)
 .B void finiparam(void)
@@ -159,6 +163,10 @@ instead of called getparam().
 This technique is used by the routine,
 \fIerror(3NEMO)\fP; it reports the program name in
 square brackets before the string is output. 
+.PP
+The optional \fBusage\fP and \fBcvsid\fP strings, that will need to
+be defined by the user, can be
+queried with the \fBhelp=u\fP and \fBhelp=I\fP options.
 .SH REQUIRED ARGUMENTS
 Arguments with default values (as listed in \fIdefv\fP) of "\|???"
 are required; \fIinitparam\fP will print an informative message and
@@ -368,4 +376,5 @@ xx-nov-86	created                         	Joshua Barnes
 20-jan-02	re-implemented indexed keywords			PJT
 12-jul03	added getargv()		PJT
 13-may-04	added help=c	PJT
+29-dec-04  	added help=I and documented CVSID	PJT
 .fi
