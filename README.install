@@ -58,7 +58,7 @@ b) Installing HDF
 
 c) Installing CFITSIO  (pending work on configure.in)
  
-   NEMO has two internal routines (fits.c and fitsio.c) that handle various
+   NEMO has two inte<rnal routines (fits.c and fitsio.c) that handle various
    types of fits I/O. Optionally the CFITSIO library can also be used, e.g.
    fitsio_nemo.c implements the fitsio.c file by providing a wrapper
    that actually calls the CFITSIO library (courtesy Bill Pence)
@@ -211,7 +211,8 @@ Results in /home/teuben/nemo_3.0.4/tmp/test22005/testsuite.log
 	% rm NEMORC.local
         % cd $NEMO/local
 	% cvs co pgplot					<== cvs.astro.umd.edu
-	% src/scripts/pgplot.install dir=/tmp		<== our install
+	% cd $NEMO
+	% src/scripts/pgplot.install dir=$NEMO/tmp	<== our install
 	% ./configure --with-pgplot-prefix=$NEMOLIB --with-yapp=pgplot
 	% make dirs config_extra scripts
 	% source NEMORC.local
@@ -562,7 +563,7 @@ before the
 
   you can fix this with
 
-	make truehost TRUEHOST=....
+	make truehost TRUEHOST=sparc-sun-solaris2.7
 
   this situation can occur if you installed NEMO on e.g. solaris2.7 and 
   suddenly the OS is new and you hav solaris2.8. If you are sure the
@@ -573,4 +574,9 @@ before the
 
 	make fakehost FAKEHOST=....
 
+
+  This is really a weak point in the installation of NEMO. During runtime it
+  will establish what version of NEMO is installed. This is because NEMO can be
+  installed on multiple architectures from the same sourcecode.
+  
 	
