@@ -6,12 +6,10 @@
  *      rproc_body btrtrans(expr)
  *      iproc_body btitrans(expr)
  *
- *  -DTOOLBOX  version of this file can test bodytrans(5) files
+ *  -DTOOLBOX  version of this file can test and save bodytrans(5) files
  *  -DSAVE_OBJ will save bodytrans(5) files
- *  -DDLOPEN   assumes the dlopen() interface is used, sharable libraries
- *		need to be made instead. The .o will be a sharable
- *		object, or symbolically:
- *		(.c (cc[-pic) -> .o -> (mv) .z -> (ld]) -> .o )
+ *  -DLOADOBJ3 the new method (using .so files) instead of old (.o) files
+ *
  *
  *  History:
  *  xx-xxx-86  Created - Joshua Barnes
@@ -53,7 +51,7 @@
  *   5-apr-01   increased buffersize for filenames (NEMO3 uses longer $NEMOHOST names)
  *  13-jun-02   fix permissions problem (Jean-Charles Lambert)
  *  31-dec-02   gcc3/SINGLEPREC; allow longer filenames (should use autoconf?)
- *  14-feb-04   proper prototypes
+ *  14-feb-04   proper prototypes, updated documentation
  *
  *  Used environment variables (normally set through .cshrc/NEMORC files)
  *      NEMO        used in case NEMOOBJ was not available
@@ -71,11 +69,12 @@
 #include <mathlinker.h>
 #include <bodytransc.h>
 
+/*  note: MAXNAMLEN is the Posix max filename (normally 255) */
 #define SHORT_FNAMELEN   64
 
-local proc   bodytrans();
-local void   ini_bt(), end_bt(), make_bt();
-local string get_bt(), put_bt();
+local proc   bodytrans(string,string,string);
+local void   ini_bt(void), end_bt(void), make_bt(string);
+local string get_bt(string), put_bt(string,char,string);
 
 /*
  * BTRTRANS, BTITRANS: map name or expression to real or integer
@@ -112,10 +111,10 @@ local char edb[256], edbbak[256];     /* filenames of BTNAMES database */
 local int  Qflock = 0;			/* used for file locking */
 #endif
 
-local proc bodytrans(type, expr, fname)
-string type;                    /* type of function to return */
-string expr;                    /* name or C expression */
-string fname;                   /* optional filename for object file */
+local proc bodytrans(string type, string expr, string fname)
+     /* string type;                    type of function to return */
+     /* string expr;                    name or C expression */
+     /* string fname;                   optional filename for object file */
 {
     char file[256], func[256], name[256], cmmd[512];
     char *sname, *cp, *cflags;
@@ -208,7 +207,7 @@ string fname;                   /* optional filename for object file */
             sprintf(cmmd,"rm -f %s",edbbak);    /* end file locking */
             system(cmmd);
 #endif
-            error("bodytrans(): could not compile\n");
+            error("bodytrans(): could not compile");
 	}
 #if defined(LOADOBJ3)
         sprintf(file, "/tmp/%s.so", name);
@@ -216,7 +215,7 @@ string fname;                   /* optional filename for object file */
 	sprintf(cmmd,"ldso /tmp/%s",name);
 	dprintf(2,"bodytrans: %s\n",cmmd);
 	if (system(cmmd) != 0)
-		error("bodytrans: could not move link files\n");
+		error("bodytrans: could not move link files");
         sprintf(file, "/tmp/%s.o", name);
 #endif
         loadobj(file);
@@ -235,7 +234,7 @@ string fname;                   /* optional filename for object file */
             if (system(cmmd) != 0) {
                 sprintf(cmmd,"rm -f %s",edbbak);    /* end file locking */
                 system(cmmd);
-                error("bodytrans(): could not copy\n");
+                error("bodytrans(): could not copy");
             } else
                 end_bt();       /* end the file locking */
         }
@@ -252,7 +251,7 @@ string fname;                   /* optional filename for object file */
  *
  */
 
-local void ini_bt()
+local void ini_bt(void)
 {
 #if defined(SAVE_OBJ)
     char *cp;
@@ -280,8 +279,7 @@ local void ini_bt()
 
 #define NL 256
 
-local string get_bt(expr)
-string expr;
+local string get_bt(string expr)
 {
 #if defined(SAVE_OBJ)
     int  nexpr;
@@ -322,9 +320,7 @@ string expr;
  
 #define MAXTRY 6
 
-local string put_bt(expr,type,file)
-string expr, file;
-char type;
+local string put_bt(string expr,char type,string file)
 {
     FILE *fpi, *fpo;
     int  i;
@@ -337,7 +333,7 @@ char type;
         if (fpo==NULL) {
             fpo = fopen(edbbak, "w");
             if (fpo==NULL)
-                error("Cannot open %s\n",edbbak);
+                error("Cannot open %s",edbbak);
             else
                 break;
         } else {
@@ -389,7 +385,7 @@ char type;
  *          on the BTNAMES database
  */
 
-local void end_bt()
+local void end_bt(void)
 {
 #if defined(SAVE_OBJ)
     if (!Qflock) {
@@ -405,8 +401,7 @@ local void end_bt()
  *              list in btname    *** NEVER USED ***
  */
 
-local void make_bt(btname)
-char *btname;
+local void make_bt(string btname)
 {
 #if defined(SAVE_OBJ)
     FILE *fp;
@@ -468,9 +463,9 @@ string defv[] = {
     "key=3\n		Key",
     "t=2.5\n		Time",
     "i=1\n		Index",
-    "file=\n		Filename to save expression in (btTYPE_FILE)",
+    "alias=\n		Filename to save expression in (bt<TYPE>_<ALIAS>)",
     "btnames=\n		BTNAMES filename to regenerate .o files",
-    "VERSION=2.0\n	1-apr-01 PJT",
+    "VERSION=3.0\n	14-feb-04 PJT",
     NULL,
 };
 
