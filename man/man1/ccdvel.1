@@ -71,7 +71,8 @@ be overridden with this keyword.
 \fBsize\fP=\fInx,ny\fP
 Size of map, up to two numbers.
 If one number supplied, the map will be
-square. [Default: \fB128\fP].
+square.  Note that in NEMO (0-based) coordinates, the center of rotation will
+be at \fI((nx-1)/2,(ny-1)/2)\fP. [Default: \fB128\fP].
 .TP
 \fBcell\fP=\fIdx,dy\fP
 Cell size, up to two numbers.
@@ -133,7 +134,7 @@ are not undefined, i.e. 0.0):
          center=100,110 fixed=center,vsys,inc tab=map1.tmp units=arcsec
     2% tabcomment map1.rotcur - | sort -n > map1.rotcur
     3% ccdvel out=map1.model rotcurfit=map1.rotcur
-    4% cdmath in=map1,map1.model out=map1.diff \\
+    4% ccdmath in=map1,map1.model out=map1.diff \\
             fie="ifeq(%1,0.0,0.0,ifeq(%2,0.0,0.0,%1-%2))"
 
 .fi
