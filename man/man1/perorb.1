@@ -1,4 +1,4 @@
-.TH PERORB 1NEMO "19 April 1995"
+.TH PERORB 1NEMO "18 February 2003"
 .SH NAME
 perorb \- interactive/iterative search for XY-periodic orbits in symmetric 
 potentials
@@ -122,6 +122,9 @@ Specify the integration mode. Any one of \fBeuler\fP,
 \fBleapfrog\fP, \fBrk2\fP or \fBrk4\fP 
 can be given.
 [Default: \fBrk4\fP].
+.SH CAVEATS
+The potential (potname= etc) needs to have a proper potential defined
+for this routine to work.
 .SH EXAMPLES
 By default, perorb will find a circular orbit in a plummer potential
 near R=1:
@@ -194,5 +197,6 @@ pjt/orbit	original sources
 .ta +1.0i +4.0i
 22-may-90	V1.0 created from old Cyber program 'PERORB'  PJT
 24-may-91	V1.1 rotating XY-frames, fixed energy option  PJT
-19-apr-95	V1.4 various, rk4 is now default integrator	PJT
+19-apr-95	V1.5 various, rk4 is now default integrator	PJT
+18-feb-03	minor code cleanup, improved man page	PJT
 .fi
