@@ -25,7 +25,8 @@
  *
  *	 6-may-95       V2.3    (hisf) allow item=headline         	PJT
  *	21-may-01	V2.4    history <old history_level> back here   PJT
- *       1-aug-02       V2.5    increased memory a bit 256->1024        PJT
+ *       1-aug-02       V2.5    increased memory a bit 256->1024        
+ *                              and free up memory in reset_history     PJT
  *
  *  ToDo: not all local variables free up memory, despite that some
  *        have clearly come from allocate'd memory. 
