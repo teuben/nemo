@@ -1,0 +1,22 @@
+#! /bin/csh -f
+#  cc script for sun4's
+#  unfortunately the -static/-Bstatic switch causes the compiler to
+#  ignore sharable libraries, and hence create larger executables -
+#  For SunOS < 4.1 this is needed because of shaky loadobj which cannot
+#  deal with sharable libraries.
+#	optional GNU compiler
+#exec /usr/local/bin/gcc -I$NEMOINC -L$NEMOLIB -ansi -Dsun4 -static -fwritable-strings -W $*
+# Old SUN CC (the $FORLIB is now commented out too in NEMORC)
+#exec /bin/cc -I$NEMOINC -L$NEMOLIB -Dsun4 -Bstatic $*
+# New SUN CC (I switched Nov 92 - PJT - also needs different FORLIBS, see NEMORC file)
+# exec /usr/lang/cc -I$NEMOINC -L$NEMOLIB -Dsun4 -Bstatic \
+# -fsingle -libmil -pipe -dalign -cg89  $*
+
+#	K&R compiler with unproto's cpp replacement (src/tools/unproto)
+#	it has no special -I$NEMO/src/tools/unproto, which may be needed
+#set unproto="-Dvolatile= -Dconst= -D__STDC__ -Qpath $NEMOBIN"
+#set unproto="-Qpath $NEMOBIN"
+#exec /usr/lang/cc $unproto -I$NEMOINC -L$NEMOLIB -Dsun4 -Bstatic $*
+
+# ANSI compiler assumed 
+exec /usr/lang/acc -I$NEMOINC -L$NEMOLIB -Dsun4 -Dbsd -Bstatic $*
