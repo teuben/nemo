@@ -4,19 +4,23 @@ table \- table format
 .SH DESCRIPTION
 A \fBtable\fP file is a simple ASCII text file, 
 structured in rows and columns, with one row per line. 
-Columns can be separated by spaces or tabs.
+Columns can be separated by spaces or tabs (though many
+dialects of this definition exist).
 The number of columns per row does not have to be the same,
 as long as the columns accessed are in the specified range
 (although some programs, e.g. \fItablint(1NEMO)\fP may
 put restrictions on this).
 .PP
 Comments can be entered by using the octothorpe ('\fB#\fP') symbol 
-on the first character on a line.
-Empty lines will generally be skipped too, and some programs
+on the first character on a line (though again, many
+dialects exist, most notably the exclamation, semi-colon and 
+backslash (IPAC tables) symbols are in practice.
+Empty lines will generally be skipped too, and as said,
+some programs 
 even skip lines starting with the ! or ; symbol. See also
 \fItabcomment\fP for some other filtering techniques.
 .SH EXAMPLE
-The following listing is an example of a valid table:
+The following listing is an example of a simple table:
 .nf
 
     # This is the first line of the table
