@@ -17,6 +17,7 @@
  *	 6-jun-96       V2.6d report total mass before rescaling  pjt
  *       8-sep-01       e   init_xrandom
  *      19-oct-01       V3.0  add a scale= parameter (defaults to virial units) pjt
+ *      22-mar-04       V2.7  merged version with a hole      ncm+pjt
  */
 
 
@@ -41,6 +42,7 @@ local string headline;		/* random text message */
 string  defv[] = {                        /* DEFAULT INPUT PARAMETERS */
     "out=???\n		      Output file name",
     "nbody=???\n	      Number of particles",
+    "mlow=0\n                 Low mass fraction cutoff of Plummer dist",
     "mfrac=0.999\n            Mass fraction used of Plummer distribution",
     "rfrac=22.8042468\n       Radius fraction used of Plummer distribution\n\
                               NOTE: the above two values are chosen so\n\
@@ -55,7 +57,7 @@ string  defv[] = {                        /* DEFAULT INPUT PARAMETERS */
     "masspars=p,0.0\n         Mass function parameters (e.g. p,0.0)",
     "massrange=1,1\n          Range for mass-spectrum (e.g. 1,2)",
     "headline=\n	      Verbiage for output",
-    "VERSION=2.6a\n           8-dec-03 PJT",
+    "VERSION=2.7a\n           22-mar-04 NCM+PJT",
     NULL,
 };
 
@@ -66,12 +68,11 @@ string usage="construct a Plummer model";
  *            note:  only for 3 dimensions and Carthesian coordinates
  *---------------------------------------------------------------------------
  */
-void
-nemo_main()
+void nemo_main(void)
 {
     bool    zerocm;
     int     nbody, seed, bits, quiet, n;
-    real    snap_time, rfrac, mfrac, mrange[2], scale;
+    real    snap_time, rfrac, mfrac, mlow, mrange[2], scale;
     Body    *btab;
     stream  outstr;
     string  massname;
@@ -80,6 +81,7 @@ nemo_main()
 
     nbody = getiparam("nbody");
     mfrac = getdparam("mfrac");
+    mlow  = getdparam("mlow");
     rfrac = getdparam("rfrac");
     seed = init_xrandom(getparam("seed"));
     snap_time = getdparam("time");
@@ -101,7 +103,7 @@ nemo_main()
 
     outstr = stropen(getparam("out"), "w");
 
-    btab = mkplummer(nbody, mfrac, rfrac, seed, snap_time, zerocm, scale,
+    btab = mkplummer(nbody, mlow, mfrac, rfrac, seed, snap_time, zerocm, scale,
                 quiet,mrange,mfunc);
     bits = (MassBit | PhaseSpaceBit | TimeBit);
     sprintf(hisline,"init_xrandom: seed used %d",seed);
@@ -127,6 +129,7 @@ nemo_main()
  *		   litt: S.J. Aarseth, M. Henon and R. Wielen (1974),
  *		         Astron. and Astrophys. 37, p. 183.
  *                 accepts: nbody: the number of particles.
+ *                          mlow:  lower mass fraction cutoff
  *                          mfrac: mass fraction of the (infinitely extended)
  *                                 Plummer model; see  rfrac immediately below.
  *                          rfrac: radius fraction of the (infinitely extended)
@@ -157,9 +160,10 @@ nemo_main()
  *-----------------------------------------------------------------------------
  */
 
-Body *mkplummer(nbody, mfrac, rfrac, seed, snap_time,zerocm,scale,quiet,mr,mf)
+Body *mkplummer(nbody, mlow, mfrac, rfrac, seed, snap_time,zerocm,scale,quiet,mr,mf)
 int   nbody;
 real  mfrac;
+real  mlow;
 real  rfrac;
 int   seed;
 real  snap_time;
@@ -238,7 +242,7 @@ rproc mf;
  *  [0, mfrac]; cf. Aarseth et al. (1974), eq. (A2).
  */
         if (quiet==0)
-	    radius = 1.0 / sqrt( pow (xrandom(0.0,mfrac), -2.0/3.0) - 1.0);
+	    radius = 1.0 / sqrt( pow (xrandom(mlow,mfrac), -2.0/3.0) - 1.0);
         else if (quiet==1) {
             m_min = (i * mfrac)/nbody;
             m_max = ((i+1) * mfrac)/nbody;
