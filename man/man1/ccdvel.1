@@ -1,4 +1,4 @@
-.TH CCDVEL 1NEMO "1 May 2001"
+.TH CCDVEL 1NEMO "3 May 2001"
 .SH NAME
 ccdvel \- create a velocity field; grid or retrace
 .SH SYNOPSIS
@@ -51,6 +51,12 @@ If less than the number of radii is
 given, the trailing ones are filled with the last supplied value.
 The default values from the \fIrotcur_table\fP table below can be also 
 be overridden with this keyword.
+.TP
+\fBvexp\fP=\fIv1,v2,...\fP
+Array of expansion velocities, one for each radius.
+If less than the number of radii is
+given, the trailing ones are filled with the last supplied value.
+Default: 0
 .TP
 \fBinc\fP=\fIi1,i2,...\fP
 Array of inclinations (degrees), one for each radius.
@@ -172,4 +178,5 @@ so the \fBrotcurfit=\fP tables should be used with caution.
 oct-99       	doc additions                               	PJT
 apr-01		V1.5b added in=, but deprecated it		PJT
 1-may-01	V1.6 added amp= for CARMA simulations		PJT/LGM
+3-may-01	V1.7 added vexp=                            	PJT
 .fi

@@ -47,6 +47,7 @@
  *  20-apr-01       a cube creation not worked too well yet, but fixed
  *                    some backwards compatibility problems
  *   1-may-01   V1.6  Added amp= keyword for fudzing density maps    PJT/LGM
+ *   3-may-01   V1.7  Added vexp= keyword                            PJT
  */
 
 #include <stdinc.h>
@@ -60,10 +61,11 @@ string defv[] = {
         "out=???\n      Output file name (an image)",
         "radii=\n       Radii in disk",
         "vrot=\n        Rotation velocities (or intensity if amp=1)",
+	"vexp=\n        Expansion velocities",
         "inc=\n         Inclinations",
         "pa=\n          Position angle: C.C.W. from +Y-axis",
 #if 0
-        /* to be implemented later */
+        /* to be implemented later e.g. Bosma's thesis 1978 method */
         "q=1\n          Axis ratio of orbit (**not implemented**)",
         "alpha=1\n      Axis ratio of epicycle (1<alpha<2)",
 #endif
@@ -273,8 +275,17 @@ setparams()
 
         n = nemoinpr(getparam("vrot"),vrot_i,nrad);
         if (n<1) error("vrot=: Need at least one (%d)",n);
-        dprintf(0,"Found %d velocities\n",n);
+        dprintf(0,"Found %d rot velocities\n",n);
         for (i=n; i<nrad; i++) vrot_i[i] = vrot_i[n-1];
+
+        n = nemoinpr(getparam("vexp"),vexp_i,nrad);
+        if (n<0) error("vexp=: Need at least one (%d)",n);
+	if (n==0) {
+	  vexp_i[0] = 0.0;
+	  n = 1;
+	} else
+	  dprintf(0,"Found %d exp velocities\n",n);
+        for (i=n; i<nrad; i++) vexp_i[i] = vexp_i[n-1];
 
         n = nemoinpr(getparam("inc"),inc_i,nrad);
         if (n<1) error("inc=: Need at least one (%d)",n);
@@ -403,8 +414,7 @@ local void vel_create_1(stream outstr)
                 theta = linfit(theta_i, rad_i, rad, nr-1, nr);
                 inc   = linfit(inc_i,   rad_i, rad, nr-1, nr);
                 vrot  = linfit(vrot_i,  rad_i, rad, nr-1, nr);
-                /* vexp  = linfit(vexp_i,  rad_i, rad, nr-1, nr); */
-		vexp = 0.0;
+                vexp  = linfit(vexp_i,  rad_i, rad, nr-1, nr);
 		sinth = sin(theta);
                 costh = cos(theta);
                 cost = (-x*sinth + y*costh) / rad;
