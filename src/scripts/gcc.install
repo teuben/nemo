@@ -1,0 +1,61 @@
+#! /bin/csh -f
+#
+#  Install GCC for NEMO
+#
+# 
+
+if ($?NEMO == 0) set NEMO=`pwd`
+
+#			 	.. command line keywords ..
+set src=$NEMO/local/gcc
+set prefix=$NEMO/opt
+set version=3.3.5
+
+
+
+
+#				.. parse command line ..
+foreach arg ($*)
+   set check = `echo $argv[1] | awk -F= '{print NF}'`
+   if ("$check" == 1) break
+   echo Setting: $arg
+   set $arg
+end
+
+set url=`printf ftp://ftp.gnu.org/pub/gnu/gcc/gcc-%s/gcc-%s.tar.bz2 $version $version`
+echo URL=$url
+set file=$url:t
+set src1=$file:r
+set src=$src1:r
+
+
+if (! -e $src) then
+  echo GCC source directory src=$src does not exist, try NEMO=
+  echo or:
+  echo " cd $NEMO/local"
+  echo " wget $url"
+  echo " tar jxf $file"
+  echo " ../src/scripts/gcc.install"
+  exit 1
+endif
+
+
+cd $src
+mkdir build
+cd build
+
+echo Building in `pwd`, 
+echo reporting the status of 4 steps as we go along.. Be patient.
+
+../configure --prefix=$prefix --enable-threads --enable-languages=c,c++,f77 >& build1.log
+echo status $status on build1.log
+
+make bootstrap   >& build2.log
+echo status $status on build2.log
+
+make             >& build3.log
+echo status $status on build3.log
+
+make install     >& build4.log
+echo status $status on build4.log
+
