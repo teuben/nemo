@@ -404,6 +404,7 @@ cvstar:
 	date > nemo_cvs/VERSION_cvs
 	echo "$(ACVSROOT) A" > nemo_cvs/.cvspass
 	cp nemo_cvs/VERSION_cvs /tmp
+	(mkdir nemo_cvs/local; cd nemo_cvs/local; cvs -Q -d $(ACVSROOT) co pgplot)
 	gtar zcf nemo_cvs.tar.gz nemo_cvs
 	rm -rf nemo_cvs
 	scp nemo_cvs.tar.gz /tmp/VERSION_cvs apus:/home/ftp/pub/nemo
