@@ -1,4 +1,5 @@
 /*   nemoinp (archaic), nemoinpd, nemoinpf, nemoinpi, nemoinpl, nemoinpb
+ *                      nemorinpd, nemorinpf, nemorinpi, nemorinpl, nemorinpb
  *                      natof, natoi
  *
  * NEMOINP:	derivatives of herinp(), more c-user friendly
@@ -27,6 +28,7 @@
  *  28-jun-03       a: fixed prototype for darwin :-)               pjt
  *  24-nov-03       b: fixed another prototype for gcc3             pjt
  *  28-jan-04       c: recognize nan or NaN and return same         pjt
+ *   6-jan-05   V1.10:  added the repeat nemorinpX routines         pjt
  */
 
 #include <stdinc.h>
@@ -258,7 +260,95 @@ int nemoinpx(
   freestrings(vals);
   return nret;
 }
-    
+
+
+int nemorinpi(string var, int *xvar,  int n, int defvar, bool repeated)
+{
+  int i, nret;
+  if (var == 0 || *var == 0) {
+    for (i=0; i<n; i++) 
+      xvar[i] = defvar;
+    return 0;
+  } else {
+    nret = nemoinpi(var,xvar,n);
+    if (nret <= 0) error("nemorinpi: parsing error %d in %s",nret,var);
+    for (i=nret; i<n; i++)
+      xvar[i] = repeated ? xvar[i-1] : defvar;
+    return nret;
+  }
+  return -1;
+}
+
+
+int nemorinpd(string var,  double *xvar, int n,double defvar, bool repeated)
+{
+  int i, nret;
+  if (var == 0 || *var == 0) {
+    for (i=0; i<n; i++) 
+      xvar[i] = defvar;
+    return 0;
+  } else {
+    nret = nemoinpd(var,xvar,n);
+    if (nret <= 0) error("nemorinpd: parsing error %d in %s",nret,var);
+    for (i=nret; i<n; i++)
+      xvar[i] = repeated ? xvar[i-1] : defvar;
+    return nret;
+  }
+  return -1;
+}
+
+int nemorinpf(string var, float *xvar,  int n, float defvar, bool repeated)
+{
+  int i, nret;
+  if (var == 0 || *var == 0) {
+    for (i=0; i<n; i++) 
+      xvar[i] = defvar;
+    return 0;
+  } else {
+    nret = nemoinpf(var,xvar,n);
+    if (nret <= 0) error("nemorinpf: parsing error %d in %s",nret,var);
+    for (i=nret; i<n; i++)
+      xvar[i] = repeated ? xvar[i-1] : defvar;
+    return nret;
+  }
+  return -1;
+}
+
+int nemorinpl(string var, long *xvar,  int n, long defvar, bool repeated)
+{
+  int i, nret;
+  if (var == 0 || *var == 0) {
+    for (i=0; i<n; i++) 
+      xvar[i] = defvar;
+    return 0;
+  } else {
+    nret = nemoinpl(var,xvar,n);
+    if (nret <= 0) error("nemorinpl: parsing error %d in %s",nret,var);
+    for (i=nret; i<n; i++)
+      xvar[i] = repeated ? xvar[i-1] : defvar;
+    return nret;
+  }
+  return -1;
+}
+
+int nemorinpb(string var, bool *xvar,  int n, bool defvar, bool repeated)
+{
+  int i, nret;
+  if (var == 0 || *var == 0) {
+    for (i=0; i<n; i++) 
+      xvar[i] = defvar;
+    return 0;
+  } else {
+    nret = nemoinpb(var,xvar,n);
+    if (nret <= 0) error("nemorinpb: parsing error %d in %s",nret,var);
+    for (i=nret; i<n; i++)
+      xvar[i] = repeated ? xvar[i-1] : defvar;
+    return nret;
+  }
+  return -1;
+}
+
+
 
 
 

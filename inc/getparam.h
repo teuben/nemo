@@ -8,6 +8,7 @@
  * Mar  1994 -- added nemoinpf/r
  * Feb  1995 -- added updparam, no more ARGS
  * Jun  2001 -- added some convenient ZENO macro	PJT
+ * Jan  2005 -- added the nemorinpX functions		pjt
  */
 
 #ifndef _getparam_h
@@ -47,12 +48,12 @@ extern int nemoinpl (string, long *, int);
 extern int nemoinpb (string, bool *, int);
 extern int nemoinpx (string, double *, int);
 
-extern int nemorinpi (string, int *, int);
-extern int nemorinpd (string, double *, int);
-extern int nemorinpf (string, float *, int);
-extern int nemorinpl (string, long *, int);
-extern int nemorinpb (string, bool *, int);
-extern int nemorinpx (string, double *, int);
+extern int nemorinpi (string, int *,    int, int,    bool);
+extern int nemorinpd (string, double *, int, double, bool);
+extern int nemorinpf (string, float *,  int, float,  bool);
+extern int nemorinpl (string, long *,   int, long,   bool);
+extern int nemorinpb (string, bool *,   int, bool,   bool);
+extern int nemorinpx (string, double *, int, double, bool);
 
 extern void outparam (string, string);
 extern void outiparam(string, int);
