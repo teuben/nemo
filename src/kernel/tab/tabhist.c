@@ -30,6 +30,7 @@
  *	24-apr-97   3.0a: fix median calculation when limits set   pjt
  *	15-feb-99   3.1:  median can be turned off now		pjt
  *	22-dec-99   3.1a: fix reporting bug when 1 point read	pjt
+ *       3-jun-01   3.2 : added nsigma=                         pjt
  */
 
 /**************** INCLUDE FILES ********************************/ 
@@ -60,7 +61,8 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "residual=t\n		  Overlay residual data-gauss(fit)",
     "cumul=f\n                    Override and do cumulative histogram instead",
     "median=t\n			  Compute median too (can be time consuming)",
-    "VERSION=3.1b\n		  27-jan-00 PJT",
+    "nsigma=-1\n                  delete points more than nsigma",
+    "VERSION=3.2a\n		  7-jun-01 PJT",
     NULL
 };
 
@@ -81,9 +83,11 @@ local int    nsteps;			/* number of divisions */
 
 local real   *x = NULL;			/* pointer to array of nmax points */
 local int    *ix = NULL;		/* pointer to index array */
+local int    *iq = NULL;                /* boolean masking array */
 local int    nmax;			/* lines to use at all */
 local int    npt;			/* actual number of points */
 local real   xmin, xmax;		/* actual min and max as computed */
+local real   nsigma;                    /* outlier rejection attempt */
 local bool   Qauto;			/* autoscale ? */
 local bool   Qgauss;                    /* gaussian overlay ? */
 local bool   Qresid;                    /* gaussian residual overlay ? */
@@ -154,6 +158,8 @@ local void setparams()
     if (nmax<1) error("Problem reading from %s",input);
     x = (real *) allocate(sizeof(real)*(nmax+1));
 
+    nsigma = getdparam("nsigma");
+
     instr = stropen (input,"r");
 }
 
@@ -187,9 +193,9 @@ local void read_data()
 
 local void histogram(void)
 {
-	int i,j,k, kmin, kmax;
+        int i,j,k, l, kmin, kmax, lcount;
 	real count[MAXHIST], under, over;
-	real xdat,ydat,xplt,yplt,dx,r,sum,sigma2;
+	real xdat,ydat,xplt,yplt,dx,r,sum,sigma2, q, qmax;
 	real mean, sigma, skew, kurt, lmin, lmax, median;
 	Moment m;
 
@@ -232,6 +238,60 @@ local void histogram(void)
 	sigma = sigma_moment(&m);
 	skew = skewness_moment(&m);
 	kurt = kurtosis_moment(&m);
+
+	if (nsigma > 0) {    /* remove outliers iteratively, starting from the largest */
+	  iq = (int *) allocate(npt*sizeof(int));
+	  for (i=0; i<npt; i++) {
+#if 1
+	    iq[i] = x[i] < xmin  || x[i] > xmax;
+#else
+	    iq[i] = 0;
+#endif
+	  }
+	  lcount = 0;
+	  do {               /* loop to remove outliers one by one */
+	    qmax = -1.0;
+	    for (i=0, l=-1; i<npt; i++) {     /* find largest deviation from current mean */
+	      if (iq[i]) continue;            /* but skip previously flagged points */
+	      q = (x[i]-mean)/sigma;
+	      q = ABS(q);
+	      if (q > qmax) {
+		qmax = q;
+		l = i;
+	      }
+	    }
+	    if (qmax > nsigma) {
+	      lcount++;
+	      iq[l] = 1;
+	      decr_moment(&m,x[l],1.0);
+	      mean = mean_moment(&m);
+	      sigma = sigma_moment(&m);
+	      skew = skewness_moment(&m);
+	      kurt = kurtosis_moment(&m);
+	      dprintf(0,"%d/%d: removing point %d, m/s=%g %g qmax=%g\n",
+		      lcount,npt,l,mean,sigma,qmax);
+	      if (sigma <= 0) {
+		/* RELATED TO presetting MINMAX */
+		warning("BUG");
+		accum_moment(&m,x[l],1.0);
+		mean = mean_moment(&m);
+		sigma = sigma_moment(&m);
+		skew = skewness_moment(&m);
+		kurt = kurtosis_moment(&m);
+		dprintf(0,"%d/%d: LAST removing point %d, m/s=%g %g qmax=%g\n",
+		      lcount,npt,l,mean,sigma,qmax);
+		break;
+		
+	      }
+
+	    } else
+	      dprintf(0,"%d/%d: keeping point %d, m/s=%g %g qmax=%g\n",
+		      lcount,npt,l,mean,sigma,qmax);
+
+	    /* if (lcount > npt/2) break; */
+	  } while (qmax > nsigma);
+	  free(iq);
+	}
 
 	dprintf (0,"Number of points     : %d\n",n_moment(&m));
 	dprintf (0,"Mean and dispersion  : %g %g\n",mean,sigma);
@@ -334,6 +394,7 @@ local void histogram(void)
             printf("       Overflow    %g\n",over);
 	    stop(0);
 	}
+
 #ifdef YAPP
 	/*	PLOTTING */	
 	plinit("***",0.0,20.0,0.0,20.0);

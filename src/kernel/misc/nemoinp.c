@@ -1,4 +1,5 @@
 /*   nemoinp (archaic), nemoinpd, nemoinpf, nemoinpi, nemoinpl, nemoinpb
+ *                      natof, natod
  *
  * NEMOINP:	derivatives of herinp(), more c-user friendly
  *		interface of the same
@@ -19,6 +20,7 @@
  *  16-jun-97   V1.6 use integer  routines if %d is used	    pjt
  *  13-mar-00   V1.7 added seed= parameter			    pjt
  *                   (but it doesn't appear to do anything useful)
+ *  31-may-01   V1.8 added natof, natoi                             pjt
  */
 
 #include <stdinc.h>
@@ -26,10 +28,10 @@
 
 #if defined(NOHERINP)
 
-int nemoinpi(expr,a,na)         /* parse integers */
-char *expr;
-int  *a;
-int   na;
+int nemoinpi(
+	     char *expr,
+	     int  *a,
+	     int   na)
 {
     int nret, atoi();
     string *vals, *burststring();
@@ -44,10 +46,10 @@ int   na;
     return(nret);    
 }
 
-int nemoinpl(expr,a,na)         /* parse longs */
-char *expr;
-long *a;
-int   na;
+int nemoinpl(
+	     char *expr,
+	     long *a,
+	     int   na)
 {
     int nret, atoi();
     string *vals, *burststring();
@@ -63,10 +65,10 @@ int   na;
 }
 
 
-int nemoinpb(expr,a,na)         /* parse booleans */
-char *expr;
-bool *a;
-int   na;
+int nemoinpb(
+	     char *expr,
+	     bool *a,
+	     int   na)
 {
     int nret;    
     string *vals, *burststring();
@@ -82,10 +84,10 @@ int   na;
 }
     
 
-int nemoinpd(expr,a,na)         /* parse doubles */
-char   *expr;
-double *a;
-int     na;
+int nemoinpd(
+	     char   *expr,
+	     double *a,
+	     int     na)
 {
     int nret;
     string *vals, *burststring();
@@ -102,10 +104,10 @@ int     na;
 }
     
 
-int nemoinpf(expr,a,na)         /* parse floats */
-char   *expr;
-float  *a;
-int     na;
+int nemoinpf(
+	     char   *expr,
+	     float  *a,
+	     int     na)
 {
     int nret;
     string *vals, *burststring();
@@ -122,12 +124,14 @@ int     na;
 }
 
 #else
-extern void herinp();
+extern void herinp(char *expr, int *nchr, char *type, int *length,
+		   char *outv, int *nout, int *nret, int *ierd);
 
-int nemoinpi(expr,a,na)         /* parse integers */
-char *expr;
-int  *a;
-int   na;
+
+int nemoinpi(
+	     char *expr,
+	     int  *a,
+	     int   na)
 {
     int ierr, nret, elen, tlen;
     char type;
@@ -142,10 +146,10 @@ int   na;
         return(nret);
 }
 
-int nemoinpl(expr,a,na)         /* parse longs */
-char *expr;
-long *a;
-int   na;
+int nemoinpl(
+	     char *expr,
+	     long *a,
+	     int   na)
 {
     int ierr, nret, elen, tlen;
     char type;
@@ -161,10 +165,10 @@ int   na;
 }
 
 
-int nemoinpb(expr,a,na)         /* parse booleans */
-char *expr;
-bool *a;
-int   na;
+int nemoinpb(
+	     char *expr,
+	     bool *a,
+	     int   na)
 {
     int ierr, nret, elen, tlen;
     char type;
@@ -180,10 +184,10 @@ int   na;
 }
     
 
-int nemoinpd(expr,a,na)         /* parse doubles */
-char   *expr;
-double *a;
-int     na;
+int nemoinpd(
+	     char   *expr,
+	     double *a,
+	     int     na)
 {
     int ierr, nret, elen, tlen;
     char type;
@@ -198,10 +202,10 @@ int     na;
         return(nret);
 }
 
-int nemoinpf(expr,a,na)         /* parse floats */
-char   *expr;
-float  *a;
-int     na;
+int nemoinpf(
+	     char   *expr,
+	     float  *a,
+	     int     na)
 {
     int ierr, nret, elen, tlen;
     char type;
@@ -211,11 +215,27 @@ int     na;
     type = 'F';
     herinp (expr, &elen, &type, &tlen, a, &na, &nret, &ierr);
     if (ierr < 0)
-        return(ierr);
+        return ierr;
     else
-        return(nret);
+        return nret;
 }
 #endif
+
+double natof(char *expr)
+{
+  double x;
+  int n;
+  n = nemoinpd(expr,&x,1);
+  return x;
+}
+
+int natoi(char *expr)
+{
+  int x, n;
+  n = nemoinpi(expr,&x,1);
+  return x;
+}
+
 
 #if defined(TOOLBOX)
 
@@ -227,7 +247,8 @@ string defv[] = {
     "nmax=32768\n	Size of output buffer",
     "tab=\n             Optional table output",
     "seed=0\n		Seed for xrandom",
-    "VERSION=1.7\n	13-mar-00 PJT",
+    "atof=\n            test (n)atof single value expression",
+    "VERSION=1.8\n	31-may-01 PJT",
     NULL,
 };
 
@@ -270,6 +291,12 @@ nemo_main()
         strcat (fmt2," ");              /* else use blank as separator */
 
     Qnl = getbparam("newline");         /* use newlines also ? */
+
+    if (hasvalue("atof")) {
+      printf(fmt1,natof(getparam("atof")));
+      printf("\n");
+      return;
+    }
 
     if (!hasvalue("expression")) {      /* extra help if nothing given */
     	/* this somewhat unusual exit is because aliens often use this program */

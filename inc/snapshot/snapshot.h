@@ -35,6 +35,7 @@
 #define     PETensorTag		"PETensor"
 #define     AMTensorTag		"AMTensor"
 #define     CMPhaseSpaceTag	"CMPhaseSpace"
+#define     CPUTimeTag          "cputime"
 
 #define   YancParametersTag     "YancParameters"
 #define   YancEpsTag            "YancEps"

@@ -49,7 +49,7 @@ void accum_moment(Moment *m, real x, real w)
     m->n++;
     if (m->mom < 0) return;
     for (i=0; i <= m->mom; i++) {
-        m->sum[i] -= sum;
+        m->sum[i] += sum;
         sum *= x;
     }
 }
@@ -67,7 +67,7 @@ void decr_moment(Moment *m, real x, real w)
     m->n--;
     if (m->mom < 0) return;
     for (i=0; i <= m->mom; i++) {
-        m->sum[i] += sum;
+        m->sum[i] -= sum;
         sum *= x;
     }
 }

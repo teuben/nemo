@@ -1,7 +1,7 @@
 This is:	A blurb on NEMO V3, what it is, how to install and use 
-Last updated:   4-apr-2001
+Last updated:   1-jun-2001
 By:		Peter Teuben
-Disclaimer:	The manual is now out of date, the autoconf based 
+Disclaimer: 	The manual is now out of date, the autoconf based 
 		installation instructions here are now more up to date.
 
 ______________________________________________________________________________
@@ -46,7 +46,7 @@ and the reverse to remove it:
 	alias omen 'source ~nemo/nemo_end'
 
 
-See also Appendix A of the manual for more details of installation.
+   (See also Appendix A of the manual for more details of installation)
 ______________________________________________________________________________
 
 
@@ -112,8 +112,8 @@ c) Installing CFITSIO
    However, we anticipate that CFITSIO will be used at some point.
 
 
-Brief overview of a Version 3.x.y INSTALLATION  
-==============================================
+Brief overview of a Version 3.x INSTALLATION  
+============================================
 
  (there is also a bootstrap loader that is a lot easier to use; 
   you may however keep this file at hand when you use that, the procedure
@@ -139,9 +139,10 @@ Brief overview of a Version 3.x.y INSTALLATION
 2) Run configure and install the basic libraries:
 
 	% ./configure 
-		(sometimes may need to
+		(sometimes you may need to do
 			setenv F77 g77
-		 or whichever is applicable)
+		 or whichever is applicable, if the fortran compiler does not
+		 get detected properly, the run configure again)
 	% source nemo_start
 	% make dirs config_extra scripts
 	% source NEMORC.local		  (or look at $NEMO/src/scripts/NEMORC)

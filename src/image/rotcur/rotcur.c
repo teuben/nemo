@@ -56,6 +56,7 @@
  *                               -- WORK NOT COMPLETED --     
  *                               see C-script 'rotcurcen' instead
  *               9-may-01 : 2.6a fixed error correction factor      pjt
+ *               5-jun-01 : 2.7  allow density map also used as weight     PJT
  ******************************************************************************/
 
 #include <stdinc.h>
@@ -99,7 +100,7 @@ string defv[] = {
     "inherit=t\n     Inherit initial conditions from previous ring",
     "fitmode=cos,1\n Basic Fitmode: cos(n*theta) or sin(n*theta)",
     "nsigma=-1\n     Iterate once by rejecting points more than nsigma resid",
-    "VERSION=2.6a\n  9-may-01 PJT",
+    "VERSION=2.7\n   4-jun-01 PJT",
     NULL,
 };
 
@@ -338,15 +339,18 @@ stream  lunpri;       /* LUN for print output */
             denstr = stropen(input,"r");
     	    read_image(denstr,&denptr);
 	    strclose(denstr);
+	    warning("Using density map for weights now");
          } else {
             warning("beam defined, but no real beam correction used");
             if (lunpri) fprintf(lunpri,"  beam: %g %g\n",beam[0],beam[1]);
+	    denptr = NULL;
          }
     } else {        /* no beam correction */
          beam[1] = beam[0] = 0.0;
          if (n!=0) warning("Parsing error beam=%s",getparam("beam"));
          printf("No beam correction\n");
          denstr = NULL;
+	 denptr = NULL;
     }
 
     *nring = nemoinpr(getparam("radii"),rad,ring+1);
@@ -973,7 +977,11 @@ real  *q;             /* output sigma */
 		dprintf(5,"@ %d,%d : r=%g cost=%g xr=%g yr=%g\n",l,m,r,costh,xr,yr);
                 if (r>ri && r<ro && costh>free) {     /* point inside ring ? */
 		  dprintf(5," ** adding this point\n");
+		  if (denptr) 
+		    wi = MapValue(denptr,l,m);
+		  else
                     wi=1.0;                /* calculate weight of this point */
+
                     for (i=0; i<wpow; i++) 
                         wi *= costh;
                     xx[0]=rx;       /* x position */

@@ -44,6 +44,7 @@
  *              11-feb-99       added xhead, for rawfits.c		pjt
  *              15-oct-99       fixed Y2K problem			pjt
  *              28-nov-00       fixed some NULL -> 0's                  pjt
+ *              30-may-01       proper prototypes                       pjt
  *
  * Places where this package will call error(), and hence EXIT program:
  *  - invalid BITPIX
@@ -67,20 +68,41 @@ local int ftsblksiz_o=FTSBLKSIZ;
 local int ftslpb_i=FTSLPB;		/* lines per block for i and o */
 local int ftslpb_o=FTSLPB;
 
-local int put_ivals(), put_dvals(), put_cvals(), 
-          atob(), parse_card(), check_ctype(), check_unit(), my_findstr(),
-	  fix_nl(), fix_ing(), fix_tucson(), fix_iraf0(), fix_msdos(), 
-	  fix_decorder(), fix_bswap(), fix_blank(), fix_zero(), fix_multi(),
-	  fix_promote(), fix_uny2k(), fix_y2k(),
-	  colitems();
-local float  show_e();
-local double show_d();
-local short  show_i();
-local int    show_j();
-
-local char *atoa();
-local void check_date(), my_copy(), poutline(), blank_fill();
-local void set_tbcoln();
+/* fits.c */
+static int fix_ing(fits_header *fh);
+static int fix_tucson(fits_header *fh);
+static int fix_nl(fits_header *fh, int mode);
+static int fix_blank(fits_header *fh);
+static int fix_zero(fits_header *fh);
+static int fix_msdos(fits_header *fh);
+static int fix_uny2k(fits_header *fh);
+static int fix_y2k(fits_header *fh);
+static int fix_iraf0(fits_header *fh);
+static int fix_multi(fits_header *fh, int first);
+static int fix_decorder(fits_header *fh);
+static int fix_bswap(fits_header *fh);
+static int fix_promote(fits_header *fh);
+static void set_tbcoln(fits_header *fh);
+static int put_ivals(char *key, char *val, char *fitsname, int *nvals, int **ivals);
+static int put_dvals(char *key, char *val, char *fitsname, int *nvals, double **dvals);
+static int put_cvals(char *key, char *val, char *fitsname, int *nvals, string **cvals);
+static int parse_card(int icard, char *card, char *a1, char *a2, char *a3, char *a4, char *a5);
+static int atob(char *cp);
+static char *atoa(char *s);
+static void my_copy(char *src, char *dest, int n);
+static void poutline(FILE *fp);
+static void check_date(char *key, char *s);
+static int check_ctype(char *key, char *val);
+static int check_unit(char *key, char *val);
+static int my_findstr(string text, string pat, int len);
+static void blank_fill(char *card, int len);
+static int colitems(char *s);
+static char *fmt(char *line, char *format);
+static float show_e(float *v, int i);
+static double show_d(double *v, int i);
+static short show_i(short *v, int i);
+static int show_j(int *v, int i);
+static int colmask(int n, string key[],string col[],int colsel[]);
 
 
 /*
@@ -98,7 +120,6 @@ int fts_rhead(fits_header *fh, stream instr)
     char a1[9], a2[2], a3[FTSLINSIZ],a4[FTSLINSIZ],a5[FTSLINSIZ];  /* args */
     int k, n, i, icard;
     struct arglist *p;
-    double atof();
 
     if (fh->naxis >= 0) {         /* we could force a fts_zero here, but ala */
         dprintf(0,"### fts_rhead: fits_header not initialized (use debug>0)\n");
@@ -410,7 +431,6 @@ int fts_xhead(fits_header *fh, stream instr,
     int k, n, i, icard;
     char buf[80];
     struct arglist *p;
-    double atof();
 
     if (fh->naxis >= 0) {         /* we could force a fts_zero here, but ala */
         dprintf(0,"### fts_rhead: fits_header not initialized (use debug>0)\n");
@@ -1153,18 +1173,17 @@ int fts_phead(fits_header *fh, string *print)
  *
  */
 
-int fts_ptable(fh, instr, col, select, row)
-fits_header *fh;     /* (i)  pointer to fits header structure */
-stream instr;		    /* (i)  input stream data is associated with */
-string *col;                /* (i)  optional selection of fields to print */
-string select;              /* (i)  output mode: header and/or data */
-int *row;                   /* (i)  list of rows to display; NULL or 1.. */
+int fts_ptable(
+	       fits_header *fh,            /* (i)  pointer to fits header structure */
+	       stream instr, 	           /* (i)  input stream data is associated with */
+	       string *col,                /* (i)  optional selection of fields to print */
+	       string select,              /* (i)  output mode: header and/or data */
+	       int *row)                   /* (i)  list of rows to display; NULL or 1.. */
 {
-    char *card, *dp, *fmt(), rowfmt[10];
-    int ncards, i, j, k, n, w, len, pos, *colsel, xstrlen();
+    char *card, *dp, rowfmt[10];
+    int ncards, i, j, k, n, w, len, pos, *colsel;
     int ncolin, ncolout, check, idx, nskip, ntail;
-    bool colall, scanopt(), addrow, ascii;
-    int colmask();
+    bool colall, addrow, ascii;
     string *sp;
 
     if (scanopt(select,"group"))
@@ -1363,18 +1382,17 @@ int *row;                   /* (i)  list of rows to display; NULL or 1.. */
  *  fts_pgroup: 	print random group parameters of a RG table
  */
 
-int fts_pgroup(fh, instr, col, select, row)
-fits_header *fh;            /* (i)  pointer to fits header structure */
-stream instr;		    /* (i)  input stream data is associated with */
-string *col;                /* (i)  optional selection of fields to print */
-string select;              /* (i)  output mode: header and/or data */
-int *row;                   /* (i)  list of rows to display; NULL or 1.. */
+int fts_pgroup(
+fits_header *fh,            /* (i)  pointer to fits header structure */
+stream instr,		    /* (i)  input stream data is associated with */
+string *col,                /* (i)  optional selection of fields to print */
+string select,              /* (i)  output mode: header and/or data */
+int *row)                   /* (i)  list of rows to display; NULL or 1.. */
 {
-    char *card, *dp, *fmt(), rowfmt[10];
-    int ncards, i, j, k, n, w, len, nitems, pos, *colsel, xstrlen();
+    char *card, *dp, rowfmt[10];
+    int ncards, i, j, k, n, w, len, nitems, pos, *colsel;
     int bytpix, check, idx, nskip, ntail;
-    bool colall, scanopt(), addrow, ascii;
-    int colmask();
+    bool colall, addrow, ascii;
     real pscal, pzero;
     string *sp;
     bool Qpar, Qval, Qraw;
@@ -1540,10 +1558,10 @@ local void set_tbcoln(fits_header *fh)
 }
 
 
-local int put_ivals (key,val,fitsname,nvals,ivals)
-char *key, *val, *fitsname;
-int *nvals;
-int **ivals;
+local int put_ivals (
+		     char *key, char *val, char *fitsname,
+		     int *nvals,
+		     int **ivals)
 {
     int ivalue, idx, *ip;
 
@@ -1574,14 +1592,13 @@ int **ivals;
     return 1;
 }
        
-local int put_dvals (key,val,fitsname,nvals,dvals)
-char *key, *val, *fitsname;
-int *nvals;
-double **dvals;
+local int put_dvals (
+		     char *key, char *val, char *fitsname,
+		     int *nvals,
+		     double **dvals)
 {
     int ivalue, idx;
     double dvalue, *fp;
-    double atof();
 
     if (key[strlen(fitsname)]==' ' || key[strlen(fitsname)]=='\0') {
         if (*nvals >= 0)
@@ -1611,10 +1628,10 @@ double **dvals;
     return 1;
 }
 
-local int put_cvals (key,val,fitsname,nvals,cvals)
-char *key, *val, *fitsname;
-int *nvals;
-string **cvals;
+local int put_cvals (
+		     char *key, char *val, char *fitsname,
+		     int *nvals,
+		     string **cvals)
 {
     int ivalue, idx;
     string svalue, *sp;
@@ -1669,9 +1686,7 @@ string **cvals;
 
 #define KEYVALID "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_"   /* see 6.1.2.1. */
 
-local int parse_card (icard, card, a1, a2, a3, a4, a5)
-int icard;
-char *card, *a1, *a2, *a3, *a4, *a5;
+local int parse_card (int icard, char *card, char *a1, char *a2, char *a3, char *a4, char *a5)
 {
     int i;
     char *cp, *buf;
@@ -1805,9 +1820,10 @@ char *card, *a1, *a2, *a3, *a4, *a5;
  *            This buffer is a direct (byte) image of the fits 
  */
 
-int fts_buf(len)
-int len;                /*  (i)  lenght to test for */
+int fts_buf(
+	    int len)        /*  (i)  lenght to test for */        
 {
+
 
     if (fts_buffer==NULL) {
         fts_buflen = ftsblksiz_i;
@@ -1825,9 +1841,9 @@ int len;                /*  (i)  lenght to test for */
  *		29-jun-94: also takes into account data read (fh->nread)
  */
 
-int fts_sdata(fh,instr)    
-fits_header *fh;         /*  (i) pointer to fits header */
-stream instr;                   /*  (i) file pointer    */
+int fts_sdata(
+	      fits_header *fh,         /*  (i) pointer to fits header */
+	      stream instr)                   /*  (i) file pointer    */
 {
     int nskip, ntail;
 
@@ -1851,11 +1867,11 @@ stream instr;                   /*  (i) file pointer    */
 #define CONVBUFLEN   2880*10
 
 int fts_cdata(
-  fits_header *fh,                /*  (i) pointer to fits header */
-  stream instr,           /* (i) file pointer for input */
-  stream outstr,           /* (i) file pointer  for output  */
-  bool trailr,			/* (i) need to read trailing end too ? */
-  bool trailw)			/* (i) need to write trailing end too ? */
+	      fits_header *fh,                /*  (i) pointer to fits header */
+	      stream instr,           /* (i) file pointer for input */
+	      stream outstr,           /* (i) file pointer  for output  */
+	      bool trailr,			/* (i) need to read trailing end too ? */
+	      bool trailw)			/* (i) need to write trailing end too ? */
 {
     int  nread, nwrite, n, ntowrite, ntoread, itemlen, nitems, totwrite=0;
     char buffer[CONVBUFLEN];
@@ -1902,8 +1918,7 @@ int fts_cdata(
  *             See also eq. (x.y.z) in the NOST manual
  */
 
-int fts_dsize(fh)
-fits_header *fh;
+int fts_dsize(fits_header *fh)
 {
     int i, size;
 
@@ -1933,11 +1948,11 @@ fits_header *fh;
  *      fh->flip is set.... (See DECORDER)
  */
 
-int fts_rdata(fh, instr, buflen, buf)
-fits_header *fh;
-stream instr;
-int buflen;
-char *buf;
+int fts_rdata(
+	      fits_header *fh,
+	      stream instr,
+	      int buflen,
+	      char *buf)
 {
     double *outp, convbuf[CONVBUFLEN];   /* local buffer used for conversion */
     int nread, nskip, ntail;      /* number of bytes to read */
@@ -2025,11 +2040,11 @@ char *buf;
 }
 #endif
 
-int fts_rrow(fh, instr, nread, buf)
-fits_header *fh;
-stream instr;
-int nread;
-char *buf;
+int fts_rrow(
+  fits_header *fh,
+  stream instr,
+  int nread,
+  char *buf)
 {
     int n;
 
@@ -2042,11 +2057,11 @@ char *buf;
     return 0;
 }
 
-int fts_wrow(fh, instr, nwrite, buf)
-fits_header *fh;
-stream instr;
-int nwrite;
-char *buf;
+int fts_wrow(
+  fits_header *fh,
+  stream instr,
+  int nwrite,
+  char *buf)
 {
     int n;
 
@@ -2064,8 +2079,8 @@ char *buf;
  *              returns 1 on success, 0 on failure
  */
 
-int fts_zero(fh)        
-fits_header *fh;     /* (i/o) pointer to fits structure */
+int fts_zero(
+fits_header *fh)     /* (i/o) pointer to fits structure */
 {
     if (fh==NULL) return 0;
 
@@ -2137,8 +2152,8 @@ fits_header *fh;     /* (i/o) pointer to fits structure */
  *      F (false) -> 0
  */
 
-local int atob(cp)
-char *cp;               /* (i) pointer to character string to convert */
+local int atob(
+char *cp)               /* (i) pointer to character string to convert */
 {
     while (*cp == ' ')          /* skip spaces (no tabs allowed) */
         cp++;
@@ -2158,8 +2173,7 @@ char *cp;               /* (i) pointer to character string to convert */
  *
  */
 
-local char *atoa(s)
-char *s;
+local char *atoa(char *s)
 {
     char *cp;
     
@@ -2174,19 +2188,17 @@ char *buf;
 double *arr;
 int narr;
 {
-    char *cp, *strpbrk();
-    int i;
-
-    if ((cp = strpbrk(buf,"0123456789")) == NULL)
-        error("FITS keyword not an array: (%s)\n",buf);
-
-    i = atoi(cp)-1;     /* point to array location */
+  char *cp;
+  int i;
+  
+  if ((cp = strpbrk(buf,"0123456789")) == NULL)
+    error("FITS keyword not an array: (%s)\n",buf);
+  
+  i = atoi(cp)-1;     /* point to array location */
 }
 #endif
 
-local void my_copy (src, dest, n)
-char *src, *dest;
-int n;
+local void my_copy (char *src, char *dest, int n)
 {
     while (n--)  *dest++ = *src++;
 }
@@ -2255,10 +2267,10 @@ local void poutline(FILE *fp)
     flinetot++;         /* poutline() BUG BUG::: should be in struct FITS */
 }
 
-int fts_wvar(fp,key,comment)                  /*  write simple variable, no '=' */
-stream fp;
-string key;  
-string comment;
+int fts_wvar(                  /*  write simple variable, no '=' */
+	     stream fp,
+	     string key,
+	     string comment)
 {
     sprintf(fline,"%-8s ",key);       /* keyword takes up 8, and a space */
     if (comment)                    /* comment starts on 10, if present */
@@ -2267,11 +2279,11 @@ string comment;
     return 1;
 }
 
-int fts_wvarc(fp, key, value, comment)    /* write double variable */
-stream fp;
-string key;
-string value;
-string comment;
+int fts_wvarc(    /* write double variable */
+	      stream fp,
+	      string key,
+	      string value,
+	      string comment)
 {
     if ((int)strlen(value) > 8)
         dprintf(0,"### Character value for key %s (%s) has length > 8\n",
@@ -2285,12 +2297,12 @@ string comment;
     return 1;
 }
 
-int fts_wvarc_a(fp, key, n, values, comment)    /* write double variable array */
-stream fp;
-string key;
-int n;
-string *values;
-string comment;
+int fts_wvarc_a(    /* write double variable array */
+		stream fp,
+		string key,
+		int n,
+		string *values,
+		string comment)
 {
     int i;
     char keyi[10];
@@ -2306,11 +2318,11 @@ string comment;
 }
 
 
-int fts_wvarb(fp, key, value, comment)    /* write single logical variable */
-stream fp;
-string key;
-int value;
-string comment;
+int fts_wvarb(   /* write single logical variable */
+	      stream fp,
+	      string key,
+	      int value,
+	      string comment)
 {
     sprintf(fline,"%-8s=                    %c ",key,(value==1)? 'T' : 'F');
     if (comment) {
@@ -2321,12 +2333,12 @@ string comment;
     return 1;
 }
 
-int fts_wvarb_a(fp, key, n, values, comment)    /* write logical variable array */
-stream fp;
-string key;
-int n;
-int *values;
-string comment;
+int fts_wvarb_a(    /* write logical variable array */
+		stream fp,
+		string key,
+		int n,
+		int *values,
+		string comment)
 {
     int i;
     char keyi[10];
@@ -2342,11 +2354,11 @@ string comment;
 }
 
 
-int fts_wvari(fp, key, value, comment)    /* write single int variable */
-stream fp;
-string key;
-int value;
-string comment;
+int fts_wvari(    /* write single int variable */
+	      stream fp,
+	      string key,
+	      int value,
+	      string comment)
 {
     char stmp[21];
 
@@ -2360,12 +2372,12 @@ string comment;
     return 1;
 }
 
-int fts_wvari_a(fp, key, n, values, comment)    /* write double variable array */
-stream fp;
-string key;
-int n;
-int *values;
-string comment;
+int fts_wvari_a(   /* write double variable array */
+		stream fp,
+		string key,
+		int n,
+		int *values,
+		string comment)
 {
     int i;
     char keyi[10];
@@ -2380,17 +2392,10 @@ string comment;
     return 1;
 }
    /* write single float variable */
-#if 1   
-int fts_wvarf(stream fp, string key, float value, string comment)
-#else
-	/* although the next should be fine, SUN ansi compiler bug ... */
-	/* /opt/SUNWspro/bin/cc was used */
-int fts_wvarf(fp, key, value, comment)
-stream fp;
-string key;
-float value;
-string comment;
-#endif
+int fts_wvarf(stream fp, 
+	      string key, 
+	      float value, 
+	      string comment)
 {
     char stmp[21];
 
@@ -2404,12 +2409,12 @@ string comment;
     return 1;
 }
 
-int fts_wvarf_a(fp, key, n, values, comment)    /* write double variable array */
-stream fp;
-string key;
-int n;
-float *values;
-string comment;
+int fts_wvarf_a(    /* write double variable array */
+		stream fp,
+		string key,
+		int n,
+		float *values,
+		string comment)
 {
     int i;
     char keyi[10];
@@ -2425,11 +2430,11 @@ string comment;
 }
 
 
-int fts_wvard(fp, key, value, comment)    /* write single double variable */
-stream fp;
-string key;
-double value;
-string comment;
+int fts_wvard(   /* write single double variable */
+	      stream fp,
+	      string key,
+	      double value,
+	      string comment)
 {
     char stmp[21];
 
@@ -2443,12 +2448,12 @@ string comment;
     return 1;
 }
 
-int fts_wvard_a(fp, key, n, values, comment)    /* write double variable array */
-stream fp;
-string key;
-int n;
-double *values;
-string comment;
+int fts_wvard_a(   /* write double variable array */
+		stream fp,
+		string key,
+		int n,
+		double *values,
+		string comment)
 {
     int i;
     char keyi[10];
@@ -2464,11 +2469,11 @@ string comment;
 }
 
 
-int fts_wdata(fh,ostr,n,cp)
-fits_header *fh;
-stream ostr;
-int n;
-char *cp;
+int fts_wdata(
+	      fits_header *fh,
+	      stream ostr,
+	      int n,
+	      char *cp)
 {
     if (fwrite(cp,sizeof(char),n,ostr) != n)
         error("Error writing %d data bytes",n);
@@ -2487,8 +2492,7 @@ char *cp;
  * with an optional time indication
  */
 
-local void check_date(key,s)
-char *key, *s;
+local void check_date(char *key, char *s)
 {
     int err=0, old=0, new=0;
     char *val;
@@ -2548,8 +2552,7 @@ local char *ctype5[] = { "TAN", "SIN", "ARC", "NCP", "STG", "AIT", "GLS", "CAR",
 			  "MER", "LSR", "HEL", "OBS", "ATF",/* ATF to be conmfirmed by */
                           ".   ", NULL};
 
-local int check_ctype(key,val)
-char *key, *val;
+local int check_ctype(char *key, char *val)
 {
     int i;
 
@@ -2592,8 +2595,7 @@ local char *units[] = {
     NULL};
 
 
-local int check_unit(key,val)
-char *key, *val;
+local int check_unit(char *key, char *val)
 {
     int i;
 
@@ -2617,8 +2619,7 @@ char *key, *val;
     return 0;
 }
 
-int fts_setiblk(n)
-int n;
+int fts_setiblk(int n)
 {
   if (n<=0) error("fts_setiblk: Illegal blocking factor %d\n",n);
   ftsblksiz_i=n * FTSBLKSIZ;	/* new blocksize for input */
@@ -2627,8 +2628,7 @@ int n;
   return n;
 }
 
-int fts_setoblk(n)
-int n;
+int fts_setoblk(int n)
 {
   if (n<=0) error("fts_setoblk: Illegal blocking factor %d\n",n);
   ftsblksiz_o=n * FTSBLKSIZ;	/* new blocksize for output */
@@ -2642,9 +2642,7 @@ int n;
 }
 
 
-local int my_findstr(text, pat, len)
-string text, pat;
-int len;
+local int my_findstr(string text, string pat, int len)
 {
   register string s;
   int nch;
@@ -2658,9 +2656,7 @@ int len;
 
 }
 
-local void blank_fill(card, len)
-char *card;
-int len;
+local void blank_fill(char *card, int len)
 {
     int i;
 
@@ -2672,15 +2668,15 @@ int len;
                                         
 /* local routine, made for fts_ptable: probably useful in library */
 
-int colmask(n, key, col, colsel)
-int n;              /* (i) number of keys */
-string key[];       /* (i) array of 'n' keys to check against */
-string col[];       /* NULL terminated array of strings to check for */
-int colsel[];        /* (o) array of 'n' int's : 0=not selected 1=selected */
+local int colmask(
+	    int n,              /* (i) number of keys */
+	    string key[],       /* (i) array of 'n' keys to check against */
+	    string col[],       /* NULL terminated array of strings to check for */
+	    int colsel[])        /* (o) array of 'n' int's : 0=not selected 1=selected */
 {
     string *s;
     int i;
-
+    
     if (col==NULL || *col==NULL) {
         for(i=0; i<n; i++) colsel[i] = 1;
         return 1;
@@ -2704,8 +2700,7 @@ int colsel[];        /* (o) array of 'n' int's : 0=not selected 1=selected */
  * the TFORMnnn's of BINTABLE's
  */
 
-local int colitems(s)
-char *s;
+local int colitems(char *s)
 {
     int len;
     char *num, *cp;
@@ -2733,12 +2728,11 @@ char *s;
  *       NOTE: returns space to statically allocate space!!!
  */
 
-char *fmt(line,format)
-char *line, *format;
+local char *fmt(char *line, char *format)
 {
     char *cp = format;
     static char sample[80];
-    int n, atoi();
+    int n;
 
 #if 1
     /* skip numerical count */   
@@ -2769,9 +2763,7 @@ char *line, *format;
  * for machines which require things to be aligned, more work needs to be done
  */
 
-local float show_e(v,i)
-float *v;
-int i;
+local float show_e(float *v, int i)
 {
 #if 1
     float f;
@@ -2787,9 +2779,7 @@ int i;
 #endif
 } 
 
-local double show_d(v,i)
-double *v;
-int i;
+local double show_d(double *v,int i)
 {
 #if 1
     double d;
@@ -2806,16 +2796,12 @@ int i;
 #endif    
 }
 
-local short show_i(v,i)
-short *v;
-int i;
+local short show_i(short *v,int i)
 {
     return v[i];
 } 
 
-local int show_j(v,i)
-int *v;
-int i;
+local int show_j(int *v,int i)
 {
     return v[i];
 } 

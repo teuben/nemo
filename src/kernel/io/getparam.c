@@ -94,6 +94,8 @@
  *                 e  gcc warnings
  *  8-apr-01    3.2   added getfparam()
  * 21-may-01       a  returned 'int history' to history.c for 'uNEMO'
+ * 31-may-01       b  added jJ (dutch/german) to boolean 'true'
+ *  7-jun-01       c  using NEMO_VERSION instead of VERSION
  *
   TODO:
       - what if there is no VERSION=
@@ -114,7 +116,7 @@
       - @macro and $key references get expanded as strings.
  */
 
-#define VERSION_ID  "3.2a 21-mar-01 PJT"
+#define VERSION_ID  "3.2c 7-jun-01 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -682,13 +684,13 @@ local void printhelp(string help)
 	printf("  8       reserved\n");
 	printf(" 16       reserved\n");
         printf(" VERSION_ID = %s\n",VERSION_ID);
-        printf(" NEMO VERSION = %s\n",VERSION);
+        printf(" NEMO VERSION = %s\n",NEMO_VERSION);
         showconfig();
         exit(0);
         /*NOTREACHED*/
     }
     if (strchr(help,'i')) {
-    	printf("NEMO version: %s\n",VERSION);
+    	printf("NEMO version: %s\n",NEMO_VERSION);
         printf("help: %s yapp: %s error: %s\n",
                 help_string  ? help_string  : "",
 		yapp_string  ? yapp_string  : "",
@@ -1105,7 +1107,7 @@ long getlparam(string par)
 
     val = getparam(par);                        /* obtain value of param */
 #if !defined(NEMOINP)
-    return (atol(val));                         /* convert to an integer */
+    return atol(val);                           /* convert to an integer */
 #else
     nret = nemoinpl(val,&lpar,1);
     if (nret < 0)
@@ -1124,7 +1126,7 @@ bool getbparam(string par)
     val = getparam(par);                        /* obtain value of param */
 #if !defined(NEMOINP)
     if (*val=='.') val++;                       /* catch .TRUE. .FALSE. */
-    if (strchr("tTyY1", *val) != NULL)          /* is value true? */
+    if (strchr("tTyY1jJ", *val) != NULL)        /* is value true? */
         return TRUE;
     if (strchr("fFnN0", *val) != NULL)          /* is value false? */
         return FALSE;
@@ -1134,7 +1136,7 @@ bool getbparam(string par)
 #else
     nret = nemoinpb(val,&bpar,1);
     if (nret < 0)
-        warning("getbparam(%s=%s) parsing error %d, assumed %d (FALSE)\n",
+        warning("getbparam(%s=%s) parsing error %d, assumed %d (FALSE)",
                         par,val,nret,bpar);
     return (nret<=0) ? FALSE : bpar;
 #endif /* !NEMOINP */
@@ -1148,11 +1150,11 @@ double getdparam(string par)
 
     val = getparam(par);                        /* obtain value of param */
 #if !defined(NEMOINP)
-    return (atof(val));                         /* convert to a double */
+    return atof(val);                         /* convert to a double */
 #else
     nret = nemoinpd(val,&dpar,1);
     if (nret < 0)
-        warning("getdparam(%s=%s) parsing error %d, assumed %g\n",
+        warning("getdparam(%s=%s) parsing error %d, assumed %g",
                             par,val,nret,dpar);
     return (nret==0) ? 0.0 : dpar;
 #endif /* !NEMOINP */

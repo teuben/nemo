@@ -3,6 +3,7 @@
  *          with iterative worst outlier removal -  no graphics output
  *
  *       9-dec-99   V1.0    Created
+ *       6-jun-01   V1.1    renamed sigma= to nsigma= as in other programs PJT
  *
  */
 
@@ -18,13 +19,13 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "in=???\n            Input file name (table)",
     "xcol=1\n		 x coordinate column(s)",
     "iter=0\n            # iterations removing worst outlier",
-    "sigma=0\n           Multiple sigma above which to remove outliers",
+    "nsigma=0\n          Multiple sigma above which to remove outliers",
     "verbose=t\n         Verbose output of all iterations?",
     "width=\n		 Width of columns to print",
     "median=t\n          Compute median too? (can be time consuming)",
     "method=0\n          Method to remove outliers (0=fast 1=slow)",
     "nmax=10000\n        maximum number of data to be read if pipe",
-    "VERSION=1.0\n	 9-dec-99 PJT",
+    "VERSION=1.1\n	 6-jun-01 PJT",
     NULL
 };
 
@@ -75,7 +76,7 @@ void setparams()
     if (nxcol < 1) error("Error parsing xcol=%s",getparam("xcol"));
 
     nmax = file_lines(input,getiparam("nmax"));
-    dprintf(0,"Allocated %d lines for table\n",nmax);
+    dprintf(1,"Allocated %d lines for table\n",nmax);
     for (j=0; j<nxcol; j++)
         x[j] = (real *) allocate(sizeof(real) * (nmax+1));   /* data */
 
@@ -87,7 +88,7 @@ void setparams()
     } else
         sprintf(outfmt,"%%s");
     dprintf(1,"format=%s\n",outfmt);
-    fsigma = getrparam("sigma");
+    fsigma = getrparam("nsigma");
     iter = getiparam("iter");
     method = getiparam("method");
 }
@@ -218,7 +219,7 @@ void stat_data()
                     }
                   }
                 } else if (method==1) {
-                  for (i=0; i<npt; i++) {      /* slow method */
+                  for (i=0; i<npt; i++) {      /* slow method : only works if all points in sample */
                     decr_moment(&m[j],x[j][i],1.0);
                     d = (x[j][i]-mean_moment(&m[j]))/
                             sigma_moment(&m[j]);

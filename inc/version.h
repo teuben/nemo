@@ -1,2 +1,2 @@
 /* do not edit - created by the version script */
-#define VERSION "3.0.4"
+#define NEMO_VERSION "3.0.5"
