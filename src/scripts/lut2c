@@ -1,0 +1,30 @@
+#! /bin/csh -f
+# 
+#  transform a table of 256 RGB values into a float[256][3] array
+#
+
+set testbed=0
+
+foreach file ($*)
+
+  set name=$file:r
+  echo "/* automatically generated from NEMO's $0 script - do not edit */"
+  echo "static float ${name}[256][3] = { "
+  awk '{printf("   %s , %s , %s ,\n",$1,$2,$3)}' $file
+  echo "};"
+
+  if ($testbed) then
+    echo '#ifdef TESTBED'                                
+    echo '#include <stdio.h>'                            
+    echo '#define name ' $name
+    echo 'main() {'                                      
+    echo '  int i, j;'                                   
+    echo '  for (i=0; i<256; i++)'                       
+    echo '      printf("%d %f %f %f\n",i+1,'
+    echo '      name[i][0],name[i][1],name[i][2]);'
+    echo '}'                                             
+    echo '#endif'
+  endif
+
+end
+
