@@ -1,0 +1,3 @@
+#
+if ($?NEMO == 0) setenv NEMO @NEMO@
+source $NEMO/nemo.rc
