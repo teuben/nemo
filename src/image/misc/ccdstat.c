@@ -24,7 +24,7 @@ string defv[] = {
     "win=\n         Optional input map for weights",
     "npar=0\n       Number of fitting parameters assumed for chi2 calc",
     "nppb=1\n       Optional correction 'number of points per beam' for chi2 calc",
-    "VERSION=1.5\n  14-nov-04 PJT",
+    "VERSION=1.5\n  15-nov-04 PJT",
     NULL,
 };
 
