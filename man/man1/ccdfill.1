@@ -1,0 +1,43 @@
+.TH CCDFILL 1NEMO "22 February 1997"
+.SH NAME
+ccdfill \- patch up the holes in an image
+.SH SYNOPSIS
+\fBccdfill\fP [parameter=value]
+.SH DESCRIPTION
+\fBccdfill\fP patches up the holes in an image.
+.PP
+Currently a simple 2-dimensional planar fit is done to the
+pixel values surrounding 'bad' pixels. The size of this area
+can be choosen by the user.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP\fIin_ccd\fP
+Input \fIimage(3NEMO)\fP file.
+No default.
+.TP 20
+\fBout=\fP\fIout_ccd\fP
+Output image file.
+No default.
+.TP 20
+\fBn=\fP
+Number of neighbor cells at one side to use in interpolation/fit.
+The total number of cells used in the fit will hence be at most
+\fB4*n*(n+1)\fP
+(this already exclude the central pixel).
+[Default: \fB1\fP].
+.TP 20
+\fBbad=\fP\fIzvalue\fP
+Value in the map that should be patched.
+[Default: \fB0.0\fP].
+.SH SEE ALSO
+image(3NEMO), ccdmath(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+10-Dec-93	V1.0 Created	PJT
+22-feb-97	V1.1 added bad=	PJT
+.fi
