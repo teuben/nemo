@@ -1,0 +1,279 @@
+	
+	++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	This software proprietary material of AT&T Bell Laboratores and 
+	is NOT to be redistributed.  However, it will be cheerfully sent at no cost 
+	to whomever requests it.  Send requests to:
+
+			Robert W. Wilson
+			HOH L239
+			AT&T Bell Laboratories
+			Holmdel, NJ  07733-1988
+
+			tel: (908) 888-7120
+
+	or 
+			Marc W. Pound
+			Astronomy Program
+			University of Maryland
+			College Park, MD 20742
+
+			tel: (301) 454-3001
+
+	++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+	FITSView Package
+	----------------
+
+	Software to display FITS images on Sun Workstations and Sparcstations
+	using the SunView environment. Included in this package are:
+
+	ql    - Quick Look. Display a single grey-scale or pseudo-color image.
+	rgb   - Use 3 images as inputs to the red, green and blue guns of
+	        an 8-bit display monitor.
+	rgb24 - Use 3 images as inputs to the red, green and blue guns of
+	        an 24-bit display monitor.
+	movie - Display many images as frames of a "movie". Images are 
+		grey-scale or pseudocolor on 8-bit monitors and full-color on 24-bit
+		monitors.
+	
+	-----------------------------------------------------------------------
+
+
+	QL - Quick Look. Display a single FITS image as grey-scale, under
+	     the SunView environment.
+
+	Usage: ql zoom filename min max
+
+	ql loads in single FITS image file and displays it as a grey-scale 
+	image. If the image is larger than the monitor, ql will add scroll
+	bars.  ql can run on monochrome, 8-bit color, and 24-bit color displays.
+	
+	ql takes the following arguments:
+
+	zoom	 - zoom factor by which image will be expanded 	(integer)
+
+	filename - name of FITS image file to be displayed
+
+	min 	 - value of minimum intensity to be displayed
+
+	max 	 - value of maximum intensity to be displayed 
+
+	If min and max are given as the same value, then the actual minimum
+	and maximum intensities of the image will be used.
+
+	Once inside ql, you will see the '>' prompt. The commands available
+	are:
+		g gamma(.38)    Change display gamma correction
+		h hardcopy      generate a postscript hardcopy
+		i invert        invert pixels
+		p nsteps(128)   Change to pseudo color display
+		s l h           Rescale picture
+		t TGA           generate a TRUEVISION TGA file (tga.out) from image
+		q		quit
+
+	Gamma is used to correct for the non-linearity of the display. 
+	The correction to greyscale ramp is of the form:
+
+		ramp[i] = 255*{(i/255)^(gamma)}   (i = 0 to 255)
+	
+	where a perfect linear monitor would need no correction and
+        have a greyscale ramp:
+
+		ramp[i] = i; (i = 0 to 255)
+	
+	We have found empirically that a value of .38 works well for the 
+	standard Sun Workstation Sony monitors. The default gamma is set 
+	to this value.
+
+	A PostScript hardcopy is obtained be setting the environment
+	variable R_DISPOSE to point to your local printer. This is
+	the same environment variable used by the IRAF package. A
+	typical definition might be
+	
+		R_DISPOSE="lpr -Pyour_printer -r -s %s" 
+	
+	The %s is necessary as this is the conversion format 
+	string for the temporary PostScript file ql creates.
+	It is useful to invert the pixels before making a
+	hardcopy--less work for the printer.
+
+	Pseudocolor can be obtained with the 'p nsteps' command, where
+	nsteps is the number of contour levels (up to 256) to divide the
+	255 brightness levels of the display into.
+	The default is 128. To change back to greyscale, use 'g gamma'.
+
+Release 3.0 	Last change: 15-AUG-1990 -- mwp.
+
+Written by Robert W. Wilson and Marc W. Pound, AT&T Bell Laboratories.
+
+	------------------------------------------------------------------
+
+	RGB - Use three FITS images as input for the Red, Green and Blue guns
+	      of the display, under the SunView environment.
+
+	Usage: rgb zoom red_image l1 h1 green_image l2 h2 blue_image l3 h3
+
+	rgb loads in three FITS image files and displays them as a single 
+	color image. If the image is larger than the monitor, rgb will add scroll
+	bars.  rgb runs only on  8-bit color displays. It uses a special dithering 
+	scheme (with two bits of blue, three bits of green, and three bits of red)
+	mimic a 24-bit display and fool the eye into seeing a true color image.
+	The images must all be the same size.
+	
+	rgb takes the following arguments:
+
+	zoom	    - zoom factor by which image will be expanded (integer)
+
+	red_image   - name of FITS image file to be displayed in the red 'plane'.
+
+	l1	    - value of minimum intensity to be displayed in the red image.
+
+	h1 	    - value of maximum intensity to be displayed in the red image.
+
+	green_image - name of FITS image file to be displayed in the green 'plane'.
+
+	l2	    - value of minimum intensity to be displayed in the green image.
+
+	h2 	    - value of maximum intensity to be displayed in the green image.
+
+	blue_image  - name of FITS image file to be displayed in the blue 'plane'.
+
+	l3	    - value of minimum intensity to be displayed in the blue image.
+
+	h3 	    - value of maximum intensity to be displayed in the blue image.
+
+
+	If ln and hn are given as the same value, then the actual minimum
+	and maximum intensities of the image will be used.
+
+	Once inside rgb, you will see the '>' prompt. The commands available
+	are:
+		d n     Load picture n           
+		r       show red 'plane' only
+		g       show green 'plane' only
+		b       show blue 'plane' only
+		q       quit
+
+	The correction for the non-linearity of the display is set to .38
+
+	is not-changeable (see documentation for ql).
+
+Release 3.0 	Last change: 15-AUG-1990 -- mwp.
+
+Written by Robert W. Wilson, AT&T Bell Laboratories.
+
+	-------------------------------------------------------------------
+
+	RGB24 - Use three FITS images as input for the Red, Green and Blue guns
+	      of a 24-bit display, under the SunView environment.
+
+	Usage: rgb24 zoom fn1 l1 h1 fn2 l2 h2 fn3 l3 h3
+
+	rgb24 loads in three FITS image files and displays them as a single 
+	color image. If the image is larger than the monitor, rgb24 will add scroll
+	bars.  rgb24 runs only on  24-bit color displays. 
+	The images need not be the same size.
+	
+	rgb24 takes the following arguments:
+
+	zoom	    - zoom factor by which image will be expanded (integer)
+
+	red_image   - name of FITS image file to be displayed in the red plane.
+
+	l1	    - value of minimum intensity to be displayed in the red image.
+
+	h1 	    - value of maximum intensity to be displayed in the red image.
+
+	green_image - name of FITS image file to be displayed in the green plane.
+
+	l2	    - value of minimum intensity to be displayed in the green image.
+
+	h2 	    - value of maximum intensity to be displayed in the green image.
+
+	blue_image  - name of FITS image file to be displayed in the blue plane.
+
+	l3	    - value of minimum intensity to be displayed in the blue image.
+
+	h3 	    - value of maximum intensity to be displayed in the blue image.
+
+	If ln and hn are given as the same value, then the actual minimum
+	and maximum intensities of the image will be used.
+
+	Once inside rgb24, you will see the '>' prompt. The commands available
+	are:
+		q       quit
+
+	The correction for the non-linearity of the display is set to .38
+	is not-changeable (see documentation for ql).
+
+Release 3.0 	Last change: 15-AUG-1990 -- mwp.
+
+Written by Robert W. Wilson, AT&T Bell Laboratories.
+	-------------------------------------------------------------------
+	
+	MOVIE - display FITS astronomical images on Sun Workstations 
+       		as frames of a "movie", using the SunView environment.
+
+	Usage: movie npic i zoom filespec [min max]
+	
+DESCRIPTION:
+	
+	movie loads in up to 200 FITS images (depending memory available)
+	and the user can step through them manually (both forwards and
+	backwards) or run a "movie" of the images at a variety of frames
+	per second. If the images are larger than the screen, movie will 
+	add scroll bars. movie requires the image filenames to conform to the
+	following standards: 
+
+		1) all the images for a single "movie" must have
+		   the same basename and increasing integer extensions.
+	
+			e.g., Orion.0, Orion.1, Orion.2, ... Orion.N.
+	
+		2) The images must all be the same size.
+
+	movie can run on 8-bit color and 24-bit color displays.
+	It displays the files as grey-scale, pseudo-color or '3-color' images. 
+      	When using 3-color, three adjacent images are loaded into the red, 
+	green and blue planes of the display. For instance, if the user is 
+	displaying spatial-spatial images and stepping through velocity space 
+	in successive images, then adjacent velocity-channel images are shown 
+	with the most negative velocity in the blue plane, the middle velocity 
+	in the green and the most positive velocity in the red.  On 8-bit
+ 	monitors a dithering scheme is used to mimic three full color planes 
+	(see documentation for 'rgb').
+	
+	movie takes the following arguments:
+
+	npic     - number of images to be displayed   		(integer)
+
+	filespec - base name of image files
+	  e.g., files are filespec.0, filespec.1 filespec.2 ... filespec.N
+
+	i        - number of starting file			(integer)
+	  e.g., images displayed will be filespec.i ... filespec.npic
+
+	zoom	 - zoom factor by which image will be expanded 	(integer)
+
+	min 	 - value of minimum intensity to be displayed
+
+	max 	 - value of maximum intensity to be displayed 
+
+	min and max are optional. If they are not given or are given as the
+	same value, each image will be scaled using its minimum and 
+	maximum intensities. 
+
+NOTE:	
+	If you are unsure that your machine has enough memory available to
+	show your "movie", then it is best to start up movie with the 
+	ampersand (&) command terminator to run it as a background job, as
+	your workstation may crash if you ask too much of it. You can then use
+	kill(1) to terminate the job with extreme prejudice if you think
+	it will crash your machine. 
+	
+SEE ALSO:
+	There is a HELP button on the movie panel if you need more information.
+
+Release 3.0 	Last change: 15-AUG-1990 -- mwp.
+
+Written by Marc W. Pound and Robert W. Wilson, AT&T Bell Laboratories.
