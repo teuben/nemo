@@ -1,0 +1,49 @@
+#! /bin/csh -f
+#
+#        2-dec-03       derived from mkvrtd, to deal with Gilberto's 2+1 dim HDF files
+
+#  scalefactors; divide data by these to get our kpc and km/s etc.
+set scale=(1e5 1e5 1e-24 3.08568e21 1)
+
+if ($#argv != 2) then
+  echo "Usage: $0 hdf_input ccd_output"
+  echo "Creates vrtd1 input (ccd) file for flowcode"
+  echo "Using scale factors: $scale"
+  exit 0
+endif
+
+set tmp=tmp$$
+set in=$1
+set out=$2
+
+if (-e $out) then
+  echo File $out already exists
+  exit 1
+endif
+
+# 							VR
+sdsfits in=$in out=$tmp.1 select=2 axis=0 dummy=t
+if ($status) goto bad
+# 							VT
+sdsfits in=$in out=$tmp.2 select=3 axis=0 dummy=t
+# 							DEN
+sdsfits in=$in out=$tmp.3 select=7 axis=0 dummy=t
+# 							RADIUS (a 1d map)
+sdsfits in=$in out=$tmp.4 select=1 axis=2 
+#							THETA (a 1d map)
+sdsfits in=$in out=$tmp.5 select=1 axis=3 
+#							catenate to one file, change dimensions
+#
+
+foreach i (1 2 3 4 5)
+  fitsccd $tmp.$i -  error=1 | ccdmath - - %1/$scale[$i] >> $out
+end
+
+#							good cleanup
+    rm -f $tmp.*
+    exit 0
+
+#							bad cleanup
+bad:
+    rm -f $tmp.*
+    exit 1
