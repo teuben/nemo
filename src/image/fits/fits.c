@@ -51,6 +51,7 @@
  *                              which is bad !!!!
  *    		12-oct-01       new standard added FITS reference
  *              15-jan-03       write floating #'s in header w/ more precision PJT
+ *              16-jan-03       warning if one of CROTA1/2 is missing      PJT
  *
  * Places where this package will call error(), and hence EXIT program:
  *  - invalid BITPIX
@@ -2545,11 +2546,26 @@ int fts_wvard_a(   /* write double variable array */
 		double *values,
 		string comment)
 {
-    int i;
+    int i, ia0, ia1;
     char keyi[10];
 
     if ((int)strlen(key)>5)
         error("Length of array keyword %s must be less then 5\n",key);
+
+    if (streq(key,"CROTA")) {
+      /* notice: should really check which of the two are sky angles */
+      if (n>=2) {
+	ia0 = 0;
+	ia1 = 1;
+	if (values[ia0]!=0 && values[ia1]==0) {
+	  warning("setting CROTA2=%g since it was missing",values[ia0]);
+	  values[ia1] = values[ia0];
+	} else if (values[ia1]!=0 && values[ia0]==0) {
+	  warning("setting CROTA1=%g since it was missing",values[ia1]);
+	  values[ia0] = values[ia1];
+	}
+      }
+    }
 
     for (i=0; i<n; i++) {
         sprintf(keyi,"%s%d",key,i+1);
