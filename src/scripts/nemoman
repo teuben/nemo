@@ -1,0 +1,24 @@
+#! /bin/csh -f
+#
+set prog=$0
+
+foreach a ($*)
+  set $a
+end
+if ($term == xterm) then
+ setenv MANPATH $NEMO/man
+ set help=$NEMO/man/cat1/nemo.1
+ # force creation of the formatted cat1 file....
+ man nemo >& /dev/null
+ if ($status != 0 || ! -e $help) then
+   echo "Problems finding/making NEMO's helpfile ($help) - using default"
+   xman -title NEMO -bothshown &
+ else
+   xman -title NEMO -bothshown -notopbox -helpfile $help &
+ endif
+else
+ echo "Sorry, $prog:t is not supported outside of X-windows. Your"
+ echo "term needs to be a xterm. Use regular man to get online help,"
+ echo "or try running it as: "
+ echo "		$prog term=xterm"
+endif
