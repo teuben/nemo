@@ -23,6 +23,7 @@
  *	 4-mar-97      b   support for SINGLEPREC
  *      18-jun-98   4.4 added optional overridden {x,y,z}lab's
  *      30-jul-98      a  fixed gridding bug introduced in 4.4
+ *       7-oct-02      c  atof -> natof
  *
  * Todo: - mean=t may not be correct for nz>1 
  */
@@ -61,7 +62,7 @@ string defv[] = {		/* keywords/default values/help */
 	"moment=0\n			  moment in zvar (-2,-1,0,1,2...)",
 	"mean=f\n			  mean (moment=0) or sum per cell",
 	"stack=f\n			  Stack all selected snapshots?",
-	"VERSION=4.4b\n			  1-apr-01 PJT",
+	"VERSION=4.4c\n			  7-oct-02 PJT",
 	NULL,
 };
 
@@ -657,17 +658,17 @@ setaxis (string rexp, real range[3], int n, int *edge, real *beam)
         range[0] = -HUGE;
         *edge |= 0x01;              /* set left edge at inifinity */	
     } else
-        range[0] = atof(rexp);
+        range[0] = natof(rexp);
     cp++;
     if (strncmp(cp,"inf",3)==0) {
         range[1] = HUGE;
 	*edge |= 0x02;              /* set right edge at infinity */
     } else
-        range[1] = atof(cp);
+        range[1] = natof(cp);
     range[2] = (range[1]-range[0])/(real)n;       /* step */
     cp = strchr(cp,',');
     if (cp)
-        *beam = atof(++cp);                  /* convolution beam */
+        *beam = natof(++cp);                  /* convolution beam */
     else
         *beam = -1.0;                        /* any number < 0 */
 }
