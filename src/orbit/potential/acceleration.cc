@@ -25,9 +25,6 @@ extern "C" {
 #include  <cstring>             // C type string manipultions
 extern "C" {
 #include  <stdinc.h>            // nemo's string (used in potential.h)
-string *burststring (string, string);
-string *burst0string(string, string);
-void    freestrings(string*);
 #include  <potential.h>         // the external potential for falling back
 #include  <getparam.h>          // getting name of main()
 #include  <loadobj.h>           // loading shared object files
@@ -541,12 +538,12 @@ namespace {
     acc_pter         AC[NMAX];               // pointers to accelerations       
     //--------------------------------------------------------------------------
   public:
-    void set(int   nacc,
-	     char**accname,
-	     char**accpars,
-	     char**accfile,
-	     bool *need_mass,
-	     bool *need_vels)
+    void set(int         nacc,
+	     const char**accname,
+	     const char**accpars,
+	     const char**accfile,
+	     bool       *need_mass,
+	     bool       *need_vels)
     {
       if(nacc > NMAX)
 	error("get_acceleration: more accnames than expected (%d)",NMAX);
@@ -628,6 +625,47 @@ namespace {
 			      &AddedAcc7,
 			      &AddedAcc8,
 			      &AddedAcc9};
+
+  //----------------------------------------------------------------------------
+  typedef const char* c_string;
+
+  inline bool is_sep(char const&c, const char*seps) {
+    for(const char*s=seps; *s; ++s)
+      if( c == *s ) return true;
+    return false;
+  }
+
+  inline c_string *splitstring(c_string list, c_string seps)
+  {
+    char    *words = new char[strlen(list)+1];
+    c_string*wlist = new c_string[128];
+    int   n    = 0;
+    char *w    = words;
+    c_string l = list;
+    wlist[n]   = w;
+    do {                                      // LOOP list
+      if(*l == 0 || is_sep(*l,seps)) {        //   IF end or seperator found
+	*w++ = 0;                             //     close word
+	if(++n == 128) error("too many words in list");
+	wlist[n] = w;                         //     get begin of new word
+      } else                                  //   ELSE
+	*w++ = *l;                            //     copy character
+    } while (*l++ != 0);                      // until list ends
+    wlist[n] = 0;                             // close word list
+//     for(int i=0; i!=n; ++i)
+//       nemo_dprintf(2,"wlist[%d]=%d:\"%s\"\n",i,int(wlist[i]-words),wlist[i]);
+    return wlist;
+  }
+
+  inline void freestrings(c_string*wlist) {
+    delete[] wlist[0];
+    delete[] wlist;
+  }
+  //////////////////////////////////////////////////////////////////////////////
+  char NameSeps[3] = {',','+',0};
+  char ParsSeps[3] = {';','#',0};
+  char FileSeps[3] = {';','#',0};
+
 } // namespace {
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -644,7 +682,7 @@ acc_pter get_acceleration(
   // 0. split accnames and count number of sub acceleration fields
   nemo_dprintf(2,"get_acceleration(\"%s\",\"%s\",\"%s\")\n",
 	       accnames,accparss,accfiles);
-  char**accname = burststring(const_cast<char*>(accnames),"+");
+  c_string*accname = splitstring(accnames,NameSeps);
   int nacc=0;
   while(accname[nacc]) nacc++;
   if(nacc == 0) error("get_acceleration: empty accname");
@@ -656,17 +694,17 @@ acc_pter get_acceleration(
   }
   // 2. several accnames
   // 2.1 split accparss, allow for empty accparss -> all accpars=0
-  char *accpars_[1024] = {0}, **accpars=accpars_;
+  c_string accpars_[1024] = {0}, *accpars = accpars_;
   if(accparss) {
-    accpars = burst0string(const_cast<char*>(accparss),":");
+    accpars = splitstring(accparss,ParsSeps);
     int n=0; while(accpars[n]) n++;
     if(n!=nacc)
       error("get_acceleration: %d names but %d parameter sets",nacc,n);
   }
   // 2.2 split accfiles, allow for empty accfiles -> all accfile=0
-  char *accfile_[1024] = {0}, **accfile=accfile_;
+  c_string accfile_[1024] = {0}, *accfile = accfile_;
   if(accfiles) {
-    accfile = burst0string(const_cast<char*>(accfiles),":");
+    accfile = splitstring(accfiles,FileSeps);
     int n=0; while(accfile[n]) n++;
     if(n!=nacc)
       error("get_acceleration: %d names but %d data files",nacc,n);
