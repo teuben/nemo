@@ -9,7 +9,7 @@
 
 typedef int (*action)(int);
 
-#define NTEST 10
+#define MAXTEST 10
 #define NMAX  30000
 
 /* Work vectors: */
@@ -28,7 +28,9 @@ real x = 1.0, y = -2.5, z = 3.14;
 string defv[] = {
   "test=0\n          test to run (0=all)",
   "n=\n              max size of arrays",
-  "VERSION=2.0\n     17-feb-2004 PJT",
+  "vlen=0,3,10,30,100,300,1000,3000,30000\n     Vector lengths to try",
+  "count=300000\n    how often shoudl the largest vlen be run",
+  "VERSION=2.1\n     2-apr-2004 PJT",
   NULL,
 };
 
@@ -95,10 +97,8 @@ void initialize()
 
       ind1[i] = i;
       ind2[i]  = (int)(NMAX*jreal/2147483648.0);
-      if (ind2[i] < 0 || ind2[i] >= NMAX) {
-	  printf("error: ind2[%d] = %d\n", i, ind2[i]);
-	  exit(1);
-      }
+      if (ind2[i] < 0 || ind2[i] >= NMAX)
+	  error("ind2[%d] = %d\n", i, ind2[i]);
 
       v4[i] = jreal/2147483648.0 - 0.5;
 
@@ -118,16 +118,24 @@ int dummy(int n)
 
 void time_action(action a, int factor, char *name, int ntmax)
 {
-  real dtime0, dtime[NTEST], t_start, t_end;
+  static int ntest=MAXTEST;
+  real dtime0, dtime[MAXTEST], t_start, t_end;
   int i, j, maxtst;
 
-  int vlen[NTEST]  = {0, 3, 10, 30, 100, 300, 1000, 3000, 30000, 300000};
-  int count[NTEST] = {10000000, 3000000, 1000000, 300000, 100000,
+  int vlen[MAXTEST]  = {0, 3, 10, 30, 100, 300, 1000, 3000, 30000, 300000};
+  int count[MAXTEST] = {10000000, 3000000, 1000000, 300000, 100000,
 		      30000, 10000, 3000, 300, 30};
 
   printf("\n%s\n", name);
 
-  for (i = 0; i < NTEST; i++)
+  if (ntest==0) {
+    warning("new code");
+    ntest = nemoinpi(getparam("vlen"),vlen,MAXTEST);
+    if (ntest<=0) error("parsing");
+    
+  }
+
+  for (i = 0; i < ntest; i++)
     if (vlen[i] <= ntmax) maxtst = i;
 
   /* Function call timing. */
@@ -159,6 +167,13 @@ void time_action(action a, int factor, char *name, int ntmax)
   fflush(stdout);
 
 }
+
+int do_test(a,b) {
+  if (a==0 || b==0) return 1;
+  if (a==b) return 1;
+  return 0;
+}
+
 /*------------------------------------------------------------------------*/
 
 /* Routines to time now moved to separate file "routines.c"... */
@@ -174,56 +189,56 @@ nemo_main()
 
     initialize();
 
-    time_action(itor, 1, "vr = vi", n);
-    time_action(rtoi, 1, "vi = vr", n);
-    time_action(iadd, 1, "vi1 = vi2 + vi3", n);
+    if (do_test(test,1)) time_action(itor, 1, "vr = vi", n);
+    if (do_test(test,2)) time_action(rtoi, 1, "vi = vr", n);
+    if (do_test(test,3)) time_action(iadd, 1, "vi1 = vi2 + vi3", n);
 
-    time_action(vmove, 1, "v1 = v2", n);
+    if (do_test(test,4)) time_action(vmove, 1, "v1 = v2", n);
 
-    s1 = 1.0, time_action(ssum1, 1, "s += v", n);
-    s1 = 1.0, time_action(ssum2, 2, "s += v + v", n);
-    s1 = 1.0, time_action(ssum3, 2, "s += v * v", n);
+    s1 = 1.0; if (do_test(test,4)) time_action(ssum1, 1, "s += v", n);
+    s1 = 1.0; if (do_test(test,5)) time_action(ssum2, 2, "s += v + v", n);
+    s1 = 1.0; if (do_test(test,6)) time_action(ssum3, 2, "s += v * v", n);
 
     s1 = 1.00000123;
     reset_v1(n);
-    time_action(vsadd1, 1, "v += s", n);
+    if (do_test(test,7)) time_action(vsadd1, 1, "v += s", n);
     reset_v1(n);
-    time_action(vsmul1, 1, "v *= s", n);
+    if (do_test(test,8)) time_action(vsmul1, 1, "v *= s", n);
 
     reset_v1(n);
-    time_action(vsmul1a, 1, "v *= s (partly unrolled)", n);
-    time_action(vsadd2, 1, "v1 = v2 + s", n);
-    time_action(vsmul2, 1, "v1 = v2 * s", n);
-    time_action(vsdiv2, 1, "v1 = v2 / s", n);
+    if (do_test(test,9)) time_action(vsmul1a, 1, "v *= s (partly unrolled)", n);
+    if (do_test(test,10)) time_action(vsadd2, 1, "v1 = v2 + s", n);
+    if (do_test(test,11)) time_action(vsmul2, 1, "v1 = v2 * s", n);
+    if (do_test(test,12)) time_action(vsdiv2, 1, "v1 = v2 / s", n);
 
     reset_v1(n);
-    time_action(vsum1, 1, "v1 += v2", n);
-    time_action(vsum2, 1, "v1 = v2 + v3", n);
+    if (do_test(test,13)) time_action(vsum1, 1, "v1 += v2", n);
+    if (do_test(test,14)) time_action(vsum2, 1, "v1 = v2 + v3", n);
 
     reset_v1(n);
-    time_action(vmul1, 1, "v1 *= v2", n);
-    time_action(vmul2, 1, "v1 = v2 * v3", n);
+    if (do_test(test,15)) time_action(vmul1, 1, "v1 *= v2", n);
+    if (do_test(test,16)) time_action(vmul2, 1, "v1 = v2 * v3", n);
     reset_v1(n);
-    time_action(vdiv1, 1, "v1 /= v2", n);
-    time_action(vdiv2, 1, "v1 = v3 / v2", n);
+    if (do_test(test,17)) time_action(vdiv1, 1, "v1 /= v2", n);
+    if (do_test(test,18)) time_action(vdiv2, 1, "v1 = v3 / v2", n);
 
 /*     {int i; for (i = 0; i < n; i+=1000) printf("%d %f\n", i, v1[i]);} */
 
-    time_action(saxpy1, 2, "v1 = s*v2 + s", n);
-    time_action(saxpy2, 2, "v1 = s*v2 + v3", n);
-    time_action(saxpy3, 2, "v1 = v2*v3 + v4", n);
-    time_action(vforce, 18, "v1 = pseudo_force(v2, v3, v4)", n);
+    if (do_test(test,19)) time_action(saxpy1, 2, "v1 = s*v2 + s", n);
+    if (do_test(test,20)) time_action(saxpy2, 2, "v1 = s*v2 + v3", n);
+    if (do_test(test,21)) time_action(saxpy3, 2, "v1 = v2*v3 + v4", n);
+    if (do_test(test,22)) time_action(vforce, 18, "v1 = pseudo_force(v2, v3, v4)", n);
 
-    time_action(vsqrt, 1, "v1 = sqrt(v2)", n);
-    time_action(vabs, 1, "v1 = abs(v2)", n);
-    time_action(vsin, 1, "v1 = sin(v2)", n);
-    time_action(vexp, 1, "v1 = exp(v2)", n);
-    time_action(vpow, 1, "v1 = pow(v2, s)", n);
+    if (do_test(test,23)) time_action(vsqrt, 1, "v1 = sqrt(v2)", n);
+    if (do_test(test,24)) time_action(vabs, 1, "v1 = abs(v2)", n);
+    if (do_test(test,25)) time_action(vsin, 1, "v1 = sin(v2)", n);
+    if (do_test(test,26)) time_action(vexp, 1, "v1 = exp(v2)", n);
+    if (do_test(test,27)) time_action(vpow, 1, "v1 = pow(v2, s)", n);
 
-    time_action(scatter1, 1, "v1[iv] = v2", n);
-    time_action(scatter2, 1, "v1[iv] = v2", n);
-    time_action(gather1, 1, "v1 = v2[iv]", n);
-    time_action(gather2, 1, "v1 = v2[iv]", n);
+    if (do_test(test,28)) time_action(scatter1, 1, "v1[iv] = v2", n);
+    if (do_test(test,29)) time_action(scatter2, 1, "v1[iv] = v2", n);
+    if (do_test(test,30)) time_action(gather1, 1, "v1 = v2[iv]", n);
+    if (do_test(test,31)) time_action(gather2, 1, "v1 = v2[iv]", n);
 
-    time_action(vif, 1, "if (v2 > 0) v1 = v2", n);
+    if (do_test(test,32)) time_action(vif, 1, "if (v2 > 0) v1 = v2", n);
 }
