@@ -1,0 +1,9 @@
+NAME
+     ile - An input line editor for UNIX (Input Line Editor)
+
+SYNTAX
+     ile [-file/name] [prog arg1 arg2 ... argn]
+
+DESCRIPTION
+     The ile program is an input line editor that provides an
+     easier to use history mechanism than the shell.

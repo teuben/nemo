@@ -1,0 +1,533 @@
+.de EX		\"Begin example
+.ne 5
+.if n .sp 1
+.if t .sp .5
+.nf
+.in +.5i
+..
+.de EE
+.fi
+.in -.5i
+.if n .sp 1
+.if t .sp .5
+..
+.TH ILE 1 "5 May 1988" 
+.SH NAME
+.PP
+ile - An input line editor for UNIX (Input Line Editor)
+.PP
+.SH SYNTAX
+.PP
+\fBile\fP [-file/name\fP] \fP[prog arg1 arg2 ... argn\fP]
+.PP
+.SH DESCRIPTION
+.PP
+
+The \fIile\fP program is an input line editor that provides an easier
+to use history mechanism than the shell.
+
+.PP
+
+The \fIile\fP program can be run as a simple shell around any program.
+It gives any program an input line editing and a history mechanism. It
+can also be run around your favorite shell. When run around the shell
+\fIile\fP records the input to programs as well as input to the shell
+in its history buffer.
+
+\fIile\fP takes two optional command line arguments. The first
+argument is the name of an initialization file containing user defined
+key and delimiter bindings. The second argument is the name of a
+program to execute and the command line arguments for that program.
+
+.PP
+
+If no initialization file is given on the command line \fIile\fP first
+looks in \fI./.ilerc\fP and then in \fI$HOME/.ilerc\fP. If no
+initialization file is found \fIile\fP provides default values for
+delimiter and key bindings.
+
+.PP
+
+If no program name is given on the command line \fIile\fP executes
+\fIcsh\fp.
+
+.PP
+.SH DEFAULT BINDINGS
+.PP
+
+Not everyone wants to have to figure out yet another initialization
+file format so \fIile\fP provides a complete set of default bindings
+for all its operations.
+
+.PP
+.SH Delimiters
+.PP
+
+Delimiters are used in \fIile\fP to mark the beginnings and ends of
+words for the \fBforward_word\fP, \fBbackward_word\fP, and
+\fBdelete_word\fP actions. The default delimiters are ' ' (blank), '/'
+(slash), '.' (period), and '-' (dash). These were chosen because the
+author decided they were "natural" stopping characters in a UNIX
+environment.
+
+.PP
+.SH Keys
+.PP
+
+The following table shows the default bindings of keys and key
+sequences provided by \fIile\fP. These are based on the emacs key
+bindings for similar operations.
+
+.EX 0
+
+^A      - start_of_line
+^B      - backward_char
+^E      - end_of_line
+^F      - forward_char
+^K      - erase_to_end_of_line
+^L      - retype_line
+^N      - forward_history
+^P      - backward_history
+^R      - search_backward_history
+^V      - quote
+^T      - transpose_chars
+del     - delete_char
+^M      - add_to_history
+^J      - add_to_history
+^U      - erase_line
+^X      - delete_char_under
+
+^C      - pass
+^D      - pass
+^Q      - pass
+^S      - pass
+^Z      - pass
+
+esc b   - backward_word
+esc f   - forward_word
+esc del - delete_word
+esc esc - complete_file
+esc s   - complete_file_full
+esc p   - query_path
+esc d   - show_files
+esc u   - upper_word
+esc l   - lower_word
+esc c   - capitalize_word
+
+esc [ A - backward_history (up arrow)
+esc [ B - forward_history  (down arrow)
+esc [ C - forward_char     (right arrow)
+esc [ D - backward_char    (left arrow)
+.EE
+
+.SH INITIALIZATION FILE
+.PP
+
+The \fIile\fP initialization file has two parts. The first part is
+also the first line of the file. This line contains the delimiter
+characters that will be used by the \fBforward_word\fP,
+\fBbackward_word\fP, and \fBdelete_word\fP actions.  Each character on
+the line becomes a delimiter character.
+
+The second part of the file is a list of table numbers, characters,
+and actions or strings. \fIile\fP has 4 action tables. Each action
+table contains an action or string for each possible character.
+\fIile\fP decides what to do with a character by looking it up in the
+table and executing the action associated with the character or by
+passing the string one character at a time into \fIile\fP as if it had
+been typed by the user. Normally only table 0 is used. But, the
+\fBescape\fP actions cause the next character to be looked up in a
+different table. The \fBescape\fP actions make it possible to map
+multiple character sequences to actions.
+
+By default, all entries in table 0 are bound to the \fBinsert\fP
+action, and all entries in the other tables are bound to the
+\fBbell\fP action. User specified bindings override these defaults.
+The following example is an initialization file that sets up the same
+key and delimiter bindings as the \fIile\fP default bindings.
+
+.PP
+.SH Example \fI.ilerc\fP file
+.EX 0
+ /.-
+
+0^A=start_of_line
+0^B=backward_char
+0^E=end_of_line
+0^F=forward_char
+0^K=erase_to_end_of_line
+0^L=retype_line
+0^N=forward_history
+0^P=backward_history
+0^R=search_backward_history
+0^V=quote
+0^T=transpose_chars
+0\\177=delete_char
+0^[=escape_1
+0^M=add_to_history
+0^J=add_to_history
+0^U=erase_line
+0^X=delete_char_under
+
+0^C=pass
+0^D=pass
+0^Q=pass
+0^S=pass
+0^Z=pass
+
+1b=backward_word
+1f=forward_word
+1\\177=delete_word
+1[=escape_2
+1^[=complete_file
+1s=complete_file_full
+1p=query_path
+1d=show_files
+1u=upper_word
+1l=lower_word
+1c=capitalize_word
+
+2A=backward_history
+2B=forward_history
+2C=forward_char
+2D=backward_char
+.EE
+
+.PP
+
+The first character on each key binding line is the index of the table
+to place the key binding in. Valid values for the index are 0, 1, 2,
+and 3.
+
+.PP
+
+The second character on the line is either the character to bind or an
+indicator that tells how to find out what character to bind. If the
+second character is any character besides '^' or '\\' then the action
+is bound to that character.
+
+.PP
+
+If the second character on the line is '^' then the next character is
+taken as the name of a control character. So ^H is backspace and ^[ is
+escape.
+
+.PP
+
+If the second character on the line is a '\\' and the next character
+is a digit between 0 and 7 the the following characters are
+interpreted as an octal number that indicates which character to bind
+the action to. If the character immediately after the '\\' is not an
+octal digit then the action is bound to that character. For example,
+to get the '^' character you would use '\\^'.
+
+.PP
+
+The next character on the line is always '='. Following the equal sign
+is the name of an action or a string. The actions are defined in the
+following table.
+
+.PP
+.SH Actions
+
+.IP "\fBbell\fP" 20
+
+Send a bell (^G) character to the terminal.  Hopefully the bell will
+ring.  This action is a nice way to tell the user that an invalid
+sequence of keys has been typed.
+
+.IP "\fBpass\fP" 20 
+
+Pass the character to the program running under \fIile\fP. Do not echo
+the character, do not insert it into the edit buffer. Just pass it
+along.  This is useful for characters like ^C, ^Z, ^Q, and ^S that
+have special meaning and shouldn't be held up in the edit buffer
+waiting to be sent.
+
+.IP "\fBinsert\fP" 20 
+
+Insert the character into the edit buffer. If there are already 256
+characters in the buffer \fIile\fP will beep and refuse to put the
+character in the buffer.
+
+.IP "\fBtranspose_chars\fP" 20
+
+Swap the character under the cursor with the character to the left of
+the cursor and move the cursor one character to the right. This is
+handy for correcting letter transposition errors.  
+
+.IP "\fBdelete_char\fP" 20
+
+ Delete the character directly to the left of the cursor from the edit
+buffer.
+
+.IP "\fBdelete_char_under\fP" 20
+ 
+Delete the character under the cursor from the edit buffer.
+
+.IP "\fBquote\fP" 20
+ 
+The next character to come into \fIile\fP will be inserted into the edit
+buffer. This allows you to put characters into the edit buffer
+that are bound to an action other than insert.
+
+.IP "\fBescape_1\fP" 20
+ 
+Look up the next character in action table 1 instead of action table 0.
+
+.IP "\fBescape_2\fP" 20
+ 
+Look up the next character in action table 2 instead of action table 0.
+
+.IP "\fBescape_3\fP" 20
+ 
+Look up the next character in action table 3 instead of action table 0.
+
+.IP "\fBdelete_word\fP" 20
+ 
+Delete the word directly to the left of the cursor. A word is a sequence
+of characters surrounded by delimiter characters.
+
+.IP "\fBforward_word\fP" 20
+ 
+Move the cursor to the right past the next word. A word is a sequence of
+characters surrounded by delimiter characters.
+
+.IP "\fBbackward_word\fP" 20
+ 
+Move the cursor to the left past the next word. A word is a sequence of
+characters surrounded by delimiter characters.
+
+.IP "\fBupper_word\fP" 20
+
+Starting with the character under the cursor, convert the word to the 
+right of the cursor to upper case.
+
+.IP "\fBlower_word\fP" 20
+
+Starting with the character under the cursor, convert the word to the
+right of the cursor to lower case.
+
+.IP "\fBcapitalize_word\fP" 20
+
+Convert the character under the cursor to upper case. Convert the word to
+the right of the cursor to lower case.
+
+.IP "\fBstart_of_line\fP" 20
+ 
+Move the cursor to the left most character in the edit buffer.
+
+.IP "\fBbackward_char\fP" 20
+ 
+Move the cursor to the left one character.
+
+.IP "\fBend_of_line\fP" 20
+ 
+Move the cursor past the last character in the edit buffer.
+
+.IP "\fBforward_char\fP" 20
+ 
+Move the cursor to the right one character.
+
+.IP "\fBadd_to_history\fP" 20
+ 
+Add the contents of the edit buffer to the history buffer and pass the line
+along to the program running under \fIile\fP.
+
+.IP "\fBerase_line\fP" 20
+ 
+Clear the line. Erase all characters on the line.
+
+.IP "\fBerase_to_end_of_line\fP" 20
+ 
+Delete the character under the cursor and all character to the left
+of the cursor from the edit buffer.
+
+.IP "\fBretype_line\fP" 20
+ 
+Retype the contents of the current edit buffer. This is handy when system
+messages or other asynchronous output has garbled the input line.
+
+.IP "\fBforward_history\fP" 20
+ 
+Display the next entry in the history buffer. If you are already at the
+most recent entry display a blank line. If you try to go forward past
+the blank line this command will beep at you.
+
+.IP "\fBbackward_history\fP" 20
+ 
+Display the previous entry in the history buffer. If there are no older
+entries in the buffer, beep.
+
+.IP "\fBsearch_backward_history\fP" 20 
+
+Search for a line in the history buffer that starts with the
+characters to the left of the cursor.  If a match is found the matched
+line is displayed. If no match is found this command will beep at you.
+
+.IP "\fBcomplete_file\fP" 20
+
+Take the word currently under, or immediately to the left of the
+cursor and treat it as a partial file name and path name. If there is
+only one file in the directory that starts with the partial file name
+then fill in the rest of the file name in the input line. If more than
+one file starts with the partial file name fill in the longest common
+starting string of those file names.  If the path is specified as "~/"
+then look in the directory named by $HOME.
+
+If the path is specified as "~name", where name is a user login name or
+a partial user login name, then look in the users login directory. If
+more than one match is found for a partial user name then \fIile\fP
+will beep. When completing a file name, a partial user name will be
+completed at the same time the file name is being completed.
+
+If you use abbreviated path names like "./file", "../file",
+"dir/file", or "file" \fIile\fP uses the path name saved by the most
+recent \fBquery_path\fP command or the value of $PWD at the time
+\fIile\fp was started.
+
+.IP "\fBcomplete_file_full\fP" 20
+
+Like \fBcomplete_file\fP but abbreviations like "~/" are replaced by
+the full path that they stand for. This is handy when you want to use
+abbreviated path names but the program you are talking to doesn't
+understand the abbreviations.
+
+Read the discussion of file name completion under \fBcomplete_file\fP
+for more information.
+
+.IP "\fBquery_path\fP" 20
+
+\fIile\fP isn't the shell and doesn't know what the current working
+directory is. But, \fIile\fP tries to do file name completion as if it
+did. To do this task \fIile\fP keeps around the path to the current
+working directory. When \fIile\fP is started up this path is
+initialized from $PWD. The \fBquery_path\fP command is provided to
+allow users to update this path at any time.
+
+When \fBquery_path\fP is invoked \fIile\fP makes the blatant
+assumption that the program running under \fIile\fP is a shell and
+sends the shell command "pwd" to that program. Whatever comes back
+from the program is assumed to the path to the current working
+directory. The next response from the program is assumed to be a new
+prompt from the shell and is ignored.
+
+.IP "\fBshow_files\fP" 20
+ 
+Take the word currently under, or immediately to the left of, the cursor and 
+treat it as a partial file name and path name. List all the files that start
+with the partial file name in the directory specified by the path name.
+
+Read the discussion of file name completion under \fBcomplete_file\fP
+for more information.
+
+.PP
+.SH Strings
+
+In addition to being able to bind a character sequence to an action \fIile\fP
+allows characters sequences to be bound to strings of characters. When a string
+is invoked the characters in the string are treated as if they were typed
+by the user. For example, if the line:
+.EX 0
+0^G=ring^Ma^Mbell^M
+.EE
+was in your \fI.ilerc\fP file, typing control G would cause three
+lines to be typed as if the user typed them. Using the default bindings,
+unless there is a ^J or ^M in the string the string will be inserted
+in the current line but not sent along until the the user actually
+presses return.
+
+.PP
+.SH Error Messages
+.PP
+
+When \fIile\fP encounters errors it prints a message and terminates.
+\fIile\fP can print several standard error message. It can also print
+a few messages that are specific to \fIile\fP.
+
+.IP "\fBile: unable to allocate pty/tty pair\fP" 20
+
+There are no free pty devices in the system. You can either try again later,
+and hope someone has freed a pty for you to use, or you can grab your
+system manager and try to get more pty devices configured.
+
+.IP "\fBile: '=' missing on line #\fP" 20
+
+In a character binding line you left out the '=' character. Or, you did 
+something that confused the initialization file reader into thinking there
+should be an '=' where you didn't think there should be one.
+
+.IP "\fBile: error in initialization file on line #\fP" 20
+
+This means that the first character of a character binding line wasn't
+a newline or a '0', '1', '2', or '3'. It could also mean that the 
+initialization file reader is confused.
+
+.IP "\fBile: can't find terminal\fP" 20
+
+\fIile\fP could not find a termcap entry for the terminal named by the TERM
+environment variable. Since it can't find it \fIile\fP can't figure out
+how to use it.
+
+.IP "\fBile: can't run on terminal\fP" 20
+
+The terminal named in your TERM environment variable doesn't support
+the capabilities \fIile\fP needs to run. So \fIile\fP doesn't even try.
+
+.PP
+.SH BUGS
+.PP
+\fIile\fP changes the input mode on the controlling terminal to RAW. This
+confuses xterm. It is a good idea to include the line:
+.EX 0
+stty cooked -nl echo tabs crt decctlq -litout
+.EE
+in your .cshrc file when using xterm. Otherwise your new xterm windows
+come up in an unusable state.
+.PP
+\fIile\fP requires a terminal that supports the termcap le, ce, bl, 
+nl, and cr capabilities. If your terminal doesn't provide these,
+\fIile\fP will refuse to run on your terminal.
+.PP
+A misspelled action name in an \fIilerc\fP will be treated as a string.
+This means that typing the sequence of characters that should
+invoke the action will actually cause the misspelled name to be inserted
+in the input line. 
+.PP
+.SH FILES
+.PP
+ $HOME/.ilerc
+ ./.ilerc
+.PP 
+.SH SEE ALSO
+.PP
+stty(1), xterm(1), csh(1), termcap(5)
+
+.SH COPYRIGHT
+.ce 4
+COPYRIGHT 1988
+Evans & Sutherland Computer Corporation
+Salt Lake City, Utah
+All Rights Reserved.
+.LP
+THE INFORMATION IN THIS SOFTWARE IS SUBJECT TO CHANGE WITHOUT NOTICE AND
+SHOULD NOT BE CONSTRUED AS A COMMITMENT BY EVANS & SUTHERLAND.
+EVANS & SUTHERLAND  MAKES NO REPRESENTATIONS ABOUT THE SUITABILITY
+OF THIS SOFTWARE FOR
+ANY PURPOSE.  IT IS SUPPLIED "AS IS" WITHOUT EXPRESS OR IMPLIED WARRANTY.
+.LP
+IF THE SOFTWARE IS MODIFIED IN A MANNER CREATING DERIVATIVE COPYRIGHT RIGHTS,
+APPROPRIATE LEGENDS MAY BE PLACED ON THE DERIVATIVE WORK IN ADDITION TO THAT
+SET FORTH ABOVE.
+.LP
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted, provided
+that the above copyright notice appear in all copies and that both the
+copyright notice and this permission notice appear in supporting documentation,
+and that the name of Evans & Sutherland not be used in advertising
+or publicity pertaining to distribution of the software without specific, 
+written prior permission.
+.SH AUTHOR
+Robert C. Pendleton <bobp@hal.com>
+.LP
+
