@@ -1,0 +1,20 @@
+%N tabfits
+%D convert tables into CCD/ images (soon to be FITS)
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man tabfits' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input sig (table) file [???]
+%A out
+	Output image file [???]
+%A dcol
+	Column for data [1]
+%A nx
+	X-Size of data, or else specify NAXIS1 in header []
+%A ny
+	Y-Size of data, or else specify NAXIS2 in header []
+%A nmax
+	Allocation space for piped I/O [100000]
+%A VERSION
+	17-dec-98 PJT [2.0]
