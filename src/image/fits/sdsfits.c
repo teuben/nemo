@@ -6,6 +6,7 @@
  *	13-apr-96	V1.2  optionally dump out axis descriptor pjt 
  *      10-nov-02       V1.3  add HISTORY
  *      14-jan-03       V1.4  add flip= for Eve Ostriker          pjt
+ *       2-dec-03       V1.5  add dummy=                          pjt
  */
 
 #include <stdinc.h>
@@ -21,7 +22,8 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "select=1\n			Select which SDS (1=first)",
     "axis=0\n                   Select this axis for 1D fits output",
     "reorder=f\n                Reorder the axes (true means expensive)",
-    "VERSION=1.4\n		14-jan-03 PJT",
+    "dummy=t\n                  Write dummy axes also ?",
+    "VERSION=1.5\n		2-dec-03 PJT",
     NULL,
 };
 
@@ -41,6 +43,7 @@ void nemo_main()
   int nx, ny, nz, num_type, select, axis, axlen, count = 0;
   FITS *ff;
   bool Qreorder = getbparam("reorder");
+  bool Qdummy = getbparam("dummy");
 
   select = getiparam("select");
   axis = getiparam("axis");
@@ -104,7 +107,9 @@ void nemo_main()
         if (ret) error("%d: Error reading data from SDS %s",ret,infile);
 
         /*
-         *  revert axes for output FITS file
+         *  revert axes for output FITS file (HDF is native C, so by default
+	 *  it reverts the axis; our keyword reorder=t restores the C order)
+	 *
          */
 
     	outfile = getparam("out");
@@ -121,7 +126,7 @@ void nemo_main()
             nx = dimsizes[0];
 	  } else
             error("(%d) Cannot deal with rank != 2 or 3",rank);
-	} else {                        /* this is actually te default */
+	} else {                        /* this is actually the default */
 	  invert_array(rank,dimsizes);
 	  if (rank==2) {
      	    nz = 1;
@@ -131,6 +136,15 @@ void nemo_main()
 	    nz = dimsizes[2];
             ny = dimsizes[1];
             nx = dimsizes[0];
+	    if (Qdummy && nx==1) {
+	      warning("trying to dummyfy NAXIS1");
+	      rank=2;
+	      nz = 1;
+	      ny = dimsizes[2];
+	      nx = dimsizes[1];
+	      dimsizes[0] = nx;
+	      dimsizes[1] = ny;
+	    }
 	  } else
             error("(%d) Cannot deal with rank != 2 or 3",rank);
 	}
