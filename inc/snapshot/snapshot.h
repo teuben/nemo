@@ -1,6 +1,7 @@
 /*
  * SNAPSHOT.H: definitions for N-body snapshot files.
  *	sep-1990	added Story, Pos and Vel options
+ *      may-2001        added Yanc stuff for Dehnen
  */
 
 #ifndef _snapshot_h
@@ -34,6 +35,12 @@
 #define     PETensorTag		"PETensor"
 #define     AMTensorTag		"AMTensor"
 #define     CMPhaseSpaceTag	"CMPhaseSpace"
+
+#define   YancParametersTag     "YancParameters"
+#define   YancEpsTag            "YancEps"
+#define   YancThetaTag          "YancTheta"
+#define   YancHminTag           "YancHminTag"
+#define   YancKernelTag         "YancKernelTag"
 
 /*
  * Symbolic names for input/output bit flags.
