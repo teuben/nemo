@@ -14,6 +14,8 @@
 |* V1.1   : minor fixes
 |* V2.0   : imported in teuben's nemo CVS tree
 |* V2.1   : PosTag VelTag and KeyTag added
+|* V2.1a  : note that within() uses real, not double
+
 \* -------------------------------------------------------------- */
 
 /* -------------------------------------------------------------- *\
@@ -161,8 +163,8 @@ nemo_main()
     * Qsel[1];           
     
   int * select_i[1];     
-  bool within();
   /*bool within(double, string, double);*/
+  /*IECK: within(real,string,real) !!! */
 
   /* get input parameters */
   infile=getparam("in");
