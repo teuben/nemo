@@ -1,0 +1,72 @@
+.TH MOMENT 3NEMO "13 June 1995"
+.SH NAME
+ini_moment, accum_moment, decr_moment, 
+reset_moment, show_moment, n_moment, sum_moment,
+mean_moment, sigma_moment, skewness_moment, kurtosis_moment,
+min_moment, max_moment \- various moment and minmax routines
+.SH SYNOPSIS
+.nf
+.B
+#include <moment.h>
+.PP
+.B void ini_moment(m, mom)
+.B void accum_moment(m, x, w)
+.B void decr_moment(m, x, w)
+.B void reset_moment(m)
+.PP
+.B real show_moment(m)
+.B int n_moment(m)
+.B real sum_moment(m)
+.B real mean_moment(m)
+.B real sigma_moment(m)
+.B real skewness_moment(m)
+.B real kurtosis_moment(m)
+.PP
+.B real min_moment(m);
+.B real max_moment(m);
+.PP
+.B Moment *m;
+.B int mom;
+.B real x, w;
+.fi
+.SH DESCRIPTION
+\fImoment\fP is a set of routines to compute the moments of 
+a set of real values, and also keep track of the actual datamin
+and datamax. The routines are written in C but in 
+an object-oriented fashion as to isolate the user from the internal
+data-structure. The \fBMoment\fP can (and should) be treated as an
+opaque datastructure. All information should be obtained through interface
+routines.
+.SH MOMENT STRUCTURE
+A simple data structure (referred to as \fImoment\fP in the above
+SYNOPSIS) is used to communicate between different routines:
+.nf
+.ta +0.3i +1.5i
+
+typedef struct { 
+	int mom;
+	int n;
+	real *sum;
+	real datamin, datamax;
+} Moment;
+
+.fi
+from the standard include file \fImoment.h\fP.
+.SH BUGS
+Does not do a whole lot of sanity checks yet.
+.SH SEE ALSO
+grid(3NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +1.5i
+~/src/kernel/misc	moment.c
+.fi
+.SH UPDATE HISTORY
+.nf
+.ta +1i +4i
+30-oct-93	Created   	PJT
+8-nov-93	fixed init bug 	PJT
+13-jun-95	added decr_moment	PJT
+.fi
