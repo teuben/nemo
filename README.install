@@ -58,6 +58,9 @@ c) Installing CFITSIO  (pending work on configure.in)
    types of fits I/O. Optionally the CFITSIO library can be used, e.g.
    fitsio_nemo.c implements the fitsio.c file by providing a wrapping layer
    that actually calls the CFITSIO library.
+
+   wget ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio2420.tar.gz
+   (see http://heasarc.gsfc.nasa.gov/docs/software/fitsio/fitsio.html)
  
    One way is to embed it into NEMO, so when you configure cfitsio
 

@@ -340,8 +340,10 @@ for the respective routines to figure out the correct number of parameters. For 
 the \fIpoly\fP rotation curve can only determine the correct order  of the polynomial
 by counting the number of arguments given in that option, e.g.
 \fBrotcur1=poly,100,10,2,2,1,1,1,1\fP  would use a 3th order polynomial.
+.PP
+rotcurshape does surprisingly bad on \fBexact\fP data.  Adding a little noise will speed up convergence.
 .SH SEE ALSO
-rotcur(1NEMO), ccdvel(1NEMO), tabcomment(1NEMO), rotcurves(1NEMO), pvtrace(1NEMO), ccdmom(1NEMO), tabnllsqfit(1NEMO),loadobj(3NEMO)
+rotcur(1NEMO), ccdvel(1NEMO), tabcomment(1NEMO), rotcurves(1NEMO), pvtrace(1NEMO), ccdmom(1NEMO), tabnllsqfit(1NEMO), loadobj(3NEMO), gal(AIPS)
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
@@ -349,6 +351,5 @@ Peter Teuben
 .ta +1i +4i
 20-jul-02	0.9 cloned off rotcur		PJT
 10-sep-02	1.0 implemented an image version for resid=	PJT
-18-sep-02	1.0c added exp (vMoorsel&Wells 1985)	PJT
-19-sep-02	1.0d added nfw	PJT
+19-sep-02	1.0d added exp (vMoorsel&Wells 1985), and nfw	PJT
 .fi

@@ -1,6 +1,6 @@
 Alaf, detailed installation instructions are in the file README.install
 
-Basically, the sequence is that if most autoconf based software:
+Basically, the sequence is that of most autoconf based software:
 
 	./configure
 	make install
