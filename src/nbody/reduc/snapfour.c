@@ -29,7 +29,7 @@ string defv[] = {
     "weight=1\n            Weight applied to observable",
     "amode=t\n             Display sin/cos amps or amp/phase if possible?",
     "times=all\n           Snapshots to select",
-    "VERSION=1.2a\n        7-may-02 PJT",
+    "VERSION=1.2b\n        15-jul-04 PJT",
     NULL,
 };
 
@@ -51,7 +51,7 @@ nemo_main()
     rproc btrtrans(), xproc, yproc, fproc, wproc;
 
     times = getparam("times");
-    nrad = nemoinpd(getparam("radii"),rad2,MAXRAD);     /* get radii */
+    nrad = nemoinpr(getparam("radii"),rad2,MAXRAD);     /* get radii */
     for (i=0; i<nrad; i++)
         rad2[i] = sqr(rad2[i]);             /* but actually save the square */
 
