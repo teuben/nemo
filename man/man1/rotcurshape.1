@@ -1,4 +1,4 @@
-.TH ROTCURSHAPE 1NEMO "19 September 2002"
+.TH ROTCURSHAPE 1NEMO "13 December 2002"
 .SH NAME
 rotcurshape \- fit parameters to a velocity field using shaped rotation curves in a co-planar disk
 .SH SYNOPSIS
@@ -119,7 +119,7 @@ the least squares solution as a function of galactic angle away
 from the major axis. Valid options are: \fBuniform\fP, \fBcosine\fP,
 and \fBcos-squared\fP.  If a density is given (see \fBdens=\fP),
 the weight function is multiplied by this geometric weight factor.
-[Default: \fBcosine\fP].
+[Default:q \fBuniform\fP].
 .TP
 \fBfixed\fP=
 List of disk geometry parameters to be kept fixed during the fit.
@@ -279,9 +279,9 @@ core2	v0,a		v=v0*x/(1+x^2)^(1/2)			-
 core	v0,a,c		v=v0*x/(1+x^c)^(1/c)			-
 poly	v0,a,p2,p3,..	v=v0*(x+p2*x^2+p3*x^3+.....pN*x^N)	a needs to be fixed !
 iso	v0,a		v=v0*sqrt(1-atan(x)/x)			-
-exp     v0,a         	v=v0*(1-exp(-x))                 	-
+exp	v0,a         	v=v0*(1-exp(-x))                 	-
 nfw	v0,a,c		v=v0*sqrt((ln(1+cx)-cx/(1+cx))/x/(ln(1+c)-c/(1+c)))	needs a fixed 'c' 	
-core	v0,a,p      	v=v0*x^p                         	-
+power	v0,a,p      	v=v0*x^p                         	a needs to be fixed (scale free)!
 .fi
 .SH EXAMPLE
 Here is an example of creating a synthetic velocity field with
@@ -307,7 +307,7 @@ NPT:  5658
 .fi
 .PP
 Here is an example to write your own C code with a rotation curve, and load it
-in during runtime:
+in during runtime: (some example files are in $NEMO/src/image/rotcur/shape):
 .nf
     % cat mylinear.c
 
@@ -334,15 +334,17 @@ but still. It is an alternative to \fIccdvel(1NEMO)\fP
 .fi
 .ta +1i
 func_rotcur.c	helper routine for tabnllsqfit to use rotcur functions
+$NEMO/src/image/rotcur/shape/	directory with other example shape functions
 .nf
 .SH CAVEAT
 Parameters and fix/free masks to rotation curve parameters should be all set, in order
 for the respective routines to figure out the correct number of parameters. For example,
-the \fIpoly\fP rotation curve can only determine the correct order  of the polynomial
+the \fIpoly\fP rotation curve can only determine the correct order of the polynomial
 by counting the number of arguments given in that option, e.g.
 \fBrotcur1=poly,100,10,2,2,1,1,1,1\fP  would use a 3th order polynomial.
 .PP
-rotcurshape does surprisingly bad on \fBexact\fP data.  Adding a little noise will speed up convergence.
+rotcurshape does surprisingly bad on \fBexact\fP data, and often complains about taking
+the sqrt of a negative number.  Adding a little noise will speed up convergence.
 .SH SEE ALSO
 rotcur(1NEMO), ccdvel(1NEMO), tabcomment(1NEMO), rotcurves(1NEMO), pvtrace(1NEMO), ccdmom(1NEMO), tabnllsqfit(1NEMO), loadobj(3NEMO), gal(AIPS)
 .SH AUTHOR
@@ -353,5 +355,5 @@ Peter Teuben
 20-jul-02	0.9 cloned off rotcur		PJT
 10-sep-02	1.0 implemented an image version for resid=	PJT
 19-sep-02	1.0d added exp (vMoorsel&Wells 1985), and nfw	PJT
-12-dec-02 	1.0f added power	PJT
+13-dec-02 	1.0h added (corrected) power law rotcur	PJT
 .fi
