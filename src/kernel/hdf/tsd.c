@@ -8,6 +8,11 @@
  *	19-may-95	local symbols - 'fmt' clashed with something on linux
  *      21-may-95       V1.2: added out= format=, coordinate output
  *      27-aug-96       V1.3: header output now using dprintf()
+ *       6-dec-04       V1.4: warn and disable SDS maps that differ in size
+ *                            allow user to select different SDS
+ *
+ *  TODO: fix rank=3 with coordinates and select=
+ *     
  */
 
  
@@ -27,7 +32,8 @@ string defv[] = {
     "out=\n                     ascii dump of the data to this file?",
     "format=%g\n                Format used in dump",
     "coord=f\n                  Add coordinates?",
-    "VERSION=1.3\n		27-aug-96 PJT",
+    "select=all\n               Select which SDS for display?",
+    "VERSION=1.4\n		6-dec-04 PJT",
     NULL,
 };
 
@@ -35,7 +41,11 @@ string defv[] = {
 
 string usage="Scan and optionally ascii dump of an HDF SDS";
 
+string cvsid="$Id$";
+ 
+
 #define MAXRANK 10
+#define MAXSDS 100
 
 local int rank, shape[MAXRANK], run[MAXRANK];
 local char label[256], unit[256], fmt[256], coordsys[256];
@@ -50,9 +60,11 @@ void nemo_main()
 scan_sd(string infile)		/* this is the fancy new version */
 {
     float **dump, **coord;
-    int i, j, k, ret, size, type, nsds;
+    int i, j, k, ret, old_size, size, type, nsds;
     char ntype[32];
-    string format;
+    bool *visib;
+    int nselect, select[MAXSDS];
+    string format, sselect;
     stream outstr;
 
     nsds = DFSDndatasets(infile);
@@ -60,14 +72,36 @@ scan_sd(string infile)		/* this is the fancy new version */
         error("%s is probably not an HDF scientific dataset",infile);
     dprintf(0,"Found %d scientific data set%s in %s\n",
             nsds,(nsds > 1 ? "s" : ""),infile);
+    visib = (bool *) allocate(sizeof(bool)*nsds);
     if (hasvalue("out")) {
         dump = (float **) allocate(nsds*sizeof(float *));   /* all data !! */
         format = getparam("format");
         outstr = stropen(getparam("out"),"w");
     } else
         outstr = NULL;
-    
+
+    for (k=0; k<nsds; k++)
+        visib[k] = TRUE;
+
+    sselect = getparam("select");
+    if (!streq(sselect,"all")) {
+      warning("The select= keyword is new and probably doesn't work yet");
+      nselect = nemoinpi(sselect,select,MAXSDS);
+      if (nselect < 0) error("%d error parsing %s",nselect,sselect);
+      if (nselect > nsds) error("%s: too many specified, nsds=%d",nselect,nsds);
+      for (k=0; k<nsds; k++)
+        visib[k] = FALSE;
+      for (k=0; k<nselect; k++) {
+	if (select[k] < 1 || select[k] > nsds) error("%d: bad SDS selection, nsds=%d",select[k],nsds);
+	visib[select[k]-1] = TRUE;
+      }
+    }
+    for (k=0; k<nsds; k++) 
+      dprintf(1,"%d: %s\n", k+1, visib[k] ? "OK" : "hidden");
+
+    old_size = -1;
     for (k=0; k<nsds; k++) {
+        if (! visib[k]) continue;
     	ret = DFSDgetdims(infile,&rank, shape, MAXRANK);
     	if (ret < 0) error("Problem getting rank/shape at SDS #%d",k+1);
         if (k==0) {         /* first time around allocate coordinates */
@@ -94,6 +128,7 @@ scan_sd(string infile)		/* this is the fancy new version */
                 ret = DFSDgetdimscale(i+1, shape[i],coord[i]);
                 if (ret<0) error("getting shape[%d]",i+1);
             }
+
     	}
     	hdf_type_info(type,ntype);
     	dprintf(0," %s ",unit);
@@ -102,7 +137,23 @@ scan_sd(string infile)		/* this is the fancy new version */
             dump[k] = (float *) allocate(size * sizeof(float));
             ret = DFSDgetdata(infile,rank,shape,dump[k]);
         }
-    }
+
+	if (old_size < 0)        /* first time around */
+	  old_size = size;
+	else {                   /* make sure subsequent ones have the same size for display */
+	  if (old_size != size) {
+	    warning("bad shape for SDS #%d, removing from selection list",k+1);
+	    visib[k] = FALSE;
+	    size = old_size;
+	  }
+	}
+    } /* k */
+
+#if 0
+    for (k=0; k<nsds; k++)
+      if (!visib[k]) warning("SDS #%d cannot be displayed, it has a different size",k+1);
+#endif
+
     if (outstr) {
         for (i=0; i<rank; i++) run[i] = 0;      /* reset run array */
 
@@ -122,8 +173,10 @@ scan_sd(string infile)		/* this is the fancy new version */
                 }
             }
             for (k=0; k<nsds; k++) {            /* loop over all columns */
+	      if (visib[k]) {
                 fprintf(outstr,format,dump[k][i]);
                 fprintf(outstr," ");
+	      }
             }        
             fprintf(outstr,"\n");
         }
