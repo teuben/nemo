@@ -35,6 +35,7 @@
  *      10-apr-97       c no more 'this is beta' message                   pjt
  *      10-jan-03       d SGN -> SIGN                                      pjt
  *       1-feb-03       e report energy conservation, use new IOM errors   pjt
+ *      12-apr-04       f SIGN -> SNG (since NumRec uses  SIGN)            pjt
  *
  *  TODO:   check why rk2 and rk4 both seem to converge at the same rate
  */
@@ -250,7 +251,7 @@ setparams()
         (*pot)(&ndim, phase, acc, &e_pot, &time); /* only to get e_pot */
         if (omega!=0)  /* NDIM=3 */
             e_pot -= 0.5*omegasq*( sqr(phase[0]) + sqr(phase[1]) );
-        s = SIGN(phase[NDIM+1-dirint]);         /* sign of velocity */
+        s = SGN(phase[NDIM+1-dirint]);         /* sign of velocity */
         vel = 2*(phase[2*NDIM]-e_pot);    /* new velocity squared */
         if (vel<0)                  /* check if vel not negative */
             error("V^2=%g < 0; try different position or energy",vel);     
@@ -361,7 +362,7 @@ prepare()
     } else {	         /* for third orbit a better extrapol. could be done */
         if (Qfix) {
             phase[2*NDIM] += phasestep;     /* tweek the energy */
-            dir0 = SIGN(Velorb(o1,0,1-dirint));
+            dir0 = SGN(Velorb(o1,0,1-dirint));
             time = Torb(o1,0);
             pos[0] = Xorb(o1,0);
             pos[1] = Yorb(o1,0);
@@ -400,7 +401,7 @@ iterate()
   time = 0.0;   /* keep it fixed */
   ndim = Ndim(o1);
 
-  dir0 = SIGN(Velorb(o1,0,1-dirint));    /* initial direction of orbit */
+  dir0 = SGN(Velorb(o1,0,1-dirint));    /* initial direction of orbit */
 
   l1 = (*cycle)(o1);                  /* advance primary orbit (by T/period) */
   dprintf(1," cycle1 @ %d\n",l1);
@@ -547,7 +548,7 @@ int cycle_euler(orbitptr o_out)
         dprintf (1,"EULER integration\n");
         ndim=Ndim(o_out);               /* number of dimensions (2 or 3) */
         i=1;                            /* count the steps it took */
-        s0 = SIGN(Velorb(o_out,0,1-dirint));
+        s0 = SGN(Velorb(o_out,0,1-dirint));
         icross = 0;   /* counter to store SOS coordinates */
         for(;;) {   /* infinite loop until broken inside */
             pos[0] = Xorb(o_out,i-1);
@@ -641,7 +642,7 @@ int cycle_leapfrog(orbitptr o_out)
     ndim=Ndim(o_out);               /* number of dimensions (2 or 3) */
 
     i=1;                            /* counter of timesteps */
-    s0 = SIGN(Velorb(o_out,0,1-dirint)); /* sense of orbit */
+    s0 = SGN(Velorb(o_out,0,1-dirint)); /* sense of orbit */
     icross = 0;                     /* counter to store SOS coords */
 
     (*pot)(&ndim,pos,acc,&epot);
@@ -743,7 +744,7 @@ int cycle_rk2(orbitptr o_out)
         dprintf (1,"RK2 integration\n");
         ndim=Ndim(o_out);               /* number of dimensions (2 or 3) */
         i=1;                            /* count the steps it took */
-        s0 = SIGN(Velorb(o_out,0,1-dirint));
+        s0 = SGN(Velorb(o_out,0,1-dirint));
         icross = 0;   /* counter to store SOS coordinates */
         for(;;) {   /* infinite loop until broken inside */
 
@@ -833,7 +834,7 @@ int cycle_rk4(orbitptr o_out)
         dprintf (1,"RK4 integration\n");
         ndim=Ndim(o_out);               /* number of dimensions (2 or 3) */
         i=1;                            /* count the steps it took */
-        s0 = SIGN(Velorb(o_out,0,1-dirint));
+        s0 = SGN(Velorb(o_out,0,1-dirint));
         icross = 0;   /* counter to store SOS coordinates */
         for(;;) {   /* infinite loop until broken inside */
 
