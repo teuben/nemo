@@ -6,7 +6,7 @@
 CFLAGS = -O
 LDFLAGS = -O
 
-UTILITIES = crc hd changed redir age
+UTILITIES = crc hd changed redir age  accudate
 
 help:
 	@echo "misc NEMO stuff ($(UTILITIES))"
@@ -55,4 +55,8 @@ redir:	redir.c
 
 age:	age.c
 	$(CC) $(CFLAGS) -o age age.c
+
+accudate:	accudate.c
+	$(CC) $(CFLAGS) -o accudate accudate.c
+
 
