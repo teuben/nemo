@@ -10,7 +10,7 @@
 #define _snapshot_h
 
 /*
- * Item tags for SnapShot components.
+ * Item tags for SnapShot components. (see also some ZENO compatibility components below)
  */
 
 #define SnapShotTag		"SnapShot"
@@ -62,7 +62,7 @@
 #define AMVectorTag 	"AMVector"
 #define AuxVecTag 	"AuxVec"
 #define BodyTag 	"Body"
-#define SmoothTag "SmoothLength"
+#define SmoothTag       "SmoothLength"
 
 
 /* Yanc  tags were designed, but never used, right Walter? */
@@ -99,6 +99,11 @@
 
 #define DensBit          (1 << 15)
 #define EpsBit           (1 << 16)
+
+/* Note:  there should be a more clear separation of grav.softening (particularly if
+ *	  variable) and what we probably mean as SPH smoothing length "Eps" in this
+ *  	  context
+ */
 
 /*
  * Coordinate system codes; these assume 32-bit ints.
