@@ -33,6 +33,7 @@
  *       2-aug-02  V2.5  : allow multiple X columns, forces pairwise xcol,ycol plotting
  *                     b : fix old semi-autoscaling bug while fixing it for multicol
  *      31-dec-03  V2.6  : option to do layout first
+ *      28-apr-04  V2.7  : added xbox, ybox= options as in snapplot
  *
  */
 
@@ -77,6 +78,8 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "ylab=\n		 Label along Y-axis",
     "xcoord=\n		 Draw additional vertical coordinate lines along these X values",
     "ycoord=\n		 Draw additional horizontal coordinate lines along these Y values",
+    "xbox=2.0:18.0\n	 extent of frame in x direction",
+    "ybox=2.0:18.0\n     extent of frame in y direction",
     "nxticks=7\n         Number of ticks on X axis",
     "nyticks=7\n         Number of ticks on Y axis",
     "nmax=100000\n       Hardcoded allocation space, if needed for piped data",
@@ -129,6 +132,7 @@ local real xcoord[MAXCOORD], ycoord[MAXCOORD];/* coordinate lines */
 local int nxcoord, nycoord;
 local int nxticks, nyticks;                   /*& number of tickmarks */
 local int ncolors;
+local real xbox[3], ybox[3];
 
 local plcommand *layout;
 local bool layout_first;
@@ -139,6 +143,7 @@ extern real median(int, real *);
 
 local real  xtrans(real),  ytrans(real);    /* WC -> cmXY */
 local real ixtrans(real), iytrans(real);    /* cmXY -> WC */
+local void setrange(real *rval, string rexp);
 
 /****************************** START OF PROGRAM **********************/
 
@@ -243,6 +248,10 @@ void setparams()
 	Qautoy0=Qautoy1=TRUE;
 	dprintf (2,"auto plotscaling\n");
     }
+
+    setrange(xbox, getparam("xbox"));
+    setrange(ybox, getparam("ybox"));
+
 
     Qfull = getbparam("fullscale");
     parse_pairsi("line", yapp_line, nycol);
@@ -439,10 +448,10 @@ void plot_data()
     xplot[1] = xmax;
     yplot[0] = ymin;        /* set scales for ytrans() */
     yplot[1] = ymax;
-    xaxis ( 2.0,  2.0, 16.0, xplot, -nxticks, xtrans, xlab);
-    xaxis ( 2.0, 18.0, 16.0, xplot, -nxticks, xtrans, NULL);
-    yaxis ( 2.0,  2.0, 16.0, yplot, -nyticks, ytrans, ylab);
-    yaxis (18.0,  2.0, 16.0, yplot, -nyticks, ytrans, NULL);
+    xaxis (xbox[0],ybox[0],xbox[2], xplot, -nxticks, xtrans, xlab);
+    xaxis (xbox[0],ybox[1],xbox[2], xplot, -nxticks, xtrans, NULL);
+    yaxis (xbox[0],ybox[0],ybox[2], yplot, -nyticks, ytrans, ylab);
+    yaxis (xbox[1],ybox[0],ybox[2], yplot, -nyticks, ytrans, NULL);
     for (i=0; i<nxcoord; i++) {
         plmove(xtrans(xcoord[i]),ytrans(yplot[0]));
         plline(xtrans(xcoord[i]),ytrans(yplot[1]));
@@ -453,9 +462,9 @@ void plot_data()
     }
 
     pljust(-1);     /* set to left just */
-    pltext(input,2.0,18.2,0.32,0.0);             /* filename */
+    pltext(input,xbox[0],ybox[1]+0.2,0.32,0.0);             /* filename */
     pljust(1);
-    pltext(headline,18.0,18.2,0.24,0.0);         /* headline */
+    pltext(headline,xbox[1],ybox[1]+0.2,0.24,0.0);         /* headline */
     pljust(-1);     /* return to left just */
 
     for (j=0, k=0; j<nycol; j++) {
@@ -658,24 +667,50 @@ real xp[], yp[], xps[], yps[], pstyle, psize;
 
 local real xtrans(real x)
 {
-    return (2.0 + 16.0*(x-xplot[0])/(xplot[1]-xplot[0]));
+  return xbox[0] + xbox[2] * (x - xplot[0]) / (xplot[1]-xplot[0]);
 }
 
 local real ytrans(real y)
 {
-    return (2.0 + 16.0*(y-yplot[0])/(yplot[1]-yplot[0]));
+  return ybox[0] + ybox[2] * (y - yplot[0]) /(yplot[1]-yplot[0]); 
 }
 
 local real ixtrans(real x)
 {
-        return xplot[0] + (x-2.0)*(xplot[1]-xplot[0])/16.0;
+  return xplot[0] + (x-xbox[0])*(xplot[1]-xplot[0])/xbox[2];
 }
  
 local real iytrans(real y)
 {
-        return yplot[0] + (y-2.0)*(yplot[1]-yplot[0])/16.0;
+  return yplot[0] + (y-xbox[0])*(yplot[1]-yplot[0])/ybox[2];
         
 }       
+
+local void setrange(real *rval, string rexp)
+{
+    char *cptr, *tmpstr;
+    double dpar;
+
+    cptr = strchr(rexp, ':');
+    if (cptr != NULL) {
+        tmpstr = allocate(cptr-rexp+1);
+        strncpy(tmpstr,rexp,cptr-rexp);
+        if (nemoinpd(tmpstr,&dpar,1) != 1)
+            error("setrange: parsing error %s",tmpstr);
+        free(tmpstr);
+        rval[0] = dpar;
+
+        if (nemoinpd(cptr+1,&dpar,1) != 1)
+            error("setrange: parsing error %s",cptr+1);
+	rval[1] = dpar;
+    } else {
+        rval[0] = 0.0;
+        if (nemoinpd(rexp,&dpar,1) != 1)
+            error("setrange: parsing error %s",rexp);
+	rval[1] = dpar;
+    }
+    rval[2] = rval[1] - rval[0];
+}
 
 
 
