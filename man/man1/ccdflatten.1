@@ -1,0 +1,34 @@
+.TH CCDFLATTEN 1NEMO "12 Feb 2005"
+.SH NAME
+ccdflatten \- flattening an image of single pixel peaks
+.SH SYNOPSIS
+\fBccdflatten\fP [parameter=value]
+.SH DESCRIPTION
+Flattening of an imagine, useful when the image has 
+single pixels deviations, and will be faster than \fIccdmedian(1NEMO)\fP
+in this case.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP
+\fBin=\fP
+Input image file [???]    
+.TP
+\fBout=\fP
+Output image file [???]    
+.TP
+\fBnsigma=\fP
+cutoff in terms of sigma [20]  
+.TP
+\fBn=\fP
+width of area around pixel to get sigma
+.SH SEE ALSO
+ccdmedian(1NEMO)
+.SH FILES
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+12-Feb-05	V0.0 Created by mkman	NEMO
+.fi
