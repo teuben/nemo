@@ -29,7 +29,7 @@ echo "Created on `hostname`: `date` <P>"
 # echo "</DIR></BODY>"
 
 
-if (1) then
+if (0) then
 
 echo "Apologies for the formatting bug"
 echo "See also the alphabatized <A HREF=whatis.html>whatis</A> pages."
@@ -46,8 +46,8 @@ echo "<CENTER>"
 echo "<TABLE BORDER>"
 
 pushd html > /dev/null
-ls *.$sec.html | awk -F. '{print $1}' | pr -t -8 |\
-  awk '{print "<tr>";for(i=1; i<=8; i++) printf("<td width=20%%><a href=%s'.$sec.html'>%s</a></td>\n",$i,$1); print "</tr>"}'
+ls *.$sec.html | awk -F. '{print $1}' | pr -t --columns=6 |\
+  awk '{print "<tr>";for(i=1; i<=6; i++) printf("<td width=20%%><a href=%s'.$sec.html'>%s</a></td>\n",$i,$i); print "</tr>"}'
 popd > /dev/null
 
 echo "</TABLE>"
