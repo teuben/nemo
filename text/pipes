@@ -1,0 +1,40 @@
+pipes in NEMO:
+
+
+Standard UNIX pipes are often use in NEMO to stream data from one task
+to another, e.g.
+
+	mkplummer - 1000 | integrator - - tstop=10 | snapplot - nxy=4,4
+
+
+This does have some limitations, e.g. it is harder to fork/split a data-stream
+and run two streams, and neither is it easy to shunt data and feed it back
+into the stream a little earlier, like a feedback loop.
+
+
+Here is an example of how to feedback some data earlier in the stream. 
+
+
+   mksnapshot - |\
+      gyrfalcON - - potname=plummerv potpars=0,1,1,0.1 potfile=plummerv.dat |\
+      analyze - - |\
+      snapcore - potfile=plummerv.dat
+
+
+To study this example, look at
+
+1) $NEMO/src/orbit/potential/data/plummerv.c
+
+	this implements an example of a plummer sphere potential (like plummer.c), but
+	at regular intervals (as set by potname[3]) it will attempt to read a  so-called
+	"plummerv" binary structured datafile and recompute the plummer parameters.
+
+
+
+2) $NEMO/src/nbody/reduc/snapcore.c
+
+	this implements an example how to read snapshots that came out of the 
+	integerator (or anything along the pipe, see example above), and compute
+	new plummer parameters and write them into a "plummerv" binary structured
+	datafile.
+
