@@ -32,6 +32,7 @@
  *                          c 
  *                          d printf -> dprintf
  *      18-dec-01        4.0  convert to use fitsio_nemo.h and optional CFITSIO
+ *      12-aug-02           a NaN problems with miriad
  */
 
 #include <stdinc.h>
@@ -56,7 +57,7 @@ string defv[] = {
     "bzero=0\n          Offset conversion factor in raw mode (0)",
     "blank=\n           Blank value re-substitution value?",
     "relcoords=f\n      Use relative (to crpix) coordinates instead abs",
-    "VERSION=4.0\n	18-dec-01 PJT",
+    "VERSION=4.0a\n	12-aug-02 PJT",
     NULL,
 };
 
@@ -67,6 +68,7 @@ string usage = "convert (near)fits files into images";
 void make_fitheader(FITS *fitsfile, imageptr iptr, bool Qrel, FLOAT *, FLOAT *);
 void make_rawheader(FITS *fitsfile, imageptr iptr, bool Qrel);
 FITS *rawopen(string name, string status, int naxis, int *nsize);
+int is_feq(int *a, int *b);
 
 void nemo_main()
 {
@@ -77,6 +79,7 @@ void nemo_main()
     real bval_out, rmin, rmax, tmp;
     FLOAT *buffer, *bp, bval_in;  /* fitsio- is in FLOAT !!! */
     FLOAT fdata_min, fdata_max, fnan;
+    int mir_nan = -1;    /* MIRIAD's FITS NaN */
     imageptr iptr;
     string mode, blankval;
     bool   Qblank, Qrel;
@@ -88,7 +91,9 @@ void nemo_main()
     Qblank = (*blankval != 0);
     Qrel = getbparam("relcoords");
     get_nanf(&fnan);
-    
+#if 1
+    memcpy(&fnan,&mir_nan,sizeof(int));    /* PORTABILITY ! */
+#endif    
     if (streq(mode,"fits"))
       fitsfile = fitopen(getparam("in"),"old",ndim,naxis);
     else if (streq(mode,"raw"))
@@ -120,17 +125,19 @@ void nemo_main()
     else
       error("Never Reached");
 
+    bval_out = 0.0;
     if (Qblank) {    
       if (streq(blankval,"datamin"))
 	bval_in = fdata_min;
       else if (streq(blankval,"datamax"))
 	bval_in = fdata_max;
-      else
+      else if (streq(blankval,"mirnan")) {
+	memcpy(&bval_in,&mir_nan,sizeof(int));    /* PORTABILITY ! */
+      } else
 	bval_in = (FLOAT) getdparam("blank");
       dprintf(0,"Substituting blank=%g [%s] with %g\n",
 	      bval_in,blankval,bval_out);
     }
-    bval_out = 0.0;
 
 
     buffer = (FLOAT *) allocate(nx*sizeof(FLOAT));
@@ -145,12 +152,12 @@ void nemo_main()
             fitread(fitsfile,j,buffer);     /* read it from fits file */
             for (i=0, bp=buffer; i<nx; i++, bp++) {   /* stuff it in memory */
                 if (Qblank) {
-                    if (*bp == bval_in) {
-                        nbval++;
-                        *bp = bval_out;
-                    }
+		  if (is_feq(bp,&bval_in)) {
+		    nbval++;
+		    *bp = bval_out;
+		  }
                 } else {
-		  if (*bp == fnan) {
+		  if (is_feq(bp,&fnan)) {
 		    nbval++;
 		    *bp = bval_out;
 		  }
@@ -324,3 +331,19 @@ void make_fitheader(FITS *fitsfile, imageptr iptr, bool Qrel,
     }
 }
 
+
+is_feq(int *ia, int *ib)
+{
+  int r;
+#if 0
+  r = memcmp(&a,&b,sizeof(float));
+  int ia, ib;
+  memcpy(&ia,&a,sizeof(float));
+  memcpy(&ib,&b,sizeof(float));
+  printf("A = %d    B=%d   \n",ia,ib);
+#else
+  dprintf(1,"A = %d    B=%d   \n",*ia,*ib);
+  r = (*ia == *ib);
+#endif
+  return r;
+}
