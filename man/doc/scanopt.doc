@@ -1,0 +1,14 @@
+%N scanopt
+%D TESTBED scanopt
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man scanopt' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A opt
+	String to an option from [foo,bar,fum]
+%A key
+	Option, check if it's in the string [foo]
+%A verbose
+	Verbose output (1/0) or use shell status [true]
+%A VERSION
+	 [2.0        30-dec-97 PJT]
