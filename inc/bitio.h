@@ -1,5 +1,7 @@
 /*
- *   manipulate bits 
+ *   manipulate bits  
+ *   in linux see also /usr/include/sys/param.h:   setbit, clrbit, isset, isclr
+ *
  */
 
 #define SETBIT(word, n) ((word) |=  (1 << (n)))   // set bit n of word
