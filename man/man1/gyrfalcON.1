@@ -1,4 +1,4 @@
-.TH GYRFALCON 1NEMO "11 April 2004"
+.TH GYRFALCON 1NEMO "15 April 2004"
 .SH NAME
 gyrfalcON \- GalaxY simulatoR using falcON (NEMO version)
 .SH SYNOPSIS
@@ -74,7 +74,9 @@ hold before it is considered for further sub-division in the tree building
 stage of the code. [6]
 .TP
 \fBeps=\fP
-Softening length OR maximum softening length [0.05]     
+If positive, this will be the softening length OR maximum softening length, equal
+for all particles. If negative, individual fixed softening lengths are used.
+[0.05]     
 .TP
 \fBkernel=\fP
 Type of softening kernel P_n. This is an integer, for 0 the classic Plummer (old 20)
@@ -110,8 +112,10 @@ resume old simulation?  that implies:
 .TP
 \fBgive=\fP
 List of output specifications. Recognizing
-\fBm\fP (mass), \fBx\fP (position), \fBv\fP (velocity), \fBa\fP (acceleration), \fBp\fP (N-body potential),
-\fBP\fP (external potential, added to pot before output), 
+\fBm\fP (mass), \fBx\fP (position), \fBv\fP (velocity), \fBa\fP (acceleration),
+\fBp\fP (N-body potential),
+\fBq\fP (add external potential before output),
+\fBe\fP (individual eps_i, only if they exist),
 \fBl\fP (time-step level, if they exist), \fBf\fP (body flag).
 [Default: mxv]
 .TP
@@ -120,7 +124,12 @@ list of specifications for secondary output.
 [Default: mxv]
 .TP
 \fBGrav=\fP
-Value of the gravitational constant [1].
+Value of the gravitational constant. 0 can be used to
+signify that no self-gravity be used (see also \fIpotcode(1NEMO)\fP)
+[1].
+.TP
+\fBroot_center=\fP
+if given (3 numbers), this forces tree-root centering. Default: not used.
 .TP
 \fBpotname=\fP
 Name of external potential. See also \fIpotential(5NEMO)\fP.
@@ -179,6 +188,8 @@ hackcode1(1NEMO), addgravity(1NEMO), getgravity(1NEMO), bench(5NEMO)
 NEMO/usr/dehnen/falcON	source code
 NEMO/usr/dehnen/yanc	source code (an old version, named YancNemo)
 NEMO/usr/dehnen/falcON/doc/user_guide_pub.pdf	\fIUser Guide for falcON\fP.
+NEMO/usr/dehnen/falcON/doc/2000ApJ...536L..39W.pdf	\fIA very fast and momentum-conserving tree code\fP
+NEMO/usr/dehnen/falcON/doc/2002JCP...179...27D.pdf	\fIA Hierarchical O(N) Force Calculation Algorithm\fP
 .fi
 .SH AUTHOR
 Walter Dehnen
@@ -187,10 +198,11 @@ Walter Dehnen
 .ta +1.0i +5.0i
 29-May-01	V1.0 manual written, at GH-2001 workshop at INAOE 	PJT
 13-jun-01	1.0.2: added Ncrit
-16-nov-01	1.0.15: aligned man page with actual code	PJT
-4-jun-02	added theta=, and corrected log/linear statement	PJT
-13-jun-02	1.2: imported into NEMO 	PJT
-2-jan-03	1.5: renamed YancNemo to gyrfalcON, (WD version 091202) 	PJT
-28-jul-03	1.6.1: also for gcc 3.3 (WD version 280703)	PJT
+16-nov-01	1.0.15: aligned man page with actual code	PJT/WD
+4-jun-02	added theta=, and corrected log/linear statement	PJT/WD
+13-jun-02	1.2: imported into NEMO 	PJT/WD
+2-jan-03	1.5: renamed YancNemo to gyrfalcON, (WD version 091202) 	PJT/WD
+28-jul-03	1.6.1: also for gcc 3.3 (WD version 280703)	PJT/WD
 11-apr-04	aligned documentation, removed Yanc from NEMO   	PJT
+15-apr-04	2.0.1: aligned with new release		PJT/WD
 .fi
