@@ -16,6 +16,7 @@
  * V2.6   pjt 4-mar-94          ansi
  * V2.7   pjt 21-mar-01         XML output option, written in 
  *                              "Coffee Plantation", Tucson, AZ.
+ * V3.0   pjt 14-jun-02         integer output not in octal anymore
  *
  */
 
@@ -32,7 +33,8 @@ string defv[] = {
     "margin=72\n		  righthand margin ",
     "item=\n                      Select specific item",
     "xml=f\n                      output data in XML format? (experimental)",
-    "VERSION=2.7\n		  21-mar-01 PJT ",
+    "octal=f\n                    Force integer output in octal again?",
+    "VERSION=3.0\n		  14-jun-02 PJT ",
     NULL,
 };
 
@@ -44,6 +46,7 @@ local bool allline;			/* if true, disable maxline limit   */
 local int maxline, indent, margin;      /* formating parameters             */
 local string testtag;                   /* if non-zero, print only this tag */
 local bool xml;                         /* output data in XML format        */
+local bool octal;                       /* integer output in octal ?        */
 
 /* local functions */
 void   print_item   (string);
@@ -74,6 +77,7 @@ void nemo_main()
     if (xml) {     /* if XML output used, it should print all items */
       allline = TRUE;
     }
+    octal = getbparam("octal");
     while ((tags = list_tags(instr)) != NULL) {
         print_item(*tags);
 	free(*tags);
@@ -238,7 +242,7 @@ struct typeinfo {
  * TYPETAB: table of info about data types.
  */
 
-struct typeinfo typetab[] = {
+struct typeinfo typetab_o[] = {
     { AnyType,    "any",      "%#o ",     "%#o ",     "%#o", },
     { CharType,   "char",     "%c",       "%c",       "%c",  },
     { ByteType,   "byte",     "%#o ",     "%#o ",     "%#d ", },
@@ -252,27 +256,42 @@ struct typeinfo typetab[] = {
     { NULL, },
 };
 
+
+struct typeinfo typetab_d[] = {
+    { AnyType,    "any",      "%#o ",     "%#o ",     "%#o", },
+    { CharType,   "char",     "%c",       "%c",       "%c",  },
+    { ByteType,   "byte",     "%#d ",     "%#d ",     "%#d ", },
+    { ShortType,  "short",    "%#d ",     "%#d ",     "%#d ", },
+    { IntType,    "int",      "%#d ",     "%#d ",     "%#d ", },
+    { LongType,   "long",     "%#ld ",    "%#ld ",    "%#d ", },
+    { FloatType,  "float",    "%#g ",     "%15.8e ",  "%#g ", },
+    { DoubleType, "double",   "%#g ",     "%23.16e ", "%#g ", },
+    { SetType,    "set",      NULL,       NULL,        NULL, },
+    { TesType,    "tes",      NULL,       NULL,        NULL, },
+    { NULL, },
+};
+
 string find_name(string type)
 {
     struct typeinfo *tip;
 
-    for (tip = typetab; tip->titype != NULL; tip++)
+    for (tip = typetab_o; tip->titype != NULL; tip++)
 	if (streq(tip->titype, type))
 	    return (tip->tiname);
     error("find_name: type %s unknown\n", type);
-    return(NULL);   /* make stringent compilers happy */
+    return NULL;   /* make stringent compilers happy */
 }
 
 string find_fmt(string type)
 {
     struct typeinfo *tip;
 
-    for (tip = typetab; tip->titype != NULL; tip++)
+    for (tip = octal ? typetab_o : typetab_d; tip->titype != NULL; tip++)
 	if (streq(tip->titype, type))
 	  return (xml ? tip->tixpfmt :
 		  maxprec ? tip->tihpfmt : tip->tilpfmt);
     error("find_fmt: type %s unknown\n", type);
-    return(NULL);   /* make stringent compilers happy */
+    return NULL;   /* make stringent compilers happy */
 }
 
 /*

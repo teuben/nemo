@@ -20,7 +20,7 @@ Input data is read from \fIfile\fP, which must be an ascii file.
 \fBout\*e\fP\fIfile\fP
 Output data is written to \fIfile\fP in binary form.
 .SH SEE ALSO
-tsf(1NEMO), filestruct(3NEMO).
+tsf(1NEMO), csf(1NEMO), filestruct(3NEMO).
 .SH DEBUG
 \fBdebug=2\fP reports values of \fIMaxTagLen\fP and \fIMaxVecDim\fP
 as defined in "\fBfilestruct.h\fP".
@@ -38,6 +38,27 @@ the line break occured just before a white space in the string.
 This can be solved by running 
 \fItsf\fP with a different or 
 long enough linelength (using the \fBmargin=\fP keyword).
+.SH BUGS
+\fBrsf\fP does not recognize decimal numbers, it assumes 
+they are always octal, and does not pay attention to a leading
+0 to distinguish. Thereforce, since \fItsf(1NEMO)\fP now
+defaults decimal integers by default, it has to be forced
+to output octal if \fBrsf\fP is part of the pipe to
+transfer information, e.g.:
+.nf
+    % mkplummer - 3 | tsf - | grep Coord
+	int CoordSystem 66306 \fB(good)\fP
+
+    % mkplummer - 3 | tsf - octal=t | grep Coord
+	int CoordSystem 0201402 \fB(good)\fP
+
+    % mkplummer - 3 | tsf - | rsf - - | tsf - | grep Coord
+	int CoordSystem 27846 \fB(bad)\fP
+
+    % mkplummer - 3 | tsf - octal=t | rsf - - | tsf - | grep Coord
+	int CoordSystem 66306 \fB(good)\fP
+	
+.fi
 .SH AUTHORS
 Joshua E. Barnes, Panayotis Skordos.
 .SH HISTORY
@@ -47,4 +68,5 @@ xx-jun-87	V1.0 first implementation	PS
 xx-apr-88	V2.0 new filestruct package	JB
 12-sep-90	V2.1 helpvec	PJT
 9-dec-90	V2.2 multiline string bug removed	PJT
+14-jun-2002	added comment on new tsf behavior for integer output	PJT
 .fi
