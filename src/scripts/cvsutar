@@ -1,0 +1,14 @@
+#! /bin/csh -f
+# input:   list of CVS/Entries files
+# output:  list of CVS controlled files
+#  	Used by top level makefile to make a CVS tar ball from a disconnected
+#	site.
+# Typical usage:
+#    tar -zcf file.tar.gz `find . -name Entries -exec cvsutar '{}' \;`
+
+
+foreach file ($*)
+  set cbase=$file:h
+  set base=$cbase:h
+  grep ^/ $file | awk -F/ '{printf("%s/%s\n","'$base'",$2)}'
+end
