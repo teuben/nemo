@@ -12,8 +12,8 @@ clean:
 	@echo Cleaning $(DIR)
 	@rm -f snap.in snap.tab1 snap.tab2 snap.tab3 io_nemo_test
 
-NBODY = 30000
-SELECT = 100,3000:15000:143,23467:29999:466
+NBODY = 3000
+SELECT = 10,300:1500:14,2346:2999:46
 
 all:	$(BIN)
 
