@@ -1,0 +1,25 @@
+# $NEMO/src/nbody/evolve/sellwood/code1
+include $(NEMOLIB)/makedefs
+#
+
+INC = admin.h  rjinclude.h
+SRC = galaxy.f
+
+help:
+	@echo GALAXY program, written by Jerry Sellwood
+
+FFLAGS = -O
+
+all:	galaxy.a galaxy
+
+clean:
+	rm -f $(LIB) galaxy *.o *.a core galaxy.res galaxy.fin galaxy.lis
+	(cd lib; make clean)
+
+
+galaxy: galaxy.a $(SRC) $(INC)
+	$(FC) $(FFLAGS) -o galaxy galaxy.f galaxy.a
+
+
+galaxy.a: $(INC)
+	(cd lib; make lib)
