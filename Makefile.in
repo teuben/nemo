@@ -153,7 +153,7 @@ dirs: nemo_start
 	    ls -l NEMORC.local;\
 	fi
 	@if [ ! -f $(NEMOLIB)/maxsizes.h ]; then \
-            echo '/* your optional systemwide MAX* macros */' >  $(NEMOLIB)/maxsizes.h;\
+	    cp inc/max/maxsizes.h $(NEMOLIB)/maxsizes.h;\
 	    cp NEMORC.gen NEMORC.local;\
 	else \
 	    echo "$(NEMOLIB)/maxsizes.h exists:";\
