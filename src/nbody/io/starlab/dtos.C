@@ -6,6 +6,7 @@
  *              14-oct-03       ieck, keeping up with many starlab changes...
  *              29-dec-03       also added phi into the output stream, key as well
  *               2-jan-04       attempt to get some UBV info for nvodemo2004
+ *               5-jan-04  1.6b fixed taking log's the right way !!!
  */
 
 #include <stdinc.h>                 /* NEMO */
@@ -27,7 +28,7 @@ typedef char *nemo_string;
 nemo_string defv[] = {
     "out=???\n          Output snapshot file (input dyn from stdin)",
     "headline=\n        Random verbiage for user",
-    "VERSION=1.6\n      2-jan-04 PJT",
+    "VERSION=1.6a\n     5-jan-04 PJT",
     NULL,
 };
 
@@ -86,13 +87,15 @@ void nemo_main(void)
       logl = *aptr++ = bi->get_luminosity();         // luminosity
       logt = *hptr++ = bi->get_temperature();        // temperature
       *kptr++ = bi->get_stellar_type();              // stellar type
-      logl = log(logl);
-      logt = log(logt);
+      logl = log10(logl);
+      logt = log10(logt);
       nemo_ltm_to_ubvri(logl,logt,m, umag,bmag,vmag,rmag,imag);
-      dprintf(1,"UBVRI: %g %g %g %g %g\n",umag,bmag,vmag,rmag,imag);
-      u_out = -2.5*log(umag);
-      b_out = -2.5*log(bmag);
-      v_out = -2.5*log(vmag);
+      dprintf(1,"logT,logR,UBVRI: %g %g %g %g %g %g %g\n",
+	      logt,logl,
+	      umag,bmag,vmag,rmag,imag);
+      u_out = umag;
+      b_out = bmag;
+      v_out = vmag;
       *pacc++ = u_out;            /*   U, V, B-V */
       *pacc++ = v_out;
       *pacc++ = b_out-v_out;
