@@ -583,8 +583,6 @@ void bootstrap(int nboot,
 
   if (nboot < 1) return;
 
-  warning("Trying out bootstrap");
-
   perm = (int *) allocate(npt*sizeof(int));
   y1 = (real *) allocate(npt*sizeof(real));
   d1 = (real *) allocate(npt*sizeof(real));
@@ -609,6 +607,7 @@ void bootstrap(int nboot,
       accum_moment(&m[i],fpar[i],1.0);
     }
   }
+  printf("bootstrap= ");
   for (i=0; i<npar; i++)
     printf("%g %g ",mean_moment(&m[i]),sigma_moment(&m[i]));
   printf("\n");
@@ -664,29 +663,8 @@ do_line()
     if (npt1 == npt) break;
     npt = npt1;
   }
-#if 1
-  if (nboot) {
-    warning("Trying out bootstrap");
-    y1 = (real *) allocate(npt*sizeof(real));
-    d1 = (real *) allocate(npt*sizeof(real));
-    perm = (int *) allocate(npt*sizeof(int));
-    for (i=0; i<npt; i++)
-      perm[i] = i;
-    for (i=0; i<lpar; i++)
-      bpar[i] = fpar[i];
-    for (iter=0; iter<nboot; iter++) {
-      random_permute(npt,perm);
-      for (i=0; i<npt; i++) {
-	y1[i] = fitfunc(&x[i],bpar,lpar) + d[perm[i]];
-      }
-      nrt = (*my_nllsqfit)(x,1,y1,dy,d1,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
-      printf("%g %g %g %g\n", fpar[0],fpar[1],epar[0],epar[1]);
-    }
-    free(y1);
-  }
-#else
   bootstrap(nboot, npt,1,x,y,dy,d, lpar,fpar,epar,mpar);
-#endif
+
   if (outstr)
     for (i=0; i<npt; i++)
       fprintf(outstr,"%g %g %g\n",x[i],y[i],d[i]);
@@ -751,6 +729,7 @@ do_plane()
     break;
 #endif
   }
+  bootstrap(nboot, npt,2,x,y,dy,d, lpar,fpar,epar,mpar);
 
   if (outstr)
     for (i=0; i<npt; i++)
