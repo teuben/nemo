@@ -22,6 +22,7 @@
  *              22-dec-03 : 1.2b  fix error estimates for the shape pars         pjt
  *              25-may-04 : 1.2c  fix sigma computation (sqrt(N))                pjt
  *                             e  plus many improvement when nsigma given
+ *              11-jun-04 : 1.3   write fit directly , with or without masked    pjt
  *
  *
  ******************************************************************************/
@@ -70,7 +71,11 @@ string defv[] = {
     "beam=\n         ** Beam (arcsec) for beam correction [no correction]",
     "dens=\n         Image containing containing density map to be used as weight",
     "tab=\n          If specified, this output table is used in append mode",
-    "resid=\n        Output of residuals in a complicated plot",
+    "resid=\n        Output of residual field",
+    "fit=f\n         Output the fit? or the residuals",
+#if 0
+    "masked=t\n      Masked fitted field or Full fitted field IFF fit=true",
+#endif
     "tol=0.001\n     Tolerance for convergence of nllsqfit",
     "lab=0.001\n     Mixing parameter for nllsqfit",
     "itmax=50\n      Maximum number of allowed nllsqfit iterations",
@@ -85,7 +90,7 @@ string defv[] = {
     "rotcur3=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur4=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur5=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
-    "VERSION=1.2f\n  26-may-04 PJT",
+    "VERSION=1.3\n   13-jun-04 PJT",
     NULL,
 };
 
@@ -96,7 +101,7 @@ string usage="nonlinear fit of kinematical parameters to the velocity field of a
 typedef real (*rcproc)(real, int, real *, real *);
 
 
-imageptr denptr, velptr, resptr;    /* pointers to Images, if applicable - velptr is recycled */
+imageptr denptr, velptr, resptr;      /* pointers to the various Images -- some recycling */
 int   lmin, mmin, lmax, mmax;              /* boundaries of map */
 real  grid[2];    /* grid separations in x and y (arcsec.) */
 real  beam[2];    /* size of beam in arcseconds            */
@@ -125,6 +130,8 @@ int    nparams = 0;             /* total number of parameters (5 + # for models)
 bool Qimage;                             /* input mode (false means tables are used) */
 bool Qrotcur;                            /* rotcur (rv) vs. velocity field (xyv) table mode */
 bool Qbeam;                              /* attempt to do beam correction */
+bool Qfit;                               /* write fit instead of residual */
+bool Qmasked;                            /* in fitted output image, use observation mask ? */
 real  *xpos_vel, *ypos_vel, *vrad_vel, *verr_vel;   /* pointer to tabular information */
 real  *vsig_vel;                         
 int  n_vel = 0;                          /* length of tabular arrays */
@@ -161,7 +168,7 @@ int set_blank(int n, real *res, real *w, int *iblank, int nfr, real nsigma, real
 void stat2(real a[], int n, int nf, real *mean, real *sig);
 void stat2b(real a[], int b[], int n, int nf, real *mean, real *sig);
 int getdat(real x[], real y[], real w[], int idx[], real res[], int *n, int nmax, 
-	   real p[], real ri, real ro, real thf, int wpow, real *q, int side, bool *full, int nfr);
+	   real p[], real ri, real ro, real thf, int wpow, real *q, int side, bool *full, int nfr, int mode);
 real bmcorr(real xx[2], real p[], int l, int m);
 int perform_init(real *p, real *c);
 
@@ -459,6 +466,10 @@ nemo_main()
     Qimage = getbparam("imagemode");
     Qrotcur = getbparam("rotcurmode");
     if (Qrotcur) Qimage=FALSE;
+    Qfit = getbparam("fit");
+#if 0
+    Qmasked = getbparam("masked");
+#endif
 
     if (hasvalue("resid")) {
       if (Qimage) {
@@ -1136,7 +1147,7 @@ stream lunres;   /* file for residuals */
     printf("  (nfr=%d)\n",nfr);
 #endif
 
-    getdat(x,y,w,idx,res,&n,MAXPTS,p,ri,ro,thf,wpow,&q,side,&full,nfr);
+    getdat(x,y,w,idx,res,&n,MAXPTS,p,ri,ro,thf,wpow,&q,side,&full,nfr,0);
     for (i=0;i<n;i++) iblank[i] = 1;  /* 1 means pixel is ok, 0 means flagged */
 
     h=0;                                          /* reset itegration counter */
@@ -1177,7 +1188,7 @@ stream lunres;   /* file for residuals */
             for(k=0; k<nparams; k++)       /* loop to calculate new parameters */
                pf[k]=flip*df[k]+p[k];                       /* new parameters */
             pf[4]=MIN(pf[4],180.0-pf[4]);         /* in case inclination > 90 */
-            getdat(x,y,w,idx,res,&n,MAXPTS,pf,ri,ro,thf,wpow,&q,side,&full,nfr);
+            getdat(x,y,w,idx,res,&n,MAXPTS,pf,ri,ro,thf,wpow,&q,side,&full,nfr,0);
 #if 0
 	    for (i=0;i<n;i++) iblank[i] = 1; 
 	    for (i=0;i<n;i++) w[i] *= iblank[i];            /* apply blanking */
@@ -1244,8 +1255,9 @@ stream lunres;   /* file for residuals */
 
     if (lunres) {
       if (Qimage) {
-	if (resptr == NULL)
+	if (resptr == NULL) 
 	  copy_image(velptr,&resptr);
+	/* should this be done each call, or only when resptr = NULL ? */
 	for (i=0;i<Nx(resptr);i++)
 	  for (j=0;j<Ny(resptr);j++)
 	    MapValue(resptr,i,j) = 0.0;
@@ -1253,6 +1265,12 @@ stream lunres;   /* file for residuals */
         fprintf(lunres,"#  %d : New ring %g - %g\n",n,ri,ro);
         fprintf(lunres,"#  Xsky Ysky Vobs Vobs-Vmod Xgal Ygal Rgal THETAgal\n");
       }
+      if (Qfit) {
+	warning("One more fit iteration for full fit field map, old map=%d points",n);
+	getdat(x,y,w,idx,res,&n,MAXPTS,p,ri,ro,thf,wpow,&q,side,&full,nfr,1);
+	warning("Found %d points",n);
+      } else
+	warning("Old map Found %d points",n);
       cosp = cos((p[3]+90)*F);
       sinp = sin((p[3]+90)*F);
       cosi = cos(p[4]*F);
@@ -1442,7 +1460,7 @@ void stat2b(real *a,int *b,int n,int nf, real *mean,real *sig)
 /* 
  *    GETDAT gets data from disk and calculates differences.
  *
- *    SUBROUTINE GETDAT(X,Y,W,IDX,RES,N,NMAX,P,RI,RO,THF,WPOW,Q,SIDE,FULL,NFR)
+ *    SUBROUTINE GETDAT(X,Y,W,IDX,RES,N,NMAX,P,RI,RO,THF,WPOW,Q,SIDE,FULL,NFR,MODE)
  *
  *    X        real array       sky coordinates of pixels inside ring
  *    Y        real array       radial velocities
@@ -1460,9 +1478,10 @@ void stat2b(real *a,int *b,int n,int nf, real *mean,real *sig)
  *    SIDE     integer          receding or approaching side
  *    FULL     logical          too many points in ring
  *    NFR      integer          number of degrees of freedom
+ *    MODE     integer          fitmode (0=fitting w/ masking 1=fit, no mask)
  */
 
-getdat(x,y,w,idx,res,n,nmax,p,ri,ro,thf,wpow,q,side,full,nfr)
+getdat(x,y,w,idx,res,n,nmax,p,ri,ro,thf,wpow,q,side,full,nfr,mode)
 int   *n,nmax;       /* number of pixels loaded (O), max. number (I) */
 int   nfr;           /* number of degrees of freedom */
 int   wpow;          /* weigthing function */
@@ -1474,7 +1493,8 @@ int   idx[];         /* coordinates in pixel units (0,0 is lower left) */
 real  p[];           /* parameters of ring */
 real  ri,ro;         /* inner and outer radius of ring */
 real  thf;           /* free angle */
-real  *q;             /* output sigma */
+real  *q;            /* output sigma */
+int   mode;          /* fit mode */
 {
 /******************************************************************************/
     int   nlt,nmt;                                                /* counters */
@@ -1544,7 +1564,7 @@ real  *q;             /* output sigma */
 	    rx=dx*(real)(l);       /* X position in plane of galaxy */
 	    /***** i=(m-m1)*nlt+l-lmin+1;        --> array pointer */
 	    v = MapValue(velptr,l,m);        /* velocity at (l,m) */
-	    if (v != undf) {       /* undefined value ? */
+	    if (mode || v != undf) {       /* undefined value ? */
 	      xr=(-(rx-dx*x0)*sinp+(ry-dy*y0)*cosp);     /* X position in galplane */
 	      yr=(-(rx-dx*x0)*cosp-(ry-dy*y0)*sinp)/cosi;
 	      r=sqrt(xr*xr+yr*yr);                       /* distance from center */
@@ -1589,7 +1609,10 @@ real  *q;             /* output sigma */
 		    w[*n]=wi;          /* load weight */
 		    idx[*n*2]=l;       /* load integer X-coordinate */
 		    idx[*n*2+1]=m;     /* load integer Y-coordinate */
-		    s=(v-vobs(xx,p,nparams));  /* corrected difference */
+		    if (mode)
+		      s=vobs(xx,p,nparams);      /* fitted map */
+		    else 
+		      s=(v-vobs(xx,p,nparams));  /* corrected difference */
 		    res[*n] = s;               
 		    *q += s*s*wi;       /* calculate chi-squared */
 		    *n += 1;           /* increment number of pixels */
