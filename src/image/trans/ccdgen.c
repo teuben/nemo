@@ -1,7 +1,7 @@
 /* 
  * CCDGEN:   create 2D 'astronomical' type objects, modeled after MIRIAD'd imgen
  *
- *      4-jan-05        V0.1: for Kartik's bars modeling experiment (IMGEN is tooooo cumbersome)
+ *      4-jan-05        V0.1: for Kartik's bars modeling experiment (IMGEN is just tooooo cumbersome)
  *                      
  */
 
@@ -28,7 +28,7 @@ string defv[] = {
   "crval=\n        Override/Set crval (0,0,0) // ignored",
   "cdelt=\n        Override/Set cdelt (1,1,1) // ignored",
   "seed=0\n        Random seed",
-  "VERSION=0.5a\n  5-jan-05 PJT",
+  "VERSION=0.6\n   5-jan-05 PJT",
   NULL,
 };
 
@@ -57,6 +57,7 @@ real pa,inc,center[2];
 real sinp, cosp, sini, cosi;
 
 bool Qtotflux;
+real surface=1.0;
 
 
 local int set_axis(string var, int n, double *xvar, double defvar);
@@ -97,7 +98,7 @@ void nemo_main ()
   cosp = cos(pa*PI/180.0);
   sini = sin(inc*PI/180.0);
   cosi = cos(inc*PI/180.0);
-  dprintf(0,"Disk with pa=%g inc=%g\n",pa,inc);
+  dprintf(0,"%s: disk with pa=%g inc=%g\n",object,pa,inc);
   dprintf(1,"pa(%g %g) inc(%g %g)\n",sinp,cosp,sini,cosi);
 
   ncen = nemoinpr(getparam("center"),center,2);
@@ -140,7 +141,9 @@ void nemo_main ()
     center[0] = (Nx(iptr)-1)/2.0;     /* 0 based center= */
     center[1] = (Ny(iptr)-1)/2.0;
   }
-  dprintf(0,"Center pixel: %g %g\n",center[0],center[1]);
+  dprintf(0,"%s: center pixel: %g %g\n",object,center[0],center[1]);
+  surface = Dx(iptr)*Dy(iptr);
+  surface = ABS(surface);
 
   if (streq(object,"flat"))
     object_flat(npar,spar);
@@ -305,6 +308,8 @@ local void object_flat(int npars, real *pars)
   int ny = Ny(iptr);
   real A = 1.0;
 
+  if (A==0) return;
+
   if (npar > 0) A = pars[0];
 
   if (Qtotflux) A /= (nx*ny);
@@ -324,9 +329,12 @@ local void object_exp(int npars, real *pars)
 
   if (npar > 0) A = pars[0];
   if (npar > 1) h = pars[1];
+  dprintf(0,"exp: %g %g\n",A,h);
+
+  if (A==0) return;
 
   if (Qtotflux) {
-    A /= (TWO_PI*h*h);
+    A /= (PI*h*h/surface);
     dprintf(0,"exp: A->%g\n",A);
   }
 
@@ -354,9 +362,12 @@ local void object_gauss(int npars, real *pars)
 
   if (npar > 0) A = pars[0];
   if (npar > 1) h = pars[1];
+  dprintf(0,"gauss: %g %g\n",A,h);
+
+  if (A==0) return;
 
   if (Qtotflux) {
-    A /= (TWO_PI*h*h);
+    A /= (PI*h*h/surface);
     dprintf(0,"gauss: A->%g\n",A);
   }
 
@@ -389,11 +400,15 @@ local void object_bar(int npars, real *pars)
   if (npar > 1) h = pars[1];
   if (npar > 2) e = pars[2];
   if (npar > 3) b = pars[3];
+  dprintf(0,"bar: %g %g %g %g\n",A,h,e,b);
+
   sinb = sin(b*PI/180.0);
   cosb = cos(b*PI/180.0);
 
+  if (A==0) return;
+
   if (Qtotflux) {
-    A /= (TWO_PI*h*h*(1-e));
+    A /= (PI*h*h*(1-e)/surface);
     dprintf(0,"bar: A->%g\n",A);
   }
   dprintf(1,"bar b=%g\n",b);
@@ -436,6 +451,10 @@ local void object_spiral(int npars, real *pars)
   if (npar > 3) p = pars[3];
   if (npar > 4) r0 = pars[4];
   if (npar > 5) p0 = pars[5];
+  dprintf(0,"spiral: %g %g %g %g %g %g\n",A,h,k,p,r0,p0);
+
+  if (A==0) return;
+
   p0 *= PI/180.0;  /* convert from degrees to radians */
   k *= TWO_PI;     /* angles are 2.PI.k.r , so absorb 2.PI.k in one */
 
@@ -484,6 +503,10 @@ local void object_noise(int npars, real *pars)
 
   if (npar > 0) m = pars[0];
   if (npar > 1) s = pars[1];
+
+  dprintf(0,"noise:%g %g\n",m,s);
+
+  if (m==0) return;
 
   if (Qtotflux) {
     m /= (nx*ny);
