@@ -10,6 +10,7 @@
  *      27-aug-96       V1.3: header output now using dprintf()
  *       6-dec-04       V1.4: warn and disable SDS maps that differ in size
  *                            allow user to select different SDS
+ *      10-dec-04       V1.5: dummy= introduced
  *
  *  TODO: fix rank=3 with coordinates and select=
  *     
@@ -32,12 +33,13 @@ string defv[] = {
     "out=\n                     ascii dump of the data to this file?",
     "format=%g\n                Format used in dump",
     "coord=f\n                  Add coordinates?",
-    "select=all\n               Select which SDS for display?",
-    "VERSION=1.4a\n		6-dec-04 PJT",
+    "select=all\n               Select which SDS# for display? (all|1..)",
+    "dummy=t\n                  Also print out dummy axis (axis with length 1)",
+    "VERSION=1.5\n		10-dec-04 PJT",
     NULL,
 };
 
-/* #define MULTI_FILE 1 */
+/* #define MULTI_FILE 1 == does not work yet */
 
 string usage="Scan and optionally ascii dump of an HDF SDS";
 
@@ -45,9 +47,9 @@ string cvsid="$Id$";
  
 
 #define MAXRANK 10
-#define MAXSDS 100
+#define MAXSDS  32
 
-local int rank, shape[MAXRANK], run[MAXRANK];
+local int rank, shape[MAXRANK], run[MAXRANK], old_shape[MAXRANK];
 local char label[256], unit[256], fmt[256], coordsys[256];
 
 
@@ -62,10 +64,13 @@ scan_sd(string infile)		/* this is the fancy new version */
     float **dump, **coord;
     int i, j, k, ret, old_size, size, type, nsds, old_rank;
     char ntype[32];
-    bool *visib;
+    bool *visib, axis_visib[MAXRANK];
     int nselect, select[MAXSDS];
     string format, sselect;
     stream outstr;
+    bool Qdummy = getbparam("dummy");
+
+    if (!Qdummy) warning("dummy may not be working so well");
 
     nsds = DFSDndatasets(infile);
     if (nsds<0) 
@@ -82,10 +87,11 @@ scan_sd(string infile)		/* this is the fancy new version */
 
     for (k=0; k<nsds; k++)    /* first flag all SDS to be shown */
         visib[k] = TRUE;
+    for (k=0; k<MAXRANK; k++)  /* first flag all axes to be shown (in case coord=t) */
+        axis_visib[k] = TRUE;
 
     sselect = getparam("select");
     if (!streq(sselect,"all")) {
-      warning("The select= keyword is new and probably doesn't work yet");
       nselect = nemoinpi(sselect,select,MAXSDS);
       if (nselect < 0) error("%d error parsing %s",nselect,sselect);
       if (nselect > nsds) error("%s: too many specified, nsds=%d",nselect,nsds);
@@ -111,7 +117,7 @@ scan_sd(string infile)		/* this is the fancy new version */
         ret = DFSDgetNT(&type);
 	if (ret < 0) error("Problem getting data type at SDS #%d",k+1);
 
-        if (! visib[k]) continue;
+        if (! visib[k]) continue;          /* don't count SDS# that were not selected */
 
         if (old_size < 0) {                /* first time around allocate coordinates */
             if (getbparam("coord")) {
@@ -134,7 +140,6 @@ scan_sd(string infile)		/* this is the fancy new version */
                 ret = DFSDgetdimscale(i+1, shape[i],coord[i]);
                 if (ret<0) error("getting shape[%d]",i+1);
             }
-
     	}
     	hdf_type_info(type,ntype);
     	dprintf(0," %s ",unit);
@@ -147,17 +152,21 @@ scan_sd(string infile)		/* this is the fancy new version */
 	if (old_size < 0) {       /* first time around */
 	  old_size = size;
 	  old_rank = rank;
+	  for (i=0; i<rank; i++) old_shape[i] = shape[i];
 	} else {                   /* make sure subsequent ones have the same size for display */
 	  if (old_size != size) {
 	    warning("bad shape for SDS #%d, removing from selection list",k+1);
 	    visib[k] = FALSE;
 	    size = old_size;
-	  } else if (old_rank != rank)
+	  } else if (old_rank != rank) {
 	    warning("bad rank for SDS #%d, removing from selection list",k+1);
 	    visib[k] = FALSE;
 	    rank = old_rank;
+	  }
 	}
     } /* k */
+    rank = old_rank;   /* restore it, in case the last one was a bad one */
+    for (i=0; i<rank; i++) shape[i] = old_shape[i] ;
 
 #if 0
     for (k=0; k<nsds; k++)
@@ -165,13 +174,19 @@ scan_sd(string infile)		/* this is the fancy new version */
 #endif
 
     if (outstr) {
-        for (i=0; i<rank; i++) run[i] = 0;      /* reset run array */
+        for (i=0; i<rank; i++) {
+	  run[i] = 0;      /* reset run (coordinate index) array */
+	  axis_visib[i] = Qdummy ? TRUE : shape[i] > 1;
+	  dprintf(1,"axis %d=%d => %d\n",i+1,shape[i],axis_visib[i]);
+	}
 
         for (i=0; i<size; i++) {                /* loop over all data */
             if (coord) {                        /* print coord system ? */
                 for (j=rank-1; j>=0; j--) {
+		  if (Qdummy || axis_visib[j]) {
                     fprintf(outstr,format,coord[j][run[j]]);  
                     fprintf(outstr," ");
+		  }
                 }
                 run[rank-1]++;
                 for (j=rank-1; j>=0; j--) {     /* check if axis reset needed */
@@ -181,7 +196,8 @@ scan_sd(string infile)		/* this is the fancy new version */
                     } else
                         break;
                 }
-            }
+            } /* coord */
+	
             for (k=0; k<nsds; k++) {            /* loop over all columns */
 	      if (visib[k]) {
                 fprintf(outstr,format,dump[k][i]);
