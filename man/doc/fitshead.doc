@@ -1,0 +1,16 @@
+%N fitshead
+%D display, or convert to, a fits header
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man fitshead' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input fits file [???]
+%A hdu
+	Which HDU (0=all, 1=1st etc.) [0]
+%A blocking
+	Blocking factor (blocking/2880) [1]
+%A out
+	Convert input text to output fits header []
+%A VERSION
+	23-may-95 PJT [1.2b]
