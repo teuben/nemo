@@ -2,7 +2,7 @@
  * WCS: wrapper to worldpos/xypix WCS
  *
  *	2-mar-03	1.1	fixed pos->pix- conversion
- *      7-may-04        1.2     added hms=
+ *      7-may-04        1.3     added hms=
  */
 
 #include <stdinc.h>
