@@ -4,6 +4,8 @@
 /*------------------------------------------------------------------------------
  *  POTENTIAL:  procedures for finding fixed potential, initially written 
  *		for newton0
+ *              It has some nasty assumptions if fortran code is loaded,
+ *              in particular names of symbols, and f2c interfaces
  *
  *      July 1987  -  Peter Teuben  @ Inst. f. Adv. Study, 
  *						  Princeton, NJ 08540, USA
@@ -30,7 +32,7 @@
  *                          fixed small CFLAGS bug
  *	 1-apr-01     V5.3  converted for NEMO V3 with .so files           pjt
  *      13-sep-01     V5.4  support for potential_double and potential_float   pjt
- *      18-sep-01           and auto-detecting which type is present
+ *      18-sep-01           auto-detecting which type is present
  *------------------------------------------------------------------------------
  */
 
@@ -90,8 +92,7 @@ potproc_float  get_potential_float(string potname, string potpars, string potfil
  */
 proc get_inipotential()
 {
-    if (first) 
-        warning("get_inipotential: get_potential not called yet");
+    if (first) error("get_inipotential: get_potential not called yet");
     return l_inipotential;
 }
 
@@ -141,10 +142,13 @@ local proc load_potential(string fname, string parameters, string dataname, char
     potpath = getenv("POTPATH");	     /* is there customized path ? */
     if (potpath==NULL) {			/* use default path */
        potpath = path;
-       strcpy (path,".:");
+       strcpy (path,".");
        nemopath = getenv("NEMO");
-       strcat (path,nemopath);
-       strcat (path,"/obj/potential");		/* ".:$NEMO/obj/potential" */
+       if (nemopath==NULL) {
+	 strcat(path,":");
+	 strcat (path,nemopath);
+	 strcat (path,"/obj/potential");		/* ".:$NEMO/obj/potential" */
+       }
     }
     strcpy (name,fname);
     strcat (name,".so");
@@ -205,9 +209,10 @@ local proc load_potential(string fname, string parameters, string dataname, char
     }
     /* it is perhaps possible that some fortran compilers will add __ for */
     /* routines that have embedded _ in their name.... we're not catching */
-    /* those here yet !!! */
+    /* those here yet !!!                                                 */
+    /* e.g.  g77 options:  -fno-underscoring and -fno-second-underscore   */
     if (pot==NULL) {
-      dprintf(0,"Could not find a suitable potential.....\n");
+      error("Could not find a suitable potential in %s",fname);
       return NULL;
     }
 

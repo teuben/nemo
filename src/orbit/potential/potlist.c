@@ -48,8 +48,9 @@ string usage = "show a NEMO potential";
 #define MAXPT 10001
 #endif
 
-potproc_double mypotd;     /* pointer to potential calculator function : double */
-potproc_float  mypotf;     /* pointer to potential calculator function : float */
+local potproc_double mypotd;     /* pointer to potential calculator function : double */
+local potproc_float  mypotf;     /* pointer to potential calculator function : float */
+local void do_potential(bool,int *, double *, double *, double *, double *);
 
 void nemo_main(void)
 {
@@ -140,7 +141,7 @@ void nemo_main(void)
         pos[0] = xarr[ix];
         pos[1] = yarr[iy];
         pos[2] = zarr[iz];  /* formally not used for ndim=2 */
-
+#if 0
 	if (Qdouble)
 	  (*mypotd) (&ndim,pos,acc,&pot,&time);	/* get forces and potential */
 	else {
@@ -155,6 +156,9 @@ void nemo_main(void)
 	  pot = pot1;
 	  time = time1;
 	}
+#else
+	do_potential(Qdouble,&ndim,pos,acc,&pot,&time);
+#endif
         ax = acc[0]; ay = acc[1]; az = acc[2];	        /* save forces */
         epot = pot;					/* and potential */
 	epot -= 0.5*sqr(omega)*
@@ -164,17 +168,17 @@ void nemo_main(void)
             da[0]=acc[0]; da[1]=acc[1]; da[2]=acc[2];	/* store forces */
 
             pos[0] = xarr[ix]+dr;
-            (*mypotd) (&ndim,pos,acc,&pot,&time);
+            do_potential(Qdouble,&ndim,pos,acc,&pot,&time);
             da[0] -= acc[0];			/* force derivative along x */
   
             pos[0]=xarr[ix]; 
             pos[1]=yarr[iy]+dr;
-            (*mypotd) (&ndim,pos,acc,&pot,&time);
+            do_potential(Qdouble,&ndim,pos,acc,&pot,&time);
             da[1] -= acc[1];			/* force derivative along y */
 
             pos[1]=yarr[iy]; 
             pos[2]=zarr[iy]+dr;
-            (*mypotd) (&ndim,pos,acc,&pot,&time);
+            do_potential(Qdouble,&ndim,pos,acc,&pot,&time);
             if (ndim==3) da[2] -= acc[2];	/* force derivative along z */
             else da[2] = 0.0;
 
@@ -197,4 +201,24 @@ void nemo_main(void)
         } 
         ix += stepx; iy += stepy; iz += stepz;
     }
+}
+
+
+local void do_potential(bool Qdouble,int *ndim, double *pos, double *acc, double *pot, double *time)
+{
+  float  pos1[3],acc1[3],pot1,time1;
+
+  if (Qdouble)
+    (*mypotd) (ndim,pos,acc,pot,time);	/* get forces and potential */
+  else {
+    pos1[0] = pos[0]; 
+    pos1[1] = pos[1];
+    pos1[2] = pos[2];
+    time1 = *time;
+    (*mypotf) (ndim,pos1,acc1,&pot1,&time1);	/* get forces and potential */	  
+    acc[0] = acc1[0];
+    acc[1] = acc1[1];
+    acc[2] = acc1[2];
+    *pot = pot1;
+  }
 }
