@@ -44,7 +44,7 @@ help:
 	@echo Nemo makefile in `pwd`
 
 clean:
-	rm -f *.o *.so *.a core $(BINFILES) $(TESTFILES)
+	rm -f *.o *.so *.a core $(BINFILES) $(TESTFILES) ctextest.*
 
 all:	
 
@@ -98,7 +98,7 @@ tests:
 
 
 ctex:
-	$(NEMO)/src/scripts/ctex -latex -section $(TEST) > pottest.tex
-	latex pottest.tex
-	dvips pottest -o
-	@echo Test for TEST=$(TEST) done...
+	$(NEMO)/src/scripts/ctex -latex -section $(TEST) > ctextest.tex
+	latex ctextest.tex
+	dvips ctextest -o
+	@echo Test for TEST=$(TEST) done... results in ctextest

@@ -17,7 +17,7 @@
  * $$
  * and corresponding surface brightness (check units)
  * $$
- * \Sigma = {  {a M} \over {2 \pi {(1 + (r/a)^2)}^{-3/2}}}
+ * \Sigma = {  {a M} \over {2 \pi {(a^2 + r^2)}^{-3/2}}}
  * $$
  * With $GMa^2 = V_0^2$.
  * This potential is also known as a Toomre n=1 disk, since it
