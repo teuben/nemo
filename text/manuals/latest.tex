@@ -1,0 +1,74 @@
+%% standalone file to test LaTeX include files
+\typeout{### Use: 'echo  file.inc | latex latest' to use any input file}
+
+%% define a few variables:
+\newif\ifdebug
+\newif\ifindex
+\newif\ifnemo
+\newif\ifdoplot
+
+%% Now set the variables either to true or false, depending on need
+\debugtrue
+\indextrue
+\nemotrue
+\doplottrue
+
+\ifdebug
+ \def\mylabel#1{\index{mylabel,#1} \label{#1}}   % debug version (label index)
+ \def\myfile#1{\index{myincfile,#1}}		 % ==old
+ \def\myincfile#1{\index{myincfile,#1}}		 % index for inc files
+ \def\mysrcfile#1{\index{mysrcfile,#1}}		 % index for src files
+\else
+ \def\mylabel#1{\label{#1}}                      % final version
+ \def\myfile#1{}			         % ignore myfile
+ \def\myincfile#1{}			         % ignore myincfile
+ \def\mysrcfile#1{}			         % ignore mysrcfile
+\fi
+
+\ifindex
+ % do nothing
+\else
+ \def\index#1{} 		               % make \index{} command a NULL
+\fi
+
+
+\ifdebug
+ \ifindex
+  \documentstyle[nemo,twoside,makeidx,showidx,epsf]{report} % Debug;add [lablst]??
+ \else
+  \documentstyle[nemo,twoside,lablst,showlabels,epsf]{report} % Debug, no index
+ \fi
+\else
+ \ifindex
+  \documentstyle[nemo,twoside,makeidx,epsf]{report}           % Final w/index
+ \else 
+  \documentstyle[nemo,twoside,epsf]{report}                   % Final no index
+ \fi
+\fi
+
+\makeindex
+
+\pagestyle{headings}
+
+\begin{document}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{2.5mm}
+
+% \chapter*{LaTest\\ \today}		% Note pronounciation is the French one
+%  fill in your favorite name - or deliberately fill in false name
+%  and most LaTeX versions will prompt for a correct name
+% \cleardoublepage
+\addcontentsline{toc}{chapter}{Table of Contents}
+\tableofcontents
+\newpage
+
+\input test.inc
+\printindex
+\typeout{### }
+\typeout{### Note: the LaTest method will not print the actual index}
+\typeout{### }
+\end{document}
+
+
+
