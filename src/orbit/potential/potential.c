@@ -35,6 +35,7 @@
  *      18-sep-01           auto-detecting which type is present
  *      17-may-02     V5.4a fix ambiguity about float/double if generic present WD
  *      25-apr-04         b fool optimizing compilers                           PJT
+ *      20-may-04         c add sqr()
  *------------------------------------------------------------------------------
  */
 
@@ -288,7 +289,7 @@ void local dummy_for_c(void)
     (void) bessi0();
     (void) bessk0();
     (void) bessi1();
-    (void) bessk1();
+    (void) sqr(1.0);
     stropen("/dev/null","w");
 #ifndef NO_IMAGE
     read_image();
