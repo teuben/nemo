@@ -1,0 +1,144 @@
+#! /bin/csh -f
+#
+#  this script will find Testfile's and create a testsuite from it
+#  Note that it will run in a directory $NEMO/tmp/test$$
+#
+#   22-mar-97   Orinally written                    Peter Teuben
+#   19-dec-99   -i added (doesn't seem to work?)
+#
+
+set testdir=$NEMO/tmp/test$$
+set log=testsuite.log
+alias test 'make -f Testfile'
+
+set norun=0
+set cleanup=0
+set clean=0
+set show=0
+set install=0
+set query=0
+set done=0
+set options=()
+foreach arg ($*)
+    switch ($arg)
+    case -n:  
+              if ($done) then
+                set options=($options $arg)                
+              else
+                set norun=1
+              endif
+              breaksw
+    case -r:  
+              set cleanup=1
+              breaksw
+    case -c:  
+              set clean=1
+              breaksw
+    case -s:  
+              set show=1
+              breaksw
+    case -i:
+	      set install=1
+	      breaksw
+    case -q:  
+              set query=1
+              breaksw
+    case -h:  
+              goto help
+              breaksw
+    case --:
+              set done=1
+              breaksw
+    default:
+              set options=($options $arg)
+              breaksw
+    endsw
+end
+
+mkdir $testdir
+pushd $testdir >& /dev/null
+
+onintr cleanup
+
+#echo OPTIONS=$options
+#echo CNRS=$clean $norun $cleanup $show
+echo "TESTSUITE started `date`"                                        > $log
+echo "NEMO version $NEMOVER `hostname` ($NEMOHOST)"                   >> $log
+
+#   using $NEMO instead of $NEMO/src really makes it run slow on solaris
+
+foreach testfile (`find $NEMO/src -name Testfile -print`)
+    if ($norun) then
+        echo $testfile
+        continue
+    endif
+    if ($clean) then
+        (cd $testfile:h ; make -f Testfile clean)
+        continue
+    endif
+    if ($show) then
+        (cd $testfile:h ; make -f Testfile need)
+        continue
+    endif
+    if ($query) then
+        foreach bin (`cd $testfile:h ; make -f Testfile need`)
+            if (! -e $NEMOBIN/$bin) then
+                echo $NEMOBIN/$bin does not exist
+                if ($install) then
+                    mknemo $bin
+                endif
+            endif
+        end
+        continue
+    endif
+    echo -n Working on $testfile:h
+    echo "==========================================================" >>  $log
+    make -f $testfile clean all  $options                             >>& $log
+    if ($status) then
+        echo " Problems"
+    else
+        echo " OK"
+    endif
+end
+echo "TESTSUITE   ended `date`"                                       >> $log
+
+cleanup:
+
+    popd >& /dev/null
+
+    if ($show || $query) then
+        set clean=1
+    else
+        echo Results in $testdir/$log
+	echo If you have any problems, this file should be sent to the nemo@astro.umd.edu
+        head -1 $testdir/$log
+        tail -1 $testdir/$log
+    endif
+
+    if ($cleanup || $clean) then
+        rm -rf $testdir
+    endif
+
+
+    exit 0
+
+help:
+    echo "Usage: $0 [options] [KEYWORD=value ...]"
+    echo ""
+    echo "This program excerizes NEMO by running a number of core programs"
+    echo "from a diverse set of packages (kernel,nbody,orbit,image)"
+    echo ""
+    echo "Options:"
+    echo "    -n    dry-run, only show which directories have Testfile's"
+    echo "    -r    cleanup working directory in '$NEMO/tmp' afterwards"
+    echo "    -c    clean the NEMO directory itself of Testfile in/out files"
+    echo "    -s    show all the binaries that are needed for each test"
+    echo "    -i    install the binaries that are needed for all test"
+    echo "    -q    show all binaries that have not been installed yet"
+    echo "    -h    this help"
+    echo ""
+    echo "Useful keywords, and their defaults:"
+    echo "(see also Testfile.def)"
+    echo "    NBODY=10         should at least be 10; 10 makes it run fast"
+    echo 
+
