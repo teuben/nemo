@@ -98,7 +98,7 @@ string defv[] = {
         "seed=0\n       Initial random seed",
 	"in=\n          Template 2D image for cube generation",
 	"headline=\n	Optional random verbiage",
-        "VERSION=1.8a\n  20-jul-02 PJT",
+        "VERSION=2.0\n  6-feb-03 PJT",
         NULL,
 };
 
