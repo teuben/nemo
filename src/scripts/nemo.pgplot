@@ -1,0 +1,97 @@
+#!/bin/csh -f
+# 	
+#	-- old miriad model -- do not use this, use pgplot.install instead
+#
+if ($?NEMOHOST == 0) then
+  echo "Need to setenv NEMOHOST"
+  exit 0
+endif
+
+echo "----- ----- ----- ----- ----- ----- ----- -----"
+echo "Begin loading NEMO PGPLOT on $NEMOHOST."
+echo "`date`"
+echo "----- ----- ----- ----- ----- ----- ----- -----"
+#
+set src   = $NEMO/local
+set lib   = $NEMOLIB
+cd $src/pgplot
+#
+#			Make PGDISP
+#
+echo "Creating pgdisp ........"
+pushd pgdisp >& /dev/null
+set pgm = "NEEDS_SET"
+set sys=$NEMOHOST
+if ($sys == "sun")    set pgm = make_pgdisp_ow.sh
+# if ($sys == "convex") set pgm = make_pgdisp_c38.csh
+/bin/csh -v $pgm
+if ($status == 0) then
+   mv pgdisp $NEMOBIN
+   make clean -f makefile.sun
+   ls -l $NEMOBIN/pgdisp
+   echo "........ pgdisp created."
+else
+   echo "===== Problem creating pgdisp; continuing ..."
+endif
+popd >& /dev/null
+#
+#			Make grfont.dat
+#
+echo "Creating grfont.dat ........"
+rm -fr pgpack grfont.dat
+make grfont.dat -f sys_${sys}/makefile "SRC=$src"
+if ($status != 0) then
+   echo ""
+   echo "===== Problem creating grfont.dat; continuing ..."
+   echo ""
+else
+   mv grfont.dat $lib
+   rm -fr pgpack
+   ls -l $lib/grfont.dat
+   echo "........ grfont.dat created."
+endif
+#
+#			Make libpgplot
+#
+echo "Creating libpgplot ........"
+if ($sys == sun || $sys == convex) then
+   make lib   -f sys_${sys}/makefile "SRC=$src"
+   if ($status != 0) then
+      echo "===== Problem creating libpgplot; continuing ..."
+   else
+      mv        libpgplot.a     $lib
+      if ($sys == "sun") then
+         mv libpgplot.a     $lib
+	 mv libpgplot.sa.*  $lib
+         mv libpgplot.so.*  $lib
+         pushd $lib >& /dev/null
+         ranlib -t libpgplot.a
+         foreach i (`ls libpgplot.sa.*`)
+            ranlib -t      $i
+         end
+         ls -l $lib/libpgplot.a
+         ls -l $lib/libpgplot.sa.*
+         ls -l $lib/libpgplot.so.*
+         popd >& /dev/null
+      else
+	 mv libpgplot.a  $lib
+	 ranlib $lib/libpgplot.a
+      endif
+      make clean -f sys_${sys}/makefile "SRC=$src"
+      echo "........ libpgplot created."
+   endif
+else
+   echo "Unidentified system; exiting with return code 1"
+   exit 1
+endif
+#
+# $MIRBIN/mir.pgdoc
+#
+echo "----- ----- ----- ----- ----- ----- ----- -----"
+echo "Done loading NEMO PGPLOT on $NEMOHOST."
+echo "`date`"
+echo "----- ----- ----- ----- ----- ----- ----- -----"
+echo ""
+#
+exit 0
+
