@@ -1,0 +1,27 @@
+This is NBODY0, more or less as published in Binney and Tremaine (1987).
+The minor deviations from BT87 are listed in the source code, nbody0.f
+
+It has an optional NEMO I/O interface, as explained in the
+Makefile.  One can also use the vanilla Fortran version, in which case
+the NEMO library is not needed to complete linking.  Hernquist' ascii
+205 format (see NEMO programs atos and stoa to convert from/to
+snapshots) is used to store snapshots.
+
+A manual page, nbody0.1, is available which explains the NEMO user
+interface part. It normally lives in $NEMO/man/man1, but a local
+copy is kept here, as well as an ascii formatted version of the manual
+page.
+
+A pure C version of the compute engine is also available under the name
+nbody00.c  It may run a little faster or slower then the fortran
+version (during development on my sparc-1 C was about about 10% slower
+than fortran).  The C version was generated with the public
+domain program 'f2c', and subsequently hand edited to optimize and
+improve readability. 
+
+		Peter Teuben - november 1991, may 1992
+
+Later additions:
+
+(jan-2000) The fortran-C interfaces have been converted to F77_FUNC macros, for which
+           you need NEMO.
