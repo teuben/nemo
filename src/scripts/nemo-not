@@ -1,0 +1,21 @@
+#! /bin/csh -f
+#
+#	If needed, install this in an old bin-directory 
+#
+if ($?NEMOPATH == 0) then
+  echo Environment variable NEMOPATH not set
+  echo Consult a manual
+endif
+if ($?NEMOBIN == 0) then
+  echo Environment variable NEMOBIN not set
+  echo Consult a manual
+endif
+echo ""
+echo "*****************************************************************"
+echo "You are currently running NEMO from an uninstalled bin directory:"
+echo "NEMOBIN = $NEMOBIN"
+echo "NEMO is not in place for this CPU architecture"
+echo "*****************************************************************"
+echo "command nemo found in..."
+echo `which nemo`
+
