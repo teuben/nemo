@@ -34,14 +34,14 @@ string usage = "convert tables into FITS images";
 
 #define MAXCOL 2048
 #define MAXDAT 2048
-#define MAXLINELEN   16384
+#define MAX_LINELEN   16384
 
 int get_key(char *line, char *key, char *value);
 
 void init_data(int);
 double get_next_data(int);
 
-static  char line[MAXLINELEN];
+static  char line[MAX_LINELEN];
 static  double data[MAXCOL];
 static  stream instr;
 
@@ -71,7 +71,7 @@ void nemo_main()
     while (1) {             /* read commented header values */
 
         if (fitsfile==NULL && nx*ny*nz > 0) {
-            dprintf(0,"Creating fits primary HDU %d*%d*%d\n",nx,ny,nz);
+            dprintf(0,"Creating initial fits primary HDU %d*%d*%d\n",nx,ny,nz);
             fitsfile = fitopen(getparam("out"),"new",3,naxis);
             if (fitsfile==NULL)
                 error("Could not open fitsfile for writing");
@@ -79,7 +79,7 @@ void nemo_main()
     
         get_line(instr, line);
 
-        if (!get_key(line,key,value)) {
+        if (!get_key(line,key,value)) {                /*   check if comment is # key = value */
             dprintf(0,"Read %d header lines\n",nheader);
 	    break;
 	}
@@ -93,8 +93,8 @@ void nemo_main()
         } else if (streq(key,"NAXIS3")) {
             nz = naxis[2] = atoi(value);
         } else if (strncmp(key,"CRVAL",5)==0 ||
-                 strncmp(key,"CDELT",5)==0 ||        
-                 strncmp(key,"CRPIX",5)==0) {
+		   strncmp(key,"CDELT",5)==0 ||        
+		   strncmp(key,"CRPIX",5)==0) {
             /* write real fits header */
             rvalue = atof(value);
             fitwrhdr(fitsfile,key,rvalue);		/* casting problem ??*/
