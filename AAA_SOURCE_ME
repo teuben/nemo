@@ -78,11 +78,8 @@ echo Building some sample executables by running the testsuite with -b:
 
 src/scripts/testsuite -b >>& install.log
 
-if (0) then
-  set fbins=(TestGrav gyrfalcON)
-  set arch=i386_linux
-  echo Compiling $fbins for $arch
-  ( cd usr/dehnen/falcON; make ; make $fbins; cd $arch; cp $fbins $NEMOBIN)  >& install_falcON.log
+if (1) then
+  ( cd usr/dehnen/falcON; make clean nemo_bins)  >& install_falcON.log
 endif
 
 if ($stat == 0) then
