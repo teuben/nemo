@@ -1,0 +1,15 @@
+#! /bin/csh -f
+#
+
+switch (`uname -s`)
+  case "Linux":
+    echo Linux selected
+    cd $NEMO/usr/vogl
+    make -f Makefile.linux -i DEST=$NEMOLIB 
+    make -f Makefile.linux -i DEST=$NEMOLIB  install clobber
+    mknemo snapxyz xyzview
+    breaksw
+  default:
+    echo System `uname -s` not known to me yet....
+    breaksw
+endsw
