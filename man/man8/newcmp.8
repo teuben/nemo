@@ -1,0 +1,53 @@
+.TH NEWCMP 8NEMO "8 July 2001"
+.SH NAME
+newcmp \- compare sourcecode within two directory hierarchies
+.SH SYNOPSIS
+.PP
+\fBnewcmp \fI[options]\fP \fIdir1 dir2\fP
+.SH DESCRIPTION
+\fInewcmp\fP compares the files in two directory hierarchies on a one-to-one
+basis using standard \fIdiff(1)\fP (or \fItkdiff(1)\fP, if the -tk flag is given).
+Each file in \fIdir1\fP is compared to its corresponding file within \fIdir2\fP,
+but not the other way around. For this the program needs to be re-run with the
+directory arguments swapped.
+.SH OPTIONS
+.TP 10
+-c
+count different files, don't difference them indivually. This
+will produce output as in:
+.nf
+        Counted 5 / 23 files different
+.fi
+which means 23 files were found under \fIdir1\fP, of which 5 were found to be
+different in \fIdir2\fP.
+.TP
+-m
+also report missing files in \fIdir2\fP. Normally they are sillently skipped.
+The will produce output as in:
+.nf
+        Found 3 files that were not in ....
+.fi
+.TP
+-tk
+use tkdiff instead of diff.
+.TP
+-s N
+start at difference file N instead of 1. Useful if you re-run the script
+and want to skip first N-1 differences.
+.TP
+-1 list
+take dir1
+.SH "SEE ALSO"
+diff(1), tkdiff(1), 
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2i
+$NEMO/src/scripts/newcmp        	script
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1i +4i
+8-jul-01	man page written	PJT
+.fi

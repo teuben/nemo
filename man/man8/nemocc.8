@@ -1,9 +1,13 @@
-.TH CC 8NEMO "6 November 1993"
+.TH CC 8NEMO "6 July 2001"
 .SH NAME
-nemocc, cc \- NEMO's C compiler
+nemocc, cc \- NEMO's C compiler (deprecated)
 .SH SYNOPSIS
 \fBcc\fP \fI[options]\fP ... \fIsourcefile ...\fP
 .SH DESCRIPTION
+This script is deprecated since NEMO V3 (2001) when we switched
+over to used autoconf. All compile options now have to be passed
+via $NEMOLIB/makedefs
+.PP
 The \fBcc\fP command (see also \fIcc(1)\fP)
 is normally available as a shell script in
 the \fB$NEMOBIN\fP directory, which should be part of your
@@ -21,7 +25,7 @@ with the flags set. The flags we most commonly we use are:
 .SH FILES
 .nf
 .ta +2i
-$NEMO/src/scripts	Various \fIcc.*\fP shell script examples
+$NEMO/src/scripts/cc.d	Various \fIcc.*\fP shell script examples
 .fi
 .SH "SEE ALSO"
 B. W. Kernighan and D. M. Ritchie,
@@ -32,3 +36,4 @@ B. W. Kernighan and D. M. Ritchie,
 .nf
 .ta +1i +4i
 6-nov-93	document written	PJT
+6-jul-01	NEMOBIN/cc deprecated, but kept for historic reasons	PJT

@@ -1,8 +1,16 @@
-.TH YAPP 5NEMO "8 February 1995"
+.TH YAPP 5NEMO "6 July 2001"
 .SH NAME
 yapp \- Yet Another Plotting Package
 .SH DESCRIPTION
-Various implementations exist for yapp, which are listed below.
+\fByapp\fP is NEMO's application programming interface \fIdefinition\fP
+for a graphics device.
+.PP
+Various implementations exist for \fByapp\fP, some of which are listed below.
+During installation one of them has been selected as your default
+implemention, with which all yapp-based graphics programs (a few
+programs, e.g. \fIxyzview(1NEMO)\fP) use other graphics device drivers).
+Currently (2001) most used at the PGPLOT and PS implementations.
+
 Hopefully one of them is close enough 
 (or exactly) for what you want. Note that most of them
 need to be linked (notable exceptions \fIyapp_null, yapp_ps, yapp_meta\fP)
@@ -10,9 +18,10 @@ with site dependant external libraries. For this, the environment
 variable \fBYAPPLIB\fP needs to be defined. Most common graphics program
 can then be compiled as follows:
 .nf
-    cc -o prog prog.c -lnemo $YAPPLIB -lm
+    cc -o prog prog.c $NEMOLIB/libnemo.a $YAPPLIB -lm
 .fi
-normally set through the $NEMO/NEMORC.local file. There are some
+normally set through the $NEMO/NEMORC.local file (see \fInemorc(8NEMO)\fP)
+There are some
 example $YAPP_XXX environment variables defined in the $NEMO/NEMORC
 file.
 .PP
@@ -63,11 +72,13 @@ you going on a machine with no proper yapp implementation yet.
 \fByapp_pgplot	\fP
 uses Tim Pierson`s (Caltech) PGPLOT package. We now support PGPLOT V5.
 (PJT)
+.TP
 \fByapp_plplot	\fP
 uses the U. Texas PLPLOT package, a PGPLOT lookalike written in C. (PJT)
 .TP
 \fByapp_ps		\fP
-PostScript, merged with JEBs enhanced versions(PJT)
+PostScript, merged with JEBs enhanced versions(PJT). Does not do color
+yet.
 .TP
 \fByapp_sm	\fP
 Super Mongo - not very good yet since sm doesn't have good
@@ -91,8 +102,13 @@ There are no good provisions to make sure a plot comes out in landscape or
 portrait (e.g. plplot). Some devices have problems making sure that
 the plot comes out square when it is meant to be square.
 .PP
-Treatment of colors, in particular what the backgroond and foreground
+Treatment of colors, in particular what the background and foreground
 color is, is not uniform. 
+.SH FILES
+.nf
+.ta +2.5i
+NEMO/src/kernel/yapp	various yapp_* implementations
+.fi
 .SH AUTHOR
 Joshua E. Barnes, Peter Teuben
 .SH SEE ALSO
@@ -104,4 +120,5 @@ yapp(3NEMO)
 16-nov-88	yapp_suntools added             	PJT
 26-oct-90	updated outdated documentation  	PJT
 11-nov-94	added yapp_meta 	PJT
+6-jul-01	
 .fi

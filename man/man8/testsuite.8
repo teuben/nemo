@@ -1,4 +1,4 @@
-.TH TESTSUITE 8NEMO "2 April 1997"
+.TH TESTSUITE 8NEMO "6 July 2001"
 .SH NAME
 testsuite \- 
 .SH SYNOPSIS
@@ -9,21 +9,33 @@ testsuite \-
 a core of frequently used NEMO programs.
 .SH OPTIONS
 .TP 20
--n
-dry-run, only show which directories have Testfile's
-.TP
--r
-cleanup and remove working directory $NEMO/tmp/testXXXXX afterwards
+-b
+force building new binaries for testsuite, and run the test
 .TP
 -c
 clean the NEMO directory tree itself of Testfile in/out files by running
 'make -f Testfile clean' in all directories.
 .TP
--s
-show all the binaries that are needed for each test
+-f
+force something
 .TP
 -h
 help
+.TP
+-i
+install something
+.TP
+-n
+dry-run, only show which directories have Testfile's
+.TP
+-q
+query something
+.TP
+-r
+cleanup and remove working directory $NEMO/tmp/testXXXXX afterwards
+.TP
+-s
+show all the binaries that are needed for each test
 .SH KEYWORDS
 These are supplied after all options, and take the form KEYWORD=value.
 All keywords are in upper case, since they are ``makefile'' macros.
@@ -59,4 +71,5 @@ $NEMO/tmp/testXXXXX               	directory with data and log files
 .nf
 .ta +1i +4i
 2-apr-97	V1.0: doc created       	PJT
+6-jul-01	documented newly added stuff	PJT
 .fi

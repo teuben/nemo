@@ -5,13 +5,15 @@ snapplot, trakplot \- display an N-body snapshot file
 .ds e =\h'-0.0m'
 \fBsnapplot in\*e\fPsnap-file [parameter\*evalue] .\|.\|.
 .SH DESCRIPTION
-\fIsnapplot\fP and its relatives plot a sequence of frames from a
-standard N-body snapshot file on a SUN display or post-script file.
-\fItrakplot\fP is very similar to snapplot, but does not erase and
-redraw the screen after each frame plotted, and can thus be used to
+\fIsnapplot\fP plots a sequence of frames from a
+standard N-body snapshot file on a \fIyapp(5NEMO)\fP display device.
+\fItrakplot\fP is an old name of snapplot that would 
+not erase and redraw the screen after each frame plotted, and 
+could thus be used to
 show the orbit of the selected points. The later added (boolean) 
-keyword \fBtrak=\fP (see below) can now be used to explicitely 
-set the 'trak'ing mode.
+keyword \fBtrak=\fP (see below) should now be used to explicitly 
+set the 'trak'ing mode. See also the \fBstack=\fP option
+in \fIsnapgrid(1NEMO)\fP
 .PP
 Arbitrary (algebraic) transformations from particle coordinates to
 plotting coordinates may be specified; the visibility, point type,

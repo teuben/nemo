@@ -1,10 +1,12 @@
 .TH IMPORT 8NEMO "2 April 1990"
 .SH NAME
-import \- import new files as a tar file from remote sites
+import \- import new files as a tar file from remote sites (deprecated)
 .SH SYNOPSIS
 .B import.csh 
 .I tar-file root-dir cp-prog mode
 .SH DESCRIPTION
+This script is now deprecated, we are now using CVS for source code control
+.PP
 \fBimport\fP is currently installed as a shell script
 \fIimport.csh\fP. The first parameter, \fItar-file\fP, is the name of the
 tarfile. The second parameter, \fIroot-dir\fP,
@@ -63,4 +65,5 @@ Peter Teuben
 .nf
 .ta +1.0i +4.5i
 2-apr-90	manual written	PJT
+6-jul-01	documented its deprecation	PJT
 .fi
