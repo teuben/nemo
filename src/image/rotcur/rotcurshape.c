@@ -176,7 +176,7 @@ real rotcur_poly(real r, int np, real *p, real *d)
   while (i > 1) {  /* p[0] and p[1] are special, p[2] last one in loop */
     v = v*x + p[i];
     dp = dp*x + i*p[i];
-    d[2+np-1-i] = d[2+np-2-i] * x;
+    d[np+1-i] = d[np-i] * x;
     i--;
   }
   v  = x*(1+x*v);
@@ -380,6 +380,8 @@ rotcurparse()
 	  mpar[nmod][j] = natof(sp[j+1]);
 	  mmsk[nmod][j] = natoi(sp[j+1+npar[nmod]]);
 	}
+	if (mmsk[nmod][0] && mmsk[nmod][1]) 
+	  error("Polynomial needs at least one of P1 and P2 fixed");
 	rcfn[nmod] = rotcur_poly;
       } else {
 	error("Don't have rotcur code for %s yet, you can supply your own",sp[0]);
@@ -784,16 +786,15 @@ stream lunres;   /* file for residuals */
     r=0.5*(ri+ro);                                     /* mean radius of ring */
 
     printf(" Disk range: %g %g\n",ri,ro); 
-    printf("  iter.  systemic position incli- ");
-    printf("x-center y-center ");
-    for (i=0; i<nmod; i++) {
-      for (j=0; j<npar[i]; j++)
-	printf("p[%d][%d] ",i,j);
-    }
-    printf("points  sigma\n");
+    /* printf(" %4d  %7.2f  %7.2f  %7.2f  %7.2f  %7.2f", */
+    printf(" iter   VSYS     XPOS     YPOS       PA      INC  ");
+    /*      xdddd__xxxx.xx__xxxx.xx__xxxx.xx__xxxx.xx__xxxx.xx__ */
+    /*    0       0.00    30.00    60.00    63.50    63.50    5.00    1.00    2.00    1.00     */
+    for (i=GPARAM; i<nparams; i++)
+      printf("    P%d  ",i+1-GPARAM);
+    printf("  points   sigma\n");
 
-    printf("  number velocity   angle  nation ");
-    printf("position position   \n");
+    printf("  \n");
 
     getdat(x,y,w,&n,MAXPTS,p,ri,ro,thf,wpow,&q,side,&full,nfr);  /* this ring */
     for (i=0;i<n;i++) iblank[i] = 1;
@@ -952,11 +953,11 @@ stream lunres;   /* file for residuals */
 perform_out(int h,real *p,int n,real q)
 {
   int i;
-  printf(" %4d    %7.2f  %7.2f  %5.2f  %7.2f  %7.2f",
-	 h,    p[0],   p[3],  p[4],  p[1],  p[2]);
+  printf(" %4d  %7.2f  %7.2f  %7.2f  %7.2f  %7.2f",
+	 h,    p[0],   p[1],  p[2],  p[3],  p[4]);
   for (i=GPARAM; i<nparams; i++)  
     printf(" %7.2f",p[i]);
-  printf("  %5d  %8.3f\n", n,   q);
+  printf("  %5d %8.3f\n", n,   q);
 }
 /******************************************************************************/
 
