@@ -17,6 +17,7 @@
  *				gcc -g:	  1.82   1.48 sec.
  *				gcc -O2:  0.78   0.69 sec.
  *	16-feb-97	V3.1a   fixed for SINGLEPREC
+ *       8-oct-01        3.2    add Dens and Eps
  */
 
 #include <stdinc.h>
@@ -39,8 +40,10 @@ string defv[] = {
     "ascale=1.0\n   Accelerations scale factor [1.0[,1.0,1.0]]",
     "xscale=1.0\n   Aux scale factor [1.0]",
     "kscale=1\n     Key scale factor [1]",
+    "dscale=1\n     Dens scale factor",
+    "escale=1\n     Eps scale factor",
     "times=all\n    Times to select snapshots from",
-    "VERSION=3.1a\n 16-feb-97 PJT",
+    "VERSION=3.2\n  8-oct-01 PJT",
     NULL,
 };
 
@@ -51,12 +54,12 @@ string usage="rescale a snapshot";
 void nemo_main()
 {
     stream instr, outstr;
-    real   mscale, pscale, xscale, tsnap;
+    real   mscale, pscale, xscale, tsnap, escale, dscale;
     vector rscale, vscale, ascale;
     string times;
     int i, nbody, bits, nrscale, nvscale, nascale, kscale;
     Body *btab = NULL, *bp;
-    bool Qmass, Qphase, Qacc, Qpot, Qkey, Qaux;
+    bool Qmass, Qphase, Qacc, Qpot, Qkey, Qaux, Qeps, Qdens;
     bool uscalar(), uvector();
 
     nrscale = nemoinpr(getparam("rscale"),rscale,NDIM);     /* RSCALE */
@@ -84,6 +87,8 @@ void nemo_main()
     mscale = getdparam("mscale");
     pscale = getdparam("pscale");
     xscale = getdparam("xscale");
+    dscale = getdparam("dscale");
+    escale = getdparam("escale");
     kscale = getiparam("kscale");
     times = getparam("times");
 
@@ -112,7 +117,9 @@ void nemo_main()
         Qacc   = AccelerationBit & bits&& !uvector(ascale);
         Qpot   = PotentialBit & bits   && !uscalar(pscale);
         Qaux   = AuxBit & bits         && !uscalar(ascale);
-        Qkey   = KeyBit & bits         &&(kscale!=1);
+        Qkey   = KeyBit & bits         && (kscale!=1);
+        Qdens  = DensBit & bits        && !uscalar(dscale);
+        Qeps   = EpsBit & bits         && !uscalar(escale);
 
         dprintf(1,"Scaling: ");
         if (Qmass)  dprintf(1," mass");
@@ -121,9 +128,11 @@ void nemo_main()
         if (Qpot)   dprintf(1," pot");
         if (Qaux)   dprintf(1," aux");
         if (Qkey)   dprintf(1," key");
+        if (Qdens)  dprintf(1," dens");
+        if (Qeps)   dprintf(1," eps");
         dprintf(1,"\n");
 
-        if (Qmass || Qphase || Qacc || Qpot || Qaux || Qkey) 
+        if (Qmass || Qphase || Qacc || Qpot || Qaux || Qkey || Qdens || Qeps) {
             for (bp = btab; bp < btab+nbody; bp++) {
                 if(Qmass) Mass(bp) *= mscale;
                 if(Qphase) {
@@ -137,8 +146,9 @@ void nemo_main()
                 if(Qaux) Aux(bp) *= xscale;
                 if(Qkey) Key(bp) *= kscale;
             }
-        else
+        } else {
             warning("No scaling applied to snapshot");
+	}
 
         put_snap(outstr, &btab, &nbody, &tsnap, &bits);
     }
