@@ -1,6 +1,8 @@
 #! /bin/csh -f
 #  convert (m,x,y,z,u,v,w) to 205 file format
+#  <written before tabtos existed, now one would use tabtos>
 #
+
 set in=$1
 set out=junk
 set sout=$2
