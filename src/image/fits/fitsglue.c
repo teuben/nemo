@@ -200,7 +200,13 @@ void fts_addwcs(struct fits_header *fh,int ndim,fts_wcs *wcs)
       wcs[i].cdelt = fh->cdeltn[i];
       strcpy(wcs[i].ctype, fh->ctypen[i]);
     }
-    if (wcs[2].naxis == 0) wcs[2].naxis = 1;
+    if (wcs[2].naxis == 0) {
+      wcs[2].naxis = 1;
+      wcs[2].crval = 0;
+      wcs[2].cdelt = 1;
+      wcs[2].crpix = 1;
+      strcpy(wcs[2].ctype,"UNKNOWN");
+    }
     dprintf(0,"fts_addwcs: Starting at %d x %d x %d [%s %s]\n",
 	    wcs[0].naxis, wcs[1].naxis, wcs[2].naxis,
 	    wcs[0].ctype, wcs[1].ctype);
