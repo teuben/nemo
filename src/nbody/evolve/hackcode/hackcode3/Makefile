@@ -61,12 +61,12 @@ tidy:
 	rm -f *.o $(BINFILES)
 #
 hackcode3: code.o code_io.o load_mp.o grav_mp.o util.o
-	$(CC) $(LDFLAGS) -o hackcode3 \
+	$(CC) $(CFLAGS) -o hackcode3 \
 	   code.o code_io.o load_mp.o grav_mp.o util.o \
 	$(NEMO_LIBS) $(LOCAL_LIBS) $(FORLIBS)
 
 hackcode3_qp: code.o code_io.o load_qp.o grav_qp.o util.o
-	$(CC) $(LDFLAGS) -o hackcode3_qp \
+	$(CC) $(CFLAGS) -o hackcode3_qp \
 	   code.o code_io.o load_qp.o grav_qp.o util.o \
 	$(NEMO_LIBS) $(LOCAL_LIBS) $(FORLIBS)
 
@@ -108,7 +108,7 @@ util.o: util.c defs.h
 # 2_D versions (not exported to NEMO though)
 
 hackcode3_2d: code_2d.o code_io_2d.o load_2d.o grav_2d.o util_2d.o
-	$(CC) $(LDFLAGS) -o hackcode3_2d \
+	$(CC) $(CFLAGS) -o hackcode3_2d \
 	   code_2d.o code_io_2d.o load_2d.o grav_2d.o util_2d.o \
 	   $(NEMO_LIBS)
 

@@ -11,6 +11,7 @@
  *                      also use nemo_main now
  *     24-mar-94  V1.2c ansi + using allocate()
  *	8-sep-01	init_xrandom
+ *     11-jan-02      d debug= renamed to hdebug=
  */
 
 #include "code.h"
@@ -48,12 +49,15 @@ string defv[] = {		/* DEFAULT PARAMETER VALUES */
     "potpars=\n			Parameters for potential(5)",
     "potfile=\n			Filename for potential(5)",
 
-    "debug=false\n		Turn on debugging messages",
-    "VERSION=1.2c\n		8-sep-01 PJT",
+    "hdebug=false\n		Turn on debugging messages",
+    "VERSION=1.2d\n		11-jan-02 PJT",
     NULL,
 };
 
 string headline = "Hack code3";	/* default id for run */
+
+string usage = "hierarchical N-body code, with potential(5NEMO) descriptors";
+
 
 nemo_main()
 {
@@ -79,7 +83,9 @@ startrun()
     contfile = getparam("continue");
     savefile = getparam("save");
     options = getparam("options");		/* set control options      */
-    debug = getbparam("debug");
+    debug = getbparam("hdebug");
+    if (debug)
+	dprintf(0,"hdebug is turned on");
     nrigid = getiparam("nrigid");
     if (*contfile != NULL)			/* resume interrupted run   */
 	restorestate(contfile);
