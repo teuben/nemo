@@ -4,6 +4,16 @@
 #  ((to $NEMOLIB via the "make config_extra" command during the))
 #  (("make postconfig" step of the install))
 
+
+# we could actually also define a set of NEMO, and derived, variables, such that the build
+# system does not need to source nemo_start
+# NEMO = @NEMO@
+# NEMOLIB = $(NEMO)/lib
+# NEMOBIN = $(NEMO)/bin
+# NEMOOBJ = $(NEMO)/obj
+# NEMOINC = $(NEMO)/inc
+
+
 # handy for recursion
 @SET_MAKE@
 
@@ -87,7 +97,11 @@ GLLIBS = @GLLIBS@
 XLIBS = @XLIBS@
 
 #			generic compile flags for C,Fortran,Linker
+# If you must absolutely be pedantic, the following gnu compiler flags are the recommended ones
+# (see GSL users guide - appendix A)
+# PEDFLAG="-ansi -pedantic -Werror -Wall -W -Wmissing-prototypes -Wstrict-prototypes -Wtraditional -Wconversion -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align  -Wwrite-strings -Wnested-externs  -fshort-enums -fno-common -Dinline= -g -O4"
 #   optimization only
+
 OPT = @CFLAGS@
 FOPT = @FFLAGS@
 LOPT = @LDFLAGS@
