@@ -1,0 +1,56 @@
+.TH TABCOLS 1NEMO "26 January 2000"
+.SH NAME
+tabcols \- Select columns, and optionally rearrange, from a table
+.SH SYNOPSIS
+\fPtabcols\fP [parameter=value] ...
+.SH DESCRIPTION
+\fBtabcols\fP selects columns from a file, and can also re-arrange the
+output column order. New column separators can be used on output.
+This way a newline on input can be converted into a space on 
+output and therefore creating a file with one long column from
+a table with mulitple columns.
+.PP
+To select lines, use \fItablines(1NEMO)\fP or \fItabmath(1NEMO)\fP.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+input file name(s). No default.
+.TP
+\fBout=\fP
+output file name. No default.
+.TP
+\fBselect=\fP
+list of columns to select. Any \fInemoinp(1NEMO)\fP  expression can be used.
+Columns can be repeated, and in any order. The output will be in exactly
+the same order as given with this keyword. First column is 1.
+[all]    
+.TP
+\fBcolsep=\fP
+Column separator. Valid are: \fBs\fP (space), \fBn\fP (newline), 
+\fBt\fP (tab), 
+\fBr\fP (carriage return), as well as the literal symbols '\fB,\fP' 
+and '\fB:\fP'.
+[Default: \fBs\fP]
+.SH EXAMPLE
+Here is an example of how to reverse the columns from a table with 4 columns:
+.nf
+    tabcols in.tab out.tab 4:1:-1
+.fi
+and here is an example that
+re-arranges all the numbers in a table in one long column
+.nf
+    tabcols in.tab out.tab all n
+.fi
+.SH SEE ALSO
+tablines(1NEMO), tabmath(1NEMO), tabs(1NEMO), awk(1)
+.SH FILES
+src/kernel/tab/tabcols.c   source code
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+26-Jan-00	V1.0 Created 	PJT
+.fi
