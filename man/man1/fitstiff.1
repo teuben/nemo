@@ -1,0 +1,100 @@
+.TH FITSTIFF 1NEMO "24 May 1995"
+.SH NAME
+fitstiff \- convert FITS file into TIFF file
+.SH SYNOPSIS
+\fBfitstiff\fP [parameter=value]
+.SH DESCRIPTION
+\fIfitstiff\fP converts a \fIfits(5NEMO)\fP into a \fItiff\fP file.
+The data are scaled between 0 and 255 as a 8 bit image.
+.PP
+In principle multiple image planes can be stored in a single
+\fItiff\fP file (but the author doesn't know how to do it yet).
+.PP
+Although by default there is no colormap written, and the image
+is really a 8-bit greyscale, a colormap can be defined from a 256-entry
+ascii RGB table, of which examples can be found in $NEMODAT/lut.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP\fIfits_file\fP
+Input fits file. No default.
+.TP
+\fBout=\fP\fItiff_file\fP
+Output tiff file. No default.
+.TP
+\fBplanes=\fP\fIp1,p2,...\fP
+Planes to select from fits cube [all] 
+Plane numbers run from 1 to the length of the 3rd axis of the cube.
+.TP
+\fBdatamin=\fP
+Min, if to override FITS header value 'DATAMIN'. 
+By default the FITS reader tries to be smart and searches the FITS
+header for what the datamin should be.
+.TP
+\fBdatamax=\fP
+Max, if to override FITS header value 'DATAMAX'. See comments above.
+.TP
+\fBlut=\fP\fIname\fB[.lut]\fP
+Name of colormap. This may be a full filename, or it's basename
+where a searchpath \fB".:$NEMODAT/lut"\fP will be tried to 
+find the LUT table file. A default extension \fB".lut"\fP is assumed.
+Default: no colortable, the output TIFF file will be a greyscale map.
+.TP
+\fBcompress=t|f\fP
+Turn LZW compresssion on? [Default: \fBt\fP].
+.SH TIFF CLASSES
+\fIfitstiff\fP does not support all known
+TIFF Classes:
+.TP
+Class B 
+for bilevel (1-bit) images. Not supported.
+.TP
+Class G 
+for grayscale images. This is the default.
+.TP
+Class P 
+for palette color images. Only used when a RGB look-up table is 
+supplied (see \fBlut=\fP).
+.TP
+Class R 
+for RGB full color images. Not supported.
+.TP
+Class F
+For Faxes. Not supported.
+.SH LIMITATIONS
+The datamin/max is only attempted to be retrieved from the FITS
+header, if not given as an explicit parameter to the program. The
+data is not scanned.
+.SH EXAMPLES
+After a \fItiff\fP file has been constructed, it can be previewed in
+a number of ways:
+.PP
+If your system manager has installed \fIxtiff\fP, it's straightforward:
+.nf
+	\fBxtiff\fP \fItiff_file\fP
+.fi
+.PP
+If Jef Poskanzer's PBM package has been installed, the following may also work:
+.nf
+	\fBtifftopnm <\fP \fItiff_file\fP \fB| pnmtoxwd | xwud\fP
+.fi
+The public domain package \fIlibtiff(3)\fP contains a number of utilities
+to operate on TIFF files, and the SDSC program \fIimconv(1)\fP converts
+TIFF to a variety of other formats.
+.SH SEE ALSO
+xtiff(1), fits(5NEMO), tiffinfo(1), libtiff(3)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2i
+$NEMODAT/lut	directory of ascii RGB look-up tables
+.fi
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+xx-nov-91	V0 Created - never used though	PJT
+15-nov-92	V0.1 smart autoscaling   	PJT
+25-may-95	V0.2 added compress=, fixed bug due to new fitsio	PJT
+.fi
