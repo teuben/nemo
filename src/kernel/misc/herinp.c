@@ -54,6 +54,7 @@
  *               7-apr-01: gcc warning                                     pjt
  *		20-jun-01: gcc3, const->hconst				   pjt
  *               3-nov-01: use NEMO's random numbers, not rand()           pjt
+ *              10-nov-03: allow and handle "null" more gracefully         pjt
  */
 
 #define BIGLOOP /* comment this our if you want MAXSHORT as largest count */
@@ -142,11 +143,11 @@ static double dcd_ifge(double arg1, double arg2, double arg3, double arg4);
 static double dcd_ifle(double arg1, double arg2, double arg3, double arg4);
 static double dcd_ifeq(double arg1, double arg2, double arg3, double arg4);
 static double dcd_ifne(double arg1, double arg2, double arg3, double arg4);
-static double dcd_null(void);
 static double dcd_ran(void);
 static double dcd_ranu(double arg1, double arg2);
 static double dcd_rang(double arg1, double arg2);
 static double dcd_ranp(double arg1);
+static void   dcd_null(void);
 static void   dcd_evaluate(int q);
 
 /*  definitions/declarations for the function code  */
@@ -256,6 +257,7 @@ static char   ctyp;
 static int    ilen, nmax;
 static double dval;
 static int    nval;
+static int    have_null;
 
 static union {
    byte    b[bid];
@@ -1310,6 +1312,10 @@ static double dcd_ranp(double arg1)
      return(val);
    }
 }
+static void dcd_null(void)
+{
+  have_null = 1;
+}
      
 static void dcd_evaluate(int q)
 {
@@ -1412,7 +1418,7 @@ static void dcd_evaluate(int q)
 /* tand  */ case 48: dcd_push(tan(dcd_rad(arg[0]))); break;
 /* atand */ case 49: dcd_push(dcd_deg(dcd_atan(arg[0]))); break;
 /* atand2*/ case 50: dcd_push(dcd_deg(dcd_atan2(arg[0],arg[1]))); break;
-/* null  */ case 51: error("no null yet"); break;
+/* null  */ case 51: dcd_null(); break;
             default: opc = err; break;
          }; break;
       };
@@ -1461,6 +1467,7 @@ void herinp(
    npar = 0;
    codeptr = 0;
    opcodeptr = 0;
+   have_null = 0;
    ch = ' ';
    dcd_inifblank();
    switch(ctyp) {
@@ -1685,7 +1692,7 @@ nemo_main()
 #if 0         	
             if (fblank_(&outv[n])) printf("BLANK\n"); else {
 #else
-            if (1) {
+            if (have_null) printf("NULL\n"); else {
 #endif            	
                if (outv[n] != 0.0) {
                   p = log10(fabs(outv[n]));
