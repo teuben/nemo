@@ -1,0 +1,51 @@
+.TH CCDSUB 1NEMO "22 February 1997"
+.SH NAME
+ccdsub \- sub/average of an image
+.SH SYNOPSIS
+\fBccdsub\fP [parameter=value]
+.SH DESCRIPTION
+\fBccdsub\fP takes a subimage from an image, as described by a new
+set of coordinates in X, Y and/or Z (since the expression of the
+selected axes is arbitrary, the resulting coordinate system may
+be bogus).
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input image file     
+.TP
+\fBout=\fP
+Output image file     
+.TP
+\fBx=\fP
+X coordinates to select    
+.TP
+\fBy=\fP
+Y coordinates to select    
+.TP
+\fBz=\fP
+Z coordinates to select    
+.TP
+\fBaver=\fP
+Coordinates to average     
+.TP
+\fBnxaver=\fP
+Number X to aver (size remains same) 
+.TP
+\fBnyaver=\fP
+Number Y to aver (size remains same) 
+.TP
+\fBskip=\fP
+Coordinates to skip     
+.SH EXAMPLES
+.SH SEE ALSO
+ccdslice(1NEMO), ccdmom(1NEMO), image(5NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+1993     	code written     	PJT
+22-Feb-97	man page written	PJT
+.fi
