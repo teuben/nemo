@@ -5,10 +5,10 @@
 //                                                                             |
 // C++ code                                                                    |
 //                                                                             |
-// Copyright Walter Dehnen, 2002                                               |
-// e-mail:   dehnen@mpia.de                                                    |
-// address:  Max-Planck Institut fuer Astronomie,                              |
-//           Koenigstuhl 17, D-69117 Heidelberg, Germany                       |
+// Copyright Walter Dehnen, 2002-2004                                          |
+// e-mail:   walter.dehnen@astro.le.ac.uk                                      |
+// address:  Department of Physics and Astronomy, University of Leicester      |
+//           University Road, Leicester LE1 7RH, United Kingdom                |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 //                                                                             |
@@ -36,89 +36,87 @@
 // Versions                                                                    |
 // 0.0   06-jun-2002    created                                           WD   |
 // 0.1   28-dec-2002    replaced NEMO's <stdinc.h> for gcc3              PJT   |
+// 0.2   23-aug-2004    added acceleration support using defacc.h         WD   |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 #include <iostream>
 #include <fstream>
-using namespace std;		
-//=============================================================================#
-void dummy()
-{
-  std::cerr<<" this is a dummy\n";
-}
-//=============================================================================#
-// declare externally linkable C routines                                      |
-//=============================================================================#
-extern "C" {
-  //  #include <stdinc.h>     this code really only need warning/error
-  //  gcc3 using string, which NEMO also has (but different)
-  extern void warning(char *, ...);
-  extern void error(char *, ...);
-  extern void nemo_dprintf(int, char *, ...);
-  void inipotential    (int*, double*, char *);
-  void potential_double(int*, double*, double*, double*, double*);
-  void potential_float (int*, float *, float *, float *, float *);
-}
-//=============================================================================#
-// define C++ implementation of Galaxy potential                               |
-//=============================================================================#
+using namespace std;
+#define POT_DEF
+#include <defacc.h>
+////////////////////////////////////////////////////////////////////////////////
 #include "inc/GalPot.cc"
-//=============================================================================#
-// now define externally linkable C routines                                   |
-//=============================================================================#
-static GalaxyPotential *POT = 0;
+////////////////////////////////////////////////////////////////////////////////
+namespace {
+  using GalPot::GalaxyPotential;
+
+  class GalaxyFile {
+  protected:
+    ifstream from;
+    GalaxyFile(const char*file)
+    {
+      if(file==0 || file[0]==0) 
+	error("Need data file to initialize GalPot");
+      from.open(file);
+      if(!from.is_open())
+	error("GalPot: cannot open file \"%s\"",file);
+    }
+  };
+  //////////////////////////////////////////////////////////////////////////////
+  class GalaxyPot : 
+    private GalaxyFile,
+    private GalaxyPotential
+  {
+  public:
+    //--------------------------------------------------------------------------
+    static const char* name() { return "GalPot"; }
+    bool NeedMass() const { return false; }
+    bool NeedVels() const { return false; }
+    //--------------------------------------------------------------------------
+    GalaxyPot(const double*pars,
+	      int          npar,
+	      const char  *file)
+      : GalaxyFile     ( file ),
+	GalaxyPotential( from )
+    {
+      double omega = (npar>0)? pars[0] : 0.;
+      if (npar>1) warning("Skipped potential parameters for GalPot beyond 1");
+      from.close();
+    }
+    //--------------------------------------------------------------------------
+    template<int NDIM, typename scalar>
+    void set_time(double       ,
+		  int          ,
+		  const scalar*,
+		  const scalar*,
+		  const scalar*) const {}
+    //--------------------------------------------------------------------------
+    template<int NDIM, typename scalar>
+    void acc(const scalar*,
+	     const scalar*X,
+	     const scalar*,
+	     scalar      &P,
+	     scalar      *A) const
+    {
+      register double fR,fz,R=hypot(X[0],X[1]);
+      if(NDIM > 2) {
+	P    = 1.e6 * GalaxyPotential::operator()(R, X[2], fR, fz);
+	fR  *=-1.e6/R;
+	A[0] = fR * X[0];
+	A[1] = fR * X[1];
+	A[2] =-1.e6 * fz;
+      } else {
+	P    = 1.e6 * GalaxyPotential::operator()(R, 0.,   fR, fz);
+	fR  *=-1.e6/R;
+	A[0] = fR * X[0];
+	A[1] = fR * X[1];
+      }
+    }
+  };
+} // namespace {
 //------------------------------------------------------------------------------
-void inipotential(int *npar, double *par, char *file) {
-  double omega = (*npar>0)? par[0] : 0.;
-  if (*npar>1) warning("Skipped potential parameters for GalPot beyond 1");
-  if (file==0) 
-    error("Need potfile to initialize GalPot, please consult $NEMODAT/GalPot");
-  ifstream from(file);
-  if (!from)   error  ("Cannot open potfile in initialization of GalPot");
-  if(POT) delete POT;
-  POT = new GalaxyPotential(from);
-  from.close();
-  nemo_dprintf (1,"INI_POTENTIAL Dehnen & Binney (1998) Galaxy potential\n");
-  nemo_dprintf (1,"  Parameters read from file %s\n",file);
-}
-//------------------------------------------------------------------------------
-void potential_double (int    *NDIM,
-		       double *X,
-		       double *F,
-		       double *P,
-		       double *T)
-{
-  if(POT) {
-    register double fR,fz,R=hypot(X[0],X[1]);
-    *P   = 1.e6 * (*POT)(R,(*NDIM>2)? X[2]:0., fR, fz);
-    fR  /= R;
-    F[0] =-1.e6 * fR * X[0];
-    F[1] =-1.e6 * fR * X[1];
-    if(*NDIM>2) 
-      F[2] =-1.e6 * fz;
-  }
-  else
-    error("potential GalPot not initialized");
-//     cerr<<"potential GalPot not initialized\n";
-}
-//------------------------------------------------------------------------------
-void potential_float  (int    *NDIM,
-		       float  *X,
-		       float  *F,
-		       float  *P,
-		       float  *T)
-{
-  if(POT) {
-    register double fR,fz,R=hypot(X[0],X[1]);
-    *P   = 1.e6 * (*POT)(R,(*NDIM>2)? X[2]:0., fR, fz);
-    fR  /= R;
-    F[0] =-1.e6 * fR * X[0];
-    F[1] =-1.e6 * fR * X[1];
-    if(*NDIM>2) 
-      F[2] =-1.e6 * fz;
-  }
-  else
-    error("potential GalPot not initialized");
-//     cerr<<"potential GalPot not initialized\n";
-}
+
+__DEF__ACC(GalaxyPot)
+__DEF__POT(GalaxyPot)
+
 //------------------------------------------------------------------------------

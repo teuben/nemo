@@ -25,7 +25,9 @@ INCFILES =
 SRCFILES= Makefile \
 	athan92.f \
 	bar83.c bulge1.c ccd.c cp80.c dehnen.c dublinz.c expdisk.c flatz.c halo.c \
-	GalPot.cc grow_plum.c grow_plum2.c \
+	Combined.cc Dehnen.cc Hernquist.cc NFW.cc GalPot.cc MiyamotoNagai.cc \
+	Plummer.cc \
+	grow_plum.c grow_plum2.c \
 	harmonic.c harmonicf.f hernquist.c hom.c hubble.c kuzmindisk.c \
 	isochrone.c jaffe.c log.c mestel.c miyamoto.c nfw.c null.c \
 	op73.c piner94.f plummer.c plummer2.c rh84.c rotcur0.c rotcur.c teusan85.c triax.c \
@@ -33,7 +35,9 @@ SRCFILES= Makefile \
 OBJFILES=\
 	athan92.so \
 	bar83.so bulge1.so ccd.so cp80.so dehnen.so dublinz.so expdisk.so flatz.so halo.so \
-	GalPot.so grow_plum.so grow_plum2.so \
+	Combined.so \
+	Dehnen.so Hernquist.so NFW.so GalPot.so MiyamotoNagai.so Plummer.so \
+	grow_plum.so grow_plum2.so \
 	harmonic.so harmonicf.so hernquist.so hom.so hubble.so kuzmindisk.so \
 	isochrone.so jaffe.so log.so mestel.so miyamoto.so nfw.so null.so \
 	op73.so piner94.so plummer.so plummer2.so rh84.so rotcur0.so rotcur.so teusan85.so triax.so \

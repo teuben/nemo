@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef included_acceleration_h
-#define included_acceleration_h
+#ifndef _acceleration_h
+#define _acceleration_h
 
 #ifdef __cplusplus
 extern "C" {
@@ -71,4 +71,4 @@ acc_pter get_acceleration(               /* return: acceleration()         */
 #ifdef __cplusplus
 }
 #endif
-#endif // included_acceleration_h
+#endif // _acceleration_h
