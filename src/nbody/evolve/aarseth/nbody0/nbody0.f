@@ -36,11 +36,11 @@ CSED	The next statement can be modified with SED to toggle type
      -    d1(NDIM,NMAX),d2(NDIM,NMAX),d3(NDIM,NMAX),
      -    t1(NMAX),t2(NMAX),t3(NMAX),a(17),
      -    f1(NDIM),f1dot(NDIM),f2dot(NDIM),f3dot(NDIM)
-      INTEGER   nsteps, n, i, j, k, makesure,reset
+      INTEGER   nsteps, n, i, j, k, makesure,reset,use3dot
 
       DATA  time,tnext,nsteps /0.0,0.0,0/
 C-----------------------------------------------------------------------
-      CALL INPARS(NMAX,n,eta,deltat,tcrit,eps2,reset)
+      CALL INPARS(NMAX,n,eta,deltat,tcrit,eps2,reset,use3dot)
       CALL INBODS (n, body, x0, x0dot)
    
 C           obtain total forces and first derivative for each body

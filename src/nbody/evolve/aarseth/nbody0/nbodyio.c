@@ -28,6 +28,7 @@ local int   nbody;                  /* actual number of bodies */
 local int   bits;                   /* bitmask what's in snapshot */
 local bool  Qstep;
 local bool  Qreset;
+local bool  Qf3dot;
 
 local stream instr;                    /* - pointer to input file */
 local stream outstr;                   /* - pointer to output file */
@@ -56,6 +57,7 @@ void pars_2_aarseth(void)
     l_eps2 = (double) sqr(getdparam("eps"));
 
     Qreset = getbparam("reset");
+    Qf3dot = getbparam("f3dot");
 
     if (hasvalue("options"))
     	Qstep = TRUE;
@@ -98,9 +100,9 @@ void call_2_aarseth(void)
  * (fortran) INPARS: read global integration parameters
  */
 
-void inpars (nmax, n, eta, deltat, tcrit, eps2, reset)
-    int *nmax, *n, *reset;
-    double *eta, *deltat, *tcrit, *eps2;
+void inpars (nmax, n, eta, deltat, tcrit, eps2, reset, use3dot)
+     int *nmax, *n, *reset, *use3dot;
+     double *eta, *deltat, *tcrit, *eps2;
 {
     if (nbody > *nmax)
         error("Too many particles (%d) in inputfile, recompile (%d) program",
@@ -110,7 +112,8 @@ void inpars (nmax, n, eta, deltat, tcrit, eps2, reset)
     *deltat = l_deltat;
     *tcrit  = l_tcrit;
     *eps2   = l_eps2;
-    *reset  =(Qreset ? 1 : 0);
+    *reset  = (Qreset ? 1 : 0);
+    *use3dot= (Qf3dot ? 1 : 0);
 }
 
 /*

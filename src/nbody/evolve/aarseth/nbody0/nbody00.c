@@ -28,6 +28,7 @@
  *       21-jan-00   added debug output and reset= option
  *       21-feb-04   stop if f2dot is 0
  *       24-feb-04   compute steps from fdot/f3dot if f2dot=0
+ *       13-mar-04   nreset was not initialized
  */
 
 
@@ -60,7 +61,7 @@ void nbody0(void)
 {
     /* Initialized data */
     double time = 0.0, tnext = 0.0, e0;
-    int nsteps = 0, makesure, nout = 0, nreset;
+    int nsteps = 0, makesure, nout = 0, nreset=0;
     double time0, time1=0.0;        /* counters for my timing/debugging */
 
     /* System (f2c) generated locals */
@@ -75,10 +76,10 @@ void nbody0(void)
 	   t0[NMAX], t1[NMAX], t2[NMAX], t3[NMAX], x0[NDIM*NMAX], 
 	   dt, deltat, dt1, dt2, dt3, eta, eps2, t1pr, t2pr, t3pr;
     double sum_f, sum_fdot, sum_f2dot, sum_f3dot;
-    int    i, j, k, n, itmp, reset;
+    int    i, j, k, n, itmp, reset, use3dot;
 
 
-    inpars(&c_nmax, &n, &eta, &deltat, &tcrit, &eps2, &reset);
+    inpars(&c_nmax, &n, &eta, &deltat, &tcrit, &eps2, &reset, &use3dot);
     inbods(&n, body, x0, x0dot);
 
 /*           obtain total forces and first derivative for each body */

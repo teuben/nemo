@@ -7,7 +7,7 @@
 #  define outene  F77_FUNC(outene,OUTENE)
 
 extern void nbody0(void);
-extern void inpars (int *, int *, double *, double *, double *, double *, int *);
+extern void inpars (int *, int *, double *, double *, double *, double *, int *, int *);
 extern void inbods (int *, double *, double *, double *);
 extern void outbods (double *, double *, double *, double *, int *);
 extern void outene (double *, int *, double *);

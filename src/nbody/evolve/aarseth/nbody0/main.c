@@ -10,6 +10,7 @@
  *	 6-jan-00       V1.3b changed to F77_FUNC macros	PJT
  *	21-jan-00	V1.4 added reset=t|f	PJT
  *      21-feb-04       V1.5 protection for f2dot=0   PJT
+ *      24-feb-04       V2.0 added f3dot=   ** only for nbody00 now ** PJT
  */
 
 #include <stdinc.h>
@@ -22,15 +23,16 @@ string defv[] = {
     "tcrit=2\n      When to stop integrating",
     "eps=0.05\n     Softening length",
     "reset=t\n      Reset timestep after datadump (debug) (t|f)",
+    "f3dot=f\n      Use more advanced timestep determination criterion?",
     "options=\n     Optional output of 'step' into AUX",
-    "VERSION=1.5a\n 24-feb-04 PJT",
+    "VERSION=2.0a\n 13-mar-04 PJT",
     NULL,
 };
 
 string usage = "NEMO driver for nbody0";
 
-extern void pars_2_aarseth(void), 
-	    call_2_aarseth(void);
+extern void pars_2_aarseth(void); 
+extern void call_2_aarseth(void);
 
 /*
  *  nemo_main is the main() type entry for the program. The functions
@@ -38,8 +40,7 @@ extern void pars_2_aarseth(void),
  *  layer.
  */
 
-void
-nemo_main()
+void nemo_main(void)
 {
     pars_2_aarseth();       /* get parameters */
     call_2_aarseth();       /* run the code */
