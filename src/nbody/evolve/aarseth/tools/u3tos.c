@@ -24,7 +24,7 @@ string defv[] = {
     "alen=\n        If given, override length of A array (0=do not read A)",
     "swap=f\n       Swap byte (big vs. little endian only)",
     "integer=4\n    Size of integers in dataset (2 or 4)",
-    "VERSION=1.3a\n 16-jun-97 PJT",
+    "VERSION=1.3b\n 18-sep-01 PJT",
     NULL,
 };
 
@@ -34,7 +34,7 @@ string usage = "Convert NBODY output to snapshot";
 #define MAXFRAME  512
 #define MAXHEADER  32
 
-extern int file_size(string);
+extern int nemo_file_size(string);
 
 
 void nemo_main(void)
@@ -56,7 +56,7 @@ void nemo_main(void)
     Qswap = getbparam("swap");
     ilen = getiparam("integer");
 
-    if (file_size(fname) < 0) error("File %s does not exist",fname);
+    if (nemo_file_size(fname) < 0) error("File %s does not exist",fname);
     outstr = stropen(getparam("out"),"w");
     put_history(outstr);
 #ifdef FIO

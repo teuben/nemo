@@ -19,13 +19,13 @@ string defv[] = {
     "in=???\n                     input file name",
     "out=\n                       output file name [fort.4]",
     "nbody=0\n                    test if this nbody is ok (0=no test)",
-    "VERSION=1.1\n		  11-jul-97 PJT",
+    "VERSION=1.1a\n		  18-sep-01 PJT",
     NULL,
 };
 
 string usage = "convert snapshot to unit-4 for NBODYx";
 
-extern int file_size(string);
+extern int nemo_file_size(string);
 
 void nemo_main(void)
 {
@@ -45,8 +45,7 @@ void nemo_main(void)
         nb4open_(fname,strlen(fname));
     } else
         fname = "fort.4";
-    if (file_size(fname) > 0) warning("Overwriting %s",fname);
-
+    if (nemo_file_size(fname) > 0) warning("Overwriting %s",fname);
 
 	get_set(instr, SnapShotTag);
 	get_set(instr, ParametersTag);

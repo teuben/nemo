@@ -17,7 +17,7 @@ string defv[] = {
     "in=\n          Input file (in UNIT 4 format)",
     "out=???\n      Output file (snapshot(5NEMO) format)",
     "nbody=\n       Input Number of particles",
-    "VERSION=1.0b\n 16-jun-97 PJT",
+    "VERSION=1.0c\n 18-sep-01 PJT",
     NULL,
 };
 
@@ -25,7 +25,7 @@ string usage = "Convert NBODY unit-4 file to snapshot";
 
 #define SIZEPP  36      /* 36 bytes per particle on fort.4 */
 
-extern int file_size(string);
+extern int nemo_file_size(string);
 
 void nemo_main(void)
 {
@@ -45,7 +45,7 @@ void nemo_main(void)
     if (hasvalue("nbody")) {
 	nbody = getiparam("nbody");
     } else {
-        nbody = file_size(fname);
+        nbody = nemo_file_size(fname);
         if (nbody%SIZEPP != 0) 
             error("Strange filesize %s; try setting nbody=",fname);
         nbody /= SIZEPP;
