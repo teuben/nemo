@@ -1,0 +1,44 @@
+.TH CCDSHARP 1NEMO "5 April 1996"
+.SH NAME
+ccdsharp \- enhance/sharpen an image
+.SH SYNOPSIS
+\fBccdsharp\fP [parameter=value]
+.SH DESCRIPTION
+Various methods to sharpen/image enhance an image can be tried out here.
+The program is not very consistent in coordinate systems, some 
+(such as laplace) preserve it, others (aregan/pregan) shift the image
+by half a pixel. Most images will have some edge effects too. For
+divergence/vorticity the images are assumes to be \fBvx\fP and
+\fBvy\fP, in that order.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input image file. For certain modes (see \fBmode=\fP below)
+the input file must contain at least two images. No default.
+.TP 20
+\fBout=\fP
+Output image file.
+No default.
+.TP 20
+\fBmode=\fP
+Modes (laplace, aregan, pregan, divergence, vorticity).
+Minimum match applies. 
+[Default: \fBlaplace\fP].
+.SH EXAMPLES
+To compute the vorticity of two images, vx and vy, containing
+the X and Y velocities you would:
+.nf
+    cat vx vy | ccdsharp - v.vor vor
+.fi
+.SH SEE ALSO
+ccdmath(1NEMO)
+.SH AUTHOR
+Peter Teuben, 
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+20-Sep-95	V0.1 Created 	PJT
+5-apr-96	V0.2 added divergence, vorticity	PJT
+.fi
