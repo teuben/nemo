@@ -4,12 +4,16 @@
 #   $NEMO to make it (anonymoous) cvs enabled
 #
 
-set nemo=nemo_tmp
+set nemo=nemo_$$
+set tar=nemo_cvsdir.tar.gz
 
 setenv CVSROOT :pserver:anonymous@cvs.astro.umd.edu:/home/cvsroot
-if (! -d $nemo) then
-  echo Getting new NEMO
-  cvs -Q co -d $nemo nemo
+echo Getting new NEMO
+cvs -Q co -d $nemo nemo
 endif
 cd $nemo
-tar zcf ../nemo_cvsdir.tar.gz `find . -type d -name CVS -print`
+echo Making $tar
+tar zcf ../$tar `find . -type d -name CVS -print`
+echo Cleaning
+rm -rf $nemo
+
