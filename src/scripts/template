@@ -3,7 +3,7 @@
 #
 if ( $#argv == 0 ) then
   echo "Usage: $0 progname key1=def1 ..."
-  echo "version 15-apr-2003"
+  echo "version 20-sep-2003"
   echo "Write template NEMO program based on keywords and default values"
   echo "Output will be in a file progname.c, which cannot be overwritten"
   
@@ -26,14 +26,13 @@ e '/*' > $name
 e ' *  TEMPLATE: created by NEMO ' >> $name
 e ' */' >> $name
 e '' >> $name
-e '#include <stdinc.h>' 	>> $name
-e '#include <getparam.h>'	>> $name
+e '#include <nemo.h>' 		>> $name
 e '' >> $name
 e 'string defv[] = {'		>> $name
 foreach a ($argv)
-e '    "'$a'\\n    some help",'	>> $name
+e '    "'$a'\n    some help",'	>> $name
 end
-e '    "VERSION=0.0\\n      '$date' XYZ",'		>> $name
+e '    "VERSION=0.0\n       '$date' XYZ",'		>> $name
 e '    NULL,'			>> $name
 e '};'				>> $name
 e '' >> $name
