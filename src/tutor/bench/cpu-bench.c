@@ -168,6 +168,7 @@ void time_action(action a, int factor, char *name, int ntmax)
 nemo_main()
 {
     int n = NMAX;
+    int test = getiparam("test");
 
     if (hasvalue("n")) n = getiparam("n");
 
