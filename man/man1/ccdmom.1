@@ -1,0 +1,51 @@
+.TH CCDMOM 1NEMO "25 March 2001"
+.SH NAME
+ccdmom \- moment along an axis of an image
+.SH SYNOPSIS
+\fBccdmom\fP [parameter=value]
+.SH DESCRIPTION
+\fBccdmom\fP takes special moments along an axis of an image/cube.
+.PP
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input image file. No default.
+.TP
+\fBout=\fP
+Output image file. No default.
+.TP
+\fBaxis=\fP
+Axis to take moment along (1=x 2=y 3=z)
+[Default: \fB1\fP]
+.TP
+\fBmom=\fP
+Moment to take [-1,0,1,2,3..]    
+Compute either the sum (0), mean (1), dispersion (2), or peak location (3). Negative
+numbers also have a special meaning. -1 computes the average intensity along the axis.
+[Default: \fB0\fP].
+.TP
+\fBkeep=t|f\P
+Boolean value if to keep the moment axis. If you keep the axis (instead
+of compressing it), the values are replaced with the computed moment.
+This can be useful if you want to subtract an cube/image with the
+mean value along a certain axis. 
+[Default: \fBf\fP].
+.SH BUGS
+Cannot compute straight moments, e.g. the 2nd moment along an axis, the 
+program only computes user friendly numbers (sum, mean, dispersion)
+.SH FILES
+src/image/misc/ccdmom.c
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+09-jun-95	V0.1 Created	PJT
+19-oct-95	V0.2 simple implementation of axis=3	PJT
+12-dec-98	V0.3 finished mom=0,1,2 for all axes	PJT
+31-dec-98	V0.4 added keep=	PJT
+21-feb-01	V0.4a added mom=3, and fixed major bugs in computing moments	PJT
+25-mar-01	V0.5 added mom=-1	PJT
+.fi
