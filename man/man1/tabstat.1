@@ -1,0 +1,65 @@
+.TH TABSTAT 1NEMO "24 January 2000"
+.SH NAME
+tabstat \- table column statistics
+.SH SYNOPSIS
+\fBtabstat\fP [parameter=value]
+.SH DESCRIPTION
+\fBtabstat\fP performs table statistics, much like tabhist without
+graphical output but with multiple columns. It also contains
+an iterative worst outlier removal.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input file name (table)
+[No default]
+.TP 20
+\fBxcol=\fP
+x coordinate column(s) [1]    
+.TP 20
+\fBiter=\fP
+# iterations removing worst outlier [0]  
+.TP 20
+\fBsigma=\fP
+Multiple sigma above which to remove outliers [0]
+.TP 20
+\fBverbose=\fP
+Verbose output of all iterations? [t]  
+.TP 20
+\fBwidth=\fP
+Width of columns to print []  
+.TP 20
+\fBmedian=\fP
+Compute median too? (can be time consuming) [t]
+.TP 20
+\fBmethod=\fP
+Method to remove outliers (0=fast 1=slow) [0] 
+.TP 20
+\fBnmax=\fP
+maximum number of data to be read if data file is a pipe [10000]
+.SH SEE ALSO
+tabhist(1NEMO)
+.SH EXAMPLE
+A table of the numbers 1 through 100, their squares and square roots
+is fed into tabstat and compute statistics for each column:
+.nf
+   % nemoinp 1:100 | tabmath - - '%1*%1,sqrt(%1)' | tabstat - 1,2,3 width=10
+npt:          100       100       100
+min:            1         1         1
+max:          100     10000        10
+mean:        50.5    3383.5   6.71463
+disp:     28.8661    3009.2   2.32675
+skew:           0  0.633312 -0.538185
+kurt:    -1.20024 -0.863731 -0.669795
+median:      50.5    2550.5   7.10625
+.fi
+.SH BUGS
+Non-existent columns are not handled gracefully
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+24-Jan-00	doc written	PJT
+.fi
