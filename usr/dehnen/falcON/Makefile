@@ -27,4 +27,6 @@ include make.public
 
 ################################################################################
 # pjt (probably not needed anymore now)
+ifdef NEMO
 include Makefile.nemo
+endif
