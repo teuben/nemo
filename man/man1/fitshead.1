@@ -78,8 +78,12 @@ a FITS header by specifying the width to be 80 characters, viz.
 .nf
     % fold -80 map1.fits | more
 .fi
+equally so, \fIdd(1)\fP:
+.nf
+    % dd cbs=80 conv=unblock in=map1.fits | more
+.fi
 .SH "SEE ALSO"
-scanfits(1NEMO), dd(1), fits(5NEMO), fold(1)
+scanfits(1NEMO), fits(5NEMO), dd(1), fold(1)
 .SH AUTHOR
 Peter Teuben
 .SH FILES
