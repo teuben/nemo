@@ -95,8 +95,8 @@ if ($debug) echo All systems go...
 # if (-e $NEMO/etc/motd) cat $NEMO/etc/motd
 if ($?prompt) then
   echo "NEMO $NEMOVER loaded for HOST $NEMOHOST from $NEMO"
-  echo "Type 'motd' to get messages of the day"
-  echo "The alias 'omen' will attempt to unload NEMO from your environment"
+#  echo "Type 'motd' to get messages of the day"
+#  echo "The alias 'omen' will attempt to unload NEMO from your environment"
 endif
 
 done:
