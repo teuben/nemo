@@ -1,0 +1,103 @@
+.TH POTLIST 1NEMO "23 March 1995"
+.SH NAME
+potlist \- list potential value and forces of a potential descriptor
+.SH SYNOPSIS
+\fBpotlist potname=\fIname\fP [parameter=value]
+.SH DESCRIPTION
+\fIpotlist\fP calculates the value of the potential value in
+(a) user specified position(s). The potential is obtained from
+data file in standard \fIpotential(5NEMO)\fP format.
+.PP
+In addition to the potential value, the forces, it's derivatives 
+and the poissonian density are calculated. The total table will
+hence contain: \fIx, y, z, ax, ay, az, phi, phixx, phiyy, phizz,
+rho, dr, time\fP.
+.SH PARAMETERS
+The following keywords are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBpotname=\fIname\fP
+Generic name of the file which contains the description of the potential.
+Some potentials require an addition data-file, see keyword \fBpotfile=\fP.
+[default: none].
+.TP
+\fBpotpars=\fIparameters\fP
+List of parameters for the model. Will all be interpreted as real numbers.
+If less than the required number of parameters are given, the remainder
+will be taken from default settings in the potential routine.
+When too many are given, the remaining are ignored.
+The first parameter, currently ignored, is reserved for pattern speed.
+[default: as defined by potential routine].
+.TP
+\fBpotfile=\fIdatafile\fP
+Optional extra datafile which some potential descriptors use.
+Some files need a list of spline fitted points, others need an
+N-body snapshot etc.  Most potentials will ignore this keyword
+though. [default: not set].
+.TP
+\fBx=\fIx-pos\fP
+X-position(s) where potential, forces and density are calculated.
+If more than one value is given, it must be consistent with the
+number given in the other space coordinates. 
+See \fInemoinp(1,3)\fP for rules to provide multiple values.
+[default: \fB0.0\fP].
+.TP
+\fBy=\fIy-pos\fP
+Y-position(s). See X.
+[default: \fB0.0\fP].
+.TP
+\fBz=\fIz-pos\fP
+Z-position(s). See X.
+[default: \fB0.0\fP].
+.TP
+\fBt=\fItime\fP
+If applicable, the time at which the potential is to be calculated.
+[default: \fB0.0\fP].
+.TP
+\fBdr=\fIvalue\fP
+Differential in position which is used to  numerically compute the
+force derivatives to compute the Laplacian.  
+The poissonian density is then obtained after 
+division by 4-pi. If no number is given, the densities are not
+computed, and only position, accelerations, potential and time 
+are returned. Default: not used.
+.TP
+\fBndim=2|3\fP
+Number of dimensions to test Poisson Equation in. 
+[Default: \fB3\fP].
+.TP
+\fBomega=\fP\fIpattern_speed\fP
+Override value for the pattern speed. Normally the pattern speed is
+defined by the first argument in \fBpotpars=\fP, but this allows
+you to override. Forces and potentials are correctly displayed in
+the rotating frame of reference, but computing poissonian
+densities would not make sense without setting \fBomega=0\fP.
+Default: not used.
+.TP
+\fBformat=\fIfmt\fP
+Format used in \fIprintf(3)\fP statement to print value. If no separator
+is provided, a space will be used. [Default: \fB%g\fP]
+.TP
+\fBndim=2|3\fP
+Number of dimensions used in Poissonian density computation. Should
+be 2 or 3. 
+.SH "SEE ALSO"
+potccd(1NEMO), potential(3NEMO), potential(5NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.0i
+~src/orbit	original sources
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+13-Jul-87	V1.0: Original created	PJT
+8-Apr-88	V2.0: added 'name' parameter for hackforce	PJT
+5-May-88	V2.1: small mods, renamed keywords	PJT
+9-feb-90	V3.0: added time dependant options, renamed keywords	PJT
+26-jun-90	V3.1: can give whole array of input positions	PJT
+15-oct-93	V5.1: new method(s) of getting pattern speed	PJT
+17-feb-94    	V5.2: added ndim=	PJT
+.fi
