@@ -7,8 +7,6 @@
 
 #include "defs.h"
 
-extern  double xrandom(real,real);
-
 /*
  * PICKVEC: generate random coordinates within a unit sphere.
  *  vector x;                             coord vector to generate 
