@@ -9,13 +9,19 @@
   Problem: can't get a fileno from a FILE * (the other way around
   is ok, use fileno()) so we're stuck....
 
-* src/kernel/misc/fie.c   does not compile with "-g -O" (I/O error in compiler)
-  on gcc version 2.96 20000731 (Linux-Mandrake 8.0 2.96-0.48mdk)
-  -g or just -O is ok.
-  --- ah --- maybe it was just a quota problem :=)
-
-- nbody0: some weird problems on Mandrake 8.0 with 'nan's...
+* nbody0: some weird problems on Mandrake 8.0 with 'nan's...
   gcc 2.96 20000731 (Linux-Mandrake 8.0 2.96-0.48mdk) 
+	-O0 	is ok
+	-O1 	is bad
+	-g  	is ok
+	-g -O2	is bad
+  cd $NEMO/src/nbody/evolve/aarseth/nbody0
+	make clean nbody00 OPT=-O0
+	make -f Testfile clean all
+  (this assumes you have a makedefs file with hacked OPT in it, not
+  CFLAGS)
+
+  gcc3.0 is ok again, as is 2.95.3
 
 - solaris: still get -rdynamic in the link options, it works, but it
   does not look nice. this is for gcc, didn't try /opt/SUNSWpro
@@ -38,3 +44,7 @@
 	 -mabi=64   (if gnu) ,or
 	-64
   For 64 bit compilations.
+
+
+- kawaii/nbody does not seem to work, neither in IONEMO mode, nor default I/O mode
+  (at least on linux)

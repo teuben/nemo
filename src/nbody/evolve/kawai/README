@@ -1,0 +1,12 @@
+These two code were added to NEMO since they show novel aspects of
+writing treecode's. They were both written by Atsushi Kawai 
+at U of Tokyo (now at: RIKEN). 
+
+The directory name "kawaii" is a typo because NEMO's maintainer
+has been to Hawaii a few times in recent years, and a pain to
+change this in CVS :-(
+
+
+Neither code conforms to the NEMO makefiles for installation, and you
+may have to tune your makefile to get it to compile. 
+

@@ -51,14 +51,13 @@ MACH = @LOADOBJ_MACH@
 FLIBS = @FLIBS@
 FORLIBS = $(FLIBS)
 
-
 # Solaris 2.6: -L/opt/SUNWspro/lib -lF77 -lM77 -lV77 -lsunmath  
 
 ## C compiler:
 #set opts="-rdynamic -ansi -fwritable-strings -Wconversion -Wnested-externs"
 #exec gcc -fPIC -Dlinux -DSYSV -I$NEMOINC -I$NEMOLIB -L$NEMOLIB $opts $* $link
 
-NEMO_CFLAGS = @NEMO_CFLAGS@ -I$(NEMOINC) -I$(NEMOLIB) @LOADOBJ_MACH@
+NEMO_CFLAGS = @NEMO_CFLAGS@ -I$(NEMOINC) -I$(NEMOLIB) @XINCS@ @LOADOBJ_MACH@
 NEMO_FFLAGS = @NEMO_FFLAGS@
 NEMO_LDFLAGS = 
 NEMO_LIBS   = -L$(NEMOLIB)          -lnemo @LOADOBJ_LIBS@ @MATH_LIBS@
@@ -69,9 +68,15 @@ GLLIBS = @GLLIBS@
 XLIBS = @XLIBS@
 
 #			generic compile flags for C,Fortran,Linker
-CFLAGS = @CFLAGS@ $(NEMO_CFLAGS)
-FFLAGS = @FFLAGS@ $(NEMO_FFLAGS)
-LDFLAGS = @LDFLAGS@ $(NEMO_LDFLAGS)
+#   optimization only
+OPT = @CFLAGS@
+FOPT = @FFLAGS@
+LOPT = @LDFLAGS@
+#   everything 
+CFLAGS = $(OPT) $(NEMO_CFLAGS)
+FFLAGS = $(OPT) $(NEMO_FFLAGS)
+LDFLAGS = $(OPT) $(NEMO_LDFLAGS)
+CPPFLAGS = @CPPFLAGS@
 
 RANLIB = @RANLIB@
 

@@ -60,9 +60,10 @@ dnl ---------------------------------------------------------------------
 dnl             Check for basic X windows stuff
 AC_PATH_X
 AC_PATH_XTRA
-CFLAGS="$CFLAGS $X_CFLAGS"
+XINCS="$X_FLAGS"
 XLIBS="$X_LIBS $X_PRE_LIBS -lXext -lX11 $X_EXTRA_LIBS"
 AC_SUBST(XLIBS)
+AC_SUBST(XINCS)
 
 dnl ---------------------------------------------------------------------
 dnl 3D Graphics Libraries (see also vis5d's configure.in)
@@ -251,7 +252,7 @@ if test x$pgplot_config_prefix != x; then
                 PGPLOT_INCLUDE="-I$pgplot_config_prefix"
                 PGPLOT_LIB="-L$pgplot_config_prefix"
                 PGPLOT_LIB="$PGPLOT_LIB -lcpgplot -lpgplot"
-                CFLAGS="$PGPLOT_INCLUDE $CFLAGS"
+#dnl                CFLAGS="$PGPLOT_INCLUDE $CFLAGS"
                 AC_DEFINE(_WITH_PGPLOT) 
                 graphtype=pgplot
                 AC_MSG_RESULT(yes)
