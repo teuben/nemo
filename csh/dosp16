@@ -1,0 +1,47 @@
+#! /bin/csh -f
+#
+#	
+if ($#argv < 2) then
+  set prg=$0
+  echo "Usage: $prg:t <times-string> <all remaining snapplot parameters>"
+  echo "                          except times,xbox,ybox"
+  echo "	Postscript version of snapplot with max 16 frames on a page"
+  exit
+endif
+set tmp=tmp$$.ps
+set x1=1:5
+set x2=6:10
+set x3=11:15
+set x4=16:20
+
+set xbox=($x1 $x2 $x3 $x4 $x1 $x2 $x3 $x4 $x1 $x2 $x3 $x4 $x1 $x2 $x3 $x4)
+set ybox=($x4 $x4 $x4 $x4 $x3 $x3 $x3 $x3 $x2 $x2 $x2 $x2 $x1 $x1 $x1 $x1)
+
+set times=(`nemoinp expression="$1"`)
+echo Debug: times=$times
+if ($#times > 12) then
+   echo "Warning: Too many times, only first 16 frames will be plotted"
+   echo "times=$times"
+endif
+shift
+rm -f $tmp
+foreach ptime ($times)
+   echo "Processing ptime=$ptime"
+   snapplot_ps $* xbox=$xbox[1] ybox=$ybox[1] times=$ptime
+   if (-e $tmp) then
+      mv $tmp $tmp.1
+      catps yapp.ps $tmp.1 > $tmp
+   else
+      mv yapp.ps $tmp
+   endif
+   shift xbox
+   shift ybox
+   if ($#xbox == 0) then
+      goto done
+   endif
+end
+
+done:
+  mv $tmp yapp.ps
+  rm -f $tmp*
+  echo All done, final ps file is in yapp.ps
