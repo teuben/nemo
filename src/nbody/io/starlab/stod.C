@@ -3,6 +3,7 @@
  *
  *  16-jul-93   1.0     written
  *  31-jul-96   1.1     for starlab 2.1
+ *  18-jul-01   1.2     for starlab 3.6:  allow to read more times
  *  
  *  This has to be a C++ main, otherwise won't link ???
  *      - nemomain.c ported to nemomain.C (very small mod)
@@ -24,7 +25,7 @@ string defv[] = {
     "in=???\n           Input snapshot file (dyn to stdout)",
     "headline=\n        Additional comment line",
     "label=f\n          Add labels to stars?",
-    "VERSION=1.0\n	31-jul-96 PJT",
+    "VERSION=1.2\n	18-jul-01 PJT",
     NULL,
 };
 

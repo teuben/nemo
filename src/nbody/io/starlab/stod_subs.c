@@ -21,11 +21,13 @@ void check_real(int size)
 }
 
 
-int get_snap_c(string fname, real **mass, real **pos, real **vel)
+int get_snap_c(string fname, real *time, real **mass, real **pos, real **vel)
 {
     int i, nbody;
     real *mptr, *pptr, *vptr, *phase;
     stream instr;
+
+    *time = -1.0;    /* for now */
 
     instr = stropen(fname,"r");                     /* open file */
     get_history(instr);                             /* add data history */
@@ -62,19 +64,27 @@ int get_snap_c(string fname, real **mass, real **pos, real **vel)
 }
 
 
-void put_snap_c(string fname, int nbody, real *mass, real *pos, real *vel)
+void put_snap_c(string fname, int nbody, real time, 
+		real *mass, real *pos, real *vel, real *aux)
 {
     int i;
     real *mptr, *pptr, *vptr, *ptr, *phase;
-    stream instr;
+    static stream instr;
+    static int n=0;
 
-    instr = stropen(fname,"w");                     /* open file */
-    put_history(instr);                             /* add data history */
+    if (n == 0) {
+	dprintf(1,"Opening %s to write\n",fname);
+	instr = stropen(fname,"w");                     /* open file */
+	put_history(instr);                             /* add data history */
+    } else
+	dprintf(1,"Appending more data\n");
+    n++;
 
     put_set(instr, SnapShotTag);                    /* and put first dataset */
 
     put_set(instr, ParametersTag);
     put_data(instr, NobjTag, IntType, &nbody, 0);
+    put_data(instr, TimeTag, RealType, &time, 0);
     put_tes(instr, ParametersTag);
 
 
@@ -93,8 +103,10 @@ void put_snap_c(string fname, int nbody, real *mass, real *pos, real *vel)
             *ptr++ = *vptr++;
     }       
     put_data(instr, PhaseSpaceTag, RealType, phase, nbody,2,NDIM,0);
+    put_data(instr, AuxTag, RealType, aux, nbody, 0);
     put_tes(instr, ParticlesTag);
     put_tes(instr, SnapShotTag);
+
 }
 
 

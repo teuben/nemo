@@ -11,10 +11,12 @@ void check_real(int size);
 
 void put_snap_c(string fname, 
 		 int nbody,
+		 double time,
                  double *mass, 
-                 double *pos, double *vel);
+                 double *pos, double *vel, double *aux);
 
 int get_snap_c(string fname, 
+		 double *time,
                  double **mass, 
                  double **pos, double **vel);
 
