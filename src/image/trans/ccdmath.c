@@ -32,6 +32,7 @@
 #include <getparam.h>
 #include <vectmath.h>
 #include <filestruct.h>
+#include <strlib.h>
 #include <image.h>
 
 string defv[] = {
@@ -40,7 +41,7 @@ string defv[] = {
 	"fie=???\n       Expression %1,%2,.. for input maps; %x,%y for new map",
 	"size=10,10,1\n  2- or 3D dimensions of map/cube",
 	"seed=0\n        Random seed",
-	"VERSION=2.7\n   25-jul-02 PJT",
+	"VERSION=2.8\n   4-dec-02 PJT",
 	NULL,
 };
 
@@ -56,18 +57,21 @@ imageptr iptr[MAXIMAGE];	/* pointers to (input) images */
 int      nimage;                /* actual number of input images */
 bool     mapgen = FALSE;	/* no input files: create from scratch ? */
 
-int fie_remap();
-void do_create(), do_combine();
+int fie_remap(char *fie, bool map_create);
+void do_create(int nx, int ny,int nz);
+void do_combine(void);
 
 extern  int debug_level;		/* see initparam() */
 extern    void    dmpfien();
 extern    int     inifien();
 extern    void    dofien();
 
+extern string *burststring(string,string);
+
 
 void nemo_main ()
 {
-    string *burststring(), *fnames, fie, scopy();
+    string *fnames, fie;
     stream  instr[MAXIMAGE];            /* input files */
     stream  outstr;                     /* output file */
     int     size[3], nx, ny, nz;        /* size of scratch map */
@@ -159,9 +163,7 @@ void nemo_main ()
  *  Returns 0 on success, -1 on some failure
  */
 
-int fie_remap(fie, map_create)
-char *fie;
-bool map_create;
+int fie_remap(char *fie, bool map_create)
 {
     for(;*fie;fie++) {
         fie = strpbrk(fie,"%$");                /* look for a $ or % */
