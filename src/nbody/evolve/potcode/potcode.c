@@ -14,6 +14,7 @@
  *		      options= fix in code_io.c
  *     16-feb-03 V4.0a use get_pattern()			pjt
  *     24-feb-03 V4.1  initial  framework for epicycle mode     pjt
+ *      ?-mar-03       ? done ?
  *
  * To improve:  use allocate() for number of particles; not static
  */
@@ -39,7 +40,7 @@ string defv[] = {
     "sigma=0\n            diffusion angle (degrees) per timestep",
     "seed=0\n		  random seed",
     "headline=PotCode\n   random mumble for humans",
-    "VERSION=4.1\n	  24-feb-03 PJT",
+    "VERSION=4.1\n        4-mar-03 PJT",
     NULL,
 };
 
@@ -55,11 +56,11 @@ void nemo_main()
     inputdata();
     initoutput();
     if (mode < 0) 
-      force1(bodytab, nbody, &tnow);
+      force1(bodytab, nbody, &tnow);             /* epicycle "integration" constants */
     else
-      initstep(bodytab, nbody, &tnow, force);
+      initstep(bodytab, nbody, &tnow, force);    /* forces from potential */
     output();
-    while (tnow + 0.1/freq < tstop) {
+    while (tnow + 0.1/freq < tstop) {            /* integration loop */
 	orbstep(bodytab, nbody, &tnow, force, 1.0/freq, mode);
 	dissipate(bodytab, nbody, NDIM, dr, eta, rmax);
 	diffuse(bodytab, nbody, NDIM, sigma);
@@ -131,7 +132,7 @@ real time;			/* current time */
  *        - planar 2D orbits
  *        - (x0,y0) is the guiding center, (u,v) can be the deviant into the epicycle 
  *          and a (u0,v0) is the deviation from circular motion
- *        
+ *    *** for now the Z oscillations are not solved for ***
  */
 
 
@@ -195,14 +196,16 @@ real time;			/* current time */
     p->A = A;
     p->B = B;
     p->kappa = kap1;
+    p->nu = 0.0;       /* VERTICAL to be done */
     /*  must convert to curvilinear, they are still cartesian here */
     p->xiv0 = -vr;
     p->etav0 = -vt;    /* ok, also figure out the sign  */
+    p->zetav0 = 0;     /* VERTICAL to be done */
     Acc(p)[0] = 0.0;
     Acc(p)[1] = 0.0;
     Acc(p)[2] = 0.0;
     Phi(p) = -1.0;
-    Key(p) = p-btab+1;
+    Key(p) = p-btab+1;     /* label particles 1....nb */
   }
   printf("### This section of the code is under development, don't believe anything it does\n");
 }

@@ -8,6 +8,7 @@
  *             not 'interacting' - build for rotating potentials  
  *             Note that RK, PC and PC1 don't work for rotating
  *             potentials.					PJT
+ * march-2003  added epistep() for epicycle orbits
  */
 
 #include "defs.h"
@@ -23,7 +24,7 @@ local real abak1[MCOR];
 local real abak2[MCOR];
 local real abak3[MCOR];
 
-local void moveaccel();
+local void moveaccel(bodyptr btab, int nb);
 
 /*
  * INITSTEP: initialize the orbit-integrator.
@@ -284,29 +285,38 @@ real dt;		/* integration time step */
 {
   bodyptr p;
   body tmp1;
-  real t, kt, kt1, coskt, sinkt, dx, dy;
+  real t, kt, kt1, coskt, sinkt, dx, dy, odt, cosodt, sinodt;
 
   *tptr += dt;                       /* get to the new time */
   t = *tptr;
 
   for (p=btab; p<btab+nb; p++) {
+    odt = (p->A - p->B)*dt;
+    sinodt = sin(odt);
+    cosodt = cos(odt);
     kt = p->kappa * t;    /* kt > 0  */
     kt1 = POS_ANGLE(kt);   
     sinkt = sin(kt1);
     coskt = 1-cos(kt1);
-    Pos(p)[0] -= Acc(p)[0];   /* cheat: deduct the old one */
+    Pos(p)[0] -= Acc(p)[0];   /* cheat: deduct the old one epi */
     Pos(p)[1] -= Acc(p)[1];
+    Pos(p)[2] -= Acc(p)[2];
 
-#if 1
+    dx = cosodt * Pos(p)[0] - sinodt * Pos(p)[1];    /* rotate by Omega * dt */
+    dy = sinodt * Pos(p)[0] + cosodt * Pos(p)[1];
+    Pos(p)[0] = dx;
+    Pos(p)[1] = dy;
+
+
     Acc(p)[0] = -p->xiv0*coskt/(2*p->B) + p->etav0*(p->A*kt - (p->A - p->B)*sinkt)/(p->kappa * p->B);
-#else
-    Acc(p)[0] = -p->xiv0*coskt/(2*p->B) + p->etav0*(0.0 - (p->A - p->B)*sinkt)/(p->kappa * p->B);
-#endif
     Acc(p)[1] =  p->xiv0*sinkt/p->kappa + p->etav0*coskt/(2*p->B);
-    /* Acc(p)[2] =  p->zetav0*sin(p->nu * t); */
+#if 0
+    Acc(p)[2] =  p->zetav0*sin(p->nu * t);
+#endif
 
-    Pos(p)[0] += Acc(p)[0];   /* cheat: add the new one */
+    Pos(p)[0] += Acc(p)[0];   /* cheat: add the new one epi */
     Pos(p)[1] += Acc(p)[1];
+    Pos(p)[2] += Acc(p)[2];
   }
 }
 
@@ -316,9 +326,7 @@ real dt;		/* integration time step */
  * MOVEACCEL: local utility to stack back old values of the
  *	      forces. Only used in RK, PC and PC1.
  */
-local void moveaccel(btab, nb)
-bodyptr btab;		/* array of bodies */
-int nb;			/* number of bodies */
+local void moveaccel(bodyptr btab, int nb)
 {
     bodyptr p;
     int i, k;

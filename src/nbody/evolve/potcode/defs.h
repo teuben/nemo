@@ -48,7 +48,7 @@ typedef struct {
     real phi;			/* potential at position */
     vector acc;			/* gravitational acceleration */
 #if 1
-    real A,B,kappa,xiv0,etav0;  /* for now: the epi constants */
+    real A,B,kappa,nu,xiv0,etav0,zetav0;    /* for now: the epi constants */
 #endif
     int key;                    /* some index */
 } body, *bodyptr;
