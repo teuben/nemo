@@ -1,13 +1,12 @@
     File Name                       Description
 ---------------------------------------------------------------------------
   MANIFEST                   This file
-  Makefile                   Root makefile for NEMO. 
+  Makefile                   Root makefile for NEMO (created by configure)
   NEMORC                     Generic NEMORC startup file.
 * NEMORC.local               Your local tailoring & overwrite features
   NEMORC.gen		     Exported version of NEMORC.local; copy at install
   README                     Quick info on NEMO and where to continue reading
   README.install             Installation instructions
-* TIMESTAMP                  File kept for various administrative purposes
   VERSION                    major.minor.patch - see src/scripts/version
   nemo.rc                    Alternative startup procedure
 * nemo_start                 Startup 
