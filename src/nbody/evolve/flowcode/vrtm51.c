@@ -4,7 +4,7 @@
  *	18-nov-03  cloned off vrt.c for the M51 project     Rahul & Peter
  *      19-nov-03  added phase equations to account for vr and vt being
  *                 constant along logarithmic arms.
- *      24-nov-03  allow multiple input files
+ *      24-nov-03  allow multiple input files w/ added error checking
  */
 
 #include <stdinc.h>
@@ -13,7 +13,7 @@
 #include <table.h>
 #include <extstring.h>
 
-#define VERSION "flowcode:vrtm51 V1.3 24-nov-03"
+#define VERSION "flowcode:vrtm51 V1.5 25-nov-03"
 
 local double omega = 0.0;		/*   pattern speed  */
 local double pitch = 10.0;              /*    pitch angle   */
@@ -29,15 +29,9 @@ local real rings[MAXTAB+1];    /* rmin(0)... rmax(ntab+1), where rmin(i)=rmax(i-
 local int ntab=0;              /* number of tables used */
 local int entries=0;           /* counter how often this routine was called */
 
-
-local double   vscale = 1.0;		/* rescale velocity unit */
-local double   rscale = 1.0;		/* rescale radius unit */
-
-local stream   potstr = NULL;
-local int      nr, np;
-local real     *rads, *phis;
-local real     dphi;
 local real     tanp;
+
+local bool Qstick = TRUE;      /* set v=0 when hitting the inner or outer edge */
 
 
 #define MAXCOL  4
@@ -48,6 +42,16 @@ extern double seval(double x0, double *x, double *y, double *coef, int n);
 
 extern string *burststring(string,string);
 
+/* 
+ * binary search into an monotonically increasing array x or length n
+ * returns 0 .. n, where 0 and n are outside the array
+ *
+ *
+ *  x[0]   x[1]  ....   x[n-1]       <-- boundaries
+ *    |      |             |
+ *
+ *  0 |   1  |   ....  n-1 |   n     <-- returned index
+ */
 
 local int binsearch(real u, real *x, int n)
 {
@@ -83,17 +87,15 @@ void inipotential (int *npar, double *par, string name)
     if (n>1) pitch = par[1];
     if (n>2) rref = par[2];
     if (n>3) thetaref = par[3];
-    
+
     if (entries>0) {
-#if 0
         warning("Re-entering inipotential(5NEMO): removed previous tables");
-        free(theta);
-        free(vr);  	free(coef_vr);
-        free(vt);       free(coef_vt);
-	free(den);      free(coef_den);
-#else
-        error("routine not re-entrant");
-#endif
+	for (i=0; i<ntab; i++) {
+	  free(theta[i]);
+	  free(vr[i]);       free(coef_vr[i]);
+	  free(vt[i]);       free(coef_vt[i]);
+	  free(den[i]);      free(coef_den[i]);
+	}
     }
     entries++;
 
@@ -117,8 +119,11 @@ void inipotential (int *npar, double *par, string name)
       if (ntab+5 != n) 
 	error("found %d/%d , need potpars=ome,pitch,rs,ts,r_0,r_1,....r_%d\n",
 	      n,ntab+5,ntab);
-      for(i=0; i<=ntab; i++)
+      for(i=0; i<=ntab; i++) {
 	rings[i] = par[i+4];
+	if (i>0 && rings[i] < rings[i-1])
+	  error("ring radii in potpars= need to be sorted (%g > %g)",rings[i-1],rings[i-1]);
+      }
     }
 
     for (i=0; i<ntab; i++) {      /* loop over all input files */
@@ -177,15 +182,24 @@ void potential(int *ndim,double *pos,double *acc,double *pot,double *time)
     x = pos[0];
     y = pos[1];
     rad = sqrt(x*x + y*y);
+
     phi = atan2(y,x)*180./PI;
     phi -= log(rad/rref)/tanp + thetaref;
-    phase = UNWRAP(phi);
+    phase = UNWRAP(phi);    /* make sure 0..360 */
 
     if (ntab > 1) {
       i = binsearch(rad,rings,ntab+1);
+      if (Qstick) {
+	if (i==0 || i==ntab+1) {
+	  acc[0] = acc[1] = acc[2] = 0.0;
+	  *pot = 1.0;
+	  return;
+	}
+      }
       if (i>0) i--;   /* binsearch gives one more than we want */
       if (i==ntab) i--;  /* outside outer ring */
-      /* inside inner ring, and outside outer life sucks: no data */
+      /* inside inner ring always point to inner ring */
+      /* outside outer ring always point to outer ring */
     } else {
       /* if only one ring, all radii are valid, even if bad */
       i = 0;
@@ -198,9 +212,8 @@ void potential(int *ndim,double *pos,double *acc,double *pot,double *time)
 	    x,y,rad,i,phi,phase,vtan,vrad,*pot);
 
     if (rad > 0) {
-	vtan -= omega * rad;
-        acc[0] = (vrad * x - vtan * y) / (rad * vscale);
-        acc[1] = (vrad * y + vtan * x) / (rad * vscale);
+        acc[0] = (vrad * x - vtan * y) / rad;
+        acc[1] = (vrad * y + vtan * x) / rad;
     } else {
         acc[0] = acc[1] = 0.0;
     }
