@@ -7,7 +7,8 @@
  *   25-jun-92	repeaired nemo_stdinc_h -> _stdinc_h check  PJT
  *   21-feb-94  ansi + nemo -> now needs <stdinc.h>
  *    5-jan-98		added fitwrhd
-     21-mar-00	offset/skip confusion cleared		    pjt
+ *   21-mar-00	offset/skip confusion cleared		    pjt
+ *    7-aug-01  clarified ncards
  */
 
 #ifndef FLOAT
@@ -59,19 +60,19 @@ typedef unsigned char byte;
 #define TYPE_DOUBLE 4
 #define TYPE_8INT   5
 
-#define STATUS_OLD 1
-#define STATUS_NEW 2
-#define STATUS_NEW_WRITE 3
+#define STATUS_OLD 1		/* reading a fits file */
+#define STATUS_NEW 2		/* writing, but still in header */
+#define STATUS_NEW_WRITE 3	/* writing, but now in data */
 
 typedef struct { 
-    int ncards;
+    int ncards;		/* is now 1-based !!! */
     int naxis;
     int axes[MAXNAX];
     int offset;		/* will/can change during I/O */
     int skip;		/* fixed */
     int type;
     int bytepix;
-    int status;
+    int status;		/* STATUS  _OLD, _NEW, _NEW_WRITE   */
     stream fd;
     FLOAT bscale,bzero; 
 } FITS;
