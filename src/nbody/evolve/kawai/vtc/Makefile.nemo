@@ -1,0 +1,78 @@
+#     "Makefile.nemo":   for NEMO V3 
+#	you probably should copy this file to Makefile, and make your local hacks
+#	but the idea is that system wide things are taken from the makedefs file
+
+include $(NEMOLIB)/makedefs
+
+# 
+# USEX11: use animation and viewtree tools.
+# USEGD: use GIF-image-creation library.
+# VECTORIZED: activate functions in treev.c. faster on vector processor.
+# BFLOAD: activate functions in treebfl.c. performs breadth-first
+#         tree construction. may be slightly faster on vector processor.
+# DYNMEM: use dynamic memory allocation. should be set to 1 unless you
+#         have any special reason.
+#
+# activate this part if you have io_nemo lib (written by JCL in Marseilles Observatory)
+# this is for NEMO/V3 which merged libio_nemo.a into libnemo.a
+IONEMOFLAGS = -DIONEMO
+IONEMOLIB = -L$(NEMOLIB) -lnemo
+#
+# acticate this part if USEX11 == 1
+# AOBJS = animation.o Xtc.o
+# ALIBS = -lX11
+# ALIBPATH = -L/usr/X11/lib
+# AFLAGS = -DANIM
+#
+# activate this part if USEGD == 1
+# GDLIBS = -lgd
+
+# host only
+LIBOBJS = $(STDOBJS) force_host.o
+GFLAGS = -DNOGRAPE=1
+#
+# for MDGRAPE-2
+# LIBOBJS = $(STDOBJS) force_md2.o
+# GLIBPATH = -L/home/atsushi/pub/lib
+# GLIBS = -lmd1pcim
+# GFLAGS = -DMDGRAPE2=1
+#
+# for GRAPE-5
+# LIBOBJS = $(STDOBJS) force_g5.o
+# GLIBPATH = -L/home/atsushi/pub/lib
+# GLIBS = -lg5a -lphibdma
+# GFLAGS = -DGRAPE5=1
+
+#INCPATH = -I/home/atsushi/pub/include
+#LIBPATH = -L/home/atsushi/pub/lib
+
+CFLAGS = -O3 -I. $(INCPATH) $(GFLAGS) $(AFLAGS)\
+         $(IONEMOFLAGS) -DUSEX11=0 -DUSEGD=0 -DVECTORIZED=0 -DBFLOAD=0 -DDYNMEM=1
+STDOBJS = tree.o direct.o sort.o cputime.o viewtree.o p2m2.o mr1interface.o
+LDFLAGS = -O3 -L. $(LIBPATH)
+LIBS = $(IONEMOLIB) $(GDLIBS) -lm
+
+all:	vtc libvtc.a
+
+vtc:	vtc.c $(GOBJS) $(AOBJS) libvtc.a
+	$(CC) -o $@ $(CFLAGS) $(ALIBPATH) $(GLIBPATH) $(LDFLAGS) $< \
+	$(GOBJS) $(AOBJS) libvtc.a $(GLIBS) $(ALIBS) $(LIBS)
+
+libvtc.a: $(LIBOBJS)
+	ar ruv $@ $?
+	ranlib $@
+
+force_md2.o:	force_md2.c
+	$(CC) -o $@ $(CFLAGS) -c $<
+
+force_g5.o:	force_g5.c
+	$(CC) -o $@ $(CFLAGS) -c $<
+
+tree.o:			tree.c treev.c treebfl.c highorder.c debug.c
+
+clean:
+	\rm -f *.o *.a vtc
+
+bak:
+	tar cvf bak.tar ./Makefile*[a-zA-Z0-9] ./*.[hcCfF] ./*.table ./INSTALL
+	gzip bak.tar
