@@ -10,6 +10,8 @@
  *            simple CPU operations.
  *   BUGS: cannot check if dat is long enough (len*cnt)
  *   NOTES:  An IBM RISC  is about 40% slower than a SPARC1
+ * 
+ *   See also:  RFC 1832 e.g.: http://www.faqs.org/rfcs/rfc1832.html
  *          
  *   History:
  *	12-oct-90  V1.0 PJT	Written
@@ -25,6 +27,7 @@
  *	23-feb-97  allow offset until which no swapping done
  *	15-dec-98  TOOLBOX : allow streaming mode
  *      12-sep-01  file_size
+ *      30-sep-03  testing memcpy, and improved the testing
  */
 
 #include <stdinc.h>
@@ -74,26 +77,48 @@ string defv[] = {
     "len=2\n        Itemlength in bytes during swapping",
     "oneswap=t\n    One swap call? (or many) - for testing only", 
     "offset=0\n     Offset (in bytes) before which no swapping done",
-    "VERSION=1.4a\n 12-sep-01 PJT",
+    "memcpy=f\n     Testing swapping double another way with memcpy",
+    "repeat=0\n     How many times to repeat the swapping (speed testing)",
+    "VERSION=1.5\n  30-sep-03 PJT",
     NULL,
 };
 
 string usage="swap bytes in a file";
 
-extern int file_size(string);
+extern int nemo_file_size(string);
+
+
+void byteswap_doubles(double *a)
+{
+  unsigned char b[8],c[8];
+  memcpy(b,a,8); 
+  c[0]=b[7]; /* swap data around */
+  c[1]=b[6];
+  c[2]=b[5];
+  c[3]=b[4];
+  c[4]=b[3];
+  c[5]=b[2];
+  c[6]=b[1];
+  c[7]=b[0];
+  memcpy(a,c,8);
+}
+
+
 
 void nemo_main(void)
 {
     stream instr, outstr;
     string fname;
-    char *data;
+    char *data, *dp;
     real t0, t1, t2, rspeed=0, wspeed=0;
-    int i, len, cnt, offset;
+    int i, len, cnt, offset, repeat, nrepeat;
     bool onetrip;
+    bool Qmemcpy = getbparam("memcpy");
 
     fname = getparam("in");
     len = getiparam("len");
     offset = getiparam("offset");
+    nrepeat = repeat = getiparam("repeat");
     onetrip = getbparam("oneswap");
     if (hasvalue("out"))
         outstr = stropen(getparam("out"),"w");
@@ -101,9 +126,16 @@ void nemo_main(void)
         warning("No swapped output file created");
         outstr = NULL;
     }
+    if (Qmemcpy)
+      if (len != 8) {
+	warning("Cannot do memcpy, len=%d, needs to be 8",len);
+	Qmemcpy = FALSE;
+      } else
+	warning("memcpy mode");
 
     instr = stropen(fname,"r");
-    cnt = file_size(fname);         /* size of the file in bytes */
+    cnt = nemo_file_size(fname);         /* size of the file in bytes */
+
  if (cnt < 0) {          /* streaming mode */
     dprintf(0,"Streaming mode\n");
     data = (char *) allocate(len);
@@ -116,25 +148,38 @@ void nemo_main(void)
     if (cnt % len)
         warning("Filesize is not a multiple of itemlength: %d / %d", cnt, len);
     cnt /= len;                     /* cnt is now number of items of 'len' */
-    if (cnt==0) error("File %s too small; file_size() returned 0",fname);
+    if (cnt==0) error("File %s too small; nemo_file_size() returned 0",fname);
     data = (char *) allocate(cnt*len);
     t0 = 60 * cputime();
     if (cnt != fread(data,len,cnt,instr)) error("Error reading %s",fname);
     t1 = 60 * cputime();
-    if (onetrip)
+    do {
+      if (onetrip) {
+	/* by doing a one-trip, speed is about 160 ; 275 for double */
         bswap(data,len,cnt);
-    else {
+      } else {
+	/*
+	 * by incrementing 'dp += len' speed went from 70 to 45  (167 to 116 for double)
+	 */
         i = cnt;
-        while (i--)
-        bswap(data,len,1);
-    }
+	for (i=0, dp=data; i<cnt; i++, dp += len) {
+	  if (Qmemcpy) {
+	    /* 40 for double */
+	    byteswap_doubles((double *)dp);
+	  } else
+	    /* 116 for double */
+	    bswap(dp,len,1);
+	}
+      }
+    } while (repeat-- > 0);
+    nrepeat++;
     t2 = 60 * cputime();
     if (t1==t0) warning("Inaccurate measurement for reading");
-    else rspeed=cnt*len/(t1-t0)/1048576.0;
+    else rspeed=cnt*len/(t1-t0)/1048576.0*nrepeat;
     if (t1==t2) warning("Inaccurate measurement for writing");
-    else wspeed=cnt*len/(t2-t1)/1048576.0;
-    dprintf(1,"Read %d: %f s; swap %d * %d bytes: %f s; %g %g Mswap\n",
-       		cnt*len, t1-t0, cnt, len, t2-t1, 
+    else wspeed=cnt*len/(t2-t1)/1048576.0*nrepeat;
+    dprintf(1,"Read %d: %f s; %d x swap %d * %d bytes: %f s; %g %g Mswap\n",
+       		cnt*len, t1-t0, nrepeat, cnt, len, t2-t1, 
 		rspeed,wspeed);
     printf("%d %d %d %g %g\n",
                 cnt,len,(onetrip?1:0),
