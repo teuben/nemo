@@ -103,6 +103,8 @@
  *                    and does not do keyword file I/O yet, no macroread 
  * 16              a  fixed macroread
  * 19-oct-01       b  fixed recursion for those not using nemo_main
+ * 24-oct-01       c  some parsing error warning's are now fatal errors
+ * 13-nov-01       d  demoted some warnings to dprintf's
 
   TODO:
       - what if there is no VERSION=
@@ -111,6 +113,11 @@
 	a new system keyword
       - allow a (file) keyword to not signify a pipe
         (-) but a popen() based process (POPENIO)
+
+      - instead of using local_error() to catch recursion or
+        errors when nemo_main() is not uses, perhaps for nkeys==0
+	should do a magic init with a dummy defv[] array
+        such that getargv0() does not recurse....
  
   BUGS/FEATURES
 
@@ -124,7 +131,7 @@
       - indexing can't handle macros
  */
 
-#define VERSION_ID  "3.3b 19-oct-01 PJT"
+#define VERSION_ID  "3.3d 13-nov-01 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -356,7 +363,7 @@ void initparam(string argv[], string defv[])
 	keys[i].indexed = keys[i].key[strlen(keys[i].key)-1] == '#';
 	keys[i].next = NULL;
 	if (keys[i].indexed)
-	  warning("new feature: indexed keyword %s",keys[i].key);
+	  dprintf(1,"new feature: indexed keyword %s",keys[i].key);
         if (streq(keys[i].key,"VERSION")) {      /* special (last?) keyword */
             version_i = scopy(keys[i].val);            
             keys[i].upd = 0;
@@ -1193,7 +1200,7 @@ int getiparam(string par)
 #else
     nret = nemoinpi(val,&ipar,1);
     if (nret < 0)
-        warning("getiparam(%s=%s) parsing error %d, assumed %d\n",
+        error("getiparam(%s=%s) parsing error %d, assumed %d\n",
                     par,val,nret,ipar);
     return (nret==0) ? 0 : ipar;
 #endif /* !NEMOINP */
@@ -1210,7 +1217,7 @@ int getiparam_idx(string par, int idx)
 #else
     nret = nemoinpi(val,&ipar,1);
     if (nret < 0)
-        warning("getiparam_idx(%s=%s,%d) parsing error %d, assumed %d\n",
+        error("getiparam_idx(%s=%s,%d) parsing error %d, assumed %d\n",
                     par,val,idx,nret,ipar);
     return (nret==0) ? 0 : ipar;
 #endif /* !NEMOINP */
@@ -1228,7 +1235,7 @@ long getlparam(string par)
 #else
     nret = nemoinpl(val,&lpar,1);
     if (nret < 0)
-        warning("getlparam(%s=%s) parsing error %d assumed %l\n",
+        error("getlparam(%s=%s) parsing error %d assumed %l\n",
                     par,val,nret,lpar);
     return (nret==0) ? 0 : lpar;
 #endif /* !NEMOINP */
@@ -1246,7 +1253,7 @@ long getlparam_idx(string par, int idx)
 #else
     nret = nemoinpl(val,&lpar,1);
     if (nret < 0)
-        warning("getlparam(%s=%s) parsing error %d assumed %l\n",
+        error("getlparam(%s=%s) parsing error %d assumed %l\n",
                     par,val,nret,lpar);
     return (nret==0) ? 0 : lpar;
 #endif /* !NEMOINP */
@@ -1271,7 +1278,7 @@ bool getbparam(string par)
 #else
     nret = nemoinpb(val,&bpar,1);
     if (nret < 0)
-        warning("getbparam(%s=%s) parsing error %d, assumed %d (FALSE)",
+        error("getbparam(%s=%s) parsing error %d, assumed %d (FALSE)",
                         par,val,nret,bpar);
     return (nret<=0) ? FALSE : bpar;
 #endif /* !NEMOINP */
@@ -1296,7 +1303,7 @@ bool getbparam_idx(string par, int idx)
 #else
     nret = nemoinpb(val,&bpar,1);
     if (nret < 0)
-        warning("getbparam(%s=%s) parsing error %d, assumed %d (FALSE)",
+        error("getbparam(%s=%s) parsing error %d, assumed %d (FALSE)",
                         par,val,nret,bpar);
     return (nret<=0) ? FALSE : bpar;
 #endif /* !NEMOINP */
@@ -1314,7 +1321,7 @@ double getdparam(string par)
 #else
     nret = nemoinpd(val,&dpar,1);
     if (nret < 0)
-        warning("getdparam(%s=%s) parsing error %d, assumed %g",
+        error("getdparam(%s=%s) parsing error %d, assumed %g",
                             par,val,nret,dpar);
     return (nret==0) ? 0.0 : dpar;
 #endif /* !NEMOINP */
@@ -1332,7 +1339,7 @@ double getdparam_idx(string par, int idx)
 #else
     nret = nemoinpd(val,&dpar,1);
     if (nret < 0)
-        warning("getdparam(%s=%s) parsing error %d, assumed %g",
+        error("getdparam(%s=%s) parsing error %d, assumed %g",
                             par,val,nret,dpar);
     return (nret==0) ? 0.0 : dpar;
 #endif /* !NEMOINP */
@@ -1675,7 +1682,7 @@ local void writekeys(string mesg)
 	  fprintf(keyfile,"VERSION=%s\n",version_i);
         else {
 	  if (keys[i].indexed) {
-	    warning("writing indexed keys");
+	    dprintf(1,"writing indexed keys");
 	    kw = &keys[i];
 	    while (kw->next) {
 	      kw = kw->next;
