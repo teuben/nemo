@@ -1,11 +1,11 @@
 #!/bin/csh -f
 #
-# $Id$
+#
 #
 
 set ARCH = ${OSTYPE}
 
-set dirs = ( ${ARCH}/obj ${ARCH}/bin )
+set dirs = ( ${ARCH}/obj ${ARCH}/obj-debug ${ARCH}/bin )
 
 if ( ! -d $ARCH ) then
     mkdir $ARCH
