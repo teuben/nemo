@@ -13,6 +13,7 @@
  *      V1.6   5-mar-98         supporting time=first and time=last
  *	      15-jun-02         debug output
  *      V2.0  14-sep-02         Multiple output names allowed via mstropen
+ *             9-oct-03         more precision in output
  */
 
 /* #define INTERACT */
@@ -33,7 +34,7 @@ string defv[] = {
 #if defined(INTERACT)
     "more=y\n                     needs interactive SETPARAM part",
 #endif
-    "VERSION=2.0\n		  14-sep-02 PJT",
+    "VERSION=2.0a\n               9-oct-03 PJT",
     NULL,
 };
 
@@ -107,7 +108,7 @@ nemo_main()
                  break;            /* done with all - break reading loop */
             }
 #if defined(INTERACT)
-        printf("Time = %f ; partflag = %d diagflag = %d, read it? (y/n): ",
+        printf("Time = %g ; partflag = %d diagflag = %d, read it? (y/n): ",
                 time, partflag, diagflag);
 #if defined(SETPARAM)
         if (Qinter) {
@@ -125,7 +126,7 @@ nemo_main()
 	if (partflag || diagflag) {
             something = TRUE;
             if (!Qlast)
-	        dprintf(0,"time =%8.3f\tnpart =%4d\tndiag =%4d\toutputing %s\n",
+	        dprintf(0,"time = %g\tnpart =%4d\tndiag =%4d\toutputing %s\n",
 		   timeflag ? time : 0.0, npart, ndiag,
 		   partflag ? "particles" : "diagnostics");
 	    outstr = mstr_open(mp,"w");
@@ -149,7 +150,7 @@ nemo_main()
     }
     strclose(instr);
     if (Qlast && something)
-        dprintf(0,"time =%8.3f\tnpart =%4d\tndiag =%4d\toutputing %s\n",
+        dprintf(0,"time = %g\tnpart =%4d\tndiag =%4d\toutputing %s\n",
                     timeflag ? time : 0.0, npart, ndiag,
                     partflag ? "particles" : "diagnostics");
     if (!something) warning("Nothing was ever written out");
