@@ -47,6 +47,11 @@ ERROR!  Sorry, NEMO now requires an ANSI C compiler
 
 #define NEMO  1
 
+/* If we're not using GNU C, elide __attribute__ */
+#ifndef __GNUC__
+#  define  __attribute__(x)  /*NOTHING*/
+#endif
+
 #include <maxsizes.h>   /* should be in $NEMOLIB - made during install */
 #include <version.h>	/* our static version id - made during install */
 #include <config.h>     /* should be in $NEMOLIB - made during install */
@@ -127,10 +132,6 @@ ERROR!  Sorry, NEMO now requires an ANSI C compiler
  * WARNING: bool is now an official type in C++.....
  */
 
-#if 0
-   typedef short int bool;      /* do not use char for logicals, says Josh */
-#else
-
 /*  probably should not use in C++ since bool is a new type in C++ */
 #if !defined(__cplusplus)
 #if !defined(CURSES_H) && !defined(_CURSES_H_)
@@ -145,19 +146,6 @@ ERROR!  Sorry, NEMO now requires an ANSI C compiler
 #  define TRUE  (1)
 #endif
 
-
-/*
- * VOID: type specifier used to declare procedures called for
- * side-effect only.  Note: this slightly kinky substitution
- * is used to so that one need not declare something to be
- * void before using it. Since ANSI is around, we should not need
- * to define void anymore... some old machine (e.g. mc68k) may still
- * need it
- */
-
-#ifdef mc68k
-#define void int
-#endif
 
 /*
  * BYTE: a short name for a handy chunk of bits. 
@@ -459,12 +447,16 @@ extern bool scanopt(string, string);
 /* core/cputime.c */
 extern double cputime(void);
 
-/* misc/{sqr.c, log2.c, pow.c} */
+  /* misc/sqr.c */
 extern double sqr(double);
 extern double qbe(double);
 extern double dex(double);
+
+  /* misc/pow.c */
 extern double powi(double,int);
 extern double powd(double,double);
+
+  /* misc/log2.c */
   /* cygwin defines log2 as a macro */
 #if defined(log2)
 #define HAVE_LOG2
@@ -473,7 +465,7 @@ extern double powd(double,double);
 extern double log2(double);
 #endif
 
-/* cores/bswap.c */
+  /* cores/bswap.c */
 extern void bswap(void *vdat, int len, int cnt);
 #define bswapr(p,cnt)  bswap(p,sizeof(real),cnt)
 #define bswapd(p,cnt)  bswap(p,sizeof(double),cnt)
@@ -482,8 +474,7 @@ extern void bswap(void *vdat, int len, int cnt);
 #define bswapi(p,cnt)  bswap(p,sizeof(int),cnt)
 #define bswaps(p,cnt)  bswap(p,sizeof(short),cnt)
 
-/* misc/within.c */
-
+  /* misc/within.c */
 extern bool within(real val, string range, real fuzz);
 
 
@@ -491,7 +482,7 @@ extern bool within(real val, string range, real fuzz);
 }
 #endif
 
-/* for tables: */
+/* for tables: (ought to go into maxsizes.h) */
 
 #ifndef MAXLINES
 #define MAXLINES 10000
