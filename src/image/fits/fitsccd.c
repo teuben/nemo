@@ -6,6 +6,8 @@
  *		even if fits file; i.e. make their
  *		defaults blanks, and use hasvalue() to detect mode.
  *
+ *        ==>>  fix the NaN problem
+ *
  *	 7-sep-89       started coding on 3b1
  *	28-jan-90	[32] V1.0 finished finally
  *       8-mar-90       V1.1 fixed bug on suns - added slice=
@@ -118,9 +120,10 @@ void nemo_main()
     }
     if (iptr==NULL) error("No memory to allocate image");
 
-    if (streq(mode,"fits"))
+    if (streq(mode,"fits")) {
       make_fitheader(fitsfile,iptr,Qrel,&fdata_min, &fdata_max);
-    else if (streq(mode,"raw"))
+      dprintf(1,"Datamin/max read: %g - %g\n",fdata_min, fdata_max);
+    } else if (streq(mode,"raw"))
       make_rawheader(fitsfile,iptr,Qrel);
     else
       error("Never Reached");
@@ -172,7 +175,7 @@ void nemo_main()
     if (rmin != MapMin(iptr)) {
         warning("Setting map minimum from %g to %g",MapMin(iptr),rmin);
         MapMin(iptr) = rmin;
-    }
+    } 
     if (rmax != MapMax(iptr)) {
         warning("Setting map maximum from %g to %g",MapMax(iptr),rmax);
         MapMax(iptr) = rmax;
@@ -332,6 +335,10 @@ void make_fitheader(FITS *fitsfile, imageptr iptr, bool Qrel,
 }
 
 
+/*
+ *  the _nan routines should supply this
+ */
+
 is_feq(int *ia, int *ib)
 {
   int r;
@@ -342,7 +349,6 @@ is_feq(int *ia, int *ib)
   memcpy(&ib,&b,sizeof(float));
   printf("A = %d    B=%d   \n",ia,ib);
 #else
-  dprintf(1,"A = %d    B=%d   \n",*ia,*ib);
   r = (*ia == *ib);
 #endif
   return r;
