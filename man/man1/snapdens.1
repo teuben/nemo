@@ -1,4 +1,4 @@
-.TH SNAPDENS 1NEMO "16 December 1988" 
+.TH SNAPDENS 1NEMO "12 April 2003"
 .SH NAME
 snapdens \- local density estimator in an N-body snapshot
 .SH SYNOPSIS
@@ -46,17 +46,30 @@ K'th nearest neighbor, velocity dispersion\fP. [default: \fBt\fP].
 \fBformat=\fP\fIf_fmt\fP
 Format with which the numbers are output in case a table was selected (see above)
 [default: \fB%e\fP].
+.TP
+\fBtfactor=\fP
+If used, this factor is used to scale radii to velocities, used in computing
+the phase space densities. ** in development **
+.TP
+\fBnn=t|f\fP
+If set, the neighest neighbor (a number from 0 and Nnbody-1) is saved in the
+\fIKey\fP of a \fIsnapshot(5NEMO)\fP.  This is required for the \fIatlas(5NEMO)\fP
+format. Default: f
+.TP
+\fBndim=2|3f\fP
+Dimensionality of space. For ndim=2 a surface density will be computed.
+Default: 3
 .SH TIMING
 .nf
 .ta +0.5i +0.5i +0.5i +0.5i +0.5i 
 Hackforce:	Nbody=16384	Kmax=32	2600"	grolsch SUN 3/160 (f68881)
-Snapdens:	Nbody=1024	Kmax=8	240" 	guinness (f68881)
+Snapdens:	Nbody=1024	Kmax=8	240"/0.41 	guinness (f68881)  / P4/1.6
 Snapdens:	Nbody=16384	Kmax=64	75000"	grolsch SUN 3/160 (f68881)
 Snapdens:	Nbody=512	Kmax=16	65"	pollux SUN 3/110 (f68881)
 Hackdens:	Nbody=512	Kmax=16 xx"	pollux SUN 3/110 (f68881)
 .fi
 .SH SEE ALSO
-snappeak(1NEMO), snapstat(1NEMO), hackdens(1NEMO)
+snappeak(1NEMO), snapstat(1NEMO), hackdens(1NEMO), snapatlas(1NEMO), atlas(5NEMO), snapshot(5NEMO)
 .SH AUTHOR
 Peter Teuben
 .SH FILES
@@ -68,5 +81,6 @@ Peter Teuben
 .nf
 .ta +1.0i +4.0i
 1-Nov-88	V1.0: created          	PJT
+12-apr-03	V1.5 added nn= and ndim=	PJT
 .fi
 

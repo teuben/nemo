@@ -44,6 +44,10 @@ void nemo_main()
     string *opt;
     rproc_body fopt[MAXOPT];
 
+#if defined(SINGLEPREC)
+    warning("SINGLEPREC mode: data will not be in full precision");
+#endif
+
     ParticlesBit = (MassBit | PhaseSpaceBit | PotentialBit | AccelerationBit |
             AuxBit | KeyBit | DensBit | EpsBit);
     instr = stropen(getparam("in"), "r");	/* open input file */

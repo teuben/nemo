@@ -20,14 +20,14 @@ where a particle-data-line contains the following numbers:
 The symbols used here are:
 .nf
   time     (real) the time of the snapshot (in standard Heggie N-body units)
-  N        (int)  the number of particles in a snapshot (1..N ??)
-  id       (int)  identification number (name) of the particle
-  mass     (real) the mass of the particle
+  N        (int)  the number of particles in a snapshot
+  i        (int)  identification number (name) of the particle  (1..N ??)
+  m        (real) the mass of the particle
   x,y,z    (real) the three position coordinates of the particle
   vx,vy,vz (real) the three velocity coordinates of the particle
   phi      (real) the potential energy per unit mass of the particle (NEGATIVE)
-  rho      (real) the density at the particle (method can differ)
-  id_near  (int)  the identification number (name) of the nearest neighbor
+  dens     (real) the density at the particle (method can differ)
+  nn       (int)  the identification number (name) of the nearest neighbor
 .fi
 Each file may contain more than one snapshot, multiple snapshots should
 be separated by a blank line.

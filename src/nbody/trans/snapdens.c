@@ -13,6 +13,7 @@
  *     18-apr-91            a   more general non-equal mass model   PJT
  *	1-apr-01 	    b   compiler warning
  *     23-may-01            c   cleanup code a bit (sleepy in mexico)
+ *     12-apr-03        V1.5 add nn= keyword for atlas  PJT
  */
 
 #include <stdinc.h>
@@ -34,7 +35,9 @@ string defv[] = {
     "tab=f\n                      get an ascii table of all ",
     "format=%e\n                  format for numbers in table ",
     "tfactor=-1.0\n               conversion factor v->r [virial=sqrt(2)]",
-    "VERSION=1.4c\n		  23-may-01 PJT",
+    "nn=f\n                       add NN index to the Key field?",
+    "ndim=3\n                     3dim or 2dim densities?",
+    "VERSION=1.5\n		  12-apr-03 PJT",
     NULL,
 };
 
@@ -44,6 +47,9 @@ string usage="density estimator using Kth-nearest neighbor";
 #define FAC1   4.188790203	/* 3.pi/4 */
 #define FAC2   15.74960994	/* (2.pi)^(3/2) */
 #define FAC3   1.644934067	/* pi^2/6 */
+#define FAC4   3.141592654      /* pi */
+#define FAC5   1.0              /* T.B.D. */
+#define FAC6   1.0              /* T.B.D. */
 
 #define MAXK   256
 
@@ -52,9 +58,9 @@ Body  *bindex[MAXK+1];            /* pointer to body */
 real  r[MAXK+1];                  /* radius squared to nearest neighbours */
 
 Body  *btab = NULL;               /* pointer to snapshot Body datastructure */
-int   nbody, kmax, klen;
+int   nbody, kmax, klen, ndim;
 
-bool  Qdens, Qtab;
+bool  Qdens, Qtab, Qnn;
 char  *fmt;
 real  tfactor;
 
@@ -69,7 +75,6 @@ nemo_main()
     real   tsnap, dm;
     string headline=NULL;
     int i, bits;
-    double sqr();
     Body   *bi, *bj;
 					
     instr =  stropen(getparam("in"),  "r");
@@ -82,6 +87,7 @@ nemo_main()
         error("parameter kmax=%d too large (%d)",kmax,MAXK);
     Qdens = getbparam("dens"); 
     Qtab = getbparam("tab");  
+    Qnn = getbparam("nn");  
     fmt = getparam("format");
     tfactor=getdparam("tfactor");
     if (Qdens && tfactor>0)
@@ -108,6 +114,7 @@ nemo_main()
         if (outstr) {
 	  put_history(outstr);
 	  bits |= AuxBit;         /* turn Aux bit on */
+	  if (Qnn) bits |= KeyBit;
 	  put_snap(outstr,&btab,&nbody,&tsnap,&bits);
         }
 	
@@ -235,7 +242,10 @@ local void stat_nn(Body *bi)
         }
     }
     rad = sqrt(r[klen-1]);      /* radius of K-th nearest neighbor */
-    dens = dens / (rad*rad*rad*FAC1);        /* space density estimate */
+    if (ndim == 3)
+      dens /= (rad*rad*rad*FAC1);        /* space density estimate */
+    else if (ndim == 2)
+      dens /= (rad*rad*FAC4);            /* surface density estimate */
     if (klen!=kmax) {       /* should never occur */
         error ("DENSITY  %f %f %f %f klen=%d\n",rad,dens,0.0,0.0,klen);
         return;
@@ -245,12 +255,18 @@ local void stat_nn(Body *bi)
         sigma += s[i];
 	sigma2 += v2[i]/(double)klen;
     }
-    sigma = sqrt(sigma);
-    fc = dens / (sigma*sigma*sigma*FAC2);  /* phase space density estimate */
-    fc2 = dens / qbe(rad/tfactor) / FAC3;    /* new 6D phase space estimate */
-
+    sigma = sqrt(sigma); 
+    if (ndim == 3) {
+      fc = dens / (sigma*sigma*sigma*FAC2);  /* phase space density estimate */
+      fc2 = dens / qbe(rad/tfactor) / FAC3;    /* new 6D phase space estimate */
+    } else if (ndim == 2) {
+      fc = dens / (sigma*sigma*FAC5);        /* phase space density estimate TODO: get FAC5 */
+      fc2 = dens / sqr(rad/tfactor) / FAC6;
+    }
 
     Aux(bi) = (Qdens ? dens : fc);        /* replace (phase space) density */
+    if (Qnn)
+      Key(bi) = iindex[0];
     if (tfactor>0 && !Qdens)  Aux(bi) = fc2;	/* new new */
     if (Qtab) {
         ABSV(radius,Pos(bi));
