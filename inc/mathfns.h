@@ -134,7 +134,7 @@ int init_xrandom(string);
 int set_xrandom(int);
 double xrandom(double, double);
 double grandom(double, double);
-double frandom(double, double, rproc);
+double frandom(double, double, real_proc);
 
 #ifdef NEMO
 

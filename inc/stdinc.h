@@ -249,7 +249,8 @@ typedef bool (*bproc)();	/* problems on sun3 ??? aix too */
 typedef int (*iproc)();
 typedef real (*rproc)();
 
-typedef int(*qsort_proc)(const void *, const void *);
+typedef int  (*qsort_proc)(const void *, const void *);
+typedef real (*real_proc)(real);
 
 /*
  * LOCAL: declare something to be local to a file.
