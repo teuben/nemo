@@ -1,0 +1,45 @@
+.TH QUADFORCE 1NEMO "6 May 1992"
+.SH NAME
+quadforce \- quadrupole-order force calculation of an N-body system.
+.SH SYNOPSIS
+\fBquadforce\fP \fBin=\fPsnapshot [parameter=value] ...
+.SH DESCRIPTION
+\fIquadforce\fP computes a quadrupole-order force calculation
+of a snapshot N-body system. (see also \fIquadcode(1NEMO)\fP). The 
+output can be either in the form of the snapshot, or a table, in 
+which case quadrupole-oder forces can be inserted in other snapshots
+(see \fIquadinter(1NEMO)\fP).
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP\fIsnaphot\fP
+Input file with N-body snapshot. No default.
+.TP 20
+\fBout=\fP\fI
+Optional snapshot output file with forces and potentials. This
+output is optional.
+.TP 20
+\fBquad=\fP
+Output file with quadrupole field tables. This output is optional.
+.TP 20
+\fBeps_r=\fP
+Radial softening parameter. [Default: \fB0.05\fP]
+.TP 20
+\fBeps_t=\fP
+Tangential softening parameter. [Default: \fB0.07\fP]
+.SH LIMITATIONS
+The code has a hardcoded maximum number of particles, through the
+macro \fBMBODY\fP. (currently 4096). If more are needed, it needs
+to be recompiled. See comments in \fIquadcode(1NEMO)\fP
+.SH AUTHOR
+Joshue Barnes
+.SH SEE ALSO
+quadcode(1NEMO), quadinter(1NEMO)
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+4-mar-89	V1.0 Old version	JEB
+12-nov-91	V1.1 FOr new nemo V2.	PJT
+6-may-92	V1.1a man page written, added some warnings	PJT
+.fi
