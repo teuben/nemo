@@ -1,0 +1,29 @@
+############################################################
+#	This is a NULL Makefile, and can be placed in any  #
+#	directory which may be visited during installation #
+#	to prevent 'make' from complaining about missing   #
+#	Makefiles                                          #
+############################################################
+#	Nemo V1.x				############
+
+nemo_bin:
+	@echo "No work to be done in here in `pwd`"
+
+nemo_lib:
+	@echo "No work to be done in here in `pwd`"
+
+nemo_src:
+	@echo "No work to be done in here in `pwd`"
+
+#	Nemo V2.x				############
+
+install:
+	@echo "No work to be done in here in `pwd`"
+
+clean:
+	@echo "No work to be done in here in `pwd`"
+
+update:
+	@echo "No work to be done in here in `pwd`"
+
+############################################################
