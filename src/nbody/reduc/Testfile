@@ -1,6 +1,6 @@
 DIR = src/nbody/reduc
 BIN = snapplot snapdiagplot snapplotv snapmradii radprof real
-NEED = $(BIN) hackcode1 mkplummer tabplot
+NEED = $(BIN) hackcode1 mkplummer tabplot snapfour
 
 help:
 	@echo $(DIR)

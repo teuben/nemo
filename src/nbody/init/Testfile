@@ -57,7 +57,7 @@ mkexpdisk:
 
 real:
 	@echo f2d conversion:
-	mkplummer - 100 | csf - - convert=f2d | snapplot - yapp=/null
+	mkplummer - 100 | csf - - convert=f2d | snapplot - 
 	@echo d2f conversion:
-	mkplummer - 100 | csf - - convert=d2f | snapplot - yapp=/null
+	mkplummer - 100 | csf - - convert=d2f | snapplot - 
 
