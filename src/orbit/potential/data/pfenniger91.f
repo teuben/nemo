@@ -1,20 +1,8 @@
 C
-C      PROGRAM TESTBAR3SUBS - originally in bar3subs3.f
-C
-C!     Minimal test program for the potential & force routines of
-C!     the n=2 Ferrers potential
-C
-C!     D. Pfenniger, Observatoire de Geneve, 2002
-C
-C      21-feb-2002   for NEMO's potential(5) format:            PJT
-C                    - added Miyamoto disk
+C      23-feb-2002   derived from pfennifer84
+C                    - added 2nd Miyamoto disk
 C                    
 C
-C Caveats:
-C      - pattern speed is still fixed, so don't change 'a'
-C      - total mass is fixed to 1, the bar mass is relative (0..1)
-C      - central 
-C                    
 C
 
 c
@@ -28,31 +16,28 @@ c
 c
       DOUBLE PRECISION gmb,a,aob,aoc
 
-      DOUBLE PRECISION gmd,ad,bd,bd2
-      COMMON /p84/gmd,ad,bd,bd2
+      DOUBLE PRECISION gmd1,gmd2,ad1,ad2,bd,bd2
+      COMMON /miya/gmd1,gmd2,ad1,ad2,bd,bd2
+
 
 
       gmb = 0.10D0
+      gmd1= 0.10D0
+      gmd2= 0.80D0
       a   = 6.00D0
       aob = 4.00D0
       aoc = 10.0D0
-      ad  = 3.00D0
+      ad1 = 0.14D0
+      ad2 = 3.00D0
       bd  = 1.00D0
       IF (npar.GE.2) gmb = par(2)
-      IF (npar.GE.3) a   = par(3)
-      IF (npar.GE.4) aob = par(4)
-      IF (npar.GE.5) aoc = par(5)      
-      IF (npar.GE.6) ad  = par(6)
-      IF (npar.GE.7) bd  = par(7)
 
       CALL inpo3 (a,a/aob,a/aoc,gmb)
-      gmd = 1.0D0 - gmb
+
       bd2 = bd*bd
 
 c     return the pattern speed of the standard model (R_cr = a)
       par(1) = 0.05471
-
-c      write(*,*) 'Disk: M, A, B = ',gmd,ad,bd
 
       RETURN
       END
@@ -66,20 +51,31 @@ c
 c
       DOUBLE PRECISION r2,q2,s2,q,tmp
 c
-      DOUBLE PRECISION gmd,ad,bd,bd2
-      COMMON /p84/gmd,ad,bd,bd2
+      DOUBLE PRECISION gmd1,gmd2,ad1,ad2,bd,bd2
+      COMMON /miya/gmd1,gmd2,ad1,ad2,bd,bd2
 
+c  bar
       CALL pbar3(pos(1),pos(2),pos(3),pot)
       CALL fbar3(pos(1),pos(2),pos(3),acc(1),acc(2),acc(3))
+c  shared miyamoto disks variables
       r2 = pos(1)*pos(1)+pos(2)*pos(2)
       q2 = pos(3)*pos(3) + bd2
       q = sqrt(q2)
-      s2 = r2 + (ad+q)*(ad+q)
-      pot = pot - gmd/sqrt(s2)
+
+c  miyamoto disk 1 ('bulge')
+      s2 = r2 + (ad1+q)*(ad1+q)
+      pot = pot - gmd1/sqrt(s2)
       tmp = pot/s2
       acc(1) = acc(1) + tmp*pos(1)
       acc(2) = acc(2) + tmp*pos(2)
-      acc(3) = acc(3) + tmp*pos(3)*(ad+q)/q
+      acc(3) = acc(3) + tmp*pos(3)*(ad1+q)/q
+c  miyamoto disk 2 ('disk')
+      s2 = r2 + (ad2+q)*(ad2+q)
+      pot = pot - gmd2/sqrt(s2)
+      tmp = pot/s2
+      acc(1) = acc(1) + tmp*pos(1)
+      acc(2) = acc(2) + tmp*pos(2)
+      acc(3) = acc(3) + tmp*pos(3)*(ad2+q)/q
 
       END
 
