@@ -27,7 +27,10 @@ string defv[] = {
     "par=\n             initial estimates of parameters (p0,p1,p2,...)",
     "free=\n            free(1) or fixed(0) parameters? [1,1,1,1,....]",
     "nmax=10000\n       Default max allocation",
-    "VERSION=1.0b\n     13-jul-02 PJT",
+    "tol=\n             Tolerance for convergence of nllsqfit",
+    "lab=\n             Mixing parameter for nllsqfit",
+    "itmax=50\n         Maximum number of allowed nllsqfit iterations",
+    "VERSION=1.0c\n     13-jul-02 PJT",
     NULL
 };
 
@@ -61,6 +64,9 @@ stream instr, outstr;       /* input / output file */
 int    nmax;                /* allocated space */
 int    npt;                 /* actual number of points from table */
 real   nsigma;              /* fractional sigma removal */
+real   tol = -1;  
+real   lab = -1;
+int    itmax;
 
 int order;                  /* order of poly's/hyperplane's */
 
@@ -115,7 +121,7 @@ static void derv_exp(real *x, real *p, real *e, int np)
   e[0] = 1.0;
   e[1] = exp(-arg);
   e[2] = p[1]*e[1] / b;
-  e[3] = p[1] * e[1] * arg / b;
+  e[3] = e[2] * arg;
 }
 
 static real func_line(real *x, real *p, int np)
@@ -227,13 +233,25 @@ setparams()
         xrange[0] = -HUGE;
         xrange[1] = HUGE;
     } 
+
+    if (hasvalue("tol")) tol = getdparam("tol");
+    if (hasvalue("lab")) lab = getdparam("lab");
+    itmax = getiparam("itmax");
     
     method = getparam("fit");
     nsigma = getdparam("nsigma");
     order = getiparam("order");
     if (order<0) error("order=%d of %s cannot be negative",order,method);
 
-    if (hasvalue("free")) {
+    if (hasvalue("par")) {         /* get the initial estimates of parameters */
+      npar = nemoinpr(getparam("par"),par,MAXPAR);
+      if (npar < 0) error("bad par=");
+    } else
+      npar = 0;
+    for (i=npar; i<MAXPAR; i++)
+      par[i] = 0.0;
+
+    if (hasvalue("free")) {        /* determine which parameters are free */
       int nfree;
       nfree = nemoinpi(getparam("free"),mask,MAXPAR);
       if (nfree < 0) error("bad free=");
@@ -243,13 +261,6 @@ setparams()
       for (i=0; i<MAXPAR; i++)
 	mask[i] = 1;
     }
-    if (hasvalue("par")) {
-      npar = nemoinpr(getparam("par"),par,MAXPAR);
-      if (npar < 0) error("bad par=");
-      for (i=npar; i<MAXPAR; i++)
-	par[i] = 0.0;
-    } else
-      npar = 0;
 }
 
 setrange(real *rval, string rexp)
@@ -326,12 +337,13 @@ do_line()
   real *x, *y, *dy, *d;
   int i,j, nrt, mpar[2];
   real fpar[2], epar[2];
-  int its = 50;
-  real tol = 0.0, lab = 0.0;
   int lpar = 2;
     
   if (nxcol < 1) error("nxcol=%d",nxcol);
   if (nycol < 1) error("nycol=%d",nycol);
+  if (tol < 0) tol = 0.0;
+  if (lab < 0) lab = 0.0;
+
   x = xcol[0].dat;
   y = ycol[0].dat;
   dy = (dycolnr>0 ? dycol.dat : NULL);
@@ -345,9 +357,9 @@ do_line()
   fitfunc = func_line;
   fitderv = derv_line;
 
-  nrt = nllsqfit(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,its,lab, fitfunc,fitderv);
+  nrt = nllsqfit(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
   printf("nrt=%d\n",nrt);
-  printf("a+bx:  \na= %g %g \nb= %g %g\n", fpar[0],epar[0],fpar[1],epar[1]);
+  printf("Fitting a+bx:  \na= %g %g \nb= %g %g\n", fpar[0],epar[0],fpar[1],epar[1]);
   if (outstr)
     for (i=0; i<npt; i++)
       fprintf(outstr,"%g %g %g\n",x[i],y[i],d[i]);
@@ -368,12 +380,12 @@ do_plane()
   real **xp;
   int i,j,k,nrt, mpar[MAXPAR];
   real fpar[MAXPAR], epar[MAXPAR];
-  int its = 50;
   int lpar = order+1;
-  real tol = 0.0, lab = 0.0;
 
   if (nxcol<order) error("Need %d value(s) for xcol=",order);
   if (nycol<1) error("Need 1 value for ycol=");
+  if (tol < 0) tol = 0.0;
+  if (lab < 0) lab = 0.0;
 
   y = ycol[0].dat;
   dy = (dycolnr>0 ? dycol.dat : NULL);
@@ -392,7 +404,7 @@ do_plane()
   fitfunc = func_plane;
   fitderv = derv_plane;
 
-  nrt = nllsqfit(x,2,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,its,lab, fitfunc,fitderv);
+  nrt = nllsqfit(x,2,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
   printf("nrt=%d\n",nrt);
   printf("Fitting p0+p1*x1+p2*x2+.....pN*xN: (N=%d)\n",order);
   for (k=0; k<lpar; k++)
@@ -420,13 +432,13 @@ do_gauss()
 {
   real *x1, *x2, *x, *y, *dy, *d;
   int i,j, nrt, mpar[4];
-  real fpar[3], epar[4];
-  int its = 50;
-  real tol = 0.0, lab = 0.01;
+  real fpar[4], epar[4];
   int lpar = 4;
 
   if (nxcol < 1) error("nxcol=%d",nxcol);
   if (nycol<1) error("Need 1 value for ycol=");
+  if (tol < 0) tol = 0.0;
+  if (lab < 0) lab = 0.01;
 
   x = xcol[0].dat;
   y = ycol[0].dat;
@@ -441,7 +453,7 @@ do_gauss()
   fitfunc = func_gauss1d;
   fitderv = derv_gauss1d;
 
-  nrt = nllsqfit(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,its,lab, fitfunc,fitderv);
+  nrt = nllsqfit(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
   printf("nrt=%d\n",nrt);
   printf("Fitting a+b*exp(-(x-c)^2/(2*d^2)):  \na= %g %g \nb= %g %g \nc= %g %g\nd= %g  %g\n",
 	 fpar[0],epar[0],fpar[1],epar[1],fpar[2],epar[2],fpar[3],epar[3]);
@@ -462,15 +474,15 @@ do_exp()
 {
   real *x1, *x2, *x, *y, *dy, *d;
   int i,j, nrt, mpar[4];
-  real fpar[3], epar[4];
-  int its = 50;
-  real tol = 0.0, lab = 0.01;
+  real fpar[4], epar[4];
   int lpar = 4;
 
-  warning("fit=exp does not work yet");
+  warning("fit=exp does not seem to work when all parameters free");
 
   if (nxcol < 1) error("nxcol=%d",nxcol);
   if (nycol<1) error("Need 1 value for ycol=");
+  if (tol < 0) tol = 0.0;
+  if (lab < 0) lab = 0.01;
 
   x = xcol[0].dat;
   y = ycol[0].dat;
@@ -485,7 +497,7 @@ do_exp()
   fitfunc = func_exp;
   fitderv = derv_exp;
 
-  nrt = nllsqfit(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,its,lab, fitfunc,fitderv);
+  nrt = nllsqfit(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
   printf("nrt=%d\n",nrt);
   printf("Fitting a+b*exp(-(x-c)/d):  \na= %g %g \nb= %g %g \nc= %g %g\nd= %g  %g\n",
 	 fpar[0],epar[0],fpar[1],epar[1],fpar[2],epar[2],fpar[3],epar[3]);
@@ -507,12 +519,12 @@ do_poly()
   real *x, *y, *dy, *d;
   int i,j, nrt, mpar[MAXPAR];
   real fpar[MAXPAR], epar[MAXPAR];
-  int its = 50;
-  real tol = 0.0, lab = 0.0;
   int lpar = order+1;
     
   if (nxcol<order) error("Need %d value(s) for xcol=",order);
   if (nycol < 1) error("nycol=%d",nycol);
+  if (tol < 0) tol = 0.0;
+  if (lab < 0) lab = 0.0;
 
   x = xcol[0].dat;
   y = ycol[0].dat;
@@ -527,7 +539,7 @@ do_poly()
   fitfunc = func_poly;
   fitderv = derv_poly;
 
-  nrt = nllsqfit(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,its,lab, fitfunc,fitderv);
+  nrt = nllsqfit(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
   printf("nrt=%d\n",nrt);
   printf("Fitting p0+p1*x+p2*x^2+.....pN*x^N: (N=%d)\n",order);
   for (i=0; i<lpar; i++)
