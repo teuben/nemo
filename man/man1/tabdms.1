@@ -14,24 +14,29 @@ is also given:
 .TP 20
 \fBin=\fP
 input file name, an ascii table. No Default.
-.TP 20
+.TP 
 \fBout=\fP
 output file name, an ascii table. No Default.
-.TP 20
+.TP 
 \fBtodms=\fP
 list of columns (1..) to convert to dms. 
 Negative columns should be used if the format is to be interpreted
 as ".DMS" instead of the default "D.MS". 
 The D ins DMS is normally assumed to be modulo 360.
 Default: none.
-.TP 20
+.TP 
 \fBtohms=\fP
 list of columns (1..) to convert to hms.
 Negative columns should be used if the format is to be interpreted
 as ".HMS" instead of the default "H.MS".
 The H ins HMS is normally assumed to be modulo 24.
 Default: none.
-.TP 20
+.TP 
+\fBfromhms=\fP
+A list of columns (1..) to convert from hms.
+** in development **
+[none]
+.TP 
 \fBseparator=\fP
 separator between output D-M-S.S 
 [Default: \fB:\fP]
