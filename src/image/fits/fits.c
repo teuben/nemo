@@ -2061,31 +2061,25 @@ int fts_cdata(
 int fts_cdata816(
 	      fits_header *fh,                /*  (i) pointer to fits header */
 	      stream instr,           /* (i) file pointer for input */
-	      stream outstr,           /* (i) file pointer  for output  */
-	      bool trailr,			/* (i) need to read trailing end too ? */
-	      bool trailw)			/* (i) need to write trailing end too ? */
+	      stream outstr)           /* (i) file pointer  for output  */
 {
-    int  nread, nwrite, n, ntowrite, ntoread, itemlen, nitems;
+    int  i,nread, nwrite, n, ntowrite, ntoread, itemlen, nitems;
     char buffer[CONVBUFLEN];
     char zero[1];
 
     if (fh->bitpix != 8) error("fts_cdata816: illegal bitpix=%d",fh->bitpix);
 
-    itemlen = 1;
     n = fts_dsize(fh);                  /* real data size  */
+    if (n == 0) return 1;
+
     zero[0] = 0;
-    if (trailr) {
-      ntoread  = ROUNDUP(n,ftsblksiz_i);  /* total size to read though */
-    } else
-      ntoread = n;
-    if (trailw) {
-      ntowrite = ROUNDUP(n,ftsblksiz_o);  /* .. and to write */
-    } else
-      ntowrite = n;
-    ntowrite *= 2;         /* 8 -> 16 conversion */
+    
+
+
     if (n==0) ntoread=0;                /* no data? */
     dprintf(2,"fts_cdata816: ntoread=%d   ntowrite=%d\n",ntoread,ntowrite);
-    while (ntoread > 0) {
+    
+    for (i=0; i<n; i++) {
         nread = fread(buffer,sizeof(char),1,instr);
         if (nread != 1) error("Tried to read 1, could only read %d",nread);
 	fh->nread += nread;
@@ -2093,9 +2087,16 @@ int fts_cdata816(
         if (nwrite != 1) error("Tried to write 1, could only write %d\n",nwrite);
         nwrite = fwrite(buffer,sizeof(char),1,outstr);
         if (nwrite != 1) error("Tried to write 1, could only write %d\n",nwrite);
-        ntoread -= nread;
     }
     fh->bitpix = 16;
+    n *= 2;
+    ntowrite = ROUNDUP(n,ftsblksiz_o);  /* .. and to write */
+    if (n == ntowrite) return 1;
+    n = ntowrite-n;
+    for (i=0; i<n; i++) {
+      nwrite = fwrite(zero,sizeof(char),1,outstr);
+      if (nwrite != 1) error("Tried to write 1, could only write %d\n",nwrite);
+    }
     return 1;
 }
 

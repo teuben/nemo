@@ -38,7 +38,7 @@ nemo_main()
     if (n<0)				              /* if no data (EOF) .. */
       break;			              /* ... quit */
     fts_chead816(&fh,outstr);                         /* copy header */
-    fts_cdata816(&fh,instr,outstr,TRUE,TRUE);  /* copy data, with trailing bits */
+    fts_cdata816(&fh,instr,outstr);         /* copy data, with trailing bits */
                                                /* this also modifies fh->bitpix */
   }
   strclose(outstr);
