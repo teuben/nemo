@@ -47,7 +47,7 @@ string defv[] = {
     "sigma=0\n            velocity dispersion, plus optional central offset and exp scalelength",
     "nmodel=1\n           number of models",
     "headline=\n	  text headline for output ",
-    "VERSION=1.7b\n	  8-apr-03 PJT",
+    "VERSION=1.7c\n	  15-jul-04 PJT",
     NULL,
 };
 
@@ -78,7 +78,7 @@ nemo_main()
     ndisk = getiparam("nbody");
     nmodel = getiparam("nmodel");
     sign = getiparam("sign");
-    nsigma = nemoinpd(getparam("sigma"),sigma,3);
+    nsigma = nemoinpr(getparam("sigma"),sigma,3);
     totmass = getdparam("mass");
     
     SPa = getdparam("a");

@@ -291,7 +291,7 @@ string defv[] = {
     "seed=0\n		Seed for xrandom",
     "atof=\n            test (n)atof single value expression",
     "dms=f\n            Use D:M:S.SS parsing instead of regular",
-    "VERSION=1.9b\n	24-nov-03 PJT",
+    "VERSION=1.9c\n	15-jul-04 PJT",
     NULL,
 };
 
@@ -302,7 +302,7 @@ string usage = "expression parser and evaluator; also does lists";
 void nemo_main(void)
 {
     char   fmt1[20], fmt2[20], *cp;
-    real   dms[32];
+    double dms[32];
     double *x;
     int    *ix;
     int    i,nret, nx, seed;

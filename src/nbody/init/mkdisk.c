@@ -46,7 +46,7 @@ string defv[] = {
     "vrad=0\n           radial velocity",
     "energy=f\n         preserve energy if random motions added?",
     "headline=\n	Text headline for output",
-    "VERSION=4.6\n	5-jul-03 PJT",
+    "VERSION=4.6a\n	15-jul-04 PJT",
     NULL,
 };
 
@@ -81,7 +81,7 @@ void nemo_main()
     ndisk = getiparam("nbody");
     jz_sign = getiparam("sign");
     if (ABS(jz_sign) != 1) error("%d: sign must be +1 or -1",jz_sign);
-    nfrac = nemoinpd(getparam("frac"),frac,NDIM);
+    nfrac = nemoinpr(getparam("frac"),frac,NDIM);
     switch (nfrac) {
     case 1:
       frac[1] = frac[0];
