@@ -18,6 +18,8 @@
  *              30-jan-03 : 1.1: added error bars in V (unfinished)              pjt
  *              12-feb-03 : 1.1a: fixed residual field computation bug           pjt
  *              19-mar-03 : 1.2  clean up weights map dens= if beam= not given   pjt
+ *               2-sep-03 : 1.2a  fix rotcurmode=t default masks                 pjt
+ *              22-dec-03 : 1.2b  fix error estimates for the shape pars         pjt
  *
  ******************************************************************************/
 
@@ -25,6 +27,8 @@
 #include <getparam.h>
 #include <image.h>
 #include <filefn.h>
+#include <extstring.h>
+#include <loadobj.h>
 
 /*     Set this appropriately if you want to use NumRec's mrqmin() based engine */
 /*     right now it appears as if the NR routine does not work as well          */
@@ -78,7 +82,7 @@ string defv[] = {
     "rotcur3=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur4=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur5=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
-    "VERSION=1.2\n   19-mar-03 PJT",
+    "VERSION=1.2b\n  22-dec-03 PJT",
     NULL,
 };
 
@@ -160,7 +164,11 @@ rproc vobs;
 proc vobsd, vcor;			/* pointers to the correct functions */
 
 extern string *burststring(string,string);
+extern void freestrings(string *);
 extern bool scanopt(string option, string key);
+
+extern int match(string, string, int *);
+
 
 
 
@@ -203,8 +211,11 @@ real rotcur_poly(real r, int np, real *p, real *d)
   return p[0] * v;
 }
 
+/*
+ *  v = p0 * x / (1+x)
+ */
 
-real rotcur_core1(real r, int n, real *p, real *d)     /* power, with c=1 */
+real rotcur_core1(real r, int n, real *p, real *d)     /* power, with c=1 fixed */
 {
   real x = r / p[1];
   d[0] = x/(1+x);
@@ -212,7 +223,11 @@ real rotcur_core1(real r, int n, real *p, real *d)     /* power, with c=1 */
   return p[0] * d[0];
 }
 
-real rotcur_core2(real r, int n, real *p, real *d)     /* power, with c=2 */
+/*
+ *  v = p0 * x / sqrt(1+x^2)
+ */
+
+real rotcur_core2(real r, int n, real *p, real *d)     /* power, with c=2 fixed */
 {
   real x = r/p[1];
   real y1 = 1+x*x;
@@ -233,7 +248,6 @@ real rotcur_core(real r, int np, real *p, real *d)
   real lnx = log(x);
   real lnq = log(q);
   real y = pow(q,1/c);
-  real v;
 
   d[0] = x / y;
   d[1] = -p[0]*d[0]/(p[1]*q);
@@ -251,13 +265,13 @@ real rotcur_plummer(real r, int np, real *p, real *d)
   return p[0] * x * y;
 }
 
+#if 0
 real rotcur_tanh(real r, int np, real *p, real *d)
 {
-#if 0
   v = tanh(x);
   dvdx = sqr(sech(x));
-#endif
 }
+#endif
 
 /*
  * softened iso-thermal sphere: (a.k.a. pseudo-isothermal)
@@ -383,7 +397,15 @@ real rotcur_power(real r, int np, real *p, real *d)
   return p[0] * d[0];
 }
 
+/*
+ * some kind of toy disk for max disk degeneracy simulations
+ *
+ */
 
+real rotcur_disk1(real r, int np, real *p, real *d)
+{
+  error("disk1 not implemented yet");
+}
 
 
 /******************************************************************************/
@@ -711,13 +733,14 @@ stream  lunpri;       /* LUN for print output */
     if (Qimage) {
       read_image(velstr,&velptr);                 /* get data */
     } else {
+      Qdens = getbparam("dens");              /* redo this, since now it's t/f */
       n_vel = nemo_file_lines(input,100000);
       xpos_vel = (real *) allocate(n_vel * sizeof(real));
       ypos_vel = (real *) allocate(n_vel * sizeof(real));
       vrad_vel = (real *) allocate(n_vel * sizeof(real));
       vsig_vel = (real *) allocate(n_vel * sizeof(real));
       if (Qdens) verr_vel = (real *) allocate(n_vel * sizeof(real));
-      if (Qrotcur) {
+      if (Qrotcur) {                         /* 1dim rotation curve */
 	colnr[0] = 1;    coldat[0] = ypos_vel;
 	colnr[1] = 2;    coldat[1] = vrad_vel;
 	if (Qdens) {
@@ -733,12 +756,19 @@ stream  lunpri;       /* LUN for print output */
 	  xpos_vel[i] = 0.0;
 	  vsig_vel[i] = 1.0;  /* not used yet */
 	}
-      } else {
+      } else {                            /* 2dim velocity field */
 	colnr[0] = 1;    coldat[0] = xpos_vel;
 	colnr[1] = 2;    coldat[1] = ypos_vel;
 	colnr[2] = 3;    coldat[2] = vrad_vel;
-	n_vel = get_atable(velstr,3,colnr,coldat,n_vel);
-	dprintf(0,"[Found %d points in velocity field table]\n",n_vel);
+	if (Qdens) {
+	  colnr[3] = 4;  coldat[3] = verr_vel;
+	  n_vel = get_atable(velstr,4,colnr,coldat,n_vel);
+	  dprintf(0,"[Found %d points in velocity field table (X,Y,V,DV)]\n",n_vel);
+	} else {
+	  n_vel = get_atable(velstr,3,colnr,coldat,n_vel);
+	  verr_vel = NULL;
+	  dprintf(0,"[Found %d points in velocity field table (X,Y,V)]\n",n_vel);
+	}
 	for (i=0; i<n_vel; i++) {
 	  vsig_vel[i] = 1.0;   /* not used yet */
 	}      
@@ -834,16 +864,18 @@ stream  lunpri;       /* LUN for print output */
       beam[1] = beam[0] = 0.0;
       if (n!=0) warning("Parsing error beam=%s",getparam("beam"));
     }
-    if (Qdens) {
-      input = getparam("dens");
-      if (lunpri) fprintf(lunpri," density file        : %s  beam: %g %g\n",
-			  input,beam[0],beam[1]);	
-      denstr = stropen(input,"r");
-      read_image(denstr,&denptr);
-      strclose(denstr);
-      warning("Using density map for weights now");
-    } else {
-      denptr = NULL;
+    if (Qimage) {
+      if (Qdens) {
+	input = getparam("dens");
+	if (lunpri) fprintf(lunpri," density file        : %s  beam: %g %g\n",
+			    input,beam[0],beam[1]);	
+	denstr = stropen(input,"r");
+	read_image(denstr,&denptr);
+	strclose(denstr);
+	warning("Using density map for weights now");
+      } else {
+	denptr = NULL;
+      }
     }
 
     *nring = nemoinpr(getparam("radii"),rad,ring+1);
@@ -915,23 +947,25 @@ stream  lunpri;       /* LUN for print output */
     iret=match(getparam("fixed"),"vsys,xpos,ypos,pa,inc,all",&fixed);
     if (iret<0) error("Illegal option in fixed=%s",getparam("fixed"));
     dprintf(1,"MASK: 0x%x ",fixed);
-    if (Qrotcur) {
+    if (Qrotcur) {                  /* for rotcurmode need to fix xpos,pa,inc */
       if (mask[1]==1) {
 	warning("rotcurmode: XPOS fixed at 0");
 	*x0 = 0.0;
-	mask[1]=1;
+	mask[1]=0;
       }
       if (mask[3]==1) {
 	warning("rotcurmode: PA fixed at 0");
 	pan[0] = 0.0;
-	mask[3]=1;
+	mask[3]=0;
       }
       if (mask[4]==1) {
-	warning("rotcurmode: INC fixed at 30");
-	inc[0] =  30.0;
-	mask[4]=1;
+	warning("rotcurmode: INC fixed at 30 (NOTE:: vel/=2 !!)");
+	inc[0] = 30.0;
+	mask[4]=0;
       }
-    }
+    } 
+    /* BUG: some of this is messing up some of the Qrotcur cases */
+    /*      solution is to use fixed= explicitly via cmdline */
     if (fixed & (1<<GPARAM)) {
       for (i=0; i<GPARAM; i++) mask[i] = 0;
     } else {
@@ -1065,6 +1099,11 @@ stream lunres;   /* file for residuals */
     int   nblank;
     int   i, j, n;                            /* n=number of points in a ring */
     static int first = 1;
+
+#if 0
+    /* Qrotcur */
+    for (i=0; i<GPARAM; i++) mask[i] = 0;    
+#endif
    
     nfr=0;                                 /* reset number of free parameters */
     for (i=0; i<nparams; i++) {
@@ -1073,7 +1112,7 @@ stream lunres;   /* file for residuals */
     }
     r=0.5*(ri+ro);                                     /* mean radius of ring */
 
-    printf(" Disk range: %g %g\n",ri,ro); 
+    printf(" Disk radii range: %g %g\n",ri,ro); 
     /* printf(" %4d  %7.2f  %7.2f  %7.2f  %7.2f  %7.2f", */
     printf(" iter   VSYS     XPOS     YPOS       PA      INC  ");
     /*      xdddd__xxxx.xx__xxxx.xx__xxxx.xx__xxxx.xx__xxxx.xx__ */
@@ -1083,6 +1122,12 @@ stream lunres;   /* file for residuals */
     printf("  points   sigma\n");
 
     printf("  \n");
+#if 1
+    printf("MASK vector: ");
+    for (i=0; i<nparams; i++)
+      printf(" %d",mask[i]);
+    printf("  (nfr=%d)\n",nfr);
+#endif
 
     getdat(x,y,w,idx,res,&n,MAXPTS,p,ri,ro,thf,wpow,&q,side,&full,nfr);  /* this ring */
     for (i=0;i<n;i++) iblank[i] = 1;
@@ -1273,7 +1318,7 @@ perform_out(int h,real *p,int n,real q)
 
 rotplt(rad,vsy,evs,pan,epa,inc,ein,xce,exc,yce,eyc,p,e,
        mask,ifit,elp,lunpri,cor,npt,factor)
-     real rad[],vsy[],evs[],pan[],epa[],inc[],ein[],p[],e[],
+real rad[],vsy[],evs[],pan[],epa[],inc[],ein[],p[],e[],
      xce[],exc[],yce[],eyc[],elp[][4], factor;
 int  mask[],ifit,cor[],npt[];
 stream lunpri;
@@ -1292,7 +1337,7 @@ stream lunpri;
     fprintf(lunpri,"PA:   %g %g\n",pan[i],epa[i]);
     fprintf(lunpri,"INC:  %g %g\n",inc[i],ein[i]);
     for (j=GPARAM; j<nparams;j++)
-      fprintf(lunpri,"P%d:  %g %g\n",j-GPARAM+1,p[j],e[j]);
+      fprintf(lunpri,"P%d:  %g %g\n",j-GPARAM+1,p[j],e[j]*factor);
     fprintf(lunpri,"NPT:  %d\n",npt[i]);
   }
   fprintf(lunpri,"\n");
@@ -1440,7 +1485,7 @@ real  *q;             /* output sigma */
 	  while (l < lhi) {   /* loop */
 	    l++;        /* increment line position counter */
 	    rx=dx*(real)(l);       /* X position in plane of galaxy */
-	    /***** i=(m-m1)*nlt+l-lmin+1;        /* array pointer */
+	    /***** i=(m-m1)*nlt+l-lmin+1;        --> array pointer */
 	    v = MapValue(velptr,l,m);        /* velocity at (l,m) */
 	    if (v != undf) {       /* undefined value ? */
 	      xr=(-(rx-dx*x0)*sinp+(ry-dy*y0)*cosp);     /* X position in galplane */
@@ -1520,7 +1565,11 @@ real  *q;             /* output sigma */
 	if (r>ri && r<ro && costh>free) {     /* point inside ring ? */
 	  dprintf(5,"@ (%g,%g,%g) r=%g cost=%g xr=%g yr=%g\n",rx,ry,v,r,costh,xr,yr);
 	  dprintf(5," ** adding this point\n");
-	  wi=1.0;                /* calculate weight of this point */
+
+	  if (verr_vel)
+	    wi = 1.0/sqr(verr_vel[i]);
+	  else
+	    wi=1.0;                /* calculate weight of this point */
 	  for (j=0; j<wpow; j++) 
 	    wi *= costh;
 	  xx[0]=rx;       /* x position */
