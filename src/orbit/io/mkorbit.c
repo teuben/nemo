@@ -21,6 +21,9 @@
  *	22-feb-95           b ansi headers
  *	17-apr-95           c compacted header file 		pjt
  *      14-sep-01	    d using potproc_ types		pjt
+ *      11-feb-02       V4.0 start of the new "+/-" notation    pjt
+ *
+ * TODO:   allow 'circular' orbit, i.e. the one that locally balances centrifugally
  */
 
 #include <stdinc.h>
@@ -30,10 +33,10 @@
 
 string defv[] = {
     "out=???\n		  output filename (an orbit)",
-    "x=\n		  x-position",
+    "x=\n		  x-position (use + or - to designate sign)",
     "y=\n                 y-",
     "z=\n                 z-",
-    "vx=\n		  x-velocity",
+    "vx=\n		  x-velocity (use + or - to designate sign)",
     "vy=\n                y-",
     "vz=\n                z-",
     "etot=\n		  total energy (ekin+epot)",
@@ -43,7 +46,7 @@ string defv[] = {
     "potpars=\n		  .. with optional parameters",
     "potfile=\n		  .. and optional datafile name",
     "headline=\n          random verbiage",
-    "VERSION=3.2b\n       22-feb-94 PJT",
+    "VERSION=4.0\n        11-feb-02 PJT",
     NULL,
 };
 
@@ -58,6 +61,8 @@ a_potential p;
 double x,y,z,u,v,w;
 double etot, lz;
 double tnow, omega;
+
+int  Dpos, Dvel;
 
 void setparams();
 
@@ -95,10 +100,44 @@ void setparams()
     potproc_double pot;
     double pos[3],acc[3],epot;
     int ndim=3;
+    int signcount;
 
     p.name = getparam("potname");
     p.pars = getparam("potpars");
     p.file = getparam("potfile");
+
+    signcount = 0;
+    Dpos = -1;
+    if (streq(getparam("x"),"+") || streq(getparam("x"),"-")) {
+      Dpos = 0;
+      signcount++;
+    }
+    if (streq(getparam("y"),"+") || streq(getparam("y"),"-")) {
+      Dpos = 1;
+      signcount++;
+    }
+    if (streq(getparam("y"),"+") || streq(getparam("z"),"-")) {
+      Dpos = 2;
+      signcount++;
+    }
+    if (signcount > 1) error("Can only set one of x,y,z to + or -");
+
+    signcount = 0;
+    Dvel = -1;
+    if (streq(getparam("vx"),"+") || streq(getparam("vx"),"-")) {
+      Dvel = 0;
+      signcount++;
+    }
+    if (streq(getparam("vy"),"+") || streq(getparam("vy"),"-")) {
+      Dvel = 1;
+      signcount++;
+    }
+    if (streq(getparam("vy"),"+") || streq(getparam("vz"),"-")) {
+      Dvel = 2;
+      signcount++;
+    }
+    if (signcount > 1) error("Can only set one of vx,vy,vz to + or -");
+    
 
     outfile = getparam("out");
     if(hasvalue("etot")) {	  /* energy given; calculate missing vx or vy */
