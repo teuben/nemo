@@ -1,0 +1,5 @@
+#! /bin/csh -f
+#	make script for machines which do not import their environment 
+#	variables - these should be the most relevant ones....
+#	
+exec /bin/make NEMO=$NEMO NEMOBIN=$NEMOBIN NEMOLIB=$NEMOLIB NEMOINC=$NEMOINC $*
