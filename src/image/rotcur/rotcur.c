@@ -59,7 +59,7 @@
  *               5-jun-01 : 2.7  allow density map also used as weight     PJT
  *               8-aug-01 :    a allow error correction factor 1.0  pjt
  *              26-jan-02      b allow scale factor for velocity    pjt
- *              25-jun-02 : .28  allow input to be an ascii table instead of image
+ *              26-jun-02 : 2.8  allow input to be an ascii table instead of image
  ******************************************************************************/
 
 
@@ -67,6 +67,13 @@
  * TODO:
  *	- keep track of pixel usage. debug output a map how many times
  *	  a pixel has been used by different rings
+ *
+ *      - weights for tabular input
+ *
+ *      - clarify that our X,Y input coordinate system (even for images)
+ *        is a  right-handed mathematical system, "X to the right, Y up"
+ *        and that we screw the astronomical one, and force dx and dy > 0
+ *        for images (mostly they will have dx < 0 , dy > 0)
  */
 
 #include <stdinc.h>
@@ -111,7 +118,7 @@ string defv[] = {
     "fitmode=cos,1\n Basic Fitmode: cos(n*theta) or sin(n*theta)",
     "nsigma=-1\n     Iterate once by rejecting points more than nsigma resid",
     "imagemode=t\n   Input image mode? (false means ascii table)",
-    "VERSION=2.8\n   25-jun-02 PJT",
+    "VERSION=2.8\n   26-jun-02 PJT",
     NULL,
 };
 
@@ -543,10 +550,15 @@ stream  lunpri;       /* LUN for print output */
     if (scanopt(input,"xpos")) mask[4] = 0;
     if (scanopt(input,"ypos")) mask[5] = 0;        
 #else
+    fixed = 0;
     iret=match(getparam("fixed"),"vsys,vrot,pa,inc,xpos,ypos",&fixed);
     if (iret<0) error("Illegal option in fixed=%s",getparam("fixed"));
-    for (i=0; i<6; i++)
-        mask[i] = (fixed & (1<<i)) ? 0 : 1;
+    dprintf(1,"MASK: 0x%x ",fixed);
+    for (i=0; i<6; i++) {
+      mask[i] = (fixed & (1<<i)) ? 0 : 1;
+      dprintf(1,"%d ",mask[i]);
+    }
+    dprintf(1,"\n");
 #endif
 
     for (nfixed=0,i=0; i<PARAMS; i++)      /* count number of fixed par's */
