@@ -614,7 +614,7 @@ bins:
 
 testsuite:
 	@echo ISSUE the following command:
-	@echo '(cd src/scripts; need -m `testsuite -s`; mknemo -c history hisf; testsuite)'
+	@echo '(cd src/scripts; ./need -m `testsuite -s`; mknemo -c history hisf; ./testsuite)'
 
 #	@(cd src/scripts; mknemo `testsuite -s`)
 
