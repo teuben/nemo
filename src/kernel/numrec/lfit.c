@@ -9,8 +9,8 @@ void lfit(float x[], float y[], float sig[], int ndat, float a[], int ia[],
 	int i,j,k,l,m,mfit=0;
 	float ym,wt,sum,sig2i,**beta,*afunc;
 
-	beta=matrix(1,ma,1,1);
-	afunc=vector(1,ma);
+	beta=fmatrix(1,ma,1,1);
+	afunc=fvector(1,ma);
 	for (j=1;j<=ma;j++)
 		if (ia[j]) mfit++;
 	if (mfit == 0) nrerror("lfit: no parameters to be fitted");
@@ -48,8 +48,8 @@ void lfit(float x[], float y[], float sig[], int ndat, float a[], int ia[],
 		*chisq += SQR((y[i]-sum)/sig[i]);
 	}
 	covsrt(covar,ma,ia,mfit);
-	free_vector(afunc,1,ma);
-	free_matrix(beta,1,ma,1,1);
+	free_fvector(afunc,1,ma);
+	free_fmatrix(beta,1,ma,1,1);
 }
 #undef NRANSI
 /* (C) Copr. 1986-92 Numerical Recipes Software ?421.1-9. */

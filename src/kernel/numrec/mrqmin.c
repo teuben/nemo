@@ -15,12 +15,12 @@ void mrqmin(float x[], float y[], float sig[], int ndata, float a[], int ia[],
 	static float ochisq,*atry,*beta,*da,**oneda;
 
 	if (*alamda < 0.0) {
-		atry=vector(1,ma);
-		beta=vector(1,ma);
-		da=vector(1,ma);
+		atry=fvector(1,ma);
+		beta=fvector(1,ma);
+		da=fvector(1,ma);
 		for (mfit=0,j=1;j<=ma;j++)
 			if (ia[j]) mfit++;
-		oneda=matrix(1,mfit,1,1);
+		oneda=fmatrix(1,mfit,1,1);
 		*alamda=0.001;
 		mrqcof(x,y,sig,ndata,a,ia,ma,alpha,beta,chisq,funcs);
 		ochisq=(*chisq);
@@ -42,10 +42,10 @@ void mrqmin(float x[], float y[], float sig[], int ndata, float a[], int ia[],
 	for (j=1;j<=mfit;j++) da[j]=oneda[j][1];
 	if (*alamda == 0.0) {
 		covsrt(covar,ma,ia,mfit);
-		free_matrix(oneda,1,mfit,1,1);
-		free_vector(da,1,ma);
-		free_vector(beta,1,ma);
-		free_vector(atry,1,ma);
+		free_fmatrix(oneda,1,mfit,1,1);
+		free_fvector(da,1,ma);
+		free_fvector(beta,1,ma);
+		free_fvector(atry,1,ma);
 		return;
 	}
 	for (j=0,l=1;l<=ma;l++)

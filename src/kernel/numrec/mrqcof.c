@@ -8,7 +8,7 @@ void mrqcof(float x[], float y[], float sig[], int ndata, float a[], int ia[],
 	int i,j,k,l,m,mfit=0;
 	float ymod,wt,sig2i,dy,*dyda;
 
-	dyda=vector(1,ma);
+	dyda=fvector(1,ma);
 	for (j=1;j<=ma;j++)
 		if (ia[j]) mfit++;
 	for (j=1;j<=mfit;j++) {
@@ -32,7 +32,7 @@ void mrqcof(float x[], float y[], float sig[], int ndata, float a[], int ia[],
 	}
 	for (j=2;j<=mfit;j++)
 		for (k=1;k<j;k++) alpha[k][j]=alpha[j][k];
-	free_vector(dyda,1,ma);
+	free_fvector(dyda,1,ma);
 }
 #undef NRANSI
 /* (C) Copr. 1986-92 Numerical Recipes Software ?421.1-9. */
