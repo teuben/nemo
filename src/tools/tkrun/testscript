@@ -1,0 +1,38 @@
+#! /bin/csh -f
+#
+#       here are some basic GUI elements
+#
+#>  IFILE   in=
+#>  OFILE   out=
+#>  ENTRY   eps=0.01
+#>  RADIO   mode=gauss              gauss,newton,leibniz
+#>  CHECK   options=mean,sigma      sum,mean,sigma,skewness,kurtosis
+#>  SCALE   n=3.141592              0:10:0.01
+#<          -digits 2
+#<  
+
+
+#		METHOD1: parse named arguments
+
+foreach a ($*)
+   set $a
+end
+
+#>  -EXEC
+echo If this is executed, tkrun does not work properly yet
+#>  +EXEC
+
+echo ARGS: in=$in out=$out eps=$eps mode=$mode options=$options n=$n
+
+echo TESTSCRIPT
+echo 0 : $0
+set count=0
+
+again:
+  if ($#argv == 0) exit 0
+  @ count++
+  echo $count : \"$1\"
+  shift argv
+  goto again
+   
+  
