@@ -1,0 +1,22 @@
+%N snapspin
+%D give a snapshot a spin around or outflow from the Z-axis
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man snapspin' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	input file (snapshot) [???]
+%A out
+	output filename [???]
+%A omega
+	rotation (counterclock) [0.0]
+%A rotcur
+	Optional rotation/outflow curve spin (table: r,v) []
+%A sign
+	Sign of rotcur [1]
+%A outflow
+	Outflow or Rotation/Spin [f]
+%A times
+	times of snapshots to copy [all]
+%A VERSION
+	28-apr-98 PJT [2.0]
