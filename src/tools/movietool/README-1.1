@@ -1,0 +1,101 @@
+
+Announcing Movietool version 1.1.
+
+This is an improved version of Movietool version 1.0.  Movietool is a display
+tool for sequences of Sun rasterfiles, providing "video animation" in a
+SunView window.  Movietool may also be used as a multi-rasterfile previewer.
+
+Compared to version 1.0, I have made several improvements in display speed
+and functionality:
+
+ * A "Clipping" button has been added.  If you flip Clipping Off, rasterfiles
+   which are being played with the -encoded flag will be written directly to
+   the framebuffer.  This bypasses a decoding to an internal memory pixrect,
+   and effectively doubles the display rate.  However, it is recommended to
+   select Resize=>FullScreen in order to avoid messing up other windows.
+
+ * The zoom function is much improved, allowing huge memory savings.  The scan
+   lines are initially zoomed in the horizontal direction, only, and replicated
+   in the vertical direction at display time.  Also, you can now combine
+   the -zoom and -encoded flags, since RT_BYTE_ENCODED images may now be both
+   decoded and zoomed at display time.
+
+ * A -audio flag has been added, allowing Movietool to play your favorite audio
+   file on the system's internal speaker, if this hardware is available.
+
+ * A -background flag that sets the color of the playing canvas outside of
+   the displayed image to a particular color.  At present, the upper left
+   pixel of the current image is used as background color.
+
+ * Numerous little twists.
+
+General comments:
+-----------------
+We use Movietool a lot for animation on the computer, as well as for video
+animation.  We simply record Movietool playing the image sequence, and we
+like the simplicity of this solution a lot.  Using Movietool in connection
+with an animation controller (such as the Lyon Lamb MiniVas) or a laser video
+disk system may or may not be the easiest way to generate single-frame
+recordings.  If someone finds a good way to interface Movietool to video
+equipment, please let me know.
+
+What I would really like for video animation is a hardware solution to 
+generate video signals in an inexpensive way.  The functionality of the
+Lyon Lamb RTC-7 box seems desirable, but it is too expensive for us.  How
+about a frame buffer card for the SPARCstation-1 that produces video signals
+for plain TVs, at TV resolution ?  Then you would direct the display of
+Movietool to this framebuffer.  Anyone knowledgable on this issue is urged
+to enlighten me on the possibilities that exist today.
+
+The limiting factor to the performance of Movietool seems to be the bandwidth
+of some internal bus, probably the memory-to-framebuffer transfer rate.
+Therefore infinite RAM memory and a very fast CPU won't help you to display
+large color images at real-time speed.  On my SPARCstation-1/GX I can display
+500 by 500 pixel color images at 19 frames per second, giving me an effective
+bandwidth of about 5 Mbytes per second.
+
+I have recently used the VORT ray tracing package from dgh@ecr.mu.oz.au for
+generating pretty image sequences.  Since I didn't find raster conversion
+packages that would convert VORT files to Sun rasterfiles, I made a little
+utility for that purpose.  Write me for a copy.
+
+I ask you for suggestions of improvements, such as the SPARC assembler code
+module requested below.  Also, if you like Movietool and have produced
+pretty and/or impressive movie sequences, please offer me a copy of the
+rasterfile sequence so that I can show it off locally.
+
+How to obtain movietool:
+------------------------
+>From titan.rice.edu you get the files movietool-1.1.shar, movietool.au.uu,
+and possibly movietool.rasters.tar.Z.uu.  These files are also available by
+anonymous FTP from oersted.ltf.dth.dk (129.142.66.16) in the ~/pub directory.
+Please use titan.rice.edu from the American side of the Atlantic.
+If you don't have FTP access to Internet, please use the Rice archive server.
+
+Testing:
+--------
+There is a compressed tar-file of rasters: movietool.rasters.tar.Z which may
+be unpacked by "make rasters" (almost 1 Mbyte in 50 files).  To play this
+(monochrome) movie, say "movietool tp*".
+
+To do:
+------
+The decoding of RT_BYTE_ENCODED images would ideally be performed by a
+graphics hardware accelerator such as the GX, reducing CPU and bus load.
+Since I don't have the XGL library at my disposal, I don't know if this
+is possible or not.
+
+On the other hand, it would be great is someone who knows the SPARC assembler
+would recode and optimize the module pr_decode.c in order to boost performance.
+
+I have no current plans to convert to XView.  If someone wants to make the
+conversion, please send the result to me for further distribution.
+
+Author:
+-------
+
+        Ole H. Nielsen
+        Lab of Applied Physics, Bygn. 307
+        Technical University of Denmark, DK-2800 Lyngby, Denmark
+        E-mail: ohnielse@ltf.dth.dk
+

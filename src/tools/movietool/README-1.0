@@ -1,0 +1,54 @@
+
+Announcing movietool version 1.0.
+
+Movietool is a display tool for sequences of Sun rasterfiles, providing
+"video animation" in a Sun window.  Movietool may also be used as a
+multi-rasterfile previewer.
+
+Movietool displays a sequence of color or monochrome raster files
+(see man 5 rasterfile) in real-time or near-real-time.
+On a Sun 3/50M with 4 MB of RAM, monochrome images of 600 by 800 pixels
+may be played at about 16 frames per second.
+On a SPARC-1/GX a full screen of monochrome images may be played at about
+50 frames per second.  Color images take of the order of 8 times longer
+than comparable monochrome images.
+
+The development of movietool was originally inspired by the VCR code
+developed by Hsuan Chang <hsc@vuse.vanderbilt.edu>, as announced in 
+sun-spots v8n68 (it no longer seems to exist at titan.rice.edu).
+
+However, movietool has rather improved functionality and significantly
+better performance than VCR.  We have used movietool for half a year now
+to display results of simulations, and we use a frame scan converter to
+record on video tape.  There are undoubtedly features that some of you might
+like to add to movietool, and I'll be glad to learn of improvements or
+suggestions thereof.
+
+        Ole H. Nielsen
+        Lab of Applied Physics, Bygn. 307
+        Technical University of Denmark, DK-2800 Lyngby
+        E-mail: ohnielse@ltf.dth.dk
+
+How to obtain movietool:
+------------------------
+From titan.rice.edu you get the files movietool-1.0.tar and possibly
+movietool.rasters.tar.Z.  These files are also available by anonymous FTP
+from oersted.ltf.dth.dk (129.142.66.16) in the ~/pub directory.
+
+Testing:
+--------
+There is a compressed tar-file of rasters: movietool.rasters.tar.Z which may
+be unpacked by "make rasters" (almost 1 Mbyte in 50 files).  To play this
+(monochrome) movie, say "movietool tp*".
+
+To do:
+------
+Find out how to decode RT_BYTEENCODED rasters within a graphics accelerator,
+such as the GX (cg6) accelerator, in order to boost performance.
+
+Rewrite movietool for OpenWindows and/or SunVideo and/or SunVision.
+
+Write an interface to a video animation system, such as the Lyon Lamb
+MINIVAS controller, so that the sequence of pictures will be recorded
+on video tape.  The SunVideo system, or some type of frame-scan converter,
+may be used to generate the video signal.

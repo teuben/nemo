@@ -1,0 +1,117 @@
+*** /usr/demo/cdrom/player.c	Sun Dec 10 06:58:32 1989
+--- player.c	Tue Oct 30 16:12:46 1990
+***************
+*** 125,130 ****
+--- 125,142 ----
+  {
+  	int	i;
+  
++ 	/* Modifications needed for cdplayer to receive external signals
++  	* from Movietool
++  	* Ole H. Nielsen, 30-Oct-1990 */
++ 	char handle[10];
++ 	(void) sprintf (handle, "%d", getpid ());
++ 	/* SIGUSR1 causes cdplayer to play */
++ 	(void) notify_set_signal_func(handle, play_proc, SIGUSR1,NOTIFY_ASYNC);
++ 	/* SIGUSR2 causes cdplayer to pause */
++ 	(void) notify_set_signal_func(handle, pause_proc, SIGUSR2,NOTIFY_ASYNC);
++ 	/* SIGTERM causes cdplayer to eject */
++ 	(void) notify_set_destroy_func (handle, eject_proc);
++ 
+  	dev_name = "/dev/rsr0";
+  	if (argc < 1) {
+  		fprintf(stderr, "usage: %s [-d device] [-n]\n", argv[0]);
+***************
+*** 172,179 ****
+  
+  	clock_init_tmp();
+  	
+! 	frame = window_create(NULL, FRAME, FRAME_LABEL, "CD PLAYER",
+! 			      FRAME_CLOSED, TRUE,
+  			      FRAME_ICON, player_icon, 
+  			      FRAME_ARGS, argc, argv,
+  			      0);
+--- 184,192 ----
+  
+  	clock_init_tmp();
+  	
+! 	frame = window_create(NULL, FRAME,
+! 				FRAME_LABEL, "CD PLAYER",
+! 			    /*  FRAME_CLOSED, TRUE, */
+  			      FRAME_ICON, player_icon, 
+  			      FRAME_ARGS, argc, argv,
+  			      0);
+***************
+*** 542,570 ****
+  Panel_item	item;
+  Event		*event;
+  {
+- 	if (playing) {
+- 		stop_proc();
+- 	}
+- 	if (paused) {
+- 		paused = 0;
+- 		reverse_pause_button();
+- 	}
+  
+  
+! 	if ((data_disc == 0) || (nx == 0)) { 
+  		cdrom_eject(fd);
+! 		clear_buttons();
+! 		read_toc_alert();
+! 	} else {
+  		/* disc has data track, see if it is mounted */
+! 		if (mounted(dev_name) == UNMOUNTED) {
+  			cdrom_eject(fd);
+! 			clear_buttons();
+! 			read_toc_alert();
+! 		} else {
+! 			generic_alert("CD-ROM Disc is mounted.",
+! 				      "Disc not ejected.");
+! 		}
+  	}
+  }
+  
+--- 555,573 ----
+  Panel_item	item;
+  Event		*event;
+  {
+  
++ 	/* Modifications needed for Movietool; Ole H. Nielsen, 30-Oct-1990 */
+  
+! 	if (playing)
+! 		stop_proc();
+! 	if ((data_disc == 0) || (nx == 0))
+  		cdrom_eject(fd);
+! 	else {
+  		/* disc has data track, see if it is mounted */
+! 		if (mounted(dev_name) == UNMOUNTED)
+  			cdrom_eject(fd);
+! 		else
+! 			exit (0);
+  	}
+  }
+  
+***************
+*** 702,712 ****
+  Panel_item	item;
+  Event		*event;
+  {
+! 	if (paused) {
+! 		cdrom_resume(fd);
+! 		paused = 0;
+! 		reverse_pause_button();
+! 	} else if (playing) {
+  		cdrom_pause(fd);
+  		paused = 1;
+  		reverse_pause_button();
+--- 705,713 ----
+  Panel_item	item;
+  Event		*event;
+  {
+! 	/* Modifications needed for Movietool; Ole H. Nielsen, 30-Oct-1990 */
+! 
+! 	if (! paused) {
+  		cdrom_pause(fd);
+  		paused = 1;
+  		reverse_pause_button();

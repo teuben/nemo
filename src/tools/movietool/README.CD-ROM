@@ -1,0 +1,25 @@
+I have now made Movietool into a "multi-media application", since I have
+added the possibility of controlling an attached SCSI CD-ROM drive.
+
+Basically, you have to patch the module player.c from /usr/demo/cdrom
+(which you got if you installed the Sun CD-ROM drive on a 4.0.3 system,
+since this requires a package called "SunCD Software").
+If you installed a 4.1 system, the directory is /usr/demo/CDROM.
+
+In the directory where you unpacked Movietool, do the following:
+
+	cp -rp /usr/demo/cdrom . 	# or /usr/demo/CDROM
+	cp Makefile.CD-ROM cdrom/Makefile
+	cd cdrom
+	patch < ../player.diff
+
+(Larry Wall's "patch" program can be got by anonymous FTP to
+jpl-devvax.jpl.nasa.gov (128.149.1.143) in the ~/pub/patch.2.0 file)
+
+Check in Makefile whether BINDIR is appropriate for your installation,
+and check that CDPLAYER in this Makefile agrees with the CDPLAYER in
+Movietool's Makefile.  Then:
+
+	make install
+
+and you're all set !
