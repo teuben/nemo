@@ -205,11 +205,32 @@ void fts_addwcs(fits_header *fh, int ndim, fts_wcs *wcs)
     if (fh->naxis > 3) error("Cannot handle > 3D data yet");
     for (i=0; i < fh->naxis; i++) {
       wcs[i].naxis = fh->naxisn[i];
-      wcs[i].crpix = fh->crpixn[i];   /* need to check if they exist */
-      wcs[i].crval = fh->crvaln[i];
-      wcs[i].cdelt = fh->cdeltn[i];
-      wcs[i].crota = fh->crotan[i];
-      strcpy(wcs[i].ctype, fh->ctypen[i]);
+      if (fh->crpixn)
+	wcs[i].crpix = fh->crpixn[i];   /* need to check if they exist */
+      else 
+	wcs[i].crpix = 1.0;
+      if (fh->crvaln)
+	wcs[i].crval = fh->crvaln[i];
+      else
+	wcs[i].crval = 0.0;
+      if (fh->cdeltn)
+	wcs[i].cdelt = fh->cdeltn[i];
+      else
+	wcs[i].cdelt = 1.0;
+      if (fh->crotan)
+	wcs[i].crota = fh->crotan[i];
+      else
+	wcs[i].crota = 0.0;
+      if (fh->ctypen)
+	strcpy(wcs[i].ctype, fh->ctypen[i]);
+      else {
+	if (i==0)
+	  strcpy(wcs[i].ctype,"RA");
+	else if (i==1)
+	  strcpy(wcs[i].ctype,"DEC");
+	else if (i==2)
+	  strcpy(wcs[i].ctype,"VLSR");
+      }
     }
     if (wcs[2].naxis == 0) {
       wcs[2].naxis = 1;
@@ -217,7 +238,7 @@ void fts_addwcs(fits_header *fh, int ndim, fts_wcs *wcs)
       wcs[2].cdelt = 1;
       wcs[2].crpix = 1;
       wcs[2].crota = 0;
-      strcpy(wcs[2].ctype,"UNKNOWN");
+      strcpy(wcs[2].ctype,"VLSR");
     }
     dprintf(0,"fts_addwcs: Starting at %d x %d x %d [%s %s]\n",
 	    wcs[0].naxis, wcs[1].naxis, wcs[2].naxis,
