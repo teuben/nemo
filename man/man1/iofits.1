@@ -31,12 +31,22 @@ Output FITS file. No default.
 \fBbitpix=\fP
 requested output BITPIX value. Valid are 8, 16, 32, -32 or -64.
 No default.
+.SH CAVEATS
+In general, decreasing the resolution in number of bits  per
+pixel almost always means loss of precision. No rescaling is
+done on the data, use this command with care!
 .SH EXAMPLES
 .SH SEE ALSO
-ccdfits(1NEMO), fitsccd(1NEMO)
-.SH FILES
+ccdfits(1NEMO), fitsccd(1NEMO), fits(5NEMO)
+.SH DATA FILES
+Input/output files shall all comply with FITS format.
+.PP
+The original FITS header  of the input  FITS  file  is  con-
+served  along,  except  for  the following keywords:  NAXIS,
+NAXISn, BITPIX, BSCALE, BZERO,  which  are  related  to  the
+newly created file.
 .SH AUTHOR
-N. Devillard (ESO), P. Teuben (NEMO adaptation)
+N. Devillard (ESO, within the eclipse package), P. Teuben (NEMO adaptation)
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
