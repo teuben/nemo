@@ -4,8 +4,10 @@ tabclip \- clip a table
 .SH SYNOPSIS
 \fBtabclip\fP [parameter=value]
 .SH DESCRIPTION
-\fBtabclip\fP removes points from a table based on some smoothness
-criteria.
+\fBtabclip\fP removes points from a table based on some "smoothness"
+criteria. Examples are when there is a jump larger than a
+critical amount it can be flagged. Or when the derivative exceeds
+a certain amount,
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -26,12 +28,20 @@ y coordinate column [2]
 Clipping if abs(derivative) exceeds this value [] 
 .TP
 \fBeta=\fP
-Clipping if the 2nd order polynomial value predicted Y of a point 
-from both sides is more than \fBeta\fP.
+Clipping if the value predicted from a 2nd order polynomial value exceeds
+the Y value by more than \fIeta\fP.
 Default: not used.
-.TP 20
+.TP
+\fBlogic=and|or\fP
+When a left and right side criteria is applied, this determines
+the outcome of the clipping. \fBand\fP requires both to be satisfied,
+\fBor\fP requires only one. [Default: \fBand\fP].
+.TP
 \fBnmax=\fP
-Hardcoded allocation space, if needed for piped data
+Hardcoded allocation space, if needed for piped data.TP
+\fBcomment=t|f\fP
+Keep the clipped points as comments in the output file? By
+default they are left out.
 .SH SEE ALSO
 tabmath(1NEMO)
 .SH AUTHOR
