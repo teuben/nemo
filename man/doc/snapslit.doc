@@ -1,0 +1,44 @@
+%N snapslit
+%D slit spectra of N-body systems: 3 moments
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man snapslit' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	input filename (snapshot) [???]
+%A xvar
+	X variable to grid [x]
+%A yvar
+	Y variable to grid [y]
+%A zvar
+	Z variable to use in moment calculation [-vz]
+%A evar
+	Emission variable to grid [m]
+%A origin
+	origin of slit on 'sky' (xvar,yvar) [0,0]
+%A pa
+	position angle ; N=0 E=90  [0]
+%A width
+	width of slit 'sky' units  [0.1]
+%A length
+	length of slit  [10.0]
+%A cell
+	cellsize  [0.1]
+%A smooth
+	symmetric smoothing array along slit [0.25,0.5,0.25]
+%A nsmooth
+	number of smoothings [1]
+%A gauss
+	If supplied, this is the gaussian FWHM beam []
+%A mmax
+	max emission to plot [0.0]
+%A vmin
+	min mean to plot [0.0]
+%A vmax
+	max mean to plot [0.0]
+%A smax
+	max dispersion to plot [0.0]
+%A tab
+	Need a table? If yes, no plot [f]
+%A VERSION
+	4-mar-97 PJT [2.0b]

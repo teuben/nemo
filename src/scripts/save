@@ -1,0 +1,26 @@
+#! /bin/csh -f
+#
+# put RCS files with original timestamp, but keep a local & writable version
+#	- pjt
+
+if ($#argv == 0) then
+  echo "Usage: $0 file(s)"
+  echo "  Backup program using RCS:"
+  echo "  Check file(s) into an RCS directory/link with current timestamp,"
+  echo "  and make them available again with lock (ci -d; co -M -l)"
+  exit 0
+endif
+
+if (! -e RCS) then
+  echo RCS directory or link does not exist
+  exit 0
+endif
+
+foreach file ($*)
+  if (-e $file) then
+    ci -d $file
+    co -M -l $file
+  else
+    echo "### Warning: skipping non-existent file: $file"
+  endif
+end
