@@ -29,6 +29,9 @@ setenv PGPLOT_FONT @PGPLOT_DIR@/grfont.dat
 #  If you use the VoGL library for xyzview, this is the only reasonable default
 setenv VDEVICE X11
 
+#  tabpp needs this
+#setenv $PP_DIR  /somewhere/pp_dir
+
 
 #  Particularly if you use shared libraries (e.g. pgplot in $NEMOLIB) you
 #  may need to change LD_LIBRARY_PATH;
@@ -46,7 +49,7 @@ if (1) then
 endif
 
 
-#### NOTE: The order of "nemorc" startup files is:
+#### NOTE: The order of reading the "nemorc" startup files is:
 #### 	1)  	$NEMO/NEMORC
 #### 	2)	$NEMO/NEMORC.local
 ####	3)	$NEMOLIB/NEMORC
