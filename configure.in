@@ -40,7 +40,7 @@ NEMOVER="`cat VERSION`"
 AC_SUBST(NEMOVER)
 
 dnl ---                 Create needed libraries for next step
-for i in bin lib ojb; do
+for i in bin lib obj local; do
  if ! test -e $i ; then
    mkdir $i
  fi
