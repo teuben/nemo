@@ -5,7 +5,7 @@ snapidl \- tabulate a snapshot for IDL in binary mode
 \fBsnapidl\fB [parameter=value]
 .SH DESCRIPTION
 \fBsnapidl\fB outputs selected particle variables for IDL
-(and potentially other programs)
+(and potentially other programs). 
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -26,16 +26,18 @@ Output file - normally a pipe for IDL.
 Here is an example to dump all positions of the particles at time 1.0
 to a pipe, which is then read by IDL into arrays \fIx,y,z\fP.
 .nf
-SPAWN, 'snapidl p10 x,y,z times=1.0', UNIT=UNIT, /NOSHELL
-IDL> SPAWN, 'snapidl snap000 x,y,z times=1.0', UNIT=UNIT, /NOSHELL
-IDL> READ nbody,tsnap
+IDL> SPAWN, ['snapidl','snap000','x,y,z'], UNIT=UNIT, /NOSHELL
+IDL> READU,UNIT,nbody,tsnap      # !!! NOTE BUG BELOW !!!
 IDL> PRINT,"Found a snapshot with ",nbody," particles at time", tsnap
 IDL> x=FINDGEN(nbody)
 IDL> y=FINDGEN(nbody)
 IDL> z=FINDGEN(nbody)
-IDL> READ x,y,z
+IDL> READU,UNIT,x,y,z
 IDL> FREE_LUN, UNIT
 .fi
+.SH BUGS
+I don't know how to read an integer....nbody is interpreted as a float 
+by IDL.
 .SH SEE ALSO
 snapprint(1NEMO)
 .SH FILES
