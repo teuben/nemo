@@ -20,7 +20,7 @@ string defv[] = {
   "bad=0.0\n	  Value of a bad pixel to be patched",
   "goodx=\n       array of coluns in X that have good values (0=first)",
   "goody=\n       array of rows in Y that have good values (0=first)",
-  "VERSION=0.1\n  8-jul-03 PJT",
+  "VERSION=0.2\n  29-oct-03 PJT",
   NULL,
 };
 
@@ -51,6 +51,8 @@ void nemo_main(void)
   read_image( instr, &iptr);
   nx = Nx(iptr);	
   ny = Ny(iptr);
+  nz = Nz(iptr);
+  if (nz > 1) error("nz=%d :: Can't handle cubes yet",nz);
   create_image(&iptr1,nx,ny);
   copy_image(iptr,&iptr1);
   outstr = stropen(getparam("out"), "w");
