@@ -1,7 +1,7 @@
 /*
  *  ODEINT:  integrate o.d.e. 
  *      15-mar-90:   made it return 0 consistently PJT
- *	16-feb-97:   no more nexted extern's       pjt
+ *	16-feb-97:   no more nexted extern's       PJT
  */
  
 
