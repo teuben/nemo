@@ -98,6 +98,7 @@
  *  7-jun-01       c  using NEMO_VERSION instead of VERSION
  * 23-jun-01       d  PRECISION now in ZENO mode
  *  3-jul-01       e  keybuf always present, not just in INTERACT mode
+ * 12-sep-01       f  nemo_file_size now
 
   TODO:
       - what if there is no VERSION=
@@ -118,7 +119,7 @@
       - @macro and $key references get expanded as strings.
  */
 
-#define VERSION_ID  "3.2e 3-jul-01 PJT"
+#define VERSION_ID  "3.2f 12-sep-01 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -279,7 +280,7 @@ local void set_yapp(string);
 
 /* external NEMO functions */
 
-extern int file_size(string);
+extern int nemo_file_size(string);
 extern void app_history(string);
 extern string date_id(void);
 
@@ -915,7 +916,7 @@ local string get_macro(char *mname)
     if (*mname != '@')  return mname;
     mname++;
     dprintf(1,"getparam[get_macro]: Opening macro file %s\n",mname);
-    n = file_size(mname);
+    n = nemo_file_size(mname);
     if (n<0)
         error("(getparam) macro include file \"%s\" does not exist",mname);
     mp = (char *) allocate(n+1);        /* extra 1 for 0 at the end */

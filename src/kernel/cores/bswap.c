@@ -24,6 +24,7 @@
  *       4-aug-94  warn about small files where t1==t0 etc. -- TOOLBOX only
  *	23-feb-97  allow offset until which no swapping done
  *	15-dec-98  TOOLBOX : allow streaming mode
+ *      12-sep-01  file_size
  */
 
 #include <stdinc.h>

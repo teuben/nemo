@@ -9,7 +9,8 @@
  *	25-feb-92   happy gcc 2.0	    PJT
  *	 5-nov-93   added second arg to file_lines!!!	PJT
  *	26-feb-94   ansi and better TESTBED defaults	pjt
- *      20-jun-01   prototypes
+ *      20-jun-01   prototypes 
+ *	12-sep-01   nemo_
  */
 
 #include <stdinc.h>
@@ -17,7 +18,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-int file_size(char *name)
+int nemo_file_size(char *name)
 {
     struct stat buf;
     
@@ -27,7 +28,7 @@ int file_size(char *name)
         return(-1);                 /* see errno error code */
 }
 
-int file_time(char *name)
+int nemo_file_time(char *name)
 {
     struct stat buf;
     
@@ -45,19 +46,19 @@ int file_time(char *name)
 
 #define BUFSIZE  8192
 
-int file_lines(char *name, int deflen)
+int nemo_file_lines(char *name, int deflen)
 {
     int len, n, cnt=0;
     char *cp, *buf;
     stream str;
 
-    len = file_size(name);
+    len = nemo_file_size(name);
     if (len<0) return deflen;
     if (len==0) return 0;
     
 #if 0
     if (isatty(fileno(str))) {
-        warning("file_lines: %s is not a true file",name);
+        warning("nemo_file_lines: %s is not a true file",name);
         return(-1);
     }
 #endif
@@ -83,7 +84,7 @@ int file_lines(char *name, int deflen)
 string defv[] = {
     "in=file_size.c\n       File to test file_size/lines on",
     "nmax=10000\n           Default size for files on pipes",
-    "VERSION=1.3\n          24-oct-97 PJT",
+    "VERSION=1.4\n          12-sep-01 PJT",
     NULL,
 };
 string usage="file_size.c testbed";
@@ -98,12 +99,12 @@ nemo_main()
     fname = getparam("in");
     deflen = getiparam("nmax");
     printf("%s file_size() = %d %d\n",
-        fname, file_size(fname), file_time(fname));
+        fname, nemo_file_size(fname), nemo_file_time(fname));
     if (errno != 0)
         perror("Error in file_size");
 
     printf("%s file_lines() = %d\nwc: ",
-        fname, file_lines(fname,deflen));
+        fname, nemo_file_lines(fname,deflen));
     sprintf(cmd,"wc %s",fname);
     system(cmd);
         
