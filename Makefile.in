@@ -593,12 +593,16 @@ install:
 	@echo "      rehash                -- update search path" 
 	@echo "      make libs             -- install the libraries"
 	@echo ""
-	@echo "If you want to compile a small standard test of binaries:"
+	@echo "If you want, test to compile two basic routines:"
+	@echo "      mknemo tsf tabhist nemoinp"
+	@echo "      nemoinp 1:10 | tabhist -"
+	@echo ""
+	@echo "Else go and compile and test the NEMO standard suite of binaries:"
 	@echo "      src/scripts/testsuite -b"
 	@echo ""
-	@echo "Any subsquent programs should be installed with the mknemo script,"
-	@echo "eg."
-	@echo "      mknemo mkplummer snapplot tabhist orbsos"
+#	@echo "Any subsquent programs should be installed with the mknemo script,"
+#	@echo "eg."
+#	@echo "      mknemo mkplummer snapplot tabhist orbsos"
 
 helpconfig:
 	@echo config, configure, config_extra, config_clean
