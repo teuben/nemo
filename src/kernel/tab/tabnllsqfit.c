@@ -14,6 +14,8 @@
  *      18-feb-03  1.6a changed named of output variables in arm and arm3 
  *      21-mar-03  1.7  optional bootstrapping to check on errors
  *       4-apr-03  1.8  added dypow= keyword, and fixed bug in handling dycol=
+ *      10-mar-04  1.8b added Lorentzian fitting, fixed setting lab= for loadable functions
+ *                      (with PJTs protest that this is not a Lorentzian ??)
  *
  *  line       a+bx
  *  plane      p0+p1*x1+p2*x2+p3*x3+.....     up to 'order'   (a 2D plane in 3D has order=2)
@@ -22,6 +24,7 @@
  *  exp        p0+p1*exp(-(x-p2)/p3)  
  *  arm        p0+p1*cos(x)+p2*sin(x)         special version for rahul 
  *  arm3       p0+p1*cos(x)+p2*sin(x)+p3*cos(3*x)+p4*sin(3*x) 
+ *  loren      (p1/PI) / ( (x-p0)^2 - p1^2 )
  */ 
 
 #include <stdinc.h>  
@@ -37,7 +40,7 @@ string defv[] = {
     "dycol=\n           optional column for sigma-y (weight = (1/dy**2)**<dypow>)",
     "dypow=1\n          optional extra power to control the weights",
     "xrange=\n          in case restricted range is used (1D only)",
-    "fit=line\n         fitmode (line, plane, poly, gauss, exp)",
+    "fit=line\n         fitmode (line, plane, poly, gauss, exp, loren)",
     "order=2\n		Order of plane/poly fit",
     "out=\n             output file for some fit modes",
     "nsigma=-1\n        delete points more than nsigma away?",
@@ -53,7 +56,7 @@ string defv[] = {
     "bootstrap=0\n      Bootstrapping to estimate errors",
     "seed=0\n           Random seed initializer",
     "numrec=f\n         Try the numrec routine instead?",
-    "VERSION=1.8a\n     10-mar-04 PJT",
+    "VERSION=1.8b\n     10-mar-04 PJT,RS",
     NULL
 };
 
@@ -256,6 +259,18 @@ static void derv_arm(real *x, real *p, real *e, int np)
 #endif
 }
 
+static real func_loren(real *x, real *p, int np)
+{
+  return (p[1]/PI)/((x[0]-p[0])*(x[0]-p[0])+p[1]*p[1]);
+}
+
+static void derv_loren(real *x, real *p, real *e, int np)
+{
+  e[0]=(2/PI)*(x[0]-p[0])*p[1]/(((x[0]-p[0])*(x[0]-p[0])+p[1]*p[1])*((x[0]-p[0])*(x[0]-p[0])+p[1]*p[1]));
+
+  e[1]=(1/PI)*((x[0]-p[0])*(x[0]-p[0])-p[1]*p[1])/(((x[0]-p[0])*(x[0]-p[0])+p[1]*p[1])*((x[0]-p[0])*(x[0]-p[0])+p[1]*p[1]));
+}
+
 static real func_arm3(real *x, real *p, int np)
 {
   real y = x[0]/DPR;
@@ -303,6 +318,8 @@ nemo_main()
     	do_exp();
     } else if (scanopt(method,"arm")) {
     	do_arm();
+    } else if (scanopt(method,"loren")) {
+    	do_loren();
     } else if (scanopt(method,"arm3")) {
     	do_arm3();
     } else
@@ -1033,6 +1050,56 @@ do_arm()
       fprintf(outstr,"%g %g %g\n",x[i],y[i],d[i]);
 
 }
+
+do_loren()
+{
+  real *x, *y, *dy, *d, *y1, *d1;
+  int i,j, nrt, npt1, iter, mpar[2], *perm;
+  real fpar[2], epar[2], sigma, s, bpar[2];
+  int lpar = 2;
+    
+  if (nxcol < 1) error("nxcol=%d",nxcol);
+  if (nycol < 1) error("nycol=%d",nycol);
+  if (tol < 0) tol = 0.0;
+  if (lab < 0) lab = 0.01;
+  sprintf(fmt,"Fitting (a/PI) / ((x-b)^2 + a^2):  \na= %s %s \nb= %s %s\n", format,format,format,format);
+
+  x = xcol[0].dat;
+  y = ycol[0].dat;
+  dy = (dycolnr>0 ? dycol.dat : NULL);
+  d = (real *) allocate(npt * sizeof(real));
+  
+  for (i=0; i<lpar; i++) {
+    mpar[i] = mask[i];
+    fpar[i] = par[i];
+  }
+
+  fitfunc = func_loren;
+  fitderv = derv_loren;
+
+  for (iter=0; iter<=msigma; iter++) {
+    nrt = (*my_nllsqfit)(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
+    if (nrt==-2)
+      warning("No free parameters");
+    else if (nrt<0)
+      error("Bad fit, nrt=%d",nrt);
+    printf("nrt=%d\n",nrt);
+    printf(fmt, fpar[0],epar[0],fpar[1],epar[1]);
+
+    npt1 = remove_data(x,1,y,dy,d,npt,nsigma[iter]);
+    if (npt1 == npt) break;
+    npt = npt1;
+  }
+  bootstrap(nboot, npt,1,x,y,dy,d, lpar,fpar,epar,mpar);
+
+  if (outstr)
+    for (i=0; i<npt; i++)
+      fprintf(outstr,"%g %g %g\n",x[i],y[i],d[i]);
+  free(d);
+
+}
+
+
 
 do_arm3()
 {
