@@ -30,11 +30,11 @@ mdarray - simple multi-dimensional array allocators (C style)
 (real) C-style arrays. Up to MDMAXDIM (defined via the header file) 
 dimensions are available. 
 .PP
-Example of use:
+Example of use: ( b = A.x)
 .nf
-    mdarray1 x = allocate_mdarray1(10);
-    mdarray2 A = allocate_mdarray2(20,10);
-    mdarray1 b = allocate_mdarray1(20);
+    mdarray1 x = allocate_mdarray1(10);      /*  x[10]     */
+    mdarray2 A = allocate_mdarray2(20,10);   /*  A[20][10] */
+    mdarray1 b = allocate_mdarray1(20);      /*  b[20]     */
     int i,j;
 
     for (j=0; j<20; j++) {
@@ -71,7 +71,7 @@ On grus (P3/930) 5.0 vs. 19.9 sec.  On chand (P4/2500)  1.1 vs. 12.3 sec CPU.
 .nf
 vectmath(3NEMO)
 .fi
-nrutil.c (Numerical Recipes)
+nrutil.c (Numerical Recipes) for an alternative approach
 .SH AUTHOR
 Peter Teuben
 .SH FILES
