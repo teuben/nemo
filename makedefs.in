@@ -103,6 +103,10 @@ RANLIB = @RANLIB@
 	$(CC) $(CFLAGS) $(LOCAL_INC) -c $<
 	ldso $*
 
+.cc.so:
+	$(CXX) $(CFLAGS) $(LOCAL_INC) -c $<
+	ldso $*
+
 .f.so:
 	$(FC) $(FFLAGS) -c $<
 	ldso $*
