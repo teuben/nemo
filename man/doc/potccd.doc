@@ -1,0 +1,28 @@
+%N potccd
+%D Create potential or density image from a NEMO potential
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man potccd' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A out
+	Output file (image) [???]
+%A potname
+	Name of potential [???]
+%A potpars
+	Parameters for potential []
+%A potfile
+	Any optional data file associated with potential []
+%A x
+	X-coordinate(s) to test potential at [0]
+%A y
+	Y-coordinate(s) to test potential at [0]
+%A z
+	Z-coordinate(s) to test potential at [0]
+%A t
+	Time to test potential at [0.0]
+%A dr
+	Differential step for (Poisson) density map []
+%A ndim
+	Poisson map using 2D or 3D derivatives [3]
+%A VERSION
+	12-jun-98 PJT [1.2]
