@@ -42,11 +42,12 @@ string defv[] = {
     "out=\n         Filename for output table",
     "options=i,x,y,data\n   Output options",
     "maxstat=1\n    Max amount of statistics printed out",
-    "VERSION=1.0b\n  3-jul-03 PJT",
+    "cursor=t\n     Go into cursor mode directly?",
+    "VERSION=1.1a\n  8-jul-03 PJT",
     NULL,
 };
 
-string usage="dynamic query table viewer";
+string usage="dynamic query table viewer with interactive zoom and action";
 
 typedef struct point {
   real x,y;		/* points in plot coordinates */
@@ -100,6 +101,7 @@ real xmin, xmax, ymin, ymax, xplot[2], yplot[2];
 string xname, yname;
 plcommand *layout;
 string action;
+bool Qcursor;
 
 /* extern */
 
@@ -144,6 +146,7 @@ setparams()
         layout = NULL;
     maxstat = getiparam("maxstat");
     action = getparam("action");
+    Qcursor = getbparam("cursor");
 }
 
 gettable()
@@ -152,7 +155,7 @@ gettable()
     stream instr;
     string  fname, *colnames, *sp;
     bool first=TRUE;
-    int i, j, k, n, nret, one=1, n_invisib;
+    int i, j, k, n, nret, one=1, n_invisib=0;
     real errval=0.0, range[2], drange, dmean, sum, sum1, sum2, sum3;
     real pcolor, psize, cmin, cmax, ptype, meanj, sigj, meank, sigk;
 
@@ -356,7 +359,7 @@ int zoom(void)
   float xref, yref, x, y, tmp;
 
   /* assume it has cursor mode */
-  printf("Old box: X: %g %g Y: %g %g\n", xplot[0], xplot[1], yplot[0], yplot[1]);
+  dprintf(1,"Old box: X: %g %g Y: %g %g\n", xplot[0], xplot[1], yplot[0], yplot[1]);
 
   mode = 0;
   posn = 0;
@@ -366,7 +369,7 @@ int zoom(void)
   xref = x;
   yref = y;
   pgband_(&mode, &posn, &xref, &yref, &x, &y, &c, 1);
-  printf("Box: %g %g %g %g Char: %c\n", xref, yref, x, y, c);
+  dprintf(0,"Box: %g %g %g %g Char: %c\n", xref, yref, x, y, c);
   if (c=='X') return 0;
 
   if (x < xref) {  tmp=x; x=xref; xref=tmp; }
@@ -376,10 +379,10 @@ int zoom(void)
   xmax = ixtrans((double)x);
   ymin = iytrans((double)yref);
   ymax = iytrans((double)y);
-  printf("New min/max: X: %g %g Y: %g %g\n", xmin,xmax, ymin,ymax);
+  dprintf(0,"New min/max: X: %g %g Y: %g %g\n", xmin,xmax, ymin,ymax);
 
   ini_display();
-  printf("New box: X: %g %g Y: %g %g\n", xplot[0], xplot[1], yplot[0], yplot[1]);
+  dprintf(0,"New box: X: %g %g Y: %g %g\n", xplot[0], xplot[1], yplot[0], yplot[1]);
   return 1;
 }
 
@@ -416,6 +419,7 @@ interact()
 {
   permanent int s=-1;  /* the currently selected slider */
   permanent char cmd_system[MAXLINLEN], cmd_popen[MAXLINLEN]; /* for ! and | */
+  permanent bool first = TRUE;
   FILE *fp;
   bool done=FALSE;
   char *word(), *show_slider(), line[MAXLINLEN], cmd[MAXLINLEN];
@@ -437,7 +441,11 @@ interact()
     printf("%s",show_slider(s));
     
     /* gets() is dangerous and should not be used */
-    if (gets(line) == NULL) return -1;
+    if (Qcursor && first) {
+      strcpy(line,"c");
+      first = FALSE;
+    } else
+      if (gets(line) == NULL) return -1;
     
     switch (line[0]) {
     case '0':
@@ -541,14 +549,32 @@ interact()
 	  pl_getpoly(xpol, ypol, MAXPOL);
 	}
       }
-    case 'c':  
-      for (;;) {                      /* loop forever */
+    case 'c':      /* interactive mode */
+      for (;;) {                      /* loop forever until done */
 	pl_cursor(&xcm, &ycm, &c);
+	if (c=='?') {
+	  printf("Cursor keys:\n");
+	  printf("q   quit\n");
+	  printf("A   (left mouse)   action\n");
+	  printf("D   (middle mouse) test where the action is\n");
+	  printf("X   (right mouse)  zoom\n");
+	  continue;
+	} else if (c=='q') 
+	  break;
+#if 0
 	if (c == 'X') break;
 	if (c == 'z') {
 	  while(zoom())
 	    re_display(0);
 	}
+#else
+	if (c == 'X') {
+	  dprintf(0,"Going into zoom mode\n");
+	  zoom();
+	  re_display(0);
+	  continue;
+	}
+#endif
 	if (xcm > 2 && xcm < 18 &&
 	    ycm > 2 && ycm < 18) {
 	  xp = ixtrans(xcm);
