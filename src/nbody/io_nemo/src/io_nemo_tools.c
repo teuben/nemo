@@ -1,21 +1,25 @@
-/* -------------------------------------------------------------- *\
-|* $Id$
-|*
-|* Set of usefull functions
-|*
-\* -------------------------------------------------------------- */
-
+/* =================================================================
+|  Copyright Jean-Charles LAMBERT - 2005                            
+|  e-mail:   Jean-Charles.Lambert@oamp.fr                           
+|  address:  Dynamique des galaxies                                 
+|            Laboratoire d'Astrophysique de Marseille               
+|            2, place Le Verrier                                    
+|            13248 Marseille Cedex 4, France                        
+|            CNRS U.M.R 6110                                        
+| ==================================================================
+|* Set of usefull functions                                         
++----------------------------------------------------------------- */
 #include <stdinc.h>
 #include <stdlib.h>
 #include <getparam.h>
 
 #include "io_nemo_tools.h"
 
-/* -------------------------------------------------------------- *\ 
-|* allocate_pointer :
-|* check if the pointer is already allocated. if not it is
-|* allocated.
-\* -------------------------------------------------------------- */ 
+/* ----------------------------------------------------------------
+|  allocate_pointer :                                              
+|  check if the pointer is already allocated. if not it is         
+|  allocated.                                                      
++---------------------------------------------------------------- */ 
 char * allocate_pointer(char * p, int lg)
 { char * ptr;
 
@@ -31,10 +35,10 @@ char * allocate_pointer(char * p, int lg)
  else /* assume p is already  allocated */
    return p;
 } 
-/* -------------------------------------------------------------- *\
-|* char2float():
-|* convert a string to a float
-\* -------------------------------------------------------------- */
+/* ----------------------------------------------------------------
+|  char2float():                                                   
+|  convert a string to a float                                     
++---------------------------------------------------------------- */
 float char2float(char * ch,int rtype)
 {
   float r;
@@ -48,10 +52,10 @@ float char2float(char * ch,int rtype)
   }
   return r;
 }
-/* -------------------------------------------------------------- *\
-|* char2double():
-|* convert a string to a double
-\* -------------------------------------------------------------- */
+/* ----------------------------------------------------------------
+|  char2double():                                                  
+|  convert a string to a double                                    
++---------------------------------------------------------------- */
 double char2double(char * ch,int rtype)
 {
   double r;
@@ -67,23 +71,23 @@ double char2double(char * ch,int rtype)
   
 }
 
-/* -------------------------------------------------------------- *\ 
-|* chk_select : 
-|*
-|* return a double dimension array of boolean Q[nb_sel][nbody] 
-|* 
-|* 'nbody' is self explained
-|* 'nb_sel' is the number of particle selection string (select_pts)
-|* 'slect_pts' is an array of particle selection string like
-|*              0:2000 || 0:2000:10 || 0:12000,23000:300000 etc...
-|* 'nret' is an array of int of size nb_sel, which contain the number
-|*        of selected particles for the current selection string
-|*
-|* 'Q' is a double dimension array of boolean which contain TRUE for
-|*     the bodies index which  match to the selection string, otherwise
-|      FALSE.
-|*           
-\* -------------------------------------------------------------- */
+/* ----------------------------------------------------------------
+|  chk_select :                                                    
+|                                                                  
+|  return a double dimension array of boolean Q[nb_sel][nbody]     
+|                                                                  
+|  'nbody' is self explained                                       
+|  'nb_sel' is the number of particle selection string (select_pts)
+|  'slect_pts' is an array of particle selection string like       
+|               0:2000 || 0:2000:10 || 0:12000,23000:300000 etc... 
+|  'nret' is an array of int of size nb_sel, which contain the     
+|   number of selected particles for the current selection string  
+|                                                                  
+|  'Q' is a double dimension array of boolean which contain TRUE   
+|      for the bodies index which  match to the selection string,  
+|      otherwise FALSE.                                            
+|                                                                  
++---------------------------------------------------------------- */
 bool ** chk_select(int * nret,int nb_sel,int nbody,string select_pts[])
 {
   int  ** select_i;
@@ -135,28 +139,42 @@ bool ** chk_select(int * nret,int nb_sel,int nbody,string select_pts[])
   return  Qsel;
 
 }
-/* -------------------------------------------------------------- *\ 
-|* f_ch_to_c :
-|* Insert '\0' character to the 'lg' position of a FORTRAN string.
-\* -------------------------------------------------------------- */ 
+/* ----------------------------------------------------------------
+|  f_ch_to_c :                                                     
+|  Insert '\0' character to the 'lg' position of a FORTRAN string. 
++---------------------------------------------------------------- */ 
 char * f_ch_to_c(char * chaine,int lg)
 {
   char * tmp;
   
   /* chaine[lg] = '\0'; */
-
+#if 1
+  char *p;
+  p = strchr(chaine,'\0');
+  dprintf(1,"[f_ch_to_c] p=[%x] chaine=[%x] diff [%d] lg=<%d>\n",p,chaine,p-chaine,lg);
+  if ((p - chaine) >= lg ) {
+    dprintf(1,"[f_ch_to_c] gonna fix fortran supposed string...\n");
+    tmp = chaine+lg-1;
+    
+    while (*tmp==' ') {
+      *tmp='\0';
+      tmp--;
+    }
+  }
+#else
   tmp = chaine+lg-1;
 
   while (*tmp==' ') {
     *tmp='\0';
     tmp--;
-  }
+  }  
+#endif
   return(chaine);
 } 
-/* -------------------------------------------------------------- *\ 
-|* get_selected :
-|* Return the string limited by "#" character.
-\* -------------------------------------------------------------- */
+/* ----------------------------------------------------------------
+|  get_selected :                                                  
+|  Return the string limited by "#" character.                     
++---------------------------------------------------------------- */
 char * get_selected(char *p)
 { 
   char * chaine=NULL, * x;
@@ -182,6 +200,6 @@ char * get_selected(char *p)
 	
   return chaine;
 }
-/* -------------------------------------------------------------- *\
-|* End of io_nemo_tools.c
-\* -------------------------------------------------------------- */
+/* ----------------------------------------------------------------
+|  End of io_nemo_tools.c                                          
++---------------------------------------------------------------- */

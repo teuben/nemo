@@ -1,9 +1,17 @@
-/* --------------------------------------------------------- *\
-|* $Id$
-|*
-|* Functions prototypes
-|*
-\* --------------------------------------------------------- */
+/* =================================================================
+|  Copyright Jean-Charles LAMBERT - 2005                            
+|  e-mail:   Jean-Charles.Lambert@oamp.fr                           
+|  address:  Dynamique des galaxies                                 
+|            Laboratoire d'Astrophysique de Marseille               
+|            2, place Le Verrier                                    
+|            13248 Marseille Cedex 4, France                        
+|            CNRS U.M.R 6110                                        
+| ==================================================================
+|* Functions prototypes                                             
++----------------------------------------------------------------  */
+
+#ifndef IO_NEMO_TOOLS_H
+#define IO_NEMO_TOOLS_H
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -24,4 +32,7 @@ char *  get_selected(char *);
 }
 #endif
 
-
+#endif /* IO_NEMO_TOOLS_H */
+/* ----------------------------------------------------------------
+|  End of io_nemo_tools.h                                          
++---------------------------------------------------------------- */
