@@ -20,15 +20,17 @@ MAN3FILES =
 MAN5FILES = 
 INCFILES = filefn.h options.h stdinc.h strlib.h 
 SRCFILES= allocate.c  bswap.c burststring.c common.c cputime.c date_id.c \
-	  error.c file_size.c filefn.c strlib.c 
+	  error.c file_size.c filefn.c strlib.c progress.c
 OBJFILES= allocate.o bswap.o burststring.o common.o cputime.o date_id.o \
-	  error.o file_size.o filefn.o strlib.o 
+	  error.o file_size.o filefn.o strlib.o progress.o
 ##  exception.o		
 # exception doesn't work on solaris
 LOBJFILES= $L(allocate.o)  $L(burststring.o) $L(cputime.o) $L(date_id.o) \
-	   $L(error.o) $L(file_size.o) $L(filefn.o) $L(strlib.o) $L(bswap.o)
+	   $L(error.o) $L(file_size.o) $L(filefn.o) $L(strlib.o) $L(bswap.o) \
+	   $L(progress.o)
 BINFILES = bswap
-TESTFILES= errortest burstrtest filefntest sizetest cputest cputool
+TESTFILES= errortest burstrtest filefntest sizetest cputest cputool \
+	   progresstest
 
 help:
 	@echo NEMO/src/kernel/core
@@ -100,6 +102,9 @@ tests: $(TESTFILES)
 
 errortest: error.c
 	$(CC) $(CFLAGS) -o errortest -DTESTBED error.c $(NEMO_LIBS)
+
+progresstest: progress.c
+	$(CC) $(CFLAGS) -o progresstest -DTESTBED progress.c $(NEMO_LIBS)
 
 burstrtest: burststring.c
 	$(CC) $(CFLAGS) -o burstrtest -DTESTBED burststring.c $(NEMO_LIBS)
