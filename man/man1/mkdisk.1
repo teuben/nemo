@@ -1,4 +1,4 @@
-.TH MKDISK 1NEMO "14 June 1992"
+.TH MKDISK 1NEMO "5 May 2003"
 .SH NAME
 mkdisk \- create a uniform-density test disk in an external potential
 .SH SYNOPSIS
@@ -55,8 +55,12 @@ will have to be used before further action is taken.
 .TP
 \fBfrac=\fIfraction\fP
 The fraction that the local velocity dispersion has w.r.t.
-the local rotation velocity. Radial and tangential velocity are
-taken to be the same. [Default: \fB0\fP]
+the local rotation velocity. If a number is given, radial and tangential velocity are
+by default taken to be the same, with no Z-velocities. If two numbers are given,
+the first one is the radial dispersion, the second one the tangential
+(currently wihtout any 2*Omega/Kappa correction), and the Z dispersion 0.
+Finally, when 3 numbers are given, random motions in Z are also added.
+[Default: \fB0\fP]
 .TP
 \fBseed=\fIrandom_seed\fP
 Use random number seed. If 0 is given, a random number is generated
@@ -88,4 +92,5 @@ xx-feb-87	coding, still debugging  	PJT
 9-jul-91	corrected a few lies in the documentation	PJT
 22-oct-91	V4.1: added in= optional input file      	PJT
 12-jun-92	V4.2: nbody= is now second parameter, lost in=	PJT
+5-may-03	V4.4: added random Z motions by using frac=	PJT
 .fi
