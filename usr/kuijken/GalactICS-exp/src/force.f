@@ -67,7 +67,8 @@ c      enddo
                dp(l/2+1) = 0.0
             else
                st2 = 1.0 - costheta*costheta
-               dp(l/2+1) = l*(plgndr1(l-1, costheta) - costheta*p(l/2+1))/st2
+               dp(l/2+1) = l*(plgndr1(l-1, costheta) 
+     +                     - costheta*p(l/2+1))/st2
             endif
          enddo
          do i=1,lmax/2+1
@@ -82,7 +83,8 @@ c      enddo
              enddo
              fth = 0.0
              do i=2,lmax/2+1
-                fth = fth - sintheta*dp(i)*(t*apot(i,ihi) + tm1*apot(i,ihim1))
+                fth = fth - sintheta*dp(i)*(t*apot(i,ihi) 
+     +          + tm1*apot(i,ihim1))
              enddo
              pot = 0.0
              do i=1,lmax/2+1

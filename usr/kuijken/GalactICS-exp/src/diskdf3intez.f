@@ -11,8 +11,8 @@ c-------------------------------------
       sr2=sigr2(rc)
       sz2=sigz2(rc)
       if (sz2.gt.0.) then
-        fvert=fnamidden(rc)*exp(-ez/sz2)
-        diskdf3intez=fomega/fkappa*sqrt(2/pi/sr2)*exp(-(ep-ec)/sr2)*fvert
+       fvert=fnamidden(rc)*exp(-ez/sz2)
+       diskdf3intez=fomega/fkappa*sqrt(2/pi/sr2)*exp(-(ep-ec)/sr2)*fvert
       else
         diskdf3intez=0
         endif

@@ -7,7 +7,8 @@ c that, hope that things come together!
       dimension drat(0:nrmax),
      +          dz2rat(0:nrmax),
      +          fzrat(0:nrmax)
-      dimension d0rat(0:nrmax),d1rat(0:nrmax),d2rat(0:nrmax),d3rat(0:nrmax),
+      dimension d0rat(0:nrmax),d1rat(0:nrmax),d2rat(0:nrmax),
+     +          d3rat(0:nrmax),
      +          d4rat(0:nrmax)
       dimension fplot(0:10*nrmax),rplot(0:10*nrmax)
       dimension ibuf(100)
@@ -54,7 +55,8 @@ c
 c first call initializes the spline fitting functions by the way
       call omekap(outdisk,fom,fka)
 
-      write(0,'('' ==> Outer dispersion, truncation dispersion:'',2g10.3)')
+      write(0,'('' ==> Outer dispersion, 
+     +  truncation dispersion:'',2g10.3)')
      +  sqrt(sigr2(outdisk)),drtrunc*fka
       if (sqrt(sigr2(outdisk)).gt.drtrunc*fka) then
         write(0,*) '** WARNING **: you have asked for an outer velocity'
@@ -112,11 +114,11 @@ c integrate analytically over vr and vz, numerically over vphi
         fzrat(ir)=log(diskdensf(r,0.)/diskdensf(r,zdisk))/log(d0/dz2)
 c        write(*,*) 'density=',d0
         enddo
-       write(0,*)
-       nrd=max(1,nrspl/10)
-       write(0,'(''      r: '',11f6.3)') (rr(ir),ir=0,nrspl,nrd)
-       write(0,'(f6.3,''  d'',11f6.3)') 0.,(drat(ir),ir=0,nrspl,nrd)
-       write(0,'(f6.3,''  d'',11f6.3)') zdisk,(dz2rat(ir),ir=0,nrspl,nrd)
+      write(0,*)
+      nrd=max(1,nrspl/10)
+      write(0,'(''      r: '',11f6.3)') (rr(ir),ir=0,nrspl,nrd)
+      write(0,'(f6.3,''  d'',11f6.3)') 0.,(drat(ir),ir=0,nrspl,nrd)
+      write(0,'(f6.3,''  d'',11f6.3)') zdisk,(dz2rat(ir),ir=0,nrspl,nrd)
        do ir=0,nrspl
         fdrat(ir)=fdrat(ir)/drat(ir)
         fszrat(ir)=fszrat(ir)/fzrat(ir)
@@ -176,10 +178,13 @@ c integrate analytically over vr and vz, numerically over vphi
        nrd=max(1,(nrspl-1)/10+1)
        write(0,'(''      r: '',11f6.3)') (rr(ir),ir=0,nrspl,nrd)
        write(0,'(f6.3,''  d'',11f6.3)') 0.,(d0rat(ir),ir=0,nrspl,nrd)
-       write(0,'(f6.3,''  d'',11f6.3)') 0.5*zdisk,(d1rat(ir),ir=0,nrspl,nrd)
+       write(0,'(f6.3,''  d'',11f6.3)') 
+     +       0.5*zdisk,(d1rat(ir),ir=0,nrspl,nrd)
        write(0,'(f6.3,''  d'',11f6.3)') zdisk,(d2rat(ir),ir=0,nrspl,nrd)
-       write(0,'(f6.3,''  d'',11f6.3)') 1.5*zdisk,(d3rat(ir),ir=0,nrspl,nrd)
-       write(0,'(f6.3,''  d'',11f6.3)') 2*zdisk,(d4rat(ir),ir=0,nrspl,nrd)
+       write(0,'(f6.3,''  d'',11f6.3)') 
+     +       1.5*zdisk,(d3rat(ir),ir=0,nrspl,nrd)
+       write(0,'(f6.3,''  d'',11f6.3)') 
+     +       2*zdisk,(d4rat(ir),ir=0,nrspl,nrd)
        write(12,'(''#'', 2g17.7,x,i4)') sigr0,disksr,nrspl
        do i=0,nrspl
           write(12,'(x,3g17.7)') rr(i),fdrat(i),fszrat(i)
@@ -197,7 +202,7 @@ c make plots of the correction functions.
           rplot(ir)=rr(ir/10)+(rr(ir/10+1)-rr(ir/10))*0.1*mod(ir,10)
        enddo
        do ir=0,nrspl*10-1
-          call splintd(rr(0),fdrat(0),drat2(0),nrspl+1,rplot(ir),fplot(ir))
+       call splintd(rr(0),fdrat(0),drat2(0),nrspl+1,rplot(ir),fplot(ir))
        enddo
        
        call pgenv(0.,rplot(nrspl*10-1),0.,2.,0,0)
@@ -206,7 +211,8 @@ c make plots of the correction functions.
        call pglabel('R',' ','Surfden Correction')
        
        do ir=0,nrspl*10-1
-          call splintd(rr(0),fszrat(0),szrat2(0),nrspl+1,rplot(ir),fplot(ir))
+          call splintd(rr(0),fszrat(0),szrat2(0),
+     +    nrspl+1,rplot(ir),fplot(ir))
        enddo
        
        call pgenv(0.,rplot(nrspl*10-1),0.,2.,0,0)
