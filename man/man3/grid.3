@@ -1,0 +1,82 @@
+.TH GRID 3NEMO "5 November 1993"
+.SH NAME
+inil_grid, inia_grid, inip_grid, index_grid, value_grid -
+various (1D) gridding routines
+.SH SYNOPSIS
+.nf
+.B
+#include <grid.h>
+.PP
+.B void inil_grid(g, ng, gmin, gmax)
+.B void inia_grid(g, na, a)
+.B void inip_grid(g, ng, fmin, fmax, f)
+.PP
+.B int index_grid(g, x)
+.B real value_grid(g, i)
+.PP
+.B Grid *g;
+.B int ng, na;
+.B real gmin, gmax, fmin, gmax, x, i;
+.B rproc f;
+.fi
+.SH DESCRIPTION
+The \fIgrid\fP are a set of routines to aid in simple 1 dimensional gridding
+problems.
+The routines are written in C but in 
+an object-oriented fashion as to isolate the user from the internal
+datastructure. The \fBGrid\fP can (and should) be treated as an
+opaque datastructure. All information should be obtained through interface
+routines.
+.PP
+\fIiniX_grid\fP is used to set up a grid. A grid can be
+monotonically increasing as well as decreasing. (X=l linear grid,
+X=a array defined grid, X=p procedure defined grid)
+.PP
+\fIindex_grid\fP returns the (C) index onto the grid, and is a number
+in the range 0 to N-1. -1 is returned if the requested value is outside
+the grid. Both edges of the grid are considered part of the grid,
+where rounding occurs towards the \fBgmin\fB ('left') value
+(see \fIfloor(3M)\fP).
+Only for the last grid-cell (the 'right' grid cell, with index \fBn-1\fP)
+both edges are considered part of the grid-cell.
+.PP
+\fIvalue_grid\fP returns the physical value associated with the grid,
+allowing for a real valued grid index value \fBi\fP which is
+in the range 0 to N (0 being the 'left' edge, and N the 'right' edge).
+0.5 means the center of the first grid cell etc. 
+Index values outside the normal 0..N range return a legal value for
+a linear grid only, and cause a fatal error for an array lookup
+(\fIor perhaps we will extrapolate using the two edge points\fP).
+.SH MOMENT STRUCTURE
+A simple data structure (referred to as \fIGrid\fP in the above
+SYNOPSIS) is used to communicate between different routines:
+.nf
+.ta +0.3i +1.5i
+
+typedef struct { 
+	int mode;
+	int n;
+	bool up;
+	real *g;
+	real gmin, gmax;
+	rproc f;
+} Grid;
+
+.fi
+from the standard include file \fIgrid.h\fP.
+.SH BUGS
+Array and Procedure gridding don't work.
+.SH SEE ALSO
+moment(3NEMO), floor(3M)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2i
+~/src/kernel/misc	grid.c
+.fi
+.SH UPDATE HISTORY
+.nf
+.ta +1i +4i
+30-oct-93	Created   	PJT
+.fi
