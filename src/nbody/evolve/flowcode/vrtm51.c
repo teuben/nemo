@@ -2,17 +2,19 @@
  * VRT: flow potential : derives vx and vy velocities given vr and vt.
  *
  *	18-nov-03  cloned off vrt.c for the M51 project     Rahul & Peter
- *
+ *      19-nov-03  added phase equations to account for vr and vt being
+ *                 constant along logarithmic arms.
  */
 
 #include <stdinc.h>
 #include <filestruct.h>
 #include <image.h>
+#include <table.h>
 
-#define VERSION "flowcode:vrtm51 V1.0 19-nov-03"
+#define VERSION "flowcode:vrtm51 V1.1 20-nov-03"
 
 local double omega = 0.0;		/*   pattern speed  */
-local double pitch = 0.0;               /*    pitch angle   */
+local double pitch = 10.0;              /*    pitch angle   */
 local double rref = 1.0;               /* reference radius */
 local double thetaref = 0.0;           /*  reference angle */
 
@@ -28,14 +30,15 @@ local stream   potstr = NULL;
 local int      nr, np;
 local real     *rads, *phis;
 local real     dphi;
+local real     tanp;
 
-local int binsearch(real, real *, int);
 
 #define MAXCOL  4
 
 extern int nemo_file_lines(string,int);
 extern void spline (double *coef, double *x, double *y, int n);
 extern double seval(double x0, double *x, double *y, double *coef, int n);
+
 
 void inipotential (int *npar, double *par, string name)
 {
@@ -59,12 +62,16 @@ void inipotential (int *npar, double *par, string name)
     }
     entries++;
 
+    tanp = tan(pitch*PI/180.0);
+
     dprintf (1,"INIPOTENTIAL vrt potential %s\n",name);
     dprintf (1,"  Parameters : Pattern Speed = %f\n",omega);
     dprintf (1,"  Parameters : Pitch Angle = %f\n",pitch);
     dprintf (1,"  Parameters : Reference Radius = %f\n",rref);
     dprintf (1,"  Parameters : Reference Angle = %f\n",thetaref);
     dprintf (1,"  Table = %s\n",name);
+
+    if (pitch == 0) error("inipotential: Need a non-zero pitch angle");
 
     nmax = nemo_file_lines(name,0);
     dprintf (1,"  Nmax = %d\n",nmax);
@@ -103,21 +110,26 @@ void inipotential (int *npar, double *par, string name)
     dprintf(2,"vrtm51[%d]: %g %g %g %g\n",nrad,theta[nrad-1],vr[nrad-1],vt[nrad-1],den[nrad-1]);
 }
 
+#define  UNWRAP(phi)    ((phi) - 360 * floor((phi)/ 360 ))
+
+
 void potential(int *ndim,double *pos,double *acc,double *pot,double *time)
 {
-    real rad, phi, phi_orig, phi1, phi2, rad1, rad2;
-    real x, y, c1, c2, c3, c4, a1, a2, vrad, vtan;
+    real rad, phi, phase;
+    real x, y, vrad, vtan;
     bool mirror;
 
     x = pos[0];
     y = pos[1];
     rad = sqrt(x*x + y*y);
-    phi = atan2(y,x)*180./PI;              
-
-    vrad = seval(phi,theta,vr,coef_vr,nrad);
-    vtan = seval(phi,theta,vt,coef_vt,nrad);
-    *pot = seval(phi,theta,den,coef_den,nrad);
-    dprintf(1,"x,y,rad,phi,vt,vr,den: %g %g   %g %g   %g %g %g\n", x,y,rad,phi,vtan,vrad,*pot);
+    phi = atan2(y,x)*180./PI;
+    phi -= log(rad/rref)/tanp + thetaref;
+    phase = UNWRAP(phi);
+      
+    vrad = seval(phase,theta,vr,coef_vr,nrad);
+    vtan = seval(phase,theta,vt,coef_vt,nrad);
+    *pot = seval(phase,theta,den,coef_den,nrad);
+    dprintf(1,"x,y,rad,phi,phase,vt,vr,den: %g %g   %g %g %g   %g %g %g\n", x,y,rad,phi,phase,vtan,vrad,*pot);
 
     if (rad > 0) {
 	vtan -= omega * rad;
