@@ -1,0 +1,51 @@
+.TH RUNCMHOG 1NEMO "19 February 1997"
+.SH NAME
+runcmhog \- preprocess a CMHOG namelist and run program in a new directory
+.SH SYNOPSIS
+\fBruncmhog\fP \fI[-options]\fP \fIrun_directory\fP \fI[[namelist:][key=val]]\fP
+.SH DESCRIPTION
+\fBruncmhog\fP is a preprocessor to run (a series of) CMHOG programs.
+It expects the 'cmhogin' input file to be present in the local
+directory, uses that, but any variables can be overridden via
+the commandline. 
+The first argument must be a (non-existent) directory name, in
+which a new 'cmhogin' file will be written, and cmhog will be 
+run. The 'cmhog' program is allowed to be in the unix PATH
+.SH OPTIONS
+The following options are recognized, they must appear before
+the \fIrun_directory\fP name
+.TP 20
+\fB-n\fP \fInamelist\fP
+Optional name of the \fInamelist\fP file. Default: \fBcmhogin\fP.
+.TP
+\fB-e\fP \fIexecutable\fP
+Optional name of the executable name. Default: \fBcmhog\fP.
+.SH CAVEAT
+There is no provision for the same key in multiple namelists yet
+The solution would be to precede the keyword with "name/"
+.PP
+Cannot add new keywords, they must already have an entry in the
+\fIcmhogin\fP
+template
+.SH EXAMPLE
+Here is a shell script running a series of models from a template \fIcmhogin\fP
+in the current directory.
+.nf
+    runcmhog run001
+    runcmhog run002 aob=3.0
+    runcmhog run003 aob=2.0
+    runcmhog run004 aob=3.0 qm=5.5e4
+    runcmhog run005 aob=3.0 qm=3.5e4
+.fi
+.SH SEE ALSO
+hdfgrid(1NEMO), sdsfits(1NEMO)
+.SH FILES
+NEMO/usr/pjt/cmhog	cmhog project
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+15-Jun-96	man written	pjt
+19-feb-97	implemented -e and -n flags	pjt
+.fi
