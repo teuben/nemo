@@ -36,6 +36,10 @@ Aarseth's nbody* series. [10]
 Output integration step. Some other codes use 1/freqout, or \fBdeltat\fP for this
  [1]    
 .TP
+\fBtheta=\fP
+tolerance parameter at M=M_tot
+[0.6]
+.TP
 \fBNreuse=\fP
 Max number of subsequent tree re-uses [0].
 .TP
@@ -106,7 +110,9 @@ scales logarithmically, i.e. for N=1,000,000 it will take almost
 1400".
 .SH EXAMPLES
 .SH SEE ALSO
-YANC(1NEMO)
+hackcode1(1NEMO)
+.PP
+2000ApJ...536L..39D (A Very Fast and Momentum-conserving Tree Code, W. Dehnen)
 .SH FILES
 .SH AUTHOR
 Walter Dehnen
@@ -116,5 +122,6 @@ Walter Dehnen
 29-May-01	V1.0 manual written, at GH-2001 workshop at INAOE 	PJT
 13-jun-01	1.0.2: added Ncrit
 16-nov-01	1.0.15: aligned man page with actual code	PJT
+3-jun-02	added theta=	PJT
 .fi
 
