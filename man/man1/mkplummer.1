@@ -1,4 +1,4 @@
-.TH MKPLUMMER 1NEMO "21 March 2004"
+.TH MKPLUMMER 1NEMO "21 November 2004"
 .SH NAME
 mkplummer \- generates a snapshot according to a truncated Plummer model
 .SH SYNOPSIS
@@ -97,8 +97,14 @@ virialized system yet. See \fIsnapvirial(1NEMO)\fP
 For very large (>1000) ratio in the mass ranges the spline
 interpolation, used in \fIfrandom(3NEMO)\fP, can fail
 using a valid [0,1] range.
+.SH EXAMPLES
+mkplummer can also be used to create a plummer sphere with a mass spectrum, e.g.
+a Salpeter mass spectrum with
+.nf
+  % mkplummer salpeter.dat 10000 massname='n(m)' massexpr='pow(m,p)' masspars=p,-2.35 massrange=0.1,10
+.fi
 .SH SEE ALSO
-snapvirial(1NEMO), mkplummer(3NEMO)
+snapvirial(1NEMO), mkplummer(3NEMO), snapmass(1NEMO)
 .PP
 H.C.Plummer (1911), \fIMNRAS\fP, \fB71\fP, 460.
 .PP

@@ -1,4 +1,4 @@
-.TH HDFGRID 1NEMO "24 April 2003"
+.TH HDFGRID 1NEMO "3 December 2004"
 .SH NAME
 hdfgrid \- Regrid a polar HDF4 SDS to cartesian image
 .SH SYNOPSIS
@@ -57,12 +57,12 @@ a linear combination of \fBvx\fP, \fBvy\fP
 to get an idea of the velocity field under a "middle" position angle.
 Default: not used, select= is used.
 .TP
-\fBsymmetry=odd|even\fP
-Override symmetry properties of the variable to be gridded. This option is
-not used yet. See mirror= below
-.TP
 \fBmirror=t|f\P
 Mirror points? [Default: \fBt\fP].
+.TP
+\fBsymmetry=odd|even|automatic\fP
+Override symmetry properties of the variable to be gridded. 
+This option is not used yet. See also \fBmirror=\fP
 .TP
 \fBit0=\fP
 Shifts the values in theta by \fBit0\fP pixels. This is equivalent 
@@ -97,4 +97,5 @@ Peter Teuben
 25-May-95	V1.0 Created for IAU157 movie	PJT
 12-dec-99	V1.3 added it0= shifting arrays to fake a rotation, for Witold	PJT
 27-aug-02	V1.5 added mirror= to allow for full grid simulations	PJT
+3-dec-04	V2.0 increased MAXRANK to handle 2+1 dim input files	PJT
 .fi
