@@ -1,4 +1,4 @@
-.TH CCDFITS 1NEMO "17 April 2001"
+.TH CCDFITS 1NEMO "7 August 2001"
 .SH NAME
 ccdfits \- write a fits file to disk
 .SH SYNOPSIS
@@ -52,6 +52,10 @@ If no reference map used, this can be used to enforce a more reasonable
 axis descriptor (RA/DEC/VEL) for astronomical data packages which 
 cannot handle theory data too well (e.g. miriad, karma etc.).
 [Default: \fBf\fP].
+.TP
+\fInfill=0\fP
+Number of dummy comment lines to add to a fits header to test I/O routines.
+Default: 0
 .SH EXAMPLES
 To convert an image to unsigned 16 bit integers use the following math:
 .nf

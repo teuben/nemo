@@ -6,8 +6,9 @@ lsq_zero, lsq_accum, lsq_solve - least squares fitting utilities
 \fBint lsq_zero (n, mat, vec)\fP
 \fBint lsq_accum (n, mat, vec, a, w)\fP
 \fBint lsq_solve (n, mat, vec, sol)\fP
+\fBint lsq_cfill (n, mat, c, sol)\fP
 .PP
-\fBint n;\fP
+\fBint n, c;\fP
 \fBreal mat[n*n], vec[n], sol[n], a[n+1], w;\fP
 .SH DESCRIPTION
 These routines provide a low level interface to solving linear
@@ -46,7 +47,7 @@ of the form \fII(x,y)=a+bx+cy\fP:
         lsq_accum(3,mat,vec,a,1.0);
     }
     lsq_solve(3,mat,vec,a);
-    printf("a+bx+cy:  a=%f b=%f c=%f\n,a[0],a[1],a[2]);
+    printf("a+bx+cy:  a=%f b=%f c=%f\\n", a[0],a[1],a[2]);
 .fi
 .SH SEE ALSO
 lsqfit(3NEMO), matinv(3NEMO)

@@ -102,6 +102,7 @@ In this case the names become \fIinifien, dofien\fP and \fIdmpfien\fP.
             ifge(x,y,a,b)  returns a if x greater or equal y, else b
             iflt(x,y,a,b)  returns a if x less y, else b
             ifle(x,y,a,b)  returns a if x less or equal y, else b
+	    sind(x), cosd(x), tand(x)		sine/cosine/tangent in degrees
 
 \fINotes\fP:      The calculations are all done in double precision (double), although the
             input and output arrays are in single precision (float).
@@ -186,4 +187,5 @@ $NEMO/src/pjt/clib	fie.c (fortran callable) nemofie.c (C-callable) fie_ftoc.c
 27-oct-87	KGB bug removed                   	RJK
 15-dec-88	Minor things for INTEGER*4 unix version  	PJT
 19-jun-89	Merged new GR version with NEMO again - routinenames appending _c	PJT
+26-aug-01	added cosd/sind/tand    	PJT
 .fi

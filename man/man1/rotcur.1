@@ -1,4 +1,4 @@
-.TH ROTCUR 1NEMO "9 May 2001"
+.TH ROTCUR 1NEMO "10 August 2001"
 .SH NAME
 rotcur \- fit kinematic parameters from velocity field
 .SH SYNOPSIS
@@ -87,7 +87,10 @@ Inner and outer radii for \fIN\fP touching rings (in arcsec).
 Remember that the number of radii is hence one more
 than the number of rings. The \fBunits=\fP keyword can be used to
 scale your physical units in the header to ``human readable'' units
-(arcsec). Radii must be either all increasing or decreasing.
+(arcsec). Radii must be either all increasing or decreasing. Note that
+the corresponding keyword in \fBGIPSY\fP has a different meaning, 
+where they denote the ring centers, and a different keyword
+\fIWIDTHS=\fP controls the width of each ring.
 No default.
 .TP
 \fBvrot\fP=\fIv1,v2,...vN\fP
@@ -238,16 +241,16 @@ If the beamsize is given, the formulae of Sicking (1997) is used
 to correct the errors for:
 .nf
 
-	factor = sqrt(4.PI.B_x.B_y/(Dx.Dy))
+	factor = sqrt(4.PI.B_x.B_y/(D_x.D_y))
 
 .fi
 .PP
 Sign of \fIDx,Dy\fP in the CCD header is ignored, and an astronomical
 image is assumed.
 .SH SEE ALSO
-ccdvel(1NEMO), tabcomment(1NEMO)
+ccdvel(1NEMO), tabcomment(1NEMO), rotcurves(1NEMO)
 .SH AUTHOR
-K. Begeman, P. J. Teuben
+K. Begeman (original GIPSY Sheltran version), P. J. Teuben (NEMO C version)
 .SH UPDATE HISTORY
 .nf
 .ta +1i +4i
@@ -265,4 +268,5 @@ K. Begeman, P. J. Teuben
 15-oct-99	compute residuals and add resid=	PJT
 14-mar-01	V2.5: clarifications, added nsigma=    	PJT
 9-may-01	V2.6a: corrected error correction factor	PJT
+10-aug-01	clarified some differences between NEMO and GIPSY versions	PJT
 .fi

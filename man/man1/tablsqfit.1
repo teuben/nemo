@@ -1,4 +1,4 @@
-.TH TABLSQFIT 1NEMO "14 August 2000"
+.TH TABLSQFIT 1NEMO "8 August 2001"
 .SH NAME
 tablsqfit \- general purpose least squares fitting program
 .SH SYNOPSIS
@@ -44,7 +44,7 @@ given, the other one is considered zero.
 .TP
 \fBfit=\fP\fImodel\fP
 Model name what to fit. Currently implemented are \fIline\fP, \fIplane\fP,
-\fIpoly\fP, \fIellipse\fP, \fIpeak\fP, and \fIimageshift\fP
+\fIpoly\fP, \fIellipse\fP, \fIpeak\fP, \fIimageshift\fP, and \fIarea\fP.
 [default: \fBline\fP].
 .TP
 \fBorder=\fP\fIorder\fP
@@ -82,7 +82,14 @@ Default: false.
 Here is an example of creating an on-the-fly table with a straight
 line, with some added noise and random weights between 1 and 2:
 .nf
-nemoinp 1:100 | tabmath - - "%1+rang(0,10),ranu(1,2)" | tablsqfit -
+% nemoinp 1:100 | tabmath - - "%1+rang(0,10),ranu(1,2)" seed=123 | tablsqfit -
+      a  =    0.974146       uncertainty:  0.039389 
+      b  =    1.755022       uncertainty:  2.291149 
+      chi-squared:    12668.983284 
+      goodness-of-fit:    1.000000 (no Y errors supplied [dycol=])
+      r:  0.92923
+      prob:  3.65557e-44
+      z:  1.65272
 .fi
 .SH SEE ALSO
 tabhist(1NEMO), tabmath(1NEMO), gaussfit(1NEMO), 
@@ -108,5 +115,6 @@ Peter Teuben
 26-jan-98	V2.9 added goodness-of-fit for fit=line 	PJT
 4-feb-98	V2.9a compute r (corr.coeff.) for line fit	PJT
 14-aug-00	V3.0 added tab=                            	PJT
+8-aug-01	V3.1c added area, using natof, error in ellipse	PJT
 .fi
 
