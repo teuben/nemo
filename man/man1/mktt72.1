@@ -1,40 +1,74 @@
-.TH MKTT72 1NEMO "19 November 2002"
+.TH MKTT72 1NEMO "5 December 2002"
 .SH NAME
 mktt72 \- Create a Toomre & Toomre 1972 test disk
 .SH SYNOPSIS
 \fBmktt72\fP [parameter=value]
 .SH DESCRIPTION
-\fBmktt72\fP creates a test disk of particles as used in Toomre & Toomre's 1972
-paper (ApJ...1972..). Currently each ring is placed in a separate snapshot. Use
+\fBmktt72\fP creates a test disk of particles similar to the one 
+used in Toomre & Toomre's 1972
+paper (1972ApJ...178..623T). Currently each ring is placed in a separate snapshot. Use
 \fIsnapmerge(1NEMO)\fP if they must be in a single snapshot.
+.PP
+The disk is rotating counter clock wise. Use \fPsnapscale(1NEMO)\fP to flip
+the sign of velocities.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBout=\fP
-output file name, in standard \fIsnapshot(5NEMO)\fP format [???]     
-.TP 20
+output file name, each ring in a separate \fIsnapshot(5NEMO)\fP. Use
+\fIsnapmerge(1NEMO)\fP
+.TP
 \fBnbody=\fP
-number of particles per ring [100]  
-.TP 20
+number of particles per (first) ring. 
+When \fBgrow=t\fP the number of particles increases to keep
+the line density constant.  [100]  
+.TP
 \fBradius=\fP
-radii of rings [1:6:1]    
-.TP 20
-\fBseed=\fP
-seed for random numbers [0]   
-.TP 20
-\fBzerocm=\fP
-if true, zero center of mass [false] 
-.TP 20
+radii of rings. They should be entered in increasing order to prevent
+interesting effects when grow=t. [1:6:1]    
+.TP
+\fBmass=\fP
+Mass of the central particle. This is used to compute the
+forces, and hence the 
+.TP
+\fBeps=\fP
+Standard softening length applied between central mass and
+test particles to compute the forces that set the particles
+.TP
+\fBcentral=t|f\fP
+Add the central mass point also, as first snapshot? Default: f
+.TP
+\fBgrow=t|f\fP
+Grow the number of particles per ring to keep the line density
+constant? Default: t
+.TP
 \fBheadline=\fP
 verbiage for output []    
+.SH EXAMPLES
+Create a single snapshot with 10 rings and 16 in the first ring
+(and about 160 in the outer ring).
+.nf
+
+   % mktt72 - 16 0.1:1:0.1 | snapmerge - snap.out
+
+.fi
+Here is a test to see if the force computations are ok, and rings stay at the same radius.
+A large value of  eps= is used to make sure the first few rings are not pure 1/r^2:
+.nf
+
+  % mktt72 - 10 radius=0.1:1:0.1 central=t eps=0.2 |\\
+	 snapmerge - - | hackcode1 - snap.out tstop=5 freq=100 freqout=10 eps=0.2
+  % snapxyz snap.out - | xyzview -
+
+.fi
 .SH SEE ALSO
-mkconfig(1NEMO)
-.SH FILES
+mkconfig(1NEMO), snapscale(1NEMO)
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
 19-Nov-02	V0.1 Created	PJT
+5-dec-02	V0.3 added grow=,central=	PJT
 .fi
