@@ -7,6 +7,8 @@
  *                      parsing via nemoinpd() now
  *	24-feb-94 1.1   ansi header - moved stdinc.h up PJT
  *      22-sep-95 1.2a  allow xcol=, ycol= and fixed counting bug at maxpt PJT
+ *      17-apr-04 1.2b  TAB's in the data were confused with numbers   PJT
+ *                      blank lines were not handled properly either
  *
  */
 
@@ -241,18 +243,28 @@ string defv[] = {
     "ycol=2\n       Column for Y coordinates",
     "mode=0\n       Output mode (0=all, 1..6=various methods",
     "maxline=10000\n Maximum size of columns",
-    "VERSION=1.2a\n 22-sep-95 PJT",
+    "VERSION=1.2b\n 17-apr-04 PJT",
     NULL,
 };
 
 string usage = "six linear regressions";
 
+#define MAXCOL  32
 
+
+patch_line(char *cp)      /* replace TAB and CR/NL with spaces */
+{
+  while (*cp) {
+    if (*cp == '\t' || *cp == '\n' || *cp == '\r') *cp = ' ';
+    cp++;
+  }
+}
+
 nemo_main()
 {
     stream fp;
     char   line[256];
-    double *x, *y, a[6],va[6],b[6],vb[6], rn, data[32];
+    double *x, *y, a[6],va[6],b[6],vb[6], rn, data[MAXCOL];
     int    maxp, i, j, ntot, mode, xcol, ycol;
 
     mode = getiparam("mode");
@@ -274,15 +286,16 @@ nemo_main()
     i=0;
     while (fgets(line,255,fp)) {
 	if(line[0] == '#') continue;
-        line[strlen(line)-1]=0;      /* overwrite \n newline */
+	patch_line(line);
         if (i >= maxp) {
             printf("Maximum number of points (%d) reached\n",maxp);
             break;
         }
-	if ((j=nemoinpd(line,data,32)) < 0) {
+	if ((j=nemoinpd(line,data,MAXCOL)) < 0) {
 	    warning("nemoinp error %d, skipping line: %s\n",j,line);
             continue;
         }
+	if (j==0) continue;
         x[i] = data[xcol-1];
         y[i] = data[ycol-1];
         dprintf(2,"Data %d: %g %g\n",i,x[i],y[i]);
@@ -313,6 +326,7 @@ nemo_main()
             printf("MEAN OLS: %g %g %g %g\n", a[5],va[5],b[5],vb[5]);
     }
 }
+
 
 /*
  Sample DATA:
