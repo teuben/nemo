@@ -3,6 +3,8 @@
 Short term:
 
   - inline help as the cursor moves over the keyword (can tk do that?)
+	or else just click on the keyword to make it say something helpful
+  - a QUITCOMMAND and HELPCOMMAND helper
   - read keyword files for persistent execution
   - allow in /bin/csh script to also accept the following type of construct
 
