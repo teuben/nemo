@@ -25,7 +25,8 @@
  *  13-apr-96   V5.0 support for (orthogonal) non-linear axes	PJT
  *                   in header image.h
  *  21-feb-00   V6.1 mapX_image() routines, cleaned up code a bit PJT
- *   9-sep-02    V6.2 added copy_image()
+ *   9-sep-02   V6.2 added copy_image()
+ *  13-nov-02   V7.0 added boolean images for masking operations  PJT
  *			
  *
  *  Note: bug in TESTBED section; new items (Unit) not filled in
@@ -215,9 +216,16 @@ int read_image (stream instr, imageptr *iptr)
  
 int free_image (imageptr iptr)
 {
-    free ((char *) Frame(iptr));
-    free ((char *) iptr);
-    return  0;
+  free ((char *) Frame(iptr));
+  free ((char *) iptr);
+  return  0;
+}
+
+int free_image_mask (image_maskptr mptr)
+{
+  free ((char *) Frame(mptr));
+  free ((char *) mptr);
+  return  0;
 }
 
 /*
@@ -258,8 +266,31 @@ int create_image (imageptr *iptr, int nx, int ny)
     Unit(*iptr)  = NULL;        /* no units */
     Time(*iptr)  = 0.0;
     Storage(*iptr) = matdef[idef];
+    Mask(*iptr) = NULL;
 
     return 1;		/* succes return code  */
+}
+
+int create_image_mask(imageptr iptr, image_maskptr *mptr)
+{
+  int nx = Nx(iptr);
+  int ny = Ny(iptr);
+  int nz = Nz(iptr);
+  int np = nx*ny*nz;
+
+  *mptr = (image_maskptr ) allocate(sizeof(image_mask));
+  dprintf (DLEV,"create_image_mask:Allocated image_mask @ %d size=%d * %d * %d",*mptr,nx,ny,nz);
+  if (*mptr == NULL) return 0;	/* no memory available */
+    	
+  Frame(*mptr) = (bool *) allocate(np*sizeof(bool));	
+  dprintf (DLEV,"Frame allocated @ %d ",Frame(*mptr));
+  if (Frame(*mptr)==NULL) {
+    printf ("CREATE_IMAGE_MASK: Not enough memory to allocate image\n");
+    return 0;
+  }
+  Nx(*mptr) = nx;
+  Ny(*mptr) = ny;
+  Nz(*mptr) = nz;
 }
 
 int copy_image (imageptr iptr, imageptr *optr)
@@ -335,8 +366,9 @@ int create_cube (imageptr *iptr, int nx, int ny, int nz)
     Unit(*iptr)  = NULL;        /* no units */
     Time(*iptr)  = 0.0;
     Storage(*iptr) = matdef[idef];
+    Mask(*iptr) = NULL;
     
-    return(1);		/* succes return code  */
+    return 1;		/* succes return code  */
 }
 
 /*
