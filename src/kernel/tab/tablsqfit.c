@@ -37,6 +37,7 @@
  *                      figuring out error bars?
  *      29-oct-02  V3.2c: ellipse fit cleanup (still bug in ellipse semi major axis?)
  *                 V3.3: add fourier mode (see also snapfour)
+ *                     a: add out= for fourier
  */
 
 /*
@@ -76,7 +77,7 @@ string defv[] = {
     "estimate=\n        optional estimates (e.g. for ellipse center)",
     "nmax=10000\n       Default max allocation",
     "tab=f\n            short one-line output?",
-    "VERSION=3.3\n      29-oct-02 PJT",
+    "VERSION=3.3a\n     30-oct-02 PJT",
     NULL
 };
 
@@ -707,16 +708,18 @@ do_fourier()
   }
   printf("\n");
 
-#if 0
-  if (outstr && Qpoly) {           /* output fitted values, if need be */
+
+  if (outstr) {           /* output fitted values, if need be */
     for(i=0; i<npt; i++) {
-      sum=sol[order];
-      for (j=order-1; j>=0; j--)
-	sum = (xcol[0].dat[i] * sum + sol[j]);
+      sum=sol[0];
+      for (j=0; j<order; j++) {
+	theta =  xcol[0].dat[i] * PI/180;
+	sum += sol[2*j+1]*cos((j+1)*theta) + sol[2*j+2]*sin((j+1)*theta);
+      }
       fprintf(outstr,"%g %g %g\n",xcol[0].dat[i], ycol[0].dat[i], sum);
     }
   }
-#endif
+
 }
 
 
