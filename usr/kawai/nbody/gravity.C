@@ -33,7 +33,10 @@
 
 #include  <stdlib.h>
 #include  <math.h>
-#include  <stdiostream.h>
+#include  <iostream>
+#include  <fstream>
+
+using namespace std;
 
 #define real double
 #include "vector.h"
@@ -127,7 +130,7 @@ void real_system::calculate_uncorrected_gravity()
 #endif // P2M2
 
 #  else /* NO GRAPE */
-    apply_vf(&(real_particle::clear_acc_phi_gravity));
+    apply_vf(&real_particle::clear_acc_phi_gravity);
 #ifdef P2M2
     for(int i = 0;i<n;i++){
 	(pb+i)->calculate_gravity_using_tree(eps2_for_gravity,

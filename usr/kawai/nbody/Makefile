@@ -1,5 +1,8 @@
-CPP = /usr/bin/g++
-CC = /usr/bin/gcc
+# intel:   icpc/icc
+#CXX = g++
+#CC  = gcc
+CXX = icpc
+CC  = icc
 
 # PGINCLUDE =  -I$(PGPLOT_DIR)
 G5INCLUDE = -I/home/atsushi/pub/include
@@ -16,23 +19,25 @@ G5INCLUDE = -I/home/atsushi/pub/include
 # -DP2M2: use Pseudo-particle Multipole Method
 #
 # direct summation
-# CPPFLAGS = -DNOGRAPHICS $(PGINCLUDE) -O4 -tune ev5 -arch ev5
+# CXXFLAGS = -DNOGRAPHICS $(PGINCLUDE) -O4 -tune ev5 -arch ev5
 #
 # treecode
-# CPPFLAGS = -DNOGRAPHICS -DTREE $(PGINCLUDE) -O4 -tune ev5 -arch ev5
+# CXXFLAGS = -DNOGRAPHICS -DTREE $(PGINCLUDE) -O4 -tune ev5 -arch ev5
 # -pthread -DPAR_TRAV
 #
 # P2M2 treecode
-# CPPFLAGS = -DNOGRAPHICS -DTREE $(PGINCLUDE) -O4 -tune ev5 -arch ev5 -DP2M2
+# CXXFLAGS = -DNOGRAPHICS -DTREE $(PGINCLUDE) -O4 -tune ev5 -arch ev5 -DP2M2
 # -DUSE_P2M2_ALWAYS
 #
 # only for test
-# CPPFLAGS = -DNOGRAPHICS -DTREE $(PGINCLUDE) -O4 -tune ev5 -arch ev5 -DP2M2 -DTESTCODE -DUSE_P2M2_ALWAYS
+# CXXFLAGS = -DNOGRAPHICS -DTREE $(PGINCLUDE) -O4 -tune ev5 -arch ev5 -DP2M2 -DTESTCODE -DUSE_P2M2_ALWAYS
 #
 # for g++ & gcc
-# CPPFLAGS = -DNOGRAPHICS $(PGINCLUDE) -O3 -ffast-math -funroll-loops
-# CPPFLAGS = -DNOGRAPHICS -DTREE $(PGINCLUDE) -O3 -ffast-math -funroll-loops -DPAR_TRAV -pthread
-CPPFLAGS = -DNOGRAPHICS -DTREE $(PGINCLUDE) -O3 -DP2M2
+# CXXFLAGS = -DNOGRAPHICS $(PGINCLUDE) -O3 -ffast-math -funroll-loops
+# CXXFLAGS = -DNOGRAPHICS -DTREE $(PGINCLUDE) -O3 -ffast-math -funroll-loops -DPAR_TRAV -pthread
+CXXFLAGS = -DNOGRAPHICS -DTREE $(PGINCLUDE) -O3 -DP2M2
+#CXXFLAGS += -ffast-math -funroll-loops 
+CXXFLAGS += -ipo -xW -tpp7 -prefetch
 
 # IONEMO = -L$(NEMOLIB) -lio_nemo -lnemo
 # PGLIB     =  -L$(PGPLOT_DIR) -O4 -lcpgplot -lpgplot -lX11 -lUfor -lfor -lFutil -lm -lprof1 -lpdf
@@ -54,23 +59,23 @@ EXPORT_FILES = BHtree.h nbody_particle.h vector.h \
 #	 samplelog samplelog_g4 samplelog_g5
 
 gravity.o : gravity.C  nbody_particle.h
-	$(CPP)  $(CPPFLAGS) -c gravity.C
+	$(CXX)  $(CXXFLAGS) -c gravity.C
 gravity_g4.o : gravity.C  nbody_particle.h
-	$(CPP)  -DHARP3 $(CPPFLAGS)  -c gravity.C
+	$(CXX)  -DHARP3 $(CXXFLAGS)  -c gravity.C
 	mv gravity.o gravity_g4.o
 gravity_g5.o : gravity.C  nbody_particle.h
-	$(CPP)  -DGRAPE5 $(G5INCLUDE) $(CPPFLAGS)  -c gravity.C
+	$(CXX)  -DGRAPE5 $(G5INCLUDE) $(CXXFLAGS)  -c gravity.C
 	mv gravity.o gravity_g5.o
 
 p2m2.o : p2m2.C
-	$(CPP)  $(CPPFLAGS) -c p2m2.C
+	$(CXX)  $(CXXFLAGS) -c p2m2.C
 
 p2m2_g4.o : p2m2.C
-	$(CPP)  -DHARP3 $(CPPFLAGS) -c p2m2.C
+	$(CXX)  -DHARP3 $(CXXFLAGS) -c p2m2.C
 	mv p2m2.o p2m2_g4.o
 
 p2m2_g5.o : p2m2.C
-	$(CPP)  -DGRAPE5 $(G5INCLUDE) $(CPPFLAGS) -c p2m2.C
+	$(CXX)  -DGRAPE5 $(G5INCLUDE) $(CXXFLAGS) -c p2m2.C
 	mv p2m2.o p2m2_g5.o
 
 libnbody.a:	library.o $(LIBOBJS)
@@ -86,43 +91,43 @@ libnbodyg4.a:	library_g4.o $(LIBOBJSG4)
 	ranlib libnbodyg4.a
 
 library.o:	library.C nbody_particle.h
-	$(CPP) $(CPPFLAGS) -o library.o -c library.C
+	$(CXX) $(CXXFLAGS) -o library.o -c library.C
 
 library_g5.o:	library.C nbody_particle.h
-	$(CPP) -DGRAPE5 $(G5INCLUDE) $(CPPFLAGS) -o library_g5.o -c library.C
+	$(CXX) -DGRAPE5 $(G5INCLUDE) $(CXXFLAGS) -o library_g5.o -c library.C
 
 library_g4.o:	library.C nbody_particle.h
-	$(CPP) -DHARP3 $(CPPFLAGS) -o library_g4.o -c library.C
+	$(CXX) -DHARP3 $(CXXFLAGS) -o library_g4.o -c library.C
 
 nbody.o : nbody.C  nbody_particle.h design.c
-	$(CPP)  -c    $(CPPFLAGS)  nbody.C 
+	$(CXX)  -c    $(CXXFLAGS)  nbody.C 
 nbody : nbody.C  nbody_particle.h $(LIBOBJS) design.c
-	$(CPP) -DEVOLVE    $(CPPFLAGS) -o nbody nbody.C $(LIBOBJS) $(IONEMO) $(PGLIB) -lm
+	$(CXX) -DEVOLVE    $(CXXFLAGS) -o nbody nbody.C $(LIBOBJS) $(IONEMO) $(PGLIB) -lm
 
 # nbody_g5 : nbody.C  nbody_particle.h $(LIBOBJSG5)
-#	$(CPP)  -p -DEVOLVE -DGRAPE5 $(CPPFLAGS) $(G5INCLUDE) -o nbody_g5 nbody.C\
+#	$(CXX)  -p -DEVOLVE -DGRAPE5 $(CXXFLAGS) $(G5INCLUDE) -o nbody_g5 nbody.C\
 #	$(LIBOBJSG5) $(IONEMO) $(PGLIB) $(G5LIB) -lm
 
 nbody_g5 : nbody.C  nbody_particle.h $(LIBOBJSG5)
-	$(CPP) -DEVOLVE -DGRAPE5 $(CPPFLAGS) $(G5INCLUDE) -o nbody_g5 nbody.C\
+	$(CXX) -DEVOLVE -DGRAPE5 $(CXXFLAGS) $(G5INCLUDE) -o nbody_g5 nbody.C\
 	$(LIBOBJSG5) $(IONEMO) $(PGLIB) $(G5LIB) -lm
 
 nbody_g4 : nbody.C  nbody_particle.h $(LIBOBJSG4)
-	$(CPP) -DEVOLVE $(CPPFLAGS) -o nbody_g4 nbody.C $(LIBOBJSG4) $(IONEMO) $(PGLIB) $(G4LIB) -lm
+	$(CXX) -DEVOLVE $(CXXFLAGS) -o nbody_g4 nbody.C $(LIBOBJSG4) $(IONEMO) $(PGLIB) $(G4LIB) -lm
 
 nbody_h3 : nbody.C  nbody_particle.h $(LIBOBJSG4)
-	$(CPP) -DEVOLVE    $(CPPFLAGS) -o nbody_h3 nbody.C $(LIBOBJSG4) $(IONEMO) $(H3LIB) -lm
+	$(CXX) -DEVOLVE    $(CXXFLAGS) -o nbody_h3 nbody.C $(LIBOBJSG4) $(IONEMO) $(H3LIB) -lm
 
 BHtree.o : BHtree.C  nbody_particle.h BHtree.h 
-	$(CPP)    $(CPPFLAGS) -c BHtree.C 
+	$(CXX)    $(CXXFLAGS) -c BHtree.C 
 BHtree_g4.o : BHtree.C  nbody_particle.h BHtree.h 
-	$(CPP) -DHARP3   $(CPPFLAGS) -c BHtree.C
+	$(CXX) -DHARP3   $(CXXFLAGS) -c BHtree.C
 	mv BHtree.o  BHtree_g4.o 
 BHtree_g5.o : BHtree.C  nbody_particle.h BHtree.h 
-	$(CPP) -DGRAPE5 $(G5INCLUDE) $(CPPFLAGS) -c BHtree.C
+	$(CXX) -DGRAPE5 $(G5INCLUDE) $(CXXFLAGS) -c BHtree.C
 	mv BHtree.o  BHtree_g5.o 
 pgetopt.o : pgetopt.C  
-	$(CPP)  $(CPPFLAGS)  -c pgetopt.C
+	$(CXX)  $(CXXFLAGS)  -c pgetopt.C
 samplelog:  nbody
 	nbody -i samplein > samplelog
 samplelog_g4:  nbody_g4

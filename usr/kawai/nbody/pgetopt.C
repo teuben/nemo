@@ -5,6 +5,7 @@
  *                           Institute for Advanced Study, Princeton, NJ, USA
  *    version 2:  Dec 1992   Piet Hut  --  adopted to the new C++-based starlab
  *    version 2.0A:  Dec 1998 Jun Makino  --  pskipopt() function added.
+ *    version 2.0B:  Apr 2004 Peter Teuben -- gcc3 changes
  *.............................................................................
  *  non-local function: 
  *    pgetopt
@@ -33,9 +34,11 @@
  *.............................................................................
  */
 
-#include <stdlib.h>
-#include <string.h>
-#include  <stdiostream.h>
+#include <cstdlib>
+#include <string>
+#include  <iostream>
+
+using namespace std;
 
 /*-----------------------------------------------------------------------------
  *  streq  --  a macro which returns 1 if two strings are equal, 0 otherwise

@@ -3,6 +3,8 @@
  *.............................................................................
  *    version 1:  Dec 1992   Piet Hut, Steve McMillan, Jun Makino
  *    version 2:
+ *    version 3:  Apr 2004   Peter Teuben - gcc3 modification: added 
+ *                           two opers that were now ambiguies
  *.............................................................................
  *     This file includes:
  *  1) definition of class vector
@@ -114,6 +116,12 @@ public:
         friend vector operator * (real, const vector & );
         friend vector operator * (const vector &, real);
         friend vector operator / (const vector &, real);
+
+	vector operator * (const real b)
+	  { return vector(element[0]*b, element[1]*b, element[2]*b); }
+
+	vector operator + (const real b)
+	  { return vector(element[0]+b, element[1]+b, element[2]+b); }
 
 //	Vector +=, -=, *=, /=
 

@@ -22,9 +22,12 @@
 #define PRC(x) cerr << #x << " = " << x << ",  "
 #define PRL(x) cerr << #x << " = " << x << "\n"
 
-#include  <stdlib.h>
+#include  <cstdlib>
 #include  <math.h>
-#include  <stdiostream.h>
+#include  <iostream>
+#include  <fstream>
+
+using namespace std;
 
 #ifdef GRAPE5
 #include <gp5util.h>
@@ -52,7 +55,6 @@ void pnextarg(char **argv);
 
 
 
-#include<fstream.h>
 static real_system pb;
 static int snapin_flag = 0;
 static int snapout = 0;
@@ -704,7 +706,7 @@ parse_flags(int argc, char ** argv)
 
 #ifndef TESTCODE
 
-void
+int
 main(int argc, char ** argv)
 {
     ifstream fsnapin;
@@ -1011,6 +1013,7 @@ main(int argc, char ** argv)
     } // i loop
 
 #endif // GB99
+    return 0;
 }
 
 #else // TESTCODE

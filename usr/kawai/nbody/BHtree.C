@@ -37,14 +37,18 @@ extern "C" double cpusec();
 #define PRC(x) cerr << #x << " = " << x << ",  "
 #define PRL(x) cerr << #x << " = " << x << "\n"
 
-#include  <string.h>
-#include  <stdlib.h>
+#include  <string>
+#include  <cstdlib>
 #include  <errno.h>
 #include  <math.h>
-#include  <stdiostream.h>
+#include  <iostream>
+#include  <fstream>
 #ifdef P2M2
 #include "p2m2.h"
 #endif
+
+using namespace std;
+
 
 #ifdef GRAPE5
 #include <gp5util.h>
@@ -952,7 +956,8 @@ printmatrix(real a[3][3])
 {
     int i, j;
 
-    cout.precision(10.6);
+    //cout.precision(10.6);
+    cout.precision(6);
     for (i = 0; i < 3; i++)
     {
 	for (j = 0; j < 3; j++)

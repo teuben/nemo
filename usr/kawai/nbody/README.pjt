@@ -1,0 +1,5 @@
+Ccanges from the original distribution:
+
+CPP -> CXX in makefile, to avoid potential confusion with the cpp preprocessor
+
+gcc3 errors cleaned up
