@@ -136,7 +136,10 @@ vectmath_f.o: vectmath.h vectmath.c
 # Nostandard targets
 
 nemoinp: nemoinp.c
-	$(CC) $(CFLAGS) -o nemoinp nemoinp.c -DTOOLBOX $(NEMO_LIBS) -lm
+	$(CC) $(CFLAGS) -o nemoinp nemoinp.c -DTOOLBOX  $(NEMO_LIBS) -lm
+
+herinp: 
+	$(CC) $(CFLAGS) -o herinp herinp.c -DTESTBED -DNEED_DCD $(NEMO_LIBS) -lm
 
 layout: layout.c
 	$(CC) $(CFLAGS) -o layout layout.c -DTOOLBOX $(NEMO_LIBS) $(YAPPLIB) -lm

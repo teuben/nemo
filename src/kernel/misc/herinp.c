@@ -142,6 +142,7 @@ static double dcd_ifge(double arg1, double arg2, double arg3, double arg4);
 static double dcd_ifle(double arg1, double arg2, double arg3, double arg4);
 static double dcd_ifeq(double arg1, double arg2, double arg3, double arg4);
 static double dcd_ifne(double arg1, double arg2, double arg3, double arg4);
+static double dcd_null(void);
 static double dcd_ran(void);
 static double dcd_ranu(double arg1, double arg2);
 static double dcd_rang(double arg1, double arg2);
@@ -185,7 +186,7 @@ static int lstopcodeptr;
 
 /*  functions we know  */
 
-#define maxfuncts  51
+#define maxfuncts  52
 #define maxfunlen  10
 #define maxarg      4
 #define maxbools    8
@@ -200,7 +201,7 @@ static char *functs[] = {
    "MOD"   , "INT"   , "NINT"  , "SIGN"  , "BLANK" , "IFGT"  ,
    "IFLT"  , "IFGE"  , "IFLE"  , "IFEQ"  , "IFNE"  , "RANU"  ,
    "RANG"  , "RANP"  , "SIND"  , "ASIND" , "COSD"  , "ACOSD" ,
-   "TAND"  , "ATAND" , "ATAND2"
+   "TAND"  , "ATAND" , "ATAND2", "NULL"
 };
 
 static int nargs[]    = {
@@ -212,7 +213,7 @@ static int nargs[]    = {
    2   ,    1   ,    1   ,    1   ,    0   ,    4   ,
    4   ,    4   ,    4   ,    4   ,    4   ,    2   ,
    2   ,    1   ,    1   ,    1   ,    1   ,    1   ,
-   1   ,    1   ,    2
+   1   ,    1   ,    2   ,    0
 };
 
 static char *bools[] = {
@@ -1411,6 +1412,7 @@ static void dcd_evaluate(int q)
 /* tand  */ case 48: dcd_push(tan(dcd_rad(arg[0]))); break;
 /* atand */ case 49: dcd_push(dcd_deg(dcd_atan(arg[0]))); break;
 /* atand2*/ case 50: dcd_push(dcd_deg(dcd_atan2(arg[0],arg[1]))); break;
+/* null  */ case 51: error("no null yet"); break;
             default: opc = err; break;
          }; break;
       };
@@ -1644,19 +1646,22 @@ int dcdchar_(
 
 
 #if defined(TESTBED)
-main(char *argc[], int argv)
+
+char *defv[] = {
+    "expr=\n      Expression to parse",
+    "VERSION=1\n  11-nov-2003 PJT",
+    NULL,
+};
+
+nemo_main()
 {
    double outv[256];
-   char   expr[256];
+   char *expr;
    int    carg;
    int    nout = 256, nret, ierd;
    char   type = 'f';
-   
-   strcpy(expr,"");
-   for (carg = 1; carg < argc; carg++) {
-      strcat(expr,argv[carg]);
-      strcat(expr," ");
-   }
+
+   expr = getparam("expr");
    nret = dcddble_(expr,outv,&nout,&ierd,strlen(expr));
    switch(ierd) {
       case -11: printf("bad call\n"); break;
@@ -1677,7 +1682,11 @@ main(char *argc[], int argv)
          int n;
          int p;
          for (n = 0; n < nret; n++) {
+#if 0         	
             if (fblank_(&outv[n])) printf("BLANK\n"); else {
+#else
+            if (1) {
+#endif            	
                if (outv[n] != 0.0) {
                   p = log10(fabs(outv[n]));
                   outv[n] = outv[n]*pow(10.0,(double) -p);
