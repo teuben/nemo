@@ -1,0 +1,37 @@
+#! /bin/csh -f
+#
+# Note: cannot use (and this is also a serious problem in C++)
+#  -Wstrict-prototypes          using proc, iproc, rproc etc.
+# if you use gcc and g77 this compile flag may be useful (or check nemomain.c)
+#	-Wl,-u,MAIN__
+# dlopen() on things from .a files may need: -Wl,-export-dynamic
+#	when linking
+
+if ($NEMOHOST == linux-a.out) then
+	# A.OUT options:
+	set opts="-ansi -fwritable-strings -Wconversion -Wnested-externs"
+	exec gcc -Dlinux -I$NEMOINC -L$NEMOLIB  $opts $*
+	exit 0
+endif
+
+#  either use the explicit version, or fix broken systems with:
+#		ln -s /lib/libdl.so.1  /lib/libdl.so
+#  slackware3.1 also needs  /lib/gnumalloc.so (see also NEMO's ftp directory)
+#		since malloc/free are broken
+set link=lib/libdl.so.1
+set link="-ldl"
+
+foreach a ($*)
+  if ("$a" == "-c") then
+    set link=""
+    break
+  endif
+end
+
+set opts="-rdynamic -ansi -fwritable-strings -Wconversion -Wnested-externs"
+
+#echo gcc -Dlinux -DSYSV -I$NEMOINC -L$NEMOLIB $opts $* $link
+exec gcc -fPIC -Dlinux -DSYSV -I$NEMOINC -I$NEMOLIB -L$NEMOLIB $opts $* $link
+
+
+
