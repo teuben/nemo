@@ -34,12 +34,13 @@ auxx_h			:= $(IPUB)auxx.h $(frst_h) $(exit_h) $(tupl_h) $(tn3D_h)
 pext_h			:= $(INC)pext.h $(auxx_h) $(flag_h)
 nbio_h			:= $(IPUB)nbio.h $(auxx_h) $(flag_h)
 body_h			:= $(INC)body.h $(auxx_h) $(flag_h) $(nbio_h)
-tree_h			:= $(IPUB)tree.h $(deft_h) $(body_h)
+tree_h			:= $(IPUB)tree.h $(deft_h) $(auxx_h) $(flag_h)
 grav_h			:= $(IPUB)grav.h $(deft_h) $(tree_h) $(ionl_h) \
 				$(tset_h) $(memo_h)
 kern_h			:= $(IPUB)kern.h $(grav_h)
 stic_h			:= $(IPUB)stic.h $(grav_h) $(ionl_h)
-falcON_cc		:= $(IPUB)falcON.cc $(grav_h) $(stic_h) $(tree_h)
+falcON_cc		:= $(IPUB)falcON.cc $(grav_h) $(stic_h) $(tree_h) \
+				 $(body_h)
 falcON_h		:= $(INC)falcON.h $(auxx_h) $(nbio_h) $(deft_h) \
 				$(falcON_cc)
 falcON_C_h		:= $(INC)falcON_C.h
@@ -47,6 +48,13 @@ falcON_f		:= $(INC)falcON.f
 step_h			:= $(IPUB)step.h $(body_h) $(inln_h)
 nbdy_h			:= $(INC)nbdy.h $(falcON_h) $(pext_h) $(step_h) \
 				$(nmio_h)
+tool_h			:= $(IPUB)tool.h $(body_h)
+rand_h			:= $(IPUB)rand.h $(inln_h)
+nsam_h			:= $(IPUB)nsam.h $(body_h) $(rand_h)
+plum_h			:= $(IPUB)plum.h $(Pi_h) $(inln_h) $(exit_h) $(nsam_h)
+gama_h			:= $(IPUB)gama.h $(Pi_h) $(inln_h) $(exit_h) $(nsam_h) \
+				$(nums_h)
+king_h			:= $(IPUB)king.h
 
 # -----------------------
 # source dependency lists
@@ -54,16 +62,23 @@ nbdy_h			:= $(INC)nbdy.h $(falcON_h) $(pext_h) $(step_h) \
 
 exit_cc			:= $(SPUB)exit.cc $(exit_h)
 nums_cc			:= $(SPUB)nums.cc $(nums_h) $(Pi_h)
-body_cc			:= $(SPUB)body.cc $(body_h) $(ionl_h) $(nmio_h) \
-				$(tags_h)
+body_cc			:= $(SPUB)body.cc $(body_h) $(ionl_h) $(nmio_h)
 nmio_cc			:= $(SPUB)nmio.cc $(nmio_h) $(exit_h)
 kern_cc			 = $(SPUB)kern.cc $(kern_h) $(coef_h) $(kern_pro)
 grav_cc			:= $(SPUB)grav.cc $(grav_h) $(kern_h) $(iact_h) \
-				$(Pi_h) $(nums_h) $(grav_pro)
+				$(Pi_h) $(nums_h) $(grav_pro) $(body_h)
 stic_cc			:= $(SPUB)stic.cc $(stic_h) $(tree_h) $(iact_h)
-tree_cc			:= $(SPUB)tree.cc $(tree_h) $(memo_h)
+tree_cc			:= $(SPUB)tree.cc $(tree_h) $(body_h) $(memo_h) \
+				 $(body_h)
 nbdy_cc			:= $(SPUB)nbdy.cc $(nbdy_h)
 falcONC_cc		:= $(SPUB)falcONC.cc $(falcON_C_h) $(falcON_h)
+tool_cc			:= $(SPUB)tool.cc $(Pi_h)
+rand_cc			:= $(SPUB)rand.cc $(rand_h) $(nums_h)
+nsam_cc			:= $(SPUB)nsam.cc $(nsam_h) $(exit_h) $(Pi_h) $(nums_h)
+gama_cc			:= $(SPUB)gama.cc $(gama_h) $(nums_h)
+king_cc			:= $(SPUB)king.cc $(king_h) $(Pi_h)   $(ionl_h) \
+				$(tupl_h) $(nums_h)
+
 
 # ---------------
 # library modules
@@ -89,21 +104,37 @@ $(LIB)nbdy.o:		$(nbdy_cc) $(makepublic)
 			$(MAKE_OBJ) $(NBDYFLAGS)
 $(LIB)falcONC.o:	$(falcONC_cc) $(makepublic)
 			$(MAKE_OBJ) $(NBDYFLAGS)
-ifdef DPROPER
+ifdef DSSE
 $(LIB)kern.o:		$(kern_cc) $(makepublic)
-			$(MAKE_OBJ) -mno-sse $(NBDYFLAGS)
+			$(MAKE_OBJ) $(NOSSE) $(NBDYFLAGS)
 else
 $(LIB)kern.o:		$(kern_cc) $(makepublic)
 			$(MAKE_OBJ) $(NBDYFLAGS)
 endif
+$(LIB)nums.o:		$(nums_cc) $(makepublic)
+			$(MAKE_OBJ)
+$(LIB)tool.o:		$(tool_cc) $(makepublic)
+			$(MAKE_OBJ)
+$(LIB)rand.o:		$(rand_cc) $(makepublic)
+			$(MAKE_OBJ) $(DNEMO)
+$(LIB)nsam.o:		$(nsam_cc) $(makepublic)
+			$(MAKE_OBJ) $(DNEMO)
+$(LIB)gama.o:		$(gama_cc) $(makepublic)
+			$(MAKE_OBJ)
+$(LIB)king.o:		$(king_cc) $(makepublic)
+			$(MAKE_OBJ)
+
 ifdef NEMO
 public_objs	 :=	$(LIB)exit.o $(LIB)body.o $(LIB)tree.o \
 			$(LIB)grav.o $(LIB)kern.o $(LIB)nmio.o \
-			$(LIB)stic.o $(LIB)nbdy.o $(LIB)falcONC.o
+			$(LIB)stic.o $(LIB)nbdy.o $(LIB)falcONC.o \
+			$(LIB)nums.o $(LIB)tool.o $(LIB)rand.o \
+			$(LIB)nsam.o
 else
 public_objs	 :=	$(LIB)exit.o $(LIB)body.o $(LIB)tree.o \
 			$(LIB)grav.o $(LIB)kern.o $(LIB)stic.o \
-			$(LIB)nbdy.o $(LIB)falcONC.o
+			$(LIB)nbdy.o $(LIB)falcONC.o $(LIB)nums.o \
+			$(LIB)tool.o $(LIB)rand.o $(LIB)nsam.o
 endif
 
 ifndef DPROPER
@@ -121,9 +152,12 @@ falcON		:=	$(LIB)libfalcON.so
 # mains
 # -----
 
-$(BIN)TestGrav:		$(EXE)TestGrav.cc $(falcON) $(makepublic)
+TestPair_h:		$(main_h) $(body_h) $(falcON_h) 
+
+$(BIN)TestGrav:		$(EXE)TestGrav.cc $(main_h) $(body_h) $(falcON_h) \
+				$(Pi_h) $(nums_h) $(exit_h) $(makepublic)
 			$(MAKE_EXE) $(NBDYFLAGS) $(LFALCON) -lm
-$(BIN)TestPair:		$(EXE)TestPair.cc $(falcON) $(makepublic)
+$(BIN)TestPair:		$(EXE)TestPair.cc $(main_h) $(falcON_h) $(makepublic)
 			$(MAKE_EXE) $(NBDYFLAGS) $(LFALCON) -lm
 $(BIN)TestGravC:	$(EXE)TestGravC.c $(falcON) $(makepublic)
 			$(MAKE_EXE_C) $(NBDYFLAGS) $(LFALCON) -lstdc++ -lm
@@ -135,41 +169,87 @@ $(BIN)TestPairF:	$(EXE)TestPairF.F $(falcON) $(makepublic)
 			$(MAKE_EXE_F) $(NBDYFLAGS) $(LFALCON) -lstdc++ -lm
 ifdef NEMO
 
-$(BIN)scale_eps:	$(EXE)scale_eps.cc $(main_h) $(falcON) $(makepublic)
+
+$(BIN)addgravity:	$(EXE)addgravity.cc $(main_h) $(falcON_h) $(nmio_h) \
+				$(makepublic)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
-$(BIN)addgravity:	$(EXE)addgravity.cc $(main_h) $(falcON) $(makepublic)
+$(BIN)density_centre:	$(EXE)density_centre.cc $(main_h) $(ionl_h) $(nmio_h) \
+				$(body_h) $(tool_h) $(makepublic)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
-$(BIN)getgravity:	$(EXE)getgravity.cc $(main_h) $(falcON) $(makepublic)
+$(BIN)getgravity:	$(EXE)getgravity.cc $(main_h) $(falcON_h) $(nmio_h) \
+				$(makepublic)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
-$(BIN)gyrfalcON:	$(EXE)gyrfalcON.cc  $(main_h) $(falcON) $(makepublic)
+$(BIN)gyrfalcON:	$(EXE)gyrfalcON.cc  $(main_h) $(nbdy_h) $(makepublic)
+			$(MAKE_EXE) $(NEMO_EXE_FLGS)
+$(BIN)lagrange_radii:	$(EXE)lagrange_radii.cc $(main_h) $(body_h) $(nmio_h) \
+				$(ionl_h) $(makepublic)
+			$(MAKE_EXE) $(NEMO_EXE_FLGS)
+$(BIN)mkdehnen:		$(EXE)mkdehnen.cc $(main_h) $(gama_h) \
+				$(nmio_h) $(LIB)gama.o $(makepublic)
+			$(MAKE_EXE) $(LIB)gama.o $(NEMO_EXE_FLGS)
+$(BIN)mkking:		$(EXE)mkking.cc $(main_h) $(body_h) $(king_h) \
+				$(nmio_h) $(rand_h) $(Pi_h) $(LIB)king.o \
+				$(makepublic)
+			$(MAKE_EXE) $(LIB)king.o $(NEMO_EXE_FLGS)
+$(BIN)mkplum:		$(EXE)mkplum.cc $(main_h) $(plum_h) $(nmio_h) \
+				$(makepublic)
+			$(MAKE_EXE) $(NEMO_EXE_FLGS)
+$(BIN)scale_eps:	$(EXE)scale_eps.cc $(main_h) $(body_h) $(nmio_h) \
+				$(makepublic)
+			$(MAKE_EXE) $(NEMO_EXE_FLGS)
+$(BIN)symmetrize:	$(EXE)symmetrize.cc $(main_h) $(body_h) $(nmio_h) \
+				$(ionl_h) $(makeproper)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
 endif
 # -----------
 # executables
 # -----------
 
-TestGrav	:	$(BIN)TestGrav
-TestPair	:	$(BIN)TestPair
-TestGravC	:	$(BIN)TestGravC
-TestPairC	:	$(BIN)TestPairC
-TestGravF	:	$(BIN)TestGravF
-TestPairF	:	$(BIN)TestPairF
+TestGrav	:	$(falcON) $(BIN)TestGrav
+TestPair	:	$(falcON) $(BIN)TestPair
+TestGravC	:	$(falcON) $(BIN)TestGravC
+TestPairC	:	$(falcON) $(BIN)TestPairC
+TestGravF	:	$(falcON) $(BIN)TestGravF
+TestPairF	:	$(falcON) $(BIN)TestPairF
 
 ifdef NEMO
 
-addgravity	:	$(BIN)addgravity
-getgravity	:	$(BIN)getgravity
-gyrfalcON	:	$(BIN)gyrfalcON
+addgravity	:	$(falcON) $(BIN)addgravity
+density_centre	:	$(falcON) $(BIN)density_centre
+getgravity	:	$(falcON) $(BIN)getgravity
+gyrfalcON	:	$(falcON) $(BIN)gyrfalcON
+lagrange_radii	:	$(falcON) $(BIN)lagrange_radii
+mkdehnen	:	$(falcON) $(BIN)mkdehnen
+mkking		:	$(falcON) $(BIN)mkking
+mkplum		:	$(falcON) $(BIN)mkplum
+scale_eps	:	$(falcON) $(BIN)scale_eps
+symmetrize	:	$(falcON) $(BIN)symmetrize
 
-all_pub		:	TestGrav gyrfalcON addgravity getgravity
+all_pub		:	TestGrav gyrfalcON addgravity getgravity \
+			density_centre lagrange_radii mkdehnen mkking \
+			mkplum scale_eps symmetrize
 
 else
 
 addgravity	:
 			@echo "ERROR: you need NEMO to make \"$@\""
+density_centre	:
+			@echo "ERROR: you need NEMO to make \"$@\""
 getgravity	:
 			@echo "ERROR: you need NEMO to make \"$@\""
 gyrfalcON	:
+			@echo "ERROR: you need NEMO to make \"$@\""
+lagrange_radii	:
+			@echo "ERROR: you need NEMO to make \"$@\""
+mkdehnen	:
+			@echo "ERROR: you need NEMO to make \"$@\""
+mkking		:
+			@echo "ERROR: you need NEMO to make \"$@\""
+mkplum		:
+			@echo "ERROR: you need NEMO to make \"$@\""
+scale_eps	:
+			@echo "ERROR: you need NEMO to make \"$@\""
+symmetrize	:
 			@echo "ERROR: you need NEMO to make \"$@\""
 
 all_pub		:	TestGrav

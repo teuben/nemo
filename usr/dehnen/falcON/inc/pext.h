@@ -233,7 +233,7 @@ namespace nbdy {
 	      const char*potfile =0) :             //[I: potfile]               
       nemo_pot(potname,potpars,potfile) {}
     //--------------------------------------------------------------------------
-    bool is_empty() { return nemo_pot::is_empty(); }
+    nemo_pot::is_empty;
     //--------------------------------------------------------------------------
 #define LoopAll    for(int n=0; n!=N; ++n)
 #define LoopActive for(int n=0; n!=N; ++n) if(is_active(F[n]))

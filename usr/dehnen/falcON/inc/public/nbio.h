@@ -28,6 +28,9 @@
 #ifndef falcON_included_flag_h
 #  include <public/flag.h>
 #endif
+#ifndef falcON_included_nmio_h
+#  include <public/nmio.h>
+#endif
 ////////////////////////////////////////////////////////////////////////////////
 namespace nbdy {
   const int         IO_NOSPH   = 13;
@@ -38,6 +41,7 @@ namespace nbdy {
   const int         IO_NQUANT  = 14;
   const char* const IO_SQUANT  ="mxvefkpqarylnH";
 #endif
+  const int         IO_MAX     = 26;
   //----------------------------------------------------------------------------
   const char* const IO_QNAME[IO_NQUANT] = 
     { "mass", "position", "velocity", "epsilon", "flag", "key",
@@ -110,7 +114,7 @@ namespace nbdy {
     {
       if(bits == 0) return -1;
       for(register int b=1,i=0; i!=N_quant; ++i,b<<=1)
-	if(b & bits) return i;
+ 	if(b & bits) return i;
       return -1;
     }
     static const char* first_name  (io const&bits)
@@ -134,6 +138,7 @@ namespace nbdy {
 	   n       = 1 << 12,                      // number of neighbours      
 	   // useful combinations                                               
 	   ap      = a    | p,                     // just gravity              
+	   pq      = p    | q,                     // internal & external pot   
 	   xv      = x    | v,                     // phases = [x,v]            
 	   mx      = m    | x,                     // masses & positions        
 	   mxv     = m    | xv,                    // masses & phases           
@@ -144,6 +149,8 @@ namespace nbdy {
 	   mxvf    = mxv  | f,                     // masses, phases & flags    
            mxvpaf  = mxvf | a | p,                 // elementary body data      
 	   gravity = mxvpaf,
+	   source  = m|x|v|e|f|k,
+	   sink    = p|q|a|r|y|l|n,
 	   // data in BodyPsph are all uppercase                                
 	   H       = 1 << 13,                      // size h of SPH particle    
 #ifdef falcON_SPH                                  // these are only for SPH:   
@@ -176,7 +183,8 @@ namespace nbdy {
 	   sphmax  = H,                            // max sph quantities        
 	   sphnemo = H,                            // sph quants with nemo I/O  
 #endif
-	   NEMO    = mxv|e|f|k|p|q|a|r|y|l|n|sphnemo
+	   NEMO    = mxv|e|f|k|p|q|a|r|y|l|n|sphnemo,
+	   all     = source|sink|sphmax
     };
     //==========================================================================
     // construction                                                             
@@ -195,11 +203,12 @@ namespace nbdy {
 	if(std::strchr(c,S_quant(i))) bits |= 1<<i;
     }
     //==========================================================================
-    void make_word(char* w) const {
+    char* make_word(char* w) const {
       char *letter = w;
       for(register int i=0; i!=N_quant; ++i)
 	if(bits & 1<<i) *(letter++) = S_quant(i);
       *letter = 0;
+      return w;
     }
     //--------------------------------------------------------------------------
     inline size_t  bytes       ()            const {
@@ -209,31 +218,173 @@ namespace nbdy {
       return n;
     }
     //==========================================================================
-    io&  operator=      (const io &i)       { bits =i.bits; return *this; }
-    io&  operator|=     (const io &i)       { bits|=i.bits; return *this; }
-    io&  operator|=     (const int&i)       { bits|=i; return *this; }
-    io&  operator&=     (const io &i)       { bits&=i.bits; return *this; }
-    io&  operator&=     (const int&i)       { bits&=i; return *this; }
+    io&  operator=      (io  i)       { bits =i.bits; return *this; }
+    io&  operator|=     (io  i)       { bits|=i.bits; return *this; }
+    io&  operator|=     (int i)       { bits|=i; return *this; }
+    io&  operator&=     (io  i)       { bits&=i.bits; return *this; }
+    io&  operator&=     (int i)       { bits&=i; return *this; }
     //==========================================================================
     operator int        ()            const { return bits; }
     //==========================================================================
-    friend std::ostream& operator<< (std::ostream&s, const io&i)
-    { return s<<i.bits; }
-    friend std::istream& operator>> (std::istream&s,       io&i)
-    { return s>>i.bits; }
+    friend std::ostream& operator<< (std::ostream&s, const io&i) {
+      if(i.bits) {
+	for(int b=0; b!=N_quant; ++b)
+	  if(i.bits & 1<<b) s << S_quant(b);
+      } else
+	s << 'o';
+      return s;
+    }
     //==========================================================================
-    io   operator|      (const io &i) const { return io(bits | i.bits); }
-    io   operator|      (const int&i) const { return io(bits | i); }
-    io   operator&      (const io &i) const { return io(bits & i.bits); }
-    io   operator&      (const int&i) const { return io(bits & i); }
-    bool operator==     (const io &i) const { return bits == i.bits; }
-    bool operator==     (const int&i) const { return bits == i; }
-    bool operator!=     (const io &i) const { return bits != i.bits; }
-    bool operator!=     (const int&i) const { return bits != i; }
-    bool contains       (const io &i) const { return (bits & i.bits)==i.bits; }
-    io   missing        (const io &i) const { return io((i^bits) & i); }
-    io   operator~      ()            const { return io(~bits); }
+    io   operator|      (io  i) const { return io(bits | i.bits); }
+    io   operator|      (int i) const { return io(bits | i); }
+    io   operator&      (io  i) const { return io(bits & i.bits); }
+    io   operator&      (int i) const { return io(bits & i); }
+    bool operator==     (io  i) const { return bits == i.bits; }
+    bool operator==     (int i) const { return bits == i; }
+    bool operator!=     (io  i) const { return bits != i.bits; }
+    bool operator!=     (int i) const { return bits != i; }
+    bool contains       (io  i) const { return (bits & i.bits)==i.bits; }
+    io   missing        (io  i) const { return io((i^bits) & i); }
+    io   operator~      ()      const { return io(~bits); }
   };
-}
+  //////////////////////////////////////////////////////////////////////////////
+  //                                                                          //
+  // struct nbdy_elem<type, int>                                              //
+  //                                                                          //
+  //   element(D,I);                 element from       void* and index       //
+  // c_element(D,I);           const element from const void* and index       //
+  //                                                                          //
+  //////////////////////////////////////////////////////////////////////////////
+  // generic template                                                           
+  template<typename TYPE, int=0> struct nbdy_elem {
+    typedef TYPE      basic_type;                  // type used in falcON       
+    typedef TYPE          d_type;                  // type in bodies_data       
+    typedef TYPE          b_type;                  // type in bodies_data       
+    typedef TYPE        & r_type;                  // return type               
+    typedef const TYPE  &cr_type;                  // const return type         
+    //--------------------------------------------------------------------------
+    static  r_type   element(void*D, int I) {
+      return static_cast<d_type*>(D)[I]; }
+    //--------------------------------------------------------------------------
+    static cr_type c_element(const void*D, int I) {
+      return static_cast<const d_type*>(D)[I]; }
+  };
+  //============================================================================
+  // real: ebodies have areals                                                  
+  template<> struct nbdy_elem<real,1> {
+    typedef real      basic_type;                  // type used in falcON       
+    typedef areal         d_type;                  // type used in ebodies      
+    typedef areal       & r_type;                  // return type from ebodies  
+    typedef const areal &cr_type;                  // const return from ebodies 
+    //--------------------------------------------------------------------------
+    static  r_type   element(void*D, int I) {
+      return static_cast<d_type*>(D)[I]; }
+    //--------------------------------------------------------------------------
+    static cr_type c_element(const void*D, int I) {
+      return static_cast<const d_type*>(D)[I]; }
+  };
+  //============================================================================
+  // vect: ebodies return pseudo_tupel<>s                                       
+  template<> struct nbdy_elem<vect,1> {
+    typedef vect      basic_type;                  // type used in falcON	
+    typedef areal        *d_type;                  // type used in ebodies      
+    typedef ps_vect       r_type;                  // return type from ebodies  
+    typedef c_ps_vect    cr_type;                  // const return from ebodies 
+    //--------------------------------------------------------------------------
+    static  r_type   element(void*D, int I) {
+      return ps_vect(static_cast<d_type*>(D),I); }
+    //--------------------------------------------------------------------------
+    static cr_type c_element(const void*D, int I) {
+      return c_ps_vect(static_cast<const d_type*>(D),I); }
+  };
+  //////////////////////////////////////////////////////////////////////////////
+  //                                                                          //
+  // struct field_bit<b,int=0>                                                //
+  // struct field_io<io,int=0>    io = 1<<f                                   //
+  //                                                                          //
+  //////////////////////////////////////////////////////////////////////////////
+  template<int B, int=0> struct field_bit {};
+  template<int I, int=0> struct field_io  {};
+#ifdef  falcON_NEMO
+  //////////////////////////////////////////////////////////////////////////////
+  //                                                                          //
+  // struct nemo_type<>                                                       //
+  //                                                                          //
+  //////////////////////////////////////////////////////////////////////////////
+  template<typename TYPE> struct nemo_type { typedef TYPE  nemo_io_type; };
+  template<> struct nemo_type<vect>        { typedef real  nemo_io_type; };
+  template<> struct nemo_type<flag>        { typedef int   nemo_io_type; };
+  template<> struct nemo_type<indx>        { typedef short nemo_io_type; };
+  template<> struct nemo_type<uint>        { typedef int   nemo_io_type; };
+  //////////////////////////////////////////////////////////////////////////////
+#  define DEF_NBDY_IO(BIT,TYPE,NEMOTAG)					\
+  template<int bodies_tag> struct field_bit< BIT, bodies_tag> :		\
+  public nbdy_elem<TYPE,bodies_tag>,					\
+  public nemo_type<TYPE> {						\
+    static const int    bit     = BIT;					\
+    static const int    iobit   = 1<<BIT;				\
+    static const bool   is_nemo = iobit & io::NEMO;			\
+    static const bool   is_sph  = (BIT >= IO_NOSPH);			\
+    static bool  is_present(nemo_in const&I) {				\
+      return is_nemo && I.is_present(nemo_io::NEMOTAG);			\
+    }									\
+    static void  read_nemo_array(nemo_in const&I,			\
+				 void   *const&D,			\
+				 io           &R) {			\
+      /* if(is_nemo && I.is_present(nemo_io::NEMOTAG)) { */	       	\
+	I.read(nemo_io::NEMOTAG,static_cast<nemo_io_type*>(D));		\
+	R |= 1<<BIT;							\
+      /* } */								\
+    }									\
+    static void write_nemo_array(nemo_out   const&O,			\
+				 const void*const&D) {			\
+      /* if(is_nemo) */							\
+        O.write(nemo_io::NEMOTAG,static_cast<const nemo_io_type*>(D));	\
+    }									\
+  };									\
+  template<int bodies_tag> struct field_io< 1<<BIT, bodies_tag >	\
+    : public field_bit< BIT, bodies_tag > {};
+#else
+#  define DEF_NBDY_IO(BIT,TYPE,NEMOTAG)					\
+  template<int bodies_tag> struct field_bit< BIT, bodies_tag > :	\
+  public nbdy_elem<TYPE,bodies_tag> {					\
+    static const int    bit     = BIT;					\
+    static const int    iobit   = 1<<BIT;				\
+    static const bool   is_sph  = (BIT >= IO_NOSPH);			\
+  };									\
+  template<int bodies_tag> struct field_io< 1<<BIT, bodies_tag >	\
+    : public field_bit< BIT, bodies_tag > {};
+#endif
+  //----------------------------------------------------------------------------
+  DEF_NBDY_IO( 0, real, mass);                     // mass                      
+  DEF_NBDY_IO( 1, vect, pos);                      // position                  
+  DEF_NBDY_IO( 2, vect, vel);                      // velocity                  
+  DEF_NBDY_IO( 3, real, eps);                      // softening length          
+  DEF_NBDY_IO( 4, flag, flag);                     // body flag                 
+  DEF_NBDY_IO( 5, int , key);                      // body key                  
+  DEF_NBDY_IO( 6, real, pot);                      // internal potential        
+  DEF_NBDY_IO( 7, real, pot);                      // external potential        
+  DEF_NBDY_IO( 8, vect, acc);                      // acceleration              
+  DEF_NBDY_IO( 9, real, rho);                      // mass density              
+  DEF_NBDY_IO(10, real, aux);                      // auxiliary scalar          
+  DEF_NBDY_IO(11, indx, level);                    // time-step level           
+  DEF_NBDY_IO(12, uint, numb);                     // # neighbours              
+  DEF_NBDY_IO(13, real, h);                        // SPH: smoothing length h   
+#ifdef falcON_SPH
+  DEF_NBDY_IO(14, uint, numbSPH);                  // SPH: # neighbours         
+  DEF_NBDY_IO(15, real, uin);                      // SPH: internal energy U    
+  DEF_NBDY_IO(16, real, null);                     // SPH: predicted U_in       
+  DEF_NBDY_IO(17, real, udin);                     // SPH: (dU/dt)_internal     
+  DEF_NBDY_IO(18, real, udex);                     // SPH: (dU/dt)_external     
+  DEF_NBDY_IO(19, real, entr);                     // SPH: entropy              
+  DEF_NBDY_IO(20, real, srho);                     // SPH: gas density          
+  DEF_NBDY_IO(21, real, null);                     // SPH: d(gas density)/dt    
+  DEF_NBDY_IO(22, vect, null);                     // SPH: predicted velocity   
+  DEF_NBDY_IO(23, real, null);                     // SPH: sigma^2              
+  DEF_NBDY_IO(24, real, null);                     // SPH: temperature          
+  DEF_NBDY_IO(25, real, null);                     // SPH: dh/dt                
+#endif
+#undef DEF_NBDY_IO
+}                                                  // END: namespace nbdy       
 ////////////////////////////////////////////////////////////////////////////////
 #endif // falcON_included_nbio_h

@@ -168,6 +168,8 @@ namespace nbdy {
 namespace nbdy {
   typedef tupel<Ndim,real  > vect;                 // plain Ndim dim vector     
   typedef tupel<Ndim,double> vect_d;               // plain Ndim dim vector     
+  typedef pseudo_tupel      <Ndim,areal>   ps_vect;
+  typedef const_pseudo_tupel<Ndim,areal> c_ps_vect;
 
 #if falcON_NDIM == 2
   typedef real               amom;

@@ -117,17 +117,17 @@ namespace meta {
   //////////////////////////////////////////////////////////////////////////////
   template<int N, int I=0, int J=0> struct __addt {
     template<typename scalar> static 
-    void a(scalar t[N+1][N+1], const scalar*x, const real*y) {
+    void a(scalar t[N+1][N+1], const scalar*x, const nbdy::real*y) {
       t[I][J] += x[I] * y[J];
       __addt<N,I,J+1>::a(t,x,y); } };
   template<int N,int I> struct __addt<N,I,N> {
     template<typename scalar> static 
-    void a(scalar t[N+1][N+1], const scalar*x, const real*y) {
+    void a(scalar t[N+1][N+1], const scalar*x, const nbdy::real*y) {
       t[I][N] += x[I] * y[N];
       __addt<N,I+1,0>::a(t,x,y); } };
   template<int N> struct __addt<N,N,N> {
     template<typename scalar> static 
-    void a(scalar t[N+1][N+1], const scalar*x, const real*y) {
+    void a(scalar t[N+1][N+1], const scalar*x, const nbdy::real*y) {
       t[N][N] += x[N] * y[N]; } };
   //////////////////////////////////////////////////////////////////////////////
 }
@@ -168,7 +168,7 @@ namespace nbdy {
     //--------------------------------------------------------------------------
     // record a CPU timing                                                      
     //--------------------------------------------------------------------------
-    static void record_cpu(clock_t& c0, real& CPU) {
+    static void record_cpu(clock_t& c0, double& CPU) {
       register clock_t c1 = clock();
       CPU += (c1-c0)/real(CLOCKS_PER_SEC);
       c0 = c1;
@@ -177,13 +177,13 @@ namespace nbdy {
     // data                                                                     
     //--------------------------------------------------------------------------
     mutable clock_t C_OLD;
-    const   sbodies*BODIES;                        // bodies                    
+    const   bodies *BODIES;                        // bodies                    
     const   bool    SELF_GRAV;                     // is G != 0?                
     const   vect   *ROOTCENTER;                    // pre-determined root center
     const   gravity*PEX;                           // external potential if any 
-    const   real    TINI;                          // initial simulation time   
+    const   double  TINI;                          // initial simulation time   
     const   int     NCRIT;                         // max # bodies in cell      
-    mutable real    CPU_BUILD,                     // time for falcON::grow etc 
+    mutable double  CPU_BUILD,                     // time for falcON::grow etc 
                     CPU_GRAV,                      // time for gravity etc      
                     CPU_PEX,                       // time for ext potential    
                     CPU_STEP,                      // total time for a longstep 
@@ -202,10 +202,10 @@ namespace nbdy {
     //--------------------------------------------------------------------------
     void reset_cpus() const
     {
-      CPU_BUILD = zero;
-      CPU_GRAV  = zero;
-      CPU_PEX   = zero;
-      CPU_STEP  = zero;
+      CPU_BUILD = 0.;
+      CPU_GRAV  = 0.;
+      CPU_PEX   = 0.;
+      CPU_STEP  = 0.;
     }
     //--------------------------------------------------------------------------
     void update_diags() const {
@@ -218,13 +218,13 @@ namespace nbdy {
     void update_cpu_total() const
     {
       register clock_t C_NEW = clock();
-      CPU_TOTAL += (C_NEW-C_OLD)/real(CLOCKS_PER_SEC);
+      CPU_TOTAL += (C_NEW-C_OLD)/double(CLOCKS_PER_SEC);
       C_OLD = C_NEW;
     }
     //--------------------------------------------------------------------------
-    nbody_base (const sbodies*const&b,             // I: bodies                 
+    nbody_base (const bodies *const&b,             // I: bodies                 
 		real          const&e,             // I: eps                    
-		real          const&ti,            // I: initial time           
+		double        const&ti,            // I: initial time           
 		real          const&th,            // I: tolerance parameter    
 		int           const&nc,            // I: N_crit                 
 		const vect*   const&x0,            // I: pre-set root center    
@@ -257,7 +257,7 @@ namespace nbdy {
       TINI      ( ti ),
       C_OLD     ( clock() ), 
       NCRIT     ( max(1,nc) ),
-      CPU_TOTAL ( zero ), 
+      CPU_TOTAL ( 0. ), 
       DIAG      ( false )
     {
       if(PEX != 0 && !BODIES->has(io::q))
@@ -268,7 +268,7 @@ namespace nbdy {
     // abstract public methods                                                  
     //--------------------------------------------------------------------------
   public:
-    virtual real const&time() const=0;             // actual time               
+    virtual double const&time() const=0;           // actual time               
     virtual void full_step () = 0;                 // one full time step        
     virtual void stats     (std::ostream&) const=0;// statistics output         
     virtual void stats_head(std::ostream&) const=0;// header for stats output   
@@ -276,14 +276,14 @@ namespace nbdy {
     //--------------------------------------------------------------------------
     // public methods                                                           
     //--------------------------------------------------------------------------
-    real const&t_ini          () const { return TINI; }
+    double const&t_ini        () const { return TINI; }
     int  const&Ncrit          () const { return NCRIT; }
     //--------------------------------------------------------------------------
     real const&kin_energy     () const { update_diags(); return T; }
     real const&pot_self_energy() const { update_diags(); return Vin; }
     real const&pot_ext_energy () const { update_diags(); return Vex; }
-    real const pot_energy     () const { update_diags(); return Vin+Vex; }
-    real const pot_energy_acc () const { update_diags(); return W; }
+    real       pot_energy     () const { update_diags(); return Vin+Vex; }
+    real       pot_energy_acc () const { update_diags(); return W; }
     real       total_energy   () const { update_diags(); return T+Vin+Vex;}
     real const&virial_ratio   () const { update_diags(); return TW; }
     amom const&total_angmom   () const { update_diags(); return L; }
@@ -324,14 +324,14 @@ namespace nbdy {
 #endif
     }
     //--------------------------------------------------------------------------
-    real const&cpu_build       () const { return CPU_BUILD; }
-    real const&cpu_self_grav   () const { return CPU_GRAV; }
-    real const&cpu_ext_grav    () const { return CPU_PEX; }
-    real       cpu_grav        () const { return CPU_GRAV+CPU_PEX; }
-    real const&cpu_longstep    () const { return CPU_STEP; }
-    real const&cpu_total       () const { return CPU_TOTAL; }
+    double const&cpu_build       () const { return CPU_BUILD; }
+    double const&cpu_self_grav   () const { return CPU_GRAV; }
+    double const&cpu_ext_grav    () const { return CPU_PEX; }
+    double       cpu_grav        () const { return CPU_GRAV+CPU_PEX; }
+    double const&cpu_longstep    () const { return CPU_STEP; }
+    double const&cpu_total       () const { return CPU_TOTAL; }
     //--------------------------------------------------------------------------
-    void  reset_cpu_total       (const real sec) const { CPU_TOTAL=sec; }
+    void  reset_cpu_total        (double sec) const { CPU_TOTAL=sec; }
   };
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
@@ -425,9 +425,9 @@ namespace nbdy {
     void reset_opening(const real) const;
     //--------------------------------------------------------------------------
     inline
-    basic_nbody(const sbodies*const&,              // I: bodies                 
+    basic_nbody(const bodies *const&,              // I: bodies                 
 		real          const&,              // I: eps/eps_max            
-		real          const&,              // I: initial time           
+		double        const&,              // I: initial time           
 		real          const&,              // I: tolerance parameter    
 		int           const&,              // I: N_crit                 
 		const vect*   const&,              // I: pre-set root center    
@@ -457,7 +457,7 @@ namespace nbdy {
   //////////////////////////////////////////////////////////////////////////////
   class LeapFrogCode :
     public    basic_nbody,
-    protected LeapFrog<sbodies>
+    protected LeapFrog<bodies>
   {
     LeapFrogCode(const LeapFrogCode&);             // not implemented           
     LeapFrogCode& operator= (const LeapFrogCode&); // not implemented           
@@ -465,9 +465,9 @@ namespace nbdy {
     // public methods                                                           
     //--------------------------------------------------------------------------
   public:
-    LeapFrogCode(const sbodies*const&,             // I: bodies                 
+    LeapFrogCode(const bodies *const&,             // I: bodies                 
 		 real          const&,             // I: eps/eps_max            
-		 real          const&,             // I: initial time           
+		 double        const&,             // I: initial time           
 		 int           const&,             // I: h0                     
 		 int           const&,             // I: h_grow                 
 		 real          const&,             // I: tolerance param        
@@ -488,7 +488,7 @@ namespace nbdy {
 		 const         int[4]);            // I: direct sum control     
     //--------------------------------------------------------------------------
     void full_step       ();                       // a single leap-frog step   
-    const real& time() const { return LeapFrog<sbodies>::time(); }
+    const double& time() const { return LeapFrog<bodies>::time(); }
     void stats     (std::ostream&) const;          // statistic of long_step    
     void stats_head(std::ostream&) const;          // table head for short_stats
     void stats_line(std::ostream&) const;          // line of proper size       
@@ -500,7 +500,7 @@ namespace nbdy {
   //////////////////////////////////////////////////////////////////////////////
   class BlockStepCode :
     public    basic_nbody,
-    protected GravBlockStep<sbodies>
+    protected GravBlockStep<bodies>
   {
     BlockStepCode(const BlockStepCode&);            // not implemented          
     BlockStepCode& operator= (const BlockStepCode&);// not implemented          
@@ -521,9 +521,9 @@ namespace nbdy {
     // public methods                                                           
     //--------------------------------------------------------------------------
   public:
-    BlockStepCode(const sbodies*const&,            // I: bodies                 
+    BlockStepCode(const bodies *const&,            // I: bodies                 
 		  real          const&,            // I: eps/eps_max            
-		  real          const&,            // I: initial time           
+		  double        const&,            // I: initial time           
 		  int           const&,            // I: h0                     
 		  int           const&,            // I: # levels               
 		  real          const&,            // I: f_a: for stepping      
@@ -554,11 +554,11 @@ namespace nbdy {
 			 real const& =zero);       //[I: f_e]                   
     void full_step      ();                        // do one blockstep          
     //--------------------------------------------------------------------------
-    const real& time    () const {
-      return BlockStep<sbodies>::time(); }
+    const double& time    () const {
+      return BlockStep<bodies>::time(); }
     //--------------------------------------------------------------------------
     void dump_steps     (std::ostream& to) const {
-      BlockStep<sbodies>::dump(to); }
+      BlockStep<bodies>::dump(to); }
     //--------------------------------------------------------------------------
     void stats     (std::ostream&) const;          // statistic of long_step    
     void stats_head(std::ostream&) const;          // statistic of long_step    
@@ -579,7 +579,7 @@ namespace nbdy {
     int          const ND;                         // # NEMO devices            
     io           const SUPPORT, INPUT;             // what: supported & given   
     nemo_out*    const NEMO;                       // NEMO output devices       
-    sbodies*     const BODIES;                     // bodies themselves         
+    bodies*      const BODIES;                     // bodies themselves         
     std::string  const IFILE;                      // input file                
     basic_nbody*       NBODY;                      // actual N-body code        
     //--------------------------------------------------------------------------
@@ -667,10 +667,10 @@ namespace nbdy {
     // data access                                                              
     //--------------------------------------------------------------------------
     int         const&No_nemo_devices() const { return ND; }
-    real        const&initial_time   () const { return NBODY->t_ini(); }
-    sbodies    *const&bodies         () const { return BODIES; }
+    double      const&initial_time   () const { return NBODY->t_ini(); }
+    bodies     *const&my_bodies      () const { return BODIES; }
     std::string const&input_file     () const { return IFILE; }
-    real        const&time           () const { return NBODY->time(); }
+    double      const&time           () const { return NBODY->time(); }
     real        const&Grav           () const { return NBODY->NewtonsG(); }
     bool              okay           () const { return BODIES!=0 && NBODY!=0; }
     //--------------------------------------------------------------------------

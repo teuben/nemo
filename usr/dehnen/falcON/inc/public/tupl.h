@@ -224,6 +224,8 @@ namespace nbdy {
     tS X dist     (cW&x) c_ { return sqrt(dist_sq (x)); }
     tS X sum_sq   (cW&x) c_ { return M::v_suq(a,(cS*)x);}
     // miscellaneous                                                            
+       V&copy     (pX x)      { M::v_as(a,x); rt; }
+    tS V&copy     (cS*x)      { M::v_as(a,x); rt; }
     tS V&ass_times(cV&x,cS&f) { M::v_ast(a,x.a,f); rt; }
     tS V&add_times(cV&x,cS&f) { M::v_adt(a,x.a,f); rt; }
     tS V&sub_times(cV&x,cS&f) { M::v_sut(a,x.a,f); rt; }
@@ -264,6 +266,16 @@ namespace nbdy {
 			   static_cast<c_ X*>(x), 
 			   static_cast<c_ X*>(y));
     return z;
+  }
+  tX   i_ X          op^(const_pseudo_tupel<2,X> c_&x,
+			 const_pseudo_tupel<2,X> c_&y) {
+    return x[0]*y[1] - x[1]*y[0];
+  }
+  tX   i_ tupel<3,X> op^(const_pseudo_tupel<3,X> c_&x,
+			 const_pseudo_tupel<3,X> c_&y) {
+    return tupel<3,X>(x[1]*y[2] - x[2]*y[1],
+		      x[2]*y[0] - x[0]*y[2],
+		      x[0]*y[1] - x[1]*y[0]);
   }
 #undef  tX
 #undef  tNX

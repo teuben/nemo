@@ -25,7 +25,8 @@ namespace nbdy {
   const double iFPit= 0.75 / Pi;                        // 3/(4*Pi)             
   const double SPi  = 1.772453850905516027298167483341;	// Sqrt[Pi]             
   const double STPi = 2.506628274631000502415765284811; // Sqrt[2 Pi]           
-#if defined(__COMPLEX__) || defined(_CPP_COMPLEX) || defined(__STD_COMPLEX)
+#if defined(__COMPLEX__) || defined(_CPP_COMPLEX) || defined(__STD_COMPLEX) \
+|| defined(__PGCC__) && defined(_STLP_template_complex)
   const std::complex<double> IMAG = std::complex<double>(0,1);	// i            
   const std::complex<double> ITPi = std::complex<double>(0,TPi);// 2 i Pi       
 #endif

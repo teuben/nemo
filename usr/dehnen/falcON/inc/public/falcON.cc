@@ -28,7 +28,7 @@
 #  include <falcON.h>                      // class falcON                      
 #endif
 #ifndef falcON_included_iomanip_h
-#  include <iomanip>                       // C++ file I/O                      
+#  include <iomanip>                       // C++ I/O formatting                
 #  define falcON_included_iomanip_h
 #endif
 #ifndef falcON_included_fstream_h
@@ -40,6 +40,9 @@
 #endif
 #ifndef falcON_included_stic_h
 #  include <public/stic.h>                 // collision partner search          
+#endif
+#ifndef falcON_included_body_h
+#  include <body.h>                        // bodies
 #endif
 #ifdef falcON_SPH
 #  ifndef falcON_included_spht_h
@@ -58,7 +61,7 @@ namespace nbdy {
 #else
 #  define I_SOFT 0
 #endif
-  inline falcON::falcON(const sbodies*  b,
+  inline falcON::falcON(const bodies*   b,
 			const real      e,
 			const real      th,
 			const kern_type k,
@@ -93,7 +96,7 @@ namespace nbdy {
 #endif
   }
   //----------------------------------------------------------------------------
-  inline falcON::falcON(const abodies  *b,
+  inline falcON::falcON(const ebodies  *b,
 			const real      e,
 			const real      th,
 			const kern_type k,

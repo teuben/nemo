@@ -42,6 +42,7 @@
 
 namespace nbdy {
   //////////////////////////////////////////////////////////////////////////////
+  //                                                                          //
   // class nbdy::block_alloc<T>                                               //
   //                                                                          //
   // - allocates elements of type T in blocks                                 //
@@ -95,7 +96,7 @@ namespace nbdy {
     private:
       block      *NEXT;                            // next block in linked list 
       value_type *FIRST;                           // front element             
-      value_type *END;                             // and of active elements    
+      value_type *END;                             // end of active elements    
       value_type *ENDTOT;                          // end of all elements       
       block();                                     // not implemented           
       //------------------------------------------------------------------------

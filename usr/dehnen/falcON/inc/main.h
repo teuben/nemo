@@ -5,7 +5,7 @@
 //                                                                             |
 // C++ code                                                                    |
 //                                                                             |
-// Copyright Walter Dehnen, 2002-2003                                          |
+// Copyright Walter Dehnen, 2002-2004                                          |
 // e-mail:   walter.dehnen@astro.le.ac.uk                                      |
 // address:  Department of Physics and Astronomy, University of Leicester      |
 //           University Road, Leicester LE1 7RH, United Kingdom                |
@@ -19,6 +19,7 @@
 //-----------------------------------------------------------------------------+
 //                                                                             |
 // to run your code with MPI, you must                                         |
+//                                                                             |
 // have falcON_MPI       #defined                                              |
 // have falcON_PARALLEL  #defined                                              |
 //                                                                             |
@@ -31,6 +32,7 @@
 //-----------------------------------------------------------------------------+
 //                                                                             |
 // to run your code with NEMO, you must                                        |
+//                                                                             |
 // have     falcON_NEMO      #defined                                          |
 // have not falcON_NONEMO    #defined                                          |
 //                                                                             |
@@ -75,7 +77,7 @@
 #endif
 
 //------------------------------------------------------------------------------
-// define macro indicating which flags have been used                           
+// define macro indicating which compiler flags have been set                   
 //------------------------------------------------------------------------------
 #ifdef falcON_PROPER
 #  define falcON_Pflag  "P"
@@ -119,6 +121,10 @@
 #  include <public/exit.h>                         // falcON exit & error       
 #endif
 
+#ifndef falcON_included_nbio_h
+#  include <public/nbio.h>                         // falcON body I/O support   
+#endif
+
 //------------------------------------------------------------------------------
 // implement exit.h: compile_info                                               
 //------------------------------------------------------------------------------
@@ -131,10 +137,10 @@ namespace nbdy { namespace compile_info {
   void init() {
     if(! __set ) {
       snprintf(__compiler,10,
-#if   defined (__GNUC__)
-	       "gcc-%d.%d",__GNUC__,__GNUC_MINOR__
-#elif defined (__INTEL_COMPILER)
+#if   defined (__INTEL_COMPILER)
 	       "icc-%d",__INTEL_COMPILER
+#elif defined (__GNUC__)
+	       "gcc-%d.%d",__GNUC__,__GNUC_MINOR__
 #else
 	       "???"
 #endif
@@ -164,11 +170,13 @@ namespace nbdy { namespace compile_info {
 //                                                                              
 //------------------------------------------------------------------------------
 
-#if (defined(falcON_NEMO) && !defined(falcON_NONEMO) ) 
+#if (defined(falcON_NEMO) && !defined(falcON_NONEMO) )
 #  ifndef falcON_USE_NEMO
 #    define falcON_USE_NEMO                        //   then use it             
 #  endif
-#  include <nemo.h>                                // NEMO basic stuff          
+#  include <stdinc.h>                              // NEMO basic stuff          
+#  include <getparam.h>                            // NEMO parameter handling   
+#  include <history.h>                             // NEMO history              
 
 extern string defv[];                              // MUST be supplied by user  
 extern string usage;	                           // MUST be supplied by user  
@@ -186,11 +194,8 @@ namespace nbdy { namespace defv_info {
 	     compile_info::time(),
 	     compile_info::compiler());
   };
-}
-  char *version  = defv_info::version;             // for backwds compatibility 
-  char *compiled = defv_info::compiled;            // for backwds compatibility 
-}
-#define falcON_DEFV defv_info::version, defv_info::compiled
+} }
+#  define falcON_DEFV nbdy::defv_info::version, nbdy::defv_info::compiled
 #endif
 
 //------------------------------------------------------------------------------
@@ -215,6 +220,7 @@ int main(int argc, char *argv[])                   // global main
   nbdy::mpi_init(&argc,&argv);                     // start MPI: spawm processes
 #endif
 
+  nbdy::set_name(argv[0]);                         // get name of application   
   nbdy::compile_info::init();                      // initialize compile_info   
   nbdy::run_info::init();                          // initialize run_info       
 
@@ -225,8 +231,8 @@ int main(int argc, char *argv[])                   // global main
   nbdy::report::open_file(argv[0],*(ask_history()));
 #  endif
 
-  nbdy::main();                                    //     call user program     
-  finiparam();                                     //   finish NEMO             
+  nbdy::main();                                    //   call user program       
+  finiparam();                                     // finish NEMO               
 
 #else // falcON_USE_NEMO
 
@@ -234,7 +240,7 @@ int main(int argc, char *argv[])                   // global main
   nbdy::report::open_file(argv[0]);
 #  endif
 
-  nbdy::main(argc,argv);                           //     call user program     
+  nbdy::main(argc,argv);                           //   call user program       
 
 #endif
 
@@ -254,9 +260,11 @@ int main(int argc, char *argv[])                   // global main
 #ifdef falcON_REAL_IS_FLOAT
 #  define nemoinpr nemoinpf
 #else
-#  define nemoinpr nemoinpf
+#  define nemoinpr nemoinpd
 #endif
 namespace nbdy {                                   // define in namespace nbdy  
+  //----------------------------------------------------------------------------
+  // read vect from nemo parameter                                              
   vect getvparam(char* option)
   {
     vect X;
@@ -270,6 +278,7 @@ namespace nbdy {                                   // define in namespace nbdy
     return X;
   }
   //----------------------------------------------------------------------------
+  // read vect from nemo parameter into 2nd argument, return pointer            
   vect* getvparam_z(char* option, vect&X)
   {
     if(!hasvalue(option)) return 0;
@@ -285,15 +294,33 @@ namespace nbdy {                                   // define in namespace nbdy
 //------------------------------------------------------------------------------
 // define getparam_z(arg), and related, which will return 0 if !hasvalue(arg).  
 //------------------------------------------------------------------------------
-#  define GET_Z(TYPE,NAME) inline TYPE NAME##_z(char* option)	       	\
-                         { return hasvalue(option)? NAME(option) : 0; }
-  GET_Z(char*,  getparam)
-  GET_Z(int,    getiparam)
-  GET_Z(long,   getlparam)
-  GET_Z(bool,   getbparam)
-  GET_Z(double, getdparam)
+#ifdef getrparam
+#  undef getrparam
+#endif
+  //----------------------------------------------------------------------------
+  inline float getfparam(const char* option) {
+    return float(getdparam(const_cast<char*>(option)));  }
+  //----------------------------------------------------------------------------
+  inline float getrparam(const char* option) { 
+    return real(getdparam(const_cast<char*>(option))); }
+  //----------------------------------------------------------------------------
+  inline io getioparam(const char* option) {
+    return io(getparam(const_cast<char*>(option))); }
+//------------------------------------------------------------------------------
+#  define GET_Z(TYPE,NAME,NULL)				\
+  inline TYPE NAME##_z(char* option)			\
+  { return hasvalue(option)? NAME(option) : NULL; }
+  GET_Z(char*,    getparam, 0)
+  GET_Z(int,      getiparam,0)
+  GET_Z(long,     getlparam,0)
+  GET_Z(bool,     getbparam,false)
+  GET_Z(float,    getfparam,0.f)
+  GET_Z(double,   getdparam,0.)
+  GET_Z(real,     getrparam,zero)
+  GET_Z(io,       getioparam, io::o)
 #  undef GET_Z
-}
+  //////////////////////////////////////////////////////////////////////////////
+}                                                  // END: namespace nbdy       
 #endif                                             // falcON_USE_NEMO           
 
 ////////////////////////////////////////////////////////////////////////////////

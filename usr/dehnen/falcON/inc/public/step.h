@@ -41,7 +41,7 @@ namespace nbdy {
   // class nbdy::LeapFrog                                                     //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
-  template<typename bodies_type = sbodies>
+  template<typename bodies_type = bodies>
   class LeapFrog {
     LeapFrog(const LeapFrog&);                     // not implemented           
     LeapFrog operator= (const LeapFrog&);          // not implemented           
@@ -49,25 +49,25 @@ namespace nbdy {
     // types                                                                    
     //--------------------------------------------------------------------------
   protected:
-    typedef typename bodies_type::body body;       // type of body              
+    typedef typename bodies_type::iterator body;   // type of body              
     //--------------------------------------------------------------------------
     // data members                                                             
     //--------------------------------------------------------------------------
-    const   real TAU, TAUH;                        // time step                 
-    mutable real TIME;                             // simulation time           
+    const   real   TAU, TAUH;                      // time step                 
+    mutable double TIME;                           // simulation time           
     const   uint REUSE;                            // # re-uses allowed         
     uint         REUSED;                           // # re-uses done            
     //--------------------------------------------------------------------------
     // public methods                                                           
     //--------------------------------------------------------------------------
   public:
-    LeapFrog(int  const&f,                         // I: -log_2(tau)            
-	     real const&t,                         // I: initial time           
-	     uint const&r) :                       // I: # re-uses allowed      
+    LeapFrog(int    const&f,                       // I: -log_2(tau)            
+	     double const&t,                       // I: initial time           
+	     uint   const&r) :                     // I: # re-uses allowed      
       TAU (pow(half,f)), TAUH (half*TAU), TIME(t), REUSE(r), REUSED(0u) {}
     //--------------------------------------------------------------------------
-    const real& time() const { return TIME; }
-    const real& tau () const { return TAU; }
+    const double &time() const { return TIME; }
+    const real   &tau () const { return TAU; }
     //--------------------------------------------------------------------------
     void predict(const bodies_type* const&B) const
     {
@@ -75,7 +75,7 @@ namespace nbdy {
 	Bi.vel().add_times(acc(Bi),TAUH);
 	Bi.pos().add_times(vel(Bi),TAU );
       }
-      TIME += TAU;
+      TIME += double(TAU);
     }
     //--------------------------------------------------------------------------
     void accelerate(const bodies_type* const&B) const
@@ -89,14 +89,14 @@ namespace nbdy {
   // class nbdy::BlockStep                                                    //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
-  template<typename bodies_type = sbodies>
+  template<typename bodies_type = bodies>
   class BlockStep {
     BlockStep(const BlockStep&);                   // not implemented           
     BlockStep& operator= (const BlockStep&);       // not implemented           
     //--------------------------------------------------------------------------
     // private types                                                            
     //--------------------------------------------------------------------------
-    typedef typename bodies_type::body body;       // type of body              
+    typedef typename bodies_type::iterator body;   // type of body              
     //--------------------------------------------------------------------------
   private:
     struct TimeStep {
@@ -118,7 +118,7 @@ namespace nbdy {
     int            H0;                             // sets longest time step    
     int            NSTEPS, HIGHEST;                // # steps, #steps-1         
     TimeStep      *TS, *SHORTEST;                  // arrays with time steps    
-    mutable real   TIME;                           // simulation time           
+    mutable double TIME;                           // simulation time           
   protected:
     //--------------------------------------------------------------------------
     // protected methods                                                        
@@ -139,9 +139,9 @@ namespace nbdy {
       }                                            // <                         
     }
     //--------------------------------------------------------------------------
-    void reset_steps(int  const&h0,                // I: h0, tau_max = 2^-h0    
-		     int  const&Ns,                // I: #steps                 
-		     real const&t =zero)           // I: actual time            
+    void reset_steps(int    const&h0,              // I: h0, tau_max = 2^-h0    
+		     int    const&Ns,              // I: #steps                 
+		     double const&t =0.)           // I: actual time            
     {
       if(TS) delete[] TS;
       NSTEPS   = abs(Ns);
@@ -158,9 +158,9 @@ namespace nbdy {
     //--------------------------------------------------------------------------
     BlockStep    () : TS(0) {}
     //--------------------------------------------------------------------------
-    BlockStep    (int  const&h0,                   // I: h0, tau_max = 2^-h0    
-		  int  const&Ns,                   // I: #steps                 
-		  real const&t)                    // I: actual time            
+    BlockStep    (int    const&h0,                 // I: h0, tau_max = 2^-h0    
+		  int    const&Ns,                 // I: #steps                 
+		  double const&t)                  // I: actual time            
       : TS ( 0 )
     {
       reset_steps (h0,Ns,t);
@@ -178,7 +178,7 @@ namespace nbdy {
     }
     //--------------------------------------------------------------------------
     void clock_on() const {
-      TIME += tau_min();
+      TIME += double(tau_min());
     }
     //--------------------------------------------------------------------------
     void reset_counts() const {
@@ -202,11 +202,11 @@ namespace nbdy {
       return i;
     }
     //--------------------------------------------------------------------------
-    void        add_to_level(const indx l) const { (TS+l)->join (); }
-    bool        is_leap_frog()             const { return NSTEPS == 1; }
-    const uint& number      (const indx l) const { return(TS+l)->N; }
-    const real& tau         (const indx l) const { return(TS+l)->TAU; }
-    const real& time        ()             const { return TIME; }
+    void          add_to_level(const indx l) const { (TS+l)->join (); }
+    bool          is_leap_frog()             const { return NSTEPS == 1; }
+    const uint   &number      (const indx l) const { return(TS+l)->N; }
+    const real   &tau         (const indx l) const { return(TS+l)->TAU; }
+    const double &time        ()             const { return TIME; }
     //--------------------------------------------------------------------------
     const real& tau         (body const&B) const { return(TS+level(B))->TAU; }
     const real& tau_h       (body const&B) const { return(TS+level(B))->TAUH; }
@@ -248,7 +248,7 @@ namespace nbdy {
   // class nbdy::GravBlockStep                                                //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
-  template<typename bodies_type = sbodies>
+  template<typename bodies_type = bodies>
   class GravBlockStep : public BlockStep<bodies_type> {
     GravBlockStep(const GravBlockStep&);            // not implemented          
     GravBlockStep& operator= (const GravBlockStep&);// not implemented          
@@ -256,7 +256,7 @@ namespace nbdy {
     // private types                                                            
     //--------------------------------------------------------------------------
   private:
-    typedef typename bodies_type::body body;       // type of body              
+    typedef typename bodies_type::iterator body;   // type of body              
     //--------------------------------------------------------------------------
     enum {
       use_a    = 1,
@@ -299,7 +299,7 @@ namespace nbdy {
 	if(SCH & use_a) update_min(tq, FAQ*ia);
 	if(SCH & use_p) update_min(tq, FPQ/square(fpot(B)));
 	if(SCH & use_c) update_min(tq, FCQ*abs(fpot(B))*ia);
-	if(SCH & use_e) update_min(tq, FEQ*eps*sqrt(ia));
+	if(SCH & use_e) update_min(tq, real(FEQ*eps*sqrt(ia)));
 	return tq;
       }
     }
@@ -342,14 +342,14 @@ namespace nbdy {
     //--------------------------------------------------------------------------
     GravBlockStep() : BlockStep<bodies_type>(), UPX(0) {}
     //--------------------------------------------------------------------------
-    GravBlockStep(int  const&h0,                   // O: h0, tau_max = 2^-h0    
-		  int  const&Ns,                   // I: #steps                 
-		  real const&t,                    // I: actual time            
-		  real const&fa,                   // I: f_acc                  
-		  real const&fp,                   // I: f_phi                  
-		  real const&fc,                   // I: f_pa                   
-		  real const&fe,                   // I: f_ea                   
-		  bool const&up)                   // I: use external pot       
+    GravBlockStep(int    const&h0,                 // O: h0, tau_max = 2^-h0    
+		  int    const&Ns,                 // I: #steps                 
+		  double const&t,                  // I: actual time            
+		  real   const&fa,                 // I: f_acc                  
+		  real   const&fp,                 // I: f_phi                  
+		  real   const&fc,                 // I: f_pa                   
+		  real   const&fe,                 // I: f_ea                   
+		  bool   const&up)                 // I: use external pot       
       : BlockStep<bodies_type> ( h0,Ns,t )
     {
       reset_scheme(fa,fp,fc,fe,up);

@@ -5,14 +5,14 @@
 //                                                                             |
 // C++ code                                                                    |
 //                                                                             |
-// Copyright Walter Dehnen, 1994-2003                                          |
+// Copyright Walter Dehnen, 1994-2004                                          |
 // e-mail:   walter.dehnen@astro.le.ac.uk                                      |
 // address:  Department of Physics and Astronomy, University of Leicester      |
 //           University Road, Leicester LE1 7RH, United Kingdom                |
 //                                                                             |
 //-----------------------------------------------------------------------------+
-#ifndef falcON_included_ioln_h
-#define falcON_included_ioln_h
+#ifndef falcON_included_ionl_h
+#define falcON_included_ionl_h
 
 #ifndef falcON_included_exit_h
 #  include <public/exit.h>

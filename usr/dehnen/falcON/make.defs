@@ -31,8 +31,13 @@ KMAX		:= 6
 ifdef NEMO
 
 INEMO		:= -I$(NEMOINC) -I$(NEMOLIB)
-LNEMO		:= -L$(NEMOLIB) -lnemo -lg2c -ldl
 DNEMO		:= -DfalcON_NEMO
+
+ifeq ($(COMPILER),icc)
+LNEMO		:= -L$(NEMOLIB) -lnemo -ldl
+else
+LNEMO		:= -L$(NEMOLIB) -lnemo -lg2c -ldl
+endif
 
 endif
 
@@ -74,6 +79,7 @@ CXX		:= $(CPATH)g++
 CC		:= $(CPATH)gcc
 FC		:= $(CPATH)g77
 OPTFLAGS	:= -O3 -ffast-math -funroll-loops -fforce-addr -fomit-frame-pointer -rdynamic
+NOSSE		:= -mno-sse
 
 else
 ifeq ($(COMPILER),pgcc)
@@ -82,7 +88,8 @@ ifeq ($(COMPILER),pgcc)
 CXX		:= pgCC
 CC		:= pgcc
 FC		:= pgf77
-OPTFLAGS	:= -fast -Minline=levels:10 -Mcache_align --no_exceptions -Minform=inform -D__PGCC__
+#OPTFLAGS	:= -fast -Minline=levels:10 -Mcache_align --no_exceptions -Minform=inform -D__PGCC__
+OPTFLAGS	:= -O3 -fastsse --no_using_std --no_exceptions -Msafeptr -Minform=inform -D__PGCC__
 
 else
 ifeq ($(COMPILER),icc)
@@ -91,7 +98,7 @@ ifeq ($(COMPILER),icc)
 CXX		:= icpc
 CC		:= icc
 FC		:= ifc
-OPTFLAGS	:= -O3 -unroll -tpp6 -xK -i_dynamic
+OPTFLAGS	:= -O3 -unroll -tpp7 -xW -i_dynamic -prefetch
 
 else
 

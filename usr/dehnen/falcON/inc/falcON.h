@@ -97,8 +97,8 @@
 #endif                                      //                                 |
 //-----------------------------------------------------------------------------+
 namespace nbdy {                            // some forward declarations:      |
-  class sbodies;                            //   bodies for serial code        |
-  class abodies;                            //   bodies for C or FORTRAN link  |
+  class bodies;                             //   bodies for serial code        |
+  class ebodies;                            //   bodies for C or FORTRAN link  |
   class oct_tree;                           //   oct tree structure            |
   class grav_mac;                           //   multipole acceptance criterion|
   class grav_stat;                          //   statistics for gravity        |
@@ -127,7 +127,7 @@ namespace nbdy {                            // some forward declarations:      |
 // which invokes a constructor for class falcON. There are, in fact two        |
 // constructors, one for the use with bodies as defined in file body.h:        |
 //                                                                             |
-    falcON (const sbodies*,                    // I: bodies                    |
+    falcON (const bodies*,                     // I: bodies                    |
 	    const real,                        // I: global/maximum eps        |
 	    const real     =Default::theta,    //[I: tolerance parameter]      |
 	    const kern_type=Default::kernel,   //[I: type of softening kernel] |
@@ -144,7 +144,7 @@ namespace nbdy {                            // some forward declarations:      |
 //                                                                             |
 // and one for the use with plain arrays:                                      |
 //                                                                             |
-    falcON (const abodies*,                    // I: bodies                    |
+    falcON (const ebodies*,                    // I: bodies                    |
 	    const real,                        // I: global/maximum eps        |
 	    const real      =Default::theta,   //[I: tolerance parameter]      |
 	    const kern_type =Default::kernel,  //[I: type of softening kernel] |
@@ -675,8 +675,8 @@ namespace nbdy {                            // some forward declarations:      |
 // data members                                                                |
 //                                                                             |
     mutable grav_stat     *STATS;                 // statistics                |
-    const   sbodies       *BODIES;                // sbodies to be used        |
-    const   abodies       *ARRAYS;                // abodies to be used        |
+    const   bodies        *BODIES;                // sbodies to be used        |
+    const   ebodies       *ARRAYS;                // abodies to be used        |
     int                    Ncrit;                 // Ncrit                     |
     oct_tree              *TREE;                  // tree to be used           |
     grav_mac              *GMAC;                  // theta(M)                  |

@@ -5,7 +5,7 @@
 //                                                                             |
 // C++ code                                                                    |
 //                                                                             |
-// Copyright Walter Dehnen, 2000-2003                                          |
+// Copyright Walter Dehnen, 2000-2004                                          |
 // e-mail:   walter.dehnen@astro.le.ac.uk                                      |
 // address:  Department of Physics and Astronomy, University of Leicester      |
 //           University Road, Leicester LE1 7RH, United Kingdom                |
@@ -24,16 +24,14 @@
 #ifndef falcON_included_tree_h
 #define falcON_included_tree_h
 
-#ifndef falcON_included_body_h
-#  include <body.h>
+#ifndef falcON_included_auxx_h
+#  include <public/auxx.h>
+#endif
+#ifndef falcON_included_flag_h
+#  include <public/flag.h>
 #endif
 #ifndef falcON_included_deft_h
 #  include <public/deft.h>
-#endif
-#ifdef falcON_MPI
-#  ifndef falcON_included_pody_h
-#    include <walter/pody.h>
-#  endif
 #endif
 #ifndef falcON_included_iomanip
 #  include <iomanip>
@@ -41,6 +39,11 @@
 #endif
 ////////////////////////////////////////////////////////////////////////////////
 namespace nbdy {
+  class  bodies;                                   // forward declaration      
+  class ebodies;                                   // forward declaration      
+#ifdef falcON_MPI
+  class pbodies;                                   // forward declaration      
+#endif
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
   // class nbdy::basic_leaf                                                   //
@@ -326,8 +329,8 @@ namespace nbdy {
     // data of class oct_tree                                                   
     //--------------------------------------------------------------------------
   private:
-    const sbodies       *BSRCES;                   // pointer to sbodies        
-    const abodies       *ASRCES;                   // pointer to abodies        
+    const  bodies       *BSRCES;                   // pointer to  bodies        
+    const ebodies       *ESRCES;                   // pointer to ebodies        
 #ifdef falcON_MPI
     const pbodies       *PSRCES;                   // pointer to pbodies        
 #endif
@@ -355,19 +358,19 @@ namespace nbdy {
     // If the specific body flag is set, only bodies with this flag set will be 
     // used in the tree.                                                        
     //--------------------------------------------------------------------------
-    // construct from sbodies                                                   
+    // construct from bodies                                                    
     //--------------------------------------------------------------------------
   public:
-    oct_tree(const sbodies*const&,                 // I: bodies' flags & pos's  
-	     int           const&,                 // I: N_crit                 
+    oct_tree(const bodies*const&,                  // I: bodies' flags & pos's  
+	     int          const&,                  // I: N_crit                 
 	     const vect*const& = 0,                //[I: pre-determined center] 
 	     int        const& = Default::MaxDepth,//[I: max tree depth]        
 	     int        const& = 0);               //[I: specific flag]         
     //--------------------------------------------------------------------------
-    oct_tree(const sbodies*const&,                 // I: bodies' flags & pos's  
-	     vect          const&,                 // I: x_min                  
-	     vect          const&,                 // I: x_max                  
-	     int           const&,                 // I: N_crit                 
+    oct_tree(const bodies*const&,                  // I: bodies' flags & pos's  
+	     vect         const&,                  // I: x_min                  
+	     vect         const&,                  // I: x_max                  
+	     int          const&,                  // I: N_crit                 
 	     const vect*const& = 0,                //[I: pre-determined center] 
 	     int        const& = Default::MaxDepth,//[I: max tree depth]        
 	     int        const& = 0);               //[I: specific flag]         
@@ -390,15 +393,15 @@ namespace nbdy {
 	     int        const& = 0);               //[I: specific flag]         
 #endif
     //--------------------------------------------------------------------------
-    // construct from abodies                                                   
+    // construct from ebodies                                                   
     //--------------------------------------------------------------------------
-    oct_tree(const abodies*const&,                 // I: abodies' flags & pos's 
+    oct_tree(const ebodies*const&,                 // I: abodies' flags & pos's 
 	     int           const&,                 // I: N_crit                 
 	     const vect*const& = 0,                //[I: pre-determined center] 
 	     int        const& = Default::MaxDepth,//[I: max tree depth]        
 	     int        const& = 0);               //[I: specific flag]         
     //--------------------------------------------------------------------------
-    oct_tree(const abodies*const&,                 // I: abodies' flags & pos's 
+    oct_tree(const ebodies*const&,                 // I: abodies' flags & pos's 
 	     vect          const&,                 // I: x_min                  
 	     vect          const&,                 // I: x_max                  
 	     int           const&,                 // I: N_crit                 
@@ -485,10 +488,10 @@ namespace nbdy {
     // other public methods                                                     
     //--------------------------------------------------------------------------
     void mark_for_subtree(int const&, int const&, uint&, uint&) const;
-    bool                use_sbodies() const { return BSRCES!=0; }
-    const sbodies*const&my_sbodies () const { return BSRCES; }
-    bool                use_abodies() const { return ASRCES!=0;}
-    const abodies*const&my_abodies () const { return ASRCES; }
+    bool                use_bodies () const { return BSRCES!=0; }
+    const  bodies*const&my_bodies  () const { return BSRCES; }
+    bool                use_ebodies() const { return ESRCES!=0;}
+    const ebodies*const&my_ebodies () const { return ESRCES; }
 #ifdef falcON_MPI
     bool                use_pbodies() const { return PSRCES!=0; }
     const pbodies*const&my_pbodies () const { return PSRCES; }
@@ -664,7 +667,7 @@ namespace nbdy {
 #ifdef falcON_MPI
       if(PSRCES) return BM(PSRCES);
 #endif
-      if(ASRCES) return BM(ASRCES);
+      if(ESRCES) return BM(ESRCES);
       error("tree has neither bodies nor arrays");
       return 0u;
     }

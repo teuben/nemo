@@ -46,6 +46,11 @@ extern "C" {                                  /* falcON.h.                    */
 #define INPUT_TYPE float                      /*   define input type = float  */
 #endif
 
+#ifndef falcON_NDIM
+#  define falcON_NDIM 3
+#else
+#  define falcON_NDIM 2
+#endif
 /*******************************************************************************
  *                                                                             *
  *  CONTENTS                                                                   *
@@ -81,24 +86,20 @@ extern "C" {                                  /* falcON.h.                    */
  *  In order to use the code, one has first to initialize it. This is done     *
  *  using the following routine, which actually does no computation at all.    *
  */
-void  falcON_initialize(const int*,          /* array with flags              */
-			      INPUT_TYPE*,   /* array with masses             */
-			      INPUT_TYPE*,   /* array with x                  */
-			      INPUT_TYPE*,   /* array with y                  */
-			      INPUT_TYPE*,   /* array with z                  */
+void  falcON_initialize(const int*,               /* flags                    */
+			const INPUT_TYPE*,        /* masses                   */
+			const INPUT_TYPE**,       /* positions                */
 #ifdef falcON_INDI
-			      INPUT_TYPE*,   /* array with eps                */
+			const INPUT_TYPE*,        /* eps                      */
 #endif
-			      INPUT_TYPE*,   /* array for acc_x               */
-		              INPUT_TYPE*,   /* array for acc_y               */
-		              INPUT_TYPE*,   /* array for acc_z               */
-		              INPUT_TYPE*,   /* array for potentials          */
-		              INPUT_TYPE*,   /* array for densities           */
-			const int,           /* N = size of arrays            */
-			const INPUT_TYPE,    /* eps = softening length        */
-			const INPUT_TYPE,    /* theta = opening angle         */
-			const int,           /* type of softening kernel      */
-			const INPUT_TYPE);   /* Newton's constant G           */
+			      INPUT_TYPE**,       /* accelerations            */
+		              INPUT_TYPE*,        /* potentials               */
+		              INPUT_TYPE*,        /* densities                */
+			const int,                /* N   = # bodies           */
+			const INPUT_TYPE,         /* eps = softening length   */
+			const INPUT_TYPE,         /* theta= opening angle     */
+			const int,                /* softening kernel         */
+			const INPUT_TYPE);        /* Newton's constant G      */
 /*                                                                             *
  * The first 11[10] arguments specify the sink and source properties of the    *
  * bodies. Each body has the sink properties: position (x,y,z), mass,          *
@@ -274,12 +275,10 @@ void falcON_iactionlist(      int*,          /* list of indices: 1st of pair  */
 		              int*,          /* list of indices: 2nd of pair  */
 			const int,           /* physical size of list         */
 			      int*,          /* actual size of list           */
-			      INPUT_TYPE*,   /* array with body sizes         */
+			const INPUT_TYPE*,   /* array with body sizes         */
 			const bool,          /* use Max(h_i,h_j) OR h_i+h_j ? */
 			const INPUT_TYPE,    /* time step tau                 */
-			      INPUT_TYPE*,   /* array with Vx                 */
-			      INPUT_TYPE*,   /* array with Vy                 */
-			      INPUT_TYPE*);  /* array with Vz                 */
+			const INPUT_TYPE**); /* arrays with V                 */
 /*
  * In case of overflow, i.e. if the number of pairs found exceeds the size     *
  * (3rd arg) of the list (1st&2nd args), a warning is issued to stderr, but    *

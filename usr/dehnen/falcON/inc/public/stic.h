@@ -85,14 +85,14 @@ namespace nbdy {
       size() = B->size(mybody());
       vel () = B->vel (mybody());
       num () = 0u;
-    };
+    }
     //--------------------------------------------------------------------------
     template<typename bodies_type>
     void set_sph(const bodies_type*const&B) {
       size () = B->size(mybody());
       sizeq() = square(size());
       num  () = 0u;
-    };
+    }
     //--------------------------------------------------------------------------
     // copy data from leaf to body                                              
     //--------------------------------------------------------------------------

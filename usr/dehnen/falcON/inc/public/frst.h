@@ -48,10 +48,7 @@
 
 #if defined(__PGCC__) || (defined(__GNUC__) && __GNUC__ < 3)
 #  define falcON_non_standard_math
-#  warning " "
-#  warning " you are using a known non-standard C++ compiler"
-#  warning " compilation may fail or produce buggy code"
-#  warning " "
+// #  warning " you are using a known non-standard C++ compiler; compilation may fail or produce buggy code"
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -159,7 +156,7 @@ namespace nbdy {
     return static_cast<T*>(malloc16(n * sizeof(T)));
   }
   //----------------------------------------------------------------------------
-  template<typename T> inline T* delete16(T*const&q)
+  template<typename T> inline void delete16(T*const&q)
   {
     free16(static_cast<void*>(q));
   }

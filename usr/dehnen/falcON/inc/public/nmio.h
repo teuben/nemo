@@ -30,6 +30,7 @@ namespace nbdy {
   public:
     enum Set          {snap=0,param=1,
 		       bodies=2,diags=3};          // type of nemo set          
+    enum NotSupported {null};                      // not supported             
     enum CoSys        {cart,spher,scat};           // type of coordinate system 
     enum SingleScalar {time,cputime};              // 1               real      
     enum SingleVector {energy};                    // 1 * Ndim        reals     
@@ -97,20 +98,22 @@ namespace nbdy {
     bool  is_present(const BodiesPhases) const;    // can we read: many phases? 
     bool  is_present(const BodiesInteger)const;    // can we read: many ints?   
     bool  is_present(const BodiesShort)  const;    // can we read: many shorts? 
+    bool  is_present(const NotSupported) const { return 0; }
     //--------------------------------------------------------------------------
-    void  read_N()                 const;          // de-alloc, read N & NS     
-    real  read(const SingleScalar) const;          // read 1          -> return 
-    void  read(const SingleVector) const;          // read Ndim       -> storage
-    void  read(const SinglePhases) const;          // read 2*Ndim     -> storage
-    void  read(const SingleMatrix) const;          // read Ndim*Ndim  -> storage
-    void  read(const BodiesScalar) const;          // read N          -> array  
-    void  read(const SPHScalar)    const;          // read NS         -> array  
-    void  read(const BodiesVector) const;          // read N*Ndim     -> array  
-    void  read(const BodiesPhases) const;          // read N*2*Ndim   -> array  
-    void  read(const BodiesInteger)const;          // read N          -> array  
-    void  read(const BodiesShort)  const;          // read N          -> array  
+    void   read_N()                 const;         // de-alloc, read N & NS     
+    double read(const SingleScalar) const;         // read 1          -> return 
+    void   read(const SingleVector) const;         // read Ndim       -> storage
+    void   read(const SinglePhases) const;         // read 2*Ndim     -> storage
+    void   read(const SingleMatrix) const;         // read Ndim*Ndim  -> storage
+    void   read(const BodiesScalar) const;         // read N          -> array  
+    void   read(const SPHScalar)    const;         // read NS         -> array  
+    void   read(const BodiesVector) const;         // read N*Ndim     -> array  
+    void   read(const BodiesPhases) const;         // read N*2*Ndim   -> array  
+    void   read(const BodiesInteger)const;         // read N          -> array  
+    void   read(const BodiesShort)  const;         // read N          -> array  
+    void   read(const NotSupported) const {}
     //--------------------------------------------------------------------------
-    void  read(const SingleScalar, real*) const;   // read 1          -> return 
+    void  read(const SingleScalar, double*) const; // read 1          -> return 
     void  read(const SingleVector, real*) const;   // read Ndim       -> pter   
     void  read(const SinglePhases, real*) const;   // read 2*Ndim     -> pter   
     void  read(const SingleMatrix, real*) const;   // read Ndim*Ndim  -> pter   
@@ -120,12 +123,15 @@ namespace nbdy {
     void  read(const BodiesPhases, real*) const;   // read N*2*Ndim   -> pter   
     void  read(const BodiesInteger,int *) const;   // read N          -> pter   
     void  read(const BodiesShort, short*) const;   // read N          -> pter   
+    void  read(const NotSupported, void*) const {}
     //==========================================================================
     void  write_N (int const&,                     // de-alloc, write N, set N  
 		   int const& = 0)   const;        //[I: N_sph]                 
     void  write(const CoSys)         const;        // write type: coord. system 
     void  write(const SingleScalar,
-		real const&)         const;        // write 2nd arg -> 1        
+		double const&)       const;        // write 2nd arg -> 1        
+    void  write(const SingleScalar,
+		real  const&)       const;         // write 2nd arg -> 1        
     //--------------------------------------------------------------------------
     void  write(const SingleVector)  const;        // write storage -> Ndim     
     void  write(const SinglePhases)  const;        // write storage -> 2*Ndim   
@@ -136,16 +142,19 @@ namespace nbdy {
     void  write(const BodiesPhases)  const;        // write array   -> N*2*Ndim 
     void  write(const BodiesInteger) const;        // write array   -> N        
     void  write(const BodiesShort)   const;        // write array   -> N        
+    void  write(const NotSupported)  const {}
     //--------------------------------------------------------------------------
-    void  write(const SingleVector, real*)  const; // write pter    -> Ndim     
-    void  write(const SinglePhases, real*)  const; // write pter    -> 2*Ndim   
-    void  write(const SingleMatrix, real*)  const; // write pter    -> Ndim*Ndim
-    void  write(const BodiesScalar, real*)  const; // write pter    -> N        
-    void  write(const SPHScalar,    real*)  const; // write pter    -> NS       
-    void  write(const BodiesVector, real*)  const; // write pter    -> N*Ndim   
-    void  write(const BodiesPhases, real*)  const; // write pter    -> N*2*Ndim 
-    void  write(const BodiesInteger,int *)  const; // write pter    -> N        
-    void  write(const BodiesShort, short*)  const; // write pter    -> N        
+    void  write(const SingleVector, const real*) const; // write pter -> Ndim   
+    void  write(const SinglePhases, const real*) const; // write pter -> 2*Ndim 
+    void  write(const SingleMatrix, const real*) const; // write pter -> Ndim^2 
+
+    void  write(const BodiesScalar, const real*) const; // write pter -> N      
+    void  write(const SPHScalar,    const real*) const; // write pter -> NS     
+    void  write(const BodiesVector, const real*) const; // write pter -> N*Ndim 
+    void  write(const BodiesPhases, const real*) const; // write pter -> 2N*Ndim
+    void  write(const BodiesInteger,const int *) const; // write pter -> N      
+    void  write(const BodiesShort, const short*) const; // write pter -> N      
+    void  write(const NotSupported, const void*) const {}
   public:
     //--------------------------------------------------------------------------
     void  close     ();                            // close open file           

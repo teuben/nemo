@@ -342,7 +342,7 @@ namespace nbdy {
     real const&rmax  () const { return AUX3.SCAL; }
     real const&size  () const { return AUX3.SCAL; }
     real const&rcrit () const { return AUX3.SCAL; }
-    real const rcrit2() const { return square(rcrit()); }
+    real       rcrit2() const { return square(rcrit()); }
 #ifdef falcON_INDI
     real const&eph   () const { return __srce->EPH; }
 #endif
@@ -389,7 +389,7 @@ namespace nbdy {
     friend real const&rmax  (const grav_cell*const&C) { return C->rmax(); }
     friend real const&rcrit (const grav_cell*const&C) { return C->rcrit(); }
     friend real const&size  (const grav_cell*const&C) { return C->size(); }
-    friend real const rcrit2(const grav_cell*const&C) { return C->rcrit2(); }
+    friend real       rcrit2(const grav_cell*const&C) { return C->rcrit2(); }
 #ifdef falcON_INDI
     friend real const&eph   (const grav_cell*const&C) { return C->eph(); }
 #endif
@@ -547,7 +547,8 @@ namespace nbdy {
       NCT            ( 0u ),
       NCA            ( 0u ),
       NLA            ( 0u ),
-      NLA_needed     ( 0u )
+      NLA_needed     ( 0u ),
+      DIR            ()
     {
       const_cast<int*>(DIR)[0]=d[0];
       const_cast<int*>(DIR)[1]=d[1];

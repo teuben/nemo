@@ -5,7 +5,7 @@
 //                                                                             |
 // C++ code                                                                    |
 //                                                                             |
-// Copyright Walter Dehnen, 2000-2003                                          |
+// Copyright Walter Dehnen, 2000-2004                                          |
 // e-mail:   walter.dehnen@astro.le.ac.uk                                      |
 // address:  Department of Physics and Astronomy, University of Leicester      |
 //           University Road, Leicester LE1 7RH, United Kingdom                |
@@ -13,14 +13,9 @@
 //-----------------------------------------------------------------------------+
 #ifndef falcON_included_iact_h
 #define falcON_included_iact_h
+
 #ifndef falcON_included_exit_h
 #  include <public/exit.h>
-#endif
-#ifdef _OPENMP
-#  ifndef falcON_included_omp_h
-#    include <omp.h>
-#    define falcON_included_omp_h
-#  endif
 #endif
 
 #define WRITE_IACT_INFO
@@ -38,6 +33,7 @@ namespace nbdy {
   //////////////////////////////////////////////////////////////////////////////
   //----------------------------------------------------------------------------
   // struct iaction<>                                                           
+  //   holds the left and right partner of an interaction                       
   //----------------------------------------------------------------------------
   template<typename A, typename B>
   struct iaction {
@@ -64,6 +60,7 @@ namespace nbdy {
   };
   //----------------------------------------------------------------------------
   // struct iastack<>                                                           
+  //   a stack of iaction<>s organised in a linked list                         
   //----------------------------------------------------------------------------
   template<typename A, typename B>
   class iastack {
@@ -102,36 +99,107 @@ namespace nbdy {
 	      );
     }
   };
+  //----------------------------------------------------------------------------
+  // struct saction<>                                                           
+  //   holds one partner of an interaction                                      
+  //----------------------------------------------------------------------------
+  template<typename A>
+  struct saction {
+#ifdef WRITE_IACT_INFO
+    int lev;                                       // level of iaction          
+#endif
+    A obj;                                         // object                    
+    saction () : obj(0)                            // constructor               
+#ifdef WRITE_IACT_INFO
+    ,lev(0)
+#endif
+    {}
+    void set(A a                                   // set object                
+#ifdef WRITE_IACT_INFO
+	     , int l
+#endif
+	     ) {
+      obj=a;
+#ifdef WRITE_IACT_INFO
+      lev=l;
+#endif
+    }
+  };
+  //----------------------------------------------------------------------------
+  // struct sastack<>                                                           
+  //   a stack of saction<>s organised in a linked list                         
+  //----------------------------------------------------------------------------
+  template<typename A>
+  class sastack {
+  private:
+    typedef saction<A> sact;                       // type of stack objects     
+    sact    *SA, *pi;                              // first & current element   
+#ifdef DEBUG
+    sact    *SEND;
+#endif
+    //--------------------------------------------------------------------------
+  public:
+    sastack (unsigned const&M)                     // constructor               
+      : SA   ( falcON_New(sact,M) ),               //   allocate memory         
+	pi   ( SA - 1 )                            //   set pter to activ       
+#ifdef DEBUG
+      , SEND ( SA + M )
+#endif
+    {}
+    //--------------------------------------------------------------------------
+    ~sastack () { delete[] SA; }                   // destructor: deallocate    
+    bool is_empty() const   { return pi<SA;}       // if stack empty?           
+    sact pop     ()         { return *(pi--); }    // give last:   pop          
+    void push    (A a                              // add element: push         
+#ifdef WRITE_IACT_INFO
+		  ,int l=0
+#endif
+		  ) {
+      ++pi;
+#ifdef DEBUG
+      if(pi >= SEND) error("push()ing beyond end of sastack");
+#endif
+      pi->set(a
+#ifdef WRITE_IACT_INFO
+	      ,l
+#endif
+	      );
+    }
+  };
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
-  // class nbdy::InteractionBase<>                                            //
+  // class nbdy::MutualInteractor<>                                           //
   //                                                                          //
   // encodes the mutual interaction algorithm.                                //
-  // the order of nodes (first,second) is preserved when splitting on node    //
+  // the order of nodes (first,second) is preserved when splitting a node     //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
-  template<typename INTERACTOR> class InteractionBase {
+  template<typename INTERACTOR> class MutualInteractor {
     //--------------------------------------------------------------------------
-    const INTERACTOR *IA;                            // interactor              
+    // types                                                                    
     //--------------------------------------------------------------------------
-  protected:
-    InteractionBase(const INTERACTOR* const&ia) : IA(ia) {}
-    //--------------------------------------------------------------------------
-#ifdef __GNUC__
-  private:
-#endif
     typedef typename INTERACTOR::cell_iter cell_iter;// iterator over cells     
     typedef typename INTERACTOR::leaf_iter leaf_iter;// iterator over leafs     
     //--------------------------------------------------------------------------
-    typedef iaction<cell_iter,cell_iter> cx_iact;    // cell-self iaction       
+    typedef saction<cell_iter>           cx_iact;    // cell-self iaction       
     typedef iaction<cell_iter,cell_iter> cc_iact;    // cell-cell iaction       
     typedef iaction<cell_iter,leaf_iter> cl_iact;    // cell-leaf iaction       
     typedef iaction<leaf_iter,cell_iter> lc_iact;    // leaf-cell iaction       
     //--------------------------------------------------------------------------
-    typedef iastack<cell_iter,cell_iter> cx_stack;   // stack: cell-self iaction
+    typedef sastack<cell_iter>           cx_stack;   // stack: cell-self iaction
     typedef iastack<cell_iter,cell_iter> cc_stack;   // stack: cell-cell iaction
     typedef iastack<cell_iter,leaf_iter> cl_stack;   // stack: cell-leaf iaction
     typedef iastack<leaf_iter,cell_iter> lc_stack;   // stack: leaf-cell iaction
+    //--------------------------------------------------------------------------
+    // data                                                                     
+    //--------------------------------------------------------------------------
+    const INTERACTOR *IA;                            // interactor              
+    mutable cx_stack CX;                             // stack: cell-self iaction
+    mutable cc_stack CC;                             // stack: cell-cell iaction
+    mutable cl_stack CL;                             // stack: cell-leaf iaction
+    mutable lc_stack LC;                             // stack: leaf-cell iaction
+    //--------------------------------------------------------------------------
+    // private methods                                                          
     //--------------------------------------------------------------------------
 #define LoopCKids(C,A)							\
     LoopCellKids(typename cell_iter,C,A) if(INTERACTOR::take(A))
@@ -143,17 +211,10 @@ namespace nbdy {
     LoopLKids(C,A)							\
       LoopLeafSecd(typename cell_iter,C,A+1,B) if(INTERACTOR::take(B))
     //--------------------------------------------------------------------------
-  public:
-    inline void leaf_leaf(leaf_iter const&s1, leaf_iter const&s2) const
-    {
-      IA->interact(s1,s2);
-    }
-    //--------------------------------------------------------------------------
-  protected:
-    void clear_leaf_cell_stack(lc_stack&LC) const {
-      // clear a stack of leaf-cell interactions                                
+    void clear_leaf_cell_stack() const {
+      // clear the stack of leaf-cell interactions                              
       while(!LC.is_empty()) {                        // WHILE(LC non-empty)     
-	register lc_iact  lc = LC.pop();             //   pop new S-C iaction   
+	lc_iact lc = LC.pop();                       //   pop new L-C iaction   
 #ifdef WRITE_IACT_INFO
 	std::cerr<<" LC "<<std::setw(2)<<lc.lev<<" :"
 		 <<std::setw(6)<< lc.snd.my_tree()->index(lc.fst)<<' '
@@ -163,20 +224,20 @@ namespace nbdy {
 #ifdef WRITE_IACT_INFO
 	  std::cerr<<": splitting\n";
 #endif
-	  LoopCKids(lc.snd,c2) LC.push  (lc.fst,c2   //     push    sub S-C     
+	  LoopCKids(lc.snd,c2) LC.push  (lc.fst,c2   //     push    sub L-C     
 #ifdef WRITE_IACT_INFO
 					 ,lc.lev+1
 #endif
 					 );
-	  LoopLKids(lc.snd,s2) leaf_leaf(lc.fst,s2); //     perform sub S-S     
+	  LoopLKids(lc.snd,s2) leaf_leaf(lc.fst,s2); //     perform sub L-L     
 	}                                            //   ENDIF                 
       }                                              // END WHILE               
     }
     //--------------------------------------------------------------------------
-    void clear_cell_leaf_stack(cl_stack&CL) const {
-      // clear a stack of cell-leaf interactions                                
+    void clear_cell_leaf_stack() const {
+      // clear the stack of cell-leaf interactions                              
       while(!CL.is_empty()) {                        // WHILE(CL non-empty)     
-	register cl_iact cl = CL.pop();              //   pop new C-S iaction   
+	cl_iact cl = CL.pop();                       //   pop new C-L iaction   
 #ifdef WRITE_IACT_INFO
 	std::cerr<<" CL "<<std::setw(2)<<cl.lev<<" :"
 		 <<std::setw(6)<< cl.fst.index()<<' '
@@ -186,20 +247,17 @@ namespace nbdy {
 #ifdef WRITE_IACT_INFO
 	  std::cerr<<": splitting\n";
 #endif
-	  LoopCKids(cl.fst,c1) CL.push  (c1,cl.snd   //     push    sub C-S     
+	  LoopCKids(cl.fst,c1) CL.push  (c1,cl.snd   //     push    sub C-L     
 #ifdef WRITE_IACT_INFO
 					 ,cl.lev+1
 #endif
 					 );
-	  LoopLKids(cl.fst,s1) leaf_leaf(s1,cl.snd); //     perform sub S-S     
+	  LoopLKids(cl.fst,s1) leaf_leaf(s1,cl.snd); //     perform sub L-L     
 	}                                            //   ENDIF                 
       }                                              // END WHILE               
     }
     //--------------------------------------------------------------------------
-    void split_cell_cell(cc_iact &cc,
-			 cc_stack&CC,
-			 cl_stack&CL,
-			 lc_stack&LC) const {
+    void split_cell_cell(cc_iact &cc) const {        // I:   iaction to be split
       // split cell-cell interaction and perform resulting leaf interactions    
       if(IA->split_first(cc.fst,cc.snd)) {           // IF(split 1st)           
 	LoopCKids(cc.fst,c1) CC.push(c1,cc.snd       //   push sub C-C          
@@ -208,12 +266,12 @@ namespace nbdy {
 #endif
 				     );
 	if(has_leaf_kids(cc.fst)) {                  //   IF(leaf kids)         
-	  LoopLKids(cc.fst,s1) LC.push(s1,cc.snd     //     push sub S-C        
+	  LoopLKids(cc.fst,s1) LC.push(s1,cc.snd     //     push sub L-C        
 #ifdef WRITE_IACT_INFO
 				       ,cc.lev+1
 #endif
 				     );
-	  clear_leaf_cell_stack(LC);                 //     clear the LC stack  
+	  clear_leaf_cell_stack();                   //     clear the LC stack  
 	}                                            //   ENDIF                 
       } else {                                       // ELSE(split 2nd)         
 	LoopCKids(cc.snd,c2) CC.push(cc.fst,c2       //   push sub C-C          
@@ -222,22 +280,20 @@ namespace nbdy {
 #endif
 				     );
 	if(has_leaf_kids(cc.snd)) {                  //   IF(leaf kids)         
-	  LoopLKids(cc.snd,s2) CL.push(cc.fst,s2     //     push sub C-S        
+	  LoopLKids(cc.snd,s2) CL.push(cc.fst,s2     //     push sub C-L        
 #ifdef WRITE_IACT_INFO
 				       ,cc.lev+1
 #endif
 				       );
-	  clear_cell_leaf_stack(CL);                 //     clear the CL stack  
+	  clear_cell_leaf_stack();                   //     clear the CL stack  
 	}                                            //   ENDIF                 
       }                                              // ENDIF                   
     }
     //--------------------------------------------------------------------------
-    void clear_cell_cell_stack(cc_stack&CC,
-			       cl_stack&CL,
-			       lc_stack&LC) const {
+    void clear_cell_cell_stack() const {
       // clear an stack of cell-cell interactions                               
       while(!CC.is_empty()) {                        // WHILE(CC non-empty)     
-	register cc_iact cc = CC.pop();              //   pop new C-C iaction   
+	cc_iact cc = CC.pop();                       //   pop new C-C iaction   
 #ifdef WRITE_IACT_INFO
 	std::cerr<<" CC "<<std::setw(2)<<cc.lev<<" :"
 		 <<std::setw(6)<< cc.fst.index()<<' '
@@ -247,153 +303,115 @@ namespace nbdy {
 #ifdef WRITE_IACT_INFO
 	  std::cerr<<": splitting\n";
 #endif
-	  split_cell_cell(cc,CC,CL,LC);              //     split               
+	  split_cell_cell(cc);                       //     split               
 	}
       }                                              // END WHILE               
     }
     //--------------------------------------------------------------------------
-  private:
-    void work_cell_cell_stack(cc_stack &CC,
-			      cl_stack &CL,
-			      lc_stack &LC,
-			      int      &i,
-			      int const&M) const {
-      // perform up to M cell-cell, perform all occuring leaf interactions      
-      while(!CC.is_empty() && i<M) {                 // WHILE(CC non-empty)     
-	register cc_iact cc = CC.pop();              //   pop new C-C iaction   
-	if(IA->interact(cc.fst,cc.snd)) ++i;         //   IF(performed): count  
-	else split_cell_cell(cc,CC,CL,LC);           //   ELSE:          split  
-      }                                              // END WHILE               
-    }
-    //--------------------------------------------------------------------------
-  protected:
-    void work_cell_cell_stack(cc_stack &CC,
-			      cl_stack &CL,
-			      lc_stack &LC,
-			      int const&M) const {
-      // perform up to M cell-cell, perform all occuring leaf interactions      
-      register int i=0;                              // counter: performed C-C  
-      work_cell_cell_stack(CC,CL,LC,i,M);            // work it out             
-    }
-    //--------------------------------------------------------------------------
-    void split_cell_self(cx_iact &cx,
-			 cx_stack&CX,
-			 cc_stack&CC,
-			 cl_stack&CL) const {
+    void split_cell_self(cx_iact &cx) const {
       // split cell-self interaction and perform resulting leaf interactions    
-      LoopCKids(cx.fst,c1) {                         // LOOP(cell kids)         
-	CX.push(c1,c1                                //   push sub C-X          
+      LoopCKids(cx.obj,c1) {                         // LOOP(cell kids)         
+	CX.push(c1                                   //   push sub C-X          
 #ifdef WRITE_IACT_INFO
 		,cx.lev+1
 #endif
 		);
-	LoopLKids (cx.fst,s2)      CL.push(c1,s2   //   push sub C-S          
+	LoopLKids (cx.obj,s2)      CL.push(c1,s2     //   push sub C-L          
 #ifdef WRITE_IACT_INFO
 					   ,cx.lev+1
 #endif
 					   );
-	LoopCPairs(cx.fst,c1+1,c2) CC.push(c1,c2   //   push sub C-C          
+	LoopCPairs(cx.obj,c1+1,c2) CC.push(c1,c2     //   push sub C-C          
 #ifdef WRITE_IACT_INFO
 					   ,cx.lev+1
 #endif
 					   );
       }                                              // END LOOP                
-      LoopSPairs(cx.fst,s1,s2) leaf_leaf(s1,s2);     // perform sub S-S         
-      clear_cell_leaf_stack(CL);                     // clear the CL stack      
+      LoopSPairs(cx.obj,s1,s2) leaf_leaf(s1,s2);     // perform sub L-L         
+      clear_cell_leaf_stack();                       // clear the CL stack      
     }
     //--------------------------------------------------------------------------
-    void clear_cell_self_stack(cx_stack&CX,
-			       cc_stack&CC,
-			       cl_stack&CL,
-			       lc_stack&LC) const {
-      // clear an stack of cell-self interactions                               
-      while(!CX.is_empty()) {                        // WHILE(CX non-empty)     
-	register cx_iact cx = CX.pop();              //   pop new self iaction  
-#ifdef WRITE_IACT_INFO
-	std::cerr<<" CX "<<std::setw(2)<<cx.lev<<" :"
-		 <<std::setw(6)<< cx.fst.index() <<"       ";
-#endif
-	if(!IA->interact(cx.fst)) {                  //   IF(not performed)     
-#ifdef WRITE_IACT_INFO
-	  std::cerr<<": splitting\n";
-#endif
-	  split_cell_self(cx,CX,CC,CL);              //     split               
-	  clear_cell_cell_stack(CC,CL,LC);           //     clear the CC stack  
-	}                                            //   ENDIF                 
-      }                                              // END WHILE               
-    }
-    //--------------------------------------------------------------------------
-    void work_cell_self_stack(cx_stack &CX,
-			      cc_stack &CC,
-			      cl_stack &CL,
-			      lc_stack &LC,
-			      int const&M) const {
-      // perform up to M cell iactions, perform all occuring leaf iactions      
-      register int i=0;                              // counter: performed      
-      work_cell_cell_stack(CC,CL,LC,i,M);            // work on C-C stack       
-      while(!CX.is_empty() && i<M) {                 // WHILE(CX non-empty)     
-	register cx_iact cx = CX.pop();              //   pop new self iaction  
-	if(IA->interact(cx.fst))                     //   IF(not performed)     
-	  ++i;                                       //     count               
-	else {                                       //   ELSE:                 
-	  split_cell_self(cx,CX,CC,CL);              //     split               
-	  work_cell_cell_stack(CC,CL,LC,i,M);        //     work on CC stack    
-	}                                            //   ENDIF                 
-      }                                              // END WHILE               
-    }    
-    //--------------------------------------------------------------------------
-    static unsigned n_x(unsigned const&d) { return Nsub*d+1; }
-    static unsigned n_c(unsigned const&d) { return Nsub*(Nsub-1)/2+Nsub*d; }
-  };
-  //////////////////////////////////////////////////////////////////////////////
 #undef LoopCKids
 #undef LoopLKids
 #undef LoopCPairs
 #undef LoopSPairs
-  //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // class nbdy::MutualInteractor<>                                           //
-  //                                                                          //
-  // encodes the mutual interaction algorithm.                                //
-  // the order of nodes (first,second) is preserved when splitting a node     //
-  //                                                                          //
-  //////////////////////////////////////////////////////////////////////////////
-  template<typename INTERACTOR> class MutualInteractor :
-    public InteractionBase<INTERACTOR> {
-#ifdef __GNUC__
     //--------------------------------------------------------------------------
-    // typedefs identical to those in InteractorBase<>                          
-    // We repeat them here, because otherwise gcc 3.2 complains, eg.:           
-    //                                                                          
-    // "`typename nbdy::MutualInteractor<INTERACTOR>::cell_iter' is implicitly  
-    //  a typename"                                                             
-    //                                                                          
-    // (which looks like a compiler bug to me).                                 
-    //--------------------------------------------------------------------------
-    typedef typename INTERACTOR::cell_iter cell_iter;// iterator over cells     
-    typedef typename INTERACTOR::leaf_iter leaf_iter;// iterator over leafs     
-    //--------------------------------------------------------------------------
-    typedef iaction<cell_iter,cell_iter> cx_iact;    // cell-self iaction       
-    typedef iaction<cell_iter,cell_iter> cc_iact;    // cell-cell iaction       
-    typedef iaction<cell_iter,leaf_iter> cl_iact;    // cell-leaf iaction       
-    typedef iaction<leaf_iter,cell_iter> lc_iact;    // leaf-cell iaction       
-    //--------------------------------------------------------------------------
-    typedef iastack<cell_iter,cell_iter> cx_stack;   // stack: cell-self iaction
-    typedef iastack<cell_iter,cell_iter> cc_stack;   // stack: cell-cell iaction
-    typedef iastack<cell_iter,leaf_iter> cl_stack;   // stack: cell-leaf iaction
-    typedef iastack<leaf_iter,cell_iter> lc_stack;   // stack: leaf-cell iaction
+    void clear_cell_self_stack() const {
+      // clear an stack of cell-self interactions                               
+      while(!CX.is_empty()) {                        // WHILE(CX non-empty)     
+	cx_iact cx = CX.pop();                       //   pop new self iaction  
+#ifdef WRITE_IACT_INFO
+	std::cerr<<" CX "<<std::setw(2)<<cx.lev<<" :"
+		 <<std::setw(6)<< cx.obj.index() <<"       ";
 #endif
+	if(!IA->interact(cx.obj)) {                  //   IF(not performed)     
+#ifdef WRITE_IACT_INFO
+	  std::cerr<<": splitting\n";
+#endif
+	  split_cell_self(cx);                       //     split               
+	  clear_cell_cell_stack();                   //     clear the CC stack  
+	}                                            //   ENDIF                 
+      }                                              // END WHILE               
+    }
     //--------------------------------------------------------------------------
-    mutable cx_stack CX;                             // stack: cell-self iaction
-    mutable cc_stack CC;                             // stack: cell-cell iaction
-    mutable cl_stack CL;                             // stack: cell-leaf iaction
-    mutable lc_stack LC;                             // stack: leaf-cell iaction
+    void work_cell_cell_stack(int      &i,
+			      int const&M) const {
+      // perform up to M cell-cell, perform all occuring leaf interactions      
+      while(!CC.is_empty() && i<M) {                 // WHILE(CC non-empty)     
+	cc_iact cc = CC.pop();                       //   pop new C-C iaction   
+#ifdef WRITE_IACT_INFO
+	std::cerr<<" CC "<<std::setw(2)<<cc.lev<<" :"
+		 <<std::setw(6)<< cc.fst.index()<<' '
+		 <<std::setw(6)<< cc.snd.index();
+#endif
+	if(IA->interact(cc.fst,cc.snd)) ++i;         //   IF(performed): count  
+	else {                                       //   ELSE                  
+#ifdef WRITE_IACT_INFO
+	  std::cerr<<": splitting\n";
+#endif
+	  split_cell_cell(cc);                       //     split               
+	}                                            //   ENDIF                 
+      }                                              // END WHILE               
+    }
+    //--------------------------------------------------------------------------
+    void work_cell_cell_stack(int const&M) const {
+      // perform up to M cell-cell, perform all occuring leaf interactions      
+      int i = 0;                                     // counter: performed C-C  
+      work_cell_cell_stack(i,M);                     // work it out             
+    }
+    //--------------------------------------------------------------------------
+    void work_cell_self_stack(int const&M) const {
+      // perform up to M cell iactions, perform all occuring leaf iactions      
+      int i = 0;                                     // counter: performed      
+      work_cell_cell_stack(i,M);                     // work on C-C stack       
+      while(!CX.is_empty() && i<M) {                 // WHILE(CX non-empty)     
+	cx_iact cx = CX.pop();                       //   pop new self iaction  
+#ifdef WRITE_IACT_INFO
+	std::cerr<<" CX "<<std::setw(2)<<cx.lev<<" :"
+		 <<std::setw(6)<< cx.obj.index() <<"       ";
+#endif
+	if(IA->interact(cx.obj))                     //   IF(not performed)     
+	  ++i;                                       //     count               
+	else {                                       //   ELSE:                 
+#ifdef WRITE_IACT_INFO
+	  std::cerr<<": splitting\n";
+#endif
+	  split_cell_self(cx);                       //     split               
+	  work_cell_cell_stack(i,M);                 //     work on CC stack    
+	}                                            //   ENDIF                 
+      }                                              // END WHILE               
+    }    
+    //--------------------------------------------------------------------------
+    // construction                                                             
+    //--------------------------------------------------------------------------
+    static unsigned n_x(unsigned const&d) { return Nsub*d+1; }
+    static unsigned n_c(unsigned const&d) { return Nsub*(Nsub-1)/2+Nsub*d; }
     //--------------------------------------------------------------------------
   public:
     MutualInteractor(                                // constructor             
 		     INTERACTOR*const&ia,            // I: interactor           
 		     unsigned   const&d1) :          // I: depth of 1st tree    
-      InteractionBase<INTERACTOR> ( ia ),	     //   initialize base       
+      IA ( ia ),                                     //   initialize interactor 
       CX ( n_x(d1) ),                                //   initialize cell-self  
       CC ( n_c(2*d1) ),                              //   initialize cell-cell  
       CL ( n_c(2*d1) ),                              //   initialize cell-leaf  
@@ -403,73 +421,94 @@ namespace nbdy {
 		     INTERACTOR*const&ia,            // I: interactor           
 		     unsigned   const&d1,            // I: depth of 1st tree    
 		     unsigned   const&d2) :          // I: depth of 2nd tree    
-      InteractionBase<INTERACTOR> ( ia ),	     //   initialize base       
+      IA ( ia ),                                     //   initialize interactor 
       CX ( n_x(d1) ),                                //   initialize cell-self  
       CC ( n_c(d2? d1+d2 : 2*d1) ),                  //   initialize cell-cell  
       CL ( n_c(d2? d1+d2 : 2*d1) ),                  //   initialize cell-leaf  
       LC ( n_c(d2? d1+d2 : 2*d1) ) {}                //   initialize leaf-cell  
     //--------------------------------------------------------------------------
-    void cell_self(cell_iter const&a) const {        // cell-self interaction   
-      CX.push(a,a);                                  // initialize stack        
-      clear_cell_self_stack(CX,CC,CL,LC);            // work until stack empty  
+    // routines for interactions in ordinary (sequential) code                  
+    //--------------------------------------------------------------------------
+    void leaf_leaf(leaf_iter const&a,
+		   leaf_iter const&b) const          // leaf-leaf interaction   
+    {
+      IA->interact(a,b);
+    }
+    //--------------------------------------------------------------------------
+    void cell_self(cell_iter const&a) const          // cell-self interaction   
+    {
+      CX.push(a);                                    // initialize stack        
+      clear_cell_self_stack();                       // work until stack empty  
     }
     //--------------------------------------------------------------------------
     void cell_cell(cell_iter const&a,
-		   cell_iter const&b) const {        // cell-cell interaction   
+		   cell_iter const&b) const          // cell-cell interaction   
+    {
       if(a==b)falcON_ErrorF("self-interaction","MutualInteractor::cell_cell()");
       CC.push(a,b);                                  // initialize stack        
-      clear_cell_cell_stack(CC,CL,LC);               // work until stack empty  
+      clear_cell_cell_stack();                       // work until stack empty  
     }
     //--------------------------------------------------------------------------
     void cell_leaf(cell_iter const&a,
-		   leaf_iter const&b) const {        // cell-leaf interaction   
+		   leaf_iter const&b) const          // cell-leaf interaction   
+    {
       CL.push(a,b);                                  // initialize stack        
-      clear_cell_leaf_stack(CL);                     // work until stack empty  
+      clear_cell_leaf_stack();                       // work until stack empty  
     }
     //--------------------------------------------------------------------------
     void leaf_cell(leaf_iter const&a,
-		   cell_iter const&b) const {        // leaf-cell interaction   
+		   cell_iter const&b) const          // leaf-cell interaction   
+    {
       LC.push(a,b);                                  // initialize stack        
-      clear_leaf_cell_stack(LC);                     // work until stack empty  
+      clear_leaf_cell_stack();                       // work until stack empty  
     }
+#ifdef falcON_MPI
     //--------------------------------------------------------------------------
-    // these routines are to be used by the MPI parallel code                   
+    // routines for interactions in MPI parallel code                           
+    //                                                                          
     // they allow to interrupt the clearing of the CX and/or CC stack, e.g., for
     // testing for the sending or receipt of an MPI message.                    
     // use init_..()   to add a new root-root interaction onto a stack          
     // use work_..()   to perform at most a pre-defined number of cell iactions 
-    //                 (leaf-cell and leaf-leaf iaction will are not counted)   
+    //                 (leaf-cell and leaf-leaf iaction are not counted)        
     //                 returns true if still some work is left.                 
     // use finish_..() to clear the stack                                       
     //--------------------------------------------------------------------------
-    void init_cell_self(cell_iter const&a) const {   // add cell-self iaction   
-      CX.push(a,a);                                  // initialize stack        
+    void init_cell_self(cell_iter const&a) const     // add cell-self iaction   
+    {
+      CX.push(a);                                    // initialize stack        
     }
     //--------------------------------------------------------------------------
     bool work_cell_self(                             // work on CX, performing  
-			int const&M) const {         // I: max # CX & CC iaction
-      work_cell_self_stack(CX,CC,CL,LC,M);           // work at most M CC       
+			int const&M) const           // I: max # CX & CC iaction
+    {
+      work_cell_self_stack(M);                       // work at most M CC/CX    
       return !CX.is_empty();                         // still work left         
     }
     //--------------------------------------------------------------------------
-    void finish_cell_self() const {                  // clear CX stack          
-      clear_cell_self_stack(CX,CC,CL,LC);            // work until stack empty  
+    void finish_cell_self() const                    // clear CX stack          
+    {
+      clear_cell_self_stack();                       // work until stack empty  
     }
     //==========================================================================
     void init_cell_cell(cell_iter const&a,
-			cell_iter const&b) const {   // add cell-cell iaction   
+			cell_iter const&b) const     // add cell-cell iaction   
+    {
       CC.push(a,b);                                  // initialize stack        
     }
     //--------------------------------------------------------------------------
     bool work_cell_cell(                             // work on CC, performing  
-			int const&M) const {         // I: max # CC iaction     
-      work_cell_cell_stack(CC,CL,LC,M);              // work at most M CC       
+			int const&M) const           // I: max # CC iaction     
+    {
+      work_cell_cell_stack(M);                       // work at most M CC       
       return !CC.is_empty();                         // still work left         
     }
     //--------------------------------------------------------------------------
-    void finish_cell_cell() const {                  // clear CC stack          
-      clear_cell_cell_stack(CC,CL,LC);               // work until stack empty  
+    void finish_cell_cell() const                    // clear CC stack          
+    {
+      clear_cell_cell_stack();                       // work until stack empty  
     }
+#endif  // falcON_MPI
     //--------------------------------------------------------------------------
   };
   //////////////////////////////////////////////////////////////////////////////
@@ -477,6 +516,9 @@ namespace nbdy {
   // class nbdy::basic_iactor<ESTIMATOR>                                        
   //                                                                            
   // a base class for a possible template argument of MutualInteractor<>        
+  //                                                                            
+  // the template argument merely serves to provide the types cell_iterator and 
+  // leaf_iterator.                                                             
   //                                                                            
   //////////////////////////////////////////////////////////////////////////////
   template<typename ESTIMATOR> class basic_iactor {
@@ -544,6 +586,10 @@ namespace nbdy {
       single(A,B);
     }
   };
+  //////////////////////////////////////////////////////////////////////////////
+  //                                                                          //
+  // this code does not seem to be used anymore (WD 19/04/04)                 //
+  //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
   // class nbdy::neighbour_counter                                            //
@@ -631,7 +677,7 @@ namespace nbdy {
   class neighbour_counter<TREE,false>
     : public basic_iactor<TREE> {
     //--------------------------------------------------------------------------
-    // nbdy::neighbour_counter<true>                                            
+    // nbdy::neighbour_counter<false>                                           
     //--------------------------------------------------------------------------
   public:
     typedef typename TREE::leaf_iterator leaf_iter;
