@@ -35,6 +35,7 @@
  *             16-dec-96 moved xrandom decl. up	          PJT
  *              7-apr-01 gcc warnings                     pjt
  *             20-jun-01 gcc3                             pjt
+ *             26-aug-01 added sind/cosd/tand             pjt
  *
  */
 #include <stdinc.h>   /* stdinc is NEMO's stdio =- uses real{float/double} */
@@ -124,7 +125,7 @@ static void fie_genconst(double cst)
 
 /*  functions we know  */
 
-#define maxfuncts 44
+#define maxfuncts 47
 #define maxfunlen 10
 #define maxarg    4
 
@@ -135,7 +136,7 @@ static char *functs[] = { "SIN"  , "ASIN" , "SINH" , "COS"  , "ACOS" , "COSH" ,
                    "K"    , "H"    , "P"    , "S"    , "MAX"  , "MIN"  ,
                    "MOD"  , "INT"  , "NINT" , "SIGN" , "UNDEF", "IFGT" ,
                    "IFLT" , "IFGE" , "IFLE" , "IFEQ" , "IFNE" , "RANU" ,
-                   "RANG" , "RANP"};
+		  "RANG"  , "RANP" , "SIND" , "COSD" , "TAND"};
 
 static int nargs[] = {    1   ,    1   ,    1   ,    1   ,    1   ,    1   ,
                       1   ,    1   ,    1   ,    2   ,    1   ,    1   ,
@@ -144,7 +145,7 @@ static int nargs[] = {    1   ,    1   ,    1   ,    1   ,    1   ,    1   ,
                       0   ,    0   ,    0   ,    0   ,    2   ,    2   ,
                       2   ,    1   ,    1   ,    1   ,    0   ,    4   ,
                       4   ,    4   ,    4   ,    4   ,    4   ,    2   ,
-                      2   ,    1   };
+		      2   ,    1   ,    1   ,    1   ,    1 };
 
 
 /*  definitions/declarations for the scanner and parser  */
@@ -678,6 +679,9 @@ void dofie(real *data, int *nop, real *results, real *errorval)
 			  case 43: if (arg[0] < 0) opc = err;
 			  	   else fie_push(fie_ranp(arg[0])); 
 			  	   break;
+			  case 44: fie_push(sin(PI*arg[0]/180.0)); break;
+			  case 45: fie_push(sin(PI*arg[0]/180.0)); break;
+			  case 46: fie_push(tan(PI*arg[0]/180.0)); break;
 			  default: opc = err; break;
 			  }
 			  break;
