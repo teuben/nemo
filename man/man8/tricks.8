@@ -1,0 +1,66 @@
+.TH TRICKS 8NEMO "6 March 1989"
+.SH NAME
+tricks \- some tricks (and bugs) when using NEMO
+.SH DESCRIPTION
+One can use \fIcat(1)\fP to catenate structured binary files, e.g.
+.nf
+	\fBcat r001a.dat >>r001.dat\fP
+.fi
+.PP
+To copy structured binary files between machines of different binary
+format, use the \fItsf(1NEMO), rsf(1NEMO)\fP programs and, if available,
+the \fIcompress(1), uncompress(1)\fP utilities:
+.nf
+	\fBtsf in=r001.dat maxprec=t allline=t | compress >> r001.data.Z\fP
+and on the other machine:
+	\fBzcat r001.data.Z | rsf - r001.dat\fP
+.fi
+On non-Unix supercomputers, often the ASCII
+"205" format (see e.g. \fIatos(1NEMO)\fP)
+will be used. This may be saved in compressed format also, and can
+be processed by NEMO after
+.nf
+	\fBzcat r001.data.Z | atos - r001.dat\fP
+.fi
+.PP
+Some N-body programs, which are capable of handling a series of snapshots,
+and selecting them using the \fBtimes=\fP keyword, are not able to
+handle subsequent snapshots which are larger than the first one. In fact, 
+unpredictable things may happen, although usually it results in
+a core because of illegal memory access. There are two solutions.
+The program can be recompiled, by using a \fB-DREALLOC\fP flag or
+\fB#define\fP it in the source code. The second solution is to prepend
+the datafile with a large enough 'dummy' file.
+.PP
+To display a scatter diagram in the form of a contour map, convert
+the two columns to a snapshot by calling them 'x' and 'y' coordinates.
+Remaining phase space coordinates are unimportant. Set masses to 1, and
+use the \fIatos(1NEMO)\fP format. A program like \fIawk(1)\fP can write
+the file for \fIatos(1NEMO)\fP, then \fIsnapgrid(1NEMO)\fP creates a
+\fIimage(5NEMO)\fP file, which can be optionally smoothed using
+\fIccdsmooth(1NEMO)\fP and displayed with \fIccdplot(1NEMO)\fP. In case
+your host has nicer contour plotting programs, use \fIccdfits(1NEMO)\fP
+to write a \fIfits(5NEMO)\fP format file.
+Check also the tabccd shell script, if available, or perhaps someone
+wrote it in C already. It calls awk, atos and snapgrid.
+.PP
+The \fIds(1LOCAL)\fP program, written by Bill Sebok, is one of the external 
+programs
+which can be used to display images. \fIds\fP can understand a variety of
+image file formats, of which the \fIfits(5NEMO)\fP is best suited for our needs.
+Transform your image to a fits file using \fIccdfits(1NEMO)\fP, and use 
+ds on that fits file. Although \fIds(1L)\fP 
+works on monochrome SUN workstations,
+it's best on a color monitor. The trick to remember is to use the \fB-yflip\fP
+switch, or click on the Y button, because  our fits interface has a problem
+obviously...
+.SH AUTHOR
+Peter Teuben.
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.5i
+18-Aug-88	Document created	PJT 
+5-mar-89	tabccd added         	PJT
+6-mar-89	ds added          	PJT
+9-oct-90	fixed some typos	PJT
+.fi
