@@ -19,7 +19,10 @@ setenv NEMOSITE `hostname`
 #  those cases you will need to tailor various path elements.
 
 #  Here's your default YAPP library
-#setenv YAPPLIB     "$NEMOLIB/yapp_@YAPP_NAME@.o @YAPP_LIBS@"
+if ($?YAPPLIB) then
+  unsetenv YAPPLIB
+  echo Warning: YAPPLIB env removed, you have some remnants of an old NEMO 3.1 installation
+endif
 setenv YAPP        @YAPP_DEF@
 setenv PGPLOT_DIR  @PGPLOT_DIR@
 #  not sure if the next two are really needed
