@@ -1,0 +1,18 @@
+%N snapvratio
+%D compute various global virials (clausius, newton)
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man snapvratio' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input file name (snapshot) [???]
+%A times
+	Times to select snapshot [all]
+%A wmode
+	Use for W (acc|phi|exact) [acc]
+%A newton
+	Do an exact N^2 newtonian calculation too? [f]
+%A eps
+	Gravitational softening, if used [0.05]
+%A VERSION
+	30-jul-97 PJT [0.5]

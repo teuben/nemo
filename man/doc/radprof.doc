@@ -1,0 +1,28 @@
+%N radprof
+%D radial profile of an N-body system
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man radprof' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	ascii input file name  [???]
+%A center
+	center of the system [0,0,0]
+%A mode
+	options: mass, density, rotcur  [density]
+%A rmax
+	def: automatic scaling  [0.0]
+%A dmax
+	def: automatic scaling  [0.0]
+%A mmax
+	def: fixed scaling 0->1  [1.0]
+%A vmax
+	def: automatic scaling  [0.0]
+%A kmax
+	number of nearest 'radial' neighbors [1]
+%A tab
+	need a table ?  [f]
+%A headline
+	random verbiage for plot []
+%A VERSION
+	30-jul-97 PJT [3.0b]
