@@ -13,9 +13,10 @@
 #include <image.h>
 
 
+/* for now we use the classes version 1 in NEMO, i.e. crpix=1 */
 
-local void wcs_f2i(int ndim, double *crpix, double *crval, double *cdelt, 
-		   image *iptr)
+void wcs_f2i(int ndim, double *crpix, double *crval, double *cdelt, 
+	     image *iptr)
 {
   int i;
   if (ndim<1) return;
@@ -40,8 +41,8 @@ local void wcs_f2i(int ndim, double *crpix, double *crval, double *cdelt,
 }
 
 
-local void wcs_i2f(image *iptr, 
-		   int ndim, double *crpix, double *crval, double *cdelt)
+void wcs_i2f(image *iptr, 
+	     int ndim, double *crpix, double *crval, double *cdelt)
 {
   int i;
   if (ndim<1) return;
