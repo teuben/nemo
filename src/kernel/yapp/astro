@@ -1,0 +1,14 @@
+%!
+initmatrix
+72 300 div dup scale
+1 setlinejoin 1 setlinecap 80 600 translate
+/Helvetica findfont 55 scalefont setfont /B { stroke newpath } def /F { moveto 0 setlinecap} def
+/L { lineto } def /M { moveto } def
+/P { moveto 0 1 rlineto stroke } def
+/T { 1 setlinecap show } def
+errordict /nocurrentpoint { pop 0 0 M currentpoint } put
+currentpoint stroke [] 0 setdash M
+currentpoint stroke M 1 0.5 add setlinewidth
+currentpoint stroke [] 0 setdash M
+stroke
+showpage
