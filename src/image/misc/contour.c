@@ -31,6 +31,7 @@
  *		    Can't figure the speed decrease out yet, program
  *                  is 10-20% slower now...
  *	30-mar-97   finally fixed the -DSINGLEPREC bug with lineto_proc
+ *      10-jan-03   SGN -> SIGN
  */
 
 /*CREF
@@ -148,7 +149,7 @@ int contour (real *a, int nx, int ny, real *z, int nc,
                         h[0]=0.25*(h[1]+h[2]+h[3]+h[4]);    /* center point */
                         xh[0]=xmin + (i+0.5)*deltax;
                         yh[0]=ymin + (j+0.5)*deltay;
-                        ish[0] = SGN(h[0]) + 1;
+                        ish[0] = SIGN(h[0]) + 1;
                     } else {
                         m1 = m-1;
 #if defined(CDEF)
@@ -160,7 +161,7 @@ int contour (real *a, int nx, int ny, real *z, int nc,
                         xh[m] = xmin + (i+im[m1])*deltax;
                         yh[m] = ymin + (j+jm[m1])*deltay;
                     }
-                    ish[m] = SGN(h[m]) + 1;   /* make sure ish = 0,1,2 */
+                    ish[m] = SIGN(h[m]) + 1;   /* make sure ish = 0,1,2 */
                 }  /* end m-loop */
 
                 for (m=1; m<=4; m++) {  /* handle each of 4 triangles in cell */

@@ -31,6 +31,7 @@
  *  7-sep-01    added maxsizes.h
  *  8-dec-01    added errno.h
  *  7-may-02    removed some old starlab crap, added strneq
+ * 10-jan-03   renamed SGN/RND/RNG to SIGN/ROUNDUP/RANGE (for Walter)
  */
 
 #ifndef _stdinc_h      /* protect against re-entry */
@@ -291,18 +292,18 @@ typedef real (*rproc)();
  *  SGN: returns the sign of its argument
  *  MIN: returns the argument with the lowest value
  *  MAX: returns the argument with the highest value
- *  RND: roundup a number
- *  RNG: range a number between a low and high value
+ *  ROUNDUP: roundup a number
+ *  RANGE:   range a number between a low and high value
  *
  *  Note: be aware of side effects here
  */
 
 #define   ABS(x)       (((x) < 0) ? -(x) : (x))
-#define   SGN(x)       (((x) < 0) ? (-1) : ((x) > 0) ? 1 : 0)
 #define   MIN(x,y)     (((x) < (y)) ? (x) : (y))
 #define   MAX(x,y)     (((x) > (y)) ? (x) : (y))
-#define   RND(x,y)     ((y)*(((x)+(y)-1)/(y)))
-#define   RNG(x,l,h)   (((x) > (h)) ? (h) : (((x) < (l)) ? (l) : (x)))
+#define   SIGN(x)      (((x) < 0) ? (-1) : ((x) > 0) ? 1 : 0)
+#define   ROUNDUP(x,y) ((y)*(((x)+(y)-1)/(y)))
+#define   RANGE(x,l,h) (((x) > (h)) ? (h) : (((x) < (l)) ? (l) : (x)))
 
 
 

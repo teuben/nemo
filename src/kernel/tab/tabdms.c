@@ -6,6 +6,7 @@
  *      13-sep-99   0.3 added hms PJT  - but not finished
  *      24-jan-00   0.4 added hms/dms with sign for decimal stuff
  *       8-dec-01   0.6 std MAX_ macros
+ *      10-jan-03     a SGN -> SIGN
  *
    %a, %A     Sun/Mon/...  or Sunday/...
    %b, %B     Jan/...	      January/...
@@ -34,7 +35,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "tohms=\n           list of columns (1..) to convert to hms (0=none)",
     "separator=:\n      separator between output D-M-S.S",
     "format=\n          date/time format",
-    "VERSION=0.6\n      8-dec-01 PJT",
+    "VERSION=0.6a\n     10-jan-03 PJT",
     NULL
 };
 
@@ -133,7 +134,7 @@ convert(stream instr, stream outstr)
                 if (nemoinpd(outv[i],&dval,1)<0) 
                     error("syntax error decoding %s",outv[i]);
 		if (colmode[i+1] < 0) {     
-                    sign = SGN(dval);
+                    sign = SIGN(dval);
 		    dval = ABS(dval);       /* do we allow < 0 ??? */
                     decimalval = (int)floor(dval);
                     fprintf(outstr,"%d",decimalval*sign);
@@ -141,7 +142,7 @@ convert(stream instr, stream outstr)
                     dval -= decimalval;
                     dval *= ABS(colmode[i+1]);
 		}
-                sign = SGN(dval);
+                sign = SIGN(dval);
                 dval = ABS(dval);
                 dd = floor(dval);
                 dval = (dval-dd)*60.0;
