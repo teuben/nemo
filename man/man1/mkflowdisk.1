@@ -1,4 +1,4 @@
-.TH MKFLOWDISK 1NEMO "23 November 2003"
+.TH MKFLOWDISK 1NEMO "13 December 2003"
 .SH NAME
 mkflowdisk \- test particle disk with optional kinematic spirals, based on a flow potential
 .SH SYNOPSIS
@@ -81,6 +81,12 @@ dependant seed. See \fIxrandom(3NEMO)\fP [default: \fB0\fP].
 \fBnmodel=\fP\fIn_models\fP
 Number of output models. [Default: \fB1\fP].
 .TP
+\fBsign=-1|1\fP
+Change sign of the Z-angular momentum. Is set to -1, it will flip the sign of all velocities
+are determined from the potential flow. Note that even with sign=1 the disk can have negative
+angular momentum, since the native angular momentum is determined from the
+potential. [Default: \fB1\fP].
+.TP
 \fBtest=t|f\fP
 In test mode all stars are placed at phase 0, and should thus trace the shape
 at phase 0 at one arm of spiral. 
@@ -102,4 +108,5 @@ mkspiral(1NEMO), mkdisk(1NEMO), snapmass(1NEMO), snapcenter(1NEMO), flowcode(1NE
 18-nov-03	V1.0  created                   	PJT
 20-nov-03	V1.1 changed some sign conventions	PJT
 23-nov-03	V1.3 added key=				PJT
+13-dec-03	V1.4 added sign=	PJT
 .fi
