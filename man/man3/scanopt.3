@@ -1,0 +1,29 @@
+.TH SCANOPT 3NEMO "6 November 1994"
+.SH NAME
+scanopt \- scan a string of the form "word1,word2,..." for word match
+.SH SYNOPSIS
+.nf
+\fBbool scanopt(string option, string key);\fP
+\fBint match(string keys, string option, int *mask);\fP
+.fi
+.SH DESCRIPTION
+\fBscanopt\fP searches a comma separated list of words
+for an exact match in one of it's components. Useful to check
+if an option is present. \fI Warning: \fP 
+words must be separated by exactly one comma -- no spaces allowed!
+.PP
+\fBmatch\fP is a related routine, which allows for minimum match.
+It is however limited to the number of bits available in an integer, since
+the \fBmask\fP returned contains a masked integer of the options selected
+in the input string \fBkeys\fP.
+\fB
+.SH SEE ALSO
+match(3NEMO)
+.SH AUTHOR
+Joshua Barnes, Peter Teuben
+.SH HISTORY
+.nf
+.ta +1i +4i
+xx-xxx-86	Created in the dark ages	Josh
+6-nov-94	documented                     	peter
+.fi
