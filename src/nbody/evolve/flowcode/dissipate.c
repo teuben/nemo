@@ -24,7 +24,7 @@ static int    entry = 0;
 #define USE_MAXGRID 1           /* fix max allowed grid */
 
 
-dissipate (btab, nb, ndim, dr, eta, grid, fheat)
+void dissipate (btab, nb, ndim, dr, eta, grid, fheat)
 Body *btab;
 int   nb;
 int   ndim;
@@ -42,7 +42,7 @@ real  fheat;
     real t_before, t_after, kappa;
     real angle, p, ss, cc, velsig, vx, vy;
     
-    if (eta==0.0) return 1;          /* no work to do ... */
+    if (eta==0.0) return;          /* no work to do ... */
     Qheat = (fheat > 0) ;
     Qangle = scanopt(options,"angle");
     Qkappa = scanopt(options,"kappa");
@@ -91,7 +91,7 @@ real  fheat;
         c = (int *) calloc(nxyz, sizeof(int));
 	if (c==NULL) {
             warning("No memory for %d * %d * %d cube; no dissipation",nx,ny,nz);
-	    return 0;       /* error: not enough memory */
+	    return;       /* error: not enough memory */
         }
 	size = nxyz;                        /* and remember new space */
 	dprintf(1,"Allocated %d on entry # %d\n",size,entry);
@@ -185,5 +185,4 @@ real  fheat;
     if (ndis==0) 
         warning("No dissipation done, cell=%g or nbody=%d too small?",
                     dr, nb);
-    return 1;                              /* success */
 }
