@@ -53,7 +53,7 @@ string defv[] = {
     "fixed=\n        Parameters to be kept fixed {vsys,xpos,ypos,pa,inc}",
     "ellips=\n       ** Parameters for which to plot error ellips",
     "beam=\n         ** Beam (arcsec) for beam correction [no correction]",
-    "dens=\n         ** Image containing containing density map",
+    "dens=\n         Image containing containing density map to be used as weight",
     "tab=\n          If specified, this output table is used in append mode",
     "resid=\n        Output of residuals in a complicated plot",
     "tol=0.001\n     Tolerance for convergence of nllsqfit",
@@ -70,7 +70,7 @@ string defv[] = {
     "rotcur3=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur4=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur5=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
-    "VERSION=0.9b\n  22-jul-02 PJT",
+    "VERSION=0.9c\n  28-jul-02 PJT",
     NULL,
 };
 
@@ -101,7 +101,9 @@ int    nparams = 0;             /* total number of parameters (5 + # for models)
 
 
 bool Qimage;                             /* input mode (false means tables are used) */
+bool Qrotcur;                            /* rotcur (rv) vs. velocity field (xyv) table mode */
 real  *xpos_vel, *ypos_vel, *vrad_vel;   /* pointer to tabular information */
+real  *vsig_vel;                         
 int  n_vel = 0;                          /* length of tabular arrays */
 
 real tol,lab;     /* parameters that go into nllsqfit */
@@ -221,35 +223,8 @@ real rotcur_core(real r, int np, real *p, real *d)
 
   d[0] = x / y;
   d[1] = -p[0]*d[0]/(p[1]*q);
-  /* CForm[D[(1+x^c)^(-1/c),c]]  */
-#if 0
-  d[2] = (-((pow(x,c)*log(x))/(c*(1 + pow(x,c)))) + 
-	  log(1 + pow(x,c))/pow(c,2))/pow(1 + pow(x,c),1/c);     /* 2.54" */
-  d[2] = (-((q1*lnx)/(c*(1 + pow(x,c)))) + 
-	  log(1 + pow(x,c))/pow(c,2))/pow(1 + pow(x,c),1/c);
-  d[2] = (-((q1*lnx)/(c*(1 + q1))) + 
-	  log(1 + pow(x,c))/pow(c,2))/pow(1 + pow(x,c),1/c);
-  d[2] = (-((q1*lnx)/(c*(1 + q1))) + 
-	  log(1 + q1)/pow(c,2))/pow(1 + pow(x,c),1/c);
-  d[2] = (-((q1*lnx)/(c*(1 + q1))) + 
-	  log(1 + q1)/pow(c,2))/pow(1 + q1,1/c);
-  d[2] = (-((q1*lnx)/(c*q)) + log(q)/pow(c,2))/pow(1 + q1,1/c);
-  d[2] = (-((q1*lnx)/(c*q)) + lnq/(c*c))/pow(q,1/c);
-
-  d[2] = (-((q1*lnx)/q) + lnq/c)/(y*c);       /* not good  1.35" */
-  d[2] = (-((q1*lnx)/(c*q)) + lnq/(c*c))/y;   /* better    1.15" */
-
-#else
-  d[2] = (-((q1*lnx)/(c*q)) + lnq/(c*c))/y;
-#endif
+  d[2] = (-((q1*lnx)/(c*q)) + lnq/(c*c))/y;     /* CForm[D[(1+x^c)^(-1/c),c]]  */
   d[2] *= p[0] * x;
-
-	   /* 
-	      P1:  98.0657 1.09572
-	      P2:  20.5109 0.625982
-	      P3:  2.24942 0.172386
-	   */
-
   return p[0] * d[0];
 }
 
@@ -344,6 +319,8 @@ nemo_main()
     else
         lunpri=NULL;                    /* no table output */
     Qimage = getbparam("imagemode");
+    Qrotcur = getbparam("rotcurmode");
+    if (Qrotcur) Qimage=FALSE;
 
     if (hasvalue("resid"))
         lunres=stropen(getparam("resid"),"a");  /* pointer to table stream output */
@@ -356,7 +333,7 @@ nemo_main()
 
     old_factor = sqrt((beam[0]+grid[0])*(beam[1]+grid[1])/(grid[0]*grid[1]));
     if (beam[0] > 0 && beam[1] > 0)
-      factor = sqrt(FOUR_PI*beam[0]*beam[1]/(grid[0]*grid[1]));  /* Sicking 1997 !!! */
+      factor = sqrt(FOUR_PI*beam[0]*beam[1]/(grid[0]*grid[1])); /* Sicking 1997 !!! */
     else
       factor = 1.0;
     dprintf(1,"Sicking (1997)'s error multiplication factor=%g  (old_factor=%g)\n",
@@ -434,7 +411,7 @@ rotcurparse()
       nsp = xstrlen(sp,sizeof(string))-2;
       if (nsp % 2) warning("%s= needs an even number of parameters",keyname);
 
-      if (streq(sp[0],"linear")) {                     /* first check for predefined ones */
+      if (streq(sp[0],"linear")) {             /* first check for predefined ones */
 	if (nsp != 2) error("linear needs 2 numbers");
 	npar[nmod] = 1;
 	mpar[nmod][0] = natof(sp[1]);
@@ -482,7 +459,7 @@ rotcurparse()
 	if (mmsk[nmod][0] && mmsk[nmod][1]) 
 	  error("Polynomial needs at least one of P1 and P2 fixed");
 	rcfn[nmod] = rotcur_poly;
-      } else {                           /* else, if load= was used, try and find it there */
+      } else {                /* else, if load= was used, try and find it there */
 	if (Qext) {
 	  sprintf(func_name,"rotcur_%s",sp[0]);
 	  rcfn[nmod] = (rcproc) findfn(func_name);
@@ -565,18 +542,33 @@ stream  lunpri;       /* LUN for print output */
       read_image(velstr,&velptr);                 /* get data */
     } else {
       n_vel = nemo_file_lines(input,100000);
-      if (0) {
-	xpos_vel = (real *) allocate(n_vel * sizeof(real));
-	ypos_vel = (real *) allocate(n_vel * sizeof(real));
-	vrad_vel = (real *) allocate(n_vel * sizeof(real));
+      xpos_vel = (real *) allocate(n_vel * sizeof(real));
+      ypos_vel = (real *) allocate(n_vel * sizeof(real));
+      vrad_vel = (real *) allocate(n_vel * sizeof(real));
+      vsig_vel = (real *) allocate(n_vel * sizeof(real));
+      if (Qrotcur) {
+	colnr[0] = 1;    coldat[0] = ypos_vel;
+	colnr[1] = 2;    coldat[1] = vrad_vel;
+	n_vel = get_atable(velstr,2,colnr,coldat,n_vel);
+	dprintf(0,"[Found %d points in rotation curve]\n",n_vel);
+	for (i=0; i<n_vel; i++) {
+	  xpos_vel[i] = 0.0;
+	  vsig_vel[i] = 1.0;
+	}
+      } else {
 	colnr[0] = 1;    coldat[0] = xpos_vel;
 	colnr[1] = 2;    coldat[1] = ypos_vel;
 	colnr[2] = 3;    coldat[2] = vrad_vel;
 	n_vel = get_atable(velstr,3,colnr,coldat,n_vel);
-	for (i=0; i<n_vel; i++)
-	  dprintf(5,"%g %g %g\n",xpos_vel[i],ypos_vel[i],vrad_vel[i]);
-      } else {
-	warning("Supposed to read a rotation curve (R,V) here");
+	dprintf(0,"[Found %d points in velocity field table]\n",n_vel);
+	for (i=0; i<n_vel; i++) {
+	  xpos_vel[i] = 0.0;
+	  vsig_vel[i] = 1.0;
+	}      
+      }
+      for (i=0; i<n_vel; i++) {
+	vsig_vel[i] = 1.0;
+	dprintf(5,"%g %g %g %g\n",xpos_vel[i],ypos_vel[i],vrad_vel[i],vsig_vel[i]);
       }
       velptr = NULL;
     }
@@ -677,20 +669,23 @@ stream  lunpri;       /* LUN for print output */
     n = nemoinpr(getparam("pa"),pan,ring);
     if (n<1) error("pa=: need at least one position angle (%d)",n);
     for (i=n;i<*nring;i++)
-        pan[i] = pan[n-1];
+      pan[i] = pan[n-1];
     n = nemoinpr(getparam("inc"),inc,ring);
     if (n<1) error("inc=: need at least one inclincation (%d)",n);
     for (i=n;i<*nring;i++)
-        inc[i] = inc[n-1];
+      inc[i] = inc[n-1];
     n = nemoinpr(getparam("center"),center,2);
     if (n==2) {                     /* if two value supplied */
-        *x0 = center[0];            /* this will be the center of rotation */
-        *y0 = center[1];
+      *x0 = center[0];            /* this will be the center of rotation */
+      *y0 = center[1];
+    } else if (n==1 && Qrotcur) {   /* rotcurmode: slit forced along Y */
+      *x0 = 0;
+      *y0 = center[0];            /* this will be the center of rotation */
     } else if (n==0) {                   /* if nothing supplied: */
-        *x0 = 0.5*(lmin+lmax);      /* use center of map */
-        *y0 = 0.5*(mmin+mmax);
+      *x0 = 0.5*(lmin+lmax);      /* use center of map */
+      *y0 = 0.5*(mmin+mmax);
     } else                          /* if all fails - barf */
-        error("Need two numbers to define the center (%d)",n);
+      error("Need two numbers to define the center (%d)",n);
     *thf = getdparam("frang");
 
     printf("ROTCUR: free angle %4.1f (degrees)\n", *thf);
@@ -737,6 +732,11 @@ stream  lunpri;       /* LUN for print output */
     iret=match(getparam("fixed"),"vsys,xpos,ypos,pa,inc,all",&fixed);
     if (iret<0) error("Illegal option in fixed=%s",getparam("fixed"));
     dprintf(1,"MASK: 0x%x ",fixed);
+    if (Qrotcur) {
+      if (mask[1]==1) warning("rotcurmode: XPOS should be fixed at 0");
+      if (mask[3]==1) warning("rotcurmode: PA should be fixed at 0");
+      if (mask[4]==1) warning("rotcurmode: INC should be fixed at 90");
+    }
     if (fixed & (1<<GPARAM)) {
       for (i=0; i<GPARAM; i++) mask[i] = 0;
     } else {
@@ -1178,10 +1178,15 @@ real  *q;             /* output sigma */
     x0=p[1];              /* x-position of center */
     y0=p[2];              /* y-position of center */
     free=ABS(sin(F*thf)); /* free angle in terms of sine */
-    sinp=sin(F*phi);       /* sine of pa. */
-    cosp=cos(F*phi);       /* cosine of pa. */
-    sini=sin(F*inc);       /* sine of inc. */
-    cosi=cos(F*inc);       /* cosine of inc. */
+    if (Qrotcur) {
+      cosi = sinp = 0.0;
+      cosp = sini = 1.0;
+    } else {
+      sinp=sin(F*phi);       /* sine of pa. */
+      cosp=cos(F*phi);       /* cosine of pa. */
+      sini=sin(F*inc);       /* sine of inc. */
+      cosi=cos(F*inc);       /* cosine of inc. */
+    }
     a=sqrt(1.0-cosp*cosp*sini*sini);       /* find square around ellipse */
     b=sqrt(1.0-sinp*sinp*sini*sini);
 
