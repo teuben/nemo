@@ -6,7 +6,8 @@ pspeed \- calculate the pattern speed of a stellar system.
 \fBpspeed int=\fPccd-intensity \fBvel=\fPccd-velocity [parameter=value]
 .SH DESCRIPTION
 \fIpspeed\fP calculates the pattern speed of a stellar system using
-Tremaine & Weinberg's method (ApJ 1985, vol. 2xx, pp. xxx). For this
+ 1984ApJ...282L...5T
+Tremaine & Weinberg's method (1984ApJ...282L...5T). For this
 a line parallel but offset to the line of nodes
 of a galaxy must have information on intensity and radial velocity.
 \fIpspeed\fP assumes the line of nodes is along the X-axis.
@@ -28,7 +29,7 @@ y value resulted in a pattern speed. For debugging only.
 .SH BUGS
 pspeed is too sensitive to noise to be useful for all practical purposes.
 .SH "SEE ALSO"
-snapslit(1NEMO), snapshot(5NEMO), image(5NEMO)
+snapslit(1NEMO), snaprotate(1NEMO), snapshot(5NEMO), image(5NEMO)
 .SH AUTHOR
 Peter Teuben
 .SH FILES
@@ -40,6 +41,6 @@ Peter Teuben
 .nf
 .ta +2.0i +4.0i
 17-Aug-87	V1.0: Original created	PJT
- 1-Nov-87	V1.2: more debugy output PJT
+ 1-Nov-87	V1.2: more debug output PJT
 .fi
 
