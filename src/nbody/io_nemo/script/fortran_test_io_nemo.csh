@@ -19,7 +19,7 @@ endif
 set RT=run_test
 
 # Set io_nemo test programs path
-set IONB=${MACHTYPE}_${OSTYPE}/bin
+set IONB=${OSTYPE}/bin
 
 set selt=( "200:300" "100,3000:15000:143,23467:29999:466"  "all" "0:29999" "0:100:2,1000:4000:3,10000,15000:25000"  )
 

@@ -3,7 +3,7 @@
 # $Id$
 #
 
-set ARCH = ${MACHTYPE}_${OSTYPE}
+set ARCH = ${OSTYPE}
 
 set dirs = ( ${ARCH}/obj ${ARCH}/bin )
 

@@ -12,7 +12,8 @@ include $(NEMOLIB)/makedefs
 #--------------------------------------------------------
 # Library path
 LIBPATH = -L$(NEMOLIB) -L.
-L = $(NEMOLIB)/libnemo.a 
+L    = $(NEMOLIB)/libnemo.a 
+Lg77 = $(NEMOLIB)/libnemomaing77.a 
 LIBNEMO = -lnemo
 #--------------------------------------------------------
 # g77's options
@@ -28,9 +29,9 @@ FFLAGS = -O -fno-second-underscore -fwritable-strings
 # Macros definitions
 
 # io_nemo OBJ
-IONO = ${MACHTYPE}_${OSTYPE}/obj
+IONO = ${OSTYPE}/obj
 # io_nemo BIN
-IONB = ${MACHTYPE}_${OSTYPE}/bin
+IONB = ${OSTYPE}/bin
 # io_nemo Test Src
 IONT = test_src
 # io_nemo src
@@ -64,8 +65,8 @@ run_Testfile : dummy
 	@make -f Testfile clean testc testf
 
 run_test : dummy
-	(make test  ; script/test_io_nemo.csh)
-	(make testf ; script/fortran_test_io_nemo.csh)
+	(make test  ; script/test_io_nemo.csh )
+	(make testf ; script/fortran_test_io_nemo.csh )
 
 test  : dirs                                                   \
 	${IONB}/io_nemo_test_float ${IONB}/io_nemo_test_double \
@@ -76,11 +77,15 @@ testf : dirs 						       \
         ${IONB}/nemo_fortran_f_n3  ${IONB}/nemo_fortran_d_n3   \
 	${IONB}/snapmask_s         ${IONB}/snapmask_d
 
-install:  dirs	.install_lib
+install:  dirs	.install_lib .install_lib_maing77
 
 .install_lib: $(LIB_IO_NEMO)
 	ar ruv $(L) $?
 	ranlib $(L)
+
+.install_lib_maing77: ${IONO}/nemo_g77.o
+	ar ruv $(Lg77) $?
+	ranlib $(Lg77)
 
 package :
 	find . -type f \( -name "*.[f,F,c,h,3]"   -o -name "Makefile"  -o -name "*.ps"  -o -name "README*" -o -name "*.csh"  -o -name "Testfile" \) -exec tar uvf io_nemo.tar {} \;
