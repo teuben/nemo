@@ -1,0 +1,22 @@
+%N snapcmp
+%D compare two N-body snapshots
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man snapcmp' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in1
+	first input file name [???]
+%A in2
+	second input file name [???]
+%A time1
+	time selected from 1st file [all]
+%A time2
+	time selected from 2nd file [all]
+%A obs
+	observable used in comparison [r]
+%A diffpart
+	difference particles first [true]
+%A relative
+	scale difference by ref value [false]
+%A VERSION
+	29-mar-94 PJT [1.4]
