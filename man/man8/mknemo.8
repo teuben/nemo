@@ -1,0 +1,46 @@
+.TH MKNEMO 8NEMO "25 June 1991"
+.SH NAME
+mknemo \- attempt to find NEMO programs and install them
+.SH SYNOPSIS
+.PP
+\fBmknemo \fIprogram(s)\fP 
+.SH DESCRIPTION
+\fImknemo\fP attempts to find the source code of the program(s)
+specified on the command line, and tries to compile them.
+If successfull, the binary will be placed in \fB$NEMOBIN\fP
+.PP
+On a first pass a single
+source file \fIprogram.c\fP is looked for, which is
+compiled with a local \fBMakefile\fP (or a template
+if none is available). If no source code is found,
+a directory with the name \fIprogram\fP is searched for, 
+and a local Makefile is then used to install the \fIprogram\fP.
+.PP
+After the binary is moved over to \fB$NEMOBIN\fP, the script
+\fImkpdoc\fP is called to see if the \fIdoc(5)\fP file needs 
+to be updated.
+.SH "SEE ALSO"
+mkbin(8NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH ENVIRONMENT
+The following environment variables are used:
+.nf
+.ta +1i 
+CFLAGS   	CC compiler flags
+.fi
+.SH FILES
+.nf
+.ta +3.0i
+$NEMOLIB/libnemo.a	main NEMO library
+$NEMOLIB/yapp*.o	various device drivers
+$NEMO/src          	source tree pruned for programs/directories
+$NEMO/adm/install/mknemo.log	logfile of all previous installs done
+$NEMO/adm/install/mknemo.lock	lockfile, to prevent multiple usage
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1i +4i
+21-jun-91	V1.0: doc created       	PJT
+25-jun-91	V1.1: added lockfile     	PJT
+.fi
