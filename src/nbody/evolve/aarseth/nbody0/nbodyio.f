@@ -48,7 +48,7 @@ CSED    The next statement can be modified with SED to toggle type
       INTEGER i,k
 
       WRITE(6,105) body,(x(k),k=1,NDIM),(a(k),k=1,NDIM),step, i
-  105 FORMAT(1h ,f10.2,3x,3f10.2,3x,3f10.2,3x,f12.4,3x,i5)
+  105 FORMAT(f10.2,3x,3f10.2,3x,3f10.2,3x,f12.4,3x,i5)
       RETURN
       END
 C***********************************************************************
@@ -63,6 +63,6 @@ CSED    The next statement can be modified with SED to toggle type
       INTEGER nsteps
 
       WRITE(6,140) tnext,nsteps,e
-  140 FORMAT(1h0,5x,'time =',f7.2,'  steps =',i6,' energy =',f10.4,/)
+  140 FORMAT(5x,'time =',f7.2,'  steps =',i6,' energy =',f10.4,/)
       RETURN
       END
