@@ -1,0 +1,40 @@
+.TH MKGALAXY 1NEMO "11 May 2002"
+.SH NAME
+mkgalaxy - create spinning galaxies (xscreensaver)
+.SH SYNOPSIS
+.B mkgalaxy
+.SH DESCRIPTION
+\fImkgalaxy\fP creates random initial conditions for spinning galaxies,
+taken straight from the famous Xscreensaver(1) program.
+.SH PARAMETERS
+The following parameters are recognized; they may be given in any order.
+.TP 25
+\fBout=\fP\fIsnapfile\fP
+.TP
+\fBnbody=\fP\fIinteger\fP
+Number of particles
+.TP
+\fBseed=\fP\fIinteger\fP
+seed for the random number generator. The default (0) the unix time clock
+will be used. Default: 0
+.SH SEE ALSO
+.BR X (1),
+.BR xscreensaver (1),
+.BR xlock (1)
+.SH AUTHOR
+Original Amiga version by Uli Siegmund <uli@wombat.okapi.sub.org>
+ for EGS in Cluster.
+
+Ported from Cluster/EGS to C/Intuition by Harald Backert.
+
+Ported to X11 and xlockmore by 
+Hubert Feyrer <hubert.feyrer@rz.uni-regensburg.de>, 30-Sep-94.
+
+Modified by David Bagley <bagleyd@bigfoot.com>, 23-Oct-94.
+
+Modified by Dave Mitchell <davem@magnet.com>, 7-Apr-97.
+
+Ability to run standalone or with \fIxscreensaver\fP added by 
+Jamie Zawinski <jwz@jwz.org>, 10-May-97.
+
+NEMO program by Peter Teuben <teuben@astro.umd.edu>, 11-may-2002.

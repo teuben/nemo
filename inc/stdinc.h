@@ -36,6 +36,10 @@
 #ifndef _stdinc_h      /* protect against re-entry */
 #define _stdinc_h
 
+#if !defined(__STDC__)
+ERROR!  Sorry, NEMO now requires an ANSI C compiler
+#endif
+
 #define NEMO  1
 
 #include <maxsizes.h>   /* should be in $NEMOLIB - made during install */
