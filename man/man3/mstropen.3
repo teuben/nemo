@@ -31,7 +31,7 @@ allocated memory associated with it.
 .nf
 	mstr *mp = mstr_init("test%03d.dat");
 	for (int i=0; i<10; i++) {
-	   stream ostr = mstr_open(mp);
+	   stream ostr = mstr_open(mp,"w");
 	   fprintf(mp,"Hello world, i=%d\\n",i);
 	}
 	mstr_close(mp);
