@@ -1,5 +1,5 @@
 DIR = src/nbody/init
-BIN = snapenter mkplummer mkexpdisk real mkommod mkhomsph
+BIN = snapenter mkplummer mkexpdisk real mkommod mkhomsph mkspiral
 NEED = $(BIN) tsf snapprint
 
 help:
@@ -61,10 +61,10 @@ mkhomsph:
 	mkhomsph mkhomsph.out $(NBODY) seed=123
 	tsf mkhomsph.out
 
-mkommod:
+mkspiral:
 	@echo Running $@
-	mkommod $(NEMODAT)/k5isot.dat mkommod.out $(NBODY) seed=123
-	tsf mkommod.out
+	mkspiral mkspiral.out $(NBODY) seed=123 a=100
+	tsf mkspiral.out
 
 real:
 	@echo f2d conversion:
