@@ -30,29 +30,61 @@ static int ncards = 0;
 
 static char *haskey(char *, char *);
 
+static char *program_version = "runcmhog:  Version 1.1 9-feb-2002";
+
+static int Qdebug = 0;                  /* -d (debug toggle) */
+
 int main(int argc, char *argv[])
 {
     int i;
+    char *cp;
     char *namelist = "cmhogin";		/* -n name */
     char *exefile = "cmhog";		/* -r name */
     char *rundir;			/* no flag */
 
     if (argc < 2) usage(argv[0]);
-    rundir = argv[1];
+    i = 1;
+    while (*argv[i] == '-') {
+      cp = argv[i];
+      cp++;
+      switch (*cp) {
+      case 'h':
+	usage(argv[0]); break;
+      case 'd':
+	i++;
+	Qdebug = 1;
+	break;
+      case 'n':
+	i++;  if (i==argc) usage(argv[0]);
+	namelist = argv[i++];
+	break;
+      case 'r' :
+	i++;  if (i==argc) usage(argv[0]);
+	exefile = argv[i++];
+	break;
+      default:
+	break;
+      }
+    }
+    rundir = argv[i++];
+
+    if (Qdebug)
+      fprintf(stderr,"%s -n %s %s\n",exefile,namelist,rundir);
 
     read_namelist(namelist);
-    for (i=2; i<argc; i++)
+    for (; i<argc; i++)
         patch_namelist(argv[i]);
     goto_rundir(rundir);
-    write_namelist(namelist);
+    write_namelist("cmhogin");
     run_program(exefile);
     exit(0);        
 }
 
 int usage(char *name)
 {
-    fprintf(stderr,"Usage: %s [-e exe] [-n namelist] run_directory [[namelist:][key=val]]\n",name);
-    exit(0);
+  fprintf(stderr,"%s\n", program_version);
+  fprintf(stderr,"Usage: %s [-e exe] [-n namelist] run_directory [[namelist:][key=val]]\n",name);
+  exit(0);
 }
 
 read_namelist(char *filename)
@@ -65,6 +97,7 @@ read_namelist(char *filename)
         fprintf(stderr,"File %s could not be opened\n",filename);
         exit(0);
     }
+    if (Qdebug) fprintf(stderr,"Opening namelist %s\n",filename);
     while (fgets(line,256,fp)) {
         /* allocate a new line, with extra space for later insertions */
         database[ncards] = (char *) malloc(sizeof(line)+1+256);
@@ -108,6 +141,10 @@ patch_namelist(char *keyval)
     } 
 
     cp = strchr(key,'=');
+    if (cp==NULL) {
+      fprintf(stderr,"argument \"%s\" : did not find '='\n",key);
+      exit(1);
+    }
     *cp++ = 0;
     strcpy(val,cp);
 
