@@ -2,7 +2,7 @@ DIR = src/image/rotcur
 BIN = ccdvel rotcur rotcurshape
 NEED = $(BIN) nemoinp
 
-DATA = map1.vel map1.den map1.rotcur map1.r map1.v map1.d
+DATA = map1.vel map1.den map1.rotcur map1.r map1.v map1.d map1.rotcurshape
 
 help:
 	@echo $(DIR)
