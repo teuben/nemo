@@ -1,0 +1,52 @@
+.TH RANGE 3NEMO "5 Aug 1987"
+.SH NAME
+drange, irange \- parser of ascii string into an array of values
+.SH SYNOPSIS
+.nf
+.B int drange (n, rval, rexp)
+.B int    *n;
+.B double rval[];
+.B char   *rexp[];
+.PP
+.B int irange (n, rval, rexp)
+.B int  *n;
+.B int  rval[];
+.B char *rexp[];
+.fi
+.SH FILES
+.nf
+.ta +2.0i
+corona:/usr/pjt/clib	source
+.fi
+.SH DESCRIPTION
+The \fIrange(3)\fP routines parse a string \fIrexp\fP 
+containing a list of numbers into
+an array \fIrval\fP of \fIn\fP values. The list must be a comma-separated 
+list of numbers. Each number however can consist of an implied do-loop,
+where the initial, final and optional the decrement (defaulted to 1 if absent)
+are separated by a colon.
+The routines are very forgiving with respect to the usage of spaces and tabs.
+.SH EXAMPLE
+The string \fI1,10:20:2,100\fP gets parsed into an array of values
+\fI1 10 12 14 16 18 20 100\fP.
+.SH SEE ALSO
+setrange(3)
+.SH DIAGNOSTICS
+Low-level catastrophies (eg, parsing errors, wrong delimiters)
+generate messages via \fIerror\fP(3).
+.SH BUGS
+A string like \fI1,,2\fP translates into an array of values \fI1,0,2\fP,
+i.e. an empty slot (which could be interpreted as a default value) will
+be parsed as a zero.
+.PP
+At the moment a \fIspace\fP character is treated as an end-of-string,
+instead of a string delimiter. One could think of reasons to change 
+this, especially when the \fIrange(3)\fP-routines are used in 
+other-than-\fIgetparam(3)\fP environments.
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +2.0i
+16-Mar-87	created (PJT)
+5-Aug-87	made skipping spaces and tabs more general (PJT)
