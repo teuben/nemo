@@ -18,6 +18,7 @@
  *                              "Coffee Plantation", Tucson, AZ.
  * V3.0   pjt 14-jun-02         integer output not in octal anymore
  * V3.1   pjt 29-aug-02         confirmed bug item=XXX doesn't work anymore
+ * V3.1a  pjt 25-nov-03         fix minor (but fatal) xml syntax error
  *
  */
 
@@ -35,7 +36,7 @@ string defv[] = {
     "item=\n                      Select specific item",
     "xml=f\n                      output data in XML format? (experimental)",
     "octal=f\n                    Force integer output in octal again?",
-    "VERSION=3.1\n		  29-aug-02 PJT ",
+    "VERSION=3.1a\n		  25-nov-03 PJT ",
     NULL,
 };
 
@@ -78,6 +79,7 @@ void nemo_main()
     xml = getbparam("xml");
     if (xml) {     /* if XML output used, it should print all items */
       allline = TRUE;
+      printf("<nemo>\n");
     }
     octal = getbparam("octal");
     while ((tags = list_tags(instr)) != NULL) {
@@ -85,6 +87,7 @@ void nemo_main()
 	free(*tags);
 	free((char *)tags);
     }
+    printf("</nemo>\n");
 }
 
 void print_item(string tag)
