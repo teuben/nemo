@@ -1,0 +1,207 @@
+#include "cmhog.def"
+c	TEUBEN will turn on HDF output, else ascii output ala Glenn Piner
+#ifdef TEUBEN
+c=======================================================================
+c/////////////////////////  SUBROUTINE HDFALL  \\\\\\\\\\\\\\\\\\\\\\\\\
+c
+      subroutine hdfall(filename)
+c
+c  MAKES AN HDF DUMP CONTAINING ALL ACTIVE FIELD ARRAYS
+c
+c     written by: Jim Stone
+c     date:       January,1989
+c     modified1:  PJT - april 1995: 3d -> 2d for the isothermal bar project
+c
+c  PURPOSE: Makes an hdf dump of all the active field variables.
+c    Data is written in the Scientific Data Set to "filename".  Note
+c    that data must be stored contiguously in order to interface
+c    correctly to the C hdf routines.
+c
+c  EXTERNALS: HDF library routines, PGAS (only if non-isothermal)
+c
+c  LOCALS:
+c-----------------------------------------------------------------------
+c      implicit NONE
+#include "param.h"
+#include "grid.h"
+#include "field.h"
+#include "root.h"
+c #include "scratch.h"
+      character*8  filename
+c
+      integer  i,j,k,rank,shape(3),ret,nyd,nzd
+      real data(jn*kn),yscale(jn),zscale(kn)
+      character*32 string
+      equivalence (data,wijk0)
+c
+      integer  dssdims,dssdast,dssdisc,dsadata,dspdata
+      external dssdims,dssdast,dssdisc,dsadata,dspdata
+     &  ,pgas
+c\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\///////////////////////////////
+c=======================================================================
+c
+      do 20 j=jbtm,jtp
+        yscale(j-jbtm+1) = y(j) + 0.5*dy(j)
+20    continue
+      do 30 k=kbtm,ktp
+        zscale(k-kbtm+1) = z(k) + 0.5*dz(k)
+30    continue
+      nyd = jtp-jbtm+1
+      nzd = ktp-kbtm+1
+c
+c  double check, since the two versions (stone vs. piner) seem to use 
+c  different indices
+c
+      if (nyd .ne. je-js+1) then
+         write(*,*) 'Problem with Radial grid',nyd,js,je         
+      endif
+      if (nzd .ne. ke-ks+1) then
+         write(*,*) 'Problem with Angular grid',nzd,ks,ke
+      endif
+
+
+c      rank     = 3
+      rank     = 2
+      shape(1) = nyd
+      shape(2) = nzd
+      ret = dssdims(rank,shape)
+c      ret = dssdisc(1,shape(1),xscale)
+c      ret = dssdisc(2,shape(2),yscale)
+c      ret = dssdisc(3,shape(3),zscale)
+      ret = dssdisc(1,shape(1),yscale)
+      ret = dssdisc(2,shape(2),zscale)
+
+c
+c  y-velocity
+c
+      do 200 k=ks,ke
+      do 200 j=js,je
+        data((k-ks)*nyd + (j-js)+1) = v(j,k)
+200   continue   
+      write(string,"('R-VELOCITY AT TIME=',1pe8.2)") time
+      ret = dssdast(string,'km/sec   ','1pe8.2','Polar')
+      ret = dsadata(filename,rank,shape,data)
+c
+c  z-velocity
+c
+      do 300 k=ks,ke
+      do 300 j=js,je
+        data((k-ks)*nyd + (j-js)+1) = w(j,k)
+300   continue   
+      write(string,"('PHI-VELOCITY AT TIME=',1pe8.2)") time
+      ret = dssdast(string,'km/sec   ','1pe8.2','Polar')
+      ret = dsadata(filename,rank,shape,data)
+c
+c  density
+c
+      do 400 k=ks,ke
+      do 400 j=js,je
+        data((k-ks)*nyd + (j-js)+1) = d(j,k)
+400   continue
+      write(string,"('DENSITY AT TIME=',1pe8.2)") time
+      ret = dssdast(string,'Msolar/pc**2','1pe8.2','Polar')
+      ret = dsadata(filename,rank,shape,data)
+#if 0
+c
+c  total energy
+c
+      do 500 k=kbtm,ktp
+      do 500 j=jbtm,jtp
+        data((k-kbtm)*nyd + (j-jbtm) + i-ibtm+1) = e(j,k)
+500   continue
+      write(string,"('TOTAL ENERGY AT TIME=',1pe8.2)") time
+      ret = dssdast(string,'ergs/gm  ','1pe8.2','Cartesian')
+      ret = dsadata(filename,rank,shape,data)
+c
+c  pressure
+c
+      call pgas(d,e,p,u,v,w,ibtm,itp,jbtm,jtp,kbtm,ktp)
+      do 600 k=kbtm,ktp
+      do 600 j=jbtm,jtp
+        data((k-kbtm)*nyd + (j-jbtm) + 1) = p(j,k)
+600   continue   
+      write(string,"('PRESSURE AT TIME=',1pe8.2)") time
+      ret = dssdast(string,'dynes    ','1pe8.2','Cartesian')
+      ret = dsadata(filename,rank,shape,data)
+#endif
+c
+c  neutral fraction
+c
+#ifdef JRC
+      do 700 k=kbtm,ktp
+      do 700 j=jbtm,jtp
+      do 700 i=ibtm,itp
+       data((k-kbtm)*nyd +(j-jbtm) + 1)=fn(j,k)
+700   continue   
+      write(string,"('IONIZATION AT TIME=',1pe8.2)") time
+      ret = dssdast(string,'dynes    ','1pe8.2','Cartesian')
+      ret = dsadata(filename,rank,shape,data)
+#endif
+c
+      return
+      end
+#else
+c=======================================================================
+c/////////////////////////  SUBROUTINE HDFALLA \\\\\\\\\\\\\\\\\\\\\\\\\
+c
+      subroutine hdfall(filename)
+c
+c  MAKES AN ASCII DUMP CONTAINING some FIELD ARRAYS
+c
+c     written by: Jim Stone
+c     date:       January,1989
+c     modified1:  
+c		  Glenn Piner, derived from hdfall()
+c
+c  PURPOSE: Makes an asciidump of some field variables.
+c
+c  EXTERNALS: 
+c
+c  LOCALS:
+c-----------------------------------------------------------------------
+#include "param.h"
+#include "grid.h"
+#include "field.h"
+#include "root.h"
+c
+      integer  j,k
+      character*1 ext
+      character*6 filename
+c
+c\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\///////////////////////////////
+c=======================================================================
+c
+      if (nwritten.eq.0) then
+	ext='0'
+      else if (nwritten.eq.1) then
+	ext='1'
+      else if (nwritten.eq.2) then
+	ext='2'
+      else if (nwritten.eq.3) then
+	ext='3'
+      else if (nwritten.eq.4) then
+	ext='4'
+      else if (nwritten.eq.5) then
+	ext='5'
+      else if (nwritten.eq.6) then
+	ext='6'
+      else if (nwritten.eq.7) then
+	ext='7'
+      else if (nwritten.eq.8) then
+	ext='8'
+      else if (nwritten.eq.9) then
+	ext='9'
+      endif
+      filename='ascii'//ext
+      open (4,file=filename)
+      do 2 j=js,je
+      do 2 k=ks,ke
+	 write (4,1) d(j,k),v(j,k),w(j,k)
+1        format (3e14.5)
+2     continue
+      nwritten=nwritten+1
+      close (unit=4)
+c
+      return
+      end
+#endif
