@@ -1,0 +1,45 @@
+.TH SNAPSPECKS 1NEMO "21 May 2001"
+.SH NAME
+snapspecks \- tabulate a snapshot in specks format
+.SH SYNOPSIS
+\fBsnapspecks\fP [parameter=value]
+.SH DESCRIPTION
+No description available. This manual page was created by mkman
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input file (snapshot) [???]    
+.TP 20
+\fBoptions=\fP
+Output variables [x,y,z,m]     
+.TP 20
+\fBformat=\fP
+Format for output [%g]    
+.TP 20
+\fBtimes=\fP
+Times to select snapshot [all]   
+.SH EXAMPLES
+.nf
+#! partiview
+filepath +:../hipcat
+read sample.dat
+eval labels off
+#eval cmap colorbv.cmap
+eval lum lum 0 1
+eval polylumvar point-size .1 area
+texturevar 4
+eval psize 5000
+eval slum 5
+eval every 1
+.fi
+.SH SEE ALSO
+.SH FILES
+.SH AUTHOR
+mkman
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+21-May-01	page created	PJT
+.fi

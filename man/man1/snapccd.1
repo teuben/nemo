@@ -22,7 +22,8 @@ Note that the radial velocity has the astronomical convention. The observer
 is located at infinity at the positive Z-axis: a positive z velocity
 (\fBvz\fP) means stars are approaching, i.e. negative radial velocity.
 .PP
-\fIsnaprotate(1NEMO)\fP has to be used first to do any other than a top-view.
+\fIsnaprotate(1NEMO)\fP has to be used first to do any other than a top-view,
+probably the more general version \fIsnapgrid(1NEMO)\fP should be used.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword is also
 given:
@@ -110,6 +111,7 @@ large images (512 square) or so are used. Need larger memory machine.
 The program gracefully allows the user to use nonzero \fBmoment\fP
 and a non-infinite \fBvrange\fP. No warnings here.
 .SH "SEE ALSO"
+snapgrid(1NEMO), 
 snaprotate(1NEMO), snapslit(1NEMO), snapsmooth(1NEMO), snapaxsym(1NEMO), 
 tsf(1NEMO), ccdgrid(1NEMO)
 .SH AUTHOR
