@@ -2,7 +2,7 @@
  * GETPARAM.C: command-line processing functions for NEMO
  *             this also encompassed most of NEMO's user interface
  *
- *             This package has a long and winded history
+ *             This package has a long and winded history...
  *
  * Nov. 1986  Joshua Edward Barnes, Princeton NJ. - original version
  * Oct. 1987  Peter Teuben: added the 'host=' system keyword 
@@ -101,12 +101,13 @@
  * 12-sep-01       f  nemo_file_size now
  * 15-sep-01    3.3   indexed keywords, but oops, can't do MINMATCH
  *                    and does not do keyword file I/O yet, no macroread 
- * 16              a  fixed macroread
+ * 16-sep-01       a  fixed macroread
  * 19-oct-01       b  fixed recursion for those not using nemo_main
  * 24-oct-01       c  some parsing error warning's are now fatal errors
  * 13-nov-01       d  demoted some warnings to dprintf's
  * 25-nov-01       e  fixed hasvalue() for indexed keywords
  * 10-dec-01       f  indexing now based at 0, not 1 (for wasp)
+ * 16-jan-02       g  wrote findakey to fix various indexing shortcomings
 
   TODO:
       - what if there is no VERSION=
@@ -131,9 +132,17 @@
       - @macro and $key references get expanded as strings.
       - indexing can't handle minmatch
       - indexing can't handle macros
+
+  SOME ALTERNATIVE RESOURCES
+	argtable  http://argtable.sourceforge.net/doc/html/index.html
+	clig	  http://wsd.iitb.fhg.de/~kir/clighome/
+	perl      http://www-106.ibm.com/developerworks/linux/library/perl-speak.html
+	parseargs
+	opt
+        getopt
  */
 
-#define VERSION_ID  "3.3f 10-dec-01 PJT"
+#define VERSION_ID  "3.3g 15-jan-02 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -148,10 +157,6 @@
 #define HISTORY         /* have history.c implemented ?           */
 #define MINMATCH	/* allow keywords to be minimum matched?  */
 #define INDEXED         /* allow keywords to be dynamically indexed */
-
-#ifdef INDEXED
-#undef MINMATCH         /* for now, we can't minmatch on indexed yet */
-#endif
 
 #if 0
 #define TCL7		/* TCL (old V7) support?		  */
@@ -216,6 +221,19 @@
 #define MAXKEYLEN 16
 
 
+/* keyword is a helper struct containing a keyword. From this the code will
+ * build a linear list of all program keywords, and those that are indexed,
+ * will follow a linked list. E.g. for 4 program keywords 'a', 'b', 'c' and 'd',
+ * of which 'c' is indexed and 3 had been supplied on the command line, the
+ * keys[] array will have the following structure:
+ *
+ *   keys[0]    argv0
+ *   keys[1]    a
+ *   keys[2]    b
+ *   keys[3]    c# ->  c4 -> c0 -> c1
+ *   keys[4]    d
+ */
+
 typedef struct keyword {    /* holds old all keyword information             */
   string keyval;              /* pointer to original R/O (defv) data         */
   string key;                 /* keyword/name                                */
@@ -246,7 +264,8 @@ typedef struct keyword {    /* holds old all keyword information             */
    local keyword *keys = NULL;          /* point to array of program keywords */
    local int getparam_argc = 0;		/* count commmand line args */
 
-/* global variables - some must be visible to the outside world */
+/* global variables - must be visible to the outside world */
+/*      some defined here, others defined elsewhere        */
 
 extern int debug_level; /* see dprintf.c   from DEBUG env.var. */
 extern int error_level; /* see error.c     from ERROR env.var. */
@@ -289,8 +308,9 @@ local void beep(void);
 local string parname(string arg);
 local string parvalue(string arg);
 local string parhelp(string arg);
-local int findkey(string name);
-local int isindexed(string name, int *idx);
+local int findkey(string name);     // to be obsoleted
+local keyword *findakey(string name);
+local int set_indexed(string name, int *idx);
 local int addindexed(int j, string keyval, int idx);
 local void writekeys(char *mesg);
 local void readkeys(string mesg, bool first);
@@ -409,13 +429,11 @@ void initparam(string argv[], string defv[])
 	      free(keys[j].val);
 	      keys[j].val = scopy(parvalue(argv[i]));        /* get value */
 	      keys[j].count++;
-	    } else if (j=isindexed(name,&idx)) {       /* enter indexed keywords */
-       	      dprintf(1,"Entering indexed %s, j=%d",argv[i],j);
-#if 0
-	      addindexed(j, argv[i], idx);
-#else
+	    } else if (j=set_indexed(name,&idx)) {       /* enter indexed keywords */
+	      // process this indexed keyword
+       	      dprintf(1,"Entering indexed %s, j=%d\n",argv[i],j);
 	      kw = &keys[j];       /* start at the indexed (base) keyword */
-	      while (kw->next) {        /* link through all indexed ones */
+	      while (kw->next) {        /* link through all previously indexed ones */
 		dprintf(1,"Link List Skipping %s\n",kw->key);
 		kw = kw->next;
 		if (kw->indexed == idx+1) 
@@ -431,7 +449,6 @@ void initparam(string argv[], string defv[])
 	      kw->upd = 0;
 	      kw->indexed = idx+1;
 	      kw->next = NULL;
-#endif
 	      dprintf(1,"Link List new keyword %s, idx=%d\n",argv[i],idx);
             } else {                            /*     not listed in defv?  */
 	      if (streq(name, "help"))       /* got system help keyword?  */
@@ -1091,6 +1108,12 @@ int cntparam(void)
 bool isaparam(string name)
 {
     if (nkeys==0) local_error("isaparam: called before initparam");
+    return findakey(name) != NULL;
+}
+
+bool isaparam_old(string name)
+{
+    if (nkeys==0) local_error("isaparam: called before initparam");
     return (findkey(name) >= 0);
 }
 
@@ -1099,6 +1122,23 @@ bool isaparam(string name)
  */
 
 bool hasvalue(string name)     
+{
+  char *cp, key[MAXKEYLEN];
+  int n = strlen(name);
+  int idx;
+  keyword *kw;
+
+  strcpy(key,name);
+  dprintf(1,"Checking indexing on %s\n",key);
+
+  kw = findakey(name);
+  if (kw == NULL) error("keyword %s does not exist",name);
+
+  if (kw->val == NULL) return FALSE;
+  return  strlen(kw->val) > 0;
+}
+
+bool hasvalue_old(string name)     
 {
 #ifdef INDEXED
   char *cp, key[MAXKEYLEN];
@@ -1135,7 +1175,15 @@ bool hasvalue(string name)
 /*
  * UPDPARAM:  check if a parameters value has been updated since last read
  */
+
 bool updparam(string name)
+{
+    keyword *kw = findakey(name);
+    if (kw == NULL) error("(updparam) \"%s\" unknown keyword",name);
+    return kw->upd == 1;
+}
+
+bool updparam_old(string name)
 {
     int i = findkey(name);
     if (i<0) error("(updparam) \"%s\" unknown keyword",name);
@@ -1148,10 +1196,35 @@ bool updparam(string name)
 
 string getparam(string name)
 {
-    int i;
     char *cp, *cp1;
+    keyword *kw;
+    int i;
 
     if (nkeys == 0) local_error("(getparam) called before initparam");
+
+    kw = findakey(name);
+    if (kw == NULL) error("(getparam) \"%s\" unknown keyword", name);
+    kw->upd = 0;
+#if defined(MACROREAD)
+    cp = kw->val;
+    if (*cp == '@') {
+        cp1 = kw->val;
+        kw->val = get_macro(cp);
+        free(cp1);
+    }
+#endif
+    return kw->val;                     /* return value part */
+}
+
+
+string getparam_old(string name)
+{
+    char *cp, *cp1;
+    keyword *kw;
+    int i;
+
+    if (nkeys == 0) local_error("(getparam) called before initparam");
+
     i = findkey(name);
     if (i<0) error("(getparam) \"%s\" unknown keyword", name);
     keys[i].upd = 0;        /* mark it as read */
@@ -1166,17 +1239,22 @@ string getparam(string name)
     return keys[i].val;                     /* return value part */
 }
 
+
+/* 
+ * cost:  10M in 5" on a P600 (w/ gcc_2.95.3 -g) 
+ */
+
 string getparam_idx(string name, int idx)
 {
     int i;
     char *cp, *cp1, key[MAXKEYLEN+1];
     keyword *kw;
 
-    if (nkeys == 0)  local_error("(getparam) called before initparam");
+    if (nkeys == 0)  local_error("(getparam_idx) called before initparam");
     strcpy(key,name);
     strcat(key,"#");
     i = findkey(key);
-    if (i<0) error("(getparam) \"%s\" unknown keyword", name);
+    if (i<0) error("(getparam_idx) \"%s\" unknown keyword", name);
     kw = &keys[i];
     if (kw->indexed < -1) error("%s is not an indexed keyword",name);
     while (kw->next) {
@@ -1198,13 +1276,15 @@ string getparam_idx(string name, int idx)
 }
 
 /*
- * indexparam: return largest index available in an 0-based indexed parameter
- *       returns -2 if the parameter is not indexed at all
- *               -1 if no index used yet
- *       For this you must set IDX < 0
+ * indexparam: 
+ *       if IDX < 0, it will return 
+ *           >=0  the largest index available in an 0-based indexed parameter
+ *            -1  if no indexed one for this keyword has been used yet
+ *            -2  if the parameter is not indexed at all
  *
- *       if IDX >= 0 is given, it will check for that index and return 
- *       1 if that index exists, and 0 if not.
+ *       if IDX >= 0 is given, it will check for that index and returns:
+ *             1  if that index exists
+ *             0  if that index does not exist
  */
 
 int indexparam(string basename, int idx)
@@ -1216,10 +1296,10 @@ int indexparam(string basename, int idx)
   if (nkeys == 0)  local_error("(indexparam) called before initparam");
   strcpy(key,basename);
   strcat(key,"#");
-  i = findkey(key);
+  i = findkey(key);        /* first find if it's indexed */
   if (i<0) {
-    i = findkey(basename);
-    if (i < 0) return -2;
+    i = findkey(basename);     /* if not, see if it is indexed at all */
+    if (i < 0) return -2;      /* no, not indexed, return -2 */
   }
   kw = &keys[i];
   if (kw->indexed < -1) error("%s is not an indexed keyword",basename);
@@ -1236,6 +1316,7 @@ int indexparam(string basename, int idx)
     }
     return 0;
   }
+  error("indexparam: reached an impossible part of code");
   return -3;   /* never reached */
 }
 
@@ -1622,6 +1703,8 @@ local string parhelp(string arg)
  * FINDKEY:  scan valid keywords and return index (>=0) for a keyname
  *           return -1 if none found
  *	     Optionally match can be done in minimum match mode
+ *
+ *  to be deprecated in favor of 'findakey' (see below)
  */
 
 local int findkey(string name)
@@ -1658,31 +1741,127 @@ local int findkey(string name)
     return -1;          /* if all else fails: return -1 */
 }
 
-/* 
- * this routine is only used to enter an indexed keyword, if
- * it turns out it is indexed. Returns 0 if not indexed.
- * Returns the index into defv[] (1 being the first program
- * keyword, argv0 is reserved for 0) is the keyword is indexed
+/* findakey:  like findkey, but now returns pointer to the keyword
+ *            will also find indexed keywords if so desired
  */
 
-local int isindexed(string name, int *idx)
+local keyword *findakey(string name)
+{
+  int i, j, l, count, last;
+
+  if (nkeys<=0) return NULL;              /* quick: no keywords at all yet */
+
+  for (i = 0; i < nkeys; i++)             /* first try an exact match */
+    if (streq(keys[i].key,name)) return &keys[i];
+
+#ifdef INDEXED
+  {
+  char *cp, *cp1, key[MAXKEYLEN];
+  int n = strlen(name);
+  int idx;
+  keyword *kw;
+
+  strcpy(key,name);
+  dprintf(1,"findakey: checking indexing on %s\n",key);
+
+  /* split basename from index number by working from the back */
+  /* should go in a private function , a.k.a. refactoring :-)  */
+
+  cp = &key[n-1];
+  while (isdigit(*cp))
+    cp--;
+  if (*(cp+1)) {        /* ok, this keyword name must be indexed now */
+    idx = atoi(cp+1);
+    cp++;
+    *cp = 0;
+    strcat(key,"#");
+    n = findkey(key);
+    if (n < 0) 
+      error("findakey:  #=%d findkey(%s) -> %d NOT INDEXED",idx,key,n);
+    kw = &keys[n];
+    if (kw->indexed < -1) 
+      error("findakey(%s): not an indexed keyword, %s: %d n=%d", 
+	    name,kw->key,kw->indexed,n);
+    while (kw->next) {
+      kw = kw->next;
+      if (kw->indexed == idx+1) {
+#if defined(MACROREAD)
+	cp = kw->val;
+	if (*cp == '@') {
+	  cp1 = kw->val;
+	  kw->val = get_macro(cp);
+	  free(cp1);
+	}
+#endif
+	return kw;
+      }
+    }
+    return NULL;
+  } else {              /* keyword was definitely not indexed */
+    return NULL;
+  }
+
+  n = indexparam(key,idx);
+  dprintf(1,"Re-Checking indexparam(%s,%d) -> %d\n",key,idx,n);
+  //return n>0;
+  return NULL;
+  }
+#endif
+
+#if defined(MINMATCH)
+  l = strlen(name);                       /* try minimum match */
+  count = 0;                              /* count # matches on */
+  for (i=1; i<nkeys; i++) {               /* any of the program keys */
+    if (strncmp(keys[i].key, name,(unsigned)l)==0) {
+      last = i;
+      count++;
+    }
+  }
+  if (count==1) {
+    warning("Resolving partially matched keyword %s= into %s=",
+	    name, keys[last].key);
+    return last;
+  } else if (count > 1) {
+    dprintf(0,"### Minimum match failed, found: ");
+    for (j=0; j<nkeys; j++)
+      if (strncmp(keys[j].key,name,(unsigned)l)==0)
+	dprintf(0,"%s ",keys[j].key);
+    dprintf(0,"\n");
+    error("Ambiguous keyword %s=",name);
+  }
+#endif
+
+  return NULL;    // will it ever get here....  it should not !
+}
+
+/* 
+ * this routine is only used to enter a new indexed keyword, if
+ * it turns out it is a indexed keyword. Returns 0 if the keyword
+ * is not indexed.
+ *
+ * If the keyword is indexed, it returns the index into defv[] array
+ * (1 being the first program keyword, argv0 was already reserved for 0)
+ */
+
+local int set_indexed(string name, int *idx)
 {
   char *cp, key[MAXKEYLEN+1], keyidx[MAXKEYLEN];
   int j;
 
-  strcpy(key,name);
-  dprintf(1,"isindexed: Checking %s\n",key);
+  dprintf(1,"set_indexed(%s)\n",name);
+  *idx = -1;
+  strcpy(key,name);                 /* local copy of the keyword to mess with */
   cp = &key[strlen(key)-1];
-  if (!isdigit(*cp)) return 0;
+  if (!isdigit(*cp)) return 0;      /* definitely not indexed */
   while (isdigit(*cp))              /* work backwords through all digits */
     *cp--;
-    cp++;                           
+  cp++;                           
   strcpy(keyidx,cp);
   *idx = atoi(keyidx);
   *cp = 0;
   strcat(key,"#");
   j = findkey(key);
-  dprintf(1,"isindexed: now at %c, base=%s j=%d idx=%s -> %d\n",*cp,key,j,keyidx,*idx);
+  dprintf(1,"set_indexed: now at %c, base=%s j=%d idx=%s -> %d\n",*cp,key,j,keyidx,*idx);
   if (j>0) return j;
   return 0;
 }
@@ -1799,7 +1978,7 @@ local void readkeys(string mesg, bool first)
 
         i = findkey(parname(keybuf));             /* get index */
         if (i<=0) {                                  /* illegal keyword ? */
-	  i = isindexed(parname(keybuf),&idx);
+	  i = set_indexed(parname(keybuf),&idx);
 	  if (i)
 	    warning("Found indexed keyword, but not implemented yet");
 	  warning("initparam: ignoring erroneous keyword %s",keybuf);
