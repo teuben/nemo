@@ -1,0 +1,72 @@
+.TH SNAPDENS 1NEMO "16 December 1988" 
+.SH NAME
+snapdens \- local density estimator in an N-body snapshot
+.SH SYNOPSIS
+.PP
+\fBsnapdens in=\fPsnap_in  [parameter=value]
+.SH DESCRIPTION
+\fBsnapdens\fP finds the space density in an N-body snapshot by
+using the Kth nearest neighbor
+density estimator discussed by Casertano & Hut (1985, ApJ 298, 80).
+It uses a simple N^2 algorithm, and is hence slow for
+large snapshots (see also \fIhackdens(1NEMO)).
+.PP
+In case the number of nearest neighbours used is large enough
+and the velocity distribution function is close enough to
+gaussian an estimate for the phase space density can also be
+obtained (see the discussion in Lake (1988, preprint))
+.PP
+Standard output (not the table) is: \fI density weighted 
+center of mass, nearest neighbor, maximum density, density radius,
+density weighted average density\fP.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 20
+\fBin=\fIin-file\fP
+input file, in \fIsnapshot(5NEMO)\fP format [no default]
+.TP
+\fBout=\fIout-file\fP
+optional output file, in \fIsnapshot(5NEMO)\fP format. The Aux() key will
+contain the density or phase space density, depending on the \fBdens\fP
+key below. [not used].
+.TP
+\fBkmax=\fIk_max\fP
+Number of nearest neighbours used in the density estimator.
+[default: \fB6\fP].
+.TP
+\fBdens=t|f\fP
+Density written to file (\fBdens=t\fP) or phase space density (\fBdens=f\fP)
+(future expansion) [default: \fBt\fP].
+.TP
+\fBtab=t|f\fP
+Table output? If selected, it shows \fIradius, density, phase space density,
+K'th nearest neighbor, velocity dispersion\fP. [default: \fBt\fP].
+.TP
+\fBformat=\fP\fIf_fmt\fP
+Format with which the numbers are output in case a table was selected (see above)
+[default: \fB%e\fP].
+.SH TIMING
+.nf
+.ta +0.5i +0.5i +0.5i +0.5i +0.5i 
+Hackforce:	Nbody=16384	Kmax=32	2600"	grolsch SUN 3/160 (f68881)
+Snapdens:	Nbody=1024	Kmax=8	240" 	guinness (f68881)
+Snapdens:	Nbody=16384	Kmax=64	75000"	grolsch SUN 3/160 (f68881)
+Snapdens:	Nbody=512	Kmax=16	65"	pollux SUN 3/110 (f68881)
+Hackdens:	Nbody=512	Kmax=16 xx"	pollux SUN 3/110 (f68881)
+.fi
+.SH SEE ALSO
+snappeak(1NEMO), snapstat(1NEMO), hackdens(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +3.0i
+~/src/pjt/nbody     snapdens.c snapdens.1
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+1-Nov-88	V1.0: created          	PJT
+.fi
+
