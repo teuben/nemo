@@ -1,0 +1,49 @@
+.TH XYZC 5NEMO "30 March 1997" 
+.SH NAME
+xyzc \- binary format for colorized point data, with optional velocities
+.SH SYNOPSIS
+.nf
+.B#include <stdinc.h>
+.B#include <filestruct.h>
+.B#include <xyzc.h>		!!!! doesn't exist yet
+.fi
+.SH DESCRIPTION
+\fIxyzc\fP data is used as a compact fileformat to store point data,
+with positional, color, and
+optionally velocity information, primarely for the purpose of 3D viewing
+with programs like \fIxyzview(1NEMO)\fP.
+.PP
+Colors are stored as (small) integers; most models in NEMO use only
+a few (up to 16 or so) colors. For compactness, it is best to store
+the point data in single precision.
+.SH TSF
+An example of a \fBPointData\fP set, with velocities,
+as seen through \fItsf(1NEMO)\fP looks as follows:
+.nf
+set PointData
+  float Tpoint 10.0000 
+  int Npoint 0400 
+  float Position[256][3] -4.98145 -0.748152 -0.191633 -6.10421 
+    0.119759 1.92620 -4.82857 0.0294401 0.0555099 -4.86905 -0.487407 
+    . . .
+  float Velocity[256][3] -0.979005 -0.0859801 0.0507055 -0.846533 
+    0.208974 0.263324 -0.614061 -0.354721 -0.539217 -1.46307 0.148926 
+    . . .
+tes
+.fi
+.SH "SEE ALSO"
+snapxyz(1NEMO), xyzview(1NEMO), snap3dv(1NEMO), tsf(1NEMO), snapshot(5NEMO)
+.SH AUTHOR
+Joshua Barnes, Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+~/src/nbody/xyz  	snapxyz.c, xyzview.c
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +2.0i +2.0i
+14-feb-93	documentation written    	PJT
+30-mar-97	exported into NEMO
+.fi
+
