@@ -192,5 +192,11 @@ makedefs_help:
 	@echo ========================================================================
 
 
+# this peculiar include will include a file LocalMakedefs in the local/current
+# directory only if it is present, but not complain if not present. This is
+# the recommended way to tailor a particular directory, e.g. for debugging
+# you could add something like
+#      NEMO_CFLAGS += -Wall -W -g
+#
 -include LocalMakedefs
 
