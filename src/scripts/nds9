@@ -5,11 +5,13 @@
 if ($#argv == 0) then
   echo "Usage: $0 nemo|fits-file(s)"
   echo "Send NEMO/ccd or fits files into ds9 display server"
-  echo "Version:  2.0 30-jul-2003 PJT"
+  echo "   (Notice you need to start 'ds9' before you use this command)"
+  echo "Version:  2.0a 19-aug-2003 PJT"
   exit 0
 endif
 
 set title=ds9
+set bad=0
 
 foreach f ($*)
   hisf $f >& /dev/null
@@ -17,17 +19,25 @@ foreach f ($*)
     set name=$f
     echo Assuming fits $name
     cat $name | xpaset $title fits $name
+    set bad=$status
   else if (-e $f.fits) then
     set name=$f.fits
     echo Found fits $name
     cat $name | xpaset $title fits $name
+    set bad=$status
   else if (-e $f) then
     echo Assuming NEMO file $f
     ccdfits $f $f.fits
     set name=$f.fits
     cat $name | xpaset $title fits $name
+    set bad=$status
     rm -f $f.fits
   else
     echo $f or $f.fits does not exist
   endif
 end
+
+if ($bad) then
+  echo "Problems with ds9/xpa ?"
+  echo "You need to start the 'ds9' server before you use this command"
+endif
