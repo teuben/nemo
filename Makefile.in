@@ -610,7 +610,7 @@ configure:	configure.in
 config_extra:
 	cp config.h makedefs $(NEMOLIB)
 
-DIFF = tkdiff
+DIFF = diff
 
 diff_new:
 	-$(DIFF) config.h $(NEMOLIB)
