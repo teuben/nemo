@@ -29,6 +29,7 @@
  *  6-apr-99    merged in AutoConf for 2.5 release
  * 22-jun-01    added some new ZENO macros for compatibility (-DNEMO)
  *  7-sep-01    added maxsizes.h
+ *  8-dec-01    added errno.h
  */
 
 #ifndef _stdinc_h      /* protect against re-entry */
@@ -55,6 +56,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
 
 /* 
  * MACHINE: this is a StarLab thing, kept for compatibility
