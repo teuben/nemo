@@ -1,0 +1,22 @@
+%N snapvirial
+%D rescale snapshot for re-virialization
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man snapvirial' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input snapshot [???]
+%A out
+	Output snapshot [???]
+%A mscale
+	Scale masses ? [f]
+%A rscale
+	Scale positions ? [t]
+%A vscale
+	Scale velocities ? [t]
+%A times
+	Times of snapshots to select [all]
+%A virial
+	New virial ratio (|2T/W|), if to be changed []
+%A VERSION
+	6-jun-97 PJT [1.4a]
