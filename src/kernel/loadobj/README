@@ -6,3 +6,6 @@ DLD: GNU library: only V3.2.1 has been tested
 28-jan-94:	loadoblDL has been made to work with solaris 2.x (SunOS 5.3)
 16-jan-95:	loadobjLINUX works, but loadobjDLD also works on Linux now.
  9-apr-95:	loadobjDLD seems to be broken (linux 1.2.3 + gcc 2.6.3)
+
+
+http://instantj.sourceforge.net/	A java project doing similar
