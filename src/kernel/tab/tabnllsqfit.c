@@ -128,14 +128,24 @@ static void derv_plane(real *x, real *p, real *e, int np)
 
 static real func_poly(real *x, real *p, int np)
 {
-  return p[0] + p[1]*x[0] + p[2]*x[0]*x[0];
+  real r = p[order];
+  int i;
+
+  for (i=order; i>0; i--)
+    r = x[0]*r + p[i-1];
+  return r;
 }
 
 static void derv_poly(real *x, real *p, real *e, int np)
 {
-  e[0] = 1.0;
-  e[1] = x[0];
-  e[2] = x[0]*x[0];
+  real r;
+  int i;
+
+  r = e[0] = 1.0;
+  for (i=0; i<order; i++) {
+    r *= x[0];
+    e[i+1] = r;
+  }
 }
 
 
@@ -330,7 +340,7 @@ do_line()
 
   nrt = nllsqfit(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,its,lab, fitfunc,fitderv);
   printf("nrt=%d\n",nrt);
-  printf("a+bx:  \na=%g %g \nb=%g %g\n", fpar[0],epar[0],fpar[1],epar[1]);
+  printf("a+bx:  \na= %g %g \nb= %g %g\n", fpar[0],epar[0],fpar[1],epar[1]);
   for (i=0; i<npt; i++)
     dprintf(1,"%g %g %g\n",x[i],y[i],d[i]);
 
@@ -345,8 +355,8 @@ do_line()
 do_plane()
 {
   real *x1, *x2, *x, *y, *dy, *d;
-  int i,j, nrt, mpar[3];
-  real fpar[3], epar[3];
+  int i,j, nrt, mpar[MAXPAR];
+  real fpar[MAXPAR], epar[MAXPAR];
   int its = 50;
   int lpar = 3;
   real tol = 0.0, lab = 0.0;
@@ -375,7 +385,7 @@ do_plane()
 
   nrt = nllsqfit(x,2,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,its,lab, fitfunc,fitderv);
   printf("nrt=%d\n",nrt);
-  printf("a+bx+cy:  \na=%g %g \nb=%g %g \nc=%g  %g\n",
+  printf("a+bx+cy:  \na= %g %g \nb= %g %g \nc= %g  %g\n",
 	 fpar[0],epar[0],fpar[1],epar[1],fpar[2],epar[2]);
   for (i=0; i<npt; i++)
     dprintf(1,"%g %g %g %g\n",x1[i],x2[i],y[i],d[i]);
@@ -421,7 +431,7 @@ do_gauss()
 
   nrt = nllsqfit(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,its,lab, fitfunc,fitderv);
   printf("nrt=%d\n",nrt);
-  printf("a+b*exp(-(x-c)^2/(2*d^2)):  \na=%g %g \nb=%g %g \nc=%g %g\nd=%g  %g\n",
+  printf("a+b*exp(-(x-c)^2/(2*d^2)):  \na= %g %g \nb= %g %g \nc= %g %g\nd= %g  %g\n",
 	 fpar[0],epar[0],fpar[1],epar[1],fpar[2],epar[2],fpar[3],epar[3]);
   for (i=0; i<npt; i++)
     dprintf(1,"%g %g %g\n",x[i],y[i],d[i]);
@@ -436,36 +446,34 @@ do_gauss()
 
 do_poly()
 {
-  real mat[(MAXCOL+1)*(MAXCOL+1)], vec[MAXCOL+1], sol[MAXCOL+1], a[MAXCOL+2], sum;
-  int i, j;
-
-  if (nycol<1) error("Need 1 value for ycol=");
-
-  lsq_zero(order+1, mat, vec);
-  for (i=0; i<npt; i++) {
-    a[0] = 1.0;
-    for (j=0; j<order; j++) {
-      if (1)
-	a[j+1] = a[j] * xcol[0].dat[i];     /* polynomial */
-      else
-	a[j+1] = xcol[j].dat[i];            /* plane */
-    }
-    a[order+1] = ycol[0].dat[i];
-    lsq_accum(order+1,mat,vec,a,1.0);
+  real *x, *y, *dy, *d;
+  int i,j, nrt, mpar[MAXPAR];
+  real fpar[MAXPAR], epar[MAXPAR];
+  int its = 50;
+  real tol = 0.0, lab = 0.0;
+  int lpar = order+1;
+    
+  if (nxcol < 1) error("nxcol=%d",nxcol);
+  if (nycol < 1) error("nycol=%d",nycol);
+  x = xcol[0].dat;
+  y = ycol[0].dat;
+  dy = (dycolnr>0 ? dycol.dat : NULL);
+  d = (real *) allocate(npt * sizeof(real));
+  
+  for (i=0; i<lpar; i++) {
+    mpar[i] = mask[i];
+    fpar[i] = par[i];
   }
-  if (order==0) printf("TEST = %g %g\n",mat[0], vec[0]);
-  lsq_solve(order+1,mat,vec,sol);
-  printf("%s fit of order %d:\n", "Polynomial", order);
-  for (j=0; j<=order; j++) printf("%g ",sol[j]);
-  printf("\n");
 
-  if (outstr) {           /* output fitted values, if need be */
-    for(i=0; i<npt; i++) {
-      sum=sol[order];
-      for (j=order-1; j>=0; j--)
-	sum = (xcol[0].dat[i] * sum + sol[j]);
-      fprintf(outstr,"%g %g %g\n",xcol[0].dat[i], ycol[0].dat[i], sum);
-    }
-  }
+  fitfunc = func_poly;
+  fitderv = derv_poly;
+
+  nrt = nllsqfit(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,its,lab, fitfunc,fitderv);
+  printf("nrt=%d\n",nrt);
+  printf("p0+p1*x+p2*x^2+.....p%d*x^%d:\n",order,order);
+  for (i=0; i<=order; i++)
+    printf("p%d= %g %g\n",i,fpar[i],epar[i]);
+  for (i=0; i<npt; i++)
+    dprintf(1,"%g %g %g\n",x[i],y[i],d[i]);
 }
 
