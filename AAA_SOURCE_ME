@@ -38,6 +38,7 @@
 # 23-mar-04  PJT                for NEMO 3.2 - no more NEMOHOST
 # 30-jul-04  PJT                make PGPLOT and CFITSIO optional bootstrappable
 # 26-dec-04  PJT       		make HDF optional bootstrappable
+# 29-dec-05  PJT                set absolute paths to compilers in makedefs
 
 rm -f install.log >& /dev/null
 touch install.log
@@ -72,7 +73,16 @@ if (-e local/hdf) then
   src/scripts/hdf.install >& install.hdf.log  
 endif
 
+if (1) then
+  touch /tmp/nemo_was_here
+  mkdir /tmp/NEMO_WAS_HERE
+  if ($status) echo Your FS does not support multi-case unique filenames
+  rmdir /tmp/NEMO_WAS_HERE
+  rm /tmp/nemo_was_here
+endif
 
+#  could temporarily setenv CC,CXX,F77  for configure, but there are really no good defaults...
+echo ./configure $copts
 ./configure $copts >>& install.log
 
 echo Initializing NEMO environment
