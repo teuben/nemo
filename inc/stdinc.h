@@ -35,6 +35,7 @@
  * 12-jul-03    WD's macro name changed backfitted
  * 24-nov-03    include mathfns.h, which includes forced math.h
  * 22-jun-04    added some more useful astr constants
+ * 25-jan-05    added powd/powi
  */
 
 #ifndef _stdinc_h      /* protect against re-entry */
@@ -457,11 +458,13 @@ extern bool scanopt(string, string);
 /* core/cputime.c */
 extern double cputime(void);
 
-/* misc/{sqr.c, log2.c} */
+/* misc/{sqr.c, log2.c, pow.c} */
 extern double sqr(double);
 extern double qbe(double);
 extern double dex(double);
 extern double log2(double);
+extern double powi(double,int);
+extern double powd(double,double);
 
 /* cores/bswap.c */
 extern void bswap(void *vdat, int len, int cnt);
