@@ -1,0 +1,164 @@
+# List of some places on earth 
+#        1         2         3         4         5         6         7
+# 34567890123456789012345678901234567890123456789012345678901234567890
+# City				Lat	  Long	  (feet)  Time Zone
+Abilene TX                     32.467     99.711    300   6.0         
+Agarita Farm TX                30.26      95.88       0   6.0         
+Alexandria VA                  38.8125    77.0625     0   5.0         
+Alice Springs Australia       -23.70    -133.88       0  -9.5         
+Albuquerque NM                 35.125    106.675   1590   7.0         
+Al Jabail Saudi Arabia         26.22     -50.55       0  -3.0         
+Aloha OR                       41.52     122.84      25   8.0         
+Ann Arbor MI                   42.30      83.72     100   5.0         
+Armidale NSW Australia        -30.52    -151.65     950 -10.0         
+Ashtabula OH                   41.87      80.80     300   5.0         
+Athens GA                      34.08      83.27     220   5.0         
+Atlanta GA                     33.75      84.38       0   5.0         
+Atoka OK                       34.18      96.17       0   6.0         
+Austin TX                      30.26917   97.74361  154   6.0         
+Baton Rouge LA                 30.4494    91.1833    17   6.0         
+Baykonur USSR                  45.9535   -63.3392  1000   0.0         
+Bel Air MD                     39.56      76.28       0   5.0         
+Belmont MA                     42.40      71.17       0   5.0         
+Berkeley CA                    37.95     122.30       0   8.0         
+Birmingham AL                  33.5169    86.8100   183   6.0         
+Bloomington IN                 39.17      86.53       0   5.0         
+Boca Raton FL                  26.35      80.08       0   5.0         
+Bonn Germany                   50.7       -7.1      100  -1.0         
+Boulder CO                     40.00     105.27    1600   7.0         
+Brisbane Australia            -27.27    -153.10       0 -10.0         
+Buffalo NY                     43.0014    78.7953     0   5.0         
+Brazos Bend State Park TX      29.67      95.57       0   6.0         
+Cambridge MA                   42.358     71.093      3   5.0         
+Chapel Hill NC                 35.92      79.07       0   5.0         
+Charlottesville VA             38.08      78.27       0   5.0         
+Chicago suburbs IL             41.88      87.90       0   6.0         
+Cincinnatti OH                 39.1019    84.5097   170   5.0         
+Colgate U  NY                  42.82      75.53    1280   5.0         
+College Station TX             30.6278    96.3342     0   6.0         
+Colorado Springs CO            38.92     104.83       0   7.0         
+Columbus OH                    39.9631    83.0047   237   5.0         
+Dallas TX                      32.78      96.80       0   6.0         
+Danbury CT                     41.42      73.42       0   5.0         
+Darlington MD                  39.67      76.22       0   5.0         
+Darmstadt Germany              49.87      -8.65       0  -1.0         
+Denver CO                      39.7494   104.9894  1610   7.0         
+Detroit MI                     42.33      83.05       0   5.0         
+Downington PA                  40.05      75.76     160   5.0         
+Dublin Ireland                 53.387     6.3393     80   0.0         
+Durham NH                      43.12      71.94      30   5.0         
+Eagan MN                       44.8453    93.1597   300   6.0         
+Edinburgh Scotland             55.92       3.17       0   0.0         
+Edmonton ALTA                  53.57     113.52     671   7.0         
+Edwards AFB                    34.0      117.0     1000   7.0         
+Equator Place                   0.00     -25.4        0   0.0         
+Escondido CA                   33.12     117.08       0   8.0         
+Eugene OR                      44.1219   123.2508   111   8.0         
+Fitchburg MA                   42.58      71.80       0   5.0         
+Flagstaff Hill PA              40.442     79.950    290   5.0         
+Fountain Valley CA             33.73     117.96      10   8.0         
+Framingham MA                  42.3125    71.4041    50   5.0         
+Fresno CA                      36.7367   119.7864   100   8.0         
+Gainesville FL                 29.67      82.33       0   5.0         
+Glasgow UK                     55.88       4.25       0   0.0         
+Hanover NH                     43.7083    72.2917     0   5.0         
+Harvard MA                     42.50      71.57       0   5.0         
+Hat Creek Observatory CA       40.0      120.0     3000   8.0
+Highland Park NJ               40.30      74.42       0   5.0         
+Honolulu HI                    21.263    157.756      0  10.0         
+Houston TX                     29.77      95.37       0   6.0         
+Hudson MA                      42.40      71.53     100   5.0         
+Indianapolis IN                39.77      86.15       0   5.0         
+Invercargill New Zealand      -46.0     -168.0        0 -12.0         
+Irvine CA                      33.68     117.77       0   8.0         
+Isla Vista CA                  34.4222   119.8611    15   8.0         
+Ithaca NY                      42.45      76.50       0   5.0         
+Kalamazoo MI                   42.2906    85.5847   230   5.0         
+Kansas City MO                 39.1322    94.5889   229   6.0         
+Kenora ON                      49.7833    94.4833   323   6.0         
+Kent WA                        48.3667   122.0833   220   8.0         
+Kingston ON                    44.23      76.50       0   5.0         
+Kourou French Guyana            5.2324    52.7758   231   0.0         
+Laramie WY                     41.314    105.58    2195   7.0         
+Las Cruces NM                  32.38     106.68    1250   7.0         
+Leland IL                      41.617     88.897    200   6.0         
+Lexington KY                   38.05      84.50       0   5.0         
+Lille France                   50.62      -3.07      20  -1.0         
+Lincoln NB                     40.80      96.70       0   6.0         
+Linkoping Sweden               58.42     -15.62       0  -1.0         
+Liverpool UK                   53.2        3.0        0   0.0         
+Livonia MI                     42.37      83.40     194   5.0         
+London England                 51.50       0.17       0   0.0         
+London ON                      42.98      81.23       0   5.0         
+Los Angeles CA                 34.05     118.25       0   8.0         
+Lower Hutt New Zealand        -41.2376  -174.9153     0 -12.0         
+Lubbock TX                     33.58     101.85       0   6.0         
+Madison WI                     43.08      89.37       0   6.0         
+Manchester UK                  53.45       2.225     35   0.0         
+Manvel TX                      29.65      95.32       0   6.0         
+McDonald Ob. TX                30.3672    97.7455   206   6.0         
+Mexico City Mexico             19.42      99.17    2240   6.0         
+Milwaukee WI                   43.03      87.92       0   6.0         
+Minneapolis MN                 44.38      93.22       0   6.0         
+Morristown NJ                  40.80      74.50       0   5.0         
+Mountain Lakes NJ              40.88      74.43       0   5.0         
+Melbourn FL                    28.02      80.58      20   5.0         
+Narragansett RI                41.43      71.45       0   5.0         
+New Haven CT                   41.3069    72.9250    12   5.0         
+New Orleans LA                 29.9481    90.0694     5   6.0         
+New York NY                    40.72      74.02       0   5.0         
+North Brunswick NJ             40.47      74.47       0   5.0         
+North Conway NH                44.05      71.15     200   5.0         
+Norwich England                52.63      -1.30       0   0.0         
+Ocean Springs MS               30.40      88.67       0   6.0         
+Orlando FL                     28.5450    81.3772    21   5.0         
+Palo Alto CA                   37.45     122.15      15   8.0         
+Paoli IN                       38.55      86.47       0   5.0         
+Paris west France              48.83      -2.12      50  -1.0         
+Pasadena CA                    34.15     118.15       0   8.0         
+Philadelphia PA                39.95      75.12       0   5.0         
+Pittsburgh PA                  40.43      80.00       0   5.0         
+Pont lAbbe France              47.86       4.23       0  -1.0         
+Portland OR                    45.55     122.60       0   8.0         
+Princeton NJ                   40.35      74.67       0   5.0         
+Raleigh NC                     35.7772    78.6392   110   5.0         
+Reading MA                     42.52      71.12      55   5.0         
+Red Bank NJ                    40.35      74.05       0   5.0         
+Rice University TX             29.92      95.37       0   6.0         
+Richardson TX                  32.922     96.729    180   6.0         
+Rochester NY                   43.17      77.67       0   5.0         
+Rutgers NJ                     40.57      74.75       0   5.0         
+Sacramento CA                  38.51     121.50       6   8.0         
+Salt Lake City UT              40.77     111.88       0   7.0         
+San Diego CA                   32.70     117.23       6   8.0         
+San Francisco CA               37.80     122.40       0   8.0         
+San Jose CA                    37.3378   121.8900    27   8.0         
+Santa Monica CA                34.02     115.50     100   8.0         
+SAO                            42.380     71.130     24   5.0         
+Sarasota FL                    27.33      82.57       0   5.0         
+Seattle WA                     47.60     122.33       0   8.0         
+Somerset NJ                    40.5       74.4        0   5.0         
+Somerset VT                    42.88      72.92     600   5.0         
+Sunnyvale CA                   37.42     122.08       0   8.0         
+Sydney Australia              -33.95    -151.167      0 -10.0         
+Swarthmore PA                  39.905     75.357      0   5.0         
+Toronto ON                     43.65      70.33     100   5.0         
+Tucson AZ                      32.22     110.97       0   7.0         
+Tuebingen Germany              48.53      -9.05     300  -1.0         
+Champaign IL                   40.1180    88.2467   225   6.0         
+Vancouver WA                   45.55     122.67      76   8.0         
+W0RPK                          41.4378    93.5680     0   0.0         
+Washington DC                  38.90      77.02       0   5.0         
+Waterloo ON                    43.47      80.52       0   5.0         
+Webster NY                     43.22      77.43       0   5.0         
+Wellfleet MA                   41.78      70.04       0   5.0         
+West Lafayette IN              40.45      86.92       0   5.0         
+Westmoreland NY                43.150     75.414    650   5.0         
+Willowdale ON                  43.78      79.43       0   5.0         
+Winnipeg Manitoba              49.88      97.15       0   6.0         
+Woburn MA                      42.44828   71.19667    0   5.0         
+Wormhout France                50.89      -2.51       2  -1.0         
+Yerkes Observatory WI          42.597956  88.555167 200   5.0         
+Zurich Switzerland             47.22      -8.20     430  -1.0         
+Stel VT                        43.4       72.5      430   5.0         
+Galway NY                      43.02      74.12    1200   5.0
