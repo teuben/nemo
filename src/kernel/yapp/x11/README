@@ -1,0 +1,42 @@
+To install this package:
+
+    xmkmf
+    make 
+    mv libyapp_x.a $NEMOLIB
+    make clean
+
+
+Some historic comments:
+
+
+
+1-nov-92: Patrick submitted code to NEMO (someplace in usr/pat)
+
+    it seems, that 'xmkmf' does not work for this account, but this is the
+    most convenient way to produce a Makefile for X applications. 
+    So I cannot test my program and I have to leave it here in the 
+    purely source code. I hope, all neede things are provided.
+
+8-oct-94: tested sun4 and sun5 implementations using a makefile generated
+    with xmkmf, which now appears to work in maryland.
+    the testprogram yappx, as well as snapplot and snapdiagplot appear to
+    work fine. Note the following YAPPLIB's that are needed:
+
+        sun4:   setenv YAPP_X4 "-lyapp_x -lX11"
+        sun5:   setenv YAPP_X5 "-lyapp_x -lX11 -lsocket -lnsl"
+
+    e.g. on a sun5:
+
+        make snapplot YAPPLIB="$YAPP_X5"
+
+    should compile a version of snapplot with this yapp_x library compiled.
+
+
+15-jan-94: oops, this yapp was written with 'double arguments all over the
+	place. At some point, the yapp interface was defined in terms
+	of 'real' ( defined in <stdinc.h>, often set by $NEMOBIN/cc)
+	This meant that nearly all double's in the code could be replaced
+	by real's. This to make the linux version work.
+
+	As it stands now, the code does contain some static vs. extern
+	declaration problems, which fail in pedantic gcc.
