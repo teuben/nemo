@@ -1,0 +1,89 @@
+.TH SNAPSPIN 1NEMO "28 April 1998"
+.SH NAME
+snapspin \- add Z-angular momentum or Z-axial outflow to an N-body snapshot
+.SH SYNOPSIS
+\fBsnapspin in=\fIsnap_in\fP \fBout=\fIsnap_out\fP [parameters=values] .\|.\.
+.SH DESCRIPTION
+\fBsnapspin\fP adds angular momentum in the Z-direction
+to the particles of a snapshot
+By default, all particles are given the same angular frequency (spin),
+\fIomega\fP. A positive value means counterclockwise rotation, as seen 
+from the positive Z-axis. If potential and/or forces are present, they
+are corrected with the usual coriolis term.
+.PP
+Optionally the spin is allowed vary as function of radius, and 
+interpolated from a tabulated rotation curve, \fBV(r)\fP.
+However, the potential and forces cannot be corrected in this case.
+.PP
+Instead of angular momentum, the particles can also be given a
+Z-axial
+outflow (or inflow). An outflow curve can optionally also be
+specified in tabular form, the same way as for spin/rotation.
+Again, no corrections to potential and forces are made
+in these cases.
+.PP
+Use \fIsnaprotate(1NEMO)\fP to transform to a different spin-axis,
+and \fIsnapshift(1NEMO)\fP to a different center of rotation.
+.SH PARAMETERS
+The following parameters are reckognized in any order if the keyword is
+also given:
+.TP 25
+\fBin=\fIsnap_in\fP
+Input data is read from \fIsnap_in\fP, which must be in standard
+\fIsnapshot(5NEMO)\fP format [no default].
+.TP
+\fBout=\fIsnap_out\fP
+Transformed data is written to \fIsnap_out\fP, which will also be in 
+\fIsnapshot(5NEMO)\fP format [No default].
+.TP
+\fBomega=\fIvalue\fP
+The amount of spin (units: velocity per length). If the keyword
+\fBrotcur\fP (see below) is used, the value of \fIomega\fP is ignored.
+[default:\fB0\fP].
+.TP
+\fBrotcur=\fP\fIr_v_table\fP
+An ascii \fItable(5NEMO)\fP
+with radii and velocities in columns 1 and 2 resp.
+If a table is supplied, the value of \fIomega\fP above is ignored.
+Between r=0 and the first radius the rotation curve is linearly
+interpolated, outside the last radius a Keplerian falloff is assumed,
+and overall interpolation is done using cubic splines
+(see \fIspline(3NEMO)\fP).
+\fINote:\fP radii in the table must be sorted.
+Default: none.
+.TP
+\fBsign=1|-1\fP
+The sign of the input rotation curve 
+from \fIr_v_table\fP. 
+\fINote:\fP Although meant to be +1 or -1, it's value is
+simply multiplied with the value interpolated
+from the input rotation curve.  It can also be used in outflow mode,
+in which case -1 can be used for inflow.
+[Default: \fB1\fP].
+.TP
+\fBoutflow=t|f\fP
+A boolean flag used to change between spin and outflow mode. By
+default spin is added to a snapshot (outflow=f).
+.TP
+\fBtimes=\fItime-ranges\fP
+Only snapshots with time values within \fItimes-ranges\fP, which is
+of the form \fBts[:te],...\fP, will be 
+copied. [default: \fBall\fP].
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +3.0i
+~/src/nbody/trans   	snapspin.c
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.5i
+18-Aug-87	Version 1.0: created          	PJT
+9-Mar-88	V1.1: data history added	PJT
+6-jun-88	V1.2: new filestruct	PJT
+25-apr-89	V1.3: get/put_snap, omega bug removed	PJT
+22-jul-92	V1.5: added rotcur= and sign=	PJT
+1-feb-93	V1.7: fixed phi/acc	PJT
+28-apr-98	V2.0: added outflow= for Tony Wong	PJT
+.fi
