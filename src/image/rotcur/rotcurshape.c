@@ -12,7 +12,7 @@
  *     and a functional parameterized form for VROT(r)
  *
  *     History: 19/jul/02 : cloned off rotcur                       pjt
- *              10-sep-02 : implemented resid= for images           pjt
+ *              10-sep-02 : implemented resid= for images, more pts for disk   pjt
  *
  ******************************************************************************/
 
@@ -34,7 +34,7 @@
 #define MAXPAR  5           /* number of parameters per model */
 
 #define RING         10     /* maximum number of rings (17 arrays) */
-#define MAXPTS    10000     /* maximum number of pixels per ring (4 arrays) */
+#define MAXPTS   100000     /* maximum number of pixels per ring (4 arrays) */
 
 #define DEF_TOL   0.001     /* tolerance for fit */
 #define DEF_LAB   0.001     /* mixing parameter */
@@ -73,7 +73,7 @@ string defv[] = {
     "rotcur3=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur4=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur5=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
-    "VERSION=1.0a\n  9-sep-02 PJT",
+    "VERSION=1.0b\n  11-sep-02 PJT",
     NULL,
 };
 
