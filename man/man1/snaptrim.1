@@ -1,4 +1,4 @@
-.TH SNAPTRIM 1NEMO "14 September 2002"
+.TH SNAPTRIM 1NEMO "31 December 2003"
 .SH NAME
 snaptrim \- select a subset of the snapshot frames in a file
 .SH SYNOPSIS
@@ -31,7 +31,10 @@ Select frames with time values within \fItime_range\fP, which is of a
 form such as \fB1.0:1.5,2.5,3.0\fP. A special format is allowed to
 select the Nth snapshot using \fBtimes=#\fP\fIN\fP, where
 the first snapshot is counted as 1. Special values are 
-\fBfirst\fP, \fBlast\fP and \fBall\fP.
+\fBfirst\fP, \fBlast\fP and \fBall\fP. If
+\fBtimefuzz=nearest\fP (see below) 
+is used, \fItime_range\fP must contain
+just a single value.
 Default: \fBall\fP.
 .TP
 \fBpartcyc=\fIinterval\fP
@@ -54,9 +57,11 @@ if to be copied. This keyword must be set to true when the input
 snapshot is not sorted in time. By setting it to false, it can speed
 up scanning enormously. Default: \fBfalse\fP.
 .TP
-\fBheadline=\fItext\fP
-Random text which is prepended to output file only if a nonempty value
-is specified.  Default: nothing.
+\fBtimefuzz=\fI
+Fuzzyness allowed in comparing times requested for output, and actual
+times in snapshot. The special string value "\fBnearest\fP" is also
+allowed to output the snapshot closest to the requested time. In this
+case, the \fBtimes=\fP keyword cannot contain ranges.
 .SH "SEE ALSO"
 snapsample(1NEMO), snapmask(1NEMO), snapshot(5NEMO)
 .SH BUGS
@@ -72,4 +77,5 @@ xx-mar-89	V1.2 keyword amnesia= added	JEB
 12-apr-89	V1.3 keyword checkall= added	PJT
 5-maa-98	V1.6 added first/last times	PJT
 14-sep-02	V2.0 support multiple output files	PJT
+31-dec-03	V2.1 timefuzz= implemented	PJT
 .fi
