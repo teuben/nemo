@@ -204,7 +204,7 @@ string usage = "list history items from a binary structured file";
 string iname,oname;			/* input/output file  name */
 stream instr,outstr;
 
-void nemo_main(nemo)
+void nemo_main()
 {
     int i, skip;
     int item = -1;
