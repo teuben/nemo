@@ -4,6 +4,9 @@ for 3.1.1
     on buffered table read better
   - ccdmath WCS is broken
 
+  - fix installation if no fortran is available
+	(fmath in potential not needed)
+	(some potential/data not needed)
 
 --------------------------------------------------------------------------------
 
