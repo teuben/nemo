@@ -91,7 +91,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "cursor=\n           Optional output file to retrieve cursor coordinates",
     "layout=\n           Optional input layout file",
     "first=f\n           Layout first or last?",
-    "VERSION=2.7a\n	 1-feb-05 PJT",
+    "VERSION=2.7b\n	 12-feb-05 PJT",
     NULL
 };
 
@@ -188,6 +188,7 @@ void setparams()
       nbin = nemoinpr(smin,xbin,nmax);   /* get binning boundaries */
       if (nbin==1) {              /*  fixed amount of datapoints to bin */
 	(void) nemoinpi(smin,&nbin,1);
+	if (nbin <= 0) error("Bad value for nbin=%d",nbin);
 	dprintf(0,"Binning with fixed number (%d) of points\n",nbin);
 	np = nmax / nbin + 1;
 	nbin = -nbin;       /* make it <0 to trigger rebin_data */
@@ -516,22 +517,23 @@ rebin_data (n,x,y, nbin,xbin, np, xp, yp,  xps, yps)
 int n, nbin, np;
 real *x, *y, *xbin, *xp, *yp, *xps, *yps;
 {
-  int    i, j, ip, iold=0, zbin=0;
+    int    i, j, ip, iold=0, zbin=0;
     real x0, x1, x2, y1, y2;
 
     dprintf(0,"Rebinning...n=%d nbin=%d np=%d\n",n,nbin,np);
     
     for (i=0; i<np; i++)
-        xp[i] = xps[i] = yp[i] = yps[i] = NaN;      /* init (again) */
+      xp[i] = xps[i] = yp[i] = yps[i] = NaN;      /* init (again) */
    
     for (i=0, ip=0; i<n-1; i++)		/* loop over all points */
       if (x[i+1] < x[i])
 	ip++;              /* count unsorted data in 'ip' */
     if (ip>0)
-      warning("%d out of %d datapoints are not sorted: bad=%g < %g", ip, n);
+      warning("%d out of %d datapoints are not sorted", ip, n);
 
     i = 0;                     /* point to original data (x,y) to be rebinned */
     iold = 0;
+    /* the next loop will not be executed if nbin < 0 */
     for (ip=0; ip<nbin-1; ip++) {		/* for each bin, accumulate */
         x0 = x1 = x2 = y1 = y2 = 0.0;       /* reset */
         while (i<n && x[i] >= xbin[ip] && x[i] < xbin[ip+1]) {
@@ -562,9 +564,9 @@ real *x, *y, *xbin, *xp, *yp, *xps, *yps;
     } /* for(ip) */
     if(zbin)warning("There were %d bins with no data",zbin);
     if (nbin>0)
-        return(0);      /* done with variable bins */
+        return 0;;      /* done with variable bins */
 
-    nbin = -nbin;       /* make it positive for fixed binning */
+    nbin = -nbin;       /* make it positive for fixed #points binning */
     for (i=0, ip=0; i<n;ip++) {       /* loop over all points */
         x0 = x1 = x2 = y1 = y2 = 0.0;       /* reset accums */
         for(j=0; j<nbin && i<n; j++, i++) {   /* accum the new bin */
