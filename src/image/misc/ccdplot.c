@@ -172,7 +172,7 @@ setparams()
 	    contour_setdef(1,getrparam("blankval"));
 	if (hasvalue("ltype")) {
             lwidth = getiparam("ltype");
-            // oops, skip ltype for now
+            /* oops, skip ltype for now */
         }
             
 }
