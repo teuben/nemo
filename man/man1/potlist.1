@@ -1,4 +1,4 @@
-.TH POTLIST 1NEMO "23 March 1995"
+.TH POTLIST 1NEMO "19 September 2001"
 .SH NAME
 potlist \- list potential value and forces of a potential descriptor
 .SH SYNOPSIS
@@ -22,11 +22,13 @@ Some potentials require an addition data-file, see keyword \fBpotfile=\fP.
 [default: none].
 .TP
 \fBpotpars=\fIparameters\fP
-List of parameters for the model. Will all be interpreted as real numbers.
+List of parameters for the model. Will all be interpreted as double 
+precision numbers.
 If less than the required number of parameters are given, the remainder
 will be taken from default settings in the potential routine.
 When too many are given, the remaining are ignored.
-The first parameter, currently ignored, is reserved for pattern speed.
+The first parameter, currently ignored, is reserved for pattern speed,
+unless overridden with the \fBomega=\fP keyword described below.
 [default: as defined by potential routine].
 .TP
 \fBpotfile=\fIdatafile\fP
@@ -62,10 +64,6 @@ division by 4-pi. If no number is given, the densities are not
 computed, and only position, accelerations, potential and time 
 are returned. Default: not used.
 .TP
-\fBndim=2|3\fP
-Number of dimensions to test Poisson Equation in. 
-[Default: \fB3\fP].
-.TP
 \fBomega=\fP\fIpattern_speed\fP
 Override value for the pattern speed. Normally the pattern speed is
 defined by the first argument in \fBpotpars=\fP, but this allows
@@ -81,6 +79,15 @@ is provided, a space will be used. [Default: \fB%g\fP]
 \fBndim=2|3\fP
 Number of dimensions used in Poissonian density computation. Should
 be 2 or 3. 
+.TP
+\fdouble=t|f\fP
+Force usage of Float or Double potentials. By default autodetected.
+Old potentials (prior to 2001) are only available in double, which
+is the default.
+.SH CAVEAT
+The keyword \fBdouble=\fP can force a float potential to be treated
+as a double potential, and vice versa. Results can thus be meaningless
+in these cases, or the program will look in untrusted memory and coredump.
 .SH "SEE ALSO"
 potccd(1NEMO), potential(3NEMO), potential(5NEMO)
 .SH AUTHOR
@@ -88,7 +95,7 @@ Peter Teuben
 .SH FILES
 .nf
 .ta +2.0i
-~src/orbit	original sources
+~src/orbit/potential	original sources
 .fi
 .SH "UPDATE HISTORY"
 .nf
@@ -100,4 +107,5 @@ Peter Teuben
 26-jun-90	V3.1: can give whole array of input positions	PJT
 15-oct-93	V5.1: new method(s) of getting pattern speed	PJT
 17-feb-94    	V5.2: added ndim=	PJT
+18-sep-01	V4.0: handle both _float and _double potentials 	PJT
 .fi

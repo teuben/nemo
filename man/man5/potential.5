@@ -1,4 +1,4 @@
-.TH POTENTIAL 5NEMO "22 April 1996"
+.TH POTENTIAL 5NEMO "19 September 2001"
 .SH NAME
 potential \- format for potential (and force field) description
 .SH SYNOPSIS
@@ -18,38 +18,52 @@ potential \- format for potential (and force field) description
 .B double par[];   	/* list of parameters (I/O) */
 .B char *name;     	/* optional (file) name for data (I) */
 .PP
-\fBvoid potential (ndim, pos, acc, pot, time)\fP
-.B int *ndim;     	/* number of dimensions (I) */
-.B double pos[];  	/* position (I) */
+\fBvoid potential_double (ndim, pos, acc, pot, time)\fP
+.B const int *ndim;     	/* number of dimensions (I) */
+.B const double pos[];  	/* position (I) */
 .B double acc[], *pot;	/* forces and potential (O) */
-.B double *time;        /* time (I) */
+.B const double *time;        /* time (I) */
+.PP
+\fBvoid potential_float (ndim, pos, acc, pot, time)\fP
+.B const int *ndim;     	/* number of dimensions (I) */
+.B const float pos[];  	/* position (I) */
+.B float acc[], *pot;	/* forces and potential (O) */
+.B const float *time;        /* time (I) */
 .PP
 \fBinteger function  inipotential (npar, par, name)\fP
 .B integer npar
 .B double precision par(*)
 .B character name*(*)
 .PP
-\fBinteger function potential (ndim, pos, acc, pot, time)\fP
+\fBinteger function potential_double (ndim, pos, acc, pot, time)\fP
 .B integer ndim     
 .B double precision pos(*)
 .B double precision acc(*) 
 .B double precision pot
 .B double precision time
+.PP
+\fBinteger function potential_float (ndim, pos, acc, pot, time)\fP
+.B integer ndim     
+.B real pos(*)
+.B real acc(*) 
+.B real pot
+.B real time
 .fi
 .SH DESCRIPTION
 \fIpotential\fP is a convenient data structure to hold an
 ascii description of a user selected potential, and all it's
-desriptors (id-name, parameters, associated file(s)). It
+descriptors (id-name, parameters, associated strings/file(s)). It
 is currently also stored in the \fIorbit(5NEMO)\fP data
 structure.
 .PP
 \fIpotential(5NEMO)\fP  is a 'filestructure' which 
-defines a potential (and force field) through a standardized
+defines a potential (and force or velocity field) through a standardized
 interface routine, as described in \fIpotential(3NEMO)\fP.
 .PP
 A \fIpotential(5NEMO)\fP datafile \fBmust\fP
-have two externally accessible entry points
-\fBinipotential\fP and \fBpotential\fP, with a 
+have two (or three) externally accessible routines 
+\fBinipotential\fP and \fBpotential_double\fP and/or
+\fBpotential_flot\fP, (old name:\fBpotential\fP) with a 
 parameter sequence as described above. The parameters are all
 called by reference to allow interfaces with some common
 but more primitive languages. Notably FORTRAN is now
@@ -132,6 +146,10 @@ potentials to modify their code in something like the following:
     *pot += 0.5*tmp;
     acc[0] += tmp / pos[0];
 .fi
+.SH CAVEAT
+Since the old format did not use _float or _double, there will
+be some potentials with no _float support,since _double is the
+default if  not present in the symbol table.
 .SH "SEE ALSO"
 get_potential(3NEMO), orbit(5NEMO)
 .SH AUTHOR
@@ -152,4 +170,5 @@ Peter Teuben
 24-may-92	V4.0: documented the new potential struct   PJT
 11-oct-93	V5.0: formalized get_pattern	PJT
 16-apr-96	documented 'flowcode' and 'vpotcode' deviations 	PJT
+19-sep-01	documented _float/_double                        	PJT
 .fi
