@@ -46,8 +46,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-extern int unlink (string);		/* POSIX ??? */
-extern int dup (int);			/* POSIX ??? */
+extern int unlink (string);		/* POSIX ??? unistd.h */
+extern int dup (int);			/* POSIX ??? unistd.h */
 
 #if !defined(NEMO_MAXFD)
 #define NEMO_MAXFD  32
