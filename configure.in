@@ -771,13 +771,13 @@ case $yapp_name in
           ;;
 	pgplot)
 	  if test "$PGPLOT_DIR" = "$NEMOLIB" ; then
-	    YAPP_LIBS="-L\$NEMOLIB -lpgplot $XLIBS $FLIBS"
+	    YAPP_LIBS="-L\$NEMOLIB -lcpgplot -lpgplot $XLIBS $FLIBS"
 	    PGPLOT_DIR="\$NEMOLIB"
 	    AC_MSG_WARN(using dollar)
 	    echo $PGPLOT_DIR
 	    echo $NEMOLIB
 	  else
-   	    YAPP_LIBS="-L$PGPLOT_DIR -lpgplot $XLIBS $FLIBS"
+   	    YAPP_LIBS="-L$PGPLOT_DIR -lcpgplot -lpgplot $XLIBS $FLIBS"
 	    AC_MSG_WARN(using classic)
 	  fi
 	  YAPP_DEF="/xs"
