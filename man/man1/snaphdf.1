@@ -1,0 +1,59 @@
+.TH SNAPHDF 1NEMO "12 February 1995"
+.SH NAME
+snaphdf \- convert snapshot to HDF SD
+.SH SYNOPSIS
+\fBsnaphdf\fP [parameter=value]
+.SH DESCRIPTION
+\fBsnaphdf\fP is a prototype program intended to test out
+conversion to some standardized HDF format. It is unclear
+at the time of this writing what this exactly is, any output
+generated with this program should self-destruct after you
+have read it.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input file, in standard \fIsnapshot(5NEMO)\fP formnat. 
+No default.
+.TP
+\fBout=\fP
+Output file (currently an hdf SD). \fINote: \fP  Any existing
+output files will be overwritten.
+No default.
+.TP
+\fBtimes=\fP
+Times to select snapshot.
+.SH EXAMPLES
+In the following example an 100 particle snapshot is created with the
+\fImkplummer(1NEMO)\fP program, but instead of storing the data, it
+is piped (in the NEMO convention) into \fIsnaphdf\fP. The \fItsd(1NEMO)\fP
+is then used to view what is inside the dataset. Compare this with the
+output of the standard HDF program \fIhdfls(1)\fP.
+.nf
+    % mkplummer - 100 | snaphdf - p100.hdf
+    % tsd p100.hdf
+    Found 8 scientific data sets in p100.out
+    1: (1)   -> [1 elements of type: 5 (FLOAT32)]
+    2: (100)   -> [100 elements of type: 5 (FLOAT32)]
+    3: pos(1)(100) Virial  -> [100 elements of type: 5 (FLOAT32)]
+    4: pos(2)(100) Virial  -> [100 elements of type: 5 (FLOAT32)]
+    5: pos(3)(100) Virial  -> [100 elements of type: 5 (FLOAT32)]
+    6: vel(1)(100) Virial  -> [100 elements of type: 5 (FLOAT32)]
+    7: vel(2)(100) Virial  -> [100 elements of type: 5 (FLOAT32)]
+    8: vel(3)(100) Virial  -> [100 elements of type: 5 (FLOAT32)]
+.fi
+.SH BUGS
+Any existing output file will be overwritten, contrary to
+the NEMO convention. This is due to the use of the hdf
+library. We ought to call some file existance routine
+before...
+.SH SEE ALSO
+tsd(1NEMO), hdfls(1), hdf(1)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+24-dec-94	V1.0 Created	PJT
+.fi
