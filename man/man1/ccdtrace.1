@@ -1,4 +1,4 @@
-.TH CCDTRACE 1NEMO "31 July 1996"
+.TH CCDTRACE 1NEMO "26 September 2002"
 .SH NAME
 ccdtrace \- interpolate a set of coordinates from an image
 .SH SYNOPSIS
@@ -33,6 +33,8 @@ Allocation space for input XY table, if needed. This value is
 only needed when the XY table is read from a device which cannot
 seek (e.g. a pipe).
 Default: 10000.
+.SH FILES
+src/nbody/evolve/flowcode/ccdtrace.c
 .SH SEE ALSO
 ccdprint(1NEMO), tsf(1NEMO), image(5NEMO), fits(5NEMO), ccdfits(1NEMO)
 .SH AUTHOR
@@ -41,5 +43,5 @@ Peter Teuben
 .nf
 .ta +1.0i +4.0i
 31-jul-96	V1.0 Created     	Peter Teuben
-sep-2001	V1.0a updated doc, fixed code for file_lines	PJT
+26-sep-2001	V1.0a updated doc, fixed code for file_lines	PJT
 .fi

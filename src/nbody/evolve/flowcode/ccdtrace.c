@@ -20,7 +20,7 @@ string defv[] = {
     "out=???\n      Output table of X,Y,I coordinates",
     "xytab=???\n    Input table of X,Y coordinates",
     "nmax=10000\n   Allocation space for input XY table, if needed",
-    "VERSION=1.0a\n  26-sep-02 PJT",
+    "VERSION=1.0b\n  10-oct-02 PJT",
     NULL,
 };
 
@@ -142,8 +142,10 @@ trace_image()
             nout++;
             fprintf(outstr,"# %g %g Outside\n",x[i],y[i]);
         } else {                                            /* inside grid */
-            outval = (1-dx)*(1-dy)*F(ix,iy) + dx*(1-dy)*F(ix+1,iy) +
-              (1-dx)*dy*F(ix,iy+1) + dx*dy*F(ix+1,iy+1);
+            outval = (1-dx)*(1-dy)*F(ix,iy)     +      /* See e.g.         */
+	                 dx*(1-dy)*F(ix+1,iy)   +      /* Abram.& Steguhn  */
+	                 (1-dx)*dy*F(ix,iy+1)   +      /* par. 25.2.66     */
+			     dx*dy*F(ix+1,iy+1);       /* Four Foint Formu */
             fprintf(outstr,"%g %g %g\n",x[i],y[i],outval);
         }
     }
