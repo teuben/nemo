@@ -1,5 +1,9 @@
-* this file is called BUGLETS, not BUGS anymore , it's insane, but...
-  MacOS-X cannot handle multiple mixed-case filenames! WTF....
+* this file is called BUGLETS, it used to be called BUGS anymore until
+  this so-called MacOSX unix clone came around and decided it cannot 
+  handle case senstive file/directory names. Cygwin isn't much better
+  (they all depend on a weaker FS, vfat and HFS+ which cannot handle
+  such names)
+
 
 - intel 8.0 - some linkeage problems left with loadobj based
   routines, e.g. vrtm51.so can't  find get_atable
