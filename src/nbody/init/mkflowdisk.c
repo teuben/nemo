@@ -8,6 +8,7 @@
  *   23-nov-03   1.3 add key=
  *   26-nov-03   1.3b   fixed final bugs in sign errors and indexing in binsearch()
  *    3-nov-03   1.3c   implemented uniform=
+ *   13-dec-03   1.4 
  *
  */
 
@@ -40,9 +41,10 @@ string defv[] = {
     "key=\n               Add a key, if present",
     "seed=0\n		  random number seed",
     "nmodel=1\n           number of models",
+    "sign=1\n             Change sign of Z-angular momentum of the disk",
     "test=f\n             test shape of spiral",
     "headline=\n	  text headline for output ",
-    "VERSION=1.3d\n	  4-dec-03 PJT",
+    "VERSION=1.4\n	  13-dec-03 PJT",
     NULL,
 };
 
@@ -59,6 +61,7 @@ local bool Qtest;
 local bool Qlinear;
 local bool Quniform;
 local bool Qkey;
+local int  jz_sign;
 
 local Body *disk = NULL;
 local real theta[361], dens[361];
@@ -80,12 +83,13 @@ void nemo_main()
     if (Qkey) key = getiparam("key");
 
     ndisk = getiparam("nbody");
+    jz_sign = getiparam("sign");
     nmodel = getiparam("nmodel");
     totmass = getdparam("mass");
     offset = getdparam("phase") * PI / 180.0;    
     Qtest = getbparam("test");
     Quniform = getbparam("uniform");
-
+    if (ABS(jz_sign) != 1) error("sign must be +1 or -1");
 
     Qlinear = hasvalue("k");
     if (Qlinear)
@@ -132,7 +136,10 @@ setdensity(void)
   double rmean = 0.5*(rmin+rmax);
   double tanp = tan(pitch*PI/180.0);
 
-  tref = log(rmean/rref)/tanp - offset;
+  if (Qlinear)
+    tref = 0;
+  else
+    tref = log(rmean/rref)/tanp - offset;
   dprintf(1,"setdensity - 0:360:1 steps at rref=%g tref=%g\n",rref,tref);
   for (i=0; i<=360; i++) {
     theta[i] = i;
@@ -142,7 +149,7 @@ setdensity(void)
     pos_d[2] = 0.0;
     (*potential)(&ndim,pos_d,vel_d,&den_d,&time_d);
     dens[i] = den_d;
-    dprintf(1,"DEN: %g   %g %g  %g %g   %g\n",
+    dprintf(2,"DEN: %g   %g %g  %g %g   %g\n",
 	    theta[i],pos_d[0],pos_d[1],vel_d[0],vel_d[1],den_d);
   }
 }
@@ -222,8 +229,8 @@ testdisk(int n)
 	Phase(dp)[0][1] = pos_d[1] = r_i * sint;
 	Phase(dp)[0][2] = pos_d[2] = 0.0;
         (*potential)(&ndim,pos_d,vel_d,&pot_d,&time_d);      /* get flow    */
-	Phase(dp)[1][0] = vel_d[0];
-	Phase(dp)[1][1] = vel_d[1];
+	Phase(dp)[1][0] = vel_d[0] * jz_sign;
+	Phase(dp)[1][1] = vel_d[1] * jz_sign;
 	Phase(dp)[1][2] = 0.0;
     }
 }
