@@ -1,0 +1,55 @@
+.TH CONTOUR 3NEMO "6 May 1995"
+.SH NAME
+contour \- simple contour routine
+.SH SYNOPSIS
+.nf
+.B #include <matdef.h>
+.PP
+\fBcontour (a, nx, ny, z, nc, xmin, ymin, xmax, ymax, lineto)
+real *a, z[], xmin, ymin, xmax, ymax;
+int nx, ny, nc;
+proc lineto;
+.PP
+contour_setdet(mode,value)
+int mode;
+real value;\fP
+.SH DESCRIPTION
+\fIcontour\fP expects a two dimensional matrix, contiguous in
+memory in either C or FORTRAN definition (\fImatdef(5NEMO)\fP), pointed
+to by \fBa\fP. The size of the matrix is \fBnx\fP by \fBny\fP pixels.
+There must be \fBnc\fP sorted contour levels supplied in the array
+\fBz\fP. The Plotting area is from \fBxmin,ymin\fP to \fBxmax,ymax\fP.
+.PP
+\fIcontour\fP needs external \fIrelocate(x,y)\fP and \fIdraw()\fP routines
+which do the actual line drawing. In NEMO can be supplied by
+the \fIyapp(3NEMO)\fP interface, or have to defined in the calling program.
+In such the linestyle of the contours can be externally set.
+An externally defined function 
+\fIvoid lineto(real x0, real y0, real x1, real y1)\fP must be supplied to
+provide the transformation from world to plot coordinates, since
+contour has no knowledge of the plotting world.
+.PP
+\fIcontour_setdef\fP defines if contours need to ignore points which
+are near undefined value. If \fImode=1\fP, the \fIvalue\fP will be taken
+as the undefined value. When this routine is never called
+\fIcontour\fP doesn't know about undefined value, i.e. \fImode=0\fP.
+.SH BUGS
+Contour levels must be sorted in increasing order.
+.PP
+The MATDEF stuff could mirror your images if not used consistently.
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +1.5i
+~/src/image/misc	contour.c 
+.fi
+.SH UPDATE HISTORY
+.nf
+.ta +1i +4i
+xx-jun-87	original version    	PJT
+1-feb-89	FORDEF/CDEF implemented -	PJT
+10-sep-90	Added routine contour_setdef	PJT
+6-may-95	new contour() with lineto now formally in NEMO 	PJT
+.fi
+
