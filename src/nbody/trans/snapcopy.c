@@ -6,6 +6,7 @@
  *	11-jan-97	   b    report # copied, NEMOV2 style
  *	25-mar-97	   c    minor fix SINGLEPREC
  *       1-apr-01          d    compiler warning
+ *      13-feb-04       V1.1f    silenced more compiler warnings (shetty bug?)
  *
  *	BUG: should optionally copy other sets within the snapshot
  *	     set, e.g. diagnostics and story
@@ -15,11 +16,14 @@
 #include <getparam.h>
 #include <vectmath.h>
 #include <filestruct.h>
+#include <history.h>
 				/* new filestruct */
 #include <snapshot/snapshot.h>	
 #include <snapshot/body.h>
 #include <snapshot/get_snap.c>
 #include <snapshot/put_snap.c>
+
+#include <bodytrans.h>
 
 string defv[] = {
     "in=???\n           Input snapshot",
@@ -28,7 +32,7 @@ string defv[] = {
     "times=all\n        Times to select",
     "precision=double\n Precision of results to store (double/single) [unused]",
     "keep=all\n         Items to copy in snapshot",
-    "VERSION=1.1e\n     25-nov-02 PJT",
+    "VERSION=1.1f\n     13-feb-04 PJT",
     NULL,
 };
 
@@ -36,7 +40,7 @@ string usage="copy an N-body snapshot";
 
 #define TIMEFUZZ	0.0001	/* tolerance in time comparisons */
 
-nemo_main()
+void nemo_main(void)
 {
     stream instr, outstr;
     real   tsnap;
@@ -44,10 +48,10 @@ nemo_main()
     Body   *btab = NULL, *bpi, *bpo;
     int    i, nbody, nout, nreject, bitsi, bitso, vis, visnow, vismax;
     bool   Qall;
-    iproc  sfunc;
+    iproc_body sfunc;
 
     times = getparam("times");
-    sfunc = (iproc) btitrans(getparam("select"));
+    sfunc = btitrans(getparam("select"));
     instr = stropen(getparam("in"), "r");
     outstr = stropen(getparam("out"), "w");
     precision = getparam("precision");	/* unused */
