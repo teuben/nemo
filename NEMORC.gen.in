@@ -26,6 +26,9 @@ setenv PGPLOT_DIR  @PGPLOT_DIR@
 setenv PGPLOT_LIB  @PGPLOT_DIR@
 setenv PGPLOT_FONT @PGPLOT_DIR@/grfont.dat
 
+#  If you use the VoGL library for xyzview, this is the only reasonable default
+setenv VDEVICE X11
+
 
 #  Particularly if you use shared libraries (e.g. pgplot in $NEMOLIB) you
 #  may need to change LD_LIBRARY_PATH;
