@@ -1,14 +1,16 @@
-.TH ERROR 3NEMO "5 March 1994"
+.TH ERROR 3NEMO "8 December 2001"
 .SH NAME
-error, errorn, warning, recover, stop \- handle errors and warnings and system exit
+error, fatal, warning, recover, stop \- handle errors and warnings and system exit
 .SH SYNOPSIS
 .nf
 \fB#include <stdinc.h>\fP
 .PP
 \fBvoid error(string format, ... )\fP
-\fBvoid errorn(string format, ... )\fP
+\fBvoid fatal(string format, ... )\fP
 \fBvoid warning(string format, arg ... )\fP
 \fBvoid recover(proc cleanup)\fP
+\fBvoid stop(int lev)\fP
+\fBvoid set_exit_level(int lev)\fP
 .fi
 .SH DESCRIPTION
 \fIerror\fP prints out an error 
@@ -20,10 +22,10 @@ This functionality is
 similar to the \fIsignal(2)\fP concept. No arguments can
 be given to the \fBcleanup()\fP function. After \fIcleanup\fP
 has been called the program continues. (hmmm)
+Any non-zero \fIerrno\fP will also be reported.
 .PP
-\fIerrorn\fP prints a descriptive message based on 
-an assumed last system error, as set by 
-errno (see also \fIerrno(3)\fP).
+\fIfatal\fP is like error, except calls \fIabort(3)\fP, which should
+cause a core dump.
 .PP
 \fIwarning\fP prints out a warning string to \fIstderr\fP,
 but always continues the program.
@@ -34,7 +36,8 @@ Each of these functions converts, formats,  and  prints  its
 .PP
 When \fBdebug_level\fP is larger than 5 (see \fIgetparam(3NEMO)\fP)
 \fIabort(3)\fP is called, instead of \fIexit(3)\fP. This should create
-a coredump, if your \fIcoredumpsize\fP is large enough.
+a coredump, if your \fIcoredumpsize\fP is large enough. 
+
 .PP
 \fIstop\fP exits to the system, similar to \fIexit(3)\fP, but
 performs some standard NEMO cleanup functions, for example, if
@@ -53,5 +56,5 @@ xx-xxx-86	Created in the dark ages	Josh
 4-oct-90	Upgraded with warning() and recover()	Peter
 29-oct-90	abort for large enough debug_level	Peter
 5-mar-94	documented stop                     	peter
-8-dec-01	added errorn                      	peter
+8-dec-01	added errno reporting, updated man page	peter
 .fi
