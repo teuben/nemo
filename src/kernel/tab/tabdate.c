@@ -36,14 +36,15 @@ string format2;
 
 nemo_main()
 {
-    format1 = getparam("format1");
-    format2 = getparam("format2");
-
-    instr = stropen(getparam("in"),"r");
-    outstr = stropen (getparam("out"),"w");
-
-    convert(instr,outstr);
+  format1 = getparam("format1");
+  format2 = getparam("format2");
+  
+  instr = stropen(getparam("in"),"r");
+  outstr = stropen (getparam("out"),"w");
+  
+  convert(instr,outstr);
 }
+
 convert(stream instr, stream outstr)
 {
   char   line[MAX_LINELEN];          /* input linelength */
@@ -62,4 +63,5 @@ convert(stream instr, stream outstr)
     fputs(line,outstr);
     fputs("\n",outstr);
   } /* for(;;) */
+  dprintf(1,"Processed %d lines\n",nlines);
 }
