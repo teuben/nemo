@@ -79,7 +79,7 @@ void accum_moment(Moment *m, real x, real w)
 	}
 	m->n--;
       }
-      dprintf(2,"add: %d\n",m->idat,x);
+      dprintf(2,"add: %d %g\n",m->idat,x);
 
       m->dat[m->idat] = x;
       m->wgt[m->idat] = w;
