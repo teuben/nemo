@@ -1,4 +1,4 @@
-.TH MKNEMO 8NEMO "16 December 2003"
+.TH MKNEMO 8NEMO "11 June 2004"
 .SH NAME
 mknemo \- attempt to find NEMO programs and install them
 .SH SYNOPSIS
@@ -25,7 +25,8 @@ to be updated.
 .nf
   -c CODE   search for CODE.c to set the directory for target(s)
   -n N      selection of N-th element from unresolved list [1]
-  -s DIR    root directory to start search [/home/teuben/nemo]
+  -s DIR    root directory to start search [$NEMO/src]
+  -a        also search $NEMO/usr 
   -r        remove lockfile before starting
   -d        also make doc file (only for true NEMO programs)
   -t        cleanup after having made the binaries
@@ -55,4 +56,5 @@ $NEMO/adm/install/mknemo.lock	lockfile, to prevent multiple usage
 4-apr-01	V1.3: added extension making for NEMO V3	PJT
 20-jun-03	V1.4: added -u flag	PJT
 16-dec-03	V1.5: added -l flag, also cloned sbin/mkstarlab	PJT
+11-jun-04	V2.4: added -a flag	PJT
 .fi

@@ -9,7 +9,7 @@
 #
 #  BIG BUG: 'mknemo mkplummer.c' would remove the sourcecode and put it into $NEMOBIN !!!!!
 #
-set version="MKNEMO Version 2.4 6-apr-04"
+set version="MKNEMO Version 2.5 11-jun-04"
 if ($#argv == 0) goto usage
 set old_argv=($*)
 
@@ -43,6 +43,7 @@ endif
 # set defaults which can be modified by command line options
 
 set src=$NEMO/src
+set usr=$NEMO/usr
 set n=0
 set d=0
 set code=""
@@ -50,11 +51,17 @@ set post_tidy=""
 set pre_tidy=""
 set u=0
 set l=0
+set a=0
 set go=0
 
 # process command line options
 loop:
  switch ($argv[1])
+  case -a:
+    shift argv
+    if ($#argv == 0) goto noargs
+    set a=1
+    breaksw
   case -c:
     shift argv
     if ($#argv == 0) goto noargs
@@ -167,6 +174,10 @@ foreach f ($argv)
      echo "MKNEMO> Searching ${ccode}.${e}: "
      set l=(`find $src -name $ccode.$e -type f -print`)
      if ($#l) break
+     if ($a) then
+	set l=(`find $usr -name $ccode.$e -type f -print`)
+	if ($#l) break
+     endif
    end
  endif
  set mk="#"
@@ -276,4 +287,5 @@ usage:
   echo "  -u        run 'cvs update -d' to NEMO before making"
   echo "  -l        recompile the library by running 'make libs'"
   echo "  -g        use gmake, instead of make"
+  echo "  -a        use all directories, usr and src, to find code to update"
   exit 1
