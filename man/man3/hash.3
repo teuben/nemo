@@ -1,0 +1,115 @@
+.TH HASH 3NEMO "30 April 1992"
+.SH NAME
+init_Hash_Table, get_hash, put_hash, next_hash \- hash functions
+.SH SYNOPSIS
+.nf
+\fBstruct Hash_Table* init_Hash_Table();
+void* get_hash(Hash_Table, key);
+bool  put_hash(Hash_Table, key, object);
+void* next_hash(Hash_Table, firstp);
+
+struct Hash_Table *Hash_Table;
+string key;
+void *object;
+bool firstp; \fP
+.fi
+.SH DESCRIPTION
+\fIhash\fP implements a general hashing technique of storing and 
+retrieving keyword based information in a hashed database. Each
+database must be initialized with a call to \fIinit_Hash_Table\fP,
+which returns a handle that
+is subsequently used to store and retrieve information. 
+.PP
+\fIput_hash\fP stores the information: it uses the pointers to the
+\fIkey\fP and \fIobject\fP you supply, which must hence
+be in safe memory, not local variables. It returns FALSE if for some
+reason the key could not be stored (a common cause would be if the key
+had already been entered).
+.PP
+\fIget_hash\fP returns a pointer to the object requested by name \fIkey\fP.
+It returns NULL if no data found.
+.PP
+\fInext_hash\fP iterated over all objects, in the order as stored in the
+hash table. It MUST be called the first time with \fIfirstp\fP set to 
+TRUE. It can be iterated until NULL is returned.
+.SH LIMITATIONS
+The largest prime number stored is 524287.
+.SH EXAMPLE
+.nf
+    typedef struct keyval {
+        char *key;
+        char *val;
+    } keyval;
+
+    keyval x[] = {
+        "in",  "???",
+        "out", "???",
+        "n",   "10",
+        "k",   "2",
+        "x",   "2.342",
+        "pi",  "PI",
+        NULL,  NULL,
+    };
+
+    struct Hash_Table  *h;
+    keyval *xp;
+    int i;
+
+    h = init_Hash_Table();                                  /* init */
+    for (xp=x; xp->key; xp++) {                             /* store */
+        if (!put_hash(h,xp->key, xp->val))
+            printf("### error put_hash\n");
+    }
+
+    for (i=1; i<ac; i++)                                    /* retrieve */
+        printf("%s -> %s\n",av[i],(char *)get_hash(h,av[i]));
+
+.fi
+.SH SEE ALSO
+getparam(3NEMO), bsearch(3), hsearch(3), lsearch(3), tsearch(3)
+.SH AUTHOR
+LGO
+.SH FILES
+$NEMO/usr/lib/misc
+.SH COPYRIGHT
+Copyright (C) 1990 Texas Instruments Incorporated.
+.PP
+Permission is granted to any individual or institution to use, copy, modify,
+and distribute this software, provided that this complete copyright and
+permission notice is maintained, intact, in all copies and supporting
+documentation.
+.PP
+Texas Instruments Incorporated provides this software "as is" without
+express or implied warranty.
+.SH IMPLEMENTATION
+The following is an extract from \fIhash.h\fP and shows the implementation
+of the hash tables.
+.nf
+
+#define BUCKET_SIZE 8
+
+struct hash_pair {
+  char* key;
+  void* value;
+};
+
+struct bucket {
+  struct hash_pair data[BUCKET_SIZE];
+};
+
+struct Hash_Table {
+  struct bucket* table;
+  unsigned char* items_in_buckets;
+  int entry_count;
+  int bucket_index;
+  int current_bucket;
+  int current_index;
+}
+
+.fi
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4i
+30-mar-89	Initial design and implementation.	LGO
+28-apr-92	Adapted from the TI cpp for NEMO      	PJT
+.fi
