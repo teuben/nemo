@@ -1,0 +1,17 @@
+%N mkpolytrope
+This doc file has been produced with help=t option
+No further help is available, try 'man mkpolytrope'
+%A out
+	output file name  [???]
+%A n
+	energy exponent  [1]
+%A m
+	angular momentum exponent  [-1]
+%A nobj
+	number of particles  [512]
+%A seed
+	seed for random numbers  [123]
+%A headline
+	verbiage for output  []
+%A VERSION
+	15-nov-90 PJT [1.2]
