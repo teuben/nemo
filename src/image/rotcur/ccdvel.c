@@ -52,6 +52,7 @@
  *   8-sep-01      a  init_xrandom
  *  29-jun-02   V1.8  add blc= for "BLC"                            PJT
  *  20-jul-02      a  fix error message if too many array elements   pjt
+ *   6-feb-03   V2.0  add phases and fourier components to vel's for Rahul    pjt
  */
 
 #include <stdinc.h>
@@ -79,6 +80,11 @@ string defv[] = {
         "kspiral=1\n    spiral wavenumber, inverse pitch angle",
         "nspiral=2\n    measure of inverse width of spiral",
 	"tspiral=0\n	phase of spiral w.r.t. line of nodes", 
+
+	"phrot=0\n      phases of vrot fourier component (per ring)",
+	"phexp=0\n      phases of vexp fourier component (per ring)",
+	"mrot=0\n       mode of fourier component for vrot (one number)",
+	"mexp=0\n       mode of fourier component for vexp (one number)",
 
         "size=128\n     Map/Cube size",
         "cell=1\n       Cell size",
@@ -134,7 +140,9 @@ local bool Qcube = FALSE;
 local real rad_i[MAXRAD],                                      /* radii */
            vrot_i[MAXRAD], vexp_i[MAXRAD],                /* velocities */
            inc_i[MAXRAD], theta_i[MAXRAD],                   /* viewing */
-           xpos_i[MAXRAD], ypos_i[MAXRAD], vsys_i[MAXRAD];    /* center */
+           xpos_i[MAXRAD], ypos_i[MAXRAD], vsys_i[MAXRAD],    /* center */
+           phrot_i[MAXRAD], phexp_i[MAXRAD];                  /* phases */
+local int  mrot_i, mexp_i;                            /* fourier moment */
 local int  nrad;
 
 local int gridx(real), gridy(real), gridz(real);
@@ -149,7 +157,6 @@ extern double grandom(double,double);
 nemo_main ()
 {
     setparams();
-
     outstr = stropen(getparam("out"),"w");
     switch (out_mode) {
        case 1:  vel_create_1(outstr);  break;
@@ -316,11 +323,31 @@ setparams()
         dprintf(0,"Found %d position angles\n",n);
         for (i=n; i<nrad; i++) theta_i[i] = theta_i[n-1];
 
+
+
+        n = nemoinpr(getparam("phrot"),phrot_i,nrad);
+        if (n<1) error("phrot=: Need at least one (%d) or at most %d",n,nrad);
+        dprintf(0,"Found %d phase angles for rotation\n",n);
+        for (i=n; i<nrad; i++) phrot_i[i] = phrot_i[n-1];
+
+        n = nemoinpr(getparam("phexp"),phexp_i,nrad);
+        if (n<1) error("phexp=: Need at least one (%d) or at most %d",n,nrad);
+        dprintf(0,"Found %d phase angles for expansion\n",n);
+        for (i=n; i<nrad; i++) phexp_i[i] = phexp_i[n-1];
+
+        mrot_i = getiparam("mrot");
+	mexp_i = getiparam("mexp");
+
+	if (mrot_i || mexp_i)
+	  warning("You are using a new option mrot= and/or mexp=; be aware");
+
         vsys = getdparam("vsys");
    
         for (i=0; i<nrad; i++) {     /* store angles in radians */
             theta_i[i] *= RPD;
             inc_i[i]   *= RPD;
+	    phrot_i[i] *= RPD;
+	    phexp_i[i] *= RPD;
         }
     }
 
@@ -366,7 +393,7 @@ setparams()
 local void vel_create_1(stream outstr)
 {
     int  i, j, k, n, nx, ny, nz, ir, nr, ip, np;
-    real x, y, vrot, vexp, ival;
+    real x, y, t, vrot, vexp, ival, fexp, frot, phexp, phrot;
     real cost, sint, cosk, sink, rad, drad, phi, dphi, sinth, costh;
     real omega, kappa, bigx, bigy, p, r, m_min, m_max, delta1, delta2;
     real x0, y0, z0, dx, dy, dz, eps, theta, inc, e1, e2, vspi, vobs;
@@ -440,6 +467,13 @@ local void vel_create_1(stream outstr)
                 costh = cos(theta);
                 cost = (-x*sinth + y*costh) / rad;
                 sint = (-x*costh - y*sinth) / (rad * cos(inc));
+		if (mrot_i || mexp_i) {         /* modulated orbit */
+		  phrot = mrot_i ? linfit(phrot_i, rad_i, rad, nr-1, nr) : 0.0;
+		  phexp = mexp_i ? linfit(phexp_i, rad_i, rad, nr-1, nr) : 0.0;
+		  t = atan2(sint,cost);
+		  if (mrot_i) vrot *= cos(mrot_i*(t-phrot));
+		  if (mexp_i) vexp *= cos(mexp_i*(t-phexp));
+		}
                 if (aspiral>0) {                    /* spiral addition ? */
                     theta = atan2(sint,cost) - kspiral * rad * TWO_PI - theta0;
                     vspi = pow(sin(theta),nspiral) * cos(theta);
@@ -526,6 +560,8 @@ local real linfit(real *f, real *x, real x0, int m, int n)
  * create a velocity field (NEMO)
  *              0..nx-1 and 0..ny-1 
  *      start from gal plane, and project; needs to do a particle simulation
+ *   
+ * NOTE: we don't use this method: see snapgrid for something closer
  */
 
 local void  vel_create_2(stream outstr)

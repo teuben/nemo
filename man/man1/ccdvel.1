@@ -1,4 +1,4 @@
-.TH CCDVEL 1NEMO "29 June 2002"
+.TH CCDVEL 1NEMO "6 February 2003"
 .SH NAME
 ccdvel \- create a velocity field; grid or retrace
 .SH SYNOPSIS
@@ -29,10 +29,27 @@ rings are projected on top of each other.
 \fINote:\fP This mode, originally the only one, 
 merely served as a shortcut between 
 the various N-body creators, followed by subsequent gridding with 
-\fIsnapgrid\fP.
+\fIsnapgrid\fP. It may not work anymore, since it is not well 
+maintained.
 .PP
 The center coordinates and systemic velocity are currently fixed for
 all rings.
+.PP
+Using keywords \fBmexp=\fP and \fBphexp=\fP a circular orbit 
+can have its expansion velocity modulated:
+.nf
+	vexp*cos(mexp*(phi-phiexp))
+.fi
+instead of a constant vexp (i.e. mexp=0). This only works for
+the retracing method though. Although the rotation speed has
+a similar modulation implemented, it is not a good idea to
+use that. Instead, it will probably be better to define this
+as
+.nf
+	vrot+vexp*sin(mexp*(phi-phiexp))
+.fi
+though this would suggest the local velocity ellipsoid to be
+isotropic (cf. Binney & Tremaine ....)
 .SH PARAMETERS
 The following parameters are recognized:
 .TP 25
@@ -67,6 +84,24 @@ be overridden with this keyword.
 Array of  position angles (degrees), one for each radius.
 The default values from the \fIrotcur_table\fP table below can be also 
 be overridden with this keyword.
+.TP
+\fBphrot\fP=\fIp1,p2,p3,...\fP
+Array of rotation phase angles (degrees), one for each radius. Don't
+use this right now. Default: 0
+.TP
+\fBphexp\fP=\fIp1,p2,p3,...\fP
+Array of expansion phase angles (degrees), one for each radius, for
+the modulation of the expansion velocities.
+.TP
+\fBmrot\fP=\fIm\fP
+Fourier mode for the rotation speed modulation. Currently not a good
+idea to use this, since we would modulate the whole rotation,
+not a tiny bit on top of rotation. Use mexp=,phexp=.
+Default: 0
+.TP
+\fBmexp\fP=\fIm\fP
+Fourier mode for the expansion speed modulation. 
+Default: 0
 .TP
 \fBsize\fP=\fInx,ny\fP
 Size of map, up to two numbers.
@@ -185,4 +220,5 @@ apr-01		V1.5b added in=, but deprecated it		PJT
 1-may-01	V1.6 added amp= for CARMA simulations		PJT/LGM
 3-may-01	V1.7 added vexp=                            	PJT
 29-jun-02	V1.8 added blc= keyword (Joshua Simon)		PJT
+6-feb-03	V2.0 modulated orbits (mexp,phexp,mrot,phrot)	PJT
 .fi
