@@ -7,33 +7,39 @@ to another, e.g.
 	mkplummer - 1000 | integrator - - tstop=10 | snapplot - nxy=4,4
 
 
-This does have some limitations, e.g. it is harder to fork/split a data-stream
-and run two streams, and neither is it easy to shunt data and feed it back
-into the stream a little earlier, like a feedback loop.
+This does have some limitations, e.g. it is hard to fork/split a
+data-stream and run two streams in the standard unix shell, and
+perhaps even harder to shunt data and feed it back into the stream a
+little earlier, like a feedback loop.
 
 
-Here is an example of how to feedback some data earlier in the stream. 
+Here is an example of how to feedback some data earlier in the stream, in a
+particular situation of an integrator that needs a background potential,
+of which the parameters are derived from the snapshot at a slightly delayed
+time (due to the nature of how pipes work)
 
 
    mkplummer  - 1000 |\
       gyrfalcON - - potname=plummerv potpars=0,1,1,0.1 potfile=plummerv.dat |\
       snapcore - potfile=plummerv.dat
 
+It should be clear that the integration is not necessarely exactly repeatable,
+not a particularly wishful situation.
 
-To study this example, look at
+To study this example, look at two new codes for this:
 
 1) $NEMO/src/orbit/potential/data/plummerv.c
 
-	this implements an example of a plummer sphere potential (like plummer.c), but
-	at regular intervals (as set by potname[3]) it will attempt to read a  so-called
-	"plummerv" binary structured datafile and recompute the plummer parameters.
+	this implements an example of a plummer sphere potential (derived from plummer.c), 
+	but at regular intervals (as roughly set by potpars[3]) it will attempt to read a  
+	so-called "plummerv" binary structured datafile and recompute the plummer parameters.
 
 
 
 2) $NEMO/src/nbody/reduc/snapcore.c
 
 	this implements an example how to read snapshots that came out of the 
-	integerator (or anything along the pipe, see example above), and compute
+	integrator (or anything along the pipe, see example above), and compute
 	new plummer parameters and write them into a "plummerv" binary structured
 	datafile.
 
@@ -43,3 +49,36 @@ Potential problems:
   - the reader could try to open when the writer is "in the middle", causing bad
     data to be read. Could do file locking, or use a shared memory segment instead.
     since it's via stropen(), stropen should offer that as an option.
+
+    I've run this test a number of times, and didn't run into this problem, however
+    i oddly enough ran out of I/O slots. 
+
+    it's also one of these potential places where Heisenbug's can creap in. By
+    adding or removing printf() statements the code runs quicker, the pipe produces
+    the "tmr" file at a different rate and you get different results.
+
+  - since i could not get the dynamic object loader work with stat64() [in the
+    fexist routine in plummerv.c], currently you probably should make a dummy file
+    plummerv.dat, e.g. as shown in the following simple shell script:
+
+
+#! /bin/csh -f
+#
+ 
+set t=0
+set m=1
+set r=0.2
+set out=plummerv.dat
+ 
+rsf in=- out=$out << EOF
+set plummerv
+  double Time $t
+  double Mass $m
+  double Radius $r
+tes
+EOF
+tsf $out
+
+
+    however if the timing is good, and dt not too small (?), it appears to work
+    without the bootstrapping need.
