@@ -1,5 +1,5 @@
 DIR = src/kernel/tab
-BIN = tabmath tabplot tabhist tabspline
+BIN = tabmath tabplot tabhist tabspline tablsqfit
 NEED = $(BIN) nemoinp
 
 help:
@@ -33,4 +33,8 @@ tabhist:
 tabspline:
 	@echo Running $*
 	nemoinp 1:2:0.001 | tabmath - - '%1*%1' | tabspline - y=2
+
+tablsqfit:
+	@echo Running $*
+	nemoinp 1:2:0.001 | tabmath - - '%1+rang(0,0.1)' seed=123 | tablsqfit -
 
