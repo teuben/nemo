@@ -4,6 +4,7 @@
  *      may-2001        added Yanc stuff for Dehnen
  *      oct-2001        added SPH/Yanc (dens/eps)
  *      jan-2002        added ZENO compatible ones
+ *      nov-2003        removed Yanc tags (YANC is also called gyrfalcON now)
  */
 
 #ifndef _snapshot_h
@@ -50,7 +51,6 @@
 #define PhaseTag       	PhaseSpaceTag
 
 
-
 /* New ZENO tags that NEMO had not defined before */
 
 #define NBodyTag 	"NBody"
@@ -64,14 +64,6 @@
 #define BodyTag 	"Body"
 #define SmoothTag       "SmoothLength"
 
-
-/* Yanc  tags were designed, but never used, right Walter? */
-
-#define   YancParametersTag     "YancParameters"
-#define     YancEpsTag            "YancEps"
-#define     YancThetaTag          "YancTheta"
-#define     YancHminTag           "YancHminTag"
-#define     YancKernelTag         "YancKernelTag"
 
 /*
  * Symbolic names for input/output bit flags.
