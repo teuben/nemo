@@ -1,4 +1,4 @@
-.TH GETPARAM 3NEMO "24 April 2002"
+.TH GETPARAM 3NEMO "12 June 2003"
 .SH NAME
 getXparam, hasvalue, isaparam, initparam, finiparam, stop \- main startup and command line processing.
 .SH SYNOPSIS
@@ -25,6 +25,8 @@ string usage="Example usage for program";
 .B long getlparam(string name)
 .B double getdparam(string name)
 .B bool getbparam(string name)
+.PP
+.B string *getargv(int *argc)
 .PP
 .B int indexparam(string basename, int idx)
 .B string getparam_idx(string basename,int idx)
@@ -107,6 +109,15 @@ must appear in \fIdefv\fP, and \fIvalue\fP is associated with \fIname\fP.
 It is an error to specify more than one \fIvalue\fP for a given \fIname\fP.
 If getparam is compiled with MINMATCH, keyword names are also matched in
 minimum match mode.
+.PP
+An exception to commandline parsing is made for any arguments that
+follow the standalone command line argument
+"--". The function \fIgetargv()\fP can be used to get access
+to any arguments that follow (and including) "--". The returned
+array simply points into the original \fIchar **argv\fP, but starts
+at the location of "--". The returned \fIargc\fP therefore only 
+counts the number of arguments after  (and including) "--", and thus
+making argv[0] be "--".
 .PP
 Depending on a user specified \fBhelp_level\fP (see below) parameters may also
 be set by reading them from a keyword file. The keyword file is unique for
@@ -347,4 +358,5 @@ xx-nov-86	created                         	Joshua Barnes
 28-nov-94	V3 rewrite, many new features, deleted some others	PJT
 12-feb-95	added updparam
 20-jan-02	re-implemented indexed keywords			PJT
+12-jul03	added getargv()		PJT
 .fi
