@@ -1,0 +1,34 @@
+.TH ORBDIM 1NEMO "1 June 1988" 
+.SH NAME
+orbdim \- compute dimensionaly of phase space for an orbit
+.SH SYNOPSIS
+.PP
+\fBorbdim in=\fPorbit [parameter=value]
+.SH DESCRIPTION
+\fIorbdim\fP computes the dimensionalty of phase space for an orbit.
+It uses the method described by Carnevalli and Santangelo.
+.PP
+\fIorbdim\fP needs a lot of data before the exponent can be reliably
+determined. In practice a 3 dimensional orbit is excluded from
+this analysis. It can be done with 2 dimensional orbits though.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 20
+\fBin=\fIin-file\fP
+input file, in \fIorbit(5NEMO)\fP format [no default]
+.SH BUGS
+I need to finish the documentation
+.SH SEE ALSO
+Carnevali, P. and Santangelo, P., 1984. \fIApJ\fP \fB281\fP 473-476.
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+pollux:/usr3/teuben/orbit	authors original sources
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +2.0i +4.0i
+.fi
