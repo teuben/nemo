@@ -67,11 +67,11 @@ $(F): $(F).dvi $(F).ps
 
 $(F).dvi: $(TEX) $(INC) $(STY)
 	@echo "Running latex 3x - will take a while [did you run 'make .prog'?]"
-	latex $(F) 
-	latex $(F)
-	makeindex < $(F).idx > $(F).ind
-	latex $(F)
-	latex $(F)
+	-latex $(F) 
+	-latex $(F)
+	-makeindex < $(F).idx > $(F).ind
+	-latex $(F)
+	-latex $(F)
 
 $(F).ps:  $(F).dvi
 	dvips $(F) -o
