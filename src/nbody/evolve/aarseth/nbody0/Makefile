@@ -22,6 +22,8 @@ L = $(NEMOLIB)/libnemo.a
 #LIBF77 = -lF77 -lI77 -lU77 -lF77 -lI77 -lU77
 LIBF77 =
 
+#  should use makedefs piece here, on mac one otherwise needs -lcc_dynamic
+
 SRCDIR = $(NEMO)/src/nbody/evolve/aarseth/nbody0
 SRC = nbody0.f nbodyio.c nbodyio.f main.c main.f \
       fdefs.inc nmax.inc \
