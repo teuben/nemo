@@ -117,6 +117,7 @@
  *  2-aug-02       b  write kiddy version of outkeys= processing
  *  4-dec-02       c  use MAXBUF for keys - btw, wc is not 2800+ lines :-(
  * 21-may-03       d  document the system keywords in help=\?
+ * 12-jul-03       e  allow -- to stop parsing
 
   TODO:
       - what if there is no VERSION=
@@ -159,7 +160,7 @@
 	gengetopt http://www.gnu.org/software/gengetopt/gengetopt.html
  */
 
-#define VERSION_ID  "3.4d 21-may-03 PJT"
+#define VERSION_ID  "3.4e 12-jul-03 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -175,6 +176,7 @@
 #define MINMATCH	/* allow keywords to be minimum matched?  */
 #define INDEXED         /* allow keywords to be dynamically indexed */
 #define OUTKEYS         /* allows writing binary export keyword   */
+#define DASHDASH        /* allows stop parsing when -- seen       */
 
 #if 0
 #define TCL7		/* TCL (old V7) support?		  */
@@ -293,6 +295,8 @@ typedef struct keyword_out {  /* a simple keyword, only meant for outkeys=   */
    local int nkeys, maxkeys;
    local keyword *keys = NULL;          /* point to array of program keywords */
    local int getparam_argc = 0;		/* count commmand line args */
+   local int dd_argc = 0;               /* location (if >0) of -- on cmdline  */
+   local string *dd_argv = NULL;        /* starts at "--" if present          */
 
 /* global variables - must be visible to the outside world */
 /*      some defined here, others defined elsewhere        */
@@ -351,7 +355,6 @@ local int set_indexed(string name, int *idx);
 local int addindexed(int j, string keyval, int idx);
 local void writekeys(char *mesg);
 local void readkeys(string mesg, bool first);
-local void set_argv(string);
 local void set_debug(string);
 local void set_error(string);
 local void set_help(string);
@@ -441,6 +444,16 @@ void initparam(string argv[], string defv[])
     posflag = TRUE;                             /* start scan by position   */
 #endif
     for (i = 1; argv[i] != NULL; i++) {         /* loop over stuff in argv  */
+#if defined(DASHDASH)
+        if (streq(argv[i],"--")) {
+	  dd_argv = &argv[i];
+	  dd_argc = 1;
+	  while (argv[++i])
+	    dd_argc++;
+	  dprintf(2,"DASHDASH: dd_argc=%d\n",dd_argc);
+	  break;
+        }
+#endif
         name = parname(argv[i]);                /*   get param name, if any */
         posflag = posflag && (*name == 0);      /*   see how to match args  */
         if (posflag) {                          /*   match by position?     */
@@ -496,8 +509,6 @@ void initparam(string argv[], string defv[])
             } else {                            /*     not listed in defv?  */
 	      if (streq(name, "help"))       /* got system help keyword?  */
 		set_help(parvalue(argv[i]));
-	      else if (streq(name, "argv")) /* arbitrary bypassed argv */
-		set_argv(parvalue(argv[i]));
 	      else if (streq(name, "debug"))   /*    got debug keyword? */
 		set_debug(parvalue(argv[i]));
 	      else if (streq(name, "yapp"))   /*     got yapp keyword?  */
@@ -794,8 +805,6 @@ local void scan_environment()
             set_review(parvalue(environ[i]));
         else if (streq("ERROR", parname(environ[i])))
             set_error(parvalue(environ[i]));
-        else if (streq("ARGV", parname(environ[i])))
-            set_argv(parvalue(environ[i]));
         else if (streq("TCL", parname(environ[i])))
             set_tcl(parvalue(environ[i]));
     }
@@ -1256,6 +1265,15 @@ local void eval_keys(void)
 }
 
 
+/* GETARGV:  find out if any parameters were unparsed (only if DASHDASH enabled)
+ *
+ */
+
+string *getargv(int *argc)
+{
+  *argc = dd_argc;
+  return dd_argv;
+}
 /*
  * CNTPARAM: return number of parameters entered on commandline 
  */
@@ -2682,11 +2700,6 @@ load_environ()
  * SET_XXX: 	set system variables
  */
  
-local void set_argv(string arg)
-{
-    argv_string = scopy(arg);
-}
-
 local void set_help(string arg)
 {
     char *cp;
@@ -2769,7 +2782,15 @@ void nemo_main(void)
 {
     bool flag2, prompt;
     double tstop;
-    int i, n;
+    int i, n, my_argc;
+    string *my_argv;
+
+    my_argv = getargv(&my_argc);
+    if (my_argc) {
+      printf("===> unparsed arguments <===\n");
+      for (i=0; i<my_argc; i++)
+	printf("argv[%d] = %s\n",i,my_argv[i]);
+    }
 
     printf("===> program %s: <===\n", getargv0());
     check("argv0");
@@ -2823,6 +2844,7 @@ void nemo_main(void)
     putparam("nosuchkey","nosuchprompt");
     warning("If you read this, you bypassed the previous fatal error");
 #endif
+
 } /* nemo_main */
 
 void check(string par)
