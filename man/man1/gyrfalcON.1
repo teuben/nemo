@@ -1,13 +1,11 @@
-.TH YANCNEMO 1NEMO "13 June 2002"
+.TH GYRFALCON 1NEMO "2 January 2003"
 .SH NAME
-YancNemo \- Yet Another N-body Code (deprecated NEMO version, see gyrfalcON)
+gyrfalcON \- GalaxY simulatoR using falcON (NEMO version)
 .SH SYNOPSIS
-\fBYancNemo\fP [parameter=value]
+\fBgyrfalcON\fP [parameter=value]
 .SH DESCRIPTION
-*** Please use the newer version that was renamed as
-\fBgyrfalcON\fP. This manual page will be deprecated in a future release. ***
-.PP
-\fBYancNemo\fP is a NEMO adaptation of Walter Dehnen's version of the 
+\fBgyrfalcON\fP (formerly called YancNemo) is a 
+NEMO adaptation of Walter Dehnen's version of the 
 tree code, where the approximate evaluation of gravitational forces is
 extended and substantially accelerated by including mutual cell-cell
 interactions. These are computed by a Taylor series in Cartesian coordinates
@@ -19,6 +17,8 @@ same level of accuracy, the new code is about four times faster than the tree
 code. For large N, the computational costs are found to scale almost linearly
 with N, which can also be supported by a theoretical argument, and the
 advantage over the tree code increases with ever larger N.
+.PP
+For a detailed description of usage, see also the \fIUser Guide for falcON\fP.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -36,24 +36,25 @@ Time at which integration is stopped. Also called \fBtcrit\fP in
 Aarseth's nbody* series. [10]     
 .TP
 \fBstep=\fP
-Output integration step. Some other codes use 1/freqout, or \fBdeltat\fP for this
- [1]    
+Output integration step. Some other codes use 1/freqout, or \fBdeltat\fP for this.
+The value of 0 can be used if output at every timestep is requested.
+[1]    
 .TP
-\fBlogout=\fP
-file for log output (default: stderr)
+\fBlogfile=\fP
+file for log output (default: stderr). Formerly called logout=
 .TP
 \fBout2=\fP
 file for secondary output stream (see \fBgive2=\fP below).
 .TP
 \fBstep2=\fP
-time between secondary outputs; 0 -> every step  [0]    
+time between secondary outputs; Again 0 signifies output at every step  [0]    
 .TP
 \fBtheta=\fP
-tolerance parameter at M=M_tot
+tolerance parameter at M=M_tot [0.6]
 [0.6]
 .TP
-\fBNreuse=\fP
-Max number of subsequent tree re-uses [0].
+\fBhgrow=\fP
+Grow fresh tree every 2^hgrow smallest steps. [0]
 .TP
 \fBNcrit=\fP
 Maximum number of bodies a cell must
@@ -61,10 +62,10 @@ hold before it is considered for further sub-division in the tree building
 stage of the code. [6]
 .TP
 \fBeps=\fP
-Softening length [0.05]     
+Softening length OR maximum softening length [0.05]     
 .TP
 \fBkernel=\fP
-Type of softening kernel. This is an integer, for 0 the Plummer (old 20)
+Type of softening kernel P_n. This is an integer, for 0 the classic Plummer (old 20)
 1 the Improved Plummer (old 21), 2 and 3 also valid improvements as 
 discussed in the paper. Invalid entries will fall back to
 Newtonion (with a warning message). 
@@ -95,18 +96,22 @@ resume old simulation?  that implies:
 \fBgive=\fP
 List of output specifications. Recognizing
 m (mass), x (position), v (velocity), a (acceleration), p (N-body potential),
-P (external potential) and r (density estimate).
+P (external potential, deprecated), r (density estimate, deprecated). 
+l (time-step level, if they exist), f (body flag).
 [Default: mxv]
 .TP
 \fBgive2=\fP
 list of specifications for secondary output.
 [Default: mxv]
 .TP
+\fBGrav=\fP
+Value of the gravitational constant [1].
+.TP
 \fBpotname=\fP
-Name of external potential
+Name of external potential. See also \fIpotential(5NEMO)\fP.
 .TP
 \fBpotpars=\fP
-parameters of external potential
+Parameters of external potential, if required.
 .TP
 \fBpotfile=\fP
 Filename, if required by external potential.
@@ -114,20 +119,49 @@ Filename, if required by external potential.
 \fBstartout=t|f\fP
 give snapshot for t=tstart? [t]
 .SH RESOURCES
-For a 128k run, memory usage is about 27MB. This will scale roughly
+For a 128k run, memory usage is about 18MB (was: 27MB?). This will scale roughly
 linearly for larger systems. The following little benchmark 
 .nf
-	mkplummer - $N | YancNemo - . tstop=1
+	mkplummer - $N | gyrfalcON - . tstop=1
 .fi
 Will take about 78" for N=100,000 on a 2GHz Pentium-iv. It
 scales slightly better than linear, for N=1,000,000 it takes
 about 728".
 .SH EXAMPLES
+The benchmark in the Users Guide is a 10^5 Plummer sphere (default) integration:
+.nf
+	mkplummer - 100000 seed=1 scale=1 | gyrfalcON - out=plum.snp eps=0.1 
+
+ 0          -0.1469415    0.50366 0.0010751  6.6e-09  0.22   1.92       2.14      2.14
+ 0.015625   -0.1469414    0.50366 0.0010751  7.1e-09  0.17   1.86       2.04      4.26
+ 0.03125    -0.1469415    0.50366 0.0010751  5.4e-09  0.17   1.84       2.01      6.33
+ 0.046875   -0.1469414    0.50366 0.0010751  8e-09    0.17   1.84       2.01       8.4
+ 0.0625     -0.1469416    0.50366 0.0010751  8.6e-09  0.17   1.94       2.11     10.57
+....
+
+	(notice this is NEMO's  -DSINGLEPREC  version, the DOUBLE might be different)
+.fi
+.SH OUTPUT DATA WARNING
+\fBgyrfalcON\fP, much like ZENO programs, writes a new type of SnapShot files,
+in which the \fIPhaseSpace\fP array has been split into a
+\fIPosition\fP and \fIVelocity\fP array. The \fIget_snap\fP macros 
+understand this flavor, but will - for now - convert the data back
+into the less flexible type with combined \fIPhaseSpace\fP coordinates.
 .SH SEE ALSO
-hackcode1(1NEMO)
+hackcode1(1NEMO), addgravity(1NEMO), getgravity(1NEMO)
 .PP
+.nf
 2000ApJ...536L..39D (A Very Fast and Momentum-conserving Tree Code, W. Dehnen)
+2001MNRAS...324...273D
+2002JCP...179...27D (A hierarchical O(N) Force Calculation Algorithm, W. Dehnen)
+.fi
 .SH FILES
+.ta +5i
+.nf
+NEMO/usr/dehnen/falcON	source code
+NEMO/usr/dehnen/yanc	source code (an old version, named YancNemo)
+NEMO/usr/dehnen/falcON/doc/user_guide_pub.pdf	\fIUser Guide for falcON\fP.
+.fi
 .SH AUTHOR
 Walter Dehnen
 .SH UPDATE HISTORY
@@ -138,4 +172,5 @@ Walter Dehnen
 16-nov-01	1.0.15: aligned man page with actual code	PJT
 4-jun-02	added theta=, and corrected log/linear statement	PJT
 13-jun-02	1.2: imported into NEMO 	PJT
+2jan-03		1.5: renamed YancNemo to gyrfalcON, (WD version 091202)	PJT
 .fi

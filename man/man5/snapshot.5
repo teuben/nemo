@@ -1,4 +1,4 @@
-.TH SNAPSHOT 5NEMO "24 June 1994" 
+.TH SNAPSHOT 5NEMO "2 January 2003"
 .SH NAME
 snapshot \- format for N-body snapshot files
 .SH SYNOPSIS
@@ -25,6 +25,8 @@ ParticlesTag     	"Particles"  	-
 CoordSystemTag      	"CoordSystem"	-
 MassTag          	"Mass"      	MassBit
 PhaseSpaceTag      	"PhaseSpace"	PhaseSpaceBit
+PositionTag      	"Position"	PositionBit (see ZENO below)
+VelocityTag      	"Velocity"	VelocityBit (see ZENO below)
 AccelerationTag  	"Acceleration"	AccelerationBit
 PotentialTag    	"Potential"	PotentialBit
 AuxTag            	"Aux"       	AuxBit
@@ -71,6 +73,12 @@ filestruct(5NEMO)
 .nf
 Large Particles, e.g. Stern et al. MNRAS, 272, 291 (1995)
 .fi
+.SH ZENO DATA
+\fIZENO\fP programs write a new flavor of SnapShot files,
+in which the \fIPhaseSpace\fP array has been split into a
+\fIPosition\fP and \fIVelocity\fP array. NEMO's\fIget_snap\fP macros 
+understand this flavor, but will - for now - convert the data back
+into the less flexible type with combined \fIPhaseSpace\fP coordinates.
 .SH AUTHOR
 Peter Teuben
 .SH FILES
@@ -82,4 +90,5 @@ Peter Teuben
 .nf
 .ta +2.0i +2.0i
 26-aug-93	written at long last	PJT
+2-jan-03	documented the split Pos/Vel (ZENO) type snapshot flavor	PJT
 .fi
