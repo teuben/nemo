@@ -152,7 +152,6 @@ proc vobsd, vcor;			/* pointers to the correct functions */
 real rotcur_linear(real r, int n, real *p, real *d)
 {
   d[0] = r;
-  dprintf(1,"Linear:  r=%g  omega=%g\n",r,p[0]);
   return p[0] * r;
 }
 
@@ -184,7 +183,7 @@ real rotcur_core2(real r, int n, real *p, real *d)
 
 real rotcur_plummer(real r, int np, real *p, real *d)
 {
-  real x = radius/p[1];
+  real x = r/p[1];
   real y = pow(1+x*x,-0.75);
   d[0] = y;
   d[1] = -x*p[0]/p[1]*(1-x*x/2)/(1+x*x)/y;
