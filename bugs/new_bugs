@@ -1,0 +1,43 @@
+Tue Mar 7 13:28:32 EST 1989 (teuben) [getparam] : aliased nemo commands get the keyword filename screwed up
+Tue Mar 7 13:29:02 EST 1989 (teuben) [getparam] : help=1 gracefully reads keyfiles with ??? values in it
+Tue Mar 7 17:17:15 EST 1989 (teuben) [movie_sv] : movie_sv does not work on color workstations, neither in 1 nor 8 bit mode....
+Wed Mar 8 12:27:27 EST 1989 (teuben) [tablsqfit] : with number of lines large enough weird things happen.....
+Wed Mar 8 20:29:36 EST 1989 (teuben) [mp] : mp is new
+Fri Mar 10 02:46:19 EST 1989 (teuben) [potcode (hackcode.o)] : complaining keyword tstop etc. does not exist ??? plummer.o is fine...
+Wed Mar 22 01:46:49 EST 1989 (teuben) [snapstat] : does not do mass-weighted center of mass - assumes all masses equal
+Tue Apr 4 01:09:18 EDT 1989 (teuben) [snappeak] : bombs out when snapshot has only diagsnostics....
+Wed Apr 5 20:07:08 EDT 1989 (teuben) [snapplotedit] : does not work when masses are not present - use snapmass for now
+Thu Apr 6 14:02:02 EDT 1989 (teuben) [snapmask] : does not handle snapshots with diagnostics in it well...
+Thu Apr 6 22:58:19 EDT 1989 (lgm) [mkspiral] : mkspiral crashes when non-Peter's use it.
+Sun Apr 9 17:48:05 EDT 1989 (teuben) [snapplotedit] : creates file without CoordSystemTag : scantag complains
+Sun Apr 9 17:48:45 EDT 1989 (teuben) [scantag] : (for Josh) can scantag be allowed to take a default.
+Tue Apr 11 18:49:49 EDT 1989 (teuben) [snapstat] : when acc present - default mode crashes because acc's not allocated yet...
+Sat Apr 15 15:16:10 EDT 1989 (teuben) [getparam] : help=3 (e.g.) does not write history at all, just help=#.....
+Sat Apr 15 22:28:00 EDT 1989 (teuben) [yapp (suntools version)] : does not call error() when not on a SUN (e.g. at home....)
+Tue Apr 25 11:54:26 EDT 1989 (teuben) [snapspin] : some omega bug, not really spinning galaxy.
+Tue May 16 00:21:40 EDT 1989 (teuben) [loadobj] : does not warn when file has been stripped
+Tue May 16 00:22:34 EDT 1989 (teuben) [loadobj] : does not warn user when object file has been stripped
+Thu May 25 12:08:24 EDT 1989 (teuben) [snapstat] : JVNC datafiles cause snapstat to crash
+Sun Jul 9 02:37:27 EDT 1989 (teuben) [bodytrans] : file= keyword can only handle files in current directory, use root()
+Mon Jul 10 23:04:17 EDT 1989 (teuben) [history(3)] : why are 'HistoryTag' and 'HeadlineTag' treated differently ---
+Tue Jul 11 00:10:09 EDT 1989 (teuben) [hackcode] : when freq <> minor_freqout or not rational, CPU is waisted !!!!
+Sun Jul 16 02:42:52 EDT 1989 (teuben) [libT] : history in libT ??? should be in libJ
+Fri Jul 28 14:35:42 EDT 1989 (teuben) [getparam] : now also writes argv0=name ???
+Fri Nov 10 16:48:40 EST 1989 (teuben) [loadobj] : loadobj is not documented
+Fri Dec 8 00:35:29 EST 1989 (teuben) [history.c] : although error() not called, core dump when too much history
+Tue Jan 9 18:44:12 EST 1990 (teuben) [date_id] : ILL instruction on SUN3 on some binaries ??? etext variable involved
+Tue Jan 9 18:49:35 EST 1990 (teuben) [] : 
+Sun Jan 14 11:51:07 EST 1990 (teuben) [hackforce (sun4)] : claims there's no memory left....
+Mon Jan 15 14:53:54 EST 1990 (teuben) [snaptrim] : still has old version, continues to read after all work done
+Tue Jan 23 10:40:08 EST 1990 (teuben) [mkspiral] : doesn't work (Bikram)
+Wed Jan 24 18:42:48 EST 1990 (teuben) [mkbaredisk] : doesn't work [bikram]
+Wed Jan 24 18:43:05 EST 1990 (teuben) [nemoinp] : herinp doesn't do / and - properly, reverses order, on a sparc
+Thu Feb 15 11:50:32 EST 1990 (teuben) [yapp_cg] : my_get_view_surface fails on sun4's
+Fri Mar 16 15:05:07 EST 1990 (teuben) [getparam and GNU compiler] : constant strings cannot be patched unless -fwriteable-strings
+Wed Apr 4 19:13:56 EDT 1990 (teuben) [csf] : fixed bug that didn't copy when 'select=all' (default) was used.
+Wed Apr 4 19:14:26 EDT 1990 (teuben) [nbody1] : aarseth found a bug
+Wed Apr 4 19:14:40 EDT 1990 (teuben) [hackcode3] : fix diagnostics bug (Etot was wrong)
+Fri Apr 13 00:58:27 EDT 1990 (teuben) [mkbaredisk/mkexpdisk] : output velocities are absurd (1e8)
+Fri Oct 5 20:50:57 EDT 1990 (teuben) [max] : ISMAX is a Cray unicos function to determine maximum in array
+Sun Dec 9 22:56:17 EST 1990 (nemo) [snapplot_cg] : seems only to do the red color.....
+Tue Dec 11 18:38:58 EST 1990 (teuben) [ccdmath] : when %x %y are used - it puts %1 and %2 back in keyword file!!!
