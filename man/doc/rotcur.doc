@@ -1,0 +1,54 @@
+%N rotcur
+%D fit kinematical parameters from observed velocity field
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man rotcur' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input image velocity field [???]
+%A radii
+	Radii of rings (arcsec) []
+%A vrot
+	Rotation velocity []
+%A pa
+	Position angle (degrees) []
+%A inc
+	Inclination (degrees) []
+%A vsys
+	Systemic velocity []
+%A center
+	Rotation center (grids w.r.t. 0,0) [center of map] []
+%A frang
+	Free angle around minor axis (degrees) [20]
+%A side
+	Side to fit: receding, approaching or [both] []
+%A weight
+	Weighting function: {uniform,[cosine],cos-squared} []
+%A fixed
+	Parameters to be kept fixed {vsys,vrot,pa,inc,xpos,ypos} []
+%A ellips
+	Parameters for which to plot error ellips []
+%A beam
+	Beam (arcsec) for beam correction [no correction] []
+%A dens
+	Image containing containing density map []
+%A tab
+	If specified, this output table is used in append mode []
+%A resid
+	Output of residuals in a complicated plot []
+%A tol
+	Tolerance for convergence of nllsqfit [0.001]
+%A lab
+	Mixing parameter for nllsqfit [0.001]
+%A itmax
+	Maximum number of allowed nllsqfit iterations [50]
+%A units
+	Units of input axes {deg, arcmin, arcsec, rad} [deg]
+%A blank
+	Value of the blank pixel to be ignored [0.0]
+%A inherit
+	Inherit initial conditions from previous ring [t]
+%A fitmode
+	Basic Fitmode: cos(n*theta) or sin(n*theta) [cos,1]
+%A VERSION
+	17-oct-99 PJT [2.4]
