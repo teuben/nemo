@@ -1,7 +1,8 @@
 
 #  ONLY EDIT THIS FILE IF IT'S $NEMOLIB/makedefs
 #  ((the one in $NEMO is the configure generated one that gets copied))
-#  ((to $NEMOLIB via the "make config" command during installation))
+#  ((to $NEMOLIB via the "make config_extra" command during the))
+#  (("make postconfig" step of the install))
 
 # handy for recursion
 @SET_MAKE@
