@@ -4,6 +4,7 @@
  *	29-jan-01	PJT	q&d for Mark Wolfire
  *      30-jan-01       PJT     experimenting with NR's sort routines
  *      30-jul-04       PJT     optional X,Y range selection
+ *       1-nov-04       PJT     experiment to cf. to python kpno_soft/imsubtract.py
  *                      
  */
 
@@ -20,7 +21,9 @@ string defv[] = {
 	"n=5\n		(odd) size of filter",
 	"x=\n           Optional subselection of the X range (min,max)",
 	"y=\n           Optional subselection of the Y range (min,max)",
-	"VERSION=0.3\n  30-jul-04 PJT",
+	"fraction=0.5\n Fraction of positive image values in subtract mode",
+	"mode=median\n  Mode: median, subtract",
+	"VERSION=0.4\n  1-nov-04 PJT",
 	NULL,
 };
 
@@ -37,6 +40,7 @@ string usage = "median filter of an image";
 #endif
 
 real median(int, real *);
+real subtract(int, real *, real);
 void sort0(int, real *);
 void sort1(int, real *);
 void sort2(int, real *);
@@ -56,14 +60,19 @@ void get_range(string axis, int *ia)
 void nemo_main()
 {
     stream  instr, outstr;
-    int     nx, ny, nz, mode;
+    int     nx, ny, nz;
     int     i,j,k, n, n1, i1, j1, m;
     int     ix[2], iy[2];
     imageptr iptr=NULL, optr;      /* pointer to images */
-    real    *vals;
+    real    *vals, fraction;
+    string  mode = getparam("mode");
+    bool Qmedian = (*mode == 'm');
 
     n = getiparam("n");
-    dprintf(0,"Median filter size %d\n",n);
+    if (Qmedian)
+      dprintf(1,"Median filter size %d\n",n);
+    else
+      dprintf(1,"Subtraction filter size %d\n",n);
     if (n%2 != 1) error("filter size %d needs to be odd",n);
     n1 = (n-1)/2;
     vals = (real *) allocate (sizeof(real) * (n*n + 1));
@@ -84,6 +93,7 @@ void nemo_main()
       iy[0] = 0;
       iy[1] = ny-1;
     }
+    dprintf(1,"Xrange: %d - %d   Yrange: %d - %d\n",ix[0],ix[1],iy[0],iy[1]);
       
     outstr = stropen(getparam("out"), "w");
     create_cube(&optr,nx,ny,nz);
@@ -108,7 +118,10 @@ void nemo_main()
 	for (j1=j-n1; j1<=j+n1; j1++)
 	  for (i1=i-n1; i1<=i+n1; i1++)
 	    vals[m++] = CVI(i1,j1);
-	CVO(i,j) = median(m,vals);
+	if (Qmedian)
+	  CVO(i,j) = median(m,vals);
+	else
+	  CVO(i,j) = subtract(m,vals,fraction);
       }
     }
     write_image(outstr, optr);
@@ -127,6 +140,18 @@ real median(int n, real *x)
   sort(n, x);
   return x[(n-1)/2];
 #endif
+}
+
+real subtract(int n, real *x, real fraction)
+{
+  int i,k;
+  sort(n, x);
+  for (i=0; i<n; i++)
+    if (x[i] > 0) break;
+  k = (int) ((n-i)*fraction);
+  if (k<0) k=0;
+  if (k>=n) k=n-1;
+  return x[k];
 }
 
 /* very simply shell sort ; k&r pp108 */
