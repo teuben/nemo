@@ -3,6 +3,9 @@
  *
  * $Header$
  * $Log$
+ * Revision 1.4  2003/10/25 15:47:42  pteuben
+ * moved declration
+ *
  * Revision 1.3  2001/08/28 21:37:06  pteuben
  * fix reading binary data, got rid of hardcoded TIPSY_NEEDPAD
  * and warn when header size is not 28.
@@ -47,13 +50,11 @@ string defv[] = {
     "mode=ascii\n		Input mode (ascii, binary)",
     "swap=f\n                   Swap bytes?",
     "offset=0\n                 Offset data from header?",
-    "VERSION=2.1\n              28-aug-01 pjt",
+    "VERSION=2.1a\n             25-oct-03 pjt",
     NULL,
 };
 
 string usage="convert tipsy ascii/binary file to snapshot";
-
-extern bswap(char *, int, int);
 
 nemo_main()
 {
