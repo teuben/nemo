@@ -1,17 +1,21 @@
-.TH ROTCUR 1NEMO "20 July 2002"
+.TH ROTCURSHAPE 1NEMO "20 July 2002"
 .SH NAME
-rotcur \- fit kinematic parameters from velocity field
+rotcurshape \- fit kinematic parameters from velocity field using shaped rotation curve
 .SH SYNOPSIS
-\fBrotcur in=\fPvelfie [parameters=values ...]
+\fBrotcurshape in=\fPvelfie [parameters=values ...]
 .SH DESCRIPTION
-\fIrotcur\fP derives the kinematical parameters from the observed
-velocity field by fitting a tilted-rings model to the velocity field.  It
-does a non-linear least-squares-fitting to the function:
+\fIrotcurshape\fP derives the kinematical parameters from the observed
+velocity field by fitting a rotation curve shape to planar galactic disk.
+Instead of dividing the galactic disk in a set of rings (see \fIrotcur(1NEMO)\fP)
+it fits the shape of the rotation curve to a single plane. This is particularly
+useful for low inclination galaxies and/or for central regions of a galaxy.
+.PP
+It does a non-linear least-squares-fitting to the function:
 .PP
 .cs 1 20
 .ss 20
 .nf
-         v(x,y) = VSYS + VROT * cos(theta) * sin(INC)
+         v(x,y) = VSYS + VROT(r) * cos(theta) * sin(INC)
 
                       - (x-XPOS) * sin(PA) -/+ (y-YPOS) * cos(PA) ?
 where:   cos(theta) = -----------------------------------------
@@ -33,6 +37,8 @@ where the radius \fIr\fP is measured in the plane of the galaxy:
 
 .cs 1
 .fi
+and the rotation curve VROT(r) can be selected from a number of predefined
+shapes or dynamically loaded from a C-coded routine.
 .PP
 In the above formula
 \fIv(x,y)\fP denotes the radial velocity at rectangular sky
@@ -58,42 +64,20 @@ radial velocity) of the galaxy.
 Values equal the undefined value (currently 0.0) are ignored in the
 fit. See \fIccdmath(1NEMO)\fP or \fIfitsccd(1NEMO)\fP on how to
 create a velocity field with such undefined values.
-.PP
-By setting the keyword \fBfitmode=\fP appropriately, \fIrotcur\fP can
-also be used to fit a model of pure expansional velocities:
-.cs 1 20
-.ss 20
-.nf
-
-         v(x,y) = VSYS + VROT * sin(theta) * sin(INC)
-
-.cs 1
-.fi
-use \fBfitmode=sin,1\fP in this case. \fIcurrently XPOS and YPOS \fBmust\fP
-be held fixed in this case\fP.
-.PP
-For a detailed discussion of this method see K. Begeman,
-\fIAstr. & Astrophys. \fP \fB223\fP, 47. (1989) and references
-therein.
 .SH PARAMETERS
-The following parameters are recognized:
+The following parameters are known:
 .TP 25
 \fBin\fP=\fIimage_vel\fP
 Input velocity field map, must be in \fIimage(5NEMO)\fP format.
 No default.
 .TP
-\fBradii\fP=\fIr0,r1,r2,...rN\fP
-Inner and outer radii for \fIN\fP touching rings (in arcsec).
-Remember that the number of radii is hence one more
-than the number of rings. The \fBunits=\fP keyword can be used to
+\fBradii\fP=\fIr0,r1\fP
+Inner and outer radius for the disk area to fit (in arcsec).
+The \fBunits=\fP keyword can be used to
 scale your physical units in the header to ``human readable'' units
-(arcsec). Radii must be either all increasing or decreasing. Note that
-the corresponding keyword in \fBGIPSY\fP has a different meaning, 
-where they denote the ring centers, and a different keyword
-\fIWIDTHS=\fP controls the width of each ring.
-No default.
+(arcsec). By default the whole disk will be used.
 .TP
-\fBvrot\fP=\fIv1,v2,...vN\fP
+** \fBvrot\fP=\fIv1,v2,...vN\fP
 Array of rotation (or expansion) velocities, one for each ring. 
 If less than the number of rings is
 given, the trailing ones are filled with the last supplied value.
@@ -146,13 +130,13 @@ The names of two parameters for which to calculate an error ellips.
 and minor axis, position angle of the one sigma deviation ellipse.
 [Default: not used]
 .TP
-\fBbeam\fP=
+** \fBbeam\fP=
 The beam size (FWHM) for beam correction. One or two numbers required.
 Currently these are only used to correct error bars for the number
 of independant points per beam. If not given, each point is assumed
 independant. [no correction].
 .TP
-\fBdens\fP=\fIimage_den\fP
+** \fBdens\fP=\fIimage_den\fP
 Image containing the density. From this local derivatives
 \fI(dN/dx)/N\fP and 
 \fI(dN/dy)/N\fP are computed numerically, and used for an 
@@ -195,12 +179,12 @@ factor by which the velocities in the map are multiplied.
 \fBblank=\fP
 Value of the blank pixel that needs to be ignored. [Default: \fB0.0\fP].
 .TP
-\fBinherit=t|f\fP
+** \fBinherit=t|f\fP
 Logical denoting if the initial conditions for subsequent fitted rings
 should be inherited from the previous successfully fitted ring. The fixed
 parameters keep of course their fixed value. [Default: \fBt\fP]
 .TP
-\fBfitmode=\fP\fBcos|sin\fP\fB,1\fP
+** \fBfitmode=\fP\fBcos|sin\fP\fB,1\fP
 .TP
 \fBnsigma=\fP
 Reject outlier points will fall outside nsigma times the dispersion 
@@ -212,101 +196,30 @@ ascii table with X and Y positions in columns 1 and 2, and radial velocities
 in column 3. Future expansion will likely allow weight factors to be added
 in other columns.
 [Default: t]
-.SH AWK
-The standard output is normally not very useful; it displays, for each
-iteration, the run of parameters plus the number of points and mean
-error in the ring. The following \fIawk(1)\fP
-scripts may be useful to extract
-information per ring:
-\fIiter. number, vsys, vrot, pa, icn, xpos, ypos, npoints, sigma_vel\fP.
+.TP
+\fBload=\fP
+Name of a shared object file containing a rotation curve.
+.TP
+\fBrotcur1=\fP
+Name of first rotation curve, followed by the initial estimates of its
+parameters, followed by an equal number of 1s (free) and 0s (fixed) to denote
+which parameters are free to fixed during the fitting process. 
+.TP
+\fBrotcur2=\fP
+.TP
+\fBrotcur3=\fP
+.TP
+\fBrotcur4=\fP
+.SH ROTCUR
+A rotation curve has
 .nf
-
-BEGIN{count=0;line="";}
-{
-  if ($1 == "radius"){
-    if (count != 0){
-      printf("%s  %s\n",rad,line);
-      rad=$4;
-    }else{
-      count=1; 
-      rad=$4;
-    }
-  }else{
-    line=$0
-  }
-}
-END{printf("%s  %s\n",rad,line);}
-
 .fi
-.SH EXAMPLE
-Here is an example of creating a synthetic velocity field with
-ccdvel, and analysing it with rotcur:
-.nf
-    % set r=`nemoinp 0:100:5`
-    % set v=`nemoinp 0:100:5 | tabmath - - "100*%1/(20+%1)" all`
-    % ccdvel out=map1.vel rad="$r" vrot="$v" pa=30 inc=60
-    % rotcur in=map1.vel radii=0:100:5 vrot=0:100:5 pa=30 inc=60 vsys=0 tab=map1.rotcur units=arcsec,1
-
-    % head map1.rotcur
-  radius   systemic   error  rotation   error position    error   inclination  error   x-position   error   y-position   error
-          velocity           velocity           angle               angle               of center            of center
- (arcsec)   (km/s)   (km/s)   (km/s)    (km/s)(degrees)  (degrees)  (degrees)   (degrees) (grids w.r.t. (0,0))  (grids w.r.t. (0,0))
-     7.50      0.00     0.44     27.08    0.50    30.45       1.09      59.72       2.47      63.50      0.20      63.50      0.30 96
-    12.50     -0.00     0.24     38.54    0.28    30.66       0.41      59.27       0.94      63.50      0.13      63.50      0.20 150
-
-    ...
-
-    % tail map1.rotcur
- average inclination      :    59.93  (   0.043)  degrees
- average position angle   :    30.05  (   0.044)  degrees
- average systemic velocity:    -0.00  (   0.001)  km/s
- average x-position       :    63.50  (   0.000)  grids
- average y-position       :    63.50  (   0.001)  grids
-
-
-.fi
-.SH BUGS
-Failures in \fInllsqfit\fP are not handled gracefully, and may
-\fIerror\fP out the program. Usage of the \fBerror=\fP system
-keyword can be used to bypass such bad rings, use with caution
-though and study the output.
-.PP
-Errorbars quoted in the table are only an estimate since the beam
-size is not known. Multiply these numbers by the square root
-of the number of pixels per beam to get a more realistic estimate.
-If the beamsize is given, the formulae of Sicking (1997) is used
-to correct the errors for:
-.nf
-
-	factor = sqrt(4.PI.B_x.B_y/(D_x.D_y))
-
-.fi
-.PP
-Sign of \fIDx,Dy\fP in the CCD header is ignored, and an astronomical
-image is assumed.
 .SH SEE ALSO
-ccdvel(1NEMO), tabcomment(1NEMO), rotcurves(1NEMO), rotcurshape(1NEMO), pvtrace(1NEMO), ccdmom(1NEMO)
+rotcur(1NEMO), ccdvel(1NEMO), tabcomment(1NEMO), rotcurves(1NEMO), pvtrace(1NEMO), ccdmom(1NEMO)
 .SH AUTHOR
-K. Begeman (original GIPSY Sheltran version, now also available in C),
-P. J. Teuben (NEMO C version)
+Peter Teuben
 .SH UPDATE HISTORY
 .nf
 .ta +1i +4i
-19/jul/83	original program                     	KGB
-9/mar/85	revision of program                 	KGB
-23/may/86	migrated to VAX-VMS                  	KGB
-27/nov/88	UNIX version                           	pjt
-8-feb-91	flushed buffers ROTCUR.DAT each write	pjt
-30-apr-91	moved to NEMO into C                   	pjt
-10-sep-91	documentation improved           	pjt
-17-oct-91	added Npts to table output      	pjt
-21-may-92	added Bob Gruendl's rotcur awk scripts	PJT
-12-jun-92	added inherit=t as default      	PJT
-13-aug-92	implemented fitmode= without XPOS,YPOS	PJT
-15-oct-99	compute residuals and add resid=	PJT
-14-mar-01	V2.5: clarifications, added nsigma=    	PJT
-9-may-01	V2.6a: corrected error correction factor	PJT
-10-aug-01	clarified some differences between NEMO and GIPSY versions	PJT
-26-jan-02	Added unit (scale factor) for velocity too	PJT
-26-jun-02	V2.8: added tabular input for irregular spaced data, fixed example	PJT
+20-jul-02	1.0 cloned off rotcur		PJT
 .fi
