@@ -1,0 +1,80 @@
+.TH ORBPLOT 1NEMO "18 April 1995"
+.SH NAME
+orbplot \- plot an orbit
+.SH SYNOPSIS
+.PP
+\fBorbplot in=\fPorbit  [parameter=value]
+.SH DESCRIPTION
+\fBorbplot\fP will plot an orbit. See also \fIsnapplot(1NEMO)\fP, which
+has a similar user interface.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 20
+\fBin=\fIin-file\fP
+Input file, which must be an \fIorbit(5NEMO)\fP. [No default].
+.TP
+\fBtimes=\fItime-range\fP
+Only plot the range of times within \fItime-range\fP, which is of the
+form "tstart:tend". [default: \fBall\fP].
+.TP
+\fBnplot=\fInumber\fP
+The stride through the data of the plotted points [default: \fB1\fP].
+.TP
+\fBxvar=\fix-expression\fP
+The value of \fIx-expression\fP is plotted along the X axis.
+\fIx-expression is a real-valued C language expression over the
+real values \fBx, y, z, vx, vy, vz, phi, t \fP and thge integer
+value \fBi\fP. See also \fIsnapplot(1NEMO)\fP. [Default: \fBx\fP].
+\fI(not implemented)\fP
+.TP
+\fBxlabel=\fIx-axis-label\fP
+Label for the X-axis. [default: expression used for \fBxvar\fP].
+.TP
+\fBxrange=\fIx-axis-range\fP
+Range of values for the X axis, specified as a pair of numbers
+separated by a colon [default: \fB-2.0:2.0\fP].
+.TP
+\fByvar=\fIy-expression\fP
+See above. The default is \fBy\fP.
+\fI(not implemented)\fP
+.TP
+\fBylabel=\fIy-axis-label\fP
+See above.
+.TP
+\fByrange=\fIy-axis-range\fP
+See above.
+.TP
+\fBvisib=\fIexpression\fP
+Determines the visibility of points. \fIexpression\fP is an 
+integer expression in the above variables; only points with 
+non-zero values are plotted. [default: \fB1\fP].
+\fI(not implemented)\fP
+.TP
+\fBpsize=\fIexpression\fP
+Determines the points type and size. [default \fB0\fP].
+\fI(not implemented)\fP
+.TP
+\fBmaxsteps=\fInum-steps\fP
+Maximum number of steps allowed for an orbit. [Default: \fB5000\fP].
+.SH BUGS
+For \fBxvar=\fP and \fByvar=\fP currently only the simple variables
+real values \fBx, y, z, vx, vy, vz\fP are implemented.
+.SH "SEE ALSO"
+potential(5NEMO), newton0(1NEMO), orbit(5NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+~/src/orbit/misc 	orbplot.c
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+14-jul-87	V1.0: created by cloning off snapplot	PJT
+28-jul-87	V2.0: new orbit(5)	PJT
+ 1-jun-88	V2.1: new filestruct, no code mod's  	PJT
+ 2-mar-92	filled in some blanks in the man page	PJT
+18-apr-95	V2.3d: cleanup, simple bodytrans (``orbtrans'') implemented	PJT
+.fi
