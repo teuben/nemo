@@ -14,9 +14,12 @@ BINFILES = treecode1 treecode1_q
 SRCFILES = treecode.c  treegrav.c  treeio.c  treeload.c
 
 
-SRCDIR = $(NEMOPATH)/src/nbody/evolve/hackcode/source1
+SRCDIR = $(NEMO)/src/nbody/evolve/hackcode/treecode1
 
 all:	$(BINFILES)
+
+install:
+	@echo Nothing to install in $(SRCDIR)
 
 clean:
 	rm -f *.o *.a core $(BINFILES)
