@@ -24,6 +24,7 @@
  *       4-dec-04       V2.0a fixed serious bug for rank=3 datasets
  *                          b toy with quadmaps
  *      14-dec-04           c fixed feature that phi's were subtracted, not added
+ *      15-dec-05       V2.1  initial attempt to do simple PIC method (pic=t)  pjt
  */
 
  
@@ -34,6 +35,7 @@
 #include <filestruct.h>
 #include <history.h>
 #include <image.h>
+#include <grid.h>
 
 #ifdef INC_HDF
 #include <hdf.h> 	/* some conflicts with nemo include files */
@@ -48,13 +50,14 @@ string defv[] = {
     "xrange=-16:16\n		Range in X",
     "yrange=-16:16\n		Range in Y",
     "zvar=\n                    Optional selections: {vr,vt,den,vx,vy}",
+    "pic=f\n                    Points In Cell (t) or interpolation (f)?",
     "mirror=t\n                 Mirror all points?",
     "symmetry=auto\n		Override otherwise automated symmetry properties (odd|even|auto) **unused**",
     "it0=0\n			Shift THETA array (i.e. rotate grid)",
     "phi1=0\n                   Shift THETA values first (*test*)",
     "scale2=1\n                 Scale THETA values after shift (*test*)",
     "phi3=0\n                   Shift THETA values after scale (*test*)",
-    "VERSION=2.0d\n		14-dec-04 PJT",
+    "VERSION=2.1\n		15-dec-04 PJT",
     NULL,
 };
 
@@ -84,7 +87,7 @@ void nemo_main()
     float *buffer1, *buffer2, *buffer3;
     float **image1, **image2;
     int i0, i1, i, j, k, ret, size, type, nsds, isel, nx, ny;
-    int ir, ip, jr, jp, nr, np, n1, n2, is;
+    int ir, ip, jr, jp, nr, np, n1, n2, is, ix, iy;
     char **output, *cbuff;
     char ntype[32];
     string filter, zvar, infile = getparam("in");
@@ -92,9 +95,11 @@ void nemo_main()
     real xrange[3], yrange[3], cosp, sinp, sumphi1, scalephi2, sumphi3;
     real x, y, a1, a2, c1,c2,c3,c4, cmin, cmax, dcon, tmp, vr, vt;
     real sds_time = -1.0;
-    imageptr iptr;
-    bool mirror, first = TRUE, both = FALSE, flip=FALSE, Qrot,
-    Qmirror  = getbparam("mirror");
+    imageptr iptr, iptr0;
+    bool mirror, first = TRUE, both = FALSE, flip=FALSE, Qrot;
+    bool Qmirror  = getbparam("mirror");
+    bool Qpic = getbparam("pic");
+    Grid gx, gy;
 
     it0 = getiparam("it0");
     sumphi1 = getdparam("phi1");
@@ -153,10 +158,10 @@ void nemo_main()
                 if (ret<0) error("getting shape[%d]",i+1);
 		cmin = cmax = coord[i][0];
 		for (j=0; j<shape[i]; j++) {
-		  cmin = MIN(cmin, coord[i][j]);
+ 		  cmin = MIN(cmin, coord[i][j]);
 		  cmax = MAX(cmax, coord[i][j]);
 		}
-                dprintf(0,"Dimension %d  Size %d Min %g Max %g %s\n",
+                dprintf(0,"Dimension %d  Size %d CoordinateValue Min %g Max %g %s\n",
 			i+1,shape[i],cmin,cmax,
 			shape[i] == 1 ? "(** dimension will be skipped **)" : "");
             }
@@ -249,7 +254,7 @@ void nemo_main()
     	for (i=0; i<shape[i0]; i++) dprintf(3,"after: %d %g\n",i,image1[i][i0]);    	
     }
     image = image1;
-    /* the image can now be referred to as in:  image[phi][rad]  */
+    /* the image can now be referred to as in:  image[i_phi][i_rad]  */
 
     outstr = stropen(getparam("out"),"w");
     nx = getiparam("nx");
@@ -262,7 +267,7 @@ void nemo_main()
     phis = coord[i0];
     create_image(&iptr, nx, ny);
 
-    /* shift/scale/shift the angles a bit */
+    /* shift/scale/shift the angles a bit to keep Rahul happy */
     dprintf(1,"Radius: %g %g\n",rads[0],rads[nr-1]);
     dprintf(1,"Theta:  %g %g\n",phis[0],phis[np-1]);
     for (j=0; j<np; j++) {
@@ -273,9 +278,56 @@ void nemo_main()
     dprintf(1,"phi1=%g scale2=%g phi3=%g\n",sumphi1,scalephi2,sumphi3);
     dprintf(1,"Radius: %g %g\n",rads[0],rads[nr-1]);
     dprintf(1,"Theta:  %g %g\n",phis[0],phis[np-1]);
-
     n1 = n2 = 0;
-    for (j=0; j<ny; j++) {                  /* loop over all rows */
+    if (Qpic) {                                                /* PARTICLE IN CELL METHOD */
+      warning("PIC method is new, don't believe what you see....");
+      inil_grid(&gx, nx, xrange[0], xrange[1]);
+      inil_grid(&gy, ny, yrange[0], yrange[1]);
+      create_image(&iptr0, nx, ny);     /* a weight image */
+      for (i=0; i<np; i++) {       /* phi */   
+	cosp = cos(phis[i]);
+	sinp = sin(phis[i]);
+	for (j=0; j<nr; j++) {     /* rad */
+	  rad = rads[j];
+	  x = rad*cosp;
+	  y = rad*sinp;
+	  ix = index_grid(&gx, x);
+	  if (ix < 0) {
+	    n1++;
+	    dprintf(2,"ix=%d from (%g,%g) outside grid\n",ix,x,y);
+	    continue;
+	  }
+	  iy = index_grid(&gy, y);
+	  if (iy < 0) {
+	    n1++;
+	    dprintf(2,"iy=%d from (%g,%g) outside grid\n",iy,x,y);
+	    continue;
+	  }
+	  MapValue(iptr0,ix,iy) += 1.0;
+	  MapValue(iptr,ix,iy)  += image[i][j];
+	} /* j<nr */
+      } /* i<np */
+      n2 = np*nr;
+      dprintf(0,"%d/%d points in R-P outside X-Y grid\n",n1,n2);
+
+      n1 = n2 = 0;
+      for (j=0; j<ny; j++) {                  /* loop over all rows */
+        for (i=0; i<nx; i++) {              /* loop over all columns */
+	  if (MapValue(iptr,i,j) > 0) {
+	    MapValue(iptr,i,j)  /= MapValue(iptr0,i,j);
+	    if (i>0 && j>0) {
+	      dmin = MIN(dmin, MapValue(iptr,i,j));
+	      dmax = MAX(dmax, MapValue(iptr,i,j));
+	    } else
+	      dmin = dmax = MapValue(iptr,0,0);
+	  } else
+	    n1++;
+	} /* i<nx */
+      } /* j<ny */
+      n2 = nx*ny;
+      dprintf(0,"%d/%d pixels in X-Y grid are empty\n",n1,n2);
+    } else {                                                         /* 4PT-INTERPOLATION METHOD */
+      for (j=0; j<ny; j++) {                  /* loop over all rows */
         y = yrange[0] + (j+0.5)*yrange[2];
         for (i=0; i<nx; i++) {              /* loop over all columns */
             x = xrange[0] + (i+0.5)*xrange[2];
@@ -365,7 +417,9 @@ void nemo_main()
                 dmax = MAX(dmax, MapValue(iptr,i,j));
             }
         } /* i */
-    } /* j */
+      } /* j */
+      dprintf(0,"%d/%d points outside grid\n",n1,n2);
+    } /* Qpic */
     /* finish off the header */
     Xmin(iptr) = xrange[0];
     Ymin(iptr) = yrange[0];
@@ -379,11 +433,6 @@ void nemo_main()
     set_headline(label);
     write_image(outstr,iptr);
     strclose(outstr);
-#if 0
-    dprintf(0,"%d/%d points outside grid ;datamin/max: %g %g\n",n1,n2,domin,domax);
-#else
-    dprintf(0,"%d/%d points outside grid\n",n1,n2);
-#endif
     dprintf(0,"Datamin/max written: %g %g\n",dmin,dmax);
 }
 
