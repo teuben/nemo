@@ -26,30 +26,32 @@
 
 #include <stdinc.h>
 #include <getparam.h>
-#ifdef ZENO
-# include <vectdefs.h>
-#else
-# include <vectmath.h>		 /* NEMO */
-#endif
+#include <vectmath.h>		 /* NEMO  -- now also includes ZENO's vectdefs.h */
 #include <filestruct.h>
-#ifdef OLD_VOGL
+
+#if defined(OLD_VOGL)
 # include <vogl.h> 		 /* probably need to add -I$(VOGLINC) or so */
 # include <vodevice.h>
+#elif defined(MESA)
+# include <GL/gl.h>
 #else
 # include <gl.h>                 /* if VOGL: add: -I$NEMOINC/vogl to CFLAGS */
 # include <device.h>
 #endif
+
+#if 0
 #ifndef VOGL
-#include <fmclient.h>           /* VOGL doesn't have font manager (-lfm) */
+# include <fmclient.h>           /* VOGL doesn't have font manager (-lfm) */
+#endif
 #endif
 
 #ifdef VOGL
-#ifndef XMAXSCREEN 
-#define XMAXSCREEN  511          /* 1279 on SGI */
-#endif
-#ifndef YMAXSCREEN 
-#define YMAXSCREEN  511         /* 1023 on SGI */
-#endif
+# ifndef XMAXSCREEN 
+#  define XMAXSCREEN  511          /* 1279 on SGI */
+# endif
+# ifndef YMAXSCREEN 
+#  define YMAXSCREEN  511         /* 1023 on SGI */
+# endif
 #endif
 
 #define XMAXSCREEN  768
@@ -135,6 +137,7 @@ init_display()
     winopen(getargv0());
     doublebuffer();
     gconfig();
+#ifdef VOGL
     qdevice(ESCKEY);					/* exit program	    */
     qdevice(SPACEKEY);					/* next frame	    */
     qdevice(RETKEY);					/* save view params */
@@ -157,6 +160,7 @@ init_display()
     qdevice(TWOKEY);     /* as if activated middle button */
     qdevice(THREEKEY);   /* as if activated right button */
     qdevice(FOURKEY);    /* also movie toggle */
+#endif
 }
 
 #define MAXCOL  4096
@@ -857,7 +861,7 @@ int j,k,l;
 
 				/* some old VOGL's don't have this ? */
 				/* 1.3.0 is ok, VOGL5D is ok too */
-#ifdef OLDVOGL
+#ifdef OLD_VOGL
 
 getsize(x,y)
 int *x, *y;
