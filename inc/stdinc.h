@@ -34,6 +34,7 @@
  * 13-mar-03    macros MIN,MAX deleted before redefinition
  * 12-jul-03    WD's macro name changed backfitted
  * 24-nov-03    include mathfns.h, which includes forced math.h
+ * 22-jun-04    added some more useful astr constants
  */
 
 #ifndef _stdinc_h      /* protect against re-entry */
@@ -276,12 +277,29 @@ typedef real (*rproc)();
  */
 
 #ifndef PI
-#define   PI         3.14159265358979323846
+#define   PI         3.141592653589793238462643
 #endif
-#define   TWO_PI     6.28318530717958647693
+#define   TWO_PI     6.283185307179586476925287
 #define   FOUR_PI   12.56637061435917295385
 #define   HALF_PI    1.57079632679489661923
 #define   FRTHRD_PI  4.18879020478639098462
+
+/*
+ * angular conversion factors (multiplicative)
+ *   DR2H   radians to hours
+ *   DH2R   hours   to radians
+ *   DR2D   radians to degrees
+ *   DD2R   degrees to radians
+ *   DR2AS  radians to arcsec
+ *   DAS2R  arcsec  to radians
+ *
+ */
+#define DR2H    3.819718634205488058453210
+#define DH2R    0.2617993877991494365385536
+#define DR2D    57.29577951308232087679815
+#define DD2R    1.745329251994329576923691e-2
+#define DR2AS   206264.8062470963551564733
+#define DAS2R   4.848136811095359935899141e-6
 
 /*
  *  POS_ANGLE, SYM_ANGLE: bring angular variables into standard form.
