@@ -1,0 +1,51 @@
+.TH LAYOUT 5NEMO "21  October 1992"
+.SH NAME
+layout \- layout command for YAPP interpreter
+.SH DESCRIPTION
+A \fBlayout\fP file is a simple ASCII text file, with 
+commands to execute basic \fIyapp(3NEMO)\fP routines. See
+\fIlayout(3NEMO)\fP for routines how to interpret and execute
+these files.
+.SH COMMANDS
+.TP 30
+\fBinit\fP \fIdevice xmin xmax ymin ymax\fP
+Name of graphics device and optional parameters, if any choice 
+at all, and the graphics plotting area in cm. (Standard plotting
+area is 20cm by 20cm).
+.TP
+\fBstop\fP 
+Close graphics device.
+.TP
+\fBltype\fP \fIwidth pattern\fP
+0 will not change the current value. \fIwidth\fP: 1 thin and increasing
+thickness. \fIpattern\fP: 1 is solid, subsequents are graphics device
+dependant, but typically dashed, dotted etc.
+.TP
+\fBline\fP \fIx y\fP
+Draw a line from current point to \fI(x,y)\fP [units in cm]
+.TP
+\fBmove\fP \fIx y\fP
+Move the current point to \fI(x,y)\fP [units in cm]
+.TP
+\fBpoint\fP \fIa b\fP
+Draw a point at \fI(x,y)\fP [units in cm]
+.TP
+\fBtext\fP \fIs x y h a\fP
+Plot a string \fItext\fP (enclose in double quotes if spaces
+are required) at \fI(x,y)\fP with character height \fIh\fP
+[all units in cm] and at angle \fIa\fP degrees,
+counterclockwise from the positive X-axis.
+.TP
+\fB#\fP
+A comment.
+.SH BUGS
+There are some more commands, but see \fIyapp(3NEMO)\fP.
+.SH "SEE ALSO"
+layout(3NEMO), yapp(3NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+21-oct-92	document created  	PJT
+.fi
