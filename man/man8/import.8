@@ -1,0 +1,66 @@
+.TH IMPORT 8NEMO "2 April 1990"
+.SH NAME
+import \- import new files as a tar file from remote sites
+.SH SYNOPSIS
+.B import.csh 
+.I tar-file root-dir cp-prog mode
+.SH DESCRIPTION
+\fBimport\fP is currently installed as a shell script
+\fIimport.csh\fP. The first parameter, \fItar-file\fP, is the name of the
+tarfile. The second parameter, \fIroot-dir\fP,
+is the root directory
+name of the package one wants to import to. The directory trees
+inside the tar file and the package are assumed to be the same.
+The third parameter, \fIcp-prog\fP,
+is the name of the program that will be 
+used for copying files from the tar image top the directory
+where the file is supposed to wind up. Common choices are
+\fI "cp -p"\fP (which also preserved time stamps) and
+\fP mv\fP. Note that it is important that timestamps are preserved
+if your local node also has export running as a Nightly crontab
+script.
+The fourth parameter, \fImode\fP, the the mode the script is run 
+in. A mode of \fB1\fP is manual and interactive, with a small menu
+letter the user browse differences and such of files to be imported
+[highly recommended]. A mode of \fB0\fP lets you run import 
+unattended. Cross your fingers.
+.PP
+The tarfile is renamed with an appending \fB-\fI, to 
+denote that the file has been imported.
+.PP
+The UNIX operating system does not have standard facilities to
+have multiple versions of a file, like VMS does. If the \fIcp-prog\fP
+is any of the standard UNIX utilities (mv, cp -p) the old version
+will disappear. You would have to get a script that saves backup files.
+A possible way is the submit script (miriad/nemo?) which renames 
+the last file to something of the form \fI.file.versionnumber\fP.
+.PP
+Although the original copies of all import/export files live in
+$NEMO/src/nemo/adm, the working copies are placed in $NEMO/adm (\fBmake
+adm\fP).  Execution of import and export scripts must be from this working
+directory, as they are not placed in general accessible bin directories
+in a users search path. 
+.SH SEE ALSO
+export(8NEMO)
+.SH FILES
+In $NEMO/src/nemo/adm: original copies, in $NEMO/adm: working copies.
+.sp 2
+.nf
+.ta +2.0i
+$NEMO/adm	root directory for all local import/export activity
+$NEMO/adm/import	imported tar files from other sites
+$NEMO/adm/export	exported tar files to other sites
+export.csh	export script, often called by Nightly
+import.csh	import script, normally called manually
+Nightly   	script run by cron
+crontab   	example crontab file to run Nightly
+Netrc   	file with list of remote sites for export
+Last_ntar	time check file, needed by export
+.fi
+.SH AUTHOR
+Peter Teuben
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.5i
+2-apr-90	manual written	PJT
+.fi
