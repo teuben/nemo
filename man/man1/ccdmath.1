@@ -1,4 +1,4 @@
-.TH CCDMATH 1NEMO "19 June 2003" 
+.TH CCDMATH 1NEMO "25 August 2004" 
 .SH NAME
 ccdmath \- map arithmetic using function expressions
 .SH SYNOPSIS
@@ -42,7 +42,8 @@ Size of the output map in case program is in creation mode [default: 10,10,1].
 .TP
 \fBcrpix=\fIr1,r2,r3\fP
 (New) values for the reference pixel. Note these are in FITS notation,
-i.e. (1,1,1) is the lower left of the first plane in a cube.
+i.e. (1,1,1) is the lower left of the first plane in a cube. Recall
+that (nx+1)/2 is the central pixel in coordinate X, not nx/2!
 By default the WCS is transferred from the first input image to the output
 image, however, by using all 3 keywords 
 \fBcrpix=,crval=,cdelt=\fP the WCS of the output image can be overwritten.
@@ -118,5 +119,6 @@ src/image/trans  	ccdmath.c ccdmath.1
 22-jan-89	V2.3: can make map from scratch using %x, %y and %z	PJT
 1-mar-03	V3.0: set/change the WCS				PJT
 19-jun-03	V3.1: allow %w and %r, and use offset from crpix	PJT
+25-aug-04	V3.2: fixed error in setting crpix (off by 2!)		PJT
 .fi
 
