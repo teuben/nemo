@@ -1,0 +1,17 @@
+%N snapdiagplot_ps
+This doc file has been produces with help=t option
+No further help is available, try 'man snapdiagplot_ps'
+%A in
+	input file name 
+%A times
+	times to plot 
+%A exactpot
+	if true, compute O(N^2) PE 
+%A eps
+	using this softening 
+%A formal
+	publication-style plot 
+%A trange
+	Range of times for plot
+%A VERSION
+	18-oct-90 PJT 
