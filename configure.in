@@ -39,6 +39,10 @@ dnl ---			Nemo version - just for fun for now
 NEMOVER="`cat VERSION`"
 AC_SUBST(NEMOVER)
 
+dnl ----                Architecture stuff we need to know
+AC_CANONICAL_HOST
+echo "Found CANONICAL_HOST = $host_os"
+  
 dnl ---                 sizeof various data types
 AC_CHECK_SIZEOF(float)
 AC_CHECK_SIZEOF(double)
@@ -92,7 +96,7 @@ AC_ARG_ENABLE(mixed,  [  --enable-mixed          mixed-precision], ok=$enableval
 if test "$ok" = "yes"; then
 	prec_flag="-DMIXEDPREC"
 fi
-AC_MSG_RESULT($prec_flag)
+AC_MSG_RESULT([$prec_flag])
 
 
 AC_MSG_CHECKING(if the gnu coverage tool is to be used)
@@ -254,11 +258,6 @@ LIBS="$GLLIBS $XLIBS $LIBS"
 AC_CHECK_FUNCS(XMesaGetBackBuffer)
 LIBS="$save_LIBS"
 
-dnl ----
-
-AC_CANONICAL_HOST
-
-  
 dnl ---------------------------------------------------------------------
 
 dnl also check FFTW configure
@@ -303,6 +302,26 @@ if test "$GCC" = "yes"; then
   NEMO_CFLAGS="$NEMO_CFLAGS -rdynamic -fwritable-strings $gcov_flag"
 fi
 NEMO_CFLAGS="$NEMO_CFLAGS $prec_flag"
+
+AC_SUBST(CCSHARED)
+CCSHARED=""
+AC_MSG_CHECKING(what flags we need to created shared libs)
+CCSHARED=-fpic  
+
+case $host_os in
+  linux*|Linux*)
+    CCSHARED="-fpic"
+    ;;
+  darwin*)
+    CCSHARED="-fpic -fno-common"
+    ;;
+  sol*)
+    CCSHARED="-KPIC"
+    ;;
+esac
+AC_MSG_RESULT([$CCSHARED])
+
+dnl ---------------------------------------------------------------------------
 
 
 AC_MSG_CHECKING(whether we have PGPLOT)
