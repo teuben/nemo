@@ -1,0 +1,48 @@
+.TH SNAPIDL 1NEMO "26 November 2002"
+.SH NAME
+snapidl \- tabulate a snapshot for IDL in binary mode
+.SH SYNOPSIS
+\fBsnapidl\fB [parameter=value]
+.SH DESCRIPTION
+\fBsnapidl\fB outputs selected particle variables for IDL
+(and potentially other programs)
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input file (snapshot). No default.
+.TP 20
+\fBoptions=\fP
+Things to output [x,y,z,vx,vy,vz]    
+.TP 20
+\fBtimes=\fP
+Times to select snapshot [all]   
+.TP 20
+\fBout=\fP
+Output file - normally a pipe for IDL.
+[Default: -]
+.SH EXAMPLES
+Here is an example to dump all positions of the particles at time 1.0
+to a pipe, which is then read by IDL into arrays \fIx,y,z\fP.
+.nf
+SPAWN, 'snapidl p10 x,y,z times=1.0', UNIT=UNIT, /NOSHELL
+IDL> SPAWN, 'snapidl snap000 x,y,z times=1.0', UNIT=UNIT, /NOSHELL
+IDL> READ nbody,tsnap
+IDL> PRINT,"Found a snapshot with ",nbody," particles at time", tsnap
+IDL> x=FINDGEN(nbody)
+IDL> y=FINDGEN(nbody)
+IDL> z=FINDGEN(nbody)
+IDL> READ x,y,z
+IDL> FREE_LUN, UNIT
+.fi
+.SH SEE ALSO
+snapprint(1NEMO)
+.SH FILES
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+26-Nov-02	V1.0 Created	PJT
+.fi
