@@ -108,6 +108,7 @@
  * 25-nov-01       e  fixed hasvalue() for indexed keywords
  * 10-dec-01       f  indexing now based at 0, not 1 (for wasp)
  * 16-jan-02       g  wrote findakey to fix various indexing shortcomings
+ * 17-jan-02       h  fix minor indexing, fix khoros output
 
   TODO:
       - what if there is no VERSION=
@@ -130,8 +131,8 @@
   	        allows to process it - and of course dies
       - ESC go key in help=2 prompting mode does not work
       - @macro and $key references get expanded as strings.
-      - indexing can't handle minmatch
-      - indexing can't handle macros
+      - keyword I/O broken with indexing: writing is now OK, but
+        does not read old ones yet
 
   SOME ALTERNATIVE RESOURCES
 	argtable  http://argtable.sourceforge.net/doc/html/index.html
@@ -142,7 +143,7 @@
         getopt
  */
 
-#define VERSION_ID  "3.3g 15-jan-02 PJT"
+#define VERSION_ID  "3.3h 17-jan-02 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -862,7 +863,7 @@ local void printhelp(string help)
                            (*parval == 0 ? " " : (opt?parval:" ")),
                            keys[i].key,keys[i].help,keys[i].key);
 
-            else if (strncmp(parname(*bp),"out",3)==0)
+            else if (strncmp(keys[i].key,"out",3)==0)
                 printf("-O 1 0 %d 1 0 1 50x1+2+%d +0+0 '%s' '%s ' '%s' %s\n",
                            opt,          
                            vcount,
@@ -1111,12 +1112,6 @@ bool isaparam(string name)
     return findakey(name) != NULL;
 }
 
-bool isaparam_old(string name)
-{
-    if (nkeys==0) local_error("isaparam: called before initparam");
-    return (findkey(name) >= 0);
-}
-
 /*
  * HASVALUE:  check if a parameter has been given a value
  */
@@ -1138,40 +1133,6 @@ bool hasvalue(string name)
   return  strlen(kw->val) > 0;
 }
 
-bool hasvalue_old(string name)     
-{
-#ifdef INDEXED
-  char *cp, key[MAXKEYLEN];
-  int n = strlen(name);
-  int idx;
-
-  strcpy(key,name);
-  dprintf(1,"Checking indexing on %s\n",key);
-
-  /* split basename from index number by working from the back */
-  /* should go in a private function , a.k.a. refactoring :-)  */
-
-  cp = &key[n-1];
-  while (isdigit(*cp))
-    cp--;
-  if (*(cp+1)) {        /* ok, this keyword name appears to be indexed */
-    idx = atoi(cp+1);
-    cp++;
-    *cp = 0;
-    n = findkey(name);
-    if (n > 0) return !streq(getparam(name), "");    /* catch non-indexed keywords */
-  } else {              /* keyword was definitely not indexed */
-    return !streq(getparam(name), "");
-  }
-
-  n = indexparam(key,idx);
-  dprintf(1,"Re-Checking indexparam(%s,%d) -> %d\n",key,idx,n);
-  return n>0;
-#else
-  return !streq(getparam(name), "");
-#endif
-}
-
 /*
  * UPDPARAM:  check if a parameters value has been updated since last read
  */
@@ -1181,13 +1142,6 @@ bool updparam(string name)
     keyword *kw = findakey(name);
     if (kw == NULL) error("(updparam) \"%s\" unknown keyword",name);
     return kw->upd == 1;
-}
-
-bool updparam_old(string name)
-{
-    int i = findkey(name);
-    if (i<0) error("(updparam) \"%s\" unknown keyword",name);
-    return keys[i].upd == 1;
 }
 
 /*
@@ -1215,30 +1169,6 @@ string getparam(string name)
 #endif
     return kw->val;                     /* return value part */
 }
-
-
-string getparam_old(string name)
-{
-    char *cp, *cp1;
-    keyword *kw;
-    int i;
-
-    if (nkeys == 0) local_error("(getparam) called before initparam");
-
-    i = findkey(name);
-    if (i<0) error("(getparam) \"%s\" unknown keyword", name);
-    keys[i].upd = 0;        /* mark it as read */
-#if defined(MACROREAD)
-    cp = keys[i].val;
-    if (*cp == '@') {
-        cp1 = keys[i].val;
-        keys[i].val = get_macro(cp);
-        free(cp1);
-    }
-#endif
-    return keys[i].val;                     /* return value part */
-}
-
 
 /* 
  * cost:  10M in 5" on a P600 (w/ gcc_2.95.3 -g) 
@@ -1719,7 +1649,8 @@ local int findkey(string name)
     l = strlen(name);                       /* try minimum match */
     count = 0;                              /* count # matches on */
     for (i=1; i<nkeys; i++) {               /* any of the program keys */
-        if (strncmp(keys[i].key, name,(unsigned)l)==0) {
+        if (strncmp(keys[i].key, name,(unsigned)l)==0 &&
+	    keys[i].indexed == -2) {
             last = i;
             count++;
         }
@@ -1812,7 +1743,8 @@ local keyword *findakey(string name)
   l = strlen(name);                       /* try minimum match */
   count = 0;                              /* count # matches on */
   for (i=1; i<nkeys; i++) {               /* any of the program keys */
-    if (strncmp(keys[i].key, name,(unsigned)l)==0) {
+    if (strncmp(keys[i].key, name,(unsigned)l)==0 &&
+	keys[i].indexed == -2) {
       last = i;
       count++;
     }
@@ -1820,7 +1752,7 @@ local keyword *findakey(string name)
   if (count==1) {
     warning("Resolving partially matched keyword %s= into %s=",
 	    name, keys[last].key);
-    return last;
+    return &keys[last];
   } else if (count > 1) {
     dprintf(0,"### Minimum match failed, found: ");
     for (j=0; j<nkeys; j++)
@@ -1899,7 +1831,7 @@ local int addindexed(int i, string keyval, int idx)
  *  These local routines read and write the keyword files.
  *
  *  Some peculiar notion to the readkeys routine is that
- *  the first time around the keyword files does not have to exist
+ *  the first time around the keyword file does not have to exist
  *
  *  The writekeys routine always writes out the internal version
  *  ID, not the external. This may result in excessive warnings
@@ -1925,15 +1857,16 @@ local void writekeys(string mesg)
         if (streq(keys[i].key,"VERSION"))
 	  fprintf(keyfile,"VERSION=%s\n",version_i);
         else {
-	  if (keys[i].indexed) {
+	  if (keys[i].next) {
 	    dprintf(1,"writing indexed keys");
 	    kw = &keys[i];
 	    while (kw->next) {
 	      kw = kw->next;
 	      fprintf(keyfile,"%s=%s\n",kw->key,kw->val);
 	    }
-	  } else
+	  } else if (keys[i].indexed == -2) {
             fprintf(keyfile,"%s=%s\n",keys[i].key,keys[i].val);
+	  } 
 	}
     }
     fprintf(keyfile,
