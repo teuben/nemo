@@ -1,12 +1,12 @@
 This is:	A blurb on NEMO V3, what it is, how to install and use 
-Last updated:   1-apr-01
+Last updated:   4-apr-01
 By:		Peter Teuben
-Disclaimer:	The manual is now out of date, this installation is
-		much more based on autoconf
+Disclaimer:	The manual is now out of date, the autoconf based 
+		installation instructions here are now more up to date.
 
 ________________________________________________________________________________
 
-(for INSTALLATION instruction see below)
+(for INSTALLATION instructions see below)
 
 Using NEMO (i.e. when somebody had already installed it for you) requires
 just a few changes modifications to your .cshrc/.login script: 
@@ -20,10 +20,13 @@ just a few changes modifications to your .cshrc/.login script:
 or the long way:
 
     1)  define the environment variable NEMO where NEMO's root directory is.
-    2)  optionally define NEMOHOST if you want to override an automatic determination
+    2)  optionally define NEMOHOST if you want to override an automatic determination.
+	Although you can use anything you want, check the subdirectories in $NEMO/bin
+	for valid names on your system.
     3)  source the $NEMO/NEMORC file.
-    4)  add $NEMOBIN to you search path. Note that in NEMO V3+ the 'cc'
-	command is now available, as NEMOBIN/cc has disappeared.
+    4)  add $NEMOBIN to you search path. Note that in NEMO V3+ the system 'cc'
+	command should now be available again, as NEMOBIN/cc has disappeared
+	in favor of setting all flags through the makedefs file.
 
 	        setenv NEMO /home/nemo		             (1)
 	        source $NEMO/NEMORC			     (3)
@@ -39,8 +42,9 @@ e.g. I use:
 	alias nemo 'source ~nemo/nemo_start; unalias nemo'
 and the reverse to remove it:
 	alias omen 'source ~nemo/nemo_end'
-This can be done at any stage during an interactive terminal session. 
-More details can be found in Appendix A of the manual. 
+
+
+See also Appendix A of the manual for more details of installation.
 ________________________________________________________________________________
 
 
@@ -61,7 +65,7 @@ present - you'll have to live without the index. Best is to create
 a dummy file nemo.ind, to prevent latex screaming about a missing file,
 but the nemo.ind file that exists is a current one.
 
-(a version of the makeindex utility lives in $NEMO/src/tools/makeindex)
+(a version of the makeindex utility also lives in $NEMO/src/tools/makeindex)
 ________________________________________________________________________________
 
 There may also a demo in the $NEMO/demo area. Run it after NEMO has been
