@@ -47,6 +47,9 @@ typedef struct {
     vector phase[2];		/* phase-space coordinates */
     real phi;			/* potential at position */
     vector acc;			/* gravitational acceleration */
+#if 1
+    real A,B,kappa,xiv0,etav0;  /* for now: the epi constants */
+#endif
     int key;                    /* some index */
 } body, *bodyptr;
 

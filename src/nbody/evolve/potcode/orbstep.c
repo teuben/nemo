@@ -29,7 +29,7 @@ local void moveaccel();
  * INITSTEP: initialize the orbit-integrator.
  */
 
-local int nstep;	/* integration step counter */
+local int nstep = 0;	/* integration step counter */
 
 initstep(btab, nb, tptr, force)
 bodyptr btab;		/* array of bodies */
@@ -54,7 +54,9 @@ proc force;		/* acceleration calculation */
 real dt;		/* integration time step */
 int mode;		/* select integration algorithm */
 {
-    if (mode == 0) {                            /* simplest Eulerian */
+  if (mode == -1) {			        /* epicycle analytical orbit */
+      epistep(btab, nb, tptr, force, dt);	/* take epicycle step */
+    } else if (mode == 0) {                     /* simplest Eulerian */
         eulerstep(btab, nb, tptr, force, dt);
         (*force)(btab, nb, *tptr);              /* compute new force */
     } else if (mode == 5) {			/* use leapfrog ? */
@@ -71,9 +73,6 @@ int mode;		/* select integration algorithm */
         pcstep(btab, nb, tptr, force, dt);	/*   take PC time-step */
 	if (mode == 2)				/*   final force requested? */
 	    (*force)(btab, nb, *tptr);		/*   compute final force */
-    } else if (mode == -1) {			/* use 4th order RK ? */
-      epistep(btab, nb, tptr, force, dt);	/* take epicycle step */
-	(*force)(btab, nb, *tptr);		/* compute final force */
     } else 
 	error("orbstep: unknown mode %d\n", mode);
     moveaccel(btab, nb);			/* save final accel */
@@ -285,17 +284,30 @@ real dt;		/* integration time step */
 {
   bodyptr p;
   body tmp1;
+  real t, kt, kt1, coskt, sinkt, dx, dy;
 
-  /* we'll just do one entry here and die */
+  *tptr += dt;                       /* get to the new time */
+  t = *tptr;
 
-  warning("Epicycle stepping");
-  
   for (p=btab; p<btab+nb; p++) {
-    (*force)(btab,nb,*tptr);	
+    kt = p->kappa * t;    /* kt > 0  */
+    kt1 = POS_ANGLE(kt);   
+    sinkt = sin(kt1);
+    coskt = 1-cos(kt1);
+    Pos(p)[0] -= Acc(p)[0];   /* cheat: deduct the old one */
+    Pos(p)[1] -= Acc(p)[1];
+
+#if 1
+    Acc(p)[0] = -p->xiv0*coskt/(2*p->B) + p->etav0*(p->A*kt - (p->A - p->B)*sinkt)/(p->kappa * p->B);
+#else
+    Acc(p)[0] = -p->xiv0*coskt/(2*p->B) + p->etav0*(0.0 - (p->A - p->B)*sinkt)/(p->kappa * p->B);
+#endif
+    Acc(p)[1] =  p->xiv0*sinkt/p->kappa + p->etav0*coskt/(2*p->B);
+    /* Acc(p)[2] =  p->zetav0*sin(p->nu * t); */
+
+    Pos(p)[0] += Acc(p)[0];   /* cheat: add the new one */
+    Pos(p)[1] += Acc(p)[1];
   }
-
-  error("DONE testing");
-
 }
 
 

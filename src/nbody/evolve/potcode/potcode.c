@@ -55,7 +55,7 @@ void nemo_main()
     inputdata();
     initoutput();
     if (mode < 0) 
-      initstep(bodytab, nbody, &tnow, force1);
+      force1(bodytab, nbody, &tnow);
     else
       initstep(bodytab, nbody, &tnow, force);
     output();
@@ -129,7 +129,9 @@ real time;			/* current time */
  * FORCE: 'force' calculation routine for epicyclic orbits
  *        where we assume that the particles are:
  *        - planar 2D orbits
- *        - (x,y) is the guiding center, (u,v) can be the deviant into the epicycle
+ *        - (x0,y0) is the guiding center, (u,v) can be the deviant into the epicycle 
+ *          and a (u0,v0) is the deviation from circular motion
+ *        
  */
 
 
@@ -141,13 +143,13 @@ real time;			/* current time */
   bodyptr p;
   vector lpos,a1,a2;
   real   lphi,r2,r,ome1,ome2, eps, f1,f2,kap2,kap1, A, B, oldkap, tol, tolmin;
+  real   vr, vt, lz;
   int    iter, ndim=NDIM;
   
   if (ome!=0.0) error("Force-1 does not work in rotating potentials");
 
-  /* print header */
-  printf("# r ome kap A B ome-kap/2 iter tol\n");
-  
+  printf("# r   omega   kappa      A           B   omega-kappa/2 iter   tol       vr      vt-ome/r       lz\n");
+
   for (p = btab; p < btab+nb; p++) {		/* loop over bodies */
     r2 = sqr(Pos(p)[0]) + sqr(Pos(p)[1]);
     r = sqrt(r2);
@@ -155,6 +157,10 @@ real time;			/* current time */
     (*pot)(&ndim,lpos,a1,&lphi,&time);
     ome2 = sqrt(sqr(a1[0]) + sqr(a1[1]))/r;
     ome1 = sqrt(ome2);
+    vr = (Pos(p)[0]*Vel(p)[0] + Pos(p)[1]*Vel(p)[1])/r;
+    vt = sqrt( (Vel(p)[0]*Vel(p)[0] + Vel(p)[1]*Vel(p)[1])-vr*vr);
+    lz = Pos(p)[0]*Vel(p)[1] - Pos(p)[1]*Vel(p)[0];
+    vt -= ome1*r;
 
     /* should do iteration until converging, for now slightly asymmetric results */
     tolmin = 1e-7;   /*  tolerance to achieve */
@@ -185,7 +191,18 @@ real time;			/* current time */
     }
     A = -0.25*(f1-f2)/(2*eps)/ome1;
     B = A - ome1;
-    printf("%g %g %g %g %g %g %d %g\n",r,ome1,kap1,A,B,ome1-kap1/2.0,iter,tol);
+    printf("%g %g %g %g %g %g %d %g %g %g %g\n",r,ome1,kap1,A,B,ome1-kap1/2.0,iter,tol,vr,vt,lz);
+    p->A = A;
+    p->B = B;
+    p->kappa = kap1;
+    /*  must convert to curvilinear, they are still cartesian here */
+    p->xiv0 = -vr;
+    p->etav0 = -vt;    /* ok, also figure out the sign  */
+    Acc(p)[0] = 0.0;
+    Acc(p)[1] = 0.0;
+    Acc(p)[2] = 0.0;
+    Phi(p) = -1.0;
+    Key(p) = p-btab+1;
   }
-  error("epi DONE for now");
+  printf("### This section of the code is under development, don't believe anything it does\n");
 }
