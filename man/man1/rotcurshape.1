@@ -1,4 +1,4 @@
-.TH ROTCURSHAPE 1NEMO "13 December 2002"
+.TH ROTCURSHAPE 1NEMO "19 March 2003"
 .SH NAME
 rotcurshape \- fit parameters to a velocity field using shaped rotation curves in a co-planar disk
 .SH SYNOPSIS
@@ -10,8 +10,6 @@ Instead of dividing the galactic disk in a set of rings (see \fIrotcur(1NEMO)\fP
 it fits the shape of the rotation curve in a single plane. This is particularly
 useful for low inclination galaxies and/or for central regions of a galaxy where
 normally the rotation curve would vary accross the ring.
-
-
 .PP
 Much like \fIrotcur\fP, this program does a non-linear least-squares-fit to the function:
 .PP
@@ -29,17 +27,10 @@ where
 .cs 1
 .fi
 and where the radius \fIr\fP is measured in the plane of the galaxy:
-.cs 1 20
-.ss 20
-.nf
-
-         r = sqrt( (x-XPOS)**2 + (y-YPOS)**2/cos(INC)**2 )
-
-.cs 1
-.fi
+.PP
 The parameterized  rotation curve VROT(r;p1,p2,...pN) can be selected from a number of predefined
 shapes or dynamically loaded from a C-coded routine (see ROTCUR FUNCTIONS below). Up to 5
-functions can be added in quadrature.
+functions can be added in quadrature (but be aware of degeneracies)
 .PP
 In the above formula
 \fIv(x,y)\fP denotes the radial velocity at rectangular sky
@@ -138,7 +129,7 @@ and minor axis, position angle of the one sigma deviation ellipse.
 The beam size (FWHM) for beam correction. One or two numbers required.
 Currently these are only used to correct error bars for the number
 of independant points per beam. If not given, each point is assumed
-independant. [no correction].
+independant. [no correction]. ** See CAVEATS below **
 .TP
 \fBdens\fP=\fIimage_den\fP
 Image containing the density. Currently only used as an additional
@@ -353,7 +344,17 @@ by counting the number of arguments given in that option, e.g.
 \fBrotcur1=poly,100,10,2,2,1,1,1,1\fP  would use a 3th order polynomial.
 .PP
 rotcurshape does surprisingly bad on \fBexact\fP data, and often complains about taking
-the sqrt of a negative number.  Adding a little noise will speed up convergence.
+the sqrt of a negative number.  Adding a little noise will speed up convergence!
+.PP
+rotcurshape sometimes needs inititial conditions  pathetically close to a minimum
+to converge, and more than often complains with the infamous 
+.nf
+### Warning [rotcurshape]: nllsqfit=-4: must find better solution (n=225)
+### Warning [rotcurshape]: ROTCUR: problems with matrix inversion
+.fi
+.PP
+if beam= is used, the map is also used to estimate beam smearing corrections. 
+This is a totally untested  feature of the code.
 .SH SEE ALSO
 rotcur(1NEMO), ccdvel(1NEMO), tabcomment(1NEMO), rotcurves(1NEMO), pvtrace(1NEMO), ccdmom(1NEMO), tabnllsqfit(1NEMO), loadobj(3NEMO), gal(AIPS)
 .SH AUTHOR

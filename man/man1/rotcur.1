@@ -1,4 +1,4 @@
-.TH ROTCUR 1NEMO "30 January 2003"
+.TH ROTCUR 1NEMO "19 March 2003"
 .SH NAME
 rotcur \- fit kinematic parameters from velocity field
 .SH SYNOPSIS
@@ -153,11 +153,13 @@ Currently these are only used to correct error bars for the number
 of independant points per beam. If not given, each point is assumed
 independant. [no correction].
 .TP
-\fBdens\fP=\fIimage_den\fP
+\fBdens\fP=\fIimage_den|true|false\fP
 Image containing the density. From this local derivatives
 \fI(dN/dx)/N\fP and 
 \fI(dN/dy)/N\fP are computed numerically, and used for an 
-estimate of beam smearing corrections.
+estimate of beam smearing corrections. Note that for
+bizarre reasons this keyword can be used to trigger reading
+a weight column in tabular input mode (\Bimagemode=\fP).
 [Default: required if a beam is supplied].
 .TP
 \fBtab\fP=

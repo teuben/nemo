@@ -62,6 +62,12 @@ ls(1v), file(1), rsf(1NEMO), csf(1NEMO), filestruct(3NEMO).
 \fBdebug=2\fP reports values of \fIMaxSetLen\fP
 as defined in "\fBfilestruct.h\fP".
 For \fIMaxTagLen\fP and \fIMaxVecDim\fP see \fIrsf(1NEMO)\fP.
+.SH EXAMPLE
+An example of converting all double precision numbers to single
+precision in a NEMO file:
+.nf
+    % tsf in=double.dat out=float.dat convert=d2f
+.fi
 .SH BUGS
 The algorithm for implementing \fBmaxline\fP is crude.
 .PP
