@@ -1,4 +1,4 @@
-.TH HDFGRID 1NEMO "27 August 2002"
+.TH HDFGRID 1NEMO "24 April 2003"
 .SH NAME
 hdfgrid \- Regrid a polar HDF SDS to cartesian image
 .SH SYNOPSIS
@@ -48,8 +48,14 @@ Range in Y
 \fBzvar=\fP\fIgrid_var\fP
 Gridding variable. Normally left alone, unless certain allowed mathematical
 expressions on the direct griddable variables (as defined by \fBselect=\fP)
-need to be overriden. Allowed are vr (select=1), vt (select=2),
-den (select=3), vx, vy. Default: not used, select= is used.
+need to be overriden. Allowed are \fBvr\fP (select=1), \fBvt\fP (select=2),
+\fBden\fP (select=3), \fBvx\fP, \fBvy\fP, 
+\fBvm\fP and \fBvp\fP. Note
+that \fBvm\fP and \fBvp\fP are special cases of
+a linear combination of \fBvx\fP, \fBvy\fP
+\fIvm =  (vx-vy)/sqrt(2)\fP and \fIvp = (vx+vy)/sqrt(2)\fP, just
+to get an idea of the velocity field under a "middle" position angle.
+Default: not used, select= is used.
 .TP
 \fBsymmetry=odd|even\fP
 Override symmetry properties of the variable to be gridded. This option is

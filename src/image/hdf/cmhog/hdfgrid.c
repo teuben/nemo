@@ -18,6 +18,7 @@
  *                            TIME= labels                               pjt
  *      19-feb-00       V1.4b fixed header coordinates expression parser pjt
  *      10-sep-00           c fixed bug in the previous fix              pjt
+ *      24-apr-03       V1.7  added vp and vm as gridding options        pjt
  */
 
  
@@ -45,7 +46,7 @@ string defv[] = {
     "symmetry=\n		Override symmetry properties (odd|even)",
     "mirror=t\n                 Allow non-mirroring",
     "it0=0\n			Shift THETA array (i.e. rotate grid)",
-    "VERSION=1.5\n		27-aug-02 PJT",
+    "VERSION=1.7\n		24-apr-03 PJT",
     NULL,
 };
 
@@ -53,6 +54,7 @@ string usage="Regrid a CMHOG polar HDF SDS image to a cartesian NEMO image";
 
 #define MAXRANK 2
 
+#define OOST    0.7071067812        /*  1/sqrt(2) */
 
 local int rank, shape[MAXRANK], run[MAXRANK];
 local char label[256], unit[256], fmt[256], coordsys[256];
@@ -80,8 +82,8 @@ void nemo_main()
     real x, y, a1, a2, c1,c2,c3,c4, cmin, cmax, dcon, tmp, vr, vt;
     real sds_time = -1.0;
     imageptr iptr;
-    bool mirror, first = TRUE, both = FALSE, flip=FALSE, 
-      Qmirror  = getbparam("mirror");
+    bool mirror, first = TRUE, both = FALSE, flip=FALSE, Qrot,
+        Qmirror  = getbparam("mirror");
 
     it0 = getiparam("it0");
     nsds = DFSDndatasets(infile);
@@ -98,10 +100,11 @@ void nemo_main()
             isel = 2;
         else if (streq(zvar,"den"))
             isel = 3;
-        else if (streq(zvar,"vx") || streq(zvar,"vy")) {
+        else if (streq(zvar,"vx") || streq(zvar,"vy") || streq(zvar,"vp") || streq(zvar,"vm")) {
             both = TRUE;
             flip = TRUE;
             isel = 1;   /* !! will need to read 1 + 2 !! */
+	    Qrot = (streq(zvar,"vp") || streq(zvar,"vm"));
         } else
             error("Unsupported gridding output variable %s",zvar);
     } else
@@ -177,6 +180,26 @@ void nemo_main()
                     vr = image1[i][j];
                     vt = image2[i][j];
                     image1[i][j] = vr*sinp+vt*cosp;
+                }
+            }
+        } else if (streq(zvar,"vm")) {
+            for (i=0; i<shape[0]; i++) {    /* phi */
+            	cosp = cos((double)coord[0][i]);
+            	sinp = sin((double)coord[0][i]);
+	        for (j=0; j<shape[1]; j++) {     /* rad */
+                    vr = image1[i][j];
+                    vt = image2[i][j];
+                    image1[i][j] = ((vr-vt)*cosp - (vr+vt)*sinp)*OOST;
+                }
+            }
+        } else if (streq(zvar,"vp")) {
+            for (i=0; i<shape[0]; i++) {    /* phi */
+            	cosp = cos((double)coord[0][i]);
+            	sinp = sin((double)coord[0][i]);
+	        for (j=0; j<shape[1]; j++) {     /* rad */
+                    vr = image1[i][j];
+                    vt = image2[i][j];
+                    image1[i][j] = ((vr+vt)*cosp + (vr-vt)*sinp)*OOST;
                 }
             }
         }
