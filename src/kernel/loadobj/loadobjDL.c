@@ -18,6 +18,7 @@
 /* 20-jan-94   only works for SUN OS 5.x now 		       */
 /*             but also works for ELF linux                    */ 
 /*  2-may-03   using RTLD_LAZY instead of 1                    */
+/* 24-sep-04   fix linux bug                                   */
 /*                                                             */
 /***************************************************************/
 
@@ -72,8 +73,13 @@ void mysymbols(string progname)
 
     if (dl_handle) {
         warning("mysymbols: Closing old dlopen");
+#if 0
+	/* calling dlclose() repeatedly on linux causes a crash */
         if (dlclose(dl_handle)) 
             warning("mysymbols: Some error closing old handle");
+#else
+	return;
+#endif
     }
     /* at some point I used:
      * #if defined(sgi) || defined(NEED_MAIN_SYMBOLS)
