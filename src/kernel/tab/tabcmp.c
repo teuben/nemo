@@ -5,6 +5,10 @@
  *       5-oct-00       0.3    added KStwo test
  *      23-mar-01       0.3a   more sanity check of input
  *      29-sep-01       0.3c   handle identical tables
+ *      23-nov-02       0.4    bug calling NR, was my brain on steroids?
+ *
+ * TODO?
+ *	- xmin/xmax for range selection
  */
 
 #include <stdinc.h>
@@ -16,13 +20,13 @@ string defv[] = {
     "col1=1\n           Column from 1st dataset",
     "col2=1\n           Column from 2nd dataset",
     "nmax=10000\n       Max lines in data, if pipe",
-    "VERSION=0.3c\n	29-sep-01 PJT",
+    "VERSION=0.4\n	23-nov-02 PJT",
     NULL,
 };
 
 string usage="KS2, Student T and F test for mean and variance comparisons";
 
-/* local NR routines */
+/* local NR routines ; now properly 0 based */
 
 void ftest(real data1[], int  n1, real data2[], int  n2,
 	real *f, real *prob);
@@ -150,7 +154,7 @@ void tptest(real data1[], real data2[], int  n, real *t,
 
 	avevar(data1,n,&ave1,&var1);
 	avevar(data2,n,&ave2,&var2);
-	for (j=1;j<=n;j++)
+	for (j=0;j<n;j++)
 		cov += (data1[j]-ave1)*(data2[j]-ave2);
 	cov /= df=n-1;
 	sd=sqrt((var1+var2-2.0*cov)/n);
@@ -194,10 +198,10 @@ void avevar(real data[], int  n, real *ave, real *var)
 	int j;
 	real s,ep;
 
-	for (*ave=0.0,j=1;j<=n;j++) *ave += data[j];
+	for (*ave=0.0,j=0;j<n;j++) *ave += data[j];
 	*ave /= n;
 	*var=ep=0.0;
-	for (j=1;j<=n;j++) {
+	for (j=0;j<n;j++) {
 		s=data[j]-(*ave);
 		ep += s;
 		*var += s*s;
