@@ -1,7 +1,8 @@
 /*
  *  SNAPIDL: tabulate a snapshot in binary mode for IDL
  *
- *      26-nov-2002    Test example for Walter Dehnen             Peter Teuben
+ *      26-nov-2002    1.0 Test example for Walter Dehnen             Peter Teuben
+ *                     1.1 add fortran= and output nvec also          PJT
  */
 
 #include <stdinc.h>
@@ -20,7 +21,8 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "options=x,y,z,vx,vy,vz\n	Things to output",
     "times=all\n		Times to select snapshot",
     "out=-\n                    Output file - normally a pipe for IDL",
-    "VERSION=1.0\n		26-nov-02 PJT",
+    "fortran=f\n                Add fortran unformatted I/O tags",
+    "VERSION=1.1\n		26-nov-02 PJT",
     NULL,
 };
 
@@ -28,14 +30,17 @@ string usage="tabulate a snapshot for IDL in binary mode";
 
 #define MAXOPT    50
 
+void fortout(stream os, int nz);
+
 void nemo_main()
 {
     stream instr, outstr;
     real   tsnap, dr, aux;
     string times;
     Body *btab = NULL, *bp, *bq;
+    bool Qfort = getbparam("fortran");
     float  *vec, sca;
-    int i, n, nbody, bits, nsep, isep, nopt, ParticlesBit;
+    int i, n, nbody, bits, nsep, isep, nopt, ParticlesBit, nfort;
     char fmt[20],*pfmt;
     string *burststring(), *opt;
     rproc btrtrans(), fopt[MAXOPT];
@@ -68,18 +73,32 @@ void nemo_main()
         if ( (bits & ParticlesBit) == 0)
             continue;                   /* skip work, only diagnostics here */
 	vec = (float *) allocate(nbody*sizeof(float));
-
-	fwrite(&nbody, sizeof(int), 1, outstr);
 	sca = tsnap;
-	fwrite(&sca, sizeof(float), 1, outstr);
+	
+	if (Qfort) fortout(outstr,2*sizeof(int)+sizeof(float));
+	fwrite(&nbody, sizeof(int),   1, outstr);
+	fwrite(&nopt,  sizeof(int),   1, outstr);
+	fwrite(&sca,   sizeof(float), 1, outstr);
+	if (Qfort) fortout(outstr,2*sizeof(int)+sizeof(float));
 	for (n=0; n<nopt; n++) {
 	  for (bp = btab, i=0; bp < btab+nbody; bp++, i++) {
-	    vec[i] = (float) fopt[n](bp,tsnap,i);
-	  }
+	    vec[i] = (float) fopt[n](bp,tsnap,i);	  }
+	  if (Qfort) fortout(outstr,nbody*sizeof(float));	  
 	  fwrite(vec, sizeof(float), nbody, outstr);
+	  if (Qfort) fortout(outstr,nbody*sizeof(float));	  
 	}
 	free(vec);
     }
     strclose(instr);
     strclose(outstr);
+}
+
+/*
+ *  this is quite possibly quite unportable, but works on at least solaris
+ *  and linux.
+ */
+
+void fortout(stream os, int nz)
+{
+  fwrite(&nz,sizeof(int),1,os);
 }

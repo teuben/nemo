@@ -4,44 +4,107 @@ snapidl \- tabulate a snapshot for IDL in binary mode
 .SH SYNOPSIS
 \fBsnapidl\fB [parameter=value]
 .SH DESCRIPTION
-\fBsnapidl\fB outputs selected particle variables for IDL
-(and potentially other programs). 
+\fBsnapidl\fP outputs selected particle variables in binary
+format (e.g. for IDL or fortran unformatted read's)
+The output format is a local host
+binary  format(see \fIsnapprint(1NEMO)\fP for an ascii table
+version), and should only be used on that local host to
+prevent endianism and floating point format
+conversion problems. See Examples below on how to read the binary
+data into IDL and fortran
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
-\fBin=\fP
+\fBin=\fP\fIfile\fP
 Input file (snapshot). No default.
-.TP 20
+.TP
 \fBoptions=\fP
 Things to output [x,y,z,vx,vy,vz]    
-.TP 20
-\fBtimes=\fP
+.TP
+\fBtimes=\fP\fIt1,t2,...\fP
 Times to select snapshot [all]   
-.TP 20
-\fBout=\fP
+.TP
+\fBout=\fP\fIfile\fP
 Output file - normally a pipe for IDL.
 [Default: -]
+.TP
+\fBfortran=t|f\fP
+Attempt to format the binary data suitable for
+a series of FORTRAN unformatted READ's. 
+[Default: \fBf\fP]
+.SH FORMAT
+The output format is binary encoded, and only meant to
+be transported to other machines (e.g. is uses the
+local host format).
+.nf
+Nb,T1,Nv,v1,v2,v3,....v_Nv,Nb,T2,Nv,v1,v2,v3,....v_Nv,....
+.fi
+where \fINb\fP is the number of bodies and \fINv\fP the number of vectors
+of length \fINb\fP each.
+
 .SH EXAMPLES
 Here is an example to dump all positions of the particles at time 1.0
 to a pipe, which is then read by IDL into arrays \fIx,y,z\fP.
 .nf
-IDL> SPAWN, ['snapidl','snap000','x,y,z'], UNIT=UNIT, /NOSHELL
-IDL> READU,UNIT,nbody,tsnap      # !!! NOTE BUG BELOW !!!
+
+mkplummer snap000 100
+idl
+IDL> SPAWN, ['snapidl','snap000','x,y,z'], UNIT=LUN, /NOSHELL
+IDL> READU,LUN,nbody,nvec,tsnap  # !!! NOTE BUG BELOW !!!
 IDL> PRINT,"Found a snapshot with ",nbody," particles at time", tsnap
-IDL> nbody=100                   # !!! note i need to know nbody !!!
-IDL> x=FINDGEN(nbody)
-IDL> y=FINDGEN(nbody)
-IDL> z=FINDGEN(nbody)
-IDL> READU,UNIT,x,y,z
-IDL> FREE_LUN, UNIT
+IDL> nbody=100                    # !!! note i need to know nbody !!!
+IDL> x=FLTARR(nbody)
+IDL> y=FLTARR(nbody)
+IDL> z=FLTARR(nbody)
+IDL> READU,LUN,x,y,z
+IDL> FREE_LUN, LUN
+.fi
+
+And here is an example writing the data in a format that can be read with
+a fortran program:
+.nf
+
+mkplummer snap111 100 
+snapidl snap111 x,y,z out=snap111.dat fortran=t
+idl
+IDL> OPENR,LUN,'snap111.dat',/F77_UNFORMATTED
+IDL> READU,LUN,nbody,nvec,tsnap  # !!! NOTE BUG BELOW !!!
+IDL> PRINT,"Found a snapshot with ",nbody," particles at time", tsnap
+IDL> nbody=100                    # !!! note i need to know nbody !!!
+IDL> nvec=3                       # !!! note i need to know nvec  !!!
+IDL> x=FLTARR(nbody)
+IDL> y=FLTARR(nbody)
+IDL> z=FLTARR(nbody)
+IDL> READU,LUN,x
+IDL> READU,LUN,y
+IDL> READU,LUN,z
+IDL> FREE_LUN, LUN
+
+.fi
+In fortran, without any error control and array overflow checking,
+\fIsnap111.dat\fP can also be read as follows:
+.nf
+
+	program snapread
+	real x(1000),y(1000),z(1000),tsnap
+	integer nbody,nvec,i
+	open(1,file='snap111.dat',form='unformatted')
+	read(1) nbody,nvec,tsnap
+	read(1) (x(i),i=1,nbody)
+	read(1) (y(i),i=1,nbody)
+	read(1) (z(i),i=1,nbody)
+	end
+
 .fi
 .SH BUGS
-I don't know how to read an integer....nbody is interpreted as a float 
+I don't know how to read an integer instead of a float in IDL yet,
+nbody and nvec are currently interpreted as a float 
 by IDL.
 .SH SEE ALSO
-snapprint(1NEMO)
+snapprint(1NEMO), snapshot(5NEMO)
 .SH FILES
+src/nbody/io	- snapidl.c
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
