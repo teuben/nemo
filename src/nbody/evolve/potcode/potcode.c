@@ -229,6 +229,10 @@ real time;			/* current time */
     p->xiv0 = -vr;
     p->etav0 =  vt;             /* check sign  */
     p->zetav0 =  vz;
+    /* 
+     *  IECK IECK IECK, better do this correctly
+     *  the guiding center is not the initial position
+     */
     Acc(p)[0] = Pos(p)[0];      /* Guiding Center is stored in the acc's */
     Acc(p)[1] = Pos(p)[1];
     Acc(p)[2] = 0.0;            /* force guiding center in the galactic plane */
