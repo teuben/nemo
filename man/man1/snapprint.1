@@ -1,0 +1,82 @@
+.TH SNAPPRINT 1NEMO "7 July 1997"
+.SH NAME
+snapprint \- print out items of a snapshot in table format
+.SH SYNOPSIS
+.PP
+\fBsnapprint in=\fPsnap_in  [parameter=value]
+.SH DESCRIPTION
+\fBsnapprint\fP produces a table of values of requested quantities
+of the bodies in a snapshot. These can be processed with programs
+such as \fBtabhist, tablsqfit\fP or \fBmongo\fP.
+.PP
+\fBsnapprint\fP also has an option of producing a table of separations
+between all bodies of the system. For N bodies this table will have
+a length of N(N-1)/2, hence the keyword \fBsepar\fP will for any non-zero
+value produce a list which is \fInsep\fP times smaller and print only
+\fInsep\fP'th interaction.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 20
+\fBin=\fIin-file\fP
+input file, in \fIsnapshot(5NEMO)\fP format [no default]
+.TP
+\fBoptions=\fIoption_list\fP
+List of data-items which will be listed, any of the \fIbodytrans(3NEM0)\fP
+functions can be used in an arbitry expression.
+[default: \fBx,y,z,vx,vy,vz\fP].
+.TP
+\fBsepar=\fInsep\fP
+\fInsep\fP will for any non-zero value turn off all above options
+and produce a single table of the logarithm of the separations
+between the bodies. Only every \fInsep\fPth entry (the stride) of all
+N(N-1)/2 combinations will be listed [default: \fB0\fP].
+.TP
+\fBtimes=\fItimes-string\fP
+Time values/intervals of which snapshots should be used. Default is
+empty string, which will only extract the first snapshot.
+.TP
+\fBtab=\fItab-file\fP
+If a filename is specified, the table is output to this file. If none,
+output will be standard output. [default: no file].
+.TP
+\fBheader=f|t\fP
+Add a header to the output? The header will contain the number of particles,
+followed by the timestamp, of the snapshot. If masses, position and velocities
+are output in the table, this format is also referred to
+as the \fIntmpv(5NEMO)\fP format.
+[Default: \fBf\fP]
+.SH BUGS
+Times=time-string does not work, returns btab=NULL, bits=1, i.e.
+something weird here. Code is identical to snapcenter, which uses same
+technique.
+.PP
+The inversion function of snapprint, reading a snapshot from a simple
+table, is not possible yet. A somewhat complicated ascii file, 
+consisting of a number of catenated tables, has to be created with 
+a little header. See the "205" format in atos(1NEMO) or stoa(1NEMO).
+There are shell scripts which handle some of the cases here.
+.SH BUGS
+A single expression like \fIatan2(y,x)\fP is parsed into two.
+.SH SEE ALSO
+tabhist(1NEMO), mongo users-manual
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +3.0i
+~/src/pjt/nbody     snapprint.c snapprint.1
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+18-Mar-88	V1.0: created          	PJT
+15-Apr-88	V1.1: more options	PJT
+6-jun-88	V1.2: new filestruct, added separ keyword	PJT
+27-sep-88	V1.3: changed to options keyword	PJT
+7-feb-89	V1.5: times= added	PJT
+10-feb-89	V1.6: bodytrans can be used 	PJT
+25-may-90	V1.8: added tab= keyword	PJT
+7-jul-97	(V2.0) documented header=	PJT
+.fi
+
