@@ -1,0 +1,46 @@
+.TH FUNTAB 1NEMO "6 October 1993"
+.SH NAME
+funtab \- Function Table lookup
+.SH SYNOPSIS
+\fBfuntab\fP [parameter=value]
+.SH DESCRIPTION
+\fIfuntab\fP computes a function from a lookup table. You can choose
+the lookup method from a variety of methods (spline, linear,
+nearest neighbor).
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP\fIascii_table\fP
+Input table with Y=f(X)
+No default.
+.TP 20
+\fBxcol=\fP\fIcol_number\fP
+Column for X values.
+[Default: \fB1\fP]
+.TP 20
+\fBycol=\fP\fIcol_number\fP
+Column for Y values.
+[Default: \fB2\fP]
+.TP 20
+\fBx=\fP\fIx1,x2...\fP
+X values to lookup.  A \fInemoinp(1)\fP expression can be used
+to specify multiple values.
+Default: none.
+.TP 20
+\fBformat=\fP\fIC-fmt\fP
+Output format in C format (\fIprintf(3)\fP) notation.
+[Default: \fB%g\fP]
+.TP 20
+\fBmode=\fP
+Lookup mode (spline, linear, near).
+[Default: \fBspline\fP].
+.SH AUTHOR
+Peter Teuben
+.SH SEE ALSO
+spline(1)
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+06-Oct-93	V1.0 Created	PJT
+.fi
