@@ -1,0 +1,6 @@
+#! /bin/sh
+
+#! /bin/csh -f
+#exec /bin/make -i $*
+
+exec /bin/make -i "$@"
