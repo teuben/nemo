@@ -1,0 +1,113 @@
+# -*- makefile -*-
+################################################################################
+#
+# make.defs for the falcON project
+#
+################################################################################
+
+# ---------
+# precision
+# ---------
+
+#                                       internal           array args
+#                                     -------------------------------
+PRECISION	:= SINGLE_SINGLE#       32 bit             32 bit
+#PRECISION	:= SINGLE_DOUBLE#       32 bit             64 bit
+#PRECISION	:= DOUBLE_SINGLE#       64 bit             32 bit
+#PRECISION	:= DOUBLE_DOUBLE#       64 bit             64 bit
+
+
+# --------
+# NEMO I/O
+# --------
+
+ifdef NEMO
+
+INEMO		:= -I$(NEMOINC) -I$(NEMOLIB)
+LNEMO		:= -L$(NEMOLIB) -lnemo++ -lnemo -lg2c -ldl
+DNEMO		:= -DALLOW_NEMO
+
+endif
+
+# -----------
+# directories
+# -----------
+
+INC		:= inc/
+IPUB		:= $(INC)public/
+IPRO		:= $(INC)proper/
+IWAL		:= $(INC)walter/
+HOS		:= $(MACHTYPE)_$(OSTYPE)/
+ifdef DPROPER
+BIN		:= $(HOS)proper/
+LIB		:= $(HOS)proper/lib/
+$(HOS)		:
+		make.dir $(HOS) 
+$(BIN)		: $(HOS)
+		make.dir $(BIN) 
+$(LIB)		: $(BIN)
+		make.dir $(LIB) 
+else
+BIN		:= $(HOS)
+LIB		:= $(HOS)lib/
+$(BIN)		:
+		make.dir $(BIN) 
+$(LIB)		: $(BIN)
+		make.dir $(LIB)
+endif
+dirs		:= $(LIB)
+SRC		:= src/
+SPUB		:= $(SRC)public/
+SPRO		:= $(SRC)proper/
+SWAL	 	:= $(SRC)walter/
+EXE		:= $(SRC)mains/
+
+USE_GNU    	:= 1
+FILEIO		:= -D_FILE_OFFSET_BITS=64
+
+ifdef USE_GNU
+
+C++COMP		:= g++
+CCOMP		:= gcc
+FORTRAN		:= g77
+OPTFLAGS	:= -O3 -ffast-math -funroll-loops -fforce-addr
+
+else
+
+C++COMP		:= icpc
+CCOMP		:= icc
+FORTRAN		:= ifc
+OPTFLAGS	:= -O3 -unroll -tpp6 -xK
+
+endif
+
+# -----------------------
+# compiler and linker etc
+# -----------------------
+
+AR		:= ar rc
+RL		:= ranlib
+CPP		:= $(CPATH)$(C++COMP)
+CCC		:= $(CPATH)$(CCOMP)
+FOR		:= $(CPATH)$(FORTRAN)
+
+
+MPICPP		:= mpiCC -compiler-path $(CPP)
+MPICCC		:= mpicc -compiler-path $(CCC)
+
+# -------------------------
+# compiler and linker flags
+# -------------------------
+
+NBDYFLAGS	:= $(DMPI) -D$(PRECISION) $(DNEMO) $(DSSE) $(DADAPT)
+CCFLAGS		:= $(FILEIO) $(OPTFLAGS) $(DPROPER)
+LFALCON		:= -L$(LIB) -lfalcON
+
+# -------------------------
+# compile and link commands
+# -------------------------
+
+MAKE_OBJ	= $(CPP) -c -o $@ $< -I$(INC) $(INEMO) $(CCFLAGS)
+MAKE_EXE	= $(CPP) -o $@ $< -I$(INC) $(INEMO) $(CCFLAGS)
+MAKE_EXE_C	= $(CCC) -o $@ $< -I$(INC) $(CCFLAGS)
+MAKE_EXE_F	= $(FOR) -o $@ $< -I$(INC) $(OPTFLAGS)

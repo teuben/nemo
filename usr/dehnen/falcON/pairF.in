@@ -1,0 +1,6 @@
+50000	N limit to be .le. NMAX, given by TestPairF
+901	random seed
+5000	NS < N number of sph/sticky particles
+0.01	size of bodies
+0.02	time step tau; if tau < 0: SPH, otherwise STICKY
+6	N_crit

@@ -1,0 +1,178 @@
+# -*- makefile -*-
+################################################################################
+#
+# make.public for the falcON N-body project
+#
+################################################################################
+
+# -----------------------
+# header dependency lists
+# -----------------------
+
+nmain_h			:= $(INC)nemomain.h
+exit_h			:= $(IPUB)exit.h
+Pi_h			:= $(IPUB)Pi.h
+inln_h			:= $(IPUB)inln.h $(exit_h)
+ionl_h			:= $(IPUB)ionl.h
+memo_h			:= $(IPUB)memo.h $(inln_h)
+tupl_h			:= $(IPUB)tupl.h $(inln_h)
+nums_h			:= $(IPUB)nums.h $(inln_h) $(tupl_h)
+nmio_h			:= $(IPUB)nmio.h
+iact_h			:= $(IPUB)iact.h
+flag_h			:= $(IPUB)flag.h
+enum_h			:= $(IPUB)enum.h
+deft_h			:= $(IPUB)deft.h $(enum_h)
+vect_h			:= $(IPUB)vect.h $(inln_h)
+tens_h			:= $(IPUB)tens.h $(vect_h) $(inln_h)
+auxx_h			:= $(IPUB)auxx.h $(exit_h) $(vect_h) $(tens_h)
+pext_h			:= $(IPUB)pext.h $(auxx_h)
+nbio_h			:= $(IPUB)nbio.h $(auxx_h)
+falcON_h		:= $(INC)falcON.h $(auxx_h) $(deft_h)
+body_h			:= $(INC)body.h $(auxx_h) $(flag_h) $(nbio_h)
+tree_h			:= $(IPUB)tree.h $(auxx_h) $(flag_h)
+grat_h			:= $(IPUB)grat.h $(body_h) $(deft_h) $(tree_h) \
+				$(ionl_h) $(memo_h)
+kern_h			:= $(IPUB)kern.h $(grat_h)
+grav_h			= $(IPUB)grav.h $(kern_h) $(deft_h) $(grav_pro)
+stic_h			:= $(IPUB)stic.h $(grat_h) $(iact_h) $(enum_h) \
+				$(deft_h) $(ionl_h)
+falcON_C_h		:= $(INC)falcON_C.h
+falcON_f		:= $(INC)falcON.f
+step_h			:= $(IPUB)step.h $(body_h) $(inln_h)
+nbdy_h			:= $(IPUB)nbdy.h $(falcON_h) $(pext_h) $(step_h)
+yanc_h			:= $(INC)yanc.h $(nbio_h) $(drct_h)
+
+# -----------------------
+# source dependency lists
+# -----------------------
+
+exit_cc			:= $(SPUB)exit.cc $(exit_h)
+nums_cc			:= $(SPUB)nums.cc $(nums_h) $(Pi_h)
+body_cc			:= $(SPUB)body.cc $(body_h) $(ionl_h) $(nmio_h) \
+				$(tags_h)
+nmio_cc			:= $(SPUB)nmio.cc $(nmio_h) $(exit_h)
+falcON_cc		:= $(SPUB)falcON.cc $(falcON_h) $(body_h) $(iact_h) \
+				$(grav_h) $(kern_h) $(stic_h)
+kern_cc			 = $(SPUB)kern.cc $(kern_h) $(kern_pro)
+grat_cc			:= $(SPUB)grat.cc $(grat_h) $(Pi_h) $(nums_h)
+grav_cc			:= $(SPUB)grav.cc $(grav_h)
+stic_cc			:= $(SPUB)stic.cc $(stic_h) $(tree_h)
+tree_cc			:= $(SPUB)tree.cc $(tree_h) $(body_h) $(memo_h) \
+				$(grat_h) $(stic_h)
+nbdy_cc			:= $(SPUB)nbdy.cc $(nbdy_h)
+yanc_cc			:= $(SPUB)yanc.cc $(yanc_h) $(nbdy_h) $(ionl_h) \
+				$(nmio_h)
+falcONC_cc		:= $(SPUB)falcONC.cc $(falcON_C_h) $(falcON_h)
+
+# ---------------
+# library modules
+# ---------------
+
+$(LIB)exit.o:		$(exit_cc) $(makefiles)
+			$(MAKE_OBJ)
+$(LIB)body.o:		$(body_cc) $(makefiles)
+			$(MAKE_OBJ) $(NBDYFLAGS)
+$(LIB)tree.o:		$(tree_cc) $(makefiles)
+			$(MAKE_OBJ) $(NBDYFLAGS)
+$(LIB)grat.o:		$(grat_cc) $(makefiles)
+			$(MAKE_OBJ) $(NBDYFLAGS)
+$(LIB)grav.o:		$(grav_cc) $(makefiles)
+			$(MAKE_OBJ) $(NBDYFLAGS)
+$(LIB)nmio.o:		$(nmio_cc) $(makefiles)
+			$(MAKE_OBJ) $(NBDYFLAGS)
+$(LIB)stic.o:		$(stic_cc) $(makefiles)
+			$(MAKE_OBJ) $(NBDYFLAGS)
+$(LIB)falcON.o:		$(falcON_cc) $(makefiles)
+			$(MAKE_OBJ) $(NBDYFLAGS)
+$(LIB)nbdy.o:		$(nbdy_cc) $(makefiles)
+			$(MAKE_OBJ) $(NBDYFLAGS)
+$(LIB)yanc.o:		$(yanc_cc) $(makefiles)
+			$(MAKE_OBJ) $(NBDYFLAGS)
+$(LIB)falcONC.o:	$(falcONC_cc) $(makefiles)
+			$(MAKE_OBJ) $(NBDYFLAGS)
+$(LIB)kern.o:		$(kern_cc) $(makefiles)
+			$(MAKE_OBJ) $(NBDYFLAGS)
+
+public_objs	 :=	$(LIB)exit.o $(LIB)body.o $(LIB)tree.o \
+			$(LIB)grat.o $(LIB)kern.o $(LIB)grav.o \
+			$(LIB)nmio.o $(LIB)stic.o $(LIB)falcON.o \
+			$(LIB)nbdy.o $(LIB)yanc.o $(LIB)falcONC.o
+ifndef DPROPER
+
+falcON_objs	 =	$(public_objs)
+
+$(LIB)libfalcON.a:	$(falcON_objs)
+			$(AR) $@ $(falcON_objs)
+			$(RL) $@
+
+falcON		:	$(LIB) $(LIB)libfalcON.a
+endif
+# -----
+# mains
+# -----
+
+$(BIN)TestGrav:		$(EXE)TestGrav.cc falcON $(makefiles)
+			$(MAKE_EXE) $(NBDYFLAGS) $(LFALCON) -lm
+$(BIN)TestPair:		$(EXE)TestPair.cc falcON $(makefiles)
+			$(MAKE_EXE) $(NBDYFLAGS) $(LFALCON) -lm
+$(BIN)TestGravC:	$(EXE)TestGravC.c falcON $(makefiles)
+			$(MAKE_EXE_C) $(NBDYFLAGS) $(LFALCON) -lstdc++ -lm
+$(BIN)TestPairC:	$(EXE)TestPairC.c falcON $(makefiles)
+			$(MAKE_EXE_C) $(NBDYFLAGS) $(LFALCON) -lstdc++ -lm
+$(BIN)TestGravF:	$(EXE)TestGravF.F falcON $(makefiles)
+			$(MAKE_EXE_F) $(NBDYFLAGS) $(LFALCON) -lstdc++ -lm
+$(BIN)TestPairF:	$(EXE)TestPairF.F falcON $(makefiles)
+			$(MAKE_EXE_F) $(NBDYFLAGS) $(LFALCON) -lstdc++ -lm
+ifdef NEMO
+
+$(BIN)addgravity:	$(EXE)addgravity.cc $(nmain_h) falcON
+			$(MAKE_EXE) $(NBDYFLAGS) $(INEMO) \
+				$(LFALCON) $(LNEMO) -lm
+$(BIN)getgravity:	$(EXE)getgravity.cc $(nmain_h) falcON
+			$(MAKE_EXE) $(NBDYFLAGS) $(INEMO) \
+				$(LFALCON) $(LNEMO) -lm
+$(BIN)gyrfalcON:	$(EXE)gyrfalcON.cc $(nmain_h) falcON \
+				$(makefiles)
+			$(MAKE_EXE) $(NBDYFLAGS) $(INEMO) -rdynamic \
+				$(LFALCON) $(LNEMO) -lm
+endif
+# -----------
+# executables
+# -----------
+
+TestGrav	:	$(BIN)TestGrav
+TestPair	:	$(BIN)TestPair
+TestGravC	:	$(BIN)TestGravC
+TestPairC	:	$(BIN)TestPairC
+TestGravF	:	$(BIN)TestGravF
+TestPairF	:	$(BIN)TestPairF
+
+ifdef NEMO
+
+addgravity	:	$(BIN)addgravity
+getgravity	:	$(BIN)getgravity
+gyrfalcON	:	$(BIN)gyrfalcON
+
+else
+
+addgravity	:
+			@echo "ERROR: you need NEMO to make \"$@\""
+getgravity	:
+			@echo "ERROR: you need NEMO to make \"$@\""
+gyrfalcON	:
+			@echo "ERROR: you need NEMO to make \"$@\""
+
+endif
+
+# --------
+# cleaning
+# --------
+
+cleanbackup:
+			rm -f $(INC)*~ $(INC)*/*~ $(SRC)*/*~
+cleanlib:
+			rm -f $(LIB)* $(SRC)mains/*.f
+clean:			
+			rm -f $(INC)*~ $(INC)*/*~ $(SRC)*/*~ \
+				$(LIB)* $(SRC)mains/*.f
+
