@@ -37,6 +37,8 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
 
 string usage="stack two N-body systems on top of each other";
 
+string cvsid="$Id$";
+
 extern string *burststring(string,string);
 
 nemo_main()
