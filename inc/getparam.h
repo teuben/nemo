@@ -46,6 +46,18 @@ extern int nemoinpf (string, float *, int);
 extern int nemoinpl (string, long *, int);
 extern int nemoinpb (string, bool *, int);
 
+extern void outparam (string, string);
+extern void outiparam(string, int);
+extern void outlparam(string, long);
+extern void outdparam(string, double);
+extern void outbparam(string, bool);
+
+extern void outiparams(string, int, int *);
+extern void outlparams(string, int, long *);
+extern void outdparams(string, int, double *);
+extern void outbparams(string, int, bool *);
+
+
 extern int    natoi(string);
 extern double natof(string);
 
