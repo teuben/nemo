@@ -14,6 +14,10 @@
  *   19-mar-99  2.1  out= now also listens to select= (albeit slowly)
  *   20-jun-01  gcc3
  *   
+ * 
+ *   TODO: with a keyword like ssize=4::20,8::10,1::100
+ *         one could swap composite data items, assuming you know the size in bytes,
+ *         and their count.
  */
 
 #include <stdinc.h>
