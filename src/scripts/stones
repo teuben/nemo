@@ -1,0 +1,16 @@
+#! /bin/csh -f
+#
+# benchmark, computing the number of NemoStones
+#
+
+set tmp=/tmp/nemostones$$
+mkdir $tmp
+cd $tmp
+echo `hostname` 
+echo `uname -a`
+echo `uptime`
+echo Running in $tmp
+
+echo mkplummer p1k:
+mkplummer out=p1k nbody=1024 seed=1024
+time hackcode1 in=p1k out=. > /dev/null
