@@ -1,0 +1,63 @@
+.TH TREECODE 1NEMO "20 July 1989"
+.SH NAME
+treecode - fortran version of hackcode
+.SH SYNOPSIS
+treecode in=snap_in out=snap_out [keyword=value ...]
+.SH DESCRIPTION
+\fBtreecode\fP is the NEMO adaptation of the fortran version (2.2) of 
+Lars Hernquist's version of the treecode.  The fortran dialect is assumed
+to be recursive. 
+.PP
+Computational units are such that the graitational constant G=1.
+.SH PARAMETERS
+The following parameters are recognized in any order when the keyword
+is also given
+.TP 25
+\fBin=\fIin_name\fP
+Input file in snapshot format [no default]
+.TP
+\fBout=\fIout_name\fP
+Output file in snapshot format [no default]
+.TP
+\fBnsteps=\fIint\fP
+Total number of  integration steps [100].
+.TP
+\fBnout=\fIint\fP
+Steps in between major output [10].
+.TP
+\fBtol=\fIreal\fP
+Tolerance (opening angle) determining accuracy of force
+calculation [1.0].
+.TP
+\fBeps=\fIreal\fP
+Softening length [0.05].
+.TP
+\fBusequad=\fIbool\fP
+Include quadrupole corrections to force calculation? [default: \fBf\fP].
+.SH TIMING
+Integrating a Plummer sphere of 128 (?check?) particles
+with accuracy \fIeta=0.02\fP for about a
+crossing time (T=0 to T=2) takes about XX minutes on a SUN 3/60
+with a simple f68881 floating point chip. 
+.SH LIMITATIONS
+The code has a hardcoded maximum number of particles in the fortran
+code (nmax.inc), change the PARAMETER statement in the beginning
+to whatever is required. During NEMO install the makefile
+macro NMAX can be used to do this automatically and 
+hence easily generate a new version with a different value for 
+NMAX, \fIe.g.\fP \fBmake nmax NMAX=10000;make treecode\fP.
+.SH AUTHOR
+Lars Hernquist, Peter Teuben (responsible)
+.SH FILES
+~/src/lars/treecode
+.SH SEE ALSO
+hackcode1(1NEMO), quadcode(1NEMO), newton0(1NEMO), nbody0(1NEMO)
+.SH HISTORY
+.nf
+.ta +1i +4i
+xx-xxx-xx	V2 added quadrupole correction          	Lars
+xx-xxx-xx	V2.1 optimized routines for 2D and 3D   	Lars
+1-sep-86	V2.2 large tol allowed (avoid self-gravity)	Lars
+xx-oct-86	V2.2a SUN version - some 'bug' removed      	PJT
+20-jul-86	V2.2b NEMO SUN version - still bugs          	PJT
+.fi
