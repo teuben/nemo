@@ -91,7 +91,7 @@ string defv[] = {
     "rotcur3=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur4=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur5=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
-    "VERSION=1.3b\n  13-jan-05 PJT",
+    "VERSION=1.3c\n  13-jan-05 PJT",
     NULL,
 };
 
@@ -133,6 +133,7 @@ bool Qrotcur;                            /* rotcur (rv) vs. velocity field (xyv)
 bool Qbeam;                              /* attempt to do beam correction */
 bool Qfit;                               /* write fit instead of residual */
 bool Qmasked;                            /* in fitted output image, use observation mask ? */
+bool Qrachel = FALSE;                    /* special mode where inc=0 and sini=cosi=1 */
 real  *xpos_vel, *ypos_vel, *vrad_vel, *verr_vel;   /* pointer to tabular information */
 real  *vsig_vel;                         
 int  n_vel = 0;                          /* length of tabular arrays */
@@ -463,8 +464,6 @@ nemo_main()
     real nsigma;
     real old_factor, factor;    /* factor > 1, by which errors need be multiplied */
     int i,j,k;
-
-    warning("New program, not all options have been tested yet");
 
     rotcurparse();
     if (nmod==0) error("No rotcur models specified");
@@ -919,6 +918,10 @@ stream  lunpri;       /* LUN for print output */
     if (n<1) error("inc=: need at least one inclincation (%d)",n);
     for (i=n;i<*nring;i++)
       inc[i] = inc[n-1];
+    if (inc[0] == 0.0) {
+      warning("Special Rachel mode to try and get circles, better have fixed=inc also");
+      Qrachel = TRUE;
+    }
     n = nemoinpr(getparam("center"),center,2);
     if (n==2) {                     /* if two value supplied */
       *x0 = center[0];            /* this will be the center of rotation */
@@ -1556,7 +1559,7 @@ int   mode;          /* fit mode */
     free=ABS(sin(F*thf)); /* free angle in terms of sine */
     sinp=sin(F*phi);       /* sine of pa. */
     cosp=cos(F*phi);       /* cosine of pa. */
-    if (inc==0) {          /* rachel mode Jan 2005 */
+    if (Qrachel) {
       sini=cosi=1.0;
     } else {
       sini=sin(F*inc);       /* sine of inc. */
@@ -1987,7 +1990,7 @@ perform_init(real *p,real *c)
     inc=p[4];               /* inclination */
     cosi1=cos(F*inc);       /* cosine */
     cosi2=cosi1*cosi1;      /* cosine squared */
-    if (inc==0)             /* rachel mode */
+    if (Qrachel)
       sini1=sini2=1.0;
     else {
       sini1=sin(F*inc);       /* sine */
