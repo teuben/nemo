@@ -52,6 +52,7 @@ string  defv[] = {
   "nstars=1000\n          Number of stars per galaxy",
   "ncolors=4\n            Number of colors",
   "galsize=0.15,0.25\n    Range in galaxy sizes",
+  "size=2                 Size of the universe",
   "niters=7500\n          Number of iterations",
   "zerocm=t\n             Centrate snapshot (t/f)?",
   "headline=\n	          Verbiage for output",
@@ -107,7 +108,7 @@ nemo_main()
 {
   Universe   *u = &universes[0];
   int         i, j, seed;
-  double      w1, w2; 
+  double      w1, w2, size;
   double      d, v, w, h;
   int ncolors = getiparam("ncolors");
   int nstars  = getiparam("nstars");
@@ -119,6 +120,7 @@ nemo_main()
   warning("Program not completed/tested, use at own risk");
 
   seed = init_xrandom(getparam("seed"));
+  size = getdparam("size");
   u->ngalaxies = ngal;
   u->galaxies = (Galaxy *) allocate(u->ngalaxies * sizeof (Galaxy));
 
@@ -151,14 +153,21 @@ nemo_main()
 	u->mat[2][0] = -sinw2;
 	u->mat[2][1] = -sinw1 * cosw2;
 	u->mat[2][2] = cosw1 * cosw2;
-	
+#if 0	
 	g->vel[0] = xrandom(-1.0,1.0);
 	g->vel[1] = xrandom(-1.0,1.0);
 	g->vel[2] = xrandom(-1.0,1.0);
 	g->pos[0] = -g->vel[0] * DELTAT * niters + xrandom(-0.5,0.5);
 	g->pos[1] = -g->vel[1] * DELTAT * niters + xrandom(-0.5,0.5);
 	g->pos[2] = -g->vel[2] * DELTAT * niters + xrandom(-0.5,0.5);
-
+#else
+	g->pos[0] = xrandom(-size,size);
+	g->pos[1] = xrandom(-size,size);
+	g->pos[2] = xrandom(-size,size);
+	g->vel[0] = xrandom(-1.0,1.0);
+	g->vel[1] = xrandom(-1.0,1.0);
+	g->vel[2] = xrandom(-1.0,1.0);
+#endif
 	g->mass = xrandom(0.0,1.0);
 
 	u->size = xrandom(GALAXYMINSIZE, GALAXYMINSIZE+GALAXYRANGESIZE);
