@@ -23,8 +23,6 @@ static int    entry = 0;
 #define ECONS  1		/* flag energy conservation */
 #define USE_MAXGRID 1           /* fix max allowed grid */
 
-extern  double grandom(double,double);
-
 
 dissipate (btab, nb, ndim, dr, eta, grid, fheat)
 Body *btab;

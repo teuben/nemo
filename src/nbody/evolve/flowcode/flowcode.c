@@ -2,6 +2,8 @@
  * FLOWCODE.C: main routines for 'flow' orbit integrator code
  *	
  *	10-apr-96 V0.1 cloned off potcode
+ *      20-jan-04  0.3 diffusion/sigma
+ *       3-feb-04  0.4 major CVS version skew fix
  *
  * To improve:  use allocate() for number of particles; not static
  *
@@ -32,7 +34,7 @@ string defv[] = {
     "sigma=0\n            diffusion angle (degrees) per timestep",
     "seed=0\n		  random seed",
     "headline=\n          random verbiage",
-    "VERSION=0.2\n	  23-nov-03 PJT",
+    "VERSION=0.4\n	  3-feb-04 PJT",
     NULL,
 };
 
@@ -51,8 +53,11 @@ void nemo_main()
     output();
     while (tnow + 0.1/freq < tstop) {
 	orbstep(bodytab, nbody, &tnow, force, 1.0/freq, mode);
+#if 0
+	/* totally useless here */
 	dissipate(bodytab, nbody, NDIM, dr, eta, rmax, fheat);
 	diffuse(bodytab, nbody, NDIM, sigma);
+#endif
 	output();
     }
     stopoutput();
@@ -103,13 +108,17 @@ real time;			/* current time */
     real   lphi;
     int    ndim=NDIM;
 
+
+    diffuse(bodytab, nb, NDIM, sigma);
+
     for (p = btab; p < btab+nb; p++) {		/* loop over bodies */
         SETV(lpos,Pos(p));
         (*pot)(&ndim,lpos,lacc,&lphi,&time);
-        
-	/* note no corrections for non-zero omega's */
-	
         Phi(p) = lphi;
         SETV(Acc(p),lacc);
     }
+    if (sigma > 0) 
+      diffuse(btab, nb, NDIM, sigma);
+
+
 }
