@@ -1,6 +1,6 @@
-.TH NEMOINP 3NEMO "4 March 1994"
+.TH NEMOINP 3NEMO "31 May 2001"
 .SH NAME
-nemoinp \- decode and parse string into reals, integers, logicals
+nemoinp, natof, natoi \- decode and parse string into reals, integers, logicals
 .SH SYNOPSIS
 .nf
 \fBint nemoinpd (expr,doutv,nout)
@@ -9,6 +9,9 @@ int nemoinpr (expr,routv,nout)
 int nemoinpi (expr,ioutv,nout)
 int nemoinpl (expr,loutv,nout)
 int nemoinpb (expr,boutv,nout)
+double natof(expr)
+int  natoi(expr)
+
 char *expr;
 double doutv[];
 float  foutv[];
@@ -22,7 +25,7 @@ int    nout;\fP
 \fInemoinpX(3NEMO)\fP parses the input character string \fBXexpr\fP into 
 a list of basic C-data structure items, pointed to by \fBXoutv\fP.
 The input string must be comma, space or
-colon separated (sorry, tabs are considered dangerous). A colon is used as 
+colon separated (TABs are considered dangerous). A colon is used as 
 an implied
 do-loop, where the first number is the starting value, the second the
 ending value, and an optional increment (which defaults to 1). Hence the
@@ -35,6 +38,12 @@ number of items returned in \fBXoutv\fP, otherwise it returns a negative
 error code (see herinp(3NEMO). 
 A 0 return code means nothing was present in the \fBexpr\fP
 string, in which case preset defaults must be assumed.
+.PP
+For convenience, NEMO parsing 
+versions of the standard C library \fIatof(3)\fP and \fIatoi(3)\fP
+are provided as natof() and natoi(), but they do not provide any
+error checking (most importantly if the string contains non-number
+parts.
 .PP
 An expression can have basic mathematical functions, such as addition,
 most transcendental functions and  even some mathematical and physical
@@ -153,4 +162,5 @@ Peter Teuben
 xx-feb-89	nemoinp made archaic - must now call nemoinpX	PJT
 20-jun-89	doc updated	PJT
 4-mar-94	added nemoinpf/r	PJT
+31-may-01	added natof/natoi	PJT
 .fi

@@ -1,4 +1,4 @@
-.TH KEYWORDS 5NEMO "12 June 1992"
+.TH KEYWORDS 5NEMO "6 June 2001"
 .SH NAME
 keywords \- list of standard keywords in NEMO. 
 .SH DESCRIPTION
@@ -12,7 +12,9 @@ It significantly eases the pain of users if
 keywords are used consistently.
 Also, parsing rules should be the same. 
 For example \fBxrange\fP always
-has two numbers, separated with a \fB:\fP.
+has two numbers, separated with a \fB:\fP,  although
+it could also use :max or min:, where in these cased
+0 is meant for the number not specified.
 .PP
 The \fB?\fP in the keywords below denotes 
 any character, e.g. \fBxrange\fP and \fByrange\fP both apply to  the
@@ -128,4 +130,5 @@ Peter Teuben
 .ta +1.0i +4.0i
 12-jun-92	document created  	PJT
 14-nov-93	minor updates    	PJT
+6-jun-01  	more keywords    	PJT
 .fi

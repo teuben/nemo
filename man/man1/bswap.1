@@ -1,11 +1,12 @@
-.TH BSWAP 1NEMO "15 December 1998"
+.TH BSWAP 1NEMO "6 June 2001"
 .SH NAME
 bswap \- swap bytes in a file
 .SH SYNOPSIS
 \fBbswap\fP [parameter=value]
 .SH DESCRIPTION
 \fBbswap\fP swaps the bytes in a file. This can be
-useful if the file was copied between different endian machines,
+useful if the file was copied between different endian machines
+(e.g. Sparc-Solaris and pc-linux),
 and consists of a homogeneous datatype (\fIfilestruct(5NEMO)\fP is
 a notable example where you cannot use this technique, but NEMO's
 binary files swap on-the-fly if need be).
@@ -33,8 +34,46 @@ One swap call? Only useful to set false under benchmark circumstances.
 \fBoffset=\fP
 Offset (in bytes) before which no swapping is done.
 [Default: \fB0\fP].
+.SH BUGS
+Be careful with pipes, they don't seem to work on an input file yet.
+.SH EXAMPLES
+The following example will byte-swap a binary file with only 4-byte 
+data (INTEGER*4, REAL*4) created using fortran unformatted I/O from the 
+following statement:
+.nf
+	PROGRAM junk
+	INTEGER MAXP,i,np,nv
+	PARAMETER (MAXP=100)
+	REAL x(MAXP), y(MAXP), z(MAXP)
+
+	np=10
+	nv=3
+	OPEN(1,FILE='junk.dat',FORM='unformatted')
+	WRITE(1) np,nv
+	WRITE(1) (x(i),i=1,np),(y(i),i=1,np),(z(i),i=1,np)
+	CLOSE(1)
+
+	END
+.fi
+with \fIunfio(1NEMO)\fP one can see the blocks, and optionally data:
+.nf
+    $ unfio junk.dat
+    1   8
+    2   120
+    $ unfio junk.dat block=1
+    10
+    3
+.fi
+If this file was created on a machine of which the endianism is reversed
+from the machine where it is being read, the \fBunfio\fP would have
+returned nothing, it would need to be swapped with \fBlen=4\fP:
+.nf
+    $ bswap junk.dat junks.dat 4
+.fi
+This above example is a bit contrived, since \fIunfio(1NEMO)\fP also
+has a \fBswap=\fP keyword to read files from the opposite endianism machine.
 .SH SEE ALSO
-filestruct(5NEMO), dd(1)
+filestruct(5NEMO), unfio(1NEMO), dd(1)
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
@@ -43,4 +82,5 @@ Peter Teuben
 27-Feb-94	V1.1b Documented	PJT
 23-feb-97	V1.3 allow offset before swapping starts	PJT
 15-dec-98	V1.4 add streaming mode to I/O    	PJT
+6-jun-01	more verbosities, plus an example	PJT
 .fi

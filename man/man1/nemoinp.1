@@ -1,4 +1,4 @@
-.TH NEMOINP 1NEMO "28 August 2000"
+.TH NEMOINP 1NEMO "31 May 2001"
 .SH NAME
 nemoinp \- parse a user supplied number string
 .SH SYNOPSIS
@@ -47,8 +47,13 @@ Optional table output. Default: none
 .TP
 \fBseed=\fIinitial_seed\fP
 Seed for \fIxrandom(3NEMO)\fP. Default: 0
+.TP
+\fBatof=\fP
+Merely provided to test what \fInatof\fP returns. Note that this
+function does not perform any error checking and can return the wrong
+number. 
 .SH SEE ALSO
-various tab* programs, nemoinp(3NEMO), getrange(3NEMO)
+tabmath(1NEMO), nemoinp(3NEMO), getrange(3NEMO)
 .SH AUTHOR
 Peter Teuben
 .SH "UPDATE HISTORY"
@@ -60,4 +65,5 @@ Peter Teuben
 18-may-92	documentation
 16-jun-97	V1.6 %d forces integer math	PJT
 28-aug-00	V1.7 documented tab= and seed=	PJT
+31-may-01	V1.8 added atof=	PJT
 .fi

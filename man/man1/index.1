@@ -1,13 +1,14 @@
 .\" pjt 
-.TH INDEX 1NEMO "13 June 1997"
+.TH INDEX 1NEMO "6 June 2001"
 .SH NAME
 index \- index of NEMO commands and utilities
 .SH DESCRIPTION
 These \fBcommands\fP and \fButilities\fP form the top layer of NEMO. They can all be found
 in the directory \fB$NEMOBIN\fP. Some of the \fButilities\fP are simple shell
-scripts, (e.g. 'cc'), or
-imported public domain programs, for which not always proper documention is
-available. Most (if not all) of the \fBcommands\fP, however,
+scripts, (e.g. 'nemoman'), or
+imported programs, for which not always documention is
+available in the way NEMO programs are documented.
+Most (if not all) of the \fBcommands\fP, however,
 conform to the NEMO user interface (\fIgetparam(3NEMO)\fP, \fIkeywords(5NEMO)\fP)
 and use the NEMO database \fIfilestruct(5NEMO)\fP.
 .PP
@@ -36,7 +37,7 @@ atosph    	atos(1)   	convert an ascii snapshot file to binary snapshot
 .\" badnews
 .\" body-compiler	(gravsim)	xxx                                               	
 bodytrans	bodytrans(1)	test body to scalar mapping                         	
-bswap   	bswap(1) 	swap bytes                                        	
+bswap   	bswap(1) 	swap bytes in a file                                       	
 ccddisplay	ccddisplay(1)	displays an image(5) file onto color Sun screen   	
 ccddump  	ccddump(1)	dump contents of an image(5)                         	
 ccdfft    	ccdfft(1)	2D Fast Fourier Transform of a map                	
@@ -87,11 +88,11 @@ gravsim0	gravsim0(1)	NEMO frontend for gravsim family
 .\" gravsim-2	(gravsim)	---                                              	
 .\" gravsim-3	(gravsim)	---                                              	
 hackcode1	hackcode1(1)	hierarchical N-body integrator                   	
-hackcode1_qp	hackcode1(1)	" and quadrupole corrections                      	
-hackcode3	hackcode3(1)	" and fixed particles/background potential      	
+hackcode1_qp	hackcode1(1)	" and quadrupole corrections"       	
+hackcode3	hackcode3(1)	" and fixed particles/background potential"
 hackdens	hackdens(1)	local density estimator using tree algorithm      	
 hackforce	hackforce(1)    	add potential and forces to an N-body snapshot  
-hackforce_qp	hackforce(1)    	" and quadrupole corrections                    
+hackforce_qp	hackforce(1)    	" and quadrupole corrections"
 hdfgrid		hdfgrid(1)	Regrid a CMHOG polar HDF SDS image to a cartesian NEMO image 
 henyey    	henyey(1)	search for periodic orbits in a potential (Henyey's method)
 himap		himap(1)	Construct galactic MAP/CUBE from a  VL/LV (B) map
@@ -171,7 +172,8 @@ radprof  	radprof(1)	radial profile plotting of N-body system
 rostat	
 rotcur    	rotcur(1)   	fit kinematic parameters from velocity field      	
 rotcurves 	rotcurves(1)	rotation curve of a composite potential           	
-rsf       	rsf(1)    	read a structured file                           	
+rsf       	rsf(1)    	read a structured file 
+rotcur		rotcur(1)	non-linear fit kinematic parameters from a velocity field
 runcmhog	runcmhog(1)	preprocess a CMHOG namelist and run program in a new directory
 rungalaxy	rungalaxy(1)	run galaxy in a special directory
 rvsnap     	rvsnap(1)     	convert Carlberg's binary 'RV' format to snapshot format
@@ -238,6 +240,7 @@ stou4   	stou4(1)	convert snapshot to unit-4 for NBODYx
 tabcomment	tabcomment(1)	Add comments to a table, or comments certain lines
 tabdms  	tabdms(1)	Convert HMS/DMS tables
 tabhist  	tabhist(1)	column analysis and histogram plotter                  	
+tablines	tablines(1)	select lines from a file
 tablint  	tablint(1)	(prototype) table syntax checker
 tablovas    	tablovas(1)	Lovas  spectral  line   catalogue   manipulator   	
 tablsqfit    	tablsqfit(1)	general purpose least squares fitting program     	
@@ -270,6 +273,7 @@ wcs
 xrandom   	xrandom(1)	Return seed for random numbers and optionally random numbers
 xvpsnap     	xvpsnap(1)	convert xvp NBODY files to snapshot format files
 xyzview		xyzview(1)	Display 3-D velocity data
+YancNemo	YancNemo(1)	NEMO version of Dehnen's YANC (Yet Another N-body Code)
 
 .fi
 .SH "LIST OF NEMO UTILITIES"
@@ -329,9 +333,9 @@ programs(8NEMO)
 .fi
 .SH BUGS
 .PP
-The version numbers in the last column above are often out of date.
+The version numbers in the last column above are almost guarenteed to be out of date.
 .PP
-This list always seems to be out of date.
+The list itself is usually out of date.
 .SH AUTHOR
 Peter Teuben
 .SH "UPDATE HISTORY"
