@@ -15,13 +15,13 @@ string defv[] = {
     "potpars=\n     Parameters for potential (1st one is pattern speed)",
     "potfile=\n     Any optional data file associated with potential",
     "r=0:2:0.1\n    Radii to sample",
-    "p=0\n          Angles to sample (degrees)",
+    "p=0\n          Angles to sample; 2 angles will iterate between (degrees)",
     "t=0.0\n        Time to test potential at, if relevant",
     "omega=\n       Use this instead of any returned pattern speed",
     "format=%g\n    Format used to print numbers",
-    "niter=10\n     Iteration max",
-    "eps=0.001\n    Accuracy",
-    "VERSION=0.2\n  7-feb-05 PJT",
+    "niter=10\n     Iteration max if 2 angles set in p=",
+    "eps=0.001\n    Relative accuracy if iterating",
+    "VERSION=0.3\n  8-feb-05 PJT",
     NULL,
 };
 
@@ -34,11 +34,8 @@ string cvsid = "$Id$";
 #endif
 
 local potproc_double mypotd;     /* pointer to potential calculator function : double */
-local potproc_float  mypotf;     /* pointer to potential calculator function : float */
-local void do_potential(bool,int *, double *, double *, double *, double *);
 local double force (double rad, double phi);
 
-local double report_q(int,double);
 
 void nemo_main(void)
 {
@@ -75,7 +72,7 @@ void nemo_main(void)
     strcat(s," ");      /* append separator if none specified */
   ini_moment(&m,2,0);
 
-  if (niter>0 && np == 2) {
+  if (niter>0 && np == 2) {      /* 2 angles: iterate between them */
     warning("Testing an iterative procedure: niter=%d eps=%f",niter,eps);
     for (i=0;i<nr;i++) {
       reset_moment(&m);
@@ -83,7 +80,7 @@ void nemo_main(void)
       accum_moment(&m, force(radii[i],phis[1]),1.0);
       accum_moment(&m, force(radii[i],0.5* (phis[0]+phis[1])),1.0);
       f0 = mean_moment(&m);
-      dphi  = (phis[1]-phis[0])/2.0;
+      dphi  = (phis[1]-phis[0])/2.0;    /* unint var ? */
       nstep = 2;
       dprintf(2,"iter 1: %g\n",f0);
       for (j=0; j<niter; j++) {
@@ -105,7 +102,7 @@ void nemo_main(void)
       vrot = sqrt(-f1*radii[i]);
       printf("%g %g %g %d\n",radii[i],fr,vrot,j);
     }
-  } else {
+  } else {                    /* NP angles, so just compute the average */
     for (i=0;i<nr;i++) {
       reset_moment(&m);
       for (j=0; j<np; j++) {
@@ -119,7 +116,7 @@ void nemo_main(void)
   }
 }
 
-/* radial force */
+/* compute radial force */
 
 double force (double rad, double phi)
 {
@@ -136,16 +133,5 @@ double force (double rad, double phi)
   fr = (pos[0]*acc[0] + pos[1]*acc[1])/sqrt(r);
 
   return fr;
-#if 0
-  ft = sqrt( (acc[0]*acc[0] + acc[1]*acc[1]) - fr*fr);
-  dprintf(2,"r,fr,ft=%g %g %g\n",r,fr,ft);
-
-  sum_fr += fr;
-  nsum++;
-  if (ft > max_ft) max_ft = ft;
-
-  rad_q = rad;
-  iter++;
-#endif
 }
 
