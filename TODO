@@ -7,3 +7,15 @@ some other help on configure:
   into NEMODAT
 
 - clean code so it can write > 2GB datafiles
+  Testing can be done with:
+	mkspiral s000 1000000 nmodel=40
+  which creates a file just over the famous 2GB limits
+  testing reading
+	tsf s000
+
+- install on solaris is broken:
+
+	- FORLIBS needs the 
+	  -R /opt/SUNWspro/lib -L/opt/SUNWspro/lib -lF77 -lM77 -lV77 -lsunmath 
+	  type solution for pgplot, and if so,
+	- FORLIBS need to be added to YAPPLIB
