@@ -8,6 +8,7 @@
  *	24-mar-97	proto fixes	pjt
  *	29-mar-97	SINGLEPREC fixed, ndisk= now nbody=	pjt
  *      29-may-01       Add time      PJT
+ *       8-sep-01       gsl/xrandom
  */
 
 #include <stdinc.h>
@@ -36,7 +37,7 @@ string defv[] = {	/* DEFAULT INPUT PARAMETERS */
     "tab=f\n		  table output also? ",
     "zerocm=t\n           center the snapshot?",
     "headline=\n	  text headline for output ",
-    "VERSION=1.2b\n	  3-jun-01 PJT",
+    "VERSION=1.2c\n	  9-sep-01 PJT",
     NULL,
 };
 
@@ -73,7 +74,7 @@ nemo_main()
     ndisk = getiparam("nbody");
     z0 = getdparam("z0");
     cmode = getiparam("mode");
-    seed = set_xrandom(getiparam("seed"));
+    seed = init_xrandom(getparam("seed"));
     Qtab = getbparam("tab");
     inittables();
     makedisk();

@@ -17,6 +17,7 @@
 #include <stdinc.h>
 #include <getparam.h>
 #include <vectmath.h>
+#include <extstring.h>
 
 #include <filestruct.h>
 #include <snapshot/snapshot.h>
@@ -31,7 +32,7 @@ string  defv[] = {              /* DEFAULT INPUT PARAMETERS */
     "time=0.0\n     Time at which snapshot taken",
     "headline=\n    Verbiage for output",
     "verbose=t\n    Be verbose when input requested",
-    "VERSION=2.2b\n 1-apr-01 PJT",
+    "VERSION=2.2c\n 8-sep-01 PJT",
     NULL,
 };
 
@@ -65,7 +66,7 @@ local string rfmt = "%lf";
 void nemo_main()
 {
     char    c;
-    string  getstring(), ordinal(), oname;
+    string oname;
     bool    Qverbose;
     stream  outstr;
     int     i;
@@ -112,7 +113,7 @@ void nemo_main()
         if (Qverbose) printf(">>            z component = ");
         scanf(rfmt, &Vel(bp)[2]);  
         }
-    warning("Center of mass not necesseraly at origin");
+    warning("Center of mass not necessarily at the origin");
     writesnap(outstr);
     strclose(outstr);
     printf("Snapshot with %d particle(s) written to file %s\n",nobj,oname);
@@ -142,7 +143,7 @@ local writesnap(stream outpt)
 
 local string  getstring(void)
 {
-    char  buf[BUFFERLENGTH], *bp, c, *copxstr();
+    char  buf[BUFFERLENGTH], *bp, c;
     int  i = BUFFERLENGTH;
     
     bp = buf;
