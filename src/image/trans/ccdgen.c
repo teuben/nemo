@@ -40,7 +40,7 @@ string defv[] = {
   "cdelt=\n        Override/Set cdelt (1,1,1) // ignored",
   "seed=0\n        Random seed",
   "headline=\n     Random veriage for the history",
-  "VERSION=0.8\n   8-jan-05 PJT",
+  "VERSION=0.8a\n  25-jan-05 PJT",
   NULL,
 };
 
@@ -87,8 +87,6 @@ local void object_isothermal(int npars, real *pars);
 local void object_comet(int npars, real *pars);
 local void object_jet(int npars, real *pars);
 local void object_shell(int npars, real *pars);
-
-local real powi(real x, int p);
 
 extern string *burststring(string,string);
 
@@ -470,48 +468,6 @@ local void object_ferrers(int npars, real *pars)
 }
 
 
-/* TODO: export as pure "double" variants to the library */
-
-/* 
- * powi(x,p):   like pow(x,p) except p is a lowish order integer
- *    this has the advantage that:
- *     1) x < 0  and it does the right thing. For odd p's  sign(powi) = sign(x)
- *     2) p < 1  
- * 
- *  Note: returns 0.0 if x=0 and p<0
- *        returns 1.0 if p=0
- *     
- */
-
-local double powi(double x, int p)
-{
-  int i;
-  real prod;
-
-  if (p==0) return 1;
-  if (x==0.0) return 0.0;
-  if (p<0) {
-    p = -p;
-    x = 1.0/x;
-  } 
-  if (p==1) return x;
-  prod = x*x;
-  for (i=2; i<p; i++)
-    prod *= x;
-  return prod;
-}
-
-/* 
- * powr(x,p):  we need  our own, to prevent NaN's for x < 0
- */
-
-local double powr(double x, double p)
-{
-  if (x<=0) return 0.0;
-  return pow(x,p);
-}
-
-
 local void object_spiral(int npars, real *pars)
 {
   int i,nx = Nx(iptr);
@@ -572,7 +528,7 @@ local void object_spiral(int npars, real *pars)
 	  if (Qint) {
 	    amp = powi(cos(m*phi),pint);   /* these can come out negative for odd p's !! */
 	  } else
-	    amp = powr(cos(m*phi),(double)p);
+	    amp = powd(cos(m*phi),(double)p);
 	  arg = r/h;
 	  value = (arg < 80) ? A * amp * exp(-arg) :  0.0;
 	}
