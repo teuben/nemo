@@ -91,12 +91,12 @@ void nemo_main()
 	    Pos(bp)[i] -= pos[i];
 	  for (i=0; i<NDIM; i++)                    /* shift VEL */
 	    Vel(bp)[i] -= vel[i];
-	  xnew = -cosp*Pos(bp)[0] + sinp*Pos(bp)[1];   /* rotate POS */
-	  ynew = -sinp*Pos(bp)[0] - cosp*Pos(bp)[1];
+	  xnew = -cosp*Pos(bp)[0] - sinp*Pos(bp)[1];   /* rotate POS */
+	  ynew =  sinp*Pos(bp)[0] - cosp*Pos(bp)[1];
 	  Pos(bp)[0] = xnew;
 	  Pos(bp)[1] = ynew;
-	  xnew = -cosp*Vel(bp)[0] + sinp*Vel(bp)[1];   /* rotate VEL */
-	  ynew = -sinp*Vel(bp)[0] - cosp*Vel(bp)[1];
+	  xnew = -cosp*Vel(bp)[0] - sinp*Vel(bp)[1];   /* rotate VEL */
+	  ynew =  sinp*Vel(bp)[0] - cosp*Vel(bp)[1];
 	  Vel(bp)[0] = xnew;
 	  Vel(bp)[1] = ynew;
         }
