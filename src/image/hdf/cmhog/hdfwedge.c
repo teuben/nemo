@@ -6,15 +6,15 @@
  *     17-dec-2004    V0.1 Initial version, only deals with select=
  *                         no copies of data made, so zvar= does not work
  *                         periodic=f does not work either
- *     20-dec-2004    V0.2 patched up too wide edges for non-integral 2pi intervals
+ *     20-dec-2004    V0.2 patched up too wide edges for non-integral 2pi intervals 
+ *     23-dec-2004    V0.3 fixed periodic for np=odd
  *
  * TODO
  *  - check the interpolation on the 2nd and 3rd quadrant, this this is where
  *    hdfgrid and hdfwedge differ on the rounding level
  *    but with the jp=idx[ip+1] it's bad (rounding or higher) all over the plane
  *  - enable zvar=
- *  - see if messy data where the integral number of data in TWO_PI doesn't quite match
- *    ** sort of fixed in 0.2 **
+ *  - enable periodic=f, it's currently broken
  *
  */
 
@@ -42,7 +42,7 @@ string defv[] = {
     "yrange=-16:16\n		Range in Y",
     "zvar=\n                    Optional selections: {vr,vt,den,vx,vy}",
     "periodic=t\n               Attempt to fill the plan by cloning the wedge N times",
-    "VERSION=0.2\n		20-dec-04 PJT",
+    "VERSION=0.3\n		23-dec-04 PJT",
     NULL,
 };
 
@@ -69,10 +69,10 @@ void nemo_main()
 {
   float **image, **coord, *buffer, *rads, *phis, *phisf, rad, phi, phi_orig, 
     dmin, dmax, phi1, phi2, rad1, rad2;
-  float *buffer1, *buffer2, *buffer3;
+  float *buffer1, *buffer2, *buffer3, *zero;
   float **image1, **image2;
   int i0, i1, i, j, k, ret, size, type, nsds, isel, nx, ny;
-  int ir, ip, jr, jp, nr, np, n1, n2, is, ix, iy, ncopy,nu,nl,n,npf;
+  int ir, ip, jr, jp, nr, np, n1, n2, is, ix, iy, ncopy,nu,nl,n,npf,nzero;
   int *idx;
   char **output, *cbuff;
   char ntype[32];
@@ -85,6 +85,9 @@ void nemo_main()
   bool mirror, first = TRUE, both = FALSE, flip=FALSE, Qrot;
   bool Qmirror, Qperiodic  = getbparam("periodic");
   Grid gx, gy;
+
+  if (Qperiodic)
+    warning("Periodic=f is currently broken");
   
   nsds = DFSDndatasets(infile);
   if (nsds<0) 
@@ -146,8 +149,9 @@ void nemo_main()
 		i+1,shape[i],cmin,cmax,
 		shape[i] == 1 ? "(** dimension will be skipped **)" : "");
       }
-      buffer1 = (float *) allocate(size * sizeof(float));
-      if (both) buffer2 = (float *) allocate(size * sizeof(float));
+      nzero = shape[i1];    /* an extra array for just 0's in case periodic=f */
+      buffer1 = (float *) allocate((size+nzero) * sizeof(float));
+      if (both) buffer2 = (float *) allocate((size+nzero) * sizeof(float));
     }
     if (k+1 == isel) {          /* if we got the right one, get data now */
       if (both && isel==2)
@@ -169,8 +173,8 @@ void nemo_main()
     }
   } /* k */
 
-  image1 = (float **) allocate(shape[i0] *sizeof(float *));
-  for (i=0; i<shape[i0]; i++)
+  image1 = (float **) allocate((shape[i0]+1) *sizeof(float *));
+  for (i=0; i<shape[i0]+1; i++)        /* notice extra row of zero also pointed to */
     image1[i] = &buffer1[i*shape[i1]];
 
   if (both) {
@@ -233,6 +237,9 @@ void nemo_main()
   rads = coord[i1];
   phis = coord[i0];
 
+  zero = image[np];
+  for (i=0; i<nr; i++) zero[i] = 0.0;
+
   /* 2st method, see how many sections of the phi range fit in 2.pi */
   pratio = TWO_PI/(phis[np-1]-phis[0]);
   ncopy = (int) lrint(pratio);    /* nearest integer ? */
@@ -263,6 +270,8 @@ void nemo_main()
   /* now create an index array such that image_filled[idx[i]] points to image[i] */
   /* and patch the upper and lower pieces to point to each other                 */
   /* also make a new 'phis' coordinate array for the full  plane, called 'phisf' */
+  /* the extra +2 is a shadow location:                                          */
+  /* 0 is to point just below -pi, npf+1 just above pi                           */
   idx = (int *) allocate((npf+2)*sizeof(int));
   phisf = (float *) allocate((npf+2)*sizeof(float));
   if (nl+nu > 0) {
@@ -271,32 +280,35 @@ void nemo_main()
       phisf[i+nl+1] = phis[i];
     }
     for (i=0, j=0; i<nu; i++) {                         /* iteratively add in the upper parts */
-      idx[i+nl+np+1] = j;
+      idx[i+nl+np+1] = Qperiodic ? j : np;
       phisf[i+nl+np+1] = phisf[i+nl+np] + deltap;
       j++;
-      if (j==np) j=0;    }
+      if (j==np) j=0;    
+    }
     for (i=0, j=np-1; i<nl; i++) {                      /* iteratively add in the lower parts */
-      idx[nl-i] = j;
+      idx[nl-i] = Qperiodic ? j : np;
       phisf[nl-i] = phisf[nl-i+1] - deltap;
       if (j==0) j=np;
       j--;
     }
-    idx[0] = idx[npf];
-    idx[npf+1] = idx[1];
+    idx[0]     = Qperiodic ? idx[npf] : np;
+    idx[npf+1] = Qperiodic ? idx[1]   : np;
     phisf[0]     = phisf[npf] - TWO_PI;
     phisf[npf+1] = phisf[1]   + TWO_PI;
-
+    
     n = idx[1]-idx[0];
-    if (n != 1) {
-      warning("First shadow cell covers %d, trying to fix it",n);
+    if (Qperiodic && n != 1) {
+      warning("First shadow cell covers %d, trying to fix it:",n);
       dprintf(0,"idx[1] = %d idx[0] was : %d  is: %d\n", idx[1],idx[0],idx[1]-1);
       idx[0] = idx[1]-1;
+      phisf[0] += deltap;
     }
     n = idx[npf+1]-idx[npf];
-    if (n != 1) {
-      warning("Last shadow cell covers %d",n);
+    if (Qperiodic && n != 1) {
+      warning("Last shadow cell covers %d, trying to fix it:",n);
       dprintf(0,"idx[N] = %d idx[N+1] was : %d  is: %d\n", idx[npf],idx[npf+1],idx[npf]+1);
       idx[npf+1] = idx[npf]+1;
+      phisf[npf+1] -= deltap;
     }
   } else {
     warning("should not have to do this section ?? ");
@@ -304,7 +316,7 @@ void nemo_main()
     for (i=0; i<np; i++) idx[i+1] = i;
     idx[np+1] = 0;
   }
-
+  
   for (i=0; i<npf+2; i++)
     dprintf(1,"idx[%d] = %d/%d    %g   %d %d\n",i,idx[i],np,phisf[i],nl,nu);
 
@@ -346,11 +358,14 @@ void nemo_main()
       /* but index in original range to get at the data */
       ip = idx[ip];
 #if 1
-      jp = ip+1;
-      if (jp==np) jp=0;    /* this is a nasty hack but doesn't work for data where delta_shadow > 1 */
-#else
-      jp = idx[ip+1];      /* something wrong with this :-) */
+      if (Qperiodic) {
+	jp = ip+1;
+	if (jp>=np) 
+	  jp=0;    /* this is a nasty hack but doesn't work for data where delta_shadow > 1 */
+      } else
+	jp = idx[ip+1];      /* something wrong with this :-) ??? */
 #endif
+      
       dprintf(2,"(x,y)%d %d (r,p) %g %g [@ %d:%d %d:%d] LL: %g %g\n",
 	      i,j,rad,phi,ir,jr,ip,jp,rads[ir],phi1);
       
@@ -382,7 +397,7 @@ void nemo_main()
       }
     } /* i */
   } /* j */
-  dprintf(0,"%d/%d out of %d points outside grid in rad/phi\n",n1,n2,nx*ny);
+  dprintf(0,"%d/%d out of %d cartesian points outside grid in rad/phi\n",n1,n2,nx*ny);
   
   /* finish off the header */
   Xmin(iptr) = xrange[0];
