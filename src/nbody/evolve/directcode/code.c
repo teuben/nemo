@@ -5,8 +5,10 @@
  *     16-feb-04  V1.0   example, prove a point to Jim       PJT
  *     22-feb-04  V1.1   leapfrog corrected                  PJT
  *     25-feb-04   1.1a  corrected the last correction       PJT
+ *     24-dec-04   1.1b  use global for MacOSX               PJT
  */
 
+#define global
 #include "code.h"
 
 string defv[] = {		/* DEFAULT PARAMETER VALUES */
@@ -29,7 +31,7 @@ string defv[] = {		/* DEFAULT PARAMETER VALUES */
     "freqout=4.0\n		  major data-output frequency ",
     "minor_freqout=32.0\n	  minor data-output frequency ",
 
-    "VERSION=1.1a\n		  25-feb-04 PJT",
+    "VERSION=1.1b\n		  24-dec-04 PJT",
     NULL,
 };
 

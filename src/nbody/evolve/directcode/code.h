@@ -5,31 +5,31 @@
 #include "defs.h"
 #include <getparam.h>
 
-string infile;			/* file name for snapshot input */
-string outfile;			/* file name for snapshot output */
-string savefile;		/* file name for state output */
+global string infile;			/* file name for snapshot input */
+global string outfile;			/* file name for snapshot output */
+global string savefile;		/* file name for state output */
 
-real freq;			/* fundamental integration frequency */
+global real freq;			/* fundamental integration frequency */
 
-real freqout, minor_freqout;	/* major, minor output frequencies */
+global real freqout, minor_freqout;	/* major, minor output frequencies */
 
-real tstop;			/* time to stop calculation */
+global real tstop;			/* time to stop calculation */
 
-string options;                 /* various option flags */
+global string options;                 /* various option flags */
 
 extern string headline;		/* message describing calculation */
 
-real tnow;			/* current value of time */
+global real tnow;			/* current value of time */
 
-real tout, minor_tout;		/* time of next major, minor output */
+global real tout, minor_tout;		/* time of next major, minor output */
 
-int nstep;			/* number of micro-steps */
+global int nstep;			/* number of micro-steps */
 
-int nbody;			/* number of bodies in system */
+global int nbody;			/* number of bodies in system */
 
-bodyptr bodytab;		/* points to array of bodies */
+global bodyptr bodytab;		/* points to array of bodies */
 
-real eps;                       /* grav softening length */
+global real eps;                       /* grav softening length */
 
 /* code.c */
 void nemo_main(void);

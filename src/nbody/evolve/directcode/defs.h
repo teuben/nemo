@@ -6,6 +6,15 @@
 #include <vectmath.h>
 
 /*
+ * GLOBAL: pseudo-keyword for storage class.
+ */
+  
+#if !defined(global)
+#  define global extern
+#endif
+ 
+
+/*
  * BODY: data structure used to represent particles.
  */
 
