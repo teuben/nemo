@@ -82,15 +82,6 @@ nemo_src:
 
 tests: $(TESTFILES)
 
-extstrtest: extstring.c
-	$(CC) $(CFLAGS) -o extstrtest -DTESTBED extstring.c $(NEMO_LIBS)
-
-errortest: error.c
-	$(CC) $(CFLAGS) -o errortest -DTESTBED error.c $(NEMO_LIBS)
-
-burstrtest: burststring.c
-	$(CC) $(CFLAGS) -o burstrtest -DTESTBED burststring.c $(NEMO_LIBS)
-
-filefntest: filefn.c filefn.h
-	$(CC) $(CFLAGS) -o filefntest -DTESTBED filefn.c  $(NEMO_LIBS)
+nllsqfittest: nllsqfit.c
+	$(CC) $(CFLAGS) -o nllsqfittest -DTESTBED nllsqfit.c $(NEMO_LIBS)
 
