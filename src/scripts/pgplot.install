@@ -6,6 +6,7 @@
 #
 #  3-apr-01	allowed final directory also to be configurable
 #		and some NEMO V3 support added
+#  9-apr-01     added support if file= is given to directly specify pgplot tar ball
 
 
 
@@ -29,16 +30,19 @@ end
 if (! -e $lib) mkdir $lib
 if ($status) exit 1
 
-cd $NEMO/local/
+cd $NEMO/local
 
-if (! -e $dir/pgplot$version.tar.gz) then
-  echo No file $dir/pgplot$version.tar.gz, you need to pick it up, e.g.
+if ($?file == 0) set file=$dir/pgplot${version}.tar.gz
+   
+
+if (! -e $file) then
+  echo No file $file, you need to pick it up, e.g.
   echo ncftp ftp://astro.caltech.edu/pub/pgplot/pgplot${version}.tar.gz
   exit 1
 else
-  echo Found $dir/pgplot$version.tar.gz
+  echo Found $file
 endif
-gunzip -dc $dir/pgplot${version}.tar.gz | tar xf -
+gunzip -dc $file | tar xf -
 cd pgplot
 cp drivers.list $lib
 
