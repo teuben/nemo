@@ -1,4 +1,4 @@
-.TH WCS 1NEMO "2 March 2003"
+.TH WCS 1NEMO "7 July 2004"
 .SH NAME
 wcs \- coordinate transforms 
 .SH SYNOPSIS
@@ -46,6 +46,10 @@ and 0-based in NEMO.
 \fBpos=\fP
 Input World Coordinates. If this one is given, conversion
 to pixel coordinates is done
+.TP
+\fBhms=t|f\fP
+Determines if the first coordinate, the longitude, should be printed in
+H:M:S (the default) or D:M:S format.
 .SH EXAMPLE
 For a given $ra, $dec and $fitsfile, the corresponding pixel positions are computed.
 .nf
@@ -73,4 +77,5 @@ Peter Teuben
 2-apr-96	V1.0 man page created	PJT
 2-mar-03	V1.1 fixed pos->pix error; finally added to NEMO	PJT
 4-mar-03	V1.2 allow hms/dms conversions using nemoinpx	PJT
+7-may-04	V1.3 added hms= keyword   	PJT
 .fi
