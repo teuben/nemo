@@ -223,6 +223,12 @@ else
   AC_MSG_WARN(no FORTRAN compiler)
 fi
 
+if test "G77" == yes; then
+  NEMO_FFLAGS="-fno-globals"
+  AC_MSG_WARN(adding -fno-globals to NEMO_FFLAGS)  
+fi
+AC_SUBST(NEMO_FFLAGS)
+
 AC_MSG_CHECKING(whether we have PGPLOT)
 AC_ARG_WITH(pgplot-prefix, 
         [  --with-pgplot-prefix=PFX     Prefix where PGPLOT was installed], 

@@ -134,7 +134,6 @@ Brief overview of a Version 3.x.y INSTALLATION
 	% rehash
 	% make libs
 
-
 *) Installation problems:
 
 	- edit *.in
@@ -145,6 +144,32 @@ Brief overview of a Version 3.x.y INSTALLATION
 
 	- edit $NEMOLIB/makedefs (but danger, configure/config_extra can overwrite this)
 
+
+*) Configuration options known to work:
+
+	--with-pgplot-prefix=$NEMOLIB
+
+		expects grfont.dat and friends to be in the named directory
+		($NEMO/src/scripts/pgplot.install will help you
+		installing pgplot in $NEMOLIB)
+
+	--with-hdf-prefix=PFX     
+	--with-cfitsio-prefix=PFX 
+	--with-miriad-prefix=PFX
+
+* Configuration options that we are working on:
+
+
+
+*** TODO:
+
+     	- more consistent way between usage of variables in the NEMORC chain, and the 
+	  'makedefs' list.
+
+	
+
+ANYTHING BELOW THIS LINE IS FROM NEMO V2 and not always relevant anymore
+========================================================================
 
 2) Copy the NEMORC.gen file to NEMORC.local, and edit it to reflect your
    local site. This file is meant to set environment variables that

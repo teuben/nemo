@@ -40,3 +40,12 @@ if (0) then
     setenv LD_LIBRARY_PATH ${NEMOLIB}
   endif
 endif
+
+
+#### Order of "nemorc" startup files:
+#### 	$NEMO/NEMORC
+#### 	$NEMO/NEMORC.local
+####	$NEMOLIB/NEMORC
+####	$HOME/.nemorc
+
+

@@ -209,13 +209,15 @@ SCRIPTS =
 scripts:
 	@echo Installing scripts on `date` 
 	@echo By `whoami` on `hostname`
+	(cd $(NEMO)/src/scripts; make install)
+
+scripts_old:
 	-@for i in $(SCRIPTS); do \
 		(cd $(NEMO)/src/scripts; \
 		echo "Available are: " ; ls $$i.* ; \
 		$(MAKE) $$i OS=$(OS)); \
 		( echo "hashed..." ; hash $(NEMOBIN)/$$i ); \
 		echo "$$i will now be: `which $$i`" ; done
-	(cd $(NEMO)/src/scripts; make install)
 
 # The next four targets are not currently supported 
 #all:	nemo_lib nemo_bin
