@@ -1,0 +1,113 @@
+.TH HACKDENS 1NEMO "18 July 1992"
+.SH NAME
+hackdens \- local density estimator using tree algorithm
+.SH SYNOPSIS
+\fBhackdens in=\fPsnapshot \fBout=\fPimage [parameter=value]
+.SH DESCRIPTION
+\fIhackdens\fP calculates the local density in the configulation space
+using the hierarchical
+N-body algorithm (J. Barnes and P. Hut, \fINature\fP \fB324\fP, 446).
+For small N or systems with complex geometry SNAPDENS(1NEMO) may be preferred.
+.SH PARAMETERS
+The following parameters are recognized; they may be given in any order.
+.TP 24
+\fBin\fP=\fIin-file\fP
+Input data will be read from \fIin-file\fP in
+snapshot format.
+.TP
+\fBout\fP=\fIout-file\fP
+Output data are written to \fIout-file\fP in snapshot format.
+.TP
+\fBneib\fP=\fIvalue\fP
+Number of neighbors used to determine the local density
+[default: 6].
+
+.TP
+\fBrneib\fP=\fIvalue\fP
+Initial radius to search the neighbors. \fIHackdens\fP adaptively
+change this search radius during the calculation. Therefore it is
+definitely required that particles in the snapshot are arranged so
+that the neighboring particles have similar local density. (See NOTES)
+[default: 0.1].
+.TP
+\fBwrite_at_phi\fP=\fIt|f\fP
+Logical if the density data is written in the "Potential" slot of the
+snapshot file. If false, the density will be written with tag "Density".
+[default: t]
+.TP
+\fBrsize\fP=\fIvalue\fP
+Intial size of the root box. Box will automatically expanded to keep
+all particles in it [defaults:4.0]
+.TP
+\fBrmin\fP=\fIvalue\fP
+If given, the coordinates of the lower left corner of the initial box.
+If not given, the center of the root box will lie at the origin.
+[defaults:none]
+.TP
+\fBoptions\fP=\fIoption-string\fP
+Output control options, specified as a comma-separated list
+of keywords.
+Currently recognized keywords are:
+\fBmass\fP, \fBphase\fP: output mass, phase space
+data with major data outputs [defaults:mass,phase].
+.TP
+\fBfcells\fP=\fIvalue\fP
+Ratio of cells to bodies, used  when
+allocating cells [defaults:0.9].
+.TP
+\fBverbose\fP=\fIt|f\fP
+Logical if print out the number of particles processed during the
+calculation [defaults:f].
+.SH NOTES
+Since the search radius is adaptively changed during the calculation,
+the local density of particles which are close in the position in the
+snapshot file should be similar.
+.PP
+Ideally, it is best if particles are
+sorted by the local density itself. Since the local density is not
+available, the second choice is to sort particles with some quantity
+that has strong correlation with the local density. For example, if
+the potential is available, sort particles by
+potential.
+.PP
+In many cases the system is roughly spherically symmetric.
+That means the density has strong correlation with the distance from
+the center of the cluster. Then sorting particles by the distance from
+the center will improve the speed significantly.
+.SH EXAMPLES
+The following example takes an N-body snapshot, sort the particles
+in the order of the distance from the C.M., and calculate local density.
+.nf
+\fB
+   snapcenter nbody.dat nbody.centered
+   snapsort nbody.centered nbody.sorted rank="x*x+y*y+z*z"
+   hackdens nbody.sorted nbody.density
+\fP
+.fi
+.SH SEE ALSO
+hackforce(1NEMO), snapdens(1NEMO).
+.SH BUGS
+The local density is calculated using (neib-1)th neighbor.
+Calculation can become very slow if the input snap shot is not
+well-formed. There should exist an option that forces the density will be
+written in the "Aux" slot of the snapshot file. Current version does
+not use standard \fIget_snap/put_snap\fP macros. KEY and AUX will be lost from
+the output snapshot. 
+.SH TIMING
+N=4096, merger remnant
+.PP
+Presorted snapshot: 5 minutes on Sun-3/60, particles are presorted by the distance from
+the center of mass of the system.
+.PP
+Random snapshot: 60 minutes Sun-3/60
+.SH AUTHOR
+Jun Makino
+.SH UPDATE HISTORY
+.nf
+.ta +1i +4i
+2-Dec-88  	V1.0:Created  	Jun
+6-jul-89	doc updated?	Jun
+23-oct-90	doc updated	Peter
+18-jul-92	printf -> dprintf to make it pipable	Peter
+.fi
+
