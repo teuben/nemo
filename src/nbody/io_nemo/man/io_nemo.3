@@ -1,0 +1,245 @@
+.TH IO_NEMO 3NEMO "03 March 2005"
+.SH NAME
+\fBio_nemo\fP \(em High level C function to read/save NEMO snapshot from a
+C program.
+.SH SYNOPSIS
+.nf
+.PP
+\fBio_nemo(filename, param, ....)\fP
+\fBchar * filename;/* input/output file name */\fP
+\fBchar * param;   /* parameters list */\fP
+.SH DESCRIPTION
+\fIio_nemo\fP is a high level C function which allows the user to
+perform I/O operations on NEMO snapshot files from a C program. It
+works quite like C printf function.
+.PP
+The use of this function is very simple and require only some basic
+knowledge of how to program in NEMO.
+.PP
+.SH PARAMETERS
+ 
+.TP 10
+\fBfilename\fP=\fIcharacter variable\fP
+Input/Output file name of the \fINEMO\fP snapshot
+that you want to read/save.
+.TP
+\fBparam\fP=\fIcharacter\fP
+Param is a string in which you specify what you want to do with
+the NEMO file. Each choice is defined with a flag separated with ','.
+There are two kind of flags. (1) \fIInformation flags\fP allow to
+specify some actions during the I/O.
+(2) \fIVariables flags\fP allow to specify what you want to get/put
+from/into the NEMO file. The FLAGS list is described below.
+.PP
+.SH (1) Information flags
+.TP 10
+\fBs | save\fP
+Specify that you want to save data to a NEMO file.
+.TP 
+\fBr | read\fP
+Specify that you want to read data from a NEMO file.
+.TP
+\fBfloat|single\fP
+Specify that the variables that you use to get/put data from/into NEMO
+files have been declared in \fIsingle precision\fP. (float).
+.TP
+\fBdouble\fP
+Specify that the variables you use to get/put data from/into NEMO
+files have been declared in \fIdouble precision\fP. (double).
+.TP
+\fBinfo | diag\fP
+Gives some informations during the runtime execution.
+.TP
+\fBclose\fP
+Specify that you want to close the NEMO file.
+.PP
+
+.SH (2) Variables flags
+
+.TP 10
+\fBn|nbody\fP
+Match to the number of \fIbodies\fP.
+.TP
+\fBt|time\fP
+Match to the snapshot \fItime\fP.
+.TP
+\fBm|mass\fP
+Match to the particle \fImasses\fP.
+.TP
+\fBx|pos\fP
+Match to the particle \fIpositions\fP.
+.TP
+\fBv|vel\fP
+Match to the particle \fIvelocities\fP.
+.TP
+\fBp|pot\fP
+Match to the particle \fIpotentials\fP.
+.TP
+\fBa|acc\fP
+Match to the particle \fIaccelerations\fP.
+.TP
+\fBe|eps\fP
+Match to the particle \fIsoftening\fP.
+.TP
+\fBh|history\fP
+Match to the NEMO file name that you want to keep track about the history.
+.TP
+\fBst\fP
+Select snapshot's times. You have to  put the selected
+time in a string. Example "100:150"
+select the time beween 100 and 150. The string is fully compatible
+with the expression usually given to \fBnemoinpi\fP (Cf man nemoinpi).
+.TP
+\fBsp\fP
+Select snapshot's particles. You have to  put the selected
+particles in a string. Example "0:299999"
+select the particles beween 0 and 299999. The \fBreturned nbody\fP
+corresponds to the \fBselected\fP nbody.
+In the example above it would thus be 300000. The string is fully compatible
+with the expression usually given to \fBnemoinpi\fP (Cf man nemoinpi).
+.TP
+\fBb\fP
+Integer variable to store input/output bit flags (see
+$NEMOINC/snapshot/snapshot.h). During \fBread\fP operation, this
+variable is filled up with OR bit operation according to the
+components requested and the existing components in the file. Example:
+if you ask for positons and potentials and no potentials exist on the
+snapshot, then bit flags will contain only PosBit. During \fBwrite\fP
+operation, if it is used, io_nemo engine will only save components, which have
+their bits positionned on it, AND requested to be saved. (see a
+complete example here: $NEMOSRC/nbody/io_nemo/test_src/io_nemo_test.c).
+
+.SH ARGUMENTS
+The \fIvariable flags\fP specify which data you will
+get/put from/into the NEMO file, hence after the selection
+string \fIparam\fP, you must insert all the selected
+variables (arguments) in the same order with which they have been
+declared in \fIparam\fP. For each of the following requested flags:
+\fIn,t,m,x,v,a,p,b,k,e\fP you **must** give as argument an address of
+pointer. During read opreation, io_nemo check NULL pointer for each
+arguments. In case of NULL pointer the memory is automatically
+allocated to fill up with the requested component. If not NULL, io_nemo
+supposed that the pointer is already allocated. For the flags \fIsp,st,h\fP
+you just have to give the pointer as argument.
+
+.SH RETURN VALUE
+The function return 1 if successfull, 0 if the end of snapshot has been
+reached, or -1 if at least one of the components requested does not exist (in that
+case you should use 'b' parameter to filter existing components).
+
+.SH EXAMPLE
+Here is a simple NEMO C program to illustrate the use of the function
+\fIio_nemo()\fP. The program reads all the time steps into a NEMO a
+file, and saves the data in another NEMO file. (See a more complete
+example here: $NEMOSRC/nbody/io_nemo/test_src/io_nemo_test.c).
+.PP
+.nf
+/* ----------------------------------------------------- *\\ 
+|* NEMO program test using 'io_nemo()' function
+\\* ----------------------------------------------------- */
+#include <stdinc.h>
+#include <getparam.h>
+
+string defv[]=  
+{ "in=???\\n       input snapshot",
+  "out=???\\n      output snapshot",
+  "VERSION=1.0\\n  16-April-97 jcl",
+  NULL
+};
+
+string usage="NEMO program test using 'io_nemo()' function";
+/* ----------------------------------------------------- *\\ 
+|* Main program
+\\* ----------------------------------------------------- */
+nemo_main()
+{
+  float * pos=NULL, * vel=NULL, * mass=NULL;
+  float * time=NULL;
+  int   * nbody=NULL;
+  string in,out;
+  int i,j;
+
+  in  =  getparam("in");
+  out =  getparam("out");
+
+  i = 1;
+  while (i!=0) {
+      /* read the NEMO snapshot */
+      i=io_nemo(in,"float,n,t,x,v,m,read,info",
+		&nbody,&time,&pos,&vel,&mass);
+
+      /* save the NEMO snapshot */
+      if (i != 0)
+	j=io_nemo(out,"float,n,t,x,v,m,h,save,info",
+		  &nbody,&time,&pos,&vel,&mass,in);
+
+  }
+  /* close the output NEMO snapshot */
+  io_nemo(out,"close");
+}
+/* ----------------------------------------------------- *\\ 
+|* END
+\\* ----------------------------------------------------- */
+.SH IMPORTANT THINGS
+a) Notice in the example above, that in the parameter list, 'n' matches
+\'nbody', 'm' matches 'mass', 'x' matches 'pos', 'v' matches 'vel', 't' matches 'ts'. 
+All the variables are in the same order that they have been
+declared in the \fIparam list\fP.
+
+b) All the NEMO variables (nbody, time, mass, pos, vel, acc, pot) must
+be declared as a \fIpointer\fP equal to \fINULL\fP. During the
+io_nemo() call, theses pointers will be allocated according the number
+of bodies in the snapshot, so you must give the \fIadress\fP of the pointer
+( ie : &pos, &vel, ...etc).
+
+c) All the floating arrays must be declared in the same floating type.
+
+d) During a "read" operation, the function io_nemo() return '0' if
+it is the end of the NEMO file. That means that no new values have
+been read.
+
+.fi
+.PP
+.SH COMPILATION
+To use the function \fIio_nemo()\fP from a C program you must
+link your program with the library \fIlibnemo.a\fP 
+as described in the Makefile below.
+.PP
+.nf
+# ----------------------------------------
+# MAKEFILE to use IO_NEMO
+# 
+# ----------------------------------------
+
+# path for NEMO Library and IO_NEMO library
+LIBS = -L$(NEMOLIB) -L/usr/local/lib
+
+io_nemo_test : io_nemo_test.o
+	$(CC) -o $@ io_nemo_test.o $(LIBS) \\
+                  -lnemo -lm
+
+# ----------------------------------------
+.fi
+.SH SEE ALSO
+.nf
+nemo(1NEMO), snapshot(5NEMO).
+.fi
+.SH AUTHOR
+Jean-Charles LAMBERT
+
+.SH BUGS and COMMENT
+Please, report all bugs and comment to : 
+.nf
+Jean-Charles.Lambert@oamp.fr
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+15-Nov-96	 V1.0 : created                           JCL
+21-Feb-97	 V1.1 : memory optimisation               JCL
+16-Apr-97	 V1.11: manual created                    JCL 
+19-Jul-02	 V1.2 : io_nemo and io_nemo_f unified     JCL
+18-Mar-04	 V1.21: bugs fixed, softening added       JCL
+03-Mar-05	 V1.30: memory bugs fixed, keybits added  JCL
+	                valgrind mem/leak safe            
+.fi
