@@ -53,7 +53,7 @@ string defv[] = {
     "bootstrap=0\n      Bootstrapping to estimate errors",
     "seed=0\n           Random seed initializer",
     "numrec=f\n         Try the numrec routine instead?",
-    "VERSION=1.8\n      4-apr-03 PJT",
+    "VERSION=1.8a\n     10-mar-04 PJT",
     NULL
 };
 
@@ -493,7 +493,7 @@ do_function(string method)
   if (nxcol < 1) error("nxcol=%d",nxcol);
   if (nycol < 1) error("nycol=%d",nycol);
   if (tol < 0) tol = 0.0;
-  if (lab < 0) lab = 0.0;
+  if (lab < 0) lab = 0.01;
 
   x = xcol[0].dat;
   y = ycol[0].dat;
