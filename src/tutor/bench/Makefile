@@ -9,7 +9,7 @@ L = $(NEMOLIB)/libnemo.a
 
 # Files etc. in this directory
 
-BINFILES = cpu-bench_f cpu-bench_d
+BINFILES = cpu-bench_f cpu-bench_d big big8
 
 #	update the library: direct comparison with modules inside L
 help:
@@ -32,3 +32,13 @@ bench:	$(BINFILES)
 	time cpu-bench_f > cpu-bench_f.log
 	time cpu-bench_d > cpu-bench_d.log
 
+bench8:	big big8
+	@./big | wc
+	@./big8 | wc
+
+#
+big:	big.f
+	$(FC) -o big big.f
+
+big8:	big8.f
+	$(FC) -o big8 big8.f
