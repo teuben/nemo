@@ -1,0 +1,10 @@
+This directory contains manuals:
+
+	Makefile	aid in making (la)tex based manuals
+	README		this file	
+	*.tex		main latex files
+	*.inc		latex include files
+	*.src		latex verbatim file to be included by \verbatim
+	*.sty		latex style files 
+				(currently nemo.sty absorbes all style mods)
+
