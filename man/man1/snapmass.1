@@ -1,0 +1,84 @@
+.TH SNAPMASS 1NEMO "30 July 1997"
+.SH NAME
+snapmass \- add or modify masses in a snapshot
+.SH SYNOPSIS
+\fBsnapmass in=\fPsnap_in \fBout=\fPsnap_out [parameters=values...]
+.SH DESCRIPTION
+\fIsnapmass\fP adds or modifies the masses in a snapshot. 
+The keyword \fBmass\fP
+can be used to give a \fIbodytrans(3NEMO)\fP expression. 
+.PP
+Alternatively masses can be copied from another input snapshot.
+.SH PARAMETERS
+The following parameters are reckognized in any order if the keyword is
+also given:
+.TP 25
+\fBin=\fIsnap_in\fP
+Input data is read from \fIsnap_in\fP, which must be in standard
+\fIsnapshot(5NEMO)\fI format [no default].
+.TP
+\fBout=\fIsnap_out\fP
+Copied output data is written to \fIsnap_out\fP, which will also be in 
+\fIsnapshot(5NEMO)\fP format [No default].
+.TP
+\fBmass=\fIexpression\fP
+Expression for the new masses, using \fIbodytrans(3NEMO)\fP to parse
+the expression. 
+If nothing supplied, either 
+\fBinmass=\fP or \fBmassname=\fP will have to be used.
+[default: none].
+.TP
+\fBinmass=\fImass-file\fP
+If used, the masses from this snapshot file are copied to that of the
+\fIsnap_out\fP file. [default: none].
+.TP
+\fBmassname=\fIname\fP
+Identification of the mass spectrum. It is normally only a function
+of mass, so \fBn(m)\fP will suffice. If nothing specified, all
+stars will have the same mass (total mass M=1).
+[default: none].
+.TP
+\fBmassexpr=\fIexpr\fP
+Expression for the mass-spectrum. In addition to the mass \fIm\fP from
+the \fBmassname\fP it may contain any variables contained in the 
+\fBmasspars\fP to be specified next. [default: \fBpow(m,p)\fP].
+.TP
+\fBmasspars=\fIpars\fP
+List of parameters and their values. They can be used by name in the
+\fBmassexpr\fP specified before. [default: \fBp,0.0\fP].
+.TP
+\fBmassrange=\fImlow:mhigh\fP
+Valid massrange. A lower and higher cutoff must be supplied. The massrange
+has arbitrary units, since all masses will be rescaled to set the total
+mass M=1. [default: \fB1,1\fP].
+.TP
+\fBseed=\fP\fIseed\fP
+seed for the random number  generator (default: a value 0, which will
+be  converted  into  a  unique  new
+value  using  UNIX's clock time, in 
+seconds since  once-upon-a-time-in-the-seventies).
+[Default: 0].
+.TP
+\fBnorm=\fP\fItotal_mass\fP
+New total mass required for normalization. By default the masses are not
+scaled. See also \fIsnapscale(1NEMO)\fP.
+[Default: not used].
+.SH SEE ALSO
+snapmstat(1NEMO), snapscale(1NEMO), bodytrans(3NEMO)
+.SH AUTHOR 
+Peter Teuben
+.SH FILES
+.nf
+.ta +3.0i
+~/src/nbody/trans	snapmass.c
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.5i
+1-Aug-88	V1.0: created             	PJT
+5-dec-88	V1.1: mass keyword added	PJT
+5-feb-89	V1.2: bodytrans() used     	PJT
+13-may-91	V1.3: helpvec + doc added	PJT
+29-may-97	V2.0: mass{name,expr,pars,range} from mkplummer 	PJT
+30-jul-97	V2.1: added norm=           	PJT
+.fi

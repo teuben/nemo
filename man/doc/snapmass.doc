@@ -1,0 +1,28 @@
+%N snapmass
+%D (re)assign masses to a snapshot
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man snapmass' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	input (snapshot) file [???]
+%A out
+	output (snapshot) file [???]
+%A mass
+	expression for new masses []
+%A inmass
+	extra file, if to use their masses only []
+%A massname
+	If used,  Mass-function name (mostly n(m)) []
+%A massexpr
+	Mass function expression (e.g. pow(m,p)) [pow(m,p)]
+%A masspars
+	Mass function parameters (e.g. p,0.0) [p,0.0]
+%A massrange
+	Range for mass-spectrum (e.g. 1,2) [1,1]
+%A seed
+	Random seed [0]
+%A norm
+	Normalization value for the total mass (if used) []
+%A VERSION
+	24-jul-97 PJT [2.1]
