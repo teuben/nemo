@@ -8,11 +8,13 @@ if ( $#argv == 0 ) then
   exit 0
 endif
 
-set name=$1.c
+set prog=$1
+set name=$prog.c
+set date=`date +%d-%b-%Y` 
 shift argv
 
 if ( -e $name ) then
-  echo File $name already exists
+  echo File $name already exists, will not overwrite it.
   exit 0
 endif
 
@@ -27,9 +29,9 @@ e '#include <getparam.h>'	>> $name
 e '' >> $name
 e 'string defv[] = {'		>> $name
 foreach a ($argv)
-e '    "'$a'",'			>> $name
+e '    "'$a'\\n    some help",'	>> $name
 end
-e '    "VERSION=0.0",'		>> $name
+e '    "VERSION=0.0\\n      '$date' XYZ",'		>> $name
 e '    NULL,'			>> $name
 e '};'				>> $name
 e '' >> $name
@@ -38,4 +40,12 @@ e '' >> $name
 e 'nemo_main()'			>> $name
 e '{'				>> $name
 e '  /* your code goes here */' >> $name
+e '  /* e.g.   string s = getparam("s");  */'  >> $name
+e '  /* e.g.   int    i = getiparam("i"); */'  >> $name
+e '  /* e.g.   real   r = getrparam("r"); */'  >> $name
+e '  /* e.g.   double d = getdparam("d"); */'  >> $name
+e '  /* followed by lots of lovely calculations */' >> $name
 e '}'				>> $name
+
+echo "All done, $name created. You can compile it using the command"
+echo "     bake $prog"
