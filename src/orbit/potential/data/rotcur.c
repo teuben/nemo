@@ -64,7 +64,8 @@ void inipotential (int *npar, double *par, string name)
     instr = stropen(name,"r");
     nrad = get_atable(instr,2,colnr,coldat,nmax);
     strclose(instr);
-    if (nrad<=0) error("No lines (%d)read from %s",nrad,name);
+    if (nrad==0) error("No lines (%d)read from %s",nrad,name);
+    if (nrad<0) nrad = -nrad;    /* buffer was exactly filled */
     coef = (real *) allocate(nrad*3*sizeof(real));
     spline(coef, rad, vel, nrad);
     par[0] = omega;
