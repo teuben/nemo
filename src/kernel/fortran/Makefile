@@ -78,7 +78,7 @@ funcf:
 	$(FC) $(FFLAGS) -c funcf.f
 	$(FC) $(FFLAGS) -c mainfuncf.f
 	ftoc mainfuncf.f > mainfuncf_tmp.c
-	$(CC) $(CCFLAGS) -c mainfuncf_tmp.c
+	$(CC) $(CFLAGS) -c mainfuncf_tmp.c
 	$(CC) $(LDFLAGS) -o funcf mainfuncf_tmp.o mainfuncf.o funcc.o funcf.o $(NEMO_LIBS) $(FLIBS)
 
 
