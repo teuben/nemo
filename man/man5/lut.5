@@ -1,0 +1,40 @@
+.TH LUT 5NEMO "17 December 2003" 
+.SH NAME
+lut \- GIPSY 256 color lookup table
+.SH DESCRIPTION
+\fIlut\fP files are simple ASCII tables with 3 columns, representing
+the colors Red, Green and Blue resp, scaled between 0.0 and 1.0,
+for 256 responses between a datamin and datamax (normally taken
+as 0 to 255.
+.SH FORMAT
+An example of reading the Red, Green and Blue responses:
+.nf
+
+  real *coldat[3], *r, *g, *b;
+  int ncolors, colnum[3];
+  stream instr = stropen(fn,"r");
+
+  colnum[0] = 1;    coldat[0] = r = (real *) allocate(256*sizeof(real));
+  colnum[1] = 2;    coldat[1] = g = (real *) allocate(256*sizeof(real));
+  colnum[2] = 3;    coldat[2] = b = (real *) allocate(256*sizeof(real));
+  ncolors = get_atable(instr,3,colnum,coldat,256);
+  if (ncolors != 256) error("Problem %d reading %s",ncolors,fn);
+
+.fi
+.SH EXAMPLES
+The \fBds9\fP image display server can read the GIPSY lut
+.SH SEE ALSO
+ccdppm(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+NEMODAT/lut	data files, mirrored from GIPSY's $gip_dat/lut
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +2.0i +2.0i
+17-dec-03	documentation written (100 years Wright flight)    	PJT
+.fi
+
