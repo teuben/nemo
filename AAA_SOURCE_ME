@@ -19,7 +19,7 @@ set stat = 0
 echo \(Sending output to install.log\)
 
     echo Running configure
-    configure >>& install.log
+    ./configure >>& install.log
     if ($status) then
 	@ stat++
     endif
