@@ -1,5 +1,5 @@
 DIR = src/nbody/init
-BIN = snapenter mkplummer
+BIN = snapenter mkplummer mkexpdisk
 NEED = $(BIN) tsf snapprint
 
 help:
@@ -10,7 +10,7 @@ need:
 
 clean:
 	@echo Cleaning $(DIR)
-	@rm -f snapenter.in snapenter.out snapenter.cmp mkplummer.out
+	@rm -f snapenter.in snapenter.out snapenter.cmp mkplummer.out mkexpdisk.out
 
 NBODY = 10
 
@@ -49,3 +49,9 @@ mkplummer:
 	mkplummer - $(NBODY) seed=123 |\
 		massname="n(m)" masspars=p,-2 massrange=0.5,10 |\
 		tsf -
+
+mkexpdisk:
+	@echo Running $@
+	mkexpdisk mkexpdisk.out $(NBODY) seed=123
+	tsf mkexpdisk.out
+
