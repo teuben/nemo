@@ -1,0 +1,67 @@
+.TH TWSPEED 1NEMO "18 November 2003"
+.SH NAME
+twspeed \- calculate the pattern speed of a stellar system using the Tremaine-Weinberg method
+.SH SYNOPSIS
+.PP
+\fBtwspeed vel=\fPccd-velocity \fBden=\fPccd-density [parameter=value]
+.SH DESCRIPTION
+\fItwspeed\fP calculates the pattern speed of a stellar system using
+Tremaine & Weinberg's method (1984ApJ...282L...5T). For this
+a line parallel but offset to the line of nodes
+of a galaxy must have information on intensity and radial velocity.
+.PP
+\fItwspeed\fP assumes the line of nodes is along the X-axis, the
+galaxy center and position angle are keywords but not implemented yet?
+.PP
+In the following (x,y) are defined along the major and minor axis of
+the galaxy resp., and
+\fPpspeed\fP will then compute the numerical sums 
+.nf
+        V(y) =  SUM ( vel(x,y) * den(x,y)) / SUM ( den(x,y) )
+
+        X(y) =  SUM ( x * den(x,y)) / SUM ( den(x,y) )
+.fi
+where the summation is along \fIx\fP. This will result in a correlation
+.nf
+	V = Omega * SIN(inc) * X
+.fi
+The output will be a table 
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 20
+\fBvel=\fIvel-file\fP
+input file, must be the radial velocity in
+\fIimage(5NEMO)\fP format [no default].
+.TP 
+\fBxin=\fIint-file\fP
+input mean position image.
+.TP
+\fBden=\fIint-file\fP
+input file, must be the intensity in \fIimage(5NEMO)\fP format [no default].
+.TP
+\fBpa=\fP
+*** Position Angle of disk [90]
+.TP
+\fBcenter=\fP
+*** Center of galaxy (map-center) []
+.TP
+\fBstep=\fP
+Slit width in pixels [1]
+.SH "SEE ALSO"
+snapslit(1NEMO), snaprotate(1NEMO), pspeed(1NEMO), snapshot(5NEMO), image(5NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+~/src/pjt/image  	twspeed.c
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +2.0i +4.0i
+17-Aug-87	Original created as pspeed	PJT
+18-nov-03	1.0: documented the new twspeed version 	PJT
+
+.fi
+
