@@ -1,0 +1,102 @@
+.TH QUADCODE 1NEMO "6 May 1992"
+.SH NAME
+quadcode \- global quadrupole-order N-body code integrator
+.SH SYNOPSIS
+\fBquadcode\fP \fBin=\fP\fIsnapshot\fP [\fIparameter\fP=\fIvalue\fP] .\|.\|.
+.SH DESCRIPTION
+\fIquadcode\fP is an equal-timestep implementation of an
+N-body code where the forces and potential are computed
+from a potential expansion in spherical harmonics
+(S. White, \fIAp.J.\fP \fB274\fP, 53 (1983), who dubbed
+it multipole expansion). See also Hernquist, L. & Barnes, J. 
+\fIAp.J.\fP \fB349\fP, 562 (1990).
+.SH PARAMETERS
+The following parameters are recognized; they may be given in any order.
+.TP 24
+\fBin\fP=\fIin-file\fP
+Snapshot with initial conditions. No default.
+.TP
+\fBout\fP=\fIout-file\fP
+Output file, will be in standard \fIsnapshot(5NEMO)\fP format.
+No default.
+.TP
+\fBquad\fP=\fIquad_table\fP
+Output file which will contain the quaddrupole-order field
+tables. Default: not used.
+.TP
+\fBsave\fP=\fIstate-file\fP
+If given, the system state will be saved in \fIstate-file\fP after each
+timestep. Default: not used.
+.TP
+\fBeps_r\fP=\fIrad_soft-length\fP
+Force softening parameter in radial direction.
+Default is \fB0.05\fP.
+.TP
+\fBeps_t\fP=\fItheta_soft-length\fP
+Force softening parameter in angular directions.
+Default is \fB0.07\fP.
+.TP
+\fBfreq\fP=\fIinteg-freq\fP
+Inverse time-step, to be used with a leap-frog integrator.
+Default is \fB64.0\fP (64 steps per unit time).
+.TP
+\fBmode\fP=\fIintegration-mode\fP
+Mode of integration. 1 = Runge Kutta, 2 = PC,
+3 = PC1. [Default: \fB3\fP].
+.TP
+\fBtstop\fP=\fIstop-time\fP
+Time to stop integration in N-body model units.
+Default is \fB2.0\fP.
+.TP
+\fBfreqout\fP=\fIout-freq\fP
+Frequency of major N-body data and quadrupole field
+table outputs. (\fBout=\fP and \fBquad=\fP)
+Default is \fB4.0\fP (4 frames per unit time).
+.TP
+\fBminor_freqout\fP=\fIout-freq\fP
+Frequency of minor diagnostic outputs.
+If this frequency is not a simple fraction of \fBfreq\fP (see above),
+the program can waiste significant amounts of time.
+Default is \fB32.0\fP (32 diagnostic measurements per unit time).
+.TP
+\fBoptions\fP=\fIoption-string\fP
+Miscellaneous control options, specified as a comma-separated list
+of keywords.
+Currently recognized keywords are:
+\fBreset_time\fP: when reading initial data, set \fItnow\fP to zero;
+\fBmass\fP, \fBphi\fP, \fBacc\fP: output mass, potential,
+acceleration data with major data outputs. The phase space coordinates
+are always output.  
+.\" It also seems that the reset_time and new_tout options have not been implemented yet.
+The default is blank, meaning only phase space coordinates are
+output. No additional information is output.
+.SH LIMITATIONS
+The code has a hardcoded maximum number of particles, through the
+macro \fBMBODY\fP. (currently 4096). If more are needed, it needs
+to be recompiled, for example:
+.nf
+    % make quadcode quadforce quadinter MBODY=16384
+.fi
+(Note that all \fIquad*\fP programs need to (should)
+be recompiled if the maximum allowed number of bodies will
+be changed.
+.SH SEE ALSO
+quadforce(1NEMO), quadinter(1NEMO)
+.SH BUGS
+When a \fBrestart\fP is specified, values must be given for \fBALL\fP
+legal parameters which do not take default values.
+.SH AUTHOR
+Joshua E. Barnes.
+.SH FILES
+.nf
+.ta +2i
+src/nbody/evolve/multicode/	exported source code
+usr/josh/nbody/multicode/	Josh' original source code
+.fi
+.SH HISTORY
+.nf
+.ta +1i +4i
+4-mar-89	V1.2 some formal NEMO version	JEB
+12-nov-91	V1.3 new NEMO V2. location in $NEMO/src tree	PJT
+6-may-92	document improved	PJT
+.fi
