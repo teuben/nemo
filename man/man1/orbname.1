@@ -1,0 +1,83 @@
+.TH ORBNAME 1NEMO "6 December 1993"
+.SH NAME
+orbname \- Orbit classification and plotting
+.SH SYNOPSIS
+\fBorbname\fP \fBin=\fP\fIorbit\fP [parameter=value ...]
+.SH DESCRIPTION
+\fBorbname\fP attempts to classify an orbit.
+Currently only orbits
+in non-rotating triaxial potentials are handled properly.
+It can distinguish between
+\fBBox\fP, (long axis) \fBX-Tube\fP, \fBY-Tube\fP, and 
+(short axis) \fBZ-Tube\fP orbits,
+based on the predominant angular momentum axis (J_i, i=X,Y,Z).
+This program cannot distinguish between  the so-called
+\fBinner-\fP and \fBouter-X-Tube\fP orbits.
+Anything else is labeled as \fBUnknown\fP.
+.PP
+Note that orbits with very long or short periods cannot be reliably
+classified, either because they have simply not been tracked long enough,
+or because they may be scattered from one orbital family
+to another.
+.PP
+\fBorbname\fP will, for each dimension (X,Y,Z),
+tabulate the number of angular momentum \fIflips\fP and velocity
+\fIflips\fP,
+\fItau\fP (the ratio of mean to dispersion of the angular momentum), 
+\fInu\fP (the ratio of half the sum of min and max to dispersion),
+the \fIminimum\fP and \fImaximum\fP angular momentum, 
+and their \fImean\fP and \fIdispersion\fP. 
+.PP
+The ratios \fItau\fP and \fInu\fP (under control of the user,
+see \fBtaumin=\fP and \fBnumin=\fP below) are
+used to classify an orbit has having a significant
+amount of angular moment along an axis. In addition, if an axis
+has no flips in angular momentum, it is also counted has having
+angular moment along that axis. This gives a total of three methods
+to classify orbits. There are output under the names
+\fBF_Category\fP (J-flipping), \fBT_Category\fP (tau)
+and \fBN_Category\fP (nu).
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP\fIin_orbit\fP
+Input orbit(s), in standard \fIorbit(5NEMO)\fP format.
+.TP
+\fBtaumin=\fP\fItau_min\fP
+Minimum mean/sigma J_i needed to count as significant angular momentum.
+[Default: \fB1\fP].
+.TP
+\fBnumin=\fP\fInu_min\fP
+Minimum ratio of half the sum of min and max to their
+sigma J_i needed to count as significant angular momentum.
+[Default: \fB1\fP].
+.TP
+\fBplot=t|f\fP
+Logical to denote if a 6 panels with evolution of angular momentum 
+and (XY,YZ,XZ) need to be plotted. See \fByapp(5NEMO)\fP.
+[Default: \fBf\fP]
+.TP
+\fBtmax=\fP
+Maximum time to plot. Default: autoscale from the orbit.
+.TP
+\fBrmax=\fP
+Maximum X,Y,Z extent to plot. Default: autoscale from -\fBrmax\fP 
+to \fBrmax\fP.
+.TP
+\fBjmax=\fP
+Maximum Jx,Jy,Jz extent to plot. Default: autoscale from -\fBjmax\fP 
+to \fBjmax\fP.
+.SH BUGS
+Has some problems with planar orbits and bi-axial potentials
+(such as oblate, prolate and spherical).
+.SH SEE ALSO
+orbdim(1NEMO), mkorbit(1NEMO), orbint(1NEMO), orbit(5MEMO)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+3-dec-93	V1.0 Created	PJT
+6-dec-93	V1.1 added nu	pjt
+.fi
