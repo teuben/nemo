@@ -1,8 +1,9 @@
 /* 
  *      CCDFITSIO: convert CCD image to a fits file, using cfitsio library
  *
- *      26-feb-10  PJT   0.1 quick and dirty compilation example
- *                           DOESN"T WORK .... file_size() conflict with cfitsio library
+ *      26-feb-01  PJT   0.1 quick and dirty compilation example
+ *                           DOESN'T WORK .... file_size() conflict with cfitsio library
+ *       8-dec-01        using HAVE_LIBCFITSIO, but the image is written transposed
  */
 
 
@@ -13,21 +14,21 @@
 #include <image.h>
 #include <history.h>
 
-
-#include "/usr/local/include/fitsio.h"   /* cfitsio */
-
-
-
+#ifdef HAVE_LIBCFITSIO
+#include <cfitsio/fitsio.h>
+#endif
 
 string defv[] = {
         "in=???\n        Input image filename",
         "out=???\n       Output fits filename",
-	"bitpix=-32\n    Bitpix",
-        "VERSION=0.1\n   26-feb-01 PJT",
+	"bitpix=-64\n    Bitpix",
+        "VERSION=0.1\n   8-nov-01 PJT",
         NULL,
 };
-
 string usage = "convert image to a fits file using cfitsio";
+
+
+#ifdef HAVE_LIBCFITSIO
 
 stream  instr;    /* file streams */
 fitsfile *fptr;   /* output file */
@@ -45,6 +46,7 @@ bool Qradecvel;         /* fake astronomy WCS header */
 
 void setparams(void);
 void write_fits(string,imageptr);
+void fits_error( int status);
 
 
 void nemo_main()
@@ -54,6 +56,7 @@ void nemo_main()
     read_image (instr,&iptr);                  /* read image */
     headline = ask_headline();                 /* possible headline */
     strclose(instr);                           /* close image file */
+
     write_fits(getparam("out"),iptr);          /* write fits file */
     free_image(iptr);
 }
@@ -64,7 +67,7 @@ void setparams(void)
 
 void write_fits(string name,imageptr iptr)
 {
-    int  nx, ny, nz, i, j, k, bitpix;
+    int  nx, ny, nz, i, j, k, bitpix, npix;
     char *cp;
     string *hitem;
     float *buffer, *bp;
@@ -72,9 +75,10 @@ void write_fits(string name,imageptr iptr)
     int status;
     double bscale, bzero;
     
-    nx = naxis[0] = Nx(iptr);
-    ny = naxis[1] = Ny(iptr);
+    nx = naxis[1] = Nx(iptr);
+    ny = naxis[0] = Ny(iptr);
     nz = naxis[2] = Nz(iptr);   if (nz <= 0) nz = 1;
+    npix = nx*ny*nz;
 
 
     dprintf(1,"NEMO Image file written to FITS disk file\n");
@@ -82,12 +86,48 @@ void write_fits(string name,imageptr iptr)
     ndim = (nz > 1 ? 3 : 2);    /* Make it 2D or real 3D map/cube */
     bitpix = getiparam("bitpix");
 
+    status = 0;
+    fptr = 0;
     if (fits_create_file(&fptr, name, &status))
-      warning("cfitsio: %d",status);
+      fits_error(status);
     if (fits_create_img(fptr,bitpix,ndim,naxis, &status))
-      warning("cfitsio: %d",status);
-    /* should write the array now */
+      fits_error(status);
+    if (ffpprd(fptr,0,1,npix, Frame(iptr), &status))
+      fits_error(status);
+    if (ffflus(fptr, &status))
+      fits_error(status);
     if (fits_close_file(fptr, &status))
-      warning("cfitsio: %d",status);
+      fits_error(status);
 }
 
+void fits_error( int status)     
+{
+  /*****************************************************/
+  /* Print out cfitsio error messages and exit program */
+  /*****************************************************/
+
+  char status_str[FLEN_STATUS], errmsg[FLEN_ERRMSG];
+
+  if (status==0) return;                  /* 0=ok, no need to do more checking */
+  
+  fits_get_errstatus(status, status_str);   /* get the error description */
+  warning("fits_error: status = %d: %s\n", status, status_str);
+
+
+  if ( fits_read_errmsg(errmsg) ) {          /* get first message; null if stack is empty */
+    dprintf(0, "Error message stack:\n");
+    dprintf(0, " %s\n", errmsg);
+    while ( fits_read_errmsg(errmsg) )  /* get remaining messages */
+      dprintf(0, " %s\n", errmsg);
+  }
+  stop(status);       /* terminate the program, returning error status to parent */
+}
+
+
+
+#else
+nemo_main()
+{
+    error("CFITSIO library not available");
+}
+#endif
