@@ -111,7 +111,7 @@ nemo_main()
       printf ("Number of points     : %d\n",n_moment(&m));
       printf ("Mean and dispersion  : %f %f\n",mean,sigma);
       printf ("Skewness and kurtosis: %f %f\n",skew,kurt);
-      printf ("Sum                  : %f\n",sum_moment(&m));
+      printf ("Sum                  : %f\n",show_moment(&m,1));
       printf ("%d/%d out-of-range points discarded\n",nsize-n_moment(&m), nsize);
     }
 }
