@@ -1,4 +1,4 @@
-.TH TABNLLSQFIT 1NEMO "4 April 2003"
+.TH TABNLLSQFIT 1NEMO "10 March 2004"
 .SH NAME
 tabnllsqfit \- general purpose non-linear least squares fitting program
 .SH SYNOPSIS
@@ -65,7 +65,7 @@ if more than one X-column is used.
 .TP
 \fBfit=\fP\fImodel\fP
 Model name what to fit. Currently implemented are \fIline\fP, \fIplane\fP,
-\fIpoly\fP, \fIgauss\fP, and \fIexp\fP.
+\fIpoly\fP, \fIgauss\fP, \fIloren\fP, and \fIexp\fP.
 [default: \fBline\fP].
 .TP
 \fBorder=\fP\fIorder\fP
@@ -103,7 +103,7 @@ If given, this should contain the full path to a compiled and
 shared object (.so) file) that contains the function to be fitted 
 in terms of the \fInllsqfit\fP parameters \fIf\fP and \fIdf\fP. They
 must be named \fBfunc_loadobj\fP and \fBderv_loadobj\fP
-(maybe modified with fit=). **under development**
+(maybe modified with fit=). See LOAD FUNCTIONS below.
 .TP
 \fBx=\fP
 If given, these are the X-values for which the load function can be tested.
@@ -144,7 +144,7 @@ details. Default: 0
 .SH FIT PARAMETERS
 Parameters are referred to as p0,p1,p2,p3,.....
 .nf
-.ta +1.5i
+.ta +1.5i 
 line     	y=p0+p1*x                        (same as poly,order=1)
 plane       	z=p0+p1*x+p2*y                   (example order=2)
 polynomial  	y=p0+p1*x+p2*x^2+p3*x^3...       (example order=3)
@@ -152,6 +152,7 @@ gauss       	y=p0+p1*exp(-(x-p2)^2/(2*p3^2))
 exp		y=p0+p1*exp(-(x-p2)/p3)
 arm		y=p0+p1*cos(x)+p2*sin(x)
 arm3		y=p0+p1*cos(x)+p2*sin(x)+p3*cos(3*x)+p4*sin(3*x) 
+loren		y=p1/PI( (x-p0)^2 - p1^2 )
 .fi
 .SH EXAMPLE
 Here is an example of a linear fit: a straight 
@@ -303,6 +304,7 @@ Peter Teuben
 21-nov-02	V1.4 nsigma= can be an array of iterations	PJT
 14-feb-03	V1.6 arm,arm3 for Rahul		PJT
 21-mar-03	V1.7 added bootstrap=, seed=	PJT
-4-apr-03	V2.0 fixed error in using dycol=, and introduced dypow=		PJT
+4-apr-03	V1.8 fixed error in using dycol=, and introduced dypow=		PJT
+1-mar-04	V1.8b added fit=loren and corrected lab= setting for functions	PJT
 .fi
 
