@@ -1,3 +1,4 @@
+- comment from Walter:
 
 > I tried to make my own potential very much in the same way in which
 > plummer.c works, except that I added a routine "potential()", beside
