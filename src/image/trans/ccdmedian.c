@@ -95,11 +95,11 @@ void nemo_main()
     Zmin(optr) = Zmin(iptr);
 
     for (j=0; j<ny; j++) {
-      if (j<n || j > ny-n || j < iy[0] || j > iy[1]) {
-	CVO(i,j) = CVI(i,j);
-	continue;
-      }
       for (i=0; i<nx; i++) {
+	if (j<n || j > ny-n || j < iy[0] || j > iy[1]) {
+	  CVO(i,j) = CVI(i,j);
+	  continue;
+	}
 	if (i<n || i>nx-n || i < ix[0] || i > ix[1]) {
 	  CVO(i,j) = CVI(i,j);
 	  continue;
