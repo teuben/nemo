@@ -1,0 +1,169 @@
+.TH NBODY0 1NEMO "22 January 2000"
+.SH NAME
+nbody0 - direct summation Aarseth N-body integrator
+.SH SYNOPSIS
+nbody0 in=snap_in out=snap_out [keyword=value ...]
+.SH DESCRIPTION
+\fBnbody0\fP is the NEMO adaptation of version 0 (the \fIMicky Mouse\fP version)
+of Aarseth's N-body integrator, as published in: Binney & Tremaine (1987).
+It is a direct N-body integrator, \fIi.e.\fP for
+each particle it computes the force due to all other N-1 particles,
+hence the computational time grows approximately as N*N.
+Although also being referred to as a 'toy version', it is 
+a fully functional N-body integrator.
+.PP
+Each particle is followed with its own integration step - an essential
+feature when the dynamical times of different particles vary a lot.
+A complete description is given in: S.J. Aarseth, "Multiple
+Time Scales", ed. U.J. Brackhill & B.I. Cohen, pp377. Orlando:
+Academic Press. (1985).
+.PP
+An important input parameter to the program is the accuracy parameter
+\fIeta\fP (see also \fBeta=\fP below).
+The timestep, \fIdt\fP, chosen for a given particle
+is related to the force, \fIF\fP, and its time derivatives by
+\fIdt = sqrt(eta * F / (d2Fdt2))\fP, which is a slight modification of
+the criterion given by Aarseth in the above mentioned reference.
+.PP
+A typical value of \fIeta = 0.02\fP usually conserves the energy better than
+one part in 10000 over one crossing time, in the absence of close
+encounters.
+.SH PARAMETERS
+The following parameters are recognized in any order when the keyword
+is also given
+.TP 25
+\fBin=\fIin_name\fP
+Input file in \fIsnapshot(5NEMO)\fP format. Depending on how \fBnbody0\fP
+was compiled, other input formats are supported.
+[no default]. 
+.TP
+\fBout=\fIout_name\fP
+Output file in snapshot format [no default].
+.TP
+\fBeta=\fIvalue\fP
+Accurracy parameter, which determines the integration step. For
+small enough values of \fBdeltat\fP however determines the integration
+step. [0.02].
+.TP
+\fBdeltat=\fIvalue\fP
+Time interval of a major output. Although the timestep is determined from
+\fBeta\fP, the accurracy parameter, for small enough values of
+\fBdeltat=\fP this parameter will determine the integration step, and
+hence accuracy.
+[Default: 0.25].
+.TP
+\fBtcrit=\fIvalue\fP
+Final integration time [2.0].
+.TP
+\fBeps=\fP\fIvalue\fP
+Gravitational softening length [0.05].
+.TP
+\fBreset=t|f\fP
+Selects if the integration time of the next particle 
+to be advanced be reset to the
+requested output time if that preceded the integration time
+(see \fBdeltat=\fP).
+This is highly recommended,
+as for high output frequencies (small \fBdeltat=\fP cf. the 
+\fIeta\fP-derived timestep \fIdt\fP)
+[t].
+.TP
+\fBoptions=\fP\fBstep\fP
+Miscellaneous control options, specified as a comma separated list of
+keywords. Currently implemented are: \fBstep\fP, outputs the current
+timestep per particle  in the \fIAux\fP array of 
+a \fIsnapshot(5NEMO)\fP.
+Default: none.
+.SH LIMITATIONS
+The code has a hardcoded maximum number of particles in the fortran
+and C code (File: \fInmax.h\fP), change the relevant PARAMETER statement 
+to whatever is required. Using NEMO install the Makefile
+macro NMAX can also be used to do this automatically and 
+hence easily generate a new version with a different value for 
+NMAX, \fIe.g.\fP \fBmake nmax NMAX=256 nbody0\fP. The NDIM parameter
+should not be changed, and remains at 3.
+.PP
+Close encounters are not treated in any special way. 
+See any of the modified 
+versions of the Aarseth code (\fInbody2(1NEMO)\fP) or
+in case regularization is needed
+(see also newton0_reg in: \fInewton0(1NEMO)\fP).
+.PP
+Timesteps are not recomputed until the current timestep has expired.
+.PP
+A side-effect of the variable and particle-unique timesteps is that
+the final snapshot will not be exactly identical for two runs
+with different choices of \fBdeltat\fP.
+.PP
+In order to save time, all calculations in the fortran code (nbody0.f)
+can be done in single precision.  A different version of nbody0.f is
+needed in this case. See code comments ``SED''.
+.PP
+A C version is also available, as nbody0.c, though the Makefile
+needs the target \fBnbody00\fP to install it. The user interface is
+the same as that of nbody0.
+.SH BUGS
+Starting time of initial conditions is (re)set to 0, even if the snapshot
+had another time.
+.SH STORAGE
+A total of order \fI600.NMAX\fP bytes is needed, for a given
+maximum of \fINMAX\fP particles. This breaks down as follows:
+.PP
+The \fBFORTRAN\fP I/O code uses \fI10.NMAX\fP double precision
+and \fI20.NMAX\fP real storage units for a maximum compiled
+number of \fINMAX\fP particles. On most machines this adds
+up to \fI160.NMAX\fP bytes.
+.PP
+The \fBC\fP I/O code allocates space dynamically; and through limitations
+of the fortran code, a maximum of \fI100.NMAX\fP double's are needed,
+which means \fI400.NMAX\fP bytes.
+.SH AUTHOR
+Sverre Aarseth (F77), Peter Teuben (C)
+.SH GENEALOGY
+The \fBnbody*\fP series of NBODY integrators were all originally written
+by Sverre Aarseth, and exist in many forms throughout the scientific
+community. The list
+below is a mere zeroth order approximation to the current state of affairs:
+.nf
+.ta +1i
+nbody0    	Binney & Tremaine's toy version, with NEMO interface 
+nbody1       	variable timestep
+          	* email version sent on Fri, 15 Oct 93 17:52 GMT
+nbody2     	with Ahmad-Cohen scheme - (see also Benz et al, 1997)
+              	* email version 17-mar-93
+nbody3          XXX
+nbody4    	... for HARP
+nbody5    	with regularization handling triples & binaries  
+nbody6     	... for new parallel machine
+.fi
+.SH FILES
+.nf
+.ta +2i
+~/src/nbody/evolve/aarseth/nbody0	official source code within NEMO
+~/usr/aarseth/                      	SJA's other nbodyX versions (not exported)
+nb0.f                              	Sverre's version
+.fi
+.SH SEE ALSO
+hackcode1(1NEMO), runbody2(1NEMO), snapshot(5NEMO), atos(1NEMO), stoa(1NEMO)
+.PP
+Binney, J. & Tremaine, S. \fIGalactic Dynamics\fP.
+Princeton Unversity Press (1987), pp678.
+.PP
+S.J.Aarseth, 1972, p.373 in: "Gravitational N-Body Problem",
+IAU Colloquium #10, M.Lecar (Ed.), Reidel, Dordrecht.
+.PP
+S.J.Aarseth, 1985, p.377 in: "Multiple Time Scales",
+U.J. Brackbill & B.I. Cohen (Eds.), Academic Press, Orlando.
+.SH HISTORY
+.nf
+.ta +1i +4i
+30-jun-89	V1.0 created + NEMO interfaces to fortran source	PJT
+3-jul-89	V1.1 mods to f2c interface, name of keywords       	PJT
+24-jan-90	V1.2 all in double precision                     	PJT
+15-nov-91	fixed up pure nbody0_ff version                 	PJT
+20-may-92	-- also made the C (f2c) version available            	PJT
+2-apr-97	documentation updated for NEMO 2.4                 	PJT
+6-aug-97	V1.3 added options=                                  	PJT
+11-feb-98	V1.3a fixed array index bug for higher order term	PJT
+21-jan-00	V1.4 added reset= to fix small deltat problem/bug	PJT
+.fi
