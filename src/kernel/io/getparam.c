@@ -320,7 +320,7 @@ local void beep(void);
 local string parname(string arg);
 local string parvalue(string arg);
 local string parhelp(string arg);
-local int findkey(string name);     // to be obsoleted
+local int findkey(string name);     /* to be obsoleted */
 local keyword *findakey(string name);
 local int set_indexed(string name, int *idx);
 local int addindexed(int j, string keyval, int idx);
@@ -443,7 +443,7 @@ void initparam(string argv[], string defv[])
 	      keys[j].val = scopy(parvalue(argv[i]));        /* get value */
 	      keys[j].count++;
 	    } else if (j=set_indexed(name,&idx)) {       /* enter indexed keywords */
-	      // process this indexed keyword
+	      /* process this indexed keyword */
 #if 1
 	      addindexed(j,argv[i],idx);
 #else
@@ -1529,7 +1529,7 @@ local void setparam (string par, string val, string prompt)
 
     kw = findakey(par);
     if (kw == NULL) {
-      // check if it's an indexed keyword, we'll allow a new one to be entered
+      /* check if it's an indexed keyword, we'll allow a new one to be entered */
       char *keyval;
       i=set_indexed(par,&idx);
       if (i==0)
@@ -1551,7 +1551,7 @@ local void setparam (string par, string val, string prompt)
 #if 0
         if (gets(line) == NULL) error("Null input");
 #else
-        // if (fgets(line,80,stdin) == NULL) error("Null input");
+        /* if (fgets(line,80,stdin) == NULL) error("Null input"); */
 	error("Can't do prompting anymore until fgets() is fixed");
 #endif
         val = line;
@@ -1865,7 +1865,7 @@ local keyword *findakey(string name)
     strcat(key,"#");
     n = findkey(key);
     if (n < 0)  return NULL;
-    // error("findakey:  #=%d findkey(%s) -> %d NOT INDEXED",idx,key,n);
+    /*  error("findakey:  #=%d findkey(%s) -> %d NOT INDEXED",idx,key,n); */
     kw = &keys[n];
     if (kw->indexed < -1) 
       error("findakey(%s): not an indexed keyword, %s: %d n=%d", 
@@ -1891,7 +1891,7 @@ local keyword *findakey(string name)
 
   n = indexparam(key,idx);
   dprintf(1,"Re-Checking indexparam(%s,%d) -> %d\n",key,idx,n);
-  //return n>0;
+  /* return n>0; */
   return NULL;
   }
 #endif
@@ -1920,7 +1920,7 @@ local keyword *findakey(string name)
   }
 #endif
 
-  return NULL;    // will it ever get here....  it should not !
+  return NULL;    /*  will it ever get here....  it should not !  */
 }
 
 /* 
