@@ -1,0 +1,13 @@
+MICRO-NEMO is the most basic set of kernel functions needed to access the NEMO  I/O
+library, without the need to use the whole baggage of user interface, yapp, etc.etc.
+
+This worked by copying a small (13) set of files  from NEMO/src/kernel/{io,cores,misc}
+and a number of header files from $NEMOINC and sadly now $NEMOLIB into this directory.
+
+The makefile in this directory can be used standalone to build a libunemo.
+
+Exception is getparam_fake.c, which defines two dummy functions from getparam.c,
+namely 
+	string getparam(string);
+	void finiparam(void);
+
