@@ -1,4 +1,4 @@
-.TH TABNLLSQFIT 1NEMO "17 April 2004"
+.TH TABNLLSQFIT 1NEMO "15 May 2004"
 .SH NAME
 tabnllsqfit \- general purpose non-linear least squares fitting program
 .SH SYNOPSIS
@@ -249,7 +249,7 @@ must be externally visible, and named \fIfunc_\fP\fImethod\fP and
 \fBfit=\fP keyword.
 .PP
 Here is an example of the file \fBmyline.c\fP that can
-be used with \fBfit=line load=myline\fP and compiled with
+be used with \fBfit=line load=myline.so\fP and compiled with
 .nf
 	bake myline.so
 .fi
@@ -299,6 +299,7 @@ Peter Teuben
 .nf
 .ta +2.5i
 ~/src/kernel/tab	tabnllsqfit.c
+~/src/kernel/tab/fit	example fitting functions
 .fi
 .SH "UPDATE HISTORY"
 .nf
