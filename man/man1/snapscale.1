@@ -1,0 +1,96 @@
+.TH SNAPSCALE 1NEMO "19 October 1999"
+.SH NAME
+snapscale \- re-scale an N-body system
+.SH SYNOPSIS
+\fBsnapscale in=\fIin_file\fP \fBout=\fIout_file\fP [parameter=value] .\|.\|.
+.SH DESCRIPTION
+\fIsnapscale\fP copies an N-body system from \fBin\fP to \fBout\fP,
+multiplying various components of the snapshot by their respective
+scale factors. All scalings are done independantly, the scalefactors
+have to be supplied explicitly. For example, if positions are scaled,
+velocities are not (unless specified of course), and are treated as
+independant. The default for all scale factors is 1.
+.PP
+For that matter \fIsnapscale\fP is not an intelligent program. 
+One could set it up with default not supplied (empty keywords), and let
+the program figure out how to rescale all available items in the snapshot
+if e.g. only masses are scaled, and virial units are to be effective, the
+radii and/or velocities will also be appropriately scaled.
+These features are implemented in \fIsnapvirial\fP.
+.SH PARAMETERS
+The following parameters are recognized:
+.TP 24
+\fBin=\fIin_file\fP
+input file, in \fIsnapshot\fP(5NEMO) format.  Default: none.
+.TP
+\fBout=\fIout_file\fP
+output file,  also \fIsnapshot\fP format.  Default: none.
+.TP
+\fBmscale=\fIm_scale_factor\fP
+Scale factor for particle masses.  Default: \fB1.0\fP.
+.TP
+\fBrscale=\fIpos_scale_factor(s)\fP
+Scale factor for position space. If three numbers are given, the
+three positions are scaled independantly.  One number means
+all NDIM (three or two) coordinates are transformed the same.
+Default: \fB1.0\fP.
+.TP
+\fBvscale=\fIvel_scale_factor(s)\fP
+Scale factor for velocity space.  If three numbers are given, the
+three velocities are scaled independantly. One number means
+all NDIM (three or two) coordinates are transformed the same.
+Default: \fB1.0\fP.
+.TP
+\fBpscale=\fIphi_scale_factor\fP
+Scale factor for particle potentials.  Default: \fB1.0\fP.
+.TP
+\fBascale=\fIacc_scale_factor(s)\fP
+Scale factor for accelerations.  If three numbers are given, the
+three accelerations are scaled independantly. One number means
+all NDIM (three or two) coordinates are transformed the same.
+Default: \fB1.0\fP.
+.TP
+\fBxscale=\fIaux_scale_factor\fP
+Scale factor for the auxilliary information item, if present.  
+Default: \fB1.0\fP.
+.TP
+\fBkscale=\fIkey_scale_factor\fP
+Scale factor for the key item.  Note that this item must
+be an integer. Default: \fB1\fP.
+.TP
+\fBtimes=\fItime-ranges\fP
+Only snapshots with time values within \fItimes-ranges\fP, which is
+of the form \fBts[:te],...\fP, will be 
+copied. [default: \fBall\fP].
+.SH EXAMPLES
+For a given axisymmetric disk with all particles on circular orbits
+squashing the orbits a bit would give a reasonable approximation for
+elliptical orbits, say by 10%:
+.nf
+    set e=1.1
+    snapscale in=mod.axi out=mod.ell "rscale=sqrt($e),1/sqrt($e),1" \\
+        "vscale=$e,1/$e,1"
+.fi
+.SH "SEE ALSO"
+snapvirial(1NEMO), snapshift(1NEMO), snapshot(5NEMO)
+.SH AUTHOR
+Joshua E. Barnes, Peter Teuben
+.SH FILES
+.nf
+.ta +3.0i
+~/src/pjt/nbody   	snapscale.c snapscale.1
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+ 7-May-87	V1.0: created          	PJT
+16-Nov-87	V1.1: mass added	PJT
+9-Mar-88	V1.2: data history added, proper debug output	PJT
+16-Mar-88	V1.0 at IAS by Josh	JEB
+1-Jun-88	V2.0: merged PJT extensions into JEB's code	PJT
+24-aug-88	V2.1: added pscale keyword	PJT
+15-aug-89	V2.4: added pscale,ascale,xscale,kscale  	PJT
+19-oct-99	doc improved	PJT
+.fi
+
+
