@@ -1,0 +1,113 @@
+.TH MKKD95 1NEMO "6 March 2004"
+.SH NAME
+mkkd95 \- Kuijken-Dubinsky-95 composite bulge-disk-halo model
+.SH SYNOPSIS
+\fBmkkd95\fP [parameter=value]
+.SH DESCRIPTION
+No description available. This manual page was created by mkman
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBout=\fP
+output snapshot (a rundirectory $out.tmpdir is also created)
+.TP
+\fBnbulge=\fP
+Number of particles in bulge [4000]  
+.TP
+\fBndisk=\fP
+Number of particles in disk [8000]  
+.TP
+\fBnhalo=\fP
+Number of particles in halo [6000]  
+.TP
+\fBpsi0=\fP
+in.dbh: Psi0 (HALO) [-4.6]    
+.TP
+\fBv0=\fP
+in.dbh: v0 [1.42]     
+.TP
+\fBq=\fP
+in.dbh: q [1]     
+.TP
+\fBrck2=\fP
+in.dbh: (rc/rk)^2 [0.1]     
+.TP
+\fBra=\fP
+in.dbh: ra [0.8]     
+.TP
+\fBmd=\fP
+in.dbh: M_d (DISK) [0.867]    
+.TP
+\fBrd=\fP
+in.dbh: R_d [1]     
+.TP
+\fBrouter=\fP
+in.dbh: R_outer [5]     
+.TP
+\fBzd=\fP
+in.dbh: z_d [0.1]     
+.TP
+\fBdrtrunc=\fP
+in.dbh: dR_trunc [0.5]     
+.TP
+\fBrhob=\fP
+in.dbh: rho_b (BULGE) [14.45]    
+.TP
+\fBpsicut=\fP
+in.dbh: psi_cut [-2.3]     
+.TP
+\fBsigb=\fP
+in.dbh: sib_b [0.714]     
+.TP
+\fBdeltar=\fP
+in.dbh: delta_r [0.01]     
+.TP
+\fBnr=\fP
+in.dbh: nr [2400]     
+.TP
+\fBnharm=\fP
+in.dbh: number of harmonics [10]   
+.TP
+\fBsigvr0=\fP
+in.diskdf: central radial velocity dispersion [0.47]  
+.TP
+\fBsigr0=\fP
+in.diskdf: scalelength of sig_r^2 [1.0]   
+.TP
+\fBncorr=\fP
+in.diskdf: number of intervals for correction function [50]
+.TP
+\fBniter=\fP
+in.diskdf: number of iterations [10]   
+.TP
+\fBfstreamb=\fP
+in.bulge: [0.75]      
+.TP
+\fBfstreamh=\fP
+in.halo: [0.5]      
+.TP
+\fBseed=\fP
+in.- Random Seed [0]    
+.TP
+\fBzerocm=\fP
+in.- Center the snapshot? [t]   
+.TP
+\fBbin=\fP
+directory in which KD95 binaries live [.] 
+.SH EXAMPLES
+The default keywords are for Kuijken-Dubinski's model-A.
+.SH SEE ALSO
+gendisk, genbulge, genhalo, dbh, getfreqs, diskdf
+.SH FILES
+.nf
+NEMO/src/nbody/init/mkkd95.c
+NEMO/usr/kuijken/GalactICS/
+.fi
+.SH AUTHOR
+Peter Teuben (NEMO interface) -
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+06-Mar-04	V1.0 Created	PJT
+.fi
