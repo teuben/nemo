@@ -1,0 +1,74 @@
+.TH UNBIND 1NEMO "24 October 1988"
+.SH NAME
+unbind \- find unbound stars to a stellar system
+.SH SYNOPSIS
+.PP
+\fBunbind in=\fPsnapshot_in \fBout=\fPsnapshot_out [parameter=value]
+.SH DESCRIPTION
+\fBunbind\fP tries to find stars that are unbound to a stellar system.
+It simply calculates the binding energy (per unit mass) and flags
+the stars for which this is larger than a specified cutoff energy (\fBecutoff\fP)
+are flagged as 'escaped'. The program outputs the stars which are either
+bound or unbind to the system. 
+.PP
+The Key field (an integer) in the \fIsnapshot(5NEMO)\fP data is also copied
+accordingly; when it is not present it will be initialized to the order of
+particles present in the input file, \fB0\fP being the first one, and \fBnbody-1\fP
+the last one.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 20
+\fBin=\fIin-file\fP
+input file, in \fIsnapshot(5NEMO)\fP format. If potentials are not
+present in the snapshot, an (expansive) exact N-squared energy 
+calculation is forced. [no default]
+.TP
+\fBout=\fIout-file\fP
+output file, in \fIsnapshot(5NEMO)\fP format, containing
+the masses and phasespace coordinates of the (un)bound particles [no default].
+.TP
+\fBexact=\fBt|f\fP
+Logical determining if you want force an exact
+N-squared calculation, in case potentials were found to be present in the 
+snapshot [default: \fBf\fP].
+.TP
+\fBeps=\fIvalue\fP
+Softening parameter used in energy calculations in case an exact
+N-squared energy calculation is done.
+[default: \fB0.025\fP]
+.TP
+\fBecutoff=\fIvalue\fP
+Cutoff of binding energy (per unit mass), above which the stars will be removed 
+from the snapshot
+[default: \fB0\fP].
+.TP
+\fBbind=t|f\fP
+Logical determining if the bound (\fBt\fP) or unbound (\fBf\fP) 
+stars should be written to file
+[default: \fBt\fP, i.e. bound stars are written to file].
+.TP
+\fBmap=t|f\fP
+Logical determining if you want a map displayed by star number of the
+stars bound and unbound to the system. This is handy to compare
+maps of the same system under slightly different conditions.
+.SH "SEE ALSO"
+snapmask(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+~/src/pjt/nbody   	unbind.c unbind.1
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +2.0i +2.0i
+12-Nov-87	V1.0 created          	Peter Teuben
+15-Nov-87	V1.2 cutoff and output added 	PJT
+19-nov-87	V1.3 bind keyword added	PJT
+9-Mar-88	V1.4 memory allocation better	PJT
+xx-apr-88	V1.6 added map option PJT
+6-jun-88	V1.7 new filestruct - keywords changed	PJT
+24-oct-88	V1.8 added Key copy	PJT
+.fi

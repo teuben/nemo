@@ -1,0 +1,66 @@
+.TH SNAPSPHERE 1NEMO "14 February 1989"
+.SH NAME
+snapsphere \- copy a phase space sphere of particles from an N-body system
+.SH SYNOPSIS
+\fBsnapsphere in=\fPsnap_in \fBout=\fPsnap_out [parameters=values...]
+.SH DESCRIPTION
+\fIsnapsphere\fP copies all particles from an N-body system which are within
+a radial shell, specified by its center and two radii, in position
+as well as velocity position space.
+.SH PARAMETERS
+The following parameters are reckognized in any order if the keyword is
+also given:
+.TP 25
+\fBin=\fIsnap_in\fP
+Input data is read from \fIsnap_in\fP, which must be in standard
+\fIsnapshot(5NEMO)\fI format [no default].
+.TP
+\fBout=\fIsnap_out\fP
+Copied output data is written to \fIsnap_out\fP, which will also be in 
+\fIsnapshot(5NEMO)\fP format [No default].
+.TP
+\fBrcen=\fIx,y,z\fP
+The center of the sphere in space coodinates. [default:\fB0,0,0\fP].
+.TP
+\fBvcen=\fIvx,vy,vz\fP
+The center of the sphere in velocity coodinates. [default:\fB0,0,0\fP].
+.TP
+\fBrrad=\fI[rmin:]rmax\fP
+\fIrmin\fP and \fIrmax\fP are
+the inner and outer radius of the shell in space 
+coordinates. If only one radius is given, it is assumed to be
+the outer radius of the sphere. [default:\fB0:infinity\fP].
+.TP
+\fBvrad=\fI[vrmin:]vrmax\fP
+\fIvmin\fP and \fIvmax\fP are
+the inner and outer radius of the shell in velocity 
+coordinates. If only one radius is given, it is assumed to be
+the outer radius of the sphere. [default:\fB0:infinity\fP].
+.TP
+\fBtimes=\fItime-ranges\fP
+Only snapshots with time values within \fItimes-ranges\fP, which is
+of the form \fBts[:te],...\fP, will be 
+copied. [default: \fBall\fP].
+.SH AUTHOR
+Peter Teuben
+.SH BUGS
+Does not handle subsequent multiple snashots when they are larger than the 
+first one.
+.SH FILES
+.nf
+.ta +3.0i
+~/src/pjt/nbody     snapsphere.c snapsphere.1
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.5i
+ 8-Apr-87	Version 1.0: created          	PJT
+22-Apr-87	V1.1: headline bug       	PJT
+xx-xxx-87	V1.2: keyword 'select' added	PJT
+19-Jun-87	V1.3: 'cs' was not read in	PJT
+ 1-Jul-87	V1.4: time check	PJT
+ 6-jun-88	V1.6: new filestruct	PJT
+ 1-aug-88	V1.6a: bug in mass transfer	PJT
+20-dec-88	V1.7: shells instead of spheres	PJT
+14-feb-89	V1.7a: bug removed - get_now snap	PJT
+.fi
