@@ -1,0 +1,43 @@
+#! /bin/csh -f
+#
+#  Makes a face-on color map of a snapshot
+#
+#	Method: use the evar= keyword in snapgrid with the
+#		fact that the snapshot is assumed to be ordered
+#		according to particle radius at T=0.
+#		The color is defined as log(I2/I1), where I2 is
+#		the modified mass 'm*i' (i=1,2,3...nbody) and
+#		I1 the original masses.
+#
+if ($#argv != 2) then
+  echo Create a color map of an nbody snapshot
+  goto err
+endif
+
+set file=$1
+set map=$2
+if (! -e $file) then
+  echo File $file does not exist
+  goto err
+endif
+if (-e $map) then
+  echo File $map already exists
+  goto err
+endif
+set nsize=128
+set gauss=0.1
+set tmp=tmp$$
+
+snapgrid in=$file out=$tmp.1 evar=m nx=$nsize ny=$nsize
+snapgrid in=$file out=$tmp.2 evar='m*(i+1)' nx=$nsize ny=$nsize
+ccdsmooth in=$tmp.1 out=$tmp.1s gauss=$gauss
+ccdsmooth in=$tmp.2 out=$tmp.2s gauss=$gauss
+ccdmath in=$tmp.1s,$tmp.2s out=$map fie='log(%2/%1)'
+rm -f $tmp.*
+
+exit 0
+
+
+err:
+  echo Usage: $0 snap-infile color-outmap
+  exit 1
