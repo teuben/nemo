@@ -1,6 +1,6 @@
 DIR = src/nbody/io_nemo
 BIN = test1
-NEED = $(BIN) mkplummer snapmask2 hackforce
+NEED = $(BIN) mkplummer snapmask snapmask2 hackforce
 
 help:
 	@echo $(DIR)
