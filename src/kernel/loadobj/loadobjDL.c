@@ -19,6 +19,7 @@
 /*             but also works for ELF linux                    */ 
 /*  2-may-03   using RTLD_LAZY instead of 1                    */
 /* 24-sep-04   fix linux bug                                   */
+/* 15-mar-05   g++ friendly                                    */
 /*                                                             */
 /***************************************************************/
 
@@ -26,7 +27,7 @@
 
 #include <dlfcn.h>
 
-static int *dl_handle = NULL;	/* void pointer to current object file */
+static void *dl_handle = NULL;	/* void pointer to current object file */
 
 /***************************************************************/
 /* loadobj(pathname);                                          */
