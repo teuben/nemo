@@ -1,4 +1,4 @@
-.TH TCPPIPE 1NEMO "2 July 2001"
+.TH TCPPIPE 1NEMO "10 February 2004"
 .SH NAME
 tcppipe \- create TCP connection to send data from/to pipe
 .SH SYNOPSIS
@@ -23,21 +23,40 @@ is started in send mode].
 TCP/IP port to communicate with [Default: 2801]  
 .TP
 \fBbufsize=\fP\fIbyte_size\fP
-buffersize to use [Default: 1024]    
+buffersize to use for transfer. Applies to both
+the sender and receiver, and best performance should be expected 
+when they are the same. [Default: 1024]    
 .SH EXAMPLES
-On machine A you start by piping data into tcppipe, note no hostname is
+On machine \fBA\fP you start by piping data into tcppipe, note no hostname is
 needed, but we use the default port (2801) and buffersize (1024):
 .nf
     A% mkplummer - 1000 | tcppipe
 .fi
 After this has been launched, 
-on machine B you can now tell it to expect data from machine 
-A and pass the data on to the task in the pipe:
+on machine \fBB\fP you can now tell it to expect data from machine 
+\fBA\fP and pass the data on to the task in the pipe:
 .nf
     B% tcppipe A | tsf -
 .fi
+
+Here are some cut and pasteable lines in C-shell that may be useful. 
+Notice the user of an "auto-incrementing" portnumber, since the
+usage of the bind/listen/accept causes TCP/IP to lock that port
+for a few minutes:
+.nf
+
+   set port=3000
+   set host=192.168.1.6
+   set buf=10240
+   cat zero1 | ./tcppipe port=$port bufsize=$buf ; @ port++
+   ./tcppipe $host report=t port=$port bufsize=$buf; @ port++
+
+   @ port--
+
+.fi
+
 .SH FUTURE
-One possible futute enhancement would be to integrate this with
+One possible future enhancement in NEMO would be to integrate this with
 existing enhancements to \fIstropen(3NEMO)\fP, the previous
 example would now read
 .nf
@@ -58,10 +77,11 @@ redir(l), nc(1)
 .SH FILES
 src/tools/tcppipe
 .SH AUTHOR
-Grischa Weberstaedt, Peter Teuben (NEMO)
+Grischa Weberstaedt (original), Peter Teuben (NEMO)
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
 2001       	Created 	Grischa Weberstaedt
 02-Jul-01	V0.3 added user interface for NEMO	PJT
+10-feb-04	V0.4 added a reporting option, changed keyname	PJT
 .fi
