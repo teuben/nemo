@@ -55,6 +55,7 @@ void inipotential (int *npar, double *par, string name)
     nmax = nemo_file_lines(name);
     if (nmax<=0) error("file_lines returned %d lines in %s\n",
              nmax,name);
+    dprintf (1,"  Nmax = %d\n",nmax);
     rad = (real *) allocate(nmax * sizeof(real));
     vel = (real *) allocate(nmax * sizeof(real));
     coldat[0] = rad;        colnr[0] = 1;
