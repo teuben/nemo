@@ -36,6 +36,7 @@
  *		     it does not exist yet				pjt
  *	28-nov-00    casted fdopen so compilers don't complain
  *      19-may-01    mktemp -> mkstemp 					pjt
+ *	29-may-01    stropen using const now
  */
 #include <stdinc.h>
 #include <getparam.h>
@@ -67,7 +68,7 @@ local struct {	          /*  our internal filetable for stropen/strdelete */
  */
 
 
-stream stropen(string name,string mode)		
+stream stropen(const string name, string mode)		
 {
     bool inflag;
     int fds;
