@@ -322,7 +322,7 @@ ACX_F77_CMAIN_FFLAGS([],[AC_MSG_WARN([problems fortran-c interface])])
 dnl MacOS (darwin) needs -lcc_dynamic
 dnl Only linux wants -rdynamic, for dlopen()
 if test "$GCC" = "yes"; then
-  NEMO_CFLAGS="$NEMO_CFLAGS -fwritable-strings $gcov_flag"
+  NEMO_CFLAGS="$NEMO_CFLAGS $gcov_flag"
 fi
 NEMO_CFLAGS="$NEMO_CFLAGS $prec_flag"
 
