@@ -14,28 +14,29 @@
  *	  8-aug-96      local var                                   pjt
  *       20-may-01      warning->dprintf
  *       10-jun-01      added \n
+ *       25-may-02      V1.9 don't mess up when upper bound > nbody pjt
  */
 
 #include <stdinc.h>
 #include <getparam.h>
-#include <vectmath.h>		/* otherwise NDIM undefined */
+#include <vectmath.h>	
 #include <filestruct.h>
 
-#include <snapshot/snapshot.h>	/* new filestruct */
+#include <snapshot/snapshot.h>
 #include <snapshot/body.h>
 #define REALLOC
 #include <snapshot/get_snap.c>
 #include <snapshot/put_snap.c>
 
 
-string defv[] = {		/* DEFAULT INPUT PARAMETERS */
+string defv[] = {		
     "in=???\n			  ascii input file name ",
     "out=???\n			  snapshot output file name ",
     "select=all\n		  select string ",
     "times=all\n		  times select string ",
     "keyfile=\n			  file with Key field to select from ",
     "keyoffset=0\n                offsets to be applied extra to outkey ",
-    "VERSION=1.7f\n		  17-jan-02 PJT",
+    "VERSION=1.9\n		  25-may-02 PJT",
     NULL,
 };
 
@@ -43,18 +44,18 @@ string usage = "mask out particles while copying snapshot data";
 
 local string select_str, times;
 
-local string headline;		/* random text message */
-local stream instr,outstr;		/* file streams */
+local string headline;		       /* random text message */
+local stream instr,outstr;	       /* file streams */
 
-local int    nbody;                   /* number of particles in input snapshot */
+local int    nbody;                    /* number of particles in input snapshot */
 local double tsnap;                    /* current time in snapshot */
-local Body   *btab=NULL;	        /* pointer to input snapshot */
+local Body   *btab=NULL;	       /* pointer to input snapshot */
 
 local bool   *Qsel=NULL;              /* pointer to select */
 local bool   *Qself=NULL;             /* pointer to select from file */
 local int    *sel=NULL;
 
-#define TIMEFUZZ	0.0001	/* tolerance in time comparisons */
+#define TIMEFUZZ	0.0001	      /* tolerance in time comparisons */
 
 
 nemo_main()
