@@ -1,0 +1,85 @@
+/*
+ * PUT_SNAP_STORY: worker routine to output snapshot stories.
+ */
+#ifndef get_snap_story
+
+#define get_snap_story  _get_snap_story
+
+local _get_snap_story(outstr, btptr, nbptr, ofptr)
+stream outstr;			/* output stream, of course */
+Body **btptr;			/* pointer to body array */
+int *nbptr;			/* pointer to number of bodies */
+int *ofptr;			/* pointer to output bit flags */
+{
+    char *malloc(), sname[32], *cp;
+    int  *ip, i, nstories;
+    Body *bp;
+
+#ifdef Story
+    if (!get_tag_ok(outstr,"Story")) return(0);
+
+    get_set (outstr,"Story");
+    get_data(outstr,"Nstories",IntType,&nstories,0);
+	dprintf(1,"Found %d stories\n",nstories);
+    ip = (int *) malloc(*nbptr * sizeof(int));
+    get_data(outstr,"IStories",IntType,ip,nstories,0);
+    for (bp=*btptr; bp < *btptr + *nbptr; bp++)          /* set all NULL */
+        Story(bp) = NULL;
+    for (i=0; i<nstories; i++) {
+        sprintf(sname,"story_%d",ip[i]);
+	cp = get_string(outstr,sname);
+	dprintf(1,"%s: %s\n",sname,cp);
+        Story(*btptr+ip[i]) = cp;
+    }
+    free(ip);
+    get_tes(outstr,"Story");
+#else
+    error("get_snap_mass: Stories undefined\n");
+#endif
+}
+
+#endif
+
+/*
+ * PUT_SNAP_STORY: worker routine to output snapshot stories.
+ */
+#ifndef put_snap_story
+
+#define put_snap_story  _put_snap_story
+
+local _put_snap_story(outstr, btptr, nbptr, ofptr)
+stream outstr;			/* output stream, of course */
+Body **btptr;			/* pointer to body array */
+int *nbptr;			/* pointer to number of bodies */
+int *ofptr;			/* pointer to output bit flags */
+{
+    char *malloc(), sname[32];
+    int  *ip, i, nstories;
+    Body *bp;
+
+#ifdef Story
+	/* first scan the Body, to see how many stories were there */
+    for (nstories=0, bp=*btptr; bp < *btptr + *nbptr; bp++)
+        if (Story(bp) != NULL) nstories++;
+    dprintf(1,"Found %d stories to write\n",nstories);
+    if (nstories==0) return(0);
+    ip = (int *) malloc(nstories * sizeof(int));
+    for (nstories=0, bp=*btptr, i=0; bp < *btptr + *nbptr; bp++, i++)
+        if (Story(bp) != NULL)
+            ip[nstories++] = i;
+    put_set (outstr,"Story");
+    put_data(outstr,"Nstories",IntType,&nstories,0);
+    put_data(outstr,"IStories",IntType,ip,nstories,0);
+    for (i=0; i<nstories; i++) {
+        sprintf(sname,"story_%d",ip[i]);
+        put_string(outstr,sname,Story(*btptr+ip[i]));
+    }
+    free(ip);
+    put_tes(outstr,"Story");
+#else
+    error("put_snap_mass: Stories undefined\n");
+#endif
+}
+
+#endif
+
