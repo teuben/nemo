@@ -29,7 +29,7 @@ local struct www {                  /*  List of all basic YAPP commands */
     { Line,   "line",     "rr"   },
     { Move,   "move",     "rr"   },
     { Color,  "color",    "i"    },
-    { Point,  "point",    "rrr"  },
+    { Point,  "point",    "rr"   },
     { Circle, "circle",   "rrr"  },
     { Cross,  "cross",    "rrr"  },
     { Box,    "box",      "rrr"  },
@@ -100,7 +100,7 @@ int pl_lread(string line, plcommand *p)
             dprintf(1,"pl_parse: %s\n",sp[0]);
             cp = www[i].args;
             if (strlen(cp) != n) {
-                warning("pl_parse: Need %d arguments for %s",n,sp[0]);
+	        warning("pl_parse: Need %d arguments for %s, got %d",strlen(cp),sp[0],n);
                 break;
             }
             p->id = www[i].id;
@@ -151,7 +151,7 @@ void pl_exec(plcommand *p)
 			 break;
             case Box:    plbox(p->pars[0].r,p->pars[1].r,p->pars[2].r);
 			 break;
-            case Just:   pljust(p->pars[0].i);
+	    case Just:   pljust(p->pars[0].i);
 			 break;
             case Text:   pltext(p->pars[0].s,p->pars[1].r,p->pars[2].r,
                                              p->pars[3].r,p->pars[4].r);
