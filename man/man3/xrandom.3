@@ -1,0 +1,81 @@
+.TH XRANDOM 3NEMO "24 February 2000"
+.SH NAME
+set_xrandom, xrandom, grandom, frandom - random number generators
+.SH SYNOPSIS
+.nf
+.B int set_xrandom(int seed)
+.PP
+.B double xrandom(double a, double b)
+.PP
+.B double grandom(double m, double d)
+.PP
+.B double frandom(double a, double b, rproc func)
+.PP
+.B double xrand(double a, double b)
+.fi
+.SH DESCRIPTION
+\fIset_xrandom\fP initializes the random number generator with a supplied
+integer \fBseed\fP. If the \fBseed\fP is 0, the current
+UNIX time (see time(3)) is used instead. It returns the seed used.
+.PP
+\fIxrandom\fP returns a uniformly distributed random number between
+\fBa\fP (inclusize) and \fBb\fP (exclusive). 
+.PP
+\fIgrandom\fP returns a gaussian distributed number with mean \fBm\fP and 
+dispersion \fBs\fP.
+.PP
+\fIfrandom\fP returns a a random number according to an arbitrary 
+given probability function \fBfunc\fP(x),
+defined between x=\fBa\fP and x=\fBb\fP. This is implemented by
+defining a spline for the inverse
+normalized cumulative distribution function
+(\fBF(x)\fP, with \fBF(a)=0, F(b)=1\fP), then
+pulling uniform random numbers between 0 and 1 and returning
+the corresponding random number between \fBa\fP and \fBb\fP.
+.PP
+Both \fIgrandom\fP and \fIfrandom\fP call \fIxrandom\fP, which in turn
+is defined in terms of either the portable random generator
+(to be installed through the include file \fIoptions.h\fP), or
+the unix random number generator \fIrandom(3)\fP.
+.PP
+\fIxrand\fP is a simple random number generator, with the same
+arguments as \fIxrandom\fP, but uses a much simpler algorithm,
+using the standard \fIrand(3)\fP. See also \fIsrand(3)\fP
+when a seed is needed. It is not recommended to use \fIxrand\fP
+if \fIxrandom\fP is available. 
+.SH BUGS
+The \fIfrandom\fP function defines a spline, and the spline coefficients
+for inversion will be initialized every time a new function is given. 
+If two series of random numbers
+are needed, each with their own probability function, it is hence 
+not such a good idea to do it within the same \fIfor-\fPloop!
+.SH TESTBED
+With the testbed program (\fBmake xrandomtest CFLAGS=\fP)
+the following first four random numbers have been extracted:
+.nf
+.ta +1i
+
+CFLAGS=  	first 4 random numbers [0,1)
+
+         	0.968071 0.0667306 0.478281 0.909534
+-DNUMREC 	0.715119 0.0330211 0.874394 0.534194
+-DRAND48 	0.0416303 0.454492 0.834817 0.335986
+.fi
+.SH SEE ALSO
+random(3), rand(3), srand(3), drand48(3)
+.SH FILES
+.ta +1.5i
+~/src/kernel/misc	xrandom.c frandom.c xrand.c 
+.SH AUTHOR
+Josh Barnes, Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1i +4i
+xx-xxx-86	created in the dark ages                  	JEB
+13-sep-90	portable random number generated installed	PJT
+17-sep-90	frandom written, for mass-spectra        	PJT
+15-apr-91	added doc for set_xrandom               	PJT
+7-jan-92	fixed seed bug in set_xrandom (from 13-sep-90)	PJT
+4-mar-94   	documented xrand  	PJT
+24-feb-00	documented special -1,-2 seeds          	PJT
+.fi
