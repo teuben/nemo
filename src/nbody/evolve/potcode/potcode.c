@@ -201,9 +201,9 @@ real time;			/* current time */
     p->xiv0 = -vr;
     p->etav0 = -vt;    /* ok, also figure out the sign  */
     p->zetav0 = 0;     /* VERTICAL to be done */
-    Acc(p)[0] = 0.0;
-    Acc(p)[1] = 0.0;
-    Acc(p)[2] = 0.0;
+    Acc(p)[0] = Pos(p)[0];
+    Acc(p)[1] = Pos(p)[1];
+    Acc(p)[2] = Pos(p)[2];
     Phi(p) = -1.0;
     Key(p) = p-btab+1;     /* label particles 1....nb */
   }

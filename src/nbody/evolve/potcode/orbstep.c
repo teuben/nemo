@@ -77,8 +77,8 @@ proc force;		/* acceleration calculation */
 real dt;		/* integration time step */
 int mode;		/* select integration algorithm */
 {
-  if (mode == -1) {			        /* epicycle analytical orbit */
-      epistep(btab, nb, tptr, force, dt);	/* take epicycle step */
+    if (mode == -1) {			        /* epicycle analytical orbit */
+        epistep(btab, nb, tptr, force, dt);	/* take epicycle step */
     } else if (mode == 0) {                     /* simplest Eulerian */
         eulerstep(btab, nb, tptr, force, dt);
         (*force)(btab, nb, *tptr);              /* compute new force */
@@ -308,6 +308,7 @@ real dt;		/* integration time step */
   bodyptr p;
   body tmp1;
   real t, kt, kt1, coskt, sinkt, dx, dy, odt, cosodt, sinodt;
+  real xi, eta, f, r, phi, cosp, sinp;
 
   *tptr += dt;                       /* get to the new time */
   t = *tptr;
@@ -320,27 +321,31 @@ real dt;		/* integration time step */
     kt1 = POS_ANGLE(kt);   
     sinkt = sin(kt1);
     coskt = 1-cos(kt1);
-    Pos(p)[0] -= Acc(p)[0];   /* cheat: deduct the old one epi */
-    Pos(p)[1] -= Acc(p)[1];
-    Pos(p)[2] -= Acc(p)[2];
+    Pos(p)[0] = Acc(p)[0];   /* cheat: restore old guiding center */
+    Pos(p)[1] = Acc(p)[1];
 
-    dx = cosodt * Pos(p)[0] - sinodt * Pos(p)[1];    /* rotate by Omega * dt */
-    dy = sinodt * Pos(p)[0] + cosodt * Pos(p)[1];
-    Pos(p)[0] = dx;
-    Pos(p)[1] = dy;
-
-
-    Acc(p)[0] = -p->xiv0*coskt/(2*p->B) + 
-                 p->etav0*(p->A*kt - (p->A - p->B)*sinkt)/(p->kappa * p->B);
-    Acc(p)[1] =  p->xiv0*sinkt/p->kappa + 
-                 p->etav0*coskt/(2*p->B);
 #if 0
-    Acc(p)[2] =  p->zetav0*sin(p->nu * t);
+    dx = cosodt * Pos(p)[0] - sinodt * Pos(p)[1];    /* incr rotate by Omega * dt */
+    dy = sinodt * Pos(p)[0] + cosodt * Pos(p)[1];
+#else
+    dx = Pos(p)[0];
+    dy = Pos(p)[1];
 #endif
+    Acc(p)[0] = dx;          /* cheat: store guiding center in Acc */
+    Acc(p)[1] = dy;
+    r = sqrt(dx*dx+dy*dy);
 
-    Pos(p)[0] += Acc(p)[0];   /* cheat: add the new one epi */
-    Pos(p)[1] += Acc(p)[1];
-    Pos(p)[2] += Acc(p)[2];
+    xi =  -p->xiv0*coskt/(2*p->B) + 
+           p->etav0*(p->A*kt - (p->A - p->B)*sinkt)/(p->kappa * p->B);
+    eta =  p->xiv0*sinkt/p->kappa + 
+           p->etav0*coskt/(2*p->B);
+
+    phi = eta/r;        /* eta is positive in direction of motion */
+    cosp = cos(phi);
+    sinp = sin(phi);
+    f = 1-xi/r;         /* xi is positive if poiting inward */
+    Pos(p)[0] = (cosp * dx - sinp * dy)*f;    /* check sign */
+    Pos(p)[1] = (sinp * dx + cosp * dy)*f;
   }
 }
 
