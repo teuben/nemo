@@ -4,11 +4,11 @@
 #   jul-2001            fixed -n bug
 #   jun-2003            optional -u "cd $NEMO;cvs update"
 #   feb-2004            both -t and -T flag
-#   mar-2004            no more NEMOBIN bug
+#   mar-2004            no more NEMOBIN bug; added -d flag to cvs update
 #
 #  BIG BUG: 'mknemo mkplummer.c' would remove the sourcecode and put it into $NEMOBIN !!!!!
 #
-set version="MKNEMO Version 2.2 22-mar-04"
+set version="MKNEMO Version 2.3 23-mar-04"
 if ($#argv == 0) goto usage
 set old_argv=($*)
 
@@ -130,7 +130,7 @@ if ($u) then
     cp $NEMO/src/scripts/mknemo $NEMOBIN/mknemo 
     exec $0 -r $*
   endif
-  (cd $NEMO; cvs update |& grep '^[A-Z]' | grep -v cvs)
+  (cd $NEMO; cvs update -d |& grep '^[A-Z]' | grep -v cvs)
 endif
 
 if ($l) then
@@ -267,6 +267,6 @@ usage:
   echo "  -d        also make doc file (only for true NEMO programs)"
   echo "  -t        cleanup after having made the binaries"
   echo "  -T        cleanup before making the binaries"
-  echo "  -u        run 'cvs update' to NEMO before making"
+  echo "  -u        run 'cvs update -d' to NEMO before making"
   echo "  -l        recompile the library by running 'make libs'"
   exit 1
