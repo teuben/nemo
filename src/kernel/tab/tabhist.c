@@ -77,7 +77,7 @@ string defv[] = {
     "nsigma=-1\n                  delete points more than nsigma",
     "sort=qsort\n                 Sort mode {qsort;...}",
     "dual=f\n                     Dual pass for large number",
-    "VERSION=5.0\n		  28-jan-05 PJT",
+    "VERSION=5.0a\n		  2-feb-05 PJT",
     NULL
 };
 
@@ -268,7 +268,7 @@ local void histogram(void)
 		count[k] = 0;		/* init histogram */
 	under = over = 0;
 
-	ini_moment(&m,4);
+	ini_moment(&m,4,0);
 	for (i=0; i<npt; i++) {
 		if (xmax != xmin)
 		    k = (int) floor((x[i]-xmin)/(xmax-xmin)*nsteps);

@@ -53,11 +53,13 @@ string defv[] = {			/* DEFAULT INPUT PARAMETERS         */
     "formal=false\n			  if true, make publication plot",
     "headline=\n                          header",
 #endif
-    "VERSION=1.5a\n			  15-apr-04 PJT",
+    "VERSION=1.5b\n			  2-feb-05 PJT",
     NULL,
 };
 
 string usage = "compare two N-body snapshots";
+
+string cvsid = "$Id$";
 
 rproc obsfunc;
 bool diffpart;
@@ -182,7 +184,7 @@ local void printquart(real result[], int nbody, real tsnap)
     Qheader = 0;
   }
   qsort(result, nbody, sizeof(real), cmpreal);
-  ini_moment(&m,2);
+  ini_moment(&m,2,0);
   for (i=0; i<nbody; i++)
     accum_moment(&m,result[i],1.0);
   printf("%g   %g %g %g %g %g  %g %g\n",

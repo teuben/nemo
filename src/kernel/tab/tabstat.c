@@ -26,7 +26,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "median=t\n          Compute median too? (can be time consuming)",
     "method=0\n          Method to remove outliers (0=fast 1=slow)",
     "nmax=10000\n        maximum number of data to be read if pipe",
-    "VERSION=1.2\n	 2-mar-02 PJT",
+    "VERSION=1.2a\n	 2-feb-05 PJT",
     NULL
 };
 
@@ -124,7 +124,7 @@ void stat_data()
     ix = (int *) allocate(sizeof(int)*npt);     /* pointer array */
 
     for (j=0; j<nxcol; j++) {           /* initialize moments for all data */
-        ini_moment(&m[j],4);
+        ini_moment(&m[j],4,0);
         for (i=0; i<npt; i++) {
             accum_moment(&m[j],x[j][i],1.0);
         }

@@ -56,7 +56,7 @@ string defv[] = {
     "bootstrap=0\n      Bootstrapping to estimate errors",
     "seed=0\n           Random seed initializer",
     "numrec=f\n         Try the numrec routine instead?",
-    "VERSION=1.9\n      17-apr-04 PJT",
+    "VERSION=1.9a\n     2-feb-05 PJT",
     NULL
 };
 
@@ -699,7 +699,7 @@ void bootstrap(int nboot,
     perm[i] = i;
   for (i=0; i<npar; i++) {
     bpar[i] = fpar[i];
-    ini_moment(&m[i],2);
+    ini_moment(&m[i],2,0);
   }
   
   for (j=0; j<nboot; j++) {

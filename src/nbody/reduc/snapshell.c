@@ -29,11 +29,13 @@ string defv[] = {
     "normalized=t\n              Use normalized radii is svar= is used?",
     "sort=t\n                    Sort snapshot in svar, if needed",
     "first=t\n                   Process only first snapshot?",
-    "VERSION=1.2\n		 19-nov-02 PJT",
+    "VERSION=1.2a\n		 2-feb-05 PJT",
     NULL,
 };
 
 string usage="compute statistics of bodyvariables in a set of shells";
+
+string cvsid="$Id$";
 
 
 Body *btab = NULL;		/* pointer to array of bodies		    */
@@ -172,9 +174,9 @@ findmoment()
   Moment mq, mr, ms;
   bool Qhead = TRUE;
 
-  ini_moment(&mq,4);
-  ini_moment(&mr,4);
-  ini_moment(&ms,4);
+  ini_moment(&mq,4,0);
+  ini_moment(&mr,4,0);
+  ini_moment(&ms,4,0);
 
   if (!Qrad) {
     smin = (svar)(btab, tsnap, 0);

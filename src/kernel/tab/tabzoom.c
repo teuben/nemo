@@ -47,7 +47,7 @@ string defv[] = {
     "maxstat=1\n    Max amount of statistics printed out",
     "cursor=t\n     Go into cursor mode directly?",
     "headline=\n    Headline for plot",
-    "VERSION=1.2a\n 22-oct-03 PJT",
+    "VERSION=1.2b\n 2-feb-05 PJT",
     NULL,
 };
 
@@ -192,7 +192,7 @@ gettable()
             }
             npoints = 0;
             for (j=0; j<nsliders; j++)
-            	ini_moment(&mom[j],4);
+            	ini_moment(&mom[j],4,0);
 
         }
         if (npoints==MAXPOINTS) {
@@ -772,6 +772,11 @@ ini_display()
 box_display()
 {
     plcolor(1);
+    /* should have a more intelligent way to figure out #nidigits needed
+     */
+    xaxvar(3,-1,-1,-1,-1);
+    yaxvar(3,-1,-1,-1,-1);
+
     xaxis ( 2.0,  2.0, 16.0, xplot, -7, xtrans, xlab);
     xaxis ( 2.0, 18.0, 16.0, xplot, -7, xtrans, NULL);
     yaxis ( 2.0,  2.0, 16.0, yplot, -7, ytrans, ylab);

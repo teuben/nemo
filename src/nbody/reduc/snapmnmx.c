@@ -22,11 +22,13 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "mode=min,max\n             Modes: {time,min,max,mean,sigma}",
     "times=all\n                Times of snapshot",
     "format=%g\n                Format to print with",
-    "VERSION=1.2\n		6-nov-93 pjt",
+    "VERSION=1.2a\n		2-feb-05 pjt",
     NULL,
 };
 
 string usage = "find min and/or max of snapshot variables";
+
+string cvsid = "$Id$";
 
 #define MAXOPT    50
 
@@ -101,7 +103,7 @@ nemo_main()
             for (bp = btab, i=0; bp < btab+nbody; bp++, i++) {
                 for (n=0; n<nopt; n++) {
                     aux = fopt[n](bp,tsnap,i);
-                    if (i==0) ini_moment(&var[n],2);
+                    if (i==0) ini_moment(&var[n],2,0);
                     accum_moment(&var[n], aux, 1.0);
                 }
             }

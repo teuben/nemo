@@ -38,7 +38,7 @@ string defv[] = {
     "out=\n         Filename for output table",
     "options=i,x,y,data\n   Output options",
     "maxstat=1\n    Max amount of statistics printed out",
-    "VERSION=0.4b\n 26-jan-00 PJT",
+    "VERSION=0.4c\n 2-feb-05 PJT",
     NULL,
 };
 
@@ -174,7 +174,7 @@ gettable()
             }
             npoints = 0;
             for (j=0; j<nsliders; j++)
-            	ini_moment(&mom[j],4);
+            	ini_moment(&mom[j],4,0);
 
         }
         if (npoints==MAXPOINTS) {
