@@ -20,11 +20,13 @@ string defv[] = {
     "format=%g\n    Format used to print numbers",
     "niter=10\n     max #iterations to ",
     "eps=0.001\n    minimal fractional change in qt to abort iterations",
-    "VERSION=1.0b\n 13-aug-02 PJT",
+    "VERSION=1.0c\n 8-feb-05 PJT",
     NULL,
 };
 
 string usage = "query a NEMO potential in the XY plane";
+
+string cvsid = "$Id$";
 
 #ifndef MAXPT
 #define MAXPT 10001
@@ -32,9 +34,10 @@ string usage = "query a NEMO potential in the XY plane";
 
 local potproc_double mypotd;     /* pointer to potential calculator function : double */
 local potproc_float  mypotf;     /* pointer to potential calculator function : float */
-local void do_potential(bool,int *, double *, double *, double *, double *);
 
-local double report_q(int,double);
+int reset_q(void);
+int add_q(double rad, double phi);
+local double report_q(int,double,int);
 
 void nemo_main(void)
 {
@@ -69,10 +72,10 @@ void nemo_main(void)
   
   for (i=0;i<nr;i++) {
     reset_q();
-    add_q(radii[i], 0);
+    add_q(radii[i], 0.0);
     add_q(radii[i], HALF_PI);
     add_q(radii[i], HALF_PI/2.0);
-    qt0 = report_q(1,-1.0);
+    qt0 = report_q(1,-1.0,1);
     
     dphi  = HALF_PI/2.0;
     nstep = 2;
@@ -80,18 +83,18 @@ void nemo_main(void)
       for (k=0, phi = dphi/2.0; k<nstep-1; k++, phi += dphi) {
 	add_q(radii[i], phi);
       }
-      qt0 = qt;
-      qt = report_q(1,qt0);
+      qt = report_q(1,qt0,j);
       dq = (qt-qt0)/qt;
       dq = ABS(dq);
       if (dq < eps && j>5) {
 	// warning("Early convergence after %d iterations",j);
 	break;
       }
+      qt0 = qt;
       nstep *= 2;
       dphi  /= 2.0;
     }
-    qt = report_q(0,qt0);
+    qt = report_q(0,qt0,j);
   }
 }
 
@@ -134,7 +137,7 @@ add_q (double rad, double phi)
   
 }
 
-double report_q(int debug, double old)
+double report_q(int debug, double old, int niter)
 {
   double x, eps;
 
@@ -149,8 +152,8 @@ double report_q(int debug, double old)
   }
 
   if (debug)
-    dprintf(1,"%g %d %g %g = %g %g\n",rad_q,iter,sum_fr/nsum,max_ft,x,eps);
+    dprintf(debug,"%g %d %g %g = %g %g\n",rad_q,iter,sum_fr/nsum,max_ft,x,eps);
   else
-    printf("%g %g %g\n",rad_q,x,eps);
+    printf("%g %g %g %d\n",rad_q,x,eps,niter);
   return x;
 }
