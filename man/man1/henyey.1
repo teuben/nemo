@@ -1,0 +1,55 @@
+.TH TEST 1NEMO "19 April 1995"
+.SH NAME
+henyey \- search for periodic orbits in a potential (Henyey's method)
+.SH SYNOPSIS
+\fBhenyey\fP [parameter=value]
+.SH DESCRIPTION
+\fBhenyey\fP compute periodic orbits using the Henyey method
+of searching for periodic solutions of a system of 
+differential equations in an (optionally rotating) 2D potential.
+.PP
+The method has been used first by T.S. v. Albada & 
+R.H. Sanders (1982) MNRAS, 201, 303. 
+For more details see also: Henyey (1964) ApJ 139, 309
+.PP
+\fINote: this program is under construction, and should not be used without
+consultation with the author\fP
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBx0=\fP
+Initial x coordinate     
+.TP 20
+\fBy0=\fP
+Initial y coordinate     
+.TP 20
+\fBu0=\fP
+Initial u velocity     
+.TP 20
+\fBv0=\fP
+Initial v velocity     
+.TP 20
+\fBper=\fP
+Period       
+.TP 20
+\fBtype=\fP
+Type of orbit {1,2,3}    
+.TP 20
+\fBome=\fP
+Pattern speed of potential    
+.TP 20
+\fBnorbit=\fP
+Number of orbits to compute   
+.TP 20
+\fBstep=\fP
+Step to increase non-zero position   
+.SH SEE ALSO
+perorb(1NEMO)
+.SH AUTHOR
+Peter Teuben, Tjeerd van Albada
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+xx-may-92	V0.0 ...still working....	PJT
+.fi
