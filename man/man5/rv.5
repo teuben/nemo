@@ -1,0 +1,40 @@
+.TH RV 5NEMO "3 May 1994" 
+.SH NAME
+rv \- binary format for N-body snapshot files
+.SH SYNOPSIS
+.nf
+.B#include <rv.h>
+
+typedef struct rv_snapshot {
+    int   nbody;                /* really: ndark, with nsph=nstar=0 */
+    float *mass;		/* mass[nbody] */
+    float time;
+    float *phase;		/* phase[nbody][2][3]; */
+}
+
+.fi
+.SH DESCRIPTION
+\fIRV\fP is the format used by Ray Carlberg to store N-body  
+particle data. Be careful when trying to read data, as it
+may be machine dependant. In case the data was written in IEEE, but
+has the wrong endianism, a simple byte swappign will suffice, for
+example:
+.nf
+        sun% bswap in=mips out=- len=4 | smooth -rv
+.fi
+will properly import little-endian MIPS data onto a big-endian
+SUN.
+.SH "SEE ALSO"
+snapshot(5NEMO)
+.SH AUTHOR
+Ray Carlberg, Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+~/inc/rv.h
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +2.0i +2.0i
+3-may-94	man written 	PJT
+.fi
