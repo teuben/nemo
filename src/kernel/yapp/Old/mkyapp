@@ -1,0 +1,10 @@
+#! /bin/csh -f
+#
+set dev=$1
+
+if (! -e yapp_$dev.c) then
+  echo Yapp device yapp_$dev.c does not exist, cannot create header file
+  exit 0
+endif
+
+awk '{ if ($1 != "/*") print #define $2 $2_'$dev' }' yapp.h > yapp_$dev.h
