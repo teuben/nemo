@@ -3,6 +3,7 @@
  *	 where all columns are separated by TABs
  *
  *      15-jul-94   created (see also: entab/detab)     pjt
+ *       8-dec-01   standardized MAX_
  *
  */
 
@@ -30,37 +31,39 @@ extern string *burststring();
 string input, output;			/* file names */
 stream instr, outstr;			/* file streams */
 
+#ifndef MAX_COL
+#define MAX_COL          256             /* MAXIMUM number of columns */
+#endif
 
-#define MAXCOL          256             /* MAXIMUM number of columns */
-#define MLINELEN       2048
+#ifndef MAX_LINELEN
+#define MAX_LINELEN       2048
+#endif
 
-bool   keepc[MAXCOL+1];                 /* columns to keep (t/f) */
+bool   keepc[MAX_COL+1];                 /* columns to keep (t/f) */
 string *colnames, *coltypes;
 int    ncol, ntyp;
 
 nemo_main()
 {
     setparams();
-
-
     tabs();
 }
 
 setparams()
 {
-    int    delc[MAXCOL];                    /* columns to skip for output */
+    int    delc[MAX_COL];                    /* columns to skip for output */
     int    i, ndelc;
 
     input = getparam("in");
     output = getparam("out");
 
-    for (i=0; i<MAXCOL; i++)
+    for (i=0; i<MAX_COL; i++)
         keepc[i]=TRUE;
     if (hasvalue("delcol")) {
-        ndelc = nemoinpi(getparam("delcol"),delc,MAXCOL);
-        if (ndelc<=0 || ndelc>MAXCOL)
-            error("Too many columns given (%d) to delete (MAXCOL %d)",
-			ndelc,MAXCOL);
+        ndelc = nemoinpi(getparam("delcol"),delc,MAX_COL);
+        if (ndelc<=0 || ndelc>MAX_COL)
+            error("Too many columns given (%d) to delete (MAX_COL %d)",
+			ndelc,MAX_COL);
         for (i=0; i<ndelc; i++)
             keepc[delc[i]-1] = FALSE;
     } 
@@ -98,7 +101,7 @@ setparams()
 
 tabs()
 {
-    char   line[MLINELEN];          /* input linelength */
+    char   line[MAX_LINELEN];          /* input linelength */
     int    nval, i;
     string *outv;                   /* pointer to vector of strings to write */
     bool   tab;

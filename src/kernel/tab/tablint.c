@@ -3,6 +3,7 @@
  *
  *      13-jan-95  V0.1 prototype - Arie's initial idea
  *      16-feb-95  V0.1 added col*= keywords, out=, 
+ *       8-dec-01  V0.2b   std. MAX_ 
  */
  
 /**************** INCLUDE FILES ********************************/ 
@@ -27,7 +28,7 @@ string defv[] = {
     "collength=\n       * set/override length of columns",
     "linelen=\n         override max linelength of a row",
     "out=\n             * optional output file of selected rows",
-    "VERSION=0.2\n      18-jan-95 PJT",
+    "VERSION=0.2b\n     8-dec-01 PJT",
     NULL
 };
 
@@ -41,11 +42,14 @@ stream instr, linstr;			/* file streams */
 stream outstr = NULL;
 
 
-#ifndef MAXCOL
-#define MAXCOL          256             /* MAXIMUM number of columns */
+#ifndef MAX_COL
+#define MAX_COL          256             /* MAXIMUM number of columns */
 #endif
 
-#define MLINELEN       8196		/* linelength of catenated */
+#ifndef MAX_LINELEN
+#define MAX_LINELEN  2048
+#endif
+
 #define MNEWDAT          80		/* space needed for one number */
 
 #define COL_NONE    0           /* valid column types */
@@ -92,7 +96,7 @@ typedef struct col {            /* definition of a column */
 int maxcol, ncol;
 col *cols = NULL;
 int nlines = 0;
-int linelen = MLINELEN;
+int linelen = MAX_LINELEN;
 
 extern string *burststring(string, string);    
 
@@ -128,8 +132,8 @@ void nemo_main()
 
 read_lintfile(stream instr)
 {
-    char   line[MLINELEN];          /* input linelength */
-    double dval[MAXCOL];            /* number of items (values on line) */
+    char   line[MAX_LINELEN];          /* input linelength */
+    double dval[MAX_COL];            /* number of items (values on line) */
     char   newdat[MNEWDAT];         /* to store new column in ascii */
     int    nval, n, i, icol;
     string *sp;
@@ -138,7 +142,7 @@ read_lintfile(stream instr)
 
     for(;;) {                       /* loop over all lines in lintfile */
 
-        if(fgets(line,MLINELEN,instr)==NULL)
+        if(fgets(line,MAX_LINELEN,instr)==NULL)
             break;
         nlines++;
         dprintf(3,"LINE: (%s)",line);
@@ -168,7 +172,7 @@ read_lintfile(stream instr)
 
 read_col(stream instr, int icol)
 {
-    char   line[MLINELEN];          /* input linelength */
+    char   line[MAX_LINELEN];          /* input linelength */
     string *sp;
     int n;
     col *cp;
@@ -177,7 +181,7 @@ read_col(stream instr, int icol)
 
     for(;;) {                       /* loop over all lines in file(s) */
 
-        if(fgets(line,MLINELEN,instr)==NULL) {
+        if(fgets(line,MAX_LINELEN,instr)==NULL) {
             error("Bad end reading col %d",icol);
             break;
         }
@@ -227,7 +231,7 @@ col *get_col(int icol)
     int i;
 
     if (cols==NULL) {
-        if (maxcol<0) maxcol = MAXCOL;
+        if (maxcol<0) maxcol = MAX_COL;
         dprintf(1,"Allocating space for %d columns\n",maxcol);
         cols = (col *) allocate(maxcol*sizeof(col));
         for (i=0, cp=cols; i<maxcol; i++, cp++) {
@@ -282,13 +286,13 @@ set_column(col *cp, string cmd, string *sp)
 
 read_row(stream instr)
 {
-    char   line[MLINELEN];          /* input linelength */
+    char   line[MAX_LINELEN];          /* input linelength */
     string *sp;
     int n;
     
     for(;;) {                       /* loop over all lines in file(s) */
 
-        if(fgets(line,MLINELEN,instr)==NULL) {
+        if(fgets(line,MAX_LINELEN,instr)==NULL) {
             warning("Bad end reading row");
             break;
         }

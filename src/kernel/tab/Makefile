@@ -15,7 +15,7 @@ OBJFILES=  table.o gettab.o tabselect.o funtab.o getaline.o
 LOBJFILES= $L(table.o) $L(gettab.o) $L(tabselect.o) $L(funtab.o) $L(getaline.o)
 BINFILES = tabhist tablst tabplot tablsqfit tabmath gettab funtab \
 	   tabcomment tabspline
-TESTFILES= 
+TESTFILES= getaline
 
 help:
 	@echo NEMO/src/kernel/tab
@@ -112,4 +112,7 @@ funtab: funtab.c
 		$(NEMO_LIBS) $(EL) -lm
 
 
+getaline:	getaline.c
+	$(CC) -DTESTBED $(CFLAGS) -o getaline getaline.c \
+		$(NEMO_LIBS) $(EL) -lm
 

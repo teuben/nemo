@@ -4,6 +4,7 @@
  *	1-aug-92  written		Peter Teuben
  *	6-aug-92  V1.1 can also delete comment lines	PJT
  *     18-jun-98  V1.1b   increased debug output level by 1 	PJT
+ *      8-dec-01      c   MAX_LINELEN
  */
 
 #include <stdinc.h>
@@ -20,17 +21,20 @@ string defv[] = {
 	"blank=t\n		  Comment blank lines?",
 	"punct=t\n		  Comment lines seem punctiation?",
 	"delete=f\n		  Delete those comment lines?",
-	"VERSION=1.1a\n		  18-jun-98 PJT",
+	"VERSION=1.1c\n		  8-dec-01 PJT",
 	NULL,
 };
 
 string usage = "Add comments to a table, or comments certain lines";
 
+#ifndef MAX_LINELEN
+#define MAX_LINELEN  2048
+#endif
 
 nemo_main()
 {
     stream instr, outstr;
-    char   line[2048], *cp;
+    char   line[MAX_LINELEN], *cp;
     bool   Qalpha, Qblank, Qpunct, Qkeep;
     int    nlines=0, nreal=0;
 
@@ -40,7 +44,7 @@ nemo_main()
     Qblank = getbparam("blank");
     Qpunct = getbparam("punct");
     Qkeep = !getbparam("delete");
-    while (fgets(line,2048,instr) != NULL) {    /* loop all lines */
+    while (fgets(line,MAX_LINELEN,instr) != NULL) {    /* loop all lines */
         nlines++;
 	cp = line;
 

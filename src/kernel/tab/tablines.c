@@ -16,20 +16,20 @@ string defv[] = {
         "select=all\n           lines to select",
 	"comment=t\n		count comment lines too?",
         "nmax=10000\n           Default max allocation",
-	"VERSION=1.1a\n		23-sep-01 PJT",
+	"VERSION=1.1b\n		8-dec-01 PJT",
 	NULL,
 };
 
 string usage="Select lines from a file";
 
-#ifndef MAXLINELEN 
-#define MAXLINELEN  2048
+#ifndef MAX_LINELEN 
+#define MAX_LINELEN  2048
 #endif
 
 nemo_main()
 {
     stream istr, ostr;
-    char line[MAXLINELEN];
+    char line[MAX_LINELEN];
     int nmax,  *select = NULL;
     int nout, next = 0;
     char *selstring=getparam("select");
@@ -57,7 +57,7 @@ nemo_main()
 
     i = j = 0;   /* i counts lines, j points into the sorted 'select' array */
     if (Qsel) next = select[j];
-    while (fgets(line,MAXLINELEN,istr) != NULL) {
+    while (fgets(line,MAX_LINELEN,istr) != NULL) {
         i++;
         if (!Qcom && line[0]=='#') i--;
         if (Qsel) {

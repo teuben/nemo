@@ -5,6 +5,7 @@
  *	28-aug-98   0.2 ?
  *      13-sep-99   0.3 added hms PJT  - but not finished
  *      24-jan-00   0.4 added hms/dms with sign for decimal stuff
+ *       8-dec-01   0.6 std MAX_ macros
  *
    %a, %A     Sun/Mon/...  or Sunday/...
    %b, %B     Jan/...	      January/...
@@ -33,7 +34,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "tohms=\n           list of columns (1..) to convert to hms (0=none)",
     "separator=:\n      separator between output D-M-S.S",
     "format=\n          date/time format",
-    "VERSION=0.5\n      14-jun-00 PJT",
+    "VERSION=0.6\n      8-dec-01 PJT",
     NULL
 };
 
@@ -45,11 +46,16 @@ stream instr, outstr;			/* file streams */
 
 string sep;                             /* separator */
 
-#define MAXCOL          256             /* MAXIMUM number of columns */
-#define MLINELEN       8196		/* max linelength of a line */
+#ifndef MAX_COL
+#define MAX_COL 256
+#endif
 
-bool   keepc[MAXCOL+1];                 /* columns to keep (t/f) in old fmt */
-int    colmode[MAXCOL+1];		/* 0, +/-24, +/- 360 */
+#ifndef MAX_LINELEN
+#define MAX_LINELEN  2048
+#endif
+
+bool   keepc[MAX_COL+1];                 /* columns to keep (t/f) in old fmt */
+int    colmode[MAX_COL+1];		/* 0, +/-24, +/- 360 */
 
 extern string *burststring(string, string);
 
@@ -66,28 +72,28 @@ nemo_main()
 
 setparams()
 {
-    int    col[MAXCOL];                    /* columns to skip for output */
+    int    col[MAX_COL];                    /* columns to skip for output */
     int    ncol, i, j;
 
-    for (i=0; i<MAXCOL; i++)
+    for (i=0; i<MAX_COL; i++)
         colmode[i+1] = 0;
 
     if (hasvalue("todms")) {
-    	ncol = nemoinpi(getparam("todms"),col,MAXCOL);
+    	ncol = nemoinpi(getparam("todms"),col,MAX_COL);
         if (ncol < 0) error("Error parsing todms=%s",getparam("todms"));
         for (i=0; i<ncol; i++) {
             j = ABS(col[i]);
-            if (j>MAXCOL) error("Column %d too large, MAXCOL=%d",j,MAXCOL);
+            if (j>MAX_COL) error("Column %d too large, MAX_COL=%d",j,MAX_COL);
             if (colmode[j] != 0) error("Column %d already specified",j);
             colmode[j] = ( col[i] > 0 ? 360 : -360);
         }
     }
     if (hasvalue("tohms")) {
-    	ncol = nemoinpi(getparam("tohms"),col,MAXCOL);
+    	ncol = nemoinpi(getparam("tohms"),col,MAX_COL);
         if (ncol < 0) error("Error parsing tohms=%s",getparam("tohms"));
         for (i=0; i<ncol; i++) {
             j = ABS(col[i]);
-            if (j>MAXCOL) error("Column %d too large, MAXCOL=%d",j,MAXCOL);
+            if (j>MAX_COL) error("Column %d too large, MAX_COL=%d",j,MAX_COL);
             if (colmode[j] != 0) error("Column %d already specified",j);
             colmode[j] = ( col[i] > 0 ? 24 : -24);
         }
@@ -100,7 +106,7 @@ setparams()
 
 convert(stream instr, stream outstr)
 {
-    char   line[MLINELEN];          /* input linelength */
+    char   line[MAX_LINELEN];          /* input linelength */
     double dval;        
     int    nval, i, nlines, sign, decimalval;
     string *outv;                   /* pointer to vector of strings to write */

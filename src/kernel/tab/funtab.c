@@ -18,6 +18,7 @@
  *     	    4-sep-97    1.1  added linear, made it default (spline has bug) PJT
  *         20-jun-01	gcc 3
  *	   23-sep-01    nemo_file_line
+ *	    8-dec-01    MAX_LINES now in maxsizes.h
  */
 
 
@@ -34,7 +35,7 @@ FunctionTable *ft_open(string fname, int mode, int xcol, int ycol)
 {
     FunctionTable *ftp;
     stream instr;
-    real *coldat[2];
+    real *coldat[2];   /* 2, for X and Y columns */
     int n, colnr[2];
 
     ftp = (FunctionTable *) allocate(sizeof(FunctionTable));
@@ -156,6 +157,11 @@ int ft_close(FunctionTable *ftp)
 
 #ifdef TOOLBOX
 
+#ifndef MAX_LINES  
+#define MAX_LINES   10000
+#endif
+
+
 #include <getparam.h>
 
 string defv[] = {
@@ -166,7 +172,7 @@ string defv[] = {
     "y=\n           Y values to lookup (X to return)",
     "format=%g\n    Output format",
     "mode=linear\n  Lookup mode (spline, linear, near)",
-    "VERSION=1.1\n  4-sep-97 PJT",
+    "VERSION=1.2\n  8-dec-01 PJT",
     NULL,
 };
 
@@ -177,7 +183,7 @@ nemo_main()
     FunctionTable *ftp;
     string fmt1, fmode = getparam("mode");
     char fmt[100];
-    real x[MAXLINES], y;
+    real x[MAX_LINES], y;
     bool Qinv;
     int i, n, mode=FUNTAB_SPLINE;
 
@@ -187,10 +193,10 @@ nemo_main()
     if (streq(fmode,"linear")) mode = FUNTAB_LINEAR;
 
     if (Qinv) {
-        n = nemoinpd(getparam("y"),x,MAXLINES);
+        n = nemoinpd(getparam("y"),x,MAX_LINES);
         if (n<0) error("Error # %d parsing y=; or too many?",n);
     } else {
-        n = nemoinpd(getparam("x"),x,MAXLINES);
+        n = nemoinpd(getparam("x"),x,MAX_LINES);
         if (n<0) error("Error # %d parsing x=; or too many?",n);
     }
     fmt1 = getparam("format");

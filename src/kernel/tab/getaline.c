@@ -18,7 +18,7 @@ NNTP-Posting-Host: kruuna.helsinki.fi
  *	20-jun-01	gcc3
  */
 
-#include <stdinc.h>	/* NEMO !! */
+#include <stdinc.h>
 #include <stdlib.h>
 
 char *getaline(stream f)
@@ -102,13 +102,18 @@ char *getsline(stream f, string *s)
 
 #ifdef TESTBED
 
-main(ac,av)
-int ac;
-char *av[];
+string defv[] = {
+    "in=???\n       input file",
+    "VERSION=1\n    pjt",
+    NULL,
+};
+
+string usage="test getaline";
+
+nemo_main()
 {
-    char *cp, *getaline();
-    FILE *f = fopen(av[1],"r");
-	
+    char *cp;
+    stream f = stropen(getparam("in"),"r");
 
     while ( (cp=getaline(f)) != NULL )
         printf("%s\n",cp);

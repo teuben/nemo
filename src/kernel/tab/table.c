@@ -18,9 +18,9 @@
 #define HUGE 1e20
 #endif
 
-#define MVAL 		 64
-#define MLINELEN       2048
-#define MNEWDAT         256
+#ifndef MAX_LINELEN
+#define MAX_LINELEN  2048
+#endif
 
 /*
  * insert a string 'b' into 'a' replacing the first 'n' positions into 'a'
@@ -60,7 +60,7 @@ int get_line(stream instr, char *line)
 		else if (c=='\n')
 			break;
 		line[i++]=c;
-		if (i>MLINELEN) {
+		if (i>MAX_LINELEN) {
 			warning("get_line: max linelen exceeded; return 0");
 			return 0;
 		}

@@ -18,13 +18,17 @@
  *	15-jan-95 pjt  fixed SINGLEPREC problems
  *	24-jun-99 pjt  fixed reading tables important from DOS
  *	20-jun-01 pjt  gcc 3
+ *       8-dec-01 pjt  MAX_LINELEN
  */
 
 #include <stdinc.h>
 #include <getparam.h>
 #include <extstring.h>
 
-#define MAXLINELEN  2048
+#ifndef MAX_LINELEN
+#define MAX_LINELEN  2048
+#endif
+
 
 extern string *burststring(string,string);
 extern void freestrings(string *);
@@ -44,12 +48,12 @@ int get_atable(
     string *sp;
     int i, n, nr, nret, nline=0, npt=0;
     bool bad;
-    char line[MAXLINELEN];
+    char line[MAX_LINELEN];
     real *dat;
 
     if (ndat<=0 || ncol<=0) error("Illegal ndat=%d ncol=%d",ndat,ncol);
     dprintf(2,"get_atable: parsing into %d columns\n",ncol);
-    while (fgets(line,MAXLINELEN,instr) != NULL) {
+    while (fgets(line,MAX_LINELEN,instr) != NULL) {
         n = strlen(line);
         nline++;                        /* count number of lines read */
         if (line[n-1]=='\n') line[n-1]='\0';      /* patch line */
@@ -107,11 +111,11 @@ int get_ftable(
 {
     int i, n, npos, nline=0, npt=0, ecount=0;
     bool bad;
-    char line[MAXLINELEN];
+    char line[MAX_LINELEN];
     real *dat;
     
     dprintf(2,"get_atable: parsing into %d columns\n",ncol);
-    while (fgets(line,MAXLINELEN,instr) != NULL) {
+    while (fgets(line,MAX_LINELEN,instr) != NULL) {
         n = strlen(line);
         nline++;                        /* count number of lines read */
         if (line[n-1]=='\n') line[n-1]='\0';      /* patch line */
@@ -160,13 +164,15 @@ string defv[] = {
     "colfmt=\n      Input format for fixed fmt case",
     "fmt=%g\n       Output format",
     "nmax=1000\n    Maximum number of rows (data) to read",
-    "VERSION=1.0\n  6-aug-92",
+    "VERSION=1.1\n  8-dec-01",
     NULL,
 };
 
 string usage = "extract real table from a table";
 
-#define MAXCOL   64
+#ifndef MAX_COL
+#define MAX_COL 256
+#endif
 
 nemo_main()
 {
@@ -197,10 +203,10 @@ nemo_main()
 }
 
 
-local string colfmt[MAXCOL];    /* output format */
-local int    coli[MAXCOL];      /* fits either colnr or colpos */
-local int    fmt[MAXCOL];       /* format for output */
-local real  *coldat[MAXCOL];    /* pointers to data */
+local string colfmt[MAX_COL];    /* output format */
+local int    coli[MAX_COL];      /* fits either colnr or colpos */
+local int    fmt[MAX_COL];       /* format for output */
+local real  *coldat[MAX_COL];    /* pointers to data */
 
 do_a(instr, outstr, ndat, scolnr, sfmt)
 stream instr, outstr;
@@ -209,7 +215,7 @@ string scolnr, sfmt;
 {   
     int ncol;
 
-    ncol = nemoinpi(scolnr,coli,MAXCOL);
+    ncol = nemoinpi(scolnr,coli,MAX_COL);
     
     my_alloc(ncol,ndat);
     error("free format not implemented");
@@ -225,7 +231,7 @@ string scolpos, scolfmt, sfmt;
     real *dat;
     char fmt[30], *fmtftoc();
 
-    ncol = nemoinpi(scolpos,coli,MAXCOL);       /* get column positions */
+    ncol = nemoinpi(scolpos,coli,MAX_COL);       /* get column positions */
 
     sp = burststring(scolfmt," ,");             /* get input fmt's */
     if ( (n=xstrlen(sp,sizeof(string))) != ncol+1) 
@@ -255,7 +261,7 @@ int ncol, ndat;
 {
     int i;
 
-    if (ncol > MAXCOL) error("my_alloc: Too many columns");
+    if (ncol > MAX_COL) error("my_alloc: Too many columns");
 
     for (i=0; i<ncol; i++)
         coldat[i] = (real *) allocate(ndat * sizeof(real));
@@ -267,7 +273,7 @@ int ncol, ndat;
 {
     int i;
 
-    if (ncol > MAXCOL) error("my_free: Too many columns");
+    if (ncol > MAX_COL) error("my_free: Too many columns");
 
     for (i=0; i<ncol; i++)
         free ((char *)coldat[i]);

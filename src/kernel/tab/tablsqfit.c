@@ -74,7 +74,7 @@ string defv[] = {
     "estimate=\n        optional estimates (e.g. for ellipse center)",
     "nmax=10000\n       Default max allocation",
     "tab=f\n            short one-line output?",
-    "VERSION=3.2a\n     18-sep-01 PJT",
+    "VERSION=3.2b\n     30-sep-01 PJT",
     NULL
 };
 
@@ -608,26 +608,6 @@ do_imageshift()
     /* this code is on 3b1 ... which we've lot by now */
 }
 
-/*
- * PLANE:       y = b_0 + b_1 * x_1 + b_2 * x_2 + ... + b_n * x_n
- *
- *      used:   n = dimensionality of space in which hyper plane is fit
- */
- 
-do_plane()
-{
-    my_poly(FALSE);
-}
-/*
- * POLYNOMIAL:  y = b_0 + b_1 * x^1 + b_2 * x^2 + ... + b_n * x^n
- *
- *      used:   n = order of polynomial
- */
- 
-do_poly()
-{
-    my_poly(TRUE);
-}
 
 my_poly(bool Qpoly)
 {
@@ -664,6 +644,28 @@ my_poly(bool Qpoly)
     }
   }
 }
+
+/*
+ * PLANE:       y = b_0 + b_1 * x_1 + b_2 * x_2 + ... + b_n * x_n
+ *
+ *      used:   n = dimensionality of space in which hyper plane is fit
+ */
+ 
+do_plane()
+{
+    my_poly(FALSE);
+}
+/*
+ * POLYNOMIAL:  y = b_0 + b_1 * x^1 + b_2 * x^2 + ... + b_n * x^n
+ *
+ *      used:   n = order of polynomial
+ */
+ 
+do_poly()
+{
+    my_poly(TRUE);
+}
+
 
 
 /* fit a peak, 

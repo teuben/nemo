@@ -26,11 +26,18 @@ string input, output;			/* file names */
 stream instr, outstr;			/* file streams */
 int   ninput;				/* number of input files */
 
-#define MAXCOL          256             /* MAXIMUM number of columns */
-#define MLINELEN       8196		/* linelength of catenated */
+#ifndef MAX_COL
+#define MAX_COL 256
+#endif
+
+#ifndef MAX_LINELEN
+#define MAX_LINELEN  2048
+#endif
+
+
 #define MNEWDAT          80		/* space needed for one number */
 
-int    keep[MAXCOL+1];                  /* column numbers to keep */
+int    keep[MAX_COL+1];                 /* column numbers to keep */
 int    nkeep;                           /* actual number of skip columns */
 int    maxcol = 0;                      /* largest column number */
 char   colsep;                          /* character to separate columns */
@@ -63,13 +70,13 @@ local void setparams(void)
     select = getparam("select");
     if (select==NULL || *select=='\0' || streq(select,"all")) {
         Qall = TRUE;
-        for (i=0; i<=MAXCOL; i++) keep[i] = i;
+        for (i=0; i<=MAX_COL; i++) keep[i] = i;
     } else {
         Qall = FALSE;
-        nkeep = nemoinpi(select,keep,MAXCOL);
-        if (nkeep<=0 || nkeep>MAXCOL)
-            error("Too many columns given (%d) to keep (MAXCOL %d)",
-      			nkeep,MAXCOL);
+        nkeep = nemoinpi(select,keep,MAX_COL);
+        if (nkeep<=0 || nkeep>MAX_COL)
+            error("Too many columns given (%d) to keep (MAX_COL %d)",
+      			nkeep,MAX_COL);
         for (i=0; i<nkeep; i++){
             if (keep[i]<0) error("Negative column number %d",keep[i]);
             maxcol = MAX(maxcol,keep[i]);
@@ -95,7 +102,7 @@ local void setparams(void)
 
 local void convert(stream instr, stream outstr)
 {
-    char   line[MLINELEN];          /* input linelength */
+    char   line[MAX_LINELEN];          /* input linelength */
     int    i, nlines, noutv;
     string *outv;                   /* pointer to vector of strings to write */
     char   *cp, *seps=", \t";       /* column separators  */

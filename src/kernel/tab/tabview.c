@@ -38,7 +38,7 @@ string defv[] = {
     "out=\n         Filename for output table",
     "options=i,x,y,data\n   Output options",
     "maxstat=1\n    Max amount of statistics printed out",
-    "VERSION=0.4a\n 21-mar-97 PJT",
+    "VERSION=0.4b\n 26-jan-00 PJT",
     NULL,
 };
 
