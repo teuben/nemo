@@ -5,6 +5,8 @@
 #
 #  17-apr-04    written, for 2490
 #  29-jul-04    checked for 2500
+# 
+# TODO:   needs to add  -D_FILE_OFFSET_BITS=64   on e.g.linux if you want large file support
 
 if ($?NEMO == 0) set NEMO=`pwd`
 
