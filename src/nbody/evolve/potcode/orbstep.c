@@ -328,7 +328,7 @@ real dt;		/* integration time step */
     dx = cosodt * Pos(p)[0] - sinodt * Pos(p)[1];    /* incr rotate by Omega * dt */
     dy = sinodt * Pos(p)[0] + cosodt * Pos(p)[1];
 #else
-    dx = Pos(p)[0];
+    dx = Pos(p)[0];                                  /* don't rotate, to test just epi's */
     dy = Pos(p)[1];
 #endif
     Acc(p)[0] = dx;          /* cheat: store guiding center in Acc */
