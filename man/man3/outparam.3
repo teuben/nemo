@@ -1,0 +1,81 @@
+.TH OUTPARAM 3NEMO "24 April 2002"
+.SH NAME
+outXparam \- output key processing routines for the NEMO user interface 
+.SH SYNOPSIS
+.nf
+.B #include <stdinc.h>
+.B #include <getparam.h>
+.PP
+string outdefv[]={
+	"key1=d\n     Example double",
+	"key2=2i\n	Example 2 integers",
+	NULL,
+};
+.PP
+.B void outparam (string name, string value)
+.B void outiparam(string name, int    value)
+.B void outlparam(string name, long   value)
+.B void outdparam(string name, double value)
+.B void outbparam(string name, bool   value)
+.PP
+.B void outiparams(string, int, int *)
+.B void outlparams(string, int, long *)
+.B void outdparams(string, int, double *)
+.B void outbparams(string, int, bool *)
+.fi
+.SH DESCRIPTION
+These functions provide a simple and uniform mechanism for 
+passing small amount of information in a persistent database
+between NEMO programs. It is part of the command line processing
+package (see also \fIgetparam(3NEMO)\fP), and activated
+by the user
+by passing a set of named output-keywords to the 
+\fIsystem keyword\fP  \fBoutkeys=\fP. 
+These names must be selected from a set of pre-registered 
+output-keyword names that the programmer has defined for 
+each program, much like the program keywords. In fact, 
+much like the \fBdefv[]\fP array of strings, the output
+keys are stored in the \fBoutdefv[]\fP array of strings,
+which the same "\fIkey=value\\nhelp\fP" syntax, expect
+the default value now encodes the type of the parameter
+(double,int,long,bool), preceded by an optional number
+of elements in case it is an array.
+.PP
+For example \fBoutdparam("rms",3.0)\fP would store
+a named value of 3.0 (in double precision) in the
+"rms" slot.
+.SH SEE ALSO
+getparam(3NEMO), nemokeys(1NEMO)
+.SH EXAMPLES
+In this example the noise in a map is used as an input parameter
+in another program. Previously we would have to parse the
+ascii output of a program, e.g.
+.nf
+  % set noise=`ccdstat in=map1.ccd  | grep dispersion | awk '{print $6}'`
+.fi
+but instead request the 'rms' and 'mean' to be exported in a
+small parameter database
+.nf
+  % ccdstat in=map1.ccd    outkeys=rms,mean
+  % set noise=`nemokeys rms format=%10.5f`
+  % ccdmom in=map1.ccd clip=$noise
+.fi
+this example still shows that data values is transferred in ascii mode ($noise)
+and passed into another program. More ideal would be to allow the user interface
+to directly input data, e.g. (note this has not been implemented)
+.nf
+  % ccdmom in=map1.ccd clip=\\$rms
+.fi
+Currently this would confuse the user interface, since \\$rms would refer to
+a program keyword, not the internal value of a output key.
+.SH FILES
+.nf
+$NEMODEF/nemokeys.dat		where NEMO stores the output keys
+.fi
+.SH AUTHOR
+Peter Teuben, Dustin Chertoff
+.SH UPDATE HISTORY
+.nf
+.ta +1i +3.5i
+24-apr-02	document created, no code written yet	Peter Teuben
+.fi

@@ -95,9 +95,15 @@ Filename, if required by external potential.
 .TP
 \fBstartout=t|f\fP
 give snapshot for t=tstart? [t]
-.SH MEMORY USAGE
+.SH RESOURCES
 For a 128k run, memory usage is about 27MB. This will scale roughly
-linearly for larger systems.
+linearly for larger systems. The following little benchmark 
+.nf
+	mkplummer - $N | YancNemo - . tstop=1
+.fi
+Will take about 150" for N=100,000 on a 933MHz Pentium-iii. It
+scales logarithmically, i.e. for N=1,000,000 it will take almost
+1400".
 .SH EXAMPLES
 .SH SEE ALSO
 YANC(1NEMO)

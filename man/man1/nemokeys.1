@@ -1,0 +1,25 @@
+.TH NEMOKEYS 1NEMO "24 April 2002"
+.SH NAME
+nemokeys \- display value of NEMO's output-keys
+.SH SYNOPSIS
+\fBnemokeys key=\fPkey1[,key2,...] .\|.\|.
+.SH DESCRIPTION
+\fInemokeys\fP displays the values of NEMO's output-keys
+(see also \fIoutparam(3NEMO)\fP).  They are useful to store
+single (or small array) named variables, as defined by
+NEMO programs.
+.SH PARAMETERS
+The following parameters are recognized.
+.TP 24
+\fBkey=\fP\fIkey1,key2,...\fP
+Keyword(s) to look the value up for.
+No default.
+.SH SEE ALSO
+outparam(3NEMO), getparam(3NEMO), tsf(1NEMO), filestruct(3NEMO).
+.SH AUTHOR
+Peter Teuben ?
+.SH HISTORY
+.ta +1i +4i
+.nf
+24-apr-02	doc written	PJT
+.fi

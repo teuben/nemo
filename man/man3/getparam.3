@@ -1,4 +1,4 @@
-.TH GETPARAM 3NEMO "20 January 2002"
+.TH GETPARAM 3NEMO "24 April 2002"
 .SH NAME
 getXparam, hasvalue, isaparam, initparam, finiparam, stop \- main startup and command line processing.
 .SH SYNOPSIS
@@ -215,6 +215,11 @@ Possible options include
 .br
 .ns
 .TP 18n
+\fBo\fP
+\- show output keywords (see \fIoutparam(3NEMO)\fP)
+.br
+.ns
+.TP 18n
 \fBq\fP
 \- exit after other help requests.
 .br
@@ -276,7 +281,7 @@ setting of \fBdebug_level\fP is also done through an environment variable
 ~/src/kernel/cores	error.c (stop)
 .fi
 .SH SEE ALSO
-environ(5), dprintf(3NEMO), error(3NEMO), nemoinp(3NEMO), nemomain(3NEMO)
+environ(5), dprintf(3NEMO), error(3NEMO), nemoinp(3NEMO), nemomain(3NEMO), outparam(3NEMO)
 .SH DIAGNOSTICS
 Complains via \fIerror(3NEMO)\fP or the \fIlocal_error()\fP function
 about extra arguments, unknown arguments,  etc.  This will generally result
