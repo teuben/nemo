@@ -1,0 +1,28 @@
+#! /usr/bin/wish -f
+#
+
+set maxcmd 20
+
+frame .frame
+pack .frame
+button .frame.quit -text "Quit" -command exit
+pack .frame.quit
+
+set id 0
+entry .entry -width 50 -relief sunken -textvariable cmd
+.entry configure -background white
+pack .entry -padx 1m -pady 1m 
+bind .entry <Return> {
+    set id [expr $id + 1]
+    if {$id > $maxcmd} {
+        destroy .b[expr $id - $cmdmax]
+    }
+    button .b$id -command "exec <@stdin >@stdout $cmd" \
+        -text $cmd
+    pack .b$id -fill x
+    bind .b$id <2> { destroy .b$id }
+    .b$id invoke
+    .entry delete 0 end
+}
+
+focus .entry
