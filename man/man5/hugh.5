@@ -1,0 +1,41 @@
+.TH HUGH 5NEMO "3 May 1994" 
+.SH NAME
+hugh \- binary format for N-body snapshot files
+.SH SYNOPSIS
+.nf
+.B#include <hugh.h>
+
+typedef struct hugh_snapshot {
+    int   dummy;        /* dummy (fortran) size filler */
+    float time;
+    int   itime;
+    int   nbody;
+    float dt;
+
+    int   pad[204];     /* ??? foffset = (4+2 +200+2 +1)*4; ??? */
+    float *par;         /* float par[3*nbody] */
+
+                        /* ??? foffset = (4+2 +200+2 +3*nobj+2 +1)*4; */
+
+    float *pav;         /* float pav[3*nbody] */
+}
+
+.fi
+.SH DESCRIPTION
+\fIRV\fP is the format used by Couchman in his fortran code to
+store N-particle data. Be careful when trying to read data, as it
+may be machine dependant.
+.SH "SEE ALSO"
+snapshot(5NEMO), rv(5NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+~/inc/rv.h
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +2.0i +2.0i
+3-may-94	man written 	PJT
+.fi
