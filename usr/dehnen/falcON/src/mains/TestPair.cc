@@ -33,24 +33,25 @@ void dmintmin(const body A, const body B, const real T, real&dmin, real&tmin)
 
 int main(int argc, char* argv[])
 {
-  if(argc != 6 && argc != 7 && argc != 9) {
+  if(argc < 6 || argc > 9) {
     cerr<<"\n Testing tree sticky/SPH particle support with a Plummer sphere\n\n"
-	<<" usage: \"TestPair N S Ns s tau [Nc T]\"\n with \n"
+	<<" usage: \"TestPair N S Ns s tau [M Nc T]\"\n with \n"
 	<<" N               : number of particles\n"
 	<<" S = long int    : seed for RNG\n"
 	<<" Ns              : first Nsub bodies to make sticky\n"
         <<" s               : size of sticky/SPH particles\n"
         <<" tau             : time step; if < 0: SPH\n"
+	<<" M  (default 1)  : 1/0: max/sum (h_i,h_j)\n"
 	<<" Nc (default "<<std::setw(2)<<Default::Ncrit
 	<<") :  don't split cell with <=Ncrit bodies\n"
-        <<" T  (default  0) : dump nodes to tree.cells and tree.souls\n";
+        <<" T  (default  0) : dump nodes to tree.cells and tree.leafs\n";
       
     nbdy::exit(1);
   }
 
   register clock_t      cpu0 = clock(), cpu1;
   register real         time_prep, time_tree, time_subt;
-  int                   p=1, T=0;
+  int                   p=1, T=0, Mx=1;
   long                  Seed;
   unsigned              N, NS, Ncrit=Default::Ncrit;
   real                  S,TAU;
@@ -60,6 +61,7 @@ int main(int argc, char* argv[])
   NS    = atoi(argv[p++]); if(NS>N) NS=N;
   S     = atof(argv[p++]);
   TAU   = atof(argv[p++]);
+  if(argc>p) Mx    = atoi(argv[p++]);
   if(argc>p) Ncrit = atoi(argv[p++]);
   if(argc>p) T     = atoi(argv[p++]);
 
@@ -118,12 +120,12 @@ int main(int argc, char* argv[])
   cpu0 = cpu1;
 
   cerr<<" tree.grow() used   "<<time_tree<<" seconds \n";
-  if(T) FALCON.dump_nodes("tree.cells","tree.souls");
+  if(T) FALCON.dump_nodes("tree.cells","tree.leafs");
 
   unsigned Na=0;
   falcON::elem_pair* BP = new falcON::elem_pair[NS];
   cpu0 = clock();
-  FALCON.make_iaction_list(BP,NS,Na,TAU);
+  FALCON.make_iaction_list(BP,NS,Na,Mx,TAU);
   cpu1 = clock();
   time_subt = (cpu1 - cpu0) / real(CLOCKS_PER_SEC);
   cerr<<" tree.make_iaction_list() used "<<time_subt<<" seconds \n";
@@ -131,16 +133,16 @@ int main(int argc, char* argv[])
   register unsigned i;
   if(TAU<zero) {
     ofstream out("pairs.c++");
-    for(i=0; i<min(NS,Na); i++) {
+    for(i=0; i!=min(NS,Na); ++i) {
       out<<setw(6) <<BP[i][0]<<" "
 	 <<setw(6) <<BP[i][1]<<"  "
 	 <<setw(10)<<setprecision(4)
-	 <<sqrt(dist_sq(BODIES->pos(BP[i][0]),BODIES->pos(BP[i][1])))<<endl;
+	 <<dist(BODIES->pos(BP[i][0]),BODIES->pos(BP[i][1]))<<endl;
     }
   } else {
     ofstream out("pairs.c++");
     real dmin=0,tmin=0;
-    for(i=0; i<min(NS,Na); i++) {
+    for(i=0; i!=min(NS,Na); ++i) {
       dmintmin(BODIES->body_no(BP[i][0]),
 	       BODIES->body_no(BP[i][1]),TAU,dmin,tmin);
       out<<setw(6) <<BP[i][0]<<" "
@@ -160,7 +162,7 @@ int main(int argc, char* argv[])
 //     if(i>=NS) Bi.forbid_tree_usage();
 //   falcON TREE2(B,N,0.);
 //   TREE2.grow(porigin);
-//   TREE2.dump_nodes("tre2.cells","tre2.souls");
+//   TREE2.dump_nodes("tre2.cells","tre2.leafs");
 
   delete BODIES;
 }

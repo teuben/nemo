@@ -5,10 +5,10 @@
 //                                                                             |
 // C++ code                                                                    |
 //                                                                             |
-// Copyright Walter Dehnen, 2000-2003                                          |
-// e-mail:   wdehnen@aip.de                                                    |
-// address:  Astrophysikalisches Institut Potsdam,                             |
-//           An der Sternwarte 16, D-14482 Potsdam, Germany                    |
+// Copyright Walter Dehnen, 2000-2004                                          |
+// e-mail:   walter.dehnen@astro.le.ac.uk                                      |
+// address:  Department of Physics and Astronomy, University of Leicester      |
+//           University Road, Leicester LE1 7RH, United Kingdom                |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 #ifndef falcON_included_nmio_h
@@ -36,9 +36,10 @@ namespace nbdy {
     enum SinglePhases {cofm};                      // 1 * 2 * Nsim    reals     
     enum SingleMatrix {KinT,PotT,AmT};             // 1 * Ndim * Ndim reals     
     enum BodiesScalar {mass,pot,rho,aux,eps};      // N               reals     
-    enum BodiesVector {acc,pos,vel};               // N * Ndim        reals     
+    enum SPHScalar    {uin,udin,udex,entr,srho,h}; // NS              reals     
+    enum BodiesVector {acc,pos,vel,auxv};          // N * Ndim        reals     
     enum BodiesPhases {posvel};                    // N * 2 * Ndim    reals     
-    enum BodiesInteger{key,flag};                  // N               integers  
+    enum BodiesInteger{key,flag,numb,numbSPH};     // N               integers  
     enum BodiesShort  {level};                     // N               shorts    
   private:
     nemo_io(const nemo_io&);
@@ -46,9 +47,9 @@ namespace nbdy {
   protected:
     static const int NDM = Ndim, TDM=2*NDM;
     void          *STREAM;
-    mutable int    N,CS;
-    mutable float  SINGLEVECTOR[NDM], SINGLEMATRIX[NDM*NDM], SINGLEPHASES[TDM];
-    mutable float *BODIESSCALAR, *BODIESARRAYS;
+    mutable int    N,NS,CS;
+    mutable real   SINGLEVECTOR[NDM], SINGLEMATRIX[NDM*NDM], SINGLEPHASES[TDM];
+    mutable real  *BODIESSCALAR, *BODIESARRAYS;
     mutable int   *BODIESINTEGER;
     mutable short *BODIESSHORT;
     //-------------------------------------------------------------------------+
@@ -61,7 +62,7 @@ namespace nbdy {
     // The arrays are allocated upon calling read_N() or write_N() and deleted |
     // upon calling reset() or the destructor.                                 |
     //                                                                         |
-    // Alternatively, if your data are stored in an array of floats, you may   |
+    // Alternatively, if your data are stored in an array of reals, you may    |
     // read and write them directly, avoiding the copying. To this end, the    |
     // second argumend of the read() and write() functions is required.        |
     //                                                                         |
@@ -91,51 +92,60 @@ namespace nbdy {
     bool  is_present(const SinglePhases) const;    // can we read: 1 phases?    
     bool  is_present(const SingleMatrix) const;    // can we read: 1 matrix?    
     bool  is_present(const BodiesScalar) const;    // can we read: many scalars?
+    bool  is_present(const SPHScalar)    const;    // can we read: many scalars?
     bool  is_present(const BodiesVector) const;    // can we read: many vectors?
     bool  is_present(const BodiesPhases) const;    // can we read: many phases? 
     bool  is_present(const BodiesInteger)const;    // can we read: many ints?   
     bool  is_present(const BodiesShort)  const;    // can we read: many shorts? 
     //--------------------------------------------------------------------------
-    int   read_N    () const;                      // de-alloc, read N, set N   
-    float read      (const SingleScalar,           // read 1          -> return 
-		     float* =0)          const;    //[O: scalar read]           
-    void  read      (const SingleVector,           // read Ndim       -> storage
-		     float* =0)          const;    //[O: OR           -> here ] 
-    void  read      (const SinglePhases,           // read 2*Ndim     -> storage
-		     float* =0)          const;    //[O: OR           -> here ] 
-    void  read      (const SingleMatrix,           // read Ndim*Ndim  -> storage
-		     float* =0)          const;    //[O: OR           -> here ] 
-    void  read      (const BodiesScalar,           // read N          -> array  
-		     float* =0)          const;    //[O: OR           -> here ] 
-    void  read      (const BodiesVector,           // read N*Ndim     -> array  
-		     float* =0)          const;    //[O: OR           -> here ] 
-    void  read      (const BodiesPhases,           // read N*2*Ndim   -> array  
-		     float* =0)          const;    //[O: OR           -> here ] 
-    void  read      (const BodiesInteger,          // read N          -> array  
-		     int*   =0)          const;    //[O: OR           -> here ] 
-    void  read      (const BodiesShort,            // read N          -> array  
-		     short* =0)          const;    //[O: OR           -> here ] 
+    void  read_N()                 const;          // de-alloc, read N & NS     
+    real  read(const SingleScalar) const;          // read 1          -> return 
+    void  read(const SingleVector) const;          // read Ndim       -> storage
+    void  read(const SinglePhases) const;          // read 2*Ndim     -> storage
+    void  read(const SingleMatrix) const;          // read Ndim*Ndim  -> storage
+    void  read(const BodiesScalar) const;          // read N          -> array  
+    void  read(const SPHScalar)    const;          // read NS         -> array  
+    void  read(const BodiesVector) const;          // read N*Ndim     -> array  
+    void  read(const BodiesPhases) const;          // read N*2*Ndim   -> array  
+    void  read(const BodiesInteger)const;          // read N          -> array  
+    void  read(const BodiesShort)  const;          // read N          -> array  
     //--------------------------------------------------------------------------
-    void  write_N   (const int)          const;    // de-alloc, write N, set N  
-    void  write     (const CoSys)        const;    // write type: coord. system 
-    void  write     (const SingleScalar,           // write 2nd arg -> 1        
-		     const float)        const;    //                           
-    void  write     (const SingleVector,           // write storage -> Ndim     
-		     float* =0)          const;    //[O:    here    -> out    ] 
-    void  write     (const SinglePhases,           // write storage -> 2*Ndim   
-		     float* =0)          const;    //[O:    here    -> out    ] 
-    void  write     (const SingleMatrix,           // write storage -> Ndim*Ndim
-		     float* =0)          const;    //[O:    here    -> out    ] 
-    void  write     (const BodiesScalar,           // write array   -> N        
-		     float* =0)          const;    //[O:    here    -> out    ] 
-    void  write     (const BodiesVector,           // write array   -> N*Ndim   
-		     float* =0)          const;    //[O:    here    -> out    ] 
-    void  write     (const BodiesPhases,           // write array   -> N*2*Ndim 
-		     float* =0)          const;    //[O:    here    -> out    ] 
-    void  write     (const BodiesInteger,          // write array   -> N        
-		     int*   =0)          const;    //[O:    here    -> out    ] 
-    void  write     (const BodiesShort,            // write array   -> N        
-		     short* =0)          const;    //[O:    here    -> out    ] 
+    void  read(const SingleScalar, real*) const;   // read 1          -> return 
+    void  read(const SingleVector, real*) const;   // read Ndim       -> pter   
+    void  read(const SinglePhases, real*) const;   // read 2*Ndim     -> pter   
+    void  read(const SingleMatrix, real*) const;   // read Ndim*Ndim  -> pter   
+    void  read(const BodiesScalar, real*) const;   // read N          -> pter   
+    void  read(const SPHScalar,    real*) const;   // read NS         -> pter   
+    void  read(const BodiesVector, real*) const;   // read N*Ndim     -> pter   
+    void  read(const BodiesPhases, real*) const;   // read N*2*Ndim   -> pter   
+    void  read(const BodiesInteger,int *) const;   // read N          -> pter   
+    void  read(const BodiesShort, short*) const;   // read N          -> pter   
+    //==========================================================================
+    void  write_N (int const&,                     // de-alloc, write N, set N  
+		   int const& = 0)   const;        //[I: N_sph]                 
+    void  write(const CoSys)         const;        // write type: coord. system 
+    void  write(const SingleScalar,
+		real const&)         const;        // write 2nd arg -> 1        
+    //--------------------------------------------------------------------------
+    void  write(const SingleVector)  const;        // write storage -> Ndim     
+    void  write(const SinglePhases)  const;        // write storage -> 2*Ndim   
+    void  write(const SingleMatrix)  const;        // write storage -> Ndim*Ndim
+    void  write(const BodiesScalar)  const;        // write array   -> N        
+    void  write(const SPHScalar)     const;        // write array   -> NS       
+    void  write(const BodiesVector)  const;        // write array   -> N*Ndim   
+    void  write(const BodiesPhases)  const;        // write array   -> N*2*Ndim 
+    void  write(const BodiesInteger) const;        // write array   -> N        
+    void  write(const BodiesShort)   const;        // write array   -> N        
+    //--------------------------------------------------------------------------
+    void  write(const SingleVector, real*)  const; // write pter    -> Ndim     
+    void  write(const SinglePhases, real*)  const; // write pter    -> 2*Ndim   
+    void  write(const SingleMatrix, real*)  const; // write pter    -> Ndim*Ndim
+    void  write(const BodiesScalar, real*)  const; // write pter    -> N        
+    void  write(const SPHScalar,    real*)  const; // write pter    -> NS       
+    void  write(const BodiesVector, real*)  const; // write pter    -> N*Ndim   
+    void  write(const BodiesPhases, real*)  const; // write pter    -> N*2*Ndim 
+    void  write(const BodiesInteger,int *)  const; // write pter    -> N        
+    void  write(const BodiesShort, short*)  const; // write pter    -> N        
   public:
     //--------------------------------------------------------------------------
     void  close     ();                            // close open file           
@@ -143,19 +153,19 @@ namespace nbdy {
     bool  is_open   () const { return STREAM!=0; } // are we ready for output ? 
     //--------------------------------------------------------------------------
     void  allocscalar() const {                    // allocate BODYSCALAR       
-      if(!BODIESSCALAR) { BODIESSCALAR = falcON_New(float,N); }
+      if(!BODIESSCALAR) { BODIESSCALAR = falcON_New(real,max(N,NS)); }
     }
     //--------------------------------------------------------------------------
     void  allocarrays() const {                    // allocate BODYARRAYS       
-      if(!BODIESARRAYS) { BODIESARRAYS = falcON_New(float,N*TDM); }
+      if(!BODIESARRAYS) { BODIESARRAYS = falcON_New(real,max(N,NS)*TDM); }
     }
     //--------------------------------------------------------------------------
     void  allocinteger() const {                   // allocate BODYINTEGER      
-      if(!BODIESINTEGER) { BODIESINTEGER = falcON_New(int,N); }
+      if(!BODIESINTEGER) { BODIESINTEGER = falcON_New(int,max(N,NS)); }
     }
     //--------------------------------------------------------------------------
     void  allocshort() const {                     // allocate BODYSHORT        
-      if(!BODIESSHORT) { BODIESSHORT = falcON_New(short,N); }
+      if(!BODIESSHORT) { BODIESSHORT = falcON_New(short,max(N,NS)); }
     }
     //==========================================================================
     void  de_allocscalar() const {                 // de-allocate BODYSCALAR    
@@ -183,7 +193,8 @@ namespace nbdy {
     //--------------------------------------------------------------------------
     bool  is_open_set(const Set S) const { return OPEN[S]; }
     //--------------------------------------------------------------------------
-    const int& Number() const { return N; }
+    int const&Number   () const { return N; }
+    int const&NumberSPH() const { return NS; }
   };
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
@@ -208,13 +219,13 @@ namespace nbdy {
     void open_set (const Set S)   const { return nemo_io::open_set (S,true); }
     void close_set(const Set S)   const { return nemo_io::close_set(S,true); }
     //--------------------------------------------------------------------------
-    float const&single_vec(c_i)     const { return SINGLEVECTOR[i]; }
-    float const&single_mat(c_i,c_j) const { return SINGLEMATRIX[i*NDM+j]; }
-    float const&single_phs(c_i,c_j) const { return SINGLEPHASES[i*NDM+j]; }
-    float const&bodies_scl(c_i)     const { return BODIESSCALAR[i]; }
-    const float*bodies_vec(c_i)     const { return BODIESARRAYS+NDM*i; }
-    const float*bodies_vel(c_i)     const { return BODIESARRAYS+NDM*(N+i); }
-    const float*bodies_phs(c_i)     const { return BODIESARRAYS+TDM*i; }
+    real const &single_vec(c_i)     const { return SINGLEVECTOR[i]; }
+    real const &single_mat(c_i,c_j) const { return SINGLEMATRIX[i*NDM+j]; }
+    real const &single_phs(c_i,c_j) const { return SINGLEPHASES[i*NDM+j]; }
+    real const &bodies_scl(c_i)     const { return BODIESSCALAR[i]; }
+    const real *bodies_vec(c_i)     const { return BODIESARRAYS+NDM*i; }
+    const real *bodies_vel(c_i)     const { return BODIESARRAYS+NDM*(N+i); }
+    const real *bodies_phs(c_i)     const { return BODIESARRAYS+TDM*i; }
     int   const&bodies_int(c_i)     const { return BODIESINTEGER[i]; }
     short const&bodies_sht(c_i)     const { return BODIESSHORT[i]; }
   };
@@ -239,15 +250,15 @@ namespace nbdy {
     void open_set (const Set S)   const { return nemo_io::open_set (S,false); }
     void close_set(const Set S)   const { return nemo_io::close_set(S,false); }
     //--------------------------------------------------------------------------
-    float&single_vec(c_i)     { return SINGLEVECTOR[i]; }
-    float&single_mat(c_i,c_j) { return SINGLEMATRIX[i*NDM+j]; }
-    float&single_phs(c_i,c_j) { return SINGLEPHASES[i*NDM+j]; }
-    float&bodies_scl(c_i)     { return BODIESSCALAR[i]; }
-    float*bodies_vec(c_i)     { return BODIESARRAYS+NDM*i; }
-    float*bodies_vel(c_i)     { return BODIESARRAYS+NDM*(N+i); }
-    float*bodies_phs(c_i)     { return BODIESARRAYS+TDM*i; }
-    int  &bodies_int(c_i)     { return BODIESINTEGER[i]; }
-    short&bodies_sht(c_i)     { return BODIESSHORT[i]; }
+    real &single_vec(c_i)     const { return SINGLEVECTOR[i]; }
+    real &single_mat(c_i,c_j) const { return SINGLEMATRIX[i*NDM+j]; }
+    real &single_phs(c_i,c_j) const { return SINGLEPHASES[i*NDM+j]; }
+    real &bodies_scl(c_i)     const { return BODIESSCALAR[i]; }
+    real *bodies_vec(c_i)     const { return BODIESARRAYS+NDM*i; }
+    real *bodies_vel(c_i)     const { return BODIESARRAYS+NDM*(N+i); }
+    real *bodies_phs(c_i)     const { return BODIESARRAYS+TDM*i; }
+    int  &bodies_int(c_i)     const { return BODIESINTEGER[i]; }
+    short&bodies_sht(c_i)     const { return BODIESSHORT[i]; }
   };
   //----------------------------------------------------------------------------
   bool time_in_range(const real&, const char*);

@@ -3,21 +3,21 @@
  *                                                                             *
  * falcON_C.h                                                                  *
  *                                                                             *
- *=============================================================================*
+ * C header file                                                               *
+ *                                                                             *
+ * Copyright Walter Dehnen, 2000-2004                                          *
+ * e-mail:   walter.dehnen@astro.le.ac.uk                                      *
+ * address:  Department of Physics and Astronomy, University of Leicester      *
+ *           University Road, Leicester LE1 7RH, United Kingdom                *
+ *                                                                             *
+ *******************************************************************************
  *                                                                             *
  * falcON = Force ALgorithm with Complexity O(N)                               *
  *                                                                             *
- *=============================================================================*
+ *******************************************************************************
  *                                                                             *
  * header file for C users.                                                    *
  * (C++ and FORTRAN users, see files falcON.h and falcON.f, respectively)      *
- *                                                                             *
- * Copyright Walter Dehnen, 2000-2003                                          *
- * e-mail:   wdehnen@aip.de                                                    *
- * address:  Astrophysikalisches Institut Potsdam,                             *
- *           An der Sternwarte 16, D-14482 Potsdam, Germany                    *
- *                                                                             *
- *******************************************************************************
  *                                                                             *
  * C routines  implementing the code described by Dehnen (2000,2002). These    *
  * routines call the original C++ functions, declared in file falcON.h.        *
@@ -82,10 +82,10 @@ extern "C" {                                  /* falcON.h.                    */
  *  using the following routine, which actually does no computation at all.    *
  */
 void  falcON_initialize(const int*,          /* array with flags              */
-			const INPUT_TYPE*,   /* array with masses             */
-			const INPUT_TYPE*,   /* array with x                  */
-			const INPUT_TYPE*,   /* array with y                  */
-			const INPUT_TYPE*,   /* array with z                  */
+			      INPUT_TYPE*,   /* array with masses             */
+			      INPUT_TYPE*,   /* array with x                  */
+			      INPUT_TYPE*,   /* array with y                  */
+			      INPUT_TYPE*,   /* array with z                  */
 #ifdef falcON_INDI
 			      INPUT_TYPE*,   /* array with eps                */
 #endif
@@ -97,7 +97,8 @@ void  falcON_initialize(const int*,          /* array with flags              */
 			const int,           /* N = size of arrays            */
 			const INPUT_TYPE,    /* eps = softening length        */
 			const INPUT_TYPE,    /* theta = opening angle         */
-			const int);          /* type of softening kernel      */
+			const int,           /* type of softening kernel      */
+			const INPUT_TYPE);   /* Newton's constant G           */
 /*                                                                             *
  * The first 11[10] arguments specify the sink and source properties of the    *
  * bodies. Each body has the sink properties: position (x,y,z), mass,          *
@@ -215,7 +216,7 @@ void falcON_approx_grav();
  * well as the interaction and evaluation phase. See src/exe/C/TestGravC.c     *
  * for an example application.                                                 *
  */
-#ifdef falcON_INDI
+#ifdef falcON_ADAP
 /* For individual adaptive softening the routine                               *
  *                                                                            */
   void falcON_adjust_epsi_and_approx_grav(INPUT_TYPE,  /* I: Nsoft            */
@@ -262,22 +263,23 @@ void falcON_estimate_n    (                  /* estimate number density       */
  *******************************************************************************
  *                                                                             *
  *                                                                             *
- * 4 SEARCH FOR AND COUNTING OF NEIGHBOURS AND COLLISION PARTNERS              *
- * ==============================================================              *
+ * 4 SEARCH FOR AND COUNTING OF COLLISION PARTNERS                             *
+ * ===============================================                             *
  *                                                                             *
- * Once a tree structure is established (i.e. after a call to falcON_grow(),   *
- * falcON_grow_centered(), or falcON_reuse()), you can also use it to create   *
- * interaction lists for SPH and sticky particles via the routine              *
+ * Once a tree structure is established (i.e. after a call to falcON_grow()    *
+ * or falcON_reuse()), you can also use it to create interaction lists for SPH *
+ * and sticky particles via the routine                                        *
  */
 void falcON_iactionlist(      int*,          /* list of indices: 1st of pair  */
 		              int*,          /* list of indices: 2nd of pair  */
 			const int,           /* physical size of list         */
 			      int*,          /* actual size of list           */
 			      INPUT_TYPE*,   /* array with body sizes         */
+			const bool,          /* use Max(h_i,h_j) OR h_i+h_j ? */
 			const INPUT_TYPE,    /* time step tau                 */
-			const INPUT_TYPE*,   /* array with Vx                 */
-			const INPUT_TYPE*,   /* array with Vy                 */
-			const INPUT_TYPE*);  /* array with Vz                 */
+			      INPUT_TYPE*,   /* array with Vx                 */
+			      INPUT_TYPE*,   /* array with Vy                 */
+			      INPUT_TYPE*);  /* array with Vz                 */
 /*
  * In case of overflow, i.e. if the number of pairs found exceeds the size     *
  * (3rd arg) of the list (1st&2nd args), a warning is issued to stderr, but    *
@@ -288,6 +290,21 @@ void falcON_iactionlist(      int*,          /* list of indices: 1st of pair  */
  * It is the responsibility of the user to ensure that the arrays for sizes    *
  * and velocity components of the bodies are properly allocated (it is         *
  * sufficient to have entries for all bodies flagged as sticky/SPH.            *
+ *                                                                             *
+ *                                                                             *
+ * 4.1 SPH support: neighbour or interaction partner search                    *
+ * --------------------------------------------------------                    *
+ * In order to make a list of all pairs {i,j} of indices for which             *
+ *                                                                             *
+ *      (1) both flags indicate SPH particles,                                 *
+ * and  (2) at least one flagged being active,                                 *
+ * and  (3)     | x_i - x_j | < max(size_i,size_j)     IF Max==true            *
+ *          OR  | x_i - x_j | < size_i + size_j        IF Max==false           *
+ *                                                                             *
+ * use falcON_iactionlist() with negative time step (7th arg) and provide an   *
+ * array with body sizes (5th arg) but give NULL pointers for the arrays with  *
+ * velocity components (last args). Note that the 6th argument determines      *
+ * whether you search for neihbours or interaction partners.                   *
  *                                                                             *
  *                                                                             *
  * 4.1 Sticky-particle support                                                 *
@@ -302,18 +319,6 @@ void falcON_iactionlist(      int*,          /* list of indices: 1st of pair  */
  * arrays with sizes (5th arg) and velocity components (last args) of the      *
  * bodies.                                                                     *
  *                                                                             *
- *                                                                             *
- * 4.2 SPH support                                                             *
- * ---------------                                                             *
- * In order to make a list of all pairs {i,j} of indices for which             *
- *                                                                             *
- *      (1) both flags indicate SPH particles,                                 *
- * and  (2) at least one flagged being active,                                 *
- * and  (3) | x_i - x_j | < max(size_i,size_j)                                 *
- *                                                                             *
- * use falcON_iactionlist() with negative time step (6th arg) and provide an   *
- * array with body sizes (5th arg) but give NULL pointers for the arrays with  *
- * velocity components (last args).                                            *
  *                                                                             *
  * See file src/C/TestPairC.c for an example application for both supports.    *
  *                                                                             *

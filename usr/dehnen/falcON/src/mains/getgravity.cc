@@ -4,21 +4,21 @@
 // getgravity.cc                                                               |
 //                                                                             |
 // copyright Walter Dehnen, 2002-2003                                          |
-// e-mail:   wdehnen@aip.de                                                    |
-// address:  Astrophysikalisches Institut Potsdam,                             |
-//           An der Sternwarte 16, D-14482 Potsdam, Germany                    |
+// e-mail:   walter.dehnen@astro.le.ac.uk                                      |
+// address:  Department of Physics and Astronomy, University of Leicester      |
+//           University Road, Leicester LE1 7RH, United Kingdom                |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 //                                                                             |
-// computes gravity (pot & acc) at sink position and due to other sources.     |
+// computes gravity (pot & acc) at sink position due to other sources.         |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 //                                                                             |
 // history:                                                                    |
 //                                                                             |
-// v 0.0    23/11/2002  WD  created.                                           |
-// v 0.1    04/02/2003  WD  default falcON parameters automized                |
-// v 0.2    20/03/2003  WD  gravity, action reporting                          |
+// v 0.0    23/11/2002  WD created.                                            |
+// v 0.1    04/02/2003  WD default falcON parameters automized                 |
+// v 0.2    20/03/2003  WD gravity, action reporting                           |
 // v 0.3    23/05/2003  WD automated NEMO history                              |
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO
@@ -41,17 +41,7 @@ string defv[] = {
   "\n                  tolerance parameter at M=M_tot  ",
   "Ncrit="falcON_NCRIT_TEXT
   "\n                  max # bodies in un-split cells  ",
-  "VERSION=0.3"
-#ifdef falcON_PROPER
-  "P"
-#endif
-#ifdef falcON_SSE
-  "S"
-#endif
-#ifdef falcON_INDI
-  "I"
-#endif
-             "\n       23-may-2003 WD\n"
+  "VERSION=0.3" falcON_PSIFLAG "\n       23-may-2003 WD\n"
   "                   compiled " __DATE__ ", " __TIME__ "  ",
   NULL};
 string usage = "getgravity -- computes gravity at test positions using\n"

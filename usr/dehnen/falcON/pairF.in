@@ -1,6 +1,7 @@
-50000	N limit to be .le. NMAX, given by TestPairF
+100000	total number of bodies
 901	random seed
-5000	NS < N number of sph/sticky particles
-0.01	size of bodies
-0.02	time step tau; if tau < 0: SPH, otherwise STICKY
-6	N_crit
+10000	number of SPH bodies
+0.04	their size (all equal in this test)
+-1	time tau < 0 / tau > 0: SPH/sticky particle support
+24	Ncrit
+0	for SPH only: use |r| < max(h_i,h_j) OR < h_i+h_j ?

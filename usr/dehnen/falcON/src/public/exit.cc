@@ -5,9 +5,9 @@
 // C++ code                                                                    |
 //                                                                             |
 // Copyright Walter Dehnen, 2002-2003                                          |
-// e-mail:   wdehnen@aip.de                                                    |
-// address:  Astrophysikalisches Institut Potsdam,                             |
-//           An der Sternwarte 16, D-14482 Potsdam, Germany                    |
+// e-mail:   walter.dehnen@astro.le.ac.uk                                      |
+// address:  Department of Physics and Astronomy, University of Leicester      |
+//           University Road, Leicester LE1 7RH, United Kingdom                |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 #include <public/exit.h>
@@ -21,6 +21,14 @@
 #include <cstdio>
 #include <cstdarg>
 #include <cstring>
+#include <ctime>
+#ifdef unix
+extern "C" {
+#  include <unistd.h>
+#  include <pwd.h>
+}
+#endif
+
 static char main_name[200] = {0};
 //------------------------------------------------------------------------------
 void nbdy::set_name(const char* name)
@@ -94,8 +102,6 @@ void nbdy::warning(const char* fmt,                // I: error message
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 #ifdef falcON_RepAction
-#include <ctime>
-#include <unistd.h>
 //------------------------------------------------------------------------------
 static struct report_data {
   char    FNAME[200];
@@ -217,5 +223,47 @@ nbdy::report::~report()
     else                   fsetpos(REPORT->STREAM,&here);
   }
 }
+#endif                                             // falcON_RepAction          
 ////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+// run information                                                            //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+namespace nbdy { namespace run_info {
+  bool __set = 0;
+  bool __host_known=0;
+  bool __user_known=0;
+  bool __pid_known =0;
+  char __time    [20];
+  char __host   [100];
+  char __user   [100];
+  char __pid    [10];
+  inline void __init() {
+    time_t now = ::time(0);
+    snprintf(__time,20,ctime(&now));
+#ifdef unix
+    gethostname(__host,100);
+    snprintf(__user,100,(getpwuid(geteuid())->pw_name));
+    snprintf(__pid,10,"%d",getpid());
+    __host_known = 1;
+    __user_known = 1;
+    __pid_known  = 1;
+#else
+    snprintf(__host,100,"unknown.host");
+    snprintf(__user,100,"unknown.user");
+    __host_known = 0;
+    __user_known = 0;
+    __pid_known  = 0;
 #endif
+    __set = 1;
+  }
+  void       init() { if(!__set) { __init(); __set=1; } }
+  bool const&host_known() { return __host_known; }
+  bool const&user_known() { return __user_known; }
+  bool const&pid_known () { return __pid_known; }
+  const char*time() { if(!__set) { __init(); __set=1; } return __time; }
+  const char*host() { if(!__set) { __init(); __set=1; } return __host; }
+  const char*user() { if(!__set) { __init(); __set=1; } return __user; }
+  const char*pid () { if(!__set) { __init(); __set=1; } return __pid; }
+} }
+////////////////////////////////////////////////////////////////////////////////

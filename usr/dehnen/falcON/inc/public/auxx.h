@@ -5,10 +5,10 @@
 //                                                                             |
 // C++ code                                                                    |
 //                                                                             |
-// Copyright Walter Dehnen, 2000-2003                                          |
-// e-mail:   wdehnen@aip.de                                                    |
-// address:  Astrophysikalisches Institut Potsdam,                             |
-//           An der Sternwarte 16, D-14482 Potsdam, Germany                    |
+// Copyright Walter Dehnen, 2000-2004                                          |
+// e-mail:   walter.dehnen@astro.le.ac.uk                                      |
+// address:  Department of Physics and Astronomy, University of Leicester      |
+//           University Road, Leicester LE1 7RH, United Kingdom                |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 //                                                                             |
@@ -16,6 +16,7 @@
 //                                                                             |
 // some global macros                                                          |
 // some global constants                                                       |
+// some external constants                                                     |
 // some global typedefs                                                        |
 //                                                                             |
 //-----------------------------------------------------------------------------+
@@ -34,7 +35,18 @@
 #  include <cstdlib>
 #  define falcON_included_cstdlib
 #endif
+#ifndef falcON_included_frst_h
+#  include <public/frst.h>
+#endif
 
+////////////////////////////////////////////////////////////////////////////////
+//                                                                              
+// general falcON macros                                                        
+//                                                                              
+////////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------
+// MPI parallelism                                                              
+//------------------------------------------------------------------------------
 #if defined(falcON_MPI) && defined(falcON_PARALLEL)
                                                    // have MPI and want it?     
 #  ifndef falcON_USE_MPI
@@ -44,63 +56,49 @@
 #  undef  falcON_USE_MPI                           //   don't use it            
 #endif
 
-#ifndef falcON_included_exit_h
-#  include <public/exit.h>
+//------------------------------------------------------------------------------
+// SPH code?                                                                    
+//------------------------------------------------------------------------------
+#if defined(falcON_SPH) && !defined(falcON_INDI)
+#  warning 'falcON_SPH' #defined but not 'falcON_INDI'
+#  warning will #define 'falcON_INDI' now
+#  define falcON_INDI
 #endif
-////////////////////////////////////////////////////////////////////////////////
-//                                                                              
-// 1. INTERNAL PRECISION                                                        
-//                                                                              
-////////////////////////////////////////////////////////////////////////////////
+
+//------------------------------------------------------------------------------
+// adaptive individual softening?                                               
+//------------------------------------------------------------------------------
+#if defined(falcON_ADAP) && !defined(falcON_INDI)
+#  warning
+#  warning 'falcON_ADAP' #defined but not 'falcON_INDI' 
+#  warning we will #undef 'falcON_ADAP'
+#  warning
+#endif
+//------------------------------------------------------------------------------
+// expansion order used in gravity                                              
+//------------------------------------------------------------------------------
+#if defined(Walter) && !defined(falcON_included_ordr_h)
+#  include <walter/ordr.h>
+#endif
+
+#ifndef falcON_ORDER
+#  define falcON_ORDER 3
+#endif
+//------------------------------------------------------------------------------
+// falcON_REAL_IS_FLOAT  and type nbdy::real                                    
+//------------------------------------------------------------------------------
 namespace nbdy {
-
 #if defined(falcON_DOUBLE_SINGLE) || defined(falcON_DOUBLE_DOUBLE)
-
-# undef falcON_REAL_IS_FLOAT
+#  undef falcON_REAL_IS_FLOAT
   typedef double real;
-# ifdef linux
-  using ::cbrt;
-# endif
-
 #else
-
-# define falcON_REAL_IS_FLOAT
+#  define falcON_REAL_IS_FLOAT
   typedef float real;
-# ifdef linux
-  inline real cbrt(real x) { return ::cbrtf(x); }
-# endif
-
 #endif
-
-  using std::sqrt;
-  using std::exp;
-  using std::log;
-  using std::pow;
-
-#ifndef linux
-  inline real cbrt(real x)
-  { 
-    return real( std::pow( double(x), 0.333333333333333333333 ) );
-  }
-#endif
-
-#if defined(falcON_REAL_IS_FLOAT) && defined (__GNUC__) && (__GNUC__ < 3)
-#  ifdef linux
-  inline real sqrt(real x) { return sqrtf(x); }
-#  else
-  inline real sqrt(real x) { return sqrt(double(x)); }
-#  endif
-#endif
-  inline real sqrt(unsigned x)           { return sqrt(real(x)); }
-  inline real pow (float  x, unsigned i) { return std::pow(x, int(i)); }
-  inline real pow (double x, unsigned i) { return std::pow(x, int(i)); }
-
-}                                                  // END: namespace nbdy       
-////////////////////////////////////////////////////////////////////////////////
-//                                                                              
-// 2. DATA TRANSFER VIA BODIES OR ARRAYS & PRECISION USED IN ARRAY ARGS         
-//                                                                              
-////////////////////////////////////////////////////////////////////////////////
+}
+//------------------------------------------------------------------------------
+// data type used for arrays (only important for FORTRAN & C export)            
+//------------------------------------------------------------------------------
 namespace nbdy {
 #if defined(falcON_SINGLE_DOUBLE) || defined(falcON_DOUBLE_DOUBLE)
   typedef double areal;
@@ -108,67 +106,82 @@ namespace nbdy {
   typedef float areal;
 #endif
 }
-////////////////////////////////////////////////////////////////////////////////
-//                                                                              
-// 3. DIMENSIONALITY                                                            
-//                                                                              
-////////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------
+// SSE code?                                                                    
+//------------------------------------------------------------------------------
+#if defined(falcON_REAL_IS_FLOAT) && defined(falcON_SSE)
+#  define  falcON_SSE_CODE
+#else
+#  undef   falcON_SSE_CODE
+#endif
+//------------------------------------------------------------------------------
+// Dimensionality                                                               
+//------------------------------------------------------------------------------
 #ifndef falcON_NDIM
 #  define falcON_NDIM 3
 #endif
-//                                                                              
-// 3.1 # dimensions                                                             
-//                                                                              
-#if falcON_NDIM == 2
-#  define falcON_NSUB 4                  // 2^NDIM                              
-#elif falcON_NDIM == 3
-#  define falcON_NSUB 8                  // 2^NDIM                              
-#else
-#  error falcON_NDIM neither 2 nor 3
-#endif
-
 namespace nbdy {
-  const int Ndim = falcON_NDIM;
-  const int Nsub = falcON_NSUB;
+  const int Ndim = falcON_NDIM;                    // # dimensions              
+  const int Nsub = 1<<Ndim;                        // 2^(# dimensions)          
 }
-
-//                                                                              
-// 3.2 vector and tensors                                                       
-//                                                                              
-
-#ifndef falcON_included_vect_h
-#  include <public/vect.h>
-#endif
-
-#ifndef falcON_included_tens_h
-#  include <public/tens.h>
-#endif
-
-namespace nbdy {
-  typedef class vector<real>   vect;     // plain Ndim dimensional vector       
-  typedef class vector<double> vect_d;   // plain Ndim dimensional vector       
-  typedef class sym1  <real>   ten1;     // symmetric tensor of order 1 = vector
-  typedef class sym2  <real>   ten2;     // symmetric tensor of order 2 = matrix
-  typedef class sym3  <real>   ten3;     // symmetric tensor of order 3         
-  typedef class sym4  <real>   ten4;     // symmetric tensor of order 4         
-
-#if falcON_NDIM == 2
-  typedef real                   amom;
-  typedef double                 amom_d;
+//------------------------------------------------------------------------------
+// macros used to test timings                                                  
+//------------------------------------------------------------------------------
+#ifdef TEST_TIMING
+#  include <ctime>
+#  define SET_I        std::clock_t __C0_TIMING = std::clock();
+#  define SET_T(TEXT)  std::cerr<<TEXT					\
+                                <<(std::clock()-__C0_TIMING)/		\
+                                   double(CLOCKS_PER_SEC)<<'\n';	\
+                       __C0_TIMING = std::clock();
 #else
-  typedef vect                   amom;
-  typedef vector<double>         amom_d;
+#  define SET_I        {}
+#  define SET_T(TEXT)  {}
 #endif
-
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// 4. USEFUL CONSTANTS AND TYPEDEFS                                             
+// elementary falcON functions and types                                        
 //                                                                              
 ////////////////////////////////////////////////////////////////////////////////
+
+//------------------------------------------------------------------------------
+// falcON error & warnings                                                      
+//------------------------------------------------------------------------------
+#ifndef falcON_included_exit_h
+#  include <public/exit.h>
+#endif
+
+//------------------------------------------------------------------------------
+//  vectors and tensors                                                         
+//------------------------------------------------------------------------------
+#ifndef falcON_included_inln_h
+#  include <public/inln.h>
+#endif
+#ifndef falcON_included_tupl_h
+#  include <public/tupl.h>
+#endif
+#ifndef falcON_included_tn3D_h
+#  include <public/tn3D.h>
+#endif
+
 namespace nbdy {
-  typedef unsigned short   indx;              // use only in non-register memory
+  typedef tupel<Ndim,real  > vect;                 // plain Ndim dim vector     
+  typedef tupel<Ndim,double> vect_d;               // plain Ndim dim vector     
+
+#if falcON_NDIM == 2
+  typedef real               amom;
+  typedef double             amom_d;
+#else
+  typedef vect               amom;
+  typedef vect_d             amom_d;
+#endif
+}
+//------------------------------------------------------------------------------
+// useful constants and typedefs                                                
+//------------------------------------------------------------------------------
+namespace nbdy {
+  typedef unsigned short   indx;                   // use only in non-register  
   typedef unsigned int     uint;
   //----------------------------------------------------------------------------
   const   real zero       = 0.,
@@ -185,14 +198,7 @@ namespace nbdy {
                six        = 6.,
                eight      = 8.,
                ten        = 10.,
-               twelve     = 12.,
-               sixten     = 16.,
-               if2        = 0.5,                         // 1 / 2!              
-               if3        = 0.166666666666666666666667,  // 1 / 3!              
-               if4        = 0.0416666666666666666666667, // 1 / 4!              
-               if5        = 0.00833333333333333333333333,// 1 / 5!              
-               if6        = 0.00138888888888888888888889;// 1 / 6!              
-
-}
+               twelve     = 12.;
+}                                                  // END: namespace nbdy       
 ////////////////////////////////////////////////////////////////////////////////
-#endif                                              // falcON_included_auxx_h   
+#endif                                             // falcON_included_auxx_h    

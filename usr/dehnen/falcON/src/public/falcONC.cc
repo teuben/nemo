@@ -2,10 +2,10 @@
 //                                                                             |
 // falcONC.cc                                                                  |
 //                                                                             |
-// copyright Walter Dehnen, 2000-2003                                          |
-// e-mail:   wdehnen@aip.de                                                    |
-// address:  Astrophysikalisches Institut Potsdam,                             |
-//           An der Sternwarte 16, D-14482 Potsdam, Germany                    |
+// copyright Walter Dehnen, 2000-2004                                          |
+// e-mail:   walter.dehnen@astro.le.ac.uk                                      |
+// address:  Department of Physics and Astronomy, University of Leicester      |
+//           University Road, Leicester LE1 7RH, United Kingdom                |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 #define falcONC_cc
@@ -17,17 +17,17 @@
 #endif
 using namespace nbdy;
 //==============================================================================
-#define POSIS   const areal*X,  const areal*Y,  const areal*Z
+#define POSIS   areal*X,  areal*Y,  areal*Z
 #define POSS    X,Y,Z
-#define VELIS   const areal*VX, const areal*VY, const areal*VZ
+#define VELIS   areal*VX, areal*VY, areal*VZ
 #define VELS    VX,VY,VZ
-#define ACCIS         areal*AX,       areal*AY,       areal*AZ
+#define ACCIS   areal*AX,       areal*AY,       areal*AZ
 #define ACCS    AX,AY,AZ
 #define ZEROS   0,0,0
 //=============================================================================#
 // auxiliary data                                                              |
 //=============================================================================#
-static barrays      ARRAYS;                   // body data arrays               
+static abodies      ARRAYS;                   // body data arrays               
 static falcON      *FALCON    = 0;            // pointer  to 'our' falcON       
 static bool         BUILT     = false;        // is our tree build or not?      
 //=============================================================================#
@@ -91,13 +91,13 @@ inline int ktype(const nbdy::kern_type K)
 }
 //=============================================================================#
 inline
-void __falcON_initialize(const int *F, const areal*M, POSIS,
+void __falcON_initialize(const int *F, areal*M, POSIS,
 #ifdef falcON_INDI
 			 areal*E,
 #endif
 			 ACCIS,
 			 areal*PH, areal*RH, const int N, const areal EPS,
-			 const areal TH, const int K)
+			 const areal TH, const int K, const areal G)
 {
   if(FALCON) delete FALCON;
   ARRAYS.set_N   (abs(N));
@@ -115,16 +115,15 @@ void __falcON_initialize(const int *F, const areal*M, POSIS,
 		      abs(real(EPS)),
 		      abs(real(TH)),
 		      ktype(K),
-		      E==0? global      : individual,
+		      E != 0,
+		      real(G),
 		      TH<0? const_theta : theta_of_M);
-  if(E) warning("[falcON_initialize()]: individual eps_i given, but not enabled"
-		"in this version (see make.defs).\n"
-		"                We will use a global eps = %g",abs(real(EPS)));
 #else
   FALCON = new falcON(&ARRAYS,
 		      abs(real(EPS)),
 		      abs(real(TH)),
 		      ktype(K),
+		      real(G),
 		      TH<0? const_theta : theta_of_M);
 #endif
   BUILT  = false;
@@ -132,7 +131,7 @@ void __falcON_initialize(const int *F, const areal*M, POSIS,
 //------------------------------------------------------------------------------
 inline 
 void __falcON_ialist(int*I1, int*I2, const int Ni, int* Nt, areal* S,
-		     const areal tau, VELIS)
+		     const bool Mx, const areal tau, VELIS)
 {
   __falcON_error("falcON_ialist");
   __falcON_grown("falcON_ialist");
@@ -140,7 +139,7 @@ void __falcON_ialist(int*I1, int*I2, const int Ni, int* Nt, areal* S,
   falcON::elem_pair *bl = new falcON::elem_pair[Ni];
   ARRAYS.set_vel (VELS);
   ARRAYS.set_size(S);
-  FALCON->make_iaction_list(bl,Ni,na,tau);
+  FALCON->make_iaction_list(bl,Ni,na,Mx,tau);
   const nbdy::uint iend = min(na,nbdy::uint(Ni));
   for(register nbdy::uint i=0; i<iend; i++) {
     I1[i] = 1+bl[i][0];           // FORTRAN indices = 1 + C indices
@@ -156,19 +155,19 @@ void __falcON_ialist(int*I1, int*I2, const int Ni, int* Nt, areal* S,
 extern "C" {
 
 //=============================================================================#
-void falcON_initialize(const int *F, const areal*M, POSIS,
+void falcON_initialize(const int *F, areal*M, POSIS,
 #ifdef falcON_INDI
 		       areal*E,
 #endif
 		       ACCIS,
 		       areal*PH, areal*RH, const int N, const areal EPS,
-		       const areal TH, const int K)
+		       const areal TH, const int K, const areal G)
 {
   __falcON_initialize(F,M,POSS,
 #ifdef falcON_INDI
 		      E,
 #endif
-		      ACCS,PH,RH,N,EPS,TH,K);
+		      ACCS,PH,RH,N,EPS,TH,K,G);
 }
 //------------------------------------------------------------------------------
 void falcon_initialize_(int *F, areal*M, POSIS,
@@ -177,13 +176,13 @@ void falcon_initialize_(int *F, areal*M, POSIS,
 #endif
 			ACCIS,
 			areal*PH, areal*RH, int*N, areal*EPS,
-			areal*TH, int*K)
+			areal*TH, int*K, areal*G)
 {
   __falcON_initialize(F,M,POSS,
 #ifdef falcON_INDI
 		      E,
 #endif
-		      ACCS,PH,RH,*N,*EPS,*TH,*K);
+		      ACCS,PH,RH,*N,*EPS,*TH,*K,*G);
 }
 //------------------------------------------------------------------------------
 void falcon_initialize__(int *F, areal*M, POSIS,
@@ -192,13 +191,13 @@ void falcon_initialize__(int *F, areal*M, POSIS,
 #endif
 			 ACCIS,
 			 areal*PH, areal*RH, int*N, areal*EPS,
-			 areal*TH, int*K)
+			 areal*TH, int*K, areal*G)
 {
   __falcON_initialize(F,M,POSS,
 #ifdef falcON_INDI
 		      E,
 #endif
-		      ACCS,PH,RH,*N,*EPS,*TH,*K);
+		      ACCS,PH,RH,*N,*EPS,*TH,*K,*G);
 }
 //=============================================================================#
 void falcON_resetsoftening(const areal EPS, const int K)
@@ -338,7 +337,7 @@ void falcon_approx_grav__()
   __falcON_grown("falcon_approx_gravity");
   FALCON->approximate_gravity();
 }  
-#ifdef falcON_INDI
+#ifdef falcON_ADAP
 //=============================================================================#
 void falcON_adjust_epsi_and_approx_grav(areal Nsoft, int Nref, areal fac)
 {
@@ -405,7 +404,7 @@ void falcon_estimate_n__(int*nx)
 }  
 //=============================================================================#
 void falcON_iactionlist(int*I1, int*I2, const int Ni, int* Nt, areal* S,
-			const areal tau, VELIS)
+			const bool Mx, const areal tau, VELIS)
 {
   __falcON_error("falcON_iactionlist");
   __falcON_grown("falcON_iactionlist");
@@ -413,7 +412,7 @@ void falcON_iactionlist(int*I1, int*I2, const int Ni, int* Nt, areal* S,
   falcON::elem_pair *bl = new falcON::elem_pair[Ni];
   ARRAYS.set_vel (VELS);
   ARRAYS.set_size(S);
-  FALCON->make_iaction_list(bl,Ni,na,tau);
+  FALCON->make_iaction_list(bl,Ni,na,Mx,tau);
   const nbdy::uint iend = min(na,nbdy::uint(Ni));
   for(register nbdy::uint i=0; i<iend; i++) {
     I1[i] = bl[i][0];
@@ -425,15 +424,15 @@ void falcON_iactionlist(int*I1, int*I2, const int Ni, int* Nt, areal* S,
 //=============================================================================#
 void falcon_sticky_ (areal*t,int*i1,int*i2,int*ni,int*na,
 		     VELIS,areal*s) {
-  __falcON_ialist(i1,i2,*ni,na,s,*t,VELS); }
+  __falcON_ialist(i1,i2,*ni,na,s,1,*t,VELS); }
 void falcon_sticky__(areal*t,int*i1,int*i2,int*ni,int*na,
 		     VELIS,areal*s) {
-  __falcON_ialist(i1,i2,*ni,na,s,*t,VELS); }
+  __falcON_ialist(i1,i2,*ni,na,s,1,*t,VELS); }
 //=============================================================================#
-void falcon_sph_ (int*i1,int*i2,int*ni,int*na,areal*s) {
-  __falcON_ialist(i1,i2,*ni,na,s,-1,ZEROS); }
-void falcon_sph__(int*i1,int*i2,int*ni,int*na,areal*s) {
-  __falcON_ialist(i1,i2,*ni,na,s,-1,ZEROS); }
+void falcon_sph_ (int*i1,int*i2,int*ni,int*na,int*mx,areal*s) {
+  __falcON_ialist(i1,i2,*ni,na,s,*mx,-1,ZEROS); }
+void falcon_sph__(int*i1,int*i2,int*ni,int*na,int*mx,areal*s) {
+  __falcON_ialist(i1,i2,*ni,na,s,*mx,-1,ZEROS); }
 
 //=============================================================================#
 areal falcON_root_center(const int i)
@@ -512,10 +511,7 @@ int falcON_softening()
 {
   if(__falcON_warning("falcON_softening")) return 0;
 #ifdef falcON_INDI
-  switch(FALCON->softening()) {
-  case nbdy::global:              return 0;
-  case nbdy::individual: default: return 1;
-  }
+  return FALCON->use_individual_eps();
 #else
   return 0;
 #endif
@@ -525,10 +521,7 @@ int falcon_softening_()
 {
   if(__falcON_warning("falcon_softening")) return 0;
 #ifdef falcON_INDI
-  switch(FALCON->softening()) {
-  case nbdy::global:              return 0;
-  case nbdy::individual: default: return 1;
-  }
+  return FALCON->use_individual_eps();
 #else
   return 0;
 #endif
@@ -538,10 +531,7 @@ int falcon_softening__()
 {
   if(__falcON_warning("falcon_softening")) return 0;
 #ifdef falcON_INDI
-  switch(FALCON->softening()) {
-  case nbdy::global:              return 0;
-  case nbdy::individual: default: return 1;
-  }
+  return FALCON->use_individual_eps();
 #else
   return 0;
 #endif

@@ -3,7 +3,7 @@ C     Here, we use C-style macros to obtain correct input data type.       |
 C     For this to work, we need first to process this file with the        |
 C     C preprocessor cpp, see makefile make.public                         |
 C--------------------------------------------------------------------------+
-#if defined(SINGLE_DOUBLE) || defined(DOUBLE_DOUBLE)
+#if defined(falcON_SINGLE_DOUBLE) || defined(falcON_DOUBLE_DOUBLE)
 #define INPUT_TYPE DOUBLE PRECISION
 #else
 #define INPUT_TYPE REAL
@@ -46,13 +46,14 @@ C---------------------------------------------------------------------------
 
       INCLUDE 'falcON.f'
 
-      INTEGER NMAX
+      INTEGER MAX,NMAX
       INPUT_TYPE RMAX,PI,TPI
       PARAMETER(NMAX=100000)
       PARAMETER(RMAX=1.E3, PI=3.14159265358979323846264338328, TPI=2*PI)
 
       INTEGER    N,NCRIT,NS,NA,IN,I,S,CPU0,CPU1,I1(NMAX),I2(NMAX)
-      INPUT_TYPE TAU,SIZE,TIME,DIST,TMP,DX(3),DV(3),DMIN,TMIN,EPS,TH
+      INPUT_TYPE TAU,SIZE,TIME,DIST,TMP,DX(3),DV(3)
+      INPUT_TYPE DMIN,TMIN,EPS,TH
       INTEGER    FL(NMAX),ZERO(3),D,K
       INPUT_TYPE M(NMAX),X(NMAX),Y(NMAX),Z(NMAX)
       INPUT_TYPE VX(NMAX),VY(NMAX),VZ(NMAX),SZ(NMAX)
@@ -70,11 +71,11 @@ C---------------------------------------------------------------------------
 
       WRITE(*,'(" Testing the pair finder using a Plummer model")')
       WRITE(*,'(" sticky particle for tau>=0, SPH for tau<0")')
-      WRITE(*,'("N(<"I6") = ")') NMAX
+      WRITE(*,'("N(<="I6")   = ")') NMAX
       READ(*,*) N
       WRITE(*,'("SEED            = ")')
       READ(*,*) S
-      WRITE(*,'("NS < N          = ")')
+      WRITE(*,'("NS <= N         = ")')
       READ(*,*) NS
       WRITE(*,'("body size       = ")')
       READ(*,*) SIZE
@@ -82,6 +83,9 @@ C---------------------------------------------------------------------------
       READ(*,*) TAU
       WRITE(*,'("NCRIT           = ")')
       READ(*,*) NCRIT
+      WRITE(*,'(" |r| < max(h_i,h_j) (1) OR")')
+      WRITE(*,'(" |r| < h_i+h_j      (0)  ? :")')
+      READ(*,*) MAX
       
       CALL SRAND48(S)
       MI  =1./N
@@ -137,7 +141,7 @@ C---------------------------------------------------------------------------
       WRITE(*,'(" time needed by tree growth:      "F13.6)') TIME
 
       IF(TAU .LT. 0) THEN
-         CALL FALCON_SPH(I1,I2,NMAX,NA,SZ)
+         CALL FALCON_SPH(I1,I2,NMAX,NA,MAX,SZ)
       ELSE
          CALL FALCON_STICKY(TAU,I1,I2,NMAX,NA,VX,VY,VZ,SZ)
       ENDIF

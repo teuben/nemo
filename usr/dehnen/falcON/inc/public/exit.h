@@ -5,10 +5,10 @@
 //                                                                             |
 // C++ code                                                                    |
 //                                                                             |
-// Copyright Walter Dehnen, 2002-2003                                          |
-// e-mail:   wdehnen@aip.de                                                    |
-// address:  Astrophysikalisches Institut Potsdam,                             |
-//           An der Sternwarte 16, D-14482 Potsdam, Germany                    |
+// Copyright Walter Dehnen, 2002-2004                                          |
+// e-mail:   walter.dehnen@astro.le.ac.uk                                      |
+// address:  Department of Physics and Astronomy, University of Leicester      |
+//           University Road, Leicester LE1 7RH, United Kingdom                |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 #ifndef falcON_included_exit_h
@@ -34,8 +34,7 @@ namespace nbdy {
   template<typename TYPE>
   TYPE* PointerCheck(TYPE*pter, const char*file, int const&line)
   {
-    if (pter == 0 )
-      error("[%s.%d]: cannot allocate memory",file,line);
+    if (pter == 0 ) error("[%s.%d]: cannot allocate memory",file,line);
     return pter;
   }
   //////////////////////////////////////////////////////////////////////////////
@@ -43,6 +42,9 @@ namespace nbdy {
   //////////////////////////////////////////////////////////////////////////////
 #define falcON_New(TYPE,SIZE)					\
   PointerCheck(new TYPE[SIZE],__FILE__,__LINE__)
+  //----------------------------------------------------------------------------
+#define falcON_New16(TYPE,SIZE)					\
+  PointerCheck(new16<TYPE>(SIZE),__FILE__,__LINE__)
   //----------------------------------------------------------------------------
 #define falcON_Memory(POINTER)					\
   PointerCheck(POINTER,__FILE__,__LINE__)
@@ -59,13 +61,13 @@ namespace nbdy {
 #define falcON_WarningF(MSGS,FUNC)				\
   warning("[%s.%d]: in %s: %s",__FILE__,__LINE__,FUNC,MSGS)
   //////////////////////////////////////////////////////////////////////////////
-  //                                                                            
-  // reporting actions to narrow code position of mysterious aborts             
-  //                                                                            
-  // instead of functions begin_report() and end_report(), we use an object     
-  // struct report, so that the implicit call to the destructor can be used     
-  // to replace a call to end_report().                                         
-  //                                                                            
+  //                                                                          //
+  // reporting actions to narrow code position of mysterious aborts           //
+  //                                                                          //
+  // instead of functions begin_report() and end_report(), we use an object   //
+  // struct report, so that the implicit call to the destructor can be used   //
+  // to replace a call to end_report().                                       //
+  //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
 #ifdef falcON_PROPER
 #  ifndef falcON_RepAction
@@ -86,6 +88,28 @@ namespace nbdy {
   struct report { report(const char*, ...) {}
                   static void info(const char*, ...) {} };
 #endif
+  //////////////////////////////////////////////////////////////////////////////
+  //                                                                          //
+  // support for code information                                             //
+  //                                                                          //
+  //////////////////////////////////////////////////////////////////////////////
+  namespace compile_info {                         // info for general usage    
+    bool const&is_set();                           //   is info provided?       
+    const char*version();                          //   version number          
+    const char*origin();                           //   version origin          
+    const char*time();                             //   time of compilation     
+    const char*compiler();                         //   compiler used           
+  }                                                // implemented in main.h     
+  namespace run_info {                             // info for general usage    
+    bool const&host_known();
+    bool const&user_known();
+    bool const&pid_known();
+    const char*time();                             //   time of run             
+    const char*host();                             //   host of run             
+    const char*user();                             //   user of run             
+    const char*pid();                              //   pid of run              
+    void       init();                             //   set info up             
+  }                                                // implemented in exit.cc    
 }                                                  // END: namespace nbdy       
 ////////////////////////////////////////////////////////////////////////////////
 #endif                                             // falcON_included_exit_h    

@@ -6,28 +6,24 @@
 // C++ code                                                                    |
 //                                                                             |
 // Copyright Walter Dehnen, 2000-2003                                          |
-// e-mail:   wdehnen@aip.de                                                    |
-// address:  Astrophysikalisches Institut Potsdam,                             |
-//           An der Sternwarte 16, D-14482 Potsdam, Germany                    |
+// e-mail:   walter.dehnen@astro.le.ac.uk                                      |
+// address:  Department of Physics and Astronomy, University of Leicester      |
+//           University Road, Leicester LE1 7RH, United Kingdom                |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 //                                                                             |
 // defines                                                                     |
 //                                                                             |
-// class sticky_soul                                                           |
-// class sticky_cell                                                           |
-// class sticky_tree                                                           |
-// class basic_finder                                                          |
-// class sticky_finder                                                         |
-// class neighbour_finder                                                      |
-// class neighbour_counter                                                     |
+// class stsp_leaf                                                             |
+// class stsp_cell                                                             |
+// class stsp_estimator                                                        |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 #ifndef falcON_included_stic_h
 #define falcON_included_stic_h
 
-#ifndef falcON_included_grat_h
-#  include <public/grat.h>
+#ifndef falcON_included_grav_h
+#  include <public/grav.h>
 #endif
 #ifndef falcON_included_ionl_h
 #  include <public/ionl.h>
@@ -37,217 +33,286 @@
 namespace nbdy {
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
-  // class nbdy::sticky_soul                                                  //
+  // class nbdy::stsp_leaf                                                    //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
-  class sticky_soul : public basic_soul {
-    sticky_soul           (const sticky_soul&);    // not implemented           
-    sticky_soul& operator=(const sticky_soul&);    // not implemented           
+  class stsp_leaf : public basic_leaf {
+    stsp_leaf           (const stsp_leaf&);        // not implemented           
+    stsp_leaf& operator=(const stsp_leaf&);        // not implemented           
     //--------------------------------------------------------------------------
-    // data of class sticky_soul                                                
+    // data of class stsp_leaf (only static)                                    
+    //--------------------------------------------------------------------------
+  public:
+    struct leaf_data {
+      vect VEL;                                    // velocity / size^2         
+    };
+    //--------------------------------------------------------------------------
+    // private data access                                                      
     //--------------------------------------------------------------------------
   private:
-    real SIZE;                                     // physical size             
-    real SIZEQ;                                    // (physical size)^ 2        
-    vect VEL;                                      // velocity                  
-    uint NUM;                                      // # neighbours              
-  public:
+#define __data  static_cast<leaf_data*>(PROP)
+    //--------------------------------------------------------------------------
+    real           &size ()       { return SCAL; }
+    uint           &num  ()       { return AUXU; }
+    real           &sizeq()       { return __data->VEL[0]; }
+    vect           &vel  ()       { return __data->VEL; }
+    //--------------------------------------------------------------------------
+    real      const&size () const { return SCAL; }
+    uint      const&num  () const { return AUXU; }
+    real      const&sizeq() const { return __data->VEL[0]; }
+    vect      const&vel  () const { return __data->VEL; }
+#undef __data
     //--------------------------------------------------------------------------
     // non-const methods                                                        
     //--------------------------------------------------------------------------
-    void inc() { NUM++; }
+  public:
+    void inc() { ++(num()); }
+    void set_data(leaf_data*const&d) { PROP = static_cast<void*>(d); }
     //--------------------------------------------------------------------------
     // const data access via friends                                            
     //--------------------------------------------------------------------------
-    friend uint const&mybody(const sticky_soul*const&O) { return O->mybody(); } 
-    friend uint const&num   (const sticky_soul*const&O) { return O->NUM; } 
-    friend vect const&pos   (const sticky_soul*const&O) { return O->pos(); } 
-    friend vect const&vel   (const sticky_soul*const&O) { return O->VEL; } 
-    friend real const&size  (const sticky_soul*const&O) { return O->SIZE; } 
-    friend real const&sizeq (const sticky_soul*const&O) { return O->SIZEQ; } 
+    friend uint const&mybody(const stsp_leaf*const&L) { return L->mybody(); } 
+    friend uint const&num   (const stsp_leaf*const&L) { return L->num(); }
+    friend vect const&pos   (const stsp_leaf*const&L) { return L->pos(); } 
+    friend vect const&vel   (const stsp_leaf*const&L) { return L->vel(); } 
+    friend real const&size  (const stsp_leaf*const&L) { return L->size(); } 
+    friend real const&sizeq (const stsp_leaf*const&L) { return L->sizeq(); } 
     //--------------------------------------------------------------------------
-    // simple manipulations for use with bodies                                 
+    // copy data from body to leaf                                              
     //--------------------------------------------------------------------------
     template<typename bodies_type>
     void set_sticky(const bodies_type*const&B) {
-      SIZE=B->size(mybody());
-      VEL =B->vel (mybody());
-      NUM =0;
-    }
+      size() = B->size(mybody());
+      vel () = B->vel (mybody());
+      num () = 0u;
+    };
     //--------------------------------------------------------------------------
     template<typename bodies_type>
-    void set_sph   (const bodies_type*const&B) {
-      SIZE =B->size(mybody());
-      SIZEQ=SIZE*SIZE;
-      NUM  =0;
-    }
+    void set_sph(const bodies_type*const&B) {
+      size () = B->size(mybody());
+      sizeq() = square(size());
+      num  () = 0u;
+    };
     //--------------------------------------------------------------------------
-    // simple manipulations for use with barrays                                
+    // copy data from leaf to body                                              
     //--------------------------------------------------------------------------
-    void set_sticky(const barrays*const&B) {
-      SIZE  =B->size (mybody());
-      VEL[0]=B->vel_x(mybody());
-      VEL[1]=B->vel_y(mybody());
-#if falcON_NDIM > 2
-      VEL[2]=B->vel_z(mybody());
-#endif
-      NUM=0;
+    template<typename bodies_type>
+    void copy_to_bodies_num(const bodies_type*const&B) const {
+      B->num(mybody()) = num();
     }
     //--------------------------------------------------------------------------
     // dump data                                                                
     //--------------------------------------------------------------------------
     static void dump_head(std::ostream& o) {
-      o<<"     #";
-      basic_soul::dump_head(o);
+      basic_leaf::dump_head(o);
       o<<"           size [velocity]";
     }
     //--------------------------------------------------------------------------
-    static void dump(std::ostream            &o, 
-		     const sticky_soul* const&S,
-		     int                const&index) {
-      o<<' '<<setw(5)<<index;
-      basic_soul::dump(o,S);
-      o<<' '<<setw(5)<<setprecision(4)<<nbdy::size(S);
-      if(S->is_set(flag::STICKY))
+    void dump(std::ostream &o) const
+    {
+      basic_leaf::dump(o);
+      o<<' '<<setw(5)<<setprecision(4)<<size();
+      if(this->is_set(flag::STICKY))
 	for(register indx d=0; d!=Ndim; ++d)
-	  o<<' '<<setw(7)<<setprecision(4)<<nbdy::vel(S)[d];
+	  o<<' '<<setw(7)<<setprecision(4)<<vel()[d];
     }
+    //--------------------------------------------------------------------------
   };
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
-  // class nbdy::sticky_cell                                                  //
+  // class nbdy::stsp_cell                                                    //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
-  class sticky_cell : public basic_cell {
-    sticky_cell           (const sticky_cell&);    // not implemented           
-    sticky_cell& operator=(const sticky_cell&);    // not implemented           
+  class stsp_cell : public basic_cell {
+    stsp_cell           (const stsp_cell&);        // not implemented           
+    stsp_cell& operator=(const stsp_cell&);        // not implemented           
+    //--------------------------------------------------------------------------
+    // friendships                                                              
+    //--------------------------------------------------------------------------
+    friend class stsp_lister;                      // for alloc of srce_data    
     //--------------------------------------------------------------------------
     // types                                                                    
     //--------------------------------------------------------------------------
   public:
-    typedef sticky_soul soul_type;                 // type of associated souls  
+    typedef stsp_leaf leaf_type;                   // type of associated leafs  
     //--------------------------------------------------------------------------
     // data of class cell                                                       
     //--------------------------------------------------------------------------
-  private:
-    vect    POS;                                   // position center           
-    vect    VEL;                                   // velocity center           
-    real    SIZE;                                  // size                      
-    union {
-      real  VRAD;                                  // radius of velocity sphere 
-      real  RMAX;                                  // radius of position sphere 
+    struct srce_data {
+      vect    POS;                                 // position center           
+      vect    VEL;                                 // velocity center           
+      real    SIZE;                                // size including leaf sizes 
+      union {
+	real  VRAD;                                // radius of position sphere 
+	real  RMAX;                                // radius of velocity sphere 
+      };
     };
+#define __srce static_cast<srce_data*>(AUX1.PTER)
+    //--------------------------------------------------------------------------
+    // private data access                                                      
+    //--------------------------------------------------------------------------
+  private:
+    vect      const&pos () const { return __srce->POS; }
+    vect      const&vel () const { return __srce->VEL; }
+    real      const&vrad() const { return __srce->VRAD; }
+    real      const&rmax() const { return __srce->RMAX; }
+    real      const&size() const { return __srce->SIZE; }
+    uint      const&numb() const { return AUX2.NUMB; }
   public:
+    //--------------------------------------------------------------------------
+    void set_srce(srce_data*const&srce)
+    {
+      AUX1.PTER = static_cast<void*>(srce);
+    }
     //--------------------------------------------------------------------------
     // non-const data access via members                                        
     //--------------------------------------------------------------------------
-    vect&vel () { return VEL; }
-    vect&pos () { return POS; }
-    real&rmax() { return RMAX; }
-    real&size() { return SIZE; }
-    real&vrad() { return VRAD; }
+    vect&vel () { return __srce->VEL; }
+    vect&pos () { return __srce->POS; }
+    real&vrad() { return __srce->VRAD; }
+    real&rmax() { return __srce->RMAX; }
+    real&size() { return __srce->SIZE; }
+    uint&numb() { return AUX2.NUMB; }
+#undef __srce
     //--------------------------------------------------------------------------
     // const data access via friends                                            
     //--------------------------------------------------------------------------
-    friend real const&radius(const sticky_cell*const&O) { return O->radius(); } 
-    friend vect const&center(const sticky_cell*const&O) { return O->center(); } 
-    friend int  const&number(const sticky_cell*const&O) { return O->number(); } 
-    friend vect const&vel   (const sticky_cell*const&O) { return O->VEL; } 
-    friend vect const&pos   (const sticky_cell*const&O) { return O->POS; } 
-    friend real const&rmax  (const sticky_cell*const&O) { return O->RMAX; } 
-    friend real const&size  (const sticky_cell*const&O) { return O->SIZE; } 
-    friend real const&vrad  (const sticky_cell*const&O) { return O->VRAD; } 
-    //--------------------------------------------------------------------------
-    // boolean information via friends                                          
-    //--------------------------------------------------------------------------
-    friend bool has_cell_kids(const sticky_cell*const&C) {
-      return C->has_cell_kids(); }
-    friend bool has_soul_kids(const sticky_cell*const&C) {
-      return C->has_soul_kids(); }
-    friend bool is_twig          (const sticky_cell*const&C) {
-      return C->is_twig(); }
-    //--------------------------------------------------------------------------
-    // flag manipulation                                                        
-    //--------------------------------------------------------------------------
-    void add_active_flag(const sticky_soul* const&S)
-    {
-      add_active_flag_from_soul(S);
-    }
-    //--------------------------------------------------------------------------
-    void add_active_flag(const sticky_cell* const&C)
-    {
-      add_active_flag_from_cell(C);
-    }
+    friend vect const&vel   (const stsp_cell*const&C) { return C->vel(); } 
+    friend vect const&pos   (const stsp_cell*const&C) { return C->pos(); } 
+    friend real const&size  (const stsp_cell*const&C) { return C->size(); } 
+    friend real const&vrad  (const stsp_cell*const&C) { return C->vrad(); } 
+    friend real const&rmax  (const stsp_cell*const&C) { return C->rmax(); } 
+    friend uint const&numb  (const stsp_cell*const&C) { return C->numb(); } 
     //--------------------------------------------------------------------------
     // dump  data                                                               
     //--------------------------------------------------------------------------
     static void dump_head(std::ostream&o) {
-      o<<"     #";
       basic_cell::dump_head(o);
-      o<<"           size     rmax/ velocity           [vrad]";
+      o<<"           size         rmax/velocity            vrad]";
     }
     //--------------------------------------------------------------------------
-    static void dump(std::ostream            &o, 
-		     const sticky_cell* const&C,
-		     int                const&index) {
-      o<<' '<<setw(5)<<index;
-      basic_cell::dump(o,C);
-      o<<' '<<setw(6)<<setprecision(4)<<nbdy::size(C);
-      if(C->is_set(flag::STICKY)) {
+    void dump(std::ostream &o) const
+    {
+      basic_cell::dump(o);
+      o<<' '<<setw(6)<<setprecision(4)<<size();
+      if       (this->is_set(flag::STICKY)) {
 	for(register indx d=0; d!=Ndim; ++d)
-	  o<<' '<<setw(9)<<setprecision(4)<<nbdy::vel(C)[d];
-	o<<' '<<setw(5)<<setprecision(4)<<nbdy::vrad(C);
-      }
-      else if (C->is_set(flag::SPH))
-	o<<' '<<setw(5)<<setprecision(4)<<nbdy::rmax(C);
+	  o<<' '<<setw(9)<<setprecision(4)<<vel()[d];
+	o<<' '<<setw(5)<<setprecision(4)<<vrad();
+      } else if(this->is_set(flag::SPH))
+	o<<' '<<setw(5)<<setprecision(4)<<rmax();
     }
+    //--------------------------------------------------------------------------
   };
   //////////////////////////////////////////////////////////////////////////////
   //                                                                            
-  // class nbdy::sticky_tree                                                    
+  // class nbdy::stsp_estimator                                                 
+  //                                                                            
+  // NOTE on the meaning of the activity and stsp flags                         
+  //                                                                            
+  // Each cell knows both the total number of leafs (basic_cell::number()) and  
+  // the number of stsp cells (stsp_cell::numb()).                              
+  // If    numb(stsp_cell*) == 0                   then  is_sph(stsp_cell*)==0  
+  // If    numb(stsp_cell*) == number(stsp_cell*)  then  al_sph(stsp_cell*)==1  
+  //                                                                            
+  // The activity flag only refers to the stsp leafs, not all leafs:            
+  // If # active stsp leaf descendants == 0      then  is_active()==0           
+  // If # active stsp leaf descendants == numb() then  al_active()==1           
   //                                                                            
   //////////////////////////////////////////////////////////////////////////////
-  class sticky_tree : public basic_tree<sticky_tree,sticky_cell> {
-    sticky_tree           (const sticky_tree&);    // not implemented           
-    sticky_tree& operator=(const sticky_tree&);    // not implemented           
+  class stsp_estimator {
+    stsp_estimator           (const stsp_estimator&);
+    stsp_estimator& operator=(const stsp_estimator&);
     //--------------------------------------------------------------------------
-    // static data                                                              
+    // data:                                                                    
     //--------------------------------------------------------------------------
-    static const int SPEC=flag::SPH|flag::STICKY;  // default flag for sub-tree 
+  private:
+    const oct_tree       *TREE;                    // the tree to be used       
+    stsp_leaf::leaf_data *LEAF_DATA;               // memory for leafs          
+    stsp_cell::srce_data *CELL_SRCE;               // memory for cell srce      
+    mutable bool          ALL_STSP;                // all leafs are stsp        
+    mutable bool          ALL_ACTIVE;              // all stsp leafs are active 
+    mutable bool          SPH_UPTODATE;            // tree ready for sph search 
+    mutable bool          STC_UPTODATE;            // tree ready for sticky --  
+    mutable uint          NL,NC;                   // # stsp leafs & cells      
+    //--------------------------------------------------------------------------
+    // private methods                                                          
+    //--------------------------------------------------------------------------
+    template<typename bodies_type>
+    void copy_to_bodies_num (const bodies_type*const&) const;
+    template<typename bodies_type>
+    void update_leafs_sph   (const bodies_type*const&);
+//     void update_leafs_sph   (const abodies*const&);
+    //--------------------------------------------------------------------------
+    void update_leafs_sticky();
+    void update_leafs_sph   ();
+    void prepare_sticky     ();
+    void prepare_sph        ();
+    //--------------------------------------------------------------------------
+    // tree stuff to be superseeded                                             
+    //--------------------------------------------------------------------------
   public:
+    typedef stsp_cell                       cell_type;
+    typedef stsp_leaf                       leaf_type;
+    typedef oct_tree::CellIter<stsp_cell>   cell_iterator;
+    typedef leaf_type*                      leaf_iterator;
+    //--------------------------------------------------------------------------
+    const oct_tree*const&my_tree() const { return TREE; }
+    cell_iterator root          () const {
+      return cell_iterator(TREE,static_cast<stsp_cell*>(TREE->FstCell())); }
+    //--------------------------------------------------------------------------
+    // dump cell and leaf data                                                  
+    //--------------------------------------------------------------------------
+    void dump_cells(std::ostream&) const;
+    void dump_leafs(std::ostream&) const;
+    //--------------------------------------------------------------------------
+    // public type                                                              
+    //--------------------------------------------------------------------------
     typedef uint elem_pair[2];                     // element: interaction list 
     //--------------------------------------------------------------------------
     // public methods                                                           
     //--------------------------------------------------------------------------
-    sticky_tree(const grav_tree*const&parent,      // I: parent tree            
-		int             const&spec=SPEC) : //[I: flag for sub-tree]     
-      base_tree(parent, spec) {}
+    stsp_estimator(const oct_tree*const&T) :       // I: tree to be used        
+      TREE         ( T ),
+      LEAF_DATA    ( 0 ),
+      CELL_SRCE    ( 0 ),
+      ALL_STSP     ( 0 ),
+      ALL_ACTIVE   ( 0 ),
+      SPH_UPTODATE ( 0 ),
+      STC_UPTODATE ( 0 ) {}
     //--------------------------------------------------------------------------
-    void count_neighbours() const;
+    void reset() {
+      if(CELL_SRCE) { delete[] CELL_SRCE; CELL_SRCE=0; }
+      if(LEAF_DATA) { delete[] LEAF_DATA; LEAF_DATA=0; }
+      SPH_UPTODATE = 0;
+      STC_UPTODATE = 0;
+    }
     //--------------------------------------------------------------------------
-    void make_iaction_list(elem_pair *,
-			   uint const&,
-			   uint      &,
-			   real const&) const;
+    void new_tree(const oct_tree*const&T) {
+      TREE = T;
+      reset();
+    }
+    //--------------------------------------------------------------------------
+    // destruction                                                              
+    //--------------------------------------------------------------------------
+    ~stsp_estimator() {
+      if(CELL_SRCE) delete[] CELL_SRCE;
+      if(LEAF_DATA) delete[] LEAF_DATA;
+    }
+    //--------------------------------------------------------------------------
+    void make_sticky_list (elem_pair *,            // I/O: interaction list     
+			   uint const&,            // I: physical size of list  
+			   uint      &,            // O: # pairs found          
+			   real const&);           // I: tau                    
+    //--------------------------------------------------------------------------
+    void make_sph_list    (elem_pair *,            // I/O: interaction list     
+			   uint const&,            // I: physical size of list  
+			   uint      &,            // O: # pairs found          
+			   bool const&);           // I: r < max(hi,hj) or hi+hj
+    //--------------------------------------------------------------------------
+    void count_sph_partners();                     // counter sph iaction ptners
     //--------------------------------------------------------------------------
   };
-  //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // const access to stick_cell data from cell_iterator                       //
-  //                                                                          //
-  // these are not really necessary, since they are already defined for taking//
-  // pointer to cell and cell_iterator has a type-conversion operator defined,//
-  // but some older compilers get confused if we omit them (eg. gcc 2.95.3    //
-  // needs them, gcc 3.2 not)                                                 //
-  //                                                                          //
-  //////////////////////////////////////////////////////////////////////////////
-#define CSCI sticky_tree::cell_iterator const&I
-  inline vect const&vel (CSCI) { return vel (I.c_pter()); }
-  inline vect const&pos (CSCI) { return pos (I.c_pter()); }
-  inline real const&rmax(CSCI) { return rmax(I.c_pter()); }
-  inline real const&size(CSCI) { return size(I.c_pter()); }
-  inline real const&vrad(CSCI) { return vrad(I.c_pter()); }
-#undef CSCI
-}
-//------------------------------------------------------------------------------
+}                                                  // END: namespace nbdy       
+////////////////////////////////////////////////////////////////////////////////
 #endif // falcON_included_stic_h

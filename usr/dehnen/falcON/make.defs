@@ -5,6 +5,13 @@
 #
 ################################################################################
 
+# --------------------
+# maximum tensor order
+# --------------------
+
+KMAX		:= 6
+
+
 # ---------
 # precision
 # ---------
@@ -24,7 +31,7 @@
 ifdef NEMO
 
 INEMO		:= -I$(NEMOINC) -I$(NEMOLIB)
-LNEMO		:= -L$(NEMOLIB) -lnemo++ -lnemo -lg2c -ldl
+LNEMO		:= -L$(NEMOLIB) -lnemo -lg2c -ldl
 DNEMO		:= -DfalcON_NEMO
 
 endif
@@ -39,13 +46,8 @@ IPRO		:= $(INC)proper/
 ISPH		:= $(INC)sph/
 IWAL		:= $(INC)walter/
 HOS		:= $(MACHTYPE)_$(OSTYPE)/
-ifdef DPROPER
-BIN		:= $(HOS)proper/
-LIB		:= $(HOS)proper/lib/
-else
 BIN		:= $(HOS)
-LIB		:= $(HOS)lib/
-endif
+LIB		:= $(BIN)lib/
 .PHONY		: dirs
 dirs		:
 		./make.dir $(HOS)
@@ -63,23 +65,42 @@ EXE		:= $(SRC)mains/
 # compiler and linker etc
 # -----------------------
 
-USE_GNU    	:= 1
 FILEIO		:= -D_FILE_OFFSET_BITS=64
 
-ifdef USE_GNU
+ifeq ($(COMPILER),gcc)
+# GNU's gcc compiler
 
 CXX		:= $(CPATH)g++
 CC		:= $(CPATH)gcc
 FC		:= $(CPATH)g77
-OPTFLAGS	:= -O3 -ffast-math -funroll-loops -fforce-addr
+OPTFLAGS	:= -O3 -ffast-math -funroll-loops -fforce-addr -fomit-frame-pointer -rdynamic
 
 else
+ifeq ($(COMPILER),pgcc)
+# portland groups compiler
+
+CXX		:= pgCC
+CC		:= pgcc
+FC		:= pgf77
+OPTFLAGS	:= -fast -Minline=levels:10 -Mcache_align --no_exceptions -Minform=inform -D__PGCC__
+
+else
+ifeq ($(COMPILER),icc)
+# intel compiler
 
 CXX		:= icpc
 CC		:= icc
 FC		:= ifc
 OPTFLAGS	:= -O3 -unroll -tpp6 -xK -i_dynamic
 
+else
+
+top		:
+		@echo "unknown compiler"
+		@echo "please set COMPILER in makefile"
+
+endif
+endif
 endif
 
 AR		:= ar rc
@@ -92,10 +113,11 @@ MPICC		:= mpicc -cc=$(CC)
 # compiler and linker flags
 # -------------------------
 
-NBDYFLAGS	:= $(DMPI) $(DSPH) $(DPRECISION) $(DNEMO) $(DSSE) $(DADAPT)
-CFLAGS		:= $(FILEIO) $(OPTFLAGS) -rdynamic $(DPROPER)
-CXXFLAGS	:= $(FILEIO) $(OPTFLAGS) -rdynamic $(DPROPER)
-LFALCON		:= -L$(LIB) -lfalcON
+NBDYFLAGS	:= $(DMPI) $(DSPH) $(DPRECISION) $(DNEMO) $(DSSE) $(DSOFT) \
+			$(DWALTER)
+CFLAGS		:= $(FILEIO) $(OPTFLAGS) $(DPROPER)
+CXXFLAGS	:= $(FILEIO) $(OPTFLAGS) $(DPROPER)
+LFALCON		:= -L$(LIB) -lfalcON $(LNEMO)
 
 # -------------------------
 # compile and link commands
@@ -105,4 +127,4 @@ MAKE_OBJ	= $(CXX) -c -o $@ $< -I$(INC) $(INEMO) $(CXXFLAGS)
 MAKE_EXE	= $(CXX) -o $@ $< -I$(INC) $(INEMO) $(CXXFLAGS)
 MAKE_EXE_C	= $(CC)  -o $@ $< -I$(INC) $(CFLAGS)
 MAKE_EXE_F	= $(FC)  -o $@ $< -I$(INC) $(OPTFLAGS)
-NEMO_EXE_FLGS	= $(NBDYFLAGS) $(LFALCON) $(LNEMO) -lm
+NEMO_EXE_FLGS	= $(NBDYFLAGS) $(LFALCON) -lm

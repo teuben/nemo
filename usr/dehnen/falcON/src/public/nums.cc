@@ -6,9 +6,9 @@
 // C++ code                                                                    |
 //                                                                             |
 // Copyright Walter Dehnen, 1994-2003                                          |
-// e-mail:   wdehnen@aip.de                                                    |
-// address:  Astrophysikalisches Institut Potsdam,                             |
-//           An der Sternwarte 16, D-14482 Potsdam, Germany                    |
+// e-mail:   walter.dehnen@astro.le.ac.uk                                      |
+// address:  Department of Physics and Astronomy, University of Leicester      |
+//           University Road, Leicester LE1 7RH, United Kingdom                |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 #include <public/nums.h>
@@ -37,11 +37,11 @@ double nbdy::qbulir(double(*func)(double),
 		    const double b, 
 		    const double eps_,
 		          double*erro,
-		    const bool   abort)
+		    const bool   abort,
+		    const int    mx)
 {
   register double ba=b-a;
   if(ba==0.) return 0.;
-  const    int    mx=25;
   register int    i,n=2,nn=3,m,mr, bo,bu=0,odd=1;
   register double c,d1,ddt,den,e,eps,eta=1.e-7,gr,hm,nt,err,
                   sm,t,t1,t2,t2a,ta,tab=0.,tb,v=0.,w;
@@ -138,8 +138,10 @@ double nbdy::qbulir(double(*func)(double),
   v = tab*eta;
   if(err<v) err = v;
   if(erro) *erro = err/(tab*w);
-  if(m==mx && abort)
-    falcON_ErrorF("max number of iterations exceeded","qbulir()");
+  if(m==mx) {
+    if(abort) falcON_ErrorF("max number of iterations exceeded","qbulir()");
+    else      falcON_WarningF("max number of iterations exceeded","qbulir()");
+  }
   return c;
 }
 //------------------------------------------------------------------------------

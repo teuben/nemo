@@ -6,9 +6,9 @@
 // C++ code                                                                    |
 //                                                                             |
 // Copyright Walter Dehnen, 1994-2003                                          |
-// e-mail:   wdehnen@aip.de                                                    |
-// address:  Astrophysikalisches Institut Potsdam,                             |
-//           An der Sternwarte 16, D-14482 Potsdam, Germany                    |
+// e-mail:   walter.dehnen@astro.le.ac.uk                                      |
+// address:  Department of Physics and Astronomy, University of Leicester      |
+//           University Road, Leicester LE1 7RH, United Kingdom                |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 #ifndef falcON_included_ioln_h
@@ -87,6 +87,7 @@ namespace nbdy {
     S.open(file,std::ios::out);
     if(S.is_open() ) return 2;
     error("cannot open file \"%s\" for appending",file);
+    return 0;
   }
   //////////////////////////////////////////////////////////////////////////////
   inline bool open(std::ifstream& S, const char* file,
@@ -137,7 +138,7 @@ namespace nbdy {
   //----------------------------------------------------------------------------
   inline const char* stndrdth(const int i)
   {
-    register int ia= (i<0)? -i:i;
+    register int ia = (i<0)? -i:i;
     switch( ia % 100 ) {
     case 11: 
     case 12: 
@@ -177,6 +178,70 @@ namespace nbdy {
     i>>x;
     if(x==c) { SwallowRestofLine(i); return true; }
     else     { i.putback(x);         return false; }
+  }
+  //----------------------------------------------------------------------------
+  // I/O of arrays whose size is known at compile time                          
+  //----------------------------------------------------------------------------
+  template<int N, int I=0> struct meta_io {
+  template<typename X> static void write(std::ostream&s, const X*x)
+    { s<<x[I]<<' '; meta_io<N,I+1>::write(s,x); }
+  template<typename X> static void read (std::istream&s,       X*x)
+    { s>>x[I];      meta_io<N,I+1>::read (s,x); }
+  };
+  //----------------------------------------------------------------------------
+  template<int N> struct meta_io<N,N> {
+  template<typename X> static void write(std::ostream&s, const X*x) { s<<x[N]; }
+  template<typename X> static void read (std::istream&s,       X*x) { s>>x[N]; }
+  };
+  //----------------------------------------------------------------------------
+  template<int N, typename X> inline
+  std::ostream& write_arr(std::ostream&s, const X* x)
+  { 
+    meta_io<N-1,0>::write(s,x);
+    return s;
+  }
+  //----------------------------------------------------------------------------
+  template<int N, typename X> inline
+  std::istream& read_arr(std::istream&s, X* x)
+  { 
+    char c=0;
+    s >> c;
+    if(c == '(') {
+      meta_io<N-1,0>::read(s,x);
+      s >> c;
+      if(c != ')') s.clear(std::ios::badbit);
+    } else {
+      s.putback(c);
+      meta_io<N-1,0>::read(s,x);
+    }
+    return s;
+  }
+  //----------------------------------------------------------------------------
+  // I/O of arrays whose size is known at run time                              
+  //----------------------------------------------------------------------------
+  template<typename S> inline
+  std::ostream& write_array(std::ostream&s, const S* x, unsigned N)
+  {
+    s << x[0];
+    for(register unsigned i=1; i!=N; ++i) s<<" "<<x[i];
+    return s;
+  }
+  //----------------------------------------------------------------------------
+  template<typename S> inline
+  std::istream& read_array(std::istream&s, S* x, unsigned N) {
+    register S y[N];
+    char c=0;
+    s >> c;
+    if(c == '(') {
+      for(register unsigned i=0; i!=N; ++i) s >> y[i];
+      s >> c;
+      if(c != ')') s.clear(std::ios::badbit);
+    } else {
+      s.putback(c);
+      for(register unsigned i=0; i!=N; ++i) s >> y[i];
+    }
+    for(register unsigned i=0; i!=N; ++i) x[i] = y[i];
+    return s;
   }
 }
 //-----------------------------------------------------------------------------+

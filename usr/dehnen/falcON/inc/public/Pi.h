@@ -6,9 +6,9 @@
 // C++ code                                                                    |
 //                                                                             |
 // Copyright Walter Dehnen, 1994-2003                                          |
-// e-mail:   wdehnen@aip.de                                                    |
-// address:  Astrophysikalisches Institut Potsdam,                             |
-//           An der Sternwarte 16, D-14482 Potsdam, Germany                    |
+// e-mail:   walter.dehnen@astro.le.ac.uk                                      |
+// address:  Department of Physics and Astronomy, University of Leicester      |
+//           University Road, Leicester LE1 7RH, United Kingdom                |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 #ifndef falcON_included_Pi_h
@@ -22,6 +22,7 @@ namespace nbdy {
   const double TPi  = 2.   * Pi;                        // 2*Pi                 
   const double FPi  = 4.   * Pi;                        // 4*Pi                 
   const double FPit = 4.   * Pi/3.;                     // 4*Pi/3               
+  const double iFPit= 0.75 / Pi;                        // 3/(4*Pi)             
   const double SPi  = 1.772453850905516027298167483341;	// Sqrt[Pi]             
   const double STPi = 2.506628274631000502415765284811; // Sqrt[2 Pi]           
 #if defined(__COMPLEX__) || defined(_CPP_COMPLEX) || defined(__STD_COMPLEX)

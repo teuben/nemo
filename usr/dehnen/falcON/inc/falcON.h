@@ -3,6 +3,13 @@
 //                                                                             |
 // falcON.h                                                                    |
 //                                                                             |
+// C++ code                                                                    |
+//                                                                             |
+// Copyright Walter Dehnen, 1999-2004                                          |
+// e-mail:   walter.dehnen@astro.le.ac.uk                                      |
+// address:  Department of Physics and Astronomy, University of Leicester      |
+//           University Road, Leicester LE1 7RH, United Kingdom                |
+//                                                                             |
 //=============================================================================+
 //                                                                             |
 // falcON = Force ALgorithm with Complexity O(N)                               |
@@ -11,13 +18,6 @@
 //                                                                             |
 // header file for C++ users                                                   |
 // (C and FORTRAN users, see files falcON_C.h and falcON.f, respectively)      |
-//                                                                             |
-// Copyright Walter Dehnen, 2000-2003                                          |
-// e-mail:   wdehnen@aip.de                                                    |
-// address:  Astrophysikalisches Institut Potsdam,                             |
-//           An der Sternwarte 16, D-14482 Potsdam, Germany                    |
-//                                                                             |
-//-----------------------------------------------------------------------------+
 //                                                                             |
 // C++ source code implementing the code described by Dehnen (2000,2002).      |
 //                                                                             |
@@ -32,23 +32,28 @@
 // CONTENTS                                                                    |
 // ========                                                                    |
 //                                                                             |
-// 1  Initialisation and clearing up                                           |
-//    1.1  Before using the code                                               |
-//    1.2  After using the code                                                |
-// 2  Meaning of the body flags                                                |
-// 3  Force approximation                                                      |
-//    3.1  Generating a tree structure                                         |
-//    3.2  Approximating the accelerations                                     |
+// 1  Initialisation and related                                               |
+//    1.1  Construction (initialisation)                                       |
+//    1.2  Destruction (clearing up)                                           |
+//    1.3  Meaning of the body flags                                           |
+// 2  Generating and maintaining an oct-tree                                   |
+// 3  Gravity approximation                                                    |
+//    3.1  Approximating the accelerations and potentials                      |
+//    3.2  Individual softening                                                |
 //    3.3  A rude estimation of the mass- and number-density                   |
-//    3.4  Neighbour counting                                                  |
-// 4  Search for Neighbours and Collision Partners                             |
-//    4.1  Neighbour search (SPH support)                                      |
-//    4.2  Collision partner search (for sticky particles)                     |
-//    4.3  SPH Neighbour counting                                              |
-// 5  Other features                                                           |
-// 6  Known bugs and problems                                                  |
-//    6.1  Test-bodies are not possible                                        |
-//    6.2  Bodies at identical positions                                       |
+// 4  Full SPH support                                                         |
+//    4.1  Partner Counting                                                    |
+//    4.2  Adjusting the smoothing sizes                                       |
+//    4.3  Sweep One                                                           |
+//    4.4  Sweep Two                                                           |
+// 5  Search for and counting of interaction partners                          |
+//    5.1  SPH partner search                                                  |
+//    5.2  sticky-particle partner search                                      |
+//    5.3  SPH partner counting                                                |
+// 6  Other features                                                           |
+// 7  Known bugs and problems                                                  |
+//    7.1  Test-bodies are not possible                                        |
+//    7.2  Bodies at identical positions                                       |
 // References                                                                  |
 // A  Non-public code and data                                                 |
 //                                                                             |
@@ -87,13 +92,22 @@
 #ifndef falcON_included_deft_h              //                                 |
 #  include <public/deft.h>                  // default parameters              |
 #endif                                      //                                 |
+#ifndef falcON_included_nbio_h              //                                 |
+#  include <public/nbio.h>                  // class nbdy::io                  |
+#endif                                      //                                 |
 //-----------------------------------------------------------------------------+
-namespace nbdy {                            // falcON is in namespace nbdy     |
-  class sbodies;                            // forward declaration             |
-  class barrays;                            // forward declaration             |
-  class grav_mac;                           // forward declaration             |
-  class grav_tree;                          // forward declaration             |
-  class grav_stat;                          // forward declaration             |
+namespace nbdy {                            // some forward declarations:      |
+  class sbodies;                            //   bodies for serial code        |
+  class abodies;                            //   bodies for C or FORTRAN link  |
+  class oct_tree;                           //   oct tree structure            |
+  class grav_mac;                           //   multipole acceptance criterion|
+  class grav_stat;                          //   statistics for gravity        |
+  class grav_estimator;                     //   gravity approximation         |
+  class stsp_estimator;                     //   collision partner search      |
+#ifdef falcON_SPH                           // walter's private addendum       |
+  class sph_estimator;                      //   full-fledged SPH              |
+  class eq_of_state;                        //   equation of state for SPH     |
+#endif                                      //                                 |
 //-----------------------------------------------------------------------------+
 //                                                                             |
 //                                                                             |
@@ -113,25 +127,37 @@ namespace nbdy {                            // falcON is in namespace nbdy     |
 // which invokes a constructor for class falcON. There are, in fact two        |
 // constructors, one for the use with bodies as defined in file body.h:        |
 //                                                                             |
-    falcON   (const sbodies*,                  // I: bodies                    |
-	      const real,                      // I: global/maximum eps        |
-	      const real      =Default::theta, //[I: tolerance parameter]      |
-	      const kern_type =Default::kernel,//[I: type of softening kernel] |
+    falcON (const sbodies*,                    // I: bodies                    |
+	    const real,                        // I: global/maximum eps        |
+	    const real     =Default::theta,    //[I: tolerance parameter]      |
+	    const kern_type=Default::kernel,   //[I: type of softening kernel] |
 #ifdef falcON_INDI                             // non-public version only:     |
-	      const soft_type =global,         //[I: global/individual eps]    |
+	    const bool     =false,             //[I: use individual eps?]      |
 #endif                                         //                              |
-	      const MAC_type  =theta_of_M);    //[I: type of MAC]              |
+	    const real     =one,               //[I: constant of gravity]      |
+	    const MAC_type =theta_of_M,        //[I: type of MAC]              |
+	    const int[4] =Default::direct      //[I: N_direct for gravity]     |
+#ifdef falcON_SPH                              // SPH version only:            |
+	   ,const int[3] =Default::SPHdirect   //[I: N_direct for SPH]         |
+#endif
+	    );
 //                                                                             |
 // and one for the use with plain arrays:                                      |
 //                                                                             |
-    falcON   (const barrays*,                  // I: bodies                    |
-	      const real,                      // I: global/maximum eps        |
-	      const real      =Default::theta, //[I: tolerance parameter]      |
-	      const kern_type =Default::kernel,//[I: type of softening kernel] |
+    falcON (const abodies*,                    // I: bodies                    |
+	    const real,                        // I: global/maximum eps        |
+	    const real      =Default::theta,   //[I: tolerance parameter]      |
+	    const kern_type =Default::kernel,  //[I: type of softening kernel] |
 #ifdef falcON_INDI                             // non-public version only:     |
-	      const soft_type =global,         //[I: global/individual eps]    |
+	    const bool      =false,            //[I: use individual eps?]      |
 #endif                                         //                              |
-	      const MAC_type  =theta_of_M);    //[I: type of MAC]              |
+	    const real      =one,              //[I: constant of gravity]      |
+	    const MAC_type  =theta_of_M,       //[I: type of MAC]              |
+	    const int[4] =Default::direct      //[I: N_direct for gravity]     |
+#ifdef falcON_SPH                              // SPH version only:            |
+	   ,const int[3] =Default::SPHdirect   //[I: N_direct for SPH]         |
+#endif
+	    );
 //                                                                             |
 // This second version is designed for the use with C and FORTRAN, see  files  |
 // falcON_C.h and falcON.f. Once a 'falcON' is constructed, one can no longer  |
@@ -148,19 +174,19 @@ namespace nbdy {                            // falcON is in namespace nbdy     |
 // of an array  holding eps_i. The same applies to the arrays for density and  |
 // potential: if a NULL pointer is given, they will never be used.             |
 //                                                                             |
-// The last 5 arguments of both constructors are identical:                    |
+// All but the first argument of both constructors are identical:              |
 //                                                                             |
-// EPS:   global  softening length, if SOFT==global                            |
-//        maximal softening length, if SOFT==individual                        |
+// EPS:   global  softening length, if SOFT==false                             |
+//        ignored,                  if SOFT==true                              |
 // THETA: theta or theta_min, depending on MAC.                                |
 //        RECOMMENDED: THETA = 0.5 - 0.6                                       |
 // KERN:  newton     : no softening                                            |
 //        p0,p1,p2,p3: Plummer (P0) and related (Dehnen & Teuben, 2002)        |
-// SOFT:  global or individual softening length, see also approximate_gravity()|
+// SOFT:  use individual softening length? see also approximate_gravity()      |
 // MAC:   type of MAC (see above). Default is eq (13) of Dehnen (2002).        |
 //                                                                             |
-// The last 4 arguments may also be omitted, in which case the default values  |
-// will be used.                                                               |
+// All but the first two arguments may also be omitted, in which case the      |
+// default values will be used.                                                |
 //                                                                             |
 // With the member functions                                                   |
 //                                                                             |
@@ -169,9 +195,10 @@ namespace nbdy {                            // falcON is in namespace nbdy     |
                          const;                          //                    |
     void reset_opening(const real,                       // I: tolerance param |
 		       const MAC_type=Default::mac)const;//[I: type of MAC]    |
+    void reset_NewtonsG(const real) const;               // I: new G           |
 //                                                                             |
 // it is possible to change, after construction, the softening length and      |
-// kernel as well as the opening criterion.                                    |
+// kernel, the opening criterion as well as Newton's constant of gravity.      |
 //                                                                             |
 //                                                                             |
 // 1.2 Destructor                                                              |
@@ -183,14 +210,11 @@ namespace nbdy {                            // falcON is in namespace nbdy     |
 //                                                                             |
     ~falcON();                              //                                 |
 //                                                                             |
-//-----------------------------------------------------------------------------+
 //                                                                             |
+// 1.3 Meaning of the body flags                                               |
+// -----------------------------                                               |
 //                                                                             |
-// 2 MEANING OF THE BODY FLAGS                                                 |
-// ===========================                                                 |
-//                                                                             |
-// The flags are 2byte unsigned integers or plain integers with the following  |
-// meaning:                                                                    |
+// The flags are integers with the following meaning:                          |
 //                                                                             |
 // bit  value     meaning                                                      |
 // ------------------------------------------------------------------------    |
@@ -209,16 +233,14 @@ namespace nbdy {                            // falcON is in namespace nbdy     |
 //-----------------------------------------------------------------------------+
 //                                                                             |
 //                                                                             |
-// 3 FORCE APPROXIMATION                                                       |
-// =====================                                                       |
+// 2 GENERATING AND MAINTAINING AN OCT-TREE                                    |
+// ========================================                                    |
 //                                                                             |
-// 3.1 Generating a tree structure                                             |
-// -------------------------------                                             |
 // In order to establish a hierarchical tree structure from all bodies that    |
-// are not flagged to be ignored, and subsequently pre-compute the centers     |
-// of mass and sizes of the cells, use                                         |
+// are not flagged to be ignored, use                                          |
 //                                                                             |
-    void grow(int const& =Default::Ncrit);    //[I: Ncrit]                     |
+    void grow(int         const& =Default::Ncrit,  //[I: Ncrit]                |
+	      const vect* const& =0);              //[I: pre-set root center   |
 //                                                                             |
 // which grows a new tree from scratch. Cells containing Ncrit or less bodies  |
 // will NOT be splitted. Experiments showed that for a full force calculation  |
@@ -227,16 +249,19 @@ namespace nbdy {                            // falcON is in namespace nbdy     |
 //                                                                             |
 // With                                                                        |
 //                                                                             |
-    void re_grow(int const&,                  // I: N_cut                      |
-		 int const& =Default::Ncrit); //[I: Ncrit]                     |
+#if(0) // code currently broken
+    void re_grow(int const&,                       // I: N_cut                 |
+		 int const& =Default::Ncrit,       //[I: Ncrit]                |
+		 const vect* const& =0);           //[I: pre-set root center   |
+#endif
 //                                                                             |
 // a new tree is grown aided by the old tree, if existent. N_cut is the size   |
 // of an old-tree cell that will be re-grown from scratch.                     |
 // Ideally: N_crit << N_cut << N.                                              |
 //                                                                             |
-// You may instead also re-use an old tree structure and only re-compute the   |
-// centers of mass and sizes of the cells (since the bodies have moved), by    |
-// using                                                                       |
+// You may instead also re-use an old tree structure. In this case, nothing    |
+// is done yet, but the routine approximate_gravity() below will re-compute    |
+// the centers of mass and sizes of the cells (since the bodies have moved).   |
 //                                                                             |
     void reuse();                             //                               |
 //                                                                             |
@@ -255,29 +280,48 @@ namespace nbdy {                            // falcON is in namespace nbdy     |
 //                    +---------------------------+                            |
 // You have been warned!                                                       |
 //                                                                             |
+//-----------------------------------------------------------------------------+
 //                                                                             |
-// 3.2 Approximating the Accelerations                                         |
-// -----------------------------------                                         |
-// Once a tree structure is established, you can compute the forces by         |
+//                                                                             |
+// 3 GRAVITY APPROXIMATION                                                     |
+// =======================                                                     |
+//                                                                             |
+// 3.1 Approximating the Accelerations and Potentials                          |
+// --------------------------------------------------                          |
+// Once a tree structure is established, the following routine                 |
+// - computes the cell's source properties (upward pass),                      |
+// - performs all interaction (interaction phase), and                         |
+// - evaluates the gravity for active bodies (evaluation phase).               |
+// (Note that in earlier versions, the upward pass was already done at tree    |
+// growth. The new version will therefore differ in the timing between tree    |
+// growth and gravity approximation.)                                          |
 //                                                                             |
     void approximate_gravity(bool const& =true,       //[I: combine phases]    |
-			     bool const& =false,      //[I: all or only active]|
-#ifdef falcON_INDI                                    // non-public  only:     |
-			     real const& =zero,       //[I: Nsoft adjust eps_i]|
+			     bool const& =false       //[I: all or only active]|
+#ifdef falcON_ADAP                                    // non-public  only:     |
+			    ,real const& =zero,       //[I: Nsoft adjust eps_i]|
 			     uint const& =0u,         //[I: Nref  adjust eps_i]|
 			     real const& =zero,       //[I: eps_min]           |
-			     real const& =zero,       //[I: max change of eps] |
+			     real const& =zero        //[I: max change of eps] |
 #endif                                                //                       |
-			     const int[4]=Default::direct); //[I: N_direct]    |
+			     );                       //[I: N_direct]          |
 //                                                                             |
-// which implements the pre-computation of the quadrupoles, as well as the     |
-// interaction and evaluation phase.                                           |
 // The first argument indicates whether the interaction and evaluation phases  |
 // shall be interweaved, resulting in a reduced memory requirement for the     |
 // Taylor-series coefficients.                                                 |
+// If Newton's constant of gravity was set to 0, approximate_gravity() will    |
+// issue a warning to stderr and set the acceleration and potential of active  |
+// bodies (or of all, if the second argument is true) to zero.                 |
 //                                                                             |
-// Individual softening                                                        |
-// --------------------                                                        |
+// IMPORTANT NOTE                                                              |
+// Since Oct-2003, you MUST not change the bodies activity flag between tree   |
+// growth (or re-growth, re-use) and a call to approximate_gravity. Whenever   |
+// you change the flags, you MUST first (re-)grow the tree before you can      |
+// approximate_gravity().                                                      |
+//                                                                             |
+//                                                                             |
+// 3.2 Individual softening                                                    |
+// ------------------------                                                    |
 // For individual adaptive softening the routine can do more for you before    |
 // the forces are actually computed:                                           |
 // If Nsoft [2nd argument] is non-zero, it estimates for each active particle  |
@@ -305,7 +349,7 @@ namespace nbdy {                            // falcON is in namespace nbdy     |
 // For test purposes, we also have a direct summation facility:                |
 //                                                                             |
     void exact_gravity(bool const& =false   //[I: all of only active]          |
-#ifdef falcON_INDI                          // non-public  only:               |
+#ifdef falcON_ADAP                          // non-public  only:               |
 		      ,real const& =zero,   //[I: Nsoft: adjust eps_i]         |
 		       uint const& =0u,     //[I: Nref:  adjust eps_i]         |
 		       real const& =zero,   //[I: eps_min]                     |
@@ -320,9 +364,15 @@ namespace nbdy {                            // falcON is in namespace nbdy     |
 // surface- or number density of bodies in the neighbourhood of every body     |
 // flagged being active, via                                                   |
 //                                                                             |
-    void estimate_rho(int const&);          // I: critical cell size           |
-    void estimate_sd (int const&);          // I: critical cell size           |
-    void estimate_n  (int const&);          // I: critical cell size           |
+    void estimate_rho(                      // estimate mass volume density    |
+		      uint const&,          // I: critical cell size           |
+		      bool const& = 0);     //[I: all or active only?]         |
+    void estimate_sd (                      // estimate mass surface density   |
+		      uint const&,          // I: critical cell size           |
+		      bool const& = 0);     //[I: all or active only?]         |
+    void estimate_n  (                      // estimate number volume density  |
+		      uint const&,          // I: critical cell size           |
+		      bool const& = 0);     //[I: all or active only?]         |
 //                                                                             |
 // These estimates are simply the mean density within the smallest cells with  |
 // more then NX (1st arg) bodies. Note, that when using test bodies (bodies    |
@@ -332,32 +382,109 @@ namespace nbdy {                            // falcON is in namespace nbdy     |
 // YOU HAVE BEEN WARNED.                                                       |
 //                                                                             |
 //                                                                             |
-// 3.4 Neighbour Counting                                                      |
-// ----------------------                                                      |
+//-----------------------------------------------------------------------------+
+#ifdef falcON_SPH                           //                                 |
 //                                                                             |
-// The number of bodies in the tree that are within the softening sphere of    |
-// each body flagged being active are counted with a of                        |
 //                                                                             |
-  private:                                  // not yet tested :                |
-    void count_neighbours();                //                                 |
-  public:                                   //                                 |
+// 4 FULL SPH SUPPORT                                                          |
+// ==================                                                          |
 //                                                                             |
+// Once a tree structure is established, you can use falcON to obtain          |
+// estimates for SPH quantities. Currently however, this is restricted to      |
+// Walter's private version of the code.                                       |
+//                                                                             |
+// This part of the code considers only bodies flagged as SPH particles.       |
+//                                                                             |
+//                                                                             |
+// 4.1 Partner Counting                                                        |
+// --------------------                                                        |
+// The following routine counts the number of interaction partners.            |
+//                                                                             |
+    void count_SPH_partners(bool const& = 0,       //[I: all (or only active)?]|
+			    bool const& = 1);      //[I: update bodies?]       |
+//                                                                             |
+// The 1st arg indicates whether all SPH-bodies shall be considered active.    |
+// The 2nd arg indicates whether or not the snum() field of the bodies shall   |
+// be updated.                                                                 |
+//                                                                             |
+//                                                                             |
+// 4.2 Adjusting the smoothing sizes                                           |
+// ---------------------------------                                           |
+// The following routine iteratively adjusts the (smoothing) sizes such that   |
+// the number of interaction partners averages to a given value. On return,    |
+// the size() and snum() fields of the bodies are updated.                     |
+//                                                                             |
+    void adjust_SPH_sizes(uint const&,            // I: desired # partners     |
+			  real const&,            // I: h_max for bodies       |
+			  bool const& =0,         //[I: ALL (or only active)?] |
+			  uint        =0u,        //[I: # partners: min allwd] |
+			  uint        =0u,        //[I: # partners: max allwd] |
+			  uint const& =10u);      //[I: max # iterations]      |
+//                                                                             |
+// The 1st arg gives the desired average number K of partners, the 2nd arg     |
+// the maximum allowed size. The 3rd arg indicates whether all SPH-bodies      |
+// shall be considered active. The 4th and 5th arg give the max and min        |
+// numbers of partners tolerated; if omitted 2/3K and 3/2K are used. The last  |
+// arg gives the maximum number of iterations.                                 |
+//                                                                             |
+//                                                                             |
+// 4.3 Sweep One                                                               |
+// -------------                                                               |
+// The following routine computes the number of interaction partners and the   |
+// gas-density for each active SPH body. Usually, the body data are not yet    |
+// updated, but to be updated after sweep two (see below).                     |
+//                                                                             |
+    void SPH_sweep_one(const eq_of_state*const&,  // I: equation of state      |
+		       uint              const&,  // I: <# partners/body>      |
+		       bool           const& =0,  //[I: ALL (or only active)?] |
+		       bool           const& =0); //[I: update bodies' ?]      |
+//                                                                             |
+// The 1st arg gives the equation of state (see inc/sph/eofs.h), the 2nd arg   |
+// indicates the mean number of interaction partners (this is used to estimate |
+// the memory requirements). The 3rd arg indicates whether all SPH bodies      |
+// shall beconsidered active. The last arg indicates whether or not the data   |
+// fields of the bodies shall be updated.                                      |
+// The routines uses as input the bodies' mass(), vprd(), size() fields and,   |
+// if the equation of state requires it, also the uprd() field. For every      |
+// active SPH body it will estimate the snum() and srho() data, but update     |
+// them only if explicitly desired by the last arg. For inactive bodies, the   |
+// srho() data are read into the tree, to be used in sweep two.                |
+// Simultaneously with the partner counting and density estimation, this       |
+// routine also produces an interaction list, which will be used in sweep two. |
+//                                                                             |
+//                                                                             |
+// 4.4 Sweep Two                                                               |
+// -------------                                                               |
+// The following routine, which can only be used AFTER SPH_sweep_one(),        |
+// estimates drho/dt (or grad v) and dv/dt and du/dt due to pressure gradient  |
+// and artificial viscosity. du/dt is computed only if required by the eq of   |
+// state (not for isothermal gas). Upon return, the snum(), srho(), drho(),    |
+// and, possibly, udin() data fields of active SPH-bodies are updated and      |
+// dv/dt added to the acc() data field.                                        |
+//                                                                             |
+    void SPH_sweep_two();
+//                                                                             |
+//  Currently, the code only implements the traditional artificial viscosity   |
+//  with eps=0.01.                                                             |
+//                                                                             |
+#endif                                      //                                 |
 //-----------------------------------------------------------------------------+
 //                                                                             |
 //                                                                             |
-// 4 SEARCH FOR AND COUNTING OF NEIGHBOURS AND COLLISION PARTNERS              |
-// ==============================================================              |
+// 5 SEARCH FOR AND COUNTING OF INTERACTION PARTNERS                           |
+// =================================================                           |
 //                                                                             |
 // Once a tree structure is established, you can also use it to create         |
 // interaction lists for neighbouring or colliding particles (useful for,      |
 // e.g., SPH and sticky-particle simulations). This is provided by             |
 //                                                                             |
     typedef uint elem_pair[2];              // element of an interaction list  |
-    void make_iaction_list(elem_pair *,     // I: interaction list             |
-			   uint const&,     // I: allocated size of list       |
-			   uint      &,     // O: actual size of list          |
-			   real const& =-one)//[I: time step tau]              |
-      const;                                //                                 |
+    void                                    //                                 |
+    make_iaction_list(elem_pair *,          // I: interaction list             |
+		      uint const&,          // I: allocated size of list       |
+		      uint      &,          // O: actual size of list          |
+		      bool const& = 1,      //[I: 1/0: Max/Sum (see below)]    |
+		      real const& =-one);   //[I: time step tau]               |
 //                                                                             |
 // In case of overflow, i.e. if the number of pairs found exceeds the size     |
 // (2nd arg) of the list (1st arg), the routine issues a warning to stderr,    |
@@ -367,13 +494,14 @@ namespace nbdy {                            // falcON is in namespace nbdy     |
 // number of interactions found.                                               |
 //                                                                             |
 //                                                                             |
-// 4.1 Neighbour search (SPH support)                                          |
-// ----------------------------------                                          |
+// 5.1 SPH partner search                                                      |
+// ----------------------                                                      |
 // In order to make a list of all pairs {i,j} of bodies/indices for which      |
 //                                                                             |
 //      (1) both are flagged to be SPH particles,                              |
 // and  (2) at least one is flagged being active,                              |
-// and  (3) | x_i - x_j | < max(size_i,size_j)                                 |
+// and  (3)    | x_i - x_j | < max(size_i,size_j)   IF Max==true               |
+//          OR | x_i - x_j | < size_i + size_j      IF Max==false              |
 //                                                                             |
 // use falcON::make_iaction_list() whereby omitting the time step (last arg).  |
 // In the case of array comnunication, provide an array with sizes of the      |
@@ -382,7 +510,7 @@ namespace nbdy {                            // falcON is in namespace nbdy     |
 // flagged as SPH particles).                                                  |
 //                                                                             |
 //                                                                             |
-// 4.2 Collision partner search (for sticky particles)                         |
+// 5.2 Sticky-particle partner search                                          |
 // ---------------------------------------------------                         |
 // In order to make a list of all pairs {i,j} of bodies/indices for which      |
 //                                                                             |
@@ -397,18 +525,19 @@ namespace nbdy {                            // falcON is in namespace nbdy     |
 // for all bodies flagged as sticky).                                          |
 //                                                                             |
 //                                                                             |
-// 4.3 SPH Neighbour counting                                                  |
-// --------------------------                                                  |
-// In order to count, for each body flagged both as SPH particle and being     |
-// active, the number of other SPH particles within its size, use              |
+// 5.3 SPH partner counting                                                    |
+// ------------------------                                                    |
+// The following method counts for each active body flagged as sph the number  |
+// of interaction partners, i.e. bodies that are also flagged as sph and       |
+// for which | x_i - x_j | < size_i + size_j                                   |
 //                                                                             |
-    void count_sph_neighbours();            //                                 |
+    void count_sph_partners();              //                                 |
 //                                                                             |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 //                                                                             |
 //                                                                             |
-// 5 OTHER FEATURES                                                            |
+// 6 OTHER FEATURES                                                            |
 // ================                                                            |
 //                                                                             |
 // There are many further routines by which the user can obtain information    |
@@ -423,7 +552,7 @@ namespace nbdy {                            // falcON is in namespace nbdy     |
 //                                                                             |
 // For the number of sets of Taylor series coefficients, use                   |
 //                                                                             |
-    unsigned No_coeffs_used() const;        //                                 |
+    unsigned const&No_coeffs_used() const;  //                                 |
 //                                                                             |
 // In order to dump (almost) all info of the bodies and cells to files, use    |
 //                                                                             |
@@ -442,10 +571,10 @@ namespace nbdy {                            // falcON is in namespace nbdy     |
 //                                                                             |
     const char* describe_MAC() const;       //                                 |
 //                                                                             |
-// To obtain the current type of softening (global/individual), use            |
+// To know whether or not individual softening lengths eps_i are used, use     |
 //                                                                             |
 #ifdef falcON_INDI                          //                                 |
-    const soft_type& softening() const;     //                                 |
+    const bool& use_individual_eps() const; //                                 |
 #endif                                      //                                 |
 //                                                                             |
 // To obtain the currently used kernel, use                                    |
@@ -460,6 +589,10 @@ namespace nbdy {                            // falcON is in namespace nbdy     |
 //                                                                             |
     const real& softening_length() const;   //                                 |
     const real& eps             () const;   //                                 |
+//                                                                             |
+// To obtain the current value of Newton's G, use                              |
+//                                                                             |
+    const real& NewtonsG() const;           //                                 |
 //                                                                             |
 // To obtain some interaction statistics, use                                  |
 //                                                                             |
@@ -480,10 +613,10 @@ namespace nbdy {                            // falcON is in namespace nbdy     |
 //-----------------------------------------------------------------------------+
 //                                                                             |
 //                                                                             |
-// 6 KNOWN BUGS AND PROBLEMS                                                   |
+// 7 KNOWN BUGS AND PROBLEMS                                                   |
 // =========================                                                   |
 //                                                                             |
-// 6.1 Test-bodies are not possible                                            |
+// 7.1 Test-bodies are not possible                                            |
 // --------------------------------                                            |
 // A body that is loaded into the tree but has zero mass, will not acquire     |
 // any acceleration. This is because the code computes first the force = mass  |
@@ -497,7 +630,7 @@ namespace nbdy {                            // falcON is in namespace nbdy     |
 // generated by the test bodies. (You have been warned!)                       |
 //                                                                             |
 //                                                                             |
-// 6.2 Bodies at identical positions                                           |
+// 7.2 Bodies at identical positions                                           |
 // ---------------------------------                                           |
 // The code cannot cope with more than Ncrit bodies at the same position       |
 // (within the floating point accuracy). This situation will lead to an        |
@@ -526,71 +659,35 @@ namespace nbdy {                            // falcON is in namespace nbdy     |
 // const protected methods                                                     |
 //                                                                             |
   protected:                                      //                           |
-    const uint& No_bodies       () const;         // R: # bodies               |
-    uint        No_zombie_bodies() const;         // R: # bodies not in tree   |
-    grav_tree* const& my_tree   () const          // R: my tree                |
+    const uint& No_bodies     () const;           // R: # bodies               |
+    oct_tree* const& my_tree  () const            // R: my tree                |
     { return TREE; }                              //                           |
 //-----------------------------------------------------------------------------+
 //                                                                             |
 // private methods                                                             |
 //                                                                             |
   private:                                        //                           |
-    falcON                      ();               // not implemented           |
-    falcON                      (const falcON&);  // not implemented           |
-    falcON& operator=           (const falcON&);  // not implemented           |
-//-----------------------------------------------------------------------------+
-//                                                                             |
-// private types                                                               |
-//                                                                             |
-    enum tree_state {                             // state of the tree         |
-      unset  = 0,                                 //   tree not existent       |
-      built  = 1,                                 //   tree grown              |
-      reused = 2                                  //   old tree re-used        |
-    };                                            //                           |
+    falcON                    ();                 // not implemented           |
+    falcON                    (const falcON&);    // not implemented           |
+    falcON& operator=         (const falcON&);    // not implemented           |
 //-----------------------------------------------------------------------------+
 //                                                                             |
 // data members                                                                |
 //                                                                             |
-    mutable tree_state     STATE;                 // state of the tree         |
-    const   sbodies       *BODIES;                // sbodies to be used        |
-    const   barrays       *ARRAYS;                // barrays to be used        |
-    grav_tree             *TREE;                  // tree to be used           |
-    int                    Ncrit;                 // Ncrit                     |
-    mutable real           EPS;                   // global eps/eps_max        |
-    mutable grav_mac      *GMAC;                  // theta(M)                  |
     mutable grav_stat     *STATS;                 // statistics                |
-#ifdef falcON_INDI                                //                           |
-    mutable soft_type      SOFTENING;             // type of softening         |
+    const   sbodies       *BODIES;                // sbodies to be used        |
+    const   abodies       *ARRAYS;                // abodies to be used        |
+    int                    Ncrit;                 // Ncrit                     |
+    oct_tree              *TREE;                  // tree to be used           |
+    grav_mac              *GMAC;                  // theta(M)                  |
+    grav_estimator        *GRAV;                  // gravity estimator         |
+    stsp_estimator        *STSP;                  // partner search            |
+#ifdef falcON_SPH                                 //                           |
+    sph_estimator         *SPHT;                  // SPH estimator             |
 #endif                                            //                           |
-    mutable kern_type      KERNEL;                // type of softening kernel  |
-//-----------------------------------------------------------------------------+
   };                                              // END: class falcON         |
-//-----------------------------------------------------------------------------+
-//                                                                             |
-// inline definitions of some public member functions                          |
-//                                                                             |
-#ifdef falcON_INDI                                //                           |
-  inline                                          //                           |
-  soft_type const &falcON::softening() const      //                           |
-  { return SOFTENING; }                           //                           |
-#endif                                            //                           |
-//-----------------------------------------------------------------------------+
-  inline                                          //                           |
-  kern_type const &falcON::kernel() const         //                           |
-  { return KERNEL; }                              //                           |
-//-----------------------------------------------------------------------------+
-  inline                                          //                           |
-  real const &falcON::eps() const                 //                           |
-  { return EPS; }                                 //                           |
-//-----------------------------------------------------------------------------+
-  inline                                          //                           |
-  real const &falcON::softening_length() const    //                           |
-  { return EPS; }                                 //                           |
-//-----------------------------------------------------------------------------+
-  inline                                          //                           |
-  const char*  falcON::describe_kernel () const   //                           |
-  { return describe(KERNEL);}                     //                           |
-//-----------------------------------------------------------------------------+
 }                                                 // END: namespace nbdy       |
+//-----------------------------------------------------------------------------+
+#include <public/falcON.cc>                       // include inline definitions|
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #endif                                            // falcON_included_falcON_h  |

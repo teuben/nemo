@@ -6,152 +6,209 @@
 // C++ code                                                                    |
 //                                                                             |
 // Copyright Walter Dehnen, 2000-2003                                          |
-// e-mail:   wdehnen@aip.de                                                    |
-// address:  Astrophysikalisches Institut Potsdam,                             |
-//           An der Sternwarte 16, D-14482 Potsdam, Germany                    |
-//                                                                             |
-//-----------------------------------------------------------------------------+
-//                                                                             |
-// implementing internal/kern.h                                                |
-// or           proprietary/kern_sse.h                                         |
-//                                                                             |
-// Note that in case of the non-public SSE_CODE, most contents of this file    |
-// are commented out and are replaced by the private version in priv.h         |
-//                                                                             |
-//-----------------------------------------------------------------------------+
-//                                                                             |
-// macro steered structure:                                                    |
-//                                                                             |
-//     general macros & code required for all further code below               |
-// #ifdef falcON_SSE_CODE                                                      |
-// # include <nbdy/priv/kern_sse>   code using SSE instructions                |
-// #else                                                                       |
-//     macros needed for non-SSE stuff                                         |
-// # ifdef falcON_INDI                                                         |
-// #  include <nbdy/priv/kern_ind>  non-SSE code for adaptive softening        |
-// # else                                                                      |
-//     non-SSE code for non-adaptive softening                                 |
-// # endif                                                                     |
-// #endif                                                                      |
-// #ifndef(falcON_INDI)                                                        |
-//     code for non-adaptive softening, not implemented using SSE              |
-// #endif                                                                      |
+// e-mail:   walter.dehnen@astro.le.ac.uk                                      |
+// address:  Department of Physics and Astronomy, University of Leicester      |
+//           University Road, Leicester LE1 7RH, United Kingdom                |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 #include <public/auxx.h>
-
-#if defined(falcON_REAL_IS_FLOAT) && defined(falcON_SSE)
-#  define  falcON_SSE_CODE
-#  include <proper/kern_sse.h>
-#else
-#  undef   falcON_SSE_CODE
-#  include <public/kern.h>
-#endif
-
-////////////////////////////////////////////////////////////////////////////////
-
-#define falcON_FULL_POT      // enable fully consistent computation of potential
-#undef  falcON_FULL_POT      // never compute the potential fully consistently  
+#include <public/kern.h>
+#include <public/coef.h>
 
 using namespace nbdy;
 using namespace nbdy::grav;
 ////////////////////////////////////////////////////////////////////////////////
-//                                                                              
-// macros used in both the public and proprietary part of the code must be      
-// defined here.                                                                
-//                                                                              
+//                                                                            //
+// class nbdy::TaylorSeries                                                   //
+//                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
-// single Body-Body interaction                                                 
+inline void TaylorSeries::
+shift_and_add(const grav_cell*const&c) {           // I: cell & its coeffs      
+  if(hasCoeffs(c)) {                               // IF(cell has had iaction)  
+    register vect dX = cofm(c) - X;                //   vector to shift by      
+    if(dX != zero && C != zero) {                  //   IF(dX != 0 AND C != 0)  
+      shift_by(C,dX);                              //     shift expansion       
+    }                                              //   ENDIF                   
+    X = cofm(c);                                   //   set X to new position   
+    C.add_times(Coeffs(c), one/mass(c));           //   add cell's coeffs in    
+  }                                                // ENDIF                     
+}
+//------------------------------------------------------------------------------
+inline void TaylorSeries::
+extract_grav(leaf_iter const&L) const {            // I: leaf to get grav to    
+  eval_expn(L->Coeffs(),C,cofm(L)-X);              // evaluate expansion        
+}
 ////////////////////////////////////////////////////////////////////////////////
-#define NEWTON(MUM)							\
-  x  = one/Rq;								\
-  D0 = MUM*sqrt(x);							\
+//                                                                            //
+// class nbdy::grav_kern_base                                                 //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+void grav_kern_base::eval_grav(cell_iter    const&C,
+			       TaylorSeries const&T) const
+{
+  TaylorSeries G(T);                               // G = copy of T             
+  G.shift_and_add(C);                              // shift G; G+=T_C           
+  take_coeffs(C);                                  // free memory: C's coeffs   
+  LoopLeafKids(cell_iter,C,l) if(is_active(l)) {   // LOOP C's active leaf kids 
+    l->normalize_grav();                           //   pot,acc/=mass           
+    if(!is_empty(G)) G.extract_grav(l);            //   add pot,acc due to G    
+  }                                                // END LOOP                  
+  LoopCellKids(cell_iter,C,c) if(is_active(c))     // LOOP C's active cell kids 
+    eval_grav(c,G);                                //   recursive call          
+}
+//------------------------------------------------------------------------------
+void grav_kern_base::eval_grav_all(cell_iter    const&C,
+				   TaylorSeries const&T) const
+{
+  TaylorSeries G(T);                               // G = copy of T             
+  G.shift_and_add(C);                              // shift G; G+=T_C           
+  take_coeffs(C);                                  // free memory: C's coeffs   
+  LoopLeafKids(cell_iter,C,l) {                    // LOOP C's leaf kids        
+    l->normalize_grav();                           //   pot,acc/=mass           
+//     // TEST
+// #define __BODY 5
+//     if(mybody(l)==__BODY) {
+//       std::cerr<<" body #"<<__BODY<<":\n"
+// 	       <<"    direct interations only: p="
+// 	       <<pot(l)<<" a="<<acc(l)<<'\n';
+//     }
+// #undef __BODY
+//     // TSET
+    if(!is_empty(G)) G.extract_grav(l);            //   add pot,acc due to G    
+  }                                                // END LOOP                  
+  LoopCellKids(cell_iter,C,c)                      // LOOP C's cell kids        
+    eval_grav_all(c,G);                            //   recursive call          
+}
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+// 1. Single body-body interaction (these are extremely rare)                 //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+#define P0(MUM)					\
+  x  = one/(Rq+EQ);				\
+  D0 = MUM*sqrt(x);				\
   R *= D0*x;
 //------------------------------------------------------------------------------
-#define P0(MUM)								\
-  x  = one/(Rq+EPQ);							\
-  D0 = MUM*sqrt(x);							\
-  R *= D0*x;
-//------------------------------------------------------------------------------
-#define P1(MUM)								\
-  x  = one/(Rq+EPQ);							\
-  D0 = MUM*sqrt(x);							\
-  register real D1 = D0*x;						\
-  register real heq= half*EPQ;						\
-  D0+= heq*D1;								\
-  D1+= heq*3*D1*x;							\
+#define P1(MUM)					\
+  x  = one/(Rq+EQ);				\
+  D0 = MUM*sqrt(x);				\
+  register real D1 = D0*x;			\
+  register real hq = half*EQ;			\
+  D0+= hq*D1;					\
+  D1+= hq*3*D1*x;				\
   R *= D1;
 //------------------------------------------------------------------------------
-#define P2(MUM)								\
-  x  = one/(Rq+EPQ);							\
-  D0 = MUM*sqrt(x);							\
-  register real D1 = D0*x, D2= 3*D1*x, D3= 5*D2*x;			\
-  register real heq= half*EPQ;						\
-  D0+= heq*(D1+heq*D2);							\
-  D1+= heq*(D2+heq*D3);							\
+#define P2(MUM)						\
+  x  = one/(Rq+EQ);					\
+  D0 = MUM*sqrt(x);					\
+  register real D1 = D0*x, D2= 3*D1*x, D3= 5*D2*x;	\
+  register real hq = half*EQ;				\
+  D0+= hq*(D1+hq*D2);					\
+  D1+= hq*(D2+hq*D3);					\
   R *= D1;
 //------------------------------------------------------------------------------
-#define P3(MUM)								\
-  x  = one/(Rq+EPQ);							\
-  D0 = MUM*sqrt(x);							\
-  register real D1 = D0*x, D2= 3*D1*x, D3= 5*D2*x, D4= 7*D3*x;		\
-  register real heq= half*EPQ, qeq=half*heq;				\
-  D0+= ((heq*D3+D2)*qeq+D1)*heq;					\
-  D1+= ((heq*D4+D3)*qeq+D2)*heq;					\
+#define P3(MUM)							\
+  x  = one/(Rq+EQ);						\
+  D0 = MUM*sqrt(x);						\
+  register real D1 = D0*x, D2= 3*D1*x, D3= 5*D2*x, D4= 7*D3*x;	\
+  register real hq = half*EQ;					\
+  register real qq = half*hq;					\
+  D0+= ((hq*D3+D2)*qq+D1)*hq;					\
+  D1+= ((hq*D4+D3)*qq+D2)*hq;					\
   R *= D1;
+//------------------------------------------------------------------------------
+#define P0_I(MUM)				\
+  EQ = square(eph(A)+eph(B));			\
+  P0(MUM)	
+//------------------------------------------------------------------------------
+#define P1_I(MUM)				\
+  EQ = square(eph(A)+eph(B));			\
+  P1(MUM)	
+//------------------------------------------------------------------------------
+#define P2_I(MUM)				\
+  EQ = square(eph(A)+eph(B));			\
+  P2(MUM)	
+//------------------------------------------------------------------------------
+#define P3_I(MUM)				\
+  EQ = square(eph(A)+eph(B));			\
+  P3(MUM)	
+//==============================================================================
+void grav_kern::single(leaf_iter const &A, leaf_iter const&B) const
+{
+  register vect R  = cofm(A)-cofm(B);
+  register real Rq = norm(R),x,D0;
+#ifdef falcON_INDI
+  if(INDI_SOFT)
+    switch(KERN) {
+    case p1: { P1_I(mass(A)*mass(B)) } break;
+    case p2: { P2_I(mass(A)*mass(B)) } break;
+    case p3: { P3_I(mass(A)*mass(B)) } break;
+    default: { P0_I(mass(A)*mass(B)) } break;
+    }
+  else
+#endif
+    switch(KERN) {
+    case p1: { P1(mass(A)*mass(B)) } break;
+    case p2: { P2(mass(A)*mass(B)) } break;
+    case p3: { P3(mass(A)*mass(B)) } break;
+    default: { P0(mass(A)*mass(B)) } break;
+    }
+  if(is_active(A)) { A->pot()-=D0; A->acc()-=R; }
+  if(is_active(B)) { B->pot()-=D0; B->acc()+=R; }
+}
+//------------------------------------------------------------------------------
+void grav_kern_all::single(leaf_iter const &A, leaf_iter const&B) const
+{
+  register vect R  = cofm(A)-cofm(B);
+  register real Rq = norm(R),x,D0;
+#ifdef falcON_INDI
+  if(INDI_SOFT)
+    switch(KERN) {
+    case p1: { P1_I(mass(A)*mass(B)) } break;
+    case p2: { P2_I(mass(A)*mass(B)) } break;
+    case p3: { P3_I(mass(A)*mass(B)) } break;
+    default: { P0_I(mass(A)*mass(B)) } break;
+    }
+  else
+#endif
+    switch(KERN) {
+    case p1: { P1(mass(A)*mass(B)) } break;
+    case p2: { P2(mass(A)*mass(B)) } break;
+    case p3: { P3(mass(A)*mass(B)) } break;
+    default: { P0(mass(A)*mass(B)) } break;
+    }
+  A->pot()-=D0; A->acc()-=R;
+  B->pot()-=D0; B->acc()+=R;
+}
 ////////////////////////////////////////////////////////////////////////////////
-// Cell-Note interaction                                                        
+//                                                                            //
+// 2. Cell-Node interactions                                                  //
+//                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
-#include <public/kmac.h>
-////////////////////////////////////////////////////////////////////////////////
-//                                                                              
-// Below, we only give the non-SSE version of the code.                         
-//                                                                              
-////////////////////////////////////////////////////////////////////////////////
-
 #ifdef falcON_SSE_CODE
-                                                   // implementing              
-                                                   // inc/proper/kern_sse.h     
-#  include <proper/kern_sse.cc>                    // non-public: SSE code      
-
-#else                                              // implementing              
-                                                   // inc/public/kern.h         
-
-////////////////////////////////////////////////////////////////////////////////
+#  include <proper/kern_sse.cc>
+#else
+//==============================================================================
 //                                                                              
 // macros for computing the gravity                                             
 //                                                                              
-// DSINGL       called after loading a soul-soul interaction                    
-// ASINGL       called after loading a cell-node interaction                    
+// DSINGL       called after loading a leaf-leaf interaction                    
 //                                                                              
-////////////////////////////////////////////////////////////////////////////////
+//==============================================================================
 //                                                                              
 // for direct summation code, we assume:                                        
 // - real  D0          contains Mi*Mj   on input                                
 // - real  D1          contains R^2+e^2 on input                                
-// - real  HEQ,QEQ     are set to e^2, e^2/2 and e^2/4 for global softening     
+// - real  EP[3]       are set to e^2, e^2/2 and e^2/4 for global softening     
+// - real  EQ          is set to e^2                   for individual softening 
 //                                                                              
-////////////////////////////////////////////////////////////////////////////////
-//                                                                              
-// for approximate gravity code, we assume:                                     
-// - real  D0          contains Mi*Mj   on input                                
-// - real  D1          contains R^2+e^2 on input                                
-// - real  D2,D3       to be computed as well                                   
-// - real  HEQ,QEQ     are set to e^2/2 and e^2/4      for global softening     
-//                                                                              
-////////////////////////////////////////////////////////////////////////////////
+//==============================================================================
 //                                                                              
 // NOTE that we changed the definition of the D_n by a sign:                    
 //                                                                              
 // D_n = (-1/r d/dr)^n g(r) at r=|R|                                            
 //                                                                              
-////////////////////////////////////////////////////////////////////////////////
-#if falcON_ORDER != 3
-#  error currently we only support falcON_ORDER==3 in "__FILE__"
-#endif
-//------------------------------------------------------------------------------
-// P0: Plummer and Newtonian                                                    
-//------------------------------------------------------------------------------
+//==============================================================================
 # define DSINGL_P0_G				\
   register real					\
   XX  = one/D1;					\
@@ -160,17 +217,7 @@ using namespace nbdy::grav;
 # define DSINGL_P0_I				\
   DSINGL_P0_G
 //------------------------------------------------------------------------------
-# define ASINGL_P0_G				\
-  register real					\
-  XX  = one/D1;					\
-  D0 *= sqrt(XX);				\
-  D1  =      XX * D0;				\
-  D2  =  3 * XX * D1;				\
-  D3  =  5 * XX * D2;
-//------------------------------------------------------------------------------
-// P1                                                                           
-//------------------------------------------------------------------------------
-# define DSINGL_P1(HQ)				\
+# define DSINGL_P1_G				\
   register real					\
   XX  = one/D1;					\
   D0 *= sqrt(XX);				\
@@ -178,27 +225,11 @@ using namespace nbdy::grav;
   XX *= 3  * D1;     /* XX == T2 */		\
   D0 += HQ * D1;				\
   D1 += HQ * XX;
-# define DSINGL_P1_G				\
-  DSINGL_P1(HEQ)
+# define DSINGL_P1_I				\
+  HQ  = half*EQ;				\
+  DSINGL_P1_G
 //------------------------------------------------------------------------------
-# define ASINGL_P1(HQ)				\
-  register real					\
-  XX  = one/D1;					\
-  D0 *= sqrt(XX);				\
-  D1  =      XX * D0;				\
-  D2  =  3 * XX * D1;				\
-  D3  =  5 * XX * D2;				\
-  XX *=  7 * D3;      /* XX == T4 */		\
-  D0 += HQ * D1;				\
-  D1 += HQ * D2;				\
-  D2 += HQ * D3;				\
-  D3 += HQ * XX;
-# define ASINGL_P1_G				\
-  ASINGL_P1(HEQ)
-//------------------------------------------------------------------------------
-// P2                                                                           
-//------------------------------------------------------------------------------
-# define DSINGL_P2(HQ)				\
+# define DSINGL_P2_G				\
   register real					\
   XX  = one/D1;					\
   D0 *= sqrt(XX);				\
@@ -208,29 +239,11 @@ using namespace nbdy::grav;
   XX *= 5 * D2;           /* XX == T3 */	\
   D0 += HQ*(D1+HQ*D2);				\
   D1 += HQ*(D2+HQ*XX);
-# define DSINGL_P2_G				\
-  DSINGL_P2(HEQ)
+# define DSINGL_P2_I				\
+  HQ = half*EQ;					\
+  DSINGL_P2_G
 //------------------------------------------------------------------------------
-# define ASINGL_P2(HQ)				\
-  register real					\
-  XX  = one/D1;					\
-  D0 *= sqrt(XX);				\
-  D1  =      XX * D0;				\
-  D2  =  3 * XX * D1;				\
-  D3  =  5 * XX * D2;				\
-  register real					\
-  D4  =  7 * XX * D3;				\
-  XX *=  9 *      D4   ;  /* XX == T5 */	\
-  D0 += HQ *(D1+HQ*D2);				\
-  D1 += HQ *(D2+HQ*D3);				\
-  D2 += HQ *(D3+HQ*D4);				\
-  D3 += HQ *(D4+HQ*XX);
-# define ASINGL_P2_G				\
-  ASINGL_P2(HEQ)
-//------------------------------------------------------------------------------
-// P3                                                                           
-//------------------------------------------------------------------------------
-# define DSINGL_P3(HQ,QQ)			\
+# define DSINGL_P3_G				\
   register real					\
   XX  = one/D1;					\
   D0 *= sqrt(XX);				\
@@ -242,53 +255,42 @@ using namespace nbdy::grav;
   XX *= 7 * D3;           /* XX == T4 */	\
   D0 += HQ*(D1+QQ*(D2+HQ*D3));			\
   D1 += HQ*(D2+QQ*(D3+HQ*XX));
-# define DSINGL_P3_G				\
-  DSINGL_P3(HEQ,QEQ)
-//------------------------------------------------------------------------------
-# define ASINGL_P3(HQ,QQ)			\
-  register real 				\
-  XX  = one/D1;				\
-  D0 *= sqrt(XX);				\
-  D1  =      XX * D0;			\
-  D2  =  3 * XX * D1;			\
-  D3  =  5 * XX * D2;			\
-  register real 				\
-  D4  =  7 * XX * D3;			\
-  register real 				\
-  D5  =  9 * XX * D4   ;			\
-  XX *= 11 *      D5   ;  /* XX == T6 */	\
-  D0 += HQ*(D1+QQ*(D2+HQ*D3));	\
-  D1 += HQ*(D2+QQ*(D3+HQ*D4));	\
-  D2 += HQ*(D3+QQ*(D4+HQ*D5));	\
-  D3 += HQ*(D4+QQ*(D5+HQ*XX));
-# define ASINGL_P3_G				\
-  ASINGL_P3(HEQ,QEQ)
+# define DSINGL_P3_I				\
+  HQ = half*EQ;					\
+  QQ = half*HQ;					\
+  DSINGL_P3_G
 ////////////////////////////////////////////////////////////////////////////////
-//                                                                              
-// 1. direct summation of many-body interactions                                
-//                                                                              
+//                                                                            //
+// 2.1 direct summation of many-body interactions                             //
+//                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
 // macros for organizing the gravity computation via direct summation.          
 //                                                                              
 // we have to take care for active and non-active                               
 //                                                                              
-////////////////////////////////////////////////////////////////////////////////
+//==============================================================================
 //                                                                              
 // These macros assume:                                                         
 //                                                                              
-// - vect    X0     position of left soul                                       
-// - real    M0     mass of left soul                                           
-// - vect    F0     force for left soul (if used)                               
-// - real    P0     potential for left soul (if used)                           
+// - vect    X0     position of left leaf                                       
+// - real    M0     mass of left leaf                                           
+// - vect    F0     force for left leaf (if used)                               
+// - real    P0     potential for left leaf (if used)                           
 // - vect    dR     to be filled with  X0-X_j                                   
 // - real    D0     to be filled with  M0*M_j                                   
 // - real    D1     to be filled with  norm(dR[J])+eps^2  on loading            
 //                                                                              
-////////////////////////////////////////////////////////////////////////////////
+//==============================================================================
 #define LOAD_G(RGHT)				\
   dR = X0 - cofm(RGHT);				\
-  D1 = norm(dR) + EPQ;				\
+  D1 = norm(dR) + EQ;				\
+  D0 = M0 * mass(RGHT)
+//------------------------------------------------------------------------------
+#define LOAD_I(RGHT)				\
+  dR = X0 - cofm(RGHT);				\
+  EQ = square(E0+eph(RGHT));			\
+  D1 = norm(dR) + EQ;				\
   D0 = M0 * mass(RGHT)
 //------------------------------------------------------------------------------
 #define PUT_LEFT(RGHT)				\
@@ -316,397 +318,611 @@ using namespace nbdy::grav;
     RGHT->pot() -= D0;				\
     RGHT->acc() += dR;				\
   }
-////////////////////////////////////////////////////////////////////////////////
-// below we only give code for global softening                                 
-////////////////////////////////////////////////////////////////////////////////
-#ifdef falcON_INDI
-#  include <proper/kern_ind.cc>                    // non-public: individual eps
-#else
-////////////////////////////////////////////////////////////////////////////////
-#define GRAV_ALL(DSINGL,PUT)			\
-for(register soul_iter B=B0; B!=BN; ++B) {	\
-  LOAD_G(B);					\
+//------------------------------------------------------------------------------
+#define GRAV_ALL(LOAD,DSINGL,PUT)		\
+for(register leaf_iter B=B0; B!=BN; ++B) {	\
+  LOAD(B);					\
   DSINGL					\
   PUT(B)					\
 } 
 //------------------------------------------------------------------------------
-#define GRAV_FEW(DSINGL)			\
-for(register soul_iter B=B0; B!=BN; ++B)	\
+#define GRAV_FEW(LOAD,DSINGL)			\
+for(register leaf_iter B=B0; B!=BN; ++B)	\
   if(is_active(B)) {				\
-    LOAD_G(B);					\
+    LOAD(B);					\
     DSINGL					\
     PUT_RGHT(B)					\
   } 
 //------------------------------------------------------------------------------
-// now defining auxiliary inline functions for the computation of  N            
-// interactions. There are the following 10 cases:                              
-// - each for the cases YA, YS, YN, NA, NS                                      
-// - each for global and individual softening                                   
-//------------------------------------------------------------------------------
 #define ARGS					\
-  kern_type const&KERN,				\
-  soul_iter const&A,				\
-  soul_iter const&B0,				\
-  soul_iter const&BN,				\
-  real      const&EPQ,				\
-  real      const&HEQ,				\
-  real      const&QEQ
+  leaf_iter const&A,				\
+  leaf_iter const&B0,				\
+  leaf_iter const&BN,				\
+  real&EQ, real&HQ, real&QQ 
 //------------------------------------------------------------------------------
-#define START					\
+#define START_G					\
   const    real      M0=mass(A);		\
   const    vect      X0=cofm(A);		\
   register vect      dR;			\
   register real      D0,D1;
 //------------------------------------------------------------------------------
-namespace nbdy {
-  //----------------------------------------------------------------------------
-  // interactions 1 <==> N                                                      
-  //----------------------------------------------------------------------------
-  inline void many_YA_G(ARGS)
-  {
-    START;
-    register real P0=zero;
-    register vect F0=zero;
-    switch(KERN) {
-    case p1: GRAV_ALL(DSINGL_P1_G,PUT_BOTH) break;
-    case p2: GRAV_ALL(DSINGL_P2_G,PUT_BOTH) break; 
-    case p3: GRAV_ALL(DSINGL_P3_G,PUT_BOTH) break; 
-    default: GRAV_ALL(DSINGL_P0_G,PUT_BOTH) break; 
-    }
-    A->pot() += P0;
-    A->acc() += F0;
-  }
-  //----------------------------------------------------------------------------
-  // interactions 1 <= [=> N ]                                                  
-  //----------------------------------------------------------------------------
-  inline void many_YS_G(ARGS)
-  {
-    START;
-    register real P0=zero;
-    register vect F0=zero;
-    switch(KERN) {
-    case p1: GRAV_ALL(DSINGL_P1_G,PUT_SOME) break;
-    case p2: GRAV_ALL(DSINGL_P2_G,PUT_SOME) break;
-    case p3: GRAV_ALL(DSINGL_P3_G,PUT_SOME) break;
-    default: GRAV_ALL(DSINGL_P0_G,PUT_SOME) break;
-    }									
-    A->pot() += P0;
-    A->acc() += F0;
-  }
-  //----------------------------------------------------------------------------
-  // interactions 1 <=  N                                                       
-  //----------------------------------------------------------------------------
-  inline void many_YN_G(ARGS)
-  {
-    START;
-    register real P0=zero;
-    register vect F0=zero;
-    switch(KERN) {
-    case p1: GRAV_ALL(DSINGL_P1_G,PUT_LEFT) break;
-    case p2: GRAV_ALL(DSINGL_P2_G,PUT_LEFT) break;
-    case p3: GRAV_ALL(DSINGL_P3_G,PUT_LEFT) break;
-    default: GRAV_ALL(DSINGL_P0_G,PUT_LEFT) break;
-    }
-    A->pot() += P0;
-    A->acc() += F0;
-  }
-  //----------------------------------------------------------------------------
-  // interactions 1 => N                                                        
-  //----------------------------------------------------------------------------
-  inline void many_NA_G(ARGS)
-  {
-    START;
-    switch(KERN) {
-    case p1: GRAV_ALL(DSINGL_P1_G,PUT_RGHT) break;
-    case p2: GRAV_ALL(DSINGL_P2_G,PUT_RGHT) break;
-    case p3: GRAV_ALL(DSINGL_P3_G,PUT_RGHT) break;
-    default: GRAV_ALL(DSINGL_P0_G,PUT_RGHT) break;
-    }
-  }
-  //----------------------------------------------------------------------------
-  // interactions 1 [=> N ]                                                     
-  //----------------------------------------------------------------------------
-  inline void many_NS_G(ARGS)
-  {
-    START;
-    switch(KERN) {
-    case p1: GRAV_FEW(DSINGL_P1_G) break;
-    case p2: GRAV_FEW(DSINGL_P2_G) break;
-    case p3: GRAV_FEW(DSINGL_P3_G) break;
-    default: GRAV_FEW(DSINGL_P0_G) break;
-    }
-  }
-}                                                  // END: namespace nbdy       
-#undef ARGS
-#undef START
-//------------------------------------------------------------------------------
-// we now can define the cell-soul and cell-self interaction via direct sums    
-//------------------------------------------------------------------------------
-void grav_kern::many(cell_iter const&A, soul_iter const&B) const
-{
-  if(is_active(B))
-    switch(who_is_active(A)) {
-    case all: 
-      many_YA_G(KERN,B,A.begin_souls(),A.end_soul_desc(),EPQ,HEQ,QEQ); break;
-    case some:
-      many_YS_G(KERN,B,A.begin_souls(),A.end_soul_desc(),EPQ,HEQ,QEQ); break;
-    case none:
-      many_YN_G(KERN,B,A.begin_souls(),A.end_soul_desc(),EPQ,HEQ,QEQ); break;
-    }
-  else
-    switch(who_is_active(A)) {
-    case all:
-      many_NA_G(KERN,B,A.begin_souls(),A.end_soul_desc(),EPQ,HEQ,QEQ); break;
-    case some:
-      many_NS_G(KERN,B,A.begin_souls(),A.end_soul_desc(),EPQ,HEQ,QEQ); break;
-    case none: break;
-    }
-}
-//------------------------------------------------------------------------------
-void grav_kern::many(cell_iter const&C) const
-{
-  const    uint      N1 = number(C)-1;
-  register uint      k, Nk;
-  register soul_iter A = C.begin_souls();
-  if(al_active(C))
-    for(k=0, Nk=N1; Nk!=0; --Nk, ++k, ++A)
-      many_YA_G(KERN,A,A+1,A+1+Nk,EPQ,HEQ,QEQ);
-  else
-    for(k=0, Nk=N1; Nk!=0; --Nk, ++k, ++A)
-      if(is_active(A)) many_YS_G(KERN,A,A+1,A+1+Nk,EPQ,HEQ,QEQ);
-      else             many_NS_G(KERN,A,A+1,A+1+Nk,EPQ,HEQ,QEQ);
-}
+#define START_I					\
+  const    real      E0=eph(A);			\
+  const    real      M0=mass(A);		\
+  const    vect      X0=cofm(A);		\
+  register vect      dR;			\
+  register real      D0,D1;
 //==============================================================================
-void grav_kern_all::many(cell_iter const&A, soul_iter const&B) const
+// now defining auxiliary inline functions for the computation of  N            
+// interactions. There are the following 10 cases:                              
+// - each for the cases YA, YS, YN, NA, NS                                      
+// - each for global and individual softening                                   
+//==============================================================================
+namespace {
+  using namespace nbdy; using nbdy::uint; using namespace nbdy::grav;
+  //////////////////////////////////////////////////////////////////////////////
+#define DIRECT(START,LOAD,DSINGL)				\
+    static void many_YA(ARGS) {					\
+      START; register real P0=zero; register vect F0=zero;	\
+      GRAV_ALL(LOAD,DSINGL,PUT_BOTH)				\
+      A->pot()+=P0;  A->acc()+=F0;				\
+    }								\
+    static void many_YS(ARGS) {					\
+      START; register real P0=zero; register vect F0=zero;	\
+      GRAV_ALL(LOAD,DSINGL,PUT_SOME)				\
+      A->pot()+=P0; A->acc()+=F0;				\
+    }								\
+    static void many_YN(ARGS) {					\
+      START; register real P0=zero; register vect F0=zero;	\
+      GRAV_ALL(LOAD,DSINGL,PUT_LEFT)				\
+      A->pot()+=P0; A->acc()+=F0;				\
+    }								\
+    static void many_NA(ARGS) {					\
+      START;							\
+      GRAV_ALL(LOAD,DSINGL,PUT_RGHT)				\
+    }								\
+    static void many_NS(ARGS) {					\
+      START;							\
+      GRAV_FEW(LOAD,DSINGL)					\
+    }
+  //////////////////////////////////////////////////////////////////////////////
+  template<kern_type, bool> struct __direct;
+  //----------------------------------------------------------------------------
+  template<> struct __direct<p0,0> {
+    DIRECT(START_G,LOAD_G,DSINGL_P0_G);
+  };
+#ifdef falcON_INDI
+  template<> struct __direct<p0,1> {
+    DIRECT(START_I,LOAD_I,DSINGL_P0_I);
+  };
+#endif
+  //----------------------------------------------------------------------------
+  template<> struct __direct<p1,0> {
+    DIRECT(START_G,LOAD_G,DSINGL_P1_G);
+  };
+#ifdef falcON_INDI
+  template<> struct __direct<p1,1> {
+    DIRECT(START_I,LOAD_I,DSINGL_P1_I);
+  };
+#endif
+  //----------------------------------------------------------------------------
+  template<> struct __direct<p2,0> {
+    DIRECT(START_G,LOAD_G,DSINGL_P2_G);
+  };
+#ifdef falcON_INDI
+  template<> struct __direct<p2,1> {
+    DIRECT(START_I,LOAD_I,DSINGL_P2_I);
+  };
+#endif
+  //----------------------------------------------------------------------------
+  template<> struct __direct<p3,0> {
+    DIRECT(START_G,LOAD_G,DSINGL_P3_G);
+  };
+#ifdef falcON_INDI
+  template<> struct __direct<p3,1> {
+    DIRECT(START_I,LOAD_I,DSINGL_P3_I);
+  };
+#endif
+#undef LOAD_G
+#undef LOAD_I
+#undef START_G
+#undef START_I
+#undef DIRECT
+  //////////////////////////////////////////////////////////////////////////////
+  template<bool I> struct Direct {
+    static void many_YA(kern_type const&KERN, ARGS) {
+      switch(KERN) {
+      case p1: __direct<p1,I>::many_YA(A,B0,BN,EQ,HQ,QQ); break;
+      case p2: __direct<p2,I>::many_YA(A,B0,BN,EQ,HQ,QQ); break;
+      case p3: __direct<p3,I>::many_YA(A,B0,BN,EQ,HQ,QQ); break;
+      default: __direct<p0,I>::many_YA(A,B0,BN,EQ,HQ,QQ); break;
+      } }
+    static void many_YS(kern_type const&KERN, ARGS) {
+      switch(KERN) {
+      case p1: __direct<p1,I>::many_YS(A,B0,BN,EQ,HQ,QQ); break;
+      case p2: __direct<p2,I>::many_YS(A,B0,BN,EQ,HQ,QQ); break;
+      case p3: __direct<p3,I>::many_YS(A,B0,BN,EQ,HQ,QQ); break;
+      default: __direct<p0,I>::many_YS(A,B0,BN,EQ,HQ,QQ); break;
+      } }
+    static void many_YN(kern_type const&KERN, ARGS) {
+      switch(KERN) {
+      case p1: __direct<p1,I>::many_YN(A,B0,BN,EQ,HQ,QQ); break;
+      case p2: __direct<p2,I>::many_YN(A,B0,BN,EQ,HQ,QQ); break;
+      case p3: __direct<p3,I>::many_YN(A,B0,BN,EQ,HQ,QQ); break;
+      default: __direct<p0,I>::many_YN(A,B0,BN,EQ,HQ,QQ); break;
+      } }
+    static void many_NA(kern_type const&KERN, ARGS) {
+      switch(KERN) {
+      case p1: __direct<p1,I>::many_NA(A,B0,BN,EQ,HQ,QQ); break;
+      case p2: __direct<p2,I>::many_NA(A,B0,BN,EQ,HQ,QQ); break;
+      case p3: __direct<p3,I>::many_NA(A,B0,BN,EQ,HQ,QQ); break;
+      default: __direct<p0,I>::many_NA(A,B0,BN,EQ,HQ,QQ); break;
+      } }
+    static void many_NS(kern_type const&KERN, ARGS) {
+      switch(KERN) {
+      case p1: __direct<p1,I>::many_NS(A,B0,BN,EQ,HQ,QQ); break;
+      case p2: __direct<p2,I>::many_NS(A,B0,BN,EQ,HQ,QQ); break;
+      case p3: __direct<p3,I>::many_NS(A,B0,BN,EQ,HQ,QQ); break;
+      default: __direct<p0,I>::many_NS(A,B0,BN,EQ,HQ,QQ); break;
+      } }
+  };
+  //////////////////////////////////////////////////////////////////////////////
+}                                                  // END: unnamed namespace    
+#undef ARGS
+//==============================================================================
+// we now can define the cell-leaf and cell-self interaction via direct sums    
+//==============================================================================
+#define ARGS KERN,B,A.begin_leafs(),A.end_leaf_desc(),EQ,HQ,QQ
+void grav_kern::direct(cell_iter const&A, leaf_iter const&B) const
 {
-  many_YA_G(KERN,B,A.begin_souls(),A.end_soul_desc(),EPQ,HEQ,QEQ);
+#ifdef falcON_INDI
+  if(INDI_SOFT)
+    if(is_active(B)) {
+      if     (al_active(A)) Direct<1>::many_YA(ARGS);
+      else if(is_active(A)) Direct<1>::many_YS(ARGS);
+      else                  Direct<1>::many_YN(ARGS);
+    } else {
+      if     (al_active(A)) Direct<1>::many_NA(ARGS);
+      else if(is_active(A)) Direct<1>::many_NS(ARGS);
+    }
+  else
+#endif
+    if(is_active(B)) {
+      if     (al_active(A)) Direct<0>::many_YA(ARGS);
+      else if(is_active(A)) Direct<0>::many_YS(ARGS);
+      else                  Direct<0>::many_YN(ARGS);
+    } else {
+      if     (al_active(A)) Direct<0>::many_NA(ARGS);
+      else if(is_active(A)) Direct<0>::many_NS(ARGS);
+    }
 }
 //------------------------------------------------------------------------------
-void grav_kern_all::many(cell_iter const&C) const
+void grav_kern_all::direct(cell_iter const&A, leaf_iter const&B) const
+{
+#ifdef falcON_INDI
+  if(INDI_SOFT)
+    Direct<1>::many_YA(ARGS);
+  else
+#endif
+    Direct<0>::many_YA(ARGS);
+}
+#undef ARGS
+//------------------------------------------------------------------------------
+#define ARGS KERN,A,A+1,A+1+Nk,EQ,HQ,QQ
+void grav_kern::direct(cell_iter const&C) const
 {
   const    uint      N1 = number(C)-1;
   register uint      k, Nk;
-  register soul_iter A = C.begin_souls();
-  for(k=0, Nk=N1; Nk!=0; --Nk, ++k, ++A)
-    many_YA_G(KERN,A,A+1,A+1+Nk,EPQ,HEQ,QEQ);
+  register leaf_iter A = C.begin_leafs();
+#ifdef falcON_INDI
+  if(INDI_SOFT)
+    if(al_active(C))
+      for(k=0, Nk=N1; Nk!=0; --Nk, ++k, ++A) Direct<1>::many_YA(ARGS);
+    else
+      for(k=0, Nk=N1; Nk!=0; --Nk, ++k, ++A)
+	if(is_active(A))                     Direct<1>::many_YS(ARGS);
+	else                                 Direct<1>::many_NS(ARGS);
+  else
+#endif
+    if(al_active(C))
+      for(k=0, Nk=N1; Nk!=0; --Nk, ++k, ++A) Direct<0>::many_YA(ARGS);
+    else
+      for(k=0, Nk=N1; Nk!=0; --Nk, ++k, ++A)
+	if(is_active(A))                     Direct<0>::many_YS(ARGS);
+	else                                 Direct<0>::many_NS(ARGS);
 }
 //------------------------------------------------------------------------------
+void grav_kern_all::direct(cell_iter const&C) const
+{
+  const    uint      N1 = number(C)-1;
+  register uint      k, Nk;
+  register leaf_iter A = C.begin_leafs();
+#ifdef falcON_INDI
+  if(INDI_SOFT)
+    for(k=0, Nk=N1; Nk!=0; --Nk, ++k, ++A) Direct<1>::many_YA(ARGS);
+  else
+#endif
+    for(k=0, Nk=N1; Nk!=0; --Nk, ++k, ++A) Direct<0>::many_YA(ARGS);
+}
+#undef ARGS
+//==============================================================================
 // we now define non-inline functions for the computation of many direct        
-// interactions between NA and NB souls                                         
+// interactions between NA and NB leafs                                         
 // there are 8 cases, depending on whether all, some, or none of either A or    
 // B are active (case none,none is trivial).                                    
 //                                                                              
-// these functions are called by grav_kern::many(cell,cell), which is inline in 
-// kern.h, or by grav_kern::flush_scc() below.                                  
-//------------------------------------------------------------------------------
-void grav_kern_base::many_AA(soul_iter const&A0, uint const&NA,
-			     soul_iter const&B0, uint const&NB) const
-{
-  const    soul_iter AN=A0+NA, BN=B0+NB;
-  register soul_iter A,B;
-  for(A=A0; A!=AN; ++A) many_YA_G(KERN,A,B0,BN,EPQ,HEQ,QEQ);
-}
-//------------------------------------------------------------------------------
-void grav_kern_base::many_AS(soul_iter const&A0, uint const&NA,
-			     soul_iter const&B0, uint const&NB) const
-{
-  const    soul_iter AN=A0+NA, BN=B0+NB;
-  register soul_iter A,B;
-  for(A=A0; A!=AN; ++A) many_YS_G(KERN,A,B0,BN,EPQ,HEQ,QEQ);
-}
-//------------------------------------------------------------------------------
-void grav_kern_base::many_AN(soul_iter const&A0, uint const&NA,
-			     soul_iter const&B0, uint const&NB) const
-{
-  const    soul_iter AN=A0+NA, BN=B0+NB;
-  register soul_iter A,B;
-  for(A=A0; A!=AN; ++A) many_YN_G(KERN,A,B0,BN,EPQ,HEQ,QEQ);
-}
-//------------------------------------------------------------------------------
-void grav_kern_base::many_SA(soul_iter const&A0, uint const&NA,
-			     soul_iter const&B0, uint const&NB) const
-{
-  const    soul_iter AN=A0+NA, BN=B0+NB;
-  register soul_iter A,B;
-  for(A=A0; A!=AN; ++A) 
-    if(is_active(A)) many_YA_G(KERN,A,B0,BN,EPQ,HEQ,QEQ);
-    else             many_NA_G(KERN,A,B0,BN,EPQ,HEQ,QEQ);
-}
-//------------------------------------------------------------------------------
-void grav_kern_base::many_SS(soul_iter const&A0, uint const&NA,
-			     soul_iter const&B0, uint const&NB) const
-{
-  const    soul_iter AN=A0+NA, BN=B0+NB;
-  register soul_iter A,B;
-  for(A=A0; A!=AN; ++A) 
-    if(is_active(A)) many_YS_G(KERN,A,B0,BN,EPQ,HEQ,QEQ);
-    else             many_NS_G(KERN,A,B0,BN,EPQ,HEQ,QEQ);
-}
-//------------------------------------------------------------------------------
-void grav_kern_base::many_SN(soul_iter const&A0, uint const&NA,
-			     soul_iter const&B0, uint const&NB) const
-{
-  const    soul_iter AN=A0+NA, BN=B0+NB;
-  register soul_iter A,B;
-  for(A=A0; A!=AN; ++A) 
-    if(is_active(A)) many_YN_G(KERN,A,B0,BN,EPQ,HEQ,QEQ);
-}
-//------------------------------------------------------------------------------
-void grav_kern_base::many_NA(soul_iter const&A0, uint const&NA,
-			     soul_iter const&B0, uint const&NB) const
-{
-  const    soul_iter AN=A0+NA, BN=B0+NB;
-  register soul_iter A,B;
-  for(A=A0; A!=AN; ++A) many_NA_G(KERN,A,B0,BN,EPQ,HEQ,QEQ);
-}
-//------------------------------------------------------------------------------
-void grav_kern_base::many_NS(soul_iter const&A0, uint const&NA,
-			     soul_iter const&B0, uint const&NB) const
-{
-  const    soul_iter AN=A0+NA, BN=B0+NB;
-  register soul_iter A,B;
-  for(A=A0; A!=AN; ++A) many_NS_G(KERN,A,B0,BN,EPQ,HEQ,QEQ);
-}
-////////////////////////////////////////////////////////////////////////////////
-//                                                                              
-// 2. approximate gravity                                                       
-//                                                                              
-////////////////////////////////////////////////////////////////////////////////
-#if falcON_FULL_POT
-# define CS_PUT					\
-  if(FULL_POT) {				\
-    CELL_BODY_FP(A,B,D0,D1,D2,D3,R)		\
-  } else {					\
-    CELL_BODY(A,B,D0,D1,D2,D3,R)		\
-  }
-# define CS_PUT_ALL				\
-  if(FULL_POT) {				\
-    CELL_BODY_FP_ALL(A,B,D0,D1,D2,D3,R)		\
-  } else {					\
-    CELL_BODY_ALL(A,B,D0,D1,D2,D3,R)		\
-  }
-#else
-# define CS_PUT					\
-  CELL_BODY(A,B,D0,D1,D2,D3,R)
-# define CS_PUT_ALL				\
-  CELL_BODY_ALL(A,B,D0,D1,D2,D3,R)
-#endif
-//------------------------------------------------------------------------------
-void grav_kern::grav(cell_iter const&A, soul_iter const&B,
-		     vect           &R, real      const&Rq) const
-{
-  register real D0=mass(A)*mass(B), D1=Rq+EPQ, D2,D3;
-  switch(KERN) {
-  case p1: { ASINGL_P1_G CS_PUT } break;
-  case p2: { ASINGL_P2_G CS_PUT } break;
-  case p3: { ASINGL_P3_G CS_PUT } break;
-  case p0: { ASINGL_P0_G CS_PUT } break;
-  }
-}
-//------------------------------------------------------------------------------
-void grav_kern_all::grav(cell_iter const&A, soul_iter const&B,
-			 vect           &R, real      const&Rq) const
-{
-  register real D0=mass(A)*mass(B), D1=Rq+EPQ, D2,D3;
-  switch(KERN) {
-  case p1: { ASINGL_P1_G CS_PUT_ALL } break;
-  case p2: { ASINGL_P2_G CS_PUT_ALL } break;
-  case p3: { ASINGL_P3_G CS_PUT_ALL } break;
-  case p0: { ASINGL_P0_G CS_PUT_ALL } break;
-  }
-}
-//------------------------------------------------------------------------------
-#if falcON_FULL_POT
-# define CC_PUT					\
-  if(FULL_POT) {				\
-    CELL_CELL_FP(A,B,D0,D1,D2,D3,R)		\
-  } else {					\
-    CELL_CELL(A,B,D0,D1,D2,D3,R)		\
-  }
-# define CC_PUT_ALL				\
-  if(FULL_POT) {				\
-    CELL_CELL_FP_ALL(A,B,D0,D1,D2,D3,R)		\
-  } else {					\
-    CELL_CELL_ALL(A,B,D0,D1,D2,D3,R)		\
-  }
-#else
-# define CC_PUT					\
-  CELL_CELL(A,B,D0,D1,D2,D3,R)
-# define CC_PUT_ALL				\
-  CELL_CELL_ALL(A,B,D0,D1,D2,D3,R)
-#endif
-//------------------------------------------------------------------------------
-void grav_kern::grav(cell_iter const&A, cell_iter const&B,
-		     vect           &R, real      const&Rq) const
-{
-  register real D0=mass(A)*mass(B), D1=Rq+EPQ, D2,D3;
-  switch(KERN) {
-  case p1: { ASINGL_P1_G CC_PUT } break;
-  case p2: { ASINGL_P2_G CC_PUT } break;
-  case p3: { ASINGL_P3_G CC_PUT } break;
-  case p0: { ASINGL_P0_G CC_PUT } break;
-  }
-}
-//------------------------------------------------------------------------------
-void grav_kern_all::grav(cell_iter const&A, cell_iter const&B,
-			 vect           &R, real      const&Rq) const
-{
-  register real D0=mass(A)*mass(B), D1=Rq+EPQ, D2,D3;
-  switch(KERN) {
-  case p1: { ASINGL_P1_G CC_PUT_ALL } break;
-  case p2: { ASINGL_P2_G CC_PUT_ALL } break;
-  case p3: { ASINGL_P3_G CC_PUT_ALL } break;
-  case p0: { ASINGL_P0_G CC_PUT_ALL } break;
-  }
-}
-////////////////////////////////////////////////////////////////////////////////
-#endif // falcON_INDI                                                           
-#endif // falcON_SSE_CODE                                                       
-#ifndef falcON_INDI
-////////////////////////////////////////////////////////////////////////////////
-//                                                                              
-// 3. Single interaction                                                        
-//                                                                              
-////////////////////////////////////////////////////////////////////////////////
-#ifdef falcON_SSE_CODE
-void grav_kern_sse
-#else
-void grav_kern
-#endif
-::single(soul_iter const &A, soul_iter const&B) const
-{
-  register vect R  = cofm(A)-cofm(B);
-  register real Rq = norm(R),x,D0;
-  switch(KERN) {
-  case p0: { P0(mass(A)*mass(B))     } break;
-  case p1: { P1(mass(A)*mass(B))     } break;
-  case p2: { P2(mass(A)*mass(B))     } break;
-  case p3: { P3(mass(A)*mass(B))     } break;
-  default: { NEWTON(mass(A)*mass(B)) } break;
-  }
-  if(is_active(A)) { A->pot()-=D0; A->acc()-=R; }
-  if(is_active(B)) { B->pot()-=D0; B->acc()+=R; }
-}
+// these functions are called by grav_kern::direct(cell,cell), which is inline  
+// in kern.h, or by grav_kern::flush_scc() below.                               
 //==============================================================================
-#ifdef falcON_SSE_CODE
-void grav_kern_sse_all
-#else
-void grav_kern_all
-#endif
-::single(soul_iter const &A, soul_iter const&B) const
+void grav_kern_base::many_AA(leaf_iter const&A0, uint const&NA,
+			     leaf_iter const&B0, uint const&NB) const
 {
-  register vect R  = cofm(A)-cofm(B);
-  register real Rq = norm(R),x,D0;
-  switch(KERN) {
-  case p0: { P0(mass(A)*mass(B))     } break;
-  case p1: { P1(mass(A)*mass(B))     } break;
-  case p2: { P2(mass(A)*mass(B))     } break;
-  case p3: { P3(mass(A)*mass(B))     } break;
-  default: { NEWTON(mass(A)*mass(B)) } break;
-  }
-  A->pot()-=D0; A->acc()-=R;
-  B->pot()-=D0; B->acc()+=R;
+  const    leaf_iter AN=A0+NA, BN=B0+NB;
+  register leaf_iter A,B;
+#ifdef falcON_INDI
+  if(INDI_SOFT)
+    for(A=A0; A!=AN; ++A) Direct<1>::many_YA(KERN,A,B0,BN,EQ,HQ,QQ);
+  else
+#endif
+    for(A=A0; A!=AN; ++A) Direct<0>::many_YA(KERN,A,B0,BN,EQ,HQ,QQ);
+}
+//------------------------------------------------------------------------------
+void grav_kern_base::many_AS(leaf_iter const&A0, uint const&NA,
+			     leaf_iter const&B0, uint const&NB) const
+{
+  const    leaf_iter AN=A0+NA, BN=B0+NB;
+  register leaf_iter A,B;
+#ifdef falcON_INDI
+  if(INDI_SOFT)
+    for(A=A0; A!=AN; ++A) Direct<1>::many_YS(KERN,A,B0,BN,EQ,HQ,QQ);
+  else
+#endif
+    for(A=A0; A!=AN; ++A) Direct<0>::many_YS(KERN,A,B0,BN,EQ,HQ,QQ);
+}
+//------------------------------------------------------------------------------
+void grav_kern_base::many_AN(leaf_iter const&A0, uint const&NA,
+			     leaf_iter const&B0, uint const&NB) const
+{
+  const    leaf_iter AN=A0+NA, BN=B0+NB;
+  register leaf_iter A,B;
+#ifdef falcON_INDI
+  if(INDI_SOFT)
+    for(A=A0; A!=AN; ++A) Direct<1>::many_YN(KERN,A,B0,BN,EQ,HQ,QQ);
+  else
+#endif
+    for(A=A0; A!=AN; ++A) Direct<0>::many_YN(KERN,A,B0,BN,EQ,HQ,QQ);
+}
+//------------------------------------------------------------------------------
+void grav_kern_base::many_SA(leaf_iter const&A0, uint const&NA,
+			     leaf_iter const&B0, uint const&NB) const
+{
+  const    leaf_iter AN=A0+NA, BN=B0+NB;
+  register leaf_iter A,B;
+#ifdef falcON_INDI
+  if(INDI_SOFT) {
+    for(A=A0; A!=AN; ++A)
+      if(is_active(A)) Direct<1>::many_YA(KERN,A,B0,BN,EQ,HQ,QQ);
+      else             Direct<1>::many_NA(KERN,A,B0,BN,EQ,HQ,QQ);
+  } else
+#endif
+    for(A=A0; A!=AN; ++A)
+      if(is_active(A)) Direct<0>::many_YA(KERN,A,B0,BN,EQ,HQ,QQ);
+      else             Direct<0>::many_NA(KERN,A,B0,BN,EQ,HQ,QQ);
+}
+//------------------------------------------------------------------------------
+void grav_kern_base::many_SS(leaf_iter const&A0, uint const&NA,
+			     leaf_iter const&B0, uint const&NB) const
+{
+  const    leaf_iter AN=A0+NA, BN=B0+NB;
+  register leaf_iter A,B;
+#ifdef falcON_INDI
+  if(INDI_SOFT) {
+    for(A=A0; A!=AN; ++A)
+      if(is_active(A)) Direct<1>::many_YS(KERN,A,B0,BN,EQ,HQ,QQ);
+      else             Direct<1>::many_NS(KERN,A,B0,BN,EQ,HQ,QQ);
+  } else
+#endif
+    for(A=A0; A!=AN; ++A) 
+      if(is_active(A)) Direct<0>::many_YS(KERN,A,B0,BN,EQ,HQ,QQ);
+      else             Direct<0>::many_NS(KERN,A,B0,BN,EQ,HQ,QQ);
+}
+//------------------------------------------------------------------------------
+void grav_kern_base::many_SN(leaf_iter const&A0, uint const&NA,
+			     leaf_iter const&B0, uint const&NB) const
+{
+  const    leaf_iter AN=A0+NA, BN=B0+NB;
+  register leaf_iter A,B;
+#ifdef falcON_INDI
+  if(INDI_SOFT) {
+    for(A=A0; A!=AN; ++A)
+      if(is_active(A)) Direct<1>::many_YN(KERN,A,B0,BN,EQ,HQ,QQ);
+  } else
+#endif
+    for(A=A0; A!=AN; ++A) 
+      if(is_active(A)) Direct<0>::many_YN(KERN,A,B0,BN,EQ,HQ,QQ);
+}
+//------------------------------------------------------------------------------
+void grav_kern_base::many_NA(leaf_iter const&A0, uint const&NA,
+			     leaf_iter const&B0, uint const&NB) const
+{
+  const    leaf_iter AN=A0+NA, BN=B0+NB;
+  register leaf_iter A,B;
+#ifdef falcON_INDI
+  if(INDI_SOFT)
+    for(A=A0; A!=AN; ++A) Direct<1>::many_NA(KERN,A,B0,BN,EQ,HQ,QQ);
+  else
+#endif
+    for(A=A0; A!=AN; ++A) Direct<0>::many_NA(KERN,A,B0,BN,EQ,HQ,QQ);
+}
+//------------------------------------------------------------------------------
+void grav_kern_base::many_NS(leaf_iter const&A0, uint const&NA,
+			     leaf_iter const&B0, uint const&NB) const
+{
+  const    leaf_iter AN=A0+NA, BN=B0+NB;
+  register leaf_iter A,B;
+#ifdef falcON_INDI
+  if(INDI_SOFT)
+    for(A=A0; A!=AN; ++A) Direct<1>::many_NS(KERN,A,B0,BN,EQ,HQ,QQ);
+  else
+#endif
+    for(A=A0; A!=AN; ++A) Direct<0>::many_NS(KERN,A,B0,BN,EQ,HQ,QQ);
 }
 ////////////////////////////////////////////////////////////////////////////////
-#endif // falcON_INDI                                                           
-
+//                                                                            //
+// 2.2 approximate gravity                                                    //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+namespace {
+  using namespace nbdy; using nbdy::uint; using namespace nbdy::grav;
+  //////////////////////////////////////////////////////////////////////////////
+#define LOAD_G					\
+  register real D[ND];				\
+  register real XX=one/(Rq+EQ);			\
+  D[0] = mass(A)*mass(B);
+  //////////////////////////////////////////////////////////////////////////////
+#define LOAD_I					\
+  register real D[ND];				\
+  EQ   = square(eph(A)+eph(B));			\
+  register real XX=one/(Rq+EQ);			\
+  D[0] = mass(A)*mass(B);			\
+  s(EQ,HQ,QQ); 
+  //////////////////////////////////////////////////////////////////////////////
+#define ARGS_B					\
+  cell_iter const&A,				\
+  leaf_iter const&B,				\
+  vect           &R,				\
+  real const     &Rq,				\
+  real&EQ, real&HQ, real&QQ
+  //////////////////////////////////////////////////////////////////////////////
+#define ARGS_C					\
+  cell_iter const&A,				\
+  cell_iter const&B,				\
+  vect           &R,				\
+  real const     &Rq,				\
+  real&EQ, real&HQ, real&QQ
+  //////////////////////////////////////////////////////////////////////////////
+  //                                                                          //
+  // class kernel<kern_type, order, all, indi_soft>                           //
+  //                                                                          //
+  //////////////////////////////////////////////////////////////////////////////
+  template<kern_type>          struct __setE;
+  template<kern_type,int>      struct __block;
+#define sv   static void
+  //////////////////////////////////////////////////////////////////////////////
+  // kern_type = p0                                                             
+  //////////////////////////////////////////////////////////////////////////////
+  template<> struct __setE<p0> {
+    sv s(real const&,real&,real&) {
+    } };
+  //----------------------------------------------------------------------------
+  template<> struct __block<p0,1> : public __setE<p0> {
+    static const int ND=2;
+    sv b(real&X, real*D, real const&EQ, real const&HQ, real const&QQ) {
+      D[0] *= sqrt(X);
+      D[1]  = X * D[0];
+    } };
+  template<int K> struct __block<p0,K> : public __setE<p0> {
+    static const int ND=K+1, F=K+K-1;
+    sv b(real&X, real*D, real const&EQ, real const&HQ, real const&QQ) {
+      __block<p0,K-1>::b(X,D,EQ,HQ,QQ);
+      D[K] = F * X * D[K-1];
+    } };
+  //////////////////////////////////////////////////////////////////////////////
+  // kern_type = p1                                                             
+  //////////////////////////////////////////////////////////////////////////////
+  template<> struct __setE<p1> {
+    sv s(real const&EQ, real&HQ, real&QQ) {
+      HQ = half * EQ;
+    } };
+  //----------------------------------------------------------------------------
+  template<> struct __block<p1,1> : public __setE<p1> {
+    static const int ND=3;
+    sv b(real&X, real*D, real const&EQ, real const&HQ, real const&QQ) {
+      D[0] *= sqrt(X);
+      D[1]  =     X * D[0];
+      D[2]  = 3 * X * D[1];
+      D[0] += HQ*D[1];
+      D[1] += HQ*D[2];
+    } };
+  template<int K> struct __block<p1,K> : public __setE<p1> {
+    static const int ND=K+2, F=K+K+1;
+    sv b(real&X, real*D, real const&EQ, real const&HQ, real const&QQ) {
+      __block<p1,K-1>::b(X,D,EQ,HQ,QQ);
+      D[K+1] = F * X * D[K];
+      D[K]  += HQ  * D[K+1];
+    } };
+  //////////////////////////////////////////////////////////////////////////////
+  // kern_type = p2                                                             
+  //////////////////////////////////////////////////////////////////////////////
+  template<> struct __setE<p2> {
+    sv s(real const&EQ, real&HQ, real&QQ) {
+      HQ = half * EQ;
+    } };
+  //----------------------------------------------------------------------------
+  template<> struct __block<p2,1> : public __setE<p2> {
+    static const int ND=4;
+    sv b(real&X, real*D, real const&EQ, real const&HQ, real const&QQ) {
+      D[0] *= sqrt(X);
+      D[1]  =     X * D[0];
+      D[2]  = 3 * X * D[1];
+      D[3]  = 5 * X * D[2];
+      D[0] += HQ*(D[1]+HQ*D[2]);
+      D[1] += HQ*(D[2]+HQ*D[3]);
+    } };
+  template<int K> struct __block<p2,K> : public __setE<p2> {
+    static const int ND=K+3, F=K+K+3;
+    sv b(real&X, real*D, real const&EQ, real const&HQ, real const&QQ) {
+      __block<p2,K-1>::b(X,D,EQ,HQ,QQ);
+      D[K+2] = F * X * D[K+1];
+      D[K]  += HQ*(D[K+1]+HQ*D[K+2]);
+    } };
+  //////////////////////////////////////////////////////////////////////////////
+  // kern_type = p3                                                             
+  //////////////////////////////////////////////////////////////////////////////
+  template<> struct __setE<p3> {
+    sv s(real const&EQ, real&HQ, real&QQ) {
+      HQ = half * EQ;
+      QQ = half * QQ;
+    } };
+  //----------------------------------------------------------------------------
+  template<> struct __block<p3,1> : public __setE<p3> {
+    static const int ND=5;
+    sv b(real&X, real*D, real const&EQ, real const&HQ, real const&QQ) {
+      D[0] *= sqrt(X);
+      D[1]  =     X * D[0];
+      D[2]  = 3 * X * D[1];
+      D[3]  = 5 * X * D[2];
+      D[4]  = 7 * X * D[3];
+      D[0] += HQ*(D[1]+QQ*(D[2]+HQ*D[3]));
+      D[1] += HQ*(D[2]+QQ*(D[3]+HQ*D[4]));
+    } };
+  template<int K> struct __block<p3,K> : public __setE<p3> {
+    static const int ND=K+4, F=K+K+5;
+    sv b(real&X, real*D, real const&EQ, real const&HQ, real const&QQ) {
+      __block<p3,K-1>::b(X,D,EQ,HQ,QQ);
+      D[K+3] = F * X * D[K+2];
+      D[K]  += HQ*(D[K+1]+QQ*(D[K+2]+HQ*D[K+3]));
+    } };
+  //////////////////////////////////////////////////////////////////////////////
+  //                                                                          //
+  // class kernel<kern_type, order, all, indi_soft>                           //
+  //                                                                          //
+  //////////////////////////////////////////////////////////////////////////////
+  template<kern_type,int,bool,bool=0> struct kernel;
+  //////////////////////////////////////////////////////////////////////////////
+  template<kern_type P, int K> struct kernel<P,K,0,0> : private __block<P,K> {
+    static const int ND=K+1;
+    sv a(ARGS_B) { LOAD_G b(XX,D,EQ,HQ,QQ); CellLeaf(A,B,D,0,R); }
+    sv a(ARGS_C) { LOAD_G b(XX,D,EQ,HQ,QQ); CellCell(A,B,D,0,R); }
+  };
+  template<kern_type P, int K> struct kernel<P,K,0,1> : private __block<P,K> {
+    static const int ND=K+1;
+    sv a(ARGS_B) { LOAD_I b(XX,D,EQ,HQ,QQ); CellLeaf(A,B,D,0,R); }
+    sv a(ARGS_C) { LOAD_I b(XX,D,EQ,HQ,QQ); CellCell(A,B,D,0,R); }
+  };
+  template<kern_type P, int K> struct kernel<P,K,1,0> : private __block<P,K> {
+    static const int ND=K+1;
+    sv a(ARGS_B) { LOAD_G b(XX,D,EQ,HQ,QQ); CellLeafAll(A,B,D,0,R); }
+    sv a(ARGS_C) { LOAD_G b(XX,D,EQ,HQ,QQ); CellCellAll(A,B,D,0,R); }
+  };
+  template<kern_type P, int K> struct kernel<P,K,1,1> : private __block<P,K> {
+    static const int ND=K+1;
+    sv a(ARGS_B) { LOAD_I b(XX,D,EQ,HQ,QQ); CellLeafAll(A,B,D,0,R); }
+    sv a(ARGS_C) { LOAD_I b(XX,D,EQ,HQ,QQ); CellCellAll(A,B,D,0,R); }
+  };
+#undef sv
+  //////////////////////////////////////////////////////////////////////////////
+}                                                  // END: unnamed namespace    
+////////////////////////////////////////////////////////////////////////////////
+#define ARGS A,B,R,Rq,EQ,HQ,QQ
+void grav_kern::approx(cell_iter const&A, leaf_iter const&B,
+		       vect           &R, real      const&Rq) const
+{
+  if(is_active(A)) give_coeffs(A);
+#ifdef falcON_INDI
+  if(INDI_SOFT) 
+    switch(KERN) {
+    case p1: kernel<p1,ORDER,0,1>::a(ARGS); break;
+    case p2: kernel<p2,ORDER,0,1>::a(ARGS); break;
+    case p3: kernel<p3,ORDER,0,1>::a(ARGS); break;
+    default: kernel<p0,ORDER,0,1>::a(ARGS); break;
+    }
+  else
+#endif
+    switch(KERN) {
+    case p1: kernel<p1,ORDER,0,0>::a(ARGS); break;
+    case p2: kernel<p2,ORDER,0,0>::a(ARGS); break;
+    case p3: kernel<p3,ORDER,0,0>::a(ARGS); break;
+    default: kernel<p0,ORDER,0,0>::a(ARGS); break;
+    }
+}
+//------------------------------------------------------------------------------
+void grav_kern_all::approx(cell_iter const&A, leaf_iter const&B,
+			   vect           &R, real      const&Rq) const
+{
+  give_coeffs(A);
+#ifdef falcON_INDI
+  if(INDI_SOFT) 
+    switch(KERN) {
+    case p1: kernel<p1,ORDER,1,1>::a(ARGS); break;
+    case p2: kernel<p2,ORDER,1,1>::a(ARGS); break;
+    case p3: kernel<p3,ORDER,1,1>::a(ARGS); break;
+    default: kernel<p0,ORDER,1,1>::a(ARGS); break;
+    }
+  else
+#endif
+    switch(KERN) {
+    case p1: kernel<p1,ORDER,1,0>::a(ARGS); break;
+    case p2: kernel<p2,ORDER,1,0>::a(ARGS); break;
+    case p3: kernel<p3,ORDER,1,0>::a(ARGS); break;
+    default: kernel<p0,ORDER,1,0>::a(ARGS); break;
+    }
+}
+//------------------------------------------------------------------------------
+void grav_kern::approx(cell_iter const&A, cell_iter const&B,
+		       vect           &R, real      const&Rq) const
+{
+  if(is_active(A)) give_coeffs(A);
+  if(is_active(B)) give_coeffs(B);
+#ifdef falcON_INDI
+  if(INDI_SOFT) 
+    switch(KERN) {
+    case p1: kernel<p1,ORDER,0,1>::a(ARGS); break;
+    case p2: kernel<p2,ORDER,0,1>::a(ARGS); break;
+    case p3: kernel<p3,ORDER,0,1>::a(ARGS); break;
+    default: kernel<p0,ORDER,0,1>::a(ARGS); break;
+    }
+  else
+#endif
+    switch(KERN) {
+    case p1: kernel<p1,ORDER,0,0>::a(ARGS); break;
+    case p2: kernel<p2,ORDER,0,0>::a(ARGS); break;
+    case p3: kernel<p3,ORDER,0,0>::a(ARGS); break;
+    default: kernel<p0,ORDER,0,0>::a(ARGS); break;
+    }
+}
+//------------------------------------------------------------------------------
+void grav_kern_all::approx(cell_iter const&A, cell_iter const&B,
+			   vect           &R, real      const&Rq) const
+{
+  give_coeffs(A);
+  give_coeffs(B);
+#ifdef falcON_INDI
+  if(INDI_SOFT) 
+    switch(KERN) {
+    case p1: kernel<p1,ORDER,1,1>::a(ARGS); break;
+    case p2: kernel<p2,ORDER,1,1>::a(ARGS); break;
+    case p3: kernel<p3,ORDER,1,1>::a(ARGS); break;
+    default: kernel<p0,ORDER,1,1>::a(ARGS); break;
+    }
+  else
+#endif
+    switch(KERN) {
+    case p1: kernel<p1,ORDER,1,0>::a(ARGS); break;
+    case p2: kernel<p2,ORDER,1,0>::a(ARGS); break;
+    case p3: kernel<p3,ORDER,1,0>::a(ARGS); break;
+    default: kernel<p0,ORDER,1,0>::a(ARGS); break;
+    }
+}
+////////////////////////////////////////////////////////////////////////////////
+#endif // falcON_SSE_CODE                                                       

@@ -12,10 +12,10 @@ C                                                                              |
 C  header file for FORTRAN users                                               |
 C  (C++ and C users, see files falcON.h and falcON_C.h, respectively)          |
 C                                                                              |
-C  Copyright Walter Dehnen, 2000-2003                                          |
-C  e-mail:   wdehnen@aip.de                                                    |
-C  address:  Astrophysikalisches Institut Potsdam,                             |
-C            An der Sternwarte 16, D-14482 Potsdam, Germany                    |
+C  Copyright Walter Dehnen, 2000-2004                                          |
+C  e-mail:   walter.dehnen@astro.le.ac.uk                                      |
+C  address:  Department of Physics and Astronomy, University of Leicester      |
+C            University Road, Leicester LE1 7RH, United Kingdom                |
 C                                                                              |
 C------------------------------------------------------------------------------+
 C                                                                              |
@@ -142,18 +142,18 @@ C     INPUT_TYPE RH(N)             array for mass densities                    |
 C     INPUT_TYPE EPS               global softening length, see below          |
 C     INPUT_TYPE TH                opening angle, see below                    |
 C     INTEGER    K                 type of softening kernel, see below         |
+C     INPUT_TYPE GRAV              Newton's constant of gravity                |
 C                                                                              |
 C     CALL FALCON_INITIALIZE(FL,M,X,Y,Z,AX,AY,AZ,P,RH, N,EPS,TH,K)             |
 C                                                                              |
-C  or, for the proprietary code, if the C-macro "falcON_INDI" is defined, see  |
-C  line 18 of the "makefile":                                                  |
+C  or, if the C-macro "falcON_INDI" is defined, see line 19 of the "Makefile": |
 C                                                                              |
 C     CALL FALCON_INITIALIZE(FL,M,X,Y,Z,E,AX,AY,AZ,P,RH, N,EPS,TH,K)           |
 C                                                                              |
 C  The first 11 arguments specify the sink and source properties of the        |
-C  bodies. Each body has the sink properties: position (x,y,z), mass,          |
+C  bodies. Each body has the source properties: position (x,y,z), mass,        |
 C  softening length (for the case of individual softening lengths), and flag   |
-C  (see section 2 below). The source properties are: acceleration(ax,ay,az),   |
+C  (see section 2 below). The sink properties are: acceleration(ax,ay,az),     |
 C  potential and mass-density. If fixed softening is used, a NULL pointer may  |
 C  be used instead of an array holding eps_i, i.e.                             |
 C                                                                              |
@@ -292,6 +292,13 @@ C  after a call to FALCON_GROW, FALCON_GROW_CENTERED, or FALCON_REUSE.         |
 C  See file src/FORTRAN/TestGravF.f for an example application.                |
 C                                                                              |
 C                                                                              |
+C  IMPORTANT NOTICE                                                            |
+C                                                                              |
+C  Since Oct-2003, you MUST not change the bodies activity flag between tree   |
+C  growth (or re-growth, re-use) and a call to approximate_gravity. Whenever   |
+C  you change the flags, you MUST first (re-)grow the tree before you call     |
+C  FALCON_APPROX_GRAV.                                                         |
+C                                                                              |
 C  3.3 Estimating mass- and number-density                                     |
 C  ---------------------------------------                                     |
 C  There is also the possibility to obtain a rough estimate of the mass- or    |
@@ -383,14 +390,16 @@ C     PARAMETER (NI=1000)             physical size or interaction list        |
 C     INTEGER    I1(NI)               array for indices: 1st of pair           |
 C     INTEGER    I2(NI)               array for indices: 2nd of pair           |
 C     INTEGER    NA                   actual size or interaction list          |
-C     CALL FALCON_SPH(I1,I2,NI,NA,SIZE)                                        |
+C     INTEGER    MAX                  1/0: use max(h_i,h_j) or h_i+h_j         |
+C     CALL FALCON_SPH(I1,I2,NI,NA,MAX,SIZE)                                    |
 C                                                                              |
 C  which fills the interaction list (1st/2nd arg) with all pairs {i,j} of      |
 C  indices which satisfy the following three conditions.                       |
 C                                                                              |
 C     (1) both flags indicate SPH particles (see section 2),                   |
 C     (2) at least one is flagged being active,                                |
-C     (3) | x_i - x_j | < max(size_i,size_j)                                   |
+C     (3)     | x_i - x_j | < max(size_i,size_j)   IF MAX .neq. 0              |
+C         OR  | x_i - x_j | < size_i + size_j      IF MAX .eq.  0              |
 C                                                                              |
 C  In case of overflow, i.e. if the number of such pairs found exceeds the     |
 C  size (3rd arg) of the list (1st/2nd arg), the routine issues a warning to   |

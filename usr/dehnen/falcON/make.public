@@ -12,35 +12,41 @@
 main_h			:= $(INC)main.h
 exit_h			:= $(IPUB)exit.h
 Pi_h			:= $(IPUB)Pi.h
-inln_h			:= $(IPUB)inln.h $(exit_h)
+frst_h			:= $(IPUB)frst.h
+inln_h			:= $(IPUB)inln.h $(frst_h) $(exit_h)
+meta_h			:= $(IPUB)meta.h
 ionl_h			:= $(IPUB)ionl.h
 memo_h			:= $(IPUB)memo.h $(inln_h)
-tupl_h			:= $(IPUB)tupl.h $(inln_h)
+tupl_h			:= $(IPUB)tupl.h $(frst_h) $(meta_h)
 nums_h			:= $(IPUB)nums.h $(inln_h) $(tupl_h)
 nmio_h			:= $(IPUB)nmio.h
 iact_h			:= $(IPUB)iact.h
+coef_h			:= $(IPUB)coef.h
 flag_h			:= $(IPUB)flag.h
 enum_h			:= $(IPUB)enum.h
-kmac_h			:= $(IPUB)kmac.h
-deft_h			:= $(IPUB)deft.h $(enum_h)
-vect_h			:= $(IPUB)vect.h $(inln_h)
-tens_h			:= $(IPUB)tens.h $(vect_h)
-auxx_h			:= $(IPUB)auxx.h $(exit_h) $(vect_h) $(tens_h)
-pext_h			:= $(INC)pext.h $(auxx_h)
-nbio_h			:= $(IPUB)nbio.h $(auxx_h)
-falcON_h		:= $(INC)falcON.h $(auxx_h) $(deft_h)
+deft_h			:= $(IPUB)deft.h $(enum_h) $(auxx_h)
+tn3D_cc			:= $(IPUB)tn3D.cc
+tn2D_h			:= $(IPUB)tn2D.h
+tn3D_h			:= $(IPUB)tn3D.h $(tupl_h) $(tn3D_cc)
+tset_cc			:= $(IPUB)tset.cc
+tset_h			:= $(IPUB)tset.h $(tn3D_h) $(tset_cc)
+auxx_h			:= $(IPUB)auxx.h $(frst_h) $(exit_h) $(tupl_h) $(tn3D_h)
+pext_h			:= $(INC)pext.h $(auxx_h) $(flag_h)
+nbio_h			:= $(IPUB)nbio.h $(auxx_h) $(flag_h)
 body_h			:= $(INC)body.h $(auxx_h) $(flag_h) $(nbio_h)
 tree_h			:= $(IPUB)tree.h $(deft_h) $(body_h)
-grat_h			:= $(IPUB)grat.h $(deft_h) $(tree_h) $(ionl_h) \
-				$(memo_h)
-kern_h			:= $(IPUB)kern.h $(grat_h)
-grav_h			 = $(IPUB)grav.h $(kern_h) $(deft_h) $(grav_pro)
-stic_h			:= $(IPUB)stic.h $(grat_h) $(ionl_h)
+grav_h			:= $(IPUB)grav.h $(deft_h) $(tree_h) $(ionl_h) \
+				$(tset_h) $(memo_h)
+kern_h			:= $(IPUB)kern.h $(grav_h)
+stic_h			:= $(IPUB)stic.h $(grav_h) $(ionl_h)
+falcON_cc		:= $(IPUB)falcON.cc $(grav_h) $(stic_h) $(tree_h)
+falcON_h		:= $(INC)falcON.h $(auxx_h) $(nbio_h) $(deft_h) \
+				$(falcON_cc)
 falcON_C_h		:= $(INC)falcON_C.h
 falcON_f		:= $(INC)falcON.f
 step_h			:= $(IPUB)step.h $(body_h) $(inln_h)
-nbdy_h			:= $(IPUB)nbdy.h $(falcON_h) $(pext_h) $(step_h)
-yanc_h			:= $(INC)yanc.h $(nbio_h) $(drct_h)
+nbdy_h			:= $(INC)nbdy.h $(falcON_h) $(pext_h) $(step_h) \
+				$(nmio_h)
 
 # -----------------------
 # source dependency lists
@@ -51,17 +57,12 @@ nums_cc			:= $(SPUB)nums.cc $(nums_h) $(Pi_h)
 body_cc			:= $(SPUB)body.cc $(body_h) $(ionl_h) $(nmio_h) \
 				$(tags_h)
 nmio_cc			:= $(SPUB)nmio.cc $(nmio_h) $(exit_h)
-falcON_cc		:= $(SPUB)falcON.cc $(falcON_h) $(grav_h) $(stic_h)
-kern_cc			 = $(SPUB)kern.cc $(kern_h) $(kmac_h) $(kern_pro)
-grat_cc			:= $(SPUB)grat.cc $(grat_h) $(iact_h) $(grav_h) \
-				$(Pi_h) $(nums_h)  $(grat_pro)
-grav_cc			 = $(SPUB)grav.cc $(grav_h) $(grav_pro)
-stic_cc			:= $(SPUB)stic.cc $(tree_h) $(iact_h)
-tree_cc			:= $(SPUB)tree.cc $(tree_h) $(memo_h) $(grat_h) \
-				$(stic_h)
+kern_cc			 = $(SPUB)kern.cc $(kern_h) $(coef_h) $(kern_pro)
+grav_cc			:= $(SPUB)grav.cc $(grav_h) $(kern_h) $(iact_h) \
+				$(Pi_h) $(nums_h) $(grav_pro)
+stic_cc			:= $(SPUB)stic.cc $(stic_h) $(tree_h) $(iact_h)
+tree_cc			:= $(SPUB)tree.cc $(tree_h) $(memo_h)
 nbdy_cc			:= $(SPUB)nbdy.cc $(nbdy_h)
-yanc_cc			:= $(SPUB)yanc.cc $(yanc_h) $(nbdy_h) $(ionl_h) \
-				$(nmio_h)
 falcONC_cc		:= $(SPUB)falcONC.cc $(falcON_C_h) $(falcON_h)
 
 # ---------------
@@ -69,46 +70,52 @@ falcONC_cc		:= $(SPUB)falcONC.cc $(falcON_C_h) $(falcON_h)
 # ---------------
 
 $(LIB)exit.o:		$(exit_cc) $(makepublic)
-			./make.dir $(HOS)
 			./make.dir $(BIN)
 			./make.dir $(LIB)
-			$(MAKE_OBJ) $(DMPI) $(DSPH) $(DNEMO) $(DADAPT)
+			$(MAKE_OBJ) $(DMPI) $(DSPH) $(DNEMO) $(DSOFT)
 $(LIB)body.o:		$(body_cc) $(makepublic)
 			$(MAKE_OBJ) $(NBDYFLAGS)
 $(LIB)tree.o:		$(tree_cc) $(makepublic)
 			$(MAKE_OBJ) $(NBDYFLAGS)
-$(LIB)grat.o:		$(grat_cc) $(makepublic)
-			$(MAKE_OBJ) $(NBDYFLAGS)
 $(LIB)grav.o:		$(grav_cc) $(makepublic)
 			$(MAKE_OBJ) $(NBDYFLAGS)
+ifdef NEMO
 $(LIB)nmio.o:		$(nmio_cc) $(makepublic)
 			$(MAKE_OBJ) $(NBDYFLAGS)
+endif
 $(LIB)stic.o:		$(stic_cc) $(makepublic)
-			$(MAKE_OBJ) $(NBDYFLAGS)
-$(LIB)falcON.o:		$(falcON_cc) $(makepublic)
 			$(MAKE_OBJ) $(NBDYFLAGS)
 $(LIB)nbdy.o:		$(nbdy_cc) $(makepublic)
 			$(MAKE_OBJ) $(NBDYFLAGS)
-$(LIB)yanc.o:		$(yanc_cc) $(makepublic)
-			$(MAKE_OBJ) $(NBDYFLAGS)
 $(LIB)falcONC.o:	$(falcONC_cc) $(makepublic)
 			$(MAKE_OBJ) $(NBDYFLAGS)
+ifdef DPROPER
+$(LIB)kern.o:		$(kern_cc) $(makepublic)
+			$(MAKE_OBJ) -mno-sse $(NBDYFLAGS)
+else
 $(LIB)kern.o:		$(kern_cc) $(makepublic)
 			$(MAKE_OBJ) $(NBDYFLAGS)
-
+endif
+ifdef NEMO
 public_objs	 :=	$(LIB)exit.o $(LIB)body.o $(LIB)tree.o \
-			$(LIB)grat.o $(LIB)kern.o $(LIB)grav.o \
-			$(LIB)nmio.o $(LIB)stic.o $(LIB)falcON.o \
-			$(LIB)nbdy.o $(LIB)yanc.o $(LIB)falcONC.o
+			$(LIB)grav.o $(LIB)kern.o $(LIB)nmio.o \
+			$(LIB)stic.o $(LIB)nbdy.o $(LIB)falcONC.o
+else
+public_objs	 :=	$(LIB)exit.o $(LIB)body.o $(LIB)tree.o \
+			$(LIB)grav.o $(LIB)kern.o $(LIB)stic.o \
+			$(LIB)nbdy.o $(LIB)falcONC.o
+endif
+
 ifndef DPROPER
 falcON_objs	 =	$(public_objs)
-
 $(LIB)libfalcON.a:	$(falcON_objs)
 			$(AR) $@ $?
 			$(RL) $@
+$(LIB)libfalcON.so:	$(falcON_objs)
+			$(CXX) $^ -shared -o $@
 endif
 
-falcON		:=	$(LIB)libfalcON.a
+falcON		:=	$(LIB)libfalcON.so
 
 # -----
 # mains
@@ -128,6 +135,8 @@ $(BIN)TestPairF:	$(EXE)TestPairF.F $(falcON) $(makepublic)
 			$(MAKE_EXE_F) $(NBDYFLAGS) $(LFALCON) -lstdc++ -lm
 ifdef NEMO
 
+$(BIN)scale_eps:	$(EXE)scale_eps.cc $(main_h) $(falcON) $(makepublic)
+			$(MAKE_EXE) $(NEMO_EXE_FLGS)
 $(BIN)addgravity:	$(EXE)addgravity.cc $(main_h) $(falcON) $(makepublic)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
 $(BIN)getgravity:	$(EXE)getgravity.cc $(main_h) $(falcON) $(makepublic)

@@ -3,7 +3,7 @@ C     Here, we use C-style macros to obtain correct input data type.       |
 C     For this to work, we need first to process this file with the        |
 C     C preprocessor cpp, see makefile make.public                         |
 C--------------------------------------------------------------------------+
-#if defined(SINGLE_DOUBLE) || defined(DOUBLE_DOUBLE)
+#if defined(falcON_SINGLE_DOUBLE) || defined(falcON_DOUBLE_DOUBLE)
 #define INPUT_TYPE DOUBLE PRECISION
 #else
 #define INPUT_TYPE REAL
@@ -41,7 +41,7 @@ C---------------------------------------------------------------------------
       ELSE
          GAM = 0
       ENDIF
-      WRITE(*,'("N ? (max "I8")")') NMAX
+      WRITE(*,'("N ? (max "I7")")') NMAX
       READ(*,*) N
       WRITE(*,'("seed ?")')
       READ(*,*) S
@@ -112,7 +112,9 @@ C---------------------------------------------------------------------------
          ATX(I)= FR * X(I)
          ATY(I)= FR * Y(I)
          ATZ(I)= FR * Z(I)
-C        WRITE(*,'("X="3E25.13)') X(I),Y(I),Z(I)
+C TEST
+C         WRITE(*,'("X="3E25.13)') X(I),Y(I),Z(I)
+C TSET
       ENDDO
       CPU1 = CLOCK()
       TIME = (CPU1-CPU0) / 1.E6
@@ -124,11 +126,13 @@ C        WRITE(*,'("X="3E25.13)') X(I),Y(I),Z(I)
 #endif
      CAX,AY,AZ,PH,RH, N,EPS,TH,K)
 
-      CALL FALCON_GROW(NCRIT)
-      CPU1 = CLOCK()
-      TIME = (CPU1-CPU0) / CLOCKS_PER_SECOND()
-      WRITE(*,'(" time needed by growing a tree:  "F13.6)') TIME
-      CPU0 = CPU1
+      DO I=1,2
+         CALL FALCON_GROW(NCRIT)
+         CPU1 = CLOCK()
+         TIME = (CPU1-CPU0) / CLOCKS_PER_SECOND()
+         WRITE(*,'(" time needed by growing a tree:  "F13.6)') TIME
+         CPU0 = CPU1
+      ENDDO
 
       CALL FALCON_APPROX_GRAV()
       CPU1 = CLOCK()

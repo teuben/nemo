@@ -6,23 +6,14 @@
 // C++ code                                                                    |
 //                                                                             |
 // Copyright Walter Dehnen, 2002-2003                                          |
-// e-mail:   wdehnen@aip.de                                                    |
-// address:  Astrophysikalisches Institut Potsdam,                             |
-//           An der Sternwarte 16, D-14482 Potsdam, Germany                    |
+// e-mail:   walter.dehnen@astro.le.ac.uk                                      |
+// address:  Department of Physics and Astronomy, University of Leicester      |
+//           University Road, Leicester LE1 7RH, United Kingdom                |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 #ifndef falcON_included_enum_h
 #define falcON_included_enum_h 1
 namespace nbdy {
-  //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // enum nbdy::soft_type                                                     //
-  //                                                                          //
-  //////////////////////////////////////////////////////////////////////////////
-  enum soft_type {                                 // type of softening         
-    global      = 0,                               // global eps                
-    individual  = 1                                // use individual eps        
-  };                                               //                           
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
   // enum nbdy::kern_type                                                     //
@@ -35,6 +26,7 @@ namespace nbdy {
     p3     = 3,                                    //                           
     newton = 9                                     // no softening              
   };                                               //                           
+  //----------------------------------------------------------------------------
   inline
   const char* describe(const kern_type KER)        // describe kernel           
   {
@@ -69,6 +61,7 @@ namespace nbdy {
     case theta_of_M:       return "theta(M)";
     case theta_of_M_ov_r:  return "theta(M/rmax)";
     case theta_of_M_ov_rq: return "theta(M/rmax^2)";
+    default:               return "unknown MAC";
     }
   }
   //////////////////////////////////////////////////////////////////////////////

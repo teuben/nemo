@@ -5,10 +5,10 @@
 //                                                                             |
 // C++ code                                                                    |
 //                                                                             |
-// Copyright Walter Dehnen, 2000-2003                                          |
-// e-mail:   wdehnen@aip.de                                                    |
-// address:  Astrophysikalisches Institut Potsdam,                             |
-//           An der Sternwarte 16, D-14482 Potsdam, Germany                    |
+// Copyright Walter Dehnen, 2000-2004                                          |
+// e-mail:   walter.dehnen@astro.le.ac.uk                                      |
+// address:  Department of Physics and Astronomy, University of Leicester      |
+//           University Road, Leicester LE1 7RH, United Kingdom                |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 //                                                                             |
@@ -41,39 +41,47 @@ namespace nbdy {
   // class nbdy::LeapFrog                                                     //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
+  template<typename bodies_type = sbodies>
   class LeapFrog {
     LeapFrog(const LeapFrog&);                     // not implemented           
     LeapFrog operator= (const LeapFrog&);          // not implemented           
     //--------------------------------------------------------------------------
+    // types                                                                    
+    //--------------------------------------------------------------------------
+  protected:
+    typedef typename bodies_type::body body;       // type of body              
+    //--------------------------------------------------------------------------
     // data members                                                             
     //--------------------------------------------------------------------------
-  private:
-    real         TAU, TAUH;                        // time step                 
+    const   real TAU, TAUH;                        // time step                 
     mutable real TIME;                             // simulation time           
+    const   uint REUSE;                            // # re-uses allowed         
+    uint         REUSED;                           // # re-uses done            
     //--------------------------------------------------------------------------
     // public methods                                                           
     //--------------------------------------------------------------------------
   public:
-    LeapFrog(const int f, const real t)
-      : TAU (pow(half,f)), TAUH (half*TAU), TIME(t) {}
+    LeapFrog(int  const&f,                         // I: -log_2(tau)            
+	     real const&t,                         // I: initial time           
+	     uint const&r) :                       // I: # re-uses allowed      
+      TAU (pow(half,f)), TAUH (half*TAU), TIME(t), REUSE(r), REUSED(0u) {}
+    //--------------------------------------------------------------------------
     const real& time() const { return TIME; }
     const real& tau () const { return TAU; }
     //--------------------------------------------------------------------------
-    template<typename bodies_type>
-    void predict    (const bodies_type* const&BB) const
+    void predict(const bodies_type* const&B) const
     {
-      LoopBodies(bodies,BB,Bi) {
-	Bi.vel().add_mul(acc(Bi),TAUH);            // v_1/2 = v_0 +a_0 * dt/2   
-	Bi.pos().add_mul(vel(Bi),TAU );            // x_1   = x_0 +v_1/2 * dt   
+      LoopBodies(typename bodies_type,B,Bi) {
+	Bi.vel().add_times(acc(Bi),TAUH);
+	Bi.pos().add_times(vel(Bi),TAU );
       }
-      TIME += TAU;                                 // t_1   = t_0 + dt          
+      TIME += TAU;
     }
     //--------------------------------------------------------------------------
-    template<typename bodies_type>
-    void accelerate (const bodies_type* const&BB) const
+    void accelerate(const bodies_type* const&B) const
     {
-      LoopBodies(bodies,BB,Bi)
-	Bi.vel().add_mul(acc(Bi),TAUH);            // v_1   = v_1/2 * a_1 * dt/2
+      LoopBodies(typename bodies_type,B,Bi)
+	Bi.vel().add_times(acc(Bi),TAUH);
     }
   };
   //////////////////////////////////////////////////////////////////////////////
@@ -81,11 +89,14 @@ namespace nbdy {
   // class nbdy::BlockStep                                                    //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
+  template<typename bodies_type = sbodies>
   class BlockStep {
     BlockStep(const BlockStep&);                   // not implemented           
     BlockStep& operator= (const BlockStep&);       // not implemented           
     //--------------------------------------------------------------------------
     // private types                                                            
+    //--------------------------------------------------------------------------
+    typedef typename bodies_type::body body;       // type of body              
     //--------------------------------------------------------------------------
   private:
     struct TimeStep {
@@ -112,8 +123,7 @@ namespace nbdy {
     //--------------------------------------------------------------------------
     // protected methods                                                        
     //--------------------------------------------------------------------------
-    void        to_lower      (body&B, int const&low) const
-    {
+    void to_lower(body&B, int const&low) const {
       if(level(B) > low) {                         // IF(above lowest active)  >
 	TS[level(B)].leave();                      //   leave old level         
 	B.level()--;                               //   set new level           
@@ -121,8 +131,7 @@ namespace nbdy {
       }                                            // <                         
     }
     //--------------------------------------------------------------------------
-    void        to_higher     (body&B) const
-    {
+    void to_higher(body&B) const {
       if(level(B) < highest_level()) {             // IF(below highest level)  >
 	TS[level(B)].leave();                      //   leave old level         
 	B.level()++;                               //   set new level           
@@ -130,9 +139,9 @@ namespace nbdy {
       }                                            // <                         
     }
     //--------------------------------------------------------------------------
-    void        reset_steps   (int  const&h0,      // I: h0, tau_max = 2^-h0    
-			       int  const&Ns,      // I: #steps                 
-			       real const&t =zero) // I: actual time            
+    void reset_steps(int  const&h0,                // I: h0, tau_max = 2^-h0    
+		     int  const&Ns,                // I: #steps                 
+		     real const&t =zero)           // I: actual time            
     {
       if(TS) delete[] TS;
       NSTEPS   = abs(Ns);
@@ -161,80 +170,76 @@ namespace nbdy {
     //--------------------------------------------------------------------------
     // other protected methods                                                  
     //--------------------------------------------------------------------------
-    void        dump          (std::ostream&to)  const
-    {
+    void dump(std::ostream&to)  const {
       for(register int i=0; i!=NSTEPS; ++i) {
 	to<<i<<": ";
 	(TS+i)->dump(to);
       }
     }
     //--------------------------------------------------------------------------
-    void        clock_on      ()             const
-    {
+    void clock_on() const {
       TIME += tau_min();
     }
     //--------------------------------------------------------------------------
-    void        reset_counts  () const
-    {
+    void reset_counts() const {
       for(register TimeStep* s=TS; s<=SHORTEST; s++) s->reset_count();
     }
     //--------------------------------------------------------------------------
-    bool        need_move     (int const&low) const
-    {
+    bool need_move(int const&low) const {
       for(register TimeStep* s=TS+low; s<=SHORTEST; s++) if(s->N) return true;
       return false;
     }
     //--------------------------------------------------------------------------
-    void        change_level  (body&B, indx const&l) const
-    {
+    void change_level(body const&B, indx const&l) const {
       TS[level(B)].leave();                        // leave old level           
       B.level() = l;                               // set new level             
       TS[level(B)].join ();                        // join new level            
     }
     //--------------------------------------------------------------------------
-    int         longest_moving(uint const&T) const
-    {
+    int longest_moving(uint const&T) const {
       register int i=HIGHEST, t=T;
       for(; !(t&1) && i>0; t>>=1, --i);
       return i;
     }
     //--------------------------------------------------------------------------
-    void        add_to_level  (const indx l) const { (TS+l)->join (); }
-    bool        is_leap_frog  ()             const {return NSTEPS == 1; }
-    const uint& number        (const indx l) const {return(TS+l)->N; }
-    const real& tau           (const indx l) const {return(TS+l)->TAU; }
-    const real& tau           (const body B) const {return(TS+level(B))->TAU; }
-    const real& tau_h         (const body B) const {return(TS+level(B))->TAUH; }
-    const real& tausq         (const body B) const {return(TS+level(B))->TAUSQ;}
-    const real& time          ()             const {return TIME; }
+    void        add_to_level(const indx l) const { (TS+l)->join (); }
+    bool        is_leap_frog()             const { return NSTEPS == 1; }
+    const uint& number      (const indx l) const { return(TS+l)->N; }
+    const real& tau         (const indx l) const { return(TS+l)->TAU; }
+    const real& time        ()             const { return TIME; }
     //--------------------------------------------------------------------------
-    void        half_kick     (body&B) const
-    {
-      B.vel().add_mul(acc(B),tau_h(B));              // v -> v + h/2 * a        
+    const real& tau         (body const&B) const { return(TS+level(B))->TAU; }
+    const real& tau_h       (body const&B) const { return(TS+level(B))->TAUH; }
+    const real& tausq       (body const&B) const { return(TS+level(B))->TAUSQ;}
+    //--------------------------------------------------------------------------
+    void half_kick(body&B) const {
+      B.vel().add_times(acc(B),tau_h(B));            // v -> v + h/2 * a        
     }
     //--------------------------------------------------------------------------
-    void        tiny_drift    (body&B) const
-    {
-      B.pos().add_mul(vel(B),tau_min());             // x -> x + h_min * v      
+    void tiny_drift(body&B) const {
+      B.pos().add_times(vel(B),tau_min());           // x -> x + h_min * v      
     }
     //--------------------------------------------------------------------------
-    void        drift_by      (body&B, real const&dt) const
-    {
-      B.pos().add_mul(vel(B),dt);                    // x -> x + dt * v         
+    void drift_by(body&B, real const&dt) const {
+      B.pos().add_times(vel(B),dt);                  // x -> x + dt * v         
     }
     //--------------------------------------------------------------------------
-    void        acce_half     (body&B) const { half_kick(B); }
-    void        move_tiny     (body&B) const { tiny_drift(B); }
-    void        move_by       (body&B, real const&dt) const { drift_by(B,dt); }
+    void acce_half(body&B) const {
+      half_kick(B); }
     //--------------------------------------------------------------------------
-    int         highest_level ()             const {return HIGHEST; }
-    const real& tau_min       ()             const {return SHORTEST->TAU; }
-    const real& tau_max       ()             const {return TS->TAU; }
-    const int & h0            ()             const {return H0; }
-    const uint& No_in_level   (const indx l) const {return(TS+l)->N; }
+    void move_tiny(body&B) const {
+      tiny_drift(B); }
     //--------------------------------------------------------------------------
-    void        short_stats   (std::ostream&to, int const&w=7) const
-    {
+    void move_by(body&B, real const&dt) const {
+      drift_by(B,dt); }
+    //--------------------------------------------------------------------------
+    int         highest_level ()             const { return HIGHEST; }
+    const real& tau_min       ()             const { return SHORTEST->TAU; }
+    const real& tau_max       ()             const { return TS->TAU; }
+    const int & h0            ()             const { return H0; }
+    const uint& No_in_level   (indx const&l) const { return(TS+l)->N; }
+    //--------------------------------------------------------------------------
+    void short_stats(std::ostream&to, int const&w=7) const {
       for(register int l=0; l!=NSTEPS; ++l) to<<std::setw(w)<<number(l)<<" ";
     }
   };
@@ -243,13 +248,16 @@ namespace nbdy {
   // class nbdy::GravBlockStep                                                //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
-  class GravBlockStep : public BlockStep {
+  template<typename bodies_type = sbodies>
+  class GravBlockStep : public BlockStep<bodies_type> {
     GravBlockStep(const GravBlockStep&);            // not implemented          
     GravBlockStep& operator= (const GravBlockStep&);// not implemented          
     //--------------------------------------------------------------------------
     // private types                                                            
     //--------------------------------------------------------------------------
   private:
+    typedef typename bodies_type::body body;       // type of body              
+    //--------------------------------------------------------------------------
     enum {
       use_a    = 1,
       use_p    = 2,
@@ -270,28 +278,34 @@ namespace nbdy {
     //--------------------------------------------------------------------------
     // data members                                                             
     //--------------------------------------------------------------------------
+    bool           UPX;                            // use pot+pex for potential 
     int            SCH;                            // stepping scheme           
     real           FAQ,FPQ,FCQ,FEQ;                // factors^2 for stepping    
   protected:
     //--------------------------------------------------------------------------
     // protected methods                                                        
     //--------------------------------------------------------------------------
-    real        step_sq       (body const&B, real const&eps=one)   const
+    real fpot(body const&B) const
+    {
+      return UPX? pex(B)+pot(B) : pot(B);
+    }
+    //--------------------------------------------------------------------------
+    real step_sq(body const&B, real const&eps=one)   const
     {
       if(SCH == 0)     return zero;
-      if(SCH == use_p) return FPQ/square(pot(B));
+      if(SCH == use_p) return FPQ/square(fpot(B));
       else {
 	register real ia = one/norm(acc(B)), tq=1.e7;
 	if(SCH & use_a) update_min(tq, FAQ*ia);
-	if(SCH & use_p) update_min(tq, FPQ/square(pot(B)));
-	if(SCH & use_c) update_min(tq, FCQ*abs(pot(B))*ia);
+	if(SCH & use_p) update_min(tq, FPQ/square(fpot(B)));
+	if(SCH & use_c) update_min(tq, FCQ*abs(fpot(B))*ia);
 	if(SCH & use_e) update_min(tq, FEQ*eps*sqrt(ia));
 	return tq;
       }
     }
     //--------------------------------------------------------------------------
-    void        assign_level  (body&B, real const&eps=one)           const
-    {
+    void assign_level(body&B, real const&eps=one)
+      const {
       register real t = sqrt(two*step_sq(B,eps)); // tau * 2^(1/2)              
       register indx l = 0;                        // try longest step           
       while(tau(l)          > t  &&               // WHILE shorter step desired 
@@ -299,44 +313,46 @@ namespace nbdy {
       add_to_level(B.level()=l);                  // account for in BlockStep   
     }
     //--------------------------------------------------------------------------
-    void        adjust_level  (body&B, int const&low, real const&eps=one) const
+    void adjust_level(body&B, int const&low, real const&eps=one) const {
       // implementing scheme 2 of my notes: change only by factors of two       
-    {
       const double root_half=0.7071067811865475244;// sqrt(1/2)                 
       register real tq=step_sq(B,eps)* root_half;  // tau^2 * sqrt(1/2)         
       if     (tausq(B) < tq)    to_lower (B,low);  // change to longer  if poss 
       else if(tausq(B) > tq+tq) to_higher(B);      // change to shorter if poss 
     }
     //--------------------------------------------------------------------------
-    void        reset_scheme  (real const&fa,
-			       real const&fp=zero,
-			       real const&fc=zero,
-			       real const&fe=zero)
+    void reset_scheme(real const&fa,
+		      real const&fp,
+		      real const&fc,
+		      real const&fe,
+		      bool const&up)
     {
+      UPX = up;
       SCH = 0;
       FAQ = fa*fa; if(FAQ) SCH |= use_a;
       FPQ = fp*fp; if(FPQ) SCH |= use_p;
       FCQ = fc*fc; if(FCQ) SCH |= use_c;
       FEQ = fe*fe; if(FEQ) SCH |= use_e;
       if(SCH==0) 
-	error("[%s.%d]: in GravBlockStep::reset_scheme(%f,%f,%f,%f): "
-	      "time step control factors=0",__FILE__,__LINE__,fa,fp,fc,fe);
+	error("[%s.%d]: in GravBlockStep::reset_scheme(%f,%f,%f,%f,%d): "
+	      "time step control factors=0",__FILE__,__LINE__,fa,fp,fc,fe,up);
     }
     //--------------------------------------------------------------------------
     // construction & destruction                                               
     //--------------------------------------------------------------------------
-    GravBlockStep() : BlockStep() {}
+    GravBlockStep() : BlockStep<bodies_type>(), UPX(0) {}
     //--------------------------------------------------------------------------
     GravBlockStep(int  const&h0,                   // O: h0, tau_max = 2^-h0    
 		  int  const&Ns,                   // I: #steps                 
 		  real const&t,                    // I: actual time            
 		  real const&fa,                   // I: f_acc                  
-		  real const&fp = zero,            // I: f_phi                  
-		  real const&fc = zero,            // I: f_pa                   
-		  real const&fe = zero)            // I: f_ea                   
-      : BlockStep(h0,Ns,t)
+		  real const&fp,                   // I: f_phi                  
+		  real const&fc,                   // I: f_pa                   
+		  real const&fe,                   // I: f_ea                   
+		  bool const&up)                   // I: use external pot       
+      : BlockStep<bodies_type> ( h0,Ns,t )
     {
-      reset_scheme(fa,fp,fc,fe);
+      reset_scheme(fa,fp,fc,fe,up);
     }
     //--------------------------------------------------------------------------
   };

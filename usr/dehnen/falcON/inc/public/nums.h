@@ -6,9 +6,9 @@
 // C++ code                                                                    |
 //                                                                             |
 // Copyright Walter Dehnen, 1994-2003                                          |
-// e-mail:   wdehnen@aip.de                                                    |
-// address:  Astrophysikalisches Institut Potsdam,                             |
-//           An der Sternwarte 16, D-14482 Potsdam, Germany                    |
+// e-mail:   walter.dehnen@astro.le.ac.uk                                      |
+// address:  Department of Physics and Astronomy, University of Leicester      |
+//           University Road, Leicester LE1 7RH, United Kingdom                |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 //                                                                             |
@@ -462,8 +462,8 @@ namespace nbdy {
 		const double,                 // I: b                           
 		const double,                 // I: eps = rel. error limit      
 		double* = 0,                  //[O: actual rel. error estimate] 
-                const bool = true);           //[I: abort if max number of      
-                                              //    iterations exceeded?]       
+                const bool = true,            //[I: abort if exceed iteration]  
+		const int  = 25);             //[I: max # iterations            
   //----------------------------------------------------------------------------
   // Runge-Kutta 4th order integrator for ODEs                                  
   //----------------------------------------------------------------------------
@@ -542,12 +542,12 @@ namespace nbdy {
   }
   //----------------------------------------------------------------------------
   template<typename S, int N> inline
-  void LegendrePeven(tupel<S,N>& p, const double x) {
+  void LegendrePeven(tupel<N,S>& p, const double x) {
     return LegendrePeven<S,N>(p,x);
   }
   //----------------------------------------------------------------------------
   template<typename S, int N> inline
-  void dLegendrePeven(tupel<S,N>& p, tupel<S,N>& d, const double x) {
+  void dLegendrePeven(tupel<N,S>& p, tupel<N,S>& d, const double x) {
     return dLegendrePeven<S,N>(p,d,x);
   }
   //----------------------------------------------------------------------------
