@@ -1,4 +1,4 @@
-.TH TABCOMMENT 1NEMO "20 May 1993"
+.TH TABCOMMENT 1NEMO "18 October 2004"
 .SH NAME
 tabcomment \- Add comments to a table, or comment certain lines
 .SH SYNOPSIS
@@ -40,6 +40,14 @@ Comment lines that start with a punctuation character
 .TP
 \fBdelete=t|f\fP
 Delete comment lines from output? [Default: \fBf\fP].
+.TP
+\fBcomment=\fP
+The actual comment character to be used at the beginning of the line.
+Although it is not adviced to use anything but the '#' symbol, the
+'!' and ';' characters have also been popular as a choice for
+comment characters. Default: \fB#\fP.
+.SH EXAMPLES
+
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
@@ -48,4 +56,5 @@ Peter Teuben
 01-aug-92	V1.0 Created	PJT
 14-sep-92	V1.1 added delete=; also updated man	PJT
 20-may-93	updated man	PJT
+18-oct-04	V2.0 allow change of comment character	PJT
 .fi
