@@ -1,0 +1,14 @@
+%N ccdstat
+%D basic statistics of an image
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man ccdstat' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input image filename [???]
+%A min
+	Minimum overrride []
+%A max
+	Maximum overrride []
+%A VERSION
+	16-sep=95 PJT [1.2]
