@@ -8,13 +8,14 @@
  *      5-jan-98    V2.1 fixed header item parsing              pjt
  *     30-nov-99    V3.0: allow nz=                             pjt
  *      9-jul-00    V3.1: allow dcol=0 for reading all columns  pjt
+ *     22-jul-00    V3.2: fix for new style fitsio              pjt
  *
  * todo:  read one more line, check if file is done!!
  */
 
 #include <stdinc.h>
 #include <getparam.h>
-#include <fitsio.h>
+#include <fitsio_nemo.h>
 #include <ctype.h>
 
 string defv[] = {
@@ -25,7 +26,7 @@ string defv[] = {
     "ny=\n              Y-Size of data, or else specify NAXIS2 in header",
     "nz=\n              Z-Size of data, or else specify NAXIS3 in header",
     "nmax=100000\n      Allocation space for piped I/O",
-    "VERSION=3.1\n	9-jul-00 PJT",
+    "VERSION=3.2\n	22-jul-02 PJT",
     NULL,
 };
 
@@ -58,7 +59,8 @@ void nemo_main()
     if (dcol < 0 || dcol > MAXCOL) error("Bad dcol=%d",dcol);
     dcol--;
     
-    nmax = file_lines(name, getiparam("nmax"));
+    nmax = nemo_file_lines(name, getiparam("nmax"));
+
     instr = stropen(name,"r");
 
     nx = naxis[0] = hasvalue("nx") ? getiparam("nx") : 0;
