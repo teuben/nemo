@@ -23,6 +23,7 @@
  *              25-may-04 : 1.2c  fix sigma computation (sqrt(N))                pjt
  *                             e  plus many improvement when nsigma given
  *              11-jun-04 : 1.3   write fit directly , with or without masked    pjt
+ *              13-jan-05 :    b  rachel mode: inc=0 -> cosi=sini=1.0 to get circles    pjt
  *
  *
  ******************************************************************************/
@@ -90,7 +91,7 @@ string defv[] = {
     "rotcur3=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur4=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur5=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
-    "VERSION=1.3a\n  13-jun-04 PJT",
+    "VERSION=1.3b\n  13-jan-05 PJT",
     NULL,
 };
 
@@ -1555,8 +1556,12 @@ int   mode;          /* fit mode */
     free=ABS(sin(F*thf)); /* free angle in terms of sine */
     sinp=sin(F*phi);       /* sine of pa. */
     cosp=cos(F*phi);       /* cosine of pa. */
-    sini=sin(F*inc);       /* sine of inc. */
-    cosi=cos(F*inc);       /* cosine of inc. */
+    if (inc==0) {          /* rachel mode Jan 2005 */
+      sini=cosi=1.0;
+    } else {
+      sini=sin(F*inc);       /* sine of inc. */
+      cosi=cos(F*inc);       /* cosine of inc. */
+    }
     a=sqrt(1.0-cosp*cosp*sini*sini);       /* find square around ellipse */
     b=sqrt(1.0-sinp*sinp*sini*sini);
 
@@ -1982,8 +1987,12 @@ perform_init(real *p,real *c)
     inc=p[4];               /* inclination */
     cosi1=cos(F*inc);       /* cosine */
     cosi2=cosi1*cosi1;      /* cosine squared */
-    sini1=sin(F*inc);       /* sine */
-    sini2=sini1*sini1;      /* sine squared */
+    if (inc==0)             /* rachel mode */
+      sini1=sini2=1.0;
+    else {
+      sini1=sin(F*inc);       /* sine */
+      sini2=sini1*sini1;      /* sine squared */
+    }
   }
   p_init = 0;                   /* academic case :-) */
   x=c[0]-p[1]*grid[0];          /* calculate x */
