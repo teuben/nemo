@@ -55,7 +55,7 @@ string defv[] = {
 	"cmode=0\n	Contour mode (0=orginal 1=pgplot)",
 	"blankval=\n	if used, use this as blankval",
 	"ltype=\n	width and type for contour",
-	"VERSION=3.0b\n	16-mar-05 PJT",
+	"VERSION=3.0d\n	16-mar-05 PJT",
 	NULL,
 };
 
@@ -90,7 +90,7 @@ int ncntval;				/* actual number of contours */
 real xplot[2],   yplot[2];		/* ranges in plot variables */
 
 char   xlabel[80], ylabel[80];              
-char   plabel[80], clabel[80], glabel[80];
+char   plabel[80], clabel[80], glabel[80], tlabel[80];
 string headline;			/* extra label */
 char   format4[100];
 int    cmode;
@@ -120,8 +120,10 @@ nemo_main()
     dy=Dy(iptr);
     xsize = nx * dx;
     ysize = ny * dy;
-    if (n==0)
+    if (n>0) {
+      sleep(1);
       plframe();
+    }
     plot_map();                                 /* plot the map */
     n++;
   }
@@ -222,6 +224,7 @@ plot_map ()
     sprintf (plabel,"File: %s",infile);			/* filename */
     sprintf (clabel,"Contours: %s",cntstr);             /* contour levels */
     sprintf (glabel,"Gray MinMax: %g %g",mmin,mmax);    /* grey scale minmax */
+    sprintf (tlabel,"Time: %g",Time(iptr));             /* time of orig snapshot */
 
 	/* set scales and labels along axes */
     if (xplot[0]==UNDEF || xplot[1]==UNDEF) {
@@ -274,6 +277,8 @@ plot_map ()
     pltext (plabel,2.0,18.4, 0.32, 0.0);	/* plot header with file name */
     pltext (clabel,2.0,19.0, 0.32, 0.0);        /* plot header with contour levels */
     pltext (glabel,2.0,19.6, 0.32, 0.0);        /* plot header with greyscale info */
+    pltext (tlabel,10.0,19.6,0.32, 0.0);        /* time info */
+
     pljust(1);
     pltext (headline,10.0,18.4, 0.26, 0.0);     /* plot extra user suplied header */
     pljust(-1);
