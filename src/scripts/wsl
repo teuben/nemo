@@ -3,12 +3,10 @@
 # wsl:  Where in NEMO can I find $last  ?
 #	Pass preceding arguments as switches to grep.
 #
-# Versions:	wsl		Full search
+# Versions:	wsl		Full search (in src)
 #		wsll		Full search, list filenames only
-#		wsl_node	Search node part only
-#		wsll_node	Search node part, list filenames only
-#		wsl_star	Search star part only
-#		wsll_star	Search star part, list filenames only
+#		wsl_usr		Search usr part only
+#		wsll_usr	Search usr part, list filenames only
 
 if [ $# = 0 ]; then exit; fi
 
