@@ -7,9 +7,9 @@
 #include <ctype.h>
 
 string defv[] = {
-    "ref=\n     Reference coordinates (deg)",
-    "refpix=\n  Reference pixels",
-    "inc=\n     Reference increment",
+    "ref=\n     Reference coordinates (deg) [i.e. crval]",
+    "refpix=\n  Reference pixels [i.e. crpix]",
+    "inc=\n     Reference increment [i.e. cdelt]",
     "rot=\n     Rotation (deg) (from N through E)",
     "type=\n    Projection type (SIN, TAN, ARC, NCP, GLS, MER, AIT)",
     "format=%g\n Output format",
@@ -107,5 +107,6 @@ strtoupper(char *text)
 }
     
 
+#ifdef NEMO
 #include "worldpos.c"
-
+#endif

@@ -1,74 +1,93 @@
-#  Makefile for testpos.c and worldpos.c 
-#  Copyright (C) 1994
-#  Associated Universities, Inc. Washington DC, USA.
-# 
-#  This library is free software; you can redistribute it and/or modify it
-#  under the terms of the GNU Library General Public License as published by
-#  the Free Software Foundation; either version 2 of the License, or (at your
-#  option) any later version.
-# 
-#  This library is distributed in the hope that it will be useful, but WITHOUT
-#  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-#  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Library General Public
-#  License for more details.
-# 
-#  You should have received a copy of the GNU Library General Public License
-#  along with this library; if not, write to the Free Software Foundation,
-#  Inc., 675 Massachusetts Ave, Cambridge, MA 02139, USA.
-# 
-#  Correspondence concerning AIPS should be addressed as follows:
-#         Internet email: aipsmail@nrao.edu
-#         Postal address: AIPS Group
-#                         National Radio Astronomy Observatory
-#                         520 Edgemont Road
-#                         Charlottesville, VA 22903-2475 USA
+#	Makefile for NEMO/src/image/misc
+include $(NEMOLIB)/makedefs
 
-# Substitute your favorite ANSI-C compiler (e.g., 'acc' for Suns):
-#CC =	gcc -pedantic -lm
-CC  =	acc
+#	NEMO Library, and make it a precious one
+L = $(NEMOLIB)/libnemo.a
+.PRECIOUS: $(L)
 
-all:	runtest
+# Files etc. in this directory
+MAN1FILES = 
+MAN3FILES = 
+MAN5FILES = 
+INCFILES = 
+SRCFILES = worldpos.c
+OBJFILES=  worldpos.o
+LOBJFILES= $L(worldpos.o)
+BINFILES = wcs 
+TESTFILES= testpos
 
-worldpos.o:	worldpos.c
-	${CC} -c worldpos.c
+help:
+	@echo NEMO/src/image/wcs
 
-testpos:	worldpos.o testpos.c
-	${CC}  testpos.c worldpos.o -o ${@}
+clean:
+	rm -f *.o *.a *~ core $(BINFILES) $(TESTFILES)
 
-testpos.out:	testpos
-	testpos > ${@}
+cleanlib:
+	ar dv $(L) $(OBJFILES)
 
-runtest:	testpos.out
-	more testpos.out
-	@echo " "
-	@echo "Compare test run to reference output (if present):"
-	-if [ -f testpos.ref ] ;then diff testpos.out testpos.ref ; fi
+all:	$(BINFILES) $(TESTFILES)
+bin: $(BINFILES)
+test: $(TESTFILES)
+#	update or install a library
+update:  .update_lib 
 
-ITEMS   = worldpos.c testpos.c testpos.ref COPYING.LIB-2.0 Makefile
-PACKAGE = worldpos.tar
-ANONFTP = /fits_1/ftp/fits/src/wcs/
+.update_lib: $(L)
+	@touch .update_lib
 
-export:	testpos.out
-	rm -Rf worldpos
-	mkdir worldpos
-	cp -p testpos.out testpos.ref
-	cp -p ${ITEMS} worldpos
-	rm -f ${PACKAGE}* testpos.ref
-	tar cf ${PACKAGE} worldpos
-	rm -Rf worldpos
-	tar tvf ${PACKAGE}
-	gzip ${PACKAGE}
-	ls -lg ${PACKAGE}.gz
-	cp -p ${PACKAGE}.gz ${ANONFTP}
-	ls -lg ${ANONFTP}
+.update_inc: .install_inc
 
-clean:	
-	rm -f *~ core *.o testpos testpos.out \
-		${PACKAGE}* ${ANONFTP}${PACKAGE}.gz
-	rm -Rf worldpos
+$(L):	$(LOBJFILES)
+	echo "*** Now updating all members ***"
+	ar ruv $(L) $?
+	$(RANLIB) $(L)
+	rm -f $?
 
-LIST	= testpos.out Makefile testpos.c worldpos.c
+install:   .install_lib 
 
-print:	${LIST}
-	# substitute your favorite print utility for 'lwf.sh':
-	lwf.sh ${LIST}
+.install_lib: $(OBJFILES) 
+	ar ruv $(L) $?
+	$(RANLIB) $(L)
+
+.install_inc: $(INCFILES)
+	cp $? $(NEMOINC)
+	@touch .install_inc
+
+.install_bin: $(BINFILES)
+	mv $? $(NEMOBIN)
+
+# Targets used by Nemo to update libraries and bins.
+
+nemo_lib: $(LIBFILE)
+
+nemo_sublibs:
+	-@for i in $(SUBDIRS); do \
+	(cd $$i; echo SUBSUBDIR $$i; $(MAKE) nemo_lib); done
+
+nemo_bin: nemo_subbins $(BINFILES)
+	mv $(BINFILES) $(NEMOBIN)
+	rm -f *.o
+
+nemo_subbins:
+	-@for i in $(SUBDIRS); do \
+	(cd $$i; echo SUBSUBDIR $$i; $(MAKE) nemo_bin); done
+
+nemo_src:
+	-@for i in $(SUBDIRS); do \
+	(cd $$i; $(MAKE) nemo_src); done
+	-@for i in $(BINFILES); do \
+	echo `pwd` $$i ; done 
+
+#	Special rules
+
+tests: $(TESTFILES)
+
+
+
+# special
+
+
+testpos:
+	$(CC) -DNEMO $(CFLAGS) -o testpos testpos.c \
+		$(NEMO_LIBS) $(EL)
+
+

@@ -1,0 +1,103 @@
+
+    Circularity tests of various projection types
+        (output from program 'testpos')
+
+    xypix() does (RA,Dec)-->(x,y) transformation,
+    worldpos() does (x,y)-->(RA2,Dec2),
+    then we compare (RA2,Dec2) with (RA,Dec).
+
+    Small-field cases:
+
+   pos=  30.4   40.3 deg
+   ref=  30.0   40.0 deg
+refpix= 500.0  500.0 pix
+   inc= 0.001  0.001 deg
+   rot=        -13.0 deg
+
+i  code    xpix     ypix     Remarks (tolerance=6e-08_deg)
+-  ----   ------   ------   ---------
+0   ???  822.263  882.291   OK (default linear)
+1  -SIN  729.607  861.601   OK
+2  -TAN  729.613  861.611   OK
+3  -ARC  729.609  861.605   OK
+4  -NCP  729.178  863.461   OK
+5  -GLS  729.763  860.936   OK
+8  -STG  729.610  861.606   OK
+
+NOTE: NCP error below is correct behavior!
+        (NCP undefined for yref==0)
+
+    Small-field cases:
+
+   pos= 359.6   -0.3 deg
+   ref=   0.0    0.0 deg
+refpix= 500.0  500.0 pix
+   inc= 0.001  0.001 deg
+   rot=        -13.0 deg
+
+i  code    xpix     ypix     Remarks (tolerance=6e-08_deg)
+-  ----   ------   ------   ---------
+0   ???  176.763  117.484   OK (default linear)
+1  -SIN  176.771  117.487   OK
+2  -TAN  176.759  117.472   OK
+3  -ARC  176.767  117.482   OK
+4  -NCP  176.763  117.484   s_xypix=1; s_worldpos=1 DX=-360_deg (xpos2=-0.401);
+5  -GLS  176.768  117.485   OK
+8  -STG  176.765  117.480   OK
+
+    Small-field cases:
+
+   pos= 360.2   40.3 deg
+   ref= 359.8   40.0 deg
+refpix= 500.0  500.0 pix
+   inc= 0.001  0.001 deg
+   rot=        -13.0 deg
+
+i  code    xpix     ypix     Remarks (tolerance=6e-08_deg)
+-  ----   ------   ------   ---------
+0   ???  822.263  882.291   OK (default linear)
+1  -SIN  729.607  861.601   OK
+2  -TAN  729.613  861.611   OK
+3  -ARC  729.609  861.605   OK
+4  -NCP  729.178  863.461   OK
+5  -GLS  729.763  860.936   OK
+8  -STG  729.610  861.606   OK
+
+    All-sky cases:
+
+   pos= 317.0  -71.0 deg
+   ref=   0.0    0.0 deg
+refpix= 500.0  500.0 pix
+   inc= 0.500  0.500 deg
+   rot=          0.0 deg
+
+i  code    xpix     ypix     Remarks (tolerance=6e-08_deg)
+-  ----   ------   ------   ---------
+6  -MER  414.000  295.146   OK
+7  -AIT  466.119  365.760   OK
+
+    All-sky cases:
+
+   pos= 181.0   87.0 deg
+   ref=   0.0    0.0 deg
+refpix= 500.0  500.0 pix
+   inc= 0.500  0.500 deg
+   rot=          0.0 deg
+
+i  code    xpix     ypix     Remarks (tolerance=6e-08_deg)
+-  ----   ------   ------   ---------
+6  -MER  142.000  917.398   OK
+7  -AIT  483.042  661.798   OK
+
+    All-sky cases:
+
+   pos= 181.0   67.0 deg
+   ref=   0.0    0.0 deg
+refpix= 500.0  500.0 pix
+   inc= 0.500  0.500 deg
+   rot=          0.0 deg
+
+i  code    xpix     ypix     Remarks (tolerance=6e-08_deg)
+-  ----   ------   ------   ---------
+6  -MER  142.000  682.465   OK
+7  -AIT  373.579  648.921   OK

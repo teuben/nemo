@@ -1,0 +1,26 @@
+DIR = src/image/wcs
+BIN = wcs
+NEED = wcs
+
+help:
+	@echo $(DIR)
+
+need:
+	@echo $(NEED)
+
+clean:
+	@echo Cleaning $(DIR)
+	@rm -f testpos.test
+
+all:	$(BIN)
+
+
+wcs: _testpos
+	@echo Running $@
+	wcs 30,30 128,128 0.1,0.1 pix=10,10
+	wcs 30,30 128,128 0.1,0.1 pos=10,10
+
+_testpos:
+	make testpos
+	testpos > testpos.test 
+	diff testpos.ref testpos.test
