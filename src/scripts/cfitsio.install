@@ -2,10 +2,13 @@
 #
 #  Install CFITSIO for NEMO
 #
-#  17-apr-04    written
+#  17-apr-04    written, for 2490
+
+if ($?NEMO == 0) set NEMO=`pwd`
 
 #			 	.. command line keywords ..
 set src=$NEMO/local/cfitsio 
+set prefix=$NEMO
 
 #				.. parse command line ..
 foreach arg ($*)
@@ -16,13 +19,13 @@ foreach arg ($*)
 end
 
 if (! -e $src) then
-  echo CFITSIO source directory src=$src does not exist
+  echo CFITSIO source directory src=$src does not exist, try NEMO=
   exit 1
 endif
 
 
 
 cd $src
-configure --prefix=$NEMO
+configure --prefix=$prefix
 make
 make install 
