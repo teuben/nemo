@@ -1,5 +1,4 @@
 
-
 CVS1 = partiview  
 CVS2 = staratlas  starcluster  stardata  starlab
 
@@ -28,3 +27,26 @@ junk:
 	gtar zcf nemo_cvs.tar.gz nemo_cvs
 	rm -rf nemo_cvs
 	scp nemo_cvs.tar.gz /tmp/VERSION_cvs apus:/home/ftp/pub/nemo
+
+cvstar: cvstar1 cvstar2 cvstar3 cvstar4
+
+cvstar1: 
+	rm -rf nemo
+	cvs -Q co  nemo;  (cd nemo; mkdir local; cd local; cvs -Q co pgplot)
+	gtar zcf nemo.tar.gz nemo
+
+cvstar2: 
+	rm -rf partiview
+	cvs -Q co  partiview; gtar zcf partiview.tar.gz partiview
+
+cvstar3: 
+	rm -rf starlab
+	cvs -Q co  starlab;   gtar zcf starlab.tar.gz starlab
+
+cvstar4: 
+	rm -rf starcluster
+	cvs -Q co  starcluster;   gtar zcf starcluster.tar.gz starcluster
+
+
+
+	
