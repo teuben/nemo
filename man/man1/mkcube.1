@@ -1,0 +1,49 @@
+.TH MKCUBE 1NEMO "26 August 1993"
+.SH NAME
+mkcube \- create a uniform cube of equal massive stars
+.SH SYNOPSIS
+\fBmkcube\fP \fBout=\fP\fIsnapshot\fP [parameter=value]
+.SH DESCRIPTION
+\fBmkcube\fP generates a random realization of a cube. Coordinates
+in X, Y and Z are uniformly randomly distributed on a cube with
+given size. Velocities by default are zero, but can be drawn from
+an isotropic distribution with choosen dispersion.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBout=\fP
+Output file name, in \fIsnapshot(5NEMO)\fP format. 
+No default.
+.TP 20
+\fBnbody=\fP
+Number of particles. [Default: \fB256\fP].
+.TP 20
+\fBsize=\fP
+Size of cube. 
+[Default: \fB1\fP].
+.TP 20
+\fBsigma=\fP
+Isotropic velocity dispersion.
+[Default: \fB0.0\fP].
+.TP 20
+\fBseed=\fP
+Random number seed     
+[Default: \fB0\fP].
+.TP 20
+\fBzerocm=t|f\fP
+Center c.o.m. ? 
+[Default: \fBt\fP].
+.TP 20
+\fBheadline=\fP
+Text headline for output    
+Default: none.
+.SH SEE ALSO
+mkplummer(1NEMO), snapshot(5NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+26-Aug-93	V1.0 Created	PJT
+.fi
