@@ -1,0 +1,46 @@
+%N perorb
+%D search for periodic orbits in a potential (SOS method)
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man perorb' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Optional input orbit file for initial P.O. []
+%A out
+	Optional output orbit file []
+%A freqout
+	Frequency of output in steps [1]
+%A maxsteps
+	Maximum number of steps for one period [5000]
+%A dt
+	Timestep [0.01]
+%A phase
+	Initial phase-space coordinates[,energy] [0,1,0,0.6,0,0]
+%A step
+	Step in {pos|energy}, perturbing pos_step [0.1,0.01]
+%A dir
+	Direction to step in (x or y) [y]
+%A norbit
+	Number of orbits to do [1]
+%A accuracy
+	Relative accuracy in p.o. [0.0001]
+%A maxiter
+	Maximum iterations allowed to find p.o. [50]
+%A ncross
+	Number of SOS crossings per iteration [1]
+%A period
+	Number of SOS points per period [2]
+%A potname
+	Name of external potential(5) []
+%A potpars
+	Parameters of potential(5) []
+%A potfile
+	Extra data-file for potential(5) []
+%A tab
+	Optional table with x,vy,y,vx,nsteps,T,E []
+%A mode
+	integration method (euler,leapfrog,rk2,rk4) [rk4]
+%A headline
+	Random verbiage for output file []
+%A VERSION
+	19-apr-95 PJT [1.5a]
