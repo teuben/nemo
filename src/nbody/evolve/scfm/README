@@ -1,0 +1,16 @@
+
+This version of the Self Consistent Field code has been submitted by
+Lars Hernquist in July 1997. The code "second.f" may be needed on some
+architectures if your fortran library does not contain it. Equally
+so, the call to etime() may have to be replaced or you have to get
+your own version of etime.c
+
+Examples of timing on the benchmark: (100 steps, 1024 particles)
+
+
+Pentium-333	6.93"
+Pentium-500	4.58
+Ultra-10/300	9.64	(g77 -O)
+		7.20	(f77 -O)
+		7.33	(f77 -fast)
+
