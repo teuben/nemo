@@ -1,0 +1,33 @@
+.TH MARTELSNAP 1NEMO "19 March 1999"
+.SH NAME
+martelsnap \- convert Martel "pos-vel" dump files to snapshot
+.SH SYNOPSIS
+\fBmartelsnap\fP [parameter=value]
+.SH DESCRIPTION
+\Efmartelsnap\fP converts a simple dump of phase space coordinates
+into a \fPsnapshot(5NEMO)\fP.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input Martel file. No default.
+.TP
+\fBout=\fP
+Output snapshot file. No default.
+.TP
+\fBnbody=\fP
+Max number of particles. Default: 262144.
+.TP
+\fBheadline=\fP
+Random verbiage      
+.TP
+.SH SEE ALSO
+http://xxx.lanl.gov/abs/astro-ph/9903210
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+19-Mar-99	V1.0 Created   	PJT
+.fi
