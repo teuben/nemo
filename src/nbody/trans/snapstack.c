@@ -72,16 +72,25 @@ snapstack()
     setvect(deltar, getparam("deltar"));
     setvect(deltav, getparam("deltav"));
 
-    btab1 = (body *) reallocate(btab1, sizeof(body)*(nbody1+nbody2));
-    btab = btab1;
     nbody = nbody1 + nbody2;
+    btab1 = (body *) reallocate(btab1, sizeof(Body)*nbody);
+    btab = btab1;
     tsnap = tsnap1;
     bits = (bits1 & bits2);
-    memcpy(&btab[nbody1],btab2,sizeof(body)*nbody2);
+    memcpy(&btab[nbody1],btab2,sizeof(Body)*nbody2);
+#if 1
+    /* shift over 1st one */
+    for (bp=btab; bp<btab+nbody1; bp++) {
+      ADDV(Pos(bp),Pos(bp),deltar);
+      ADDV(Vel(bp),Vel(bp),deltav);
+    }
+#else
+    /* shift over 2nd one */
     for (bp=&btab[nbody1]; bp<btab+nbody; bp++) {
       ADDV(Pos(bp),Pos(bp),deltar);
       ADDV(Vel(bp),Vel(bp),deltav);
     }
+#endif
     if (getbparam("zerocm")) snapcenter();
 }
 
@@ -100,7 +109,6 @@ string str;
 writedata()
 {
     stream outstr;
-    int cscode = CSCode(Cartesian, NDIM, 2);
 
     if (! streq(getparam("headline"), ""))
 	set_headline(getparam("headline"));
