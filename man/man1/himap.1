@@ -1,0 +1,85 @@
+.TH HIMAP 1NEMO "11 October 1995"
+.SH NAME
+himap \- Construct galactic XY/TR (Z) MAP from an LV(B) diagram
+.SH SYNOPSIS
+\fBhimap\fP [parameter=value]
+.SH DESCRIPTION
+\fIhimap\fP converts a galactic position-velocity map into a 2D
+galactic (top-view) surface density map or density cube.
+The gridding is done in a 
+polar (THETA-RADIUS) or cartesian (X-Y) grid, and
+if choosen, Z in the vertical dimension. Coordinates are 
+always normalized to the solar radius, which is one of the
+user definable parameters.
+.PP
+In both a polar (THETA-RADIUS) and
+cartesian (X-Y) grid the sun is located at (0,1). The sense of galactic
+rotation is clockwise in the cartesian X-Y, or in increasing THETA
+in the polar grid.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP\fIimage_in\fP
+Input VL(B) image. This must be an \fIimage(5NEMO)\fP file. 
+No default.
+.TP
+\fBout=\fP\fIimage_out\fP
+Optional output image, will be in \fIimage(5NEMO)\fP format.
+If no name supplied, no output image is generated. Default: none.
+.TP
+\fBrotcur=\fP\fItable_in\fP
+Input rotation curve in (ascii) \fItable(5NEMO)\fP format, with
+radius (in kpc) in column 1, and velocity (in km/s) in
+column 2. Note that the table will internally be normalized to 
+(\fBr0,v0\fP). No default.
+.TP
+\fBxgrid=\fP\fIx1,x2,...\fP
+Grid coordinates in image X coordinates, using
+a \fInemoinp(3NEMO)\fP list expression.
+They are either normalized X or THETA,
+depending on the gridding \fBmode\fP (see below).
+.TP
+\fBygrid=\fP\fIy1,y2,...\fP
+Grid coordinates in image Y coordinates, using
+a \fInemoinp(3NEMO)\fP list expression.
+They are either normalized Y or normalized RADIUS,
+depending on the gridding \fBmode\fP (see below). 
+.TP
+\fBzgrid=\fP\fIz1,z2,...\fP
+Grid coordinates in image Z coordinates, using
+a \fInemoinp(3NEMO)\fP list expression.
+They are normalized with the solar radius (r0, see below). By
+default only one plane (z=0) is gridded, all emission 
+is averaged in Z (or b for that matter).
+.TP
+\fBr0=\fP\fIr0_kpc\fP
+Solar Radius in kpc. [Default: \fB8\fP].
+.TP
+\fBv0=\fP\fIv0_km/s\fP
+LSR velocity in km/s. [Default: \fB220\fP].
+.TP
+\fBgrid=p|c\fP
+Output mode: \fBpolar\fP (theta,r) or \fBcartesian\fP (x,y).
+[Default: \fBpolar\fP].
+.TP
+\fBnear=t|f\fP
+Allow pixels to assume the value of the nearest edge, in case they
+are found outside the VL/LV map? [Default: \fBfalse\fP].
+.TP
+\fBtab=\fP\fItable_out\fP
+Optional output table of 
+{theta,radius,l,v,l_grid,v_grid,surden,vrot}.
+Default: none.
+.SH SEE ALSO
+hispectrum(1NEMO), image(3NEMO), fitsccd(1NEMO), hispectrum(1NEMO),
+fitshicube(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+19-Feb-93	V0.1 Created    	PJT
+7-oct-94	V1.1b added near=, more messages	PJT
+10-oct-95	V1.2 added zrange= and 3D support	PJT
+.fi
