@@ -1,4 +1,4 @@
-.TH TABHIST 1NEMO "21 July 2000"
+.TH TABHIST 1NEMO "2 August 2002"
 .SH NAME
 tabplot \- general table plotter
 .SH SYNOPSIS
@@ -10,21 +10,25 @@ connects the datapoints by lines. It can also bin the data, and plot
 error-bars in X and Y derived from the dispersion within the bins.
 .PP
 \fItabplot\fP is intended for quick and dirty display of the data. 
-For more complicated plot, other plotting packages should be used
+For more complicated plots, full plotting packages should be used
 (Mongo, SM, WIP, gnuplot, Grace etc.)
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword is also
 given:
 .TP 20
 \fBin=\fIinfile\fP
-input file, in tabular format [no default].
+input file, in (ASCII) tabular format [no default].
 .TP
 \fBxcol=\fIy-column\fP
-column from which the (x) values are taken [default \fB1\fP].
+column(s) from which the X values are taken. Multiple columns can be
+taken, but if so, the number of Y columns must be the same for
+pairwise plotting.
+[default \fB1\fP].
 .TP
 \fBycol=\fIy-column\fP
-column from which the (y) values are taken. Multiple columns can be
-given.
+column from which the Y values are taken. Multiple columns can be
+given. The number of X columns can either be 1 or must be equal to
+the number of Y columns.
 [default \fB2\fP].
 .TP
 \fBxmin=\fIx_min\fP
@@ -116,10 +120,6 @@ than 2.0 fullscale was always on (t), by default it is now off (f).
 .TP
 \fBlayout=\fP
 Optional Layout file that contains draw commands. Default: none.
-.SH "SEE ALSO"
-tablsqfit(1NEMO), tabmath(1NEMO)
-.SH AUTHOR
-Peter Teuben
 .SH BUGS
 tab= doesn't work properly with multiple columns
 .SH EXAMPLES
@@ -138,6 +138,10 @@ currently the user has to convert to \fIyapp\fP (cm) units, and
 actually know that most yapp plots runs from 2 to 18 cm in both X and Y.
 This will likely change in a future version where points can be given
 in a more reasonably WCS.
+.SH "SEE ALSO"
+tablsqfit(1NEMO), tabmath(1NEMO)
+.SH AUTHOR
+Peter Teuben
 .SH FILES
 .nf
 .ta +3.0i
@@ -155,4 +159,5 @@ in a more reasonably WCS.
 31-mar-99	V2.1 autoscaling now takes range in other axis into account	PJT
 28-jul-99	V2.2 added color=
 21-jul-00	V2.3 min & max can be separately set	PJT
+2-aug-02	V2.5 allow number of x columns to be > 1	PJT
 .fi
