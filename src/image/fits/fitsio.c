@@ -151,9 +151,11 @@ FITS *fitopen(string name,string status,int naxis,int *nsize)
 #endif
     first_message = 0;
   }
+#if 0  
   if (sizeof(int8) != 8)
     warning("Cannot read BITPIX=64 items with this code, sizeof(int8)=%d",sizeof(int8));
   else
+#endif
     dprintf(1,"This version has experimental handling of BITPIX 64 data\n");
 
   f = (FITS *)allocate(sizeof(FITS));
