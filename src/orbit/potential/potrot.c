@@ -85,6 +85,7 @@ void nemo_main(void)
       f0 = mean_moment(&m);
       dphi  = (phis[1]-phis[0])/2.0;
       nstep = 2;
+      dprintf(2,"iter 1: %g\n",f0);
       for (j=0; j<niter; j++) {
 	for (k=0, phi = dphi/2.0; k<nstep-1; k++, phi += dphi) {
 	  accum_moment(&m, force(radii[i],phi),1.0);
@@ -92,6 +93,8 @@ void nemo_main(void)
 	f1 = mean_moment(&m);
 	df = (f1-f0)/f0;
 	df = ABS(df);
+	dprintf(2,"iter %d: %g %g\n",j+1,f0,df);
+	f0 = f1;
 	if (df < eps && j>5) {
 	  // warning("Early convergence after %d iterations",j);
 	  break;
