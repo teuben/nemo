@@ -29,8 +29,9 @@ string defv[] = {
     "t=0.0\n        Time to test potential at",
     "mode=pot\n     Output pot,ax,ay,az",
     "dr=\n          Differential step for (Poisson) density map",
+    "omega=\n       Use this instead of any returned pattern speed",
     "ndim=3\n       Poisson map using 2D or 3D derivatives",
-    "VERSION=1.3\n  12-sep-02 PJT",
+    "VERSION=1.4\n  30-sep-02 PJT",
     NULL,
 };
 
@@ -101,12 +102,11 @@ void nemo_main(void)
 			  getparam("potfile"));
 			  
     if (mypot==NULL) error("Potential could not be loaded");
-    omega = get_pattern();
-#if 1
-    dprintf(0,"Omega = %g\n",omega);
-#else
-    dprintf(0,"Omega = %g ** ignored **\n",omega);
-#endif
+    if (hasvalue("omega"))
+      omega = getdparam("omega");
+    else
+      omega = get_pattern();
+    dprintf(0,"using Omega = %g\n",omega);
 
     create_cube(&iptr,nx,ny,nz);
     Dx(iptr) = (nx > 1 ? xarr[1]-xarr[0] : 0.0);
