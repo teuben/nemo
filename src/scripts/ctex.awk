@@ -1,4 +1,4 @@
-#! /bin/nawk -f
+#! /bin/awk -f
 #
 #  extract CTEX comments from C source code...
 #  Each paragraph should be structured as follows:

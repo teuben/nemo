@@ -144,7 +144,7 @@ foreach d ($dirs)
 	     endif
 	  else
 	     if ($missing) then
-	       echo "MISSING $dir1/$d/$f $r/$f "
+	       echo "MISSING $dir1/$d/$f in $r/$f "
 	       @ missing++
 	     endif
           endif
