@@ -1,0 +1,62 @@
+.TH DATA 5NEMO "4 March 1999"
+.SH NAME
+data \- list of various data files in $NEMODAT
+.SH DESCRIPTION
+Various data files may have been supplied with the NEMO version
+you have running, and can be found in the directory \fB$NEMODAT\fP.
+The convention for filename extensions is that \fIascii\fP files
+have extension \fB.data\fP, whereas binary \fIfilestruct(5NEMO)\fP
+files have extension \fB.dat\fP, although this is not always strictly
+enforced. Sometimes both the binary and ascii file may be present,
+in which case you have to confirm that \fItsf\fP produces the
+right result by comparing with the \fIascii\fP data version. 
+.PP
+Some table files are specifically designed for the N-body creation
+program \fImkommod\fP.
+.PP
+The environment variable \fBNEMODAT\fP is defined as part of your normal
+NEMO setup, programs sometimes use this as a default directory
+to search  for data.
+.SH DATA FILES
+.nf
+.ta +1.5i
+iau25.dat	Standard IAU 25-body problem (M. Lecar, Bull.Astr. 3, 91. 1968)
+pyth.dat	3-body Pythagorean Problem
+k1isot.dat	Osipkov-Merritt DF : wc=1 isotropic velocity distr.
+k3isot.dat	Osipkov-Merritt DF : wc=3
+k5an01.dat	Osipkov-Merritt DF : wc=5 anisotropic velocity distr.
+k5an02.dat	Osipkov-Merritt DF
+k5isot.dat	Osipkov-Merritt DF
+k7an01.dat	Osipkov-Merritt DF : wc=7
+k7isot.dat	Osipkov-Merritt DF
+plum.dat	Osipkov-Merritt DF: plummer (isotropic)
+devauc.dat	Osipkov-Merritt DF: De Vaulouleurs (isotropic)
+expmodel.inp	Example table for \fImkexphot\fP
+starlab/cube10.dyn	example starlab data (dyn): [mkcube -n 10 -s 123]
+
+archive     	Archive of interesting N-body simulations
+        	        (usually a symbolic link to a large local disk)
+.SH "SEE ALSO"
+snapshot(5NEMO), image(5NEMO), tsf(1NEMO)
+.PP
+\fIA comparison of eleven numerical integrations of the same gravitational 25 body
+problem\fP,
+Myron. Lecar, Bull.Astr. 3, 91. 1968 (in: Colloque sur le problem gravitationnel des N
+corps).
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+~/data   	standard repository area for data files.
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+24-jun-87	created  	PJT
+22-jul-90	IAU25 added  	PJT
+22-jul-91	added expmodel.inp	PJT
+23-nov-93	added devauc.dat	PJT
+12-apr-97	added starlab examples	PJT
+4-mar-99	added archive link to large archive	PJT
+.fi
