@@ -52,6 +52,7 @@
  *    		12-oct-01       new standard added FITS reference
  *              15-jan-03       write floating #'s in header w/ more precision PJT
  *              16-jan-03       warning if one of CROTA1/2 is missing      PJT
+ *               3-may-04       add fts_read_img_coord                     PJT
  *               4-may-04       conform more to fits standard              PJT
  *
  * Places where this package will call error(), and hence EXIT program:
@@ -485,6 +486,39 @@ int fts_xhead(fits_header *fh, stream instr,
 }
 
 
+
+char *fts_shead(fits_header *fh, string keyword)
+{
+  char key[9];
+  int i, j, ncards;
+  char *cp;
+  static char line[FTSLINSIZ+1];
+
+  sprintf(key,"%-8s",keyword);
+
+  ncards = fh->hlen / FTSLINSIZ;      /* number of cards to process */
+  for (i=0; i<ncards; i++) {          /* scan through all cards ... */
+    cp = &fts_buffer[i*FTSLINSIZ];    /* point to card */
+    if (strncmp(cp,key,8)==0) {       /* if key matches */
+      cp = &line[8];
+      if (*cp != '=') continue;
+      cp++;
+      while (*cp == ' ') cp++;
+      if (*cp == '\'' || *cp == '"') {
+	error("Cannot copy strings yet");
+      } else {
+	i=0;
+	while (*cp != ' ')
+	  line[i++] = *cp++;
+	line[i] = 0;
+	dprintf(0,"fts_shead: %s\n",line);
+	return line;
+      }
+    }
+  }
+  return NULL;
+}
+
 /*
  *   fts_lhead:   (lint) more sanity checks on a fits header
  *                This is not really required, but may prevent
@@ -1199,6 +1233,36 @@ int fts_phead(fits_header *fh, string *print)
     return 1;
 }
 
+
+/* 
+ *  fts_read_img_coord:  get the WCS  in the cfitsio style
+ *
+ */
+
+int fts_read_img_coord(
+		       fits_header *fh,            /* (i)  pointer to fits header structure */
+		       double *crval1, 
+		       double *crval2,
+		       double *crpix1, 
+		       double *crpix2,
+		       double *cdelt1, 
+		       double *cdelt2,
+		       double *rot,
+		       char *proj)
+{
+  *crval1 = fh->crvaln[0];
+  *crval2 = fh->crvaln[1];
+
+  *crpix1 = fh->crpixn[0];
+  *crpix2 = fh->crpixn[1];
+
+  *cdelt1 = fh->cdeltn[0];
+  *cdelt2 = fh->cdeltn[1];
+
+}
+
+
+
 /* 
  *  fts_ptable:   print a table extensions:   XTENSION="TABLE   "
  *					      XTENSION="BINTABLE"
