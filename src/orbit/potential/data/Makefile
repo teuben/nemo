@@ -30,7 +30,7 @@ SRCFILES= Makefile \
 	grow_plum.c grow_plum2.c \
 	harmonic.c harmonicf.f hernquist.c hom.c hubble.c kuzmindisk.c \
 	isochrone.c jaffe.c log.c mestel.c miyamoto.c nfw.c null.c \
-	op73.c piner94.f plummer.c plummer2.c rh84.c rotcur0.c rotcur.c teusan85.c triax.c \
+	op73.c pfenniger84.f piner94.f plummer.c plummer2.c rh84.c rotcur0.c rotcur.c teusan85.c triax.c \
 	twofixed.c plummer4.c vertdisk.c tidaldisk.c polynomial.c wada94.c
 OBJFILES=\
 	athan92.so \
@@ -40,7 +40,7 @@ OBJFILES=\
 	grow_plum.so grow_plum2.so \
 	harmonic.so harmonicf.so hernquist.so hom.so hubble.so kuzmindisk.so \
 	isochrone.so jaffe.so log.so mestel.so miyamoto.so nfw.so null.so \
-	op73.so piner94.so plummer.so plummer2.so rh84.so rotcur0.so rotcur.so teusan85.so triax.so \
+	op73.so pfenniger84.o piner94.so plummer.so plummer2.so rh84.so rotcur0.so rotcur.so teusan85.so triax.so \
 	twofixed.so plummer4.so vertdisk.so tidaldisk.so polynomial.so wada94.so
 
 BINFILES = 
