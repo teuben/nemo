@@ -1,4 +1,4 @@
-.TH TABHIST 1NEMO "22 December 1999"
+.TH TABHIST 1NEMO "7 May 2003"
 .SH NAME
 tabhist \- histogram plotter and gaussian fit for tabular data
 .SH SYNOPSIS
@@ -7,12 +7,14 @@ tabhist \- histogram plotter and gaussian fit for tabular data
 .SH DESCRIPTION
 \fItabhist\fP plots a histogram and computes the first 
 4 moments of a number of points, obtained
-from an column from an (ascii) file in tabular format. 
+from an (set of) column(s) from an (ascii) file in tabular format. 
 It calculates the mean, dispersion,
 skewness and kurtosis. It then plots the data in the form of a histogram,
 optionally with a 'best' gaussian fit and residuals. It can also plot
 a cumulative histogram of the data.
 .PP
+If multiple columns are used, they are appended to each other and
+treated like a single long column.
 If you need simple statistics for multiple columns, use \fBtabstat\fP 
 instead. It can also remove outliers and re-compute the statistics.
 .SH PARAMETERS
@@ -23,7 +25,8 @@ given:
 input file, in tabular format [no default].
 .TP
 \fBxcol=\fIcolumn\fP
-column from which the (X) values are taken [default \fB1\fP].
+column(s) from which the (X) values are taken. 
+Multiple columns can be given. [default \fB1\fP].
 .TP
 \fBxmin=\fIx_min\fP
 Minimum value along X-axis to include [default: minimum of datapoints].
@@ -120,5 +123,6 @@ xx-mar-88	V1.0: created          	PJT
 22-dec-99	V3.1a: optional median, fix N=1 reporting bug	PJT
 24-jan-00	documentation updated with program	PJT
 7-jun-01   	3.2: added nsigma, corrected man page options	PJT
+7-may-03	4.0: multiple columns allowed	PJT
 .fi
 

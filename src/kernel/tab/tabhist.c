@@ -32,6 +32,7 @@
  *	22-dec-99   3.1a: fix reporting bug when 1 point read	pjt
  *       3-jun-01   3.2 : added nsigma=                         pjt
  *	23-sep-01      b: ->nemo_file_lines
+ *       7-may-03   4.0 : allow multiple columns                pjt
  * 
  * TODO:
  *     option to do dual-pass to subtract the mean before computing
@@ -46,12 +47,13 @@
 #include <moment.h>
 #include <yapp.h>
 #include <axis.h>
+#include <mdarray.h>
 
 /**************** COMMAND LINE PARAMETERS **********************/
 
-string defv[] = {                /* DEFAULT INPUT PARAMETERS */
+string defv[] = {
     "in=???\n                     Input file name",
-    "xcol=1\n			  Column to use (or use: all)",
+    "xcol=1\n			  Column(s) to use",
     "xmin=\n			  In case minimum used (need both minmax)",
     "xmax=\n			  In case maximum used (need both minmax)",
     "bins=16\n			  Number of bins",
@@ -67,7 +69,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "cumul=f\n                    Override and do cumulative histogram instead",
     "median=t\n			  Compute median too (can be time consuming)",
     "nsigma=-1\n                  delete points more than nsigma",
-    "VERSION=3.2b\n		  23-sep-01 PJT",
+    "VERSION=4.0\n		  7-may-03 PJT",
     NULL
 };
 
@@ -79,10 +81,15 @@ string usage = "General tabular 1D statistics and histogram plotter";
 #define MAXHIST	1024
 #endif
 
+#ifndef MAXCOL
+#define MAXCOL 256
+#endif
+
 local string input;			/* filename */
 local stream instr;			/* input file */
 
-local int col;				/* histogram column number */
+local int ncol;                         /* number of columns used */
+local int col[MAXCOL];			/* histogram column number(s) */
 local real   xrange[2];			/* range of  histogram values */
 local int    nsteps;			/* number of divisions */
 
@@ -123,12 +130,8 @@ nemo_main()
 local void setparams()
 {
     input = getparam("in");
-    if (streq(getparam("xcol"),"all"))
-        col =  -1;
-    else
-        col = getiparam("xcol");
-
-    if (col < 0) error("doing all columns is not implemented yet");
+    ncol = nemoinpi(getparam("xcol"),col,MAXCOL);
+    if (ncol < 0) error("parsing error col=%s",getparam("col"));
     
     nsteps=getiparam("bins");
     if (nsteps > MAXHIST) 
@@ -161,7 +164,6 @@ local void setparams()
 
     nmax = nemo_file_lines(input,getiparam("nmax"));
     if (nmax<1) error("Problem reading from %s",input);
-    x = (real *) allocate(sizeof(real)*(nmax+1));
 
     nsigma = getdparam("nsigma");
 
@@ -172,17 +174,25 @@ local void setparams()
 
 local void read_data()
 {
-    real *coldat[2];
-    int   colnr[2], i;
-		
-    dprintf (2,"Reading datafile, col=%d\n",col);
+    real *coldat[MAXCOL];
+    int   i,j,k;
+    mdarray2 md2 = allocate_mdarray2(ncol,nmax);
 
-    coldat[0] = x;  colnr[0] = col;     /* set to read 1 column */
-    npt = get_atable(instr,1,colnr,coldat,nmax);        /* read it */
+    dprintf(0,"Reading %d columns\n",ncol);
+    for (i=0; i<ncol; i++)
+      coldat[i] = md2[i];
+    npt = get_atable(instr,ncol,col,coldat,nmax);        /* read it */
     if (npt == -nmax) {
     	warning("Could only read %d data",nmax);
     	npt = nmax;
     }
+    x = (real *) allocate(npt*ncol*sizeof(real));
+    for (i=0, k=0; i<ncol; i++)
+      for (j=0; j<npt; j++)
+	x[k++] = md2[i][j];
+    npt *= ncol;
+    free_mdarray2(md2,ncol,nmax);
+
     minmax(npt, x, &xmin, &xmax);
     if (Qauto) {
 	xrange[0] = xmin;
@@ -205,7 +215,7 @@ local void histogram(void)
 	Moment m;
 
 	dprintf (0,"read %d values\n",npt);
-	dprintf (0,"min and max value in column %d: [%g : %g]\n",col,xmin,xmax);
+	dprintf (0,"min and max value in column(s)  %d: [%g : %g]\n",col[0],xmin,xmax);
 	if (!Qauto) {
 	    xmin = xrange[0];
 	    xmax = xrange[1];
