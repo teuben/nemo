@@ -1,0 +1,67 @@
+
+# Source this file to install and build NEMO from scratch.
+#
+# See also approach in other 'manybody' modules, e.g. starlab, partiview
+#
+# Within NEMO see also 'src/scripts/quickps' and 'src/scripts/bootstrap'
+# for other approaches we used to have.
+#
+# 25-jul-01  Peter Teuben		created
+
+rm -f install.log >& /dev/null
+touch install.log
+
+set stat = 0
+echo \(Sending output to install.log\)
+
+    echo Running configure
+    configure >>& install.log
+    if ($status) then
+	@ stat++
+    endif
+    echo '++++++++++++++++++++++++++++++++++++++++' >>& install.log
+
+echo Initializing NEMO environment
+source nemo_start >>& install.log
+if ($status) then
+    @ stat++
+endif
+echo '++++++++++++++++++++++++++++++++++++++++' >>& install.log
+
+
+    echo Installing configuration files
+    make dirs config_extra scripts >>& install.log
+    if ($status) then
+	@ stat++
+    endif
+    echo '++++++++++++++++++++++++++++++++++++++++' >>& install.log
+
+
+source NEMORC.local >>& install.log
+if ($status) then
+    @ stat++
+endif
+rehash
+echo '++++++++++++++++++++++++++++++++++++++++' >>& install.log
+
+echo Building NEMO \(this may take a few minutes\)...
+(cd src; make clean install) >>& install.log
+if ($status) then
+    @ stat++
+endif
+rehash
+echo '++++++++++++++++++++++++++++++++++++++++' >>& install.log
+
+echo Building some sample exectuables by running testsuite:
+
+src/scripts/testsuite -b >>& install.log
+
+    echo "Note: Although your current shell now has the NEMO environment loaded,"
+    echo "      new shells will not have NEMO pre-loaded. You would need to add"
+    echo "      the following command/alias to your .cshrc (or equivalent) file:"
+    echo "                   source $NEMO/nemo_start"
+
+else
+    echo Install failed: stat = $stat
+endif
+
