@@ -1,0 +1,35 @@
+.TH MKLIB 8NEMO "26 November 1989"
+.SH NAME
+mklib \- update main NEMO library
+.SH SYNOPSIS
+.PP
+\fBmklib [\fIobject-files\fP]
+.SH DESCRIPTION
+\fBmklib\fP checks if the main NEMO library needs to be updated
+with modules from it's dependancies. If arguments are given,
+they are assumed to be object files (.o files)
+to be added/replaced to the main NEMO library using \fIar(1)\fP.
+.PP
+\fBmklib\fP is really a system managers utility, and should
+not be executed by a random user at random times. \fBmklib\fP
+does however utilitize a simple file locking system.
+.SH BUGS
+The dependancies are still hardwired in 
+the \fI$NEMO/src/nemo/lib/Makefile\fP. 
+.SH "SEE ALSO"
+mkbin(8NEMO), addlib(8NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +3.0i
+$NEMO/src/nemo/lib	sources
+$NEMOLIB/libNEMO.a	main NEMO library
+$NEMOLIB/lock-mklib	lockfile preventing multiple updates
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1i +4i
+1-Aug-89	V1.0: created            	PJT
+26-nov-89	V1.1: NEMOLIB env.var.now used   	PJT
+.fi

@@ -1,0 +1,36 @@
+.TH MKBIN 8NEMO "26 November 1989"
+.SH NAME
+mkbin \- compile and link a NEMO program
+.SH SYNOPSIS
+.PP
+\fBmkbin \fIprogram-name\fP [\fImake-options\fP]
+.SH DESCRIPTION
+\fBmkbin\fP compiles a NEMO program using a standard target
+in a Makefile. The argument \fIprogram-name\fP must not
+contain an extension, and there must exist a single
+source file \fIprogram-name.c\fP on which the program
+depends.
+.PP
+All remaining arguments on the commandline are treated
+as options to the make call. Passing of arguments to
+make is done through an assumed macro substitution
+mechanisme of the form \fIMACRO=new-name\fP. This
+feature  may not be present on all make implementations.
+.PP
+The linking is done with two libraries, which are in
+make MACRO names LIBNEMO and LIBYAPP. They default to
+$NEMOLIB/libNEMO.a and an empty string.
+.SH "SEE ALSO"
+mklib(8NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +3.0i
+$NEMOLIB/libNEMO.a	main NEMO library
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1i +4i
+26-nov-89	V1.0: doc created          	PJT
+.fi
