@@ -184,7 +184,7 @@ local proc load_potential(string fname, string parameters, string dataname, char
     /*
      * changed code 17/05/02 WD
      *
-     * after finding the .o file, we still need to find the proper 
+     * after finding the .so file, we still need to find the proper 
      * routine to link with. This is controlled by the type.
      * if type = 'r',  we look for "potential" and restore to 
      *                 "potential_double" if no "potential" found
@@ -223,8 +223,9 @@ local proc load_potential(string fname, string parameters, string dataname, char
     /* routines that have embedded _ in their name.... we're not catching */
     /* those here yet !!!                                                 */
     /* e.g.  g77 options:  -fno-underscoring and -fno-second-underscore   */
+    /* will fix this problem                                              */
     if (pot==NULL) {
-      error("Could not find a suitable potential in %s",fname);
+      error("Could not find a suitable potential type %c in %s",type,fname);
       return NULL;
     }
 
