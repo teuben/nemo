@@ -1,7 +1,12 @@
 Utilities for the cmhog program; you really should be in touch with the
 author before using these. The old/original copy lives/d in 
 $NEMO/usr/pjt/cmhog, and has been moved here in the 2.5.3 release
-(January 5, 2000)
+(January 5, 2000).
+
+The actual released code is available as a module 'cmhog2' under the
+same CVS server where you obtained NEMO from. Please be in touch with
+the author(s), as this code differs from the original 'cmhog' 1995 
+version, which probably have not been well documented.
 
 	peter
 Makefile
