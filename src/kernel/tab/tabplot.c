@@ -288,6 +288,10 @@ read_data()
         colnr[k]  = ycol[j];
         coldat[k] = y[j];
     }
+
+    /* could also find out if any columns duplicated, and
+       replace them with pointers */
+
     npt = get_atable(instr,nxcol+nycol,colnr,coldat,nmax);    /* get data */
     if (npt < 0) {
     	npt = -npt;
