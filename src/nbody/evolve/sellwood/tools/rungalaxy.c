@@ -5,6 +5,9 @@
  *  which a new 'galaxy.dat' file will be written, and in which
  *  galaxy will be run. The 'galaxy' program is allowed to be in the
  *  unix PATH
+
+ *	24-jun-1997		written
+ *	18-jul-2001		default is galaxy.exe
  *
  * Todo:  incoorporate some kind of snap2ini script in the code.
  */
@@ -24,9 +27,9 @@ string defv[] = {
     "dtout=0.5\n     time between particle outputs",
     "dtlog=0.1\n     time between integral checks",
     "tstop=1.0\n     end time",
-    "grid=33,33,33\n number of grid cells in (x,y,z,)",
-    "exe=galaxy\n    name of GALAXY executable",
-    "VERSION=1.1\n   24-jun-97 PJT",
+    "grid=33,33,33\n  number of grid cells in (x,y,z,)",
+    "exe=galaxy.exe\n name of GALAXY executable",
+    "VERSION=1.2\n    18-jul-01 PJT",
     NULL,
 };
 
