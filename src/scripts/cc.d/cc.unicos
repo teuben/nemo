@@ -1,0 +1,3 @@
+#! /bin/csh -f
+#  Cray C compiler 3.0 release
+/bin/cc -I $NEMOINC -L $NEMOLIB -D unicos -D STUB $*
