@@ -1,0 +1,56 @@
+.TH SNAPSHIFT 1NEMO "15 Mar 1995"
+.SH NAME
+snapshift \- shifts the phase space coordinates of an N-body system
+.SH SYNOPSIS
+.PP
+\fBsnapshift in=\fPsnap_in \fBout=\fPsnap_out [parameter=value]
+.SH DESCRIPTION
+This program shifts the coordinates of all the particles 
+in phase space. Position and velocity are treated separately
+however. 
+.PP 
+Note: The shifted coordinates is added to the existing
+coordinates unless the \fBmode\fP keyword is set to \fBadd\fP
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 20
+\fBin=\fIin-file\fP
+input file, in \fIsnapshot(5NEMO)\fP format [no default]
+.TP
+\fBout=\fIout_file\fP
+output file,  in \fIsnapshot(5NEMO)\fP format [no default]
+.TP
+\fBrshift=\fIx,y,z\fP
+The shift in position space [default: \fB0,0,0\fP].
+.TP
+\fBvshift=\fIu,v,w\fP
+The shift in velocity space [default: \fB0,0,0\fP].
+.TP
+\fBtimes=\fItime-ranges\fP
+Only snapshots with time values within \fItimes-ranges\fP, which is
+of the form \fBts[:te],...\fP, will be 
+copied. [default: \fBall\fP].
+.TP
+\fBmode=add|+|sub|-\fP
+Shift mode, if the shifted coordinates are to be added (+) or
+subtracted (-) to the particles coordinates.
+[Default: \fBadd\fP].
+.SH "SEE ALSO"
+snapstack(1NEMO), snapshot(5NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +3.0i
+~/src/pjt/nbody  	snapshift.c snapshift.1
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+24-Apr-87	V1.0: created          	PJT
+ 5-May-87	V1.1: checks and copies almost all Tag's and snapshots	PJT
+ 9-Mar-88	V1.2: data history added + debug output  	PJT
+ 6-jun-88	V2.0: new filestruct	PJT
+25-may-90	V2.3: added mode keyword	PJT
+.fi
