@@ -2,7 +2,7 @@
 /*
  *  nr_nllsqfit:   wrapper function that acts like GIPSY's nllsqfit, but
  *                 calls the NumRec routine mrqmin() and helpers instead
- *                 to do the Marquand-Levenbergh
+ *                 to do the Marquardt-Levenberg
  *
  *    16-jul-2002  Created                                  Peter Teuben
  *    17-jul-2002  added lfit() call for linear fits                 PJT
@@ -17,6 +17,8 @@
 
 static rproc old_f;
 static iproc old_df;
+
+static int old_xdim = -1;
 
 /* nr_func: for non-linear fits */
 
@@ -35,7 +37,26 @@ void nr_func(float x, float *a, float *y, float *dyda, int na)
   dprintf(2,"nr_func(%d): x=%g y=%g a[1]=%g a[2]=%g\n",na,x,*y,a[1],a[2]);
 }
 
-/* nr_func: for linear fits using lfit(), just returns the basis functions */
+/* nr_funcx:  for non-linear fits that also allow xdim > 1        */
+/*           needs patches NumRec routines mrqminx and mrqcofx   */
+
+void nr_funcx(float *x, float *a, float *y, float *dyda, int na)  
+{
+  static real old_x[MAXPAR], old_a[MAXPAR], old_d[MAXPAR];
+  static int i;
+
+  for (i=0; i<old_xdim; i++)
+    old_x[i] = x[i];
+  for (i=0; i<na; i++)
+    old_a[i] = a[i+1];
+  *y = (*old_f)(old_x, old_a, na);
+  (*old_df)(old_x, old_a, old_d, na);
+  for (i=0; i<na; i++)
+    dyda[i+1] = old_d[i];
+  dprintf(2,"nr_funcx(%d): x=%g y=%g a[1]=%g a[2]=%g\n",na,x,*y,a[1],a[2]);
+}
+
+/* nr_funcl: for linear fits using lfit(), just returns the basis functions */
 /*          it has a cumbersome way to get the basis functions, the way  */
 /*          lfit() wants them to our f/df functions that nllsqfit() wants them */
 
@@ -73,18 +94,18 @@ int nr_nllsqfit(
     iproc df)         /*  df/da */
 {
   float *x, *y, *sig, **covar, **alpha;
-  float *a, chisq, ochisq;
-  float lamda;
+  float *a, chisq, ochisq, lamda, fac;
   int i, k, itst, *ia;
   int itc = 0;
 
-  if (xdim != 1) error("nr: Cannot handle xdim > 1 yet (ever?)");
-  if (npar > MAXPAR) error("MAXPAR too small");
+  if (npar > MAXPAR) error("MAXPAR too small for npar");
+  if (xdim > MAXPAR) error("MAXPAR too small for xdim");
 
   old_f  = f;
   old_df = df;
+  old_xdim = xdim;
 
-  x   = fvector(1,ndat);            /* allocate NumRec arrays and matrices */
+  x   = fvector(1,ndat*xdim);        /* allocate NumRec arrays and matrices */
   y   = fvector(1,ndat);
   sig = fvector(1,ndat);
   covar = fmatrix(1,npar,1,npar);
@@ -93,13 +114,14 @@ int nr_nllsqfit(
   ia = ivector(1,npar);
 
   for (i=0; i<ndat; i++) {          /* copy our input data into NumRec ones */
-    x[i+1] = xdat[i];
     y[i+1] = ydat[i];
     if (wdat)
       sig[i+1] = wdat[i];
     else
       sig[i+1] = 1.0;
   }
+  for (i=0; i<ndat*xdim; i++)
+    x[i+1] = xdat[i];
   for (i=0; i<npar; i++) {
     a[i+1] = fpar[i];
     ia[i+1] = mpar[i];
@@ -108,10 +130,12 @@ int nr_nllsqfit(
   if (lab > 0.0) {
     lamda = -1;
     dprintf(1,"MRQMIN\n");
-    mrqmin(x,y,sig,ndat, a,ia,npar, covar,alpha,&chisq,nr_func,&lamda);
+    mrqminx(x,xdim,y,sig,ndat, a,ia,npar, covar,alpha,&chisq,nr_funcx,&lamda);
   } else { 
-    warning("nr_nllsqfit: testing linear fit");
+    if (xdim != 1) error("Cannot do linear fit with xdim=%d",xdim);
+    warning("nr_nllsqfit: testing linear fit using lfit");
     lfit(x,y,sig,ndat, a,ia,npar, covar,&chisq,nr_funcl);
+    dprintf(0,"chisq=%g\n",chisq);
   }
   k=1;
   itst=0;
@@ -122,7 +146,7 @@ int nr_nllsqfit(
     dprintf(1,"\n");
     k++;
     ochisq=chisq;
-    mrqmin(x,y,sig,ndat, a,ia,npar, covar,alpha,&chisq,nr_func,&lamda);
+    mrqminx(x,xdim,y,sig,ndat, a,ia,npar, covar,alpha,&chisq,nr_funcx,&lamda);
     itc++;
     if (chisq > ochisq)
       itst=0;
@@ -131,7 +155,7 @@ int nr_nllsqfit(
     if (itst < 4) continue;
     /* reached convergence, reset lamda=0 to get covar */
     lamda=0.0;
-    mrqmin(x,y,sig,ndat, a,ia,npar, covar,alpha,&chisq,nr_func,&lamda);
+    mrqminx(x,xdim,y,sig,ndat, a,ia,npar, covar,alpha,&chisq,nr_funcx,&lamda);
     itc++;
     dprintf(1,"Uncertainties:\n");
     for (i=0;i<npar;i++) dprintf(1,"%9.4f",sqrt(covar[i+1][i+1]));
@@ -139,8 +163,14 @@ int nr_nllsqfit(
     break;
   }
 
+  if (wdat)
+    fac = 1;
+  else {
+    fac = sqrt(chisq/(ndat-npar));
+  }
+
   for (i=0;i<npar;i++) {                /* copy info back to our arrays */
-    epar[i] = sqrt(covar[i+1][i+1]);
+    epar[i] = fac * sqrt(covar[i+1][i+1]);
     fpar[i] = a[i+1];
   }
 
@@ -148,7 +178,7 @@ int nr_nllsqfit(
   free_fmatrix(covar,1,npar,1,npar);
   free_fvector(sig,1,ndat);
   free_fvector(y,1,ndat);
-  free_fvector(x,1,ndat);
+  free_fvector(x,1,ndat*xdim);
   free_ivector(ia,1,npar);
 
   return itc;                       /* return number of iterations */
