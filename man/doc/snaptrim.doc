@@ -1,0 +1,22 @@
+%N snaptrim
+%D cut a snapshot file down to size
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man snaptrim' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	input file name [???]
+%A out
+	output file name [???]
+%A times
+	time range to scan through [all]
+%A partcyc
+	keep one in partcyc particle frames [1]
+%A diagcyc
+	keep one in diagcyc diagnostics [1]
+%A amnesia
+	if true, do not output history, etc [false]
+%A checkall
+	must it check all snapshots [false]
+%A VERSION
+	5-mar-98 PJT [1.6]
