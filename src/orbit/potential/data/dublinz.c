@@ -9,8 +9,13 @@
 
 /*CTEX
  *  {\bf potname=dublinz
- *       potpars={\it $\Omega$},r0,r1,v1,dvdr,s,h}
+ *       potpars={\it $\Omega,r_0,r_1,v_1,dvdr,s,h$}}
  *	 
+ * Forces defined by a double linear rotation curve defined by
+ * ($r_1,v_1$) and a gradient $dvdr$ between $r_0$ and $r_1$.
+ * As in  {\bf flatz} (from which this one is derived), the 
+ * potential is quasi harmonic in $Z$ (linear forces), 
+ * with radial scalelength $h$ and scale height $s$
  */
  
 

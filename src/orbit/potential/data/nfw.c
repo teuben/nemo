@@ -25,6 +25,20 @@
  * 0.1   18-nov-2002    converted from C++ to C                           WD   |
  *                                                                             |
  *----------------------------------------------------------------------------*/
+
+/*CTEX
+ *
+ * The NFW (Navarro,Frank \& White) density is given by
+ *
+ * $$
+ *    \rho = {  M_0  \over { r (r+a)^2}}
+ * $$
+ *
+ * and the potential by
+ * $$
+ *     \Phi = -4 \pi M_0 { \ln{(1+r/a)} \over r }
+ * $$
+ */
 #include <stdinc.h>
 static double a,ia,fac;
 

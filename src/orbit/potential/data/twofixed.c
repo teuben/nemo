@@ -12,6 +12,19 @@
  *      19-sep-04   float/double
  *
  */
+
+/*CTEX
+ *	{\bf potname=twofixed
+ *       potpars={\it $\Omega,M_1,x_1,y_1,z_1,M_2,x_2,y_2,z_2$}}
+ *
+ *
+ * This potential is defined by two fixed points, with different masses
+ * and positions. Orbits in this potential exhibit a number of interesting
+ * properties. One well known limit is the {\tt stark problem}, where one
+ * of the two bodies is far from the other and near-circular orbits near
+ * the central particles are studied. Another is the limit or two particles
+ * near to other and orbits that circumscribe both particles.
+ */
  
 #include <stdinc.h>
 #include <potential_float.h>

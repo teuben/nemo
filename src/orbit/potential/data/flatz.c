@@ -11,7 +11,12 @@
 
 /*CTEX
  *  {\bf potname=flatz
- *       potpars={\it $\Omega$},r0,v0,s,h}
+ *       potpars={\it $\Omega,r_0,v_0,s,h$}}
+ *
+ * forces defined by a rotation curve that is linear to 
+ * $(r_0,v_0)$ and flat thereafter and quasi harmonic in $Z$,
+ * with radial scalelength $h$ and scale height $s$.
+ * See also {\bf dublinz} for a variation on this theme.
  *	 
  */
  

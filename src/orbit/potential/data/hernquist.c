@@ -15,8 +15,8 @@
  *  {\bf potname=hernquist
  *       potpars={\it $\Omega,M,r_c$}}
  *
- * Hernquist potential (ApJ, 356, pp.359, 1990) is a special $\gamma=1$ case
- * of Dehnen potential. The potential is given by:
+ * The Hernquist potential (ApJ, 356, pp.359, 1990) is a special $\gamma=1$ case
+ * of the Dehnen potential. The potential is given by:
  * $$
  *     \Phi = - { M \over  {(r_c+r)}}
  * $$

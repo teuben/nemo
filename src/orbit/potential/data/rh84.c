@@ -20,6 +20,20 @@
 /*CTEX
  *  {\bf potname=rh84
  *       potpars={\it $\Omega,B,a,A,r_0,i_0,j$}}
+ *  
+ *
+ *  This 2D spiral and bar potential was used by Robert and collaborators
+ *  in the 70s and 80s.
+ *  For counterclockwise streaming, this spiral is a trailing
+ * spiral when the pitch angle ($i_0$) is positive.
+ * Within a radius $r_0$ the potential becomes barlike, with
+ * the bar along the X axis.
+ * At large radii the spiral is logarithmic.
+ * References:
+ *
+ *		Roberts \& Haussman (1984: ApJ 277, 744) 
+ *
+ *	        Roberts, Huntley \& v.Albada (1979: ApJ 233, 67)
  */
  
 

@@ -15,6 +15,15 @@
  *  {\bf potname=rotcur
  *       potpars={\it $\Omega$}
  *	 potfile={\it table(5NEMO)}}
+ *
+ * The forces returned are the axisymmetric forces as defined by
+ * a rotation curve as defined by a table given from an ascii table.
+ * The potential is not computed, instead the interpolated rotation
+ * curve is returned in as the potential value.
+ *
+ * This version can only compute one version; i.e.
+ * on re-entry of inipotential(), old versions are lost.
+ *  
  */
  
 

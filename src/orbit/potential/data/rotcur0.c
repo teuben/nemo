@@ -8,8 +8,12 @@
 
 /*CTEX
  *  {\bf potname=rotcur0
- *       potpars={\it $\Omega$},r0,v0}
+ *       potpars={\it $\Omega,r_0,v_0$}
  *	 
+ * The forces returned are the axisymmetric forces as defined by
+ * a linear-flat rotation curve as defined by the turnover point $r_0,v_0$.
+ * The potential is not computed, instead the interpolated rotation
+ * curve is returned in as the potential value.
  */
  
 

@@ -10,7 +10,7 @@
 * The following three density models are available                             *
 *                                                                              *
 * 1. thin disk:                                                                *
-*                                                                              *
+*
 * rho(z) = Sig * delta(z)                                                      *
 *                                                                              *
 * 2. exponential disk:                                                         *

@@ -10,6 +10,8 @@
 
  /*CTEX
  *  {\bf potname=triax}
+ * 
+ * A growing bi/triaxial potential
  */
 
 

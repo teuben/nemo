@@ -17,7 +17,7 @@
  * $$
  * \Phi = - {  G M \over {\sqrt{r^2 + (a+{|z|})^2}}}
  * $$
- * and corresponding surface brightness (check units)
+ * and corresponding surface brightness ({\it check units})
  * $$
  * \Sigma = {  {a M} \over {2 \pi {(a^2 + r^2)}^{-3/2}}}
  * $$

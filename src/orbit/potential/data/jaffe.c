@@ -8,8 +8,8 @@
  *	{\bf potname=jaffe
  *       potpars={\it $\Omega,M,r_c$}}
  *
- * Jaffe potential (BT, pp.237, see also MNRAS 202, 995 (1983))),
- * special $\gamma=2$ case of Dehnen potential.
+ * The Jaffe potential (BT, pp.237, see also MNRAS 202, 995 (1983))),
+ * is another special $\gamma=2$ case of the Dehnen potential.
  *
  * $$
  *    \Phi = - {  M \over r_c}  \ln{

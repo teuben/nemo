@@ -9,7 +9,9 @@
  *    {\bf potname=log
  *       potpars={\it $\Omega,M_c,r_c,q$}} 
  *
- * Logarithmic Potential (BT, pp.45, eq. 2.54 and eq. 3.77
+ * The Logarithmic Potential (BT, pp.45, eq. 2.54 and eq. 3.77) has
+ * been often used in orbit calculations because of its flat rotation
+ * curve. The potential is given by
  *
  * $$
  *    \Phi = {1\over 2} v_0^2

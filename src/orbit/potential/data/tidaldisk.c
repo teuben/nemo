@@ -4,76 +4,76 @@
 *                                                                              *
 * copyright by Walter Dehnen 2001                                              *
 *                                                                              *
-********************************************************************************
-*                                                                              *
-* Tidal field exerted by a (plane-parallel) stellar disk on a cluster passing  *
-* through with constant vertical velocity.                                     *
-* Useful for simulations of disk-shocking of, say, globular clusters           *
-*                                                                              *
-* The following three density models are available                             *
-*                                                                              *
-* 1. thin disk:                                                                *
-*                                                                              *
-* rho(z) = Sig * delta(z)                                                      *
-*                                                                              *
-* 2. exponential disk:                                                         *
-*                                                                              *
-*           Sig        -|z|                                                    *
-* rho(z) = ----- * exp ----                                                    *
-*           2*h          h                                                     *
-*                                                                              *
-* 3. sech^2 disk:                                                              *
-*                                                                              *
-*           Sig        2  z                                                    *
-* rho(z) = ----- * sech  ---                                                   *
-*           4*h          2*h                                                   *
-*                                                                              *
-* Parameters (to be given by potpars=...) are:                                 *
-*                                                                              *
-* par[0] = not used (reserved for pattern speed in NEMO)                       *
-* par[1] = h    scale-height  par[1] = 0 -> thin disk                          *
-*                             par[1] > 0 -> vertically exponential disk        *
-*                             par[1] < 0 -> sech^2 disk with h=|par[1]|        *
-* par[2] = Sig  disk surface density                                           *
-* par[3] = Vz   constant vertical velocity of cluster center                   *
-* par[4] = Z0   cluster center z-position at t=0                               *
-* par[5] = add  boolean: add tidal potential or not?                           *
-*                                                                              *
-* We always assume G=1.                                                        *
-*                                                                              *
-********************************************************************************
-*                                                                              *
-* If you want to include the acceleration of the disk on the cluster as a      *
-* whole, rather than assume a constant velocity, use vertdisk.c                *
-*                                                                              *
-********************************************************************************
-*                                                                              *
-* Some words on the mechanics                                                  *
-* ===========================                                                  *
-*                                                                              *
-* Assume that the plane-parallel disk potential and force are given by         *
-*                                                                              *
-* (1)    Phi(Z)  and  F(Z) = -Phi'(Z).                                         *
-*                                                                              *
-* Then, the tidal force exerted on a star at position z w.r.t. to cluster      *
-* center, which in turn is at absolute height Zc = Z0 + t Vz, is simply        *
-*                                                                              *
-* (2)    F_t(z) = F(Zc+z) - F(Zc).                                             *
-*                                                                              *
-* Integrating this from z=0 to z gives the associated tidal potential as       *
-*                                                                              *
-* (3)    Phi_t(z) = Phi(Zc+z) - Phi(Zc) + z * F(Zc).                           *
-*                                                                              *
-* Whenever the tidal force & potential are desired at a new time t, we         *
-* pre-compute Zc and the plane-parallel potential and force at Z=Zc.           *
-* Note that when both Zc and Zc+z are outside of the mass of the disk (and Z=0 *
-* is not between them), both tidal force and potential vanish identically.     *
-* The standard treatment of tidal forces corresponds to approximating (2) by   *
-* F(Zc) + z * F'(Zc). This method, however, breaks down for disks that are     *
-* thin compared to the cluster, while our method is always valid, even for a   *
-* razor thin disk.                                                             *
-*                                                                              *
-******************************************************************************/
+*******************************************************************************/
+/*CTEX
+*                                                                              
+* Tidal field exerted by a (plane-parallel) stellar disk on a cluster passing  
+* through with constant vertical velocity.                                     
+* Useful for simulations of disk-shocking of, say, globular clusters           
+*                                                                              
+* The following three density models are available                             
+*                             
+* 1. thin disk:               
+*                             
+* $$                                                                             
+* \rho(z) = \Sigma * \delta(z)
+* $$                                                                             
+*                                                                              
+* 2. exponential disk:                                                         
+*
+* $$                                                                             
+* \rho(z) = {\Sigma \over {2h}} \exp{ { -|z|} \over h}
+* $$
+*   
+* 3. sech$^2$ disk:                                                       
+*
+* $$                                                                    
+*  \rho(z) = {\Sigma \over {4h}} sech^2{ { z \over {2h}}}
+* $$                                                                    
+*                                                                       
+* Parameters (to be given by potpars=...) are:                         
+* \begin{verbatim}
+* par[0] = not used (reserved for pattern speed in NEMO)               
+* par[1] = h    scale-height  par[1] = 0 -> thin disk                  
+*                             par[1] > 0 -> vertically exponential disk
+*                             par[1] < 0 -> sech$^2$ disk with h=|par[1]|
+* par[2] = Sig  disk surface density                        
+* par[3] = Vz   constant vertical velocity of cluster center
+* par[4] = Z0   cluster center z-position at t=0     
+* par[5] = add  boolean: add tidal potential or not? 
+* \end{verbatim}
+*
+* We always assume G=1.
+*
+* If you want to include the acceleration of the disk on the cluster as a      
+* whole, rather than assume a constant velocity, use vertdisk.c                
+*
+* Some words on the mechanics                         
+*
+* Assume that the plane-parallel disk potential and force are given by         
+* $$                                                                             
+*     \Phi(Z)  and  F(Z) = -\Phi'(Z).                                         
+* $$                                                                             
+* Then, the tidal force exerted on a star at position z w.r.t. to cluster      
+* center, which in turn is at absolute height Zc = Z0 + t Vz, is simply        
+* $$                                                                             
+*     F_t(z) = F(Zc+z) - F(Zc).                                             
+* $$                                                                             
+* Integrating this from z=0 to z gives the associated tidal potential as       
+* $$                                                                             
+*     \Phi_t(z) = \Phi(Zc+z) - \Phi(Zc) + z * F(Zc).                           
+* $$                                                                             
+* Whenever the tidal force \& potential are desired at a new time t, we         
+* pre-compute $Zc$ and the plane-parallel potential and force at $Z=Zc$.
+* Note that when both $Zc$ and $Zc+z$ are outside of the mass of the disk (and 
+* $Z=0$
+* is not between them), both tidal force and potential vanish identically.     
+* The standard treatment of tidal forces corresponds to approximating (2) by   
+* $F(Zc) + z * F'(Zc)$. This method, however, breaks down for disks that are     
+* thin compared to the cluster, while our method is always valid, even for a
+* razor thin disk.
+*/
+
 #include "vertdisk.h"
 
 local double Vz  = 1.0;                     /* vertical v of cluster center   */
