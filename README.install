@@ -1,9 +1,21 @@
+Installation overview:
+----------------------
+
+The aim of easing the installation in NEMO V3.x was to following that
+of most of GNU utilities, by using autoconf. This would basically
+be a 'configure;make;make install' except that NEMO does install
+binaries in some directory like /usr/local/bin, and NEMO needs to
+bootstrap an environment via a NEMORC file. Hence the basic scheme
+is more like 'configure; source NEMORC; make'.  
+
+
 
 Preconditions to INSTALLATION
 =============================
 
 The default installation installs NEMO with a simple postscript-only
-graphics library (a.k.a. yapp_ps). You should probably consider selecting a
+graphics library (a.k.a. yapp_ps), unless it find the PGPLOT library
+in a reasonably location. Otherwise you should probably consider selecting a
 more versatile YAPP hookup with multiple output devices, e.g. PGPLOT.
 It allows transparent switching between X (multiple persistent as well
 as non-persistent), postscript, GIF, PPM etc.
@@ -43,7 +55,73 @@ c) Installing CFITSIO
 
    There is no code in NEMO yet using CFITSIO, NEMO has two internal
    routines (fits.c and fitsio.c) that handle all of the fits I/O.
-   However, we anticipate that CFITSIO will be used at some point.
+   However, we anticipate that CFITSIO will be used at some point, and if
+   so, the preferred way to install is not the way they recommend you
+   to do it. Their script configure is not quite autoconf 
+ 
+   One way is to embed it into NEMO, so when you configure cfitsio
+
+	configure --prefix=$NEMO/host/$NEMOHOST   
+
+   but that currently does not work yet, so do:
+
+	setenv FTOOLS_INCLUDE $NEMO/host/$NEMOHOST/include/cfitsio
+	setenv FTOOLS_LIB     $NEMO/host/$NEMOHOST/lib
+	mkdir $FTOOLS_INCLUDE 
+	make
+	make install
+
+
+   If you system has FTOOLS installed, possibly via the LHEASOFT package,
+   you can use their prefix, e.g.
+
+	nemo% configure --with-cfitsio-prefix=/opt/lheasoft/SunOS_5.6_sparc
+
+
+d) If you are on a system where you need to install NEMO and other packages,
+   but don't have root access to places like /usr/local, 
+   but plenty of disk-space, you can also host these packages inside of NEMO.
+
+   For this the directory $NEMO/host will be created during the installation
+   process, and each architecture that NEMO will support (the environment
+   variable $NEMOHOST will be the architecture name, e.g. i686-pc-linux-gnu)
+   Under $NEMO/host/$NEMOHOST you will then find the usual /usr/local hiearchy:
+	bin		-> NEMOBIN
+	include		-> ../include
+	info		
+	lib		-> NEMOLIB
+	man	
+	share
+   Packages that NEMO can use can then be installed under this hierarchy:
+
+	gsl:		configure --prefix=$NEMO/host/$NEMOHOST
+	hdf ?
+	pgplot ?
+	cfitsio
+	plplot
+
+   most of these use GNU autoconf and can be installed in the NEMO hierarchy with
+   the commands
+
+	configure ....
+	make
+	make install
+
+   and don't need root permission anymore.  
+
+   NEMO can then use these packages as follows:
+
+	configure --with-gsl-prefix=$NEMO/host/$NEMOHOST
+	configure --enable-gsl
+	configure --disable-gsl		(the default)
+
+?) if you ever want to protect your source code from 'duplicate' include files, and still
+use NEMO, how about
+	-I$NEMO/host/$NEMOHOST/include
+and use
+	#include <nemo/stdinc.h>
+
+no, that won't work, since stdinc.h will call for options.h, but it's now in nemo/options.h .....
 
 
 Brief overview of a Version 3.x INSTALLATION  
@@ -215,6 +293,8 @@ Results in /home/teuben/nemo_3.0.4/tmp/test22005/testsuite.log
 
      	- more consistent way between usage of variables in the NEMORC chain, 
 	  and the 'makedefs' list.
+
+
 
 
 	
