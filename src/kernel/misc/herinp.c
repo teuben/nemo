@@ -55,16 +55,22 @@
  *		20-jun-01: gcc3, const->hconst				   pjt
  *               3-nov-01: use NEMO's random numbers, not rand()           pjt
  *              10-nov-03: allow and handle "null" more gracefully         pjt
+ *              24-jan-04: STACKMAX check
  */
 
 #define BIGLOOP /* comment this our if you want MAXSHORT as largest count */
 
 /* if we use NEMO.H here, string.h seems to cause a linux parse problem */
-#include <stdio.h>
-#include <stdlib.h>
+#if 1
+# include <stdinc.h>
+#else
+# include <stdio.h>
+# include <stdlib.h>
+# include <string.h>
+# include <math.h>
+#endif
+
 #include <ctype.h>
-#include <string.h>
-#include <math.h>
 #include "gipsyc.h"
 
 
@@ -792,20 +798,22 @@ static void dcd_dump()  /* never used */
    } while ((opc != hlt)&&(c < maxfiecode));
 }
 
-#define stackmax 20
+#define STACKMAX 32
 
-static double stack[stackmax];
+static double stack[STACKMAX];
 
 static int sp;
 
 static void dcd_push(double r)
 {
-   stack[++sp] = r;
+  if (sp==STACKMAX) error("dcd_push: stack exceeded %d",STACKMAX);
+  stack[++sp] = r;
 }
 
 static double dcd_pop()
 {
-   return(stack[sp--]);
+  if (sp < 0) error("dcd_pop: empty stack");
+  return(stack[sp--]);
 }
 
 static double dcd_add(double arg1, double arg2)
@@ -1315,6 +1323,7 @@ static double dcd_ranp(double arg1)
 static void dcd_null(void)
 {
   have_null = 1;
+  warning("dcd_null: have a null");
 }
      
 static void dcd_evaluate(int q)
