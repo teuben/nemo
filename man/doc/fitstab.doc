@@ -1,0 +1,22 @@
+%N fitstab
+%D convert fits table or random groups to ascii table
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man fitstab' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input fits table file [???]
+%A hdu
+	Select which HDU file(s)? [0=all] [0]
+%A select
+	Output mode {info,data,header,row,group} [data]
+%A col
+	Column names to select [all] []
+%A row
+	Row numbers to select [all] []
+%A format
+	Format for each row to use [TFORMnnn] []
+%A maxrow
+	Max row numbers to select [20000]
+%A VERSION
+	30-sep-96 PJT [1.3]
