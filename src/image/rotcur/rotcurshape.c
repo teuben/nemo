@@ -17,6 +17,7 @@
  *              13-dec-02 : 1.0h: added power law rotation curve for Josh Simon  pjt
  *              30-jan-03 : 1.1: added error bars in V (unfinished)              pjt
  *              12-feb-03 : 1.1a: fixed residual field computation bug           pjt
+ *              19-mar-03 : 1.2  clean up weights map dens= if beam= not given   pjt
  *
  ******************************************************************************/
 
@@ -77,7 +78,7 @@ string defv[] = {
     "rotcur3=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur4=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur5=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
-    "VERSION=1.1a\n  12-feb-03 PJT",
+    "VERSION=1.2\n   19-mar-03 PJT",
     NULL,
 };
 
@@ -116,6 +117,7 @@ int    nparams = 0;             /* total number of parameters (5 + # for models)
 
 bool Qimage;                             /* input mode (false means tables are used) */
 bool Qrotcur;                            /* rotcur (rv) vs. velocity field (xyv) table mode */
+bool Qbeam;                              /* attempt to do beam correction */
 real  *xpos_vel, *ypos_vel, *vrad_vel, *verr_vel;   /* pointer to tabular information */
 real  *vsig_vel;                         
 int  n_vel = 0;                          /* length of tabular arrays */
@@ -815,28 +817,33 @@ stream  lunpri;       /* LUN for print output */
 	     toarcsec,dx);
     }
 
+    /*** WARNING: beam= and dens= are currently tied, if beam= used,
+	 the dens= is **also** used for beam smearing corrections,
+	 which is a largely untested feature of the code 
+    ***/
+    
     n = nemoinpr(getparam("beam"),beam,2);   /* get size of beam from user */
-    if (n==2 || n==1) {       /* OK, got a beam, now get density map ... */
-         if (n==1) beam[1] = beam[0];
-         if (Qdens) {
-            input = getparam("dens");
-            if (lunpri) fprintf(lunpri," density file        : %s  beam: %g %g\n",
-                                    input,beam[0],beam[1]);	
-            denstr = stropen(input,"r");
-    	    read_image(denstr,&denptr);
-	    strclose(denstr);
-	    warning("Using density map for weights now");
-         } else {
-            warning("beam defined, but no real beam correction used");
-            if (lunpri) fprintf(lunpri,"  beam: %g %g\n",beam[0],beam[1]);
-	    denptr = NULL;
-         }
-    } else {        /* no beam correction */
-         beam[1] = beam[0] = 0.0;
-         if (n!=0) warning("Parsing error beam=%s",getparam("beam"));
-         printf("No beam correction\n");
-         denstr = NULL;
-	 denptr = NULL;
+    if (n==2 || n==1) {
+      Qbeam = TRUE;
+      printf("With beam correction\n");
+      if (n==1) beam[1] = beam[0];               /* make circular beam */
+      if (lunpri) fprintf(lunpri,"  beam: %g %g\n",beam[0],beam[1]);
+    } else {
+      Qbeam = FALSE;
+      printf("No beam correction\n");
+      beam[1] = beam[0] = 0.0;
+      if (n!=0) warning("Parsing error beam=%s",getparam("beam"));
+    }
+    if (Qdens) {
+      input = getparam("dens");
+      if (lunpri) fprintf(lunpri," density file        : %s  beam: %g %g\n",
+			  input,beam[0],beam[1]);	
+      denstr = stropen(input,"r");
+      read_image(denstr,&denptr);
+      strclose(denstr);
+      warning("Using density map for weights now");
+    } else {
+      denptr = NULL;
     }
 
     *nring = nemoinpr(getparam("radii"),rad,ring+1);
@@ -1564,7 +1571,7 @@ int l,m;        /* grid coordinates w.r.t. 0,0 */
 {
     real d, vdif, dn[2];
 
-    if (denptr) {       /* beam-correction wanted ? */
+    if (Qbeam && denptr) {       /* beam-correction wanted ? */
         d = MapValue(denptr,l,m);
         dn[0] = (MapValue(denptr,l+1,m)-MapValue(denptr,l-1,m))/d/grid[0];
         dn[1] = (MapValue(denptr,l,m+1)-MapValue(denptr,l,m-1))/d/grid[1];
@@ -1662,7 +1669,7 @@ void vcor_c1(real *c,real *p,real *vd,real *dn)
     t[0]=sint2;                         /*  fill T  */
     t[1]=-sint1*cost1;
 
-    warning("Why does this loop i<1 ?? ");
+    /* warning("Why does this loop i<1 ?? "); */
     for (i=0; i<1; i++){        /* loop for calculating correction  */
         if (i==0) {
             fc=dn[i]*vc*sini1*bx2*r;     /*  factor  */
