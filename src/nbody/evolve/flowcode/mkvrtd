@@ -1,0 +1,44 @@
+#! /bin/csh -f
+#
+#	20-apr-96	created 	pjt
+#       12-sep-96       added the density for 'vrtd'
+
+if ($#argv != 2) then
+  echo "Usage: $0 hdf_input ccd_output"
+  echo "Creates vrtd input (ccd) file for flowcode"
+  exit 0
+endif
+
+set tmp=tmp$$
+set in=$1
+set out=$2
+
+if (-e $out) then
+  echo File $out already exists
+  exit 1
+endif
+
+# 							VR
+sdsfits in=$in out=$tmp.1 select=1 axis=0
+if ($status) goto bad
+# 							VT
+sdsfits in=$in out=$tmp.2 select=2 axis=0
+# 							DEN
+sdsfits in=$in out=$tmp.3 select=3 axis=0
+# 							RADIUS (a 1d map)
+sdsfits in=$in out=$tmp.4 select=1 axis=1 
+#							THETA (a 1d map)
+sdsfits in=$in out=$tmp.5 select=1 axis=2 
+#							catenate to one file
+foreach i (1 2 3 4 5)
+  fitsccd $tmp.$i -  error=1 >> $out
+end
+
+#							good cleanup
+    rm -f $tmp.*
+    exit 0
+
+#							bad cleanup
+bad:
+    rm -f $tmp.*
+    exit 1
