@@ -1,0 +1,16 @@
+DIR = src/kernel/fortran
+BIN = func
+NEED =$(BIN)
+
+help:
+	@echo $(DIR)
+need:
+	@echo $(NEED)
+
+clean: 
+	@echo Cleaning $(DIR)
+
+all:	$(BIN)
+
+func:
+	(make funcc; funcc)
