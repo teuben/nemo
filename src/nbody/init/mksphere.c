@@ -4,6 +4,7 @@
  *
  *	 6-sep-95       V1.0 toy, created for NHK video		pjt
  *       9-sep-01       gsl/xrandom
+ *      14-sep-03       toy model to test radius selections in power laws    PJT
  */
 
 
@@ -22,12 +23,13 @@ string  defv[] = {
     "nbody=???\n	      Number of particles",
     "radii=\n                 Radii in sphere",
     "density=\n               Associated densities at given radii",
+    "alpha=\n                 If give, rho=radius^{-alpha} power law",
     "seed=0\n                 Seed for the random number generator",
     "zerocm=t\n               Centrate snapshot (t/f)?",
     "rmin=\n                  minimum radius, if to override from radii",
     "rmax=\n                  maximum radius, if to override from radii",
     "headline=\n	      Verbiage for output",
-    "VERSION=1.0b\n           9-sep-01 PJT",
+    "VERSION=1.1\n            14-sep-03 PJT",
     NULL,
 };
 
@@ -37,11 +39,12 @@ string usage="construct an arbitrary spherical mass distribution";
 # define MAXTAB  1024
 #endif
 
-real rad[MAXTAB], den[MAXTAB], mass[MAXTAB], rmin, rmax;
+real rad[MAXTAB], den[MAXTAB], mass[MAXTAB], rmin, rmax, mmin, mmax, alpha;
 int ntab;
 
 local double mr(double);
 local Body *mkplummer(int , int , bool);
+local Body *mksphere(int , int , bool);
 
 extern double frandom(double, double, rproc);
 extern double xrandom(double, double);
@@ -55,28 +58,41 @@ nemo_main()
     stream  outstr;
     string  headline;
     char    hisline[128];
+    bool    Qalpha;
 
     nbody = getiparam("nbody");
     seed = init_xrandom(getparam("seed"));
     zerocm = getbparam("zerocm");
+    Qalpha = hasvalue("alpha");
 
     ntab = nemoinpr(getparam("radii"), rad, MAXTAB);
     if (ntab<0) error("Parsing error radii");
     if (ntab<2) error("Need at least two radii");
     rmin = hasvalue("rmin") ? getdparam("rmin") : rad[0];
     rmax = hasvalue("rmax") ? getdparam("rmax") : rad[ntab-1];
-    n = nemoinpr(getparam("density"), den, MAXTAB);
-    if (n<1) error("Need at least 1 value for density=");
-    if (n>ntab) warning("Last %d values of density= ignored",n-ntab);
-    if (n<ntab)
-        for (i=n; i<ntab; i++)  den[i] = den[i-1];
-    make_mass();
 
+    if (Qalpha) {
+      alpha = getdparam("alpha");
+      mmin = pow(rmin,3-alpha);
+      mmax = pow(rmax,3-alpha);
+      dprintf(0,"TESTING: alpha=%g rmin=%g rmax=%g (%g..%g)\n",
+	      alpha,rmin,rmax,mmin,mmax);
+    } else {
+      n = nemoinpr(getparam("density"), den, MAXTAB);
+      if (n<1) error("Need at least 1 value for density=");
+      if (n>ntab) warning("Last %d values of density= ignored",n-ntab);
+      if (n<ntab)
+        for (i=n; i<ntab; i++)  den[i] = den[i-1];
+      make_mass();
+    }
     dprintf(0,"seed=%d\n",seed);
 
     outstr = stropen(getparam("out"), "w");
 
-    btab = mkplummer(nbody, seed, zerocm);
+    if (Qalpha)
+      btab = mksphere(nbody, seed, zerocm);
+    else
+      btab = mkplummer(nbody, seed, zerocm);
     bits = (MassBit | PhaseSpaceBit | TimeBit);
     sprintf(hisline,"init_xrandom: seed used %d",seed);
     app_history(hisline);
@@ -124,6 +140,65 @@ local Body *mkplummer(int nbody, int seed, bool zerocm)
 	Vel(bp)[0] = 0.0;
 	Vel(bp)[1] = 0.0;
 	Vel(bp)[2] = 0.0;
+    }
+
+    if (zerocm) {       /* False for Masspectrum */
+        w_sum = 0.0;
+        CLRV(w_pos);
+        CLRV(w_vel);
+        for (i = 0, bp = btab; i < nbody; i++, bp++) {
+            w_sum = w_sum + 1.0;        /* all bodies same mass */
+            ADDV(w_pos, w_pos, Pos(bp));
+            ADDV(w_vel, w_vel, Vel(bp));
+        }
+        DIVVS(w_pos, w_pos, w_sum);
+        DIVVS(w_vel, w_vel, w_sum);
+        for (i = 0, bp = btab; i < nbody; i++, bp++) {
+            SUBV(Pos(bp), Pos(bp), w_pos);
+            SUBV(Vel(bp), Vel(bp), w_vel);
+        }
+    }
+
+    return btab; 
+}
+
+local Body *mksphere(int nbody, int seed, bool zerocm)
+{
+    int  i;
+    real  mtot, m;
+    real  radius;		/* absolute value of position vector      */
+    real  velocity;		/* absolute value of velocity vector      */
+    real  theta, phi;		/* direction angles of above vectors      */
+    real  x, y;		        /* for use in rejection technique         */
+    real  scalefactor;          /* for converting between different units */
+    real  inv_scalefactor;      /* inverse scale factor                   */
+    real  sqrt_scalefactor;     /* sqare root of scale factor             */
+    real  mrfrac;               /* m( rfrac )                             */
+    real  m_min, m_max;         /* mass shell limits for quiet=1          */
+    real   m_med;		/* mass shell value for quiet=2           */
+    real   w_sum;               /* temporary storage for c.o.m. calc      */
+    vector w_pos, w_vel;        /* temporary storage for c.o.m. calc      */
+    Body  *btab;                /* pointer to the snapshot                */
+    Body  *bp;                  /* pointer to one particle                */
+
+    btab = (Body *) allocate (nbody * sizeof(Body));
+
+    mtot = 0.0;
+    for (i = 0, bp=btab; i < nbody; i++, bp++) {
+      m = xrandom(mmin, mmax);
+      radius = pow(m, 1/(3-alpha));
+      theta = xrandom(-1.0, 1.0);
+      theta = acos(theta);
+      phi = xrandom(0.0, TWO_PI);
+      Pos(bp)[0] = radius * sin( theta ) * cos( phi );
+      Pos(bp)[1] = radius * sin( theta ) * sin( phi );
+      Pos(bp)[2] = radius * cos( theta );
+      
+      Mass(bp) = 1.0/ (real) nbody;
+      
+      Vel(bp)[0] = 0.0;
+      Vel(bp)[1] = 0.0;
+      Vel(bp)[2] = 0.0;
     }
 
     if (zerocm) {       /* False for Masspectrum */
