@@ -1,0 +1,64 @@
+.TH SNAPATLAS 1NEMO "8 April 2003"
+.SH NAME
+snapatlas \- tabulate a snapshot in ASCII atlas format
+.SH SYNOPSIS
+\fBsnapatlas\fP [parameter=value]
+.SH DESCRIPTION
+\fBsnapatlas\fP prints out a snapshot in \fIatlas(5NEMO)\fP
+format. As the atlas and this format are
+still in development, don't rely any programs on
+this yet. (april 2003)
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input file (in standard \fIsnapshot(5NEMO)\fP format). No default.
+.TP
+\fBtimes=\fP
+Times to select snapshot [all]   
+TP
+\fBoptions=\fP
+Things to output. For an atlas, this
+\fBshould\fP be \fBi,m,x,y,z,vx,vy,vz,phi,aux,key\fP (which is
+of course the default), but by using this keyword, you 
+\fBcan\fP change them.
+.TP
+\fBformat=\fP
+Format used to output floating point numbers [%.16e]
+..TP
+\fBheader=\fP
+Add header to output? [f]   
+.SH EXAMPLES
+Here is an example with a header and modified output format (to make it fit
+on this line) of a multi-snapshot (albeit with the same fake time) file:
+.nf
+
+   % mkspiral - 4 nmodel=2 | snapatlas - format=%g header=t
+
+.# i m x y z vx vy vz phi aux key 
+4
+0 
+0 0.25 -0.319825 -0.676624 0 0.48471 -0.229111 0 0 0 0 
+1 0.25 -0.259019 -0.304021 0 0.272079 -0.231805 0 0 0 0 
+2 0.25 -0.34059 0.38346 0 -0.321852 -0.28587 0 0 0 0 
+3 0.25 0.273086 0.183263 0 -0.169677 0.252841 0 0 0 0 
+ 
+4
+0 
+0 0.25 0.489699 0.694055 0 -0.461807 0.325833 0 0 0 0 
+1 0.25 0.281568 -0.905331 0 0.559667 0.174063 0 0 0 0 
+2 0.25 0.779421 -0.276075 0 0.186778 0.527316 0 0 0 0 
+3 0.25 0.103361 0.516519 0 -0.429855 0.0860186 0 0 0 0 
+.fi
+.SH SEE ALSO
+snapprint(1NEMO), snapshot(5NEMO)
+.SH FILES
+src/nbody/reduc/snapatlas.c
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+8-Apr-03	V1.0 Created	PJT
+.fi
