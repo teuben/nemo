@@ -34,6 +34,7 @@
  *                     b : fix old semi-autoscaling bug while fixing it for multicol
  *      31-dec-03  V2.6  : option to do layout first
  *      28-apr-04  V2.7  : added xbox, ybox= options as in snapplot
+ *       1-feb-05      a : fix xbin reporting error
  *
  */
 
@@ -90,11 +91,13 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "cursor=\n           Optional output file to retrieve cursor coordinates",
     "layout=\n           Optional input layout file",
     "first=f\n           Layout first or last?",
-    "VERSION=2.6\n	 31-dec-03 PJT",
+    "VERSION=2.7a\n	 1-feb-05 PJT",
     NULL
 };
 
 string usage = "general table plotter";
+
+string cvsid = "$Id$";
 
 /**************** GLOBAL VARIABLES ************************/
 
@@ -513,7 +516,7 @@ rebin_data (n,x,y, nbin,xbin, np, xp, yp,  xps, yps)
 int n, nbin, np;
 real *x, *y, *xbin, *xp, *yp, *xps, *yps;
 {
-    int    i, j, ip, iold=0, zbin=0;
+  int    i, j, ip, iold=0, zbin=0;
     real x0, x1, x2, y1, y2;
 
     dprintf(0,"Rebinning...n=%d nbin=%d np=%d\n",n,nbin,np);
@@ -522,10 +525,10 @@ real *x, *y, *xbin, *xp, *yp, *xps, *yps;
         xp[i] = xps[i] = yp[i] = yps[i] = NaN;      /* init (again) */
    
     for (i=0, ip=0; i<n-1; i++)		/* loop over all points */
-        if (x[i] < x[i-1])
-            ip++;              /* count unsorted data in 'ip' */
+      if (x[i+1] < x[i])
+	ip++;              /* count unsorted data in 'ip' */
     if (ip>0)
-        warning("%d out of %d datapoints are not sorted\n", ip, n);
+      warning("%d out of %d datapoints are not sorted: bad=%g < %g", ip, n);
 
     i = 0;                     /* point to original data (x,y) to be rebinned */
     iold = 0;
