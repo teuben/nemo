@@ -1,0 +1,44 @@
+.TH SNAPTIPSY 1NEMO "17 August 2000"
+.SH NAME
+snaptipsy \- convert a snapshot to tipsy binary format
+.SH SYNOPSIS
+.PP
+\fBsnaptipsy in=\fPsnap_in  [parameter=value]
+.SH DESCRIPTION
+\fBsnaptipsy\fP converts the data in a snapshot into a form which can
+be read by the TIPSY \fBloadb\fP command.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 20
+\fBin=\fIin-file\fP
+input file, in \fIsnapshot(5NEMO)\fP format [no default]
+.TP
+\fBout=\fIout-file\fP
+output file, in binary \fItipsy(5NEMO)\fP format [no default]
+.TP
+\fBtimes=\fItimes-string\fP
+Time values/intervals of which snapshots should be used. Default is
+empty string, which will only extract the first snapshot.
+.TP
+\fBmode=\fIdark|gas|star\fP
+.TP
+\fBswap=t|f\fP
+Swap bytes of data. This is needed if you want to produce
+standard (XDR, big endian) or native binary format.
+.SH BUGS
+This space left intentionally non-blank.
+.SH AUTHOR
+Tom Quinn
+.SH FILES
+.nf
+.ta +3.0i
+~/src/pjt/nbody     snaptipsy.c snaptipsy.1
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+15-Apr-94	V1.0: created          	TRQ
+19-aug-00	V1.2: fixed pad problem, added swap=	PJT
+.fi
+
