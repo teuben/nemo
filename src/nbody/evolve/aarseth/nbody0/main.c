@@ -9,6 +9,7 @@
  *	11-feb-98	V1.3a fixed that bad index bug in nbody0.f/c	PJT
  *	 6-jan-00       V1.3b changed to F77_FUNC macros	PJT
  *	21-jan-00	V1.4 added reset=t|f	PJT
+ *      21-feb-04       V1.5 protection for f2dot=0   PJT
  */
 
 #include <stdinc.h>
@@ -22,7 +23,7 @@ string defv[] = {
     "eps=0.05\n     Softening length",
     "reset=t\n      Reset timestep after datadump (debug) (t|f)",
     "options=\n     Optional output of 'step' into AUX",
-    "VERSION=1.4\n  21-jan-00 PJT",
+    "VERSION=1.5\n  21-feb-04 PJT",
     NULL,
 };
 
