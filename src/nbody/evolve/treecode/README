@@ -1,0 +1,7 @@
+
+This version of the treecode uses recursion, and many (most) fortran
+compilers do not support that. It used to work on the Cray, and with
+a special compile flag on the sun also (~1987)
+
+The later sun compilers have no recursion option.
+
