@@ -1,0 +1,46 @@
+.TH TABLINES 1NEMO "9 March 1999"
+.SH NAME
+tablines \- select lines from a file
+.SH SYNOPSIS
+\fBtablines\fP [parameter=value]
+.SH DESCRIPTION
+\fBtablines\fP selective copies lines from an input (ASCII) table.
+Selection is done by line numbers, 1 being the first line. Syntax
+follows the \fInemofie(1NEMO)\fP rules.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+input file. No default.
+.TP
+\fBout=\fP
+output fil. No default.
+.TP
+\fBselect=\fP
+lines to select     [all]
+.TP
+\fBcomment=t|f\fP
+Count comment lines too? [t]
+.TP
+\fBnmax=\fP
+Default max allocation of the linecount in a table from
+a pipe  [10000].
+.SH EXAMPLES
+To find the square root of any number \fIn\fP between 1 and 100:
+.nf
+    nemoinp 1:100:1 > t1
+    tabmath t1 t2 'sqrt(%1)' all
+    tablines t2 - select=\fIn\fP
+.fi
+.SH SEE ALSO
+awk(1), tabmath(1NEMO)
+.SH FILES
+src/kernel/tab
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+9-Mar-99	V0.9 Created 	PJT
+.fi
