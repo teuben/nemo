@@ -1,0 +1,40 @@
+.TH RVCSNAP 1NEMO "9 May 1994"
+.SH NAME
+rvcsnap \- convert Couchman's rvc files to snapshot format
+.SH SYNOPSIS
+\fBrvcsnap\fP \fBin=\fP\fIrvc_file\fP [parameter=value]
+.SH DESCRIPTION
+\fBrvcsnap\fP converts an binary file in \fIrvc(5NEMO)\fP format
+to single precision \fIsnapshot(5NEMO)\fP format. Most NEMO programs
+will be able to handle these data, if not, \fIcsf(1NEMO)\fP would
+have to be used to convert to double precision (see example below).
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input rvc file. No default.
+.TP
+\fBout=\fP
+Output snapshot file. No default.
+.TP 20
+\fBheadline=\fP
+Random verbiage added to the snapshot.
+.SH EXAMPLES
+First a series of \fIrvc(5NEMO)\fP is converted to \fIsnapshot(5NEMO)\fP 
+format,
+.PP
+.nf
+        % cat run1234/data/rv* | rvcsnap - - | snapplot - nxy=2,2
+        % cat run1234/data/rv* | rvcsnap - - |\
+		csf - - convert=f2d | snapplot - nxy=2,2
+.fi
+.SH SEE ALSO
+rvsnap(1NEMO), tabtos(1NEMO), rvc(5NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+9-may-94	V1.0 Created	PJT
+.fi
