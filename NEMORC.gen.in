@@ -36,6 +36,9 @@ if (1) then
   else
     setenv LD_LIBRARY_PATH ${NEMOLIB}
   endif
+  if ("$PGPLOT_DIR" != "$NEMOLIB") then
+    setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:$PGPLOT_DIR
+  endif
 endif
 
 
