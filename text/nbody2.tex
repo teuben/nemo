@@ -1,0 +1,662 @@
+\magnification=1200
+\font\big=cmr10 scaled \magstep2
+\vglue 3.0cm
+\hsize=6truein
+\vsize=8.5truein
+\centerline {\big NBODY2}
+\bigskip
+\bigskip
+\centerline {AHMAD--COHEN N-BODY CODE}
+\bigskip
+\centerline {Sverre J. Aarseth, Institute of Astronomy, Cambridge}
+\bigskip
+\bigskip
+\centerline {INTRODUCTION}
+\bigskip
+
+  This program is based on the direct integration method of A. Ahmad and L.
+ Cohen
+ in {\it J. Comp. Phys.} 12, 389, 1973.  The procedure has been modified
+ slightly
+ and the improvements are described in the 1985 book article on direct
+ methods for N-body simulations ({\it Multiple Time Scales}, eds.
+ Brackbill and Cohen).  This article also makes comparisons with the
+ standard polynomial method (program NBODY1).  The present version
+ does not contain regularization of close two-body encounters
+ and is therefore best suited for soft potentials, dissipative
+ effects (i.e. tidal fields or supernova mass loss) or a small number
+ of crossing times.  A regularized version of the AC method is also
+ available and is described in separate write-ups (programs NBODY4 and
+ NBODY5).
+
+  The program is written in FORTRAN IV and has been developed on the
+ IBM 370/165.  The integrator itself contains about 470 FORTRAN statements and
+ the whole package is about 1395 lines of EBCDIC code (the VAX
+ version is in ASCII code).  This includes the generation of initial
+ conditions, an output routine and general comment cards.  Logical units
+ 5 and 6 are used for input and output, respectively, whereas units
+ 1, 2 and 3 denote optional tape/disc facilities.
+
+  The alphanumerical list of all COMMON variables is given below.  Then follow
+ tables of input parameters, options and diagnostic output counters.  A brief
+ description of each routine is included.  Together with the algorithm write-up
+ and the internal comments this should provide an understanding of how the
+ program works and enable
+ some simple modifications to be made.  The last section contains a discussion
+ of the relevant input parameters.
+
+  Some saving of core storage may be achieved by overlaying different parts of
+ the program.  The routines can be arranged into segments as follows: (1) MAIN,
+ MYDUMP; (2) START, DATA; (3) MAINPT; (4) INTGRT.  Segment 1 is the root phase;
+ the other segments are formed by the linkage editor using appropriate
+ include statements naming the routines.
+
+  The present version contains sufficient allocation of COMMON variables for
+ integrating up to 2500 particles.  Modification to other systems is readily
+ achieved by a global edit, setting new values of NMAX and LMAX in
+ the PARAMETER statement which precedes COMMON.  Thus any value
+ of NMAX and LMAX can be specified without further changes.  The maximum
+ size of the neighbour list is discussed at the end.  The array
+ NLIST(500) should be large enough for N $<$ 10000 since its
+ membership is stabilized on NNBMAX (note
+ explicit tests on the membership at end of routine START and
+ just below label 4 of INTGRT).
+\bigskip
+\bigskip
+\centerline {COMMON VARIABLES}
+\medskip
+\hrule
+\medskip
+\settabs\+\indent&NSTEPNX\quad&\cr
+           \+&A&     General purpose working space. \cr
+           \+&BE&    Total energy.  BE(1)=initial, BE(2)=previous,
+ BE(3)=current. \cr
+           \+&BODY&    Mass of an individual particle. \cr
+           \+&CMR&     Centre of mass coordinates and scalar value. \cr
+           \+&CMRDOT&  Centre of mass velocity components and scalar value. \cr
+           \+&DELTAT&  Constant time interval for output. \cr
+           \+&DTLIST&  Interval for updating the time-step list. \cr
+           \+&D1&      First divided difference of the irregular force. \cr
+           \+&D1R&     First divided difference of the regular force. \cr
+           \+&D2&      Second divided difference of the irregular force. \cr
+           \+&D2R&     Second divided difference of the regular force. \cr
+           \+&D3&      Third divided difference of the irregular force. \cr
+           \+&D3R&     Third divided difference of the regular force. \cr
+           \+&EPS2&    Soft potential parameter (square is stored). \cr
+           \+&ETAI&    Time-step parameter for irregular force polynomial. \cr
+           \+&ETAR&    Time-step parameter for the regular force polynomial. \cr
+           \+&F&       One-half the total force at the last irregular step. \cr
+           \+&FDOT&    One-sixth the total force derivative at last irregular
+ step. \cr
+           \+&FI&      Irregular force due to the neighbours. \cr
+           \+&FR&      Regular force due to the distant particles. \cr
+           \+&F1&      Irregular or regular force on current particle. \cr
+           \+&F1DOT&   First force derivative of current particle (both types).
+ \cr
+           \+&F2DOT&   Second force derivative of current particle (both types).
+ \cr
+           \+&F3DOT&   Third force derivative of current particle (both types).
+ \cr
+           \+&F4DOT&   Fourth force derivative of current particle (both types).
+ \cr
+           \+&ILIST&   Current list of neighbours. \cr
+           \+&JLIST&   Current list of receding neighbours in shell within
+ 1.26$\ast$RS. \cr
+           \+&KZ&      Options for alternative paths at run time (see table).
+ \cr
+           \+&LIST&    Sequential neighbour list (LIST(1,I) = membership). \cr
+           \+&N&       Total particle number. \cr
+           \+&NDUMP&   Control variable for automatic energy check procedure.
+ \cr
+           \+&NFIX&    Output frequency of binaries or data save (options 3 and
+ 6). \cr
+           \+&NLIST&   Time-step list for determining next body to be
+ integrated. \cr
+           \+&NNBMAX&  Maximum number of neighbours (allow one extra with option
+ 5). \cr
+           \+&NPRINT&  Output counter (reset to zero when NPRINT = NFIX). \cr
+           \+&NSTEPN&  Counters for diagnostic output information (see table).
+ \cr
+           \+&NSTEPS&  Time-step counter for calling computer clock (reset to
+ zero). \cr
+           \+&ONE2&    The constant 0.5. \cr
+           \+&ONE3&    The constant 1.0/3.0. \cr
+           \+&ONE4&    The constant 0.25. \cr
+           \+&ONE5&    The constant 0.2. \cr
+           \+&ONE6&    The constant 1.0/6.0. \cr
+           \+&ONE12&   The constant 1.0/12.0. \cr
+           \+&QE&      Relative energy tolerance for error control (option 2).
+ \cr
+           \+&RS&      Radius of the standard neighbour sphere. \cr
+           \+&RSCALE&  Half-mass radius determined from the potential energy.
+ \cr
+           \+&SMIN&    Close encounter time-step for retention of old
+ neighbours. \cr
+           \+&STEP&    Time-step for irregular force polynomial. \cr
+           \+&STEPR&   Time-step for regular force polynomial. \cr
+           \+&TCRIT&   Termination time in scaled units. \cr
+           \+&TIME&    Physical integration time in scaled units. \cr
+           \+&TLIMIT&  Maximum computing time in minutes (used with the timer).
+ \cr
+           \+&TLIST&   Time for next updating of the time-step list. \cr
+           \+&TNEXT&   Time for next output. \cr
+           \+&T0&      Time of last irregular force calculation. \cr
+           \+&T0R&     Time of last regular force calculation. \cr
+           \+&T1&      Time of first backwards irregular force calculation. \cr
+           \+&T1R&     Time of first backwards regular force calculation. \cr
+           \+&T2&      Time of second backwards irregular force calculation. \cr
+           \+&T2R&     Time of second backwards regular force calculation. \cr
+           \+&T3&      Time of third backwards irregular force calculation. \cr
+           \+&T3R&     Time of third backwards regular force calculation. \cr
+           \+&X&       Coordinates at current time. \cr
+           \+&XDOT&    Velocities at beginning of step and current values at
+ output. \cr
+           \+&X0&      Coordinates at the beginning of a step. \cr
+           \+&X0DOT&   Velocities at the beginning of a step. \cr
+\medskip
+\hrule
+\bigskip
+\bigskip
+\vfill\eject
+\centerline {INPUT PARAMETERS}
+\medskip
+\hrule
+\medskip
+           \+&KSTART*&  Values 1,2,3 indicate new case, restart, or modified
+ restart. \cr
+           \+&TCOMP&   Maximum computing time in minutes (stored in TLIMIT). \cr
+           \+&N*&       Total particle number. \cr
+           \+&NFIX&    Output frequency of binaries or data save (options 3 and
+ 6). \cr
+           \+&NNBMAX&  Maximum number of neighbours (option 5 needs one more).
+ \cr
+           \+&ETAI*&    Time-step parameter for irregular force polynomial. \cr
+           \+&ETAR&    Time-step parameter for regular force polynomial. \cr
+           \+&RS0&     Initial radius of neighbour sphere. \cr
+           \+&DELTAT&  Output time interval in units of the crossing time. \cr
+           \+&TCRIT&   Termination time in units of the crossing time. \cr
+           \+&QE&      Energy tolerance (restart if DE/KE $>$ $5\ast$QE and
+ KZ(2) $>$ 0). \cr
+           \+&SMIN&    Close encounter time-step for neighbour retention (option
+ 5). \cr
+           \+&CUTOFF&  Soft potential parameter (stored as square in EPS2). \cr
+           \+&KZ(J)*&   Non-zero options for alternative paths (see separate
+ table). \cr
+\medskip
+\hrule
+\medskip
+\+& & *)New input line (free format). \cr
+\bigskip
+\bigskip
+\settabs\+\indent&XXX\quad&\cr
+\centerline {OPTIONS KZ(J)}
+\medskip
+\hrule
+\medskip
+           \+&^^1&  COMMON save on unit 1 if TCOMP $>$ TLIMIT or if TIME $>$
+ TCRIT. \cr
+           \+&^^2&  COMMON save on unit 2 for restart if DE/E $>$ 5$\ast$QE. \cr
+           \+&^^3&  Binary search every NFIX output time. \cr
+           \+&^^4&  Skips full predictor loop if neighbour number $>$ KZ(4) and
+ KZ(4) $>$ 0. \cr
+           \+&^^5&  Retains small step neighbours inside 2$\ast$RS (STEP(J) $<$
+ SMIN). \cr
+           \+&^^6&  Essential data written to unit 3 at output time (frequency
+ NFIX). \cr
+           \+&^^7&  All bodies listed at output time. \cr
+           \+&^^9&  First 5 bodies listed at output time. \cr
+          \+&17&  Modification of accuracy parameters ETAI and ETAR using
+ tolerance. \cr
+\medskip
+\hrule
+\bigskip
+\bigskip
+\centerline {OUTPUT COUNTERS NSTEPN(J)}
+\medskip
+\hrule
+\medskip
+           \+&^^1&  Irregular integration steps. \cr
+           \+&^^2&  Regular integration steps. \cr
+           \+&^^3&  Full predictor loops. \cr
+           \+&^^4&  Force polynomial corrections. \cr
+           \+&^^5&  Too many neighbours with standard criterion. \cr
+           \+&^^6&  No neighbours inside 1.26 times the basic radius. \cr
+          \+&13&  Retained neighbours using time-step criterion SMIN. \cr
+          \+&14&  Large F3DOT corrections not included if also STEP $<$ SMIN.
+ \cr
+          \+&18&  No neighbours with standard criterion. \cr
+\medskip
+\hrule
+\vfill\eject
+\centerline {MAIN}
+\bigskip
+
+  This is the main routine which controls the calling sequence.  First it reads
+  two decision variables, i.e. KSTART and TCOMP.  KSTART = 1,2,3 denotes new
+ case,
+ restart from COMMON dump on tape/disc or restart with modified parameters,
+ respectively.  The local variable TCOMP specifies the maximum computing time
+ in minutes to be used for the run.  It is subsequently stored in the COMMON
+ variable TLIMIT since otherwise an over-write would occur at
+ restart time.  Timing
+ procedures are usually installation dependent and the VAX system statements
+ CALL LIB\$INIT used for initialization and CALL LIB\$STAT giving the elapsed
+ time may therefore have to be replaced.  The latter is used near the end
+ of routines MAINPT and INTGRT (displayed between asterisks).
+
+ Note that all the COMMON variables are read back at restart time and the start
+ routine is therefore only needed at TIME = 0.  Once control passes to routine
+ INTGRT a return does not occur until the next output time denoted by variable
+ TNEXT.  The program terminates either in routine MAINPT or in INTGRT, depending
+ on the conditions TIME $>$ TCRIT or TCOMP $>$ TLIMIT, respectively.  In either
+ case
+ all COMMON variables are saved if option 1 is activated and the appropriate
+ tape/disc unit has been allocated.
+\bigskip
+\bigskip
+\centerline {MYDUMP}
+\bigskip
+ A tape/disc routine is provided for writing or reading the COMMON
+ variables.  The general
+             call statement is CALL MYDUMP(I,J).  If I = 0, all COMMON blocks
+ are read from logical unit J, whereas I = non-zero is used for saving
+ COMMON.  The restart
+ procedure requires that all important variables are stored in COMMON.  Several
+ labelled COMMON blocks are used for organizational convenience.
+
+ The size of COMMON blocks is consistent with the other routines.  At
+ present the storage requirement is 260$\ast$NMAX + 2$\ast$LMAX$\ast$NMAX + 1548
+ bytes,
+ where LMAX denotes the maximum size of the neighbour list array for each
+ particle (take NNBMAX = LMAX -- 2).  Note that the size of BLOCK1 is
+ 40$\ast$NMAX + 4
+ bytes for the single precision version but twice as much is needed when
+ using the present double precision statements for
+ X, X0, X0DOT, T0 and TIME.
+\bigskip
+\bigskip
+\centerline {START}
+\bigskip
+ This routine reads the basic parameters and performs the initialization for
+ the integrator.  Relevant counters and variables are first set to zero and the
+ fractional constants ONE2, etc are specified.  The reason for introducing these
+ constants is to save time by avoiding divisions (only ONE3, ONE6 and
+ ONE12 are implemented).
+
+ Four data cards are required for a run.  All input is read in free
+ format as READ (5,$\ast$) for convenience but this can readily be
+ changed.  The relevant variables are listed
+ in the input table and the choice of integration parameters is
+ discussed at the end of this write-up.  Initial values for the variables
+ BODY(I), X(K,I), XDOT(K,I) where I = 1,2,...,N and K = 1,2,3 must be specified
+ next.  These initial conditions are supplied by routine DATA which will
+ normally be written by the user.  After the call
+     to routine DATA the force polynomials are obtained by the method of
+ explicit differencing which only requires the masses, coordinates and
+ velocities (see the 1985 algorithm for details).
+
+ There are two main loops, both
+ requiring N$\ast\ast$2 operations.  The force and first derivative due to
+ neighbours
+ and distant particles are evaluated separately in one loop.  The choice of
+ neighbour sphere radius RS for each particle depends on the density as well as
+ the maximum permitted neighbour number (NNBMAX).  If the system is not
+ homogeneous it is desirable to modify the individual neighbour
+ radius (local variable RS2) at the beginning of the loop, otherwise it will be
+ set to the input value RS0.  There is an automatic
+ reduction/increase of the neighbour sphere if the membership is not in the
+ range (1, NNBMAX -- 1).
+
+ A second main loop obtains the second and third force derivatives for the
+ irregular and regular force components.  This procedure requires the total
+ force and first derivative (F and FDOT) which are also used by the integrator
+ for
+ coordinate predictions.  To save time the second and third derivatives for
+ the regular component are only evaluated inside a distance 3$\ast$RS since more
+ distant particles do not contribute significantly, i.e. F2DOT scales as
+ 1/R$\ast\ast$5.
+
+  Individual integration steps for the irregular and regular force polynomials
+ are determined from a relative criterion of the type
+ STEP = (ETA$\ast$(F$\ast$F2DOT + FDOT$\ast\ast$2)/(FDOT$\ast$F3DOT +
+ F2DOT$\ast\ast$2))$\ast\ast$0.5
+ where the parameter ETA controls the rate of convergence.  Note that this
+ expression is also well behaved for particles at rest.  The time-step loop
+ initializes the times used for the backwards difference scheme (four variables
+ for each type).  This loop also
+ sets X0(K,I) = X(K,I) and X0DOT(K,I) = XDOT(K,I).  These variables denote the
+ values at the beginning of a step and are only updated at the end of each
+ individual time-step, whereas the variables X(K,I) which represent current
+ coordinates are over-written by the predictor.  Also note that the variables
+ XDOT(K,I) are used to represent current velocities in the output
+ routine.  Finally one-half the total force and one-sixth the total force
+ derivative is set in F(K,I) and FDOT(K,I), respectively.  This permits a fast
+ coordinate prediction to be made.
+
+ Members of the time-step list are determined in the final loop.  The starting
+ value of DTLIST is taken as one-half the average time-step, subject to a
+ membership in the permitted range.  The array
+ NLIST contains the index of all particles to be treated during the interval
+ (0, DTLIST), with NLIST(1) holding the membership number.  If the initial
+ irregular time-steps are equal, NLIST should be of size N + 1 (note
+ the explicit test near the end and also in routine INTGRT).
+\bigskip
+\bigskip
+\centerline {DATA}
+\bigskip
+
+ Provides the initial conditions for the starting routine and will normally
+ be written by the user.  Random numbers within (0, +1.0) are obtained by the
+  VAX library function RAN(KKK).  The
+ variables which must be specified are BODY(I),
+ X(K,I), XDOT(K,I) for each particle I = 1,2,...,N with K = 1,2,3 denoting
+ components of coordinates and velocities.  Unless there are special reasons
+ it is recommended to initialize the coordinates and velocities with respect
+ to the centre of mass rest frame.  The standard scaling convention for cluster
+ calculations is to take total mass = N and adjust the coordinates and
+ velocities such that the total energy = --N$\ast\ast$2/4.  This gives a virial
+ scale
+ factor of unity at equilibrium and a crossing time = 2$\ast$(2/N)$\ast\ast$0.5.
+  However,
+ the program works for any set of consistent units.
+\bigskip
+\bigskip
+\centerline {MAINPT}
+\bigskip
+
+  This routine deals with output and error control.  The current
+ coordinates and velocities are first predicted to highest order.  The next loop
+ which has N$\ast$(N--1)/2 terms evaluates the potential energy.  The density
+ centre (based on maximum neighbour density) is set in CMR(1,2,3).
+ Other quantities calculated are kinetic energy,
+                centre of mass coordinates, angular momentum about the Z-axis
+ and the average neighbour number (denoted by $<$NNB$>$).  If non-zero,
+ option 4 is updated to KZ(4) = $<$NNB$>$.
+
+   The main output lines are mostly self-explanatory.  Here CMR
+ gives the current c.m. value of coordinates, DE is the relative
+ energy error (evaluated with respect to the kinetic energy), E
+ is total energy, TCR denotes the time in units of the crossing
+ time, AZ is Z-component of angular momentum, $<$R$>$ is
+ approximate half-mass radius, and RHOMAX is maximum density
+ contrast. The six first counters NSTEPN(J) are also printed.
+ One line is printed for each particle if
+ option 7 is activated and this is reduced to only the first five particles if
+      option 9 is non-zero.  Option 3 permits a binary search with a frequency
+ specified by the input parameter NFIX.  Each line contains index of components,
+ mass of components, relative binding energy per unit mass, semi-major axis,
+ mean motion, separation, central distance, eccentricity, and neighbour
+ number for the first component.
+
+ A facility for automatic error control is included (option 2) and works as
+ follows.  A restart from the last output time is made with reduced time-step
+ parameters if the relative energy (absolute value) exceeds 5$\ast$QE, where QE
+ is
+ specified at input.  If option 17 is also activated and the relative error is
+ in the range (QE, 5$\ast$QE) the time-step parameters are merely reduced by an
+ appropriate amount, whereas ETAI and ETAR are increased slightly if the error
+ is $<$ 0.2$\ast$QE.  Note that the program terminates after one unsuccessful
+ restart
+ using the COMMON variable NDUMP.  As a safety precaution the program also
+ terminates if the error exceeds 5$\ast$QE and option 2 is zero.
+
+     Options 1 and 2 may be used independently if desired.  However, the most
+ flexible procedure is to have both options non-zero.  In this case the
+ calculation can be halted at any time.  Alternatively option 2 may be used
+ for both error control and termination at output time by moving the test
+ TCOMP $>$ TLIMIT from INTGRT to MAINPT.  If there are no
+ numerical problems (i.e. fairly soft potential) it is sufficient to use
+ option 1 by itself.
+
+ Option 17 may be used independently of option 2.  The adopted strategy can
+ easily be modified if it is not satisfactory.  Most runs to date have been
+ made without this facility, relying instead on reading new time-step
+ parameters at restart time if appropriate.
+
+ Routine INTGRT uses the density centre CMR(K) for including a radial
+ velocity modification of the neighbour sphere.  If the system does not
+ have a natural density centre it is better to set CMR(K) = 0.0 after
+ obtaining the scalar value CMR(K), or suppress the RIDOT term in
+ INTGRT (near label 68).
+
+ The velocities XDOT which are over-written must be restored before the
+ COMMON save in order that a correct integration restart can be made.  Also note
+ that the predictor uses XDOT rather than X0DOT to save time in case the double
+ precision version is used.  The data on both unit 1 and 2 is
+ temporary, being over-written each time.  It is most convenient to accumulate
+ the basic data such as TIME, BODY(I), X(K,I), XDOT(K,I) on a separate tape/disc
+ unit.  The best place for doing this is just before setting
+ XDOT(K,I) = X0DOT(K,I), i.e. when XDOT represent current velocities and the
+ solution is acceptable.  An example of writing data to unit 3 is included
+ with option 6 (frequency NFIX).  When using disc instead of tape the particle
+ number should be
+ written first as a separate record since otherwise the arrays cannot be
+ read.  Note that X(K,I) is stored as a double precision number
+ unless first copied into a local array.
+\bigskip
+\bigskip
+\centerline {INTGRT}
+\bigskip
+
+The integration procedure is based on a predictor using three force differences
+ and a fourth-order corrector.  The Ahmad-Cohen scheme represents the force
+ field due to neighbours and distant particles by separate polynomials.  The
+ main idea is to evaluate the neighbour force at frequent intervals and
+ obtain the total force by adding the predicted contribution from distant
+ particles.  The regular force component is updated less frequently and this
+ results in a considerable saving.  Consistent corrections to the polynomial
+ derivatives are made whenever there is a change of neighbours.  The neighbour
+ strategy depends on available core storage and may be designed to suit
+ individual problems.  The two-dimensional arrays are written explicitly inside
+ loops for increased efficiency, i.e. X(1,I), X(2,I), X(3,I).  Note that
+ on a scalar machine like VAX the array X(K,I)
+ is faster than X(I,K) which was used previously.
+
+  The first part determines the next body to be integrated (denoted by index I
+ throughout).  Note that the current value of the time is set by
+ TIME = T0(I) + STEP(I).  Only those particles which
+ fall due within an interval DTLIST are examined each time and a new list is
+ formed in the array NLIST at the end of this interval.  The variable DTLIST is
+ stabilized on a membership in the range (0.5$\ast$NNBMAX, NNBMAX) which is
+ close to the optimum.  The size of NLIST should be chosen somewhat
+ larger than NNBMAX (which is usually about N$\ast\ast$0.5) to include bunching
+ of time-steps.  Adjust the explicit test on the permitted membership
+ accordingly.
+
+            The integration cycle starts with coordinate predictions to
+ order FDOT for either neighbours or all particles,
+ depending on whether the regular force component
+ can be extrapolated or needs to be evaluated again.  Old and new
+ neighbour numbers are denoted by the local variables NNB0 and NNB,
+ respectively.  The local
+ variable IR is used as an indicator for the relevant case (i.e. IR = 0 or
+  IR = 1) which is determined by comparing TIME + STEP(I) with
+ T0R(I) + STEPR(I).  It is possible
+ to save time by restricting the full predictor loop to particles with small
+ neighbour numbers since other particles are predicted more frequently anyway,
+ i.e. there is a multiplicity factor of NNB in the predictor.  Option
+ 4 is used for this purpose with the convention that if non-zero it specifies
+ the limiting neighbour number for the full predictor loop (i.e. skip full
+ prediction if NNB0 $>$ KZ(4)).  A neighbour
+ prediction is performed instead if the full loop is skipped.  Note that this is
+ the only instance where the actual value of an option is used
+ (KZ(4) = $<$NNB$>$ is set in MAINPT).  This time
+ saving is not recommended for non-equilibrium systems or if massive bodies are
+ present.
+
+ The total force polynomial for body I is now formed to highest order
+ (i.e. F3DOT) and new coordinates and velocities are obtained.  This is followed
+ by a force summation over the neighbours.  After updating the relevant times
+ T0, T1, T2, T3, new divided differences are set for the
+ irregular force component.  The fourth difference formed from the old and new
+ third difference is used as a corrector (so-called semi-iteration) since
+ experiments show that there is a useful gain in accuracy at no extra cost.  At
+    this stage there are two paths depending on the control indicator.  If
+ IR = 0, the current regular force and first derivative are extrapolated from
+ the third-order polynomial and added to the irregular force and extrapolated
+ first derivative to form the total force and first derivative which are
+ used in the subsequent predictions.  Control then
+              passes to the end of the cycle where a new irregular integration
+ step is obtained, whereupon another cycle is started.  The alternative path
+ described below requires a determination of the total force as well as a
+ new neighbour search and associated correction procedure.
+
+ The total force loop evaluates the irregular and regular components
+ separately and stores the new neighbours in array ILIST.  Approaching
+ particles between RS and 1.26$\ast$RS are included in the neighbour field if
+ the
+ impact parameter $<$ RS.  Other particles in the outer sphere are
+ stored in array JLIST and will be selected if ILIST is empty, whereas a new
+ search is only made if JLIST is also empty.  Note the general convention that
+ the first list location is reserved for the membership number, although
+ ILIST(1) and JLIST(1) are not used here.  Unless
+ NNB $\leq$ NNBMAX the neighbour sphere radius is reduced and some members are
+ removed while their force contributions are updated consistently.  The
+ value of NNBMAX should allow for the retention of one old neighbour at
+ a later stage.  The neighbour strategy is based on a simple distance criterion
+ combined with an impact parameter test for approaching particles in the outer
+ shell (of equal volume to the inner sphere).  It may
+ be advantageous to introduce a mass-dependent criterion if the
+ masses differ by many orders of magnitude.  This would require modification of
+ all three distance tests in the regular force loop and also in the loop which
+ reduces the neighbour number.
+
+ One good strategy for choosing the neighbour sphere radius uses the
+ square root of the number density contrast
+ RHOS = 2$\ast$(NNB/N)$\ast$(RSCALE/RS(I))$\ast\ast$3.  The half-mass radius
+ RSCALE is
+ calculated from the potential energy
+ in routine MAINPT.  It should be replaced if not appropriate (see $<$R$>$
+ in the output).  The present modification
+ of RS aims at five neighbours for a density contrast of unity and
+ NNBMAX = 28.  The maximum permitted volume change of the neighbour
+ sphere is limited to 25 \% either way.  Moreover,
+ the neighbour sphere is increased by the smallest radial
+ velocity factor RSDOT$\ast$STEPR(I) if NNB $<$ 4 and all neighbours are moving
+ into the outer shell.
+
+ An efficient search procedure is used to find the loss and gain of
+  neighbours at the same time, which is faster than that employed
+  previously.  If the step is suitably small
+ (i.e. STEP(J) $<$ SMIN) a candidate for removal may be retained to avoid large
+ derivative corrections.  This is implemented if the particle is inside twice
+ the neighbour radius, in which case the relevant force components are
+ updated.  This procedure may be skipped for fairly soft potentials
+ (take option KZ(5) = 0).
+
+ The next part deals with the regular force differences.  The procedure
+ is almost identical to that for the irregular component.  The
+ differences are first evaluated for a constant (i.e. old) neighbour
+ field.  This is
+         achieved by subtracting the change of neighbour force due to the old
+ and new members.  The current total force
+ and first derivative are then set and the fourth-order corrector
+ is included.  Derivative corrections due to the loss and gain of
+ neighbours are now
+ accumulated.  These terms are calculated in a separate dual purpose
+ part at the end of the routine.  Note that the loss of neighbours
+ must be known before evaluating the regular differences because
+ of the retention procedure.  If there has been a change of neighbours the
+ membership list is updated and consistent corrections performed to the force
+ polynomials.  Finally new regular and irregular time-steps are set using the
+ composite expression given in the next section.  If desired, a new integration
+ cycle may now be entered at label 1.
+
+ Control passes temporarily to the main routine at every output time, followed
+ by a call to MAINPT before returning.  The
+ routine ends with a timing check after a specified number of integration
+ steps (both types counted equally).  Provided that option 1 is non-zero, the
+ COMMON blocks are saved on unit 1 if the calculation does not finish in the
+ specified time (i.e. TCOMP $>$ TLIMIT).  The VAX timer LIB\$STAT is used for
+ this
+ purpose.  Intermediate COMMON saves on unit 1 may also be introduced to
+ safeguard against system failure during long runs.
+\bigskip
+\bigskip
+\centerline {CHOICE OF INPUT PARAMETERS}
+\bigskip
+
+ The choice of integration parameters depends on the requirements as well as
+ the available precision.  In principle the accuracy is only limited by the
+ computer word-length since the procedure does not require any
+ approximations.  Note however that the most distant particles (i.e. those
+ outside 3$\ast$RS) are neglected in the initialization of F2DOT and F3DOT for
+ the sake
+ of efficiency.  Moreover, very large corrections to F3DOT are omitted to
+ prevent
+ a severe time-step reduction for the regular component (only if STEP(J) $<$
+ SMIN).  For 32-bit word machines (i.e. IBM 370 and VAX) it is
+ advisable to define COMMON /BLOCK1/ in double precision together with a few
+ local variables in routine INTGRT.  This
+ leads to a significant improvement in accuracy at little extra cost since
+ the force calculations are the most time-consuming part.  By changing the
+ square root functions to DSQRT the program should also run in full double
+ precision if desired but a few
+ numerical constants may then have to be converted (compiler dependent).
+
+ There are only two primary integration parameters, i.e. ETAI and ETAR.  A
+ simple time-step expression of the type STEP = (ETA$\ast$F/F2DOT)$\ast\ast$0.5
+ was used for
+ many calculations (taking ETAI = 0.02, ETAR = 0.06).  It has now been replaced
+ by a more efficient one which employs all the Taylor series derivatives, i.e.
+ STEP = (ETA$\ast$(F$\ast$F2DOT + FDOT$\ast\ast$2)/(FDOT$\ast$F3DOT +
+ F2DOT$\ast\ast$2))$\ast\ast$0.5.  This criterion
+ is more sensitive and is particularly
+ advantageous if the potential is very soft or if a repulsive force is
+ included.  The recommended choice of time-step parameters for the composite
+ expression is ETAI = 0.03, ETAR = 0.08.  For increased accuracy try
+ ETAI = 0.02, ETAR = 0.06.  Note that the choice of ETAI and ETAR should be
+ consistent with the machine accuracy.  The larger value permitted for ETAR
+ is partly due to the procedure of reducing the regular time-step to coincide
+ with the start of an irregular step.  There is no restriction on the softening
+ parameter and mass-dependence can readily be included.
+
+ The optimum value of the neighbour sphere is problem dependent but the
+ machine time is not a sensitive function of the ratio NNB/N, i.e. there is a
+ shallow minimum because of compensating factors.  An average neighbour
+ number of about five is sufficient for N = 100, increasing to
+ 20 for N = 4000.  Choose a maximum neighbour number of at least
+ NNBMAX = 10 + N$\ast\ast$0.5, subject to NNBMAX $<$ LMAX -- 1 (or $<$ LMAX
+ without
+ option 5).  In order to have about NNB neighbours for a constant
+ density system, take an initial neighbour radius
+ RS0 = (NNB/N)$\ast\ast$0.33$\ast$$<$R$>$ ($<$R$>$ = half-mass radius).
+ Individual values
+ may be introduced if
+ there are significant density variations.  The present version with
+ LIST(NMAX,LMAX) permits NNBMAX = LMAX -- 2 but NNBMAX = LMAX -- 1 is allowed
+ if the SMIN retention procedure is
+ not used.  Note that the standard neighbour search loop now accepts
+ NNB = NNBMAX but one extra member may be added later if option 5 is non-zero.
+
+ The energy tolerance QE may be used to modify the time-step parameters ETAI
+  and ETAR during the calculation (options 2 and 17).  A typical value
+ for an output interval of one crossing time is QE = 2.0E--04.  This gives
+ rise to a slightly smaller rms relative energy error.  The time-step for
+ retention of close encounter neighbours (with option 5) may be taken
+ as SMIN =
+ 0.04$\ast$(4/N)$\ast\ast$1.5$\ast$($<$R$>$$\ast\ast$3/$<$M$>$)$\ast\ast$0.5.
+ This corresponds to twice
+ the standard value for starting a two-body regularization.  Set a small dummy
+ value for SMIN with large softening (EPS $>$ 4$<$R$>$/N).  Option 4 is used
+ to skip full predictor loops for neighbour numbers $>$ KZ(4).  If
+ KZ(4) $>$ 0 it is set to the average value ($<$NNB$>$) every output.  About
+ 3/4 of the regular steps can be skipped, unless a massive body
+ is present (check counter NSTEPN(3)).
+
+ One possible modification is to include the tidal field in a star cluster
+ calculation.  The case of a circular cluster orbit in the galactic plane is
+ conveniently
+              studied in rotating coordinates.  The relevant equations of motion
+ are formulated in {\it Bulletin Astronomique} 2, 47, 1967.  Add the Coriolis
+ force
+ to the irregular component and the tidal force to the regular
+ component.  Consistent derivatives must be included in routine START.  The
+ latter are obtained using the explicit derivative principle.  Note that the
+ Coriolis force should be added to the irregular force at two different places
+ in routine INTGRT (i.e. near labels 25 and 60).  The current tidal
+ force should be added to F1(K) just after label 60 of routine INTGRT.  It
+ then becomes part of the regular force FR(K,I) and total force F(K,I).  The
+ case of a linearized tidal field permits an energy integral to be used.
+\bye
+
