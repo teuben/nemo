@@ -56,6 +56,11 @@ need:      	report all NEMO binaries needed to run the test
 all:       	run all tests
 clean:     	clean up all data files created by "all"
 .fi
+.SH CAVEATS
+Listing a program in the \fIBIN=\fP macro of the \fITestsuite\fP is sufficient
+to test a program when the testsuite is run with the -b flag, but not during
+a fresh install. For this it must also be added to the \fIBINFILES=\fP
+(or whichever appropriate) of the \fIMakefile\fP in order to be built.
 .SH "SEE ALSO"
 mknemo(8NEMO), need(8NEMO)
 .SH AUTHOR
