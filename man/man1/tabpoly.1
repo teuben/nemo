@@ -1,0 +1,45 @@
+.TH TABPOLY 1NEMO "8 September 2001"
+.SH NAME
+tabpoly \- Evaluate polynomials or find roots of polynomials
+.SH SYNOPSIS
+\fBtabpoly\fP [parameter=value]
+.SH DESCRIPTION
+\fBtabpoly\fP evaluates polynomials of arbitrary degree, or finds
+their roots.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBcoef=\fP
+Polynomial coefficients, c_0 first [No default]
+.TP 20
+\fBx=\fP
+Evaluate polynial at these values of X. If no values give,
+the roots are returned.
+.TP 20
+\fBformat=\fP
+Output format, in standard \fIprintf(3)\fP format [%g].
+.SH EXAMPLES
+Here is the standard GSL example of the 5 roots of the equation
+x^5-1, which has 1,e^{2.PI.i/5},e^{4.PI.i/5},e^{6.PI.i/5},e^{8.PI.i/5}:
+.nf
+% tabpoly coef=-1,0,0,0,0,1 format=%25.18g
+    -0.809016994374947451      0.587785252292473026
+    -0.809016994374947451     -0.587785252292473026
+      0.30901699437494734      0.951056516295153531
+      0.30901699437494734     -0.951056516295153531
+                        1                         0
+.fi
+.SH SEE ALSO
+gsl, tabspline(1NEMO)
+.SH FILES
+.nf
+src/kernel/tab
+.fi
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+08-sep-01	V1.0 Created, as first example of GSL usage	PJT
+.fi
