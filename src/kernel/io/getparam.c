@@ -116,6 +116,7 @@
  *  1-aug-02       a  try and free() some allocated local data
  *  2-aug-02       b  write kiddy version of outkeys= processing
  *  4-dec-02       c  use MAXBUF for keys - btw, wc is not 2800+ lines :-(
+ * 21-may-03       d  document the system keywords in help=\?
 
   TODO:
       - what if there is no VERSION=
@@ -151,14 +152,14 @@
   SOME ALTERNATIVE RESOURCES
 	argtable  http://argtable.sourceforge.net/doc/html/index.html
 	clig	  http://wsd.iitb.fhg.de/~kir/clighome/
-	perl      http://www-106.ibm.com/developerworks/linux/library/perl-speak.html
+	perl      http://www-106.ibm.com/developerworks/linux/library/l-perl-speak.html
 	parseargs
 	opt
         getopt
 	gengetopt http://www.gnu.org/software/gengetopt/gengetopt.html
  */
 
-#define VERSION_ID  "3.4c 4-dec-02 PJT"
+#define VERSION_ID  "3.4d 21-may-03 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -334,6 +335,7 @@ local void save_history(string *argv);
 local void printhelp(string help);
 local void newline(int n);
 local void showconfig(void);
+local void showsystem(void);
 local void printusage(string *defv);
 local string get_macro(char *mname);
 local void eval_keys(void);
@@ -884,6 +886,7 @@ local void printhelp(string help)
         printf(" VERSION_ID = %s\n",VERSION_ID);
         printf(" NEMO VERSION = %s\n",NEMO_VERSION);
         showconfig();
+	showsystem();
         local_exit(0);
         /*NOTREACHED*/
     }
@@ -1103,6 +1106,22 @@ local void showconfig()
 #endif
 
     printf("Precision: %s\n",Precision);
+}
+/*
+ * SHOWSYSTEM: show the system keywords
+ */
+
+local void showsystem()
+{
+  printf("System keywords:\n");
+  printf("  help=     various inline help options (see above) for program keywords\n");
+  printf("  debug=    change the debug level [0]\n");
+  printf("  error=    change the number of allowed fatal errors [0]\n");
+  printf("  yapp=     change the default plotting device [$YAPP]\n");
+  printf("  outkeys=  **under development**  outkeys to be written\n");
+  printf("  review=   interrupt mode to review keywords before start\n");
+  printf("  argv=     addition cmdline arguments not parsed by NEMO\n");
+  printf("  tcl=      go into tcl (deprecated)\n");
 }
 /*
  * PRINTUSAGE: print out helpful usage info.
