@@ -90,4 +90,12 @@ testpos:
 	$(CC) -DNEMO $(CFLAGS) -o testpos testpos.c \
 		$(NEMO_LIBS) $(EL)
 
+_testpos:
+	testpos > testpos.test
+	diff testpos.ref testpos.test
 
+
+check:	_testpos
+	make -f Testfile clean all
+
+	
