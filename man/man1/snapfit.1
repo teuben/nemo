@@ -1,12 +1,12 @@
 .TH SNAPFIT 1NEMO "15 July 2003"
 .SH NAME
-snapfit \- fit a (6D) snapshot to a (3D) data cube \fI** in development ** \fP
+snapfit \- fit a (6D) snapshot to a (3D) data cube
 .SH SYNOPSIS
 \fBsnapfit\fP [parameter=value]
 .SH DESCRIPTION
 \fIsnapfit\fP attempts to match an observed 3D datacube
-(X and Y are positions on the sky, Z is the radial velocity) with
-a 6D model snapshot (with the usual \fBx,y,z,vx,vy,vz\fP coordinates,
+(where X and Y are normally positions on the sky, and Z the radial velocity) 
+with a 6D model snapshot (with the usual \fBx,y,z,vx,vy,vz\fP coordinates,
 see \fIbodytrans(1NEMO)\fP). It finds the best match by varying
 the two viewing angles, two scale factors and three offsets of the model.
 The scalefactors in X and Y are forced to be the same, 
@@ -137,5 +137,5 @@ Peter Teuben
 .nf
 .ta +1.0i +4.0i
 30-May-92	V0.0 Prototype created               	PJT
-15-jul-03	V0.7 documentated past changes	PJT
+15-jul-03	V0.7 documentated some recent changes	PJT
 .fi

@@ -1,6 +1,6 @@
-.TH ROTCUR 1NEMO "19 March 2003"
+.TH ROTCUR 1NEMO "11 October 2003"
 .SH NAME
-rotcur \- fit kinematic parameters from velocity field
+rotcur \- fit parameters to velocity field using tilted rings
 .SH SYNOPSIS
 \fBrotcur in=\fPvelfie [parameters=values ...]
 .SH DESCRIPTION
@@ -75,6 +75,9 @@ be held fixed in this case\fP.
 For a detailed discussion of this method see K. Begeman,
 \fIAstr. & Astrophys. \fP \fB223\fP, 47. (1989) and references
 therein.
+.PP
+See also \fIvelfit(1NEMO)\fP on the classic WWB73
+(Warner, Wright and Baldwin, 1973, MNRAS, 163,163) method.
 .SH PARAMETERS
 The following parameters are recognized:
 .TP 25
@@ -108,7 +111,8 @@ Array of inclinations (degrees), one for each ring.
 See also \fBvrot=\fP.
 .TP
 \fBvsys\fP=\fIv0\fP
-Systemic velocity. Only one number applies.
+Systemic velocity. Only one number applies, though VSYS can vary
+accross rings.
 .TP
 \fBcenter\fP=\fIx0,y0\fP
 Rotation center (grid units w.r.t. lower left corner being
@@ -128,7 +132,7 @@ Valid options are \fBreceding\fP, \fBapproaching\fP
 or \fBboth\fP side(s). [Default: \fBboth\fP].
 .TP
 \fBweight\fP=
-Choice of weighting function with which points are weighed into
+Choice of geometric weighting function with which points are weighed into
 the least squares solution as a function of galactic angle away
 from the major axis. Valid options are: \fBuniform\fP, \fBcosine\fP,
 and \fBcos-squared\fP.
@@ -205,6 +209,11 @@ Logical denoting if the initial conditions for subsequent fitted rings
 should be inherited from the previous successfully fitted ring. The fixed
 parameters keep of course their fixed value. [Default: \fBt\fP]
 .TP
+\fBreuse=t|f\fP
+Reuse pixels between rings. If neighboring rings have a different geometries,
+it can occur that pixels will be reused. This flag will prevent that.
+[Default: \fBf\fP]
+.TP
 \fBfitmode=\fP\fBcos|sin\fP\fB,1\fP
 .TP
 \fBnsigma=\fP
@@ -279,7 +288,7 @@ though and study the output.
 Errorbars quoted in the table are only an estimate since the beam
 size is not known. Multiply these numbers by the square root
 of the number of pixels per beam to get a more realistic estimate.
-If the beamsize is given, the formulae of Sicking (1997) is used
+If the beamsize, \fBbeam=\fP, is given, the formulae of Sicking (1997) is used
 to correct the errors for:
 .nf
 
@@ -287,8 +296,8 @@ to correct the errors for:
 
 .fi
 .PP
-Sign of \fIDx,Dy\fP in the CCD header is ignored, and an astronomical
-image is assumed.
+Sign of the pixelsize \fIDx,Dy\fP in the CCD header is ignored, and an astronomical
+image is assumed. See also the \fBreuse=\fP keyword.
 .PP
 For calculations of residuals in  overlapping rings (e.g. warps) only the last ring velocity
 will be used.

@@ -227,9 +227,9 @@ see rotcur1
 see rotcur1.  The final composite rotation curve will be the sum
 (in quadrature) of up to these 5 components.
 .SH ROTCUR FUNCTIONS
-A \fIrotcur\fP function needs to provide the least square fitting routine
-with the rotation curve value, and all its partial derivates w.r.t.
-the parameters. Most rotation curve shapes have two dimensional parameters,
+A \fIrotcur\fP function needs to provide a routine that returns
+a rotation curve, as well as all of its partial derivates w.r.t.
+the parameters. Most rotation curve shapes have two parameters,
 a velocity and a radial scale parameter, and they are usually
 the first and second parameter. Note that the user needs to know how
 many parameters a \fIrotcur\fP function has. Apart from a number
@@ -261,7 +261,7 @@ real rotcur_plummer(real r, int np, real *p, real *d)
 .PP
 Here is a list of the builtin rotation curves, where x=r/a is the dimensionless radius:
 .nf
-.ta +0.6i +0.6i +2.5i
+.ta +0.6i +0.8i +2.5i
 Name:	Parameters:	Formula:				Comments:
 -----	-----------	--------				---------
 linear	omega   	v=omega*r				-
@@ -272,9 +272,9 @@ core2	v0,a    	v=v0*x/(1+x^2)^(1/2)			-
 core	v0,a,c  	v=v0*x/(1+x^c)^(1/c)			-
 poly	v0,a,p2,.. 	v=v0*(x+p2*x^2+p3*x^3+.....pN*x^N) 	a needs to be fixed !
 iso	v0,a    	v=v0*sqrt(1-atan(x)/x)			-
-exp	v0,a         	v=v0*(1-exp(-x))                 	-
+exp 	v0,a    	v=v0*(1-exp(-x))                 	-
 nfw	v0,a,c  	v=v0*sqrt((ln(1+cx)-cx/(1+cx))/x/(ln(1+c)-c/(1+c)))	needs a fixed 'c' 	
-power	v0,a,p      	v=v0*x^p                         	a needs to be fixed (scale free)!
+power	v0,a,p  	v=v0*x^p                         	a needs to be fixed (scale free)!
 .fi
 .SH EXAMPLE
 First an example of creating a synthetic velocity field with
@@ -348,7 +348,7 @@ rotcurshape does surprisingly bad on \fBexact\fP data, and often complains about
 the sqrt of a negative number.  Adding a little noise will speed up convergence!
 .PP
 rotcurshape sometimes needs inititial conditions  pathetically close to a minimum
-to converge, and more than often complains with the infamous 
+to converge, and more than often complains with the message
 .nf
 ### Warning [rotcurshape]: nllsqfit=-4: must find better solution (n=225)
 ### Warning [rotcurshape]: ROTCUR: problems with matrix inversion
