@@ -245,7 +245,7 @@ ccdvel, and analysing it with rotcur:
     % set r=`nemoinp 0:100:5`
     % set v=`nemoinp 0:100:5 | tabmath - - "100*%1/(20+%1)" all`
     % ccdvel out=map1.vel rad="$r" vrot="$v" pa=30 inc=60
-    % rotcur in=map1.vel radii=0:100:5 vrot=0:100:5 pa=30 inc=60 vsys=0 tab=map1.rotcur
+    % rotcur in=map1.vel radii=0:100:5 vrot=0:100:5 pa=30 inc=60 vsys=0 tab=map1.rotcur units=arcsec,1
 
     % head map1.rotcur
   radius   systemic   error  rotation   error position    error   inclination  error   x-position   error   y-position   error
@@ -253,6 +253,7 @@ ccdvel, and analysing it with rotcur:
  (arcsec)   (km/s)   (km/s)   (km/s)    (km/s)(degrees)  (degrees)  (degrees)   (degrees) (grids w.r.t. (0,0))  (grids w.r.t. (0,0))
      7.50      0.00     0.44     27.08    0.50    30.45       1.09      59.72       2.47      63.50      0.20      63.50      0.30 96
     12.50     -0.00     0.24     38.54    0.28    30.66       0.41      59.27       0.94      63.50      0.13      63.50      0.20 150
+
     ...
 
     % tail map1.rotcur
@@ -307,5 +308,5 @@ P. J. Teuben (NEMO C version)
 9-may-01	V2.6a: corrected error correction factor	PJT
 10-aug-01	clarified some differences between NEMO and GIPSY versions	PJT
 26-jan-02	Added unit (scale factor) for velocity too	PJT
-25-jun-02	V2.8: added tabular input for irregular spaced data	PJT
+25-jun-02	V2.8: added tabular input for irregular spaced data, fixed example	PJT
 .fi
