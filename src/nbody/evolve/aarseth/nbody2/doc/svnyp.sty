@@ -1,0 +1,553 @@
+\font \tenbf                  = cmb10
+\font \tafontss               = cmbx5  scaled\magstep2
+\font \tbfontss               = cmbx5  scaled\magstep1
+\font \sixbf                  = cmbx6
+\font \tafonts                = cmbx7  scaled\magstep2
+\font \tbfonts                = cmbx7  scaled\magstep1
+\font \ninebf                 = cmbx9
+\font \bxf                    = cmbx10
+\font \tbfontt                = cmbx10 scaled\magstep1
+\font \tafontt                = cmbx10 scaled\magstep2
+\font \tasys                  = cmex10 scaled\magstep1
+\font \tasyt                  = cmex10 scaled\magstep2
+\font \sixi                   = cmmi6
+\font \ninei                  = cmmi9
+\font \kleinhalbcurs          = cmmib10 scaled 833
+\font \tamss                  = cmmib10
+\font \tams                   = cmmib10 scaled\magstep1
+\font \tamt                   = cmmib10 scaled\magstep2
+\font \smallescriptscriptfont = cmr5
+\font \smallescriptfont       = cmr5 at 7pt
+\font \smalletextfont         = cmr5 scaled\magstep4
+\font \sixrm                  = cmr6
+\font \ninerm                 = cmr9
+\font \markfont               = cmr10 scaled\magstep1
+\font \ninesl                 = cmsl9
+\font \tensans                = cmss10
+\font \fivesans               = cmss10 at 5pt
+\font \sixsans                = cmss10 at 6pt
+\font \sevensans              = cmss10 at 7pt
+\font \ninesans               = cmss10 at 9pt
+\font \tbst                   = cmsy10 scaled\magstep1
+\font \tbsss                  = cmsy5  scaled\magstep1
+\font \tasss                  = cmsy5  scaled\magstep2
+\font \sixsy                  = cmsy6
+\font \tbss                   = cmsy7  scaled\magstep1
+\font \tass                   = cmsy7  scaled\magstep2
+\font \ninesy                 = cmsy9
+\font \tast                   = cmsy10 scaled\magstep2
+\font \nineit                 = cmti9
+\font \ninett                 = cmtt9
+% Kodierungen zur automatischen Erstellung des Layouts:
+%\magnification=\magstep1
+\vsize=7.5in
+\hsize=4.5in
+\hfuzz=2pt
+\tolerance=500
+\abovedisplayskip=3 mm plus6pt minus 4pt
+\belowdisplayskip=3 mm plus6pt minus 4pt
+\abovedisplayshortskip=0mm plus6pt minus 2pt
+\belowdisplayshortskip=2 mm plus4pt minus 4pt
+\predisplaypenalty=0
+\frenchspacing
+\newdimen\oldparindent\oldparindent=20pt
+%--------------------------------------------------------------------------
+\def\newline{\hfil\break}
+%-------------------------------------------------------------------
+%
+%  Fontdefinitionen
+%
+% vektor-fonts
+% petit-fonts
+\skewchar\ninei='177 \skewchar\sixi='177
+\skewchar\ninesy='60 \skewchar\sixsy='60
+\hyphenchar\ninett=-1
+%-------------------------------------------------------------------
+% Definition der versal griechischen Buchstaben
+%===============================================================================
+  \mathchardef\Gamma="0100
+  \mathchardef\Delta="0101
+  \mathchardef\Theta="0102
+  \mathchardef\Lambda="0103
+  \mathchardef\Xi="0104
+  \mathchardef\Pi="0105
+  \mathchardef\Sigma="0106
+  \mathchardef\Upsilon="0107
+  \mathchardef\Phi="0108
+  \mathchardef\Psi="0109
+  \mathchardef\Omega="010A
+%-------------------------------------------------------------------------------
+\def\sun{\hbox{$\odot$}}
+\def\la{\mathrel{\mathchoice {\vcenter{\offinterlineskip\halign{\hfil
+$\displaystyle##$\hfil\cr<\cr\sim\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\textstyle##$\hfil\cr<\cr\sim\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\scriptstyle##$\hfil\cr<\cr\sim\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\scriptscriptstyle##$\hfil\cr<\cr\sim\cr}}}}}
+\def\ga{\mathrel{\mathchoice {\vcenter{\offinterlineskip\halign{\hfil
+$\displaystyle##$\hfil\cr>\cr\sim\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\textstyle##$\hfil\cr>\cr\sim\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\scriptstyle##$\hfil\cr>\cr\sim\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\scriptscriptstyle##$\hfil\cr>\cr\sim\cr}}}}}
+\def\sq{\hbox{\rlap{$\sqcap$}$\sqcup$}}
+\def\degr{\hbox{$^\circ$}}
+\def\arcmin{\hbox{$^\prime$}}
+\def\arcsec{\hbox{$^{\prime\prime}$}}
+\def\utw{\smash{\rlap{\lower5pt\hbox{$\sim$}}}}
+\def\udtw{\smash{\rlap{\lower6pt\hbox{$\approx$}}}}
+\def\fd{\hbox{$.\!\!^{\rm d}$}}
+\def\fh{\hbox{$.\!\!^{\rm h}$}}
+\def\fm{\hbox{$.\!\!^{\rm m}$}}
+\def\fs{\hbox{$.\!\!^{\rm s}$}}
+\def\fdg{\hbox{$.\!\!^\circ$}}
+\def\farcm{\hbox{$.\mkern-4mu^\prime$}}
+\def\farcs{\hbox{$.\!\!^{\prime\prime}$}}
+\def\fp{\hbox{$.\!\!^{\scriptscriptstyle\rm p}$}}
+\def\getsto{\mathrel{\mathchoice {\vcenter{\offinterlineskip\halign{\hfil
+$\displaystyle##$\hfil\cr\gets\cr\to\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\textstyle##$\hfil\cr\gets\cr\to\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\scriptstyle##$\hfil\cr\gets\cr\to\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\scriptscriptstyle##$\hfil\cr\gets\cr\to\cr}}}}}
+\def\cor{\mathrel{\mathchoice {\hbox{$\widehat=$}}{\hbox{$\widehat=$}}
+{\hbox{$\scriptstyle\hat=$}}
+{\hbox{$\scriptscriptstyle\hat=$}}}}
+\def\grole{\mathrel{\mathchoice {\vcenter{\offinterlineskip\halign{\hfil
+$\displaystyle##$\hfil\cr>\cr\noalign{\vskip-1.5pt}<\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\textstyle##$\hfil\cr
+>\cr\noalign{\vskip-1.5pt}<\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\scriptstyle##$\hfil\cr
+>\cr\noalign{\vskip-1pt}<\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\scriptscriptstyle##$\hfil\cr
+>\cr\noalign{\vskip-0.5pt}<\cr}}}}}
+\def\lid{\mathrel{\mathchoice {\vcenter{\offinterlineskip\halign{\hfil
+$\displaystyle##$\hfil\cr<\cr=\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\textstyle##$\hfil\cr<\cr=\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\scriptstyle##$\hfil\cr<\cr=\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\scriptscriptstyle##$\hfil\cr<\cr=\cr}}}}}
+\def\gid{\mathrel{\mathchoice {\vcenter{\offinterlineskip\halign{\hfil
+$\displaystyle##$\hfil\cr>\cr=\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\textstyle##$\hfil\cr>\cr=\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\scriptstyle##$\hfil\cr>\cr=\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\scriptscriptstyle##$\hfil\cr>\cr=\cr}}}}}
+\def\sol{\mathrel{\mathchoice {\vcenter{\offinterlineskip\halign{\hfil
+$\displaystyle##$\hfil\cr\sim\cr\noalign{\vskip-0.25truemm}<\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\textstyle##$\hfil\cr\sim\cr<\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\scriptstyle##$\hfil\cr\sim\cr<\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\scriptscriptstyle##$\hfil\cr\sim\cr<\cr}}}}}
+\def\sog{\mathrel{\mathchoice {\vcenter{\offinterlineskip\halign{\hfil
+$\displaystyle##$\hfil\cr\sim\cr\noalign{\vskip-0.25truemm}>\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\textstyle##$\hfil\cr\sim\cr>\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\scriptstyle##$\hfil\cr\sim\cr>\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\scriptscriptstyle##$\hfil\cr\sim\cr>\cr}}}}}
+\def\lse{\mathrel{\mathchoice {\vcenter{\offinterlineskip\halign{\hfil
+$\displaystyle##$\hfil\cr<\cr\simeq\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\textstyle##$\hfil\cr<\cr\simeq\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\scriptstyle##$\hfil\cr<\cr\simeq\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\scriptscriptstyle##$\hfil\cr<\cr\simeq\cr}}}}}
+\def\gse{\mathrel{\mathchoice {\vcenter{\offinterlineskip\halign{\hfil
+$\displaystyle##$\hfil\cr>\cr\simeq\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\textstyle##$\hfil\cr>\cr\simeq\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\scriptstyle##$\hfil\cr>\cr\simeq\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\scriptscriptstyle##$\hfil\cr>\cr\simeq\cr}}}}}
+\def\grole{\mathrel{\mathchoice {\vcenter{\offinterlineskip\halign{\hfil
+$\displaystyle##$\hfil\cr>\cr\noalign{\vskip-1.5pt}<\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\textstyle##$\hfil\cr
+>\cr\noalign{\vskip-1.5pt}<\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\scriptstyle##$\hfil\cr
+>\cr\noalign{\vskip-1pt}<\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\scriptscriptstyle##$\hfil\cr
+>\cr\noalign{\vskip-0.5pt}<\cr}}}}}
+\def\leogr{\mathrel{\mathchoice {\vcenter{\offinterlineskip\halign{\hfil
+$\displaystyle##$\hfil\cr<\cr\noalign{\vskip-1.5pt}>\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\textstyle##$\hfil\cr
+<\cr\noalign{\vskip-1.5pt}>\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\scriptstyle##$\hfil\cr
+<\cr\noalign{\vskip-1pt}>\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\scriptscriptstyle##$\hfil\cr
+<\cr\noalign{\vskip-0.5pt}>\cr}}}}}
+\def\loa{\mathrel{\mathchoice {\vcenter{\offinterlineskip\halign{\hfil
+$\displaystyle##$\hfil\cr<\cr\approx\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\textstyle##$\hfil\cr<\cr\approx\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\scriptstyle##$\hfil\cr<\cr\approx\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\scriptscriptstyle##$\hfil\cr<\cr\approx\cr}}}}}
+\def\goa{\mathrel{\mathchoice {\vcenter{\offinterlineskip\halign{\hfil
+$\displaystyle##$\hfil\cr>\cr\approx\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\textstyle##$\hfil\cr>\cr\approx\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\scriptstyle##$\hfil\cr>\cr\approx\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\scriptscriptstyle##$\hfil\cr>\cr\approx\cr}}}}}
+\def\bbbr{{\rm I\!R}} %reelle Zahlen
+\def\bbbn{{\rm I\!N}} %natuerliche Zahlen
+\def\bbbm{{\rm I\!M}}
+\def\bbbh{{\rm I\!H}}
+\def\bbbk{{\rm I\!K}}
+\def\bbbp{{\rm I\!P}}
+\def\bbbone{{\mathchoice {\rm 1\mskip-4mu l} {\rm 1\mskip-4mu l}
+{\rm 1\mskip-4.5mu l} {\rm 1\mskip-5mu l}}}
+\def\bbbc{{\mathchoice {\setbox0=\hbox{$\displaystyle\rm C$}\hbox{\hbox
+to0pt{\kern0.4\wd0\vrule height0.9\ht0\hss}\box0}}
+{\setbox0=\hbox{$\textstyle\rm C$}\hbox{\hbox
+to0pt{\kern0.4\wd0\vrule height0.9\ht0\hss}\box0}}
+{\setbox0=\hbox{$\scriptstyle\rm C$}\hbox{\hbox
+to0pt{\kern0.4\wd0\vrule height0.9\ht0\hss}\box0}}
+{\setbox0=\hbox{$\scriptscriptstyle\rm C$}\hbox{\hbox
+to0pt{\kern0.4\wd0\vrule height0.9\ht0\hss}\box0}}}}
+\def\bbbe{{\mathchoice {\setbox0=\hbox{\smalletextfont e}\hbox{\raise
+0.1\ht0\hbox to0pt{\kern0.4\wd0\vrule width0.3pt height0.7\ht0\hss}\box0}}
+{\setbox0=\hbox{\smalletextfont e}\hbox{\raise
+0.1\ht0\hbox to0pt{\kern0.4\wd0\vrule width0.3pt height0.7\ht0\hss}\box0}}
+{\setbox0=\hbox{\smallescriptfont e}\hbox{\raise
+0.1\ht0\hbox to0pt{\kern0.5\wd0\vrule width0.2pt height0.7\ht0\hss}\box0}}
+{\setbox0=\hbox{\smallescriptscriptfont e}\hbox{\raise
+0.1\ht0\hbox to0pt{\kern0.4\wd0\vrule width0.2pt height0.7\ht0\hss}\box0}}}}
+\def\bbbq{{\mathchoice {\setbox0=\hbox{$\displaystyle\rm Q$}\hbox{\raise
+0.15\ht0\hbox to0pt{\kern0.4\wd0\vrule height0.8\ht0\hss}\box0}}
+{\setbox0=\hbox{$\textstyle\rm Q$}\hbox{\raise
+0.15\ht0\hbox to0pt{\kern0.4\wd0\vrule height0.8\ht0\hss}\box0}}
+{\setbox0=\hbox{$\scriptstyle\rm Q$}\hbox{\raise
+0.15\ht0\hbox to0pt{\kern0.4\wd0\vrule height0.7\ht0\hss}\box0}}
+{\setbox0=\hbox{$\scriptscriptstyle\rm Q$}\hbox{\raise
+0.15\ht0\hbox to0pt{\kern0.4\wd0\vrule height0.7\ht0\hss}\box0}}}}
+\def\bbbt{{\mathchoice {\setbox0=\hbox{$\displaystyle\rm
+T$}\hbox{\hbox to0pt{\kern0.3\wd0\vrule height0.9\ht0\hss}\box0}}
+{\setbox0=\hbox{$\textstyle\rm T$}\hbox{\hbox
+to0pt{\kern0.3\wd0\vrule height0.9\ht0\hss}\box0}}
+{\setbox0=\hbox{$\scriptstyle\rm T$}\hbox{\hbox
+to0pt{\kern0.3\wd0\vrule height0.9\ht0\hss}\box0}}
+{\setbox0=\hbox{$\scriptscriptstyle\rm T$}\hbox{\hbox
+to0pt{\kern0.3\wd0\vrule height0.9\ht0\hss}\box0}}}}
+\def\bbbs{{\mathchoice
+{\setbox0=\hbox{$\displaystyle     \rm S$}\hbox{\raise0.5\ht0\hbox
+to0pt{\kern0.35\wd0\vrule height0.45\ht0\hss}\hbox
+to0pt{\kern0.55\wd0\vrule height0.5\ht0\hss}\box0}}
+{\setbox0=\hbox{$\textstyle        \rm S$}\hbox{\raise0.5\ht0\hbox
+to0pt{\kern0.35\wd0\vrule height0.45\ht0\hss}\hbox
+to0pt{\kern0.55\wd0\vrule height0.5\ht0\hss}\box0}}
+{\setbox0=\hbox{$\scriptstyle      \rm S$}\hbox{\raise0.5\ht0\hbox
+to0pt{\kern0.35\wd0\vrule height0.45\ht0\hss}\raise0.05\ht0\hbox
+to0pt{\kern0.5\wd0\vrule height0.45\ht0\hss}\box0}}
+{\setbox0=\hbox{$\scriptscriptstyle\rm S$}\hbox{\raise0.5\ht0\hbox
+to0pt{\kern0.4\wd0\vrule height0.45\ht0\hss}\raise0.05\ht0\hbox
+to0pt{\kern0.55\wd0\vrule height0.45\ht0\hss}\box0}}}}
+\def\bbbz{{\mathchoice {\hbox{$\sans\textstyle Z\kern-0.4em Z$}}
+{\hbox{$\sans\textstyle Z\kern-0.4em Z$}}
+{\hbox{$\sans\scriptstyle Z\kern-0.3em Z$}}
+{\hbox{$\sans\scriptscriptstyle Z\kern-0.2em Z$}}}}
+%---------------------------------------------------------------------------
+\def\diameter{{\ifmmode\oslash\else$\oslash$\fi}}
+%------------------------------------------------------------------------
+\newfam\sansfam
+\textfont\sansfam=\tensans\scriptfont\sansfam=\sevensans
+\scriptscriptfont\sansfam=\fivesans
+\def\sans{\fam\sansfam\tensans}
+%---------------------------------------------------------------------------
+% Abbildungen
+\def\begfig#1cm#2\endfig{\par
+\setbox1=\vbox{\dimen0=#1true cm\advance\dimen0
+by1true cm\kern\dimen0#2}%
+\dimen0=\ht1\advance\dimen0by\dp1\advance\dimen0by5\baselineskip
+\advance\dimen0by0.4true cm
+\ifdim\dimen0>\vsize\pageinsert\box1\vfill\endinsert
+\else%keine seitenhohe Abbildung
+\dimen0=\pagetotal\ifdim\dimen0<\pagegoal%aktuelle Seite ist noch nicht voll
+\advance\dimen0by\ht1\advance\dimen0by\dp1\advance\dimen0by1.4true cm
+\ifdim\dimen0>\vsize
+\topinsert\box1\endinsert
+\else\box1\vskip4true mm\fi
+\else\box1\vskip4true mm\fi\fi}
+%
+\def\begdoublefig#1cm #2 #3 \enddoublefig{\begfig#1cm%
+\vskip-.8333\baselineskip\line{\vtop{\hsize=0.46\hsize#2}\hfill
+\vtop{\hsize=0.46\hsize#3}}\endfig}
+%-------------------------------------------------------------------
+% Abbildungslegenden
+% Falls Text kleiner als eine volle Zeile, zentriert.
+\def\figure#1#2{\vskip1true cm\setbox0=\vbox{\noindent\petit{\bf Fig.\ts#1.\
+}\ignorespaces #2\smallskip
+\count255=0\global\advance\count255by\prevgraf}%
+\ifnum\count255>1\box0\else
+\centerline{\petit{\bf Fig.\ts#1.\ }\ignorespaces#2}\smallskip\fi}
+%-----------------------------------------------------------------
+% Tabellenkoepfe
+\def\tabcap#1#2{\vskip0.5truecm\vbox{\noindent\petit{\bf Table\ts#1\unskip.\
+}\ignorespaces #2\vskip0.4truecm}}
+%-------------------------------------------------------------------
+\def\begtab#1cm#2\endtab{\par
+   \ifvoid\topins\midinsert\vbox{#2\hrule width2truecm \kern#1true cm
+\hrule width2truecm\vskip3truemm}\endinsert
+   \else\topinsert\vbox{#2\hrule width2truecm \kern#1true cm
+\hrule width2truecm\vskip3truemm}\endinsert\fi}
+%-------------------------------------------------------------------
+\def\begpet{\vskip6pt\bgroup\petit}
+\def\endpet{\vskip6pt\egroup}
+% Referenzen
+\def\begref{\par\bgroup\petit
+\let\sl=\rm\let\INS=N}
+% Jede Referenz bleibt komplett, kein Seitenumbruch dazwischen
+\def\ref{\goodbreak\if N\INS\let\INS=Y
+\goodbreak\vskip25true pt plus4pt minus4pt
+\noindent{\tbfontt References}\vskip15true pt plus4pt minus4pt
+\mark{References}\fi
+\hangindent0.5\parindent\hangafter=1\noindent\ignorespaces}
+\let\endref=\endpet% Ende der Referenzen
+%-------------------------------------------------------------------
+\def\vec#1{\hbox{\textfont1=\bxf\textfont0=\bxf$#1$}}
+%---------------------------------------------------------------------
+\def\petit{\def\rm{\fam0\ninerm}%
+\textfont0=\ninerm \scriptfont0=\sixrm \scriptscriptfont0=\fiverm
+ \textfont1=\ninei \scriptfont1=\sixi \scriptscriptfont1=\fivei
+ \textfont2=\ninesy \scriptfont2=\sixsy \scriptscriptfont2=\fivesy
+ \def\it{\fam\itfam\nineit}%
+ \textfont\itfam=\nineit
+ \def\sl{\fam\slfam\ninesl}%
+ \textfont\slfam=\ninesl
+ \def\bf{\fam\bffam\ninebf}%
+ \textfont\bffam=\ninebf \scriptfont\bffam=\sixbf
+ \scriptscriptfont\bffam=\fivebf
+ \def\sans{\fam\sansfam\ninesans}%
+ \textfont\sansfam=\ninesans \scriptfont\sansfam=\sixsans
+ \scriptscriptfont\sansfam=\fivesans
+ \def\tt{\fam\ttfam\ninett}%
+ \textfont\ttfam=\ninett
+ \normalbaselineskip=9pt
+ \setbox\strutbox=\hbox{\vrule height7pt depth2pt width0pt}%
+ \normalbaselines\rm
+\def\vec##1{\setbox0=\hbox{$##1$}\hbox{\hbox
+to0pt{\copy0\hss}\kern0.45pt\box0}}}%
+%-------------------------------------------------------------------
+% "running head"
+\headline={\petit\def\newline{ }\def\fonote#1{}\ifodd\pageno
+\rightheadline
+\else
+\rlap{\folio}\kern1.4true cm\ignorespaces\botmark\hfil
+\fi}
+\def\rightheadline{\hfil Chaptertitle\unskip\kern1.4true
+cm\llap{\folio}}
+\mark{Name(s) of the author(s)}
+\nopagenumbers
+%
+% Der Schalter \header gibt an, ob ein "running head" gedruckt werden
+% soll; wenn er nicht auf "N" steht kommt ein solcher.
+\let\header=Y
+\output={\if N\header\headline={\hfil}\fi\plainoutput\global\let\header=Y}
+%----------------------------------------------------------------------
+\def\mkchap#1 #2\fin{\setbox0=\hbox{\petit\def\newline{ }\def\fonote##1{}%
+\rlap{\folio}\kern1.4true cm Chapter\thinspace#1.\ #2}\ifdim\wd0>\hsize
+\message{Your TITLEA exceeds the headline, please use a short form with
+TITLEARUNNING}\gdef\rightheadline{\hfil
+Chapter\thinspace#1.\ Title of chapter suppressed due to excessive
+length\kern1.4true cm\llap{\folio}}%
+\else\gdef\rightheadline{\hfil
+Chapter\thinspace#1.\ \ignorespaces#2\unskip
+\kern1.4true cm\llap{\folio}}\fi
+\global\let\header=N
+\vbox to5true cm{\leftline{\markfont
+Chapter #1}\vskip.3true cm
+\noindent\ignorespaces#2\par\vfil}}%
+%------------------------------------------------------
+\def\authors#1{\bgroup\par
+\baselineskip=15pt
+\lineskip=0pt
+\pretolerance=10000
+\markfont
+\parindent=0pt\relax
+\ignorespaces#1\bigskip\egroup
+\setbox0=\hbox{\petit\kern1.4true cm\ignorespaces#1\unskip}%
+\ifdim\wd0>\hsize
+\message{The name(s) of the author(s) exceed the headline,
+please use a}%
+\message{short form with AUTHORRUNNING}%
+\mark{AUTHORS suppressed due to excessive length}%
+\else
+\mark{\ignorespaces#1}\fi
+\parindent=0pt
+\everypar={\global\parindent=\oldparindent
+\global\everypar={}}%
+\ignorespaces}
+%------------------------------------------------------
+\def\authorrunning#1{\message{Running head on left hand sides (AUTHOR)
+has been changed}\mark{\ignorespaces#1}}
+%------------------------------------------------------
+\let\lasttitle=N
+ % Beginn Ueberschrift 1. Ordnung
+ \def\titlea#1{\vfill\eject
+     \bgroup
+ \textfont0=\tafontt \scriptfont0=\tafonts \scriptscriptfont0=\tafontss
+ \textfont1=\tamt \scriptfont1=\tams \scriptscriptfont1=\tamss
+ \textfont2=\tast \scriptfont2=\tass \scriptscriptfont2=\tasss
+ \textfont3=\tasyt \scriptfont3=\tasys \scriptscriptfont3=\tenex
+     \tafontt
+     \baselineskip=18pt
+     \lineskip=18pt
+     \raggedright
+     \pretolerance=10000
+     \mkchap#1\fin
+     \egroup
+     \nobreak
+     \parindent=0pt
+     \everypar={\global\parindent=\oldparindent
+     \global\let\lasttitle=N\global\everypar={}}%
+     \global\let\lasttitle=A%
+     \ignorespaces}
+%------------------------------------------------------
+\def\split#1 #2\fin{\gdef\rightheadline{\hfil
+Chapter\thinspace#1.\ \ignorespaces#2\unskip
+\kern1.4true cm\llap{\folio}}}
+%------------------------------------------------------
+\def\titlearunning#1{\split#1\fin\message{Excessive headline from TITLEA
+has been corrected}\ignorespaces}
+%------------------------------------------------------
+ % Beginn Ueberschrift 2. Ordnung
+ \def\titleb#1{%
+     \if N\lasttitle\else\vskip-29pt
+     \fi
+     \vskip25pt plus 4pt minus4pt
+     \bgroup
+ \textfont0=\tbfontt \scriptfont0=\tbfonts \scriptscriptfont0=\tbfontss
+ \textfont1=\tams \scriptfont1=\tamss \scriptscriptfont1=\kleinhalbcurs
+ \textfont2=\tbst \scriptfont2=\tbss \scriptscriptfont2=\tbsss
+ \textfont3=\tasys \scriptfont3=\tenex \scriptscriptfont3=\tenex
+     \baselineskip=16pt
+     \lineskip=16pt
+     \raggedright
+     \pretolerance=10000
+     \tbfontt
+     \setbox0=\vbox{\vskip25pt
+     \def\fonote##1{}%
+     \noindent
+     \ignorespaces#1
+     \vskip15pt}%
+     \dimen0=\pagetotal\advance\dimen0 by-\pageshrink
+     \ifdim\dimen0<\pagegoal
+     \dimen0=\ht0\advance\dimen0 by\dp0\advance\dimen0 by
+     2\normalbaselineskip
+     \advance\dimen0 by\pagetotal
+     \ifdim\dimen0>\pagegoal\vfill\eject\fi\fi
+     \noindent\ignorespaces #1
+     \vskip15true pt plus4pt minus4pt\egroup
+%     \setbox0=\hbox{\petit\def\newline{ }\def\fonote##1{}%
+%     \kern1.4true cm#1}\ifdim\wd0>\hsize
+%     \message{Your TITLEB exceeds the headline, please use a short form with
+%TITLEBRUNNING}\mark{Title of section suppressed due to excessive length}%
+%     \else{\def\newline{ }\def\fonote##1{}\mark{#1}}\fi
+     \nobreak
+     \global\let\lasttitle=B%
+     \parindent=0pt
+     \everypar={\global\parindent=\oldparindent
+     \global\let\lasttitle=N\global\everypar={}}%
+     \ignorespaces}
+%------------------------------------------------------
+\def\titlebrunning#1{{\def\newline{ }\def\fonote##1{}\mark{#1}}%
+\message{Excessive headline from TITLEB has been corrected}\ignorespaces}
+%------------------------------------------------------
+ % Beginn Ueberschrift 3. Ordnung
+ \def\titlec#1{%
+     \if N\lasttitle\else\vskip-3pt\vskip-\baselineskip
+     \fi
+     \vskip17pt plus 4pt minus 4pt
+     \bgroup
+     \bxf
+     \raggedright
+     \pretolerance=10000
+     \setbox0=\vbox{\vskip 17pt
+     \def\fonote##1{}%
+     \noindent
+     \ignorespaces#1
+     \vskip10pt}%
+     \dimen0=\pagetotal\advance\dimen0 by-\pageshrink
+     \ifdim\dimen0<\pagegoal
+     \dimen0=\ht0\advance\dimen0 by\dp0\advance\dimen0 by
+     2\normalbaselineskip
+     \advance\dimen0 by\pagetotal
+     \ifdim\dimen0>\pagegoal\vfill\eject\fi\fi
+     \noindent
+     \ignorespaces #1
+     \vskip10pt plus4pt minus4pt\egroup
+     \nobreak
+     \global\let\lasttitle=C%
+     \parindent=0pt
+     \everypar={\global\parindent=\oldparindent
+     \global\let\lasttitle=N\global\everypar={}}%
+     \ignorespaces}
+%------------------------------------------------------
+ % Beginn Ueberschrift 4. Ordnung
+ \def \titled#1{
+     \if N\lasttitle\else\vskip-3pt\vskip-\baselineskip
+     \fi
+     \vskip7true pt plus 4pt minus 4pt
+     \bgroup
+     \bf
+     \noindent
+     \ignorespaces #1\unskip.\ \egroup
+     \ignorespaces}
+%-------------------------------------------------------------------
+\let\ts=\thinspace
+\def\footnoterule{\kern-3pt\hrule width 2true cm\kern2.6pt}
+% Fussnoten-macros
+\newcount\footcount \footcount=0
+\def\advftncnt{\advance\footcount by1\global\footcount=\footcount}
+% Automatisch numerierte Fussnote, Fussnotentex in petit
+\def\fonote#1{\advftncnt$^{\the\footcount}$\begingroup\petit
+       \def\textindent##1{\hangindent0.5\oldparindent\noindent\hbox
+       to0.5\oldparindent{##1\hss}\ignorespaces}%
+\vfootnote{$^{\the\footcount}$}{#1}\endgroup}
+%-------------------------------------------------------------------
+\def\item#1{\par\parindent=\oldparindent\noindent
+\hangindent\parindent\hbox to\parindent{#1\hss}\ignorespaces}
+%-------------------------------------------------------------------
+\def\itemitem#1{\par\parindent=\oldparindent\noindent
+\hangindent1.6\parindent\hangafter=0
+\llap{#1\enspace}\ignorespaces}
+%-------------------------------------------------------------------
+% Acknowledgement
+\def\ack#1{\vskip11pt\begingroup\noindent{\it Acknowledgements\/}.
+\ignorespaces#1\vskip6pt\endgroup}
+%------------------------------------------------------------------
+% Lemma
+\long\def\lemma#1#2{\removelastskip\vskip\baselineskip\noindent{\bf
+\if!#1!\else(#1)\ \fi Lemma. }{\it\ignorespaces#2}\vskip\baselineskip}
+% Theorem
+\long\def\theorem#1#2{\removelastskip\vskip\baselineskip\noindent{\bf
+\if!#1!\else(#1)\ \fi Theorem. }{\it\ignorespaces#2}\vskip\baselineskip}
+% Corollary
+\long\def\corollary#1#2{\removelastskip\vskip\baselineskip\noindent{\bf
+\if!#1!\else(#1)\ \fi Corollary. }{\it\ignorespaces#2}\vskip\baselineskip}
+% Example
+\long\def\example#1#2{\removelastskip\vskip\baselineskip\noindent{\bf
+\if!#1!\else(#1)\ \fi Example. }\ignorespaces#2\vskip\baselineskip}
+%Proof:
+\long\def\proof#1{\removelastskip\vskip0.5\baselineskip\noindent{\it Proof.
+}\ignorespaces#1\vskip\baselineskip}
+%Remark:
+\long\def\remark#1#2{\removelastskip\vskip\baselineskip\noindent
+{\if!#1!\else{\bf(#1)\ }\fi\it Remark. }\ignorespaces#2\vskip\baselineskip}
+%--------------------------------------------------------------------------
+%Definition:
+\long\def\definition#1#2{\removelastskip\vskip\baselineskip\noindent{\bf
+\if!#1!\else(#1)\ \fi Definition. }{\it\ignorespaces#2}\vskip\baselineskip}
+%------------------------------------------------------------------
+\def\typeset{\petit\noindent This article was processed by the author using
+the \TeX\ macro package from Springer-Verlag.\par}
+\outer\def\byebye{\bigskip\bigskip\typeset
+\footcount=1\ifx\speciali\undefined\else
+\loop\smallskip\noindent special character No\number\footcount:
+\csname special\romannumeral\footcount\endcsname
+\advance\footcount by 1\global\footcount=\footcount
+\ifnum\footcount<11\repeat\fi
+\vfill\supereject\end}
+%-------------------------------------------------
+\def\typeset{\petit\noindent This article was processed by the author using
+the \TeX\ macro package from Springer-Verlag.\par}
+\outer\def\bye{\bigskip\bigskip\typeset
+\footcount=1\ifx\speciali\undefined\else
+\loop\smallskip\noindent special character No\number\footcount:
+\csname special\romannumeral\footcount\endcsname
+\advance\footcount by 1\global\footcount=\footcount
+\ifnum\footcount<11\repeat\fi
+\vfill\supereject\end}
+%------------------------------------------------------------------
+\def\frame#1{\bigskip\vbox{\hrule\hbox{\vrule\kern5pt
+\vbox{\kern5pt\advance\hsize by-10.8pt
+\centerline{\vbox{#1}}\kern5pt}\kern5pt\vrule}\hrule}\bigskip}
+%------------------------------------------------------------------
+\def\qed{\ifmmode\sq\else{\unskip\nobreak\hfil
+\penalty50\hskip1em\null\nobreak\hfil\sq
+\parfillskip=0pt\finalhyphendemerits=0\endgraf}\fi}
