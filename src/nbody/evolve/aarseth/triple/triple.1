@@ -1,0 +1,71 @@
+.TH TRIPLE 1NEMO "24 June 1997"
+.SH NAME
+triple \- Three-body regularization integrator with interactive X-windows display
+.SH SYNOPSIS
+\fBtriple\fP < triple.in
+.SH DESCRIPTION
+\fItriple\fP 
+is a three-body regularization program that follows the method of
+Aarseth & Zare (Celestial Mechanics vol 10, pp 185, 19xx).
+.SH INPUT PARAMETERS
+.TP 25
+TOL
+Tolerance for Bulirsch-Stoer integrator.
+.TP
+TCRIT0  
+Maximum time (terminates on escape or TCRIT).
+.TP
+ECRIT   
+Energy error criterion (time reversal only).
+.TP
+IREV    
+Time reversal option (IREV = 0: standard).
+.TP
+MOVIE   
+Movie option (> 0).
+.TP
+XMAX    
+Maximum range (X & Y; movie option).
+.TP
+M,R,V   
+Mass, coordinates & velocities (routine DATA).
+.SH EXAMPLE
+Template:
+.nf
+     1.0D-12 100.0 1.0D-03 0 1 5.0
+.fi
+.SH FILES
+.nf
+.ta +3i
+$NEMO/src/nbody/evolve/aarseth/triple 	source code tree
+.PP
+Sample \fIgalaxy.dat\fP initialization file:
+
+.nf
+1.0E-12 80.0 1.0E-03 0 1 5.0
+3.0 1.0 4.0 0.0 0.0 0.0 0.0
+4.0 -2.0 0.0 0.0 0.0 0.0 0.0
+5.0 1.0 0.0 0.0 0.0 0.0 0.0
+-4.0 -2.0 0.0 0.0 0.0 0.0 0.0
+-5.0 1.0 0.0 0.0 0.0 0.0 0.0
+-6.0 1.0 0.0 0.0 0.0 0.0 0.0
+.SH BENCHMARKS
+The standard Pythagoras problem takes 136 steps and takes:
+.nf
+.ta +1i
+0.24"	sparc Ultra-170
+0.99	Pentium-100
+.fi
+.SH SEE ALSO
+nbody0(1NEMO)
+.PP
+.nf
+Aarseth & Zare, Celestial Mechanics 10, 185.
+.fi
+.SH AUTHOR
+Sverre Aarseth
+.SH HISTORY
+.nf
+.ta +1i +4i
+21-jan-98	V1.0  Aarseth release/adopted for NEMO  	SJA/PJT (ams)
+.fi
