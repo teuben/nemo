@@ -18,7 +18,8 @@ clean:
 NBODY = 10
 FIE = 10*%x+sqrt(%y)
 
-all:	$(BIN) bitpix64
+#all:	$(BIN) bitpix64
+all:	$(BIN) 
 
 ccd.in:
 	@echo Creating $@

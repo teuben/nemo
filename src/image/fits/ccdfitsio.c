@@ -71,7 +71,8 @@ void write_fits(string name,imageptr iptr)
     char *cp;
     string *hitem;
     float *buffer, *bp;
-    int ndim, naxis[3];   /* at most 3D cubes for now */
+    int ndim;
+    long naxis[3];   /* at most 3D cubes for now */
     int status;
     double bscale, bzero;
     
@@ -93,8 +94,6 @@ void write_fits(string name,imageptr iptr)
     if (fits_create_img(fptr,bitpix,ndim,naxis, &status))
       fits_error(status);
     if (ffpprd(fptr,0,1,npix, Frame(iptr), &status))
-      fits_error(status);
-    if (ffflus(fptr, &status))
       fits_error(status);
     if (fits_close_file(fptr, &status))
       fits_error(status);
