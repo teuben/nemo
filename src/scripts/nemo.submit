@@ -1,0 +1,257 @@
+#! /bin/csh -fb
+#
+set version="csh-shell script; 7-feb-95"
+#
+#+
+#  Submit source code from programmers to the NEMO system.
+#  A poor-mans version of RCS/SCSS.
+#  Using a lockfile, source code permissions are changed after
+#  code checkout by programmers to prevent overwriting by
+#  another programmer.
+#
+#    Usage:  nemo.submit [-m] [-i] [-p] [-s] [-u|l] source destdir
+#
+#    -m ........ move files rather than copying
+#    -i ........ run non-interactively
+#    -p ........ preserved timestamp when copying
+#    -l ........ lock submit for other users
+#    -u ........ unlock submit for other users
+#    -s ........ show status of lockfile
+#    -x ........ ignore lock if it was present [UNDOCUMENTED!!!]
+#
+#    source .... source code files(s)
+#    destdir ... destination (must be a directory)
+#
+#  The script requires either group write permissions with NEMO
+#  or has to be installed with set-uid one:
+#		chmod ug+s $NEMOBIN/nemo.submit
+#--
+#
+########################################################################
+#	Submission script for software, could in principle also be
+#	used accros our sites and network... 
+#	Submit is to be used instead of 'cp' to copy/overwrite files
+#	into the miriad tree. It uses a lockfile, such that no two 
+#	users can copy source code within that tree.
+#	If files are updated, a 'invisible' backup is made of the type
+#	.name.<version>, where <version> is a number larger than 0.
+#	These backup files need to be cleaned up periodically by
+#	the system manager.
+#	After the file is copied, the file's write permission is changed
+#	from group to user. The system manager must make sure that the
+#	whole miriad tree at installation time is made group writable
+#	for this to work. If you don't want this, set the 'chmode' shell
+#	variable to 'u+w' instead, or even 'a+w' if more access is needed.
+#       It happily skips over files that are the same. One can hence
+#       safely use: 'submit *.for $MIR/src/subs' when in fact only one
+#       file has been changed and needs to be copied.
+#
+#       mod:     7-feb-94  cloned from the miriad version            PJT
+########################################################################
+
+onintr int_done
+set submit=$NEMO/adm/submit
+if ($status != 0) then
+    echo "SUBMIT> Environment variable NEMO not defined"
+    echo "SUBMIT> needed for lockfile"
+    exit 1
+endif
+set lockfile=$submit/submit.lock
+set logfile=$submit/submit.log
+set chmode=g+w
+set lock=0
+set needlock=1
+if ($#argv == 0) then
+    goto usage
+endif
+#######################################################################
+# set defaults for optional switches, allow first parameters to be 
+# switches, reset is passed as at least 2 required parameters :
+# <file> and <dest-dir>
+set copy=cp
+set int=1
+set dolock=0
+set dounlock=0
+loop1:
+   switch ($argv[1])
+      case -i*:
+         echo "SUBMIT> non-interactive mode"
+         set int=0
+         breaksw
+      case -m*:
+         echo "SUBMIT> moving files as opposed to copying"
+         set copy=mv
+         breaksw
+      case -p*:
+         echo "SUBMIT> copying files while retaining timestamp"
+         # may not work on SYSV
+	 set copy="cp -p"
+         breaksw
+      case -l*:
+         echo "SUBMIT> locking for all other users"
+         set dolock=1
+         breaksw
+      case -u*:
+         echo "SUBMIT> unlocking to free for all other users"
+         set dounlock=1
+         breaksw
+      case -s*:
+         goto showstat
+      case -x*:
+         set needlock=0
+         echo "SUBMIT> bypassing lockfile"
+         breaksw
+      case -*:
+         echo "SUBMIT> ### Warning: unknown switch $argv[1] ignored."
+         breaksw
+      default:
+         goto loop1_done
+   endsw
+   shift argv
+   if ($#argv < 2) then
+      if ($dolock || $dounlock) then
+         goto loop1_done
+      else
+         goto usage
+      endif
+   endif
+   goto loop1
+loop1_done:
+#######################################################################
+if ($needlock == 0) goto loop2_done
+#######################################################################
+if (-e $lockfile) then
+   if ($dounlock) then
+      echo "SUBMIT> removing lockfile"
+      goto ok_done
+   endif
+   echo "SUBMIT> Cannot submit now, pausing until lockfile $lockfile freed..."
+   echo "SUBMIT> Date: `date`"
+   echo "SUBMIT> Contents of lockfile:"
+   cat  $lockfile
+   echo "SUBMIT> hit ^C to abort"
+endif
+
+loop2:
+   if (! -e $lockfile) then
+      set lock=1
+      echo "User:     $LOGNAME"       >> $lockfile
+      echo "Date:     `date`"         >> $lockfile
+      echo "Machine:  `hostname`"     >> $lockfile
+      echo "Submit:   $*"             >> $lockfile
+      chmod g+w $lockfile
+      if ($dolock) goto lock
+      goto loop2_done
+   endif
+   if ($lock == 0) then
+      echo -n "."
+      sleep 5
+      if (! -e $lockfile) echo -n ""
+      goto loop2
+   endif
+loop2_done:
+#######################################################################
+#	get destination directory as last argument
+set n=$#argv
+set dest=$argv[$n]
+if (! -d $dest) then
+   goto err_done
+else
+   set destdir=$dest
+endif
+echo "SUBMIT> destination dir = $destdir"
+#######################################################################
+#	process all args except last one as files to be copied
+loop3:
+   set file=$argv[1]
+   echo "SUBMIT> Processing file=$file ..."
+   if (! -e $file) then
+      echo "SUBMIT> source file $file does not exist"
+      goto loop3_done
+   endif
+   set name=$file:t
+   # echo "SUBMIT> checking $destdir / $name"
+   if (! -e $destdir/$name) then
+      if ($int) then
+        echo -n "SUBMIT> Remote file does not exist, do you want to copy it? [y/n]"
+        set ans=$<
+      else
+        set ans=y
+      endif
+      if ($ans == 'y' || $ans == 'Y') then
+          $copy $file $destdir
+          chmod $chmode $destdir/$name
+      else
+          goto loop3_done
+      endif
+    else
+      cmp -s $file $destdir/$name
+      if ($status == 0) then
+          echo "SUBMIT> $file : Identical files : will not make new version"
+          goto loop3_done
+      endif
+      set olddir=$cwd
+      cd $destdir
+      set nfiles=(`ls .$name.*`)
+      set n=$#nfiles
+      @ n++
+      chmod $chmode $name
+      mv $name .$name.$n
+      echo "SUBMIT> $file : BackupFile .$name.$n created"
+      cd $olddir
+      $copy $file $destdir
+      chmod $chmode $destdir/$name
+      echo "$destdir $file $LOGNAME `hostname` `date`" >> $logfile
+    endif
+loop3_done:
+    shift argv
+    if ($#argv > 1) then
+        goto loop3
+    else
+        goto ok_done
+    endif
+#######################################################################
+ok_done:
+  if ($needlock) rm -f $lockfile
+  echo "SUBMIT> All done..."
+  exit 0
+#######################################################################
+err_done:
+  if ($needlock) rm -f $lockfile
+  echo "SUBMIT> Error: invalid destination directory reference $dest"
+  echo "        NEMO root NEMO = $NEMO"
+  exit 1
+#######################################################################
+int_done:
+  if ($lock)  rm -f $lockfile
+  exit 1
+lock:
+  echo "SUBMIT> Lockfile present now."
+  exit 0
+#######################################################################
+usage:
+  set name=$0 ; set name=$name:t
+  echo "SUBMIT> Version $version"
+  echo "SUBMIT> Not enough parameters for submit (argc=$#argv argv=$*)"
+  echo 'SUBMIT>'
+  echo 'SUBMIT> Usage: '$name' [-m|p] [-i] [-s] [-l|u] <source-file(s)> <dest-dir>'
+  echo 'SUBMIT>'
+  echo 'SUBMIT>  -m: move as opposed to copy (default is cp) [mv]'
+  echo 'SUBMIT>  -p: copy while retaining timestamp [cp -p]'
+  echo 'SUBMIT>  -i: non-interactive mode (default is interactive)'
+  echo 'SUBMIT>  -l: lock for other users (default locks at start)'
+  echo 'SUBMIT>      comments should be added after -lock flag'
+  echo 'SUBMIT>  -u: unlock for other users (default unlocks at end)'
+  echo 'SUBMIT>  -s: status of lockfile'
+  exit 1
+#######################################################################
+showstat:
+  echo -n "Lockfile ($lockfile)"
+  if (-e $lockfile) then
+    echo " exists; its contents is:"
+    cat $lockfile
+  else
+    echo " does not exist"
+  endif
+  exit 0
+#######################################################################
