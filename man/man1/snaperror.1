@@ -1,0 +1,52 @@
+.TH SNAPERROR 1NEMO "24 Mar 2005"
+.SH NAME
+\fBsnaperror\fP performs various potential and force error 
+statistics where an analytical form is known (assumed).
+.SH SYNOPSIS
+\fBsnaperror\fP [parameter=value]
+.SH DESCRIPTION
+This program is really meant for special spherical
+potentials where an analytical form of the density (and potential and force)
+is also known, so the errors can be computed both via the analytical
+and direct summation method.
+See also \fITestGrav(1falcON)\fP.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input file (snapshot) [???]    
+.TP
+\fBmodel=\fP
+Dehnen's MOD number (0=hom.sphere / 1=Plummer /2=gamma-model / 3=Kuzmin disk / 4=hom. disk) [0]
+.TP
+\fBgamma=\fP
+Parameter of model (if any) [1]  
+.SH MODELS
+.TP 10
+0 
+Homogenous sphere of mass 1, radius 1
+.TP
+1 
+Plummer sphere, mass 1, scale-length 1
+.TP
+2 
+Gamma model, free parameter \fBgamma\fP
+.TP
+3 
+Kuzmin disk, mass 1, radius 1
+.TP
+4 
+Homogenenous disk, mass 1, radius 1
+.SH EXAMPLES
+.SH SEE ALSO
+hackforce(1NEMO), TestGrav(1falcON)
+.SH FILES
+src/nbody/reduc
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+24-Mar-05	V0.1 Created	PJT
+.fi
