@@ -8,6 +8,7 @@
 #    6-apr-01   -f added
 #   20-jun-01   -b added
 #   17-jul-01   kludge hackforce, and rotcur
+#   15-feb-03   nemo.coverage 
 #
 #
 # BUG:  -b  does not remove executable, so you never know if new binary did
@@ -26,11 +27,15 @@ set force=0
 set query=0
 set done=0
 set bootstrap=0
+set local=0
 set options=()
 foreach arg ($*)
     switch ($arg)
     case -b:
               set bootstrap=1
+              breaksw
+    case -l:
+              set local=1
               breaksw
     case -n:  
               if ($done) then
@@ -117,12 +122,14 @@ foreach testfile (`find $NEMO/src -name Testfile -print | sort`)
     endif
     echo -n TESTSUITE: $testfile:h
     echo "==========================================================" >>  $log
+    if ($local) pushd $testfile:h >& /dev/null
     make -f $testfile clean all  $options                             >>& $log
     if ($status) then
         echo " Problems"
     else
         echo " OK"
     endif
+    if ($local) popd >& /dev/null
 end
 echo "TESTSUITE   ended `date`"                                       >> $log
 
