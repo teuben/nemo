@@ -467,7 +467,6 @@ int get_data_select(char * infile,
   
   if (SP_io) {
     free(SelectedPart);
-    free(SelectionString123);
     *nbody=nBodySelected;
   }
   return 1;
