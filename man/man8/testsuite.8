@@ -1,0 +1,62 @@
+.TH TESTSUITE 8NEMO "2 April 1997"
+.SH NAME
+testsuite \- 
+.SH SYNOPSIS
+.PP
+\fBtestsuite \fI[options]\fP \fIkey=val\fP
+.SH DESCRIPTION
+\fItestsuite\fP runs a standard number of NEMO programs to excersize
+a core of frequently used NEMO programs.
+.SH OPTIONS
+.TP 20
+-n
+dry-run, only show which directories have Testfile's
+.TP
+-r
+cleanup and remove working directory $NEMO/tmp/testXXXXX afterwards
+.TP
+-c
+clean the NEMO directory tree itself of Testfile in/out files by running
+'make -f Testfile clean' in all directories.
+.TP
+-s
+show all the binaries that are needed for each test
+.TP
+-h
+help
+.SH KEYWORDS
+These are supplied after all options, and take the form KEYWORD=value.
+All keywords are in upper case, since they are ``makefile'' macros.
+.TP 20
+NBODY
+Number of bodies. Should be at least 10 or so, making it less can break
+some code. Default: 10.
+.TP
+N
+Size of a testimage. Default: 2.
+
+.SH TESTFILE
+Each \fBTestfile\fP should have a standard number of targets:
+.nf
+.ta +1i
+help:    	report the directory name
+need:      	report all NEMO binaries needed to run the test
+all:       	run all tests
+clean:     	clean up all data files created by "all"
+.fi
+.SH "SEE ALSO"
+mknemo(8NEMO), need(8NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2i
+Testfile                        	makefile with testsuite targets
+$NEMO/src/scripts/testsuite        	script
+$NEMO/tmp/testXXXXX               	directory with data and log files
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1i +4i
+2-apr-97	V1.0: doc created       	PJT
+.fi
