@@ -1,0 +1,9 @@
+/* @(#)glob.h	1.1 (TRW) 1/14/86 */
+#define GLOB_MAX_PATTERN	1024
+#define GLOB_OK			0
+#define GLOB_PATTERN_TOO_BIG	-1
+#define GLOB_PATTERN_EMPTY	-2
+#define GLOB_BRACKET_MISSING	-3
+#define GLOB_RANGE_INVERTED	-4
+#define GLOB_SET_TOO_BIG	-5
+#define GLOB_EXECUTION_ERROR	-6

@@ -1,0 +1,89 @@
+Article 180 of comp.sources.misc:
+Relay-Version: version B 2.10.3 alpha 5/22/85; site osu-eddie.UUCP
+Path: osu-eddie!cbosgd!ihnp4!ptsfa!ames!husc6!necntc!ncoast!allbery
+From: simpson@trwrb.UUCP (Scott Simpson)
+Newsgroups: comp.sources.misc
+Subject: Patches for LaTeX Index Processor
+Message-ID: <4222@ncoast.UUCP>
+Date: 20 Aug 87 01:59:43 GMT
+Date-Received: 20 Aug 87 15:29:28 GMT
+Sender: allbery@ncoast.UUCP
+Lines: 73
+Approved: allbery@ncoast.UUCP
+X-Archive: comp.sources.misc/8708/35
+
+Here are a set of patches for my LaTeX index processor.  There are a couple of
+bugs.  An empty group such as
+	\indexentry{\LaTeX{}}
+causes a syntax error.  Also, the lexical analyzer does not look at
+surrounding context when it encounters a comment character.  For example, in
+	\indexentry{\verb"%"}
+the text after the % is not passed to the parser.  Since LaTeX does not ever
+generate comments, I just changed it so % is a normal character.  Here are the
+diffs suitable for patch.
+		Scott Simpson
+		TRW Space and Defense Sector
+		...{decvax,ihnp4,ucbvax}!trwrb!simpson
+
+*** /usr/local/src/cmd/index/indexlex.l	Fri Jun 26 08:24:01 1987
+--- indexlex.l	Mon Aug 17 10:29:06 1987
+***************
+*** 30,36
+  			    strcpy(yylval.value, yytext);
+  			    return(CONTROLSEQUENCE);
+  			}
+- \%.*\n			LineNo = EndLineNo++;	/* Comment. Don't pass to parser */
+  {integer}		{
+  			    LineNo = EndLineNo;
+  			    strcpy(yylval.value, yytext);
+
+--- 30,35 -----
+  			    strcpy(yylval.value, yytext);
+  			    return(CONTROLSEQUENCE);
+  			}
+  {integer}		{
+  			    LineNo = EndLineNo;
+  			    strcpy(yylval.value, yytext);
+***************
+*** 52,58
+  			    strcpy(yylval.value, yytext);
+  			    return(WHITESPACE);
+  			}
+! [^\\\{\}\%\, \t\n0-9]+	{
+  			    LineNo = EndLineNo;
+  			    strcpy(yylval.value, yytext);
+  			    return(STRING);
+
+--- 51,57 -----
+  			    strcpy(yylval.value, yytext);
+  			    return(WHITESPACE);
+  			}
+! [^\\\{\}\, \t\n0-9]+	{
+  			    LineNo = EndLineNo;
+  			    strcpy(yylval.value, yytext);
+  			    return(STRING);
+*** /usr/local/src/cmd/index/index.y	Fri Jun 26 08:24:00 1987
+--- index.y	Mon Aug 17 10:29:06 1987
+***************
+*** 390,396
+  	    $$ = $2;
+  	}
+      |
+!     anyelement		/* Default action is $$ = $1 */
+      ;
+  
+  anyelement :
+
+--- 390,399 -----
+  	    $$ = $2;
+  	}
+      |
+! 	/* epsilon */
+! 	{
+! 	    ;	/* Do nothing */
+! 	}
+      ;
+  
+  anyelement :
+
+

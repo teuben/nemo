@@ -1,0 +1,208 @@
+.\" $Header
+.if t .ds LX L\v'-.22m'a\v'.22m'T\h'-.1667m'\v'.22m'E\h'-.125m'\v'-.22m'X
+.if n .ds LX LaTeX
+.TH INDEX 5 TRW
+.UC
+.SH NAME
+index \- format of alphabetization stanza for LaTeX index processor
+.SH ORIGIN
+TRW
+.SH SYNOPSIS
+~/.alphabetize
+.SH DESCRIPTION
+The \*(LX index processor
+.IR index (1)
+reads the file
+.I .alphabetize
+file in the home directory to determine
+how to sort index entries.
+This file is in 
+.IR profile (5)
+format and consists of a stanza containing bindings.
+These bindings consist of key/value pairs.
+There may be multiple values for each key.
+.PP
+The stanza contained in the 
+.I .alphabetize 
+file should contain one stanza with the marker 
+.I alphabetize.
+This stanza may contain three keys: 
+.I skipchars,
+.I mapctrlsequence 
+and 
+.I mapindexentry.
+.PP
+.I Skipchars
+is a list of characters to ignore when alphabetizing index entries.
+.PP
+.I Mapctrlsequence
+is a list of pairs of values.
+The odd numbered value 
+.I n
+(a control sequence)
+maps into the even value
+.I n+1
+(any text).
+The leading backslash may 
+be omitted for the odd control sequence strings.
+.PP
+.I Mapindexentry
+is a list of index entries to match exactly.
+The odd numbered value
+.I n
+(an index entry) maps into the even value
+.I n+1
+(any text).
+The backslashes
+may not be omitted here.
+.SH EXAMPLES
+Here is an example stanza to help clarify some ideas.
+.RS
+.nf
+.ta \w'    mapctrlsequence     'u
+alphabetize
+{
+    skipchars		'{' '}' '$' '\e^' '\e'' '`' '_' '"'
+    mapctrlsequence	"\e\etrwlogo" "TRW" \e
+			"LaTeX" "LaTeX"
+    mapindexentry	"\e\everb|\e\e\e\e|" "\e\e" \e
+			"\e\everb|\e\e\e"|" "\e""
+}
+.fi
+.RE
+When alphabetizing the index file, the characters {, }, $, ^, ', `, _,
+and " will be ignored.
+.IR Profile (5)
+requires escaping the ^, ' and \e.
+.PP
+The control word
+.I \etrwlogo
+will be treated as the string
+.I TRW
+wherever it occurs in an index entry
+and the control word
+.I \eLaTeX
+will be treated as 
+.I LaTeX
+wherever it occurs in an index entry.
+Note that the leading backslash in the third value (i.e.,
+.IR \eLaTeX )
+can be omitted without ill effect.
+Normally, control words and control symbols are removed when alphabetizing.
+.PP
+The index entries
+.I \everb|\e\e|
+and
+\fI\everb|\e"|\fR
+will be treated as \e and " when alphabetizing, respectively.
+.PP
+Here is one last example illustrating the sorting rules.
+Suppose we have the stanza
+.RS
+.nf
+.ta \w'    mapctrlsequence     'u
+alphabetize
+{
+    skipchars		'{' '}'
+    mapctrlsequence	"\e\ehello" "salutation"
+    mapindexentry	"{\e\ela de da}" "z"
+}
+.fi
+.RE
+and we have the
+.I \eindex
+commands
+.RS
+.nf
+\eindex{{\ebf Orca!} kills}
+\eindex{say,{\ela de da}}
+\eindex{say,{\ehello} there}
+\eindex{say,mazzard}
+\eindex{{\ela de da} de da}
+\eindex{{\eit Wolfman} Jack}
+.fi
+.RE
+sprinkled throughout the document.
+\*(LX may generate the following 
+.I idx
+file
+.RS
+.nf
+\eindexentry{{\ebf Orca!} kills}{5}
+\eindexentry{say,{\ela de da}}{10}
+\eindexentry{say,{\ehello} there}{15}
+\eindexentry{say,mazzard}{20}
+\eindexentry{{\ela de da} de da}{25}
+\eindexentry{{\eit Wolfman} Jack}{30}
+.fi
+.RE
+After running through
+.I index
+we obtain the 
+.I ind
+file
+.RS
+.nf
+\ebegin{theindex}
+\eitem {\ela de da} de da 25
+\eindexspace
+\eitem {\ebf Orca!} kills 5
+\eindexspace
+\eitem say
+  \esubitem mazzard 20
+  \esubitem {\ehello} there 15
+  \esubitem {\ela de da} 10
+\eindexspace
+\eitem {\eit Wolfman} Jack 30
+\eend{theindex}
+.fi
+.RE
+The entries are logically sorted using the strings
+.RS
+.nf
+dedadeda
+Orca!kills
+say
+  mazzard
+  salutationthere
+  z
+WolfmanJack
+.fi
+.RE
+Note that the 
+.I mapindexentry
+must match everything between the commas and braces while the 
+.I mapctrlsequence
+matches control sequences anywhere within the index entry.
+.SH COMMENTS
+The 
+.I mapindexentry 
+entries are examined first and must completely match an index entry.
+If they match, no other alphabetizing substitution takes place.
+.br
+Upper and lower case letters are equivalent when sorting.
+Upper case alphabetics are converted to lower case; consequently,
+most non-alphabetic characters precede the alphabetic characters
+in the ASCII collating sequence.
+The exception are the characters {, |, } and ~.
+.br
+Blanks are ignored when sorting.
+.br
+After control sequences are expanded into their logical sort string,
+they are not scanned for
+.I skipchars.
+.br
+Lowercase roman numerals are recognized when the \epagestyle is roman.
+They always precede their arabic counterparts.
+Uppercase roman numerals are not recognized.
+.SH FILES
+.nf
+.ta \w'~/.alphabetize   'u
+~/.alphabetize	alphabetization file
+.fi
+.SH AUTHOR
+Scott Simpson
+.SH SEE ALSO
+index(1), profile(3), profile(5), ascii(7)
+.SH BUGS
+This manual page is confusing.

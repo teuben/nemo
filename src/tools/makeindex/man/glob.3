@@ -1,0 +1,173 @@
+.\" %W% (TRW) %G%
+.TH GLOB 3 TRW
+.UC
+.SH NAME
+glob \- shell style pattern matching
+.SH SYNOPSIS
+.nf
+.B #include <local/glob.h>
+
+.B int glob_compile(pattern, buffer)
+.B char *pattern;
+.B char *buffer;
+
+.B int glob_execute(buffer, s)
+.B char *buffer;
+.B char *s;
+
+.B int glob_match (pattern, s)
+.B char *pattern;
+.B char *s;
+.fi
+
+.B cc 
+[ flags ] files
+.B -lglob
+[ libraries ]
+.fi
+.SH DESCRIPTION
+.I Glob
+is a pattern matching facility similar to that of
+.IR sh (1)
+and
+.IR csh (1).
+.PP
+A pattern specifies a set of strings of characters.
+A member of this set of strings is said to be matched by the pattern.
+.TP
+(1)
+Any character except a special character matches itself.
+The special characters are [ * and ?.
+.TP
+(2)
+A ? matches any character.
+.TP
+(3)
+A nonempty string
+.I s
+bracketed
+.RI [ s ]
+matches any character in
+.IR s .
+In
+.I s
+] may only appear as the first letter.
+A substring
+.IR a \- b ,
+with
+.I a
+and
+.I b
+in ascending ASCII order,
+stands for the inclusive range of ASCII characters.
+.TP
+(4)
+A * matches 0 or more characters.
+.PP
+.I Glob_compile
+compiles a
+.I pattern
+into an internal form suitable for matching,
+placing the result in the character array
+.IR buffer .
+.I Buffer
+must be a character array of size
+.BR GLOB_MAX_PATTERN .
+.I Glob_compile
+returns 0 if the
+.I pattern
+was compiled successfully;
+otherwise a negative error code is returned.
+.PP
+.I Glob_execute
+checks the argument string
+.I s
+against the compiled
+.IR pattern .
+.I Glob_execute
+returns 1 if the string
+.I s
+matches the compiled pattern in
+.IR buffer ,
+0 if the string
+.I s
+failed to match the compiled pattern in
+.IR buffer ,
+and a negative error code if the compiled pattern was invalid.
+.PP
+The strings passed to both
+.I glob_compile
+and
+.I glob_execute
+may have trailing or embedded newline characters;
+they are terminated by nulls.
+.PP
+.I Glob_match
+compiles
+.I pattern
+and matches it against the argument string
+.IR s .
+It returns 1 if the string
+.I s
+matches the pattern;
+0 if the string
+.I s
+fails to match the pattern
+and a negative error code if the pattern was invalid.
+.SH AUTHOR
+Michael Gorlick, TRW
+.SH SEE ALSO
+regex(3)
+.SH DIAGNOSTICS
+The following diagnostic codes are provided:
+.TP
+GLOB_OK
+returned by
+.I glob_compile
+indicating the pattern compiled successfully;
+.TP
+GLOB_PATTERN_TOO_BIG
+returned by
+.I glob_compile
+or
+.I glob_match
+indicating the compiled pattern overflowed the buffer;
+.TP
+GLOB_PATTERN_EMPTY
+returned by
+.I glob_compile
+or
+.I glob_match
+indicating the pattern is the empty string;
+.TP
+GLOB_BRACKET_MISSING
+returned by
+.I glob_compile
+or
+.I glob_match
+indicating that a set expression
+.RI [ s ]
+is missing the terminating bracket ];
+.TP
+GLOB_RANGE_INVERTED
+returned by
+.I glob_compile
+or
+.I glob_match
+indicating a range expression in a set
+is inverted, for example [z-a];
+.TP
+GLOB_SET_TOO_BIG
+returned by
+.I glob_compile
+or
+.I glob_match
+indicating a compiled set requires more than 127 bytes
+(a single character consumes 2 bytes and a range consumes 3 bytes);
+.TP
+GLOB_EXECUTION_ERROR
+returned by
+.I glob_execute
+or
+.I glob_match
+indicating an internal error.

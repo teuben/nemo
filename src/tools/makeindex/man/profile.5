@@ -1,0 +1,230 @@
+.\" @(#)profile.5	1.1 (TRW) 6/11/84
+.TH PROFILE 5 TRW
+.UC 4
+.SH NAME
+profile \- configuration file format
+.SH SYNOPSIS
+.B #include <local/profile.h>
+.SH DESCRIPTION
+.I Profile
+is a general purpose configuration file facility.
+.PP
+Each profile is an ASCII file containing a sequence of one or more
+.IR stanzas .
+Each stanza in turn consists of a sequence of
+.I markers
+followed by a sequence of
+.IR bindings .
+The characters `{' (left brace) and `}' (right brace)
+delimit the beginning and end respectively of the stanza bindings.
+Each binding consists of a name
+followed by an optional sequence of values. 
+.SH MARKERS
+Markers are arbitrary patterns in the style of
+.IR glob (3)
+delimited by white space.
+The list of markers may be empty.
+There is no limit to the number of markers.
+Examples of markers are:
+.nf
+
+	queue
+	/usr/lib
+	1776
+	a_long_marker
+	file[0-9]*.?
+.fi
+.SH BINDINGS
+Bindings are the association of names with values.
+There is one binding to a line each consisting of a name followed
+by an optional sequence of values.
+Names and values are separated,
+one from the other,
+by blanks or tabs.
+Here a newline preceded by a backslash is equivalent to a blank.
+The list of bindings may be empty.
+There is no limit to the number of bindings.
+By convention each binding is indented by a single tab.
+.SH NAMES
+Names are arbitrary patterns in the style of
+.IR glob (3)
+delimited by white space.
+.SH VALUES
+Values are
+integer,
+real,
+octal,
+hex,
+character,
+or
+string
+constants.
+Arbitrary text,
+not recognizably one of the aforementioned types,
+is classified as
+.I other
+and is a legitimate value.
+.TP
+integer
+A sequence of digits optionally preceded by a minus sign.
+Every integer constant is taken to be long.
+.TP
+floating
+A floating constant consists of an optional minus sign,
+an integer part
+a decimal point,
+a fraction part,
+an
+.B e
+or
+.BR E ,
+and an optionally signed integer exponent.
+The integer and fraction parts both consist of a sequence of digits.
+Either the integer part or the fraction part (not both)
+may be missing;
+either the decimal point or the
+.B e
+and the exponent (not both) may be missing.
+Every floating constant is taken to be double-precision.
+.TP
+hex
+A sequence of hexidecimal digits preceded by
+.B 0x
+or
+.BR 0X .
+The hexidecimal digits are 0-9, a-e and A-F.
+Every hex constant is taken to be long.
+.TP
+octal
+A sequence of octal digits preceded by
+.B 0o
+or
+.B 0O 
+(digit zero followed by a letter o).
+The octal digits are 0-7.
+Every octal constant is taken to be long.
+.TP
+character
+A character constant is a character enclosed in single quotes.
+Certain non-graphic characters,
+the single quote ',
+the caret ^ and
+the backslash \\,
+may be represented according to the following table of escape sequences:
+.ta 1i +\w'carriage return  'u
+.nf
+
+ 	newline	\\n
+	horizontal tab	\\t
+	backspace	\\b
+	carriage return	\\r
+	form feed	\\f
+	escape	\\e
+	backslash	\\\\
+	single quote	\\'
+	caret	\\^
+	control-@	^@
+	control-A	^A
+	...	...
+	control-Z	^Z
+	control-[	^[
+	control-\\	^\\
+	control-^	^^
+	control-_	^_
+	delete	^?
+	bit pattern	\\\fIddd\fR
+
+.fi
+.DT
+The escape \\\fIddd\fR
+consists of the backslash followed by 1, 2, or 3 octal digits
+which are taken to specify the value of the desired character.
+If the character following a backslash (caret) is not one of those
+specified, the backslash (caret) is ignored.
+.TP
+string
+A string is a sequence of characters surrounded by double quotes, as in
+\fB"..."\fR.
+In a string,
+the double quote character \fB"\fR must be preceded by a \\;
+in addition,
+the same escapes as described for character constants may be used.
+.PP
+Examples of values are:
+.nf
+
+	7
+	-1.293e3
+	0x10a5
+	0o1273
+	'x'
+	"a string"
+	an_other_value
+.fi
+.SH COMMENTS
+Comments may appear anywhere within a profile.
+They are introduced by the character `#' and are terminated by
+the succeeding newline.
+.SH EXAMPLES
+The empty stanza.
+.nf
+
+{
+}
+.fi
+.PP
+A stanza in the configuration file of a fictitious network server.
+.nf
+.ta \w'queue 'u +\w'cost_per_packet 'u +\w'0o125 0x1af  'u
+
+queue net*
+{
+	priority	7	# integer
+	expect	"who is it"	# string
+	send	'?'	# character
+	flags[0-9]	0o125 0x1af 	# octal and hex
+	cost_per_packet	0.28	# floating
+	device	/dev/net	# other
+	homebrew		# a name with no associated value
+}	
+.fi
+.DT
+.PP
+A password file entry recast as a stanza.
+.nf
+.ta \w'brown 'u +\w'password 'u
+
+brown
+{
+	password	/bObOZtyGclMV
+	userid	225
+	groupid	30
+	home	/home/brown
+	shell	/bin/csh
+}
+.fi
+.DT
+.PP
+A termcap entry recast as a stanza.
+.nf
+.ta \w'adm3a 'u +\w'mm 'u
+
+adm3a
+{
+	fullname "lsi adm3a"
+	am
+	bs
+	cm	"\\e=%+ %+ "
+	cl	"1^Z"
+	co	80
+	li	24
+	ho	'^^'
+	ma	"^K^P"
+	nd	'^L'
+	up	'^K'
+}
+.fi
+.SH AUTHOR
+Michael Gorlick, TRW
+.SH SEE ALSO
+glob(3), profile(3)
