@@ -198,6 +198,14 @@ fakehost:
 	ln -s $(NEMOLIB) $(NEMO)/lib/$(FAKEHOST)
 	ln -s $(NEMOOBJ) $(NEMO)/obj/$(FAKEHOST)
 
+TRUEHOST=unknown
+truehost:
+	@echo "Creating dummy (bin,lib,obj) link for TRUEHOST=$(TRUEHOST)"
+	ln -s $(NEMO)/bin/$(TRUEHOST) $(NEMOBIN)
+	ln -s $(NEMO)/lib/$(TRUEHOST) $(NEMOLIB)
+	ln -s $(NEMO)/obj/$(TRUEHOST) $(NEMOOBJ)
+
+
 
 OS = $(NEMOHOST)
 
