@@ -1,0 +1,109 @@
+%	10-dec-90 : created in LaTeX		- PJT
+%	12-jun-92 : updates
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                                                                          %%
+%% To print this LaTex document:                                            %%
+%%                                                                          %%
+%%	latex faq							    %%
+%%	dvipr faq (or whatever)			                            %%
+%%                                                                          %%
+%%                              Peter Teuben                                %%
+%%                                                                          %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentstyle[]{report}
+
+\title{NEMO USERS/PROGRAMMERS MANUAL - SUMMARY SHEET}
+
+\date{Version 2.1-UMD \\
+ Summer 1992 \\
+ Document revised: \today\ by P. Teuben}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{2.5mm}
+
+\centerline{FREQUENTLY ASKED QUESTIONS (FAQ)}
+
+\begin{itemize}
+\item What is NEMO?
+{\bf Answer:} NEMO is a dynamics toolbox, 
+for users as well as programmers. It is a set of programs and libraries,
+which serve to exend your UNIX environment.
+
+\item Does NEMO run on my machine?
+{\bf Answer:} Designed to run under UNIX, some modules have been ported to
+MS-DOS and VMS. We do not recommend nor formally support this.
+\item In what language is NEMO written?
+{\bf Answer:} Most of the source code
+(currently about 10,000 lines) is written in K\&R
+C. There is some support to interface Fortran modules.
+
+\item Who do I contact for more information?
+{\bf Answer:} teuben@astro.umd.edu, who should also receive
+problems, bugs and enhancements..
+
+
+
+\item Do I need to know Unix in order to use NEMO? 
+{\bf Answer:} In short: Yes.  You should know how to log in, things like
+how to use a windowing system and how it applies to your current
+terminal (if you log into a computer from a remote terminal, you cannot
+always use it's graphics capabilities), you ought to know what files and
+directories are, how they are created (either by editor or by programs),
+how you cleanup your directories etc. It will probably help a lot to
+use UNIX pipes, utilities like grep and awk, head and tail etc. 
+
+\item If NEMO is installed on my system, how can I use it?
+{\bf Answer:} Read Appendix A, although you do need to know
+in what directory NEMO has been installed, i.e. the value
+to set the NEMO environment variable to.
+
+\item What kind of programs can I use in NEMO
+{\bf Answer:} The manual pages {\it index.1} and {\it programs.8}.
+Use the script {\tt manlaser}, or something equivalent,
+to get hardcopies.
+The first manual page is an alphabetical index of NEMO programs
+and utilities, the second on a listing by topic.
+
+\item Can files produced by NEMO on one type of
+computer be used on another?
+{\bf Answer:} Yes and No. Some are interchangable (sun, dec)
+as long as they use IEEE for floating point and twos complement
+for integers. Byte ordering is not important, although you will
+see messages that data is being read in byte swapped order. There
+is potential trouble when a program reads two different endian
+programs.
+
+\item 
+{\bf Answer:}
+
+\item 
+{\bf Answer:}
+
+\item 
+{\bf Answer:}
+
+\item 
+{\bf Answer:}
+
+\item 
+{\bf Answer:}
+
+\item 
+{\bf Answer:}
+
+\item 
+{\bf Answer:}
+
+\item 
+{\bf Answer:}
+
+
+\end{itemize}
+
+\end{document}
+
+
+
