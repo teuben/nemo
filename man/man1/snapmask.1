@@ -1,0 +1,65 @@
+.TH SNAPMASK 1NEMO "13 April 1989"
+.SH NAME
+snapmask \- mask out certain particles while copying particles from an N-body system
+.SH SYNOPSIS
+\fBsnapmask in=\fPsnap_in \fBout=\fPsnap_out [parameters=values...]
+.SH DESCRIPTION
+\fBsnapmask\fP copies all particles from an N-body system for which
+a select keyword is given
+.PP
+The Key field (an integer) in the input file (if present) is also copied
+accordingly; when it is not present it will be initialized to the order of
+particles present in the input file, \fB0\fP being the first one, and \fBnbody-1\fP
+the last one.
+.SH PARAMETERS
+The following parameters are reckognized in any order if the keyword is
+also given:
+.TP 25
+\fBin=\fIsnap_in\fP
+Input data is read from \fIsnap_in\fP, which must be in standard
+\fIsnapshot(5NEMO)\fI format [no default].
+.TP
+\fBout=\fIsnap_out\fP
+Copied output data is written to \fIsnap_out\fP, which will also be in 
+\fIsnapshot(5NEMO)\fP format. If output file exists, program refuses
+to overwrite it and dies. [No default]
+.TP
+\fBselect=\fIlist\fP
+List of numbers of all particles to be copied. This list is currently 
+purely by position in the file, and the maximum should never be larger 
+than the maximum number of bodies in any of the snapshots to be copied.
+The keyword \fBkeyoffset\fP (see below) can be used to correct to
+keyvalues to be output.
+Example: "\fB0:1000:10,2000:3000:10\fP". [default:all].
+.TP
+\fBkeyfile=\fIkeyfile\fP
+Filename which is assumed to have a key field used to mask the particles
+to be copied. [default: not used].
+.TP
+\fBkeyoffset=\fIoffset\fP
+Offset applied to the output key. This offset is a temporary hack until more
+programs make use of the key field. The \fIoffset\fP is applied
+before it is compared with the key field in the above mentioned \fIkeyfile\fP.
+E.g. An input file \fIsnap-in\fP with 10 bodies is compared with a
+keyfile \fIsnap-key\fP with 5 bodies numbered 5:9 and  ...
+- Don't use this option, still under development.
+.SH AUTHOR
+Peter Teuben
+.SH SEE ALSO
+snapsort(1NEMO)
+.SH FILES
+.nf
+.ta +3.0i
+~pjt/nbody		snapmask.c snapmask.1
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.5i
+19-Jun-87	Version 1.0: created                	PJT
+9-Mar-88	V1.2: added data-history mechanism	PJT
+xx-jun-88	V1.3 new filestruct               	PJT
+18-aug-88	V1.4 allow different sized snapshots 	PJT
+25-oct-88	V1.5 keyfile + keyoffset introduced  	PJT
+6-apr-89	V1.6: skip diagnostics			PJT
+12-apr-89	V1.6a: different parser for 'select' 	PJT
+.fi
