@@ -63,6 +63,8 @@ string  defv[] = {                        /* DEFAULT INPUT PARAMETERS */
 
 string usage="construct a Plummer model";
 
+string cvsid="$Id$";
+
 /*---------------------------------------------------------------------------
  *  main  --  a tool to make a Plummer model, by invoking mkplummer()
  *            note:  only for 3 dimensions and Carthesian coordinates
