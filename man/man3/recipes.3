@@ -1,0 +1,44 @@
+.TH RECIPES 3NEMO "11 December 1993"
+.SH NAME
+recipes - selection of Numerical Recipes routines
+.SH SYNOPSIS
+.nf
+\fB#include <stdinc.h>\fP
+\fB#include <numrec/\fIroutine\fP\fB>\fP
+.fi
+.SH DESCRIPTION
+A small selection of routines from \fINumerical Recipes\fP 
+(Press et al., 1992), is available from within NEMO.
+(they cannot be compiled outside of NEMO since the
+include file \fB<stdinc.h>\fP is needed).
+.PP
+Note that most NumRec routines in NEMO don't use (fortran) 1-based
+offset arrays, but the (C) 0-based offset arrays. 
+.SH DISCLAIMER
+Although including NumRec source code
+probably violates a whole slew of federal, state and local laws,
+we simply cannot live without them. Since NEMO operates under a
+cannot-sell-for-profit flag, we're probably ok. 
+.SH FILES
+.nf
+.ta +1i
+realft	new
+four1	new
+rkqc	old
+.fi
+.SH BUGS
+Some routines in Version 1 and Version 2 of the original NumRec source
+code give different meaning to the parameters, e.g. \fIrealft\fP now needs
+the length of the array, not half the length.
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +1.5i
+~/inc/numrec  	various stubs
+.fi
+.SH UPDATE HISTORY
+.nf
+.ta +1i +4i
+10-dec-93	document created	PJT
+.fi
