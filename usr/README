@@ -1,3 +1,10 @@
+This directory contains contributed software which has a much looser connection
+to NEMO. Installation is sometimes integrated, but without any formal rules.
+The $NEMO/src tree is more controlled in how routines and programs get compiled.
+
+Portability within the $NEMO/usr tree is not as well maintained as in the $NEMO/src
+tree.
+
 aarseth/firstn/		von Hoerner's N-body code (1960), arguably the first N-body code
 aarseth/hermit/		a Hermite integrator
 
