@@ -18,10 +18,9 @@ given:
 Input file, which must be an \fIorbit(5NEMO)\fP. [No default].
 .TP
 \fBellipse=t|f\fP
-Check how well the orbit is ellipsoidal. 
-This option was really added to check on the amazing property the
-loop orbits have in potentials that are a function of
-ellipsoidal coordinate with constant axis ratio.
+Check how well the orbit is ellipsoidal.  If set to true, it
+will print 
+\fIT, E, r2_min, r2_max, v2_min, v2_max, r2_mean, r2_sigma, v2_mean, v2_sigma, Lmin/Lmax\fP.
 Default: \fBf\fP.
 .SH CAVEAT
 The \fBellipse=t\fP option only makes sense for closed orbits, since

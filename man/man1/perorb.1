@@ -57,11 +57,13 @@ this is taken as the trial energy for the
 first orbit. The trial launch velocity is then calculated from the
 available potential at the specified launch position.
 .TP
-\fBphasestep=\fIstep\fP
-Step in phase space to take to get next orbit. Only
-one number can be given, step in the direction
-as given by the \fBdir\fP keyword. Only used when more
-than one orbit (\fBnorbit\fP) is to be searched for.
+\fBstep=\fIstep,perturb\fP
+Step in phase space to take to get next orbit (the step
+is taken in the direction given by the
+\fBdir\fP keyword. The second number is the perturbation in
+direction \fBdir\fP used to start the first iteration
+that should result in finding the periodic orbit.
+Default: 0.1,0.01
 .TP
 \fBdir=x|y\fP
 Direction in which to step for next orbit.
@@ -132,7 +134,8 @@ near R=1:
 perorb
 INIPOTENTIAL Plummer: [3d version]
 ### Warning [perorb]: DRY RUN: No output orbit file created
-1.007320 0.595679 1.007323 -0.595674 533 3 10.625226 -0.527107 -0.600039
+#  x0       v0       y1        x1    NPT NITER PERIOD   ETOT    LZ_MEAN   ETOT_ERR
+1.007320 0.595679 1.007323 -0.595674 533 3 10.625226 -0.527107 -0.600039 4.08912e-06
 .fi
 The printed columns are pos1(t=0), vel2(t=0), pos2(t=P/2), vel1(t=P/2), l, iter, 
 Period, Energy, meanAngMom.  See also \fIorbstat(1NEMO)\fP for another
@@ -141,16 +144,18 @@ of the 1:1 resonance orbit in a logarithmic potential
 .nf
 
 % perorb potname=log potpars=0,1,1,0.9 norbit=10 out=log.orb
-0.956311 0.675829 0.629557 -1.140210 280 5 5.560441 0.984048 -0.679534
-1.020431 0.731892 0.706384 -1.174306 290 5 5.761082 1.094431 -0.785260
-1.086113 0.781263 0.781720 -1.205717 300 5 5.972464 1.203861 -0.892278
-1.153376 0.825038 0.856210 -1.234575 311 5 6.194336 1.312000 -1.000653
-1.222193 0.864064 0.930308 -1.260978 323 4 6.426479 1.418565 -1.110458
-1.292542 0.898976 1.004360 -1.285151 335 4 6.668597 1.523326 -1.221855
-1.364403 0.930272 1.078516 -1.307186 348 4 6.920329 1.626100 -1.334623
-1.437707 0.958411 1.153092 -1.327410 361 4 7.181385 1.726745 -1.448891
-1.512414 0.983745 1.228047 -1.345782 374 4 7.451368 1.825161 -1.564586
-1.588487 1.006573 1.303499 -1.362555 388 4 7.729841 1.921275 -1.681411
+#  x0      v0        y1        x1    NPT NITER PERIOD   ETOT   LZ_MEAN    ETOT_ERR
+0.956311 0.675829 0.629557 -1.140210 280 5 5.560441 0.984048 -0.679534 -1.4864e-05
+1.020431 0.731892 0.706384 -1.174306 290 5 5.761082 1.094431 -0.785260 -1.55914e-06
+1.086113 0.781263 0.781720 -1.205717 300 5 5.972464 1.203861 -0.892278 -1.50248e-05
+1.153376 0.825038 0.856210 -1.234575 311 5 6.194336 1.312000 -1.000653 -7.58749e-06
+1.222193 0.864064 0.930308 -1.260978 323 4 6.426479 1.418565 -1.110458 -1.37877e-05
+1.292542 0.898976 1.004360 -1.285151 335 4 6.668597 1.523326 -1.221855 -7.93163e-06
+1.364403 0.930272 1.078516 -1.307186 348 4 6.920329 1.626100 -1.334623 -1.17395e-05
+1.437707 0.958411 1.153092 -1.327410 361 4 7.181385 1.726745 -1.448891 -8.47802e-06
+1.512414 0.983745 1.228047 -1.345782 374 4 7.451368 1.825161 -1.564586 -9.25693e-06
+1.588487 1.006573 1.303499 -1.362555 388 4 7.729841 1.921275 -1.681411 -8.9171e-06
+
 
 % orbstat log.orb
 # T	E	x_max	y_max	u_max	v_max	j_mean	j_sigma
@@ -198,5 +203,5 @@ pjt/orbit	original sources
 22-may-90	V1.0 created from old Cyber program 'PERORB'  PJT
 24-may-91	V1.1 rotating XY-frames, fixed energy option  PJT
 19-apr-95	V1.5 various, rk4 is now default integrator	PJT
-18-feb-03	minor code cleanup, improved man page	PJT
+1-mar-03	minor code cleanup, less lies in the man page, added etot_err	PJT
 .fi

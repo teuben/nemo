@@ -153,9 +153,11 @@ If specified, this output table is used in \fIappend\fP mode!
 [Default: not used].
 .TP
 \fBresid\fP=
-If specified, this output table will contain a listing of X, Y, Velocity
-and Residual Velocities in the disk. If the input map was an image, this
-will be an output image of the residual (OBS-FIT). ** under development **
+If specified, this will contain a listing of X, Y, Velocity
+and Residual Velocities in the disk if the input file was a 
+table (see also \fBimagemode=\fP).
+If however the input map was an image, this
+will be an \fIimage(5NEMO)\fP of the residual (OBS-FIT).
 Note for \fBnsigma>0\fP the residual map will be two maps, and
 you will need \fBcsf(1NEMO)\fP to get access to the 2nd (supposedly improved)
 residual map.
