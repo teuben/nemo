@@ -4,6 +4,7 @@
  * 
  *     13-nov-01     V1.0   derived from snapkinem                             PJT
  *     17-nov-01     V1.1   implemented two options for svar= (in UA 1020 !!)  PJT
+ *     19-nov-02     V1.2   process all snapshots in input if requested        PJT
  */
 
 #include <stdinc.h>
@@ -27,7 +28,8 @@ string defv[] = {
     "format=%g\n                 Format used for output columns",
     "normalized=t\n              Use normalized radii is svar= is used?",
     "sort=t\n                    Sort snapshot in svar, if needed",
-    "VERSION=1.1\n		 17-nov-01 PJT",
+    "first=t\n                   Process only first snapshot?",
+    "VERSION=1.2\n		 19-nov-02 PJT",
     NULL,
 };
 
@@ -82,6 +84,7 @@ nemo_main()
     stream instr;
     rproc btrtrans();
     int i, bits, ndim;
+    bool Qfirst = getbparam("first");
 
     instr = stropen(getparam("in"), "r");
     nrad = nemoinpd(getparam("radii"),radii,MAXRAD);
@@ -112,10 +115,12 @@ nemo_main()
     dprintf(1,"Masking range %d - %d\n",STAT_NPT,STAT_MED);
 
     dprintf(1,"Axes: %g %g %g\n",axes[0],axes[1],axes[2]);
-    get_snap(instr, &btab, &nbody, &tsnap, &bits);
-    if (bits & PhaseSpaceBit) {
-      reshape(1);
-      findmoment();
+    while (get_snap(instr, &btab, &nbody, &tsnap, &bits)) {
+        if (bits & PhaseSpaceBit) {
+            reshape(1);
+            findmoment();
+        }
+        if (Qfirst) break;
     }
 }
 
