@@ -1,5 +1,5 @@
 DIR = src/nbody/reduc
-BIN = snapplot snapdiagplot snapplotv snapmradii radprof
+BIN = snapplot snapdiagplot snapplotv snapmradii radprof real
 NEED = $(BIN) hackcode1 mkplummer tabplot
 
 help:
@@ -47,3 +47,10 @@ snapmradii: hack2.out
 radprof:   snap.in
 	@echo Running $@
 	radprof snap.in tab=t > /dev/null ; nemo.coverage radprof.c
+
+real:
+	@echo Checking d2f for snapfour
+	mkplummer - 100 | csf - - convert=d2f | snapfour - radii=0:2
+	@echo Checking f2d for snapfour
+	mkplummer - 100 | csf - - convert=f2d | snapfour - radii=0:2
+
