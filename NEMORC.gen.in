@@ -19,7 +19,7 @@ setenv NEMOSITE `hostname`
 #  those cases you will need to tailor various path elements.
 
 #  Here's your default YAPP library
-setenv YAPPLIB     $NEMOLIB/yapp_@YAPP_NAME@.o @YAPP_LIBS@
+setenv YAPPLIB     "$NEMOLIB/yapp_@YAPP_NAME@.o @YAPP_LIBS@"
 setenv YAPP        /xs
 setenv PGPLOT_DIR  @PGPLOT_DIR@
 setenv PGPLOT_LIB  @PGPLOT_DIR@
