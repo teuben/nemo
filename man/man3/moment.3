@@ -1,4 +1,4 @@
-.TH MOMENT 3NEMO "13 June 1995"
+.TH MOMENT 3NEMO "17 April 2004"
 .SH NAME
 ini_moment, accum_moment, decr_moment, 
 reset_moment, show_moment, n_moment, sum_moment,
@@ -14,7 +14,7 @@ min_moment, max_moment \- various moment and minmax routines
 .B void decr_moment(m, x, w)
 .B void reset_moment(m)
 .PP
-.B real show_moment(m)
+.B real show_moment(m, mom)
 .B int n_moment(m)
 .B real sum_moment(m)
 .B real mean_moment(m)
@@ -53,7 +53,7 @@ typedef struct {
 .fi
 from the standard include file \fImoment.h\fP.
 .SH BUGS
-Does not do a whole lot of sanity checks yet.
+Does not do a whole lot of sanity checks.
 .SH SEE ALSO
 grid(3NEMO)
 .SH AUTHOR
