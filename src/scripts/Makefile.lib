@@ -1,0 +1,40 @@
+#	template Makefile to install NEMO binaries and libraries....
+#	Usually installed as $NEMOLIB/Makefile and use by the 'bake' replace
+#	ment of 'make'
+
+include $(NEMOLIB)/makedefs
+
+L = $(NEMOLIB)/libnemo.a
+OBJFILES=
+BINFILES=
+TESTFILES=
+#	Define an extra SUFFIX for our .doc file
+.SUFFIXES: .doc
+
+.c.doc: $*
+	$* help=t > $*.doc
+	@echo "### Normally this $*.doc file would be moved to NEMODOC"
+	@echo "### You can also use mkpdoc to move it over"
+
+help:
+	@echo "Standard template nemo Makefile"
+	@echo " No more help to this date"
+
+clean:
+	rm -f core *.o *.a *.doc $(BINFILES) $(TESTFILES)
+
+cleanlib:
+	ar dv $(L) $(OBJFILES)
+	ranlib $(L)
+
+$(L):   $(LOBJFILES)
+	echo "*** Now updating all members ***"
+	ar ruv $(L) $?
+	$(RANLIB) $(L)
+	rm -f $?
+				
+lib:   $(L)
+
+bin: $(BINFILES)
+
+#

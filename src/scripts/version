@@ -1,0 +1,74 @@
+#! /bin/csh -f
+#
+#  version control in NEMO
+#
+set v=$NEMO/VERSION
+set h=$NEMOINC/version.h
+
+if (! -e $v) then
+    echo You are using an old version of NEMO without version control
+    if (-e $h) then
+        echo But you do have a version header file...
+    endif
+    exit 1
+endif
+
+
+set version=`cat $v`
+set patch=$version:e
+set id=$version:r
+set minor=$id:e
+set major=$id:r
+
+
+if ($#argv == 0) then
+  echo $version
+  exit 0
+endif
+
+switch ($1)
+  case "inc*":
+        @ patch++
+        breaksw
+  case "set":
+        set version=$2
+        set patch=$version:e
+        set id=$version:r
+        set minor=$id:e
+        set major=$id:r
+        breaksw
+  case "help":
+  case "-h":
+  case "-help":
+  case "--help":
+        goto usage
+  default:
+        echo 'Bad command, try none, or "help"'
+        exit 1
+endsw
+
+set version=$major.$minor.$patch
+
+echo $version
+
+echo updating $v
+echo $version                                             >! $v
+
+echo updating $h
+echo "/* do not edit - created by the version script */"  >! $h
+echo '#define VERSION "'$version'"'                      >>! $h
+
+exit 0
+
+
+#-----------------------------------------------------------------------
+# alternate exit
+
+usage:
+ echo "By default version shows the current NEMO version"
+ echo "Optional commands are:"
+ echo "  set MAJOR.MINOR.PATCH      set a new version id (note 3 components)"
+ echo "  inc                        increment patch level" 
+ echo "        Note: both these commands write the version ID into NEMO"
+ echo '        as maintained in $NEMO/.version and $NEMOINC/version.h'
+ exit 0
