@@ -168,7 +168,7 @@
 	opag      http://www.zero-based.org/software/opag/
  */
 
-#define GETPARAM_VERSION_ID  "3.4m 15-mar-05 PJT"
+#define GETPARAM_VERSION_ID  "3.4n 28-mar-05 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -1828,6 +1828,7 @@ void outbparams(string key, int n, bool *val)
 
 local int readparam(string buffer,string text)
 {
+#if defined(TIOCSTI)
     char *p;
     int  i,n, go = 0;
 
@@ -1850,6 +1851,9 @@ local int readparam(string buffer,string text)
     *p = 0;                      /* terminate string */
     dprintf(1,"readparam: buffer=%d p=%d\n",buffer,p);
     return go;
+#else
+    error("readparam: feature not available (missing TIOCSTI)");
+#endif
 }
 #endif /* INTERACT */
 
