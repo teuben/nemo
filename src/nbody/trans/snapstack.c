@@ -9,6 +9,8 @@
  *	 6-aug-96  1.1d printf -> dprintf
  *	30-dec-97  1.1e ansi 
  *      20-jun-03  1.2  using modern get_snap and put_snap
+ *      13-mar-05  1.3  fix writing the time, free unused
+ *
  */
 #include <stdinc.h>
 #include <getparam.h>
@@ -42,6 +44,7 @@ nemo_main()
     readdata();
     snapstack();
     writedata();
+    freedata();
 }
 
 int nbody, nbody1, nbody2;
@@ -53,15 +56,17 @@ readdata()
 {
     stream instr1, instr2;
 
+
     instr1 = stropen(getparam("in1"), "r");
     get_history(instr1);
     instr2 = stropen(getparam("in2"), "r");
     get_history(instr2);
 
-    get_snap(instr1, &btab1, &nbody1, &tsnap, &bits1);
-    get_snap(instr2, &btab2, &nbody2, &tsnap, &bits2);
+    get_snap(instr1, &btab1, &nbody1, &tsnap1, &bits1);
+    get_snap(instr2, &btab2, &nbody2, &tsnap2, &bits2);
 
     dprintf(1,"nbody1 = %d    nbody2 = %d\n", nbody1, nbody2);
+    dprintf(1,"tsnap1 = %g    tsnap2 = %g\n", tsnap1, tsnap2);
 }
 
 snapstack()
@@ -76,6 +81,8 @@ snapstack()
     btab1 = (body *) reallocate(btab1, sizeof(Body)*nbody);
     btab = btab1;
     tsnap = tsnap1;
+    if (tsnap2 != tsnap)
+      warning("tsnap2=%g not used, since tsnap1=%g",tsnap2,tsnap1);
     bits = (bits1 & bits2);
     memcpy(&btab[nbody1],btab2,sizeof(Body)*nbody2);
 #if 1
@@ -94,9 +101,7 @@ snapstack()
     if (getbparam("zerocm")) snapcenter();
 }
 
-setvect(vec, str)
-vector vec;
-string str;
+setvect(vector vec, string str)
 {
     string *vcp;
     int i;
@@ -115,6 +120,12 @@ writedata()
     outstr = stropen(getparam("out"), "w");
     put_history(outstr);
     put_snap(outstr, &btab, &nbody, &tsnap, &bits);
+}
+
+freedata()
+{
+  free(btab1);
+  free(btab2);
 }
 
 snapcenter() 
