@@ -15,6 +15,11 @@ help:
 clean:
 	rm -f core *.o tkrun testscript.tk  scratchrun.tk
 
+install:
+
+bins:	tkrun
+	mv tkrun $(NEMOBIN)
+
 
 tkrun: tkrun.c
 	$(CC) $(CFLAGS) -o tkrun tkrun.c

@@ -66,6 +66,9 @@ nemo_bin: $(BINFILES)
 	mv $(BINFILES) $(NEMOBIN)
 	rm -f *.o
 
+bins: $(BINFILES)
+	mv $(BINFILES) $(NEMOBIN)
+
 nemo_src:
 	-@for i in $(BINFILES); do \
 	echo `pwd` $$i ; done 

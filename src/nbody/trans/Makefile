@@ -15,7 +15,7 @@ SRCFILES=
 OBJFILES=
 LOBJFILES=
 BINFILES = snapcenter snapsort snapstack snaptrim snaprotate snapdens \
-	hackdens snapscale unbind snapmask snapadd snaprect \
+	snapscale unbind snapmask snapadd snaprect \
         snapsphere snapmass snapspin snaptrans snapvirial
 TESTFILES= snapcopy snapinert snapmerge snapshift snapsplit
 
@@ -70,6 +70,10 @@ nemo_sublibs:
 nemo_bin: nemo_subbins $(BINFILES)
 	mv $(BINFILES) $(NEMOBIN)
 	rm -f *.o
+
+bins: $(BINFILES) 
+	mv $(BINFILES) $(NEMOBIN)
+	(cd hackdens; $(MAKE) bins)
 
 nemo_subbins:
 	-@for i in $(SUBDIRS); do \

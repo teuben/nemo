@@ -8,6 +8,7 @@ SRCS = Makefile README ftoc.c getparam_ftoc.c \
 	getparam.inc
 INCS = getparam.inc
 BINS = ftoc test unfio
+BINFILES = ftoc unfio
 OBJFILES = getparam_ftoc.o unfio.o
 TESTFILES = testunfio funcc funcf
 
@@ -38,7 +39,11 @@ install: .install_lib
 clean:
 	rm -f *~ *.o *.a core $(BINS) $(TESTFILES) test_main.c mainfuncf_tmp.*
 
-bins:	$(BINS)
+#bins:	$(BINS)
+
+bins:	$(BINFILES)
+	mv $(BINFILES) $(NEMOBIN)
+
 tests:  $(TESTFILES)
 	
 

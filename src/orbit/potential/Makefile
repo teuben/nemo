@@ -22,7 +22,7 @@ SRCFILES= potential.c potential0.c potlist.c rotcurves.c \
  	  $(INCFILES) Makefile
 OBJFILES= potential.o fmath.o
 LOBJFILES= $L(potential.o) $L(fmath.o)
-BINFILES = potlist rotcurves potccd
+BINFILES = potlist rotcurves potccd potq
 TESTFILES = potfortest
 
 #	update the library: direct comparison with modules inside L
@@ -91,6 +91,9 @@ nemo_sublibs:
 nemo_bin: nemo_subbins $(BINFILES)
 	mv $(BINFILES) $(NEMOBIN)
 	rm -f *.o
+
+bins: $(BINFILES)
+	mv $(BINFILES) $(NEMOBIN)
 
 nemo_subbins:
 	-@for i in $(SUBDIRS); do \

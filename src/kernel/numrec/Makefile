@@ -73,6 +73,8 @@ install:  .install_lib
 .install_inc: $(INCFILES)
 	cp $? $(NEMOINC)
 
+bins:
+
 # Targets used by Nemo to update libraries and bins.
 
 all:

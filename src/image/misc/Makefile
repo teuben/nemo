@@ -13,7 +13,8 @@ INCFILES =
 SRCFILES = contour.c
 OBJFILES=  contour.o
 LOBJFILES= $L(contour.o)
-BINFILES = ccdgoat ccdplot ccdstat ccdsub ccdmom ccdplot_ps
+BINFILES = ccdgoat ccdplot ccdstat ccdsub ccdmom 
+# ccdplot_ps
 TESTFILES= 
 
 help:
@@ -66,6 +67,9 @@ nemo_sublibs:
 nemo_bin: nemo_subbins $(BINFILES)
 	mv $(BINFILES) $(NEMOBIN)
 	rm -f *.o
+
+bins: $(BINFILES)
+	mv $(BINFILES) $(NEMOBIN)
 
 nemo_subbins:
 	-@for i in $(SUBDIRS); do \

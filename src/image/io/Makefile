@@ -16,7 +16,7 @@ INCFILES = image.h matdef.h xyio.h
 SRCFILES = image.c ccddump.c xyio.c
 OBJFILES=  image.o xyio.o
 LOBJFILES= $L(image.o) $L(xyio.o)
-BINFILES = ccddump ccdprint
+BINFILES = ccddump ccdprint ccdslice sigccd
 TESTFILES= imagetest xyiotest
 
 help:
@@ -71,6 +71,9 @@ nemo_sublibs:
 nemo_bin: nemo_subbins $(BINFILES)
 	mv $(BINFILES) $(NEMOBIN)
 	rm -f *.o
+
+bins: $(BINFILES)
+	mv $(BINFILES) $(NEMOBIN)
 
 nemo_subbins:
 	-@for i in $(SUBDIRS); do \

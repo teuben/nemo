@@ -35,6 +35,8 @@
 extern string *burststring(string,string);
 extern void freestrings(string *);
 
+char *fmtftoc(char *s);
+
 /*
  *  get_atable:  get table in memory, using free format
  *               can be used in multiple passes
@@ -173,7 +175,7 @@ string defv[] = {
     "colfmt=\n      Input format for fixed fmt case",
     "fmt=%g\n       Output format",
     "nmax=1000\n    Maximum number of rows (data) to read",
-    "VERSION=1.1\n  8-dec-01",
+    "VERSION=1.1a\n  12-apr-04",
     NULL,
 };
 
@@ -238,7 +240,7 @@ string scolpos, scolfmt, sfmt;
     int ncol, n, i, j;
     string *sp, *burststring();
     real *dat;
-    char fmt[30], *fmtftoc();
+    char fmt[30];
 
     ncol = nemoinpi(scolpos,coli,MAX_COL);       /* get column positions */
 
@@ -308,12 +310,11 @@ int ncol, ndat;
  *
  */
 
-char *fmtftoc(s)
-char *s;
+char *fmtftoc(char *s)
 {
     char fmt[32];
 
-    if (s == NULL || *s == NULL) {  /* by default use %lf as format */
+    if (s == NULL || *s == 0) {  /* by default use %lf as format */
         strcpy(fmt,"%lf");
     } else if (*s == '%') {         /* C 'printf' format is passed 'as is' */
         sprintf(fmt,"%s",s);

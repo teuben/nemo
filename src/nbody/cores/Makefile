@@ -38,6 +38,9 @@ nemo_lib: $(INCFILES)
 nemo_bin: $(BINFILES)
 	@echo no nemo_bin in `pwd`
 
+bins: $(BINFILES)
+	mv $(BINFILES) $(NEMOBIN)
+
 nemo_src:
 
 clean:

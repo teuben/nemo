@@ -54,6 +54,9 @@ nemo_bin: $(BINFILES)
 	mv $? $(NEMOBIN)
 	rm -f *.o
 
+bins: $(BINFILES)
+	mv $(BINFILES) $(NEMOBIN)
+
 clean:
 	rm -f *.o *.a core $(BINFILES)
 

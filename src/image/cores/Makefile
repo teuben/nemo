@@ -69,6 +69,8 @@ nemo_bin: nemo_subbins $(BINFILES)
 	mv $(BINFILES) $(NEMOBIN)
 	rm -f *.o
 
+bins:
+
 nemo_subbins:
 	-@for i in $(SUBDIRS); do \
 	(cd $$i; echo SUBSUBDIR $$i; $(MAKE) nemo_bin); done

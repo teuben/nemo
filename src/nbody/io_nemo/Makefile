@@ -95,6 +95,9 @@ install:  dirs	.install_lib .install_lib_maing77 .install_lib_dummy test testf
 	ar ruv $(Ldummyc) $?
 	ar ruv $(Ldummyf) $?
 
+bins:
+#	@echo No bins in nemo_io
+
 package :
 	find . -type f \( -name "*.[f,F,c,h,3]"   -o -name "Makefile"  -o -name "*.ps"  -o -name "README*" -o -name "*.csh"  -o -name "Testfile" \) -exec tar uvf io_nemo.tar {} \;
 	gzip -f io_nemo.tar

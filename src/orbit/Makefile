@@ -20,6 +20,10 @@ install:
 	-@for i in $(DIRS); do\
 	(cd $$i;$(MAKE) install); done
 
+bins:
+	-@for i in $(DIRS); do\
+	(cd $$i;$(MAKE) bins); done
+
 update:
 	-@for i in $(DIRS); do\
 	(cd $$i;$(MAKE) update); done

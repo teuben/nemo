@@ -77,6 +77,8 @@ nemo_sublibs:
 nemo_bin: nemo_subbins $(BINFILES)
 	mv $(BINFILES) $(NEMOBIN)
 	rm -f *.o
+bins: $(BINFILES)
+	mv $(BINFILES) $(NEMOBIN)
 
 nemo_subbins:
 	-@for i in $(SUBDIRS); do \

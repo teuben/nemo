@@ -28,6 +28,9 @@ print:
 install: nbody2
 	mv nbody2 $(NEMOBIN)
 
+bins: nbody2
+	mv nbody2 $(NEMOBIN)
+
 clean:
 	\rm -f core nbody2 *.o
 

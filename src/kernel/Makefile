@@ -29,6 +29,10 @@ install:
 	-@for i in $(DIRS); do\
 	(cd $$i;$(MAKE) $(MFLAGS) install); done
 
+bins:
+	-@for i in $(DIRS); do\
+	(cd $$i;$(MAKE) $(MFLAGS) bins); done
+
 all:
 	-@for i in $(DIRS); do\
 	(cd $$i;$(MAKE) $(MFLAGS) all); done

@@ -53,6 +53,9 @@ nemo_lib:
 
 nemo_bin: $(BINFILES)
 	mv $(BINFILES) $(NEMOBIN)
+
+bins: $(BINFILES)
+	mv $(BINFILES) $(NEMOBIN)
 #
 clean:
 	rm -f *.o *.BAK *.CKP potcode core

@@ -12,3 +12,6 @@ clean:
 
 install:
 	(cd source; $(MAKE) $@)
+
+bins:
+	(cd source; $(MAKE) $@)

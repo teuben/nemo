@@ -2,7 +2,8 @@
 include $(NEMOLIB)/makedefs
 
 #	Directories to be visited, in this order
-DIRS = movie movietool
+#DIRS = movie movietool
+DIRS = misc tkrun
 
 
 TARNAME = stuff.tar
@@ -28,6 +29,10 @@ cleanlib:
 install:
 	-@for i in $(DIRS); do\
 	(cd $$i;echo "### Dir: `pwd`";$(MAKE) $(MFLAGS) install); done
+
+bins:
+	-@for i in $(DIRS); do\
+	(cd $$i;echo "### Dir: `pwd`";$(MAKE) $(MFLAGS) bins); done
 
 update:
 	-@for i in $(DIRS); do\

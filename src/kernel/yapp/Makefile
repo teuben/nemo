@@ -48,7 +48,11 @@ LIBMESA	    = -lGL $(LIBX)
 OBJFILES = yapp.o
 YAPPOBJS = yapp_ps.o yapp_null.o yapp_pgplot.o yapp_plplot.o \
 	yapp_cpgplot.o yapp_meta.o
-BINFILES = catps catpgps pltext_ps plarrow_ps
+BINFILES = catps catpgps 
+# wow: the following are TRUE original NEMO V1 programs !!!    can't be in BINFILES yet
+# pltext_ps plarrow_ps
+
+
 TESTFILES = yapptest \
 	   yapptest_mongo yapptest_pgplot yapptest_core yapptest_suntools \
 	   yapptest_gl \
@@ -79,6 +83,9 @@ nemo_lib: $(OBJFILES)
 
 nemo_bin: $(BINFILES)
 	mv $? $(NEMOBIN)
+
+bins: $(BINFILES)
+	mv $(BINFILES) $(NEMOBIN)
 
 nemo_src:
 	-@for i in $(BINFILES); do \

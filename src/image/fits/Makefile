@@ -19,8 +19,9 @@ SRCFILES = fitsio.c fits.c \
 	   ccdfits.c fitsccd.c fitssplit.c scanfits.c
 OBJFILES=  fitsio_nemo.o fits.o
 LOBJFILES= $L(fitsio.o) $L(fits.o)
-BINFILES = ccdfits fitsccd fitssplit scanfits fitstab fitshead fitsgrid \
+BINFILES = ccdfits fitsccd fitssplit scanfits fitstab fitshead \
 	   fitsglue sdsfits
+# fitsgrid <-- is broken ?
 TESTFILES=  format
 
 help:
@@ -76,6 +77,9 @@ nemo_sublibs:
 nemo_bin: nemo_subbins $(BINFILES)
 	mv $(BINFILES) $(NEMOBIN)
 	rm -f *.o
+
+bins: $(BINFILES)
+	mv $(BINFILES) $(NEMOBIN)
 
 nemo_subbins:
 	-@for i in $(SUBDIRS); do \

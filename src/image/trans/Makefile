@@ -13,7 +13,8 @@ INCFILES =
 SRCFILES = 
 OBJFILES=  
 LOBJFILES= 
-BINFILES = ccdsmooth ccdmath ccdflip ccdfill ccdsharp
+BINFILES = ccdsmooth ccdmath ccdflip ccdfill ccdsharp \
+	ccdclip ccdintpol ccdmedian ccdpot
 TESTFILES= 
 
 help:
@@ -66,6 +67,9 @@ nemo_sublibs:
 nemo_bin: nemo_subbins $(BINFILES)
 	mv $(BINFILES) $(NEMOBIN)
 	rm -f *.o
+
+bins: $(BINFILES)
+	mv $(BINFILES) $(NEMOBIN)
 
 nemo_subbins:
 	-@for i in $(SUBDIRS); do \

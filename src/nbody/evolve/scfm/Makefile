@@ -46,6 +46,9 @@ nemo_bin:	$(BINS)
 	mv $? $(NEMOBIN)
 	rm -f *.o
 
+bins: $(BINS)
+	mv $(BINS) $(NEMOBIN)
+
 nemo_src:
 	-@echo `pwd` scfm
 		

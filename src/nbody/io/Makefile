@@ -46,6 +46,9 @@ nemo_lib: $(INCFILES)
 
 nemo_bin: $(BINFILES)
 
+bins: $(BINFILES)
+	mv $(BINFILES) $(NEMOBIN)
+
 nemo_src:
 
 clean:

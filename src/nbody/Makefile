@@ -2,7 +2,7 @@
 include $(NEMOLIB)/makedefs
 
 #	Directories to be visited, in this order
-DIRS = cores cores/bodysub io io_nemo tools init evolve trans reduc fits kepler image
+DIRS = cores cores/bodysub io io_nemo tools init evolve trans reduc fits kepler image xyz
 
 TARNAME = stuff.tar
 CHKFILE = Last_update
@@ -21,6 +21,10 @@ cleanlib:
 install:
 	-@for i in $(DIRS); do\
 	(cd $$i;$(MAKE) install); done
+
+bins:
+	-@for i in $(DIRS); do\
+	(cd $$i;$(MAKE) bins); done
 
 update:
 	-@for i in $(DIRS); do\

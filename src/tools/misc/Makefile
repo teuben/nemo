@@ -6,7 +6,8 @@
 CFLAGS = -O
 LDFLAGS = -O
 
-UTILITIES = crc hd changed redir age  accudate
+#UTILITIES = crc hd changed redir age  accudate
+UTILITIES = hd redir accudate
 
 help:
 	@echo "misc NEMO stuff ($(UTILITIES))"
@@ -19,6 +20,9 @@ nemo_lib:
 nemo_bin: $(UTILITIES)
 	mv $? $(NEMOBIN)
 	rm -f *.o *.a core $(UTILITIES)
+
+bins: $(UTILITIES)
+	mv $? $(NEMOBIN)
 
 nemo_src:
 	-@for i in $(UTILITIES) ; do \

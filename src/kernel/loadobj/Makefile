@@ -90,6 +90,9 @@ install:   .install_lib
 	cp $? $(NEMOINC)
 	@touch .install_inc
 
+bins:	$(BINFILES)
+	mv $(BINFILES) $(NEMOBIN)
+
 ####    Test with DLOPEN()  - sep-90 - pjt
 
 loadobjtest: loadobj.c testloadobj.c 

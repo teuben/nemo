@@ -32,6 +32,7 @@ SRC = nbody0.f nbodyio.c nbodyio.f main.c main.f \
       nbody00.c nbody0.h \
       Makefile Testfile README
 BIN = nbody0 nbody00 nbody0_ff
+BINFILES = $(BIN)
 MAN1= nbody0.1
 MAN = $(MAN1)
 TAR = $(SRC) $(MAN) nbody0.man
@@ -59,6 +60,9 @@ nemo_lib:
 nemo_bin:	$(BIN)
 	mv $? $(NEMOBIN)
 	rm -f *.o
+
+bins:	$(BINFILES)
+	mv $(BINFILES) $(NEMOBIN)
 
 nemo_src:
 	-@for i in $(BIN); do \

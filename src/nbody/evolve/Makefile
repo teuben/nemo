@@ -3,7 +3,7 @@ include $(NEMOLIB)/makedefs
 #
 
 #	Directories to be visited, in this order
-DIRS = hackcode aarseth scfm
+DIRS = hackcode aarseth scfm directcode multicode flowcode potcode 
 
 TARNAME = stuff.tar
 CHKFILE = Last_update
@@ -19,6 +19,10 @@ cleanlib:
 install:
 	-@for i in $(DIRS); do\
 	(cd $$i;echo "### Dir: `pwd`";$(MAKE) install); done
+
+bins:
+	-@for i in $(DIRS); do\
+	(cd $$i;echo "### Dir: `pwd`";$(MAKE) bins); done
 
 update:
 	-@for i in $(DIRS); do\

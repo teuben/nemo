@@ -67,7 +67,7 @@ string defv[] = {	/* DEFAULT INPUT PARAMETERS */
     "seed=0\n	          Random number seed",
     "headline=\n	  Extra text headline for output file",
     "fhalo=\n             Different halo/disk mass fraction from default",
-    "VERSION=1.2b\n	  9-sep-01 PJT",
+    "VERSION=1.2c\n	  12-apr-04 PJT",
     NULL,
 };
 
@@ -149,7 +149,7 @@ string tabfile,testfile;
                vhmax, rhcore, q2i, hamass);
 
     fn = getparam("fhalo");
-    if (*fn != NULL) {                  /* fake a different halo/disk mass */
+    if (*fn) {                             /* fake a different halo/disk mass */
         fhalo = getdparam("fhalo");
         dprintf(0,"=> halo/disk mass ratio changed from %f to %f\n",
 		hamass/dkmass,fhalo);

@@ -56,6 +56,8 @@ install:  .install_lib
 	cp $? $(NEMOINC)
 	@touch .install_inc
 
+bins:
+
 # Targets used by Nemo to update libraries and bins.
 
 nemo_lib: $(LIBFILE)

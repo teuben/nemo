@@ -26,6 +26,9 @@ nbody1:	$(OBJECTS)
 install: nbody1
 	mv nbody1 $(NEMOBIN)
 
+bins: nbody1
+	mv nbody1 $(NEMOBIN)
+
 
 print:
 	@- \rm -f NBODY1.TEXT

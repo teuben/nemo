@@ -51,6 +51,8 @@ nemo_lib: nemo_ann $(OBJ)
 
 nemo_bin: nemo_ann
 
+bins:
+
 nemo_ann:
 	@echo "DIR: `pwd`"
 

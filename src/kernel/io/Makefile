@@ -23,7 +23,7 @@ OBJFILES=  dprintf.o command.o convert.o defv.o extstring.o \
 LOBJFILES= $L(dprintf.o) $L(command.o) $L(convert.o) $L(defv.o) $L(extstring.o) \
            $L(filesecret.o) $L(getparam.o) $L(history.o) $L(memio.o) $L(outdefv.o) \
 	   $L(stropen.o) $L(mstropen(.o) $L(usage.o)
-BINFILES = csf tsf rsf hisf
+BINFILES = csf tsf rsf qsf hisf 
 TESTFILES= getpartest stropentest extstrtest commandtest \
            testio testfs testprompt memiotest mstropentest
 
@@ -78,6 +78,9 @@ nemo_sublibs:
 nemo_bin: nemo_subbins $(BINFILES)
 	mv $(BINFILES) $(NEMOBIN)
 	rm -f *.o
+
+bins: $(BINFILES)
+	mv $(BINFILES) $(NEMOBIN)
 
 nemo_subbins:
 	-@for i in $(SUBDIRS); do \
