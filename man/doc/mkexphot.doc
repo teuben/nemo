@@ -1,0 +1,30 @@
+%N mkexphot
+%D set up an exponential disk in a halo
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man mkexphot' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input table (w/ radius,density,forces,sigmas) [???]
+%A out
+	Output file name (snapshot) [???]
+%A nbody
+	Number of particles for disk [1024]
+%A test
+	Input file with positions to find new velocities []
+%A rmin
+	Inner cutoff radius [0.0]
+%A rmax
+	Outer cutoff radius [25.0]
+%A ratio
+	Z-R Velocity dispersion ratio (at large radii) [2.0]
+%A rcsig
+	Z-R Velocity dispersion conversion scalelength [2.0]
+%A seed
+	Random number seed [0]
+%A headline
+	Extra text headline for output file []
+%A fhalo
+	Different halo/disk mass fraction from default []
+%A VERSION
+	22-jul-91 PJT [1.2]
