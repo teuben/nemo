@@ -30,7 +30,7 @@ string defv[] = {
     "out=\n             output file for some fit modes",
     "nsigma=-1\n        ** delete points more than nsigma away?",
     "par=\n             initial estimates of parameters (p0,p1,p2,...)",
-    "free=\n            free(1) or fixed(0) parameters? [1,1,1,1,....]",
+    "free=\n            free(1) or fixed(0) parameters? [1,1,1,....]",
     "load=\n            If used, uses this dynamic object function (full path)",
     "x=\n               X-values to test the function for, then exit",
     "nmax=10000\n       Default max allocation",
@@ -38,7 +38,7 @@ string defv[] = {
     "lab=\n             Mixing parameter for nllsqfit",
     "itmax=50\n         Maximum number of allowed nllsqfit iterations",
     "numrec=f\n         Try the numrec routine instead?",
-    "VERSION=1.1e\n     11-sep-02 PJT",
+    "VERSION=1.1g\n     31-oct-02 PJT",
     NULL
 };
 
@@ -194,6 +194,39 @@ static void derv_poly(real *x, real *p, real *e, int np)
   }
 }
 
+/* testing for Rahul - oct 2002 */
+
+#define DPR 57.29577951308232
+
+/* #define PHASEAMP */
+
+static real func_arm(real *x, real *p, int np)
+{
+#ifdef PHASEAMP
+  return p[0] + p[1]*cos( (x[0]-p[2])/DPR);
+#else
+  real y = x[0]/DPR;
+
+  return p[0] + p[1]*cos(y) + p[2]*sin(y);
+#endif
+}
+
+static void derv_arm(real *x, real *p, real *e, int np)
+{
+#ifdef PHASEAMP
+  e[0] = 1.0;
+  e[1] = cos( (x[0]-p[2])/DPR);
+  e[2] = p[1]*sin ((x[0]-p[2])/DPR) / DPR;
+#else
+  real y = x[0]/DPR;
+
+  e[0] = 1.0;
+  e[1] = cos(y);
+  e[2] = sin(y);
+#endif
+}
+
+
 
 
 /****************************** START OF PROGRAM **********************/
@@ -220,6 +253,8 @@ nemo_main()
     	do_gauss();
     } else if (scanopt(method,"exp")) {
     	do_exp();
+    } else if (scanopt(method,"arm")) {
+    	do_arm();
     } else
         error("fit=%s invalid; try [line,plane,poly,gauss]",
 	      getparam("fit"));
@@ -683,3 +718,60 @@ do_poly()
       fprintf(outstr,"%g %g %g\n",x[i],y[i],d[i]);
 }
 
+
+
+/*
+ * ARM:     y = a + b * cos [(x-c)/DPR]
+ *      simple m=1 fourier analysis
+ */
+
+do_arm()
+{
+  real *x, *y, *dy, *d;
+  int i,j, nrt, mpar[3];
+  real fpar[3], epar[3],amp,pha;
+  int lpar = 3;
+    
+  if (nxcol < 1) error("nxcol=%d",nxcol);
+  if (nycol < 1) error("nycol=%d",nycol);
+  if (tol < 0) tol = 0.0;
+  if (lab < 0) lab = 0.0;
+
+  x = xcol[0].dat;
+  y = ycol[0].dat;
+  dy = (dycolnr>0 ? dycol.dat : NULL);
+  d = (real *) allocate(npt * sizeof(real));
+  
+  for (i=0; i<lpar; i++) {
+    mpar[i] = mask[i];
+    fpar[i] = par[i];
+  }
+
+  fitfunc = func_arm;
+  fitderv = derv_arm;
+
+  nrt = (*my_nllsqfit)(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
+  printf("nrt=%d\n",nrt);
+#ifdef PHASEAMP
+  printf("Fitting a+b.cos(x-c)/DPR:  \na= %g %g \nb= %g %g\nc= %g %g\n", 
+	 fpar[0],epar[0],fpar[1],epar[1],fpar[2],epar[2]);
+#else
+  printf("Fitting a+c.cos(x/DPR)+s.cos(y/DPR):  \na= %g %g \nc= %g %g\ns= %g %g\n", 
+	 fpar[0],epar[0],fpar[1],epar[1],fpar[2],epar[2]);
+  printf("Converting to amp/phase:\n");
+  amp = sqrt(sqr(fpar[1])+sqr(fpar[2]));
+  pha = atan2(fpar[2],fpar[1])*DPR;
+  printf("amp= %g\n",amp);
+  printf("pha= %g\n",pha);
+
+#endif
+  if (nrt==-2)
+    warning("No free parameters");
+  else if (nrt<0)
+    error("Bad fit, nrt=%d",nrt);
+
+  if (outstr)
+    for (i=0; i<npt; i++)
+      fprintf(outstr,"%g %g %g\n",x[i],y[i],d[i]);
+
+}
