@@ -22,6 +22,7 @@ set head=none
 set header=1
 set footer=1
 set index=0
+set ctexawk=$NEMO/src/scripts/ctex.awk
 
 set n=0
 
@@ -61,28 +62,28 @@ foreach a ($*)
             endif
 	    if ($header) then
               if ($mode == latex) then
-                echo '\documentstyle{report}'
-                echo '\begin{document}'
+                echo '\\documentstyle{report}'
+                echo '\\begin{document}'
               endif
 	    endif
         endif	
         if ($head == section) then
-            echo "\section{$a:r}"
+            echo "\\section{$a:r}"
 	else if ($head == subsection) then
-            echo "\subsection{$a:r}"
+            echo "\\subsection{$a:r}"
 	else if ($head == centerline) then
-            echo "\centerline{$a:r}"
+            echo "\\centerline{$a:r}"
         endif
-	if ($mode == latex) echo "\index{potential, $a}"
-        ctex.awk $a
+	if ($mode == latex) echo "\\index{potential, $a}"
+        $ctexawk $a
         @ n++
 	breaksw
   endsw
 end
 if ($footer) then
   if ($mode == tex) then
-    echo '\bye'
+    echo '\\bye'
   else if ($mode == latex) then
-    echo '\end{document}'
+    echo '\\end{document}'
   endif
 endif
