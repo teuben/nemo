@@ -1,0 +1,61 @@
+.TH HISF 1NEMO "6 May 1995"
+.SH NAME
+hisf \- display and manipulate history of datafiles.
+.SH SYNOPSIS
+.PP
+\fBhisf in=\fPsf_in [parameter=value] .\|.\|.
+.SH DESCRIPTION
+\fIhisf\fP displays the history (\fBHeadline\fP,\fBHistory\fP), 
+as found at the beginning (see \fItsf(1NEMO)\fP) of any 
+structured data file. 
+Optionally it can 
+append a new history text string to the (from data
+stripped) output file. The output (history) has some value in
+adding new history information to an existing data file.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 20
+\fBin=\fIsf_in\fP
+Input file, in binary structured format. [no default].
+.TP
+\fBout=\fIout_file\fP
+output file, in pure history format. The data have been stripped off
+the input file.  [default: none]
+.TP
+\fBitem=\fP
+Select which item to print. It can be a number, in which case the
+appropriate history item is output, or \fBall\fP, in which case
+all history is written out (the default), or \fBheadline\fP,
+in which case only the (optional) one-line headline of the dataset
+is output.
+[Default: \fBall\fP].
+.TP
+\fBhistory=\fIstring\fP
+String appended to the existing history from the input file [default: none].
+.TP
+\fBskip\fP=\fInskip\fP
+Number of lines to skip from the (reverse) history. Since running the
+program, causes \fIhisf\fP itself to appear on the history list,
+a default value of \fB1\fP is used to fake a more sensible output.
+[Default: \fB1\fP].
+.SH BUGS
+\fIhisf\fP will only find history/headline's at the beginning of a datafile.
+Of course this could be seen as the definition of a 'history' line. Use
+\fIcsf(1NEMO)\fP for more manual work.
+.SH "SEE ALSO"
+tsf(1NEMO), csf(1NEMO), history(3NEMO), getparam(3NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +3.0i
+src/kernel/io	history.c (-DTOOLBOX)
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +2.0i +2.0i
+ 8-Mar-88	V1.0: created          	PJT
+22-jul-91	V1.9: documentation updated	PJT
+6-may-95	V2.3: doc up to date with code	PJT
+.fi
