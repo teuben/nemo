@@ -1,15 +1,15 @@
 #
 include $(NEMOLIB)/makedefs
 
+# need to override the overly complex versions that makedefs have ?
 CFLAGS = -O
 FFLAGS = -O
-FC = f77
 
+#   For cambridge, or starlib, sites
 #SL=/star/lib
 #LIBP = -L$(SL) `pgplot_link`
 
 LIBP = -L$(PGPLOT_DIR) -lpgplot -L/usr/X11R6/lib -lX11
-
 LIBX = -L/usr/X11R6/lib -lX11
 
 SOURCE = triple.f binary.f block.f data.f derqp.f difsy1.f impact.f \
@@ -51,7 +51,8 @@ print:
 	@cat $(SOURCE) > TRIPLE.TEXT
 
 
-#	these are benchmarks with the (X) windows display
+#	these are benchmarks with the (X) windows display disabled
+#       use inx0 and inpyth for the ones with a window
 bench:
 	time xtriple < inx0
 	time ptriple < inpyth0
