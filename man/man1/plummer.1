@@ -1,0 +1,27 @@
+.TH PLUMMER 1NEMO "2 June 1988"
+.SH NAME
+plummer \- tabulate Osipkov-Merritt generalization of Plummer model
+.SH SYNOPSIS
+\fBplummer out=\fPout_file [parameter=value] .\|.\|.
+.SH DESCRIPTION
+\fIplummer\fP tabulates an Osipkov-Merritt-Plummer model.  The output
+file, written in binary format, may be used with \fImkommod\fP(1NEMO).
+.SH PARAMETERS
+The following parameters are recognized.
+.TP 24
+\fBout=\fP\fIout_file\fP
+Write binary \fBOsipkovMerrittModel\fP data to \fIout_file\fP.
+Default: \fIrequired\fP.
+.TP
+\fBanisorad=\fP\fIanisotropy_radius\fP
+Radius at which the distribution function becomes significantly
+anisotropic.  If negative, an isotropic model is tabulated.  Default:
+\fB-1.0\fP.
+.TP
+\fBmcutoff=\fP\fIfrac_mass_cutoff\fP
+The output tables extend to the radius corresponding to this fraction
+of the total mass.  Default: \fB0.999999\fP.
+.SH "SEE ALSO"
+mkommod(1NEMO)
+.SH AUTHOR
+Joshua E. Barnes

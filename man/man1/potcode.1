@@ -1,0 +1,167 @@
+.TH POTCODE 1NEMO "24 October 1992"
+.SH NAME
+potcode \- non-selfconsistent N-body code with options to dissipate/diffuse orbits
+.SH SYNOPSIS
+\fBpotcode\fP [\fIparameter\fP=\fIvalue\fP] .\|.\|.
+.SH DESCRIPTION
+\fIpotcode\fP is an equal-timestep N-body integrator which is not 
+self-consistent. The forces and potential are obtained from a standard
+potential descriptor, given by the three keywords
+\fBpotname=,potpars=,potfile=\fP (See also \fIpotential(3,5NEMO)\fP).
+If the potential is conservative, the energy will (should) be conserved,
+but the user is of course free to pick any potential.
+.PP
+In addition to integrating the equations of motion, the particles
+are allowed to loose some (\fBeta\fP) of their random energy (smoothed over
+a certain ``box'' size (\fBcell\fP)), and turn it into mean orbital motion. 
+.PP
+Orbits can also be diffused: each timestep the velocity vector 
+can be rotated over the randomly gaussian distributed angle (\fBsigma\fP).
+.SH PARAMETERS
+The following parameters are recognized; they may be given in any order.
+.TP 24
+\fBin\fP=\fIin-file\fP
+Initial conditions will be read from \fIin-file\fP in snapshot format
+[default: none - but is required].
+.TP
+\fBout\fP=\fIout-file\fP
+If given, results are written to \fIout-file\fP in snapshot format
+[default: empty, no snapshot output file produced].
+.TP
+\fPpotname=\fIname\fP
+name of file of \fIpotential(5NEMO)\fP descriptor 
+[default: \fBharmonic\fP].
+.TP
+\fPpotpars=\fIpar-list\fP
+List of parameters to the potential descriptor. The first
+parameter must be the pattern speed in the x-y plane,
+although rotating frames of reference are not
+yet supported. The remaining parameters are used by the
+\fI_inipotential()\fP routine in the potential descriptor.
+[default: none - let them be defined by routine itself].
+.TP
+\fBpotfile=\fIfile-name\fP
+name of an optional datafile to the potential descriptor.
+This might be an N-body snapshot or list of spline fit
+coefficients etc. [default: none].
+.TP
+\fBsave\fP=\fIstate-file\fP
+If given, the system state will be saved in \fIstate-file\fP after each
+timestep. Useful for some recovery after system crashes.
+.TP
+\fBfreq\fP=\fIinteg-freq\fP
+Inverse time-step, to be used with the time integrator.
+[Default: \fB64.0\fP (64 steps per unit time)].
+.TP
+\fBmode\fP=\fImode-number\fP
+Integration mode number: 0=simpel Eulerian, 
+0=Euler, 
+1=PC (Predictor Corrector) algorithm, 
+2=modified PC algorithm, 
+3=Runge-Kutta (JEB modified)
+4=4th order Runge-Kutta.
+[default: \fB3\fp].
+.TP
+\fBtstop\fP=\fIstop-time\fP
+Time to stop integration in N-body model units.
+Default is \fB2.0\fP.
+.TP
+\fBfreqout\fP=\fIout-freq\fP
+Frequency of major N-body data outputs.
+Default is \fB4.0\fP (4 frames per unit time).
+.TP
+\fBminor_freqout\fP=\fIout-freq\fP
+Frequency of minor diagnostic outputs.
+Default is \fB32.0\fP (32 diagnostic measurements per unit time).
+.TP
+\fBoptions\fP=\fIoption-string\fP
+Miscellaneous control options, specified as a comma-separated list
+of keywords.
+Currently recognized keywords are:
+\fBreset_time\fP: when reading initial data, set \fItnow\fP to zero;
+\fBnew_tout\fP: when restarting, set new output times;
+\fBmass\fP, \fBphi\fP, \fBacc\fP: output mass, potential,
+acceleration data with major data outputs.
+.TP
+\fBeta\fP=\fIloss-fraction\fP
+Fraction of random energy that is dissipated
+[Default: \fB0.0\fP].
+.TP
+\fBcell\fP=\fIbox-size\fP
+Cell size in which dissipation is performed after every timestep.
+Dissipation is current performed on a cartesian grid, in which 
+cells are square (2D) or a cube (3D).
+[Default: \fB0.1\fP].
+.TP
+\fBrmax\fP=\fImax_box-size\fP
+Maximum size of the "box" (actually cube) within which dissipation
+is performed. If a negative number is given, the box is allow to grow
+as large as is needed, though this may consume a lot of memory.
+Default: \fB-1\fP, i.e. box can grow indefinite.
+.TP
+\fBfheat=\fP\fIfheat\fP
+The ratio of diffusion angle to rms velocity dispersion in a cell.
+If \fIfheat>0\fP, each time dissipation is applied, the rms
+velocity dispersion in a cell is computed, and a diffusion angle
+computed. The velocity vector of each particle is then
+rotated with a gaussian distributed value with rms \fIfheat*velsig\fP.
+This in effect gives a dissipation dependant heating source. See also
+\fBsigma=\fP, which is position independant. [Default: \fB0\fP].
+.TP
+\fBsigma\fP=\fIangle\fP
+Diffusion angle, gaussian distributed with this sigma, about which
+each velocity vector is rotated after each timestep.
+[Default: \fB0\fP].
+.TP
+\fBseed\fP=\fIrandom-seed\fP
+Random number seed, only used when diffusion (\fBsigma=\fP) is used.
+0 must be used to get the random seed from the time of the day.
+[Default: \fB0\fP].
+.TP
+\fBheadline\fP=
+Identifying text for this run. Default: not used.
+.SH BUGS
+RK, PC and PC1 don't work in rotating potential - use EULER or RK4.
+.PP
+Since \fBcell\fP is a fixed number throughout the execution,
+is doesn't deal well with systems who's lenght-scale changes,
+in particular, expanding systems will allocate more and more
+space to hold the dissipation grid.
+.SH DISSIPATION
+Various schemes of dissipation can be invoked. Here's one, see
+also Lin & Pringle (1974):
+.PP
+For each cell the relative position and velocity for each particle
+within that cell is computed:
+.nf
+        R   =  r  - <r >
+         i      i     i
+
+        V   =  v  - <v >
+         i      i     i
+.fi
+after which the dimensionless viscosity parameter 'alpha' controls
+the new velocity for each particle after a timestep:
+.nf
+                                 < R  x  V >
+                                    j     j
+        u  =  <v>  - alpha  R  x ------------   +  (1-alpha) V
+         i      i            i                                i
+                                 < R  .  R >
+                                    j     j  
+.fi
+.SH SEE ALSO
+newton0(1NEMO), hackcode1(1NEMO), hackcode3(1NEMO), nbody0(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.ta +1i +4i
+.nf
+5-feb-89	V1.0 written  	PJT
+3-apr-90	V2.0 new potential(5), renamed keywords	PJT
+9-jun-92	V3.0 rotating pattern are now allowed - made rk4	PJT
+17-jun-92	V3.1 fix energy conservation in 'dissipation'	PJT
+19-jun-92	V3.2 added diffusion	PJT
+6-oct-92	V4.0 added rmax=, made options= same as hackcode1	PJT
+24-oct-92	V4.1 added fheat=        	PJT
+.fi

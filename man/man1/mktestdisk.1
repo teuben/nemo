@@ -1,0 +1,54 @@
+.TH MKTESTDISK 1NEMO "2 June 1988"
+.SH NAME
+mktestdisk \- make uniform-density test disk in spheroid
+.SH SYNOPSIS
+\fBmktestdisk out=\fPout_file [parameter=value] .\|.\|.
+.SH DESCRIPTION
+\fImktestdisk\fP sets up a cold disk of test particles orbiting in the
+gravitational field of a user-supplied spheroid.
+.SH PARAMETERS
+The following parameters are recognized.
+.TP 24
+\fBin=\fP\fIin_file\fP	
+Spheroid \fIsnapshot\fP(5NEMO) input file. Default: \fIrequired\fP.
+.TP
+\fBout=\fP\fIout_file\fP
+Write to \fIout_file\fP in \fIsnapshot\fP(5NEMO) form.
+Default: \fIrequired\fP.
+.TP
+\fBrmin=\fP\fImin_disk_radius\fP
+Inner cutoff radius of test-particle disk. Default: \fB0.1\fP.
+.TP
+\fBrmax=\fP\fImax_disk_radius\fP
+Outer cutoff radius of test-particle disk. Default: \fB0.4\fP.
+.TP
+\fBeps=\fP\fIsoftening_parameter\fP
+Force softening, used when computing circular velocities.
+Default: \fB0.0\fP.
+.TP
+\fBndisk=\fP\fInum_bodies\fP
+Number of disk particles. Default: \fB2048\fP.
+.TP
+\fBncenter=\fP\fInum_center\fP
+If positive, the first \fInum_center\fP spheroid particles define the
+center of the test disk. Default: \fB0\fP.
+.TP
+\fBseed=\fP\fIrandom_seed\fP
+Usual random number seed. Default: \fB54321\fP.
+.TP
+\fBheadline=\fP\fImessage\fP
+Text headline for output. Default: \fInone\fP.
+.SH "SEE ALSO"
+mkbaredisk(1NEMO)
+.SH AUTHOR
+Joshua E. Barnes
+
+
+
+
+
+
+
+
+
+

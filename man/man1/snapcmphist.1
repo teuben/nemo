@@ -1,0 +1,77 @@
+.TH SNAPCMPHIST 1NEMO "23 May 1988"
+.SH NAME
+snapcmphist \- compare two N-body snapshots and plot histogram
+.SH SYNOPSIS
+\fBsnapcmphist in1=\fPsnap_file \fBin2=\fPsnap_file [parameter=value] .\|.\|.
+.SH DESCRIPTION
+\fIsnapcmphist\fP like \fIsnapcmp\fP(1NEMO) is a flexible tool for
+comparing two N-body snapshots on a particle by particle basis, but
+\fIsnapcmphist\fP plots a histogram of the resulting values.  An
+arbitrary ``observable'' defined in terms of the basic components of a
+\fIbody\fP(3NEMO) may be specified for the comparison.  Particles are
+compared by differencing their observables, or by computing the
+observable applied to a differenced particle.  These options cover
+most of the common methods of comparing N-body snapshots.  The
+default settings compute the magnitude of the configuration-space
+displacements between each pair of particles.
+.SH PARAMETERS
+The following parameters are recognized.
+.TP 24
+\fBin1=\fP\fIsnap_file1\fP
+.TP
+\fBin2=\fP\fIsnap_file2\fP
+Input data is read from \fIsnap_file1\fP and \fIsnap_file2\fP, which
+must be in \fIsnapshot\fP(5NEMO) format.  Default: none.
+.TP
+\fBtime1=\fP\fItime_range1\fP
+.TP
+\fBtime2=\fP\fItime_range2\fP
+Data with time values within \fItime_range1\fP and \fItime_range2\fP
+will be read from \fIsnap_file1\fP and \fIsnap_file2\fP, respectively.
+At present only the first pair of frames within these ranges will be
+analyzed.  Default: \fB"all"\fP, which has the effect of using the
+first pair of frames in the files.
+.TP
+\fBobs=\fP\fIobs_expression\fP
+\fIobs_expression\fP is the observable used to compare the particles.
+See \fIbodytrans\fP(1NEMO) for the form of \fIobs_expression\fP.
+Default: \fBr\fP, which compares the positions of particles.
+.TP
+\fBdiffpart=\fP\fIflag\fP
+If \fIflag\fP is true, particles are compared by subtracting the
+components of one from the components of the other, and evaluating the
+observable \fBobs\fP on this ``differenced particle''. Otherwise,
+\fBobs\fP is evaluated for each particle, and the results are
+differenced.  Default: \fBtrue\fP.
+.TP
+\fBrelative\fP\fI=flag\fP
+If \fIflag\fP is true, the differenced observable is divided by the
+value of \fBobs\fP computed from the particle in \fIsnap_file1\fP.
+Otherwise, the differenced observable is used.  Default: \fBfalse\fP.
+.TP
+\fBnbins=\fP\fInum_bins\fP
+Number of equally-spaced bins to use for histogram.  Default: \fB8\fP.
+.TP
+\fBxrange=\fP\fIx_axis_range\fP
+Range of values covered by histogram; of the form \fIlow:high\fP.
+Default: \fB0.0:1.0\fP.
+.TP
+\fBxlabel=\fP\fIx_axis_label\fP
+Label for x-axis.  Default is \fIobs_expression\fP.
+.TP
+\fBnxticks=\fP\fInum_x_ticks\fP
+Number of equally-spaced tickmarks along x-axis.  Default: \fB3\fP.
+.TP
+\fBymax=\fP\fImax_y_value\fP
+If specified, use as max value on vertical axis; if not, program uses
+highest histogram bin to pic scaling.  Default: \fInone\fP.
+.TP
+\fBylabel=\fP\fIy_axis_label\fP
+Label for y-axis.  Default: \fBN\fP.
+.TP
+\fBnyticks=\fP\fInum_y_ticks\fP
+Number of equally-spaced tickmarks along y-axis.  Default: \fB3\fP.
+.SH SEE ALSO
+snapcmp(1NEMO), snapdiff(1NEMO), bodytrans(3NEMO), snapshot(5NEMO)
+.SH AUTHOR
+Joshua E. Barnes.

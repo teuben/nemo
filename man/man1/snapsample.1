@@ -1,0 +1,35 @@
+.TH SNAPSAMPLE 1NEMO "2 June 1988"
+.SH NAME
+snapsample \- select a subset particles in snapshot
+.SH SYNOPSIS
+\fBsnapsample in=\fIin_file\fP \fBout=\fIout_file\fP [parameter=value] .\|.\|.
+.SH DESCRIPTION
+\fIsnapsample\fP reads the first \fIsnapshot\fP(5NEMO) frame from
+\fBin\fP and copies a subset of the particles to \fBout\fP.  The
+remaining particles are rescaled in mass so that the total mass is
+unchanged.
+.SH PARAMETERS
+The following parameters are recognized:
+.TP 24
+\fBin=\fIin_file\fP
+Input data is read from \fIin_file\fP.  Default: \fIrequired\fP.
+.TP
+\fBout=\fIout_file\fP
+Output data is written to \fIout_file\fP.  Default: \fIrequired\fP.
+.TP
+\fBnsamp=\fP\fInum_bodies\fP
+Number of bodies written to output.  Should evenly divide the number
+in the input file.  Default: \fB32\fP.
+.TP
+\fBoffset=\fP\fIbody_offset\fP
+Specify origin for periodic sampling of body array.  Default: \fB0\fP.
+.TP
+\fBbesort=\fP\fIsort_flag\fP
+If set, sort particles by binding energy before sampling.  Input data
+must include \fBPotential\fP item.  Default: \fBfalse\fP.
+.SH "SEE ALSO"
+snapmask(1NEMO), snaptrim(1NEMO), snapshot(5NEMO)
+.SH NOTES
+At some point, we should merge this program with snapmask.
+.SH AUTHOR
+Joshua E. Barnes

@@ -1,0 +1,71 @@
+.TH SNAPHIST 1NEMO "27 July 1989"
+.SH NAME
+snaphist \- histogram of projected radii and radial velocities of a snapshot
+.SH SYNOPSIS
+\fBsnapscale in=\fIin_file\fP [parameter=value] .\|.\|.
+.SH DESCRIPTION
+\fIsnaphist\fP creates a histogram of projected radii and radial velocities
+of the particles in a snapshot. The histogram is weighted by the mass of
+the particles.
+.PP
+A number of random angles can optionally be choosen for each point to be
+rotated before it is projected.  A random orientation is achieved by 2
+rotations: one in polar angle phi (0..2PI) followed by a random value
+of cos(theta) where theta is 0..PI away from the Z axis.
+The histogram counts are then normalized by \fBnrand\fP. This then means
+that the histograms are completely normalized, it's integral being
+the total mass.
+.PP
+A little on the background of this program: (dumbell)
+.PP
+\fIsnaphist\fP does not use \fIyapp(3NEMO)\fP yet, it produces a table,
+meant for \fImongo(1LOCAL)\fP or \fItabhist(1NEMO)\fP.
+.SH PARAMETERS
+The following parameters are recognized:
+.TP 24
+\fBin=\fIin_file\fP
+input file, in \fIsnapshot\fP(5NEMO) format.  [Default: none].
+.TP
+\fBrad=\fIreal-array\fP
+boundaries of the projected radii which should be used to construct
+the histogram. [\fB0:2:0.05\fP].
+.TP
+\fBvel=\fIreal-array\fP
+boundaries of the radial velocities which should be used to construct
+the histogram. [\fB-2:2:0.1\fP].
+.TP
+\fBnrand=\fIint\fP
+Number of random angles used for each point before it is projected.
+Only positive values are used. [default: \fB0\fP].
+.TP
+\fBseed=\fIint\fP
+A random seed for the random number generator. A value of zero means
+time of day is taken as random seed. [\fB0\fP].
+.TP
+\fBtab=r|v|s|rv\fP
+Table needed of radii (\fBr\fP) or velocities (\fBv\fP). A scatter table
+of velocity vs. radius can be obtained with \fBs\fP. 
+If the option \fBrv\fP is taken, and the number
+of bins in radius and velocity is the same, both radius and velocity
+columns will be output. Radius in columns 1 and 2, velocity in 3 and 4.
+[default: r].
+.SH "SEE ALSO"
+snapprint(1NEMO), tabhist(1NEMO), tabplot(1NEMO)
+.SH BUGS
+When non-uniform bins are choosen, the centers of the bins appear in the
+table, which is not exactly understandable for mongo.
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +3.0i
+~/src/pjt/nbody   	snaphist.c snaphist.1
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+19-jun-89	V1.0: created          	PJT
+27-jul-89	V1.1: more efficient random angles	PJT
+.fi
+
+

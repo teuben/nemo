@@ -1,0 +1,41 @@
+.TH SNAPDIAGPLOT 1NEMO "17 June 1992"
+.SH NAME
+snapdiagplot \- plot diagnostics of an N-body run
+.SH SYNOPSIS
+\fBsnapdiagplot in=\fPsnap_file [parameter=value] .\|.\|.
+.SH DESCRIPTION
+\fIsnapdiagplot\fP plots the diagnostics of an N-body run. As input it
+needs a \fIsnapshot\fP(5NEMO) file.  The diagnostics currently
+displayed, as functions of time, are the total binding energy and the
+center of mass offset.
+.SH PARAMETERS
+The following parameters are recognized.
+.TP 24
+\fBin=\fP\fIsnap_file\fP
+Input data is read from \fIsnap_file\fP.  Default: \fIrequired\fP.
+.TP
+\fBtimes=\fItime_range\fP
+Only plot frames with time values within \fItime_range\fP,
+which is of the form, eg, "1.0:1.5,2.5,3.0".  Default: \fBall\fP.
+.TP
+\fBexactpot=\fP\fIpot_flag\fP
+If set, recompute potential energy from particle data.
+Note this is O(N^2).  Default: \fBfalse\fP.
+.TP
+\fBeps=\fIsoftening\fP
+If \fBexactpot\fP is set, this softening length is used.
+Default: \fB0.05\fP.
+.TP
+\fBformal=\fP\fIformal_flag\fP
+If set, generate publication-style plot.  Default: \fBfalse\fP.
+.SH SEE ALSO
+snapplot(1NEMO), snapshot(5NEMO).
+.SH AUTHOR
+Joshua E. Barnes
+.SH HISTORY
+.nf
+.ta +1i +4i
+dark-ages	0.0 Created	JEB
+2-jun-88	1.0 Man Created...   	JEB
+17-jun-92	1.2 fixed times=; added energy conservation message	PJT
+.fi
