@@ -1,0 +1,24 @@
+.TH CC 8NEMO "19 December 1999"
+.SH NAME
+NEMORC, NEMORC.gen, NEMORC.local \- NEMO C-shell environment
+.SH SYNOPSIS
+\fBsource $NEMO/NEMORC\fP
+.SH DESCRIPTION
+The \fBNEMORC\fP script defines a number of standard environment
+variables that are needed to work with NEMO. 
+.SH FILES
+The following NEMORC files are read, in order given, if present. It
+allows for some site, architecture and user preferences.
+.nf
+.ta +2i
+$NEMO/NEMORC    	master control script with basic templates
+$NEMO/NEMORC.local	local site definitions
+$NEMOLIB/NEMORC		architecture definitions
+$HOME/.nemorc      	user definitions
+.fi
+.SH BUGS
+There is only support for csh-shells, no support for sh-types yet
+.SH HISTORY
+.nf
+.ta +1i +4i
+19-dec-99	document written	PJT
