@@ -37,7 +37,7 @@ char **argv;
 	readmassrad();
 	readharmfile_(harmfile,&gparam);
 	psicutb = gparam.psicut; sigb = gparam.sigbulge; rho1 = gparam.rho1;
-	sigb2 = sigb;
+	sigb2 = sigb*sigb;
     fbulgeconst = rho1/pow(2.0*M_PI*sigb2,1.5);
 
 	mass = bulgemass/nobj; 
