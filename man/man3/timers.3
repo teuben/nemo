@@ -5,14 +5,16 @@ init_timers, stamp_timers, diff_timers - routines to time your code
 .nf
 .B #include <timers.h>
 .PP
-.B void init_timers(int n);
-.B void stamp_timers(int i);
-.B long long diff_timers(int i, int j);
+.B void init_timers(int maxtimers);
+.B void stamp_timers(int slot);
+.B long long diff_timers(int slot1, int slot2);
+.PP
+.fi
 .SH DESCRIPTION
-\fIinit_timers\fP is used to allocate a set of \fBn\fP slots to
+\fIinit_timers\fP is used to allocate a set of \fBmaxtimers\fP slots to
 hold timer information. \fIstamp_timers\fP is used remember
-the timer info in slot \fBi\fP. The difference between
-slot \fBj\fP and \fBi\fP (j>i is normally assumed) is 
+the timer info in a \fBslot\fP. The difference between
+\fBslot2\fP and \fBslot1\fP (slot2>slot1 is normally assumed) is 
 returned by \fIdiff_timers\fP.
 .SH EXAMPLE
 .nf
