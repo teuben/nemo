@@ -405,6 +405,14 @@ distcvs:
 distu:
 	tar -zcf $(DIST_DIR)_cvs.tar.gz `find . -name Entries -exec src/scripts/cvsutar '{}' \;`
 
+cvs:
+	@if [ -d CVS ]; \
+	then \
+	  cat CVS/Root; \
+	else \
+	  echo This NEMO does not seem to be CVS enabled; \
+	fi;	
+
 cvsnew:
 	cvs -n -q update
 
