@@ -15,7 +15,6 @@ clean:
 	@echo Cleaning $(DIR)
 	@rm -f $(DATA)
 
-NBODY = 10
 FIE = 10*%x+sqrt(%y)
 
 #all:	$(BIN) bitpix64
