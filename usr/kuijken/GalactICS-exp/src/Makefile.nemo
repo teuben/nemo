@@ -1,4 +1,5 @@
 #Makefile for particle generators of the combined df - June 8/94 - JJD
+#need some modfs for MacOS-X      -lcc_dynamic
 #
 .f.o:
 	$(F77) $(FFLAGS) -c $*.f
