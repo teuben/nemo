@@ -60,7 +60,7 @@ inline int Alloc1D(ALLOCTYPE* &A, const int N)
 template <class ALLOCTYPE>
 inline int Alloc2D(ALLOCTYPE** &A, const int N[2])
     { register int i, iN1;
-      A    = new (ALLOCTYPE*)[N[0]];	 if(!A) return 1;
+      A    = new ALLOCTYPE* [N[0]];	 if(!A) return 1;
       A[0] = new ALLOCTYPE[N[0]*N[1]]; 	 if(!A[0]) return 1;
       for(i=1, iN1=N[1]; i<N[0]; i++,iN1+=N[1])
 	  A[i] = A[0] + iN1;
