@@ -593,6 +593,8 @@ clean:
 	@echo '"make cleanall" would remove' $(CLEAN)
 	@echo
 	@echo $(CLEAN)
+	@echo ""
+	@echo '"make cleansrc" would clean the src tree'
 
 cleanall:
 	rm -rf $(CLEAN)
