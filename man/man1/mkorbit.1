@@ -1,0 +1,77 @@
+.TH MKORBIT 1NEMO "2 March 1992" 
+.SH NAME
+mkorbit \- make an orbit with initial conditions
+.SH SYNOPSIS
+.PP
+\fBmkorbit out=\fPorbit [parameter=value]
+.SH DESCRIPTION
+\fImkorbit\fP will generate an orbit by either given it the exact inititial
+coordinates in phase space, or specifying an energy and leaving out one
+of the velocities (the standard way to generate initial conditions for
+a surface of section plot). In the last case an external potential needs
+to be given.
+.PP
+Orbits can also be created from snapshots, by using \fIstoo(1NEMO)\fP.
+.PP
+\fINote: currently the \fBz,vz\fI coordinates are set to zero, generating
+effectively 2D orbits.\fP
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 20
+\fBout=\fIout-file\fP
+output file, will be in \fIorbit(5NEMO)\fP format [no default]
+.TP
+\fBx=\fIx-position\fP
+Initial value of position along x-axis [default: not used]
+.TP
+\fBy=\fIy-position\fP
+Initial value of position along y-axis [default: not used]
+.TP
+\fBvx=\fIx-velocity\fP
+Initial value of velocity along x-axis [default: not used]
+.TP
+\fBvy=\fIy-velocity\fP
+Initial value of velocity along y-axis [default: not used]
+.TP
+\fBe=\fIenergy\fP
+Energy of the orbit. If no value is given, the program assumes
+that all phase space coordinates will be used. If a value for
+the energy is given, one of the phase space velocities may be
+left out, and will be calculated. In this case the potential
+where the orbit is calculated in, must also be given, see next
+3 parameters [default: not used].
+.TP
+\fBpotname=\fIname\fP
+name of file of the \fIpotential(5NEMO)\fP descriptor, 
+in case it is needed [default: none].
+.TP
+\fBpotpars=\fIpar-list\fP
+List of parameters to the potential descriptor. The first
+parameter MUST be the pattern speed in the x-y plane,
+(although rotating frames of reference are not supported in
+all programs). The remaining parameters are used by the
+\fIinipotential()\fP routine in the potential descriptor.
+[default: none - let them be defined by routine itself].
+.TP
+\fBpotfile=\fIname\fP
+name of an optional datafile to the potential descriptor.
+This might be an N-body snapshot or table of spline fit
+coefficients etc. [default: none].
+.SH "SEE ALSO"
+stoo(1NEMO), potlist(1NEMO), potential(5NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+~/src/orbit/io  	mkorbit.c
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+xx-jul-87	V1.0: Created:	PJT
+4-May-88	V2.1: keywords e,potential etc. implemented	PJT
+2-Jun-88	V2.2: new filestruct, no code change	PJT
+2-Mar-92	V2.3: new NEMO 2.x	PJT
+.fi
