@@ -11,6 +11,7 @@
  *	26-jun-96 no more local definitions, use extern		PJT
  *       8-oct-01 read eps/dens                 PJT
  *      17-jan-02 detect split Pos/Vel		pjt
+ *       2-apr-02 add UdotIntTag for ZENO	pjt
  */
 
 /*
@@ -374,6 +375,39 @@ int *ifptr;			/* pointer to input bit flags */
 	    Dens(bp) = *ap++;
 	free(abuf);
 	*ifptr |= DensBit;
+    }
+#endif
+}
+
+#endif
+
+
+/*
+ * GET_SNAP_UINT: worker routine to input UDotInt values.
+ */
+
+#ifndef get_snap_uint
+
+#define get_snap_uint  _get_snap_uint
+
+local void
+_get_snap_uint(instr, btptr, nbptr, ifptr)
+stream instr;			/* input stream, of course */
+Body **btptr;			/* pointer to body array */
+int *nbptr;			/* pointer to number of bodies */
+int *ifptr;			/* pointer to input bit flags */
+{
+#ifdef Uint
+    real *abuf, *ap;
+    Body *bp;
+
+    if (get_tag_ok(instr, UdotIntTag)) {
+	abuf = (real *) allocate(*nbptr * sizeof(real));
+	get_data_coerced(instr, UdotIntTag, RealType, abuf, *nbptr, 0);
+	for (bp = *btptr, ap = abuf; bp < *btptr + *nbptr; bp++)
+	    Dens(bp) = *ap++;
+	free(abuf);
+	*ifptr |= UdotIntBit;
     }
 #endif
 }
