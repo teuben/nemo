@@ -13,6 +13,9 @@ R = $(NEMOOBJ)/potential
 L = $(NEMOLIB)/libnemo.a
 .PRECIOUS: $(L)
 
+# testing a single potential
+TEST = hubble.c
+
 # Files etc. in this directory
 
 MAN1FILES = 
@@ -93,3 +96,9 @@ nemo_src:
 
 tests: 
 
+
+ctex:
+	$(NEMO)/src/scripts/ctex -latex -section $(TEST) > pottest.tex
+	latex pottest.tex
+	dvips pottest -o
+	@echo Test for TEST=$(TEST) done...

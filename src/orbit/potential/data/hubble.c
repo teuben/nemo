@@ -9,11 +9,34 @@
  *		  -- some optimized version is still possible --
  *	   oct-93 get_pattern
  *	   mar-95 no output of NULL name
+ *	 7-jul-02 documented the formulae in ctex
  */
 
 /*CTEX
  *  {\bf potname=hubble
  *       potpars={\it $\Omega,M,R,b,c$}} 
+ * 
+ *  The Hubble profile (BT, pp 39, req. 2-37 and 2-41) has a density
+ *  law:
+ *  $$
+ *	\rho = \rho_h ( 1 + (r/r_h)^2 )^{-3/2}
+ *  $$
+ *  and an equally simple expression for the projected surface brightness:
+ *  $$
+ *   	\Sigma = 2 \rho_h r_h ( 1 + (r/r_h)^2)^{-1}
+ *  $$
+ *  The derivation of the potential is a bit more involved, since there
+ *  is no direct inversion, and integration in parts is needed. The
+ *  cumulative mass is given by:
+ *  $$
+ *	M_h(r) = 4\pi r_h^3 \rho_h \{ \ln[(r/r_h) + \sqrt{1+(r/r_h)^2}] -  
+ *		{  {r/a} \over { \sqrt{1+(r/r_h)^2}  }  } \}
+ *  $$
+ *  and the potential
+ *  $$
+ *	\Phi(r) = - {  {GM_h(r)}\over {r} } - 
+ *                     { {4\pi G \rho_h r_h^2} \over {\sqrt{1+r}} }
+ *  $$
  */
  
  
