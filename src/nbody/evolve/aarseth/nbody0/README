@@ -5,7 +5,7 @@ It has an optional NEMO I/O interface, as explained in the
 Makefile.  One can also use the vanilla Fortran version, in which case
 the NEMO library is not needed to complete linking.  Hernquist' ascii
 205 format (see NEMO programs atos and stoa to convert from/to
-snapshots) is used to store snapshots.
+snapshots) is then used to store snapshots.
 
 A manual page, nbody0.1, is available which explains the NEMO user
 interface part. It normally lives in $NEMO/man/man1, but a local
@@ -25,3 +25,4 @@ Later additions:
 
 (jan-2000) The fortran-C interfaces have been converted to F77_FUNC macros, for which
            you need NEMO.
+(feb-2004) Added an option to do better timestep control (e.g. for figure8 orbit)
