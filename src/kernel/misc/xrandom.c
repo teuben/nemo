@@ -20,6 +20,7 @@
  *  20-jan-99   add tab= to optionally output all random numbers  PJT
  *  24-feb-01   added comments to grandrom() and return both #'s  PJT
  *   7-apr-01   fixed grandom() bug, introduced 24-feb
+ *   7-sep-01   added GSL testing for ran3 :-)
  */
 
 #include <stdinc.h>
@@ -45,6 +46,11 @@ real portable_ran(int *);
 #endif
 
 local int idum;            /* local variable to store used seed */
+
+#ifdef HAVE_GSL
+#include <gsl/gsl_rng.h>
+#endif
+
 
 int set_xrandom(int dum)
 {
@@ -150,12 +156,14 @@ string defv[] = {
     "gauss=f\n      gaussian or uniform noise?",
     "report=f\n     Report mean/dispersian/skewness/kurtosis?",
     "tab=t\n        Tabulate all random numbers?",
-    "VERSION=1.1\n  20-jan-99 PJT",
+    "VERSION=1.2\n  7-20-jan-99 PJT",
     NULL,
 };
 
 string usage="Return seed for random numbers and optionally random numbers";
 
+
+/* argsssssssssss , this is for seed=1 */
 
 string defaults[] = {
     "srandom:        0.968071  0.0667306 0.478281  0.909534",
@@ -171,10 +179,12 @@ nemo_main()
     bool   Qgauss = getbparam("gauss");
     bool   Qreport = getbparam("report");
     bool   Qtab = getbparam("tab");
+    bool   Qbench;
     string *sp;
 
     n = getiparam("n");
     seed = getiparam("seed");
+    Qbench = (n==4 && seed==1);
 
     seed = set_xrandom(seed);
     printf("Seed used = %d\n",seed);
@@ -209,8 +219,8 @@ nemo_main()
     }
 
         
-    if (!Qgauss && n==4 ) {
-            dprintf(1,"Known n=4 cased are:\n");
+    if (!Qgauss && Qbench) {
+            dprintf(1,"Known n=4 seed=1 cases are:\n");
             for (sp=defaults; *sp; sp++) dprintf(1,"%s\n",*sp);
     }
 }
