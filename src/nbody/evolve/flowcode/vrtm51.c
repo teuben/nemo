@@ -4,23 +4,30 @@
  *	18-nov-03  cloned off vrt.c for the M51 project     Rahul & Peter
  *      19-nov-03  added phase equations to account for vr and vt being
  *                 constant along logarithmic arms.
+ *      24-nov-03  allow multiple input files
  */
 
 #include <stdinc.h>
 #include <filestruct.h>
 #include <image.h>
 #include <table.h>
+#include <extstring.h>
 
-#define VERSION "flowcode:vrtm51 V1.1 20-nov-03"
+#define VERSION "flowcode:vrtm51 V1.3 24-nov-03"
 
 local double omega = 0.0;		/*   pattern speed  */
 local double pitch = 10.0;              /*    pitch angle   */
 local double rref = 1.0;               /* reference radius */
 local double thetaref = 0.0;           /*  reference angle */
 
-local int nrad, nmax;
-local real *theta, *vr, *vt, *den, *coef_vr, *coef_vt, *coef_den;
-local int entries=0;
+#define MAXTAB  32
+
+local int nrad[MAXTAB], nmax;
+local real *theta[MAXTAB], *vr[MAXTAB], *vt[MAXTAB], *den[MAXTAB], 
+  *coef_vr[MAXTAB], *coef_vt[MAXTAB], *coef_den[MAXTAB];
+local real rings[MAXTAB+1];    /* rmin(0)... rmax(ntab+1), where rmin(i)=rmax(i-1) */
+local int ntab=0;              /* number of tables used */
+local int entries=0;           /* counter how often this routine was called */
 
 
 local double   vscale = 1.0;		/* rescale velocity unit */
@@ -39,11 +46,36 @@ extern int nemo_file_lines(string,int);
 extern void spline (double *coef, double *x, double *y, int n);
 extern double seval(double x0, double *x, double *y, double *coef, int n);
 
+extern string *burststring(string,string);
+
+
+local int binsearch(real u, real *x, int n)
+{
+  int i, j, k;
+  
+  if (u < x[0])                   /* check below left edge */
+    return 0;
+  else if (u >= x[n-1])           /* and above right edge */
+    return n;
+  else {
+    i = 0;
+    k = n;
+    while (i+1 < k) {
+      j = (i+k)/2;
+      if (x[j] <= u)
+	i = j;
+      else
+	k = j;
+    }
+    return i;
+  }
+}
 
 void inipotential (int *npar, double *par, string name)
 {
-    int n, colnr[MAXCOL];
+    int i, n, colnr[MAXCOL];
     real *coldat[MAXCOL];
+    string *fnames;
     stream instr;
 
     n = *npar;
@@ -51,14 +83,17 @@ void inipotential (int *npar, double *par, string name)
     if (n>1) pitch = par[1];
     if (n>2) rref = par[2];
     if (n>3) thetaref = par[3];
-    if (n>4) warning("inipotential(flowrt): npar=%d only 4 parameters accepted (ome,pitch,rref,tref)",n);
     
     if (entries>0) {
+#if 0
         warning("Re-entering inipotential(5NEMO): removed previous tables");
         free(theta);
-        free(vr);
-        free(vt);
-	free(den);
+        free(vr);  	free(coef_vr);
+        free(vt);       free(coef_vt);
+	free(den);      free(coef_den);
+#else
+        error("routine not re-entrant");
+#endif
     }
     entries++;
 
@@ -73,51 +108,71 @@ void inipotential (int *npar, double *par, string name)
 
     if (pitch == 0) error("inipotential: Need a non-zero pitch angle");
 
-    nmax = nemo_file_lines(name,0);
-    dprintf (1,"  Nmax = %d\n",nmax);
-    if (nmax<=0) error("file_lines returned %d lines in %s\n",
-             nmax,name);
-    dprintf (1,"  Nmax = %d\n",nmax);
-    
-    theta = (real *) allocate(nmax * sizeof(real));
-    vr = (real *) allocate(nmax * sizeof(real));
-    vt = (real *) allocate(nmax * sizeof(real));
-    den = (real *) allocate(nmax * sizeof(real));
-
-    coldat[0] = theta;        colnr[0] = 1;
-    coldat[1] = vr;           colnr[1] = 2;
-    coldat[2] = vt;           colnr[2] = 3;
-    coldat[3] = den;          colnr[3] = 4;
-
-    instr = stropen(name,"r");
-    nrad = get_atable(instr,MAXCOL,colnr,coldat,nmax);
-    dprintf(0,"table has %d entries\n",nrad);
-    strclose(instr);
-    if (nrad==0) error("No lines (%d)read from %s",nrad,name);
-    if (nrad<0) {
-	nrad = -nrad;
-	warning("only read part of table");
+    fnames = burststring(name,",");
+    ntab = xstrlen(fnames,sizeof(string))-1;
+    if (ntab < 1) error("potpars= needs at least one filename");
+    if (ntab > MAXTAB) 
+      error("Not enough slots for input tables: %d > %d=MAXTAB",ntab,MAXTAB);
+    if (ntab > 1) {
+      if (ntab+5 != n) 
+	error("found %d/%d , need potpars=ome,pitch,rs,ts,r_0,r_1,....r_%d\n",
+	      n,ntab+5,ntab);
+      for(i=0; i<=ntab; i++)
+	rings[i] = par[i+4];
     }
-    coef_vr = (real *) allocate(nrad*4*sizeof(real));
-    coef_vt = (real *) allocate(nrad*4*sizeof(real));
-    coef_den = (real *) allocate(nrad*4*sizeof(real));
 
-    spline(coef_vr, theta, vr, nrad);
-    spline(coef_vt, theta, vt, nrad);
-    spline(coef_den, theta, den, nrad);
+    for (i=0; i<ntab; i++) {      /* loop over all input files */
 
-    dprintf(2,"vrtm51[1]: %g %g %g %g\n",theta[0],vr[0],vt[0],den[0]);
-    dprintf(2,"vrtm51[%d]: %g %g %g %g\n",nrad,theta[nrad-1],vr[nrad-1],vt[nrad-1],den[nrad-1]);
+      nmax = nemo_file_lines(fnames[i],0);
+      dprintf (1,"  Nmax = %d\n",nmax);
+      if (nmax<=0) error("file_lines returned %d lines in %s\n",
+			 nmax,fnames[i]);
+      dprintf (1,"  Nmax = %d\n",nmax);
+    
+      coldat[0] = theta[i] = (real *) allocate(nmax * sizeof(real));
+      coldat[1] = vr[i]    = (real *) allocate(nmax * sizeof(real));
+      coldat[2] = vt[i]    = (real *) allocate(nmax * sizeof(real));
+      coldat[3] = den[i]   = (real *) allocate(nmax * sizeof(real));
+      
+      colnr[0] = 1;
+      colnr[1] = 2;
+      colnr[2] = 3;
+      colnr[3] = 4;
+
+      instr = stropen(fnames[i],"r");
+      nrad[i] = get_atable(instr,MAXCOL,colnr,coldat,nmax);
+      dprintf(0,"table has %d entries\n",nrad[i]);
+      strclose(instr);
+
+      if (nrad[i] == 0) error("No lines (%d)read from %s",nrad[i],fnames[i]);
+      if (nrad[i] < 0) {
+	nrad[i] = -nrad[i];
+	warning("only read part of table");
+      }
+      coef_vr[i]  = (real *) allocate(nrad[i]*4*sizeof(real));
+      coef_vt[i]  = (real *) allocate(nrad[i]*4*sizeof(real));
+      coef_den[i] = (real *) allocate(nrad[i]*4*sizeof(real));
+
+      spline(coef_vr[i], theta[i], vr[i], nrad[i]);
+      spline(coef_vt[i], theta[i], vt[i], nrad[i]);
+      spline(coef_den[i], theta[i], den[i], nrad[i]);
+      
+      dprintf(2,"vrtm51[1]: %g %g %g %g\n",theta[i][0],vr[i][0],vt[i][0],den[i][0]);
+      dprintf(2,"vrtm51[%d]: %g %g %g %g\n",
+	      nrad[i],   theta[i][nrad[i]-1],
+	                 vr[i][nrad[i]-1],
+	                 vt[i][nrad[i]-1],
+	                 den[i][nrad[i]-1]);
+    }
 }
 
 #define  UNWRAP(phi)    ((phi) - 360 * floor((phi)/ 360 ))
-
 
 void potential(int *ndim,double *pos,double *acc,double *pot,double *time)
 {
     real rad, phi, phase;
     real x, y, vrad, vtan;
-    bool mirror;
+    int i;
 
     x = pos[0];
     y = pos[1];
@@ -125,11 +180,22 @@ void potential(int *ndim,double *pos,double *acc,double *pot,double *time)
     phi = atan2(y,x)*180./PI;
     phi -= log(rad/rref)/tanp + thetaref;
     phase = UNWRAP(phi);
+
+    if (ntab > 1) {
+      i = binsearch(rad,rings,ntab+1);
+      if (i>0) i--;   /* binsearch gives one more than we want */
+      if (i==ntab) i--;  /* outside outer ring */
+      /* inside inner ring, and outside outer life sucks: no data */
+    } else {
+      /* if only one ring, all radii are valid, even if bad */
+      i = 0;
+    }
       
-    vrad = seval(phase,theta,vr,coef_vr,nrad);
-    vtan = seval(phase,theta,vt,coef_vt,nrad);
-    *pot = seval(phase,theta,den,coef_den,nrad);
-    dprintf(1,"x,y,rad,phi,phase,vt,vr,den: %g %g   %g %g %g   %g %g %g\n", x,y,rad,phi,phase,vtan,vrad,*pot);
+    vrad = seval(phase,theta[i],vr[i],coef_vr[i],nrad[i]);
+    vtan = seval(phase,theta[i],vt[i],coef_vt[i],nrad[i]);
+    *pot = seval(phase,theta[i],den[i],coef_den[i],nrad[i]);
+    dprintf(1,"x,y,rad,iring,phi,phase,vt,vr,den: %g %g   %g %d %g %g   %g %g %g\n", 
+	    x,y,rad,i,phi,phase,vtan,vrad,*pot);
 
     if (rad > 0) {
 	vtan -= omega * rad;
@@ -142,3 +208,5 @@ void potential(int *ndim,double *pos,double *acc,double *pot,double *time)
             rad,phi,vrad,vtan,acc[0],acc[1]);
     acc[2] = 0.0;
 }
+
+
