@@ -22,7 +22,7 @@ INCFILES = filefn.h options.h stdinc.h strlib.h
 SRCFILES= allocate.c  bswap.c burststring.c common.c cputime.c date_id.c \
 	  error.c file_size.c filefn.c strlib.c 
 OBJFILES= allocate.o bswap.o burststring.o common.o cputime.o date_id.o \
-	  error.o file_size.o filefn.o strlib.o 
+	  error.o file_size.o filefn.o strlib.o exception.o
 LOBJFILES= $L(allocate.o)  $L(burststring.o) $L(cputime.o) $L(date_id.o) \
 	   $L(error.o) $L(file_size.o) $L(filefn.o) $L(strlib.o) $L(bswap.o)
 BINFILES = bswap
