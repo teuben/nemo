@@ -21,7 +21,8 @@ string defv[] = {
 	"blank=t\n		  Comment blank lines?",
 	"punct=t\n		  Comment lines seem punctiation?",
 	"delete=f\n		  Delete those comment lines?",
-	"VERSION=1.1c\n		  8-dec-01 PJT",
+	"comment=#\n              The comment character!",
+	"VERSION=2.0\n		  18-oct-04 PJT",
 	NULL,
 };
 
@@ -37,13 +38,16 @@ nemo_main()
     char   line[MAX_LINELEN], *cp;
     bool   Qalpha, Qblank, Qpunct, Qkeep;
     int    nlines=0, nreal=0;
+    string comment;
 
+    dprintf(1,"MAX_LINELEN = %d\n",MAX_LINELEN);
     instr = stropen(getparam("in"),"r");
     outstr = stropen(getparam("out"),"w");
     Qalpha = getbparam("alpha");
     Qblank = getbparam("blank");
     Qpunct = getbparam("punct");
     Qkeep = !getbparam("delete");
+    comment = getparam("comment");
     while (fgets(line,MAX_LINELEN,instr) != NULL) {    /* loop all lines */
         nlines++;
 	cp = line;
@@ -52,17 +56,17 @@ nemo_main()
             cp++;
 
         if (*cp == '\0' && Qblank) {        /* if blank, comment */
-            if (Qkeep) fprintf(outstr,"# %s",line);
+            if (Qkeep) fprintf(outstr,"%c %s",*comment,line);
             continue;
         }
 
         if (isalpha(*cp) && Qalpha) {        /* if alpha, comment */
-            if (Qkeep) fprintf(outstr,"# %s",line);
+            if (Qkeep) fprintf(outstr,"%c %s",*comment,line);
             continue;
         }
 
         if (ispunct(*cp) && Qpunct) {        /* if punct, comment */
-            if (Qkeep) fprintf(outstr,"# %s",line);
+            if (Qkeep) fprintf(outstr,"%c %s",*comment,line);
             continue;
         }
 
