@@ -1,0 +1,29 @@
+.TH HISTOGRAM 3NEMO "27 July 1989"
+.SH NAME
+histogramidx \- find histogram index of a value in an array
+.SH SYNOPSIS
+.nf
+.B int histogramidx (na, xa, x)
+.B int     na;
+.B double *xa;
+.B double  x;
+.fi
+.SH DESCRIPTION
+\fIhistogramidx\fP returns the histogram index \fBidx\fP 
+of a value \fBx\fP in an array
+\fBxa\fP with \fBna\fP entries (xa[0]..xa[na-1]), such that
+xa[idx] < x < xa[idx+1]. Hence \fBidx\fP is in the range
+0..na-2.
+.PP
+\fIhistogramidx\fP returns -1 when \fBx\fP is outside the two extremes.
+.SH LIMITATIONS
+It is assumed that the the array is an ordered array, the first
+element being the lowest value.
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4i
+20-jun-89	created  	PJT
+27-jul-89	changed name from histid to histogramidx	PJT
+.fi
