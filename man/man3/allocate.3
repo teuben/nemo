@@ -1,4 +1,4 @@
-.TH ALLOCATE 3NEMO "5 March 1994"
+.TH ALLOCATE 3NEMO "5 May 2003"
 .SH NAME
 allocate, reallocate \- memory allocation with error control.
 .SH SYNOPSIS
@@ -21,14 +21,26 @@ another one, see
 .nf
     http://www.cs.colorado.edu/homes/zorn/public_html/Malloc.html
 .fi
+.SH EXAMPLE
+Here is an example of allocating a simple 1D array, after which
+the size is increased. All failures in allocation will result
+in a call to \fIerror(3NEMO)\fP.
+.nf
+
+    int n = 1000;
+    double *x = allocate(n * sizeof(double));
+    ...
+    x = reallocate(x,2000);
+.fi
 .SH BUGS
 Although NEMO program should all call \fIallocate\fP instead of 
 the system routine \fImalloc(3)\fP, there are a few places left where
-\fImalloc\fP is called since failure to allocate must be caught.
+\fImalloc\fP is called since failure to allocate must be caught
+immediately.
 We don't supply a good solution to this, other than error control
 (see \fIerror(3NEMO)\fP).
-.SH SEE ALSO
 .SH HISTORY
 .ta +1.0i +3.0i
 5-mar-94	man created 	PJT
+5-may-03	added an example	PJT
 .fi
