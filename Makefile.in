@@ -610,12 +610,14 @@ libs:
 	cd src;make install > ../install.log 2>&1 
 	@echo Done at `date`
 
-
-
 bins:
-	@echo NEMO does not have a bins yet...try testsuite
+	src/scripts/testsuite -b
 
 testsuite:
 	@echo ISSUE the following command:
 	@echo 'src/scripts/testsuite -b'
 
+
+
+sure:	libs bins
+	

@@ -4,6 +4,7 @@
  *	 2-jun-88	some original version	JEB
  *	25-feb-92	happy gcc2.0
  *	24-mar-94	ansi
+ *      22-jun-01       added ZENO compatibility
  */
 
 #include <stdinc.h>
@@ -11,9 +12,9 @@
 extern double xrandom(double, double);
 
 void pickshell(			/* pick point on shell */
-real vec[],			/*   coordinates chosen */
-int ndim,			/*   number of dimensions */
-double rad)			/*   radius of shell */
+    real vec[],			/*   coordinates chosen */
+    int ndim,			/*   number of dimensions */
+    double rad)			/*   radius of shell */
 {
     double rsq, rscale;
     int i;
@@ -31,9 +32,9 @@ double rad)			/*   radius of shell */
 }
 
 void pickball(			/* pick point within ball */
-real vec[],			/*   coordinates chosen */
-int ndim,			/*   number of dimensions */
-double rad)			/*   radius of ball */
+    real vec[],			/*   coordinates chosen */
+    int ndim,			/*   number of dimensions */
+    double rad)			/*   radius of ball */
 {
     double rsq;
     int i;
@@ -50,14 +51,14 @@ double rad)			/*   radius of ball */
 }
 
 void pickbox(			/* pick point within box */
-real vec[],			/*   coordinates chosen */
-int ndim,			/*   number of dimensions */
-double size)			/*   from -size to size */
+    real vec[],			/*   coordinates chosen */
+    int ndim,			/*   number of dimensions */
+    double size)			/*   from -size to size */
 {
     int i;
 
     for (i = 0; i < ndim; i++)
-	vec[i] = xrandom(- size, size);
+	vec[i] = xrandom(-size, size);
 }
 
 /* end of: pickpnt.c */

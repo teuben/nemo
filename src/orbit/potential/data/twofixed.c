@@ -8,6 +8,7 @@
  *	"xxx"		- two fixed particles very close together
  *
  *	3-feb-98    Peter Teuben - after a suggestion by Kevin Rauch
+ *	22-jun-01   compiler complaints
  *
  */
  
@@ -36,8 +37,6 @@ int    *npar;
 double par[];
 char *name;
 {
-    int i;
-
     if (*npar>0) omega = par[0];
     if (*npar>1) m1    = par[1];
     if (*npar>2) x1[0] = par[2];
@@ -66,7 +65,6 @@ void potential (ndim,pos,acc,pot,time)
 int    *ndim;
 double pos[], acc[], *pot,*time;
 {
-	int    i;
 	double dr1, dr2;
 	
 	*pot = 0.0;
@@ -81,4 +79,3 @@ double pos[], acc[], *pot,*time;
 	acc[2] = -m1*(pos[2]-x1[2])/dr1/sqrt(dr1)
                  -m2*(pos[2]-x2[2])/dr2/sqrt(dr2);
 }
-

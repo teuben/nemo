@@ -3,16 +3,19 @@
  * Joshua Barnes  1 December 1986  Princeton, NJ.
  *	29-jul-92	convex fix		PJT
  *	22-jan-95	ansi prototypes - functions return real ????
+ *      23-jun-01       ZENOisms
  */
 
 #include <stdinc.h>
 
-#ifndef SINGLEPREC
+#if defined(DOUBLEPREC)
 #  define _dotvp	_dotvp_d
 #  define _absv		_absv_d
 #  define _distv	_distv_d
 #  define _tracem	_tracem_d
-#else
+#endif
+
+#if defined(SINGLEPREC)
 #  define _dotvp	_dotvp_f
 #  define _absv		_absv_f
 #  define _distv	_distv_f
@@ -40,7 +43,7 @@ double _absv(real *v, int n)
     }
     return (sqrt(s));
 }
-
+
 double _distv(real *v, real *u, int n)
 {
     real d, s;

@@ -24,3 +24,6 @@
   (.so object files, e.g. athan92)
 
 - sgi: loadobjDL works for bodytrans, but not potentials....
+
+- -DSINGLEPREC:  scfm does not work
+ 		 athan92 shows some significant force differences

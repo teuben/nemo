@@ -8,7 +8,7 @@
 /* and made gcc2.0 silent by declaring more 		       */
 /*                  20-nov-94 added () to shutup gcc/lint      */
 /*                  12-apr-95 no more ARGS                     */
-/*                  20-jun-01 gcc3                             */
+/*                  20-jun-01 gcc3 - removed old BORLAND code  */
 /***************************************************************/
 
 #include <stdinc.h>
@@ -16,9 +16,7 @@
 #include <filefn.h>
 
 #include <ctype.h>
-#if !defined(__BORLANDC__)
-#  include <pwd.h>        /* no turbo c */
-#endif
+#include <pwd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -31,12 +29,7 @@
 local string expandtilde ( string );
 local string checkexists ( string, string );
 
-/* we don't do VMS here */
-#if defined(__BORLANDC__)
-#  define DIR_SEP  '\\'
-#else
-#  define DIR_SEP  '/'
-#endif
+#define DIR_SEP  '/'
 
 
 /***************************************************************/

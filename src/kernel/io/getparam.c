@@ -96,7 +96,8 @@
  * 21-may-01       a  returned 'int history' to history.c for 'uNEMO'
  * 31-may-01       b  added jJ (dutch/german) to boolean 'true'
  *  7-jun-01       c  using NEMO_VERSION instead of VERSION
- *
+ * 23-jun-01       d  PRECISION now in ZENO mode
+
   TODO:
       - what if there is no VERSION=
       - process system keywords in readkeys()
@@ -116,7 +117,7 @@
       - @macro and $key references get expanded as strings.
  */
 
-#define VERSION_ID  "3.2c 7-jun-01 PJT"
+#define VERSION_ID  "3.2d 23-jun-01 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -867,18 +868,13 @@ local void showconfig()
 #else
     printf("off\n");
 #endif
-    printf("SINGLEPREC ");
-#if defined(SINGLEPREC)
-    printf("on\n");
-#else
-    printf("off\n");
-#endif
     printf("TCL        ");
 #if defined(TCL)
     printf("on\n");
 #else
     printf("off\n");
 #endif
+    printf("Precision: %s\n",Precision);
 }
 /*
  * PRINTUSAGE: print out helpful usage info.

@@ -2,12 +2,24 @@
  * LOG2: log to the base two.
  * WHY AINT THIS STANDARD? WHATS *W*R*O*N*G* WITH PEOPLE?
  *
+ *	22-jun-01	added ZENO mixed precision code		PJT
+ * 
+ *   Warning: gcc3 has log2
  */
 
+#include <stdinc.h>
 #include <math.h>
+#include <mathfns.h>
 
 double log2(double x)
 {
 
     return (log(x) / 0.693147180559945);	/* normalize by ln(2)       */
 }
+
+#if !defined(DOUBLEPREC)
+real rlog2(real x)
+{
+    return (rlog(x) / M_LN2);
+}
+#endif

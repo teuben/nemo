@@ -1,6 +1,7 @@
 /*
  * log.c:  logarithmic triaxial potential
  *	dec-93    allowed r_c=0 exception, by setting v_0^2 = 2*m_c
+ *      jun-01    stdinc.h
  */
 
 /*CTEX
@@ -16,7 +17,8 @@
  *
  * with $ M_c \equiv {1\over 2} r_c v_0^2 $ defined as the ``core mass''.
  */
-                      
+
+#include <stdinc.h>
  
 /* default parameters */
 
@@ -28,15 +30,8 @@ static double r;		/* default: r=q (prolate) */
 
 static double mor, r2, iq2[3];  /* scratch variables  */
 
-extern double sqr(), log();
-
-void inipotential (npar, par, name)
-int    *npar;
-double par[];
-char *name;
+void inipotential (int *npar, double *par, char *name)
 {
-    int i;
-
     if (*npar>0) omega = par[0];
     if (*npar>1) mc = par[1];
     if (*npar>2) rc = par[2];
@@ -46,9 +41,9 @@ char *name;
     else
     	r = q;			/* default: prolate */
 
-    dprintf (1,"INI_POTENTIAL Logarithmic potential (prolate) %s\n",name);
-    dprintf (1,"  Parameters : Pattern Speed = %f\n",omega);
-    dprintf (1,"  m_c, r_c, q= %f %f %f %f\n",mc,rc,q,r);
+    dprintf(1,"INI_POTENTIAL Logarithmic potential (prolate) %s\n",name);
+    dprintf(1,"  Parameters : Pattern Speed = %f\n",omega);
+    dprintf(1,"  m_c, r_c, q= %f %f %f %f\n",mc,rc,q,r);
 
     if (rc>0)    
         mor = mc/rc;
@@ -62,9 +57,7 @@ char *name;
 }
     
 
-void potential (ndim,pos,acc,pot,time)
-int    *ndim;
-double pos[], acc[], *pot, *time;
+void potential (int *ndim, double *pos, double *acc, double *pot, double *time)
 {
     double rad, f;
     int    i;
