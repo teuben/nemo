@@ -129,7 +129,7 @@ string defv[] = {
     "fitmode=cos,1\n Basic Fitmode: cos(n*theta) or sin(n*theta)",
     "nsigma=-1\n     Iterate once by rejecting points more than nsigma resid",
     "imagemode=t\n   Input image mode? (false means ascii table)",
-    "VERSION=3.0\n   12-nov-02 PJT",
+    "VERSION=2.10\n  30-jan-03 PJT",
     NULL,
 };
 
