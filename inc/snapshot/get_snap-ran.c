@@ -1,3 +1,4 @@
+// warning: this is still unreliable
 /*
  * GET_SNAP.C: generic method for snapshot input.
  *	Note: this file is to be included at the source level 

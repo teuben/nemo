@@ -10,6 +10,7 @@
  *	22-feb-94 ansi headers (w/ allocate)    pjt
  *	26-jun-96 no more local definitions, use extern		PJT
  *       8-oct-01 read eps/dens                 PJT
+ *      17-jan-02 detect split Pos/Vel		pjt
  */
 
 /*
@@ -80,7 +81,13 @@ int *ifptr;			/* pointer to input bit flags */
 
     if (get_tag_ok(instr, ParametersTag)) {
 	get_set(instr, ParametersTag);
-	get_data(instr, NobjTag, IntType, &nbody, 0);
+	if (get_tag_ok(instr,NobjTag))
+	  get_data(instr, NobjTag, IntType, &nbody, 0);
+	else if (get_tag_ok(instr,NBodyTag)) {
+	  get_data(instr, NBodyTag, IntType, &nbody, 0);
+	  warning("Reading a ZENO file with NBody=%d",nbody);
+	} else
+	  error("Cannot find Nobj or NBody in snapshot");
 	if (*btptr != NULL && nbody > *nbptr)	/* bigger than expected? */
 	    error("get_snap_parameters: %s = %d is too big\n",
 		  NobjTag, nbody);
@@ -116,7 +123,7 @@ int *ifptr;			/* pointer to input bit flags */
 	    error("get_snap_csys: cant handle %s = %#o\n",
 		  CoordSystemTag, cs);
     } else
-	printf("get_snap_csys: assuming %s = %#o\n",
+	dprintf(1,"get_snap_csys: assuming %s = %#o\n",
 	       CoordSystemTag, CSCode(Cartesian, NDIM, 2));
 }
 
@@ -185,6 +192,25 @@ int *ifptr;			/* pointer to input bit flags */
 	}
 	free(rvbuf);
 	*ifptr |= PhaseSpaceBit;
+    } else if (get_tag_ok(instr, PosTag) || get_tag_ok(instr, VelTag)) {
+      real *rbuf, *vbuf, *rp, *vp;
+      rbuf = (real *) allocate(*nbptr * 2 * NDIM * sizeof(real));
+      vbuf = (real *) allocate(*nbptr * 2 * NDIM * sizeof(real));
+      if (get_tag_ok(instr,PosTag))
+	  get_data_coerced(instr, PosTag, RealType, rbuf,
+		       *nbptr, NDIM, 0);
+      if (get_tag_ok(instr,VelTag))
+	  get_data_coerced(instr, VelTag, RealType, vbuf,
+		       *nbptr, NDIM, 0);
+      for (bp = *btptr, rp=rbuf, vp=vbuf; bp < *btptr + *nbptr; bp++) {
+	SETV(Phase(bp)[0], rp);
+	rp += NDIM;
+	SETV(Phase(bp)[1], vp);
+	vp += NDIM;
+      }
+      free(rbuf);
+      free(vbuf);
+      *ifptr |= PhaseSpaceBit;
     }
 #endif
 }
