@@ -1,0 +1,73 @@
+.TH TABCMP 1NEMO "5 October 2000"
+.SH NAME
+tabcmp \- Student T and F test for mean and variance comparisons
+.SH SYNOPSIS
+\fBtabcmp\fP [parameter=value]
+.SH DESCRIPTION
+tabcmp compares two columns from two tables. It uses the Student's t-test
+and f-test to  assess if their means and variances are significantly
+different. It also assesses the two distributions using a non-parametric
+Kolmogorov-Smirnov test.
+
+.PP
+.nf
+.ta +1i
+t-test  	different mean? But variances are expected to be the same
+tu-test  	different mean? But variances are allowed different
+tp-test   	different mean? Paired arrays
+f-test    	different variances? Different arrays allowed
+ks2       	non-parametric Kolmogorov-Smirnov test
+.fi
+
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin1=\fP
+First dataset, a simple ascii table. No default.
+.TP
+\fBin2=\fP
+Second dataset. No default.
+.TP
+\fBcol1=\fP
+Column from 1st dataset (in1=). Default: 1.
+.TP
+\fBcol2=\fP
+Column from 2nd dataset (in2=). Default: 1.
+.TP
+\fBnmax=\fP
+Max allocated lines in data if from a pipe. Default: 10000.
+.SH EXAMPLES
+Here is an example to compare two gaussian distributions, fully done 
+through NEMO.
+First create two simple tables, random gaussian numbers with mean
+0 and dispersion 1 (make sure they are not identical, or use
+seed=-1 in tabmath):
+.nf
+
+    % nemoinp 1:20 | tabmath - - "rang(0,1)" all > tab1
+    % nemoinp 1:20 | tabmath - - "rang(0,1)" all > tab2
+    % cmp tab1 tab2
+    % tabcmp tab1 tab2
+    F-test: f=1.33497  prob=0.535006
+    T-test: t=-0.77149  prob=0.445188
+    TU-test: tu=-0.77149  prob=0.445285
+    TP-test: tp=-0.796496  prob=0.435584
+    KS2-test: ks2=0.15  prob=0.965485
+
+.fi
+.SH BUGS
+Paired t-Test cannot handle identical arrays.
+.SH SEE ALSO
+tabhist(1NEMO), tabplot(1NEMO), table(5NEMO), nemoinp(1NEMO), tabmath(1NEMO)
+.SH FILES
+src/kernel/tab/tabcmp.c
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+7-Oct-97	V0.1 adopted from Numerical Recipes routines	PJT
+8-oct-97	V0.2 added col1=,col2= and same-table processing	PJT
+5-oct-00	V0.3 added KS2 test, also from NR	PJT
+.fi
