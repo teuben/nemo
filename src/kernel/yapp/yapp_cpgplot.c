@@ -1,29 +1,15 @@
 /*
  * YAPP: Yet Another Plotting Package.
  *
- *       7-dec-89:      pgplot interface        Peter Teuben
- *	13-jun-90:	finished coding		PJT
- *	 2-mar-92:	pl_getpoly()		PJT
- *	15-apr-92:	new pgplot4.9e with shorter (<=6) function names  PJT
- *			(compile with -DPG6)
- *	22-may-92:	added pgplot colors when compiled -DCOLOR	PJT
- *			use macros to optionally use the new short names 
- *	 5-nov-92	defined white as highest color			PJT
- *	 1-mar-94       ansi fix
- *	22-jan-94       fixed double -> real and the real=float problems  PJT
- *	14-oct-97	set plotting size from "max default" to 20cm	  PJT
+ *	5-dec-2003	cloned off yapp_pgplot.c
  */
-
-#error "This routine is not for public use yet" 
 
 #include <stdinc.h>
 #include <yapp.h>
-#include <cpgplot.h>
+#include <pgplot/cpgplot.h>     /* we keep a version in NEMO */
 
 extern string yapp_string;	/* a kludge, see: getparam.c */
 extern int debug_level;         /* see dprintf.c   from DEBUG env.var. */
-
-/* make COLOR and PG6 (short names only) now the defaults */
 
 #define COLOR
 
@@ -31,25 +17,24 @@ local real   dxymax;    /* size of user window */
 local int    iterm;     /* terminal number */
 
 #ifdef COLOR
-#define MAXCOLOR 256
-local int ncolors=0;
-local float red[MAXCOLOR];		/* RGB color tables		    */
-local float blue[MAXCOLOR];
-local float green[MAXCOLOR];
-local cms_rgbsetup();
+# define MAXCOLOR 256
+  local int ncolors=0;
+  local float red[MAXCOLOR];		/* RGB color tables		    */
+  local float blue[MAXCOLOR];
+  local float green[MAXCOLOR];
+  local void cms_rgbsetup();
 #else
-#define MAXCOLOR 0
+# define MAXCOLOR 0
 #endif
 
 /*
  * PLINIT: initalize the plotting package.
  */
 
-plinit(string pltdev, real xmin, real xmax, real ymin, real ymax)
+int plinit(string pltdev, real xmin, real xmax, real ymin, real ymax)
 {
     float width, height, x1,x2,y1,y2, zero, one;
-    int   dummy, nx, ny, units;
-    Logical ask;
+    int   dummy, nx, ny, ask, units;
     
     iterm = 1;
     if (yapp_string == NULL || *yapp_string == 0) {
@@ -61,33 +46,32 @@ plinit(string pltdev, real xmin, real xmax, real ymin, real ymax)
 
     nx = ny = 1;        /* only one window on the page */
     if (iterm) {
-/*      iterm = pgbegin_(&dummy,yapp_string, &nx, &ny, strlen(yapp_string))==1; */
-      iterm = cpgbeg(dummy,yapp_string,nx,ny)
+      iterm = cpgbeg(dummy,yapp_string, nx, ny)==1;
     } else {
-      iterm = pgbegin_(&dummy,"?", &nx, &ny, 1)==1;
+      iterm = cpgbeg(dummy,"?", nx, ny)==1;
     }
-    if (iterm==0) return;
+    if (iterm==0) return 0;
 #if 1
-    ask = 0;        /* 'ask' should really be a fortran LOGICAL ! */
-    pgask_(&ask);   /* here we want ask=FALSE */
+    ask = 0;        /* Logical = int in cpgplot */
+    cpgask(ask);    /* here we want ask=FALSE */
 #endif
 
     units = 2;
-    pgqvsz_(&units, &x1, &x2, &y1, &y2);
-    dprintf(0,"PGQVSZ: X= %g - %g Y= %g - %g\n",x1,x2,y1,y2);
+    cpgqvsz(units, &x1, &x2, &y1, &y2);
+    dprintf(1,"PGQVSZ: X= %g - %g Y= %g - %g\n",x1,x2,y1,y2);
     zero = 0.0;  one = 1.0;    /* zero is good for "max size of device" */
-    pgsvp_(&zero,&one,&zero,&one);
+    cpgsvp(zero,one,zero,one); /* xleft,xright,ybot,ytop */
 #if 0
 
 	/* it's better to use the PGPLOT_PS_ * environment variables */
-    /* zero = 7.874;	       /* 20.0 cm is good for most YAPP devices */
-    /* zero = 9.874; */
+    zero = 7.874;	       /* 20.0 cm is good for most YAPP devices */
+    zero = 9.874;
 #endif    
-    pgpaper_( &zero, &one);    /* set size and make it come out square  */
+    cpgpap(zero,one);    /* (width,aspect) set size and make it come out square  */
 
     x1=xmin;  x2=xmax;
     y1=ymin;  y2=ymax;
-    pgwindow_(&x1,&x2,&y1,&y2);         /* set the viewport */
+    cpgswin(x1,x2,y1,y2);         /* set the viewport */
 
     if (ymax - ymin < xmax - xmin) {		/* not used for now */
         dxymax = xmax - xmin;
@@ -102,6 +86,7 @@ plinit(string pltdev, real xmin, real xmax, real ymin, real ymax)
     cms_rgbsetup();
     plcolor(1);     /* set initial color to the forground color */
 #endif
+    return 0;
 }
 
 /*
@@ -117,14 +102,12 @@ plswap() { }
 
 real plxscale(real x, real y)
 {
-    if (iterm==0) return;       /* no graphics output requested */
-    return (x);
+    return x;
 }
 
 real plyscale(real x, real y)
 {
-    if (iterm==0) return;       /* no graphics output requested */
-    return (y);
+    return y;
 }
 
 /*
@@ -139,11 +122,11 @@ plltype(int lwid, int lpat)
 
     if (lwid > 0) {
         lw = lwid;
-	pgslw_(&lw);			/* set line width */
+	cpgslw(lw);			/* set line width */
     }
     if (lpat > 0) {
         ls = lpat;
-	pgsls_(&ls);			/* set line style */
+	cpgsls(ls);			/* set line style */
     }
 }
 
@@ -158,7 +141,7 @@ plline(real x, real y)
     if (iterm==0) return;       /* no graphics output requested */
 
     xp=x; yp=y;         /* RECALC !! */
-    pgdraw_(&xp,&yp);
+    cpgdraw(xp,yp);
 
 }
 
@@ -169,7 +152,7 @@ plmove(real x, real y)
    if (iterm==0) return;       /* no graphics output requested */
 
    xp=x; yp=y;          /* RECALC !! */
-   pgmove_(&xp,&yp);
+   cpgmove(xp,yp);
 
 }
 
@@ -181,8 +164,8 @@ plpoint(real x, real y)
     
     if (iterm==0) return;       /* no graphics output requested */
 
-    xp=x; yp=y;         /* RECALC !! */
-    pgpoint_(&npoint, &xp, &yp, &ipoint);       /* draw 1 dot */
+    xp=x; yp=y;                             /* RECALC !! */
+    cpgpt(npoint, &xp, &yp, ipoint);       /* draw 1 dot */
 }
 
 /*
@@ -272,10 +255,9 @@ pltext(string msg, real x, real y, real hgt, real ang)
     xp=x; yp=y; ap=ang;         /* copy into local variables */
 
     newsize = 2 * hgt;          /* pgplot scaling factor */        
-    pgsch_(&newsize);           /* set height of char */
+    cpgsch(newsize);           /* set height of char */
 
-    n = strlen(msg);
-    pgptext_(&xp, &yp, &ap, &fjust, msg, n);        /* plot it */
+    cpgptxt(xp, yp, ap, fjust, msg);        /* plot it */
 }
 
 /*
@@ -286,7 +268,7 @@ plflush()
 { 
     if (iterm==0) return;
 
-    pgupdt_();
+    cpgupdt();
 }
 
 /*
@@ -297,7 +279,7 @@ plframe()
 {
     if (iterm==0) return;       /* no graphics output requested */
 
-    pgpage_();
+    cpgpage();
 }
 
 /*
@@ -314,57 +296,102 @@ plstop()
 
 
     if (debug_level > 0)
-        pgiden_();    
+        cpgiden();    
 
-    pgend_();
+    cpgend();
 }
 
 pl_matrix(real *frame,int nx,int ny,real xmin,real ymin,
 	  real cell,real fmin,real fmax,real findex)
 {
-    real x,y,f,grayscale,ds;
-    int ix,iy;
+    int ix,iy,ix0,ix1,iy0,iy1;
+    float gray0, gray1, tr[6], *data, *dp;
+    real dval,dfac;
     
-    if (iterm==0) return;       /* no graphics output requested */
+    if (iterm==0) return 0;       /* no graphics output requested */
 
-#if TRUE
-    printf("PL_MATRIX is unsupported in pgplot version of YAPP\n");
-    return(0);
-#else
-    /*
-     * this is code from PS- must be converted to SunCore stuff
-     * see:  set_fill_index
-     *       define_color_indices
-     */
-    ds = cell*PTPCM;                    /* convert cm -> pixels */
-    dprintf(2,"GRAY_MATRIX cm: %d * %d matrix  ll corner: %f %f cell %f\n",
-           nx,ny,xmin,ymin,cell);
-    dprintf(2,"GRAY_MATRIX DC: %d * %d matrix  ll corner: %f %f cell %f\n",
-           nx,ny,convx(xmin),convy(ymin),ds);   
-    grayscale = 1.0/(fmax-fmin);
-                                /* normally positive for a negative image */
-    for (ix = 0, x = xmin; ix<nx; ix++, x += cell) {
-        for (iy = 0, y = ymin; iy<ny; iy++, y+=cell) {
-            f = *(frame + ix*ny + iy);
-                                        /* apply linear grayscale + cutoff */
-            if (grayscale>0.0)
-                f *= grayscale;
-            else
-                f = f*grayscale + 1.0;
-            if (f>1.0)                  /* upper cutoff */
-                f = 1.0;
-            if (f<0.0)                  /* lower cutoff */
-                f = 0.0;
-            f = pow(f,findex);          /* transfer function */
-            vec_paint (convx(x),convy(y),ds,f);         /* paint this square */
-        }  
+    dprintf(0,"PL_MATRIX development version for YAPP_PGPLOT\n");
+    if (findex < 0.0) {
+        dprintf(0,"Swapping min and max to : %g %g\n",fmax,fmin);
+        findex = -findex;
+        dval = fmin;
+        fmin = fmax;
+        fmax = dval;
     }
-#endif
+    if (fmin==fmax) {
+        warning("Cannot greyscale a uniform image yet");
+        return 1;
+    } else {
+        dfac = 1.0/(fmax-fmin);
+    }
+    ix0 = 1;
+    iy0 = 1;
+    ix1 = nx;
+    iy1 = ny;
+    gray0 = 0.0;
+    gray1 = 1.0;
+    tr[2] = tr[4] = 0.0;    /* off axis matrix scaling */
+    tr[1] = 16.0/nx;        /* linear scaling to make it fit in 16x16cm */
+    tr[5] = 16.0/ny;
+    tr[0] = 2.0 - 8.0/nx;   /* offset to make pgplot fit the ll corner */
+    tr[3] = 2.0 - 8.0/ny;
+    data = (float *) allocate(sizeof(float)*nx*ny);
+    for(iy=0, dp=data; iy<ny; iy++)
+        for(ix=0; ix<nx; ix++) {
+            dval =  *(frame + ix*ny + iy);
+            if (fmin < fmax) {
+                if (dval < fmin) dval=fmin;
+                if (dval > fmax) dval=fmax;
+                dval = (dval-fmin)*dfac;
+            } else {
+                if (dval < fmax) dval=fmax;
+                if (dval > fmin) dval=fmin;
+                dval = (dval-fmax)*dfac + 1.0;
+            }
+            *dp++ = pow(dval,findex);
+        }
+    cpggray(data,nx,ny,ix0,ix1,iy0,iy1,gray1,gray0,tr);
+    free(data);
+    return 0;
 }
+
+/* not functional yet */
+
+pl_contour(real *frame,int nx,int ny, int nc, real *c)
+{
+    int ix,iy,ix0,ix1,iy0,iy1;
+    float tr[6], *data, *dp, *cnt;
+    real dval,dfac;
+    
+    if (iterm==0) return 0;       /* no graphics output requested */
+
+    dprintf(0,"PL_CONTOUR development version for YAPP_PGPLOT\n");
+    ix0 = 1;
+    iy0 = 1;
+    ix1 = nx;
+    iy1 = ny;
+    tr[2] = tr[4] = 0.0;    
+    tr[1] = 16.0/nx;
+    tr[5] = 16.0/ny;
+    tr[0] = 2.0 - 8.0/nx;
+    tr[3] = 2.0 - 8.0/ny;
+    data = (float *) allocate(sizeof(float)*nx*ny);
+    for(iy=0, dp=data; iy<ny; iy++)
+        for(ix=0; ix<nx; ix++)
+            *dp++ = *(frame + ix*ny + iy);
+    cnt = (float *) allocate(sizeof(float)*nc);
+    for(ix=0; ix<nc; ix++)
+        cnt[ix] = c[ix];
+    cpgcont(data,nx,ny,ix0,ix1,iy0,iy1,cnt,nc,tr);
+    free(data);
+    free(cnt);
+    return 0;
+}
+
 
 pl_screendump(string fname)
 {
-  printf("pl_screendump(%s): Not implemented for yapp_mongo\n",fname);
+  printf("pl_screendump(%s): Not implemented for yapp_pgplot\n",fname);
 }
 
 local bell()
@@ -390,27 +417,27 @@ pl_getpoly(float *x, float *y, int n)
 
     nn = 0;                           /* count points in polygon */
     for(;;) {
-        k = pgcurse_(&xnew, &ynew, ch, 1);
+        k = cpgcurs(&xnew, &ynew, ch);   /* check if length of 'ch' ok */
         if(k==0) {
             warning("Device has no cursor...");
-            return;
+            return 0;
         }
         if (ch[0]=='A') {                     /* left button = DEFINE POLYGON */
             xold = xnew;
             yold = ynew;
             dprintf (2,"Button A at x=%f y=%f\n",xold,yold);
             if (nn==0) {
-                pgmove_(&xold,&yold);
+                cpgmove(xold,yold);
                 k=1;
                 symbol=2;
-                pgpoint_(&k,&xold,&yold,&symbol);
+                cpgpt(k,&xold,&yold,symbol);
 #if 0
                 set_marker_symbol(43);      /* a 'plus' symbol */
                 marker_abs_2(xold,yold);
         
 #endif
             } else
-                pgdraw_(&xold,&yold);
+                cpgdraw(xold,yold);
             if (nn<n) {
                x[nn] = xold;
                y[nn] = yold;
@@ -421,7 +448,7 @@ pl_getpoly(float *x, float *y, int n)
             if (nn>0)
                 nn--;
             if (nn!=0)
-               pgmove_(&x[nn-1],&y[nn-1]);    /* reset */
+               cpgmove(x[nn-1],y[nn-1]);    /* reset */
         } else if (ch[0]=='X') {                          /* right = QUIT */
             break;
         } else
@@ -429,9 +456,26 @@ pl_getpoly(float *x, float *y, int n)
     }   /* for(;;) */
     dprintf (2,"Button C pressed to finish up polygon (%d)\n",nn);
     if (nn>0) {
-        pgdraw_(&x[0],&y[0]);       /* close polygon */
+        cpgdraw(x[0],y[0]);       /* close polygon */
     }
     return(nn<3 ? 0 : nn);        
+}
+
+int pl_cursor(real *x, real *y, char *c)
+{
+    char inf[8], ans[8];
+    int len, inf_len, ans_len;
+    permanent float xsave, ysave;
+                
+    strcpy(inf,"CURSOR");
+    inf_len = strlen(inf);
+    ans_len = 1;
+    cpgqinf(inf, ans, &len);
+    if (ans[0]=='n' || ans[0]=='N') return 0;
+    cpgcurs(&xsave, &ysave, c);
+    *x = xsave;
+    *y = ysave;
+    return 1;
 }
 
 
@@ -458,7 +502,7 @@ pl_getpoly(float *x, float *y, int n)
 #define LIGHT_GRAY	14
 #define	WHITE   	15
 
-local cms_rgbsetup()
+local void cms_rgbsetup()
 {
   ncolors = WHITE+1;
   /* default PGPLOT  colors: although, defined here, plpalette is not called */
@@ -491,7 +535,7 @@ void plcolor(int color)
 	color = 0;
     else if (color > ncolors - 1)
 	color = ncolors - 1;
-    pgsci_(&color);
+    cpgsci(color);
 }
 
 /*
@@ -518,7 +562,8 @@ void plpalette(real *r, real *g, real *b, int nc)
 	red[i] = r[i];
 	green[i] = g[i];
 	blue[i] = b[i];
-        pgscr_(&i,&red[i],&green[i],&blue[i]);
+	dprintf(1,"->PGSCR_(%d,%g,%g,%g) \n",i,red[i],green[i],blue[i]);
+        cpgscr(i,red[i],green[i],blue[i]);
     }
     red[ncolors] = green[ncolors] = blue[ncolors] = 0.0;    /* terminate */
     plcolor(1);			/* reset default color to foreground */
