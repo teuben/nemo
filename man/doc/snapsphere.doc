@@ -1,0 +1,24 @@
+%N snapsphere
+%D copy a selected number of particles from an N-body system
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man snapsphere' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	snapshot input file name  [???]
+%A out
+	snapshot output file name  [???]
+%A rcen
+	pos center  [0,0,0]
+%A vcen
+	vel center  [0,0,0]
+%A rrad
+	inner and outer radius in pos [0:infinity]
+%A vrad
+	inner and outer radius in vel [0:infinity]
+%A times
+	times to select [all]
+%A icen
+	overrid center by selecting a particle (1=first) []
+%A VERSION
+	23-oct-97 PJT [1.9]
