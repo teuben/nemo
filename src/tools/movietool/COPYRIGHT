@@ -1,0 +1,15 @@
+/*
+ * This file is part of
+ * Movietool: display a succession of rasterfile frames in real-time
+ *
+ * Copyright 1989, 1990 by Ole H. Nielsen
+ * This software may be distributed freely provided that:
+ * 1) this copyright notice is kept intact,
+ * 2) you do not try to sell this software for a profit,
+ * 3) you provide the full source code.
+ *
+ * Author: Ole H. Nielsen
+ *         Lab of Applied Physics, Bygn. 307
+ *         Technical University of Denmark, DK-2800 Lyngby
+ *         E-mail: ohnielse@ltf.dth.dk
+ */

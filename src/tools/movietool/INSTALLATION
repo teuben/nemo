@@ -1,0 +1,14 @@
+You want to check Makefile for the definitions of AUDIOPLAYER and AUDIODIR.
+By default, the file "movietool.au" in AUDIODIR is played by means of the
+program AUDIOPLAYER.  A file play.c from the net has been included as a 
+convenient AUDIOPLAYER.  You may use a soft link for "movietool.au" if
+you want flexibility in which file to play.  In case your system doesn't
+have a speaker, simply comment out the lines defining AUDIOPLAYER and AUDIODIR
+in Makefile.
+
+Also check the definitions of BINDIR, MANDIR and MANEXT before you install.
+
+Say "make install", and you are all set.
+
+For testing, you may obtain the raster file sequence that was posted with
+Movietool-1.0 from titan.rice.edu.

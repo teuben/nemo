@@ -1,0 +1,28 @@
+#
+# Makefile for Cdplayer for SunCD 1.0 for 4.0.3c
+# @(#)Makefile 1.5 89/11/14 Copyr 1989 Sun Microsystem, Inc.
+#
+ARCH:sh= arch -k
+
+# Installation directories etc.
+BINDIR = /usr/local/bin
+CDPLAYER = movietool_cdplayer
+
+CFLAGS= -D$(ARCH) $(TARGET_ARCH)
+LTOOL= -lsuntool
+LSUNWINDOW= -lsunwindow
+LPIXRECT= -lpixrect
+LIBS=   ${LTOOL} ${LSUNWINDOW} ${LPIXRECT} -lm
+
+HFILES   = cdrom.h msf.h toc.h 
+OBJS	= player.o msf.o toc.o cdrom.o
+IFILES	= player.icon
+
+${CDPLAYER}:	${HFILES} ${IFILES} ${OBJS}
+	$(LINK.c) $(OBJS) -o $@ ${CFLAGS}  ${LIBS}
+
+install: ${CDPLAYER}
+	install -s ${CDPLAYER} /usr/local/bin
+
+clean:
+	rm -f *.o ${CDPLAYER} core *.BAK

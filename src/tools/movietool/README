@@ -1,0 +1,51 @@
+
+Announcing Movietool version 1.2.
+
+This is an improved version of Movietool version 1.1.  Movietool is a display
+tool for sequences of Sun rasterfiles, providing "video animation" in a
+SunView window.  Movietool may also be used as a multi-rasterfile previewer.
+
+Version 1.2 differs a little from previous ones in that the control panel
+is now a separate frame that can be moved around independently of the
+animation canvas.  This makes it easier to accomodate large images.
+
+In addition, I have now made Movietool into a "multi-media application",
+since I have added the possibility of controlling an attached SCSI CD-ROM 
+drive.  Read the file README.CD-ROM for further instructions.
+
+How to obtain movietool:
+------------------------
+From titan.rice.edu you get the files movietool-1.2.shar, movietool.au.uu,
+and possibly movietool.rasters.tar.Z.uu.  These files are also available by
+anonymous FTP from oersted.ltf.dth.dk (129.142.66.16) in the ~/pub directory.
+Please use titan.rice.edu from the American side of the Atlantic.
+If you don't have FTP access to Internet, please use the Rice archive server.
+
+Testing:
+--------
+There is a compressed tar-file of rasters: movietool.rasters.tar.Z which may
+be unpacked by "make rasters" (almost 1 Mbyte in 50 files).  To play this
+(monochrome) movie, say "movietool tp*".
+
+To do:
+------
+The decoding of RT_BYTE_ENCODED images would ideally be performed by a
+graphics hardware accelerator such as the GX, reducing CPU and bus load.
+However, it seems that presently available GX software (i.e., the XGL library)
+will NOT do this.  Sun would have to implement decoding in a future upgrade.
+Unfortunately, I have no indication that this has any priority inside SMI.
+
+In addition, it would be great is someone who knows the SPARC assembler
+would recode and optimize the module pr_decode.c in order to boost performance.
+ANYONE VOLUNTEERING ??
+
+I will convert Movietool to XView once we decide to use that window system.
+
+Author:
+-------
+
+        Ole H. Nielsen
+        Lab of Applied Physics, Bygn. 307
+        Technical University of Denmark, DK-2800 Lyngby, Denmark
+        E-mail: ohnielse@ltf.dth.dk
+
