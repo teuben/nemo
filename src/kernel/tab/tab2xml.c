@@ -2,7 +2,7 @@
  * TAB2XML: table into XML, mostly to produce a VOTable
  *
  *      13-feb-04   created
- *      15-feb-04   V1.1  - decided to keep the traditional out=
+ *      15-feb-04   V1.1  - decided to keep the traditional out=-
  *
  * TODO:
  *    - "TABLE name=" is wrong, it's the input file
