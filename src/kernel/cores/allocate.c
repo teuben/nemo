@@ -18,7 +18,7 @@
 
 #include "exception.h"
 
-#define calloc my_calloc
+// #define calloc my_calloc
 
 void *allocate(int nb)
 {
