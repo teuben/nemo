@@ -4,10 +4,11 @@
 #   jul-2001            fixed -n bug
 #   jun-2003            optional -u "cd $NEMO;cvs update"
 #   feb-2004            both -t and -T flag
+#   mar-2004            no more NEMOBIN bug
 #
 #  BIG BUG: 'mknemo mkplummer.c' would remove the sourcecode and put it into $NEMOBIN !!!!!
 #
-set version="MKNEMO Version 2.1 21-feb-04 - +NEMOBIN bug"
+set version="MKNEMO Version 2.2 22-mar-04"
 if ($#argv == 0) goto usage
 set old_argv=($*)
 
@@ -137,6 +138,10 @@ if ($l) then
 endif
 
 foreach f ($argv)
+ if (X$f:e != X) then
+   echo "Cannot handle arguments that appear like full filenames - skipping $f"
+   continue
+ endif
  # strip any extensions from the arguments, we're looking to make executables
  set ft=$f:t
  set file=$ft:r
