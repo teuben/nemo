@@ -1,0 +1,133 @@
+.TH IMAGE 5NEMO "21 February 2000"
+.SH NAME
+image \- binary format for 2D and 3D image files
+.SH SYNOPSIS
+.nf
+\fB#include <stdinc.h>\fP
+\fB#include <filestruct.h>\fP
+\fB#include <image.h>\fP
+.fi
+.SH DESCRIPTION
+\fIimage\fP files is a dataformat that describes a rectangular 
+2-dimensional matrix, although the coordinate transformation 
+to world coordinates is by no means restricted to a simple linear
+equation of the form:
+.nf
+        x.w.c. = SCALE * i + OFFSET
+.fi
+where \fIi\fP runs from 0 to N-1, the dimension of the matrix in
+any of its coordinates.
+We have restricted images to 2- and 3-dimensional cases, as well 
+as the restriction that the whole image must be in memory at the
+same time.
+.PP
+\fIImage\fP files are used in 2D and 3D images, i.e. a matrix of
+values of any kind (intensity, velocity etc.).
+The output format of \fIImage(3NEMO)\fP files is the general binary
+structured fileformat as described in \fIfilestructy(3NEMO)\fP.
+.PP
+The data is stored on disk in Fortran or C fashion, depending on
+a compile switch or #define in the image.h module, which must be
+included in every program using images. The default compilation is
+using the FORDEF, i.e. x coordinate running fastest in memory
+(compatibility with existing contour and FITS routines).
+.SH FORMAT
+.nf
+typedef struct {
+    real   *frame;	 /* pointer to datablock */
+    real   **matrix;     /* 2D special case: pointers to pointers */
+    real   ***cube;      /* 3D special case: ptr to ptr to ptr's  */
+    int    nx;		 /* number of pixels along x-axis */
+    int    ny;		 /* number of pixels along y-axis */
+    int    nz;           /* number of pixels along z-axis */
+    real   xmin;	 /* x-value belonging to first x-pixel */
+    real   ymin;	 /* y-value belonging to first y-pixel */
+    real   zmin;	 /* z-value belonging to first z-pixel */
+    real   dx;		 /* step in x-pixel */
+    real   dy;		 /* step in y_pixel */
+    real   dz;		 /* step in z_pixel */
+    real   map_min;		/* minimum map value */
+    real   map_max;		/* maximum map value */
+    int    beamtype;		/* type of beam used for beam smoothing */
+    real   beamx;		/* beamwidth along x (if used) */
+    real   beamy;		/* beamwidth along y (if used) */
+    real   beamz;		/* beamwidth along z (if used) */
+    string namex;		/* pointer to x-axis name string */
+    string namey;		/* pointer to y-axis name string */
+    string namez;		/* pointer to z-axis name string */
+    string unit;
+    real   time;
+    string storage;		/* pointer to storage fashion string */
+} image, *imageptr;
+.fi
+.SH ACCESS-MACROS
+Accessing the individual structure components can be done through some
+pre-define macros (in \fBimage.h\fP):
+.nf
+.ta +2i
+#define Frame(iptr)	((iptr)->frame)
+#define Nx(iptr)	((iptr)->nx)
+#define Ny(iptr)	((iptr)->ny)
+#define Nz(iptr)	((iptr)->nz)
+#define Xmin(iptr) 	((iptr)->xmin)
+#define Ymin(iptr) 	((iptr)->ymin)
+#define Zmin(iptr) 	((iptr)->zmin)
+#define Dx(iptr)	((iptr)->dx)
+#define Dy(iptr)	((iptr)->dy)
+#define Dz(iptr)	((iptr)->dz)
+#define MapMin(iptr)	((iptr)->map_min)
+#define MapMax(iptr)	((iptr)->map_max)
+#define BeamType(iptr)	((iptr)->beamtype)
+#define Beamx(iptr)	((iptr)->beamx)
+#define Beamy(iptr)	((iptr)->beamy)
+#define Beamz(iptr)	((iptr)->beamz)
+#define Namex(iptr)	((iptr)->namex)
+#define Namey(iptr)	((iptr)->namey)
+#define Namez(iptr)	((iptr)->namez)
+#define Unit(iptr)      ((iptr)->unit)
+#define Storage(iptr)   ((iptr)->storage)
+#if defined(CDEF)
+#define MapValue(iptr,ix,iy)	(*( (iptr)->frame + iy + ix*Ny(iptr) ))
+#define CubeValue(iptr,ix,iy,iz)	(*( (iptr)->frame + iz + Nz(iptr)*(iy + Ny(iptr)*ix)))
+#endif
+#if defined(FORDEF)
+#define MapValue(iptr,ix,iy)	 (*( (iptr)->frame + ix + Nx(iptr)*iy) )
+#define CubeValue(iptr,ix,iy,iz)	(*( (iptr)->frame + ix + Nx(iptr)*(iy+Ny(iptr)*iz)))
+#endif 
+.fi
+.SH ARRAY NOTATION
+The \fIMapValue\fP and \fICubeValue\fP macros are sometimes cumbersome
+typography, and using two image library routines, 
+\fBmap2_image\fP and \fBmap3_image\fP these can be converted to
+the commonly used array syntax:
+.nf
+    image *iptr = open_image(....);
+    real **a = map2_image(iptr);
+    for (i=0; i<nx; i++)
+        for (j=0; j<nx; j++)
+            a[i][j] = 0.0;
+.fi
+
+.SH "FUTURE EXPANSIONS"
+Code could be modified to use dynamem(3NEMO). Allows more flexable
+use by addressing image[i][j] instead of stupid(?) macros MapValue(iptr,i,j)
+.SH "SEE ALSO"
+snapshot(5NEMO),image(3NEMO),tsf(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+~/src/pjt/image   	image.c image.h image.3 image.5
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +2.0i +2.0i
+29-Jun-87	V1.0: Original created	PJT
+30-Jun-87	V2.0: use \fBstruct\fP as interface	PJT
+22-May-88	comment to use dynamem(3NEMO)	PJT
+23-dec-88	V2.3: velocity added to header	PJT
+18-jan-89	V3.0: 3D added PJT
+1-feb-89	V4.0: compile switch for FORDEF and CDEF matrix storage	PJT
+21-feb-00	A[i][j] usage        	PJT
+.fi
