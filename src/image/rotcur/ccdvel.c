@@ -50,6 +50,7 @@
  *   1-may-01   V1.6  Added amp= keyword for fudzing density maps    PJT/LGM
  *   3-may-01   V1.7  Added vexp= keyword                            PJT
  *   8-sep-01      a  init_xrandom
+ *  29-jun-02   V1.8  add blc= for "BLC"                            PJT
  */
 
 #include <stdinc.h>
@@ -81,6 +82,7 @@ string defv[] = {
         "size=128\n     Map/Cube size",
         "cell=1\n       Cell size",
         "center=\n      Rotation center of disk [default: map center]",
+	"blc=0\n        Set bottom-left corner (normally 0,0)",
         "vsys=\n        Systemic velocity",
         "rotcurfit=\n   initial conditions from rotcur output table",
         "fixring=1\n    ring to use for center, and vsys",
@@ -89,7 +91,7 @@ string defv[] = {
         "seed=0\n       Initial random seed",
 	"in=\n          Template 2D image for cube generation",
 	"headline=\n	Optional random verbiage",
-        "VERSION=1.6b\n 8-sep-01 PJT",
+        "VERSION=1.8\n  29-jun-02 PJT",
         NULL,
 };
 
@@ -105,6 +107,7 @@ local stream  outstr;                    /* output file */
 local int  size[3];                /* 2D/3D size of map/cube   */
 local real cell[3];                /* cell sizes */
 local real center[3];              /* rot center */
+local real blc[3];                 /* bottom left corner */
 local real rmin, rmax;             /* spatial extent of disk  */
 local real vsys = 0.0;             /* systemic velocity */
 local real noise;                  /* noise ?? */
@@ -197,7 +200,7 @@ setparams()
                 error("Need cell= keyword");
     }
 
-   switch ( nemoinpr(getparam("center"),center,2) ) {   /* ROT CENTER */
+    switch ( nemoinpr(getparam("center"),center,2) ) {   /* ROT CENTER */
        case 1:                  /*  x0[,y0] */
                 center[1] = center[0];
                 break;
@@ -208,7 +211,20 @@ setparams()
                 center[1] = 0.5*(size[1]-1.0);
                 break;
        default:                 /* --- some error --- */
-                error("Syntax error in offset keyword");
+                error("Syntax error in offset= keyword");
+    }
+
+    switch ( nemoinpr(getparam("blc"),blc,2) ) {         /* BLC edge */
+       case 1:                  /*  xmin[,ymin] */
+                blc[1] = blc[0];
+                break;
+       case 2:                  /*  xmin,ymin */
+                break;
+       case 0:                  /*  [0,0,0] */
+	        blc[0] = blc[0] = 0.0;
+                break;
+       default:                 /* --- some error --- */
+                error("Syntax error in blc= keyword");
     }
 
     if (hasvalue("rotcurfit")) {  /* if table given: override all other */
@@ -327,8 +343,8 @@ setparams()
    printf("Mapsize: %d * %d * %d\n",size[0],size[1],size[2]);
    printf("Cell size: %g * %g * %g\n",cell[0],cell[1],cell[2]);
    printf("Center: %g * %g pixels\n",center[0],center[1]);
+   printf("BLC: %g %g\n",blc[0],blc[1]);
    printf("Systemic velocity: %g\n",vsys);
-
 
    for (n=1; n<nrad; n++)
       if (rad_i[n] < rad_i[n-1]) error("Radii not sorted (%d)",n);
@@ -340,9 +356,10 @@ setparams()
 
 
 /*
- * create a velocity field
+ * create a velocity field (GIPSY method)
  *              0..nx-1 and 0..ny-1 
  *      start from pixel, work back to gal plane and interpolate
+ *
  */
 local void vel_create_1(stream outstr)
 {
@@ -383,9 +400,9 @@ local void vel_create_1(stream outstr)
     }
 
     for (j=0; j<ny; j++) {          /* Loop over all pixels */
-        y = dy*(j-y0);
+        y = dy*(j-y0) + blc[1];
         for (i=0; i<nx; i++) {      
-            x = dx*(i-x0);
+            x = dx*(i-x0) + blc[0];
 	    for (k=0; k<nz; k++)
 	      CubeValue(vptr,i,j,k) = undef;       /* set to 'undefined' */
             
@@ -463,6 +480,9 @@ local void vel_create_1(stream outstr)
     Dx(vptr) = dx;
     Dy(vptr) = dy;
     Dz(vptr) = dz;
+    Xmin(vptr) = blc[0];
+    Ymin(vptr) = blc[1];
+    Zmin(vptr) = blc[2];
 
     if (n>0) warning("%d/%d cells with no signal",n,nx*ny*nz);
     printf("Min and max in map: %g %g\n",m_min,m_max);
@@ -501,7 +521,7 @@ local real linfit(real *f, real *x, real x0, int m, int n)
 }
 
 /*
- * create a velocity field
+ * create a velocity field (NEMO)
  *              0..nx-1 and 0..ny-1 
  *      start from gal plane, and project; needs to do a particle simulation
  */
@@ -602,6 +622,8 @@ local void  vel_create_2(stream outstr)
     MapMax(vptr) = m_max;
     Dx(vptr) = cell[0];
     Dy(vptr) = cell[1];
+    Xmin(vptr) = blc[0];
+    Ymin(vptr) = blc[1];
     write_image (outstr,vptr);      /* write out the velocity field */
 }
 

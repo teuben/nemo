@@ -1,10 +1,10 @@
-.TH CCDVEL 1NEMO "4 November 2001"
+.TH CCDVEL 1NEMO "29 June 2002"
 .SH NAME
 ccdvel \- create a velocity field; grid or retrace
 .SH SYNOPSIS
 \fBccdvel out=\fPvelfie [parameters=values ...]
 .SH DESCRIPTION
-\fIccdvel\fP creates a velocity field for a disk with material
+\fIccdvel\fP creates a model velocity field for a disk with material
 in circular orbits. The user supplies the
 program with a rotation curve with a number of radii and 
 rotation velocities. The position
@@ -84,6 +84,10 @@ Rotation center (grids with lower left corner being 0,0).
 Default: center of map if \fIrotcur_table\fP is not used, else
 the \fIcenter_ring\fP entry from the \fIrotcur_table\fP. 
 .TP
+\fBblc\fP=\fIxmin,ymin\fP
+Lower left corner of the grid.
+Default: 0,0.
+.TP
 \fBvsys\fP=\fIvsys\fP
 Systemic velocity. 
 Default: \fB0\fP if \fIrotcur_table\fP is not used, else
@@ -143,13 +147,13 @@ One can also use ccdvel to create a surface brightness. Creating a functional
 form for the density can be done using \fItabmath(1NEMO)\fP. E.g. the following
 example creates an exponential surface density profile:
 .nf
-    1% set rad=`nemoinp 0:100:5`
-    2% set den=`nemoinp 0:100:5 | tabmath - - "exp(-%1/20)" all`
-    3% ccdvel out=map1.den radii="$rad" vrot="$den" pa=30 inc=60 amp=t
+    5% set rad=`nemoinp 0:100:5`
+    6% set den=`nemoinp 0:100:5 | tabmath - - "exp(-%1/20)" all`
+    7% ccdvel out=map1.den radii="$rad" vrot="$den" pa=30 inc=60 amp=t
 or
-    1% nemoinp 0:100:5 > map1.radt
-    2% nemoinp 0:100:5 | tabmath - - "exp(-%1/20)" all > map1.dent
-    3% ccdvel out=map1.den radii=@map1.radt vrot=@map1.dent pa=30 inc=60 amp=t
+    8% nemoinp 0:100:5 > map1.radt
+    9% nemoinp 0:100:5 | tabmath - - "exp(-%1/20)" all > map1.dent
+   10% ccdvel out=map1.den radii=@map1.radt vrot=@map1.dent pa=30 inc=60 amp=t
 .fi
 .SH ROTCURFIT
 The table \fBrotcurfit\fP assumes the
@@ -165,7 +169,7 @@ The output map is patched with the undefined value 0.0 where-ever
 no information is requested for these pixels.
 .PP
 The \fIgridding\fP method is currently not available. The \fPretracing\fP
-method will be used.
+(GIPSY) method will be used.
 .PP
 Different versions of rotcur exist (NEMO, Gipsy) that use different columns,
 so the \fBrotcurfit=\fP tables should be used with caution.
@@ -180,4 +184,5 @@ oct-99       	doc additions                               	PJT
 apr-01		V1.5b added in=, but deprecated it		PJT
 1-may-01	V1.6 added amp= for CARMA simulations		PJT/LGM
 3-may-01	V1.7 added vexp=                            	PJT
+29-jun-02	V1.8 added blc= keyword (Joshua Simon)		PJT
 .fi
