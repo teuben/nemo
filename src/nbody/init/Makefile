@@ -82,5 +82,10 @@ mkplummer: mkplummer.c
 
 mkkd95:	kd95
 
+magalie: bkpg2001
+
 kd95:
 	(cd $(NEMO)/usr/kuijken/GalactICS-exp/src; make -f Makefile.nemo clean all install)
+
+bkpg2001:
+	(cd $(NEMO)/usr/boily/magalie ; $(MAKE) install)
