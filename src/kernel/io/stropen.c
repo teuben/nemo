@@ -38,6 +38,7 @@
  *	29-may-01    stropen using const now
  *      14-feb-02    mktemp -> mkstemp 					pjt
  *       2-aug-03    scratchfile (r+w) access was broken                pjt
+ *       2-dec-03    increase MAXFD to 64
  */
 #include <stdinc.h>
 #include <getparam.h>
@@ -50,8 +51,9 @@
 extern int unlink (string);		/* POSIX ??? unistd.h */
 extern int dup (int);			/* POSIX ??? unistd.h */
 
+/* normally already defined via maxsizes.h */
 #if !defined(NEMO_MAXFD)
-#define NEMO_MAXFD  32
+#define NEMO_MAXFD  64
 #endif
 
 local struct {	          /*  our internal filetable for stropen/strdelete */
