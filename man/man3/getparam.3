@@ -5,20 +5,15 @@ getXparam, hasvalue, isaparam, initparam, finiparam, stop \- main startup and co
 .nf
 .B #include <stdinc.h>
 .B #include <getparam.h>
-
-.B extern int error_level;
-.B extern int debug_level;
-.B extern int yapp_level;
-.B extern int help_level;
 .PP
-    undocumented:
-.B      _bell_level
-.B      _history
-.B      _review_flag
-.B      _yapp_dev
-.B      _yapp_string
-.B      _help_string
-.B      _argv_string
+string defv[]={
+	"key1=val1\\n   Example help for key1",
+	"key2=val2\\n	Example help for key2",
+	"VERSION=1.0\\n 30-apr-2002 pjt",
+	NULL,
+};
+
+string usage="Example usage for program";
 .PP
 .B void initparam(string *argv, string *defv)
 .B void finiparam(void)
@@ -44,21 +39,38 @@ getXparam, hasvalue, isaparam, initparam, finiparam, stop \- main startup and co
 .B bool hasvalue(string name)
 .B bool isaparam(string name)
 .B bool updparam(string name)
+
+.B extern int error_level;
+.B extern int debug_level;
+.B extern int yapp_level;
+.B extern int help_level;
+.PP
+    undocumented:
+.B      _bell_level
+.B      _history
+.B      _review_flag
+.B      _yapp_dev
+.B      _yapp_string
+.B      _help_string
+.B      _argv_string
+.PP
+
 .fi
 .SH DESCRIPTION
 These functions provide a simple and uniform mechanism for 
-command line processing (see also nemomain(3NEMO)). Input as well
+command line processing (see also nemomain(3NEMO) for
+an even simpler approach). Input as well
 as output (storage) of selected parameters can be controlled via
 command line parameters.
 First, \fIinitparam\fP is called to set up values associated with a
-(fixed) set of possible keyword names; 
-after this \fIgetparam\fP and any of its children may be called
+set of possible keyword names; 
+after this \fIgetparam\fP and any of its relatives may be called
 to access and/or parse the value associated with a specified 
 keyword. \fIfiniparam\fP  should be called before the program
 ends, to ensure any outstanding requests are dealt with
 (e.g. writing updated keyword files, see HELP and DEBUG below),
 or optionally complain about unprocessed command line arguments.
-
+Output of parameters is described in \fIoutparam(3NEMO)\fP.
 .PP
 \fIinitparam\fP is called with two arguments:
 the argument vector
