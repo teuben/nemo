@@ -40,10 +40,12 @@ can have its expansion velocity modulated:
 .nf
 	vexp*cos(mexp*(phi-phiexp))
 .fi
-instead of a constant vexp (i.e. mexp=0). This only works for
+instead of a constant vexp (i.e. mexp=0), where phi is measured
+from the major axis in the plane of the disk (check!).
+This only works for
 the retracing method though. Although the rotation speed has
 a similar modulation implemented, it is not a good idea to
-use that. Instead, it will probably be better to define this
+use that. Instead, it will probably be better to re-define this
 as
 .nf
 	vrot+vexp*sin(mexp*(phi-phiexp))
