@@ -1,6 +1,8 @@
 /*
  * plummer.c:  (spherical) plummer potential
  *
+ *	sep-2001	provide both a _double and _float version for the new potproc interface
+ *
  */
 
 /*CTEX
@@ -46,7 +48,8 @@ void inipotential (int *npar, double *par, string name)
     par[0] = omega;
 }
 
-void potential (int *ndim,double *pos,double *acc,double *pot,double *time)
+
+void potential_double (int *ndim,double *pos,double *acc,double *pot,double *time)
 {
     register double tmp;
 
@@ -70,3 +73,29 @@ void potential (int *ndim,double *pos,double *acc,double *pot,double *time)
 
 #endif
 }
+
+void potential_float (int *ndim,float *pos,float *acc,float *pot,float *time)
+{
+    register float tmp;
+
+#if defined(TWODIM)
+    /* TWODIM: Saves two MUL's - hardly making any difference... */
+    tmp = 1.0/(r2 + pos[0]*pos[0] + pos[1]*pos[1]);
+    *pot = -sqrt(tmp);
+    tmp *= (*pot) * plummer_mass;
+    *pot *= plummer_mass;
+    acc[0] = tmp*pos[0];
+    acc[1] = tmp*pos[1];
+    acc[2] = 0.0;
+#else
+    tmp = 1.0/(r2 + pos[0]*pos[0] + pos[1]*pos[1] + pos[2]*pos[2]);
+    *pot = -sqrt(tmp);
+    tmp *= (*pot) * plummer_mass;
+    *pot *= plummer_mass;
+    acc[0] = tmp*pos[0];
+    acc[1] = tmp*pos[1];
+    acc[2] = tmp*pos[2];
+
+#endif
+}
+

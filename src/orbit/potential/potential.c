@@ -180,6 +180,7 @@ local proc load_potential(string fname, string parameters, string dataname, char
       if (pot) 
 	Qfortran = TRUE;		    /* must be F77 then... */		
     }
+
     if (pot==NULL && type=='d') {
       strcpy(pname,"potential_double");
       mapsys(pname);
@@ -202,8 +203,13 @@ local proc load_potential(string fname, string parameters, string dataname, char
 	  Qfortran = TRUE;
       }
     }
-    if (pot==NULL)
-      error ("getpotential: %s() or _double/_float not present",pname);
+    /* it is perhaps possible that some fortran compilers will add __ for */
+    /* routines that have embedded _ in their name.... we're not catching */
+    /* those here yet !!! */
+    if (pot==NULL) {
+      dprintf(0,"Could not find a suitable potential.....\n");
+      return NULL;
+    }
 
     strcpy(pname,"inipotential");
     mapsys(pname);

@@ -8,8 +8,8 @@ L = $(NEMOLIB)/libnemo.a
 
 # local for potentials (won't work well on SGI if .o is actually shared object)
 EL = 
-POTNAME = null
-POTOBJ = $(NEMOOBJ)/potential/$(POTNAME).o
+POTNAME = zero
+POTOBJ = $(NEMOOBJ)/potential/$(POTNAME).so
 #POTOBJ =
 
 # Files etc. in this directory

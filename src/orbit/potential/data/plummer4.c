@@ -2,7 +2,8 @@
  * plummer4.c:  (spherical) plummer potential, derived from plummer.c
  * 		but explicitely written for single precision 
  *		potential interface 
- *			13-sep-01  first test		Peter Teuben
+ *			13-sep-01  this test		Peter Teuben
+ *		
  *
  */
 

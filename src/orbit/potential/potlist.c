@@ -17,6 +17,7 @@
  *			    d   20-feb-97	adapted for SINGLEPREC
  *                          e   12-jun-98       fixed bug in NDIM=3
  *			    f   13-sep-01       potproc prototypes
+ *                       4.0    18-sep-01       handle float as well as double potentials
  */
 
 #include <stdinc.h>
@@ -36,7 +37,8 @@ string defv[] = {
     "omega=\n       Use this instead of any returned pattern speed",
     "format=%g\n    Format used to print numbers",
     "ndim=3\n       Poission test in 3-dim  (XYZ) or 2-dim (XY)",
-    "VERSION=3.2f\n 13-sep-01 PJT",
+    "double=\n      float or double, or automatic detection",
+    "VERSION=4.0\n  18-sep-01 PJT",
     NULL,
 };
 
@@ -46,17 +48,19 @@ string usage = "show a NEMO potential";
 #define MAXPT 10001
 #endif
 
-potproc_double mypot;     /* pointer to potential calculator function */
+potproc_double mypotd;     /* pointer to potential calculator function : double */
+potproc_float  mypotf;     /* pointer to potential calculator function : float */
 
 void nemo_main(void)
 {
     int    i, ndim, nx,ny,nz, ix,iy,iz, stepx, stepy, stepz, nsteps;
-    double pos[3],acc[3],pot,dr,da[3],time;
+    double pos[3],acc[3],pot,time;
+    float  pos1[3],acc1[3],pot1,time1;
     real   xarr[MAXPT],yarr[MAXPT],zarr[MAXPT];
-    double ax,ay,az,epot;
+    double ax,ay,az,epot, dr,da[3];
     double fourpi = 4*PI;
     double omega;
-    bool Qdens;
+    bool Qdens, Qdouble;
     char *fmt, s[20], pfmt[256];
 
     Qdens = hasvalue("dr");
@@ -85,11 +89,33 @@ void nemo_main(void)
 
     time = getdparam("t");
 
-    mypot = get_potential(getparam("potname"), 
-			  getparam("potpars"), 
-			  getparam("potfile"));
-    if (mypot==NULL)
-        error("Potential could not be loaded");
+    if (hasvalue("double")) {
+      Qdouble = getbparam("double");
+      if (Qdouble)
+	mypotd = get_potential_double(getparam("potname"), 
+				      getparam("potpars"), 
+				      getparam("potfile"));
+      else
+	mypotf = get_potential_float(getparam("potname"), 
+				     getparam("potpars"), 
+				     getparam("potfile"));
+    } else {
+      mypotd = get_potential_double(getparam("potname"), 
+				    getparam("potpars"), 
+				    getparam("potfile"));
+      Qdouble = (mypotd != NULL);
+      if (!Qdouble) {
+	mypotf = get_potential_float(getparam("potname"), 
+				     getparam("potpars"), 
+				     getparam("potfile"));
+	if (mypotf == NULL) error("Could not find double or float potential");
+      }
+    }
+    if (Qdouble)
+      dprintf(0,"[potlist in double mode]\n");
+    else
+      dprintf(0,"[potlist in float mode]\n");
+      
     if (hasvalue("omega"))
         omega = getdparam("omega");
     else
@@ -115,7 +141,20 @@ void nemo_main(void)
         pos[1] = yarr[iy];
         pos[2] = zarr[iz];  /* formally not used for ndim=2 */
 
-        (*mypot) (&ndim,pos,acc,&pot,&time);	/* get forces and potential */
+	if (Qdouble)
+	  (*mypotd) (&ndim,pos,acc,&pot,&time);	/* get forces and potential */
+	else {
+	  pos1[0] = pos[0]; 
+	  pos1[1] = pos[1];
+	  pos1[2] = pos[2];
+	  time1 = time;
+	  (*mypotf) (&ndim,pos1,acc1,&pot1,&time1);	/* get forces and potential */	  
+	  acc[0] = acc1[0];
+	  acc[1] = acc1[1];
+	  acc[2] = acc1[2];
+	  pot = pot1;
+	  time = time1;
+	}
         ax = acc[0]; ay = acc[1]; az = acc[2];	        /* save forces */
         epot = pot;					/* and potential */
 	epot -= 0.5*sqr(omega)*
@@ -125,17 +164,17 @@ void nemo_main(void)
             da[0]=acc[0]; da[1]=acc[1]; da[2]=acc[2];	/* store forces */
 
             pos[0] = xarr[ix]+dr;
-            (*mypot) (&ndim,pos,acc,&pot,&time);
+            (*mypotd) (&ndim,pos,acc,&pot,&time);
             da[0] -= acc[0];			/* force derivative along x */
   
             pos[0]=xarr[ix]; 
             pos[1]=yarr[iy]+dr;
-            (*mypot) (&ndim,pos,acc,&pot,&time);
+            (*mypotd) (&ndim,pos,acc,&pot,&time);
             da[1] -= acc[1];			/* force derivative along y */
 
             pos[1]=yarr[iy]; 
             pos[2]=zarr[iy]+dr;
-            (*mypot) (&ndim,pos,acc,&pot,&time);
+            (*mypotd) (&ndim,pos,acc,&pot,&time);
             if (ndim==3) da[2] -= acc[2];	/* force derivative along z */
             else da[2] = 0.0;
 
