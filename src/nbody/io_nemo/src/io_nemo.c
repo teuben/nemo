@@ -1,13 +1,28 @@
-/* -------------------------------------------------------------- *\
-|* $Id$
-|*
-|* Perform I/O operations on NEMO structure data from a C program
-|*
-\* -------------------------------------------------------------- */
+/* =================================================================
+|  Copyright Jean-Charles LAMBERT - 2005                            
+|  e-mail:   Jean-Charles.Lambert@oamp.fr                           
+|  address:  Dynamique des galaxies                                 
+|            Laboratoire d'Astrophysique de Marseille               
+|            2, place Le Verrier                                    
+|            13248 Marseille Cedex 4, France                        
+|            CNRS U.M.R 6110                                        
+| ==================================================================
+|* Perform I/O operations on NEMO structure data from a C program   
+| ==================================================================
+| history                                                           
+|                *            *             *                       
+| 15-Nov-96	 V1.0 : created                                  JCL
+| 21-Feb-97	 V1.1 : memory optimisation                      JCL
+| 16-Apr-97	 V1.11: manual created                           JCL
+| 19-Jul-02	 V1.2 : io_nemo and io_nemo_f unified            JCL
+| 18-Mar-04	 V1.21: bugs fixed, softening added              JCL
+| 03-Mar-05	 V1.30: memory bugs fixed, nemo control bits     JCL
+|                       added, valgrind mem/leak safe               
++----------------------------------------------------------------  */
 
-/* -------------------------------------------------------------- *\
-|* Include files
-\* -------------------------------------------------------------- */
+/* -----------------------------------------------------------------
+|  Include files                                                    
++----------------------------------------------------------------- */
 #include <stdinc.h>
 #include <getparam.h>
 #include <vectmath.h>		
@@ -30,9 +45,9 @@
 /* extern variables */
 #include "flags_data.h"
 
-/* -------------------------------------------------------------- *\
-|* Shared variables
-\* -------------------------------------------------------------- */
+/* -----------------------------------------------------------------
+|  Shared variables                                                 
++----------------------------------------------------------------- */
 
 /* Variables used for reading operations */
 char * io_in[MAXIO]; 
@@ -49,29 +64,14 @@ bool   set_history[MAXIO];
 char * history_prog=NULL;
 char * hist_file;         /* history file name  */
 
-/* io_nemo_data (EXPORTED) */
-char         
-  * pos,   ** pos_p,      /* position           */
-  * vel,   ** vel_p,      /* velocity           */
-  * phase, ** phase_p,    /* phase              */
-  * pot,   ** pot_p,      /* potential          */
-  * acc,   ** acc_p,      /* acceleration       */
-  * mass,  ** mass_p,     /* mass               */
-  * keys,  ** keys_p,     /* keys               */
-  * eps,   ** eps_p,      /* softening          */
-  * timu,  ** time_p,     /* time steps         */
-  * selt,  ** selt_p,     /* selected time      */
-  *SelectionString123;    /* selected particles */
-int   
-  * nbody, ** nbody_p;    /* nbody              */
-
-/* -------------------------------------------------------------- *\ 
-|* reajust_ptr :
-|* match for each pointers passing to "io_nemo" the pointers
-|* allocated.
-\* -------------------------------------------------------------- */ 
+/* ------------------------------------------------------------------
+|  reajust_ptr :                                                     
+|  match for each pointers passing to "io_nemo" the pointers         
+|  allocated.                                                        
++------------------------------------------------------------------ */ 
 void reajust_ptr()
-{ 
+{
+#if 0 
   if (N_io)    *nbody_p    = nbody;
   if (T_io)    *time_p     = timu;
   if (M_io)    *mass_p     = mass;
@@ -83,16 +83,20 @@ void reajust_ptr()
   if (K_io)    *keys_p     = keys; 
   if (EPS_io)  *eps_p      = eps; 
   /*  if (ST_io)   *selt_p     = selt; */
+#endif
 }
 
-/* -------------------------------------------------------------- *\ 
-|* io_nemo :
-|* function called from a C program to perform I/O on a NEMO file.
-\* -------------------------------------------------------------- */
+/* ------------------------------------------------------------------
+|  io_nemo :                                                         
+|  function called from a C program to perform I/O on a NEMO file.   
++------------------------------------------------------------------ */
 int io_nemo(char * iofile,
             char * param, ...)
 {
   va_list pa;      /* variable parameter list                 */
+
+
+  t_ion_data * ion;
 
   char * p, * field;
   int code;        /* return value according to I/O performed */
@@ -111,6 +115,13 @@ int io_nemo(char * iofile,
     first = FALSE;
   }
 
+  /* allocate memory for a new data structure */
+  ion = (t_ion_data *) malloc(sizeof(t_ion_data));
+  if (!ion) {
+    fprintf(stderr,"Unable to allocate memory of size [t_ion_data], aborting...\n");
+    exit(1);
+  }
+
   /* get the first parameter from the variable list */
   va_start(pa, param);
   p = param;    /* point to the first element of the variable list */
@@ -121,52 +132,57 @@ int io_nemo(char * iofile,
     switch (get_case(field)) {
 
     case 1 : N_io = 1;
-      nbody_p = va_arg(pa, int **);
-      nbody   = *nbody_p; /* match local and parameter pointer */
+      ion->nbody_p = va_arg(pa, int **);
+      ion->nbody   = *(ion->nbody_p); /* match local and parameter pointer */
       break;
 
     case 2 : T_io = 1;
-      time_p  = va_arg(pa, char **);
-      timu    = *time_p; /* match local and parameter pointer */
+      ion->time_p  = va_arg(pa, char **);
+      ion->timu    = *(ion->time_p); /* match local and parameter pointer */
       break;
 
     case 3 : M_io = 1;
-      mass_p  = va_arg(pa, char **);
-      mass    = *mass_p; /* match local and parameter pointer */
+      ion->mass_p  = va_arg(pa, char **);
+      ion->mass    = *(ion->mass_p); /* match local and parameter pointer */
       break;
 
     case 4 : X_io = 1;
-      pos_p   = va_arg(pa, char **);
-      pos     = *pos_p; /* match local and parameter pointer */
+      ion->pos_p = va_arg(pa, char **);
+      ion->pos   = *(ion->pos_p);
       break;
 
     case 5 : V_io = 1;
-      vel_p   = va_arg(pa, char **);
-      vel     = *vel_p; /* match local and parameter pointer */
+      ion->vel_p   = va_arg(pa, char **);
+      ion->vel     = *(ion->vel_p); /* match local and parameter pointer */
       break; 
 
     case 6 : P_io = 1;
-      pot_p   = va_arg(pa, char **);
-      pot     = *pot_p; /* match local and parameter pointer */
+      ion->pot_p   = va_arg(pa, char **);
+      ion->pot     = *(ion->pot_p); /* match local and parameter pointer */
       break;
 
     case 7 : A_io = 1;
-      acc_p   = va_arg(pa, char **);
-      acc     = *acc_p; /* match local and parameter pointer */
+      ion->acc_p   = va_arg(pa, char **);
+      ion->acc     = *(ion->acc_p); /* match local and parameter pointer */
       break;
 
     case 8 : K_io = 1;
-      keys_p   = va_arg(pa, char **);
-      keys     = *keys_p; /* match local and parameter pointer */
+      ion->keys_p   = va_arg(pa, char **);
+      ion->keys     = *(ion->keys_p); /* match local and parameter pointer */
       break;
 
     case 10 : EPS_io = 1;
-      eps_p   = va_arg(pa, char **);
-      eps     = *eps_p; /* match local and parameter pointer */
+      ion->eps_p   = va_arg(pa, char **);
+      ion->eps     = *(ion->eps_p); /* match local and parameter pointer */
+      break;
+
+    case 11 : B_io = 1;
+      ion->bits_p   = va_arg(pa, int **);
+      ion->bits     = *(ion->bits_p); /* match local and parameter pointer */
       break;
 
     case 57 : ST_io = 1;
-      selt     = va_arg(pa, char *);
+      ion->selt     = va_arg(pa, char *);
       break;
 
     case 52 : io_op = FALSE;  /* save the snapshot */
@@ -189,7 +205,7 @@ int io_nemo(char * iofile,
       break;
 	  
     case 58 : SP_io=1;
-      SelectionString123=va_arg(pa, char*);
+      ion->SelectionString123=va_arg(pa, char*);
       break;
 
     case 60 : C_io = 1;
@@ -209,31 +225,43 @@ int io_nemo(char * iofile,
 
   if (C_io)  /* close the snapshot */
     code=close_io_nemo(iofile);
-  else
+  else {
     if (io_op) { /* operation on snaphot is reading */
-      code = get_data_select(iofile, rtype, io_in, read_one, instr, MAXIO);
+      code = get_data_select(iofile, rtype, io_in, read_one, instr, MAXIO,ion);
       /* reajust pointers */
-      reajust_ptr();
+      /*reajust_ptr();*/
+      if (N_io)    *(ion->nbody_p)    = ion->nbody;
+      if (T_io)    *(ion->time_p )    = ion->timu;
+      if (M_io)    *(ion->mass_p )    = ion->mass;
+      if (X_io)    *(ion->pos_p  )    = ion->pos;
+      if (V_io)    *(ion->vel_p  )    = ion->vel;
+      if (XV_io)   *(ion->phase_p)    = ion->phase;
+      if (P_io)    *(ion->pot_p  )    = ion->pot;
+      if (A_io)    *(ion->acc_p  )    = ion->acc; 
+      if (K_io)    *(ion->keys_p )    = ion->keys; 
+      if (EPS_io)  *(ion->eps_p  )    = ion->eps; 
+      if (B_io)    *(ion->bits_p )    = ion->bits; 
     }
-    else
-      { 
-	if (!N_io) {
-	  fprintf(stderr,"Parameter error ## [io_nemo] param : \"%s\"\n",
-		  param);
-	  fprintf(stderr,
-		  "You must specify \"nbody\" "
-		  "in the field parameter for SAVE operation \n");
-	  exit(1);
-	}
-	code = put_data_select(iofile, rtype, io_out, save_one, outstr, MAXIO);
+    else { 
+      if (!N_io) {
+	fprintf(stderr,"Parameter error ## [io_nemo] param : \"%s\"\n",
+		param);
+	fprintf(stderr,
+		"You must specify \"nbody\" "
+		"in the field parameter for SAVE operation \n");
+	exit(1);
       }
+      code = put_data_select(iofile, rtype, io_out, save_one, outstr, MAXIO,ion);
+    }
+  }
+  free ((t_ion_data *) ion);
   return code;
 }
-/* -------------------------------------------------------------- *\ 
-|* close_io_nemo :
-|* Close the opening snapshot.
-|* Return 0 if the file was not open, otherwise 1
-\* -------------------------------------------------------------- */
+/* ------------------------------------------------------------------
+|  close_io_nemo :                                                   
+|  Close the opening snapshot.                                       
+|  Return 0 if the file was not open, otherwise 1                    
++------------------------------------------------------------------ */
 int close_io_nemo(char * iofile)
 {
   int no_io,code;
@@ -271,6 +299,6 @@ int close_io_nemo(char * iofile)
   /* reset_history();  */
   return code;
 }
-/* -------------------------------------------------------------- *\ 
-|* End of io_nemo.c 
-\* -------------------------------------------------------------- */
+/* ------------------------------------------------------------------
+|  End of io_nemo.c                                                  
++------------------------------------------------------------------ */
