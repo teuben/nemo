@@ -4,26 +4,27 @@
  *             pieces under your own control
  *
  *    8-may-2002  created on Amtrak,  Amar suggesting this for the 2GB problem   PJT
+ *   21-may-2002  oops, template is a reserved word in C++ :-)                   pjt
  */
 
 #include <stdinc.h>
 
-mstr *mstr_init(string template)
+mstr *mstr_init(string tmplate)
 {
   mstr *mp = allocate(sizeof(mstr));
 
-  mp->template = allocate(strlen(template)+1);
-  mp->filename = allocate(strlen(template)+20);
-  strcpy(mp->template,template);
+  mp->tmplate = allocate(strlen(tmplate)+1);
+  mp->filename = allocate(strlen(tmplate)+20);
+  strcpy(mp->tmplate,tmplate);
   mp->status = 0;
   mp->count = 0;
-  mp->mode = (strchr(template,'%') != NULL);
+  mp->mode = (strchr(tmplate,'%') != NULL);
   if (mp->mode) {
     int n;
-    n = sprintf(mp->filename,mp->template,mp->count);
-    if (n < 0) error("Problem using %s as template filename",mp->template);
+    n = sprintf(mp->filename,mp->tmplate,mp->count);
+    if (n < 0) error("Problem using %s as tmplate filename",mp->tmplate);
   } else
-    strcpy(mp->filename,mp->template);
+    strcpy(mp->filename,mp->tmplate);
   dprintf(1,"mstr_init: %s\n",mp->filename);
 
   mp->ostr = stropen(mp->filename,"w");
@@ -37,7 +38,7 @@ stream mstr_open(mstr *mp)
     return mp->ostr;
   }
   if (mp->mode) {
-    sprintf(mp->filename,mp->template,mp->count);
+    sprintf(mp->filename,mp->tmplate,mp->count);
     strclose(mp->ostr);
     mp->ostr = stropen(mp->filename,"w");
   }
@@ -48,10 +49,10 @@ stream mstr_open(mstr *mp)
 
 void mstr_close(mstr *mp)
 {
-  dprintf(1,"mstr_close: %s count=%d\n",mp->template,mp->count);
+  dprintf(1,"mstr_close: %s count=%d\n",mp->tmplate,mp->count);
   if (mp->ostr) strclose(mp->ostr);
   free(mp->filename);
-  free(mp->template);
+  free(mp->tmplate);
   free(mp);
 }
 
@@ -63,7 +64,7 @@ void mstr_close(mstr *mp)
 string defv[] = {
   "out=test%03d.dat\n     template name",
   "n=10\n                 number to write",
-  "VERSION=1.0\n          8-may-2002 PJT",
+  "VERSION=1.0a\n         21-may-2002 PJT",
   NULL,
 };
 

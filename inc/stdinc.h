@@ -167,7 +167,7 @@ typedef const char* const_string;
 typedef FILE *stream;
 
 typedef struct _mstr {     /* see mstropen(3) */
-  string template;
+  string tmplate;
   string filename;
   int status;
   int count;
@@ -350,7 +350,7 @@ extern string strname(stream);
 extern bool   strseek(stream);
 
 /* io/mstropen.c */
-extern mstr *mstr_init(string template);
+extern mstr *mstr_init(string tmplate);
 extern stream mstr_open(mstr *mp);
 extern void mstr_close(mstr *mp);
 
