@@ -27,5 +27,6 @@ endif
 
 cd $src
 configure --prefix=$prefix
+make clean
 make
 make install 
