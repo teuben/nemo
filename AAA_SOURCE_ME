@@ -94,6 +94,14 @@ echo '++++++++++++++++++++++++++++++++++++++++' >>& install.log
 echo Building some sample executables by running the testsuite with -b:
 echo '   You can later build all executables with "cd $NEMO;make bins"'
 echo '   or using "mknemo <programname>" on a per-case basis'
+if (-d CVS) then
+  echo "    Since you also seem to have a CVS structure (very good!)"
+  echo "    you can also update code directly via CVS, using the -u flag to mknemo:"
+  echo '                mknemo -u <programname>'
+  echo or
+  echo '                mknemo -u -l <programname>'
+  echo if the library also needs to be rebuild.
+end
 
 src/scripts/testsuite -b >>& install.log
 
