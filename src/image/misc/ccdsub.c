@@ -6,6 +6,8 @@
  *	n[xy]aver=	  5-nov-93 	puzzling.....
  * 
 		something is wrong here                     
+
+    TODO:  wcs is wrong on output
  */
 
 
