@@ -14,6 +14,7 @@
  *	      15-jun-02         debug output
  *      V2.0  14-sep-02         Multiple output names allowed via mstropen
  *             9-oct-03         more precision in output
+ *       2.1  31-dec-03         implemented timefuzz=nearest 
  */
 
 /* #define INTERACT */
@@ -31,16 +32,18 @@ string defv[] = {
     "diagcyc=1\n		  keep one in diagcyc diagnostics",
     "amnesia=false\n		  if true, do not output history, etc",
     "checkall=false\n             must it check all snapshots",
+    "timefuzz=0.00001\n           time fuzzy, or use 'nearest'",
 #if defined(INTERACT)
     "more=y\n                     needs interactive SETPARAM part",
 #endif
-    "VERSION=2.0a\n               9-oct-03 PJT",
+    "VERSION=2.1\n                31-dec-03 PJT",
     NULL,
 };
 
+#define TimeFuzz  0.00001	  /* slop tolerated in time comparisons */
+
 string usage="cut a snapshot file down to size";
 
-#define TimeFuzz  0.00001	  /* slop tolerated in time comparisons */
 
 extern bool within(real, string, real);
 extern bool beyond(real, string, real);
@@ -49,12 +52,14 @@ nemo_main()
 {
     stream instr, outstr = NULL;
     mstr *mp;
-    string times;
+    string times, fuzz;
     int partcyc, diagcyc, npart, ndiag;
     bool pramflag, timeflag, partflag, diagflag;
     bool checkall, more, first=TRUE, something=FALSE;
-    bool Qfirst=FALSE, Qlast=FALSE, Qdone=FALSE;
-    real time;
+    bool Qfirst=FALSE, Qlast=FALSE, Qdone=FALSE, Qnear = FALSE;
+    real time, timefuzz;
+    real diff, best_diff, best, guess;
+    int first_time = 1;
     char c;
 
     instr = stropen(getparam("in"), "r");
@@ -66,6 +71,13 @@ nemo_main()
       put_history(outstr);
 #endif
     times = getparam("times");
+    fuzz= getparam("timefuzz");
+    Qnear = streq(fuzz,"nearest")==1;
+    if (!Qnear) 
+      timefuzz = getdparam("timefuzz");
+    else
+      timefuzz = TimeFuzz;
+
     Qfirst = streq(times,"first");
     Qlast = streq(times,"last");
     partcyc = getiparam("partcyc");
@@ -74,7 +86,40 @@ nemo_main()
 #if defined(INTERACT)
     more=getbparam("more");
 #endif
+    if (Qnear) {
+      for (;;) {
+        get_history(instr);
+        if (!get_tag_ok(instr, SnapShotTag))
+	  break;
+	get_set(instr, SnapShotTag);
+	if (get_tag_ok(instr, ParametersTag)) {
+	    get_set(instr, ParametersTag);
+	    if (get_tag_ok(instr, TimeTag)) {
+	      get_data_coerced(instr, TimeTag, RealType, &time, 0);
+	      dprintf(1,"Scanning Time=%g\n",time);
+	      if (first_time) {
+		first_time = 0;
+		guess = natof(times);
+		best_diff = ABS(time-guess);
+		best      = time;
+	      } else {
+		diff = ABS(time-guess);
+		if (diff < best_diff) {
+		  best_diff = diff;
+		  best      = time;
+		}
+	      }
+	    }
+	    get_tes(instr, ParametersTag);
+	}
+	get_tes(instr, SnapShotTag);
+      }
+      dprintf(0,"Found best=%g\n",best);
+      rewind(instr);
+    }
+
     npart = ndiag = 0;
+
     for (;;) {
         get_history(instr);                                 /* skip junk */
         if (!get_tag_ok(instr, SnapShotTag))
@@ -88,11 +133,26 @@ nemo_main()
 		timeflag = TRUE;
 		get_data_coerced(instr, TimeTag, RealType, &time, 0);
 		dprintf(1,"Found Time=%g\n",time);
+		if (!Qnear) {
+		  if (first_time) {
+		    first_time = 0;
+		    guess     = natof(times);
+		    best_diff = ABS(time-guess);
+		    best      = time;
+		  } else {
+		    diff = ABS(time-guess);
+		    if (diff < best_diff) {
+		      best_diff = diff;
+		      best      = time;
+		    }
+		  }
+		}
 	    }
 	    get_tes(instr, ParametersTag);
 	}
 	if (! timeflag ||
-	      (streq(times, "all") || within(time, times, TimeFuzz)) ||
+	      (streq(times, "all") || within(time, times, timefuzz)) ||
+	      (Qnear && time==best) ||
 	      ( (first && Qfirst) || Qlast) ) {
 	    if (get_tag_ok(instr, ParticlesTag)) {
 		partflag = (partcyc != 0 && npart % partcyc == 0);
@@ -102,7 +162,7 @@ nemo_main()
 		diagflag = (diagcyc != 0 && ndiag % diagcyc == 0);
 		ndiag++;
 	    }
-	} else if (timeflag && beyond(time,times,TimeFuzz))  /* all done? */
+	} else if (timeflag && beyond(time,times,timefuzz))  /* all done? */
             if (!checkall) {
                  get_tes(instr,SnapShotTag);
                  break;            /* done with all - break reading loop */
@@ -147,13 +207,14 @@ nemo_main()
 	}
 	get_tes(instr, SnapShotTag);
 	if (Qdone) break;
-    }
+    } /* for(;;) */
     strclose(instr);
     if (Qlast && something)
         dprintf(0,"time = %g\tnpart =%4d\tndiag =%4d\toutputing %s\n",
                     timeflag ? time : 0.0, npart, ndiag,
                     partflag ? "particles" : "diagnostics");
-    if (!something) warning("Nothing was ever written out");
+    if (!something) warning("Nothing was ever written out; closest=%g, timefuzz=%g",
+			    best, timefuzz);
     mstr_close(mp);
 }
 
