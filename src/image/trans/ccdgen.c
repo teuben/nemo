@@ -28,7 +28,7 @@ string defv[] = {
   "crval=\n        Override/Set crval (0,0,0) // ignored",
   "cdelt=\n        Override/Set cdelt (1,1,1) // ignored",
   "seed=0\n        Random seed",
-  "VERSION=0.3\n   5-jan-05 PJT",
+  "VERSION=0.4\n   5-jan-05 PJT",
   NULL,
 };
 
@@ -99,7 +99,7 @@ void nemo_main ()
   sini = sin(inc*PI/180.0);
   cosi = cos(inc*PI/180.0);
   dprintf(0,"Disk with pa=%g inc=%g\n",pa,inc);
-  dprintf(0,"pa(%g %g) inc(%g %g)\n",sinp,cosp,sini,cosi);
+  dprintf(1,"pa(%g %g) inc(%g %g)\n",sinp,cosp,sini,cosi);
 
   ncen = nemoinpr(getparam("center"),center,2);
   if (ncen<0) error("Syntax error %s",getparam("center"));
@@ -358,7 +358,7 @@ local void object_gauss(int npars, real *pars)
 
   if (Qtotflux) {
     A /= (TWO_PI*h*h);
-    dprintf(0,"exp: A->%g\n",A);
+    dprintf(0,"gauss: A->%g\n",A);
   }
 
   for (j=0; j<ny; j++) {
@@ -395,9 +395,9 @@ local void object_bar(int npars, real *pars)
 
   if (Qtotflux) {
     A /= (TWO_PI*h*h*(1-e));
-    dprintf(0,"exp: A->%g\n",A);
+    dprintf(0,"bar: A->%g\n",A);
   }
-  dprintf(0,"bar b=%g\n",b);
+  dprintf(1,"bar b=%g\n",b);
 
   for (j=0; j<ny; j++) {
     y1 = (j-center[1])*Dy(iptr) + Ymin(iptr);
@@ -433,7 +433,12 @@ local void object_noise(int npars, real *pars)
   if (npar > 0) m = pars[0];
   if (npar > 1) s = pars[1];
 
-  if (Qtotflux) m /= (nx*ny);
+  if (Qtotflux) {
+    m /= (nx*ny);
+    s /= (nx*ny);
+    dprintf(0,"noise: m->%g  s->%g\n",m,s);
+  }
+  
 
   for (j=0; j<ny; j++)
     for (i=0; i<nx; i++)
