@@ -463,9 +463,11 @@ extern double cputime(void);
 extern double sqr(double);
 extern double qbe(double);
 extern double dex(double);
-extern double log2(double);
 extern double powi(double,int);
 extern double powd(double,double);
+#if !defined(HAVE_LOG2)
+extern double log2(double);
+#endif
 
 /* cores/bswap.c */
 extern void bswap(void *vdat, int len, int cnt);
