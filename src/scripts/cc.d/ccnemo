@@ -1,0 +1,19 @@
+#! /bin/csh -f
+#	compile a program with standard NEMO libraries and optional
+#	arguments
+
+foreach file ($*)
+
+switch ($file)
+case -*:
+  echo "CCNEMO> Applying switch $file"
+  breaksw
+default:
+  echo "CCNEMO> Compiling $file"
+  echo cc -o $file $file.c $* \
+    $NEMO/lib/libOrbit.a $NEMO/lib/libT.a \
+    $NEMO/lib/libNbody.a $NEMO/lib/libJ.a \
+    $YAPPLINT
+endsw
+
+end
