@@ -1,0 +1,62 @@
+.TH EXCEPTION 3NEMO "15 January 2002"
+.SH NAME
+BeginBlock, EndBlock, (Un)RegisterPointer,  (Un)RegisterStream, RaiseException, RestoreUserContext - exception handling
+.SH SYNOPSIS
+.nf
+.B #include <exception.h>
+.PP
+.B extern int BeginBlock (void);
+.B extern int EndBlock (void);
+.B extern int RegisterPointer (void * ptr);
+.B extern int UnRegisterPointer (void * ptr);
+.B extern int RegisterStream (stream fptr);
+.B extern int UnRegisterStream (stream fptr);
+.B extern void RaiseException (int errNumber);
+.B extern void RestoreUserContext (void);
+.SH DESCRIPTION
+Exception handling is an alternative error handling mechanism in NEMO, much
+like the C++ exception handling.
+NEMO can optionally be compiled (see options.h or the autoconf mechanism, see
+installation manual)
+such that that main trouble points in NEMO's libraries (e.g.
+allocate.c and stropen.c) can use this mechanism. It has the advantage 
+that .... bla bla bla
+
+.PP
+
+\fIBeginBlock\fP marks point of return from exception handler.
+
+\fIEndBlock\fP turns off exception handling for the block begun
+with the last BeginBlock; does cleanup of memory and streams.
+
+\fIRegisterPointer \fP
+marks allocated memory as resource to be freed when an
+error occurs.
+
+
+\fIUnRegisterPointer\fP  unmarks a  resource - for example, 
+when it is freed.
+
+\fIRegisterStream\fP and \fIUnRegisterStream \fP .... bla bla ..
+
+\fIRaiseException\fP
+raises an exception when irretrievable error occurs.
+It transfers control to exception handling mechanism.
+
+\fIRestoreUserContext\fP
+restores the context after exception handling is done.
+.SH EXAMPLES
+In the following example a lower level routine is entered ....
+.nf
+.fi
+.SH SEE ALSO
+error(3NEMO), getparam(3NEMO),
+.SH FILES
+src/kernel/cores/exception.c
+.SH AUTHOR
+N.S. Amarnath
+.SH UPDATE HISTORY
+.nf
+.ta +1i +3.5i
+dec-2001	introduced in NEMO	NAS
+.fi
