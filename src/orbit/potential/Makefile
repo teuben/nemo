@@ -18,9 +18,9 @@ MAN1FILES = potlist.1 rotcurves.1
 MAN3FILES = 
 MAN5FILES = 
 INCFILES = 
-SRCFILES= potential.c potential0.c potlist.c rotcurves.c \
+SRCFILES= potential.c potential0.c potlist.c rotcurves.c acceleration.cc \
  	  $(INCFILES) Makefile
-OBJFILES= potential.o fmath.o
+OBJFILES= potential.o fmath.o acceleration.o
 LOBJFILES= $L(potential.o) $L(fmath.o)
 BINFILES = potlist rotcurves potccd potq
 TESTFILES = potfortest
