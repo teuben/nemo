@@ -1,0 +1,38 @@
+%N /smc/teuben/nemo/bin/sun4/gravsim0
+This doc file has been produced with help=t option
+No further help is available, try 'man gravsim0'
+%A in
+	Snapshot input filename [???]
+%A out
+	Snapshot output filename [???]
+%A prog
+	GRAVSIM Program to run [gravsim]
+%A clean
+	Clean up temp files?
+            Remaining parameters are for GRAVSIM family [t]
+%A title
+	Title for the run []
+%A processors
+	Number of processors that can be used [1]
+%A cells
+	Number of cells to be allocated []
+%A split-number
+	... []
+%A start-time
+	Start time for run [0.0]
+%A end-time
+	Stop time for run [2.0]
+%A eps
+	Softening length [0.05]
+%A tol
+	Tolerance [1]
+%A data-step
+	Major Output of data [0.25]
+%A report-step
+	Minor Output of energy etc. [0.03125]
+%A g-value
+	Gravitational constant [1]
+%A time-step
+	Integration time step [0.03125]
+%A VERSION
+	28-may-91 PJT [1]
