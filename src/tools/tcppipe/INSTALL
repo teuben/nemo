@@ -1,0 +1,13 @@
+TCPpipe - INSTALL
+-----------------
+
+This file describes how to compile and install TCPpipe.
+
+To compile type:
+
+	make
+
+Then copy the binary where you want, for instance:
+
+	cp tcppipe /usr/local/bin
+

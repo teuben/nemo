@@ -1,0 +1,10 @@
+include $(NEMOLIB)/makedefs
+
+tcppipe:	tcppipe_nemo.c
+	$(CC) $(CFLAGS) tcppipe_nemo.c -o tcppipe $(NEMOLIB)/libnemo.a -lm
+
+clean:
+	rm -f tcppipe *.o core
+
+install:	tcppipe
+	mv tcppipe $(NEMOBIN)

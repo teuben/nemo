@@ -1,0 +1,11 @@
+TCPpipe - TODO
+--------------
+
+This is an uncomplete list of things for future versions.
+
+- Correct and improve my english!!!!!
+- Write error messages and usage!
+- Write documentation: manpage, info-manual, a book...
+- If --listen, check who connects
+- Add --verbose
+- Add --file

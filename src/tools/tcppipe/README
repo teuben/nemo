@@ -1,0 +1,48 @@
+				TCPpipe
+========================================================================
+
+Version 0.2
+
+
+ABOUT:
+------
+TCPpipe is a very small program to transfer any kind of data from one
+host to another over a network.
+To do this, first TCPpipe on one host must listen, then TCPpipe on the
+other host can connect. After this the data can be transfered: The
+sending TCPpipe reads from standard-input and sends it to the receiving
+TCPpipe, which writes to standard-output. This allows to connect two
+processes on different machines.
+
+TCPpipe was/is written by Grischa Weberstaedt <epibrator@gmx.net> as a
+programming exercise and is published under the GNU General Public
+License (see COPYING).
+
+
+BUGS:
+-----
+Please report all bugs to <epibrator@gmx.net>!
+This also applies to my buggy english in source code and documentation.
+
+
+COMPILING/INSTALLATION:
+-----------------------
+Take a look at the file INSTALL.
+
+
+USAGE EXAMPLES:
+---------------
+For example you can transfer files without an FTP or HTTP server:
+On host A:
+tcppipe --listen --port 1100 --send < file-on-A
+On host B:
+tcppipe --connect --port 1100 --receive host.name.of.A > file-on-B
+(The port 1100 is only an example, change the file- and hostnames.)
+
+You could even transfer many files with tar:
+tar -cOf file1 file2 dir/* | tcppipe -lp1100
+tcppipe -cp1100 192.168.0.5 | tar -xf -
+
+To gzip the data do this:
+prog-producing-output | gzip | tcppipe --send ...
+tcppipe --receive ... | gunzip | prog-reading-input

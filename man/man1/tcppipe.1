@@ -1,0 +1,53 @@
+.TH TCPPIPE 1NEMO "2 July 2001"
+.SH NAME
+tcppipe \- create TCP connection to send data from/to pipe
+.SH SYNOPSIS
+\fBtcppipe\fP [parameter=value]
+.SH DESCRIPTION
+TCPpipe is a very small program to transfer any kind of data from one
+host to another over a network.
+To do this, first TCPpipe on one host must listen, then TCPpipe on the
+other host can connect. After this the data can be transfered: The
+sending TCPpipe reads from standard-input and sends it to the receiving
+TCPpipe, which writes to standard-output. This allows to connect two
+processes on different machines.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBhost=\fP
+hostname, only needed in send mode [] 
+.TP 20
+\fBport=\fP
+TCP/IP port to communicate with [2801]  
+.TP 20
+\fBbufsize=\fP
+buffersize to use [1024]    
+.TP 20
+.SH EXAMPLES
+On machine A you start by piping data into tcppipe:
+.nf
+    A% mkplummer - 1000 | tcppipe
+.fi
+after which on machine B you tell it to expect data from machine A and send it to the next 
+task in the pipe:
+.nf
+    B% tcppipe A | tsf -
+.fi
+.SH CAVEATS
+A TCP/IP connnection that was used, will remain blocked for usage on that same port
+for a little while (usually 60 seconds).
+Equally so, tcppipe will only listen for so long until it gives
+up, it will not block that port forever (????)
+.SH SEE ALSO
+redir(l)
+.SH FILES
+src/tools/tcppipe
+.SH AUTHOR
+Grischa Weberstaedt, Peter Teuben (NEMO)
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+2001       	Created 	Grischa Weberstaedt
+02-Jul-01	V0.3 added user interface for NEMO	PJT
+.fi

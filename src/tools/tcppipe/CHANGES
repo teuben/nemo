@@ -1,0 +1,11 @@
+TCPpipe - CHANGES
+-----------------
+
+This file lists user-visible changes, while ChangeLog is something for
+programmers.
+
+0.2:	- all the documentation stuff + improved Makefile
+	- support for resolving host names
+	- additional parameter checks
+
+0.1:	- first version, never published
