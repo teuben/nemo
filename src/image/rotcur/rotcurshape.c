@@ -21,6 +21,8 @@
  *               2-sep-03 : 1.2a  fix rotcurmode=t default masks                 pjt
  *              22-dec-03 : 1.2b  fix error estimates for the shape pars         pjt
  *              25-may-04 : 1.2c  fix sigma computation (sqrt(N))                pjt
+ *                             e  plus many improvement when nsigma given
+ *
  *
  ******************************************************************************/
 
@@ -83,7 +85,7 @@ string defv[] = {
     "rotcur3=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur4=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur5=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
-    "VERSION=1.2c\n  25-may-04 PJT",
+    "VERSION=1.2e\n  25-may-04 PJT",
     NULL,
 };
 
@@ -94,7 +96,7 @@ string usage="nonlinear fit of kinematical parameters to the velocity field of a
 typedef real (*rcproc)(real, int, real *, real *);
 
 
-imageptr denptr, velptr;       /* pointers to Images, if applicable - velptr is recycled */
+imageptr denptr, velptr, resptr;    /* pointers to Images, if applicable - velptr is recycled */
 int   lmin, mmin, lmax, mmax;              /* boundaries of map */
 real  grid[2];    /* grid separations in x and y (arcsec.) */
 real  beam[2];    /* size of beam in arcseconds            */
@@ -155,7 +157,9 @@ int rotplt(real rad[], real vsy[], real evs[], real pan[], real epa[],
 	   real inc[], real ein[], real xce[], real exc[], real yce[], real eyc[], 
 	   real p[], real e[],
 	   int mask[], int ifit, real elp[][4], stream lunpri, int cor[], int npt[], real factor);
-void stat2(real a[], int n, real *mean, real *sig);
+int set_blank(int n, real *res, real *w, int *iblank, int nfr, real nsigma, real *q);
+void stat2(real a[], int n, int nf, real *mean, real *sig);
+void stat2b(real a[], int b[], int n, int nf, real *mean, real *sig);
 int getdat(real x[], real y[], real w[], int idx[], real res[], int *n, int nmax, 
 	   real p[], real ri, real ro, real thf, int wpow, real *q, int side, bool *full, int nfr);
 real bmcorr(real xx[2], real p[], int l, int m);
@@ -457,9 +461,10 @@ nemo_main()
     if (Qrotcur) Qimage=FALSE;
 
     if (hasvalue("resid")) {
-      if (Qimage)
+      if (Qimage) {
 	lunres=stropen(getparam("resid"),"w");  /* pointer to table stream output */
-      else
+        resptr = NULL;                          /* signal that we need to allocate */
+      } else
         lunres=stropen(getparam("resid"),"a");  /* pointer to table stream output */
     } else
         lunres=NULL;                    /* no residual table or image output */
@@ -1084,6 +1089,7 @@ stream lunres;   /* file for residuals */
     int   h, k;                                              /* loop counters */
     int   nrt;                       /* error return code from subroutine FIT */
     real  x[2*MAXPTS],y[MAXPTS],w[MAXPTS];/* arrays for coords, vels and wgts */
+    real  wb[MAXPTS];
     int   idx[2*MAXPTS];
     int   iblank[MAXPTS];
     real  res[MAXPTS];                        /* array for y-x, the residuals */
@@ -1130,8 +1136,8 @@ stream lunres;   /* file for residuals */
     printf("  (nfr=%d)\n",nfr);
 #endif
 
-    getdat(x,y,w,idx,res,&n,MAXPTS,p,ri,ro,thf,wpow,&q,side,&full,nfr);  /* this ring */
-    for (i=0;i<n;i++) iblank[i] = 1;
+    getdat(x,y,w,idx,res,&n,MAXPTS,p,ri,ro,thf,wpow,&q,side,&full,nfr);
+    for (i=0;i<n;i++) iblank[i] = 1;  /* 1 means pixel is ok, 0 means flagged */
 
     h=0;                                          /* reset itegration counter */
     nblank=0;
@@ -1142,33 +1148,28 @@ stream lunres;   /* file for residuals */
          chi=q;                                           /* save chi-squared */
          for(k=0;k<nparams;k++)              /* loop to save initial estimates */
             pf[k]=p[k];                                       /* save p in pf */
-         nrt = nllsqfit(x,2,y,w,res,n,pf,e,mask,nparams,tol,itmax,lab,
-			vobs,vobsd);
-	 if (nsigma > 0 && h==1) {
-	   stat2(res,n,&resmean,&ressig);
-	   dprintf(1,"Refit: mean=%g sigma=%g nsigma=%g\n",resmean,ressig,nsigma);
-	   if (ABS(resmean) > ressig) 
-	     warning("Residuals not gaussian? mean=%g/sigma=%g => %g",
-		     resmean,ressig,ABS(resmean)/ressig);
-	   nblank = 0;
-	   for (i=0;i<n;i++) {
-	     ratio = ABS(res[i]-resmean)/ressig;
-	     if (ratio > nsigma) {
-	       iblank[i] = 0;
-	       w[i] = 0.0;
-	       nblank++;
-	     } else {
-	       iblank[i] = 1;
-	     }
-	     dprintf(4,"%d %g %g %g %g %s\n",i+1,y[i],w[i],res[i],
-		     ratio,(ratio > nsigma) ? "***" : "" );
-	   }
-	   if (nblank) {
-	     dprintf(0,"Rejecting %d/%d points\n",nblank,n);
+         nrt = nllsqfit(x,2,y,w,res,n,pf,e,mask,nparams,tol,itmax,lab,vobs,vobsd);
+	 if (nsigma > 0)  {              /* do another fit w/ outliers marked */
+	   nblank=set_blank(n,res,w,iblank,nfr,nsigma,&q);
+	   if (nblank)
 	     nrt = nllsqfit(x,2,y,w,res,n,p,e,mask,nparams,tol,itmax,lab,
 			    vobs,vobsd);
-	   }
+#if 0
 	   break;
+#else
+	   if (Qimage) {
+	     if (h==1)
+	       warning("new feature: patching the input maps for nsigma rejects");
+	     /* alternatively you could only allow masking at the firsts iter */
+	     /* h==1 only 1st; h>0 always */
+	     if (h>0) {
+	       for (i=0; i<n; i++) 
+		 if (iblank[i] == 0)
+		   MapValue(velptr,idx[2*i],idx[2*i+1]) = undf;
+	     }
+   	   } else
+	     break;
+#endif
 	 }
          if (nrt<0) {
             warning("nllsqfit=%d: must find better solution (n=%d)",nrt,n);
@@ -1183,13 +1184,16 @@ stream lunres;   /* file for residuals */
                pf[k]=flip*df[k]+p[k];                       /* new parameters */
             pf[4]=MIN(pf[4],180.0-pf[4]);         /* in case inclination > 90 */
             getdat(x,y,w,idx,res,&n,MAXPTS,pf,ri,ro,thf,wpow,&q,side,&full,nfr);
+#if 0
+	    for (i=0;i<n;i++) iblank[i] = 1; 
 	    for (i=0;i<n;i++) w[i] *= iblank[i];            /* apply blanking */
+#endif
             if (q < chi) {                                     /* better fit ?*/
                perform_out(h,pf,n,q);                   /* show the iteration */
                for(k=0;k<nparams;k++)            /* loop to save new estimates */
                   p[k]=pf[k];
                 stop=FALSE;  /* but make sure it doesn't quit from outer loop */
-                dprintf(1,"Found a solution\n");
+                dprintf(1,"Found a solution q=%g chi=%g\n",q,chi);
                 break;                             /* leave inner XWHILE loop */
             } else {                                      /* not a better fit */
                stop=TRUE;                                    /* reset logical */
@@ -1197,9 +1201,10 @@ stream lunres;   /* file for residuals */
                   stop = stop && (ABS(flip*df[k]) < eps[k]);
                stop = (ABS(q-chi)/chi < tol);      /* difference small enough */
                if (stop) {                                      /* is it so ? */
-                  dprintf(1,"Chi^2 small enough anyhow....\n");
-                  break;                             /* we found it ! XREPEAT */
-               }
+		 dprintf(1,"Chi^2 small enough anyhow....%g\n",(q-chi)/chi);
+		 break;                             /* we found it ! XREPEAT */
+               } else
+		 dprintf(1,"Chi^2 not small...%g\n",(q-chi)/chi);
             }
             if (flip > 0.0)                               /* make it negative */
                flip *= -1.0;
@@ -1245,9 +1250,11 @@ stream lunres;   /* file for residuals */
 
     if (lunres) {
       if (Qimage) {
-	for (i=0;i<Nx(velptr);i++)
-	  for (j=0;j<Ny(velptr);j++)
-	    MapValue(velptr,i,j) = 0.0;
+	if (resptr == NULL)
+	  copy_image(velptr,&resptr);
+	for (i=0;i<Nx(resptr);i++)
+	  for (j=0;j<Ny(resptr);j++)
+	    MapValue(resptr,i,j) = 0.0;
       } else {
         fprintf(lunres,"#  %d : New ring %g - %g\n",n,ri,ro);
         fprintf(lunres,"#  Xsky Ysky Vobs Vobs-Vmod Xgal Ygal Rgal THETAgal\n");
@@ -1261,12 +1268,12 @@ stream lunres;   /* file for residuals */
 	xc2 =   xc1*cosp + yc1*sinp;         /* X and Y (galaxy) w.r.t. rotation center */
 	yc2 = (-xc1*sinp + yc1*cosp)/cosi;   /* Qrotcur */
 	if (Qimage) {
-	  MapValue(velptr,idx[2*i],idx[2*i+1]) = res[i];
+	  MapValue(resptr,idx[2*i],idx[2*i+1]) = res[i];
 	  if (i==0)
-	    MapMin(velptr) = MapMax(velptr) = res[i];
+	    MapMin(resptr) = MapMax(resptr) = res[i];
 	  else {
-	    MapMin(velptr) = MIN(MapMin(velptr), res[i]);
-	    MapMax(velptr) = MAX(MapMax(velptr), res[i]);
+	    MapMin(resptr) = MIN(MapMin(resptr), res[i]);
+	    MapMax(resptr) = MAX(MapMax(resptr), res[i]);
 	  }
 	} else {
 	  fprintf(lunres,"%g %g %g %g %g %g %g %g\n",
@@ -1274,7 +1281,7 @@ stream lunres;   /* file for residuals */
 		xc2, yc2, sqrt(xc2*xc2+yc2*yc2),atan2(yc2,xc2)/F);
 	}
       }
-      if (Qimage) write_image(lunres,velptr);
+      if (Qimage) write_image(lunres,resptr);
     }
 
     if (ier==1 && cor[0]>0 && cor[1]>0) {   /* calculate ellipse parameters ? */
@@ -1310,6 +1317,39 @@ perform_out(int h,real *p,int n,real q)
     printf(" %7.2f",p[i]);
   printf("  %5d %8.3f\n", n,   q);
 }
+
+
+int set_blank(int n, real *res, real *w, int *iblank, int nfr, real nsigma, real *q)
+{
+  real resmean, ressig, ratio;
+  int i, nblank;
+
+  stat2(res,n,nfr,&resmean,&ressig);
+  dprintf(1,"Refit: mean=%g sigma=%g nsigma=%g\n",resmean,ressig,nsigma);
+  if (ABS(resmean) > ressig) 
+    warning("Residuals not gaussian? mean=%g/sigma=%g => %g",
+	    resmean,ressig,ABS(resmean)/ressig);
+  nblank = 0;
+  /* note that this loop ensures iblank[] is completely reset for all elements */
+  for (i=0;i<n;i++) {
+    ratio = ABS(res[i]-resmean)/ressig;
+    if (ratio > nsigma) {
+      iblank[i] = 0;
+      w[i] = 0.0;
+      nblank++;
+    } else {
+      iblank[i] = 1;
+    }
+  }
+  if (nblank) {
+    dprintf(0,"Rejecting %d/%d points for nsigma=%g\n",nblank,n,nsigma);
+    stat2b(res,iblank,n,nfr,&resmean,&ressig);
+    dprintf(1,"Refit-blanking: mean=%g sigma=%g nsigma=%g\n",resmean,ressig,nsigma);
+    *q = ressig;
+  }
+  return nblank;
+}
+
 /******************************************************************************/
 
 /*
@@ -1346,26 +1386,26 @@ stream lunpri;
 
   if (ifit < 2) return;
    
-  stat2(inc,ifit,&mean,&sig);
+  stat2(inc,ifit,1,&mean,&sig);
   fprintf(lunpri," average inclination      : %8.2f  (%8.3f)  degrees\n",
                                               mean,    sig);
-  stat2(pan,ifit,&mean,&sig);
+  stat2(pan,ifit,1,&mean,&sig);
   fprintf(lunpri," average position angle   : %8.2f  (%8.3f)  degrees\n",
                                               mean,    sig);
-  stat2(vsy,ifit,&mean,&sig);
+  stat2(vsy,ifit,1,&mean,&sig);
   fprintf(lunpri," average systemic velocity: %8.2f  (%8.3f)  km/s\n",
                                               mean,    sig);
-  stat2(xce,ifit,&mean,&sig);
+  stat2(xce,ifit,1,&mean,&sig);
   fprintf(lunpri," average x-position       : %8.2f  (%8.3f)  grids\n",
                                               mean,    sig);
-  stat2(yce,ifit,&mean,&sig);
+  stat2(yce,ifit,1,&mean,&sig);
   fprintf(lunpri," average y-position       : %8.2f  (%8.3f)  grids\n",
                                               mean,    sig);
 }
 
 /* stat2: for an input array a[] of length n, get the mean and dispersion */
 
-void stat2(real *a,int n,real *mean,real *sig)
+void stat2(real *a,int n,int nf, real *mean,real *sig)
 {
     real s=0, sx=0, sxx=0;
     int i;
@@ -1377,9 +1417,31 @@ void stat2(real *a,int n,real *mean,real *sig)
         sxx += sqr(*a++);
     }
     *mean = sx/s;
-    if (n > 1)
-      *sig = sqrt( (sxx-s*sqr(*mean)) / MAX(1.0,s-1) );
-    else
+    if (n > 1) {
+      s -= nf;
+      *sig = sqrt( (sxx-s*sqr(*mean)) / MAX(1.0,s) );
+    } else
+      *sig = 0.0;
+}
+
+void stat2b(real *a,int *b,int n,int nf, real *mean,real *sig)
+{
+    real s=0, sx=0, sxx=0;
+    int i;
+
+    if (n<=0) return;
+    for (i=0; i<n; i++) {
+      if (b[i]) {
+        s += 1.0;
+        sx += *a;
+        sxx += sqr(*a++);
+      }
+    }
+    *mean = sx/s;
+    if (s > 0) {
+      s -= nf;
+      *sig = sqrt( (sxx-s*sqr(*mean)) / MAX(1.0,s) );
+    } else
       *sig = 0.0;
 }
 
