@@ -1,0 +1,92 @@
+.TH CCDPLOT 1NEMO "29 March 1997"
+.SH NAME
+ccdplot \- display program for 2D image maps (contour and/or gray-scale)
+.SH SYNOPSIS
+.PP
+\fBccdplot in=\fPsnapshot [parameter=value]
+.SH DESCRIPTION
+\fBccdplot\fP plots a contour representation of a 2D image map.
+It can also superimpose a 32-level grayscale represention (only
+very few yapp devices support this though), or
+optionally leave out the contour values.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 20
+\fBin=\fIin-file\fP
+input file, must be in \fIImage(5)\fP format [no default]
+.TP
+\fBcontour=\fIvalues\fP
+A list of contour values to be plotted. If the keyword is not used
+a grayscale-map is produced between displaylevels \fBmmin\fP and \fBmmax\fP
+(see below). For \fBmmin\fP < \fBmmax\fP this will be a 'negative'
+image (lowest values are white, which is also the default).
+For \fBmmin\fP > \fBmmax\fP this will be a 'positive' image. 
+[default: no contour levels plotted, grayscale is plotted]
+.TP
+\fBgray=\fItrue|false\fP
+Should the grayscale map be used/superimposed? [default depends 
+on usage of \fBcontour\fP keyword].
+.TP
+\fBmmin=\fImmin\fP
+Minimum mapvalue to be plotted. [default: auto-scaled].
+.TP
+\fBmmax=\fImmax\fP
+Maximum mapvalue to be plotted [default: auto-scaled].
+.TP
+\fBpower=\fIvalue\fP
+Power of the transfer function for a grayscale display. Only values between
+\fBmmin\fP and \fBmmax\fP are plotted. A power greater than one will
+enhance the higher intensities, smaller than 1 the lower intensities.
+ [default: \fB1\fP, i.e. a linear
+transfer function].
+.TP
+\fBxrange=\fIvalues\fP
+Range in x to plot, e.g. \fB-2:2\fP [default: whole matrix, sizes are
+obtained from mapheader]. 
+\fIWarning: BUG, don't used\fP
+.TP
+\fByrange=\fIvalues\fP
+Range in y to plot. See \fBxrange\fP.
+\fIWarning: BUG, don't used\fP
+.SH EXAMPLES
+.nf
+.ta +3i
+\fBccdplot foo.dat contour=1:10:0.5\fP	contour map only
+\fBccdplot foo.dat\fP              	gray scale map only, with default min/max
+\fBccdplot foo.dat contour=1:10:2 gray=true\fP	contour + gray scale map overlayed
+.SH "FUTURE ENHANCEMENTS"
+A color bar at the bottom, or so.
+.PP
+Extensive encoding of contour-levels etc. around plot-frame
+.PP
+Sorting contour values must be done (sort of a bug really)
+.SH "SEE ALSO"
+image(5NEMO), ccddisplay(1NEMO)
+.SH BUGS
+Not always greyscale map produced, you may need an old version of my yapp_ps.
+We haven't decided on a proper way to call/define plmatrix(3NEMO) I guess.
+.PP
+Clipping absent, produces awkward pictures when not whole area to be 
+displayed.
+.PP
+Plotting subregions doesn't work
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+~/src/image/misc  	ccdplot.c
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+29-jun-87	V1.0: created from ccd's module 	PJT
+30-jun-87	V1.1: improved 'struct' filestruc	PJT
+ 6-jul-87	V1.2: order keywords optimized for cnt/gray PJT
+ 8-jul-87	V1.4: proper defn. of cell-position	PJT
+ 1-jun-88	V2.0: name change, new filestruct, though code same	PJT
+ 3-apr-91	V2.2: documented that big bug	PJT
+13-jan-92	V2.3: added greyscale as plotlabel	PJT
+29-mar-97	fixed outdated doc	PJT
+.fi
