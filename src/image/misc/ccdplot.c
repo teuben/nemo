@@ -17,6 +17,7 @@
  *	 5-dec-99  V2.6 optional compilation with new pl_contour()	PJT
  *	 3-nov-00  V2.7 added blankval=		PJT
  * 	 7-may-01     a cleaned up some superfluous #define's	PJT
+ *      19-feb-02  V2.8 added ltype=				pjt
  *	
  */
 
@@ -50,7 +51,8 @@ string defv[] = {
 	"format=%g\n	Format for above table",
 	"cmode=0\n	Contour mode (0=orginal 1=pgplot)",
 	"blankval=\n	if used, use this as blankval",
-	"VERSION=2.7a\n	7-may-01 PJT",
+	"ltype=\n	width and type for contour",
+	"VERSION=2.8\n	19-feb-02 PJT",
 	NULL,
 };
 
@@ -86,6 +88,7 @@ char   plabel[80], clabel[80], glabel[80];
 string headline;			/* extra label */
 char   format4[100];
 int    cmode;
+int    lwidth=0, ltype=0;
 
 local real xtrans(real), ytrans(real);
 void lineto(real, real, real, real);
@@ -167,6 +170,11 @@ setparams()
 	cmode = getiparam("cmode");
 	if (hasvalue("blankval"))
 	    contour_setdef(1,getrparam("blankval"));
+	if (hasvalue("ltype")) {
+            lwidth = getiparam("ltype");
+            // oops, skip ltype for now
+        }
+            
 }
 
 plot_map ()
@@ -231,6 +239,7 @@ plot_map ()
            /*  color_bar (100.0,500.0,32);  */
      } 
      		/* OLD ROUTINE, has to call relocate/frame ---> plcontour */
+     plltype(lwidth,ltype);
      if (cmode==0) 
         contour (Frame(iptr),nx,ny,cntval,ncntval,
 		Xmin(iptr), 
@@ -240,7 +249,7 @@ plot_map ()
     
      else if (cmode==1)
          pl_contour (Frame(iptr),nx,ny,ncntval,cntval);
-
+     plltype(1,1);
 
 	/* draw axes and their labels */
     xaxis ( 2.0, 2.0, 16.0, xplot, -7, xtrans,  xlabel);
