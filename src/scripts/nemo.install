@@ -1,5 +1,9 @@
 #! /bin/csh -f
 #
+# example script which installs NEMO from scratch. Needs (CVS) network access 
+# see also $NEMO/AAA_SOURCE_ME
+#
+#
 #  P500/     431.720u 58.010s 10:52.41 75.0% 0+0k 0+0io 1841259pf+0w
 # P1600/     209.350u 33.580s  5:11.70 77.9% 0+0k 0+0io 1712038pf+0w
 # P2800/     113.260u 16.760s  2:45.88 78.3% 0+0k 0+0io 1993802pf+0w
@@ -38,7 +42,7 @@ else
 endif
 
 #		get  the source ($pgplot is done below)
-echo Getting the NEMO source code via CVS
+echo Getting the NEMO source code via CVS into $root
 time cvs -Q checkout $cvs_rev -d $root nemo
 
 # --disable-gsl
@@ -53,7 +57,7 @@ source nemo_start
 if ($pgplot) then
   make dirs config_clean
   rm NEMORC.local
-  echo Getting the PGPLOT source code via CVS
+  echo Getting the PGPLOT source code via CVS into NEMO/local/pgplot
   (cd local; cvs -Q checkout pgplot)
   (cd src/scripts; ./pgplot.install dir=$NEMO/local/pgplot) >& pgplot.install.log
   setenv PGPLOT_DIR $NEMOLIB
@@ -69,7 +73,7 @@ src/scripts/testsuite -b
 if (1) then
 if (-d usr/dehnen/falcON) then
   # falcON
-  set fbins=(TestGrav gyrfalcON)
+  set fbins=(TestGrav gyrfalcON addgravity setgravity)
   set arch=i386_linux
   echo Compiling $fbins for $arch
   ( cd usr/dehnen/falcON; make ; make $fbins; cd $arch; cp $fbins $NEMOBIN)  >& install_falcON.log
