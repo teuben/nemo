@@ -25,7 +25,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "median=t\n          Compute median too? (can be time consuming)",
     "method=0\n          Method to remove outliers (0=fast 1=slow)",
     "nmax=10000\n        maximum number of data to be read if pipe",
-    "VERSION=1.1a\n	 23-sep-01 PJT",
+    "VERSION=1.1b\n	 29-sep-01 PJT",
     NULL
 };
 
@@ -75,7 +75,7 @@ void setparams()
     nxcol = nemoinpi(getparam("xcol"),xcol,MAXCOL);
     if (nxcol < 1) error("Error parsing xcol=%s",getparam("xcol"));
 
-    nmax = file_lines(input,getiparam("nmax"));
+    nmax = nemo_file_lines(input,getiparam("nmax"));
     dprintf(1,"Allocated %d lines for table\n",nmax);
     for (j=0; j<nxcol; j++)
         x[j] = (real *) allocate(sizeof(real) * (nmax+1));   /* data */
