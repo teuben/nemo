@@ -149,7 +149,6 @@ testdisk(int n)
 
     for (dp=disk, i = 0; i < ndisk; dp++, i++) {
 	Mass(dp) = mass_i;
-	/* r_i = sqrt(rmin2 + i * (rmax2 - rmin2) / (ndisk - 1.0)); */
         r_i = sqrt(rmin2 + xrandom(0.0,1.0) * (rmax2 - rmin2));
         f = xrandom(0.0,1.0);			   /* pick random disk/spiral */
 	if (f<unifrac)                                     /* disk particle   */
