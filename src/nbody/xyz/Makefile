@@ -11,11 +11,11 @@ XYZFLAG = -DXYZVEL
 #  for SGI you probably need to use:
 #		VOGLINC= VOGLLIB=-lgl
 VOGLINC = -I$(NEMOINC)/vogl
-VOGLLIB = $(NEMOLIB)/libvogl.a $(NEMOXLIBS)
+VOGLLIB = $(NEMOLIB)/libvogl.a $(XLIBS)
 
 MESA = $(HOME)/code/Mesa-6.0.1
 MESAINC = -DMESA -I$(MESA)/include
-MESALIB = -L$(MESA)/lib -lGL -lGLU -lglut $(NEMOXLIB)
+MESALIB = -L$(MESA)/lib -lGL -lGLU -lglut $(XLIBS)
 
 
 #	NEMO Library, and make it a precious one
