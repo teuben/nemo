@@ -1,6 +1,6 @@
 /*
- * TABHIST: a general histogram plotter program 
- *          for ascii data in tabular format
+ * TABHIST: a general histogram plotter program for ascii data in tabular format
+ *          
  *
  *	17-Mar-88  V1.0 :  created by P.J.Teuben
  *	15-apr-88  V1.1 :  added higher order moment, scaling in Y  PJT
