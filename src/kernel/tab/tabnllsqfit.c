@@ -15,7 +15,6 @@
  *      21-mar-03  1.7  optional bootstrapping to check on errors
  *       4-apr-03  1.8  added dypow= keyword, and fixed bug in handling dycol=
  *      10-mar-04  1.8b added Lorentzian fitting, fixed setting lab= for loadable functions
- *                      (with PJTs protest that this is not a Lorentzian ??)
  *
  *  line       a+bx
  *  plane      p0+p1*x1+p2*x2+p3*x3+.....     up to 'order'   (a 2D plane in 3D has order=2)
@@ -56,7 +55,7 @@ string defv[] = {
     "bootstrap=0\n      Bootstrapping to estimate errors",
     "seed=0\n           Random seed initializer",
     "numrec=f\n         Try the numrec routine instead?",
-    "VERSION=1.8b\n     10-mar-04 PJT,RS",
+    "VERSION=1.8c\n     15-mar-04 PJT,RS",
     NULL
 };
 
