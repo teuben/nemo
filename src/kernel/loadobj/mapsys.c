@@ -49,9 +49,9 @@
 
 void mapsys(char *func)
 {
-    int i,n;
+    int i, n;
 
-    n=strlen(func);
+    n = strlen(func);
 
 #if defined(bsd)
     for (i=n+1; i>0; i--)

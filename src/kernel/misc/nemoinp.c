@@ -25,11 +25,15 @@
  *   8-sep-01       b:  init_xrandom
  *   4-mar-03   V1.9: added nemoinpx for sexa decoding into degrees pjt
  *  28-jun-03       a: fixed prototype for darwin :-)               pjt
+ *  24-nov-03       b: fixed another prototype for gcc3             pjt
  */
 
 #include <stdinc.h>
 #include <getparam.h>
+#include <extstring.h>
+
 extern string *burststring(string,string);
+extern void freestrings(string *);
 
 #if defined(NOHERINP)
 
@@ -128,6 +132,7 @@ int nemoinpf(
 
 
 #else
+
 extern void herinp(char *expr, int *nchr, char *type, int *length,
 		   char *outv, int *nout, int *nret, int *ierd);
 
@@ -231,7 +236,7 @@ int nemoinpx(
 	     double *a,
 	     int     na)
 {
-  int i, nret, ncomp;
+  int nret, ncomp;
   string *vals, *comp;
 
   vals = burststring(expr,",");
@@ -284,7 +289,7 @@ string defv[] = {
     "seed=0\n		Seed for xrandom",
     "atof=\n            test (n)atof single value expression",
     "dms=f\n            Use D:M:S.SS parsing instead of regular",
-    "VERSION=1.9\n	4-mar-03 PJT",
+    "VERSION=1.9b\n	24-nov-03 PJT",
     NULL,
 };
 
@@ -292,7 +297,7 @@ string defv[] = {
 string usage = "expression parser and evaluator; also does lists";
 
 
-nemo_main()
+void nemo_main(void)
 {
     char   fmt1[20], fmt2[20], *cp;
     real   dms[32];

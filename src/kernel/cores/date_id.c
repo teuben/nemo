@@ -12,25 +12,26 @@
  *		 9-dec-90   the 'real time;' declaration caused trouble PJT
  *		19-feb-94   ANSI
  *              12-jan-99   kkkkon solaris and w/ ccmalloc ctime() crashed PJT
+ *              24-nov-03   %ld instead of %d
  */
 
 #include <stdinc.h>
 #include <time.h>	/* time(), ctime() */
 
-string date_id()
+string date_id(void)
 {
     permanent char did[32];
+#if 0    
     char *ct;
-    long lt;
     time_t clock, tloc;
 
-    lt = time(0);
-#if 0    
     ct = ctime(&lt);
     strcpy(did,ct);
     did[strlen(did)-1] = '\0';  /* get rid of last \n; at position 24 */
 #else
-    sprintf(did,"DATE_ID=%d",lt);
+    long lt = time(0);
+
+    sprintf(did,"DATE_ID=%ld",lt);
 #endif
     return(did);
 }

@@ -78,7 +78,7 @@ int index_grid(
     Grid *g,
     real x)
 {
-    int idx, imin, imax;
+    int imin, imax, idx = 0;
 
     switch (g->mode) {
       case GRID_PROC:

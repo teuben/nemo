@@ -21,6 +21,7 @@
  *  24-feb-01   added comments to grandrom() and return both #'s  PJT
  *   7-apr-01   fixed grandom() bug, introduced 24-feb
  *   8-sep-01   (V2.0) added GSL 
+ *  24-nov-03   V2.0b  some prototypes for -Wall added            PJT
  */
 
 #include <stdinc.h>
@@ -40,8 +41,8 @@ extern string *burststring(string,string);
 
 
 #if defined(RAND48)
-extern double drand48(void);
-extern void   srand48(long);
+ extern double drand48(void);
+ extern void   srand48(long);
 #endif
 
 
@@ -53,14 +54,18 @@ real portable_ran(int *);
 local int idum;            /* local variable to store used seed */
 
 #ifdef HAVE_GSL
-#include <gsl/gsl_rng.h>
-#include <gsl/gsl_randist.h>
-static gsl_rng *my_r = NULL;
-static const gsl_rng_type *my_T;
+# include <gsl/gsl_rng.h>
+# include <gsl/gsl_randist.h>
+ static gsl_rng *my_r = NULL;
+ static const gsl_rng_type *my_T;
+
+ static string env_type = "GSL_RNG_TYPE";    /* environment variables    */
+ static string env_seed = "GSL_RNG_SEED";    /* used by GSL_RNG routines */
+
 #endif
 
-static string env_type = "GSL_RNG_TYPE";    /* environment variables    */
-static string env_seed = "GSL_RNG_SEED";    /* used by GSL_RNG routines */
+extern int natoi(char *expr);
+
 
 int init_xrandom(string init)
 {
@@ -222,7 +227,7 @@ string defv[] = {
     "gsl=\n         If given, GSL distribution name",
     "pars=\n        Parameters for GSL distribution",
 #endif
-    "VERSION=2.0a\n 10-sep-01 PJT",
+    "VERSION=2.0b\n 24-nov-03 PJT",
     NULL,
 };
 

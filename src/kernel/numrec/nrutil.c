@@ -6,14 +6,15 @@
 #define NR_END 1
 #define FREE_ARG char*
 
+extern void warning(char *, ...);
+extern void error(char *, ...);
+
 void nrerror(char error_text[])
-/* Numerical Recipes standard error handler */
+/* Numerical Recipes standard error handler for NEMO */
 {
 	warning("Numerical Recipes 2 run-time error...");
 	warning("%s",error_text);
 	error("...now exiting to system...");
-
-	exit(1);
 }
 
 float *fvector(long nl, long nh)
