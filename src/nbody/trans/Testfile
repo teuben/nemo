@@ -25,31 +25,31 @@ snap.in:
 	@echo Creating snap.in
 	$(EXEC) mkplummer snap.in $(NBODY) seed=123
 
-snapcenter:
+snapcenter: snap.in
 	@echo Running snapcenter
 	$(EXEC) snapcenter snap.in . weight=r report=t  ; nemo.coverage snapcenter.c
 
-snaprotate:
+snaprotate: snap.in
 	@echo Running snaprotate
 	$(EXEC) snaprotate snap.in - 45,60,45 xyz | csf - . ; nemo.coverage snaprotate.c
 
-snaprect:
+snaprect: snap.in
 	@echo Running snaprect
 	$(EXEC) snaprect snap.in . ; nemo.coverage snaprect.c
 
-snapinert:
+snapinert: snap.in
 	@echo Running snapinert
 	$(EXEC) snapinert snap.in - ; nemo.coverage snapintert.c
 
-snapsplit:
+snapsplit: snap.in
 	@echo Running $@
 	$(EXEC) snapsplit snap.in - nbody=1 | csf - . ; nemo.coverage snapsplit.c
 
-snapcopy:
+snapcopy: snap.in
 	@echo Running $*
 	$(EXEC) snapcopy snap.in - select=i | csf - . ; nemo.coverage snapcopy.c
 
-snapadd:
+snapadd: snap.in
 	@echo Running $*
 	$(EXEC) snapadd snap.in,snap.in - | tsf -; nemo.coverage snapadd.c
 
