@@ -156,7 +156,7 @@ void nemo_main(void)
   fprintf(datstr,"unfio in=m.dat block=0 type=f | tabtos - ../%s block1=m,x,y,z,vx,vy,vz options=wrap nbody=%d\n",
 	  out, ndisk+nbulge+nhalo);
   strclose(datstr);
-  run_program("chmod +x make-it; ./make-it > magalie.log 2>&1");   /* run it ! */
+  run_program("chmod +x make-it; time ./make-it > magalie.log 2>&1");   /* run it ! */
   if (Qcleanup) {
     dprintf(0,"Removing the run directory %s.tmpdir\n",out);  
     sprintf(rundir,"cd ..; rm -rf %s.tmpdir",out);  
