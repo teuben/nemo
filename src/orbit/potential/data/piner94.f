@@ -14,6 +14,7 @@ C               The potentials of the bars have been messed up a bit
 C               to correct for bars being along the Y axis in some
 C               simulations. Better was to have this handled in
 C               the caller routines (e.g. potential)
+c   20-jun-01   geez, SGI doesn't like ctrl-L in the file....       pjt
 C
 C   ToDO:
 C	code DACSH()
@@ -240,7 +241,6 @@ C
 C 
       RETURN
       END
-
 C-----------------------------------------------------------------------
       SUBROUTINE FORAX( X, Y, Z, FX, FY, FZ)
 C-----------------------------------------------------------------------
@@ -273,7 +273,6 @@ C
       FZ = 0.
       RETURN
       END
-
 C-----------------------------------------------------------------------
       SUBROUTINE FORBA1( XINPUT, YINPUT, Z, AXOUT, AYOUT, AZ)
 C-----------------------------------------------------------------------
@@ -343,7 +342,6 @@ C     EPT = -EPT * ACONST
       AYOUT=AX
       RETURN
       END
-
 C-------------------------------------------------------------------------------
       SUBROUTINE FORBA0( X, Y, Z, FX, FY, FZ)
 C-------------------------------------------------------------------------------
@@ -427,7 +425,6 @@ C     TOTAL
       POT = POTBU + POTDI
       RETURN
       END
-
 C-----------------------------------------------------------------------
       SUBROUTINE POTBA1( XINPUT, YINPUT, Z, EPT)
 C-----------------------------------------------------------------------
@@ -488,7 +485,6 @@ C     ACONST = ELIPM*4.027209375/(A*C*C)
       EPT = -EPT * ACONST
       RETURN
       END
-
 C-------------------------------------------------------------------------------
       SUBROUTINE POTBA0( X, Y, Z, POT) 
 C-------------------------------------------------------------------------------
