@@ -1,0 +1,269 @@
+.\" pjt 
+.TH PROGRAMS 8NEMO "18 April 1996" 
+.SH NAME
+programs \- list of currently available nemo(1NEMO) commands, ordered thematically
+.SH DESCRIPTION
+These are the tasks currently available under to run under NEMO. They are a
+collection of program to do N-body calculations and
+some simple 2/3-D image processing, connected with the N-body calculations.
+If program names are preceded by a dash (\fB-\fP) they 
+do not have NEMO's user interface
+and are sometimes not even found in NEMO's bin area on disk (usually referred
+to as $NEMOBIN). Program names ending on a star (\fB*\fP) 
+are available under this and sometimes more wildcard names (e.g. snapplot and 
+snapplot_ps)
+Program names ending in a 
+questionmark (\fB?\fP) are not available yet, but we're thinking of making them.
+Check the future-plan
+\fIsoftware(8NEMO)\fP document to see if anyone is working on them
+yet.
+.SH "1. GENERAL INFORMATION (only doc/man)"
+.nf
+.ta +2.0i
+programs	list of programs (this file)	[8]
+intro    	list of programs (alphabetical)	
+software	status software developement	[8]
+files   	summary of all special files
+example  	example skeleton file for manual page writers	[8]
+usage205	a very short an simple instruction list for CYBER 205 users [8]
+usageeta10	some comments on ETA-10 usage [8]
+cookbook	a quick list of what to do to run (e.g.) treecode on the 205 [8]
+tricks    	useful tricks and bug detours [8]
+orbit   	overview what orbit utilities are planned [0]
+.fi
+.SH "2. UTILITY TASKS"
+.nf
+.ta +2.0i
+nemoshow    	check environment, show NEMO system variables/keywords
+.\" -nemonews      	check if there is NEMO news
+.\" -nemobugs    	check if there are any bug reports within NEMO
+.\" -nemonew      	add new_additions comments
+.\" -nemobug     	add new_bugs bug reports
+-cc       	special program or shell script needed in some UNIX flavors
+-make      	special program or shell script needed in some UNIX flavors
+.\" -update     	combine multiple source files for CYBER 205's UPDATE
+-keyval   	display value in a 'keyword=value' string
+nemoinp  	test parsing of numbers
+units        	units conversion utility
+.fi
+.SH "3. DATA CONVERSION"
+.nf
+.ta +2.0i
+atos,atos_sph  	convert an ascii snapshot file into \fIsnapshot(5)\fP format
+stoa,stoa_sph  	convert a \fIsnapshot(5)\fP file into an ascii file
+tabtos    	convert ascii table into snapshot format
+snapprint	create table of snapshot variables
+snapfits	Convert snapshot into FITS random group format
+snap3dv   	convert snapshot to 3dv format for 3D display
+stoo      	convert a \fIsnapshot(5)\fP file into an \fIorbit(5)\fP file
+otos    	convert an \fIorbit(5)\fP file into an \fIsnapshot(5)\fP file
+snapccd    	grid a \fIsnapshot(5)\fP file into an \fIimage(5)\fP file
+snapgrid	grid a \fIsnapshot(5)\fP file into an \fIimage(5)\fP file
+ccdfits  	convert an \fIimage(5)\fP into a \fIfits(5)\fP file
+tsf         	type a structured file
+rsf       	read a structured file
+csf      	copy a structured file and swap bytes if needed
+hisf    	display and manipulate data history of a structured file
+bodytrans	test (and/or create new) body to scalar mapping routines
+bswap       	swap bytes
+snapxyz   	convert snapshot to xyzc data
+fitsgrid	convert fits binary table to an image by gridding
+unfio    	access fortran unformatted I/O files
+units       	units conversion utility
+wcs       	(astronomical) world coordinate system transformations
+.fi
+.SH "4. N-BODY REALIZATORS"
+.nf
+.ta +2.0i
+anisot    	create distribution function table for anistropic spherical models
+mkommod   	anisotropic velocity distribution (Merritt)
+mkplummer	plummer model 
+mkdisk  	uniform disk of test-particles in external potential
+mkspiral	uniform disk of test-particles with logarithmic spiral
+mkpolytrope  	polytrope sphere
+mkbaredisk	almost stable disk...
+mkexpdisk	almost stable disk... (test version)
+mkexphot 	3D-exponential hot disk inside assumed halo
+snapenter	interactive, quicky
+mkconfig	...
+mkhomsph	homogeneous sphere
+mkhom   	homogeneous sphere
+mkisosph	isothermal sphere
+mkmestel	Mestel disk
+mktestdisk	toy program
+.fi
+.SH "5. N-BODY INTEGRATORS"
+.nf
+.ta +2.0i
+hackcode1* 	C-version of TREECODE: with optional time slicing
+hackcode3*	C-version, with optional fixed particles/background potential
+-treecode      	(Hernquist') fortran version of HACKCODE
+quadcode	Simon White's quad-code
+potcode    	fixed potential N-body integrator - optional dissipation
+nbody0     	aarseth integrator, variable timestep (toy version)
+nbody1     	aarseth integrator, variable timestep (full version)
+nbody2  	aarseth integrator, with Ahmad-Cohen neighbor scheme
+newton0*    	multi-purpose N-body integrator
+gravsim0	frontend for the GRAVSIM family of integrators
+.fi
+.SH "6. PLOTTING, PRINTING and HARD COPIES"
+.nf
+.ta +2.0i
+--sm    	interactive graphics utility (sun/x windows)
+--mongo     	interactive graphics utility (sun (color) windows)
+--gnuplot  	interactive function plotter 
+snapdiagplot*	diagnosis of an N-body run
+snapplot*	display N-body snapshot file
+trakplot*	display N-body snapshot file (cumulative)
+snapplotedit	display and edit N-body snapshot file (interactive + mouse)
+xyzview      	Display 3-D position & velocity data
+tsf         	type structured file
+snaplist	make listing of N-body snapshot file
+snapprint	make tabular listing of N-body snapshot file
+radprof*	radial profile and plotting
+snapslit*     	Simulate taking a slit spectrum of an N-body snapshot
+snapaxsym	Axisymetric image view of a snapshot
+plarrow_ps	plot an arrow in postscript
+pltext_ps	plot text in postscript
+-movie,movie_sv	display screendumps in orderly fashion
+mkcolor  	create color table
+.SH "7. 2D IMAGE UTILITIES"
+.nf
+.ta +2.0i
+snapccd     	construct CCD velocity-moment image from an N-body snapshot
+snapgrid	general image constructor from snapshot
+snapsmooth*	variable smoothing of an N-body snapshot to an image
+ccdsmooth    	smoothing of a 2D image map
+ccdmath   	image arithmetic, using function expressions
+ccdfft    	2D Fast Fourier Transform of a map
+ccdfits   	create fits file from an image
+ccdplot       	contour/gray-scale for an image
+ccddisplay	display 2D image on Sun screen (non-yapp suntools)
+ccddump   	dump contents of an image
+ccdstat     	statistics on image
+ccdprint	print out map values at gridpoints of an image
+ccdvel       	create a velocity field
+ccdsub      	subset/average of an image
+snapaxsym	Axisymetric image view of a snapshot
+-ds         	image display program (suntools)
+.fi
+.SH "8. ORBIT UTILITIES"
+.nf
+.ta +2.0i
+mkorbit  	quick making of an orbit for \fIorbit(5NEMO)\fP
+stoo      	conversion of \fIsnapshot(5NEMO)\fP to \fIorbit(5NEMO)\fP format
+otos    	convert an \fIorbit(5)\fP file into an \fIsnapshot(5)\fP file
+orbint       	integrate an orbit using \fIpotential(5NEMO)\fP file
+orblist   	list an orbit
+orbplot*  	plot an orbit
+orbdim         	dimensionality of phase space for an orbit
+potlist   	show potential and forces of \fIpotential(5NEM0)\fP file
+pspeed   	Tremaine & Weinberg pattern speed of system
+perorb  	search for periodic orbits
+.fi
+.SH "9. MANIPULATION"
+.nf
+.ta +2.0i
+hackforce*	add hack-forces to a snapshot
+snapscale   	scale phase space coordinates of an N-body snapshot
+snapshift	shift phase space coordinates of an N-body snapshot
+snapcopy	copy particles of snapshot subject to conditions
+snaprotate  	rotate an N-body system
+snaptrim	cut(extract) a snapshot file down in size
+snapsphere	take a selective number of particles from a snapshot
+snapcenter	center a snapshot
+snaprect	diaganolize moment-of-inertia of snapshot
+snapmask      	mask out certain particles
+snapdist	distance between two snapshots
+snapmass	add masses to a snapshot
+snapspin	add spin along Z-axis of a snapshot
+snapvirial	scale snapshot while retaining virial ratio
+snapcmp    	compare two snapshots
+snapcmphist	compare two snapshots and plot histogram
+snapplotedit	interactive graphics editor for N-body snapshots
+snapdens	local density estimator using nearest neighbor
+hackdens	local density estimator using nearest neighbor and tree
+.fi
+.SH "10. COMBINATION"
+.nf
+.ta +2.0i
+snapstack   	add snapshots, optional offset them
+snapadd
+.fi
+.SH "11. ANALYSIS"
+.nf
+.ta +2.0i
+snapstat      	compute various statistics of a snapshot
+snappeak    	mode analysis on snapshot
+snapkinem	lagrangian kinematic analysis
+snapinert	--same--
+snaprect	diaganolize moment-of-inertia of snapshot
+snapdiagplot*	diagnosis of an N-body run
+snaphist	histogram of projected radii and velocities
+snapvirial	scale snapshot while retaining virial ratio
+diag205   	diagnosis: prepare 205 logfile to tabular data
+radprof* 	radial profile, fitting and plotting of snapshot
+unbind     	unbind stars from a system
+snapstab	report on stability of a stellar system
+snapfour	fourier analyze a snapshot
+.fi
+.SH "13. TABLE MANIPULATIONS"
+.nf
+.ta +2.0i
+tabmath   	general table mathematics - mini spreadsheet
+tablsqfit    	linear least squares fitting of tabular data
+tabhist  	histogram plotter
+tablst    	ascii output of binary table
+tabsplit	split a table into two
+snapprint	tabular output of a snapshot
+tabpp     	Poynter-Picket spectral line catalogue manipulator
+--awk      	UNIX program with a lot of similar capabilities
+.fi
+
+.SH "14. FITS"
+.nf
+.ta +2.0i
+fitshead	dump the header of a fits file
+scanfits	scan a fits file, optionally extract and convert
+fitstab  	convert fits table to ascii table
+snapfits	convert a snapshot file to a fits file
+ccdfits     	write a fits file to disk
+fitsccd  	read a (fits) image file from disk
+.fi
+.SH "15. MODEL FITTING and ANALYSIS"
+.nf
+.ta +2.0i
+tablsqfit    	general linear least squares fitting of tabular data
+tabhist  	histogram plotter
+snaprect	diaganolize moment-of-inertia of snapshot
+rotcur      	fit kinematic parameters from velocity field
+ccdvel    	create theoretical velocity field
+rotcurves	rotation curve of a composite potentials
+snapfit  	fit a (6D) snapshot to a (3D) data cube
+.fi
+.SH "16. ASTRONOMY"
+.nf
+.ta +2.0i
+wcs       	(astronomical) world coordinate system transformations
+.fi
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +3.0i
+~teuben/nemodoc 	original manual page
+.fi
+.SH "SEE ALSO"
+.nf
+index(1NEMO), software(8NEMO)
+\fIThe NEMO Users/Programmers Manual\fP
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i 
+16-Mar-87	created    	PJT
+7-jun-88	..another update	PJT
+16-dec-88	..	PJT
+10-feb-90	..	PJT
+4-mar-92	updated	PJT
+.fi

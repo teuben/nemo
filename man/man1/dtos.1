@@ -1,0 +1,44 @@
+.TH DTOS 1NEMO "6 August 1996"
+.SH NAME
+dtos \- convert STARLAB dyn to NEMO snapshot
+.SH SYNOPSIS
+\fBdtos\fP [parameter=value]
+.SH DESCRIPTION
+\fBdtos\fP converts a STARLAB dyn file to a NEMO snapshot file
+(see also stod(1NEMO) for the reverse operation  and other information).
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBout=\fP
+Output snapshot file in standard \fIsnapshot(5NEMO)\fP
+format. Note that the input dyn must be from standard input.
+No default.
+.SH EXAMPLES
+Since STARLAB has the restriction that input and output are through
+stdin/stdout (cin/cout), the user interface of \fBdtos\fP is not
+quite standard NEMO. In the following example a file in dyn
+format is converted to snapshot format:
+.nf
+        dtos out=run1.ss < run1.dyn
+.fi
+.SH BUGS
+There are no times associated with the \fIdyn\fP
+input stream. A keyword
+"times=" should be used to enforce. The \fIhdyn\fP format does
+have times.
+.SH SEE ALSO
+stod(1NEMO), snapshot(5NEMO)
+.SH FILES
+.nf
+.ta +1i
+src/nbody/io/starlab  	dtos.C, stod_subs.c
+.fi
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+31-Jul-96	V1.1 doc written	PJT
+6-aug-96	V1.1a handle multple snapshots from input	PJT
+.fi
