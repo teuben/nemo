@@ -1,0 +1,236 @@
+.TH WORLDPOS 3NEMO "14 October 1993"
+.SH NAME
+worldpos, xypix \- astronomical coordinate conversions
+.SH SYNOPSIS
+.B int worldpos(
+.B double 
+.I xpix, 
+.B double 
+.I ypix, 
+.B double 
+.I xref, 
+.B double 
+.I yref,
+.B double 
+.I xrefpix, 
+.B double 
+.I yrefpix, 
+.B double 
+.I xinc, 
+.B double 
+.I yinc, 
+.B double 
+.I rot,
+.B char 
+.I *type, 
+.B double 
+.I *xpos, 
+.B double 
+.I *ypos);
+.PP
+.B int xypix(
+.B double 
+.I xpos, 
+.B double 
+.I ypos, 
+.B double 
+.I xref, 
+.B double 
+.I yref, 
+.B double 
+.I xrefpix, 
+.B double 
+.I yrefpix, 
+.B double 
+.I xinc, 
+.B double 
+.I yinc, 
+.B double 
+.I rot,
+.B char 
+.I *type, 
+.B double 
+.I *xpix, 
+.B double 
+.I *ypix);
+.SH DESCRIPTION
+\fBworldpos\fP and \fBxypix\fP, perform
+forward and reverse Wold Coordinate System (WCS)
+computations for 8 common types of projective
+geometries ("-SIN", "-TAN", "-ARC", "-NCP", "-GLS", "-MER", "-AIT"
+and "-STG"):
+.nf
+        worldpos() converts from pixel location to RA,Dec 
+        xypix()    converts from RA,Dec         to pixel location   
+.fi
+where "(RA,Dec)" are more generically (long,lat). These functions
+are based on the WCS implementation of Classic AIPS, an
+implementation which has been in production use for more than ten
+years. See the two memos by Eric Greisen
+.nf
+        \fIftp://fits.cv.nrao.edu/fits/documents/wcs/aips27.ps.Z\fP
+        \fIftp://fits.cv.nrao.edu/fits/documents/wcs/aips46.ps.Z\fP
+.fi
+for descriptions of the 8 projective geometries and the
+algorithms.  Footnotes in these two documents describe the
+differences between these algorithms and the 1993-94 WCS draft
+proposal (see URL below). In particular, these algorithms support
+ordinary field rotation, but not skew geometries (CD or PC matrix
+cases). Also, the MER and AIT algorithms work correctly only for
+CRVALi=(0,0). Users should note that GLS projections with yref!=0
+will behave differently in this code than in the draft WCS
+proposal.  The NCP projection is now obsolete (it is a special
+case of SIN).  WCS syntax and semantics for various advanced
+features is discussed in the draft WCS proposal by Greisen and
+Calabretta at:
+.nf    
+        \fIftp://fits.cv.nrao.edu/fits/documents/wcs/wcs.all.ps.Z\fP
+.fi    
+.PP
+.nf
+\fBworldpos\fP determines accurate position for pixel coordinates.
+It returns 0 if successful, 1 if the angle too large for projection.
+.nf
+.ta +1i 
+Input:
+xpix	x pixel number  (RA or long without rotation)
+ypiy	y pixel number  (dec or lat without rotation)
+xref	x reference coordinate value (deg)
+yref	y reference coordinate value (deg)
+xrefpix	x reference pixel
+yrefpix	y reference pixel
+xinc	x coordinate increment (deg)
+yinc	y coordinate increment (deg)
+rot	rotation (deg)  (from N through E)
+*type	projection type code e.g. "-SIN"
+	Valid are: -SIN, -TAN, -ARC, -NCP, -GLS, -MER, -AIT projections,
+	anything else is linear.
+
+Output:
+
+*xpos	x (RA) coordinate (deg)
+*ypos	y (dec) coordinate (deg)
+.fi
+.PP
+.nf
+
+\fBxypix\fP determines accurate pixel coordinates for an RA and Dec.
+It returns 0 if successful otherwise: 
+1 if the angle too large for projection; 
+2 if bad values 
+.nf
+.ta +1i
+Input: 
+xpos	x (RA) coordinate (deg)
+ypos	y (dec) coordinate (deg)
+xref	x reference coordinate value (deg)
+yref	y reference coordinate value (deg)
+xrefpix	x reference pixel
+yrefpix	y reference pixel
+xinc	x coordinate increment (deg)
+yinc	y coordinate increment (deg)
+rot	rotation (deg)  (from N through E)
+*type	projection type code e.g. "-SIN";
+	Valid are: -SIN, -TAN, -ARC, -NCP, -GLS, -MER, -AIT projections,
+	anything else is linear.
+Output:                                  
+*xpix	x pixel number  (RA or long without rotation)
+*ypiy	y pixel number  (dec or lat without rotation)
+.fi
+.SH HISTORY
+The original version of this code was Emailed to D.Wells on
+Friday, 23 September by Bill Cotton <bcotton@gorilla.cv.nrao.edu>,
+who described it as a "..more or less.. exact translation from the
+AIPSish..". Changes were made by Don Wells <dwells@nrao.edu>
+during the period October 11-13, 1994:
+.nf
+    1) added GNU license and header comments
+    2) added testpos.c program to perform extensive circularity tests
+    3) changed float-->double to get more than 7 significant figures
+    4) testpos.c circularity test failed on MER and AIT. B.Cotton
+       found that "..there were a couple of lines of code [in] the wrong
+       place as a result of merging several Fortran routines." 
+    5) testpos.c found 0h wraparound in xypix() and worldpos().
+    6) E.Greisen recommended removal of various redundant if-statements,
+       and addition of a 360d difference test to MER case of
+.fi
+.SH ERROR RETURN CODE
+.nf
+.ta +1i
+0   	no error
+-1
+-2
+.SH COORDINATE SYSTEMS
+The following table is a list of the currently described coordinate
+systems. The ones implements in these routines are marked with a *.
+.nf
+.ta +0.5i +0.5i +3i
+FITS 	Number	Name                 	Comments
+code 	code
+----	------	-----------------------	-----------------------------------
+DEF	0   	Default = Cartesian
+AZP	1   	Zenithal perspective	projp1 required
+TAN*	2    	Gnomic                	AZP w/ projp1 = 0
+SIN*   	3    	Orthographic          	AZP w/ projp1 = Infinity (>10^14)
+STG*   	4    	Stereographic         	AZP w/ projp1 = 1
+ARC*   	5    	Zenithal Equidistant
+ZPN   	6    	Zenithal polynomial   	prop1-projp9 required, useless
+ZEA   	7    	Zenithal equal area
+AIR   	8    	Airy                  	projp1 required
+CYP   	9    	Cylindrical perspective	projp1 and projp2 required
+CAR  	10    	Cartesian
+MER*   	11    	Mercator
+CEA   	12    	Cylindrical equal area 	projp1 required
+COP   	13    	Conical perspective    	projp1 and projp2 required
+COD   	14    	Conical equidistant    	projp1 and projp2 required
+COE   	15    	Conical equal area     	projp1 and projp2 required
+COO   	16    	Conical orthomorphic   	projp1 and projp2 required
+BON   	17    	Bonne's equal area     	projp1 required
+PCO   	18    	Polyconic
+GLS*   	19    	Sinusoidal
+PAR   	20    	Parabolic
+AIT*   	21    	Hammer-Aitoff
+MOL   	22    	Mollweide
+CSC   	23    	Cobe Quadrilateralized 	convergence of inverse is poor
+             	Spherical Cube
+QSC   	24    	Quadrilateralized 
+             	Spherical Cube
+TSC   	25    	Tangential Spherical Cube
+.SH COPYRIGHT
+.nf
+Copyright (C) 1994
+Associated Universities, Inc. Washington DC, USA.
+.fi
+   
+This library is free software; you can redistribute it and/or modify it
+under the terms of the GNU Library General Public License as published by
+the Free Software Foundation; either version 2 of the License, or (at your
+option) any later version.
+   
+This library is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Library General Public
+License for more details.
+   
+You should have received a copy of the GNU Library General Public License
+along with this library; if not, write to the Free Software Foundation,
+Inc., 675 Massachusetts Ave, Cambridge, MA 02139, USA.
+
+Correspondence concerning AIPS should be addressed as follows:
+.nf
+           Internet email: aipsmail@nrao.edu
+           Postal address: AIPS Group
+                           National Radio Astronomy Observatory
+                           520 Edgemont Road
+                           Charlottesville, VA 22903-2475 USA
+
+.fi
+.SH SEE ALSO
+aips
+.SH AUTHOR
+Peter Teuben (man page)
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4i
+13-oct-94	doc written PJT
+.fi
