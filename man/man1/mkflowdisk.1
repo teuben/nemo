@@ -1,13 +1,13 @@
-.TH MKFLOWDISK 1NEMO "19 November 2003"
+.TH MKFLOWDISK 1NEMO "21 November 2003"
 .SH NAME
-mkflowdisk \- test disk based on a flow potential
+mkflowdisk \- test particle disk with optional kinematic spirals, based on a flow potential
 .SH SYNOPSIS
 \fBmkflowdisk out=\fPsnapshot [parameters=values ...]
 .SH DESCRIPTION
 \fImkflowdisk\fP sets up a two-dimensional disk of test particles 
 in a user-supplied flow potential (in standard \fIpotential(5NEMO)\fP format). 
 Optionally the surface density of particles can mimic that of a logarithmic
-spiral.
+spiral, and thus create a kinematic spiral.
 .PP
 \fIsnapmass(1NEMO)\fP and \fIsnapcenter(1NEMO)\fP have to be used if
 for some reason the user want finite mass particles and a perfectly
@@ -25,12 +25,12 @@ format [no default].
 Number of disk particles [default: \fB2048\fP]
 .TP
 \fBpotname=\fIpotential_name\fP
-name of the potential, see $NEMO/obj/potential for the current
+name of the potential, see $NEMOOBJ/potential for the current
 repository. The user can supply his own, see potential(5NEMO).
 [default: \fBvrtm51\fP].
 .TP
 \fBpotpars=\fIpot_pars\fP
-Paramaters to the user supplied potential. The number of parameters
+Parameters to the user supplied potential. The number of parameters
 depends on the potential supplied, the first parameter is reserved
 for a pattern speed.
 [default: not supplied, parameters are defaulted by how they are defined in the 
@@ -48,7 +48,7 @@ Inner cutoff radius of test-particle disk. [Default: \fB0.0\fP].
 \fBrmax=\fImax_disk_radius\fP
 Outer cutoff radius of test-particle disk. [Default: \fB1.0\fP].
 .TP
-\fBmass=\fP
+\fBmass=\fIdisk_mass\fP
 Total mass of the disk. Default: 0.0.
 .TP
 \fBuniform=t|f\fP
@@ -58,9 +58,13 @@ Default: f.
 \fBk=\fIinv_rad\fP
 Wavenumber of the spiral pattern, such that \fB2.pi.k.r\fP is the phase of
 the spiral density maximum.  Positive \fB\fP means a \fItrailing spiral pattern\fP.
-The wavenumber is related to the pitch angle.   k=0 should be used for an
-axisymmetric disk.
-[default: \fB1\fP]. 
+The wavenumber is related to the pitch angle at a given radius: 
+tan(pitch) = 1/(2.pi.k.r).
+k=0 should be used for an axisymmetric disk. No default. 
+.TP
+\fBpitch=\fIinv_rad\fP
+Note that pitch=0 is not allowed, use \fBk=0\fP for axisymmetric disks.
+No default, either \fBk=\fP or \fBpitch=\fP must be used.
 .TP
 \fBphase=\fI\fP
 Phase offset of the spiral at the outer radius (rmax) of the disk, in degrees.
@@ -75,7 +79,8 @@ Number of output models. [Default: \fB1\fP].
 .TP
 \fBtest=t|f\fP
 In test mode all stars are placed at phase 0, and should thus trace the shape
-of the spiral. By default particles are spread around phase according to the
+at phase 0 at one arm of spiral. 
+By default particles are spread around phase according to the
 density distribution as returned by the potential in the flow potential
 descriptor. Default: f.
 .TP
@@ -90,10 +95,6 @@ mkspiral(1NEMO), mkdisk(1NEMO), snapmass(1NEMO), snapcenter(1NEMO), flowcode(1NE
 .SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.5i
-13-mar-89	V1.0  created                   	PJT
-6-apr-89	V1.1 seed=0 implemented          	PJT
-7-apr-89	V1.2 angular keyword introduced  	PJT
-26-feb-93	V1.4 new potential keywrds	PJT
-16-sep-95	V1.5 added nmodel=, sign= ; radii now random	PJT
-26-may-02	added benchmark data for >2GB files	PJT
+18-nov-03	V1.0  created                   	PJT
+20-nov-03	V1.1 changed some sign conventions	PJT
 .fi

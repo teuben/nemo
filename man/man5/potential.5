@@ -1,6 +1,6 @@
-.TH POTENTIAL 5NEMO "19 September 2001"
+.TH POTENTIAL 5NEMO "19 November 2003"
 .SH NAME
-potential \- format for potential (and force field) description
+potential \- format for (flow) potential (and force field) description
 .SH SYNOPSIS
 .nf
 \fB #include <potential.h>
@@ -57,7 +57,8 @@ is currently also stored in the \fIorbit(5NEMO)\fP data
 structure.
 .PP
 \fIpotential(5NEMO)\fP  is a 'filestructure' which 
-defines a potential (and force or velocity field) through a standardized
+defines a potential (and force/density or velocity field) 
+through a standardized 
 interface routine, as described in \fIpotential(3NEMO)\fP.
 .PP
 A \fIpotential(5NEMO)\fP datafile \fBmust\fP
@@ -124,12 +125,15 @@ same calling convention but different meaning to the arguments:
 .PP
 \fBflowcode\fP uses a potential which returns the (currently 2-dimensional)
 velocities at the requested input position. These are returned in the
-\fBacc\fP slot. The \fBpot\fP has no meaning. 
+\fBacc\fP slot. The \fBpot\fP has no meaning, though is used to
+represent densities in programs like \fImkflowdisk(1NEMO)\fP.
 .PP
 \fBvpotcode\fP uses a potential which expects the velocity to be 
 input in the \fBacc\fP slot, but the returned arguments
 (\fBacc\fP and \fBpot\fP) have the same meaning. This is to emulate
 (non-coriolis) forces which depend on velocity.
+.PP
+\fBmkflowdisk\fP initializes a 2D disk based on the flow velocities.
 .SH "MERIDIONAL PLANE IN AXISYMMETRIC POTENTIALS"
 A well known fact about meridional motion in an axisymmetric system
 is that their 3D motion is really a 2D motion in the R-z plane with
@@ -152,7 +156,7 @@ Since the old format did not use _float or _double, there will
 be some potentials with no _float support,since _double is the
 default if  not present in the symbol table.
 .SH "SEE ALSO"
-get_potential(3NEMO), orbit(5NEMO)
+get_potential(3NEMO), orbit(5NEMO), flowcode(1NEMO), mkflowdisk(1NEMO), vpotcode(1NEMO)
 .SH AUTHOR
 Peter Teuben
 .SH FILES
@@ -172,4 +176,5 @@ Peter Teuben
 11-oct-93	V5.0: formalized get_pattern	PJT
 16-apr-96	documented 'flowcode' and 'vpotcode' deviations 	PJT
 19-sep-01	documented _float/_double                        	PJT
+19-nov-03	more flow documentation, added mkflowdisk	PJT
 .fi

@@ -227,6 +227,10 @@ return the program to the operating system.
 This error-checking is
 implemented with the goal of freeing applications programmers from
 the responsibility of checking for I/O errors other than end-of-file.
+.SH NOTES
+The library will delay reading large data-items in memory and only
+store a pointer to their location until it is really needed via
+one of the get_data() routines.
 .SH BUGS
 Whenever pipes are used, all data is read into memory, as opposed to
 being deferred for input.

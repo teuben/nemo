@@ -48,13 +48,29 @@ in the current directory.
     runcmhog run004 aob=3.0 qm=5.5e4
     runcmhog run005 aob=3.0 qm=3.5e4
     runcmhog run101 ggen2/nbl=200
+
+.fi
+For following snippet of c-shell code shows how easy it is to
+keep your CPU busy for months and months...
+.nf
+
+foreach a (1 1.5 2 2.5 3 3.5)
+  foreach b (10 20 30 40 50)
+    foreach c (1 3 10 30 100 300 1000)
+      set dir=run1/$a/$b/$c
+      mkdir -p $dir
+      runcmhog -n cmhogin $dir a=$a  b=$b  c=$c >& $dir/cmhog.log
+    end
+  end
+end
+
 .fi
 .SH SEE ALSO
 hdfgrid(1NEMO), sdsfits(1NEMO)
 .SH FILES
 .nf
 NEMO/src/image/hdf/cmhog      cmhog utility tools
-WASP2                         cmhog2 code (may be out of date)
+CMHOG2                        cmhog2 code (may be out of date)
 .fi
 .SH AUTHOR
 Peter Teuben
