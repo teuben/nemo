@@ -448,6 +448,11 @@ int fts_rhead(fits_header *fh, stream instr)
     return fts_dsize(fh);     /* return the size of upcoming data */
 }
 
+/*
+ *  fts_xhead: fake reading a header (see rawfits.c)
+ *
+ */
+
 int fts_xhead(fits_header *fh, stream instr,
 	      int bitpix, int naxis, int *naxisn, int skip)
 {
@@ -1339,6 +1344,12 @@ int fts_ptable(
                 idx++;	                        /* found card to print: */
             }
 
+
+	    //
+	    //  fix this binary table column selection stuff
+	    //
+
+
             if (colall) {     /* if printing all columns for this row */
                 if (addrow) printf(rowfmt,j);
                 /* 'BUG': since card could contain NULL's or so: patch it */
@@ -1369,8 +1380,10 @@ int fts_ptable(
                         printf("%c",dp[k]);
                     } else if (strrchr(fh->tformn[i],'X')) {
                         ;
+                    } else if (strrchr(fh->tformn[i],'L')) {
+                        ;
                     } else
-                      error ("BINTABLE not encoded format yet");
+                      error ("BINTABLE %s not encoded format yet",fh->tformn[i]);
                   }
                   printf("\n");
                 }
@@ -1538,6 +1551,12 @@ int *row)                   /* (i)  list of rows to display; NULL or 1.. */
 
     return 1;
 }
+
+/*
+   patch columns 
+
+*/
+
 
 local void set_tbcoln(fits_header *fh)
 {
@@ -2270,6 +2289,15 @@ int fts_whead(fits_header *fh, stream ostr)
         if (fh->ptypen)
             fts_wvarc_a(ostr,"PTYPE",fh->pcount,fh->ptypen,NULL);
     }
+    if (fh->crpixn)
+        fts_wvard_a(ostr,"CRPIX",fh->naxis,fh->crpixn,NULL);
+    if (fh->crvaln)
+        fts_wvard_a(ostr,"CRVAL",fh->naxis,fh->crvaln,NULL);
+    if (fh->cdeltn)
+        fts_wvard_a(ostr,"CDELT",fh->naxis,fh->cdeltn,NULL);
+    if (fh->ctypen)
+        fts_wvarc_a(ostr,"CTYPE",fh->naxis,fh->ctypen,NULL);
+
     fts_wvard(ostr,"DATAMIN",fh->datamin,NULL);
     fts_wvard(ostr,"DATAMAX",fh->datamax,NULL);
     fts_wvard(ostr,"BSCALE",fh->bscale,NULL);
@@ -2321,7 +2349,7 @@ int fts_wvar(                  /*  write simple variable, no '=' */
     return 1;
 }
 
-int fts_wvarc(    /* write double variable */
+int fts_wvarc(    /* write string variable */
 	      stream fp,
 	      string key,
 	      string value,
@@ -2339,7 +2367,7 @@ int fts_wvarc(    /* write double variable */
     return 1;
 }
 
-int fts_wvarc_a(    /* write double variable array */
+int fts_wvarc_a(    /* write string variable array */
 		stream fp,
 		string key,
 		int n,
@@ -2353,8 +2381,10 @@ int fts_wvarc_a(    /* write double variable array */
         error("Length of array keyword %s must be less then 5\n",key);
 
     for (i=0; i<n; i++) {
-        sprintf(keyi,"%s%d",key,i+1);
-        fts_wvarc(fp,keyi,values[i],comment);
+        if (values[i]) {
+            sprintf(keyi,"%s%d",key,i+1);
+            fts_wvarc(fp,keyi,values[i],comment);
+        }
     }
     return 1;
 }
@@ -2414,7 +2444,7 @@ int fts_wvari(    /* write single int variable */
     return 1;
 }
 
-int fts_wvari_a(   /* write double variable array */
+int fts_wvari_a(   /* write int variable array */
 		stream fp,
 		string key,
 		int n,
@@ -2451,7 +2481,7 @@ int fts_wvarf(stream fp,
     return 1;
 }
 
-int fts_wvarf_a(    /* write double variable array */
+int fts_wvarf_a(    /* write float variable array */
 		stream fp,
 		string key,
 		int n,
