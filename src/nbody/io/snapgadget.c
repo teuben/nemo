@@ -100,7 +100,7 @@ void nemo_main()
 	  strcpy(outstub, outfname);
 	  fnpt=strstr(outstub,TIMEFORMAT);
 	}
-	dprintf(0,"FILENAME: \"%s\"\n",outfname);
+	dprintf(1,"Writing t=%f to \"%s\"\n",tsnap,outfname);
         outstr = stropen(outfname,"w");
 	sscanf(getparam("N"), "%d,%d,%d,%d", &nh, &nd, &nb, &ns);
 	if(nbody != nh + nd  + nb + ns) {
@@ -114,7 +114,9 @@ void nemo_main()
 
 
 /* write FORTRAN block length fields */
-#define BLKLEN fwrite(&blklen, sizeof(blklen), 1, outstr)
+#define BLKLEN if(swapp) bswap(&blklen,sizeof(blklen),1); fwrite(&blklen,\
+        sizeof(blklen), 1, outstr); if(swapp) \
+        bswap(&blklen,sizeof(blklen),1)
 
 void write_gadget(stream outstr,real time,Body *bodies,int nhalo,int ndisk,
 		  int nbulge,int nstars,bool swapp)
