@@ -1,0 +1,20 @@
+#! /bin/csh -f
+#
+#
+set pldir=$NEMO/local/plplot
+
+if (! -d $pldir) then
+  echo Creating $pldir
+  mkdir $pldir
+endif
+
+if (! -e ./configure) then
+  echo You need to execute this from the plplot root directory
+  exit 0
+endif
+
+configure --prefix=$NEMO/local/plplot
+
+# nov 2000: new version doesn't work so well anymore....
+configure --prefix=$NEMO/local/plplot --without-shared --enable-ps --disable-vga
+
