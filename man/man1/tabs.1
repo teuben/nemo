@@ -1,0 +1,49 @@
+.TH TABS 1NEMO "16 July 1994"
+.SH NAME
+tabs \- table format converter
+.SH SYNOPSIS
+\fBtabs\fP [parameter=value]
+.SH DESCRIPTION
+\fBtabs\fP converts ascii tables to the table format needed by
+\fIgaussfit(1NEMO)\fP.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+input file name.
+No default.
+.TP
+\fBout=\fP
+output file name.
+No default.
+.TP
+\fBcol=\fP
+column names, one for each, separated by comma's.
+These are listed in the two lines header of the table.
+No default.
+.TP
+\fBtype=\fP
+column types, one for each with last repeated until they match the
+number of columns given in \fBcol=\fP.  You must list valid names
+(double, float, ..). [Default: \fBdouble\fP].
+.TP
+\fBdelcol=\fP
+column numbers to skip at output (1=first). Default: none.
+.SH EXAMPLES
+To create a \fIgaussfit\fP parameter file from scratch, with parameters
+a=1 and b=2, use:
+.nf
+
+echo 1 2 | tabs - Params a,b
+
+.fi
+.SH SEE ALSO
+awk(1), sed(1), tabmath(1NEMO), tabcols(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+16-Jul-94	V1.0 Created  	PJT
+.fi
