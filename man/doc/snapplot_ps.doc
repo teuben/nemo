@@ -1,0 +1,45 @@
+%N snapplot_ps
+This doc file has been produced with help=t option
+No further help is available, try 'man snapplot_ps'
+%A in
+	times=all [???]
+%A times
+	xvar=x [all]
+%A xvar
+	xlabel= [x]
+%A xlabel
+	xrange=-2.0:2.0 []
+%A xrange
+	yvar=y [-2.0:2.0]
+%A yvar
+	ylabel= [y]
+%A ylabel
+	yrange=-2.0:2.0 []
+%A yrange
+	visib=1 [-2.0:2.0]
+%A visib
+	psize=0 [1]
+%A psize
+	fill_circle=t [0]
+%A fill_circle
+	formal=false [t]
+%A formal
+	xbox=2.0:18.0 [false]
+%A xbox
+	ybox=2.0:18.0 [2.0:18.0]
+%A ybox
+	nobox=false [2.0:18.0]
+%A nobox
+	nxticks=7 [false]
+%A nxticks
+	nyticks=7 [7]
+%A nyticks
+	xticks= [7]
+%A xticks
+	yticks= []
+%A yticks
+	frame= []
+%A frame
+	VERSION=2.2a []
+%A VERSION
+	r [2.2a]
