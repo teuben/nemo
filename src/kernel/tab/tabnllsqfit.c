@@ -3,11 +3,12 @@
  *
  *      12-jul-02  1.0  derived from tablsqfit, but using nllsqfit() now
  *      17-jul-02  1.1  allow NR's mrqmin() to be used via an emulator (nr_nllsqfit)
- *                      added initial code for dynamic object loading functions
+ *                      added initial code for dynamic object loading functions 
+ *      11-sep-02  1.1e error/warning if fit is bad, but can still write out residuals
  *
  *
  *  line       a+bx
- *  plane      p0+p1*x1+p2*x2+p3*x3+.....     up to 'order'   (2d plane has order=2)
+ *  plane      p0+p1*x1+p2*x2+p3*x3+.....     up to 'order'   (a 2D plane in 3D has order=2)
  *  poly       p0+p1*x+p2*x^2+p3*x^3+.....    up to 'order'   (paraboloid has order=2)
  *  gauss      p0+p1*exp(-(x-p2)^2/(2*p3^2))
  *  exp        p0+p1*exp(-(x-p2)/p3)   
@@ -37,7 +38,7 @@ string defv[] = {
     "lab=\n             Mixing parameter for nllsqfit",
     "itmax=50\n         Maximum number of allowed nllsqfit iterations",
     "numrec=f\n         Try the numrec routine instead?",
-    "VERSION=1.1c\n     18-jul-02 PJT",
+    "VERSION=1.1e\n     11-sep-02 PJT",
     NULL
 };
 
@@ -404,11 +405,17 @@ do_function(string method)
   printf("Fitting LOADED function \"%s\":  \n",method);
   for (k=0; k<lpar; k++)
     printf("p%d= %g %g\n",k,fpar[k],epar[k]);
+  if (nrt==-2)
+    warning("No free parameters");
+  else if (nrt<0)
+    error("Bad fit, nrt=%d",nrt);
 
   if (outstr)
     for (i=0; i<npt; i++)
       fprintf(outstr,"%g %g %g\n",x[i],y[i],d[i]);
 }
+
+
 do_function_test(string xvals)
 {
   real *x, y, dyda[MAXPAR];
@@ -462,6 +469,11 @@ do_line()
   nrt = (*my_nllsqfit)(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
   printf("nrt=%d\n",nrt);
   printf("Fitting a+bx:  \na= %g %g \nb= %g %g\n", fpar[0],epar[0],fpar[1],epar[1]);
+  if (nrt==-2)
+    warning("No free parameters");
+  else if (nrt<0)
+    error("Bad fit, nrt=%d",nrt);
+
   if (outstr)
     for (i=0; i<npt; i++)
       fprintf(outstr,"%g %g %g\n",x[i],y[i],d[i]);
@@ -511,6 +523,11 @@ do_plane()
   printf("Fitting p0+p1*x1+p2*x2+.....pN*xN: (N=%d)\n",order);
   for (k=0; k<lpar; k++)
     printf("p%d= %g %g\n",k,fpar[k],epar[k]);
+  if (nrt==-2)
+    warning("No free parameters");
+  else if (nrt<0)
+    error("Bad fit, nrt=%d",nrt);
+
   if (outstr)
     for (i=0; i<npt; i++)
       fprintf(outstr,"%g %g %g %g\n",x1[i],x2[i],y[i],d[i]);
@@ -559,7 +576,12 @@ do_gauss()
   printf("nrt=%d\n",nrt);
   printf("Fitting a+b*exp(-(x-c)^2/(2*d^2)):  \na= %g %g \nb= %g %g \nc= %g %g\nd= %g  %g\n",
 	 fpar[0],epar[0],fpar[1],epar[1],fpar[2],epar[2],fpar[3],epar[3]);
-  if (nrt < 0) error("Bad gauss fit nrt=%d",nrt);
+  if (nrt==-2)
+    warning("No free parameters");
+  else if (nrt<0)
+    error("Bad fit, nrt=%d",nrt);
+
+
   if (outstr)
     for (i=0; i<npt; i++)
       fprintf(outstr,"%g %g %g\n",x[i],y[i],d[i]);
@@ -603,7 +625,12 @@ do_exp()
   printf("nrt=%d\n",nrt);
   printf("Fitting a+b*exp(-(x-c)/d):  \na= %g %g \nb= %g %g \nc= %g %g\nd= %g  %g\n",
 	 fpar[0],epar[0],fpar[1],epar[1],fpar[2],epar[2],fpar[3],epar[3]);
-  if (nrt < 0) error("Bad exp fit nrt=%d",nrt);
+  if (nrt==-2)
+    warning("No free parameters");
+  else if (nrt<0)
+    error("Bad fit, nrt=%d",nrt);
+
+
   if (outstr)
     for (i=0; i<npt; i++)
       fprintf(outstr,"%g %g %g\n",x[i],y[i],d[i]);
@@ -646,6 +673,11 @@ do_poly()
   printf("Fitting p0+p1*x+p2*x^2+.....pN*x^N: (N=%d)\n",order);
   for (i=0; i<lpar; i++)
     printf("p%d= %g %g\n",i,fpar[i],epar[i]);
+  if (nrt==-2)
+    warning("No free parameters");
+  else if (nrt<0)
+    error("Bad fit, nrt=%d",nrt);
+
   if (outstr)
     for (i=0; i<npt; i++)
       fprintf(outstr,"%g %g %g\n",x[i],y[i],d[i]);

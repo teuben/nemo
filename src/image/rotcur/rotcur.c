@@ -61,6 +61,7 @@
  *              26-jan-02      b allow scale factor for velocity    pjt
  *              26-jun-02 : 2.8  allow input to be an ascii table instead of image
  *              19-jul-02      a optional compilation for numrec
+ *              11-sep-02   2.9  compute residuals as in rotcurshape       pjt
  ******************************************************************************/
 
 
@@ -124,7 +125,7 @@ string defv[] = {
     "fitmode=cos,1\n Basic Fitmode: cos(n*theta) or sin(n*theta)",
     "nsigma=-1\n     Iterate once by rejecting points more than nsigma resid",
     "imagemode=t\n   Input image mode? (false means ascii table)",
-    "VERSION=2.8b\n  20-jul-02 PJT",
+    "VERSION=2.8c\n  28-jul-02 PJT",
     NULL,
 };
 
@@ -132,7 +133,7 @@ string usage="nonlinear fit of kinematical parameters to a velocity field";
 
 
 
-imageptr denptr, velptr;       /* pointers to Images, if applicable */
+imageptr denptr, velptr, resptr;    /* pointers to Images, if applicable */
 int   lmin, mmin, lmax, mmax;              /* boundaries of map */
 real  grid[2];    /* grid separations in x and y (arcsec.) */
 real  beam[2];    /* size of beam in arcseconds            */
@@ -146,6 +147,7 @@ int  n_vel = 0;
 real tol,lab;     /* parameters that go into nllsqfit */
 int  itmax;
 bool Qimage;      /* input mode */   
+bool Qfirstring;
 
 /* Compute engine, derivative and beam smearing correction functions:
  * _c1 = cos(theta)	
@@ -174,7 +176,7 @@ int rotplt(real rad[], real vsy[], real evs[], real vro[], real evr[], real pan[
 	   real inc[], real ein[], real xce[], real exc[], real yce[], real eyc[], 
 	   int mask[], int ifit, real elp[][4], stream lunpri, int cor[], int npt[], real factor);
 void stat2(real a[], int n, real *mean, real *sig);
-int getdat(real x[], real y[], real w[], int *n, int nmax, real p[], real ri, real ro, real thf, 
+int getdat(real x[], real y[], real w[], int idx[], int *n, int nmax, real p[], real ri, real ro, real thf, 
 	   int wpow, real *q, int side, bool *full, int nfr);
 real bmcorr(real xx[2], real p[], int l, int m);
 int perform_init(real *p, real *c);
@@ -216,12 +218,15 @@ nemo_main()
     real old_factor, factor;    /* factor > 1, by which errors need be multiplied */
 
     if (hasvalue("tab"))
-        lunpri=stropen(getparam("tab"),"a");  /* pointer to table stream output */
+      lunpri=stropen(getparam("tab"),"a");  /* pointer to table stream output */
     else
-        lunpri=NULL;                    /* no table output */
+      lunpri=NULL;                    /* no table output */
     Qimage = getbparam("imagemode");
 
     if (hasvalue("resid"))
+      if (Qimage)
+        lunres=stropen(getparam("resid"),"w");  /* pointer to table stream output */
+      else
         lunres=stropen(getparam("resid"),"a");  /* pointer to table stream output */
     else
         lunres=NULL;                    /* no residual table output */
@@ -237,7 +242,7 @@ nemo_main()
       factor = 1.0;
     dprintf(1,"Sicking (1997)'s error multiplication factor=%g  (old_factor=%g)\n",
 	    factor,old_factor);
-
+    Qfirstring = TRUE;           /* for rotfit residual calc */
     for (irng=0; irng<nring-1; irng++) {  /* loop for each ring */
          ri=rad[irng];          /* inner radius of ring */
          ro=rad[irng+1];        /* outer radius of ring */
@@ -278,6 +283,7 @@ nemo_main()
             ifit++;
          }
     } /* end of loop through rings */
+    if (lunres && Qimage) write_image(lunres,resptr);
 
     rotplt(rad,vsy,evs,vro,evr,pan,epa,         /* output the results */
            inc,ein,xce,exc,yce,eyc,
@@ -345,6 +351,7 @@ stream  lunpri;       /* LUN for print output */
     velstr = stropen(input,"r");                /* open velocity field */   
     if (Qimage) {
       read_image(velstr,&velptr);                 /* get data */
+      copy_image(velptr,&resptr);
     } else {
       n_vel = nemo_file_lines(input,100000);
       xpos_vel = (real *) allocate(n_vel * sizeof(real));
@@ -420,8 +427,8 @@ stream  lunpri;       /* LUN for print output */
     } else {
       printf("Mapsize unkown for point data, but toarcsec = %g\n",toarcsec);
       undf=getdparam("blank");        /* the undefined value */
-      grid[0]=1.0;
-      grid[1]=1.0;
+      grid[0]=dx=1.0;
+      grid[1]=dy=1.0;
       pamp=0.0;
     }
 
@@ -695,6 +702,7 @@ stream lunres;   /* file for residuals */
     int   nrt;                       /* error return code from subroutine FIT */
     real  x[2*MAXPTS],y[MAXPTS],w[MAXPTS];/* arrays for coords, vels and wgts */
     int   iblank[MAXPTS];
+    int   idx[2*MAXPTS];
     real  res[MAXPTS];                        /* array for y-x, the residuals */
     real  pf[PARAMS];               /* array for storing intermediate results */
     real  df[PARAMS];                 /* array which stores difference vector */
@@ -707,7 +715,7 @@ stream lunres;   /* file for residuals */
     real  sinp, cosp, cosi, xc1, xc2, yc1, yc2;    	     /* ring elements */
     real  resmean, ressig, ratio;
     int   nblank;
-    int   i, n;                               /* n=number of points in a ring */
+    int   i, j, n;                               /* n=number of points in a ring */
    
     nfr=0;                                 /* reset number of free parameters */
     for (i=0; i<PARAMS; i++) {
@@ -722,7 +730,7 @@ stream lunres;   /* file for residuals */
     printf("  number velocity velocity   angle  nation ");
     printf("position position        velocity\n");
 
-    getdat(x,y,w,&n,MAXPTS,p,ri,ro,thf,wpow,&q,side,&full,nfr);  /* this ring */
+    getdat(x,y,w,idx,&n,MAXPTS,p,ri,ro,thf,wpow,&q,side,&full,nfr);  /* this ring */
     for (i=0;i<n;i++) iblank[i] = 1;
 
     h=0;                                           /* reset itegration counter */
@@ -776,7 +784,7 @@ stream lunres;   /* file for residuals */
             for(k=0; k<PARAMS; k++)       /* loop to calculate new parameters */
                pf[k]=flip*df[k]+p[k];                       /* new parameters */
             pf[3]=MIN(pf[3],180.0-pf[3]);         /* in case inclination > 90 */
-            getdat(x,y,w,&n,MAXPTS,pf,ri,ro,thf,wpow,&q,side,&full,nfr);
+            getdat(x,y,w,idx,&n,MAXPTS,pf,ri,ro,thf,wpow,&q,side,&full,nfr);
 	    for (i=0;i<n;i++) w[i] *= iblank[i];            /* apply blanking */
             if (q < chi) {                                     /* better fit ?*/
                perform_out(h,pf,n,q);                   /* show the iteration */
@@ -838,20 +846,38 @@ stream lunres;   /* file for residuals */
     }
 
     if (lunres) {
+      if (Qimage) {
+	if (Qfirstring) {     /* for the first ring, reset the whole resid vel field */
+	  for (i=0;i<Nx(resptr);i++)
+	    for (j=0;j<Ny(resptr);j++)
+	      MapValue(resptr,i,j) = 0.0;
+	}
+      } else {
         fprintf(lunres,"#  %d : New ring %g - %g\n",n,ri,ro);
         fprintf(lunres,"#  Xsky Ysky Vobs Vobs-Vmod Xgal Ygal Rgal THETAgal\n");
-        cosp = cos((p[2]+90)*F);
-        sinp = sin((p[2]+90)*F);
-        cosi = cos(p[3]*F);
-        for (i=0; i<n; i++) {
-            xc1 = x[2*i]-dx*p[4];
-            yc1 = x[2*i+1]-dy*p[5];
-            xc2 =   xc1*cosp + yc1*sinp;
-            yc2 = (-xc1*sinp + yc1*cosp)/cosi;
-            fprintf(lunres,"%g %g %g %g %g %g %g %g\n",
-                    xc1, yc1, y[i], res[i],
-                    xc2, yc2, sqrt(xc2*xc2+yc2*yc2),atan2(yc2,xc2)/F);
-	}
+      }
+      cosp = cos((p[2]+90)*F);
+      sinp = sin((p[2]+90)*F);
+      cosi = cos(p[3]*F);
+      for (i=0; i<n; i++) {
+	xc1 = x[2*i]-dx*p[4];
+	yc1 = x[2*i+1]-dy*p[5];
+	xc2 =   xc1*cosp + yc1*sinp;
+	yc2 = (-xc1*sinp + yc1*cosp)/cosi;
+	if (Qimage) {
+	  MapValue(resptr,idx[2*i],idx[2*i+1]) = res[i];
+	  if (i==0 && Qfirstring)
+	    MapMin(resptr) = MapMax(resptr) = res[i];
+	  else {
+	    MapMin(resptr) = MIN(MapMin(resptr), res[i]);
+	    MapMax(resptr) = MAX(MapMax(resptr), res[i]);
+	  }
+	  Qfirstring = FALSE;
+	} else
+	  fprintf(lunres,"%g %g %g %g %g %g %g %g\n",
+		  xc1, yc1, y[i], res[i],
+		  xc2, yc2, sqrt(xc2*xc2+yc2*yc2),atan2(yc2,xc2)/F);
+      }
     }
 
     if (ier==1 && cor[0]>0 && cor[1]>0) {   /* calculate ellipse parameters ? */
@@ -964,11 +990,12 @@ void stat2(real *a,int n,real *mean,real *sig)
 /* 
  *    GETDAT gets data from disk and calculates differences.
  *
- *    SUBROUTINE GETDAT(X,Y,W,N,NMAX,P,RI,RO,THF,WPOW,Q,SIDE,FULL,NFR)
+ *    SUBROUTINE GETDAT(X,Y,W,IDX,N,NMAX,P,RI,RO,THF,WPOW,Q,SIDE,FULL,NFR)
  *
  *    X        real array       sky coordinates of pixels inside ring
  *    Y        real array       radial velocities
  *    W        real array       weights of radial velocities
+ *    IDX
  *    N        integer          number of pixels inside ring
  *    NMAX     integer          maximum number of pixels
  *    P        real array       parameters of ring
@@ -982,13 +1009,14 @@ void stat2(real *a,int n,real *mean,real *sig)
  *    NFR      integer          number of degrees of freedom
  */
 
-getdat(x,y,w,n,nmax,p,ri,ro,thf,wpow,q,side,full,nfr)
+getdat(x,y,w,idx,n,nmax,p,ri,ro,thf,wpow,q,side,full,nfr)
 int   *n,nmax;       /* number of pixels loaded (O), max. number (I) */
 int   nfr;           /* number of degrees of freedom */
 int   wpow;          /* weigthing function */
 int   side;          /* part of galaxy */
 bool  *full;         /* output if data overflow */
 real  x[],y[],w[];   /* arrays to store coords., vels. and weights */
+int   idx[];
 real  p[];           /* parameters of ring */
 real  ri,ro;         /* inner and outer radius of ring */
 real  thf;           /* free angle */
@@ -1105,6 +1133,8 @@ real  *q;             /* output sigma */
 		    x[*n*2+1]=ry;      /* load Y-coordinate */
 		    y[*n]=v;           /* load radial velocity */
 		    w[*n]=wi;          /* load weight */
+		    idx[*n*2]=l;
+		    idx[*n*2+1]=m;
 		    s=(v-vobs(xx,p,PARAMS));  /* corrected difference */
 		    *q += s*s*wi;       /* calculate chi-squared */
 		    *n += 1;           /* increment number of pixels */
@@ -1120,7 +1150,7 @@ real  *q;             /* output sigma */
 	mdone += mstep;      /* number of lines done */
 	mleft -= mstep;      /* number of lines left */
       } while (mleft>0);        /* big loop */
-    } else {
+    } else {                /* read from table instead of image */
       for (i=0; i<n_vel; i++) {
 	rx = xpos_vel[i];
 	ry = ypos_vel[i];
@@ -1164,6 +1194,8 @@ real  *q;             /* output sigma */
 	      x[*n*2+1]=ry;      /* load Y-coordinate */
 	      y[*n]=v;           /* load radial velocity */
 	      w[*n]=wi;          /* load weight */
+	      idx[*n*2] = i;
+	      idx[*n*2+1] = -1;
 	      s=(v-vobs(xx,p,PARAMS));  /* corrected difference */
 	      *q += s*s*wi;       /* calculate chi-squared */
 	      *n += 1;           /* increment number of pixels */

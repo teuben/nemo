@@ -1,4 +1,4 @@
-.TH ROTCUR 1NEMO "20 July 2002"
+.TH ROTCUR 1NEMO "11 September 2002"
 .SH NAME
 rotcur \- fit kinematic parameters from velocity field
 .SH SYNOPSIS
@@ -166,10 +166,12 @@ fed to \fIccdvel(1NEMO)\fP to create model velocity fields.
 [Default: not used].
 .TP
 \fBresid\fP=
-If specified, this output table will contain a listing of X, Y, Velocity
-and Residual Velocities in each ring. Each ring will be separated from
+If specified, this output will either contain a residual image
+(OBS-FIT) if the input file was an image, or a
+table with X, Y, Velocity and Residual Velocities in each ring. 
+Each ring will be separated from
 the previous one with a simple commented line specifying which ring
-it refers to. It is mostly intended for debugging purposes.
+it refers to. 
 [Default: not used].
 .TP
 \fBtol\fP=
@@ -284,6 +286,9 @@ to correct the errors for:
 .PP
 Sign of \fIDx,Dy\fP in the CCD header is ignored, and an astronomical
 image is assumed.
+.PP
+For calculations of residuals in  overlapping rings (e.g. warps) only the last ring velocity
+will be used.
 .SH SEE ALSO
 ccdvel(1NEMO), tabcomment(1NEMO), rotcurves(1NEMO), rotcurshape(1NEMO), pvtrace(1NEMO), ccdmom(1NEMO)
 .SH AUTHOR
@@ -309,4 +314,5 @@ P. J. Teuben (NEMO C version)
 10-aug-01	clarified some differences between NEMO and GIPSY versions	PJT
 26-jan-02	Added unit (scale factor) for velocity too	PJT
 26-jun-02	V2.8: added tabular input for irregular spaced data, fixed example	PJT
+11-sep-02	V2.9: implemented map residual velocity field	PJT
 .fi
