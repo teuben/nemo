@@ -37,6 +37,7 @@
  *             20-jun-01 gcc3                             pjt
  *             26-aug-01 added sind/cosd/tand             pjt
  *             27-nov-01 fixed cosd(), it was sind()	  pjt
+ *              4-dec-02 use MAXLINE for linelength       pjt
  *
  */
 #include <stdinc.h>   /* stdinc is NEMO's stdio =- uses real{float/double} */
@@ -166,8 +167,10 @@ static int nargs[] = {    1   ,    1   ,    1   ,    1   ,    1   ,    1   ,
 
 #define MAXPAR  32
 
+#define MAXLINE 1024
+
 static bool   parused[MAXPAR];
-static char   innline[255];
+static char   innline[MAXLINE];
 static int    pos, errorpos;
 static char   ch;
 static int    sym;
@@ -267,10 +270,11 @@ static void fie_nextsym()
 
 int inifie(char *expr)			/* PJT: now int instead of short */
 {
-	int i;
+        int i, n = strlen(expr);
 	
 	for ( i=0 ; i<MAXPAR ; i++)
 	    parused[i] = false;
+	if (n > MAXLINE) error("inifie: No room (%d) to copy %s",n,expr);
 	strcpy(innline,expr);
 	oddran = 0;
 	errorlev = 0;
