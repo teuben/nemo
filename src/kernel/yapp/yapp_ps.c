@@ -16,6 +16,7 @@
  *                               5 dec 99  stub pl_contour
  *                              21 jan 00  stub pl_cursor
  *				 5 apr 01  added plswap/plxscale/plyscale for completeness
+ *					   and plcolor (but this ought to do color too) + friends
  */
 
 #define VERSIONID "Version 3.2 5-may-95 PJT"
@@ -66,6 +67,15 @@ local int ltype;				/* line type: solid, etc */
 local int just;					/* text centering parameter */
 local real fntsz;				/* current size of font */
 local string did;                               /* date id string */
+
+
+#define MAXCOLOR 256
+local int ncolors=2;				/* black and white ??? */
+local float red[MAXCOLOR];              /* RGB color tables                 */
+local float blue[MAXCOLOR];
+local float green[MAXCOLOR];
+
+
 
 local real xscale(real), yscale(real);		/* user to pt mappings */
 local prolog(real, real), trailer(), begpage(), endpage(), begpath(), endpath();
@@ -222,6 +232,54 @@ plpoint(real x, real y)
     endpath();
     fprintf(psst, "%.1f %.1f pt\n", xscale(x), yscale(y));
 }
+
+/*
+ * PLCOLOR: specify new plotting color as an integer between 0 and ncolors-1;
+ * values outside this range are mapped to the nearest endpoint.
+ */
+
+void plcolor(int color)
+{
+    if (color < 0)
+        color = 0;
+    else if (color > ncolors - 1)
+        color = ncolors - 1;
+    /* now set some color here ??? */
+}
+
+/*
+ * PLNCOLORS: return current value of local variable ncolors.
+ */
+   
+int plncolors()
+{
+    return ncolors;
+}
+
+/*
+ * PLPALETTE: re-initialize color table from user-supplied values.
+ */
+   
+void plpalette(real *r, real *g, real *b, int nc)
+{
+    int i;
+    
+    if (nc > MAXCOLOR)
+        error("plpalette: cannot define more than %d colors", MAXCOLOR);
+    ncolors = nc;
+    for (i = 0; i < ncolors; i++) {
+        red[i] = r[i];
+        green[i] = g[i];
+        blue[i] = b[i]; 
+        dprintf(1,"->PGSCR_(%d,%g,%g,%g) \n",i,red[i],green[i],blue[i]);
+	/* pgscr_(&i,&red[i],&green[i],&blue[i]); */
+    }
+    red[ncolors] = green[ncolors] = blue[ncolors] = 0.0;    /* terminate */
+    plcolor(1);                 /* reset default color to foreground */
+    dprintf(0,"Setting default color to: %g %g %g\n",
+            red[1], green[1], blue[1]);
+}
+ 
 
 /*
  *  PLCIRCLE, PLCROSS, PLBOX: draw useful marking symbols.
