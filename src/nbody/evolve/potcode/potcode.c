@@ -16,6 +16,7 @@
  *     24-feb-03      initial  framework for epicycle mode      pjt
  *      5-mar-03 V5.0 analytical epicyclic orbits               pjt
  *      6-may-03     a  missing factor 2 for A ???              pjt
+ *      6-jul-03     b  computed the guiding center             PJT/RPO
  *
  * To improve:  use allocate() for number of particles; not static
  */
@@ -41,7 +42,7 @@ string defv[] = {
     "sigma=0\n            diffusion angle (degrees) per timestep",
     "seed=0\n		  random seed",
     "headline=PotCode\n   random mumble for humans",
-    "VERSION=5.0a\n       6-may-03 PJT",
+    "VERSION=5.0b\n       6-jul-03 PJT",
     NULL,
 };
 
@@ -49,15 +50,18 @@ string usage = "Analytical potential orbit integrator";
 
 local proc  pot;
 
+void setparams(void);
+void force(bodyptr btab, int nb, real time);
+void force1(bodyptr btab, int nb, real time);
+extern int initstep(bodyptr btab, int nb, real *tptr, proc force);
+
 void nemo_main()
 {
-    void force(), force1(), setparams();
-
     setparams();
     inputdata();
     initoutput();
     if (mode < 0) 
-      force1(bodytab, nbody, &tnow);             /* epicycle "integration" constants */
+      force1(bodytab, nbody, tnow);              /* epicycle "integration" constants */
     else
       initstep(bodytab, nbody, &tnow, force);    /* forces from potential */
     output();
@@ -70,7 +74,7 @@ void nemo_main()
     stopoutput();
 }
 
-void setparams()
+void setparams(void)
 {
     infile = getparam("in");
     outfile = getparam("out");
@@ -102,10 +106,10 @@ void setparams()
  * FORCE: force calculation routine.
  */
 
-void force(btab, nb, time)
-bodyptr btab;			/* array of bodies */
-int nb;				/* number of bodies */
-real time;			/* current time */
+void force(
+	   bodyptr btab,		/* array of bodies */
+	   int nb,			/* number of bodies */
+	   real time)			/* current time */
 {
     bodyptr p;
     vector lacc,lpos;
@@ -127,7 +131,6 @@ real time;			/* current time */
     }
 }
 
-
 /*
  * FORCE: 'force' calculation routine for epicyclic orbits
  *        where we assume that the particles are:
@@ -136,108 +139,140 @@ real time;			/* current time */
  *          and a (u0,v0) is the deviation from circular motion
  *    *** for now the Z oscillations are not solved for ***
  *
- *   Recall:
- *      A = -1/2 R d(Omega)/dR
- *      Kappa^2 = R d(Omega^2)/dR + 4 Omega^2
+ *   Recall:                                           flat rotcur:
+ *      A = -1/2 R d(Omega)/dR                         1/2 V/R
+ *      B = Omega - A                                 -1/2 V/R
+ *      Kappa^2 = R d(Omega^2)/dR + 4 Omega^2      sqrt(2) V/R
  */
 
 
-void force1(btab, nb, time)
-bodyptr btab;			/* array of bodies */
-int nb;				/* number of bodies */
-real time;			/* current time */
+void force1(
+	    bodyptr btab,		/* array of bodies */
+	    int nb,			/* number of bodies */
+	    real time)			/* current time */
 {
   bodyptr p;
   vector lpos,a1,a2;
-  real   lphi,r2,r,ome1,ome2, eps, f1,f2,kap2,kap1, A, B, oldkap, tol, tolmin;
-  real   vr, vt, vz, lz, eps2, tol2, nu, oldnu;
-  int    iter1, iter2, ndim=NDIM;
+  real   lphi,r2,r,ome1,ome2, eps, f1,f2,kap2,kap1, A, B, oldkap, tol, tol3, tolmin;
+  real   vr, vt, vz, lz, eps2, tol2, nu, oldnu, xiv0, etav0, zetav0, amp, oldamp;
+  int    iter1, iter2, iter3, ndim=NDIM;
   
   if (ome!=0.0) error("Force-1 does not work in rotating potentials");
 
-  printf("#   r    omega    kappa      A         B   omega-kappa/2 nu    it it   tol     tol    vr        vt-ome/r   vz      lz\n");
+  printf("# r   r_g    omega    kappa      A         B   omega-kappa/2 nu    it it   tol     tol    vr        vt-ome/r   vz      lz\n");
 
   for (p = btab; p < btab+nb; p++) {		/* loop over bodies */
     r2 = sqr(Pos(p)[0]) + sqr(Pos(p)[1]);
-    r = sqrt(r2);
-    SETV(lpos,Pos(p));
-    (*pot)(&ndim,lpos,a1,&lphi,&time);
-    ome2 = sqrt(sqr(a1[0]) + sqr(a1[1]))/r;
-    ome1 = sqrt(ome2);
-    vr = (Pos(p)[0]*Vel(p)[0] + Pos(p)[1]*Vel(p)[1])/r;
-    vt = sqrt( (Vel(p)[0]*Vel(p)[0] + Vel(p)[1]*Vel(p)[1])-vr*vr);
-    lz = Pos(p)[0]*Vel(p)[1] - Pos(p)[1]*Vel(p)[0];
-    vt -= ome1*r;
-    vz = Vel(p)[2];
+    amp = 0.0;
 
-    /* should do iteration until converging, for now slightly asymmetric results */
-    tolmin = 1e-7;   /*  tolerance to achieve */
-    eps = 0.01;       /*  first small fractional step in radius */
-    for (iter1=0; iter1<15; iter1++) {                  /* iterate to find kappa */
-      MULVS(lpos,Pos(p), 1+eps);
+    for (iter3=0; iter3<15; iter3++) {          /* axisymmetric potential assumed */
+      r = sqrt(r2) + amp;
+      CLRV(lpos);
+      lpos[0] = r;
       (*pot)(&ndim,lpos,a1,&lphi,&time);
-      MULVS(lpos,Pos(p), 1-eps);
-      (*pot)(&ndim,lpos,a2,&lphi,&time);
+      ome2 = sqrt(sqr(a1[0]) + sqr(a1[1]))/r;
+      ome1 = sqrt(ome2);
+
+      if (iter3 == 0) {
+	vr = (Pos(p)[0]*Vel(p)[0] + Pos(p)[1]*Vel(p)[1])/r;
+	vt = sqrt( (Vel(p)[0]*Vel(p)[0] + Vel(p)[1]*Vel(p)[1])-vr*vr);
+	lz = Pos(p)[0]*Vel(p)[1] - Pos(p)[1]*Vel(p)[0];
+	vt -= ome1*r;
+	vz = Vel(p)[2];
       
-      f1 = sqrt(sqr(a1[0]) + sqr(a1[1]))/(r*(1+eps));
-      f2 = sqrt(sqr(a2[0]) + sqr(a2[1]))/(r*(1-eps));
-      kap2 = (f1-f2)/(2*eps) + 4*ome2;     /* Kappa^2 = R d(Omega^2)/dR + 4 Omega^2 */
-      kap1 = sqrt(kap2);
+	/* (xiv0,etav0) are constant in the iter3 loop to find the guiding center */
+
+	xiv0   = -vr;   /* check sign ! */
+	etav0  = vt;    /* check sign ! */
+	zetav0 = vz;
+      }
+
+      /* should do iteration until converging, for now slightly asymmetric results */
+      tolmin = 1e-7;   /*  tolerance to achieve */
+      eps = 0.01;       /*  first small fractional step in radius */
+      for (iter1=0; iter1<15; iter1++) {                  /* iterate to find kappa */
+	CLRV(lpos);
+	lpos[0] = r * (1+eps);
+	(*pot)(&ndim,lpos,a1,&lphi,&time);
+	CLRV(lpos);
+	lpos[0] = r * (1-eps);
+	(*pot)(&ndim,lpos,a2,&lphi,&time);
       
-      if (iter1==0) {
-	oldkap = kap1;
-	eps /= 2.0;
-	continue;
+	f1 = sqrt(sqr(a1[0]) + sqr(a1[1]))/(r*(1+eps));
+	f2 = sqrt(sqr(a2[0]) + sqr(a2[1]))/(r*(1-eps));
+	kap2 = (f1-f2)/(2*eps) + 4*ome2;     /* Kappa^2 = R d(Omega^2)/dR + 4 Omega^2 */
+	kap1 = sqrt(kap2);
+	
+	if (iter1==0) {
+	  oldkap = kap1;
+	  eps /= 2.0;
+	  continue;
+	} else {
+	  tol = (kap1-oldkap)/kap1;
+	  tol = ABS(tol);
+	  dprintf(2,"%g : iter1 %d %g %g %g\n",r,iter1,eps,kap1,tol);
+	  if (iter1>1 && tol < tolmin) break;
+	  oldkap = kap1;
+	  eps /= 2.0;
+	}
+      } /* iter1 */
+
+      eps2 = 0.01;
+      SETV(lpos,Pos(p));
+      for (iter2=0; iter2<10; iter2++) {                  /* iterate to find nu */
+	lpos[2] = eps2*r;
+	(*pot)(&ndim,lpos,a1,&lphi,&time);
+	nu = a1[2]/lpos[2];
+	nu = sqrt(ABS(nu));
+	if (iter2==0) {
+	  oldnu = nu;
+	  eps2 /= 2.0;
+	  continue;
+	} else {
+	  tol2 = (nu-oldnu)/nu;
+	  tol2 = ABS(tol2);
+	  dprintf(2,"%g : iter2 %d %g %g %g\n",r,iter2,eps2,nu,tol2);
+	  if (iter2>1 && tol2 < tolmin) break;
+	  oldnu = nu;
+	  eps2 /= 2.0;
+	}
+      } /* iter2 */
+      A = -0.25*(f1-f2)/(2*eps)/ome1;     /*  A = -1/2 R d(Omega)/dR   */
+      B = A - ome1;
+      amp = -etav0/(2*B);
+
+      if (iter3==0) {
+	oldamp = amp;
       } else {
-	tol = (kap1-oldkap)/kap1;
-	tol = ABS(tol);
-	dprintf(1,"%g : iter1 %d %g %g %g\n",r,iter1,eps,kap1,tol);
-	if (iter1>1 && tol < tolmin) break;
-	eps /= 2.0;
+	tol3 = (amp-oldamp)/amp;
+	tol3 = ABS(tol3);
+	dprintf(1,"%g: iter3 %d %g %g\n",r,iter3,amp,tol3);
+	if (iter3 > 1 && tol3 < tolmin) break;
+	oldamp = amp;
       }
-    }
-    eps2 = 0.01;
-    SETV(lpos,Pos(p));
-    for (iter2=0; iter2<10; iter2++) {                  /* iterate to find nu */
-      lpos[2] = eps2*r;
-      (*pot)(&ndim,lpos,a1,&lphi,&time);
-      nu = a1[2]/lpos[2];
-      nu = sqrt(ABS(nu));
-      if (iter2==0) {
-	oldnu = nu;
-	eps2 /= 2.0;
-	continue;
-      } else {
-	tol2 = (nu-oldnu)/nu;
-	tol2 = ABS(tol2);
-	dprintf(1,"%g : iter2 %d %g %g %g\n",r,iter2,eps2,nu,tol2);
-	if (iter2>1 && tol2 < tolmin) break;
-	eps2 /= 2.0;
-      }
-    }
-    A = -0.25*(f1-f2)/(2*eps)/ome1;     /*  A = -1/2 R d(Omega)/dR   */
-#if 1
-    A /= 2;  /* ??? */
-#endif
-    B = A - ome1;
-    printf("%g %g %g %g %g %g %g %d %d %g %g  %g %g %g %g\n",
-	   r,ome1,kap1,A,B,ome1-kap1/2.0,nu,iter1,iter2,tol,tol2,vr,vt,vz,lz);
+
+
+    } /* iter3 */
+    printf("%g %g %g %g %g %g %g %g %d %d %d %g %g  %g %g %g %g %g\n",
+	   sqrt(r2),r,ome1,kap1,A,B,ome1-kap1/2.0,nu,iter1,iter2,iter3,tol,tol2,vr,vt,vz,lz,amp);
     p->A = A;
     p->B = B;
     p->kappa = kap1;
     p->nu = nu;
-    p->xiv0 = -vr;
-    p->etav0 =  vt;             /* check sign  */
-    p->zetav0 =  vz;
+    p->xiv0   = xiv0;
+    p->etav0  = etav0;
+    p->zetav0 = zetav0;
+    
+
     /* 
      *  IECK IECK IECK, better do this correctly
      *  the guiding center is not the initial position
      */
-    Acc(p)[0] = Pos(p)[0];      /* Guiding Center is stored in the acc's */
-    Acc(p)[1] = Pos(p)[1];
+    Acc(p)[0] = r * (Pos(p)[0]/sqrt(r2));
+    Acc(p)[1] = r * (Pos(p)[1]/sqrt(r2));
     Acc(p)[2] = 0.0;            /* force guiding center in the galactic plane */
     Phi(p) = -1.0;
     Key(p) = p-btab+1;          /* label particles 1....nb */
-  }
+  } /* all p's */
   printf("### This section of the code is under development, don't believe anything it does\n");
 }
