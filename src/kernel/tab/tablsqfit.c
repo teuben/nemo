@@ -625,7 +625,7 @@ do_ellipse()
 do_imageshift()
 {
     real *x, *y, *u, *v;
-    /* this code is on 3b1 ... which we've lot by now */
+    /* this code was on 3b1 ... which we've lost by now */
 }
 
 
