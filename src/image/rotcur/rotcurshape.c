@@ -551,7 +551,7 @@ rotcurparse()
 	mmsk[nmod][0] = natoi(sp[3]);
 	mmsk[nmod][1] = natoi(sp[4]);
 	rcfn[nmod] = rotcur_iso;
-      } else if (streq(sp[0],"core")) {
+      } else if (streq(sp[0],"power")) {
 	if (nsp != 6) error("iso needs 3 numbers");
 	npar[nmod] = 3;
 	mpar[nmod][0] = natof(sp[1]);
