@@ -8,6 +8,7 @@
  *      19-apr-96       improved error reporting        pjt
  *      12-jun-98       made ndim=3 the default, like potlist           pjt
  *	13-sep-01	better prototype for proc			pjt
+ *       4-dec-01       also compute min/max
  *	
  */
 
@@ -27,7 +28,7 @@ string defv[] = {
     "t=0.0\n        Time to test potential at",
     "dr=\n          Differential step for (Poisson) density map",
     "ndim=3\n       Poisson map using 2D or 3D derivatives",
-    "VERSION=1.2a\n 13-sep-01 PJT",
+    "VERSION=1.2b\n 4-dec-01 PJT",
     NULL,
 };
 
@@ -46,11 +47,11 @@ void nemo_main(void)
     double xarr[MAXPT],yarr[MAXPT],zarr[MAXPT];
     double ax,ay,az,epot;
     double fourpi = FOUR_PI;
-    double omega;
+    double omega, dmin, dmax;
     char *fmt, s[20], pfmt[256];
+    int idim, ndim, maxdim = 3, first=1;
     imageptr iptr;
     stream ostr;
-    int idim, ndim, maxdim = 3;
 
     ostr = stropen(getparam("out"),"w");
     nx = nemoinpd(getparam("x"), xarr, MAXPT);  /* get sample arrays */
@@ -99,36 +100,42 @@ void nemo_main(void)
     Ymin(iptr) = yarr[0];
     Zmin(iptr) = zarr[0];
 
-
     for (iz=0; iz<nz; iz++) {
-        pos[2] = zarr[iz];
-        for (iy=0; iy<ny; iy++) {
-            pos[1] = yarr[iy];
-            for (ix=0; ix<nx; ix++) {
-                pos[0] = xarr[ix];
-                (*mypot)(&maxdim,pos,acc,&pot,&time);
-                if (dr > 0.0) {                                 /* Poisson */
-
-                    den = 0.0;
-                    for (idim=0; idim<ndim; idim++) {
-                        pos[idim] += dr;
-                        (*mypot)(&maxdim,pos,acc,&pot,&time);
-                        den -= acc[idim];
-                        pos[idim] -= 2*dr;
-                        (*mypot)(&maxdim,pos,acc,&pot,&time);
-                        den += acc[idim];
-                        pos[idim] += dr;
-                    }
-                    CubeValue(iptr,ix,iy,iz) = den/dr;
-                } else {                                        /* Potential */
-		    if (omega != 0.0) {
-            	        pot -= 0.5*sqr(omega)*
-			    (sqr(pos[0])+sqr(pos[1]));
-                    }
-                    CubeValue(iptr,ix,iy,iz) = pot;
-                }
-            }
-        }
+      pos[2] = zarr[iz];
+      for (iy=0; iy<ny; iy++) {
+	pos[1] = yarr[iy];
+	for (ix=0; ix<nx; ix++) {
+	  pos[0] = xarr[ix];
+	  (*mypot)(&maxdim,pos,acc,&pot,&time);
+	  if (dr > 0.0) {                                 /* Poisson */
+	    den = 0.0;
+	    for (idim=0; idim<ndim; idim++) {
+	      pos[idim] += dr;
+	      (*mypot)(&maxdim,pos,acc,&pot,&time);
+	      den -= acc[idim];
+	      pos[idim] -= 2*dr;
+	      (*mypot)(&maxdim,pos,acc,&pot,&time);
+	      den += acc[idim];
+	      pos[idim] += dr;
+	    }
+	    pot = den/dr;
+	  } else {                                        /* Potential */
+	    if (omega != 0.0) {
+	      pot -= 0.5*sqr(omega)*(sqr(pos[0])+sqr(pos[1]));
+	    }
+	  }
+	  CubeValue(iptr,ix,iy,iz) = pot;
+	  if (first) {
+	    dmin = dmax = pot;
+	    first = 0;
+	  } else {
+	    dmin = MIN(dmin, pot);
+	    dmax = MAX(dmax, pot);
+	  }
+	}
+      }
     }
+    MapMin(iptr) = dmin;
+    MapMax(iptr) = dmax;
     write_image(ostr, iptr);
 }
