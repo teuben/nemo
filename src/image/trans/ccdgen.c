@@ -28,7 +28,7 @@ string defv[] = {
   "crval=\n        Override/Set crval (0,0,0) // ignored",
   "cdelt=\n        Override/Set cdelt (1,1,1) // ignored",
   "seed=0\n        Random seed",
-  "VERSION=0.2\n   5-jan-05 PJT",
+  "VERSION=0.3\n   5-jan-05 PJT",
   NULL,
 };
 
@@ -84,12 +84,13 @@ void nemo_main ()
   int     size[3],nx, ny, nz;         /* size of scratch map */
   int     ncen;
   string  object;
-  bool Qtotflux = getbparam("totflux");
   int seed = init_xrandom(getparam("seed"));
 
   object = getparam("object");
   npar = nemoinpr(getparam("spar"),spar,MAXPAR);
   if (npar < 0) error("Syntax error %s",getparam("spar"));
+
+  Qtotflux = getbparam("totflux");
 
   pa = getdparam("pa");
   inc = getdparam("inc");
@@ -325,14 +326,17 @@ local void object_exp(int npars, real *pars)
   if (npar > 0) A = pars[0];
   if (npar > 1) h = pars[1];
 
-  if (Qtotflux) A /= 1.0;   /* fix */
+  if (Qtotflux) {
+    A /= (TWO_PI*h*h);
+    dprintf(0,"exp: A->%g\n",A);
+  }
 
   for (j=0; j<ny; j++) {
     y1 = (j-center[1])*Dy(iptr) + Ymin(iptr);
     for (i=0; i<nx; i++) {
       x1 = (i-center[0])*Dx(iptr) + Xmin(iptr);
-      x2 =  x1*cosp + y1*sinp;
-      y2 = -x1*sinp + y1*cosp;
+      x2 =  -x1*sinp - y1*cosp;
+      y2 =   x1*cosp - y1*sinp;
       r = sqrt(x2*x2 + sqr(y2/cosi));
       arg = r/h;
       dprintf(2,"%d %d : %g %g %g %g  %g\n",i,j,x1,y1,x2,y2,arg);
@@ -352,14 +356,17 @@ local void object_gauss(int npars, real *pars)
   if (npar > 0) A = pars[0];
   if (npar > 1) h = pars[1];
 
-  if (Qtotflux) A /= 1.0;   /* fix */
+  if (Qtotflux) {
+    A /= (TWO_PI*h*h);
+    dprintf(0,"exp: A->%g\n",A);
+  }
 
   for (j=0; j<ny; j++) {
     y1 = (j-center[1])*Dy(iptr) + Ymin(iptr);
     for (i=0; i<nx; i++) {
       x1 = (i-center[0])*Dx(iptr) + Xmin(iptr);
-      x2 =  x1*cosp + y1*sinp;
-      y2 = -x1*sinp + y1*cosp;
+      x2 =  -x1*sinp - y1*cosp;
+      y2 =   x1*cosp - y1*sinp;
       r = sqrt(x2*x2 + sqr(y2/cosi));
       arg = r/h;
       dprintf(2,"%d %d : %g %g %g %g   %g\n",i,j,x1,y1,x2,y2,arg);
@@ -386,16 +393,23 @@ local void object_bar(int npars, real *pars)
   sinb = sin(b*PI/180.0);
   cosb = cos(b*PI/180.0);
 
-  if (Qtotflux) A /= 1.0;   /* fix */
+  if (Qtotflux) {
+    A /= (TWO_PI*h*h*(1-e));
+    dprintf(0,"exp: A->%g\n",A);
+  }
+  dprintf(0,"bar b=%g\n",b);
 
   for (j=0; j<ny; j++) {
     y1 = (j-center[1])*Dy(iptr) + Ymin(iptr);
     for (i=0; i<nx; i++) {
       x1 = (i-center[0])*Dx(iptr) + Xmin(iptr);
-      x2 =   x1*cosp + y1*sinp;
-      y2 = (-x1*sinp + y1*cosp)/cosi;
-      x3 =   x2*cosb + y2*sinb;
-      y3 = (-x2*sinb + y2*cosb)/(1-e);
+
+      x2 =  -x1*sinp - y1*cosp;
+      y2 =   (x1*cosp - y1*sinp)/cosi;
+
+      x3 =   x2*cosb - y2*sinb;
+      y3 = (x2*sinb  + y2*cosb)/(1-e);
+
       r = sqrt(x3*x3+y3*y3);
       arg = r/h;
       if (arg < 100) MapValue(iptr,i,j) += A * exp(-arg);
@@ -405,6 +419,7 @@ local void object_bar(int npars, real *pars)
 
 local void object_spiral(int npars, real *pars)
 {
+  warning("no spiral yet");
 }
 
 local void object_noise(int npars, real *pars)
