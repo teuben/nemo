@@ -9,7 +9,7 @@
 
 typedef int (*action)(int);
 
-#define MAXTEST 10
+#define MAXTEST 11
 #define NMAX  30000
 
 /* Work vectors: */
@@ -26,11 +26,44 @@ real x = 1.0, y = -2.5, z = 3.14;
 /*------------------------------------------------------------------------*/
 
 string defv[] = {
-  "test=0\n          test to run (0=all)",
-  "n=\n              max size of arrays",
+  "test=0\n          test to run (0=all)\n"
+  "                  1   vr = vi\n"
+  "                  2   vi = vr\n"
+  "                  3   vi1 = vi2 + vi3\n"
+  "                  4   v1 = v2\n"
+  "                  5   s += v\n"
+  "                  6   s += v + v\n"
+  "                  7   s += v * v\n"
+  "                  8   v += s\n"
+  "                  9   v *= s\n"
+  "                  10  v *= s (partly unrolled)\n"
+  "                  11  v1 = v2 + s\n"
+  "                  12  v1 = v2 * s\n"
+  "                  13  v1 = v2 / s\n"
+  "                  14  v1 += v2\n"
+  "                  15  v1 = v2 + v3\n"
+  "                  16  v1 *= v2\n"
+  "                  17  v1 = v2 * v3\n"
+  "                  18  v1 /= v2\n"
+  "                  19  v1 = v3 / v2\n"
+  "                  20  v1 = s*v2 + s\n"
+  "                  21  v1 = s*v2 + v3\n"
+  "                  22  v1 = v2*v3 + v4\n"
+  "                  23  v1 = pseudo_force(v2, v3, v4)\n"
+  "                  24  v1 = sqrt(v2)\n"
+  "                  25  v1 = abs(v2)\n"
+  "                  26  v1 = sin(v2)\n"
+  "                  27  v1 = exp(v2)\n"
+  "                  28  v1 = pow(v2, s)\n"
+  "                  29  v1[iv] = v2\n"
+  "                  30  v1[iv] = v2\n"
+  "                  31  v1 = v2[iv]\n"
+  "                  32  v1 = v2[iv]\n"
+  "                  33  if (v2 > 0) v1 = v2",
+  "n=30000\n         max size of arrays",
   "vlen=0,3,10,30,100,300,1000,3000,30000\n     Vector lengths to try",
   "count=300000\n    how often shoudl the largest vlen be run",
-  "VERSION=2.1\n     2-apr-2004 PJT",
+  "VERSION=2.2\n     4-apr-2004 PJT",
   NULL,
 };
 
@@ -122,14 +155,14 @@ void time_action(action a, int factor, char *name, int ntmax)
   real dtime0, dtime[MAXTEST], t_start, t_end;
   int i, j, maxtst;
 
-  int vlen[MAXTEST]  = {0, 3, 10, 30, 100, 300, 1000, 3000, 30000, 300000};
+  int vlen[MAXTEST]  = {0, 3, 10, 30, 100, 300, 1000, 3000, 30000, 300000, 3000000};
   int count[MAXTEST] = {10000000, 3000000, 1000000, 300000, 100000,
-		      30000, 10000, 3000, 300, 30};
+		      30000, 10000, 3000, 300, 30, 3};
 
   printf("\n%s\n", name);
 
   if (ntest==0) {
-    warning("new code");
+    error("new code");
     ntest = nemoinpi(getparam("vlen"),vlen,MAXTEST);
     if (ntest<=0) error("parsing");
     
@@ -186,6 +219,10 @@ nemo_main()
     int test = getiparam("test");
 
     if (hasvalue("n")) n = getiparam("n");
+    if (n > NMAX) {
+      warning("n=%d , NMAX=%d cannot be exceeded",n,NMAX);
+      n = NMAX;
+    }
 
     initialize();
 
