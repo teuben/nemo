@@ -42,6 +42,8 @@ void *allocate(int nb)
 	errno = ENOMEM;
 	RaiseException (errno);
 #else
+	dprintf(0,"solaris csh: limit datasize unlimited\n");
+        dprintf(0,"solaris ksh: ulimit -d unlimited\n");
 	error("allocate: not enough memory for %d bytes", nb);
 #endif
     }
