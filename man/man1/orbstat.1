@@ -1,4 +1,4 @@
-.TH ORBSTAT 1NEMO "23 March 1995"
+.TH ORBSTAT 1NEMO "21 February 2003"
 .SH NAME
 orbstat \- tabulate some orbital statistics
 .SH SYNOPSIS
@@ -16,6 +16,17 @@ given:
 .TP 20
 \fBin=\fIin-file\fP
 Input file, which must be an \fIorbit(5NEMO)\fP. [No default].
+.TP
+\fBellipse=t|f\fP
+Check how well the orbit is ellipsoidal. 
+This option was really added to check on the amazing property the
+loop orbits have in potentials that are a function of
+ellipsoidal coordinate with constant axis ratio.
+Default: \fBf\fP.
+.SH CAVEAT
+The \fBellipse=t\fP option only makes sense for closed orbits, since
+the maximum extent in position and velocity is used for scaling factors
+to check the ellipsoidability.
 .SH "SEE ALSO"
 orblist(1NEMO)
 .SH AUTHOR
@@ -29,4 +40,5 @@ Peter Teuben
 .nf
 .ta +1.0i +4.0i
 23-mar-95	V1.0 Created	PJT
+21-feb-03	V1.1 check how well ellipsoidal 	PJT
 .fi
