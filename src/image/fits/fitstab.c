@@ -20,7 +20,8 @@ string defv[] = {			/* Standard NEMO keyword+help */
     "row=\n                Row numbers to select [all]",
     "format=\n             Format for each row to use [TFORMnnn]",
     "maxrow=20000\n        Max row numbers to select",
-    "VERSION=1.3\n         30-sep-96 PJT",
+    "random=f\n            Force random group\n",
+    "VERSION=1.4\n         15-may-03 PJT",
     NULL,
 };
 
@@ -33,6 +34,7 @@ void nemo_main()
     string *col, select, *burststring();
     struct fits_header fh;
     bool   scanopt();
+    bool   Qrg = getbparam("random");
 
     instr = stropen(getparam("in"),"r");    /* open input */
     
@@ -61,9 +63,12 @@ void nemo_main()
           break;			              /* ... quit */
        dprintf(0,"Working on FITS file %d\n",i);
 
-       if ((nfile==0 || nfile==i))			/* if right file */
-          fts_ptable(&fh,instr,col,select,row); 	/* try and print */
-       else                                            /* Otherwise just */
+       if ((nfile==0 || nfile==i)) {			/* if right file */
+          if (Qrg)
+              fts_pgroup(&fh,instr,col,select,row); 	/* try and print */
+          else
+              fts_ptable(&fh,instr,col,select,row); 	/* try and print */
+       } else                                            /* Otherwise just */
           fts_sdata(&fh,instr);		               /* skip the data */
 
        if (i==nfile)
