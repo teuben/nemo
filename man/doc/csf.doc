@@ -1,0 +1,18 @@
+%N csf
+%D Copy a binary structured file
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man csf' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input file [???]
+%A out
+	Output file [???]
+%A item
+	Top level selection items [default: all] []
+%A select
+	Selection numbers (1...) [default: all] []
+%A convert
+	Conversion options {d2f,f2d,i2f,f2i,d2i,i2d} []
+%A VERSION
+	14-apr-96 PJT [1.5a]

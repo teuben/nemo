@@ -1,0 +1,24 @@
+%N unbind
+%D iteratively finds unbound stars to an N-body system
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man unbind' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input file name [???]
+%A out
+	Output file name [???]
+%A exact
+	Exact N-squared potential ? [f]
+%A eps
+	Softening length in case exact potentials [0.025]
+%A ecutoff
+	Cutoff for (un)binding [0.0]
+%A bind
+	Output bound(t) or unbound(f) stars [t]
+%A map
+	Print map of bound/unbound [f]
+%A times
+	Times of shapshots to copy [all]
+%A VERSION
+	15-aug-96 PJT [2.5]

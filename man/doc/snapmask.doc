@@ -1,0 +1,20 @@
+%N snapmask
+%D mask out particles while copying snapshot data
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man snapmask' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	ascii input file name  [???]
+%A out
+	snapshot output file name  [???]
+%A select
+	select string  [all]
+%A times
+	times select string  [all]
+%A keyfile
+	file with Key field to select from  []
+%A keyoffset
+	offsets to be applied extra to outkey  [0]
+%A VERSION
+	8-aug-96 [1.7b]
