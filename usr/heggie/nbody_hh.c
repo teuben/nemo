@@ -1,16 +1,40 @@
+/*
+ * nbody_hh:  Heggie & Hut
+ *            The Gravitational Million-Body Problem (Cambridge, 2003)
+ *            Appendix A (pp.306): A Simple N-Body Integrator
+ *
+ * command line arguments:   nbody ndumps tstop
+ *
+ * performance:
+ *    100 10 1.0      2.2
+ *
+ *
+ * Slight modifications for NEMO
+ *    - added a Makefile for NEMO integration
+ *
+ *
+ */
+
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
 #include <assert.h>
-#define NMAX 1024
-#define NDIM 3
+
+#ifndef NMAX
+# define NMAX 1024
+#endif
+
+#ifndef NDIM
+# define NDIM 3
+#endif
+
 #define loop(idx,last) for (idx = 0; idx < last ; idx++)
-#define min(x, y) (x<y?x:y)
+#define min(x, y) ((x)<(y)?(x):(y))
 typedef double real;
 static int i, j, k;
 
-void main(int argc, char **argv) {
+int main(int argc, char **argv) {
     real x[NMAX][NDIM], xdot[NMAX][NDIM], f[NMAX][NDIM],
       /**/fdot[NMAX][NDIM];
     real step[NMAX], tlast[NMAX], m[NMAX], t, dt;
@@ -19,7 +43,10 @@ void main(int argc, char **argv) {
 /*     cpu = clock(); */
     time(&cpu);
     srand(cpu);
-    assert(argc==4);
+    if (argc != 4) {
+      printf("Usage: %s nbody ndumps tstop\n",argv[0]);
+      exit(1);
+    }
     n = atoi(argv[1]); 
     noutp = atoi(argv[2]); 
     dt = atof(argv[3])/(real)noutp; 
@@ -33,6 +60,7 @@ void main(int argc, char **argv) {
       runtime_output(x,t,n);
     }
     final_output(t,cpu,nsteps,noutp);
+    return 0;
 }
 
 void initialise(int n, real x[NMAX][NDIM], 
