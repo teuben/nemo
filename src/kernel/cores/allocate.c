@@ -34,7 +34,7 @@ void *allocate(int nb)
     }
 #endif
     /* how should this kind of error be processed ? */
-    if (nb < 0) error("allocate: cannot allocate %d bytes",nb);
+    if (nb < 0) error("allocate < 0: cannot allocate %d bytes",nb);
     if (nb==0) nb++;       /* never allocate 0 bytes */
     mem = (void *) calloc((size_t)nb, 1);
     if (mem == NULL)  {
