@@ -19,6 +19,7 @@
  *      25-nov-03  ieck, another emberassing reference frame error
  *      26-nov-03  indexing error in binsearch; sign error in thetaref
  *       1-jan-04  option to use constant vt in ring after omega*r
+ *      29-dec-04  cleanup a valgrind complaint
  */
 
 #include <stdinc.h>
@@ -221,7 +222,12 @@ void potential(int *ndim,double *pos,double *acc,double *pot,double *time)
       i = 0;
     }
 
+#if 0
+    /* hmmm.... valgrind is actually failing the next stmt */
     rad1 = Qconst ? rad0 : rad ;
+#else
+    rad1 = rad;
+#endif
       
     vrad = seval(phase,theta[i],vr[i],coef_vr[i],nrad[i]);
     vtan = seval(phase,theta[i],vt[i],coef_vt[i],nrad[i]) - omega*rad1;
