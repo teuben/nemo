@@ -6,7 +6,8 @@
  *	n[xy]aver=	  5-nov-93 	puzzling.....
  *		something is wrong here                     
  * 1.3  added some z stuff for Martin Bureau       1-may-2002      PJT
- * 1.4  added reorder=
+ * 1.4  added reorder=  (args, largely unfinished)
+ * 1.5  added a more proper WCS when simple subsetting is done     PJT
 
     TODO:  wcs is wrong on output
  */
@@ -30,7 +31,7 @@ string defv[] = {
 	"nzaver=1\n	Number Z to aver (size remains same)",
 	"skip=xyz\n	Coordinates to skip (** ignored **)",
 	"reorder=\n     New coordinate ordering",
-	"VERSION=1.4a\n  12-aug-2002 PJT",
+	"VERSION=1.5\n  17-jun-2003 PJT",
 	NULL,
 };
 
@@ -52,7 +53,7 @@ void nemo_main()
     int     i,j,k, i0,j0,k0, i1,j1,k1;
     imageptr iptr=NULL, iptr1=NULL;      /* pointer to images */
     real    sum, tmp, zzz;
-    bool    Qreorder;
+    bool    Qreorder = FALSE;
     string  reorder;
 
     instr = stropen(getparam("in"), "r");
@@ -83,7 +84,7 @@ void nemo_main()
 	  error("...");
 	}
 #else
-	  error("...this option not implemented yet...");
+	  error("reorder ...this option not implemented yet...");
 #endif
     } else {
       nx1 = ax_index("x",nx,nx1,ix);
@@ -119,6 +120,7 @@ void nemo_main()
 	}
         write_image(outstr, iptr);
     } else if (Qreorder) {            	/* reordering */
+      warning("reordering");
         create_cube(&iptr1,nx1,ny1,nz1);
         for (k=0; k<nz1; k++)
 	  for (j=0; j<ny1; j++)
@@ -131,9 +133,20 @@ void nemo_main()
 	  for (j=0; j<ny1; j++)
             for (i=0; i<nx1; i++)
                 CubeValue(iptr1,i,j,k) = CubeValue(iptr,ix[i],iy[j],iz[k]);
-	/* need to do WCS here */
+	warning("Attempting to fix the WCS");
+
+	Xmin(iptr1) = Xmin(iptr) + (ix[0]-1)*Dx(iptr);
+	Dx(iptr1)   = (ix[1]-ix[0]) * Dx(iptr);
+
+	Ymin(iptr1) = Ymin(iptr) + (iy[0]-1)*Dy(iptr);
+	Dy(iptr1)   = (iy[1]-iy[0]) * Dy(iptr);
+
+	Zmin(iptr1) = Zmin(iptr) + (iz[0]-1)*Dz(iptr);
+	Dz(iptr1)   = (iz[1]-iz[0]) * Dz(iptr);
+	dprintf(0,"WCS Corner: %g %g %g\n",Xmin(iptr1),Ymin(iptr1),Zmin(iptr1));
+
         write_image(outstr, iptr1);
-    }                    
+    } 
 }
 
 /*
