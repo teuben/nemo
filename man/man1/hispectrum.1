@@ -1,0 +1,239 @@
+.TH HISPECTRUM 1NEMO "6 March 1996"
+.SH NAME
+hispectrum \- HI spectrum extraction and gridder
+.SH SYNOPSIS
+\fBhispectrum\fP [parameter=value]
+.SH DESCRIPTION
+\fIhispectrum\fP can perform any of the following functions:
+.PP
+1) List the scan positions of a given HI survey dataset. 
+.PP
+2) Extract a single spectrum from the combined HI surveys. 
+It does this by simply searching through
+the databases until the distance to the
+requested position is less than a required miniumum distance.
+It can also report the nearest or take an average of the
+spectra within a search radius. See the \fBmode=\fP keyword
+below.
+.PP
+3) Combine, weigh and grid spectra from the combined HI surveys
+into a velocity-position-position (VLB) datacube. This is 
+generally a 
+time- and disk-consuming task, since a temporary list of
+relevant scans is written to disk into a scratch file.
+Note that creating a datacube is done by gridding in X and Y,
+while the Velocity axis is sampled (interpolated) from
+a predefined set of values (normally regular, like the grid
+in X and Y).
+.PP
+The HI survey databases live in either your current directory
+or the directory given by the environment variable \fBHI_DIR\fP, and
+can be compressed (.Z or .gz) (see \fIhi(5NEMO)\fP).
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBhi=\fP\fIHI_id\fP
+Input dataset id's to combine {hh,pk,ar,bl,ww,kj,lb}. 
+Minimum match is applied. See also \fIhi(5NEMO)\fP for survey
+id's. [No default].
+.TP
+\fBlon=\fP\fIl\fP
+Desired galactic longitude (l) to find a single spectrum. Must be in the
+range 0..360 degrees.
+If none supplied, all scan positions 
+in the database will be shown. This keyword is only active when
+cube gridding (see \fBcube=\fP below) has not been selected.
+.TP
+\fBlat=\fP\fIb\fP
+Desired galactic latitude (b) to find a single spectrum. Must be in the
+range -90..90 degrees. See comments above.
+.TP
+\fBvlsr=\fP\fIvmin:vmax:vstep\fP
+Velocity value samples (km/s, in LSR units), on which the output
+spectrum is interpolated. If none choosen,
+the original raw data will be shown. 
+When gridding a datacube (see \fBcube=\fP below), 
+you \fBmust\fP specify these output velocities since different
+datasets are on different velocity scales (note: the user
+should compensate for interpolation using the \fBbscale/bzero\fP
+keywords below).
+When a requested velocity is outside the
+range of the raw data, 0.0 is returned in the spectrum. 
+Default: none.
+.TP
+\fBcube=\fP\fIfits_file\fP
+Output cube, if requested. 
+This file will be in standard \fIfits(5NEMO)\fP format. 
+Default: none, a single spectrum or all scan positions are listed
+(see \fBlat=\fP and \fBlon=\fP above).
+.TP
+\fBxgrid=\fP\fIxmin,xmax,step\fP
+X-range (min and max) and step, in the output cube (see also
+\fBprojection=\fP).
+If \fIxmin\fP is negative, the galactic center will be properly placed 
+somewhere in the middle of the grid.
+Note these values are the centers of the first and last pixel requested,
+not the edges of the pixels.
+Default: none.
+.TP
+\fBygrid=\fP\fIymin,ymax,step\fP
+Y-range (min and max) and step, in the output cube 
+Note these values are the centers of the first and last pixel requested.
+Default: none.
+.TP
+\fBbscale=\fP\fIscale_factor(s)\fP
+Scale factors applied to input spectra. See also \fBbzero=\fP.
+One value for each input dataset much be given
+(see \fBhi=\fP above).
+Default: 1.0.
+.TP
+\fBbzero=\fP\fIoffset(s)\fP
+Offset applied to input spectra after scaling (\fBbscale=\fP). 
+One for each input dataset much be given
+(see \fBhi=\fP above).
+Default: 0.0.
+.TP
+\fBweight=\fP\fIfactor(s)\fP
+Relative weight factor given to a dataset when they are combined.
+One for each input dataset much be given
+(see \fBhi=\fP above).
+Default: 1.0
+.TP
+\fBncell=\fP
+Number of neighbor cells to use in gridding. Default: 0 (only the
+scans in the cell of interest are taken into account).
+.TP
+\fBsigma=\fP
+Weighting distance (in degrees) with which data from neighboring 
+pixels are used to combine. Currently the weighing function ...
+[Default: \fB1\fP].
+.TP
+\fBdist=\fP
+Minimum distance when to stop searching for a single spectrum.
+Only used if you want to override the
+one in the database (it is probably not a good idea to
+use this keyword and let the database choose a value).
+Default: not used, the internal database
+value (see \fIhi.h\fP:  \fBhi_defs[].dist_min\fP) is used.
+.TP
+\fBmode=first|aver|near\fP    
+Modes in single spectrum search. Possible modes are 
+\fIfirst, average,\fP and \fInearest\fP. Minimum match applies.
+[Default: \fBfirst\fP].
+.TP
+\fBclip=\fP
+Range of brightness temperatures which to include or exclude from
+the gridding. Note clipping occurs AFTER the data has been rescaled
+with the \fBbzero,bscale\fP parameters(see above). Default: none.
+\fI** not implemented **\fP
+.TP
+\fBoutfreq=\fP
+Status output frequency (debug=1). Searching the databases 
+for valid scans is very time consuming, and it's useful
+to keep the user informed. Use \fB0\fP if no status output
+requested. Default: \fB100\fP.
+.TP
+\fBprojection=\fP
+Projection. Valid projections are \fBcartesian\fP, in which 
+galactic longitude (l) and latitude (b) are gridded,
+\fBnpolar\fP and \fBspolar\fP grid the north-polar and south-polar
+cap resp. (\fBxgrid= and ygrid=\fP are also in degrees, and
+measure the degrees away from the polar cap), \fBcos\fP and
+\fBaitoff\fP.
+For \fBnpolar\fP the
+galactic center is at the bottom,  running clockwise, for
+\fBspolar\fP at the top, running counter clockwise.
+[Default: \fBcartesian\fP.
+.TP
+\fBprojpar=\fP
+Optional parameters associated with a projection. Currently only
+used for \fBcos\fP and \fBaitoff\fP  where they are used to
+override the central longitude (the default being the mean of
+xmin and xmax).
+.TP
+\fBheadline=\fP\fIcomments\fP
+Comments added to table/fits file. Default: none.
+.SH EXAMPLES
+The following example lists all scan positions (l, b, ra, dec) for the
+(Heiles&Habing) Hat Creek high latitude survey. Note the output is
+very large (134932 scans) and has been redirected to a file \fIhh.pos\fP:
+.nf
+
+    % hispectrum in=hh > hh.pos
+.fi
+.PP
+This second example extracts a spectrum in the form of an ascii table.
+You can plot it using NEMO's \fItabplot\fP program, or go into a mongo-type
+program:
+.nf
+
+    % hispectrum in=hh lon=45 lat=20 > hh.45.20.spectrum
+.fi
+.PP
+The third example grids a portion of the sky into a VLB 
+(velocity-longitude-latitude) FITS cube:
+.nf
+
+    % hispectrum in=hh,pk vlsr=-100:100:2 xgrid=200,300,2 ygrid=-30,30,2 \\
+        cube=cube1.fits 
+
+.fi
+.SH LIMITATIONS
+Program is disk space intensive: a scratch file with all
+velocity interpolated scans within the ROI 
+(Region Of Interest: \fBxgrid, ygrid\fP) will be created; this will
+need about \fI4 * nscans * nv\fP bytes. In addition the output datacube
+will be \fI 4 * nv * nx * ny\fP in size. \fInx, ny\fP are the
+number of pixels in X and Y, \fInv\fP those requested in velocity.
+The factor of 4 from the assumption that a C-float needs 4 bytes storage.
+.PP
+Velocity interpolation is enforced, but when gridding and combining
+multiple dataset proper \fBbscale\fP factor's need to be used
+to get the correct answer. I.e. each dataset should be multiplied
+with the ratio of the channel separation of original divided by
+new (interpolated) cube.
+.SH BUGS
+\fIhispectrum\fP uses an internal fortran-to-c interface, and is unlikely
+to work on Unix versions where this is very different from the default
+BSD convention. 
+.PP
+There is no check on available diskspace (scratch spectra plus gridded 
+output data cube) before the program starts. To estimate the size of
+the scratch file is difficult.
+.PP
+Although gridding in X and Y is forced to be regular, the one in
+V is not forced to be. The CDELT1 written in the FITS file will
+be wrong in this case.
+.PP
+If the number of spectra per pixel is larger than a compiler defined
+value (\fBMAXSCAN\fP) the program will crash after all the hard
+work of sorting spectra has been done; this will happen  in the middle
+of writing the output FITS file.
+.PP
+Only scans with known format (as defined in \fIhi.h\fP are understood.
+No provisions for some free format has been made yet.
+.SH FILES
+.nf
+.ta +1.5i
+$HI_DIR/        	directory, or colon separated searchpath, where the ascii (raw) scans live.
+$NEMO/usr/bima/hi  	source code
+hiXXXXXX           	scratch file (see mktemp) with scans for the cube gridding
+.fi
+.SH SEE ALSO
+hi(5NEMO), fitsio(3NEMO), tabplot(3NEMO), himap(1NEMO), fitstohi(1NEMO)
+.SH AUTHOR
+Peter Teuben, William T. Reach (decode.f)
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+29-Jun-92	V0.0 Created: simple spectrum extraction	PJT
+1-jul-92	V0.1 cube gridder - using nearest cells 	PJT
+6-jul-92	V0.2 added HI_DIR, deleted nx=, ny=       	PJT
+8-nov-92	V0.3 10% faster code, but using 50% more memory	PJT
+17-sep-93	V0.6 added mode= for single spectrum search	PJT
+2-apr-94	V0.6a fixed bug in WW decoding           	PJT
+6-apr-94	V0.7 sigma=0 now default; delete scratchfile	PJT
+29-sep-95	V0.8 added npolar/spolar projection options 	PJT
+x-mar-96	V0.9 added cosb averagin, gridding options	PJT
+.fi
