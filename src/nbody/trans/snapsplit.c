@@ -6,6 +6,7 @@
  *      27-jan-94  V1.0 Created             peter teuben
  *	28-jan-94  V1.1 allow nbody= to have more entries
  *	22-dec-95  released 'as is'
+ *      14-sep-02  V2.0 use mstropen() to optionally split into different files
  */
 #include <stdinc.h>
 #include <getparam.h>
@@ -19,11 +20,11 @@
 
 string defv[] = {
     "in=???\n           Input snapshot",
-    "out=???\n          Output snapshot",
+    "out=???\n          Output snapshot (multiple allowed via %)",
     "nbody=\n           Size of one (or more) snapshot(s)",
     "nsnap=\n           Number of pieces to cut a snapshot into",
     "times=all\n        Series of times-ranges to select",
-    "VERSION=1.1\n	28-jan-94 (22/dec/95) PJT",
+    "VERSION=2.0\n	14-sep-02 PJT",
     NULL,
 };
 
@@ -38,6 +39,7 @@ extern bool within(real, string, real);
 nemo_main()
 {
     stream instr, outstr;
+    mstr *mp;
     real   tsnap;
     string times, precision, keep;
     Body   *btab = NULL, *bp;
@@ -58,14 +60,13 @@ nemo_main()
         error("Need either nbody= or nsnap= to cut into pieces");
 
     instr = stropen(getparam("in"), "r");
-    outstr = stropen(getparam("out"), "w");
+    mp = mstr_init(getparam("out"));
 
-    get_history(instr);
-    put_history(outstr);		
     for (;;) {
     	get_history(instr);		/* skip over stuff we can forget */
         if (!get_tag_ok(instr, SnapShotTag))
 		break;			/* done with work in loop */
+
         get_snap(instr, &btab, &nin, &tsnap, &bits);
         if ((bits & MassBit) == 0 && (bits & PhaseSpaceBit) == 0) {
 	    continue;       /* just skip */
@@ -85,6 +86,11 @@ nemo_main()
                 n1 = nout;
             else
                 n1 = nin - i;
+
+	    outstr = mstr_open(mp, "w");
+	    dprintf(0,"mstropen: count=%d\n",mstr_count(mp));
+	    if (mstr_count(mp)==1 || mstr_multi(mp))
+	      put_history(outstr);
             put_snap(outstr, &bp, &n1, &tsnap, &bits);
         }
         if (n1 != nout)
@@ -93,4 +99,6 @@ nemo_main()
         else
             dprintf(0,"Wrote %d %d-body snapshots\n",nc,nout);
     }
+    strclose(instr);
+    mstr_close(mp);
 }

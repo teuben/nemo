@@ -14,6 +14,10 @@ of pieces you want to have a snapshot split into.
 Note that not all programs can correctly handle snapshots in
 this serialized mode. For example, \fIradprof(1NEMO)\fP needs
 all particles in memory at the same time.
+.PP
+If you want to create
+split a snapshot by time, use \fIsnaptrim(1NEMO)\fP; it can
+also create multiple output files.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -23,7 +27,8 @@ Input snapshot
 No default.
 .TP 20
 \fBout=\fP
-Output snapshot      
+Output snapshot. If a \fIprintf(3)\fP-like format specification
+is used.
 No default.
 .TP 20
 \fBtimes=\fP
