@@ -2,10 +2,11 @@
  *  ODEINT:  integrate o.d.e. 
  *      15-mar-90:   made it return 0 consistently PJT
  *	16-feb-97:   no more nexted extern's       PJT
+ *      24-nov-03:   NEMOfied, prototype for gcc3  PJT
  *      23-jan-04:   prototypes, nemofied          pjt
  */
 
-#include <stdinc.h> 
+#include <stdinc.h>
 
 #define MAXSTP  10000		/* maximum steps to be taken */
 #define NMAX	10		/* maximum number of independant variables */
