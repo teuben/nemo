@@ -25,7 +25,7 @@ int debug_level=0;	/* needs to be global; see also getparam.c */
  *	    as set by the user interface (debug=)
  */
 
-int dprintf(int debug, const string fmt, ...)
+int dprintf(int debug, const_string fmt, ...)
 {
     va_list ap;
     int nret = 0;
