@@ -4,13 +4,14 @@
  *      4-jan-05        V0.1: for Kartik's bars modeling experiment 
  *                      (IMGEN is just tooooo cumbersome, and so is ccdmath) 
  *      6-jan-05        V0.7: added many more models and features. added factor=
- *                      
+ *      8-jan-05        V0.8: add m!=2 multi-arm spirals
  * TODO:
  *    - find out why the normalization was PI, and not TWO_PI, which worked before.
  *       (this happened when I changed from 1 to 1/3600 scaling factor in the examples)
  *    - add a few more of the imgen models
  *    - replace crpix/crval/cdelt with cell= and maybe radec= ? as in imgen
- *    - if A=0, then factor most like won't work
+ *    - if A=0, then factor most like won't work (hard to fix the way it's written)
+ *
  */
 
 #include <stdinc.h>
@@ -18,6 +19,7 @@
 #include <getparam.h>
 #include <vectmath.h>
 #include <filestruct.h>
+#include <history.h>
 #include <strlib.h>
 #include <image.h>
 
@@ -26,22 +28,23 @@ string defv[] = {
   "out=???\n       Output file",
   "object=flat\n   Object type (flat,exp,gauss,bar,spiral,....)",
   "spar=\n         Parameters for this object",
-  "center=\n       Center of object (defaults to mapcenter) in pixels 0..size-1",
+  "center=\n       Center of object (defaults to map(reference)center) in pixels 0..size-1",
   "size=10,10,1\n  2- or 3D dimensions of map/cube (only if no input file given)",
   "cell=1\n        Cellsize",
   "pa=0\n          Position Angle of disk in which object lives",
   "inc=0\n         Inclination Angle of disk in which object lives",
   "totflux=f\n     Interpret peak values (spar[0]) as total flux instead",
   "factor=1\n      Factor to multiple input image by before adding object",
-  "crpix=\n        Override/Set crpix (1,1,1) // ignored",
+  "crpix=\n        Override/Set crpix (1,1,1) // ignored ** mapcenter if left blank **",
   "crval=\n        Override/Set crval (0,0,0) // ignored",
   "cdelt=\n        Override/Set cdelt (1,1,1) // ignored",
   "seed=0\n        Random seed",
-  "VERSION=0.7\n   6-jan-05 PJT",
+  "headline=\n     Random veriage for the history",
+  "VERSION=0.8\n   8-jan-05 PJT",
   NULL,
 };
 
-string usage = "image creation with objects";
+string usage = "image creation/modification with objects";
 
 string cvsid = "$Id$";
 
@@ -70,10 +73,7 @@ real factor;
 real surface=1.0;
 
 
-local int set_axis(string var, int n, double *xvar, double defvar);
 local void do_create(int nx, int ny, int nz);
-local void wcs_f2i(             int ndim, double *crpix, double *crval, double *cdelt, image *iptr);
-local void wcs_i2f(image *iptr, int ndim, double *crpix, double *crval, double *cdelt);
 
 local void object_flat(int npars, real *pars);
 local void object_exp(int npars, real *pars);
@@ -88,6 +88,8 @@ local void object_comet(int npars, real *pars);
 local void object_jet(int npars, real *pars);
 local void object_shell(int npars, real *pars);
 
+local real powi(real x, int p);
+
 extern string *burststring(string,string);
 
 
@@ -99,6 +101,7 @@ void nemo_main ()
   int     size[3],nx, ny, nz;         /* size of scratch map */
   int     ncen;
   string  object;
+  string  headline;
   int seed = init_xrandom(getparam("seed"));
 
   object = getparam("object");
@@ -122,9 +125,9 @@ void nemo_main ()
   if (ncen==1) center[1] = center[0];
 
   init_xrandom(getparam("seed"));
-  nwcs += set_axis(getparam("crpix"),MAXNAX,crpix,1.0);
-  nwcs += set_axis(getparam("crval"),MAXNAX,crval,0.0);
-  nwcs += set_axis(getparam("cdelt"),MAXNAX,cdelt,1.0);
+  nwcs = nemorinpd(getparam("crval"),crval,MAXNAX,0.0,FALSE);
+  nwcs = nemorinpd(getparam("cdelt"),cdelt,MAXNAX,1.0,FALSE);
+  nwcs = nemorinpd(getparam("crpix"),crpix,MAXNAX,1.0,FALSE);
   if (hasvalue("in")) {
     instr = stropen(getparam("in"),"r");    /* open file */
     read_image (instr, &iptr);
@@ -152,6 +155,15 @@ void nemo_main ()
     ny = size[1];
     nz = size[2];
     do_create(nx,ny,nz);
+#if 0
+    if (nwcs == 0) {    /* last one for crpix */
+      warning("going to set the center of the map in new NEMO convention");
+      crpix[0] = (nx-1)/2.0;
+      crpix[1] = (ny-1)/2.0;
+      crpix[2] = (nz-1)/2.0;
+    }
+#endif
+
   }
   if (ncen==0) {   /* fix center if it has not been set yet */
     center[0] = (Nx(iptr)-1)/2.0;     /* 0 based center= */
@@ -189,84 +201,11 @@ void nemo_main ()
     error("Unknown object %g",object);
   
   outstr = stropen (getparam("out"),"w");  /* open output file first ... */
+  if (hasvalue("headline"))
+    set_headline(getparam("headline"));
   write_image (outstr,iptr);         /* write image to file */
   strclose(outstr);
 }
-
-
-local int set_axis(string var, int n, double *xvar, double defvar)
-{
-  int i, nret;
-  if (var == 0 || *var == 0) {
-    for (i=0; i<n; i++) 
-      xvar[i] = defvar;
-    return 0;
-  } else {
-    nret = nemoinpd(var,xvar,n);
-    if (nret < 0) error("Parsing error %d in %s",nret,var);
-    for (i=nret; i<n; i++)
-      xvar[i] = defvar;
-    return 1;
-  }
-  return 999;
-}
-
-/*
- *    FITS: x = (i-crpix)*cdelt + crval        lower/left is 1 (i=1...naxis)
- *    NEMO: x = i*Dx + Xmin                    lower/left is 0 (i=0...naxis-1)
- */
-
-local void wcs_f2i(int ndim, double *crpix, double *crval, double *cdelt, image *iptr)
-{
-  int i;
-  if (ndim<1) return;
-
-  for (i=0; i<ndim; i++)
-    dprintf(1,"axis %d: %g %g %g\n",i+1,crpix[i],crval[i],cdelt[i]);
-  
-  Dx(iptr) = cdelt[0];
-  Xmin(iptr) = (1.0-crpix[0])*cdelt[0] + crval[0];
-  if (ndim==1) return;
-  
-  Dy(iptr) = cdelt[1];
-  Ymin(iptr) = (1.0-crpix[1])*cdelt[1] + crval[1];
-  if (ndim==2) return;
-
-  Dz(iptr) = cdelt[2];
-  Zmin(iptr) = (1.0-crpix[2])*cdelt[2] + crval[2];
-
-  dprintf(1,"XYZMin/Dxyz: %g %g %g %g 5g 5g\n",
-	  Xmin(iptr),Ymin(iptr),Zmin(iptr),Dx(iptr),Dy(iptr),Dz(iptr));
-
-}
-
-local void wcs_i2f(image *iptr, int ndim, double *crpix, double *crval, double *cdelt)
-{
-  int i;
-  if (ndim<1) return;
-
-  dprintf(1,"XYZMin/Dxyz: %g %g %g %g 5g 5g\n",
-	  Xmin(iptr),Ymin(iptr),Zmin(iptr),Dx(iptr),Dy(iptr),Dz(iptr));
-
-  crpix[0] = 1.0;
-  crval[0] = Xmin(iptr);
-  cdelt[0] = Dx(iptr);
-  if (ndim==1) return;
-  
-  crpix[1] = 1.0;
-  crval[1] = Ymin(iptr);
-  cdelt[1] = Dy(iptr);
-  if (ndim==2) return;
-
-  crpix[2] = 1.0;
-  crval[2] = Ymin(iptr);
-  cdelt[2] = Dy(iptr);
-
-  for (i=0; i<ndim; i++)
-    dprintf(1,"axis %d: %g %g %g\n",i+1,crpix[i],crval[i],cdelt[i]);
-
-}
-
 
 /*
  *  create new map from scratch, using %x and %y as position parameters 
@@ -284,8 +223,12 @@ local void do_create(int nx, int ny,int nz)
     badvalues = 0;		/* count number of bad operations */
 
     if (nz > 0) {
+      warning("cube");
       if (!create_cube (&iptr, nx, ny, nz))	/* create default empty image */
         error("Could not create 3D image from scratch");
+#if 0      
+      Axis(iptr) = 1;      /* set linear axistype with a fits-style reference pixel */
+#endif
       wcs_f2i(3,crpix,crval,cdelt,iptr);
 
       for (iz=0; iz<nz; iz++) {
@@ -302,6 +245,7 @@ local void do_create(int nx, int ny,int nz)
         }
       }
     } else {
+      warning("2d-map");
       if (!create_image (&iptr, nx, ny))	
         error("Could not create 2D image from scratch");
       wcs_f2i(2,crpix,crval,cdelt,iptr);
@@ -376,7 +320,7 @@ local void object_exp(int npars, real *pars)
       r = sqrt(x2*x2 + sqr(y2/cosi));
       arg = r/h;
       dprintf(2,"%d %d : %g %g %g %g  %g\n",i,j,x1,y1,x2,y2,arg);
-      value = (arg < 100) ? A * exp(-arg) : 0.0;
+      value = (arg < 80) ? A * exp(-arg) : 0.0;
       MapValue(iptr,i,j) = factor*MapValue(iptr,i,j) + value;
     }
   }
@@ -410,7 +354,7 @@ local void object_gauss(int npars, real *pars)
       r = sqrt(x2*x2 + sqr(y2/cosi));
       arg = r/h;
       dprintf(2,"%d %d : %g %g %g %g   %g\n",i,j,x1,y1,x2,y2,arg);
-      value = (arg < 100) ?  A * exp(-0.5*arg*arg) : 0.0;
+      value = (arg < 13) ?  A * exp(-0.5*arg*arg) : 0.0;
       MapValue(iptr,i,j)  = factor*MapValue(iptr,i,j) + value;
     }
   }
@@ -525,6 +469,49 @@ local void object_ferrers(int npars, real *pars)
   } /* k */
 }
 
+
+/* TODO: export as pure "double" variants to the library */
+
+/* 
+ * powi(x,p):   like pow(x,p) except p is a lowish order integer
+ *    this has the advantage that:
+ *     1) x < 0  and it does the right thing. For odd p's  sign(powi) = sign(x)
+ *     2) p < 1  
+ * 
+ *  Note: returns 0.0 if x=0 and p<0
+ *        returns 1.0 if p=0
+ *     
+ */
+
+local double powi(double x, int p)
+{
+  int i;
+  real prod;
+
+  if (p==0) return 1;
+  if (x==0.0) return 0.0;
+  if (p<0) {
+    p = -p;
+    x = 1.0/x;
+  } 
+  if (p==1) return x;
+  prod = x*x;
+  for (i=2; i<p; i++)
+    prod *= x;
+  return prod;
+}
+
+/* 
+ * powr(x,p):  we need  our own, to prevent NaN's for x < 0
+ */
+
+local double powr(double x, double p)
+{
+  if (x<=0) return 0.0;
+  return pow(x,p);
+}
+
+
 local void object_spiral(int npars, real *pars)
 {
   int i,nx = Nx(iptr);
@@ -536,21 +523,29 @@ local void object_spiral(int npars, real *pars)
   real p = 1.0;   /* 1/2 power of cos */
   real r0 = 0.0;  /* starting radius */
   real p0 = 0.0;  /* starting angle */
+  int m = 2;      /* number of arms */
   real x1,y1,x2,y2,x3,y3,r,arg,value;
   real amp,phi,sum;
+  bool Qint, pint;
 
   if (npar > 0) A = pars[0];
   if (npar > 1) h = pars[1];
   if (npar > 2) k = pars[2];
   if (npar > 3) p = pars[3];
-  if (npar > 4) r0 = pars[4];
-  if (npar > 5) p0 = pars[5];
-  dprintf(0,"spiral: %g %g %g %g %g %g\n",A,h,k,p,r0,p0);
+  if (npar > 4) m =  (int) pars[4];  /* note rounding ? */
+  if (npar > 5) r0 = pars[5];
+  if (npar > 6) p0 = pars[6];
+
+  dprintf(0,"spiral: %g %g   %g %g %d   %g %g\n",A,h,k,p,m,r0,p0);
 
   if (A==0) return;
 
   p0 *= PI/180.0;  /* convert from degrees to radians */
   k *= TWO_PI;     /* angles are 2.PI.k.r , so absorb 2.PI.k in one */
+  pint = (int) p;
+  Qint = (p-pint == 0);
+  if (Qint)
+    warning("Integer power p = %d\n",pint);
 
   lmax = Qtotflux ? 2 : 1;
 
@@ -574,9 +569,12 @@ local void object_spiral(int npars, real *pars)
 	else {
 	  /* ? should match this up better so we can connect bar and spiral ? */
 	  phi = atan2(y2,x2) + k*(r-r0) + p0;
-	  amp = pow(cos(phi),2*p);
+	  if (Qint) {
+	    amp = powi(cos(m*phi),pint);   /* these can come out negative for odd p's !! */
+	  } else
+	    amp = powr(cos(m*phi),(double)p);
 	  arg = r/h;
-	  value = (arg < 100) ? A * amp * exp(-arg) :  0.0;
+	  value = (arg < 80) ? A * amp * exp(-arg) :  0.0;
 	}
 	if (Qtotflux) {   
 	  if (l==0) 

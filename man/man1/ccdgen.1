@@ -1,10 +1,10 @@
-.TH CCDGEN 1NEMO "5 January 2005"
+.TH CCDGEN 1NEMO "8 January 2005"
 .SH NAME
 ccdgen \- create or add objects to an image
 .SH SYNOPSIS
-\fBccdgen\fP [parameter=value]
+\fBccdgen\fP \fBout=\fP\fIimage-file\fP [parameter=value]
 .SH DESCRIPTION
-\fBccdgen\fP creates or modified images by 
+\fBccdgen\fP creates or modified (2D) images by 
 adding simple parameterized two-dimensional objects. For arbitrary
 expressions use \fIccdmath(1NEMO)\fP instead. 
 .PP
@@ -36,8 +36,8 @@ of the peak value can be modified by setting \fBtotflux=t\fP
 are typically 1,1...
 .TP
 \fBcenter=\fP
-Center of object in pixels. The lower left hand
-pixel is counted as (0,0) here. Default: mapcenter.
+Center of object (in 0-based pixel coordinates). The lower left corner
+is counted as (0,0) here. Default: mapcenter.
 .TP
 \fBsize=\fP
 Mapsize. It is allowed to have a different size in X and Y.
@@ -46,7 +46,7 @@ Mapsize. It is allowed to have a different size in X and Y.
 Cellsize [1]      *not used yet*
 .TP
 \fBpa=\fP
-Position Angle of disk in which object lives. Counted positive
+Position Angle of disk in which the object lives. Counted positive
 starting at North through East in the standard astronomical
 fashion. Default: 0
 .TP
@@ -56,13 +56,14 @@ Default: 0
 .TP
 \fBtotflux=t|f\fP
 If set to true, the amplitude (always the first parameter in
-\fBspar\fP is interpreted as the total integrated intensity
-instead of the peak value of the object
+\fBspar\fP) is interpreted as the total integrated intensity
+instead of the peak value of the object.
+Default: \fBf\fP.
 .TP
 \fBfactor=\fP
 The factor by which an image is multiplied before the object is added.
 Warning: if the amplitude (usually the first of the spar= numbers) is 0,
-this will not apply.
+this will not apply, and the output would equal the input.
 Default: 1
 .TP
 \fBcrpix=\fP
@@ -76,39 +77,70 @@ Override/Set cdelt (1,1,1)
 .TP
 \fBseed=\fP
 Random seed [0]    
+.TP
+\fBheadline=\fP
+Random verbiage added to the image. Default: none
 .SH OBJECTS
 .nf
-.ta +1i +2i
+.ta +1i +1.5i
 flat	A		A
 exp	A.exp(-r/h)	A,h
 gauss	A.exp(-r^2/(2h^2))	A,h
 bar	A.exp(-r/h)	A,h,e,b   (e=1-minor/major   b=bar position angle w.r.t. disk)
 noise	gaussian(m,s)	mean,sigma
-spiral  A.exp(-r/h)	A,h,k,p,r0,p0
-ferrers A.(1-r^2)^p	A,h,e,b,p (h=size of bar, p=power to 1-r^2)
+spiral	A.exp(-r/h)	A,h,k,p,m,r0,p0
+ferrers	A.(1-r^2)^p	A,h,e,b,p (h=size of bar, p=power to 1-r^2)
 isothermal	A.(1+r^2)^p	A,h,p
 
-to be implemented:
+\fImaybe to be implemented\fP:
 
 j1x	J1(x)/x
 comet	2d proj
 jet	jet model w/ power law brightness
 shell	2d proj of shell
+poisson 
 .fi 
 A few object that are in MIRIAD's \fIimgen(1MIRIAD)\fP program and not listed 
-here directly, can be simulated or replace by:
+here directly, can be simulated or replaced by:
 .nf
 .ta +1i +2i
 level	same as our flat
 cluster	same as isothermal, except we also allow p different from -0.5
-noise	notice we have a mean, miriad doesn't
-point	use exp with a very small scale length
+noise	notice we have a mean, miriad doesn't, also miriad has a crude low approximation
+point	use exp with a very small scale length \fBh\fP
 gaussian	our gauss, but bmin/bmaj via inc
 gauss3	no equivalent, ccdgen does not support 3D models yet
 disk	use ferrers with p=0
 .fi
+.PP
+Most of these objects have a peak or representative intensity value as the first argument,
+and a scale length as the second parameter. The next parameters are sometimes scale
+free 
+.PP
+Bars have an additional axis ratio (we mostly use e=1-b/a here) and position angle
+of the bar w.r.t. the disk in the disk plane
+(see \fIsnaprotate(1NEMO)\fP for an approach if you
+know the angle of the bar in the sky plane). A Ferrers bar also needs to know the
+power (usuall an integer) to which 1-r^2 is raised.
+.PP
+Spirals are yet more complex: A and h are the usual peak and exponential scale-length.
+k is the wavenumber (related to the pitch angle as tan(pitch)=1/(2.pi.k.r), 
+see also \fImkspiral(1NEMO)\fP),
+p controls the relative width of the spiral (assumed to be cos^p(m*phi), 
+r0 the starting radius of the spiral (defaults to 0), p0 the
+phase of the spiral at radius r0, and m the number of spiral arms. In particular,
+since the \fIpow(3)\fP function is used internally for non-integer values of \fBp\fP,
+the bahavior of \fBm\fP for integer and non-integer values of \fBp\fP is different:
+for integer values our own internal \fIpowi(3NEMO)\fP is used, and correctly represents.
+For example, for m=1 and p=1 you'll get a one armed spiral, but with negative counter-arm.
+With p=2 it becomes a 2-armed spiral, as they will get progressively narrower as p remains
+even and gets higher. For odd values of p you will again have a positive and negative
+spiral, and as p gets larger, the arms get narrower.   By making sure \fBp\fP becomes
+non-integer, e.g. p=2.0001, the negative arm becomes 0.
+
 .SH EXAMPLES
-Here's how to make a barred galaxy:
+Here's how to make a simple barred galaxy by adding an exponential disk and
+a (smaller) exponential bar:
 .nf
 ccdgen out=- object=exp spar=1,40 pa=60 inc=45 size=256 |\\
  ccdgen - bar.ccd object=bar spar=10,6,0.5,70 pa=60 inc=45
@@ -122,14 +154,8 @@ ccdgen out=- object=exp spar=1,40/3600 pa=60 inc=45 size=256 cdelt=-1/3600,1/360
  ccdgen - - object=bar spar=10,6/3600,0.5,70 pa=60 inc=45 |\\
  ccdfits - bar.fits radecvel=t
 .fi
-.PP
-Spirals are a bit more complex: A and h are the usual peak and exponential scale-length.
-k is the wavenumber (related the pitch angles, see also \fImkspiral(1NEMO)\fP), 
-p controls the relative width of the spiral (assumed to be cos^2p, thus you 
-should set p>1), r0 the starting radius of the spiral (defaults to 0), and p0 the
-phase of the spiral at radius r0.
 .SH SEE ALSO
-ccdmath(1NEMO), image(5NEMO)
+ccdmath(1NEMO), snaprotate(1NEMO), image(5NEMO)
 .SH FILES
 src/image/trans
 .SH AUTHOR
@@ -139,4 +165,5 @@ Peter Teuben
 .ta +1.0i +4.0i
 4-Jan-05	V0.1 Created	PJT
 6-jan-05	V0.7 added (many features and) factor=	PJT
+8-jan-05	V0.8 add #arms parameter to spiral	PJT
 .fi
