@@ -1,6 +1,6 @@
-.TH IMAGE 3NEMO "27 January 1989"
+.TH IMAGE 3NEMO "9 September 2002"
 .SH NAME
-image, read_image, write_image, create_image, create_cube, free_image - high level image i/o
+image, read_image, write_image, create_image, create_cube, copy_image, free_image - high level image i/o
 .SH SYNOPSIS
 .nf
 .B #include <stdinc.h>
@@ -17,6 +17,10 @@ image, read_image, write_image, create_image, create_cube, free_image - high lev
 .B int create_image (iptr, nx, ny)
 .B imageptr *iptr;
 .B int nx,ny;
+.PP
+.B int copy_image (iptr, optr)
+.B imageptr iptr;
+.B imageptr *optr;
 .PP
 .B int create_cube (iptr, nx, ny, nz)
 .B imageptr *iptr;
@@ -39,6 +43,8 @@ file \fBoutstr\fP.
 \fIcreate_image()\fP is like \fIread_image\fP, but only allocates space
 and sets most image header (except the size) variables to zero.
 \fIcreate_cube()\fP is the extension of \fIcreate_image()\fP for 3D images.
+\fIcopy_image\fP copies an image, but not the image elements.  All header
+elements are copied.
 .SH AUTHOR
 Peter Teuben
 .SH FILES
@@ -53,4 +59,5 @@ xx-jul-87       original version        PJT
 23-dec-88       V2.3 velocity added     PJT
 18-jan-89       V3.0 3D implemented     PJT
 27-jun-89       V4.1 added free_image   PJT
+9-sep-02    	V6.2 added copy_image	PJT
 .fi

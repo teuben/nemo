@@ -25,6 +25,7 @@
  *  13-apr-96   V5.0 support for (orthogonal) non-linear axes	PJT
  *                   in header image.h
  *  21-feb-00   V6.1 mapX_image() routines, cleaned up code a bit PJT
+ *   9-sep-02    V6.2 added copy_image()
  *			
  *
  *  Note: bug in TESTBED section; new items (Unit) not filled in
@@ -40,6 +41,7 @@
 
 #define DLEV   5		/* local default debug output level */
 
+local char *mystrcpy(char *);
 
 /*	storage of matrices can be done in several ways: */
 
@@ -259,6 +261,41 @@ int create_image (imageptr *iptr, int nx, int ny)
 
     return 1;		/* succes return code  */
 }
+
+int copy_image (imageptr iptr, imageptr *optr)
+{
+  int nx,ny,nz;
+  nx = Nx(iptr);
+  ny = Ny(iptr);
+  nz = Nz(iptr);
+
+  *optr = (imageptr ) allocate(sizeof(image));
+  dprintf (DLEV,"copy_image:Allocated image @ %d size=%d * %d",*iptr,nx,ny,nz);
+  if (*optr == NULL) return 0;	/* no memory available */
+    	
+  Frame(*optr) = (real *) allocate(nx*ny*nz*sizeof(real));	
+  dprintf (DLEV,"Frame allocated @ %d ",Frame(*optr));
+  if (Frame(*optr)==NULL) {
+    warning ("CREATE_IMAGE: Not enough memory to allocate image\n");
+    return 0;
+  }
+  Nx(*optr) = nx;
+  Ny(*optr) = ny;
+  Nz(*optr) = nz;
+  Xmin(*optr) = Xmin(iptr);
+  Ymin(*optr) = Ymin(iptr);
+  Zmin(*optr) = Zmin(iptr);
+  Dx(*optr) = Dx(iptr);
+  Dy(*optr) = Dy(iptr);
+  Dz(*optr) = Dz(iptr);
+  Namex(*optr) = mystrcpy(Namex(iptr));
+  Namey(*optr) = mystrcpy(Namey(iptr));
+  Namez(*optr) = mystrcpy(Namez(iptr));
+  Storage(*optr) = matdef[idef];
+  
+  return 1;		/* succes return code  */
+}
+
 
 /*
  * CREATE_CUBE: create a blank cube Nx by Ny by Nz in size
@@ -350,6 +387,16 @@ real ***map3_image (imageptr iptr)
     error("map3_image: not implemented for !CDEF");    
 #endif    
 }
+
+char *mystrcpy(char *a)
+{
+  char *b;
+  if (a==NULL || *a == 0) return NULL;
+  b = allocate(strlen(a)+1);
+  strcpy(b,a);
+  return b;
+}
+
 
 #ifdef TESTBED
 
