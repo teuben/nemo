@@ -1,0 +1,50 @@
+.TH SNAPSTACK 1NEMO "18 November 1990"
+.SH NAME
+snapstack \- superimpose two N-body snapshots
+.SH SYNOPSIS
+\fBsnapstack in1=\fPin_file1 \fBin2=\fPin_file2 \fBout=\fPout_file [parameter=value] .\|.\|.
+.SH DESCRIPTION
+\fIsnapstack\fP reads in two N-body systems and outputs one containing
+particles from both.  It may be used to set up collisions by
+specifying offsets in position and velocity space.
+.PP
+If more than two snapshots need to be stacked, multiple runs of \fIsnapstack\fP.
+would be needed, or \fIsnapadd(1NEMO)\fP can be used.
+.SH PARAMETERS
+The following parameters are recognized.
+.TP 24
+\fBin1=\fP\fIin_file1\fP
+.TP
+\fBin2=\fP\fIin_file2\fP
+Input data will be read from these files, which must be in
+\fIsnapshot\fP(5NEMO) format.  Only the first frames are used.
+Default: \fIrequired\fP.
+.TP
+\fBout=\fP\fIout_file\fP
+Output data will be written to \fIout_file\fP.
+.TP
+\fBdeltar=\fP\fIrel_position\fP
+Relative position of first snapshot w.r.t. second.
+Default: \fB0.0,0.0,0.0\fP.
+.TP
+\fBdeltav=\fP\fIrel_velocity\fP
+Relative velocity of first snapshot w.r.t. second.
+Default: \fB0.0,0.0,0.0\fP.
+.TP
+\fBzerocm=\fP\fIzero_cm_flag\fP
+If true, translate to center of mass before output.
+Default: \fBtrue\fP. 
+.TP
+\fBheadline=\fP\fImessage\fP
+Text message prepended to \fIout_file\fP.  Default: \fInone\fP.
+.SH SEE ALSO
+snapadd(1NEMO), snapshot(5NEMO)
+.SH AUTHOR
+Joshua E. Barnes
+.SH HISTORY
+.nf
+.ta +1i +4i
+2-jun-88	
+22-jan-89	V1.1 ???	JEB
+.fi
+
