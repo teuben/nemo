@@ -106,6 +106,7 @@
  * 24-oct-01       c  some parsing error warning's are now fatal errors
  * 13-nov-01       d  demoted some warnings to dprintf's
  * 25-nov-01       e  fixed hasvalue() for indexed keywords
+ * 10-dec-01       f  indexing now based at 0, not 1 (for wasp)
 
   TODO:
       - what if there is no VERSION=
@@ -116,7 +117,7 @@
         (-) but a popen() based process (POPENIO)
 
       - instead of using local_error() to catch recursion or
-        errors when nemo_main() is not uses, perhaps for nkeys==0
+        errors when nemo_main() is not used, perhaps for nkeys==0
 	should do a magic init with a dummy defv[] array
         such that getargv0() does not recurse....
  
@@ -132,7 +133,7 @@
       - indexing can't handle macros
  */
 
-#define VERSION_ID  "3.3e 25-nov-01 PJT"
+#define VERSION_ID  "3.3f 10-dec-01 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -153,7 +154,7 @@
 #endif
 
 #if 0
-#define TCL		/* TCL support?				  */
+#define TCL7		/* TCL (old V7) support?		  */
 #define READLINE	/* READLINE support?			  */
 #endif
 
@@ -172,7 +173,7 @@
 #include <unistd.h>
 #include <ctype.h>
 
-#if defined(TCL)
+#if defined(TCL7)
 # include <tcl.h>
 #endif
 
@@ -216,15 +217,15 @@
 
 
 typedef struct keyword {    /* holds old all keyword information             */
-    string keyval;              /* pointer to original R/O (defv) data       */
-    string key;                 /* keyword/name                              */
-    string val;                 /* value                                     */
-    string help;                /* help/comment -- may be empty              */
-    int count;                  /* update count; 0=original default          */
-    int upd;                    /* 0=read 1=unread original 2=unread updated */
-    int flag;                   /* zeno flags (unused)                       */
-    int indexed;                /* indexed keyword ?                         */
-    struct keyword *next;       /* pointer to next indexed keyword           */
+  string keyval;              /* pointer to original R/O (defv) data         */
+  string key;                 /* keyword/name                                */
+  string val;                 /* value                                       */
+  string help;                /* help/comment -- may be empty                */
+  int count;                  /* update count; 0=original default            */
+  int upd;                    /* 0=read 1=unread original 2=unread updated   */
+  int flag;                   /* zeno flags (unused)                         */
+  int indexed;                /* index+1 of keyword, if so; 0 if none        */
+  struct keyword *next;       /* pointer to next indexed keyword             */
 } keyword;
 
 /*      *       *       *       variables        *       *       */
@@ -265,7 +266,7 @@ string help_string = NULL;  /* cumulative ? */
 string argv_string = NULL;  /* cumulative ? */
 string error_string = NULL;
 
-#if defined(TCL)
+#if defined(TCL7)
   Tcl_Interp *tcl_interp;
   int cmdInp(), cmdCd(), cmdLoad(), cmdTest(), cmdGo(), cmdHelp(), cmdEcho();
   int cmdKeys();
@@ -361,10 +362,11 @@ void initparam(string argv[], string defv[])
         keys[i].help = scopy(parhelp(defv[j]));
         keys[i].count = 0;
         keys[i].upd = 1;
-	keys[i].indexed = keys[i].key[strlen(keys[i].key)-1] == '#';
+	if (keys[i].key[strlen(keys[i].key)-1] == '#')
+	  keys[i].indexed = -1;   /* indexed, but not initialized */
+	else
+	  keys[i].indexed = -2;   /* not indexed */
 	keys[i].next = NULL;
-	if (keys[i].indexed)
-	  dprintf(1,"new feature: indexed keyword %s",keys[i].key);
         if (streq(keys[i].key,"VERSION")) {      /* special (last?) keyword */
             version_i = scopy(keys[i].val);            
             keys[i].upd = 0;
@@ -390,7 +392,8 @@ void initparam(string argv[], string defv[])
             } else if (streq(argv[i],"-version") || streq(argv[i],"--version")) {
 	      printhelp("V");    /* will also exit */
             } else {
-	      if (keys[i].indexed) error("Cannot match indexed keywords by position");
+	      if (keys[i].indexed >= -1) 
+		error("Cannot match indexed keywords by position");
 	      free(keys[i].val);
 	      keys[i].val = scopy(argv[i]);
 	      keys[i].count++;
@@ -415,7 +418,8 @@ void initparam(string argv[], string defv[])
 	      while (kw->next) {        /* link through all indexed ones */
 		dprintf(1,"Link List Skipping %s\n",kw->key);
 		kw = kw->next;
-		if (kw->indexed == idx) error("Duplicated indexed keyword %s",name);
+		if (kw->indexed == idx+1) 
+		  error("Duplicated indexed keyword %s",name);
 	      }
 	      kw->next = (keyword *) allocate(sizeof(keyword));
 	      kw = kw->next;
@@ -425,7 +429,7 @@ void initparam(string argv[], string defv[])
 	      kw->help = 0;
 	      kw->count = 0;
 	      kw->upd = 0;
-	      kw->indexed = idx;
+	      kw->indexed = idx+1;
 	      kw->next = NULL;
 #endif
 	      dprintf(1,"Link List new keyword %s, idx=%d\n",argv[i],idx);
@@ -1105,7 +1109,7 @@ bool hasvalue(string name)
   dprintf(1,"Checking indexing on %s\n",key);
 
   /* split basename from index number by working from the back */
-  /* should go in a private function */
+  /* should go in a private function , a.k.a. refactoring :-)  */
 
   cp = &key[n-1];
   while (isdigit(*cp))
@@ -1174,11 +1178,11 @@ string getparam_idx(string name, int idx)
     i = findkey(key);
     if (i<0) error("(getparam) \"%s\" unknown keyword", name);
     kw = &keys[i];
-    if (kw->indexed == 0) error("%s is not an indexed keyword",name);
+    if (kw->indexed < -1) error("%s is not an indexed keyword",name);
     while (kw->next) {
       dprintf(1,"Checking linked list w/ %s for %d, %d\n",kw->key,kw->indexed,idx);
       kw = kw->next;
-      if (kw->indexed == idx) {
+      if (kw->indexed == idx+1) {
 #if defined(MACROREAD)
 	cp = kw->val;
 	if (*cp == '@') {
@@ -1194,42 +1198,45 @@ string getparam_idx(string name, int idx)
 }
 
 /*
- * indexparam: return largest index available in an indexed parameter
- *       return -1 if the parameter is not indexed at all
+ * indexparam: return largest index available in an 0-based indexed parameter
+ *       returns -2 if the parameter is not indexed at all
+ *               -1 if no index used yet
+ *       For this you must set IDX < 0
  *
- *       if IDX > 0 is given, it will check for that index
+ *       if IDX >= 0 is given, it will check for that index and return 
+ *       1 if that index exists, and 0 if not.
  */
 
-int indexparam(string name, int idx)
+int indexparam(string basename, int idx)
 {
-    int i, idxmax = 0;
-    char *cp, key[MAXKEYLEN+1];
-    keyword *kw;
+  int i, idxmax = -1;
+  char *cp, key[MAXKEYLEN+1];
+  keyword *kw;
 
-    if (nkeys == 0)  local_error("(getparam) called before initparam");
-    strcpy(key,name);
-    strcat(key,"#");
-    i = findkey(key);
-    if (i<0) {
-      i = findkey(name);
-      if (i < 0) return -1;
+  if (nkeys == 0)  local_error("(indexparam) called before initparam");
+  strcpy(key,basename);
+  strcat(key,"#");
+  i = findkey(key);
+  if (i<0) {
+    i = findkey(basename);
+    if (i < 0) return -2;
+  }
+  kw = &keys[i];
+  if (kw->indexed < -1) error("%s is not an indexed keyword",basename);
+  if (idx < 0) {        /* check the max idx and return it */
+    while (kw->next) {
+      kw = kw->next;
+      idxmax = MAX(idxmax, kw->indexed);
     }
-    kw = &keys[i];
-    if (kw->indexed == 0) error("%s is not an indexed keyword",name);
-    if (idx > 0) {
-      while (kw->next) {
-	kw = kw->next;
-	if (idx == kw->indexed) return idx;
-      }
-      return 0;
-    } else {
-      while (kw->next) {
-	kw = kw->next;
-	idxmax = MAX(idxmax, kw->indexed);
-      }
-      return idxmax;
+    return idxmax;
+  } else {              /* else check if a specific index exists */
+    while (kw->next) {
+      kw = kw->next;
+      if (kw->indexed == idx+1) return 1;
     }
-    return -1;   /* never reached */
+    return 0;
+  }
+  return -3;   /* never reached */
 }
 
 /*
@@ -1651,18 +1658,25 @@ local int findkey(string name)
     return -1;          /* if all else fails: return -1 */
 }
 
+/* 
+ * this routine is only used to enter an indexed keyword, if
+ * it turns out it is indexed. Returns 0 if not indexed.
+ * Returns the index into defv[] (1 being the first program
+ * keyword, argv0 is reserved for 0) is the keyword is indexed
+ */
+
 local int isindexed(string name, int *idx)
 {
   char *cp, key[MAXKEYLEN+1], keyidx[MAXKEYLEN];
   int j;
 
   strcpy(key,name);
-  dprintf(1,"isindexed: Checking %s",key);
+  dprintf(1,"isindexed: Checking %s\n",key);
   cp = &key[strlen(key)-1];
   if (!isdigit(*cp)) return 0;
-  while (isdigit(*cp))
+  while (isdigit(*cp))              /* work backwords through all digits */
     *cp--;
-  cp++;
+    cp++;                           
   strcpy(keyidx,cp);
   *idx = atoi(keyidx);
   *cp = 0;
@@ -1673,6 +1687,9 @@ local int isindexed(string name, int *idx)
   return 0;
 }
 
+/*
+ * addindexed:  not in use 
+ */
 local int addindexed(int i, string keyval, int idx)
 {
   keyword *kw;
@@ -1681,7 +1698,7 @@ local int addindexed(int i, string keyval, int idx)
   while (kw->next) {        /* link through all indexed ones */
     dprintf(1,"Link List Skipping %s\n",kw->key);
     kw = kw->next;
-    if (kw->indexed == idx) error("Duplicated indexed keyword %s",keyval);
+    if (kw->indexed == idx+1) error("Duplicated indexed keyword %s",keyval);
   }
   kw->next = (keyword *) allocate(sizeof(keyword));
   kw = kw->next;
@@ -1691,7 +1708,7 @@ local int addindexed(int i, string keyval, int idx)
   kw->help = 0;
   kw->count = 0;
   kw->upd = 0;
-  kw->indexed = idx;
+  kw->indexed = idx+1;
   kw->next = NULL;
   return 0;
 }
@@ -1980,7 +1997,7 @@ local void ieee_nemo(
 /*
  * TCL: if TCL is installed, it builds an extra comand processing layer
  *      into NEMO after the commandline and keyword files have been read,
- *      but before the program goes off and does it's thing.
+ *      but before the program goes off and does it's thing (nemo_main).
  *      All program keywords have now become TCL variables, and may be
  *      modified in the usual TCL way (with the set command), as well as
  *      some system variables (but on a lower level)
@@ -2380,7 +2397,7 @@ void nemo_main(void)
     n = indexparam("naxis",0);
     if (n<1) warning("No indexed keyword naxis### used");
     printf("Indexed keyword:\n");
-    for (i=1; i<=n; i++)
+    for (i=0; i<=n; i++)
       if (getparam_idx("naxis",i))
             printf("naxis%d=%s\n",i,getparam_idx("naxis",i));
      
