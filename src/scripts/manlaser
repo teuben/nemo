@@ -1,0 +1,77 @@
+#! /bin/csh -f
+#
+#   Generic command that searches for and prints out manual
+#   pages.
+#   If troff doesn't work on your system, try setting MANLASER
+#   to 'groff -M$NEMO/man -man' or 'ditroff -man'   
+#   If the script sees the existence of that environment variable,
+#   it is used instead of troff.
+#
+# to get txt files of your man page (without all the ^H^_ stuff)
+#  groff -t -e -mandoc -Tascii manpage.1 | col -bx > manpage.txt
+# to get high quality ps files:
+#  groff -t -e -mandoc -Tps manpage.1 > manpage.ps
+
+set manext=(1 2 3 4 5 6 7 8 l man)
+
+if ($?MANLASER == 0) then
+  set roff="troff -man -t"
+  set print="lpr -t"
+else
+  set roff="$MANLASER"
+  set print=lpr 
+endif
+if ($?NEMO != 0) then
+  set mandir=(. $NEMO/man/man?)
+else
+  set mandir=(.)
+endif
+set cutoff=10
+
+if ($#argv == 0) then
+  echo "Usage: $0 file(s)"
+  echo ""
+  echo "Searches for <file(s)> with extension manext=$manext"
+  echo "and uses roff=$roff"
+  echo "         print=$print"
+  echo "to send the manual pages to your printer of choice"
+  echo "(The environment variable PRINTER is used for this)"
+  echo "The man search path is: $mandir"
+  exit 0
+endif
+
+if ($?PRINTER == 0) then
+  set printer=""
+else
+  set printer=-P$PRINTER
+  echo "Using printer $PRINTER"
+endif
+
+foreach file ($*)
+  if (-e $file) then
+    set n=`awk 'END {print NR}' $file`
+    if ($n < $cutoff) then
+       echo "$file too small - possible .so include file - not printed"
+    else
+       echo $file
+    endif
+    troff -man -t $file | lpr -t $printer
+  else
+    foreach dir ($mandir)
+      foreach i ($manext)
+	set man=$dir/$file.$i
+        if (-e $man) then
+          set n=`awk 'END {print NR}' $man`
+          if ($n < $cutoff) then
+             echo "$man too small - possible .so include file - not printed"
+          else
+             echo $man
+          endif
+          $roff $man | $print $printer
+          goto done
+        endif
+      end
+    end
+  endif
+  done:
+end
