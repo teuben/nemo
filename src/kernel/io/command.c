@@ -17,27 +17,80 @@ command *command_init(string name)
   command *c;
   c = (command *) allocate(sizeof(command));
   c->name = strdup(name);
+  c->ncmd = 0;
   return c;
 }
 
-void command_register(command *c, string cmd, string argtypes)
-{
+#define VALID_TYPES "irs."
 
+void command_register(command *c, string cmd, string type)
+{
+  int i, clen, n = c->ncmd;
+  char *cp;
+
+  for (i=0; i<n; i++) {     /* check if not already known */
+    if (streq(c->cmd[i],cmd))
+      error("Command %s was already registered",cmd);
+  }
+  if (n==MAXCMD) error("Too many commands (%d)",MAXCMD);
+  c->cmd[n] = strdup(cmd);
+  c->type[n] = strdup(type);
+  c->nargs[n] = strlen(type);
+  c->ncmd++;
+
+  cp = c->type[n];
+  clen = strlen(cp);
+  if (clen>0) {
+    for (i=0; i<clen; i++) {
+      if (strchr(VALID_TYPES,cp[i]) == NULL)
+	error("Command arguments to %s are %s, should only contain \"%s\"",
+	      cmd,type,VALID_TYPES);
+      if (cp[i] == ".") {
+	*cp = 0;
+	break;
+      }
+    }      
+    c->nargs[n] = strlen(c->type[n]);
+  }
 }
 
 string *command_get(command *c)
 {
   char line[1024];
   string *sp;
+  int i, na;
   
+ again:
   printf("%s> ",c->name);
   fflush(stdout);
   clearerr(stdin);
   if (fgets(line,1024,stdin) == NULL)
     return NULL;
+  if (line[0] == '?') {
+    dprintf(0,"Valid commands: ");
+    for (i=0; i<c->ncmd; i++) 
+      dprintf(0,"%s ",c->cmd[i]);
+    dprintf(0,"\n");
+    goto again;
+  }
 
-  sp = burststring(line," ");
-  return sp;
+  sp = burststring(line," \n");
+  na = xstrlen(sp,sizeof(string))-2;
+  for (i=0; i<c->ncmd; i++) {
+    if (streq(c->cmd[i],sp[0])) {
+      dprintf(0,"Found matching command %s, needs %d, got %d\n",
+	      sp[0],c->nargs[i],na);
+      if (na < c->nargs[i]) {
+	warning("Not enough arguments for %s (need %d)",sp[0],c->nargs[i]);
+	freestrings(sp);
+	goto again;
+      }
+      return sp;
+    }
+  }
+  warning("%s: not a valid command",sp[0]);
+  freestrings(sp);
+  goto again;
 }
 
 void command_close(command *c)
@@ -85,25 +138,31 @@ void do_e(void) {
 
 nemo_main()
 {
-  int n = getiparam("n");
-  int na;
+  int i, n = getiparam("n");
+  int na, ivar;
+  
   string name = getparam("name");
   command *cmd;
   string *argv;
   
   cmd = command_init(name);
   command_register(cmd,"a","i");
-  command_register(cmd,"b","id");
+  command_register(cmd,"b","ir");
   command_register(cmd,"c","s");
   command_register(cmd,"d","i.");
   command_register(cmd,"e","");
+  command_register(cmd,"quit","");
 
   while((argv=command_get(cmd))) {                  /* loop getting arguments */
     na = xstrlen(argv,sizeof(string))-1;
-    dprintf(0,"Command: %s has %d argc\n",argv[0],na);
+    dprintf(0,"Command: %s has argc=%d \n",argv[0],na);
+    for (i=0; i<na; i++)
+      dprintf(1,"argv[%d] = %s\n",i,argv[i]);
 
     if (streq(argv[0],"?")) {
       warning("command not understood");
+    } else if (streq(argv[0],"quit")) {
+      break;
     } else if (streq(argv[0],"a")) {
       do_a(natoi(argv[1]));
     } else if (streq(argv[0],"b")) {
