@@ -8,6 +8,7 @@
  *      9-dec-90    V1.3  helpvec - new numrec macros via <nrutil>  PJT
  *	1-jun-92    V1.4  usage
  *     12-apr-97       a  fixed bug (free_fmatrix -> free_convert_matrix)
+ *     17-jul-02    V2.0  convert to use with the nemofied NumRec2 routines
  *	
  *  Note: this program only works for NDIM=3
  */
@@ -31,7 +32,7 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "weight=m\n		          factor to use in computing center/inertia  ",
     "per_weight=t\n		  flag to give inertia per weight basis  ",
     "tab=f\n			  flag to produce one-line output",
-    "VERSION=1.4a\n		  12-apr-97 PJT",
+    "VERSION=2.0\n		  17-jul-02 PJT",
     NULL,
 };
 
@@ -73,7 +74,7 @@ nemo_main()
 
 	    snapinert(btab, nbody, tsnap, weight, inert);
 	    for(i=0;i<3;i++)for(j=0;j<3;j++) inert0[i][j]=inert[i][j];
-            convi = convert_matrix(inert,1,3,1,3);
+	    convi = convert_matrix(&inert[0][0],1,3,1,3);
 	    jacobi(convi, 3, eigens, eigenvs, &nrot);
 	    eigsrt(eigens, eigenvs, 3);
 	    if(!oneline){
