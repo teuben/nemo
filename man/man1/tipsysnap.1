@@ -1,0 +1,41 @@
+.TH TIPSYSNAP 1NEMO "19 august 2000"
+.SH NAME
+tipsysnap \- convert tipsy file to snapshot
+.SH SYNOPSIS
+\fBtipsysnap\fP [parameter=value]
+.SH DESCRIPTION
+\fBtipsysnap\fP converts a \fItipsy\fP ascii or binary formatted data file,
+consisting of gas, dark and star- particles to \fIsnapshot(5NEMO)\fP
+format. Simple selections by particle kind can be made.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input TIPSY file. No default.
+.TP
+\fBout=\fP
+Output snapshot file. No default.
+.TP
+\fBoptions=\fP
+Output which particles?. Valid options are
+\fBgas\fP, \fBdark\fP and \fBstar\fP. Default:
+\fBgas,dark,star\fP (all).
+.TP
+\fBmodes=ascii|binary\fP
+Read ascii or binary TIPSY file format. Default: ascii
+.TP
+\fBswap=t|f\fP
+Swap bytes. This is needed if you want to be able to read
+standard (XDR, big endian) or native binary files.
+Default: false.
+.SH SEE ALSO
+snaptipsy(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+02-Sep-94	V1.0 Created 	PJT
+19-aug-00	V2.0 add mode= to allow binary files, added swap= 	PJT
+.fi
