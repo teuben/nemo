@@ -55,6 +55,7 @@
  *  21-feb-04   fixed expression->file matching criterion (pretty bad bug)
  *  28-mar-04   V3.2 added extra counter to random name to work around loadobj() problem
  *                   redirect output of make to a logfile for pipes to work in NEMO
+ *   7=may-04   fixed permission problem
  *
  *  Used environment variables (normally set through .cshrc/NEMORC files)
  *      NEMO        used in case NEMOOBJ was not available
@@ -205,7 +206,7 @@ local proc bodytrans(string type, string expr, string fname)
         fclose(cdstr);
 	cflags = getenv("CFLAGS");
 #if defined(LOADOBJ3)
-        sprintf(cmmd, "cd /tmp;make -f $NEMOLIB/Makefile.lib %s.so > $s.log 2>&1",name,name);
+        sprintf(cmmd, "cd /tmp;make -f $NEMOLIB/Makefile.lib %s.so > %s.log 2>&1",name,name);
 #else
         sprintf(cmmd, "cd /tmp;cc %s -c %s.c",
 		(cflags==NULL) ? "" : cflags,name);
@@ -474,7 +475,7 @@ string defv[] = {
     "i=1\n		Index",
     "alias=\n		Filename to save expression in (bt<TYPE>_<ALIAS>)",
     "btnames=\n		BTNAMES filename to regenerate .o files",
-    "VERSION=3.2\n	28-mar-04 PJT",
+    "VERSION=3.2a\n	4-may-04 PJT",
     NULL,
 };
 
