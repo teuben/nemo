@@ -334,7 +334,9 @@ extern void   strclose(stream);
 /* error.c dprintf.c */
 void error(string, ...);
 void warning(string, ...);
+#ifndef HAVE_DPRINTF
 int dprintf(int, const string, ...);
+#endif
 /* eprintf is ZENO's "warning" */
 #define eprintf warning
 
