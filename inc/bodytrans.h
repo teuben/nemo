@@ -6,6 +6,7 @@
  *	 1-mar-94       <math.h> loaded - don't declare them again
  *	12-apr-95	no more ARGS  - defer math stuff to stdinc.h
  *      31-dec-02       gcc3/SINGLEPREC
+ *      24-sep-04       added macro defining r as specified in man page  WD
  */
 
 #ifndef _bodytrans_h
@@ -39,6 +40,9 @@ extern iproc_body btitrans(string expr);
 #define y     Pos(b)[1]
 #if defined(THREEDIM)
 #define z     Pos(b)[2]
+#define r     sqrt(x*x+y*y+z*z)
+#else
+#define r     sqrt(x*x+y*y)
 #endif
 
 #define vel   Vel(b)
