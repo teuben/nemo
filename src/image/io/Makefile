@@ -13,9 +13,9 @@ MAN1FILES =
 MAN3FILES = 
 MAN5FILES = 
 INCFILES = image.h matdef.h xyio.h
-SRCFILES = image.c ccddump.c xyio.c
-OBJFILES=  image.o xyio.o
-LOBJFILES= $L(image.o) $L(xyio.o)
+SRCFILES = image.c ccddump.c xyio.c 
+OBJFILES=  image.o xyio.o wcsio.o
+LOBJFILES= $L(image.o) $L(xyio.o) $L(wcsio.o)
 BINFILES = ccddump ccdprint ccdslice sigccd
 TESTFILES= imagetest xyiotest
 
