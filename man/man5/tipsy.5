@@ -1,0 +1,43 @@
+.TH TIPSY 5NEMO "23 December 1994" 
+.SH NAME
+tipsy \- formats used in TIPSY package
+.SH DESCRIPTION
+The \fBTIPSY ARRAY\fP format is an ascii format where the first
+line contains the number of elements of a 1 dimensional array,
+followed by all elements.
+.PP
+The \fBTIPSY VECTOR\fP format is an ascii format where the first
+line contains the number of elements of the 3 dimensional vector,
+followed by all elements, one vector at a time (but split of 3 lines).
+.SH EXAMPLE
+Here is a TIPSY VECTOR format of the origin, unit X, Y and Z vectors
+on a 3-dimensional cube.
+.PP
+.nf
+4
+1.0
+0.0
+0.0
+0.0
+1.0
+0.0
+0.0
+0.0
+1.0
+.fi
+.SH CAVEATS
+Only works in 3-dimensional space
+.SH "SEE ALSO"
+tipsy(1), snapshot(5NEMO)
+.SH AUTHOR
+Peter Teuben 
+.SH FILES
+.nf
+.ta +2.5i
+tipsy.h  	definition of the TIPSY binary format
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +2.0i +2.0i
+23-dec-94	man written 	PJT
+.fi
