@@ -1,0 +1,52 @@
+.\" This man pages created with /astromake/opt/nemo/cvs/src/scripts/mkman
+.\" Remove these comment lines when editing
+.TH GETGRAVITY 1NEMO "12 May 2004"
+.SH NAME
+getgravity \- getgravity -- computes gravity at test positions using falcON = Force ALgorithm with Complexity O(N)
+.SH SYNOPSIS
+\fBgetgravity\fP [parameter=value]
+.SH DESCRIPTION
+No description available. This manual page was created by mkman
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBsrce=\fP
+input file: sources [m,x] [???]   
+.TP 20
+\fBsink=\fP
+input file: sinks [x] [???]   
+.TP 20
+\fBout=\fP
+output file [x,a,p] [???]    
+.TP 20
+\fBtimes=\fP
+time range (for srce only) [all]  
+.TP 20
+\fBeps=\fP
+softening length [0.05]     
+.TP 20
+\fBkernel=\fP
+softening kernel [1]     
+.TP 20
+\fBtheta=\fP
+tolerance parameter at M=M_tot [0.60]   
+.TP 20
+\fBNcrit=\fP
+max # bodies in un-split cells [6] 
+.TP 20
+\fBVERSION=\fP
+[Igcc-3.2]       
+.TP 20
+\fBCOMPILED=\fP
+May 12 2004, 10:02:47, with gcc-3.2 [] 
+.SH EXAMPLES
+.SH SEE ALSO
+.SH FILES
+.SH AUTHOR
+mkman
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+12-May-04	V0.0 Created by mkman	NEMO
+.fi

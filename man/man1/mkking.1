@@ -1,0 +1,62 @@
+.TH MKKING 1NEMO "12 May 2004"
+.SH NAME
+mkking \- construct a King model
+.SH SYNOPSIS
+\fBmkking\fP [parameter=value]
+.SH DESCRIPTION
+No description available. This manual page was created by mkman
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBout=\fP
+output file [???]     
+.TP 20
+\fBnbody=\fP
+number of bodies [???]    
+.TP 20
+\fBW0=\fP
+W0 = Psi0/sigma [???]    
+.TP 20
+\fBseed=\fP
+seed for the randum number generator [0] 
+.TP 20
+\fBtime=\fP
+simulation time of snapshot [0]   
+.TP 20
+\fBmass=\fP
+total mass [1]     
+.TP 20
+\fBr_c=\fP
+core radius [1]     
+.TP 20
+\fBr_t=\fP
+tidal radius (don't use r_c) []  
+.TP 20
+\fBeps=\fP
+output softening length eps with every body []
+.TP 20
+\fBWD_units=\fP
+input: kpc, solar masses    
+.TP 20
+\fBoutput:=\fP
+kpc/Gyr, G=1 (-> mass unit) [f]  
+.TP 20
+\fBq-ran=\fP
+use quasi- instead of pseudo-random numbers [f] 
+.TP 20
+\fBoutputs=\fP
+give some global quantities to stderr [f] 
+.TP 20
+\fBtable=\fP
+file for table of r,Phi,rho,M(<r) []  
+.SH EXAMPLES
+.SH SEE ALSO
+.SH FILES
+.SH AUTHOR
+Walter Dehnen 
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+30-apr-2004	1.4.1 added to NEMO	WD
+.fi

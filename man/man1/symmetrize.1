@@ -1,0 +1,36 @@
+.TH SYMMETRIZE 1NEMO "12 May 2004"
+.SH NAME
+symmetrize \- symmetrize snapshots every ith particle is taken and replaced by its symmetric wrt origin and z=0 copies. can also be used to reduce N
+.SH SYNOPSIS
+\fBsymmetrize\fP [parameter=value]
+.SH DESCRIPTION
+No description available. This manual page was created by mkman
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+input file [???]     
+.TP 20
+\fBout=\fP
+output file [???]     
+.TP 20
+\fBtimes=\fP
+times to process [all]    
+.TP 20
+\fBuse=\fP
+use every ith particle [2]   
+.TP 20
+\fBcopy=\fP
+make 2^h symmetized copies, h in [0,1,2] [1]
+.SH EXAMPLES
+.SH SEE ALSO
+snapsample(1NEMO)
+.SH FILES
+.SH AUTHOR
+Walter Dehnen
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+10-may-2004 V0.6 Added to NEMO	WD
+.fi

@@ -1,0 +1,66 @@
+.TH LAGRANGE_RADII 1NEMO "12 May 2004"
+.SH NAME
+lagrange_radii \- writes table with Lagrange radii
+.SH SYNOPSIS
+\fBlagrange_radii\fP [parameter=value]
+.SH DESCRIPTION
+No description available. This manual page was created by mkman
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+input file [???]     
+.TP 20
+\fBmasses=\fP
+table of masses; will be parsed by nemoinp
+.TP 20
+\fBtimes=\fP
+times to process [all]    
+.TP 20
+\fBtabfile=\fP
+file to append table to; [stdout] [] 
+.TP 20
+\fBout=\fP
+output file [default: no output] []  
+.TP 20
+\fBstep=\fP
+step between outputs [0]    
+.TP 20
+\fBgive=\fP
+what data to put out []  
+.TP 20
+\fBstopfile=\fP
+create stop file []    
+.TP 20
+\fBstopindex=\fP
+index for lagrange rad used in stop, first=0
+.TP 20
+\fBstopvalue=\fP
+stop if R_i < value ( or >
+.TP 20
+\fBstoprelative=\fP
+use R_i / R_i[t=t_initial] in stop criterion [f]
+.TP 20
+\fBstopafter=\fP
+don't stop before this time (default: t_initial) []
+.TP 20
+\fBstopdelay=\fP
+delay stopping after condition is satisfied [0] 
+.TP 20
+\fBVERSION=\fP
+
+.TP 20
+\fBCOMPILED=\fP
+May 12 2004, 10:02:52, with gcc-3.2 [] 
+.SH EXAMPLES
+.SH SEE ALSO
+snapmradii(1NEMO)
+.SH FILES
+.SH AUTHOR
+Walter Dehnen 
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+11-may-2004	V3.2 aded to NEMO	WD
+.fi

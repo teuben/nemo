@@ -57,7 +57,10 @@ The default is \fBy\fP.
 \fBvisib\*e\fP\fIexpression\fP
 Determines the visibility of particles.
 \fIexpression\fP is a integer expression in the above variables;
-only points with non-zero values are plotted.
+only points with non-zero values are plotted. Particles are plotted
+in order of their visib, e.g. visib=1 are plotted before visib=2,
+thus this keyword can be used to re-arrange the plotting order
+on screen (useful if colors are used).
 The default is \fB1\fP.
 .TP
 \fBpsize\*e\fP\fIexpression\fP
@@ -128,3 +131,8 @@ bodytrans(1NEMO), snapshot(5NEMO).
 The default ranges should depend on the variables plotted.
 .SH AUTHOR
 Joshua E. Barnes.
+.SH HISTORY
+.nf
+.ta +1i +4i
+28-apr-04	documented history	PJT
+.fi
