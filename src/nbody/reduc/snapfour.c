@@ -6,6 +6,7 @@
  *      17-feb-92       V1.1    added weight=                           PJT
  *	22-feb-92	V1.1b   usage
  *       9-nov-93       V1.2    times=
+ *       7-may-02       minor code cleanup
  */
 
 #include <stdinc.h>
@@ -19,16 +20,16 @@
 
 string defv[] = {
     "in=???\n              Input snapshot",
-    "radii=0:2:0.1\n       Radii",
+    "radii=0:2:0.1\n       Set of radii denoting edges of cylinders",
     "cos=0:4:1\n	   List of noj-zero cos(m.phi) terms",
     "sin=1:4:1\n	   List of non-zero sin(m.phi) terms",
     "xvar=x\n              X variable",
     "yvar=y\n              Y variable",
     "fvar=vy\n             Fourier Observable to be decomposed",
     "weight=1\n            Weight applied to observable",
-    "amode=t\n             Display amps or amp/phase if possible?",
+    "amode=t\n             Display sin/cos amps or amp/phase if possible?",
     "times=all\n           Snapshots to select",
-    "VERSION=1.2\n         9-nov-93 PJT",
+    "VERSION=1.2a\n        7-may-02 PJT",
     NULL,
 };
 
@@ -47,7 +48,6 @@ nemo_main()
     int    i, n, nbody, bits, nrad, maxorder, tmpi[MAXORDER+1];
     real rad2[MAXRAD], tsnap;
     bool Qcos[MAXORDER+1], Qsin[MAXORDER+1], amode;
-    double sqr(), sqrt(); 
     rproc btrtrans(), xproc, yproc, fproc, wproc;
 
     times = getparam("times");
