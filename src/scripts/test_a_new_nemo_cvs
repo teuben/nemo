@@ -7,6 +7,9 @@ set pgplot=1
 set intel=0
 set gcc=0
 set falcon=1
+set anonymous=1
+set cvsroot=0
+set vogl=1
 
 foreach _a ($*)
   set $_a
@@ -17,9 +20,13 @@ if ($?NEMO) then
   exit 1
 endif
 
-if (1) then
+if ($anonymous) then
  setenv CVSROOT :pserver:anonymous@cvs.astro.umd.edu:/home/cvsroot
 endif
+
+#if ($?CVSROOT == 0) then
+#
+#endif
 
 #		pick another GNU compiler 
 if ($gcc) then
@@ -32,6 +39,7 @@ if ($intel) then
   source /astromake/astromake_start
   astroload intel
   setenv CC icc
+  setenv CXX icc
   setenv F77 ifort
 endif
 
@@ -45,7 +53,7 @@ endif
 #		get  the source
 time cvs -Q checkout $cvs_rev nemo
 if ($pgplot) then
-   (mkdir nemo/borrow; cd nemo; cvs -Q checkout pgplot)
+   (mkdir nemo/local; cd nemo/local; cvs -Q checkout pgplot)
 endif
 
 # --disable-gsl
@@ -53,9 +61,17 @@ endif
 
 cd nemo
 if ($pgplot) then
+  # first do a dummy to get the architecture libraries done.... a kludge
+  ./configure 
+  source nemo_start
+  make dirs config_clean
+  rm NEMORC.local
+  # dir= not used ??
+  src/scripts/pgplot.install dir=$NEMO/tmp
+
   #./configure --with-pgplot-prefix=/astromake/opt/pgplot --with-yapp=pgplot 
   #./configure --with-pgplot-prefix=/astromake/opt/pgplot
-  ./configure --with-yapp=pgplot 
+  ./configure --with-yapp=pgplot --with-pgplot-prefix=$NEMOLIB
 else
  ./configure --with-yapp=ps 
 endif
@@ -64,6 +80,8 @@ make dirs config_extra scripts
 source NEMORC.local
 rehash
 make libs
+if ($vogl) $NEMO/src/scripts/nemo.vogl
+
 src/scripts/testsuite -b
 
 if ($falcon) then
