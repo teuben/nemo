@@ -1,20 +1,31 @@
 #! /bin/csh -f
 #
-#   simple wrapper to send nemo, or fits files, to the ds9 display
-#   server. If you have ds9 from astromake, you should have mirds9
-#   else, SOL for now.
+#
 
 if ($#argv == 0) then
-  mirds9
-  exit
+  echo "Usage: $0 nemo|fits-file(s)"
+  echo "Send NEMO/ccd or fits files into ds9 display server"
+  echo "Version:  2.0 30-jul-2003 PJT"
+  exit 0
 endif
 
+set title=ds9
+
 foreach f ($*)
-  if (-e $f.fits) then
-    mirds9 $f.fits
+  hisf $f >& /dev/null
+  if ($status) then
+    set name=$f
+    echo Assuming fits $name
+    cat $name | xpaset $title fits $name
+  else if (-e $f.fits) then
+    set name=$f.fits
+    echo Found fits $name
+    cat $name | xpaset $title fits $name
   else if (-e $f) then
+    echo Assuming NEMO file $f
     ccdfits $f $f.fits
-    mirds9 $f.fits
+    set name=$f.fits
+    cat $name | xpaset $title fits $name
     rm -f $f.fits
   else
     echo $f or $f.fits does not exist
