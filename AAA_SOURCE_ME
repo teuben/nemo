@@ -107,4 +107,12 @@ else
 endif
 
 
-grep TESTSUITE: install.log | grep -v OK
+set n1=(`grep TESTSUITE: install.log | grep -v OK | wc -l`)
+set n2=(`grep TESTSUITE: install.log | wc -l`)
+set n3=(`ls bin|wc -l`)
+
+echo "Found $n3 executables"
+echo "Found $n1/$n2 problems with the TESTSUITE"
+if ($n1 > 0) then
+  grep TESTSUITE: install.log | grep -v OK 
+endif
