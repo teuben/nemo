@@ -545,6 +545,10 @@ interact()
       for (;;) {                      /* loop forever */
 	pl_cursor(&xcm, &ycm, &c);
 	if (c == 'X') break;
+	if (c == 'z') {
+	  while(zoom())
+	    re_display(0);
+	}
 	if (xcm > 2 && xcm < 18 &&
 	    ycm > 2 && ycm < 18) {
 	  xp = ixtrans(xcm);
