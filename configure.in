@@ -764,7 +764,7 @@ AC_FUNC_MMAP
 AC_TYPE_SIGNAL
 AC_FUNC_VFORK
 AC_FUNC_VPRINTF
-AC_CHECK_FUNCS(ftime gethostname gettimeofday getwd mkdir select strdup strtod strtol strtoul dprintf)
+AC_CHECK_FUNCS(ftime gethostname gettimeofday getwd mkdir select strdup strtod strtol strtoul dprintf log2)
 
 AC_C_BIGENDIAN
 
