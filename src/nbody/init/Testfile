@@ -1,5 +1,5 @@
 DIR = src/nbody/init
-BIN = snapenter mkplummer mkexpdisk
+BIN = snapenter mkplummer mkexpdisk real
 NEED = $(BIN) tsf snapprint
 
 help:
@@ -54,4 +54,10 @@ mkexpdisk:
 	@echo Running $@
 	mkexpdisk mkexpdisk.out $(NBODY) seed=123 ; nemo.coverage mkexpdisk.c
 	tsf mkexpdisk.out
+
+real:
+	@echo f2d conversion:
+	mkplummer - 100 | csf - - convert=f2d | snapplot - yapp=/null
+	@echo d2f conversion:
+	mkplummer - 100 | csf - - convert=d2f | snapplot - yapp=/null
 
