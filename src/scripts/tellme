@@ -20,8 +20,11 @@ echo === NEMOBIN:	 >> $log
 ls -l $NEMOBIN		 >> $log
 
 echo === NEMOBIN/cc:	 >> $log
-cat $NEMOBIN/cc		 >> $log
-
+if (-e $NEMOBIN/cc) then
+  cat $NEMOBIN/cc	 >> $log
+else
+  echo N/A               >> $log
+endif
 
 echo === BEGIN PRINTENV >> $log
 printenv      >> $log
