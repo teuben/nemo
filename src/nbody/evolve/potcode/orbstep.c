@@ -325,7 +325,7 @@ real dt;		/* integration time step */
     Pos(p)[1] = Acc(p)[1];
     Pos(p)[2] = Acc(p)[2];   /* this one better be 0 */
 
-#if 1
+#if 0
     dx = cosodt * Pos(p)[0] - sinodt * Pos(p)[1];    /* incr rotate by Omega * dt */
     dy = sinodt * Pos(p)[0] + cosodt * Pos(p)[1];
 #else
