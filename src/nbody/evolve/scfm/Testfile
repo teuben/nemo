@@ -1,5 +1,5 @@
 DIR = src/nbody/evolve/scfm
-BIN = scfm runscfm
+BIN = scfm.exe runscfm
 NEED = $(BIN) mkplummer snapprint tabtos
 
 help:

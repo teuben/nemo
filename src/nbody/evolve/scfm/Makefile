@@ -31,7 +31,7 @@ else
   SECOND = second.o
 endif
 
-BINS = scfm runscfm
+BINS = scfm.exe runscfm
 
 TAR = $(ALLSRC) $(INC) $(MAN) $(EXE) SCFBI SCFPAR
 
@@ -49,7 +49,7 @@ nemo_src:
 	-@echo `pwd` scfm
 		
 		
-install:	nemo_bin 
+install:	nemo_bin
 
 .install_src:	$(ALLSRC) $(INC)
 	cp $? $(NEMO)/src/nbody/evolve/scfm
@@ -59,8 +59,8 @@ install:	nemo_bin
 	cp $? $(NEMO)/man/man1
 	@touch .install_man
 
-scfm: $(OBJ) $(SECOND)
-	$(FC) $(FFLAGS) -o scfm $(OBJ) $(SECOND)
+scfm.exe: $(OBJ) $(SECOND)
+	$(FC) $(FFLAGS) -o scfm.exe $(OBJ) $(SECOND)
 
 runscfm: runscfm.c
 	$(CC) $(CFLAGS) -o runscfm runscfm.c -L$(NEMOLIB) -lnemo -lm

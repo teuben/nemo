@@ -1,9 +1,11 @@
 /*
  *  MAIN.C: NEMO driver for SCFM
+ *		this program also needs 'tabtos' in $NEMOBIN
  *	
  *      22-jan-98   V1.0    cloned off runbody2                 pjt
  *	16-dec-99   V1.1    exe is now scfm.exe within NEMO     pjt
  *			    back to non-exe
+ *	 3-apr-01   V1.2    back to exe .... why on earth....   pjt
  *
  */
 
@@ -29,7 +31,7 @@ string defv[] = {
     "zeroeven=f\n     ",
     "fixacc=f\n       ",
     "headline=\n      run comment",
-    "VERSION=1.1\n    16-dec-99 PJT",
+    "VERSION=1.2\n    3-apr-01 PJT",
     NULL,
 };
 
@@ -37,7 +39,7 @@ string usage="Self Consistent Field Method N-body code";
 
 nemo_main()
 {
-    string exefile = "scfm";
+    string exefile = "scfm.exe";
     string parfile = "SCFPAR";
     string rundir = getparam("outdir");
     string infile;
