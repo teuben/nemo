@@ -1,6 +1,8 @@
 /*
  *  retrieve the value for NaN; mostly useful for FITS blanking
  *
+ *  another way of getting the NaN value is
+ *	nan = atof("nan");
  */
 
 void get_nanf(float *x)
