@@ -1,4 +1,4 @@
-.TH ROTCUR 1NEMO "11 September 2002"
+.TH ROTCUR 1NEMO "30 January 2003"
 .SH NAME
 rotcur \- fit kinematic parameters from velocity field
 .SH SYNOPSIS
@@ -79,7 +79,8 @@ therein.
 The following parameters are recognized:
 .TP 25
 \fBin\fP=\fIimage_vel\fP
-Input velocity field map, must be in \fIimage(5NEMO)\fP format.
+Input velocity field map, either in \fIimage(5NEMO)\fP format, or
+\fItable(5NEMO)\fP format. See also \fBimagemode=\fP below.
 No default.
 .TP
 \fBradii\fP=\fIr0,r1,r2,...rN\fP
@@ -211,8 +212,8 @@ away from the mean velocity in a ring. By default, it will not reject any outlie
 \fBimagemode=t|f\fP
 Image input file mode? By default the input file is an image, alternatively a simple
 ascii table with X and Y positions in columns 1 and 2, and radial velocities
-in column 3. Future expansion will likely allow weight factors to be added
-in other columns.
+in column 3, and optional errors in the radial velocity in column 4
+(activated by setting \fBdens=t\fP).
 [Default: t]
 .SH AWK
 The standard output is normally not very useful; it displays, for each
@@ -315,4 +316,5 @@ P. J. Teuben (NEMO C version)
 26-jan-02	Added unit (scale factor) for velocity too	PJT
 26-jun-02	V2.8: added tabular input for irregular spaced data, fixed example	PJT
 11-sep-02	V2.9: implemented map residual velocity field	PJT
+30-jan-03	V2.10: allow tables to use error in velocity	PJT
 .fi
