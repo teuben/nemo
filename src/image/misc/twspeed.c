@@ -20,9 +20,10 @@ string defv[] = {
     "den=???\n       Input density image",
     "xin=\n          Input mean position image",
     "pa=90\n         *** Position Angle of disk",
+    "inc=0\n         *** Inclination of disk",
     "center=\n       *** Center of galaxy (map-center)",
     "step=1\n        Slit width in pixels",
-    "VERSION=1.1\n   22-apr-04 PJT",
+    "VERSION=1.1a\n  23-apr-04 PJT",
     NULL,
 };
 
@@ -31,15 +32,13 @@ string usage="TW pattern speed of an object";
 stream  vinstr, xinstr, instr;
 
 imageptr viptr=NULL;			/* will be allocated dynamically */
-imageptr xiptr=NULL;			/* will be allocated dynamically */
 imageptr iptr=NULL;			/* will be allocated dynamically */
-
+imageptr xiptr=NULL;			/* will be allocated dynamically, if used */
 
 int    nx,ny,nz,nsize;			/* actual size of map */
 double xmin,ymin,zmin,dx,dy,dz;
 double size;				/* size of frame (square) */
 double cell;				/* cell or pixel size (square) */
-
 
 
 void nemo_main(void)
@@ -49,19 +48,14 @@ void nemo_main(void)
     
   vinstr = stropen (getparam("vel"), "r");         /* velocity map */
   read_image (vinstr,&viptr);
-  strclose(vinstr);
+
+  instr = stropen (getparam("den"), "r");         /* density map */
+  read_image (instr,&iptr);
 
   if (hasvalue("xin")) {
     xinstr = stropen (getparam("xin"), "r");      /* optional Xmean map */
     read_image (xinstr,&xiptr);
-    strclose(xinstr);
-  } else
-    xinstr = NULL;
-  
-  instr = stropen (getparam("den"), "r");         /* density map */
-  read_image (instr,&iptr);
-  strclose(instr);
-
+  } 
   
   nx = Nx(iptr);	
   ny = Ny(iptr);
@@ -69,7 +63,6 @@ void nemo_main(void)
   ymin = Ymin(iptr);
   dx = Dx(iptr);
   dy = Dy(iptr);
-  
 
   printf("# j sum0 sum1 sum2  sum1/sum0  sum2/sum0\n");
   for (j=0; j<ny; j++) {     /* loop over all lines parallel to the major axis */
