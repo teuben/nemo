@@ -1,11 +1,11 @@
 .TH ROTCURSHAPE 1NEMO "21 July 2002"
 .SH NAME
-rotcurshape \- fit kinematic parameters from velocity field using shaped rotation curve
+rotcurshape \- fit parameters to a velocity field using shaped rotation curves
 .SH SYNOPSIS
 \fBrotcurshape in=\fPvelfie [parameters=values ...]
 .SH DESCRIPTION
-\fIrotcurshape\fP derives the kinematical parameters from the observed
-velocity field by fitting a rotation curve shape to planar galactic disk.
+\fIrotcurshape\fP derives the kinematical parameters from an observed
+velocity field of a galactic disk by fitting a rotation curve shape.
 Instead of dividing the galactic disk in a set of rings (see \fIrotcur(1NEMO)\fP)
 it fits the shape of the rotation curve to a single plane. This is particularly
 useful for low inclination galaxies and/or for central regions of a galaxy.
@@ -64,7 +64,8 @@ The following parameters are known (those with ** are still here
 since we clones this off rotcur, but are likely to be slashed shortly):
 .TP 25
 \fBin\fP=\fIimage_vel\fP
-Input velocity field map, must be in \fIimage(5NEMO)\fP format.
+Input velocity field map, normally in \fIimage(5NEMO)\fP format.
+Input data can also be a table, see \fBimagemode=\fP and \fBrotcurmode\fP below.
 No default.
 .TP
 \fBradii\fP=\fIr0,r1\fP
@@ -73,13 +74,8 @@ The \fBunits=\fP keyword can be used to
 scale your physical units in the header to ``human readable'' units
 (arcsec). By default the whole disk will be used.
 .TP
-** \fBvrot\fP=\fIv1,v2,...vN\fP
-Array of rotation (or expansion) velocities, one for each ring. 
-If less than the number of rings is
-given, the trailing ones are filled with the last supplied value.
-.TP
 \fBpa\fP=\fIpa\fP
-Position angles (degrees) of the disk.
+Kinematic position angle (in degrees) of the disk (i.e. receiding side).
 .TP
 \fBinc\fP=\fIinc\fP
 Inclination (degrees) of the disk.
@@ -112,11 +108,11 @@ and \fBcos-squared\fP.
 [Default: \fBcosine\fP].
 .TP
 \fBfixed\fP=
-List of parameters, separated by commas, to be kept fixed during the fit.
+List of disk geometry parameters to be kept fixed during the fit.
 Choose any of the
-following: \fBvsys, vrot, pa, inc, xpos, ypos\fP, although at least
-one parameters should be kept free. [Default: none, i.e. all parameters
-free.
+following: \fBvsys,pa,inc,xpos,ypos\fP, although \fBall\fP can also
+be use to fix all geometric parameters.
+[Default: none, i.e. all parameters free]
 .TP
 \fBellips\fP=
 The names of two parameters for which to calculate an error ellips. 
@@ -191,6 +187,9 @@ in column 3. Future expansion will likely allow weight factors to be added
 in other columns.
 [Default: t]
 .TP
+\fBrotcurmode=t|f\fP
+Input table is just a rotation curve (R,V) instead. ** not implemented yet **
+.TP
 \fBload=\fP
 Name of a shared object file containing a rotation curve. ** Not implemented yet **
 .TP
@@ -254,7 +253,7 @@ ccdvel, and analysing it with rotcur:
     % set r=`nemoinp 0:60`
     % set v=`nemoinp 0:60 | tabmath - - "100*%1/(20+%1)" all`
     % ccdvel out=map1.vel rad="$r" vrot="$v" pa=30 inc=60
-    % rotcurshape in=map1.vel radii=0,50 pa=30 inc=60 vsys=0 units=arcsec,1 \
+    % rotcurshape in=map1.vel radii=0,50 pa=30 inc=60 vsys=0 units=arcsec,1 \\
          rotcur1=core1,100,20,1,1 tab=-
 ....
 

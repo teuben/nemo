@@ -143,6 +143,10 @@ int perform_init(real *p, real *c);
 
 rproc vobs;
 proc vobsd, vcor;			/* pointers to the correct functions */
+
+extern string *burststring(string,string);
+extern bool scanopt(string option, string key);
+
 
 
 /* a bunch of rotation curves and parameter derivatives */
@@ -189,6 +193,29 @@ real rotcur_plummer(real r, int np, real *p, real *d)
   return p[0] * x * y;
 }
 
+real rotcur_poly(real r, int np, real *p, real *d)
+{
+  real v, dp, x = r/p[1];
+  int i;
+
+  i = np-1;
+  v = 0;
+  dp = 0;
+  d[1] = p[0] * x;   /* fake placeholder for recursion */
+  while (i > 1) {  /* p[0] and p[1] are special, p[2] last one in loop */
+    v = v*x + p[i];
+    dp = dp*x + i*p[i];
+    d[2+np-1-i] = d[2+np-2-i] * x;
+    i--;
+  }
+  v += x;
+  dp += x;
+
+  d[0] = v;
+  d[1] = -p[0]*dp/p[1];
+
+  return p[0] * v;
+}
 
 
 
@@ -307,7 +334,6 @@ nemo_main()
 rotcurparse()
 {
   string *sp;
-  string *burststring(string,string);
   char keyname[30];
   int i, nsp;
 
@@ -339,6 +365,14 @@ rotcurparse()
 	rcfn[0] = rotcur_core1;
       } else if (streq(sp[0],"core2")) {
 	if (nsp != 4) error("core2 needs 2 numbers");
+	npar[nmod] = 2;
+	mpar[nmod][0] = natof(sp[1]);
+	mpar[nmod][1] = natof(sp[2]);
+	mmsk[nmod][0] = natoi(sp[3]);
+	mmsk[nmod][1] = natoi(sp[4]);
+	rcfn[0] = rotcur_core2;
+      } else if (streq(sp[0],"poly")) {
+	error("poly: yuck, how to get the npars");
 	npar[nmod] = 2;
 	mpar[nmod][0] = natof(sp[1]);
 	mpar[nmod][1] = natof(sp[2]);
@@ -412,8 +446,7 @@ stream  lunpri;       /* LUN for print output */
     int iret, i, j, n, nfixed, fixed, ninputs;
     real center[2], toarcsec, tokms;
     stream velstr, denstr;
-    string *burststring(), *fmode;
-    bool scanopt();
+    string *fmode;
     real *coldat[3];
     int colnr[3];
 
@@ -603,22 +636,25 @@ stream  lunpri;       /* LUN for print output */
     }
 
     fixed = 0;
-    iret=match(getparam("fixed"),"vsys,xpos,ypos,pa,inc",&fixed);
+    iret=match(getparam("fixed"),"vsys,xpos,ypos,pa,inc,all",&fixed);
     if (iret<0) error("Illegal option in fixed=%s",getparam("fixed"));
     dprintf(1,"MASK: 0x%x ",fixed);
-    for (i=0; i<GPARAM; i++) {
-      mask[i] = (fixed & (1<<i)) ? 0 : 1;
-      dprintf(1,"%d ",mask[i]);
+    if (fixed && (1<<GPARAM)) {
+      for (i=0; i<GPARAM; i++) mask[i] = 0;
+    } else {
+      for (i=0; i<GPARAM; i++) {
+	mask[i] = (fixed & (1<<i)) ? 0 : 1;
+	dprintf(1,"%d ",mask[i]);
+      }
+      dprintf(1,"\n");
     }
-    dprintf(1,"\n");
-
 
     for (i=0; i<nmod; i++) {
       /* count fixed/free for models -- fix this */
       mask[i+GPARAM] = 1;
     }
 
-    for (nfixed=0,i=0; i<PARAMS; i++)      /* count number of fixed par's */
+    for (nfixed=0,i=0; i<nparams; i++)      /* count number of fixed par's */
         if (mask[i]==0) nfixed++; 
 
     printf("ROTCUR: will fit the following parameter(s)\n");
