@@ -167,8 +167,9 @@ in which old version ID's are labeled by time and author,
 The \fBindexparam\fP and \fBgetparam_idx\fP family provide access to
 indexed keywords. Indexed keywords are defined in the \fBdefv\fP vector
 by a name that ends in with the \fB#\fP symbol, which can at runtime
-be replaced by an positive integer, e.g. \fBnaxis#\fP can be used
-to for example define \fBnaxis1=10\fP, \fBnaxis4=4\fP. It is up to the
+be replaced by an non-negative integer, e.g. \fBnaxis#\fP can be used
+to for example define \fBnaxis1=10\fP, \fBnaxis4=4\fP
+(note the index can be 0 based). It is up to the
 programmer to decipher missing elements. \fIindexparam(basename,0)\fP can
 be used to return the largest index, whereas \fIindexparam(basename,idx)\fP
 will check for a specific index. Although \fIhasvalue(name)\fP will also
