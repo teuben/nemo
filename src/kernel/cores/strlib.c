@@ -53,7 +53,7 @@ char *getmem(int nbytes)
 /* see also: strdup()                                          */
 /***************************************************************/
 
-string scopy(string s)
+string scopy(const_string s)
 {
     string result;
 

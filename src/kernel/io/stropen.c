@@ -68,7 +68,7 @@ local struct {	          /*  our internal filetable for stropen/strdelete */
  */
 
 
-stream stropen(const string name, string mode)		
+stream stropen(const_string name, string mode)		
 {
     bool inflag;
     int fds;

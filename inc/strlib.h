@@ -22,7 +22,7 @@
 #define _strlib_h
 
 extern char *getmem    ( int nbytes );
-extern string scopy    ( char *s );
+extern string scopy    ( const char *s );
 extern string sconc    ( char *s1, char *s2 );
 extern string substr   ( char *s, int p1, int p2 );
 extern int findstr     ( char *text, char *pat );
