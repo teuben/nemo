@@ -27,11 +27,13 @@
  *  2-apr-97    optional HUGE ???
  *  8-jan-98    temp. added common.c until laptop version merged
  *  6-apr-99    merged in AutoConf for 2.5 release
+ * 22-jun-01    added some new ZENO macros for compatibility (-DNEMO)
  */
 
 #ifndef _stdinc_h      /* protect against re-entry */
 #define _stdinc_h
 
+#define NEMO  1
 
 #include <version.h>	/* our static version id - made by scripts */
 #include <config.h>     /* should be in $NEMOLIB - made by scripts */
@@ -97,6 +99,8 @@ char *strchr(), *strrchr();
  * (see  6.3.9, 6.3.10, 6.3.13, 6.3.14)
  *      18-nov-91:  disabled the #ifdef to always get 'bool' (AIX)
  *	24-feb-92:  bool as char ? - sendoff mesg to Josh
+ *
+ * WARNING: bool is now an official type in C++.....
  */
 
 #if 0
@@ -153,18 +157,43 @@ typedef FILE *stream;
 
 
 /*
- * REAL: default type is double; if single precision calculation is
+ * REAL, REALPTR: default type is double; if single precision calculation is
  * supported and desired, compile with -DSINGLEPREC. 
+ *      DOUBLEPREC:     everything (variables & functions) is double.
+ *      MIXEDPREC:      user values are float, -lm functions are double.
+ *      SINGLEPREC:     everything (variables & functions) is float.
  * Note: The whole package must be compiled in one floating point
  *       type, although some routines are compiled in both single
  *       and double. Using this conmpile directive we can keep one
  *       version of the source code.
  */
 
-#if !defined(SINGLEPREC)
-  typedef  double  real, *realptr;
-#else
-  typedef  float   real, *realptr;
+/*   first off, by default, NEMO will be in DOUBLEPREC mode */
+
+#if !defined(MIXEDPREC) && !defined(SINGLEPREC) && !defined(DOUBLEPREC)
+#define DOUBLEPREC
+#endif
+
+
+#if defined(DOUBLEPREC)
+#undef SINGLEPREC
+#undef MIXEDPREC
+typedef double real, *realptr;
+#define Precision "DOUBLEPREC"
+#endif
+
+#if defined(MIXEDPREC)
+#undef DOUBLEPREC
+#undef SINGLEPREC
+typedef float *realptr, real;
+#define Precision "MIXEDPREC"
+#endif
+
+#if defined(SINGLEPREC)
+#undef DOUBLEPREC
+#undef MIXEDPREC
+typedef float real, *realptr;
+#define Precision "SINGLEPREC"
 #endif
 
 
@@ -201,10 +230,11 @@ typedef real (*rproc)();
 #endif
 
 /*
- * STREQ: handy string-equality macro.
+ * STREQ, STRNULL: handy string-equality macros
  */
 
 #define streq(x,y) (strcmp((x), (y)) == 0)
+#define strnull(x) (strcmp((x), "") == 0)
 
 /*
  *  PI, etc.  --  mathematical constants
@@ -305,6 +335,8 @@ extern void   strclose(stream);
 void error(string, ...);
 void warning(string, ...);
 int dprintf(int, const string, ...);
+/* eprintf is ZENO's "warning" */
+#define eprintf warning
 
 /* core/allocate.c */
 extern void *allocate(int);
@@ -317,6 +349,8 @@ void set_common(int id, int byte_size);
 int get_common(int id, int elt_size, int bucket_size);
 byte *open_common(int id);
 void close_common(int id);
+
+extern bool scanopt(string, string);
 
 
 /* core/cputime.c */

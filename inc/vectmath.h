@@ -5,6 +5,7 @@
  * 22-oct-90    added some impure vector operations	PJT
  * 27-apr-92    added SMULVV				PJT
  * 16-feb-97    sqrt() from math.h			pjt
+ * 23-jun-01    ZENOisms
  *
  */
 
@@ -320,24 +321,27 @@
  * Scalar-valued vector functions.
  */
 
-#ifndef SINGLEPREC
+#if defined(DOUBLEPREC)
 
-#  define dotvp(v,u)	(_dotvp_d((v),(u),NDIM))
-#  define absv(v)	(_absv_d((v),NDIM))
-#  define distv(v,u)	(_distv_d((v),(u),NDIM))
-#  define tracem(p)	(_tracem_d((p),NDIM))
+#define dotvp(v,u)	(_dotvp_d((v),(u),NDIM))
+#define absv(v)		(_absv_d((v),NDIM))
+#define distv(v,u)	(_distv_d((v),(u),NDIM))
+#define tracem(p)	(_tracem_d((p),NDIM))
 
 extern   double _dotvp_d(real *, real *, int);
 extern   double _absv_d(real *, int);
 extern   double _distv_d(real *, real *, int);
 extern   double _tracem_d(real *, int);
 
-#else
+#endif
 
-#  define dotvp(v,u)	(_dotvp_f((v),(u),NDIM))
-#  define absv(v)	(_absv_f((v),NDIM))
-#  define distv(v,u)	(_distv_f((v),(u),NDIM))
-#  define tracem(p)	(_tracem_f((p),NDIM))
+
+#if defined(SINGLEPREC)
+
+#define dotvp(v,u)	(_dotvp_f((v),(u),NDIM))
+#define absv(v)		(_absv_f((v),NDIM))
+#define distv(v,u)	(_distv_f((v),(u),NDIM))
+#define tracem(p)	(_tracem_f((p),NDIM))
 
 extern   double _dotvp_f(real *, real *, int);
 extern   double _absv_f(real *, int);
@@ -393,5 +397,43 @@ extern   double _tracem_f(real *, int);
     for (_i = 0; _i < NDIM; _i++)					\
         (u)[_i] = sqrt( (u)[_i] );                                      \
 }
+
+/* ZENO things to be added properly later */
+
+#if defined(THREEDIM)
+
+#define ADDMULVS(v,u,s)         /* MUL Vect by Scalar, ADD to vect */   \
+{                                                                       \
+    (v)[0] += (u)[0] * (s);                                             \
+    (v)[1] += (u)[1] * (s);                                             \
+    (v)[2] += (u)[2] * (s);                                             \
+}
+
+#define DOTPSUBV(s,v,u,w)       /* SUB Vectors, form DOT Prod */        \
+{                                                                       \
+    (v)[0] = (u)[0] - (w)[0];    (s)  = (v)[0] * (v)[0];                \
+    (v)[1] = (u)[1] - (w)[1];    (s) += (v)[1] * (v)[1];                \
+    (v)[2] = (u)[2] - (w)[2];    (s) += (v)[2] * (v)[2];                \
+}
+
+#define DOTPMULMV(s,v,p,u)      /* MUL Mat by Vect, form DOT Prod */    \
+{                                                                       \
+    DOTVP(v[0], p[0], u);    (s)  = (v)[0] * (u)[0];                    \
+    DOTVP(v[1], p[1], u);    (s) += (v)[1] * (u)[1];                    \
+    DOTVP(v[2], p[2], u);    (s) += (v)[2] * (u)[2];                    \
+}
+
+#define ADDMULVS2(v,u,s,w,r)    /* 2 times MUL V by S, ADD to vect */   \
+{                                                                       \
+    (v)[0] += (u)[0] * (s) + (w)[0] * (r);                              \
+    (v)[1] += (u)[1] * (s) + (w)[1] * (r);                              \
+    (v)[2] += (u)[2] * (s) + (w)[2] * (r);                              \
+}
+
+
+
+
+
+#endif
 
 #endif

@@ -7,6 +7,7 @@
  * July 1993 -- C++ entrant
  * Mar  1994 -- added nemoinpf/r
  * Feb  1995 -- added updparam, no more ARGS
+ * Jun  2001 -- added some convenient ZENO macro	PJT
  */
 
 #ifndef _getparam_h
@@ -50,9 +51,11 @@ extern int nemoinpb (string, bool *, int);
 #endif
 
 /*
- * Macro used to obtain name of program.
+ * Macro used to obtain name and version of program.
  */
 
 #define getargv0()      (getparam("argv0"))
+#define getversion()    (getparam("VERSION"))
+
 
 #endif /* _getparam_h */

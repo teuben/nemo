@@ -3,4 +3,5 @@
  * most of this is included via <vectmath.h>
  *
  * 29-jun-98  PJT
+ * 22-jun-01  probably not needed anymore, ZENO now uses vectmath.h also again
  */
