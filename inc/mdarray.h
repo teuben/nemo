@@ -23,8 +23,11 @@ mdarray5 allocate_mdarray5(int n5, int n4, int n3, int n2, int n1);
 mdarray6 allocate_mdarray6(int n6, int n5, int n4, int n3, int n2, int n1);
 mdarray7 allocate_mdarray7(int n7, int n6, int n5, int n4, int n3, int n2, int n1);
 
-#if 0
-void free_mdarray1(mdarray1 x);
-void free_mdarray2(mdarray2 x, int n2);
-void free_mdarray3(mdarray3 x, int n3, int n2);
-#endif
+void free_mdarray1(mdarray1 x, int n1);
+void free_mdarray2(mdarray2 x, int n2, int n1);
+void free_mdarray3(mdarray3 x, int n3, int n2, int n1);
+void free_mdarray4(mdarray4 x, int n4, int n3, int n2, int n1);
+void free_mdarray5(mdarray5 x, int n5, int n4, int n3, int n2, int n1);
+void free_mdarray6(mdarray6 x, int n6, int n5, int n4, int n3, int n2, int n1);
+void free_mdarray7(mdarray7 x, int n7, int n6, int n5, int n4, int n3, int n2, int n1);
+

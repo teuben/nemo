@@ -1,6 +1,6 @@
-.TH MDARRAY 3NEMO "5 May 2003"
+.TH MDARRAY 3NEMO "6 May 2003"
 .SH NAME
-mdarray - 
+mdarray - simple multi-dimensional array allocators (C style)
 .SH SYNOPSIS
 .nf
 .B
@@ -19,10 +19,15 @@ mdarray -
 .B mdarray3 allocate_mdarray3(n3,n2,n1)
 .B mdarray4 allocate_mdarray4(n4,n3,n2,n1)
 .B ...
+.B void free_mdarray1(mdarray1 x, int n1);
+.B void free_mdarray2(mdarray2 x, int n2, int n1);
+.B void free_mdarray3(mdarray3 x, int n3, int n2, int n1);
+.B void free_mdarray4(mdarray4 x, int n4, int n3, int n2, int n1);
+.B ...
 .fi
 .SH DESCRIPTION
 \fImdarray\fP offers a uniform way to allocate and free multi-dimensional
-(real) arrays. Up to MDMAXDIM (defined via the header file) 
+(real) C-style arrays. Up to MDMAXDIM (defined via the header file) 
 dimensions are available. 
 .PP
 Example of use:
@@ -39,13 +44,10 @@ Example of use:
     }
     
 .fi
-
-.SH CAVEATS
-Although there are \fIfree_mdarrayN\fP functions available, they currently
-need to know the dimensions. Looking into this.
 .SH TIMING
-The TESTBED function excersizes a simple initialization of all array elements, and
-summing them up. This clearly shows how reversing the order of array access 
+The TESTBED function (\fBmdarraytest\fP) excersizes a simple initialization of 
+all array elements, and
+summing them up. This also clearly shows how reversing the order of array access 
 affects the CPU speed , viz. timings on a P4/1600 laptop:
 .nf
     % time mdarraytest 4,4,4 iter=1000000  flip=f
@@ -69,7 +71,7 @@ On grus (P3/930) 5.0 vs. 19.9 sec.  On chand (P4/2500)  1.1 vs. 12.3 sec CPU.
 .nf
 vectmath(3NEMO)
 .fi
-Numerical Recipes's nrutil.c
+nrutil.c (Numerical Recipes)
 .SH AUTHOR
 Peter Teuben
 .SH FILES
