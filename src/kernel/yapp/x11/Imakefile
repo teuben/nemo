@@ -1,0 +1,19 @@
+# Imakefile - yappx
+
+
+	      CC = cc
+              AR = ar ruv
+EXTRA_LOAD_FLAGS = 
+     CDEBUGFLAGS = -g
+               L = $(NEMOLIB)/libnemo.a
+
+        INCLUDES = -I$(NEMOINC)
+ LOCAL_LIBRARIES = -lX11 $(L)
+   SYS_LIBRARIES = -lm
+	    SRCS = yapp_x.c X.c Xutil.c font.c testyapp.c event.c
+	    OBJS = yapp_x.o X.o Xutil.o font.o testyapp.o event.o
+
+ComplexProgramTarget(yappx)
+NormalLibraryTarget(yapp_x, yapp_x.o X.o Xutil.o font.o event.o)
+
+
