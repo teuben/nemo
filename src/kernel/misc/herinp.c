@@ -52,6 +52,7 @@
  *		           and atand2() also with dcd_ calls instead	   pjt
  *		16-feb-97: removed some nexted external decl's             pjt
  *               7-apr-01: gcc warning                                     pjt
+ *		20-jun-01: gcc3, const->hconst				   pjt
  */
 
 #define BIGLOOP /* comment this our if you want MAXSHORT as largest count */
@@ -226,7 +227,7 @@ static bool boolv[] = {
 #define minus    2
 #define times    3
 #define divide   4
-#define const    5
+#define hconst   5
 #define funct    6
 #define lpar     7
 #define rpar     8
@@ -467,7 +468,7 @@ static void dcd_nextsym()
             } else dcd_error(-24);
          }
       }
-      sym = const;
+      sym = hconst;
    } else if (isalpha(ch)) {
       i = 0;
       while ((isalpha(ch)||isdigit(ch)) && (i < maxfunlen)) {
@@ -703,7 +704,7 @@ static void dcd_factor()
       }
       case minus : dcd_nextsym(); dcd_factor(); dcd_gencode(neg); break;
       case plus  : dcd_nextsym(); dcd_factor(); break;
-      case const : dcd_genconst(curconst); dcd_nextsym(); break;
+      case hconst: dcd_genconst(curconst); dcd_nextsym(); break;
       case funct : dcd_function(); break;
       case lbrac : {
          dcd_beginlist();
