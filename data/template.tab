@@ -1,0 +1,18 @@
+# (Template table)
+# 
+# Lines starting with '# ' are comments, and many table manipulation
+# programs, including for example sm ('super mongo') know how to
+# skip them. If your program does not, filter this table in the
+# the following way:
+#
+#		awk '{if ($1 != "#") print $0}' 
+#
+# ===> Note the need for an extra space after the comment (#) symbol
+#
+# It is a good habit to annotate the table with column names:
+#
+# mass radius
+0.0	0.0
+0.5	1.0
+1.0	2.0
+2.0	5.0
