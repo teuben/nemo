@@ -3,6 +3,8 @@
  *	
  * updates:
  *     16-feb-04  V1.0   example, prove a point to Jim       PJT
+ *     22-feb-04  V1.1   leapfrog corrected                  PJT
+ *     25-feb-04   1.1a  corrected the last correction       PJT
  */
 
 #include "code.h"
@@ -27,7 +29,7 @@ string defv[] = {		/* DEFAULT PARAMETER VALUES */
     "freqout=4.0\n		  major data-output frequency ",
     "minor_freqout=32.0\n	  minor data-output frequency ",
 
-    "VERSION=1.0a\n		  17-feb-04 PJT",
+    "VERSION=1.1a\n		  25-feb-04 PJT",
     NULL,
 };
 
@@ -109,6 +111,37 @@ void testdata(bool cencon)
  */
 
 void stepsystem(void)
+{
+  real dthf, dt;
+  bodyptr p;
+
+  dt = 1.0 / freq;				/* get basic time-step      */
+  dthf = 0.5 * dt;				/* and basic half-step      */
+  if (nstep==0) {
+    for (p = bodytab; p < bodytab+nbody; p++) {
+      hackgrav(p);				/*   compute new acc for p  */
+    }
+  }
+  output();					/* do major or minor output */
+  for (p = bodytab; p < bodytab+nbody; p++) {	/* loop advancing bodies    */
+    ADDMULVS(Vel(p), Acc(p), dthf);             /* advance v by 1/2 step    */
+    ADDMULVS(Pos(p), Vel(p), dt);               /* advance r by 1 step      */
+  }
+  for (p = bodytab; p < bodytab+nbody; p++) {	/* loop getting new forces  */
+    hackgrav(p);				/*   compute new acc for p  */
+  }
+  for (p = bodytab; p < bodytab+nbody; p++) {   /* loop over all bodies     */
+    ADDMULVS(Vel(p), Acc(p), dthf);             /* advance v by 1/2 step    */
+  }
+  nstep++;					/* count another mu-step    */
+  tnow = tnow + dt;				/* finally, advance time    */
+}
+
+/*
+ * here is the very old leapfrogger we used in 1986 .... see also hackcode1
+ */
+
+void stepsystem_old(void)
 {
   real dthf, dt;
   bodyptr p;

@@ -72,3 +72,13 @@ load.o: load.c defs.h
 grav.o: grav.c defs.h
 
 util.o: util.c defs.h
+
+
+bench:	bench1 bench2
+
+bench1:
+	time directcode nbody=1024 > /dev/null
+
+bench2:
+	time directcode nbody=10240 > /dev/null
+
