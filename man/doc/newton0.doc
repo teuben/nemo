@@ -1,0 +1,92 @@
+%N /saturn/nemo/bin/sun4/newton0
+
+This doc file has been produces with help=t option
+No further help is available, try 'man newton0'
+
+%A in
+     
+
+%A lastout
+     
+
+%A out
+     
+
+%A save
+     
+
+%A resume
+     
+
+%A restore
+     
+
+%A restart
+     
+
+%A nbody
+     
+
+%A seed
+     
+
+%A t_begin
+     
+
+%A t_end
+     
+
+%A dt_minor
+     
+
+%A dt_major
+     
+
+%A dt_save
+     
+
+%A dt_max
+     
+
+%A nstep
+     
+
+%A de_max
+     
+
+%A nstep_de
+     
+
+%A dn_major
+     
+
+%A min_pairdist
+     
+
+%A cpu_max
+     
+
+%A cpu_last_call
+     
+
+%A eta_acc
+     
+
+%A r0_soft
+     
+
+%A soft_focus
+     
+
+%A timestep
+     
+
+%A diagnostics
+     
+
+%A scheme
+     
+
+%A headline
+     
+

@@ -1,0 +1,13 @@
+%N /saturn/nemo/bin/sun4/snapfits
+This doc file has been produces with help=t option
+No further help is available, try 'man snapfits'
+%A in
+	Input filename (a snapshot)
+%A out
+	Output filename (a fits file)
+%A options
+	Options for output
+%A comment
+	Additional comments for FITS file
+%A VERSION
+	30-mar-90 PJT

@@ -1,0 +1,14 @@
+%N /saturn/nemo/bin/sun4/nemo
+
+This doc file has been produces with help=t option
+No further help is available, try 'man nemo'
+
+%A env
+     List some used environment variables
+
+%A def
+     List various defaults
+
+%A VERSION
+     14-dec--89 PJT
+
