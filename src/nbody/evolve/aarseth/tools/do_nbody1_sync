@@ -1,0 +1,24 @@
+#! /bin/csh -f
+#
+#
+set nbody=10
+set tstop=2
+set kz=0,0,1,2,0,0,0,0,2,0,1
+
+rm -r plum.in
+mkplummer plum.in $nbody
+
+set deltat=(1 0.25 0.1 0.02)
+
+foreach i (`nemoinp 1:$#deltat`)
+  rm -r run$i
+  runbody1 $cwd/plum.in run$i $nbody kz=$kz tcrit=$tstop deltat=$deltat[$i] > run$i.log
+  u3tos run$i/OUT3 run$i/out3
+  snaptrim run$i/out3 run$i/last time=last
+end
+
+foreach i (`nemoinp 1:$#deltat`)
+  snapcmp run1/last run$i/last
+end
+
+
