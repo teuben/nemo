@@ -5,6 +5,7 @@ at U of Tokyo (now at: RIKEN).
 The directory name "kawaii" is a typo because NEMO's maintainer
 has been to Hawaii a few times in recent years, and a pain to
 change this in CVS :-(
+  [fixed in May 2003 by patching the CVS repository]
 
 
 Neither code conforms to the NEMO makefiles for installation, and you
