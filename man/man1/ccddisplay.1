@@ -1,0 +1,88 @@
+.TH CCDDISPLAY 1NEMO "12 July 1988" 
+.SH NAME
+\fBccddisplay\fP \- displays an \fIImage(5NEMO)\fP file
+onto a color Sun screen
+.SH SYNOPSIS
+.PP
+\fBdisp in=\fP\fIimagefile\fP [parameters = values]
+.SH DESCRIPTION
+\fBccddisplay\fP uses \fIImage(5)\fP files, such as those produced by nnmush, to 
+produce a grey-scaled image of the file on a color graphics device. Note
+that one must be able to interact with \fBccddisplay\fP: therefore it must be
+run either within a graphics tool in SunView or onto the console of
+a workstation from another workstation or terminal.
+.PP
+NOTE: The current method to display images is convert them to \fIfits(5NEMO)\fP
+format, e.g. using \fIccdfits(1NEMO)\fP, and use any of the modern
+FITS viewers, like ds9/saoimage.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given
+.TP 20
+\fBin=\fIin-file\fP
+input file, in \fIImage(5)\fP format [no default].
+.TP
+\fBcms=\fI2, 4, 8, 16 ...\fP
+the size of the color map segment used: it must be an integral
+power of two between 2 and, for Suns with 8 bit frame buffers,
+256 (note that if you run \fBccddisplay\fP within SunView the program will only
+use the 256-entry color table while the mouse is within the picture
+frame).
+Try 128 if you only have one image
+on the screen, 128 and 64 for 2 images, and 64, 64 and 64 for three images
+(as you may have noticed, the sum must be less then 256), or 256
+if you are using a remote console [default 64].
+.TP
+\fBmaxi=\fI0.0 - 1.0\fP \fBmini=\fI0.0 - 1.0\fP
+only plots intensities from the proportions
+maxi to mini, scaling the color table
+to give maximum variation to the subrange. These parameters
+are primarily useful to bring out contrast in the dim regions of the
+image [default maxi=1.0 mini=0.0].
+.TP
+\fBevery=\fIvalue\fP
+plot every \fIvalue\fP pixel.
+.SH
+After drawing the image on the screen the program prompt the user
+for the name of a subroutine to manipulate the color map
+of the image. These subroutines will subsequently prompt the user
+for any necessary parameters. The routines currently implemented are:
+.TP 20
+\fBnorm\fP
+maps a monomial of degree N to the colormap, where N is supplied
+by the user.
+.TP
+\fBnormmod\fP
+maps a monomial of degree N to the colormap, where N is supplied
+by the user, but multiplies it by the number of contours requested
+and then shifts the result into the range 0 to 1: this produces 
+a map with fewer contours near the beginning then the top 
+.TP
+\fBflow\fP
+uses the same function as \fBnormmod\fP, but dynamically varies the 
+number of contours from 0 to the maximum supplied by the user
+for an expanding ripple effect.
+.TP
+\fBlinmod\fP
+maps N linear contours onto the color table, N supplied by user.
+.TP 20
+\fBinv\fP
+inverts the color map.
+.SH "SEE ALSO"
+snapsmooth(1NEMO), ccdfits(1NEMO), saoimage(1L), ds9(1L)
+.SH BUGS
+Relies on SunCore directly rather then yapp(3NEMO).
+.SH AUTHOR
+Peter Wisnovsky
+.SH FILES
+.nf
+.ta +2.5i
+~/src/pswisnov/ccddisplay author's original sources
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+xx-jun-87	Braught into system	PSW
+12-Jul-88	small mods for new filestruct
+31-mar-01	deprecated this program
+.fi
