@@ -3,6 +3,8 @@
  *              snapshot(5NEMO) format
  *
  *  2-jun-2003  based on their read_snapshot.c template example    - Peter Teuben
+ *
+ * TODO: make sure it works
  */
 
 #include <nemo.h>
