@@ -37,7 +37,7 @@
  *	28-nov-00    casted fdopen so compilers don't complain
  *	29-may-01    stropen using const now
  *      14-feb-02    mktemp -> mkstemp 					pjt
- *       2-aug-03    scratchfile was broken                             pjt
+ *       2-aug-03    scratchfile (r+w) access was broken                pjt
  */
 #include <stdinc.h>
 #include <getparam.h>
@@ -114,9 +114,9 @@ stream stropen(const_string name, string mode)
 	    if (fds < 0) {
 	      if (stat(tempname,&buf)==0)
                 error("stropen: scratch file \"%s\" already exists", tempname);
-	      res = fopen(tempname,"w");
+	      res = fopen(tempname,"w+");
 	    } else
-	      res = fdopen(fds,"w");
+	      res = fdopen(fds,"w+");
             if (res==NULL) 
                 error("stropen: cannot open scratch file \"%s\"",tempname);
         } else {                    /* "r" or "w" mode */
@@ -252,9 +252,8 @@ nemo_main()
     }
 
     if (streq(mode, "s")) {
-        printf("REWIND AND READING: %ld\n",ftell(str));
+      printf("REWIND AND READING\n");
         rewind(str);
-        printf("REWIND AND READING: %ld\n",ftell(str));
 	while (fgets(buf, 127, str) != NULL)
 	    printf("%s", buf);
     }
