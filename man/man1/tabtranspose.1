@@ -1,0 +1,30 @@
+.TH TABTRANSPOSE 1NEMO "5 October 2002"
+.SH NAME
+tabtranspose \- transpose a table
+.SH SYNOPSIS
+\fBtabtranspose\fB [parameter=value]
+.SH DESCRIPTION
+\fBtabtranspose\fB transposes a table. Columns become the rows, rows become the
+columns. Comment lines are skipped.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+input file name. No default.
+.TP 20
+\fBout=\fP
+output file name. No default.
+.TP 20
+\fBnmax=\fP
+max space (needed if data in pipe) [10000]
+.SH EXAMPLES
+.SH SEE ALSO
+tabmath(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+5-Oct-02	V1.0 Created	PJT
+.fi
