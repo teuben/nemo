@@ -1,0 +1,47 @@
+#! /bin/csh -f
+#
+
+if ($#argv == 0) then
+  echo "Usage: $0 file(s)"
+  echo "  Get nemo tar files from the mother site"
+  echo "  they will be picked up from the remote"
+  echo "  and will be placed in your local NEMO/adm/import"
+  exit 0
+endif
+
+
+set site=saturn.astro.umd.edu
+set dir=pub/teuben/nemo
+set import=$NEMO/adm/import
+set files=($*)
+
+set tmp=/tmp/tmp$$
+
+#
+cd $import
+
+
+echo "cd $dir"                    > $tmp.1
+echo "dir"                       >> $tmp.1
+echo "bin"	                 >> $tmp.1
+if ($#argv > 0) then
+ foreach f ($*)
+  echo "get $f"                  >> $tmp.1
+ end
+ echo "quit"                     >> $tmp.1
+endif
+cat $tmp.1
+
+#
+
+ftp -v $site < $tmp.1
+
+echo "----------------------------------------------------------"
+foreach f ($files)
+  ls -l $f
+end
+echo "----------------------------------------------------------"
+echo "These files have all been stored in $import"
+
+
+rm -f $tmp.*
