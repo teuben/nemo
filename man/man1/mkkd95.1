@@ -178,8 +178,13 @@ Base K&D95 model. The default model parameters above are
 already for model-A,
 but with this keyword another one of the 4 published models can
 be quickly loaded. After that specific parameters can still
-be overriden by setting their value explicitly.
-[Default:  A]
+be overriden by setting their value explicitly. By default
+model is not set via this method.
+.TP
+\fBnmodel=\fP
+Number of models computed. Useful if you want to stack a large
+number of models to increase signal to noise.
+Default: 1.
 .SH PROCEDURE
 Creating a galaxy model from these parameters is sort of a black art
 since the halo and bulge models are not parameterized in terms of
@@ -295,5 +300,6 @@ Peter Teuben (NEMO interface) -
 .nf
 .ta +1.0i +4.0i
 06-Mar-04	V1.0 Created, using kd95's  README file 	PJT
+11-mar-04	V1.2 added nmodel= and warns about using model= 	PJT
 .fi
 
