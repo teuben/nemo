@@ -13,7 +13,7 @@
 *       Note that initial conditions are assumed REAL*4 here.
           DO 2 I = 1,N
               READ (4)  BODY(I), (A(K),K=1,3), (XDOT(K,I),K=1,3)
-              DO 2 K = 1,3
+              DO 1 K = 1,3
                   X(K,I) = A(K)
     1         CONTINUE
     2     CONTINUE
