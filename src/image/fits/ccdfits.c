@@ -32,7 +32,7 @@
  *                        NOT WORKING YET
  *	 7-aug-01  
  *      18-dec-01  V4.0  work with new fitsio_nemo.h
- *       2-may-02      a fix dummy=f
+ *       6-may-02      b implemented dummy=f
  *
  *  TODO:
  *      reference mapping has not been well tested, especially for 2D
@@ -393,9 +393,28 @@ void set_refmap(string name)
 /* if done to an array 1 2 3, it will result in buggy data */
 /* this routine should just shift the 1's to the end , not sort */
 
+void permute (int *x ,int *p, int n)
+{
+  int    i, j, tmp;
+
+  for (i=0; i<n; i++)
+    p[i]=i;               /*  one-to-one */
+                
+  for (j=0; j<n; j++) {
+    for (i=1; i<n; i++) {
+      if (x[p[i-1]]==1 && x[p[i]] > 1) {
+	tmp = p[i];
+	p[i]   = p[i-1];
+	p[i-1] = tmp;
+      }
+    }
+  }
+}
+
+
 /* right now this is a silly bubble sort !!! */
 
-void permute (int *x ,int *idx, int n)
+void permute_old (int *x ,int *idx, int n)
 {
     int    gap, i, j;
     int    tmp;
