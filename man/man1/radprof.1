@@ -1,4 +1,4 @@
-.TH RADPROF 1NEMO "20 June 2002"
+.TH RADPROF 1NEMO "27 May 2004"
 .SH NAME
 radprof \- tabulate or display radial profiles of an N-body snapshot
 .SH SYNOPSIS
@@ -26,10 +26,11 @@ The density at radius of radius-sorted star \fIi\fP (i=0..NBODY-1) is given by:
                     4/3 * PI * ( r(i+k)^3 - r(i-k)^3 )
 .fi
 
-where M(i) is the cumulative mass within that radius (including 
-star \fIi\fP itself). This equation is only valid for i=1...NBODY-2, the
+where M(i) is the mass of star \fIi\fP). 
+This equation is only valid for i=k...NBODY-1-k, the
 two edge stars have different densities defined. See source code for details.
-For points within 'k' stars of the minimum and maximum radius,
+For points within 'k' stars (see also \fBkmax=\fP below)
+of the minimum and maximum radius,
 fewer stars will be used on one side of the interval, but the
 formulae used is still the same.
 .PP
@@ -72,7 +73,8 @@ the maximum found rotation curve to fit on the plot].
 .TP
 \fBkmax=\fP\fIk_max\fP
 Number of nearest neighbors in radius on either side used 
-determine the density.  Note this means that each density point
+determine the density.  This acts like a hanning type smoothing
+constant. Note this means that each density point
 used \fB2 kmax + 1\fP points from the snapshot.
 [Default: \fB1\fP].
 .TP
