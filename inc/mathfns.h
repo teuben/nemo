@@ -125,6 +125,8 @@ float rcbrt(float);
  * Random number functions available only in double precision.
  */
 
+int init_xrandom(string);
+int set_xrandom(int);
 double xrandom(double, double);
 double grandom(double, double);
 

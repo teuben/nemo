@@ -22,6 +22,7 @@
  *                   (but it doesn't appear to do anything useful)
  *  31-may-01   V1.8 added natof, natoi                             pjt
  *   7-jun-01       a:  added casting to shut up compiler           pjt
+ *   8-sep-01       b:  init_xrandom
  */
 
 #include <stdinc.h>
@@ -249,7 +250,7 @@ string defv[] = {
     "tab=\n             Optional table output",
     "seed=0\n		Seed for xrandom",
     "atof=\n            test (n)atof single value expression",
-    "VERSION=1.8a\n	7-jun-01 PJT",
+    "VERSION=1.8b\n	8-sep-01 PJT",
     NULL,
 };
 
@@ -280,8 +281,8 @@ nemo_main()
       dprintf(1,"Using floating point math\n");
       Qint = FALSE;
     }
-    seed = set_xrandom(getiparam("seed"));
-    dprintf(1,"set_xrandom: seed=%d\n",seed);
+    seed = init_xrandom(getparam("seed"));
+    dprintf(1,"init_xrandom: seed=%d\n",seed);
 
     strcpy (fmt1,cp);                   /* store it in 'fmt' */
     strcpy (fmt2,cp);                   /* and here */

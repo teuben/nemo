@@ -16,7 +16,7 @@ CHECKDIR1 = data inc news tmp csh \
             adm/import adm/export adm/install adm/submit adm/purge 
 
 # absolute (derived) directories & files
-CHECKDIR2 = $(NEMOBIN) $(NEMOLIB) $(NEMOOBJ) \
+CHECKDIR2 = $(NEMOBIN) $(NEMOLIB) $(NEMOOBJ) host host/include host/$(NEMOHOST) \
             $(NEMOOBJ)/bodytrans $(NEMOOBJ)/potential
 
 CHECKFIL2 = $(NEMO)/adm/Usage \
@@ -126,6 +126,21 @@ dirs: nemo_start
 	    mkdir $$i; \
 	    chmod a+w $$i; \
 	fi); done
+	-@for i in bin lib ; do \
+	(if [ -d host/$(NEMOHOST)/$$i ]; \
+	then \
+	    echo SYMLINK $$i exists; \
+	else \
+	    echo SYMLINK $$i created; \
+	    ln -s $(NEMO)/$$i/$(NEMOHOST) host/$(NEMOHOST)/$$i; \
+	fi); done
+	@if [ -d host/$(NEMOHOST)/include ]; \
+	then \
+	    echo SYMLINK include exists; \
+	else \
+	    echo SYMLINK include created; \
+	    ln -s $(NEMO)/host/include host/$(NEMOHOST)/include; \
+	fi
 	-@for i in $(CHECKFIL2); do \
 	(if [ -f $$i ]; \
 	then \

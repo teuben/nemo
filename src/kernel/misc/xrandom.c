@@ -20,7 +20,7 @@
  *  20-jan-99   add tab= to optionally output all random numbers  PJT
  *  24-feb-01   added comments to grandrom() and return both #'s  PJT
  *   7-apr-01   fixed grandom() bug, introduced 24-feb
- *   7-sep-01   (V2.0) added GSL 
+ *   8-sep-01   (V2.0) added GSL 
  */
 
 #include <stdinc.h>
@@ -54,25 +54,32 @@ local int idum;            /* local variable to store used seed */
 
 #ifdef HAVE_GSL
 #include <gsl/gsl_rng.h>
+#include <gsl/gsl_randist.h>
 static gsl_rng *my_r = NULL;
 static const gsl_rng_type *my_T;
 #endif
 
-static string env_type = "GSL_RNG_TYPE";
-static string env_seed = "GSL_RNG_SEED";
+static string env_type = "GSL_RNG_TYPE";    /* environment variables    */
+static string env_seed = "GSL_RNG_SEED";    /* used by GSL_RNG routines */
 
 int init_xrandom(string init)
 {
 #ifdef HAVE_GSL
-    char my_gsl_type[128], my_gsl_seed[128], *cp;
+    char my_gsl_type[64], my_gsl_seed[64], *cp;     /* need two strings, bug in putenv? */
     string *is;
-    int nis;
+    int nis, iseed;
 
-    is = burststring(init,", ");                /* parse init as "[seed[,name]]"  */
+    is = burststring(init,", ");                      /* parse init as "[seed[,name]]"  */
     nis = xstrlen(is,sizeof(string))-1;
     if (nis > 0) {                                          /* seed is first, but optional */
-        sprintf(my_gsl_seed,"%s=%s",env_seed,is[0]);
-        putenv(my_gsl_seed);
+        iseed = natoi(is[0]);
+	if (iseed > 0 || streq(is[0],"+0")) {
+	  sprintf(my_gsl_seed,"%s=%s",env_seed,is[0]);
+	} else {
+	  iseed = set_xrandom(iseed);
+	  sprintf(my_gsl_seed,"%s=%u",env_seed,iseed);
+	}
+	putenv(my_gsl_seed);
 	dprintf(1,"putenv: %s\n",my_gsl_seed);
         if (nis > 1) {                                      /* name is second, also optional */
             sprintf(my_gsl_type,"%s=%s",env_type,is[1]);
@@ -81,14 +88,7 @@ int init_xrandom(string init)
         }
     }
 
-
-    cp = getenv(env_seed);
-    printf("%s -> %s\n",env_seed,cp);
-    cp = getenv(env_type);
-    printf("%s -> %s\n",env_type,cp);
-    
-
-    gsl_rng_env_setup();                                /* initialize the rng (name/seed) setup */
+    gsl_rng_env_setup();                          /* initialize the rng (name/seed) setup */
     my_T = gsl_rng_default;
     my_r = gsl_rng_alloc(my_T);
 
@@ -109,10 +109,6 @@ int set_xrandom(int dum)
     int retval;
     struct tms buffer;
 
-#if defined(HAVE_GSL)
-    warning("set_xrandom called with GSL enabled");
-#endif
-
     if (dum <= 0) {
 	if (dum == -1)
             retval = idum = (int) times(&buffer);   /* clock cycles */
@@ -123,6 +119,7 @@ int set_xrandom(int dum)
     } else
     	retval = idum = dum;	           /* use supplied seed in argument */
 
+#if !defined(HAVE_GSL)
 #if defined(NUMREC)
     dprintf(2,"set_xrandom(NUMREC portable) seed=%d\n",idum);
     if (idum > 0) idum = -idum; /* ran needs a negative idum as seed */
@@ -134,8 +131,10 @@ int set_xrandom(int dum)
 #else    
     dprintf(2,"set_xrandom(UNIX srandom) seed=%d\n",retval);
     srandom(retval);
-#endif    
+#endif
+#endif
     return retval;
+
 }
 
 double xrandom(double xl, double xh)
@@ -211,7 +210,7 @@ double grandom(double mean, double sdev)
 
 string defv[] = {
 #ifdef HAVE_GSL
-    "seed=\n        GSL Seed name, and optional arguments",
+  "seed=0,mt19937\n Seed [0=seconds_1970, -1=centisec_boot -2=pid], and optional GSL name",
 #else
     "seed=0\n       Seed [0=seconds_1970, -1=centisec_boot -2=pid]",
 #endif
@@ -239,21 +238,27 @@ string defaults[] = {
     NULL,
 };
 
+#define MAXPARS 5
+
+static bool check(string, string, string, int, int);
+
 nemo_main()
 {
-    int i, seed, n;
-    double sum[5], mean, sigma, skew, kurt, y, s;
+    int i, seed, n, npars;
+    double sum[5], mean, sigma, skew, kurt, x, y, s;
+    double p[MAXPARS];
+    unsigned int up[MAXPARS];
     bool   Qgauss = getbparam("gauss");
     bool   Qreport = getbparam("report");
     bool   Qtab = getbparam("tab");
     bool   Qbench;
-    string *sp;
+    string *sp, ran_name;
 
     n = getiparam("n");
     seed = init_xrandom(getparam("seed"));
     Qbench = (n==4 && seed==1);
 
-    printf("Seed used = %d\n",seed);
+    printf("#Seed used = %d\n",seed);
 
     sum[0] = sum[1] = sum[2] = sum[3] = sum[4] = 0.0;
     if (Qgauss) {
@@ -289,6 +294,94 @@ nemo_main()
             dprintf(1,"Known n=4 seed=1 cases are:\n");
             for (sp=defaults; *sp; sp++) dprintf(1,"%s\n",*sp);
     }
+#ifdef HAVE_GSL
+    if (hasvalue("gsl")) {
+      ran_name = getparam("gsl");
+      npars = nemoinpd(getparam("pars"),p,MAXPARS);
+      if (npars < 0) error("Error parsing pars=%s",getparam("pars"));
+      for (i=0; i<npars; i++) {
+	up[i] = (unsigned int) p[i];
+	dprintf(1,"par(%d) = %g\n",i+1,p[i]);
+      }
+
+      if (       check(ran_name,"gaussian",              "sigma",1,npars)) {
+	for (i=0; i<n; i++) printf("%g\n", gsl_ran_gaussian(my_r, p[0]));
+      } else if (check(ran_name,"gaussian_ratio_method", "sigma",1,npars)) {
+	for (i=0; i<n; i++) printf("%g\n", gsl_ran_gaussian_ratio_method(my_r, p[0]));
+      } else if (check(ran_name,"gaussian_tail",         "a sigma",2,npars)) {
+	for (i=0; i<n; i++) printf("%g\n", gsl_ran_gaussian_tail(my_r, p[0],p[1]));
+      } else if (check(ran_name,"exponential",           "mu",1,npars)) {
+	for (i=0; i<n; i++) printf("%g\n", gsl_ran_exponential(my_r, p[0]));
+      } else if (check(ran_name,"laplace",               "a",1,npars)) {
+	for (i=0; i<n; i++) printf("%g\n", gsl_ran_laplace(my_r, p[0]));
+      } else if (check(ran_name,"exppow",                "a b",2,npars)) {
+	for (i=0; i<n; i++) printf("%g\n", gsl_ran_exppow(my_r, p[0],p[1]));
+      } else if (check(ran_name,"cauchy",                "a",1,npars)) {
+	for (i=0; i<n; i++) printf("%g\n", gsl_ran_cauchy(my_r, p[0]));
+      } else if (check(ran_name,"rayleigh",              "sigma",1,npars)) {
+	for (i=0; i<n; i++) printf("%g\n", gsl_ran_rayleigh(my_r, p[0]));
+      } else if (check(ran_name,"rayleigh_tail",         "a sigma",2,npars)) {
+	for (i=0; i<n; i++) printf("%g\n", gsl_ran_rayleigh_tail(my_r, p[0],p[1]));
+      } else if (check(ran_name,"landau",                "-none-",0,npars)) {
+	for (i=0; i<n; i++) printf("%g\n", gsl_ran_landau(my_r));
+      } else if (check(ran_name,"levy",                  "c alpha",2,npars)) {
+	for (i=0; i<n; i++) printf("%g\n", gsl_ran_levy(my_r, p[0],p[1]));
+      } else if (check(ran_name,"levy_skey",             "c alpha beta",3,npars)) {
+	for (i=0; i<n; i++) printf("%g\n", gsl_ran_levy_skew(my_r, p[0],p[1],p[2]));
+      } else if (check(ran_name,"gamma",                 "a b",2,npars)) {
+	for (i=0; i<n; i++) printf("%g\n", gsl_ran_gamma(my_r, p[0],p[1]));
+      } else if (check(ran_name,"flat",                  "a b",2,npars)) {
+	for (i=0; i<n; i++) printf("%g\n", gsl_ran_flat(my_r, p[0],p[1]));
+      } else if (check(ran_name,"lognormal",             "zeta sigma",2,npars)) {
+	for (i=0; i<n; i++) printf("%g\n", gsl_ran_lognormal(my_r, p[0],p[1]));
+      } else if (check(ran_name,"chisq",                 "nu",1,npars)) {
+	for (i=0; i<n; i++) printf("%g\n", gsl_ran_chisq(my_r, p[0]));
+      } else if (check(ran_name,"fdist",                 "nu1 nu2",2,npars)) {
+	for (i=0; i<n; i++) printf("%g\n", gsl_ran_fdist(my_r, p[0],p[1]));
+      } else if (check(ran_name,"tdist",                 "nu",1,npars)) {
+	for (i=0; i<n; i++) printf("%g\n", gsl_ran_tdist(my_r, p[0]));
+      } else if (check(ran_name,"beta",                  "a b",2,npars)) {
+	for (i=0; i<n; i++) printf("%g\n", gsl_ran_beta(my_r, p[0],p[1]));
+      } else if (check(ran_name,"logistic",              "a",1,npars)) {
+	for (i=0; i<n; i++) printf("%g\n", gsl_ran_logistic(my_r, p[0]));
+      } else if (check(ran_name,"pareto",                "a b",2,npars)) {
+	for (i=0; i<n; i++) printf("%g\n", gsl_ran_pareto(my_r, p[0],p[1]));
+      } else if (check(ran_name,"weibull",               "a b",2,npars)) {
+	for (i=0; i<n; i++) printf("%g\n", gsl_ran_weibull(my_r, p[0],p[1]));
+      } else if (check(ran_name,"gumbel1",               "a b",2,npars)) {
+	for (i=0; i<n; i++) printf("%g\n", gsl_ran_gumbel1(my_r, p[0],p[1]));
+      } else if (check(ran_name,"gumbel2",               "a b",2,npars)) {
+	for (i=0; i<n; i++) printf("%g\n", gsl_ran_gumbel2(my_r, p[0],p[1]));
+
+	/* the next ones are actually discrete (integer) functions  */
+
+      } else if (check(ran_name,"poisson",               "mu",1,npars)) {
+	for (i=0; i<n; i++) printf("%g\n", (double)gsl_ran_poisson(my_r, p[0]));
+      } else if (check(ran_name,"bernoulli",             "p",1,npars)) {
+	for (i=0; i<n; i++) printf("%g\n", (double) gsl_ran_bernoulli(my_r, p[0]));
+      } else if (check(ran_name,"binomial",              "p n",2,npars)) {
+	for (i=0; i<n; i++) printf("%g\n", (double) gsl_ran_binomial(my_r, p[0],up[1]));
+      } else if (check(ran_name,"negative_binomial",     "p n",2,npars)) {
+	for (i=0; i<n; i++) printf("%g\n", (double) gsl_ran_negative_binomial(my_r, p[0],p[1]));
+      } else if (check(ran_name,"pascal",                "p k",2,npars)) {
+	for (i=0; i<n; i++) printf("%g\n", (double) gsl_ran_pascal(my_r, p[0],up[1]));
+      } else if (check(ran_name,"geometric",             "p",1,npars)) {
+	for (i=0; i<n; i++) printf("%g\n", (double) gsl_ran_geometric(my_r, p[0]));
+      } else if (check(ran_name,"hypergeometric",        "n1 n2 nt",3,npars)) {
+	for (i=0; i<n; i++) printf("%g\n", (double) gsl_ran_hypergeometric(my_r, up[0],up[1],up[2]));
+      } else if (check(ran_name,"logarithmic",           "sigma",1,npars)) {
+	for (i=0; i<n; i++) printf("%g\n", (double) gsl_ran_logarithmic(my_r, p[0]));
+      } else
+	error("Bad name");
+    }
+#endif
+}
+
+static bool check(string a, string b, string msg, int k, int l)
+{
+  if (!streq(a,b)) return FALSE;
+  if (k!=l) error("%s needs %d parameters (%s)",a,k,msg);
+  return TRUE;
 }
 
 #endif

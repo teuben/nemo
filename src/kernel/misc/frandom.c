@@ -6,6 +6,7 @@
  *	25-feb-92  pjt   happy gccV2.0 
  *       7-sep-95  pjt   prototyping
  *	16-feb-97  pjt   fixed for SINGLEPREC 
+ *	 8-sep-01  pjt   init_xrandom
  *
  */
 #include <stdinc.h>
@@ -80,7 +81,7 @@ nemo_main()
    n = getiparam("n");
    a = getdparam("a");
    b = getdparam("b");
-   set_xrandom(getiparam("seed"));
+   init_xrandom(getparam("seed"));
    while (n-- > 0)
       dprintf(0,"%f\n", frandom(a,b,gauss));
 }

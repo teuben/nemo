@@ -14,7 +14,7 @@
  *			named program 'MKOP73'
  *	30-nov-95	Fixed system-specific function call (irint())	JAN
  *	27-mar-97  1.0d SINGLEPREC fixes, but not finished yet		pjt
- *
+ *         sep-01       xrandom
  */
 
 
@@ -46,7 +46,7 @@ string defv[] = {
     "potpars=0,0\n	  .. with potential parameters",
     "potfile=\n		  .. and optional potential datafile name",    
     "headline=\n	  text headline for output",
-    "VERSION=1.0d\n	  27-mar-97 PJT",
+    "VERSION=1.0e\n	  8-sep-01 PJT",
     NULL,
 };
 
@@ -89,7 +89,7 @@ nemo_main()
     nring = getiparam("nring");
     nvel  = getiparam("nvel");
     nderiv = getiparam("nderiv");
-    set_xrandom(getiparam("seed"));
+    init_xrandom(getparam("seed"));
     zerocm = getbparam("zerocm");
     options = getparam("options");
     mode = getiparam("mode");

@@ -37,6 +37,10 @@ FITSIOLIB = @FITSIO_LIB@
 MIRIAD_INC = @MIRIAD_INC@
 MIRIAD_LIB = @MIRIAD_LIB@
 
+#	GSL
+GSL_CFLAGS = @GSL_CFLAGS@
+GSL_LIBS   = @GSL_LIBS@
+
 
 
 # LOADOBJ stuff; -DMACH=.....
@@ -57,11 +61,11 @@ FORLIBS = $(FLIBS)
 #set opts="-rdynamic -ansi -fwritable-strings -Wconversion -Wnested-externs"
 #exec gcc -fPIC -Dlinux -DSYSV -I$NEMOINC -I$NEMOLIB -L$NEMOLIB $opts $* $link
 
-NEMO_CFLAGS = @NEMO_CFLAGS@ -I$(NEMOINC) -I$(NEMOLIB) @XINCS@ $(MACH)
+NEMO_CFLAGS = @NEMO_CFLAGS@ -I$(NEMOINC) -I$(NEMOLIB) @XINCS@ $(GSL_CFLAGS) $(MACH)
 NEMO_FFLAGS = @NEMO_FFLAGS@
 NEMO_LDFLAGS = 
-NEMO_LIBS   = -L$(NEMOLIB)          -lnemo @LOADOBJ_LIBS@ @MATH_LIBS@
-NEMO_LIBSPP = -L$(NEMOLIB) -lnemo++ -lnemo @LOADOBJ_LIBS@ @MATH_LIBS@
+NEMO_LIBS   = -L$(NEMOLIB)          -lnemo @LOADOBJ_LIBS@ $(GSL_LIBS) @MATH_LIBS@
+NEMO_LIBSPP = -L$(NEMOLIB) -lnemo++ -lnemo @LOADOBJ_LIBS@ $(GSL_LIBS) @MATH_LIBS@
 
 #			some graphics libraries:
 GLLIBS = @GLLIBS@

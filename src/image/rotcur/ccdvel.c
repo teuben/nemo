@@ -48,6 +48,7 @@
  *                    some backwards compatibility problems
  *   1-may-01   V1.6  Added amp= keyword for fudzing density maps    PJT/LGM
  *   3-may-01   V1.7  Added vexp= keyword                            PJT
+ *   8-sep-01      a  init_xrandom
  */
 
 #include <stdinc.h>
@@ -87,7 +88,7 @@ string defv[] = {
         "seed=0\n       Initial random seed",
 	"in=\n          Template 2D image for cube generation",
 	"headline=\n	Optional random verbiage",
-        "VERSION=1.6a\n 1-may-01 PJT/LGM",
+        "VERSION=1.6b\n 8-sep-01 PJT",
         NULL,
 };
 
@@ -307,7 +308,7 @@ setparams()
 
 
    noise = getdparam("noise");
-   set_xrandom(getiparam("seed"));
+   init_xrandom(getparam("seed"));
    aspiral = getdparam("aspiral");
    pspiral = getdparam("pspiral");
    kspiral = -getdparam("kspiral");	/* positive = trailing arms */

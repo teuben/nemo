@@ -11,6 +11,7 @@
  *	28-may-97	2.0 allow bodytrans and generic function	PJT
  *				(code taken from mkplummer)
  *      24-jul-97       2.1 added norm=
+ *	 8-sep-01       a   init_xrandom
  */
 #include <stdinc.h>
 #include <getparam.h>
@@ -33,7 +34,7 @@ string defv[] = {
     "massrange=1,1\n          Range for mass-spectrum (e.g. 1,2)",
     "seed=0\n                 Random seed",
     "norm=\n                  Normalization value for the total mass (if used)",
-    "VERSION=2.1\n            24-jul-97 PJT",
+    "VERSION=2.1a\n           8-sep-01 PJT",
     NULL,
 };
 
@@ -75,7 +76,7 @@ nemo_main()
     } else
     	error("One of: mass=, massname=, inmass= must be given");
     outstr = stropen(getparam("out"), "w");
-    seed = set_xrandom(getiparam("seed"));
+    seed = init_xrandom(getparam("seed"));
     Qnorm = hasvalue("norm");
     if (Qnorm) norm = getdparam("norm");
 

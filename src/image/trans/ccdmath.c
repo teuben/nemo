@@ -18,6 +18,7 @@
  *	 7-mar-92	V2.5 modern style - gcc 2.0 happy		PJT
  *				fie() is now in real, not float
  *	24-feb-98	V2.6 added seed=				PJT
+ *	 8-sep-01	a    init_xrandom
  *
  *       because of the float/real conversions and
  *       to eliminate excessive memory usage, operations 'fie' are
@@ -70,7 +71,7 @@ void nemo_main ()
     void    dmpfien();
     int     inifien();
 
-    set_xrandom(getiparam("seed"));
+    init_xrandom(getparam("seed"));
     fie = getparam("in");
     if (fie==NULL || *fie==0)
         mapgen = TRUE;      /* no input files: create maps from scratch */

@@ -1,4 +1,4 @@
-.TH XRANDOM 1NEMO "13 April 1997"
+.TH XRANDOM 1NEMO "8 September 2001"
 .SH NAME
 xrandom \- Return seed for random numbers and optionally random numbers
 .SH SYNOPSIS
@@ -8,6 +8,9 @@ xrandom \- Return seed for random numbers and optionally random numbers
 and optionally random numbers drawn from a uniform or gaussian (normal)
 distribution. Uniform numbers are between 0 and 1, gaussian numbers 
 have a mean of 0 and a dispersion of 1. 
+.PP
+If compiled with GSL, random number generator types 
+can be selected, as well as many more distribution types.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -16,7 +19,10 @@ is also given:
 Initial seed. Use 0 for the current time (seconds since 1970.00,
 see also \fItime(2)\fP)
 -1 for the number of centiseconds since boot (see \fItimes(2)\fP) 
-and 2 for the current pid (see \fIgetpid(2)\fP).
+and 2 for the current pid (see \fIgetpid(2)\fP).  If GSL is implemented
+the seed value can be optionally followed by the random number 
+generator type (default: mt19937). See \fIxrandom(3)\fP for more
+details.
 \fBn=\fP
 [Default: 0].
 Number of random numbers to draw 
@@ -29,6 +35,13 @@ Return gaussian numbers instead of uniform?
 \fBreport=\fP
 Report mean/dispersion/skewness/kurtosis? 
 [Default: f]
+.TP
+\fBtab=t|f\fP
+Tabulate all random numbers [t]
+.TP
+\fBgsl=\fP
+.TP
+\fBpars=\fP
 .SH EXAMPLES
 Here is an example script, \fBgrandom.csh\fP, 
 to test if the error in the mean scales
@@ -69,4 +82,5 @@ Peter Teuben
 .ta +1.0i +4.0i
 26-Nov-96	V1.0 turned TESTBED into a TOOLBOX program	PJT
 13-apr-97	example
+8-sep-01	V2.0 GSL optionally added	PJT
 .fi

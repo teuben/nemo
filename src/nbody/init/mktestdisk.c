@@ -5,6 +5,7 @@
  *	15-nov-90  V1.3 NEMO 2.x	PJT
  *      28-mar-97  V1.4 SINGLEPREC/proto's      PJT
  *                      but doesn't work in SINGLEPREC yet
+ *       8-sep-01       a   init_xrandom
  */
 
 #include <stdinc.h>
@@ -27,7 +28,7 @@ string defv[] = {	/* DEFAULT INPUT PARAMETERS */
     "ncenter=0\n	  particles used to center disk ",
     "seed=54321\n	  usual random number seed ",
     "headline=\n	  text headline for output ",
-    "VERSION=1.4\n	  29-mar-97 PJT",
+    "VERSION=1.4a\n	  8-sep-01 PJT",
     NULL,
 };
 
@@ -39,8 +40,6 @@ local int ndisk, ncenter, nspheroid, ngalaxy;
 
 local Body *spheroid, *galaxy;
 
-extern  double xrandom(double,double);
-
 void nemo_main()
 {
     rmin = getdparam("rmin");
@@ -48,7 +47,7 @@ void nemo_main()
     eps = getdparam("eps");
     ndisk = getiparam("ndisk");
     ncenter = getiparam("ncenter");
-    set_xrandom(getiparam("seed"));
+    init_xrandom(getparam("seed"));
     readspheroid(getparam("in"));
     if (ncenter > 0)
 	centersnap(spheroid, ncenter, nspheroid);

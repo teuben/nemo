@@ -6,14 +6,21 @@ These \fBgsl\fP \fIcommands\fP and \fIutilities\fP  are wrappers
 around a number of useful routines from the
 GNU Scientific Library, integrated in NEMO.
 .SH "LIST OF NEMO GSL WRAPPER COMMANDS (help=)"
+The following programs currently have optional GSL components
 .sp 2
 .nf
 .ta +1.0iC +1.2iC +2.5iL
 \fIName\fP	\fIDescription\fP
 .ta +1.2iL +1.2iL +3.5iL
 .sp 5p
-tabpoly   	gsl_poly_eval, ... gsl_poly_complex_solve
+tabpoly   	gsl_poly_eval, ... gsl_poly_complex_solve  [7-sep-01]
+xrandom    	gsl_rng-_*  (seed=name[,value])  [8-sep-01]
+tablsqfit	-todo-
+tabspline	-todo-
 .SH SEE ALSO
+.nf
+http://sources.redhat.com/gsl/
+.fi
 .SH BUGS
 .SH AUTHOR
 Peter Teuben

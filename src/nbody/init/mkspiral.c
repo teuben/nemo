@@ -15,6 +15,7 @@
  *      27-mar-97 V1.6  add mass= for optional total mass       pjt
  *                      but actually was still broken for SINGLEPREC
  *      10-mar-01 V1.7  allow sigma= to have 3 parameters
+ *       8-sep-01       a   init_xrandom
  */
 
 #include <stdinc.h>
@@ -45,7 +46,7 @@ string defv[] = {
     "sigma=0\n            velocity dispersion, plus optional central offset and exp scalelength",
     "nmodel=1\n           number of models",
     "headline=\n	  text headline for output ",
-    "VERSION=1.7\n	  9-mar-01 PJT",
+    "VERSION=1.7a\n	  8-sep-01 PJT",
     NULL,
 };
 
@@ -88,7 +89,7 @@ nemo_main()
 	SPw /= 180 * PI;		/* convert degrees to radians */
     } else
         width = SPw;
-    set_xrandom(getiparam("seed"));
+    init_xrandom(getparam("seed"));
 
     outstr = stropen(getparam("out"), "w");
     put_history(outstr);

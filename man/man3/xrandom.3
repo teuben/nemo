@@ -1,8 +1,10 @@
-.TH XRANDOM 3NEMO "24 February 2000"
+.TH XRANDOM 3NEMO "8 September 2001"
 .SH NAME
 set_xrandom, xrandom, grandom, frandom - random number generators
 .SH SYNOPSIS
 .nf
+.B int init_xrandom(string init)
+.PP
 .B int set_xrandom(int seed)
 .PP
 .B double xrandom(double a, double b)
@@ -14,6 +16,18 @@ set_xrandom, xrandom, grandom, frandom - random number generators
 .B double xrand(double a, double b)
 .fi
 .SH DESCRIPTION
+\fIinit_xrandom\fP initializes the random number generator with a supplied
+string \fBinit\fP, the meaning of which is implementation dependant. For
+non-GSL implementation, an integer will be extracted, and 
+\fIset_xrandom\fP will be called. For GSL implementations,
+the integer can be optionally followed by a GSL random number 
+generator name (normally set via the GSl environment variable GSL_RNG_TYPE).
+Allowed names are (e.g.) ran0, ran1, ran2, ran3 (from
+Numerical Recipes), rand48, random_bsd, mt19937 (the default), 
+uni32, vax, tt800 etc.
+Typing in an illegal name will return the list of current valid names.
+See the GSL manual for details.
+.PP
 \fIset_xrandom\fP initializes the random number generator with a supplied
 integer \fBseed\fP. If the \fBseed\fP is 0, the current
 UNIX time (see time(3)) is used instead. It returns the seed used.
@@ -78,4 +92,5 @@ xx-xxx-86	created in the dark ages                  	JEB
 7-jan-92	fixed seed bug in set_xrandom (from 13-sep-90)	PJT
 4-mar-94   	documented xrand  	PJT
 24-feb-00	documented special -1,-2 seeds          	PJT
+8-sep-01	starting a GSL optional implementation, added init_xrandom	PJT
 .fi

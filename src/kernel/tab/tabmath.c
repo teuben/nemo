@@ -28,6 +28,7 @@
  *      13-jun-98  V3.0  add selfie= to select rows based on column evaluations
  *                       but deleted the skip & stride keywords. 
  *      19-apr-01  V3.1  added comments=
+ *       8-sep-01     a  init_xrandom
  */
 
 /**************** INCLUDE FILES ********************************/ 
@@ -152,7 +153,7 @@ local void setparams(void)
 	if (savefie(nfies+1) < 0) error("Could not save selfie=%s",selfie);
         Qfie = nfies > 0;
     }
-    set_xrandom(getiparam("seed"));
+    init_xrandom(getparam("seed"));
     Qcomment = getbparam("comments");
 }
 

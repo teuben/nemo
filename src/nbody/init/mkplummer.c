@@ -15,6 +15,7 @@
  *	17-feb-94       V2.5b fixed for -DSINGLEPREC		pjt
  *	11-jan-95	V2.5c ??? (or was it march 1994)
  *	 6-jun-96       V2.6d report total mass before rescaling  pjt
+ *       8-sep-01       e   init_xrandom
  */
 
 
@@ -28,8 +29,7 @@
 #include <snapshot/body.h>
 #include <snapshot/put_snap.c>
 
-extern double  xrandom(), frandom();
-
+extern double xrandom(), frandom();
 extern rproc  getrfunc();
 Body    *mkplummer();
 
@@ -53,7 +53,7 @@ string  defv[] = {                        /* DEFAULT INPUT PARAMETERS */
     "masspars=p,0.0\n         Mass function parameters (e.g. p,0.0)",
     "massrange=1,1\n          Range for mass-spectrum (e.g. 1,2)",
     "headline=\n	      Verbiage for output",
-    "VERSION=2.5d\n           6-jun-96 PJT",
+    "VERSION=2.5e\n           7-sep-01 PJT",
     NULL,
 };
 
@@ -79,7 +79,7 @@ nemo_main()
     nbody = getiparam("nbody");
     mfrac = getdparam("mfrac");
     rfrac = getdparam("rfrac");
-    seed = getiparam("seed");
+    seed = init_xrandom(getparam("seed"));
     snap_time = getdparam("time");
     zerocm = getbparam("zerocm");
     quiet = getiparam("quiet");
@@ -98,10 +98,10 @@ nemo_main()
 
     outstr = stropen(getparam("out"), "w");
 
-    btab = mkplummer(nbody, mfrac, rfrac, &seed, snap_time, zerocm, 
+    btab = mkplummer(nbody, mfrac, rfrac, seed, snap_time, zerocm, 
                 quiet,mrange,mfunc);
     bits = (MassBit | PhaseSpaceBit | TimeBit);
-    sprintf(hisline,"set_xrandom: seed used %d",seed);
+    sprintf(hisline,"init_xrandom: seed used %d",seed);
     put_string(outstr, HeadlineTag, hisline);
     put_history (outstr);           /* update history */
     if (*headline)
@@ -141,10 +141,6 @@ nemo_main()
  *                                       other parameter is still the limiting
  *                                       factor; Beware!
  *			    seed: the seed for the random number generator;
- *			          a value 0 will be converted into a unique new
- *			          value using UNIX's clock time, in seconds
- *			          since once-upon-a-time-in-the-seventies.
- *				  Now returns the actual seed used.
  *                          snap_time: the time at which the snapshot applies.
  *                          zerocm: logical determining if to center snapshot
  *                          quiet: integer how quiet model should be (0=noisy)
@@ -162,7 +158,7 @@ Body *mkplummer(nbody, mfrac, rfrac, seed, snap_time,zerocm,quiet,mr,mf)
 int   nbody;
 real  mfrac;
 real  rfrac;
-int   *seed;
+int   seed;
 real  snap_time;
 bool  zerocm;
 int   quiet;
@@ -190,8 +186,6 @@ rproc mf;
         error("mkplummer: NDIM = %d but should be 3", NDIM);
 
     btab = (Body *) allocate (nbody * sizeof(Body));
-
-    *seed = set_xrandom(*seed);
 
 /*
  *  Calculating the coordinates is easiest in STRUCTURAL units;

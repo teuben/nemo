@@ -20,7 +20,15 @@ dnl -- checks for system services
 
 dnl ---			NEMO base directory
 NEMO="`pwd`"
+NEMO_LIBS=""
+NEMO_CFLAGS=""
+NEMO_FFLAGS=""
 AC_SUBST(NEMO)
+AC_SUBST(NEMO_LIBS)
+AC_SUBST(NEMO_CFLAGS)
+AC_SUBST(NEMO_FFLAGS)
+
+
 
 dnl ---			Nemo version - just for fun for now
 NEMOVER="`cat VERSION`"
@@ -466,14 +474,19 @@ dnl## --  Also note the -DHAVE_GSL is a bit of a kludge, since i cannot
 dnl## --  figure out how to do this properly through config.h
 dnl##--------------------------------------------------------------------
 
-AM_PATH_GSL(0.9.2, ok=yes, ok=no)
+AC_ARG_ENABLE(gsl, [  --disable-gsl   don't use any GSL], ok=$enableval, ok=yes)
+
 if test "$ok" = "yes"; then
-    AC_MSG_RESULT(ok, i found it)
-    NEMO_CFLAGS="$NEMO_CFLAGS $GSL_CFLAGS -DHAVE_GSL"
-    NEMO_LIBS="$NEMO_LIBS $GSL_LIBS"
-else
-    AC_MSG_WARN(could not find GSL library)
+  AM_PATH_GSL(0.9.2, ok=yes, ok=no)
+  if test "$ok" = "yes"; then
+    GSL_CFLAGS="$GSL_CFLAGS -DHAVE_GSL"
+  else
+    AC_MSG_WARN([could not find GSL library])
+  fi
 fi
+
+AC_SUBST(GSL_CFLAGS)
+AC_SUBST(GSL_LIBS)
 
 dnl##--------------------------------------------------------------------
 dnl##
@@ -503,146 +516,9 @@ dnl fi
 dnl ---------------------------------------------------------------------
 
 
-dnl Checks for libraries.
-dnl Replace `main' with a function in -lAccessx:
-dnl AC_CHECK_LIB(Accessx, main)
-dnl Replace `main' with a function in -lDXm:
-dnl AC_CHECK_LIB(DXm, main)
-dnl Replace `main' with a function in -lF77:
-dnl AC_CHECK_LIB(F77, main)
-dnl Replace `main' with a function in -lI77:
-dnl AC_CHECK_LIB(I77, main)
-dnl Replace `main' with a function in -lMrm:
-dnl === AC_CHECK_LIB(g2c, s_stop)
-dnl Replace `main' with a function in -lMrm:
-dnl AC_CHECK_LIB(Mrm, main)
-dnl Replace `main' with a function in -lU77:
-dnl AC_CHECK_LIB(U77, main)
-dnl Replace `main' with a function in -lX11:
-dnl == AC_CHECK_LIB(X11, XDestroyWindow)
-dnl Replace `main' with a function in -lXIE:
-dnl AC_CHECK_LIB(XIE, main)
-dnl Replace `main' with a function in -lXTrap:
-dnl AC_CHECK_LIB(XTrap, main)
-dnl Replace `main' with a function in -lXau:
-dnl AC_CHECK_LIB(Xau, main)
-dnl Replace `main' with a function in -lXaw:
-dnl AC_CHECK_LIB(Xaw, main)
-dnl Replace `main' with a function in -lXbsd:
-dnl AC_CHECK_LIB(Xbsd, main)
-dnl Replace `main' with a function in -lXdmcp:
-dnl AC_CHECK_LIB(Xdmcp, main)
-dnl Replace `main' with a function in -lXext:
-dnl AC_CHECK_LIB(Xext, main)
-dnl Replace `main' with a function in -lXi:
-dnl AC_CHECK_LIB(Xi, main)
-dnl Replace `main' with a function in -lXie:
-dnl AC_CHECK_LIB(Xie, main)
-dnl Replace `main' with a function in -lXm:
-dnl AC_CHECK_LIB(Xm, main)
-dnl Replace `main' with a function in -lXmu:
-dnl AC_CHECK_LIB(Xmu, main)
-dnl Replace `main' with a function in -lXt:
-dnl AC_CHECK_LIB(Xt, main)
-dnl Replace `main' with a function in -lXtst:
-dnl AC_CHECK_LIB(Xtst, main)
-dnl Replace `main' with a function in -latex2html:
-dnl AC_CHECK_LIB(atex2html, main)
-dnl Replace `main' with a function in -lbkr:
-dnl AC_CHECK_LIB(bkr, main)
-dnl Replace `main' with a function in -lcda:
-dnl AC_CHECK_LIB(cda, main)
-dnl Replace `main' with a function in -lcgi:
-dnl AC_CHECK_LIB(cgi, main)
-dnl Replace `main' with a function in -lcgi77:
-dnl AC_CHECK_LIB(cgi77, main)
-dnl Replace `main' with a function in -lchf:
-dnl AC_CHECK_LIB(chf, main)
-dnl Replace `main' with a function in -lcore:
-dnl AC_CHECK_LIB(core, main)
-dnl Replace `main' with a function in -lcore68881:
-dnl AC_CHECK_LIB(core68881, main)
-dnl Replace `main' with a function in -ld:
-dnl AC_CHECK_LIB(d, main)
-dnl Replace `main' with a function in -ldbm:
-dnl AC_CHECK_LIB(dbm, main)
-dnl Replace `main' with a function in -ldevices:
-dnl AC_CHECK_LIB(devices, main)
-dnl Replace `main' with a function in -ldf:
+
 AC_CHECK_LIB(df, DFSDndataset)
-dnl Replace `main' with a function in -ldnet_stub:
-dnl AC_CHECK_LIB(dnet_stub, main)
-dnl Replace `main' with a function in -ldps:
-dnl AC_CHECK_LIB(dps, main)
-dnl Replace `main' with a function in -ldpstk:
-dnl AC_CHECK_LIB(dpstk, main)
-dnl Replace `main' with a function in -ldvr:
-dnl AC_CHECK_LIB(dvr, main)
-dnl Replace `main' with a function in -ldvs:
-dnl AC_CHECK_LIB(dvs, main)
-dnl Replace `main' with a function in -ldwi18n:
-dnl AC_CHECK_LIB(dwi18n, main)
-dnl Replace `main' with a function in -ldyn:
-dnl AC_CHECK_LIB(dyn, main)
-dnl AC_CHECK_LIB(f2c, s_stop)
-dnl AC_CHECK_LIB(g2c, s_stop)
-dnl Replace `main' with a function in -lgdi:
-dnl AC_CHECK_LIB(gdi, main)
-dnl Replace `main' with a function in -lids:
-dnl AC_CHECK_LIB(ids, main)
-dnl Replace `main' with a function in -lids_nox:
-dnl AC_CHECK_LIB(ids_nox, main)
-dnl Replace `main' with a function in -lieee:
-dnl AC_CHECK_LIB(ieee, main)
-dnl Replace `main' with a function in -limg:
-dnl AC_CHECK_LIB(img, main)
-dnl Replace `main' with a function in -lips:
-dnl AC_CHECK_LIB(ips, main)
-dnl Replace `main' with a function in -litcl:
-dnl AC_CHECK_LIB(itcl, main)
-dnl Replace `main' with a function in -ll:
-dnl AC_CHECK_LIB(l, main)
-dnl Replace `main' with a function in -llwkdxm:
-dnl AC_CHECK_LIB(lwkdxm, main)
-dnl Replace `main' with a function in -lm:
-dnl AC_CHECK_LIB(m, main)
-dnl Replace `main' with a function in -lnemo:
-dnl AC_CHECK_LIB(nemo, main)
-dnl Replace `main' with a function in -lnode:
-dnl AC_CHECK_LIB(node, main)
-dnl Replace `main' with a function in -loldX:
-dnl AC_CHECK_LIB(oldX, main)
-dnl Replace `main' with a function in -lolgx:
-dnl AC_CHECK_LIB(olgx, main)
-dnl Replace `main' with a function in -lpgplot:
-dnl AC_CHECK_LIB(pgplot, grflun)
-dnl Replace `main' with a function in -lphigs:
-dnl AC_CHECK_LIB(phigs, main)
-dnl Replace `main' with a function in -lpixrect:
-dnl AC_CHECK_LIB(pixrect, main)
-dnl Replace `main' with a function in -lplotsub:
-dnl AC_CHECK_LIB(plotsub, main)
-dnl Replace `main' with a function in -lplplotftk:
-dnl AC_CHECK_LIB(plplotftk, main)
-dnl Replace `main' with a function in -lpsres:
-dnl AC_CHECK_LIB(psres, main)
-dnl Replace `main' with a function in -lreadline:
 AC_CHECK_LIB(readline, read_history)
-dnl Replace `main' with a function in -lstd:
-dnl AC_CHECK_LIB(std, main)
-dnl Replace `main' with a function in -lsuntool:
-dnl AC_CHECK_LIB(suntool, main)
-dnl Replace `main' with a function in -lsunwindow:
-dnl AC_CHECK_LIB(sunwindow, main)
-dnl Replace `main' with a function in -ltcl:
-dnl AC_CHECK_LIB(tcl, main)
-dnl Replace `main' with a function in -ltermcap:
-dnl AC_CHECK_LIB(termcap, main)
-dnl Replace `main' with a function in -ltk:
-dnl AC_CHECK_LIB(tk, main)
-dnl Replace `main' with a function in -lutils:
-dnl AC_CHECK_LIB(utils, main)
-dnl Replace `main' with a function in -lvogl:
 AC_CHECK_LIB(vogl, foreground)
 AC_CHECK_LIB(z, inflate)
 AC_CHECK_LIB(c, strtoll)
@@ -651,8 +527,19 @@ AC_CHECK_LIB(c, strtoull)
 AC_CHECK_LIB(dl, dlopen)	# Dynamic linking for SunOS/Solaris and SYSV
 AC_CHECK_LIB(dld, shl_load)	# Dynamic linking for HP-UX
 
+
+dnl AC_CHECK_LIB(utils, main)
+dnl Replace `main' with a function in -lvogl:
+
+
 dnl##	this doesn't seem to work, since gsl linkeage also need libcblas etc...
-AC_CHECK_LIB(gsl,gsl_error)
+dnl AC_CHECK_LIB(gsl,gsl_version)
+dnl##   hmm, but this does not seem to work either....
+dnl AC_CHECK_LIB(gsl, main)
+AC_SEARCH_LIBS(sin, m)
+AC_SEARCH_LIBS(cblas_daxpy, gslcblas)
+AC_SEARCH_LIBS(gsl_version, gsl)
+
 
 dnl AC_CHECK_LIB(c, strsignal)
 
@@ -682,7 +569,6 @@ AC_FUNC_VFORK
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS(ftime gethostname gettimeofday getwd mkdir select strdup strtod strtol strtoul)
 
-
 AC_CHECK_SIZEOF(float, 0)
 AC_CHECK_SIZEOF(int, 0)
 AC_CHECK_SIZEOF(signed char, 0)
@@ -696,7 +582,6 @@ AC_ARG_WITH(yapp,
 	yapp_name="$yapp_default")
 
 YAPP_NAME="$yapp_name"
-
 
 AC_MSG_CHECKING(looking for a reasonable YAPP)
 case $yapp_name in
@@ -715,11 +600,8 @@ AC_SUBST(YAPP_NAME)
 AC_SUBST(YAPP_LIBS)
 AC_SUBST(YAPP_DEF)
 
-AC_SUBST(NEMO_FFLAGS)
-AC_SUBST(NEMO_CFLAGS)
-
 if test -d "$NEMODAT"; then
-  echo "*** Warning: \$NEMO=$NEMO is already present"
+  echo "*** Warning: NEMO=$NEMO, maybe you are running NEMO already"
   echo "*** you probably should source $NEMO/nemo_end"
 fi
 

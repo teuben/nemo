@@ -7,6 +7,7 @@
  *    V1.2   jul-91          set_xrandom(seed)             PJT
  *    V1.2a  feb-92          usage,                        PJT
  *    V1.2b  23-mar-97       cleanup protos		   pjt
+ *           8-sep-01	     init_xrandom
  *.............................................................................
  *     A homogeneous spherical system cannot be both isotropic and in dynamical
  *  equilibrium.  Therefore several options are presented for providing an
@@ -91,7 +92,7 @@ nemo_main()
 
     outstr = stropen(getparam("out"),"w");
     n = getiparam("nbody");
-    seed = set_xrandom(getiparam("seed"));    
+    seed = init_xrandom(getparam("seed"));    
     shape = getparam("shape");  /* default: i */
     switch (*shape) {
         case 'i':   i_flag = TRUE; break;
