@@ -16,6 +16,7 @@
  *	 3-apr-96	   c added usage line		pjt
  *	20-nov-96	V2.0 added header=		pjt
  *				for nbody,time
+ *       9-oct-01          a  toying with time selection pjt
  */
 
 #include <stdinc.h>
@@ -37,7 +38,7 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "times=all\n		Times to select snapshot",
     "tab=\n			Standard output or table file?",
     "header=f\n			Add header to output?",
-    "VERSION=2.0\n		20-nov-96 PJT",
+    "VERSION=2.0a\n		9-oct-01 PJT",
     NULL,
 };
 
@@ -58,7 +59,7 @@ void nemo_main()
     rproc btrtrans(), fopt[MAXOPT];
 
     ParticlesBit = (MassBit | PhaseSpaceBit | PotentialBit | AccelerationBit |
-            AuxBit | KeyBit);
+            AuxBit | KeyBit | DensBit | EpsBit);
     instr = stropen(getparam("in"), "r");	/* open input file */
     Qhead = getbparam("header");
 
@@ -102,9 +103,13 @@ void nemo_main()
 	get_history(instr);
         if (!get_tag_ok(instr, SnapShotTag))
             break;                                  /* done with work */
+#if 0
         get_snap(instr, &btab, &nbody, &tsnap, &bits);
         if (!streq(times,"all") && !within(tsnap,times,0.0001))
             continue;                   /* skip work on this snapshot */
+#else
+        get_snap_by_t(instr, &btab, &nbody, &tsnap, &bits, times);	
+#endif
         if ( (bits & ParticlesBit) == 0)
             continue;                   /* skip work, only diagnostics here */
 	if (!Qsepar) {				/* printf options */
