@@ -58,6 +58,9 @@ echo updating $h
 echo "/* do not edit - created by the version script */"  >! $h
 echo '#define VERSION "'$version'"'                      >>! $h
 
+#  touch it again, so it's the last one touched :-)
+touch $v
+
 exit 0
 
 
