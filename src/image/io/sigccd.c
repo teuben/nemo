@@ -17,12 +17,15 @@ string defv[] = {
     "nx=16\n            first dimension???",
     "dcol=2\n           Column for data",
     "nmax=100000\n      Allocation space for piped I/O",
-    "VERSION=1.1a\n	1-jan-04 PJT",
+    "VERSION=1.1b\n	12-apr-04 PJT",
     NULL,
 };
 
 string usage = "convert (WASP sig)tables into images";
 
+#if !defined(MAX_LINELEN)
+#define MAX_LINELEN 10000
+#endif
 
 void nemo_main()
 {
