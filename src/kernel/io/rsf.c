@@ -22,7 +22,7 @@
 string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "in=???\n			input file name (ascii structured file)",
     "out=???\n			output file name (binary structured file)",
-    "VERSION=2.3e\n		5-feb-95 PJT",
+    "VERSION=2.3f\n		15-mar-05 PJT",
     NULL,
 };
 
@@ -56,7 +56,7 @@ void safe_read_long       (stream, long *);
 void safe_read_float      (stream, float *);
 void safe_read_double     (stream, double *); 
 
-nemo_main()
+void nemo_main()
 {
     stream istr, ostr;
     char typ[MaxTagLen], tag[MaxTagLen];
