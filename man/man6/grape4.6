@@ -1,0 +1,60 @@
+.TH GRAPE4 6NEMO "22 May 1997"
+.SH NAME
+grape4 \- sample operations on GRAPE4
+.SH DESCRIPTION
+Currently only a reminder to some operational details for the GRAPE4 in
+Drexel.
+.SH EXAMPLES
+Demo versions \fBharp3\fP and \fBharp3X\fP expect input files in 
+ascii "205" (see \fIstoa(1NEMO)\fP) format or create initial data on
+the fly.
+The output (also optional) format however
+is in binary "205" format (see also \fIatos(1NEMO)\fP, with the
+\fBbinary=true\fP option), and this needs to be converted on the
+host to tag the proper endianism in \fIsnapshot(5NEMO)\fP files.
+.PP
+The \fIdirect4(1NEMO)\fP demo program is a condensed version
+of the \fBharp3\fP demo, but expects standard NEMO datafiles.
+.SH HARP3
+Here is a parameter input file for \fBharp3\fP, to be run as follows:
+.nf
+    % harp3 < run1.par
+    % atos run1.out - binary=t options=mass,phase,phi |\\
+        snapxyz - - | xyzview - scale=4 maxframe=200
+.fi
+.PP
+where run1.par looks as follows: (did somebody mix up dtout and dtsnapout?)
+.nf
+16384 0.03125 25 1 0.03125  0.25 8
+run1.out
+1 0.2
+0
+0.8
+2 		<-- never used?
+.fi
+.SH NEMO
+The following NEMO chain of commands 
+should be the same as the \fBharp3\fP demo just shown:
+.nf
+mkhomsph - 16384 rmax=1 vmax=0.2 |\\
+    snapspin - - omega=-0.8 |\\
+    direct4 - . dt=0.03125 tstop=25 dtlog=0.03125 dtout=1 eps=0.25 
+.fi
+.SH "SEE ALSO"
+direct4(1NEMO), atos(1NEMO), stoa(1NEMO), snapshot(5NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH ENVIRONMENT
+The following environment variables are expected by the GRAPE4 board:
+.nf
+.ta +2i
+HARP3_NBOARDS    	number of board you have [Drexel: 1]
+HARP3_NCLUSTERS      	number of clusters [Drexel: 1]
+HARP3_FIRSTCLUSTER  	first cluster [Drexel: 0]
+HARP3_DEFECTS         	file with list of defects [Drexel: ~makino/src/harplibs/defect_list]
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +2.0i +2.0i
+21-may-97	Created  	PJT
+.fi
