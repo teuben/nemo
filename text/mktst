@@ -1,0 +1,12 @@
+#! /bin/csh
+#	Test if the command 'makeindex' is online, if not it goes
+#	into the index subdir and compiles it as 'makeindex' in the
+#	$NEMO/doc directory.
+set itst=(`which makeindex`)
+if ($#itst == 1) then
+  echo makeindex found as $itst
+else
+  echo Program makeindex not found in search path, recompile
+  (cd index ; make all ; make install ; mv index ../makeindex ; make clean)
+endif
+
