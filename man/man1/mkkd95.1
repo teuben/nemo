@@ -1,27 +1,49 @@
 .TH MKKD95 1NEMO "6 March 2004"
 .SH NAME
-mkkd95 \- Kuijken-Dubinski-95 composite bulge-disk-halo model
+mkkd95 \- Kuijken-Dubinski-95 composite disk-bulge-halo model
 .SH SYNOPSIS
 \fBmkkd95\fP [parameter=value]
 .SH DESCRIPTION
-\fBmkkd95\fP creates a composite Bulge-Disk-Halo galaxy in 
+\fBmkkd95\fP creates a composite Disk-Bulge-Halo galaxy in 
 near equilibrium following the procedure described in
-Kuijken & Dubinksi (1995).
+Kuijken & Dubinksi (1995). This program is merely a NEMO wrapper
+that assembles all the correct parameters, runs the a set
+of KD95 programs in a temporary rundirectory and converts the
+ascii output to a NEMO \fIsnapshot(5NEMO)\fP.
+.PP
+The bulge and halo are  a King and lowered Evans distribution
+resp, whereas the disk a 3D generalization of Shu's planar disk
+to include a 3rd integral of motion to account for the vertical
+structure. The construction occurs in 3 steps. First the potential
+is calculated, after which the disk distribution function
+is constructed which generates the given potential. Finally,
+each component is realized with a self-consistent distribution
+of particle orbits.
+.PP
+Although one
+has the option of including any combination of components,
+leaving out the halo probably won't work.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBout=\fP
-output snapshot (a rundirectory $out.tmpdir is also created)
+output snapshot (a rundirectory $out.tmpdir is also created). 
+No default.
+.TP
+\fBndisk=\fP
+Number of particles in disk. Set them to 0 to leave out this
+component.
+Notice these are the first set of particles in the final snapshot.
+ [8000]  
 .TP
 \fBnbulge=\fP
 Number of particles in bulge [4000]  
 .TP
-\fBndisk=\fP
-Number of particles in disk [8000]  
-.TP
 \fBnhalo=\fP
-Number of particles in halo [6000]  
+Number of particles in halo. 
+Notice these are the last set of particles in the final snapshot.
+[6000]  
 .TP
 \fBpsi0=\fP
 in.dbh: Psi0 (HALO) 
@@ -99,14 +121,22 @@ in.dbh:
 sig_b    - bulge central potential
 [0.714]     
 .TP
-\fBdeltar=\fP
-in.dbh: delta_r [0.01]     
+\fBdr=\fP
+in.dbh: delta_r 
+the width of the radial bins used to calculate the potential
+[0.01]     
 .TP
 \fBnr=\fP
-in.dbh: nr [2400]     
+in.dbh: nr -
+number of radial bins - initially a guess since we don't know
+the radial extent of the system
+[2400]     
 .TP
-\fBnharm=\fP
-in.dbh: number of harmonics [10]   
+\fBlmax=\fP
+in.dbh: the largest value in the potential harmonic expansion - use
+lmax=2 to get a quick look at the mass profile and lmax=10 for
+the final calculation of the model
+ number of harmonics [10]   
 .TP
 \fBsigvr0=\fP
 in.diskdf: central radial velocity dispersion [0.47]  
@@ -121,25 +151,34 @@ in.diskdf: number of intervals for correction function [50]
 in.diskdf: number of iterations [10]   
 .TP
 \fBfstreamb=\fP
-in.bulge: [0.75]      
+in.bulge: the streaming fraction of stars with L_z > 0.
+This controls the  rotation of the bulge and the halo,
+with f=0.5 the non-rotating case.
+[0.75]      
 .TP
 \fBfstreamh=\fP
-in.halo: [0.5]      
+in.halo: see above, for the halo. [0.5]      
 .TP
-\fBseed=\fP
-in.- Random Seed [0]    
+\fBiseed=\fP
+in.- Random Seed - KD95 convention. Notice this seed is shared
+by all 3 components. [-1]    
 .TP
 \fBzerocm=\fP
-in.- Center the snapshot? [t]   
+in.- Center the snapshot? Notice again this is shared by all
+three components. [t]   
 .TP
 \fBbin=\fP
-directory in which KD95 binaries live [.] 
+directory in which KD95 binaries live. Unless your binaries 
+have been added  to your search PATH, you need to specify
+the directory where these live.
+ [.] 
 .TP
 \fBmodel=A|B|C|D\fP
-Base K&D95 model. The default model parameters are for model-A,
+Base K&D95 model. The default model parameters above are 
+already for model-A,
 but with this keyword another one of the 4 published models can
 be quickly loaded. After that specific parameters can still
-be overriden by resetting their value explicitly.
+be overriden by setting their value explicitly.
 [Default:  A]
 .SH PROCEDURE
 Creating a galaxy model from these parameters is sort of a black art
@@ -150,8 +189,8 @@ effects on the mass profile.
 .PP
 The halo is a flattened analogue of the King model so the concentration
 (R_tidal/R_core) is determined by the dimensionless central potential
-$\psi_0/\sigma_0^2$.  The more negative the value the greater the
-concentration.  The parameters $R_a$ and $v_0$, affect the scaling of the
+psi_0/sigma_0^2.  The more negative the value the greater the
+concentration.  The parameters R_a and v_0, affect the scaling of the
 halo mass profile.
 .PP
 The effect of different bulge parameters is more predictable.  Decreasing the
@@ -164,12 +203,12 @@ rotation curve is predictable ahead of time.
 .PP
 Hit and miss seems to be a good strategy for finding a suitable profile.
 Generate a model to lmax=2 and then view the resulting rotation curve by typing
-'make vr.dat'.  This uses the program to generate the file vr.dat which
+\fImake vr.dat\fP.  This uses the program to generate the file \fIvr.dat\fP which
 tells you the contributions to the total rotation curve.  Another useful
-file is 'mr.dat' which tells you the mass and radial extent of the disk
+file is \fImr.dat\fP which tells you the mass and radial extent of the disk
 bulge and halo.
 .PP
-The program plotforce will also generate the rotation curves for you
+The program \fIplotforce\fP will also generate the rotation curves for you
 directly from the dbh.dat, b.dat and h.dat files.
 .PP
 The potential is determined iteratively: starting from an initial
@@ -190,10 +229,53 @@ potential is insufficient to generate a potential well as deep as
 requested. If this persists over many iterations, again increase the
 number or size of the radial bins.
 .PP
+.SH PROGRAMS
+Although \fBmkkd95\fP calls a number of KD95 programs, here is a brief
+explanation of some of them:
+.PP
+\fBdbh\fP calculates the potential. From in.dbh is computes
+dbh.dat, h.dat, b.dat and mr.dat.
+.PP
+\fBgetfreqs\fP tabulates various characteristic frequencies (omega, kappa etc.)
+in the equatorial plane for use by \fBdiskdf\fP. Input files are 
+dbh.dat h.dat b.dat, and it generates freqdbh.dat
+.PP
+\fBdiskdf\fP iteratively calculates the correction functions for
+the disk distribution function. These functions are multiplicative
+corrections to the surface density and vertical velocity dispersion
+which appear to leading order in the Shu (1969) distribution
+functions. See KD95 for details. The keywords
+sigrv0, sigr0, ncorr, niter are used for this.
+It also outputs the Toomre Q as a function of radius in the file
+toomre.dat.
+.PP
+\fBgendisk, genbulge, genhalo\fP assembled the respective components
+using an input file.
+.PP
+\fBmergerv\fP is a small shell script that merges the 3 ascii files.
 .SH EXAMPLES
 The default keywords are for Kuijken-Dubinski's model-A.
+
+.nf
+% mkkd95 A0.dat
+% snapmstat A0.dat sort=f
+0 0:7999  = 8000 Mass= 0.000108822 TotMas= 0.87058 CumMas= 0.87058
+1 8000:11999  = 4000 Mass= 0.00010631 TotMas= 0.425242 CumMas= 1.29582
+2 12000:17999 = 6000 Mass= 0.000819365 TotMas= 4.91619 CumMas= 6.21201
+% snapplot A0.dat color='i<8000?2.0/16.0:(i<12000?3.0/16.0:4.0/16.0)' yvar=z
+% snapxyz A0.dat - color='i<8000?1:(i<12000?2:4)' | xyzview - maxpoint=18000 nfast=18000 scale=8 fullscreen=t
+
+% mkkd95 B0.dat model=B
+% snapplot B0.dat color='i<1000?2.0/16.0:(i<2000?3.0/16.0:4.0/16.0)' yvar=z
+
+% mkkd95 C0.dat model=C
+% snapplot C0.dat color='i<4000?2.0/16.0:(i<6000?3.0/16.0:4.0/16.0)' yvar=z
+
+% mkkd95 D0.dat model=D
+% snapplot D0.dat color='i<1000?2.0/16.0:(i<2000?3.0/16.0:4.0/16.0)' yvar=z
+.fi
 .SH SEE ALSO
-gendisk, genbulge, genhalo, dbh, getfreqs, diskdf
+gendisk, genbulge, genhalo, dbh, getfreqs, diskdf, snapmstat(1NEMO), tabtos(1NEMO)
 .SH FILES
 .nf
 NEMO/src/nbody/init/mkkd95.c
@@ -212,6 +294,6 @@ Peter Teuben (NEMO interface) -
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
-06-Mar-04	V1.0 Created	PJT
+06-Mar-04	V1.0 Created, using kd95's  README file 	PJT
 .fi
 
