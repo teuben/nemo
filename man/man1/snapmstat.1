@@ -1,0 +1,59 @@
+.TH SNAPMSTAT 1NEMO "18 September 1990"
+.SH NAME
+snapmstat \- statistics of the masses in a snapshot
+.SH SYNOPSIS
+\fBsnapscale in=\fP\fIin_file\fP [parameter=value] .\|.\|.
+.SH DESCRIPTION
+\fIsnapmstat\fP runs through the masses of a snapshot, in
+sequential order or sorted by mass, and reports in each bin
+(to be defined later) how many stars there are and the total
+mass is each bin.
+.PP
+A new bin is defined when its predecessor in the searching 
+(either sequential or sorted) has a different mass.
+.PP
+The output is suitable to be parsed by \fIawk(1)\fP or
+\fItabmath(1NEMO)\fP and can be used in \fIsnapmask(1NEMO)\fP
+to select certain particles by mass. \fIsnapcopy\fP can perhaps
+also be of some use.
+.SH PARAMETERS
+The following parameters are recognized:
+.TP 24
+\fBin=\fIin_file\fP
+input file, in \fIsnapshot\fP(5NEMO) format.  Default: none.
+.TP
+\fBsort=\fBt|f\fP
+Should masses be sorted? Although this keyword has not been
+implemented yet, it's effect can be achieved with \fIsnapsort\fP.
+[default: \fBf\fP].
+.TP
+\fBspecies=\fImaxspecies\fP
+Maximum number of species allowed. This keyword is also not used,
+since the current table is build on the fly, and not saved.
+[default: \fB100\fP].
+.SH EXAMPLE
+The output of an SPH snapshot could look like:
+.PP
+.nf
+0 0:8191  = 8192 Mass= 3.4332e-06 TotMas= 0.0281248 CumMas= 0.0281248
+1 8192:12287  = 4096 Mass= 1.5259e-05 TotMas= 0.0625009 CumMas= 0.0906256
+2 12288:28671  = 16384 Mass= 9.7275e-06 TotMas= .159375 CumMas= .250001
+3 28672:45055  = 16384 Mass= 6.1035e-05 TotMas= .999997 CumMas= 1.25
+4 45056:49151 = 4096 Mass= 0.00015259 TotMas= .625009 CumMas= 1.87501
+.fi
+.SH "SEE ALSO"
+snapstat(1NEMO), snapprint(1NEMO), snapcopy(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +3.0i
+~/src/pjt/nbody   	snapmstat.c snapmstat.1
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+18-Sep-90	V1.0: created          	PJT
+.fi
+
+
