@@ -1,4 +1,4 @@
-VERSION = NEMO V3.0 20-jun-01 PJT
+VERSION = NEMO V3.0 13-sep-01 PJT
 ################################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 ################################################################################
@@ -609,6 +609,12 @@ configure:	configure.in
 
 config_extra:
 	cp config.h makedefs $(NEMOLIB)
+
+DIFF = tkdiff
+
+diff_new:
+	-$(DIFF) config.h $(NEMOLIB)
+	-$(DIFF) makedefs $(NEMOLIB)
 
 #	useful if you want to start with a clean slate
 config_clean:
