@@ -1,0 +1,142 @@
+.TH TABHIST 1NEMO "21 July 2000"
+.SH NAME
+tabplot \- general table plotter
+.SH SYNOPSIS
+.PP
+\fBtabplot in=\fPinfile [parameter=value]
+.SH DESCRIPTION
+\fItabplot\fP plots datapoints from an ascii table, and optionally
+connects the datapoints by lines. It can also bin the data, and plot
+error-bars in X and Y derived from the dispersion within the bins.
+.PP
+\fItabplot\fP is intended for quick and dirty display of the data. 
+For more complicated plot, other plotting packages should be used
+(Mongo, SM, WIP, gnuplot, Grace etc.)
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 20
+\fBin=\fIinfile\fP
+input file, in tabular format [no default].
+.TP
+\fBxcol=\fIy-column\fP
+column from which the (x) values are taken [default \fB1\fP].
+.TP
+\fBycol=\fIy-column\fP
+column from which the (y) values are taken. Multiple columns can be
+given.
+[default \fB2\fP].
+.TP
+\fBxmin=\fIx_min\fP
+Minimum value along X-axis to include [default: minimum of datapoints].
+.TP
+\fBxmax=\fIx_max\fP
+Maximum value along X-axis to include [default: maximum of datapoints].
+.TP
+\fBymin=\fIy_min\fP
+Minimum value along y-axis to include [default: minimum of datapoints].
+.TP
+\fBymax=\fIy_max\fP
+Maximum value along y-axis to include [default: maximum of datapoints].
+.TP
+\fBxbin=\fIboundaries\fP
+When used either the number of datapoints used to average to a plotted
+datapoint or the bin boundaries (in X-worldcoordinates) must be given.
+The program can distinguish from both cases by the number of variables
+given to this keyword. One means fixed number of datapoints used in
+averaging, more than one means the numbers are bin boundaries.
+[default: not used, datapoints from file are used].
+.TP
+\fBpoint=\fP\fItype,size\fP
+Pairs of integers, (one pair for each plotted column) describing the
+point type (0=none, 1=point, 2=circle, 3=plus, 4=square)
+and size in cm (see also \fIyapp(3NEMO)\fP). Pairs not specified
+inherit from the last one entered. Default: 1,0.1
+.TP
+\fBline=\fP\fItype,width\fP
+Pairs of integers, (one pair for each plotted column) describing the
+line type and width (see \fIplltype(3NEMO)\fP). Default: 0,0
+.TP
+\fBcolor=\fP\fIcolor\fP
+Integer denoting color. This will be \fIyapp(3NEMO)\fP specific.
+Colors not specified will inherit from the last
+one entered.
+Default: not used (i.e. default drawing color used)
+.TP
+\fBerrors=x|y|xy\fP
+Specify which error bars to draw in case binning is used. Default: none.
+.TP
+\fBxlab=\fIx-label\fP
+Label along the X-axis [default: \fBvalue\fP].
+.TP
+\fBylab=\fIy-label\fP
+Label along the Y-axis [default: \fBN\fP].
+.TP
+\fBxcoord=\fP\fIx1,x2,...\fP
+A list of numbers (see \fInemoinp(3NEMO)\fP for valid syntax) that will
+cause vertical lines at these X coordinate to be drawn. Default: none
+.TP
+\fBycoord=\fP\fIy1,y2,...\fP
+Y coordinates for the horizontal lines, same as \fBxcoord=\fP.
+.TP
+\fBnxticks=\fP
+Number of tickmarks along the X axis. This divides the X axis in
+\fInxticks+1\fP pieces. [Default: \fB7\fP].
+.TP
+\fBnyticks=\fP
+Same for Y.
+.TP
+\fBnmax=\fP
+Maximum number of lines that are allocated in pipes. [10000]
+.TP
+\fBmedian=f|t\fP
+Use median to compute "average" binning values. It is used to 
+compute the X as well as Y coordinates of the binned point, however
+error bars are still computed using the mean.
+Default: \fBf\fP.
+.TP
+\fBheadline=\fItext\fP
+Random verbiage, will be plotted along right top of plot for id. [default: none].
+The left top will contain the filename \fIinfile\fP.
+.TP
+\fBtab=\fP
+If binning is used, this keyword can be use to supply an optional
+output filename. Default: none.
+.TP
+\fBcursor=\fP
+This will be the name of an ascii file that will contain coordinates
+that have been marked with the cursor (currently only implemented for
+PGPLOT). Cursor keys are in the usual definition: A=left mouse will mark,
+D=middle mouse has no function, X=right mouse will exit. 
+Default: not used.
+.TP
+\fBfullscale=t|f\fP
+Use full scale in one axis if other axis is autoscaled? In versions older
+than 2.0 fullscale was always on (t), by default it is now off (f).
+.TP
+\fBlayout=\fP
+Optional Layout file that contains draw commands. Default: none.
+.SH "SEE ALSO"
+tablsqfit(1NEMO), tabmath(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH BUGS
+tab= doesn't work properly with multiple columns
+.SH FILES
+.nf
+.ta +3.0i
+~/src/kernel/tab	tabplot.c
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+25-nov-88	V1.0 - created  	PJT
+13-nov-90	V1.1 deleted nmax= by using file_lines()	PJT
+26-jan-95	V1.5a multi-column plotting support, trickmarks, extra coord lines	PJT
+14-feb-96	V1.6 added cursor= keyword (*PGPLOT only*)	PJT
+7-may-98	V2.0 added median= for binning method	PJT
+25-jul-98	V2.0b added line=lwidth,lstyle w/ lstyle<0 histogram (thank Kartik)	PJT
+31-mar-99	V2.1 autoscaling now takes range in other axis into account	PJT
+28-jul-99	V2.2 added color=
+21-jul-00	V2.3 min & max can be separately set	PJT
+.fi
