@@ -1,0 +1,29 @@
+%N king
+%D ### NEMO program with unknown intent...(missing usage)
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man king' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A out
+	Output File (required) [???]
+%A w0
+	Dimensionless central potential [1]
+%A mass
+	Total Mass of model [1]
+%A rc
+	Core Radius of model [1]
+%A nsteps
+	Number of steps to take [101]
+%A epsilon
+	Accuracy for Integration [1e-6]
+%A tab
+	tabulate in an ASCII - file []
+%A g
+	Gravitational Constant [1]
+%A VERSION
+	AdM  -   mar 91 [V0.9]
+%A AUTHOR
+	Patrick (AdM) Frisch
+                                    University of G'ottingen
+                                    Department of Astrophysics
+                                    BITNET: pfrisch@dgogwdg1 [AdM]
