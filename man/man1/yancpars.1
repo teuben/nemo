@@ -1,0 +1,63 @@
+.TH YANCPARS 1NEMO "27 May 2001"
+.SH NAME
+yancpars \- add YANC parameters to an existing snapshot
+.SH SYNOPSIS
+\fByancpars\fP [parameter=value]
+.SH DESCRIPTION
+\fByancpars\fP adds YANC integration parameters to a snapshot.
+It will only read the first
+snapshot, and discard all others. Use \fIcsf(1NEMO)\fP
+or \fIsnaptrim(1NEMO)\fP to select an arbitrary snapshot. In addition,
+any double precision snapshots will be converted to single
+precision, since that is what YANC wants.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input file, must be a snapshot file. 
+No default.
+.TP
+\fBout=\fP
+Output file, in snapshot format. No default.
+.TP
+\fBeps=\fP
+Softening length [0.05]     
+.TP
+\fBkernel=\fP
+Softening kernel. See below for an enumeration of
+this integer parameter [21]     
+.TP
+\fBtheta=\fP
+Treecode opening angle [0.5]    
+.TP
+\fBhmin=\fP
+Timestep dt=2^-hmin [5.0]     -- is this an integer or real --
+26-may-01 PJT [1.0]     
+.TP
+\fBconvert=\fP
+Convert certain types in the input data to another  type. Normally
+YANC wants single precision, so any double will be converted to
+single. [d2f].
+.SH SOFTENING KERNEL
+The following softening kernels are available:
+.nf
+.ta +1i
+1-9	Ferrers softening, 'kernel' is the index
+10-19	...
+20	P0, the classic Plummer softening
+21	P1
+22	P2
+23	P3
+30	experimental
+.fi
+.SH SEE ALSO
+cfs(1NEMO), snaptrim(1NEMO)
+.SH FILES
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+27-May-01	Created  	PJT
+.fi

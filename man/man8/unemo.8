@@ -1,0 +1,35 @@
+.TH UNEMO 8NEMO "21 May 2001"
+.SH NAME
+unemo \- micro-NEMO environment
+.SH DESCRIPTION
+\fIuNEMO\fP is an environment which gives users access to
+the basic I/O library alone. A few more files are also
+needed, and getparam.c is replaced by getparam_fake.c,
+creating a libunemo.a to complete external linking.
+.PP
+Most notably, all aspects of the NEMO user interface have
+been avoided, so users can use their own main(). However,
+NEMO's output routines like dprintf(), error() and warning() 
+are still called, and can in principle be overridden
+by the users own names.
+.SH CAVEAT
+The include file config.h is currently located in $NEMOLIB, since
+it is made by the configure system. Thus uNEMO should be built
+after a regular NEMO has been built, although with some tweaking
+any config.h can probably be used.
+.PP
+It is possible that the ZENO library is more cleanly defined in 
+terms of usage by clients that don't want to use the whole NEMO
+or ZENO libarry.
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +3.0i
+$NEMO/src/uNEMO		directory in which uNEMO can be built
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1i +4i
+21-may-01	V1.0: created to play with Dehnen's new YANC	PJT
+.fi
