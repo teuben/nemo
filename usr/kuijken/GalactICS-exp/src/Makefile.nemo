@@ -11,7 +11,7 @@ CFLAGS = -O -DRINGASCII -DASCII
 LIBS = -lm
 
 ALLFILES= dbh genhalo genbulge gendisk diskdf tobinary \
-     getfreqs dbh vcirc plothalo plotforce 
+     getfreqs vcirc plothalo plotforce 
 
 #FFLAGS = -O -extend_source
 #CFLAGS = -O2 -DRINGASCII -DASCII -DTP
