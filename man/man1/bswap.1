@@ -1,4 +1,4 @@
-.TH BSWAP 1NEMO "6 June 2001"
+.TH BSWAP 1NEMO "30 September 2003"
 .SH NAME
 bswap \- swap bytes in a file
 .SH SYNOPSIS
@@ -7,9 +7,15 @@ bswap \- swap bytes in a file
 \fBbswap\fP swaps the bytes in a file. This can be
 useful if the file was copied between different endian machines
 (e.g. Sparc-Solaris and pc-linux),
-and consists of a homogeneous datatype (\fIfilestruct(5NEMO)\fP is
-a notable example where you cannot use this technique, but NEMO's
-binary files swap on-the-fly if need be).
+and consists of a homogeneous datatype. (most NEMO files,
+e.g. those made via \fIfilestruct(5NEMO)\fP are
+notable example where you cannot use this technique, though NEMO's
+binary files swap on-the-fly if they detect them to be
+originating from another endian-type machine).
+.PP
+This program also has a few keyword to aid benchmarking file I/O
+and different sized word swapping speed. The reported speed
+will be in Mswaps (mega word swaps per second).
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -34,6 +40,14 @@ One swap call? Only useful to set false under benchmark circumstances.
 \fBoffset=\fP
 Offset (in bytes) before which no swapping is done.
 [Default: \fB0\fP].
+.TP
+\fBmemcpy=t|f\fP
+Test swapping data as 8-byte doubles via memcpy. len=8 is required for
+this to work. Default:f 
+.TP
+\fBrepeat=\fP\fIrepeat-count\fP
+Number of times to repeat swapping all the words, 
+only good for more accurate benchmarking. Default: 0
 .SH BUGS
 Be careful with pipes, they don't seem to work on an input file yet.
 .SH EXAMPLES
@@ -83,4 +97,5 @@ Peter Teuben
 23-feb-97	V1.3 allow offset before swapping starts	PJT
 15-dec-98	V1.4 add streaming mode to I/O    	PJT
 6-jun-01	more verbosities, plus an example	PJT
+30-sep-03	V1.5 added memcpy=, repeat=	PJT
 .fi
