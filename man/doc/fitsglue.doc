@@ -1,0 +1,22 @@
+%N fitsglue
+%D catenate fits images into a fitscube
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man fitsglue' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input fits files or template for list [???]
+%A out
+	Output fits file [???]
+%A multiple
+	Check for multiple fits files on input? [t]
+%A naxis3
+	Preset NAXIS3 here, or let program scan first [0]
+%A blocking
+	Blocking factors for I/O [1,1]
+%A compact
+	Compact (move) dummy axes to the end [f]
+%A inlist
+	optional nemoinp(1) list expression for in= []
+%A VERSION
+	24-feb-98 PJT [1.2]
