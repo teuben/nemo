@@ -29,7 +29,8 @@ POT_CC = \
 	harmonic.c hernquist.c hom.c hubble.c kuzmindisk.c \
 	isochrone.c jaffe.c log.c mestel.c miyamoto.c nfw.c null.c \
 	op73.c plummer.c plummer2.c rh84.c rotcur0.c rotcur.c teusan85.c triax.c \
-	twofixed.c plummer4.c vertdisk.c tidaldisk.c polynomial.c wada94.c
+	twofixed.c plummer4.c vertdisk.c tidaldisk.c polynomial.c wada94.c \
+        zero.c
 
 POT_F77 = \
 	athan92.f harmonicf.f pfenniger84.f piner94.f 
