@@ -1,14 +1,13 @@
-.TH MKFLOWDISK 1NEMO "26 May 2002"
+.TH MKFLOWDISK 1NEMO "19 November 2003"
 .SH NAME
-mkflowdisk \- uniform-density test disk plus spiral in spherical potential
+mkflowdisk \- test disk based on a flow potential
 .SH SYNOPSIS
 \fBmkflowdisk out=\fPsnapshot [parameters=values ...]
 .SH DESCRIPTION
-\fImkflowdisk\fP sets up a thin disk of test particles 
-in a user-supplied flow potential (in
-\fIpotential(5NEMO)\fP format). 
-The inverse wavelenght of the spiral (related to the pitch angle)
-will be positive for a \fItrailing spiral pattern\fP.
+\fImkflowdisk\fP sets up a two-dimensional disk of test particles 
+in a user-supplied flow potential (in standard \fIpotential(5NEMO)\fP format). 
+Optionally the surface density of particles can mimic that of a logarithmic
+spiral.
 .PP
 \fIsnapmass(1NEMO)\fP and \fIsnapcenter(1NEMO)\fP have to be used if
 for some reason the user want finite mass particles and a perfectly
@@ -33,8 +32,9 @@ repository. The user can supply his own, see potential(5NEMO).
 \fBpotpars=\fIpot_pars\fP
 Paramaters to the user supplied potential. The number of parameters
 depends on the potential supplied, the first parameter is reserved
-for a pattern speed in future implementation.
-[default: not supplied, parameters as defined by potential(5)].
+for a pattern speed.
+[default: not supplied, parameters are defaulted by how they are defined in the 
+potential(5NEMO) code].
 .TP
 \fBpotfile=\fIpot_file\fP
 Data_file(s) to the user supplied flow potential. 
@@ -48,8 +48,8 @@ Inner cutoff radius of test-particle disk. [Default: \fB0.0\fP].
 \fBrmax=\fImax_disk_radius\fP
 Outer cutoff radius of test-particle disk. [Default: \fB1.0\fP].
 .TP
-\fBmass=
-
+\fBmass=\fP
+Total mass of the disk. Default: 0.0.
 .TP
 \fBuniform=t|f\fP
 Override the densities from the flow potential and create a uniform disk?
@@ -57,16 +57,18 @@ Default: f.
 .TP
 \fBk=\fIinv_rad\fP
 Wavenumber of the spiral pattern, such that \fB2.pi.k.r\fP is the phase of
-the spiral density maximum.  Positive \fB\fP means trailing spiral pattern.
-(note that this is defined in term of \fBsign=\fP, see below)
+the spiral density maximum.  Positive \fB\fP means a \fItrailing spiral pattern\fP.
+The wavenumber is related to the pitch angle.   k=0 should be used for an
+axisymmetric disk.
 [default: \fB1\fP]. 
 .TP
 \fBphase=\fI\fP
-Phase offset of the spiral at the outer radius (rmax) of the disk.
+Phase offset of the spiral at the outer radius (rmax) of the disk, in degrees.
+[Default: 0.0]
 .TP
 \fBseed=\fIrandom_seed\fP
 Use random number seed. A zero seed will generate a system-time
-dependant seed. [default: \fB0\fP].
+dependant seed. See \fIxrandom(3NEMO)\fP [default: \fB0\fP].
 .TP
 \fBnmodel=\fP\fIn_models\fP
 Number of output models. [Default: \fB1\fP].
@@ -79,8 +81,12 @@ descriptor. Default: f.
 .TP
 \fBheadline=\fImessage\fP
 Text headline for output file [default: not used].
+.SH "CAVEATS"
+The current implementation assumes the density is defined along the
+angular coordinate, since it can currently only do a one-dimensional
+interpolation. A radial dependance is not possible yet.
 .SH "SEE ALSO"
-mkspiral(1NEMO), mkdisk(1NEMO), snapmass(1NEMO), snapcenter(1NEMO), flowcode(1NEMO)
+mkspiral(1NEMO), mkdisk(1NEMO), snapmass(1NEMO), snapcenter(1NEMO), flowcode(1NEMO), potential(5NEMO)
 .SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.5i
