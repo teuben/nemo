@@ -15,16 +15,29 @@
 
 #include <stdinc.h>
 
+#include "exception.h"
+
+#define calloc my_calloc
+
 void *allocate(int nb)
 {
     void *mem;
 
+    if (BeginBlock() == -1)  {
+	RestoreUserContext();
+	return NULL;
+    }
+    // how should this kind of error be processed ?
     if (nb < 0) error("allocate: cannot allocate %d bytes",nb);
     if (nb==0) nb++;
     mem = (void *) calloc((size_t)nb, 1);
-    if (mem == NULL)
-	error("allocate: not enough memory for %d bytes", nb);
+    if (mem == NULL)  {
+	RaiseException (errno);
+	// error("allocate: not enough memory for %d bytes", nb);
+    }
     dprintf(8,"allocate: %d bytes @ %d \n",nb, mem);
+
+    EndBlock();
     return mem;
 }
 
@@ -32,15 +45,41 @@ void *reallocate(void *bp, int nb)
 {
     void *mem;
 
+    if (BeginBlock() == -1)  {
+	RestoreUserContext();
+	return NULL;
+    }
+    // how should this kind of error be processed ?
     if (nb < 0) error("reallocate: cannot allocate %d bytes",nb);
     if (nb == 0) nb++;
     if(bp==NULL)
         mem = (void *) calloc((size_t)nb, 1);
     else
         mem = (void *) realloc((void *)bp,(size_t)nb);
-    if (mem == NULL)
-	error("reallocate: not enuf memory (%d bytes)", nb);
+    if (mem == NULL)  {
+	RaiseException (errno);
+	// error("allocate: not enough memory for %d bytes", nb);
+    }
     dprintf(8,"reallocate: %d bytes @ %d \n",nb, mem);
+
+    EndBlock();
     return mem;
 }
+
+#undef calloc
+
+
+
+void *
+my_calloc(size_t nmemb, size_t size)
+{
+  static int my_counter = 0;
+
+  my_counter++;
+  if (my_counter == 5) return NULL;
+  return calloc( nmemb, size);
+}
+
+
+
 

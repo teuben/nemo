@@ -8,6 +8,7 @@
 #include <errno.h>
 #include <setjmp.h>
 #include <signal.h>
+#include <assert.h>
 
 #include "exception.h"
 
