@@ -31,6 +31,11 @@ int debug_level=0;	/* needs to be global; see also getparam.c */
 
 static char *nemo_file = "dprintf.c: debugging stuff";
 
+bool nemo_debug(int debug) 
+{
+  return debug <= debug_level;
+}
+
 /*
  * DPRINTF: printf-style debugging messages, controlled by debug_level
  *	    as set by the user interface (debug=)

@@ -364,6 +364,7 @@ void error(string, ...);
 void errorn(string, ...);
 void warning(string, ...);
 int nemo_dprintf(int, const_string, ...);    /* NEMO has same name as libc */
+bool nemo_debug(int);
 
 #ifndef HAVE_DPRINTF
 #define dprintf		nemo_dprintf
