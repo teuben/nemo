@@ -67,8 +67,9 @@ string defv[] = {
     "potfile=\n                Extra data-file for potential(5)",
     "tab=\n                    Optional table with x,vy,y,vx,nsteps,T,E",
     "mode=rk4\n                integration method (euler,leapfrog,rk2,rk4)",
+    "last=f\n                  Use the last orbit in the in= orbit file?",
     "headline=\n               Random verbiage for output file",
-    "VERSION=1.5f\n            19-aug-04 PJT",
+    "VERSION=1.6\n             19-aug-04 PJT",
     NULL,
 };
 
@@ -95,6 +96,7 @@ double eps_min, eps_max;
 double omega, omegasq, omegato;         /* pattern speed, and related ^2,*2 */
 FILE *tab;
 bool  Qfix;                             /* flag if to step in Energy instead */
+bool  Qlast;                            /* last orbit in in= ?? */
 iproc cycle;                            /* integrator */
 
 string integration_modes = "euler leapfrog rk2 rk4";
@@ -168,6 +170,7 @@ setparams()
     dt2 = 0.5*dt;
 
     maxiter = getiparam("maxiter");
+    Qlast = getbparam("last");
 
     eps_min = getdparam("accuracy");
     eps_max = 1/eps_min;    /* just a guess */
@@ -188,8 +191,7 @@ setparams()
         p.name = NULL;
         p.pars = NULL;
         p.file = NULL;
-        if (read_orbit(instr,&o1)) {
-            dprintf(0,"[Read initial conditions from %s, size=%d\n]",infile,Size(o1));
+        while (read_orbit(instr,&o1)) {
             phase[0] = Xorb(o1,0);
             phase[1] = Yorb(o1,0);
             phase[2] = Zorb(o1,0);
@@ -200,8 +202,9 @@ setparams()
             p.name = PotName(o1);
             p.pars = PotPars(o1);
             p.file = PotFile(o1);
-        } else
-            warning("No initial condition from %s",infile);
+	    if (!Qlast) break;
+	}
+	dprintf(0,"[Read initial conditions from %s, maxsteps=%d\n]",infile,MAXsteps(o1));
         strclose(instr);
     }
     if(hasvalue("potname"))p.name = getparam("potname");
