@@ -10,15 +10,16 @@ foreach arg ($*)
   set $arg
 end
 
-if (! -e nemo_start) then
+if (-e nemo_end) then
+   source nemo_end
+else
    exit 1
 endif
 
-if ($cc  != x$cc) setenv CC $cc
+if ($cc != x$cc) setenv CC $cc
 if ($f77 != x$f77) setenv F77 $f77
 
 ./configure --with-yapp=ps
-source nemo_end
 source nemo_start
 make dirs config_extra scripts
 source NEMORC.local
