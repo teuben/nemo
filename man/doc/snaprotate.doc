@@ -1,0 +1,20 @@
+%N snaprotate
+%D rotate a snapshot
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man snaprotate' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input snapshot file [???]
+%A out
+	Output snapshot file [???]
+%A theta
+	Angles (degrees) to rotate around axes []
+%A order
+	Order to do rotations (zyz=eulerian) []
+%A invert
+	Invert transformation? [false]
+%A tscale
+	If used, scalefactor for angles with time of snapshot []
+%A VERSION
+	21-nov-98 PJT [5.0]

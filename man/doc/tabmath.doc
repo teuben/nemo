@@ -1,0 +1,24 @@
+%N tabmath
+%D General table manipulator
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man tabmath' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	input file name(s) [???]
+%A out
+	output file name [???]
+%A newcol
+	formula for new column (fie notation) []
+%A delcol
+	columns to skip while writing []
+%A selfie
+	select rows using fie notation []
+%A format
+	format for new output columns [%g]
+%A select
+	Select lines [all]
+%A seed
+	Initial random number [0]
+%A VERSION
+	13-jun-98 PJT [3.0]
