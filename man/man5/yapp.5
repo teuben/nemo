@@ -1,0 +1,107 @@
+.TH YAPP 5NEMO "8 February 1995"
+.SH NAME
+yapp \- Yet Another Plotting Package
+.SH DESCRIPTION
+Various implementations exist for yapp, which are listed below.
+Hopefully one of them is close enough 
+(or exactly) for what you want. Note that most of them
+need to be linked (notable exceptions \fIyapp_null, yapp_ps, yapp_meta\fP)
+with site dependant external libraries. For this, the environment
+variable \fBYAPPLIB\fP needs to be defined. Most common graphics program
+can then be compiled as follows:
+.nf
+    cc -o prog prog.c -lnemo $YAPPLIB -lm
+.fi
+normally set through the $NEMO/NEMORC.local file. There are some
+example $YAPP_XXX environment variables defined in the $NEMO/NEMORC
+file.
+.PP
+Some yapp implementations allow you to select from
+various devices. As we do not advertise interactive programs
+very much, the keyword 'yapp=' or an environment variable
+\fBYAPP\fP will be used to select a device and it's possible
+options.
+.SH AVAILABLE YAPP VERSIONS
+.TP 24
+\fByapp\fP
+wrapper, which attempts (with or without some help) to include the
+correct yapp_xxx.c version (see below).
+.TP
+\fByapp_agl	\fP
+uses Trieste/ESO's AGL package.  \fINot implemented yet\fP.
+.TP
+\fByapp_cg		\fP
+pure color graphics version for suncore (JEB)
+.TP
+\fByapp_cg_old\fP
+slightly outdated color graphics (PSW & JEB).
+.TP
+\fByapp_cg_new\fP
+??? seems to hang terminal (oct-90)
+.TP
+\fByapp_cgi	\fP
+old 1986 experiment, uses CGI; must be outdated by now (PJT)
+.TP
+\fByapp_core	\fP
+The old original one (JEB), uses suncore, can have optional
+mouse interface (-DMOUSE) and retained segments (-DRETAINED).
+Working on color interface (-DCOLOR), see also yapp_cg below.
+.TP
+\fByapp_meta	\fP
+An ascii meta-file format.
+.TP
+\fByapp_mongo	\fP
+for usage when mongo(87) is available. Uses
+environment varibiable \fBYAPP\fP, initialized in the
+\fIgetparam(3NEMO)\fP package, to select from a number
+of devices.	(PJT)
+.TP
+\fByapp_null\fP
+a stubbed list of all required and optional routines which gets
+you going on a machine with no proper yapp implementation yet.
+.TP
+\fByapp_pgplot	\fP
+uses Tim Pierson`s (Caltech) PGPLOT package. We now support PGPLOT V5.
+(PJT)
+\fByapp_plplot	\fP
+uses the U. Texas PLPLOT package, a PGPLOT lookalike written in C. (PJT)
+.TP
+\fByapp_ps		\fP
+PostScript, merged with JEBs enhanced versions(PJT)
+.TP
+\fByapp_sm	\fP
+Super Mongo - not very good yet since sm doesn't have good
+callable provisions.	(PJT)
+.TP 
+\fByapp_suntools\fP
+Suntools version with enhanced cursor interaction; has optional
+-DMOUSE, -DCOLOR and -DRETAINED and autodetection of window vs.
+non-window mode under suntools. \fIdeprecated\fP.
+.TP
+\fByapp_sv\fP
+SunView version, in so-called implicit dispatch mode. This version
+is really only intended to create small images, to be saved in 
+screendump 'frame's, which can be displayed with the sunview windows
+version \fImoview(1NEMO)\fP.  \fIdeprecated\fP.
+.TP
+\fByapp_x11\fP
+Based on a standalone, now modified to handle singleprecision real (float).
+.SH BUGS
+There are no good provisions to make sure a plot comes out in landscape or
+portrait (e.g. plplot). Some devices have problems making sure that
+the plot comes out square when it is meant to be square.
+.PP
+Treatment of colors, in particular what the backgroond and foreground
+color is, is not uniform. 
+.SH AUTHOR
+Joshua E. Barnes, Peter Teuben
+.SH SEE ALSO
+yapp(3NEMO)
+.SH UPDATE HISTORY
+.nf
+.ta +1i +4i
+16-aug-88	document written - some are premature!	PJT
+16-nov-88	yapp_suntools added             	PJT
+26-oct-90	updated outdated documentation  	PJT
+11-nov-94	added yapp_meta 	PJT
+.fi
