@@ -1,0 +1,26 @@
+%N himap
+%D Construct galactic MAP from it's VL/LV diagram
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man himap' for more extensive online help
+  Defaults of program keywords are listed between square brackets
+%A in
+	Input VL image [???]
+%A out
+	Optional Output XY/TR image []
+%A rotcur
+	Input rotation curve table [???]
+%A xgrid
+	X Range (theta - in degrees) [0:360:1]
+%A ygrid
+	Y Range (radius - solar normalized) [1:5:1]
+%A r0
+	Solar Radius (kpc) [8]
+%A v0
+	LSR velocity (km/s) [220]
+%A grid
+	Output mode: polar (theta,r) or cartesian (x,y) [polar]
+%A tab
+	Optional output table of (t,r,l,v,il,iv,sd) []
+%A VERSION
+	15-mar-93 PJT [1.1]
