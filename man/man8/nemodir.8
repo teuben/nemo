@@ -1,0 +1,57 @@
+.TH NEMODIR 8NEMO "29 January 1994"
+.SH NAME
+nemodir \- introduction to NEMO directory structure
+.SH DESCRIPTION
+The NEMO directory structure is modeled somewhat after the
+UNIX directory structure, with the environment variable 
+$NEMO being the root directory.
+.SH PARAMETERS
+.TP 20
+\fBenv=\fP\fIt|f\fP
+Show settings of environment variables and NEMO's hidden system
+command line parameters. [default: \fBf\fP].
+.SH FILES
+The NEMO filesystem
+.nf
+.ta +.5i +.5i +.5i +.5i +.5i 
+$NEMO/			-- toplevel directory
+	inc/			-- include (.h) files for compilation
+	lib/			-- library (.a, .o) files for compilation
+	bin/			-- executable files
+	man/			-- manual pages
+		man1/		-- . for programs
+		man3/		-- . for functions
+		man5/		-- . for data
+		man8/		-- . for administration
+	text/			-- various other docs and manuals on NEMO
+	src/			-- sources, per topic
+		kernel/
+		nbody/
+		image/
+	usr/			-- sources, per contributing user
+		josh/
+		piet/
+		pjt/
+		pat/
+	data/			-- online data files
+	adm/			-- recent imports and exports
+	csh/			-- example shell scripts
+.fi
+.SH "SEE ALSO"
+.nf
+programs(1NEMO), files(1NEMO)
+\fIThe NEMO Users/Programmers Manual\fP -- Appendix D.
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.5i
+xx-xxx-86	created  	JEB
+18-Mar-87	updated for new /usr/guinness fileserver	PJT
+xx-apr-88	program \fBnemo\fP now really exists	PJT
+29-jan-93	renamed nemo.1 to nemodir.8	PJT
+.sp 2
+\fI	It's easy to create,
+	but being responsible for what
+	the creation does is something else.
+\fP
+
