@@ -13,6 +13,7 @@
  *     29-sep-92 V4.0 allow max grid size                       PJT
  *		      options= fix in code_io.c
  *     16-feb-03 V4.0a use get_pattern()			pjt
+ *     24-feb-03 V4.1  initial  framework for epicycle mode     pjt
  *
  * To improve:  use allocate() for number of particles; not static
  */
@@ -38,7 +39,7 @@ string defv[] = {
     "sigma=0\n            diffusion angle (degrees) per timestep",
     "seed=0\n		  random seed",
     "headline=PotCode\n   random mumble for humans",
-    "VERSION=4.0a\n	  15-feb-03 PJT",
+    "VERSION=4.1\n	  24-feb-03 PJT",
     NULL,
 };
 
@@ -48,12 +49,15 @@ local proc  pot;
 
 void nemo_main()
 {
-    void force(), setparams();
+    void force(), force1(), setparams();
 
     setparams();
     inputdata();
     initoutput();
-    initstep(bodytab, nbody, &tnow, force);
+    if (mode < 0) 
+      initstep(bodytab, nbody, &tnow, force1);
+    else
+      initstep(bodytab, nbody, &tnow, force);
     output();
     while (tnow + 0.1/freq < tstop) {
 	orbstep(bodytab, nbody, &tnow, force, 1.0/freq, mode);
@@ -119,4 +123,69 @@ real time;			/* current time */
         Phi(p) = lphi;
         SETV(Acc(p),lacc);
     }
+}
+
+/*
+ * FORCE: 'force' calculation routine for epicyclic orbits
+ *        where we assume that the particles are:
+ *        - planar 2D orbits
+ *        - (x,y) is the guiding center, (u,v) can be the deviant into the epicycle
+ */
+
+
+void force1(btab, nb, time)
+bodyptr btab;			/* array of bodies */
+int nb;				/* number of bodies */
+real time;			/* current time */
+{
+  bodyptr p;
+  vector lpos,a1,a2;
+  real   lphi,r2,r,ome1,ome2, eps, f1,f2,kap2,kap1, A, B, oldkap, tol, tolmin;
+  int    iter, ndim=NDIM;
+  
+  if (ome!=0.0) error("Force-1 does not work in rotating potentials");
+
+  /* print header */
+  printf("# r ome kap A B ome-kap/2 iter tol\n");
+  
+  for (p = btab; p < btab+nb; p++) {		/* loop over bodies */
+    r2 = sqr(Pos(p)[0]) + sqr(Pos(p)[1]);
+    r = sqrt(r2);
+    SETV(lpos,Pos(p));
+    (*pot)(&ndim,lpos,a1,&lphi,&time);
+    ome2 = sqrt(sqr(a1[0]) + sqr(a1[1]))/r;
+    ome1 = sqrt(ome2);
+
+    /* should do iteration until converging, for now slightly asymmetric results */
+    tolmin = 1e-7;   /*  tolerance to achieve */
+    eps = 0.001;       /*  first small fractional step in radius */
+    for (iter=0; iter<10; iter++) {
+      MULVS(lpos,Pos(p), 1+eps);
+      (*pot)(&ndim,lpos,a1,&lphi,&time);
+      MULVS(lpos,Pos(p), 1-eps);
+      (*pot)(&ndim,lpos,a2,&lphi,&time);
+      
+      f1 = sqrt(sqr(a1[0]) + sqr(a1[1]))/(r*(1+eps));
+      f2 = sqrt(sqr(a2[0]) + sqr(a2[1]))/(r*(1-eps));
+      kap2 = (f1-f2)/(2*eps) + 4*ome2;
+      kap1 = sqrt(kap2);
+      
+      if (iter==0) {
+	oldkap = kap1;
+	eps = eps/2;
+	continue;
+      } else {
+	tol = (kap1-oldkap)/kap1;
+	tol = ABS(tol);
+	if (tol < tolmin) break;
+	eps = eps/2;
+	dprintf(1,"%g : %d %g %g %g\n",r,iter,eps,kap1,tol);
+      }
+      
+    }
+    A = -0.25*(f1-f2)/(2*eps)/ome1;
+    B = A - ome1;
+    printf("%g %g %g %g %g %g %d %g\n",r,ome1,kap1,A,B,ome1-kap1/2.0,iter,tol);
+  }
+  error("epi DONE for now");
 }

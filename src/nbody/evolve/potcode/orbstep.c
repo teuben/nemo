@@ -71,6 +71,9 @@ int mode;		/* select integration algorithm */
         pcstep(btab, nb, tptr, force, dt);	/*   take PC time-step */
 	if (mode == 2)				/*   final force requested? */
 	    (*force)(btab, nb, *tptr);		/*   compute final force */
+    } else if (mode == -1) {			/* use 4th order RK ? */
+      epistep(btab, nb, tptr, force, dt);	/* take epicycle step */
+	(*force)(btab, nb, *tptr);		/* compute final force */
     } else 
 	error("orbstep: unknown mode %d\n", mode);
     moveaccel(btab, nb);			/* save final accel */
@@ -214,6 +217,7 @@ real dt;		/* integration time step */
 {
     error("leapfrog stepping not implemented");
 }
+
 
 rk4step(btab, nb, tptr, force, dt)
 bodyptr btab;		/* array of bodies */
@@ -271,6 +275,29 @@ real dt;		/* integration time step */
     }
     *tptr += dt;
 }
+
+epistep(btab, nb, tptr, force, dt)
+bodyptr btab;		/* array of bodies */
+int nb;			/* number of bodies */
+real *tptr;		/* current time */
+proc force;		/* acceleration calculation */
+real dt;		/* integration time step */
+{
+  bodyptr p;
+  body tmp1;
+
+  /* we'll just do one entry here and die */
+
+  warning("Epicycle stepping");
+  
+  for (p=btab; p<btab+nb; p++) {
+    (*force)(btab,nb,*tptr);	
+  }
+
+  error("DONE testing");
+
+}
+
 
 
 /* 
