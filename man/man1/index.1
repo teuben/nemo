@@ -1,0 +1,348 @@
+.\" pjt 
+.TH INDEX 1NEMO "13 June 1997"
+.SH NAME
+index \- index of NEMO commands and utilities
+.SH DESCRIPTION
+These \fBcommands\fP and \fButilities\fP form the top layer of NEMO. They can all be found
+in the directory \fB$NEMOBIN\fP. Some of the \fButilities\fP are simple shell
+scripts, (e.g. 'cc'), or
+imported public domain programs, for which not always proper documention is
+available. Most (if not all) of the \fBcommands\fP, however,
+conform to the NEMO user interface (\fIgetparam(3NEMO)\fP, \fIkeywords(5NEMO)\fP)
+and use the NEMO database \fIfilestruct(5NEMO)\fP.
+.PP
+\fIComments on the last column in table below: \fP
+Anything else but a version number in the last column means that the program
+does not use standard \fBnemo\fP's keyword based input format (-), or lacks
+a version number (X). -- The author/person responsible is also listed. 
+.PP
+The \fIgravsim\fP package has it's own file format (gdff) and the manual pages can be found 
+within the \fIsrc/gravsim/src/man/...\fP tree, not the usual \fIman/...\fP tree. 
+On some machines the \fIgravsim\fP package performs as a superior N-body integrator.
+A modified MANPATH is needed for online access using \fIman(1)\fP.
+.SH "LIST OF NEMO COMMANDS (help=)"
+.sp 2
+.nf
+.ta +1.0iC +1.2iC +2.5iL
+\fIName\fP	\fIAppears on Page\fP	\fIDescription\fP	\fIVersion/Author\fP
+.ta +1.2iL +1.2iL +3.5iL
+.sp 5p
+.\" 205-to-gdff	(gravsim)	---                                             	
+aasplot    	aasplot 	plot particle positions from a snapshot file
+anisot    	anisot(1)    	tabulate models for spherical galaxies              	
+atos    	atos(1)   	convert an ascii snapshot file to binary snapshot 	
+atosph    	atos(1)   	convert an ascii snapshot file to binary snapshot 	
+.\" badman
+.\" badnews
+.\" body-compiler	(gravsim)	xxx                                               	
+bodytrans	bodytrans(1)	test body to scalar mapping                         	
+bswap   	bswap(1) 	swap bytes                                        	
+ccddisplay	ccddisplay(1)	displays an image(5) file onto color Sun screen   	
+ccddump  	ccddump(1)	dump contents of an image(5)                         	
+ccdfft    	ccdfft(1)	2D Fast Fourier Transform of a map                	
+ccdfill  	ccdfill(1)	patch up holes in an image
+ccdfits      	ccdfits(1)    	convert image to fits file                         	
+ccdflip  	ccdflip(1)	flip an image
+ccdgoat 	ccdgoat(1)	LV diagram diagnostics
+ccdmath  	ccdmath(1)     	combine ccd frames (simple arithmetic)          	
+ccdmom		ccdmom(1)	moment along an axis of an image
+ccdplot      	ccdplot(1)    	display 2D image(5) maps                           	
+ccdprint	ccdprint(1)	print out gridvalues of an image                  	
+ccdsharp	ccdsharp(1)	enhance/sharpen an image
+ccdslice	ccdslice(1) 	takes slices from a cube
+ccdsmooth   	ccdsmooth(1)	smoothing of an 2D image map                     	
+ccdstat     	ccdstat(1)   	statistics (1st through 4th moment)                  	
+ccdsub   	ccdsub(1)    	sub/average of an image
+ccdtrace	ccdtrace(1)	interpolate a set of coordinates in an image
+ccdvel       	ccdvel(1)   	create a velocity field                         	
+csf      	csf(1)   	copy structred file                             	
+demfits   	demfits(1)	Read DEM (Digital Elevation Maps) from USGS
+direct4     	direct4(1)   	simple N-body integrator, optionally for GRAPE-4 Pipelined N-body engine
+dtos     	dtos(1)		convert STARLAB dyn to NEMO snapshot
+.\" findcenter	findcenter(1)	find center of N-body system (in development)      	
+fitsccd     	fitsccd(1)	convert fits to image                              	
+fitsgids	fitsgids(1)	display fits images on GIDS display server
+fitsglue	fitsglue(1)	catenate fits images into a fitscube
+fitsgrid	fitsgrid(1)	convert and grid fits table to regular fits image
+fitshead      	fitshead(1)   	dump the header of a fits file                      	
+fitssao		fitssao(1)	display fits images on SAOIMAGE/XIMTOOL display server
+fitssds		fitssds(1)	convert FITS to SDS HDF
+fitssplit	fitssplit(1)	split fits image dataset into subsets
+fitstab   	fitstab(1)     	convert fits table to ascii table               	
+fitstiff	fitstiff(1)   	convert FITS file into TIFF file
+flowcode	flowcode(1)	Analytical flow_potential orbit integrator
+ftoc        	ftoc(1)      	nemo_main() builder from fortran source code     	
+funtab		funtab(1)	Function Table lookup
+galaxy     	galaxy(1)     	3D FFT N-body code
+galview		galview(1)  	create x3d database for our galaxy
+.\" gaussfit
+.\" gdff-cut	(gravsim)	cut gdff file in pieces                           	
+.\" gdff-editor	(gravsim)	edit gdff file (adding keywords etc)             	
+.\" gdff-to-205	(gravsim)	copy gdff to ascii format as used in 'atos/stoa'      	
+gettab     	gettab(1)	extract real table from a table
+.\" gids.exe
+.\" gif2tiff
+gravsim0	gravsim0(1)	NEMO frontend for gravsim family                 	
+.\" gravsim 	(gravsim)	version of hackcode for multiple processor machines	
+.\" gravsim-2	(gravsim)	---                                              	
+.\" gravsim-3	(gravsim)	---                                              	
+hackcode1	hackcode1(1)	hierarchical N-body integrator                   	
+hackcode1_qp	hackcode1(1)	" and quadrupole corrections                      	
+hackcode3	hackcode3(1)	" and fixed particles/background potential      	
+hackdens	hackdens(1)	local density estimator using tree algorithm      	
+hackforce	hackforce(1)    	add potential and forces to an N-body snapshot  
+hackforce_qp	hackforce(1)    	" and quadrupole corrections                    
+hdfgrid		hdfgrid(1)	Regrid a CMHOG polar HDF SDS image to a cartesian NEMO image 
+henyey    	henyey(1)	search for periodic orbits in a potential (Henyey's method)
+himap		himap(1)	Construct galactic MAP/CUBE from a  VL/LV (B) map
+hisf     	hisf(1)    	display history of datafiles                     	
+hispectrum	hispectrum(1)	HI spectrum extraction and gridde
+kep2kep		kep2kep(1)	nteractive transformations between kepler orbit coordinates
+king      	king(1)      	tabulate Osipkov-Merritt generalization of King model  	
+linreg		linreg(1)	six linear regressions
+memio   	memio(1)  	misaligned data/memory routines with optional disk I/O
+miller   	miller(1)	convert Miller's (ascii) plot file to snapshot format
+mkbaredisk  	mkbaredisk(1)	almost stable disk                              
+mkcolor  	mkcolor(1)   	create color table                              	
+mkconfig	mkconfig(1)   	make various static configurations of particles (line, ring, shell, ...)
+mkcube  	mkcube(1)	create a uniform cube of equal massive stars
+mkdisk   	mkdisk(1)	make massless disk in a potential(5)              	
+mkepidisk   	mkepidisk(1)   	uniform-ring-density test disk on epicycles         	
+mkexpdisk	mkexpdisk(1)	almost stable disk (experimental)                  	
+mkexphot    	mkexphot(1)     	make an exponential disk (hot) embedded in a halo
+mkhom   	mkhom(1) 	make homogeneous sphere                          	
+mkhomsph	mkhomsph(1)	make homogeneous sphere                          	
+mkisosph	mkisosph(1)	make isothermal sphere                              	
+mkjet   	mkjet(1)	create a toy model for a jet
+mkmestel	mkmestel(1)	make finite Mestel disk                              	
+mknbody5	mknbody5(1)	Initial condictions using NBODY5 program
+mkneil  	mkneil(1)	create a toy model for a jet
+mkommod  	mkommod(1)   	generate N-body system with anisotropic d.f.       	
+mkop73  	mkop73(1)	Set up a Mestel disk using 1973 Ostriker & Peebles' method
+mkorbit    	mkorbit(1)  	generate an orbit                                 	
+mkplummer	mkplummer(1)	generate a truncated Plummer model                	
+mkpolytrope 	mkpolytrope(1)	make N-body system: polytrope                   	
+.\" mkrich	
+mksphere	mksphere(1)	construct an arbitrary spherical mass distribution
+mkspiral	mkspiral(1)	make a spiral (toy)                               	
+mktestdisk	mktestdisk(n1)	make uniform massless disk in N-body spheroid     	
+.\" movie
+.\" mtvp
+.\" m2h
+nbody0         	nbody0(1)   	Aarseth N-body integrator                        	
+nbody1   	nbody1(1)	Aarseth direct summation N-body integrator with variable timestep
+nbody2      	nbody2(1)    	Aarseth N-body integrator with Ahmad-Cohen scheme	
+nbody5    	nbody5(1)	Regularized AC N-body code with triple & binary collisions
+.\" nemo     	nemo(1)    	display NEMO environment and help me             	
+.\" ncftp
+.\" nemo1
+nemoinp    	nemoinp(1)   	number/array parser                               	
+.\" nemoinp.orig
+nemoshow	nemoshow(1)
+newton0    	newton0(1)	nbody codes with equal time steps                	
+newton0ext	newton0(1)  	nbody aarseth code, ind. timestep (nbody2)       	
+newton0fixed	newton0(1)	nbody codes with equal time steps (fixed potential) 	
+newton0reg    	newton0(1)	nbody codes with equal time steps (regularized) 	
+newton0tree    	newton0(1)	nbody codes with equal time steps (treecode)    	
+orbdim    	orbdim(1)   	dimensionality of orbits                           	
+orbfour      	orbfour(1)	fourier analysis of an orbit
+orbint     	orbint(1)	simple orbit integrator                         	
+orblist   	orblist(1)	list orbit(5NEMO)                                      	
+orbname		orbname(1)   	Orbit classification and plotting
+orbplot   	orbplot(1)	plot orbit(5NEMO) on screen                           	
+orbsos       	orbsos(1)	compute surface of section coordinates from an orbit	
+orbstat  	orbstat(1)	Tabulate some statistics of orbit(s)
+orbwood  	orbwood(1)	Orbit Spectral Analysis
+otos     	otos(1)   	convert an orbit into a snapshot                 	
+perorb     	perorb(1)   	search for periodic orbits                        	
+plummer   	plummer(1)     	tabulate Osipkov-Merritt gener. of plummer model	
+potccd       	potccd(1)   	Create image from a NEMO potential                  	
+potcode   	potcode(1)**	integrate non-interacting particles               	
+potlist   	potlist(1)	get potential and forces of a potential(5)       	
+pr-gdff   	(gravsim)	print gdff file                                  	
+.\" prun
+pspeed   	pspeed(1)	Tremaine & Weinberg pattern speed of system      	
+.\" pstart
+qsf      	qsf(1)      	check if a file is a structured file              	
+quadcode	quadcode(1)	global quadrupole-order N-body code integrator        	
+quadforce	quadforce(1)	quadrupole-order force calculation of an  N-body        
+quadinter   	quadinter(1)	quadrupole-order force calculation from tabulated field	
+radprof  	radprof(1)	radial profile plotting of N-body system           	
+rostat	
+rotcur    	rotcur(1)   	fit kinematic parameters from velocity field      	
+rotcurves 	rotcurves(1)	rotation curve of a composite potential           	
+rsf       	rsf(1)    	read a structured file                           	
+runcmhog	runcmhog(1)	preprocess a CMHOG namelist and run program in a new directory
+rungalaxy	rungalaxy(1)	run galaxy in a special directory
+rvsnap     	rvsnap(1)     	convert Carlberg's binary 'RV' format to snapshot format
+scanfits      	scanfits(1) 	scan a fits file, optionally extract and convert.	
+sdsfits  	sdsfits(1)	convert SDS HDF to FITS
+snap3dv    	snap3dv(1)  	convert snapshot to 3dv format for 3D display     	
+snapadd     	snapadd(1)	adds N-body systems on top of each other             	
+snapaxsym	snapaxsym(1)	axisymmetric ccd-frame of a snapshot            	
+snapccd     	snapccd(1)    	top view ccd frame of an N-body snapsho            	
+snapcenter	snapcenter(1)	centrate snapshot(5) data                         	
+snapcmp   	snapcmp(1)	compare two N-body snapshots                        	
+snapcmphist	snapcmphist(1)	compare two N-body snapshots and plot histogram  	
+snapcomove	snapcomove(1)	scale cosmological simulations to/from comoving coordinates
+snapcopy	snapcopy(1)	copy particles of snapshot subject to conditions	
+snapdens      	snapdens(1)	find density estimator for N-body snapshot           	
+snapdiagplot	snapdiagplot(1)	diagnosis of an N-body run                      	
+snapdist	snapdist 	compute metric differences between snapshots    	
+snapenter	snapenter(1)	enter an N-body system interactively            	
+snapfit     	snapfit(1)  	fit a (6D) snapshot to a  (3D)  data  cube       	
+snapfits    	snapfits(1)	convert a snapshot file to a fits file              	
+snapfour	snapfour(1)	fourier analysis of a snapshot                     	
+snapgrid	snapgrid(1)	general snapshot gridder for image(5) format     	
+snaphdf		snaphdf(1)	convert snapshot to HDF Scientific Dataset (SDS)
+snaphist	snaphist(1)	histogram of projected radii and velocities      	
+snapinert	snapinert(1)	calculate moment of inertia of a snapshot             	
+snapkinem	snapkinem(1)    	compute kinematic diagnostics for snapshot      
+snaplist	snaplist(1)	make listing of an N-body snapshot file         	
+snapmask    	snapmask(1)   	mask out particles in N-body system                	
+snapmass	snapmass(1)	add or modify masses in a snapshot                             	
+snapmerge	snapmerge(1)	merge N-body snapshots together
+snapmnmx	snapmnmx(1)	show statistics of snapshot variables               	
+snapmradii	snapmradii(1)	print mass radii in a snapshot                       	
+snapmstat	snapmstat(1)	statistics of the masses in a snapshot            	
+snapopt		snapopt(1)	Special Ostriker-Peebles 't' calculator
+snappeak   	snappeak(1)	maximum density, using mode analysis (crude)        	
+snapplot	snapplot(1)	display an N-body snapshot file                  	
+snapplotedit	snapplotedit(1)	display and edit an N-body snapshot              	
+snapplotv	snapplotv(1)	display an N-body snapshot file with vectorfield    	
+snapprint	snapprint(1)	tabular output of a snapshot                    	
+snaprect	snaprect(1)	diagonalize moment-of-inertia of snapshot       	
+snaprotate	snaprotate(1)	rotate an N-body model                            	
+snapsample	snapsample(1) 	select a subset of particles of a snapshot            	
+snapscale	snapscale(1)	scales phase space coordinates of an N-body snapshot	
+snapshift	snapshift(1)	shifts phase space coordinates of an N-body snapshot	
+snapslit      	snapslit(1)   	top view slit spectrum of an N-body snapshot       	
+snapsmooth   	snapsmooth(1)	adaptive variable length smoothing                  	
+snapsort	snapsort(1)  	sort particles of N-body snapshot                      	
+snapsphere	snapsphere(1)	copy a sphere of particles from an N-body system	
+snapspin	snapspin(1)	add angular momentum to system                      	
+snapsplit	snapsplit(1)	cut an N-body snapshot in pieces for serial processing
+snapstab	snapstab(1)	report of stability of a stellar system          	
+snapstack	snapstack(1) 	superimpose two snapshots                             	
+snapstat      	snapstat(1)	statistics of N-body snapshot                      	
+snaptipsy	snaptipsy(1)	convert a snapshot to tipsy binary format
+snaptrans  	snaptrans(1)	coordinate transformations of a snapshot
+snaptrim	snaptrim(1)	cut a snapshot file down to size                     	
+snapvirial	snapvirial(1)	rescale snapshot while retaining virial           	
+snapvratio    	snapvratio(1)	compute various global virials (clausius, newton)
+snapxyz		snapxyz(1)	Convert snapshot to xyzc data
+stoa         	stoa(1)     	convert snapshot file to "205" ascii file          	
+stod    	stod(1)		convert NEMO snapshot to STARLAB dyn
+stoo      	stoo(1)    	convert snapshot to orbit data file               	
+stou4   	stou4(1)	convert snapshot to unit-4 for NBODYx
+tabcomment	tabcomment(1)	Add comments to a table, or comments certain lines
+tabdms  	tabdms(1)	Convert HMS/DMS tables
+tabhist  	tabhist(1)	column analysis and histogram plotter                  	
+tablint  	tablint(1)	(prototype) table syntax checker
+tablovas    	tablovas(1)	Lovas  spectral  line   catalogue   manipulator   	
+tablsqfit    	tablsqfit(1)	general purpose least squares fitting program     	
+tablst      	tablst(1)	list tables, ascii as well as binary               	
+tabmath   	tabmath(1)	general table handling                           	
+tabplot    	tabplot(1)	plot data from table                               	
+.\" tabplot14
+tabpp     	tabpp(1)  	Poynter-Pickett spectral line catalogue manipulator	
+tabs      	tabs(1)		Table format converter
+tabsplit	tabsplit(1)	split table into two parts                        	
+tabtos    	tabtos(1)	ascii table to snapshot conversion                	
+tabview		tabview(1)	dynamic query table viewer
+.\" tiffcp
+.\" tiffinfo
+tipsysnap	tipsysnap(1)	convert tipsy to snapshot format
+trakplot	snapplot(1)	like snapplot, but does not erase screen between plots	
+treecode	treecode(1)	fortran version of HACK                            	
+treecode0	
+treecode2	
+treesfr		
+tsd       	tsd(1)		Scan and optionally ascii dump of an HDF SDS
+tsf     	tsf(1)   	type structured file                                	
+u3tos		u3tos(1)	Convert NBODY output to snapshot
+u4tos		
+unbind    	unbind(1)	unbind stars from a N-body system                    	
+unfio    	unfio(1)	access fortran unformatted I/O files
+units    	units(1)        no table
+.\" vmsfix
+wcs		
+xrandom   	xrandom(1)	Return seed for random numbers and optionally random numbers
+xvpsnap     	xvpsnap(1)	convert xvp NBODY files to snapshot format files
+xyzview		xyzview(1)	Display 3-D velocity data
+
+.fi
+.SH "LIST OF NEMO UTILITIES"
+ .sp 2
+.nf
+.ta +1.0iC +1.2iC +2.5iL
+\fIName\fP	\fIAppears on Page\fP	\fIDescription\fP	\fIVersion / Author\fP
+.ta +1.0iL +1.2iL +3.5iL
+.sp 5p
+-3dmovie	**PJT    	shell script to generate 3D movie of snapshot    	-   -
+-bake         	bake(8)      	generic nemo make
+-catps     	JEB       	catenate postscript files                           	-   /
+-cc      	cc(8)       	/bin/cc(1) command line parser                      	-   -
+-changed   	***PJT/NEMO    	list changed files since a specified date           	-   -
+-crc      	crc(1)*     	checksum of files (ascii/binary)                   	-   -
+-ctex		ctex(1)    	extract tex comments from C/C++ source code
+-ds         	ds(1)       	display program for suntools                    	X       WLS
+-diag205   	***PJT    	diagnosis preparation of 205 output logfile       	-   /
+-findsrc	findsrc(1)	walk directories, trying to find source files (makekit)	-   -
+-getline	***        	get a number of lines from a file                   	-   -
+-hd          	***hd(1)(PJT)	dump contents of a file in hex                   	-   -
+-install	***          	call mknemo and install old programs
+-kep2kep      	***PIET???	guess (bad user interface ??)                     	-X  -X
+-keyval   	***PJT    	display value in 'keyword=value' string         	-   -
+-linreg
+-ltos    	***PJT   	shell script to convert Lars table to snapshot      	-   -
+-make    	bake(8)  	/bin/make(1) command line parser                   	/   /
+-makekit   	***(PJT)	NEMO manager utility                             	-   -
+-makeindex
+-miriad
+-mkman
+-mknemo   	mknemo(8)	attempt to find NEMO programs and install them
+-mkpdoc
+-movie    	movie(1)  	display sun rasterfiles in movie mode                	-   -
+-movie_sv	(movie(1))	display sun rasterfiles in movie mode wihtin suntools
+-need
+-nemobug      	nemobug(1)    	add bugreports
+-nemobugs     	nemobugs(1)     	read bugreports
+-nemoman
+-nemonew       	nemonew(1)      	add news
+-nemonews      	nemonews(1)     	read news                                          	-   -
+-nemotool
+-makekit	makekit(1)	split files up into shell archives packages        	-   -
+-makepath	***PJT     	make a path file for 3D movies                  	-   -
+plarrow_ps	***JEB   	guess (send an arrow to a postscript file??)     	1.0 /
+pltext_ps	***JEB  	guess (send some text to a postscript file??)     	1.0 /
+-redir    	redir(1)   	split stderr and stdout in a nice way               	-   -
+-tr2latex
+-showstat	***PJT    	guess                                             	-   -
+-unshar   	unshar(1)	unpack shell archives from news, mail, notes, etc.  	-   -
+-update     	update(1)  	sun-fortran to cyber source code utility          	-   -
+.fi
+.SH SEE ALSO
+.nf
+programs(8NEMO)
+\fIThe NEMO Users/Programmers Manual\fP
+.fi
+.SH BUGS
+.PP
+The version numbers in the last column above are often out of date.
+.PP
+This list always seems to be out of date.
+.SH AUTHOR
+Peter Teuben
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+26-Nov-86	created  	(PJT)
+26-sep-89	updates.....	(PJT)
+9-dec-89	and more updates..	PJT
+10-oct-90	renamed intro(1) to index(1)	PJT
+11-nov-91	major updating of doc	PJT
+4-mar-92	more updates..   	PJT
+jan-93    	format mod for hman and hypertext friends	PJT
+apr-97    	updated    	AMK
+.fi
