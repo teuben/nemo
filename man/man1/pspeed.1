@@ -1,0 +1,45 @@
+.TH PSPEED 1NEMO "2 June 1988"
+.SH NAME
+pspeed \- calculate the pattern speed of a stellar system.
+.SH SYNOPSIS
+.PP
+\fBpspeed int=\fPccd-intensity \fBvel=\fPccd-velocity [parameter=value]
+.SH DESCRIPTION
+\fIpspeed\fP calculates the pattern speed of a stellar system using
+Tremaine & Weinberg's method (ApJ 1985, vol. 2xx, pp. xxx). For this
+a line parallel but offset to the line of nodes
+of a galaxy must have information on intensity and radial velocity.
+\fIpspeed\fP assumes the line of nodes is along the X-axis.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 20
+\fBint=\fIint-file\fP
+input file, must be the intensity in \fIimage(5NEMO)\fP format [no default].
+.TP
+\fBvel=\fIvel-file\fP
+input file, must be the radial velocity in
+\fIimage(5NEMO)\fP format [no default].
+.TP
+\fBdebugy=\fIy\fP
+Will produce a table how the numerical integration along only one specific
+y value resulted in a pattern speed. For debugging only.
+[default: \fB-1\fP, i.e. not used].
+.SH BUGS
+pspeed is too sensitive to noise to be useful for all practical purposes.
+.SH "SEE ALSO"
+snapslit(1NEMO), snapshot(5NEMO), image(5NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+~/src/pjt/image  	authors original sources
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +2.0i +4.0i
+17-Aug-87	V1.0: Original created	PJT
+ 1-Nov-87	V1.2: more debugy output PJT
+.fi
+
