@@ -1,4 +1,5 @@
 /* for NEMO:  no select(), since unix has one ... */
+/*            added some 'x' routines for multidim (xdim) fitting */
 
 #ifndef _NR_H_
 #define _NR_H_
@@ -256,6 +257,8 @@ void kstwo(float data1[], unsigned long n1, float data2[], unsigned long n2,
 void laguer(fcomplex a[], int m, fcomplex *x, int *its);
 void lfit(float x[], float y[], float sig[], int ndat, float a[], int ia[],
 	int ma, float **covar, float *chisq, void (*funcs)(float, float [], int));
+void lfitx(float x[], int xdim, float y[], float sig[], int ndat, float a[], int ia[],
+	int ma, float **covar, float *chisq, void (*funcs)(float *, float [], int));
 void linbcg(unsigned long n, double b[], double x[], int itol, double tol,
 	 int itmax, int *iter, double *err);
 void linmin(float p[], float xi[], int n, float *fret,
@@ -316,9 +319,15 @@ void mpsub(int *is, unsigned char w[], unsigned char u[], unsigned char v[],
 void mrqcof(float x[], float y[], float sig[], int ndata, float a[],
 	int ia[], int ma, float **alpha, float beta[], float *chisq,
 	void (*funcs)(float, float [], float *, float [], int));
+void mrqcofx(float x[], int xdim, float y[], float sig[], int ndata, float a[],
+	int ia[], int ma, float **alpha, float beta[], float *chisq,
+	void (*funcs)(float *, float [], float *, float [], int));
 void mrqmin(float x[], float y[], float sig[], int ndata, float a[],
 	int ia[], int ma, float **covar, float **alpha, float *chisq,
 	void (*funcs)(float, float [], float *, float [], int), float *alamda);
+void mrqminx(float x[], int xdim, float y[], float sig[], int ndata, float a[],
+	int ia[], int ma, float **covar, float **alpha, float *chisq,
+	void (*funcs)(float *, float [], float *, float [], int), float *alamda);
 void newt(float x[], int n, int *check,
 	void (*vecfunc)(int, float [], float []));
 void odeint(float ystart[], int nvar, float x1, float x2,
