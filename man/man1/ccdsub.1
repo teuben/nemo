@@ -8,6 +8,10 @@ ccdsub \- sub/average of an image
 set of coordinates in X, Y and/or Z (since the expression of the
 selected axes is arbitrary, the resulting coordinate system may
 be bogus).
+.PP
+Since cubes/images produced by this program may have dummy
+axes (length 1), you will need to use \fIccdslice(1NEMO)\fP to
+get rid of them.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -42,7 +46,6 @@ Number Y to aver (size remains same)
 .TP
 \fBskip=\fP
 Coordinates to skip     
-.SH EXAMPLES
 .SH SEE ALSO
 ccdslice(1NEMO), ccdmom(1NEMO), image(5NEMO)
 .SH AUTHOR
