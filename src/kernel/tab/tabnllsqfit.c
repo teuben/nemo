@@ -8,6 +8,7 @@
  *  plane      p0+p1*x1+p2*x2+p3*x3+.....     up to 'order'   (2d plane has order=2)
  *  poly       p0+p1*x+p2*x^2+p3*x^3+.....    up to 'order'   (paraboloid has order=2)
  *  gauss      p0+p1*exp(-(x-p2)^2/(2*p3^2))
+ *  exp        p0+p1*exp(-(x-p2)/p3)   
  */
 
 #include <stdinc.h>  
@@ -19,14 +20,14 @@ string defv[] = {
     "ycol=2\n           column(s) for y, the dependant variable(s)",
     "dycol=\n           optional column for sigma-y (weight = 1/dy**2)",
     "xrange=\n          in case restricted range is used (1D only)",
-    "fit=line\n         fitmode (line, plane, poly, gauss)",
-    "order=\n		Order of plane/poly fit",
+    "fit=line\n         fitmode (line, plane, poly, gauss, exp)",
+    "order=2\n		Order of plane/poly fit",
     "out=\n             output file for some fit modes",
     "nsigma=-1\n        ** delete points more than nsigma away?",
     "par=\n             initial estimates of parameters (p0,p1,p2,...)",
     "free=\n            free(1) or fixed(0) parameters? [1,1,1,1,....]",
     "nmax=10000\n       Default max allocation",
-    "VERSION=1.0a\n     13-jul-02 PJT",
+    "VERSION=1.0b\n     13-jul-02 PJT",
     NULL
 };
 
@@ -93,6 +94,28 @@ static void derv_gauss1d(real *x, real *p, real *e, int np)
   e[1] = exp(-arg);
   e[2] = -p[1]*e[1] * a / (b*b);
   e[3] = p[1] * e[1] * a * a / (b*b*b);
+}
+
+
+static real func_exp(real *x, real *p, int np)
+{
+  real a,b,arg;
+  a = x[0]-p[2];
+  b = p[3];
+  arg = a/b;
+  return p[0] + p[1] * exp(-arg);
+}
+
+static void derv_exp(real *x, real *p, real *e, int np)
+{
+  real a,b,arg;
+  a = x[0]-p[2];
+  b = p[3];
+  arg = a/b;
+  e[0] = 1.0;
+  e[1] = exp(-arg);
+  e[2] = p[1]*e[1] / b;
+  e[3] = p[1] * e[1] * arg / b;
 }
 
 static real func_line(real *x, real *p, int np)
@@ -165,6 +188,8 @@ nemo_main()
     	do_poly();
     } else if (scanopt(method,"gauss")) {
     	do_gauss();
+    } else if (scanopt(method,"exp")) {
+    	do_exp();
     } else
         error("fit=%s invalid; try [line,plane,poly,gauss]",
 	      getparam("fit"));
@@ -335,6 +360,8 @@ do_line()
  *      used:   n = dimensionality of space in which hyper plane is fit
  */
  
+/*  BUG:  plane,order=1 does not reproduce line   !!  */
+
 do_plane()
 {
   real *x1, *x2, *x, *y, *dy, *d;
@@ -345,8 +372,8 @@ do_plane()
   int lpar = order+1;
   real tol = 0.0, lab = 0.0;
 
-  if (nycol<1) error("Need 1 value for ycol=");
   if (nxcol<order) error("Need %d value(s) for xcol=",order);
+  if (nycol<1) error("Need 1 value for ycol=");
 
   y = ycol[0].dat;
   dy = (dycolnr>0 ? dycol.dat : NULL);
@@ -398,6 +425,7 @@ do_gauss()
   real tol = 0.0, lab = 0.01;
   int lpar = 4;
 
+  if (nxcol < 1) error("nxcol=%d",nxcol);
   if (nycol<1) error("Need 1 value for ycol=");
 
   x = xcol[0].dat;
@@ -424,6 +452,50 @@ do_gauss()
 
 }
 
+
+/*
+ * EXP:       y = a + b * exp(-(x-c)/d)
+ *
+ */
+ 
+do_exp()
+{
+  real *x1, *x2, *x, *y, *dy, *d;
+  int i,j, nrt, mpar[4];
+  real fpar[3], epar[4];
+  int its = 50;
+  real tol = 0.0, lab = 0.01;
+  int lpar = 4;
+
+  warning("fit=exp does not work yet");
+
+  if (nxcol < 1) error("nxcol=%d",nxcol);
+  if (nycol<1) error("Need 1 value for ycol=");
+
+  x = xcol[0].dat;
+  y = ycol[0].dat;
+  dy = (dycolnr>0 ? dycol.dat : NULL);
+  d = (real *) allocate(npt * sizeof(real));
+
+  for (i=0; i<lpar; i++) {
+    mpar[i] = mask[i];
+    fpar[i] = par[i];
+  }
+  
+  fitfunc = func_exp;
+  fitderv = derv_exp;
+
+  nrt = nllsqfit(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,its,lab, fitfunc,fitderv);
+  printf("nrt=%d\n",nrt);
+  printf("Fitting a+b*exp(-(x-c)/d):  \na= %g %g \nb= %g %g \nc= %g %g\nd= %g  %g\n",
+	 fpar[0],epar[0],fpar[1],epar[1],fpar[2],epar[2],fpar[3],epar[3]);
+  if (nrt < 0) error("Bad exp fit nrt=%d",nrt);
+  if (outstr)
+    for (i=0; i<npt; i++)
+      fprintf(outstr,"%g %g %g\n",x[i],y[i],d[i]);
+
+}
+
 /*
  * POLYNOMIAL:  y = b_0 + b_1 * x^1 + b_2 * x^2 + ... + b_n * x^n
  *
@@ -439,8 +511,9 @@ do_poly()
   real tol = 0.0, lab = 0.0;
   int lpar = order+1;
     
-  if (nxcol < 1) error("nxcol=%d",nxcol);
+  if (nxcol<order) error("Need %d value(s) for xcol=",order);
   if (nycol < 1) error("nycol=%d",nycol);
+
   x = xcol[0].dat;
   y = ycol[0].dat;
   dy = (dycolnr>0 ? dycol.dat : NULL);
