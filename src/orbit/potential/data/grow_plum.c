@@ -58,6 +58,7 @@ void inipotential(int*npar, double*par, string file) {
      * Note, we don't bother here about Peter's idea that the first parameter
      *       shall be a pattern speed (a pattern speed makes no sense with a
      *       spherical model anyway ...)
+     * Peter's reaction: ieck.... ok, but then you can't integrate orbits...
      */
   }
   init_timer((*npar>0)? (int)(par[0]) : 0,
