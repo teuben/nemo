@@ -1,0 +1,3 @@
+#! /bin/csh -f
+#  cc script for sun3's
+exec /bin/cc -I$NEMOINC -L$NEMOLIB -Dsun3 -Bstatic $*
