@@ -36,8 +36,8 @@ namespace {
 	warning("%s: file \"%s\" ignored",name(),file);
       double
 	o   = npar>0? pars[0] : 0.,
-	m   = npar>2? pars[2] : 1.,
-	a   = npar>3? pars[3] : 1.;
+	m   = npar>2? pars[1] : 1.,
+	a   = npar>3? pars[2] : 1.;
       Aq    = a*a;
       GM    = -m;
       if(npar>3) warning("%s: skipped parameters beyond 3",name());
