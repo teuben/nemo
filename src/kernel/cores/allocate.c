@@ -11,6 +11,7 @@
  *	22-jan-95	proto
  *	 3-may-95	added dprintf() 
  *	 6-apr-01	changed malloc -> calloc		pjt
+ *         jan-02       experimenting with exception handling	pjt/nas
  */
 
 #include <stdinc.h>
@@ -19,38 +20,45 @@
 #include "exception.h"
 
 // #define calloc my_calloc
+// #define NEW_EH
 
 void *allocate(int nb)
 {
     void *mem;
-
+#ifdef NEW_EH
     if (BeginBlock() == -1)  {
 	RestoreUserContext();
 	return NULL;
     }
+#endif
     // how should this kind of error be processed ?
     if (nb < 0) error("allocate: cannot allocate %d bytes",nb);
     if (nb==0) nb++;
     mem = (void *) calloc((size_t)nb, 1);
     if (mem == NULL)  {
+#ifdef NEW_EH
 	errno = ENOMEM;
 	RaiseException (errno);
-	// error("allocate: not enough memory for %d bytes", nb);
+#else
+	error("allocate: not enough memory for %d bytes", nb);
+#endif
     }
     dprintf(8,"allocate: %d bytes @ %d \n",nb, mem);
-
+#ifdef NEW_EH
     EndBlock();
+#endif
     return mem;
 }
 
 void *reallocate(void *bp, int nb)
 {
     void *mem;
-
+#ifdef NEW_EH
     if (BeginBlock() == -1)  {
 	RestoreUserContext();
 	return NULL;
     }
+#endif
     // how should this kind of error be processed ?
     if (nb < 0) error("reallocate: cannot allocate %d bytes",nb);
     if (nb == 0) nb++;
@@ -59,17 +67,20 @@ void *reallocate(void *bp, int nb)
     else
         mem = (void *) realloc((void *)bp,(size_t)nb);
     if (mem == NULL)  {
+#ifdef NEW_EH
 	RaiseException (errno);
-	// error("allocate: not enough memory for %d bytes", nb);
+#else
+	error("allocate: not enough memory for %d bytes", nb);
+#endif
     }
     dprintf(8,"reallocate: %d bytes @ %d \n",nb, mem);
-
+#ifdef NEW_EH
     EndBlock();
+#endif
     return mem;
 }
 
 #undef calloc
-
 
 
 void *
