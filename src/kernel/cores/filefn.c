@@ -8,6 +8,7 @@
 /* and made gcc2.0 silent by declaring more 		       */
 /*                  20-nov-94 added () to shutup gcc/lint      */
 /*                  12-apr-95 no more ARGS                     */
+/*                  20-jun-01 gcc3                             */
 /***************************************************************/
 
 #include <stdinc.h>
@@ -52,8 +53,7 @@ local string checkexists ( string, string );
 /* a file name with no extension at all.  JEB  06 Dec 1986     */
 /***************************************************************/
 
-string root(filename)
-string filename;
+string root(string filename)
 {
     char *dotpos;
 
@@ -66,8 +66,7 @@ string filename;
         return (substr(filename, 0, (dotpos - filename) - 1));
 }
 
-string extension(filename)
-string filename;
+string extension(string filename)
 {
     char *dotpos;
 
@@ -80,8 +79,7 @@ string filename;
         return (scopy(dotpos + 1));
 }
 
-string head(filename)
-string filename;
+string head(string filename)
 {
     char *slashpos;
 
@@ -92,8 +90,7 @@ string filename;
         return (substr(filename, 0, (slashpos - filename) - 1));
 }
 
-string tail(filename)
-string filename;
+string tail(string filename)
 {
     char *slashpos;
 
@@ -122,8 +119,7 @@ string filename;
 /* to ensure safety on multiple calls in a single statement.   */
 /***************************************************************/
 
-string defext(filename, ext)
-string filename, ext;
+string defext(string filename, string ext)
 {
     register char c, *cp;
     char *xp;
@@ -177,8 +173,7 @@ string filename, ext;
 /* found.                                                      */
 /***************************************************************/
 
-stream pathopen(path, filename, mode)
-string path, filename, mode;
+stream pathopen(string path, string filename, string mode)
 {
     return      /* PPAP */
         (stream) _mappath((strfn) fopen, path, filename, mode);
@@ -195,8 +190,7 @@ string path, filename, mode;
 /* or NULL if none exist.                                      */
 /***************************************************************/
 
-string pathfind(path, filename)
-string path, filename;
+string pathfind(string path, string filename)
 {
     return
         (string) _mappath((strfn) checkexists, path, filename, (string) NULL);
@@ -206,8 +200,7 @@ string path, filename;
 /* Internal routine to determine if a file exists              */
 /***************************************************************/
 
-local string checkexists(name, dummy)
-string name, dummy;
+local string checkexists(string name, string dummy)
 {
     permanent struct stat statbuf;
 
@@ -226,9 +219,7 @@ string name, dummy;
 /* from _mappath.                                              */
 /***************************************************************/
 
-string _mappath(fn, path, filename, arg)
-strfn fn;
-string path, filename, arg;
+string _mappath(strfn fn, string path, string filename, string arg)
 {
     register char *cp;
     char c;
@@ -264,8 +255,7 @@ string path, filename, arg;
 /* For MSDOS this always returns the oldname                   */
 /***************************************************************/
 
-local string expandtilde(name)
-string name;
+local string expandtilde(string name)
 {
 #if defined(__BORLANDC__) 
     if (*name != '~') return (name);

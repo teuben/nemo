@@ -6,6 +6,7 @@
 /*      22-nov-91   malloc() -> allocate()                     */
 /*      25-feb-92   gcc 2.0				       */
 /*      20-feb-94   ansi                                       */
+/*      20-jun-01   gcc 3                                      */
 /* ----------------------------------------------------------- */
 /*     The strlib package contains the implementations for     */
 /* several routines that use dynamically-allocated string      */
@@ -52,8 +53,7 @@ char *getmem(int nbytes)
 /* see also: strdup()                                          */
 /***************************************************************/
 
-string scopy(s)
-string s;
+string scopy(string s)
 {
     string result;
 

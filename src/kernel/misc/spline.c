@@ -23,6 +23,7 @@
  *    1-mar-94   1.2 : double is now real				pjt
  *   15-apr-98   2.0 : finishing TOOLBOX version                        pjt
  *   16-apr-98   2.1 : TOOLBOX in its own tabspline.c (see kernel/tab)  pjt
+ *   20-jun-01   gcc3                                                   pjt
  */
 
 #include <stdinc.h>
@@ -49,10 +50,10 @@ void spline(real *coef, real *x, real *y, int n)
  * SPLSUB: local worker routine that sets up the spline coeffs
  */
 
-local void splsub(b, c, d, x, y, n)
-real b[], c[], d[];   /* 1st to 3rd order polynomial coefs */
-real x[], y[];
-int n;
+local void splsub(
+    real b[], real c[], real d[],   /* 1st to 3rd order polynomial coefs */
+    real x[], real y[],
+    int n)
 {
     int i;
     real t1, tn, t;

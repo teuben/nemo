@@ -1202,7 +1202,7 @@ local void setparam (string par, string val, string prompt)
 {
 #if defined(PUTPARAM) && defined(INTERACT)
     char line[80];      
-    int  old, new, i;
+    int  i;
 
     if (par==NULL || *par==0)
         error("setparam: no parameter supplied?");

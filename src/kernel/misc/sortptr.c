@@ -11,10 +11,7 @@
         
 #include <stdinc.h>
 
-void sortptr (x ,idx, n)
-real   x[];
-int    idx[];
-int    n;
+void sortptr (real *x ,int *idx, int n)
 {
     int    gap, i, j;
     int    tmp;
@@ -44,8 +41,9 @@ int    n;
 
 #ifdef TESTBED
 
-real   x[10]={9, 5, 4, 7, 6, 2, 1, 3, 8, 0};
-int    idx[10];
+static real   x[10]={9, 5, 4, 7, 6, 2, 1, 3, 8, 0};
+static int    idx[10];
+
 main()
 {
     int i;

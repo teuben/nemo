@@ -17,6 +17,7 @@
               30-sep-1990  written in C for Nemo's lsq_ routines            PJT
                9-jul-1991  replaced '=-' with '= -' (appease IRIS compiler) PJT
 	      25-feb-92    happy gcc2.0                                     PJT
+              20-jun-01    gcc 3.0                                          pjt
 */
 
 #include <stdinc.h>
@@ -24,11 +25,11 @@
 /*	maximum size of matrix */
 #define  LIMIT 32
 
-void matinv(matrix,size,sizemp,det)
-real *matrix;		/* a(n,m) us used in here */
-int size;		/* actual size of matrix */
-int sizemp;		/* declared size of matrix by caller */
-real *det;		/* returned determinant; 0=singular */
+void matinv(
+    real *matrix,		/* a(n,m) us used in here */
+    int size,		/* actual size of matrix */
+    int sizemp,		/* declared size of matrix by caller */
+    real *det)		/* returned determinant; 0=singular */
 {
     int  i,j,row,k,evin,per[LIMIT];
     real max,even,hv[LIMIT],mjk;

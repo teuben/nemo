@@ -1,13 +1,12 @@
 /*
  *  SORT:  shell sort of an array of pointers to 'real's'  
  *              See K&R pp108
+ *     20-jun-01	gcc3 			pjt
  */
 
 #include <stdinc.h>
         
-void sort (x , n)
-real *x[];
-int    n;
+void sort (real *x[] , int n)
 {
     int    gap, i, j;
     real  *temp;

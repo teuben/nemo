@@ -1,10 +1,12 @@
 /*
  *  select: table row selection routines
  *
- *	18-dec-99	NULL->0
+ *	18-dec-99	NULL->0			pjt
+ *	20-jun-01 	gcc3			pjt
  *
  */
 #include <stdinc.h>
+#include <getparam.h>
 
    /* allowed numeric comparisons 'a OPER b' with the following OPER's */
 
@@ -16,10 +18,13 @@
 #define ISEQ    5   /* == */
 #define ISNE    6   /* != */
 
-local int substitute();
+local int substitute(string s, string *cnam, string *cval, 
+	real *a, real *b);
 
-bool num_select(cnam, cval, sels)
-string *cnam, *cval, *sels;
+
+extern void strinsert(char *a, char *b, int n);
+
+bool num_select(string *cnam, string *cval, string *sels)
 {
     string *s;
     char sel[128];
@@ -49,9 +54,8 @@ string *cnam, *cval, *sels;
     return TRUE;        /* if gotten here, all is TRUE and return as such */
 }
 
-local int substitute(s, cnam, cval, a, b)
-string s, *cnam, *cval;
-real *a, *b;
+local int substitute(string s, string *cnam, string *cval, 
+	real *a, real *b)
 {
     char sel[128], var[128];
     char *vp, *cp = sel;

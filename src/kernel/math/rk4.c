@@ -1,17 +1,16 @@
 /*
  *  RK4: take a single RK4 - step
  *
+ *	20-jun-01	gcc3					pjt
+ *
  *  Numerical Recipies, pp. xxx
  */
  
 #define  NMAX   10
 
 
-rk4 (y, dydx, n, x, h, yout, derivs)
-double y[], dydx[], yout[], x,h;
-int    n;
-int    (*derivs)();
-
+void rk4 (double *y, double *dydx, int n, double x, double h, double *yout, 
+	int (*derivs)())
 {
       double yt[NMAX], dyt[NMAX], dym[NMAX];
       double hh, h6, xh;

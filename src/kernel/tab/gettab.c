@@ -17,6 +17,7 @@
  *	 4-mar-94 pjt  ansi headers
  *	15-jan-95 pjt  fixed SINGLEPREC problems
  *	24-jun-99 pjt  fixed reading tables important from DOS
+ *	20-jun-01 pjt  gcc 3
  */
 
 #include <stdinc.h>
@@ -26,18 +27,19 @@
 #define MAXLINELEN  2048
 
 extern string *burststring(string,string);
+extern void freestrings(string *);
 
 /*
  *  get_atable:  get table in memory, using free format
  *
  */
 
-int get_atable(instr,ncol,colnr,coldat,ndat)
-stream instr;                   /* in: input ascii file */
-int ncol;                       /* in: number of columns to read */
-int colnr[];                    /* in: column numbers to read */
-real *coldat[];                 /* out: array of pointers to data */
-int ndat;                       /* in: length of dat arrays */
+int get_atable(
+    stream instr,                   /* in: input ascii file */
+    int ncol,                       /* in: number of columns to read */
+    int colnr[],                    /* in: column numbers to read */
+    real *coldat[],                 /* out: array of pointers to data */
+    int ndat)                       /* in: length of dat arrays */
 {
     string *sp;
     int i, n, nr, nret, nline=0, npt=0;
@@ -95,13 +97,13 @@ int ndat;                       /* in: length of dat arrays */
  *
  */
 
-int get_ftable(instr,ncol,colpos,colfmt,coldat,ndat)
-stream instr;                   /* in: input ascii file */
-int ncol;                       /* in: number of columns to read */
-int colpos[];                   /* in: position to start reading */
-string colfmt[];		/* in: format of that number */
-real *coldat[];                 /* out: array of pointers to data */
-int ndat;                       /* in: length of dat arrays */
+int get_ftable(
+    stream instr,                   /* in: input ascii file */
+    int ncol,                       /* in: number of columns to read */
+    int colpos[],                   /* in: position to start reading */
+    string colfmt[],		/* in: format of that number */
+    real *coldat[],                 /* out: array of pointers to data */
+    int ndat)                       /* in: length of dat arrays */
 {
     string *sp;
     int i, n, npos, nret, nline=0, npt=0, ecount=0;

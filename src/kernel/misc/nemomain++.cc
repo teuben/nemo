@@ -10,6 +10,7 @@
  *
  *      20-nov-93  added options MAIN_ symbol to fool the fortran compiler
  *	21-nov-94  correct C++ version for C++ main
+ *	20-jun-01  must be an int
  */
 
 #include <stdinc.h>
@@ -20,7 +21,7 @@ extern string usage;		/* One line description of the program    */
 
 extern void nemo_main(void);	/* this must be be a C++ nemo_main too !! */
 
-void main(int argc,char *argv[])
+int main(int argc,char *argv[])
 {
     if(argv[argc] != NULL) 
        warning("Your C compiler seems to have an old-style (short) argv[]");
@@ -31,7 +32,7 @@ void main(int argc,char *argv[])
 }
 
 #if defined(MAIN)
-MAIN_()
+int MAIN_()
 {
   error("MAIN_ called; some fortran inconsistency");
 }

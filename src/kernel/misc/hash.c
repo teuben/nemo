@@ -18,9 +18,12 @@
  *          PJT 28-apr-92 -- Testbed for standalone; away from 'cpp'
  *			     EOS->NULL
  *	    pjt 22-feb-94 -- ansi headers - ANSI warning (see *CAST* comment)
+ *	    pjt 20-jun-01    gcc 3
  * Hash functions
  */
 
+#include <stdinc.h>	/* just for getmem() */
+#include <strlib.h>
 #include <hash.h>
 
 static int hash_primes[] = {3, 7, 13, 19, 29, 41, 53, 67, 83, 97, 113, 137,
@@ -137,10 +140,10 @@ get_entry_count (struct Hash_Table* h)
 }
 
 bool
-put_hash (h, key, value)
-    struct Hash_Table* h;
-    char* key;
-    void* value;
+put_hash (
+    struct Hash_Table* h,
+    char* key,
+    void* value)
 {
   long prime,hash;
   int next, i;
@@ -162,9 +165,9 @@ put_hash (h, key, value)
 }
 
 void*
-get_hash (h, key)
-     struct Hash_Table* h;
-     char* key;
+get_hash (
+     struct Hash_Table* h,
+     char* key)
 {
   long prime, hash;
   int i, len;

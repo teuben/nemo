@@ -2,6 +2,8 @@
 
 /*
  *  RKQC:  integrate a rk4 step ..
+ *
+ *	20-jun-01	gcc3				PJT
  */
  
 
@@ -16,11 +18,10 @@ extern void rk4 (double *, double *, int, double, double, double *, iproc);
 
 
 
-rkqc(y,dydx,n,x,htry,eps,yscal,hdid,hnext,derivs) 
-double  y[],dydx[],htry,eps,yscal[];
-double  *x, *hdid, *hnext;				/* output (as well) */
-int	n;
-int	(*derivs)();
+void rkqc(double *y, double *dydx, int n,
+	double *x, double htry, double eps, double *yscal,
+	double *hdid, double *hnext,
+	int (*derivs)())
 {
       double ytemp[NMAX], ysav[NMAX], dysav[NMAX];
       double pgrow, pshrnk, xsav, h, hh, errmax;

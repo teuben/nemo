@@ -31,21 +31,21 @@ int main(int argc,char *argv[])
 }
 
 #if defined(MAIN)
-MAIN()
+int MAIN()
 {
   error("MAIN called; some fortran inconsistency");
 }
 #endif
 
 #if defined(MAIN_)
-MAIN_()
+int MAIN_()
 {
   error("MAIN_ called; some fortran inconsistency");
 }
 #endif
 
 #if defined(MAIN__) || defined(linux)
-MAIN__()
+int MAIN__()
 {
   error("MAIN__ called; some fortran inconsistency");
 }

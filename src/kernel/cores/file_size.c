@@ -9,6 +9,7 @@
  *	25-feb-92   happy gcc 2.0	    PJT
  *	 5-nov-93   added second arg to file_lines!!!	PJT
  *	26-feb-94   ansi and better TESTBED defaults	pjt
+ *      20-jun-01   prototypes
  */
 
 #include <stdinc.h>
@@ -16,8 +17,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-int file_size(name)
-char *name;
+int file_size(char *name)
 {
     struct stat buf;
     
@@ -27,8 +27,7 @@ char *name;
         return(-1);                 /* see errno error code */
 }
 
-int file_time(name)
-char *name;
+int file_time(char *name)
 {
     struct stat buf;
     
@@ -46,9 +45,7 @@ char *name;
 
 #define BUFSIZE  8192
 
-int file_lines(name, deflen)
-char *name;
-int deflen;
+int file_lines(char *name, int deflen)
 {
     int len, n, cnt=0;
     char *cp, *buf;

@@ -1,12 +1,15 @@
 /*
  * Median: find the median of an array
  *
+ *	20-jun-01	gcc3
  */
 
 #include <stdinc.h>
 
 static int *ix=NULL;
 static int nix=0;
+
+extern     void sortptr(real *x, int *ix, int n);
 
 real median(int n, real *x)
 {
@@ -15,10 +18,10 @@ real median(int n, real *x)
 
     if (nix==0) {                       /* first time allocate */
         nix = n;
-        ix = allocate(sizeof(real)*nix);
+        ix = (int *) allocate(sizeof(real)*nix);
     } else if (nix < n) {               /* re-allocation */
         nix = n;
-        ix = reallocate(ix, sizeof(real)*nix);
+        ix = (int *) reallocate(ix, sizeof(real)*nix);
     }
     sortptr(x,ix,n);
     if (n % 2)
@@ -30,7 +33,7 @@ real median(int n, real *x)
 void init_median(int size)
 {
     nix = size;
-    ix = allocate(sizeof(real)*nix);
+    ix = (int *) allocate(sizeof(real)*nix);
 }
 
 void finis_median(void)

@@ -193,9 +193,11 @@ typedef real (*rproc)();
 #define local     static
 #define permanent static
 
+#if 0
 #if !defined(__STDC__)
 #   define const
 #   define volatile
+#endif
 #endif
 
 /*
@@ -248,22 +250,6 @@ typedef real (*rproc)();
 #define   MIN(x,y)     (((x) < (y)) ? (x) : (y))
 #define   MAX(x,y)     (((x) > (y)) ? (x) : (y))
 #define   RND(x,y)     ((y)*(((x)+(y)-1)/(y)))
-
-/* 
- * ARGS:  Define a macro that aides in presenting prototypes
- *        We don't recommend using it, we write ANSI code,
- *        and supply an 'unproto' cpp pre-processor.
- */
-#if 0
-#if defined(__STDC__) || defined(__cplusplus)
-#  define ARGS(alist) alist
-#  define PROTO
-#else
-#  define ARGS(alist) ()
-#  define const    /* empty def for compatibility */
-#  define volatile /* empty def for compatibility */
-#endif /*__STDC__*/
-#endif
 
 /*
  *      On some older BSD (4.2?) implementations the strchr() and strrchr()
@@ -318,7 +304,7 @@ extern void   strclose(stream);
 /* error.c dprintf.c */
 void error(string, ...);
 void warning(string, ...);
-void dprintf(int, const string, ...);
+int dprintf(int, const string, ...);
 
 /* core/allocate.c */
 extern void *allocate(int);

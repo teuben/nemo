@@ -22,6 +22,7 @@
  *      e 13-jan-99   pjt       defer free in random I/O
  *      f  6-apr-01   pjt       malloc->calloc
  *      g  7-jun-01   pjt       aptr -> ap (why did the compiler not warn?)
+ * V 2.7  20-jun-01   pjt       no more NOPROTO, fixed protos for gcc3
  *
  *  Although the SWAP test is done on input for every item - for deferred
  *  input it may fail if in the mean time another file was read which was
@@ -35,11 +36,7 @@
 #include <filestruct.h>
 #include <extstring.h>
 #include "filesecret.h"
-#ifndef NOPROTO
-# include <stdarg.h>		/* new style ... variable arguments */
-#else
-# include <varargs.h>		/* old style */
-#endif
+#include <stdarg.h>
 
 extern int convert_d2f (int, double *, float *);
 extern int convert_f2d (int, float *, double *);
@@ -51,9 +48,7 @@ extern int bswap (void *, int, int);
  * An example of recursive file traversal and memory etiquette.
  */
 
-void copy_item(ostr, istr, tag)
-stream ostr, istr;			/* output, input files */
-string tag;				/* tag of item to copy */
+void copy_item(stream ostr, stream istr, string tag)
 {
     string type, *tags, *tp;
     int *dims, dlen;
@@ -95,10 +90,7 @@ string tag;				/* tag of item to copy */
  *	With the option to convert data type
  */
 
-void copy_item_cvt(ostr, istr, tag, cvt)
-stream ostr, istr;			/* output, input files */
-string tag;				/* tag of item to copy */
-string *cvt;				/* list of conversions */
+void copy_item_cvt(stream ostr, stream istr, string tag, string *cvt)
 {
     string type, *tags, *tp;
     int *dims, dlen, cvtlen;
@@ -185,9 +177,7 @@ string *cvt;				/* list of conversions */
  * PUT_SET: begin named set in output.
  */
 
-void put_set(str, tag)
-stream str;
-string tag;
+void put_set(stream str, string tag)
 {
     strstkptr sspt;
     itemptr ipt;
@@ -202,9 +192,7 @@ string tag;
  * PUT_TES: end set in output.
  */
 
-void put_tes(str, tag)
-stream str;
-string tag;
+void put_tes(stream str, string tag)
 {
     strstkptr sspt;
     itemptr ipt;
@@ -226,10 +214,7 @@ string tag;
  * PUT_STRING: write string to a structured file.
  */
 
-void put_string(str, tag, dat)
-stream str;	 	/* stream to write data to */
-string tag; 		/* tag for output item */
-string dat; 		/* text of string to output */
+void put_string(stream str, string tag, string dat)
 {
     put_data(str, tag, CharType, dat, xstrlen(dat, 1), 0);
 }
@@ -238,7 +223,6 @@ string dat; 		/* text of string to output */
  * PUT_DATA: write data object to a structured file.
  * Synopsis: put_data(str, tag, typ, dat, dimN, ..., dim1, 0)
  */
-#ifndef NOPROTO
 void put_data(stream str, string tag, string typ, void *dat, int dim1, ...)
 {
     va_list ap;
@@ -256,17 +240,16 @@ void put_data(stream str, string tag, string typ, void *dat, int dim1, ...)
     						/* call next level routine  */
     put_data_sub(str, tag, typ, dat, (dim[0] != 0 ? dim : NULL), FALSE);
 }
-#endif
 /*
  * PUT_DATA_SUB: worker for above manager.
  */
 void put_data_sub(
-stream str, 		/* stream to write data to */
-string tag, 		/* tag for output item */
-string typ,     	/* data type for output */
-void *dat,	 	/* place to store data */
-int *dim,		/* vector of dimensions */
-bool con)		/* coercion flag (not used) */
+    stream str, 		/* stream to write data to */
+    string tag, 		/* tag for output item */
+    string typ,     	/* data type for output */
+    void *dat,	 	/* place to store data */
+    int *dim,		/* vector of dimensions */
+    bool con)		/* coercion flag (not used) */
 {
     itemptr ipt;
 
@@ -284,7 +267,6 @@ bool con)		/* coercion flag (not used) */
  * PUT_DATA_SET: open an item for random access
  * Synopsis: put_data_set(str, tag, typ, dimN, ..., dim1, 0)
  */
-#ifndef NOPROTO
 void put_data_set(stream str, string tag, string typ, int dim1, ...)
 {
     va_list ap;
@@ -312,15 +294,13 @@ void put_data_set(stream str, string tag, string typ, int dim1, ...)
     ItemPos(ipt) = ftell(str);                       /* begin of random data */
     sspt->ss_pos = ftell(str) + datlen(ipt,0);         /* end of random data */
 }
-#endif
+
 /*
  * PUT_DATA_TES: close an item for random access
  * Synopsis:  put_data_tes(str, tag)
  */
 
-void put_data_tes(str,tag)
-stream str;
-string tag;
+void put_data_tes(stream str, string tag)
 {
     itemptr ipt;
     strstkptr sspt;
@@ -341,12 +321,12 @@ string tag;
  * Synopsis:   put_data_ran(str, tag, dat, offset, length)
  */
 
-void put_data_ran(str,tag,dat,offset,length)
-stream str;
-string tag;
-void *dat;
-int offset;
-int length;
+void put_data_ran(
+    stream str,
+    string tag,
+    void *dat,
+    int offset,
+    int length)
 {
     itemptr ipt;
     strstkptr sspt;
@@ -396,9 +376,7 @@ void put_data_ran()
  * GET_SET: access named set in input.
  */
 
-void get_set(str, tag)
-stream str;
-string tag;
+void get_set(stream str, string tag)
 {
     strstkptr sspt;
     itemptr sptr;
@@ -416,9 +394,7 @@ string tag;
  * GET_TES: end access of named set.
  */
 
-void get_tes(str, tag)
-stream str;
-string tag;
+void get_tes(stream str, string tag)
 {
     itemptr ipt;
     strstkptr sspt;
@@ -441,7 +417,6 @@ string tag;
  * GET_DATA: read data object from a structured file.
  * Synopsis: get_data(str, tag, typ, dat, dimN, ..., dim1, 0)
  */
-#ifndef NOPROTO
 void get_data(stream str, string tag, string typ, void *dat, int dim1, ...)
 {
     va_list ap;
@@ -458,13 +433,11 @@ void get_data(stream str, string tag, string typ, void *dat, int dim1, ...)
     						/* call next level routine  */
     get_data_sub(str, tag, typ, dat, (dim[0] != 0 ? dim : NULL), FALSE);
 }
-#endif
 /*
  * GET_DATA_COERCED : read data object from a structured file,
  * automatically performing float <--> double conversions.
  * Synopsis: get_data_coerced(str, tag, typ, dat, dimN, ..., dim1, 0)
  */
-#ifndef NOPROTO
 void get_data_coerced(stream str,string tag,string typ,void *dat,int dim1, ...)
 {
     va_list ap;
@@ -481,18 +454,17 @@ void get_data_coerced(stream str,string tag,string typ,void *dat,int dim1, ...)
     						/* call next level routine  */
     get_data_sub(str, tag, typ, dat, (dim[0] != 0 ? dim : NULL), TRUE);
 }
-#endif
 	
 /*
  * GET_DATA_SUB: worker for above managers.
  */
 void get_data_sub(
-stream str,             	/* stream to read data from */
-string tag,             	/* expected item tag */
-string typ,               	/* expected data type */
-void *dat,              	/* place to store data */
-int *dim,			/* array of dimensions */
-bool con)			/* coercion flag */
+    stream str,             	/* stream to read data from */
+    string tag,             	/* expected item tag */
+    string typ,               	/* expected data type */
+    void *dat,              	/* place to store data */
+    int *dim,			/* array of dimensions */
+    bool con)			/* coercion flag */
 {
     strstkptr sspt;
     itemptr ipt;
@@ -533,7 +505,6 @@ bool con)			/* coercion flag */
  * GET_DATA_SET: open an item for random access
  * Synopsis: get_data_set(str, tag, typ, dimN, ..., dim1, 0)
  */
-#ifndef NOPROTO
 void get_data_set(stream str, string tag, string typ, int dim1, ...)
 {
     va_list ap;
@@ -560,17 +531,14 @@ void get_data_set(stream str, string tag, string typ, int dim1, ...)
     sspt->ss_pos = ItemPos(ipt) + datlen(ipt,0);         /* end of random data */
     sspt->ss_ran = ipt;
 }
-#endif
 
 /*
  * GET_DATA_TES: close an item for random access
  * Synopsis:  get_data_tes(str, tag)
  */
 
-void get_data_tes(
-    stream str,
-    string tag
-) {
+void get_data_tes(stream str, string tag)
+{
     itemptr ipt;
     strstkptr sspt;
 
@@ -782,9 +750,7 @@ bool skip_item(
  * WRITEITEM: write an item or set of items.     [NOT USED]
  */
 
-local bool writeitem(str, ipt)
-stream str;
-itemptr ipt;
+local bool writeitem(stream str, itemptr ipt)
 {
     itemptr *setp, tesp;
 
@@ -809,9 +775,7 @@ itemptr ipt;
  * PUTITEM: write item to stream; returns indication of success/failure.
  */
 
-local bool putitem(str, ipt)
-stream str;            		/* stdio stream to write item to */
-itemptr ipt;            	/* pointer to item to write */
+local bool putitem(stream str, itemptr ipt)
 {
     if (! puthdr(str, ipt))                     /* write item header        */
         return (FALSE);
@@ -826,9 +790,7 @@ itemptr ipt;            	/* pointer to item to write */
  * PUTHDR: write item header to stream.
  */
 
-local bool puthdr(str, ipt)
-stream str;             	/* stdio stream to write header to */
-itemptr ipt;            	/* pointer to item to write */
+local bool puthdr(stream str, itemptr ipt)
 {
     short num;
 
@@ -858,9 +820,7 @@ itemptr ipt;            	/* pointer to item to write */
  * PUTDAT: write data of a item.
  */
 
-local bool putdat(str, ipt)
-stream str;             	/* stdio stream to write data to */
-itemptr ipt;            	/* pointer to item with data */
+local bool putdat(stream str, itemptr ipt)
 {
     int len;
 
@@ -880,9 +840,7 @@ itemptr ipt;            	/* pointer to item with data */
  * calls error() if requested item not found.
  */
 
-local itemptr scantag(sspt, tag)
-strstkptr sspt;
-string tag;
+local itemptr scantag(strstkptr sspt, string tag)
 {
     itemptr ipt;
 
@@ -902,8 +860,7 @@ string tag;
     return (ipt);				/* return item found	  */
 }
 
-local itemptr nextitem(sspt)
-strstkptr sspt;
+local itemptr nextitem(strstkptr sspt)
 {
     itemptr ipt;
 
@@ -916,9 +873,7 @@ strstkptr sspt;
     return (ipt);				/* supply item to caller    */
 }
 
-local itemptr finditem(sspt, tag)
-strstkptr sspt;
-string tag;
+local itemptr finditem(strstkptr sspt, string tag)
 {
     itemptr sptr, *ivec;
 
@@ -936,9 +891,7 @@ string tag;
  * READITEM: read a simple or compound item.
  */
 
-local itemptr readitem(str, first)
-stream str;			/* stream to read from */
-itemptr first;                  /* first item read in */
+local itemptr readitem(stream str, itemptr first)
 {
     itemptr ip, ibuf[MaxSetLen], *bufp, np, res;
 
@@ -970,8 +923,7 @@ itemptr first;                  /* first item read in */
  * GETITEM: read item from stream; return ptr to item or NULL.
  */
 
-local itemptr getitem(str)
-stream str;             	/* stream to read item from */
+local itemptr getitem(stream str)
 {
     itemptr ipt;
 
@@ -988,8 +940,7 @@ stream str;             	/* stream to read item from */
  * GETHDR: read a item header from a stream.
  */
 
-local itemptr gethdr(str)
-stream str;
+local itemptr gethdr(stream str)
 {
     short num;
     string typ, tag;
@@ -1054,8 +1005,7 @@ stream str;
  * GETHDR: read a item header from a stream.
  */
 
-bool qsf(str)
-stream str;
+bool qsf(stream str)
 {
     short num;
 
@@ -1063,22 +1013,22 @@ stream str;
         return FALSE;
 
     if (fread(&num, sizeof(short), 1, str) != 1)/* read magic number        */
-	return (FALSE);				/*   return NULL on EOF     */
+	return FALSE;				/*   return NULL on EOF     */
     if (num == SingMagic || num == PlurMagic) {	/* new-style magic number?  */
-        return(TRUE);
+        return TRUE;
     }
 #if defined(CHKSWAP)
     else {
         bswap(&num,sizeof(short int),1);        /* swap the bytes */
         if (num == SingMagic || num == PlurMagic) {    /* test the swapped */
-            return(TRUE);
+            return TRUE;
         } else {
-            return(FALSE);
+            return FALSE;
         }
     }
 #else
     else {  
-        return(FALSE);
+        return FALSE;
     }
 #endif
 } /* qsf */
@@ -1089,9 +1039,7 @@ stream str;
 
 #define MaxReadNow  256
 
-local void getdat(ipt, str)
-itemptr ipt;
-stream str;
+local void getdat(itemptr ipt, stream str)
 {
     int dlen, elen;
 
@@ -1119,8 +1067,7 @@ stream str;
  * COPYFUN: select copy routine for given data types.
  */
 
-local proc copyfun(srctyp, destyp)
-string srctyp, destyp;			/* data type strings */
+local proc copyfun(string srctyp, string destyp)
 {
     if (streq(srctyp, destyp))
 	return copydata;
@@ -1135,12 +1082,12 @@ string srctyp, destyp;			/* data type strings */
  * COPYDATA - copy real or virtual data to assigned memory space
  */
 
-local void copydata(vdat, off, len, ipt, str)
-void *vdat;
-int off;
-int len;
-itemptr ipt;
-stream str;
+local void copydata(
+    void *vdat,
+    int off,
+    int len,
+    itemptr ipt,
+    stream str)
 {
     char *src, *dat = (char *) vdat;
     long oldpos;
@@ -1159,12 +1106,12 @@ stream str;
     }
 } /* copydata */
 
-local void copydata_f2d(dat, off, len, ipt, str)
-double *dat;
-int off;
-int len;
-itemptr ipt;
-stream str;
+local void copydata_f2d(
+    double *dat,
+    int off,
+    int len,
+    itemptr ipt,
+    stream str)
 {
     float *src;
     long oldpos;
@@ -1184,12 +1131,12 @@ stream str;
     }
 } /* copydata_f2d */
 
-local void copydata_d2f(dat, off, len, ipt, str)
-float *dat;
-int off;
-int len;
-itemptr ipt;
-stream str;
+local void copydata_d2f(
+    float *dat,
+    int off,
+    int len,
+    itemptr ipt,
+    stream str)
 {
     double *src;
     long oldpos;
@@ -1209,8 +1156,7 @@ stream str;
     }
 } /* copydata_d2f */
 
-local float getflt(str)
-stream str;
+local float getflt(stream str)
 {
     float x;
 
@@ -1218,8 +1164,7 @@ stream str;
     return x; 
 }
 
-local double getdbl(str)
-stream str;
+local double getdbl(stream str)
 {
     double x;
 
@@ -1227,11 +1172,11 @@ stream str;
     return x;
 }
 
-local void saferead(dat, siz, cnt, str)
-void *dat;
-int siz;
-int cnt;
-stream str;
+local void saferead(
+    void *dat,
+    int siz,
+    int cnt,
+    stream str)
 {
     if (fread(dat, siz, cnt, str) != cnt)
 	error("saferead: error calling fread %d*%d bytes", siz, cnt);
@@ -1240,10 +1185,10 @@ stream str;
 #endif
 }
 
-local void safeseek(str, offset, key)
-stream str;
-long offset;
-int key;	      /* 0: start of file, 1: current point, 2: end */
+local void safeseek(
+    stream str,
+    long offset,
+    int key)	      /* 0: start of file, 1: current point, 2: end */
 {
     if (fseek(str, offset, key) == -1)
 	error("safeseek: error calling fseek %d bytes from %d",
@@ -1258,9 +1203,9 @@ int key;	      /* 0: start of file, 1: current point, 2: end */
  * ELTCNT: compute number of basic elements in subspace of item.
  */
 
-local int eltcnt(ipt, skp)
-itemptr ipt;            	/* pointer to item w/ possible vector dims */
-int skp;                	/* num of dims to skip, starting with dimN */
+local int eltcnt(
+    itemptr ipt,            	/* pointer to item w/ possible vector dims */
+    int skp)                	/* num of dims to skip, starting with dimN */
 {
     register int prod, *ip;
 
@@ -1277,9 +1222,9 @@ int skp;                	/* num of dims to skip, starting with dimN */
  * DATLEN: compute length in bytes of subspace of item.
  */
 
-local int datlen(ipt, skp)
-itemptr ipt;            	/* pointer to item w/ possible vector dims */
-int skp;                	/* num of dims to skip, starting with dimN */
+local int datlen(
+    itemptr ipt,            	/* pointer to item w/ possible vector dims */
+    int skp)                	/* num of dims to skip, starting with dimN */
 {
     return (ItemLen(ipt) * eltcnt(ipt, skp));	/* find byte-len needed     */
 }
@@ -1288,11 +1233,11 @@ int skp;                	/* num of dims to skip, starting with dimN */
  * MAKEITEM: construct an item from components.
  */
 
-local itemptr makeitem(typ, tag, dat, dim)
-string typ;			/* data type of generated item */
-string tag;     	        /* tag for generated item */
-void *dat;              	/* pointer to data */
-int *dim;                  	/* dims, terminated with 0 */
+local itemptr makeitem(
+    string typ,			/* data type of generated item */
+    string tag,     	        /* tag for generated item */
+    void *dat,              	/* pointer to data */
+    int *dim)                 	/* dims, terminated with 0 */
 {
     itemptr ipt;
 
@@ -1315,8 +1260,8 @@ int *dim;                  	/* dims, terminated with 0 */
  * FREEITEM: deallocate item and data.
  */
 local void freeitem(
-itemptr ipt,			/* address of item to free */
-bool flg)			/* if true, free fields of item */
+    itemptr ipt,			/* address of item to free */
+    bool flg)			/* if true, free fields of item */
 {
     itemptr *ivp;
 
@@ -1356,8 +1301,7 @@ local typlen tl_tab[] = {
     { NULL,	  0,              },
 };
 
-local int baselen(typ)
-string typ;
+local int baselen(string typ)
 {
     typlenptr tp;
 
@@ -1371,8 +1315,7 @@ string typ;
 /************************************************************************/
 /*                             FINDING                                  */
 /************************************************************************/
-local string findtype(a,type)
-string *a, type;
+local string findtype(string *a, string type)
 {
     int i;
     char *cp;
@@ -1388,7 +1331,7 @@ string *a, type;
         else if (streq(type,IntType) && *cp=='s')
             return(cp);
     }
-    return(NULL);
+    return NULL;
 }
 
 /************************************************************************/
@@ -1406,8 +1349,7 @@ string *a, type;
 
 local strstk strtable[StrTabLen], *last = NULL;
 
-local strstkptr findstream(str)
-stream str;
+local strstkptr findstream(stream str)
 {
     strstkptr stfree, sspt;
 
@@ -1438,17 +1380,14 @@ stream str;
     return (stfree);				/* return new slot	    */
 }
 
-local void ss_push(sspt, ipt)
-strstkptr sspt;
-itemptr ipt;
+local void ss_push(strstkptr sspt, itemptr ipt)
 {
     if (sspt->ss_stp++ == SetStkLen)		/* check stack overflow	    */
 	error("get_set: Too many nested items");
     sspt->ss_stk[sspt->ss_stp] = ipt;		/* put set on stack	    */
 }
 
-local void ss_pop(sspt)
-strstkptr sspt;
+local void ss_pop(strstkptr sspt)
 {
     if (sspt->ss_stp == -1)			/* check stack underflow    */
 	error("ss_pop: stream stack underflow");
@@ -1463,8 +1402,7 @@ strstkptr sspt;
  * STRCLOSE: remove stream from strtable, free associated items, and close.
  */
 
-void strclose(str)
-stream str;
+void strclose(stream str)
 {
     strstkptr sspt;
 
@@ -1477,15 +1415,5 @@ stream str;
     last = NULL;                                /* also removed quick access*/
     strdelete(str,FALSE);                       /* delete file if scratch   */
     fclose(str);				/* and close it up	    */
-#ifdef NOPROTO
-    dprintf(1,"filesecret.c: NOPROTO is defined\n");
-#else
-    dprintf(1,"filesecret.c: NOPROTO is not defined\n");
-#endif
 }
 
-/* now the ... routines that need <varargs.h> */
-
-#ifdef NOPROTO
-# include "filesecret.va"
-#endif

@@ -124,6 +124,7 @@ Updates:      May  7, 1990: KGB, Document created.
               May 14, 1990: MXV, Document refereed.
               Apr 30, 1991: PJT, NEMO version, more like old 'fit'
               Oct 15, 1999: PJT  Added residual computations
+              Jun 20, 2001: PJT  gcc3 prototpypes 
 
 */
 
@@ -239,12 +240,11 @@ static int invmat()
    return( 0 );                                 /* all is well */
 } /* invmat */
 
-static void getmat(xdat,xdim, ydat, wdat, ddat, ndat, fpar, epar, npar)
-real *xdat , *ydat , *wdat , *ddat, *fpar , *epar;
-int  xdim , ndat , npar ;
-/*
- * getmat builds the matrix.
- */
+
+static void getmat(             /* build the matrix */
+        real *xdat, int xdim, 
+        real *ydat, real *wdat, real *ddat, int ndat,
+        real *fpar, real *epar, int npar)
 {
    real wd;
    real wn;
@@ -278,9 +278,10 @@ int  xdim , ndat , npar ;
    }
 } /* getmat */
 
-static int getvec(xdat, xdim, ydat, wdat, ndat, fpar, epar, npar)
-real *xdat ,*ydat ,*wdat ,*fpar , *epar;
-int  xdim, ndat, npar ;
+static int getvec(
+    real *xdat, int xdim, 
+    real *ydat, real *wdat, int ndat, 
+    real *fpar, real *epar, int npar)
 /*
  * getvec calculates the correction vector. The matrix has been built by
  * getmat, we only have to rescale it for the current value for labda.

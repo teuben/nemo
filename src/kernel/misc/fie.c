@@ -34,6 +34,7 @@
  *             18-may-92 set_xrandom for NEMO             PJT
  *             16-dec-96 moved xrandom decl. up	          PJT
  *              7-apr-01 gcc warnings                     pjt
+ *             20-jun-01 gcc3                             pjt
  *
  */
 #include <stdinc.h>   /* stdinc is NEMO's stdio =- uses real{float/double} */
@@ -112,8 +113,7 @@ static void fie_gencode(int opc)
    }
 }
 
-static void fie_genconst(cst)
-double cst;
+static void fie_genconst(double cst)
 {
 	fie_gencode(ldc);
 	if (opcodeptr != 0) codeptr++;
@@ -475,7 +475,7 @@ static double fie_erfc(double arg1)
 static double fie_mod(double arg1,double arg2)
 {
 	double val;
-	int   xxx = arg1/arg2;
+	int   xxx = (int)(arg1/arg2);
 	val = arg1 - xxx * arg2;
 	return(val);
 }
@@ -483,7 +483,7 @@ static double fie_mod(double arg1,double arg2)
 static double fie_int(double arg1)
 {
 	double val;
-	int xxx = arg1;
+	int xxx = (int)arg1;
 	val = xxx;
 	return(val);
 }
@@ -533,7 +533,7 @@ static double fie_ranp(double arg1)
 {
 	double val, cum, p, f;
 	if (arg1 < 40) {
-		int xxx = fie_rang(arg1,sqrt(arg1))+0.5;
+		int xxx = (int)(fie_rang(arg1,sqrt(arg1))+0.5);
 		val = xxx;
 	} else {
 		cum = exp(-arg1);
@@ -593,7 +593,8 @@ void dofie(real *data, int *nop, real *results, real *errorval)
 		          s = fie_pop();
 		          if (s >= 0) fie_push(pow(s,r));
 		          else {
-		          	int p = r, t;
+				int t;
+		          	int p = (int) r;
 		          	double epsilon = 0.000001;
 		          	if (fabs(r - p) <= epsilon){
 		          		t = (p % 2 == 0) ? 1 : -1;
@@ -711,7 +712,7 @@ static struct fie_slot {
 
 int savefie(int slot)
 {
-    struct fie_slot *psfie, *new;
+    struct fie_slot *psfie, *newf;
     int found=0, count=0;
     
     if (slot<=0) return(-1);    /* not supported yet */
@@ -734,12 +735,12 @@ int savefie(int slot)
             psfie = psfie->fwd;
     }
     if (found==0 && psfie->fwd==NULL) {   /* allocate new one */
-        new = (struct fie_slot *) malloc(sizeof(struct fie_slot));
-        if (new==NULL) return(-1);     /* couln't allocate */
-        new->slot = psfie->slot + 1;
-        new->fwd = NULL;
-        psfie->fwd = new;
-        psfie = new;        /* work on this new one */
+        newf = (struct fie_slot *) malloc(sizeof(struct fie_slot));
+        if (newf==NULL) return(-1);     /* couln't allocate */
+        newf->slot = psfie->slot + 1;
+        newf->fwd = NULL;
+        psfie->fwd = newf;
+        psfie = newf;        /* work on this new one */
     }
     
     bcopy(fiecode,psfie->fiecode,bid*maxfiecode);

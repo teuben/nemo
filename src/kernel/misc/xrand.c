@@ -16,8 +16,7 @@
 #define RAND_MAX  2147483647   /* some machines (DOS) may need 32767 */
 #endif
 
-double xrand(xl, xh)
-double xl, xh;
+double xrand(double xl, double xh)
 {
     return xl + (xh - xl) * ((double) rand()) / RAND_MAX;
 }

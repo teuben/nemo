@@ -103,8 +103,7 @@ void warning(string fmt, ...)
 
 
 
-void recover(cl)
-proc cl;
+void recover(proc cl)
 {
     if (cl)
 	dprintf(1,"Setting recoverable error\n");
@@ -114,8 +113,7 @@ proc cl;
 }
 
 
-void stop(lev)
-int lev;
+void stop(int lev)
 {
     if (lev<0)
         if (error_count++ < error_level) {

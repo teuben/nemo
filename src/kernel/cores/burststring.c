@@ -3,6 +3,7 @@
  *  25-dec-94 added burst2string()
  *  20-may-96 added burst0string() for checker
  *  28-nov-00 changed some names to make it compile for C++
+ *  20-jun-01 prototypes to help gcc3
  *
  * BURSTSTRING: break a string of the form "word1, word2, ..." into
  * seperate strings "word1", "word2", ... and return them in an
@@ -122,8 +123,8 @@ string *burst2string(string lst, string sep)
 }
 
 
-void freestrings(strptr)              /* free a previously allocated  */
-string *strptr;                    /* array of strings */
+void freestrings(              /* free a previously allocated */
+	string *strptr)                  /* array of strings */
 {
     string *s;
 
@@ -133,11 +134,11 @@ string *strptr;                    /* array of strings */
 }
 
 
-int splitstring(maxout, out, lst, sep)
-int maxout;		/* declared length of out[] array */
-string out[];		/* array for pointers to words that remain in lst */
-string lst;		/* list of words to patch and seperate */
-string sep;		/* chars which seperate words */
+int splitstring(
+int maxout,		/* declared length of out[] array */
+string out[],		/* array for pointers to words that remain in lst */
+string lst,		/* list of words to patch and seperate */
+string sep)		/* chars which seperate words */
 {
     string wrdbuf[MWRD], *wp;
     char strbuf[MSTR], *sp, *lp;

@@ -16,6 +16,7 @@
  *	    6-nov-93    fixed incomplete pipe data problem  pjt
  *          5-mar-94    use MAXLINES from header
  *     	    4-sep-97    1.1  added linear, made it default (spline has bug) PJT
+ *         20-jun-01	gcc 3
  */
 
 
@@ -24,6 +25,9 @@
 #include <strlib.h>
 #include <funtab.h>
 #include <spline.h>
+
+extern int file_lines(string, int);
+extern int get_atable(stream, int, int*, real **, int);
 
 FunctionTable *ft_open(string fname, int mode, int xcol, int ycol)
 {

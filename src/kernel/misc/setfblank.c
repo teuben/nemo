@@ -56,17 +56,8 @@
 #include <stdio.h>
 #include "gipsyc.h"
 
-void setfblank_( value )
-integer *value;
+void setfblank_( integer *value )
 {
    *value = BLANKVAL;
 }
-
-#if defined(VMS)
-void setfblank( value )
-integer *value;
-{
-   *value = BLANKVAL;
-}
-#endif
 

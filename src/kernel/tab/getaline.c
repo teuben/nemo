@@ -14,13 +14,14 @@ NNTP-Posting-Host: kruuna.helsinki.fi
  *	3-nov-93 ported to NEMO, but using K&R notation (no prototype) PJT
  *		 also using NEMO's (re)allocate
  *               idea about getsline()
+ * 
+ *	20-jun-01	gcc3
  */
 
 #include <stdinc.h>	/* NEMO !! */
 #include <stdlib.h>
 
-char *getaline(f)
-stream f;
+char *getaline(stream f)
 {
 	char *buf;		/* buffer for line */
 	size_t size;		/* size of buffer */
@@ -93,9 +94,7 @@ stream f;
  *      }
  *      free(s);
  */
-char *getsline(f,s)
-stream f;
-string *s;
+char *getsline(stream f, string *s)
 {
     error("Not implemented yet");
     return NULL;
