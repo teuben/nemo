@@ -69,7 +69,7 @@ string defv[] = {
 	"dummy=t\n       Write dummy axes also ?",
 	"nfill=0\n	 Add some dummy comment cards to test fitsio",
 	"ndim=\n         Testing if only that many dimensions need to be written",
-        "VERSION=5.3\n   8-may-04 PJT",
+        "VERSION=5.3a\n  8-may-04 PJT",
         NULL,
 };
 
@@ -175,7 +175,7 @@ void write_fits(string name,imageptr iptr)
 {
     FLOAT tmpr,xmin[3],xref[3],dx[3],mapmin,mapmax;   /* fitsio FLOAT !!! */
     FITS *fitsfile;
-    char *cp;
+    char *cp, origin[80];
     string *hitem, axname[3];
     float *buffer, *bp;
     int i, j, k, axistype, bitpix, keepaxis[3], nx[3], p[3], nx_out[3], ndim=3;
@@ -191,9 +191,9 @@ void write_fits(string name,imageptr iptr)
     dx[0] = Dx(iptr)*scale[0];
     dx[1] = Dy(iptr)*scale[1];
     dx[2] = Dz(iptr)*scale[2];
-    xref[0] = Xref(iptr);
-    xref[1] = Yref(iptr);
-    xref[2] = Zref(iptr);
+    xref[0] = Xref(iptr)+1.0;
+    xref[1] = Yref(iptr)+1.0;
+    xref[2] = Zref(iptr)+1.0;
     axistype = Axis(iptr);
     axname[0] = (Namex(iptr) ? Namex(iptr) : xyz[0]);
     axname[1] = (Namey(iptr) ? Namey(iptr) : xyz[1]);
@@ -216,6 +216,7 @@ void write_fits(string name,imageptr iptr)
 #else
     for (i=0; i<3; i++)  nx_out[i] = nx[i];
 #endif
+    sprintf(origin,"NEMO ccdfits %s",getparam("VERSION"));
 
     dprintf(1,"NEMO Image file written to FITS disk file\n");
     dprintf(1,"%d %d %d   %f %f %f   %f %f %f  %f %f %f   %f %f \n",
@@ -305,7 +306,7 @@ void write_fits(string name,imageptr iptr)
 
     fitwrhdr(fitsfile,"DATAMIN",mapmin);
     fitwrhdr(fitsfile,"DATAMAX",mapmax);
-    fitwrhda(fitsfile,"ORIGIN","NEMO");
+    fitwrhda(fitsfile,"ORIGIN",origin);
 
     cp = getenv("USER");                                /* AUTHOR */
     if (cp)
