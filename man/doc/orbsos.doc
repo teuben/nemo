@@ -1,0 +1,16 @@
+%N orbsos
+%D Generate SOS from an orbit
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man orbsos' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input orbit [???]
+%A mode
+	Mode (x|y|xy) [x]
+%A pabs
+	Show absolute values of positions? [f]
+%A vabs
+	Show absolute values of velocities? [f]
+%A VERSION
+	30-dec-93 PJT [1.2]
