@@ -1,5 +1,4 @@
 #--------------------------------------------------------
-# $Id$
 #
 #	NEMO/src/nbody/io_nemo   - for NEMO V3
 #
@@ -18,10 +17,10 @@ Ldummyf = $(NEMOLIB)/libio_nemo_f.a
 
 LIBNEMO = -lnemo
 #--------------------------------------------------------
-# g77's options
+# compilers options
 FC     = g77
-FFLAGS = -O -fno-second-underscore -fwritable-strings
-
+FFLAGS = -O -fno-second-underscore -fwritable-strings -Wno-globals
+OPT    = -Wall -g
 #--------------------------------------------------------
 # Absoft f77's options
 #FC=f77
@@ -72,8 +71,12 @@ run_test : dummy
 	(make test  ; script/test_io_nemo.csh )
 	(make testf ; script/fortran_test_io_nemo.csh )
 
+run_stress: dummy
+	(make test  ; script/stress_io_nemo.pl)
+
 test  : dirs                                                   \
 	${IONB}/io_nemo_test_float ${IONB}/io_nemo_test_double \
+	${IONB}/stress_io_nemo     ${IONB}/stress_io_nemo_f    \
 	${IONB}/snapmask_s         ${IONB}/snapmask_d
 
 testf : dirs 						       \
@@ -81,7 +84,7 @@ testf : dirs 						       \
         ${IONB}/nemo_fortran_f_n3  ${IONB}/nemo_fortran_d_n3   \
 	${IONB}/snapmask_s         ${IONB}/snapmask_d
 
-install:  dirs	.install_lib .install_lib_maing77 .install_lib_dummy test testf
+install:  dirs	.install_lib .install_lib_maing77 .install_lib_dummy test testf man
 
 .install_lib: $(LIB_IO_NEMO)
 	ar ruv $(L) $?
@@ -95,13 +98,12 @@ install:  dirs	.install_lib .install_lib_maing77 .install_lib_dummy test testf
 	ar ruv $(Ldummyc) $?
 	ar ruv $(Ldummyf) $?
 
+lib: $(LIB_IO_NEMO)
 bins:
 #	@echo No bins in nemo_io
 
-package :
-	find . -type f \( -name "*.[f,F,c,h,3]"   -o -name "Makefile"  -o -name "*.ps"  -o -name "README*" -o -name "*.csh"  -o -name "Testfile" \) -exec tar uvf io_nemo.tar {} \;
-	gzip -f io_nemo.tar
-
+tar :
+	        name=io_nemo-`date "+%d%b-%H.%M"`; cd ..; tar czhvf io_nemo/store/$${name}.tar.gz `find io_nemo/ -type f \( -name "*.[f,F,c,h,3]"  -o -name "*.cc" -o -name "Makefile"  -o -name "*.ps"  -o -name "README*" -o -name "*.csh" -o -name "*.pl" -o -name "Testfile" \)`; cp io_nemo/store/$${name}.tar.gz ~/io_nemo.tar.gz
 dirs : 
 	@script/make_dirs.csh
 
@@ -114,6 +116,9 @@ docascii :
 	@groff -Tascii man/io_nemo.3   > doc/io_nemo.ascii
 	@groff -Tascii man/io_nemo_f.3 > doc/io_nemo_f.ascii
 
+man: dummy
+	/bin/cp man/io_nemo.3 man/io_nemo_f.3 $(NEMO)/man/man3
+
 dummy :
 #--------------------------------------------------------
 # dependencies
@@ -123,51 +128,51 @@ ${IONO}/io_nemo.o          : ${IONS}/io_nemo.h      ${IONS}/maxio.h          \
 			     ${IONS}/io_init.h      ${IONS}/parameters.h     \
 			     ${IONS}/io_get_put.h   ${IONS}/check_file.h     \
 			     ${IONS}/io_nemo.c
-	$(CC) $(CFLAGS) $(INC) -c ${IONS}/io_nemo.c -o ${IONO}/io_nemo.o
+	$(CC) $(CFLAGS) $(OPT) $(INC) -c ${IONS}/io_nemo.c -o ${IONO}/io_nemo.o
 
 ${IONO}/io_get_put.o       : ${IONS}/io_get_put.h   ${IONS}/io_nemo_data.h   \
 			     ${IONS}/flags_data.h   ${IONS}/history_data.h   \
 			     ${IONS}/check_file.h   ${IONS}/io_nemo_tools.h  \
 			     ${IONS}/get_data_wrapper.h                      \
 			     ${IONS}/io_get_put.c
-	$(CC) $(CFLAGS) $(INC) -c ${IONS}/io_get_put.c -o ${IONO}/io_get_put.o
+	$(CC) $(CFLAGS) $(OPT) $(INC) -c ${IONS}/io_get_put.c -o ${IONO}/io_get_put.o
 
 # Specific io_nemo_f's files :
 ${IONO}/io_nemo_f.o        : ${IONS}/io_nemo_f.h    ${IONS}/maxio.h          \
 			     ${IONS}/io_init.h      ${IONS}/parameters.h     \
 			     ${IONS}/io_get_put_f.h ${IONS}/check_file.h     \
 			     ${IONS}/io_nemo_f.c
-	$(CC) $(CFLAGS) $(INC) -c ${IONS}/io_nemo_f.c -o ${IONO}/io_nemo_f.o
+	$(CC) $(CFLAGS) $(OPT) $(INC) -c ${IONS}/io_nemo_f.c -o ${IONO}/io_nemo_f.o
 
 ${IONO}/io_get_put_f.o     : ${IONS}/io_get_put_f.h ${IONS}/io_nemo_data_f.h \
 			     ${IONS}/flags_data.h   ${IONS}/history_data_f.h \
 		     	     ${IONS}/check_file.h   ${IONS}/io_nemo_tools.h  \
 			     ${IONS}/get_data_wrapper.h                      \
 			     ${IONS}/io_get_put_f.c
-	$(CC) $(CFLAGS) $(INC) -c ${IONS}/io_get_put_f.c -o ${IONO}/io_get_put_f.o
+	$(CC) $(CFLAGS) $(OPT) $(INC) -c ${IONS}/io_get_put_f.c -o ${IONO}/io_get_put_f.o
 
 
 # Common C files with "io_nemo" and "io_nemo_f" :
 ${IONO}/io_init.o          : ${IONS}/io_init.h      ${IONS}/io_nemo_tools.h  \
 			     ${IONS}/io_init.c
-	$(CC) $(CFLAGS) $(INC) -c ${IONS}/io_init.c -o ${IONO}/io_init.o 
+	$(CC) $(CFLAGS) $(OPT) $(INC) -c ${IONS}/io_init.c -o ${IONO}/io_init.o 
 
 ${IONO}/parameters.o       : ${IONS}/parameters.h   ${IONS}/flags_data.h     \
 			     ${IONS}/parameters.c
-	$(CC) $(CFLAGS) $(INC) -c ${IONS}/parameters.c -o ${IONO}/parameters.o
+	$(CC) $(CFLAGS) $(OPT) $(INC) -c ${IONS}/parameters.c -o ${IONO}/parameters.o
 
 ${IONO}/io_nemo_tools.o    : ${IONS}/io_nemo_tools.h ${IONS}/io_nemo_tools.c
-	$(CC) $(CFLAGS) $(INC) -c ${IONS}/io_nemo_tools.c -o ${IONO}/io_nemo_tools.o
+	$(CC) $(CFLAGS) $(OPT) $(INC) -c ${IONS}/io_nemo_tools.c -o ${IONO}/io_nemo_tools.o
 
 ${IONO}/get_data_wrapper.o : ${IONS}/get_data_wrapper.h ${IONS}/get_data_wrapper.c
-	$(CC) $(CFLAGS) $(INC) -c ${IONS}/get_data_wrapper.c -o ${IONO}/get_data_wrapper.o
+	$(CC) $(CFLAGS) $(OPT) $(INC) -c ${IONS}/get_data_wrapper.c -o ${IONO}/get_data_wrapper.o
 
 ${IONO}/check_file.o       : ${IONS}/check_file.h ${IONS}/check_file.c
-	$(CC) $(CFLAGS) $(INC) -c ${IONS}/check_file.c -o ${IONO}/check_file.o
+	$(CC) $(CFLAGS) $(OPT) $(INC) -c ${IONS}/check_file.c -o ${IONO}/check_file.o
 
 # main program used with g77 compiler
 ${IONO}/nemo_g77.o         : ${IONS}/nemo_g77.c
-	$(CC) $(CFLAGS) $(INC) -c ${IONS}/nemo_g77.c -o ${IONO}/nemo_g77.o 
+	$(CC) $(CFLAGS) $(OPT) $(INC) -c ${IONS}/nemo_g77.c -o ${IONO}/nemo_g77.o 
 
 #
 # io_nemo test programs
@@ -178,7 +183,7 @@ ${IONB}/io_nemo_test_float : ${IONO}/io_nemo_test_float.o $(LIB_IO_NEMO)
 	                          $(LIB_IO_NEMO) -L$(NEMOLIB) -lnemo -lm
 
 ${IONO}/io_nemo_test_float.o: ${IONT}/io_nemo_test.c
-	$(CC) $(CFLAGS) $(INC) -DSINGLEPREC -c ${IONT}/io_nemo_test.c       \
+	$(CC) $(CFLAGS) $(OPT) $(INC) -DSINGLEPREC -c ${IONT}/io_nemo_test.c       \
 			       -o ${IONO}/io_nemo_test_float.o
 
 ${IONB}/io_nemo_test_double : ${IONO}/io_nemo_test_double.o $(LIB_IO_NEMO)
@@ -186,8 +191,26 @@ ${IONB}/io_nemo_test_double : ${IONO}/io_nemo_test_double.o $(LIB_IO_NEMO)
 	                            $(LIB_IO_NEMO) -L$(NEMOLIB) -lnemo -lm
 
 ${IONO}/io_nemo_test_double.o: ${IONT}/io_nemo_test.c
-	$(CC) $(CFLAGS) $(INC) -c ${IONT}/io_nemo_test.c                    \
+	$(CC) $(CFLAGS) $(OPT) $(INC) -c ${IONT}/io_nemo_test.c                    \
 			       -o ${IONO}/io_nemo_test_double.o
+
+
+${IONO}/stress_io_nemo.o: ${IONT}/stress_io_nemo.cc
+	$(CXX) $(CFLAGS) $(OPT) $(INC) -DSINGLEPREC -c ${IONT}/stress_io_nemo.cc       \
+			       -o ${IONO}/stress_io_nemo.o
+
+${IONB}/stress_io_nemo : ${IONO}/stress_io_nemo.o $(LIB_IO_NEMO)
+	$(CXX) -o ${IONB}/stress_io_nemo ${IONO}/stress_io_nemo.o    \
+	                          $(LIB_IO_NEMO) -L$(NEMOLIB) -lnemo -lm
+
+${IONO}/stress_io_nemo_f.o: ${IONT}/stress_io_nemo_f.cc
+	$(CXX) $(CFLAGS) $(OPT) $(INC) -DSINGLEPREC -c ${IONT}/stress_io_nemo_f.cc       \
+			       -o ${IONO}/stress_io_nemo_f.o
+
+${IONB}/stress_io_nemo_f : ${IONO}/stress_io_nemo_f.o $(LIB_IO_NEMO)
+	$(CXX) -o ${IONB}/stress_io_nemo_f ${IONO}/stress_io_nemo_f.o    \
+	                          $(LIB_IO_NEMO) -L$(NEMOLIB) -lnemo -lm
+
 #
 # io_nemo_f test programs
 #
@@ -229,18 +252,18 @@ ${IONB}/snapmask_s   : ${IONO}/snapmask_s.o
 	$(CC)  -o ${IONB}/snapmask_s ${IONO}/snapmask_s.o -L$(NEMOLIB) -lnemo -lm
 
 ${IONO}/snapmask_s.o : ${IONT}/snapmask2.c
-	$(CC) $(CFLAGS) $(INC) -DSINGLEPREC -c ${IONT}/snapmask2.c          \
+	$(CC) $(CFLAGS) $(OPT) $(INC) -DSINGLEPREC -c ${IONT}/snapmask2.c          \
 	                                    -o ${IONO}/snapmask_s.o
 ${IONB}/snapmask_d   : ${IONO}/snapmask_d.o
 	$(CC)  -o  ${IONB}/snapmask_d ${IONO}/snapmask_d.o -L$(NEMOLIB) -lnemo -lm
 
 ${IONO}/snapmask_d.o : ${IONT}/snapmask2.c
-	$(CC) $(CFLAGS) $(INC) -c ${IONT}/snapmask2.c                       \
+	$(CC) $(CFLAGS) $(OPT) $(INC) -c ${IONT}/snapmask2.c                       \
                                -o ${IONO}/snapmask_d.o
 #
 # Dummy function
 #
 ${IONO}/dummy.o : ${IONS}/dummy.c
-	$(CC) $(CFLAGS) $(INC) -c ${IONS}/dummy.c -o ${IONO}/dummy.o
+	$(CC) $(CFLAGS) $(OPT) $(INC) -c ${IONS}/dummy.c -o ${IONO}/dummy.o
 #--------------------------------------------------------
 #
