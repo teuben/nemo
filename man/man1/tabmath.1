@@ -162,6 +162,29 @@ wrong value) would be created in the first example.
 .PP
 If comments are passed on, processing multiple input files which do not
 have matching comment lines will cause the output to have odd lines.
+.PP
+Complex expressions where one component fails, fails the whole expression. 
+An example is adding two gaussians with different widths. The one with the
+narrow gaussian component will cause an internal failure (exp() argument
+overflow). For example, the following expression to add two gaussians
+.nf
+
+fie="$a1+$b1*exp(-(%1-$c1)**2/(2*$d1**2)) + 
+     $a2+$b2*exp(-(%1-$c2)**2/(2*$d2**2)) + 
+     rang(0,$sig)"
+
+.fi
+can only be reliably be done as follows
+
+.nf
+
+nemoinp $x |\
+   tabmath - - "$b1*exp(-(%1-$c1)**2/(2*$d1**2))" |\
+   tabmath - - "$b2*exp(-(%1-$c2)**2/(2*$d2**2))" |\
+   tabmath - - "%1,%2+%3+$a1+$a2+rang(0,$sig)" all
+
+.fi
+
 .SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
