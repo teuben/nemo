@@ -316,11 +316,12 @@ case $host_os in
 	LOADOBJ_MACH="-Dlinux -DSYSV"
 	LOADOBJ_LIBS=-ldl
 	;;
-dnl                         BUG? does this fail on solaris 8 with /opt/'s CC, gcc ok
       solaris*)
 	LOADOBJ_MACH="-Dsun4 -DSOLARIS -DSYSV"
 	LOADOBJ_LIBS=-ldl
         ;;
+      irix*)
+	;;
 esac
 
 AC_SUBST(LOADOBJ_MACH)

@@ -1,6 +1,6 @@
 - compiling on some older linux versions will fail due to a prototype
   for dprintf() in /usr/include/stdio.h - you can comment out our
-  version in $NEMOINC/stdinc.h and it will work.
+  version in $NEMOINC/stdinc.h and it will work
 
   still a linking problem on those cases left... (redhat 5.2)
 
@@ -12,8 +12,8 @@
 * nbody0: some weird problems on Mandrake 8.0 with 'nan's...
   gcc 2.96 20000731 (Linux-Mandrake 8.0 2.96-0.48mdk) 
 	-O0 	is ok
-	-O1 	is bad
 	-g  	is ok
+	-O1 	is bad
 	-g -O2	is bad
   cd $NEMO/src/nbody/evolve/aarseth/nbody0
 	make clean nbody00 OPT=-O0
@@ -25,12 +25,13 @@
 
 - solaris: still get -rdynamic in the link options, it works, but it
   does not look nice. this is for gcc, didn't try /opt/SUNSWpro yet
-	(doesn't work for getparam, loadobj)
 
 - Suse didn't resolve fortran binding to C too well for potentials
   (.so object files, e.g. athan92)
 
 - sol8:  potlist does not built due to __powf missing....   (cc)
+  need to manually adjust the $NEMOLIB/makedefs file and move the
+  -lsunmath line to FORLIBS
 
 - sgi: loadobjDL works for bodytrans, but not potentials....
 
@@ -45,20 +46,15 @@ potlist: rld: Fatal Error: attempted access to unresolvable symbol in
 
   This is a "mips-sgi-irix6.5" machine.
 
+- sgi:  hackforce does not compile/link
+
 - -DSINGLEPREC:  scfm does not work
  		 athan92 shows some significant force differences
-
-- solaris8: some installtion problems, needs manual patching -
-	for experts only
-
-	-DSOLARIS 		needed for getparam
-	-DSYSV -Dsparc -Dsun	needed for loadobj
 
 - sgi:  for 64 bit mode add
 	 -mabi=64   (if gnu) ,or
 	-64
   For 64 bit compilations.
-
 
 - kawaii/nbody does not seem to work, neither in IONEMO mode, nor default I/O mode
   (at least on linux)

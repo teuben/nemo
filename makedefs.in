@@ -51,7 +51,7 @@ MACH = @LOADOBJ_MACH@
 FLIBS = @FLIBS@
 FORLIBS = $(FLIBS)
 
-# Solaris 2.6: -L/opt/SUNWspro/lib -lF77 -lM77 -lV77 -lsunmath  
+# Solaris 2.6+: -R /opt/SUNWspro/lib -L/opt/SUNWspro/lib -lF77 -lM77 -lV77 -lsunmath  
 
 ## C compiler:
 #set opts="-rdynamic -ansi -fwritable-strings -Wconversion -Wnested-externs"

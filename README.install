@@ -10,6 +10,10 @@ as non-persistent), postscript, GIF, PPM etc.
 
 a) Installing PGPLOT
 
+   If you already have an environment variable $PGPLOT_DIR, it may already
+   have been installed for you, and in addition configure (see below) will
+   recognize it and you should already get PGPLOT as your default YAPP.
+
 	cd $NEMO/local
 	$NEMO/src/scripts/pgplot.install
 	(you may need to get the pgplot522.tar.gz, or newer, file from
@@ -18,7 +22,7 @@ a) Installing PGPLOT
    this assumes $NEMO has a basic presence already, so don't start this
    yet, first figure something out about the installation. See below.
 
-See also $NEMO/src/scripts/
+   See also $NEMO/src/scripts/
 
    On some linux systems (e.g. older versions of Redhat) may need to 
 		 ln -s /usr/X11R6 /usr/X11
@@ -45,17 +49,16 @@ c) Installing CFITSIO
 Brief overview of a Version 3.x INSTALLATION  
 ============================================
 
-1) To untar a compressed tar file the following will do just fine, and
-   you never need to save the uncompressed version:
+1) Obtain the (compressed) tar file, nemo_3.x.y.tar.gz, from ftp.astro.umd.edu:/progs/nemo
+   and uncompress it anywhere where you have enough (at least 100MB, but more is better):
 
         % gzip -cd nemo_3.x.y.tar.gz | tar xf -
    or
 	% gtar -zxf nemo_3.x.y.tar.gz
 
-   and now change directory to the newly made nemo directory:
+   and now change directory to the newly made "NEMO" directory:
 
 	% cd nemo_3.x.y
-
 
 2) Run configure and install the basic NEMO libraries:
 
@@ -201,8 +204,8 @@ Results in /home/teuben/nemo_3.0.4/tmp/test22005/testsuite.log
 
 	
 
-ANYTHING BELOW THIS LINE IS FROM NEMO V2 and not always relevant anymore
-========================================================================
+ANYTHING BELOW THIS LINE IS FROM NEMO V2 and probably not relevant anymore
+==========================================================================
 
 2) Copy the NEMORC.gen file to NEMORC.local, and edit it to reflect your
    local site. This file is meant to set environment variables that

@@ -4,11 +4,11 @@
 #
 #  linux:   src/scripts/quickps
 #  sol:     src/scripts/quickps cc=gcc f77=f77          ok
-#           src/scripts/quickps cc=gcc f77=g77          bad
-#           src/scripts/quickps cc=cc                   ok, but __powf
+#           src/scripts/quickps cc=gcc f77=g77          bad --
+#           src/scripts/quickps cc=cc                   ok, but FORLIBS missing sunmath
 #           src/scripts/quickps cc=gcc                  
 #
-#  sgi:     src/scripts/quickps cc=cc  f77=f90          ok
+#  sgi:     src/scripts/quickps cc=cc  f77=f90          ok, but potlist problems
 #
 
 #			set defaults for command line arguments
@@ -34,19 +34,23 @@ if ("x$f77" != "x") setenv F77 $f77
 set log=quick.log
 
 echo "### Start:"
-echo "### Running Configure"
-./configure --with-yapp=ps        >& $log 
+echo "quickps $*"                 >& $log
+echo "### Running configure..."
+if (-e Makefile) then
+  make cleanall                  >>& $log 
+endif
+./configure --with-yapp=ps       >>& $log 
 if ($?NEMO) then
   source nemo_end                >>& $log
 endif
 source nemo_start		 >>& $log 
-echo "### Installing scripts"
+echo "### Installing scripts..."
 make dirs config_extra scripts   >>& $log 
 source NEMORC.local              >>& $log 
 rehash
-echo "### Making library"
+echo "### Making library..."
 make libs                        >>& $log 
-echo "### Running testsuite"
+echo "### Running testsuite..."
 src/scripts/testsuite -b         >>& $log 
 echo "### Done:"
 grep TESTSUITE: $log | grep -v OK
