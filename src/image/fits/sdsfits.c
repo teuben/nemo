@@ -3,11 +3,13 @@
  *
  *      19-jan-95	V1.0  toy model, for Jim Stone		Peter Teuben
  *      13-apr-95       V1.1  also made it work for 2D          pjt
- *	13-apr-96	V1.2  optionally dump out axis descriptor pjt
+ *	13-apr-96	V1.2  optionally dump out axis descriptor pjt 
+ *      10-nov-02       V1.3  add HISTORY
  */
 
 #include <stdinc.h>
 #include <getparam.h>
+#include <history.h>
 #include <fitsio_nemo.h>
 
 /* #include <hdf.h> */
@@ -17,7 +19,7 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "out=\n			Optional output FITS file",
     "select=1\n			Select which SDS (1=first)",
     "axis=0\n                   Select this axis for 1D fits output",
-    "VERSION=1.2a\n		3-apr-02 PJT",
+    "VERSION=1.3\n		10-nov-02 PJT",
     NULL,
 };
 
@@ -27,7 +29,7 @@ string usage="convert SDS HDF to FITS";
 
 void nemo_main()
 {
-    string infile, outfile;
+  string infile, outfile, *hitem;
     char label[128], unit[128], format[128], coordsys[128];
     float *buff, *fp, fmin, fmax, *coord = 0;
     int i, j, k, nsds, ret, size, rank, dimsizes[MAXRANK];
@@ -120,7 +122,12 @@ void nemo_main()
          * because of Fortran/C
          */
 
-	fitwrhda(ff,"ORIGIN","NEMO: sdsfits");
+	fitwrhda(ff,"ORIGIN","NEMO: sdsfits w/history");
+
+	/* only write 1 line */
+	hitem = ask_history();
+	fitwra(ff,"HISTORY",*hitem);
+
 	if (fmin == fmax) {
 	    fmin = fmax = buff[0];
 	    for (i=0, fp=buff; i<size; i++, fp++) {
@@ -156,7 +163,12 @@ void nemo_main()
          * because of Fortran/C
          */
 
-	fitwrhda(ff,"ORIGIN","NEMO: sdsfits");
+	fitwrhda(ff,"ORIGIN","NEMO: sdsfits w/ history");
+
+	/* only write 1 line */
+	hitem = ask_history();
+	fitwra(ff,"HISTORY",*hitem);
+
 	if (fmin == fmax) {
 	    fmin = fmax = coord[0];
 	    for (i=0; i<axlen; i++) {
