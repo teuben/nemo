@@ -1,0 +1,13 @@
+Not bugs, but something to pay attention to when you want to use GCC
+gcc:
+
+1) needs -DSOLARIS in the $NEMOBIN/cc script
+2) -static was needed, but can't find -ldl in that case for dynamic linking
+   you can leave out -static,
+   however,, now it seems to work fine in dynamic mode
+3) in loadobj	
+	make install "CFLAGS=-O -DDL"
+
+
+
+egcs:
