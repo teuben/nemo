@@ -51,6 +51,7 @@
  *   3-may-01   V1.7  Added vexp= keyword                            PJT
  *   8-sep-01      a  init_xrandom
  *  29-jun-02   V1.8  add blc= for "BLC"                            PJT
+ *  20-jul-02      a  fix error message if too many array elements   pjt
  */
 
 #include <stdinc.h>
@@ -91,7 +92,7 @@ string defv[] = {
         "seed=0\n       Initial random seed",
 	"in=\n          Template 2D image for cube generation",
 	"headline=\n	Optional random verbiage",
-        "VERSION=1.8\n  29-jun-02 PJT",
+        "VERSION=1.8a\n  20-jul-02 PJT",
         NULL,
 };
 
@@ -244,7 +245,7 @@ setparams()
         if (hasvalue("radii")) warning("Cannot override radii");
         if (hasvalue("vrot")) {
             n = nemoinpr(getparam("vrot"),vrot_i,MAXRAD);
-            if (n<1) error("vrot=: Need at least one (%d)",n);
+            if (n<1) error("vrot=: Need at least one (%d) ",n);
             dprintf(0,"Overriding %d velocitie(s); setting remaining %d to %g\n",
                     n,nrad-n,vrot_i[n-1]);
             for (i=n; i<nrad; i++) vrot_i[i] = vrot_i[n-1];
@@ -292,12 +293,12 @@ setparams()
         dprintf(0,"Found %d radii\n",nrad);
 
         n = nemoinpr(getparam("vrot"),vrot_i,nrad);
-        if (n<1) error("vrot=: Need at least one (%d)",n);
+        if (n<1) error("vrot=: Need at least one (%d) or at most %d",n,nrad);
         dprintf(0,"Found %d rot velocities\n",n);
         for (i=n; i<nrad; i++) vrot_i[i] = vrot_i[n-1];
 
         n = nemoinpr(getparam("vexp"),vexp_i,nrad);
-        if (n<0) error("vexp=: Need at least one (%d)",n);
+        if (n<0) error("vexp=: Need at least one (%d) or at most %d",n,nrad);
 	if (n==0) {
 	  vexp_i[0] = 0.0;
 	  n = 1;
@@ -306,12 +307,12 @@ setparams()
         for (i=n; i<nrad; i++) vexp_i[i] = vexp_i[n-1];
 
         n = nemoinpr(getparam("inc"),inc_i,nrad);
-        if (n<1) error("inc=: Need at least one (%d)",n);
+        if (n<1) error("inc=: Need at least one (%d) or at most %d",n,nrad);
         dprintf(0,"Found %d inclinations\n",n);
         for (i=n; i<nrad; i++) inc_i[i] = inc_i[n-1];
 
         n = nemoinpr(getparam("pa"),theta_i,nrad);
-        if (n<1) error("pa=: Need at least one (%d)",n);
+        if (n<1) error("pa=: Need at least one (%d) or at most %d",n,nrad);
         dprintf(0,"Found %d position angles\n",n);
         for (i=n; i<nrad; i++) theta_i[i] = theta_i[n-1];
 
