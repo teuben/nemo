@@ -1,4 +1,4 @@
-.TH TSD 1NEMO "27 August 1996"
+.TH TSD 1NEMO "10 December 2004"
 .SH NAME
 tsd \- scan and report contents of an HDF4 SDS
 .SH SYNOPSIS
@@ -6,8 +6,9 @@ tsd \- scan and report contents of an HDF4 SDS
 .SH DESCRIPTION
 \fBtsd\fP lists the contents of a HDF Scientific Data Set (SDS). 
 It can optionally print
-out all data (in ascii format) to a specified file, with or without
-the coordinate system.
+out the data (in ascii format) from all or specified SDS#
+to a specified file, with or without
+their coordinate values. 
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -18,7 +19,8 @@ Input file (HDF FLOAT32 SDS), no default.
 \fBout=\fP\fItable_file\fP
 Optional output file in which an ascii dump of all SDS, printed side by side,
 are dumped. Obviously in this mode all datasets must have the same rank and
-shape. Currently all the data are accumulated in memory.
+shape, selected SDS that are not the same size and rank as the first one,
+will not be displayed. Currently all the data are accumulated in memory.
 Default: none.
 .TP
 \fBformat=\fP\fIC_fmt\fP
@@ -28,8 +30,18 @@ representing an SDS.
 [Default: \fB%g\fP].
 .TP
 \fBcoord=t|f\fP
-Print out the coordinate system too? 
+Print out the coordinate system too?  If selected, they will be printed
+in the first NDIM columns (except if \fBdummy=f\fP was selected, see below),
+followed by whichever columns were selected (see \fBselect=\fP below).
 [Default: \fBf\fP].
+.TP
+\fBselect=\fP
+Select the SDS# by their position in the file, the first one being numbered 1.
+[Default: \fBall\fP].
+.TP
+\fBdummy=t|f\fP
+Should coordinate values of dummy axes (of which the dimension is 1) be displayed?
+Default: t
 .SH EXAMPLE
 .nf
     % tsd hdf000bg
@@ -54,6 +66,8 @@ If output (ascii) requested, all data from all SDS is allocated in memory.
 .PP
 The datatype of the SDS must be FLOAT32 (normally in fortran: \fIREAL*4\fP, 
 and in C: \fIfloat\fP)
+.PP 
+The data is listed in the order of the file. 
 .SH SEE ALSO
 hdf(1), hdfls(1), fitssds(1NEMO), sdsfits(1NEMO)
 .SH AUTHOR
@@ -64,4 +78,5 @@ Peter Teuben
 25-dec-94	V1.0 Created	PJT
 21-may-95	V1.1/2 fixed a bug, added new output features	PJT
 27-aug-96	V1.3 header output now to stderr (dprintf)	pjt
+10-dec-04	V1.5 added dummy=	PJT
 .fi
