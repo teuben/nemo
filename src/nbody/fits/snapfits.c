@@ -4,6 +4,7 @@
  *             
  *      19-mar-90  V1.0 -- created as a toy model     PJT
  *			Must be changed to 3DTABLE to be standard FITS
+ *       9-aug-04  1.0a - bring code to 2000+
  */
 
 #include <stdinc.h>             /* also gets <stdio.h>  */
@@ -18,12 +19,12 @@
 
 #include <fits.h>
 
-char *defv[] = {
+string defv[] = {
         "in=???\n               Input filename (a snapshot)",
         "out=???\n              Output filename (a fits file)",
         "options=mass,phase\n   Options for output",
         "comment=\n             Additional comments for FITS file",
-        "VERSION=1.0\n          30-mar-90 PJT",            
+        "VERSION=1.0a\n         9-aug-04 PJT",            
         NULL,
 };
 
@@ -41,12 +42,8 @@ static char *comments[] = {NULL, NULL};        /* place to save ONE comment */
 static int needs[MAXNEEDS];     /* 0=mass, 1=pos, 2=vel 3=phi, 4=acc */
 
 
-main (argc, argv)
-int argc;
-char *argv[];
+nemo_main(void)
 {
-    initparam (argv, defv);                     /* get user thingos */
-
     instr = stropen (getparam ("in"), "r");     /* open snapshot */
     get_history(instr);
     get_snap(instr,&btab,&nbody,&tnow,&bits);
@@ -57,8 +54,7 @@ char *argv[];
     w_data(outstr,&fh,nbody,btab);
 }
 
-need_pars(options)
-string options;
+need_pars(string options)
 {
     int i, ntot;
     bool scanopt();
@@ -87,11 +83,7 @@ string options;
     return(ntot);
 }
 
-w_header(ostr,fh,nbody,options,comment)
-stream ostr;
-struct fits_header *fh;
-char *options, *comment;
-int nbody;
+w_header(stream ostr,struct fits_header *fh, int nbody, char *options,char *comment)
 {   
     static int naxis[1] = { 0 };    /* random groups ! */
     int i, n, ni;
@@ -108,7 +100,7 @@ int nbody;
     fh->pcount = n = need_pars(options);
     fh->gcount = nbody;
     fh->history = ask_history();    /* fill in some history */
-    if (*comment != NULL) {         /* were there any comments ? */
+    if (*comment != 0) {         /* were there any comments ? */
         comments[0] = comment;        
         fh->comment = comments;
     }
@@ -139,19 +131,15 @@ int nbody;
     fh->ptypen = ptype;
     
     
-    fts_whead(ostr,fh);      /* write the header */
+    fts_whead(fh,ostr);      /* write the header */
 }
 
-w_data(ostr,fh,nbody,btab)
-stream ostr;
-struct fits_header *fh;
-int nbody;
-Body *btab;
+w_data(stream ostr,struct fits_header *fh,int nbody,Body *btab)
 {
     int i, nw, need_mass,need_pos,need_vel, ntot, isize;
     Body *bp;
     double out[32];   /* scratch array for buffering up a body's parameters */
-    char null = NULL;
+    char null = 0;
     
     ntot = 0;
     isize = sizeof(double);
@@ -171,7 +159,7 @@ Body *btab;
             for (i=0; i<NDIM; i++)
                 out[nw++] = Acc(bp)[i];
             
-        fts_wdata(ostr,fh,nw*isize,out);
+        fts_wdata(fh,ostr,nw*isize,(char *)out);
         ntot += nw*isize;
     }
     /* make sure tail end filled with zero's */
@@ -179,6 +167,6 @@ Body *btab;
     if (i==FTSBLKSIZ) i=0;
     dprintf(0,"Wrote %d bytes, flushing %d zero's\n",ntot,i);
     while (i-- > 0)
-       fts_wdata(ostr,fh,1,&null);
+       fts_wdata(fh,ostr,1,&null);
     
 }
