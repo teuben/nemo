@@ -3,7 +3,7 @@
 #
 if ( $#argv == 0 ) then
   echo "Usage: $0 progname key1=def1 ..."
-  echo "version 21-oct-2004"
+  echo "version 21-nov-2004"
   echo "Write template NEMO program based on keywords and default values"
   echo "Output will be in a file progname.c, which cannot be overwritten"
   
@@ -38,7 +38,10 @@ e '};'				>> $name
 e '' >> $name
 e 'string usage="TEMPLATE program usage -- fill in yourself";' >> $name
 e '' >> $name
-e 'string cvsid="$Id$";' >> $name
+#    break the CVS ID string in two pieces to fool cvs 
+#    'string cvsid="$Id$";' >> $name
+e -n 'string cvsid="$Id' >> $name
+e    ':$";'              >> $name
 e '' >> $name
 e 'nemo_main()'			>> $name
 e '{'				>> $name
