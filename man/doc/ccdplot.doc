@@ -1,0 +1,34 @@
+%N ccdplot
+%D display an image using contours and/or gray-scales
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man ccdplot' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	input filename  [???]
+%A contour
+	contour levels  []
+%A gray
+	have gray scale ? (t/f)  []
+%A mmin
+	plot min for grayscale []
+%A mmax
+	plot max for grayscale [autoscale] []
+%A power
+	power of transfer function  [1.0]
+%A xrange
+	range in x to plot -- BUG -- don't use  []
+%A yrange
+	range in y to plot -- BUG -- don't use  []
+%A headline
+	optional header above plot  []
+%A tab
+	table of contour segments []
+%A format
+	Format for above table [%g]
+%A cmode
+	Contour mode (0=orginal 1=pgplot) [0]
+%A blankval
+	if used, use this as blankval []
+%A VERSION
+	3-nov-00 PJT [2.7]

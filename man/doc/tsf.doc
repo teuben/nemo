@@ -1,0 +1,24 @@
+%N tsf
+%D type contents of a (binary) structured file
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man tsf' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	input file name  [???]
+%A maxprec
+	print nums with max precision  [false]
+%A maxline
+	max lines per item  [4]
+%A allline
+	print all lines (overrides maxline)  [false]
+%A indent
+	indentation of compound items  [2]
+%A margin
+	righthand margin  [72]
+%A item
+	Select specific item []
+%A xml
+	output data in XML format? (experimental) [f]
+%A VERSION
+	21-mar-01 PJT  [2.7]
