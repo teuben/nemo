@@ -63,6 +63,9 @@ ERROR!  Sorry, NEMO now requires an ANSI C compiler
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+#ifdef HAVE_MALLOC_H
+#include <malloc.h>
+#endif
 
 #if !defined(NOMATH)
 #   include <math.h>
@@ -79,7 +82,9 @@ ERROR!  Sorry, NEMO now requires an ANSI C compiler
 #   define strchr  index
 #   define strrchr rindex
 # endif
+
 char *strchr(), *strrchr();
+
 # ifndef HAVE_MEMCPY
 # define memcpy(d,s,n)  bcopy((s),(d),(n))
 # define memmove(d,s,n) bcopy((s),(d),(n))
