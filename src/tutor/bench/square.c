@@ -29,28 +29,6 @@ string usage="benchmark cross product/matrix operations";
 
 extern real xrandom(real,real);
 
-#if 0
-#if defined(__GNUC__) && defined(i386)
-long long readTSC(void) {
-  /* this assumes long long is 64 bits. unsigned in 32 */
-  union {
-    long long complete;
-    unsigned part[2];
-  } ticks;
-  __asm__ ( "rdtsc; mov %%eax,%0;mov %%edx,%1"
-	      : "=mr" (ticks.part[0]),
-	        "=mr" (ticks.part[1])
-	      : /* No inputs */
-	      : "eax", "edx");
-  return ticks.complete;
-}
-#else
-long long readTSC(void) {
-  return 0;
-}
-#endif
-#endif
-
 #define FUN(a,b)  (1/sqrt(a+b))
 
 nemo_main()
@@ -62,7 +40,9 @@ nemo_main()
   int i,j,k,l;
   real *x, sum;
   real t0,t1,t2;
-  long long l0,l1,l2,l3,l4,l5;
+
+  init_timers(100);
+  stamp_timers(0);
 
   x = (real *) allocate(n*sizeof(real));
 
@@ -73,23 +53,24 @@ nemo_main()
 
   sum = 0.0;
   t0 = cputime();
-  init_timers(100);
+  stamp_timers(1);
   if (m==0) {                         /* do it in one sweep, the N^2 algorithm */
-    stamp_timers(0);
+    stamp_timers(2);
     for (l=0; l<iter;  l++)
       for (j=0; j<n; j++)
 	for (i=0; i<n; i++)
 	  sum += FUN(x[i],x[j]);
-    stamp_timers(1);
+    stamp_timers(3);
   } else {                            /* N/M times a small M*M patch that may be in cache */
-    stamp_timers(0);
+    stamp_timers(2);
     for (l=0; l<iter; l++)
       for (k=0; k<n-m; k++)
 	for (j=k; j<k+m; j++)
 	  for (i=k; i<k+m; i++)
 	    sum += FUN(x[i],x[j]);
-    stamp_timers(1);
+    stamp_timers(3);
   }
+  stamp_timers(4);
   t1 = cputime();
   if (m)
     printf("%d %d %d sum=%lg Mops=%lg\n",
@@ -97,5 +78,11 @@ nemo_main()
   else
     printf("%d %d %d sum=%lg Mops=%lg\n",
 	 n,iter,m,sum,iter*n*n/(t1-t0)/60.0/1e6);
-  printf("%d\n",diff_timers(0,1));
+  stamp_timers(5);
+  printf("%Ld %Ld %Ld %Ld %Ld\n",
+	 diff_timers(0,1),
+	 diff_timers(1,2),
+	 diff_timers(2,3),
+	 diff_timers(3,4),
+	 diff_timers(4,5));
 }
