@@ -9,6 +9,7 @@
  *	 4-mar-96  fixed VERSION to CCD_VERSION
  *      19-jul-02  V2.0 cleaned up the code a bit, provided potential scale factor     PJT
  *      13-aug-02  V3.0 reworked WCS issues due to ported FITS files from e.g. miriad's potfft
+ *       6-sep-02  V3.1 some flexibility in the interpolation method                     PJT
  *
  *  Note: astronomical images often have Dx<0 (Right Ascension increases
  *        to the left)....
@@ -46,6 +47,7 @@ local double   xcen=0.0;       /* central pixel; where (0,0) is the lower left p
 local double   ycen=0.0;
 local double   dx=1;           /* pixel steps */
 local double   dy=1;
+local int      method = 1;
 
 
 void inipotential (int *npar, double par[], char *name)
@@ -148,7 +150,14 @@ void potential(int *ndim,double *pos,double *acc,double *pot,double *time)
 
     *pot = MapValue(iptr,ix,iy);               /* no interpolation for now */
 
-    acc[0] = -( (-2+x4+y3)*MapValue(iptr,ix-1,iy-1)
+	/* args.... i don't remember where i got this wonderful formulae from */
+	/* or to quote from the original Unix kernel : 			      */
+	/* "you are not expected to understand this"   			      */
+
+    
+    switch (method) {
+    case 1:
+      acc[0] = -( (-2+x4+y3)*MapValue(iptr,ix-1,iy-1)
                +(  -x8   )*MapValue(iptr,ix  ,iy-1)
                +( 2+x4-y3)*MapValue(iptr,ix+1,iy-1)
                +(-2+x4   )*MapValue(iptr,ix-1,iy)
@@ -158,7 +167,7 @@ void potential(int *ndim,double *pos,double *acc,double *pot,double *time)
                +(  -x8   )*MapValue(iptr,ix  ,iy+1)
 	       +( 2+x4+y3)*MapValue(iptr,ix+1,iy+1) )/12.0*idx;
 
-    acc[1] = -( (-2+x3+y4)*MapValue(iptr,ix-1,iy-1)
+      acc[1] = -( (-2+x3+y4)*MapValue(iptr,ix-1,iy-1)
                +(-2   +y4)*MapValue(iptr,ix  ,iy-1)
                +(-2-x3+y4)*MapValue(iptr,ix+1,iy-1)
                +(     -y8)*MapValue(iptr,ix-1,iy)
@@ -167,6 +176,13 @@ void potential(int *ndim,double *pos,double *acc,double *pot,double *time)
                +( 2-x3+y4)*MapValue(iptr,ix-1,iy+1)
                +( 2   +y4)*MapValue(iptr,ix  ,iy+1)
 	       +( 2+x3+y4)*MapValue(iptr,ix+1,iy+1) )/12.0*idy;
+      break;
+      acc[0] = 0.0;
+      acc[1] = 0.0;
+    case 2:
+    default:
+      error("%d: Unknown method of interpolation",method);
+    }
     acc[2] = 0.0;
     dprintf(5,"x,y,ix,iy,ax,ay=%f %f %d %d %g %g\n",x,y,ix,iy,acc[0],acc[1]);
 }
