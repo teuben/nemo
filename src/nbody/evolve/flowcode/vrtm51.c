@@ -32,7 +32,7 @@ local int entries=0;           /* counter how often this routine was called */
 
 local real     tanp;
 
-local bool Qstick = FALSE;      /* set v=0 when hitting the inner or outer edge */
+local bool Qstick = TRUE;      /* set v=0 when hitting the inner or outer edge */
 
 
 #define MAXCOL  4
@@ -88,6 +88,7 @@ void inipotential (int *npar, double *par, string name)
     if (n>1) pitch = par[1];
     if (n>2) rref = par[2];
     if (n>3) thetaref = par[3];
+    /* n>4 reserved for the rings */
 
     if (entries>0) {
         warning("Re-entering inipotential(5NEMO): removed previous tables");
@@ -107,6 +108,7 @@ void inipotential (int *npar, double *par, string name)
     dprintf (1,"  Parameters : Pitch Angle = %f\n",pitch);
     dprintf (1,"  Parameters : Reference Radius = %f\n",rref);
     dprintf (1,"  Parameters : Reference Angle = %f\n",thetaref);
+    dprintf (1,"  Sticky     : %s (hardcoded)\n",Qstick ? "TRUE" : "FALSE");
     dprintf (1,"  Table = %s\n",name);
 
     if (pitch == 0) error("inipotential: Need a non-zero pitch angle");
@@ -210,7 +212,7 @@ void potential(int *ndim,double *pos,double *acc,double *pot,double *time)
     vrad = seval(phase,theta[i],vr[i],coef_vr[i],nrad[i]);
     vtan = seval(phase,theta[i],vt[i],coef_vt[i],nrad[i]) - omega*rad;
     *pot = seval(phase,theta[i],den[i],coef_den[i],nrad[i]);
-    dprintf(1,"x,y,rad,iring,phi,phase,DELTA,vt,vr,den: %g %g   %g %d %g %g [%g]  %g %g %g\n", 
+    dprintf(2,"x,y,rad,iring,phi,phase,DELTA,vt,vr,den: %g %g   %g %d %g %g [%g]  %g %g %g\n", 
 	    x,y,rad,i,phi,phase,tmp,vtan,vrad,*pot);
 
     if (rad > 0) {
@@ -219,7 +221,7 @@ void potential(int *ndim,double *pos,double *acc,double *pot,double *time)
     } else {
         acc[0] = acc[1] = 0.0;
     }
-    dprintf(1,"r,t=%g %g  vr,vt=%g %g vx,vy=%g %g\n",
+    dprintf(2,"r,t=%g %g  vr,vt=%g %g vx,vy=%g %g\n",
             rad,phi,vrad,vtan,acc[0],acc[1]);
     acc[2] = 0.0;
 }
