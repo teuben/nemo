@@ -5,34 +5,34 @@
 //                                                                             |
 // C++ code                                                                    |
 //                                                                             |
-// Copyright Walter Dehnen, 1994-2002                                          |
+// Copyright Walter Dehnen, 1994-2003                                          |
 // e-mail:   wdehnen@aip.de                                                    |
 // address:  Astrophysikalisches Institut Potsdam,                             |
 //           An der Sternwarte 16, D-14482 Potsdam, Germany                    |
 //                                                                             |
 //-----------------------------------------------------------------------------+
-#ifndef included_inln_h
-#define included_inln_h
+#ifndef falcON_included_inln_h
+#define falcON_included_inln_h
 
-#ifndef included_cstdlib
+#ifndef falcON_included_cstdlib
 #  include <cstdlib>
-#  define included_cstdlib
+#  define falcON_included_cstdlib
 #endif
-#ifndef included_iostream
+#ifndef falcON_included_iostream
 #  include <iostream>
-#  define included_iostream
+#  define falcON_included_iostream
 #endif
-#ifndef included_cmath
+#ifndef falcON_included_cmath
 #  include <cmath>
-#  define included_cmath
+#  define falcON_included_cmath
 #endif
-#ifndef included_exit_h
+#ifndef falcON_included_exit_h
 #  include <public/exit.h>
 #endif
 //------------------------------------------------------------------------------
 namespace nbdy {
   using std::abs;
-#if(0)
+#if(0) // general abs is not defined in the C++ std headers
   template<typename scalar_type> inline
   const scalar_type   abs     (const scalar_type&x)
   { return (x<0)? -x : x; }
@@ -106,7 +106,11 @@ namespace nbdy {
   void      swap    (scalar_type&a, scalar_type&b)
   { register scalar_type t=a; a=b; b=t; }
   //----------------------------------------------------------------------------
-#if (0)
+  template<typename scalar_type> inline
+  scalar_type sqrt0(scalar_type const&x)
+  { return x <= scalar_type(0)? scalar_type(0) : std::sqrt(x); }
+  //----------------------------------------------------------------------------
+#if (0) // integer power of floating point number is now supported by cmath
   template<typename _Tp> inline
   _Tp pow(const _Tp &x, unsigned int n)
   {
@@ -116,14 +120,6 @@ namespace nbdy {
     return y;
   }
 #endif
-  //----------------------------------------------------------------------------
-//   template<typename scalar_type> inline
-//   const scalar_type pow(const scalar_type&x, const int i)
-//   {
-//     if(i>=0) return pow(x,unsigned(i));
-//     if(x==0) { std::cerr<<"pow(): negative power of zero\n"; nbdy::exit(1); }
-//     return pow(scalar_type(1)/x,unsigned(-i));
-//   }
   //----------------------------------------------------------------------------
   template<typename scalar_type> inline
   void update_max(scalar_type&x, const scalar_type&y)
@@ -169,4 +165,4 @@ namespace nbdy {
   }
 }
 //------------------------------------------------------------------------------
-#endif // included_inln_h
+#endif // falcON_included_inln_h

@@ -16,6 +16,10 @@
 #  define INPUT_TYPE float
 #endif
 
+#ifndef NDIM
+#  define NDIM 3
+#endif
+
 void dmintmin(const INPUT_TYPE R[NDIM], const INPUT_TYPE V[NDIM],
 	      const INPUT_TYPE T, INPUT_TYPE *dmin, INPUT_TYPE *tmin)
 {

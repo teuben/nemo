@@ -5,7 +5,7 @@
 //                                                                             |
 // C++ code                                                                    |
 //                                                                             |
-// Copyright Walter Dehnen, 2000-2002                                          |
+// Copyright Walter Dehnen, 2000-2003                                          |
 // e-mail:   wdehnen@aip.de                                                    |
 // address:  Astrophysikalisches Institut Potsdam,                             |
 //           An der Sternwarte 16, D-14482 Potsdam, Germany                    |
@@ -21,22 +21,19 @@
 // class grav_stat                                                             |
 //                                                                             |
 //-----------------------------------------------------------------------------+
-#ifndef included_grat_h
-#define included_grat_h
+#ifndef falcON_included_grat_h
+#define falcON_included_grat_h
 
-#ifndef included_body_h
-#  include <body.h>
-#endif
-#ifndef included_tree_h
+#ifndef falcON_included_tree_h
 #  include <public/tree.h>
 #endif
-#ifndef included_deft_h
+#ifndef falcON_included_deft_h
 #  include <public/deft.h>
 #endif
-#ifndef included_ionl_h
+#ifndef falcON_included_ionl_h
 #  include <public/ionl.h>
 #endif
-#ifndef included_memo_h
+#ifndef falcON_included_memo_h
 #  include <public/memo.h>
 #endif
 
@@ -44,7 +41,7 @@
 #define ENHANCED_IACT_STATS
 #undef  ENHANCED_IACT_STATS
 ////////////////////////////////////////////////////////////////////////////////
-#define P_ORDER 3                                  // expansion order is fixed !
+#define falcON_ORDER 3                             // expansion order is fixed !
 ////////////////////////////////////////////////////////////////////////////////
 namespace nbdy {
   //////////////////////////////////////////////////////////////////////////////
@@ -117,25 +114,35 @@ namespace nbdy {
   private:
     real    MASS;                                  // mass of body              
     real   *SINKPT;                                // sink part of soul         
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
     real    EPH;                                   // epsi/2                    
 #endif
-    //--------------------------------------------------------------------------
-    // constructor                                                              
-    //--------------------------------------------------------------------------
   public:
-    grav_soul() {}
+    //--------------------------------------------------------------------------
+    // stuff needed for MPI code                                                
+    //--------------------------------------------------------------------------
+#ifdef falcON_MPI
+    void copy_prune(const grav_soul*S) {
+      basic_soul::copy_prune(S);
+      MASS = nbdy::mass(S);
+#ifdef falcON_INDI
+      EPH  = nbdy::eph (S);
+#endif
+    }
+#endif
     //--------------------------------------------------------------------------
     // non-const data access via members                                        
     //--------------------------------------------------------------------------
     ten1 acc  ()            { return ten1(SINKPT+1); }
     real&acc  (int const&i) { return SINKPT[i+1]; }
+    vect&cofm ()            { return pos(); }
+    real&cofm (int const&i) { return pos(i); }
     real&sizeq()            { return SINKPT[1]; }
     real&pot  ()            { return SINKPT[0]; }
     real&rho  ()            { return SINKPT[0]; }
     uint&num  ()            { return static_cast<uint*>(
 				     static_cast<void*>(SINKPT))[0]; }
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
     real&eph  ()            { return EPH; }
 #endif
     void inc  ()            { ++num(); }
@@ -143,8 +150,8 @@ namespace nbdy {
     // const data access via friends                                            
     //--------------------------------------------------------------------------
 #define CGCS const grav_soul*const&S
-    friend vect const&cofm  (CGCS) { return S->cofm(); }
-    friend vect const&pos   (CGCS) { return S->cofm(); }
+    friend vect const&cofm  (CGCS) { return S->pos(); }
+    friend vect const&pos   (CGCS) { return S->pos(); }
     friend uint const&mybody(CGCS) { return S->mybody(); }
     friend ten1 const acc   (CGCS) { return ten1(S->SINKPT+1); }
     friend real const&acc   (CGCS,
@@ -153,7 +160,7 @@ namespace nbdy {
     friend real const&rho   (CGCS) { return S->SINKPT[0]; }
     friend uint const&num   (CGCS) { return static_cast<uint*>(
 				 	    static_cast<void*>(S->SINKPT))[0]; }
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
     friend real const&eph   (CGCS) { return S->EPH; }
     friend real const size  (CGCS) { return twice(S->EPH); }
     friend real const&sizeq (CGCS) { return S->SINKPT[1]; }
@@ -163,38 +170,30 @@ namespace nbdy {
     //--------------------------------------------------------------------------
     // simple manipulations                                                     
     //--------------------------------------------------------------------------
-    void set_mass(const areal*const&m) {
-      MASS = m[mybody()];
-    }
-    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     template<typename bodies_type>
     void set_mass(const bodies_type*const&B) {
-      MASS = B->mas(mybody());
+      MASS = B->mass(mybody());
     }
     //--------------------------------------------------------------------------
-    void set_mass_and_pos(const areal*const&m, const areal*x[NDIM]) {
-      MASS      = m   [mybody()];
-      cofm()[0] = x[0][mybody()];
-      cofm()[1] = x[1][mybody()];
-#if NDIM==3
-      cofm()[2] = x[2][mybody()];
+    void set_mass_and_pos(const barrays*const&B) {
+      MASS      = B->mass (mybody());
+      cofm()[0] = B->pos_x(mybody());
+      cofm()[1] = B->pos_y(mybody());
+#if falcON_NDIM==3
+      cofm()[2] = B->pos_z(mybody());
 #endif
     }
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     template<typename bodies_type>
     void set_mass_and_pos(const bodies_type*const&B) {
-      MASS   = B->mas(mybody());
-      cofm() = B->pos(mybody());
+      MASS   = B->mass(mybody());
+      cofm() = B->pos (mybody());
     }
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
     //--------------------------------------------------------------------------
     template<typename bodies_type>
     void copy_eph(const bodies_type*const&B) {
       eph() = half*B->eps(mybody());
-    }
-    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    void copy_eph(const areal*const&E) { 
-      eph() = half*E[mybody()];
     }
 #endif
     //--------------------------------------------------------------------------
@@ -202,7 +201,7 @@ namespace nbdy {
       SINKPT[0] = zero;
       SINKPT[1] = zero;
       SINKPT[2] = zero;
-#if NDIM > 2
+#if falcON_NDIM > 2
       SINKPT[3] = zero;
 #endif
     }
@@ -211,10 +210,6 @@ namespace nbdy {
     void update_dens(const bodies_type*const&B) const {
       B->rho(mybody()) = nbdy::rho(this);
     }
-    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    void update_dens(areal*const&rh) const {
-      rh[mybody()] = nbdy::rho(this);
-    }
     //--------------------------------------------------------------------------
     template<typename bodies_type>
     void update_grav(const bodies_type*const&B) const {
@@ -222,38 +217,25 @@ namespace nbdy {
       B->acc(mybody()) = nbdy::acc(this);
     }
     //--------------------------------------------------------------------------
-    void update_grav(areal*a[NDIM], areal*const&p) const {
-      if(p) p[mybody()] = nbdy::pot(this);
-      a[0][mybody()] = nbdy::acc(this,0);
-      a[1][mybody()] = nbdy::acc(this,1);
-#if NDIM>2
-      a[2][mybody()] = nbdy::acc(this,2);
+    void update_grav(const barrays*const&B) const {
+      if(B->has(io::p)) B->pot(mybody()) = nbdy::pot(this);
+      B->acc_x(mybody()) = nbdy::acc(this,0);
+      B->acc_y(mybody()) = nbdy::acc(this,1);
+#if falcON_NDIM>2
+      B->acc_z(mybody()) = nbdy::acc(this,2);
 #endif
     }
-#ifdef ALLOW_INDI
     //--------------------------------------------------------------------------
-    void update_eps(const sbodies*const&B) const {
-     B->eps(mybody()) = twice(nbdy::eph(this));
-    }
-#ifdef ALLOW_MPI
-    //--------------------------------------------------------------------------
-    void update_eps(const pbodies*const&B) const {
-     B->eps(mybody()) = twice(nbdy::eph(this));
-    }
-#endif
-    //--------------------------------------------------------------------------
-    void update_eps(areal*const&ep) const {
-      ep[mybody()] = twice(nbdy::eph(this));
+#ifdef falcON_INDI
+    template<typename bodies_type>
+    void update_eps(const bodies_type*const&B) const {
+      B->eps(mybody()) = twice(nbdy::eph(this));
     }
 #endif
     //--------------------------------------------------------------------------
     template<typename bodies_type>
     void update_num(const bodies_type*const&B) const {
       B->num(mybody()) = nbdy::num(this);
-    }
-    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    void update_num(int*const&num) const {
-      num[mybody()] = nbdy::num(this);
     }
     //--------------------------------------------------------------------------
     void normalize_grav () {                       // acc,pot     /= mass       
@@ -299,6 +281,7 @@ namespace nbdy {
     // friends                                                                  
     //--------------------------------------------------------------------------
     friend class grav_tree;
+    friend class grap_cell;
     //--------------------------------------------------------------------------
     // static data and methods                                                  
     //--------------------------------------------------------------------------
@@ -311,11 +294,11 @@ namespace nbdy {
       N_RCR2  = 4,
       N_COFM  = 5,
       N_P2    = N_COFM + ten1::NDAT,
-#if   P_ORDER > 3
+#if   falcON_ORDER > 3
       N_P3    = N_P2   + ten2::NDAT,
-# if  P_ORDER > 4
+# if  falcON_ORDER > 4
       N_P4    = N_P3   + ten3::NDAT,
-#  if P_ORDER > 5
+#  if falcON_ORDER > 5
 #   error "expansion order > 5 not supported in public/grav.h"
 #  endif
       N_EPH   = N_P4   + ten4::NDAT,
@@ -325,7 +308,7 @@ namespace nbdy {
 #else
       N_EPH   = N_P2   + ten2::NDAT,
 #endif
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
       N_TOTAL = N_EPH  + 1;
     static const int N_eph() { return N_EPH; }
 #else
@@ -334,11 +317,11 @@ namespace nbdy {
     static const int N_tot() { return N_TOTAL; }
     //--------------------------------------------------------------------------
     static const int N_COEFF = 1 + ten1::NDAT + ten2::NDAT + ten3::NDAT
-#if  P_ORDER > 3
+#if  falcON_ORDER > 3
     + ten4::NDAT
-#if  P_ORDER > 4
+#if  falcON_ORDER > 4
     + ten5::NDAT
-#if  P_ORDER > 5
+#if  falcON_ORDER > 5
     + ten6::NDAT
 #endif
 #endif
@@ -350,15 +333,10 @@ namespace nbdy {
     //--------------------------------------------------------------------------
     real   *SOURCE;                                // source data for cell      
     real   *COEFFS;                                // sink data for cell        
-    //--------------------------------------------------------------------------
-    // constructor                                                              
-    //--------------------------------------------------------------------------
   public:
-    grav_cell() : COEFFS(0) {}
     //--------------------------------------------------------------------------
     // simple manipulations                                                     
     //--------------------------------------------------------------------------
-  public:
     void set_rcrit(real const&ith) {
       SOURCE[N_RCRT] = ith * SOURCE[N_RMAX];
       SOURCE[N_RCR2] = square(SOURCE[N_RCRT]);
@@ -371,14 +349,14 @@ namespace nbdy {
     real  &imass () { return SOURCE[N_IMAS]; }
     real  &rmax  () { return SOURCE[N_RMAX]; }
     real  &size  () { return SOURCE[N_RCRT]; }
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
     real  &eph   () { return SOURCE[N_EPH]; }
 #endif
     real* &coeffs() { return COEFFS; }
     ten2   quad  () { return ten2(SOURCE+N_P2); }
-#if   P_ORDER > 3
+#if   falcON_ORDER > 3
     ten3   octo  () { return ten3(SOURCE+N_P3); }
-# if  P_ORDER > 4
+# if  falcON_ORDER > 4
     ten4   hexa  () { return ten4(SOURCE+N_P4); }
 # endif
 #endif
@@ -397,14 +375,14 @@ namespace nbdy {
     friend real const&rcrit (CCCC) { return C->SOURCE[N_RCRT]; }
     friend real const&size  (CCCC) { return C->SOURCE[N_RCRT]; }
     friend real const&rcrit2(CCCC) { return C->SOURCE[N_RCR2]; }
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
     friend real const&eph   (CCCC) { return C->SOURCE[N_EPH]; }
 #endif
     friend real*const&coeffs(CCCC) { return C->COEFFS; }
     friend ten2       quad  (CCCC) { return ten2(C->SOURCE+N_P2); }
-#if   P_ORDER > 3
+#if   falcON_ORDER > 3
     friend ten3       octo  (CCCC) { return ten3(C->SOURCE+N_P3); }
-# if  P_ORDER > 4
+# if  falcON_ORDER > 4
     friend ten4       hexa  (CCCC) { return ten4(C->SOURCE+N_P4); }
 # endif
 #endif
@@ -425,8 +403,12 @@ namespace nbdy {
     //--------------------------------------------------------------------------
     // flag manipulation                                                        
     //--------------------------------------------------------------------------
-    void add_sink_flag(const grav_soul* const&S) { add_sink_flag_from_soul(S); }
-    void add_sink_flag(const grav_cell* const&C) { add_sink_flag_from_cell(C); }
+    void add_active_flag(const grav_soul* const&S) {
+      add_active_flag_from_soul(S);
+    }
+    void add_active_flag(const grav_cell* const&C) {
+      add_active_flag_from_cell(C);
+    }
     //--------------------------------------------------------------------------
     // dump cell data                                                           
     //--------------------------------------------------------------------------
@@ -440,7 +422,7 @@ namespace nbdy {
       o<<' '<<setw(5)<<index;
       basic_cell::dump(o,C);
       o<<' '<<setw(8)<<nbdy::mass(C);
-      for(register int i=0; i<NDIM; i++)
+      for(register int i=0; i<Ndim; i++)
 	o<<" "<<setw(8)<<setprecision(4)<<nbdy::cofm(C)[i];
       o<<" "<<setw(12)<<nbdy::rmax(C);
     }
@@ -451,6 +433,7 @@ namespace nbdy {
   // class nbdy::grav_tree                                                    //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
+  class grav_stat;                                 // forward declaration       
   class grav_tree : public basic_tree<grav_tree,grav_cell> {
     //--------------------------------------------------------------------------
     friend class tree_transport<grav_tree>;        // for parallel code         
@@ -460,27 +443,80 @@ namespace nbdy {
     //--------------------------------------------------------------------------
     // data:                                                                    
     //--------------------------------------------------------------------------
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
     const soft_type   SOFT;                        // global / individual       
 #endif
-    const areal      *M;                           // array with masses         
-#ifdef ALLOW_INDI
-    const areal      *EP;                          // array with eps_i          
-#endif
     const int         nCS;                         // source:    memory / cell  
-    static const int  nSS = NDIM+1;                // sink part: memory / soul  
+    static const int  nSS = Ndim+1;                // sink part: memory / soul  
     static const int  nCC = grav_cell::N_COEFF;    // coeffs:    memory / cell  
-    int               Ncs, Nss;                    // # cell/soul sinks         
+    int               Ncs, Nss;                    // # active cell/soul        
+    uint              Ncoeffs;                     // # coeffs used             
     real             *CELL_SOURCE;                 // memory for cell source    
     real             *CELL_COEFFS;                 // memory for cell sink part 
     real             *SOUL_SINKPT;                 // memory for soul sink part 
     //--------------------------------------------------------------------------
-    inline void reset_soul_sinkpt();               // set grav_soul::SINKPT     
+    inline void reset_soul_sinkpt(bool const& =0); // set grav_soul::SINKPT     
     inline void reset_cell_source();               // set grav_cell::SOURCE     
-    inline void reset_cell_coeffs();               // for parallel code only    
-    inline void   set_soul_sinkpt();               // set grav_soul::SINKPT     
+    inline void reset_cell_coeffs(bool const& =0); // for parallel code only    
+    inline void   set_soul_sinkpt(bool const& =0); // set grav_soul::SINKPT     
     inline void   set_cell_source();               // set grav_cell::SOURCE     
-    inline void   set_cell_coeffs();               // for parallel code only    
+    inline void   set_cell_coeffs(bool const& =0); // for parallel code only    
+    //--------------------------------------------------------------------------
+    // prepare for neighbour counting:                                          
+    // - update souls' and cells' active flags                                  
+    // - give sinkpt memory to active souls                                     
+    // - update souls' eph_i                       (individual softening only)  
+    // - souls: set size^2=eph^2, num=0                                         
+    // - cell actives: update size (pass up tree)                               
+    // - update cell's eph_i (pass up the tree)    (individual softening only)  
+    void prepare_count_neighbours(                 //                           
+				  real const& =0,  //[I: global body size]      
+				  bool const& =0); //[I: re-use memory?]        
+    //--------------------------------------------------------------------------
+    // prepare for exact gravity computation:                                   
+    // - update souls' and cells' active flags                                  
+    // - update souls' eph_i                       (individual softening only)  
+    // - optionally: adjust active's eph_i         (individual softening only)  
+    // - update cell's eph_i (pass up the tree)    (individual softening only)  
+    // - give sinkpt memory to active souls                                     
+    // - reset souls' pot & acc                                                 
+    void prepare_grav_exact (                      // prepare for direct sums   
+			     bool const&,          // I: for all or active only 
+#ifdef falcON_INDI
+			     real const&,          // I: Nsoft: adjust actives  
+			     real const&,          // I: emin:  adjust actives  
+			     real const&,          // I: emax:  adjust actives  
+			     uint const&,          // I: Nref:  adjust actives  
+			     real const&,          // I: max change in eps_i    
+#endif
+			     bool const&);         // I: re-use memory?         
+    //--------------------------------------------------------------------------
+    // prepare for gravity approximation:                                       
+    // - update souls' and cells' active flags                                  
+    // - update souls' eph_i                       (individual softening only)  
+    // - optionally: adjust active's eph_i         (individual softening only)  
+    // - update cell's eph_i (pass up the tree)    (individual softening only)  
+    // - give sinkpt memory to active souls                                     
+    // - reset souls' pot & acc                                                 
+    // - optionally give coeffs memory to active cells                          
+    // - recursively compute the multipoles                                     
+    // - set the cells r_crit & r_crit^2                                        
+    void prepare_grav_approx(const grav_mac*const&,// I: MAC                    
+			     bool const&,          // I: for all or active only 
+			     bool const&,          // I: give cell coeffs?      
+#ifdef falcON_INDI
+			     real const&,          // I: Nsoft: adjust actives  
+			     real const&,          // I: emin:  adjust actives  
+			     real const&,          // I: emax:  adjust actives  
+			     uint const&,          // I: Nref:  adjust actives  
+			     real const&,          // I: max change in eps_i    
+#endif
+			     bool const&);         // I: re-use memory?         
+    //--------------------------------------------------------------------------
+    // update gravity [& eps] of bodies from souls                              
+    void update_grav_eps(bool const&,              //[I: update eps, too?]      
+			 bool const&);             //[I: for all or active only]
+  public:
     //--------------------------------------------------------------------------
     // construction:                                                            
     // - sets up the oct tree structure from scratch                            
@@ -488,26 +524,16 @@ namespace nbdy {
     // - recursively computes for every cell: mass, cofm, rmax                  
     // - does NOT give sink memory to cells nor to souls                        
     //--------------------------------------------------------------------------
-  public:
-    //--------------------------------------------------------------------------
     //   construction from list of bodies                                       
     grav_tree(const sbodies* const&,               // I: sbodies                
-#ifdef ALLOW_INDI
-	      const soft_type  = Default::soften,  //[I: global/individual]     
-#endif
-	      const int        = Default::Ncrit);  //[I: N_crit]                
-#ifdef ALLOW_MPI
-    //--------------------------------------------------------------------------
-    grav_tree(const pbodies* const&,               // I: pbodies                
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
 	      const soft_type  = Default::soften,  //[I: global/individual]     
 #endif
 	      const int        = Default::Ncrit);  //[I: N_crit]                
     //--------------------------------------------------------------------------
+#ifdef falcON_MPI
     grav_tree(const pbodies* const&,               // I: pbodies                
-	      vect           const&,               // I: x_min                  
-	      vect           const&,               // I: x_max                  
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
 	      const soft_type  = Default::soften,  //[I: global/individual]     
 #endif
 	      const int        = Default::Ncrit);  //[I: N_crit]                
@@ -517,20 +543,24 @@ namespace nbdy {
     grav_tree(const sbodies* const&,               // I: sbodies                
 	      vect           const&,               // I: x_min                  
 	      vect           const&,               // I: x_max                  
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
 	      const soft_type  = Default::soften,  //[I: global/individual]     
 #endif
 	      const int        = Default::Ncrit);  //[I: N_crit]                
     //--------------------------------------------------------------------------
-    //   construction from arrays of flags and positions                        
-    grav_tree(const int        *,                  // I: array with flags       
-	      const areal      *[NDIM],            // I: arrays with x,y,z      
-	      const areal      *,                  // I: array  with m_i        
-#ifdef ALLOW_INDI
-	      const areal      *,                  // I: array  with eps_i      
+#ifdef falcON_MPI
+    grav_tree(const pbodies* const&,               // I: pbodies                
+	      vect           const&,               // I: x_min                  
+	      vect           const&,               // I: x_max                  
+#ifdef falcON_INDI
+	      const soft_type  = Default::soften,  //[I: global/individual]     
 #endif
-	      const uint        ,                  // I: size of arrays         
-#ifdef ALLOW_INDI
+	      const int        = Default::Ncrit);  //[I: N_crit]                
+#endif
+    //--------------------------------------------------------------------------
+    //   construction from barrays                                              
+    grav_tree(const barrays* const&,               // I: body arrays            
+#ifdef falcON_INDI
 	      const soft_type  = Default::soften,  //[I: global/individual]     
 #endif
 	      const int        = Default::Ncrit);  //[I: N_crit]                
@@ -559,64 +589,51 @@ namespace nbdy {
     void reuse();
     //--------------------------------------------------------------------------
     // prepare for density estimation:                                          
-    // - update souls sink flags                                                
-    // - pass sink flags up the tree                                            
-    // - give sinkpt memory to sink souls                                       
+    // - update souls active flags                                              
+    // - pass active flags up the tree                                          
+    // - give sinkpt memory to active souls                                     
     void prepare_density    (bool = false);        //[I: re-use memory?]        
     //--------------------------------------------------------------------------
-    // prepare for exact gravity computation:                                   
-    // - update souls' and cells' sink flags                                    
-    // - update souls' eph_i                       (individual softening only)  
-    // - optionally: adjust sink's eph_i           (individual softening only)  
-    // - update cell's eph_i (pass up the tree)    (individual softening only)  
-    // - give sinkpt memory to sink souls                                       
-    // - reset souls' pot & acc                                                 
-    void prepare_grav_exact (                      // prepare for direct sums   
-#ifdef ALLOW_INDI
-			     real = zero,          //[I: Nsoft: adjust sinks]   
-			     real = one,           //[I: emax:  adjust sinks]   
-			     uint = 0u,            //[I: Nref:  adjust sinks]   
-			     real = two,           //[I: max change in eps_i]   
-#endif
-			     bool = false);        //[I: re-use memory?]        
+    // compute gravity by direct summation                                      
     //--------------------------------------------------------------------------
-    // prepare for gravity approximation:                                       
-    // - update souls' and cells' sink flags                                    
-    // - update souls' eph_i                       (individual softening only)  
-    // - optionally: adjust sink's eph_i           (individual softening only)  
-    // - update cell's eph_i (pass up the tree)    (individual softening only)  
-    // - give sinkpt memory to sink souls                                       
-    // - reset souls' pot & acc                                                 
-    // - optionally give coeffs memory to sink cells                            
-    // - recursively compute the multipoles                                     
-    // - set the cells r_crit & r_crit^2                                        
-    void prepare_grav_approx(const grav_mac*,      // I: MAC                    
-			     bool = false,         //[I: give cell coeffs?]     
-#ifdef ALLOW_INDI
-			     real = zero,          //[I: Nsoft: adjust sinks]   
-			     real = one,           //[I: emax:  adjust sinks]   
-			     uint = 0u,            //[I: Nref:  adjust sinks]   
-			     real = two,           //[I: max change in eps_i]   
+    void exact_gravity(kern_type const&,           // I: kernel to be used      
+		       grav_stat*const&,           // I: statistics             
+		       real      const&,           // I: global/max eps         
+		       bool      const& =false     //[I: for all or active only]
+#ifdef falcON_INDI
+		      ,real      const& =zero,     //[I: Nsoft: adjust eps_i]   
+		       uint      const& =0u,       //[I: Nref:  adjust eps_i]   
+		       real      const& =zero,     //[I: eps_min]               
+		       real      const& =zero      //[I: max change of eps]     
 #endif
-			     bool = false);        //[I: re-use memory?]        
+		       );
     //--------------------------------------------------------------------------
-    // prepare for neighbour counting:                                          
-    // - update souls' and cells' sink flags                                    
-    // - give sinkpt memory to sink souls                                       
-    // - update souls' eph_i                       (individual softening only)  
-    // - souls: set size^2=eph^2, num=0                                         
-    // - cell sinks: update size (pass up tree)                                 
-    // - update cell's eph_i (pass up the tree)    (individual softening only)  
-    void prepare_neighbour_counting(               //                           
-				    const real* =0,//[I: global body size]      
-				    bool = false); //[I: re-use memory?]        
+    // compute gravity by the approximate method of Dehnen (2002)               
     //--------------------------------------------------------------------------
-    int         const& N_cell_sinks() const { return Ncs; }
-    int         const& N_soul_sinks() const { return Nss; }
-    const areal*const& my_masses   () const { return M; }
-#ifdef ALLOW_INDI
-    const areal*const& my_eps      () const { return EP; }
+    void approx_gravity(const grav_mac*const&,     // I: MAC                    
+			kern_type const&,          // I: kernel to be used      
+			grav_stat*const&,          // I: statistics             
+			real      const&,          // I: global/max eps         
+			bool      const& =false,   //[I: for all or active only]
+			bool      const& =true,    //[I: combine phases]        
+#ifdef falcON_INDI
+			real      const& =zero,    //[I: Nsoft: adjust eps_i]   
+			uint      const& =0u,      //[I: Nref:  adjust eps_i]   
+			real      const& =zero,    //[I: eps_min]               
+			real      const& =zero,    //[I: max change of eps]     
 #endif
+			const int[4]=Default::direct); //[I: direct sum control]
+    //--------------------------------------------------------------------------
+    // count neighbours                                                         
+    //--------------------------------------------------------------------------
+    void count_neighbours(                         // count neighbours          
+			  real const& = zero);     //[I: eps if global softning]
+    //--------------------------------------------------------------------------
+    // informations                                                             
+    //--------------------------------------------------------------------------
+    int         const& N_active_cells() const { return Ncs; }
+    int         const& N_active_souls() const { return Nss; }
+    uint        const& N_coeffs      () const { return Ncoeffs; }
   };
 #if defined(__GNUC__) && (__GNUC__ < 3)
   //////////////////////////////////////////////////////////////////////////////
@@ -638,14 +655,14 @@ namespace nbdy {
   inline real const&rcrit    (CCCC) { return rcrit    (I.c_pter()); }
   inline real const&size     (CCCC) { return size     (I.c_pter()); }
   inline real const&rcrit2   (CCCC) { return rcrit2   (I.c_pter()); }
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
   inline real const&eph      (CCCC) { return eph      (I.c_pter()); }
 #endif
   inline real*const&coeffs   (CCCC) { return coeffs   (I.c_pter()); }
   inline ten2       quad     (CCCC) { return quad     (I.c_pter()); }
-# if   P_ORDER > 3
+# if   falcON_ORDER > 3
   inline ten3       octo     (CCCC) { return octo     (I.c_pter()); }
-#  if  P_ORDER > 4
+#  if  falcON_ORDER > 4
   inline ten4       hexa     (CCCC) { return hexa     (I.c_pter()); }
 #  endif
 # endif
@@ -656,6 +673,41 @@ namespace nbdy {
 #endif
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
+  // namespace nbdy::grav                                                     //
+  //                                                                          //
+  //////////////////////////////////////////////////////////////////////////////
+  namespace grav {
+    //--------------------------------------------------------------------------
+    // static data                                                              
+    //--------------------------------------------------------------------------
+    static const int
+      N_C1    = 1,
+      N_C2    = N_C1 + ten1::NDAT,
+      N_C3    = N_C2 + ten2::NDAT,
+#if   falcON_ORDER > 3
+      N_C4    = N_C3 + ten3::NDAT,
+# if  falcON_ORDER > 4
+      N_C5    = N_C4 + ten4::NDAT,
+#  if falcON_ORDER > 5
+      N_C6    = N_C5 + ten5::NDAT,
+      N_COEFF = N_C6 + ten6::NDAT;
+#  else
+      N_COEFF = N_C5 + ten5::NDAT;
+#  endif
+# else
+      N_COEFF = N_C4 + ten4::NDAT;
+# endif
+#else
+      N_COEFF = N_C3 + ten3::NDAT;
+#endif
+    //--------------------------------------------------------------------------
+    // types                                                                    
+    //--------------------------------------------------------------------------
+    typedef grav_tree::cell_iterator  cell_iter;   // cell iterator             
+    typedef grav_tree::soul_iterator  soul_iter;   // soul iterator             
+  }
+  //////////////////////////////////////////////////////////////////////////////
+  //                                                                          //
   // class grav_stat                                                          //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
@@ -663,11 +715,28 @@ namespace nbdy {
   private:
     typedef grav_tree::cell_iterator cell_iter;
     typedef grav_tree::soul_iterator soul_iter;
-    uint N_BB, N_CB, M_CB, N_CC, M_CC, M_CS;
+    uint D_BB, D_CB, D_CC, D_CX;                   // # direct interactions     
+    uint A_CB, A_CC;                               // # approximate interactions
 #ifdef ENHANCED_IACT_STATS
-    double D_C, D_CC;
+    uint P_CB, P_CC, P_CX;                         // # BB pairs in direct      
+#  define ADD_SS(COUNTER,NUMBER)  COUNTER += NUMBER;
+    static const char* trick_SS(uint const&n, int&w)
+    {
+      if(n < 10) { w=1; return "         ("; }
+      if(n < 100) { w=2; return "        ("; }
+      if(n < 1000) { w=3; return "       ("; }
+      if(n < 10000) { w=4; return "      ("; }
+      if(n < 100000) { w=5; return "     ("; }
+      if(n < 1000000) { w=6; return "    ("; }
+      if(n < 10000000) { w=7; return "   ("; }
+      if(n < 100000000) { w=8; return "  ("; }
+      if(n < 1000000000) { w=9; return " ("; }
+      w=10; return "(";
+    }
+#else
+#  define ADD_SS(COUNTER,NUMBER) 
 #endif
-    static int trick(const real x, const int w)
+    static int trick(real const&x, int const&w)
     {
       if(x<0.001)  return max(1,w-5);
       if(x<0.01)   return max(1,w-4);
@@ -678,83 +747,123 @@ namespace nbdy {
     }
   public:
     // 1 recording                                                             
-    void reset    () { N_BB=0; N_CB=0; M_CB=0; N_CC=0; M_CC=0; M_CS=0;
+    void reset    () {
+      D_BB=0, D_CB=0, D_CC=0, D_CX=0;
+      A_CB=0, A_CC=0;
 #ifdef ENHANCED_IACT_STATS
-                       D_CC=0.;
+      P_CB=0, P_CC=0, P_CX=0;
 #endif
     }
-    void record_BB() { N_BB++; }
-    void record_taylor_CB(cell_iter const&A, soul_iter const&B) { N_CB++; }
-    void record_taylor_CC(cell_iter const&A, cell_iter const&B) { N_CC++;
+    void record_BB() { ++D_BB; }
+    void record_approx_CB(cell_iter const&A, soul_iter const&B)
+    { ++A_CB; }
+    void record_approx_CC(cell_iter const&A, cell_iter const&B)
+    { ++A_CC; }
+    void record_direct_CB(cell_iter const&A, soul_iter const&B)
+    { ++D_CB; ADD_SS(P_CB, number(A)) }
+    void record_direct_CC(cell_iter const&A, cell_iter const&B)
+    { ++D_CC; ADD_SS(P_CC, number(A)*number(B)) }
+    void record_direct_CX(cell_iter const&A)
+    { ++D_CX; ADD_SS(P_CX, (number(A)*(number(A)-1))>>1 ) }
 #ifdef ENHANCED_IACT_STATS
-      D_CC += abs(A.index()-B.index());
+#  undef ADD_SS
 #endif
-    }
-    void record_direct_CB(cell_iter const&A, soul_iter const&B) { M_CB++; }
-    void record_direct_CC(cell_iter const&A, cell_iter const&B) { M_CC++; }
-    void record_direct_CS(cell_iter const&A)                    { M_CS++; }
     // 2 reporting                                                             
-    const uint& BB_iacts()        const { return N_BB; }
-    const uint& CB_taylor_iacts() const { return N_CB; }
-    const uint& CC_taylor_iacts() const { return N_CC; }
-    const uint& CB_direct_iacts() const { return M_CB; }
-    const uint& CC_direct_iacts() const { return M_CC; }
-    const uint& CS_direct_iacts() const { return M_CS; }
+    const uint& BB_direct_iacts() const { return D_BB; }
+    const uint& CB_direct_iacts() const { return D_CB; }
+    const uint& CC_direct_iacts() const { return D_CC; }
+    const uint& CX_direct_iacts() const { return D_CX; }
+    const uint  total_direct_iacts() const { return
+					       BB_direct_iacts() +
+					       CB_direct_iacts() +
+					       CC_direct_iacts() +
+					       CX_direct_iacts();
+    }
 #ifdef ENHANCED_IACT_STATS
-    const int   CC_taylor_dist() const { return int(D_CC / N_CC); }
+    const uint& BB_direct_pairs() const { return D_BB; }
+    const uint& CB_direct_pairs() const { return P_CB; }
+    const uint& CC_direct_pairs() const { return P_CC; }
+    const uint& CX_direct_pairs() const { return P_CX; }
+    const uint  total_direct_pairs() const { return
+					       BB_direct_pairs() +
+					       CB_direct_pairs() +
+					       CC_direct_pairs() +
+					       CX_direct_pairs();
+    }
 #endif
+    const uint  BB_approx_iacts() const { return 0u; }
+    const uint& CB_approx_iacts() const { return A_CB; }
+    const uint& CC_approx_iacts() const { return A_CC; }
+    const uint  CX_approx_iacts() const { return 0u; }
+    const uint  total_approx_iacts() const { return
+					       BB_approx_iacts() +
+					       CB_approx_iacts() +
+					       CC_approx_iacts() +
+					       CX_approx_iacts();
+    }
     // 3 writing stats to ostream                                               
     void write(std::ostream&out) const {
-      register uint total = BB_iacts()
-	+ CB_taylor_iacts()
-	+ CB_direct_iacts()
-	+ CC_taylor_iacts()
-	+ CC_direct_iacts()
-	+ CS_direct_iacts(), part;
+      register uint part, total=total_approx_iacts()+total_direct_iacts();
+#ifdef ENHANCED_IACT_STATS
+      register int wSS;
+#endif
       register real percent;
-      out<<" interaction statitics:\n"
-	 <<"     type          approx   direct      total\n"
-	 <<" # body-body :          - ";
-      part    = BB_iacts();
+      out <<
+	" interaction statitics:\n"
+	"     type          approx   direct"
+#ifdef ENHANCED_IACT_STATS
+	"      (pairs)"
+#endif
+	"      total\n"
+	" # body-body :          - ";
+      part    = BB_direct_iacts();
       percent = 100.*part/real(total);
-      out<<setw( 8)<<BB_iacts()<<" "
+      out<<setw( 8)<<BB_direct_iacts()<<' '
+#ifdef ENHANCED_IACT_STATS
+	 <<trick_SS(BB_direct_pairs(),wSS)<<setw(wSS)<<BB_direct_pairs()<<") "
+#endif
 	 <<setw(10)<<part<<" = "
 	 <<setprecision(trick(percent,5))<<setw(8)<<percent<<"%\n"
 	 <<" # cell-body : ";
-      part    = CB_taylor_iacts()
-	+CB_direct_iacts();
+      part    = CB_approx_iacts()+CB_direct_iacts();
       percent = 100.*part/real(total);
-      out<<setw(10)<<CB_taylor_iacts()<<" "
+      out<<setw(10)<<CB_approx_iacts()<<" "
 	 <<setw( 8)<<CB_direct_iacts()<<" "
+#ifdef ENHANCED_IACT_STATS
+	 <<trick_SS(CB_direct_pairs(),wSS)<<setw(wSS)<<CB_direct_pairs()<<") "
+#endif
 	 <<setw(10)<<part<<" = "
 	 <<setprecision(trick(percent,5))<<setw(8)<<percent<<"%\n"
 	 <<" # cell-cell : ";
-      part    = CC_taylor_iacts() + CC_direct_iacts();
+      part    = CC_approx_iacts() + CC_direct_iacts();
       percent = 100.*part/real(total);
-      out<<setw(10)<<CC_taylor_iacts()<<" "
+      out<<setw(10)<<CC_approx_iacts()<<" "
 	 <<setw( 8)<<CC_direct_iacts()<<" "
+#ifdef ENHANCED_IACT_STATS
+	 <<trick_SS(CC_direct_pairs(),wSS)<<setw(wSS)<<CC_direct_pairs()<<") "
+#endif
 	 <<setw(10)<<part<<" = "
 	 <<setprecision(trick(percent,5))<<setw(8)<<percent<<"%\n"
 	 <<" # cell-self :          - ";
-      part    = CS_direct_iacts();
+      part    = CX_direct_iacts();
       percent = 100.*part/real(total);
-      out<<setw( 8)<<CS_direct_iacts()<<" "
+      out<<setw( 8)<<CX_direct_iacts()<<" "
+#ifdef ENHANCED_IACT_STATS
+	 <<trick_SS(CX_direct_pairs(),wSS)<<setw(wSS)<<CX_direct_pairs()<<") "
+#endif
 	 <<setw(10)<<part<<" = "
 	 <<setprecision(trick(percent,5))<<setw(8)<<percent<<"%\n"
 	 <<" # total     : ";
-      part=BB_iacts()
-	+CB_direct_iacts()
-	+CC_direct_iacts()
-	+CS_direct_iacts();
-      out<<setw(10)<<CB_taylor_iacts()+CC_taylor_iacts()<<" "
-	 <<setw( 8)<<part<<" "
-	 <<setw(10)<<total<<" =  100.000%\n";
+      out<<setw(10)<<total_approx_iacts()<<" "
+	 <<setw( 8)<<total_direct_iacts()<<" "
 #ifdef ENHANCED_IACT_STATS
-      out<<" mean memory distance between interacting cells: "
-	 <<CC_taylor_dist()<<"\n";
+	 <<trick_SS(total_direct_pairs(),wSS)
+	 <<setw(wSS)<<total_direct_pairs()<<") "
 #endif
+	 <<setw(10)<<total<<" =  100.000%\n";
     }
   };
 }                                                  // END: namespace nbdy       
 ////////////////////////////////////////////////////////////////////////////////
-#endif                                             // included_grat_h           
+#undef  ENHANCED_IACT_STATS
+#endif                                             // falcON_included_grat_h    

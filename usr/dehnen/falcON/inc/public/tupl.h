@@ -5,22 +5,22 @@
 //                                                                             |
 // C++ code                                                                    |
 //                                                                             |
-// Copyright Walter Dehnen, 1996-2001                                          |
+// Copyright Walter Dehnen, 1996-2003                                          |
 // e-mail:   wdehnen@aip.de                                                    |
 // address:  Astrophysikalisches Institut Potsdam,                             |
 //           An der Sternwarte 16, D-14482 Potsdam, Germany                    |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 
-#ifndef included_tupl_h
-#define included_tupl_h
+#ifndef falcON_included_tupl_h
+#define falcON_included_tupl_h
 
-#ifndef included_iostream
+#ifndef falcON_included_iostream
 #  include <iostream>
-#  define included_iostream
+#  define falcON_included_iostream
 #endif
 
-#ifndef included_inln_h
+#ifndef falcON_included_inln_h
 #  include <public/inln.h>
 #endif
 
@@ -81,12 +81,12 @@ namespace nbdy {
     void   apply   (REAL(*Y)(c_REAL&))  { FI(0) a[i] = Y(a[i]); }
     void   connect (c_tupel &b, REAL(*Y)(c_REAL&,c_REAL&))
                                         { FI(0) a[i] = Y(a[i],b[i]); }
-    REAL   norm    () const             { RR x=0; FI(0) x+=a[i]*a[i]; return x; }
+    REAL   norm    () const             { RR x=0; FI(0) x+=a[i]*a[i]; return x;}
     REAL   dist_sq (c_tupel &b) const   { RR x=0; FI(0) x+=square(a[i]-b[i]);
                                           return x; }
-    REAL   op*     (c_tupel &b) const   { RR x=0;   FI(0) x+=a[i]*b[i];
+    REAL   op*     (c_tupel &b) const   { RR x=0;  FI(0) x+=a[i]*b[i];
                                           return x; }
-    REAL   maxnorm () const             { RR b,x=0; FI(0) if(x<(b=abs(a[i]))) x=b;
+    REAL   maxnorm () const             { RR b,x=0;FI(0) if(x<(b=abs(a[i])))x=b;
                                           return x; }
   };
 #undef c_tupel
@@ -104,11 +104,11 @@ namespace nbdy {
   TN REAL maxnorm  (c_tupel x)             { return x.maxnorm(); }
   //----------------------------------------------------------------------------
   TN std::ostream& op<< (std::ostream& s, c_tupel& a) {
-    return write_array(s,a,N);
+    return write_array(s,(const REAL*)(a),N);
   }
   //----------------------------------------------------------------------------
   TN std::istream& op>> (std::istream& s, TUPEL& a) {
-    return read_array(s,a,N);
+    return read_array(s,(REAL*)(a),N);
   }
   //////////////////////////////////////////////////////////////////////////////
 #undef c_REAL
@@ -120,4 +120,4 @@ namespace nbdy {
 #undef TUPEL
 }
 ////////////////////////////////////////////////////////////////////////////////
-#endif	// included_tupel_h
+#endif	// falcON_included_tupel_h

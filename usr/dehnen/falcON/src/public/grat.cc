@@ -4,7 +4,7 @@
 //                                                                             |
 // C++ code                                                                    |
 //                                                                             |
-// Copyright Walter Dehnen, 2000-2002                                          |
+// Copyright Walter Dehnen, 2000-2003                                          |
 // e-mail:   wdehnen@aip.de                                                    |
 // address:  Astrophysikalisches Institut Potsdam,                             |
 //           An der Sternwarte 16, D-14482 Potsdam, Germany                    |
@@ -15,18 +15,14 @@
 //                                                                             |
 //-----------------------------------------------------------------------------+
 #include <public/grat.h>
+#include <public/iact.h>
+#include <public/grav.h>
 #include <public/Pi.h>
 #include <public/nums.h>
 
 using namespace nbdy;
 ////////////////////////////////////////////////////////////////////////////////
 namespace nbdy {
-  //////////////////////////////////////////////////////////////////////////////
-  //                                                                            
-  // parameters controlling code                                                
-  //                                                                            
-  //////////////////////////////////////////////////////////////////////////////
-  const int MAX_TREE_DEPTH = 50;                   // should be plenty          
   //////////////////////////////////////////////////////////////////////////////
   //                                                                            
   // auxiliary stuff for class grav_mac                                         
@@ -61,10 +57,10 @@ namespace nbdy {
       P   ( p ),
       A   ( a ),
       hA  ( half * A ),
-      sA  ( A/(P+2.) )
+      sA  ( A/(P+2.) ),
+      Z   ( falcON_New(real,N) ),
+      Y   ( falcON_New(real,N) )
     {
-      MemoryCheck(Z = new real[N]); 
-      MemoryCheck(Y = new real[N]);
       register double z,iA=1./A,
 	zmin = 1.e-4,
 	zmax = 1.e4,
@@ -109,27 +105,27 @@ grav_mac::grav_mac(const MAC_type mc,
     // th^(p+2)    M  (d-2)/d   th0^(p+2)
     // --------  (---)        = ---------
     // (1-th)^2   M0            (1-th0)^2
-#if NDIM==2
+#if falcON_NDIM==2
     IZ = 0;
 #else
-    MemoryCheck(IZ = new InvertZ(third,P));
+    IZ = falcON_Memory(new InvertZ(third,P));
 #endif
     break;
   case theta_of_M_ov_r:
     // th^(p+2)    Q  (d-2)/(d-1)   th0^(p+2)               M  
     // --------  (---)            = ---------  with  Q := -----
     // (1-th)^2   Q0                (1-th0)^2             r_max
-#if NDIM==2
+#if falcON_NDIM==2
     IZ = 0;
 #else
-    MemoryCheck(IZ = new InvertZ(half,P));
+    IZ = falcON_Memory(new InvertZ(half,P));
 #endif
     break;
   case theta_of_M_ov_rq:
     // th^(p+2)    S     th0^(p+2)                M   
     // --------  (---) = ---------  with  S := -------
     // (1-th)^2   S0     (1-th0)^2             r_max^2
-    MemoryCheck(IZ = new InvertZ(one,P));
+    IZ = falcON_Memory(new InvertZ(one,P));
     break;
   }
 }
@@ -148,21 +144,21 @@ void grav_mac::reset(const MAC_type mc,
       IZ = 0;
       break;
     case theta_of_M:
-#if NDIM==2
+#if falcON_NDIM==2
       IZ = 0;
 #else
-      MemoryCheck(IZ = new InvertZ(third,P));
+      IZ = falcON_Memory(new InvertZ(third,P));
 #endif
       break;
     case theta_of_M_ov_r:
-#if NDIM==2
+#if falcON_NDIM==2
       IZ = 0;
 #else
-      MemoryCheck(IZ = new InvertZ(half,P));
+      IZ = falcON_Memory(new InvertZ(half,P));
 #endif
       break;
     case theta_of_M_ov_rq:
-      MemoryCheck(IZ = new InvertZ(one,P));
+      IZ = falcON_Memory(new InvertZ(one,P));
       break;
     }
   }
@@ -180,7 +176,7 @@ void grav_mac::set_rcrit(const grav_tree* T) const {
     LoopCellsDown(grav_tree,T,Ci) Ci->set_rcrit(iTH0);
     break;
   case theta_of_M: {
-#if NDIM==2
+#if falcON_NDIM==2
     LoopCellsDown(grav_tree,T,Ci) Ci->set_rcrit(iTH0);
 #else
     register real 
@@ -190,12 +186,12 @@ void grav_mac::set_rcrit(const grav_tree* T) const {
 #endif
   } break;
   case theta_of_M_ov_r: {
-#if NDIM==2
+#if falcON_NDIM==2
     LoopCellsDown(grav_tree,T,Ci) Ci->set_rcrit(iTH0);
 #else
     register int  i  = 0;
     register real Q0 = mass(T->root()) / rmax(T->root());
-    register real *Q = new real[T->N_cells()]; MemoryCheck(Q);
+    register real *Q = falcON_New(real,T->N_cells());
     LoopCellsDown(grav_tree,T,Ci) {
       Q[i] = mass(Ci)/rmax(Ci);
       if(Q[i] > Q0) Q0 = Q[i];
@@ -210,7 +206,7 @@ void grav_mac::set_rcrit(const grav_tree* T) const {
   case theta_of_M_ov_rq: {
     register int  i  = 0;
     register real S0 = mass(T->root()) / square(rmax(T->root()));
-    register real *S = new real[T->N_cells()]; MemoryCheck(S);
+    register real *S = falcON_New(real,T->N_cells());
     LoopCellsDown(grav_tree,T,Ci) {
       S[i] = mass(Ci)/square(rmax(Ci));
       if(S[i] > S0) S0 = S[i];
@@ -243,8 +239,8 @@ namespace nbdy {
     // distant corner.                                                          
   {
     register real bq=zero;                         // initialize return variable
-    for(register indx i=0; i<NDIM; i++)            // loop dimensions           
-      bq += square(radius(C)+abs(cofm(C)[i]-center(C)[i])); // add in square    
+    for(register int d=0; d!=Ndim; ++d)            // loop dimensions           
+      bq += square(radius(C)+abs(cofm(C)[d]-center(C)[d])); // add in square    
     return sqrt(bq);                               // return sqrt of total      
   }
   //----------------------------------------------------------------------------
@@ -295,31 +291,32 @@ namespace nbdy {
     register int n=0;
     if       (T->use_sbodies()) {                  // 1. loops souls, get flags 
       LoopSouls(grav_tree,T,Si) {
-	Si->copy_sink_flag(T->my_sbodies());
-	if(is_sink(Si)) ++n;
+	Si->copy_active_flag(T->my_sbodies());
+	if(is_active(Si)) ++n;
       }
-#ifdef ALLOW_MPI
+#ifdef falcON_MPI
     } else if(T->use_pbodies()) { 
       LoopSouls(grav_tree,T,Si) {
-	Si->copy_sink_flag(T->my_pbodies());
-	if(is_sink(Si)) ++n;
+	Si->copy_active_flag(T->my_pbodies());
+	if(is_active(Si)) ++n;
       }
 #endif
-    } else {
+    } else if(T->use_barrays()) {
       LoopSouls(grav_tree,T,Si) {
-	Si->copy_sink_flag(T->my_flags());
-	if(is_sink(Si)) ++n;
+	Si->copy_active_flag(T->my_barrays());
+	if(is_active(Si)) ++n;
       }
-    }
-    ns = n;                                        // # soul sinks              
+    } else
+      falcON_Error("tree has neither bodies nor array data");
+    ns = n;                                        // # active souls            
     n  = 0;
     LoopCellsUp(grav_tree,T,Ci) {                  // 2. loops cells, set flags 
-      Ci->reset_sink_flag();
-      LoopCellKids(cell_iter,Ci,c) Ci->add_sink_flag(c);
-      LoopSoulKids(cell_iter,Ci,s) Ci->add_sink_flag(s);
-      if(is_sink(Ci)) n++;
+      Ci->reset_active_flag();
+      LoopCellKids(cell_iter,Ci,c) Ci->add_active_flag(c);
+      LoopSoulKids(cell_iter,Ci,s) Ci->add_active_flag(s);
+      if(is_active(Ci)) n++;
     }
-    nc = n;                                        // # cell sinks              
+    nc = n;                                        // # active cells            
   }
   //----------------------------------------------------------------------------
   template<int ORDER> inline void evaluate_poles (const grav_tree*const&);
@@ -327,7 +324,7 @@ namespace nbdy {
   //----------------------------------------------------------------------------
   template<> inline void evaluate_poles<3>(const grav_tree*const&T) {
     register vect Xi;                              // distance vector           
-    SYM2(M2);                                      //   macro in tens.h         
+    falcON_SYM2(M2);                               //   macro in tens.h         
     LoopCellsUp(grav_tree,T,Ci) {                  //   loop tree upwards >     
       M2 = zero;                                   //     reset M2 = 0          
       LoopSoulKids(cell_iter,Ci,s) {               //     loop over soul kids > 
@@ -346,11 +343,11 @@ namespace nbdy {
     LoopCellsDown(grav_tree,T,Ci)                  // loop cells                
       Ci->quad() *= if2*imass(Ci);                 //   normalize quadrupole <  
   }
-#if P_ORDER > 3
+#if falcON_ORDER > 3
   template<> inline void evaluate_poles<4>(const grav_tree*const&T) {
     register vect Xi;                              // distance vector           
-    SYM2(M2); SYM2(X2);                            //   macro in tens.h         
-    SYM3(M3);                                      //   macro in tens.h         
+    falcON_SYM2(M2); falcON_SYM2(X2);              //   macro in tens.h         
+    falcON_SYM3(M3);                               //   macro in tens.h         
     LoopCellsUp(grav_tree,T,Ci) {                  //   loop tree upwards >     
       M2 = zero;                                   //     reset M2 = 0          
       M3 = zero;                                   //     reset M3 = 0          
@@ -377,12 +374,12 @@ namespace nbdy {
       Ci->octo() *= if3*imass(Ci);                 //   normalize octopole      
     }
   }
-#if P_ORDER > 4
+#if falcON_ORDER > 4
   template<> inline void evaluate_poles<5>(const grav_tree*const&T) {
     register vect Xi;                              // distance vector           
-    SYM2(M2); SYM2(X2);                            //   macro in tens.h         
-    SYM3(M3); SYM3(X3);                            //   macro in tens.h         
-    SYM4(M4);                                      //   macro in tens.h         
+    falcON_SYM2(M2); falcON_SYM2(X2);              //   macro in tens.h         
+    falcON_SYM3(M3); falcON_SYM3(X3);              //   macro in tens.h         
+    falcON_SYM4(M4);                               //   macro in tens.h         
     LoopCellsUp(grav_tree,T,Ci) {                  //   loop tree upwards >     
       M2 = zero;                                   //     reset quadrupole      
       M3 = zero;                                   //     reset octopole        
@@ -420,8 +417,8 @@ namespace nbdy {
 #endif
 #endif
 }                                                  // END: namespace nbdy       
-#ifdef ALLOW_INDI
-# include <proper/grat.ind>
+#ifdef falcON_INDI
+# include <proper/grat_ind.cc>
 #endif
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -429,7 +426,7 @@ namespace nbdy {
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 inline void grav_tree::set_cell_source() {
-  if(CELL_SOURCE==0) NbdyError("no memory");
+  if(CELL_SOURCE==0) falcON_Error("no memory");
   register real*ci=CELL_SOURCE;                    // pter to cell's source     
   LoopMyCellsDown(Ci) {                            // loops cells         >     
     Ci->SOURCE = ci;                               //   give memory to cell     
@@ -439,66 +436,76 @@ inline void grav_tree::set_cell_source() {
 //------------------------------------------------------------------------------
 inline void grav_tree::reset_cell_source() {
   if(CELL_SOURCE) delete[] CELL_SOURCE;            // delete old allocation     
-  MemoryCheck(CELL_SOURCE=new real[N_cells()*nCS]);// allocate memory           
+  CELL_SOURCE = falcON_New(real,N_cells()*nCS);    // allocate memory           
   set_cell_source();                               // set cells: pter to memory 
 }
 //------------------------------------------------------------------------------
-inline void grav_tree::set_cell_coeffs() {
-  if(CELL_COEFFS==0) NbdyError("no memory");
+inline void grav_tree::set_cell_coeffs(bool const&all) {
+  if(CELL_COEFFS==0) falcON_Error("no memory");
   register real*ci=CELL_COEFFS;                    // pter to cell's coeffs     
-  LoopMyCellsDown(Ci)                              // loops cells         >     
-    if(is_sink(Ci)) {                              //   IF(soul is sink)       >
-      Ci->COEFFS = ci;                             //     set cell: pter to sink
+  if(all)                                          // IF all souls              
+    LoopMyCellsDown(Ci) {                          //   LOOP cells              
+      Ci->COEFFS = ci;                             //     set cell: pter->sink  
       ci += nCC;                                   //     pter to next memory   
-    } else                                         //   < ELSE                 >
-      Ci->COEFFS = 0;
+    }                                              //   END LOOP                
+  else                                             // ELSE (only active)        
+    LoopMyCellsDown(Ci)                            //   LOOP cells              
+      if(is_active(Ci)) {                          //     IF(soul is active)    
+	Ci->COEFFS = ci;                           //       set cell: pter->sink
+	ci += nCC;                                 //       pter to next memory 
+      } else                                       //     ELSE                  
+	Ci->COEFFS = 0;                            //       cell: pter->sink = 0
 }
 //------------------------------------------------------------------------------
-inline void grav_tree::reset_cell_coeffs() {
+inline void grav_tree::reset_cell_coeffs(bool const&all) {
   if(CELL_COEFFS) delete[] CELL_COEFFS;            // delete old allocation     
-  MemoryCheck(CELL_COEFFS = new real[Ncs*nCC]);    // allocate memory           
-  set_cell_coeffs();                               // set cells: pter to memory 
+  CELL_COEFFS = falcON_New(real,Ncs*nCC);          // allocate memory           
+  set_cell_coeffs(all);                            // set cells: pter to memory 
 }
 //------------------------------------------------------------------------------
-inline void grav_tree::set_soul_sinkpt() {
-  if(SOUL_SINKPT==0) NbdyError("no memory");
+inline void grav_tree::set_soul_sinkpt(bool const&all) {
+  if(SOUL_SINKPT==0) falcON_Error("no memory");
   register real*si=SOUL_SINKPT;                    // pter to soul's source     
-  LoopMySouls(Si)                                  // loops souls              >
-    if(is_sink(Si)) {                              //   IF(soul is sink)       >
-      Si->SINKPT = si;                             //     set soul: pter to sink
+  if(all)                                          // IF all souls              
+    LoopMySouls(Si) {                              //   LOOP souls              
+      Si->SINKPT = si;                             //     set soul: pter->sink  
       si += nSS;                                   //     pter to next memory   
-    } else                                         //   < ELSE                 >
-      Si->SINKPT = 0;
+    }                                              //   END LOOP                
+  else                                             // ELSE (only active)        
+    LoopMySouls(Si)                                //   LOOP souls              
+      if(is_active(Si)) {                          //     IF(soul is active)    
+	Si->SINKPT = si;                           //       set soul: pter->sink
+	si += nSS;                                 //       pter to next memory 
+      } else                                       //     ELSE                  
+	Si->SINKPT = 0;                            //       soul: pter->sink = 0
 }
 //------------------------------------------------------------------------------
-inline void grav_tree::reset_soul_sinkpt() {
+inline void grav_tree::reset_soul_sinkpt(bool const&all) {
   if(SOUL_SINKPT) delete[] SOUL_SINKPT;            // delete old allocation     
-  MemoryCheck(SOUL_SINKPT = new real[Nss*nSS]);    // allocate memory           
-  set_soul_sinkpt();                               // set souls: pter to memory 
+  SOUL_SINKPT = falcON_New(real,Nss*nSS);          // allocate memory           
+  set_soul_sinkpt(all);                            // set souls: pter to memory 
 }
 //------------------------------------------------------------------------------
 grav_tree::grav_tree(const sbodies*const&b,        // I: sbodies                
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
 		     const soft_type     s,        //[I: global/individual]     
 #endif
 		     const int           n) :      //[I: N_crit]                
-  base_tree   ( b,n,MAX_TREE_DEPTH ),
-#ifdef ALLOW_INDI
+  base_tree   ( b,n,Default::MaxDepth ),
+#ifdef falcON_INDI
   SOFT        ( s ),
 #endif
-  M           ( 0 ),
-#ifdef ALLOW_INDI
-  EP          ( 0 ),
-#endif
   nCS         ( 
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
 	        SOFT==global? grav_cell::N_eph() : 
 #endif
 	        grav_cell::N_tot() ),
-  SOUL_SINKPT ( 0 ),
+  Ncoeffs     ( 0u),
   CELL_SOURCE ( 0 ),
-  CELL_COEFFS ( 0 )
+  CELL_COEFFS ( 0 ),
+  SOUL_SINKPT ( 0 )
 {
+  LoopMyCellsDown(Ci) Ci->COEFFS = 0;              // reset cell coeffs         
   reset_cell_source();                             // set cell's memory         
   LoopMySouls(Si) Si->set_mass(b);                 // set masses                
   eval_basic_source<false>(this);                  // set basic source props    
@@ -507,55 +514,51 @@ grav_tree::grav_tree(const sbodies*const&b,        // I: sbodies
 grav_tree::grav_tree(const sbodies*const&b,        // I: sbodies                
 		     vect          const&xmin,     // I: x_min                  
 		     vect          const&xmax,     // I: x_max                  
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
 		     const soft_type     s,        //[I: global/individual]     
 #endif
 		     const int           n) :      //[I: N_crit]                
-  base_tree   ( b,xmin,xmax,n,MAX_TREE_DEPTH ),
-#ifdef ALLOW_INDI
+  base_tree   ( b,xmin,xmax,n,Default::MaxDepth ),
+#ifdef falcON_INDI
   SOFT        ( s ),
 #endif
-  M           ( 0 ),
-#ifdef ALLOW_INDI
-  EP          ( 0 ),
-#endif
   nCS         ( 
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
 	        SOFT==global? grav_cell::N_eph() : 
 #endif
 	        grav_cell::N_tot() ),
-  SOUL_SINKPT ( 0 ),
+  Ncoeffs     ( 0u),
   CELL_SOURCE ( 0 ),
-  CELL_COEFFS ( 0 )
+  CELL_COEFFS ( 0 ),
+  SOUL_SINKPT ( 0 )
 {
+  LoopMyCellsDown(Ci) Ci->COEFFS = 0;              // reset cell coeffs         
   reset_cell_source();                             // set cell's memory         
   LoopMySouls(Si) Si->set_mass(b);                 // set masses                
   eval_basic_source<false>(this);                  // set basic source props    
 }
-#ifdef ALLOW_MPI
+#ifdef falcON_MPI
 //------------------------------------------------------------------------------
 grav_tree::grav_tree(const pbodies*const&b,        // I: pbodies                
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
 		     const soft_type     s,        //[I: global/individual]     
 #endif
 		     const int           n) :      //[I: N_crit]                
-  base_tree   ( b,n,MAX_TREE_DEPTH ),
-#ifdef ALLOW_INDI
+  base_tree   ( b,n,Default::MaxDepth ),
+#ifdef falcON_INDI
   SOFT        ( s ),
 #endif
-  M           ( 0 ),
-#ifdef ALLOW_INDI
-  EP          ( 0 ),
-#endif
   nCS         ( 
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
 	        SOFT==global? grav_cell::N_eph() : 
 #endif
 	        grav_cell::N_tot() ),
-  SOUL_SINKPT ( 0 ),
+  Ncoeffs     ( 0u),
   CELL_SOURCE ( 0 ),
-  CELL_COEFFS ( 0 )
+  CELL_COEFFS ( 0 ),
+  SOUL_SINKPT ( 0 )
 {
+  LoopMyCellsDown(Ci) Ci->COEFFS = 0;              // reset cell coeffs         
   reset_cell_source();                             // set cell's memory         
   LoopMySouls(Si) Si->set_mass(b);                 // set masses                
   eval_basic_source<false>(this);                  // set basic source props    
@@ -564,195 +567,531 @@ grav_tree::grav_tree(const pbodies*const&b,        // I: pbodies
 grav_tree::grav_tree(const pbodies*const&b,        // I: pbodies                
 		     vect          const&xmin,     // I: x_min                  
 		     vect          const&xmax,     // I: x_max                  
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
 		     const soft_type     s,        //[I: global/individual]     
 #endif
 		     const int           n) :      //[I: N_crit]                
-  base_tree   ( b,xmin,xmax,n,MAX_TREE_DEPTH ),
-#ifdef ALLOW_INDI
+  base_tree   ( b,xmin,xmax,n,Default::MaxDepth ),
+#ifdef falcON_INDI
   SOFT        ( s ),
 #endif
-  M           ( 0 ),
-#ifdef ALLOW_INDI
-  EP          ( 0 ),
-#endif
   nCS         ( 
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
 	        SOFT==global? grav_cell::N_eph() : 
 #endif
 	        grav_cell::N_tot() ),
-  SOUL_SINKPT ( 0 ),
+  Ncoeffs     ( 0u),
   CELL_SOURCE ( 0 ),
-  CELL_COEFFS ( 0 )
+  CELL_COEFFS ( 0 ),
+  SOUL_SINKPT ( 0 )
 {
+  LoopMyCellsDown(Ci) Ci->COEFFS = 0;              // reset cell coeffs         
   reset_cell_source();                             // set cell's memory         
   LoopMySouls(Si) Si->set_mass(b);                 // set masses                
   eval_basic_source<false>(this);                  // set basic source props    
 }
 #endif
 //------------------------------------------------------------------------------
-grav_tree::grav_tree(const int      *f,            // I: array with flags       
-		     const areal    *x[NDIM],      // I: arrays with x,y,z      
-		     const areal    *m,            // I: array with masses      
-#ifdef ALLOW_INDI
-		     const areal    *ep,           // I: array with eps_i       
+grav_tree::grav_tree(const barrays*const&b,        // I: body arrays            
+#ifdef falcON_INDI
+		     const soft_type     s,        //[I: global/individual]     
 #endif
-		     const uint      nb,           // I: size of arrays         
-#ifdef ALLOW_INDI
-		     const soft_type s,            //[I: global/individual]     
-#endif
-		     const int       n) :          //[I: N_crit]                
-  base_tree   ( f,x,nb,n,MAX_TREE_DEPTH ),
-#ifdef ALLOW_INDI
+		     const int           n) :      //[I: N_crit]                
+  base_tree   ( b,n,Default::MaxDepth ),
+#ifdef falcON_INDI
   SOFT        ( s ),
 #endif
-  M           ( m ),
-#ifdef ALLOW_INDI
-  EP          ( ep ),
-#endif
   nCS         ( 
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
 	        SOFT==global? grav_cell::N_eph() : 
 #endif
 	        grav_cell::N_tot() ),
-  SOUL_SINKPT ( 0 ),
+  Ncoeffs     ( 0u),
   CELL_SOURCE ( 0 ),
-  CELL_COEFFS ( 0 )
+  CELL_COEFFS ( 0 ),
+  SOUL_SINKPT ( 0 )
 {
+  LoopMyCellsDown(Ci) Ci->COEFFS = 0;              // reset cell coeffs         
   reset_cell_source();                             // set cell's memory         
-  LoopMySouls(Si) Si->set_mass(M);                 // set masses                
+  LoopMySouls(Si) Si->set_mass(b);                 // set masses                
   eval_basic_source<false>(this);                  // set basic source props    
 }
 //------------------------------------------------------------------------------
 void grav_tree::rebuild(const int       Nc,        //[I: N_crit]                
 			const int       Nu) {      //[I: N_cut for re_grow]     
+  report REPORT("grav_tree::rebuild(%d,%d)",Nc,Nu);
   if(SOUL_SINKPT) { delete[] SOUL_SINKPT; SOUL_SINKPT=0; } // free memory       
   if(CELL_SOURCE) { delete[] CELL_SOURCE; CELL_SOURCE=0; } // free memory       
-  if(Nu) base_tree::rebuild(Nu,Nc,MAX_TREE_DEPTH); // rebuild base tree   OR    
-  else   base_tree::build  (   Nc,MAX_TREE_DEPTH); // build   base tree         
+  if(Nu) base_tree::rebuild(Nu,Nc,Default::MaxDepth); // rebuild base tree  OR  
+  else   base_tree::build  (   Nc,Default::MaxDepth); // build   base tree      
+  LoopMyCellsDown(Ci) Ci->COEFFS = 0;              // reset cell coeffs         
   if     (use_sbodies()) LoopMySouls(Si) Si->set_mass(my_sbodies());
-#ifdef ALLOW_MPI
+#ifdef falcON_MPI
   else if(use_pbodies()) LoopMySouls(Si) Si->set_mass(my_pbodies());
 #endif
-  else                   LoopMySouls(Si) Si->set_mass(M);
+  else if(use_barrays()) LoopMySouls(Si) Si->set_mass(my_barrays());
+  else falcON_Error("tree has neither bodies nor arrays for data");
   reset_cell_source();                             // set memory: cell's source 
   eval_basic_source<false>(this);                  // set basic source props    
 }
 //------------------------------------------------------------------------------
 void grav_tree::reuse() {
+  report REPORT("grav_tree::reuse()");
   if(SOUL_SINKPT) { delete[] SOUL_SINKPT; SOUL_SINKPT=0; } // free memory       
   if     (use_sbodies()) LoopMySouls(Si) Si->set_mass_and_pos(my_sbodies());
-#ifdef ALLOW_MPI
+#ifdef falcON_MPI
   else if(use_pbodies()) LoopMySouls(Si) Si->set_mass_and_pos(my_pbodies());
 #endif
-  else                   LoopMySouls(Si) Si->set_mass_and_pos(M,my_pos());
+  else if(use_barrays()) LoopMySouls(Si) Si->set_mass_and_pos(my_barrays());
+  else falcON_Error("tree has neigher bodies nor arrays for data");
   eval_basic_source<true>(this);
 }
 //------------------------------------------------------------------------------
 void grav_tree::prepare_density(bool re_use_mem)
 {
-  update_and_pass_flags(this,Nss,Ncs);             // update & pass; count sinks
-  if(re_use_mem) set_soul_sinkpt();                // give sinkpt to sink souls 
-  else         reset_soul_sinkpt();                // give sinkpt to sink souls 
+  update_and_pass_flags(this,Nss,Ncs);             // update &pass; count active
+  if(re_use_mem) set_soul_sinkpt();                // active souls: give sinkpt 
+  else         reset_soul_sinkpt();                // active souls: give sinkpt 
+}
+//--------------------------------------------------------------------------
+inline void grav_tree::update_grav_eps(bool const&U,
+				       bool const&all)
+{
+  if(use_sbodies())
+#ifdef falcON_INDI
+    if(U)
+      if(all)
+	LoopMySouls(Si) {
+	  Si->update_grav(my_sbodies());
+	  Si->update_eps (my_sbodies());
+        }
+      else
+	LoopMySouls(Si) { if(is_active(Si)) {
+	  Si->update_grav(my_sbodies());
+	  Si->update_eps (my_sbodies());
+	} }
+    else
+#endif
+      if(all)
+	LoopMySouls(Si) Si->update_grav(my_sbodies());
+      else
+        LoopMySouls(Si) { if(is_active(Si)) 
+	  Si->update_grav(my_sbodies());
+        }
+#ifdef falcON_MPI
+  else if(use_pbodies())
+#ifdef falcON_INDI
+    if(U)
+      if(all)
+	LoopMySouls(Si) {
+	  Si->update_grav(my_pbodies());
+	  Si->update_eps (my_pbodies());
+        }
+      else
+	LoopMySouls(Si) { if(is_active(Si)) {
+	  Si->update_grav(my_pbodies());
+	  Si->update_eps (my_pbodies());
+	} }
+    else
+#endif
+      if(all)
+	LoopMySouls(Si) Si->update_grav(my_pbodies());
+      else
+        LoopMySouls(Si) { if(is_active(Si)) 
+	  Si->update_grav(my_pbodies());
+        }
+#endif
+  else if(use_barrays())
+#ifdef falcON_INDI
+    if(U)
+      if(all)
+	LoopMySouls(Si) {
+	  Si->update_grav(my_barrays());
+	  Si->update_eps (my_barrays());
+        }
+      else
+	LoopMySouls(Si) { if(is_active(Si)) {
+	  Si->update_grav(my_barrays());
+	  Si->update_eps (my_barrays());
+	} }
+    else
+#endif
+      if(all)
+	LoopMySouls(Si) Si->update_grav(my_barrays());
+      else
+        LoopMySouls(Si) { if(is_active(Si)) 
+	  Si->update_grav(my_barrays());
+        }
+  else
+    falcON_Error("tree has neither bodies nor arrays for data");
 }
 //------------------------------------------------------------------------------
-void grav_tree::prepare_grav_exact(
-#ifdef ALLOW_INDI
-				   real Ns, real ex, uint Nr, real fe,
+inline void grav_tree::prepare_grav_exact(
+					  bool const&al,
+#ifdef falcON_INDI
+					  real const&Ns,
+					  real const&em,
+					  real const&ex,
+					  uint const&Nr,
+					  real const&fe,
 #endif
-				   bool re_use_mem)
+					  bool const&re_use_mem)
 {
-  update_and_pass_flags(this,Nss,Ncs);             // update & pass; count sinks
-#ifdef ALLOW_INDI
+  if(al) {
+    Nss = N_souls();
+    Ncs = N_cells();
+  } else
+    update_and_pass_flags(this,Nss,Ncs);           // update &pass; count active
+  const bool all = al || Nss==N_souls();
+#ifdef falcON_INDI
   if(SOFT==individual)                             // IF individual softening   
-    update_adjust_and_pass_eph(this,Ns,ex,Nr,fe);  //   get eph_i = eps_i/2     
+    update_adjust_and_pass_eph(this,all,Ns,em,ex,Nr,fe);// get eph_i = eps_i/2  
 #endif
-  if(re_use_mem) set_soul_sinkpt();                // give sinkpt to sink souls 
-  else         reset_soul_sinkpt();                // give sinkpt to sink souls 
-  LoopMySouls(Si) if(is_sink(Si)) Si->reset_srce();// reset souls' grav source  
+  if(re_use_mem) set_soul_sinkpt(all);             // souls: give sinkpt        
+  else         reset_soul_sinkpt(all);             // souls: give sinkpt        
+  if(all) LoopMySouls(Si) Si->reset_srce();
+  else    LoopMySouls(Si) if(is_active(Si)) Si->reset_srce();
 }
 //------------------------------------------------------------------------------
-void grav_tree::prepare_grav_approx(const grav_mac*MAC,
-				    bool           give_coeffs,
-#ifdef ALLOW_INDI
-				    real           Ns, 
-				    real           ex,
-				    uint           Nr,
-				    real           fe,
+void grav_tree::exact_gravity(kern_type  const&KERNEL,
+			      grav_stat *const&STATS,
+			      real       const&EPS,
+			      bool       const&al
+#ifdef falcON_INDI
+			     ,real       const&Nsoft,
+			      uint       const&Nref,
+			      real       const&emin,
+			      real       const&efac
 #endif
-				    bool           re_use_mem)
+			      )
 {
-  update_and_pass_flags(this,Nss,Ncs);             // update & pass; count sinks
-#ifdef ALLOW_INDI
-  if(SOFT==individual)                             // IF individual softening   
-    update_adjust_and_pass_eph(this,Ns,ex,Nr,fe);  //   get eph_i = eps_i/2     
+  prepare_grav_exact(al,
+#ifdef falcON_INDI
+		     Nsoft,emin,EPS,Nref,efac,
 #endif
-  if(re_use_mem) set_soul_sinkpt();                // give sinkpt to sink souls 
-  else         reset_soul_sinkpt();                // give sinkpt to sink souls 
-  LoopMySouls(Si) if(is_sink(Si)) Si->reset_srce();// reset souls' grav source  
-  if(give_coeffs)                                  // IF(cell coeffs to give)  >
-    if(re_use_mem) set_cell_coeffs();              //  give coeffs to sink cells
-    else         reset_cell_coeffs();              //  give coeffs to sink cells
-  evaluate_poles <P_ORDER>(this);                  // compute the multipoles    
-  normalize_poles<P_ORDER>(this);                  // normalize poles           
+		     0);
+  const bool all = al || Nss==N_souls();
+  if(N_active_cells()==0)
+    return warning("[grav_tree::exact_gravity()]: nobody active");
+  STATS->reset();
+  if(all) {
+    grav_iact_all K(STATS,EPS,KERNEL
+#ifdef falcON_INDI
+		    ,SOFT
+#endif
+		    );
+    K.direct_summation(root());
+    LoopMySouls(Si) Si->normalize_grav();
+  } else {
+    grav_iact K(STATS,EPS,KERNEL
+#ifdef falcON_INDI
+		,SOFT
+#endif
+		);
+    K.direct_summation(root());
+    LoopMySouls(Si) if(is_active(Si)) Si->normalize_grav();
+  }
+  update_grav_eps(
+#ifdef falcON_INDI
+		  Nsoft,
+#else
+		  false,
+#endif
+		  all);
+}
+//------------------------------------------------------------------------------
+inline
+void grav_tree::prepare_grav_approx(const grav_mac* const&MAC,
+				    bool            const&al,
+				    bool            const&give_coeffs,
+#ifdef falcON_INDI
+				    real            const&Ns, 
+				    real            const&em,
+				    real            const&ex,
+				    uint            const&Nr,
+				    real            const&fe,
+#endif
+				    bool            const&re_use_mem)
+{
+  report REPORT("grav_tree::prepare_grav_approx()");
+  if(al) {
+    Nss = N_souls();
+    Ncs = N_cells();
+  } else
+    update_and_pass_flags(this,Nss,Ncs);           // update &pass; count active
+  const bool all = al || Nss==N_souls();
+#ifdef falcON_INDI
+  if(SOFT==individual)                             // IF individual softening   
+    update_adjust_and_pass_eph(this,all,Ns,em,ex,Nr,fe);// get eph_i = eps_i/2  
+#endif
+  if(re_use_mem) set_soul_sinkpt(all);             // souls: give sinkpt        
+  else         reset_soul_sinkpt(all);             // souls: give sinkpt        
+  if(all) LoopMySouls(Si) Si->reset_srce();
+  else    LoopMySouls(Si) if(is_active(Si)) Si->reset_srce();
+  if(give_coeffs)                                  // IF(cell coeffs to give)   
+    if(re_use_mem) set_cell_coeffs();              //   active cells: give coeff
+    else         reset_cell_coeffs();              //   active cells: give coeff
+  evaluate_poles <falcON_ORDER>(this);             // compute the multipoles    
+  normalize_poles<falcON_ORDER>(this);             // normalize poles           
   MAC->set_rcrit(this);                            // set r_crit for all cells  
 }
 //------------------------------------------------------------------------------
-void grav_tree::prepare_neighbour_counting(
-					   const real* SIZE,
-					   bool re_use_mem)
+void grav_tree::approx_gravity(const grav_mac*const&GMAC,
+			       kern_type  const&KERNEL,
+			       grav_stat *const&STATS,
+			       real       const&EPS,
+			       bool       const&al,
+			       bool       const&split,
+#ifdef falcON_INDI
+			       real       const&Nsoft,
+			       uint       const&Nref,
+			       real       const&emin,
+			       real       const&efac,
+#endif
+			       const int        direct[4])
 {
-  update_and_pass_flags(this,Nss,Ncs);             // update & pass; count sinks
-  if(re_use_mem) set_soul_sinkpt();                // give sinkpt to sink souls 
-  else         reset_soul_sinkpt();                // give sinkpt to sink souls 
-#ifdef ALLOW_INDI
-  if(SOFT == individual) {                         // IF(individual sizes)     >
+  report REPORT("grav_tree::approx_gravity()");
+  prepare_grav_approx(GMAC,al,                     // prepare for grav          
+#ifdef _OPENMP
+		      (!split)? 1 :                // only if openmp & !split   
+#endif
+		      0,
+#ifdef falcON_INDI
+		      Nsoft,emin,EPS,Nref,efac,
+#endif
+		      false);
+  const bool all = al || Nss==N_souls();
+  if(N_active_cells()==0)                          //   DONE if nobody active   
+    return warning("[grav_tree::approx_gravity()]: nobody active");
+  STATS->reset();                                  //   reset iaction statistics
+
+#ifdef _OPENMP
+  if(!split)                                       // IF openmp && !splitting   
+    if(all) {                                      //   IF all assumed active   
+      grav_iact_all GK(STATS,EPS,KERNEL,           //     init gravity kernel   
+#  ifdef falcON_INDI
+		       SOFT,
+#  endif
+		       direct,false);
+      SelfInteractorP<grav_iact_all> MI(&GK,root(),depth());
+      MI.interact_parallel();                      //     interaction phase     
+      GK.evaluate(root());                         //     evaluation phase      
+      Ncoeffs = N_active_cells();                  //     # coeffs used         
+    } else {                                       //   ELSE                    
+      grav_iact GK(STATS,EPS,KERNEL,               //     init gravity kernel   
+#  ifdef falcON_INDI
+		   SOFT,
+#  endif
+		   direct,false);
+      SelfInteractorP<grav_iact> MI(&GK,root(),depth());
+      MI.interact_parallel();                      //     interaction phase     
+      GK.evaluate(root());                         //     evaluation phase      
+      Ncoeffs = N_active_cells();                  //     # coeffs used         
+    }
+  else {                                           // ELSE (no openmp or split) 
+#endif
+    report REPORT2("interaction & evaluation");
+    if(all) {                                      //   IF all are active       
+      register uint NP = split? 4+N_cells()/8 : N_cells();
+                                                   //     initial size: C_i pool
+      grav_iact_all_s GK(STATS,EPS,NP,KERNEL,      //     init gravity kernel   
+#ifdef falcON_INDI
+			 SOFT,
+#endif
+			 direct,false);
+      MutualInteractor<grav_iact_all_s> MI(&GK,split? depth()-1 : depth());
+                                                   //   init mutual interactor  
+      if(split) {                                  //     IF splitting          
+	LoopCellKids(cell_iter,root(),c1) {        //       LOOP cell kids c1   
+	  report::info("interaction");
+	  MI.cell_self(c1);                        //         self-iaction c1   
+	  LoopCellSecd(cell_iter,root(),c1+1,c2)   //         LOOP kids c2>c1   
+	    MI.cell_cell(c1,c2);                   //           interaction c1,2
+	  LoopSoulKids(cell_iter,root(),s2)        //         LOOP soul kids s  
+	    MI.cell_soul(c1,s2);                   //           interaction c1,s
+	  report::info("evaluation");
+	  GK.evaluate(c1);                         //         evaluation phase  
+	}                                          //       END LOOP            
+	LoopSoulKids(cell_iter,root(),s1) {        //       LOOP soul kids s1   
+	  report::info("interaction");
+	  LoopSoulSecd(cell_iter,root(),s1+1,s2)   //         LOOP kids s2>s1   
+	    GK.interact(s1,s2);                    //           interaction s1,2
+	  report::info("evaluation");
+	  s1->normalize_grav();                    //         evaluation phase  
+	}                                          //       END LOOP            
+      } else {                                     //     ELSE                  
+	report::info("interaction");
+	MI.cell_self(root());                      //       interaction phase   
+	report::info("evaluation");
+	GK.evaluate(root());                       //       evaluation phase    
+      }                                            //     ENDIF                 
+      Ncoeffs = GK.coeffs_used();                  //     remember # coeffs used
+    } else {                                       //   ELSE: not all are active
+      register uint NP = split? 4+N_active_cells()/8 : N_active_cells();
+                                                   //     initial size: C_i pool
+      grav_iact_s GK(STATS,EPS,NP,KERNEL,          //     init gravity kernel   
+#ifdef falcON_INDI
+		     SOFT,
+#endif
+		     direct,false);
+      MutualInteractor<grav_iact_s> MI(&GK,split? depth()-1 : depth());
+                                                   //     init mutual interactor
+      if(split) {                                  //     IF splitting          
+	LoopCellKids(cell_iter,root(),c1) {        //       LOOP cell kids c1   
+	  if(is_active(c1)) {                      //        IF active s1:      
+	    report::info("interaction");
+	    MI.cell_self(c1);                      //         self-iaction c1   
+	    LoopCellSecd(cell_iter,root(),c1+1,c2) //         LOOP kids c2>c1   
+	      MI.cell_cell(c1,c2);                 //           interaction c1,2
+	    LoopSoulKids(cell_iter,root(),s2)      //         LOOP soul kids s  
+	      MI.cell_soul(c1,s2);                 //           interaction c1,s
+	    report::info("evaluation");
+	    GK.evaluate(c1);                       //         evaluation phase  
+	  } else {                                 //        ELSE: inactive c1  
+	    report::info("interaction");
+	    LoopCellSecd(cell_iter,root(),c1+1,c2) //         LOOP kids c2>c1   
+	      if(is_active(c2))MI.cell_cell(c1,c2);//           interaction c1,2
+	    LoopSoulKids(cell_iter,root(),s2)      //         LOOP soul kids s  
+	      if(is_active(s2))MI.cell_soul(c1,s2);//           interaction c1,s
+	    report::info("no evaluation");
+	  }                                        //        ENDIF              
+	}                                          //       END LOOP            
+	LoopSoulKids(cell_iter,root(),s1) {        //       LOOP soul kids s1   
+	  if(is_active(s1)) {                      //        IF active s1:      
+	    report::info("interaction");
+	    LoopSoulSecd(cell_iter,root(),s1+1,s2) //         LOOP kids s2>s1   
+	      GK.interact(s1,s2);                  //           interaction s1,2
+	    report::info("evaluation");
+	    s1->normalize_grav();                  //         evaluation phase  
+	  } else {                                 //        ELSE: inactive s1  
+	    report::info("interaction");
+	    LoopSoulSecd(cell_iter,root(),s1+1,s2) //         LOOP kids s2>s1   
+	      if(is_active(s2)) GK.interact(s1,s2);//           interaction s1,2
+	    report::info("no evaluation");
+	  }                                        //        ENDIF              
+	}                                          //       END LOOP            
+      } else {                                     //     ELSE                  
+	report::info("interaction");
+	MI.cell_self(root());                      //       interaction phase   
+	report::info("evaluation");
+	GK.evaluate(root());                       //       evaluation phase    
+      }                                            //     ENDIF                 
+      Ncoeffs = GK.coeffs_used();                  //     remember # coeffs used
+    }                                              //   ENDIF                   
+#ifdef _OPENMP
+  }                                                // ENDIF                     
+#endif
+  update_grav_eps(                                 // update bodies             
+#ifdef falcON_INDI
+		  Nsoft,
+#else
+		  false,
+#endif
+		  all);
+}
+//------------------------------------------------------------------------------
+inline void grav_tree::prepare_count_neighbours(
+						real const &SIZE,
+						bool const &re_use_mem)
+{
+  update_and_pass_flags(this,Nss,Ncs);             // update &pass; count active
+  if(re_use_mem) set_soul_sinkpt();                // active souls: give sinkpt 
+  else         reset_soul_sinkpt();                // active souls: give sinkpt 
+#ifdef falcON_INDI
+  if(SOFT == individual) {                         // IF(individual sizes) THEN 
     if       (use_sbodies()) {
-      LoopMySouls(Si) if(is_sink(Si)) {
+      LoopMySouls(Si) if(is_active(Si)) {
 	Si->copy_eph(my_sbodies());                //     get size == eps       
 	Si->sizeq() = square(size(Si));            //     set size^2            
 	Si->num()   = 0u;                          //     reset counter         
       }
-#ifdef ALLOW_MPI
+#ifdef falcON_MPI
     } else if(use_pbodies()) { 
-      LoopMySouls(Si) if(is_sink(Si)) {
+      LoopMySouls(Si) if(is_active(Si)) {
 	Si->copy_eph(my_pbodies());                //     get size == eps       
 	Si->sizeq() = square(size(Si));            //     set size^2            
 	Si->num()   = 0u;                          //     reset counter         
       }
 #endif
-    } else {
-      LoopMySouls(Si) if(is_sink(Si)) {
-	Si->copy_eph(my_eps());                    //     get size == eps       
+    } else if(use_barrays()) {
+      LoopMySouls(Si) if(is_active(Si)) {
+	Si->copy_eph(my_barrays());                //     get size == eps       
 	Si->sizeq() = square(size(Si));            //     set size^2            
 	Si->num()   = 0u;                          //     reset counter         
       }
-    }
-  } else                                           // < ELSE(global size)      >
+    } else
+      falcON_Error("tree has neither bodies nor arrays for data");
+  } else                                           // ELSE(global size)         
 #endif
-    LoopMySouls(Si) if(is_sink(Si)) {              //   loop sink souls        >
+    LoopMySouls(Si) if(is_active(Si)) {            //   LOOP active souls       
       Si->num()   = 0u;                            //     reset counter         
-    }                                              //   <                       
+    }                                              // ENDIF                     
   register real smax;                              // cell size                 
-  LoopMyCellsUp(Ci) {                              // loop cells upwards       >
+  LoopMyCellsUp(Ci) {                              // LOOP cells upwards        
     smax = zero;                                   //   reset cell size         
-#ifdef ALLOW_INDI
-    if(SIZE == 0) {
-      LoopSoulKids(cell_iter,Ci,s) if(is_sink(s)){ //   loop soul kids         >
+#ifdef falcON_INDI
+    if(SOFT == individual) {
+      LoopSoulKids(cell_iter,Ci,s) if(is_active(s)){ // LOOP active soul kids   
 	update_max(smax, sqrt(dist_sq(pos(Ci),pos(s))) + size(s));//update size 
-      }                                            //   <                       
+      }                                            //   END LOOP                
     } else {
 #endif
-      LoopSoulKids(cell_iter,Ci,s) if(is_sink(s)){ //   loop soul kids         >
-	update_max(smax, sqrt(dist_sq(pos(Ci),pos(s))) + *SIZE); // update size 
-      }                                            //   <                       
-#ifdef ALLOW_INDI
+      LoopSoulKids(cell_iter,Ci,s) if(is_active(s)){ // LOOP active soul kids   
+	update_max(smax, sqrt(dist_sq(pos(Ci),pos(s))) + SIZE); // update size  
+      }                                            //   END LOOP                
+#ifdef falcON_INDI
     }
 #endif
-    LoopCellKids(cell_iter,Ci,c) if(is_sink(c)){   //   loop cell kids         >
+    LoopCellKids(cell_iter,Ci,c) if(is_active(c)){ //   LOOP active cell kids   
       update_max(smax, sqrt(dist_sq(pos(Ci),pos(c))) + size(c)); // update size 
-    }                                              //   <                       
+    }                                              //   END LOOP                
     Ci->size() = smax;                             //   set cell size           
-  }                                                // <                         
+  }                                                // END LOOP                  
+}
+//------------------------------------------------------------------------------
+void grav_tree::count_neighbours(real const&EPS)
+{
+  if(use_sbodies() && !my_sbodies()->has(io::n) ||
+#ifdef falcON_MPI
+     use_pbodies() && !my_pbodies()->has(io::n) ||
+#endif
+     use_barrays() && !my_barrays()->has(io::n))
+    falcON_ErrorF("nobody has memory for num","grat_tree::count_neighbours()");
+#ifdef falcON_INDI
+  switch(SOFT) {
+  case individual: {
+    prepare_count_neighbours();
+    if(N_active_souls()==0)
+      return warning("[grav_tree::count_neighbours()]: nobody active");
+    neighbour_counter<grav_tree,individual> count;
+    MutualInteractor<neighbour_counter<grav_tree,individual> > 
+    MI(&count,depth());
+    MI.cell_self(root());
+  } break;
+  case global: {
+#endif
+    if(EPS == zero)
+      return warning("[grav_tree::count_neighbours()]: eps=0 -> no neighbours");
+    prepare_count_neighbours(EPS);
+    if(N_active_souls()==0)
+      return warning("[grav_tree::count_neighbours()]: nobody active");
+    neighbour_counter<grav_tree,global> count(EPS);
+    MutualInteractor<neighbour_counter<grav_tree,global> > 
+    MI(&count,depth());
+    MI.cell_self(root());
+#ifdef falcON_INDI
+  } break;
+  }
+#endif
+  if     (use_sbodies())
+    LoopMySouls(Si) { if(is_active(Si)) Si->update_num(my_sbodies()); }
+#ifdef falcON_MPI
+  else if(use_pbodies())
+    LoopMySouls(Si) { if(is_active(Si)) Si->update_num(my_pbodies()); }
+#endif
+  else if(use_barrays())
+    LoopMySouls(Si) { if(is_active(Si)) Si->update_num(my_barrays()); }
+  else
+    falcON_Error("tree has neither bodies nor arrays for data");
 }
 ////////////////////////////////////////////////////////////////////////////////

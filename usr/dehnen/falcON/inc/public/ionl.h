@@ -5,29 +5,29 @@
 //                                                                             |
 // C++ code                                                                    |
 //                                                                             |
-// Copyright Walter Dehnen, 1994-2001                                          |
+// Copyright Walter Dehnen, 1994-2003                                          |
 // e-mail:   wdehnen@aip.de                                                    |
 // address:  Astrophysikalisches Institut Potsdam,                             |
 //           An der Sternwarte 16, D-14482 Potsdam, Germany                    |
 //                                                                             |
 //-----------------------------------------------------------------------------+
-#ifndef included_ioln_h
-#define included_ioln_h
+#ifndef falcON_included_ioln_h
+#define falcON_included_ioln_h
 
-#ifndef included_exit_h
+#ifndef falcON_included_exit_h
 #  include <public/exit.h>
 #endif
-#ifndef included_iostream
+#ifndef falcON_included_iostream
 #  include <iostream>
-#  define included_iostream
+#  define falcON_included_iostream
 #endif
-#ifndef included_fstream
+#ifndef falcON_included_fstream
 #  include <fstream>
-#  define included_fstream
+#  define falcON_included_fstream
 #endif
-#ifndef included_cstdio
+#ifndef falcON_included_cstdio
 #  include <cstdio>
-#  define included_cstdio
+#  define falcON_included_cstdio
 #endif
 //------------------------------------------------------------------------------
 namespace nbdy {
@@ -211,9 +211,9 @@ namespace nbdy {
          { return Smanip<std::ios::fmtflags>( &std::ios::setf ,a); }
 }
 #else // use std manipulators
-#ifndef included_iomanip
+#ifndef falcON_included_iomanip
 #  include <iomanip>
-#  define included_iomanip
+#  define falcON_included_iomanip
 #endif
 namespace nbdy {
   using std::setw;
@@ -222,4 +222,4 @@ namespace nbdy {
 }
 #endif
 //------------------------------------------------------------------------------
-#endif // included_ioln_h
+#endif // falcON_included_ioln_h

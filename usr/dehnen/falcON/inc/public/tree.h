@@ -5,7 +5,7 @@
 //                                                                             |
 // C++ code                                                                    |
 //                                                                             |
-// Copyright Walter Dehnen, 2000-2002                                          |
+// Copyright Walter Dehnen, 2000-2003                                          |
 // e-mail:   wdehnen@aip.de                                                    |
 // address:  Astrophysikalisches Institut Potsdam,                             |
 //           An der Sternwarte 16, D-14482 Potsdam, Germany                    |
@@ -21,25 +21,33 @@
 // macros for access to cells & souls of basic_tree<cell>                      |
 //                                                                             |
 //-----------------------------------------------------------------------------+
-#ifndef included_tree_h
-#define included_tree_h
+//                                                                             |
+// WARNING: we allocate memory for the tree's souls and cells in ONE block     |
+//          (to ease data communication in parallel code) of raw memory.       |
+//          We do therefore NOT call a constructor for the souls and cells.    |
+//          Hence, these classes MUST NOT a non-trivial default constructor.   |
+//                                                                             |
+//-----------------------------------------------------------------------------+
+#ifndef falcON_included_tree_h
+#define falcON_included_tree_h
 
-#ifndef included_auxx_h
-#  include <public/auxx.h>
+#ifndef falcON_included_body_h
+#  include <body.h>
 #endif
-#ifndef included_flag_h
-#  include <public/flag.h>
+#ifndef falcON_included_deft_h
+#  include <public/deft.h>
 #endif
-#ifndef included_iomanip
+#ifdef falcON_MPI
+#  ifndef falcON_included_pody_h
+#    include <walter/pody.h>
+#  endif
+#endif
+#ifndef falcON_included_iomanip
 #  include <iomanip>
-#  define included_iomanip
+#  define falcON_included_iomanip
 #endif
 ////////////////////////////////////////////////////////////////////////////////
 namespace nbdy {
-  class sbodies;                                   // forward declaration       
-#ifdef ALLOW_MPI
-  class pbodies;                                   // forward declaration       
-#endif
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
   // class nbdy::basic_soul                                                   //
@@ -52,96 +60,84 @@ namespace nbdy {
     //--------------------------------------------------------------------------
     // data of class basic_soul                                                 
     //--------------------------------------------------------------------------
-    vect COFM;                                     // center of mass = position 
-    uint LINK;                                     // associated body index     
+    vect POS;                                      // center of mass = position 
+    uint LNK;                                      // associated body index     
     //--------------------------------------------------------------------------
     // constructor                                                              
     //--------------------------------------------------------------------------
   protected:
     basic_soul() {}                                // for optimization, we don't
-                                                   // initialize COFM & LINK    
+                                                   // initialize POS & LNK      
     //--------------------------------------------------------------------------
     // non-const methods                                                        
     //--------------------------------------------------------------------------
-    void  link(unsigned  const&L) { LINK = L; }
-    vect &cofm()                  { return COFM; }
-    real &cofm(const int i)       { return COFM[i]; }
+    void  link(unsigned  const&L) { LNK = L; }
+    vect &pos ()                  { return POS; }
+    real &pos (int const&i)       { return POS[i]; }
     //--------------------------------------------------------------------------
   public:
-    void copy_link (const basic_soul*S) { LINK = S->LINK; }
-    void copy_basic(const basic_soul*S) { COFM = S->COFM; LINK = S->LINK; }
+    void copy_link (const basic_soul*S) { LNK = S->LNK; }
+    void copy_basic(const basic_soul*S) { POS = S->POS; LNK = S->LNK; }
     //--------------------------------------------------------------------------
     // data access                                                              
     //--------------------------------------------------------------------------
-    vect const&cofm  () const { return COFM; }
-    uint const&mybody() const { return LINK; }
+    vect const&pos   () const { return POS; }
+    uint const&mybody() const { return LNK; }
     //--------------------------------------------------------------------------
     // flag manipulations to use with bodies                                    
     //--------------------------------------------------------------------------
-    template<typename BODIES>
-    void copy_body_flag(const BODIES*BB) {
-      flag::set_to_part(&(BB->flg(mybody())), flag::BODY_FLAGS);
+    template<typename bodies_type>
+    void copy_body_flag(const bodies_type*const&B) {
+      flag::set_to_part(B->flg(mybody()), flag::BODY_FLAGS);
     }
     //--------------------------------------------------------------------------
-    template<typename BODIES>
-    void add_body_flag(const BODIES*BB) {
-      flag::add_part(&(BB->flg(mybody())),flag::BODY_FLAGS);
+    template<typename bodies_type>
+    void add_body_flag(const bodies_type*const&B) {
+      flag::add_part(B->flg(mybody()),flag::BODY_FLAGS);
     }
     //--------------------------------------------------------------------------
-    template<typename BODIES>
-    void set_body_flag(const BODIES*BB) {
-      flag::set_part(&(BB->flg(mybody())),flag::BODY_FLAGS);
+    template<typename bodies_type>
+    void set_body_flag(const bodies_type*const&B) {
+      flag::set_part(B->flg(mybody()),flag::BODY_FLAGS);
     }
     //--------------------------------------------------------------------------
-    template<typename BODIES>
-    void copy_sink_flag(const BODIES*BB) {
-      flag::set_part(&(BB->flg(mybody())),flag::SINK);
-    }
-    //--------------------------------------------------------------------------
-    // flag manipulations to use with arrays                                    
-    //--------------------------------------------------------------------------
-    void copy_body_flag(const int*F) {
-      flag::set_to_part(F[mybody()],flag::BODY_FLAGS);
-    }
-    //--------------------------------------------------------------------------
-    void add_body_flag(const int*F) {
-      flag::add_part(F[mybody()],flag::BODY_FLAGS);
-    }
-    //--------------------------------------------------------------------------
-    void copy_sink_flag(const int*F) {
-      flag::set_part(F[mybody()],flag::SINK);
+    template<typename bodies_type>
+    void copy_active_flag(const bodies_type*const&B) {
+      flag::set_part(B->flg(mybody()),flag::ACTIVE);
     }
     //--------------------------------------------------------------------------
     // other non-const methods                                                  
     //--------------------------------------------------------------------------
-    void set_pos(const areal*x[NDIM]) {
-      cofm()[0] = x[0][mybody()];
-      cofm()[1] = x[1][mybody()];
-#if NDIM==3
-      cofm()[2] = x[2][mybody()];
+    void set_pos(const barrays*const&B) {
+      pos()[0] = B->pos_x(mybody());
+      pos()[1] = B->pos_y(mybody());
+#if falcON_NDIM==3
+      pos()[2] = B->pos_z(mybody());
 #endif
     }
     //--------------------------------------------------------------------------
-    template<typename BODIES>
-    void set_pos(const BODIES*BB) {
-      cofm() = BB->pos(mybody());
+    template<typename bodies_type>
+    void set_pos(const bodies_type*const&B) {
+      pos() = B->pos(mybody());
     }
     //--------------------------------------------------------------------------
     void set_link_and_pos(const uint&i, vect const&x) {
       link(i);
-      cofm()=x;
+      pos()=x;
     }
     //--------------------------------------------------------------------------
-    void copy(const basic_soul*S)  {
+    void copy(const basic_soul*const&S)  {
       copy_basic(S);
       set_to_part(S,flag::BODY_FLAGS);
     }
     //--------------------------------------------------------------------------
-    void copy_prune(const basic_soul*S, size_t const &L) { 
-      COFM = S->COFM;
-      LINK = L; 
+#ifdef falcON_MPI
+    void copy_prune(const basic_soul*const&S) { 
+      POS = S->POS;
+      LNK = S->LNK; 
       set_to_part(S,flag::BODY_FLAGS);
     }
+#endif
     //--------------------------------------------------------------------------
     // dump soul basic data                                                     
     //--------------------------------------------------------------------------
@@ -152,8 +148,8 @@ namespace nbdy {
     static void dump(std::ostream&o, const basic_soul* const&S) {
       o<<" "<<std::setw(3)<<flag(*S)
        <<" "<<std::setw(6)<<S->mybody();
-      for(register int i=0; i!=NDIM; ++i)
-	o<<" "<<std::setw(8)<<std::setprecision(4)<<S->cofm()[i];
+      for(register int d=0; d!=Ndim; ++d)
+	o<<" "<<std::setw(8)<<std::setprecision(4)<<S->pos()[d];
     }
   };
   //////////////////////////////////////////////////////////////////////////////
@@ -173,7 +169,7 @@ namespace nbdy {
     real  RADIUS;                                  // half edge length of cube  
     vect  CENTER;                                  // center of cube            
     int   NUMBER;                                  // # soul descendants        
-    int   FCSOUL;                                  // index of fst soul child   
+    int   FCSOUL;                                  // index of fst soul desc    
     int   FCCELL;                                  // index of fst cell child   
     short NSOULS;                                  // # soul children           
     short NCELLS;                                  // # cell children           
@@ -201,12 +197,12 @@ namespace nbdy {
     //--------------------------------------------------------------------------
     void reset_flag() {
       flag::reset();
-      flag::add(flag::AL_SINK);
+      flag::add(flag::AL_ACTIVE);
     }
     //--------------------------------------------------------------------------
-    void reset_sink_flag() {
-      flag::un_set(flag::SINK);
-      flag::add(flag::AL_SINK);
+    void reset_active_flag() {
+      flag::un_set(flag::ACTIVE);
+      flag::add(flag::AL_ACTIVE);
     }
     //--------------------------------------------------------------------------
     void add_flag(int const&f) {
@@ -214,14 +210,14 @@ namespace nbdy {
     }
     //--------------------------------------------------------------------------
   protected:
-    void add_sink_flag_from_soul(const flag* const&S) {
-      flag::add_part(S,flag::SINK);
-      if(!is_sink(S)) flag::un_set(flag::AL_SINK);
+    void add_active_flag_from_soul(const flag* const&S) {
+      flag::add_part(S,flag::ACTIVE);
+      if(!is_active(S)) flag::un_set(flag::AL_ACTIVE);
     }
     //--------------------------------------------------------------------------
-    void add_sink_flag_from_cell(const flag* const&C) {
-      flag::add_part(C,flag::SINK);
-      if(!al_sink(C)) flag::un_set(flag::AL_SINK);
+    void add_active_flag_from_cell(const flag* const&C) {
+      flag::add_part(C,flag::ACTIVE);
+      if(!al_active(C)) flag::un_set(flag::AL_ACTIVE);
     }
     //--------------------------------------------------------------------------
     // boolean information                                                      
@@ -249,17 +245,27 @@ namespace nbdy {
        <<" "<<std::setw(5)<<C->nsouls()
        <<" "<<std::setw(6)<<C->number()
        <<" "<<std::setw(9)<<C->radius();
-      for(register int i=0; i<NDIM; ++i)
-	o<<" "<<std::setw(8)<<std::setprecision(4)<<C->center()[i];
+      for(register int d=0; d!=Ndim; ++d)
+	o<<" "<<std::setw(8)<<std::setprecision(4)<<C->center()[d];
     }
+    //--------------------------------------------------------------------------
+    // other non-const methods                                                  
+    //--------------------------------------------------------------------------
+#ifdef falcON_MPI
+    void copy_prune(const basic_cell*C) {
+      RADIUS = C->RADIUS;
+      CENTER = C->CENTER;
+      NUMBER = C->NUMBER;
+      set_to_part(C,flag::ACTIVE_FLAGS);
+    }
+#endif
   };
   //////////////////////////////////////////////////////////////////////////////
   const int PRUNED      = 1<<10;
   const int PUREREP     = 1<<11;
   const int PRUNE_FLAGS = PRUNED | PUREREP;
   //////////////////////////////////////////////////////////////////////////////
-  template<typename TREE>
-  class tree_transport;                            // forward declaration     //
+  template<typename TREE> class tree_transport;    // forward declaration     //
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
   // class nbdy::basic_tree<TREE,CELL>                                        //
@@ -276,7 +282,7 @@ namespace nbdy {
   template<typename TREE, typename CELL>           // derived tree, cell of it  
   class basic_tree {
     //--------------------------------------------------------------------------
-    friend class tree_transport<TREE>;             // for parallel code         
+    friend class tree_transport<TREE>;             // for passing a tree        
     //--------------------------------------------------------------------------
     basic_tree           (const basic_tree&);      // not implemented           
     basic_tree& operator=(const basic_tree&);      // not implemented           
@@ -405,74 +411,86 @@ namespace nbdy {
     //--------------------------------------------------------------------------
   private:
     const sbodies       *BSRCES;                   // pointer to sbodies        
-#ifdef ALLOW_MPI
+    const barrays       *ASRCES;                   // pointer to abodies        
+#ifdef falcON_MPI
     const pbodies       *PSRCES;                   // pointer to pbodies        
 #endif
-    const int           *F;                        // array with flags          
-    const areal        **X;                        // arrays with x,y,z         
-    uint                 Nb,Ns,Nc;                 // # bodies/souls/cells      
-    int                  Dp;                       // depth                     
+    const int            SPFLAG;                   // specific body flag        
+    uint                 Ns, Nc;                   // # souls/cells             
     mutable soul_type   *S0, *SN;                  // begin & end of souls      
     mutable cell_type   *C0, *CN;                  // begin & end of cells      
+    union {
+      mutable char      *ALLOC;                    // allocated memory          
+      mutable unsigned  *DUINT;                    // easy access to 1st few    
+    };
+    //--------------------------------------------------------------------------
+    // private methods                                                          
+    //--------------------------------------------------------------------------
+    void allocate (uint const&, uint const&);
+    void set_depth(uint const&);
     //--------------------------------------------------------------------------
     // construction and such                                                    
     //--------------------------------------------------------------------------
+#ifdef falcON_MPI
     basic_tree() :                                 // for friend tree_transport 
-      BSRCES(0), 
-#ifdef ALLOW_MPI
-      PSRCES(0),
+      BSRCES(0), ASRCES(0), PSRCES(0),
+      Ns(0), Nc(0), S0(0), C0(0), ALLOC(0) {}
 #endif
-      F(0), X(0), Ns(0), Nc(0), S0(0), C0(0) {}
   public:
     //--------------------------------------------------------------------------
-    // construct from sbodies                                                   
-    //--------------------------------------------------------------------------
-    basic_tree(                                    // openMP//ized              
-	       const sbodies* const&,              // I: bodies' flags & pos's  
-	       const int    = 6,                   //[I: N_crit]                
-	       const int    = 50);                 //[I: max tree depth]        
+    // constructors                                                             
+    //                                                                          
+    // If the specific body flag is set, only bodies with this flag set will be 
+    // used in the tree.                                                        
     //--------------------------------------------------------------------------
     // construct from sbodies                                                   
     //--------------------------------------------------------------------------
     basic_tree(                                    // openMP//ized              
 	       const sbodies* const&,              // I: bodies' flags & pos's  
+	       int   const& = Default::Ncrit,      //[I: N_crit]                
+	       int   const& = Default::MaxDepth,   //[I: max tree depth]        
+	       int   const& = 0);                  //[I: specific flag]         
+    //--------------------------------------------------------------------------
+    basic_tree(                                    // openMP//ized              
+	       const sbodies* const&,              // I: bodies' flags & pos's  
 	       vect           const&,              // I: x_min                  
 	       vect           const&,              // I: x_max                  
-	       const int    = 6,                   //[I: N_crit]                
-	       const int    = 50);                 //[I: max tree depth]        
-#ifdef ALLOW_MPI
+	       int   const& = Default::Ncrit,      //[I: N_crit]                
+	       int   const& = Default::MaxDepth,   //[I: max tree depth]        
+	       int   const& = 0);                  //[I: specific flag]         
+#ifdef falcON_MPI
     //--------------------------------------------------------------------------
     // construct from pbodies                                                   
     //--------------------------------------------------------------------------
     basic_tree(                                    // openMP//ized              
 	       const pbodies* const&,              // I: bodies' flags & pos's  
-	       const int    = 6,                   //[I: N_crit]                
-	       const int    = 50);                 //[I: max tree depth]        
-    //--------------------------------------------------------------------------
-    // construct from pbodies                                                   
+	       int   const& = Default::Ncrit,      //[I: N_crit]                
+	       int   const& = Default::MaxDepth,   //[I: max tree depth]        
+	       int   const& = 0);                  //[I: specific flag]         
     //--------------------------------------------------------------------------
     basic_tree(                                    // openMP//ized              
 	       const pbodies* const&,              // I: bodies' flags & pos's  
 	       vect           const&,              // I: x_min                  
 	       vect           const&,              // I: x_max                  
-	       const int    = 6,                   //[I: N_crit]                
-	       const int    = 50);                 //[I: max tree depth]        
+	       int   const& = Default::Ncrit,      //[I: N_crit]                
+	       int   const& = Default::MaxDepth,   //[I: max tree depth]        
+	       int   const& = 0);                  //[I: specific flag]         
 #endif
     //--------------------------------------------------------------------------
-    // construct from flags & pos                                               
+    // construct from barrays                                                   
     //--------------------------------------------------------------------------
     basic_tree(                                    // openMP//ized              
-	       const int   *,                      // I: array with flags       
-	       const areal *[NDIM],                // I: arrays with x,y,z      
-	       const uint,                         // I: size of arrays         
-	       const int   = 6,                    //[I: N_crit]                
-	       const int   = 50);                  //[I: max tree depth]        
+	       const barrays* const&,              // I: abodies' flags & pos's 
+	       int   const& = Default::Ncrit,      //[I: N_crit]                
+	       int   const& = Default::MaxDepth,   //[I: max tree depth]        
+	       int   const& = 0);                  //[I: specific flag]         
     //--------------------------------------------------------------------------
     // construct as sub-tree                                                    
     //--------------------------------------------------------------------------
     template<typename PARENT_TREE>                 //   type of parent-tree     
     basic_tree(                                    // construct as sub-tree     
-	       const PARENT_TREE*const&);          // I: parent tree            
+	       const PARENT_TREE*const&,           // I: parent tree            
+	       int               const&);          // I: flag specif'ing subtree
     //--------------------------------------------------------------------------
     // construct a pruned tree:                                                 
     //   a pruned tree gives a coarser representation of the original tree:     
@@ -482,31 +500,43 @@ namespace nbdy {
     //   A purely representative cell has no meaningful entries for sub-nodes   
     //   but represents them by their properties (N, ...).                      
     //   On a pruned cell, direct access to ALL soul descendants is impossible. 
-    //   The souls and cells of the prunded tree hold the index of the corres-  
-    //   ponding soul and cell of the original tree.                            
     //                                                                          
     // The purpose of a pruned tree is to represent the tree of an external     
     // domain in the MPI parallel version of the code: only those cells that    
     // need to be resolved even from outside will not be pruned.                
     //--------------------------------------------------------------------------
+    template<typename PARENT_TREE>                 //   type of parent-tree     
     basic_tree(                                    // construct as sub-tree     
-	       const basic_tree*const&,            // I: parent tree            
-	       bool(*)(const cell_type*const&));   // I: prune cell?            
+	       const PARENT_TREE*const&,           // I: parent tree            
+	       bool(*)(typename PARENT_TREE::cell_iterator const&));
+                                                   // I: prune cell?            
     //--------------------------------------------------------------------------
     void reset_bodies(                             // exchange bodies           
 		      const sbodies*B)             // I: sbodies                
     {
       BSRCES = B; 
-#ifdef ALLOW_MPI
+      ASRCES = 0;
+#ifdef falcON_MPI
       PSRCES = 0;
 #endif
     }
-#ifdef ALLOW_MPI
+    //--------------------------------------------------------------------------
+    void reset_bodies(                             // exchange bodies           
+		      const barrays*A)             // I: barrays                
+    { 
+      BSRCES = 0;
+      ASRCES = A;
+#ifdef falcON_MPI
+      PSRCES = 0;
+#endif
+    }
+#ifdef falcON_MPI
     //--------------------------------------------------------------------------
     void reset_bodies(                             // exchange bodies           
 		      const pbodies*P)             // I: pbodies                
     { 
       BSRCES = 0;
+      ASRCES = 0;
       PSRCES = P;
     }
 #endif
@@ -516,41 +546,37 @@ namespace nbdy {
     // use order of souls only                                                  
     //--------------------------------------------------------------------------
     void build  (                                  // openMP//ized              
-		 const int   = 6,                  //[I: N_crit]                
-		 const int   = 50);                //[I: max tree depth]        
+		 int const& = Default::Ncrit,      //[I: N_crit]                
+		 int const& = Default::MaxDepth);  //[I: max tree depth]        
     //--------------------------------------------------------------------------
     // use full tree structure                                                  
     //--------------------------------------------------------------------------
     void rebuild(                                  //                           
-		 const int,                        // I: N_cut                  
-		 const int   = 6,                  //[I: N_crit]                
-		 const int   = 50);                //[I: max tree depth]        
+		 int const&,                       // I: N_cut                  
+		 int const& = Default::Ncrit,      //[I: N_crit]                
+		 int const& = Default::MaxDepth);  //[I: max tree depth]        
     //--------------------------------------------------------------------------
     // destructor                                                               
     //--------------------------------------------------------------------------
     ~basic_tree() {
-      if(S0) delete[] S0;
-      if(C0) delete[] C0;
+      if(ALLOC) delete[] ALLOC;
     }
     //--------------------------------------------------------------------------
     // other public methods                                                     
     //--------------------------------------------------------------------------
-    void mark_for_subtree(uint&, uint&) const;
-    const sbodies*const&my_sbodies () const { return BSRCES; }
-#ifdef ALLOW_MPI
-    const pbodies*const&my_pbodies () const { return PSRCES; }
-    bool                use_pbodies() const { return PSRCES!=0; }
-    bool                use_arrays () const { return BSRCES==0 && PSRCES==0;}
-#else
-    bool                use_arrays () const { return BSRCES==0;}
-#endif
-    const int    *const&my_flags   () const { return F; }
-    const areal **const&my_pos     () const { return X; }
+    void mark_for_subtree(int const&, uint&, uint&) const;
     bool                use_sbodies() const { return BSRCES!=0; }
+    const sbodies*const&my_sbodies () const { return BSRCES; }
+    bool                use_barrays() const { return ASRCES!=0;}
+    const barrays*const&my_barrays () const { return ASRCES; }
+#ifdef falcON_MPI
+    bool                use_pbodies() const { return PSRCES!=0; }
+    const pbodies*const&my_pbodies () const { return PSRCES; }
+#endif
+    int           const&SP_flag    () const { return SPFLAG; }
     unsigned      const&N_souls    () const { return Ns; }
     unsigned      const&N_cells    () const { return Nc; }
-    unsigned      const&N_array    () const { return Nb; }
-    int           const&depth      () const { return Dp; }
+    unsigned      const&depth      () const { return DUINT[2]; }
     //--------------------------------------------------------------------------
     // access to cells via cell_iterators                                       
     //--------------------------------------------------------------------------
@@ -587,7 +613,24 @@ namespace nbdy {
   static const int SUBTREE = 1<<7;                 // node = node of subtree    
   inline void flag_for_subtree(flag*F) { F->add    (SUBTREE); }
   inline void unflag_subtree  (flag*F) { F->un_set (SUBTREE); }
-}
+  //////////////////////////////////////////////////////////////////////////////
+  //                                                                          //
+  // nbdy::enum who                                                           //
+  //                                                                          //
+  //////////////////////////////////////////////////////////////////////////////
+  enum who {                                       // in a cell:                
+    none = 0,                                      //  nobody                   
+    some = 1,                                      //  somebody                 
+    all  = 2                                       //  everybody                
+  };                                               // is active                 
+  //////////////////////////////////////////////////////////////////////////////
+  inline who who_is_active(const basic_cell *const&C)
+  {
+    if(!is_active(C)) return none;
+    if( al_active(C)) return all;
+                      return some;
+  }
+}                                                  // END: namespace nbdy       
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
 // macros for looping all souls and cells in a tree                           //
@@ -651,7 +694,6 @@ namespace nbdy {
       NAME  = TREE_PTER->soul_No(BEGIN);           /* from begin soul        */\
       NAME != TREE_PTER->soul_No(END);             /* until beyond end soul  */\
     ++NAME)                                        // get next soul             
-//------------------------------------------------------------------------------
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
 // macros for looping the cell and soul children and descendants of a cell    //
@@ -731,4 +773,4 @@ namespace nbdy {
       NAME != CELL.last_soul_desc();               /* until last             */\
     ++NAME)                                        // get next child            
 ////////////////////////////////////////////////////////////////////////////////
-#endif                                             // included_tree_h           
+#endif                                             // falcON_included_tree_h    

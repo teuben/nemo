@@ -5,38 +5,38 @@
 //                                                                             |
 // C++ code                                                                    |
 //                                                                             |
-// Copyright Walter Dehnen, 2002                                               |
+// Copyright Walter Dehnen, 2002-2003                                          |
 // e-mail:   wdehnen@aip.de                                                    |
 // address:  Astrophysikalisches Institut Potsdam,                             |
 //           An der Sternwarte 16, D-14482 Potsdam, Germany                    |
 //                                                                             |
 //-----------------------------------------------------------------------------+
-#ifndef included_enum_h                     // ensure these definitions are    |
-#define included_enum_h 1                   // seen once only by the compiler  |
+#ifndef falcON_included_enum_h
+#define falcON_included_enum_h 1
 namespace nbdy {
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
   // enum nbdy::soft_type                                                     //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
-  enum soft_type {                          // type of softening                
-    global      = 0,                        // global eps                       
-    individual  = 1                         // use individual eps               
-  };                                        //                                  
+  enum soft_type {                                 // type of softening         
+    global      = 0,                               // global eps                
+    individual  = 1                                // use individual eps        
+  };                                               //                           
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
   // enum nbdy::kern_type                                                     //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
-  enum kern_type {                          // type of kernel                   
-    p0     = 0,                             // P0 = Plummer kernel              
-    p1     = 1,                             // P1,P2,P3: enhanced Plummer       
-    p2     = 2,                             //                                  
-    p3     = 3,                             //                                  
-    newton = 9                              // no softening                     
-  };                                        //                                  
+  enum kern_type {                                 // type of kernel            
+    p0     = 0,                                    // P0 = Plummer kernel       
+    p1     = 1,                                    // P1,P2,P3: enhanced Plummer
+    p2     = 2,                                    //                           
+    p3     = 3,                                    //                           
+    newton = 9                                     // no softening              
+  };                                               //                           
   inline
-  const char* describe(const kern_type KER) // describe kernel                  
+  const char* describe(const kern_type KER)        // describe kernel           
   {
     switch(KER) {
     case p0: return "P0==Plummer";
@@ -53,15 +53,16 @@ namespace nbdy {
   //                                                                          //
   // NOTE The latter two possibilities are experimental and should not be     //
   // used by the general user (he won't know what theta_0 to use with them).  //
+  //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
-  enum MAC_type {                           // type of MAC                      
-    const_theta     =0,                     // theta = const                    
-    theta_of_M      =1,                     // theta = theta(M)                 
-    theta_of_M_ov_rq=2, /* experimental*/   // theta = theta(M/rmax^2)          
-    theta_of_M_ov_r =3  /* experimental*/   // theta = theta(M/rmax)            
-  };                                        //                                  
+  enum MAC_type {                                  // type of MAC               
+    const_theta     =0,                            // theta = const             
+    theta_of_M      =1,                            // theta = theta(M)          
+    theta_of_M_ov_rq=2, /* experimental */         // theta = theta(M/rmax^2)   
+    theta_of_M_ov_r =3  /* experimental */         // theta = theta(M/rmax)     
+  };                                               //                           
   inline
-  const char* describe(const MAC_type MAC)  // describe MAC                     
+  const char* describe(const MAC_type MAC)         // describe MAC              
   {
     switch(MAC) {
     case const_theta:      return "theta=const";
@@ -71,5 +72,5 @@ namespace nbdy {
     }
   }
   //////////////////////////////////////////////////////////////////////////////
-}                                           // END: namespace nbdy              
-#endif                                      // included_enum_h                  
+}                                                  // END: namespace nbdy       
+#endif                                             // falcON_included_enum_h    

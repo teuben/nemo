@@ -4,7 +4,7 @@
 //                                                                             |
 // C++ code                                                                    |
 //                                                                             |
-// Copyright Walter Dehnen, 2000-2002                                          |
+// Copyright Walter Dehnen, 2000-2003                                          |
 // e-mail:   wdehnen@aip.de                                                    |
 // address:  Astrophysikalisches Institut Potsdam,                             |
 //           An der Sternwarte 16, D-14482 Potsdam, Germany                    |
@@ -34,7 +34,11 @@ extern "C" {
 #include <public/nmio.h>
 #include <public/ionl.h>
 
-using namespace nbdy;
+#define EPS_FACTOR 1.1            // factor to change eps_i at most             
+
+using nbdy::bodies;
+using nbdy::io;
+using nbdy::yanc;
 ////////////////////////////////////////////////////////////////////////////////
 namespace nbdy{
   //===========================================================================+
@@ -42,7 +46,7 @@ namespace nbdy{
   // auxiliary constants and functions for the installation of class ndata     |
   //                                                                           |
   //============================================================================
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
   inline basic_nbody::soft_type soften(const indx SOFTEN) {
     switch(SOFTEN) {
     case 1:  return basic_nbody::individual_fixed;
@@ -68,19 +72,19 @@ namespace nbdy{
 			"theta",           //  1
 			"hgrow",           //  2  replaces reuse                
 			"Ncrit",           //  3
-			"root_center",     //  4  not used, abolished           
-			"reuse",           //  5  not used, replaced by hgrow   
-			"softening",       //  6 used is ALLOW_INDI is defined  
-			"Nsoft",           //  7 used is ALLOW_INDI is defined  
+			"time",            //  4
+			"emin",            //  5 used if falcON_INDI is defined 
+			"softening",       //  6 used if falcON_INDI is defined 
+			"Nsoft",           //  7 used if falcON_INDI is defined 
 			"eps",             //  8
 			"eps_given",       //  9
 			"kernel",          // 10
 			"Grav",            // 11
-			"Nref",            // 12 used is ALLOW_INDI is defined  
+			"Nref",            // 12 used if falcON_INDI is defined 
 			"facc",            // 13
 			"fpot",            // 14
 			"fcom",            // 15
-			"time",            // 16
+			"feps",            // 16
 			"hmin",            // 17
 			"Nsteps",          // 18
 			"give_pot",        // 19
@@ -93,7 +97,7 @@ namespace nbdy{
 			"data_file"};      // 27
   const unsigned nopt=28;
   //----------------------------------------------------------------------------
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
   inline nbdy::uint check_eps_range(const real EPS,
 				    nbdy::bodies *BODIES)
   {
@@ -114,7 +118,7 @@ namespace nbdy{
   //                                                                           |
   //============================================================================
   class ndata {
-#ifdef ALLOW_NEMO
+#ifdef falcON_NEMO
     int                    ND;               // # NEMO devices                  
     nemo_out              *NEMO;             // NEMO output devices             
   public:
@@ -127,11 +131,12 @@ namespace nbdy{
     real                   THETA;            // opening angle                   
     int                    HGROW;            // grow fresh tree every 2^h esteps
     int                    NCRIT;            // max # bodies in unsplit cell    
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
     real                   NSOFT;            // # bodies in softening spheres   
     uint                   NREF;             // # bodies for density estimate   
     indx                   SOFTEN;           // softening type                  
     bool                   EPS_GIVEN;        // eps_i are given on input        
+    real                   EMIN;             // lower limit for eps_i           
 #endif
     real                   EPS;              // eps / eps_max                   
     indx                   KERN;             // (0/1/2/3/9) soft kernel         
@@ -139,6 +144,7 @@ namespace nbdy{
     real                   FACC;             // factor f_acc for time-stepping  
     real                   FPOT;             // factor f_pot for time-stepping  
     real                   FCOM;             // factor f_com for time-stepping  
+    real                   FEPS;             // factor f_eps for time-stepping  
     real                   TINI;             // initial simulation time         
     real                   TIME;             // simulation time                 
     io                     WRITE;            // what to write to output         
@@ -151,10 +157,11 @@ namespace nbdy{
     ndata(const ndata&);                     // not implemented                 
     //--------------------------------------------------------------------------
     io bodydatabits() const {
-      register io need = io::mxvpaf;         // basic data bits                 
-#ifdef ALLOW_INDI
-      if(SOFTEN) need |= io::e;              // need eps_i                      
+      register io  need = io::mxvpaf;        // basic data bits                 
+#ifdef falcON_INDI
+      if(SOFTEN)   need |= io::e;            // need eps_i                      
 #endif
+      if(PEX)      need |= io::P;            // need external potentials        
       if(NSTEPS>1) need |= io::l;            // need levels                     
       return need;
     }
@@ -180,12 +187,9 @@ namespace nbdy{
 	case  1: in >> THETA;      SwallowRestofLine(in); break;
 	case  2: in >> HGROW;      SwallowRestofLine(in); break;
 	case  3: in >> NCRIT;      SwallowRestofLine(in); break;
-	case  4: std::cerr<<"### YANC parameter \"root_center\" deprecated\n";
-	                           SwallowRestofLine(in); break;
-	case  5: std::cerr<<"### YANC parameter \"reuse\" deprecated;"
-			  <<" use \"hgrow\" instead\n";
-	                           SwallowRestofLine(in); break;
-#ifdef ALLOW_INDI
+	case  4: in >> TIME;       SwallowRestofLine(in); break;
+#ifdef falcON_INDI
+	case  5: in >> EMIN;       SwallowRestofLine(in); break;
 	case  6: in >> SOFTEN;     SwallowRestofLine(in); break;
 	case  7: in >> NSOFT;      SwallowRestofLine(in); break;
 #else
@@ -196,7 +200,7 @@ namespace nbdy{
 #endif
 	case  8: in >> EPS;        SwallowRestofLine(in); break;
 	case  9: 
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
 	         EPS_GIVEN = true;
 #else
 		 std::cerr<<"### YANC parameter \"eps_given\" disabled\n";
@@ -204,7 +208,7 @@ namespace nbdy{
 	                           SwallowRestofLine(in); break;
 	case 10: in >> KERN;       SwallowRestofLine(in); break;
 	case 11: in >> G; iG=1./G; SwallowRestofLine(in); break;
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
 	case 12: in >> NREF;       SwallowRestofLine(in); break;
 #else
 	case 12: std::cerr<<"### YANC parameter \"Nref\" disabled\n";
@@ -213,7 +217,7 @@ namespace nbdy{
 	case 13: in >> FACC;       SwallowRestofLine(in); break;
 	case 14: in >> FPOT;       SwallowRestofLine(in); break;
 	case 15: in >> FCOM;       SwallowRestofLine(in); break;
-	case 16: in >> TIME;       SwallowRestofLine(in); break;
+	case 16: in >> FEPS;       SwallowRestofLine(in); break;
 	case 17: in >> HMIN;       SwallowRestofLine(in); break;
 	case 18: in >> Ns;         SwallowRestofLine(in);
 	         if(Ns>=1) NSTEPS = Ns;
@@ -233,8 +237,8 @@ namespace nbdy{
 	}
       } while(iopt);
       if(BODIES) BODIES->reset(Nbody,bodydatabits());
-      else       MemoryCheck(BODIES = new bodies(Nbody,bodydatabits()));
-#ifdef ALLOW_INDI
+      else       BODIES = falcON_Memory(new bodies(Nbody,bodydatabits()));
+#ifdef falcON_INDI
 #define WRITEOUT(WR) EPS_GIVEN? WR | io::e : WR
 #else
 #define WRITEOUT(WR) WR
@@ -249,7 +253,7 @@ namespace nbdy{
 	BODIES = 0;
 	return;
       }
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
       if(SOFTEN && EPS_GIVEN) {
 	uint a = check_eps_range(EPS,BODIES);
 	if(NSOFT>zero && a>0) std::cerr<<"### YANC: "<<a<<" eps_i > eps_max\n";
@@ -264,7 +268,7 @@ namespace nbdy{
     void write_yanc_header(                       // write header in yanc format
 			   std::ostream&out,      // I/O:  stream to write to   
 			   const char *file,      // I:    name of file written 
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
 			   const bool  eps_i,     // I:    add param eps_given  
 #endif
 			   const char *prog,      // I:    name of calling main 
@@ -304,7 +308,7 @@ namespace nbdy{
 	 <<"# Ncrit          "<<std::setw(15)<<NCRIT
 	 <<" max # of bodies in un-splitted cell\n";
       // softening issues
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
       out<<"# softening      "<<std::setw(15)<<SOFTEN;
       switch(SOFTEN) {
       case 1:
@@ -314,6 +318,8 @@ namespace nbdy{
 	out<<" individually adaptive softening lengths with\n"
 	   <<"# Nsoft          "<<std::setw(15)<<NSOFT
 	   <<" # bodies in softening sphere\n"
+	   <<"# emin           "<<std::setw(15)<<EMIN
+	   <<" minimum eps_i\n"
 	   <<"# eps            "<<std::setw(15)<<EPS
 	   <<" maximum eps_i\n";
 	break;
@@ -336,6 +342,8 @@ namespace nbdy{
 	if(FPOT) out<<"tau <= "<<FPOT<<" / |pot|\n"; else out<<"\n";
 	out<<"# fcom           "<<std::setw(15)<<FCOM;
 	if(FCOM) out<<"tau <= "<<FCOM<<" * sqrt|pot| / |acc|\n"; else out<<"\n";
+	out<<"# feps           "<<std::setw(15)<<FEPS;
+	if(FEPS) out<<"tau <= "<<FEPS<<" * sqrt(eps/|acc|\n"; else out<<"\n";
 	out<<"# hmin           "<<std::setw(15)<<HMIN<<" tau_min = 2^"<<(-HMIN)
 	   <<" = "<<tau_min()<<"\n";
 	out<<"# Nsteps         "<<std::setw(15)<<NSTEPS<<" tau_max = 2^"
@@ -356,7 +364,7 @@ namespace nbdy{
 	if(WRITE & io::r)
 	  out<<"# give_rho                         density given on output\n";
       }
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
       if(eps_i)
 	out<<"# eps_given                        eps_i given with data below\n";
 #endif
@@ -365,7 +373,7 @@ namespace nbdy{
 	 <<"# start_data"<<std::endl;
     }
     //--------------------------------------------------------------------------
-#ifdef ALLOW_NEMO
+#ifdef falcON_NEMO
     //--------------------------------------------------------------------------
   public: void open_nemo(const int  d=0,
 			 const char*file=0, 
@@ -375,15 +383,12 @@ namespace nbdy{
       if(resume) {
 	if(file==0 || FILE == std::string(file))
 	  (NEMO+d)->open_to_append(FILE.c_str());
-	else {
+	else
 	  (NEMO+d)->open(file);
-	  (NEMO+d)->write_history();
-	}
       } else if(file) {
 	if(FILE == std::string(file) && FILE != "-")
 	  error("out==in; use option resume instead");
 	(NEMO+d)->open(file);
-	(NEMO+d)->write_history();
       } else
 	warning("cannot open nemo output");
     }
@@ -407,16 +412,16 @@ namespace nbdy{
 		   const bool resume=false)        //[I: resume old simul?]     
     {
       const io support = want | bodydatabits();
-      if(!BODIES) 
-	{ MemoryCheck(BODIES=new bodies(0,support)); }// initialize bodies      
-      else BODIES->reset(BODIES->N_bodies(),support); // or reset bodies        
+      if(BODIES)
+	BODIES->reset(BODIES->N_bodies(),support); // reset bodies              
+      else
+	BODIES=falcON_Memory(new bodies(0,support));// or init bodies           
       nemo_in NEMO(FILE.c_str());                  // open nemo input           
-      NEMO.read_history();                         // read history              
       register io got;                             // what did we get?          
       if(resume) {                                 // IF (resuming old sim)    >
 	do {                                       //   do: read particles     >
 	  NEMO.open_set(nemo_io::snap);            //     open nemo snapshot    
-	  BODIES->read_nemo_particles(NEMO,got,&TIME,want);// read particles    
+	  BODIES->read_nemo_particles(NEMO,got,&TIME,want,0,false);//read bodies
 	  if(NEMO.is_present(nemo_io::diags)) {    //     IF(diags set)      >  
 	    NEMO.open_set(nemo_io::diags);         //       open diags set      
 	    if(NEMO.is_present(nemo_io::cputime))  //       IF(cpu time there)  
@@ -427,10 +432,12 @@ namespace nbdy{
 	} while(NEMO.is_present(nemo_io::snap));   //   < while more to be read 
       } else {                                     // < ELSE (not resuming) >   
 	  NEMO.open_set(nemo_io::snap);            //   open nemo snapshot      
-	  BODIES->read_nemo_particles(NEMO,got,&TIME,want);// read particles    
+	  BODIES->read_nemo_particles(NEMO,got,&TIME,want,0,false);//read bodies
 	  NEMO.close_set(nemo_io::snap);           //   close nemo snapshot     
       }
-#ifdef ALLOW_INDI
+      if(!got.contains(want))
+	error("couldn't read body data: %s",word(got.missing(want)));
+#ifdef falcON_INDI
       if(got & io::e) EPS_GIVEN = true;            // set EPS_GIVEN             
 #endif
       if(G != 1.0 && G != 0.)                      // IF(G != 1)                
@@ -458,7 +465,7 @@ namespace nbdy{
       register uint        i,j;
       OUT->open_set(nemo_io::snap);                // open a new nemo snapshot  
       BODIES->write_nemo_particles(*OUT, &TIME,    //   write out particles     
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
 				   SOFTEN? w | io::e : w
 #else
 				   w
@@ -473,16 +480,16 @@ namespace nbdy{
 	OUT->single_vec(1)=NBODY->kin_energy();    //       copy kin energy     
 	OUT->single_vec(2)=NBODY->pot_energy();    //       copy pot energy     
 	OUT->write(nemo_io::energy);               //       write energies      
-	for(i=0;i!=NDIM;++i) for(j=0;j!=NDIM;++j)  //     loop dims twice    > >
+	for(i=0;i!=Ndim;++i) for(j=0;j!=Ndim;++j)  //     loop dims twice    > >
 	  OUT->single_mat(i,j) = NBODY->kin_energy(i,j);//   copy K_ij       < <
 	OUT->write(nemo_io::KinT);                 //     write K_ij            
-	for(i=0;i!=NDIM;++i) for(j=0;j!=NDIM;++j)  //     loop dims twice    > >
+	for(i=0;i!=Ndim;++i) for(j=0;j!=Ndim;++j)  //     loop dims twice    > >
 	  OUT->single_mat(i,j) = NBODY->pot_energy(i,j);//   copy W_ij       < <
 	OUT->write(nemo_io::PotT);                 //     write W_ij            
-	for(i=0;i!=NDIM;++i) for(j=0;j!=NDIM;++j)  //     loop dimensions    > >
+	for(i=0;i!=Ndim;++i) for(j=0;j!=Ndim;++j)  //     loop dimensions    > >
 	  OUT->single_mat(i,j) = NBODY->as_angmom(i,j); //   copy A_ij       < <
 	OUT->write(nemo_io::AmT);                  //     write A_ij            
-	for(i=0;i!=NDIM;++i) {                     //     loop dims            <
+	for(i=0;i!=Ndim;++i) {                     //     loop dims            <
 	  OUT->single_phs(0,i)=NBODY->center_of_mass()[i];// copy c-of-m pos    
 	  OUT->single_phs(1,i)=NBODY->total_momentum()[i];// copy c-of-m vel    
 	}                                          //     <                     
@@ -503,16 +510,18 @@ namespace nbdy{
 	  int          const&nc,
 	  double       const&ep,
 	  int          const&kn,
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
 	  int          const&sf,
 	  double       const&ns,
 	  int          const&nr,
+	  double       const&em,
 #endif
 	  int          const&hm,
 	  int          const&nl,
 	  double       const&fa,
 	  double       const&fp,
 	  double       const&fc,
+	  double       const&fe,
 	  const extpot*const&pt,
 	  const bool        resume   =false,        // only applies if nemo=true
 	  const io          read_more=io::o,        // only applies if nemo=true
@@ -520,18 +529,19 @@ namespace nbdy{
 	  double const&     gr       =1.0)
       :
       ND        (nemo? nd : 0),
-      NEMO      (new nemo_out[ND]),
+      NEMO      (ND? falcON_New(nemo_out,ND) : 0),
       CPU_I     (zero),
       FILE      (file),
       PEX       (pt),
       THETA     (real(th)),
       HGROW     (hg<0? 0 : hg),
       NCRIT     (uint(max(0,nc))),
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
       NSOFT     (real(abs(ns))),
       NREF      (uint(max(0,nr))),
       SOFTEN    (sf),
       EPS_GIVEN (false),
+      EMIN      (real(abs(em))),
 #endif
       EPS       (real(ep)),
       KERN      (indx(max(0,kn))),
@@ -540,6 +550,7 @@ namespace nbdy{
       FACC      (real(fa)),
       FPOT      (real(fp)),
       FCOM      (real(fc)),
+      FEPS      (real(fe)),
       TIME      (zero),
       WRITE     (io::mxv),
       HMIN      (hm),
@@ -547,14 +558,16 @@ namespace nbdy{
       FORMAT    (0),
       BODIES    (0)
     {
-      if(ND) { MemoryCheck(NEMO); }
       if(nemo) {
 	register io  need  = io::mxv | read_more;
+#ifdef falcON_INDI
+	if(soften(SOFTEN) == basic_nbody::individual_fixed) need |= io::e;
+#endif
 	read_nemo(need, resume);
       } else
 	read_yanc();
       TINI = TIME;
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
       if(SOFTEN == basic_nbody::individual_adaptive && HGROW)
 	error("inidividual adaptive softening lengths must not be used"
 	      "with hgrow != 0");
@@ -570,11 +583,12 @@ namespace nbdy{
       THETA     (Default::theta),
       HGROW     (0),
       NCRIT     (Default::Ncrit),
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
       NSOFT     (zero),
       NREF      (32u),
       SOFTEN    (0),
       EPS_GIVEN (false),
+      EMIN      (zero),
 #endif
       EPS       (zero),
       KERN      (1),
@@ -583,6 +597,7 @@ namespace nbdy{
       FACC      (0.01),
       FPOT      (zero),
       FCOM      (zero),
+      FEPS      (zero),
       TIME      (zero),
       WRITE     (io::mxv),
       HMIN      (6),
@@ -592,7 +607,7 @@ namespace nbdy{
     {
       read_yanc();
       TINI = TIME;
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
       if(SOFTEN == basic_nbody::individual_adaptive && HGROW)
 	error("inidividual adaptive softening lengths must not be used"
 	      "with hgrow != 0");
@@ -601,7 +616,7 @@ namespace nbdy{
     //--------------------------------------------------------------------------
   public:  ~ndata()
     {
-#ifdef ALLOW_NEMO
+#ifdef falcON_NEMO
       for(register int d=0; d!=ND; ++d) close_nemo(d);
       delete[] NEMO;
 #endif
@@ -627,13 +642,14 @@ namespace nbdy{
 	 <<"\n#   hgrow                "<<HGROW
 	 <<"\n#   Ncrit                "<<NCRIT;
       // softening issues
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
       switch(SOFTEN) {
       case 1:
 	out<<"\n#   softening            individually fixed";
 	if(EPS_GIVEN) out<<"\n#   eps_i                given with data";
 	else          out<<"\n#   eps_i                to be initialized using"
 			 <<"\n#   Nsoft                "<<NSOFT
+			 <<"\n#   eps_min              "<<EMIN
 			 <<"\n#   eps_max              "<<EPS;
 	break;
       case 2:
@@ -659,6 +675,8 @@ namespace nbdy{
 	if(FPOT) out<<"tau <= "<<FPOT<<" / |pot|";
 	out<<"\n# fcom           "<<std::setw(15)<<FCOM;
 	if(FCOM) out<<"tau <= "<<FCOM<<" * sqrt(-pot) / |acc|";
+	out<<"\n# feps           "<<std::setw(15)<<FEPS;
+	if(FEPS) out<<"tau <= "<<FEPS<<" * sqrt(eps/|acc|) / |acc|";
 	out<<"\n#   tau_min              "<<tau_min()
 	   <<"\n#   tau_max              "<<tau_max();
       }
@@ -696,7 +714,7 @@ namespace nbdy{
 	"                                        > 0 -> th=th(M), th_min=TH\n"
 	" hgrow          hg    0  grow fresh tree every 2^hg smallest steps\n"
 	" Ncrit          Nc    6  max # bodies in un-splitted cell\n"
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
 	" softening       S    0  determines usage of softening lengths\n"
 	"                           0 -> globally fixed\n"
 	"                           1 -> individually fixed (NOT TESTED)\n"
@@ -704,17 +722,19 @@ namespace nbdy{
 	" Nsoft          Ns    0  # bodies in softening spheres (for S>0)\n"
 #endif
 	" eps            ep    0  fixed / maximum softening length\n"
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
 	" eps_given               individual eps_i are given on input\n"
 #endif
 	" kernel         kr    1  P_kr (P_0=Plummer) softening kernel\n"
 	" Grav           G     1  Newton's constant of gravity\n"
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
 	" Nref           Nf   16  # bodies in density estimate with scheme=1\n"
+	" emin           em    0  # minimum softening length\n"
 #endif
 	" facc           fa 0.01  factor in time-stepping  tau < fa/acc\n"
 	" fpot           fp    0  factor in time-stepping  tau < fp/pot\n"
 	" fcom           fc    0  factor in time-stepping  tau < fc*sqrt(pot)/acc\n"
+	" feps           fe    0  factor in time-stepping  tau < fe*sqrt(eps/acc)\n"
 	" hmin           hm    6  tau_min = (1/2)^hm\n"
 	" Nsteps         Nt    1  # time steps (1 -> leap-frog)\n"
 	" give_pot        g    0  0/1/2/3 give no/N-body pot/external pot/both\n"
@@ -729,13 +749,13 @@ namespace nbdy{
 	" are actually given (see below) plus N lines (ASCII/binary) containing\n"
 	" these data in this order (if given):\n"
 	"   mass         (1    float) :  bit 0,  value   1\n"
-	"   position     (NDIM floats):  bit 1,  value   2\n"
-	"   velocity     (NDIM floats):  bit 2,  value   4\n"
-#ifdef ALLOW_INDI
+	"   position     (Ndim floats):  bit 1,  value   2\n"
+	"   velocity     (Ndim floats):  bit 2,  value   4\n"
+#ifdef falcON_INDI
 	"   eps_i        (1    float) :  bit 3,  value   8\n"
 #endif
 	"   potential    (1    float) :  bit 4,  value  16\n"
-	"   acceleration (NDIM floats):  bit 5,  value  32\n"
+	"   acceleration (Ndim floats):  bit 5,  value  32\n"
 	"   density      (1    float) :  bit 6,  value  64\n"
 	"   auxiliary    (1    float) :  bit 7,  value 128\n"
 	"   external pot (1    float) :  bit 8,  value 256\n";
@@ -756,7 +776,7 @@ namespace nbdy{
 	return false;
       }
       write_yanc_header(out,file,
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
 			SOFTEN,
 #endif
 			prog,0);
@@ -786,7 +806,7 @@ namespace nbdy{
 	return false;
       }
       write_yanc_header(out,file,
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
 			SOFTEN,
 #endif
 			prog,1);
@@ -812,10 +832,11 @@ namespace nbdy{
     real              tau_min()     const { return pow(half,HMIN); }
     real              tau_max()     const { return pow(half,HMIN+1-NSTEPS); }
     io          const&writing()     const { return WRITE; }
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
     indx              softening()   const { return SOFTEN; }
     real        const&Nsoft()       const { return NSOFT; }
     uint        const&Nref()        const { return NREF; }
+    real        const&emin()        const { return EMIN; }
 #endif
     indx              kernel()      const { return KERN; }
     double      const&Grav  ()      const { return G; }
@@ -825,6 +846,7 @@ namespace nbdy{
     real        const&facc()        const { return FACC; }
     real        const&fpot()        const { return FPOT; }
     real        const&fcom()        const { return FCOM; }
+    real        const&feps()        const { return FEPS; }
   };
 }
 //=============================================================================#
@@ -845,7 +867,7 @@ void yanc::describe(std::ostream&out,
 //------------------------------------------------------------------------------
 bool yanc::write_yanc_ascii(const char* file, const char* prog)
 {
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
   if(MYNDATA->WRITE & io::r) MYNBODY->estimate_mass_densities();
 #endif
   return MYNDATA->write_yanc_ascii(file,prog);
@@ -888,10 +910,11 @@ FUNC(int,    Nbodies)
 FUNC(int,    hgrow)
 FUNC(int,    Ncrit)
 FUNC(io,     writing)
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
 FUNC(int,    softening)
 FUNC(int,    Nref)
 FUNC(float,  Nsoft)
+FUNC(float,  emin)
 #endif
 FUNC(int,    kernel)
 FUNC(double, Grav)
@@ -901,6 +924,7 @@ FUNC(float,  theta)
 FUNC(float,  facc)
 FUNC(float,  fpot)
 FUNC(float,  fcom)
+FUNC(float,  feps)
 FUNC(float,  eps)
 FUNC(float,  tau_min)
 FUNC(float,  tau_max)
@@ -908,7 +932,7 @@ FUNC(float,  tau_max)
 float       yanc::cpu_total() const { return MYNBODY->cpu_total(); }
 const char* yanc::data_file() const { return MYNDATA->data_file().c_str(); }
 //------------------------------------------------------------------------------
-#ifdef ALLOW_NEMO
+#ifdef falcON_NEMO
 //------------------------------------------------------------------------------
 int yanc::nemo_devices() const {
   return MYNDATA->nemo_devices();
@@ -926,7 +950,7 @@ void yanc::close_nemo(const int d) { MYNDATA->close_nemo(d); }
 //------------------------------------------------------------------------------
 void yanc::write_nemo(const io w, const int d, const bool di)
 {
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
   if(w & io::r) MYNBODY->estimate_mass_densities();
 #endif
   MYNDATA->write_nemo(w,di? MYNBODY : 0,d);
@@ -944,7 +968,8 @@ void yanc::describe_nemo(std::ostream&out,
   time_t now = ::time(0);
   out<<"# run at  "<<ctime(&now)
      <<"#     by  \""<<(getpwuid(geteuid())->pw_name)<<"\"\n"
-     <<"#     on  \""<<host<<"\"\n#\n";
+     <<"#     on  \""<<host<<"\"\n"
+     <<"#     pid  " <<getpid()<<"\n#\n";
 #endif
   out.flush();
 }
@@ -961,9 +986,11 @@ yanc::yanc(const char     *in,                      // I: data input file
 	   const double    fa,                      // I: f_a                   
 	   const double    fp,                      //[I: f_p]                  
 	   const double    fc,                      //[I: f_c]                  
-#ifdef ALLOW_INDI
+	   const double    fe,                      //[I: f_e]                  
+#ifdef falcON_INDI
 	   const double    ns,                      //[I: Nsoft]                
 	   const int       nr,                      //[I: Nref]                 
+	   const double    em,                      //[I: emin]                 
 	   const int       sf,                      //[I: softening: global]    
 #endif
 	   const double    gr,                      //[I: grav]                 
@@ -973,10 +1000,10 @@ yanc::yanc(const char     *in,                      // I: data input file
 	   const int       nd,                      //[I: # nemo output streams]
 	   const int       dir[4]   ) :             //[I: direct sum control]   
   MYNDATA( new ndata(in,nemo,th,hg,nc,ep,kn,
-#ifdef ALLOW_INDI
-		     sf,ns,nr,
+#ifdef falcON_INDI
+		     sf,ns,nr,em,
 #endif
-		     hm,nl,fa,fp,fc,pt,resume,read_more,nd,gr)),
+		     hm,nl,fa,fp,fc,fe,pt,resume,read_more,nd,gr)),
   MYNBODY( MYNDATA->NSTEPS > 1 ?
 	   static_cast<basic_nbody*>(
 	     new BlockStepCode(MYNDATA->BODIES,
@@ -987,15 +1014,17 @@ yanc::yanc(const char     *in,                      // I: data input file
 			       MYNDATA->FACC,
 			       MYNDATA->FPOT,
 			       MYNDATA->FCOM,
+			       MYNDATA->FEPS,
 			       MYNDATA->HGROW,
 			       MYNDATA->THETA,
 			       MYNDATA->NCRIT,
 			       kern(MYNDATA->KERN),
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
 			       soften(MYNDATA->SOFTEN),
 			       MYNDATA->NSOFT,
 			       MYNDATA->NREF,
-			       two,
+			       MYNDATA->EMIN,
+			       EPS_FACTOR,
 #endif
 			       MYNDATA->PEX,
 			       dir) )
@@ -1009,25 +1038,26 @@ yanc::yanc(const char     *in,                      // I: data input file
 			       MYNDATA->THETA,
 			       MYNDATA->NCRIT,
 			       kern(MYNDATA->KERN),
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
 			       soften(MYNDATA->SOFTEN),
 			       MYNDATA->NSOFT,
 			       MYNDATA->NREF,
-			       two,
+			       MYNDATA->EMIN,
+			       EPS_FACTOR,
 #endif
 			       MYNDATA->PEX,
 			       dir) )
 	   )
 {
-  MemoryCheck(MYNDATA);
-  MemoryCheck(MYNBODY);
+  falcON_Memory(MYNDATA);
+  falcON_Memory(MYNBODY);
   if(resume) MYNBODY->reset_cpu_total(MYNDATA->CPU_I);
 }
 #endif
 //------------------------------------------------------------------------------
 yanc::yanc(const char  *in,                         // I: input file            
 	   pot_provider*pv) :                       //[I: provider for ext pot] 
-  MYNDATA( new ndata(in,pv) ),
+  MYNDATA( falcON_Memory( new ndata(in,pv) ) ),
   MYNBODY( MYNDATA->NSTEPS > 1 ?
 	   static_cast<basic_nbody*>(
 	     new BlockStepCode(MYNDATA->BODIES,
@@ -1038,15 +1068,17 @@ yanc::yanc(const char  *in,                         // I: input file
 			       MYNDATA->FACC,
 			       MYNDATA->FPOT,
 			       MYNDATA->FCOM,
+			       MYNDATA->FEPS,
 			       MYNDATA->HGROW,
 			       MYNDATA->THETA,
 			       MYNDATA->NCRIT,
 			       kern(MYNDATA->KERN),
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
 			       soften(MYNDATA->SOFTEN),
 			       MYNDATA->NSOFT,
 			       MYNDATA->NREF,
-			       two,
+			       MYNDATA->EMIN,
+			       EPS_FACTOR,
 #endif
 			       MYNDATA->PEX,
 			       Default::direct) )
@@ -1060,18 +1092,18 @@ yanc::yanc(const char  *in,                         // I: input file
 			       MYNDATA->THETA,
 			       MYNDATA->NCRIT,
 			       kern(MYNDATA->KERN),
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
 			       soften(MYNDATA->SOFTEN),
 			       MYNDATA->NSOFT,
 			       MYNDATA->NREF,
-			       two,
+			       MYNDATA->EMIN,
+			       EPS_FACTOR,
 #endif
 			       MYNDATA->PEX,
 			       Default::direct) )
 	   )
 {
-  MemoryCheck(MYNDATA);
-  MemoryCheck(MYNBODY);
+  falcON_Memory(MYNBODY);
 }
 //------------------------------------------------------------------------------
 yanc::~yanc()

@@ -5,7 +5,7 @@
 //                                                                             |
 // C++ code                                                                    |
 //                                                                             |
-// Copyright Walter Dehnen, 2000-2002                                          |
+// Copyright Walter Dehnen, 2000-2003                                          |
 // e-mail:   wdehnen@aip.de                                                    |
 // address:  Astrophysikalisches Institut Potsdam,                             |
 //           An der Sternwarte 16, D-14482 Potsdam, Germany                    |
@@ -25,18 +25,18 @@
 //                      - free elements are kept in a linked list              |
 //                                                                             |
 //-----------------------------------------------------------------------------+
-#ifndef included_memo_h
-#define included_memo_h
+#ifndef falcON_included_memo_h
+#define falcON_included_memo_h
 
-#ifndef included_cstddef
+#ifndef falcON_included_cstddef
 #  include <cstddef>
-#  define included_cstddef
+#  define falcON_included_cstddef
 #endif
 
-#ifndef included_exit_h
+#ifndef falcON_included_exit_h
 #  include <public/exith>
 #endif
-#ifndef included_inln_h
+#ifndef falcON_included_inln_h
 #  include <public/inln.h>
 #endif
 
@@ -93,20 +93,15 @@ namespace nbdy {
       block();                                     // not implemented           
       //------------------------------------------------------------------------
     public:
-      block(size_type n) :                         // constructor               
+      block(size_type const&n) :                   // constructor               
 	NEXT    ( 0 ),                             //   no next block           
-	FIRST   ( new value_type[n] ),             //   first of n elements     
+	FIRST   ( falcON_New(value_type,n) ),      //   first of n elements     
 	END     ( FIRST ),                         //   no elements used yet    
-	ENDTOT  ( FIRST + n )                      //   end of all elements     
-      {
-	MemoryCheck(FIRST);
-      }
+	ENDTOT  ( FIRST + n ) {}                   //   end of all elements     
       //------------------------------------------------------------------------
       ~block() { delete[] FIRST; }                 // destructor: de-allocate   
       //------------------------------------------------------------------------
       void link(block* next){ NEXT = next; }       // link to next block        
-      //------------------------------------------------------------------------
-      void link_check(block* next){ MemoryCheck(NEXT = next); }
       //------------------------------------------------------------------------
       pointer new_element() { return END++; }      // give out: another element 
       //------------------------------------------------------------------------
@@ -184,13 +179,10 @@ namespace nbdy {
   public:
     block_alloc(                                   // constructor:              
 		size_type Ns) :                    // I: # elements in 1st block
-      FIRST ( new block(Ns) ),                     //   allocate first block    
+      FIRST ( falcON_Memory(new block(Ns)) ),      //   allocate first block    
       LAST  ( FIRST ),                             //   last=first block        
       NTOT  ( Ns ),                                //   # elements allocated    
-      NUSED ( 0 )                                  //   # elements used sofar   
-    {
-      MemoryCheck(FIRST);
-    }
+      NUSED ( 0 )   {}                             //   # elements used sofar   
     //--------------------------------------------------------------------------
     ~block_alloc() {                               // destructor:               
       register block *A=FIRST, *N;                 //   actual & next block     
@@ -204,8 +196,7 @@ namespace nbdy {
     pointer new_element() {                        // give out: another element 
       if(LAST->is_full()) {                        //   IF(last block is full) >
 	register size_type New = LAST->N_alloc();  //     # elements to allocate
-	LAST->link(new block(New));                //     allocate new block &  
-	MemoryCheck(LAST->NEXT);
+	LAST->link(falcON_Memory(new block(New))); //     allocate new block &  
 	LAST = LAST->next();                       //     add it to linked list 
       }                                            //   <                       
       NUSED++;                                     //   # elements used         
@@ -220,7 +211,7 @@ namespace nbdy {
                                                    //    # elements used sofar  
       if(LAST->is_full()) {                        //   IF(last block is full) >
 	register size_type New = F(NUSED);         //     # elements to allocate
-	LAST->link_check(new block(New));          //     allocate new block &  
+	LAST->link(falcON_Memory(new block(New))); //     allocate new block &  
 	LAST = LAST->next();                       //     add it to linked list 
       }                                            //   <                       
       NUSED++;                                     //   # elements used         
@@ -232,7 +223,7 @@ namespace nbdy {
       if(!LAST->has_free(Ne)) {                    //   IF(last block is full) >
 	register size_type
 	  New=max(Ne,LAST->N_alloc());             //     # elements to allocate
-	LAST->link_check(new block(New));          //     allocate new block &  
+	LAST->link(falcON_Memory(new block(New))); //     allocate new block &  
 	LAST = LAST->next();                       //     add it to linked list 
       }                                            //   <                       
       NUSED+=Ne;                                   //   # elements used         
@@ -248,7 +239,7 @@ namespace nbdy {
                                                    //    # elements used sofar  
       if(!LAST->has_free(Ne)) {                    //   IF(last block is full) >
 	register size_type New=max(Ne,F(NUSED));   //     # elements to allocate
-	LAST->link_check(new block(New));          //     allocate new block &  
+	LAST->link(falcON_Memory(new block(New))); //     allocate new block &  
 	LAST = LAST->next();                       //     add it to linked list 
       }                                            //   <                       
       NUSED+=Ne;                                   //   # elements used         
@@ -314,10 +305,10 @@ namespace nbdy {
       chunk  *NEXT;                                  // pter to next chunk      
       //------------------------------------------------------------------------
       chunk(size_type N,                             // I: # elements           
-	    size_type Kp)                            // I: size of elements     
+	    size_type Kp) :                          // I: size of elements     
+	DATA ( falcON_New(char,N*Kp) ),              // allocate memory         
+	NEXT ( 0 )                                   // reset pter to next chunk
       {
-	MemoryCheck(DATA = new char[N*Kp]);          // allocate memory         
-	NEXT  = 0;                                   // reset pter to next chunk
 	const    char *END=DATA+N*Kp;                // beyond last byte        
 	register char *l,*n;                         // now we link the elements
 	for(l=DATA, n=DATA+Kp; n!=END; l+=Kp, n+=Kp) // loop bits of Kp bytes   
@@ -343,7 +334,7 @@ namespace nbdy {
     // private methods                                                          
     //--------------------------------------------------------------------------
     void grow() {                                    // add another chunk       
-      chunk *c = new chunk(N,Kp);  MemoryCheck(c);   //   allocate new chunk    
+      chunk *c = falcON_Memory(new chunk(N,Kp));     // allocate new chunk      
       c->NEXT  = CHUNKS;                             //   add to list of chunks 
       CHUNKS   = c;                                  //   make it first chunk   
       HEAD     = LINK(CHUNKS->DATA);                 //   add elements to list  
@@ -356,11 +347,8 @@ namespace nbdy {
 	 size_type k) :                              // I: desired sizeof(elem) 
       N      ( n<1? 1 : n ),                         //  actual # elements      
       Kp     ( sizeof(link) < k? k : sizeof(link) ), //  actual sizeof(element) 
-      CHUNKS ( new chunk(N,Kp) ),                    //  allocate 1st chunk     
-      HEAD   ( LINK(CHUNKS->DATA) )                  //  get list of elements   
-    {
-      MemoryCheck(CHUNKS);
-    }
+      CHUNKS ( falcON_Memory(new chunk(N,Kp)) ),     //  allocate 1st chunk     
+      HEAD   ( LINK(CHUNKS->DATA) ) {}               //  get list of elements   
 #undef LINK
     //--------------------------------------------------------------------------
     // destructor                                                               
@@ -393,4 +381,4 @@ namespace nbdy {
   };
 }
 ////////////////////////////////////////////////////////////////////////////////
-#endif // included_memo_h
+#endif // falcON_included_memo_h

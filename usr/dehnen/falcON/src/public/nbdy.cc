@@ -4,7 +4,7 @@
 //                                                                             |
 // C++ code                                                                    |
 //                                                                             |
-// Copyright Walter Dehnen, 2000-2002                                          |
+// Copyright Walter Dehnen, 2000-2003                                          |
 // e-mail:   wdehnen@aip.de                                                    |
 // address:  Astrophysikalisches Institut Potsdam,                             |
 //           An der Sternwarte 16, D-14482 Potsdam, Germany                    |
@@ -16,6 +16,7 @@
 #include <fstream>
 #include <iomanip>
 #include <ctime>
+
 using std::ostream;
 using std::endl;
 using std::ios;
@@ -30,24 +31,29 @@ using namespace nbdy;
 #define LoopMyBodies LoopBodies(bodies,BODIES,Bi)
 namespace nbdy {
   //////////////////////////////////////////////////////////////////////////////
-  // auxiliary inline function                                                  
+  //                                                                          //
+  // auxiliary inline function                                                //
+  //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
   inline void record_cpu(clock_t& c0, real& CPU) {
     register clock_t c1 = clock();
     CPU += (c1-c0)/real(CLOCKS_PER_SEC);
     c0 = c1;
   }
+  //----------------------------------------------------------------------------
+  template<typename scalar, int N>
+  inline scalar tr(scalar T[N][N])
+  {
+    register scalar x=scalar(0);
+    for(register int i=0; i<N; i++) x += T[i][i];
+    return x;
+  }
 }
 ////////////////////////////////////////////////////////////////////////////////
-// class nbdy::basic_nbody                                                      
+//                                                                            //
+// class nbdy::basic_nbody                                                    //
+//                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
-inline real basic_nbody::trace(const tensor&T)
-{
-  register real tr=zero;
-  for(register int i=0; i<NDIM; i++) tr += T[i][i];
-  return tr;
-}
-//------------------------------------------------------------------------------
 inline void basic_nbody::reset_cpus() const
 {
   CPU_BUILD   = zero;
@@ -66,66 +72,77 @@ inline void basic_nbody::update_cpu_total() const
 //------------------------------------------------------------------------------
 inline void basic_nbody::set_tree(const bool grow_tree)
 {
+  report REPORT("basic_nbody::set_tree(%d)",grow_tree);
   register clock_t cpu = clock();                  // get current CPU time      
   if(grow_tree)   falcON::grow(NCRIT);             // grow() new tree OR        
   else            falcON::reuse();                 // reuse() old tree          
   record_cpu(cpu,CPU_BUILD);                       // record CPU time required  
 }
 //------------------------------------------------------------------------------
-// - adjusts eps_i of sink bodies       (individual_adaptive)                   
-// - upates acceleration of sink bodies                                         
-inline void basic_nbody::eps_and_acc(
-#ifdef ALLOW_INDI
-				     const bool adjust
+// - adjusts eps_i of active bodies       (individual_adaptive)                 
+// - upates acceleration of active bodies                                       
+inline void basic_nbody::eps_and_acc(bool const&all
+#ifdef falcON_INDI
+				    ,bool const&adjust
 #endif
 				     )
 {
-  register clock_t cpu = clock();                  // CPU clock                 
-#ifdef ALLOW_INDI
-  if(SOFTENING==individual_adaptive) {
-    if(adjust) falcON::approximate_gravity(true,NSOFT,NREF,EFAC,DIR);
-    else       falcON::approximate_gravity(true,NSOFT,NREF,zero,DIR);
-  } else 
-    falcON::approximate_gravity(true,zero,0,EFAC,DIR);
+#ifdef falcON_INDI
+  report REPORT("basic_nbody::eps_and_acc(%d,%d)",all,adjust);
 #else
-    falcON::approximate_gravity(true,DIR);
+  report REPORT("basic_nbody::eps_and_acc(%d)",all);
+#endif
+  register clock_t cpu = clock();                  // CPU clock                 
+#ifdef falcON_INDI
+  if(SOFTENING==individual_adaptive) {
+    if(adjust) falcON::approximate_gravity(true,all,NSOFT,NREF,EMIN,EFAC,DIR);
+    else       falcON::approximate_gravity(true,all,NSOFT,NREF,zero,zero,DIR);
+  } else 
+    falcON::approximate_gravity(true,all,zero,0u,EMIN,zero,DIR);
+#else
+    falcON::approximate_gravity(true,all,DIR);
 #endif
   record_cpu(cpu,CPU_GRAV);                        // record CPU                
-  if(using_extpot()) {                             // IF external potential    >
+  if(using_extpot()) {                             // IF external potential     
+    report REPORT2("adding external potential");
     register vect A;                               //   external acceleration   
-    LoopMyBodies if(is_sink(Bi)) {                 //   loop body sinks        >
-      Bi.pot() += PEX->pot_f(A,pos(Bi),time());    //     add external pot      
+    LoopMyBodies if(is_active(Bi)) {               //   LOOP active bodies      
+      Bi.pex()  = PEX->pot_f(A,pos(Bi),time());    //     get external pot      
       Bi.acc() += A;                               //     add external acc      
-    }                                              //   <                       
+    }                                              //   END LOOP                
     record_cpu(cpu,CPU_PEX);                       //   record CPU              
-  }                                                // <                         
+  }                                                // ENDIF                     
 }
 //------------------------------------------------------------------------------
 void basic_nbody::reset_softening(
 				  kern_type const&ker,
 				  real      const&e
-#ifdef ALLOW_INDI
-				  ,
-				  real      const&ns,
+#ifdef falcON_INDI
+				 ,real      const&ns,
 				  uint      const&nr,
+				  real      const&em,
 				  real      const&ef
 #endif
 				  )
 {
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
   NSOFT = ns;
   NREF  = nr;
+  EMIN  = abs(em);
   EFAC  = abs(ef);
   if(SOFTENING == individual_adaptive && EFAC  == zero)
-    NbdyErrorF("using individual adaptive softening, but eps_fac=0",
-	       "basic_nbody::reset_softening()")
+    falcON_ErrorF("using individual adaptive softening, but eps_fac=0",
+		  "basic_nbody::reset_softening()");
   if(SOFTENING == individual_adaptive && NSOFT == zero)
-    NbdyErrorF("using individual adaptive softening, but Nsoft=0",
-	       "basic_nbody::reset_softening()")
+    falcON_ErrorF("using individual adaptive softening, but Nsoft=0",
+		  "basic_nbody::reset_softening()");
 #endif
   falcON::reset_softening(abs(e),ker);
 }
 //------------------------------------------------------------------------------
+#ifdef TESTING_
+static std::ofstream test[10];
+#endif
 inline
 basic_nbody::basic_nbody(const bodies*const&b,     // I: bodies                 
 			 real         const&e,     // I: eps/eps_max            
@@ -133,22 +150,23 @@ basic_nbody::basic_nbody(const bodies*const&b,     // I: bodies
 			 real         const&th,    // I: tolerance parameter    
 			 int          const&nc,    // I: N_crit                 
 			 kern_type    const&ker,   // I: softening kernel       
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
 			 soft_type    const&sf,    // I: softening type         
 			 real         const&ns,    // I: N_soft                 
 			 uint         const&nr,    // I: N_ref                  
+			 real         const&em,    // I: eps_min                
 			 real         const&ef,    // I: eps_fac                
 #endif
 			 const extpot*const&p,     // I: P_ex                   
 			 const int          nd[4]):// I: direct sum control     
   falcON   ( b,  abs(e), abs(th), ker,
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
 	     sf==global_fixed? global : individual,
 #endif
 	     th<0? const_theta : theta_of_M ),
   BODIES   ( b ),
   PEX      ( p ),
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
   SOFTENING( sf ),
 #endif
   TINI     ( ti ),
@@ -158,17 +176,30 @@ basic_nbody::basic_nbody(const bodies*const&b,     // I: bodies
   DIAG     ( false ),
   CPU_TOTAL( zero )
 {
+#ifdef TESTING_
+  // TEST
+  char file[10];
+  for(register int i=0; i!=10; ++i) {
+    sprintf(file,"test.%03d",i+1);
+    test[i].open(file);
+  }
+  // TSET
+#endif
   DIR[0] = nd[0];
   DIR[1] = nd[1];
   DIR[2] = nd[2];
   DIR[3] = nd[3];
-#ifdef ALLOW_INDI
-  if(SOFTENING==individual_fixed && !BODIES->has_eps()) 
-    NbdyErrorF("individual fixed softening, but no epsi given","basic_nbody")
-  reset_softening(ker,e,ns,nr,ef);
+#ifdef falcON_INDI
+  if(SOFTENING==individual_fixed && !BODIES->has(io::e)) 
+    falcON_ErrorF("individual fixed softening, but no epsi given",
+		  "basic_nbody");
+  reset_softening(ker,e,ns,nr,em,ef);
 #else
   reset_softening(ker,e);
 #endif
+  if(PEX != 0 && !BODIES->has(io::P))
+    falcON_ErrorF("external potential desired, but nobody has memory",
+		  "basic_nbody");
 }
 //------------------------------------------------------------------------------
 void basic_nbody::reset_opening(const real th) const {
@@ -176,75 +207,89 @@ void basic_nbody::reset_opening(const real th) const {
 			th<zero? const_theta : theta_of_M);
 }
 //------------------------------------------------------------------------------
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
 inline void basic_nbody::estimate_mass_density(const bool ext)
 {
   register clock_t  cpu = clock();                 // cpu time                  
   falcON::estimate_rho(NREF);                      // estimate rho in tree      
-  if(PEX && !PEX->is_empty() && ext)               // if external potential     
-    LoopMyBodies if(is_sink(Bi))                   //   loop body sinks         
+  if(PEX && !PEX->is_empty() && ext)               // IF external potential     
+    LoopMyBodies if(is_active(Bi))                 //   LOOP active bodies      
       Bi.rho()+=PEX->rho(pos(Bi),time());          //     add ext density       
   record_cpu(cpu,CPU_DENS);                        // record CPU                
 }
 //------------------------------------------------------------------------------
 void basic_nbody::estimate_mass_densities(const bool ext)
 {
-  LoopMyBodies Bi.flag_as_sink();
+  LoopMyBodies Bi.flag_as_active();
   estimate_mass_density(ext);
 }
 //------------------------------------------------------------------------------
 void basic_nbody::estimate_surf_densities()
 {
-  LoopMyBodies Bi.flag_as_sink();
+  LoopMyBodies Bi.flag_as_active();
   falcON::estimate_sd(NREF);
 }
 #endif
 //------------------------------------------------------------------------------
 void basic_nbody::diagnose() const
-#define LoopTensor for(i=0; i<NDIM; i++) for(j=0; j<NDIM; j++)
+#define LoopTensor							\
+  for(register int i=0; i!=Ndim; ++i) for(register int j=0; j!=Ndim; ++j)
 {
-  register indx   i,j;
-  register double u=zero, m=zero, t=zero, ue=zero;
-  register vect   x=zero, v=zero;
-  register amom   l=zero;
-  register tensor T,W;
-  LoopTensor T[i][j] = W[i][j] = zero;
-  if(PEX && !PEX->is_empty()) {
-    register real uer=zero, mr=zero;
-    PEX->energies(uer,W,T,x,v,l,mr);
-    ue = uer;
-    m  = mr;
-  }
-  LoopMyBodies {
-    m += double(mass(Bi));                         // total mass                
-    u += double(mass(Bi)) * pot(Bi);               // internal potential energy 
-    t += double(mass(Bi)) * 
-      ( square(double(vel(Bi)[0])) +
-        square(double(vel(Bi)[1])) +
-        square(double(vel(Bi)[2])) );
-    LoopTensor {
-      T[i][j] += mass(Bi) * vel(Bi)[i]*vel(Bi)[j]; // kin energy tensor         
-      W[i][j] += mass(Bi) * pos(Bi)[i]*acc(Bi)[j]; // pot energy tensor         
-    }
-    x += mass(Bi) * pos(Bi);                       // dipole                    
-    v += mass(Bi) * vel(Bi);                       // momentum                  
-    l += mass(Bi) * pos(Bi) ^ vel(Bi);             // total angular momentum    
-  }
+  report REPORT("basic_nbody::diagnose()");
+  register double  m=0., ui=0., ue=0.;
+  register vect_d  x=0., v=0., mx, mv;
+  register amom_d  l=0.;
+  register double  K[Ndim][Ndim]={0.}, W[Ndim][Ndim]={0.};
+  if(PEX && !PEX->is_empty()) {                    // IF have external pot      
+    PEX->energies(ue,K,W,x,v,l,m);                 //   get external contrib    
+    LoopMyBodies {                                 //   LOOP bodies             
+      m += mass(Bi);                               //     add: total mass       
+      ui+= mass(Bi) * pot(Bi);                     //     add: int pot energy   
+      ue+= mass(Bi) * pex(Bi);                     //     add: ext pot energy   
+      mx = mass(Bi) * pos(Bi);                     //     m * x                 
+      mv = mass(Bi) * vel(Bi);                     //     m * v                 
+      LoopTensor {                                 //     LOOP i,j              
+	K[i][j] += mv[i] * vel(Bi)[j];             //       add: K_ij           
+	W[i][j] += mx[i] * acc(Bi)[j];             //       add: W_ij           
+      }                                            //     END LOOP              
+      x += mx;                                     //     add: dipole           
+      v += mv;                                     //     add: total momentum   
+      l += mx ^ vel(Bi);                           //     add: total ang mom    
+    }                                              //   END LOOP                
+  } else {                                         // ELSE: no external pot     
+    LoopMyBodies {                                 //   LOOP bodies             
+      m += mass(Bi);                               //     add: total mass       
+      ui+= mass(Bi) * pot(Bi);                     //     add: int pot energy   
+      mx = mass(Bi) * pos(Bi);                     //     m * x                 
+      mv = mass(Bi) * vel(Bi);                     //     m * v                 
+      LoopTensor {                                 //     LOOP i,j              
+	K[i][j] += mv[i] * vel(Bi)[j];             //       add: K_ij           
+	W[i][j] += mx[i] * acc(Bi)[j];             //       add: W_ij           
+      }                                            //     END LOOP              
+      x += mx;                                     //     add: dipole           
+      v += mv;                                     //     add: total momentum   
+      l += mx ^ vel(Bi);                           //     add: total ang mom    
+    }                                              //   END LOOP                
+  }                                                // ENDIF                     
   M    = m;                                        // total mass                
-  Ktot = half*t;                                   // total kin energy          
-  Utot = half*u+ue;                                // total pot energy          
-  TU   =-half*trace(T)/trace(W);                   // virial ratio              
+  Ktot = 0.5*tr(K);                                // total kin energy          
+  Uin  = 0.5*ui;                                   // total int pot energy      
+  Uex  = ue;                                       // total ext pot energy      
+  TU   =-half*tr(K)/tr(W);                         // virial ratio              
   L    = l;                                        // total angular momentum    
-  CMX  = x/m;                                      // center of mass            
-  CMV  = v/m;                                      // center of mass velocity   
+  m    = 1./m;
+  CMX  = x*m;                                      // center of mass            
+  CMV  = v*m;                                      // center of mass velocity   
   LoopTensor {
-    KT[i][j] = half * T[i][j];                     // kin energy tensor         
-    WT[i][j] =        W[i][j];                     // pos energy tensor         
+    KT[i][j] = half * K[i][j];                     // kin energy tensor         
+    WT[i][j] = half *(W[i][j]+W[j][i]);            // pot energy tensor         
   }
 }
 #undef LoopTensor
 ////////////////////////////////////////////////////////////////////////////////
-// class fasstree::LeapFrogCode                                                 
+//                                                                            //
+// class nbdy::LeapFrogCode                                                   //
+//                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 LeapFrogCode::LeapFrogCode(const bodies*const&b,   // I: bodies                 
 			   real         const&e,   // I: eps/eps_max            
@@ -254,17 +299,18 @@ LeapFrogCode::LeapFrogCode(const bodies*const&b,   // I: bodies
 			   real         const&th,  //[I: tolerance parameter]   
 			   int          const&nc,  //[I: N_crit]                
 			   kern_type    const&ker, //[I: softening kernel]      
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
 			   soft_type    const&sf,  //[I: softening type]        
 			   real         const&ns,  //[I: N_soft]                
 			   uint         const&nr,  //[I: N_ref]                 
+			   real         const&em,  //[I: eps_min]               
 			   real         const&ef,  //[I: eps_fac]               
 #endif
 			   const extpot*const&p,   //[I: P_ex]                  
 			   const int       nd[4]): //[I: direct sum control]    
   basic_nbody(b,e,ti,th,nc,ker,
-#ifdef ALLOW_INDI
-	      sf,ns,nr,ef,
+#ifdef falcON_INDI
+	      sf,ns,nr,em,ef,
 #endif
 	      p,nd),
   LeapFrog   (h0,ti),
@@ -274,10 +320,10 @@ LeapFrogCode::LeapFrogCode(const bodies*const&b,   // I: bodies
   register clock_t  cpu = clock();                 // cpu time                  
   reset_cpus();                                    // reset CPU time counters   
   set_tree(true);                                  // create tree               
-  LoopMyBodies Bi.flag_as_sink();                  // flag everybody as sink    
-  eps_and_acc(                                     // set eps & get acc         
-#ifdef ALLOW_INDI
-	      false
+  LoopMyBodies Bi.flag_as_active();                // flag everybody as active  
+  eps_and_acc(true                                 // set eps & get acc         
+#ifdef falcON_INDI
+	     ,false
 #endif
 	      );
   record_cpu(cpu,CPU_STEP);                        // record CPU time           
@@ -286,6 +332,7 @@ LeapFrogCode::LeapFrogCode(const bodies*const&b,   // I: bodies
 //------------------------------------------------------------------------------
 void LeapFrogCode::full_step()
 {
+  report REPORT("LeapFrogCode::full_step()");
   register clock_t  cpu = clock();                 // cpu time                  
   reset_cpus();                                    // reset CPU time counters   
   predict(BODIES);                                 // move = drift              
@@ -296,7 +343,18 @@ void LeapFrogCode::full_step()
     set_tree(true);                                //   create tree             
     REUSED=0;                                      //   reset # re-using        
   }                                                // <                         
-  eps_and_acc();                                   // asjust eps & get acc      
+#ifdef TESTING_
+  // TEST
+  for(register int i=0; i!=10; ++i)
+    test[i] << time() <<"  "
+	    << BODIES->pos(i) << "  "
+	    << BODIES->vel(i) << "  "
+	    << BODIES->acc(i) << "  "
+	    << BODIES->pot(i) << "  "
+	    << BODIES->eps(i) << std::endl;
+  // TSET
+#endif
+  eps_and_acc(true);                               // asjust eps & get acc      
   accelerate(BODIES);                              // accelerate = kick         
   DIAG = false;                                    // diagnose out-of-date      
   record_cpu(cpu,CPU_STEP);                        // record CPU time           
@@ -305,13 +363,14 @@ void LeapFrogCode::full_step()
 //------------------------------------------------------------------------------
 void LeapFrogCode::stats(ostream& to) const
 {
+  report REPORT("LeapFrogCode::stats()");
   to.setf(ios::left, ios::adjustfield);
-  update_diagnostics();
+  update_diags();
   to<<setprecision(5)<<setw(10)<<time()         <<" "
     <<setprecision(7)<<setw(13)<<total_energy() <<" "
     <<setprecision(min(5,max(1,5-int(-log10(virial_ratio())))))
     <<setw(7)<<virial_ratio()<<" ";
-#if NDIM==3
+#if falcON_NDIM==3
   to<<setprecision(5)<<setw(10)<<sqrt(norm(total_angmom()))  <<" ";
 #else
   to<<setprecision(5)<<setw(10)<<total_angmom()              <<" ";
@@ -329,7 +388,7 @@ void LeapFrogCode::stats_head(ostream& to) const
   to<<"    time   "
     <<"   energy     "
     <<"  -T/U  "
-#if NDIM==3
+#if falcON_NDIM==3
     <<"   |L|     "
 #else
     <<"   L_z     "
@@ -344,51 +403,76 @@ void LeapFrogCode::stats_line(ostream &to) const
     "--------------------------------"<<endl;
 }
 ////////////////////////////////////////////////////////////////////////////////
-// class nbdy::BlockStepCode                                                    
+//                                                                            //
+// class nbdy::BlockStepCode                                                  //
+//                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
-void BlockStepCode::reset_stepping(const real fa, const real fp, const real fc)
+void BlockStepCode::reset_stepping(real const&fa,
+				   real const&fp,
+				   real const&fc,
+				   real const&fe)
 {
-  BlockStep::reset_scheme(fa,fp,fc);
+  GravBlockStep::reset_scheme(fa,fp,fc,fe);
 }
 //------------------------------------------------------------------------------
 #define ForAll       LoopMyBodies
-#define ForActive    LoopMyBodies if(is_sink(Bi))
+#define ForActive    LoopMyBodies if(is_active(Bi))
 //------------------------------------------------------------------------------
-inline void BlockStepCode::set_sink_flags(const indx low)
+inline void BlockStepCode::set_active_flags(int const&low)
 {
-  LoopMyBodies                                     // loop bodies in tree       
-    if(level(Bi) >= low) Bi.flag_as_sink();        //   IF(level>=low): sink    
-    else                 Bi.unflag_sink ();        //   ELSE          : no sink 
+  report REPORT("BlockStepCode::set_active_flags(%d)",low);
+  LoopMyBodies                                     // LOOP bodies in tree       
+    if(level(Bi) >= low) Bi.flag_as_active();      //   IF(level>=low): active  
+    else                 Bi.unflag_active ();      //   ELSE          : inactive
 }
 //------------------------------------------------------------------------------
 void BlockStepCode::
-elementary_step(const indx low)                    // I: lowest level moving    
+elementary_step(int const&low)                     // I: lowest level moving    
 {
+  report REPORT("BlockStepCode::elementary_step(%d)",low);
+#ifdef TESTING_
+  // TEST
+  for(register int i=0; i!=10; ++i) if(low==0 || is_active(BODIES->flg(i)))
+    test[i] << time() <<"  "
+	    << BODIES->pos(i) << "  "
+	    << BODIES->vel(i) << "  "
+	    << BODIES->acc(i) << "  "
+	    << BODIES->pot(i) << "  "
+	    << BODIES->eps(i) << "  "
+	    << BODIES->level(i) << std::endl;
+  // TSET
+#endif
   static uint m = 0u;                              // # of tiny moves omitted   
   clock_on();                                      // increase actual clock     
-  if(need_move(low)) {                             // IF anybody is sink now   >
+  if(need_move(low)) {                             // IF anybody is active now  
     register real dt = tau_min() * (m+1);          //   dt = (m+1)*tau_min      
     ForAll move_by(Bi,dt);                         //   all:    x -> x+v*dt     
     m = 0;                                         //   reset m = 0             
     set_tree(low<LGROW);                           //   initialize tree         
-    set_sink_flags(low);                           //   IF(l>=low) -> active    
-    eps_and_acc();                                 //   active: a = acc(x)      
+    set_active_flags(low);                         //   IF(l>=low) -> active    
+    eps_and_acc(low==0);                           //   active: a = acc(x)      
     ForActive acce_half(Bi);                       //   active: v -> v+a*h/2    
-    if(low != highest_level())                     //   IF(levels may change)  >
-      ForActive adjust_level(Bi,low);              //     active: h -> h'      <
-    if(low)                                        //   IF(not last step)      >
-      ForActive acce_half(Bi);                     //     active: v -> v+a*h/2 <
-  } else m++;                                      // < ELSE count move omission
+    if(low != highest_level())                     //   IF(levels may change)   
+#ifdef falcON_INDI
+      if(SOFTENING==global_fixed) {                //     IF fixed eps          
+	ForActive adjust_level(Bi,low,eps());      //       active: h -> h'     
+      } else                                       //     ELSE: individual eps_i
+#endif
+	ForActive adjust_level(Bi,low,::eps(Bi));  //       active: h -> h'     
+    if(low)                                        //   IF(not last step)       
+      ForActive acce_half(Bi);                     //     active: v -> v+a*h/2  
+  } else m++;                                      // ELSE count move omission  
 }
 //------------------------------------------------------------------------------
 void BlockStepCode::full_step()
 {
+  report REPORT("BlockStepCode::full_step()");
   register clock_t  cpu = clock();                 // cpu time                  
   const    unsigned nn  = 1 << highest_level();    // number of small steps     
   register unsigned tn;                            // index of small step       
   reset_cpus();                                    // reset CPU time counters   
   ForAll acce_half(Bi);                            // v -> v + a*h/2            
-  for(tn=1; tn<nn; tn++)                           // loop over all but last    
+  for(tn=1; tn<nn; tn++)                           // LOOP all but last         
     elementary_step(longest_moving(tn));           //   elementary steps        
   elementary_step(0);                              // last step: grow tree      
   DIAG = false;                                    // diagnose out-of-date      
@@ -398,22 +482,23 @@ void BlockStepCode::full_step()
 #undef ForAll
 #undef ForActive
 //------------------------------------------------------------------------------
-void BlockStepCode::prepare(const int h0,          // I: h0                     
-			    const int nl)          // I: N_levels               
+void BlockStepCode::prepare(int const&h0,          // I: h0                     
+			    int const&nl)          // I: N_levels               
 {
+  report REPORT("BlockStepCode::prepare(%d,%d)",h0,nl);
   register clock_t cpu = clock();                  // local CPU counter         
   reset_cpus();                                    // reset CPU counters        
-  BlockStep::reset_steps(h0,nl,TINI);              // set time steps            
+  GravBlockStep::reset_steps(h0,nl,TINI);          // set time steps            
   set_tree(true);                                  // initialize tree           
-  LoopMyBodies Bi.flag_as_sink();                  // flag every body as sink   
-  eps_and_acc(                                     // set eps & get acc         
-#ifdef ALLOW_INDI
-	      false
+  LoopMyBodies Bi.flag_as_active();                // flag every body as active 
+  eps_and_acc(true                                 // set eps & get acc         
+#ifdef falcON_INDI
+	     ,false
 #endif
 	      );
   diagnose();                                      // energy et al. at t=t0     
   DIAG = true;                                     // diagnose up-to-date       
-  BlockStep::reset_counts();                       // reset counts              
+  GravBlockStep::reset_counts();                   // reset counts              
   LoopMyBodies                                     // loop bodies               
     assign_level(Bi);                              //   assign step level       
   record_cpu(cpu,CPU_STEP);                        // record total CPU          
@@ -428,51 +513,52 @@ BlockStepCode::BlockStepCode(const bodies*const&b,   // I: bodies
 			     real         const&fa,  // I: f_a: for stepping    
 			     real         const&fp,  //[I: f_p: for stepping]   
 			     real         const&fc,  //[I: f_c: for stepping]   
+			     real         const&fe,  //[I: f_e: for stepping]   
 			     int          const&hg,  //[I: h_grow]              
 			     real         const&th,  //[I: tolerance parameter] 
 			     int          const&nc,  //[I: N_crit]              
 			     kern_type    const&ker, //[I: softening kernel]    
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
 			     soft_type    const&sf,  //[I: softening type]      
 			     real         const&ns,  //[I: N_soft]              
 			     uint         const&nr,  //[I: N_ref]               
+			     real         const&em,  //[I: eps_min]             
 			     real         const&ef,  //[I: eps_fac]             
 #endif
 			     const extpot*const&p,   //[I: P_ex]                
 			     const int       nd[4]): //[I: direct sum control]  
-  basic_nbody(b,e,ti,th,nc,ker,
-#ifdef ALLOW_INDI
-	      sf,ns,nr,ef,
+  basic_nbody  (b,e,ti,th,nc,ker,
+#ifdef falcON_INDI
+	        sf,ns,nr,em,ef,
 #endif
-	      p,nd),
-  BlockStep  (),
-  LGROW      ((nl <= hg)? 1 : nl-hg),
-  W          (max(6, int(log10(double(b->N_bodies())))))
+	        p,nd),
+  GravBlockStep (),
+  LGROW         ((nl <= hg)? 1 : nl-hg),
+  W             (max(6, 1+int(log10(double(b->N_bodies())))))
 {
-  BlockStep::reset_scheme(fa,fp,fc);
-  if(!BODIES->has_lev())
-    NbdyErrorF("bodies::has_lev() == false","BlockStepCode")
-  if(fa==zero && fp==zero) 
-    NbdyErrorF("time step control factors = 0","BlockStepCode")
+  GravBlockStep::reset_scheme(fa,fp,fc,fe);
+  if(!BODIES->has(io::l))
+    falcON_ErrorF("bodies::has(io::l) == false","BlockStepCode");
   prepare(h0,nl);
 }
 //------------------------------------------------------------------------------
 void BlockStepCode::stats(ostream& to) const
 {
+  report REPORT("BlockStepCode::stats()");
   to.setf(ios::left, ios::adjustfield);
-  if(time() != TINI) update_diagnostics();
+  if(time() != TINI) update_diags();
   to<<setprecision(5)<<setw(10)<<time()         <<" "
     <<setprecision(7)<<setw(13)<<total_energy() <<" "
     <<setprecision(min(5,max(1,5-int(-log10(virial_ratio())))))
     <<setw(7)<<virial_ratio()<<" ";
-#if NDIM==3
+#if falcON_NDIM==3
   to<<setprecision(5)<<setw(10)<<sqrt(norm(total_angmom()))  <<" ";
 #else
   to<<setprecision(5)<<setw(10)<<total_angmom()              <<" ";
 #endif
   to<<setprecision(2)<<setw(8)<<sqrt(norm(total_momentum()))  <<" ";
   to.setf(ios::right, ios::adjustfield);
-  if(highest_level()) BlockStep::short_stats(to,W);
+  if(highest_level()) GravBlockStep::short_stats(to,W);
   to.setf(ios::left, ios::adjustfield);
   to<<setprecision(4)<<setw(6)<<cpu_build()    <<" "
     <<setprecision(4)<<setw(7)<<cpu_force()    <<" "
@@ -494,7 +580,7 @@ void BlockStepCode::stats_head(ostream& to) const
   to<<"    time   "
     <<"   energy     "
     <<"  -T/U  "
-#if NDIM==3
+#if falcON_NDIM==3
     <<"   |L|     "
 #else
     <<"    L      "

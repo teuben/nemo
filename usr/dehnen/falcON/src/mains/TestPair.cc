@@ -95,7 +95,7 @@ int main(int argc, char* argv[])
     Bi.vel()[1] =  R * cos(phi);
     Bi.vel()[2] =  v * cth;
     Bi.mass() = mass;
-    Bi.flag_as_sink();
+    Bi.flag_as_active();
     if(index(Bi)<NS) {
       Bi.size() = S;
       Bi.flag_as_sticky();

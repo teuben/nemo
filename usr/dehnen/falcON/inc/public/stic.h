@@ -5,7 +5,7 @@
 //                                                                             |
 // C++ code                                                                    |
 //                                                                             |
-// Copyright Walter Dehnen, 2000-2002                                          |
+// Copyright Walter Dehnen, 2000-2003                                          |
 // e-mail:   wdehnen@aip.de                                                    |
 // address:  Astrophysikalisches Institut Potsdam,                             |
 //           An der Sternwarte 16, D-14482 Potsdam, Germany                    |
@@ -23,16 +23,13 @@
 // class neighbour_counter                                                     |
 //                                                                             |
 //-----------------------------------------------------------------------------+
-#ifndef included_stic_h
-#define included_stic_h
+#ifndef falcON_included_stic_h
+#define falcON_included_stic_h
 
-#ifndef included_grat_h
+#ifndef falcON_included_grat_h
 #  include <public/grat.h>
 #endif
-#ifndef included_iact_h
-#  include <public/iact.h>
-#endif
-#ifndef included_ionl_h
+#ifndef falcON_included_ionl_h
 #  include <public/ionl.h>
 #endif
 ////////////////////////////////////////////////////////////////////////////////
@@ -54,11 +51,7 @@ namespace nbdy {
     real SIZEQ;                                    // (physical size)^ 2        
     vect VEL;                                      // velocity                  
     uint NUM;                                      // # neighbours              
-    //--------------------------------------------------------------------------
-    // constructor                                                              
-    //--------------------------------------------------------------------------
   public:
-    sticky_soul() {}
     //--------------------------------------------------------------------------
     // non-const methods                                                        
     //--------------------------------------------------------------------------
@@ -66,10 +59,9 @@ namespace nbdy {
     //--------------------------------------------------------------------------
     // const data access via friends                                            
     //--------------------------------------------------------------------------
-    friend vect const&cofm  (const sticky_soul*const&O) { return O->cofm(); } 
     friend uint const&mybody(const sticky_soul*const&O) { return O->mybody(); } 
     friend uint const&num   (const sticky_soul*const&O) { return O->NUM; } 
-    friend vect const&pos   (const sticky_soul*const&O) { return O->cofm(); } 
+    friend vect const&pos   (const sticky_soul*const&O) { return O->pos(); } 
     friend vect const&vel   (const sticky_soul*const&O) { return O->VEL; } 
     friend real const&size  (const sticky_soul*const&O) { return O->SIZE; } 
     friend real const&sizeq (const sticky_soul*const&O) { return O->SIZEQ; } 
@@ -90,18 +82,16 @@ namespace nbdy {
       NUM  =0;
     }
     //--------------------------------------------------------------------------
-    // simple manipulations for use with arrays                                 
+    // simple manipulations for use with barrays                                
     //--------------------------------------------------------------------------
-    void set_sticky(const areal*const&s, const areal*v[NDIM]) {
-      SIZE=s[mybody()];
-      for(register int d=0; d<NDIM; ++d) VEL[d]=v[d][mybody()];
+    void set_sticky(const barrays*const&B) {
+      SIZE  =B->size (mybody());
+      VEL[0]=B->vel_x(mybody());
+      VEL[1]=B->vel_y(mybody());
+#if falcON_NDIM > 2
+      VEL[2]=B->vel_z(mybody());
+#endif
       NUM=0;
-    }
-    //--------------------------------------------------------------------------
-    void set_sph   (const areal*const&s) {
-      SIZE =s[mybody()];
-      SIZEQ=SIZE*SIZE;
-      NUM  =0;
     }
     //--------------------------------------------------------------------------
     // dump data                                                                
@@ -119,7 +109,7 @@ namespace nbdy {
       basic_soul::dump(o,S);
       o<<' '<<setw(5)<<setprecision(4)<<nbdy::size(S);
       if(S->is_set(flag::STICKY))
-	for(register indx d=0; d<NDIM; d++)
+	for(register indx d=0; d!=Ndim; ++d)
 	  o<<' '<<setw(7)<<setprecision(4)<<nbdy::vel(S)[d];
     }
   };
@@ -147,11 +137,7 @@ namespace nbdy {
       real  VRAD;                                  // radius of velocity sphere 
       real  RMAX;                                  // radius of position sphere 
     };
-    //--------------------------------------------------------------------------
-    // constructor                                                              
-    //--------------------------------------------------------------------------
   public:
-    sticky_cell() {}
     //--------------------------------------------------------------------------
     // non-const data access via members                                        
     //--------------------------------------------------------------------------
@@ -183,8 +169,15 @@ namespace nbdy {
     //--------------------------------------------------------------------------
     // flag manipulation                                                        
     //--------------------------------------------------------------------------
-    void add_sink_flag(const sticky_soul* const&S) {add_sink_flag_from_soul(S);}
-    void add_sink_flag(const sticky_cell* const&C) {add_sink_flag_from_cell(C);}
+    void add_active_flag(const sticky_soul* const&S)
+    {
+      add_active_flag_from_soul(S);
+    }
+    //--------------------------------------------------------------------------
+    void add_active_flag(const sticky_cell* const&C)
+    {
+      add_active_flag_from_cell(C);
+    }
     //--------------------------------------------------------------------------
     // dump  data                                                               
     //--------------------------------------------------------------------------
@@ -201,7 +194,7 @@ namespace nbdy {
       basic_cell::dump(o,C);
       o<<' '<<setw(6)<<setprecision(4)<<nbdy::size(C);
       if(C->is_set(flag::STICKY)) {
-	for(register indx d=0; d<NDIM; ++d)
+	for(register indx d=0; d!=Ndim; ++d)
 	  o<<' '<<setw(9)<<setprecision(4)<<nbdy::vel(C)[d];
 	o<<' '<<setw(5)<<setprecision(4)<<nbdy::vrad(C);
       }
@@ -218,28 +211,25 @@ namespace nbdy {
     sticky_tree           (const sticky_tree&);    // not implemented           
     sticky_tree& operator=(const sticky_tree&);    // not implemented           
     //--------------------------------------------------------------------------
-    // data of class sticky_tree                                                
+    // static data                                                              
     //--------------------------------------------------------------------------
-  private:
-    const areal  *S,**V;                           // arrays with sizes and vels
+    static const int SPEC=flag::SPH|flag::STICKY;  // default flag for sub-tree 
+  public:
+    typedef uint elem_pair[2];                     // element: interaction list 
     //--------------------------------------------------------------------------
     // public methods                                                           
     //--------------------------------------------------------------------------
-  public:
-    sticky_tree(grav_tree *parent) :
-      base_tree(parent), S(0), V(0)
-    { if(!use_sbodies()) NbdyError("bodies/array mismatch") }
+    sticky_tree(const grav_tree*const&parent,      // I: parent tree            
+		int             const&spec=SPEC) : //[I: flag for sub-tree]     
+      base_tree(parent, spec) {}
     //--------------------------------------------------------------------------
-    sticky_tree(grav_tree *parent,
-		const areal *s,
-		const areal *v[NDIM]) :
-      base_tree(parent), S(s), V(v)
-    { if(!use_arrays()) NbdyError("bodies/array mismatch") }
+    void count_neighbours() const;
     //--------------------------------------------------------------------------
-    void prepare_sticky();
-    void prepare_sph();
-    void set_num(grav_soul*) const;
-    void set_num(int *) const;
+    void make_iaction_list(elem_pair *,
+			   uint const&,
+			   uint      &,
+			   real const&) const;
+    //--------------------------------------------------------------------------
   };
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
@@ -258,137 +248,6 @@ namespace nbdy {
   inline real const&size(CSCI) { return size(I.c_pter()); }
   inline real const&vrad(CSCI) { return vrad(I.c_pter()); }
 #undef CSCI
-  //////////////////////////////////////////////////////////////////////////////
-  //                                                                            
-  // class nbdy::basic_finder                                                   
-  //                                                                            
-  // for finding soul pairs in a sticky_tree;                                   
-  // derived from basic_iactor of iact.h, which satisfies the requirements for  
-  // an INTERACTOR template parameter to class MutualInteractor<>;              
-  //                                                                            
-  //////////////////////////////////////////////////////////////////////////////
-  class basic_finder : public basic_iactor<sticky_tree> {
-    //--------------------------------------------------------------------------
-    // types of class basic_finder                                              
-    //--------------------------------------------------------------------------
-  public:
-    typedef uint elem_pair[2];                     // pair of indices           
-    //--------------------------------------------------------------------------
-    // data of class basic_finder                                               
-    //--------------------------------------------------------------------------
-  private:
-    const uint    MAX;                             // maximal size of list      
-    elem_pair    *BL;                              // list of interaction pairs 
-    mutable uint  N;                               // actual size of list       
-    //--------------------------------------------------------------------------
-    // other methods                                                            
-    //--------------------------------------------------------------------------
-  protected:
-    void add_pair(soul_iter const&, soul_iter const&) const;
-  public:
-    uint const &actual_size_of_list() const { return N; }
-    //--------------------------------------------------------------------------
-    // constructors                                                             
-    //--------------------------------------------------------------------------
-    basic_finder(const uint n, elem_pair*l) : MAX(n),BL(l),N(0){}
-  };
-  //////////////////////////////////////////////////////////////////////////////
-  //                                                                            
-  // class nbdy::sticky_finder                                                  
-  //                                                                            
-  // for finding sticky_soul pairs which satisfy:                               
-  // - at least one is flagged as sink                                          
-  // - there is a time t in [0,tau] such that:                                  
-  //   | (x_i+v_i*t) - (x_j+v+j*t) | < size_i+size_j                            
-  //                                                                            
-  //////////////////////////////////////////////////////////////////////////////
-  class sticky_finder : public basic_finder {
-  private:
-    const real    TAU;                             // time period               
-  protected:
-    void many       (bool const&, soul_iter const&,
-		     soul_iter const&, soul_iter const&) const;
-    void single     (soul_iter const&, soul_iter const&) const;
-    bool discard    (cell_iter const&, soul_iter const&) const;
-    bool discard    (cell_iter const&, cell_iter const&) const;
-  public:
-    sticky_finder(const real t, const uint n, elem_pair*l) :
-      basic_finder(n,l), TAU(t) {}
-    bool split_first(cell_iter const&A, cell_iter const&B) const {
-      return is_twig(B) || size(A)+TAU*vrad(A) > size(B)+TAU*vrad(B);
-    }
-  };
-  //////////////////////////////////////////////////////////////////////////////
-  //                                                                            
-  // class nbdy::neighbour_finder                                               
-  //                                                                            
-  // for finding sticky_soul pairs which satisfy:                               
-  // - at least one is flagged as sink                                          
-  // - | x_i - x_j | < max(size_i,size_j)                                       
-  //                                                                            
-  //////////////////////////////////////////////////////////////////////////////
-  class neighbour_finder : public basic_finder {
-  protected:
-    void many       (bool const&, soul_iter const&,
-		     soul_iter const&, soul_iter const&) const;
-    void single     (soul_iter const&, soul_iter const&) const;
-    bool discard    (cell_iter const&, soul_iter const&) const;
-    bool discard    (cell_iter const&, cell_iter const&) const;
-  public:
-    neighbour_finder(const uint n, elem_pair*l) : basic_finder(n,l) {}
-    bool split_first(cell_iter const&A, cell_iter const&B) const {
-      return is_twig(B) || size(A) > size(B);
-    }
-  };
-  //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // class nbdy::neighbour_counter                                            //
-  //                                                                          //
-  // for each sink soul: count # souls with |R| < size(A);                    //
-  // for individual sizes(soft_type=individual): requires:                    //
-  //     - each sink soul to hold its size and size^2.                        //
-  //     - each sink cell to hold its size                                    //
-  // for global size, it is given as argument to the constructor              //
-  //                                                                          //
-  //////////////////////////////////////////////////////////////////////////////
-  template<typename TREE, soft_type SOFT>  class neighbour_counter;
-  //----------------------------------------------------------------------------
-  template<typename TREE>
-  class neighbour_counter<TREE,individual> : public basic_iactor<TREE> {
-    typedef typename TREE::soul_iterator soul_iter;
-    typedef typename TREE::cell_iterator cell_iter;
-  protected:
-    void many       (bool const&, soul_iter const&,
-		     soul_iter const&, soul_iter const&) const;
-    void single     (soul_iter const&, soul_iter const&) const;
-    bool discard    (cell_iter const&, soul_iter const&) const;
-    bool discard    (cell_iter const&, cell_iter const&) const;
-  public:
-    neighbour_counter() {}
-    bool split_first(cell_iter const&A, cell_iter const&B) const {
-      return nbdy::is_twig(B) || size(A) > size(B);
-    }
-  };
-  //----------------------------------------------------------------------------
-  template<typename TREE>
-  class neighbour_counter<TREE,global>
-    : public basic_iactor<TREE> {
-    typedef typename TREE::soul_iterator soul_iter;
-    typedef typename TREE::cell_iterator cell_iter;
-  private:
-    const real EPS,EPQ;
-  protected:
-    void many       (bool const&, soul_iter const&,
-		     soul_iter const&, soul_iter const&) const;
-    void single     (soul_iter const&, soul_iter const&) const;
-    bool discard    (cell_iter const&, soul_iter const&) const;
-    bool discard    (cell_iter const&, cell_iter const&) const;
-  public:
-    neighbour_counter(const real e) : EPS(e), EPQ(e*e) {}
-    bool split_first(cell_iter const&A, cell_iter const&B) const {
-      return is_twig(B) || size(A) > size(B); }
-  };
-  //////////////////////////////////////////////////////////////////////////////
 }
 //------------------------------------------------------------------------------
-#endif // included_stic_h
+#endif // falcON_included_stic_h

@@ -173,7 +173,11 @@ int main(int argc, char* argv[])
    * computing forces
    */
 
-  falcON_initialize(F,M,X[0],X[1],X[2],0,A[0],A[1],A[2],PH,RHO,N,EPS,TH,K);
+  falcON_initialize(F,M,X[0],X[1],X[2],
+#ifdef falcON_INDI
+		    0,
+#endif
+		    A[0],A[1],A[2],PH,RHO,N,EPS,TH,K);
   for(ig=0; ig<=Ng; ++ig) {
     falcON_grow(Ncrit);
     cpu1      = clock();

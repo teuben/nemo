@@ -5,7 +5,9 @@
 #
 ################################################################################
 
-makefiles 	:= Makefile make.defs make.public
+install		: TestGrav gyrfalcON
+
+makepublic 	:= Makefile make.defs make.public
 
 include make.defs
 include make.public

@@ -118,8 +118,12 @@ C        WRITE(*,'("X="3E25.13)') X(I),Y(I),Z(I)
       TIME = (CPU1-CPU0) / 1.E6
       WRITE(*,'(" time needed for set up of X_i:  "F13.6)') TIME
       CPU0 = CPU1
+      CALL FALCON_INITIALIZE(FL,M,X,Y,Z,
+#ifdef falcON_INDI
+     C%VAL(0),
+#endif
+     CAX,AY,AZ,PH,RH, N,EPS,TH,K)
 
-      CALL FALCON_INIT(FL,M,X,Y,Z,%VAL(0),AX,AY,AZ,PH,RH, N,EPS,TH,K,50)
       CALL FALCON_GROW(NCRIT)
       CPU1 = CLOCK()
       TIME = (CPU1-CPU0) / CLOCKS_PER_SECOND()

@@ -5,7 +5,7 @@
 //                                                                             |
 // C++ code                                                                    |
 //                                                                             |
-// Copyright Walter Dehnen, 1994-2002                                          |
+// Copyright Walter Dehnen, 1994-2003                                          |
 // e-mail:   wdehnen@aip.de                                                    |
 // address:  Astrophysikalisches Institut Potsdam,                             |
 //           An der Sternwarte 16, D-14482 Potsdam, Germany                    |
@@ -139,7 +139,7 @@ double nbdy::qbulir(double(*func)(double),
   if(err<v) err = v;
   if(erro) *erro = err/(tab*w);
   if(m==mx && abort)
-    NbdyErrorF("max number of iterations exceeded","qbulir()")
+    falcON_ErrorF("max number of iterations exceeded","qbulir()");
   return c;
 }
 //------------------------------------------------------------------------------

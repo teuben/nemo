@@ -5,7 +5,7 @@
 //                                                                             |
 // C++ code                                                                    |
 //                                                                             |
-// Copyright Walter Dehnen, 2000-2002                                          |
+// Copyright Walter Dehnen, 2000-2003                                          |
 // e-mail:   wdehnen@aip.de                                                    |
 // address:  Astrophysikalisches Institut Potsdam,                             |
 //           An der Sternwarte 16, D-14482 Potsdam, Germany                    |
@@ -21,18 +21,18 @@
 // class yanc                                                                  |
 //                                                                             |
 //-----------------------------------------------------------------------------+
-#ifndef included_yanc_h
-#define included_yanc_h
+#ifndef falcON_included_yanc_h
+#define falcON_included_yanc_h
 
-#ifndef included_iostream
+#ifndef falcON_included_iostream
 #  include <iostream>
-#  define included_iostream
+#  define falcON_included_iostream
 #endif
 
-#ifndef included_nbio_h
+#ifndef falcON_included_nbio_h
 #  include <public/nbio.h>
 #endif
-#ifndef included_deft_h
+#ifndef falcON_included_deft_h
 #  include <public/deft.h>
 #endif
 ////////////////////////////////////////////////////////////////////////////////
@@ -61,7 +61,7 @@ namespace nbdy {                               // yanc is in namespace nbdy
     yanc(                                      // construction via input file   
 	 const char*,                          // I: yanc-formatted input file  
 	 pot_provider* =0);                    //[I: provider for external pot] 
-#ifdef ALLOW_NEMO
+#ifdef falcON_NEMO
     //--------------------------------------------------------------------------
     yanc(                                      // constructor taking parameters 
 	 const char*,                          // I: input file (yanc/nemo)     
@@ -76,9 +76,11 @@ namespace nbdy {                               // yanc is in namespace nbdy
 	 const double,                         // I: f_a                        
 	 const double  = 0.,                   //[I: f_p]                       
 	 const double  = 0.,                   //[I: f_c]                       
-#ifdef ALLOW_INDI
+	 const double  = 0.,                   //[I: f_e]                       
+#ifdef falcON_INDI
 	 const double  = 0.,                   //[I: Nsoft]                     
 	 const int     = 32,                   //[I: Nref]                      
+	 const double  = 0.,                   //[I: emin]                      
 	 const int     = 0,                    //[I: softening:global]          
 #endif
 	 const double  = 1.,                   //[I: Grav]                      
@@ -110,7 +112,7 @@ namespace nbdy {                               // yanc is in namespace nbdy
     bool  nemo_is_open    (                    // ready for NEMO output ?       
 			   const int =0) const;//[I: index of nemo stream]      
     //--------------------------------------------------------------------------
-#endif // ALLOW_NEMO
+#endif // falcON_NEMO
     //--------------------------------------------------------------------------
     ~yanc();                                   // destructor                    
     //--------------------------------------------------------------------------
@@ -142,10 +144,11 @@ namespace nbdy {                               // yanc is in namespace nbdy
     float  eps            ()         const;    // softening length              
     float  tau_min        ()         const;    // minimum time step             
     float  tau_max        ()         const;    // maximum time step             
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
     int    softening      ()         const;    // type of softening             
     int    Nref           ()         const;    // # bodies in cell for rho estim
     float  Nsoft          ()         const;    // # bodies in eps sphere        
+    float  emin           ()         const;    // # lower limit for eps_i       
 #endif
     int    kernel         ()         const;    // type of kernel                
     double Grav           ()         const;    // Newton's G                    
@@ -159,9 +162,10 @@ namespace nbdy {                               // yanc is in namespace nbdy
     float  facc           ()         const;    // time-stepping parameter       
     float  fpot           ()         const;    // time-stepping parameter       
     float  fcom           ()         const;    // time-stepping parameter       
+    float  feps           ()         const;    // time-stepping parameter       
     float  cpu_total      ()         const;    // accumulated cpu time [sec]    
     //--------------------------------------------------------------------------
   };
 }
 //------------------------------------------------------------------------------
-#endif                                         // included_yanc_h               
+#endif                                         // falcON_included_yanc_h        

@@ -11,7 +11,7 @@
 //                                                                             |
 //-----------------------------------------------------------------------------+
 #include <public/nmio.h>
-#ifdef   ALLOW_NEMO                                // empty if NEMO not running 
+#ifdef   falcON_NEMO                               // empty if NEMO not running 
 #include <public/exit.h>
 #include <iostream>
 #include <cstdlib>
@@ -23,7 +23,6 @@ extern "C" {
 # include <filestruct.h>
 # include <history.h>
 # include <snapshot/snapshot.h>
-  bool within(::real, char*, ::real);              // NEMO range checker        
 }
 #ifndef DensityTag
 #  define DensityTag "Density"
@@ -45,12 +44,6 @@ extern "C" {
 #endif
 #ifndef LevelTag
 #  define LevelTag "Level"
-#endif
-
-#ifdef TWODIMENSIONAL
-#  define NDM 2
-#else
-#  define NDM 3
 #endif
 
 #define mystream static_cast<stream>(STREAM)
@@ -177,6 +170,12 @@ void nemo_io::open(const char* file, const char* control)
   if(STREAM) strclose(mystream);
   STREAM = static_cast<void*>(stropen(const_cast<char*>(file),
 				      const_cast<char*>(control)));
+  if     (0 == std::strcmp(const_cast<char*>(control), "r"))
+    get_history(mystream);
+  else if(0 == std::strcmp(const_cast<char*>(control), "w")  ||
+	  0 == std::strcmp(const_cast<char*>(control), "w!") ||
+	  0 == std::strcmp(const_cast<char*>(control), "s") )
+    put_history(mystream);
 }  
 //------------------------------------------------------------------------------
 void nemo_io::close()
@@ -211,6 +210,12 @@ nemo_io::nemo_io(const char* file, const char* control) :
   BODIESSHORT   (0)
 {
   OPEN[0]= OPEN[1] = OPEN[2] = OPEN[3] = false;
+  if     (0 == std::strcmp(const_cast<char*>(control), "r"))
+    get_history(mystream);
+  else if(0 == std::strcmp(const_cast<char*>(control), "w")  ||
+	  0 == std::strcmp(const_cast<char*>(control), "w!") ||
+	  0 == std::strcmp(const_cast<char*>(control), "s") )
+    put_history(mystream);
 }
 //------------------------------------------------------------------------------
 nemo_io::~nemo_io()
@@ -323,11 +328,6 @@ void nemo_io::read(const BodiesShort X, short*Y) const
   }
 }
 //------------------------------------------------------------------------------
-void nemo_io::read_history() const
-{
-  get_history(mystream);
-}
-//------------------------------------------------------------------------------
 void nemo_io::write_N(const int n) const
 {
   reset();
@@ -337,7 +337,7 @@ void nemo_io::write_N(const int n) const
 //------------------------------------------------------------------------------
 void nemo_io::write(const CoSys X) const
 {
-  CS = CSCode(tag(X), NDM, 2);
+  CS = CSCode(tag(X),NDM,2);
   put_data(mystream,CoordSystemTag,IntType,&CS,0);
 }
 //------------------------------------------------------------------------------
@@ -378,7 +378,8 @@ void nemo_io::write(const BodiesVector X, float* Y) const
   if(Y)           put_data(mystream,tag(X),FloatType,Y,N,NDM,0);
   else if(BODIESARRAYS==0)
     nbdy::error("[nemo_io::write(BodiesVector)]: no memory allocated");
-  else if(X==vel) put_data(mystream,tag(X),FloatType,BODIESARRAYS+N*NDM,N,NDM,0);
+  else if(X==vel) put_data(mystream,tag(X),FloatType,BODIESARRAYS+N*NDM,
+			   N,NDM,0);
   else            put_data(mystream,tag(X),FloatType,BODIESARRAYS,N,NDM,0);
 }
 //------------------------------------------------------------------------------
@@ -405,20 +406,50 @@ void nemo_io::write(const BodiesShort X, short* Y) const
     nbdy::error("[nemo_io::write(BodiesShort)]: no memory allocated");
   else  put_data(mystream,tag(X),ShortType,BODIESSHORT,N,0);
 }
-//------------------------------------------------------------------------------
-void nemo_io::write_history() const
-{
-  put_history(mystream);
-}
-//------------------------------------------------------------------------------
 #undef mystream
-#undef NDM
 ////////////////////////////////////////////////////////////////////////////////
-bool nbdy::time_in_range(const nbdy::real& t, const char*times)
+namespace nbdy {
+  static int within_count = 0;
+  inline bool within(real const&val, char*range, real const&fuzz)
+    // almost identical to nemo::within
+  {
+    char*endptr, *subptr, *sepptr, *colptr;
+    real sublow, subhi;
+    int  count;
+    subptr = range;
+    if (*subptr++ == '#') {                        // special select Nth        
+      within_count++;                              // (first=1) occurence       
+      count = atoi(subptr);
+      return count == within_count;
+    }
+    endptr = range + strlen(range);                // point to term. NULL       
+    for(subptr = range; subptr != endptr; ) {      // for each subrange         
+        sepptr = strchr(subptr, ',');              //   pnt to subrange end     
+        if (sepptr == 0)                           //   last subrange listed?   
+            sepptr = endptr;                       //     fix up subend ptr     
+        colptr = strchr(subptr, ':');              //   scan subrange for :     
+        if (colptr > sepptr)                       //   in another subrange?    
+            colptr = 0;                            //     then dont use it      
+        sublow = atof(subptr) - fuzz/2.0;          //   set low end of range    
+        if (colptr != 0)                           //   high end specified?     
+            subhi = atof(colptr+1) + fuzz/2.0;     //     set high end          
+        else
+            subhi = sublow + fuzz;                 //     just use low end      
+        if (sublow <= val && val <= subhi)         //   within subrange?        
+            return true;
+        subptr = sepptr;                           //   advance subrange ptr    
+        if (*subptr == ',')                        //   more ranges to do?      
+            subptr++;                              //     move on to next       
+    }
+    return false;
+  }
+}
+////////////////////////////////////////////////////////////////////////////////
+bool nbdy::time_in_range(nbdy::real const &t, const char*times)
 {
   return  times == 0
     ||    std::strcmp(const_cast<char*>(times),"all") == 0
-    ||    within(t,const_cast<char*>(times),0.0005);
+    ||    nbdy::within(t,const_cast<char*>(times),0.0005);
 }
 ////////////////////////////////////////////////////////////////////////////////
-#endif                                               // ALLOW_NEMO              
+#endif                                               // falcON_NEMO             

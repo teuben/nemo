@@ -1,8 +1,6 @@
 /* -*- C -*-
  *******************************************************************************
  *                                                                             *
- * latest change 02/12/2002 WD                                                 *
- *                                                                             *
  * falcON_C.h                                                                  *
  *                                                                             *
  *=============================================================================*
@@ -14,7 +12,7 @@
  * header file for C users.                                                    *
  * (C++ and FORTRAN users, see files falcON.h and falcON.f, respectively)      *
  *                                                                             *
- * Copyright Walter Dehnen, 2000-2002                                          *
+ * Copyright Walter Dehnen, 2000-2003                                          *
  * e-mail:   wdehnen@aip.de                                                    *
  * address:  Astrophysikalisches Institut Potsdam,                             *
  *           An der Sternwarte 16, D-14482 Potsdam, Germany                    *
@@ -32,8 +30,8 @@
  *                                                                             *
  *******************************************************************************
  */
-#ifndef included_falcONC_h                    /* ensure this file is seen     */
-#define included_falcONC_h 1                  /* once only by the compiler    */
+#ifndef falcON_included_falcONC_h             /* ensure this file is seen     */
+#define falcON_included_falcONC_h 1           /* once only by the compiler    */
 
 #ifdef __cplusplus                            /* C++ users should better use  */
 extern "C" {                                  /* falcON.h.                    */
@@ -42,17 +40,12 @@ extern "C" {                                  /* falcON.h.                    */
 #endif
 #endif                                        /* this is for savety only      */
 
-#if defined(SINGLE_DOUBLE) || defined(DOUBLE_DOUBLE)
+#if defined(falcON_SINGLE_DOUBLE) || defined(falcON_DOUBLE_DOUBLE)
 #define INPUT_TYPE double                     /*   define input type = double */
 #else                                         /*                              */
 #define INPUT_TYPE float                      /*   define input type = float  */
 #endif
 
-#ifdef TWODIMENSIONAL                         /* code for 2D:                 */
-#define NDIM 2                                /*   define NDIM = 2            */
-#else                                         /* code for 3D:                 */
-#define NDIM 3                                /*   define NDIM = 3            */
-#endif                                        /*                              */
 /*******************************************************************************
  *                                                                             *
  *  CONTENTS                                                                   *
@@ -92,18 +85,16 @@ void  falcON_initialize(const int*,          /* array with flags              */
 			const INPUT_TYPE*,   /* array with masses             */
 			const INPUT_TYPE*,   /* array with x                  */
 			const INPUT_TYPE*,   /* array with y                  */
-#if NDIM==3                                  /*                               */
 			const INPUT_TYPE*,   /* array with z                  */
-#endif                                       /*                               */
+#ifdef falcON_INDI
 			      INPUT_TYPE*,   /* array with eps                */
+#endif
 			      INPUT_TYPE*,   /* array for acc_x               */
 		              INPUT_TYPE*,   /* array for acc_y               */
-#if NDIM==3                                  /*                               */
 		              INPUT_TYPE*,   /* array for acc_z               */
-#endif                                       /*                               */
 		              INPUT_TYPE*,   /* array for potentials          */
 		              INPUT_TYPE*,   /* array for densities           */
-			const int,           /* N = size of arrayes           */
+			const int,           /* N = size of arrays            */
 			const INPUT_TYPE,    /* eps = softening length        */
 			const INPUT_TYPE,    /* theta = opening angle         */
 			const int);          /* type of softening kernel      */
@@ -113,8 +104,8 @@ void  falcON_initialize(const int*,          /* array with flags              */
  * softening length (for the case of individual softening lengths), and flag   *
  * (see section 2 below). The source properties are: acceleration(ax,ay,az),   *
  * potential and mass-density. If individual softening is enabled (via the     *
- * preprocessor flag "ALLOW_INDI", see file make.defs) but global softening is *
- * used, a NULL pointer may be used instead of an array holding eps_i. The     *
+ * preprocessor flag "falcON_INDI", see file make.defs) but global softening   *
+ * is used, a NULL pointer may be used instead of an array holding eps_i. The  *
  * same applies to the arrays for density and potential: if a NULL pointer is  *
  * given, they will never be updated (but possibly computed).                  *
  *                                                                             *
@@ -156,14 +147,14 @@ void falcON_clearup();                       /*                               */
  *                                                                             *
  * bit  value     meaning                                                      *
  * --------------------------------------------------------------              *
- *   1      1     this body is a sink, i.e. wants update                       *
+ *   1      1     this body is active, i.e. wants update                       *
  *   2      2     don't load this body into the tree, ignore it                *
  *   3      4     this body is a SPH particle                                  *
  *   4      8     this body is a sticky particle                               *
  * i>4   2^(i-1)  not used                                                     *
  *                                                                             *
  *                                                                             *
- * The default, flag=0, represents a plain body that is not sink, but still    *
+ * The default, flag=0, represents a plain body that is inactive, but still    *
  * source of gravity.                                                          *
  * The flag is obtained by setting the bits or, equivalently, adding the       *
  * values. The flags are not used by falcON_initialize() and will unfold their *
@@ -224,7 +215,7 @@ void falcON_approx_grav();
  * well as the interaction and evaluation phase. See src/exe/C/TestGravC.c     *
  * for an example application.                                                 *
  */
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
 /* For individual adaptive softening the routine                               *
  *                                                                            */
   void falcON_adjust_epsi_and_approx_grav(INPUT_TYPE,  /* I: Nsoft            */
@@ -233,7 +224,7 @@ void falcON_approx_grav();
 /*
  * can do more for you before the forces are actually computed:                *
  *                                                                             *
- * If Nsoft [2nd argument] is non-zero, it estimates for each sink particle    *
+ * If Nsoft [2nd argument] is non-zero, it estimates for each active particle  *
  * the local number density (using the number density of the smallest cell     *
  * containing that particle with not less than Nref [3rd argument] bodies).    *
  * If fac [4th arg] is zero, the bodies softening lengths are set such that,   *
@@ -252,8 +243,8 @@ void falcON_approx_grav();
  * 3.3 A crude Estimation of the Mass- and Number-Density                      *
  * ------------------------------------------------------                      *
  * There is also the possibility to obtain a rough estimate of the mass- or    *
- * number density of bodies in the neighbourhood of every body flagged as      *
- * sink, via                                                                   *
+ * number density of bodies in the neighbourhood of every body flagged being   *
+ * active, via                                                                 *
  */
 void falcON_estimate_rho  (                  /* estimate mass density         */
 			   const int);       /* I:  critical cell size        */
@@ -282,14 +273,11 @@ void falcON_iactionlist(      int*,          /* list of indices: 1st of pair  */
 		              int*,          /* list of indices: 2nd of pair  */
 			const int,           /* physical size of list         */
 			      int*,          /* actual size of list           */
-			const INPUT_TYPE*,   /* array with body sizes         */
+			      INPUT_TYPE*,   /* array with body sizes         */
 			const INPUT_TYPE,    /* time step tau                 */
 			const INPUT_TYPE*,   /* array with Vx                 */
-			const INPUT_TYPE*    /* array with Vy                 */
-#if NDIM==3
-			,const INPUT_TYPE*   /* array with Vz                 */
-#endif
-			);
+			const INPUT_TYPE*,   /* array with Vy                 */
+			const INPUT_TYPE*);  /* array with Vz                 */
 /*
  * In case of overflow, i.e. if the number of pairs found exceeds the size     *
  * (3rd arg) of the list (1st&2nd args), a warning is issued to stderr, but    *
@@ -307,7 +295,7 @@ void falcON_iactionlist(      int*,          /* list of indices: 1st of pair  */
  * In order to make a list of all pairs {i,j} of indices for which             *
  *                                                                             *
  *      (1) both flags indicate sticky particles,                              *
- * and  (2) at least one flag indicates sink,                                  *
+ * and  (2) at least one is flagged being active,                              *
  * and  (3) | (x_i+t*v_i)-(x_j+t*v_j) | < size_i+size_j  with t in [0,tau],    *
  *                                                                             *
  * use flacON_iactionlist() with the time step (6th arg) >= 0 and provide      *
@@ -320,7 +308,7 @@ void falcON_iactionlist(      int*,          /* list of indices: 1st of pair  */
  * In order to make a list of all pairs {i,j} of indices for which             *
  *                                                                             *
  *      (1) both flags indicate SPH particles,                                 *
- * and  (2) at least one flag indicates sink,                                  *
+ * and  (2) at least one flagged being active,                                 *
  * and  (3) | x_i - x_j | < max(size_i,size_j)                                 *
  *                                                                             *
  * use falcON_iactionlist() with negative time step (6th arg) and provide an   *
@@ -401,4 +389,4 @@ void falcON_stats();                         /* writes some statistics        */
 #ifdef __cplusplus
 }
 #endif
-#endif                                        /* included_falcONC_h           */
+#endif                                        /* falcON_included_falcONC_h    */

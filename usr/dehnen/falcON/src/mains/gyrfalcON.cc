@@ -5,7 +5,7 @@
 //                                                                             |
 // C++ code                                                                    |
 //                                                                             |
-// Copyright Walter Dehnen, 2000-2002                                          |
+// Copyright Walter Dehnen, 2000-2003                                          |
 // e-mail:   wdehnen@aip.de                                                    |
 // address:  Astrophysikalisches Institut Potsdam,                             |
 //           An der Sternwarte 16, D-14482 Potsdam, Germany                    |
@@ -64,109 +64,146 @@
 // v 1.4.1   26/11/2002  WD debugged some features                             |
 // v 1.5     04/12/2002  WD re-named "gyrfalcON" (previously "YancNemo")       |
 //                          several changes in file layout for public version  |
+// v 1.5.1   09/01/2003  WD saver C-macros, default parameters                 |
+// v 1.5.2   13/01/2003  WD never ending; logstep; stopfile                    |
+// v 1.5.3   24/01/2003  WD option lastout added.                              |
+// v 1.5.4   03/03/2003  WD debugged: handling of external pot in total energy |
+// v 1.5.5   13/03/2003  WD added check for over-using of stdout/pipe          |
+// v 1.5.6   17/03/2003  WD options emin, fea, limits on |eps_new/eps_old|     |
+// v 1.5.7   20/03/2003  WD changes in gravity, action reporting (proper only) |
+// v 1.6     02/06/2003  WD allow for individual but fixed eps_i by eps<0      |
+// v 1.6.1   28/07/3002  WD happy gcc 3.3 (about 6% faster than gcc 3.2)       |
 //                                                                             |
 //-----------------------------------------------------------------------------+
-#ifndef ALLOW_NEMO                                    // this is a NEMO program 
-#  error You need "ALLOW_NEMO" to compile __FILE__
+#ifndef falcON_NEMO                                // this is a NEMO program    
+#  error You need "NEMO" to compile src/mains/gyrfalcON.cc
 #endif
-#include <yanc.h>                                     // the N-body code        
-#include <public/pext.h>                              // external potential     
-#include <iostream>                                   // C++ I/O                
-#include <fstream>                                    // C++ file I/O           
-#include <nemomain.h>                                 // NEMO main              
-#include <nemo.h>                                     // NEMO basics & main     
+#include <yanc.h>                                  // the N-body code           
+#include <pext.h>                                  // external potential        
+#include <iostream>                                // C++ I/O                   
+#include <fstream>                                 // C++ file I/O              
+#include <main.h>                                  // main & NEMO stuff         
 
 using namespace nbdy;
 //------------------------------------------------------------------------------
 string defv[] = {
-  "in=???\n            input file                                         ",
-  "out=\n              file for primary output; required, unless resume=t ",
-  "tstop=10\n          final integration time                             ",
-  "step=1\n            time between primary outputs; 0 -> every step      ",
-  "logfile=-\n         file for log output                                ",
-  "out2=\n             file for secondary output stream                   ",
-  "step2=0\n           time between secondary outputs; 0 -> every step    ",
-  "theta=0.6\n         tolerance parameter at M=M_tot                     ",
-  "hgrow=0\n           grow fresh tree every 2^hgrow smallest steps       ",
-#ifndef DEFAULT_NCRIT
-# error "unknown default for Ncrit"
-#elif DEFAULT_NCRIT ==  1
-  "Ncrit=1\n           max # bodies in un-split cells                     ",
-#elif DEFAULT_NCRIT ==  6
-  "Ncrit=6\n           max # bodies in un-split cells                     ",
-#elif DEFAULT_NCRIT ==  8
-  "Ncrit=8\n           max # bodies in un-split cells                     ",
-#elif DEFAULT_NCRIT == 12
-  "Ncrit=12\n          max # bodies in un-split cells                     ",
-#elif DEFAULT_NCRIT == 16
-  "Ncrit=16\n          max # bodies in un-split cells                     ",
-#else 
-# error "unknown default for Ncrit"
+  "in=???\n           input file                                         ",
+  "out=\n             file for primary output; required, unless resume=t ",
+  "tstop=\n           final integration time [default: never]            ",
+  "step=1\n           time between primary outputs; 0 -> every step      ",
+  "logfile=-\n        file for log output                                ",
+  "stopfile=\n        stop simulation as soon as file exists             ",
+  "logstep=1\n        # blocksteps between log outputs                   ",
+  "out2=\n            file for secondary output stream                   ",
+  "step2=0\n          time between secondary outputs; 0 -> every step    ",
+  "theta="falcON_THETA_TEXT
+  "\n                 tolerance parameter at M=M_tot                     ",
+  "hgrow=0\n          grow fresh tree every 2^hgrow smallest steps       ",
+  "Ncrit="falcON_NCRIT_TEXT
+  "\n                 max # bodies in un-split cells                     ",
+#ifdef falcON_INDI
+  "eps=0.05\n         >=0: softening length OR maximum softening length\n"
+  "                   < 0: use individual but FIXED softening lengths    ",
+#else
+  "eps=0.05\n         softening length                                   ",
 #endif
-  "eps=0.05\n          softening length OR maximum softening length       ",
-  "kernel=1\n          softening kernel of family P_n (P_0=Plummer)       ",
-#ifdef ALLOW_INDI
-  "Nsoft=0\n           if 0:  use global softening length eps\n"
+  "kernel="falcON_KERNEL_TEXT
+  "\n                 softening kernel of family P_n (P_0=Plummer)       ",
+#ifdef falcON_INDI
+  "Nsoft=0\n          if 0:  use global softening length eps\n"
   "                   else:  use eps_i with ~Nsoft bodies in eps spheres ",
-  "Nref=16\n           if using eps_i: size of cell for estimating n      ",
+  "Nref=16\n          if using eps_i: size of cell for estimating n      ",
+  "emin=0\n           if using eps_i: lower limit for eps_i              ",
 #endif
-  "hmin=6\n            tau_min = (1/2)^hmin                               ",
-  "Nlev=1\n            # time-step levels                                 ",
-  "fac=\n              tau = fac/acc           \\   If more than one of    ",
-  "fph=\n              tau = fph/pot            |  these is non-zero, we  ",
-  "fpa=\n              tau = fpa*sqrt(pot)/acc /   use the minimum tau.   ",
-  "resume=f\n          resume old simulation?  that implies:\n"
+  "hmin=6\n           tau_min = (1/2)^hmin                               ",
+  "Nlev=1\n           # time-step levels                                 ",
+  "fac=\n             tau = fac / acc           \\   If more than one of  ",
+  "fph=\n             tau = fph / pot            |  these is non-zero,   ",
+  "fpa=\n             tau = fpa * sqrt(pot)/acc  |  we use the minimum   ",
+  "fea=\n             tau = fea * sqrt(eps/acc) /   tau.                 ",
+  "resume=f\n         resume old simulation?  that implies:\n"
   "                   - read last snapshot from input file\n"
   "                   - append primary output to input (unless out given)",
-  "give=mxv\n          list of output specifications. Recognizing:\n"
-  "                     m: mass                              (default)\n"
-  "                     x: position                          (default)\n"
-  "                     v: velocity                          (default)\n"
-  "                     a: acceleration\n"
-#ifdef ALLOW_INDI
-  "                     e: individual eps_i (if they exist)\n"
+  "give=mxv\n         list of output specifications. Recognizing:\n"
+  "                    m: mass                              (default)\n"
+  "                    x: position                          (default)\n"
+  "                    v: velocity                          (default)\n"
+  "                    a: acceleration\n"
+  "                    p: N-body potential\n"
+  "                    P: external Pot (added to pot before output)\n"
+#ifdef falcON_INDI
+  "                    e: individual eps_i (if they exist)\n"
 #endif
-  "                     p: N-body potential\n"
-  "                     l: time-step level (if they exist)\n"
+  "                    l: time-step level (if they exist)\n"
 #if(0)
-  "                     k: body key (if given with input)\n"
+  "                    k: body key (if given with input)\n"
 #endif
-#ifdef ALLOW_INDI
-  "                     f: body flag\n"
-  "                     r: density estimate                              ",
+#ifdef falcON_INDI
+  "                    f: body flag\n"
+  "                    r: density estimate                               ",
 #else
-  "                     f: body flag                                     ",
+  "                    f: body flag                                      ",
 #endif
-  "give2=mxv\n         list of specifications for secondary output        ",
-  "Grav=1\n            Newton's constant of gravity                       ",
-  "potname=\n          name of external potential                         ",
-  "potpars=\n          parameters of external potential                   ",
-  "potfile=\n          file required by external potential                ",
-  "startout=t\n        primary output for t=tstart?                       ",
-  "VERSION=1.5\n       04/December/2002  WD\n"
-  "                   compiled  " __DATE__ ", " __TIME__ "                    ",
+  "give2=mxv\n        list of specifications for secondary output        ",
+  "Grav=1\n           Newton's constant of gravity                       ",
+  "potname=\n         name of external potential                         ",
+  "potpars=\n         parameters of external potential                   ",
+  "potfile=\n         file required by external potential                ",
+  "startout=t\n       primary output for t=tstart?                       ",
+  "lastout=t\n        primary output for t=tstop?                        ",
+  "VERSION=1.6.1"
+#ifdef falcON_PROPER
+  "P"
+#endif
+#ifdef falcON_SSE
+  "S"
+#endif
+#ifdef falcON_INDI
+  "I"
+#endif
+               "\n    28-jul-2003 Walter Dehnen\n"
+  "                   compiled " __DATE__ ", " __TIME__ "                     ",
   NULL};
 //------------------------------------------------------------------------------
 string usage = "gyrfalcON -- a superberb N-body code";
 //------------------------------------------------------------------------------
-void nemo::main()
+inline bool exists(const char* stop_file)
+{
+  static std::ifstream IN;
+  IN.open(stop_file);
+  if(IN.is_open()) {
+    IN.close();
+    return true;
+  } else
+    return false;
+}
+//------------------------------------------------------------------------------
+void nbdy::main()
 {
   // 1. set some parameters                                                     
-  register double t_out0,t_out1,                      // t_out0, t_out1         
-    t_end   = getdparam("tstop"),                     // integrate until t=t_end
+  const bool
+    never_ending = !hasvalue("tstop"),                // integrate forever?     
+    resume       = getbparam("resume"),               // resume old simulation ?
+    stopfile     = hasvalue ("stopfile"),             // use stopfile?          
+    lastout      = getbparam("lastout");              // write out last snapshot
+  const double
+    t_end   = getdparam_z("tstop"),                   // integrate until t=t_end
     dt_out0 = getdparam("step"),                      // primary output interval
     dt_out1 = getdparam("step2");                     // secondary  --------    
-  register int Nlev = getiparam("Nlev");              // # time step levels     
-  if(Nlev>1 &&                                        // IF(more than one level)
-     ! (hasvalue("fac") || hasvalue("fph")))          //   we need fac or fph   
-    error("fac or fph required if Nlev > 1");         //   error otherwise      
-  nemo_pot *pot = hasvalue("potname")?                // IF(potname given) THEN 
+  const int
+    Nlev    = getiparam("Nlev"),                      // # time step levels     
+    logstep = getiparam("logstep");                   // # blocksteps/logoutput 
+  const io
+    wr0(getparam("give")),                            // what to output 0?      
+    wr1(getparam("give2"));                           // what to output 1?      
+  const nemo_pot *pot = hasvalue("potname")?          // IF(potname given) THEN 
     new nemo_pot(getparam  ("potname"),               //   initialize external  
 		 getparam_z("potpars"),               //   potential            
-		 getparam_z("potfile"))               //                        
-    : 0;                                              // ELSE: no potential     
-  bool resume = getbparam("resume");                  // resume old simulation ?
-  io wr0(getparam("give")), wr1(getparam("give2"));   // what to output?        
+		 getparam_z("potfile")) : 0;          // ELSE: no potential     
+  if(Nlev>1 &&                                        // IF(more than one level)
+     ! (hasvalue("fac") || hasvalue("fph") ||         //   we need fac or fph   
+	hasvalue("fpa") || hasvalue("fea") ))         //        or fpa or fea   
+    error("fac, fph, fap, or fea required if Nlev>1");//   error otherwise      
   // 2. initialize N-body integrator                                            
   yanc YANC(getparam   ("in"),                        //   snapshot input       
 	    true,                                     //   do nemo I/O          
@@ -180,10 +217,13 @@ void nemo::main()
 	    getdparam_z("fac"),                       //   fac in adapting steps
 	    getdparam_z("fph"),                       //   fph in adapting steps
 	    getdparam_z("fpa"),                       //   fpa in adapting steps
-#ifdef ALLOW_INDI
+	    getdparam_z("fea"),                       //   fea in adapting steps
+#ifdef falcON_INDI
 	    getdparam  ("Nsoft"),                     //   #in eps sphere       
 	    getiparam  ("Nref"),                      //   #bodies in n-estimate
-	    getdparam  ("Nsoft")!=0 ? 2 : 0,          //   softening type       
+	    getiparam  ("emin"),                      //   lower limit for eps_i
+	    getdparam  ("eps")  <  zero? 1 :          //   individual fixed     
+	    getdparam  ("Nsoft")== 0   ? 0 : 2,       //   global OR indiv adap 
 #endif
 	    getdparam  ("Grav"),                      //   Newton's constant    
 	    resume,                                   //   resume old simul?    
@@ -194,6 +234,13 @@ void nemo::main()
     return;                                           //   and can stop here    
   }                                                   // ENDIF                  
   // 3. initialize output streams                                               
+  // 3.0 check that at most one output is to stdout                             
+  int nstdout = 0;                                    // counter for stdout     
+  if(0==strcmp(getparam("logfile"),"-") ) ++nstdout;  // is logfile=- ?         
+  if(0==strcmp(getparam("out")    ,"-") ) ++nstdout;  // is out=- ?             
+  if(0==strcmp(getparam("out2")   ,"-") ) ++nstdout;  // is out2=- ?            
+  if(nstdout > 1)                                     // IF # stdout > 1 ERROR  
+    error("more than one of \"logfile\", \"out\", \"out2\" equals \"-\"");
   // 3.1 primary output                                                         
   if(hasvalue("out"))                                 // IF(out given) THEN     
     YANC.open_nemo(0,getparam("out"),resume);         //   open NEMO output     
@@ -213,37 +260,49 @@ void nemo::main()
     YANC.write_nemo(wr1,1);                           //   write snapshot       
   }                                                   // ENDIF                  
   // 3.3 log output                                                             
-  std::ostream *logout;                               // pointer to log ostream 
-  if(0 == strcmp(getparam("logfile"),"."))
+  std::ostream *logout = 0;                           // pointer to log ostream 
+  if(0 == strcmp(getparam("logfile"),"."))            // IF no log output       
     warning("option \"logfile=.\" supresses any log output");
-  if(strcmp(getparam("logfile"),"-"))                 // IF desired             
+  else if(strcmp(getparam("logfile"),"-"))            // ELIF desired:          
     logout = new std::ofstream(getparam("logfile"));  //   log output to file   
   else                                                // ELSE                   
     logout = &std::clog;                              //   log output to stdlog 
-  if(logout) {
-    YANC.describe_nemo(*logout,*(ask_history()));     // put history to logout  
-    YANC.stats_head   (*logout);                      // header for logout      
-    YANC.stats  (*logout);                            // statistics -> logout   
-  }
+  if(logout) {                                        // IF any log output      
+    YANC.describe_nemo(*logout,*(ask_history()));     //   put history to logout
+    YANC.stats_head   (*logout);                      //   header for logout    
+    YANC.stats        (*logout);                      //   statistics -> logout 
+  }                                                   // ENDIF                  
   // 4. time integration & outputs                                              
-  t_out0 = YANC.initial_time()+0.999999*dt_out0;      // time for next output   
-  t_out1 = YANC.initial_time()+0.999999*dt_out1;      // time for next output   
-  while(YANC.time() < t_end) {                        // WHILE( t < t_end )     
+  register bool written=false;                        // current snapshot wrtten
+  register double
+    t_out0 = YANC.initial_time()+0.999999*dt_out0,    // time for next output 0 
+    t_out1 = YANC.initial_time()+0.999999*dt_out1;    // time for next output 1 
+  for(register int steps=0;                           // blockstep counter      
+      (never_ending || YANC.time() < t_end) &&        // WHILE t < t_end        
+      (!stopfile || !exists(getparam("stopfile")));   //   AND no stopfile      
+      ++steps) {                                      //   increment counter    
     YANC.full_step();                                 //   make full block step 
-    if(logout) YANC.stats(*logout);                   //   statistics output    
+    if(logout && steps%logstep ==0)                   //   IF(time for logout)  
+      YANC.stats(*logout);                            //     statistics output  
     if(YANC.time() >= t_out0) {                       //   IF(t >= t_out0)      
       YANC.write_nemo(wr0,0);                         //     primary output     
       t_out0 += dt_out0;                              //     increment t_out0   
-    }                                                 //   ENDIF                
+      written = true;                                 //     written out        
+    } else                                            //   ELSE                 
+      written = false;                                //     not written        
     if(YANC.nemo_is_open(1) &&                        //   IF(secondary output  
        YANC.time() >= t_out1) {                       //   AND t >= t_out1)     
       YANC.write_nemo(wr1,1);                         //     secondary output   
       t_out1 += dt_out1;                              //     increment t_out1   
     }                                                 //   ENDIF                
   }                                                   // END: WHILE             
+  if(!written && lastout) YANC.write_nemo(wr0,0);     // write last snapshot    
+  if(logout && stopfile && exists(getparam("stopfile")))
+    (*logout) <<"# simulation STOPPED because file \""
+	      << getparam("stopfile") << "\" found to exist\n";
   // 5. cleaning up (including implicit call of destructors)                    
   if(logout && strcmp(getparam("logfile"),"-"))       // IF log output to file  
     static_cast<std::ofstream*>(logout)->close();     //   close log output file
   if(pot) delete pot;                                 // delete external pot    
 }
-//---------------------end-of-YancNemo.cc------that's-it-!----------------------
+//---------------------end-of-gyrfalcON.cc------that's-it-!---------------------

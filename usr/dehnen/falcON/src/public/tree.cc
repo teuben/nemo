@@ -5,7 +5,7 @@
 //                                                                             |
 // C++ code                                                                    |
 //                                                                             |
-// Copyright Walter Dehnen, 2000-2002                                          |
+// Copyright Walter Dehnen, 2000-2003                                          |
 // e-mail:   wdehnen@aip.de                                                    |
 // address:  Astrophysikalisches Institut Potsdam,                             |
 //           An der Sternwarte 16, D-14482 Potsdam, Germany                    |
@@ -22,10 +22,10 @@
 // the center and size of an appropriate root box computed.                    |
 //                                                                             |
 // building of a box-leaf tree                                                 |
-// We first construct a box-leaf tree. The leaf-adding algorithm is used, i.e. |
+// We first construct a box-leaf tree. The leaf-adding algorithm is used, ie.  |
 // the leafs are added one-by-one to the root box (the alternative would be    |
 // the box-dividing algorithm, which we found to be slightly less efficient).  |
-// The boxes are allocated in blocks, using block_alloc of internal/memo.h.    |
+// The boxes are allocated in blocks, using block_alloc of public/memo.h.      |
 // Boxes with less than Ncrit leafs are not divided (ie. we wait until a box   |
 // has Ncrit leafs before splitting it).                                       |
 //                                                                             |
@@ -56,7 +56,8 @@
 // - We may actually take the sorting of the old tree directly. If we still    |
 //   want to have a cell-soul tree with contiguous sub-nodes (and we do), then |
 //   we must still go via a box-leaf tree. The resulting code is not           |
-//   significantly faster then the much simpler method above.                  |
+//   significantly faster then the much simpler method above and in some cases |
+//   actually much slower. It is NOT RECOMMENDED; we keep it for reference.    |
 //                                                                             |
 // Naming                                                                      |
 // Throughout this file, we use the following names:                           |
@@ -75,10 +76,15 @@
 //                                                                             |
 //-----------------------------------------------------------------------------+
 #include <public/tree.h>
-#include <body.h>
 #include <public/memo.h>
 #include <public/grat.h>
 #include <public/stic.h>
+#ifdef falcON_MPI
+#  include <walter/grap.h>
+#endif
+#ifdef falcON_SPH
+#  include <sph/spht.h>
+#endif
 
 using namespace nbdy;
 ////////////////////////////////////////////////////////////////////////////////
@@ -96,13 +102,13 @@ static double  Tini, Tgro, Tlnk, Ttot;
 
 ////////////////////////////////////////////////////////////////////////////////
 namespace nbdy {
-#define LoopDims for(register int d=0; d<NDIM; d++)
+#define LoopDims for(register int d=0; d<Ndim; d++)
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
   // auxiliarty constants                                                     //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
-  const int BIT[8]        = {1,2,4,8,16,32,64,128};// 2^i, i=1,..2^NDIM         
+  const int BIT[8]        = {1,2,4,8,16,32,64,128};// 2^i, i=1,..2^Ndim         
   const int SUBTREECELL   = 1<<8;                  // cell = cell of subtree    
   const int SUBTREEZOMBIE = 1<<9;                  // cell with 1 subtree subcel
   const int SUBTREE_FLAGS = SUBTREE | SUBTREECELL | SUBTREEZOMBIE;
@@ -122,29 +128,34 @@ namespace nbdy {
   inline bool is_subtreezombie     (CFCF)   { return F->is_set(SUBTREEZOMBIE);}
 #undef CFCF
   //----------------------------------------------------------------------------
+  // This routines returns, in each dimension, the nearest integer to x         
+  //----------------------------------------------------------------------------
   inline vect Integer(const vect& x) {
-    // This routines returns, in each dimension, the nearest integer to x       
     register vect c = zero;                        // reset return position     
     LoopDims c[d]=int(x[d]+half);                  // find center position      
     return c;                                      // and return it             
   }
   //----------------------------------------------------------------------------
+  // in which octant of the cube centred on cen is pos?                         
+  //----------------------------------------------------------------------------
   inline int octant(const vect& cen, const vect& pos) {
     register int 
       oct=(pos[0] > cen[0])? 1 : 0;
     if    (pos[1] > cen[1]) oct |= 2;
-#if NDIM==3
+#if falcON_NDIM==3
     if    (pos[2] > cen[2]) oct |= 4;
 #endif
     return oct;                                    // return octant             
   }
+  //----------------------------------------------------------------------------
+  // is pos inside the cube centred on cen and with radius (=half size) rad?    
   //----------------------------------------------------------------------------
   inline bool contains(const vect& cen,
 		       const real& rad,
 		       const vect& pos) {
     return abs(cen[0]-pos[0]) <= rad
       &&   abs(cen[1]-pos[1]) <= rad
-#if NDIM==3
+#if falcON_NDIM==3
       &&   abs(cen[2]-pos[2]) <= rad
 #endif
       ;
@@ -156,6 +167,9 @@ namespace nbdy {
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
   // nbdy::class basic_cell_access                                            //
+  //                                                                          //
+  // any class derived from this one has write access to the tree-specific    //
+  // entries of tree cells, which are otherwise not writable.                 //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
   class basic_cell_access {
@@ -173,18 +187,18 @@ namespace nbdy {
   };
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
-  // class nbdy::sub_tree_builder<SUB_TREE,PARENT_TREE>                       //
+  // class nbdy::sub_tree_builder<TREE,PARENT_TREE>                           //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
-  template<typename SUB_TREE, typename PARENT_TREE>
+  template<typename TREE, typename PARENT_TREE>
   class sub_tree_builder : private basic_cell_access {
     //--------------------------------------------------------------------------
     // some types                                                               
     //--------------------------------------------------------------------------
     typedef typename PARENT_TREE::cell_iterator       parent_c_iter;
     typedef typename PARENT_TREE::soul_type          *parent_s_pter;
-    typedef typename SUB_TREE::cell_iterator          cell_iter;
-    typedef typename SUB_TREE::soul_type             *soul_pter;
+    typedef typename TREE::cell_iterator          cell_iter;
+    typedef typename TREE::soul_type             *soul_pter;
     //--------------------------------------------------------------------------
     // all methods are static                                                   
     //--------------------------------------------------------------------------
@@ -259,81 +273,79 @@ namespace nbdy {
   };
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
-  // class nbdy::tree_pruner<TREE>                                            //
+  // class nbdy::tree_pruner<TREE,PARENT_TREE>                                //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
-  template<typename TREE>
+  template<typename TREE, typename PARENT_TREE>
   class tree_pruner : private basic_cell_access {
     tree_pruner(tree_pruner const&);               // not implemented           
     //--------------------------------------------------------------------------
-    typedef typename TREE::cell_type           cell_type;
-    typedef typename TREE::cell_iterator       cell_iter;
-    typedef typename TREE::soul_type          *soul_pter;
-    typedef bool(*pruner)(const cell_type*const&);
+    typedef typename TREE::cell_type            cell_type;
+    typedef typename TREE::cell_iterator        cell_iter;
+    typedef typename TREE::soul_type           *soul_pter;
+    typedef typename PARENT_TREE::cell_iterator parent_ci;
+    typedef typename PARENT_TREE::soul_type    *parent_sp;
+    typedef bool(*pruner)(parent_ci const&);
     //--------------------------------------------------------------------------
-    const pruner prune;
-    const TREE  *parent;
-    int          nC,nS;
+    const pruner        prune;
+    const PARENT_TREE  *parent;
+    int                 nC,nS;
     //--------------------------------------------------------------------------
-    void count_nodes(cell_iter const&C)
-    {
+    void count_nodes(parent_ci const&C) {
       ++nC;                                        // count C                   
-      if(!(*prune)(C.c_pter())) {                  // IF(C is not pruned)       
+      if(!(*prune)(C)) {                           // IF(C is not pruned)       
 	nS += C->nsouls();                         //   count soul kids         
-	LoopCellKids(typename cell_iter,C,c)       //   LOOP(cell kids)         
+	LoopCellKids(typename parent_ci,C,c)       //   LOOP(cell kids)         
 	  count_nodes(c);                          //     RECURSIVE call        
       }                                            // ENDIF                     
     }
     //--------------------------------------------------------------------------
     int link(                                      // R:   depth                
-	     cell_iter const&P,                    // I:   parent cell to link  
+	     parent_ci const&P,                    // I:   parent cell to link  
 	     cell_iter const&C,                    // I:   cell to link with    
 	     cell_iter      &Cf,                   // I/O: next free cell       
 	     soul_pter const&S0,                   // I:   souls                
 	     int            &Sf)                   // I/O: next free soul       
     {
       register int dep=0;                          // depth                     
-      radius_(C) = P->radius();                    // copy radius               
-      center_(C) = P->center();                    // copy center               
-      number_(C) = P->number();                    // copy number               
-      nsouls_(C) = 0;                              // reset # subsouls          
-      ncells_(C) = 0;                              // reset # subcells          
-      if((*prune)(P.c_pter())) {                   // IF(prune cell P)          
+      C->copy_prune(P);                            // copy relevant data        
+      if((*prune)(P)) {                            // IF(prune cell P)          
 	C->add_flag(PRUNE_FLAGS);                  //   mark C as purely repr.  
+	nsouls_(C) = 0;                            //   reset # subsouls        
+	ncells_(C) = 0;                            //   reset # subcells        
 	fcsoul_(C) =-1;                            //   subsouls meaningless    
 	fccell_(C) =-1;                            //   subcells meaningless    
-      } else {                                     // ELSE                      
+      } else {                                     // ELSE(retain original)     
+	nsouls_(C) = P->nsouls();                  //   copy # subsouls         
+	ncells_(C) = P->ncells();                  //   copy # subcells         
 	fcsoul_(C) = Sf;                           //   set sub-souls           
-	LoopSoulKids(typename cell_iter,P,ps) {    //   LOOP(subsouls)         >
-	  S0[Sf++].copy_prune(ps,parent->index(ps)); //   copy properties       
-	  nsouls_(C)++;                            //     increment # soul kids 
-	}                                          //   ENDIF                  <
-	ncells_(C) = P->ncells();                  //   set 1st cell kid        
-	if(ncells_(C)) {                           //   IF(have cell kids)      
-	  register int  de,pruned=0;               //     depth of sub-cell     
+	LoopSoulKids(typename parent_ci,P,ps)      //   LOOP(sub-souls)         
+	  S0[Sf++].copy_prune(ps);                 //     copy properties       
+	if(P->ncells()) {                          //   IF(P has cell kids)     
+	  register int       de,pruned=0;          //     sub-depth             
 	  register cell_iter Ci=Cf;                //     remember free cells   
-	  fccell_(C) = Ci.index();                 //     set cell children     
-	  Cf += ncells_(C);                        //     reserve children cells
-	  LoopCellKids(typename cell_iter,P,pc) {  //     LOOP(subcells)       >
+	  fccell_(C) = Ci.index();                 //     set cell: 1st sub-cell
+	  Cf += P->ncells();                       //     reserve sub-cells     
+	  LoopCellKids(typename parent_ci,P,pc) {  //     LOOP(sub-cells)       
 	    de = link(pc,Ci,Cf,S0,Sf);             //       RECURSIVE link      
 	    if(de>dep) dep=de;                     //       update depth        
-#if defined(__GNUC__) && __GNUC__ < 3
-	    pruned |= C->is_set(PRUNED);           //       pruning info        
-#else
+// #if defined(__GNUC__) && __GNUC__ < 3
+// 	    pruned |= Ci->is_set(PRUNED);          //       pruning info        
+// #else
 	    pruned |= is_pruned(Ci);               //       pruning info        
-#endif
+// #endif
 	    ++Ci;                                  //       next subcell        
-	  }                                        //     <                     
+	  }                                        //     END LOOP              
 	  if(pruned) C->add_flag(PRUNED);          //     IF(pruned) flag so    
-	} else                                     //   ELSE(no cell kids)      
-	  fccell_(C) =-1;                          //     set cell children     
+	} else                                     //   ELSE                    
+	  fccell_(C) = -1;                         //     set cell: 1st sub-cell
       }                                            // ENDIF                     
       return dep+1;                                // return cell's depth       
     }
     //--------------------------------------------------------------------------
   public:
-    tree_pruner(pruner     const&p,
-		const TREE*const&t) : prune(p), parent(t), nC(0), nS(0)
+    tree_pruner(pruner            const&p,
+		const PARENT_TREE*const&t) : prune(p), parent(t), nC(0), nS(0)
     {
       count_nodes(t->root());
     }
@@ -387,16 +399,16 @@ namespace nbdy {
       LIST = this;
       ++COUNTER;
     }
-     //--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
     void add_to_list(node* &LIST, int& COUNTER) {
       NEXT = static_cast<leaf*>(LIST);
       LIST = this;
       ++COUNTER;
     }
-   //--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
     template<typename soul_type>
     void  set_up  (const soul_type* const&S) {
-      pos() = nbdy::cofm(S);
+      pos() = nbdy::pos(S);
       LINK  = mybody(S);
     }
     //--------------------------------------------------------------------------
@@ -406,12 +418,12 @@ namespace nbdy {
       pos() = BB->pos(i);
     }
     //--------------------------------------------------------------------------
-    void  set_up  (const areal*x[NDIM], int const&i) {
+    void  set_up  (const barrays* const&BB, int const&i) {
       LINK = i;
-      pos()[0] = x[0][i];
-      pos()[1] = x[1][i];
-#if NDIM==3
-      pos()[2] = x[2][i];
+      pos()[0] = BB->pos_x(i);
+      pos()[1] = BB->pos_y(i);
+#if falcON_NDIM==3
+      pos()[2] = BB->pos_z(i);
 #endif
     }
     //--------------------------------------------------------------------------
@@ -481,7 +493,7 @@ namespace nbdy {
     // data                                                                     
     //--------------------------------------------------------------------------
     real       RADIUS;                             // half size of the cube     
-    node      *OCT[NSUB];                          // octants                   
+    node      *OCT[Nsub];                          // octants                   
     int        TYPE;                               // bitfield: 1=cell, 0=leaf  
     int        NUMBER;                             // number of leafs           
     leaf      *LEAFS;                              // linked list of leafs      
@@ -540,7 +552,7 @@ namespace nbdy {
       TYPE      = 0;
       NUMBER    = 0;
       LEAFS     = 0;
-      for(register int b=0; b!=NSUB; ++b) OCT[b] = 0;
+      for(register int b=0; b!=Nsub; ++b) OCT[b] = 0;
     }
     //--------------------------------------------------------------------------
     void mark_as_box    (int const&i) { TYPE |=  BIT[i]; }
@@ -548,7 +560,7 @@ namespace nbdy {
     vect&      center   ()            { return pos(); }
     //--------------------------------------------------------------------------
     box& reset_octants() {
-      for(register node**P=OCT; P!=OCT+NSUB; ++P) *P = 0;
+      for(register node**P=OCT; P!=OCT+Nsub; ++P) *P = 0;
       return *this;
     }
     //--------------------------------------------------------------------------
@@ -582,7 +594,7 @@ namespace nbdy {
       RADIUS *= half;                              // reduce radius             
       if(i&1) center()[0]+= RADIUS; else center()[0]-= RADIUS;
       if(i&2) center()[1]+= RADIUS; else center()[1]-= RADIUS;
-#if NDIM==3
+#if falcON_NDIM==3
       if(i&4) center()[2]+= RADIUS; else center()[2]-= RADIUS;
 #endif
     }
@@ -590,7 +602,7 @@ namespace nbdy {
     void expand_to_octant(int const&i) {           // expand in direction i     
       if(i&1) center()[0]+= RADIUS; else center()[0]-= RADIUS;
       if(i&2) center()[1]+= RADIUS; else center()[1]-= RADIUS;
-#if NDIM==3
+#if falcON_NDIM==3
       if(i&4) center()[2]+= RADIUS; else center()[2]-= RADIUS;
 #endif
       RADIUS *= two;                               // increase radius           
@@ -720,8 +732,13 @@ namespace nbdy {
       return &((new_box(nl))->operator= (Po));
     }
     //--------------------------------------------------------------------------
+#define TREE_TOO_DEEP							       \
+    error("exceeding maxium tree depth of %d\n                 "	       \
+	  "(presumably more than Ncrit=%d bodies have a common position)",     \
+	  DMAX,NCRIT);
+    //--------------------------------------------------------------------------
     inline void split_box(box*         P,          // I: box to be splitted     
-			  int    const&l,          // I: level                  
+			  register int l,          // I: level                  
 			  size_t const&nl)         // I: # leafs added so far   
       // This routines splits a box:                                            
       // The leafs in the linked list are sorted into octants. Octants with one 
@@ -730,32 +747,32 @@ namespace nbdy {
       // If all leafs happen to be in just one octant, the process is repeated  
       // recursively on the box of this octant.                                 
     {
-      if(l>DMAX)                                   // IF (level>DMAX)           
-	error("exceeding max tree depth");         //   issue error message     
-      register int   NUM[NSUB];                    // array with number of leafs
+      register int   NUM[Nsub];                    // array with number of leafs
       register int   b,ne;                         // octant & counters         
       register box  *sub=0;                        // current sub-box           
       register leaf *Li, *Ln;                      // current & next leaf       
-      do {                                         // DO(until # octants > 1)  >
-	for(b=0; b<NSUB; b++) NUM[b] = 0;          //   reset counters          
-	for(Li=P->LEAFS; Li; Li=Ln) {              //   LOOP(linked list)      >
+      do {                                         // DO until # octants > 1    
+	if(l>DMAX) TREE_TOO_DEEP                   // IF level>DMAX ERROR       
+	for(b=0; b<Nsub; b++) NUM[b] = 0;          //   reset counters          
+	for(Li=P->LEAFS; Li; Li=Ln) {              //   LOOP linked list        
 	  Ln = Li->NEXT;                           //     next leaf in list     
 	  b  = P->octant(Li);                      //     octant of current leaf
 	  Li->add_to_list(P->OCT[b], NUM[b]);      //     add leaf to list [b]  
-	}                                          //                          <
+	}                                          //   END LOOP                
 	P->LEAFS = 0;                              //   reset list of sub-leafs 
-	for(ne=b=0; b<NSUB; b++) if(NUM[b]) {      //   LOOP(non-empty octs)   >
+	for(ne=b=0; b<Nsub; b++) if(NUM[b]) {      //   LOOP non-empty octs     
 	  ne++;                                    //     count them            
-	  if(NUM[b]>1) {                           //     IF(many leafs)        
+	  if(NUM[b]>1) {                           //     IF many leafs         
 	    sub = make_subbox(P,b,nl);             //       make sub-box        
 	    sub->LEAFS = PLEAF(P->OCT[b]);         //       assign sub-box's    
 	    sub->NUMBER= NUM[b];                   //       leaf list & number  
 	    P->OCT[b]= sub;                        //       set octant=sub-box  
 	    P->mark_as_box(b);                     //       mark octant as box  
 	  }                                        //     ENDIF                 
-	}                                          //                          <
+	}                                          //   END LOOP                
 	P = sub;                                   //   set current box=sub-box 
-      } while(ne==1);                              // WHILE(only 1 octant)     <
+	++l;                                       //   increment depth counter 
+      } while(ne==1);                              // WHILE only 1 octant       
     }
     //--------------------------------------------------------------------------
     inline void addleaf_1(                         // add single leaf to box    
@@ -770,24 +787,23 @@ namespace nbdy {
       register leaf  *Lo;                          // actual leaf loaded        
       register box   *P=base;;                     // actual box                
       register node **oc;                          // actual sub-node           
-      for(l=l0; l<DMAX; l++) {                     // LOOP(over boxes)         <
+      for(l=l0; l<DMAX; l++) {                     // LOOP over boxes           
 	b  = P->octant(Li);                        //   leaf's octant           
 	oc = P->OCT+b;                             //   pointer to octant       
 	P->NUMBER++;                               //   increment number        
-	if((*oc)==0) {                             //   IF (octant empty)       
+	if((*oc)==0) {                             //   IF octant empty         
 	  *oc = Li;                                //     assign leaf to it     
 	  P->mark_as_leaf(b);                      //     mark octant as leaf   
 	  return;                                  // <-  DONE with this leaf   
-	} else if(P->marked_as_leaf(b)) {          //   ELIF (octant=leaf)      
+	} else if(P->marked_as_leaf(b)) {          //   ELIF octant=leaf        
 	  Lo = PLEAF(*oc);                         //     get old leaf          
 	  P->mark_as_box(b);                       //     mark octant as box    
 	  P = make_subbox_1(P,b,Lo,nl);            //     create sub-box        
 	  *oc = P;                                 //     assign sub-box to oc  
-	} else                                     //   ELSE (octant=box)       
+	} else                                     //   ELSE octant=box         
 	  P = PBOX(*oc);                           //     set current box       
-      }                                            //   ENDIF                  <
-      if(l>=DMAX)                                  // IF (level>DMAX)           
-	error("exceeding max tree depth");         //   issue an error          
+      }                                            // END LOOP                  
+      if(l>=DMAX) TREE_TOO_DEEP                    // IF level>DMAX ERROR       
     }
     //--------------------------------------------------------------------------
     inline void addleaf_N(                         // add single leaf to box    
@@ -802,30 +818,29 @@ namespace nbdy {
       register leaf  *Lo;                          // actual leaf loaded        
       register box   *P=base;;                     // actual box                
       register node **oc;                          // actual sub-node           
-      for(l=l0; l<DMAX; l++) {                     // LOOP (over boxes)        >
-	if(P->is_twig()) {                         //   IF (box == twig)        
+      for(l=l0; l<DMAX; l++) {                     // LOOP over boxes           
+	if(P->is_twig()) {                         //   IF box == twig          
 	  P->addleaf_to_list(Li);                  //     add leaf to list      
 	  if(P->NUMBER>NCRIT) split_box(P,l,nl);   //     IF(N > NCRIT) split   
 	  return;                                  //     DONE with this leaf   
-	} else {                                   //   ELIF (box==branch)      
+	} else {                                   //   ELIF box==branch        
 	  b  = P->octant(Li);                      //     leaf's octant         
 	  oc = P->OCT+b;                           //     pointer to octant     
 	  P->NUMBER++;                             //     increment number      
-	  if((*oc)==0) {                           //     IF (octant empty)     
+	  if((*oc)==0) {                           //     IF octant empty       
 	    *oc = Li;                              //       assign leaf to it   
 	    P->mark_as_leaf(b);                    //       mark octant as leaf 
 	    return;                                // <-    DONE with this leaf 
-	  } else if(P->marked_as_leaf(b)) {        //     ELIF (octant=leaf)    
+	  } else if(P->marked_as_leaf(b)) {        //     ELIF octant=leaf      
 	    Lo = PLEAF(*oc);                       //       get old leaf        
 	    P->mark_as_box(b);                     //       mark octant as box  
 	    P = make_subbox_N(P,b,Lo,nl);          //       create sub-box      
 	    *oc = P;                               //       assign sub-box to oc
-	  } else                                   //     ELSE (octant=box)     
+	  } else                                   //     ELSE octant=box       
 	    P = PBOX(*oc);                         //       set current box     
-	}                                          //     ENDIF                 
-      }                                            //   ENDIF                  <
-      if(l>=DMAX)                                  // IF (level>DMAX)           
-	error("exceeding max tree depth");         //   issue an error          
+	}                                          //   ENDIF                   
+      }                                            // END LOOP                  
+      if(l>=DMAX) TREE_TOO_DEEP                    // IF level>DMAX  ERROR      
     }
     //--------------------------------------------------------------------------
     inline void addleaf(                           // add single leaf to box    
@@ -853,54 +868,54 @@ namespace nbdy {
       // larger cells accumulate a list of "lost" souls                         
       // NOTE:     this version ASSUMES that all souls are still in tree        
       register box* P = make_cellbox(C,Na);        // get new box = cell        
-      if(number(C) > NCUT_FAC) {                   // IF(N > N_cut * fac/2)     
+      if(number(C) > NCUT_FAC) {                   // IF N > N_cut * fac/2      
 	register leaf_list Lo;                     //   list: leafs lost from C 
-	LoopSoulKids(typename cell_iter,C,Si) {    //   LOOP(soul kids of C)   >
+	LoopSoulKids(typename cell_iter,C,Si) {    //   LOOP soul kids of C     
 	  Lf->set_up(Si);                          //     map soul -> leaf      
 	  Lo.add_leaf(Lf);                         //     add to list Lo        
 	  ++Lf;                                    //     increment leaf pter   
-	}                                          //                          <
+	}                                          //   END LOOP                
 	register box* Pi;                          //   pter to child box       
-	LoopCellKids(typename cell_iter,C,Ci) {    //   LOOP(cell kids)        >
+	LoopCellKids(typename cell_iter,C,Ci) {    //   LOOP cell kids of C     
 	  Pi = unlink(Ci,de+1,Na,Lf,Lo);           //     RECURSIVE call        
 	  if(Pi) P->addbox_to_octs(Pi);            //     add box to octants    
-	}                                          //                          <
-	if(Lo.SIZE   > NCUT        &&              //   IF(enough lost leafs    
-	   number(C) > FACH*Lo.SIZE    ) {         //      but much less than N)
-	  BeginLeafList(Lo,Li)                     //     LOOP(list of lost L) >
-	    if(P->contains(Li))                    //       IF(leaf in box)     
+	}                                          //   END LOOP                
+	if(Lo.SIZE   > NCUT        &&              //   IF enough lost leafs    
+	   number(C) > FACH*Lo.SIZE    ) {         //      but much less than N 
+	  BeginLeafList(Lo,Li)                     //     LOOP list of lost L   
+	    if(P->contains(Li))                    //       IF leaf in box      
 	      addleaf(P,Li,Na++,de);               //         add leaf to box   
 	    else                                   //       ELSE(still lost)    
 	      Lp.add_leaf(Li);                     //         add leaf to Lp    
-	  EndLeafList                              //       ENDIF              <
-	} else if(!Lo.is_empty())                  //   ELSE(few lost leafs)    
+	  EndLeafList                              //     END LOOP              
+	} else if(!Lo.is_empty())                  //   ELSE (few lost leafs)   
 	  Lp.append(Lo);                           //     append list Lo to Lp  
-      } else if(number(C) > NCUT) {                // ELIF(N > N_cut)           
-	LoopSoulKids(typename cell_iter,C,Si) {    //   LOOP(soul kids of C)   >
+      } else if(number(C) > NCUT) {                // ELIF N > N_cut            
+	LoopSoulKids(typename cell_iter,C,Si) {    //   LOOP soul kids of C     
 	  Lf->set_up(Si);                          //     map soul -> leaf      
 	  Lp.add_leaf(Lf);                         //     add to list Lp        
 	  ++Lf;                                    //     increment leaf pter   
-	}                                          //                          <
+	}                                          //   END LOOP                
 	register box* Pi;                          //   pter to child box       
-	LoopCellKids(typename cell_iter,C,Ci) {    //   LOOP(cell kids of C)   >
+	LoopCellKids(typename cell_iter,C,Ci) {    //   LOOP cell kids of C     
 	  Pi = unlink(Ci,de+1,Na,Lf,Lp);           //     RECURSIVE call        
 	  if(Pi) P->addbox_to_octs(Pi);            //     add box to octants    
-	}                                          //                          <
+	}                                          //   END LOOP                
       } else {                                     // ELSE(N <= N_cut)          
-	LoopAllSouls(typename cell_iter,C,Si) {    //   LOOP(all souls in cell)>
+	LoopAllSouls(typename cell_iter,C,Si) {    //   LOOP all souls in cell  
 	  Lf->set_up(Si);                          //     initialize leaf       
 	  if(P->contains(Lf))                      //     IF(leaf in box)       
 	    addleaf(P,Lf,Na++,de);                 //       add leaf to box     
 	  else                                     //     ELSE(not in box)      
 	    Lp.add_leaf(Lf);                       //       add to list Lp      
 	  ++Lf;                                    //     incr current leaf     
-	}                                          //                          <
+	}                                          //   END LOOP                
       }                                            // ENDIF                     
       return P->NUMBER ? P : 0;                    // return this box           
     }
     //--------------------------------------------------------------------------
     template<typename cell_iter>
-    inline int link_cells_1(                       // R:   max tree depth       
+    inline int link_cells_1(                       // R:   tree depth of cell   
 			    const box* const&P,    // I:   current box          
 			    cell_iter  const&C,    // I:   current cell         
 			    cell_iter       &Cf,   // I/O: free cells           
@@ -921,12 +936,12 @@ namespace nbdy {
       nsouls_(C) = 0;                              // reset cell: # soul kids   
       register int i,nsub=0;                       // index, # sub-boxes        
       register node*const*N;                       // pointer to current sub    
-      for(i=0,N=P->OCT; i!=NSUB; ++i,++N)          // LOOP(octants)            >
+      for(i=0,N=P->OCT; i!=Nsub; ++i,++N)          // LOOP octants              
 	if(P->TYPE & BIT[i]) ++nsub;               //   IF   sub-boxes: count   
 	else if(*N) {                              //   ELIF sub-leafs:         
 	  PLEAF(*N)->set_soul(S0[sf++]);           //     set soul              
 	  nsouls_(C)++;                            //     inc # sub-souls       
-	}                                          //   ENDIF                  <
+	}                                          // END LOOP                  
       if(nsub) {                                   // IF sub-boxes              
 	register int       de;                     //   sub-depth               
 	register box      *Pi;                     //   sub-box pointer         
@@ -934,12 +949,12 @@ namespace nbdy {
 	fccell_(C) = Ci.index();                   //   set cell: 1st sub-cell  
 	ncells_(C) = nsub;                         //   set cell: # sub-cells   
 	Cf += nsub;                                //   reserve nsub cells      
-	for(i=0,N=P->OCT; i!=NSUB; ++i,++N)        //   LOOP(octants)          >
-	  if(*N && P->marked_as_box(i)) {          //     IF sub-box            
+	for(i=0,N=P->OCT; i!=Nsub; ++i,++N)        //   LOOP octants            
+	  if(*N && P->marked_as_box(i)) {          //     IF oct==sub-box       
 	    Pi = PBOX(*N);                         //       sub-box             
 	    de = link_cells_1(Pi,Ci++,Cf,S0,sf);   //       recursive call      
 	    if(de>dep) dep=de;                     //       update depth        
-	  }                                        //     ENDIF                <
+	  }                                        //   END LOOP                
       } else {                                     // ELSE (no sub-boxes)       
 	fccell_(C) =-1;                            //   set cell: 1st sub-cell  
 	ncells_(C) = 0;                            //   set cell: # sub-cells   
@@ -949,7 +964,7 @@ namespace nbdy {
     }
     //--------------------------------------------------------------------------
     template<typename cell_iter>
-    inline int link_cells_N(                       // R:   max tree depth       
+    inline int link_cells_N(                       // R:   tree depth of cell   
 			    const box* const&P,    // I:   current box          
 			    cell_iter  const&C,    // I:   current cell         
 			    cell_iter       &Cf,   // I/O: free cells           
@@ -968,43 +983,43 @@ namespace nbdy {
       number_(C) = P->NUMBER;                      // copy number               
       fcsoul_(C) = sf;                             // set cell: soul kids       
       nsouls_(C) = 0;                              // reset cell: # soul kids   
-      if(P->is_twig()) {                           // IF(box==twig)             
+      if(P->is_twig()) {                           // IF box==twig              
 	fccell_(C) =-1;                            //   set cell: sub-cells     
 	ncells_(C) = 0;                            //   set cell: # sub-cells   
 	register leaf*Li=P->LEAFS;                 //   sub-leaf pointer        
-	for(; Li; Li=Li->NEXT) {                   //   loop sub-leafs      >   
+	for(; Li; Li=Li->NEXT) {                   //   LOOP sub-leafs          
 	  Li->set_soul(S0[sf++]);                  //     set soul              
 	  nsouls_(C)++;                            //     increment # sub-souls 
-	}                                          //   <                       
+	}                                          //   END LOOP                
       } else {                                     // ELSE (box==branch)        
 	register int   i,nsub=0;                   //   index, # sub-boxes      
 	register node*const*N;                     //   pointer to current sub  
-	for(i=0,N=P->OCT; i!=NSUB; ++i,++N)        //   LOOP(octants)          >
-	  if(P->TYPE & BIT[i]) ++nsub;             //     IF(sub-boxes): count  
-	  else if(*N) {                            //     ELIF(sub-leafs):      
+	for(i=0,N=P->OCT; i!=Nsub; ++i,++N)        //   LOOP octants            
+	  if(P->TYPE & BIT[i]) ++nsub;             //     IF is sub-boxe: count 
+	  else if(*N) {                            //     ELIF is sub-leafs     
 	    PLEAF(*N)->set_soul(S0[sf++]);         //       set soul            
 	    nsouls_(C)++;                          //       inc # sub-souls     
-	  }                                        //     ENDIF                <
-	if(nsub) {                                 //   IF(sub-boxes)           
+	  }                                        //   END LOOP                
+	if(nsub) {                                 //   IF has sub-boxes        
 	  register int       de;                   //     sub-depth             
 	  register box      *Pi;                   //     sub-box pointer       
 	  register cell_iter Ci=Cf;                //     remember free cells   
 	  fccell_(C) = Ci.index();                 //     set cell: 1st sub-cell
 	  ncells_(C) = nsub;                       //     set cell: # sub-cells 
 	  Cf += nsub;                              //     reserve nsub cells    
-	  for(i=0,N=P->OCT; i!=NSUB; ++i,++N)      //     LOOP(octants)        >
-	    if(*N && P->marked_as_box(i)) {        //       IF(oct=sub-box)     
+	  for(i=0,N=P->OCT; i!=Nsub; ++i,++N)      //     LOOP octants          
+	    if(*N && P->marked_as_box(i)) {        //       IF oct==sub-box     
 	      Pi = PBOX(*N);                       //         sub-box           
-	      de = link_cells_N(Pi,Ci++,Cf,S0,sf); //         recursive call    
+	      de = link_cells_N(Pi,Ci++,Cf,S0,sf); //         RECURSIVE call    
 	      if(de>dep) dep=de;                   //         update depth      
-	    }                                      //       ENDIF              <
+	    }                                      //     END LOOP              
 	} else {                                   //   ELSE (no sub-boxes)     
 	  fccell_(C) =-1;                          //     set cell: 1st sub-cell
 	  ncells_(C) = 0;                          //     set cell: # sub-cells 
 	}                                          //   ENDIF                   
       }                                            // ENDIF                     
       dep++;                                       // increment depth           
-      return dep;                                  // return cells depth        
+      return dep;                                  // return cell's depth       
     }
     //--------------------------------------------------------------------------
     box_leaf_tree()
@@ -1023,7 +1038,7 @@ namespace nbdy {
       DMAX   = dm;
       NLEAFS = nl;
       if(BM) delete BM;
-      MemoryCheck(BM = new block_alloc<box>(nb>0? nb : 1+NLEAFS/4));
+      BM     = falcON_Memory(new block_alloc<box>(nb>0? nb : 1+NLEAFS/4));
       P0     = new_box(1);
       P0->center() = x0;
       P0->RADIUS   = sz;
@@ -1039,10 +1054,10 @@ namespace nbdy {
       NCRIT  ( nc ),
       NCUT   ( nu ),
       DMAX   ( dm ),
-      NLEAFS ( nl )
+      NLEAFS ( nl ),
+      BM     ( falcON_Memory(new block_alloc<box>(nb>0? nb : 1+NLEAFS/4))),
+      P0     ( new_box(1) )
     {
-      MemoryCheck(BM = new  block_alloc<box>(nb>0? nb : 1+NLEAFS/4));
-      P0     = new_box(1);
       P0->center() = x0;
       P0->RADIUS   = sz;
     }
@@ -1057,7 +1072,7 @@ namespace nbdy {
   public:
     inline size_t       N_allocated() const { return BM->N_allocated(); }
     inline size_t       N_used     () const { return BM->N_used(); }
-    inline size_t       N_needed   () const { return BM->N_used(); }
+    inline size_t       N_boxes    () const { return BM->N_used(); }
     inline size_t       N_free     () const { return N_allocated()-N_used(); }
     inline int    const&depth      () const { return DEPTH; }
     inline int    const&maxdepth   () const { return DMAX; }
@@ -1070,6 +1085,7 @@ namespace nbdy {
     template<typename cell_iter>
     void link(cell_iter const&C0, typename cell_iter::soul_type*const&S0)
     {
+      report REPORT("box_leaf_tree::link()");
       register int       Sf=0;
       register cell_iter Cf=C0+1;
       DEPTH = NCRIT > 1?
@@ -1103,7 +1119,7 @@ namespace nbdy {
     //--------------------------------------------------------------------------
     // methods of class tree_builder                                            
     //--------------------------------------------------------------------------
-#if NDIM == 2
+#if falcON_NDIM == 2
 #define SET_XMIN_XMAX					\
     if     (Li->pos(0) > XMAX[0]) XMAX[0]=Li->pos(0);	\
     else if(Li->pos(0) < XMIN[0]) XMIN[0]=Li->pos(0);	\
@@ -1139,6 +1155,7 @@ namespace nbdy {
     inline void build_from_scratch()
       // This routine simply calls addleafs() with the root box as argument.    
     {
+      report REPORT("tree_builder::build_from_scratch()");
       register size_t nl=0;                        // counter: # leafs added    
       register leaf  *Li;                          // actual leaf loaded        
       if(Ncrit() > 1)                              // IF(N_crit > 1)            
@@ -1151,6 +1168,7 @@ namespace nbdy {
     //--------------------------------------------------------------------------
     inline void build_from_tree()
     {
+      report REPORT("tree_builder::build_from_tree()");
       // - un_link the tree                                                     
       // - ensure the lost leafs are boxed by root                              
       // - add lost leafs to root                                               
@@ -1193,21 +1211,23 @@ namespace nbdy {
     //==========================================================================
     inline void setup_from_scratch_bodies(const sbodies*const&BB,
 					  uint          const&b0 = 0u,
-					  uint                nb = 0u)
+					  uint                nb = 0u,
+					  int           const&SP = 0)
     {
       if(nb == 0) nb=BB->N_bodies();               // number of bodies          
-      MemoryCheck(L0 = new leaf[nb]);              // allocate leafs            
+      L0 = falcON_New(leaf,nb);                    // allocate leafs            
       register leaf* Li=L0;                        // current leaf              
       XAVE = zero;                                 // reset X_ave               
       XMAX = XMIN = BB->pos(b0);                   // reset X_min/max           
       const uint bn=b0+nb;                         // end bodies                
-      for(register uint b=b0; b!=bn; ++b)          // LOOP(body flags & pos's) >
-	if(is_in_tree(BB->flg(b))) {               //   IF(body is active)      
+      for(register uint b=b0; b!=bn; ++b)          // LOOP body flags & pos's   
+	if(is_in_tree(BB->flg(b))                  //   IF body is in tree      
+	   && SP==0 | is_set(BB->flg(b),SP)) {     //      AND specified        
 	  Li->set_up(BB,b);                        //     initialize leaf       
 	  SET_XMIN_XMAX;                           //     update XMIN & XMAX    
 	  XAVE += Li->pos();                       //     sum up X              
 	  Li++;                                    //     incr current leaf     
-	}                                          //   ENDIF                  <
+	}                                          // END LOOP                  
       LN    = Li;                                  // set: beyond last leaf     
       XAVE /= LN-L0;                               // set: X_ave                
     }
@@ -1216,43 +1236,47 @@ namespace nbdy {
 					  vect          const&xmin,
 					  vect          const&xmax,
 					  uint          const&b0 = 0u,
-					  uint                nb = 0u)
+					  uint                nb = 0u,
+					  int           const&SP = 0)
     {
       if(nb == 0u) nb=BB->N_bodies();              // number of bodies          
-      MemoryCheck(L0 = new leaf[nb]);              // allocate leafs            
+      L0 = falcON_New(leaf,nb);                    // allocate leafs            
       register leaf* Li=L0;                        // current leaf              
       XAVE = zero;                                 // reset X_ave               
       XMIN = xmin;                                 // believe delivered x_min   
       XMAX = xmax;                                 // believe delivered x_max   
       const uint bn=b0+nb;                         // end bodies                
-      for(register uint b=b0; b!=bn; ++b)          // loop body flags & pos's  >
-	if(is_in_tree(BB->flg(b))) {               //   IF(body is active)     >
+      for(register uint b=b0; b!=bn; ++b)          // LOOP body flags & pos's   
+	if(is_in_tree(BB->flg(b))                  //   IF body is in tree      
+	   && SP==0 | is_set(BB->flg(b),SP)) {     //      AND specified        
 	  Li->set_up(BB,b);                        //     initialize leaf       
 	  XAVE += Li->pos();                       //     sum up X              
 	  Li++;                                    //     incr current leaf     
-	}                                          // < <                       
+	}                                          // END LOOP                  
       LN    = Li;                                  // set: beyond last leaf     
       XAVE /= LN-L0;                               // set: X_ave                
     }
-#ifdef ALLOW_MPI
+#ifdef falcON_MPI
     //--------------------------------------------------------------------------
     inline void setup_from_scratch_bodies(const pbodies*const&BB,
 					  uint          const&b0 = 0u,
-					  uint                nb = 0u)
+					  uint                nb = 0u,
+					  int           const&SP = 0)
     {
       if(nb == 0u) nb=BB->N_bodies();              // number of bodies          
-      MemoryCheck(L0 = new leaf[nb]);              // allocate leafs            
+      L0 = falcON_New(leaf,nb);                    // allocate leafs            
       register leaf* Li=L0;                        // current leaf              
       XAVE = zero;                                 // reset X_ave               
       XMAX = XMIN = BB->pos(b0);                   // reset x_min & x_max       
       const uint bn=b0+nb;                         // end bodies                
-      for(register uint b=b0; b!=bn; ++b)          // loop body flags & pos's  >
-	if(is_in_tree(BB->flg(b))) {               //   IF(body is active)     >
+      for(register uint b=b0; b!=bn; ++b)          // LOOP body flags & pos's   
+	if(is_in_tree(BB->flg(b))                  //   IF body is in tree      
+	   && SP==0 | is_set(BB->flg(b),SP)) {     //      AND specified        
 	  Li->set_up(BB,b);                        //     initialize leaf       
 	  SET_XMIN_XMAX;                           //     update XMIN & XMAX    
 	  XAVE += Li->pos();                       //     sum up X              
 	  Li++;                                    //     incr current leaf     
-	}                                          // < <                       
+	}                                          // END LOOP                  
       LN    = Li;                                  // set: beyond last leaf     
       XAVE /= LN-L0;                               // set: X_ave                
     }
@@ -1261,43 +1285,47 @@ namespace nbdy {
 					  vect          const&xmin,
 					  vect          const&xmax,
 					  uint          const&b0 = 0u,
-					  uint                nb = 0u)
+					  uint                nb = 0u,
+					  int           const&SP = 0)
     {
       if(nb == 0u) nb=BB->N_bodies();              // number of bodies          
-      MemoryCheck(L0 = new leaf[nb]);              // allocate leafs            
+      L0 = falcON_New(leaf,nb);                    // allocate leafs            
       register leaf* Li=L0;                        // current leaf              
       XAVE = zero;                                 // reset X_ave               
       XMIN = xmin;                                 // believe delivered x_min   
       XMAX = xmax;                                 // believe delivered x_max   
       const uint bn=b0+nb;                         // end bodies                
-      for(register uint b=b0; b!=bn; ++b)          // loop body flags & pos's  >
-	if(is_in_tree(BB->flg(b))) {               //   IF(body is active)     >
+      for(register uint b=b0; b!=bn; ++b)          // LOOP body flags & pos's   
+	if(is_in_tree(BB->flg(b))                  //   IF body is in tree      
+	   && SP==0 | is_set(BB->flg(b),SP)) {     //      AND specified        
 	  Li->set_up(BB,b);                        //     initialize leaf       
 	  XAVE += Li->pos();                       //     sum up X              
 	  Li++;                                    //     incr current leaf     
-	}                                          // < <                       
+	}                                          // END LOOP                  
       LN    = Li;                                  // set: beyond last leaf     
       XAVE /= LN-L0;                               // set: X_ave                
     }
 #endif
     //--------------------------------------------------------------------------
-    inline void setup_from_scratch_arrays(const areal*x[NDIM],
-					  const int  *f,
-					  uint const &nb,
-					  uint const &b0 = 0u)
+    inline void setup_from_scratch_arrays(const barrays*const&BA,
+					  uint          const&b0 = 0u,
+					  uint                nb = 0u,
+					  int           const&SP = 0)
     {
-      MemoryCheck(L0 = new leaf[nb]);              // allocate leafs            
+      if(nb == 0u) nb=BA->N_bodies();              // number of bodies          
+      L0 = falcON_New(leaf,nb);                    // allocate leafs            
       register leaf* Li=L0;                        // current          leaf     
       XAVE = zero;                                 // reset X_ave               
-      LoopDims XMAX[d] = XMIN[d] = x[d][0];        //   reset x_min & x_max     
+      LoopDims XMAX[d] = XMIN[d] = BA->pos(d)[b0]; // reset x_min & x_max       
       const uint bn=b0+nb;                         // end bodies                
-      for(register uint b=b0; b!=bn; ++b)          // loop body flags & pos's  >
-	if(is_in_tree(f[b])) {                     //   IF(body is active)     >
-	  Li->set_up(x,b);                         //     initialize leaf       
+      for(register uint b=b0; b!=bn; ++b)          // LOOP body flags & pos's   
+	if(is_in_tree(BA->flg(b))                  //   IF body is in tree      
+	   && SP==0 | is_set(BA->flg(b),SP)) {     //      AND specified        
+	  Li->set_up(BA,b);                        //     initialize leaf       
 	  SET_XMIN_XMAX;                           //     update XMIN & XMAX    
 	  XAVE += Li->pos();                       //     sum up X              
 	  Li++;                                    //     incr current leaf     
-	}                                          // < <                       
+	}                                          // END LOOP                  
       LN    = Li;                                  // set: beyond last leaf     
       XAVE /= LN-L0;                               // set: X_ave                
     }
@@ -1308,7 +1336,7 @@ namespace nbdy {
 					uint              const&b0 = 0u,
 					uint                    nb = 0u) {
       if(nb==0u) nb=T->N_souls();                  // number of souls to add    
-      MemoryCheck(L0  = new leaf[nb]);             // allocate leafs            
+      L0 = falcON_New(leaf,nb);                    // allocate leafs            
       register leaf*Li = L0;                       // current leaf              
       XAVE = zero;                                 // reset X_ave               
       XMAX = XMIN = BB->pos(T->soul_No(b0)->mybody());  // reset x_min & x_max  
@@ -1323,32 +1351,30 @@ namespace nbdy {
       XAVE /= LN-L0;                               // set: X_ave                
     }
     //--------------------------------------------------------------------------
-    inline void setup_soul_order_arrays(const areal*          x[NDIM],
-					const int  *          f,
-					const tree_type*const&T,
+    inline bool setup_soul_order_arrays(const tree_type*const&T,
+					const barrays*  const&BB,
 					uint            const&b0 = 0u,
 					register uint         nb = 0u) {
       if(nb==0u) nb=T->N_souls();                  // number of souls to add    
-      MemoryCheck(L0 = new leaf[nb]);              // allocate leafs            
+      L0 = falcON_New(leaf,nb);                    // allocate leafs            
       register leaf* Li = L0;                      // current leaf              
       XAVE = zero;                                 // reset X_ave               
       LoopDims                                     // reset x_min & x_max       
-	XMAX[d] = XMIN[d] = x[d][T->soul_No(b0)->mybody()];
-      register uint i;                             // current body index        
+	XMAX[d] = XMIN[d] = BB->pos(d)[T->soul_No(b0)->mybody()];
       const uint bn=b0+nb;                         // end souls                 
-      LoopSoulsRange(typename tree_type,T,b0,bn,S) {
-	i = S->mybody();                           //   corresponding body      
-	if(is_in_tree(f[i])) {                     //   IF(body is active)     >
-	  Li->set_up(x,i);                         //     initialize leaf       
+      LoopSoulsRange(typename tree_type,T,b0,bn,S) // LOOP souls of old tree    
+	if(is_in_tree(BB->flg(S->mybody()))) {     //   IF(body is in tree)     
+	  Li->set_up(BB,S->mybody());              //     initialize leaf       
 	  SET_XMIN_XMAX;                           //     update XMIN & XMAX    
 	  XAVE += Li->pos();                       //     sum up X              
 	  Li++;                                    //     incr current leaf     
-	} else {                                   //   < ELSE (tree bad)      >
-	  error("inactive soul: cannot re-build tree"); //issue error message   
-	}                                          //   <                       
-      }                                            // <                         
+	} else {                                   //   ELSE(body not in tree)  
+	  delete L0;                               //     delete allocated leafs
+	  return false;                            //     return unsuccessful   
+	}                                          //   ENDIF                   
       LN    = Li;                                  // set: beyond last leaf     
       XAVE /= LN-L0;                               // set: X_ave                
+      return true;                                 // successful                
     }
     //--------------------------------------------------------------------------
     template<typename bodies_type>
@@ -1357,22 +1383,23 @@ namespace nbdy {
       LoopSouls(typename tree_type,T,Si)           // loop souls of tree       >
 	Si->set_pos(BB);                           //   set soul from body     <
       TREE = T;                                    // tree is still useful      
-      MemoryCheck(L0 = new leaf[TREE->N_souls()]); // allocate leafs            
+      L0   = falcON_New(leaf,TREE->N_souls());     // allocate leafs            
       LN   = L0 + TREE->N_souls();                 // set: beyond last leaf     
     }
     //--------------------------------------------------------------------------
-    inline void setup_old_tree_arrays(const areal          *x[NDIM],
-				      const int            *f,
-				      const tree_type*const&T)
-    {
-      LoopSouls(typename tree_type,T,S) {          // loop souls of tree       >
-	if(is_in_tree(f[S->mybody()]))             //   IF(body is active)     >
-	  S->set_pos(x);                           //     set new position      
-	else                                       //   < ELSE(tree bad)       >
-	  error("inactive soul: cannot re-build tree"); //issue error message   
-      }                                            // < <                       
+    inline bool setup_old_tree_arrays(const tree_type  *const&T,
+				      const barrays    *const&BB) {
+      LoopSouls(typename tree_type,T,S)            // LOOP souls of old tree    
+	if(is_in_tree(BB->flg(S->mybody())))       //   IF(body is active)      
+	  S->set_pos(BB);                          //     set new position      
+	else {                                     //   ELSE(body not in tree)  
+	  TREE = 0;                                //     tree is useless       
+	  return false;                            //     return unsuccessful   
+	}                                          //   ENDIF                   
       TREE = T;                                    // tree is still useful      
+      L0   = falcON_New(leaf,TREE->N_souls());     // allocate leafs            
       LN   = L0 + TREE->N_souls();                 // set: beyond last leaf     
+      return true;                                 // successful                
     }
   public:
     //--------------------------------------------------------------------------
@@ -1390,6 +1417,7 @@ namespace nbdy {
     tree_builder(int               const&,         // I: Ncrit                  
 		 int               const&,         // I: Dmax                   
 		 const bodies_type*const&,         // I: body sources           
+		 int               const& = 0,     //[I: flag specifying bodies]
 		 uint              const& = 0u,    //[I: first body]            
 		 uint              const& = 0u);   //[I: number of bodies]      
     //--------------------------------------------------------------------------
@@ -1399,17 +1427,18 @@ namespace nbdy {
 		 const bodies_type*const&,         // I: body sources           
 		 vect              const&,         // I: x_min                  
 		 vect              const&,         // I: x_max                  
+		 int               const& = 0,     //[I: flag specifying bodies]
 		 uint              const& = 0u,    //[I: first body]            
 		 uint              const& = 0u);   //[I: number of bodies]      
     //--------------------------------------------------------------------------
-    // 1.2 for the use with arrays                                              
+    // 1.2 for the use with barrays                                             
     //--------------------------------------------------------------------------
-    tree_builder(int   const&,                     // I: Ncrit                  
-		 int   const&,                     // I: Dmax                   
-		 const areal* [NDIM],              // I: positions              
-		 const int  *,                     // I: flags                  
-		 uint  const&,                     // I: # bodies               
-		 uint  const& = 0u);               //[I: first body]            
+    tree_builder(int               const&,         // I: Ncrit                  
+		 int               const&,         // I: Dmax                   
+		 const barrays    *const&,         // I: body source arrays     
+		 int               const& = 0,     //[I: flag specifying bodies]
+		 uint              const& = 0u,    //[I: first body]            
+		 uint              const& = 0u);   //[I: number of bodies]      
     //--------------------------------------------------------------------------
     // 2   from scratch, but aided by old tree                                  
     //     we put the leafs to be added in the same order as the souls of the   
@@ -1424,7 +1453,7 @@ namespace nbdy {
 		 int               const&,         // I: Dmax                   
 		 const tree_type  *const&,         // I: old tree               
 		 uint              const& = 0u,    //[I: first soul]            
-		 uint                     = 0u);   //[I: number of bodies/souls]
+		 uint              const& = 0u);   //[I: number of bodies/souls]
     //--------------------------------------------------------------------------
     // 3   aided by old tree:                                                   
     //     we build only the lower parts of the old tree anew -- except, of     
@@ -1445,7 +1474,7 @@ namespace nbdy {
 		 int               const&,         // I: Dmax                   
 		 int               const&,         // I: Ncut                   
 		 uint              const& = 0u,    //[I: first soul]            
-		 uint                     = 0u);   //[I: number of bodies/souls]
+		 uint              const& = 0u);   //[I: number of bodies/souls]
     //--------------------------------------------------------------------------
     // destructor                                                               
     //--------------------------------------------------------------------------
@@ -1473,11 +1502,13 @@ namespace nbdy {
   tree_builder<tree_type>::tree_builder(int               const&nc,
 					int               const&dm,
 					const bodies_type*const&bb,
+					int               const&sp,
 					uint              const&b0,
 					uint              const&nb)
     : TREE ( 0 )
   {
-    setup_from_scratch_bodies(bb,b0,nb);
+    report REPORT("tree_builder::tree_builder(): 1");
+    setup_from_scratch_bodies(bb,b0,nb,sp);
     register vect X0 = root_center();
     box_leaf_tree::reset(nc,0,dm,LN-L0,X0,root_radius(X0));
   }
@@ -1489,25 +1520,28 @@ namespace nbdy {
 					const bodies_type*const&bb,
 					vect              const&xmin,
 					vect              const&xmax,
+					int               const&sp,
 					uint              const&b0,
 					uint              const&nb)
     : TREE ( 0 )
   {
-    setup_from_scratch_bodies(bb,xmin,xmax,b0,nb);
+    report REPORT("tree_builder::tree_builder(): 2");
+    setup_from_scratch_bodies(bb,xmin,xmax,b0,nb,sp);
     register vect X0 = root_center();
     box_leaf_tree::reset(nc,0,dm,LN-L0,X0,root_radius(X0));
   }
   //----------------------------------------------------------------------------
   template<typename tree_type>
-  tree_builder<tree_type>::tree_builder(int   const&nc,
-					int   const&dm,
-					const areal*x[NDIM],
-					const int  *f,
-					uint  const&nb,
-					uint  const&b0)
+  tree_builder<tree_type>::tree_builder(int               const&nc,
+					int               const&dm,
+					const barrays    *const&BA,
+					int               const&sp,
+					uint              const&b0,
+					uint              const&nb)
     : TREE ( 0 )
   {
-    setup_from_scratch_arrays(x,f,nb,b0);
+    report REPORT("tree_builder::tree_builder(): 3");
+    setup_from_scratch_arrays(BA,b0,nb,sp);
     register vect X0 = root_center();
     box_leaf_tree::reset(nc,0,dm,LN-L0,X0,root_radius(X0));
   }
@@ -1517,21 +1551,17 @@ namespace nbdy {
 					int               const&dm,
 					const tree_type  *const&T,
 					uint              const&b0,
-					uint                    nb)
+					uint              const&nb)
     : TREE ( 0 )
   {
-    if       (T->use_arrays()) {                   // CASE 1: use arrays        
-      if(nb==0u) nb = T->N_souls();                //   number of souls         
-      const areal**x= T->my_pos();                 //   get positions           
-      const int   *f= T->my_flags();               //   get flags               
-      setup_soul_order_arrays(x,f,T,b0,nb);        //   use soul order          
-    } else if(T->use_sbodies()) {                  // CASE 2: use sbodies       
+    report REPORT("tree_builder::tree_builder(): 4");
+    if       (T->use_sbodies()) {                  // CASE 1: use sbodies       
       const sbodies* BB=T->my_sbodies();           //   get bodies              
       if(BB->changes_in_tree_usage_flags())        //   IF(tree-usage changed)  
 	setup_from_scratch_bodies(BB,b0,nb);       //     build from scratch    
       else                                         //   ELSE                    
 	setup_soul_order_bodies(T,BB,b0,nb);       //     use soul order        
-#ifdef ALLOW_MPI
+#ifdef falcON_MPI
     } else if(T->use_pbodies()) {                  // CASE 2: use pbodies       
       const pbodies* BB=T->my_pbodies();           //   get bodies              
       if(BB->changes_in_tree_usage_flags())        //   IF(tree-usage changed)  
@@ -1539,7 +1569,11 @@ namespace nbdy {
       else                                         //   ELSE                    
 	setup_soul_order_bodies(T,BB,b0,nb);       //     use soul order        
 #endif
-    } else
+    } else if(T->use_barrays()) {                  // CASE 3: use barrays       
+      const barrays* BA=T->my_barrays();           //   get bodies              
+      if(!setup_soul_order_arrays(T,BA,b0,nb))     //   use soul order          
+	setup_from_scratch_arrays(BA,b0,nb,T->SP_flag());
+    } else 
       error("cannot build from old tree");
     register vect X0 = root_center();
     box_leaf_tree::reset(nc,0,dm,LN-L0,X0,root_radius(X0));
@@ -1551,32 +1585,25 @@ namespace nbdy {
 					int               const&dm,
 					int               const&nu,
 					uint              const&b0,
-					uint                    nb) 
+					uint              const&nb) 
     : TREE ( 0 )
   {
-    if       (T->use_arrays()) {                   // CASE 1: use arrays        
-      if(nb==0u) nb = T->N_souls();                //   number of souls         
-      const areal**x= T->my_pos();                 //   get positions           
-      const int   *f= T->my_flags();               //   get flags               
-      if(nu <= nc)                                 //   IF   (Ncut<=Ncrit)     >
-	setup_soul_order_arrays(x,f,T,b0,nb);      //     use soul order        
-      else                                         //   ELSE (Ncut >Ncrit)     >
-	setup_old_tree_arrays(x,f,T);              //     use old tree fully   <
-    } else if(T->use_sbodies()) {                  // CASE 2: use sbodies       
+    report REPORT("tree_builder::tree_builder(): 5");
+    if       (T->use_sbodies()) {                  // CASE 1: use sbodies       
       const sbodies* BB=T->my_sbodies();           //   get bodies              
       if(BB->changes_in_tree_usage_flags())        //   IF(tree-usage changed)  
-	setup_from_scratch_bodies(BB,b0,nb);       //     build from scratch    
+	setup_from_scratch_bodies(BB,b0,nb,T->SP_flag()); // build from scratch 
       else if(nu <= nc)                            //   ELIF(Ncut<=Ncrit)       
 	setup_soul_order_bodies(T,BB,b0,nb);       //     use soul order        
       else if(nb != 0u)
 	error("cannot partially rebuild");
       else                                         //   ELSE(Ncut >Ncrit)       
 	setup_old_tree_bodies(T,BB);               //     use old tree fully   <
-#ifdef ALLOW_MPI
+#ifdef falcON_MPI
     } else if(T->use_pbodies()) {                  // CASE 2: use pbodies       
       const pbodies* BB=T->my_pbodies();           //   get bodies              
       if(BB->changes_in_tree_usage_flags())        //   IF(tree-usage changed)  
-	setup_from_scratch_bodies(BB,b0,nb);       //     build from scratch    
+	setup_from_scratch_bodies(BB,b0,nb,T->SP_flag()); // build from scratch 
       else if(nu <= nc)                            //   ELIF(Ncut<=Ncrit)       
 	setup_soul_order_bodies(T,BB,b0,nb);       //     use soul order        
       else if(nb != 0u)
@@ -1584,7 +1611,18 @@ namespace nbdy {
       else                                         //   ELSE(Ncut >Ncrit)       
 	setup_old_tree_bodies(T,BB);               //     use old tree fully   <
 #endif
-    } else
+    } else if(T->use_barrays()) {                  // CASE 3: use arrays        
+      const barrays* BA=T->my_barrays();           //   get bodies              
+      if(nu <= nc) {                               //   IF   (Ncut<=Ncrit)     >
+	if(!setup_soul_order_arrays(T,BA,b0,nb))   //   use soul order          
+	  setup_from_scratch_arrays(BA,b0,nb,T->SP_flag());
+      } else if(nb != 0u)
+	error("cannot partially rebuild");
+      else {                                       //   ELSE (Ncut >Ncrit)     >
+	if(!setup_old_tree_arrays(T,BA))           //     use old tree fully   <
+	  setup_from_scratch_arrays(BA,b0,nb,T->SP_flag());
+      }
+    } else 
       error("cannot build from old tree");
     register vect X0 = root_center();
     if(TREE)
@@ -1602,39 +1640,43 @@ namespace nbdy {
 ////////////////////////////////////////////////////////////////////////////////
 template<typename TREE, typename CELL> void basic_tree<TREE,CELL>::
 mark_for_subtree(                                  // sub-tree mark my nodes    
+		 int const&F,                      // I: flag for subtree       
 		 uint &Nsubc,                      // O: # subtree cells        
 		 uint &Nsubs) const                // O: # subtree souls        
 {
   register int  nsun,nsuc;                         // # subt nodes per cell     
   register uint ns=0u, nc=0u;                      // # subt nodes in total     
-  LoopMyCellsUp(Ci) {                              // loop tree cells backward  
+  LoopMyCellsUp(Ci) {                              // LOOP tree cells backward  
     unflag_subtree_flags(Ci);                      //   reset subtree flags     
     nsun=0;                                        //   counter: subt subnodes  
     nsuc=0;                                        //   counter: subt subcells  
-    LoopSoulKids(typename cell_iterator,Ci,s)      //   loop child souls       >
-      if(in_subtree(s)) ++nsun;                    //     count subt souls     <
+    LoopSoulKids(typename cell_iterator,Ci,s)      //   LOOP child souls        
+      if(is_set(s,F)) {                            //     IF flag F is set      
+	flag_for_subtree(s);                       //       flag for subtree    
+	++nsun;                                    //       count               
+      }                                            //   END LOOP                
     ns += nsun;                                    //   count total subt souls  
-    LoopCellKids(typename cell_iterator,Ci,c)      //   loop child cells       >
-      if(in_subtree(c)) {                          //     IF cell is in subt   >
+    LoopCellKids(typename cell_iterator,Ci,c)      //   LOOP child cells        
+      if(in_subtree(c)) {                          //     IF cell is in subt    
 	++nsun;                                    //       count subt nodes    
 	if(is_subtreecell(c) ||                    //       IF is subt cell     
-	   is_subtreezombie(c) )                   //       OR is subt zombie  >
-	  ++nsuc;                                  //         count subcells   <
-      }                                            //   < <                     
-    if(nsun > 0) {                                 //   IF cell is subt node   >
+	   is_subtreezombie(c) )                   //       OR is subt zombie   
+	  ++nsuc;                                  //         count subcells    
+      }                                            //   END LOOP                
+    if(nsun > 0) {                                 //   IF cell is subt node    
       flag_for_subtree(Ci);                        //     flag it as such       
-      if(nsun > 1) {                               //     IF tcell subt cell   >
+      if(nsun > 1) {                               //     IF tcell subt cell    
 	flag_as_subtreecell(Ci);                   //       flag it as such     
 	++nc;                                      //       count subt cells    
-      } else if(nsuc > 0)                          //     < ELSE tcell=zombie  >
-	flag_as_subtreezombie(Ci);                 //       so flag it as such <
-    }                                              //   <                       
-  }                                                // <                         
+      } else if(nsuc > 0)                          //     ELSE tcell=zombie     
+	flag_as_subtreezombie(Ci);                 //       so flag it as such  
+    }                                              //   ENDIF                   
+  }                                                // END LOOP                  
   Nsubs = ns;                                      // # subt souls              
   Nsubc = nc;                                      // # subt cells              
 }
 //------------------------------------------------------------------------------
-// construction from bodies                                                     
+// construction and helpers                                                     
 //------------------------------------------------------------------------------
 #ifdef TEST_TIMING
 #  define SET_I        C_i  = clock();
@@ -1644,7 +1686,7 @@ mark_for_subtree(                                  // sub-tree mark my nodes
       std::cerr<<" time for tree_builder::tree_builder(): "<<Tini<<"\n"	\
                <<" time for tree_builder::build():        "<<Tgro<<"\n"	\
                <<" time for tree_builder::link():         "<<Tlnk<<"\n"	\
-               <<" time for tree::tree()                  "<<Ttot<<endl;
+               <<" time for tree::tree()                  "<<Ttot<<std::endl;
 #else
 #  define SET_I        {}
 #  define SET_C        {}
@@ -1652,41 +1694,56 @@ mark_for_subtree(                                  // sub-tree mark my nodes
 #  define SET_F        {}
 #endif
 //------------------------------------------------------------------------------
+template<typename TREE, typename CELL> inline void basic_tree<TREE,CELL>::
+allocate (uint const&ns, uint const&nc) {
+  if(ALLOC) delete[] ALLOC;
+  ALLOC = falcON_New(char,   3*sizeof(uint)        // Ns, Nc, Dp                
+		          + ns*sizeof(soul_type)   // souls                     
+		          + nc*sizeof(cell_type)); // cells                     
+  DUINT[0] = Ns = ns;
+  DUINT[1] = Nc = nc;
+  S0 = static_cast<soul_type*>(static_cast<void*>(DUINT+3));
+  SN = S0+Ns;
+  C0 = static_cast<cell_type*>(static_cast<void*>(SN));
+  CN = C0+Nc;
+}
+//------------------------------------------------------------------------------
+template<typename TREE, typename CELL> inline void basic_tree<TREE,CELL>::
+set_depth(uint const&dp) {
+  DUINT[2] = dp;
+}
+//------------------------------------------------------------------------------
 // construction from sbodies                                                    
 //------------------------------------------------------------------------------
 template<typename TREE, typename CELL> basic_tree<TREE,CELL>::
 basic_tree(const sbodies*const&bb,                 // I: body sources           
-	   const int           nc,                 //[I: N_crit]                
-	   const int           dm) :               //[I: max tree depth]        
-  BSRCES(bb), 
-#ifdef ALLOW_MPI
+	   int           const&nc,                 //[I: N_crit]                
+	   int           const&dm,                 //[I: max tree depth]        
+	   int           const&sp) :               //[I: flag specifying bodies]
+  BSRCES(bb),  ASRCES(0),
+#ifdef falcON_MPI
   PSRCES(0),
 #endif
-  F(0), X(0), Nb(0), S0(0), C0(0)                  // set some data             
+  SPFLAG(sp), S0(0), C0(0), ALLOC(0)
 {
   SET_I
   SET_C
-  tree_builder<base_tree> TB(nc,dm,bb);            // initialize tree_builder   
+  tree_builder<base_tree> TB(nc,dm,bb,sp);         // initialize tree_builder   
   SET_T(Tini)
-  Ns = TB.N_leafs();                               // # souls= # active bodies  
-  if(Ns) {                                         // IF(leafs in tree)         
+  if(TB.N_leafs()) {                               // IF(leafs in tree)         
     SET_C
     TB.build();                                    //   build box-leaf tree     
     SET_T(Tgro)
-    MemoryCheck(S0 = new soul_type[Ns]);           //   allocate souls          
-    Nc = TB.N_needed();                            //   # cells= # active boxes 
-    MemoryCheck(C0 = new cell_type[Nc]);           //   allocate cells          
     SET_C
+    allocate(TB.N_leafs(),TB.N_boxes());           //   allocate souls & cells  
     TB.link(root(),S0);                            //   box-leaf -> cell-soul   
+    set_depth(TB.depth());                         //   set tree depth          
     SET_T(Tlnk)
-    Dp = TB.depth();                               //   depth of tree           
   } else {                                         // ELSE                      
     warning("nobody in tree");                     //   issue a warning         
-    Nc = 0;                                        //   # cells= 0              
-    Dp = 0;                                        //   depth of tree           
+    allocate(0,0);                                 //   reset souls & cells     
+    set_depth(0);                                  //   set tree depth to zero  
   }                                                // ENDIF                     
-  CN = C0 + Nc;                                    // pointer past last cell    
-  SN = S0 + Ns;                                    // pointer past last soul    
   BSRCES->after_tree_growth();                     // reset change flag         
   SET_F
 }  
@@ -1695,76 +1752,67 @@ basic_tree(const sbodies*const&bb,                 // I: body sources
 //------------------------------------------------------------------------------
 template<typename TREE, typename CELL> basic_tree<TREE,CELL>::
 basic_tree(const sbodies*const&bb,                 // I: body sources           
-	   vect          const&xmin,               // I: x_min                  
-	   vect          const&xmax,               // I: x_max                  
-	   const int           nc,                 //[I: N_crit]                
-	   const int           dm) :               //[I: max tree depth]        
-  BSRCES(bb), 
-#ifdef ALLOW_MPI
+	   vect          const&xi,                 // I: x_min                  
+	   vect          const&xa,                 // I: x_max                  
+	   int           const&nc,                 //[I: N_crit]                
+	   int           const&dm,                 //[I: max tree depth]        
+	   int           const&sp) :               //[I: flag specifying bodies]
+  BSRCES(bb), ASRCES(0),
+#ifdef falcON_MPI
   PSRCES(0),
 #endif
-  F(0), X(0), Nb(0), S0(0), C0(0)                  // set some data             
+  SPFLAG(sp), S0(0), C0(0), ALLOC(0)
 {
   SET_I
   SET_C
-  tree_builder<base_tree> TB (nc,dm,bb,xmin,xmax); // initiliaze tree_builder   
+  tree_builder<base_tree> TB (nc,dm,bb,xi,xa,sp);  // initiliaze tree_builder   
   SET_T(Tini)
-  Ns = TB.N_leafs();                               // # souls= # active bodies  
-  if(Ns) {                                         // IF(leafs in tree)       > 
+  if(TB.N_leafs()) {                               // IF(leafs in tree)         
     SET_C
     TB.build();                                    //   build box-leaf tree     
     SET_T(Tgro)
-    MemoryCheck(S0 = new soul_type[Ns]);           //   allocate souls          
-    Nc = TB.N_needed();                            //   # cells= # active boxes 
-    MemoryCheck(C0 = new cell_type[Nc]);           //   allocate cells          
     SET_C
+    allocate(TB.N_leafs(),TB.N_boxes());           //   allocate souls & cells  
     TB.link(root(),S0);                            //   box-leaf -> cell-soul   
+    set_depth(TB.depth());                         //   set tree depth          
     SET_T(Tlnk)
-    Dp = TB.depth();                               //   depth of tree           
   } else {                                         // < ELSE                  > 
     warning("nobody in tree");                     //   issue a warning         
-    Nc = 0;                                        //   # cells= 0              
-    Dp = 0;                                        //   depth of tree           
+    allocate(0,0);                                 //   reset souls & cells     
+    set_depth(0);                                  //   set tree depth to zero  
   }                                                // <                         
-  CN = C0 + Nc;                                    // pointer past last cell    
-  SN = S0 + Ns;                                    // pointer past last soul    
   BSRCES->after_tree_growth();                     // reset change flag         
   SET_F
 }  
-#ifdef ALLOW_MPI
+#ifdef falcON_MPI
 //------------------------------------------------------------------------------
 // construction from pbodies                                                    
 //------------------------------------------------------------------------------
 template<typename TREE, typename CELL> basic_tree<TREE,CELL>::
 basic_tree(const pbodies*const&bb,                 // I: body sources           
-	   const int           nc,                 //[I: N_crit]                
-	   const int           dm) :               //[I: max tree depth]        
-  BSRCES(0), PSRCES(bb),
-  F(0), X(0), Nb(0), S0(0), C0(0)                  // set some data             
+	   int           const&nc,                 //[I: N_crit]                
+	   int           const&dm,                 //[I: max tree depth]        
+	   int           const&sp) :               //[I: flag specifying bodies]
+  BSRCES(0), ASRCES(0), PSRCES(bb), SPFLAG(sp), S0(0), C0(0), ALLOC(0)
 {
   SET_I
   SET_C
-  tree_builder<base_tree> TB (nc,dm,bb);           // initiliaze tree_builder   
+  tree_builder<base_tree> TB (nc,dm,bb,sp);        // initiliaze tree_builder   
   SET_T(Tini)
-  Ns = TB.N_leafs();                               // # souls= # active bodies  
-  if(Ns) {                                         // IF(leafs in tree)       > 
+  if(TB.N_leafs()) {                               // IF(leafs in tree)         
     SET_C
     TB.build();                                    //   build box-leaf tree     
     SET_T(Tgro)
-    MemoryCheck(S0 = new soul_type[Ns]);           //   allocate souls          
-    Nc = TB.N_needed();                            //   # cells= # active boxes 
-    MemoryCheck(C0 = new cell_type[Nc]);           //   allocate cells          
     SET_C
+    allocate(TB.N_leafs(),TB.N_boxes());           //   allocate souls & cells  
     TB.link(root(),S0);                            //   box-leaf -> cell-soul   
+    set_depth(TB.depth());                         //   set tree depth          
     SET_T(Tlnk)
-    Dp = TB.depth();                               //   depth of tree           
   } else {                                         // < ELSE                  > 
     warning("nobody in tree");                     //   issue a warning         
-    Nc = 0;                                        //   # cells= 0              
-    Dp = 0;                                        //   depth of tree           
+    allocate(0,0);                                 //   reset souls & cells     
+    set_depth(0);                                  //   set tree depth to zero  
   }                                                // <                         
-  CN = C0 + Nc;                                    // pointer past last cell    
-  SN = S0 + Ns;                                    // pointer past last soul    
   PSRCES->after_tree_growth();                     // reset change flag         
   SET_F
 }  
@@ -1773,168 +1821,147 @@ basic_tree(const pbodies*const&bb,                 // I: body sources
 //------------------------------------------------------------------------------
 template<typename TREE, typename CELL> basic_tree<TREE,CELL>::
 basic_tree(const pbodies*const&bb,                 // I: body sources           
-	   vect          const&xmin,               // I: x_min                  
-	   vect          const&xmax,               // I: x_max                  
-	   const int           nc,                 //[I: N_crit]                
-	   const int           dm) :               //[I: max tree depth]        
-  BSRCES(0), PSRCES(bb),
-  F(0), X(0), Nb(0), S0(0), C0(0)                  // set some data             
+	   vect          const&xi,                 // I: x_min                  
+	   vect          const&xa,                 // I: x_max                  
+	   int           const&nc,                 //[I: N_crit]                
+	   int           const&dm,                 //[I: max tree depth]        
+	   int           const&sp) :               //[I: flag specifying bodies]
+  BSRCES(0), ASRCES(0), PSRCES(bb), SPFLAG(sp), S0(0), C0(0), ALLOC(0)
 {
   SET_I
   SET_C
-  tree_builder<base_tree> TB (nc,dm,bb,xmin,xmax); // initiliaze tree_builder   
+  tree_builder<base_tree> TB (nc,dm,bb,xi,xa,sp);  // initiliaze tree_builder   
   SET_T(Tini)
-  Ns = TB.N_leafs();                               // # souls= # active bodies  
-  if(Ns) {                                         // IF(leafs in tree)       > 
+  if(TB.N_leafs()) {                               // IF(leafs in tree)         
     SET_C
     TB.build();                                    //   build box-leaf tree     
     SET_T(Tgro)
-    MemoryCheck(S0 = new soul_type[Ns]);           //   allocate souls          
-    Nc = TB.N_needed();                            //   # cells= # active boxes 
-    MemoryCheck(C0 = new cell_type[Nc]);           //   allocate cells          
     SET_C
+    allocate(TB.N_leafs(),TB.N_boxes());           //   allocate souls & cells  
     TB.link(root(),S0);                            //   box-leaf -> cell-soul   
+    set_depth(TB.depth());                         //   set tree depth          
     SET_T(Tlnk)
-    Dp = TB.depth();                               //   depth of tree           
   } else {                                         // < ELSE                  > 
     warning("nobody in tree");                     //   issue a warning         
-    Nc = 0;                                        //   # cells= 0              
-    Dp = 0;                                        //   depth of tree           
+    allocate(0,0);                                 //   reset souls & cells     
+    set_depth(0);                                  //   set tree depth to zero  
   }                                                // <                         
-  CN = C0 + Nc;                                    // pointer past last cell    
-  SN = S0 + Ns;                                    // pointer past last soul    
   PSRCES->after_tree_growth();                     // reset change flag         
   SET_F
 }
 #endif  
 //------------------------------------------------------------------------------
-// construction from arrays of flags & positions                                
+// construction from barrays                                                    
 //------------------------------------------------------------------------------
 template<typename TREE, typename CELL> basic_tree<TREE,CELL>::
-basic_tree(const int  *f,                          // I: array: flags           
-	   const areal*x[NDIM],                    // I: arrays: x,y,z          
-	   const uint  nb,                         // I: size of arrays         
-	   const int   nc,                         //[I: N_crit]                
-	   const int   dm) :                       //[I: max tree depth]        
-  BSRCES(0), 
-#ifdef ALLOW_MPI
+basic_tree(const barrays*const&ba,                 // I: body arrays            
+	   int           const&nc,                 //[I: N_crit]                
+	   int           const&dm,                 //[I: max tree depth]        
+	   int           const&sp) :               //[I: flag specifying bodies]
+  BSRCES(0),  ASRCES(ba),
+#ifdef falcON_MPI
   PSRCES(0),
 #endif
-  F(f), X(x), Nb(nb), S0(0), C0(0)                 // set some data             
+  SPFLAG(sp), S0(0), C0(0), ALLOC(0)
 {
   SET_I
   SET_C
-  tree_builder<base_tree> TB(nc,dm,X,F,Nb);        // initiliaze tree_builder   
+  tree_builder<base_tree> TB(nc,dm,ba,sp);         // initiliaze tree_builder   
   SET_T(Tini)
-  Ns = TB.N_leafs();                               // # souls = # active bodies 
-  if(Ns) {                                         // IF(leafs in tree)       > 
+  if(TB.N_leafs()) {                               // IF(leafs in tree)         
     SET_C
     TB.build();                                    //   build box-leaf tree     
     SET_T(Tgro)
-    MemoryCheck(S0 = new soul_type[Ns]);           //   allocate souls          
-    Nc = TB.N_needed();                            //   # cells= # active boxes 
-    MemoryCheck(C0 = new cell_type[Nc]);           //   allocate cells          
     SET_C
+    allocate(TB.N_leafs(),TB.N_boxes());           //   allocate souls & cells  
     TB.link(root(),S0);                            //   box-leaf -> cell-soul   
+    set_depth(TB.depth());                         //   set tree depth          
     SET_T(Tlnk)
-    Dp = TB.depth();                               //   depth of tree           
   } else {                                         // < ELSE                  > 
     warning("nobody in tree");                     //   issue a warning         
-    Nc = 0;                                        //   # cells= 0              
-    Dp = 0;                                        //   depth of tree           
+    allocate(0,0);                                 //   reset souls & cells     
+    set_depth(0);                                  //   set tree depth to zero  
   }                                                // <                         
-  CN = C0 + Nc;                                    // pointer past last cell    
-  SN = S0 + Ns;                                    // pointer past last soul    
   SET_F
 }
 //------------------------------------------------------------------------------
 // construction as sub-tree from another tree                                   
 //------------------------------------------------------------------------------
-template<typename SUB_TREE,   typename SUB_CELL>   // type of sub-tree & -cell  
-template<typename PARENT_TREE>                     // type of parent-basic_tree 
-basic_tree<SUB_TREE,SUB_CELL>::
-basic_tree(const PARENT_TREE* const&parent) :      // I: parent tree            
-  BSRCES(parent->my_sbodies()),                    // copy parent's bodies      
-#ifdef ALLOW_MPI
-  PSRCES(parent->my_pbodies()),                    // copy parent's bodies      
+template<typename TREE, typename CELL>             // type of sub-tree & -cell  
+template<typename PARENT_TREE>                     // type of parent-tree       
+basic_tree<TREE, CELL>::
+basic_tree(const PARENT_TREE* const&parent,        // I: parent tree            
+	   int                const&F     ) :      // I: flag specif'ing subtree
+  BSRCES(parent->my_sbodies()),                    // copy parent's sbodies     
+  ASRCES(parent->my_barrays()),                    // copy parent's barrays     
+#ifdef falcON_MPI
+  PSRCES(parent->my_pbodies()),                    // copy parent's pbodies     
 #endif
-  F     (parent->my_flags()),                      // copy parent's flag array  
-  X     (parent->my_pos()),                        // copy parent's pos arrays  
-  Nb    (parent->N_array()),                       // copy parent's N_array     
-  S0(0), C0(0)                                     // reset some data           
+  SPFLAG(parent->SP_flag()),                       // copy body specific flag   
+  S0(0), C0(0), ALLOC(0)                           // reset some data           
 {
-  parent->mark_for_subtree(Nc,Ns);                 // mark parent tree          
+  parent->mark_for_subtree(F,Nc,Ns);               // mark parent tree          
   if(Ns==0 || Nc==0) {                             // IF no nodes marked       >
     warning("empty subtree");                      //   issue warning and       
-    Dp = 0;                                        //   tree has no depth       
+    allocate(0,0);                                 //   reset souls & cells     
+    set_depth(0);                                  //   set tree depth to zero  
   } else {                                         // < ELSE                   >
-    MemoryCheck(S0 = new soul_type[Ns]);           //   allocate subtree cells  
-    MemoryCheck(C0 = new cell_type[Nc]);           //   allocate subtree souls  
+    allocate(Ns,Nc);                               //   allocate souls & cells  
     register cell_iterator Cr=root(),Cf=Cr+1;      //   root, first empty cell  
     register int sf=0;                             //   index: free cell,soul   
-    Dp = sub_tree_builder<base_tree,typename PARENT_TREE::base_tree>::
-      link(parent->root(),Cr,Cf,S0,sf);            //   link sub-tree           
+    set_depth(                                     //   set tree depth          
+	      sub_tree_builder<base_tree,typename PARENT_TREE::base_tree>::
+	      link(parent->root(),Cr,Cf,S0,sf));   //   link sub-tree           
   }                                                // <                         
-  CN = C0 + Nc;                                    // pointer past last cell    
-  SN = S0 + Ns;                                    // pointer past last soul    
 }
 //------------------------------------------------------------------------------
 // construction as pruned version of another tree                               
 //------------------------------------------------------------------------------
-template<typename TREE, typename CELL>
-basic_tree<TREE,CELL>::basic_tree(const basic_tree<TREE,CELL>*const&parent,
-				  bool(*prune)(const cell_type*const&)) :
-  BSRCES( 0 ),
-#ifdef ALLOW_MPI
-  PSRCES( 0 ),
+template<typename TREE, typename CELL>             // type of sub-tree & -cell  
+template<typename PARENT_TREE>                     // type of parent-tree       
+basic_tree<TREE,CELL>::
+basic_tree(const PARENT_TREE* const&parent,
+	   bool(*prune)(typename PARENT_TREE::cell_iterator const&)) :
+  BSRCES(0), ASRCES(0),
+#ifdef falcON_MPI
+  PSRCES(0),
 #endif
-  F     ( 0 ),
-  X     ( 0 ),
-  Nb    ( parent->Nb )
+  SPFLAG(parent->SP_flag()),
+  ALLOC(0)
 {
-  tree_pruner<base_tree> TP(prune,parent);
-  Ns = TP.N_souls();
-  MemoryCheck(S0 = new soul_type[Ns]);
-  SN = S0 + Ns;
-  Nc = TP.N_cells();
-  MemoryCheck(C0 = new cell_type[Nc]);
-  CN = C0 + Nc;
-  Dp = TP.link(root(),S0);
+  tree_pruner<base_tree,PARENT_TREE> TP(prune,parent);
+  allocate(TP.N_souls(),TP.N_cells());
+  set_depth(TP.link(root(),S0));
 }
 //------------------------------------------------------------------------------
 // building using the soul-order of the old tree structure                      
 //------------------------------------------------------------------------------
 template<typename TREE, typename CELL> void basic_tree<TREE,CELL>::
-build(const int nc,                                //[I: N_crit]                
-      const int dm)                                //[I: max tree depth]        
+build(int const&nc,                                //[I: N_crit]                
+      int const&dm)                                //[I: max tree depth]        
 {
+  report REPORT("basic_tree::build(%d,%d)",nc,dm);
   SET_I
-  if(C0) { delete[] C0; C0=0; }                    // delete cells              
   SET_C
-  tree_builder<base_tree> TB(nc,dm,this);          // initiliaze tree_builder   
+  tree_builder<base_tree> TB(nc,dm,this);          // initialize tree_builder   
+  if(ALLOC) { delete[] ALLOC; ALLOC=0; }           // de-allocate old memory    
   SET_T(Tini)
-  if(S0) { delete[] S0; S0=0; }                    // delete souls              
-  Ns = TB.N_leafs();                               // # souls = # active bodies 
-  if(Ns) {                                         // IF(leafs in tree)       > 
+  if(TB.N_leafs()) {                               // IF(leafs in tree)         
     SET_C
     TB.build();                                    //   build box-leaf tree     
     SET_T(Tgro)
-    MemoryCheck(S0 = new soul_type[Ns]);           //   allocate souls          
-    Nc = TB.N_needed();                            //   # cells= # active boxes 
-    MemoryCheck(C0 = new cell_type[Nc]);           //   allocate cells          
     SET_C
+    allocate(TB.N_leafs(),TB.N_boxes());           //   allocate souls & cells  
     TB.link(root(),S0);                            //   box-leaf -> cell-soul   
-    Dp = TB.depth();                               //   depth of tree           
+    set_depth(TB.depth());                         //   set tree depth          
     SET_T(Tlnk)
   } else {                                         // < ELSE                  > 
     warning("nobody in tree");                     //   issue a warning         
-    Nc = 0;                                        //   # cells= 0              
-    Dp = 0;                                        //   depth of tree           
+    allocate(0,0);                                 //   reset souls & cells     
+    set_depth(0);                                  //   set tree depth to zero  
   }                                                // <                         
-  CN = C0 + Nc;                                    // pointer past last cell    
-  SN = S0 + Ns;                                    // pointer past last soul    
   if     (BSRCES) BSRCES->after_tree_growth();     // reset change flag         
-#ifdef ALLOW_MPI
+#ifdef falcON_MPI
   else if(PSRCES) PSRCES->after_tree_growth();     // reset change flag         
 #endif
   SET_F
@@ -1943,39 +1970,31 @@ build(const int nc,                                //[I: N_crit]
 // rebuilding the old tree structure                                            
 //------------------------------------------------------------------------------
 template<typename TREE, typename CELL> void basic_tree<TREE,CELL>::
-rebuild(const int nu,                              // I: N_cut                  
-	const int nc,                              //[I: N_crit]                
-	const int dm)                              //[I: max tree depth]        
+rebuild(int const&nu,                              // I: N_cut                  
+	int const&nc,                              //[I: N_crit]                
+	int const&dm)                              //[I: max tree depth]        
 {
+  report REPORT("basic_tree::rebuild(%d,%d,%d)",nu,nc,dm);
   SET_I
   SET_C
-  tree_builder<base_tree> TB(this,nc,dm,nu);       // initiliaze tree_builder   
+  tree_builder<base_tree> TB(this,nc,dm,nu);       // initialize tree_builder   
   SET_T(Tini)
-  Ns = TB.N_leafs();                               // # souls = # active bodies 
-  if(Ns) {                                         // IF(leafs in tree)       > 
+  if(TB.N_leafs()) {                               // IF(leafs in tree)         
     SET_C
     TB.build();                                    //   build box-leaf tree     
-    if(C0) { delete[] C0; C0=0; }                  //   delete cells            
-    if(S0) { delete[] S0; S0=0; }                  //   delete souls            
     SET_T(Tgro)
-    MemoryCheck(S0 = new soul_type[Ns]);           //   allocate souls          
-    Nc = TB.N_needed();                            //   # cells= # active boxes 
-    MemoryCheck(C0 = new cell_type[Nc]);           //   allocate cells          
     SET_C
+    allocate(TB.N_leafs(),TB.N_boxes());           //   allocate souls & cells  
     TB.link(root(),S0);                            //   box-leaf -> cell-soul   
-    Dp = TB.depth();                               //   depth of tree           
+    set_depth(TB.depth());                         //   set tree depth          
     SET_T(Tlnk)
   } else {                                         // < ELSE                  > 
-    if(C0) { delete[] C0; C0=0; }                  //   delete cells            
-    if(S0) { delete[] S0; S0=0; }                  //   delete souls            
     warning("nobody in tree");                     //   issue a warning         
-    Nc = 0;                                        //   # cells= 0              
-    Dp = 0;                                        //   depth of tree           
+    allocate(0,0);                                 //   reset souls & cells     
+    set_depth(0);                                  //   set tree depth to zero  
   }                                                // <                         
-  CN = C0 + Nc;                                    // pointer past last cell    
-  SN = S0 + Ns;                                    // pointer past last soul    
   if     (BSRCES) BSRCES->after_tree_growth();     // reset change flag         
-#ifdef ALLOW_MPI
+#ifdef falcON_MPI
   else if(PSRCES) PSRCES->after_tree_growth();     // reset change flag         
 #endif
   SET_F
@@ -2013,7 +2032,17 @@ void basic_tree<TREE,CELL>::dump_nodes(std::ostream*oc, std::ostream*os) const
 template class basic_tree<grav_tree,grav_cell>;
 
 template class basic_tree<sticky_tree,sticky_cell>;
-
 template basic_tree<sticky_tree,sticky_cell>::
-  basic_tree(const grav_tree* const&);
+  basic_tree(const grav_tree* const&, int const&);
+#ifdef falcON_USE_MPI
+template class basic_tree<grap_tree,grap_cell>;
+template basic_tree<grap_tree,grap_cell>::
+  basic_tree(const grav_tree* const&,
+	     bool(*)(grav_tree::cell_iterator const&));
+#endif
+#ifdef falcON_SPH
+template class basic_tree<sph_tree,sph_cell>;
+template basic_tree<sph_tree,sph_cell>::
+  basic_tree(const grav_tree* const&, int const&);
+#endif
 ////////////////////////////////////////////////////////////////////////////////

@@ -5,14 +5,14 @@
 //                                                                             |
 // C++ code                                                                    |
 //                                                                             |
-// Copyright Walter Dehnen, 1994-2001                                          |
+// Copyright Walter Dehnen, 1994-2003                                          |
 // e-mail:   wdehnen@aip.de                                                    |
 // address:  Astrophysikalisches Institut Potsdam,                             |
 //           An der Sternwarte 16, D-14482 Potsdam, Germany                    |
 //                                                                             |
 //-----------------------------------------------------------------------------+
-#ifndef included_Pi_h
-#define included_Pi_h
+#ifndef falcON_included_Pi_h
+#define falcON_included_Pi_h
 ////////////////////////////////////////////////////////////////////////////////
 namespace nbdy {
   const double Pi   = 3.14159265358979323846264338328;  // Pi                   
@@ -30,4 +30,4 @@ namespace nbdy {
 #endif
 }
 ////////////////////////////////////////////////////////////////////////////////
-#endif // included_Pi_h
+#endif // falcON_included_Pi_h

@@ -5,7 +5,7 @@
 //                                                                             |
 // C++ code                                                                    |
 //                                                                             |
-// Copyright Walter Dehnen, 2000-2002                                          |
+// Copyright Walter Dehnen, 2000-2003                                          |
 // e-mail:   wdehnen@aip.de                                                    |
 // address:  Astrophysikalisches Institut Potsdam,                             |
 //           An der Sternwarte 16, D-14482 Potsdam, Germany                    |
@@ -80,29 +80,31 @@
 //  For the initial h we take the integer power of 2 that is nearest to tau.   |
 //                                                                             |
 //-----------------------------------------------------------------------------+
-#ifndef included_nbdy_h
-#define included_nbdy_h
+#ifndef falcON_included_nbdy_h
+#define falcON_included_nbdy_h
 
-#ifndef included_ctime
+#ifndef falcON_included_ctime
 #  include <ctime>
-#  define included_ctime
+#  define falcON_included_ctime
 #endif
-#ifndef included_body_h
+#ifndef falcON_included_body_h
 #  include <body.h>
 #endif
-#ifndef included_falcON_h
+#ifndef falcON_included_falcON_h
 #  include <falcON.h>
 #endif
-#ifndef included_pext_h
-#  include <public/pext.h>
+#ifndef falcON_included_pext_h
+#  include <pext.h>
 #endif
-#ifndef included_step_h
+#ifndef falcON_included_step_h
 #  include <public/step.h>
 #endif
 ////////////////////////////////////////////////////////////////////////////////
 namespace nbdy {
   //////////////////////////////////////////////////////////////////////////////
-  // class nbdy::basic_nbody                                                    
+  //                                                                          //
+  // class nbdy::basic_nbody                                                  //
+  //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
   class basic_nbody : protected falcON
   {
@@ -111,7 +113,7 @@ namespace nbdy {
     //--------------------------------------------------------------------------
     // types                                                                    
     //--------------------------------------------------------------------------
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
   public:
     enum soft_type {                               // type of softening         
       global_fixed        = 0,                     // globally time-constant    
@@ -121,28 +123,28 @@ namespace nbdy {
 #endif
     //--------------------------------------------------------------------------
   protected:
-    typedef real tensor[NDIM][NDIM];               // not necessarily symmetric 
-    static  real trace(tensor const&);
+    typedef real tensor[Ndim][Ndim];               // not necessarily symmetric 
     //--------------------------------------------------------------------------
     // data                                                                     
     //--------------------------------------------------------------------------
     const bodies   *BODIES;
     const extpot   *PEX;
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
     soft_type       SOFTENING;                     // type of softening method  
 #endif
     real            TINI;                          // initial simulation time   
   private:
     mutable clock_t C_OLD;
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
     real            NSOFT;                         // #/sphere for eps_i setting
     uint            NREF;                          // #/cell for eps_i setting  
+    real            EMIN;                          // lower limit for eps_i     
     real            EFAC;                          // max change factor for epsi
 #endif
     const int       NCRIT;                         // max # bodies in cell      
     const int       NCUT;                          // for tree re-build         
     int             DIR[4];                        // direct summation          
-    mutable real    M,Ktot,Utot,TU;                // mass, kin & pot E, vir rat
+    mutable real    M,Ktot,Uin,Uex,TU;             // mass, kin & pot E, vir rat
     mutable amom    L;                             // total angular momentum    
     mutable tensor  KT,WT;                         // kin & pot energy, AM tens 
     mutable vect    CMX,CMV;                       // center of mass pos & vel  
@@ -159,26 +161,26 @@ namespace nbdy {
     //--------------------------------------------------------------------------
   protected:
     //--------------------------------------------------------------------------
-    // - compute KT, WT, CMX, CMV, Ktot, Utot, TU                               
+    // - compute KT, WT, CMX, CMV, Ktot, Uin, Uex, TU                           
     void diagnose          () const;
     //--------------------------------------------------------------------------
-    // - IF out of date: compute KT, WT, CMX, CMV, Ktot, Utot, TU               
-    void update_diagnostics() const { if(! DIAG) { diagnose(); DIAG = true; } }
+    // - IF out of date: compute KT, WT, CMX, CMV, Ktot, Uin, Uex, TU           
+    void update_diags() const { if(! DIAG) { diagnose(); DIAG = true; } }
     //--------------------------------------------------------------------------
     // - (re-)grows or re-uses the tree (the latter if arg = true)              
     void set_tree          (const bool);
     //--------------------------------------------------------------------------
-    // - adjusts eps_i of sink bodies       (individual_adaptive)               
-    // - upates acceleration of sink bodies                                     
-    void eps_and_acc    (
-#ifdef ALLOW_INDI
-			 const bool=true           // adjust/set epsi, get acc  
+    // - adjusts eps_i of active bodies       (individual_adaptive)             
+    // - upates acceleration of active bodies                                   
+    void eps_and_acc    (bool const&               // I: all or only active?    
+#ifdef falcON_INDI
+			,bool const& =true         //[I: indi&adap: adjust epsi]
 #endif
 			);
     //--------------------------------------------------------------------------
     inline void reset_cpus           () const;
     void update_cpu_total     () const;
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
     void estimate_mass_density(const bool);
 #endif
     //--------------------------------------------------------------------------
@@ -193,29 +195,31 @@ namespace nbdy {
     //--------------------------------------------------------------------------
     // public methods                                                           
     //--------------------------------------------------------------------------
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
     void estimate_mass_densities(                  // estimate every bodies rho 
 				 const bool=true); //[I: add contrib of Pot_ext]
     void estimate_surf_densities();                // estimate every bodies SD  
 #endif
     //--------------------------------------------------------------------------
-    real const&kin_energy    () const { update_diagnostics(); return Ktot; }
-    real const&pot_energy    () const { update_diagnostics(); return Utot; }
-    real       total_energy  () const { update_diagnostics(); return Ktot+Utot;}
-    real const&virial_ratio  () const { update_diagnostics(); return TU; }
-    amom const&total_angmom  () const { update_diagnostics(); return L; }
-    vect const&total_momentum() const { update_diagnostics(); return CMV; }
-    vect const&center_of_mass() const { update_diagnostics(); return CMX; }
-    real const&kin_energy    (int const&i, int const&j) const {
-                                        update_diagnostics(); return KT[i][j]; }
-    real const&pot_energy    (int const&i, int const&j) const {
-                                        update_diagnostics(); return WT[i][j]; }
-    bool       using_extpot  () const { return PEX && !PEX->is_empty(); }
+    real const&kin_energy     () const { update_diags(); return Ktot; }
+    real const&pot_self_energy() const { update_diags(); return Uin; }
+    real const&pot_ext_energy () const { update_diags(); return Uex; }
+    real const pot_energy     () const { update_diags(); return Uin+Uex; }
+    real       total_energy   () const { update_diags(); return Ktot+Uin+Uex;}
+    real const&virial_ratio   () const { update_diags(); return TU; }
+    amom const&total_angmom   () const { update_diags(); return L; }
+    vect const&total_momentum () const { update_diags(); return CMV; }
+    vect const&center_of_mass () const { update_diags(); return CMX; }
+    real const&kin_energy     (int const&i, int const&j) const {
+                                         update_diags(); return KT[i][j]; }
+    real const&pot_energy     (int const&i, int const&j) const {
+                                         update_diags(); return WT[i][j]; }
+    bool       using_extpot   () const { return PEX && !PEX->is_empty(); }
     //--------------------------------------------------------------------------
     real       as_angmom     (int const&i, int const&j) const 
     {
-      update_diagnostics();
-#if NDIM==3
+      update_diags();
+#if falcON_NDIM == 3
       switch(i) {
       case 0:
 	switch(j) {
@@ -255,10 +259,10 @@ namespace nbdy {
     void reset_softening(                          // resets softening params   
 			 kern_type const&,         // I: softening kernel       
 			 real      const&          // I: eps                    
-#ifdef ALLOW_INDI
-			 ,
-			 real      const&,         // I: Nsoft                  
+#ifdef falcON_INDI
+			,real      const&,         // I: Nsoft                  
 			 unsigned  const&,         // I: Nref                   
+			 real      const&,         // I: eps_min                
 			 real      const&          // I: eps_fac                
 #endif
 			 );
@@ -273,10 +277,11 @@ namespace nbdy {
 		real         const&,               // I: tolerance parameter    
 		int          const&,               // I: N_crit                 
 		kern_type    const&,               // I: softening kernel       
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
 		soft_type    const&,               // I: softening type         
 		real         const&,               // I: N_soft                 
 		uint         const&,               // I: N_ref                  
+		real         const&,               // I: eps_min                
 		real         const&,               // I: eps_fac                
 #endif
 		const extpot*const&,               // I: P_ex                   
@@ -285,7 +290,9 @@ namespace nbdy {
     virtual ~basic_nbody() {}
   };
   //////////////////////////////////////////////////////////////////////////////
-  // class nbdy::LeapFrogCode                                                   
+  //                                                                          //
+  // class nbdy::LeapFrogCode                                                 //
+  //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
   class LeapFrogCode :
     public    basic_nbody,
@@ -310,10 +317,11 @@ namespace nbdy {
 		 real         const& =Default::theta,  //[I: tolerance param]   
 		 int          const& =Default::Ncrit,  //[I: N_crit]            
 		 kern_type    const& =Default::kernel, //[I: softening kernel]  
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
 		 soft_type    const& =global_fixed,    //[I: softening type]    
 		 real         const& =zero,            //[I: N_soft]            
 		 uint         const& =32,              //[I: N_ref]             
+		 real         const& =zero,            //[I: eps_min]           
 		 real         const& =two,             //[I: eps_fac]           
 #endif
 		 const extpot*const& =0,               //[I: P_ex]              
@@ -326,11 +334,13 @@ namespace nbdy {
     void stats_line(std::ostream&) const;          // line of proper size       
   };
   //////////////////////////////////////////////////////////////////////////////
-  // class nbdy::BlockStepCode                                                  
+  //                                                                          //
+  // class nbdy::BlockStepCode                                                //
+  //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
   class BlockStepCode :
     public    basic_nbody,
-    protected BlockStep
+    protected GravBlockStep
   {
     BlockStepCode(const BlockStepCode&);            // not implemented          
     BlockStepCode& operator= (const BlockStepCode&);// not implemented          
@@ -343,10 +353,10 @@ namespace nbdy {
     // private methods                                                          
     //--------------------------------------------------------------------------
   private:
-    void set_sink_flags (const indx);
-    void elementary_step(const indx);
-    void prepare(const int,                        // I: h0                     
-		 const int);                       // I: N_steps                
+    void set_active_flags(int const&);
+    void elementary_step (int const&);
+    void prepare         (int const&,              // I: h0                     
+			  int const&);             // I: N_steps                
     //--------------------------------------------------------------------------
     // public methods                                                           
     //--------------------------------------------------------------------------
@@ -357,24 +367,27 @@ namespace nbdy {
 		  int          const&,                 // I: h0                 
 		  int          const&,                 // I: # levels           
 		  real         const&,                 // I: f_a: for stepping  
-		  real         const& =0,              //[I: f_p: for stepping] 
-		  real         const& =0,              //[I: f_c: for stepping] 
+		  real         const& =zero,           //[I: f_p: for stepping] 
+		  real         const& =zero,           //[I: f_c: for stepping] 
+		  real         const& =zero,           //[I: f_e: for stepping] 
 		  int          const& =0,              //[I: h_grow]            
 		  real         const& =Default::theta, //[I: tolerance param]   
 		  int          const& =Default::Ncrit, //[I: N_crit]            
 		  kern_type    const& =Default::kernel,//[I: softening kernel]  
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
 		  soft_type    const& =global_fixed,   //[I: softening type]    
 		  real         const& =zero,           //[I: N_soft]            
 		  uint         const& =32,             //[I: N_ref]             
+		  real         const& =zero,           //[I: eps_min]           
 		  real         const& =two,            //[I: eps_fac]           
 #endif
 		  const extpot*const& =0,              //[I: P_ex]              
 		  const int[4]       =Default::direct);//[I: direct sum control]
     //--------------------------------------------------------------------------
-    void reset_stepping (const real,               // I: f_a                    
-			 const real = zero,        //[I: f_p]                   
-			 const real = zero);       //[I: f_c]                   
+    void reset_stepping (real const&,              // I: f_a                    
+			 real const& =zero,        //[I: f_p]                   
+			 real const& =zero,        //[I: f_c]                   
+			 real const& =zero);       //[I: f_e]                   
     void full_step      ();                        // do one blockstep          
     const real& time    () const { return BlockStep::time(); }
     void dump_steps     (std::ostream& to) const { BlockStep::dump(to); }
@@ -384,4 +397,4 @@ namespace nbdy {
   };
 }
 ////////////////////////////////////////////////////////////////////////////////
-#endif // included_nbdy_h
+#endif // falcON_included_nbdy_h

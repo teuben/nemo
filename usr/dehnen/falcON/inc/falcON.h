@@ -1,8 +1,6 @@
 // -*- C++ -*-                                                                 |
 //-----------------------------------------------------------------------------+
 //                                                                             |
-// latest change 02/12/2002 WD                                                 |
-//                                                                             |
 // falcON.h                                                                    |
 //                                                                             |
 //=============================================================================+
@@ -14,7 +12,7 @@
 // header file for C++ users                                                   |
 // (C and FORTRAN users, see files falcON_C.h and falcON.f, respectively)      |
 //                                                                             |
-// Copyright Walter Dehnen, 2000-2002                                          |
+// Copyright Walter Dehnen, 2000-2003                                          |
 // e-mail:   wdehnen@aip.de                                                    |
 // address:  Astrophysikalisches Institut Potsdam,                             |
 //           An der Sternwarte 16, D-14482 Potsdam, Germany                    |
@@ -34,10 +32,6 @@
 // CONTENTS                                                                    |
 // ========                                                                    |
 //                                                                             |
-// 0  Auxiliary types                                                          |
-//    0.1  The type of softening                                               |
-//    0.2  The type of kernel                                                  |
-//    0.3  The type of MAC                                                     |
 // 1  Initialisation and clearing up                                           |
 //    1.1  Before using the code                                               |
 //    1.2  After using the code                                                |
@@ -85,17 +79,18 @@
 // uint     an unsigned integer                                                |
 //                                                                             |
 //-----------------------------------------------------------------------------+
-#ifndef included_falcON_h                   // ensure these definitions are    |
-#define included_falcON_h 1                 // seen once only by the compiler  |
-#ifndef included_auxx_h                     //                                 |
+#ifndef falcON_included_falcON_h            // ensure these definitions are    |
+#define falcON_included_falcON_h 1          // seen once only by the compiler  |
+#ifndef falcON_included_auxx_h              //                                 |
 #  include <public/auxx.h>                  // basic types etc.                |
 #endif                                      //                                 |
-#ifndef included_deft_h                     //                                 |
+#ifndef falcON_included_deft_h              //                                 |
 #  include <public/deft.h>                  // default parameters              |
 #endif                                      //                                 |
 //-----------------------------------------------------------------------------+
 namespace nbdy {                            // falcON is in namespace nbdy     |
   class sbodies;                            // forward declaration             |
+  class barrays;                            // forward declaration             |
   class grav_mac;                           // forward declaration             |
   class grav_tree;                          // forward declaration             |
   class grav_stat;                          // forward declaration             |
@@ -122,27 +117,18 @@ namespace nbdy {                            // falcON is in namespace nbdy     |
 	      const real,                      // I: global/maximum eps        |
 	      const real      =Default::theta, //[I: tolerance parameter]      |
 	      const kern_type =Default::kernel,//[I: type of softening kernel] |
-#ifdef ALLOW_INDI                              // non-public version only:     |
+#ifdef falcON_INDI                             // non-public version only:     |
 	      const soft_type =global,         //[I: global/individual eps]    |
 #endif                                         //                              |
 	      const MAC_type  =theta_of_M);    //[I: type of MAC]              |
 //                                                                             |
 // and one for the use with plain arrays:                                      |
 //                                                                             |
-    falcON   (const int*,                      // I: array with flags          |
-	      const areal*,                    // I: array with masses         |
-	      const areal* [NDIM],             // I: array with positions      |
-#ifdef ALLOW_INDI                              // non-public version only:     |
-	            areal*,                    // I: array with eps_i          |
-#endif                                         //                              |
-	            areal* [NDIM],             // I: array for accelerations   |
-	            areal*,                    // I: array for potentials      |
-	            areal*,                    // I: array for densities       |
-	      const unsigned,                  // I: N   = size of arrays      |
+    falcON   (const barrays*,                  // I: bodies                    |
 	      const real,                      // I: global/maximum eps        |
 	      const real      =Default::theta, //[I: tolerance parameter]      |
 	      const kern_type =Default::kernel,//[I: type of softening kernel] |
-#ifdef ALLOW_INDI                              // non-public version only:     |
+#ifdef falcON_INDI                             // non-public version only:     |
 	      const soft_type =global,         //[I: global/individual eps]    |
 #endif                                         //                              |
 	      const MAC_type  =theta_of_M);    //[I: type of MAC]              |
@@ -208,13 +194,13 @@ namespace nbdy {                            // falcON is in namespace nbdy     |
 //                                                                             |
 // bit  value     meaning                                                      |
 // ------------------------------------------------------------------------    |
-//   1      1     this body is a sink, i.e. it wants update                    |
+//   1      1     this body is active, i.e. it wants update                    |
 //   2      2     don't load this body into the tree, ignore it                |
 //   3      4     this body is a SPH particle                                  |
 //   4      8     this body is a sticky particle                               |
 // i>4   2^(i-1)  not used                                                     |
 //                                                                             |
-// The default, flag=0, represents a plain body that is not sink, but still    |
+// The default, flag=0, represents a plain body that is inactive, but still    |
 // source of gravity.                                                          |
 // The flag is obtained by setting the bits or, equivalently, adding the       |
 // values. The flags are not used by the constructor and will unfold their     |
@@ -232,7 +218,7 @@ namespace nbdy {                            // falcON is in namespace nbdy     |
 // are not flagged to be ignored, and subsequently pre-compute the centers     |
 // of mass and sizes of the cells, use                                         |
 //                                                                             |
-    void grow(const int = Default::Ncrit);    //[I: Ncrit]                     |
+    void grow(int const& =Default::Ncrit);    //[I: Ncrit]                     |
 //                                                                             |
 // which grows a new tree from scratch. Cells containing Ncrit or less bodies  |
 // will NOT be splitted. Experiments showed that for a full force calculation  |
@@ -241,8 +227,8 @@ namespace nbdy {                            // falcON is in namespace nbdy     |
 //                                                                             |
 // With                                                                        |
 //                                                                             |
-    void re_grow(const int,                   // I: N_cut                      |
-		 const int = Default::Ncrit); //[I: Ncrit]                     |
+    void re_grow(int const&,                  // I: N_cut                      |
+		 int const& =Default::Ncrit); //[I: Ncrit]                     |
 //                                                                             |
 // a new tree is grown aided by the old tree, if existent. N_cut is the size   |
 // of an old-tree cell that will be re-grown from scratch.                     |
@@ -274,11 +260,13 @@ namespace nbdy {                            // falcON is in namespace nbdy     |
 // -----------------------------------                                         |
 // Once a tree structure is established, you can compute the forces by         |
 //                                                                             |
-    void approximate_gravity(bool  =true,             //[I: combine phases]    |
-#ifdef ALLOW_INDI                                     // non-public  only:     |
-			     real  =zero,             //[I: Nsoft adjust eps_i]|
-			     uint  =0u,               //[I: Nref  adjust eps_i]|
-			     real  =zero,             //[I: max change of eps] |
+    void approximate_gravity(bool const& =true,       //[I: combine phases]    |
+			     bool const& =false,      //[I: all or only active]|
+#ifdef falcON_INDI                                    // non-public  only:     |
+			     real const& =zero,       //[I: Nsoft adjust eps_i]|
+			     uint const& =0u,         //[I: Nref  adjust eps_i]|
+			     real const& =zero,       //[I: eps_min]           |
+			     real const& =zero,       //[I: max change of eps] |
 #endif                                                //                       |
 			     const int[4]=Default::direct); //[I: N_direct]    |
 //                                                                             |
@@ -292,7 +280,7 @@ namespace nbdy {                            // falcON is in namespace nbdy     |
 // --------------------                                                        |
 // For individual adaptive softening the routine can do more for you before    |
 // the forces are actually computed:                                           |
-// If Nsoft [2nd argument] is non-zero, it estimates for each sink particle    |
+// If Nsoft [2nd argument] is non-zero, it estimates for each active particle  |
 // the local number density (using the number density of the smallest cell     |
 // containing that particle with not less than Nref [3rd argument] bodies).    |
 // If fac [4th arg] is zero, the bodies softening lengths are set such that,   |
@@ -316,11 +304,12 @@ namespace nbdy {                            // falcON is in namespace nbdy     |
 //                                                                             |
 // For test purposes, we also have a direct summation facility:                |
 //                                                                             |
-    void exact_gravity(
-#ifdef ALLOW_INDI                           // non-public  only:               |
-		       real  =zero,         //[I: Nsoft: adjust eps_i]         |
-		       uint  =0u,           //[I: Nref:  adjust eps_i]         |
-		       real  =zero          //[I: max change of eps]           |
+    void exact_gravity(bool const& =false   //[I: all of only active]          |
+#ifdef falcON_INDI                          // non-public  only:               |
+		      ,real const& =zero,   //[I: Nsoft: adjust eps_i]         |
+		       uint const& =0u,     //[I: Nref:  adjust eps_i]         |
+		       real const& =zero,   //[I: eps_min]                     |
+		       real const& =zero    //[I: max change of eps]           |
 #endif                                      //                                 |
 		       );                   //                                 |
 //                                                                             |
@@ -329,11 +318,11 @@ namespace nbdy {                            // falcON is in namespace nbdy     |
 // ------------------------------------------------------                      |
 // There is also the possibility to obtain a rough estimate of the mass-,      |
 // surface- or number density of bodies in the neighbourhood of every body     |
-// flagged as sink, via                                                        |
+// flagged being active, via                                                   |
 //                                                                             |
-    void estimate_rho(const int);           // I: critical cell size           |
-    void estimate_sd (const int);           // I: critical cell size           |
-    void estimate_n  (const int);           // I: critical cell size           |
+    void estimate_rho(int const&);          // I: critical cell size           |
+    void estimate_sd (int const&);          // I: critical cell size           |
+    void estimate_n  (int const&);          // I: critical cell size           |
 //                                                                             |
 // These estimates are simply the mean density within the smallest cells with  |
 // more then NX (1st arg) bodies. Note, that when using test bodies (bodies    |
@@ -347,14 +336,11 @@ namespace nbdy {                            // falcON is in namespace nbdy     |
 // ----------------------                                                      |
 //                                                                             |
 // The number of bodies in the tree that are within the softening sphere of    |
-// each body flagged as sink are counted with a call to either of              |
+// each body flagged being active are counted with a of                        |
 //                                                                             |
   private:                                  // not yet tested :                |
     void count_neighbours();                //                                 |
-    void count_neighbours(int*);            // I/O: array with N_neighbour     |
   public:                                   //                                 |
-//                                                                             |
-// depending on the usage of bodies or arrays for data communication.          |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 //                                                                             |
@@ -364,23 +350,14 @@ namespace nbdy {                            // falcON is in namespace nbdy     |
 //                                                                             |
 // Once a tree structure is established, you can also use it to create         |
 // interaction lists for neighbouring or colliding particles (useful for,      |
-// e.g., SPH and sticky-particle simulations). In the case of bodies (class    |
-// body) being used to communicate the data, this is provided by               |
+// e.g., SPH and sticky-particle simulations). This is provided by             |
 //                                                                             |
     typedef uint elem_pair[2];              // element of an interaction list  |
-    void make_iaction_list(elem_pair*,      // I: interaction list             |
-			   const uint,      // I: allocated size of list       |
-			   uint&,           // O: actual size of list          |
-			   const real=-1.); //[I: time step tau]               |
-//                                                                             |
-// while in the case of array communication, you must use                      |
-//                                                                             |
-    void make_iaction_list(elem_pair*,      // I: interaction list             |
-			   const uint,      // I: allocated size of list       |
-			   uint&,           // O: actual size of list          |
-			   const areal*,    // I: array with body sizes        |
-			   const areal*[NDIM],//I: array with body velocities  |
-			   const real=-1.); //[I: time step tau]               |
+    void make_iaction_list(elem_pair *,     // I: interaction list             |
+			   uint const&,     // I: allocated size of list       |
+			   uint      &,     // O: actual size of list          |
+			   real const& =-one)//[I: time step tau]              |
+      const;                                //                                 |
 //                                                                             |
 // In case of overflow, i.e. if the number of pairs found exceeds the size     |
 // (2nd arg) of the list (1st arg), the routine issues a warning to stderr,    |
@@ -395,7 +372,7 @@ namespace nbdy {                            // falcON is in namespace nbdy     |
 // In order to make a list of all pairs {i,j} of bodies/indices for which      |
 //                                                                             |
 //      (1) both are flagged to be SPH particles,                              |
-// and  (2) at least one is flagged to be sink                                 |
+// and  (2) at least one is flagged being active,                              |
 // and  (3) | x_i - x_j | < max(size_i,size_j)                                 |
 //                                                                             |
 // use falcON::make_iaction_list() whereby omitting the time step (last arg).  |
@@ -410,7 +387,7 @@ namespace nbdy {                            // falcON is in namespace nbdy     |
 // In order to make a list of all pairs {i,j} of bodies/indices for which      |
 //                                                                             |
 //      (1) both are flagged to be sticky particles,                           |
-// and  (2) at least one is flagged to be sink,                                |
+// and  (2) at least one is flagged being active,                              |
 // and  (3) | (x_i+t*v_i)-(x_j+t*v_j) | < size_i+size_j  with t in [0,tau],    |
 //                                                                             |
 // use falcON::make_iaction_list() with the time step (last arg) >= 0. In the  |
@@ -422,13 +399,10 @@ namespace nbdy {                            // falcON is in namespace nbdy     |
 //                                                                             |
 // 4.3 SPH Neighbour counting                                                  |
 // --------------------------                                                  |
-// In order to count for each body flagged both as SPH particle and as sink    |
-// the number of other SPH particles within its size, use                      |
+// In order to count, for each body flagged both as SPH particle and being     |
+// active, the number of other SPH particles within its size, use              |
 //                                                                             |
-    void count_sph_neighbours();            // if bodies are used              |
-    void count_sph_neighbours(              // if arrays are used              |
-			      const areal*, // I: array with sizes             |
-			            int  *);// I/O: array with N_neighbour     |
+    void count_sph_neighbours();            //                                 |
 //                                                                             |
 //                                                                             |
 //-----------------------------------------------------------------------------+
@@ -470,7 +444,7 @@ namespace nbdy {                            // falcON is in namespace nbdy     |
 //                                                                             |
 // To obtain the current type of softening (global/individual), use            |
 //                                                                             |
-#ifdef ALLOW_INDI                           //                                 |
+#ifdef falcON_INDI                          //                                 |
     const soft_type& softening() const;     //                                 |
 #endif                                      //                                 |
 //                                                                             |
@@ -485,6 +459,7 @@ namespace nbdy {                            // falcON is in namespace nbdy     |
 // To obtain the currently used (global) softening length, use                 |
 //                                                                             |
     const real& softening_length() const;   //                                 |
+    const real& eps             () const;   //                                 |
 //                                                                             |
 // To obtain some interaction statistics, use                                  |
 //                                                                             |
@@ -500,7 +475,7 @@ namespace nbdy {                            // falcON is in namespace nbdy     |
     const real& root_radius() const;        // R: radius of root               |
     const int & root_number() const;        // R: # bodies in root             |
     const real& root_mass  () const;        // R: mass  of root                |
-    const int & root_depth () const;        // R: depth  of root               |
+    const uint& root_depth () const;        // R: depth  of root               |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 //                                                                             |
@@ -578,19 +553,13 @@ namespace nbdy {                            // falcON is in namespace nbdy     |
 //                                                                             |
     mutable tree_state     STATE;                 // state of the tree         |
     const   sbodies       *BODIES;                // sbodies to be used        |
+    const   barrays       *ARRAYS;                // barrays to be used        |
     grav_tree             *TREE;                  // tree to be used           |
-    uint                   Nb, Ncoeffs;           // # bodies, coeffs used     |
     int                    Ncrit;                 // Ncrit                     |
-    const   int           *FL;                    // flags                     |
-    const   areal         *M, **X;                // masses, positions         |
-#ifdef ALLOW_INDI                                 //                           |
-    areal                 *EP;                    // eps_i                     |
-#endif                                            //                           |
-    areal                 *PH,*RH,**A;            // pots, dens, accs          |
     mutable real           EPS;                   // global eps/eps_max        |
     mutable grav_mac      *GMAC;                  // theta(M)                  |
     mutable grav_stat     *STATS;                 // statistics                |
-#ifdef ALLOW_INDI                                 //                           |
+#ifdef falcON_INDI                                //                           |
     mutable soft_type      SOFTENING;             // type of softening         |
 #endif                                            //                           |
     mutable kern_type      KERNEL;                // type of softening kernel  |
@@ -600,23 +569,28 @@ namespace nbdy {                            // falcON is in namespace nbdy     |
 //                                                                             |
 // inline definitions of some public member functions                          |
 //                                                                             |
-  inline unsigned         falcON::No_coeffs_used()   const
-  { return Ncoeffs; }
-//-----------------------------------------------------------------------------+
-#ifdef ALLOW_INDI                                 //                           |
-  inline soft_type const &falcON::softening()        const
-  { return SOFTENING; }
+#ifdef falcON_INDI                                //                           |
+  inline                                          //                           |
+  soft_type const &falcON::softening() const      //                           |
+  { return SOFTENING; }                           //                           |
 #endif                                            //                           |
 //-----------------------------------------------------------------------------+
-  inline kern_type const &falcON::kernel()           const
-  { return KERNEL; }
+  inline                                          //                           |
+  kern_type const &falcON::kernel() const         //                           |
+  { return KERNEL; }                              //                           |
 //-----------------------------------------------------------------------------+
-  inline real      const &falcON::softening_length() const
-  { return EPS; }
+  inline                                          //                           |
+  real const &falcON::eps() const                 //                           |
+  { return EPS; }                                 //                           |
 //-----------------------------------------------------------------------------+
-  inline const     char*  falcON::describe_kernel () const
-  { return describe(KERNEL);}
+  inline                                          //                           |
+  real const &falcON::softening_length() const    //                           |
+  { return EPS; }                                 //                           |
 //-----------------------------------------------------------------------------+
-}                                                  // END: namespace nbdy      |
+  inline                                          //                           |
+  const char*  falcON::describe_kernel () const   //                           |
+  { return describe(KERNEL);}                     //                           |
+//-----------------------------------------------------------------------------+
+}                                                 // END: namespace nbdy       |
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#endif                                             // included_falcON_h        |
+#endif                                            // falcON_included_falcON_h  |

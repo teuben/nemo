@@ -2,26 +2,28 @@
 //-----------------------------------------------------------------------------+
 //                                                                             |
 // iact.h                                                                      |
-//                                                                             |
 // C++ code                                                                    |
 //                                                                             |
-// Copyright Walter Dehnen, 2000-2002                                          |
+// Copyright Walter Dehnen, 2000-2003                                          |
 // e-mail:   wdehnen@aip.de                                                    |
 // address:  Astrophysikalisches Institut Potsdam,                             |
 //           An der Sternwarte 16, D-14482 Potsdam, Germany                    |
 //                                                                             |
 //-----------------------------------------------------------------------------+
-#ifndef included_iact_h
-#define included_iact_h
-
-#ifndef included_exit_h
-#  include <public/exith>
+#ifndef falcON_included_iact_h
+#define falcON_included_iact_h
+#ifndef falcON_included_exit_h
+#  include <public/exit.h>
 #endif
 #ifdef _OPENMP
-# ifndef included_omp_h
-#  include <omp.h>
-#  define included_omp_h
-# endif
+#  ifndef falcON_included_omp_h
+#    include <omp.h>
+#    define falcON_included_omp_h
+#  endif
+#endif
+
+#if defined(WRITE_IACT_INFO) && !defined(DEBUG)
+#  define DEBUG
 #endif
 
 namespace nbdy {
@@ -35,10 +37,26 @@ namespace nbdy {
   //----------------------------------------------------------------------------
   template<typename A, typename B>
   struct iaction {
+#ifdef WRITE_IACT_INFO
+    int lev;                                       // level of iaction          
+#endif
     A fst;                                         // first object              
     B snd;                                         // second object             
-    iaction ()             : fst(0), snd(0) {}     // constructor               
-    void set(A a, B b)     { fst=a;  snd=b; }      // set pair                  
+    iaction () : fst(0), snd(0)                    // constructor               
+#ifdef WRITE_IACT_INFO
+    ,lev(0)
+#endif
+    {}
+    void set(A a, B b                              // set pair                  
+#ifdef WRITE_IACT_INFO
+	     , int l
+#endif
+	     ) {
+      fst=a;  snd=b;
+#ifdef WRITE_IACT_INFO
+      lev=l;
+#endif
+    }
   };
   //----------------------------------------------------------------------------
   // struct iastack<>                                                           
@@ -47,19 +65,44 @@ namespace nbdy {
   class iastack {
   private:
     typedef iaction<A,B> iact;                     // type of stack objects     
-    iact    *IA, *pi;                              // first & active element    
+    iact    *IA, *pi;                              // first & current element   
+#ifdef DEBUG
+    iact    *IEND;
+#endif
     //--------------------------------------------------------------------------
   public:
     iastack (unsigned const&M)                     // constructor               
+      : IA   ( falcON_New(iact,M) ),               //   allocate memory         
+	pi   ( IA - 1 )                            //   set pter to activ       
+#ifdef DEBUG
+      , IEND ( IA + M )
+#endif
     {
-      MemoryCheck(IA = new iact[M]);               //   allocate memory         
-      pi = IA-1;                                   //   set pter to activ       
+//       falcON_MemoryCheck(IA = new iact[M]);
+//       pi = IA-1;
+// #ifdef DEBUG
+//       IEND = IA + M;
+// #endif
     }
     //--------------------------------------------------------------------------
     ~iastack () { delete[] IA; }                   // destructor: deallocate    
     bool is_empty() const   { return pi<IA;}       // if stack empty?           
-    iact pop     ()         { return *(pi--); }    // give last active: pop     
-    void push    (A a, B b) { (++pi)->set(a,b); }  // add element:      push    
+    iact pop     ()         { return *(pi--); }    // give last:   pop          
+    void push    (A a, B b                         // add element: push         
+#ifdef WRITE_IACT_INFO
+		  ,int l=0
+#endif
+		  ) {
+      ++pi;
+#ifdef DEBUG
+      if(pi >= IEND) error("push()ing beyond end of iastack");
+#endif
+      pi->set(a,b
+#ifdef WRITE_IACT_INFO
+	      ,l
+#endif
+	      );
+    }
   };
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
@@ -107,24 +150,52 @@ namespace nbdy {
     void clear_soul_cell_stack(sc_stack&SC) const {
       // clear a stack of soul-cell interactions                                
       while(!SC.is_empty()) {                        // WHILE(SC non-empty)     
-	register iaction<soul_iter,cell_iter>        // current S-C iaction     
-	  sc = SC.pop();                             //   pop new S-C iaction   
+	register sc_iact  sc = SC.pop();             //   pop new S-C iaction   
+#ifdef WRITE_IACT_INFO
+	std::cerr<<" SC "<<setw(2)<<sc.lev<<" :"
+		 <<std::setw(6)<< sc.snd.my_tree()->index(sc.fst)<<' '
+		 <<std::setw(6)<< sc.snd.index();
+#endif
 	if(!IA->interact(sc.fst,sc.snd)) {           //   IF(not performed)     
-	  LoopCKids(sc.snd,c2) SC.push  (sc.fst,c2); //     push    sub S-C     
+#ifdef WRITE_IACT_INFO
+	  std::cerr<<": splitting\n";
+#endif
+	  LoopCKids(sc.snd,c2) SC.push  (sc.fst,c2   //     push    sub S-C     
+#ifdef WRITE_IACT_INFO
+					 ,sc.lev+1
+#endif
+					 );
 	  LoopSKids(sc.snd,s2) soul_soul(sc.fst,s2); //     perform sub S-S     
 	}                                            //   ENDIF                 
+#ifdef WRITE_IACT_INFO
+	else std::cerr<<": DONE\n";
+#endif
       }                                              // END WHILE               
     }
     //--------------------------------------------------------------------------
     void clear_cell_soul_stack(cs_stack&CS) const {
       // clear a stack of cell-soul interactions                                
       while(!CS.is_empty()) {                        // WHILE(CS non-empty)     
-	register iaction<cell_iter,soul_iter>        //   current C-S iaction   
-	  cs = CS.pop();                             //   pop new C-S iaction   
+	register cs_iact cs = CS.pop();              //   pop new C-S iaction   
+#ifdef WRITE_IACT_INFO
+	std::cerr<<" CS "<<setw(2)<<cs.lev<<" :"
+		 <<std::setw(6)<< cs.fst.index()<<' '
+		 <<std::setw(6)<< cs.fst.my_tree()->index(cs.snd);
+#endif
 	if(!IA->interact(cs.fst,cs.snd)) {           //   IF(not performed)     
-	  LoopCKids(cs.fst,c1) CS.push  (c1,cs.snd); //     push    sub C-S     
+#ifdef WRITE_IACT_INFO
+	  std::cerr<<": splitting\n";
+#endif
+	  LoopCKids(cs.fst,c1) CS.push  (c1,cs.snd   //     push    sub C-S     
+#ifdef WRITE_IACT_INFO
+					 ,cs.lev+1
+#endif
+					 );
 	  LoopSKids(cs.fst,s1) soul_soul(s1,cs.snd); //     perform sub S-S     
 	}                                            //   ENDIF                 
+#ifdef WRITE_IACT_INFO
+	else std::cerr<<": DONE\n";
+#endif
       }                                              // END WHILE               
     }
     //--------------------------------------------------------------------------
@@ -134,15 +205,31 @@ namespace nbdy {
 			 sc_stack&SC) const {
       // split cell-cell interaction and perform resulting soul interactions    
       if(IA->split_first(cc.fst,cc.snd)) {           // IF(split 1st)           
-	LoopCKids(cc.fst,c1) CC.push(c1,cc.snd);     //   push sub C-C          
+	LoopCKids(cc.fst,c1) CC.push(c1,cc.snd       //   push sub C-C          
+#ifdef WRITE_IACT_INFO
+				     ,cc.lev+1
+#endif
+				     );
 	if(has_soul_kids(cc.fst)) {                  //   IF(soul kids)         
-	  LoopSKids(cc.fst,s1) SC.push(s1,cc.snd);   //     push sub S-C        
+	  LoopSKids(cc.fst,s1) SC.push(s1,cc.snd     //     push sub S-C        
+#ifdef WRITE_IACT_INFO
+				       ,cc.lev+1
+#endif
+				     );
 	  clear_soul_cell_stack(SC);                 //     clear the SC stack  
 	}                                            //   ENDIF                 
       } else {                                       // ELSE(split 2nd)         
-	LoopCKids(cc.snd,c2) CC.push(cc.fst,c2);     //   push sub C-C          
+	LoopCKids(cc.snd,c2) CC.push(cc.fst,c2       //   push sub C-C          
+#ifdef WRITE_IACT_INFO
+				     ,cc.lev+1
+#endif
+				     );
 	if(has_soul_kids(cc.snd)) {                  //   IF(soul kids)         
-	  LoopSKids(cc.snd,s2) CS.push(cc.fst,s2);   //     push sub C-S        
+	  LoopSKids(cc.snd,s2) CS.push(cc.fst,s2     //     push sub C-S        
+#ifdef WRITE_IACT_INFO
+				       ,cc.lev+1
+#endif
+				       );
 	  clear_cell_soul_stack(CS);                 //     clear the CS stack  
 	}                                            //   ENDIF                 
       }                                              // ENDIF                   
@@ -153,10 +240,21 @@ namespace nbdy {
 			       sc_stack&SC) const {
       // clear an stack of cell-cell interactions                               
       while(!CC.is_empty()) {                        // WHILE(CC non-empty)     
-	register iaction<cell_iter,cell_iter>        //   current C-C iaction   
-	  cc = CC.pop();                             //   pop new C-C iaction   
-	if(!IA->interact(cc.fst,cc.snd))             //   IF(not performed)     
+	register cc_iact cc = CC.pop();              //   pop new C-C iaction   
+#ifdef WRITE_IACT_INFO
+	std::cerr<<" CC "<<setw(2)<<cc.lev<<" :"
+		 <<std::setw(6)<< cc.fst.index()<<' '
+		 <<std::setw(6)<< cc.snd.index();
+#endif
+	if(!IA->interact(cc.fst,cc.snd)) {           //   IF(not performed)     
+#ifdef WRITE_IACT_INFO
+	  std::cerr<<": splitting\n";
+#endif
 	  split_cell_cell(cc,CC,CS,SC);              //     split               
+	}
+#ifdef WRITE_IACT_INFO
+	else std::cerr<<": DONE\n";
+#endif
       }                                              // END WHILE               
     }
     //--------------------------------------------------------------------------
@@ -168,8 +266,7 @@ namespace nbdy {
 			      int const&M) const {
       // perform up to M cell-cell, perform all occuring soul interactions      
       while(!CC.is_empty() && i<M) {                 // WHILE(CC non-empty)     
-	register iaction<cell_iter,cell_iter>        //   current C-C iaction   
-	  cc = CC.pop();                             //   pop new C-C iaction   
+	register cc_iact cc = CC.pop();              //   pop new C-C iaction   
 	if(IA->interact(cc.fst,cc.snd)) ++i;         //   IF(performed): count  
 	else split_cell_cell(cc,CC,CS,SC);           //   ELSE:          split  
       }                                              // END WHILE               
@@ -191,9 +288,21 @@ namespace nbdy {
 			 cs_stack&CS) const {
       // split cell-self interaction and perform resulting soul interactions    
       LoopCKids(cx.fst,c1) {                         // LOOP(cell kids)         
-	CX.push(c1,c1);                              //   push sub C-X          
-	LoopSKids (cx.fst,s2)      CS.push(c1,s2);   //   push sub C-S          
-	LoopCPairs(cx.fst,c1+1,c2) CC.push(c1,c2);   //   push sub C-C          
+	CX.push(c1,c1                                //   push sub C-X          
+#ifdef WRITE_IACT_INFO
+		,cx.lev+1
+#endif
+		);
+	LoopSKids (cx.fst,s2)      CS.push(c1,s2   //   push sub C-S          
+#ifdef WRITE_IACT_INFO
+					   ,cx.lev+1
+#endif
+					   );
+	LoopCPairs(cx.fst,c1+1,c2) CC.push(c1,c2   //   push sub C-C          
+#ifdef WRITE_IACT_INFO
+					   ,cx.lev+1
+#endif
+					   );
       }                                              // END LOOP                
       LoopSPairs(cx.fst,s1,s2) soul_soul(s1,s2);     // perform sub S-S         
       clear_cell_soul_stack(CS);                     // clear the CS stack      
@@ -205,12 +314,21 @@ namespace nbdy {
 			       sc_stack&SC) const {
       // clear an stack of cell-self interactions                               
       while(!CX.is_empty()) {                        // WHILE(CX non-empty)     
-	register iaction<cell_iter,cell_iter>        //   current c-self iaction
-	  cx = CX.pop();                             //   pop new self iaction  
+	register cx_iact cx = CX.pop();              //   pop new self iaction  
+#ifdef WRITE_IACT_INFO
+	std::cerr<<" CX "<<setw(2)<<cx.lev<<" :"
+		 <<std::setw(6)<< cx.fst.index() <<"       ";
+#endif
 	if(!IA->interact(cx.fst)) {                  //   IF(not performed)     
+#ifdef WRITE_IACT_INFO
+	  std::cerr<<": splitting\n";
+#endif
 	  split_cell_self(cx,CX,CC,CS);              //     split               
 	  clear_cell_cell_stack(CC,CS,SC);           //     clear the CC stack  
 	}                                            //   ENDIF                 
+#ifdef WRITE_IACT_INFO
+	else std::cerr<<": DONE\n";
+#endif
       }                                              // END WHILE               
     }
     //--------------------------------------------------------------------------
@@ -223,8 +341,7 @@ namespace nbdy {
       register int i=0;                              // counter: performed      
       work_cell_cell_stack(CC,CS,SC,i,M);            // work on C-C stack       
       while(!CX.is_empty() && i<M) {                 // WHILE(CX non-empty)     
-	register iaction<cell_iter,cell_iter>        //   current c-self iaction
-	  cx = CX.pop();                             //   pop new self iaction  
+	register cx_iact cx = CX.pop();              //   pop new self iaction  
 	if(IA->interact(cx.fst))                     //   IF(not performed)     
 	  ++i;                                       //     count               
 	else {                                       //   ELSE:                 
@@ -234,15 +351,15 @@ namespace nbdy {
       }                                              // END WHILE               
     }    
     //--------------------------------------------------------------------------
-    static unsigned n_x(unsigned const&d) { return NSUB*d; }
-    static unsigned n_c(unsigned const&d) { return NSUB*(NSUB-1)/2+NSUB*d; }
+    static unsigned n_x(unsigned const&d) { return Nsub*d+1; }
+    static unsigned n_c(unsigned const&d) { return Nsub*(Nsub-1)/2+Nsub*d; }
   };
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
   // class nbdy::MutualInteractor<>                                           //
   //                                                                          //
   // encodes the mutual interaction algorithm.                                //
-  // the order of nodes (first,second) is preserved when splitting on node    //
+  // the order of nodes (first,second) is preserved when splitting a node     //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
   template<typename INTERACTOR> class MutualInteractor :
@@ -279,8 +396,17 @@ namespace nbdy {
   public:
     MutualInteractor(                                // constructor             
 		     INTERACTOR*const&ia,            // I: interactor           
+		     unsigned   const&d1) :          // I: depth of 1st tree    
+      InteractionBase<INTERACTOR> ( ia ),	     //   initialize base       
+      CX ( n_x(d1) ),                                //   initialize cell-self  
+      CC ( n_c(2*d1) ),                              //   initialize cell-cell  
+      CS ( n_c(2*d1) ),                              //   initialize cell-soul  
+      SC ( n_c(2*d1) ) {}                            //   initialize soul-cell  
+    //--------------------------------------------------------------------------
+    MutualInteractor(                                // constructor             
+		     INTERACTOR*const&ia,            // I: interactor           
 		     unsigned   const&d1,            // I: depth of 1st tree    
-		     unsigned   const&d2=0u) :       // I: depth of 2nd tree    
+		     unsigned   const&d2) :          // I: depth of 2nd tree    
       InteractionBase<INTERACTOR> ( ia ),	     //   initialize base       
       CX ( n_x(d1) ),                                //   initialize cell-self  
       CC ( n_c(d2? d1+d2 : 2*d1) ),                  //   initialize cell-cell  
@@ -294,7 +420,7 @@ namespace nbdy {
     //--------------------------------------------------------------------------
     void cell_cell(cell_iter const&a,
 		   cell_iter const&b) const {        // cell-cell interaction   
-      if(a==b) NbdyErrorF("self-interaction","MutualInteractor::cell_cell()")
+      if(a==b)falcON_ErrorF("self-interaction","MutualInteractor::cell_cell()");
       CC.push(a,b);                                  // initialize stack        
       clear_cell_cell_stack(CC,CS,SC);               // work until stack empty  
     }
@@ -451,7 +577,7 @@ namespace nbdy {
     void split(cell_iter const&C, node_iter* const&node, int const&Nmax) {
       LoopSKids(C,s) {
 	if(Nnod > Nmax)
-	  NbdyErrorF("exceeding max # nodes","SelfInteractorP::split()")
+	  falcON_ErrorF("exceeding max # nodes","SelfInteractorP::split()");
 	node[Nnod++] = node_iter(s);
       }
       LoopCKids(C,c)
@@ -459,7 +585,7 @@ namespace nbdy {
 	  split(c,node,Nnod,Nmax);
 	else {
 	  if(Nnod > Nmax)
-	    NbdyErrorF("exceeding max # nodes","SelfInteractorP::split()")
+	    falcON_ErrorF("exceeding max # nodes","SelfInteractorP::split()");
 	  node[Nnod++] = node_iter(c);
 	}
     }
@@ -478,12 +604,15 @@ namespace nbdy {
       const int f    = 1;
       const int pmax = omp_get_max_threads();
       const int fmax = f*pmax;
-      const int Nmax = NSUB*NSUB*fmax;
+      const int Nmax = Nsub*Nsub*fmax;
       Ncut = number(root) / fmax;
-      node_iter *node = new node_iter[Nmax];    MemoryCheck(node);
+//       node_iter *node = new node_iter[Nmax];    falcON_MemoryCheck(node);
+      node_iter *node = falcON_New(node_iter,Nmax);
       split(root,node,Nmax);
-      iact = new l_iaction[(Nnod*(Nnod+1))/2];  MemoryCheck(iact);
-      lock = new omp_lock_t[Nnod];              MemoryCheck(lock);
+//       iact = new l_iaction[(Nnod*(Nnod+1))/2];  falcON_MemoryCheck(iact);
+      iact = falcON_New(l_iaction,(Nnod*(Nnod+1))/2);
+//       lock = new omp_lock_t[Nnod];              falcON_MemoryCheck(lock);
+      lock = falcON_New(omp_lock_t,Nnod);
       for(register int i=0; i!=Nnod; ++i) omp_init_lock(lock+i);
       register l_iaction *iac = iact;
       register int N = Nnod + (Nnod%2? 0 : 1);
@@ -583,7 +712,7 @@ namespace nbdy {
     //--------------------------------------------------------------------------
   private:
     bool many  (cell_iter const&A, soul_iter const&B) const {
-      many(is_sink(B) || al_sink(A), B, A.begin_souls(), A.end_soul_desc());
+      many(al_active(A) || is_active(B), B, A.begin_souls(), A.end_soul_desc());
       return true;
     }
     //--------------------------------------------------------------------------
@@ -593,36 +722,38 @@ namespace nbdy {
     }
     //--------------------------------------------------------------------------
     bool many  (cell_iter const&A) const {
+      // debugged 12-may-2003                                                   
+      // bug detected by Clayton Heller in falcON::make_iaction_list()          
       LoopLstSouls(typename cell_iter,A,Ai)
-	many(al_sink(A),Ai,Ai+1,A.end_soul_desc());
+	many(is_active(Ai), Ai,Ai+1,A.end_soul_desc());
       return true;
     }
     //--------------------------------------------------------------------------
   public:
     bool interact(cell_iter const&A, soul_iter const&B) const {
-      if(!is_sink(A) && !is_sink(B)) return true;        // no sinks -> no job  
-      if(discard(A,B))               return true;        // try to discard      
-      if(number(A) < NCB)            return many(A,B);   // perform many single 
-                                     return false;       // must split          
+      if(!is_active(A) && !is_active(B))return true;     // no actives -> no job
+      if(discard(A,B))                  return true;     // try to discard      
+      if(number(A) < NCB)               return many(A,B);// perform many single 
+                                        return false;    // must split          
     }
     //--------------------------------------------------------------------------
     bool interact(soul_iter const&B, cell_iter const&A) const {
-      if(!is_sink(A) && !is_sink(B)) return true;        // no sinks -> no job  
-      if(discard(A,B))               return true;        // try to discard      
-      if(number(A) < NCB)            return many(A,B);   // perform many single 
-                                     return false;       // must split          
+      if(!is_active(A) && !is_active(B))return true;     // no actives -> no job
+      if(discard(A,B))                  return true;     // try to discard      
+      if(number(A) < NCB)               return many(A,B);// perform many single 
+                                        return false;    // must split          
     }
     //--------------------------------------------------------------------------
     bool interact(cell_iter const&A, cell_iter const&B) const {
-      if(!is_sink(A) && !is_sink(B)) return true;        // no sinks -> no job  
-      if(discard(A,B))               return true;        // try to discard      
+      if(!is_active(A) && !is_active(B))return true;     // no actives -> no job
+      if(discard(A,B))                  return true;     // try to discard      
       if(number(A) < NCC &&
-	 number(B) < NCC    )        return many(A,B);   // perform many single 
-                                     return false;       // must split          
+	 number(B) < NCC    )           return many(A,B);// perform many single 
+                                        return false;    // must split          
     }
     //--------------------------------------------------------------------------
     bool interact(cell_iter const&A) const {
-      if(!is_sink(A))                return true;        // no sinks -> no job  
+      if(!is_active(A))              return true;        // no actives -> no job
       if(number(A) < NCS)            return many(A);     // perform many single 
                                      return false;       // must split          
     }
@@ -631,7 +762,152 @@ namespace nbdy {
       single(A,B);
     }
   };
-  //----------------------------------------------------------------------------
-}                                                        // END: namespace nbdy 
+  //////////////////////////////////////////////////////////////////////////////
+  //                                                                          //
+  // class nbdy::neighbour_counter                                            //
+  //                                                                          //
+  // for each active soul: count # souls with |R| < size(A);                  //
+  // for individual sizes(soft_type=individual): requires:                    //
+  //     - each active soul to hold its size and size^2.                      //
+  //     - each active cell to hold its size                                  //
+  // for global size, it is given as argument to the constructor              //
+  //                                                                          //
+  //////////////////////////////////////////////////////////////////////////////
+  template<typename TREE, soft_type SOFT>  class neighbour_counter;
+  //////////////////////////////////////////////////////////////////////////////
+  template<typename TREE>
+  class neighbour_counter<TREE,individual> : public basic_iactor<TREE> {
+    //--------------------------------------------------------------------------
+    // nbdy::neighbour_counter<individual>                                      
+    // MUST NOT be commented out via #ifdef falcON_INDI                         
+    //--------------------------------------------------------------------------
+  public:
+    typedef typename TREE::soul_iterator soul_iter;
+    typedef typename TREE::cell_iterator cell_iter;
+  protected:
+    //--------------------------------------------------------------------------
+    void many(bool      const&all,
+	      soul_iter const&A,
+	      soul_iter const&B0,
+	      soul_iter const&BN) const {
+      register real      Rq;
+      register soul_iter B;
+      if(is_active(A))
+	if(all)
+	  for(B=B0; B<BN; B++) {
+	    Rq = dist_sq(pos(A),pos(B));
+	    if(Rq < sizeq(A)) A->inc();
+	    if(Rq < sizeq(B)) B->inc();
+	  }
+	else
+	  for(B=B0; B<BN; B++) {
+	    Rq = dist_sq(pos(A),pos(B));
+	    if(                Rq < sizeq(A)) A->inc();
+	    if(is_active(B) && Rq < sizeq(B)) B->inc();
+	  }
+      else
+	if(all)
+	  for(B=B0; B<BN; B++) {
+	    Rq = dist_sq(pos(A),pos(B));
+	    if(Rq < sizeq(B)) B->inc();
+	  }
+	else
+	  for(B=B0; B<BN; B++) if(is_active(B)) {
+	    Rq = dist_sq(pos(A),pos(B));
+	    if(Rq < sizeq(B)) B->inc();
+	  }
+    }
+    //--------------------------------------------------------------------------
+    void single(soul_iter const&A, soul_iter const&B) const {
+      if(!is_active(A) && !is_active(B)) return;   // no actives -> no job      
+      register real Rq = dist_sq(pos(A),pos(B));   // R^2 = distance^2          
+      if(is_active(A) && Rq < sizeq(A)) A->inc();  // A is active && |R|<siza(A)
+      if(is_active(B) && Rq < sizeq(B)) B->inc();  // B is active && |R|<siza(B)
+    }
+    //--------------------------------------------------------------------------
+    bool discard(cell_iter const&A, soul_iter const&B) const
+    {
+      return dist_sq(pos(A),pos(B)) >              // |xA-xB| >                 
+	square(max(rmax(A)+size(B),size(A)));      // max(sA,rA+sB)  ?          
+    }
+    //--------------------------------------------------------------------------
+    bool discard(cell_iter const&A, cell_iter const&B) const
+    {
+      return dist_sq(pos(A),pos(B)) >              // |xA-xB| >                 
+	square(max(rmax(A)+size(B),rmax(B)+size(A))); // max(rb+sA,rA+sB)  ?    
+    }
+  public:
+    //--------------------------------------------------------------------------
+    neighbour_counter() {}
+    //--------------------------------------------------------------------------
+    bool split_first(cell_iter const&A, cell_iter const&B) const {
+      return nbdy::is_twig(B) || size(A) > size(B);
+    }
+  };
+  //////////////////////////////////////////////////////////////////////////////
+  template<typename TREE>
+  class neighbour_counter<TREE,global>
+    : public basic_iactor<TREE> {
+  public:
+    typedef typename TREE::soul_iterator soul_iter;
+    typedef typename TREE::cell_iterator cell_iter;
+  private:
+    const real EPS,EPQ;
+  protected:
+    //--------------------------------------------------------------------------
+    void many(bool      const&all,
+	      soul_iter const&A,
+	      soul_iter const&B0,
+	      soul_iter const&BN) const {
+      register soul_iter B;
+      if(is_active(A))
+	if(all)
+	  for(B=B0; B<BN; B++) {
+	    if(dist_sq(pos(A),pos(B)) < EPQ) { A->inc();
+	    B->inc(); }
+	  }
+	else
+	  for(B=B0; B<BN; B++) {
+	    if(dist_sq(pos(A),pos(B)) < EPQ) {                  A->inc();
+	    if(is_active(B)) B->inc(); }
+	  }
+      else
+	if(all)
+	  for(B=B0; B<BN; B++) {
+	    if(dist_sq(pos(A),pos(B)) < EPQ) { B->inc(); }
+	  }
+	else
+	  for(B=B0; B<BN; B++) 
+	    if(is_active(B) && dist_sq(pos(A),pos(B)) < EPQ) { B->inc(); }
+    }
+    //--------------------------------------------------------------------------
+    void single(soul_iter const&A, soul_iter const&B) const {
+      if(!is_active(A) && !is_active(B)) return;   // no actives -> no job      
+      if(dist_sq(pos(A),pos(B)) < EPQ) {           // distance^2 < eps^2        
+	if(is_active(A)) A->inc();                 // A is active && |R|<siza(A)
+	if(is_active(B)) B->inc();                 // B is active && |R|<siza(B)
+      }
+    }
+    //--------------------------------------------------------------------------
+    bool discard(cell_iter const&A, soul_iter const&B) const
+    {
+      return dist_sq(pos(A),pos(B)) >                // |xA-xB| >               
+	square(max(rmax(A)+EPS,size(A)));            // max(sA,rA+sB)  ?        
+    }
+    //--------------------------------------------------------------------------
+    bool discard(cell_iter const&A, cell_iter const&B) const
+    {
+      return dist_sq(pos(A),pos(B)) >                // |xA-xB| >               
+	square(max(rmax(A)+size(B),rmax(B)+size(A)));// max(rb+sA,rA+sB)  ?     
+    }
+  public:
+    //--------------------------------------------------------------------------
+    neighbour_counter(const real e) : EPS(e), EPQ(e*e) {}
+    //--------------------------------------------------------------------------
+    bool split_first(cell_iter const&A, cell_iter const&B) const {
+      return is_twig(B) || size(A) > size(B); }
+  };
+  //////////////////////////////////////////////////////////////////////////////
+}                                                  // END: namespace nbdy       
 ////////////////////////////////////////////////////////////////////////////////
-#endif                                                   // included_iact_h     
+#endif                                             // falcON_included_iact_h    

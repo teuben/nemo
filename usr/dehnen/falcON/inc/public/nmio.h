@@ -5,38 +5,26 @@
 //                                                                             |
 // C++ code                                                                    |
 //                                                                             |
-// Copyright Walter Dehnen, 2000-2002                                          |
+// Copyright Walter Dehnen, 2000-2003                                          |
 // e-mail:   wdehnen@aip.de                                                    |
 // address:  Astrophysikalisches Institut Potsdam,                             |
 //           An der Sternwarte 16, D-14482 Potsdam, Germany                    |
 //                                                                             |
 //-----------------------------------------------------------------------------+
-//                                                                             |
-// defines                                                                     |
-//                                                                             |
-//-----------------------------------------------------------------------------+
-#ifndef included_nmio_h
-#define included_nmio_h
+#ifndef falcON_included_nmio_h
+#define falcON_included_nmio_h
 
-#ifndef included_auxx_h
+#ifndef falcON_included_auxx_h
 #  include <public/auxx.h>
 #endif
 
-#ifdef  ALLOW_NEMO
-//------------------------------------------------------------------------------
-
-#ifdef TWODIMENSIONAL
-#  define NDM 2
-#  define TDM 4
-#else
-#  define NDM 3
-#  define TDM 6
-#endif
-
+#ifdef  falcON_NEMO
 //------------------------------------------------------------------------------
 namespace nbdy {
   //////////////////////////////////////////////////////////////////////////////
-  // class nbdy::nemo_io                                                        
+  //                                                                          //
+  // class nbdy::nemo_io                                                      //
+  //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
   class nemo_io {
   public:
@@ -56,6 +44,7 @@ namespace nbdy {
     nemo_io(const nemo_io&);
     mutable bool   OPEN[4];
   protected:
+    static const int NDM = Ndim, TDM=2*NDM;
     void          *STREAM;
     mutable int    N,CS;
     mutable float  SINGLEVECTOR[NDM], SINGLEMATRIX[NDM*NDM], SINGLEPHASES[TDM];
@@ -71,6 +60,10 @@ namespace nbdy {
     // them out in your own memory.                                            |
     // The arrays are allocated upon calling read_N() or write_N() and deleted |
     // upon calling reset() or the destructor.                                 |
+    //                                                                         |
+    // Alternatively, if your data are stored in an array of floats, you may   |
+    // read and write them directly, avoiding the copying. To this end, the    |
+    // second argumend of the read() and write() functions is required.        |
     //                                                                         |
     // IMPORTANT NOTE                                                          |
     // There is only one array for N numbers and one for N*2*Ndim numbers.     |
@@ -122,7 +115,6 @@ namespace nbdy {
 		     int*   =0)          const;    //[O: OR           -> here ] 
     void  read      (const BodiesShort,            // read N          -> array  
 		     short* =0)          const;    //[O: OR           -> here ] 
-    void  read_history () const;                   // read nemo history         
     //--------------------------------------------------------------------------
     void  write_N   (const int)          const;    // de-alloc, write N, set N  
     void  write     (const CoSys)        const;    // write type: coord. system 
@@ -144,7 +136,6 @@ namespace nbdy {
 		     int*   =0)          const;    //[O:    here    -> out    ] 
     void  write     (const BodiesShort,            // write array   -> N        
 		     short* =0)          const;    //[O:    here    -> out    ] 
-    void  write_history() const;                   // write nemo history        
   public:
     //--------------------------------------------------------------------------
     void  close     ();                            // close open file           
@@ -152,19 +143,19 @@ namespace nbdy {
     bool  is_open   () const { return STREAM!=0; } // are we ready for output ? 
     //--------------------------------------------------------------------------
     void  allocscalar() const {                    // allocate BODYSCALAR       
-      if(!BODIESSCALAR) { MemoryCheck(BODIESSCALAR = new float[N]); }
+      if(!BODIESSCALAR) { BODIESSCALAR = falcON_New(float,N); }
     }
     //--------------------------------------------------------------------------
     void  allocarrays() const {                    // allocate BODYARRAYS       
-      if(!BODIESARRAYS) { MemoryCheck(BODIESARRAYS = new float[N*TDM]); }
+      if(!BODIESARRAYS) { BODIESARRAYS = falcON_New(float,N*TDM); }
     }
     //--------------------------------------------------------------------------
     void  allocinteger() const {                   // allocate BODYINTEGER      
-      if(!BODIESINTEGER) { MemoryCheck(BODIESINTEGER = new int[N]); }
+      if(!BODIESINTEGER) { BODIESINTEGER = falcON_New(int,N); }
     }
     //--------------------------------------------------------------------------
     void  allocshort() const {                     // allocate BODYSHORT        
-      if(!BODIESSHORT) { MemoryCheck(BODIESSHORT = new short[N]); }
+      if(!BODIESSHORT) { BODIESSHORT = falcON_New(short,N); }
     }
     //==========================================================================
     void  de_allocscalar() const {                 // de-allocate BODYSCALAR    
@@ -195,13 +186,15 @@ namespace nbdy {
     const int& Number() const { return N; }
   };
   //////////////////////////////////////////////////////////////////////////////
-  // class nbdy::nemo_in                                                        
+  //                                                                          //
+  // class nbdy::nemo_in                                                      //
+  //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
-#define c_i const int i
-#define c_j const int j
+#define c_i int const&i
+#define c_j int const&j
   class nemo_in : public nemo_io {
   private:
-    nemo_in(const nemo_in&);
+    nemo_in(nemo_in const&);
   public:
     nemo_in() {}
     nemo_in(const char* file, const char* mode="r") : nemo_io(file,mode) {}
@@ -209,36 +202,36 @@ namespace nbdy {
     nemo_io::is_present;
     nemo_io::read;
     nemo_io::read_N;
-    nemo_io::read_history;
     //--------------------------------------------------------------------------
     void open (const char* file) { nemo_io::open(file,"r"); }
     //--------------------------------------------------------------------------
     void open_set (const Set S)   const { return nemo_io::open_set (S,true); }
     void close_set(const Set S)   const { return nemo_io::close_set(S,true); }
     //--------------------------------------------------------------------------
-    const float& single_vec(c_i)     const { return SINGLEVECTOR[i]; }
-    const float& single_mat(c_i,c_j) const { return SINGLEMATRIX[i*NDM+j]; }
-    const float& single_phs(c_i,c_j) const { return SINGLEPHASES[i*NDM+j]; }
-    const float& bodies_scl(c_i)     const { return BODIESSCALAR[i]; }
-    const float* bodies_vec(c_i)     const { return BODIESARRAYS+NDM*i; }
-    const float* bodies_vel(c_i)     const { return BODIESARRAYS+NDM*(N+i); }
-    const float* bodies_phs(c_i)     const { return BODIESARRAYS+TDM*i; }
-    const int  & bodies_int(c_i)     const { return BODIESINTEGER[i]; }
-    const short& bodies_sht(c_i)     const { return BODIESSHORT[i]; }
+    float const&single_vec(c_i)     const { return SINGLEVECTOR[i]; }
+    float const&single_mat(c_i,c_j) const { return SINGLEMATRIX[i*NDM+j]; }
+    float const&single_phs(c_i,c_j) const { return SINGLEPHASES[i*NDM+j]; }
+    float const&bodies_scl(c_i)     const { return BODIESSCALAR[i]; }
+    const float*bodies_vec(c_i)     const { return BODIESARRAYS+NDM*i; }
+    const float*bodies_vel(c_i)     const { return BODIESARRAYS+NDM*(N+i); }
+    const float*bodies_phs(c_i)     const { return BODIESARRAYS+TDM*i; }
+    int   const&bodies_int(c_i)     const { return BODIESINTEGER[i]; }
+    short const&bodies_sht(c_i)     const { return BODIESSHORT[i]; }
   };
   //////////////////////////////////////////////////////////////////////////////
-  // class nbdy::nemo_out                                                       
+  //                                                                          //
+  // class nbdy::nemo_out                                                     //
+  //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
   class nemo_out : public nemo_io {
   private:
-    nemo_out(const nemo_out&);
+    nemo_out(nemo_out const&);
   public:
     nemo_out() {}
     nemo_out(const char* file, const char* mode="w") : nemo_io(file,mode) {}
     //--------------------------------------------------------------------------
     nemo_io::write;
     nemo_io::write_N;
-    nemo_io::write_history;
     //--------------------------------------------------------------------------
     void open           (const char* file) { nemo_io::open(file,"w"); }
     void open_to_append (const char* file) { nemo_io::open(file,"a"); }
@@ -246,15 +239,15 @@ namespace nbdy {
     void open_set (const Set S)   const { return nemo_io::open_set (S,false); }
     void close_set(const Set S)   const { return nemo_io::close_set(S,false); }
     //--------------------------------------------------------------------------
-    float& single_vec(c_i)     { return SINGLEVECTOR[i]; }
-    float& single_mat(c_i,c_j) { return SINGLEMATRIX[i*NDM+j]; }
-    float& single_phs(c_i,c_j) { return SINGLEPHASES[i*NDM+j]; }
-    float& bodies_scl(c_i)     { return BODIESSCALAR[i]; }
-    float* bodies_vec(c_i)     { return BODIESARRAYS+NDM*i; }
-    float* bodies_vel(c_i)     { return BODIESARRAYS+NDM*(N+i); }
-    float* bodies_phs(c_i)     { return BODIESARRAYS+TDM*i; }
-    int  & bodies_int(c_i)     { return BODIESINTEGER[i]; }
-    short& bodies_sht(c_i)     { return BODIESSHORT[i]; }
+    float&single_vec(c_i)     { return SINGLEVECTOR[i]; }
+    float&single_mat(c_i,c_j) { return SINGLEMATRIX[i*NDM+j]; }
+    float&single_phs(c_i,c_j) { return SINGLEPHASES[i*NDM+j]; }
+    float&bodies_scl(c_i)     { return BODIESSCALAR[i]; }
+    float*bodies_vec(c_i)     { return BODIESARRAYS+NDM*i; }
+    float*bodies_vel(c_i)     { return BODIESARRAYS+NDM*(N+i); }
+    float*bodies_phs(c_i)     { return BODIESARRAYS+TDM*i; }
+    int  &bodies_int(c_i)     { return BODIESINTEGER[i]; }
+    short&bodies_sht(c_i)     { return BODIESSHORT[i]; }
   };
   //----------------------------------------------------------------------------
   bool time_in_range(const real&, const char*);
@@ -265,5 +258,5 @@ namespace nbdy {
 #undef NDM
 #undef TDM
 ////////////////////////////////////////////////////////////////////////////////
-#endif // ALLOW_NEMO
-#endif // included_nmio_h
+#endif // falcON_NEMO
+#endif // falcON_included_nmio_h

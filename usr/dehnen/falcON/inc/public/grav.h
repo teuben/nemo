@@ -5,7 +5,7 @@
 //                                                                             |
 // C++ code                                                                    |
 //                                                                             |
-// Copyright Walter Dehnen, 2000-2002                                          |
+// Copyright Walter Dehnen, 2000-2003                                          |
 // e-mail:   wdehnen@aip.de                                                    |
 // address:  Astrophysikalisches Institut Potsdam,                             |
 //           An der Sternwarte 16, D-14482 Potsdam, Germany                    |
@@ -16,49 +16,43 @@
 //                                                                             |
 // class grav_iact                                                             |
 // class grav_iact_s                                                           |
+// class grav_iact_all                                                         |
+// class grav_iact_all_s                                                       |
 //                                                                             |
 //-----------------------------------------------------------------------------+
-#ifndef included_grav_h
-#define included_grav_h
+#ifndef falcON_included_grav_h
+#define falcON_included_grav_h
 
-#ifndef included_grat_h
+#ifndef falcON_included_grat_h
 #  include <public/grat.h>
 #endif
-#ifndef included_deft_h
+#ifndef falcON_included_deft_h
 #  include <public/deft.h>
 #endif
 
-#if defined(REAL_IS_FLOAT) && defined(USE_SSE)
-#  define  SSE_CODE
+#if defined(falcON_REAL_IS_FLOAT) && defined(falcON_SSE)
+#  define  falcON_SSE_CODE
 #  include <proper/kern_sse.h>
 #  define  grav_kern grav_kern_sse
+#  define  grav_kern_all grav_kern_sse_all
 #else
-#  undef   SSE_CODE
+#  undef   falcON_SSE_CODE
 #  include <public/kern.h>
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
-#define P_ORDER 3                                  // expansion order is fixed !
+#ifndef falcON_ORDER
+#  warning expansion order not defined in grav.h
+#  define falcON_ORDER 3
+#endif
 ////////////////////////////////////////////////////////////////////////////////
 namespace nbdy {
   //////////////////////////////////////////////////////////////////////////////
-  //                                                                            
-  // class nbdy::grav_iact                                                      
-  //                                                                            
-  // This class is at the heart of the algorithm. It serves as INTERACTOR in    
-  // the template class MutualInteract<>, defined in iact.h, which encodes      
-  // the interaction phase in a most general way.                               
-  // class nbdy::grav_iact has member functions for soul-soul, soul-cell,       
-  // cell-soul, cell-cell, and cell-self interactions (methods interact()), as  
-  // well as a function for the evaluation phase, method evaluate_grav().       
-  //                                                                            
-  // NOTE. We do NOT allocate memory for the cell's Taylor coefficients. Rather 
-  // this has to be done before the first call to any interact().               
-  //                                                                            
+  //                                                                          //
+  // class nbdy::grav_iact_base                                               //
+  //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
-  class grav_iact : public grav_kern {
-    grav_iact           (grav_iact const&);        // not implemented           
-    grav_iact& operator=(grav_iact const&);        // not implemented           
+  class grav_iact_base {
     //--------------------------------------------------------------------------
     // data                                                                     
     //--------------------------------------------------------------------------
@@ -69,49 +63,43 @@ namespace nbdy {
     // types                                                                    
     //--------------------------------------------------------------------------
   public:
-    typedef grav_tree::cell_iterator  cell_iter;   // cell iterator             
-    typedef grav_tree::soul_iterator  soul_iter;   // soul iterator             
+    typedef grav::soul_iter soul_iter;
+    typedef grav::cell_iter cell_iter;
     //--------------------------------------------------------------------------
   protected:
     struct TaylorSeries {
               vect X;                              // expansion center          
-      mutable real C[N_COEFF];                     // coefficients              
+      mutable real C[grav::N_COEFF];               // coefficients              
       TaylorSeries(vect const&);
       TaylorSeries(TaylorSeries const&);
-//       TaylorSeries(vect const&x) : X(x)
-//       { for(register int i=0; i!=N_COEFF; ++i) C[i] = zero; }
-//       TaylorSeries(TaylorSeries const&T) : X(T.X)
-//       { for(register int i=0; i!=N_COEFF; ++i) C[i] = T.C[i]; }
     };
     //--------------------------------------------------------------------------
     real&      c0(real*         const&T) const { return *(T); }
     real const&c0(TaylorSeries  const&T) const { return *(T.C); }
-    ten1       c1(real*         const&T) const { return ten1(T+N_C1); }
+    ten1       c1(real*         const&T) const { return ten1(T+grav::N_C1); }
     ten1       c1(TaylorSeries  const&T) const { return c1(T.C); }
-    ten2       c2(real*         const&T) const { return ten2(T+N_C2); }
+    ten2       c2(real*         const&T) const { return ten2(T+grav::N_C2); }
     ten2       c2(TaylorSeries  const&T) const { return c2(T.C); }
-    ten3       c3(real*         const&T) const { return ten3(T+N_C3); }
+    ten3       c3(real*         const&T) const { return ten3(T+grav::N_C3); }
     ten3       c3(TaylorSeries  const&T) const { return c3(T.C); }
-#if P_ORDER > 3
-    ten4       c4(real*         const&T) const { return ten4(T+N_C4); }
+#if falcON_ORDER > 3
+    ten4       c4(real*         const&T) const { return ten4(T+grav::N_C4); }
     ten4       c4(TaylorSeries  const&T) const { return c4(T.C); }
-#if P_ORDER > 4
-    ten5       c5(real*         const&T) const { return ten5(T+N_C5); }
+#if falcON_ORDER > 4
+    ten5       c5(real*         const&T) const { return ten5(T+grav::N_C5); }
     ten5       c5(TaylorSeries  const&T) const { return c5(T.C); }
-#if P_ORDER > 5
-    ten6       c6(real*         const&T) const { return ten6(T+N_C6); }
+#if falcON_ORDER > 5
+    ten6       c6(real*         const&T) const { return ten6(T+grav::N_C6); }
     ten6       c6(TaylorSeries  const&T) const { return c6(T.C); }
 #endif
 #endif
 #endif
     //--------------------------------------------------------------------------
+    // methods                                                                  
+    //--------------------------------------------------------------------------
     void shift_and_add  (TaylorSeries&, vect const&,
 			 const real* const&, real const&) const;
     void extract_grav   (TaylorSeries const&, soul_iter const&) const;
-    //--------------------------------------------------------------------------
-    // protected methods                                                        
-    //--------------------------------------------------------------------------
-  protected:
     //--------------------------------------------------------------------------
     bool do_direct_pre (cell_iter const&A, soul_iter const&B) const {
       return number(A) < N_PRE[0];
@@ -138,30 +126,14 @@ namespace nbdy {
 			       real      const&Rq)
     { return Rq > rcrit2(A); }
     //--------------------------------------------------------------------------
-    // private methods                                                          
-    //--------------------------------------------------------------------------
   private:
     void shift_by (real*  const&, vect const&) const;
     void shift_to (TaylorSeries&, vect const&) const;
-    void eval_grav(cell_iter const&, TaylorSeries const&) const;
     //--------------------------------------------------------------------------
-    // public methods                                                           
-    //--------------------------------------------------------------------------
-  public:
-    grav_iact(
-	      grav_stat*const&t,                      // I: statistics          
-	      real            e,                      // I: softening length    
-	      kern_type       k    = Default::kernel, //[I: type of kernel]     
-#ifdef ALLOW_INDI
-	      soft_type       s    = Default::soften, //[I: type of softening]  
-#endif
-	      int const       nd[4]= Default::direct, //[I: direct sum control] 
-	      bool            fp   = false) :         //[I: use Pth pole in pot]
-#ifdef ALLOW_INDI
-      grav_kern( k, e, s, fp ),
-#else
-      grav_kern( k, e, fp ),
-#endif
+  protected:
+    grav_iact_base(
+		   grav_stat*const&t,                 // I: statistics          
+		   int const nd[4]= Default::direct): //[I: direct sum control] 
       STAT     ( t )                               // set statistics            
     {
       N_PRE [0] = nd[0];                           // C-B direct before try     
@@ -172,37 +144,81 @@ namespace nbdy {
       N_POST[2] = 0u;                              // C-S direct after fail     
     }
     //--------------------------------------------------------------------------
+  public:
     bool split_first(cell_iter const&A, cell_iter const&B) const {
       return is_twig(B) || (!is_twig(A) && rmax(A) > rmax(B));
     }
+  };
+  //////////////////////////////////////////////////////////////////////////////
+  //                                                                          //
+  // class nbdy::grav_iact                                                    //
+  //                                                                          //
+  // This class is at the heart of the algorithm. It serves as INTERACTOR in  //
+  // the template class MutualInteract<>, defined in iact.h, which encodes    //
+  // the interaction phase in a most general way.                             //
+  // class nbdy::grav_iact has member functions for soul-soul, soul-cell,     //
+  // cell-soul, cell-cell, and cell-self interactions (methods interact()),   //
+  // as well as a function for the evaluation phase, method evaluate_grav().  //
+  //                                                                          //
+  // NOTE. We do NOT allocate memory for the cell's Taylor coefficients.      //
+  // Rather this has to be done before the first call to any interact().      //
+  //                                                                          //
+  //////////////////////////////////////////////////////////////////////////////
+  class grav_iact : 
+    public grav_iact_base,
+    public grav_kern
+  {
+    grav_iact           (grav_iact const&);        // not implemented           
+    grav_iact& operator=(grav_iact const&);        // not implemented           
+    //--------------------------------------------------------------------------
+    void eval_grav(cell_iter const&, TaylorSeries const&) const;
+    //--------------------------------------------------------------------------
+    // public methods                                                           
+    //--------------------------------------------------------------------------
+  public:
+    grav_iact(
+	      grav_stat*const&t,                      // I: statistics          
+	      real      const&e,                      // I: softening length    
+	      kern_type const&k    = Default::kernel, //[I: type of kernel]     
+#ifdef falcON_INDI
+	      soft_type const&s    = Default::soften, //[I: type of softening]  
+#endif
+	      int const       nd[4]= Default::direct, //[I: direct sum control] 
+	      bool      const&fp   = false) :         //[I: use Pth pole in pot]
+      grav_iact_base(t,nd),
+      grav_kern(k,e,
+#ifdef falcON_INDI
+		s,
+#endif
+		fp ) {}
     //--------------------------------------------------------------------------
     // interaction phase                                                        
     //--------------------------------------------------------------------------
     void direct_summation(cell_iter const&A) const { 
-      grav_kern::many(A);
+      many(A);
     }
     //--------------------------------------------------------------------------
     bool interact(cell_iter const&A) const {
-      if(!is_sink(A)) return true;                 // no interaction -> DONE    
+      if(!is_active(A)) return true;               // no interaction -> DONE    
       if(do_direct(A)) {                           // IF(suitable)             >
-	grav_kern::many(A);                        //   perform BB iactions     
-	STAT->record_direct_CS(A);                 //   record stats            
+	many(A);                                   //   perform BB iactions     
+	STAT->record_direct_CX(A);                 //   record stats            
 	return true;                               //   DONE                    
       }                                            // < ELSE >                  
       return false;                                //   must be splitted        
     }
     //--------------------------------------------------------------------------
     bool interact(cell_iter const&A, cell_iter const&B) const {
-      if(!(is_sink(A) || is_sink(B))) return true; // no interaction -> DONE    
+      if(!(is_active(A)||is_active(B)))return true;// no interaction -> DONE    
       register vect dX = cofm(A)-cofm(B);          // compute dX = X_A - X_B    
       register real Rq = norm(dX);                 // and dX^2                  
       if(well_separated (A,B,Rq)) {                // IF(well separated)      > 
-	grav_kern::grav(A,B,dX,Rq);                //   interact                
-	STAT->record_taylor_CC(A,B);               //   record stats            
+	grav(A,B,dX,Rq);                           //   interact                
+	STAT->record_approx_CC(A,B);               //   record stats            
 	return true;                               //   DONE                    
       }                                            // <                         
       if(do_direct_post(A,B)) {                    // IF(suitable)            > 
-	grav_kern::many(A,B);                      //   perform BB iactions     
+	many(A,B);                                 //   perform BB iactions     
 	STAT->record_direct_CC(A,B);               //   record stats            
 	return true;                               //   DONE                    
       }                                            // < ELSE  >                 
@@ -210,7 +226,7 @@ namespace nbdy {
     }
     //--------------------------------------------------------------------------
     bool interact(cell_iter const&A, soul_iter const&B) const {
-      if(!(is_sink(A) || is_sink(B))) return true; // no interaction -> DONE    
+      if(!(is_active(A)||is_active(B)))return true;// no interaction -> DONE    
       if(do_direct_pre(A,B)) {                     // IF(suitable)             >
 	many(A,B);                                 //   perform BB iactions     
 	STAT->record_direct_CB(A,B);               //   record statistics       
@@ -220,7 +236,7 @@ namespace nbdy {
       register real Rq = norm(dX);                 // compute R^2               
       if(well_separated(A,B,Rq)) {                 // IF(well separated)       >
 	grav(A,B,dX,Rq);                           //   interact                
-	STAT->record_taylor_CB(A,B);               //   record statistics       
+	STAT->record_approx_CB(A,B);               //   record statistics       
 	return true;                               //   DONE                    
       }                                            // <                         
       if(do_direct_post(A,B)) {                    // IF(suitable)             >
@@ -236,8 +252,8 @@ namespace nbdy {
     }
     //--------------------------------------------------------------------------
     void interact(soul_iter const&A, soul_iter const&B) const {
-      if(!(is_sink(A) || is_sink(B))) return;      // no interaction -> DONE    
-      grav_iact::single(A,B);                      // perform interaction       
+      if(!(is_active(A) || is_active(B))) return;  // no interaction -> DONE    
+      single(A,B);                                 // perform interaction       
       STAT->record_BB();                           // record statistics         
     }  
     //--------------------------------------------------------------------------
@@ -270,7 +286,7 @@ namespace nbdy {
     void give_coeffs(cell_iter const&C) const {
       if(coeffs(C)==0) {
 	register real*X = static_cast<real*>(POOL->alloc());
-	for(register int i=0; i!=N_COEFF; ++i) X[i] = zero;
+	for(register int i=0; i!=grav::N_COEFF; ++i) X[i] = zero;
 	C->coeffs() = X;
 	++NC;
       }
@@ -291,23 +307,22 @@ namespace nbdy {
   public:
     grav_iact_s(
 	      grav_stat*const&t,                      // I: statistics          
-	      real            e,                      // I: softening length    
-	      uint            np,                     // I: initial pool size   
-	      kern_type       k    = Default::kernel, //[I: type of kernel]     
-#ifdef ALLOW_INDI
-	      soft_type       s    = Default::soften, //[I: type of softening]  
+	      real      const&e,                      // I: softening length    
+	      uint      const&np,                     // I: initial pool size   
+	      kern_type const&k = Default::kernel,    //[I: type of kernel]     
+#ifdef falcON_INDI
+	      soft_type const&s = Default::soften,    //[I: type of softening]  
 #endif
-	      int const       nd[4]= Default::direct, //[I: direct sum control] 
-	      bool            fp   = false) :         //[I: use Pth pole in pot]
-#ifdef ALLOW_INDI
+	      int const    nd[4]= Default::direct,    //[I: direct sum control] 
+	      bool      const&fp= false) :            //[I: use Pth pole in pot]
+#ifdef falcON_INDI
       grav_iact ( t,e,k,s,nd,fp ),
 #else
       grav_iact ( t,e,k,nd,fp ),
 #endif
-      NC        ( 0 ), MAXNC( 0 )
-    {
-      MemoryCheck( POOL=new nbdy::pool(np,N_COEFF*sizeof(real)) );
-    }
+      POOL ( falcON_Memory(new nbdy::pool(np,grav::N_COEFF*sizeof(real))) ),
+      NC   ( 0 ),
+      MAXNC( 0 ) {}
     //--------------------------------------------------------------------------
     ~grav_iact_s() { delete POOL; }
     //--------------------------------------------------------------------------
@@ -318,18 +333,18 @@ namespace nbdy {
     }
     //--------------------------------------------------------------------------
     bool interact(cell_iter const&A, cell_iter const&B) const {
-      if(!(is_sink(A) || is_sink(B))) return true; // no interaction -> DONE    
+      if(!(is_active(A)||is_active(B)))return true;// no interaction -> DONE    
       register vect dX = cofm(A)-cofm(B);          // compute dX = X_A - X_B    
       register real Rq = norm(dX);                 // and dX^2                  
       if(well_separated (A,B,Rq)) {                // IF(well separated)      > 
-	if(is_sink(A)) give_coeffs(A);             //   ensure coeffs exist     
-	if(is_sink(B)) give_coeffs(B);             //   ensure coeffs exist     
-	grav_kern::grav(A,B,dX,Rq);                //   interact                
-	STAT->record_taylor_CC(A,B);               //   record stats            
+	if(is_active(A)) give_coeffs(A);           //   ensure coeffs exist     
+	if(is_active(B)) give_coeffs(B);           //   ensure coeffs exist     
+	grav(A,B,dX,Rq);                           //   interact                
+	STAT->record_approx_CC(A,B);               //   record stats            
 	return true;                               //   DONE                    
       }                                            // <                         
       if(do_direct_post(A,B)) {                    // IF(suitable)            > 
-	grav_kern::many(A,B);                      //   perform BB iactions     
+	many(A,B);                                 //   perform BB iactions     
 	STAT->record_direct_CC(A,B);               //   record stats            
 	return true;                               //   DONE                    
       }                                            // < ELSE  >                 
@@ -337,7 +352,7 @@ namespace nbdy {
     }
     //--------------------------------------------------------------------------
     bool interact(cell_iter const&A, soul_iter const&B) const {
-      if(!(is_sink(A) || is_sink(B))) return true; // no interaction -> DONE    
+      if(!(is_active(A)||is_active(B)))return true;// no interaction -> DONE    
       if(do_direct_pre(A,B)) {                     // IF(suitable)             >
 	many(A,B);                                 //   perform BB iactions     
 	STAT->record_direct_CB(A,B);               //   record statistics       
@@ -346,9 +361,9 @@ namespace nbdy {
       register vect dX = cofm(A)-cofm(B);          // compute R = x_A-x_B       
       register real Rq = norm(dX);                 // compute R^2               
       if(well_separated(A,B,Rq)) {                 // IF(well separated)       >
-	if(is_sink(A)) give_coeffs(A);             //   ensure coeffs exist     
+	if(is_active(A)) give_coeffs(A);           //   ensure coeffs exist     
 	grav(A,B,dX,Rq);                           //   interact                
-	STAT->record_taylor_CB(A,B);               //   record statistics       
+	STAT->record_approx_CB(A,B);               //   record statistics       
 	return true;                               //   DONE                    
       }                                            // <                         
       if(do_direct_post(A,B)) {                    // IF(suitable)             >
@@ -370,6 +385,219 @@ namespace nbdy {
     void evaluate(cell_iter const&) const;         // evaluation phase          
     //--------------------------------------------------------------------------
   };
+  //////////////////////////////////////////////////////////////////////////////
+  //                                                                          //
+  // class nbdy::grav_iact_all                                                //
+  //                                                                          //
+  // Like grav_iact, except that all cells and souls are assumed active.      //
+  //                                                                          //
+  //////////////////////////////////////////////////////////////////////////////
+  class grav_iact_all : 
+    public grav_iact_base,
+    public grav_kern_all
+  {
+    grav_iact_all           (grav_iact_all const&);// not implemented           
+    grav_iact_all& operator=(grav_iact_all const&);// not implemented           
+    //--------------------------------------------------------------------------
+    void eval_grav(cell_iter const&, TaylorSeries const&) const;
+    //--------------------------------------------------------------------------
+    // public methods                                                           
+    //--------------------------------------------------------------------------
+  public:
+    grav_iact_all(
+		  grav_stat*const&t,                  // I: statistics          
+		  real      const&e,                  // I: softening length    
+		  kern_type const&k =Default::kernel, //[I: type of kernel]     
+#ifdef falcON_INDI
+		  soft_type const&s =Default::soften, //[I: type of softening]  
+#endif
+		  int const    nd[4]=Default::direct, //[I: direct sum control] 
+		  bool      const&fp=false) :         //[I: use Pth pole in pot]
+      grav_iact_base(t,nd),
+      grav_kern_all(k,e,
+#ifdef falcON_INDI
+		    s,
+#endif
+		    fp ) {}
+    //--------------------------------------------------------------------------
+    // interaction phase                                                        
+    //--------------------------------------------------------------------------
+    void direct_summation(cell_iter const&A) const { 
+      many(A);
+    }
+    //--------------------------------------------------------------------------
+    bool interact(cell_iter const&A) const {
+      if(do_direct(A)) {                           // IF(suitable)              
+	many(A);                                   //   perform BB iactions     
+	STAT->record_direct_CX(A);                 //   record stats            
+	return true;                               //   DONE                    
+      }                                            // ELSE                      
+      return false;                                //   must be splitted        
+    }
+    //--------------------------------------------------------------------------
+    bool interact(cell_iter const&A, cell_iter const&B) const {
+      register vect dX = cofm(A)-cofm(B);          // compute dX = X_A - X_B    
+      register real Rq = norm(dX);                 // and dX^2                  
+      if(well_separated (A,B,Rq)) {                // IF(well separated)        
+	grav(A,B,dX,Rq);                           //   interact                
+	STAT->record_approx_CC(A,B);               //   record stats            
+	return true;                               //   DONE                    
+      }                                            // ENDIF                     
+      if(do_direct_post(A,B)) {                    // IF(suitable)              
+	many(A,B);                                 //   perform BB iactions     
+	STAT->record_direct_CC(A,B);               //   record stats            
+	return true;                               //   DONE                    
+      }                                            // ELSE                      
+      return false;                                //   SPLIT <                 
+    }
+    //--------------------------------------------------------------------------
+    bool interact(cell_iter const&A, soul_iter const&B) const {
+      if(do_direct_pre(A,B)) {                     // IF(suitable)              
+	many(A,B);                                 //   perform BB iactions     
+	STAT->record_direct_CB(A,B);               //   record statistics       
+	return true;                               //   DONE                    
+      }                                            // ENDIF                     
+      register vect dX = cofm(A)-cofm(B);          // compute R = x_A-x_B       
+      register real Rq = norm(dX);                 // compute R^2               
+      if(well_separated(A,B,Rq)) {                 // IF(well separated)        
+	grav(A,B,dX,Rq);                           //   interact                
+	STAT->record_approx_CB(A,B);               //   record statistics       
+	return true;                               //   DONE                    
+      }                                            // ENDIF                     
+      if(do_direct_post(A,B)) {                    // IF(suitable)              
+	many(A,B);                                 //   perform BB iactions     
+	STAT->record_direct_CB(A,B);               //   record statistics       
+	return true;                               //   DONE                    
+      }                                            // ELSE                      
+      return false;                                //   cell must be splitted   
+    }
+    //--------------------------------------------------------------------------
+    bool interact(soul_iter const&A, cell_iter const&B) const {
+      return interact(B,A);
+    }
+    //--------------------------------------------------------------------------
+    void interact(soul_iter const&A, soul_iter const&B) const {
+      single(A,B);                                 // perform interaction       
+      STAT->record_BB();                           // record statistics         
+    }  
+    //--------------------------------------------------------------------------
+    void evaluate(cell_iter const&C) const;        // evaluation phase          
+  };
+  //////////////////////////////////////////////////////////////////////////////
+  //                                                                            
+  // class nbdy::grav_iact_all_s                                                
+  //                                                                            
+  //////////////////////////////////////////////////////////////////////////////
+  class grav_iact_all_s : public grav_iact_all {
+  private:
+    //--------------------------------------------------------------------------
+    // data                                                                     
+    //--------------------------------------------------------------------------
+    nbdy::pool   *POOL;                             // pool for TaylorCoeffs    
+    mutable int   NC, MAXNC;                        // # TaylorCoeffs ever used 
+    //--------------------------------------------------------------------------
+    // private methods                                                          
+    //--------------------------------------------------------------------------
+    void give_coeffs(cell_iter const&C) const {
+      if(coeffs(C)==0) {
+	register real*X = static_cast<real*>(POOL->alloc());
+	for(register int i=0; i!=grav::N_COEFF; ++i) X[i] = zero;
+	C->coeffs() = X;
+	++NC;
+      }
+    }
+    //--------------------------------------------------------------------------
+    void take_coeffs(cell_iter const&C) const {
+      if(coeffs(C)) {
+	POOL->free(C->coeffs());
+	C->coeffs() = 0;
+	--NC;
+      }
+    }
+    //--------------------------------------------------------------------------
+    void eval_grav  (cell_iter const&, TaylorSeries const&) const;
+    //--------------------------------------------------------------------------
+    // public methods                                                           
+    //--------------------------------------------------------------------------
+  public:
+    grav_iact_all_s(
+		    grav_stat*const&t,                // I: statistics          
+		    real      const&e,                // I: softening length    
+		    uint      const&np,               // I: initial pool size   
+		    kern_type const&k=Default::kernel,//[I: type of kernel]     
+#ifdef falcON_INDI
+		    soft_type const&s=Default::soften,//[I: type of softening]  
+#endif
+		    int const   nd[4]=Default::direct,//[I: direct sum control] 
+		    bool      const&f=false) :        //[I: use Pth pole in pot]
+      grav_iact_all (t,e,k,
+#ifdef falcON_INDI
+		     s,
+#endif
+		     nd,f),
+      POOL ( falcON_Memory(new nbdy::pool(np,grav::N_COEFF*sizeof(real))) ),
+      NC   ( 0 ),
+      MAXNC( 0 ) {}
+    //--------------------------------------------------------------------------
+    ~grav_iact_all_s() { delete POOL; }
+    //--------------------------------------------------------------------------
+    const  int& coeffs_used  () const { return MAXNC; }
+    //--------------------------------------------------------------------------
+    bool interact(cell_iter const&A) const {
+      return grav_iact_all::interact(A);
+    }
+    //--------------------------------------------------------------------------
+    bool interact(cell_iter const&A, cell_iter const&B) const {
+      register vect dX = cofm(A)-cofm(B);          // compute dX = X_A - X_B    
+      register real Rq = norm(dX);                 // and dX^2                  
+      if(well_separated (A,B,Rq)) {                // IF(well separated)      > 
+	give_coeffs(A);                            //   ensure coeffs exist     
+	give_coeffs(B);                            //   ensure coeffs exist     
+	grav(A,B,dX,Rq);                           //   interact                
+	STAT->record_approx_CC(A,B);               //   record stats            
+	return true;                               //   DONE                    
+      }                                            // <                         
+      if(do_direct_post(A,B)) {                    // IF(suitable)            > 
+	many(A,B);                                 //   perform BB iactions     
+	STAT->record_direct_CC(A,B);               //   record stats            
+	return true;                               //   DONE                    
+      }                                            // < ELSE  >                 
+      return false;                                //   SPLIT <                 
+    }
+    //--------------------------------------------------------------------------
+    bool interact(cell_iter const&A, soul_iter const&B) const {
+      if(do_direct_pre(A,B)) {                     // IF(suitable)             >
+	many(A,B);                                 //   perform BB iactions     
+	STAT->record_direct_CB(A,B);               //   record statistics       
+	return true;                               //   DONE                    
+      }                                            // <                         
+      register vect dX = cofm(A)-cofm(B);          // compute R = x_A-x_B       
+      register real Rq = norm(dX);                 // compute R^2               
+      if(well_separated(A,B,Rq)) {                 // IF(well separated)       >
+	give_coeffs(A);                            //   ensure coeffs exist     
+	grav(A,B,dX,Rq);                           //   interact                
+	STAT->record_approx_CB(A,B);               //   record statistics       
+	return true;                               //   DONE                    
+      }                                            // <                         
+      if(do_direct_post(A,B)) {                    // IF(suitable)             >
+	many(A,B);                                 //   perform BB iactions     
+	STAT->record_direct_CB(A,B);               //   record statistics       
+	return true;                               //   DONE                    
+      }                                            // < ELSE                    
+      return false;                                //   cell must be splitted   
+    }
+    //--------------------------------------------------------------------------
+    bool interact(soul_iter const&A, cell_iter const&B) const {
+      return interact(B,A);
+    }
+    //--------------------------------------------------------------------------
+    void interact(soul_iter const&A, soul_iter const&B) const {
+      return grav_iact_all::interact(A,B);
+    }
+    //--------------------------------------------------------------------------
+    void evaluate(cell_iter const&) const;         // evaluation phase          
+    //--------------------------------------------------------------------------
+  };
 }
 ////////////////////////////////////////////////////////////////////////////////
-#endif                                             // included_grav_h           
+#endif                                             // falcON_included_grav_h    

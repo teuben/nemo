@@ -4,7 +4,7 @@
 //                                                                             |
 // C++ code                                                                    |
 //                                                                             |
-// Copyright Walter Dehnen, 2000-2002                                          |
+// Copyright Walter Dehnen, 2000-2003                                          |
 // e-mail:   wdehnen@aip.de                                                    |
 // address:  Astrophysikalisches Institut Potsdam,                             |
 //           An der Sternwarte 16, D-14482 Potsdam, Germany                    |
@@ -26,9 +26,7 @@
 #include <falcON.h>                        // class falcON                      
 #include <iomanip>                         // C++ file I/O                      
 #include <fstream>                         // C++ file I/O                      
-#include <body.h>                          // bodies                            
 #include <public/grav.h>                   // gravity stuff                     
-#include <public/iact.h>                   // generic interaction algorithm     
 #include <public/stic.h>                   // support for SPH & sticky particles
 
 using namespace nbdy;                      // make all nbdy stuff available     
@@ -47,89 +45,56 @@ falcON::falcON(const bodies*   b,
 	       const real      e,
 	       const real      th,
 	       const kern_type k,
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
 	       const soft_type s,
 #endif
 	       const MAC_type  mac) :
   STATE     ( unset ),
   BODIES    ( b ),
+  ARRAYS    ( 0 ),
   TREE      ( 0 ),
-  Nb        ( BODIES->N_bodies() ),
   Ncrit     ( 0 ),
-  Ncoeffs   ( 0 ),
-  FL        ( 0 ),
-  M         ( 0 ),
-#ifdef ALLOW_INDI
-  EP        ( 0 ),
-#endif
-  X         ( 0 ),
-  PH        ( 0 ),
-  RH        ( 0 ),
-  A         ( 0 ),
   EPS       ( e ),
-  GMAC      ( new grav_mac(mac, abs(th)) ),
-  STATS     ( new grav_stat() ),
-#ifdef ALLOW_INDI
+  GMAC      ( falcON_Memory(new grav_mac(mac, abs(th))) ),
+  STATS     ( falcON_Memory(new grav_stat()) ),
+#ifdef falcON_INDI
   SOFTENING ( s ),
 #endif
   KERNEL    ( k )
 {
-  MemoryCheck(GMAC);
-  MemoryCheck(STATS);
-#ifdef ALLOW_INDI
-  if(BODIES->has_eps() && SOFTENING==global)
+#ifdef falcON_INDI
+  if(BODIES->has(io::e) && SOFTENING==global)
     warning("eps_i given but global softening chosen");
-  if(!BODIES->has_eps() && SOFTENING==individual)
+  if(!BODIES->has(io::e) && SOFTENING==individual)
     error("no eps_i given, but individual softening chosen");
 #endif
 }
 //------------------------------------------------------------------------------
-falcON::falcON(const int      *fl,
-	       const areal    *m,
-	       const areal    *x[NDIM],
-#ifdef ALLOW_INDI
-	             areal    *ep,
-#endif
-	             areal    *a[NDIM],
-	             areal    *ph,
-	             areal    *rh,
-	       const unsigned  n,
+falcON::falcON(const barrays  *b,
 	       const real      e,
 	       const real      th,
 	       const kern_type k,
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
 	       const soft_type s,
 #endif
 	       const MAC_type  mac) :
   STATE     ( unset ),
   BODIES    ( 0 ),
+  ARRAYS    ( b ),
   TREE      ( 0 ),
-  Nb        ( n ),
   Ncrit     ( 0 ),
-  Ncoeffs   ( 0 ),
-  FL        ( fl ),
-  M         ( m ),
-#ifdef ALLOW_INDI
-  EP        ( ep ),
-#endif
-  X         ( x ),
-  PH        ( ph ),
-  RH        ( rh ),
-  A         ( a ),
   EPS       ( e ),
-  GMAC      ( new grav_mac(mac, abs(th)) ),
-  STATS     ( new grav_stat() ),
-#ifdef ALLOW_INDI
+  GMAC      ( falcON_Memory(new grav_mac(mac, abs(th))) ),
+  STATS     ( falcON_Memory(new grav_stat()) ),
+#ifdef falcON_INDI
   SOFTENING ( s ),
 #endif
   KERNEL    ( k )
 {
-  MemoryCheck(GMAC);
-  MemoryCheck(STATS);
-#ifdef ALLOW_INDI
-  if(EP!=0 && SOFTENING==global)
+#ifdef falcON_INDI
+  if(ARRAYS->has(io::e) && SOFTENING==global)
     warning("eps_i given but global softening chosen");
-  if(EP==0 && SOFTENING==individual)
+  if(!ARRAYS->has(io::e) && SOFTENING==individual)
     error("no eps_i given, but individual softening chosen");
 #endif
 }
@@ -158,45 +123,41 @@ void falcON::reset_opening(const real     th,
 // ========================                                                    |
 //                                                                             |
 //=============================================================================+
-void falcON::grow(const int Ncr)
+void falcON::grow(int const&Ncr)
   // This routines grows a fresh tree & evaluates the cells' basic source       
   // properties.                                                                
 {
   Ncrit = max(Ncr,1);
   if(TREE)
     TREE->rebuild(Ncrit);
-  else {
+  else
     TREE = BODIES?
-#ifdef ALLOW_INDI
-      new tree_type(BODIES,      SOFTENING,Ncrit) :
-      new tree_type(FL,X,M,EP,Nb,SOFTENING,Ncrit) ;
+#ifdef falcON_INDI
+      falcON_Memory(new tree_type(BODIES,SOFTENING,Ncrit)) :
+      falcON_Memory(new tree_type(ARRAYS,SOFTENING,Ncrit)) ;
 #else
-      new tree_type(BODIES,   Ncrit) :
-      new tree_type(FL,X,M,Nb,Ncrit) ;
+      falcON_Memory(new tree_type(BODIES,Ncrit)) :
+      falcON_Memory(new tree_type(ARRAYS,Ncrit)) ;
 #endif
-    MemoryCheck(TREE);
-  }
   STATE=built;                                     // set tree state            
 }
 //------------------------------------------------------------------------------
-void falcON::re_grow(const int Ncut, const int Ncr)
+void falcON::re_grow(int const&Ncut, int const&Ncr)
   // This routines grows a fresh tree & evaluates the cells' basic source       
   // properties.                                                                
 {
   Ncrit = max(Ncr,1);
   if(TREE)
     TREE->rebuild(Ncrit,Ncut);
-  else {
+  else
     TREE = BODIES?
-#ifdef ALLOW_INDI
-      new tree_type(BODIES,      SOFTENING,Ncrit) :
-      new tree_type(FL,X,M,EP,Nb,SOFTENING,Ncrit) ;
+#ifdef falcON_INDI
+      falcON_Memory(new tree_type(BODIES,SOFTENING,Ncrit)) :
+      falcON_Memory(new tree_type(ARRAYS,SOFTENING,Ncrit)) ;
 #else
-      new tree_type(BODIES,   Ncrit) :
-      new tree_type(FL,X,M,Nb,Ncrit) ;
+      falcON_Memory(new tree_type(BODIES,Ncrit)) :
+      falcON_Memory(new tree_type(ARRAYS,Ncrit)) ;
 #endif
-    MemoryCheck(TREE);
-  }
   STATE=built;                                     // set tree state            
 }
 //------------------------------------------------------------------------------
@@ -244,7 +205,7 @@ nbdy::uint falcON::No_zombie_bodies() const {
   if(BODIES) {
     LoopSouls(tree_type,TREE,Si) if(!is_in_tree(BODIES->flg(mybody(Si)))) n++;
   } else {
-    LoopSouls(tree_type,TREE,Si) if(!is_in_tree(FL[mybody(Si)])) n++;
+    LoopSouls(tree_type,TREE,Si) if(!is_in_tree(ARRAYS->flg(mybody(Si)))) n++;
   }
   return n;
 }
@@ -263,8 +224,9 @@ namespace nbdy {
 //------------------------------------------------------------------------------
 void falcON::dump_nodes(const char* fcells, const char* fleafs) const
 {
-  std::ofstream *oc = fcells? new std::ofstream(fcells) : 0; MemoryCheck(oc);
-  std::ofstream *os = fleafs? new std::ofstream(fleafs) : 0; MemoryCheck(os);
+  std::ofstream *oc=0, *os=0;
+  if(fcells) oc = falcON_Memory(new std::ofstream(fcells));
+  if(fleafs) os = falcON_Memory(new std::ofstream(fleafs));
   TREE->dump_nodes(oc,os);
   if(oc) delete oc;
   if(os) delete os;
@@ -287,7 +249,7 @@ void falcON::stats(std::ostream& out) const
        <<" maximum depth:         "<<TREE->depth()          <<"\n"
        <<" current theta:         "<<GMAC->theta_min()      <<"\n"
        <<" current MAC:           "<<GMAC->describe_method()<<"\n";
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
     if(SOFTENING == global) 
       out<<" softening:             global\n"
 	 <<" softening length:      "<< EPS                 <<"\n";
@@ -297,26 +259,30 @@ void falcON::stats(std::ostream& out) const
     out<<" softening length:      "<< EPS                   <<"\n";
 #endif
     out<<" softening kernel:      "<<describe_kernel()      <<"\n"
-       <<" Taylor coeffs used:    "<<Ncoeffs                <<"\n";
+       <<" Taylor coeffs used:    "<<TREE->N_coeffs()       <<"\n";
   }
   STATS->write(out);
 }
+//-----------------------------------------------------------------------------+
+nbdy::uint falcON::No_coeffs_used()   const {
+  return TREE? TREE->N_coeffs() : 0;
+}
 //------------------------------------------------------------------------------
 nbdy::uint falcON::BB_interactions() const {
-  return STATS->BB_iacts();
+  return STATS->BB_direct_iacts();
 }
 //------------------------------------------------------------------------------
 nbdy::uint falcON::MB_interactions() const {
   return STATS->CB_direct_iacts() +STATS->CC_direct_iacts()
-        +STATS->CS_direct_iacts();
+        +STATS->CX_direct_iacts();
 }
 //------------------------------------------------------------------------------
 nbdy::uint falcON::CB_interactions() const {
-  return STATS->CB_taylor_iacts();
+  return STATS->CB_approx_iacts();
 }
 //------------------------------------------------------------------------------
 nbdy::uint falcON::CC_interactions() const {
-  return STATS->CC_taylor_iacts();
+  return STATS->CC_approx_iacts();
 }
 //------------------------------------------------------------------------------
 nbdy::uint falcON::total_interactions () const {
@@ -326,7 +292,7 @@ nbdy::uint falcON::total_interactions () const {
 //------------------------------------------------------------------------------
 const nbdy::vect& falcON::root_center() const { return center(TREE->root()); }
 const nbdy::real& falcON::root_radius() const { return radius(TREE->root()); }
-const int&        falcON::root_depth () const { return TREE->depth(); }
+const nbdy::uint& falcON::root_depth () const { return TREE->depth(); }
 const int&        falcON::root_number() const { return number(TREE->root()); }
 const nbdy::real& falcON::root_mass  () const { return mass  (TREE->root()); }
 //-----------------------------------------------------------------------------+
@@ -338,94 +304,88 @@ const nbdy::real& falcON::root_mass  () const { return mass  (TREE->root()); }
 namespace nbdy {
   inline void guess_N(cell_iter const&Ci, real n, int const&Nx)
   {
-#if NDIM==3
-    if(number(Ci)>Nx || n==zero) n = number(Ci)/(NSUB*cube(radius(Ci)));
-#else  // NDIM==3
-    if(number(Ci)>Nx || n==zero) n = number(Ci)/(NSUB*square(radius(Ci)));
-#endif // NDIM==3
-    LoopCellKids(cell_iter,Ci,c) if(is_sink(c)) guess_N(c,n,Nx);
-    LoopSoulKids(cell_iter,Ci,s) if(is_sink(s)) s->rho() = n;
+#if falcON_NDIM==3
+    if(number(Ci)>Nx || n==zero) n = number(Ci)/(Nsub*cube(radius(Ci)));
+#else  // falcON_NDIM==3
+    if(number(Ci)>Nx || n==zero) n = number(Ci)/(Nsub*square(radius(Ci)));
+#endif // falcON_NDIM==3
+    LoopCellKids(cell_iter,Ci,c) if(is_active(c)) guess_N(c,n,Nx);
+    LoopSoulKids(cell_iter,Ci,s) if(is_active(s)) s->rho() = n;
   }
   //----------------------------------------------------------------------------
   inline void guess_sd(cell_iter const&Ci, real sd, int const&Nx)
   {
     if(number(Ci)>Nx || sd==zero) sd = mass(Ci) / (4*square(radius(Ci)));
-    LoopCellKids(cell_iter,Ci,c) if(is_sink(c)) guess_sd(c,sd,Nx);
-    LoopSoulKids(cell_iter,Ci,s) if(is_sink(s)) s->rho() = sd;
+    LoopCellKids(cell_iter,Ci,c) if(is_active(c)) guess_sd(c,sd,Nx);
+    LoopSoulKids(cell_iter,Ci,s) if(is_active(s)) s->rho() = sd;
   }
   //----------------------------------------------------------------------------
   inline void guess_rho(cell_iter const&Ci, real rh, int const&Nx)
   {
-#if NDIM==3
-    if(number(Ci)>Nx || rh==zero) rh = mass(Ci)/(NSUB*cube(radius(Ci)));
-#else  // NDIM==3
-    if(number(Ci)>Nx || rh==zero) rh = mass(Ci)/(NSUB*square(radius(Ci)));
-#endif // NDIM==3
-    LoopCellKids(cell_iter,Ci,c) if(is_sink(c)) guess_rho(c,rh,Nx);
-    LoopSoulKids(cell_iter,Ci,s) if(is_sink(s)) s->rho() = rh;
+#if falcON_NDIM==3
+    if(number(Ci)>Nx || rh==zero) rh = mass(Ci)/(Nsub*cube(radius(Ci)));
+#else  // falcON_NDIM==3
+    if(number(Ci)>Nx || rh==zero) rh = mass(Ci)/(Nsub*square(radius(Ci)));
+#endif // falcON_NDIM==3
+    LoopCellKids(cell_iter,Ci,c) if(is_active(c)) guess_rho(c,rh,Nx);
+    LoopSoulKids(cell_iter,Ci,s) if(is_active(s)) s->rho() = rh;
   }
 }
 //------------------------------------------------------------------------------
-void falcON::estimate_n(const int Nx)
+void falcON::estimate_n(int const&Nx)
 {
-  if(BODIES && !BODIES->has_rho())
+  if(BODIES && !BODIES->has(io::r) || ARRAYS && !ARRAYS->has(io::r))
     error("[falcON::estimate_n()]: nobody has memory for rho");
-  if(!BODIES && RH==0)
-    error("[falcON::estimate_n()]: no array for density given");
   TREE->prepare_density();                         // update flags, set memory  
-  if(TREE->N_soul_sinks() == 0) {                  // IF(no sinks)             >
+  if(TREE->N_active_souls() == 0) {                // IF(no active souls) THEN  
     warning("[falcON::estimate_n()]: nobody wants updating");
     return;                                        //   we are done already     
   }
   guess_N(TREE->root(),zero,Nx);                   // guess n_i                 
   if(BODIES) {
     LoopSouls(tree_type,TREE,Si)
-      if(is_sink(Si)) Si->update_dens(BODIES);     // copy n_i into body        
+      if(is_active(Si)) Si->update_dens(BODIES);   // copy n_i into body        
   } else {
     LoopSouls(tree_type,TREE,Si)
-      if(is_sink(Si)) Si->update_dens(RH);         // copy n_i into array RH    
+      if(is_active(Si)) Si->update_dens(ARRAYS);   // copy n_i into array RH    
   }
 }
 //------------------------------------------------------------------------------
-void falcON::estimate_sd(const int Nx)
+void falcON::estimate_sd(int const&Nx)
 {
-  if(BODIES && !BODIES->has_rho())
+  if(BODIES && !BODIES->has(io::r) || ARRAYS && !ARRAYS->has(io::r))
     error("[falcON::estimate_sd()]: nobody has memory for rho");
-  if(!BODIES && RH==0)
-    error("[falcON::estimate_sd()]: no array for density given");
   TREE->prepare_density();                         // update flags, set memory  
-  if(TREE->N_soul_sinks() == 0) {                  // IF(no sinks)             >
+  if(TREE->N_active_souls() == 0) {                // IF(no active souls) THEN  
     warning("[falcON::estimate_sd()]: nobody wants updating");
     return;                                        //   we are done already     
   }
   guess_sd(TREE->root(),zero,Nx);                  // guess SD_i                
   if(BODIES) {
     LoopSouls(tree_type,TREE,Si)
-      if(is_sink(Si)) Si->update_dens(BODIES);     // copy n_i into body        
+      if(is_active(Si)) Si->update_dens(BODIES);   // copy n_i into body        
   } else {
     LoopSouls(tree_type,TREE,Si)
-      if(is_sink(Si)) Si->update_dens(RH);         // copy n_i into array RH    
+      if(is_active(Si)) Si->update_dens(ARRAYS);   // copy n_i into array RH    
   }
 }
 //------------------------------------------------------------------------------
-void falcON::estimate_rho(const int Nx)
+void falcON::estimate_rho(int const&Nx)
 {
-  if(BODIES && !BODIES->has_rho())
+  if(BODIES && !BODIES->has(io::r) || ARRAYS && !ARRAYS->has(io::r))
     error("[falcON::estimate_rho()]: nobody has memory for rho");
-  if(!BODIES && RH==0)
-    error("[falcON::estimate_rho()]: no array for density given");
   TREE->prepare_density();                         // update flags, set memory  
-  if(TREE->N_soul_sinks() == 0) {                  // IF(no sinks)             >
+  if(TREE->N_active_souls() == 0) {                // IF(no active souls) THEN  
     warning("[falcON::estimate_rho()]: no body wants updating");
     return;                                        //   we are done already     
   }
   guess_rho(TREE->root(),zero,Nx);                 // guess n_i                 
   if(BODIES) {
     LoopSouls(tree_type,TREE,Si)
-      if(is_sink(Si)) Si->update_dens(BODIES);     // copy n_i into body        
+      if(is_active(Si)) Si->update_dens(BODIES);   // copy n_i into body        
   } else {
     LoopSouls(tree_type,TREE,Si)
-      if(is_sink(Si)) Si->update_dens(RH);         // copy n_i into array RH    
+      if(is_active(Si)) Si->update_dens(ARRAYS);   // copy n_i into array RH    
   }
 }
 //-----------------------------------------------------------------------------+
@@ -434,173 +394,37 @@ void falcON::estimate_rho(const int Nx)
 // ==========================                                                  |
 //                                                                             |
 //-----------------------------------------------------------------------------+
-#define ROOT TREE->root()
-void falcON::approximate_gravity(bool      split,
-#ifdef ALLOW_INDI
-				 real      Nsoft,
-				 uint      Nref,
-				 real      efac,
+void falcON::approximate_gravity(bool const&split,
+				 bool const&all,
+#ifdef falcON_INDI
+				 real const&Nsoft,
+				 uint const&Nref,
+				 real const&emin,
+				 real const&efac,
 #endif
 				 const int direct[4])
 {
-  if(split) {                                      // IF(interweaving)         >
-#ifdef ALLOW_INDI
-    TREE->prepare_grav_approx(GMAC,0,Nsoft,EPS,Nref,efac); // prepare for grav  
-#else
-    TREE->prepare_grav_approx(GMAC,0);             // prepare for grav          
+  TREE->approx_gravity(GMAC,KERNEL,STATS,EPS,all,split,
+#ifdef falcON_INDI
+		       Nsoft,Nref,emin,efac,
 #endif
-    if(TREE->N_cell_sinks()==0) {                  // IF(no sink cells)        >
-      warning("[falcON::approximate_gravity()]: nobody wants updating");
-      return;                                      //   we are done already     
-    }                                              // <                         
-    STATS->reset();                                // reset iaction statistics  
-    register uint NP = split? 4+TREE->N_cell_sinks()/8 : TREE->N_cell_sinks();
-                                                   // initial size of C_i pool  
-#ifdef ALLOW_INDI
-    grav_iact_s GK(STATS,EPS,NP,KERNEL,SOFTENING,direct,false);
-#else
-    grav_iact_s GK(STATS,EPS,NP,KERNEL,direct,false);
-#endif
-	                                           //   init gravity kernel     
-    MutualInteractor<grav_iact_s> MI(&GK,TREE->depth()-1);
-                                                   //   init mutual interactor  
-    LoopCellKids(cell_iter,ROOT,c1) {              //   loop cell kids c1      >
-      MI.cell_self(c1);                            //     self-interaction c1   
-      LoopCellSecd(cell_iter,ROOT,c1+1,c2)         //     loop cell kids c2 > c1
-	MI.cell_cell(c1,c2);                       //       interaction c1,c2   
-      LoopSoulKids(cell_iter,ROOT,s2)              //     loop soul kids s      
-	MI.cell_soul(c1,s2);                       //       interaction c1,s    
-      GK.evaluate(c1);                             //     evaluation phase      
-    }                                              //   <                       
-    LoopSoulKids(cell_iter,ROOT,s1) {              //   loop soul kids s1      >
-      LoopSoulSecd(cell_iter,ROOT,s1+1,s2)         //     loop soul kids s2 > s1
-	GK.interact(s1,s2);                        //       interaction phase   
-      s1->normalize_grav();                        //     evaluation phase      
-    }                                              //   <                       
-    Ncoeffs = GK.coeffs_used();                    //   remember # coeffs used  
-  // case 2.2: non-interweaving, as in the JCP paper                            
-  } else {                                         // < ELSE(not splitting)    >
-#ifdef _OPENMP
-#ifdef ALLOW_INDI
-    TREE->prepare_grav_approx(GMAC,1,Nsoft,EPS,Nref,efac); // prepare for grav  
-#else
-    TREE->prepare_grav_approx(GMAC,1,);            // prepare for grav          
-#endif
-    if(TREE->N_cell_sinks()==0) {                  // IF(no sink cells)        >
-      warning("[falcON::approximate_gravity()]: nobody wants updating");
-      return;                                      //   we are done already     
-    }                                              // <                         
-    STATS->reset();                                // reset iaction statistics  
-#ifdef ALLOW_INDI
-    grav_iact GK(STATS,EPS,KERNEL,SOFTENING,direct,false);
-#else
-    grav_iact GK(STATS,EPS,KERNEL,direct,false);   //   init gravity kernel     
-#endif
-    SelfInteractorP<grav_iact> MI(&GK,ROOT,TREE->depth());
-    MI.interact_parallel();
-    GK.evaluate(ROOT);                             //   evaluation phase        
-    Ncoeffs = TREE->N_cell_sinks();                //   # coeffs used           
-#else
-#ifdef ALLOW_INDI
-    TREE->prepare_grav_approx(GMAC,0,Nsoft,EPS,Nref,efac); // prepare for grav  
-#else
-    TREE->prepare_grav_approx(GMAC,0);             // prepare for grav approx   
-#endif
-    if(TREE->N_cell_sinks()==0) {                  // IF(no sink cells)        >
-      warning("[falcON::approximate_gravity()]: nobody wants updating");
-      return;                                      //   we are done already     
-    }                                              // <                         
-    STATS->reset();                                // reset iaction statistics  
-    register uint NP = split? 4+TREE->N_cell_sinks()/8 : TREE->N_cell_sinks();
-                                                   // initial size of C_i pool  
-#ifdef ALLOW_INDI
-    grav_iact_s GK(STATS,EPS,NP,KERNEL,SOFTENING,direct,false);
-#else
-    grav_iact_s GK(STATS,EPS,NP,KERNEL,direct,false); //init gravity kernel     
-#endif
-    MutualInteractor<grav_iact_s> MI(&GK,TREE->depth());
-                                                   //   init mutual interactor  
-    MI.cell_self(ROOT);                            //   interaction phase       
-    GK.evaluate(ROOT);                             //   evaluation phase        
-    Ncoeffs = GK.coeffs_used();                    //   remember # coeffs used  
-#endif
-  }                                                // <                         
-  // 3. copy gravity and eps_i from the souls into the bodies                   
-  if(BODIES) {
-#ifdef ALLOW_INDI
-    if(Nsoft) {
-      LoopSouls(tree_type,TREE,Si) if(is_sink(Si)) {
-	Si->update_grav(BODIES);
-	Si->update_eps (BODIES);
-      }
-    } else
-#endif
-      LoopSouls(tree_type,TREE,Si) if(is_sink(Si)) Si->update_grav(BODIES);
-  } else {
-#ifdef ALLOW_INDI
-    if(Nsoft) {
-      LoopSouls(tree_type,TREE,Si) if(is_sink(Si)) {
-	Si->update_grav(A,PH);
-	Si->update_eps (EP);
-      }
-    } else
-#endif
-      LoopSouls(tree_type,TREE,Si) if(is_sink(Si)) Si->update_grav(A,PH);
-  }
+		       direct);
 }
-#undef ROOT
 //------------------------------------------------------------------------------
-void falcON::exact_gravity(
-#ifdef ALLOW_INDI
-			   real Nsoft, uint Nref, real efac
+void falcON::exact_gravity(bool const&all
+#ifdef falcON_INDI
+			  ,real const&Nsoft,
+			   uint const&Nref,
+			   real const&emin,
+			   real const&efac
 #endif
 			   )
 {
-#ifdef ALLOW_INDI
-  TREE->prepare_grav_exact(Nsoft,EPS,Nref,efac);
-#else
-  TREE->prepare_grav_exact();
+  TREE->exact_gravity(KERNEL,STATS,EPS,all
+#ifdef falcON_INDI
+		      ,Nsoft,Nref,emin,efac
 #endif
-  if(TREE->N_cell_sinks()==0) {
-    warning("[falcON::exact_gravity()]: nobody wants updating");
-    return;
-  }
-  STATS->reset();
-#ifdef ALLOW_INDI
-  grav_iact K(STATS,EPS,KERNEL,SOFTENING);
-#else
-  grav_iact K(STATS,EPS,KERNEL);
-#endif
-  K.direct_summation(TREE->root());
-  if(BODIES) {
-#ifdef ALLOW_INDI
-    if(Nsoft) {
-      LoopSouls(tree_type,TREE,Si) if(is_sink(Si)) {
-	Si->normalize_grav();
-	Si->update_grav(BODIES);
-	Si->update_eps (BODIES);
-      }
-    } else 
-#endif
-      LoopSouls(tree_type,TREE,Si) if(is_sink(Si)) {
-	Si->normalize_grav();
-	Si->update_grav(BODIES);
-      }
-  } else {
-#ifdef ALLOW_INDI
-    if(Nsoft) {
-      LoopSouls(tree_type,TREE,Si) if(is_sink(Si)) {
-	Si->normalize_grav();
-	Si->update_grav(A,PH);
-	Si->update_eps (EP);
-      }
-    } else 
-#endif
-      LoopSouls(tree_type,TREE,Si) if(is_sink(Si)) {
-	Si->normalize_grav();
-	Si->update_grav(A,PH);
-      }
-  }
+		      );
 }
 //-----------------------------------------------------------------------------+
 //                                                                             |
@@ -608,165 +432,34 @@ void falcON::exact_gravity(
 // ================================                                            |
 //                                                                             |
 //-----------------------------------------------------------------------------+
-void falcON::make_iaction_list(      elem_pair*bl,
-			       const uint      nl,
-			             uint     &na,
-			       const real      tau)
+void falcON::make_iaction_list(elem_pair *bl,
+			       uint const&nl,
+			       uint      &na,
+			       real const&tau) const
 {
-  if(BODIES==0) error("[falcON::make_iaction_list()]: bodies/arrays mismatch");
-  if(tau < zero) {             // SPH
-    LoopSouls(tree_type,TREE,Si) if(is_sph(BODIES->flg(mybody(Si)))) {
-      flag_for_subtree(Si);
-      Si->add_body_flag(BODIES);
-    }
-    sticky_tree      stree(TREE);
-    neighbour_finder sfind(nl,bl);
-    stree.prepare_sph();
-    MutualInteractor<neighbour_finder> MI(&sfind,stree.depth());
-    MI.cell_self(stree.root());
-    na = sfind.actual_size_of_list();
-  } else {                     // sticky particles
-    LoopSouls(tree_type,TREE,Si) if(is_sticky(BODIES->flg(mybody(Si)))) {
-      flag_for_subtree(Si);
-      Si->add_body_flag(BODIES);
-    }
-    sticky_tree   stree(TREE);
-    sticky_finder sfind(tau,nl,bl);
-    stree.prepare_sticky();
-    MutualInteractor<sticky_finder> MI(&sfind,stree.depth());
-    MI.cell_self(stree.root());
-    na = sfind.actual_size_of_list();
-  }
+  if(BODIES) LoopSouls(tree_type,TREE,Si) Si->add_body_flag(BODIES);
+  else       LoopSouls(tree_type,TREE,Si) Si->add_body_flag(ARRAYS);
+  sticky_tree      stree(TREE, tau<zero? flag::SPH : flag::STICKY);
+  stree.make_iaction_list(bl,nl,na,tau);
 }
 //-----------------------------------------------------------------------------+
 void falcON::count_sph_neighbours()
 {
-  if(BODIES==0) error("[falcON::count_sph_neighbours()]: bodies/arrays mismatch");
-  LoopSouls(tree_type,TREE,Si) if(is_sph(BODIES->flg(mybody(Si)))) {
-    flag_for_subtree(Si);
-    Si->add_body_flag(BODIES);
-  }
-  sticky_tree       stree (TREE);
-  neighbour_counter<sticky_tree,individual> scount;
-  stree.prepare_sph();
-  MutualInteractor<neighbour_counter<sticky_tree,individual> > 
-    MI(&scount,stree.depth());
-  MI.cell_self(stree.root());
-  stree.set_num(TREE->begin_souls());
+  if(BODIES && !BODIES->has(io::n) || ARRAYS && !ARRAYS->has(io::n))
+    falcON_ErrorF("nobody has memory for num","falcON::count_sph_neighbours()");
+  if(BODIES) LoopSouls(tree_type,TREE,Si) Si->add_body_flag(BODIES);
+  else       LoopSouls(tree_type,TREE,Si) Si->add_body_flag(ARRAYS);
+  sticky_tree stree (TREE, flag::SPH);
+  stree.count_neighbours();
 }
 //-----------------------------------------------------------------------------+
-void falcON::make_iaction_list(      elem_pair*bl,
-			       const uint      nl,
-			             uint     &na,
-			       const areal    *s,
-			       const areal    *v[NDIM],
-			       const real      tau)
+void falcON::count_neighbours()
 {
-  if(BODIES) error("[falcON::make_iaction_list()]: bodies/arrays mismatch");
-  if(tau < zero) {             // SPH
-    LoopSouls(tree_type,TREE,Si) if(is_sph(FL[mybody(Si)])) {
-      flag_for_subtree(Si);
-      Si->add_body_flag(FL);
-    }
-    sticky_tree      stree(TREE,s,v);
-    neighbour_finder sfind(nl,bl);
-    stree.prepare_sph();
-    MutualInteractor<neighbour_finder> MI(&sfind,stree.depth());
-    MI.cell_self(stree.root());
-    na = sfind.actual_size_of_list();
-  } else {                     // sticky particles
-    LoopSouls(tree_type,TREE,Si) if(is_sticky(FL[mybody(Si)])) {
-      flag_for_subtree(Si);
-      Si->add_body_flag(FL);
-    }
-    sticky_tree   stree(TREE,s,v);
-    sticky_finder sfind(tau,nl,bl);
-    stree.prepare_sticky();
-    MutualInteractor<sticky_finder> MI(&sfind,stree.depth());
-    MI.cell_self(stree.root());
-    na = sfind.actual_size_of_list();
-  }
-}
-//-----------------------------------------------------------------------------+
-void falcON::count_sph_neighbours(const areal* s, int* NUM)
-{
-  if(BODIES) error("[falcON::sph_neighbours()]: bodies/arrays mismatch");
-  LoopSouls(tree_type,TREE,Si) if(is_sph(FL[mybody(Si)])) {
-    flag_for_subtree(Si);
-    Si->add_body_flag(FL);
-  }
-  sticky_tree       stree(TREE,s,0);
-  neighbour_counter<sticky_tree,individual> scount;
-  stree.prepare_sph();
-  MutualInteractor<neighbour_counter<sticky_tree,individual> >
-    MI(&scount,stree.depth());
-  MI.cell_self(stree.root());
-  stree.set_num(NUM);
-}
-//-----------------------------------------------------------------------------+
-void falcON::count_neighbours() {
-  if(!BODIES) error("[falcON::count_neighbours()]: bodies/arrays mismatch");
-#ifdef ALLOW_INDI
-  switch(SOFTENING) {
-  case individual: {
-    TREE->prepare_neighbour_counting();
-    if(TREE->N_soul_sinks()==0) {
-      warning("[falcON::count_neighbours()]: nobody wants updating");
-      return;
-    }
-    neighbour_counter<grav_tree,individual> count;
-    MutualInteractor<neighbour_counter<grav_tree,individual> > 
-    MI(&count,TREE->depth());
-    MI.cell_self(TREE->root());
-  } break;
-  case global: {
+#ifdef falcON_INDI
+  if(SOFTENING == individual)
+    return TREE->count_neighbours();
+  else
 #endif
-    TREE->prepare_neighbour_counting(&EPS);
-    if(TREE->N_soul_sinks()==0) {
-      warning("[falcON::count_neighbours()]: nobody wants updating");
-      return;
-    }
-    neighbour_counter<grav_tree,global> count(EPS);
-    MutualInteractor<neighbour_counter<grav_tree,global> > 
-    MI(&count,TREE->depth());
-    MI.cell_self(TREE->root());
-#ifdef ALLOW_INDI
-  } break;
-  }
-#endif
-  LoopSouls(tree_type,TREE,Si) if(is_sink(Si)) Si->update_num(BODIES);
-}
-//-----------------------------------------------------------------------------+
-void falcON::count_neighbours(int* NUM) {
-  if(BODIES) error("[falcON::count_neighbours()]: bodies/arrays mismatch");
-#ifdef ALLOW_INDI
-  switch(SOFTENING) {
-  case individual: {
-    TREE->prepare_neighbour_counting();
-    if(TREE->N_soul_sinks()==0) {
-      warning("[falcON::count_neighbours()]: nobody wants updating");
-      return;
-    }
-    neighbour_counter<grav_tree,individual> count;
-    MutualInteractor<neighbour_counter<grav_tree,individual> > 
-    MI(&count,TREE->depth());
-    MI.cell_self(TREE->root());
-  } break;
-  case global: {
-#endif
-    TREE->prepare_neighbour_counting(&EPS);
-    if(TREE->N_soul_sinks()==0) {
-      warning("[falcON::count_neighbours()]: nobody wants updating");
-      return;
-    }
-    neighbour_counter<grav_tree,global> count(EPS);
-    MutualInteractor<neighbour_counter<grav_tree,global> > 
-    MI(&count,TREE->depth());
-    MI.cell_self(TREE->root());
-#ifdef ALLOW_INDI
-  } break;
-  }
-#endif
-  LoopSouls(tree_type,TREE,Si) if(is_sink(Si)) Si->update_num(NUM);
+    return TREE->count_neighbours(EPS);
 }
 ////////////////////////////////////////////////////////////////////////////////

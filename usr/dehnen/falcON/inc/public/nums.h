@@ -5,7 +5,7 @@
 //                                                                             |
 // C++ code                                                                    |
 //                                                                             |
-// Copyright Walter Dehnen, 1994-2002                                          |
+// Copyright Walter Dehnen, 1994-2003                                          |
 // e-mail:   wdehnen@aip.de                                                    |
 // address:  Astrophysikalisches Institut Potsdam,                             |
 //           An der Sternwarte 16, D-14482 Potsdam, Germany                    |
@@ -34,24 +34,24 @@
 // Gauss-Legendre integration: points & weights         v0.1                   |
 //                                                                             |
 //-----------------------------------------------------------------------------+
-#ifndef included_nums_h
-#define included_nums_h
+#ifndef falcON_included_nums_h
+#define falcON_included_nums_h
 
-#ifndef included_iostream
+#ifndef falcON_included_iostream
 #  include <iostream>
-#  define included_iostream
+#  define falcON_included_iostream
 #endif
-#ifndef included_cstdlib
+#ifndef falcON_included_cstdlib
 #  include <cstdlib>
-#  define included_cstdlib
+#  define falcON_included_cstdlib
 #endif
-#ifndef included_inln_h
+#ifndef falcON_included_inln_h
 #  include <public/inln.h>
 #endif
-#ifndef included_memo_h
+#ifndef falcON_included_memo_h
 #  include <public/memo.h>
 #endif
-#ifndef included_tupl_h
+#ifndef falcON_included_tupl_h
 #  include <public/tupl.h>
 #endif
 
@@ -123,7 +123,7 @@ namespace nbdy {
     if(klo<0 || klo>=n-1 || x[klo]>xi || x[klo+1]<xi) {
       klo = int( (xi-x[0]) / (x[n-1]-x[0]) * (n-1) );
       klo = hunt(x,n,xi,klo);
-      if(klo<0 || klo>=n) NbdyErrorF("x out of range","find()")
+      if(klo<0 || klo>=n) falcON_ErrorF("x out of range","find()");
     }
   }
   //----------------------------------------------------------------------------
@@ -242,7 +242,7 @@ namespace nbdy {
     for(i=0;i!=n;++i) P[i]=ya[i];
     for(m=1;m!=n;++m)
       for(i=0;i<n-m;++i) {
-	if(xa[i]==xa[i+m]) NbdyErrorF("x's not distinct","polev()")
+	if(xa[i]==xa[i+m]) falcON_ErrorF("x's not distinct","polev()");
 	P[i]= ( (x-xa[i+m])*P[i] + (xa[i]-x)*P[i+1] ) / (xa[i] - xa[i+m]);
       }
     y = P[0];    
@@ -287,7 +287,7 @@ namespace nbdy {
     register scalar_type xh,xl,dx,dxo,f,df,fh,fl,rts,swap,temp;
     func(x1,fl,df);
     func(x2,fh,df);
-    if(fl*fh >= 0.) NbdyErrorF("root must be bracketed","rtsafe()")
+    if(fl*fh >= 0.) falcON_ErrorF("root must be bracketed","rtsafe()");
     if(fl<0.) {
       xl  = x1;
       xh  = x2;
@@ -325,7 +325,7 @@ namespace nbdy {
 	fh  = f;
       }
     }
-    NbdyWarningF("max number of iterations exceeded","rtsafe()")
+    falcON_WarningF("max number of iterations exceeded","rtsafe()");
     return rts;
   }
   //----------------------------------------------------------------------------
@@ -449,7 +449,7 @@ namespace nbdy {
 	}
       }
     }
-    NbdyErrorF("exceeding iterations","brent()")
+    falcON_ErrorF("exceeding iterations","brent()");
     xmin   =x;
     return fx;
   }
@@ -543,13 +543,11 @@ namespace nbdy {
   //----------------------------------------------------------------------------
   template<typename S, int N> inline
   void LegendrePeven(tupel<S,N>& p, const double x) {
-//     return LegendrePeven<S,N>((S*)(p),x);
     return LegendrePeven<S,N>(p,x);
   }
   //----------------------------------------------------------------------------
   template<typename S, int N> inline
   void dLegendrePeven(tupel<S,N>& p, tupel<S,N>& d, const double x) {
-//     return dLegendrePeven<S,N>((S*)(p),(S*)(d),x);
     return dLegendrePeven<S,N>(p,d,x);
   }
   //----------------------------------------------------------------------------
@@ -756,12 +754,13 @@ namespace nbdy {
     //--------------------------------------------------------------------------
     void merge(const sorttree* const that) {
       if(that->Ncrit != this->Ncrit)
-	NbdyErrorF("Ncrit differs: cannot merge","sorttree::merge()")
+	falcON_ErrorF("Ncrit differs: cannot merge","sorttree::merge()");
       if(that->L0==0 || this->L0==0)
-	NbdyErrorF("leafs have been deleted: cannot merge","sorttree::merge()")
+	falcON_ErrorF("leafs have been deleted: cannot merge",
+		      "sorttree::merge()");
       if(that->ROOT->C != this->ROOT->C ||
 	 that->ROOT->S != this->ROOT->S)
-	NbdyErrorF("root ranges differ: cannot merge","sorttree::merge()")
+	falcON_ErrorF("root ranges differ: cannot merge","sorttree::merge()");
       Ncrit;
       merge(ROOT,that->ROOT);
     }
@@ -797,4 +796,4 @@ namespace nbdy {
   }
 }
 ////////////////////////////////////////////////////////////////////////////////
-#endif // included_nums_h
+#endif // falcON_included_nums_h

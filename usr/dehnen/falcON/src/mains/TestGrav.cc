@@ -11,10 +11,12 @@
 //           An der Sternwarte 16, D-14482 Potsdam, Germany                    |
 //                                                                             |
 //-----------------------------------------------------------------------------+
+#define falcON_NONEMO
 #include <iostream>
 #include <fstream>
 #include <iomanip>
 #include <ctime>
+#include <main.h>
 #include <body.h>
 #include <falcON.h>
 #include <public/Pi.h>
@@ -58,48 +60,50 @@ double ms_density_gamma(const double gamma)
   return cube(3-gamma)*f/square(4*Pi);
 }
 
-int main(int argc, char* argv[])
+void nbdy::main(int argc, char* argv[])
 {
-#ifdef TWODIMENSIONAL
+#if falcON_NDIM == 2
   if(argc < 5) {
     cerr<<
-      " \"TestGrav MOD N S EPS [THE K Ns"
-#ifdef ALLOW_INDI
-      " Nsoft Nref"
-#endif
-      " Nc MAC s Ng Ncb0 Ncb1 Ncc Ncs DUMP]\" with \n"
+      " \"TestGrav MOD N S EPS [Ngrow theta K"
+#  ifdef falcON_INDI
+      " Nsoft Nref emin"
+#  endif
+      " Ncrit Ncut Nact MAC s Ncb0 Ncb1 Ncc Ncs DUMP]\" with \n"
       " MOD = 3/4           : Kuzmin disk / homogeneous disk\n"
 #else
   if(argc < 6) {
     cerr<<
-      " \"TestGrav MOD gam N S EPS [Ng THE K Ns"
-#ifdef ALLOW_INDI
-      " Nsoft Nref"
-#endif
-      " Nc MAC s Ncb0 Ncb1 Ncc Ncs DUMP]\" with \n"
+      " \"TestGrav MOD gam N S EPS [Ngrow theta K"
+#  ifdef falcON_INDI
+      " Nsoft Nref emin"
+#  endif
+      " Ncrit Ncut Nact MAC s Ncb0 Ncb1 Ncc Ncs DUMP]\" with \n"
       " MOD = 0/1/2/3/4     : hom. sphere / Plummer / gamma-model"
       " / Kuzmin disk / hom. disk\n"
       " gam                 : parameter of model (if any)\n"
 #endif
       " N                   : number of positions\n"
       " S = long            : seed for RNG\n"
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
       " EPS                 : fixed / maximum / individual softening length\n"
 #else
       " EPS                 : softening length\n"
 #endif
-      " Ng   (default   0)  : # additional grow()s\n"
-      " THE  (default "<<std::setw(3)<<Default::theta
-	<<")  : accuracy parameter\n"
-      " K    (default   "<<DEFAULT_KERNEL<<")  : P_n softening kernel\n"
-      " Ns   (default   N)  : # sinks\n"
-#ifdef ALLOW_INDI
+      " Ngrow(default   0)  : # additional grow()s\n"
+      " theta(default "<<std::setw(3)<<Default::theta
+	<<") : accuracy parameter\n"
+      " K    (default   "<<falcON_KERNEL_TEXT<<")  : P_n softening kernel\n"
+#ifdef falcON_INDI
       " Nsoft(default   0)  : use individual softening with Nsoft\n"
       " Nref (default Nsoft): use individual softening with Nref\n"
+      " emin (default   0)  : lower limit for eps_i\n"
 #endif
-      " Nc   (default "<<std::setw(3)<<Default::Ncrit
+      " Ncrit(default "<<std::setw(3)<<Default::Ncrit
 	               <<")  : don't split cell with <= Nc bodies\n"
-      " MAC  (default   "<<DEFAULT_MAC
+      " Ncut (default   0)  : if != 0: N_cut in re-growing of tree\n"
+      " Nact (default   N)  : # active bodies\n"
+      " MAC  (default   "<<falcON_MAC_TEXT
 	<<")  : 0/1/2/3: theta=const, f(M), f(M/rmax^2), f(M/rmax)\n"
       " s    (default   1)  : interweave interaction & evaluation phase?\n"
       " Ncb0 (default "<<std::setw(3)<<Default::direct[0]<<")  : N_cb^pre\n"
@@ -111,70 +115,70 @@ int main(int argc, char* argv[])
   }
 
   register clock_t  cpu0 = clock(), cpu1;
-#ifdef ALLOW_INDI
-  real              NSOFT=zero;
+#ifdef falcON_INDI
+  real              Nsoft=zero,emin=zero;
   bool              use_indiv = false;
   soft_type         Soft;
   unsigned          NREF;
 #endif
   const real        rmax = 1.e3;
-  int               p=1, MOD, T=0;
+  int               p=1, MOD, dump=0;
   MAC_type          MAC = Default::mac;
   kern_type         K   = Default::kernel;
   long              Seed;
-  unsigned          N, Ns, split=1, Ng=0;
-  int               Ncrit=Default::Ncrit,
+  unsigned          N, Nact, split=1, Ngrow=0;
+  int               Ncrit=Default::Ncrit, Ncut=0, 
                     DIR[4]={Default::direct[0],Default::direct[1],
 			    Default::direct[2],Default::direct[3]};
-  real              EPS, TH=Default::theta, MTOT=one;
+  real              EPS, theta=Default::theta, MTOT=one;
 
   MOD  = atoi(argv[p++]);
-#ifndef TWODIMENSIONAL
+#if falcON_NDIM == 3
   real GAM;
   GAM  = atof(argv[p++]);
 #endif
-  N    = atoi(argv[p++]); Ns=N;
+  N    = atoi(argv[p++]); Nact=N;
   Seed = atoi(argv[p++]);
   EPS  = atof(argv[p++]);
-  if(argc>p) Ng     = atoi(argv[p++]);
-  if(argc>p) TH     = atof(argv[p++]);
+  if(argc>p) Ngrow  = atoi(argv[p++]);
+  if(argc>p) theta  = atof(argv[p++]);
   if(argc>p) K      = kern_type(atoi(argv[p++]) % 10);
-  if(argc>p) Ns     = atoi(argv[p++]);
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
   if(EPS < 0.) use_indiv = true;
-  if(argc>p) NSOFT  = atof(argv[p++]);
-  NREF = NSOFT>0? (NSOFT>1? nbdy::uint(NSOFT+half) : 1) : 0;
+  if(argc>p) Nsoft  = atof(argv[p++]);
+  NREF = Nsoft>0? (Nsoft>1? nbdy::uint(Nsoft+half) : 1) : 0;
   if(argc>p) NREF   = atoi(argv[p++]);
+  if(argc>p) emin   = atof(argv[p++]);
 #endif
   if(argc>p) Ncrit  = atoi(argv[p++]);
-  if(argc>p) MAC  = MAC_type (atoi(argv[p++]) % 10);
+  if(argc>p) Ncut   = atoi(argv[p++]);
+  if(argc>p) Nact   = atoi(argv[p++]);
+  if(argc>p) MAC    = MAC_type (atoi(argv[p++]) % 10);
   if(argc>p) split  = atoi(argv[p++]);
   if(argc>p) DIR[0] = atoi(argv[p++]);
   if(argc>p) DIR[1] = atoi(argv[p++]);
   if(argc>p) DIR[2] = atoi(argv[p++]);
   if(argc>p) DIR[3] = atoi(argv[p++]);
-#ifndef TWODIMENSIONAL
-#endif
-  if(argc>p) T     = atoi(argv[p++]);
-  bodies *BODIES   = 
-#ifdef ALLOW_INDI
-    (NSOFT || use_indiv)? 
+  if(argc>p) dump   = atoi(argv[p++]);
+  bodies *BODIES    = 
+#ifdef falcON_INDI
+    (Nsoft || use_indiv)? 
     new bodies(N,bodies::DEFBITS() | io::e) :
 #endif
     new bodies(N);
-#ifdef ALLOW_INDI
-  Soft = (NSOFT||use_indiv)? nbdy::individual : nbdy::global;
+#ifdef falcON_INDI
+  Soft = (Nsoft || use_indiv)? nbdy::individual : nbdy::global;
 #endif
   EPS  = nbdy::abs(EPS);
   vect  *A = new vect[N];
   real *RH = new real[N];
   srand48(Seed);
 
-#ifndef TWODIMENSIONAL
+#if falcON_NDIM == 3
   const    real g1=1.-GAM, g2=2.-GAM, ig2=1./g2, g3=3-GAM, ig3=1./g3;
 #endif
   register real tm,r=zero,R,phi,fr,P,rh=zero;
-#ifndef TWODIMENSIONAL
+#if falcON_NDIM == 3
   register real cth;
 #endif
   register double sph,cph;
@@ -182,7 +186,7 @@ int main(int argc, char* argv[])
   LoopBodies(bodies,BODIES,Bi) {
     do {
       switch(MOD) {
-#ifndef TWODIMENSIONAL
+#if falcON_NDIM == 3
       case 0:  // homogeneous
 	r  = pow(drand48(),1./3.);
 	P  = 0.5*(3*r*r-1);
@@ -224,7 +228,7 @@ int main(int argc, char* argv[])
 	nbdy::exit(1);
       }
     } while(r>rmax);
-#ifdef TWODIMENSIONAL
+#if falcON_NDIM == 2
     R = r;
 #else
     cth = (MOD==3) ? zero : 2*drand48()-1;
@@ -237,14 +241,15 @@ int main(int argc, char* argv[])
     Bi.pos(0) = R * sph;
     Bi.pos(1) = R * cph;
     Bi.mass() = mi;
-    if(index(Bi) < Ns) Bi.flag_as_sink();
-    else               Bi.unflag_sink();
-#ifdef ALLOW_INDI
+    if(index(Bi) < Nact) Bi.flag_as_active();
+    else                 Bi.unflag_active();
+#ifdef falcON_INDI
     if(use_indiv) Bi.eps() = EPS;
 #endif
     A [index(Bi)] = MTOT * fr * pos(Bi);   // exact force
     RH[index(Bi)] = rh;             // exact density
   }
+  const bool all = Nact==N;
 //   // create file with masses & positions
 //   ofstream out("positions.dat");
 //   out<<N<<"\n";
@@ -257,26 +262,27 @@ int main(int argc, char* argv[])
       <<" time needed for set up of X_i:           "
       <<(cpu1 - cpu0)/real(CLOCKS_PER_SEC)<<endl;
   cpu0 = cpu1;
-#ifdef ALLOW_INDI
-  falcON falcon(BODIES,EPS,TH,K,Soft,MAC);
+#ifdef falcON_INDI
+  falcON falcon(BODIES,EPS,theta,K,Soft,MAC);
 #else
-  falcON falcon(BODIES,EPS,TH,K,MAC);
+  falcON falcon(BODIES,EPS,theta,K,MAC);
 #endif
-  for(register unsigned ig=0; ig<=Ng; ++ig) {
-    falcon.grow(Ncrit);
+  for(register unsigned ig=0; ig<=Ngrow; ++ig) {
+    if(Ncut) falcon.re_grow(Ncut,Ncrit);
+    else     falcon.grow(Ncrit);
     cpu1 = clock();
     cout<<setprecision(6)
 	<<" time needed for falcON::grow():          "
 	<<(cpu1 - cpu0) / real(CLOCKS_PER_SEC)<<endl;
     cpu0 = cpu1;
   }
-  if(T) falcon.dump_nodes("tree.cells","tree.souls");
+  if(dump) falcon.dump_nodes("tree.cells","tree.souls");
 
   cpu0 = clock();
-#ifdef ALLOW_INDI
-  falcon.approximate_gravity(split,NSOFT,NREF,0.,DIR);
+#ifdef falcON_INDI
+  falcon.approximate_gravity(split,all,Nsoft,NREF,emin,0.,DIR);
 #else
-  falcon.approximate_gravity(split,DIR);
+  falcon.approximate_gravity(split,all,DIR);
 #endif
   cpu1 = clock();
   cout<<setprecision(6)
@@ -306,12 +312,12 @@ int main(int argc, char* argv[])
   case 3: ase *= 17.5;   break;
   case 4: ase *= 1.125;  break;
   case 0: ase /= 0.6;    break;
-#ifndef TWODIMENSIONAL
+#if falcON_NDIM == 3
   case 2: if(GAM<1.66) ase /= (MTOT*MTOT*ms_Force_gamma(GAM)); break;    
 #endif      
   default: break;
   }
-#ifndef TWODIMENSIONAL
+#if falcON_NDIM == 3
   if(MOD==2 && GAM>=1.66)
     cout<<setprecision(10)<<" ASE(F)           = "<< ase <<"\n";
   else
@@ -325,11 +331,11 @@ int main(int argc, char* argv[])
 //     cerr<<" "<<acc(B+i)<<" "<<neighbours(B+i)<<"\n";
 //   }
 #if(0)
-#ifdef ALLOW_INDI
-  if(NSOFT || use_indiv) {
+#ifdef falcON_INDI
+  if(Nsoft || use_indiv) {
     std::ofstream FILE("test.in");
     if(FILE.is_open()) {
-      FILE<<setfill(' ')<<N<<' '<<NSOFT<<"\n";
+      FILE<<setfill(' ')<<N<<' '<<Nsoft<<"\n";
       LoopBodies(bodies,BODIES,Bi)
 	FILE
 	  <<setw(13)<<setprecision(8)<<Bi.pos()[0]<<" "
@@ -358,7 +364,7 @@ int main(int argc, char* argv[])
 	  <<setw(13)<<setprecision(8)<<Bi.acc()[2]<<"\n";
       FILE.close();
     }
-#ifdef ALLOW_INDI
+#ifdef falcON_INDI
   }
 #endif
 #endif

@@ -123,9 +123,11 @@ C---------------------------------------------------------------------------
       TIME = (CPU1-CPU0) / 1.E6
       CPU0 = CPU1
       WRITE(*,'(" time needed for set up of (x,v): "F13.6)') TIME
-
-      CALL FALCON_INIT(FL,M,X,Y,Z,%VAL(0),%VAL(0),%VAL(0),%VAL(0),
-     C %VAL(0),%VAL(0),N,0,0.6,1)
+      CALL FALCON_INITIALIZE(FL,M,X,Y,Z,
+#ifdef falcON_INDI
+     C%VAL(0),
+#endif
+     C%VAL(0),%VAL(0),%VAL(0),%VAL(0),%VAL(0), N,0.1,0.55,1)
 
       CALL FALCON_GROW(NCRIT)
 
