@@ -4,13 +4,16 @@ ccdslice \- takes slices and/or re-orient an image cube
 .SH SYNOPSIS
 \fBccdslice\fP [parameter=value] ...
 .SH DESCRIPTION
-\fBccdslice\fP takes slices from an image cube, along any axis and 
-can thereby also reorder the axes, or remove a redundant axis.
+\fBccdslice\fP takes slices from an image cube, along any (orthogonal)
+axis and can thereby also reorder the axes, or remove a redundant axis.
 .PP
 A chain of \fBccdslice\fP has to be applied if
 the first (x) or second (y) axis needs to be reduced but the ordering
 of the cube coordinates to remain the same (see EXAMPLES below),
 see also \fIccdsub(1NEMO)\fP for a better alternative.
+.PP
+\fIccdfits(1NEMO)\fP can also remove redundant ("dummy") axes
+when writing out a \fIfits(5NEMO)\fP file.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -60,7 +63,7 @@ image cube. This is a limitation of the \fIimage(5NEMO)\fP format.
 The coordinate system description of the new \fIzvar\fP axis can easily 
 be corrupted by choosing an irregular layout with \fBxrange=\fP.
 .SH SEE ALSO
-ccdsub(1NEMO), image(5NEMO)
+ccdsub(1NEMO), ccdfits(1NEMO),  image(5NEMO), fits(5NEMO)
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
