@@ -264,10 +264,11 @@ int close_io_nemo(char * iofile)
 
     /* RAZ variables */
     read_one[no_io] = FALSE;
+    set_history[no_io] = FALSE;
     free((char *) io_in[no_io]);
     code=1;
   }
-  reset_history();
+  //reset_history();
   return code;
 }
 /* -------------------------------------------------------------- *\ 
