@@ -1,0 +1,69 @@
+.TH XVPSNAP 1NEMO "8 June 1994"
+.SH NAME
+xvpsnap \- convert xvp NBODY files to snapshot format files
+.SH SYNOPSIS
+\fBxvpsnap\fP \fBin=\fP\fIxvp_fiiile\fP [parameter=value] ...
+.SH DESCRIPTION
+\fBxvpsnap\fP converts (fortran) direct access files in Quinn/Balcells format
+(see also \fIrvp(5NEMO)\fP) to standard \fIsnapshot(5NEMO)\fP format. Some
+control exists over which snapshots are extracted from the input file.
+.PP
+Currently the user must know if the input \fIxvp\fP file is in single or double
+precision (native floating point) format. The output 
+file will be in single precision \fIsnapshot\fP format.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input \fIxyp(5NEMO)\fP file. No default.
+.TP
+\fBout=\fP
+Output \fIsnapshot(5NEMO)\fP
+file. If none given, the program will automatically operate in scan-mode
+and report all \fIselected\fP (see \fBmodel=\fP and \fBtimes=\fP below)
+snapshots. 
+Default: 
+.TP
+\fBtimes=\fP\fIt1[:t2],...\fP
+Select by time ranges. \fI *** not implemented yet *** \fP
+.TP
+\fBmodel=\fP
+Select by model numbers (0=all, 1=first). Any \fInemoinp(3NEMO)\fP expression
+can be given. [Default: \fB0\fP (all)].
+.TP
+\fBheadline=\fP
+Random verbiage added to the history of the output file.
+.TP
+\fBnbody=\fP
+Maximum number of bodies allowed for memory allocation. 
+By default, the \fIxvp\fP input file will be scanned to retrieve 
+the correct number of bodies. By using this keyword, this
+scan will be skipped. In this case any too small number
+will cause unpredictable results.
+.TP
+\fBnobytes=4|8\fP
+Number of bytes per floating point number in the \fIxvp\fP
+input data. Valid numbers are \fB4\fP (single precision) and
+\fB8\fP (double precision) files. 
+\fINote: \fP There is no way, other than trial and error, for the user
+to find out if a dataset of unknown content is in single or double precision.
+Default: 4.
+.SH BUGS
+\fIxvp(5NEMO)\fP files that consist of multiple snapshots must all be
+equally sized.
+.SH SEE ALSO
+xvp(5NEMO), tabtos(1NEMO), atos(1NEMO), rvc(1NEMO), snapshot(5NEMO)
+.SH FILES
+.nf
+.ta +2i
+~/usr/balcells/nora/{xvpread.f,xvprd8.f}	I/O routines for library
+~/src/nbody/io/xvpsnap.c                	this program
+.fi
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+30-May-94	V1.0 Created 	PJT
+.fi
