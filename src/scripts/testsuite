@@ -167,6 +167,7 @@ help:
     echo "    -s    show all the binaries that are needed for each test"
     echo "    -i    install the missing binaries that are needed for all tests"
     echo "    -f    forced install of the binaries needed for all tests"
+    echo "    -b    bootstrap mode"
     echo "    -q    show all binaries that have not been installed yet"
     echo "    -h    this help"
     echo ""
