@@ -1,0 +1,163 @@
+Proposal for a random access extension to filestruct:
+-----------------------------------------------------
+
+Problem: 
+
+Random access is only allowed to individual items within a
+hierarchically structured set.  One would like to have random access
+within an item itself.  This is adding another level of hierarchy, 
+
+
+Proposed solution:
+
+One would generally only be allowed to open one at a time in random
+access mode.  One would not be allowed to 'open' two items for random
+access, similarly to two parallel set's.  This could be considered an
+unnecessary limitation? Of course random access items do not nest, since
+they are ONE simple stream of data. 
+
+
+Now for the implementation:
+
+the 'struct item' remains the same, the itempos now denotes the 
+(ftell) position in the file where the base of data is. This for
+input as well as output. It is up to the other routines to detect
+that a memory item (perhaps also called sequential - although some
+ideas exist to break that barrier too) is random. 
+As for now we only can accomodate one random item per file at a time.
+
+For the rest the same rules apply as with the old-style items.
+
+
+
+A random item must be 'opened' with
+                put_data_set(str,tag,typ,dimN,...dim1,0);
+accesses with
+                put_data_ran(str,tag,dat,offset,length);
+and closed with
+                put_data_tes(str,tag);
+
+The extra 'tag' in the _ran and _tes call are perhaps redundant,
+but allow for strict access checking.  The put_ and get_ routines are
+symmetric as usual.
+
+
+
+
+/*
+ * PUT_DATA_SET, PUT_DATA_RAN, PUT_DATA_TES: random access within an item
+ * Synopsis: put_data_set(str, tag, typ, dimN, ..., dim1, 0)
+ * 	     put_data_ran(str, tag, dat, offset, length)
+ * 	     put_data_tes(str, tag)
+ */
+void put_data_set(va_alist)
+va_dcl				/* brain-damaged variable arg mechanism */
+{
+    va_list aptr;
+    stream str;
+    string tag, typ;
+    int dim[MaxVecDim], n = 0;
+    itemptr ipt, batchitem();
+    strstkptr sspt;
+
+    va_start(aptr);				/* access argument list     */
+    str = va_arg(aptr, stream);			/* collect mandatory args   */
+    tag = va_arg(aptr, string);
+    typ = va_arg(aptr, string);
+    do {					/* loop reading dimensions  */
+	if (n >= MaxVecDim)			/*   no room for any more?  */
+	    error("put_data: too many dims; item %s\n", tag);
+	dim[n] = va_arg(aptr, int);		/*   else get next argument */
+    } while (dim[n++] != 0);			/* until a zero comes up    */
+    va_end(aptr);
+
+    ipt = batchitem(str,typ,tag,dim);            /* make item & copy header */
+}
+
+void put_data_tes(str,tag)
+stream str;
+string tag;
+{
+    int dim[MaxVecDim], n = 0;
+    itemptr ipt;
+    strstkptr sspt;
+
+    sspt = findstream(str);
+    if (sspt->ss_ran == 0) error("put_data_tes: item %s was not random",tag);
+    ipt = sspt->ss_ran;
+    if (!streq(tag,ItemTag(ipt))) error("put_data_tes: invalid tag name %s",tag);
+    lseek(str,sspt->ss_pos);        /* go where we left */
+    sspt->ss_pos = 0L;              /* mark file as sequential again */
+    sspt->ss_ran = NULL;            /* reset pointer to the random item */
+    freeitem(ipt,FALSE);
+}
+
+void put_data_ran(str,tag,dat,offset,length)
+stream str;
+string tag;
+byte *dat;
+int offset;
+int length;
+{
+    itemptr ipt;
+    strstkptr sspt;
+
+    sspt = findstream(str);
+    ipt = sspt->ss_ran;
+    if (ipt==NULL) error("put_data_ran: tag %s no random item",tag);
+    if (!streq(tag,ItemTag(ipt))) error("put_data_tes: invalid tag name %s",tag);
+
+    dprintf(1,"random: offset=%d length=%d itemlen=%d datlen=%d  itempos=%d\n",
+        offset, length, ItemLen(ipt), datlen(ipt,0), ItemPos(ipt));
+    offset *= ItemLen(ipt);
+    length *= ItemLen(ipt);
+    if (offset+length > datlen(ipt,0))
+        error("put_data_ran: tag %s cannot write beyond allocated boundary",tag);
+    lseek(offset + ItemPos(ipt));
+    if (length != fwrite(dat,sizeof(byte),length,str))
+        error("put_data_ran: error writing tag %s",tag);
+}
+
+/*
+ *  BATCHITEM: construct an random access item from components
+ *             and stash away the header
+ */
+itemptr batchitem(str,typ,tag,dim)
+stream str;
+string typ;
+string tag;
+int *dim;
+{
+    itemptr ipt;
+    strstkptr sspt;
+
+    sspt = findstream(str);
+    if (sspt->ss_pos) 
+        error("batchitem: set %s: can only handle one random access item",tag);
+    ipt = (itemptr) malloc(sizeof(item));
+    if (ipt==NULL)
+        error("batchitem: tag %s: malloc failed",tag);
+    ItemTyp(ipt) = typ;
+    ItemLen(ipt) = baselen(typ);
+    ItemTag(ipt) = tag;
+    if (dim != NULL && dim[0] != 0)
+        ItemDim(ipt) = dim;             /* use copy ??? */
+    else
+        ItemDim(ipt) = NULL;
+    ItemDat(ipt) = NULL;                /* points to no data */
+    puthdr(str,ipt);                           /* write the header right now */
+    ItemPos(ipt) = ftell(str);                       /* begin of random data */
+    sspt->ss_pos = ftell(str) + datlen(ipt,0);         /* end of random data */
+    sspt->ss_ran = ipt;
+    return(ipt);
+}
+
+
+---header---
+ * V 2.x: Peter Teuben 13-oct-90  random access
+
+    long   itempos;		/* where the item began in stream (i/o) */
+
+    long    ss_pos;                 /* tail of file, in case random access */
+    itemptr ss_ran;                 /* pointer to random access item */
+
