@@ -150,10 +150,10 @@ Brief overview of a Version 3.x INSTALLATION
 
 3) Run the testsuite, which also installs a pretty basic set of NEMO executables:
 
-	%  setenv YAPP /vps			## only needed if you're on a remote link,
-						## otherwise leave it as /xs or yapp.ps
+	%  setenv YAPP /vps		## only needed if you're on a remote link,
+					## otherwise leave it as /xs or yapp.ps
 
-	%  src/scripts/testsuite -b		# run test testsuite
+	%  src/scripts/testsuite -b	# run test testsuite
 
 
    Study the output of the lines that do not contain the word 'OK' at the end, e.g.
@@ -199,7 +199,7 @@ Results in /home/teuben/nemo_3.0.4/tmp/test22005/testsuite.log
 	% rehash
 	% make libs
 
-   Or if you want to use our (not blessed) PGPLOT cvs release 
+   Or if you want to use our (not TJP blessed) PGPLOT cvs release 
 
 	% ./configure 
 	% source nemo_start
