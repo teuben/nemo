@@ -85,7 +85,7 @@ string defv[] = {
     "rotcur3=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur4=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur5=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
-    "VERSION=1.2e\n  25-may-04 PJT",
+    "VERSION=1.2f\n  26-may-04 PJT",
     NULL,
 };
 
@@ -1154,22 +1154,16 @@ stream lunres;   /* file for residuals */
 	   if (nblank)
 	     nrt = nllsqfit(x,2,y,w,res,n,p,e,mask,nparams,tol,itmax,lab,
 			    vobs,vobsd);
-#if 0
-	   break;
-#else
 	   if (Qimage) {
 	     if (h==1)
 	       warning("new feature: patching the input maps for nsigma rejects");
-	     /* alternatively you could only allow masking at the firsts iter */
-	     /* h==1 only 1st; h>0 always */
-	     if (h>0) {
-	       for (i=0; i<n; i++) 
-		 if (iblank[i] == 0)
-		   MapValue(velptr,idx[2*i],idx[2*i+1]) = undf;
-	     }
-   	   } else
+	     for (i=0; i<n; i++) 
+	       if (iblank[i] == 0)
+		 MapValue(velptr,idx[2*i],idx[2*i+1]) = undf;
+   	   } else {
+	     warning("sadly we don't have a good way to iterate w/ nsigma on tables");
 	     break;
-#endif
+	   }
 	 }
          if (nrt<0) {
             warning("nllsqfit=%d: must find better solution (n=%d)",nrt,n);
