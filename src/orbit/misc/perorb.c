@@ -68,7 +68,7 @@ string defv[] = {
     "tab=\n                    Optional table with x,vy,y,vx,nsteps,T,E",
     "mode=rk4\n                integration method (euler,leapfrog,rk2,rk4)",
     "headline=\n               Random verbiage for output file",
-    "VERSION=1.5e\n            1-mar-03 PJT",
+    "VERSION=1.5f\n            19-aug-04 PJT",
     NULL,
 };
 
@@ -107,7 +107,7 @@ int   cycle_euler(orbitptr),
 
 nemo_main()
 {
-    int i, n, maxout;
+  int i, n, maxout, nold;
 
     if (NDIM!=3) error("Program can only run with NDIM=3");
 
@@ -132,9 +132,11 @@ nemo_main()
             continue;
         }
         maxout = Nsteps(o1);               /* save how much space we have */
+        nold   = Nsteps(o1);               /* save how much space we have */
+        maxout = MAXsteps(o1);               /* save how much space we have */
         Nsteps(o1) = n;                           /* set these for output */
         if (outstr) my_write_orbit(outstr, o1, maxout, freqout, period);
-        Nsteps(o1) = maxout;                /* reset space for next orbit */
+        Nsteps(o1) = nold;
         if (ncross>1) {
             if (dirint==1)
                 dprintf(0,"Time     Ycross    VYcross   Energy\n");
@@ -187,7 +189,7 @@ setparams()
         p.pars = NULL;
         p.file = NULL;
         if (read_orbit(instr,&o1)) {
-            dprintf(0,"[Read initial conditions from %s\n]",infile);
+            dprintf(0,"[Read initial conditions from %s, size=%d\n]",infile,Size(o1));
             phase[0] = Xorb(o1,0);
             phase[1] = Yorb(o1,0);
             phase[2] = Zorb(o1,0);
@@ -326,7 +328,8 @@ my_write_orbit(stream outstr, orbitptr o, int maxout, int freqout, int period)
           }
           nout = 2*nout-1;
        } else
-          warning("Not enough space to save symmetric part of orbit");
+	 warning("Not enough space to save symmetric part of orbit: nout=%d maxout=%d",
+		 nout,maxout);
     }
     Nsteps(o) = nout;   /* make sure only all these are written */
     PotName(o) = p.name;    /* make sure any new potential is known */
