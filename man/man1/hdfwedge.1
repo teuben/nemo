@@ -1,0 +1,90 @@
+.TH HDFGRID 1NEMO "17 December 2004"
+.SH NAME
+hdfwedge \- Regrid a polar HDF4 SDS wedge to cartesian image
+.SH SYNOPSIS
+\fBhdfwedge\fP [parameter=value]
+.SH DESCRIPTION
+\fBhdfwedge\fP regrids HDF (SDS) output files that are assumed to
+be in polar (rad-phi) coordinates, but can contain any size wedge
+(ideally an integer fraction of 2.PI). It was cloned off
+\fPhdfgrid(1NEMO)\fP in December 2004, so a number of their 
+comments on the assumptions on the input format also apply to
+this program.
+.PP
+The first two dimension must be radius and angle, there can be
+an optional 3rd dimension, but it must be 1 slice in Z only.
+.PP
+The (2D) four-point interpolation that is used in regridding is
+based on the one in \fIcmhog/movie.src\fP, but includes correct
+interpolations for points that are created if \fBperiodic=t\fP
+is used. The program is not well designed to detect errors
+in the amount of periodicity (e.g. creating a wedge
+from -1 to 1 radian, and setting \fPperiodic=t\fP will probably
+result in awkward looking images.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP\fIhdf_sds\fP
+Input file (HDF SD). No default.
+.TP
+\fBout=\fP\fIimage\fP
+Output file, in \fIimage(5NEMO)\fP format.
+.TP
+\fBselect=\fP\fIframe_no\fP
+Select which SDS from the file (1=first). See also \fBzvar=\fP below.
+[Default: \fB1\fP].
+.TP
+\fBnx=\fP\fIX_pixels\fP
+Number of pixels in X.
+[Default: \fB256\fP]
+.TP
+\fBny=\fP\fIY_pixels\fP
+Number of pixels in Y   
+[Default: \fB256\fP].
+.TP
+\fBxrange=\fP\fIxmin:xmax\fP
+Range in X     
+[Default: \fB-16:16\fP].
+.TP
+\fByrange=\fP\fIymin:ymax\fP
+Range in Y     
+[Default: \fB-16:16\fP].
+.TP
+\fBzvar=\fP\fIgrid_var\fP
+Gridding variable. Normally left alone, unless certain allowed mathematical
+expressions on the direct griddable variables (as defined by \fBselect=\fP)
+need to be overriden. Allowed are \fBvr\fP (select=1), \fBvt\fP (select=2),
+\fBden\fP (select=3), \fBvx\fP, \fBvy\fP, 
+\fBvm\fP and \fBvp\fP. Note
+that \fBvm\fP and \fBvp\fP are special cases of
+a linear combination of \fBvx\fP, \fBvy\fP
+\fIvm =  (vx-vy)/sqrt(2)\fP and \fIvp = (vx+vy)/sqrt(2)\fP, just
+to get an idea of the velocity field under a "middle" position angle.
+Default: not used, select= is used.
+.TP
+\fBperiodic=t|f\P
+Attempt to fill the plane by making the data periodic.
+[Default: \fBt\fP].
+.TP
+\fBsymmetry=odd|even|automatic\fP
+Override symmetry properties of the variable to be gridded. 
+This option is not used yet. See also \fBmirror=\fP
+.SH EXAMPLES
+Here is ....
+.nf
+
+  hdfwedge hdf010aa den010.ccd select=4 nx=256 ny=256 xrange=-8:8 yrange=-8:8
+
+.fi
+.SH FILES
+src/image/hdf/cmhog  	hdfwedge.c
+.SH SEE ALSO
+hdfgrid(1NEMO), tsd(1NEMO), sdsfits(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+17-dec-04	V0.1 created	PJT
+.fi
