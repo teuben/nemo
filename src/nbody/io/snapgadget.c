@@ -1,8 +1,12 @@
 /*
-SNAPGADGET: convert a NEMO snapshot to GADGET format
-
-Jeremy Bailin September 2003, based on snaptipsy.c (by TRQ + PJT)
-and JB's file_gadget.c.
+ *  SNAPGADGET: convert a NEMO snapshot to GADGET format
+ *
+ * Jeremy Bailin September 2003, based on snaptipsy.c (by TRQ + PJT)
+ * and JB's file_gadget.c.
+ *
+ * V0.2   fixed bug when no %t in output filename, re-arranged order of keys    PJT
+ *
+ * TODO:  should use mstropen() instead of the dangerous manual parsing of %t->%f
  */
 
 #include <stdinc.h>
@@ -36,12 +40,12 @@ struct io_header_1
 
 
 string defv[] = {		/* DEFAULT INPUT PARAMETERS */
-    "in=???\n			Input file (snapshot)",
-    "out=-\n                    Output file (GADGET format), %t for time",
+    "in=???\n			Input file (NEMO snapshot)",
+    "out=???\n                  Output file (GADGET format), %t for time",
+    "N=???\n			Nhalo,Ndisk,Nbulge,Nstars (in that order)",
     "times=all\n		Times to select snapshot",
     "swap=f\n                   Swap bytes on output?",
-    "N=???\n			Nhalo,Ndisk,Nbulge,Nstars",
-    "VERSION=0.1\n		08-sep-03",
+    "VERSION=0.2\n		8-sep-03 PJT",
     NULL,
 };
 
@@ -49,9 +53,9 @@ string usage="convert snapshot to GADGET format";
 
 #define TIMEFORMAT "%t"
 
-extern bswap(char *, int, int);
+extern void bswap(void *, int, int);
 void write_gadget(stream outstr,real time,Body *bodies,int nhalo,int ndisk,
-    int nbulge,int nstars,bool swapp);
+		  int nbulge,int nstars,bool swapp);
 
 
 void nemo_main()
@@ -89,12 +93,14 @@ void nemo_main()
 
 	/* replace all instances of '%t' with the snapshot time */
 	strcpy(outstub, getparam("out"));
+	strcpy(outfname,outstub);
 	for(fnpt=strstr(outstub,TIMEFORMAT); fnpt!=NULL; ) {
 	  *(fnpt+1)='f';
 	  sprintf(outfname, outstub, tsnap);
 	  strcpy(outstub, outfname);
 	  fnpt=strstr(outstub,TIMEFORMAT);
 	}
+	dprintf(0,"FILENAME: \"%s\"\n",outfname);
         outstr = stropen(outfname,"w");
 	sscanf(getparam("N"), "%d,%d,%d,%d", &nh, &nd, &nb, &ns);
 	if(nbody != nh + nd  + nb + ns) {
@@ -109,8 +115,9 @@ void nemo_main()
 
 /* write FORTRAN block length fields */
 #define BLKLEN fwrite(&blklen, sizeof(blklen), 1, outstr)
+
 void write_gadget(stream outstr,real time,Body *bodies,int nhalo,int ndisk,
-    int nbulge,int nstars,bool swapp)
+		  int nbulge,int nstars,bool swapp)
 {
   struct io_header_1 header;
   bool indivmass[4];
