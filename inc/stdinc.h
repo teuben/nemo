@@ -305,7 +305,6 @@ typedef real (*rproc)();
  */
 
 #define   ABS(x)       (((x) < 0) ? -(x) : (x))
-#define   SGN(x)       (((x) < 0) ? (-1) : ((x) > 0) ? 1 : 0)
 #ifdef MIN	/* WD 13/03/03: added to prevent clash with other definitions */
 #  undef MIN
 #endif
@@ -314,10 +313,12 @@ typedef real (*rproc)();
 #  undef MAX
 #endif
 #define   MAX(x,y)     (((x) > (y)) ? (x) : (y))
+#define   SGN(x)       (((x) < 0) ? (-1) : ((x) > 0) ? 1 : 0)
+#define   SIGN(x)      (((x) < 0) ? (-1) : ((x) > 0) ? 1 : 0)
 #define   RND(x,y)     ((y)*(((x)+(y)-1)/(y)))
-#define   ROUNDUP(x,y)     ((y)*(((x)+(y)-1)/(y)))
+#define   ROUNDUP(x,y) ((y)*(((x)+(y)-1)/(y)))
 #define   RNG(x,l,h)   (((x) > (h)) ? (h) : (((x) < (l)) ? (l) : (x)))
-#define   RANGE(x,l,h)   (((x) > (h)) ? (h) : (((x) < (l)) ? (l) : (x)))
+#define   RANGE(x,l,h) (((x) > (h)) ? (h) : (((x) < (l)) ? (l) : (x)))
 
 
 
