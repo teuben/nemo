@@ -1,6 +1,8 @@
 #	Makefile for NEMO/src/image/fits
 include $(NEMOLIB)/makedefs
 
+LOCAL_LIB = $(CFITSIO_LIB)
+
 #PRECFLAG = -DSINGLEPREC -fsingle
 PRECFLAG = 
 
@@ -15,7 +17,7 @@ MAN5FILES =
 INCFILES = fitsio.h fits.h
 SRCFILES = fitsio.c fits.c \
 	   ccdfits.c fitsccd.c fitssplit.c scanfits.c
-OBJFILES=  fitsio.o fits.o
+OBJFILES=  fitsio_nemo.o fits.o
 LOBJFILES= $L(fitsio.o) $L(fits.o)
 BINFILES = ccdfits fitsccd fitssplit scanfits fitstab fitshead fitsgrid \
 	   fitsglue sdsfits

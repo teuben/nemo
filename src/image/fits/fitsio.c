@@ -58,8 +58,8 @@
 /************************************************************************/
 
 #include <stdinc.h>
-#include <fitsio.h>
 #include <ctype.h>
+#include <fitsio_nemo.h>
 
 /* 
  * this next #def's obviously needs to be refined. 

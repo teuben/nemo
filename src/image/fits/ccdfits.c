@@ -31,6 +31,7 @@
  *      23-may-01  V3.1  added dummy= to be able to not write dummy axes  PJT
  *                        NOT WORKING YET
  *	 7-aug-01  
+ *      18-dec-01  V4.0  work with new fitsio_nemo.h
  *
  *  TODO:
  *      reference mapping has not been well tested, especially for 2D
@@ -43,7 +44,7 @@
 #include <filestruct.h>
 #include <image.h>
 #include <history.h>
-#include <fitsio.h>
+#include <fitsio_nemo.h>
 
 string defv[] = {
         "in=???\n        Input image filename",
@@ -60,7 +61,7 @@ string defv[] = {
 	"radecvel=f\n    Enforce reasonable RA/DEC/VEL axis descriptor",
 	"dummy=t\n       Write dummy axes also ? ",
 	"nfill=0\n	 Add some dummy comment cards to test fitsio",
-        "VERSION=3.2\n   7-aug-01 PJT",
+        "VERSION=4.0\n   18-dec-01 PJT",
         NULL,
 };
 

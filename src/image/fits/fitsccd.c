@@ -31,12 +31,13 @@
  *      12-mar-01           b allow blank to be read from datamin/datamax
  *                          c 
  *                          d printf -> dprintf
+ *      18-dec-01        4.0  convert to use fitsio_nemo.h and optional CFITSIO
  */
 
 #include <stdinc.h>
 #include <getparam.h>
 #include <image.h>
-#include <fitsio.h>
+#include <fitsio_nemo.h>
 
 string defv[] = {
     "in=???\n		Input fits file",
@@ -55,7 +56,7 @@ string defv[] = {
     "bzero=0\n          Offset conversion factor in raw mode (0)",
     "blank=\n           Blank value re-substitution value?",
     "relcoords=f\n      Use relative (to crpix) coordinates instead abs",
-    "VERSION=3.7e\n	31-mar-01 PJT",
+    "VERSION=4.0\n	18-dec-01 PJT",
     NULL,
 };
 
@@ -178,7 +179,16 @@ void nemo_main()
     free(buffer);
 }
 
-
+#ifdef HAVE_LIBCFITSIO
+FITS *rawopen(string name, string status, int naxis, int *nsize)
+{
+  error("raw I/O not implemented for CFITSIO");
+}
+void make_rawheader(FITS *fitsfile, imageptr iptr, bool Qrel)
+{
+  error("raw I/O not implemented for CFITSIO");
+}
+#else
 FITS *rawopen(string name, string status, int naxis, int *nsize)
 {
     FITS *f;
@@ -238,7 +248,7 @@ void make_rawheader(FITS *fitsfile, imageptr iptr, bool Qrel)
     Zmin(iptr) = 0.0;
 
 }
-
+#endif
 void make_fitheader(FITS *fitsfile, imageptr iptr, bool Qrel, 
 		    FLOAT *data_min, FLOAT *data_max)
 {
