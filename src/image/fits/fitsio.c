@@ -50,6 +50,7 @@
 /*              fixed offset bug when fitsetpl called before fitwrite   */
 /*     7-aug-01 fixed bug rounding bug getting offset in reading        */
 /*              (redefined f->ncards now to be 1-based upon reading too)*/
+/*    28-sep-01 added bitpix=64 support - portability not solved yet    */
 /* ToDo:                                                                */
 /*  - BLANK substitution                                                */
 /*  - finish bitpix=-64 support						*/
@@ -67,6 +68,12 @@
  * autoconf generated include files)
  */
 
+#if 1
+typedef long long int int8;         /* e.g. i386; 
+#else
+typedef long int8;                  /* e.g. alpha 64's */
+#endif
+
 local int  fitsrch    (FITS *, char *, char *);
 local void fitpad     (FITS *, int, char),
            fitput     (FITS *, char *),
@@ -74,11 +81,13 @@ local void fitpad     (FITS *, int, char),
            fitcvt_8i  (char *, byte *, int),
            fitcvt_16i (char *, short int *, int),
            fitcvt_32i (char *, int *, int),
+           fitcvt_64i (char *, int8 *, int),
            fitcvt_fr  (char *, FLOAT *, int),
            fitcvt_dr  (char *, DOUBLE *, int),
            fitcvt_i8  (byte *, char *, int),
            fitcvt_i16 (short int *, char *, int),
            fitcvt_i32 (int *, char *, int),
+           fitcvt_i64 (int8 *, char *, int),
            fitcvt_rf  (FLOAT *, char *, int),
            fitcvt_rd  (DOUBLE *, char *, int);
 
@@ -125,6 +134,10 @@ FITS *fitopen(string name,string status,int naxis,int *nsize)
 #endif
     first_message = 0;
   }
+  if (sizeof(int8) != 8)
+    warning("Cannot read BITPIX=64 items with this code, sizeof(int8)=%d",sizeof(int8));
+  else
+    dprintf(1,"This version has experimental handling of BITPIX 64 data\n");
 
   f = (FITS *)allocate(sizeof(FITS));
 
@@ -143,6 +156,7 @@ FITS *fitopen(string name,string status,int naxis,int *nsize)
       case   8:    f->type = TYPE_8INT;   break;
       case  16:    f->type = TYPE_16INT;  break;
       case  32:    f->type = TYPE_32INT;  break;
+      case  64:    f->type = TYPE_64INT;  break;
       case -32:    f->type = TYPE_FLOAT;  break;
       case -64:    f->type = TYPE_DOUBLE; break;
       default:
@@ -188,6 +202,7 @@ FITS *fitopen(string name,string status,int naxis,int *nsize)
     if(bitpix ==   8)      f->type = TYPE_8INT;
     else if(bitpix == 16)  f->type = TYPE_16INT;
     else if(bitpix ==  32) f->type = TYPE_32INT;
+    else if(bitpix ==  64) f->type = TYPE_64INT;
     else if(bitpix == -32) f->type = TYPE_FLOAT;
     else if(bitpix == -64) f->type = TYPE_DOUBLE;
     else
@@ -254,7 +269,7 @@ void fitclose(FITS *file)
   free((char *)f);
 }
 /**********************************************************************/
-void fitread(FITS *file, int j,FLOAT *data)
+void fitread(FITS *file, int j, FLOAT *data)
 /*
   This reads a row of a FITS image.
 
@@ -265,13 +280,18 @@ void fitread(FITS *file, int j,FLOAT *data)
   Output:
     data        A FLOAT array of naxis1 elements, being the pixel values
                 read.
+
+  Data is read into 'buf1', then converted into 'buf2', (which also swaps
+  the bytes in buf1 as a side effect), from where it
+  is converted into a FLOAT array that was passed to this routine
 ----------------------------------------------------------------------*/
 {
-  int offset,length,bytes;
+  int i, offset,length,bytes;
   FITS *f;
   FLOAT bscale,bzero;
-  int i,*idat;
-  short int *jdat;
+  short int *idat;
+  int  *jdat;
+  int8 *kdat;
   byte *sdat;
   double *ddat;
 
@@ -297,13 +317,27 @@ void fitread(FITS *file, int j,FLOAT *data)
     fitcvt_8i(buf1,sdat,f->axes[0]);
     for(i=0; i < f->axes[0]; i++) *data++ = bscale * *sdat++ + bzero;/* ansi warning */
   } else if(f->type == TYPE_16INT){
-    jdat = (short int *)buf2;
-    fitcvt_16i(buf1,jdat,f->axes[0]);
-    for(i=0; i < f->axes[0]; i++) *data++ = bscale * *jdat++ + bzero;
-  } else if(f->type == TYPE_32INT){
-    idat = (int *)buf2;
-    fitcvt_32i(buf1,idat,f->axes[0]);
+    idat = (short int *)buf2;
+    fitcvt_16i(buf1,idat,f->axes[0]);
     for(i=0; i < f->axes[0]; i++) *data++ = bscale * *idat++ + bzero;
+  } else if(f->type == TYPE_32INT){
+    jdat = (int *)buf2;
+    fitcvt_32i(buf1,jdat,f->axes[0]);
+    for(i=0; i < f->axes[0]; i++) *data++ = bscale * *jdat++ + bzero;
+  } else if(f->type == TYPE_64INT){
+#if 0
+    kdat = (int8 *)buf1;
+    /* print out raw data, will be in the wrong endian on e.g. i386 */
+    /* also note %lld format may not be supported on all versions of printf.. */
+    for(i=0; i < f->axes[0]; i++) dprintf(1,"DEBUG1: %d -> %lld\n",i,kdat[i]);
+#endif
+    kdat = (int8 *)buf2;
+    fitcvt_64i(buf1,kdat,f->axes[0]);
+#if 0
+    kdat = (int8 *)buf2;
+    for(i=0; i < f->axes[0]; i++) dprintf(1,"DEBUG2: %d -> %lld\n",i,kdat[i]);
+#endif
+    for(i=0; i < f->axes[0]; i++) *data++ = bscale * *kdat++ + bzero;
   } else if(f->type == TYPE_DOUBLE){
     ddat = (double *)buf1;
     fitcvt_dr(buf1,ddat,f->axes[0]);
@@ -331,13 +365,17 @@ void fitwrite(FITS *file, int j, FLOAT *data)
    j           The row number to be written. This varies from 0 to naxis2-1.
    data        A FLOAT array of naxis1 elements, being the pixel values  
                 to write.
+
+   FLOAT array data is written into buf1,  then converted to buf2 as FITS
+   format, which is then written to the fits file
 ----------------------------------------------------------------------*/
 {
-  int offset,length,bytes;
+  int i,offset,length,bytes;
   FITS *f;
   FLOAT bscale,bzero, *fdat;
-  int i,*idat;
-  short int *jdat;
+  int *jdat;
+  short int *idat;
+  int8 *kdat;
   byte *sdat;
   double *ddat;
 
@@ -371,17 +409,23 @@ void fitwrite(FITS *file, int j, FLOAT *data)
     sdat = (byte *)buf2;	/* reset pointer to buffer */
     fitcvt_i8(sdat,buf1,f->axes[0]);
   } else if(f->type == TYPE_16INT){
-    jdat = (short int *)buf2;   /* set pointer to conversion buffer */
+    idat = (short int *)buf2;   /* set pointer to conversion buffer */
     for(i=0; i < f->axes[0]; i++)
-        *jdat++ = (short int) ( (*data++ - bzero) / bscale);
-    jdat = (short int *)buf2;	/* reset pointer to buffer */
-    fitcvt_i16(jdat,buf1,f->axes[0]);
+        *idat++ = (short int) ( (*data++ - bzero) / bscale);
+    idat = (short int *)buf2;	/* reset pointer to buffer */
+    fitcvt_i16(idat,buf1,f->axes[0]);
   } else if(f->type == TYPE_32INT){
-    idat = (int *)buf2;         /* set pointer to conversion buffer */
+    jdat = (int *)buf2;         /* set pointer to conversion buffer */
     for(i=0; i < f->axes[0]; i++)
-        *idat++ = (int) ( (*data++ - bzero) / bscale);
-    idat = (int *)buf2;		/* reset pointer to buffer */
-    fitcvt_i32(idat,buf1,f->axes[0]);
+        *jdat++ = (int) ( (*data++ - bzero) / bscale);
+    jdat = (int *)buf2;		/* reset pointer to buffer */
+    fitcvt_i32(jdat,buf1,f->axes[0]);
+  } else if(f->type == TYPE_64INT){
+    kdat = (int8 *)buf2;         /* set pointer to conversion buffer */
+    for(i=0; i < f->axes[0]; i++)
+        *kdat++ = (int8) ( (*data++ - bzero) / bscale);
+    kdat = (int8 *)buf2;		/* reset pointer to buffer */
+    fitcvt_i64(kdat,buf1,f->axes[0]);
   } else if(f->type == TYPE_DOUBLE){
     ddat = (double *)buf2;	/* set pointer to conversion buffer */
     for(i=0; i < f->axes[0]; i++)
@@ -460,6 +504,7 @@ void fit_setbitpix(int bp)
     switch(bp) {
       case -64:
       case -32:
+      case  64:
       case  32:
       case  16:
       case   8:
@@ -815,6 +860,25 @@ local void fitcvt_32i(char *in, int *out, int n)
   memcpy((char *)out,in,sizeof(int)*n);
 }
 /**********************************************************************/
+local void fitcvt_64i(char *in, int8 *out, int n)
+/*
+  This converts an array of FITS 64 bit integers into host int8's
+
+  Input:
+    in          An array of 64 bit FITS integers.
+    n           Number of integers to convert.
+  Output:
+    out         The array of host int8's
+----------------------------------------------------------------------*/
+/* The following assumes that 64 bit FITS integers are equivalent to
+   host int8's */
+{
+#ifndef WORDS_BIGENDIAN 
+  bswap(in, 8, n);
+#endif  
+  memcpy((char *)out,in,sizeof(int8)*n);
+}
+/**********************************************************************/
 local void fitcvt_fr(char *in,FLOAT *out, int n)
 /*
   This converts an array of IEEE 32 bit floating point numbers into
@@ -915,6 +979,26 @@ local void fitcvt_i32(int *in,char *out,int n)
   memcpy(out,(char *)in,sizeof(int)*n);
 #ifndef WORDS_BIGENDIAN 
   bswap(out, 4, n);
+#endif  
+
+}
+/**********************************************************************/
+local void fitcvt_i64(int8 *in,char *out,int n)
+/*
+  This converts an array of host integers into FITS 64 bit integers.
+
+  Input:
+    in          The array of host integers.
+    n           Number of integers to convert.
+  Output:
+    out         An array of 64 bit FITS integers.
+----------------------------------------------------------------------*/
+/* The following assumes that 64 bit FITS integers are equivalent to
+   host integers. */
+{
+  memcpy(out,(char *)in,sizeof(int8)*n);
+#ifndef WORDS_BIGENDIAN 
+  bswap(out, 8, n);
 #endif  
 
 }

@@ -46,6 +46,9 @@
  *              28-nov-00       fixed some NULL -> 0's                  pjt
  *              30-may-01       proper prototypes                       pjt
  *              20-jun-01       a few gcc3 fixes
+ *              28-sep-01       'K' format for 64 bit integers (*long*) pjt
+ *                              endian swap is done in the show_ routines
+ *                              which is bad !!!!
  *
  * Places where this package will call error(), and hence EXIT program:
  *  - invalid BITPIX
@@ -60,6 +63,8 @@
 #include <fits.h>
 
 #define ROUNDUP(a,b) ((b)*(((a)-1)/(b)+1))
+
+typedef long long int int8;
 
 local char *fts_buffer = NULL; /* buffer for exact header in memory */
 local int  fts_buflen = 0;
@@ -102,7 +107,8 @@ static char *fmt(char *line, char *format);
 static float show_e(float *v, int i);
 static double show_d(double *v, int i);
 static short show_i(short *v, int i);
-static int show_j(int *v, int i);
+static int   show_j(int *v, int i);
+static int8  show_k(int8 *v, int i);
 static int colmask(int n, string key[],string col[],int colsel[]);
 
 
@@ -127,6 +133,8 @@ int fts_rhead(fits_header *fh, stream instr)
         dprintf(1,"    it seems to still have a naxis=%d\n",fh->naxis);
         dprintf(1,"    unpredictable things might happen\n");
     }
+    if (sizeof(int8) != 8)
+      warning("Cannot handle BITPIX=64 of tables K format, sizeof(long)=%d",sizeof(long));
 
     for(icard=1;;icard++) {  /* loop reading cards; count them in 'icard' */
 
@@ -1338,6 +1346,9 @@ int fts_ptable(
                     } else if (strrchr(fh->tformn[i],'J')) {
                       for (k=0; k<fh->tbitems[i]; k++)
                         printf(" %d",show_j((int *) dp,k));
+                    } else if (strrchr(fh->tformn[i],'K')) {
+                      for (k=0; k<fh->tbitems[i]; k++)
+                        printf(" %lld",show_k((int8 *) dp,k));     /* portabilty not ok  */
                     } else if (strrchr(fh->tformn[i],'A')) {
                       printf(" ");
                       for (k=0; k<fh->tbitems[i]; k++)
@@ -1482,6 +1493,8 @@ int *row)                   /* (i)  list of rows to display; NULL or 1.. */
                         printf("%g",show_e((float *)card,k)*pscal+pzero);
                     else if (fh->bitpix == -64)
                         printf("%g",show_d((double *)card,k)*pscal+pzero);
+                    else if (fh->bitpix == 64)
+                        printf("%g **",show_k((int8 *)card,k)*pscal+pzero);
                     else if (fh->bitpix == 32)
                         printf("%g",show_j((int *)card,k)*pscal+pzero);
                     else if (fh->bitpix == 16)
@@ -1533,6 +1546,8 @@ local void set_tbcoln(fits_header *fh)
           n = 2;
         } else if (strrchr(fh->tformn[i],'J')) { /* signed long integer */
           n = 4;
+        } else if (strrchr(fh->tformn[i],'K')) { /* signed long long integer */
+          n = 8;
         } else if (strrchr(fh->tformn[i],'C')) { /* single complex real */
           n = 8;
         } else if (strrchr(fh->tformn[i],'M')) {  /* double complex real */
@@ -1959,6 +1974,7 @@ int fts_rdata(
     double *outp, convbuf[CONVBUFLEN];   /* local buffer used for conversion */
     int nread, nskip;      /* number of bytes to read */
     int i, *ip;
+    int8 *kp;
     short *sp;
     double *dp;
     float *fp;
@@ -1992,6 +2008,15 @@ int fts_rdata(
         i = fread(ip,4,nread,instr);  /* straight read */
         if (i != nread) error("Did not read right amount");
         if (fh->flip) bswap(sp,4,nread);
+        for (i=0; i<nread; i++) 
+            *outp++ = ip[i] * fh->bscale + fh->bzero;
+        break;
+    case 64:
+        nread /= 8;
+        kp = (int8 *) convbuf;     /* local buffer */
+        i = fread(kp,8,nread,instr);  /* straight read */
+        if (i != nread) error("Did not read right amount");
+        if (fh->flip) bswap(sp,8,nread);
         for (i=0; i<nread; i++) 
             *outp++ = ip[i] * fh->bscale + fh->bzero;
         break;
@@ -2771,6 +2796,10 @@ local float show_e(float *v, int i)
     int j;
     char *dest = (char *) &f;
     char *src = (char *) &v[i];
+  
+#ifndef WORDS_BIGENDIAN 
+  bswap(&v[i], 4, 1);
+#endif  
 
     for (j=0; j<sizeof(float); j++)
         dest[j] = src[j];
@@ -2788,6 +2817,10 @@ local double show_d(double *v,int i)
     char *dest = (char *) &d;
     char *src = (char *) &v[i];
 
+#ifndef WORDS_BIGENDIAN 
+  bswap(&v[i], 8, 1);
+#endif  
+
     for (j=0; j<sizeof(double); j++)
         dest[j] = src[j];
     return d;
@@ -2799,11 +2832,25 @@ local double show_d(double *v,int i)
 
 local short show_i(short *v,int i)
 {
+#ifndef WORDS_BIGENDIAN 
+  bswap(&v[i], 2, 1);
+#endif  
     return v[i];
 } 
 
 local int show_j(int *v,int i)
 {
+#ifndef WORDS_BIGENDIAN 
+  bswap(&v[i], 4, 1);
+#endif  
+    return v[i];
+} 
+
+local int8 show_k(int8 *v,int i)
+{
+#ifndef WORDS_BIGENDIAN 
+  bswap(&v[i], 8, 1);
+#endif  
     return v[i];
 } 
 

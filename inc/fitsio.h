@@ -54,11 +54,12 @@ typedef unsigned char byte;
 #endif
 /*	Some remaining fixed definitions and structure definitions */
 
-#define TYPE_16INT  1
-#define TYPE_32INT  2
-#define TYPE_FLOAT  3
-#define TYPE_DOUBLE 4
-#define TYPE_8INT   5
+#define TYPE_8INT   1
+#define TYPE_16INT  2
+#define TYPE_32INT  3
+#define TYPE_64INT  4
+#define TYPE_FLOAT  5
+#define TYPE_DOUBLE 6
 
 #define STATUS_OLD 1		/* reading a fits file */
 #define STATUS_NEW 2		/* writing, but still in header */
