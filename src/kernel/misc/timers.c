@@ -4,6 +4,7 @@
  */
 
 #include <stdinc.h>
+#include <timers.h>
 
 /* 
  * readTSC:   reads the Time Stamp Counter of an i386 processor
@@ -35,6 +36,10 @@ static int maxtimers = 0;
 
 void init_timers(int n)
 {
+  if (timers) {
+    dprintf(2,"init_timers: free up old maxtimers %d \n",maxtimers);
+    free(timers);
+  }
   timers = (long long *) allocate(n*sizeof(long long));
   maxtimers = n;
   if (n>1) {
@@ -54,11 +59,34 @@ void stamp_timers(int i)
   timers[i] = readTSC();
 }
 
-int diff_timers(int i, int j)
+long long diff_timers(int i, int j)
 {
   if (maxtimers==0) error("init_timers not called");
   if (i >= maxtimers) error("i=%d maxtimers=%d",i,maxtimers);
   if (j >= maxtimers) error("j=%d maxtimers=%d",j,maxtimers);
   
-  return (int) (timers[j]-timers[i]);
+  return timers[j]-timers[i];
 }
+
+
+
+#ifdef TESTBED
+
+
+nemo_main()
+{
+  int i, n=10;
+    init_timers(n+1);
+    for (i=0; i<n; i++)
+	stamp_timers(i);
+    stamp_timers(n);
+    for (i=0; i<n; i++)
+	printf("Method-1: %Ld\n",diff_timers(i,i+1));
+
+    stamp_timers(0);
+    for (i=0; i<n; i++) {
+	stamp_timers(i+1);
+	printf("Method-2: %Ld\n",diff_timers(i,i+1));
+    }
+}
+#endif

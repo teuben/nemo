@@ -1,0 +1,51 @@
+.TH TIMERS 3NEMO "24 April 2004"
+.SH NAME
+init_timers, stamp_timers, diff_timers - routines to time your code
+.SH SYNOPSIS
+.nf
+.B #include <timers.h>
+.PP
+.B void init_timers(int n);
+.B void stamp_timers(int i);
+.B long long diff_timers(int i, int j);
+.SH DESCRIPTION
+\fIinit_timers\fP is used to allocate a set of \fBn\fP slots to
+hold timer information. \fIstamp_timers\fP is used remember
+the timer info in slot \fBi\fP. The difference between
+slot \fBj\fP and \fBi\fP (j>i is normally assumed) is 
+returned by \fIdiff_timers\fP.
+.SH EXAMPLE
+.nf
+    init_timers(n+1);
+    for (i=0; i<n; i++)
+	stamp_timers(i);
+    stamp_timers(n);
+    for (i=0; i<n; i++)
+	printf("Method-1: %Ld\n",diff_timers(i,i+1));
+
+    stamp_timers(0);
+    for (i=0; i<n; i++) {
+	stamp_timers(i+1);
+	printf("Method-2: %Ld\n",diff_timers(i,i+1));
+    }
+
+.fi
+.SH CAVEATS
+Currently this function is only implemented on Intel hardware, where it
+uses the Time Stamp Counter. For other processors 0 is returned.
+.PP
+long long is assumed to hold 64 bits, where unsigned is assumed 32 bit.
+.SH SEE ALSO
+cputime(3NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +1.5i
+~/src/kernel/misc  	timers.c
+.fi
+.SH UPDATE HISTORY
+.nf
+.ta +1i +4i
+23-apr-04	created		PJT
+.fi
