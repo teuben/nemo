@@ -1,0 +1,21 @@
+I'm afraid these functions/include files should not be used anymore.
+They are from the NEMO childhood period (1986).
+
+This is 'ls -l' as I saw it on July 7, 1990, when it was moved
+into the $NEMO/inc/archaic. To be deleted at some point in the
+future.
+
+-rw-r--r--  1 nemo         3607 Apr 16  1988 old_filestr.h
+-rw-r--r--  1 nemo         1733 Apr 16  1988 old_filestruct.h
+-rw-r--r--  1 nemo         3475 Jul 29  1987 snapshot.h
+-rw-r--r--  1 nemo          985 Jul 29  1987 snipshot.h
+
+
+			Peter Teuben
+
+Problems with:
+
+ newton0:  apparantly new stuff in <snapshot/snapshot.h> and 
+	<snapshot/body.h> has macro names that Piet also had. Hence
+	we still need <snapshot.h>, which should now be referred to
+	as <archaic/snapshot.h>.
