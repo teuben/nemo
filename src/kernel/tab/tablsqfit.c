@@ -38,6 +38,7 @@
  *      29-oct-02  V3.2c: ellipse fit cleanup (still bug in ellipse semi major axis?)
  *                 V3.3: add fourier mode (see also snapfour)
  *                     a: add out= for fourier
+ *      24-feb-03  V3.4  add fit=zero
  */
 
 /*
@@ -70,14 +71,14 @@ string defv[] = {
     "ycol=2\n           column(s) for y",
     "dycol=\n           column for sigma-y, if used",
     "xrange=\n          in case restricted range is used (1D only)",
-    "fit=line\n         fitmode (line, ellipse, imageshift, plane, poly, peak, area)",
+    "fit=line\n         fitmode (line, ellipse, imageshift, plane, poly, peak, area, zero)",
     "order=0\n		Order of plane/poly fit",
     "out=\n             optional output file for some fit modes",
     "nsigma=-1\n        delete points more than nsigma away?",
     "estimate=\n        optional estimates (e.g. for ellipse center)",
     "nmax=10000\n       Default max allocation",
     "tab=f\n            short one-line output?",
-    "VERSION=3.3b\n     30-oct-02 PJT",
+    "VERSION=3.4\n      24-feb-03 PJT",
     NULL
 };
 
@@ -139,6 +140,8 @@ nemo_main()
         do_area();
     } else if (scanopt(method,"peak")) {
     	do_peak();
+    } else if (scanopt(method,"zero")) {
+    	do_zero();
     } else if (scanopt(method,"fourier")) {
     	do_fourier();
     } else
@@ -774,6 +777,38 @@ do_peak()
             x[j] - sol[1]/(2*sol[2]),
             sol[0]+sqr(sol[1])/(2*sol[2]));
 }
+
+/* find a zero point
+ * for now this is the my_poly() code, though forced with order=2 
+ * first find the peak, then take the two points on either side
+ * to find an exact solution
+ */
+
+do_zero()
+{
+    real *x, *y, zero;
+    int i, j;
+    int nzero = 1, izero = 0;
+
+    order = 2;
+
+    if (nycol<1) error("Need 1 value for ycol=");
+
+    x = xcol[0].dat;
+    y = ycol[0].dat;
+    j = -1;
+    for (i=1; i<npt; i++) {	       /* find the zero point */
+      if (y[i]*y[i-1] < 0) {
+	j = i;
+	izero++;
+	if (izero == nzero) break;
+      }
+    }
+    if (j < 0) error("Could not find a zero");
+    zero = x[j-1] - y[j-1]*(x[j]-x[j-1])/(y[j]-y[j-1]);
+    printf("Zero:x= %g\n",zero);
+}
+
 
 
 do_area()
