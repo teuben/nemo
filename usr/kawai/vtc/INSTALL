@@ -1,0 +1,14 @@
+1) choose Makefile suffixed by your platform.
+
+Makefile.linus    Linux
+Makefile.tru64    COMPAQ Tru64 UNIX
+Makefile.solaris  SUN Solaris
+Makefile.darwin   Apple Darwin (Mac OS X)
+Makefile.vpp5k    Fujitsu UXP/V
+
+2) activate GRAPE5 or MDGRAPE2 definition in the Makefile, if you have 
+   one of them.
+
+3) type 'make -f Makefile.suffix' and you will get executable named 'vtc'.
+
+4) try './vtc -h' to see available options.
