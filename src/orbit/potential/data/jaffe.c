@@ -42,26 +42,38 @@ void inipotential (int *npar, double *par, string name)
     par[0] = omega;
 
 }
-
-void potential (int *ndim,double *pos,double *acc,double *pot,double *time)
-{
-    int    i;
-    double r2,r,f;
-        
-    for (i=0, r2=0; i<*ndim; i++)              /* radius - squared */
-        r2 += sqr(pos[i]);
 
-    if (r2==0.0) {
-        *pot = 0.0;			/* a lie though */
-        for (i=0; i<*ndim; i++)
-            acc[i] = 0.0;
-    } else {
-        r = sqrt(r2);                        /* radius */
-        f = 1.0/(r+a);                  /* temporary storage */
-        *pot = vc * log(r*f);                 /* returned potential */
-        f *= hmass/r2;
-        for (i=0; i<*ndim; i++)
-            acc[i] = -pos[i]*f;        /* radial force to cartesian */
-    }
+#define POT									\
+{										\
+    int    i;									\
+    double r2,r,f;								\
+        									\
+    for (i=0, r2=0; i<*ndim; i++)              /* radius - squared */		\
+        r2 += sqr(pos[i]);							\
+										\
+    if (r2==0.0) {								\
+        *pot = 0.0;		       	       /* a lie though */		\
+        for (i=0; i<*ndim; i++)							\
+            acc[i] = 0.0;							\
+    } else {									\
+        r = sqrt(r2);                          /* radius */			\
+        f = 1.0/(r+a);                         /* temporary storage */		\
+        *pot = vc * log(r*f);                  /* returned potential */		\
+        f *= hmass/r2;								\
+        for (i=0; i<*ndim; i++)							\
+            acc[i] = -pos[i]*f;                /* radial force to cartesian */	\
+    }										\
 }
+
+void potential_double (int *ndim,
+		       double *pos,
+		       double *acc,
+		       double *pot,
+		       double *time) POT
+void potential_float  (int *ndim,
+		       float *pos,
+		       float *acc,
+		       float *pot,
+		       float *time) POT
+#undef POT
 

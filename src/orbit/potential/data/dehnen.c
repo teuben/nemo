@@ -1,6 +1,7 @@
 /*
- *	3-nov-93	created				                 pjt
+ *	3-nov-93	created				                   pjt
  *     26-jun-96        finalized, special hernq and jaffe models builtin  PJT
+ *     17-may-02        added potential_double, potential_float            WD 
  *                          
  */
 
@@ -70,54 +71,66 @@ void inipotential (int *npar, double *par, string name)
     if (Qhernq) warning("Dehnen: gamma=1 Hernquist model");
 }
 
-
-void potential (int *ndim,double *pos,double *acc,double *pot,double *time)
-{
-    int    i;
-    real   r2,r,f,g;
-
-    for (i=0, r2=0; i<*ndim; i++)              /* radius - squared */
-        r2 += sqr(pos[i]);
-
-    if (Qjaffe) {
-        if (r2==0.0) {
-            warning("dehnen/jaffe r=0");
-            *pot = 0.0;
-            for (i=0; i<*ndim; i++) acc[i] = 0.0;
-            return;
-        }
-        r = sqrt(r2);                        /* radius */
-        f = 1.0/(r+a);                   /* temporary storage */
-        *pot = vc * log(r*f);                 /* returned potential */
-        f *= m/r2;                        /* radial_force / r */
-        for (i=0; i<*ndim; i++)
-            acc[i] = -pos[i]*f;           /* radial force to cartesian */
-        return;        
-    } else if (Qhernq) {
-        if (r2==0.0) {
-            *pot = -m / a;
-            for (i=0; i<*ndim; i++) acc[i] = 0.0;
-            return;
-        }
-        r = sqrt(r2);                        /* radius */
-        f = 1.0/(r+a);                       /* temporary storage */
-        *pot = -m * f;                       /* returned potential */
-        f = (*pot) * f / r;                  /* radial force / r  */
-        for (i=0; i<*ndim; i++)
-            acc[i] = pos[i] * f;             /* make cartesian forces */
-    } else {
-        if (r2==0.0) {
-            *pot = -dmass/a;
-            for (i=0; i<*ndim; i++) acc[i] = 0.0;
-            return;
-        }
-        r = sqrt(r2);                        /* radius */
-        f = r/(r+a);                         /* temporary storage */
-        g = pow(f,-gam);
-        *pot = -dmass * (1-f*f*g) / a;	
-	f = -m/qbe(a+r)*g;	             /* radial_force/r	*/
-        for (i=0; i<*ndim; i++)
-            acc[i] = pos[i] * f;            /* make cartesian forces */
-    }
+#define DEHNEN_POT								\
+{										\
+    int    i;									\
+    real   r2,r,f,g;								\
+										\
+    for (i=0, r2=0; i<*ndim; i++)            /* radius - squared */		\
+        r2 += sqr(pos[i]);							\
+										\
+    if (Qjaffe) {								\
+        if (r2==0.0) {								\
+            warning("dehnen/jaffe r=0");					\
+            *pot = 0.0;								\
+            for (i=0; i<*ndim; i++) acc[i] = 0.0;				\
+            return;								\
+        }									\
+        r = sqrt(r2);                        /* radius */			\
+        f = 1.0/(r+a);                       /* temporary storage */		\
+        *pot = vc * log(r*f);                /* returned potential */		\
+        f *= m/r2;                           /* radial_force / r */		\
+        for (i=0; i<*ndim; i++)							\
+            acc[i] = -pos[i]*f;              /* radial force to cartesian */	\
+        return;        								\
+    } else if (Qhernq) {							\
+        if (r2==0.0) {								\
+            *pot = -m / a;							\
+            for (i=0; i<*ndim; i++) acc[i] = 0.0;				\
+            return;								\
+        }									\
+        r = sqrt(r2);                        /* radius */			\
+        f = 1.0/(r+a);                       /* temporary storage */		\
+        *pot = -m * f;                       /* returned potential */		\
+        f = (*pot) * f / r;                  /* radial force / r  */		\
+        for (i=0; i<*ndim; i++)							\
+            acc[i] = pos[i] * f;             /* make cartesian forces */	\
+    } else {									\
+        if (r2==0.0) {								\
+            *pot = -dmass/a;							\
+            for (i=0; i<*ndim; i++) acc[i] = 0.0;				\
+            return;								\
+        }									\
+        r = sqrt(r2);                        /* radius */			\
+        f = r/(r+a);                         /* temporary storage */		\
+        g = pow(f,-gam);							\
+        *pot = -dmass * (1-f*f*g) / a;						\
+	f = -m/qbe(a+r)*g;	             /* radial_force/r	*/		\
+        for (i=0; i<*ndim; i++)							\
+            acc[i] = pos[i] * f;             /* make cartesian forces */       	\
+    }										\
 }
 
+void potential_double(int   *ndim,            	    /* I: # dims, ignored     */
+		      double*pos,             	    /* I: (x,y,z)             */
+		      double*acc,            	    /* O: (ax,ay,az)          */
+		      double*pot,            	    /* O: potential           */
+		      double*time) DEHNEN_POT       /* I: time                */
+
+void potential_float (int   *ndim,            	    /* I: # dims, ignored     */
+		      float *pos,             	    /* I: (x,y,z)             */
+		      float *acc,            	    /* O: (ax,ay,az)          */
+		      float *pot,            	    /* O: potential           */
+		      float *time) DEHNEN_POT       /* I: time                */
+
+#undef DEHNEN_POT
