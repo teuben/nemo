@@ -3,6 +3,7 @@
  * WHY AINT THIS STANDARD? WHATS *W*R*O*N*G* WITH PEOPLE?
  *
  *	22-jun-01	added ZENO mixed precision code		PJT
+ *      28-mar-05       log2 now under configure control        PJT
  * 
  *   Warning: gcc3 has log2
  */
@@ -11,11 +12,14 @@
 #include <math.h>
 #include <mathfns.h>
 
+#if !defined(HAVE_LOG2)
 double log2(double x)
 {
 
-    return (log(x) / 0.693147180559945);	/* normalize by ln(2)       */
+    return (log(x) / 0.693147180559945309417);	/* normalize by ln(2)       */
+                   /*  M_LOG2_E  */
 }
+#endif
 
 #if !defined(DOUBLEPREC)
 real rlog2(real x)
