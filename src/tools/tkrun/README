@@ -1,0 +1,46 @@
+tkrun is a tk script generator allows you to build a Tcl/Tk GUI that
+executes another program or script. You don't need to learn Tcl/Tk
+(although that is still much easier than learning to program a GUI in a
+language like C or C++). TkRun is probably most useful if you use sliders,
+radio- and checkbuttons and perhaps file browsers. For pure text entry
+the speedup you gain in your life is only modest, if not even less.
+
+The receiving program *must* currently conform to the ``keyword=value''
+(but probably not too hard to add some ``-option value'' type
+interface). In the C-shell this is easily achieved by adding the
+following 3-liner to the top of the script:
+	foreach a ($*)
+	   set $a
+	end	
+
+I am submitting this code in the hope it will be tried out and found
+useful, but problems and suggestions for improvement be reported for
+updates which I am planning.
+
+adass97.ps.gz: a small poster contribution I gave at the annual ADASS
+    conference. I represented the status at the 0.1 release.
+
+redo:  Also added is a tiny little tcl/tk script 'redo' that I found in John
+    Ousterhout's book that I find quite useful under certain circumstances.
+    You can run programs, and keep rerunning them. Cute.
+
+Feel free to redistribute the code (please keep the original copyright
+and GPL notice) but I appreciate receiving changed code, particularly
+if it is an improvement on my version. 
+
+
+The latest "x.y" version can be found in 
+	ftp://ftp.astro.umd.edu/progs/nemo/tkrun-x.y.tar.gz
+or see the NEMO home page at:
+	http://www.astro.umd.edu/nemo/
+
+Note: if the tar file version contains the word beta, e.g.
+tkrun-0.2beta.tar.gz, the version is just a beta snapshot of
+that version, and not final. Use at your own risk.
+
+Note2: sometime in November 2000, I noticed the announcement of a similar
+program under Freshmeat, or Linux Applications, and this should be tracked
+down..
+
+- Peter Teuben
+
