@@ -10,7 +10,11 @@
  *	5-apr-01      c increased default MAXIN			pjt
  *     20-jun-01   1.3  removed the blocking= keyword           pjt
  *     10-aug-02   1.4  copy over WCS of the first file         pjt
+ *      3-oct-02   1.4a flush 0s to fill to 2880 
+ *                        fts_cdata_(....,TRUE) does not work   PJT
  *
+ * TODO:
+ *   if no WCS, wcs=t coredumps the program
  */
 
 #include <stdinc.h>
@@ -24,7 +28,7 @@ string defv[] = {			/* Standard NEMO keyword+help */
     "compact=f\n           Compact (move) dummy axes to the end",
     "inlist=\n             optional nemoinp(1) list expression for in=",
     "wcs=f\n               try and copy a reasonably WCS from input to output",
-    "VERSION=1.4\n         10-aug-02 PJT",
+    "VERSION=1.4a\n        3-oct-02 PJT",
     NULL,
 };
 
@@ -61,7 +65,7 @@ void nemo_main()
     bool   Qmultiple, Qcompact = getbparam("compact"), Qwcs = getbparam("wcs");
     struct fits_header fh, fh_out;
     string outname, *innames;
-    char   *buffer, *zbuf, fname[128];
+    char   *buffer, *zbuf, fname[128], zero = 0;
     int    inlist[MAXIN];
     double datamin, datamax;
     fts_wcs wcs[3];
@@ -165,13 +169,16 @@ void nemo_main()
 		if (Qwcs) fts_setwcs(&fh_out,3,wcs);
                 fts_whead(&fh_out,outstr);
             }
-            fts_cdata(&fh,instr,outstr,FALSE,FALSE);
+	    fts_cdata(&fh,instr,outstr,FALSE,FALSE);
             fts_sdata(&fh,instr);
             dprintf(1,"Copying %d-D Data: %d\n",fh.naxis, fh_out.naxis);
             if (!Qmultiple) break;
         }
         strclose(instr);
     } /* for (j) */
+    n = fts_tsize(&fh_out);
+    if (n > 0)
+      fwrite(&zero,1,n,outstr);
     strclose(outstr);
 }
 

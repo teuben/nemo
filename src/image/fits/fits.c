@@ -1938,6 +1938,7 @@ int fts_cdata(
       ntowrite = n;
     if (n==0) ntoread=0;                /* no data? */
     if (fh->flip) dprintf(1,"fts_cdata: Swapping bytes\n");
+    dprintf(2,"fts_data: ntoread=%d   ntowrite=%d\n",ntoread,ntowrite);
     while (ntoread > 0) {
         if (ntoread > CONVBUFLEN)
             n = CONVBUFLEN;
@@ -1987,6 +1988,17 @@ int fts_dsize(fits_header *fh)
     } else
         size = 0;
     return size;
+}
+
+/*
+ *  fts_tsize: return trailing size of useable data portion
+ */
+
+int fts_tsize(fits_header *fh)
+{
+  int n = fts_dsize(fh);
+  int tail = ROUNDUP(n,ftsblksiz_o);
+  return tail - n;
 }
 
 /*

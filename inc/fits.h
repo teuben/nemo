@@ -218,6 +218,7 @@ int fts_buf      (int);
 int fts_sdata    (fits_header *, stream);
 int fts_cdata    (fits_header *, stream, stream, bool, bool);
 int fts_dsize    (fits_header *);
+int fts_tsize    (fits_header *);
 int fts_rdata    (fits_header *, stream, int, char *);
 int fts_wdata    (fits_header *, stream, int, char *);
 int fts_rrow     (fits_header *, stream, int, char *);
