@@ -4,7 +4,7 @@
  *  Originally designed to match an observed 3D datacube to 
  *  a 6D model. 
  *      28-may-92   V0.0 Initial design - fairly interactive
- *
+ *		     0.4 fixed matrix rotation order bug
  */
 #define THREEDIM
 
@@ -19,7 +19,8 @@
 #include <image.h>
 
 typedef struct {    /* special fake cube particle to aid coding */
-    vector r;
+    vector r;		/* position in the cube */
+    real w;		/* weight or intensity */
 } cube, *cubeptr;
 
 #define RAD2DEG   (180.0/PI)
@@ -30,13 +31,10 @@ typedef struct {    /* special fake cube particle to aid coding */
 /* -------------------------------------------------------------------------- */
 
 string defv[] = {
-    "in=???\n         Input snapshot with positions",
-    "cube=\n            Input cube, with X,Y,Z positions",
+    "in=???\n           Input model snapshot(5NEMO)",
+    "cube=???\n         Input data cube (image(5NEMO) or ascii table)",
     "cutoff=\n          Cutoff applied to datacube, if needed.",
-    "xvar=x\n           X-Observable to match",
-    "yvar=y\n           Y-Observable to match",
-    "zvar=vz\n          Z-Observable to match",
-    "weight=1\n         Weight",
+    "weight=1\n         Weight applied to model data",
     "out=\n             Optional output",
     "minchi=\n          Min chi-quared to trigger output",
     "frame=model\n      Output in model|data units",
@@ -44,7 +42,10 @@ string defv[] = {
     "theta1=\n          Inclination Angles to test",
     "theta2=\n          Position Angle Angles to test",
     "maxreport=\n       Max. best chi-squares reported if fixed thetas",
-    "VERSION=0.1\n      29-may-92 PJT",
+    "contour=\n         Optional Output image file with chi-squared",
+    "iter=0\n           number of more iterations after best on matrix",
+    "times=all\n        Times selected from snapshot models",
+    "VERSION=0.4\n      5-jun-92 PJT",
     NULL,
 };
 
@@ -52,27 +53,39 @@ string usage = "fit snapshots to some model";
 
 /* -------------------------------------------------------------------------- */
 
-    /* Snapshot */
-stream instr;
-Body *btab=NULL;
-cube *mtab=NULL;
-int nbody=0;
+    /* Model: Snapshot */
+stream instr, outstr=NULL;   /* file pointer to input and output */
+body *btab=NULL;             /* snapshot */
+cube *mtab=NULL;	     /* to be fitted coordinates out of the snapshot */
+int nmodel=0;		     /* number of model bodies */
+rproc weight;
+real tsnap;
+string times;
 
-    /* Special 3D {x,y,v} body to represent the image */
-cube *ctab=NULL;
-int ndata=0;
+    /* Data: A special 3D {x,y,v} body */
+cube *dtab=NULL;	/* observed data */
+int ndata=0;		/* number of observed data */
 
     /* placeholders for array of angles to test */
 real theta1[MAXANG], theta2[MAXANG];
 int ntheta1, ntheta2;
+
+stream constr=NULL;   /* images of chi-squared country */
+
+int my_debug=2;
+bool Qsimul;
+real rscale, vscale;
+int maxiter=0;
+
+
     
 
-   /* local declarations */
+   /* local forward declarations */
 void setparams(), read_data(), snap_fit();
 void printvec(), yrotate(), zrotate();
 real *mk_coords();
 int read_model();
-
+ 
 
 /* -------------------------------------------------------------------------- */
 
@@ -87,9 +100,33 @@ void nemo_main()
 
 void setparams()
 {
-    ntheta1 = nemoinpd(getparam("theta1"),theta1,MAXANG);
-    ntheta2 = nemoinpd(getparam("theta2"),theta2,MAXANG);
+    string zmode;
+    rproc btrtrans();
+
+    if (hasvalue("theta1")) {
+        ntheta1 = nemoinpd(getparam("theta1"),theta1,MAXANG);
+        if (ntheta1<1) error("Too many theta1's: maximum %d",MAXANG);
+    }
+    if (hasvalue("theta2")) {
+        ntheta2 = nemoinpd(getparam("theta2"),theta2,MAXANG);
+        if (ntheta2<1) error("Too many theta2's: maximum %d",MAXANG);
+    }
     instr=stropen(getparam("in"),"r");
+    if(hasvalue("out"))
+        outstr=stropen(getparam("out"),"w");
+    if(hasvalue("contour"))
+        constr=stropen(getparam("contour"),"w");
+    zmode = getparam("zmode");
+    if (strncmp(zmode,"si",2)==0)
+        Qsimul = TRUE;
+    else if (strncmp(zmode,"se",2)==0)
+        Qsimul = FALSE;
+    else
+        error("%s: zmode must be 'simultaneous' or 'separate'",zmode);
+
+    weight = btrtrans(getparam("weight"));
+    maxiter = getiparam("iter");    
+    times = getparam("times");
 }
 
 /*
@@ -98,36 +135,39 @@ void setparams()
 
 int read_model()
 {
-    real tsnap, x,y,z;
-    int bits;
-    Body *bp;
+    real x,y,z, w;
+    int i, bits, count;
+    Body *bp, *bq;
     byte *allocate();
 
     for(;;) {       /* infinite loop until some data found, or nothing */
         get_history(instr);             /* skip over stuff we can forget */
         if (!get_tag_ok(instr, SnapShotTag))
-            return 0;
-        get_snap(instr, &btab, &nbody, &tsnap, &bits);
+            return 0;			/* eof */
+        get_snap(instr, &btab, &nmodel, &tsnap, &bits);
+        if (!streq(times,"all") && !within(tsnap,times,0.0001))
+            continue;
         if ((bits & MassBit) == 0 && (bits & PhaseSpaceBit) == 0)
             continue;       /* skip diagnostics */
         break;
     }
     /* 
-     * before we return sucessfully though, stuff the particle
-     * weight into the Aux() array, 
-     * The first time around, when mtab=NULL, also allocate the
-     * mtab which will hold the 3 model coordinates to be directly
-     * compared to the data (ctab)
+     * The first time around, when mtab=NULL, allocate the
+     * 'mtab' which can hold the 3 model coordinates to be directly
+     * compared to the data 'dtab'
      */
 
-    for (bp=btab; bp<btab+nbody; bp++) {
-        Aux(bp) = 1.0;          /* weight */
-    }
-
     if (mtab==NULL) {
-        mtab = (cube *) allocate(nbody*sizeof(cube));
+        mtab = (cube *) allocate(nmodel*sizeof(cube));
     }    
     
+    count=0;
+    for (bp=btab, i=0; i<nmodel; bp++, i++) {
+        mtab[i].w = (weight)(bp,tsnap,i);
+        if (mtab[i].w > 0) count++;
+    }
+    dprintf(0,"Snapshot: time=%g Using %d/%d bodies\n",tsnap,count,nmodel);
+
     return 1;
 }
 
@@ -136,92 +176,169 @@ int read_model()
  *            each pixel get world coordinates from a lookup table 
  */
 
+vector unit_frame[3] = {
+    { 1.0, 0.0, 0.0, },
+    { 0.0, 1.0, 0.0, },
+    { 0.0, 0.0, 1.0, },
+};
+
+
+vector data_frame[3];
+
 void read_data()
 {
     imageptr  iptr=NULL;
-    stream instr;
+    stream instr, scrstr;
     bool Qall;
-    int nx,ny,nz, ix,iy,iz, idx;
-    real f, cutoff, sum;
+    int nx,ny,nz, ix,iy,iz, i;
+    real f, cutoff, sum, vals[4];
     real *xw, *yw, *zw;         /* lookup table */
-    vector tmpv, pos, data_com;
+    vector tmpv, tmpr, data_com, frame[3];
     matrix tmpm, qpole;
+    char line[256];
     byte *allocate();
 
     if (hasvalue("cube")) {
-         Qall = !hasvalue("cutoff");
+        Qall = !hasvalue("cutoff");
         if (!Qall) cutoff=getdparam("cutoff");
         instr =  stropen(getparam("cube"),"r");
-        read_image(instr,&iptr);
-	if (iptr==NULL) error("%s: Bad image cube",getparam("cube"));
-        xw = mk_coords(Nx(iptr), Xmin(iptr), Dx(iptr));
-        yw = mk_coords(Ny(iptr), Ymin(iptr), Dy(iptr));
-        zw = mk_coords(Nz(iptr), Zmin(iptr), Dz(iptr));
-        
-        nx = Nx(iptr);                              /* cube dimensions */
-        ny = Ny(iptr);
-        nz = Nz(iptr);
-	if (nz==1) warning("Input data %s has only one plane",
-				getparam("cube"));
 
-        /* 
-         * first loop over all points, count how many, and get center
-         * of mass 
-         */
-        CLRV(data_com);
-        sum=0;
-        for(ix=0; ix<nx; ix++) {
-            for(iy=0; iy<ny; iy++) {
-                for(iz=0; iz<nz; iz++) {
-                    f=CubeValue(iptr,ix,iy,iz);
-                    if(Qall || f>=cutoff) {
-                        sum += f;
-                        tmpv[0] = xw[ix];
-                        tmpv[1] = xw[iy];
-                        tmpv[2] = xw[iz];
-                        ADDV(data_com, data_com, tmpv);
-                        ndata++;
-                    }
-                }
-            }
-        }
-        dprintf(0,"%d/%d data (%g%%) from the cube used in fit\n",
-                ndata, nx*ny*nz, 100*(real)ndata / (real)(nx*ny*nz));
-        if (sum==0.0 || ndata==0) error("No data found");
-        DIVVS(data_com,data_com,sum);
-        printvec("Data -- Center of Mass:",data_com);
-
-        ctab = (cube *) allocate(ndata*sizeof(cube));
-        idx = 0;
-        CLRM(qpole);
-        for(ix=0; ix<nx; ix++) {
-            for(iy=0; iy<ny; iy++) {
-                for(iz=0; iz<nz; iz++) {
-                    f=CubeValue(iptr,ix,iy,iz);
-                    if(Qall || f>=cutoff) {
-                        ctab[idx].r[0] = xw[ix];
-                        ctab[idx].r[1] = yw[iy];
-                        ctab[idx].r[2] = zw[iz];
-                        SUBV(pos,ctab[idx].r,data_com);
-                        MULVS(tmpv,pos,f);
-                        OUTVP(tmpm,tmpv,pos);
-                        ADDM(qpole,qpole,tmpm);
-                        idx++;
-                    }
-                }
-            }
-        }
-        DIVMS(qpole,qpole,sum);
-        printvec("       qpole[0]:   ", qpole[0]);
-        printvec("       qpole[1]:   ", qpole[1]);
-        printvec("       qpole[2]:   ", qpole[2]);
-        free_image(iptr);
-        strclose(instr);
-    } else {
-        error("Currently no other options then to supply an image; cube=");
-    }
-
+        if (qsf(instr)) {       /* if binary; assume it's an image */
+           rewind(instr);
     
+           read_image(instr,&iptr);
+           if (iptr==NULL) error("%s: Bad image cube",getparam("cube"));
+           xw = mk_coords(Nx(iptr), Xmin(iptr), Dx(iptr));
+           yw = mk_coords(Ny(iptr), Ymin(iptr), Dy(iptr));
+           zw = mk_coords(Nz(iptr), Zmin(iptr), Dz(iptr));
+        
+           nx = Nx(iptr);                              /* cube dimensions */
+           ny = Ny(iptr);
+           nz = Nz(iptr);
+           if (nz==1) warning("Input data %s has only one plane",
+                                getparam("cube"));
+
+           /* 
+            * first loop over all points, count how many, 
+            */
+           for(ix=0; ix<nx; ix++) {
+              for(iy=0; iy<ny; iy++) {
+                 for(iz=0; iz<nz; iz++) {
+                    f=CubeValue(iptr,ix,iy,iz);
+                    if(Qall || f>=cutoff) ndata++;
+                 }
+              }
+           }
+           dprintf(0,"%d/%d data (%g%%) from the cube used in fit\n",
+                   ndata, nx*ny*nz, 100*(real)ndata / (real)(nx*ny*nz));
+           if (ndata==0) error("No data found; use different cutoff");
+
+
+           /* 
+            * allocate space, and stuff data into array 
+            */
+           dtab = (cube *) allocate(ndata*sizeof(cube));
+           i = 0;
+           for(ix=0; ix<nx; ix++) {
+              for(iy=0; iy<ny; iy++) {
+                 for(iz=0; iz<nz; iz++) {
+                    f=CubeValue(iptr,ix,iy,iz);
+                    if(Qall || f>=cutoff) {
+                        dtab[i].r[0] = xw[ix];
+                        dtab[i].r[1] = yw[iy];
+                        dtab[i].r[2] = zw[iz];
+                        dtab[i].w    = f;
+                        i++;
+                    }
+                 }
+              }
+           }
+           free_image(iptr);
+        } else {                /* assume it's a table */
+           rewind(instr);
+           scrstr = stropen("","s");     /* scratch file for 'cube' */
+           while ( fgets(line,256,instr) != NULL) {
+              if(line[0]=='#') continue;
+              line[strlen(line)-1] = '\0';
+              switch (nemoinpd(line,vals,4)) {
+                case 2:
+                  vals[2] = 0.0;      /* allow rare 2D fit?? */
+                case 3:
+                  vals[3] = 1.0;      /* fill in default weight */
+                case 4:
+                  if (Qall || vals[3]>cutoff) {
+                    put_data(scrstr,"XYVI",RealType,vals,4,0);
+                    ndata++;
+                  }
+                  break;
+                default:
+                  warning("Parsing: %s",line);
+                  break;
+              }
+           }
+           rewind(scrstr);
+           if (ndata==0) error("No data found; use different cutoff");
+         
+           dtab = (cube *) allocate(ndata*sizeof(cube));
+
+           for(i=0; i<ndata; i++) {
+              get_data(scrstr,"XYVI",RealType,vals,4,0);
+              dtab[i].r[0] = vals[0];
+              dtab[i].r[1] = vals[1];
+              dtab[i].r[2] = vals[2];
+              dtab[i].w    = vals[3];
+           }
+           strclose(scrstr);
+        }
+        strclose(instr);
+    } else
+        error("No cube or table input");
+
+    /* 
+     * since the data is never modified throughout the fitting process
+     * it's convenient to compute all relevant scaling and rotation 
+     * angles which need to be compared with the model later on.
+     */
+
+    sum=0;                          /* center of mass */
+    CLRV(data_com);
+    for(i=0; i<ndata; i++) {
+        dprintf(3,"%g %g %g %g\n",
+                dtab[i].r[0], dtab[i].r[1], dtab[i].r[2], dtab[i].w);
+        sum += dtab[i].w;
+	MULVS(tmpv, dtab[i].r, dtab[i].w);
+        ADDV(data_com, data_com, tmpv);
+    }
+    if (sum==0.0) error("Total data weighs 0.0");
+    DIVVS(data_com,data_com,sum);
+    printvec("Data - C.O.M.  :   ", data_com);
+
+    CLRM(qpole);                    /* moment of inertia */
+    for(i=0; i<ndata; i++) {
+        SUBV(tmpr, dtab[i].r, data_com);
+        MULVS(tmpv, tmpr, dtab[i].w);
+        OUTVP(tmpm, tmpv, tmpr);
+        ADDM(qpole, qpole, tmpm);
+    }
+    DIVMS(qpole,qpole,sum);
+    printvec("       qpole[0]:   ", qpole[0]);
+    printvec("       qpole[1]:   ", qpole[1]);
+    printvec("       qpole[2]:   ", qpole[2]);
+    rscale = sqrt(qpole[0][0]+qpole[1][1]);
+    vscale = sqrt(qpole[2][2]);
+
+    eigenframe(frame, qpole);			/* get rot frame */
+    if (dotvp(unit_frame[0], frame[0]) < 0.0)
+        MULVS(frame[0], frame[0], -1.0);   
+    if (dotvp(unit_frame[2], frame[2]) < 0.0)
+        MULVS(frame[2], frame[2], -1.0);   
+    CROSSVP(frame[1], frame[2], frame[0]); 	/* make it R.H. */
+    printvec(" e_x:", frame[0]);		/* show it */
+    printvec(" e_y:", frame[1]);
+    printvec(" e_z:", frame[2]);
+    for (i = 0; i < NDIM; i++)			/* save it */
+        SETV(data_frame[i], frame[i]);
+
 }
 
 /*
@@ -236,7 +353,7 @@ real start, incr;
     real *a;
     int i;
 
-    if (n<=0) error("mk_coords: bad array length %d\n",n);
+    if (n<=0) error("mk_coords: bad array length %d",n);
     a = (real *) allocate(n*sizeof(real));
 #if 0    
     for (i=1, a[0]=start; i<n; i++)
@@ -252,7 +369,7 @@ void printvec(name, vec)
 string name;
 vector vec;
 {
-        printf("%s  %10.5f  %10.5f  %10.5f  %10.5f\n",
+        dprintf(my_debug,"%s  %10.5f  %10.5f  %10.5f  %10.5f\n",
                    name, absv(vec), vec[0], vec[1], vec[2]);
                    
 }
@@ -261,42 +378,168 @@ vector vec;
  * snap_fit: the actual work horse 
  */
 
+vector model_frame[3];
+
 void snap_fit()
 {
-    int i, i1, i2;
-    matrix mat1, mat2, rot;
-    vector tmpv;
+    int i, i1, i2, i1_min=-1, i2_min=-1;
+    matrix mat1, mat2, rot, tmpm, w_qpole;
+    vector tmpv, tmpr, w_pos, frame[3], framet[3];
+    real w_sum, sum, sum_min=1000.0, w_rscale=1, w_vscale=1;
     Body tmpp, *bp, *qp=&tmpp;
+    imageptr iptr=NULL;
+    double log10();
 
 
-    /* case: both theta's fixed */
-    printf("Model fit: \n");
-
-    for (i1=0; i1<ntheta1; i1++) {          
-        printf("Theta1=%g\n", theta1[i1]);
-        yrotate(mat1,theta1[i1]);
-        for (i2=0; i2<ntheta2; i2++) {
-            printf("Theta2=%g\n", theta2[i2]);
-            zrotate(mat2,theta2[i2]);
-            MULM(rot, mat1, mat2);      /* rotation matrix */
-            for(i=0, bp=btab; i<nbody; i++, bp++) {
-                tmpv[0] = Pos(bp)[0];    /* xvar */
-                tmpv[1] = Pos(bp)[1];    /* yvar */
-                tmpv[2] = Vel(bp)[2];    /* zvar */
-                MULMV(ctab[i].r, rot, tmpv);
-                /* accumulate to find center of mass */
-                /* ... */
-            }
-
-            for(i=0, bp=btab; i<nbody; i++, bp++) {
-                /* moment of inertia */
-                /* ... */
-            }
-            
-            /* compare moment of inertia of model with that of data */
-        }
+    if (ntheta1==0 || ntheta2==0) {
+        error("No searching implemented yet, search must be manual");
+        return;
     }
+    if (ntheta1==1 || ntheta2==1) my_debug = 1;
+    /* case 1: both theta's fixed: for those values fit is shown */
+    dprintf(my_debug,"Model fit: \n");
+
+    if (ntheta1>1 && ntheta2>2) {
+        create_image(&iptr,ntheta1,ntheta2);
+        Xmin(iptr) = theta1[0];     
+        Ymin(iptr) = theta2[0];
+        Dx(iptr) = theta1[1] - theta1[0];
+        Dy(iptr) = theta2[1] - theta2[0];
+    }
+
+
+    printf("2\\1   ");
+    for (i1=0; i1<ntheta1; i1++)
+        printf(" %5.1f",theta1[i1]);
+    printf("\n\n");
+
+
+    for (i2=0; i2<ntheta2; i2++) {
+        zrotate(mat2,theta2[i2]);
+        printf("%5.1f :",theta2[i2]);
+        for (i1=0; i1<ntheta1; i1++) {          
+            dprintf(my_debug,"Theta1,2= %g %g\n", theta1[i1], theta2[i2]);
+            yrotate(mat1,theta1[i1]);
+            MULM(rot, mat2, mat1);      /* rotation matrix : order=yz */
+
+#if 1
+            printvec("  rot[0]: ", rot[0]);
+            printvec("  rot[1]: ", rot[1]);
+            printvec("  rot[2]: ", rot[2]);
+#endif
+
+            w_sum = 0.0;
+            CLRV(w_pos);                /* C.O.M. of this model cube */
+            for(i=0, bp=btab; i<nmodel; i++, bp++) {
+                if (mtab[i].w <= 0) continue;
+                MULMV(tmpr, rot, Pos(bp));
+                MULMV(tmpv, rot, Vel(bp));
+                mtab[i].r[0] = tmpr[0];     /* xvar, yvar, zvar */
+                mtab[i].r[1] = tmpr[1];
+                mtab[i].r[2] = tmpv[2];
+                w_sum += mtab[i].w;
+                SETV(tmpv,mtab[i].r);
+                MULVS(tmpv,tmpv,mtab[i].w);
+                ADDV(w_pos, w_pos, tmpv);
+            }
+            if(w_sum==0.0) error("weight is zero");
+            DIVVS(w_pos,w_pos,w_sum);
+            printvec("       C.O.M.  :   ", w_pos);
+
+            CLRM(w_qpole);
+            for(i=0, bp=btab; i<nmodel; i++, bp++) {
+                if (mtab[i].w <= 0) continue;
+                SUBV(tmpr, mtab[i].r, w_pos);
+                MULVS(tmpv, tmpr, mtab[i].w);
+                OUTVP(tmpm, tmpv, tmpr);
+                ADDM(w_qpole, w_qpole, tmpm);
+            }
+            DIVMS(w_qpole, w_qpole, w_sum);
+            if (!Qsimul) {
+                w_rscale = sqrt(w_qpole[0][0]+w_qpole[1][1]);
+                w_vscale = sqrt(w_qpole[2][2]);
+                w_qpole[0][0] *= rscale*rscale/(w_rscale*w_rscale);
+                w_qpole[0][1] *= rscale*rscale/(w_rscale*w_rscale);
+                w_qpole[1][0] *= rscale*rscale/(w_rscale*w_rscale);
+                w_qpole[1][1] *= rscale*rscale/(w_rscale*w_rscale);
+                w_qpole[0][2] *= rscale*vscale/(w_rscale*w_vscale);
+                w_qpole[1][2] *= rscale*vscale/(w_rscale*w_vscale);
+                w_qpole[2][0] *= rscale*vscale/(w_rscale*w_vscale);
+                w_qpole[2][1] *= rscale*vscale/(w_rscale*w_vscale);
+                w_qpole[2][2] *= vscale*vscale/(w_vscale*w_vscale);
+            }
+            printvec("       qpole[0]:   ", w_qpole[0]);
+            printvec("       qpole[1]:   ", w_qpole[1]);
+            printvec("       qpole[2]:   ", w_qpole[2]);
+
+            eigenframe(frame, w_qpole);			/* get rot frame */
+            if (dotvp(unit_frame[0], frame[0]) < 0.0)
+               MULVS(frame[0], frame[0], -1.0);   
+            if (dotvp(unit_frame[2], frame[2]) < 0.0)
+               MULVS(frame[2], frame[2], -1.0);   
+            CROSSVP(frame[1], frame[2], frame[0]); 	/* make it R.H. */
+            for (i = 0; i < NDIM; i++)
+                SETV(model_frame[i], frame[i]);
+
+            printvec(" frame e_x   :", frame[0]);
+            printvec("       e_y   :", frame[1]);
+            printvec("       e_z   :", frame[2]);
+            invert(frame);
+            TRANM(model_frame, frame);       /* model_frame is now inverse */
+                                            /* and can be mult'd with model_ */
+                                            /* and compared with unit I */
+            printvec(" e_x^-1   :", model_frame[0]);
+            printvec(" e_y^-1   :", model_frame[1]);
+            printvec(" e_z^-1   :", model_frame[2]);
+
+
+
+            sum = 0.0;
+            for (i=0; i<3; i++) {
+                MULMV(tmpv, data_frame, model_frame[i]);
+                printvec(" data*model^-1:", tmpv);
+                SUBV(tmpv, tmpv, unit_frame[i]);
+                sum += absv(tmpv);
+            }
+            dprintf(my_debug,"Theta1,2,sum= %g %g %g\n",theta1[i1], theta2[i2], sum);
+            sum = log10(sum);
+            if (sum<sum_min) {
+                sum_min = sum;
+                i1_min = i1;
+                i2_min = i2;
+            }
+            printf(" %5.2f",sum);
+            MapValue(iptr,i1,i2) = sum;
+        } /* i1 */
+        printf("\n");
+    } /* i2 */
+
+    printf("\n");
+    printf("       ");
+    for (i1=0; i1<ntheta1; i1++)
+        printf(" %5.1f",theta1[i1]);
+    printf("\nMinimum at theta1=%g theta2=%g log10(sum)=%g\n",
+            theta1[i1_min], theta2[i2_min], sum_min);
+    if (constr) write_image(constr,iptr);
+    if (outstr) write_snapshot( outstr,
+				nmodel,btab,
+				theta1[i1_min], theta2[i2_min], 
+				rscale/w_rscale, vscale/w_vscale);
+
 }
+
+write_snapshot( outstr, nbody, btab, t1, t2, rscale, vscale)
+stream outstr;
+int nbody;
+Body *btab;
+real t1, t2, rscale,vscale;
+{
+    warning("output snapshot not supported yet");
+}
+/*
+ * yrotate: construct a rotation matrix for a rotation of 'theta' 
+ *          around the y-axis
+ */
 
 void yrotate(mat,theta)
 matrix mat;
@@ -307,6 +550,11 @@ real theta;
     mat[0][2] =  -(mat[2][0] = sin(DEG2RAD * theta));
 }
 
+/*
+ * yrotate: construct a rotation matrix for a rotation of 'theta' 
+ *          around the y-axis
+ */
+
 void zrotate(mat,theta)
 matrix mat;
 real theta;
@@ -316,3 +564,58 @@ real theta;
     mat[1][0] =  -(mat[0][1] = sin(DEG2RAD * theta));
 }
 
+
+#include "nrutil.h"
+
+#if 1
+
+eigenframe(frame, mat)
+vector frame[];
+matrix mat;
+{   
+    float **q, *d, **v;
+    int i, j, nrot;
+        
+    q = fmatrix(1, 3, 1, 3);
+    for (i = 1; i <= 3; i++)
+        for (j = 1; j <= 3; j++)
+            q[i][j] = mat[i-1][j-1];
+    d = fvector(1, 3);
+    v = fmatrix(1, 3, 1, 3);
+    jacobi(q, 3, d, v, &nrot);
+    eigsrt(d, v, 3);
+    for (i = 1; i <= 3; i++)
+        for (j = 1; j <= 3; j++)
+            frame[i-1][j-1] = v[j][i];
+} 
+
+#else
+
+eigenframe(frame, mat)
+vector frame[];
+matrix mat;
+{   
+    double **q, *d, **v;
+    int i, j, nrot;
+        
+    q = dmatrix(1, 3, 1, 3);
+    for (i = 1; i <= 3; i++)
+        for (j = 1; j <= 3; j++)
+            q[i][j] = mat[i-1][j-1];
+    d = dvector(1, 3);
+    v = dmatrix(1, 3, 1, 3);
+    jacobi_d(q, 3, d, v, &nrot);
+    eigsrt_d(d, v, 3);
+    for (i = 1; i <= 3; i++)
+        for (j = 1; j <= 3; j++)
+            frame[i-1][j-1] = v[j][i];
+} 
+#endif 
+
+invert(frame)
+vector frame[];
+{
+    real mat[NDIM*NDIM], det;
+
+    matinv(frame, 3, 3, &det);
+}
