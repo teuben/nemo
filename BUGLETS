@@ -22,6 +22,9 @@
 	  type solution for pgplot, and if so,
 	- FORLIBS need to be added to YAPPLIB
 
+* LFS seems to work, but keep an eye open on e.g.
+	http://freshmeat.net/articles/view/709/
+
 
 - filestruct:
   The following snippet of code stores only  "1" for the value of pi,
