@@ -1,0 +1,84 @@
+.TH CCDSMOOTH 1NEMO "12 March 1998"
+.SH NAME
+ccdsmooth \- smoothing of an image map (2D or 3D)
+.SH SYNOPSIS
+.PP
+\fBccdsmooth in=\fPimage \fBout=\fPimage [parameter=value]
+.SH DESCRIPTION
+\fIccdsmooth\fP will smooth an image cube through a simple convolution
+(no FFT). The smoothing beam must be circular/spherical, or smoothing
+must be done independantly per coordinate by calling \fIccdsmooth\fP
+multiple times using the \fBdir=\fP keyword (see below).
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 20
+\fBin=\fIin-file\fP
+input file, in \fIImage(5)\fP format [no default]
+.TP
+\fBout=\fIout-file\fP
+output file, will be in \fIImage(5)\fP format [no default]
+.TP
+\fBgauss=\fIvalue\fP
+Beam size (FWHM, note FWM = 2.355 * sigma) of a gaussian smoothing
+kernel. Note this is size of the used smoothing kernel, NOT the resulting
+beam in the output map.
+If this parameter is used, the parameter \fBsmooth\fP is
+ignored [default: not used].
+.TP
+\fBdir=x|y|z\fP
+Direction of smoothing. This gives the flexibility of smoothing in
+x, y and/or z separately. Note that when smoothing in more than one
+coordinate the beam is forced to be circular.
+[default: xy].
+.TP
+\fBsmooth=\fIarray\fP
+Smoothing array, should be at least 1 number, prefarably normalized 
+to unity for sake for conservation of units (mass per unit square
+length). The program does not normalize the beam to unity.
+Example is e.g. the Hanning smoothing: "0.25,0.5,0.25".
+[default: \fB0.25,0.5,0.25\fP]. This parameter is only used if
+\fBgauss\fP parameter is not used.
+.TP
+\fBnsmooth=\fIvalue\fP
+Number of times the above smoothing kernel is applied over the data, 
+just in case you wanted to be wasteful.
+[default: \fB1\fP].
+.TP
+\fBbad=\fIbad_value\fP
+Input pixel value which to skip in smoothing.
+[Default: not used]
+.TP
+\fBcut=\fIcutoff_value\fP
+Value at which to cutoff the gaussian beam. 
+[Default: \fB0.01\fP]
+.SH "SEE ALSO"
+snapccd(1NEMO), snapsmooth(1NEMO), image(5NEMO)
+.SH TIMING
+.nf
+.ta +1.0i
+With 68881 on SUN 3/50 (~16Mhz) and 200*200 map - old program (pre-V2.1)
+Nbeam=17	54"
+Nbeam=33	98"
+Nbeam=47	140"
+.SH BUGS
+Smoothing a map which has already been smoothed will result in an incorrect
+header - shouldn't it be the simple sum of squares??
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+src/image/trans     	ccdsmooth.c ccdsmooth.1
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+29-jun-87	V1.0: Created as module from CCD program	PJT
+30-Jun-87	V1.1: improved 'struct' filestructure      	PJT
+ 9-jul-87	V1.2: keyword 'dir' adn keyword order changed	PJT
+ 1-jun-88	V2.0: new filestruct, although code is same	PJT
+ 5-feb-89	V2.2: general 3D smoothing                	PJT
+11-sep-91	some additional comments                	PJT
+12-mar-98	V3.1: added cut=, fixed fwhm=0.0         	PJT
+.fi
