@@ -7,7 +7,11 @@
  *      24-jan-00   0.4 added hms/dms with sign for decimal stuff
  *       8-dec-01   0.6 std MAX_ macros
  *      10-jan-03     a SGN -> SIGN
+ *      31-jan-04   0.7 added fromhms=
  *
+  
+  TODO:  shuld use strptime() for parsing 
+
    %a, %A     Sun/Mon/...  or Sunday/...
    %b, %B     Jan/...	      January/...
    %d         day of month (01..31)
@@ -33,9 +37,10 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "out=???\n          output file name",
     "todms=\n           list of columns (1..) to convert to dms (0=none)",
     "tohms=\n           list of columns (1..) to convert to hms (0=none)",
+    "fromhms=\n         list of columns (1..) to convert from hms (0=none)",
     "separator=:\n      separator between output D-M-S.S",
-    "format=\n          date/time format",
-    "VERSION=0.6b\n     1-jan-04 PJT",
+    "format=%g\n        output format",
+    "VERSION=0.7\n      31-jan-05 PJT",
     NULL
 };
 
@@ -56,10 +61,10 @@ string sep;                             /* separator */
 #endif
 
 bool   keepc[MAX_COL+1];                 /* columns to keep (t/f) in old fmt */
-int    colmode[MAX_COL+1];		/* 0, +/-24, +/- 360 */
+int    colmode[MAX_COL+1];		 /* 0, +/-24, +/- 360 */
+int    fromhms[MAX_COL+1];               /* convert HMS to decimal (seconds)? */
 
 extern string *burststring(string, string);
-
 
 nemo_main()
 {
@@ -76,8 +81,10 @@ setparams()
     int    col[MAX_COL];                    /* columns to skip for output */
     int    ncol, i, j;
 
-    for (i=0; i<MAX_COL; i++)
+    for (i=0; i<MAX_COL; i++) {
         colmode[i+1] = 0;
+	fromhms[i+1] = 0;
+    }
 
     if (hasvalue("todms")) {
     	ncol = nemoinpi(getparam("todms"),col,MAX_COL);
@@ -85,7 +92,7 @@ setparams()
         for (i=0; i<ncol; i++) {
             j = ABS(col[i]);
             if (j>MAX_COL) error("Column %d too large, MAX_COL=%d",j,MAX_COL);
-            if (colmode[j] != 0) error("Column %d already specified",j);
+            if (colmode[j] || fromhms[j]) error("Column %d already specified",j);
             colmode[j] = ( col[i] > 0 ? 360 : -360);
         }
     }
@@ -95,11 +102,20 @@ setparams()
         for (i=0; i<ncol; i++) {
             j = ABS(col[i]);
             if (j>MAX_COL) error("Column %d too large, MAX_COL=%d",j,MAX_COL);
-            if (colmode[j] != 0) error("Column %d already specified",j);
+            if (colmode[j] || fromhms[j]) error("Column %d already specified",j);
             colmode[j] = ( col[i] > 0 ? 24 : -24);
         }
     }
-
+    if (hasvalue("fromhms")) {
+    	ncol = nemoinpi(getparam("fromhms"),col,MAX_COL);
+        if (ncol < 0) error("Error parsing fromhms=%s",getparam("fromhms"));
+        for (i=0; i<ncol; i++) {
+            j = ABS(col[i]);
+            if (j>MAX_COL) error("Column %d too large, MAX_COL=%d",j,MAX_COL);
+            if (colmode[j] || fromhms[j]) error("Column %d already specified",j);
+	    fromhms[j] = 1;
+        }
+    }
     sep = getparam("separator");
 }
 
@@ -109,8 +125,8 @@ convert(stream instr, stream outstr)
 {
     char   line[MAX_LINELEN];          /* input linelength */
     double dval;        
-    int    nval, i, nlines, sign, decimalval;
-    string *outv;                   /* pointer to vector of strings to write */
+    int    nval, i, nlines, sign, decimalval,nhms;
+    string *outv, *hms;             /* pointer to vector of strings to write */
     string seps=", \t";             /* column separators  */
     real   dd, mm, ss;
         
@@ -128,8 +144,19 @@ convert(stream instr, stream outstr)
         i=0;
         while (outv[i]) {
             if (colmode[i+1] == 0) {        /* no special mode: just copy */
+	      if (fromhms[i+1]) {
+		hms = burststring(outv[i],sep);
+		nhms = xstrlen(hms,sizeof(string))-1;
+		dval = atof(hms[0])*3600;
+		if (nhms > 1) dval += atof(hms[1])*60;
+		if (nhms > 2) dval += atof(hms[2]);
+		if (nhms > 3) error("HMS string %s too many %s",outv[i],sep);
+                fprintf(outstr,"%g ",dval);
+		freestrings(hms);
+	      } else {
                 fputs(outv[i],outstr);
                 fputs(" ",outstr);
+	      }
             } else {
                 if (nemoinpd(outv[i],&dval,1)<0) 
                     error("syntax error decoding %s",outv[i]);
@@ -158,5 +185,6 @@ convert(stream instr, stream outstr)
             i++;
         }
         fputs("\n",outstr);
+	freestrings(outv);
     } /* for(;;) */
 }
