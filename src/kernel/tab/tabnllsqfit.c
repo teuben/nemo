@@ -17,8 +17,8 @@ string defv[] = {
     "in=???\n           input (table) file name",
     "xcol=1\n           column(s) for x, the independant variable(s)",
     "ycol=2\n           column(s) for y, the dependant variable(s)",
-    "dycol=\n           (weight) column for sigma-y, if used (weight = 1/dy**2)",
-    "xrange=\n          ** in case restricted range is used (1D only)",
+    "dycol=\n           optional column for sigma-y (weight = 1/dy**2)",
+    "xrange=\n          in case restricted range is used (1D only)",
     "fit=line\n         fitmode (line, plane, poly, gauss)",
     "order=\n		Order of plane/poly fit",
     "out=\n             output file for some fit modes",
@@ -26,7 +26,7 @@ string defv[] = {
     "par=\n             initial estimates of parameters (p0,p1,p2,...)",
     "free=\n            free(1) or fixed(0) parameters? [1,1,1,1,....]",
     "nmax=10000\n       Default max allocation",
-    "VERSION=1.0\n      13-jul-02 PJT",
+    "VERSION=1.0a\n     13-jul-02 PJT",
     NULL
 };
 
@@ -338,24 +338,23 @@ do_line()
 do_plane()
 {
   real *x1, *x2, *x, *y, *dy, *d;
-  int i,j, nrt, mpar[MAXPAR];
+  real **xp;
+  int i,j,k,nrt, mpar[MAXPAR];
   real fpar[MAXPAR], epar[MAXPAR];
   int its = 50;
-  int lpar = 3;
+  int lpar = order+1;
   real tol = 0.0, lab = 0.0;
 
   if (nycol<1) error("Need 1 value for ycol=");
   if (nxcol<order) error("Need %d value(s) for xcol=",order);
 
-  x1 = xcol[0].dat;
-  x2 = xcol[1].dat;
   y = ycol[0].dat;
   dy = (dycolnr>0 ? dycol.dat : NULL);
   d = (real *) allocate(npt * sizeof(real));
-  x = (real *) allocate(2 * npt * sizeof(real));
+  x = (real *) allocate(order * npt * sizeof(real));
   for (i=0, j=0; i<npt; i++) {
-    x[j++] = x1[i];
-    x[j++] = x2[i];
+    for (k=0; k<order; k++)
+      x[j++] = xcol[k].dat[i];
   }
 
   for (i=0; i<lpar; i++) {
@@ -368,8 +367,9 @@ do_plane()
 
   nrt = nllsqfit(x,2,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,its,lab, fitfunc,fitderv);
   printf("nrt=%d\n",nrt);
-  printf("a+bx+cy:  \na= %g %g \nb= %g %g \nc= %g  %g\n",
-	 fpar[0],epar[0],fpar[1],epar[1],fpar[2],epar[2]);
+  printf("Fitting p0+p1*x1+p2*x2+.....pN*xN: (N=%d)\n",order);
+  for (k=0; k<lpar; k++)
+    printf("p%d= %g %g\n",k,fpar[k],epar[k]);
   if (outstr)
     for (i=0; i<npt; i++)
       fprintf(outstr,"%g %g %g %g\n",x1[i],x2[i],y[i],d[i]);
@@ -415,8 +415,9 @@ do_gauss()
 
   nrt = nllsqfit(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,its,lab, fitfunc,fitderv);
   printf("nrt=%d\n",nrt);
-  printf("a+b*exp(-(x-c)^2/(2*d^2)):  \na= %g %g \nb= %g %g \nc= %g %g\nd= %g  %g\n",
+  printf("Fitting a+b*exp(-(x-c)^2/(2*d^2)):  \na= %g %g \nb= %g %g \nc= %g %g\nd= %g  %g\n",
 	 fpar[0],epar[0],fpar[1],epar[1],fpar[2],epar[2],fpar[3],epar[3]);
+  if (nrt < 0) error("Bad gauss fit nrt=%d",nrt);
   if (outstr)
     for (i=0; i<npt; i++)
       fprintf(outstr,"%g %g %g\n",x[i],y[i],d[i]);
@@ -455,10 +456,11 @@ do_poly()
 
   nrt = nllsqfit(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,its,lab, fitfunc,fitderv);
   printf("nrt=%d\n",nrt);
-  printf("p0+p1*x+p2*x^2+.....p%d*x^%d:\n",order,order);
-  for (i=0; i<=order; i++)
+  printf("Fitting p0+p1*x+p2*x^2+.....pN*x^N: (N=%d)\n",order);
+  for (i=0; i<lpar; i++)
     printf("p%d= %g %g\n",i,fpar[i],epar[i]);
-  for (i=0; i<npt; i++)
-    dprintf(1,"%g %g %g\n",x[i],y[i],d[i]);
+  if (outstr)
+    for (i=0; i<npt; i++)
+      fprintf(outstr,"%g %g %g\n",x[i],y[i],d[i]);
 }
 
