@@ -1,0 +1,237 @@
+#! /bin/csh -f
+#
+#   This script is a bootstrap loader for NEMO. It picks up the most
+#   recent compressed tar file from Maryland, and installs it in
+#   a directory of your choice. It then proceeds and install scripts,
+#   tries to compile the libraries, and attempts to compile a few
+#   small programs.
+#   At various stages tweeking may be needed, for which the $NEMO/README
+#   file and possibly the manual ($NEMO/text/manuals) may be needed.
+#
+#   Most common usage:
+#
+#       chmod +x bootstrap
+#       bootstrap nemo=/usr/nemo
+#
+#   where /usr/nemo is the ultimate location of $NEMO (the default is the
+#   current directory)
+#
+#   For problems consult:   nemo@astro.umd.edu
+#
+#   Known problems:
+#       convex: instead of make, using src/scripts/make.convex
+
+# set local aliases
+alias stamp 'date +%H:%M:%S'
+
+# set defaults
+set site=ftp.astro.umd.edu
+set dir=pub/nemo
+set file=nemo.tar.gz
+set nemo=$cwd
+set goto=start
+set cc=""
+set yapp=null
+set tmp=/tmp/tmp$$
+set config=""
+
+foreach kv ($*)
+  if ("$kv" == go) break
+  set $kv
+end
+
+
+set VERSION="1.7 1-apr-01"
+
+
+if ($#argv == 0) then
+  echo "Usage: $0 [keyword=value] ..."
+  echo "with the following optional key=val's"
+  echo ""
+  echo "  [site=$site]  ## mother site"
+  echo "  [dir=$dir]    ## anon ftp directory where tar files exist"
+  echo "  [file=$file]  ## nemo (compressed) tar file"
+  echo "  [nemo=$nemo]  ## name of new NEMO directory"
+  echo "  [goto=$goto]  ## label to goto in this script "
+  echo "                (start, tar, install, prog, test, suite)"
+  echo "  [cc=$cc]      ## override C compiler from "'$NEMO/src/scripts/cc'
+  echo "  [yapp=$yapp]  ## override YAPP interface choice (null, pgplot) -not active-"
+  echo "  [config=$config]     ## options for configure"
+  echo ""
+  echo "Bootstrap new nemo version from mother site"
+  echo "VERSION $VERSION"
+  exit 0
+endif
+
+set tmp=/tmp/tmp$$
+set log=/tmp/nemo$$.bootlog
+
+
+if (-d $nemo) then
+  cd $nemo
+else
+  mkdir -p $nemo
+  cd $nemo
+endif
+date;stamp; 
+echo "### Working with nemo=$nemo"
+echo "### Logfile maintained in log=$log"
+
+goto $goto
+
+#
+# ----------------------------------------------------------------------
+#
+start:
+ftp:
+stamp;echo Running tar to pick up the tar file...
+echo "(You may be asked for a passwd for the anonymous user)"
+
+ftp -v $site << END_OF_FTP >> $log
+anonymous
+nemo@astro.umd.edu
+bin
+cd $dir
+dir $file
+get $file
+quit
+END_OF_FTP
+
+
+stamp;echo Transferred ${file} into directory ${nemo}
+ls -l $file
+
+#
+# ----------------------------------------------------------------------
+#
+tar:
+
+if (! -e $file) then
+  echo File $file does not exist in $cwd
+  exit 1
+endif
+
+stamp
+set e=$file:e
+echo "   ==> The following step may take a few minutes, depending on disk i/o"
+if ("$e" == "Z") then
+  echo Using uncompress and tar ...
+  uncompress $file | tar xf -
+else if("$e" == "gz" || "$e" == "z") then
+  echo Using gzip and tar ...
+  gzip -dc $file | tar xf -
+else if ("$e" == "tar") then
+  echo Using tar ...
+  tar xf $file
+else
+  echo "Unknown extension of (compressed) tar file $file"
+  exit 1
+endif
+stamp
+#
+# ----------------------------------------------------------------------
+#
+install:
+
+stamp
+if (-e NEMORC && -e Makefile) then
+  echo Now installing NEMO:
+else
+  echo Cannot install NEMO, missing Makefile or NEMORC file
+  exit 1
+endif
+
+# always get rid of unwanted pollution from an existing version
+unsetenv NEMO NEMOBIN
+if (! -e nemo_start) then
+  echo Creating missing startup files
+  make nemo_start NEMO=$nemo  >> $log
+endif
+
+echo The file $nemo/nemo_start can be sourced to load NEMO
+unsetenv NEMOBIN
+source nemo_start
+echo NEMO=$NEMO is now loaded in the bootstrap for NEMOHOST=$NEMOHOST
+
+
+stamp
+echo Creating full directory structure and installing scripts.
+mkdir -p $NEMO/tmp
+echo Running configure, with options:  $config
+./configure $config >> $log
+make dirs config_extra scripts >> $log
+echo Adding in NEMORC.local 
+source NEMORC.local
+rehash
+stamp
+echo "Installing the libraries ..."
+echo "   (this will take a few minutes, go and have a coffee)"
+(cd src; make -i clean install >>& $log)
+
+prog:
+
+echo Installing a few sample programs:
+stamp
+foreach p (tsf hisf mkplummer mkcube hackcode1 snapscale snapprint snapplot perorb)
+  echo -n Working on $p ...
+  if ($p == hisf) then
+    mknemo -c history hisf >>& $log
+  else
+    mknemo $p >>& $log
+  endif
+  if ($status == 0) then
+    echo -n Compiling appears ok ...
+    rehash
+    $p help=h > /dev/null 
+    if ($status == 0) then
+       echo Running ok too.
+    else
+       echo Problem running.
+    endif
+  else
+    echo Problems installing.
+  endif
+end
+stamp
+
+test:
+  stamp; echo "Running a simple test (this will install a few programs)"
+  echo Running a simple test: >>& $log
+  rehash
+  time mkplummer out=$tmp.1 nbody=128  >>& $log
+  time tsf in=$tmp.1 >>& $log
+  time hisf in=$tmp.1 >>& $log
+  time hackcode1 in=$tmp.1 out=$tmp.2 tstop=1 >>& $log
+  time snapscale in=$tmp.2 out=$tmp.3 mscale=2.0 >>& $log
+  rm -f $tmp.*
+  stamp
+
+suit:
+  stamp; echo "Running the testsuite (this will install quite a few programs)"
+  cd $NEMO/src/scripts
+  time need -m `testsuite -s`                   >>& $log
+  echo "Begin Missing testsuite executables: "  >>  $log
+  time testsuite -q                             >>& $log
+  echo "End   Missing testsuite executables: "  >>  $log
+  stamp
+  $NEMO/src/scripts/testsuite                   >>& $log
+  stamp
+
+end:
+  echo "If you haven't done so, issue the following command:"
+  echo "        source nemo_start"
+  echo "to load NEMO into your shell."
+  echo "To make it permanent, add this alias to your .cshrc file:"
+  echo "  alias nemo source $nemo/nemo_start"
+  echo "after the PATH has been set,"
+  echo "or the following series of commands before PATH is set:"
+  echo "  setenv NEMO $nemo"
+  echo '  source $NEMO/NEMORC'
+  echo "  ..."
+  echo '  set path=( ... $NEMOBIN ...)'
+  echo ' '
+  echo ' '
+  echo 'Please register your usage by email:  nemo@astro.umd.edu'
+  echo 'and let us know if you do/do not wish to be informed of updates'
+  echo ""
+  echo "Logfile in: $log"
