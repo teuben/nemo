@@ -70,7 +70,7 @@
   version in $NEMOINC/stdinc.h and it will work
   Or add		-DHAVE_DPRINTF
   to CFLAGS (should add that to configure.in)
-  THe official name is now nemo_dprintf, though internally
+  The official name is now nemo_dprintf, though internally
   dprintf will stay and #defined to nemo_configure
 
   still a linking problem on those cases left... (redhat 5.2)
@@ -130,4 +130,8 @@ potlist: rld: Fatal Error: attempted access to unresolvable symbol in
 
 ? kawai/nbody does not seem to work, neither in IONEMO mode, nor default I/O mode
   (at least on linux)
+
+- fie:  ifgt(%1,0,log(%1),-10) doesn't work,e.g. seems to work in nemoinp
+  but not via ccdmath/tabmath, e.g.
+   echo -10 | tabmath - - 'ifgt(%1,0,log(%1),%1)'
 
