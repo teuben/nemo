@@ -1,8 +1,9 @@
 /*
- * PROGRESS:  keep the user happy and report progress
+ * PROGRESS:  write timely progress messages, and keep the user happy
  *
  *
  *      30-jun-04 V1.0  created
+ *       1-nov-04  1.1  made it an 'int' function instead
  */
 
 #include <stdinc.h>
@@ -13,7 +14,7 @@
 static int bypass = -1;
 static double cpu0;
 
-void progress(double dtime, string fmt, ...)
+int progress(double dtime, string fmt, ...)
 {
     va_list ap;
     char cp;
@@ -26,13 +27,14 @@ void progress(double dtime, string fmt, ...)
 	bypass = 1;
       cpu0 = cputime()*60.0;
     } 
-    if (bypass) return;
+    if (bypass) return 0;
 
     if (dtime > 0) {
       cpu1 = cputime()*60.0;
-      if (cpu1-cpu0 < dtime) return;
+      if (cpu1-cpu0 < dtime) return 0;
       cpu1 = cpu0;
     }
+    if (fmt==0 || *fmt==0) return 1;
 
     va_start(ap, fmt);              /* ap starts with string 'fmt' */
 
@@ -47,6 +49,7 @@ void progress(double dtime, string fmt, ...)
       fprintf(stderr,"\r");         
     fflush(stderr);                 /* flush it NOW */
     va_end(ap);                     /* end varargs */
+    return 1;
 }
 
 #ifdef TESTBED
@@ -56,8 +59,9 @@ string defv[]={
   "m=1\n          report every m",
   "sleep=0\n	  delay?",
   "cpu=0\n        cpu delay?",
-  "compute=0\n    compute something",
-  "VERSION=1.0\n  30-jun-04 PJT",
+  "compute=1\n    compute something",
+  "int=f\n        check int value",
+  "VERSION=1.1\n  1-nov-04 PJT",
   NULL,
 };
 
@@ -79,11 +83,12 @@ void do_compute(int n)
 
 nemo_main()
 {
-  int n0, n = getiparam("n");
+  int k, n0, n = getiparam("n");
   int m = getiparam("m");
   int isleep = getiparam("sleep");
   double cpu = getdparam("cpu");
   int ncomp = getiparam("compute");
+  bool Qint = getbparam("int");
 
   n0 = n;
   dprintf(1,"Going to print:\n");
@@ -91,7 +96,11 @@ nemo_main()
     if (n%m == 0) {
       if (ncomp) do_compute(ncomp);
       if (isleep) sleep(isleep);
-      progress(cpu,"Done %d/%d",n,n0);
+      if (Qint) {
+	k=progress(cpu,0);
+	if (k) dprintf(0,"Done %d/%d\r",n,n0);
+      } else
+	progress(cpu,"Done %d/%d",n,n0);
     }
   }
   dprintf(1,"\n All done.\n");

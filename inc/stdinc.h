@@ -426,7 +426,7 @@ extern void   strclose(stream);
 void error(string, ...);
 void errorn(string, ...);
 void warning(string, ...);
-void progress(double dtime, string, ...);
+int progress(double dtime, string, ...);
 int nemo_dprintf(int, const_string, ...);    /* NEMO has same name as libc */
 bool nemo_debug(int);
 

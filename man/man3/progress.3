@@ -1,17 +1,18 @@
-.TH PROGRESS 3NEMO "30 June 2004"
+.TH PROGRESS 3NEMO "1 November 2004"
 .SH NAME
 progress \- write progress strings
 .SH SYNOPSIS
 .nf
 \fB#include <stdinc.h>\fP
 .PP
-\fBvoid progress(double dcpusec, string format, ... )\fP
+\fBint progress(double dcpusec, string format, ... )\fP
 .fi
 .SH DESCRIPTION
-\fIprogress\fP prints out a user-controlled formatted
+\fIprogress\fP optionally prints out a user-controlled formatted
 string to \fIstderr\fP, automatically terminated with the
 carriage-return (\\r) symbol, so it overwrites the previous
-string.
+string. The return value if set to 1 if progress should be reported.
+If the \fIformat\fP string is set to 0, no output is done.
 .PP
 It is the users control to
 make sure the string length does not descrease, since
@@ -46,6 +47,16 @@ or under full control of the user, as show in this example:
     }
 
 .fi
+You can also use \fIprogress\fP to take your own actions:
+.nf
+
+    do {
+        if (progress(10.0,0)) 
+	  dprintf(1,"Working on line %3d\r",n);
+	n = do_something();
+    } while (n>0);
+
+.fi
 .SH SEE ALSO
 dprintf(3NEMO), warning(3NEMO), 
 .SH AUTHOR
@@ -54,4 +65,5 @@ Peter Teuben
 .nf
 .ta +1i +4i
 30-jun-04	created 	PJT
+1-nov-04	changed return type from void to int	PJT
 .fi
