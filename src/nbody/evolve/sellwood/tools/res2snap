@@ -1,0 +1,34 @@
+#! /bin/csh -f
+#
+#  sample script to convert a binary res file from Sellwood's binary 'res'
+#  format to a NEMO snapshot
+#
+if ($#argv <  2) then
+  echo "Usage: $0 file n1 [n2 ...]"
+  echo "Extract the n1-th, n2-th, ... snapshot from a .res file"
+  exit 0
+endif
+
+set file=$1
+shift argv
+
+foreach ns ($*)
+foreach n (`nemoinp "$ns"`)
+
+    echo Extracting $n
+
+    # get header
+
+    set tsnap=`unfio $file "$n*2-1" float | awk '{if (NR==1) print $1}'`
+    set nbody=`unfio $file "$n*2-1" int   | awk '{if (NR==2) print $1}'`
+
+    echo Nbody=$nbody Tsnap=$tsnap
+
+    # dump data and convert
+    
+    unfio $file "$n*2" float maxbuf=100000 |\
+	tabtos - ${file:r}.$n.snap "" pos,vel,phi \
+			options=wrap times=$tsnap nbody=$nbody
+
+end
+end
