@@ -1,0 +1,22 @@
+%N snapprint
+%D tabulate a snapshot
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man snapprint' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input file (snapshot) [???]
+%A options
+	Things to output [x,y,z,vx,vy,vz]
+%A format
+	Format used to output numbers [%g]
+%A separ
+	Special table of interparticle distances [0]
+%A times
+	Times to select snapshot [all]
+%A tab
+	Standard output or table file? []
+%A header
+	Add header to output? [f]
+%A VERSION
+	20-nov-96 PJT [2.0]
