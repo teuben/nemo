@@ -1,0 +1,14 @@
+%N layout
+%D YAPP interpreter
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man layout' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input yapp layout file [???]
+%A init
+	Add plinit() before calling pl_exec()? [f]
+%A stop
+	Add plstop() after calling pl_exec()? [f]
+%A VERSION
+	16-sep-96 PJT [0.1]
