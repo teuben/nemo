@@ -1,0 +1,67 @@
+.TH SNAPMRADII 1NEMO "15 August 1996"
+.SH NAME
+snapmradii \- print mass radii in a snapshot
+.SH SYNOPSIS
+\fBsnapscale in=\fP\fIin_file\fP [parameter=value] .\|.\|.
+.SH DESCRIPTION
+\fIsnapmradii\fP prints a table of the fcractional mass-radii
+of a snapshot. The snapshot will be sorted internally by
+increasing radius, there is no need to use \fIsnapsort(1NEMO)\fP
+preceding this call.
+.SH PARAMETERS
+The following parameters are recognized:
+.TP 24
+\fBin=\fIin_file\fP
+input file, in \fIsnapshot\fP format.  Default: none.
+.TP
+\fBfraction=\fIf1,f2,...\fP
+Fractional mass radii. They must be sorted and between 0 and 1
+(inclusive). [Default: \fB0.1:0.9:0.1\fP]
+.TP
+\fBtab=t|f\fP
+Output in the form of a table of mass fraction vs. radius? The normal
+output mode is one snapshot per output row, with  time, and the
+mass fractions
+[Default: \fBf\fP]
+.SH EXAMPLE
+The following example shows the evolution of 10% lagrangian mass radius and
+outputs the result in a graph
+.nf
+
+    snapmradii snap.dat 0.05 |\\
+            tabplot - xlab=time ylab="10% Mass radius"
+.fi
+.PP
+The following example shows the cumulative mass distribution function
+for the third snapshot in a large simulation, and plots it:
+.nf
+
+    snaptrim snap.dat - times=#3 | snapmradii - 0.01:0.99:01 |\\
+            tabplot - xlab="Mass fraction" ylab=Radius
+.fi
+.SH BUGS
+Doesn't handle snapshots with zero mass very well.
+.PP
+Doesn't deal with snapshots where there is no stars in one of the
+fraction bins requested. Since linear interpolation is used, some crazy
+larger radius is reported.
+.SH "SEE ALSO"
+snapcenter(1NEMO), snapstat(1NEMO), snapprint(1NEMO)
+.PP
+W.L.Sweatman - (1993) MNRAS 261, 497.
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +3.0i
+~/src/nbody/reduc   	snapmradii.c 
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+12-May-92	V1.0: created          	PJT
+10-aug-95	V1.2: added tab= 	PJT
+15-aug-96	V1.3: fixed bug which assumed total mass =1 PJT
+.fi
+
+
