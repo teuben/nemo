@@ -22,6 +22,10 @@ ccdmath: ccd.in
 	@echo Running $@
 	$(EXEC) ccdmath ccd.in - %1 | $(EXEC) ccdprint - x= y= format=%7.3f ; nemo.coverage ccdmath.c
 
+ccdgen: 
+	@echo Running $@
+	$(EXEC) ccdgen out=- object=exp pa=30 | $(EXEC) ccdprint - x= y= format=%7.3f ; nemo.coverage ccdgen.c
+
 ccdflip: ccd.in
 	@echo Running $@
 	$(EXEC) ccdflip ccd.in - xy | $(EXEC) ccdprint - x= y= format=%7.3f ; nemo.coverage ccdflip.c
