@@ -46,10 +46,13 @@ In itself, \fItheta\fP is a function of
 the inclination (\fIINC\fP) and the 
 position angle (\fIPA\fP) of the major axis.
 \fIXPOS\fP and \fIYPOS\fP denote the position of the rotation center
-in pixels w.r.t. 0,0 being the lower left corner of the map.  \fIrotcur\fP
-can fit for each ring the 6 parameters
-\fIVSYS\fP, \fIVROT\fP, \fIINC\fP, \fIPA\fP, \fIXPOS\fP
-and \fIYPOS\fP, though any combination of them can be fixed
+in pixels w.r.t. 0,0 being the lower left corner of the map
+(note that MIRIAD and GIPSY all have different conventions where
+0,0 is).
+ \fIrotcurshape\fP
+can fit the 5 geometric parameters
+\fIVSYS\fP, \fIINC\fP, \fIPA\fP, \fIXPOS\fP and \fIYPOS\fP, 
+though any combination of them can be fixed
 (see \fBfixed=\fP).
 The position angle \fIPA\fP of the major axis is defined as the
 angle, taken in anti-clockwise direction between the north direction on
@@ -58,14 +61,16 @@ radial velocity) of the galaxy.
 .PP
 Values equal the undefined value (currently 0.0) are ignored in the
 fit. See \fIccdmath(1NEMO)\fP or \fIfitsccd(1NEMO)\fP on how to
-create a velocity field with such undefined values.
+create a velocity field with such undefined values. See also
+the EXAMPLES below.
 .SH PARAMETERS
 The following parameters are known (those with ** are still here
 since we clones this off rotcur, but are likely to be slashed shortly):
 .TP 25
-\fBin\fP=\fIimage_vel\fP
+\fBin\fP=\fIv_image|xyv_tab|rv_tab\fP
 Input velocity field map, normally in \fIimage(5NEMO)\fP format.
-Input data can also be a table, see \fBimagemode=\fP and \fBrotcurmode\fP below.
+Input data can also be a table, see \fBimagemode=\fP and \fBrotcurmode\fP below
+how to control input tables.
 No default.
 .TP
 \fBradii\fP=\fIr0,r1\fP
@@ -169,13 +174,6 @@ factor by which the velocities in the map are multiplied.
 \fBblank=\fP
 Value of the blank pixel that needs to be ignored. [Default: \fB0.0\fP].
 .TP
-** \fBinherit=t|f\fP
-Logical denoting if the initial conditions for subsequent fitted rings
-should be inherited from the previous successfully fitted ring. The fixed
-parameters keep of course their fixed value. [Default: \fBt\fP]
-.TP
-** \fBfitmode=\fP\fBcos|sin\fP\fB,1\fP
-.TP
 \fBnsigma=\fP
 Reject outlier points will fall outside nsigma times the dispersion 
 away from the mean velocity in a ring. By default, it will not reject any outliers.
@@ -189,9 +187,14 @@ in other columns.
 .TP
 \fBrotcurmode=t|f\fP
 Input table is just a rotation curve (R,V) instead. ** not implemented yet **
+Note that \fItabnllsqfit(1NEMO)\fP is also quite efficient to use, except
+the rotation curve functions would need to be re-written in their
+function interface.
 .TP
 \fBload=\fP
-Name of a shared object file containing a rotation curve. ** Not implemented yet **
+Name of a shared object file containing rotation curve(s). The function names 
+must be \fBrotcur_\fP\fIname\fP, where \fIname\fP is the identifier name of the
+rotation curve used in the subsquent \fBrotcur#=\fP keywords.
 .TP
 \fBrotcur1=\fP
 Name of first rotation curve, followed by the initial estimates of its
@@ -245,6 +248,7 @@ flat	v0		v=v0
 plummer	v0,a		v=v0*x/(1+x^2)^(3/4)
 core1	v0,a		v=v0*x/(1+x)
 core2	v0,a		v=v0*x/(1+x^2)^(1/2)
+poly	v0,a,p2,p3,..	v=v0*(x+p2*x^2+p3*x^3+.....pN*x^N)
 .fi
 .SH EXAMPLE
 Here is an example of creating a synthetic velocity field with
@@ -257,23 +261,27 @@ ccdvel, and analysing it with rotcur:
          rotcur1=core1,100,20,1,1 tab=-
 ....
 
-VSYS: 6.14085e-17 0.0272559
-XPOS: 63.5 0.0171391
-YPOS: 63.5 0.0225175
-PA:   30.0004 0.0293586
-INC:  60.0033 0.0645938
-P1:  83.2638 0.155903
-P2:  13.1505 0.0844784
+VSYS: -1.48853e-18 5.80432e-05
+XPOS: 63.5 3.59896e-05
+YPOS: 63.5 4.78336e-05
+PA:   30 5.77529e-05
+INC:  60 0.000127084
+P1:  100.022 0.000459549
+P2:  20.0142 0.000246391
 NPT:  3926
 
-	(NB: bad example)
-
+.SH CAVEAT
+Parameters and fix/free masks to rotation curve parameters should be all set, in order
+for the respective routines to figure out the number of parameters. For example,
+the \fIpoly\fP rotation curve can only determine the correct order  of the polynomial
+by counting the number of arguments given in that option, e.g.
+\fBrotcur1=poly,100,10,2,2,1,1,1,1\fP  would use a 3th order polynomial.
 .SH SEE ALSO
-rotcur(1NEMO), ccdvel(1NEMO), tabcomment(1NEMO), rotcurves(1NEMO), pvtrace(1NEMO), ccdmom(1NEMO)
+rotcur(1NEMO), ccdvel(1NEMO), tabcomment(1NEMO), rotcurves(1NEMO), pvtrace(1NEMO), ccdmom(1NEMO), tabnllsqfit(1NEMO)
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
 .nf
 .ta +1i +4i
-20-jul-02	1.0 cloned off rotcur		PJT
+20-jul-02	0.9 cloned off rotcur		PJT
 .fi
