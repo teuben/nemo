@@ -1,0 +1,68 @@
+.TH FIRSTN 1NEMO "9 March 2004"
+.SH NAME
+firstn - von Hoerners first N-body code
+.SH SYNOPSIS
+firstn < in.firstn
+.SH DESCRIPTION
+\fBfirstn\fP currently only integrates an example internally-generated Plummer
+sphere.
+.SH INPUT 
+The \fBin.firstn\fP input file contains 3 lines (See also \fInbody0(1NEMO)\fP).
+.nf
+N ETA EPS DELTAT TCRIT
+ALPHAS BODY1 BODYN KZ5
+Q, ISCALE
+.fi
+.TP 25
+N - number of particles.
+.TP
+ETA - integration accuracy
+.TP
+EPS - gravitational softening
+.TP
+DELTAT - time interval of data output.
+.TP
+TCRIT - final integration time
+.TP
+ALPHAS - slope of the IMF
+.TP
+BODY1 - lower cutoff in IMF
+.TP
+BODYN - upper cutoff in IMF
+.TP
+KZ5 - control parameter what kind of input data are generated.
+.TP
+Q - Initial virial ratio (1  meant 2T/W=1)
+.TP
+ISCALE - 
+.SH PERFORMANCE
+CPU should  scale as N^2. Here are some numbers from a 
+.nf
+.ta +1i +1i +1i
+N	cpu"	cpu"
+	?	p4/1600/gcc	ifort
+
+16	2.9	2.2	0.79
+32	62.0	33.2	19.0
+64	93.4	27.8	84.2
+128	642.6	108.4	75.1
+256	n/a	834.3	746.5
+.fi
+.SH CAVEATS
+This is a code meant to be historic and educational, and should most
+certainly not be used for any serious work.
+.SH AUTHOR
+S. von Hoerner (original), Sverre Aarseth (21st century adaptation)
+.SH FILES
+.nf
+.ta +2i
+~/usr/aarseth/firstn	original
+.fi
+.SH SEE ALSO
+nbody0(1NEMO)
+.SH HISTORY
+.nf
+.ta +1i +4i
+dec-2000	version from Aarseth			        	PJT
+9-mar-04	man page written, 				PJT
+.fi
