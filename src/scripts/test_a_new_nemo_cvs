@@ -4,19 +4,33 @@
 # P1600/
 #
 #  History:     29-mar-2004   for NEMO V3.2
+#                4-may-2004   various new keywords and cfitsio optional install
 
-set pgplot=1
-set intel=0
-set gcc=0
-set falcon=1
-set anonymous=1
-set cvsroot=0
-set vogl=1
-set branch=()
+# todo: nemo needs to use -lcpgplot for pgplot also 
+
+set pgplot=1		# install PGPLOT
+set intel=0		# pick intel compiler (astromake)
+set gcc=0		# pick gcc version (astromake)
+set falcon=1		# compile gyrfalcON
+set anonymous=1		# anonymous CVS ?
+set cvsroot=0		# override the official CVSROOT
+set vogl=1		# compile vogl
+set single=0            # singe or double (default) precision
+set all=1		# make all binaries , or just testsuite?
+set clean=1		# remove old nemo directory before installing
+set branch=()		# use a CVS branch name?
+set yapp=(/null)	# set a YAPP device during the install
+set cfitsio=()		# point to the compressed tar file for CFITSIO
+set reuse=0             # don't clean and use CVS, just reuse the current nemo tree
 
 foreach _a ($*)
   set $_a
 end
+
+#   if reusing current tree, make sure we're not removing the directory
+if ($reuse) then
+  set clean=0
+endif
   
 if ($?NEMO) then
   echo Cannot test if NEMO=$NEMO is present already
@@ -46,61 +60,87 @@ if ($intel) then
   setenv F77 ifort
 endif
 
+if ($clean) rm -rf nemo
+
 #		pick a certain CVS release, if requested
-if ($#branch) then
-  echo Using branch $branch
-  set cvs_rev=(-r $branch)
-else
-  echo Using default MAIN branch
-  set cvs_rev=()
+#		then get the source
+if ($reuse == 0) then
+  if ($#branch) then
+    echo cvs: Using branch $branch
+    set cvs_rev=(-r $branch)
+  else
+    echo cvs: Using default MAIN branch
+    set cvs_rev=()
+  endif
+  cvs -Q checkout $cvs_rev nemo
 endif
 
-#		get  the source
-time cvs -Q checkout $cvs_rev nemo
+
 cd nemo
+if (! -e local) mkdir local
 
-if ($pgplot) then   
-  (mkdir local; cd local; cvs -Q checkout pgplot)
+if ($reuse) then
+  echo DISTCLEAN
+  make distclean >& install.distclean.log
 endif
+
+if ($pgplot && $reuse == 0) then   
+  (cd local; cvs -Q checkout pgplot)
+endif
+
+if (-e $cfitsio) then
+  echo Installing bootstrapping cfitsio
+  if (! -e include) ln -s inc include
+  (cd local; tar zxf $cfitsio)
+  src/scripts/cfitsio.install >& install.cfitsio.log
+  echo STATUS=$status
+  set cfitsio=1
+else
+  set cfitsio=0
+endif
+
 
 
 set copts=()
 # set copts=($copts --disable-gsl)
-# set copts=($copts --enable-single)
 if ($pgplot) set copts=($copts --with-yapp=pgplot --with-pgplot-prefix=`pwd`/lib)
+if ($cfitsio) set copts=($copts --enable-cfitsio)
+if ($single) set copts=($copts --enable-single)
 
-./configure  $copts
+echo Running configure $copts
+echo configure $copts  >& install.config.log
+./configure  $copts   >>& install.config.log
 source nemo_start
 make postconfig
 
 source NEMORC.local
+
+if ($#yapp > 0) setenv YAPP $yapp
+
 if ($pgplot) then
   echo "Compiling internal pgplot (logfile: install.pgplot.log)"
   make pgplot >& install.pgplot.log
 endif
+
 rehash
 make libs
+
 if ($vogl) then
   echo "Compiling vogl (logfile: install.vogl.log)"
-  $NEMO/src/scripts/nemo.vogl >& install.vogl.log
+  make vogl >& install.vogl.log
 endif
 
-src/scripts/testsuite -b
+if ($all) then
+  make bins
+  src/scripts/testsuite
+else
+  src/scripts/testsuite -b
+endif
 
 if ($falcon) then
-if (-d usr/dehnen/falcON) then
-  # falcON
-  set fbins=(TestGrav gyrfalcON)
-  set arch=i386_linux
-  echo Compiling $fbins for $arch
-  ( cd usr/dehnen/falcON; make ; make $fbins; cd $arch; cp $fbins $NEMOBIN)  >& install_falcON.log
-else
-  # YancNemo
-  echo Compiling YancNemo
-  ( cd usr/dehnen/yanc; mkdir -p lib; make ; make YancNemo mkking; cp YancNemo mkking $NEMOBIN )  >& install_yanc.log
-endif
+  ( cd usr/dehnen/falcON; make nemo_bins)  >& install_falcON.log
 endif
 
-# src/scripts/nemo.vogl
+
 
 echo All done.
