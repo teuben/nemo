@@ -1,6 +1,6 @@
 #!/bin/echo Usage: source 
 ###
-###  Standard C-shell setup for NEMO V2.2+ environment:
+###  Standard C-shell setup for NEMO V3 environment:
 ###
 ###	1) define the NEMO environment variable 
 ###	2) source  this file
@@ -14,7 +14,7 @@
 
 # 				try and set NEMO if it didn't exist 
 if ($?NEMO == 0) then
-  foreach v (/home/nemo /usr/nemo)
+  foreach v (/home/nemo /usr/nemo /usr/local/nemo)
     if (-d $v && -e $v/NEMORC) then
       setenv NEMO $v
     endif
@@ -32,12 +32,14 @@ if ($?NEMO == 0 && $?NEMOPATH == 1) then
  unsetenv NEMOPATH
 endif
 
-# 				resolve the hosttype NEMOHOST if not given 
+# 				resolve the hosttype NEMOHOST if not given yet
 if ($?NEMOHOST == 0) then
-   if (-x $NEMO/src/scripts/hosttype) then
+   if (-x $NEMO/config.guess) then
+	setenv NEMOHOST `$NEMO/config.guess`
+   else if (-x $NEMO/src/scripts/hosttype) then
    	setenv NEMOHOST `$NEMO/src/scripts/hosttype`
    else
-        echo "### Warning: no script $NEMO/src/scripts/hosttype"
+        echo "### Warning: no script config.guess or src/scripts/hosttype"
         echo "NEMORC: Warning: using unknown NEMOHOST"
 	setenv NEMOHOST unknown
    endif

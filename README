@@ -1,7 +1,8 @@
-This is:	A blurb on NEMO, what it is, how to install and use 
-Last updated:   16-dec-99
+This is:	A blurb on NEMO V3, what it is, how to install and use 
+Last updated:   1-apr-01
 By:		Peter Teuben
-Disclaimer:	You should probably also read some parts of the manual also (:-)
+Disclaimer:	The manual is now out of date, this installation is
+		much more based on autoconf
 
 ________________________________________________________________________________
 
@@ -20,8 +21,7 @@ or the long way:
     2)  source the $NEMO/NEMORC file.
     3)  add $NEMOBIN to you search path, preferably at start of the 
 	search path when you also intend to do programming within the 
-	NEMO environment. Note that $NEMOBIN will contain a 'cc' script
-	that may interfere with your other programming habits. For example:
+	NEMO environment. Note that in NEMO V3+ the 'cc'
 
 
 	        setenv NEMO /home/nemo		             (1)
@@ -100,8 +100,14 @@ See also $NEMO/src/scripts/
 b) Installing HDF
 	
 -- To be filled in --
+
+c) Installing CFITSIO
+
+   Be aware that at some future point when NEMO is going to use more of cfitsio,
+   the fitsio.h header file in NEMO and CFITSIO will cause problems. Note sure
+   of what the final resolution is. Perhaps NEMO's fitsio.h will be renamed.
 
-Brief overview of a Version 2.5.x INSTALLATION  
+Brief overview of a Version 3.x.y INSTALLATION  
 ==============================================
 
  (there is also a bootstrap loader that is a lot easier to use; 

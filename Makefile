@@ -1,5 +1,5 @@
 # Generated automatically from Makefile.in by configure.
-VERSION = NEMO V2.5 7-jan-00 PJT
+VERSION = NEMO V3.0 1-apr-01 PJT
 ################################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 ################################################################################
@@ -111,8 +111,8 @@ dirs: nemo_start
 	    echo DIR $(NEMO)/$$i exists; \
 	else \
 	    echo DIR $(NEMO)/$$i created; \
- 	    mkdir $(NEMO)/$$i; \
- 	    chmod a+w $(NEMO)/$$i; \
+	    mkdir $(NEMO)/$$i; \
+	    chmod a+w $(NEMO)/$$i; \
 	fi); done
 	-@for i in $(CHECKDIR2); do \
 	(if [ -d $$i ]; \
@@ -120,18 +120,18 @@ dirs: nemo_start
 	    echo DIR $$i exists; \
 	else \
 	    echo DIR $$i created; \
- 	    mkdir $$i; \
- 	    chmod a+w $$i; \
+	    mkdir $$i; \
+	    chmod a+w $$i; \
 	fi); done
 	-@for i in $(CHECKFIL2); do \
 	(if [ -f $$i ]; \
 	then \
 	    echo FILE $$i exists; \
- 	    chmod a+w $$i; \
+	    chmod a+w $$i; \
 	else \
 	    echo FILE $$i created; \
 	    touch $$i; \
- 	    chmod a+w $$i; \
+	    chmod a+w $$i; \
 	fi); done
 	@if [ ! -f $(TIMESTAMP) ]; then \
             echo Updating $(TIMESTAMP) file on `date`; \
@@ -191,7 +191,6 @@ alias:
 	@echo "# add these lines to your .cshrc file:"
 	@echo "alias nemo 'setenv NEMO "$(NEMO)" ; source $$NEMO/nemo_start'"
 
-	
 # fake a hosttype for current NEMO: (usage: make fakehost FAKEHOST=alias)
 FAKEHOST=unknown
 fakehost:
@@ -205,16 +204,17 @@ OS = $(NEMOHOST)
 
 # 
 
-# 
-SCRIPTS = cc f77 make ranlib
+#SCRIPTS = cc f77 make ranlib	## this was NEMO V2
+SCRIPTS = 
+
 scripts:
 	@echo Installing scripts on `date` 
 	@echo By `whoami` on `hostname`
 	-@for i in $(SCRIPTS); do \
 		(cd $(NEMO)/src/scripts; \
-  		echo "Available are: " ; ls $$i.* ; \
- 		$(MAKE) $$i OS=$(OS)); \
-  		( echo "hashed..." ; hash $(NEMOBIN)/$$i ); \
+		echo "Available are: " ; ls $$i.* ; \
+		$(MAKE) $$i OS=$(OS)); \
+		( echo "hashed..." ; hash $(NEMOBIN)/$$i ); \
 		echo "$$i will now be: `which $$i`" ; done
 	(cd $(NEMO)/src/scripts; make install)
 
@@ -225,15 +225,15 @@ nemo_lib:
 	@echo Make all subdirectories on `date`
 	@echo By `whoami` on `hostname`
 	-@for i in ${MAKEDIRS}; do \
- 		(cd $$i; echo `date` MAKE NEMO_LIB in `pwd`; \
- 		$(MAKE) nemo_lib); done
+		(cd $$i; echo `date` MAKE NEMO_LIB in `pwd`; \
+		$(MAKE) nemo_lib); done
 	@echo NEMO is installed in $(NEMO)
 	@echo all done `date`
 
 nemo_bin:
 	-@for i in ${MAKEDIRS}; do \
- 		(cd $$i; echo `date` MAKE NEMO_BIN in `pwd`; \
- 		$(MAKE) nemo_bin); done
+		(cd $$i; echo `date` MAKE NEMO_BIN in `pwd`; \
+		$(MAKE) nemo_bin); done
 	@echo all done `date`
 
 nemo_src:
@@ -336,6 +336,18 @@ tarfile:
 	tar -cf $(FILE) $(EXPORTA)
 	@echo ... All done!
 
+# autoconf/CVS based export
+#
+
+NEMOVER = `cat VERSION`
+DIST_DIR = nemo_$(NEMOVER)
+
+dist:
+	rm -rf $(DIST_DIR)
+	cvs -q export -D tomorrow -d $(DIST_DIR) nemo 2>&1 > /tmp/nemodist.log
+	tar -zcf $(DIST_DIR).tar.gz $(DIST_DIR)
+	rm -rf $(DIST_DIR)
+
 
 # The following 'ftp' targets only supposed to work at the master site
 # Warning:  (COMPRESS) .gz extensions have been hardcoded here
@@ -400,7 +412,7 @@ test1:
 test2:
 	@echo "<A HREF=ftp://ftp.astro.umd.edu/pub/nemo/$(NEMOTAR).gz> $(NEMOTAR).gz </A>"  > $(WWWDIR)/lastftp
 	@echo "(`date`)" >> $(WWWDIR)/lastftp
-	
+
 new_ftp:
 	-@for i in $(EXPORTA); do \
 	(find $$i -newer $(FTPDIR)/$(NEMOTAR).gz -type f -print); done
@@ -526,8 +538,8 @@ makeindex:
 OSS = sun3 sun4 mf sun3_old sun4_old sparc
 
 install:
-	@echo "There is no official install from the root menu"
-	@echo "see src/scripts/bootstrap how to bootstrap NEMO"
+	@echo "There is no official install from the root menu yet"
+	@echo "see also src/scripts/bootstrap how to bootstrap NEMO"
 	@echo ""
 	@echo "However, typically you would do the following: (must be in (t)csh)"
 	@echo '      ./configure        -- run configure, with lots of options'
@@ -536,7 +548,6 @@ install:
 	@echo "      make dirs          -- creates directory structure"
 	@echo "      make config_extra  -- copy configure created files into dirs"
 	@echo "      make scripts       -- destribute basic scripts to NEMOBIN"
-	@echo '	          (add $$NEMOBIN to your $$path, e.g.)'
 	@echo '      set path=(. $$NEMOBIN $$path); rehash'
 	@echo '            you may want to adjust NEMORC.local now,and then:'
 	@echo '      source NEMORC.local'
@@ -547,13 +558,15 @@ helpconfig:
 
 config:	configure
 	./configure
+	cp config.h makedefs $(NEMOLIB)
 
 configure:	configure.in
 	autoconf
 
 config_extra:
-	cp config.h makedefs $(NEMOLIB)
+	@echo DEPRECATED: should now call config
 
+#	useful if you want to start with a clean slate
 config_clean:
 	rm -f $(CONFIG_CLEAN)
 

@@ -15,8 +15,13 @@ dnl -- checks for compiler characteristics
 dnl -- checks for library functions
 dnl -- checks for system services
 
-dnl			Nemo version - just for fun for now
-NEMOVER="256"
+
+dnl ---			NEMO base directory
+NEMO = "`pwd`"
+AC_SUBST(NEMO)
+
+dnl ---			Nemo version - just for fun for now
+NEMOVER="`cat VERSION`"
 AC_SUBST(NEMOVER)
 
 
@@ -47,7 +52,6 @@ if test "$ok" = "yes"; then
         LDFLAGS="-g"
         # should we define DEBUG too?
 fi
-
 
 AC_ARG_ENABLE(fortran, [ --disable-fortran   don't use any Fortran], enable_fortran=$enableval, enable_fortran=yes)
 
@@ -259,22 +263,15 @@ dnl ---------------------------------------------------------------------
 
 
 case $host_os in
-      ultrix*)
-	LOADOBJ_MACH =
-        ;;
-      osf*)
-	LOADOBJ_MACH =
-        ;;
-      sunos*)
-	LOADOBJ_MACH =
+      *linux*)
+	LOADOBJ_MACH = "-Dlinux -DSYSV"
+	LOADOBJ_LIBS=-ldl
 	;;
       sparc*)
-	LOADOBJ_MACH = 
+	LOADOBJ_MACH = "-Dsun4 -DSOLARIS -DSYSV"
+	LOADOBJ_LIBS=-ldl
         ;;
 esac
-
-LOADOBJ_MACH="$LOADOBJ_MACH -Dlinux -DSYSV"
-LOADOBJ_LIBS=-ldl
 
 AC_SUBST(LOADOBJ_MACH)
 AC_SUBST(LOADOBJ_LIBS)
@@ -284,7 +281,7 @@ dnl ---------------------------------------------------------------------
 
 AC_MSG_CHECKING(whether we have HDF)
 AC_ARG_WITH(hdf-prefix, 
-        [  --with-hdf-prefix=PFX     Prefix where hdf was installed], 
+        [  --with-hdf-prefix=PFX     Prefix where HDF was installed], 
         hdf_config_prefix="$withval", 
         hdf_config_prefix="/usr/local")
 
@@ -562,12 +559,10 @@ AC_CHECK_FUNCS(ftime gethostname gettimeofday getwd mkdir select strdup strtod s
 
 AC_C_BIGENDIAN
 
-
-dnl AC_OUTPUT(Makefile makedefs test/Makefile)
-AC_OUTPUT(Makefile makedefs)
+AC_OUTPUT(Makefile makedefs nemo_start)
 
 echo "
-
+-------------------------------------------------------------------------
 All done, continue with your installation now as described in the
 output from the command
 
@@ -576,5 +571,6 @@ output from the command
 Note that this command actually does not install NEMO yet, but merely
 tells you what to do in which order. The recommended procedure is using
 the bootstrap script in NEMO/src/scripts.
+-------------------------------------------------------------------------
 "
 
