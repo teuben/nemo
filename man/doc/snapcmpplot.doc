@@ -1,0 +1,39 @@
+%N snapcmpplot
+This doc file has been produced with help=t option
+No further help is available, try 'man snapcmpplot'
+%A in1
+	first input file name [???]
+%A in2
+	second input file name [???]
+%A time1
+	time selected from 1st file [all]
+%A time2
+	time selected from 2nd file [all]
+%A obs
+	observable used in comparison [r]
+%A diffpart
+	difference particles first [true]
+%A relative
+	scale difference by ref value [false]
+%A xvar
+	indp var to plot; default is obs []
+%A xrange
+	range of values to display [0.0:2.0]
+%A xlabel
+	X axis label; default is xvar []
+%A yrange
+	range of delta values to display [0.0:1.0]
+%A ylabel
+	label for Y axis [delta]
+%A nxticks
+	number of tickmarks along X axis [3]
+%A nyticks
+	number of tickmarks along Y axis [3]
+%A xbox
+	extent of graph in x direction [2.5:17.5]
+%A ybox
+	extent of graph in y direction [5.0:15.0]
+%A formal
+	if true, make publication plot [false]
+%A VERSION
+	25-nov-90 PJT [1.3]
