@@ -1,4 +1,4 @@
-for 3.1.1
+for 3.1.2
   - make sure cfitsio stuff is ok in configure
   - the change in get_atable() should mean routines need to work
     on buffered table read better
@@ -7,6 +7,7 @@ for 3.1.1
   - fix installation if no fortran is available
 	(fmath in potential not needed)
 	(some potential/data not needed)
+  - intel linker problems (use different technique to force loading?)
 
 --------------------------------------------------------------------------------
 
@@ -36,7 +37,7 @@ some other help on configure:
 
 - compile under cygwin
 
-- fix for pgplot  when libpng is needed
+- fix for pgplot  when libpng is needed, or tcl/tk for that matter....
 
 - fix for gcc3 where the libraries have changed. It's now a lot easier:
 	/opt/gcc/3.2.1/lib
@@ -56,3 +57,9 @@ some other help on configure:
   #endif
 
 - getparam:  an option to produce an iraf .par file?
+
+
+- many integrators use conflicting designations for tstop,freq,freqout
+
+
+- getparam:  finish the outkeys= stuff
