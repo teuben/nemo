@@ -1,5 +1,5 @@
 DIR = src/nbody/io
-BIN = snaptipsy tipsysnap stoa atos tabtos 
+BIN = stoa atos tabtos snaptipsy tipsysnap 
 NEED = $(BIN) mkplummer snapprint snapcmp
 
 help:
@@ -38,7 +38,7 @@ tipsysnap:
 	@echo Running tipsysnap
 	tipsysnap st.out ts.out mode=binary options=$(T)
 	@echo Running snapcmp
-	tsf ts.out; tsf mp.out
+#	tsf ts.out; tsf mp.out
 	snapcmp ts.out mp.out
 
 tabtos:
