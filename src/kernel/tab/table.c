@@ -9,6 +9,7 @@
  *
  * iscomment(line)			is this line a blank or comment line?
  * 
+ *    1-jan-04      get_line::  changed EOF to return -1, and empty line to 0
  */
  
 #include <stdinc.h>
@@ -56,7 +57,7 @@ int get_line(stream instr, char *line)
 	for(;;) {
 		c=getc(instr);
 		if (c==EOF)
-			return 0;	/* error code: EOF */
+			return -1;	/* error code: EOF */
 		else if (c=='\n')
 			break;
 		line[i++]=c;

@@ -3,6 +3,7 @@
  *
  *	12-nov-98	coded, quick and dirty as usual (from fitsccd)
  *         dec-00       added nx= (aphid has nx=16, wasp has nx=128)
+ *       1-jan-04       get_line changed interface, fixed to nemo_file_lines
  */
 
 #include <stdinc.h>
@@ -16,7 +17,7 @@ string defv[] = {
     "nx=16\n            first dimension???",
     "dcol=2\n           Column for data",
     "nmax=100000\n      Allocation space for piped I/O",
-    "VERSION=1.1\n	20-dec-00 PJT",
+    "VERSION=1.1a\n	1-jan-04 PJT",
     NULL,
 };
 
@@ -26,7 +27,7 @@ string usage = "convert (WASP sig)tables into images";
 void nemo_main()
 {
     stream outstr;
-    char line[80];
+    char line[MAX_LINELEN];
     stream instr;
     double freq, freqold, data[3];
     int nmax, nx, ny, i, j, ierr;
@@ -37,7 +38,7 @@ void nemo_main()
     char namex[32], namey[32];
 
     
-    nmax = file_lines(name, getiparam("nmax"));
+    nmax = nemo_file_lines(name, getiparam("nmax"));
     nx = getiparam("nx");
     ny = nmax / (nx+1);
     if (nmax % (nx+1))
@@ -50,10 +51,11 @@ void nemo_main()
 
     instr = stropen(name,"r");
     for (j=0; j<ny; j++) {
-        get_line(instr, line);
+        if (get_line(instr, line) <= 0)
+	  error("blank line,or no more data found for row j=%d\n",j+1);
         freq = atof(line);
         dprintf(1,"%d : freq=%g\n",j,freq);
-        if (j==1) {
+        if (j==1) {    /* at the 2nd point, figure out the linear delta */
             Xmin(iptr) = 0.0;
             Ymin(iptr) = freqold;
             Dx(iptr) = 1.0;
@@ -61,7 +63,8 @@ void nemo_main()
         }
         freqold = freq;
         for (i=0; i<nx; i++) {
-            get_line(instr, line);
+	    if (get_line(instr, line) <= 0)
+	      error("blank line, or no more data found for col i=%d\n",i+1);
             patch_line(line);
             if ((ierr=nemoinpd(line,data,3)) != 3)
                 error("(%d,%d) badly formatted line: %s; err=%d\n",i,j,line,ierr);

@@ -35,7 +35,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "tohms=\n           list of columns (1..) to convert to hms (0=none)",
     "separator=:\n      separator between output D-M-S.S",
     "format=\n          date/time format",
-    "VERSION=0.6a\n     10-jan-03 PJT",
+    "VERSION=0.6b\n     1-jan-04 PJT",
     NULL
 };
 
@@ -117,7 +117,7 @@ convert(stream instr, stream outstr)
     nlines=0;               /* count lines read so far */
     for(;;) {                       /* loop over all lines in file(s) */
 
-        if (!get_line(instr, line))
+        if (get_line(instr, line) < 0)
             return 0;
         dprintf(3,"LINE: (%s)\n",line);
 	if(line[0] == '#') continue;		/* don't use comment lines */
@@ -134,7 +134,7 @@ convert(stream instr, stream outstr)
                 if (nemoinpd(outv[i],&dval,1)<0) 
                     error("syntax error decoding %s",outv[i]);
 		if (colmode[i+1] < 0) {     
-                    sign = SIGN(dval);
+                    sign = SGN(dval);
 		    dval = ABS(dval);       /* do we allow < 0 ??? */
                     decimalval = (int)floor(dval);
                     fprintf(outstr,"%d",decimalval*sign);
@@ -142,7 +142,7 @@ convert(stream instr, stream outstr)
                     dval -= decimalval;
                     dval *= ABS(colmode[i+1]);
 		}
-                sign = SIGN(dval);
+                sign = SGN(dval);
                 dval = ABS(dval);
                 dd = floor(dval);
                 dval = (dval-dd)*60.0;

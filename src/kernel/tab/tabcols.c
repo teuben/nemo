@@ -15,7 +15,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "out=???\n          output file name",
     "select=all\n       columns to select",
     "colsep=SP\n        Column separator (SP,TAB,NL)",    
-    "VERSION=1.0\n      26-jan-00 PJT",
+    "VERSION=1.0a\n     1-jan-04 PJT",
     NULL
 };
 
@@ -110,7 +110,7 @@ local void convert(stream instr, stream outstr)
     nlines=0;               /* count lines read so far */
 
     for (;;) {
-        if (!get_line(instr, line))           
+        if (get_line(instr, line) < 0)      /* EOF */
             return; 					     
 
         dprintf(3,"LINE: (%s)\n",line);

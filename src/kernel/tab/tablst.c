@@ -11,6 +11,8 @@
 #include <stdinc.h>
 #include <getparam.h>
 #include <filestruct.h>
+#include <history.h>
+#include <table.h>
 
 string defv[] = {
 	"in=???\n		  input table (filestruct) ",
@@ -19,7 +21,7 @@ string defv[] = {
 	"skip=0\n                 skip in front ",
 	"stride=1\n               stride through table ",
 	"format=%f\n              format for printf ",
-	"VERSION=1.3\n		  9-jan-95 PJT",
+	"VERSION=1.3a\n		  1-jan-04 PJT",
 	NULL,
 };
 
@@ -29,17 +31,21 @@ string usage="list a (binary) table";
 #define MAXCOL 64
 #endif
 
-nemo_main()
+extern string *burststring(string,string);
+
+string get_setname(string);
+
+void nemo_main()
 {
     stream instr;
     int    i, j, ntab, ncol, skip, stride;
-    real   *xc, *x[MAXCOL];      /* pointers to the columns */
-    char   *set, *col, *fmt, *get_setname();
-    string *colname, *burststring();
+    real   *x[MAXCOL];      /* pointers to the columns */
+    char   *set, *col, *fmt;
+    string *colname;
 
     instr = stropen(getparam("in"),"r");
     set = getparam("set");
-    if (set==NULL || *set==NULL)
+    if (set==NULL || *set==0)
         set = get_setname(getparam("in"));  /* ??? I/O redir ??? */
     col = getparam("col");
     colname = burststring(col,", ");
@@ -82,10 +88,9 @@ nemo_main()
 }
 
 
-char *get_setname (fname)
-char *fname;
+string get_setname (string fname)
 {
-    permanent char buffer[128];		/* this space is returned */
+    permanent char buffer[256];		/* pointer to this space is returned */
     int i;
     stream instr;
 
@@ -96,7 +101,7 @@ char *fname;
     system (buffer);
 
     instr = stropen("_get_setname_out","r");
-    if (!get_line (instr, buffer)) {
+    if (get_line (instr, buffer) < 0) {
         dprintf (0,"GET_SETNAME: no set found in %s\n",fname);
 	buffer[0] = '\0';
         return (buffer);

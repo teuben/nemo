@@ -32,6 +32,7 @@
  *       1-aug-02     b  using nemo_debug()
  *      13-nov-03  V3.3  handle null's (now that herinp sort of knows what to do?)  [unfinished]
  *      31-dec-03  V3.4  added colname=
+ *       1-jan-04     a  changed interface to get_line
  *
  */
 
@@ -57,7 +58,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "seed=0\n           Initial random number",
     "colname=\n         (unchecked) commented column names to add into output",
     "comments=f\n       Pass through comments?",
-    "VERSION=3.4\n      31-dec-03 PJT",
+    "VERSION=3.4a\n     1-jan-04 PJT",
     NULL
 };
 
@@ -190,7 +191,7 @@ local void convert(int ninput, stream *instr, stream outstr)
     for(;;) {                              /* loop over all lines in file(s) */
 
         for(i=0, cp=line; i<ninput; i++) { /* append all lines into one line */
-            if (!get_line(instr[i], cp))           
+            if (get_line(instr[i], cp) < 0)           
                 return; 					      /* EOF */
             if(iscomment(cp)) {
 	      if (Qcomment)

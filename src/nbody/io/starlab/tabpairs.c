@@ -8,12 +8,14 @@
  *
  *	21-jun-00	PJT @ AMNH - figuring out pieces of star encounter histo
  *       1-mar-03       fixed file_lines
+ *       1-jan-04       get_line changed interface
  *
  */
 
 #include <stdinc.h>	
 #include <getparam.h>
 #include <moment.h>
+#include <extstring.h>
 
 #define MLINELEN    512
 #define MAXLIST       8
@@ -26,7 +28,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "count=f\n           Count occurance of all stars?",
     "delete=0\n		 Iteration count to delete obvious combo/split pairs?",
     "nmax=10000\n        maximum number of data to be read if pipe",
-    "VERSION=1.0a\n	 1-mar-03 PJT",
+    "VERSION=1.0b\n	 1-jan-04 PJT",
     NULL
 };
 
@@ -64,7 +66,7 @@ int npairs;
 int combo_cnt[MAXSTARS], split_cnt[MAXSTARS];
 
 
-nemo_main()
+void nemo_main()
 {
     setparams();
 
@@ -80,8 +82,6 @@ nemo_main()
 
 void setparams(void)
 {
-    int  j;
-   
     input = getparam("in");             /* input table file */
     instr = stropen (input,"r");
 
@@ -108,14 +108,14 @@ void setparams(void)
  
 void read_data(void)
 {
-    int i, j, k, nwords, n, n1, n2, count=0;
+    int i, k, nwords, n, n1, n2, count=0;
     char line[MLINELEN];
     real tsnap, e, p;
     string *sp, *nlist1, *nlist2;
     int nlist[MAXLIST];
 		
     for(;;) {
-        if (!get_line(instr,line)) {
+        if (get_line(instr,line) < 0) {
             dprintf(1,"## Read %d lines\n",count);
             npairs = count;
             break;
@@ -195,7 +195,7 @@ void old_stat_data(void)
 
 void stat_data(void)
 {
-    int i,j, n, notsame;
+    int i,j;
     
     
     for (i=0; i<npairs; i++) {

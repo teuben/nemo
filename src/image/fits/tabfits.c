@@ -10,6 +10,7 @@
  *      9-jul-00    V3.1: allow dcol=0 for reading all columns  pjt
  *     22-jul-00    V3.2: fix for new style fitsio              pjt
  *     23-oct-03    V3.2b: check for MAXDAT (and made it bigger) pjt
+ *      1-jan-04        c: get_line check return value
  *
  * todo:  read one more line, check if file is done!!
  */
@@ -27,7 +28,7 @@ string defv[] = {
     "ny=\n              Y-Size of data, or else specify NAXIS2 in header",
     "nz=\n              Z-Size of data, or else specify NAXIS3 in header",
     "nmax=100000\n      Allocation space for piped I/O",
-    "VERSION=3.2b\n	23-oct-03 PJT",
+    "VERSION=3.2c\n	1-jan-04 PJT",
     NULL,
 };
 
@@ -80,7 +81,8 @@ void nemo_main()
                 error("Could not open fitsfile for writing");
         }
     
-        get_line(instr, line);
+        if (get_line(instr, line) < 0)     /* EOF */
+	  break;
 
         if (!get_key(line,key,value)) {                /*   check if comment is # key = value */
             dprintf(0,"Read %d header lines\n",nheader);
