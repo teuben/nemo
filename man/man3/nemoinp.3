@@ -1,0 +1,156 @@
+.TH NEMOINP 3NEMO "4 March 1994"
+.SH NAME
+nemoinp \- decode and parse string into reals, integers, logicals
+.SH SYNOPSIS
+.nf
+\fBint nemoinpd (expr,doutv,nout)
+int nemoinpf (expr,foutv,nout)
+int nemoinpr (expr,routv,nout)
+int nemoinpi (expr,ioutv,nout)
+int nemoinpl (expr,loutv,nout)
+int nemoinpb (expr,boutv,nout)
+char *expr;
+double doutv[];
+float  foutv[];
+real   routv[];
+int    ioutv[];
+long   loutv[];
+bool   boutv[];
+int    nout;\fP
+.fi
+.SH DESCRIPTION
+\fInemoinpX(3NEMO)\fP parses the input character string \fBXexpr\fP into 
+a list of basic C-data structure items, pointed to by \fBXoutv\fP.
+The input string must be comma, space or
+colon separated (sorry, tabs are considered dangerous). A colon is used as 
+an implied
+do-loop, where the first number is the starting value, the second the
+ending value, and an optional increment (which defaults to 1). Hence the
+format is \fBs:e[:i]\fP. A repeat facility is also 
+built in by using the double colon, and has the format \fBv::n\fP, the 
+number \fBv\fP is repeated \fBn\fP times. 
+\fBnout\fP is the declared length of \fBXoutv\fP.
+In case of success \fInemoinpX\fP returns the actual 
+number of items returned in \fBXoutv\fP, otherwise it returns a negative
+error code (see herinp(3NEMO). 
+A 0 return code means nothing was present in the \fBexpr\fP
+string, in which case preset defaults must be assumed.
+.PP
+An expression can have basic mathematical functions, such as addition,
+most transcendental functions and  even some mathematical and physical
+constants. See also \fIherinp(3NEMO)\fP.
+.SH OPERATORS
+The following operators are known:
+.nf
+.ta +1i
++	addition
+-	subtraction
+*	multiplication
+/	division
+**	power
+.fi
+.SH CONSTANTS
+The following constants are implemented (in SI units, where applicable)
+.nf
+.ta +1i
+pi	3.14159....            
+c	speed of light (SI)
+h	Planck (SI)            
+k	Boltzmann (SI)
+g	gravitation (SI)       
+s	Stefan-Boltzman (SI)
+m	mass of sun (SI)       
+p	parsec (SI)
+undef	errorval
+
+Note: the Hubble constant is not included.
+.fi
+.SH FUNCTIONS
+The following mathematical functions are implemented:
+.nf
+.ta +1i
+abs(x)    	absolute value of x   
+sqrt(x)    	square root of x
+sin(x)    	sine of x             
+asin(x)    	inverse sine of x
+cos(x)    	cosine of x           
+acos(x)    	inverse cosine of x
+tan(x)    	tangent of x          
+atan(x)    	inverse tan of x
+exp(x)   	exponential of x      
+sinh(x)    	hyperbolic sine of x
+ln(x)     	natural log of x      
+cosh(x)    	hyperbolic cosine of x
+log(x)    	log (bas 10) of x     
+tanh(x)    	hyperbolic tangent of x
+rad(x)    	convert x to radians  
+deg(x)     	convert x to degrees
+erf(x)   	error function of x   
+erfc(x)    	1-error function
+max(x,y)  	maximum of x and y    
+min(x,y)   	minimum of x and y
+sinc(x)  	sin(x)/x              
+atan2(x,y)	inverse tan (mod 2pi); x = sin, y = cos
+sign(x)   	sign of x (-1,0,1)    
+mod(x,y)   	gives remainder of x/y
+int(x)    	truncates to integer  
+nint(x)    	nearest integer
+ranu(x,y) 	generates uniform noise between x and y
+rang(x,y) 	generates gaussian noise with mean x and dispersion y
+ranp(x)   	generates poisson noise with mean x
+ifeq(x,y,a,b)  	returns a if x equal y, else b
+ifne(x,y,a,b)  	returns a if x not equal y, else b
+ifgt(x,y,a,b)  	returns a if x greater y, else b
+ifge(x,y,a,b)  	returns a if x greater or equal y, else b
+iflt(x,y,a,b)  	returns a if x less y, else b
+ifle(x,y,a,b)  	returns a if x less or equal y, else b
+.fi
+.SH ERROR RETURN CODE
+.nf
+.ta +1i
+0   	no error
+-11   	bad call
+-12   	unknown function
+-13   	syntax error
+-14   	illegal character
+-15   	wrong repeat argument (maximum is 32767)
+-16   	wrong number of arguments
+-17   	arithmetic error
+-18   	not enough internal memory
+-19   	conversion error
+-20   	unequal list length
+-21   	empty list
+-22   	nested lists
+-23   	output buffer overflow
+-24   	floating overflow/underflow in conversion
+.fi
+.SH BUGS
+The number e-floating number 0 (0.00000E+00) cannot be processed, nemoinp
+complains about floating underflow. Begeman is looking into this (dec 88)
+.SH LIMITATIONS
+Each subexpression can contain at most 32767 items, e.g. "1::40000" will not
+parse but "1::20000,1::20000" will correctly parse to 40000 1's.
+.PP
+Loops, repeats and lists cannot be nested!!
+.SH EXAMPLE
+.nf
+.ta
+.ta +1.5i +0.5i 
+1 2 3/3  sin(pi)      	yields       	1.0 2.0 1.0 0.0
+log(10)::4            	yields       	1.0 1.0 1.0 1.0
+log(10):log(100):2/4  	yields       	1.0 1.5 2.0
+10**[0 1 2 3]         	yields       	1.0 10.0 100.0 1000.0
+
+.fi
+.SH SEE ALSO
+herinp(3NEMO), fie(3NEMO), nemofie(3NEMO), getrange(3NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4i
+18-May-88	Implemented in NEMO by calling GIPSY's herinp	PJT
+xx-feb-89	nemoinp made archaic - must now call nemoinpX	PJT
+20-jun-89	doc updated	PJT
+4-mar-94	added nemoinpf/r	PJT
+.fi
