@@ -60,6 +60,7 @@
  *               8-aug-01 :    a allow error correction factor 1.0  pjt
  *              26-jan-02      b allow scale factor for velocity    pjt
  *              26-jun-02 : 2.8  allow input to be an ascii table instead of image
+ *              19-jul-02      a optional compilation for numrec
  ******************************************************************************/
 
 
@@ -79,6 +80,11 @@
 #include <stdinc.h>
 #include <getparam.h>
 #include <image.h>
+
+/*     Set this appropriate if you want to use NumRec's mrqmin() based engine */
+#if 0
+#define nllsqfit nr_nllsqfit
+#endif
 
 #define PARAMS  6           /* number of parameters */
 
@@ -118,7 +124,7 @@ string defv[] = {
     "fitmode=cos,1\n Basic Fitmode: cos(n*theta) or sin(n*theta)",
     "nsigma=-1\n     Iterate once by rejecting points more than nsigma resid",
     "imagemode=t\n   Input image mode? (false means ascii table)",
-    "VERSION=2.8a\n  26-jun-02 PJT",
+    "VERSION=2.8a\n  19-jul-02 PJT",
     NULL,
 };
 
@@ -158,12 +164,18 @@ void vcor_s1(real *c, real *p, real *vd, real *dn);
 
 
 
-int rotinp(real *rad, real pan[], real inc[], real vro[], int *nring, int ring, real *vsys, real *x0, real *y0, real *thf, int *wpow, int mask[], int *side, int cor[], int *inh, int *fitmode, real *nsigma, stream lunpri);
-int rotfit(real ri, real ro, real p[], real e[], int mask[], int wpow, int side, real thf, real elp4[], int cor[], int *npt, int fitmode, real nsigma, stream lunres);
+int rotinp(real *rad, real pan[], real inc[], real vro[], int *nring, int ring, real *vsys, 
+	   real *x0, real *y0, real *thf, int *wpow, int mask[], int *side, int cor[], 
+	   int *inh, int *fitmode, real *nsigma, stream lunpri);
+int rotfit(real ri, real ro, real p[], real e[], int mask[], int wpow, int side, real thf, 
+	   real elp4[], int cor[], int *npt, int fitmode, real nsigma, stream lunres);
 int perform_out(int h, real p[6], int n, real q);
-int rotplt(real rad[], real vsy[], real evs[], real vro[], real evr[], real pan[], real epa[], real inc[], real ein[], real xce[], real exc[], real yce[], real eyc[], int mask[], int ifit, real elp[][4], stream lunpri, int cor[], int npt[], real factor);
+int rotplt(real rad[], real vsy[], real evs[], real vro[], real evr[], real pan[], real epa[], 
+	   real inc[], real ein[], real xce[], real exc[], real yce[], real eyc[], 
+	   int mask[], int ifit, real elp[][4], stream lunpri, int cor[], int npt[], real factor);
 void stat2(real a[], int n, real *mean, real *sig);
-int getdat(real x[], real y[], real w[], int *n, int nmax, real p[], real ri, real ro, real thf, int wpow, real *q, int side, bool *full, int nfr);
+int getdat(real x[], real y[], real w[], int *n, int nmax, real p[], real ri, real ro, real thf, 
+	   int wpow, real *q, int side, bool *full, int nfr);
 real bmcorr(real xx[2], real p[], int l, int m);
 int perform_init(real *p, real *c);
 
