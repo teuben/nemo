@@ -1,0 +1,3 @@
+#! /bin/csh -f
+cc -DTESTBED -DX11 -o tyx yapp_x11.c Canvas.c \
+ -lXaw -lXt -lXmu -lX11 $NEMOLIB/libNEMO.a -lm
