@@ -16,6 +16,7 @@
  *     15-apr-92      c -- malloc() -> allocate()    PJT
  *     22-jul-93  V1.5  fixed bug when handling multisnapshots      PJT/JAN
  *	7-aug-94  V1.5a declaration of atof() fails on macro-versions (linux)
+ *     20-sep-01      b NULL -> 0
  */
 
 #include "defs.h"
@@ -41,7 +42,7 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "rmin=\n    Lower left corner of initial box [default is -rsize/2 (centered)",
     "options=mass,phase\n Output options: phase and/or mass",
     "fcells=0.75\n        Cell/body allocation ratio",
-    "VERSION=1.5a\n       7-aug-94 PJT",
+    "VERSION=1.5b\n       30-sep-01 PJT",
     NULL,
 };
 
@@ -80,7 +81,7 @@ inputdata()
         input = getparam("in");             /* get filename */
         instr = stropen(input, "r");        /* open file */
         test = getparam("test");            /* get name for testfile */
-        if (*test != NULL)                  /* if testfile provided: */
+        if (*test != 0)                     /* if testfile provided: */
 	    tststr = stropen(test, "r");    /* ... open it */
     }
 
