@@ -1,0 +1,25 @@
+.TH NEED 8NEMO "2 April 1997"
+.SH NAME
+need \- check and optionally compile software for NEMO
+.SH SYNOPSIS
+.PP
+\fBneed \fI[-m] [-s] program(s)\fP 
+.SH DESCRIPTION
+\fIneed\fP reports if an executable is present in $NEMOBIN, 
+and by using the -m flag (optionally)
+will attempt to install it if not present. If an executable
+is already present, it is not installed again. If you want to
+override that, use \fImknemo(8NEMO)\fP.
+.PP
+The -s flag can be used to keep the script silent during execution.
+.SH "SEE ALSO"
+mknemo(8NEMO)
+.SH AUTHOR
+Peter Teuben
+$NEMO/src/scripts/need         	script
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1i +4i
+2-apr-97	V1.0: doc created       	PJT
+.fi
