@@ -1,0 +1,10 @@
+%N orbstat
+%D Tabulate some statistics of orbit(s)
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man orbstat' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input orbit [???]
+%A VERSION
+	23-mar-95 PJT [1.0]
