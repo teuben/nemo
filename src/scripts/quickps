@@ -16,8 +16,9 @@ else
    exit 1
 endif
 
-if ($cc != x$cc) setenv CC $cc
-if ($f77 != x$f77) setenv F77 $f77
+if ("x$cc" != "x") setenv CC $cc
+if ("x$f77" != "x") setenv F77 $f77
+
 
 ./configure --with-yapp=ps
 source nemo_start
