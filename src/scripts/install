@@ -1,0 +1,37 @@
+#! /bin/csh -f
+#
+if ($#argv == 0) then
+  echo "Usage: $0 filename(s)"
+  echo "Install (via mknemo) all programs listed in the 1st column of filename(s)"
+  echo ""
+  exit 0
+endif
+
+set log=$NEMO/adm/install/install.log
+
+foreach usage ($*)
+  if (! -e $usage) then
+    echo "INSTALL> File $usage does not exist"
+    continue
+  endif
+
+  echo "INSTALL> `date` : Working on usage file $usage" | tee -a $log
+  set all=(`awk '{print $1}' $usage | sort | uniq`)
+
+foreach p ($all)
+  echo -n "$p "
+  $p help= >& /dev/null
+  if ($status == 0) then
+    echo " already installed"
+  else
+    echo -n " installing  "
+    mknemo $p >>& $log
+    if ($status == 0) then
+      echo " done OK"
+    else
+      echo " done, but some error ### $status"
+    endif
+  endif
+end
+
+end
