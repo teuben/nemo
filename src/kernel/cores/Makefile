@@ -61,7 +61,6 @@ install:  .install_lib
 .install_lib: $(OBJFILES)
 	ar ruv $(L) $?
 	$(RANLIB) $(L)
-	@touch .install_lib
 
 .install_inc: $(INCFILES)
 	cp $? $(NEMOINC)

@@ -6,6 +6,8 @@ Disclaimer:	The manual is now out of date, this installation is
 
 ________________________________________________________________________________
 
+(for INSTALLATION instruction see below)
+
 Using NEMO (i.e. when somebody had already installed it for you) requires
 just a few changes modifications to your .cshrc/.login script: 
 (sorry, no sh support yet)
@@ -18,32 +20,23 @@ just a few changes modifications to your .cshrc/.login script:
 or the long way:
 
     1)  define the environment variable NEMO where NEMO's root directory is.
-    2)  source the $NEMO/NEMORC file.
-    3)  add $NEMOBIN to you search path, preferably at start of the 
-	search path when you also intend to do programming within the 
-	NEMO environment. Note that in NEMO V3+ the 'cc'
-
+    2)  optionally define NEMOHOST if you want to override an automatic determination
+    3)  source the $NEMO/NEMORC file.
+    4)  add $NEMOBIN to you search path. Note that in NEMO V3+ the 'cc'
+	command is now available, as NEMOBIN/cc has disappeared.
 
 	        setenv NEMO /home/nemo		             (1)
-	        source $NEMO/NEMORC			     (2)
-	        set path = ( . $NEMOBIN xxx yyy zzz)	     (3)
+	        source $NEMO/NEMORC			     (3)
+	        set path = ( . xxx $NEMOBIN yyy zzz)	     (4)
 
 where xxx, yyy  and zzz are other directories you may want in there. 
-
-you can also use, with some caution, an incremental technique:
-
-		set path = ( . $NEMOBIN $path[2-] )
-
-
-This is called a static installation, and means that NEMO is present in
-your environment each time you log in.  
 
 Alternatively, you can set up a dynamic NEMO installation, which means
 that NEMO is by default not present after you have logged in.  The
 dynamic installation requires a special command (normally an alias
 'nemo') to be issued in order to ``load'' NEMO into the environment. 
 e.g. I use:
-	alias nemo 'source ~nemo/nemo_start'
+	alias nemo 'source ~nemo/nemo_start; unalias nemo'
 and the reverse to remove it:
 	alias omen 'source ~nemo/nemo_end'
 This can be done at any stage during an interactive terminal session. 
@@ -87,14 +80,15 @@ a) Installing PGPLOT
 
 	cd $NEMO/local
 	$NEMO/src/scripts/pgplot.install
-	(you may need to get the pgplot5.2.tar.gz file from caltech)
+	(you may need to get the pgplot5.2.tar.gz file from caltech
+	or a local repository)
 
    this assumes $NEMO has a basic presence already, so don't start this
    yet, first figure something out about the installation.
 
 See also $NEMO/src/scripts/
 
-   On some linux systems (e.g. redhat) may need to 
+   On some linux systems (e.g. older versions of Redhat) may need to 
 		 ln -s /usr/X11R6 /usr/X11
 
 b) Installing HDF
@@ -117,13 +111,8 @@ Brief overview of a Version 3.x.y INSTALLATION
 1) To untar a compressed tar file the following will do just fine, and
    you never need to save the uncompressed version:
 
-	% zcat nemo.tar.Z | tar xf -
-   or
-        % gzip -cd nemo.tar.gz | tar xf -
+        % gzip -cd nemo_3.x.y.tar.gz | tar xf -
 
-   Make sure you do this in NEMO's root directory (what we later refer to
-   as $NEMO)
- 
    You can also (if your ftp allows this) do this from within the ftp
    program:
 
@@ -134,7 +123,17 @@ Brief overview of a Version 3.x.y INSTALLATION
 	ftp> cd pub/teuben/nemo
 	ftp> get nemo.tar.gz "|zcat|tar xf -"
 	ftp> quit
-	%
+	% cd nemo_3.x.y
+
+2) Run configure and install the basic libraries:
+
+	% configure
+	% source nemo_start
+	% make dirs config_extra scripts
+	% source NEMORC.local			(or look at $NEMO/src/scripts/NEMORC)
+	% rehash
+	% make install
+
 
 2) Copy the NEMORC.gen file to NEMORC.local, and edit it to reflect your
    local site. This file is meant to set environment variables that
@@ -144,39 +143,7 @@ Brief overview of a Version 3.x.y INSTALLATION
 
 	cp NEMORC.gen NEMORC.local
 
-   You can also look at some working examples in $NEMO/src/scripts/NEMORC/.
-
-   Take particular care to the following ones (sometimes you don't discover
-   to reset them after an initial installation has failed in certain areas,
-   and you'll have to do it all over again):
-
-    FORLIBS:    choose the appropriate one, SUN OS 4.1 has now only one
-                fortran library libF77.a (-lF77) in a strange new location.
-                Keep track of changes as SUN OS upgrades their software
-		e.g. on a sun4, with FPVERSION either cg87 or cg89 (default) 
-		one needs sometimes:
-	setenv FORLIBS "-L/usr/lang/SC0.0 -lF77 \
-		/usr/lang/SC0.0/$FPVERSION/libm.a \
-		/usr/lang/SC0.0/$FPVERSION/_crt1.o"
-		but on a sun3 the last _crt1.o needs to be omitted, i.e.
-	setenv FORLIBS "-L/usr/lang/SC0.0 -lF77 \
-		/usr/lang/SC0.0/$FPVERSION/libm.a \
-		/usr/lang/SC0.0/$FPVERSION/_crt1.o"
-		To me still totally incomprehencable. You'll have to find
-		out empirically I guess......
-	setenv FORLIBS -lg2c
-		for linux systems that use g77. For f2c based fortran compilers
-		there is currently no support, try -lf2c, that may work.
-    YAPPLIB:    set it to the YAPP_* library you want it to be the default
-                In order to test which one works on your system, you'd have
-                to go through at least installing 
-                $NEMO/src/kernel/io and $NEMO/src/kernel/core.
-
-   In particular one should pay attention if your system supports multiple
-   float_options (e.g. -f68881, -ffpa, -fswitch etc. on a Sun3). If so, make
-   sure the (graphics) libraries you will use have the same setting as how
-   you compile NEMO. In case of tricky things, the cc script (see in: (2) 
-   below) can be adapted too.
+   You can also look at some working examples in $NEMO/src/scripts/NEMORC/
 
 2b) The installation was also designed to allow upgrading your existing
     NEMO version by placing the new tar file on top of your own directory.
@@ -185,7 +152,6 @@ Brief overview of a Version 3.x.y INSTALLATION
         make new
     which  is supposed to check new sourcecode since the last official
     install.  ** i need to write more about this, this can be tricky **
-
 
 3a) follow the $NEMO/src/bootstrap script to install a fairly complete
     system:
@@ -206,7 +172,9 @@ Brief overview of a Version 3.x.y INSTALLATION
 	...
 	set path = ( . $NEMOBIN $path )
 
-4) Bootstrap the system with a replacement 'cc' and/or 'make' script
+
+
+4) Bootstrap the system 
 
    % cd $NEMO   
    % make config  
@@ -214,23 +182,10 @@ Brief overview of a Version 3.x.y INSTALLATION
    % make config_extra
    % make scripts
 
-    For some very old UNIX versions there may be a serious problem
-    here if your local 'make' does not import environment variables, you
-    may need a make script in $NEMOBIN too.. Have to do this by hand,
-    the $NEMO/src/scripts area has some examples)
-    for example,
-
-   % make SHELL=/bin/sh dirs scripts
-   % make SHELL=/bin/sh cc make OS=linux    (for example)
-   % rehash
-   % which cc make
-
-    And make sure your getting the $NEMOBIN versions of cc and make
-
 5) Make the library ($NEMOLIB/libnemo.a)
 
    % cd $NEMO/src
-   % make -i clean install
+   % make clean install
 
    Before you run this, you may want to check/change 
 

@@ -3,7 +3,7 @@ include $(NEMOLIB)/makedefs
 
 #	Compile flags  $(NFLAGS)
 DIM=THREEDIM
-NFLAGS=-$(DIM)
+NFLAGS=-D$(DIM)
 LOCAL_INC = $(NFLAGS)
 
 #	remote dir where object files should live

@@ -218,7 +218,8 @@ scripts:
 	(cd $(NEMO)/src/scripts; make install)
 
 # The next four targets are not currently supported 
-all:	nemo_lib nemo_bin
+#all:	nemo_lib nemo_bin
+
 
 nemo_lib:
 	@echo Make all subdirectories on `date`
@@ -526,8 +527,7 @@ miriad:
 	 $(MAKE) nemotool ; mv nemotool $(NEMOBIN); make clean)
 
 makeindex:
-	@echo "Installing makeindex utility for LaTeX manuals"
-	(cd $(NEMO)/src/tools/makeindex;\
+	@echo "Installing makeindex utility for LaTeX manuals"	(cd $(NEMO)/src/tools/makeindex;\
 	 make;mv indexsrc/index $(NEMOBIN)/makeindex;make clean)
 #	END
 
@@ -541,15 +541,12 @@ install:
 	@echo "see also src/scripts/bootstrap how to bootstrap NEMO"
 	@echo ""
 	@echo "However, typically you would do the following: (must be in (t)csh)"
-	@echo '      ./configure        -- run configure, with lots of options'
-	@echo '      setenv NEMO `pwd`  -- define NEMO'
-	@echo "      source NEMORC      -- this is a bootstrap, but we need it here"
-	@echo "      make dirs          -- creates directory structure"
+	@echo "      ./configure        -- run configure, with lots of options"
+	@echo "      source nemo_start  -- load the NEMO environment"
+	@echo "      make dirs          -- creates directory structure and admin stuff"
 	@echo "      make config_extra  -- copy configure created files into dirs"
 	@echo "      make scripts       -- destribute basic scripts to NEMOBIN"
-	@echo '      set path=(. $$NEMOBIN $$path); rehash'
-	@echo '            you may want to adjust NEMORC.local now,and then:'
-	@echo '      source NEMORC.local'
+	@echo "      source NEMORC.local   -- any last minute local changes"
 	@echo "      cd src;make install"
 
 helpconfig:
@@ -557,13 +554,12 @@ helpconfig:
 
 config:	configure
 	./configure
-	cp config.h makedefs $(NEMOLIB)
 
 configure:	configure.in
 	autoconf
 
 config_extra:
-	@echo DEPRECATED: should now call config
+	cp config.h makedefs $(NEMOLIB)
 
 #	useful if you want to start with a clean slate
 config_clean:
@@ -589,11 +585,11 @@ cleanall:
 cleansrc:
 	(cd src; make clean)
 
-
-sun3 sun4 sparc:	sun
-
-sun:
-	@echo Starting at `date`
-	(cd src;make install)
+libs:
+	@echo Starting at `date`, tail -f $(NEMO)/install.log
+	cd src;make install 2>&1 > ../install.log
 	@echo Done at `date`
 
+
+bins:
+	@echo NEMO does not have a bins yet...

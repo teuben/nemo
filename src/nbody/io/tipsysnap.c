@@ -3,8 +3,11 @@
  *
  * $Header$
  * $Log$
- * Revision 1.1  2000/08/19 03:56:44  teuben
- * Initial revision
+ * Revision 1.2  2001/04/02 05:18:51  teuben
+ * more fixing of the linux install
+ *
+ * Revision 1.1.1.1  2000/08/19 03:56:44  teuben
+ * import NEMO V3
  *
  * Revision 1.1  93/09/14  09:51:22  trq
  * Initial revision
@@ -15,8 +18,9 @@
  * Revision 2.1  1991/04/18  18:11:35  trq
  * Added checks for malloc(0).
  *
- * 2-sep-94	For NEMO conversion to snapshot
+ *  2-sep-94	For NEMO conversion to snapshot
  * 18-aug-00    also allow binary files..., with padding and optional swap
+ *  1-apr-01    compiler warnings - pjt
  */
  
 #include <stdinc.h>
@@ -37,7 +41,7 @@ string defv[] = {
     "options=gas,dark,star\n    Output which particles?",
     "mode=ascii\n		Input mode (ascii, binary)",
     "swap=f\n                   Swap bytes?",
-    "VERSION=2.0\n              19-aug-00 pjt",
+    "VERSION=2.0a\n             1-apr-01 pjt",
     NULL,
 };
 
@@ -277,12 +281,12 @@ nemo_main()
         if (n <= 0) break;
 
         if (Qswap) {
-            bswap(&header.time,    sizeof(double), 1);
-            bswap(&header.nbodies, sizeof(int),    1);
-            bswap(&header.ndim,    sizeof(int),    1);
-            bswap(&header.nsph,    sizeof(int),    1);
-            bswap(&header.ndark,   sizeof(int),    1);
-            bswap(&header.nstar,   sizeof(int),    1);
+            bswap((void *)&header.time,    sizeof(double), 1);
+            bswap((void *)&header.nbodies, sizeof(int),    1);
+            bswap((void *)&header.ndim,    sizeof(int),    1);
+            bswap((void *)&header.nsph,    sizeof(int),    1);
+            bswap((void *)&header.ndark,   sizeof(int),    1);
+            bswap((void *)&header.nstar,   sizeof(int),    1);
         }
 
         switch(header.ndim) {

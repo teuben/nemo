@@ -1,9 +1,7 @@
 /*
  * SNAPSHOT.H: definitions for N-body snapshot files.
+ *	sep-1990	added Story, Pos and Vel options
  */
-
-#ifndef _snapshot_h
-#define _snapshot_h
 
 /*
  * Item tags for SnapShot components.
@@ -19,10 +17,13 @@
 #define     CoordSystemTag      "CoordSystem"
 #define     MassTag             "Mass"
 #define     PhaseSpaceTag       "PhaseSpace"
+#define     PosTag              "Pos"
+#define     VelTag              "Vel"
 #define	    AccelerationTag	"Acceleration"
 #define	    PotentialTag	"Potential"
 #define     AuxTag              "Aux"
 #define     KeyTag              "Key"
+#define     StoryTag		"Story"
 
 #define   DiagnosticsTag	"Diagnostics"
 #define     EnergyTag           "Energy"
@@ -33,6 +34,7 @@
 
 /*
  * Symbolic names for input/output bit flags.
+ *	Assumed 32 bits are available
  */
 
 #define TimeBit          (1 <<  0)
@@ -49,6 +51,10 @@
 #define PETensorBit      (1 <<  9)
 #define AMTensorBit      (1 << 10)
 #define CMPhaseSpaceBit  (1 << 11)
+
+#define StoryBit         (1 << 12)
+#define PosBit		 (1 << 13)
+#define VelBit		 (1 << 14)
 
 /*
  * Coordinate system codes; these assume 32-bit ints.
@@ -68,4 +74,3 @@
 #define EccAnomaly  (5 << 16)
 #define MeanAnomaly (6 << 16)
 #define PeriPassage (7 << 16)
-#endif

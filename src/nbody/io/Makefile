@@ -31,14 +31,12 @@ install: .install_lib
 
 .install_inc: $(INCFILES)
 	cp $? $(NEMOINC)/snapshot
-	@touch .install_inc
 
 .install_lib: $(OBJFILES)
 	ar ruv $(L) $?
 	ranlib $(L)
-	@touch .install_lib
 
-update: .install_inc
+update:
 
 
 # Targets used by Nemo to update include libraries and bin directories.

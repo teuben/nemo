@@ -17,7 +17,7 @@ dnl -- checks for system services
 
 
 dnl ---			NEMO base directory
-NEMO = "`pwd`"
+NEMO="`pwd`"
 AC_SUBST(NEMO)
 
 dnl ---			Nemo version - just for fun for now

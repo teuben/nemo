@@ -543,7 +543,7 @@ fi
 
 
 
-NEMO = "`pwd`"
+NEMO="`pwd`"
 
 
 NEMOVER="`cat VERSION`"
@@ -5908,7 +5908,7 @@ test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1
 
 
 echo "
-
+-------------------------------------------------------------------------
 All done, continue with your installation now as described in the
 output from the command
 
@@ -5917,5 +5917,6 @@ output from the command
 Note that this command actually does not install NEMO yet, but merely
 tells you what to do in which order. The recommended procedure is using
 the bootstrap script in NEMO/src/scripts.
+-------------------------------------------------------------------------
 "
 

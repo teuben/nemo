@@ -23,7 +23,7 @@ OBJFILES= eigsrt.o jacobi.o nrutil.o \
 LOBJFILES= $L(eigsrt.o)   $L(jacobi.o) $L(nrutil.o) \
 	   $L(eigsrt_d.o) $L(jacobi_d.o) $L(ran3.o) \
 	   $L(beta.o) $L(gamma.o) $L(pearsn.o)
- 
+
 BINFILES = 
 TESTFILES =
 
@@ -55,16 +55,14 @@ $(L):	$(LOBJFILES)
 	rm -f $?
 
 #	install the library: can be (re)done from scratch by removing .o files
-install:   .install_inc .install_lib 
+install:  .install_lib 
 
 .install_lib: $(OBJFILES)
 	ar ruv $(L) $?
 	$(RANLIB) $(L)
-	@touch .install_lib
 
 .install_inc: $(INCFILES)
 	cp $? $(NEMOINC)
-	@touch .install_inc
 
 # Targets used by Nemo to update libraries and bins.
 
@@ -116,7 +114,7 @@ xrandomtest: xrandom.c
 
 frandomtest: frandom.c 
 	$(CC) $(CFLAGS) -o frandomtest -DTESTBED frandom.c $(L) -lm
-			
+
 axistest: axis.c
 	$(CC) $(CFLAGS) -o axistest -DTESTBED axis.c $(L) -lm
 

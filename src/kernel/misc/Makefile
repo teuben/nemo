@@ -82,7 +82,6 @@ install:   .install_lib
 .install_lib: $(OBJFILES)
 	ar ruv $(L) $?
 	$(RANLIB) $(L)
-	@touch .install_lib
 
 .install_inc: $(INCFILES)
 	cp $? $(NEMOINC)
@@ -152,7 +151,7 @@ xrandomtest: xrandom.c
 
 frandomtest: frandom.c 
 	$(CC) $(CFLAGS) -o frandomtest -DTESTBED frandom.c $(L) -lm
-			
+
 hashtest: hash.c 
 	$(CC) $(CFLAGS) -o hashtest -DTESTBED hash.c $(L) -lm
 
