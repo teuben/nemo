@@ -3,10 +3,11 @@
 #   april-2001		allow making from file+ext (e.g. scfm.exe) too
 #   jul-2001            fixed -n bug
 #   jun-2003            optional -u "cd $NEMO;cvs update"
+#   feb-2004            both -t and -T flag
 #
 #  BIG BUG: 'mknemo mkplummer.c' would remove the sourcecode and put it into $NEMOBIN !!!!!
 #
-set version="MKNEMO Version 2.0 27-dec-03 - +NEMOBIN bug"
+set version="MKNEMO Version 2.1 21-feb-04 - +NEMOBIN bug"
 if ($#argv == 0) goto usage
 set old_argv=($*)
 
@@ -42,7 +43,8 @@ set src=$NEMO/src
 set n=0
 set d=0
 set code=""
-set tidy=""
+set post_tidy=""
+set pre_tidy=""
 set u=0
 set l=0
 set go=0
@@ -85,7 +87,11 @@ loop:
     shift argv
     breaksw
   case -t:
-    set tidy="make clean"
+    set pre_tidy="make clean"
+    shift argv
+    breaksw
+  case -T:
+    set post_tidy="make clean"
     shift argv
     breaksw
   case -r:
@@ -175,7 +181,7 @@ foreach f ($argv)
      if (-e $l/Makefile) then
        set mk=$ft
        if (! -e $NEMOBIN/$mk) set newbins=1
-       (cd $l;make $mk; set err=$status; mv $mk $NEMOBIN; $tidy)
+       (cd $l;$pre_tidy;make $mk; set err=$status; mv $mk $NEMOBIN; $post_tidy)
        @ errs += $status
        if ($d) then
            mkpdoc $mk
@@ -207,7 +213,7 @@ foreach f ($argv)
       set mf=""
    endif
    if (! -e $NEMOBIN/$mk) set newbins=1
-   (cd $dir ; make $mf $mk; set err=$status; mv $mk $NEMOBIN; $tidy)
+   (cd $dir ; $pre_tidy; make $mf $mk; set err=$status; mv $mk $NEMOBIN; $post_tidy)
    @ errs += $err
    # see if new doc file needed...
    if ($d) then
@@ -255,6 +261,7 @@ usage:
   echo "  -r        remove lockfile before starting"
   echo "  -d        also make doc file (only for true NEMO programs)"
   echo "  -t        cleanup after having made the binaries"
+  echo "  -T        cleanup before making the binaries"
   echo "  -u        run 'cvs update' to NEMO before making"
   echo "  -l        recompile the library by running 'make libs'"
   exit 1
