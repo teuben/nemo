@@ -1,0 +1,40 @@
+#! /bin/csh -f
+#
+#  Install HDF for NEMO
+#
+#
+#  16-dec-04    checked for HDF4.2r0.tar.gz
+# 
+
+if ($?NEMO == 0) set NEMO=`pwd`
+
+#			 	.. command line keywords ..
+set HDF=HDF4.2r0
+set hdf=hdf4.2r0
+set src=$NEMO/local/$hdf
+set prefix=$NEMO
+
+
+#				.. parse command line ..
+foreach arg ($*)
+   set check = `echo $argv[1] | awk -F= '{print NF}'`
+   if ("$check" == 1) break
+   echo Setting: $arg
+   set $arg
+end
+
+if (! -e $src) then
+  echo HDF source directory src=$src does not exist, try NEMO=
+  echo or:
+  echo " cd $NEMO/local"
+  echo " wget ftp://ftp.ncsa.uiuc.edu/HDF/pub/outgoing/hdf4/$hdf/$hdf.tar.gz"
+  echo " tar zxf $hdf.tar.gz"
+  echo " ../src/scripts/hdf.install"
+  exit 1
+endif
+
+cd $src
+./configure --prefix=$prefix
+make clean
+make
+make install 
