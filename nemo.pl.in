@@ -2,6 +2,9 @@
 #
 #  this is a section of perl code to setup perl (e.g. cgi-bin) scripts
 #  to know the absolute location of NEMO and define all needed variables
+# 
+#  CAVEAT:  if you relocate the NEMO directory tree, you will need to 
+#	    edit this file (or re-install in the new location)
 #
 #
 
