@@ -9,7 +9,8 @@
  *                      AMPHASE though
  *      21-nov-02  1.3  implemented nsigma for "line" and "arm"
  *      22-dec-02  1.3a fixing code to make it work for -DSINGLEPREC
- *
+ *      12-feb-03  1.3b add "fourier m=2' mode as arm3 for Rahul by Rahul
+ *      14-feb-03  1.6  back to PJT style (version # got screwed up)
  *
  *  line       a+bx
  *  plane      p0+p1*x1+p2*x2+p3*x3+.....     up to 'order'   (a 2D plane in 3D has order=2)
@@ -17,7 +18,8 @@
  *  gauss      p0+p1*exp(-(x-p2)^2/(2*p3^2))
  *  exp        p0+p1*exp(-(x-p2)/p3)  
  *  arm        p0+p1*cos(x)+p2*sin(x)         special version for rahul 
- */
+ *  arm3       p0+p1*cos(x)+p2*sin(x)+p3*cos(3*x)+p4*sin(3*x) 
+ */ 
 
 #include <stdinc.h>  
 #include <getparam.h>
@@ -44,7 +46,7 @@ string defv[] = {
     "itmax=50\n         Maximum number of allowed nllsqfit iterations",
     "format=%g\n        Output format for fitted values and their errors",
     "numrec=f\n         Try the numrec routine instead?",
-    "VERSION=1.5\n      28-nov-02 PJT",
+    "VERSION=1.6\n      14-feb-03 PJT",
     NULL
 };
 
@@ -213,12 +215,13 @@ static void derv_poly(real *x, real *p, real *e, int np)
 
 #define DPR 57.29577951308232
 
+/* don't use PHASEAMP, somehow it's not working .. */
 /* #define PHASEAMP */
 
 static real func_arm(real *x, real *p, int np)
 {
 #ifdef PHASEAMP
-  return p[0] + p[1]*cos( (x[0]-p[2])/DPR);
+    return p[0] + p[1]*cos( (x[0]-p[2])/DPR);
 #else
   real y = x[0]/DPR;
 
@@ -229,9 +232,9 @@ static real func_arm(real *x, real *p, int np)
 static void derv_arm(real *x, real *p, real *e, int np)
 {
 #ifdef PHASEAMP
-  e[0] = 1.0;
-  e[1] = cos( (x[0]-p[2])/DPR);
-  e[2] = p[1]*sin ((x[0]-p[2])/DPR) / DPR;
+    e[0] = 1.0;
+    e[1] = cos( (x[0]-p[2])/DPR);
+    e[2] = p[1]*sin ((x[0]-p[2])/DPR) / DPR;
 #else
   real y = x[0]/DPR;
 
@@ -239,6 +242,24 @@ static void derv_arm(real *x, real *p, real *e, int np)
   e[1] = cos(y);
   e[2] = sin(y);
 #endif
+}
+
+static real func_arm3(real *x, real *p, int np)
+{
+  real y = x[0]/DPR;
+
+  return p[0] + p[1]*cos(y) + p[2]*sin(y) + p[3]*cos(3*y) + p[4]*sin(3*y);
+}
+
+static void derv_arm3(real *x, real *p, real *e, int np)
+{
+  real y = x[0]/DPR;
+
+  e[0] = 1.0;
+  e[1] = cos(y);
+  e[2] = sin(y);
+  e[3] = cos(3*y);
+  e[4] = sin(3*y);
 }
 
 
@@ -270,6 +291,8 @@ nemo_main()
     	do_exp();
     } else if (scanopt(method,"arm")) {
     	do_arm();
+    } else if (scanopt(method,"arm3")) {
+    	do_arm3();
     } else
         error("fit=%s invalid; try [line,plane,poly,gauss]",
 	      getparam("fit"));
@@ -833,26 +856,92 @@ do_arm()
   
   for (iter=0; iter<=msigma; iter++) {
     nrt = (*my_nllsqfit)(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
-    if (nrt==-2)
+    /*if (nrt==-2)
       warning("No free parameters");
     else if (nrt<0)
       error("Bad fit, nrt=%d",nrt);
     
-    printf("nrt=%d\n",nrt);
+      printf("nrt=%d\n",nrt); */
 #ifdef PHASEAMP
-    printf("Fitting a+b.cos(x-c)/DPR:  \na= %g %g \nb= %g %g\nc= %g %g\n", 
-	 fpar[0],epar[0],fpar[1],epar[1],fpar[2],epar[2]);
+      printf("Fitting a+b.cos(x-c)/DPR:  \na= %g %g \nb= %g %g\nc= %g %g\n", 
+      fpar[0],epar[0],fpar[1],epar[1],fpar[2],epar[2]);
 #else
-    printf("Fitting a + c.cos(x/DPR) + s.cos(y/DPR): [x now in degrees]  \na= %g %g \nc= %g %g\ns= %g %g\n", 
+    printf("Fitting a + c.cos(x/DPR) + s.sin(y/DPR): ");
+    printf("[x now in degrees]  \na= %g %g \nc= %g %g\ns= %g %g\n", 
 	 fpar[0],epar[0],fpar[1],epar[1],fpar[2],epar[2]);
     printf("Converting to amp/phase: (Fitting as a + amp.cos((x-pha)/DPR)\n");
     amp = sqrt(sqr(fpar[1])+sqr(fpar[2]));
     pha = atan2(fpar[2],fpar[1])*DPR;
     amperr = sqrt(sqr(fpar[1]*epar[1]) + sqr(fpar[2]*epar[2]))/amp;
     phaerr = sqrt(sqr(fpar[1]*epar[2]) + sqr(fpar[2]*epar[1]))/(amp*amp)*DPR;
-    printf("amp= %g %g\n",amp,amperr);
+    printf("amp= %g %g\n",amp,amperr); 
     printf("pha= %g %g\n",pha,phaerr);
 #endif
+
+    npt1 = remove_data(x,1,y,dy,d,npt,nsigma[iter]);
+    if (npt1 == npt) iter=msigma+1;       /* signal early bailout */
+    npt = npt1;
+  }
+
+
+
+  if (outstr)
+    for (i=0; i<npt; i++)
+      fprintf(outstr,"%g %g %g\n",x[i],y[i],d[i]);
+
+}
+
+do_arm3()
+{
+  real *x, *y, *dy, *d;
+  int i,j, nrt, npt1, iter, mpar[5];
+  real fpar[5], epar[5],amp,pha,amperr,phaerr,amp3,pha3,amperr3,phaerr3;
+  int lpar = 5;
+    
+  if (nxcol < 1) error("nxcol=%d",nxcol);
+  if (nycol < 1) error("nycol=%d",nycol);
+  if (tol < 0) tol = 0.0;
+  if (lab < 0) lab = 0.0;
+
+  x = xcol[0].dat;
+  y = ycol[0].dat;
+  dy = (dycolnr>0 ? dycol.dat : NULL);
+  d = (real *) allocate(npt * sizeof(real));
+  
+  for (i=0; i<lpar; i++) {
+    mpar[i] = mask[i];
+    fpar[i] = par[i];
+  }
+
+  fitfunc = func_arm3;
+  fitderv = derv_arm3;
+
+  for (iter=0; iter<=msigma; iter++) {
+    nrt = (*my_nllsqfit)(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
+    if (nrt==-2)
+      warning("No free parameters"); 
+    else if (nrt<0)
+      error("Bad fit, nrt=%d",nrt); 
+    
+    printf("nrt=%d\n",nrt);  
+    printf("Fitting a + c1.cos(x/DPR) + s1.sin(y/DPR) + c3.sin(3x/DPR) + s3.cos(3x/DPR): ");
+    printf("[x now in degrees]  \na= %g %g \nc1= %g %g\ns1= %g %g \nc3= %g %g \ns3= %g %g \n", 
+	 fpar[0],epar[0],fpar[1],epar[1],fpar[2],epar[2],fpar[3],epar[3],fpar[4],epar[4]);
+    printf("Converting to amp/phase: (Fitting as a + amp.cos((x-pha)/DPR) + amp3.cos(3(x-pha3)/DPR)\n");
+    amp = sqrt(sqr(fpar[1])+sqr(fpar[2]));
+    pha = atan2(fpar[2],fpar[1])*DPR;
+    amperr = sqrt(sqr(fpar[1]*epar[1]) + sqr(fpar[2]*epar[2]))/amp;
+    phaerr = sqrt(sqr(fpar[1]*epar[2]) + sqr(fpar[2]*epar[1]))/(amp*amp)*DPR;
+    printf("amp= %g %g\n",amp,amperr);
+    printf("pha= %g %g\n",pha,phaerr);
+
+    amp3 = sqrt(sqr(fpar[3])+sqr(fpar[4]));
+    pha3 = atan2(fpar[4],fpar[3])*DPR/3;
+    amperr3 = sqrt(sqr(fpar[3]*epar[3]) + sqr(fpar[4]*epar[4]))/amp3;
+    phaerr3 = sqrt(sqr(fpar[3]*epar[4]) + sqr(fpar[4]*epar[3]))/(amp3*amp3)*DPR/3;
+    printf("amp3= %g %g\n",amp3,amperr3);
+    printf("pha3= %g %g\n",pha3,phaerr3);
+
 
     npt1 = remove_data(x,1,y,dy,d,npt,nsigma[iter]);
     if (npt1 == npt) iter=msigma+1;       /* signal early bailout */
