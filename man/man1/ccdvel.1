@@ -1,4 +1,4 @@
-.TH CCDVEL 1NEMO "11 October 2003"
+.TH CCDVEL 1NEMO "27 May 2004"
 .SH NAME
 ccdvel \- create a velocity field; grid or retrace
 .SH SYNOPSIS
@@ -198,7 +198,22 @@ or
     8% nemoinp 0:100:5 > map1.radt
     9% nemoinp 0:100:5 | tabmath - - "exp(-%1/20)" all > map1.dent
    10% ccdvel out=map1.den radii=@map1.radt vrot=@map1.dent pa=30 inc=60 amp=t
+.PP
+Now one can create a velocity field in a simular way, 
 .fi
+
+   11% nemoinp 0:100:5 | tabmath - - "%1/sqrt(40+%1*%1)" all > map1.velt
+   12% ccdvel out=map1.vel radii=@map1.radt vrot=@map1.velt pa=30 inc=60 
+.nf
+and with simulated beamsmearing create a beam smeared velocity field:
+
+   13% ccdsmooth map1.den map1.dens 4
+   13% ccdmath map1.den,map1.vel - "%1*%2" | ccdsmooth - map1.dvels 4
+   14% ccdmath map1.den,map1.dvels map1.vels "%2/%1"
+.fi
+Note however that this method of beamsmearing is only approximate, 
+and ignores the internal velocity dispersion, which can be very important
+in areas of large velocity gradients.
 .SH ROTCURFIT
 The table \fBrotcurfit\fP assumes the
 radius, systemic velocity, rotation velocity, 
