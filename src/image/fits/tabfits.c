@@ -9,7 +9,7 @@
  *     30-nov-99    V3.0: allow nz=                             pjt
  *      9-jul-00    V3.1: allow dcol=0 for reading all columns  pjt
  *     22-jul-00    V3.2: fix for new style fitsio              pjt
- *     23-oct-03    V3.2a: check for MAXDAT (and made it bigger) pjt
+ *     23-oct-03    V3.2b: check for MAXDAT (and made it bigger) pjt
  *
  * todo:  read one more line, check if file is done!!
  */
@@ -27,7 +27,7 @@ string defv[] = {
     "ny=\n              Y-Size of data, or else specify NAXIS2 in header",
     "nz=\n              Z-Size of data, or else specify NAXIS3 in header",
     "nmax=100000\n      Allocation space for piped I/O",
-    "VERSION=3.2a\n	8-nov-02 PJT",
+    "VERSION=3.2b\n	23-oct-03 PJT",
     NULL,
 };
 
