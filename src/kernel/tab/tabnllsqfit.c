@@ -41,8 +41,9 @@ string defv[] = {
     "tol=\n             Tolerance for convergence of nllsqfit",
     "lab=\n             Mixing parameter for nllsqfit",
     "itmax=50\n         Maximum number of allowed nllsqfit iterations",
+    "format=%g\n        Output format for fitted values and their errors",
     "numrec=f\n         Try the numrec routine instead?",
-    "VERSION=1.4\n      21-nov-02 PJT",
+    "VERSION=1.5\n      28-nov-02 PJT",
     NULL
 };
 
@@ -87,6 +88,9 @@ int order;                  /* order of fits that have an order (poly's/hyperpla
 int mask[MAXPAR];           /* 1=free  0=fixed parameter */
 real par[MAXPAR];           /* initial parameters */
 int npar; 
+
+char fmt[256];
+string format;
 
 bool Qtab;                  /* do table output ? */
 
@@ -328,6 +332,7 @@ setparams()
       my_nllsqfit = nr_nllsqfit;
     else
       my_nllsqfit = nllsqfit;
+    format = getparam("format");
 }
 
 setrange(real *rval, string rexp)
@@ -426,6 +431,7 @@ do_function(string method)
   int lpar = npar;        /* MUST be set */
 
   if (npar == 0) error("You must specify initial conditions for all parameters");
+  sprintf(fmt,"p%%d= %s %s\n",format,format);
     
   if (nxcol < 1) error("nxcol=%d",nxcol);
   if (nycol < 1) error("nycol=%d",nycol);
@@ -446,7 +452,7 @@ do_function(string method)
   printf("nrt=%d\n",nrt);
   printf("Fitting LOADED function \"%s\":  \n",method);
   for (k=0; k<lpar; k++)
-    printf("p%d= %g %g\n",k,fpar[k],epar[k]);
+    printf(fmt, k,fpar[k],epar[k]);
   if (nrt==-2)
     warning("No free parameters");
   else if (nrt<0)
@@ -519,6 +525,7 @@ do_line()
   if (nycol < 1) error("nycol=%d",nycol);
   if (tol < 0) tol = 0.0;
   if (lab < 0) lab = 0.0;
+  sprintf(fmt,"Fitting a+bx:  \na= %s %s \nb= %s %s\n", format,format,format,format);
 
   x = xcol[0].dat;
   y = ycol[0].dat;
@@ -540,14 +547,10 @@ do_line()
     else if (nrt<0)
       error("Bad fit, nrt=%d",nrt);
     printf("nrt=%d\n",nrt);
-    printf("Fitting a+bx:  \na= %g %g \nb= %g %g\n", fpar[0],epar[0],fpar[1],epar[1]);
+    printf(fmt, fpar[0],epar[0],fpar[1],epar[1]);
 
     npt1 = remove_data(x,1,y,dy,d,npt,nsigma[iter]);
-#if 0
-    if (npt1 == npt) iter=msigma+1;       /* signal early bailout */
-#else
     if (npt1 == npt) break;
-#endif
     npt = npt1;
   }
 
@@ -570,14 +573,15 @@ do_plane()
 {
   real *x1, *x2, *x, *y, *dy, *d;
   real **xp;
-  int i,j,k,nrt, mpar[MAXPAR];
+  int i,j,k,nrt, npt1,iter,mpar[MAXPAR];
   real fpar[MAXPAR], epar[MAXPAR];
   int lpar = order+1;
 
-  if (nxcol<order) error("Need %d value(s) for xcol=",order);
+  if (nxcol != order) error("Need exactly %d value(s) for xcol=",order);
   if (nycol<1) error("Need 1 value for ycol=");
   if (tol < 0) tol = 0.0;
   if (lab < 0) lab = 0.0;
+  sprintf(fmt,"p%%d= %s %s\n",format,format);
 
   y = ycol[0].dat;
   dy = (dycolnr>0 ? dycol.dat : NULL);
@@ -596,15 +600,24 @@ do_plane()
   fitfunc = func_plane;
   fitderv = derv_plane;
 
-  nrt = (*my_nllsqfit)(x,2,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
-  printf("nrt=%d\n",nrt);
-  printf("Fitting p0+p1*x1+p2*x2+.....pN*xN: (N=%d)\n",order);
-  for (k=0; k<lpar; k++)
-    printf("p%d= %g %g\n",k,fpar[k],epar[k]);
-  if (nrt==-2)
-    warning("No free parameters");
-  else if (nrt<0)
-    error("Bad fit, nrt=%d",nrt);
+  for (iter=0; iter<=msigma; iter++) {
+    nrt = (*my_nllsqfit)(x,2,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
+    printf("nrt=%d\n",nrt);
+    printf("Fitting p0+p1*x1+p2*x2+.....pN*xN: (N=%d)\n",order);
+    for (k=0; k<lpar; k++)
+      printf(fmt, k,fpar[k],epar[k]);
+    if (nrt==-2)
+      warning("No free parameters");
+    else if (nrt<0)
+      error("Bad fit, nrt=%d",nrt);
+#if 0    
+    npt1 = remove_data(x,2,y,dy,d,npt,nsigma[iter]);
+    if (npt1 == npt) iter=msigma+1;       /* signal early bailout */
+    npt = npt1;
+#else
+    break;
+#endif
+  }
 
   if (outstr)
     for (i=0; i<npt; i++)
@@ -628,7 +641,7 @@ do_plane()
 do_gauss()
 {
   real *x1, *x2, *x, *y, *dy, *d;
-  int i,j, nrt, mpar[4];
+  int i,j, nrt, npt1, iter, mpar[4];
   real fpar[4], epar[4];
   int lpar = 4;
 
@@ -636,6 +649,8 @@ do_gauss()
   if (nycol<1) error("Need 1 value for ycol=");
   if (tol < 0) tol = 0.0;
   if (lab < 0) lab = 0.01;
+  sprintf(fmt,"Fitting a+b*exp(-(x-c)^2/(2*d^2)):  \na= %s %s \nb= %s %s \nc= %s %s\nd= %s %s\n",
+	  format,format,format,format,format,format,format,format);
 
   x = xcol[0].dat;
   y = ycol[0].dat;
@@ -650,15 +665,20 @@ do_gauss()
   fitfunc = func_gauss1d;
   fitderv = derv_gauss1d;
 
-  nrt = (*my_nllsqfit)(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
-  printf("nrt=%d\n",nrt);
-  printf("Fitting a+b*exp(-(x-c)^2/(2*d^2)):  \na= %g %g \nb= %g %g \nc= %g %g\nd= %g  %g\n",
-	 fpar[0],epar[0],fpar[1],epar[1],fpar[2],epar[2],fpar[3],epar[3]);
-  if (nrt==-2)
-    warning("No free parameters");
-  else if (nrt<0)
-    error("Bad fit, nrt=%d",nrt);
+  for (iter=0; iter<=msigma; iter++) {
+    nrt = (*my_nllsqfit)(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
+    printf("nrt=%d\n",nrt);
+    printf(fmt,fpar[0],epar[0],fpar[1],epar[1],fpar[2],epar[2],fpar[3],epar[3]);
+    if (nrt==-2)
+      warning("No free parameters");
+    else if (nrt<0)
+      error("Bad fit, nrt=%d",nrt);
 
+    npt1 = remove_data(x,1,y,dy,d,npt,nsigma[iter]);
+    if (npt1 == npt) iter=msigma+1;       /* signal early bailout */
+    npt = npt1;
+  }
+    
 
   if (outstr)
     for (i=0; i<npt; i++)
@@ -675,7 +695,7 @@ do_gauss()
 do_exp()
 {
   real *x1, *x2, *x, *y, *dy, *d;
-  int i,j, nrt, mpar[4];
+  int i,j, nrt, npt1, iter, mpar[4];
   real fpar[4], epar[4];
   int lpar = 4;
 
@@ -685,7 +705,8 @@ do_exp()
   if (nycol<1) error("Need 1 value for ycol=");
   if (tol < 0) tol = 0.0;
   if (lab < 0) lab = 0.01;
-
+  sprintf(fmt,"Fitting a+b*exp(-(x-c)/d):  \na= %s %s \nb= %s %s \nc= %s %s\nd= %s %s\n",
+	  format,format,format,format,format,format,format,format);
   x = xcol[0].dat;
   y = ycol[0].dat;
   dy = (dycolnr>0 ? dycol.dat : NULL);
@@ -699,15 +720,19 @@ do_exp()
   fitfunc = func_exp;
   fitderv = derv_exp;
 
-  nrt = (*my_nllsqfit)(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
-  printf("nrt=%d\n",nrt);
-  printf("Fitting a+b*exp(-(x-c)/d):  \na= %g %g \nb= %g %g \nc= %g %g\nd= %g  %g\n",
-	 fpar[0],epar[0],fpar[1],epar[1],fpar[2],epar[2],fpar[3],epar[3]);
-  if (nrt==-2)
-    warning("No free parameters");
-  else if (nrt<0)
-    error("Bad fit, nrt=%d",nrt);
+  for (iter=0; iter<=msigma; iter++) {
+    nrt = (*my_nllsqfit)(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
+    printf("nrt=%d\n",nrt);
+    printf(fmt,fpar[0],epar[0],fpar[1],epar[1],fpar[2],epar[2],fpar[3],epar[3]);
+    if (nrt==-2)
+      warning("No free parameters");
+    else if (nrt<0)
+      error("Bad fit, nrt=%d",nrt);
 
+    npt1 = remove_data(x,1,y,dy,d,npt,nsigma[iter]);
+    if (npt1 == npt) iter=msigma+1;       /* signal early bailout */
+    npt = npt1;
+  }
 
   if (outstr)
     for (i=0; i<npt; i++)
@@ -724,7 +749,7 @@ do_exp()
 do_poly()
 {
   real *x, *y, *dy, *d;
-  int i,j, nrt, mpar[MAXPAR];
+  int i,j, nrt, npt1, iter, mpar[MAXPAR];
   real fpar[MAXPAR], epar[MAXPAR];
   int lpar = order+1;
     
@@ -732,6 +757,7 @@ do_poly()
   if (nycol < 1) error("nycol=%d",nycol);
   if (tol < 0) tol = 0.0;
   if (lab < 0) lab = 0.0;
+  sprintf(fmt,"p%%d= %s %s\n",format,format);
 
   x = xcol[0].dat;
   y = ycol[0].dat;
@@ -746,15 +772,20 @@ do_poly()
   fitfunc = func_poly;
   fitderv = derv_poly;
 
-  nrt = (*my_nllsqfit)(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
-  printf("nrt=%d\n",nrt);
-  printf("Fitting p0+p1*x+p2*x^2+.....pN*x^N: (N=%d)\n",order);
-  for (i=0; i<lpar; i++)
-    printf("p%d= %g %g\n",i,fpar[i],epar[i]);
-  if (nrt==-2)
-    warning("No free parameters");
-  else if (nrt<0)
-    error("Bad fit, nrt=%d",nrt);
+  for (iter=0; iter<=msigma; iter++) {
+    nrt = (*my_nllsqfit)(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
+    printf("nrt=%d\n",nrt);
+    printf("Fitting p0+p1*x+p2*x^2+.....pN*x^N: (N=%d)\n",order);
+    for (i=0; i<lpar; i++)
+      printf(fmt,i,fpar[i],epar[i]);
+    if (nrt==-2)
+      warning("No free parameters");
+    else if (nrt<0)
+      error("Bad fit, nrt=%d",nrt);
+    npt1 = remove_data(x,1,y,dy,d,npt,nsigma[iter]);
+    if (npt1 == npt) iter=msigma+1;       /* signal early bailout */
+    npt = npt1;
+  }
 
   if (outstr)
     for (i=0; i<npt; i++)
