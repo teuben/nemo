@@ -1,4 +1,4 @@
-.TH PERORB 1NEMO "18 February 2003"
+.TH PERORB 1NEMO "19 August 2004"
 .SH NAME
 perorb \- interactive/iterative search for XY-periodic orbits in symmetric 
 potentials
@@ -25,10 +25,20 @@ coordinates are plotted; from a visual inspection the central
 periodic orbit(s) can then be estimated at this energy, and
 used to get good estimates in the iterative mode to find
 the periodic orbits.
+.PP
+This technique has been used in various forms by various researchers, 
+and is described in its most original form in 
+Henon (1965, Ann.Astr. xxx, yyy). See also
+El-Sabaa & Sherief (1990) Ap&SS 167, 305 for some more recent work.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword is also
 given:
 .TP 20
+\fBin=\fIin-file\fP
+An optional input file in standard \fIorbit(5NEMO)\fP format.
+If given, the input conditions are taken from the first
+phase point in this orbit (using the keyword \fBlast=\fP 
+you can select the last orbit). Default: none.
 \fBout=\fIout-file\fP
 output file, into which the orbits are accumulated.
 The file is in standard \fIorbit(5NEMO)\fP format.
@@ -81,6 +91,10 @@ surface of section coordinate is to be accurate.
 \fIOnly used in iterative mode.\fP
 [Default: 0.001].
 .TP
+\fBmaxiter=\fP
+Maximum iterations allowed to find a periodic orbit.
+Default: 50.
+.TP
 \fBncross=\fIcount\fP
 Number of crossings through surface of section
 used to plot/iterate. This count does include the 
@@ -124,6 +138,14 @@ Specify the integration mode. Any one of \fBeuler\fP,
 \fBleapfrog\fP, \fBrk2\fP or \fBrk4\fP 
 can be given.
 [Default: \fBrk4\fP].
+.TP
+\fBlast=t|f\fP
+Controls which orbit from the input file is used for the
+initial conditions. By default, the first one, otherwise
+the last. Default: \fBf\fP.
+.TP
+\fBheadline=\fP
+Random user verbiage added to the output file. Default:none
 .SH CAVEATS
 The potential (potname= etc) needs to have a proper potential defined
 for this routine to work.
@@ -204,4 +226,5 @@ pjt/orbit	original sources
 24-may-91	V1.1 rotating XY-frames, fixed energy option  PJT
 19-apr-95	V1.5 various, rk4 is now default integrator	PJT
 1-mar-03	minor code cleanup, less lies in the man page, added etot_err	PJT
+19-aug-04	V1.6 added last= and fixed an allocation problem	PJT
 .fi
