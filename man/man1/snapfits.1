@@ -1,0 +1,75 @@
+.TH SNAPFITS 1NEMO "19 March 1990"
+.SH NAME
+snapfits \- convert a snapshot file to a fits file.
+.SH SYNOPSIS
+.PP
+\fBsnapfits in=\fPsnapshot \fBout=\fPfitsfile [parameter=value]
+.SH DESCRIPTION
+\fBsnapfits\fP converts a snapshot to a fits file, in
+the random groups format (See: \fIxxx\fP). See 
+the section on 'FITS KEYWORDS' below for a more
+detailed description. The kind of
+parameters written can be choosen
+with the \fBoptions\fP keyword (see below). The
+default is 7 (masses, positions and velocities for a 3-dimensional
+simulation). 
+.PP
+Note: Only one snapshot can be written. The time of the
+snapshot is not saved yet.
+.SH PARAMETERS
+The following parameters are the ones whose meaning is different
+from the one in \fBsnapplot\fP:
+.TP 20
+\fBin=\fIin-file\fP
+input file, must be in \fIsnapshot(5NEMO)\fP format [no default].
+.TP
+\fBout=\fIout-file\fP
+output file, will be in \fIfits(5NEMO)\fP format [no default].
+.TP
+\fBoptions=\fIopt1[,opt2...]\fP
+List of options, separated by comma's (no spaces),  of the
+items to be saved in the output FITS file.
+They can be any combination of: \fImass, phase (pos, vel), phi and acc\fP.
+Note that the order of items written is fixed, as described above.
+Even for \fIoptions=pos,mass\fP the mass will be preceded by the 2/3 
+positions of the particle. [default: \fBmass,phase\fP].
+.TP
+\fBcomment=\fIcomment\fP
+One comment line with up to about [70] characters can be used to identify
+this FITS file. [default: empty].
+.SH FITS KEYWORDS
+The data is written using the random groups format in FITS without
+any primary data matrix.
+Hence NAXIS1=0, PGROUP the number of items per particle to be output
+(7 being the default), and GCOUNT the total number of bodies in a snapshot.
+The external format of the data is IEEE floating point (BITPIX = -32 or
+-64, depending on precision required). There will be no scaling
+(default PZEROnnn and PSCALnnn), whereas the axes are labeled using
+the PTYPEnnn keyword. They can be any of MASS, POSn, VELn, PHI and
+ACCn (n=1,..NDIM).
+.SH BUGS
+There is really no use for this program, since the general way
+to transport data is using the general ascii format (see \fIatos(1NEMO)\fP or
+\fIsnapprint(1NEMO)\fP) or ascii structured files (see \fItsf(1NEMO)\fP).
+For large amounts of datafiles this fits format may
+actually become useful. It was merely created for the
+authors amusement and to show
+how the FITS format could be used to export N-body data.
+.PP
+There is no program \fIfitssnap\fP yet. As the need arises, and
+this fits-i/o format becomes popular, the author may be poked 
+to create one.
+.SH "SEE ALSO"
+atos(1NEMO), stoa(1NEMO), tsf(1NEMO), rsf(1NEMO), snapprint(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+src/pjt/image	snapfits.c, snapfits.1
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+19-mar-90	V1.0: Created	PJT
+.fi
