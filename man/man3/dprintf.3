@@ -1,0 +1,39 @@
+.TH DPRINTF 3NEMO "2 June 1988"
+.SH NAME
+dprintf \- debug level dependant formatted output conversion
+.SH SYNOPSIS
+.nf
+.PP
+.B extern int debug_level
+.PP
+.B dprintf (level, format, ...)
+.B int level;
+.B char *format;
+.fi
+.SH DESCRIPTION
+\fBdprintf\fP can be used much in the same way as UNIX counterpart
+\fIprintf(3)\fP and \fIfprintf(3)\fP, except that the output
+of dprintf is always to the standard output device, \fIstderr\fP,
+and is only done when the input parameter \fBlevel\fP is less or equal
+a user or system defined \fBdebug_level\fP.
+The user can set  \fBdebug_level\fP 
+by using a system keyword \fBdebug=\fP 
+or setting an environment variable \fBDEBUG\fP (this is done by 
+\fIinitparam(3NEMO)\fP).
+\fBformat\fP is the
+string to be encoded. The optional remaining arguments \fBarg\fP are handled
+through a variable argument mechanism (see also \fIprintf(3)\fP).
+.SH SEE ALSO
+getparam(3NEMO), printf(3)
+.SH FILES
+.nf
+.ta +2.0i
+~/src/josh/clib  	getparam.c dprintf.3
+.fi
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1i +4i
+xx-mar-88	added to getparam.c	Peter Teuben
+
