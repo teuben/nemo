@@ -7,6 +7,7 @@
  *   8-apr-01       a: fixed SINGLEPREC operation
  *   9-sep-01    3.0   GSL enabled
  *  23-sep-01       a  ->nemo_file_lines
+ *  26-may-02    3.1   add derivatives (old TOOLBOX from spline.c) for non-GSL
  *
  *   TODO:
  *      - spline vs. linear
@@ -28,13 +29,13 @@ string defv[] = {
     "ycol=2\n       Y Column",
     "x=\n           For these X's, find Y",
     "y=\n           For these Y's, find X",
-    "n=0\n          Which one to find (0=all) - not used in GSL",
+    "n=0\n          Which roots one to find (0=all) - not used in GSL",
     "format=%g\n    Output format",
 #if HAVE_GSL
     "type=cspline\n Spline interpolation type (only for GSL)",
-    "nder=0\n       Number of derivates to show (0,1,2)",
 #endif
-    "VERSION=3.0\n  9-sep-01 PJT",
+    "nder=0\n       Number of derivates to show (0,1,2)",
+    "VERSION=3.1\n  25-may-02 PJT",
     NULL,
 
 };
@@ -52,7 +53,9 @@ nemo_main()
     stream instr;
     string fmt, stype;
     char fmt1[100], fmt2[100];
-    int i, j, n, nx, ny, nmax, izero, nder, nzero = getiparam("n");
+    int i, j, n, nx, ny, nmax, izero;
+    int nzero = getiparam("n");
+    int nder = getiparam("nder");
     bool Qx, Qy;
 #if HAVE_GSL
     gsl_interp_accel *acc = gsl_interp_accel_alloc();
@@ -94,7 +97,6 @@ nemo_main()
 
 #if HAVE_GSL
     stype = getparam("type");
-    nder = getiparam("nder");
     dprintf(1,"Using interpolation type=%s\n",stype);
     if (streq(stype,"linear"))
       spline = gsl_spline_alloc(gsl_interp_linear, n);
@@ -113,7 +115,7 @@ nemo_main()
       error("Program not compiled with real==double, cannot use GSL");
 
     if (Qx) {
-      dprintf(0,"Evaluating Y(x) using GSL\n");
+      dprintf(1,"Evaluating Y(x) using GSL\n");
       gsl_spline_init(spline, xdat, ydat, n);
       nx = nemoinpr(getparam("x"),xp,MAXDATA);
       if (nx<0) error("Parsing x=%s",getparam("x"));
@@ -136,7 +138,7 @@ nemo_main()
     }
 
     if (Qy) {
-      dprintf(0,"Evaluating X(y) using GSL\n");
+      dprintf(1,"Evaluating X(y) using GSL\n");
       gsl_spline_init(spline, ydat, xdat, n);
       ny = nemoinpr(getparam("y"),yp,MAXDATA);
       if (ny<0) error("Parsing y=%s",getparam("y"));
@@ -162,6 +164,7 @@ nemo_main()
     strcat(fmt2,"\n");
 
     if (Qx) {
+      dprintf(1,"Evaluating Y(x)\n");
       nx = nemoinpr(getparam("x"),xp,MAXDATA);
       if (nx<0) error("Parsing x=%s",getparam("x"));
       for (j=0; j<nx; j++) {
@@ -184,6 +187,7 @@ nemo_main()
     }
 
     if (Qy) {
+      dprintf(1,"Evaluating X(y)\n");
       ny = nemoinpr(getparam("y"),yp,MAXDATA);
       if (ny<0) error("Parsing y=%s",getparam("y"));
       for (j=0; j<ny; j++) {
