@@ -1,0 +1,49 @@
+.TH MATCH 3NEMO "7 March 1992"
+.SH NAME
+match, partialstreq \- minimal match of sub-strings 
+.SH SYNOPSIS
+.nf
+\fBint match (istring, compar, mask)
+char *istring, *compar;
+int *mask;
+.PP
+int partialstreq(a,i1,i2,b,j1,j2)
+char *a, *b;
+int i1, i2, j1, j2;
+\fP
+.SH DESCRIPTION
+\fImatch\fP performs a minimal match of sub-strings in
+\fIistring\fP with substrings
+in the compare string \fIcompar\fP. The result is returned
+in \fImask\fP: if a match is possible with the I-th substring
+in \fIcompar\fP, then the I-th bit in \fImask\fP will be set.
+I can be 1..sizeof(int).
+The comparison is only done for all printable 
+ASCII characters except for the blank and the comma,
+since they are used as substring delimiters.
+.PP
+A helper function \fIpartialstreq\fP is used to partially compare
+two strings \fIa\fP and \fIb\fP from positions \fIi1..i2\fP in 
+\fIa\fP, and positions \fIj1..j2\fP in \fIb\fP. The indeces are 0
+based, i.e. the first character in a string has \fIi1=j1=0\fP
+.SH MATCH ERROR RETURN CODE
+.nf
+.ta +0.5i
+1   	no error
+0	length of input string is zero
+-1	length of compare string is zero
+-2	a sub-string in \fIistring\fP can be matched in more than one sub-string in \fIcompar\fP
+-3	no sub-string in \fIistring\fP can be matched to any sub-string in \fIcompar\fP.
+.SH LIMITATIONS
+Since \fImask\fP is used, there can only be up to \fIsizeof(int)\fP (normally 32)
+options.
+.SH SEE ALSO
+wild(3NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4i
+16-may-91	include into NEMO -adapted from Gipsy version 	PJT
+7-may-92	man page written	PJT
+.fi
