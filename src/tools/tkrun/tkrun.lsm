@@ -1,0 +1,22 @@
+Begin3
+Title:          tkrun - automatic GUI builder and frontend to run shell scripts
+Version:        0.2
+Entered-date:   2000-nov-25
+Description:    This program allows you to build a very simple GUI from some
+                tagged comments in a shell script. It does this on-the-fly
+		by scanning the shell script, then running wish on this tk 
+		script with a GUI that controls subsequent execution (through 
+                a ``keyword=value'' type CLI) of the script itself.
+		One of the main advantages of running the script this
+		way is easy re-execution with different parameters.
+		The GUI currently supports the main standard Tk widgets:
+		entry (plus tk_getOpenFile, tk_getSaveFile for files), 
+		radiobutton, checkbutton, and scale.
+Keywords:       tk X11 toolkit tcl script language GUI builder
+Author:         teuben@astro.umd.edu (Peter Teuben)
+Maintained-by:  
+Primary-site:   ftp://ftp.astro.umd.edu/progs/nemo/
+Alternate-site: ftp://ftp.ibiblio.org/pub/Linux/devel
+Platforms:      Linux, Solaris
+Copying-policy: GPL
+End
