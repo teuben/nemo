@@ -52,7 +52,7 @@ void inipotential (int *npar, double *par, string name)
     dprintf (1,"  Parameters : Pattern Speed = %f\n",omega);
     dprintf (1,"  Table = %s\n",name);
 
-    nmax = nemo_file_lines(name);
+    nmax = nemo_file_lines(name,0);
     if (nmax<=0) error("file_lines returned %d lines in %s\n",
              nmax,name);
     dprintf (1,"  Nmax = %d\n",nmax);
