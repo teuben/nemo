@@ -125,7 +125,7 @@ void free_mdarray7(mdarray7 x, int n7, int n6, int n5, int n4, int n3, int n2, i
 
 
 /* =============================================================================== */
-#if 1
+#ifdef TESTBED
 
 string defv[] = {
   "dim=10,20,5\n    Dimensions of array A[dim1][dim2][dim3]....",
