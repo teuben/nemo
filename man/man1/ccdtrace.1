@@ -1,0 +1,41 @@
+.TH CCDTRACE 1NEMO "31 July 1996"
+.SH NAME
+ccdtrace \- interpolate a set of coordinates from an image
+.SH SYNOPSIS
+\fBccdtrace\fP [parameter=value]
+.SH DESCRIPTION
+\fBccdtrace\fP takes a set of (X,Y) coordinates, in the form
+of an ascii \fItable(1NEMO)\fP, and interpolates them from an
+\fIimage(1NEMO)\fP. The output will also be in standard table
+format.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input Image(5NEMO) file. Currently only 2D images are supported,
+for 3D cubes the first plane could be used. 
+No default.
+.TP
+\fBout=\fP
+Output table of X,Y,I coordinates. 
+No default.
+.TP
+\fBxytab=\fP
+Input table of X,Y coordinates.
+No default.
+.TP
+\fBnmax=\fP
+Allocation space for input XY table, if needed. This value is
+only needed when the XY table is read from a device which cannot
+seek (e.g. a pipe).
+Default: 10000.
+.SH SEE ALSO
+ccdprint(1NEMO), image(5NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+31-jul-96	V1.0 Created     	Peter Teuben
+.fi
