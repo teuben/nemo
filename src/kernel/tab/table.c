@@ -19,7 +19,7 @@
 #endif
 
 #ifndef MAX_LINELEN
-#define MAX_LINELEN  2048
+#define MAX_LINELEN  16384
 #endif
 
 /*
@@ -61,7 +61,7 @@ int get_line(stream instr, char *line)
 			break;
 		line[i++]=c;
 		if (i>MAX_LINELEN) {
-			warning("get_line: max linelen exceeded; return 0");
+			warning("get_line: max linelen (%d) exceeded; return 0",MAX_LINELEN);
 			return 0;
 		}
 	}
