@@ -29,11 +29,10 @@
  *       21-feb-04   stop if f2dot is 0
  *       24-feb-04   compute steps from fdot/f3dot if f2dot=0
  *       13-mar-04   nreset was not initialized
+ *       20-apr-04   was never using the header file. now it does.
  */
 
-
-#define NMAX 512
-#define NDIM 3
+#include "nbody0.h"
 
 /* extract X, Y and Z components of a 3-vector */
 #define X(a,i)	(a[i*NDIM])
