@@ -6,6 +6,7 @@
 #define _body_h
 
 
+#define _body_h_dens
 
 typedef struct {
     real   bodymass;			/* mass of body			    */
@@ -14,6 +15,10 @@ typedef struct {
     vector bodyacc;			/* gravitational acceleration	    */
     real   bodyaux;			/* misc. real value assoc. w. body  */
     int    bodykey;			/* misc. int. value assoc. w. body  */
+#ifdef _body_h_dens
+    real   bodydens;			/* density associated w. body       */
+    real   bodyeps;                     /* softening length w. body         */
+#endif
 } body;
 
 typedef int  (*btiproc)(body *, real, int);
@@ -30,5 +35,9 @@ typedef real (*btrproc)(body *, real, int);
 #define Acc(b)   ((b)->bodyacc)
 #define Aux(b)   ((b)->bodyaux)
 #define Key(b)   ((b)->bodykey)
+#ifdef _body_h_dens
+#define Dens(b)  ((b)->bodydens)
+#define Eps(b)   ((b)->bodyeps)
+#endif
 
 #endif

@@ -2,6 +2,7 @@
  * SNAPSHOT.H: definitions for N-body snapshot files.
  *	sep-1990	added Story, Pos and Vel options
  *      may-2001        added Yanc stuff for Dehnen
+ *      oct-2001        added SPH/Yanc (dens/eps)
  */
 
 #ifndef _snapshot_h
@@ -27,6 +28,8 @@
 #define	    PotentialTag	"Potential"
 #define     AuxTag              "Aux"
 #define     KeyTag              "Key"
+#define     DensityTag          "Density"
+#define     EpsTag              "Eps"
 #define     StoryTag		"Story"
 
 #define   DiagnosticsTag	"Diagnostics"
@@ -37,11 +40,13 @@
 #define     CMPhaseSpaceTag	"CMPhaseSpace"
 #define     CPUTimeTag          "cputime"
 
+/* Yanc  tags were designed, but never used, right Walter? */
+
 #define   YancParametersTag     "YancParameters"
-#define   YancEpsTag            "YancEps"
-#define   YancThetaTag          "YancTheta"
-#define   YancHminTag           "YancHminTag"
-#define   YancKernelTag         "YancKernelTag"
+#define     YancEpsTag            "YancEps"
+#define     YancThetaTag          "YancTheta"
+#define     YancHminTag           "YancHminTag"
+#define     YancKernelTag         "YancKernelTag"
 
 /*
  * Symbolic names for input/output bit flags.
@@ -66,6 +71,9 @@
 #define StoryBit         (1 << 12)
 #define PosBit		 (1 << 13)
 #define VelBit		 (1 << 14)
+
+#define DensBit          (1 << 15)
+#define EpsBit           (1 << 16)
 
 /*
  * Coordinate system codes; these assume 32-bit ints.

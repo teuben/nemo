@@ -9,6 +9,7 @@
  *	 2-may-92  fixed allocate() declaration PJT
  *	22-feb-94 ansi headers (w/ allocate)    pjt
  *	26-jun-96 no more local definitions, use extern		PJT
+ *       8-oct-01 read eps/dens                 PJT
  */
 
 /*
@@ -320,6 +321,73 @@ int *ifptr;			/* pointer to input bit flags */
 }
 
 #endif
+
+/*
+ * GET_SNAP_DENS: worker routine to input dens values.
+ */
+
+#ifndef get_snap_dens
+
+#define get_snap_dens  _get_snap_dens
+
+local void
+_get_snap_dens(instr, btptr, nbptr, ifptr)
+stream instr;			/* input stream, of course */
+Body **btptr;			/* pointer to body array */
+int *nbptr;			/* pointer to number of bodies */
+int *ifptr;			/* pointer to input bit flags */
+{
+#ifdef Dens
+    real *abuf, *ap;
+    Body *bp;
+
+    dprintf(0,"get_snap_dens...\n");
+
+    if (get_tag_ok(instr, DensityTag)) {
+	abuf = (real *) allocate(*nbptr * sizeof(real));
+	get_data_coerced(instr, DensityTag, RealType, abuf, *nbptr, 0);
+	for (bp = *btptr, ap = abuf; bp < *btptr + *nbptr; bp++)
+	    Dens(bp) = *ap++;
+	free(abuf);
+	*ifptr |= DensBit;
+    }
+#endif
+}
+
+#endif
+
+/*
+ * GET_SNAP_EPS: worker routine to input eps values.
+ */
+
+#ifndef get_snap_eps
+
+#define get_snap_eps  _get_snap_eps
+
+local void
+_get_snap_eps(instr, btptr, nbptr, ifptr)
+stream instr;			/* input stream, of course */
+Body **btptr;			/* pointer to body array */
+int *nbptr;			/* pointer to number of bodies */
+int *ifptr;			/* pointer to input bit flags */
+{
+#ifdef Eps
+    real *abuf, *ap;
+    Body *bp;
+
+    if (get_tag_ok(instr, EpsTag)) {
+	abuf = (real *) allocate(*nbptr * sizeof(real));
+	get_data_coerced(instr, EpsTag, RealType, abuf, *nbptr, 0);
+	for (bp = *btptr, ap = abuf; bp < *btptr + *nbptr; bp++)
+	    Eps(bp) = *ap++;
+	free(abuf);
+	*ifptr |= EpsBit;
+    }
+#endif
+}
+
+#endif
+
 
 /*
  * GET_SNAP_PARTICLES: managing routine for input of particle data.
@@ -348,6 +416,8 @@ int *ifptr;			/* pointer to input bit flags */
 	get_snap_acc(instr, btptr, nbptr, ifptr);
 	get_snap_aux(instr, btptr, nbptr, ifptr);
 	get_snap_key(instr, btptr, nbptr, ifptr);
+	get_snap_dens(instr, btptr, nbptr, ifptr);
+	get_snap_eps(instr, btptr, nbptr, ifptr);
 	get_tes(instr, ParticlesTag);
     }
 }

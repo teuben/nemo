@@ -7,6 +7,7 @@
  *	 2-may-92  fixed allocate() declaration PJT
  *	22-feb-94  ansi header (w/ allocate)	PJT
  *	25-mar-97  removed nested decl fflush() PJT
+ *       8-oct-01  add some dens/eps if present PJT (for yanc)
  */
 
 /*
@@ -298,6 +299,74 @@ int *ofptr;			/* pointer to output bit flags */
 
 #endif
 
+
+/*
+ * PUT_SNAP_DENS: worker routine to output dens data.
+ */
+
+#ifndef put_snap_dens
+
+#define put_snap_dens  _put_snap_dens
+
+local void
+_put_snap_dens(outstr, btptr, nbptr, ofptr)
+stream outstr;			/* output stream, of course */
+Body **btptr;			/* pointer to body array */
+int *nbptr;			/* pointer to number of bodies */
+int *ofptr;			/* pointer to output bit flags */
+{
+    real *abuf, *ap;
+    Body *bp;
+    
+    if (*ofptr & DensBit) {
+#ifdef Dens
+	abuf = (real *) allocate(*nbptr * sizeof(real));
+	for (bp = *btptr, ap = abuf; bp < *btptr + *nbptr; bp++)
+	    *ap++ = Dens(bp);;
+	put_data(outstr, DensityTag, RealType, abuf, *nbptr, 0);
+	free(abuf);
+#else
+	error("put_snap_dens: Dens undefined");
+#endif
+    }
+}
+
+#endif
+
+
+/*
+ * PUT_SNAP_EPS: worker routine to output eps data.
+ */
+
+#ifndef put_snap_eps
+
+#define put_snap_eps  _put_snap_eps
+
+local void
+_put_snap_eps(outstr, btptr, nbptr, ofptr)
+stream outstr;			/* output stream, of course */
+Body **btptr;			/* pointer to body array */
+int *nbptr;			/* pointer to number of bodies */
+int *ofptr;			/* pointer to output bit flags */
+{
+    real *abuf, *ap;
+    Body *bp;
+    
+    if (*ofptr & EpsBit) {
+#ifdef Eps
+	abuf = (real *) allocate(*nbptr * sizeof(real));
+	for (bp = *btptr, ap = abuf; bp < *btptr + *nbptr; bp++)
+	    *ap++ = Eps(bp);;
+	put_data(outstr, EpsTag, RealType, abuf, *nbptr, 0);
+	free(abuf);
+#else
+	error("put_snap_eps: Eps undefined");
+#endif
+    }
+}
+
+#endif
+
 /*
  * PUT_SNAP_BODY: managing routine for output of particle data.
  */
@@ -323,6 +392,8 @@ int *ofptr;			/* pointer to output bit flags */
 	put_snap_acc(outstr, btptr, nbptr, ofptr);
 	put_snap_aux(outstr, btptr, nbptr, ofptr);
 	put_snap_key(outstr, btptr, nbptr, ofptr);
+	put_snap_dens(outstr, btptr, nbptr, ofptr);
+	put_snap_eps(outstr, btptr, nbptr, ofptr);
 	put_tes(outstr, ParticlesTag);
     }
 }
