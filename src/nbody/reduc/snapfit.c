@@ -6,7 +6,7 @@
  *      28-may-92   V0.0 Initial design - fairly interactive
  *	 4-may-92    0.4 fixed matrix rotation order bug
  *	16-jun-92    0.6 rotation order -> math positive (see snaprotate(1))
- *      15-jul-03    0.7 make it compile under nemo 3.1.1
+ *      17-jul-03    0.7 make it compile under nemo 3.1.1
  */
 
 /* this code will only work in 3D */
@@ -20,8 +20,13 @@
 #include <snapshot/snapshot.h>
 #include <snapshot/body.h>
 #include <snapshot/get_snap.c>
+#if 0
+#include <bodytrans.h>    /* this defines some conflicting macro's, even in nrutil.h */
+#else
+typedef real (*rproc_body)(Body *, real, int);
+extern rproc_body btrtrans(string expr);
+#endif
 #include <image.h>
-#include <bodytrans.h>
 
 typedef struct {    /* special fake cube particle to aid coding */
     vector r;		/* position in the cube */
@@ -49,7 +54,7 @@ string defv[] = {
     "contour=\n         Optional Output image file with chi-squared",
     "iter=0\n           number of more iterations after best on matrix",
     "times=all\n        Times selected from snapshot models",
-    "VERSION=0.7\n      15-jul-03 PJT",
+    "VERSION=0.7\n      17-jul-03 PJT",
     NULL,
 };
 
@@ -138,7 +143,6 @@ void setparams()
 
 int read_model()
 {
-    real x,y,z, w;
     int i, bits, count;
     Body *bp, *bq;
 
@@ -159,9 +163,8 @@ int read_model()
      * compared to the data 'dtab'
      */
 
-    if (mtab==NULL) {
+    if (mtab==NULL)
         mtab = (cube *) allocate(nmodel*sizeof(cube));
-    }    
     
     count=0;
     for (bp=btab, i=0; i<nmodel; bp++, i++) {
