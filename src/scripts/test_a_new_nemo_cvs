@@ -10,18 +10,25 @@
 
 set pgplot=1		# install PGPLOT
 set intel=0		# pick intel compiler (astromake)
-set gcc=0		# pick gcc version (astromake)
+set gcc=0		# pick gcc version (version number via astromake)
 set falcon=1		# compile gyrfalcON
 set anonymous=1		# anonymous CVS ?
 set cvsroot=0		# override the official CVSROOT
 set vogl=1		# compile vogl
 set single=0            # singe or double (default) precision
 set all=1		# make all binaries , or just testsuite?
-set clean=1		# remove old nemo directory before installing
+set clean=1		# remove old nemo directory before installing (rm -r nemo)
 set branch=()		# use a CVS branch name?
 set yapp=(/null)	# set a YAPP device during the install
-set cfitsio=()		# point to the compressed tar file for CFITSIO
+                  	# point to the compressed tar file for CFITSIO (e.g. cfitsio2490.tar.gz)
+set cfitsio=ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio2500.tar.gz   
+set debug=1             # compile in debug mode (not implemented)
+set pedantic=0          # compile in pedantic mode
+
+# some variables that affect earlier variables
+
 set reuse=0             # don't clean and use CVS, just reuse the current nemo tree
+set quick=0             # install with minimal extra packages
 
 foreach _a ($*)
   set $_a
@@ -45,7 +52,7 @@ endif
 #
 #endif
 
-#		pick another GNU compiler 
+#		pick another GNU compiler (this is rather astromake specific of course)
 if ($gcc) then
    source /astromake/astromake_start
    astroload -v $gcc gcc
@@ -88,24 +95,32 @@ if ($pgplot && $reuse == 0) then
   (cd local; cvs -Q checkout pgplot)
 endif
 
-if (-e $cfitsio) then
+if ($cfitsio != 0) then
+ if (! -e $cfitsio) then
+   echo Attempting to find/retrieve $cfitsio
+   wget -q $cfitsio
+   set cfitsio=`pwd`/$cfitsio:t
+ endif
+ if (-e $cfitsio) then
   echo Installing bootstrapping cfitsio
   if (! -e include) ln -s inc include
   (cd local; tar zxf $cfitsio)
   src/scripts/cfitsio.install >& install.cfitsio.log
-  echo STATUS=$status
+  echo cfitsio installed with STATUS=$status
   set cfitsio=1
-else
+ else
   set cfitsio=0
+ endif
 endif
-
 
 
 set copts=()
 # set copts=($copts --disable-gsl)
 if ($pgplot) set copts=($copts --with-yapp=pgplot --with-pgplot-prefix=`pwd`/lib)
-if ($cfitsio) set copts=($copts --enable-cfitsio)
+if ($cfitsio) set copts=($copts --enable-cfitsio --with-cfitsio-prefix=`pwd`)
 if ($single) set copts=($copts --enable-single)
+if ($debug) set copts=($copts --enable-debug)
+if ($pedantic) set copts=($copts --enable-pedantic)
 
 echo Running configure $copts
 echo configure $copts  >& install.config.log
@@ -138,7 +153,8 @@ else
 endif
 
 if ($falcon) then
-  ( cd usr/dehnen/falcON; make nemo_bins)  >& install_falcON.log
+  echo Compile falcon
+  ( cd usr/dehnen/falcON; make nemo_bins)  >& install.falcON.log
 endif
 
 

@@ -2,7 +2,9 @@
 #
 #  Install CFITSIO for NEMO
 #
+#
 #  17-apr-04    written, for 2490
+#  29-jul-04    checked for 2500
 
 if ($?NEMO == 0) set NEMO=`pwd`
 
@@ -20,13 +22,16 @@ end
 
 if (! -e $src) then
   echo CFITSIO source directory src=$src does not exist, try NEMO=
+  echo or:
+  echo " cd $NEMO/local"
+  echo " wget ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio2500.tar.gz"
+  echo " tar zxf cfitsio2500.tar.gz"
+  echo " ../src/scripts/cfitsio.install"
   exit 1
 endif
 
-
-
 cd $src
-configure --prefix=$prefix
+./configure --prefix=$prefix
 make clean
 make
 make install 
