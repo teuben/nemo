@@ -1,0 +1,5 @@
+#! /bin/csh -f
+#  list external symbols for SYSV
+#  Solaris 2.x
+#
+nm $1 | awk -F\| '{print $4,$7}'
