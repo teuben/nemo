@@ -55,8 +55,8 @@ echo "<CENTER>"
 echo "<TABLE BORDER>"
 
 pushd html > /dev/null
-ls *.$sec.html | awk -F. '{print $1}' | pr -t --columns=6 |\
-  awk '{print "<tr>";for(i=1; i<=6; i++) printf("<td width=24%%><a href=%s'.$sec.html'>%s</a></td>\n",$i,$i); print "</tr>"}'
+ls *.$sec.html | awk -F. '{print $1}' | pr -t --columns=5 --width=200 |\
+  awk '{print "<tr>";for(i=1; i<=5; i++) printf("<td width=20%%><a href=%s'.$sec.html'>%s</a></td>\n",$i,$i); print "</tr>"}'
 popd > /dev/null
 
 echo "</TABLE>"

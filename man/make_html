@@ -30,7 +30,7 @@ if (! -e html) mkdir html
 
 foreach d ($manlevels)
  set dir=man$d
- foreach file ($dir/*.?)
+ foreach file ($dir/*.$d)
    set base=$file:t
    rman -f HTML $file  >  html/$base.html
  end

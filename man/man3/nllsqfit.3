@@ -137,20 +137,17 @@ The following routines have to be defined by the user:
 Fitting a straight line \fI y(x) = a * x + b \fP:
 .PP
 .nf
-    real func( xdat, fpar, npar)
-    real *xdat, fpar[];
-    int npar;
+    real func(real *xdat, real *fpar, int npar)
     {
         return fpar[0] * (*xdat) + fpar[1];
     }
               
-    void derv( xdat, fpar, dpar, npar)
-    real *xdat, fpar[], dpar[];
-    int npar;
+    void derv(real *xdat, real *fpar, real *dpar, int npar)
     {
         dpar[0] = *xdat;
         dpar[1] = 1.0;
     }
+.fi
 .SH FILES
 nllsqfit.c
 .SH SEE ALSO
