@@ -71,7 +71,7 @@ string defv[] = {
     "rotcur3=\n      Rotation curve name, parameters and set of free(1)/fixed(0) values",
     "rotcur4=\n      Rotation curve name, parameters and set of free(1)/fixed(0) values",
     "rotcur5=\n      Rotation curve name, parameters and set of free(1)/fixed(0) values",
-    "VERSION=1.0\n   21-jul-02 PJT",
+    "VERSION=0.9\n   21-jul-02 PJT",
     NULL,
 };
 
@@ -152,17 +152,42 @@ extern bool scanopt(string option, string key);
 /* a bunch of rotation curves and parameter derivatives */
 
 
+real rotcur_flat(real r, int n, real *p, real *d)
+{
+  d[0] = 1.0;
+  return p[0];
+}
+
 real rotcur_linear(real r, int n, real *p, real *d)
 {
   d[0] = r;
   return p[0] * r;
 }
 
-real rotcur_flat(real r, int n, real *p, real *d)
+real rotcur_poly(real r, int np, real *p, real *d)
 {
-  d[0] = 1.0;
-  return p[0];
+  real v, dp, x = r/p[1];
+  int i;
+
+  i = np-1;
+  v = 0;
+  dp = 0;
+  d[1] = p[0] * x;   /* fake placeholder for recursion */
+  while (i > 1) {  /* p[0] and p[1] are special, p[2] last one in loop */
+    v = v*x + p[i];
+    dp = dp*x + i*p[i];
+    d[2+np-1-i] = d[2+np-2-i] * x;
+    i--;
+  }
+  v  = x*(1+x*v);
+  dp = x*(1+x*dp);
+
+  d[0] = v;
+  d[1] = -p[0]*dp/p[1];
+
+  return p[0] * v;
 }
+
 
 real rotcur_core1(real r, int n, real *p, real *d)
 {
@@ -192,31 +217,6 @@ real rotcur_plummer(real r, int np, real *p, real *d)
   d[1] = -x*p[0]/p[1]*(1-x*x/2)/(1+x*x)/y;
   return p[0] * x * y;
 }
-
-real rotcur_poly(real r, int np, real *p, real *d)
-{
-  real v, dp, x = r/p[1];
-  int i;
-
-  i = np-1;
-  v = 0;
-  dp = 0;
-  d[1] = p[0] * x;   /* fake placeholder for recursion */
-  while (i > 1) {  /* p[0] and p[1] are special, p[2] last one in loop */
-    v = v*x + p[i];
-    dp = dp*x + i*p[i];
-    d[2+np-1-i] = d[2+np-2-i] * x;
-    i--;
-  }
-  v += x;
-  dp += x;
-
-  d[0] = v;
-  d[1] = -p[0]*dp/p[1];
-
-  return p[0] * v;
-}
-
 
 
 /******************************************************************************/
@@ -252,6 +252,7 @@ nemo_main()
     real old_factor, factor;    /* factor > 1, by which errors need be multiplied */
     int i,j,k;
 
+    warning("New program, not all options have been tested yet");
 
     rotcurparse();
     if (nmod==0) error("No rotcur models specified");
@@ -335,7 +336,7 @@ rotcurparse()
 {
   string *sp;
   char keyname[30];
-  int i, nsp;
+  int i, j, nsp;
 
   nmod = 0;
   for (i=0; i<MAXMOD; i++) {
@@ -343,18 +344,19 @@ rotcurparse()
     if (hasvalue(keyname)) {
       sp = burststring(getparam(keyname),", ");
       nsp = xstrlen(sp,sizeof(string))-2;
+      if (nsp % 2) warning("%s= needs an even number of parameters",keyname);
       if (streq(sp[0],"linear")) {
 	if (nsp != 2) error("linear needs 2 numbers");
 	npar[nmod] = 1;
 	mpar[nmod][0] = natof(sp[1]);
 	mmsk[nmod][0] = natoi(sp[2]);
-	rcfn[0] = rotcur_linear;
+	rcfn[nmod] = rotcur_linear;
       } else if (streq(sp[0],"flat")) {
 	if (nsp != 2) error("flat needs 2 numbers");
 	npar[nmod] = 1;
 	mpar[nmod][0] = natof(sp[1]);
 	mmsk[nmod][0] = natoi(sp[2]);
-	rcfn[0] = rotcur_flat;
+	rcfn[nmod] = rotcur_flat;
       } else if (streq(sp[0],"core1")) {
 	if (nsp != 4) error("core1 needs 2 numbers");
 	npar[nmod] = 2;
@@ -362,7 +364,7 @@ rotcurparse()
 	mpar[nmod][1] = natof(sp[2]);
 	mmsk[nmod][0] = natoi(sp[3]);
 	mmsk[nmod][1] = natoi(sp[4]);
-	rcfn[0] = rotcur_core1;
+	rcfn[nmod] = rotcur_core1;
       } else if (streq(sp[0],"core2")) {
 	if (nsp != 4) error("core2 needs 2 numbers");
 	npar[nmod] = 2;
@@ -370,39 +372,27 @@ rotcurparse()
 	mpar[nmod][1] = natof(sp[2]);
 	mmsk[nmod][0] = natoi(sp[3]);
 	mmsk[nmod][1] = natoi(sp[4]);
-	rcfn[0] = rotcur_core2;
+	rcfn[nmod] = rotcur_core2;
       } else if (streq(sp[0],"poly")) {
-	error("poly: yuck, how to get the npars");
-	npar[nmod] = 2;
-	mpar[nmod][0] = natof(sp[1]);
-	mpar[nmod][1] = natof(sp[2]);
-	mmsk[nmod][0] = natoi(sp[3]);
-	mmsk[nmod][1] = natoi(sp[4]);
-	rcfn[0] = rotcur_core2;
+	if (nsp % 2) error("poly really needs an even number of parameters");
+	npar[nmod] = nsp/2;
+	for (j=0; j<npar[nmod]; j++) {
+	  mpar[nmod][j] = natof(sp[j+1]);
+	  mmsk[nmod][j] = natoi(sp[j+1+npar[nmod]]);
+	}
+	rcfn[nmod] = rotcur_poly;
       } else {
-	error("Don't have code for %s",sp[0]);
+	error("Don't have rotcur code for %s yet, you can supply your own",sp[0]);
       }
+      dprintf(0,"ROTCUR%d: name=%s parameters=",i+1,sp[0]);
+      for (j=0; j<npar[nmod]; j++) {
+	dprintf(0,"%g (%s) ",mpar[nmod][j], mmsk[nmod][j] ? "free" : "fixed");
+      }
+      dprintf(0,"\n");
       nmod++;
-    }
-  }
-
-#if 0
-    /* 1 model, linear */
-    nmod = 1;
-    ipar[0] = 0;
-    npar[0] = 1;
-    rcfn[0] = rotcur_linear;
-    mpar[0][0] = 4;
-    mmsk[0][0] = 1;
-#endif
-#if 0
-    npar[0] = 2;
-    rcfn[0] = rotcur_core1;
-    mpar[0][0] = 20;
-    mpar[0][1] = 10;
-    mmsk[0][0] = mmsk[0][0] = 1;
-#endif
-
+      freestrings(sp);
+    } /* hasvalue */
+  } /* i */
 }
 
 /*
