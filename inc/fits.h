@@ -227,7 +227,7 @@ int fts_wrow     (fits_header *, stream, int, char *);
 int fts_zero     (fits_header *);
 
 int fts_chead816 (fits_header *, stream);
-int fts_cdata816 (fits_header *, stream, stream, bool, bool);
+int fts_cdata816 (fits_header *, stream, stream);
 
 int fts_wvar     (stream, string, string);
 int fts_wvarc    (stream, string, string, string);
