@@ -2,4 +2,6 @@ Ccanges from the original distribution:
 
 CPP -> CXX in makefile, to avoid potential confusion with the cpp preprocessor
 
-gcc3 errors cleaned up
+gcc3 errors cleaned up, but it will only work on a modern gcc3
+	(e.g. gcc 3.0.4 won't work, 3.2.2 is known to work,as well as
+	the intel 8 compiler on linux also)

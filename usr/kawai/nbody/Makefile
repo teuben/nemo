@@ -1,8 +1,8 @@
 # intel:   icpc/icc
-#CXX = g++
-#CC  = gcc
-CXX = icpc
-CC  = icc
+CXX = g++
+CC  = gcc
+#CXX = icpc
+#CC  = icc
 
 # PGINCLUDE =  -I$(PGPLOT_DIR)
 G5INCLUDE = -I/home/atsushi/pub/include
@@ -37,7 +37,7 @@ G5INCLUDE = -I/home/atsushi/pub/include
 # CXXFLAGS = -DNOGRAPHICS -DTREE $(PGINCLUDE) -O3 -ffast-math -funroll-loops -DPAR_TRAV -pthread
 CXXFLAGS = -DNOGRAPHICS -DTREE $(PGINCLUDE) -O3 -DP2M2
 #CXXFLAGS += -ffast-math -funroll-loops 
-CXXFLAGS += -ipo -xW -tpp7 -prefetch
+#CXXFLAGS += -ipo -xW -tpp7 -prefetch
 
 # IONEMO = -L$(NEMOLIB) -lio_nemo -lnemo
 # PGLIB     =  -L$(PGPLOT_DIR) -O4 -lcpgplot -lpgplot -lX11 -lUfor -lfor -lFutil -lm -lprof1 -lpdf
