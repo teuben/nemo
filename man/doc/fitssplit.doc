@@ -1,0 +1,13 @@
+%N /smc/teuben/nemo/bin/sun4/fitssplit
+This doc file has been produced with help=t option
+No further help is available, try 'man fitssplit'
+%A in
+	Input fits file [???]
+%A out
+	Basename for output fits file [???]
+%A file
+	Select which planes(s)? [0=all] [0]
+%A blocking
+	Blocking factors for I/O [1,1]
+%A VERSION
+	14-aug-90   PJT [1.1]
