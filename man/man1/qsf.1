@@ -1,0 +1,39 @@
+.TH QSF 1NEMO "13 February 1992"
+.SH NAME
+qsf \- query a structured file
+.SH SYNOPSIS
+\fBqsf in=\fP\fIin-file\fP
+.SH DESCRIPTION
+\fIqsf\fP queries if a file is a proper \fIbinary structured file\fP. If so,
+it returns a 0 status to the parent shell, if not, 1 is returned.
+Most \fBNEMO\fP programs will exit when structured files are
+expected, and no such thing was encountered.
+.PP
+\fIascii structured files\fP can be converted to \fIbinary\fP using
+\fIrsf(1NEMO)\fP. Other format converted are problem specific.
+.SH PARAMETERS
+The following parameters are recognized; they may be given in any order
+if the keyword is also given.
+.TP 20
+\fBin\fP=\fIin-file\fP
+Input filename to test
+[no default].
+.SH DEBUG
+The following debug levels are active in this program:
+.TP 15
+\fB 1 \fP
+Prints out a message if the file is structured or not.
+.SH SEE ALSO
+tsf(1NEMO), rsf(1NEM0)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +1.5i
+~/src/kernel/io  	qsf.c
+.fi
+.SH HISTORY
+.nf
+.ta +1i +4i
+13-feb-92	V1.0: created	PJT
+.fi
