@@ -1,0 +1,65 @@
+.TH VELFIT 1NEMO "5 October 2003"
+.SH NAME
+velfit \- fit rotation curve to coplanar disk (WWB73 method)
+.SH SYNOPSIS
+\fBvelfit\fP [parameter=value]
+.SH DESCRIPTION
+VELFIT fits a theoretical velocity pattern to an
+isovelocity image, weighted by the intensity image and a
+geometric factor specified by model input paramaters.
+The default option is to fit a rotation curve to an isovelocity
+image of a rotating disk. The rotation curve and rms for the
+fit are printed out and can be used to find the best fit to the
+other parameters. For more details see paper by 
+Warner, Wright and Baldwin (1973MNRAS.163..163W).
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+input velocity field, in \fIimage(5NEMO)\fP format. No default.
+.TP 20
+\fBradii=\fP
+radii of the ring boundaries. For N rings, N+1 values need to be give.
+They need to be sorted by increasing radius. 
+.TP 20
+\fBpa=\fP
+position angle of disk, in degrees. [0]
+.TP 20
+\fBinc=\fP
+inclination angle of disk, in degrees [45]   
+.TP 20
+\fBcenter=\fP
+rotation center (mapcenter if left blank, 0,0=lower left)
+.TP 20
+\fBvsys=\fP
+systemic velocity [0]     
+.TP 20
+\fBden=\fP
+input density image, used to weigh the velocities. If missing,
+weights are uniform (but see \fBcoswt=\fP below). Default: none.
+.TP 20
+\fBfrang=\fP
+free angle around minor axis (2*frang is the total angle around
+the minor axis used).
+.TP 20
+\fBblank=\fP
+Value of the blank pixel to be ignored. Default: 0.0
+.TP 20
+\fBcoswt=\fP
+power of cos(theta) weighting [1]   
+.TP 20
+\fBwwb73=\fP
+use the classic WWB73 method. Currently there is no other 
+method. [t]  
+.SH SEE ALSO
+rotcur(1NEMO), rotcurshape(1NEMO)
+.SH FILES
+.SH AUTHOR
+Mel Wright (Fortran version), Peter Teuben (C version)
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+30-sep-92	new task in miriad	MCHW
+5-oct-2003	V1.0 : C version in NEMO	PJT
+.fi
