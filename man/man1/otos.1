@@ -1,0 +1,64 @@
+.TH OTOS 1NEMO "20 December 1990" 
+.SH NAME
+otos \- convert and combine orbits to a snapshot 
+.SH SYNOPSIS
+.PP
+\fBotos in=\fPorbit \fBout=\fPsnapshot [parameter=value]
+.SH DESCRIPTION
+\fIotos\fP converts a set of orbits into a snapshot, as if they
+are part of one big family. Selections can be made from the
+orbits, as well as a simple stride through each orbit itself. More
+complex selections would  have to be done using multiple runs
+of \fIotos\fP, and recombining them with \fIsnapadd\fP.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 20
+\fBin=\fIin-file\fP
+input file, will be in \fIorbit(5NEMO)\fP format [no default]
+.TP
+\fBout=\fIout-file\fP
+output file, in \fIsnapshot(5NEMO)\fP format [no default]
+.TP
+\fBorbit=\fIn1,n2,..\fP
+Orbit numbers to select. A ordered list can be given, the word "\fBall\fP" is
+reserved to select all orbits for copy. The first orbit is numbered
+0. 
+[default: \fBall\fP]
+.TP
+\fBmaxsteps=\fImax-steps\fP
+Steps allocated such that largest orbit fits in here.
+[default: \fB5000\fP]
+.TP
+\fBstride=\fIstride\fP
+Stride through an orbit. If 1, all points are copied to the snapshot,
+numbers larger than 1 select every \fIstride-th\fP particle from
+the orbit to be copied.
+[default: \fB1\fP]
+.TP
+\fBnbody=\fImaxbody\fP
+Since the orbit file is only scanned once, we need to supply an estimate
+how many bodies to allocate for the final snapshot.
+[default: \fB10000\fP]
+.TP
+\fBscan=t|f\fP
+If this mode it \fBtrue\fP, program continues to scan all orbits, according
+to input parameters \fBorbit=\fP and \fBstride=\fP, even if all allocated
+space in the snapshot has been filled. At the end it
+reports on the total number of bodies needed.
+[default: \fBf\fP]
+.SH "SEE ALSO"
+snapshot(5NEMO), orbit(5NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+~/src/orbit/misc   	otos.c otos.1
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+23-may-90	V1.0 created, seemingly in great haste...	PJT
+20-dec-90	V1.1 scan= implemented; some manual page written	PJT
+.fi
