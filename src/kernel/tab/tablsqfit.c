@@ -32,6 +32,7 @@
  *      23-mar-01     a fixed xrange=  for singular column files
  *      14-apr-01  V3.1 added convex hull computation as 'area'
  *      18-jun-01     b fixed boundary check for xrange, also use natof now in setxrange
+ *       8-aug-01     c compute error in axis ratio for ellipses
  */
 
 /*
@@ -61,7 +62,7 @@ string defv[] = {
     "estimate=\n        optional estimates (e.g. for ellipse center)",
     "nmax=10000\n       Default max allocation",
     "tab=f\n            short one-line output?",
-    "VERSION=3.1a\n     18-jun-01 PJT",
+    "VERSION=3.1c\n     8-aug-01 PJT",
     NULL
 };
 
@@ -267,7 +268,7 @@ do_line()
 #if 1
                 if ( (mwt>0) && (dycolnr==0) )
                         continue;               /* break off */
-                fit(x,y,npt,dy,mwt,&b,&a,&sigb,&siga,&chi2,&q);
+                fit1(x,y,npt,dy,mwt,&b,&a,&sigb,&siga,&chi2,&q);
 #else
 		if (mwt==0)
                     fit(x,y,npt,dy,mwt,&b,&a,&sigb,&siga,&chi2,&q);
@@ -328,7 +329,8 @@ do_ellipse()
     real aa,bb,cc,dd,ee,pa,pp,cospp,sinpp,cospa,sinpa,ecc,al,r,ab,
          s1,s2,s3,y1,y2,y3,x0,y0, sum0, sum1, sum2, dx, dy, rr,
 	 radmean, radsig, dr;
-    real aaa, bbb, xp, yp, delta;
+    real aaa, bbb, xp, yp, delta, sigfac;
+    real siga, sigb, sigc, sigd, sige, fac1, fac2, fac3, dr1da, dr1db, dr1dc, sigr;
     int i, j;
 
     if (nxcol < 1) error("nxcol=%d",nxcol);
@@ -385,12 +387,31 @@ do_ellipse()
         mat[i*5+0], mat[i*5+1], mat[i*5+2], mat[i*5+3], mat[i*5+4],
         name[i], sol[i]);
 
+    sigfac = 0.0;
+    for (i=0; i<npt; i++) {
+        x = xdat[i]-xmean;          /* treat (x,y) w.r.t. the mean center */
+        y = ydat[i]-ymean;          /* of all points to prevent rounding err */
+	sigfac += sqr(sol[0]*x*x+2*sol[1]*x*y+sol[2]*y*y+sol[3]*x+sol[4]*y-1);
+    }
+    sigfac /= (npt-5);
+    sigfac = sqrt(sigfac);
+    dprintf(1,"Sigma factor=%g\n",sigfac);
+    siga = sigfac * sqrt(mat[0]);
+    sigb = sigfac * sqrt(mat[6]);
+    sigc = sigfac * sqrt(mat[12]);
+    sigd = sigfac * sqrt(mat[18]);
+    sigd = sigfac * sqrt(mat[24]);
+
     /* Now that we have the coefficient a,b,c,d,e in:
      *      a.x^2 + 2bxy + cy^2 + dx + ey = 1
      * They have to be converted to human readable ones
      */
 
     aa = sol[0]; bb = sol[1]; cc = sol[2]; dd = sol[3]; ee = sol[4];
+    dprintf(1,"Solutions  a..e: %g %g %g %g %g\n",aa,bb,cc,dd,ee);
+    dprintf(1,"Errors  in a..e: %g %g %g %g %g\n",siga,sigb,sigc,sigd,sige);
+    dprintf(1,"FracErr in a..e: %g %g %g %g %g\n",siga/aa,sigb/bb,sigc/cc,sigd/dd,sige/ee);
+
     delta = aa*cc-bb*bb;
     if (delta < 0)
         warning("You seem to have an hyperbola, not an ellipse");
@@ -400,7 +421,10 @@ do_ellipse()
     cospa = cos(pa);
     sinpp = sin(pp);
     sinpa = sin(pa);
-    r = (sinpp*(aa+cc) + 2*bb)/(sinpp*(aa+cc) - 2*bb);
+    fac1 = sinpp*(aa+cc) + 2*bb;
+    fac2 = sinpp*(aa+cc) - 2*bb;
+    fac3 = sqr(aa-cc)+4*sqr(bb);
+    r = fac1/fac2;
     r = sqrt(ABS(r));           /* r is now axis ratio b/a or a/b for ell/hyp */
     s1 = bb*ee-cc*dd;
     s2 = bb*dd-aa*ee;
@@ -431,13 +455,21 @@ do_ellipse()
     else                            /* use the biggest divisor */
         ab = (2/(sol[0]+sol[2] + 2*sol[1]/sinpp));
 
+    /* compute error in axis ratio : for this one we only need 3 partial derivitives */
+    dr1da = 4*bb*(sinpp-(2*bb*(aa+cc)*cospp)/fac3)/sqr(fac2);
+    dr1dc = 4*bb*(sinpp+(2*bb*(aa+cc)*cospp)/fac3)/sqr(fac2);
+    dr1db = (8*bb*cospp*(sqr(aa)-sqr(cc))+4*sinpp*(aa+cc)*fac3)/(fac3*sqr(fac2));
+    sigr  = sqrt((sqr(siga*dr1da)+sqr(sigb*dr1db)+sqr(sigc*dr1dc))/(2*r));
+    dprintf(1,"sigr=%g\n",sigr);
+
     pa *= 180/PI;           /* PA is now in degrees */
-    dprintf(1,"Before re-arrangeing: ab, r, pa = %f %f %f\n",ab,r,pa);
+    dprintf(1,"Before re-arranging: ab, r, pa = %f %f %f\n",ab,r,pa);
     if (delta > 0) {            /* ELLIPSE */
         if (r>1.0) { /* ellipse with r>1 means we've got a & b mixed up */
             r = 1/r;            /* so make r < 1 */
             ab = sqrt(ab)/r;    /* and ab is now the true semi major axis */
             pa -= 90.0;         /* and change PA by 90 degrees */
+	    sigr *= sqr(r);     /* correct errors */
        }
        ecc = sqrt(1-r*r);       /* eccentricity of the ellipse ecc=sqrt(a^2-b^2)/a */
     } else {                    /* HYPERBOLA */
@@ -461,7 +493,7 @@ do_ellipse()
 	  } else {
             printf("Ellips fit: \n");
             printf(" semi major axis: %g\n",ab);
-            printf(" eccentricity:    %g axis ratio: %g\n",ecc,r);
+            printf(" eccentricity:    %g axis ratio: %g  error: %g\n",ecc,r,sigr);
             printf(" x-center:        %g\n",x0);
             printf(" y-center:        %g\n",y0);
             printf(" P.A.:            %g\n",pa+90);
@@ -708,6 +740,8 @@ int ndata,mwt;
         int i;
         real wt,t,sxoss,sx=0.0,sy=0.0,st2=0.0,ss,sigdat;
 
+
+
         *b=0.0;
         if (mwt) {
                 ss=0.0;
@@ -755,5 +789,32 @@ int ndata,mwt;
                         *chi2 += sqr((y[i]-(*a)-(*b)*x[i])/sig[i]);
                 *q=gammq(0.5*(ndata-2),0.5*(*chi2));	
         }
+}
+
+
+void fit1(x,y,ndata,sig,mwt,a,b,siga,sigb,chi2,q)
+real x[],y[],sig[],*a,*b,*siga,*sigb,*chi2,*q;
+int ndata,mwt;
+{
+  real mat[4], vec[2], sol[2], aa[3];
+  int i;
+
+  warning("testing fit using lsq_ routines");
+
+  lsq_zero(2,mat,vec);
+  for (i=0; i<ndata; i++) {
+    aa[0] = 1.0;
+    aa[1] = x[i];
+    aa[2] = y[i];
+    lsq_accum(2,mat,vec,aa,1.0);
+  }
+  printf("mat   : %g %g => %g \n",mat[0],mat[1],vec[0]);
+  printf("      : %g %g => %g \n",mat[2],mat[3],vec[1]);
+  lsq_solve(2,mat,vec,a);
+  printf("a+bx  :  a=%g  b=%g\n", aa[0],aa[1]);
+  printf("mat^-1: %g %g \n       %g %g\n", mat[0],mat[1],mat[2],mat[3]);
+
+
+  stop(0);       
 }
 
