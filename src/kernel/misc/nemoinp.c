@@ -21,6 +21,7 @@
  *  13-mar-00   V1.7 added seed= parameter			    pjt
  *                   (but it doesn't appear to do anything useful)
  *  31-may-01   V1.8 added natof, natoi                             pjt
+ *   7-jun-01       a:  added casting to shut up compiler           pjt
  */
 
 #include <stdinc.h>
@@ -28,13 +29,15 @@
 
 #if defined(NOHERINP)
 
+extern string *burststring(string,string);
+
 int nemoinpi(
 	     char *expr,
 	     int  *a,
 	     int   na)
 {
-    int nret, atoi();
-    string *vals, *burststring();
+  int nret;
+  string *vals;
 
     vals = burststring(expr,", ");
     for (nret=0; vals[nret] != NULL; nret++) {
@@ -51,8 +54,8 @@ int nemoinpl(
 	     long *a,
 	     int   na)
 {
-    int nret, atoi();
-    string *vals, *burststring();
+  int nret;
+  string *vals, *burststring();
 
     vals = burststring(expr,", ");
     for (nret=0; vals[nret] != NULL; nret++) {
@@ -70,8 +73,8 @@ int nemoinpb(
 	     bool *a,
 	     int   na)
 {
-    int nret;    
-    string *vals, *burststring();
+  int nret;    
+  string *vals;
 
     vals = burststring(expr,", ");
     for (nret=0; vals[nret] != NULL; nret++) {
@@ -89,9 +92,8 @@ int nemoinpd(
 	     double *a,
 	     int     na)
 {
-    int nret;
-    string *vals, *burststring();
-    double atof();
+  int nret;
+  string *vals;
 
     vals = burststring(expr,", ");
     for (nret=0; vals[nret] != NULL; nret++) {
@@ -109,9 +111,8 @@ int nemoinpf(
 	     float  *a,
 	     int     na)
 {
-    int nret;
-    string *vals, *burststring();
-    double atof();
+  int nret;
+  string *vals;
 
     vals = burststring(expr,", ");
     for (nret=0; vals[nret] != NULL; nret++) {
@@ -139,7 +140,7 @@ int nemoinpi(
     elen = strlen(expr);
     tlen = sizeof(int);
     type = 'I';     /* integer */
-    herinp (expr, &elen, &type, &tlen, a, &na, &nret, &ierr);
+    herinp (expr, &elen, &type, &tlen, (char *)a, &na, &nret, &ierr);
     if (ierr < 0)
         return(ierr);
     else
@@ -157,7 +158,7 @@ int nemoinpl(
     elen = strlen(expr);
     tlen = sizeof(long);
     type = 'I'; /* integer */
-    herinp (expr, &elen, &type, &tlen, a, &na, &nret, &ierr);
+    herinp (expr, &elen, &type, &tlen, (char *)a, &na, &nret, &ierr);
     if (ierr < 0)
         return(ierr);
     else
@@ -176,7 +177,7 @@ int nemoinpb(
     elen = strlen(expr);
     tlen = sizeof(bool);
     type = 'L';     /* logical */
-    herinp (expr, &elen, &type, &tlen, a, &na, &nret, &ierr);
+    herinp (expr, &elen, &type, &tlen, (char *)a, &na, &nret, &ierr);
     if (ierr < 0)
         return(ierr);
     else
@@ -195,7 +196,7 @@ int nemoinpd(
     elen = strlen(expr);
     tlen = sizeof(double);
     type = 'F';
-    herinp (expr, &elen, &type, &tlen, a, &na, &nret, &ierr);
+    herinp (expr, &elen, &type, &tlen, (char *)a, &na, &nret, &ierr);
     if (ierr < 0)
         return(ierr);
     else
@@ -213,7 +214,7 @@ int nemoinpf(
     elen = strlen(expr);
     tlen = sizeof(float);
     type = 'F';
-    herinp (expr, &elen, &type, &tlen, a, &na, &nret, &ierr);
+    herinp (expr, &elen, &type, &tlen, (char *)a, &na, &nret, &ierr);
     if (ierr < 0)
         return ierr;
     else
@@ -248,7 +249,7 @@ string defv[] = {
     "tab=\n             Optional table output",
     "seed=0\n		Seed for xrandom",
     "atof=\n            test (n)atof single value expression",
-    "VERSION=1.8\n	31-may-01 PJT",
+    "VERSION=1.8a\n	7-jun-01 PJT",
     NULL,
 };
 
