@@ -1,4 +1,4 @@
-.TH DTOS 1NEMO "29 December 2003"
+.TH DTOS 1NEMO "16 March 2004"
 .SH NAME
 dtos \- convert STARLAB dyn to NEMO snapshot
 .SH SYNOPSIS
@@ -16,6 +16,14 @@ is also given:
 Output snapshot file in standard \fIsnapshot(5NEMO)\fP
 format. Note that the input dyn must be from standard input.
 No default.
+.TP
+\fBheadline=\fP
+Random verbiage added to output.
+.TP
+\fBoptions=\fP
+Optional starlab items to write out. Currently it will write out
+all items, even if meaningless. This probably means that 
+Aux, Acceleration, Potential and Key could be quite meaningless.
 .SH EXAMPLES
 Since STARLAB has the restriction that input and output are through
 stdin/stdout (cin/cout), the user interface of \fBdtos\fP is not
@@ -57,4 +65,5 @@ Peter Teuben
 18-jul-01	V1.2 also output time, improved scanning dyn's to pdyn's PJT
 15-oct-03	V1.3 compatible with starlab4, made L/T work	PJT
 29-dec-03   	V1.4 output all L/T/S	PJT
+16-mar-04	V2.0 added options= and headline=	PJT
 .fi
