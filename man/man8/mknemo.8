@@ -1,4 +1,4 @@
-.TH MKNEMO 8NEMO "4 April 2001"
+.TH MKNEMO 8NEMO "20 June 2003"
 .SH NAME
 mknemo \- attempt to find NEMO programs and install them
 .SH SYNOPSIS
@@ -27,6 +27,7 @@ to be updated.
   -r        remove lockfile before starting
   -d        also make doc file (only for true NEMO programs)
   -t        cleanup after having made the binaries
+  -u        update your NEMO cvs tree before (re)making
 .fi
 .SH "SEE ALSO"
 mkbin(8NEMO)
@@ -49,4 +50,5 @@ $NEMO/adm/install/mknemo.lock	lockfile, to prevent multiple usage
 21-jun-91	V1.0: doc created       	PJT
 25-jun-91	V1.1: added lockfile     	PJT
 4-apr-01	V1.3: added extension making for NEMO V3	PJT
+20-jun-03	V1.4: added -u flag	PJT
 .fi
