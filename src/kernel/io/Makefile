@@ -15,17 +15,17 @@ MAN5FILES =
 INCFILES = story.h
 SRCFILES = dprintf.c convert.c defv.c extstring.c \
 	   filesecret.[ch] getparam.[ch] history.[ch] memio.c outdefv.c \
-	   story.[ch] stropen.c usage.c \
+	   story.[ch] stropen.c mstropen.c usage.c \
 	   filestruct.h Makefile
 OBJFILES=  dprintf.o convert.o defv.o extstring.o \
 	   filesecret.o getparam.o history.o memio.o outdefv.o \
-	   stropen.o usage.o 
+	   stropen.o mstropen.o usage.o 
 LOBJFILES= $L(dprintf.o) $L(convert.o) $L(defv.o) $L(extstring.o) \
            $L(filesecret.o) $L(getparam.o) $L(history.o) $L(memio.o) $L(outdefv.o) \
-	   $L(stropen.o) $L(usage.o)
+	   $L(stropen.o) $L(mstropen(.o) $L(usage.o)
 BINFILES = csf tsf rsf hisf
 TESTFILES= getpartest stropentest extstrtest \
-           testio testfs testprompt memiotest
+           testio testfs testprompt memiotest mstropentest
 
 help:
 	@echo NEMO/src/kernel/io
@@ -102,6 +102,9 @@ getpartest: getparam.c
 
 stropentest: stropen.c
 	$(CC) $(CFLAGS) -o stropentest -DTESTBED stropen.c $(NEMO_LIBS)
+
+mstropentest: mstropen.c
+	$(CC) $(CFLAGS) -o mstropentest -DTESTBED mstropen.c $(NEMO_LIBS)
 
 extstrtest: extstring.c
 	$(CC) $(CFLAGS) -o extstrtest -DTESTBED extstring.c $(NEMO_LIBS)

@@ -30,6 +30,7 @@
  * 22-jun-01    added some new ZENO macros for compatibility (-DNEMO)
  *  7-sep-01    added maxsizes.h
  *  8-dec-01    added errno.h
+ *  7-may-02    removed some old starlab crap, added strneq
  */
 
 #ifndef _stdinc_h      /* protect against re-entry */
@@ -57,14 +58,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
-
-/* 
- * MACHINE: this is a StarLab thing, kept for compatibility
- */
-
-#if !defined(MACHINE)
-#   define MACHINE "UNDEFINED"
-#endif
 
 #if !defined(NOMATH)
 #   include <math.h>
@@ -169,6 +162,16 @@ typedef const char* const_string;
  
 typedef FILE *stream;
 
+typedef struct _mstr {     /* see mstropen(3) */
+  string template;
+  string filename;
+  int status;
+  int count;
+  int mode;
+  stream ostr;
+} mstr;
+
+
 
 /*
  * REAL, REALPTR: default type is double; if single precision calculation is
@@ -244,11 +247,12 @@ typedef real (*rproc)();
 #endif
 
 /*
- * STREQ, STRNULL: handy string-equality macros
+ * STREQ, STRNEQ, STRNULL: handy string-equality macros
  */
 
-#define streq(x,y) (strcmp((x), (y)) == 0)
-#define strnull(x) (strcmp((x), "") == 0)
+#define streq(x,y)    (strcmp((x), (y)) == 0)
+#define strneq(x,y,z) (strncmp((x), (y), (z)) == 0)
+#define strnull(x)    (strcmp((x), "") == 0)
 
 /*
  *  PI, etc.  --  mathematical constants
@@ -340,6 +344,11 @@ extern stream stropen(const_string, string);
 extern int    strdelete(stream, bool);
 extern string strname(stream);
 extern bool   strseek(stream);
+
+/* io/mstropen.c */
+extern mstr *mstr_init(string template);
+extern stream mstr_open(mstr *mp);
+extern void mstr_close(mstr *mp);
 
 /* io/filesecret.c */
 extern void   strclose(stream);

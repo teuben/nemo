@@ -1,0 +1,54 @@
+.TH MSTROPEN 3NEMO "8 May 2002"
+.SH NAME
+mstr_init, mstr_open, mstr_close \- multiple template based file-stream utilities
+.SH SYNOPSIS
+.nf
+.B #include <stdinc.h>
+.PP
+.B mstr *mstr_init(string template)
+.B stream mstr_open(mstr *mp)
+.B void mstr_close(mstr *mp)
+.SH DESCRIPTION
+\fImstr_init()\fP returns a structure that is used
+to aid in writing to a set of related files
+whose name is derived from a template and embedded integer counter.
+The argument is a string which can optionally contain a template
+in the form of a 
+\fIprintf(3)\fP style string in which an integer is used to derive
+a variable name, e.g. \fBrun%03d.dat\fP. This call will also open the
+first (or only, if no template is used) 
+file for writing. \fImstr_open\fP will however have 
+to be used to get a \fIstream\fP in order to write actual data
+(see example below).
+.PP
+\fImstr_open()\fP returns the \fIstream\fP (see \fIstropen(3NEMO)\fP)
+to the next file.  It also closes the previously opened stream, if
+there was such one.
+.PP
+\fImstr_close()\fP closes access to an \fBmstr\fP and free's all
+allocated memory associated with it.
+.SH EXAMPLE
+.nf
+	mstr *mp = mstr_init("test%03d.dat");
+	for (int i=0; i<10; i++) {
+	   stream ostr = mstr_open(mp);
+	   fprintf(mp,"Hello world, i=%d\\n",i);
+	}
+	mstr_close(mp);
+.fi
+.SH TODO
+Add reading them back in again
+.SH SEE ALSO
+stropen(3NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +1.5i
+~/src/kernel/io  	mstropen.c
+.fi
+.SH UPDATE HISTORY
+.nf
+.ta +1i +4i
+8-may-2002	created, on Amtrak	Peter
+.fi
