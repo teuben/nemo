@@ -7,6 +7,7 @@
  *   21-nov-03   1.2 changed signs once again, make is consistent w/ vrtm51.c
  *   23-nov-03   1.3 add key=
  *   26-nov-03   1.3b   fixed final bugs in sign errors and indexing in binsearch()
+ *    3-nov-03   1.3c   implemented uniform=
  *
  */
 
@@ -41,7 +42,7 @@ string defv[] = {
     "nmodel=1\n           number of models",
     "test=f\n             test shape of spiral",
     "headline=\n	  text headline for output ",
-    "VERSION=1.3b\n	  26-nov-03 PJT",
+    "VERSION=1.3c\n	  3-dec-03 PJT",
     NULL,
 };
 
@@ -56,6 +57,7 @@ local real totmass;
 local real offset;  /* phase offset at rref */
 local bool Qtest;
 local bool Qlinear;
+local bool Quniform;
 local bool Qkey;
 
 local Body *disk = NULL;
@@ -82,6 +84,7 @@ void nemo_main()
     totmass = getdparam("mass");
     offset = getdparam("phase") * PI / 180.0;    
     Qtest = getbparam("test");
+    Quniform = getbparam("uniform");
 
 
     Qlinear = hasvalue("k");
@@ -203,6 +206,8 @@ testdisk(int n)
         r_i = sqrt(rmin2 + xrandom(0.0,1.0) * (rmax2 - rmin2));
 	if (Qtest)
 	  theta_i = 0.0;
+	else if (Quniform)
+	  theta_i = xrandom(0.0,TWO_PI);
 	else 
 	  theta_i = frandom(0.0,360.0,density) * PI / 180.0;
 	theta_i += offset;
