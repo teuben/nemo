@@ -1,0 +1,1 @@
+cc -g -o yapptest_sm yapp_sm.c -DTESTBED /saturn/teuben/sm/callable/dummy.o  /saturn/nemo/lib/sun4/libplotsub.a /saturn/nemo/lib/sun4/libdevices.a /saturn/nemo/lib/sun4/libutils.a  -lsuntool -lsunwindow -lpixrect -lX11  -lm
