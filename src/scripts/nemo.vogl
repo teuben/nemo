@@ -14,6 +14,12 @@ switch (`uname -s`)
     make -f Makefile.linux -i DEST=$NEMOLIB 
     make -f Makefile.linux -i DEST=$NEMOLIB  install clobber
     breaksw
+ case "SunOS":
+    echo SunOS selected, but experimental, uses gcc, but works ok with cc also
+    cd $NEMO/usr/vogl
+    make -f Makefile.linux -i DEST=$NEMOLIB 
+    make -f Makefile.linux -i DEST=$NEMOLIB  install clobber
+    breaksw
   default:
     echo System `uname -s` not known to me yet....
     breaksw
