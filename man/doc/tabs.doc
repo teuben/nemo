@@ -1,0 +1,18 @@
+%N tabs
+%D Table format converter
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man tabs' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	input file name(s) [???]
+%A out
+	output file name [???]
+%A col
+	column names, one for each, for header [???]
+%A type
+	column types, one for each with last repeated [double]
+%A delcol
+	column numbers to skip at output (1=first) []
+%A VERSION
+	16-jul-94 PJT [1.0]
