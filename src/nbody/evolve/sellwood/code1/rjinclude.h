@@ -23,7 +23,7 @@ c / rjblank /
       common / rjstack / istack, maxstk, wstack
       equivalence ( jstack, wstack )
 c
-      character*6 mxstid
+      character mxstid*6
       common / rjmxstid / mxstid
 c / rjchan /
       integer ibltab, iend, iwin, iwout, limb, pll4, pl1, pl2, pl3, pl4,
@@ -49,7 +49,7 @@ c / rjfactor /
       real fact( lnfac )
       common / rjfactor / fact
 c / rjfnamtb /
-      character*8 fnamtb( 100 )
+      character fnamtb( 100 )*8
       common / rjfnamtb / fnamtb
 c / rjgreen /
       integer lngrn
@@ -79,7 +79,7 @@ c / rjiocon /
      1                   outnxt, infile, ofile, lin, lout, lenn, limfil,
      2                   nspio, itrbuf, bufer
 c / rjpagsiz /
-      character*5 pagsiz
+      character pagsiz*5
       common / rjpagsiz / pagsiz
 c / rjlev3 /
       integer lnlev3
@@ -141,4 +141,5 @@ c      lnwork = 2 * rjn2 * rjn3 + 4 * ( rjn2 - 2 ) + rjn3 - 2 )
       real wfill( 1 ), work1( rjn3 ), work2( rjn3 ), work3( rjn3 ),
      1     work( lnwork )
       common / rjwork / work1, work2, work3, wfill
-      equivalence ( work( 1 ), work( 1 ) ), ( work1( 1 ), iwork( 1 ) )
+c      equivalence ( work( 1 ), work( 1 ) ), ( work1( 1 ), iwork( 1 ) )
+      equivalence ( work1( 1 ), iwork( 1 ) )
