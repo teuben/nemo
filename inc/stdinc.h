@@ -470,7 +470,9 @@ extern void bswap(void *vdat, int len, int cnt);
 #define bswapi(p,cnt)  bswap(p,sizeof(int),cnt)
 #define bswaps(p,cnt)  bswap(p,sizeof(short),cnt)
 
+/* misc/within.c */
 
+extern bool within(real val, string range, real fuzz);
 
 
 #if defined(__cplusplus)
