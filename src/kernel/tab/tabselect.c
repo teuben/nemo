@@ -53,8 +53,7 @@ bool num_select(string *cnam, string *cval, string *sels)
     return TRUE;        /* if gotten here, all is TRUE and return as such */
 }
 
-local int substitute(string s, string *cnam, string *cval, 
-	real *a, real *b)
+local int substitute(string s, string *cnam, string *cval, real *a, real *b)
 {
     char sel[128], var[128];
     char *vp, *cp = sel;
@@ -118,8 +117,8 @@ local int substitute(string s, string *cnam, string *cval,
 
     if (retval==ISBAD) return ISBAD;
 
-    if (nemoinpd(sel,a,1) != 1) warning("Error parsing %s",sel);
-    if (nemoinpd(cp, b,1) != 1) warning("Error parsing %s",cp);
+    if (nemoinpr(sel,a,1) != 1) warning("Error parsing %s",sel);
+    if (nemoinpr(cp, b,1) != 1) warning("Error parsing %s",cp);
         
     return retval;
 }
