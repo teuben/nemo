@@ -1,0 +1,21 @@
+%N /smc/teuben/nemo/bin/sun4/mkepidisk
+  This doc file has been produced with NEMO help=t option
+  Try 'man mkepidisk' for more online help
+%A out
+	output file name (snapshot) [???]
+%A rmin
+	inner disk radius  [0.0]
+%A rmax
+	outer cutoff radius  [1.0]
+%A nring
+	number of rings [20]
+%A dr
+	Typical interstellar distance [0.05]
+%A axirat
+	Axial ratio of resulting orbits [1.0]
+%A a
+	Scalelenght of fake omega(r) function [5.0]
+%A headline
+	text headline for output  []
+%A VERSION
+	PJT  18-dec-90 [1.2a]
