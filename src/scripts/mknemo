@@ -6,7 +6,7 @@
 #
 #  BIG BUG: 'mknemo mkplummer.c' would remove the sourcecode and put it into $NEMOBIN !!!!!
 #
-set version="MKNEMO Version 1.5  16-dec-03 - +NEMOBIN bug"
+set version="MKNEMO Version 1.6  17-dec-03 - +NEMOBIN bug"
 if ($#argv == 0) goto usage
 
 onintr error
@@ -44,6 +44,7 @@ set code=""
 set tidy=""
 set u=0
 set l=0
+set go=0
 
 # process command line options
 loop:
@@ -62,6 +63,7 @@ loop:
   case -l:
     shift argv
     set l=1
+    set go=1
     breaksw
   case -n:
     shift argv
@@ -90,6 +92,7 @@ loop:
     breaksw
   case -u:
     set u=1
+    set go=1
     shift argv
     breaksw
   case -*:
@@ -99,15 +102,19 @@ loop:
   default:
     goto process
  endsw
- if ($#argv == 0) goto noargs
+ if ($#argv == 0) then
+    if ($go) goto process
+    goto noargs
+ endif
+    
  goto loop
 
 process:
 
-if ($#argv == 0) goto noargs
+if ($go == 0 && $#argv == 0) goto noargs
 
 if ($u) then
-  (cd $NEMO; cvs update)
+  (cd $NEMO; cvs update |& grep ^'[A-Z]')
 endif
 
 if ($l) then
@@ -240,5 +247,5 @@ usage:
   echo "  -d        also make doc file (only for true NEMO programs)"
   echo "  -t        cleanup after having made the binaries"
   echo "  -u        run 'cvs update' to NEMO before making"
-  echo "  -l        update the library by running 'make libs'"
+  echo "  -l        recompile the library by running 'make libs'"
   exit 1
