@@ -33,6 +33,10 @@ Star # to represent LSR (0=first). By default not used.
 .TP 20
 \fBtimes=\fP
 Times to select snapshots from [all]  
+.SH BUGS
+The galactic plane is fixed at z=0, therefore selecting an LSR with Z or VZ not
+zero can give strange results. Use programs like \fIsnaprect(1NEMO)\fP
+to re-orient your disk in the Z=0 plane.
 .SH EXAMPLES
 Here is something close enough to our galactic disk, and after transforming
 to a particle (half way out to the edge of 20 kpc),
