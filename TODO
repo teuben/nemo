@@ -27,6 +27,7 @@ general things for 3.2.x
   - get a mini-NEMO going (Dehnen, BIMA/CARMA)
   - remove environment variables from NEMORC.local that are needed in Makefiles
     and move them into makedefs
+	**mostly done**
 
   => a NEMO install for gyrfalcON, so we don't have to figure the funky NEMOHOST
      in Walter's tree  (he is using make's MACHTYPE and OSTYPE internal variables)
@@ -37,6 +38,7 @@ some other help on configure:
 	http://www.airs.com/ian/configure/
 
 - io_nemo library written by JCL in Marseille
+	has problems in -DSINGLEPREC
 
 - add the self-exploding problem for treecodes (Salmon ...)
   into NEMODAT
@@ -86,3 +88,8 @@ some other help on configure:
    some linkers want to link with gcc, not g77 or vice versa? This
    may require a configure macro in the makefiles
 
+- problems in -DSINGLEPREC mode:
+
+	- nemo_io
+	- rotcur/rotcurshape: cube1/cube1.sig appears to create some NaN pixels
+	- mkommod has problems with out of bounds intervals
