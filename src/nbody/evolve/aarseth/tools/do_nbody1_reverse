@@ -1,0 +1,42 @@
+#! /bin/csh -f
+#
+#
+#  because of scaling the time with the crossing time,
+#  it is not possible to return to the same "time" as you started
+#  out with, because it looks like there is a rescaling happening
+#  in the code too.... even if deltat=tcrit....
+
+set nbody=10
+set tstop=1
+set seed=123
+set eps=0.05
+set eta=0.02
+set kz=0,0,1,2,0,0,0,0,2,1,1
+
+rm -r run1 run2 plum.in
+
+mkplummer plum.in $nbody seed=$seed
+runbody1 $cwd/plum.in run1 $nbody kz=$kz \
+	tcrit=$tstop deltat=$tstop eps=$eps eta=$eta > run1.log
+
+u3tos run1/OUT3 run1/out3
+snaptrim run1/out3 run1/first times=first
+snaptrim run1/out3 run1/last times=last
+snapscale run1/last run1/reverse 1 1 -1
+
+if (1) then
+  set e0=(`snapvratio plum.in   wmode=exact newton=t eps=$eps | tail -1`)
+  set e1=(`snapvratio run1/last wmode=exact newton=t eps=$eps | tail -1`)
+  echo E0=$e0[3]  Tcr=`nemoinp "1/abs($e0[3]*2)**1.5" format=%20.10f`
+  echo E1=$e1[3]  Tcr=`nemoinp "1/abs($e1[3]*2)**1.5" format=%20.10f`
+endif
+
+runbody1 $cwd/run1/reverse run2 $nbody kz=$kz \
+	tcrit=$tstop deltat=$tstop eps=$eps eta=$eta > run2.log
+u3tos run2/OUT3 run2/out3
+snaptrim run2/out3 run2/first times=first
+snaptrim run2/out3 run2/last times=last
+
+snapcmp run1/reverse run2/first
+snapcmp run1/first run2/last
+
