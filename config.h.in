@@ -88,6 +88,9 @@
 /* Define if you have the strtoul function.  */
 #undef HAVE_STRTOUL
 
+/* Define if you have the dprintf function.  */
+#undef HAVE_DPRINTF
+
 /* Define if you have the <dirent.h> header file.  */
 #undef HAVE_DIRENT_H
 
