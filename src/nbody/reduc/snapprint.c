@@ -42,7 +42,8 @@ string defv[] = {
     "tab=\n			Standard output or table file?",
     "header=f\n			Add header to output?",
     "csv=f\n                    Use Comma Separated Values format",
-    "VERSION=2.2\n		4-sep-03 PJT",
+    "comment=f\n                Add table columns as common, instead of debug",
+    "VERSION=2.3\n		29-dec-03 PJT",
     NULL,
 };
 
@@ -60,6 +61,7 @@ void nemo_main()
     Body *btab = NULL, *bp, *bq;
     bool   Qsepar, Qhead;
     bool   Qcsv = getbparam("csv");
+    bool   Qcomment = getbparam("comment");
     int i, n, nbody, bits, nsep, isep, nopt, ParticlesBit;
     char fmt[20],*pfmt;
     string *opt;
@@ -80,9 +82,16 @@ void nemo_main()
             break;
         }
     }
-    for (i=0; i<nopt; i++)
+    if (Qcomment) {
+      printf("# ");
+      for (i=0; i<nopt; i++)
+        printf("\t%s",opt[i]);
+      printf("\n");
+    } else {
+      for (i=0; i<nopt; i++)
         dprintf(0,"%s ",opt[i]);
-    dprintf(0,"\n");
+      dprintf(0,"\n");
+    }
 
     if (hasvalue("tab")) {
 	pfmt = getparam("tab");
