@@ -15,6 +15,7 @@
  *	19-may-95   added optional (-DETIME) etime/dtime
  *	18-apr-96   debuglevel of cputool at 4 now.
  *	31-mar-01   now using CLK_TCK instead of HZ (POSIX ?)
+ *      21-nov-03   adding clock() for testing, using sysconf to get clk_tck;
  *	
  */
 
@@ -22,16 +23,33 @@
 #include <limits.h>     /* solaris hides CLK_TCK here */
 #include <time.h>	/* linux hides CLK_TCK here */
 #include <sys/times.h>
+#include <unistd.h>     /* for sysconf() */
+
+#define TRY_CLOCK
 
 
+static long clk_tck = 0;
 
 double cputime()
 {
     struct tms buffer;
+    clock_t pt = 0;
+
+    if (clk_tck == 0) {
+      clk_tck = sysconf(_SC_CLK_TCK);
+      dprintf(4,"cputime: initialized clk_tck=%ld [CLK_TCK=%ld]\n",clk_tck,CLK_TCK);
+    }
 
     if (times(&buffer) == -1) error("times(2) call failed");
-    dprintf(4,"cputool: times: usr=%ld sys=%ld \n",buffer.tms_utime, buffer.tms_stime);
+#ifdef TRY_CLOCK
+    pt = clock();
+#endif
+    dprintf(4,"cputool: times: usr=%ld sys=%ld clock=%ld\n",buffer.tms_utime, buffer.tms_stime,pt);
+#if 1
     return buffer.tms_utime / ((double)CLK_TCK * 60.0);       /* return minutes */
+#else
+    return pt/( (double)CLOCKS_PER_SEC*60.0);
+#endif
 }
 
 /* Now some routines that some fortran users like:
