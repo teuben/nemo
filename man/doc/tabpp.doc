@@ -1,0 +1,25 @@
+%N tabpp
+%D Poynter-Pickett spectral line catalogue browser
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man tabpp' for more online help
+%A species
+	List of species [all] []
+%A mode
+	Mode of output {species|lines} [???]
+%A col
+	List of columns to see [all]
+        In species mode: (tag,name,nline,qlog,version)|all
+        In lines mode:   (freq,err,lgint,dr,elow,gup,tag,qnform,qn1,qn2)|all []
+%A freq
+	Ranges in frequency to show, and units ([Mhz]|Ghz|THz) []
+%A tab
+	Output table [terminal](** not implemented **) []
+%A select
+	C-style selection criteria (** not implemented **) []
+%A fmt
+	Alternative format for column output (** not implemented **) []
+%A dir
+	Dir, species-fmt, sp-dirfile [$PP_DIR,c%s.ed4.Z,catdir.ed4]
+%A VERSION
+	9-mar-92 PJT [1.0b]
