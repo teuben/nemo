@@ -31,6 +31,7 @@ set nemo=$cwd
 set goto=start
 set cc=""
 set yapp=null
+set pgplot=""
 set tmp=/tmp/tmp$$
 set config=""
 
@@ -40,7 +41,7 @@ foreach kv ($*)
 end
 
 
-set VERSION="3.0 5-apr-01"
+set VERSION="3.1 9-apr-01"
 
 
 if ($#argv == 0) then
@@ -54,8 +55,9 @@ if ($#argv == 0) then
   echo "  [nemo=$nemo]  ## name of new directory within which NEMO will be installed"
   echo "  [goto=$goto]  ## label to goto in this script "
   echo "                (start, tar, install, prog, test, suite)"
-  echo "  [cc=$cc]      ## override C compiler from "'$NEMO/src/scripts/cc'
+  echo "  [cc=$cc]      ## hardcode C compiler"
   echo "  [yapp=$yapp]  ## override YAPP interface choice (null, pgplot) -not active-"
+  echo "  [pgplot=$pgplot]     ## pgplot TAR file to install (special)"
   echo "  [config=$config]     ## options for configure"
   echo ""
   echo "Bootstrap new nemo version from mother site or local tar file"
@@ -166,6 +168,16 @@ echo Running configure, with options:  $config
 ./configure $config >> $log
 source nemo_start
 make dirs config_extra scripts >> $log
+if (X$yapp != X) then
+  if (-e $yapp) then
+    echo Patching in PGPLOT in $NEMO/local/pgplot
+    make config_clean
+    rm NEMORC.local 
+    src/scripts/pgplot.install file=$yapp >> $log
+    ./configure --with-pgplot-prefix=$NEMOLIB --with-yapp=pgplot $config >> $log    
+    make dirs config_extra scripts >> $log
+  endif
+endif
 echo Adding in NEMORC.local 
 source NEMORC.local
 rehash

@@ -96,7 +96,7 @@ foreach f ($argv)
  # strip any extensions from the arguments, we're looking to make executables
  set ft=$f:t
  set file=$ft:r
- echo FILE=$file F=$f FT=$ft
+ # echo FILE=$file F=$f FT=$ft
  set err=0
  # if a local file, use that to compile, don't search for it
  if (-e $file.c) then
