@@ -1,0 +1,12 @@
+%N snapmerge
+%D merge N-body snapshots together
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man snapmerge' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	input file names [???]
+%A out
+	output file name [???]
+%A VERSION
+	8-mar-94 PJT [1.0b]
