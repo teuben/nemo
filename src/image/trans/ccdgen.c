@@ -28,7 +28,7 @@ string defv[] = {
   "crval=\n        Override/Set crval (0,0,0) // ignored",
   "cdelt=\n        Override/Set cdelt (1,1,1) // ignored",
   "seed=0\n        Random seed",
-  "VERSION=0.1\n   5-jan-05 PJT",
+  "VERSION=0.2\n   5-jan-05 PJT",
   NULL,
 };
 
@@ -70,6 +70,7 @@ local void object_exp(int npars, real *pars);
 local void object_gauss(int npars, real *pars);
 local void object_bar(int npars, real *pars);
 local void object_spiral(int npars, real *pars);
+local void object_noise(int npars, real *pars);
 
 
 extern string *burststring(string,string);
@@ -84,6 +85,7 @@ void nemo_main ()
   int     ncen;
   string  object;
   bool Qtotflux = getbparam("totflux");
+  int seed = init_xrandom(getparam("seed"));
 
   object = getparam("object");
   npar = nemoinpr(getparam("spar"),spar,MAXPAR);
@@ -148,6 +150,10 @@ void nemo_main ()
     object_gauss(npar,spar);
   else if (streq(object,"bar"))
     object_bar(npar,spar);
+  else if (streq(object,"spiral"))
+    object_spiral(npar,spar);
+  else if (streq(object,"noise"))
+    object_noise(npar,spar);
   else
     error("Unknown object %g",object);
   
@@ -305,7 +311,7 @@ local void object_flat(int npars, real *pars)
 
   for (j=0; j<ny; j++)
     for (i=0; i<nx; i++)
-      MapValue(iptr,i,j) = A;
+      MapValue(iptr,i,j) += A;
 }
 
 local void object_exp(int npars, real *pars)
@@ -399,6 +405,24 @@ local void object_bar(int npars, real *pars)
 
 local void object_spiral(int npars, real *pars)
 {
+}
+
+local void object_noise(int npars, real *pars)
+{
+  int i,j;
+  int nx = Nx(iptr);
+  int ny = Ny(iptr);
+  double m = 1.0;
+  double s = 1.0;
+
+  if (npar > 0) m = pars[0];
+  if (npar > 1) s = pars[1];
+
+  if (Qtotflux) m /= (nx*ny);
+
+  for (j=0; j<ny; j++)
+    for (i=0; i<nx; i++)
+      MapValue(iptr,i,j) += grandom(m,s);
 }
 
 
