@@ -1,6 +1,6 @@
-.TH IMAGE 5NEMO "21 February 2000"
+.TH IMAGE 5NEMO "19 May 2003"
 .SH NAME
-image \- binary format for 2D and 3D image files
+image \- binary format for 2D and 3D image/cube files
 .SH SYNOPSIS
 .nf
 \fB#include <stdinc.h>\fP
@@ -9,7 +9,8 @@ image \- binary format for 2D and 3D image files
 .fi
 .SH DESCRIPTION
 \fIimage\fP files is a dataformat that describes a rectangular 
-2-dimensional matrix, although the coordinate transformation 
+2-dimensional matrix or 3-dimensional cube,
+although the coordinate transformation 
 to world coordinates is by no means restricted to a simple linear
 equation of the form:
 .nf
@@ -19,14 +20,17 @@ where \fIi\fP runs from 0 to N-1, the dimension of the matrix in
 any of its coordinates.
 We have restricted images to 2- and 3-dimensional cases, as well 
 as the restriction that the whole image must be in memory at the
-same time.
+same time. See \fImdarray(3NEMO)\fP for a more general 
+multi-dimensional array interface (though there is no special
+I/O interface for this data structure).
 .PP
 \fIImage\fP files are used in 2D and 3D images, i.e. a matrix of
 values of any kind (intensity, velocity etc.).
 The output format of \fIimage(3NEMO)\fP files is the general binary
 structured fileformat as described in \fIfilestruct(3NEMO)\fP.
 .PP
-The data is stored on disk in Fortran or C fashion, depending on
+The data is stored on disk in Fortran (column-major) or C (row-major)
+fashion, as in \fIData(row,column,plane)\fP depending on
 a compile switch or #define in the image.h module, which must be
 included in every program using images. The default compilation is
 using the FORDEF, i.e. x coordinate running fastest in memory
@@ -110,7 +114,7 @@ the commonly used array syntax:
 
 .SH "FUTURE EXPANSIONS"
 Code could be modified to use dynamem(3NEMO). Allows more flexable
-use by addressing image[i][j] instead of stupid(?) macros MapValue(iptr,i,j)
+use by addressing image[i][j] instead of slower macros MapValue(iptr,i,j)
 .SH "SEE ALSO"
 snapshot(5NEMO),image(3NEMO),tsf(1NEMO)
 .SH AUTHOR
@@ -130,4 +134,5 @@ Peter Teuben
 18-jan-89	V3.0: 3D added PJT
 1-feb-89	V4.0: compile switch for FORDEF and CDEF matrix storage	PJT
 21-feb-00	A[i][j] usage        	PJT
+19-may-03	improved documentation	PJT
 .fi
