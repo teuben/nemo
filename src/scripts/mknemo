@@ -152,7 +152,7 @@ endif
 
 foreach f ($argv)
  if (X$f:e != X) then
-   echo "Cannot handle arguments that appear like full filenames - trying $f:r"
+   echo "MKNEMO> Cannot handle arguments that appear like full filenames - trying $f:r"
    set f=$f:r
  endif
  # strip any extensions from the arguments, we're looking to make executables
