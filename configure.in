@@ -390,16 +390,14 @@ AC_MSG_CHECKING(whether we have CFITSIO)
 AC_ARG_WITH(cfitsio-prefix, 
         [  --with-cfitsio-prefix=PFX     Prefix where CFITSIO was installed], 
         cfitsio_config_prefix="$withval", 
-        cfitsio_config_prefix="/usr/local/")
+        cfitsio_config_prefix="/usr/local")
 
 if test x$cfitsio_config_prefix != x; then
     cdir="$cfitsio_config_prefix"
     found="no"
     for dir in $cdir $cdir/include $cdir/include/cfitsio
       do
-        echo Testing ${dir}/fitsio.h 
         if test -f ${dir}/fitsio.h ; then
-                echo Found ${dir}/fitsio.h
                 CFITSIO_INC="-I${dir}"
                 CFITSIO_LIB="-L$cfitsio_config_prefix/lib"
                 CFITSIO_LIB="$CFITSIO_LIB -lcfitsio"
