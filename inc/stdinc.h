@@ -292,6 +292,7 @@ typedef real (*rproc)();
  *  MIN: returns the argument with the lowest value
  *  MAX: returns the argument with the highest value
  *  RND: roundup a number
+ *  RNG: range a number between a low and high value
  *
  *  Note: be aware of side effects here
  */
@@ -301,6 +302,9 @@ typedef real (*rproc)();
 #define   MIN(x,y)     (((x) < (y)) ? (x) : (y))
 #define   MAX(x,y)     (((x) > (y)) ? (x) : (y))
 #define   RND(x,y)     ((y)*(((x)+(y)-1)/(y)))
+#define   RNG(x,l,h)   (((x) > (h)) ? (h) : (((x) < (l)) ? (l) : (x)))
+
+
 
 /*
  *      On some older BSD (4.2?) implementations the strchr() and strrchr()
