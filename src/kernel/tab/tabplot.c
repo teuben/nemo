@@ -29,7 +29,12 @@
  *	28-jul-99  V2.2  : add color=
  *      21-jul-00  V2.3  : allow autoscaling on half (min OR max) an axis
  *      23-sep-01      a : ->nemo_file_lines
+ *       6-oct-01  V2.4  : fixed Y autoscale if all Y's have the same value
  *
+ */
+
+/* TODO:
+ *     - simple dycol= to plot error bars
  */
 
 /**************** INCLUDE FILES ********************************/ 
@@ -78,7 +83,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "fullscale=f\n       Use full autoscale in one axis if other autoscaled?",
     "cursor=\n           Optional output file to retrieve cursor coordinates",
     "layout=\n           Optional input layout file",
-    "VERSION=2.3\n	 21-jul-00 PJT",
+    "VERSION=2.4\n	 6-oct-01 PJT",
     NULL
 };
 
@@ -329,23 +334,29 @@ void plot_data()
         dprintf(0,"X:min and max value reset to : [%f : %f]\n",xmin,xmax);
 
     if (Qautoy0 && Qautoy1) {
-	    edge = (ymax-ymin) * 0.05;        /* add 5% to the edges */
-	    ymin -= edge;
-	    ymax += edge;
+      edge = (ymax-ymin) * 0.05;        /* add 5% to the edges */
+      if (edge == 0.0) edge = 0.05*ABS(ymax);
+      if (edge == 0.0) edge = 1;
+      ymin -= edge;
+      ymax += edge;
     } else if (Qautoy0) {
-	    ymax = yrange[1];
-            edge = (ymax-ymin) * 0.05;        /* add 5% to the edge */
-            ymin -= edge;
+      ymax = yrange[1];
+      edge = (ymax-ymin) * 0.05;        /* add 5% to the edge */
+      if (edge == 0.0) edge = 0.05*ABS(ymin);
+      if (edge == 0.0) edge = 1;
+      ymin -= edge;
     } else if (Qautoy1) {
-	    ymin = yrange[0];
-            edge = (ymax-ymin) * 0.05;        /* add 5% to the edge */
-            ymax += edge;
+      ymin = yrange[0];
+      edge = (ymax-ymin) * 0.05;        /* add 5% to the edge */
+      if (edge == 0.0) edge = 0.05*ABS(ymax);
+      if (edge == 0.0) edge = 1;
+      ymax += edge;
     } else {
-	    ymin = yrange[0];
-	    ymax = yrange[1];
+      ymin = yrange[0];
+      ymax = yrange[1];
     }
     if (Qautoy0 || Qautoy1)
-        dprintf(0,"Y:min and max value reset to : [%f : %f]\n",ymin,ymax);
+      dprintf(0,"Y:min and max value reset to : [%f : %f]\n",ymin,ymax);
 
     /*
      *  if scale in X fully fixed, and some autoscaling in Y is done
