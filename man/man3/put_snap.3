@@ -1,0 +1,23 @@
+.TH PUT_SNAP 3NEMO "22 Jan 1989"
+.SH NAME
+put_snap \(em output routines for standardized snapshot files
+.SH SYNOPSIS
+.nf
+\fB#include <snapshot/snapshot.h>\fP
+\fB#include <snapshot/put_snap.c>\fP
+.PP
+\fBput_snap(outstr, btab, nbody, tsnap, bits)\fP
+\fBstream outstr;\fP
+\fBBody **btab;\fP
+\fBint *nbody, *bits;\fP
+\fBreal *tsnap;\fP
+.SH DESCRIPTION
+\fIput_snap\fP is a generic method for writing snapshot data to a file,
+to be included by the preprocessor in an application program.
+It assumes that a body structure with standard declaration and accessor
+macros \fBBody\fP, \fBMass()\fP, \fBPhase()\fP, etc has been defined
+(see \fIbody\fP(3NEMO)).
+.SH SEE ALSO
+get_snap(3NEMO), body(3NEMO), snapshot(5NEMO).
+.SH AUTHOR
+Joshua E. Barnes.
