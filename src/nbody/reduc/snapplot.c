@@ -21,6 +21,7 @@
  *	V3.4  11-feb-98 added trak=					  pjt
  *      V3.4a 21-jan-00 fixed acc/phi bug				  pjt
  *          b 23-may-01 setrange() now using nemoinp()			  PJT
+ *          c 7-oct-02  atof->natof					  pjt
  */
 
 #include <stdinc.h>
@@ -65,7 +66,7 @@ string defv[] = {
 #endif
     "frame=\n			  base filename for rasterfiles(5)",
     "trak=\n                      alternative for trakplot (t|f)",
-    "VERSION=3.4b\n		  23-may-01 PJT",
+    "VERSION=3.4c\n		  7-oct-02 PJT",
     NULL,
 };
 
@@ -228,11 +229,11 @@ string rexp;
 
     cptr = strchr(rexp, ':');
     if (cptr != NULL) {
-        rval[0] = atof(rexp);
-	rval[1] = atof(cptr+1);
+        rval[0] = natof(rexp);
+	rval[1] = natof(cptr+1);
     } else {
         rval[0] = 0.0;
-	rval[1] = atof(rexp);
+	rval[1] = natof(rexp);
     }
     rval[2] = rval[1] - rval[0];
 }
@@ -445,7 +446,7 @@ string tikstr;
     tptr = burststring(tikstr, ", ");
     *ntik = 0;
     while (*tptr != NULL)
-	tiks[(*ntik)++] = atof(*tptr++);
+	tiks[(*ntik)++] = natof(*tptr++);
 #else
     *ntik = nemoinpr(tikstr, tiks, MAXTICKS);
     if (*ntik < 0) error("(5d) Parsing %s",*ntik, tikstr);
