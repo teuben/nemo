@@ -51,6 +51,7 @@
  *  16-feb-97   attempt to support SINGLEPREC
  *   1-apr-01   NEMO V3 style .so file usage
  *   5-apr-01   increased buffersize for filenames (NEMO3 uses longer $NEMOHOST names)
+ *  13-jun-02   fix permissions problem (Jean-Charles Lambert)
  *
  *  Used environment variables (normally set through .cshrc/NEMORC files)
  *      NEMO        used in case NEMOOBJ was not available
@@ -219,12 +220,12 @@ string fname;                   /* optional filename for object file */
         if (!Qflock) {      /* copy when no file locking encountered */
 #if defined(LOADOBJ3)
             sprintf(cmmd, 
-            "cp /tmp/%s.so $NEMOOBJ/bodytrans/%s.so;chmod a+w %s",
-             name,sname,edbbak);
+            "cp /tmp/%s.so $NEMOOBJ/bodytrans/%s.so;chmod a+rw %s;chmod a+r $NEMOOBJ/bodytrans/%s.so",
+             name,sname,edbbak,sname);
 #else
             sprintf(cmmd, 
-            "cp /tmp/%s.o $NEMOOBJ/bodytrans/%s.o;chmod a+w %s",
-             name,sname,edbbak);
+            "cp /tmp/%s.o $NEMOOBJ/bodytrans/%s.o;chmod a+rw %s;chmod a+r $NEMOOBJ/bodytrans/%s.o ",
+             name,sname,edbbak,sname);
 #endif
             if (system(cmmd) != 0) {
                 sprintf(cmmd,"rm -f %s",edbbak);    /* end file locking */
