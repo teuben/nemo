@@ -55,7 +55,7 @@ string defv[] = {
 	"cmode=0\n	Contour mode (0=orginal 1=pgplot)",
 	"blankval=\n	if used, use this as blankval",
 	"ltype=\n	width and type for contour",
-	"VERSION=3.0d\n	16-mar-05 PJT",
+	"VERSION=3.0e\n	16-mar-05 PJT",
 	NULL,
 };
 
@@ -110,6 +110,7 @@ nemo_main()
   instr = stropen (infile, "r");
   plinit ("***", 0.0, 20.0, 0.0, 20.0);       /* init yapp */
   while (read_image(instr,&iptr)) {   /* loop while more images found */
+    dprintf(1,"Time= %g MinMax= %g %g\n",Time(iptr),MapMin(iptr),MapMax(iptr));
     nx=Nx(iptr);			
     ny=Ny(iptr);
     nz=Nz(iptr);
