@@ -23,7 +23,7 @@ string defv[] = {
     "eps=0.05\n     Softening length",
     "reset=t\n      Reset timestep after datadump (debug) (t|f)",
     "options=\n     Optional output of 'step' into AUX",
-    "VERSION=1.5\n  21-feb-04 PJT",
+    "VERSION=1.5a\n 24-feb-04 PJT",
     NULL,
 };
 

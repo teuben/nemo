@@ -26,6 +26,8 @@
  *	  6-jan-00   new F77_FUNC macros, renamed to nbody00.c since
  *		     compiled name could clash with nbody0.f
  *       21-jan-00   added debug output and reset= option
+ *       21-feb-04   stop if f2dot is 0
+ *       24-feb-04   compute steps from fdot/f3dot if f2dot=0
  */
 
 
@@ -72,7 +74,7 @@ void nbody0(void)
            d1[NDIM*NMAX], d2[NDIM*NMAX], d3[NDIM*NMAX], f1[NDIM], 
 	   t0[NMAX], t1[NMAX], t2[NMAX], t3[NMAX], x0[NDIM*NMAX], 
 	   dt, deltat, dt1, dt2, dt3, eta, eps2, t1pr, t2pr, t3pr;
-    double step_t, step_b;
+    double sum_f, sum_fdot, sum_f2dot, sum_f3dot;
     int    i, j, k, n, itmp, reset;
 
 
@@ -84,6 +86,7 @@ void nbody0(void)
 	for (k = 0; k < NDIM; ++k) {
 	    f[k+i*3] = 0.0;
 	    fdot[k+i*3] = 0.0;
+	    d1[k+i*3] = 0.0;
 	    d2[k+i*3] = 0.0;
 	    d3[k+i*3] = 0.0;
 	}
@@ -139,11 +142,13 @@ void nbody0(void)
 			a[k]) * a[13];
 		d2[k+i*3] += f2dot[k];
 		d3[k+i*3] = d3[k+i*3] + f3dot[k] - a[14] * 9 * f2dot[k];
+		d1[k+i*3] += f3dot[k];  /* PJT */
 	    }
 	}
     } /* for (i) */
 
-/*             initialize integration steps and convert to force diffences */
+/*             initialize integration steps and convert to force diffences          */
+/*             STEP = sqrt(ETA * (F*F2DOT + FDOT*FDOT)/(F2DOT*F2DOT + FDOT*F3DOT))  */
     for (i = 0; i < n; ++i) {
 	d__1 = X(f,i);
 	d__2 = Y(f,i);
@@ -151,12 +156,31 @@ void nbody0(void)
 	d__4 = X(d2,i);
 	d__5 = Y(d2,i);
 	d__6 = Z(d2,i);
-	step_t = SQR(d__1)+SQR(d__2)+SQR(d__3);
-	step_b = SQR(d__4)+SQR(d__5)+SQR(d__6);
-	if (step_b == 0.0) error("You have hit upon an F2DOT=0 case");
-        step[i] = sqrt(eta * sqrt(step_t/step_b));
-	dprintf(1,"INT0: time=%g step_t=%g step_b=%g -> %g\n",
-		time,step_t,step_b,step[i]);
+	sum_f     = SQR(d__1)+SQR(d__2)+SQR(d__3);
+	sum_f2dot = SQR(d__4)+SQR(d__5)+SQR(d__6);
+	d__1 = X(fdot,i);
+	d__2 = Y(fdot,i);
+	d__3 = Z(fdot,i);
+	d__4 = X(d1,i);
+	d__5 = Y(d1,i);
+	d__6 = Z(d1,i);
+	sum_fdot  = SQR(d__1)+SQR(d__2)+SQR(d__3);
+	sum_f3dot = SQR(d__4)+SQR(d__5)+SQR(d__6);	
+
+	if (sum_f2dot == 0.0) {
+	  warning("You have hit upon an F2DOT=0 case, correcting....");
+	  step[i] = sqrt(eta * sqrt(sum_fdot/sum_f3dot));	  
+	  dprintf(1,"INT0: i=%d time=%g sum_fdot=%g sum_f3dot=%g -> %g\n",
+		  i,time,sum_fdot,sum_f3dot,step[i]);
+	} else {
+	  step[i] = sqrt(eta * sqrt(sum_f/sum_f2dot));
+	  dprintf(1,"INT0: i=%d time=%g sum_f=%g sum_f2dot=%g -> %g \n",
+		  i,time,sum_f,sum_f2dot,step[i]);
+	  dprintf(1,"INT0: i=%d time=%g sum_fdot=%g sum_f3dot=%g -> %g [***]\n",
+		  i,time,sum_fdot,sum_f3dot,
+		  sqrt(eta*(sqrt(sum_f)*sqrt(sum_f2dot)+sum_fdot)/
+		       (sum_f2dot + sqrt(sum_fdot)*sqrt(sum_f2dot))));
+	}
 	t0[i] = time;
 	t1[i] = time - step[i];
 	t2[i] = time - step[i] * 2;
@@ -347,12 +371,13 @@ L200:
     d__4 = f2dot[0];
     d__5 = f2dot[1];
     d__6 = f2dot[2];
-    step_t = SQR(d__1)+SQR(d__2)+SQR(d__3);
-    step_b = SQR(d__4)+SQR(d__5)+SQR(d__6);
-    if (step_b == 0.0) error("You have hit upon an F2DOT=0 case");
-    step[i] = sqrt(eta * sqrt(step_t/step_b));
-    dprintf(1,"INT1: time=%g step_t=%g step_b=%g -> %g\n",
-	    time,step_t,step_b,step[i]);
+    sum_f     = SQR(d__1)+SQR(d__2)+SQR(d__3);
+    sum_f2dot = SQR(d__4)+SQR(d__5)+SQR(d__6);
+    /* should do the same here at T=0 in case f2dot=0 */
+    if (sum_f2dot == 0.0) error("You have hit upon an F2DOT=0 case during integration");
+    step[i] = sqrt(eta * sqrt(sum_f/sum_f2dot));
+    dprintf(1,"INT1: i=%d time=%g sum_f=%g sum_f2dot=%g -> %g\n",
+	    i,time,sum_f,sum_f2dot,step[i]);
     ++nsteps;
     if (time - tnext >= 0.0) {
 	goto L100;
