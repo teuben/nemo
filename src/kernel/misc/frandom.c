@@ -75,27 +75,41 @@ string defv[] = {
    "a=-3\n     Left size of interval",
    "b=3\n      Right size of interval",
    "n=20\n     Number of experiments",
+   "mode=1\n   Function mode:  1=gauss 2=power",
    "seed=0\n   Random seed",
    NULL,
 };
 
+string usage="frandom test";
+
+string cvsid="$Id$";
 
 real gauss(real x)
 {
    return exp(-0.5*x*x);  /* gauss: mean 0, sigma: 1 */
 }
 
+real power(real x)
+{
+  return pow(x,-2.5);
+}
+
 nemo_main()
 {
    double a,b;
    int n;
+   int mode=getiparam("mode");
 
    n = getiparam("n");
    a = getdparam("a");
    b = getdparam("b");
    init_xrandom(getparam("seed"));
-   while (n-- > 0)
-      dprintf(0,"%f\n", frandom(a,b,gauss));
+   if (mode==1)
+     while (n-- > 0)
+       printf("%f\n", frandom(a,b,gauss));
+   else if (mode==2)
+     while (n-- > 0)
+       printf("%f\n", frandom(a,b,power));
 }
 
 #endif
