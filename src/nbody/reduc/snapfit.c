@@ -10,6 +10,7 @@
  *      29              a  : patch, since scratch files appear to not work
  *       2-aug-03       b  : patch back, stropen() has been fixed
  *	20-may-04       c  : declare local variables for times()
+ *      15-jul-04       d  : SINGLE_PREC cleanup
  */
 
 /* this code will only work in 3D */
@@ -57,7 +58,7 @@ string defv[] = {
     "contour=\n         Optional Output image file with chi-squared",
     "iter=0\n           number of more iterations after best on matrix",
     "times=all\n        Times selected from snapshot models",
-    "VERSION=0.7c\n     20-may-04 PJT",
+    "VERSION=0.7d\n     15-jul-04 PJT",
     NULL,
 };
 
@@ -72,7 +73,7 @@ local cube *mtab=NULL;	     /* to be fitted coordinates out of the snapshot */
 local int nmodel=0;		     /* number of model bodies */
 local real tsnap;
 local string times;
-local rproc weight;
+local rproc_body weight;
 
     /* Data: A special 3D {x,y,v} body */
 local cube *dtab=NULL;	/* observed data */
@@ -120,11 +121,11 @@ void setparams()
     string zmode;
 
     if (hasvalue("theta1")) {
-        ntheta1 = nemoinpd(getparam("theta1"),theta1,MAXANG);
+        ntheta1 = nemoinpr(getparam("theta1"),theta1,MAXANG);
         if (ntheta1<1) error("Too many theta1's: maximum %d",MAXANG);
     }
     if (hasvalue("theta2")) {
-        ntheta2 = nemoinpd(getparam("theta2"),theta2,MAXANG);
+        ntheta2 = nemoinpr(getparam("theta2"),theta2,MAXANG);
         if (ntheta2<1) error("Too many theta2's: maximum %d",MAXANG);
     }
     instr=stropen(getparam("in"),"r");
@@ -274,7 +275,7 @@ void read_data()
            while ( fgets(line,256,instr) != NULL) {
               if(line[0]=='#') continue;
               line[strlen(line)-1] = '\0';
-              switch (nemoinpd(line,vals,4)) {
+              switch (nemoinpr(line,vals,4)) {
                 case 2:
                   vals[2] = 0.0;      /* allow rare 2D fit?? */
                 case 3:
