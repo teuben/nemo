@@ -4,6 +4,7 @@
  *	 4-oct-88  V1.0 created
  *	 5-nov-93  V1.1 nemo V2, and using moment.h
  *      16-sep-95  V1.2 added min/max
+ *       9-may-03  V1.3 added bad=, and added #points,
  *
  */
 
@@ -17,7 +18,8 @@ string defv[] = {
     "in=???\n       Input image filename",
     "min=\n         Minimum overrride",
     "max=\n         Maximum overrride",
-    "VERSION=1.2\n  16-sep=95 PJT",
+    "bad=\n         Use this as masking value to ignore data",
+    "VERSION=1.3\n  9-may-03 PJT",
     NULL,
 };
 
@@ -39,9 +41,9 @@ double cell;				/* cell or pixel size (square) */
 nemo_main()
 {
     int  i, j, k;
-    real x, xmin, xmax, mean, sigma, skew, kurt;
+    real x, xmin, xmax, mean, sigma, skew, kurt, bad;
     Moment m;
-    bool Qmin, Qmax;
+    bool Qmin, Qmax, Qbad;
     
     instr = stropen (getparam("in"), "r");
     read_image (instr,&iptr);
@@ -54,6 +56,8 @@ nemo_main()
     if (Qmin) xmin = getdparam("min");
     Qmax = hasvalue("max");
     if (Qmax) xmax = getdparam("max");
+    Qbad = hasvalue("bad");
+    if (Qbad) bad = getdparam("bad");
 
 
     ini_moment(&m,4);
@@ -63,6 +67,7 @@ nemo_main()
             x =  CubeValue(iptr,i,j,k);
             if (Qmin && x<xmin) continue;
             if (Qmax && x>xmax) continue;
+            if (Qbad && x==bad) continue;
             accum_moment(&m,x,1.0);
         }
       }
@@ -75,8 +80,8 @@ nemo_main()
     kurt = kurtosis_moment(&m);
           
     printf ("Min=%f  Max=%f\n",min_moment(&m), max_moment(&m));
+    printf ("Number of points     : %d\n",n_moment(&m));
     printf ("Mean and dispersion  : %f %f\n",mean,sigma);
     printf ("Skewness and kurtosis: %f %f\n",skew,kurt);
     printf ("%d/%d out-of-range points discarded\n",nsize-n_moment(&m), nsize);
-        
 }

@@ -1,4 +1,4 @@
-.TH CCDSTAT 1NEMO "4 October 1988" 
+.TH CCDSTAT 1NEMO "9 May 2003"
 .SH NAME
 ccdstat \- statistics (1st through 4th moment)
 .SH SYNOPSIS
@@ -14,6 +14,17 @@ given:
 .TP 20
 \fBin=\fIin-file\fP
 input file, in \fIImage(5)\fP format [no default]
+.TP
+\fBmin=\fImin_value\fP
+If given, all values below this value are ignored in the statistics.
+.TP
+\fPmax=\fImax_value\fP
+If given, all values above this value are ignored in the statistics.
+.TP
+\fBbad=\fIbad_value\fP
+If given, all values identical to this value are ignored in the statistics.
+Note that, apart for bad=0, it is dangerous to use equating to a real value
+as a masking operating.
 .SH "SEE ALSO"
 snapccd(1NEMO), image(5NEMO)
 .SH AUTHOR
@@ -21,10 +32,11 @@ Peter Teuben
 .SH FILES
 .nf
 .ta +2.5i
-~pjt/image	authors original sources
+src/image/misc	ccdstat.c
 .fi
 .SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
  4-Oct-88	V1.0: Created             	PJT
+9-may-03	V1.3: added bad=	PJT
 .fi
