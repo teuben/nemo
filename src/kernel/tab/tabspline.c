@@ -10,6 +10,7 @@
  *   TODO:
  *      - spline vs. linear
  *      - error bars, via derivatives
+ *      - (GSL) integrate function
  */
 
 #include <stdinc.h> 

@@ -291,7 +291,7 @@ if test x$pgplot_config_prefix != x; then
                 PGPLOT_LIB="-L$pgplot_config_prefix"
                 PGPLOT_LIB="$PGPLOT_LIB -lcpgplot -lpgplot"
 dnl                CFLAGS="$PGPLOT_INCLUDE $CFLAGS"
-                AC_DEFINE(_WITH_PGPLOT) 
+                AC_DEFINE(HAVE_PGPLOT) 
                 graphtype=pgplot
                 AC_MSG_RESULT(yes)
 		yapp_default="pgplot"
@@ -372,7 +372,7 @@ for dir in $hdf $hdf/include $hdf/hdf $hdf/include/hdf
 
 if test "X$HDF_INC" != "X"; then
     HDF_LIB="-L$hdf -ldf -ljpeg -lz"
-    AC_DEFINE(_WITH_HDF)
+    AC_DEFINE(HAVE_HDF)
     AC_MSG_RESULT(yes: hdf4)    
 else
     HDF_INC=""
@@ -393,20 +393,31 @@ AC_ARG_WITH(cfitsio-prefix,
         cfitsio_config_prefix="/usr/local/")
 
 if test x$cfitsio_config_prefix != x; then
-        if test -f ${cfitsio_config_prefix}/include/fitsio.h ; then
-                CFITSIO_INCLUDE="-I$cfitsio_config_prefix/include"
-                CFITSIO_LIB="-L$cfitsio_config_prefix"
+    cdir="$cfitsio_config_prefix"
+    found="no"
+    for dir in $cdir $cdir/include $cdir/include/cfitsio
+      do
+        echo Testing ${dir}/fitsio.h 
+        if test -f ${dir}/fitsio.h ; then
+                echo Found ${dir}/fitsio.h
+                CFITSIO_INC="-I${dir}"
+                CFITSIO_LIB="-L$cfitsio_config_prefix/lib"
                 CFITSIO_LIB="$CFITSIO_LIB -lcfitsio"
-                CFLAGS="$CFITSIO_INCLUDE $CFLAGS"
-                LIBS="$CFITSIO_LIB $LIBS"
-                AC_DEFINE(_WITH_CFITSIO) 
+                AC_DEFINE(HAVE_LIBCFITSIO) 
                 AC_MSG_RESULT(yes)
-        else
-                AC_MSG_RESULT(no)
-                AC_MSG_WARN(could not find CFITSIO library...)
+                found="yes"
+                break;
         fi
-
+      done
+    if test "$found" = "no"; then
+      AC_MSG_RESULT(no)
+      AC_MSG_WARN(could not find CFITSIO library...)
+    fi
+    
 fi
+
+AC_SUBST(CFITSIO_INC)
+AC_SUBST(CFITSIO_LIB)
 
 dnl##--------------------------------------------------------------------
 
@@ -480,6 +491,7 @@ if test "$ok" = "yes"; then
   AM_PATH_GSL(0.9.2, ok=yes, ok=no)
   if test "$ok" = "yes"; then
     GSL_CFLAGS="$GSL_CFLAGS -DHAVE_GSL"
+    AC_DEFINE(HAVE_LIBGSL)
   else
     AC_MSG_WARN([could not find GSL library])
   fi

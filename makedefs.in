@@ -29,8 +29,8 @@ PVMLIB = @PVM_LIB@
 
 
 #  CFITSIO library
-FITSIOINC = @FITSIO_INC@
-FITSIOLIB = @FITSIO_LIB@
+CFITSIOINC = @CFITSIO_INC@
+CFITSIOLIB = @CFITSIO_LIB@
 
 #			miriad 
 #	(could also depend on $(MIR) and $(MIRLIB) if you don't like these)

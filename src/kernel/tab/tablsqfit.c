@@ -33,6 +33,7 @@
  *      14-apr-01  V3.1 added convex hull computation as 'area'
  *      18-jun-01     b fixed boundary check for xrange, also use natof now in setxrange
  *       8-aug-01     c compute error in axis ratio for ellipses
+ *      10-sep-01  V3.2 GSL enabled for linear fit
  */
 
 /*
@@ -49,6 +50,16 @@ or
 #include <stdinc.h>  
 #include <getparam.h>
 
+/*    we don't allow this code with GSL yet, output is
+ *    not unified with older version
+ */
+
+#undef HAVE_GSL
+
+#if HAVE_GSL
+#include <gsl/gsl_fit.h>
+#endif 
+
 string defv[] = {
     "in=???\n           input (table) file name",
     "xcol=1\n           column(s) for x",
@@ -62,7 +73,7 @@ string defv[] = {
     "estimate=\n        optional estimates (e.g. for ellipse center)",
     "nmax=10000\n       Default max allocation",
     "tab=f\n            short one-line output?",
-    "VERSION=3.1c\n     8-aug-01 PJT",
+    "VERSION=3.2\n      10-sep-01 PJT",
     NULL
 };
 
@@ -254,6 +265,7 @@ do_line()
     real *x, *y, *dy;
     int i,j, mwt;
     real chi2,q,siga,sigb, sigma, d;
+    real cov00, cov01, cov11, sumsq;
     real r, prob, z;
     void fit(), pearsn();
 
@@ -262,6 +274,23 @@ do_line()
     x = xcol[0].dat;
     y = ycol[0].dat;
     dy = (dycolnr>0 ? dycol.dat : NULL);
+
+#if HAVE_GSL
+    gsl_fit_linear (x, 1, y, 1, npt, &b, &a, 
+		    &cov00, &cov01, &cov11, &sumsq);
+    printf("y=ax+b:  a=%g b=%g  cov00,01,11=%g %g %g   sumsq=%g\n",
+	     a,b, cov00,cov01,cov11, sumsq);
+
+    if (dy) {
+      for (i=0; i<npt; i++)
+	dy[i] = 1/(dy[i]*dy[i]);
+      gsl_fit_wlinear (x, 1, dy, 1, y, 1, npt, &b, &a, 
+		    &cov00, &cov01, &cov11, &chi2);
+      printf("y=ax+b:  a=%g b=%g  cov00,01,11=%g %g %g   chi^2=%g\n",
+	     a,b, cov00,cov01,cov11, chi2);
+
+    }
+#else
 
     for(mwt=0;mwt<=1;mwt++) {
 
@@ -318,6 +347,7 @@ do_line()
     } /* mwt */
     
     if (outstr) write_data(outstr);
+#endif
 }
 
 char name[10] = "ABCDE";

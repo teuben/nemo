@@ -41,6 +41,12 @@
 #include <config.h>     /* should be in $NEMOLIB - made during install */
 #include <options.h>    /* our private options   - manually edited still */
 
+/* 	some backwards compat things */
+#if defined(HAVE_LIBGSL)
+#define HAVE_GSL
+#endif
+
+
 /*
  * Always include stdio.h and stdlib.h
  */
