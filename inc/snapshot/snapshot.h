@@ -5,7 +5,7 @@
  *      oct-2001        added SPH/Yanc (dens/eps)
  *      jan-2002        added ZENO compatible ones
  *      nov-2003        removed Yanc tags (YANC is also called gyrfalcON now)
- *      feb-2004        added GasDensity (Density used for stars)
+ *      feb-2004        added some new SPH stuff (GasDensity, NPartners, NSPHPartners)
  */
 
 #ifndef _snapshot_h
@@ -35,6 +35,9 @@
 #define     GasDensTag          "GasDensity"
 #define     EpsTag              "Eps"
 #define     StoryTag		"Story"
+
+#define     NumberTag           "NPartners"
+#define     SPHNumberTag        "NSPHPartners"
 
 
 #define   DiagnosticsTag	"Diagnostics"
