@@ -1,0 +1,16 @@
+%N ccdfill
+%D patch up holes in an image
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man ccdfill' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input image file [???]
+%A out
+	Output image file [???]
+%A n
+	Number of neighbor cells on all sides to use [1]
+%A bad
+	Value of a bad pixel to be patched [0.0]
+%A VERSION
+	22-feb-97 PJT [1.1]
