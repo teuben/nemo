@@ -45,7 +45,21 @@ and 0-based in NEMO.
 .TP
 \fBpos=\fP
 Input World Coordinates. If this one is given, conversion
-to pixel coordinates is done.
+to pixel coordinates is done
+.SH EXAMPLE
+For a given $ra, $dec and $fitsfile, the corresponding pixel positions are computed.
+.nf
+set crpix1=`fitshead $b | grep -w ^CRPIX1 | awk '{print $3}'`
+set crpix2=`fitshead $b | grep -w ^CRPIX2 | awk '{print $3}'`
+set crval1=`fitshead $b | grep -w ^CRVAL1 | awk '{print $3}'`
+set crval2=`fitshead $b | grep -w ^CRVAL2 | awk '{print $3}'`
+set cdelt1=`fitshead $b | grep -w ^CDELT1 | awk '{print $3}'`
+set cdelt2=`fitshead $b | grep -w ^CDELT2 | awk '{print $3}'`
+
+set pix=(`wcs ref=$crval1,$crval2 refpix=$crpix1,$crpix2 inc=$cdelt1,$cdelt2 rot=0 type=TAN pos=$ra,$dec`)
+
+.fi
+
 .SH SEE ALSO
 worldpos(3NEMO), ccdtrace(1NEMO), nemoinp(1NEMO), nemoinpx(3NEMO), tabdms(1NEMO), impos(1MIRIAD)
 .SH FILES
