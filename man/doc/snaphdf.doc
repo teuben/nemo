@@ -1,0 +1,14 @@
+%N snaphdf
+%D convert snapshot to HDF SD
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man snaphdf' for more extensive online help
+  Defaults of program keywords are listed between square brackets
+%A in
+	Input file (snapshot) [???]
+%A out
+	Output file (hdf SD) [???]
+%A times
+	Times to select snapshot [all]
+%A VERSION
+	24-dec-94 PJT [1.0]
