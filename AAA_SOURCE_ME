@@ -7,6 +7,7 @@
 # for other approaches we used to have.
 #
 # 25-jul-01  Peter Teuben		created
+# 18-jan-02  PJT                added optional PGPLOT if detected
 
 rm -f install.log >& /dev/null
 touch install.log
@@ -35,6 +36,11 @@ echo '++++++++++++++++++++++++++++++++++++++++' >>& install.log
 	@ stat++
     endif
     echo '++++++++++++++++++++++++++++++++++++++++' >>& install.log
+
+    if (-d local/pgplot) then
+       make config_clean
+       
+    endif
 
 
 source NEMORC.local >>& install.log
