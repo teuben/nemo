@@ -4,6 +4,7 @@ include $(NEMOLIB)/makedefs
 #
 #   7-jul-97	installed from Lars version 1 in usr tree
 #  20-jan-98    installed in src tree
+#   4-apr-01    NEMO V3 changes
 
 NBODY = 1024
 
@@ -23,9 +24,9 @@ SRC = scfm.f
 OBJ = scfm.o
 
 #		replace this with second0.o, second.o or whichever
-#		if you make(1) utility cannot handle 'ifeq' constructs
+#		if your make(1) utility cannot handle 'ifeq' constructs
 #SECOND = second.o
-ifeq "$(NEMOHOST)" "linux"
+ifeq "$(FC)" "g77"
   SECOND = 
 else
   SECOND = second.o
@@ -59,6 +60,8 @@ install:	nemo_bin
 	cp $? $(NEMO)/man/man1
 	@touch .install_man
 
+scfm:	scfm.exe
+
 scfm.exe: $(OBJ) $(SECOND)
 	$(FC) $(FFLAGS) -o scfm.exe $(OBJ) $(SECOND)
 
@@ -80,5 +83,5 @@ newdata:
 	mkplummer - $(NBODY) seed=$(NBODY) |\
 	 snapprint - m,x,y,z,vx,vy,vz header=t > SCFBI
 #
-bench: SCFBI SCFPAR
-	mkdir bench; cd bench; cp ../SCFBI ../SCFPAR . ; time scfm
+bench: SCFBI SCFPAR scfm.exe
+	mkdir bench; cd bench; cp ../SCFBI ../SCFPAR . ; time ../scfm.exe

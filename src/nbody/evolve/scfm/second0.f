@@ -16,10 +16,9 @@ C=======================================================================
 
         REAL etime,utime,stime,x,second
 
-        x=0
 c	x=etime(utime,stime)
-
-        second=utime+stime     
+c	second = utime + stime
+        second=0
 
         RETURN 
         END
