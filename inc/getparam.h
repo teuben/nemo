@@ -47,6 +47,13 @@ extern int nemoinpl (string, long *, int);
 extern int nemoinpb (string, bool *, int);
 extern int nemoinpx (string, double *, int);
 
+extern int nemorinpi (string, int *, int);
+extern int nemorinpd (string, double *, int);
+extern int nemorinpf (string, float *, int);
+extern int nemorinpl (string, long *, int);
+extern int nemorinpb (string, bool *, int);
+extern int nemorinpx (string, double *, int);
+
 extern void outparam (string, string);
 extern void outiparam(string, int);
 extern void outlparam(string, long);
