@@ -21,6 +21,8 @@
 
 local diagnostics(void);
 
+local bool Qkey, Qaux;
+
 /*
  * INPUTDATA: read initial conditions from input file.
  */
@@ -41,10 +43,12 @@ inputdata()
 	error("inputdata: essential data missing\tbits = %o", bits);
 
     if ((bits & MassBit) == 0) {                /* if no masses present */
-	warning("No masses present: set all to 1.0");
+	warning("No masses present: setting all to 1.0");
         for(bp=btab; bp<btab+nbody;bp++)
             Mass(bp)=1.0;                       /* set all masses to dummy 1*/
     }
+    Qkey = bits & KeyBit;
+    Qaux = bits & AuxBit;   /* will never be used, since we use this otherwise */
 
     if (scanopt(options, "reset_time") || (bits & TimeBit) == 0)
 						/* no time specified?       */
@@ -135,6 +139,7 @@ output()
 	bits |= TimeBit | PhaseSpaceBit;
 	if (scanopt(options, "mass") || firstmass) {
 	    bits |= MassBit;
+	    if (Qkey) bits |= KeyBit;
 	    firstmass = FALSE;
 	}
 	if (scanopt(options, "phi"))
@@ -150,7 +155,6 @@ output()
 	if (bits & PhaseSpaceBit)
 	    printf("\n\tparticle data written\n");
     }
-
 
     if (*savefile != 0)			        /* state file specified?    */
 	savestate(savefile);			/*   save system data       */
