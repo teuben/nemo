@@ -1,9 +1,27 @@
-/* -------------------------------------------------------------- *\
-|* $Id$
-|*
-|* Perform I/O operations on NEMO structure data from a Fortran program
-|*
-\* -------------------------------------------------------------- */
+/* =================================================================
+|  Copyright Jean-Charles LAMBERT - 2005                            
+|  e-mail:   Jean-Charles.Lambert@oamp.fr                           
+|  address:  Dynamique des galaxies                                 
+|            Laboratoire d'Astrophysique de Marseille               
+|            2, place Le Verrier                                    
+|            13248 Marseille Cedex 4, France                        
+|            CNRS U.M.R 6110                                        
+| ==================================================================
+|* Perform I/O operations on NEMO structure data from a Fortran     
+|  program.                                                         
+| ==================================================================
+| history                                                           
+|                *            *             *                       
+| 15-Jun-95	 V1.0 : created                                  JCL
+| 21-Jun-95	 V1.10: bugs fixes                               JCL
+| 12-Dec-95	 V1.11: possibility to close file                JCL
+| 11-Mar-96	 V1.12: acceleration I/O added                   JCL
+| 04-Apr-97	 V1.13: generic real format                      JCL
+| 07-Apr-97	 V1.14: manual created                           JCL
+| 19-Jul-02	 V1.20: io_nemo/io_nemo_f unified                JCL
+| 18-Mar-04	 V1.21: bugs fixed, softening added              JCL
+| 03-Mar-05	 V1.30: code cleaning, valgrind mem/leak safe    JCL
++----------------------------------------------------------------  */
 
 #ifdef ABSOFT
 #  define IO_NEMO_F io_nemo_f__
@@ -12,16 +30,16 @@
 #  define IO_NEMO_F io_nemo_f_
 #  define CLOSE_IO_NEMO_F close_io_nemo_f_
 #endif
-/* -------------------------------------------------------------- *\
-|* Include files
-\* -------------------------------------------------------------- */
+/* ----------------------------------------------------------------
+|  Include files                                                   
++---------------------------------------------------------------- */
 #include <stdinc.h>
 #include <stdarg.h>
 #include <history.h>
 
-/* -------------------------------------------------------------- *\
-|* Local include files
-\* -------------------------------------------------------------- */
+/* ----------------------------------------------------------------
+|  Local include files                                             
++---------------------------------------------------------------- */
 #include "io_init.h" 
 #include "check_file.h"
 #include "parameters.h"
@@ -33,9 +51,9 @@
 /* extern variables */
 #include "flags_data.h"
 
-/* -------------------------------------------------------------- *\
-|* Shared variables
-\* -------------------------------------------------------------- */
+/* ----------------------------------------------------------------
+|  Shared variables                                                
++---------------------------------------------------------------- */
 
 /* variables for reading */
 extern char * io_in[MAXIO]; 
@@ -68,12 +86,12 @@ char
 int   
   * nbody_f;   /* nbody              */
 
-/* -------------------------------------------------------------- *\ 
-|* io_nemo_f_ :
-|* Function called from a FORTRAN program to perform I/O operations
-|* on NEMO datas structure.
-|* 
-\* -------------------------------------------------------------- */
+/* ----------------------------------------------------------------
+|  io_nemo_f_ :                                                    
+|  Function called from a FORTRAN program to perform I/O operations
+|  on NEMO datas structure.                                        
+|                                                                  
++---------------------------------------------------------------- */
 int IO_NEMO_F(char * iofile,
 	      int  * lg, 
 	      int  * size_array, 
@@ -86,7 +104,7 @@ int IO_NEMO_F(char * iofile,
   bool io_op=TRUE;   /* TRUE -> READ,   FALSE -> SAVE */
   int rtype;         /* rtype = 1 (float), or = 2 (double) */
   static bool first=TRUE;	
-	
+
   /* correct the FORTRAN string */
   iofile = (char *) f_ch_to_c(iofile,*lg);
 
@@ -204,11 +222,11 @@ int IO_NEMO_F(char * iofile,
   return code;
 }
 
-/* -------------------------------------------------------------- *\ 
-|* close_io_nemo_f_ :
-|* Close the opening snapshot.
-|* Return 0 if the file was not open, otherwise 1
-\* -------------------------------------------------------------- */
+/* ----------------------------------------------------------------
+|  close_io_nemo_f_ :                                              
+|  Close the opening snapshot.                                     
+|  Return 0 if the file was not open, otherwise 1                  
++---------------------------------------------------------------- */
 int CLOSE_IO_NEMO_F(char * iofile,int * lg)
 {
   int no_io,code;
@@ -247,6 +265,6 @@ int CLOSE_IO_NEMO_F(char * iofile,int * lg)
   reset_history();
   return code;
 }
-/* -------------------------------------------------------------- *\ 
-|* End of io_nemo_f.c
-\* -------------------------------------------------------------- */
+/* ----------------------------------------------------------------
+|  End of io_nemo_f.c                                              
++---------------------------------------------------------------- */
