@@ -1,4 +1,4 @@
-.TH CCDFITS 1NEMO "7 August 2001"
+.TH CCDFITS 1NEMO "6 May 2002"
 .SH NAME
 ccdfits \- write a fits file to disk
 .SH SYNOPSIS
@@ -27,11 +27,18 @@ Scaling factors for CDELT keyword. If the second or third number is
 omitted, it is repeated from the previous number.
 [default: \fB1,1,1\fP].
 .TP
+\fBiscale=\fIbscale,bzero\fP
+Scaling factors for intensity (should only be used for BITPIX > 0)
+[default: \fB1,0\fP].
+.TP
 \fBobject=\fIname\fP
 Name of your object/image [default: none].
 .TP
 \fBcomment=\fIcomments\fP
 Comment using the COMMENT keyword. [default: none]
+.TP
+\fBcdmatrix=t|f\fP
+Use CD matrix instead of CDELT? [t/f]. Default: f.
 .TP
 \fBblocking=\fIfactor\fP
 Blocking factor (multiplicity of blocksize in terms of 2880 bytes) used
@@ -52,6 +59,17 @@ If no reference map used, this can be used to enforce a more reasonable
 axis descriptor (RA/DEC/VEL) for astronomical data packages which 
 cannot handle theory data too well (e.g. miriad, karma etc.).
 [Default: \fBf\fP].
+.TP
+\fIdummy=t|f\fP
+Write dummy (NAXISn=1) axes too?  If not, axes with length 1 are
+written last.
+Default: t
+.TP
+\fIndim=\fP
+If used, this will be the value of NAXIS written to the FITS file. Only
+useful of \fBdummy=f\fP and your FITS reader still cannot handle 
+dummy trailing axes.
+Default: not used.
 .TP
 \fInfill=0\fP
 Number of dummy comment lines to add to a fits header to test I/O routines.
@@ -142,4 +160,5 @@ Peter Teuben
 nov-92     	documented the FITFITS VMS procedure            	PJT
 dec-99     	some more documentation             	PJT
 apr-01		V3.0 reference map/pixel to inherit a WCS from  	PJT
+6-may-02	V4.0b proplery implemented dummy= 	PJT
 .fi
