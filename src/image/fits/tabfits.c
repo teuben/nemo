@@ -9,6 +9,7 @@
  *     30-nov-99    V3.0: allow nz=                             pjt
  *      9-jul-00    V3.1: allow dcol=0 for reading all columns  pjt
  *     22-jul-00    V3.2: fix for new style fitsio              pjt
+ *     23-oct-03    V3.2a: check for MAXDAT (and made it bigger) pjt
  *
  * todo:  read one more line, check if file is done!!
  */
@@ -33,7 +34,7 @@ string defv[] = {
 string usage = "convert tables into FITS images";
 
 #define MAXCOL 2048
-#define MAXDAT 2048
+#define MAXDAT 8192
 #ifndef MAX_LINELEN
 #define MAX_LINELEN  16384
 #endif
@@ -110,6 +111,8 @@ void nemo_main()
             fitwra(fitsfile,"        ",line);
         }
     }
+
+    if (nx > MAXDAT) error("MAXDAT=%d not large enough for nx=%d",MAXDAT,nx);
 
     if (nx*ny*nz <= 0 || fitsfile == NULL) {         /* figure out sizes */
     	if (nx == 0 && ny == 0 && nz == 0) {
