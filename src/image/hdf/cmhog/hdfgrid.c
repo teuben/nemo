@@ -19,6 +19,8 @@
  *      19-feb-00       V1.4b fixed header coordinates expression parser pjt
  *      10-sep-00           c fixed bug in the previous fix              pjt
  *      24-apr-03       V1.7  added vp and vm as gridding options        pjt
+ *       3-dec-04       V2.0  fixed MAXRANK->3 so it can do fake2d from zeus3d    pjt
+ *                            changed order of symmetry/mirror, changed some dprintf's
  */
 
  
@@ -43,18 +45,19 @@ string defv[] = {
     "xrange=-16:16\n		Range in X",
     "yrange=-16:16\n		Range in Y",
     "zvar=\n                    Optional selections: {vr,vt,den,vx,vy}",
-    "symmetry=\n		Override symmetry properties (odd|even)",
-    "mirror=t\n                 Allow non-mirroring",
+    "mirror=t\n                 Mirror all points?",
+    "symmetry=auto\n		Override otherwise automated symmetry properties (odd|even|auto) **unused**",
     "it0=0\n			Shift THETA array (i.e. rotate grid)",
-    "VERSION=1.7\n		24-apr-03 PJT",
+    "VERSION=2.0\n		3-dec-04 PJT",
     NULL,
 };
 
 string usage="Regrid a CMHOG polar HDF SDS image to a cartesian NEMO image";
 
-#define MAXRANK 2
+/* 3rd dimension is ignored though.... */
+#define MAXRANK 3
 
-#define OOST    0.7071067812        /*  1/sqrt(2) */
+#define OOST    0.7071067812        /*  (float) 1/sqrt(2)  */
 
 local int rank, shape[MAXRANK], run[MAXRANK];
 local char label[256], unit[256], fmt[256], coordsys[256];
@@ -113,7 +116,7 @@ void nemo_main()
     
     for (k=0; k<nsds; k++) {        /* read until we have the right SDS */
     	ret = DFSDgetdims(infile,&rank, shape, MAXRANK);
-    	if (ret < 0) error("Problem getting rank/shape at SDS #%d",k+1);
+    	if (ret < 0) error("Problem getting rank/shape at SDS #%d, MAXRANK=%d",k+1,MAXRANK);
 
     	label[0] = unit[0] = fmt[0] = coordsys[0] = 0;
         ret = DFSDgetdatastrs(label, unit, fmt, coordsys);
@@ -129,7 +132,12 @@ void nemo_main()
                 coord[i] = (float *) allocate(shape[i] * sizeof(float));
                 ret = DFSDgetdimscale(i+1, shape[i],coord[i]);
                 if (ret<0) error("getting shape[%d]",i+1);
-                dprintf(0,"Dimension %d  Size %d\n",i+1,shape[i]);
+		cmin = cmax = coord[i][0];
+		for (j=0; j<shape[i]; j++) {
+		  cmin = MIN(cmin, coord[i][j]);
+		  cmax = MAX(cmax, coord[i][j]);
+		}
+                dprintf(0,"Dimension %d  Size %d Min %g Max %g\n",i+1,shape[i],cmin,cmax);
             }
             buffer1 = (float *) allocate(size * sizeof(float));
             if (both) buffer2 = (float *) allocate(size * sizeof(float));
@@ -208,7 +216,7 @@ void nemo_main()
         dprintf(0,"New feature: shifting theta by %d/%d pixels\n",it0,shape[0]);
     	/* nt=shape[0]  nr=shape[1] */
         buffer3 = (float *) allocate(sizeof(float)*shape[0]);
-    	for (i=0; i<shape[0]; i++) dprintf(2,"before: %d %g\n",i,image1[i][0]);
+    	for (i=0; i<shape[0]; i++) dprintf(3,"before: %d %g\n",i,image1[i][0]);
 	for (j=0; j<shape[1]; j++) {
             for (i=0; i<shape[0]; i++) buffer3[i] = image1[i][j];
             fshift(shape[0], buffer3, it0);
@@ -219,7 +227,7 @@ void nemo_main()
                 for (i=0; i<shape[0]; i++) image2[i][j] = buffer3[i];
             }
     	}
-    	for (i=0; i<shape[0]; i++) dprintf(2,"after: %d %g\n",i,image1[i][0]);    	
+    	for (i=0; i<shape[0]; i++) dprintf(3,"after: %d %g\n",i,image1[i][0]);    	
     }
     image = image1;
     /* the image can now be referred to as in:  image[phi][rad]  */
@@ -302,7 +310,7 @@ void nemo_main()
                     continue;
                 }
             }
-            dprintf(1,"(x,y)%d %d (r,p) %g %g [@ %d %d] LL: %g %g\n",
+            dprintf(2,"(x,y)%d %d (r,p) %g %g [@ %d %d] LL: %g %g\n",
                     i,j,rad,phi,ir,ip,rads[ir],phis[ip]);
                 
             c1 = (rad-rad2)/(rad1-rad2);
@@ -340,8 +348,11 @@ void nemo_main()
     set_headline(label);
     write_image(outstr,iptr);
     strclose(outstr);
-
-    dprintf(0,"%d points outside radial grid\n",n1,n2);
+#if 0
+    dprintf(0,"%d points outside grid ;datamin/max: %g %g\n",n1,n2,domin,domax);
+#else
+    dprintf(0,"%d points outside grid\n",n1,n2);
+#endif
     dprintf(0,"Datamin/max written: %g %g\n",dmin,dmax);
 }
 
