@@ -1,0 +1,135 @@
+#! /bin/csh -f
+#
+#	            Create some fake BIMA data
+#
+#  ==> These are the keywords as 'tkrun' likes to see them <==
+#  ==> Preferred way to run:    tkrun scriptname           <==
+#
+#> RADIO telescope=bima9   bima9,bima,vla
+#> RADIO array=c        a,ab,b,c,d
+ #> SCALE ra=0.0         0.0:24.0:0.1
+#> SCALE dec=30.0       -90.0:90.0:0.1
+ #> SCALE ha1=-6.0       -12.0:12.0:0.1
+ #> SCALE ha2=6.0        -12.0:12.0:0.1
+ #> SCALE ha3=0.1        0.0:12.0:0.05
+ #> SCALE lat=40.0       -90.0:90.0:0.1
+ #> SCALE flux=1.0       0.0:20.0:0.1
+#> SCALE dra=0.0        0.0:60.0:0.1
+#> SCALE ddec=0.0       0.0:60.0:0.1
+#> SCALE gnoise=0.0     0.0:100.0:0.1
+#> SCALE pnoise=0.0     0.0:180.0:0.1
+#> SCALE systemp=0.0    0.0:1000.0:1
+#> SCALE tpower1=0.0    0.0:10:1
+#> SCALE tpower2=0.0    0.0:10:1
+#> SCALE jyperk=140     0:1000:1
+#> RADIO selfcal=false  true,false
+#> CHECK plots=amp,phase,sao,dmap,cmap  amp,phase,sao,dmap,cmap
+#> OFILE out=bima
+#> RADIO bimafiller=false    true,false
+
+#				set command line equivalents 
+awk '{if ($1=="#>") print "set",$3}' $0 > $0.keys; source $0.keys
+#
+set allplots=amp,phase,sao,dmap,cmap
+#				fix some keywords not CLI accessible
+#                               and prepare some input files for UVGEN
+set source=$out.source
+set corr=$MIRCAT/uvgen.corr
+set log=$out.log
+
+# 				parse command line args
+foreach a ($*)
+  set $a
+end
+
+if (-e $out) rm -rf $out $out.*
+
+echo "________________________________________________________________________"
+echo "Executing $0 at `date` " > $log
+
+#   Create that offset point source (yuck Mel!)
+echo $flux $dra $ddec 0 0 0 0 0 |\
+  awk '{printf(" %9.4f %9.4f %9.4f %9.4f %9.4f %9.4f %9.4f %9.4f\n",$1,$2,$3,$4,$5,$6,$7,$8)}' > $out.source
+
+#   Set the antenna configuration
+set ant=$MIRCAT/${telescope}_${array}.ant
+if (! -e $ant) then
+  echo OOPS: ant=$ant does not exist
+  exit
+endif
+
+#   Figure out which plotoptions to use (yuck Peter!)
+foreach opt (`echo $allplots|sed s/,/\ /g`)
+    scanopt $plots $opt
+    if ($status) then
+       set do_$opt=1
+    else
+       set do_$opt=0
+    endif
+end
+
+#   Start the calculations
+uvgen source=$source ant=$ant corr=$corr \
+      radec=$ra,$dec harange=$ha1,$ha2,$ha3 lat=$lat \
+      gnoise=$gnoise pnoise=$pnoise systemp=$systemp \
+      tpower=$tpower1,$tpower2 jyperk=$jyperk \
+      out=$out >> $log
+
+if ($selfcal == "true") then
+    selfcal vis=$out options=noscale,apriori,amp flux=$flux line=wide >> $log
+endif
+
+# fix some UVGEN problems that would cause bimafiller to barf out
+# it also writes a WSYSTEMP, not sure if this is right though
+#puthd in=$out/dra  value=0.0 type=real >> $log
+#puthd in=$out/ddec value=0.0 type=real >> $log
+puthd in=$out/wsystemp value=$systemp type=real >> $log
+
+
+if ($do_amp) uvplt vis=$out device=1/xs axis=time,amp nxy=6,6 >> $log
+if ($do_phase) uvplt vis=$out device=2/xs axis=time,pha nxy=6,6 >> $log
+
+set imsize=512
+set cell=0.5
+
+invert vis=$out map=$out/dmap beam=$out/dbeam \
+    imsize=$imsize  cell=$cell  >> $log
+if ($do_sao) mirsao $out/dmap
+if ($do_dmap) then
+    cgdisp in=$out/dmap 'region=arcsec,box(-32,-32,32,32)' device=3/xs \
+        type=c levs1=-0.1,-0.03,-0.01,0.01,0.03,0.1,0.3,0.6,0.9 \
+        labtyp=arcsec options=full,trlab >> $log
+endif
+echo DIRTY MAP:
+histo in=$out/dmap 'region=arcsec,box(-64,-64,-32,-32)' nbin=2 | grep ^Mean
+histo in=$out/dmap 'region=arcsec,box(-32,-32,32,32)' nbin=2 | grep ^Max
+
+
+clean map=$out/dmap beam=$out/dbeam out=$out/cc >> $log
+restor map=$out/dmap model=$out/cc beam=$out/dbeam out=$out/cmap >> $log
+if ($do_cmap) then
+    cgdisp in=$out/cmap 'region=arcsec,box(-32,-32,32,32)' device=4/xs \
+        type=c levs1=-0.1,-0.03,-0.01,0.01,0.03,0.1,0.3,0.6,0.9 \
+        labtyp=arcsec options=full,beambr,trlab >> $log
+endif
+echo CLEAN MAP:
+histo in=$out/cmap 'region=arcsec,box(-64,-64,-32,-32)'  nbin=2 | grep ^Mean
+histo in=$out/cmap 'region=arcsec,box(-32,-32,32,32)' nbin=2 | grep ^Max
+
+echo CLEANING:
+grep "Residual min,max,rms" $log
+echo RESTORED BEAM:
+grep "gaussian beam" $log
+echo THEORETICAL RMS NOISE:
+grep "Theoretical rms noise" $log
+
+
+#  until we fix the bug that the flag value is the other way around, do this:
+if($bimafiller == "true") then
+    echo BIMAFILLER:
+    set bug=0
+    if ($bug) uvflag vis=$out flagval=flag line=wide >> $log
+    bimafiller vis=$out MS=$out/MS
+    if ($bug) uvflag vis=$out flagval=unflag line=wide >> $log
+    fits in=$out out=$out/$out.fits op=uvout
+endif
