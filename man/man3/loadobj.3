@@ -17,7 +17,14 @@ loadobj, findfn, mysymbols \- dynamic object file loader
 .SH DESCRIPTION
 These routines provide a uniform low-level I/O interface to loading
 object modules. Higher level I/O interfaces are present for a few
-standard operations (see e.g. potential(3NEMO) and bodytrans(3NEMO))
+standard operations (see e.g. \fIpotential(3NEMO)\fP and 
+\fIbodytrans(3NEMO))\fP.
+.PP
+These routines are intended for applications where a set of mathematical
+expressions is specified at runtime as function strings, which are then
+evaluated for a large number of variable values. This is done by compiling the
+set of function strings into byte code sequences, which can be interpreted very
+efficiently for the various variable values. 
 .PP
 The routine \fImysymbols\fP is generally called once and in the beginning
 of the program. It loads all symbols from the program pointed to
@@ -51,12 +58,14 @@ In the following section of code gives an example of use.
 .SH SEE ALSO
 a.out(4), potential(3NEMO), bodytrans(3NEMO))
 .SH AUTHOR
-Eric Roberts, Peter Teuben
+Eric Roberts (original SunOS version), Peter Teuben (sun4, coff, dl)
 .SH FILES
 .nf
 .ta +1.5i
 ~/src/kernel/loadobj         loadobj.c, loadobj*.c
 .fi
+Much like \fIyapp(3NEMO)\fP, different implementations exist for
+different operating systems.
 .SH UPDATE HISTORY
 .nf
 .ta +1i +4i

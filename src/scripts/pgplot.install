@@ -7,15 +7,16 @@
 #  3-apr-01	allowed final directory also to be configurable
 #		and some NEMO V3 support added
 #  9-apr-01     added support if file= is given to directly specify pgplot tar ball
+# 11-jun-01     for new pgplot file name convention (520, 521, 522....)
 
 
 
 #			 	.. command line keywords ..
-set version=5.2
+set version=522
 set ftp=astro.caltech.edu
 set dir=$NEMO/local
 set lib=$NEMOLIB
-set drivers=GIDRIV,NUDRIV,PGDRIV,PPDRIV,PSDRIV,WDDRIV,XWDRIV
+set drivers=CGDRIV,GIDRIV,NUDRIV,PGDRIV,PPDRIV,PSDRIV,WDDRIV,XWDRIV
 set host=$NEMOHOST
 
 #				.. parse command line ..
@@ -71,7 +72,7 @@ switch ($host)
     breaksw
   case linux:
   case *linux-gnu:
-    $NEMO/local/pgplot/makemake  $NEMO/local/pgplot linux g77_elf
+    $NEMO/local/pgplot/makemake  $NEMO/local/pgplot linux g77_gcc
     if (! -e /usr/X11) then
         echo You may need to patch your Linux distribution:
         echo ln -s /usr/X11R6 /usr/X11
@@ -86,6 +87,7 @@ switch ($host)
 endsw
 
 make
+make cpg
 make clean
 \rm -fr pgdemo*
 

@@ -1,5 +1,5 @@
 /*
- *	a very simple (ANSI) C program
+ *	a very simple (ANSI) C program, no NEMO interface
  */
 
 #include <stdio.h>

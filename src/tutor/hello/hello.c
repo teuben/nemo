@@ -1,13 +1,10 @@
 /*
- *  HELLO:  Example of ``hello world'' using NEMO in C++
- *
- *  With the $NEMOBIN/cc script it should compile as follows:
- *             cc -o hello hello.c  -lnemo -lm
- *  With the $NEMOBIN/CC script it should compile as follows:
- *             CC -o hello hello.cc -lnemo++ -lnemo -lm
+ *  HELLO:  Example of ``hello world'' using NEMO in C/C++
  *
  *      ??         V1.0    Created                 Peter Teuben
  *	23-nov-94  V1.3    C and C++ code now same 	    PJT
+ *                    (but they need different file extensions)
+ *      17-jun-01  updated source code documentation for NEMO V3
  */
 
 #include <stdinc.h>              /* standard (NEMO) definitions */
@@ -21,7 +18,7 @@ string defv[] = {       /* standard keywords and default values */
 
 string usage = "Example NEMO C/C++ program";      /* usage text */
 
-void nemo_main()      /* standard start of any NEMO program */
+void nemo_main()          /* standard start of any NEMO program */
 {
     bool verbose;                  /* declaration of local var. */
 

@@ -39,6 +39,11 @@ Output integration step. Some other codes use 1/freqout, or \fBdeltat\fP for thi
 \fBtheta=\fP
 Opening angle parameter at M=M_root [0.5]   
 .TP
+\fBNcrit=\fP
+Maximum number of bodies a cell must
+hold before it is considered for further sub-division in the tree building
+stage of the code. [6]
+.TP
 \fBeps=\fP
 Softening length [0.05]     
 .TP
@@ -82,5 +87,6 @@ Walter Dehnen
 .nf
 .ta +1.0i +4.0i
 29-May-01	V1.0 manual written, at GH-2001 workshop at INAOE 	PJT
+13-jun-01	1.0.2: added Ncrit
 .fi
 

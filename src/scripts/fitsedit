@@ -1,5 +1,13 @@
 #! /bin/csh -f
 #
+
+if ($#argv == 0) then
+  echo "Usage: $0 fitsfile(s)"
+  echo "Edit primary HDU FITSfile with your favorite editor, needs"
+  echo "NEMO's fitshead and scanfits programs"
+  exit 0
+endif
+
 if ($?EDITOR) then
   set edit=$EDITOR
 else if ($?VISUAL) then
@@ -7,7 +15,7 @@ else if ($?VISUAL) then
 else
   set edit=vi
 endif
-echo Using editor $edit
+echo Using EDITOR/VISUAL $edit
 set tmp=tmp$$
 set bad=0
 

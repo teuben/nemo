@@ -10,6 +10,7 @@
  *			 	 nbody= is now second parameter	
  *		V4.2b: 24-jul-98 bit more documentation			PJT
  *		** still broken for SINGLEPREC **
+ *              V4.3:  12-jun-01 allow regularly spaced (with random start) PJT
  */
 
 #include <stdinc.h>
@@ -22,7 +23,7 @@
 #include <snapshot/body.h>
 #include <snapshot/put_snap.c>
 
-string defv[] = {	/* DEFAULT INPUT PARAMETERS */
+string defv[] = {
     "out=???\n		Output file name (snapshot)",
     "nbody=2048\n	Number of disk particles",
     "potname=plummer\n  Name of potential(5)",
@@ -35,9 +36,10 @@ string defv[] = {	/* DEFAULT INPUT PARAMETERS */
     "seed=0\n		Usual random number seed",
     "sign=1\n           Sign of Z-angular momentum vector of disk",
     "in=\n              If given, these are initial positions",
+    "angle=f\n          Regular angular distribution?",
     "vrad=0\n           radial velocity",
     "headline=\n	Text headline for output",
-    "VERSION=4.2d\n	11-may-01 PJT",
+    "VERSION=4.3\n	13-jun-01 PJT",
     NULL,
 };
 
@@ -45,6 +47,7 @@ string usage="set up a uniform-density test disk in a spherical potential";
 
 local real rmin, rmax, mass;
 local int  jz_sign;
+local bool Qangle;
 
 local int ndisk;
 local real frac, vrad;
@@ -77,6 +80,7 @@ void nemo_main()
     } else
         Qmass=TRUE;
     set_xrandom(getiparam("seed"));
+    Qangle = getbparam("angle");
     testdisk();
     writegalaxy(getparam("out"), getparam("headline"), Qmass);
 }
@@ -115,7 +119,7 @@ testdisk()
 {
     Body *dp;
     real rmin2, rmax2, r_i, theta_i, vcir_i, pot_i, t;
-    real  dv_r, dv_t, sint, cost, sigma_i;
+    real  dv_r, dv_t, sint, cost, sigma_i, theta_0;
     vector acc_i;
     int i, ndim=NDIM;
     double pos_d[NDIM], acc_d[NDIM], pot_d, time_d = 0.0;
@@ -123,11 +127,16 @@ testdisk()
     disk = (Body *) allocate(ndisk * sizeof(Body));
     rmin2 = rmin * rmin;
     rmax2 = rmax * rmax;
+    theta_i = xrandom(0.0, TWO_PI);
     t = 0;    /* dummy time ; we do not support variable time yet */
     for (dp=disk, i = 0; i < ndisk; dp++, i++) {	/* loop all stars */
 	Mass(dp) = mass;
 	r_i = sqrt(rmin2 + i * (rmax2 - rmin2) / (ndisk - 1.0));
-	theta_i = xrandom(0.0, TWO_PI);
+	if (Qangle) {
+	  theta_i += TWO_PI/ndisk;
+	} else {
+	  theta_i = xrandom(0.0, TWO_PI);
+	}
         cost = cos(theta_i);
         sint = sin(theta_i);
 	Pos(dp)[0] = pos_d[0] = r_i * cost;		/* set positions */

@@ -5,11 +5,12 @@
   NEMORC                     Generic NEMORC startup file.
 * NEMORC.local               Your local tailoring & overwrite features
   NEMORC.gen		     Exported version of NEMORC.local; copy at install
-  README                     Non-manual new release information, installs etc. 
+  README                     Quick info on NEMO and where to continue reading
+  README.install             Installation instructions
 * TIMESTAMP                  File kept for various administrative purposes
   VERSION                    major.minor.patch - see src/scripts/version
   nemo.rc                    Alternative startup procedure
-* nemo_start                 Startup for morons
+* nemo_start                 Startup 
 
 
 (*: files not exported to other sites, since they are site specific)
