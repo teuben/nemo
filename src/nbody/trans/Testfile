@@ -1,0 +1,50 @@
+DIR = src/nbody/trans
+BIN = snapcenter snaprotate snaprect snapinert snapsplit snapcopy
+NEED = $(BIN) mkplummer snapprint
+
+help:
+	@echo $(DIR)
+
+need:
+	@echo $(NEED)
+
+clean:
+	@echo Cleaning $(DIR)
+	@rm -f snap.in
+
+NBODY = 10
+
+test:   snapcenter snapsort snapstack snaptrim snaprotate snapdens \
+        hackdens snapscale unbind snapmask snapadd snaprect \
+        snapsphere snapmass snapspin snaptrans snapvirial
+
+all:	snap.in $(BIN)
+
+snap.in:
+	@echo Creating snap.in
+	mkplummer snap.in $(NBODY) seed=123
+
+snapcenter:
+	@echo Running snapcenter
+	snapcenter snap.in . weight=r report=t 
+
+snaprotate:
+	@echo Running snaprotate
+	snaprotate snap.in - 45,60,45 xyz | csf - .
+
+snaprect:
+	@echo Running snaprect
+	snaprect snap.in .
+
+snapinert:
+	@echo Running snapinert
+	snapinert snap.in -
+
+snapsplit:
+	@echo Running $@
+	snapsplit snap.in - nbody=1 | csf - .
+
+snapcopy:
+	@echo Running $*
+	snapcopy snap.in - select=i | csf - .
+

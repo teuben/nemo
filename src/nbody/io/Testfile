@@ -1,0 +1,38 @@
+DIR = src/nbody/io
+BIN = stoa atos tabtos
+NEED = $(BIN) mkplummer snapprint
+
+help:
+	@echo $(DIR)
+
+need:
+	@echo $(NEED)
+
+clean:
+	@echo Cleaning $(DIR)
+	@rm -f stoa.out stoa.cmp atos.out tabtos.in tabtos.out tabtos.cmp
+
+NBODY = 10
+
+all:	$(BIN)
+
+stoa:
+	@echo Running stoa
+	mkplummer - $(NBODY) | stoa - stoa.out
+
+atos:
+	@echo Running atos
+	atos stoa.out atos.out
+	stoa atos.out stoa.cmp
+	@echo Running diff stoa.out stoa.cmp
+	diff stoa.out stoa.cmp
+
+tabtos:
+	@echo Running tabtos
+	mkplummer - $(NBODY) | snapprint - m,x,y,z,vx,vy,vz > tabtos.in
+	tabtos tabtos.in tabtos.out "" mass,pos,vel times=0
+	snapprint tabtos.out m,x,y,z,vx,vy,vz > tabtos.cmp
+	@echo Running diff tabtos.in tabtos.cmp
+	diff tabtos.in tabtos.cmp
+
+
