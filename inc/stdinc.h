@@ -349,6 +349,7 @@ extern void   strclose(stream);
 /* C99 stdargs example of macro usage:   #define HELLO(a,...)  error(a,__VA_ARGS__)   */
 /* GNU stdargs (deprecated now)          #define HELLO(a,args...)  error(a,##args)    */
 void error(string, ...);
+void errorn(string, ...);
 void warning(string, ...);
 int nemo_dprintf(int, const_string, ...);    /* NEMO has same name as libc */
 
