@@ -98,11 +98,11 @@ int do_listen(int port, char *rhost) {
     address.sin_addr.s_addr=INADDR_ANY;
     address.sin_port=htons(port);
 
-    if ((listen_socket = socket(PF_INET, SOCK_STREAM, 0)) == -1) error("socket-1");
-    if (bind(listen_socket, &address, address_size) == -1) error("bind-1");
-    if (listen(listen_socket, 1) == -1) error("listen-1");
-    if ((data_socket=accept(listen_socket, &address, &address_size)) == -1) error("accept-1");
-    if (close(listen_socket) == -1) error("close-1");
+    if ((listen_socket = socket(PF_INET, SOCK_STREAM, 0)) == -1) error("socket-1 port=%d",port);
+    if (bind(listen_socket, &address, address_size) == -1) error("bind-1 port=%d",port);
+    if (listen(listen_socket, 1) == -1) error("listen-1 port=%d",port);
+    if ((data_socket=accept(listen_socket, &address, &address_size)) == -1) error("accept-1 port=%d",port);
+    if (close(listen_socket) == -1) error("close-1 port=%d",port);
     return data_socket;
 }
 
@@ -118,8 +118,10 @@ int do_connect(int port, char *rhost) {
     }
     address.sin_port=htons(port);
 
-    if ((data_socket=socket(PF_INET, SOCK_STREAM, 0)) == -1) error("socket-2");
-    if (connect(data_socket, &address, sizeof(address)) == -1) error("connect-2");
+    if ((data_socket=socket(PF_INET, SOCK_STREAM, 0)) == -1) 
+      error("socket-2 port=%d",port);
+    if (connect(data_socket, &address, sizeof(address)) == -1) 
+      error("connect-2 port=%d",port);
     return data_socket;
 }
 
