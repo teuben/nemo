@@ -1,0 +1,26 @@
+#! /bin/csh -f
+#  cc script - tested for solaris2 (sunos 5.3)
+#  their 'cc' seems to (define (-D)
+#           __BUILTIN_VA_ARG_INCR, __FILE__,__LINE__,sparc,sun,unix
+#
+# note: /usr/ucb/cc has not been tested, in fact the -DSYSV  flag
+# is now used to force some SYSV notions (mapsys, stdinc.h etc.)
+#
+# -Xa(ansi) -Xc(conformance) -Xs(sun) -Xt(transition) (-Xt=default on SC3.x)
+#						       -Xa=default on SC4.x)
+#
+# Don't use -Xc, since conforming ANSI does not define some macros
+# and we rely on them still (e.g. HUGE, also you would need -DDL)
+#
+exec /opt/SUNWspro/bin/cc -I$NEMOLIB -I$NEMOINC -L$NEMOLIB \
+        -Dsun4 -DSOLARIS -DSYSV \
+	$* -ldl -lm
+
+#  -DSINGLEPREC -fsingle
+
+# exec /local/bin/gcc -I$NEMOINC -L$NEMOLIB -Dsun4 -DSOLARIS -DSYSV \
+#    -fwritable-strings -ansi -Wall -DDL $* -ldl -lm
+
+
+#    -fwritable-strings  -DDL $* -ldl -lm
+

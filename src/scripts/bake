@@ -1,0 +1,23 @@
+#! /bin/csh -f
+#
+#   A Fake Make Bake Utility ! no pun intended
+#   
+#   Normally however, bake is installed through an alias:
+#	alias bake 'make -f $NEMOLIB/Makefile.lib'
+
+if ($#argv == 0) then
+  echo "Usage: $0 targets"
+  echo 'A NEMO make replacement using $NEMOLIB/Makefile.lib'
+  exit 0
+endif
+
+set m=$NEMOLIB/Makefile.lib
+
+if (! -e $m) then
+ echo "$m not installed .. "
+ echo "run 'make scripts' from $NEMO/src/scripts"
+ exit 1
+endif
+
+echo "BAKE: V1.0"
+exec make -f $m $*
