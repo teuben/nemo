@@ -1,0 +1,51 @@
+.TH MKSPHERE 1NEMO "8 September 1995"
+.SH NAME
+mksphere \- construct an arbitrary spherical mass distribution
+.SH SYNOPSIS
+\fBmksphere\fP \fBout=\fP \fBnbody=\fP [parameter=value]
+.SH DESCRIPTION
+\fBmksphere\fP creates a spherical mass distribution consistent
+with a user supplied density profile.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBout=\fP
+Output file name, in standard \fIsnapshot(5NEMO)\fP format. No default.
+.TP 20
+\fBnbody=\fP
+Number of particles, no default.
+.TP 20
+\fBradii=\fP
+Radii in sphere. Must be given in ascending order, but can be any
+\fInemoinp(3NEMO)\fP expression, e.g. 0:10:0.1. 
+.TP 20
+\fBdensity=\fP
+Associated densities at given radii. If fewer densities are given
+than radii, the last entered density will repeat.
+.TP 20
+\fBseed=\fP
+Seed for the random number generator. [Default: 0]
+.TP 20
+\fBzerocm=\fP
+Center the snapshot after creation?     [Default: \fBt\fP]
+.TP 20
+\fBrmin=\fP
+minimum radius, if to override from radii. Default first radius.
+.TP 20
+\fBrmax=\fP
+maximum radius, if to override from radii. Default last radius.
+.TP 20
+\fBheadline=\fP
+Verbiage for output. Default none.
+.SH SEE ALSO
+snapscale(1NEMO), snapadd(1NEMO), snapshot(5NEMO)
+.SH TODO
+Add velocities, a fake hubble flow. Look at Vincent Icke's nbodyinit.f
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+8-sep-95	V1.0 Created as toy model for 1995 NHK production	PJT
+.fi
