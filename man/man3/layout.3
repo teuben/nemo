@@ -1,0 +1,61 @@
+.TH AXIS 3NEMO "25 April 1992"
+.SH NAME
+pl_fread, pl_lread, pl_exec \- ASCII interpreter of YAPP commands
+.SH SYNOPSIS
+.nf
+\fB#include <layout.h>
+
+plcommand *pl_fread(filename)
+string filename;
+
+int pl_lread(line, p)
+string line;
+plcommand *p;
+
+void pl_exec(p)
+plcommand *p;
+\fP
+.fi
+.SH DESCRIPTION
+The \fIlayout(3NEMO)\fP routines proved the programmer with an ASCII
+interpreter and executionar of all basic
+\fIyapp(3NEMO)\fP routines (see \fIlayout(5NEMO)\fP for a listing).
+They are mostly used to add a standard ``background'' to a dynamic
+picture, yet which needs to be programmable by the outside user.
+.PP
+With the routine
+\fIpl_fread\fP a \fIlayout(5NEMO)\fP (regular text) 
+file is read, it's YAPP commands are interpreted
+and placed in a linked list of \fBplcommand\fP's, returned as a pointer
+to that structure. Commands that are not understood are skipped and
+not saved.
+.PP
+The routine \fIpl_lread\fP reads a single line, parses it in YAPP
+commands, and stores the encoded command in the \fBplcommand\fP
+structure pointed to by \fBp\fP. 
+Of course \fIpl_fread\fP calls \fIpl_lread\fP to do its work.
+\fIpl_lread\fP returns the number of arguments (including the
+YAPP command); 0 means no legal command (or a blank line) 
+was encountered and the structures contents have no meaning.
+.PP
+The routine \fIpl_exec\fP executes a previously read
+LAYOUT file, by passing it a pointer to the linked list of
+\fBplcommand\fP. The linked list is traversed until it ends
+or the \fIEnd\fP command is encountered.
+.SH EXAMPLES
+The following code reads a layout file entered through a program
+keyword \fBlayout=\fP, parses it and executes it. Because of the
+nested programming style, the linked list of \fBplcommand\fP is lost.
+.nf
+
+	pl_exec(pl_fread(getparam("layout")));
+.nf
+.SH SEE ALSO
+yapp(3NEMO), layout(5NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4i
+20-oct-92 	written          	PJT
+.fi
