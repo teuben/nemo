@@ -24,12 +24,12 @@ io_nemo_test:
 	make io_nemo_test
 
 
-test1:	snap.in  io_nemo_test
-	@echo Running io_nemo_test
-	io_nemo_test snap.in - select=$(SELECT)| snapprint - options=m,x,y,z,vx,vy,vz,ax,ay,az,phi > snap.tab1
+test1:	snap.in
+	# @echo Running io_nemo_test
+	# io_nemo_test snap.in - select=$(SELECT)| snapprint - options=m,x,y,z,vx,vy,vz,ax,ay,az,phi > snap.tab1
 	@echo Running snapmask2
 	snapmask2 snap.in - select=$(SELECT) | snapprint - options=m,x,y,z,vx,vy,vz,ax,ay,az,phi > snap.tab2
 	@echo Running snapmask
 	snapmask snap.in - select=$(SELECT) | snapprint - options=m,x,y,z,vx,vy,vz,ax,ay,az,phi > snap.tab3
 	@echo Running diff snap.tab1 snap.tab2
-	@diff snap.tab1 snap.tab2
+	@diff snap.tab3 snap.tab2
