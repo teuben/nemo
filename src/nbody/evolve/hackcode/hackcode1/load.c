@@ -28,9 +28,9 @@ static cellptr makecell(void);
  * MAKETREE: initialize tree structure for hack force calculation.
  */
 
-maketree(btab, nbody)
-bodyptr btab;			/* array of bodies to build into tree */
-int nbody;			/* number of bodies in above array */
+void maketree(
+  bodyptr btab,			/* array of bodies to build into tree */
+  int nbody)			/* number of bodies in above array */
 {
     register bodyptr p;
 

@@ -23,7 +23,7 @@ void out_result(void);
 void write_snapshot(void);
 
 /* load.c */
-int maketree(bodyptr btab, int nbody);
+void maketree(bodyptr btab, int nbody);
 
 /* util.c */
 void pickvec(vector x, bool cf);

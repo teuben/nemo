@@ -24,6 +24,7 @@
 #include "code.h"
 #include <getparam.h>
 #include <filestruct.h>
+#include <history.h>
 #include <extstring.h>
 
 #if 0
@@ -34,17 +35,17 @@
 #include <archaic/snapshot.h>
 #endif
 
-string defv[] = {		/* DEFAULT INPUT PARAMETERS */
+string defv[] = {	
     "in=???\n       Input (snapshot) file with mass coordinates",
     "out=???\n      Output (snapshot) file with f.c. results",
     "test=\n        Input file with test coordinates (if blank, in= coords are used)",
     "tol=1.0\n      Cell subdivision tolerence",
     "eps=0.05\n     Standard softening parameter",
     "rsize=4.0\n    Side-length of initial box",
-    "rmin=\n    Lower left corner of initial box [default is -rsize/2 (centered)",
+    "rmin=\n              Lower left corner of initial box [default is -rsize/2 (centered)",
     "options=mass,phase\n Output options: phase and/or mass",
     "fcells=0.75\n        Cell/body allocation ratio",
-    "VERSION=1.6\n        29-mar-04 PJT",
+    "VERSION=1.6a\n       28-mar-05 PJT",
     NULL,
 };
 
