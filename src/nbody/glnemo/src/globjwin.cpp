@@ -57,9 +57,14 @@
 #include "network_data.h"
 #include "select_particles_form.h"
 #include "movie_thread.h"
+#include "about_form.h"
+
+#define NETWORK_BROWSE 0
+#define RECORD_FRAME 0
 
 // Include XPM images
-#include "images/galaxy1.xpm"
+#include "images/glnemo35.xpm"
+//#include "images/galaxy1.xpm"
 #include "images/arrowsb.xpm"
 #include "images/target1.xpm"
 #include "images/screen2.xpm"
@@ -71,18 +76,19 @@
 #include "images/camera5.xpm"
 #include "images/comm.xpm"
 #include "images/allfit.xpm"
-#include "images/broadcast.xpm"
+#if NETWORK_BROWSE
+  #include "images/broadcast.xpm"
+#endif  
 #include "images/reload.xpm"
 #include "images/recorder.xpm"
 
 using namespace std;
 #define LINE cerr << "Line: " << __LINE__ << "\n";
 
-#define LOCAL_DEBUG 1
+#define LOCAL_DEBUG 0
 #include "print_debug.h"
 
-#define NETWORK_BROWSE 0
-#define RECORD_FRAME 0
+
 // ----------------------------------------------------------------------------
 // Constructor
 GLObjectWindow::GLObjectWindow( QWidget* parent, const char* name)
@@ -124,7 +130,7 @@ GLObjectWindow::GLObjectWindow( QWidget* parent, const char* name)
   initStuff();
 
   // icon main window
-  setIcon( QPixmap( galaxy1 ) );
+  setIcon( QPixmap( glnemo35_xpm ) );
 
   // Create Dialogs
   //DialogForm * dialogform = new DialogForm(this);
@@ -135,7 +141,7 @@ GLObjectWindow::GLObjectWindow( QWidget* parent, const char* name)
   fileOpenAction = new QAction( this, "fileOpenAction" );
   fileOpenAction->setText( tr( "Open File" ) );
   connect( fileOpenAction, SIGNAL( activated() ) , this, SLOT( selectFileOpen() ) );
-  fileOpenAction->setIconSet( QIconSet( galaxy1 ) );
+  fileOpenAction->setIconSet( QIconSet( glnemo35_xpm ) );
   
    // create menu connectionOpen
   QAction* connexionOpenAction;
@@ -151,11 +157,16 @@ GLObjectWindow::GLObjectWindow( QWidget* parent, const char* name)
   file->insertItem( "Exit",  qApp, SLOT(quit()), CTRL+Key_Q );
   //file->insertItem( "Options",  dialogform, SLOT(show()), CTRL+Key_O );
 
+  // Create a Help menu
+  AboutForm * about_form = new AboutForm();
+  QPopupMenu *help_menu = new QPopupMenu( this );
+  help_menu->insertItem( "About Glnemo",  about_form, SLOT(show()), QKeySequence());//CTRL+Key_B );
+  
   // Create a menu bar
   QMenuBar *m = new QMenuBar( this );
   m->setSeparator( QMenuBar::InWindowsStyle );
-  m->insertItem("&File", file );
-
+  m->insertItem("&File", file );           // insert File menu
+  m->insertItem("&Help", help_menu );      // insert Help menu
 
   //                        Create butons widgets for the toolbar options
   // Full Screen
@@ -534,6 +545,7 @@ void GLObjectWindow::selectConnexionOpen()
   static HostnameSelectionForm *hsl;
   int n; // happy Red Hat 9
   
+  if (n); // remove compiler warning
   // first time, create Hostname selection box
   if (first) {
     first = FALSE;
@@ -564,6 +576,9 @@ void GLObjectWindow::selectConnexionOpen()
 //
 void GLObjectWindow::optionsReloadSnapshot()
 {
+  if ( ! virtual_data ) { // no data loaded
+    return;
+  }
   pthread_mutex_lock(&mutex_timer);
   if (play_animation) {
     killTimer( play_timer );
@@ -699,7 +714,7 @@ void GLObjectWindow::optionsToggleFullScreen()
     showFullScreen();
   }
   else {
-    setIcon( QPixmap( galaxy1 ) );
+    setIcon( QPixmap( glnemo35_xpm ) );
     showNormal();
   }
   full_screen=!full_screen;
