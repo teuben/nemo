@@ -3,6 +3,7 @@
  *	sep-1990	added Story, Pos and Vel options
  *      may-2001        added Yanc stuff for Dehnen
  *      oct-2001        added SPH/Yanc (dens/eps)
+ *      jan-2002        added ZENO compatible ones
  */
 
 #ifndef _snapshot_h
@@ -32,6 +33,7 @@
 #define     EpsTag              "Eps"
 #define     StoryTag		"Story"
 
+
 #define   DiagnosticsTag	"Diagnostics"
 #define     EnergyTag           "Energy"
 #define     KETensorTag         "KETensor"
@@ -39,6 +41,29 @@
 #define     AMTensorTag		"AMTensor"
 #define     CMPhaseSpaceTag	"CMPhaseSpace"
 #define     CPUTimeTag          "cputime"
+
+/* Some ZENO compatible tags */
+
+#define	AccTag         	AccelerationTag
+#define CMPhaseTag     	CMPhaseSpaceTag
+#define RhoTag         	DensityTag
+#define PhaseTag       	PhaseSpaceTag
+
+
+
+/* New ZENO tags that NEMO had not defined before */
+
+#define NBodyTag 	"NBody"
+#define NGasTag 	"NGas"
+#define UdotIntTag 	"UdotInternal"
+#define UdotRadTag 	"UdotRadiation"
+#define UinternTag 	"Uinternal"
+#define EntFuncTag 	"EntropyFunc"
+#define AMVectorTag 	"AMVector"
+#define AuxVecTag 	"AuxVec"
+#define BodyTag 	"Body"
+#define SmoothTag "SmoothLength"
+
 
 /* Yanc  tags were designed, but never used, right Walter? */
 
