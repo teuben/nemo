@@ -1,0 +1,11 @@
+#! /bin/csh -f 
+#
+#  normally this script is called in Testfile's
+#  which are called by src/script/testsuite
+#
+
+if ($?NEMO_COVERAGE == 0) exit 0
+
+foreach s ($*)
+   gcov $s     >> & $NEMO/tmp/nemo.coverage.log
+end
