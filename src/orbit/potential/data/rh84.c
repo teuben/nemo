@@ -14,7 +14,7 @@
  *      19-jul-92 added the forces              PJT
  *	25-jul-92 A=0 still done the hard way   PJT
  *	   oct-93 get_pattern
- *
+ *	19-sep-04 float/double			PJT
  */
 
 /*CTEX
@@ -24,7 +24,8 @@
  
 
 #include <stdinc.h>
- 
+#include <potential_float.h>
+
 static double omega = 0.0;         /* \omega: [Myr^-1]   Pattern speed */
 static double rh_B  = 0.0576;      /* B: [Myr^-1]        Mass */
 static double rh_a  = 7.0;         /* a: [kpc]           Lenght scale */
@@ -36,10 +37,7 @@ static double rh_j  = 5;           /* j: dimensionless   coefficient */
 static double gm, aa, jt;          /* handy constants to keep around */
 
 
-void inipotential (npar, par, name)
-int    *npar;
-double par[];
-char *name;
+void inipotential (int  *npar, double *par, char *name)
 {
     int n;
 
@@ -65,9 +63,7 @@ char *name;
     par[0] = omega;
 }
 
-void potential (ndim,pos,acc,pot,time)
-int    *ndim;
-double pos[], acc[], *pot, *time;
+void potential_double (int *ndim,double *pos,double *acc,double *pot,double *time)
 {
     double r, r2, ra2, ra2sq;
     double theta, psi, ksi, phi, tmp1, fr, ft, sinp, cosp;

@@ -24,8 +24,6 @@ static double ecc, rbul2;
 
 void inipotential (int *npar, double *par, char *name)
 {
-    int i;
-
     if (*npar>0)
         omega = par[0];
     if (*npar>1)

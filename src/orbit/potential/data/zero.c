@@ -1,5 +1,5 @@
 /*
- * zero.c:  a true zero potential
+ * zero.c:  a true zero potential, no forces anywhere
  *
  */
 
@@ -14,7 +14,6 @@
  */                     
   
 #include <stdinc.h>
-#include <vectmath.h>	/* define DIMensionality */
  
 void inipotential (int *npar, double *par, string name)
 {
@@ -23,11 +22,19 @@ void inipotential (int *npar, double *par, string name)
     n = *npar;
     if (n>0) warning("zero: npar=%d no parameters accepted",n);
 }
-
-void potential (int *ndim,double *pos,double *acc,double *pot,double *time)
+
+void potential_double (int *ndim,double *pos,double *acc,double *pot,double *time)
 {
     *pot = 0.0;
     acc[0] = 0.0;
     acc[1] = 0.0;
     acc[2] = 0.0;
 }
+void potential_float (int *ndim,float *pos,float *acc,float *pot,float *time)
+{
+    *pot = 0.0;
+    acc[0] = 0.0;
+    acc[1] = 0.0;
+    acc[2] = 0.0;
+}
+

@@ -31,10 +31,11 @@
  */
 
 #include <stdinc.h>
+#include <potential_float.h>
 #include <filestruct.h>
 #include <image.h>
 
-#define CCD_VERSION "ccd V3.0 13-aug-02"
+#define CCD_VERSION "ccd V3.1 19-sep-04"
 
 local double   omega = 0.0;
 local double   iscale = 1.0;
@@ -70,8 +71,8 @@ void inipotential (int *npar, double par[], char *name)
     if (n>6)  warning("inipotential(ccd): npar=%d only 6 parameter accepted",n);
 
     /* set some easy to use booleans */
-    Qcen = n>2;
-    Qdel = n>4;
+    Qcen = n>2;     /* if a new center was defined via parameters */
+    Qdel = n>4;     /* if a new pixel size was defined via parameters */
 
     dprintf(1,"INIPOTENTIAL: %s: %s\n",CCD_VERSION,name);
     dprintf(1,"  Parameters:  Omega=%g iscale=%g xcen,ycen=%g,%g dx,dy=%g,%g\n",
@@ -122,7 +123,7 @@ void inipotential (int *npar, double par[], char *name)
     par[0] = omega;
 }
 
-void potential(int *ndim,double *pos,double *acc,double *pot,double *time)
+void potential_double(int *ndim,double *pos,double *acc,double *pot,double *time)
 {
     double x, y, dx, x3, x4, x8, dy, y3, y4, y8;
     int ix, iy;

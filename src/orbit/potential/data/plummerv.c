@@ -2,7 +2,7 @@
  * plummerv.c:  (spherical) plummer potential with variable mass/radius drive via file
  *
  *	18-jun-2003    toy model for Walter and Lia               PJT
- *
+ *	
  */
 
 /*CTEX

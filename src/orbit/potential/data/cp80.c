@@ -4,13 +4,13 @@
  *           (See also Barbanis & Woltjer, 1967)
  *
  *  V = V_0 + V_1
- *      Where the axisymetric part (V_0) is the Isochrone model
+ *      where the axisymmetric part (V_0) is the Isochrone model
  *      and a cos(2*phi) perturbation V_1=eps.sqrt(r).(16-r)cos(2*phi)
  *
  *	7-mar-92   happy gcc2.0				pjt
  *	  oct-93   get_pattern
  *        feb-03   ANSI coding
- *
+ *        sep-04   double/float
  *
  */
 
@@ -21,8 +21,9 @@
  *  Contopoulos \& Papayannopoulos (1980, A\&A, 92,33)
  *  used this potential
  *  in the study of orbits in barred galaxies. Note that their
- *  ``bar'' is oriented along the Y-axis, and an axis ratio is not
- *  well defined. The potential used is given by adding an
+ *  ``bar'' is oriented along the Y-axis, an axis ratio is not
+ *  well defined, and for larger values of $\epsilon$ the density
+ *  can be negative. The potential used is given by adding an
  *  axisymmetric component to a m=2 fourier component:
  *  $$
  *     \Phi = \Phi_1 + \Phi_2
@@ -36,9 +37,13 @@
  *  $$
  *         \Phi_2 = \epsilon  r (16-r) cos(2\phi)
  *  $$
+ *
+ *  A value of $\epsilon=0.00001$ is the default for a moderate bar,
+ *  whereas 0.001 is a strong bar!
  */
  
 #include <stdinc.h>
+#include <potential_float.h>
 
 local double omega = 0.05;         /* pattern speed */
 local double eps = 0.00001;        /* 'bar' perturbation: 0.001 is strong! */
@@ -66,7 +71,7 @@ void inipotential (int *npar, double *par, char *name)
     par[0] = omega;
 }
     
-void potential (int *ndim,double *pos,double *acc,double *pot,double *time)
+void potential_double (int *ndim,double *pos,double *acc,double *pot,double *time)
 {
     double a, tmp, rad2, rad, rads, ft, fr, cosp, sinp, costp, sintp;
 
@@ -95,3 +100,4 @@ void potential (int *ndim,double *pos,double *acc,double *pot,double *time)
     acc[0] -= fr*cosp - ft*sinp;
     acc[1] -= fr*sinp + ft*cosp;
 }
+

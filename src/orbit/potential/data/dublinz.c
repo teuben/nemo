@@ -4,6 +4,7 @@
  *          and quasi harmonic in Z
  *
  *      06-may-03       RPO, adapted from flatz
+ *      19-sep-04       PJT: double/float
  */
 
 /*CTEX
@@ -16,6 +17,7 @@
 #include <stdinc.h>
 #include <spline.h>
 #include <table.h>
+#include <potential_float.h>
 
 local double omega = 0.0;
 local double r0    = 0.001; /* inner radius  */
@@ -48,7 +50,7 @@ void inipotential (int *npar, double *par, string name)
     h2     = h*h;
 }
     
-void potential (int *ndim, double *pos,double *acc,double *pot,double *time)
+void potential_double (int *ndim, double *pos,double *acc,double *pot,double *time)
 {
     real r, r2, v, v0, f;
     int    i;

@@ -9,10 +9,12 @@
  *
  *	3-feb-98    Peter Teuben - after a suggestion by Kevin Rauch
  *	22-jun-01   compiler complaints
+ *      19-sep-04   float/double
  *
  */
  
 #include <stdinc.h>
+#include <potential_float.h>
 
 static double omega = 0.0;
 
@@ -22,8 +24,6 @@ static double x1[3] = {  0.0, 0.0, 0.0 };
 static double m2 = 0.1;                         /* particle 2 */
 static double x2[3] = { -1.5, 0.0, 0.0 };
 
-extern double sqr(double);
-
 /*------------------------------------------------------------------------------
  * INIPOTENTIAL: initializes the potential.
  *      input: npar, the number of parameters
@@ -32,10 +32,7 @@ extern double sqr(double);
  *      variables in this file.
  *------------------------------------------------------------------------------
  */
-void inipotential (npar, par, name)
-int    *npar;
-double par[];
-char *name;
+void inipotential (int  *npar, double *par, char *name)
 {
     if (*npar>0) omega = par[0];
     if (*npar>1) m1    = par[1];
@@ -61,9 +58,7 @@ char *name;
  *      Note that this routine is good for 2 and 3D
  *------------------------------------------------------------------------------
  */
-void potential (ndim,pos,acc,pot,time)
-int    *ndim;
-double pos[], acc[], *pot,*time;
+void potential_double (int *ndim,double *pos,double *acc,double *pot,double *time)
 {
 	double dr1, dr2;
 	

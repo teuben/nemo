@@ -10,6 +10,7 @@
  *	   oct-93 get_pattern
  *	   mar-95 no output of NULL name
  *	 7-jul-02 documented the formulae in ctex
+ *      19-sep-04 float/double
  */
 
 /*CTEX
@@ -44,6 +45,7 @@
  
  
 #include <stdinc.h>		    /* NEMO only */
+#include <potential_float.h>
 
 local double omega = 0.0;           /* just put to zero until implemented */
 local double hubble_mass = 1.0;	    /* core mass */
@@ -83,7 +85,7 @@ void inipotential (int *npar, double *par, string name)
 
 }
     
-void potential (int *ndim,double *pos,double *acc,double *pot,double *time)
+void potential_double (int *ndim,double *pos,double *acc,double *pot,double *time)
 {
     double tmp1, tmp2, tmp3, tmp4, r, r2 = 0.0;
     int    i;

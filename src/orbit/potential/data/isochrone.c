@@ -5,6 +5,7 @@
  *      nov-90	Created		PJT
  *	mar-92  happy gcc2.0	PJT
  *	oct-93  get_pattern()	PJT
+ *      sep-04  float/double	PJT
  */
 
 /*CTEX
@@ -14,6 +15,7 @@
 
  
 #include  <stdinc.h>
+#include <potential_float.h>
 
 local double omega = 0.0;           /* just put to zero until implemented */
 local double iso_mass = 1.0;
@@ -21,12 +23,7 @@ local double iso_radius = 1.0;
 
 local double iso_radius2;
 
-double sqr();
-
-void inipotential (npar, par, name)
-int    *npar;
-double par[];
-char *name;
+void inipotential (int  *npar, double *par, char *name)
 {
     int n;
 
@@ -44,9 +41,7 @@ char *name;
     par[0] = omega;
 }
     
-void potential (ndim,pos,acc,pot,time)
-int    *ndim;
-double pos[], acc[], *pot, *time;
+void potential_double (int *ndim,double *pos,double *acc,double *pot,double *time)
 {
     double a, tmp;
     int    i;

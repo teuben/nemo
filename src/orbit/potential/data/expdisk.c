@@ -17,6 +17,7 @@
  
  
 #include <stdinc.h>                     /* standard Nemo include */
+#include <potential_float.h>
 
 local double omega = 0.0;           /* just put to zero until implemented */
 local double mass = 1.0;	/* total mass */
@@ -44,9 +45,7 @@ char *name;
     par[0] = omega;
 }
 
-void potential (ndim,pos,acc,pot,time)
-int    *ndim;
-double  pos[], acc[], *pot,*time;
+void potential_double (int *ndim,double *pos,double *acc,double *pot,double *time)
 {
     int    i;
     double r2, r, x, i0, k0, i1, k1, f;

@@ -3,6 +3,7 @@
  *
  *	7-mar-92  happy gcc2.0		pjt
  *	  oct-93  get_pattern		pjt
+ * 	  sep-04  double/float		PJT
  */
 
 /*CTEX
@@ -20,6 +21,7 @@
  
 
 #include <stdinc.h>
+#include <potential_float.h>
 
 static double omega = 0.0;           /* just put to zero until implemented */
 static double h[3] = {1.0,1.0,1.0};  /* default parameters harmonic potential */
@@ -40,7 +42,7 @@ void inipotential (int *npar, double *par, string name)
     par[0] = omega;
 }
 
-void potential (int *ndim,double *pos,double *acc,double *pot,double *time)
+void potential_double (int *ndim,double *pos,double *acc,double *pot,double *time)
 {
         int    i;
         

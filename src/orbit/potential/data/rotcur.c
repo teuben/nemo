@@ -21,8 +21,9 @@
 #include <stdinc.h>
 #include <spline.h>
 #include <table.h>
+#include <potential_float.h>
 
-extern int file_lines(string);
+extern int nemo_file_lines(string,int);
  
 local double omega = 0.0;           /* just put to zero until implemented */
 
@@ -76,7 +77,7 @@ void inipotential (int *npar, double *par, string name)
     dprintf(2,"rotcur[%d]: %g %g\n",nrad,rad[nrad-1],vel[nrad-1]);
 }
     
-void potential (int *ndim, double *pos,double *acc,double *pot,double *time)
+void potential_double (int *ndim, double *pos,double *acc,double *pot,double *time)
 {
     real r, r2, v, f;
     int    i;

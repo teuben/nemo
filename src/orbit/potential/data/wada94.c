@@ -6,6 +6,7 @@
  *              Wada (1994, PASJ 46, 165)
  *
  *	16-jun-96	fixed bug in setting wada_e (n>2 -> n>3)	pjt
+ *      19-sep-04	float/double
  */
 /*CTEX
  *    {\bf potname=wada94
@@ -34,7 +35,8 @@
 
 #include <stdinc.h>
 #include <vectmath.h>
- 
+#include <potential_float.h>
+
 local double omega = 0.0;
 local double wada_c = 1.0;    /* mass scaling: c = v_max * a * (27/4)**(1/4) */
 local double wada_a = 1.0;    /* length scaling */
@@ -62,9 +64,9 @@ void inipotential (int *npar, double *par, string name)
     par[0] = omega;
 }
 
-void potential(int *ndim, double *pos, double *acc, double *pot, double *time)
+void potential_double(int *ndim, double *pos, double *acc, double *pot, double *time)
 {
-    double r2, w, ws, ws3, fr, ft, cos2t, eps, phi_a;
+    double r2, w, ws, ws3, fr, ft, cos2t, eps;
 
     r2  = pos[0]*pos[0] + pos[1]*pos[1];
     w = 1.0/(a2 + r2);

@@ -4,6 +4,7 @@
  */
   
 #include <stdinc.h>
+#include <potential_float.h>
  
 local double omega = 0.0;
 local double plummer_mass = 1.0;
@@ -34,7 +35,7 @@ void inipotential (int *npar, double *par, string name)
     par[0] = omega;
 }
 
-void potential(int *ndim, double *pos, double *acc, double *pot, double *time)
+void potential_double(int *ndim, double *pos, double *acc, double *pot, double *time)
 {
   double tmp, rad;
 

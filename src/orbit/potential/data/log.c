@@ -2,6 +2,7 @@
  * log.c:  logarithmic triaxial potential
  *	dec-93    allowed r_c=0 exception, by setting v_0^2 = 2*m_c
  *      jun-01    stdinc.h
+ *      sep-04    double/float
  */
 
 /*CTEX
@@ -19,7 +20,8 @@
  */
 
 #include <stdinc.h>
- 
+#include <potential_float.h>
+
 /* default parameters */
 
 static double omega = 0.0;	/* pattern speed */
@@ -57,7 +59,7 @@ void inipotential (int *npar, double *par, char *name)
 }
     
 
-void potential (int *ndim, double *pos, double *acc, double *pot, double *time)
+void potential_double (int *ndim, double *pos, double *acc, double *pot, double *time)
 {
     double rad, f;
     int    i;

@@ -1,5 +1,7 @@
 /*
- *  kuzmindisk.c:   a thin Kuzmin disk
+ *  kuzmindisk.c:   an infinitesimally thin Kuzmin disk
+ *
+ *	sep-04	added float/double		PJT
  *
  */
 
@@ -26,7 +28,8 @@
  */
  
  
-#include <stdinc.h>                     /* standard Nemo include */
+#include <stdinc.h>
+#include <potential_float.h>
 
 local double omega = 0.0;       /* just put to zero until implemented */
 local double mass = 1.0;	/* total mass */
@@ -46,10 +49,10 @@ void inipotential(int *npar, double *par, string name)
     par[0] = omega;
 }
 
-void potential (int *ndim,double *pos,double *acc, double *pot,double *time)
+void potential_double (int *ndim,double *pos,double *acc, double *pot,double *time)
 {
     int    i;
-    double r2, r, x, i0, k0, i1, k1, f;
+    double r2, r, f;
 
     r2 = sqr(pos[0])+sqr(pos[1]);
     r = sqrt(r2);

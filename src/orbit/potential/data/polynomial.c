@@ -3,6 +3,7 @@
  *
  *	jul-2002b	created for N4313 (Apj 437,162)
  *      jan-2003        MAXN -> MAXPOW
+ *      sep-2004	float/double
  */
 
 /*CTEX
@@ -18,6 +19,7 @@
   
 #include <stdinc.h>
 #include <vectmath.h>
+#include <potential_float.h>
 
 #define MAXPOW  16
  
@@ -63,12 +65,5 @@ void potential_double (int *ndim,double *pos,double *acc,double *pot,double *tim
     acc[0] = f*pos[0];
     acc[1] = f*pos[1];
     acc[2] = f*pos[2];
-}
-
-void potential_float (int *ndim,float *pos,float *acc,float *pot,float *time)
-{
-    register float tmp;
-
-    error("didn't do the float polynomial yet");
 }
 

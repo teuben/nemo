@@ -13,6 +13,8 @@
  *	 potpars={\it $\Omega,f_m,f_x,{c\over a}$}}
  */
 #include <stdinc.h>
+#include <potential_float.h>
+
 		/* composite model parameters */
 
 static double omega = 0.0;		/* pattern speed */	     
@@ -21,7 +23,7 @@ static double fx    = 8.485281374;	/* length scale ratio bar/disk */
 static double ca    = 0.2;		/* bar axial ratio */
 
 
-static double    M_core, M_h, M_b, M_c, A_b, B_b, A_c, A_h;  /* handy */
+static double    M_core, M_h, M_b, M_c, A_b, B_b, A_c, A_h;  /* handy variables */
 static double    Grav_Const;
 
 static void prol6 (double elipm,
@@ -33,8 +35,6 @@ static void prol6 (double elipm,
 
 void inipotential (int *npar, double *par, char *name)
 {
-    int i;
-
     if (*npar>0)
         omega = par[0];
     if (*npar>1)
@@ -58,11 +58,10 @@ void inipotential (int *npar, double *par, char *name)
     dprintf (1,"fm=%f   fx=%f  ca=%f\n\n",fm,fx,ca);
 }
     
-void potential (int *ndim,double *pos,double *acc,double *pot,double *time)
+void potential_double (int *ndim,double *pos,double *acc,double *pot,double *time)
 {
 	double rr, r;
 	double q_h, q_c, pot_h, pot_c, acc_h, acc_c;
-	int    i;
 
 	prol6 (M_b,A_b,B_b,B_b,pos[0],pos[1],pos[2],
 					&acc[0],&acc[1],&acc[2],pot);

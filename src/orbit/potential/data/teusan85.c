@@ -19,6 +19,7 @@
  *	Aug 96  - changed order of pars to improve readability  Dave Shone/pjt
  *                prototyped and #ifdeffed the NEED3D a bit too.
  *	Jun 01  - dprintf level 0->1
+ *      Sep 04  - double/float
  */
 
 /*CTEX
@@ -26,6 +27,7 @@
  */
  
 #include <stdinc.h>
+#include <potential_float.h>
 
 /* Official model parameters as they go into inipotential(): */
 
@@ -108,7 +110,7 @@ void inipotential (int *npar, double *par, string name)
  *  POTENTIAL: the worker routine: gets forces and pot at (x,y) (z=dummy in 2D)
  *------------------------------------------------------------------------------
  */
-void potential (int *ndim,double *pos,double *acc,double *pot,double *time)
+void potential_double (int *ndim,double *pos,double *acc,double *pot,double *time)
 {
     double rr;
     double dn_h, dn_c, ftr;

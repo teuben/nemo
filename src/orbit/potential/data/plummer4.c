@@ -50,7 +50,7 @@ void inipotential (int *npar, double *par, string name)
     par[0] = omega;
 }
 
-void potential (int *ndim,float *pos,float *acc,float *pot,float *time)
+void potential_float(int *ndim,float *pos,float *acc,float *pot,float *time)
 {
     register float tmp;
 

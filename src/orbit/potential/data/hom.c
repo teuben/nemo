@@ -5,6 +5,7 @@
  *	feb-90  Created for open cluster project - no real boundary though
  *	mar-92	Happy gcc2.0 - re-introduced rmax boundary          pjt
  *	oct-93  get_pattern, and fixed center point bug             pjt
+ *	sep-04  float/double					    pjt
  */
 
 /*CTEX
@@ -14,6 +15,7 @@
  
 
 #include <stdinc.h>
+#include <potential_float.h>
 
 local  double omega= 0.0;	     /* just put to zero until implemented */
 local  double mtot=  1.0; 	     /* Mass of sphere */
@@ -22,12 +24,8 @@ local  double tau=   0.0;            /* decay time; 0.0 means no decay */
 
 local  double w2, rmax2, poffset;
 
-void inipotential (npar, par, name)
-int    *npar;
-double par[];
-char *name;
+void inipotential (int  *npar, double *par, char *name)
 {
-
     if (*npar>0) omega = par[0];
     if (*npar>1) mtot = par[1];  
     if (*npar>2) rmax = par[2];
@@ -42,11 +40,7 @@ char *name;
     par[0] = omega;
 }
     
-
-
-void potential (ndim,pos,acc,pot,time)
-int    *ndim;
-double pos[], acc[], *pot,*time;
+void potential_double (int *ndim,double *pos,double *acc,double *pot,double *time)
 {
     double mass, r2, r, ft;
     int    i;

@@ -4,7 +4,7 @@
  *
  *	Mar 92:		happy gcc2.0		pjt
  *	Oct 93:	get_pattern() support		pjt
- *
+ *	Sep 04: float/double			pjt
  */
 
 /*CTEX
@@ -15,6 +15,7 @@
 
 
 #include <stdinc.h>
+#include <potential_float.h>
 
 local double omega = 0.0;	     /* just put to zero until implemented */
 local double v0 = 1.0;		/* rotation velocity at large radii */
@@ -57,9 +58,7 @@ char *name;
  *      Note that this routine is good for 2 and 3D
  *------------------------------------------------------------------------------
  */
-void potential (ndim,pos,acc,pot,time)
-int    *ndim;
-double pos[], acc[], *pot, *time;
+void potential_double (int *ndim,double *pos,double *acc,double *pot,double *time)
 {
 	double rad, tmp;
 	

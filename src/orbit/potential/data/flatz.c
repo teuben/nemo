@@ -6,6 +6,7 @@
  *	29-dec-01	derived from rotcur
  *      13-feb-03       derived from rotcur0; toy project Rob Olling
  *      15-feb-03       RPO, buglet fixed and documentation added
+ *      19-sep-04       PJT, double/float
  */
 
 /*CTEX
@@ -18,6 +19,7 @@
 #include <stdinc.h>
 #include <spline.h>
 #include <table.h>
+#include <potential_float.h>
 
 local double omega = 0.0;
 local double r0    = 1.0;  /* radius at which RC changes from linear to flat */
@@ -46,7 +48,7 @@ void inipotential (int *npar, double *par, string name)
     h2     = h*h;
 }
     
-void potential (int *ndim, double *pos,double *acc,double *pot,double *time)
+void potential_double (int *ndim, double *pos,double *acc,double *pot,double *time)
 {
     real r, r2, v, f;
     int    i;

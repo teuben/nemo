@@ -3,6 +3,7 @@
  *            that is linear to (r0,v0) and flat thereafter
  *
  *	29-dec-01	derived from rotcur
+ *      19-sep-04       float/double
  */
 
 /*CTEX
@@ -15,6 +16,7 @@
 #include <stdinc.h>
 #include <spline.h>
 #include <table.h>
+#include <potential_float.h>
 
 local double omega = 0.0;
 local double r0  = 1.0;
@@ -37,7 +39,7 @@ void inipotential (int *npar, double *par, string name)
     par[0] = omega;     /* return pattern speed again */
 }
     
-void potential (int *ndim, double *pos,double *acc,double *pot,double *time)
+void potential_double (int *ndim, double *pos,double *acc,double *pot,double *time)
 {
     real r, r2, v, f;
     int    i;
