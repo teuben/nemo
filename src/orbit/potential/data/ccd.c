@@ -7,55 +7,63 @@
  *		   working on them, and will hence move away (escape)   PJT
  *	   oct-93  get_pattern
  *	 4-mar-96  fixed VERSION to CCD_VERSION
+ *      19-jul-02  cleaned up the code a bit, provided scale factor     PJT
  *
  *  Note: astronomical images often have Dx<0 (Right Ascension increases
- *        to the left);
+ *        to the left)....
  *
  */
 
 /*CTEX
  *  {\bf potname=ccd
- *	 potpars={\it $\Omega,X_o,Y_o$}
+ *	 potpars={\it $\Omega,I_scale,X_o,Y_o$}
  *	 potfile={\it image(5NEMO)}}
  */
 
-#include <stdinc.h>		/* also gets <stdio.h	*/
+#include <stdinc.h>
 #include <filestruct.h>
 #include <image.h>
 
-#define CCD_VERSION "ccd V1.1a 4-may-96"
+#define CCD_VERSION "ccd V2.0 17-jul-02"
 
 local double   omega = 0.0;
-local double   gravc = 1.0;
+local double   iscale = 1.0;
 local stream   potstr = NULL;
 local imageptr iptr = NULL;
-local double   idx, idy, xmin, ymin;
+local double   idx, idy, xmin, ymin, xmax, ymax, dx, dy;
 local int      nx, ny;
 local double   xoff=0.0;       /* central pixel shift w.r.t. Xmin.Ymin */
 local double   yoff=0.0;       /* in pixel coordinates */
 
 
-void inipotential (npar, par, name)
-int *npar;
-double par[];
-char *name;
+void inipotential (int *npar, double par[], char *name)
 {
     int n;
 
     n = *npar;
     if (n>0)  omega = par[0];
-    if (n>1)  xoff = par[1];
-    if (n>2)  yoff = par[2];
-    if (n>3)  warning("inipotential(ccd): npar=%d only 3 parameter accepted",n);
+    if (n>1)  iscale = par[1];
+    if (n>2)  xoff = par[2];
+    if (n>3)  yoff = par[3];
+    if (n>4)  warning("inipotential(ccd): npar=%d only 4 parameter accepted",n);
 
     dprintf(1,"INIPOTENTIAL: %s: %s\n",CCD_VERSION,name);
-    dprintf(1,"  Parameters:  Omega=%g xoff,yoff=%g,%g\n",omega,xoff,yoff);
+    dprintf(1,"  Parameters:  Omega=%g iscale=%g xoff,yoff=%g,%g\n",
+	    omega,iscale,xoff,yoff);
 
     potstr = stropen (name, "r");          /* open the image */
     read_image (potstr,&iptr);              /* read the image */
+    if (iscale != 1.0) {
+      int i,j;
+      for (j=0; j<Ny(iptr); j++)
+      for (i=0; i<Nx(iptr); i++)
+	MapValue(iptr,i,j) =  MapValue(iptr,i,j) * iscale;
+    }
 
-    idx = 1.0/Dx(iptr);          /* set some constants to remember */
-    idy = 1.0/Dy(iptr);
+    dx = Dx(iptr);
+    dy = Dy(iptr);
+    idx = 1.0/dx;
+    idy = 1.0/dy;
     xmin = Xmin(iptr);
     ymin = Ymin(iptr);
     nx = Nx(iptr);
@@ -71,15 +79,17 @@ char *name;
     }
     if (idx<0) warning("1/Dx=%f",idx);
     if (idy<0) warning("1/Dy=%f",idy);
+    xmax = xmin + nx * dx;
+    ymax = ymin + ny * dy;
     dprintf(1,"Offset and scale factors: xmin,ymin,1/dx,1/dy=%f %f %f %f\n",
             xmin,ymin,idx,idy);
+    dprintf(1,"Formal X-range: %g %g\n",xmin - dx/2,xmax + dx/2);
+    dprintf(1,"Formal Y-range: %g %g\n",ymin - dy/2,ymax + dy/2);
 
     par[0] = omega;
 }
 
-void potential(ndim,pos,acc,pot,time)
-int    *ndim;
-double pos[], acc[], *pot, *time;
+void potential(int *ndim,double *pos,double *acc,double *pot,double *time)
 {
     double x, y, dx, x3, x4, x8, dy, y3, y4, y8;
     int ix, iy;
@@ -115,7 +125,7 @@ double pos[], acc[], *pot, *time;
                +( 2+x4   )*MapValue(iptr,ix+1,iy)
                +(-2+x4-y3)*MapValue(iptr,ix-1,iy+1)
                +(  -x8   )*MapValue(iptr,ix  ,iy+1)
-               +( 2+x4+y3)*MapValue(iptr,ix+1,iy+1) )/12.0*idx;
+	       +( 2+x4+y3)*MapValue(iptr,ix+1,iy+1) )/12.0*idx;
 
     acc[1] = -( (-2+x3+y4)*MapValue(iptr,ix-1,iy-1)
                +(-2   +y4)*MapValue(iptr,ix  ,iy-1)
@@ -125,7 +135,7 @@ double pos[], acc[], *pot, *time;
                +(     -y8)*MapValue(iptr,ix+1,iy)
                +( 2-x3+y4)*MapValue(iptr,ix-1,iy+1)
                +( 2   +y4)*MapValue(iptr,ix  ,iy+1)
-               +( 2+x3+y4)*MapValue(iptr,ix+1,iy+1) )/12.0*idy;
+	       +( 2+x3+y4)*MapValue(iptr,ix+1,iy+1) )/12.0*idy;
     acc[2] = 0.0;
 }
 
