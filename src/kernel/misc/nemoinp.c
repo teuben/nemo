@@ -24,14 +24,14 @@
  *   7-jun-01       a:  added casting to shut up compiler           pjt
  *   8-sep-01       b:  init_xrandom
  *   4-mar-03   V1.9: added nemoinpx for sexa decoding into degrees pjt
+ *  28-jun-03       a: fixed prototype for darwin :-)               pjt
  */
 
 #include <stdinc.h>
 #include <getparam.h>
+extern string *burststring(string,string);
 
 #if defined(NOHERINP)
-
-extern string *burststring(string,string);
 
 int nemoinpi(
 	     char *expr,
