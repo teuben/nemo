@@ -16,7 +16,7 @@ bins: 	all
 	mv $(BINS) $(NEMOBIN)
 	
 fitsverify:	$(SRC)
-	$(CC) $(CFLAGS) -DSTANDALONE -o fitsverify $(SRC) $(CFITSIO_INC) $(CFITSIO_LIB) -lcfitsio -lm
+	$(CC) $(CFLAGS) -DSTANDALONE -o fitsverify $(SRC) $(CFITSIO_INC) $(CFITSIO_LIB) -lm
 #	$(CC) $(CFLAGS) -DSTANDALONE -o fitsverify $(SRC) -I$(NEMOINC) -L$(NEMOLIB) -lcfitsio -lm
 
 clean:
