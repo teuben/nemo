@@ -2,6 +2,10 @@
  * TAB2XML: table into XML, mostly to produce a VOTable
  *
  *      13-feb-04   created
+ *      15-feb-04   V1.1  - decided to keep the traditional out=
+ *
+ * TODO:
+ *    - "TABLE name=" is wrong, it's the input file
  */
 
 #include <stdinc.h>
@@ -11,11 +15,12 @@
 #include <ctype.h>
 
 string defv[] = {
-    "in=???\n           input file name(s)",
-    "col=\n             column numbers to select",
-    "colnames=\n        Column names",
-    "VERSION=1.0\n      13-feb-04 PJT",
-    NULL
+  "in=???\n           input ascii table",
+  "out=???\n          output VOTable",
+  "col=\n             column numbers to select",
+  "colnames=\n        Column names",
+  "VERSION=1.1\n      15-feb-04 PJT",
+  NULL
 };
 
 string usage = "Select columns from a table and convert to VOTable/XML";
@@ -66,11 +71,9 @@ local string vot_trailer=
 "</VOTABLE>";
 
 
-nemo_main()
+void nemo_main()
 {
   setparams();
-  instr  = stropen(input,"r");
-  outstr = stropen("-","w");
   convert (instr,outstr);
 }
 
@@ -79,6 +82,9 @@ local void setparams(void)
   int i;
   
   input = getparam("in");
+  output = getparam("out");
+  instr  = stropen(input,"r");
+  outstr  = stropen(output,"w");
   
   if (hasvalue("col")) {
     Qall = FALSE;
