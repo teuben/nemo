@@ -1,4 +1,4 @@
-.TH TABLSQFIT 1NEMO "8 August 2001"
+.TH TABLSQFIT 1NEMO "12 July 2002"
 .SH NAME
 tablsqfit \- general purpose least squares fitting program
 .SH SYNOPSIS
@@ -19,6 +19,10 @@ same and equal to 1. Lines starting with the '#' symbol are comment
 lines. Certain models (see \fBfit=\fP below) allow multiple X or Y
 columns. For \fBfit=line\fP a proper goodness-of-fit is also 
 computed in a second fit an error column (\fBdycol=\fP) is given.
+.PP
+For most linear functions the non-linear version of this program
+will also work fine, and has the added power that certain parameters
+can be fixed, and error estimates are returned. See \fItabnllsqfit(1NEMO)\fP.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword is also
 given:
@@ -27,14 +31,18 @@ given:
 (ascii) input file, a table of values from which data is taken. No default.
 .TP
 \fBxcol=\fIcol,...\fP
-The column(s) from which the X-values are taken. The first column
+The column(s) from which the (independant) 
+X-values are taken. The first column
 is called 1 by definition [default: \fB1\fP].
 .TP
 \fBycol=\fIcol,...\fP
-The column(s) from which the Y-values are taken [default: \fB2\fP].
+The column(s) from which the (dependant) 
+Y-values are taken [default: \fB2\fP].
 .TP
 \fBdycol=\fIint\fP
-Optional column from which the DY-values (errors in Y) are taken. 
+Optional column from which the DY-values (errors in Y) are taken. The
+inverse square of the errors are uses as weights for those fits where
+these are used 
 [default: none assigned].
 .TP
 \fBxrange=\fIxmin:xmax\fP
@@ -92,7 +100,7 @@ line, with some added noise and random weights between 1 and 2:
       z:  1.65272
 .fi
 .SH SEE ALSO
-tabhist(1NEMO), tabmath(1NEMO), gaussfit(1NEMO), linreg(1NEMO),
+tabhist(1NEMO), tabmath(1NEMO), gaussfit(1NEMO), linreg(1NEMO), tabnllsqfit(1NEMO)
 \fINumerical Recipies in C, Ch.14\fP
 .SH AUTHOR
 Peter Teuben
