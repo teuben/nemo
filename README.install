@@ -194,6 +194,23 @@ Results in /home/teuben/nemo_3.0.4/tmp/test22005/testsuite.log
 	% rehash
 	% make libs
 
+   Or if you want to use our (not blessed) PGPLOT cvs release 
+
+	% ./configure 
+	% source nemo_start
+	% make dirs 
+	% make config_clean				<==
+	% rm NEMORC.local
+        % cd $NEMO/local
+	% cvs co pgplot					<== cvs.astro.umd.edu
+	% src/scripts/pgplot.install dir=/tmp		<== our install
+	% ./configure --with-pgplot-prefix=$NEMOLIB --with-yapp=pgplot
+	% make dirs config_extra scripts
+	% source NEMORC.local
+	% rehash
+	% make libs
+	
+
 *) Installation problems:
 
 	- edit *.in
