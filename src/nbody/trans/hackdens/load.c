@@ -6,6 +6,7 @@
  *      18-jul-92  PJT  replaced many if(debug)printf(...) by dprintf(1,...)
  *      24-may-02  pjt  while waiting for the coffee to brew.... laptop on lap....
  *                      changed the 32bit depth treebuild to 64bit... (see int_hack)
+ *      29-mar-02  pjt  add 'nudge' to maketree
  */
 
 #include "defs.h"
@@ -15,12 +16,13 @@ local int ncell, maxcell;	/* count cells in use, max available */
 
 
 static expandbox(bodyptr p);
-static loadtree(bodyptr p);
+static loadtree(bodyptr p, bodyptr btab, double nudge);
 static bool intcoord(int_hack xp[3], vector rp);
 static int_hack subindex(int_hack x[3], int_hack l);
 static hackcofm(register nodeptr q);
 static cellptr makecell(void);
 
+extern double xrandom(double,double);
 
 
 /*
@@ -29,23 +31,21 @@ static cellptr makecell(void);
 
 maketree(
 	 bodyptr btab,			/* array of bodies to build into tree */
-	 int nbody)			/* number of bodies in above array */
+	 int nbody,			/* number of bodies in above array */
+	 double nudge)
 {
     register bodyptr p;
 
     if (ctab == NULL) {				/* first time through?      */
 	maxcell = fcells * nbody;		/*   typ. need: 0.5 nbody   */
-	ctab = (cellptr) malloc(maxcell * sizeof(cell));
-						/*   allocate cell space    */
-	if (ctab == NULL)
-	    error("maketree: not enuf memory\n");
+	ctab = (cellptr) allocate(maxcell * sizeof(cell));  /* alloc  cells */
     }
     ncell = 0;					/* reset cells in use       */
     troot = NULL;				/* deallocate current tree  */
     for (p = btab; p < btab+nbody; p++)		/* loop over all bodies     */
 	if (Mass(p) != 0.0) {			/*   only load massive ones */
 	    expandbox(p);			/*     expand root to fit   */
-	    loadtree(p);			/*     insert into tree     */
+	    loadtree(p,btab,nudge);		/*     insert into tree     */
 	}
     hackcofm(troot);				/* find c-of-m coordinates  */
 }
@@ -84,24 +84,31 @@ local expandbox(
 }
 
 /*
- * LOADTREE: descend tree and insert particle.
+ * LOADTREE: descend tree and insert a particle.
  */
 
 local loadtree(
-	       bodyptr p)			/* body to load into tree */
+	       bodyptr p,			/* body to load into tree */
+	       bodyptr btab,	                /* pointer to base array  */
+	       double nudge)
 {
-    int_hack l, xp[NDIM], xq[NDIM], subindex();
-    nodeptr *qptr;
-    cellptr c, makecell();
-    
+  int_hack l, xp[NDIM], xq[NDIM], subindex();
+  nodeptr *qptr;
+  int i;
+  cellptr c, makecell();
 
+  do {
     assert(intcoord(xp, Pos(p)));		/* form integer coords      */
     l = IMAX >> 1;				/* start with top bit       */
     qptr = &troot;				/* start with tree root     */
     while (*qptr != NULL) {			/* loop descending tree     */
         dprintf(1,"loadtree: descending tree  l = %o\n", l);
 	/* assert(l != 0);			/*   dont run out of bits   */
-	if(l==0) error("loadtree: ran out of bits");
+	if(l==0) {
+	  int offset = p-btab;
+	  warning("loadtree: ran out of bits for particle %d",offset+1);
+	  break;
+	}
 	if (Type(*qptr) == BODY) {		/*   reached a "leaf"?      */
 	    dprintf(1,"loadtree: replacing body with cell\n");
 	    c = makecell();			/*     alloc a new cell     */
@@ -112,8 +119,14 @@ local loadtree(
 	qptr = &Subp(*qptr)[subindex(xp, l)];	/*   move down one level    */
 	l = l >> 1;				/*   and test next bit      */
     }
-    dprintf(1,"loadtree: installing body  l = %o\n", l);
-    *qptr = (nodeptr) p;			/* found place, store p     */
+    if (l==0) {
+      warning("Nudging particle by %g",nudge);
+      for (i=0; i<NDIM; i++)
+	Pos(p)[i] += xrandom(-nudge,nudge);
+    }
+  } while (l==0);
+  dprintf(1,"loadtree: installing body  l = %o\n", l);
+  *qptr = (nodeptr) p;			/* found place, store p     */
 }
 
 /*
@@ -127,7 +140,7 @@ local bool intcoord(
 {
     register int k;
     bool inb;
-    double xsc, floor();
+    double xsc;
 
     dprintf(1,"intcoord: rp = [%8.4f,%8.4f,%8.4f]\n", rp[0], rp[1], rp[2]);
     inb = TRUE;					/* use to check bounds      */
@@ -139,7 +152,7 @@ local bool intcoord(
             inb = FALSE;                        /*     then remember that   */
     }
     dprintf(1,"\t  xp = [%8x,%8x,%8x]\tinb = %d\n", xp[0], xp[1], xp[2], inb);
-    return (inb);
+    return inb;
 }
 
 /*
