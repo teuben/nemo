@@ -71,19 +71,19 @@ update: .update_src .update_man
 # needed to link
 
 u3tos_f: u3tos.o nbody_io.o
-	$(FC) $(FFLAGS) -o u3tos u3tos.o nbody_io.o  $(NEMO_LIBS)
+	$(FC) $(F77_CMAIN_FFLAGS) $(FFLAGS) -o u3tos u3tos.o nbody_io.o  $(NEMO_LIBS)
 
 u3tos: u3tos.o nbody_io_c.o
 	$(CC) $(CFLAGS) -o u3tos u3tos.o nbody_io_c.o $(NEMO_LIBS)
 
 u4tos: u4tos.o nbody_io.o
-	$(FC) $(FFLAGS) -o u4tos u4tos.o nbody_io.o  $(NEMO_LIBS)
+	$(FC) $(F77_CMAIN_FFLAGS) $(FFLAGS) -o u4tos u4tos.o nbody_io.o  $(NEMO_LIBS)
 
 stou4: stou4.o nbody_io.o
-	$(FC) $(FFLAGS) -o stou4 stou4.o nbody_io.o  $(NEMO_LIBS)
+	$(FC) $(F77_CMAIN_FFLAGS) $(FFLAGS) -o stou4 stou4.o nbody_io.o  $(NEMO_LIBS)
 
 runbody1: runbody1.o nbody_io.o
-	$(FC) $(FFLAGS) -o runbody1 runbody1.o nbody_io.o  $(NEMO_LIBS)
+	$(FC) $(F77_CMAIN_FFLAGS) $(FFLAGS) -o runbody1 runbody1.o nbody_io.o  $(NEMO_LIBS)
 
 runbody2: runbody2.o
 	$(CC) $(CFLAGS) -o runbody2 runbody2.o  $(NEMO_LIBS)
