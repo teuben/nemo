@@ -145,6 +145,9 @@
 /* Define if you have the readline library (-lreadline).  */
 #undef HAVE_LIBREADLINE
 
+/* Define if you have the gsl library (-lgsl).  */
+#undef HAVE_GSL
+
 /* Define if you have the vogl library (-lvogl).  */
 #undef HAVE_LIBVOGL
 

@@ -163,6 +163,13 @@ dirs: nemo_start
 	    echo "NEMORC.local exists:";\
 	    ls -l NEMORC.local;\
 	fi
+	@if [ ! -f $(NEMOLIB)/maxsizes.h ]; then \
+            echo '/* your optional systemwide MAX* macros */' >  $(NEMOLIB)/maxsizes.h;\
+	    cp NEMORC.gen NEMORC.local;\
+	else \
+	    echo "$(NEMOLIB)/maxsizes.h exists:";\
+	    ls -l $(NEMOLIB)/maxsizes.h;\
+	fi
 	@echo "OK, all main directories and files should be there now"
 	@echo Done at `date`
 

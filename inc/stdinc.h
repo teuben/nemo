@@ -28,6 +28,7 @@
  *  8-jan-98    temp. added common.c until laptop version merged
  *  6-apr-99    merged in AutoConf for 2.5 release
  * 22-jun-01    added some new ZENO macros for compatibility (-DNEMO)
+ *  7-sep-01    added maxsizes.h
  */
 
 #ifndef _stdinc_h      /* protect against re-entry */
@@ -35,8 +36,9 @@
 
 #define NEMO  1
 
-#include <version.h>	/* our static version id - made by scripts */
-#include <config.h>     /* should be in $NEMOLIB - made by scripts */
+#include <maxsizes.h>   /* should be in $NEMOLIB - made during install */
+#include <version.h>	/* our static version id - made during install */
+#include <config.h>     /* should be in $NEMOLIB - made during install */
 #include <options.h>    /* our private options   - manually edited still */
 
 /*

@@ -456,6 +456,24 @@ fi
 AC_SUBST(MIRIAD_INC)
 AC_SUBST(MIRIAD_LIB)
 
+dnl##--------------------------------------------------------------------
+dnl##
+dnl## GSL  (GNU Scientific Library)
+dnl##
+dnl##  also need to find out a way to replace -lgslcblas with -lcblas
+dnl##  or if ATLAS has been installed, with -lcblas -latlas
+dnl## --  Also note the -DHAVE_GSL is a bit of a kludge, since i cannot
+dnl## --  figure out how to do this properly through config.h
+dnl##--------------------------------------------------------------------
+
+AM_PATH_GSL(0.9.2, ok=yes, ok=no)
+if test "$ok" = "yes"; then
+    AC_MSG_RESULT(ok, i found it)
+    NEMO_CFLAGS="$NEMO_CFLAGS $GSL_CFLAGS -DHAVE_GSL"
+    NEMO_LIBS="$NEMO_LIBS $GSL_LIBS"
+else
+    AC_MSG_WARN(could not find GSL library)
+fi
 
 dnl##--------------------------------------------------------------------
 dnl##
@@ -626,11 +644,6 @@ dnl Replace `main' with a function in -lutils:
 dnl AC_CHECK_LIB(utils, main)
 dnl Replace `main' with a function in -lvogl:
 AC_CHECK_LIB(vogl, foreground)
-dnl Replace `main' with a function in -lxview:
-dnl AC_CHECK_LIB(xview, main)
-dnl Replace `main' with a function in -lyapp_x:
-dnl AC_CHECK_LIB(yapp_x, main)
-dnl Replace `main' with a function in -lz:
 AC_CHECK_LIB(z, inflate)
 AC_CHECK_LIB(c, strtoll)
 AC_CHECK_LIB(c, strtoull)
@@ -638,6 +651,8 @@ AC_CHECK_LIB(c, strtoull)
 AC_CHECK_LIB(dl, dlopen)	# Dynamic linking for SunOS/Solaris and SYSV
 AC_CHECK_LIB(dld, shl_load)	# Dynamic linking for HP-UX
 
+dnl##	this doesn't seem to work, since gsl linkeage also need libcblas etc...
+AC_CHECK_LIB(gsl,gsl_error)
 
 dnl AC_CHECK_LIB(c, strsignal)
 
