@@ -1,6 +1,6 @@
-.TH GETPARAM 3NEMO " 25 November 2001"
+.TH GETPARAM 3NEMO " 16 January 2002"
 .SH NAME
-getXparam, initparam, finiparam, stop \- main startup and command line processing.
+getXparam, hasvalue, isaparam, initparam, finiparam, stop \- main startup and command line processing.
 .SH SYNOPSIS
 .nf
 .B #include <stdinc.h>
@@ -51,10 +51,11 @@ command line processing (see also nemomain(3NEMO))
 First, \fIinitparam\fP is called to set up values associated with a
 (fixed) set of possible keyword names; 
 after this \fIgetparam\fP and any of its children may be called
-to access and parse the value associated with a specified 
+to access and/or parse the value associated with a specified 
 keyword. \fIfiniparam\fP  should be called before the program
 ends, to ensure any outstanding requests are dealt with
-(writing updated keyword files, see HELP and DEBUG below).
+(e.g. writing updated keyword files, see HELP and DEBUG below),
+or optionally complain about unprocessed command line arguments.
 
 .PP
 \fIinitparam\fP is called with two arguments:
@@ -90,12 +91,12 @@ The remaining arguments must all be of the form
 "\fIname\fP=\fIvalue\fP", and are \fImatched by keyword\fP: \fIname\fP
 must appear in \fIdefv\fP, and \fIvalue\fP is associated with \fIname\fP.
 It is an error to specify more than one \fIvalue\fP for a given \fIname\fP.
-If getparam is defined with MINMATCH, keyword names are also matched in
+If getparam is compiled with MINMATCH, keyword names are also matched in
 minimum match mode.
 .PP
 Depending on a user specified \fBhelp_level\fP (see below) parameters may also
 be set by reading them from a keyword file. The keyword file is unique for
-each program, and has a name "\fIprogram\fP\fB.def\fP". Although there
+each program, and has the name "\fIprogram\fP\fB.def\fP". Although there
 is some control over the directory in which these keyword files should
 be located (\fB$NEMODEF\fP, but more on that later), 
 it is dangerous to use keyword files during multiple sessions since
@@ -127,10 +128,12 @@ have no other way of determining what program called them; for example,
 .RE
 .PP
 could be used to print an error message from a square-root procedure,
-giving the name of the program in which the error occured.
+giving the name of the program in which the error occured. The macro
+\fPgetargv0()\fP, defined in getparam.h, can also be used for this,
+instead of called getparam().
 This technique is used by the routine,
 \fIerror(3NEMO)\fP; it reports the program name in
-square brackets before the string is output.
+square brackets before the string is output. 
 .SH REQUIRED ARGUMENTS
 Arguments with default values (as listed in \fIdefv\fP) of "\|???"
 are required; \fIinitparam\fP will print an informative message and
@@ -141,7 +144,7 @@ no reasonable default exists.
 It is good (NEMO) programming practice to give your program a
 VERSION id. We refer to this as the \fIinternal\fP VERSION
 id. The NEMO technique has historically been by adding
-it as the last keyword, \fBVERSION\fP, in upper case.  It's value
+it as the last keyword, \fBVERSION\fP, in upper case.  Its value
 should be of the form \fBx.y\fP, where \fBx\fP is the major
 version number, and \fBy\fP the minor version number. Sometimes
 a subversion labeled \fBa, b, c, ...\fP has been added. 
@@ -152,7 +155,7 @@ way to label the data history with the version of the program used
 to generate that data. A minor version number conflict will result
 in a warning message, but a major one will result in a fatal error
 message. If your program has changed data format, or keywords
-have changed meaning or name, it's time to change the major 
+have changed meaning or name, it is adviced to change the major 
 version number.
 .PP
 The \fIexternal\fP VERSION id is the id stored in some
@@ -162,20 +165,21 @@ This would make it possible for
 programs to refuse execution if the internal and 
 external VERSION id do not match. We do not currently employ this
 technique. Most NEMO programs have a section labeled \fBUPDATE HISTORY\fP
-in which old version ID's are labeled by time and author, 
+in which old version ID's are labeled by time, comment and author.
 .SH INDEXED KEYWORDS
-The \fBindexparam\fP and \fBgetparam_idx\fP family provide access to
-indexed keywords. Indexed keywords are defined in the \fBdefv\fP vector
-by a name that ends in with the \fB#\fP symbol, which can at runtime
-be replaced by an non-negative integer, e.g. \fBnaxis#\fP can be used
+The \fBindexparam\fP and \fBgetparam_idx\fP family provides one way
+of access to indexed keywords. Indexed keywords are defined in the \fBdefv\fP vector
+by a basename that ends in with the \fB#\fP symbol, which can at runtime
+be replaced by any set of non-negative integers, e.g. \fBnaxis#\fP can be used
 to for example define \fBnaxis1=10\fP, \fBnaxis4=4\fP
-(note the index can be 0 based). It is up to the
-programmer to decipher missing elements. \fIindexparam(basename,0)\fP can
-be used to return the largest index, whereas \fIindexparam(basename,idx)\fP
-will check for a specific index. Although \fIhasvalue(name)\fP will also
-check for indexed keywords, the \fIgetparam(name)\fP family will not,
-instead the \fIgetparam_idx(basename,idx)\fP needs to be used to retrieve
-values of an indexed keyword.
+(note the index is actually 0 based). It is up to the
+programmer to decipher missing elements (e.g. using \fBisaparam\fP or
+\fBindexparam\fP).
+.PP
+\fIindexparam(basename,-1)\fP returns the largest index that was found,
+\fIindexparam(basename,-2)\fP returns 0 if the keyword is not an indexed
+keyword, and  \fIindexparam(basename,idx)\fP, for \fIidx >= 0\fP,
+will check existence (1=true) for a specific index. 
 .SH HELP FUNCTIONS
 Besides interpreting the command line, \fIinitparam\fP provides some
 assistance to the user via an additional argument (in addition to those
@@ -237,7 +241,7 @@ Possible options include
 .ns
 .TP 18n
 \fBi\fP
-\- show some internal variables of the user interface (export mode)
+\- show some internal variables of the user interface (expert mode)
 .PP
 These options must be abbreviated to one character.
 For example,
@@ -274,8 +278,9 @@ setting of \fBdebug_level\fP is also done through an environment variable
 .SH SEE ALSO
 environ(5), dprintf(3NEMO), error(3NEMO), nemoinp(3NEMO), nemomain(3NEMO)
 .SH DIAGNOSTICS
-Complains via \fIerror(3NEMO)\fP about extra arguments, unknown arguments,
-etc. 
+Complains via \fIerror(3NEMO)\fP or the \fIlocal_error()\fP function
+about extra arguments, unknown arguments,  etc.  This will generally result
+in a stopped program.
 .SH BUGS
 The code to access \fIenviron\fP has only been implemented for the system
 environment variables \fBDEBUG, YAPP, HISTORY, BELL, REVIEW, ERROR, ARGV\fP 
@@ -287,6 +292,24 @@ more complete.
 A key-less parameter that contains an '=' sign confuses the parser and will
 most likely complain about an unknown parameter. E.g. "i%%128==0"
 will return \fIParameter "i%128" unknown\fP.
+.SH EXAMPLES
+Here are some examples of usage of such a user interface. Assume we have
+a program \fBp\fP, which has keywords \fBa\fP, \fBb\fP and \fBc\fP, of
+which \fBc\fP is an indexed keyword
+.nf
+% p help=
+p a=1 b=2 c#= VERSION=0.1
+
+% p help=h
+a                : keyword a [1]
+b                : keyword b [2]
+c#               : indexed keyword c []
+VERSION          : PJT [0.1]
+
+% p a=2
+% p c2=1 c0=1.2
+
+.fi
 .SH AUTHOR
 Joshua Barnes, Peter Teuben
 .SH UPDATE HISTORY
@@ -300,4 +323,5 @@ xx-nov-86	created                         	Joshua Barnes
 6-mar-89	added nemoinp parsing of getXparam	PJT
 28-nov-94	V3 rewrite, many new features, deleted some others	PJT
 12-feb-95	added updparam
+16-jan-02	re-implemented indexed keywords 			PJT
 .fi
