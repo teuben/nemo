@@ -12,6 +12,7 @@
 #  3-dec-02  PJT                added vogl stuff
 #  1-mar-03  PJT                added make_html 
 # 17-jun-03  PJT                better path, rehash for immediate use
+# 15-oct-03  PJT                added gyfalcON
 
 rm -f install.log >& /dev/null
 touch install.log
@@ -42,8 +43,12 @@ echo '++++++++++++++++++++++++++++++++++++++++' >>& install.log
     echo '++++++++++++++++++++++++++++++++++++++++' >>& install.log
 
     if (-d local/pgplot) then
-       make config_clean
-       
+       echo 'Compiling an internal PGPLOT'
+       make config_clean >>& install.log
+       rm -f NEMORC.local
+       src/scripts/pgplot.install dir=$NEMO/tmp  >>& install.log
+       ./configure --with-yapp=pgplot --with-pgplot-prefix=$NEMOLIB >>& install.log
+       make dirs config_extra scripts >>& install.log
     endif
 
 
@@ -70,6 +75,13 @@ echo '++++++++++++++++++++++++++++++++++++++++' >>& install.log
 echo Building some sample exectuables by running testsuite:
 
 src/scripts/testsuite -b >>& install.log
+
+if (0) then
+  set fbins=(TestGrav gyrfalcON)
+  set arch=i386_linux
+  echo Compiling $fbins for $arch
+  ( cd usr/dehnen/falcON; make ; make $fbins; cd $arch; cp $fbins $NEMOBIN)  >& install_falcON.log
+endif
 
     echo "Note: Although your current shell now has the NEMO environment loaded,"
     echo "      new shells will not have NEMO pre-loaded. You would need to add"
