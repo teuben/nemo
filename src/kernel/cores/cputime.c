@@ -16,6 +16,7 @@
  *	18-apr-96   debuglevel of cputool at 4 now.
  *	31-mar-01   now using CLK_TCK instead of HZ (POSIX ?)
  *      21-nov-03   adding clock() for testing, using sysconf to get clk_tck;
+ *      15-mar-05   fallback to CLOCKS_PER_SEC for g++
  *	
  */
 
@@ -27,6 +28,15 @@
 
 #define TRY_CLOCK
 
+/*  CLK_TCK is typically 100, in g++ CLK_TCK isn't know, uses CLOCK_PER_SEC, else fail */
+
+#ifndef CLK_TCK
+# ifndef CLOCKS_PER_SEC
+#  error CLK_TCK as well as CLOCKS_PER_SEC definitions missing
+# else
+#  define CLK_TCK CLOCKS_PER_SEC
+# endif
+#endif
 
 static long clk_tck = 0;
 
@@ -93,6 +103,8 @@ float dtime(float *tarr)
     return tarr[0] + tarr[1];
 }
 #endif
+
+/*===========================================================================*/
 
 #if defined(TESTBED)
 
