@@ -57,7 +57,15 @@
  *                               see C-script 'rotcurcen' instead
  *               9-may-01 : 2.6a fixed error correction factor      pjt
  *               5-jun-01 : 2.7  allow density map also used as weight     PJT
+ *               8-aug-01 :    a allow error correction factor 1.0  pjt
  ******************************************************************************/
+
+
+/*
+ * TODO:
+ *	- keep track of pixel usage. debug output a map how many times
+ *	  a pixel has been used by different rings
+ */
 
 #include <stdinc.h>
 #include <getparam.h>
@@ -180,7 +188,10 @@ nemo_main()
            &wpow,mask,&side,cor,&inherit,&fitmode,&nsigma,lunpri);
 
     old_factor = sqrt((beam[0]+grid[0])*(beam[1]+grid[1])/(grid[0]*grid[1]));
-    factor = sqrt(FOUR_PI*beam[0]*beam[1]/(grid[0]*grid[1]));  /* Sicking 1997 !!! */
+    if (beam[0] > 0 && beam[1] > 0)
+      factor = sqrt(FOUR_PI*beam[0]*beam[1]/(grid[0]*grid[1]));  /* Sicking 1997 !!! */
+    else
+      factor = 1.0;
     dprintf(1,"Sicking (1997)'s error multiplication factor=%g  (old_factor=%g)\n",
 	    factor,old_factor);
 
