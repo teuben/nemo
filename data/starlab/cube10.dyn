@@ -1,0 +1,160 @@
+(Particle
+  N = 10
+(Log
+ ===>  Sat Apr 12 23:01:29 1997
+       Starlab 2.1 : mkcube -n 10 -s 123
+         random number generator seed = 123
+)Log
+(Dynamics
+  m  =  0.9999999999999999
+  r  =  0  0  0
+  v  =  0  0  0
+)Dynamics
+(Hydro
+)Hydro
+(Star
+  mass_scale     =  1
+  size_scale     =  1
+  time_scale     =  1
+)Star
+(Particle
+  N = 1
+(Log
+)Log
+(Dynamics
+  m  =  0.1
+  r  =  -0.3415756946810217  -0.4552125176632734  0.04259438067253955
+  v  =  -0.3665520489734484  0.1529226602511815  -0.3311574436715249
+)Dynamics
+(Hydro
+)Hydro
+(Star
+)Star
+)Particle
+(Particle
+  N = 1
+(Log
+)Log
+(Dynamics
+  m  =  0.1
+  r  =  0.6339799551434487  0.774270199326733  0.06133206181998531
+  v  =  -0.5713350799395696  0.0613439850540386  -0.2706215787572166
+)Dynamics
+(Hydro
+)Hydro
+(Star
+)Star
+)Particle
+(Particle
+  N = 1
+(Log
+)Log
+(Dynamics
+  m  =  0.1
+  r  =  0.2821071595474949  0.2829585521088798  0.2190503939421917
+  v  =  -0.9083809450845458  0.5988133405778162  0.1287078334288845
+)Dynamics
+(Hydro
+)Hydro
+(Star
+)Star
+)Particle
+(Particle
+  N = 1
+(Log
+)Log
+(Dynamics
+  m  =  0.1
+  r  =  0.7792139243966945  0.6924913947266215  0.0205610611658095
+  v  =  0.3887176755779497  -0.1913391332937014  0.5841654637221786
+)Dynamics
+(Hydro
+)Hydro
+(Star
+)Star
+)Particle
+(Particle
+  N = 1
+(Log
+)Log
+(Dynamics
+  m  =  0.1
+  r  =  0.375868207158524  0.7717631222480507  0.701648754447368
+  v  =  0.557560520566576  -0.4482050146083044  -0.4730925029636698
+)Dynamics
+(Hydro
+)Hydro
+(Star
+)Star
+)Particle
+(Particle
+  N = 1
+(Log
+)Log
+(Dynamics
+  m  =  0.1
+  r  =  0.1053247341108117  -0.664636608492403  -0.0718148543252147
+  v  =  0.4957624802577167  -0.3887884473234225  0.1832476826601522
+)Dynamics
+(Hydro
+)Hydro
+(Star
+)Star
+)Particle
+(Particle
+  N = 1
+(Log
+)Log
+(Dynamics
+  m  =  0.1
+  r  =  0.5725753289420566  0.3932304486241146  -0.3522028581314188
+  v  =  0.2390735022229538  0.5775291595618156  0.2137243791433946
+)Dynamics
+(Hydro
+)Hydro
+(Star
+)Star
+)Particle
+(Particle
+  N = 1
+(Log
+)Log
+(Dynamics
+  m  =  0.1
+  r  =  -0.8969301737117794  -0.2291114796695427  -1.158810544737349
+  v  =  0.5123293691836532  -0.1614988185756325  0.00717063458942417
+)Dynamics
+(Hydro
+)Hydro
+(Star
+)Star
+)Particle
+(Particle
+  N = 1
+(Log
+)Log
+(Dynamics
+  m  =  0.1
+  r  =  -1.134119113047941  -1.070394861155253  0.3444831227932369
+  v  =  0.0183489913664036  0.04569206855395955  0.4844740991709891
+)Dynamics
+(Hydro
+)Hydro
+(Star
+)Star
+)Particle
+(Particle
+  N = 1
+(Log
+)Log
+(Dynamics
+  m  =  0.1
+  r  =  -0.3764443278582881  -0.4953582500539278  0.1931584823528514
+  v  =  -0.3655244651776902  -0.2464698001977501  -0.5266185673226121
+)Dynamics
+(Hydro
+)Hydro
+(Star
+)Star
+)Particle
+)Particle
