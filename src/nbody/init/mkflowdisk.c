@@ -18,7 +18,7 @@
 string defv[] = {
     "out=???\n		  output file name",
     "nbody=2048\n	  number of particles",
-    "potname=vrt\n        name of flow potential",
+    "potname=vrtm51\n     name of flow potential",
     "potpars=\n           optional parameters to potential",
     "potfile=\n           optional data file with potential",
     "rmin=0.0\n	          inner disk radius",
@@ -26,6 +26,7 @@ string defv[] = {
     "mass=0\n             total mass of disk",
     "uniform=t\n          uniform surface density, or use density from potfile?",
     "k=1\n                spiral wavenumber  (> 0 trailing spirals)",
+    "pitch=10\n           pitch angle for log spirals",
     "phase=0\n            phase offset of spiral at rmax (in degrees)",
     "seed=0\n		  random number seed",
     "nmodel=1\n           number of models",
@@ -41,6 +42,7 @@ string usage = "toy spiral density perturbation in a uniform disk";
 local real rmin, rmax;
 local int  ndisk, nmodel;
 local real SPk;     /* spiral parameters */
+local real pitch;
 local real width;
 local real totmass;
 local real offset;
@@ -66,6 +68,7 @@ nemo_main()
     totmass = getdparam("mass");
     offset = getdparam("phase") * PI / 180.0;    
     Qtest = getbparam("test");
+    pitch = getdparam("pitch");
     
     SPk = - getdparam("k");	/* corrected for rot counter clock wise */
     
@@ -109,6 +112,7 @@ testdisk(int n)
     real cost, sint;
     int i, ndim=NDIM;
     double pos_d[NDIM], acc_d[NDIM], vel_d[NDIM], pot_d, time_d = 0.0;
+    double tani = tan(pitch*PI/180.0);
 
     if (disk == NULL) disk = (Body *) allocate(ndisk * sizeof(Body));
     rmin2 = rmin * rmin;
@@ -123,7 +127,11 @@ testdisk(int n)
 	else
 	  theta_i = grandom(0.0,TWO_PI);
 	theta_i += offset;
-        theta_i -= SPk * (r_i-rmax) * TWO_PI;    /* positive SPk is trailing SP  */
+	if (pitch < 0) {
+	  theta_i -= SPk * (r_i-rmax) * TWO_PI;    /* positive SPk is trailing SP  */
+	} else {
+	  theta_i -= log(r_i)/tani;
+	}
         cost = cos(theta_i);
         sint = sin(theta_i);
 	Phase(dp)[0][0] = pos_d[0] = r_i * sint;        /* set positions      */
