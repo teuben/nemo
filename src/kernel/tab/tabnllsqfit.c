@@ -30,12 +30,13 @@ string defv[] = {
     "par=\n             initial estimates of parameters (p0,p1,p2,...)",
     "free=\n            free(1) or fixed(0) parameters? [1,1,1,1,....]",
     "load=\n            If used, uses this dynamic object function (full path)",
+    "x=\n               X-values to test the function for, then exit",
     "nmax=10000\n       Default max allocation",
     "tol=\n             Tolerance for convergence of nllsqfit",
     "lab=\n             Mixing parameter for nllsqfit",
     "itmax=50\n         Maximum number of allowed nllsqfit iterations",
     "numrec=f\n         Try the numrec routine instead?",
-    "VERSION=1.1a\n     17-jul-02 PJT",
+    "VERSION=1.1b\n     17-jul-02 PJT",
     NULL
 };
 
@@ -203,7 +204,10 @@ nemo_main()
 
     if (hasvalue("load")) {
       load_function(getparam("load"),method);
-      do_function(method);
+      if (hasvalue("x"))
+	do_function_test(getparam("x"));
+      else
+	do_function(method);
     } else if (scanopt(method,"line")) {
         do_line();
     } else if (scanopt(method,"plane")) {
@@ -352,15 +356,16 @@ load_function(string fname,string method)
 
   mysymbols(getargv0());
   if (method) {
-    sprintf(path,"%s_%s.so",fname,method);
+    sprintf(path,"./%s.so",fname);
     sprintf(func_name,"func_%s",method);
     sprintf(derv_name,"derv_%s",method);
   } else {
-    sprintf(path,"%s_%s.so",fname,"loadobj");
+    sprintf(path,"./%s.so",fname);
     sprintf(func_name,"func_loadobj");
     sprintf(derv_name,"derv_loadobj");
   }
-  loadobj(fname);
+  dprintf(0,"load_function: %s with %s\n",path,func_name);
+  loadobj(path);
   
   fitfunc = (my_proc1) findfn(func_name);
   fitderv = (my_proc2) findfn(derv_name);
@@ -401,7 +406,23 @@ do_function(string method)
   if (outstr)
     for (i=0; i<npt; i++)
       fprintf(outstr,"%g %g %g\n",x[i],y[i],d[i]);
+}
+do_function_test(string xvals)
+{
+  real *x, y, dyda[MAXPAR];
+  int i,j,n = getiparam("nmax");
 
+  x = (real *) allocate(n * sizeof(real));
+  n = nemoinpr(xvals,x,n);
+  if (n < 0) error("Parsing x");
+  for (i=0; i<n; i++) {
+    y = (*fitfunc)(&x[i],par,npar);
+    (*fitderv)(&x[i],par,dyda,npar);
+    printf("%g %g  ",x[i],y);
+    for (j=0; j<npar; j++)
+      printf(" %g",dyda[j]);
+    printf("\n");
+  }
 }
 
 
