@@ -13,6 +13,7 @@
  *      14-feb-03  1.6  back to PJT style (version # got screwed up)
  *      18-feb-03  1.6a changed named of output variables in arm and arm3 
  *      21-mar-03  1.7  optional bootstrapping to check on errors
+ *       4-apr-03  1.8  added dypow= keyword, and fixed bug in handling dycol=
  *
  *  line       a+bx
  *  plane      p0+p1*x1+p2*x2+p3*x3+.....     up to 'order'   (a 2D plane in 3D has order=2)
@@ -33,7 +34,8 @@ string defv[] = {
     "in=???\n           input (table) file name",
     "xcol=1\n           column(s) for x, the independant variable(s)",
     "ycol=2\n           column(s) for y, the dependant variable(s)",
-    "dycol=\n           optional column for sigma-y (weight = 1/dy**2)",
+    "dycol=\n           optional column for sigma-y (weight = (1/dy**2)**<dypow>)",
+    "dypow=1\n          optional extra power to control the weights",
     "xrange=\n          in case restricted range is used (1D only)",
     "fit=line\n         fitmode (line, plane, poly, gauss, exp)",
     "order=2\n		Order of plane/poly fit",
@@ -51,7 +53,7 @@ string defv[] = {
     "bootstrap=0\n      Bootstrapping to estimate errors",
     "seed=0\n           Random seed initializer",
     "numrec=f\n         Try the numrec routine instead?",
-    "VERSION=1.7a\n     23-mar-03 PJT",
+    "VERSION=1.8\n      4-apr-03 PJT",
     NULL
 };
 
@@ -74,7 +76,8 @@ typedef struct column {
     int colnr;      /* column number this data came from */ /* not used */
 } a_column;
 
-int nxcol, nycol, xcolnr[MAXCOL], ycolnr[MAXCOL], dycolnr; 
+int nxcol, nycol, xcolnr[MAXCOL], ycolnr[MAXCOL], dycolnr;
+real dypow;
 a_column            xcol[MAXCOL],   ycol[MAXCOL],   dycol,  bcol;
 
 real xrange[MAXCOL*2];      /* ??? */
@@ -330,6 +333,8 @@ setparams()
         dycolnr = getiparam("dycol");
     else
         dycolnr = 0;
+    dypow = getrparam("dypow");
+    dypow *= -2.0;
 
     if (hasvalue("xrange"))
         setrange(xrange,getparam("xrange"));
@@ -392,7 +397,7 @@ setrange(real *rval, string rexp)
 read_data()
 {
     real *coldat[2*MAXCOL+1];
-    int colnr[2*MAXCOL+1], ncols = 0, i, j;
+    int colnr[2*MAXCOL+1], ncols = 0, i, j, ncount;
 
     for (i=0; i<nxcol; i++) {
         coldat[ncols] = xcol[i].dat = (real *) allocate(nmax * sizeof(real));
@@ -417,6 +422,16 @@ read_data()
     if (npt < 0) {
         npt = -npt;
        	warning("Could only read %d data",npt);
+    }
+    if (dycolnr>0 && dypow != 1) {
+      warning("New feature dypow=: weights are dycol**(%g)",dypow);
+      ncount = 0;
+      for(i=0; i<npt; i++) {
+	if (dycol.dat[i] < 0) 
+	  ncount++;
+	else
+	  dycol.dat[i] = pow(dycol.dat[i], dypow);
+      }
     }
 
 

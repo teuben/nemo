@@ -1,4 +1,4 @@
-.TH TABNLLSQFIT 1NEMO "21 March 2003"
+.TH TABNLLSQFIT 1NEMO "4 April 2003"
 .SH NAME
 tabnllsqfit \- general purpose non-linear least squares fitting program
 .SH SYNOPSIS
@@ -43,10 +43,19 @@ The column(s) from which the (dependant) Y-values are taken
 [default: \fB2\fP].
 .TP
 \fBdycol=\fIint\fP
-Optional column from which the DY-values (errors in Y) are taken. The
-inverse square of the errors are uses as weights for those fits where
-these are used 
+Optional column from which the weights will be derived. By default
+this column is meant to refer to an error bar, and normally 
+the inverse square of the errors are uses as weights for those fits where
+these are used (see \fBdypow=\fP next).
 [default: none assigned].
+.TP
+\fBdypow=\fIpower\fP
+By changing this value, you can adjust the weights column (\fBdycol\fP).
+Instead of the normal \fIweight = 1/sigma^2\fP, you will be able to use
+them as \fIweight^dypow\fP. The most common use is when your
+\fBdycol\fP does not refer to an error, but to the weight directly
+(e.g. an intensity), in which case \fBdypow=-0.5\fP is appropriate.
+[default: 1].
 .TP
 \fBxrange=\fIxmin:xmax\fP
 Range in X-values for which the fit is done. If only one number is
@@ -125,6 +134,8 @@ Output format. Default %g
 .TP
 \fBbootstrap\fP=
 Number of bootstrap samples to take to estimate the error in the parameters.
+Output off all parameters and their errors are on one line containing
+the word bootstrap. Parameters and their errors are output in pairs.
 Default:0
 .TP
 \fBseed=\fP
@@ -213,6 +224,21 @@ b= 2.01358 0.00753531
 .fi
 Although 3 iterations were requested, after the first iteration no more
 points were removed, and the iterations were stopped.
+.PP
+Here is an example of estimating the errors via a bootstrap (resampling of errors) 
+method. Fitting a polynomial of order 2 and taking 100 bootstrap samples:
+.nf
+
+% tabnllsqfit tab11 fit=poly order=2 bootstrap=100
+nrt=0
+Fitting p0+p1*x+p2*x^2+.....pN*x^N: (N=2)
+p0= 3.11325 0.192787
+p1= 1.97474 0.0896959
+p2= 0.00157311 0.008639
+bootstrap= 3.11603 0.164922 1.96464 0.086429 0.00293632 0.00820007 
+             ^^^^    ^^^^^   ^^^^^    ^^^^^    ^^^^^^      ^^^^^^
+              P0      dP0      P1      dP2       P3         dP3
+.fi
 
 .SH LOAD FUNCTIONS
 With the \fBload=\fP keyword dynamic object files can be loaded using the
@@ -277,5 +303,6 @@ Peter Teuben
 21-nov-02	V1.4 nsigma= can be an array of iterations	PJT
 14-feb-03	V1.6 arm,arm3 for Rahul		PJT
 21-mar-03	V1.7 added bootstrap=, seed=	PJT
+4-apr-03	V2.0 fixed error in using dycol=, and introduced dypow=		PJT
 .fi
 
