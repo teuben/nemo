@@ -18,6 +18,7 @@
  *				for nbody,time
  *       9-oct-01          a  toying with time selection pjt
  *      31-dec-02       V2.1 gcc3/SINGLEPREC             pjt
+ *       4-sep-03       V2.2 allow CSV output based      pjt
  */
 
 #include <stdinc.h>
@@ -40,7 +41,8 @@ string defv[] = {
     "times=all\n		Times to select snapshot",
     "tab=\n			Standard output or table file?",
     "header=f\n			Add header to output?",
-    "VERSION=2.1\n		31-dec-02 PJT",
+    "csv=f\n                    Use Comma Separated Values format",
+    "VERSION=2.2\n		4-sep-03 PJT",
     NULL,
 };
 
@@ -57,6 +59,7 @@ void nemo_main()
     string times;
     Body *btab = NULL, *bp, *bq;
     bool   Qsepar, Qhead;
+    bool   Qcsv = getbparam("csv");
     int i, n, nbody, bits, nsep, isep, nopt, ParticlesBit;
     char fmt[20],*pfmt;
     string *opt;
@@ -90,7 +93,7 @@ void nemo_main()
     times = getparam("times");
     pfmt = getparam("format");
     strcpy (fmt,pfmt);
-    if (strchr(fmt,' ')==NULL && strchr(fmt,',')==NULL)
+    if (!Qcsv && strchr(fmt,' ')==NULL && strchr(fmt,',')==NULL)
         strcat (fmt," ");       /* append blank if user did not specify sep */
 
     nsep = getiparam("separ");
@@ -121,6 +124,7 @@ void nemo_main()
             for (bp = btab, i=0; bp < btab+nbody; bp++, i++) {
                 for (n=0; n<nopt; n++) {
                     aux = fopt[n](bp,tsnap,i);
+		    if (Qcsv && n>0) fprintf(tabstr,",");
                     fprintf(tabstr,fmt,aux);
                 }
                 fprintf(tabstr,"\n");

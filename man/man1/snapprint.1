@@ -1,4 +1,4 @@
-.TH SNAPPRINT 1NEMO "7 July 1997"
+.TH SNAPPRINT 1NEMO "4 September 2003"
 .SH NAME
 snapprint \- print out items of a snapshot in table format
 .SH SYNOPSIS
@@ -51,6 +51,11 @@ followed by the timestamp, of the snapshot. If masses, position and velocities
 are output in the table, this format is also referred to
 as the \fIntmpv(5NEMO)\fP format.
 [Default: \fBf\fP]
+.TP
+\fBcsv=f|t\fP
+Use CSV (comma separated values) output style. This means a comma, instead of
+a space, will be used to separate the values in the output stream.
+Default: false.
 .SH BUGS
 Times=time-string does not work, returns btab=NULL, bits=1, i.e.
 something weird here. Code is identical to snapcenter, which uses same
@@ -83,5 +88,6 @@ Peter Teuben
 10-feb-89	V1.6: bodytrans can be used 	PJT
 25-may-90	V1.8: added tab= keyword	PJT
 7-jul-97	(V2.0) documented header=	PJT
+4-sep-03	V2.2: added csv=	PJT
 .fi
 
