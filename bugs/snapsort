@@ -1,0 +1,19 @@
+To Josh:
+   % snapsort junk1 junk2 -aux
+
+   where aux is a positive arry will result in properly sorted output
+   but the aux array is suddenly negative!!
+
+
+From josh@bohemia Sun Mar  5 08:10:33 1989
+Subject: snapsort 
+
+Peter,
+	yes, snapsort trashes the Aux variable.  To be specific, it
+uses Aux(b) to store the value of the ranking function for body b,
+and then sorts particles by the value of Aux.  I can't claim this
+is a feature, but it is a known bug, which I will mention in the
+man page.
+
+							Josh
+
