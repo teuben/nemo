@@ -59,6 +59,12 @@ If set to true, the amplitude (always the first parameter in
 \fBspar\fP is interpreted as the total integrated intensity
 instead of the peak value of the object
 .TP
+\fBfactor=\fP
+The factor by which an image is multiplied before the object is added.
+Warning: if the amplitude (usually the first of the spar= numbers) is 0,
+this will not apply.
+Default: 1
+.TP
 \fBcrpix=\fP
 Override/Set crpix (1,1,1) 
 .TP
@@ -80,7 +86,27 @@ bar	A.exp(-r/h)	A,h,e,b   (e=1-minor/major   b=bar position angle w.r.t. disk)
 noise	gaussian(m,s)	mean,sigma
 spiral  A.exp(-r/h)	A,h,k,p,r0,p0
 ferrers A.(1-r^2)^p	A,h,e,b,p (h=size of bar, p=power to 1-r^2)
+isothermal	A.(1+r^2)^p	A,h,p
+
+to be implemented:
+
+j1x	J1(x)/x
+comet	2d proj
+jet	jet model w/ power law brightness
+shell	2d proj of shell
 .fi 
+A few object that are in MIRIAD's \fIimgen(1MIRIAD)\fP program and not listed 
+here directly, can be simulated or replace by:
+.nf
+.ta +1i +2i
+level	same as our flat
+cluster	same as isothermal, except we also allow p different from -0.5
+noise	notice we have a mean, miriad doesn't
+point	use exp with a very small scale length
+gaussian	our gauss, but bmin/bmaj via inc
+gauss3	no equivalent, ccdgen does not support 3D models yet
+disk	use ferrers with p=0
+.fi
 .SH EXAMPLES
 Here's how to make a barred galaxy:
 .nf
@@ -111,5 +137,6 @@ Peter Teuben
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
-05-Jan-05	V0.1 Created	PJT
+4-Jan-05	V0.1 Created	PJT
+6-jan-05	V0.7 added (many features and) factor=	PJT
 .fi
