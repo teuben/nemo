@@ -46,7 +46,8 @@ string defv[] = {
     "options=i,x,y,data\n   Output options",
     "maxstat=1\n    Max amount of statistics printed out",
     "cursor=t\n     Go into cursor mode directly?",
-    "VERSION=1.2\n  21-oct-03 PJT",
+    "headline=\n    Headline for plot",
+    "VERSION=1.2a\n 22-oct-03 PJT",
     NULL,
 };
 
@@ -101,7 +102,7 @@ int maxstat;
 
 real gxmin, gxmax, gymin, gymax;
 real xmin, xmax, ymin, ymax, xplot[2], yplot[2];
-string xname, yname, xlab, ylab;
+string xname, yname, xlab, ylab, headline;
 plcommand *layout;
 string action;
 bool Qcursor;
@@ -150,6 +151,7 @@ setparams()
     maxstat = getiparam("maxstat");
     action = getparam("action");
     Qcursor = getbparam("cursor");
+    headline = getparam("headline");
 }
 
 gettable()
@@ -774,7 +776,11 @@ box_display()
     xaxis ( 2.0, 18.0, 16.0, xplot, -7, xtrans, NULL);
     yaxis ( 2.0,  2.0, 16.0, yplot, -7, ytrans, ylab);
     yaxis (18.0,  2.0, 16.0, yplot, -7, ytrans, NULL);
-    
+    if (*headline) {
+      pljust(1);
+      pltext(headline,18.0,18.2,0.24,0.0); 
+      pljust(-1);
+    }
 }
 
 
