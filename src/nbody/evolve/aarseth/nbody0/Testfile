@@ -1,0 +1,35 @@
+DIR = src/nbody/evolve/aarseth/nbody0
+BIN = nbody0 nbody00
+NEED = $(BIN) mkplummer snaptrim snapcmp
+
+help:
+	@echo $(DIR)
+
+need:
+	@echo $(NEED)
+
+clean:
+	@echo Cleaning $(DIR)
+	@rm -f nbody0.in nbody0.out nbody0.log nbody00.out nbody00.log
+
+NBODY = 10
+TCRIT = 2
+
+all: $(BIN) compare
+
+nbody0.in:
+	@echo Creating nbody0.in
+	mkplummer nbody0.in $(NBODY) seed=123
+
+nbody0:	nbody0.in
+	@echo Running $@
+	time nbody0 nbody0.in nbody0.out tcrit=$(TCRIT) > nbody0.log
+	snaptrim nbody0.out - times=$(TCRIT) | tsf -
+
+nbody00:	nbody0.in
+	@echo Running $@
+	time nbody00 nbody0.in nbody00.out tcrit=$(TCRIT) > nbody00.log
+	snaptrim nbody00.out - times=$(TCRIT) | tsf -
+
+compare: 
+	snapcmp nbody0.out nbody00.out
