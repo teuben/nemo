@@ -1,0 +1,22 @@
+%N snapstack
+%D stack two N-body systems on top of each other
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man snapstack' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in1
+	input file name  [???]
+%A in2
+	input file name  [???]
+%A out
+	output file name  [???]
+%A deltar
+	position of in1 wrt in2  [0.0,0.0,0.0]
+%A deltav
+	velocity of in1 wrt in2  [0.0,0.0,0.0]
+%A zerocm
+	zero center of mass  [true]
+%A headline
+	random verbiage  []
+%A VERSION
+	30-dec-97 PJT [1.1e]
