@@ -29,6 +29,7 @@ to a pipe, which is then read by IDL into arrays \fIx,y,z\fP.
 IDL> SPAWN, ['snapidl','snap000','x,y,z'], UNIT=UNIT, /NOSHELL
 IDL> READU,UNIT,nbody,tsnap      # !!! NOTE BUG BELOW !!!
 IDL> PRINT,"Found a snapshot with ",nbody," particles at time", tsnap
+IDL> nbody=100                   # !!! note i need to know nbody !!!
 IDL> x=FINDGEN(nbody)
 IDL> y=FINDGEN(nbody)
 IDL> z=FINDGEN(nbody)
