@@ -1,0 +1,22 @@
+%N mkconfig
+%D make a static configuration of particles
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man mkconfig' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A out
+	output file name [???]
+%A shape
+	shape of configuration {shell,ball,cusp,line,ring} [shell]
+%A radius
+	radius of shell, ball or ring [1.0]
+%A nbody
+	number of particles [512]
+%A seed
+	seed for random numbers [123]
+%A zerocm
+	if true, zero center of mass [false]
+%A headline
+	verbiage for output []
+%A VERSION
+	25-mar-94 PJT [0.2a]
