@@ -1,0 +1,51 @@
+DIR = src/nbody/init
+BIN = snapenter mkplummer
+NEED = $(BIN) tsf snapprint
+
+help:
+	@echo $(DIR)
+
+need:
+	@echo $(NEED)
+
+clean:
+	@echo Cleaning $(DIR)
+	@rm -f snapenter.in snapenter.out snapenter.cmp mkplummer.out
+
+NBODY = 10
+
+all: $(BIN)
+
+snapenter:
+	@echo Creating snapenter.in
+	@echo "snapenter.out" > snapenter.in
+	@echo "2" >> snapenter.in
+	@echo "1.0" >> snapenter.in
+	@echo "-1" >> snapenter.in
+	@echo "0" >> snapenter.in
+	@echo "0" >> snapenter.in
+	@echo "0" >> snapenter.in
+	@echo "-0.125" >> snapenter.in
+	@echo "0" >> snapenter.in
+	@echo "0.5" >> snapenter.in
+	@echo "2" >> snapenter.in
+	@echo "0" >> snapenter.in
+	@echo "0" >> snapenter.in
+	@echo "0" >> snapenter.in
+	@echo "0.25" >> snapenter.in
+	@echo "0" >> snapenter.in
+	snapenter < snapenter.in verbose=f headline="test suite"
+	@echo Running tsf
+	tsf snapenter.out
+	@echo Running snapprint
+	snapprint snapenter.out m,x,y,z,vx,vy,vz
+	@echo Comparing snapenter.out snapenter.cmp
+	tsf snapenter.out | rsf - snapenter.cmp ; cmp snapenter.cmp snapenter.out
+
+mkplummer:
+	@echo Running $@
+	mkplummer mkplummer.out $(NBODY) seed=123
+	tsf mkplummer.out
+	mkplummer - $(NBODY) seed=123 |\
+		massname="n(m)" masspars=p,-2 massrange=0.5,10 |\
+		tsf -

@@ -1,0 +1,22 @@
+DIR = src/nbody/core
+BIN = bodytrans
+NEED = $(BIN)
+
+help:
+	@echo $(DIR)
+
+need:
+	@echo $(NEED)
+
+clean:
+	@echo Cleaning $(DIR)
+
+all:	$(BIN)
+
+bodytrans:
+	@echo Running $@
+	bodytrans x
+	bodytrans y
+	bodytrans z
+	bodytrans r
+
