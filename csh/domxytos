@@ -1,0 +1,26 @@
+#! /bin/csh -f
+#
+#	transfer a table of m,x,y to a snapshot
+#	m in column 1
+#	x in column 2
+#	y in column 3
+#
+set infile=$1
+set outfile=$2
+set tmp=tmp$$
+
+set xcol=1
+set ycol=2
+set mcol=3
+
+#   make an ascii format (see atos)
+awk "END {print NR}" $infile		> $tmp.1
+echo "3"                               >> $tmp.1
+echo "0.0"                             >> $tmp.1
+awk '{ print $'$mcol'}'  $infile               >> $tmp.1
+awk '{ print $'$xcol',$'$ycol',0.0}' $infile   >> $tmp.1
+awk '{ print 0.0,0.0,0.0}' $infile             >> $tmp.1
+#   convert to snapshot
+atos $tmp.1 $outfile
+# 
+rm -f $tmp.1
