@@ -1,4 +1,4 @@
-.TH GETPARAM 3NEMO "12 June 2003"
+.TH GETPARAM 3NEMO "13 May 2004"
 .SH NAME
 getXparam, hasvalue, isaparam, initparam, finiparam, stop \- main startup and command line processing.
 .SH SYNOPSIS
@@ -245,6 +245,11 @@ Possible options include
 .br
 .ns
 .TP 18n
+\fBc\fP
+\- show CPU usage: clock, user, system, child-user, child-system and cpu-tick-0
+.br
+.ns
+.TP 18n
 \fBq\fP
 \- exit after other help requests.
 .br
@@ -343,6 +348,9 @@ VERSION          : PJT [0.1]
 % p a=2
 % p c2=1 c0=1.2
 
+% mkplummer . 1000000 help=c
+CPU_USAGE mkplummer : 7.84    6.99 0.42  0.00 0.00  6202936
+
 .fi
 .SH AUTHOR
 Joshua Barnes, Peter Teuben
@@ -359,4 +367,5 @@ xx-nov-86	created                         	Joshua Barnes
 12-feb-95	added updparam
 20-jan-02	re-implemented indexed keywords			PJT
 12-jul03	added getargv()		PJT
+13-may-04	added help=c	PJT
 .fi
