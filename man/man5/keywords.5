@@ -62,6 +62,12 @@ determine the tickmark values, but the user can also supply his
 own array. It must be a comma separated array, normal \fInemoinp\fP
 parsing rules apply. {x,y}. 
 .TP
+.B nsigma
+Rejection level of of points from a distribution where
+points that are outside nsigma times the current sigma from the mean.
+Often sigma is recomputed after a point has been rejected, since they
+tend to bias the computation of sigma.
+.TP
 .B visib	
 Visibility of points, used in snapplot and clones. Must evaluate
 as an integer, 0 meaning no visible, anything else is.
@@ -130,5 +136,5 @@ Peter Teuben
 .ta +1.0i +4.0i
 12-jun-92	document created  	PJT
 14-nov-93	minor updates    	PJT
-6-jun-01  	more keywords    	PJT
+7-jun-01  	more keywords    	PJT
 .fi

@@ -83,9 +83,13 @@ Plot a cumulative histogram instead. If set, the keywords gauss, residual,
 and ylog are automatically re-set to false. 
 [Default: \fBf\fP].
 .TP
-\fBcumul=t|f\fP
+\fBmedian=t|f\fP
 Compute median too? This can be timeconsuming for large numbers of points.
-[Default: \fBf\fP].
+[Default: \fBt\fP].
+.TP
+\fBnsigma=\fI
+Delete points more than nsigma times the sigma from the mean. After each
+point sigma and mean are recomputed. [Default: none]
 .SH BUGS
 Cannot autoscale with only xmin or xmax set.
 .SH BUGS
@@ -115,5 +119,6 @@ xx-mar-88	V1.0: created          	PJT
 24-apr-98	V3.0a: fix median calculation for restricted range	PJT
 22-dec-99	V3.1a: optional median, fix N=1 reporting bug	PJT
 24-jan-00	documentation updated with program	PJT
+7-jun-01   	3.2: added nsigma, corrected man page options	PJT
 .fi
 
