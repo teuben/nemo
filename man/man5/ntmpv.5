@@ -1,0 +1,34 @@
+.TH NTMPV 5NEMO "10 May 1994" 
+.SH NAME
+ntmpv \- ascii format for N-body snapshot files
+.SH SYNOPSIS
+.nf
+.B    Nbody Time
+.B    m1 x1 y1 z1 vx1 vy1 vz2
+.B    ...
+.B    mN xN yN zN vxN vyN vzN
+.fi
+.SH DESCRIPTION
+\fIntmpv\fP is a natural way to describe the data in an N-body snapshot.
+The first line contains the number of bodies, and the time of the snapshot.
+The 2nd through (N+1)st line contain, one particle per line, the mass,
+position and velocity of each particle.
+.PP
+Reading such a format into NEMO's \fIsnapshot(5NEMO)\fP can be done as
+follows:
+.nf
+    tabtos in=plum1.tab out=plum1.snap header=nbody,time block1=mass,pos,vel
+.fi
+and turning a snapshot into \fIntmpv(5NEMO)\fP format as follows:
+.nf
+    snapprint in=plum1.snap options=m,x,y,z,vx,vy,vz header=t > plum1.tab
+.fi
+.SH "SEE ALSO"
+snapshot(5NEMO), scfm(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH "UPDATE HISTORY"
+.nf
+.ta +2.0i +2.0i
+7-jul-97	man written 	PJT
+.fi
