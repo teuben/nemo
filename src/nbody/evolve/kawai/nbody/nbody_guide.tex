@@ -1,0 +1,351 @@
+% Note for next  update
+%
+\documentstyle[11pt]{article}
+%\documentstyle[11pt,epsf]{article}
+%\documentstyle[12pt,epsf]{article}
+
+\begin{document}
+%\baselineskip 24pt
+
+\begin{center}
+{\Large\bf Treecode User's Guide}\\
+\bigskip
+{\large Junichiro Makino}\\
+\bigskip
+
+Department of Information Science and Graphics,\\
+College of Arts and Sciences,\\
+University of Tokyo,\\
+Komaba 3--8--1, Meguro-ku, Tokyo 153, Japan\\
+Phone : 81--3--3465--3925\\
+Fax : 81--3--3465--3925 (same as phone)\\
+E-mail : makino@kyohou.c.u-tokyo.ac.jp\\
+\end{center}
+
+\begin{center}
+Version 1 : Dec 21, 1998\\
+Version 1.1 : Dec 22, 1998\\
+Version 1.1A : Jan 1st, 1999\\
+Version 1.1B : Feb 9th, 1999\\
+\end{center}
+
+\def\nbody{{\tt nbody}}
+\def\vcode{{\tt v\_code}}
+\bigskip
+\begin{abstract}
+
+This guide gives a brief desciption of the program \nbody, a C++
+version of treecode and its GRAPE-4 variant.
+\end{abstract}
+
+
+\section{Changes}
+
+\subsection{Version 1 to 1.1}
+
+The {\tt qsort(3)} routine is replaced by a more usual quicksort
+(taken from Handbook of Algorithms and Data Structures,
+http://www.thunderstone.com/jump/demos/algorithms/hbook.html). The
+performance problem disappered. 
+
+\subsection{Version 1.1 to 1.1A}
+
+Note that this corresponds to the change of the version 1.0 to 1.1 of
+the program itself.
+
+The main routine is rewrited to use commandline arguments instead of
+the parameter file.
+
+\subsection{Version 1.1A to 1.1B}
+
+No change in functionality. Just made some bug fix so that the code
+can be compiled with g++ 2.8.1. Previous versions works only with
+2.7.2 or older. 
+
+\section{What is \nbody ?}
+
+\nbody is a C++ implementation of Barnes-Hut treecode. This program is
+intended as the replacement for the old FORTRAN version of treecode
+developed by the author (\vcode). The algorithm used in \nbody and
+\vcode\ are essntially the same. The main goal in the desing of \nbody 
+is to minimize the memory usage.
+
+\section{Installing \nbody}
+
+\subsection{Requirements}
+
+\nbody requires a reasonably new C++ compiler (currently, I have
+tested it only with g++ on Digital UNIX V4.0), which support 64 bit
+integer (as {\tt long}). You may be able to change the source code to
+support 32-bit platform, but I have never tried.
+
+Standard Makefile for \nbody assumes that PGPLOT is available. It's
+easy to edit Makefile so that you can run \nbody without PGPLOT.
+
+\subsection{Getting \nbody}
+
+In Komaba astrophysics computer network, you can find the most recent
+version of \nbody as
+\begin{verbatim}
+~makino/src/C++tree/export.tar.gz
+\end{verbatim}
+You can just copy it to your local directory.
+
+It's also available at my Web cite
+\begin{verbatim}
+http://grape.c.u-tokyo.ac.jp/~makino/softwares/C++tree/
+\end{verbatim}
+
+
+\subsection{Compiling \nbody}
+
+First go to the directory to which yo install \nbody. Then extract the 
+files from the tar file you've got.
+
+Then, you may need to edit the Makefile according to your need. The
+default Makefile is designed for Digital UNIX platform with GRAPE-4
+installed, and it looks like
+
+\begin{verbatim}
+PGPLOT_DIR = /usr/local/pgplot5.2
+#PGPLOT_DIR = /data6/makino/PDS/pgplot_linux/pgplot
+PGINCLUDE =  -I$(PGPLOT_DIR)
+CFLAGS = $(FLOAT_OPTIONS) -DREAL=double -O4 -ffast-math -funroll-loops
+
+# Add -DNOGRAPHICS for installation without PGPLOT
+ CPPFLAGS =   -DNOGRAPHICS -DTREE $(PGINCLUDE) -pg $(FLOAT_OPTIONS) -O4   -ffast-math -funroll-loops
+PGLIB     =  -L$(PGPLOT_DIR) -g3 -O4 -lcpgplot -lpgplot -lX11 -lUfor -lfor -lFutil -lm -lprof1 -lpdf
+G4LIB =  -L/usr6/kawai/pub/lib -lg4a -lrt -lm
+H3LIB = -L/usr2/makino/src/harp3board -lharp3  -lrt -lm 
+
+LIBOBJS = pgetopt.o gravity.o BHtree.o second.o
+LIBOBJSG4 = pgetopt.o  gravity_g4.o BHtree_g4.o second.o
+
+EXPORT_FILES = BHtree.h nbody_particle.h vector.h \
+               BHtree.C	gravity.C nbody.C pgetopt.C\
+	       second.c \
+	       Makefile nbody_guide.tex\
+               samplein sampleparm samplelog  samplelog_g4 
+
+export: export.tar.gz
+	ls -al export.tar.gz
+export.tar.gz: $(EXPORT_FILES)
+	tar cvf export.tar  $(EXPORT_FILES)
+	gzip export.tar 
+gravity.o : gravity.C  nbody_particle.h
+	g++  $(CPPFLAGS)  -c gravity.C
+gravity_g4.o : gravity.C  nbody_particle.h
+	g++  -DHARP3 $(CPPFLAGS)  -c gravity.C
+	mv gravity.o gravity_g4.o
+
+nbody.o : nbody.C  nbody_particle.h
+	g++  -c    $(CPPFLAGS)  nbody.C 
+nbody : nbody.C  nbody_particle.h $(LIBOBJS)
+	g++  -DEVOLVE    $(CPPFLAGS) -o nbody nbody.C $(LIBOBJS) 
+nbody_g4 : nbody.C  nbody_particle.h $(LIBOBJSG4)
+	g++  -DEVOLVE    $(CPPFLAGS) -o nbody_g4 nbody.C $(LIBOBJSG4) $(PGLIB) $(G4LIB)
+nbody_h3 : nbody.C  nbody_particle.h $(LIBOBJSG4)
+	g++  -DEVOLVE    $(CPPFLAGS) -o nbody_h3 nbody.C $(LIBOBJSG4) $(H3LIB)
+
+BHtree.o : BHtree.C  nbody_particle.h BHtree.h 
+	g++    $(CPPFLAGS) -c BHtree.C 
+BHtree_g4.o : BHtree.C  nbody_particle.h BHtree.h 
+	g++ -DHARP3   $(CPPFLAGS) -c BHtree.C
+	mv BHtree.o  BHtree_g4.o 
+pgetopt.o : pgetopt.C  
+	g++  $(CPPFLAGS)  -c pgetopt.C
+samplelog: sampleparm nbody
+	nbody < sampleparm > samplelog
+samplelog_g4: sampleparm nbody_g4
+	nbody_g4 < sampleparm > samplelog_g4
+
+
+
+
+
+\end{verbatim}
+
+If you do not have PGPLOT, add {\tt -DNOGRAPHICS} to CPPFLAGS. If you
+have one, specify the installed directory at {\tt PGPLOT\_DIR}.
+
+If you have GRAPE-4, check {\tt G4LIB} so that it points to the right
+directory. In addition, target name for HARP-3 (GRAPE-4 with
+Turbochannel driver) version ({\tt nbody\_h3}) is also provided. This
+one uses {\tt H3LIB} instead of {\tt G4LIB}. To use this one in
+Komaba, change {\tt PGPLOT\_DIR} to {\tt /usr/local/pgplot} or specify 
+{\tt -NOGRAPHICS} in {\tt CPPFLAGS}
+
+To compile \nbody, just type
+\begin{verbatim}
+make nbody
+\end{verbatim}
+or, for GRAPE-4 version, 
+\begin{verbatim}
+make nbody_g4
+\end{verbatim}
+If you've met by an error message, well, good luck! Please let me know 
+how you fixed the problem.
+
+\section{Running \nbody}
+Parameters are taken from the command line.
+The complete list of options (which you can find in the {\tt main()}
+routine) is:
+
+\begin{verbatim}
+list of options
+-i        name of snapshot input file       (no default)
+-o        name of snapshot output file      (default: no output)
+-d        timestep                          (default: 0.015625)
+-D        time interval for snapshot output (default: 1)
+-T        time to stop integration          (default: 10)
+-e        softening parameter epsilon2      (default: 0.025)
+-t        opening angle theta               (default: 0.75)
+-n        ncrit for Barnes' vectrization    (default: 1024)
+          (ONLY used with GRAPE/HARP inplementation)
+-w        window size for PGPLOT snapshot plot (default: 10)
+-c        flag for collision run
+-x        relative position vector for collision run (no default)
+-v        relative velocity vector for collision run (no default)
+-s        scale factor for position scaling (default: 1)
+-S        scale factor for velocity scaling (default: 1)
+-h        print this help
+\end{verbatim}
+
+In the following, I give somewhat more detailed explanation:
+\begin{description}
+\item{\bf -i:} Specify the name of input snapshot file. This is 
+required. The file format is nemo\footnote{Nemo is available at
+Peter Teuben's Web page, {\tt
+http://bima.astro.umd.edu/nemo/}}
+stoa format. 
+\item{\bf -o:} Specify the name of output snapshot file. This  is 
+optional. The file format is nemo stoa. When not specified, no output
+snapshot is made.
+\item{\bf -d:} The step size for time integration. The default value
+is 1/64.
+
+\item{\bf -D:}The time interval to output snapshot. The default value
+is 1. 
+
+\item{\bf -T:}The time to stop integration. The default value is 10.
+
+\item{\bf -e:}The softening parameter.  The default value
+is 1/40. 
+
+\item{\bf -t:}The opening angle for the force calculation.  The default value
+is 0.75. 
+
+\item{\bf -n:}The critical number of particles in the cell, used in
+Josh Barnes' vectrization scheme.  The default value is 1024.  Only
+used with GRAPE/HARP implementation. {\tt Nbody} uses the standard
+particle-based scheme on general-purpose computer. 
+
+\item{\bf -w:} The size of PGPLOT window. The default value is
+10. When compiles without {\tt -NOGRAPHICS}, {\tt nbody} creates a
+PGPLOT window and displays the projection of the system to the x-y
+plane. This option specifies the size of the region displayed.
+
+\item{\bf -c:} If specified, collision of two identical system is set
+up. Default is no collision.
+
+\item{\bf -x:} When -c option is given, specify the initial separation 
+as, for example,  {\tt -x 10 0 0} (x, y, and z coordinates). 
+\item{\bf -v:} Similar to x option, but for initial relative
+velocity. 
+
+\item{\bf -s:}Multiply the initial position  of each particle by this parameter. Default 
+is 1. 
+\item{\bf -S:}Multiply the initial velocity of each particle  by this parameter. Default 
+is 1. 
+
+\item{\bf -h:} Print a short summary of the command line options.
+
+\end{description}
+
+The file {\tt samplein} is a Plummer model with 4096 particles, in
+Heggie units.  You can try a test run with
+\begin{verbatim}
+nbody -i samplein
+\end{verbatim}
+You may compare the log output (in {\tt stdout}) with
+file {\tt samplelog}. The sample log file is obtained on an Alpha
+clone with 600 MHz EV56 chip (164LX motherboard).
+
+Some additional timing information goes to standard error.
+
+\section{Memory requirement}
+
+According to the measurement, \nbody requires about $8+200*(N/10^6)$ MB of
+main memory, where $N$ is the number of particles. GRAPE-4 version
+would require additional memory for the library, which I believe a few 
+tens of MBs. Thus, you should be able to run a $10^6$-body simulation
+on a machine with 256MB memory. 
+
+\section{Features and Bugs}
+
+\subsection{Integer word length}
+
+The current implemntation of {\tt nbody} relies on the Morton key
+encoded into a single {\tt long int} word. Actual number of bits used
+(per dimension) is defined in the file BHtree.h as integer constant
+{\tt default\_key\_length}. Set this value not exceeding 10 on
+machines {\tt long} is of 32-bit length. On machines with 64-bit {\tt
+long}, you can set its value to up to 21.
+
+The value of {\tt default\_key\_length} determines the maximimum
+possible depth of the tree. Unless you are using really very large
+number of particles (say, $10^7$ or more), the maximum of 10 levels is 
+probably enough.
+
+If the maximum depth is not suffucient to resolve the distribution of
+particles, {\tt nbody} just stops subdividing the cell there. As a
+result, the lowest cell may contain rather large number of
+particles. This does not cause any integration error, but causes some
+performance degradation.
+
+\subsection{Memory management for tree}
+
+Currently, {\tt nbody} stops if the memory allocated for tree turned
+out to be insufficient to build the tree. One could change the program 
+so that either it reallocates a  larger amount memory or stop to
+refining the tree at that point. It's not clear which approach is
+better, and neither option is implemented yet.
+
+\section{Description of the algorithm implemented and the data
+structure}
+
+Not completed yet...
+
+
+
+\section{Things to be done}
+
+\subsection{Version 1}
+\begin{itemize}
+\item Currently, \nbody is rather slow. The force calculation routine runs
+at the speed essentially the same as that of \vcode, but tree
+constraction phase take roughly twice longer time. This is because the 
+{\tt qsort(3)} routine used in BHtree.C is less than optimal. A
+handcoded version would significantly improve the performance.
+\end{itemize}
+
+\subsection{Version 1.1}
+\begin{itemize}
+\item The source code needs some cleaning up... It's mostly not
+documented and not easily understandable.
+
+\item snapshot input and output should be taken from standard input
+and output. However, then, what shall we do with the log output? Of
+course, the starlab  format solves the problem, but it's a bit too
+large... 
+\end{itemize}
+\end{document}
+
+
+
+
+
+
+
+
+

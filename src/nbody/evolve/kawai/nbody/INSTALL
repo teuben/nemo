@@ -1,0 +1,5 @@
+1) type 'make nbody' and you'll get an executable 'nbody'.
+
+2) type 'make nbody_g5' or 'make nbody_g4' if you have GRAPE-4 or 5.
+
+3) try 'nbody -h' to see available options.
