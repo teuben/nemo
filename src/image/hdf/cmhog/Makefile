@@ -1,7 +1,7 @@
 #	Makefile for NEMO/src/kernel/hdf
 include $(NEMOLIB)/makedefs
-LOCAL_INC = $(HDFINC)
-LOCAL_LIB = $(HDFLIB)
+LOCAL_INC = $(HDF_INC)
+LOCAL_LIB = $(HDF_LIB)
 
 #	sub-directories to be visited, in the order given here
 #DIRS = 
