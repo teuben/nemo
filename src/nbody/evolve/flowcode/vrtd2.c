@@ -10,17 +10,17 @@
  *          1D T-axis descriptor
  *
  *	 2-dec-03  cloned off vxyd.c, since it's very similar
- *      11-dec-03  fixed
+ *      13-dec-03  fixed; vscale=1; phi=-1
  */
 
 #include <stdinc.h>
 #include <filestruct.h>
 #include <image.h>
 
-#define CCD_VERSION "flowcode:vrtd2 V1.0 11-dec-03"
+#define CCD_VERSION "flowcode:vrtd2 V1.0 13-dec-03"
 
 local double   omega = 0.0;		/* pattern speed */
-local double   vscale = 100.0;		/* rescale velocity unit */
+local double   vscale = 1.0;		/* rescale velocity unit */
 local double   rscale = 1.0;		/* rescale radius unit */
 
 local stream   potstr = NULL;
@@ -179,7 +179,7 @@ void potential(int *ndim,double *pos,double *acc,double *pot,double *time)
 
     }
     
-    *pot = 0.0;
+    *pot = -1.0;
     if (rad > 0) {
 	vtan -= omega * rad;
         acc[0] = (vrad * x - vtan * y) / (rad * vscale);
