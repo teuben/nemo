@@ -9,11 +9,12 @@
 #  9-apr-01     added support if file= is given to directly specify pgplot tar ball
 # 11-jun-01     for new pgplot file name convention (520, 521, 522....)
 # 11-jan-02     also allow pgplot directory in $NEMO/local/pgplot
+#  9-apr-02     fixed caltech links
 
 
 #			 	.. command line keywords ..
 set version=522
-set ftp=astro.caltech.edu
+set ftp=ftp.astro.caltech.edu
 set dir=$NEMO/local
 set lib=$NEMOLIB
 set drivers=CGDRIV,GIDRIV,NUDRIV,PGDRIV,PPDRIV,PSDRIV,WDDRIV,XWDRIV
@@ -39,7 +40,7 @@ else
   if ($?file == 0) set file=$dir/pgplot${version}.tar.gz
   if (! -e $file) then
     echo No file $file, you need to pick it up, e.g.
-    echo ncftp ftp://astro.caltech.edu/pub/pgplot/pgplot${version}.tar.gz
+    echo ncftp ftp://ftp.astro.caltech.edu/pub/pgplot/pgplot${version}.tar.gz
     exit 1
   else
     echo Found $file
@@ -72,7 +73,12 @@ switch ($host)
   case solaris*:
   case sparc*:
   case sun5:
-    $NEMO/local/pgplot/makemake  $NEMO/local/pgplot sol2 f77_cc
+    if ($?CC && $?F77) then
+      echo ${F77}_${CC}
+      $NEMO/local/pgplot/makemake  $NEMO/local/pgplot sol2 ${F77}_${CC}
+    else 
+      $NEMO/local/pgplot/makemake  $NEMO/local/pgplot sol2 f77_cc
+    endif
     breaksw
   case linux:
   case *linux-gnu:
