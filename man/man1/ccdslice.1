@@ -1,0 +1,69 @@
+.TH CCDSLICE 1NEMO "6 May 1995"
+.SH NAME
+ccdslice \- takes slices and/or re-orient an image cube
+.SH SYNOPSIS
+\fBccdslice\fP [parameter=value] ...
+.SH DESCRIPTION
+\fBccdslice\fP takes slices from an image cube, along any axis and 
+can thereby also reorder the axes. 
+.PP
+A chain of \fBccdslice\fP has to be applied if
+the first (x) or second (y) axis needs to be reduced but the ordering
+of the cube coordinates to remain the same (see EXAMPLES below),
+see also \fIccdsub(1NEMO)\fP for a better alternative.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input filename, in \fIimage(5NEMO)\fP format.
+[no default]
+.TP 20
+\fBout=\fP
+Output filename
+[no default]
+.TP 20
+\fBzvar=x|y|z\fP
+Slice variable (x, y, or z), along which axis the cube is sliced. This
+axis will then become the 3rd axis.
+[\fBz\fP].
+.TP 20
+\fBzrange=\fP
+Slices to select. Multiple planes can be selected, but must be in the
+range 1..N\fBzvaR\fP. If none given, all planes will be selected.
+Any \fInemoinp(1NEMO)\fP expression can be given, but only regular
+ranges will result in a correct coordinate system.
+Default: the whole \fIzvar\fP axis is extracted.
+.SH EXAMPLES
+Here is a cube, if which only the 2nd plane is selected
+.nf
+    ccdslice cube.in cube.out z 2
+.fi
+here is a cube which is re-oriented in YZX:
+.nf
+    ccdslice cube.in cube.out x
+.fi
+and here a somewhat cumbersome three-step process to select a 
+subset of the X axis, but leaving the cube intact:
+.nf
+    ccdslice cube.in - x 2:10:2 | ccdslice - - x | ccdslice - cube.out x
+.fi
+and the same for selecting a subset of the Y axis, now in two steps:
+.fi
+    ccdslice cube.in - y 2:10:2 | ccdslice - cube.out y
+.fi
+.SH BUGS
+This code depends on the fact that the data is 3-dimensional, i.e. an
+image cube. This is a limitation of the \fIimage(5NEMO)\fP format.
+.PP
+The coordynate system description of the new \fIzvar\fP axis can easily 
+be corrupted by choosing an irregular layout with \fBxrange=\fP.
+.SH SEE ALSO
+ccdsub(1NEMO), image(5NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+6-May-95	V1.0 Created    PJT
+.fi
