@@ -1,0 +1,501 @@
+This is:	A blurb on NEMO V3, what it is, how to install and use 
+Last updated:   1-jun-2001
+By:		Peter Teuben
+Disclaimer: 	The manual is now out of date, the autoconf based 
+		installation instructions here are now more up to date.
+
+______________________________________________________________________________
+
+(for INSTALLATION instructions see below)
+
+Using NEMO (i.e. when somebody had already installed it for you) requires
+just a few changes modifications to your .cshrc/.login script: 
+(sorry, no sh support yet). The most simplest would be
+
+    1)	source the "nemo_start" file. You may have to ask your system
+	manager where it is kept. For example:
+
+		source ~nemo/nemo_start
+
+or the long way:
+
+    1)  define the environment variable NEMO where NEMO's root directory is.
+    2)  optionally define NEMOHOST if you want to override an automatic 
+	determination.
+	Although you can use anything you want, check the subdirectories 
+	in $NEMO/bin for valid names on your system, but you better know
+	what you are doing, since by default NEMO will figure it out.
+    3)  source the $NEMO/NEMORC file.
+    4)  add $NEMOBIN to you search path. Note that in NEMO V3+ the system 'cc'
+	command should now be available again, as NEMOBIN/cc has disappeared
+	in favor of setting all flags through the makedefs file.
+
+	        setenv NEMO /home/nemo		             (1)
+	        source $NEMO/NEMORC			     (3)
+	        set path = ( . xxx $NEMOBIN yyy zzz)	     (4)
+
+where xxx, yyy  and zzz are other directories you may want in there. 
+
+Alternatively, you can set up a dynamic NEMO installation, which means
+that NEMO is by default not present after you have logged in.  The
+dynamic installation requires a special command (normally an alias
+'nemo') to be issued in order to ``load'' NEMO into the environment. 
+e.g. I use:
+	alias nemo 'source ~nemo/nemo_start; unalias nemo'
+and the reverse to remove it:
+	alias omen 'source ~nemo/nemo_end'
+
+
+   (See also Appendix A of the manual for more details of installation)
+______________________________________________________________________________
+
+
+The NEMO (latex) manual is located in $NEMO/text/manuals, as nemo.tex
+with many small include (.inc) files. There may also be a final nemo.dvi, 
+or even nemo.ps file. If not, use the Makefile in there, and try
+	make nemo
+to create a full manual. If, for one particular include (.inc) file, you 
+need a copy one can use:
+	make test TEST=setup.inc
+and turn the 'latest.dvi' file into a 'latest.ps' file for printing.
+
+The 'nemo.tex' file also generates a table of contents and an index, which
+requires you to run the program latex more than once. Also the index
+file is not all done by 'latex'. An additional program 'makeindex', which
+turns an .idx file into an .ind file, is required. If this is not
+present - you'll have to live without the index. Best is to create
+a dummy file nemo.ind, to prevent latex screaming about a missing file,
+but the nemo.ind file that exists is a current one.
+
+(a version of the makeindex utility also lives in $NEMO/src/tools/makeindex)
+______________________________________________________________________________
+
+There may also a demo in the $NEMO/demo area. Run it after NEMO has been
+installed.
+______________________________________________________________________________
+
+
+Preconditions to INSTALLATION
+=============================
+
+The default installation installs NEMO with a simple postscript-only
+graphics library (a.k.a. yapp_ps). You should consider selecting a well 
+supported YAPP hookup, e.g. PGPLOT, which allows transparent switching
+between X (multiple persistent as well as non-persistent), postscript,
+GIF, PPM etc.
+
+a) Installing PGPLOT
+
+	cd $NEMO/local
+	$NEMO/src/scripts/pgplot.install
+	(you may need to get the pgplot5.2.tar.gz file from caltech
+	or a local repository)
+
+   this assumes $NEMO has a basic presence already, so don't start this
+   yet, first figure something out about the installation. See below.
+
+See also $NEMO/src/scripts/
+
+   On some linux systems (e.g. older versions of Redhat) may need to 
+		 ln -s /usr/X11R6 /usr/X11
+
+b) Installing HDF
+    
+   You only need the HDF library if you plan to work with CMHOG (hydrocode).
+	
+-- To be filled in --
+
+c) Installing CFITSIO
+
+   There is no code in NEMO yet using CFITSIO, NEMO has two internal
+   routines (fits.c and fitsio.c) that handle all of the fits I/O.
+   However, we anticipate that CFITSIO will be used at some point.
+
+
+Brief overview of a Version 3.x INSTALLATION  
+============================================
+
+ (there is also a bootstrap loader that is a lot easier to use; 
+  you may however keep this file at hand when you use that, the procedure
+  you follow below is basically what bootstrap does by itself automatically)
+
+1) To untar a compressed tar file the following will do just fine, and
+   you never need to save the uncompressed version:
+
+        % gzip -cd nemo_3.x.y.tar.gz | tar xf -
+
+   You can also (if your ftp allows this) do this from within the ftp
+   program:
+
+	% cd /usr/nemo
+	% ftp astro.umd.edu
+	...			(login as anonymous)
+	ftp> binary
+	ftp> cd pub/teuben/nemo
+	ftp> get nemo.tar.gz "|zcat|tar xf -"
+	ftp> quit
+	% cd nemo_3.x.y
+
+2) Run configure and install the basic libraries:
+
+	% ./configure 
+		(sometimes you may need to do
+			setenv F77 g77
+		 or whichever is applicable, if the fortran compiler does not
+		 get detected properly, the run configure again)
+	% source nemo_start
+	% make dirs config_extra scripts
+	% source NEMORC.local		  (or look at $NEMO/src/scripts/NEMORC)
+	% rehash
+	% make libs
+
+
+3) Run the testsuite, which also installs a pretty basic set of NEMO executables:
+
+	%  setenv YAPP /vps			## only needed if you're on a remote link,
+						## otherwise leave it as /xs 
+
+	%  ( cd src/scripts ; need -m `testsuite -s` ; mknemo -c history hisf ; testsuite )
+
+
+   Study the output of the lines that do not contain the word 'OK' at the end, e.g.
+
+Working on /home/teuben/nemo_3.0.4/src/image/fits OK
+Working on /home/teuben/nemo_3.0.4/src/image/io OK
+Working on /home/teuben/nemo_3.0.4/src/image/misc OK
+Working on /home/teuben/nemo_3.0.4/src/image/trans OK
+Working on /home/teuben/nemo_3.0.4/src/kernel/fortran OK
+Working on /home/teuben/nemo_3.0.4/src/kernel/io OK
+Working on /home/teuben/nemo_3.0.4/src/kernel/misc OK
+Working on /home/teuben/nemo_3.0.4/src/kernel/tab Problems				<<------
+Working on /home/teuben/nemo_3.0.4/src/nbody/cores OK
+Working on /home/teuben/nemo_3.0.4/src/nbody/evolve/aarseth/nbody0 Problems		<<------
+Working on /home/teuben/nemo_3.0.4/src/nbody/evolve/aarseth/tools OK
+Working on /home/teuben/nemo_3.0.4/src/nbody/evolve/hackcode/hackcode1 OK
+Working on /home/teuben/nemo_3.0.4/src/nbody/evolve/scfm OK
+Working on /home/teuben/nemo_3.0.4/src/nbody/image OK
+Working on /home/teuben/nemo_3.0.4/src/nbody/init OK
+Working on /home/teuben/nemo_3.0.4/src/nbody/io OK
+Working on /home/teuben/nemo_3.0.4/src/nbody/io/starlab OK
+Working on /home/teuben/nemo_3.0.4/src/nbody/reduc OK
+Working on /home/teuben/nemo_3.0.4/src/nbody/trans OK
+Working on /home/teuben/nemo_3.0.4/src/nbody/xyz OK
+Working on /home/teuben/nemo_3.0.4/src/orbit/potential Problems				<<------
+Results in /home/teuben/nemo_3.0.4/tmp/test22005/testsuite.log
+
+
+*) Installing PGPLOT within NEMO is a bit cumbersome, but not
+   impossible
+
+	% ./configure 
+	% source nemo_start
+	% make dirs 
+	% make config_clean				<==
+	% rm NEMORC.local
+	% src/scripts/pgplot.install dir=/tmp		<==
+	% ./configure --with-pgplot-prefix=$NEMOLIB --with-yapp=pgplot
+	% make dirs config_extra scripts
+	% source NEMORC.local
+	% rehash
+	% make libs
+
+*) Installation problems:
+
+	- edit *.in
+		make config config_extra
+		
+	- edit NEMORC.local (came from NEMORC.gen.in)
+		source NEMORC.local
+
+	- edit $NEMOLIB/makedefs (but danger, configure/config_extra can 
+	  overwrite this)
+
+	- if 'configure' fails for some reason, check the config.log file. 
+	  Sometimes the cause is a rather trivial one, e.g. missing licences 
+	  or a bad path or a bad shell.
+
+
+*) Configuration options known to work:
+
+	--with-pgplot-prefix=$NEMOLIB
+
+		expects grfont.dat and friends to be in the named directory
+		($NEMO/src/scripts/pgplot.install will help you
+		installing pgplot in $NEMOLIB)
+
+	--with-hdf-prefix=PFX
+
+		expects hdf.h to be found somewhere in an {include,hdf} 
+		subdirectory and will link with 'df', 'jpeg' and 'z' library.
+
+	--with-miriad-prefix=PFX
+		if $MIR is present, it will use this variable
+
+	--disable-fortran
+		if you don't have a working fortran compiler
+	--with-ccmalloc
+		use CCMALLOC to debug malloc usage
+
+* Configuration options that we are working on:
+
+	--with-cfitsio-prefix=PFX 
+
+
+	LAM/MPI: lam-6.3.1-4.i386.rpm 
+
+	PVM:	 pvm-3.4.3-4.i386.rpm  pvm-gui-3.4.3-4.i386.rpm
+	   needs  env.var   PVM_ROOT=/usr/share/pvm3/
+		            PVM_ARCH=LINUX
+
+
+* Known configurations to work:
+
+	    NEMOHOST			"uname -a" for the machine that worked
+
+	mips-sgi-irix6.5	IRIX64 sulfur 6.5 01101245 IP27
+	i686-pc-linux-gnu	Linux nemo 2.2.14-5.0 #1 Tue Mar 7 21:07:39 EST 2000 i686 unknown
+	sparc-sun-solaris2.6	SunOS atlas 5.6 Generic_105181-20 sun4u sparc SUNW,Ultra-5_10
+	sparc-sun-solaris2.7
+	sparc-sun-solaris2.8
+
+
+
+3) Running a small test of tests to see if everything works fine
+
+ 	src/scripts/testsuite
+
+*** TODO:
+
+     	- more consistent way between usage of variables in the NEMORC chain, 
+	  and the 'makedefs' list.
+
+
+
+
+	
+
+ANYTHING BELOW THIS LINE IS FROM NEMO V2 and not always relevant anymore
+========================================================================
+
+2) Copy the NEMORC.gen file to NEMORC.local, and edit it to reflect your
+   local site. This file is meant to set environment variables that
+   had already been set in the NEMORC file, and you need to override.
+   It is recommended to study this in some detail, particularly if you're
+   not on one of machine to which I don't have frequent access.
+
+	cp NEMORC.gen NEMORC.local
+
+   You can also look at some working examples in $NEMO/src/scripts/NEMORC/
+
+2b) The installation was also designed to allow upgrading your existing
+    NEMO version by placing the new tar file on top of your own directory.
+    If you are not sure you changed any source code, try this:
+        cd $NEMO
+        make new
+    which  is supposed to check new sourcecode since the last official
+    install.  ** i need to write more about this, this can be tricky **
+
+3a) follow the $NEMO/src/bootstrap script to install a fairly complete
+    system:
+
+	src/scripts/bootstrap goto=install nemo=$cwd
+
+    this will install all the way through the testsuite, but you will
+    probably have to repeat this procedure since the default bootstrap
+    currently does not install any graphics (yapp) libraries, just
+    yapp_null.
+	
+
+3b) follow installation instructions as if NEMO was installed, i.e. add stuff
+   to your .cshrc file:
+
+	setenv NEMO /usr/nemo		(or "setenv NEMO `pwd`")
+	source $NEMO/NEMORC
+	...
+	set path = ( . $NEMOBIN $path )
+
+
+
+4) Bootstrap the system 
+
+   % cd $NEMO   
+   % make config  
+   % make dirs 
+   % make config_extra
+   % make scripts
+
+5) Make the library ($NEMOLIB/libnemo.a)
+
+   % cd $NEMO/src
+   % make clean install
+
+   Before you run this, you may want to check/change 
+
+   a) which loadobj to use - this MUST be choosen correctly
+      by using the right CC flag, or fiddling with $NEMOINC/options.h
+
+      For the following machines this is all pre-defined:
+            sun3
+            sun4 (sparc/sunos)
+            sun5 (sparc/solaris)
+            alpha (tested on: OSF1 V3.2, but V2.x probably won't work)
+            sgi (tested on: IRIX V5.2, but V4.x probably won't work)
+            linux (tested on 2.x, slackware 3.1 all the way through redhat 6.0)
+		
+   b) all yapp's are compiled into .o files, and not
+      put into library; in accordance with using YAPPLIB
+      environment variable at compile time to set it
+
+   c) which options to (un)set in src/kernel/io/getparam.c (the
+      user interface). A dryrun with 
+            cc -c getparam.c 
+      will do fine. Don't forget to remove getparam.o before
+      official installation.
+
+
+6) Compile hackcode, the C version of the treecode
+
+   % cd $NEMO/src/nbody/evolve/hackcode/hackcode1; make hackcode1;
+        mv hackcode1 $NEMOBIN
+or equivalently:
+   % mknemo hackcode1
+
+
+6) Compile a few utilities, pick what you want....
+
+   % cd $NEMO/src/nbody/tools ; make atos stoa ; mv atos stoa $NEMOBIN
+   or
+   % mknemo atos stoa tabtos tsf
+   and a somewhat special
+   % mknemo -c history hisf
+ 
+
+   % cd $NEMO/src/nbody/init  ; make mkplummer ; mv mkplummer $NEMOBIN
+   or
+   % mknemo mkplummer
+
+   % cd $NEMO/src/nbody/reduc ; make snapplot snapdiagplot ;
+            mv snapplot snapdiagplot $NEMOBIN
+   These last two will also tell you if the proper YAPPLIB was choosen.
+   (Otherwise the EL macro may be used, e.g. as in:
+		make snapplot EL="$YAPP_MONGO"
+   The NEMORC must be setup for this properly. Local things should really
+   be done in the NEMORC.local file. If it is not present, create one.
+   Preferably you would want to keep away from editing the NEMORC file,
+   since in updates you'd have to figure out what to retain and what to
+   keep from this file, and again create you private version....
+
+Again, if you want to change the default yapp graphics device; the
+environment variable YAPPLIB needs to be reset to any of the YAPP_... 
+ones in $NEMO/NEMORC file.  Make those changes to your NEMORC.local
+file, not the ones that get updated when you get a new NEMO release
+from me :-)
+
+
+Some examples of patch work, mostly using the local Makefile's:
+
+* Updating libnemo.a with a fixed set of routines:
+
+	make install OBJFILES="a.o b.o c.o"
+
+* Compiling a graphics program with another library:
+
+	make snapplot YAPPLIB="$YAPP_MONGO"
+
+* Compiling something with an extra library:
+
+	make ccdfft EL=-lfft
+
+* Compiling a program that does not need loadobj() and can hence be
+  compiled without the -Bstatic in $NEMOBIN/cc. This is peculiar to
+  some architectures, e.g.
+
+	make atos CC="/bin/cc -I$NEMOINC"
+
+  It will create significantly smaller executables since shared
+  libraries are used. On Solaris this will be the default.
+
+* Testbed functions:
+
+  Some functions in the $NEMO/src/kernel tree, and in some of the other
+  places, can be compiled into an exectuable, for debugging purposes.
+  Compilation of such testbed routines is accomplished by a piece of
+  main() code [or nemo_main() for all that matters] #ifdeffed by a
+  TESTBED test.
+  To compile them, one can generally use
+
+        make getparam CFLAGS="-g -DTESTBED"
+
+  or, if provided for in the Makefile:
+
+        make getpartest
+
+7) Testsuite:
+  Once you have basic compilation going, you should run the testsuite.
+This is a shell script that will help you find all the test scripts
+(as defined by a makefile-based Testfile in the various directories in
+$NEMO), identify the programs needed for the tests, compile those programs,
+and then run a whole series of tests.
+You can then compare the output of the testsuite against a baseline 
+release and get an idea if your newly compiled version of NEMO is producing
+reasonable data.
+
+First query and install all programs needed:
+
+	$NEMO/src/scripts/testsuite -q -i
+
+The bootstrap script actually also runs the standard testsuite.
+
+ERROR:::: found /data/nemo/src/nbody/evolve/scfm/scfm.f
+f77 -O  -c scfm.f -o scfm.o
+f77 -O -o scfm scfm.o
+scfm.doc open: No such file or directory
+apparent state: unit 10 named SCFPAR
+last format: list io
+lately writing direct formatted external IO
+Abort (core dumped)
+ [was up to date] Well done
+
+
+
+
+-- maintenance:
+
+before the 
+	
+	cd $NEMO
+	src/script/version inc			
+  or
+	src/script/version set 3.0.1		
+
+  then make a tar ball
+
+	make dist
+
+  which makes nemo_3.0.1.tar.gz
+
+	make stamp
+
+  which stamps your local adm/Chkfile such that 'make new' works
+
+
+
+
+	
+-- 
+  Faking a host
+
+
+  If you get a message like:
+	
+	Warning: /atlas2/nemo/nemo/bin/sparc-sun-solaris2.8 does not exist
+
+  you can fix this with
+
+	make truehost TRUEHOST=....
+
+  or if you want to give an exist host other aliases, use
+
+	make fakehost FAKEHOST=....
+
+	
