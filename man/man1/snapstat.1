@@ -1,0 +1,95 @@
+.TH SNAPSTAT 1NEMO "24 August 1988"
+.SH NAME
+snapstat \- compute various statistics of an N-body snapshot
+.SH SYNOPSIS
+\fBsnapstat in=\fPsnapshot_file  [parameters=values...]
+.SH DESCRIPTION
+\fBsnapstat\fP provides various statistics of an N-body snapshot,
+such as moments in phase space, various radii (such as
+mass-fraction radii, virial radius and core radius)
+and generalized surface density, total energetics.
+For particles with binding energy larger than
+a specifief amount  a shape analysis is done.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is
+also given:
+.TP 25
+\fBin=\fIin_file\fP
+Input data are read from \fIin_file\fP, which must be 
+in standard \fISnapShot(5)\fP format [No default].
+.TP
+\fBtimes=\fIrange\fP
+Range of times to do the analysis on. E.g.
+"0:10,12,13" [default: \fBall\fP].
+.TP
+\fBexact=t|f\fP
+
+.TP
+\fBminradfrac=\fIvalue\\fP
+Fudge factor, smaller than but not too close to 1, for
+core-radius determination. A better algorithm is expected in some
+future version [default: \fB0.1\fP].
+.TP
+\fBall=\fIt|f\fP
+This overrides all other subsequent logicals (exept \fBexact\fP)
+who determine what parameters to determine for the system 
+[default: \fBfalse\fP].
+.TP
+\fBpot=\fIt|f\fP
+Logical if to determine energetics (potential en kinetic) of system. 
+This is a time consuming (N*N) part [default: \fBfalse\fP].
+.TP
+\fBeps=\fIvalue\fP
+Value of the softening length for potential energy
+calculation [default: \fB0.025\fP].
+.TP
+\fBr_h=\fIt|f\fP
+Logical if to determine the fractional mass radii of the system.
+Currently implemented it will return radii at which the mass
+fraction is 10%..90% in steps of 10% [default: \fBfalse\fP].
+.TP
+\fBr_v=\fIt|f\fP
+Logical if to determine the virial radius of the system.
+This is a time consuming (N*N) part [default: \fBfalse\fP].
+.TP
+\fBr_c=\fIt|f\fP
+Logical if to determine the core radius of the system
+[default: \fBfalse\fP].
+.TP
+\fBrms=\fIt|f\fP
+Logical if to determine the full rms velocity dispersion
+of the system [default: \fB false\fP].
+.TP
+\fBecutoff=\fIvalue\fP
+Value of the energy above which the particles will be discarded
+from a shape analysis. [default: \fB0.0\fP, i.e. only
+'bound' particles].
+\fBverbose=\fIt|f\fP
+Logical if you need a lot of explanatory text around your numbers.
+The \fIfalse\fP option is often used to make tables for further
+plotting using plotting packages as Mongo(1)
+[default: \fBfalse\fP]
+.SH "SEE ALSO"
+snapkinem(1NEMO),snapshot(5NEMO)
+.SH BUGS
+The algorithm to determine the core radius is noisy.
+.PP
+Shape analysis is a straight moment analysis, and hence
+perhaps too heavily weighted for particles at large radii.
+.PP
+Keyword \fBverbose\fP is not fully implemented yet in V1.3.
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +3.0i
+~/src/pjt/nbody     snapstat.c snapstat.1
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.5i
+ 9-Jan-87	V1.0: created                     	PJT
+24-Jul-87	V1.1: cleanup up, doc written     	PJT
+10-Nov-87	V1.3: output enhancements, improved doc	PJT
+7-jun-88	V1.4: new filestruct                	PJT
+24-aug-88	V1.4a: cleanup                        	PJT
