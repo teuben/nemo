@@ -1,0 +1,46 @@
+.TH ORBFOUR 1NEMO "1 September 1990" 
+.SH NAME
+orbfour \- show geometric fourier coefficients of an orbit
+.SH SYNOPSIS
+.PP
+\fBorbfour in=\fPorbit [parameter=value]
+.SH DESCRIPTION
+\fBorbfour\fP calculates the fourier coefficients of an orbit 
+by assuming you have sampled the orbit evenly. The first few
+dominant coefficients are then immediately computed by a
+straight sum.
+.PP
+The current implementation only shows the even cosine coefficients
+in the XY-plane. 
+.PP
+
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 20
+\fBin=\fIin-file\fP
+input file, in \fIorbit(5NEMO)\fP format 
+[no default]
+.TP
+\fBmaxorder=\fIn\fP
+Maximum order of the fourier expansion used.
+[default: \fB10\fP]
+.SH "SEE ALSO"
+orbdim(1NEMO), orbit(5NEMO)
+.SH BUGS
+The algorithm is based on a least squares fit, but assuming that
+sampling of the orbit has been done properly only diagonal
+terms in the matrix are used, and hence no matrix inversion
+is needed.
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+src/pjt/orbit	authors original sources
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+1-sep-90	V1.0: Created - only even cos terms	PJT
+.fi
