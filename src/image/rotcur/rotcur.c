@@ -25,6 +25,7 @@
  *    taken in anti-clockwise  direction between the north direction on
  *    the sky and the major axis of the receding half of the galaxy.
  *
+ *
  *    Author:  K. Begeman (S77) P.J. Teuben (C)
  *
  *     History: 19/jul/83 : original program                       (KGB)
@@ -65,6 +66,8 @@
  *              13-nov-02        reuse= allow used points to be flagged as used (unfinished) PJT
  *              30-jan-03   2.10 allow vel.error  in tabular input if dens=t    pjt
  *              12-feb-03   2.10a  fix residual velfie as done in rotcurshape   PJT
+ *
+ *               4-oct-03   2.11 added option to use the WWB73 method     PJT
  ******************************************************************************/
 
 
@@ -79,6 +82,12 @@
  *        is a  right-handed mathematical system, "X to the right, Y up"
  *        and that we screw the astronomical one, and force dx and dy > 0
  *        for images (mostly they will have dx < 0 , dy > 0)
+ *
+ *      - contrain the geometry (VSYS,XPOS,YPOS,PA,INC) to be the same
+ *        over a set of rings, but still find their errors.
+ *        This is a big change, and it will need new fitting functions
+ *
+ *      - allow expansion term, and person elliptical like streaming
  *
  */
 
@@ -130,7 +139,8 @@ string defv[] = {
     "fitmode=cos,1\n Basic Fitmode: cos(n*theta) or sin(n*theta)",
     "nsigma=-1\n     Iterate once by rejecting points more than nsigma resid",
     "imagemode=t\n   Input image mode? (false means ascii table)",
-    "VERSION=2.10a\n 12-feb-03 PJT",
+    "wwb73=f\n       Use simpler WWB73 linear method of fitting",
+    "VERSION=2.11\n  4-oct-03 PJT",
     NULL,
 };
 
@@ -155,6 +165,7 @@ int  itmax;
 bool Qimage;      /* input mode */   
 bool Qfirstring;
 bool Qreuse;      /* reuse points from other rings ? */
+bool Qwwb73;      /* use WWB73 method of linear fitting? */
 
 /* Compute engine, derivative and beam smearing correction functions:
  * _c1 = cos(theta)	
@@ -357,7 +368,7 @@ stream  lunpri;       /* LUN for print output */
 
     velstr = stropen(input,"r");                /* open velocity field */   
     Qdens = hasvalue("dens");                /* check if density given */
-    if (Qimage) {
+    if (Qimage) {                          /* get data from an image */
       read_image(velstr,&velptr);                 /* get data */
       copy_image(velptr,&resptr);
       if (Qreuse) {
@@ -366,7 +377,7 @@ stream  lunpri;       /* LUN for print output */
 	for (j=0; j<Ny(maskptr); j++)
 	  MapValue(maskptr,i,j) = TRUE;
       }
-    } else {
+    } else {                                    /* get data from a table */
       n_vel = nemo_file_lines(input,100000);
       xpos_vel = (real *) allocate(n_vel * sizeof(real));
       ypos_vel = (real *) allocate(n_vel * sizeof(real));
@@ -687,6 +698,7 @@ stream  lunpri;       /* LUN for print output */
     *nsigma = getdparam("nsigma");
 
     Qreuse = getbparam("reuse");
+    Qwwb73 = getbparam("wwb73");
 }
 
 /*
@@ -762,10 +774,14 @@ stream lunres;   /* file for residuals */
     getdat(x,y,w,idx,res,&n,MAXPTS,p,ri,ro,thf,wpow,&q,side,&full,nfr);  /* this ring */
     for (i=0;i<n;i++) iblank[i] = 1;
 
+
     h=0;                                           /* reset itegration counter */
     nblank=0;
 
     perform_out(h,p,n,q);                             /* show first iteration */
+    if (Qwwb73) {
+      return 1;
+    }
     do {                                   /* and start the outer REPEAT loop */
          h++;                                               /* next iteration */
          chi=q;                                           /* save chi-squared */
