@@ -1,0 +1,60 @@
+.TH CCDFFT 1NEMO "7 July 1989" 
+.SH NAME
+ccdfft \- 2D fourier transform of a map
+.SH SYNOPSIS
+.PP
+\fBccdfft ini=\fPimage  \fBoutr=\fPimage [parameter = value ...]
+.SH DESCRIPTION
+\fBccdfft\fP applies a Fast Fourier Transform to the input map(s).
+.PP
+Input maps musthave sizes which are powers of 2.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 20
+\fBinr=\fIreal-in-map\fP
+input file name, in \fIimage(5NEMO)\fP format. This file is taken
+as the real part of the map to be transformed. 
+[no default].
+.TP
+\fBini=\fPima-in-map\fP
+input file name, in \fIimage(5NEMO)\fP format. This file is taken
+as the imaginary part of the map to be transformed. If no filename
+is given, the input map is assumed to be real. [default: not used].
+.TP
+\fBoutr=\fIreal-out-map\fP
+output file, will be in \fIimage(5NEMO)\fP format. Will store the
+real part of the transform. [no default]
+.TP
+\fBouti=\fIima-out-map\fP
+output file, will be in \fIimage(5NEMO)\fP format. Will store the
+imaginary part of the transform [no default].
+.SH TIMING
+Performance on Rigel (SUN 3/160, 16Mhz):
+.nf
+.ta +1i +2i +2i
+100 * 100	
+200 * 200	
+300 * 300	
+512 * 512	
+.fi
+.SH STORAGE REQUIREMENT
+Totals to \fI24.NX.NY\fP bytesm\, which break down as follows:
+Only two images will be stored im memory, taking up \fI16.NX.NY\fP bytes, for
+as long as images are stored in double. The actual fourier transform
+is done in float, and thiis requires a dynamically allocated scratch
+array of size \fI8.NX.NY\fP.
+.SH "SEE ALSO"
+ccdmath(1NEMO), image(5NEMO), tsf(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+~/src/pjt/image  	ccdfft.c ccdfft.1
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+ 7-Jul-89	V1.0: Created	PJT
+.fi
