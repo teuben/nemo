@@ -1,0 +1,68 @@
+.TH MILLER 5NEMO "13 July 1994" 
+.SH NAME
+miller \- ascii (plot) format for Miller's N-body snapshot files
+.SH SYNOPSIS
+.nf
+c     print two consecutive steps from movie file
+c       for peter teuben
+c       source teuben.f on humbabe  10 july 1994
+      program main
+c
+      integer karr(64),kcoord(4,2048)
+      real ahold(2048),rarr(64)
+      equivalence (karr(1),rarr(1))
+c
+      open(9,file='awobl8f',form='unformatted',status='old')
+c
+      kstep=767
+c     steps kstep and kstep+1 will be extracted and formatted
+   10 continue
+      read(9,end=270) karr
+      read(9,end=270) ahold
+      if (karr(1).lt.kstep) go to 10
+c     skip up to one less than desired step number
+c
+      write(6,9019) rarr(31)
+      do 40 k=1,32,16
+         ku=min0(k+15,30)
+   40    write(6,9020)(karr(j),j=k,ku)
+      do 50 k=33,64,8
+         ku=k+7
+   50    write(6,9022)(rarr(j),j=k,ku)
+c
+      call unpack1(kcoord,ahold)
+c     unpack1 is a subroutine that unpacks our compact ahold(2048) into
+c        array kcoord(4,2048) of integers.
+c
+      do 60 kp=1,2048
+   60    write(6,9030) (kcoord(k,kp),k=1,4)
+      write(6,9033)
+c
+      if (karr(1).le.kstep) go to 10
+c
+  270 continue
+c
+ 9019 format(2x,a8)
+ 9020 format(2x,16i8)
+ 9022 format(2x,8e13.5)
+ 9030 format(4i7)
+ 9033 format(/)
+c
+      stop
+      end
+.fi
+.SH DESCRIPTION
+\fImiller\fP is (one of?) the ascii plot format(s) used by Miller & Smith in 
+their N-body codes. It typically only outputs a fraction of the particles
+used in the integration, and does not contain velocity information.
+Instead, two adjacent snapshots are used to construct velocities.
+A sample implementation of converting this format to \fIsnapshot(5NEMO)\fP.
+.SH "SEE ALSO"
+miller(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH "UPDATE HISTORY"
+.nf
+.ta +2.0i +2.0i
+13-jul-94	man written 	PJT
+.fi
