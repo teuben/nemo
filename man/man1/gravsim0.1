@@ -1,0 +1,91 @@
+.TH GRAVSIM0 1NEMO "16 JUL 1991"
+.SH NAME
+gravsim0 \- NEMO frontend for the GRAVSIM family of programs
+.SH SYNOPSIS
+\fBgravsim0\fP [parameter=value]
+.SH DESCRIPTION
+\fIgravsim0\fP is a NEMO frontend to run any of the GRAVSIM family of
+programs, such that NEMO datafile are given, converted on the fly to
+GRAVSIM format, the specified GRAVSIM integrator is run, and output
+files in GRAVSIM format are converted back to NEMO format.
+.PP 
+This program works by writing a C-shell script \fBgravsim\fP\fIpid\fP, 
+where \fIpid\fP is the process ID (see \fIgetpid(3)\fP). This script
+is then executed via \fIexecl(3)\fP, and kept in the current working
+directory.
+.PP
+Since this program uses the following NEMO programs, they need
+to have been installed: \fIstoa, 205-to-gdff, gdff-editor, gravsim*, 
+gdff-to-205\fP and \fIatos\fP.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Snapshot input filename. No default.
+.TP 20
+\fBout=\fP
+Snapshot output filename. No default.
+.TP 20
+\fBprog=\fP
+GRAVSIM Program to run. [Default: \fBgravsim\fP].
+.TP 20
+\fBclean=\fP
+Clean up temp files? [Default: \fBt\fP].
+............................. remaining for GRAVSIM
+.TP 20
+\fBtitle=\fP
+Title for the run    [Default: not used].
+.TP 20
+\fBprocessors=\fP
+Number of processors that can be used  [Default: \fB1\fP].
+.TP 20
+\fBcells=\fP
+Number of cells to be allocated  
+.TP 20
+\fBsplit-number=\fP
+...       
+.TP 20
+\fBstart-time=\fP
+Start time for run    [Default: \fB0.0\fP].
+.TP 20
+\fBend-time=\fP
+Stop time for run    [Default: \fB2.0\fP].
+.TP 20
+\fBeps=\fP
+Softening length      [Default: \fB0.025\fP].
+.TP 20
+\fBtol=\fP
+Tolerance       [Default: \fB1.0\fP]
+.TP 20
+\fBdata-step=\fP
+Major Output of data    [Default: \fB0.25\fP].
+.TP 20
+\fBreport-step=\fP
+Minor Output of energy etc.   [Default: \fB0.03125\fP].
+.TP 20
+\fBg-value=\fP
+Gravitational constant      [Default: \fB1.0\fP].
+.TP 20
+\fBtime-step=\fP
+Integration time step     [Default: \fB0.03125\fP].
+.SH SEE ALSO
+gravsim(8GRAVSIM)
+.SH AUTHOR
+Peter Teuben, Mark Bellon
+.SH BUGS
+This program has not been tested extensively, it also serves as
+another example to bind existing N-body integrators into NEMO.
+The Aarseth NBODY family of N-body integrators shows another method
+of doing the same job.
+.SH FILES
+.nf
+.ta +2.5i
+usr/mbellon/gravsim/	Source tree for GRAVSIM package (env.var. GRAVSIM)
+usr/pjt/nbody      	gravsim0.c 
+.fi
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+16-Jul-91	V0.0 document Created NEMO
+.fi

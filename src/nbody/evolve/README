@@ -1,0 +1,6 @@
+aarseth:	the NBODYx series of direct integrators
+hackcode:	the C version of the treecode
+potcode:	toy version to orbit particles in a fixed potential
+treecode:	the original Hernquist Fortran version of the treecode
+treecode2:	Hernquist treecode, modified for non-recursive machines
+gravsim:	NEMO Emulator to call gravsim family of programs
