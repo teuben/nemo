@@ -178,10 +178,16 @@ local void printquart(real result[], int nbody, real tsnap)
 	   result[nbody-1]);
 }
 
+/* should have prototype :: int (*compar)(const void *, const void *)) */
+
 local int cmpreal(real *ap, real *bp)
 {
     return (*ap < *bp ? -1 : *ap > *bp ? 1 : 0);
 }
+
+
+
+
 
 #endif
 

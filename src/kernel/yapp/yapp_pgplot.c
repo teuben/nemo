@@ -16,6 +16,7 @@
  *	 5-dec-99	resurrecting pl_matrix using pggray()		  
  *                      and trying a new pl_contour() from PGPLOT         PJT
  *	21-jan-00       added pl_cursor from tabplot			  PJT
+ *      31-dec-03       added yapp_meta                                   PJT
  */
 
 #include <stdinc.h>
