@@ -294,6 +294,9 @@ typedef real (*rproc)();
 #define  SYM_ANGLE(phi)    ((phi) - TWO_PI * floor(((phi)+PI)/TWO_PI ))
 
 /*
+ * Some "useful" macro's:    this is where C just falls down,
+ *		             everybody pretty much comes up with these names....
+ *
  *  ABS: returns the absolute value of its argument
  *  SGN: returns the sign of its argument
  *  MIN: returns the argument with the lowest value
@@ -304,15 +307,21 @@ typedef real (*rproc)();
  *  Note: be aware of side effects here
  */
 
+#ifdef ABS
+#  undef ABS
+#endif
 #define   ABS(x)       (((x) < 0) ? -(x) : (x))
+
 #ifdef MIN	/* WD 13/03/03: added to prevent clash with other definitions */
 #  undef MIN
 #endif
 #define   MIN(x,y)     (((x) < (y)) ? (x) : (y))
+
 #ifdef MAX      /* WD 13/03/03: added to prevent clash with other definitions */
 #  undef MAX
 #endif
 #define   MAX(x,y)     (((x) > (y)) ? (x) : (y))
+
 #define   SGN(x)       (((x) < 0) ? (-1) : ((x) > 0) ? 1 : 0)
 #if 0
 /* nrutil.h defines SIGN(a,b) */

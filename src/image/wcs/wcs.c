@@ -103,7 +103,7 @@ nemo_main()
 
 to_hms(double dval, int *dd, int *mm, double *ss)
 {
-  int sign = SIGN(dval);
+  int sign = SGN(dval);
   dval = ABS(dval)/15.0;
   *dd = (int) floor(dval);
   dval = (dval-(*dd))*60.0;
@@ -114,7 +114,7 @@ to_hms(double dval, int *dd, int *mm, double *ss)
 
 to_dms(double dval, int *dd, int *mm, double *ss)
 {
-  int sign = SIGN(dval);
+  int sign = SGN(dval);
   dval = ABS(dval);
   *dd = (int) floor(dval);
   dval = (dval-(*dd))*60.0;
