@@ -1,0 +1,37 @@
+.TH ORBLIST 1NEMO "2 June 1988" 
+.SH NAME
+orblist \- list an orbit
+.SH SYNOPSIS
+.PP
+\fBorbint in=\fPorbit [parameter=value]
+.SH DESCRIPTION
+\fBorblist\fP will list positions and velocities of an orbit. Lists all
+available timesteps for the moment.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 20
+\fBin=\fIin-file\fP
+input file, in \fIorbit(5NEMO)\fP format [no default]
+.TP
+\fBn=\fInumber\fP
+number of steps to skip between each listed timestep [default: \fB1\fP].
+.TP
+\fBdt=\fItime-step\fP
+time step (constant) to be taken [default: \fB0.1\fP].
+.SH "SEE ALSO"
+tsf(1NEMO), potential(5NEMO), newton0(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+~src/pjt/orbit  	orblist.1 orblist.c
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+xx-jul-87	V1.0: Created: simple Eulerian	PJT
+28-jul-87	V2.0: new orbit(5) structure	PJT
+ 2-Jun-88	V2.1: new filestruct, code same	PJT
+.fi
