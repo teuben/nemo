@@ -15,7 +15,7 @@
  *      21-mar-03  1.7  optional bootstrapping to check on errors
  *       4-apr-03  1.8  added dypow= keyword, and fixed bug in handling dycol=
  *      10-mar-04  1.8b added Lorentzian fitting, fixed setting lab= for loadable functions
- *      16-apr-04  1.9  added printing out the chi-squared or RMS or whatever it can do
+ *      17-apr-04  1.9a added printing out the chi-squared or RMS or whatever it can do
  *
  *  line       a+bx
  *  plane      p0+p1*x1+p2*x2+p3*x3+.....     up to 'order'   (a 2D plane in 3D has order=2)
@@ -56,7 +56,7 @@ string defv[] = {
     "bootstrap=0\n      Bootstrapping to estimate errors",
     "seed=0\n           Random seed initializer",
     "numrec=f\n         Try the numrec routine instead?",
-    "VERSION=1.9\n      16-mar-04 PJT",
+    "VERSION=1.9\n      17-apr-04 PJT",
     NULL
 };
 
@@ -126,6 +126,9 @@ extern int    nllsqfit(real *, int, real *, real *, real *, int, real *, real *,
 		       int, real, int, real, my_proc1, my_proc2);
 
 extern double  xrandom(double a, double b);
+
+extern real gammq(real a, real x);    /* from nr */
+
 
 
 
@@ -293,18 +296,6 @@ static void derv_arm3(real *x, real *p, real *e, int np)
   e[4] = sin(3*y);
 }
 
-real data_rms(int n, real *d)
-{
-  int i;
-  Moment m;
-
-  ini_moment(&m, 2);
-  for (i=0; i<n; i++)
-    accum_moment(&m,d[i],1.0);
-  return sigma_moment(&m);
-    
-}
-
 
 /****************************** START OF PROGRAM **********************/
 
@@ -424,6 +415,32 @@ setrange(real *rval, string rexp)
     	warning("Range taken from 0 - %g",rval[1]);
     }
 }
+
+
+
+real data_rms(int n, real *d, real *dy, int m)
+{
+  int i;
+  real sum = 0.0;
+
+  if (dy)
+    for (i=0; i<n; i++) {
+      dprintf(1,"DEBUG(i,d,w) %d %g %g\n",i,d[i],dy[i]);
+      sum += sqr(d[i])*dy[i];    /* dy was converted to 1/sigma^2 */
+    }
+  else
+    for (i=0; i<n; i++)
+      sum += sqr(d[i]);
+
+  printf("rms2/chi2= %g\n",sum);
+#if 0
+  return sqrt(sum);
+#else
+  return gammq(0.5*(n-m), 0.5*sum);
+#endif
+    
+}
+
 
 read_data()
 {
@@ -454,8 +471,7 @@ read_data()
         npt = -npt;
        	warning("Could only read %d data",npt);
     }
-    if (dycolnr>0 && dypow != 1) {
-      dprintf(1,"New feature dypow=: weights are dycol**(%g)",dypow);
+    if (dycolnr>0) {         /* convert dy such that it's a weight now */
       ncount = 0;
       for(i=0; i<npt; i++) {
 	if (dycol.dat[i] < 0) 
@@ -483,6 +499,9 @@ read_data()
     }
        
     if (npt==0) error("No data");
+
+    for (i=0; i<npt; i++)
+      dprintf(2,"DATA(x,y,w): %g %g %g\n",xcol[0].dat[i],ycol[0].dat[i], dycolnr>0 ? dycol.dat[i] : 1.0);
 }
 
 
@@ -755,6 +774,7 @@ do_line()
   if (outstr)
     for (i=0; i<npt; i++)
       fprintf(outstr,"%g %g %g\n",x[i],y[i],d[i]);
+  printf("rms/chi = %g\n",data_rms(npt,d,dy,2));
   free(d);
 }
 
@@ -882,7 +902,7 @@ do_gauss()
   if (outstr)
     for (i=0; i<npt; i++)
       fprintf(outstr,"%g %g %g\n",x[i],y[i],d[i]);
-  printf("rms = %g\n",data_rms(npt,d));
+  printf("rms/chi = %g\n",data_rms(npt,d,dy,4));
 }
 
 
@@ -1109,7 +1129,7 @@ do_loren()
   if (outstr)
     for (i=0; i<npt; i++)
       fprintf(outstr,"%g %g %g\n",x[i],y[i],d[i]);
-  printf("rms = %g\n",data_rms(npt,d));
+  printf("rms/chi = %g\n",data_rms(npt,d,dy,2));
   free(d);
 
 }
