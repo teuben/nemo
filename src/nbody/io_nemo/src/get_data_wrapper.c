@@ -26,8 +26,6 @@ int get_data_gen(stream instr, char * TypeTag,char * DataType,
 {
   if (*genptr == NULL)
     *genptr = ( void **) allocate(size_alloc);
-  if (*genptr == NULL)
-    error("Pas assez de memoire dans \"get_data_gen\"\n");
   get_data_coerced(instr, TypeTag, DataType,*genptr, nbody,
                    dim1,dim2,0);
   return 0;
