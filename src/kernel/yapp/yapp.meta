@@ -1,0 +1,207 @@
+plinit  0.00 20.00  0.00 20.00 yapp.meta
+pldraw  0.00  0.00
+plline 20.00  0.00
+plline 20.00 20.00
+plline  0.00 20.00
+plline  0.00  0.00
+plline 20.00 20.00
+pldraw 20.00  0.00
+plline  0.00 20.00
+plltype 12 0
+pldraw  4.00 18.00
+plline 16.00 18.00
+plltype -6 0
+pldraw  6.00 18.00
+plline 14.00 18.00
+plltype 1 1
+pldraw  1.00 12.00
+plline  3.00 12.00
+plpoint  3.50 12.00
+plltype 1 1
+pldraw  1.50 11.80
+plline  2.50 11.80
+pldraw  1.50 11.60
+plline  3.50 11.60
+pldraw  1.50 11.40
+plline  4.50 11.40
+pldraw  1.50 11.20
+plline  5.50 11.20
+plltype 2 1
+pldraw  1.00 11.00
+plline  3.00 11.00
+plpoint  3.50 11.00
+plltype 1 2
+pldraw  1.50 10.80
+plline  2.50 10.80
+pldraw  1.50 10.60
+plline  3.50 10.60
+pldraw  1.50 10.40
+plline  4.50 10.40
+pldraw  1.50 10.20
+plline  5.50 10.20
+plltype 3 1
+pldraw  1.00 10.00
+plline  3.00 10.00
+plpoint  3.50 10.00
+plltype 1 3
+pldraw  1.50  9.80
+plline  2.50  9.80
+pldraw  1.50  9.60
+plline  3.50  9.60
+pldraw  1.50  9.40
+plline  4.50  9.40
+pldraw  1.50  9.20
+plline  5.50  9.20
+plltype 4 1
+pldraw  1.00  9.00
+plline  3.00  9.00
+plpoint  3.50  9.00
+plltype 1 4
+pldraw  1.50  8.80
+plline  2.50  8.80
+pldraw  1.50  8.60
+plline  3.50  8.60
+pldraw  1.50  8.40
+plline  4.50  8.40
+pldraw  1.50  8.20
+plline  5.50  8.20
+plltype 1 1
+plcircle 15.00  9.00  0.50
+plcircle 16.00  9.00  0.25
+plcircle 17.00  9.00  0.12
+plcircle 18.00  9.00  0.06
+plbox 16.00  8.00  0.40
+plbox 17.00  8.00  0.20
+plbox 18.00  8.00 -0.20
+plcross 16.00  7.00  0.40
+plcross 17.00  7.00  0.20
+plcross 18.00  7.00 -0.20
+pltext  8.00  5.00  0.50  0.00 Foo Bar!
+pltext  8.00  3.00  0.25  0.00 Fum Bar!
+pltext 16.00 10.00  0.20  0.00  testing angles
+pltext 16.00 10.00  0.20 45.00  testing angles
+pltext 16.00 10.00  0.20 90.00  testing angles
+pltext 16.00 10.00  0.20 135.00  testing angles
+pltext 16.00 10.00  0.20 180.00  testing angles
+pldraw 10.00  8.50
+plline 10.00 11.50
+pljust -1
+pltext 10.00  9.00  0.25  0.00 left justified
+pljust 0
+pltext 10.00 10.00  0.25  0.00 centered
+pljust 1
+pltext 10.00 11.00  0.25  0.00 right justified
+pljust 0
+pltext 10.00 19.00  0.50  0.00 TEUBEN
+pl_screendump
+plflush
+plframe
+pldraw  0.00  0.00
+plline 20.00  0.00
+plline 20.00 20.00
+plline  0.00 20.00
+plline  0.00  0.00
+pljust 0
+pltext 10.00 10.00  0.25  0.00 This is page 2
+pldraw  0.00  0.00
+plline  0.00  0.00
+plline  0.20  0.20
+plline  0.40  0.40
+plline  0.60  0.60
+plline  0.80  0.80
+plline  1.00  1.00
+plline  1.20  1.20
+plline  1.40  1.40
+plline  1.60  1.60
+plline  1.80  1.80
+plline  2.00  2.00
+plline  2.20  2.20
+plline  2.40  2.40
+plline  2.60  2.60
+plline  2.80  2.80
+plline  3.00  3.00
+plline  3.20  3.20
+plline  3.40  3.40
+plline  3.60  3.60
+plline  3.80  3.80
+plline  4.00  4.00
+plline  4.20  4.20
+plline  4.40  4.40
+plline  4.60  4.60
+plline  4.80  4.80
+plline  5.00  5.00
+plline  5.20  5.20
+plline  5.40  5.40
+plline  5.60  5.60
+plline  5.80  5.80
+plline  6.00  6.00
+plline  6.20  6.20
+plline  6.40  6.40
+plline  6.60  6.60
+plline  6.80  6.80
+plline  7.00  7.00
+plline  7.20  7.20
+plline  7.40  7.40
+plline  7.60  7.60
+plline  7.80  7.80
+plline  8.00  8.00
+plline  8.20  8.20
+plline  8.40  8.40
+plline  8.60  8.60
+plline  8.80  8.80
+plline  9.00  9.00
+plline  9.20  9.20
+plline  9.40  9.40
+plline  9.60  9.60
+plline  9.80  9.80
+plline 10.00 10.00
+plline 10.20 10.20
+plline 10.40 10.40
+plline 10.60 10.60
+plline 10.80 10.80
+plline 11.00 11.00
+plline 11.20 11.20
+plline 11.40 11.40
+plline 11.60 11.60
+plline 11.80 11.80
+plline 12.00 12.00
+plline 12.20 12.20
+plline 12.40 12.40
+plline 12.60 12.60
+plline 12.80 12.80
+plline 13.00 13.00
+plline 13.20 13.20
+plline 13.40 13.40
+plline 13.60 13.60
+plline 13.80 13.80
+plline 14.00 14.00
+plline 14.20 14.20
+plline 14.40 14.40
+plline 14.60 14.60
+plline 14.80 14.80
+plline 15.00 15.00
+plline 15.20 15.20
+plline 15.40 15.40
+plline 15.60 15.60
+plline 15.80 15.80
+plline 16.00 16.00
+plline 16.20 16.20
+plline 16.40 16.40
+plline 16.60 16.60
+plline 16.80 16.80
+plline 17.00 17.00
+plline 17.20 17.20
+plline 17.40 17.40
+plline 17.60 17.60
+plline 17.80 17.80
+plline 18.00 18.00
+plline 18.20 18.20
+plline 18.40 18.40
+plline 18.60 18.60
+plline 18.80 18.80
+plline 19.00 19.00
+plline 19.20 19.20
+plline 19.40 19.40
+plline 19.60 19.60
+plline 19.80 19.80
+plstop
