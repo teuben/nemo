@@ -77,8 +77,8 @@ proc force;		/* acceleration calculation */
 real dt;		/* integration time step */
 int mode;		/* select integration algorithm */
 {
-    if (mode == -1) {			        /* epicycle analytical orbit */
-        epistep(btab, nb, tptr, force, dt);	/* take epicycle step */
+    if (mode < 0) {			        /* epicycle analytical orbit */
+        epistep(btab, nb, tptr, force, dt, mode);/* take epicycle step */
     } else if (mode == 0) {                     /* simplest Eulerian */
         eulerstep(btab, nb, tptr, force, dt);
         (*force)(btab, nb, *tptr);              /* compute new force */
@@ -298,12 +298,14 @@ real dt;		/* integration time step */
     *tptr += dt;
 }
 
-epistep(btab, nb, tptr, force, dt)
+
+epistep(btab, nb, tptr, force, dt, mode)
 bodyptr btab;		/* array of bodies */
 int nb;			/* number of bodies */
 real *tptr;		/* current time */
 proc force;		/* acceleration calculation */
 real dt;		/* integration time step */
+int mode;               /* -1: normal  -2: only epi motion */
 {
   bodyptr p;
   body tmp1;
@@ -325,13 +327,13 @@ real dt;		/* integration time step */
     Pos(p)[1] = Acc(p)[1];
     Pos(p)[2] = Acc(p)[2];   /* this one better be 0 */
 
-#if 1
-    dx = cosodt * Pos(p)[0] - sinodt * Pos(p)[1];    /* incr rotate by Omega * dt */
-    dy = sinodt * Pos(p)[0] + cosodt * Pos(p)[1];
-#else
-    dx = Pos(p)[0];                           /* don't rotate, to test just epi's */
-    dy = Pos(p)[1];
-#endif
+    if (mode == -1) {
+      dx = cosodt * Pos(p)[0] - sinodt * Pos(p)[1];    /* incr rotate by Omega * dt */
+      dy = sinodt * Pos(p)[0] + cosodt * Pos(p)[1];
+    } else {
+      dx = Pos(p)[0];                           /* don't rotate, to test just epi's */
+      dy = Pos(p)[1];
+    }
     Acc(p)[0] = dx;          /* cheat: store guiding center in Acc */
     Acc(p)[1] = dy;
     Acc(p)[2] = 0.0;
