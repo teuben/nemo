@@ -1,0 +1,36 @@
+%N snap3dv
+%D convert snapshot for 3d viewing formats
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man snap3dv' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input snapshot [???]
+%A out
+	Output ascii file for 3DV [???]
+%A xvar
+	X-bodytrans variable to view [x]
+%A yvar
+	Y-bodytrans variable to view [y]
+%A zvar
+	Z-bodytrans variable to view [z]
+%A xrange
+	X-range of variables [autoscale] []
+%A yrange
+	Y-range of variables [autoscale] []
+%A zrange
+	V-range of variables [autoscale] []
+%A time
+	Time to select (default: first one) []
+%A visib
+	Visibility bodytrans (0=no >=yes & layer number) [1]
+%A color
+	Color of particles (bodytrans) [3]
+%A border
+	Color and Color-1 of borders (0=not plotted) [0]
+%A format
+	Format used to store floating point coords X,Y,Z [%f]
+%A mode
+	Output mode {3dv, acd, dxf, wld, xyzc, x3d} [3dv]
+%A VERSION
+	3-feb-92 PJT [1.0c]
