@@ -4,6 +4,7 @@
  *      4-mar-94    ansi            pjt
  *     22-jan-95    fixed real=float problems
  *     20-jun-01    gcc3
+ *     15-mar-05    proper real_proc for c++
  *
  */
 
@@ -62,7 +63,7 @@ void inip_grid(
     int n,
     real fmin,
     real fmax,
-    rproc f)
+    real_proc f)
 {
     g->mode = GRID_PROC;
     g->n = n;

@@ -27,12 +27,12 @@ libraries.  I find most of them at best fair.
 #endif
 
 local int n = 0;
-local rproc lastfun=NULL;
+local real_proc lastfun=NULL;
 local real coeff[MAXN*3], t[MAXN], f[MAXN], cf[MAXN];
 
 extern double xrandom(double, double);
 
-double frandom(double a, double b, rproc fun)
+double frandom(double a, double b, real_proc fun)
 {
    double x, dx;
    int i;
