@@ -1,0 +1,98 @@
+.TH TABPAIRS 1NEMO "23 June 2000"
+.SH NAME
+tabpairs \- analyze interaction histories of stars in a starlab simulation
+.SH SYNOPSIS
+\fBtabpairs\fP [parameter=value]
+.SH DESCRIPTION
+\fBtabpairs\fP reads a pre-processed (grep/awk) log file from a
+starlab simulation, and performs various statistics on this table.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input file name (table). No default.
+.TP
+\fBstar=\fP
+Select the star to show detailed interaction history of. 
+Default: none
+.TP
+\fBcount=\fP
+Count occurance of all stars? [f]  
+.TP
+\fBdelete=\fP
+Number of iterations to delete obvious combo/splitting pairs
+of the same interaction list. Default: 0.
+.TP
+\fBnmax=\fP
+maximum number of data to be read if from a pipe. [10000]
+.SH EXAMPLES
+First the LOG file from a simulation must be trimmed down by
+grepping for \Itop_level_node\P and 
+\fIrelative E/mu\fP, for example as follows:
+.nf
+    egrep 'top_level_node|relative E/mu' LOG 
+.fi
+after which a script \fBlog2tab.awk\fP will turn this otherwise
+still messy looking output in a simplified table that can then
+be read by \fBtabpairs\fP:
+.nf
+    egrep 'top_level_node|relative E/mu' LOG | log2tab.awk > LOG.tab
+    tabpairs LOG.tab count=t > LOG1.count
+    tabpairs LOG.tab count=t delete=t > LOG2.count
+.fi
+
+.SH SEE ALSO
+.SH LOG2TAB
+Here's a version of the \fBlog2tab.awk\fP script:
+.nf
+#! /bin/awk -f
+#
+#split_top_level_node: splitting (953,(8587,2559)) at time 2232.54
+#split_top_level_node: splitting ((2559,8512),8587) at time 2232.54
+#split_top_level_node: splitting (3403,((3940,1130),7781)) at time 2294.29
+#combine_top_level_nodes: combining (659,9654) and 4348 at time 2278.07
+#combine_top_level_nodes: combining ((8429,3078),3440) and 8161 at time 2292.19
+#
+
+BEGIN {
+}
+
+{
+    if ($2 == "combining") {
+        n1 = $3;
+        n2 = $5;
+        t = $8;
+        getline;
+        e = $4;
+	p = $7;
+        if (e<0) 
+		print 1,t,e,p,n1,n2;
+	else
+		print 1,t,e,0,n1,n2;
+    } else if ($2 == "splitting") {
+        n1 = $3;
+        t = $6;
+        getline;
+        e = $4;
+	p = $7;
+        if (e<0) 
+		print -1,t,e,p,n1;
+	else
+		print -1,t,e,0,n1;
+    } else
+        print "# Something wrong on line",$0
+
+}
+
+END {
+}
+
+.fi
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+22-Jun-00	V1.0 Created - at AMNH visit    	PJT
+.fi
