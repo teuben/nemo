@@ -1,0 +1,58 @@
+#! /bin/csh -f
+#
+#	plot 12 frames in time series
+
+if ($#argv != 14) then
+   echo Warning, expecting 14 arguments
+   echo Usage: $0 file size t1 t2 t3 t4 t5 t6 t7 t8 t9 t10 t11 t12
+   echo This script uses files of the name junk.XX and junk.XX.xy
+   echo and will first of all delete all junk files.
+endif
+if ($#argv < 3) then
+   echo Error: at least 3 arguments needed 
+   exit
+endif
+set file=$1
+set size=$2
+shift
+shift
+
+echo "Snapplot series using mongo: file=$file abs(x/yrange)=$size"
+echo "Deleting all junk files in 10 seconds...."
+sleep 10
+echo "Gone off..."
+touch junk ; rm -f junk*
+set n=0
+foreach time ($*)
+  snaptrim $file junk.$n times=$time
+  snapprint junk.$n x,y > junk.$n.xy
+  rm junk.$n
+  @ n++
+end
+
+if ($n < 12) then
+   loop:
+      touch junk.$n.xy
+      @ n++
+      if ($n == 12) then
+         goto plot
+      else
+         goto loop
+      endif
+endif
+
+plot:
+
+echo Script will now run mongo, you have 15 seconds to still abort this...
+sleep 15
+echo Gone of into mongo-land now...
+echo "limits -$size $size -$size $size" > junk.mon
+cat $NEMOPATH/mongo/sps12.mon >>junk.mon
+mongo <<END
+printer 5
+input junk.mon
+hardc
+END
+
+done:
+echo "All done, please remove the temporary junk--- files"
