@@ -30,6 +30,7 @@
  *      21-jul-00  V2.3  : allow autoscaling on half (min OR max) an axis
  *      23-sep-01      a : ->nemo_file_lines
  *       6-oct-01  V2.4  : fixed Y autoscale if all Y's have the same value
+ *       2-aug-02  V2.5  : allow multiple X columns, forces pairwise xcol,ycol plotting
  *
  */
 
@@ -52,15 +53,15 @@
 #define NaN 0x7FFFFFFF
 #endif
 
-#define MAXYCOL 256
+#define MAXCOL  256
 #define MAXCOORD 16
 
 /**************** COMMAND LINE PARAMETERS **********************/
 
 string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "in=???\n            Input file name (table)",
-    "xcol=1\n		 x coordinate column",
-    "ycol=2\n		 y coordinate column",
+    "xcol=1\n		 x coordinate column(s)",
+    "ycol=2\n		 y coordinate column(s)",
     "xmin=\n		 X-min value if not autoscaled",
     "xmax=\n		 X-max value if not autoscaled",
     "ymin=\n		 Y-min value if not autoscaled",
@@ -83,7 +84,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "fullscale=f\n       Use full autoscale in one axis if other autoscaled?",
     "cursor=\n           Optional output file to retrieve cursor coordinates",
     "layout=\n           Optional input layout file",
-    "VERSION=2.4\n	 6-oct-01 PJT",
+    "VERSION=2.5\n	 2-aug-02 PJT",
     NULL
 };
 
@@ -94,10 +95,10 @@ string usage = "general table plotter";
 local string input;				/* filename */
 local stream instr;				/* input file */
 
-local int xcol, ycol[MAXYCOL], nycol;		/* column numbers */
+local int xcol[MAXCOL], ycol[MAXCOL], nxcol, nycol;	/* column numbers */
 local real xrange[2], yrange[2];		/* range of values */
 
-local real  *x, *y[MAXYCOL]; 			/* data from file */
+local real  *x[MAXCOL], *y[MAXCOL]; 			/* data from file */
 local real *xp, *yp, *xps, *yps;              /* rebinned data (if needed) */
 local int    npt;				/* actual number of data points */
 local int    np;                              /* actual number of rebinned data */
@@ -117,9 +118,9 @@ local int    nmax;				/* lines to allocate */
 local string headline;			/* text string above plot */
 local string xlab, ylab;			/* text string along axes */
 local real xplot[2],yplot[2];		        /* borders of plot */
-local int    yapp_line[2*MAXYCOL];            /* thickness and pattern of line */
-local int    yapp_color[MAXYCOL];	      /* color per column */
-local real yapp_point[2*MAXYCOL];             /* what sort of point to plot */
+local int    yapp_line[2*MAXCOL];            /* thickness and pattern of line */
+local int    yapp_color[MAXCOL];	      /* color per column */
+local real yapp_point[2*MAXCOL];             /* what sort of point to plot */
 local string errorbars;                       /* x or y or both (xy) */
 local real xcoord[MAXCOORD], ycoord[MAXCOORD];/* coordinate lines */
 local int nxcoord, nycoord;
@@ -152,43 +153,48 @@ void setparams()
     int  i, j;
    
     input = getparam("in");             /* input table file */
-    xcol = getiparam("xcol");           /* x column */
-    nycol = nemoinpi(getparam("ycol"),ycol,MAXYCOL);
+    nxcol = nemoinpi(getparam("xcol"),xcol,MAXCOL);
+    nycol = nemoinpi(getparam("ycol"),ycol,MAXCOL);
+    if (nxcol < 1) error("Error parsing xcol=%s",getparam("xcol"));
     if (nycol < 1) error("Error parsing ycol=%s",getparam("ycol"));
+    if (nxcol > 1 && nycol != nxcol) 
+      error("nxcol=%d nycol=%d cannot be paired properly",nxcol,nycol);
 
     nmax = nemo_file_lines(input,getiparam("nmax"));
-    dprintf(0,"Allocated %d lines for table\n",nmax);
-    x = (real *) allocate(sizeof(real) * (nmax+1));          /* X data */
+    dprintf(1,"Allocated %d lines for table\n",nmax);
+    for (j=0; j<nxcol; j++)
+        x[j] = (real *) allocate(sizeof(real) * (nmax+1));   /* X data */
+
     for (j=0; j<nycol; j++)
         y[j] = (real *) allocate(sizeof(real) * (nmax+1));   /* Y data */
 
     Qsigx = Qsigy = FALSE;
     if (hasvalue("xbin")) {
-	smin = getparam("xbin");            /* binning of data */
-        Qsigx = Qsigy = TRUE;           /* binning of data */
-        xbin = (real *) allocate(nmax*sizeof(real));
-        nbin = nemoinpr(smin,xbin,nmax);   /* get binning boundaries */
-        if (nbin==1) {              /*  fixed amount of datapoints to bin */
-            (void) nemoinpi(smin,&nbin,1);
-            dprintf(0,"Binning with fixed number (%d) of points\n",nbin);
-            np = nmax / nbin + 1;
-            nbin = -nbin;       /* make it <0 to trigger rebin_data */
-        } else if (nbin>1) {
-            np = nbin - 1;
-            if (np==1)
-                warning("plotting one averaged datapoint");
-        } else
-            error("Error %d in parsing xbin=%s",nbin,smin);
+      smin = getparam("xbin");            /* binning of data */
+      Qsigx = Qsigy = TRUE;           /* binning of data */
+      xbin = (real *) allocate(nmax*sizeof(real));
+      nbin = nemoinpr(smin,xbin,nmax);   /* get binning boundaries */
+      if (nbin==1) {              /*  fixed amount of datapoints to bin */
+	(void) nemoinpi(smin,&nbin,1);
+	dprintf(0,"Binning with fixed number (%d) of points\n",nbin);
+	np = nmax / nbin + 1;
+	nbin = -nbin;       /* make it <0 to trigger rebin_data */
+      } else if (nbin>1) {
+	np = nbin - 1;
+	if (np==1)
+	  warning("plotting one averaged datapoint");
+      } else
+	error("Error %d in parsing xbin=%s",nbin,smin);
 
-        xp =  (real *) allocate(np*sizeof(real));    /* X data */
-        yp =  (real *) allocate(np*sizeof(real));    /* Y data */
-        xps = (real *) allocate(np*sizeof(real));   /* sig-X data */
-        yps = (real *) allocate(np*sizeof(real));   /* sig-Y data */
+      xp =  (real *) allocate(np*sizeof(real));    /* X data */
+      yp =  (real *) allocate(np*sizeof(real));    /* Y data */
+      xps = (real *) allocate(np*sizeof(real));   /* sig-X data */
+      yps = (real *) allocate(np*sizeof(real));   /* sig-Y data */
 
-        for (i=0; i<np; i++)
-            xp[i] = xps[i] = yp[i] = yps[i] = NaN;      /* init empty */
+      for (i=0; i<np; i++)
+	xp[i] = xps[i] = yp[i] = yps[i] = NaN;      /* init empty */
     } else
-        np = 0;
+      np = 0;
     
     if (hasvalue("xmin") && hasvalue("xmax")) {
 	xrange[0] = getdparam("xmin");
@@ -269,17 +275,19 @@ void setparams()
 
 read_data()
 {
-    real *coldat[1+MAXYCOL];
-    int i, j, colnr[1+MAXYCOL];
+    real *coldat[1+MAXCOL];
+    int i, j, k, colnr[1+MAXCOL];
 		
-    dprintf (2,"Reading datafile, xcol,ycol=%d,%d,...\n",xcol,ycol[0]);
-    colnr[0] = xcol;
-    coldat[0] = x;
-    for (j=0; j<nycol; j++) {
-        colnr[1+j] = ycol[j];
-        coldat[1+j] = y[j];
+    dprintf (2,"Reading datafile, xcol,ycol=%d..,%d,...\n",xcol[0],ycol[0]);
+    for (j=0, k=0; j<nxcol; j++, k++) {
+        colnr[k]  = xcol[j];
+        coldat[k] = x[j];
     }
-    npt = get_atable(instr,1+nycol,colnr,coldat,nmax);    /* get data */
+    for (j=0; j<nycol; j++, k++) {
+        colnr[k]  = ycol[j];
+        coldat[k] = y[j];
+    }
+    npt = get_atable(instr,nxcol+nycol,colnr,coldat,nmax);    /* get data */
     if (npt < 0) {
     	npt = -npt;
     	warning("Could only read first set of %d data",npt);
@@ -288,8 +296,10 @@ read_data()
     xmin = ymin =  HUGE;
     xmax = ymax = -HUGE;
     for (i=0; i<npt; i++) {     /* find global min and max in X and all Y */
-        xmax=MAX(x[i],xmax);
-        xmin=MIN(x[i],xmin);
+        for (j=0; j<nxcol; j++) {
+	    xmax=MAX(x[j][i],xmax);
+	    xmin=MIN(x[j][i],xmin);
+        }
         for (j=0; j<nycol; j++) {
 	    ymax=MAX(y[j][i],ymax);
 	    ymin=MIN(y[j][i],ymin);
@@ -304,7 +314,7 @@ void plot_data()
     real xcur, ycur, edge;
     char c;
     stream cstr;
-    bool first;
+    bool first, Qin;
 
     if (npt<1) {
         warning("Nothing to plot, npt=%d",npt);
@@ -361,24 +371,32 @@ void plot_data()
     /*
      *  if scale in X fully fixed, and some autoscaling in Y is done
      *  we can recompute the Ymin and/or Ymax based on fixed Xmin/Xmax
+     *  for those points which are within Xmin/Xmax
      */
 
     if (!Qfull && (Qautoy0 || Qautoy1) && !Qautox0 && !Qautox1) {
-        first = TRUE;
-        for (i=0; i<npt; i++) {     /* go through data, find Y min and max again */
-	    if (xmin < xmax && (x[i] < xmin || x[i] > xmax)) continue;
-	    if (xmin > xmax && (x[i] > xmin || x[i] < xmax)) continue;
-            if (first) {
-                if (Qautoy0) ymin = y[0][i];
-                if (Qautoy1) ymax = y[0][i];
-                first = FALSE;
-            }
-            for (j=0; j<nycol; j++) {
-	        if (Qautoy0) ymin=MIN(y[j][i],ymin);
-    	        if (Qautoy1) ymax=MAX(y[j][i],ymax);
-            }
-        }
-        dprintf(0,"Y:min and max value re-reset to : [%f : %f]\n",ymin,ymax);
+      first = TRUE;
+      for (i=0; i<npt; i++) {     /* go through data, find Y min and max again */
+	if (first) {
+	  if (Qautox0) xmin = x[0][i];
+	  if (Qautox1) xmax = x[0][i];
+	  if (Qautoy0) ymin = y[0][i];
+	  if (Qautoy1) ymax = y[0][i];
+	  first = FALSE;
+	}
+	Qin = TRUE;
+	for (j=0; Qin && j<nxcol; j++) {
+	  if (xmin < xmax && (x[j][i] < xmin || x[j][i] > xmax)) Qin = FALSE;
+	  if (xmin > xmax && (x[j][i] > xmin || x[j][i] < xmax)) Qin = FALSE;
+	}
+	if (!Qin) continue;
+
+	for (j=0; j<nycol; j++) {
+	  if (Qautoy0) ymin=MIN(y[j][i],ymin);
+	  if (Qautoy1) ymax=MAX(y[j][i],ymax);
+	}
+      }
+      dprintf(0,"Y:min and max value re-reset to : [%f : %f]\n",ymin,ymax);
     }
 
     /*
@@ -393,7 +411,7 @@ void plot_data()
                 if (ymin > ymax && (y[j][i]>ymin || y[j][i]<ymax)) break;
             }
             if (j<nycol) continue;
-
+#if 0
             if (first) {
                 if (Qautox0) xmin = x[i];
                 if (Qautox1) xmax = x[i];
@@ -401,12 +419,14 @@ void plot_data()
             }
             if (Qautox0) xmin=MIN(x[i],xmin);
             if (Qautox1) xmax=MAX(x[i],xmax);
+#else
+	    error("gotta code this Q xmin/xmax stuff");
+#endif
         }
         dprintf(0,"X:min and max value re-reset to : [%f : %f]\n",xmin,xmax);
     }
     
-	/*	PLOTTING */	
-    plinit("***",0.0,20.0,0.0,20.0);
+    plinit("***",0.0,20.0,0.0,20.0);                 /*	PLOTTING */	
 
     xplot[0] = xmin;        /* set scales for xtrans() */
     xplot[1] = xmax;
@@ -424,7 +444,6 @@ void plot_data()
         plmove(xtrans(xplot[0]),ytrans(ycoord[i]));
         plline(xtrans(xplot[1]),ytrans(ycoord[i]));
     }
-    
 
     pljust(-1);     /* set to left just */
     pltext(input,2.0,18.2,0.32,0.0);             /* filename */
@@ -432,14 +451,15 @@ void plot_data()
     pltext(headline,18.0,18.2,0.24,0.0);         /* headline */
     pljust(-1);     /* return to left just */
 
-    for (j=0; j<nycol; j++) {
-        if (np) rebin_data (npt,x,y[j], nbin, xbin, np, xp, yp,  xps, yps);
+    for (j=0, k=0; j<nycol; j++) {
+        if (np) rebin_data (npt,x[k],y[j], nbin, xbin, np, xp, yp,  xps, yps);
 
-        plot_points( npt, x, y[j], xps, yps,
+        plot_points( npt, x[k], y[j], xps, yps,
             yapp_point[2*j], yapp_point[2*j+1],
             yapp_line[2*j], yapp_line[2*j+1],
             ncolors > 0 ? yapp_color[j] : -1,
             Qsigx & (Qsigy << 1) );
+	if (nxcol > 1) k++;
     }
 
     if (hasvalue("cursor")) {
