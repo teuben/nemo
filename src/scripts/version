@@ -56,7 +56,8 @@ echo $version                                             >! $v
 
 echo updating $h
 echo "/* do not edit - created by the version script */"  >! $h
-echo 'static char *version_h = "$Id$'                  >>! $h 
+echo -n 'static char *version_h = "$'                    >>! $h
+echo 'Id: $";'                                           >>! $h 
 echo '#define NEMO_VERSION "'$version'"'                 >>! $h
 
 #  touch it again, so it's the last one touched :-)
