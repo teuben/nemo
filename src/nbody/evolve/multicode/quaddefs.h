@@ -9,6 +9,8 @@
 
 #include "quadfield.h"
 
+typedef void (*force_proc)(Body *, int , real);
+
 string infile;			/* input file with initial conds            */
 string outfile;			/* output file for simulation results       */
 string quadfile;		/* output file for field tables             */
@@ -41,3 +43,22 @@ Body *bodytab;			/* array representing state                 */
 #if !defined(MBODY)
 #  define MBODY 4096		/* max number of bodies, for orbstep        */
 #endif
+
+/* quadcode_io.c */
+extern void inputdata(void);
+extern void initoutput(void);
+extern void stopoutput(void);
+extern void output(void);
+extern int savestate(string file);
+extern int restorestate(string file);
+
+/* orbstep.c */
+extern int initstep(body *btab, int nb, real *tptr, force_proc force);
+extern int orbstep(body *btab, int nb, real *tptr, force_proc force, real dt, int mode);
+extern int rkstep(body *btab, int nb, real *tptr, force_proc force, real dt, real atmp1[]);
+extern int pcstep(body *btab, int nb, real *tptr, force_proc force, real dt);
+extern int moveaccel(body *btab, int nb);
+
+/* quadforce.c */
+extern int quadforce(body *btab, int nb, real eps1, real eps2);
+

@@ -29,10 +29,12 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS		    */
 
 string usage = "Global quadrupole N-body integrator";
 
+
+local void force(Body *, int , real);
+
+
 nemo_main()
 {
-    void force();
-
     setparams();
     inputdata();
     initoutput();
@@ -66,10 +68,10 @@ setparams()
  * FORCE: force calcualtion routine.
  */
 
-void force(btab, nb, time)
-Body *btab;			/* array of bodies */
-int nb;				/* number of bodies */
-real time;			/* current time (ignored) */
+local void force(
+	   Body *btab,			/* array of bodies */
+	   int nb,			/* number of bodies */
+	   real time)			/* current time (ignored) */
 {
     Body *p;
 

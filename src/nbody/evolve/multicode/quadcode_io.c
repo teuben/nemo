@@ -21,9 +21,6 @@
 local my_put_snap_diagnostics();
 local diagnostics(), put_quadfield();
 
-extern double cputime();
-
-
 #include <snapshot/snapshot.h>
 #include <snapshot/get_snap.c>
 #include <snapshot/put_snap.c>
@@ -32,7 +29,7 @@ extern double cputime();
  * INPUTDATA: read initial conditions from input file.
  */
 
-inputdata()
+void inputdata()
 {
     stream instr;
     int bits;
@@ -65,17 +62,17 @@ local stream outstr = NULL;		/* output stream pointer */
 
 local stream quadstr = NULL;		/* quadrupole field output */
 
-initoutput()
+void initoutput()
 {
     if (! streq(headline, "")) {		/* nontrivial headline?     */
 	printf("\n%s\n", headline);		/* headline log stream      */
 	set_headline(headline);			/* and save with history    */
     }
-    if (*outfile != NULL) {                     /* output file given?       */
+    if (*outfile) {                             /* output file given?       */
         outstr = stropen(outfile, "w");         /*   setup out. stream      */
 	put_history(outstr);
     }
-    if (*quadfile != NULL) {                    /* field file given?        */
+    if (*quadfile) {                            /* field file given?        */
         quadstr = stropen(quadfile, "w");       /*   setup out. stream      */
         put_history(quadstr);
     }
@@ -83,10 +80,10 @@ initoutput()
            "nbody", "freq", "eps_r", "eps_t", "mode", "tstop");
     printf("%12d%12.4f%12.4f%12.4f%12d%12.2f\n\n",
 	   nbody, freq, eps1, eps2, mode, tstop);
-    if (*options != NULL)
+    if (*options)
 	printf("\toptions: %s\n\n", options);
     minor_tout = tout = tnow;			/* schedule 1st outputs     */
-    if (*savefile != NULL)			/* restart file enabled?    */
+    if (*savefile)       			/* restart file enabled?    */
 	savestate(savefile);			/*   save inital state      */
 }
 
@@ -94,7 +91,7 @@ initoutput()
  * STOPOUTPUT: finish up after a run.
  */
 
-stopoutput()
+void stopoutput()
 {
     if (outstr != NULL)
         strclose(outstr);
@@ -115,7 +112,7 @@ local vector cmphase[2];	/* center of mass coordinates               */
 
 local bool firstmass = TRUE;	/* set if masses have yet to be output      */
 
-output()
+void output()
 {
     int k, bits;
 
@@ -154,7 +151,7 @@ output()
     }
     if ((bits & PhaseSpaceBit) != 0 && quadstr != NULL)
 	put_quadfield(quadstr);
-    if (*savefile != NULL)			/* state file specified?    */
+    if (*savefile)        			/* state file specified?    */
 	savestate(savefile);			/*   save system data       */
 }
 
@@ -206,9 +203,7 @@ local diagnostics()
  * MY_PUT_SNAP_DIAGNOSTICS: output various N-body diagnostics.
  */
 
-local my_put_snap_diagnostics(outstr, ofptr)
-stream outstr;
-int *ofptr;
+local my_put_snap_diagnostics(stream outstr, int *ofptr)
 {
     real cput;
 
@@ -227,8 +222,7 @@ int *ofptr;
  * PUT_QUADFIELD: output tabulation of quadrupole field.
  */
 
-local put_quadfield(quadstr)
-stream quadstr;
+local put_quadfield(stream quadstr)
 {
     put_set(quadstr, "QuadField");
     put_data(quadstr, TimeTag, RealType, &tnow, 0);
@@ -254,8 +248,7 @@ stream quadstr;
  * SAVESTATE: write current state to disk file.
  */
 
-savestate(file)
-string file;
+savestate(string file)
 {
     stream str;
 
@@ -285,8 +278,7 @@ string file;
  * RESTORESTATE: restore state from disk file.
  */
 
-restorestate(file)
-string file;
+restorestate(string file)
 {
     stream str;
     string program, version;

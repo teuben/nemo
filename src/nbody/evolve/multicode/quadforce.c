@@ -5,6 +5,7 @@
  *
  *	16-mar-90	PJT	made GCC happy
  *      20-may-94       pjt     remove allocate() decl. into headers
+ *      25-dec-02       pjt     better ANSI C
  */
 
 #include "quaddefs.h"
@@ -16,15 +17,16 @@ typedef struct {
     real rad0, rads1, rads2;			/* exact, softened radii    */
 } shadow, *shadowptr;
 
-local rankrad(), int_quad_force(), ext_quad_force();
+local void init_quad_field(shadow *, int, real);
+local void int_quad_force(shadow *, int);
+local void ext_quad_force(shadow *, int);
+local int rankrad(shadowptr, shadowptr);
+
 /*
  * QUADFORCE: compute the force-field of a spheroidal distribution.
  */
 
-quadforce(btab, nb, eps1, eps2)
-Body *btab;			/* array of bodies */
-int nb;				/* number of bodies */
-real eps1, eps2;		/* softening parameters */
+quadforce(Body *btab, int nb, real eps1, real eps2)
 {
     shadowptr shad;
     Body *b;
@@ -50,8 +52,7 @@ real eps1, eps2;		/* softening parameters */
  * RANKRAD: ranking function for quicksort.
  */
 
-local int rankrad(sp1, sp2)
-shadowptr sp1, sp2;
+local int rankrad(shadowptr sp1, shadowptr sp2)
 {
     return (sp1->rad0 < sp2->rad0 ? -1 : 1);	/* compare body radii       */
 }
@@ -65,10 +66,7 @@ shadowptr sp1, sp2;
 local int jint, jext;
 local real rfield;
 
-init_quad_field(shad, nb, eps1)
-shadow shad[];			/* bodies with shadows */
-int nb;				/* number of bodies */
-real eps1;			/* softening parameter */
+local void init_quad_field(shadow *shad, int nb, real eps1)
 {
     int ktab, j;
 
@@ -116,9 +114,7 @@ real eps1;			/* softening parameter */
  * INT_QUAD_FORCE: compute force due to interior particles.
  */
 
-local int_quad_force(shad, nb)
-shadow shad[];			/* bodies with shadows */
-int nb;				/* number of bodies */
+local void int_quad_force(shadow *shad, int nb)
 {
     real Q00, Q10, r1i, r2i, r2is, r2iq, q11r, rq22r, tmp;
     vector Q11, q22r, tmpv;
@@ -167,9 +163,7 @@ int nb;				/* number of bodies */
  * EXT_QUAD_FORCE: compute force due to exterior particles.
  */
 
-local ext_quad_force(shad, nb)
-shadow shad[];			/* bodies with shadows */
-int nb;				/* number of bodies */
+local void ext_quad_force(shadow *shad, int nb)
 {
     real P00, P10, r2i, r2is, tmp;
     vector P11, p22r, tmpv;

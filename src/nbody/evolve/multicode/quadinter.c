@@ -4,20 +4,19 @@
  * Requires: Body, Pos(), Acc(), Phi(), quadfield, qfld, ...
  *
  *	16-mar-90	PJT	made GCC happy
+ *      25-dec-02       pjt     bit more cleanup
  */
 
 #include "quaddefs.h"
 
-local inter_field(), force_eval();
+local inter_field(real r);
+local force_eval(Body *b, real eps1, real eps2);
 
 /*
  * QUADINTER: interpolate field and evaluate force on array of particles.
  */
 
-quadinter(btab, nb, eps1, eps2)
-Body *btab;
-int nb;
-real eps1, eps2;
+quadinter(Body *btab, int nb, real eps1, real eps2)
 {
     Body *b;
 
@@ -60,8 +59,7 @@ local matrix Q22, P22;
  * INTER_FIELD: interpolate field tables to given radius.
  */
 
-local inter_field(r)
-real r;
+local inter_field(real r)
 {
     int i, j, k;
     real f;
@@ -96,11 +94,9 @@ real r;
  * FORCE_EVAL: compute force and potential on particle.
  */
 
-local force_eval(b, eps1, eps2)
-Body *b;
-real eps1, eps2;
+local force_eval(Body *b, real eps1, real eps2)
 {
-    real rsq, sqrt(), r1i, r2i, r2is, r2iq, q11r, rq22r, tmp;
+    real rsq, r1i, r2i, r2is, r2iq, q11r, rq22r, tmp;
     vector q22r, p22r, tmpv;
     matrix tmpm;
 
