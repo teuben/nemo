@@ -1,0 +1,257 @@
+.TH SCANFITS 1NEMO "15 October 1999"
+.SH NAME
+scanfits \- scan a fits file, optionally extract and convert.
+.SH SYNOPSIS
+.PP
+\fBscanfits in=\fPfits_file  [parameter=value]
+.SH DESCRIPTION
+\fIscanfits\fP reads a FITS file from disk. It scans the header for
+various FITS (mis)interpretations, and reports on bad behaviour.
+Some of it can be fixed, in which case the header and/or data
+can be output to a file. It is also possible to insert new card
+images in a header.
+.PP
+FITS Header-Data Unit's (HDU) can be extracted individually by
+using the \fBhdu\fP keyword. 0 typically signifies all of the
+HDU's in a file, you can select them by number, 1 being the first.
+.PP
+Since scanfits can only process disk FITS files, FITS files on
+tape have to be extracted using \fIdd(1)\fP or
+similar programs. See also notes in \fIccdfits(1NEMO)\fP how 
+to process fits files from tape. 
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is 
+also given:
+.TP 20
+\fBin=\fIfits-infile\fP
+input file, in \fIfits(5)\fP format. The input fits file is allowed
+to have many HDU's. [no default]. 
+.TP
+\fBout=\fIfits-outfile\fP
+output file, in \fIfits(5)\fP format. If \fBsplit=t\fP this is the
+basename of the output filename. The basename can contain a standard
+\fIprintf(3)\fP expression (e.g. \fItry%d.fits\fP), in which case
+the HDU will be automatically encoded in the output filename(s).
+If no filename is given, the input fits 
+file is only scanned, and a summary of the
+selected HDU's is presented (see also \fBprint=\fP).
+The header can also be fixed up (see \fBdelete=\fP,
+\fBkeep=\fP, \fBinsert=\fP and \fBfix=\fP below), 
+though the data cannot be modified, 
+but it is guaranteed that the size of the data portion
+on disk will be a multiple of the logical block size 
+(\fIblocking * 2880\fP, see below), even if the last did not
+have this.  [default: none].
+.TP
+\fBhdu=\fIinteger_list\fP
+List of HDU's of the FITS file that need to be processed.
+(\fI Note: currently only one at a time can be processed\fP)
+Using a value of 0 will cause all HDU's (the whole fits file)
+to be read. [default: \fB0\fP].
+.TP
+\fBdelete=\fIpattern\fP
+A list of patterns can be given, separated by
+comma's. Note that no spaces can be used: a space is 
+considered part of the pattern.
+Each of these is matched against the
+card images. If a match is found, that particular
+card images is deleted by blanking the card. 
+Blank lines can then be deleted from
+the FITS header using \fBfix=BLANK\fP, see below.
+The list can be empty, in which case no action is undertaken.
+Note that only one of \fBkeep=\fP and \fBdelete=\fP can be given.
+[default: none].
+.TP
+\fBkeep=\fIpattern\fP
+A list of patterns can be given, separated by
+comma's. Each of these is matched against the card images.
+When all the card images have been scanned, only the ones
+which were part of the \fIkeep\fP patterns will not
+be blanked out. Blank lines can subsequently be deleted
+from the header by using  \fBfix=BLANK\fP, see below.
+The list can be empty, in which case no action is undertaken.
+Note that only one of \fBkeep=\fP and \fBdelete=\fP can be given.
+\fINote: \fPBe careful when using this keyword, and that the
+required keywords are not deleted this way.
+[default: none].
+.TP
+\fBinsert=\fP\fIhfile\fP
+A list of files with (currently valid FITS header format) header 
+cards, which will
+be inserted *as is* just before the END keyword in the above selected HDU's.
+Note that these insertions are done after any of the above mentioned 
+optional \fBkeep\fP, \fBdelete\fP, \fBfix\fP etc. To get an example
+file, extract an editable ASCII header with e.g. \fIfitshead\fP, or
+see the example below. 
+\fINOTE\fP: The lines need to be exactly 80 characters wide,
+any lines shorter than this will be blankfilled according to the FITS rules,
+and any lines wider than 80 will be cut.
+[Default: none].
+.TP
+\fBfix=\fIoptions\fP
+List of fixes, separated by comma's. Possible options
+are: \fBING, TUCSON, LF, BLANK, ZERO, DECORDER, FIRST, LAST, Y2K, UNY2K\fP 
+and \fBIRAF0\fP. 
+For an description see the section FIXES below.
+The list can be empty, in which case no fixes are applied.
+[default: none].
+.TP
+\fBprint=\fIpattern\fP
+A list of patterns with which a FITS keyword (really: the first 8
+characters on a FITS card image) begins. For these keywords
+the value or HISTORY/COMMENT is printed on  lines starting
+with a \fB#\fP symbol. Different header sections are
+separated with the \fB##\fP symbol in the first column.
+Note that is either \fBkeep=\fP or \fBdelete=\fP has been used,
+the blanked header cards cannot be seen anymore via the \fBprint=\fP keyword.
+Note that printout is only active in scanmode. If an output file is
+created, this keyword is not active.
+[Default: not used].
+.TP
+\fBblocking=\fIfactor\fP
+Positive integer that denotes the blocking factor with which the input 
+file was written. The second number is the blocking factor for output.
+If the second number if not supplied, it is taken the same as the first
+one.
+The blocking factor is the multiple of blocks of 2880 bytes with which 
+the data is to be read/written.
+The FITS standard allows the blocking factor to be from 1 to 10.
+\fIBe aware that datafiles that need a blocking factor larger than
+1, may not need it once the data is written to disk.\fP
+[default: \fB1,1\fP].
+.TP
+\fBselect=header|data\fP
+Select \fBdata\fP, \fBheader\fP or both (separated by comma's)
+for output.
+[Default: \fBheader,data\fP].
+.TP
+\fBsplit=t|f\fP
+Boolean (t/f) to designate that when an output file is selected 
+(\fBout=\fP) AND
+multiple files to be copied (\fBfile=0\fP) the output file is split into
+it's ``file'' components. The \fIfits-outfile\fP name will then be a base
+filename, and the program generates its own numeric extension.
+[Default: \fBfalse\fP].
+.SH FIXES
+This is a list of the currently supported fixes for the header.
+Each of them is applied in the order as 
+they appear in the \fBfix=\fP keyword. Their
+names have to be supplied in full, separated by commas. No spaces.
+.TP 20
+\fBING\fP
+Isaac Newton Group (ING) uses 9 blanks in the first column,
+followed by the word \fBING\fP, followed by a space, after
+which an ING specific keywords start. If you want to promote
+these to regular keywords, a shift of 13 characters to the left
+does the job. The 13 rightmost characters in the card image are 
+set to blank.
+.TP 20
+\fBTUCSON\fP
+Certain FITS files coming out of NRAO TUCSON have card images
+starting with \fBSINGLDSH\fP. The next 10 characters are used for
+another level of identification, and at position 19 the actual
+FITS-like keyword starts. By using this option the FITS keyword
+starting at position 19 is promoted to a real FITS keyword, by 
+shifting those 18 positions to the left. The 18 rightmost 
+characters in the card image are set to blank.
+.TP
+\fBLF\fP
+Character 80 (the last one) in each header card image
+is patched with a linefeed (newline) (\fIhexadecimal 0x0A\fP). 
+This is useful to edit the header with an ASCII editor on UNIX.
+It would normally be used with \fBoptions=header\fP.
+See also \fIfitshead(1NEMO)\fP if you don't want to see
+trailing blanks.
+.TP
+\fBBLANK\fP
+Delete all card images which are completeley blank. This is often the
+result of either old style FITS files, or when card images had been
+blanked before with \fBdelete=\fP\fIpattern\fP or \fBkeep=\fP\fIpattern\fP
+ Since the \fIfix\fP is applied
+\fIafter\fP the \fIblank\fP only one run of scanfits is needed to blank
+out and delete certain card 
+images, e.g. \fBscanfits in out delete=ING fix=BLANK\fP.
+.TP
+\fBZERO\fP
+Replace all zero's in the header by blanks.
+.TP
+\fBFIRST\fP
+Retain only the first keyword if they occur multiple times in the header.
+The other card images are blanked.
+HISTORY and COMMENT and anything that does not have an '=' in column 9
+are not affected.
+.TP
+\fBLAST\fP
+Retain only the last keyword if they occur multiple times in the header.
+The other card images are blanked.
+HISTORY and COMMENT and anything that does not have an '=' in column 9
+are not affected.
+.TP
+\fBY2K\fP
+If a keyword \fBDATExxxx\fP is present, and it matches the pattern
+"dd/mm/yy", it will be transformed to "yyyy-mm-dd", which makes the
+file Y2K compliant.  
+.TP
+\fBUNY2K\fP
+If a keyword \fBDATExxxx\fP is present, and it matches the pattern
+"yyyy-mm-dd", it will be transformed to "dd/mm/yy", which makes the
+file non-Y2K compliant. This might help you getting by some old readers.
+.TP
+\fBDECORDER\fP
+If the keyword \fBDECORDER\fP is present, and it has a value \fBT\fP,
+it will replace this keyword by a COMMENT and set a flag such that
+of all data the bytes are byte swapped when read (or copied) according
+to \fIabs(BITPIX)\fP.
+.TP
+\fBIRAF0\fP
+Replace the FITS keyword \fBHISTORY\fP by \fBCOMMENT\fP. This has been
+proven useful to be able to see al that information by the \fIiraf\fP
+program \fIimhead\fP. 
+.TP
+\fBPROMOTE\fP
+Replace the first FITS keyword \fBXTENSION\fP with \fBSIMPLE = T\fP, so
+an extension is promoted to become the primary HDU. Of course this only
+makes sense if you are extracting single HDUs, e.g. via the
+\fBhdu=\fP or \fBsplit=t\fP options.
+.SH PROCESSING ORDER
+With all the possible editing capabilities, it is important to 
+know the processing order:
+.nf
+        select the valid HDU's, 0=all (\fBhdu=\fP)
+        delete header items by pattern matching (\fBdelete=\fP)
+        keep header items by pattern matching (\fBkeep=\fP)
+        insert new header items before the END card (\fBinsert=\fP)
+        fix header items (in order of individual \fBfix=\fP components)
+.fi
+.SH EXAMPLES
+To extract the header in a pleasing manner, such that \fImore(1)\fP
+can be used, one can use:
+.nf
+    % scanfits in=junk.fits out=junk.header fix=LF select=header
+or
+    % fitshead junk.fits  > junk.header
+.fi
+where the latter example does not contain trailing blanks anymore.
+.SH "SEE ALSO"
+ccdfits(1NEMO), dd(1), fits(5NEMO), fitshead(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+~/src/image/fits         scanfits.c
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+27-mar-90	V1.0 Written                     	PJT
+17-jul-90	V1.1 added fix=, blank=            	PJT
+ 7-mar-91	V1.3 added split=,keep=, and TUSCON 	PJT
+25-jul-91	V1.4 added the IRAF0 fix - blocking  	PJT
+30-jul-91	V1.4b added Jeff Hesters brilliant DECORDER fix  	PJT
+11-apr-92	V1.5 changed name of file= to hdu=	PJT
+7-aug-92   	fixed ctype/ttype bugs in fits(3NEMO)	PJT
+13-jan-93    	V1.7 insert= now implemented Arie!	PJT
+2-dec-98	V1.8 fix=PROMOTE for lgm's nicmos 	PJT
+15-oct-99	V1.8b fix=UNY2K (and Y2K)for Staguhn's GILDAS  	pjt
+.fi
