@@ -1,0 +1,26 @@
+%N mksphere
+%D construct an arbitrary spherical mass distribution
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man mksphere' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A out
+	Output file name [???]
+%A nbody
+	Number of particles [???]
+%A radii
+	Radii in sphere []
+%A density
+	Associated densities at given radii []
+%A seed
+	Seed for the random number generator [0]
+%A zerocm
+	Centrate snapshot (t/f)? [t]
+%A rmin
+	minimum radius, if to override from radii []
+%A rmax
+	maximum radius, if to override from radii []
+%A headline
+	Verbiage for output []
+%A VERSION
+	11-nov-96 PJT [1.0a]
