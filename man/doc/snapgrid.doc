@@ -1,0 +1,52 @@
+%N snapgrid
+%D grid a snapshot into a 2/3D image-cube
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man snapgrid' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	input filename (a snapshot) [???]
+%A out
+	output filename (an image) [???]
+%A times
+	standard selection of times [all]
+%A xrange
+	x-range in gridding [-2:2]
+%A yrange
+	y-range in gridding [-2:2]
+%A zrange
+	z-range in gridding [-infinity:infinity]
+%A xvar
+	x-variable to grid [x]
+%A yvar
+	y-variable to grid [y]
+%A zvar
+	z-variable to grid [-vz]
+%A evar
+	emission variable(s) [m]
+%A tvar
+	absorbtion variable [0]
+%A dvar
+	depth variable w/ tvar= [z]
+%A svar
+	smoothing size variable []
+%A nx
+	x size of image [64]
+%A ny
+	y size of image [64]
+%A nz
+	z size of image [1]
+%A xlab
+	Optional X label [xvar] []
+%A ylab
+	Optional Y label [yvar] []
+%A zlab
+	Optional Z label [zvar] []
+%A moment
+	moment in zvar (-2,-1,0,1,2...) [0]
+%A mean
+	mean (moment=0) or sum per cell [f]
+%A stack
+	Stack all selected snapshots? [f]
+%A VERSION
+	30-jul-98 PJT [4.4a]
