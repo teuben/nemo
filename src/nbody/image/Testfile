@@ -1,0 +1,35 @@
+DIR = src/nbody/image
+BIN = snapccd snapgrid snapslit
+NEED = $(BIN) mkplummer
+
+help:
+	@echo $(DIR)
+
+need:
+	@echo $(NEED)
+
+clean:
+	@echo Cleaning $(DIR)
+	@rm -f snap.in
+
+NBODY = 10
+
+all:	snap.in $(BIN)
+
+snap.in:
+	@echo Creating snap.in
+	mkplummer snap.in $(NBODY) seed=123
+
+snapccd:
+	@echo Running $@
+	snapccd snap.in . 
+
+snapgrid:
+	@echo Running $@
+	snapgrid snap.in . 
+
+snapslit:
+	@echo Running $@
+	snapslit snap.in  width=1 length=4 zvar=vy
+
+

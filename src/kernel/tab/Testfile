@@ -1,0 +1,32 @@
+DIR = src/kernel/tab
+BIN = tabmath tabplot tabhist 
+NEED = $(BIN) nemoinp
+
+help:
+	@echo $(DIR)
+
+need:
+	@echo $(NEED)
+
+clean:
+	@echo Cleaning $(DIR)
+	@rm -f tab.in tab.out
+
+all:	tab.in $(BIN)
+
+tab.in:
+	@echo Creating $@
+	nemoinp 1:100 > tab.in
+
+tabmath: tab.in
+	@echo Running $@
+	tabmath tab.in tab.out 'sqrt(%1)'
+
+tabplot:
+	@echo Running $@
+	tabmath tab.in - 'sqrt(%1)' | tabplot -
+
+tabhist:
+	@echo Running $*
+	nemoinp 1:1000 | tabmath - - 'rang(0,1)' all seed=123 | tabhist -
+
