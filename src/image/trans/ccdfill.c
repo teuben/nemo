@@ -6,6 +6,7 @@
  *	22-feb-97	1.1 added bad=				pjt
  *      19-feb-02       1.2 added all=, m=			pjt
  *       2-may-03       1.3 added iter=                         pjt
+ *       2-jun-03       1.4 trying out xmirror/ymirror          pjt
  *                      
  */
 
@@ -21,10 +22,12 @@ string defv[] = {
 	"out=???\n      Output image file",
 	"n=1\n		Number of neighbor cells on all sides to use",
 	"bad=0.0\n	Value of a bad pixel to be patched",
-	"all=f\n        Force all points?",
+	"all=f\n        Force all points to be refitted?",
 	"m=3\n          Minimum number of neighbor pixels needed",
 	"iter=1\n       Number of iterations",
-	"VERSION=1.3\n  2-may-03 PJT",
+	"xmirror=f\n    Use points mirrored in X to get near a border",
+	"ymirror=f\n    Use points mirrored in Y to get near a border",
+	"VERSION=1.4\n  2-jun-03 PJT",
 	NULL,
 };
 
@@ -32,7 +35,7 @@ string usage = "patch up holes in an image by linear interpolation";
 
 
 local void ini_fit(void), accum_fit(int, int, real);
-local bool good_fit(int);
+local bool good_fit(int), lin_fit(int);
 local real best_fit(void);
 
 #define NLSQ  3
@@ -42,11 +45,13 @@ void nemo_main(void)
 {
   stream   instr, outstr;
   int      m, n, nx, ny, nz;        /* size of scratch map */
-  int      ngood, ntry;
+  int      ngood, ntry, nlin;
   int      i,j, di, dj;
   imageptr iptr=NULL, iptr1=NULL;      /* pointer to images */
   real     crit = getdparam("bad");
   bool     Qall = getbparam("all");
+  bool     Qxm  = getbparam("xmirror");
+  bool     Qym  = getbparam("ymirror");
   int      iter, niter = getiparam("iter");
   
   instr = stropen(getparam("in"), "r");
@@ -70,16 +75,16 @@ void nemo_main(void)
 	}
     }
 
-    ntry = ngood = 0;
+    ntry = ngood = nlin = 0;
     for (j=0; j<ny; j++) {                  /* loop over image and patch */
     	for (i=0; i<nx; i++) {
             if (MapValue(iptr1,i,j) == crit || Qall) {   /* try and patch up */
                 ntry++;
                 ini_fit();
                 for (dj=-n; dj<=n; dj++) {
-                    if (j+dj<0 || j+dj>=ny) continue;
+		  if ((j+dj<0 || j+dj>=ny)) continue;
                     for (di=-n; di<=n; di++) {
-                        if (i+di<0 || i+di>=nx) continue;
+                        if ((i+di<0 || i+di>=nx)) continue;
                         if (MapValue(iptr1,i+di,j+dj) != crit)
                             accum_fit(di,dj,MapValue(iptr1,i+di,j+dj));
                     }
@@ -87,11 +92,20 @@ void nemo_main(void)
                 if (good_fit(m)) {
                     MapValue(iptr,i,j) = best_fit();
                     ngood++;
-                } 
+                } else if (lin_fit(n)) {
+		  if (MapValue(iptr1,i+1,j) != crit && MapValue(iptr1,i-1,j) != crit) {
+		    nlin++;
+		    MapValue(iptr,i,j) = 0.5 * (MapValue(iptr1,i+1,j) + MapValue(iptr1,i-1,j));
+		  }
+		  if (MapValue(iptr1,i,j+1) != crit && MapValue(iptr1,i,j-1) != crit) {
+		    nlin++;
+		    MapValue(iptr,i,j) = 0.5 * (MapValue(iptr1,i,j+1) + MapValue(iptr1,i,j-1));
+		  }
+		}
             }
 	}
     }
-    dprintf(0,"Found %d values to patch, successfull with %d\n",ntry,ngood);
+    dprintf(0,"Found %d values to patch, successfull with %d, %d linear?\n",ntry,ngood,nlin);
     if (ngood == 0 || ntry==ngood) break;
   }
   write_image(outstr, iptr);
@@ -122,6 +136,12 @@ local bool good_fit(int m)
 {
   return nsum>=m;
 }
+
+local bool lin_fit(int n)
+{
+  return nsum==2;
+}
+
 
 local real best_fit(void)
 {
