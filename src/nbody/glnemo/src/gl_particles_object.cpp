@@ -132,7 +132,14 @@ void GLParticlesObject::displayPolygons(const double * mModel,GLuint texture,flo
   glBindTexture(GL_TEXTURE_2D, texture);				// Select Our Texture
   //glBegin(GL_QUADS);
   glBegin(GL_TRIANGLES);
+  float uv[4][2] = { {0.0,   1.0-v_max}, {0.0,   1.0},{u_max, 1.0},
+                     {u_max, 1.0-v_max}
+                   };
+#define   BEFORE_TAB 0                 
   // draw all the selected points
+  //std::cerr <<"umax = " << u_max << " vmax =" << v_max << "\n"; 
+  //u_max=1.0; v_max=1.0;
+  int modulo;
   for (int i=prv->first_part; i<=prv->last_part; i+=prv->step_part) {
     float 
       x=pos[i*3  ],
@@ -149,7 +156,8 @@ void GLParticlesObject::displayPolygons(const double * mModel,GLuint texture,flo
     //glBegin(GL_QUADS);
     
     //glBegin(GL_TRIANGLES);
-    
+
+#if BEFORE_TAB        
     glTexCoord2f(0.0,   1.0-v_max);
     glVertex3f(mx-sizeq , my+sizeq  ,mz );
     glTexCoord2f(0.0,   1.0);
@@ -167,7 +175,29 @@ void GLParticlesObject::displayPolygons(const double * mModel,GLuint texture,flo
     glTexCoord2f(u_max, 1.0-v_max);
     glVertex3f(mx+sizeq , my+sizeq  ,mz );       
 #endif    
-
+#else // method to shuffle triangles orientation
+    modulo = i%4;
+    // 1st triangle
+    glTexCoord2f(uv[modulo][0],   uv[modulo][1]);
+    modulo = (modulo+1)%4;
+    glVertex3f(mx-sizeq , my+sizeq  ,mz );
+    glTexCoord2f(uv[modulo][0],   uv[modulo][1]);
+    modulo = (modulo+1)%4;
+    glVertex3f(mx-sizeq , my-sizeq  ,mz );
+    glTexCoord2f(uv[modulo][0],   uv[modulo][1]);
+    glVertex3f(mx+sizeq , my-sizeq  ,mz );
+    // second triangle
+    modulo = (modulo+2)%4;
+    glTexCoord2f(uv[modulo][0],  uv[modulo][1]);
+    glVertex3f(mx-sizeq , my+sizeq  ,mz );
+    modulo = (modulo+2)%4;
+    glTexCoord2f(uv[modulo][0],  uv[modulo][1]);
+    glVertex3f(mx+sizeq , my-sizeq  ,mz );
+    modulo = (modulo+1)%4;
+    glTexCoord2f(uv[modulo][0],  uv[modulo][1]);
+    glVertex3f(mx+sizeq , my+sizeq  ,mz );
+    //modulo = (modulo+1)%4;
+#endif
 
   }
   glEnd();
