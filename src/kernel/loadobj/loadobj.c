@@ -20,6 +20,7 @@
  *	28-nov-91	formally added MIPS (note NEXT/AIX/MIPS all bad)PJT
  *	20-jan-94	NULL is now STUB				pjt
  *	22-oct-96	DL is default for linux				pjt
+ *      12-jul-03       DL is default for darwin (though needs dlcompat) PJT
  */
 
 #include <stdinc.h>		/* standard Nemo include file */
@@ -32,7 +33,7 @@
 #  define DL 1
 # elif defined(sgi) || defined(alpha) || defined(__alpha) 
 #  define DL 1
-# elif defined(linux) && defined(SYSV)
+# elif defined(linux) && defined(SYSV) || defined(darwin)
 #  define DL 1
 # endif
 #endif
