@@ -4,7 +4,8 @@
  *	10-dec-93 	written	- very quick and dirty      pjt
  *	14-mar-95	protos's
  *	22-feb-97	1.1 added bad=				pjt
- *      19-fe-02        1.2 added all=, m=			pjt
+ *      19-feb-02       1.2 added all=, m=			pjt
+ *       2-may-03       1.3 added iter=                         pjt
  *                      
  */
 
@@ -22,11 +23,12 @@ string defv[] = {
 	"bad=0.0\n	Value of a bad pixel to be patched",
 	"all=f\n        Force all points?",
 	"m=3\n          Minimum number of neighbor pixels needed",
-	"VERSION=1.2\n  19-feb-02 PJT",
+	"iter=1\n       Number of iterations",
+	"VERSION=1.3\n  2-may-03 PJT",
 	NULL,
 };
 
-string usage = "patch up holes in an image";
+string usage = "patch up holes in an image by linear interpolation";
 
 
 local void ini_fit(void), accum_fit(int, int, real);
@@ -38,27 +40,29 @@ local real best_fit(void);
 
 void nemo_main(void)
 {
-    stream   instr, outstr;
-    int      m, n, nx, ny, nz;        /* size of scratch map */
-    int      ngood, ntry;
-    int      i,j, di, dj;
-    imageptr iptr=NULL, iptr1=NULL;      /* pointer to images */
-    real     crit = getdparam("bad");
-    bool     Qall = getbparam("all");
-    
-    instr = stropen(getparam("in"), "r");
-    n = getiparam("n");
-    m = getiparam("m");
-    if (m < NLSQ) error("Cannot choose m=%d < %d",m,NLSQ);
-
-    read_image( instr, &iptr);
-
-    nx = Nx(iptr);	
-    ny = Ny(iptr);
-    create_image(&iptr1,nx,ny);
-
-    outstr = stropen(getparam("out"), "w");
-
+  stream   instr, outstr;
+  int      m, n, nx, ny, nz;        /* size of scratch map */
+  int      ngood, ntry;
+  int      i,j, di, dj;
+  imageptr iptr=NULL, iptr1=NULL;      /* pointer to images */
+  real     crit = getdparam("bad");
+  bool     Qall = getbparam("all");
+  int      iter, niter = getiparam("iter");
+  
+  instr = stropen(getparam("in"), "r");
+  n = getiparam("n");
+  m = getiparam("m");
+  if (m < NLSQ) error("Cannot choose m=%d < %d",m,NLSQ);
+  
+  read_image( instr, &iptr);
+  
+  nx = Nx(iptr);	
+  ny = Ny(iptr);
+  create_image(&iptr1,nx,ny);
+  
+  outstr = stropen(getparam("out"), "w");
+  
+  for (iter=0; iter < niter; iter++) {
 
     for (j=0; j<ny; j++) {                  /* make copy of image */
     	for (i=0; i<nx; i++) {
@@ -87,8 +91,10 @@ void nemo_main(void)
             }
 	}
     }
-    write_image(outstr, iptr);
     dprintf(0,"Found %d values to patch, successfull with %d\n",ntry,ngood);
+    if (ngood == 0 || ntry==ngood) break;
+  }
+  write_image(outstr, iptr);
 }
 
 
