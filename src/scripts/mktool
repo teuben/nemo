@@ -1,0 +1,37 @@
+#! /bin/csh -f
+#
+#   Utility 
+if ($#argv == 0) then
+  echo "mktool file(s)"
+  echo 'Updates the $NEMODOC ($NEMO/man/doc?) directory for particular programs'
+  exit 0
+endif
+set tmp=/tmp/tmpdoc.$$
+foreach arg ($*)
+    set bin=$arg:r
+    if (-e $bin) then
+        echo -n "Checking $bin ..."
+        $bin help=t > $tmp
+    else
+        set where=(`which $bin`)
+        if ($#where == 1) then
+            echo -n "Checking $bin ..."
+            $bin help=t > $tmp
+        else
+            echo "No binary $bin found in search path"
+            continue
+        endif
+    endif
+    if (! -e $NEMODOC/$bin.doc) then
+        echo "Creating $bin.doc"
+        mv $tmp $NEMODOC/$bin.doc
+    else
+        cmp -s $tmp $NEMODOC/$bin.doc
+        if ($status != 0) then
+            echo "Updating $bin.doc"
+            mv $tmp $NEMODOC/$bin.doc
+        else
+            echo "skipped - no update necessary"
+        endif
+    endif
+end
