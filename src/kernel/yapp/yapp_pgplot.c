@@ -94,7 +94,7 @@ plinit(string pltdev, real xmin, real xmax, real ymin, real ymax)
     units = 2;
     pgqvsz_(&units, &x1, &x2, &y1, &y2);
     dprintf(1,"PGQVSZ: X= %g - %g Y= %g - %g\n",x1,x2,y1,y2);
-    if (x2 < x1 || y1 < y2) {
+    if (x2 < x1 || y2 < y1) {
       warning("yapp_pgplot: (plinit) weird screen layout, or your X server things the DPI is wrong");
       warning("              check w/ xdpyinfo if your dpi is ok, else use startx -- -dpi 140 or so");
     }
