@@ -2,6 +2,8 @@ some other help on configure:
 	http://www.airs.com/ian/configure/
 - io_nemo library written by JCL in Marseille
 
+- add better 'automatic' html production of man pages, mostly for the
+  web site  (** more or less done **)
 
 - add the self-exploding problem for treecodes (Salmon ...)
   into NEMODAT
@@ -20,4 +22,28 @@ some other help on configure:
 	  type solution for pgplot, and if so,
 	- FORLIBS need to be added to YAPPLIB
 
+	- sun's make doesn't work, it need gmake
+
 - compile under cygwin
+
+- fix for pgplot  when libpng is needed
+
+- fix for gcc3 where the libraries have changed. It's now a lot easier:
+	/opt/gcc/3.2.1/lib
+  vs.
+	/opt/gcc/2.95.3/lib/gcc-lib/i686-pc-linux-gnu/2.95.3/
+
+- if the code has to be C++ friendly, i.e. the nemo_main() be compiled
+  by c++, but the rest with CC,  all extern's must be wrapped in
+
+
+  #if defined(__cplusplus)
+  extern "C" {
+  #endif
+  ...
+  #if defined(__cplusplus)
+  }
+  #endif
+
+
+	
