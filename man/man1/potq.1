@@ -33,13 +33,31 @@ Format used to print numbers [%g]
 Not used.
 .TP
 \fBniter=\fP
-#iterations [10]      
+max #iterations to find qt.
+[10]      
 .TP
 \fBeps=\fP
-#or minimal change [0.001]    
+minimal fractional change in qt to abort iterations 
+[0.001]    
 .SH EXAMPLES
+The following example prints the 
+.nf
+% potq pfenniger84 r=1:10:1
+ 1 0.497721   0.00100091
+ 2 0.517117   0.000606655
+ 3 0.426776   0.000922551
+ 4 0.275563   0.000832961
+ 5 0.10667    0.000569431
+ 6 0.0305462  0.000926259
+ 7 0.0177048  0.000573299
+ 8 0.0118711  0.000401105
+ 9 0.00860622 0.000298991
+10 0.00656493 0.000234145
+.fi
 .SH SEE ALSO
+potccd(1NEMO), potential(5NEMO)
 .SH FILES
+src/orbit/potential	source code
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
@@ -47,3 +65,9 @@ Peter Teuben
 .ta +1.0i +4.0i
 23-Feb-02	V1.0 Created	PJT
 .fi
+
+
+
+
+
+

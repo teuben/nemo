@@ -122,6 +122,22 @@ tablsqfit(1NEMO), tabmath(1NEMO)
 Peter Teuben
 .SH BUGS
 tab= doesn't work properly with multiple columns
+.SH EXAMPLES
+Here is an example working with layout files. 
+.nf
+
+  nemoinp 1:20 | tabmath - -  'ranu(0,1),ranu(0,1)' all > ran.tab
+  tabmath ran.tab - '2+%1*16,2+%2*16,0.2' all | awk '{print "circle",$0}' > ran.layout
+  tabplot ran.tab 1 2 0 1 0 1 layout=ran.layout
+
+.fi
+It plots the data points from the file \fBran.tab\fP as dots, and
+converts, using tabmath and awk, these to a layout file where the
+same points as plotted as open circles in \fBran.layout\fP. Note that
+currently the user has to convert to \fIyapp\fP (cm) units, and 
+actually know that most yapp plots runs from 2 to 18 cm in both X and Y.
+This will likely change in a future version where points can be given
+in a more reasonably WCS.
 .SH FILES
 .nf
 .ta +3.0i
