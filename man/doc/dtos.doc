@@ -1,0 +1,10 @@
+%N dtos
+%D convert STARLAB dyn to NEMO snapshot
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man dtos' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A out
+	Output snapshot file (input dyn from stdin) [???]
+%A VERSION
+	31-jul-96 PJT [1.1]

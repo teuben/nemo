@@ -1,0 +1,14 @@
+%N stod
+%D convert NEMO snapshot to STARLAB dyn
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man stod' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input snapshot file (dyn to stdout) [???]
+%A headline
+	Additional comment line []
+%A label
+	Add labels to stars? [f]
+%A VERSION
+	31-jul-96 PJT [1.0]
