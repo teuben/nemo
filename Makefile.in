@@ -1,4 +1,4 @@
-VERSION = NEMO V3.0 23-oct-01 PJT
+VERSION = NEMO V3.0 17-jan-01 PJT
 ################################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 ################################################################################
@@ -376,7 +376,6 @@ tarfile:
 # autoconf/CVS based export
 #
 
-NEMOVER = `cat VERSION`
 DIST_DIR = nemo_$(NEMOVER)
 
 dist:
@@ -390,6 +389,8 @@ dist:
 	  echo 'Change this date in:  www/nemo/lastftp'; \
 	  echo 'Change: whatsnew.html'; \
 	  echo 'Change: nemo.html'; \
+	  echo 'And run the following commands: '; \
+	  echo "cvs tag `echo nemo_$(NEMOVER) | sed 's/\./_/g'`"; \
 	  echo 'scp $(DIST_DIR).tar.gz apus:/home/ftp/pub/nemo'; \
 	  echo 'src/scripts/version inc'; \
 	  echo 'cvs commit VERSION inc/version.h'; \
@@ -613,6 +614,9 @@ install:
 	@echo "      source NEMORC.local   -- any last minute local changes"
 	@echo "      rehash                -- update search path" 
 	@echo "      make libs             -- install the libraries"
+	@echo ""
+	@echo "If you want to compile a small standard test of binaries:"
+	@echo "      src/scripts/testsuite -b"
 
 helpconfig:
 	@echo config, configure, config_extra, config_clean
