@@ -8,12 +8,13 @@ set nemo=nemo_$$
 set tar=nemo_cvsdir.tar.gz
 
 setenv CVSROOT :pserver:anonymous@cvs.astro.umd.edu:/home/cvsroot
-echo Getting new NEMO
-cvs -Q co -d $nemo nemo
+echo Getting new NEMO in $nemo
+if (! -d $nemo) then
+  cvs -Q -d $CVSROOT co -d $nemo nemo
 endif
 cd $nemo
 echo Making $tar
 tar zcf ../$tar `find . -type d -name CVS -print`
-echo Cleaning
+echo Cleaning $nemo
 rm -rf $nemo
 
