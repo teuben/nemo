@@ -1,6 +1,9 @@
 /* 
- *  NEMOfied:  vector -> fvector
+ *  NEMOfied:  vector -> fvector  
  *	       matrix -> fmatrix
+ *
+ *Note: a bugus free_vector and free_matrix remained to trigger compiler errors
+ *      for those who use the original NumRec code
  */
 
 #ifndef _NR_UTILS_H_
@@ -61,11 +64,13 @@ float **submatrix(float **a, long oldrl, long oldrh, long oldcl, long oldch,
 	long newrl, long newcl);
 float **convert_matrix(float *a, long nrl, long nrh, long ncl, long nch);
 float ***f3tensor(long nrl, long nrh, long ncl, long nch, long ndl, long ndh);
+void free_vector(void);   /* insert bogus old one to trigger compile error */
 void free_fvector(float *v, long nl, long nh);
 void free_ivector(int *v, long nl, long nh);
 void free_cvector(unsigned char *v, long nl, long nh);
 void free_lvector(unsigned long *v, long nl, long nh);
 void free_dvector(double *v, long nl, long nh);
+void free_matrix(void);   /* insert bogus old one to trigger compile error */
 void free_fmatrix(float **m, long nrl, long nrh, long ncl, long nch);
 void free_dmatrix(double **m, long nrl, long nrh, long ncl, long nch);
 void free_imatrix(int **m, long nrl, long nrh, long ncl, long nch);
