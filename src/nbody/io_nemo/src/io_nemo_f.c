@@ -38,14 +38,14 @@
 \* -------------------------------------------------------------- */
 
 /* variables for reading */
-char * io_in[MAXIO]; 
-FILE * instr[MAXIO];
-bool   read_one[MAXIO];
+extern char * io_in[MAXIO]; 
+extern FILE * instr[MAXIO];
+extern bool   read_one[MAXIO];
 
 /* variables for writing */
-char * io_out[MAXIO]; 
-FILE * outstr[MAXIO];
-bool   save_one[MAXIO];
+extern char * io_out[MAXIO]; 
+extern FILE * outstr[MAXIO];
+extern bool   save_one[MAXIO];
 
 /* variables used to keep track of history (EXPORTED) */
 bool   set_history_f[MAXIO];
