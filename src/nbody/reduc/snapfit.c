@@ -7,6 +7,7 @@
  *	 4-may-92    0.4 fixed matrix rotation order bug
  *	16-jun-92    0.6 rotation order -> math positive (see snaprotate(1))
  *      17-jul-03    0.7 make it compile under nemo 3.1.1
+ *      29              a  : patch, since scratch files appear to not work
  */
 
 /* this code will only work in 3D */
@@ -54,7 +55,7 @@ string defv[] = {
     "contour=\n         Optional Output image file with chi-squared",
     "iter=0\n           number of more iterations after best on matrix",
     "times=all\n        Times selected from snapshot models",
-    "VERSION=0.7\n      17-jul-03 PJT",
+    "VERSION=0.7a\n     29-jul-03 PJT",
     NULL,
 };
 
@@ -208,6 +209,7 @@ void read_data()
         instr =  stropen(getparam("cube"),"r");
 
         if (qsf(instr)) {       /* if binary; assume it's an image */
+	   dprintf(1,"BINARY image cube\n");
            rewind(instr);
     
            read_image(instr,&iptr);
@@ -259,8 +261,10 @@ void read_data()
            }
            free_image(iptr);
         } else {                /* assume it's a table */
+	   dprintf(1,"ASCII table\n");
            rewind(instr);
-           scrstr = stropen("","s");     /* scratch file for 'cube' */
+	   /* scratch file I/O is broken in 3.1.1 ??? */
+           scrstr = stropen("tmp1","w!");     /* scratch file for 'cube' */
            while ( fgets(line,256,instr) != NULL) {
               if(line[0]=='#') continue;
               line[strlen(line)-1] = '\0';
@@ -270,23 +274,26 @@ void read_data()
                 case 3:
                   vals[3] = 1.0;      /* fill in default weight */
                 case 4:
-                  if (Qall || vals[3]>cutoff) {
-                    put_data(scrstr,"XYVI",RealType,vals,4,0);
-                    ndata++;
-                  }
                   break;
                 default:
                   warning("Parsing: %s",line);
                   break;
               }
+	      if (Qall || vals[3]>cutoff) {
+		put_data(scrstr,"XYVI",RealType,vals,4,0);
+		ndata++;
+	      }
            }
-           rewind(scrstr);
+	   strclose(scrstr);
+           scrstr = stropen("tmp1","r");
+	   dprintf(0,"%d valid data found\n",ndata);
            if (ndata==0) error("No data found; use different cutoff");
          
            dtab = (cube *) allocate(ndata*sizeof(cube));
 
            for(i=0; i<ndata; i++) {
               get_data(scrstr,"XYVI",RealType,vals,4,0);
+	      dprintf(1,"%g %g %g %g\n",vals[0],vals[1],vals[2],vals[3]);
               dtab[i].r[0] = vals[0];
               dtab[i].r[1] = vals[1];
               dtab[i].r[2] = vals[2];
