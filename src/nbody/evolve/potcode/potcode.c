@@ -13,8 +13,8 @@
  *     29-sep-92 V4.0 allow max grid size                       PJT
  *		      options= fix in code_io.c
  *     16-feb-03 V4.0a use get_pattern()			pjt
- *     24-feb-03 V4.1  initial  framework for epicycle mode     pjt
- *      ?-mar-03       ? done ?
+ *     24-feb-03      initial  framework for epicycle mode      pjt
+ *      5-mar-03 V5.0 analytical epicyclic orbits               pjt
  *
  * To improve:  use allocate() for number of particles; not static
  */
@@ -40,7 +40,7 @@ string defv[] = {
     "sigma=0\n            diffusion angle (degrees) per timestep",
     "seed=0\n		  random seed",
     "headline=PotCode\n   random mumble for humans",
-    "VERSION=4.1\n        4-mar-03 PJT",
+    "VERSION=5.0\n        5-mar-03 PJT",
     NULL,
 };
 
@@ -144,12 +144,12 @@ real time;			/* current time */
   bodyptr p;
   vector lpos,a1,a2;
   real   lphi,r2,r,ome1,ome2, eps, f1,f2,kap2,kap1, A, B, oldkap, tol, tolmin;
-  real   vr, vt, lz;
-  int    iter, ndim=NDIM;
+  real   vr, vt, vz, lz, eps2, tol2, nu, oldnu;
+  int    iter, iter2, ndim=NDIM;
   
   if (ome!=0.0) error("Force-1 does not work in rotating potentials");
 
-  printf("# r   omega   kappa      A           B   omega-kappa/2 iter   tol       vr      vt-ome/r       lz\n");
+  printf("#   r    omega    kappa      A         B   omega-kappa/2 nu    it it   tol     tol    vr        vt-ome/r   vz      lz\n");
 
   for (p = btab; p < btab+nb; p++) {		/* loop over bodies */
     r2 = sqr(Pos(p)[0]) + sqr(Pos(p)[1]);
@@ -162,11 +162,12 @@ real time;			/* current time */
     vt = sqrt( (Vel(p)[0]*Vel(p)[0] + Vel(p)[1]*Vel(p)[1])-vr*vr);
     lz = Pos(p)[0]*Vel(p)[1] - Pos(p)[1]*Vel(p)[0];
     vt -= ome1*r;
+    vz = Vel(p)[2];
 
     /* should do iteration until converging, for now slightly asymmetric results */
     tolmin = 1e-7;   /*  tolerance to achieve */
     eps = 0.001;       /*  first small fractional step in radius */
-    for (iter=0; iter<10; iter++) {
+    for (iter=0; iter<10; iter++) {                  /* iterate to find kappa */
       MULVS(lpos,Pos(p), 1+eps);
       (*pot)(&ndim,lpos,a1,&lphi,&time);
       MULVS(lpos,Pos(p), 1-eps);
@@ -188,19 +189,37 @@ real time;			/* current time */
 	eps = eps/2;
 	dprintf(1,"%g : %d %g %g %g\n",r,iter,eps,kap1,tol);
       }
-      
+    }
+    eps2 = 0.001;
+    SETV(lpos,Pos(p));
+    for (iter2=0; iter2<10; iter2++) {                  /* iterate to find nu */
+      lpos[2] = eps2*r;
+      (*pot)(&ndim,lpos,a1,&lphi,&time);
+      nu = a1[2]/lpos[2];
+      nu = sqrt(ABS(nu));
+      if (iter2==0) {
+	oldnu = nu;
+	eps2 /= 2.0;
+	continue;
+      } else {
+	tol2 = (nu-oldnu)/nu;
+	tol2 = ABS(tol2);
+	if (tol2 < tolmin) break;
+	eps2 /= 2.0;
+	dprintf(1,"%g : %d %g %g %g\n",r,iter2,eps2,nu,tol2);
+      }
     }
     A = -0.25*(f1-f2)/(2*eps)/ome1;
     B = A - ome1;
-    printf("%g %g %g %g %g %g %d %g %g %g %g\n",r,ome1,kap1,A,B,ome1-kap1/2.0,iter,tol,vr,vt,lz);
+    printf("%g %g %g %g %g %g %g %d %d %g %g  %g %g %g %g\n",
+	   r,ome1,kap1,A,B,ome1-kap1/2.0,nu,iter,iter2,tol,tol2,vr,vt,vz,lz);
     p->A = A;
     p->B = B;
     p->kappa = kap1;
-    p->nu = 0.0;       /* VERTICAL to be done */
-    /*  must convert to curvilinear, they are still cartesian here */
+    p->nu = nu;
     p->xiv0 = -vr;
-    p->etav0 = -vt;    /* ok, also figure out the sign  */
-    p->zetav0 = 0;     /* VERTICAL to be done */
+    p->etav0 =  vt;             /* check sign  */
+    p->zetav0 =  vz;
     Acc(p)[0] = Pos(p)[0];
     Acc(p)[1] = Pos(p)[1];
     Acc(p)[2] = Pos(p)[2];

@@ -308,7 +308,7 @@ real dt;		/* integration time step */
   bodyptr p;
   body tmp1;
   real t, kt, kt1, coskt, sinkt, dx, dy, odt, cosodt, sinodt;
-  real xi, eta, f, r, phi, cosp, sinp;
+  real xi, eta, zeta, f, r, phi, cosp, sinp;
 
   *tptr += dt;                       /* get to the new time */
   t = *tptr;
@@ -323,8 +323,9 @@ real dt;		/* integration time step */
     coskt = 1-cos(kt1);
     Pos(p)[0] = Acc(p)[0];   /* cheat: restore old guiding center */
     Pos(p)[1] = Acc(p)[1];
+    Pos(p)[2] = Acc(p)[2];   /* this one better be 0 */
 
-#if 0
+#if 1
     dx = cosodt * Pos(p)[0] - sinodt * Pos(p)[1];    /* incr rotate by Omega * dt */
     dy = sinodt * Pos(p)[0] + cosodt * Pos(p)[1];
 #else
@@ -333,12 +334,14 @@ real dt;		/* integration time step */
 #endif
     Acc(p)[0] = dx;          /* cheat: store guiding center in Acc */
     Acc(p)[1] = dy;
+    Acc(p)[1] = 0.0;
     r = sqrt(dx*dx+dy*dy);
 
-    xi =  p->xiv0*sinkt/p->kappa + 
-           p->etav0*coskt/(2*p->B);
-    eta =  -p->xiv0*coskt/(2*p->B) + 
-           p->etav0*(p->A*kt - (p->A - p->B)*sinkt)/(p->kappa * p->B);
+    xi =   p->xiv0  * sinkt/p->kappa   + 
+           p->etav0 * coskt/(2*p->B);
+    eta = -p->xiv0  * coskt/(2*p->B)   + 
+           p->etav0 * (p->A*kt - (p->A - p->B)*sinkt)/(p->kappa * p->B);
+    zeta = p->zetav0* sin(p->nu * t) / p->nu;
 
     phi = eta/r;        /* eta is positive in direction of motion */
     cosp = cos(phi);
@@ -346,6 +349,7 @@ real dt;		/* integration time step */
     f = 1-xi/r;         /* xi is positive if pointing inward */
     Pos(p)[0] = (cosp * dx - sinp * dy)*f;    /* check sign */
     Pos(p)[1] = (sinp * dx + cosp * dy)*f;
+    Pos(p)[2] = zeta;
   }
 }
 
