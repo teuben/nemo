@@ -329,6 +329,8 @@ helptar:
 	@echo "  % make tarkernel"
 	@echo "  % make tarbima"
 	@echo "  % make tarorbit"
+	@echo "  % make dist"
+	@echo "  % make distu"
 	@echo ""
 
 tardu:
@@ -361,8 +363,14 @@ dist:
 	tar -zcf $(DIST_DIR).tar.gz $(DIST_DIR)
 	rm -rf $(DIST_DIR)
 
+distu:
+	tar -zcf $(DIST_DIR)_cvs.tar.gz `find . -name Entries -exec src/scripts/cvsutar '{}' \;`
+
 cvsnew:
 	cvs -n -q update
+
+cvsu:
+	cvsu | grep ^M
 
 
 # The following 'ftp' targets only supposed to work at the master site
@@ -559,6 +567,7 @@ install:
 	@echo ""
 	@echo "However, typically you would do the following: (must be in (t)csh)"
 	@echo "      ./configure        -- run configure, with lots of options"
+	@echo "      source nemo_end    -- if you have an *old* NEMO env"
 	@echo "      source nemo_start  -- load the NEMO environment"
 	@echo "      make dirs          -- creates directory structure and admin stuff"
 	@echo "      make config_extra  -- copy configure created files into dirs"
@@ -619,3 +628,5 @@ testsuite:
 
 sure:	libs bins
 	
+.makedefs:
+	$(MAKE) -f src/Makefile makedefs_help

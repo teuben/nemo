@@ -3,17 +3,17 @@ Preconditions to INSTALLATION
 =============================
 
 The default installation installs NEMO with a simple postscript-only
-graphics library (a.k.a. yapp_ps). You should consider selecting a well 
-supported YAPP hookup, e.g. PGPLOT, which allows transparent switching
-between X (multiple persistent as well as non-persistent), postscript,
-GIF, PPM etc.
+graphics library (a.k.a. yapp_ps). You should consider selecting a
+more versatile YAPP hookup with multiple output devices, e.g. PGPLOT.
+It allows transparent switching between X (multiple persistent as well
+as non-persistent), postscript, GIF, PPM etc.
 
 a) Installing PGPLOT
 
 	cd $NEMO/local
 	$NEMO/src/scripts/pgplot.install
-	(you may need to get the pgplot522.tar.gz file from caltech
-	or a local repository)
+	(you may need to get the pgplot522.tar.gz, or newer, file from
+        Caltech (http://astro.caltech.edu/~tjp/pgplot/) or a local repository)
 
    this assumes $NEMO has a basic presence already, so don't start this
    yet, first figure something out about the installation. See below.
@@ -31,6 +31,9 @@ b) Installing HDF
 	libdf.a
 	libz.a	(often comes with the system)
 	/usr/local/include/df.h   -- and many others
+
+   A newer version of HDF (HDF5) is currently under development. NEMO does
+   not support this yet.
 
 c) Installing CFITSIO
 
@@ -70,6 +73,7 @@ Brief overview of a Version 3.x INSTALLATION
 			setenv F77 g77
 		 or whichever is applicable, if the fortran compiler does not
 		 get detected properly, the run configure again)
+	% source nemo_end		(only if you have an old NEMO running)
 	% source nemo_start
 	% make dirs config_extra scripts
 	% source NEMORC.local		  (or look at $NEMO/src/scripts/NEMORC)

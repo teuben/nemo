@@ -233,11 +233,15 @@ fi
 
 
 AC_MSG_CHECKING(whether we have PGPLOT)
+if test -d "$PGPLOT_DIR"; then
+      pgplot_dir="$PGPLOT_DIR"
+else
+      pgplot_dir="/usr/lib/pgplot"
+fi
 AC_ARG_WITH(pgplot-prefix, 
         [  --with-pgplot-prefix=PFX     Prefix where PGPLOT was installed], 
         pgplot_config_prefix="$withval", 
-        pgplot_config_prefix="/usr/lib/pgplot")
-
+        pgplot_config_prefix="$pgplot_dir")
 
 yapp_default="ps"
 if test x$pgplot_config_prefix != x; then
@@ -285,6 +289,7 @@ case $host_os in
 	LOADOBJ_MACH="-Dlinux -DSYSV"
 	LOADOBJ_LIBS=-ldl
 	;;
+dnl                         BUG? does this fail on solaris 8 ???
       solaris*)
 	LOADOBJ_MACH="-Dsun4 -DSOLARIS -DSYSV"
 	LOADOBJ_LIBS=-ldl
@@ -653,6 +658,12 @@ AC_SUBST(YAPP_DEF)
 
 AC_SUBST(NEMO_FFLAGS)
 AC_SUBST(NEMO_CFLAGS)
+
+if test -d "$NEMODAT"; then
+  echo "*** Warning: \$NEMO=$NEMO is already present"
+  echo "*** you probably should source $NEMO/nemo_end"
+fi
+
 
 AC_OUTPUT(NEMORC.gen Makefile makedefs nemo_start)
 

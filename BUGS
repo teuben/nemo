@@ -27,3 +27,14 @@
 
 - -DSINGLEPREC:  scfm does not work
  		 athan92 shows some significant force differences
+
+- solaris8: some installtion problems, needs manual patching -
+	for experts only
+
+	-DSOLARIS 		needed for getparam
+	-DSYSV -Dsparc -Dsun	needed for loadobj
+
+- sgi:  for 64 bit mode add
+	 -mabi=64   (if gnu) ,or
+	-64
+  For 64 bit compilations.

@@ -97,6 +97,7 @@
  * 31-may-01       b  added jJ (dutch/german) to boolean 'true'
  *  7-jun-01       c  using NEMO_VERSION instead of VERSION
  * 23-jun-01       d  PRECISION now in ZENO mode
+ *  3-jul-01       e  keybuf always present, not just in INTERACT mode
 
   TODO:
       - what if there is no VERSION=
@@ -117,13 +118,13 @@
       - @macro and $key references get expanded as strings.
  */
 
-#define VERSION_ID  "3.2d 23-jun-01 PJT"
+#define VERSION_ID  "3.2e 3-jul-01 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
 #if !defined(unicos) && !defined(__BORLANDC__) && !defined(mc68k)
-# define INTERACT        /* want interactive input ?            *//* no cray */
-# define NEMOINP         /* want nemoinp parsing in getXparam ? *//* BUG cray?*/
+# define INTERACT        /* want interactive input ?              */
+# define NEMOINP         /* want nemoinp parsing in getXparam ?   */
 #endif
 
 #define PUTPARAM        /* allow putparam ?                       */
@@ -208,10 +209,8 @@ typedef struct keyword {    /* holds old all keyword information             */
 
 /* local variables - not visible to outside world */
 
-#if defined(INTERACT)
    local char key_filename[MAXBUF];         /* filename to store keywords */
    local char keybuf[MAXBUF];               /* buffer for keyword i/o to file */
-#endif /* INTERACT */
    local string version_e=NULL; /* extern version (keyfile or commandline)    */
    local string version_i="*";  /* internal version (executable)              */
 
