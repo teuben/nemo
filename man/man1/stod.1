@@ -1,0 +1,132 @@
+.TH STOD 1NEMO "6 August 1996"
+.SH NAME
+stod \- convert a NEMO snapshot to a STARLAB dyn (node/story)
+.SH SYNOPSIS
+\fBstod\fP \fBin=\fP\fIsnapshot\fP [parameter=value]
+.SH DESCRIPTION
+\fBstod\fP converts a snapshot from NEMO to a dyn system for
+STARLAB consumption (see \fIdtos(1NEMO)\fP for the 
+reverse operation).
+In traditional NEMO the input snapshot file is given 
+via a standard keyword \fBin=\fP (see \fIgetparam(3NEMO)\fP), 
+whereas  the output is limited to \fIstdout\fP (\fIcout\fP in C++).
+.PP
+\fI This is an experimental program, merely written to aid
+conversion and show that NEMO and STARLAB code can be linked
+together, albeit with some caveats and boundary conditions.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP\fIsnapshot\fP
+Input snapshot file. No default.
+.TP
+\fBheadline=\fP\fItext\fP
+Additional comment line that can be added.
+By default the one inherited from the input snapshot will be used,
+and if that is not present, nothing will be added.
+.TP
+\fBlabel=t|f\fP
+Add ordinal labels to stars? 
+Labels are the equivalent of a snapshot \fIKey\fP, though \fIstarlab\fP's
+labels are 1-based, \fIsnapshot\fP key's are 0-based.
+[Default: \fBf\fP].
+.SH EXAMPLE
+.nf
+    % mkplummer - 2 | stod - "mkplummer test" label=t
+(Particle
+  N = 2
+(Log
+mkplummer test
+ ### This is still an experimental conversion ### 
+ ===>  Fri Jul 16 11:53:57 1993
+       Starlab 1.0 (beta) : "stod - mkplummer test label=t 1.0" "mkplummer - 2 VERSION=2.5a"
+)Log
+(Dynamics
+  m  =  1
+  r  =  0  0  0
+  v  =  0  0  0
+)Dynamics
+(Hydro
+)Hydro
+(Star
+)Star
+(Particle
+  i = 1
+  N = 1
+(Log
+)Log
+(Dynamics
+  m  =  0.5
+  r  =  0.337823  0.0637204  -0.0639563
+  v  =  0.222878  -0.544599  0.272201
+)Dynamics
+(Hydro
+)Hydro
+(Star
+)Star
+)Particle
+(Particle
+  i = 2
+  N = 1
+(Log
+)Log
+(Dynamics
+  m  =  0.5
+  r  =  -0.337823  -0.0637204  0.0639563
+  v  =  -0.222878  0.544599  -0.272201
+)Dynamics
+(Hydro
+)Hydro
+(Star
+)Star
+)Particle
+)Particle
+.fi
+.PP
+The reverse operation, conversion from a dyn to a snapshot
+can also be achieved using a small number of existing tools
+(although the NEMO program \fIdtos(1NEMO)\fP would be easier
+to use).
+.PP
+First the dyn is printed in a ``dumb'' table format
+(which can also be used by NBODY1-5). For example, to convert
+a dyn file \fBrun1.dyn\fP to a snapshot file \fBrun1.snap\fP we can
+use a temporary (ascii) table, or directly convert using a
+pipe:
+.nf
+
+   dumbp < run1.dyn > run1.tab
+   tabtos run1.tab run1.snap "" mass,pos,vel
+   rm run1.tab
+
+   dumbp < run1.dyn | tabtos - run1.snap  \\
+                  block1=mass,pos,vel nbody=9999 error=1
+
+.fi
+Note that in the second example
+the number of bodies cannot be obtained directly
+from the pipe, and some arbitrarely large number must be given for
+the keyword \fBnobody=\fP, and the risky \fBerror=1\fP must be used
+to bypass an ``unexpected EOF'' fatal error to properly close the 
+file with the actually encountered number of particles.
+.SH BUGS
+\fIstory\fPs cannot handle very long input lines, as e.g. generated
+by the NEMO history mechanism. NEMO needs to break them in single
+lines to write them to the log.
+.SH FILES
+.nf
+.ta +1.5i
+src/nbody/io/starlab	stod.C stod_stubs.c
+.fo
+.SH SEE ALSO
+dtos(1NEMO), snapshot(5NEMO), dumbp(1starlab), tabtos(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+16-Jul-93	V0.1 Created                     	PJT
+30-Jul-96       documented the reverse conversion	PJT
+6-aug-96	V1.1a handle multiple snapshots on input	PJT
+.fi
