@@ -1,0 +1,9 @@
+%N /smc/teuben/nemo/bin/sun4/snapstab
+This doc file has been produced with help=t option
+No further help is available, try 'man snapstab'
+%A in
+	Input file name (snapshot) [???]
+%A times
+	Times to select snapshots from [all]
+%A VERSION
+	29-oct-90 PJT [1.1]
