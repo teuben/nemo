@@ -49,5 +49,10 @@ nbody0_ff:	nbody0.in
 compare: 
 	snapcmp nbody0.out nbody00.out
 
+
+#   note that nbody0 doesn't have all the corrections, 
+#   where nbody00 (the C version) does, and has a lot more debug=1 output
 figure8:
-	nbody0 $(NEMODAT)/figure8.dat - | tsf - | tail -13 
+	nbody0  $(NEMODAT)/figure8.dat - | tsf - | tail -13 
+	nbody00 $(NEMODAT)/figure8.dat - | tsf - | tail -13 
+
