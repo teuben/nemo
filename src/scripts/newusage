@@ -1,0 +1,55 @@
+#! /bin/csh -f
+#
+#   compress old Usage file, and make a new one
+#   if a flag '-d' is used, the old one is deleted
+#
+set u=$NEMO/adm/Usage
+if (! -e $u) then
+   echo No usage file $u
+   exit 0
+endif
+
+set dodel=0
+set check=1
+
+while ($#argv > 0)
+    switch ($argv[1])
+        case "-d":  set dodel=1
+		   echo "Deleting"
+                   breaksw
+        case "-f":  set check=0
+		   echo "No checking"
+                   breaksw
+        case "-h":  goto usage
+        default:   echo Unknown option $argv[1]
+                   goto usage
+    endsw
+    shift argv
+end
+
+set t=`date +%y%h%d | tr '[A-Z]' '[a-z]'`
+
+if (-e $u.$t.Z && $check == 1) then
+  echo "Usage for today already done; file $u.$t.Z exists"
+  exit 0
+endif
+
+cd $NEMO/adm
+echo "Renaming to $u.$t"
+mv $u $u.$t
+touch Usage
+chmod a+w Usage
+if ($dodel == 1) then
+  echo "Deleting $u.$t"
+  \rm -f $u.$t
+else
+  echo "Compressing"
+  compress $u.$t &
+endif
+exit 0
+
+usage:
+  echo "Usage: $0 [-del] [-help]"
+  echo "   -d     delete the old Usage log"
+  echo "   -f     override previous Usage backup log from today"
+  exit 0
