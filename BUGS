@@ -1,22 +1,30 @@
 
-- yanc 1.0.8 does not compile YancNemo (or YANC)
-  NO: ah, just some dirty files, needs to 'make clean'
+> I tried to make my own potential very much in the same way in which
+> plummer.c works, except that I added a routine "potential()", beside
+> "potential_double()" and "potential_float()", but identical to
+> "potential_double()". It appears that adding "potential()" creates a
+> segmentation fault (on returning from "potential_float()"). I don't know
+> why, do you?
+
 
 - compiling on some older linux versions will fail due to a prototype
   for dprintf() in /usr/include/stdio.h - you can comment out our
   version in $NEMOINC/stdinc.h and it will work
   Or add		-DHAVE_DPRINTF
   to CFLAGS (should add that to configure.in)
+  THe official name is now nemo_dprintf, though internally
+  dprintf will stay and #defined to nemo_configure
 
   still a linking problem on those cases left... (redhat 5.2)
+	-ansi ?
 
 - mktemp() should be converted mkstemp() in stropen.c (recent gcc compilers
   will complain about it, but it will work)
   Problem: can't get a fileno from a FILE * (the other way around
   is ok, use fileno()) so we're stuck....
 
-* nbody0: some weird problems on Mandrake 8.0 with 'nan's...
-  gcc 2.96 20000731 (Linux-Mandrake 8.0 2.96-0.48mdk) 
+* nbody0: some weird problems with some (all?) gcc 2.96's:
+  e.g. gcc 2.96 20000731 (Linux-Mandrake 8.0 2.96-0.48mdk) 
 	-O0 	is ok
 	-g  	is ok
 	-O1 	is bad
@@ -43,14 +51,14 @@
 
 potlist: rld: Fatal Error: attempted access to unresolvable symbol in
 /home/starlab/nemo_3.0.6/obj/mips-sgi-irix6.5/potential/athan92.so: __powdi
-
+  (some conceptual program? since sol8 seems to have the same problem)
 
   Also, for the SGI at sulfur.amnh.org (where there is some problem with
   the default f77 license) one needs to do
 
 	setenv F77 f90
 
-  This is a "mips-sgi-irix6.5" machine.
+  before configure is run.  This is a "mips-sgi-irix6.5" machine.
 
 - sgi:  hackforce does not compile/link
 
