@@ -1,11 +1,17 @@
+
+- yanc 1.0.8 does not compile YancNemo (or YANC)
+  NO: ah, just some dirty files, needs to 'make clean'
+
 - compiling on some older linux versions will fail due to a prototype
   for dprintf() in /usr/include/stdio.h - you can comment out our
   version in $NEMOINC/stdinc.h and it will work
+  Or add		-DHAVE_DPRINTF
+  to CFLAGS (should add that to configure.in)
 
   still a linking problem on those cases left... (redhat 5.2)
 
-- mktemp() should be converted mkstemp() in stropen.c (SuSe compiler
-  will complain about it, but it will work).
+- mktemp() should be converted mkstemp() in stropen.c (recent gcc compilers
+  will complain about it, but it will work)
   Problem: can't get a fileno from a FILE * (the other way around
   is ok, use fileno()) so we're stuck....
 
@@ -58,6 +64,3 @@ potlist: rld: Fatal Error: attempted access to unresolvable symbol in
 
 - kawaii/nbody does not seem to work, neither in IONEMO mode, nor default I/O mode
   (at least on linux)
-
-
-
