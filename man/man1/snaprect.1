@@ -1,0 +1,86 @@
+.TH SNAPRECT 1NEMO "26 July 1994"
+.SH NAME
+snaprect \- diagonalize moment-of-inertia of snapshot
+.SH SYNOPSIS
+\fBsnaprect in=\fPsnap_file \fBout=\fPsnap_file [parameter=value] .\|.\|.
+.SH DESCRIPTION
+\fIsnaprect\fP transforms the input N-body snapshot to a coordinate
+system which diagonalizes the moment-of-inertia tensor of a specified
+subset of particles (see keywords \fBweight\fP, \fBrcut\fP and \fBshell\fP
+below). The centroid of the subset is translated to the
+origin. As with \fIsnapkinem\fP(1NEMO), an arbitrary weighting may be
+specified for each particle.
+.PP
+Iterative determinations of the axis ratio, using the moments of
+inertia, have been implemented on an experimental basis.
+.SH PARAMETERS
+The following parameters are recognized.
+.TP 24
+\fBin=\fP\fIsnap_file\fP
+Input data is read from \fIsnap_file\fP, which must be in
+\fIsnapshot\fP(5NEMO) format.  Default: \fIrequired\fP.
+.TP
+\fBout=\fP\fIsnap_file\fP
+Output data is written to \fIsnap_file\fP, in \fIsnapshot\fP(5NEMO)
+format.  Default: \fIrequired\fP.
+.TP
+\fBweight=\fP\fIbody_weight\fP
+Expression used to compute the weight of each body.
+See \fIbodytrans\fP(1NEMO) for the form of \fIbody_weight\fP.
+Default: \fB1.0\fP.
+.TP
+\fBrcut=\fP\fIcutoff_radius\fP
+If \fIcutoff_radius\fP is greater than zero, only particles within
+\fIcutoff_radius\fP of the \fIbody_weight\fPed centroid will be used
+to compute the moment-of-inertia.
+Default: \fB0.0\fP.
+.TP
+\fBtimes=\fP\fItime_range\fP
+Only frames within \fItime_range\fP will be analyzed.  Default: \fBall\fP.
+.TP
+\fBshell\fP=\fIr_min,r_max\fP
+Two \fIradii\fP are expected here. They define an ellipsoidal shell
+within which the (modified) inertia tensor is computed and iterated.
+Default: all particles.
+.TP
+\fBiters=\fP\fImax_iters\fP
+Maximum number of iterations allowed in computing the inertia tensor
+within a changing volume/shell. Default: \fB1\fP.
+.TP
+\fBtol=\fP\fImin_tol\fP
+Minimum tolerance required to stop iterations.
+[Default: \fB0.0001\fP]
+.TP
+\fBmodified=t|f\fP
+Use modified inertia tensor? If set to true, the modified (normalized
+w.r.t. the squared ellipsoidal radius from a previous iteraton) inertia
+tensor is used instead of the regular one. Note that the \fIbody_weight\fP
+is also applied. It only makes sense to use this option if
+\fImax_iters\fP > 1. [Default: \fBf\fP].
+.TP
+\fBtest=\fP\fIsnap_file\fP
+If a filename is given, it is expected to be a snapshot. The first
+snapshot in this file is used to rectify all selected snapshots
+from the inputfile. Default: none.
+.SH BUGS
+During iterations, the printed output contains momentary eigenvectors
+and angles, not the cumulative ones.
+.SH SEE ALSO
+snapkinem(1NEMO), snapinert(1NEMO), snapplot(1NEMO), snapshot(5NEMO)
+.PP
+Aguilar & Meritt (1990) - ApJ 354, 33. 	Using a fraction of the most bound particles
+.PP
+Katz (1991) ApJ 368, 325. Volume iterative tensor.
+.PP
+Dubinski & Carlberg (1991) ApJ 378, 496. Volume iterative modified tensor.
+.PP
+Kuijken & Dubinksi (1994) MN 269, 13. Shell iterative modified tensor.
+.SH AUTHOR
+Joshua E. Barnes, Peter Teuben
+.SH HISTORY
+.nf
+.ta +1i +4i
+5-mar-89	original version?	JEB
+4-jul-94	finally implemented test=, also output theta/phi of p.axes	PJT
+24-jul-94	V1.4 experimental iters=, shell=	PJT
+.nf

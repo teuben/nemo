@@ -1,0 +1,76 @@
+# In Reverse Chronological Order:
+
+====== 12-jan-95  PJT
+
+This directory is a terrible hotchpotch of shell scripts. Some of them
+are essential for every installation, (e.g. the cc.* scripts, the
+ranlib.* pointers) and copied into $NEMOBIN, others are here that
+work almost perfect, but often need some tailoring to make it work
+on your site, or change your preferences (e.g. nemoman, nemohelp)
+and they are not installed by default into  $NEMOBIN. Others are for
+administrative purposes only, and not always well documented.
+Slowly I will bring some structure to this directory 
+
+
+==== nov-90:
+
+if you need new cc or make scripts, call them
+	cc.$NEMOHOST
+	make.$NEMOHOST
+as they can be easier used with the top level makefile in $NEMO:
+
+	make scripts SCRIPTS=cc
+
+
+====== 9-jul-87   P.J. Teuben  
+
+Why special versions of 'make' and 'cc'?
+
+Well, on the SUN a special version of cc would suffice, beause
+we want the C compiler to also look for default include files
+in NEMO (usage of the -I flag) and libraries (-L flag).
+However Ultrix does not know the -L flag for cc. Solution:
+explicitely name all libraries, instead of through the -l flag.
+
+The special make is really Ultrix specific (of course it also
+works on SUN), because environment variables are not passed
+to makefiles, so a special make was necessary which does pass
+it the NEMOPATH variable.
+
+This now also means that the LIBRARY and INCLUDE environment 
+variables become obsolete, and could be discarded.
+
+In the process of doing this I had of course a few not well understood
+problems....
+
+
+The 1st. solution to the cc/make version did not work:
+
+  alias cc /bin/cc -I$NEMOPATH/inc
+
+why, is not clear to me yet. Any program in the makefile will execute 
+the csh and should know these aliases; however (even on the SUN) it
+seemed not to. [correct: /bin/sh is the default]
+
+So I wrote a shell script:
+
+#	new make
+echo New Make;/bin/make NEMOPATH=$NEMOPATH/inc $*
+
+#	new cc
+echo New Cc;/bin/cc -I$NEMOPATH/inc $*
+
+but this again did not always all the commands it was supposed to
+do. In fact their is a difference between doing it manually and through
+the Makefile, as if a buffer was overflown....
+ 
+The thing that eventually seemed to work (on SUN) was:
+
+#	new make
+/bin/make NEMOPATH=$NEMOPATH/inc $*
+
+#	new cc
+/bin/cc -I$NEMOPATH/inc $*
+
+
+
