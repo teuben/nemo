@@ -7,8 +7,8 @@
 default		: all
 ifdef NEMO
 tonemo		: all
-			cp $(LIB)/libfalcON.so $(NEMOLIB)
-			cp $(BIN)/* $(NEMOBIN) >& /dev/null
+			-cp $(LIB)/libfalcON.so $(NEMOLIB)
+			-cp $(BIN)/* $(NEMOBIN) >& /dev/null
 install		: tonemo man
 else
 install		: all man
