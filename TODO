@@ -13,10 +13,18 @@ Remaining MacOSX problems: (a special macosx.html web page dedicated to this)
     OpenGL (and thus Mesa) can be linked. This would also remove the
     immediate need for vogl.
 
+problems with gcc4: (as tested on FC3)
+  - pgplot: grfont.dat cannot be built, some runtime problem with fortran
+  - pgplot: needs a gfortran_gcc4.conf file for now
+	also:  no more -fno-backslash
+	also:  %VAL() does not seem to be supported anymore ???
+	also:  some formatted reading that spans multi lines BAD (pgpack.f)
+  - no more -fno-globals for fortran
+  - no more -fwritable-strings in C
 -------------------------------------------------------------------------------
 
 general things for 3.2.x
-  - make sure cfitsio stuff is ok in configure
+  - make sure cfitsio stuff is ok in configure (THIS IS BROKEN NOW)
   - the change in get_atable() should mean routines need to work
     on buffered table read better
   - ccdmath WCS is broken
@@ -25,12 +33,21 @@ general things for 3.2.x
 	(some potential/data not needed)
   - intel linker problems (use different technique to force loading?)
   - get a mini-NEMO going (Dehnen, BIMA/CARMA)
-  - remove environment variables from NEMORC.local that are needed in Makefiles
+  * remove environment variables from NEMORC.local that are needed in Makefiles
     and move them into makedefs
+  - use some kind of global MAXBODY where we often use different values
 	**mostly done**
 
   => a NEMO install for gyrfalcON, so we don't have to figure the funky NEMOHOST
      in Walter's tree  (he is using make's MACHTYPE and OSTYPE internal variables)
+
+things for 3.4
+
+  - -fwritable-strings is deprecated;
+  + linking with unused functions (e.g. to aid loadobj) can now cause
+    failure. we've repaired/kludged most, but the flag
+		-fno-unit-at-a-time
+    is claimed to maybe work 'for some time'
 
 --------------------------------------------------------------------------------
 
@@ -49,6 +66,9 @@ some other help on configure:
   which creates a file just over the famous 2GB limits
   testing reading
 	tsf s000
+
+- gyrfalcON uses potentials in such a way that only potential_float
+  is looked for ???
 
 - install on solaris is broken:				[fixed w/ gcc, cc/f77 minor patch needed]
 
@@ -81,6 +101,13 @@ some other help on configure:
 
 - getparam:  finish the outkeys= stuff
 
+- overal design:
+  separation of funtionality and data format. E.g. to compute the 
+  statistics of a variable in either a table, a snapshot or an image
+  should have the same set of keywords that control the statistics.
+  Yet accessing the data is different. This is done rather sloppy
+  and slightly different in different places.
+
 - fortran-to-C
    some fortran compilers need -nofor_main to prevent main getting
    linked in from the fortran library
@@ -93,3 +120,13 @@ some other help on configure:
 	- nemo_io
 	- rotcur/rotcurshape: cube1/cube1.sig appears to create some NaN pixels
 	- mkommod has problems with out of bounds intervals
+
+- configure should use more consistent use of the
+	--with-xxx-yyy=DIR
+  where xxx is any of e.g. x11,tk,tcl,,.... libaries
+  and yyy is either dir    if it specifies -I DIR/ionclude -L DIR/lib
+	        include    if it specifies -I DIR
+		    lib    if it specifies -L DIR
+
+
+- alternative to autoconf?  Pre Make Kit  = http://pmk.sourceforge.net/
