@@ -1,0 +1,27 @@
+0 bti_0
+1 bti_1
+i bti_i
+key bti_key
+0.0 btr_0
+1.0 btr_1
+aux btr_aux
+ax btr_ax
+ay btr_ay
+az btr_az
+phi + 0.5*(vx*vx + vy*vy + vz*vz) btr_etot
+i btr_i
+sqrt(sqr(x*vy - y*vx) + sqr(y*vz - z*vy) + sqr(z*vx - x*vz)) btr_jtot
+key btr_key
+m btr_m
+phi btr_phi
+sqrt(x*x + y*y + z*z) btr_r
+t btr_t
+sqrt(vx*vx + vy*vy + vz*vz) btr_v
+(x*vx + y*vy + z*vz) / sqrt(x*x + y*y + z*z) btr_vr
+sqrt((vx*vx + vy*vy + vz*vz) btr_vt
+vx btr_vx
+vy btr_vy
+vz btr_vz
+x btr_x
+y btr_y
+z btr_z
