@@ -34,6 +34,10 @@
  *
  *	  Example of usage: see SNAPCCD.C	for writing
  *			        CCDSMOOTH.C  	for reading
+ * 
+ *  Note on VO usage:  the WCS in SIAP is a simple, but common, way
+ *   to express a WCS of an astronomical image:
+ *   naxis, cframe, equinox, crpix, crval, cdelt, rotang, proj
  */
 
 #include <stdinc.h>
