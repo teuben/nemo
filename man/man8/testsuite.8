@@ -1,4 +1,4 @@
-.TH TESTSUITE 8NEMO "6 July 2001"
+.TH TESTSUITE 8NEMO "24 December 2004"
 .SH NAME
 testsuite \- 
 .SH SYNOPSIS
@@ -36,6 +36,10 @@ cleanup and remove working directory $NEMO/tmp/testXXXXX afterwards
 .TP
 -s
 show all the binaries that are needed for each test
+.TP
+-v
+run all programs through valgrind. This will make the testsuite run
+very slowly, and it will be painfull to grep through the logfile.
 .SH KEYWORDS
 These are supplied after all options, and take the form KEYWORD=value.
 All keywords are in upper case, since they are ``makefile'' macros.
@@ -77,4 +81,5 @@ $NEMO/tmp/testXXXXX               	directory with data and log files
 .ta +1i +4i
 2-apr-97	V1.0: doc created       	PJT
 6-jul-01	documented newly added stuff	PJT
+24-dec-04	added -v	PJT
 .fi
