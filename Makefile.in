@@ -573,6 +573,9 @@ makeindex:
 pgplot:
 	src/scripts/pgplot.install
 
+cfitsio:
+	src/scripts/cfitsio.install
+
 vogl:
 	src/scripts/nemo.vogl
 
