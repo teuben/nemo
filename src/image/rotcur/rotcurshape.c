@@ -42,7 +42,6 @@
 string defv[] = {
     "in=???\n        Input image velocity field",
     "radii=\n        Radii of rings (arcsec)",
-    "vrot=\n         ** Rotation velocity",
     "pa=\n           Position angle (degrees)",
     "inc=\n          Inclination (degrees)",
     "vsys=\n         Systemic velocity",
@@ -50,7 +49,7 @@ string defv[] = {
     "frang=0\n       Free angle around minor axis (degrees)",
     "side=\n         Side to fit: receding, approaching or [both]",
     "weight=u\n      Weighting function: {uniform,[cosine],cos-squared}",
-    "fixed=\n        Parameters to be kept fixed {vsys,vrot,pa,inc,xpos,ypos}",
+    "fixed=\n        Parameters to be kept fixed {vsys,xpos,ypos,pa,inc}",
     "ellips=\n       ** Parameters for which to plot error ellips",
     "beam=\n         ** Beam (arcsec) for beam correction [no correction]",
     "dens=\n         ** Image containing containing density map",
@@ -76,7 +75,7 @@ string defv[] = {
     NULL,
 };
 
-string usage="nonlinear fit of kinematical parameters to a velocity field";
+string usage="nonlinear fit of kinematical parameters to a disk velocity field";
 
 
 
@@ -544,16 +543,12 @@ stream  lunpri;       /* LUN for print output */
     *nring = nemoinpr(getparam("radii"),rad,ring+1);
     if (*nring<2) error("radii=: Need at least two radii for one ring");
     *vsys = getdparam("vsys");
-    n = nemoinpr(getparam("vrot"),vro,ring);
-    if (n<1) error("vrot=: need at least one velocity (%d)",n);
-    for (i=n;i<*nring;i++)
-        vro[i] = vro[n-1];
     n = nemoinpr(getparam("pa"),pan,ring);
-    if (n<1) error("vrot=: need at least one position angle (%d)",n);
+    if (n<1) error("pa=: need at least one position angle (%d)",n);
     for (i=n;i<*nring;i++)
         pan[i] = pan[n-1];
     n = nemoinpr(getparam("inc"),inc,ring);
-    if (n<1) error("vrot=: need at least one inclincation (%d)",n);
+    if (n<1) error("inc=: need at least one inclincation (%d)",n);
     for (i=n;i<*nring;i++)
         inc[i] = inc[n-1];
     n = nemoinpr(getparam("center"),center,2);
