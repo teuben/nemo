@@ -4,11 +4,12 @@ dprintf \- debug level dependant formatted output conversion
 .SH SYNOPSIS
 .nf
 .PP
-.B extern int debug_level
+.B extern int debug_level;
 .PP
-.B dprintf (level, format, ...)
-.B int level;
-.B char *format;
+.B void nemo_dprintf(int level, char *format, ...);
+.B void dprintf(int level, char *format, ...);
+.PP
+.B bool nemo_debug(int level);
 .fi
 .SH DESCRIPTION
 \fBdprintf\fP can be used much in the same way as UNIX counterpart
@@ -23,6 +24,13 @@ or setting an environment variable \fBDEBUG\fP (this is done by
 \fBformat\fP is the
 string to be encoded. The optional remaining arguments \fBarg\fP are handled
 through a variable argument mechanism (see also \fIprintf(3)\fP).
+.PP
+\fBnemo_debug\fP can be used to test for a debug level. Thus equivalent
+statements are:
+.nf
+    dprintf(3,"Hello world\n");
+    if (nemo_debug(3)) fprintf(stderr,"Hello world\n");
+.fi
 .SH SNPRINTFV
 Note dprintf(int,char *,...) is now used by the snprintfv package
 see http://www.gnu.org/software/autogen/
@@ -44,3 +52,4 @@ Peter Teuben
 .ta +1i +4i
 xx-mar-88	added to getparam.c	Peter Teuben
 26-sep-01	official name now nemo_dprintf()	PJT
+28-jul-02	implemented nemo_debug()	PJT
