@@ -1,0 +1,54 @@
+.TH TABLST 1NEMO "1 December 1988" 
+.SH NAME
+tablst \- list a (binary) table
+.SH SYNOPSIS
+.PP
+\fBtablst in=\fPtable-file \fBset=\fPset-name \fBcol=\fPcolname(s) [parameter=value] ...
+.SH DESCRIPTION
+\fItablst\fP lists columns of a table. The table may as well be in standard
+binary (\fIfilestruct(5NEMO)\fP) format as in standard ascii format.
+When no binary table is found, it assumes the data is in standard ascii,
+and lists the appropriate columns.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 20
+\fBin=\fIin-file\fP
+input table file, can be ascii or binary \fIfilestruct(5NEMO)\fP format. 
+[no default].
+.TP
+\fBset=\fIsetname\fP
+Name of the (first) set in the file. If no setname is given program tries 
+to find the first setname. If no set is found (e.g. in case file is
+a normal ascii file) is will try to handle the file
+as a regular ascii table file. 
+[default: first setname/ascii file].
+.TP
+\fBcol=\fIname(s)\fP
+List of names of the columns to be printed. The list must be comma or space
+separated. For a binary file the actual names of the columns are required,
+for an ascii file the column numbers, 1 being the first.
+[no default].
+.TP
+\fBskip=\fInumber\fP
+Number of lines to skip in file before attempting reading data at all
+[default: \fB0\fP].
+.TP
+\fBstride=\fInumber\fP
+A \fIstride\fP through the data can be applied, when showing the table, 
+meaning every \fIstride\fPth line will be shown, starting at line number
+\fIskip\fP (see previous keyword). [default: \fB1\fP].
+.TP
+\fBformat=\fIexpression\fP
+Format with which the column is displayed [\fB%f\fP].
+.SH SEE ALSO
+various tab* programs
+.SH AUTHOR
+Peter Teuben
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+27-Oct-88	V1.0 created	PJT
+4-Nov-88	V1.0a set= keyword can be left empty	PJT
+1-dec-88	V1.1 also allow ascii file	PJT
+.fi
