@@ -7,6 +7,7 @@
  *	10-aug-95  V1.2  added tab= keyword for full table output	pjt
  *      15-aug-96  V1.3  fixed bug in which total mass=1 was assumed    pjt
  *	25-mar-97     a  fixed for SINGLEPREC				pjt
+ *      10-mar-04  V1.4  add log=                                       pjt
  *
  *  Bug: if the massfractions are too close such that there
  *       are bins withouth mass, this algorithm fails
@@ -16,6 +17,7 @@
 #include <getparam.h>
 #include <vectmath.h>
 #include <filestruct.h>
+#include <history.h>
 
 #include <snapshot/snapshot.h>	
 #include <snapshot/body.h>
@@ -25,7 +27,8 @@ string defv[] = {
     "in=???\n                   Input file name (snapshot)",
     "fraction=0.1:0.9:0.1\n     Fractional masses to print radii of",
     "tab=f\n			Full table of r,m(r) ? ",
-    "VERSION=1.3a\n             25-mar-97 PJT",
+    "log=f\n                    Print radii in log10() ? ",
+    "VERSION=1.4\n              10-mar-04 PJT",
     NULL,
 };
 
@@ -41,9 +44,10 @@ local int rank_aux(Body *, Body *);
 void nemo_main()
 {
     stream instr;
-    real   tsnap, mf[MFRACT], tmass, cmass, fmass, mold, rold;
+    real   tsnap, mf[MFRACT], tmass, cmass, fmass, mold, rold, rlag;
     int    k, nbody, bits, nfract;
     bool   Qtab = getbparam("tab");
+    bool   Qlog = getbparam("log");
     Body *btab = NULL, *bp;
     
     nfract = nemoinpr(getparam("fraction"),mf,MFRACT);
@@ -78,8 +82,9 @@ void nemo_main()
             cmass += Mass(bp);
             if(cmass>=fmass) {
             	if (Qtab) printf("%g", mf[k]);
-                printf(" %g", rold + 
-                        (tmass*mf[k]-mold)*(Aux(bp)-rold)/(cmass-mold));
+		rlag = rold + (tmass*mf[k]-mold)*(Aux(bp)-rold)/(cmass-mold);
+		if (Qlog) rlag = log10(rlag);
+                printf(" %g", rlag);
                 if (Qtab) printf("\n");
                 k++;
                 if (k >= nfract) break;
