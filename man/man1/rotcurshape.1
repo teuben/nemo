@@ -284,8 +284,12 @@ nfw	v0,a,c		v=v0*sqrt((ln(1+cx)-cx/(1+cx))/x/(ln(1+c)-c/(1+c)))	needs a fixed 'c
 power	v0,a,p      	v=v0*x^p                         	a needs to be fixed (scale free)!
 .fi
 .SH EXAMPLE
-Here is an example of creating a synthetic velocity field with
-ccdvel, and analysing it with rotcur:
+First an example of creating a synthetic velocity field with
+\fIccdvel(1NEMO)\fP, and analysing it with 
+rotcurshape, by using a simple rotation curve 
+entered by a sneaky construction in shell variables \fB$r\fP and 
+\fB$v\fP. The shape function is a \fBcore1\fP with amplitude 200 and
+core radius 20:
 .nf
     % set r=`nemoinp 0:60`
     % set v=`nemoinp 0:60 | tabmath - - "100*%1/(20+%1)" all`
@@ -305,9 +309,12 @@ NPT:  5658
 
 		(this is also the Testfile version)
 .fi
+The reason why the error bars are not exactly zero is because 
+ccdvel interpolates from the (r,v) table, and the finite pixel
+sizes.
 .PP
 Here is an example to write your own C code with a rotation curve, and load it
-in during runtime: (some example files are in $NEMO/src/image/rotcur/shape):
+in during runtime: (examples are in $NEMO/src/image/rotcur/shape):
 .nf
     % cat mylinear.c
 
