@@ -7,6 +7,7 @@
  *      16-sep-96  0.1  added init= keyword             pjt 
  *       7-apr-01       gcc warnings                    pjt
  *      14-apr-01       added color
+ *      14-mar-04       skip blank line
  *
  */
 
@@ -66,6 +67,7 @@ plcommand *pl_fread(string file)
     while (fgets(line,128,fp)) {        /* read all lines in file */
 	dprintf(1,"%s",line);
         if (line[0] == '#') continue;
+        if (line[0] == '\n') continue;
         if (pl_lread(line,p)>0) {
             p->next = (plcommand *) allocate(sizeof(plcommand));
             p = p->next;
