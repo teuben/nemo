@@ -1,0 +1,13 @@
+%N ccdfits13
+This doc file has been produces with help=t option
+No further help is available, try 'man ccdfits13'
+%A in
+	Input filename(image)
+%A out
+	Output filename(fits)
+%A scale
+	Scalefactor for output map
+%A object
+	Alternate ID name for the object
+%A VERSION
+	13-jul-89 PJT
