@@ -1,0 +1,18 @@
+%N snapdiagplot
+%D plot diagnostics of a snapshot file
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man snapdiagplot' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	input file name [???]
+%A times
+	times to plot [all]
+%A exactpot
+	if true, compute O(N^2) PE [false]
+%A eps
+	using this softening [0.05]
+%A formal
+	publication-style plot [false]
+%A VERSION
+	16-feb-97 PJT [1.4c]
