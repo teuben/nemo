@@ -1,7 +1,8 @@
-Here are some examples of working NEMORC.local files that you can copy
-(and probably still need to edit) in $NEMO. Notice that the standard
-installation processing probably copied a generic NEMORC.gen onto
-NEMORC.local.
+Here are some examples of (previously) working NEMORC.local files that
+you can copy (and probably still need to edit) in $NEMO. 
+
+!! Notice that the standard installation processing probably copied a
+generic NEMORC.gen onto NEMORC.local, so be aware.
 
 
 
