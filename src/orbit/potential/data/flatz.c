@@ -4,7 +4,7 @@
  *          and quasi harmonic in Z
  *
  *	29-dec-01	derived from rotcur
- *      13-feb-03       derived from rotcur0
+ *      13-feb-03       derived from rotcur0; toy project Rob Olling
  */
 
 /*CTEX
