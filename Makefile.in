@@ -1,4 +1,4 @@
-VERSION = NEMO V3.2 6-apr-04 PJT
+VERSION = NEMO V3.2 13-apr-04 PJT
 ################################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 ################################################################################
@@ -674,6 +674,11 @@ bins:
 	cd src;$(MAKE) -i bins >> ../install.log 2>&1 
 	cd usr;$(MAKE) -i bins >> ../install.log 2>&1 
 	@echo Done at `date`
+
+missingbins:
+	ls $(NEMO)/bin > bins.list
+	-$(DIFF) bins.list src/scripts
+	@echo This NEMO has `wc -l bins.list`, the benchmark is `wc -l src/scripts/bins.list`
 
 testbins:
 	src/scripts/testsuite -b
