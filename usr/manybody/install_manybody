@@ -1,0 +1,62 @@
+#! /bin/csh -f
+#
+#  5-mar-2004     for nbody-school            PJT 
+#
+#  
+
+set pgplot=1
+set gcc=0
+set falcon=1
+
+foreach _a ($*)
+  set $_a
+end
+
+if (-d /astromake) then
+  source /astromake/astromake_start
+endif
+
+set fltk=`pwd`/fltk-1.1.4-source.tar.gz
+
+# remove the old manybody
+rm -rf manybody
+
+# get all the new stuff via CVS and tarballs
+echo CVS: manybody/starcluster
+cvs -Q co manybody/starcluster
+echo CVS: manybody/starlab
+cvs -Q co manybody/starlab
+cd manybody
+echo CVS: partiview
+cvs -Q co partiview
+echo CVS: nemo
+cvs -Q co nemo
+echo CVS: pgplot
+(cd nemo; mkdir local; cvs -Q co pgplot)
+echo TAR: $fltk
+tar -C partiview/src -zxf $fltk
+
+
+#                                                   starlab
+pushd starlab
+  source AAA_SOURCE_ME
+popd
+
+#                                                   fltk (internal build only)
+pushd partiview/src/fltk-1.1.4
+  ./configure
+  make
+popd
+
+#                                                   partiview
+pushd partiview/src
+  ./configure --with-fltk=`pwd`/fltk-1.1.4
+  make
+popd
+
+#                                                   nemo
+pushd nemo
+  source AAA_SOURCE_ME
+popd
+
+
