@@ -48,6 +48,21 @@ and the moments now become running moments.
 .PP
 Note that the \fImedian_moment\fP can only be used in \fBx\fP (the weights are
 ignored) and moving moment where \fBndat>0\fP.
+.SH EXAMPLES
+The following code computes a weighted mean and dispersion of a set of points:
+.nf
+
+    real x[100], w[100];
+    int  i,n=100;
+    Moment m;
+    ...
+    ini_moment(&m,2,0);      /* up to 2nd order moment, and using no circular buffer */
+    for (i=0; i<n; i)
+	accum_moment(&m,x[i],w[i]);
+    printf("Mean: %g   Dispersion: %g\\n",
+	mean_moment(&m), sigma_moment(&m));
+
+.fi
 .SH MOMENT STRUCTURE
 A simple data structure (referred to as \fImoment\fP in the above
 SYNOPSIS) is used to communicate between different routines:
