@@ -50,3 +50,19 @@ It also turns out I once did write a prototype for this
 but this was designed to store keywords in ascii format, which we are
 now arguing we should do in binary using NEMO's filestruct(3NEMO)
 format. Also , the name is in use in the kernel and may cause confusion.
+
+---------------------------------------------------------------------------
+http://www.ex-parrot.com/~chris/xdata/
+
+xdata is a set of shell-level utilities, and a perl module, which
+implement an interface to arbitrary key-value pairs which is accessible
+to simple shell and perl programs. Examples of applications for this
+include to-do lists, contact databases, browser bookmarks and so forth--
+in fact, anything which requires small pieces of data to be referenced
+by keys. xdata stores timestamps for the data it manages, and comes with
+a program to synchronise databases among cooperating hosts. This allows
+you to propagate information among hosts in a transparent fashion
+(creations, updates and deletes are correctly handled), which is nice if
+you want to create a uniform environment on numerous machines.
+
+

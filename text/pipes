@@ -87,3 +87,24 @@ tsf $out
 
     however if the timing is good, and dt not too small (?), it appears to work
     without the bootstrapping need.
+
+
+
+tcppipe:
+
+   lets take this example 
+				     mkplummer - 1000 | tsf -
+   and let both sides of the pipe done on different machines
+
+ currently we do:
+   start sending on machine A:       mkplummer - 1000 | tcppipe
+   then receive in machine B:        tcppipe A | tsf -
+
+
+ in the future we could think of a unique type approach:
+
+	on A:	mkplummer + 1000
+	on B:	tsf +A
+
+ which defaults to port 
+ A full syntax could be:		+host:port/bufsize
