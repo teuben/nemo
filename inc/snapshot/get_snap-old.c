@@ -341,8 +341,6 @@ int *ifptr;			/* pointer to input bit flags */
     real *abuf, *ap;
     Body *bp;
 
-    dprintf(0,"get_snap_dens...\n");
-
     if (get_tag_ok(instr, DensityTag)) {
 	abuf = (real *) allocate(*nbptr * sizeof(real));
 	get_data_coerced(instr, DensityTag, RealType, abuf, *nbptr, 0);
