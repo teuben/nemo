@@ -1,0 +1,73 @@
+.TH SNAPXYZ 1NEMO "30 March 1997"
+.SH NAME
+snapxyz \- Convert snapshot to xyzc data
+.SH SYNOPSIS
+\fBsnapxyz\fP [parameter=value]
+.SH DESCRIPTION
+\fIsnapxyz\fP converts snapshot data into Position-Color (\fBxyzc\fP) data,
+or optionally Position-Velocity-Color (\fBxyzuvwc\fP) data.
+In this format utilities exist to interactively browsing this 3D dataset,
+optionally accompanied with velocity vectors. See \fIxyzview(1NEMO)\fP.
+.PP
+The positions are computed 
+using a \fIbodytrans(3NEMO)\fP expression, and default to \fBx,y,z\fP
+for position, and  \fBvx,vy,vz\fP  for velocity.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input file of \fIsnapshot(5NEMO)\fP data. No default.
+.TP
+\fBout=\fP
+Output file for xyzc/xyzuvwc data in \fIxyz(3NEMO)\fP format. No default.
+.TP
+\fBtimes=\fP
+Range of times to convert. [Default: \fBall\fP].
+.TP
+\fBxvar=\fP
+Expression for x-axis variable    [Default:  \fBx\fP].
+.TP
+\fByvar=\fP
+Expression for y-axis variable    [Default:  \fBy\fP].
+.TP
+\fBzvar=\fP
+Expression for z-axis variable    [Default:  \fBz\fP].
+.TP
+\fBvxvar=\fP
+Expression for vx-axis variable (see also \fBvel=\fP below)
+[Default:  \fBvx\fP].
+.TP
+\fBvyvar=\fP
+Expression for vy-axis variable  (see also \fBvel=\fP below)
+[Default:  \fBvy\fP].
+.TP
+\fBvzvar=\fP
+Expression for vz-axis variable  (see also \fBvel=\fP below)
+[Default:  \fBvz\fP].
+.TP
+\fBvel=t|f\fP
+Should velocities be output also.
+Default: \fBt\fP.
+.TP
+\fBcolor=\fP
+Expression for point color. This must be an integer expression,
+0 being the background color, 1 and higher some other colors.
+[Default: \fB1\fP].
+.TP
+\fBvisib=\fP
+Expression for point visibility. This must be an integer expression,
+where 0 means invisible, and anything else visible.
+[Default: \fB1\fP].
+.SH SEE ALSO
+snap3dv(1NEMO)
+.SH AUTHOR
+Josh Barnes, Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+xx-xxx-90	V1.x using bodymap(3ZENO)         	JEB
+20-Jan-93	V2.0 using bodytrans(3NEMO) now  	PJT
+30-mar-97	V2.1 formal export in NEMO; added vel=	PJT
+.fi
+
