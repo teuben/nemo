@@ -1,4 +1,4 @@
-.TH TKRUN 1 "20 November 1997"
+.TH TKRUN 1 "22 April 2003"
 .SH NAME
 tkrun \- automatic GUI builder and frontend to run shell scripts or programs
 .SH SYNOPSIS
@@ -32,6 +32,10 @@ Should be in your $PATH.
 \fB-x\fP
 Do not run the script, merely create the Tcl/Tk script.
 .TP
+\fB-e\fP
+Show an example/template. Serves as a reminder how to create a new
+script from scratch. 
+.TP
 \fB-c\fP
 * Cleanup the script after done (maybe reverse the logic here, and cleanup
 by default; currently no cleanup is done)
@@ -64,6 +68,11 @@ The following tags are recongized GUI builders, using
     #> +EXEC
     #
 .fi
+It is also possible to put these lines on the same line as the shell variable
+in e.g. c-shell scripts, e.g.:
+.nf
+    set a=1    #> SCALE  a=1     0:10:0.1
+.fi
 .SH CAVEATS
 Resetting (right click on the keyword) a checkbutton doesn't work properly.
 .PP
@@ -85,8 +94,8 @@ wish(1)
 .PP
 .nf
 .ta +2i
-http://sunscript.sun.com/	Home Page of Tcl/Tk
-http://www.neosoft.com/		Archive of Tcl/Tk tools
+http://sunscript.sun.com/	Home Page of Tcl/Tk (now outdated)
+http://www.neosoft.com/		Archive of Tcl/Tk tools 
 .fi
 .SH EXAMPLES
 .nf
@@ -139,7 +148,7 @@ again:
   goto again
 .fi
 .SH AUTHOR
-Peter Teuben (Astronomy Department,University of Maryland,College Park,MD,USA)
+Peter Teuben (teuben@astro.umd.edu) Astronomy Department,University of Maryland,College Park,MD,USA)
 .SH FILES
 .nf
 .ta +2.0i
@@ -150,4 +159,6 @@ $run.def	keyword file in which keywords can be maintained
 .nf
 .ta +1.0i +4.5i
 18-aug-97	V0.1 released for ADASS97 paper (tcl/tk 7.6/4.2) 	PJT
+30-jan-98	V0.2 added -e, and some minor features	PJT
+22-apr-04	V1.2 added option to share the set and #> comment on one line	PJT
 .fi
