@@ -17,8 +17,6 @@
 	and is also needed in preparation for NEMO V4 when a C++ compiler
 	will be the default compiler.
 
-? problems with defining multiple bodytrans functions in the same programs
-
 - install on darwin:
 	- FORLIBS get crt1.o or something, and this is not needed,
 	and will cause linkers to fail. It needs to be removed
@@ -130,5 +128,6 @@ potlist: rld: Fatal Error: attempted access to unresolvable symbol in
 	-64
   For 64 bit compilations.
 
-- kawaii/nbody does not seem to work, neither in IONEMO mode, nor default I/O mode
+? kawai/nbody does not seem to work, neither in IONEMO mode, nor default I/O mode
   (at least on linux)
+
