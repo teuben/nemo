@@ -40,4 +40,4 @@ tablsqfit:
 
 tabnllsqfit:
 	@echo Running $*
-	nemoinp 1:100 | tabmath - - '4+exp(-(%1-50)**2/(200)+ranu(0,1)' seed=123 | tabnllsqfit - fit=gauss par=4,1,50,10
+	nemoinp 1:100 | tabmath - - '4+exp(-(%1-50)**2/(200))+rang(0,0.1)' seed=123 | tabnllsqfit - fit=gauss par=4,1,50,10
