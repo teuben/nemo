@@ -1,0 +1,29 @@
+DIR = src/image/trans
+BIN = ccdmath ccdflip
+NEED = $(BIN) 
+
+help:
+	@echo $(DIR)
+
+need:
+	@echo $(NEED)
+
+clean:
+	@echo Cleaning $(DIR)
+	@rm -f ccd.in
+
+NBODY = 10
+
+all:	$(BIN)
+
+ccd.in:
+	@echo Creating $@
+	ccdmath out=ccd.in "fie=10*%x+sqrt(%y)"  size=5,5,1
+
+ccdmath: ccd.in
+	@echo Running $@
+	ccdmath ccd.in - %1 | ccdprint - x= y= format=%7.3f
+
+ccdflip:
+	@echo Running $@
+	ccdflip ccd.in - xy | ccdprint - x= y= format=%7.3f
