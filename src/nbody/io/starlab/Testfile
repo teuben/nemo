@@ -1,0 +1,34 @@
+DIR = src/nbody/io/starlab
+BIN = dtos stod
+NEED = tabtos snapcmp mkdisk
+#			do not use yet until starlab present
+help:
+	@echo $(DIR)
+
+need:
+	@echo $(NEED)
+
+clean:
+	@echo Cleaning $(DIR)
+	@rm -f test1.ss test2.ss test3.ss test3.dyn
+
+NBODY = 10
+
+all:
+
+starlab:  cmp
+
+test1.ss:
+	dumbp < $(NEMODAT)/starlab/cube10.dyn |\
+	   tabtos - test1.ss "" mass,pos,vel nbody=10 
+
+test2.ss:
+	dtos < $(NEMODAT)/starlab/cube10.dyn test2.ss
+
+cmp: test1.ss test2.ss test3.ss
+	snapcmp test1.ss test2.ss
+	snapcmp test3.ss $(NEMODAT)/snapshot/plum10
+
+test3.ss:
+	stod $(NEMODAT)/snapshot/plum10 > test3.dyn
+	dtos < test3.dyn  test3.ss
