@@ -4,9 +4,14 @@ directcode \- simple direct N-body code
 .SH SYNOPSIS
 \fBdirectcode\fP [\fIparameter\fP=\fIvalue\fP] .\|.\|.
 .SH DESCRIPTION
-\fIdirectcode\fP is an leapfrog equal-timestepping direct N-body code.
+\fIdirectcode\fP is a simple leapfrog equal-timestepping direct N-body code.
+.PP
+The infra-structure of the code is derived from \fIhackcode1(1NEMO)\fP,
+though most of the save and restore state code has been removed to keep
+the code simple.
 .SH PARAMETERS
-The following parameters are recognized; they may be given in any order.
+The following parameters are recognized; they may be given in any order
+if supplied with their keyword.
 .TP 24
 \fBin\fP=\fIin-file\fP
 If given, initial conditions will be read from \fIin-file\fP in
