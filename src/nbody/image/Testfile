@@ -18,18 +18,18 @@ all:	snap.in $(BIN)
 
 snap.in:
 	@echo Creating snap.in
-	mkplummer snap.in $(NBODY) seed=123
+	$(EXEC) mkplummer snap.in $(NBODY) seed=123
 
-snapccd:
+snapccd: snap.in
 	@echo Running $@
-	snapccd snap.in . ; nemo.coverage snapccd.c
+	$(EXEC) snapccd snap.in . ; nemo.coverage snapccd.c
 
-snapgrid:
+snapgrid: snap.in
 	@echo Running $@
-	snapgrid snap.in .  ; nemo.coverage snapgrid.c
+	$(EXEC) snapgrid snap.in .  ; nemo.coverage snapgrid.c
 
-snapslit:
+snapslit: snap.in
 	@echo Running $@
-	snapslit snap.in  width=1 length=4 zvar=vy ; nemo.coverage snapsplit.c
+	$(EXEC) snapslit snap.in  width=1 length=4 zvar=vy ; nemo.coverage snapsplit.c
 
 
