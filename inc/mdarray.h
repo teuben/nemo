@@ -2,6 +2,9 @@
 /*
  * simple multi-dimensional arrays 
  * (real = double or float, depending on the setting in NEMO 
+ *
+ * MDMAXDIM: maximum number of dimensions we support here;
+ * it's hardcoded.
  */
 
 #define MDMAXDIM   7
