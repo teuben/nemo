@@ -15,7 +15,9 @@ Hut and  Peter\index{Teuben P.} Teuben at the Institute for Advanced
 Study during the 1986/87 academic year. At the initial stages of this
 project we have also benefitted from contributions by Lyman\index{Hurd
 L.} Hurd, Eric\index{Roberts E.} Roberts, Mark\index{Ross M.} Ross, and
-Panayotis Skordis\index{Skordis P.}.
+Panayotis Skordis\index{Skordis P.}. You will also find many ideas
+originally developed in NEMO in derived and evolved products
+such as Starlab and ZENO.
 
 Of course any package will only improve when it is used.  Numerous
 people, in particular the University of Maryland graduate students and
