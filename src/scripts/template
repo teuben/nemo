@@ -3,8 +3,10 @@
 #
 if ( $#argv == 0 ) then
   echo "Usage: $0 progname key1=def1 ..."
+  echo "version 15-apr-2003"
   echo "Write template NEMO program based on keywords and default values"
   echo "Output will be in a file progname.c, which cannot be overwritten"
+  
   exit 0
 endif
 
