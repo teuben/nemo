@@ -1,0 +1,61 @@
+.TH SNAPAXSYM 1NEMO "7 July 1989" 
+.SH NAME
+snapaxsym \- generates an around-axis integrated ccd-like frame of an N-body snapshot
+.SH SYNOPSIS
+.PP
+\fBsnapaxsym in=\fPsnapshot \fBout=\fPimage [parameter=value]
+.SH DESCRIPTION
+\fBsnapaxsym\fP makes a ccd frame from an N-body snapshot, by
+binning the (r,z) in the cylindrical coordinate of all stars on a regular 
+rectangular (square) grid and
+assigning a mean integrated 'local density' (integrated around z-axis, i.e. 
+by assuming the axial symmetry around the z-axis,
+units: mass (intensity). There is an option which produces the map of
+rotation velocity insted of the density 
+The ccd frame is written to a standard \fIImage(5)\fP output file, and can
+be accessed by various other programs for smoothing, display etc.
+.PP
+\fIsnaprotate(1NEMO)\fP has to be used first to set the axis of the
+symmetry not parallel to the coordinate axis.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 20
+\fBin=\fIin-file\fP
+input file, must be in \fISnapShot(5)\fP format [no default].
+.TP
+\fBout=\fIout-file\fP
+output file, will be in \fIImage(5)\fP format [no default].
+.TP
+\fBtimes=\fItime-range\fP
+Only data frames  with  time  values
+within  \fItime-range\fP,  which is of the
+form, eg, "1.0:1.5,2.5,3.0", will be
+translated.
+[default: all].
+.TP
+\fBsize=\fIvalue\fP
+Size of the CCD frame in sky units. Note that the picture 
+is forced to be square [default: 5.0].
+.TP
+\fBcell=\fIvalue\fP
+Cell- or pixel size. Again they will be square. For a 2D matrix
+this value will be set by the header of that dataset.
+[default: 0.1].
+.TP
+\fBvrot=\fIt|f\fP
+Logical if the map of rotational velocity is requested.
+[default: f].
+.SH "SEE ALSO"
+snapccd(1NEMO), snaprotate(1NEMO), ccdsmooth(1NEMO)
+.SH BUGS
+The values of density of the cells closest to the axis of symmetry may be
+erratic.
+.SH AUTHOR
+Jun Makino
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+7-Dec-88	V1.0: Created	JM
+7-jul-89	V1.2: get_snap()	PJT
+.fi
