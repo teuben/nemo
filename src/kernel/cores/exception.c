@@ -33,7 +33,10 @@ typedef struct excepBlkElem {
     sigjmp_buf			context;
     MemElem*			headMem;
     StreamElem*			headStream;
+//    MessageFunction		dosomething;
+//	(void *)(*printer_handler)(...);
     struct excepBlkElem*	next;
+
 } BlockRes;
 
 static BlockRes		topLevelRes = { {}, NULL, NULL, NULL};
