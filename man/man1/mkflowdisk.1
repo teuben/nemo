@@ -1,11 +1,11 @@
-.TH MKSPIRAL 1NEMO "26 May 2002"
+.TH MKFLOWDISK 1NEMO "26 May 2002"
 .SH NAME
-mkspiral \- uniform-density test disk plus spiral in spherical potential
+mkflowdisk \- uniform-density test disk plus spiral in spherical potential
 .SH SYNOPSIS
-\fBmkspiral out=\fPsnapshot [parameters=values ...]
+\fBmkflowdisk out=\fPsnapshot [parameters=values ...]
 .SH DESCRIPTION
-\fImkspiral\fP sets up a cold disk of test particles orbiting clockwise
-in the gravitational potential of a user-supplied potential (in
+\fImkflowdisk\fP sets up a thin disk of test particles 
+in a user-supplied flow potential (in
 \fIpotential(5NEMO)\fP format). In addition a spiral is added with
 constant width in degrees along a galactic circle. For given ratio
 of spiral/disk perturbation \fBa\fP and width \fBw\fP (now measured in
@@ -82,32 +82,16 @@ rotation. Not
 \fBnmodel=\fP\fIn_models\fP
 Number of output models. [Default: \fB1\fP].
 .TP
+\fBtest=t|f\fP
+In test mode all stars are placed at phase 0, and should thus trace the shape
+of the spiral. By default particles are spread around phase according to the
+density distribution as returned by the potential in the flow potential
+descriptor. Default: f.
+.TP
 \fBheadline=\fImessage\fP
 Text headline for output file [default: not used].
-.SH BENCHMARK
-This program has been used as benchmark to test writing >2GB files
-(40 models of 1,000,000 particles creates a file just over this
-magic limit):
-.nf
-    % time mkspiral s000 1000000 nmodel=40
-.fi
-Here is a sample on some 2002-class machines:
-.nf
-  U-sparc IIi/440 MHz:  161.30u 42.59s 5:04.85 66.8%  
-  PentiumIV 2.2 GHz:    29.54u 10.68s 2:40.14 25.1% 
-  PentiumIV 2.4 GHz:    26.46u 10.14s 1:37.71 37.4%  
-  G5 2.0GHz:            28.400u 24.660s 1:05.41 81.1%
-  P4/1.6 GHz:           69.940u 18.470s 4:50.64 30.4% (laptop)
-
-sum: 79.35u  3.72s 2:17.64 60.3%   P2400
-tsf:  0.00u  7.59s 1:59.46  6.3%   P2400
-
-sum: 68.63u 22.34s 2:31.54 60.0%  U440
-tsf: 21.85u 30.73s 2:32.06 34.5%  U440
-
-.fi
 .SH "SEE ALSO"
-mkdisk(1NEMO), snapmass(1NEMO), snapcenter(1NEMO)
+mkspiral(1NEMO), mkdisk(1NEMO), snapmass(1NEMO), snapcenter(1NEMO), flowcode(1NEMO)
 .SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.5i
