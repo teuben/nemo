@@ -1,0 +1,27 @@
+DIR = src/nbody/evolve/scfm
+BIN = scfm runscfm
+NEED = $(BIN) mkplummer snapprint tabtos
+
+help:
+	@echo $(DIR)
+
+need:
+	@echo $(NEED)
+
+clean:
+	@echo Cleaning $(DIR)
+	@rm -fr core scfm.in scfm.log  scfm.run
+
+NBODY = 10
+
+all: runscfm
+
+scfm.in:
+	@echo Creating scfm.in
+	mkplummer scfm.in $(NBODY) seed=123
+
+runscfm:	scfm.in
+	@echo Running $@
+	runscfm `pwd`/scfm.in scfm.run > scfm.log
+	tsf scfm.run/scfm.dat
+
