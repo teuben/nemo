@@ -1,10 +1,12 @@
 .TH MKKD95 1NEMO "6 March 2004"
 .SH NAME
-mkkd95 \- Kuijken-Dubinsky-95 composite bulge-disk-halo model
+mkkd95 \- Kuijken-Dubinski-95 composite bulge-disk-halo model
 .SH SYNOPSIS
 \fBmkkd95\fP [parameter=value]
 .SH DESCRIPTION
-No description available. This manual page was created by mkman
+\fBmkkd95\fP creates a composite Bulge-Disk-Halo galaxy in 
+near equilibrium following the procedure described in
+Kuijken & Dubinksi (1995).
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -22,43 +24,80 @@ Number of particles in disk [8000]
 Number of particles in halo [6000]  
 .TP
 \fBpsi0=\fP
-in.dbh: Psi0 (HALO) [-4.6]    
+in.dbh: Psi0 (HALO) 
+central potential - the smaller (the more negative) this parameter
+the deeper the potential and the more extended the halo
+[-4.6]    
 .TP
 \fBv0=\fP
-in.dbh: v0 [1.42]     
+in.dbh:
+v0 = sqrt(2.0)*sigma0 where sigma0 is the central velocity
+dispersion. roughly the velocity where the halo rotation curve peaks
+[1.42]     
 .TP
 \fBq=\fP
-in.dbh: q [1]     
+in.dbh: q 
+an optional flattening parameter for the potential - generally
+0.7 < q < 1.05 - q=1.0 will give a nearly spherical halo
+[1]     
 .TP
 \fBrck2=\fP
-in.dbh: (rc/rk)^2 [0.1]     
+in.dbh: (rc/rk)^2 
+a core smoothing parameter - ratio of the core radius to the
+derived King radius for halo only models set this
+to 1.0.  For multicomponent models, this can be a smaller
+number 0.0 to 0.1.  I've found that with this parameter=0.0 the
+program can crash.
+[0.1]     
 .TP
 \fBra=\fP
-in.dbh: ra [0.8]     
+in.dbh:
+Ra   - a scaling radius for the halo -
+The halo Ra radius is the radius at which the halo rotation curve, at its
+initial slope ignoring cutoffs and the other components, reaches v0.
+ [0.8]     
 .TP
 \fBmd=\fP
-in.dbh: M_d (DISK) [0.867]    
+in.dbh:
+M_d - mass of the exponential disk ignoring cutoffs
+[0.867]    
 .TP
 \fBrd=\fP
-in.dbh: R_d [1]     
+in.dbh:
+R_d - exponential scale length
+[1]     
 .TP
 \fBrouter=\fP
-in.dbh: R_outer [5]     
+in.dbh: 
+R_outer - outer radius where we begin to truncate the disk density
+[5]     
 .TP
 \fBzd=\fP
-in.dbh: z_d [0.1]     
+in.dbh: 
+z_d - disk scale height assuming a sech^2(z/zd) vertical density law
+[0.1]     
 .TP
 \fBdrtrunc=\fP
-in.dbh: dR_trunc [0.5]     
+in.dbh: 
+dR_trunc - truncation width - the disk density smoothly drops to zero in
+the range R_outer < R < ~R_outer + 2*dR_trunc.
+[0.5]     
 .TP
 \fBrhob=\fP
-in.dbh: rho_b (BULGE) [14.45]    
+in.dbh: 
+rho_b    - bulge central density
+[14.45]    
 .TP
 \fBpsicut=\fP
-in.dbh: psi_cut [-2.3]     
+in.dbh: 
+psi_cut  - bulge cut-off potential psi0 < psi_cut < 0.0
+         - energy cut-off for the bulge
+[-2.3]     
 .TP
 \fBsigb=\fP
-in.dbh: sib_b [0.714]     
+in.dbh: 
+sig_b    - bulge central potential
+[0.714]     
 .TP
 \fBdeltar=\fP
 in.dbh: delta_r [0.01]     
@@ -95,6 +134,62 @@ in.- Center the snapshot? [t]
 .TP
 \fBbin=\fP
 directory in which KD95 binaries live [.] 
+.TP
+\fBmodel=A|B|C|D\fP
+Base K&D95 model. The default model parameters are for model-A,
+but with this keyword another one of the 4 published models can
+be quickly loaded. After that specific parameters can still
+be overriden by resetting their value explicitly.
+[Default:  A]
+.SH PROCEDURE
+Creating a galaxy model from these parameters is sort of a black art
+since the halo and bulge models are not parameterized in terms of
+their mass profiles but rather properties of their distribution
+functions.  Changes in psi0, v0 etc. have weird but predictable
+effects on the mass profile.
+.PP
+The halo is a flattened analogue of the King model so the concentration
+(R_tidal/R_core) is determined by the dimensionless central potential
+$\psi_0/\sigma_0^2$.  The more negative the value the greater the
+concentration.  The parameters $R_a$ and $v_0$, affect the scaling of the
+halo mass profile.
+.PP
+The effect of different bulge parameters is more predictable.  Decreasing the
+central velocity dispersion will create a more centrally concentrated
+bulge and decreasing the psi cut off will truncate the bulge and decrease
+its total mass.
+.PP
+The disk is parameterized directly by its mass profile so its effect on the
+rotation curve is predictable ahead of time.
+.PP
+Hit and miss seems to be a good strategy for finding a suitable profile.
+Generate a model to lmax=2 and then view the resulting rotation curve by typing
+'make vr.dat'.  This uses the program to generate the file vr.dat which
+tells you the contributions to the total rotation curve.  Another useful
+file is 'mr.dat' which tells you the mass and radial extent of the disk
+bulge and halo.
+.PP
+The program plotforce will also generate the rotation curves for you
+directly from the dbh.dat, b.dat and h.dat files.
+.PP
+The potential is determined iteratively: starting from an initial
+guess at the potential, the density implied by the halo and bulge DFs
+is calculated, the disk density added, and the potential of that mass
+distribution is used as starting point for the next
+iteration. Initially only the monopole (l=0) components are calculated
+until the model converges, then one more harmonic is added per
+iteration up to the maximum requested, and once all harmonics are
+included the iterations are continued until the outer (tidal) radius
+of the halo is unchanged between iterations. At each iterations plots
+of the harmonic expansion coefficients are produced.
+If the tidal radius reported is "outside grid" for a large number of
+iterations, increase the number of radial bins or increase their
+size. Sometimes infinite tidal radii are also reported: this happens
+when the total mass of the model using the current guess for the
+potential is insufficient to generate a potential well as deep as
+requested. If this persists over many iterations, again increase the
+number or size of the radial bins.
+.PP
 .SH EXAMPLES
 The default keywords are for Kuijken-Dubinski's model-A.
 .SH SEE ALSO
@@ -103,11 +198,20 @@ gendisk, genbulge, genhalo, dbh, getfreqs, diskdf
 .nf
 NEMO/src/nbody/init/mkkd95.c
 NEMO/usr/kuijken/GalactICS/
+$out.tmdir/dbh.dat            contains tabulated values of the harmonic coefficients
+                  for the Legendre expansion of the density, potential and
+                  radial force at the specified radii for the entire model
+
+$out.tmdir/h.dat              same as above, but only for halo
+$out.tmdir/b.dat              same as above, but only for bulge
+$out.tmdir/mr.dat             mass and radial extent (or edge) of disk, bulge and halo
 .fi
 .SH AUTHOR
+Konrad Kuijken & John Dubinski (fortran programs)
 Peter Teuben (NEMO interface) -
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
 06-Mar-04	V1.0 Created	PJT
 .fi
+
