@@ -1,4 +1,4 @@
-.TH NBODY0 1NEMO "22 January 2000"
+.TH NBODY0 1NEMO "21 February 2004"
 .SH NAME
 nbody0 - direct summation Aarseth N-body integrator
 .SH SYNOPSIS
@@ -105,6 +105,15 @@ the same as that of nbody0.
 .SH BUGS
 Starting time of initial conditions is (re)set to 0, even if the snapshot
 had another time.
+.PP
+nbody0 has a simple version of the time step criterion, which can fail
+in "academic" situations. For example, for the nice symmetric
+\fI"figure8 orbit"\fP (see $NEMODAT/figure8.dat), 
+the integration will fail since the
+timestep for the 3rd particle blows up. Interestingly enough, some
+compilers (e.g. gnu) will happily work around this if optimization
+is turned on, but fail with pure debugging (OPT=-g) since only
+in this case the expression will compute as exactly 0.
 .SH STORAGE
 A total of order \fI600.NMAX\fP bytes is needed, for a given
 maximum of \fINMAX\fP particles. This breaks down as follows:
@@ -166,4 +175,5 @@ U.J. Brackbill & B.I. Cohen (Eds.), Academic Press, Orlando.
 6-aug-97	V1.3 added options=                                  	PJT
 11-feb-98	V1.3a fixed array index bug for higher order term	PJT
 21-jan-00	V1.4 added reset= to fix small deltat problem/bug	PJT
+21-feb-04	V1.5 documented the academic figure8 orbit problem	PJT
 .fi
