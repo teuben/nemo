@@ -1,0 +1,5 @@
+unproto from: <comp.sources.misc> (Vol 26 or so, plus one patch01 one volume
+later).
+
+This program needs to be compiled and replaces cpp(1). See README file
+for how to do this. On SunOS 4.x use the -Qpath directive.
