@@ -108,6 +108,12 @@ static int fexist(string name)
 #endif
 }
 
+/*
+ * advance time by another "dt", and check the "tmr" file
+ * for new values of the mass and radius.   
+   See snapcore.c for a matching writer for this reader!
+ *
+ */
 
 static void re_check(void)
 {
@@ -126,6 +132,10 @@ static void re_check(void)
       get_tes(f,"plummerv");
       strclose(f);
       dprintf(0,"PLUMMERV: %g %g %g\n",t1,m1,r1);
+
+      plummer_mass = m1;
+      plummer_radius = r1;
+      r2 = sqr(plummer_radius);
     } else
       warning("File %s does not exist yet",tmr_file);
   }
