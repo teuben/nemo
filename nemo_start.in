@@ -12,7 +12,11 @@
 #         NEMORC.local
 #
 
-#  set a reasonable NEMO if it's not present (from original dir hostinstallation)
+#  set a reasonable NEMO if it's not present  (from original dir hostinstallation)
+#  if you mannually patch this value, also be sure to look in the following files:
+#        $NEMOLIB/makedefs   (derived from $NEMO/makedefs)
+#        $NEMO/NEMORC.local  (derived from $NEMO/NEMORC.gen)
+#
 if ($?NEMO == 0) setenv NEMO @NEMO@
 
 source $NEMO/nemo.rc
