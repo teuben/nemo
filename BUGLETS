@@ -32,6 +32,9 @@
 
 * LFS seems to work, but keep an eye open on e.g.
 	http://freshmeat.net/articles/view/709/
+  and 
+	http://www.suse.de/~aj/linux_lfs.html
+  for an outline of the problems
 
 - runbody1/2 : input files can have velocities changed by 2t/w ??
 	also needs nbody= when really not needed?
