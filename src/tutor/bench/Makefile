@@ -26,3 +26,9 @@ cpu-bench_f:
 
 cpu-bench_d:
 	$(CC) -DDOUBLEPREC $(CFLAGS) -o cpu-bench_d  cpu-bench.c $(NEMO_LIBS)
+
+
+bench:	$(BINFILES)
+	time cpu-bench_f > cpu-bench_f.log
+	time cpu-bench_d > cpu-bench_d.log
+
