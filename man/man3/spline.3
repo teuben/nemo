@@ -1,0 +1,40 @@
+.TH SPLINE 3NEMO "29 July 1992"
+.SH NAME
+spline, seval \- cubic spline fit interpolation and derivatives
+.SH SYNOPSIS
+.nf
+\fBvoid spline (coef, x, y, n)
+double seval(x0, x, y, coef, n)
+double spldif(x0, x, y, coef, n)
+double spldif2(x0, x, y, coef, n)
+
+double *coef, *x, *y, x0;
+int n;
+\fP
+.fi
+.SH DESCRIPTION
+\fIspline\fP is a routine to set up an array for a (cubic) spline
+fit interpolation.
+.PP
+\fIseval\fP returns the value of the interpolated function at
+the ordinate \fBx0\fP.
+.PP
+\fIspldif\fP returns the derivative of the function at
+the ordinate \fBx0\fP.
+.PP
+This cubic spline fit has been described by
+Forsythe, Malcolm & Moler in: \fI"Computer Methods for
+Mathematical Computations"\fP, pp. 76-79. (see \fIseval.for\fP)
+.SH BUGS
+No check done for points which fall outside the interval,
+i.e. it will return wildly extrapolated values. 
+.SH FILES
+spline.c
+.SH AUTHOR
+P.J. Teuben (C)
+.SH HISTORY
+.nf
+dark-ages	written            	Josh?
+sep-90    	added spldif2()     	PJT
+jul-92      	document written, recall last interval	PJT
+.fi
