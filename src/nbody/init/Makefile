@@ -82,4 +82,4 @@ mkplummer: mkplummer.c
 
 
 kd95:
-	(cd $(NEMO)/usr/kuijken/GalactICS/src; make -f Makefile.nemo install)
+	(cd $(NEMO)/usr/kuijken/GalactICS-exp/src; make -f Makefile.nemo clean all install)
