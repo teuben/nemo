@@ -96,8 +96,9 @@ p6:
 
 
 bench1: snapbench p6
+	@echo "using NP6=$(NP6) ITER=$(ITER), use 'make cleanbench' if you use a new NP6"
 	time ./snapbench p6 'mass=3.1415'   bodytrans=f iter=$(ITER)
-	time ./snapbench p6 'mass=3.1415*m' bodytrans=f iter=$(ITER)
+	time ./snapbench p6 'mass=3.1415*m' bodytrans=t iter=$(ITER)
 
 cleanbench:
 	rm -f p6
