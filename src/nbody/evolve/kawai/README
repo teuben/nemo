@@ -11,3 +11,5 @@ change this in CVS :-(
 Neither code conforms to the NEMO makefiles for installation, and you
 may have to tune your makefile to get it to compile. 
 
+
+-- grumpfffff - see $NEMO/usr/kawai for an April 2004 version. (pjt brain malfunction)
