@@ -1,4 +1,4 @@
-.TH SDSFITS 1NEMO "10 March 1997"
+.TH SDSFITS 1NEMO "14 January 2003"
 .SH NAME
 sdsfits \- convert selected plane or coordinate descriptor of SDS HDF to FITS
 .SH SYNOPSIS
@@ -12,6 +12,7 @@ dataset into a FITS image/cube. Selection must be made wich SDS dataset
 is converted (1=first) and optional the coordinate values can be written
 instead of the SDS values. The \fIfitsbrowser\fP toolset in HDF can also
 convert SDS from/to a FITS file (primary HDU).
+One can also reorder the axes in the data matrix/cube, albeit at a cost.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -35,6 +36,14 @@ Note the first axis is the one that described the fasted running
 index in the data-array (i.e. fortran array notation). A 0 is used if
 the 2/3D array is written.
 Default: 0.
+.TP
+\fPreorder=t|f\fP
+Reorder the axes. Normally the data is transferred to the FITS file
+"as is", without reordering, though SDS lists the axis backwards
+(NZ,NY,NX: where NX is the fastest running axis in fortran sense,
+and in FITS normally plotted horizontally). With \fBreorder=t\fP
+all data is reordered, which can take large resources for large SDS
+files.
 .SH BUGS
 No known bugs, but there are some limitations in the current version:
 .PP
@@ -53,6 +62,31 @@ snaphdf(1NEMO), hdf(1), lshdf(1), fitssds(1NEMO), tsd(1NEMO), fits2sds(1HDF), ph
 
 http://hdf.ncsa.uiuc.edu/fits/index.html (fitsbrowser::fits2sds,phdu2shs)
 .fi
+.SH EXAMPLES
+In this example the file hdf100bg has 3 SDS datasets of 19 cells in Y, and
+32 cells in X each.
+.nf
+% tsd hdf100bg
+Found 3 scientific data sets in hdf100bg
+1: R-VELOCITY AT TIME=2.00E+00(19,32) km/sec  -> [608 elements of type: 5 (FLOAT32)]
+2: PHI-VELOCITY AT TIME=2.00E+00(19,32) km/sec  -> [608 elements of type: 5 (FLOAT32)]
+3: DENSITY AT TIME=2.00E+00(19,32) Msolar/pc**2  -> [608 elements of type: 5 (FLOAT32)]
+
+% sdsfits hdf100bg map1.fits 3 reorder=f
+...
+Data: DENSITY AT TIME=2.00E+00 Msolar/pc**2 1pe8.2 Polar
+map1.fits: writing as FITS file
+Data min/max = 0.00177725 362.925
+
+% sdsfits hdf100bg map2.fits 3 reorder=t
+...
+Data: DENSITY AT TIME=2.00E+00 Msolar/pc**2 1pe8.2 Polar
+map2.fits: writing as FITS file
+reorder: 19 x 32
+Data min/max = 0.00177725 362.925
+
+.fi
+
 .SH FILES
 .SH AUTHOR
 Peter Teuben
@@ -62,4 +96,5 @@ Peter Teuben
 19-Jan-95	V1.0 Created 	PJT
 13-apr-95	V1.1 added select=, fixed bug in 2D conversion	PJT
 13-apr-96	V1.2 added axis=	PJT
+14-jan-03	V1.4 added reorder=	PJT
 .fi

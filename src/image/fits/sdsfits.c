@@ -2,9 +2,10 @@
  *  SDSFITS: convert HDF SDS into a FITS image/cube (2d/3d only)
  *
  *      19-jan-95	V1.0  toy model, for Jim Stone		Peter Teuben
- *      13-apr-95       V1.1  also made it work for 2D          pjt
+ *      13-apr-95       V1.1  also made it work for 2D            pjt
  *	13-apr-96	V1.2  optionally dump out axis descriptor pjt 
  *      10-nov-02       V1.3  add HISTORY
+ *      14-jan-03       V1.4  add flip= for Eve Ostriker          pjt
  */
 
 #include <stdinc.h>
@@ -19,7 +20,8 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "out=\n			Optional output FITS file",
     "select=1\n			Select which SDS (1=first)",
     "axis=0\n                   Select this axis for 1D fits output",
-    "VERSION=1.3\n		10-nov-02 PJT",
+    "reorder=f\n                Reorder the axes (true means expensive)",
+    "VERSION=1.4\n		14-jan-03 PJT",
     NULL,
 };
 
@@ -27,27 +29,31 @@ string usage="convert SDS HDF to FITS";
 
 #define MAXRANK    3
 
+void invert_array(int n, int *idx);
+float *reorder_array(float *a, int size, int n, int *idx);
+
 void nemo_main()
 {
   string infile, outfile, *hitem;
-    char label[128], unit[128], format[128], coordsys[128];
-    float *buff, *fp, fmin, fmax, *coord = 0;
-    int i, j, k, nsds, ret, size, rank, dimsizes[MAXRANK];
-    int nx, ny, nz, num_type, select, axis, axlen, count = 0;
-    FITS *ff;
+  char label[128], unit[128], format[128], coordsys[128];
+  float *buff, *fp, fmin, fmax, *coord = 0;
+  int i, j, k, nsds, ret, size, rank, dimsizes[MAXRANK];
+  int nx, ny, nz, num_type, select, axis, axlen, count = 0;
+  FITS *ff;
+  bool Qreorder = getbparam("reorder");
 
-    select = getiparam("select");
-    axis = getiparam("axis");
+  select = getiparam("select");
+  axis = getiparam("axis");
 
-    /*
-     *  Open SDS and read and display it's header
-     */
+  /*
+   *  Open SDS and read and display it's header
+   */
 
-    infile = getparam("in");
-    nsds = DFSDndatasets(infile);
-    if (nsds<0) error("Error interpreting SDS file %s",infile);
-    dprintf(0,"%s: has %d scientific data sets\n",infile,nsds);
-
+  infile = getparam("in");
+  nsds = DFSDndatasets(infile);
+  if (nsds<0) error("Error interpreting SDS file %s",infile);
+  dprintf(0,"%s: has %d scientific data sets\n",infile,nsds);
+  
 
   for (count=1; count<=select; count++) {
     
@@ -82,7 +88,7 @@ void nemo_main()
   }
 
     /*
-     * If output requested
+     * If some kind of output requested
      */
 
     if (hasvalue("out") && axis==0) {
@@ -94,7 +100,7 @@ void nemo_main()
         if (num_type != 5)
             error("Can only read REAL32 floating point data now");
         buff = (float *) allocate(sizeof(float)*size);
-        ret = DFSDgetdata(infile, rank, dimsizes, buff);
+        ret = DFSDgetdata(infile, rank, dimsizes, buff);   /* get all data */
         if (ret) error("%d: Error reading data from SDS %s",ret,infile);
 
         /*
@@ -103,17 +109,31 @@ void nemo_main()
 
     	outfile = getparam("out");
         dprintf(0,"%s: writing as FITS file\n",outfile);
-        invert(rank,dimsizes);
-        if (rank==2) {
+	if (Qreorder) {                    /* Reordering can be a lot of work */
+	  buff = reorder_array(buff, size, rank, dimsizes);
+	  if (rank==2) {
      	    nz = 1;
 	    ny = dimsizes[1];
 	    nx = dimsizes[0];
-        } else if (rank==3) {
+	  } else if (rank==3) {
+	    nx = dimsizes[2];
+            ny = dimsizes[1];
+            nx = dimsizes[0];
+	  } else
+            error("(%d) Cannot deal with rank != 2 or 3",rank);
+	} else {                        /* this is actually te default */
+	  invert_array(rank,dimsizes);
+	  if (rank==2) {
+     	    nz = 1;
+	    ny = dimsizes[1];
+	    nx = dimsizes[0];
+	  } else if (rank==3) {
 	    nz = dimsizes[2];
             ny = dimsizes[1];
             nx = dimsizes[0];
-        } else
+	  } else
             error("(%d) Cannot deal with rank != 2 or 3",rank);
+	}
 	ff = fitopen(outfile,"new",rank, dimsizes);
 
         /*
@@ -150,6 +170,7 @@ void nemo_main()
         fitclose(ff);
     } else if (hasvalue("out") && axis > 0) {
 
+        if (Qreorder) error("Cannot deal with reorder=t here");
     	outfile = getparam("out");
         dprintf(0,"%s: writing axis %d as FITS file\n",outfile,axis);
         rank = 2;
@@ -189,7 +210,7 @@ void nemo_main()
 
 /* invert all elements of an array idx[n] */
 
-invert(int n, int *idx)
+void invert_array(int n, int *idx)
 {
     int i, tmp, *a, *b;
 
@@ -204,5 +225,33 @@ invert(int n, int *idx)
         a++;
         b--;
     }
+}
+
+/* reorder the array/matrix: brute force approach (only 2D and 3D) */
+
+float *reorder_array(float *a, int size, int n, int *idx)
+{
+  int x0, y0, z0, nx0, ny0, nz0;
+  float *b = (float *) allocate(size*sizeof(float));
+
+  if (n==2) {
+    nx0 = idx[0];
+    ny0 = idx[1];
+    dprintf(0,"reorder: %d x %d\n",nx0,ny0);
+    for (x0=0; x0<nx0; x0++)
+      for (y0=0; y0<ny0; y0++)
+	b[x0+nx0*y0] = a[y0+ny0*x0];
+  } else {
+    nx0 = idx[0];
+    ny0 = idx[1];
+    nz0 = idx[2];
+    dprintf(0,"reorder: %d x %d x %d\n",nx0,ny0,nz0);
+    for (x0=0; x0<nx0; x0++)
+      for (y0=0; y0<ny0; y0++)
+	for (z0=0; z0<nz0; z0++)
+	b[x0+nx0*y0+nx0*ny0*z0] = a[z0+nz0*y0+nz0*ny0*x0];
+  }		
+  free(a);
+  return b;
 }
 
