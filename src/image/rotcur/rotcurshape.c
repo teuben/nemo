@@ -14,7 +14,9 @@
  *     History: 19/jul/02 : cloned off rotcur                                  pjt
  *              10-sep-02 : implemented resid= for images, more pts for disk   pjt
  *              19-sep-02 : added a few more rotcur's (exp, nfw)               pjt
- *              13-dec-02 : added power law rotation curve for Josh Simon      pjt
+ *              13-dec-02 : 1.0h: added power law rotation curve for Josh Simon  pjt
+ *              30-jan-03 : 1.1: added error bars in V (unfinished)              pjt
+ *              12-feb-03 : 1.1a: fixed residual field computation bug           pjt
  *
  ******************************************************************************/
 
@@ -25,7 +27,7 @@
 
 /*     Set this appropriately if you want to use NumRec's mrqmin() based engine */
 /*     right now it appears as if the NR routine does not work as well          */
-/*     See also tabnllsqfit                                                     */
+/*     See also my tabnllsqfit experiments where you can test both side by side */
 #if 0
 #define nllsqfit nr_nllsqfit
 #endif
@@ -54,7 +56,7 @@ string defv[] = {
     "center=\n       Rotation center (grids w.r.t. 0,0) [center of map]",
     "frang=0\n       Free angle around minor axis (degrees)",
     "side=\n         Side to fit: receding, approaching or [both]",
-    "weight=u\n      Weighting function: {uniform,[cosine],cos-squared}",
+    "weight=u\n      Weighting function: {[uniform],cosine,cos-squared}",
     "fixed=\n        Geometric parameters to be kept fixed {vsys,xpos,ypos,pa,inc}",
     "ellips=\n       ** Parameters for which to plot error ellips",
     "beam=\n         ** Beam (arcsec) for beam correction [no correction]",
@@ -75,7 +77,7 @@ string defv[] = {
     "rotcur3=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur4=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur5=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
-    "VERSION=1.0h\n  13-dec-02 PJT",
+    "VERSION=1.1a\n  12-feb-03 PJT",
     NULL,
 };
 
@@ -114,7 +116,7 @@ int    nparams = 0;             /* total number of parameters (5 + # for models)
 
 bool Qimage;                             /* input mode (false means tables are used) */
 bool Qrotcur;                            /* rotcur (rv) vs. velocity field (xyv) table mode */
-real  *xpos_vel, *ypos_vel, *vrad_vel;   /* pointer to tabular information */
+real  *xpos_vel, *ypos_vel, *vrad_vel, *verr_vel;   /* pointer to tabular information */
 real  *vsig_vel;                         
 int  n_vel = 0;                          /* length of tabular arrays */
 
@@ -147,8 +149,8 @@ int rotplt(real rad[], real vsy[], real evs[], real pan[], real epa[],
 	   real p[], real e[],
 	   int mask[], int ifit, real elp[][4], stream lunpri, int cor[], int npt[], real factor);
 void stat2(real a[], int n, real *mean, real *sig);
-int getdat(real x[], real y[], real w[], int idx[], int *n, int nmax, real p[], real ri, real ro, real thf, 
-	   int wpow, real *q, int side, bool *full, int nfr);
+int getdat(real x[], real y[], real w[], int idx[], real res[], int *n, int nmax, 
+	   real p[], real ri, real ro, real thf, int wpow, real *q, int side, bool *full, int nfr);
 real bmcorr(real xx[2], real p[], int l, int m);
 int perform_init(real *p, real *c);
 
@@ -343,6 +345,7 @@ real rotcur_moore(real r, int np, real *p, real *d)
 
 /*
  * Brandt, J.C. (1960, ApJ 131, 293)
+ * Brandt, J.C. & Scheer, L.S.  1965 AJ 70, 471
  *
  * v = v_0   x /   (1/3 + 3/2*x^n)^(3/2n)
  * 
@@ -685,6 +688,7 @@ stream  lunpri;       /* LUN for print output */
     int iret, i, j, k, n, nfixed, fixed, ninputs;
     real center[2], toarcsec, tokms;
     stream velstr, denstr;
+    bool Qdens;
     real *coldat[3];
     int colnr[3];
 
@@ -700,7 +704,8 @@ stream  lunpri;       /* LUN for print output */
     if (lunpri) fprintf(lunpri," velocity field file : %s (%s)\n",input,
 			Qimage ? "image" : "ascii table");
 
-    velstr = stropen(input,"r");                /* open velocity field */   
+    velstr = stropen(input,"r");                /* open velocity field */  
+    Qdens = hasvalue("dens");
     if (Qimage) {
       read_image(velstr,&velptr);                 /* get data */
     } else {
@@ -709,11 +714,19 @@ stream  lunpri;       /* LUN for print output */
       ypos_vel = (real *) allocate(n_vel * sizeof(real));
       vrad_vel = (real *) allocate(n_vel * sizeof(real));
       vsig_vel = (real *) allocate(n_vel * sizeof(real));
+      if (Qdens) verr_vel = (real *) allocate(n_vel * sizeof(real));
       if (Qrotcur) {
 	colnr[0] = 1;    coldat[0] = ypos_vel;
 	colnr[1] = 2;    coldat[1] = vrad_vel;
-	n_vel = get_atable(velstr,2,colnr,coldat,n_vel);
-	dprintf(0,"[Found %d points in rotation curve]\n",n_vel);
+	if (Qdens) {
+	  colnr[2] = 3;  coldat[2] = verr_vel;
+	  n_vel = get_atable(velstr,3,colnr,coldat,n_vel);
+	  dprintf(0,"[Found %d points in rotation curve (R,V,DV)]\n",n_vel);
+	} else {
+	  n_vel = get_atable(velstr,2,colnr,coldat,n_vel);
+	  verr_vel = NULL;
+	  dprintf(0,"[Found %d points in rotation curve (R,V)]\n",n_vel);
+	}
 	for (i=0; i<n_vel; i++) {
 	  xpos_vel[i] = 0.0;
 	  vsig_vel[i] = 1.0;  /* not used yet */
@@ -805,7 +818,7 @@ stream  lunpri;       /* LUN for print output */
     n = nemoinpr(getparam("beam"),beam,2);   /* get size of beam from user */
     if (n==2 || n==1) {       /* OK, got a beam, now get density map ... */
          if (n==1) beam[1] = beam[0];
-         if (hasvalue("dens")) {
+         if (Qdens) {
             input = getparam("dens");
             if (lunpri) fprintf(lunpri," density file        : %s  beam: %g %g\n",
                                     input,beam[0],beam[1]);	
@@ -1020,7 +1033,7 @@ real elp4[];     /* array for ellipse parameters */
 real p[],e[];    /* initial estimates (I), results and erros (O) */
 real thf;        /* free angle around minor axis (I) */
 int *npt;	 /* number of points in ring (0) */
-real nsigma;     /* if positive, remove outliers and fit again */
+real nsigma;     /* if positive, remove outliers and fit again, also iff lunres */
 stream lunres;   /* file for residuals */
 {
     int ier;                                             /* error return code */
@@ -1044,6 +1057,7 @@ stream lunres;   /* file for residuals */
     real  resmean, ressig, ratio;
     int   nblank;
     int   i, j, n;                            /* n=number of points in a ring */
+    static int first = 1;
    
     nfr=0;                                 /* reset number of free parameters */
     for (i=0; i<nparams; i++) {
@@ -1063,7 +1077,7 @@ stream lunres;   /* file for residuals */
 
     printf("  \n");
 
-    getdat(x,y,w,idx,&n,MAXPTS,p,ri,ro,thf,wpow,&q,side,&full,nfr);  /* this ring */
+    getdat(x,y,w,idx,res,&n,MAXPTS,p,ri,ro,thf,wpow,&q,side,&full,nfr);  /* this ring */
     for (i=0;i<n;i++) iblank[i] = 1;
 
     h=0;                                          /* reset itegration counter */
@@ -1115,7 +1129,7 @@ stream lunres;   /* file for residuals */
             for(k=0; k<nparams; k++)       /* loop to calculate new parameters */
                pf[k]=flip*df[k]+p[k];                       /* new parameters */
             pf[4]=MIN(pf[4],180.0-pf[4]);         /* in case inclination > 90 */
-            getdat(x,y,w,idx,&n,MAXPTS,pf,ri,ro,thf,wpow,&q,side,&full,nfr);
+            getdat(x,y,w,idx,res,&n,MAXPTS,pf,ri,ro,thf,wpow,&q,side,&full,nfr);
 	    for (i=0;i<n;i++) w[i] *= iblank[i];            /* apply blanking */
             if (q < chi) {                                     /* better fit ?*/
                perform_out(h,pf,n,q);                   /* show the iteration */
@@ -1189,9 +1203,9 @@ stream lunres;   /* file for residuals */
       sinp = sin((p[3]+90)*F);
       cosi = cos(p[4]*F);
       for (i=0; i<n; i++) {
-	xc1 = x[2*i]-dx*p[1];
+	xc1 = x[2*i]-dx*p[1];                /* X and Y (sky) w.r.t. rotation center */
 	yc1 = x[2*i+1]-dy*p[2];
-	xc2 =   xc1*cosp + yc1*sinp;
+	xc2 =   xc1*cosp + yc1*sinp;         /* X and Y (galaxy) w.r.t. rotation center */
 	yc2 = (-xc1*sinp + yc1*cosp)/cosi;   /* Qrotcur */
 	if (Qimage) {
 	  MapValue(velptr,idx[2*i],idx[2*i+1]) = res[i];
@@ -1319,12 +1333,13 @@ void stat2(real *a,int n,real *mean,real *sig)
 /* 
  *    GETDAT gets data from disk and calculates differences.
  *
- *    SUBROUTINE GETDAT(X,Y,W,IDX,N,NMAX,P,RI,RO,THF,WPOW,Q,SIDE,FULL,NFR)
+ *    SUBROUTINE GETDAT(X,Y,W,IDX,RES,N,NMAX,P,RI,RO,THF,WPOW,Q,SIDE,FULL,NFR)
  *
  *    X        real array       sky coordinates of pixels inside ring
  *    Y        real array       radial velocities
  *    W        real array       weights of radial velocities
  *    IDX      integer array    sky coordinates in integer pixels
+ *    RES      real array       residual velocities
  *    N        integer          number of pixels inside ring
  *    NMAX     integer          maximum number of pixels
  *    P        real array       parameters of ring
@@ -1338,13 +1353,14 @@ void stat2(real *a,int n,real *mean,real *sig)
  *    NFR      integer          number of degrees of freedom
  */
 
-getdat(x,y,w,idx,n,nmax,p,ri,ro,thf,wpow,q,side,full,nfr)
+getdat(x,y,w,idx,res,n,nmax,p,ri,ro,thf,wpow,q,side,full,nfr)
 int   *n,nmax;       /* number of pixels loaded (O), max. number (I) */
 int   nfr;           /* number of degrees of freedom */
 int   wpow;          /* weigthing function */
 int   side;          /* part of galaxy */
 bool  *full;         /* output if data overflow */
 real  x[],y[],w[];   /* arrays to store coords., vels. and weights */
+real  res[];         /* array to store residuals "as is" (no fitting) */
 int   idx[];         /* coordinates in pixel units (0,0 is lower left) */
 real  p[];           /* parameters of ring */
 real  ri,ro;         /* inner and outer radius of ring */
@@ -1380,7 +1396,7 @@ real  *q;             /* output sigma */
     a=sqrt(1.0-cosp*cosp*sini*sini);       /* find square around ellipse */
     b=sqrt(1.0-sinp*sinp*sini*sini);
 
-    if (Qimage) {
+    if (Qimage) {                         /* Image input data */
       /* BUG:  need to fix this, there is a rounding problem near center */
       /*       although this is where rotcur isn't quite all that valid  */
       llo=MAX(lmin,(int)(x0-a*ro/dx));        /* square around ellipse */
@@ -1465,6 +1481,7 @@ real  *q;             /* output sigma */
 		    idx[*n*2]=l;       /* load integer X-coordinate */
 		    idx[*n*2+1]=m;     /* load integer Y-coordinate */
 		    s=(v-vobs(xx,p,nparams));  /* corrected difference */
+		    res[*n] = s;               
 		    *q += s*s*wi;       /* calculate chi-squared */
 		    *n += 1;           /* increment number of pixels */
 		  }
@@ -1479,7 +1496,7 @@ real  *q;             /* output sigma */
 	mdone += mstep;      /* number of lines done */
 	mleft -= mstep;      /* number of lines left */
       } while (mleft>0);        /* big loop */
-    } else {
+    } else {                                               /* tabular input data */
       for (i=0; i<n_vel; i++) {
 	rx = xpos_vel[i];
 	ry = ypos_vel[i];
@@ -1524,6 +1541,7 @@ real  *q;             /* output sigma */
 	      y[*n]=v;           /* load radial velocity */
 	      w[*n]=wi;          /* load weight */
 	      s=(v-vobs(xx,p,nparams));  /* corrected difference */
+	      res[*n] = s;               
 	      *q += s*s*wi;       /* calculate chi-squared */
 	      *n += 1;           /* increment number of pixels */
 	    }
@@ -1551,9 +1569,9 @@ int l,m;        /* grid coordinates w.r.t. 0,0 */
         dn[0] = (MapValue(denptr,l+1,m)-MapValue(denptr,l-1,m))/d/grid[0];
         dn[1] = (MapValue(denptr,l,m+1)-MapValue(denptr,l,m-1))/d/grid[1];
         vcor(xx,p,&vdif,dn); /*  calculate correction */
-        return(vdif);
+        return vdif;
     } else
-        return(0.0);
+        return 0.0;
 }
 
 /*  External functions needed by the nllsqfit routine */

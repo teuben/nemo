@@ -64,6 +64,7 @@
  *              11-sep-02   2.9  compute residuals as in rotcurshape       pjt
  *              13-nov-02        reuse= allow used points to be flagged as used (unfinished) PJT
  *              30-jan-03   2.10 allow vel.error  in tabular input if dens=t    pjt
+ *              12-feb-03   2.10a  fix residual velfie as done in rotcurshape   PJT
  ******************************************************************************/
 
 
@@ -129,7 +130,7 @@ string defv[] = {
     "fitmode=cos,1\n Basic Fitmode: cos(n*theta) or sin(n*theta)",
     "nsigma=-1\n     Iterate once by rejecting points more than nsigma resid",
     "imagemode=t\n   Input image mode? (false means ascii table)",
-    "VERSION=2.10\n  30-jan-03 PJT",
+    "VERSION=2.10a\n 12-feb-03 PJT",
     NULL,
 };
 
@@ -182,8 +183,8 @@ int rotplt(real rad[], real vsy[], real evs[], real vro[], real evr[], real pan[
 	   real inc[], real ein[], real xce[], real exc[], real yce[], real eyc[], 
 	   int mask[], int ifit, real elp[][4], stream lunpri, int cor[], int npt[], real factor);
 void stat2(real a[], int n, real *mean, real *sig);
-int getdat(real x[], real y[], real w[], int idx[], int *n, int nmax, real p[], real ri, real ro, real thf, 
-	   int wpow, real *q, int side, bool *full, int nfr);
+int getdat(real x[], real y[], real w[], int idx[], real res[], int *n, int nmax, real p[], 
+	   real ri, real ro, real thf, int wpow, real *q, int side, bool *full, int nfr);
 real bmcorr(real xx[2], real p[], int l, int m);
 int perform_init(real *p, real *c);
 
@@ -743,7 +744,7 @@ stream lunres;   /* file for residuals */
     real  sinp, cosp, cosi, xc1, xc2, yc1, yc2;    	     /* ring elements */
     real  resmean, ressig, ratio;
     int   nblank;
-    int   i, j, n;                               /* n=number of points in a ring */
+    int   i, j, n;                            /* n=number of points in a ring */
    
     nfr=0;                                 /* reset number of free parameters */
     for (i=0; i<PARAMS; i++) {
@@ -758,7 +759,7 @@ stream lunres;   /* file for residuals */
     printf("  number velocity velocity   angle  nation ");
     printf("position position        velocity\n");
 
-    getdat(x,y,w,idx,&n,MAXPTS,p,ri,ro,thf,wpow,&q,side,&full,nfr);  /* this ring */
+    getdat(x,y,w,idx,res,&n,MAXPTS,p,ri,ro,thf,wpow,&q,side,&full,nfr);  /* this ring */
     for (i=0;i<n;i++) iblank[i] = 1;
 
     h=0;                                           /* reset itegration counter */
@@ -773,7 +774,7 @@ stream lunres;   /* file for residuals */
          nrt = nllsqfit(x,2,y,w,res,n,pf,e,mask,PARAMS,tol,itmax,lab,
                         vobs,vobsd);
 	 
-	 if (nsigma > 0 && h==1) {
+	 if (nsigma > 0 && h==1) {        /* first time only, with sigma > 0  */
 	   stat2(res,n,&resmean,&ressig);
 	   dprintf(1,"Refit: mean=%g sigma=%g nsigma=%g\n",resmean,ressig,nsigma);
 	   if (ABS(resmean) > ressig) 
@@ -793,9 +794,11 @@ stream lunres;   /* file for residuals */
 		     ratio,(ratio > nsigma) ? "***" : "" );
 	   }
 	   if (nblank) {
-	     dprintf(0,"Rejecting %d/%d points\n",nblank,n);
+	     dprintf(0,"Rejecting %d/%d points for nsigma=%g\n",nblank,n,nsigma);
 	     nrt = nllsqfit(x,2,y,w,res,n,p,e,mask,PARAMS,tol,itmax,lab,
                         vobs,vobsd);
+	     if (nrt<0)
+	       warning("nllsqfit=%d<0: PJT must find better solution (npoints=%d)",nrt,n);
 	   }
 	   break;
 	 }
@@ -812,7 +815,7 @@ stream lunres;   /* file for residuals */
             for(k=0; k<PARAMS; k++)       /* loop to calculate new parameters */
                pf[k]=flip*df[k]+p[k];                       /* new parameters */
             pf[3]=MIN(pf[3],180.0-pf[3]);         /* in case inclination > 90 */
-            getdat(x,y,w,idx,&n,MAXPTS,pf,ri,ro,thf,wpow,&q,side,&full,nfr);
+            getdat(x,y,w,idx,res,&n,MAXPTS,pf,ri,ro,thf,wpow,&q,side,&full,nfr);
 	    for (i=0;i<n;i++) w[i] *= iblank[i];            /* apply blanking */
             if (q < chi) {                                     /* better fit ?*/
                perform_out(h,pf,n,q);                   /* show the iteration */
@@ -831,6 +834,10 @@ stream lunres;   /* file for residuals */
                   break;                             /* we found it ! XREPEAT */
                }
             }
+	    /* with flip=1 initially the next if() makes this for() loop 
+	     * go through flip=1,-1,1/2,-1/2,1/4,-1/4,......
+	     * until convergence is reached 
+	     */
             if (flip > 0.0)                               /* make it negative */
                flip *= -1.0;
             else                                          /* make it positive */
@@ -1018,12 +1025,13 @@ void stat2(real *a,int n,real *mean,real *sig)
 /* 
  *    GETDAT gets data from disk and calculates differences.
  *
- *    SUBROUTINE GETDAT(X,Y,W,IDX,N,NMAX,P,RI,RO,THF,WPOW,Q,SIDE,FULL,NFR)
+ *    SUBROUTINE GETDAT(X,Y,W,IDX,RES,N,NMAX,P,RI,RO,THF,WPOW,Q,SIDE,FULL,NFR)
  *
  *    X        real array       sky coordinates of pixels inside ring
  *    Y        real array       radial velocities
  *    W        real array       weights of radial velocities
- *    IDX
+ *    IDX      integer array    back indexed into pixels (x,y)
+ *    RES      real array       residuals
  *    N        integer          number of pixels inside ring
  *    NMAX     integer          maximum number of pixels
  *    P        real array       parameters of ring
@@ -1037,7 +1045,7 @@ void stat2(real *a,int n,real *mean,real *sig)
  *    NFR      integer          number of degrees of freedom
  */
 
-getdat(x,y,w,idx,n,nmax,p,ri,ro,thf,wpow,q,side,full,nfr)
+getdat(x,y,w,idx,res,n,nmax,p,ri,ro,thf,wpow,q,side,full,nfr)
 int   *n,nmax;       /* number of pixels loaded (O), max. number (I) */
 int   nfr;           /* number of degrees of freedom */
 int   wpow;          /* weigthing function */
@@ -1045,6 +1053,7 @@ int   side;          /* part of galaxy */
 bool  *full;         /* output if data overflow */
 real  x[],y[],w[];   /* arrays to store coords., vels. and weights */
 int   idx[];
+real  res[];
 real  p[];           /* parameters of ring */
 real  ri,ro;         /* inner and outer radius of ring */
 real  thf;           /* free angle */
@@ -1164,6 +1173,7 @@ real  *q;             /* output sigma */
 		    idx[*n*2]=l;
 		    idx[*n*2+1]=m;
 		    s=(v-vobs(xx,p,PARAMS));  /* corrected difference */
+		    res[*n] = s;
 		    *q += s*s*wi;       /* calculate chi-squared */
 		    *n += 1;           /* increment number of pixels */
 		  }
@@ -1225,6 +1235,7 @@ real  *q;             /* output sigma */
 	      idx[*n*2] = i;
 	      idx[*n*2+1] = -1;
 	      s=(v-vobs(xx,p,PARAMS));  /* corrected difference */
+	      res[*n] = s;
 	      *q += s*s*wi;       /* calculate chi-squared */
 	      *n += 1;           /* increment number of pixels */
 	    }
