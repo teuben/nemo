@@ -1,0 +1,65 @@
+.TH KING 1NEMO "27 June 1997"
+.SH NAME
+king \- tabulate Osipkov-Merritt generalization of King model
+.SH SYNOPSIS
+\fBking out=\fPout_file [parameter=value] .\|.\|.
+.SH DESCRIPTION
+\fIking\fP tabulates an Osipkov-Merritt-King model.  The output
+file, written in binary format, may be used with \fImkommod\fP(1NEMO).
+.SH PARAMETERS
+The following parameters are recognized:
+.TP 24
+\fBout=\fP\fIout_file\fP
+Write a binary table \fBOsipkovMerrittModel\fP to \fIout_file\fP.
+  No default.
+.TP
+\fBw0=\fP\fIdimensionless central potential\fP
+This parameter defines the starting point for the integration of
+the corresponding differential equations (see King (1966) or 
+Binney & Tremaine (1987)).
+  Default: \fB-1.0\fP.
+.TP
+\fBmass=\fP\fItotal mass of system\fP
+Used for calculating the real values from the previously computed
+unscaled model.
+  Default: \fB1.0\fP.
+.TP
+\fBrc=\fP\fIcore radius\fP
+The core radius is the scaling parameter for the radius. It is defined as
+radius at which the surface brightness falls down to half of its initial value.
+  Default: \fB1.0\fB
+.TP
+\fBnsteps=\fP\fInumber of steps\fP
+Number of steps to tabulate.
+  Default: 101
+.TP
+\fBepsilon=\fP\fIaccuracy for integration\fP
+Epsilon is used to define the precision of the numerical integration
+  Default: 1e-6
+.TP
+\fBtab=\fP\fItable filename\fP
+If a filename given, the calculated values will also be tabulated in an 
+ASCII-file. If no filename is given, no table is output.
+  Default: no table file.
+.TP 
+\fBg=\fP\fIgravitational constant\fP
+to create models with physical quantities, set this constant.
+  Default: not used. (as it should be)
+.. I (pjt) happen to disagree that this parameter should be present at all
+.. Utilities like snapscale can always be used to rescale snapshots, but
+.. even this is not a normal practice.
+.SH "SEE ALSO"
+mkommod(1NEMO), king(1NEMO), plummer(1NEMO), tablst(1NEMO)
+.SH AUTHOR
+Patrick A. Frisch
+.SH FILES
+.nf
+.ta +2i
+~/usr/pat	king.c
+.fi
+.SH HISTORY
+.nf
+.ta +1i +4i
+xx-mar-91	V0.9 Initial coding and testing  	PAF
+27-jun-97	V1.0 more scaling options, code cleaning for NEMO V2	PJT/JJM
+.fi
