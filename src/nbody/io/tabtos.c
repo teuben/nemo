@@ -30,6 +30,7 @@
  *       7-jul-98       c   fixed bug skipping blocks                   pjt
  *      19-aug-00       d   fixed TABs correctly                        pjt
  *	23-sep-01       e   ->nemo_file_lines
+ *      24-jan-02       f   to block10, time to use indexed parameter   pjt
  */
 
 #include <stdinc.h>
@@ -54,13 +55,14 @@ string defv[] = {
     "block7=\n     - aux",
     "block8=\n     - key",
     "block9=\n     - skip",
+    "block10=\n    - skip",
     "nbody=\n      Number of bodies, if needed",
     "ndim=\n	   Dimension of pos,vel,acc arrays, if needed",
     "times=\n      Time(s) of snapshot, if needed, or override",
     "options=\n    Other processing options (scan|comment|wrap|spill)",
     "nskip=0\n     Number of lines skipped before each (header+block1+...)",
     "headline=\n   Random mumblage for humans",
-    "VERSION=1.3e\n 23-sep-01 PJT",
+    "VERSION=1.3f\n 24-jan-02 PJT",
     NULL,
 };
 
@@ -80,7 +82,7 @@ local Body *btab = NULL;
 local string *header;
 local int nheader=0;
 
-#define MAXBLOCK 9
+#define MAXBLOCK 10
 local string block[MAXBLOCK];
 local int nblocks=0;
 
