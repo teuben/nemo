@@ -1,0 +1,89 @@
+.TH DYNAMEM 3 "28 August 1987"
+.SH NAME
+dynamem, freeup \- multidimensional dynamic array handling
+.SH SYNOPSIS
+.br
+.B char *dynamem(pointer,element_size,
+.br
+.B				 number_dimensions,dimensions ...)
+.br
+.B char **pointer;
+
+.br
+.B freeup(pointer)
+.br
+.B char *pointer;
+
+.SH DESCRIPTION
+.I dynamem 
+is the multidimensional analogue to malloc().
+It is passed a number of arguments: a pointer which on
+exiting the procedure will point to the begining of the
+array, the element size, the number of dimensions 
+required, followed by a list of the dimension sizes. 
+To declare a 4 dimensional array normally one would code:
+.DS L
+
+int array[10][11][12][13];
+
+.DE
+however, this array is then fixed at compile time. This
+same array can be declared dynamically at run time 
+using the following code:
+.DS L
+
+int ****array;
+
+array = (int ****) dynamem(&array, sizeof(int), 4, 10, 11, 12, 13);
+
+.DE
+(Note that the number of levels of indirection in the cast
+is equal to the number of dimensions in the array.)
+This enables array sizes to be fixed via, for example, 
+command line arguments. 
+.PP
+.I freeup
+is the 
+.I dynamem
+analogue to free(). When passed an array previously 
+dynamically declared by 
+.I dynamem
+the function returns this memory to the system.
+.PP
+.I dynamem
+attempts to set up the array required in the same way that 
+it would be set up by the compiler at compile time. Thus
+a multidimensional dynamically array declared using 
+.I dynamem
+can be used in exactly the same way as a fixed array declared
+by the compiler. There is obviously some overhead in the actual
+setting up of the array; however, this is minimal: 
+when dynamically allocating 2 arrays of 346000
+unsigned characters and one of the same number of shorts all in
+two dimensions, the run time of a convolution of a 7x7 Lapacian-
+Marr filter over an image of size 720 by 480 varied as follows:
+.sp 1
+time convolve -fbfilt -X720 -Y480 -e < bubble2 > test.1
+.br
+	  222.0 real       213.4 user         1.6 sys  
+.sp 1
+time convolve -fbfilt -e < bubble2 > test.2
+.br
+	  225.2 real       212.5 user         2.7 sys  
+.sp 1
+which is probably adequate. From this we can see that 
+it takes 1.1 secs for the fixed array to be set up
+and zeroed and only 0.9 secs for the array to be
+dynamically declared using
+.IR dynamem ; 
+however, using dynamem the array is not initialized to
+0 and this is the reason for the 0.2 speed increase.
+.SH FILES
+/users/alv/everson/usr/lib/dynamem.a
+.SH "SEE ALSO"
+malloc(3), convolve(1)
+.SH DIAGNOSTICS
+.br
+.I dynamem
+returns NULL if it is unable to allocate sufficient
+memory for the array.

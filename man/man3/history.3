@@ -1,0 +1,71 @@
+.TH HISTORY 3NEMO "7 May 1992"
+.SH NAME
+get_history, put_history, app_history , ask_history, reset_history, ask_headline, set_headline \- data history utilities 
+.SH SYNOPSIS
+.nf
+.B get_history(instr)
+.B put_history(outstr)
+.B app_history (s)
+.B string *ask_history()
+.B reset_history()
+.PP
+.B void set_headline(s)
+.B string ask_headline()
+.PP
+.B stream instr, outstr;
+.B string s;
+.fi
+.SH DESCRIPTION
+\fIhistory\fP is a general mechanism to keep track of data history,
+and also store random user-supplied comments to data in
+\fIfilestruct(5NEMO)\fP format. One history database at a time
+can be managed, history from a file can be added to this, and
+it can be written out to a file. Whenever a NEMO command is run,
+the history is initialized with the actual command line supplied. 
+History from datafiles can be appended to this.
+.PP
+\fIget_history()\fP appends history from a file
+\fBinstr\fP (assumed to be in \fIfilestruct(5NEMO)\fP format) to 
+the internal history buffer. This is usually
+one of the first things a program should do before other input is
+attempted, as the data history is normally prepended to the data. 
+.PP
+A program can add (append) arbitrary history by calling
+\fIapp_history()\fP, where \fBs\fP points to the string to be added.
+.PP
+\fIput_history()\fP writes the current history to an output file 
+\fBoutstr\fP.
+If any headline had been set, it will also be written.
+.PP
+\fIask_history()\fP returns a pointer to a NULL terminated array of
+strings that contain the full history status.
+.PP
+\fIset_headline()\fP is an old way to add user supplied to the history
+database. Only one string can be hold here. It is added to the data history
+when \fIput_history\fP is called.
+.PP
+\fIask_headline()\fP returns the headline string, which would be output
+.SH FILESTRUCT FORMAT
+History items are character strings with tagname \fBHistory\fP, 
+headline items are character strings with tagname \fBHeadline\fP.
+They are both treated equal: if a headline is present, it is also
+written via \fIput_history\fP.
+.SH FILES
+.nf
+.ta +2.0i
+~/src/kernel/io   	history.[ch]
+~/inc                	history.h
+.fi
+.SH SEE ALSO
+getparam(3NEMO), tsf(1NEMO), rsf(3NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+9-mar-88	V1.0 created		Peter Teuben
+1-jun-88	V1.1 adapted to new filestruct, renamed names	PJT
+14-jun-88	V1.3 integrate at IAS, changed _hist to _history	JEB
+9-oct-90	V1.8b upgraded manual page	PJT
+7-may-92	V1.9 documented name change add_ to app_	PJT
+.fi
