@@ -1,0 +1,84 @@
+.TH GLNEMO 1NEMO "3 December 2004"
+.SH NAME
+glnemo \- 3D OpenGL Nemo Snapshot rendering
+.SH SYNOPSIS
+\fBglnemo\fP [parameter=value]
+.SH DESCRIPTION
+\fBglnemo\fP is an interactive visualization program for snapshots,
+based on the Qt library from Trolltech. 
+You can zoom in/out, rotate, scale, translate, save a screenshot, 
+select different particles
+and plot them in different blending colors. 
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Nemo input snapshot []    
+.TP 20
+\fBserver=\fP
+Running simulation server hostname []   
+.TP 20
+\fBselect=\fP
+Select particles. This option can be used to color the particles. Sets of particles
+must be selected using the : range operator, separated by a comma. E.g.
+0:9,10:19 would select two sets of 10 particles and give them a different color.
+[all]     
+.TP 20
+\fBtimes=\fP
+Select time [all]     
+.TP 20
+\fBblending=\fP
+Activate blending colors [t]    
+.TP 20
+\fBdbuffer=\fP
+Activate OpenGL depth buffer [t]   
+.TP 20
+\fBgrid=\fP
+Show grid [f]     
+.TP 20
+\fBpsize=\fP
+Set particles size [2.0]    
+.TP 20
+\fBport=\fP
+Server's communication port [4444]    
+.TP 20
+\fBwsize=\fP
+Windows's width size [925]    
+.TP 20
+\fBhsize=\fP
+Windows's height size [685]    
+.TP 20
+\fBscreenshot=\fP
+Screenshot name []
+.SH OPERATION
+Most selections on the left side of the screen can also be activated by
+hitting a key in the display window itself:
+.nf
++                               zoom in
+-                               zoom out
+middle (scroll) Mouse:		zoom in or out
+CTRL + Left-Mouse/Right-Mouse   translate
+g                               toggle the grid
+r                               toggle particle ranges
+CTRL + r                        reset rotation/translation
+CTRL + a                        autoscale to fit the frame
+s                               snapshot
+p                               play all snapshots
+f                               toggle fullscreen (might make it slow)
+.fi
+.SH SEE ALSO
+xyzview(1NEMO)
+.PP
+http://www.trolltech.com       Qt library web site
+.SH LICENCE
+CeCILL (see http://www.cecill.info)
+.SH FILES
+src/nbody/glnemo: directory with source code
+.SH AUTHOR
+Jean-Charles Lambert
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+3-dec-04	V0.5 added to NEMO	JCL
+.fi
