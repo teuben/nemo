@@ -35,10 +35,12 @@
 //                                                                             |
 // Versions                                                                    |
 // 0.0   06-jun-2002    created                                           WD   |
+// 0.1   28-dec-2002    replaced NEMO's <stdinc.h> for gcc3              PJT   |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 #include <iostream>
 #include <fstream>
+using namespace std;		
 //=============================================================================#
 void dummy()
 {
@@ -48,8 +50,12 @@ void dummy()
 // declare externally linkable C routines                                      |
 //=============================================================================#
 extern "C" {
-#include <stdinc.h>
-  void inipotential    (int*, double*, string);
+  //  #include <stdinc.h>     this code really only need warning/error
+  //  gcc3 using string, which NEMO also has (but different)
+  extern void warning(char *, ...);
+  extern void error(char *, ...);
+  extern void nemo_dprintf(int, char *, ...);
+  void inipotential    (int*, double*, char *);
   void potential_double(int*, double*, double*, double*, double*);
   void potential_float (int*, float *, float *, float *, float *);
 }
@@ -62,7 +68,7 @@ extern "C" {
 //=============================================================================#
 static GalaxyPotential *POT = 0;
 //------------------------------------------------------------------------------
-void inipotential(int*npar, double*par, string file) {
+void inipotential(int *npar, double *par, char *file) {
   double omega = (*npar>0)? par[0] : 0.;
   if (*npar>1) warning("Skipped potential parameters for GalPot beyond 1");
   if (file==0) error  ("Need potfile to initialize GalPot");
@@ -71,8 +77,8 @@ void inipotential(int*npar, double*par, string file) {
   if(POT) delete POT;
   POT = new GalaxyPotential(from);
   from.close();
-  dprintf (1,"INI_POTENTIAL Dehnen & Binney (1998) Galaxy potential\n");
-  dprintf (1,"  Parameters read from file %s\n",file);
+  nemo_dprintf (1,"INI_POTENTIAL Dehnen & Binney (1998) Galaxy potential\n");
+  nemo_dprintf (1,"  Parameters read from file %s\n",file);
 }
 //------------------------------------------------------------------------------
 void potential_double (int    *NDIM,
