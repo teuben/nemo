@@ -1,0 +1,118 @@
+.TH FITS 3NEMO "23 May 1995"
+.SH NAME
+fts_rhead, fts_whead, fts_rdata, fts_wdata, fts_sdata, fts_zero, fts_dsize -
+fits I/O routines
+.SH SYNOPSIS
+.nf
+.B #include <stdinc.h>
+.B #include <fits.h>
+.PP
+.B int fts_zero(fh)
+.B int fts_rhead (fh, instr)
+.B int fts_whead (fh, outstr)
+.B int fts_rdata(fh, instr, size, buf)
+.B int fts_wdata(fh, outstr, size, buf)
+.B int fts_rrow(fh, instr, size, buf)
+.B int fts_wrow(fh, instr, size, buf)
+.B int fts_sdata(fh, instr)
+.B int fts_cdata(fh, instr, outstr, trailer)
+.B int fts_dsize(fh)
+.B int fts_setiblk(factor)
+.B int fts_setoblk(factor)
+.PP
+.B stream instr;
+.B stream outstr;
+.B struct fits_header *fh;
+.B char *buf;
+.B int size, factor;
+.B bool trailer
+.PP
+.I	other miscellanious, not yet documented, routines:
+.PP
+fts_buf
+.PP
+fts_chead, fts_dhead, fts_fhead, fts_ihead, fts_khead, fts_lhead, fts_phead, fts_thead
+.PP
+.PP
+fts_wvar, fts_wvarb, fts_wvarb_a, fts_wvarc, fts_wvarc_a, 
+fts_wvard, fts_wvard_a, fts_wvarf, fts_wvarf_a, fts_wvari, fts_wvari_a
+.SH DESCRIPTION
+These routines provide a low-level I/O interface 
+to the FITS data structure. For most programs the \fIfitsio(3NEMO)\fP
+interface will be sufficient; that package however does not call
+the \fIfits(3NEMO)\fP package but has it's own I/O routines. The
+amount of checking and correction/conversion done in the \fIfits(3NEMO)\fP
+routines makes it a more flexible setup. The amount of work to be done
+by the application programmer is often however greater.
+.PP
+After a file has been opened with
+\fIstropen\fP, \fIfts_rhead\fP must be called to
+read in the FITS header information into the 
+\fBstruct fits_header *fh\fP; this structure needs to be cleared
+with \fIfts_zero\fP before reading is attempted. Most 
+essential FITS keywords are placed in this structure,
+unknown keywords are skipped, although they can be retrieved
+using the exact binary image of the header, of which there is always
+an exact memory image available to the application programmer.
+.PP
+It is the programmers responsibility to keep track of the position
+of the file pointer. The FITS headers are always read/written in one
+call (\fIfts_rhead, fts_whead\fP), but it is possible to either
+skip the data completely (\fIfts_sdata\fP) or read/write (portions of)
+the data (\fIfts_rdata, fts_wdata, fts_rrow, fts_wrow\fP). 
+No buffering is done on the
+fits-I/O routines, since system calls \fIfread(3)\fP and \fIfwrite(3)\fP 
+are used. It is possible to read and write with different FITS blocking
+factors using \fIfts_setiblk\fP and \fIfts_setoblk\fP.
+.SH EXAMPLE
+It is the programmers responsiblity to read in the data 
+correctly. The following example shows, without any bells,
+whistles and error checking, how a simple data matrix can be read in:
+.nf
+.ta +0.2i +3.5i
+	instr = stropen(getparam("in"),"r");
+	fts_zero(&fh);                   	/* zero the fits header */
+	fts_rhead(instr,&fh);              	/* read fits header */
+	n = fts_dsize(&fh);              	/* get size of data portion */
+	if (fh.bitpix == -32) {          	/* IEEE single precision */
+	  fbuf = (float *) malloc(n/sizeof(float));	/* allocate */
+	  fts_rdata(instr,&fh,fbuf,n);     	/* read in as single prec. */
+	} else if (fh.bitpix == -64) {      	/* IEEE double precision */
+	  dbuf = (double *) malloc(n/sizeof(double));  	/* allocate */
+	  fts_rdata(instr,&fh,dbuf,n);     	/* read in as double precision */
+	} else
+	  error("Cannot handle non-IEEE data format\n");	/* too bad */
+.fi
+.PP
+The program \fIscanfits(1NEMO)\fP provides an excellent example how
+this package can be used. The program \fIccdfits(1NEMO)\fP is a more
+common example where \fIfits(3NEMO)\fP is sufficient.
+.SH SEE ALSO
+fseek(3), ftell(3), fitsio(3NEMO), scanfits(1NEMO), fitshead(3NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +1.5i
+~/src/image/fits  	fits.[ch]
+.fi
+.SH BUGS
+Reading multiple open fits files in parallel has not been secured
+since there is only one slot for the memory copy of the FITS header.
+.PP
+No support for machines whos native format is not floating point
+IEEE and integer twos complement, although byte-swapping is supported.
+.SH UPDATE HISTORY
+.nf
+.ta +1i +4i
+xx-mar-90	created  	PJT
+19-jun-90	more comments 	PJT
+16-mar-91	upgraded plus warnings that fits(3NEMO) should be used	PJT
+25-jul-91	various blocking factor I/O now done properly	PJT
+7-aug-92	fixed ctype/ttype reading bugs; more output fts_phead	PJT
+24-sep-92	fixed more bugs  	PJT
+18-jan-93	added fts_ihead  	PJT
+29-jun-94	added fts_rrow/wrow and keep track of all I/O	PJT
+7-oct-94	added argument to fts_cdata	PJT
+23-may-95	added argument to fts_chead and fts_thead	PJT
+.fi
