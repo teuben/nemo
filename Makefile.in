@@ -1,4 +1,4 @@
-VERSION = NEMO V3.0 24-sep-01 PJT
+VERSION = NEMO V3.0 23-oct-01 PJT
 ################################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 ################################################################################
@@ -380,22 +380,26 @@ NEMOVER = `cat VERSION`
 DIST_DIR = nemo_$(NEMOVER)
 
 dist:
-	rm -rf $(DIST_DIR)
-	cvs -q export -D tomorrow -d $(DIST_DIR) nemo 2>&1 > /tmp/nemodist.log
-	tar -zcf $(DIST_DIR).tar.gz $(DIST_DIR)
-	rm -rf $(DIST_DIR)
-	@echo 'TODO: ----------------------------------------------------'
-	@echo Date: `date`
-	@echo 'Change this date in:  www/nemo/lastftp'
-	@echo 'Change: whatsnew.html'
-	@echo 'Change: nemo.html'
-	@echo 'scp $(DIST_DIR).tar.gz apus:/home/ftp/pub/nemo'
-	@echo 'src/scripts/version inc'
-	@echo 'cvs commit VERSION inc/version.h'
-	@echo 'DONE: ----------------------------------------------------'
+	@if [ ! -d $(DIST_DIR) ]; \
+	then \
+	  cvs -q export -D tomorrow -d $(DIST_DIR) nemo 2>&1 > /tmp/nemodist.log; \
+	  tar -zcf $(DIST_DIR).tar.gz $(DIST_DIR); \
+	  rm -rf $(DIST_DIR); \
+	  echo 'TODO: ----------------------------------------------------'; \
+	  echo Date: `date`; \
+	  echo 'Change this date in:  www/nemo/lastftp'; \
+	  echo 'Change: whatsnew.html'; \
+	  echo 'Change: nemo.html'; \
+	  echo 'scp $(DIST_DIR).tar.gz apus:/home/ftp/pub/nemo'; \
+	  echo 'src/scripts/version inc'; \
+	  echo 'cvs commit VERSION inc/version.h'; \
+	  echo 'DONE: ----------------------------------------------------';\
+	else \
+	  echo Directory $(DIST_DIR) exists; \
+	fi;
 
 distcvs:
-	make dist DIST_DIR=nemo_cvs
+	make dist DIST_DIR=nemo
 
 distu:
 	tar -zcf $(DIST_DIR)_cvs.tar.gz `find . -name Entries -exec src/scripts/cvsutar '{}' \;`
@@ -667,6 +671,6 @@ testsuite:
 	@echo 'src/scripts/testsuite -b'
 
 sure:	libs bins
-	
+
 .makedefs:
 	$(MAKE) -f src/Makefile makedefs_help
