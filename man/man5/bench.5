@@ -1,15 +1,15 @@
-.TH DATA 5NEMO "17 February 2004"
+.TH DATA 5NEMO "31 March 2005"
 .SH NAME
 bench \- NEMO benchmarks in NemoStones
 .SH DESCRIPTION
 Nemo Benchmarks (a.k.a. NemoStones)
 .PP
 \fBbench1\fP tests the classic (1986) Barnes and Hut code in C, without
-quadrupole corrections, for 10240 particles and 128 timesteps.
+quadrupole corrections, for 10240 particles and 64 timesteps.
 \fBbench2\fP tests a more modern Treecode, this one is the
-O(N) version from Dehnen (2002?).
+O(N) version from Dehnen (2002?). Again 64 timesteps.
 \fBbench0\fP has been added to compare a tree code with a 
-direct N-body code, but is not part of the NemoStone.
+direct N-body code, also 64 timesteps. 
 \fBbench3\fP benchmarks the creation of a large (>2GB) snapshot.
 .SH DATA
 Here are the benchmarks
@@ -24,26 +24,30 @@ Here are the benchmarks
 and the data :
 .PP
 .nf
-.ta +2i
+.ta +3i
 bench0
        P4/3.0	342.7
        G5/2.0	472.8
        AMD64/2.0	300.3
+       P4/2.8 w/cygwin	365.9
 bench1
        P4/3.0	13.4
        G5/2.0	13.1
        AMD64/2.0	9.36
+       P4/2.8 w/cygwin	15.1
 
 bench2
        P4/3.0	10.8
        G5/2.0	21.0
        AMD64/2.0	8.1
+       P4/2.8 w/cygwin	45.5
 
 bench3 
        P4/3.0	22.890u  5.980s 1:45.63 27.3%
        G5/2.0	28.400u 24.660s 1:05.41 81.1% 
        AMD64/2.0	18.540u 10.921s 0:56.93 51.7% 
        P4/2.8	25.541u 8.081s 0:59.98 56.0% (S/ATA)
+       P4/2.8 w/cygwin	276.56u 26.35s 6:34.75 76.7% (using mkplummer V2.8)
 .fi
 .SH "SEE ALSO"
 gyrfalcON(1NEMO), data(5NEMO), mkspiral(1NEMO), hackcode1(1NEMO), nbody1(1NEMO), scfm(1NEMO),
@@ -61,4 +65,5 @@ Peter Teuben
 12-may-97	created  	PJT
 26-nov-03	finally added some data		PJT
 17-feb-04	added bench0 comparison  	PJT
+31-mar-05	added some cygwin numbers, fixed input	PJT
 .fi
