@@ -8,6 +8,7 @@
  *      31-oct02   1.2  add "fourier m=1" mode as 'arm' for Rahul - problems fitting  as 
  *                      AMPHASE though
  *      21-nov-02  1.3  implemented nsigma for "line" and "arm"
+ *      22-dec-02  1.3a fixing code to make it work for -DSINGLEPREC
  *
  *
  *  line       a+bx
@@ -96,16 +97,20 @@ bool Qtab;                  /* do table output ? */
 
 typedef real (*my_proc1)(real *, real *, int);
 typedef void (*my_proc2)(real *, real *, real *, int);
+typedef int  (*my_proc3)(real *, int, real *, real *, real *, int, real *, real *, int *, 
+			 int, real, int, real, my_proc1, my_proc2);
+
 
 my_proc1 fitfunc;
 my_proc2 fitderv;
+
 
 extern int nr_nllsqfit(real *, int, real *, real *, real *, int, real *, real *, int *, 
 		       int, real, int, real, my_proc1, my_proc2);
 extern int    nllsqfit(real *, int, real *, real *, real *, int, real *, real *, int *, 
 		       int, real, int, real, my_proc1, my_proc2);
 
-iproc my_nllsqfit;    /* set via numrec= to be the Gipsy or NumRec routine */
+my_proc3 my_nllsqfit;    /* set via numrec= to be the Gipsy or NumRec routine */
 
 
 
@@ -306,7 +311,7 @@ setparams()
     itmax = getiparam("itmax");
     
     method = getparam("fit");
-    msigma = nemoinpd(getparam("nsigma"),nsigma,MAXSIG);
+    msigma = nemoinpr(getparam("nsigma"),nsigma,MAXSIG);
     order = getiparam("order");
     if (order<0) error("order=%d of %s cannot be negative",order,method);
 
@@ -557,7 +562,6 @@ do_line()
   if (outstr)
     for (i=0; i<npt; i++)
       fprintf(outstr,"%g %g %g\n",x[i],y[i],d[i]);
-
 }
 
 
