@@ -1,6 +1,7 @@
 #! /bin/csh -f
 #
 #  5-mar-2004     for nbody-school            PJT 
+# 20-apr-2004     minor things for fam04      pjt
 #
 #  Removed any local directory called manybody and installs a new manybody tree
 #  The default should be executed from the home directory, such that
@@ -86,6 +87,7 @@ popd
 #                                                   nemo
 pushd nemo
   source AAA_SOURCE_ME
+  make bins
   echo NEMOBIN-COUNT: `ls $NEMOBIN|wc -l`
 popd
 
@@ -154,6 +156,6 @@ popd
 
 #  xyz stuff
 $NEMO/src/scripts/nemo.vogl
-mknemo xyzview
+mknemo xyzview snapxyz
 
 # -- end of install --
