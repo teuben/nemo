@@ -317,6 +317,16 @@ in during runtime:
     % bake mylinear.so
     % rotcurshape in=map1.vel radii=0,10 load=mylinear.so rotcur1=linear,10,1
 .fi
+.PP
+Here is a contrived example of creating a velocity model field with rotcurshape by
+supplying a zero map, fixing all parameters, and computing the residual
+velocity field (OBS-FIT). Of course you will get -1 times the velocity field,
+but still. It is an alternative to \fIccdvel(1NEMO)\fP
+.nf
+    % ccdmath out=map0.vel fie=0 size=128,128
+    % rotcurshape map0.vel 0,40 30 45 0 blank=-999 resid=map.vel \\
+	rotcur1=plummer,200,10,0,0 fixed=all units=arcsec,1 
+.fi
 .SH FILES
 .fi
 .ta +1i
