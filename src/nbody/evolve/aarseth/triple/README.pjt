@@ -36,6 +36,9 @@ Not finished yet:
 
 Some other things to note:
 
-  - xtriple only works in 8 bit X windows, not in  16/24/32.
+  - xtriple only works in 8 bit X windows, not in  16/24/32 bitdepth.
     It needs a fair number of colors, so better not have netscape or an 
     old version of pgplot.
+    The alternative is of course to use ptriple, the pgplot based version,
+    which runs just fine independant of what colordepth you are using
+    in your X server.
