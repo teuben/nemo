@@ -31,6 +31,7 @@
  *      14-aug-00  V3.0 added tab=t|f for tabular short output
  *      23-mar-01     a fixed xrange=  for singular column files
  *      14-apr-01  V3.1 added convex hull computation as 'area'
+ *      18-jun-01     b fixed boundary check for xrange, also use natof now in setxrange
  */
 
 /*
@@ -60,7 +61,7 @@ string defv[] = {
     "estimate=\n        optional estimates (e.g. for ellipse center)",
     "nmax=10000\n       Default max allocation",
     "tab=f\n            short one-line output?",
-    "VERSION=3.1\n      14-apr-01 PJT",
+    "VERSION=3.1a\n     18-jun-01 PJT",
     NULL
 };
 
@@ -100,6 +101,7 @@ int order;
 bool Qtab;
 
 extern bool scanopt();
+extern real natof();
 
 
 /****************************** START OF PROGRAM **********************/
@@ -174,12 +176,12 @@ string rexp;
     char *cptr;
 
     cptr = strchr(rexp, ':');
-    if (cptr != NULL) {
-        rval[0] = atof(rexp);
-        rval[1] = atof(cptr+1);
+    if (cptr) {
+        rval[0] = natof(rexp);
+        rval[1] = natof(cptr+1);
     } else {
         rval[0] = 0.0;
-        rval[1] = atof(rexp);
+        rval[1] = natof(rexp);
     	warning("Range taken from 0 - %g",rval[1]);
     }
 }
@@ -217,7 +219,7 @@ read_data()
 
     if (nxcol == 1 && nycol == 1) {
         for(i=0, j=0; i<npt; i++) {
-          if(xrange[0] < xcol[0].dat[i] && xcol[0].dat[i] < xrange[1]) {    /* sub-select on X */
+          if(xrange[0] <= xcol[0].dat[i] && xcol[0].dat[i] <= xrange[1]) {    /* sub-select on X */
               xcol[0].dat[j] = xcol[0].dat[i];
               ycol[0].dat[j] = ycol[0].dat[i];
               if (dycolnr>0) dycol.dat[j] = dycol.dat[i];
