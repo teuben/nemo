@@ -3,6 +3,7 @@
  *
  *	31-oct-90	created		PJT
  *	30-mar-97	usage
+ *	 7-may-01    	cleaned up superfluous #define's	PJT
  *
  *                      
  */
@@ -19,15 +20,11 @@ char *defv[] = {
         "vel=0.0\n      Velocity cutoff for Ndiff table",
         "temp=1.0\n     Temperature to measure Isotherms at",
         "mode=goat\n    Mode {goat, int, vdiff}",
-        "VERSION=1.0b\n 2-nov-90 PJT",
+        "VERSION=1.0c\n 7-may-01 PJT",
         NULL,
 };
 
 string usage="LV diagram diagnostics (PJT)";
-
-#define HPI  1.5702
-#define RPD (3.1415/360.0)
-#define HUGE 1.0e20
 
 
 

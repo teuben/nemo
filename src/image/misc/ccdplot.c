@@ -16,6 +16,7 @@
  *	22-feb-97  V2.5a support for SINGLEPREC			pjt
  *	 5-dec-99  V2.6 optional compilation with new pl_contour()	PJT
  *	 3-nov-00  V2.7 added blankval=		PJT
+ * 	 7-may-01     a cleaned up some superfluous #define's	PJT
  *	
  */
 
@@ -49,14 +50,12 @@ string defv[] = {
 	"format=%g\n	Format for above table",
 	"cmode=0\n	Contour mode (0=orginal 1=pgplot)",
 	"blankval=\n	if used, use this as blankval",
-	"VERSION=2.7\n	3-nov-00 PJT",
+	"VERSION=2.7a\n	7-may-01 PJT",
 	NULL,
 };
 
 string usage = "display an image using contours and/or gray-scales";
 
-#define HPI  1.5702
-#define RPD (3.1415/360.0)
 #define UNDEF HUGE
 
 string	infile;				/* input file */
