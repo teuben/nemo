@@ -5,13 +5,16 @@
  *      17-jul-02  1.1  allow NR's mrqmin() to be used via an emulator (nr_nllsqfit)
  *                      added initial code for dynamic object loading functions 
  *      11-sep-02  1.1e error/warning if fit is bad, but can still write out residuals
+ *      31-oct02   1.2  add "fourier m=1" mode as 'arm' for Rahul - problems fitting  as 
+ *                      AMPHASE though
  *
  *
  *  line       a+bx
  *  plane      p0+p1*x1+p2*x2+p3*x3+.....     up to 'order'   (a 2D plane in 3D has order=2)
  *  poly       p0+p1*x+p2*x^2+p3*x^3+.....    up to 'order'   (paraboloid has order=2)
  *  gauss      p0+p1*exp(-(x-p2)^2/(2*p3^2))
- *  exp        p0+p1*exp(-(x-p2)/p3)   
+ *  exp        p0+p1*exp(-(x-p2)/p3)  
+ *  arm        p0+p1*cos(x)+p2*sin(x)         special version for rahul 
  */
 
 #include <stdinc.h>  
@@ -38,11 +41,11 @@ string defv[] = {
     "lab=\n             Mixing parameter for nllsqfit",
     "itmax=50\n         Maximum number of allowed nllsqfit iterations",
     "numrec=f\n         Try the numrec routine instead?",
-    "VERSION=1.1g\n     31-oct-02 PJT",
+    "VERSION=1.2\n      31-oct-02 PJT",
     NULL
 };
 
-string usage="a non-linear least square fitting program";
+string usage="a non-linear least square fitting program for tabular data";
 
 /**************** SOME GLOBAL VARIABLES ************************/
 
@@ -72,11 +75,11 @@ stream instr, outstr;       /* input / output file */
 int    nmax;                /* allocated space */
 int    npt;                 /* actual number of points from table */
 real   nsigma;              /* fractional sigma removal */
-real   tol = -1;  
-real   lab = -1;
-int    itmax;
+real   tol = -1;            /* tolerance for M-L convergence, if used */ 
+real   lab = -1;            /* mixing parameter for M-L convergence, if used  */
+int    itmax;               /* max. number of iterations */
 
-int order;                  /* order of poly's/hyperplane's */
+int order;                  /* order of fits that have an order (poly's/hyperplane's) */
 
 int mask[MAXPAR];           /* 1=free  0=fixed parameter */
 real par[MAXPAR];           /* initial parameters */
@@ -723,13 +726,15 @@ do_poly()
 /*
  * ARM:     y = a + b * cos [(x-c)/DPR]
  *      simple m=1 fourier analysis
+ *  BUG:  for some reason the AMPHASE model does just not work. Write it out
+ *        and fit it linearly as a separate cos and sin term, it works fine.
  */
 
 do_arm()
 {
   real *x, *y, *dy, *d;
   int i,j, nrt, mpar[3];
-  real fpar[3], epar[3],amp,pha;
+  real fpar[3], epar[3],amp,pha,amperr,phaerr;
   int lpar = 3;
     
   if (nxcol < 1) error("nxcol=%d",nxcol);
@@ -756,13 +761,15 @@ do_arm()
   printf("Fitting a+b.cos(x-c)/DPR:  \na= %g %g \nb= %g %g\nc= %g %g\n", 
 	 fpar[0],epar[0],fpar[1],epar[1],fpar[2],epar[2]);
 #else
-  printf("Fitting a+c.cos(x/DPR)+s.cos(y/DPR):  \na= %g %g \nc= %g %g\ns= %g %g\n", 
+  printf("Fitting a + c.cos(x/DPR) + s.cos(y/DPR): [x now in degrees]  \na= %g %g \nc= %g %g\ns= %g %g\n", 
 	 fpar[0],epar[0],fpar[1],epar[1],fpar[2],epar[2]);
-  printf("Converting to amp/phase:\n");
+  printf("Converting to amp/phase: (Fitting as a + amp.cos((x-pha)/DPR)\n");
   amp = sqrt(sqr(fpar[1])+sqr(fpar[2]));
   pha = atan2(fpar[2],fpar[1])*DPR;
-  printf("amp= %g\n",amp);
-  printf("pha= %g\n",pha);
+  amperr = sqrt(sqr(fpar[1]*epar[1]) + sqr(fpar[2]*epar[2]))/amp;
+  phaerr = sqrt(sqr(fpar[1]*epar[2]) + sqr(fpar[2]*epar[1]))/(amp*amp)*DPR;
+  printf("amp= %g %g\n",amp,amperr);
+  printf("pha= %g %g\n",pha,phaerr);
 
 #endif
   if (nrt==-2)
