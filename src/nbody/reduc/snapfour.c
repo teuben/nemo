@@ -115,7 +115,6 @@ bool amode;                 /* TRUE=amps only FALSE=amp+phase if all available *
     Body *bp;
     real mat[2*(MAXORDER+1)*(MAXORDER+1)],vec[2*(MAXORDER+1)];
     real sol[2*(MAXORDER+1)], a[2*(MAXORDER+1)+1];
-    double cos(), sin(), atan2(), sqr(), sqrt();
     permanent bool first=TRUE;
 
     for (m=0, dim=0; m<=maxorder; m++)  /* count dimension of matrix needed */
