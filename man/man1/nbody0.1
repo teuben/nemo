@@ -1,6 +1,6 @@
-.TH NBODY0 1NEMO "21 February 2004"
+.TH NBODY0 1NEMO "24 February 2004"
 .SH NAME
-nbody0 - direct summation Aarseth N-body integrator
+nbody0, nbody00 - direct summation Aarseth N-body integrator
 .SH SYNOPSIS
 nbody0 in=snap_in out=snap_out [keyword=value ...]
 .SH DESCRIPTION
@@ -23,11 +23,18 @@ An important input parameter to the program is the accuracy parameter
 The timestep, \fIdt\fP, chosen for a given particle
 is related to the force, \fIF\fP, and its time derivatives by
 \fIdt = sqrt(eta * F / (d2Fdt2))\fP, which is a slight modification of
-the criterion given by Aarseth in the above mentioned reference.
+the criterion given by Aarseth in the above mentioned reference
+(but see also \fBBUGS\fP below on academic cases like the
+\fIfigure8\fP orbit).
 .PP
 A typical value of \fIeta = 0.02\fP usually conserves the energy better than
 one part in 10000 over one crossing time, in the absence of close
 encounters.
+.PP
+\fBnbody00\fP is the C version of \fBnbody0\fP, 
+based on the f2c translater code (and hence will look odd and ugly in places).
+It has more debug output (debug=1 and higher) and also fixed problems with
+orbits like the figure8 orbit (see BUGS below).
 .SH PARAMETERS
 The following parameters are recognized in any order when the keyword
 is also given
@@ -97,7 +104,7 @@ with different choices of \fBdeltat\fP.
 .PP
 In order to save time, all calculations in the fortran code (nbody0.f)
 can be done in single precision.  A different version of nbody0.f is
-needed in this case. See code comments ``SED''.
+needed in this case. See code comments labeled ``\fISED\fP''.
 .PP
 A C version is also available, as nbody0.c, though the Makefile
 needs the target \fBnbody00\fP to install it. The user interface is
@@ -149,7 +156,7 @@ nbody6     	... for new parallel machine
 .nf
 .ta +2i
 ~/src/nbody/evolve/aarseth/nbody0	official source code within NEMO
-~/usr/aarseth/                      	SJA's other nbodyX versions (not exported)
+~/usr/aarseth/                      	SJA's other nbodyX versions (not all exported)
 nb0.f                              	Sverre's version
 .fi
 .SH SEE ALSO
@@ -175,5 +182,5 @@ U.J. Brackbill & B.I. Cohen (Eds.), Academic Press, Orlando.
 6-aug-97	V1.3 added options=                                  	PJT
 11-feb-98	V1.3a fixed array index bug for higher order term	PJT
 21-jan-00	V1.4 added reset= to fix small deltat problem/bug	PJT
-21-feb-04	V1.5 documented the academic figure8 orbit problem	PJT
+24-feb-04	V1.5 documented the academic figure8 orbit problem, fixed in nbody00	PJT
 .fi
