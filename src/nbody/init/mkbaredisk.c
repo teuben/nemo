@@ -5,6 +5,7 @@
  *	15-nov-90	V1.2 helpvec, set_xrandom, gammas	PJT
  *	24-mar-94	ansi
  *      29-mar-97       V2.0 SINGLEPREC, ndisk= now is nbody=   PJT
+ *       9-sep-01       a    gsl/xrandom
  */
 
 #include <stdinc.h>
@@ -27,7 +28,7 @@ string defv[] = {	/* DEFAULT INPUT PARAMETERS */
     "epsi=0.025\n	  softening (sets vert. scale) ",
     "seed=0\n	  	  usual random number seed ",
     "headline=\n	  text headline for output ",
-    "VERSION=2.0\n	  29-mar-97 PJT",
+    "VERSION=2.0a\n	  9-sep-01 PJT",
     NULL,
 };
 
@@ -53,7 +54,7 @@ nemo_main()
     gammas = getdparam("gamma");
     ndisk = getiparam("nbody");
     epsi = getdparam("epsi");
-    set_xrandom(getiparam("seed"));
+    init_xrandom(getparam("seed"));
     inittables();
     makedisk();
     writesnap(getparam("out"), getparam("headline"));

@@ -6,6 +6,7 @@
  *	20-feb-92  0.2	PJT	usage, nemo_main
  *	23-mar-97  0.2b pjt     fixed protos
  *	27-mar-97  0.3  pjt	moved nbody= as 2nd keyword
+ *       9-sep-01       a    gsl/xrandom
  */
 
 #include <stdinc.h>
@@ -24,7 +25,7 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "seed=123\n		seed for random numbers",
     "zerocm=false\n	if true, zero center of mass",
     "headline=\n	verbiage for output",
-    "VERSION=0.3\n	29-mar-97 PJT",
+    "VERSION=0.3a\n	9-sep-01 PJT",
     NULL,
 };
 
@@ -54,7 +55,7 @@ void nemo_main()
     nobj = getiparam("nbody");
     if (nobj > MOBJ)
 	error("Too many particles requested: nbody > MOBJ [%d]", MOBJ);
-    set_xrandom(getiparam("seed"));
+    init_xrandom(getparam("seed"));
     if (streq(shape, "shell"))
 	makeshell();
     else if (streq(shape, "ball"))

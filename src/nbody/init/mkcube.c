@@ -3,6 +3,7 @@
  *	
  *	25-aug-93  V1.0	Created (cloned off mkhomsph)	PJT
  *	23-mar-96  V1.0a proto cleanup, free memory 	PJT
+ *       9-sep-01      b    gsl/xrandom
  */
 
 #include <stdinc.h>
@@ -22,7 +23,7 @@ string defv[] = {	/* DEFAULT INPUT PARAMETERS */
     "seed=0\n       Random number seed",
     "zerocm=t\n     Center c.o.m. ?",
     "headline=\n    Text headline for output",
-    "VERSION=1.0a\n  25-mar-94 PJT",
+    "VERSION=1.0b\n 9-sep-01 PJT",
     NULL,
 };
 
@@ -46,7 +47,7 @@ void nemo_main()
     rmax = -rmin;
     nbody = getiparam("nbody");
     sigma = getdparam("sigma");
-    seed = set_xrandom(getiparam("seed"));
+    seed = init_xrandom(getparam("seed"));
     zerocm = getbparam("zerocm");
     mkcube();
     writegalaxy(getparam("out"), getparam("headline"));

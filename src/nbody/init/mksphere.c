@@ -3,6 +3,7 @@
  *		density profile
  *
  *	 6-sep-95       V1.0 toy, created for NHK video		pjt
+ *       9-sep-01       gsl/xrandom
  */
 
 
@@ -26,7 +27,7 @@ string  defv[] = {
     "rmin=\n                  minimum radius, if to override from radii",
     "rmax=\n                  maximum radius, if to override from radii",
     "headline=\n	      Verbiage for output",
-    "VERSION=1.0a\n           11-nov-96 PJT",
+    "VERSION=1.0b\n           9-sep-01 PJT",
     NULL,
 };
 
@@ -56,7 +57,7 @@ nemo_main()
     char    hisline[128];
 
     nbody = getiparam("nbody");
-    seed = set_xrandom(getiparam("seed"));
+    seed = init_xrandom(getparam("seed"));
     zerocm = getbparam("zerocm");
 
     ntab = nemoinpr(getparam("radii"), rad, MAXTAB);
@@ -77,7 +78,7 @@ nemo_main()
 
     btab = mkplummer(nbody, seed, zerocm);
     bits = (MassBit | PhaseSpaceBit | TimeBit);
-    sprintf(hisline,"set_xrandom: seed used %d",seed);
+    sprintf(hisline,"init_xrandom: seed used %d",seed);
     app_history(hisline);
     if (hasvalue("headline")) 
         set_headline(getparam("headline"));

@@ -15,6 +15,7 @@
  *      9-mar-99    Adopted for NEMO                Peter Teuben
  *                   - removed sorting and fcut stuff (snapsort,unbind)
  *                   - float->real (including the NR stuff; no query/ran1)
+ *      9-sep-01    gsl/xrandom
  *
  */
 
@@ -37,7 +38,7 @@ string  defv[] = {
     "addphi=f\n               Add potentials to snapshot",
     "zerocm=t\n               Centrate snapshot (t/f)?",
     "headline=\n              Optional verbiage",
-    "VERSION=1.0\n            9-mar-99 PJT",
+    "VERSION=1.0a\n           9-sep-01 PJT",
     NULL,
 };
 
@@ -79,7 +80,7 @@ void nemo_main()
 
         mu = getdparam("m");
         a = getdparam("a");
-        seed = set_xrandom(getiparam("seed"));
+        seed = init_xrandom(getparam("seed"));
         nobj = getiparam("nbody");
 	if (nobj%2) 
 	    warning("Total number of particles reset to %d\n",2*((nobj+1)/2));

@@ -7,6 +7,7 @@
  *	13-dec-94   V1.3  renamed 4th parameter nobj= to 2nd nbody=	PJT
  *                        default seed is now 0
  *	29-mar-97   V1.3a usage, SINGLEPREC		pjt
+ *       9-sep-01       b gsl/xrandom
  */
 
 #include <stdinc.h>
@@ -59,7 +60,7 @@ nemo_main()
 
     nobj = getiparam("nbody");
     if (nobj > MOBJ) error("nbody=%d out of range (%d max)", nobj, MOBJ);
-    set_xrandom(getiparam("seed"));
+    init_xrandom(getparam("seed"));
     nval = getdparam("n");
     mval = getdparam("m");
     oname = getparam("out");

@@ -7,6 +7,7 @@
  *		feb-92  usage, set_xrandom      PJT
  *	     23-mar-97  cleanup protos          pjt
  *           20-may-97  added vmax, power for rho=r^{-p}  PJT
+ *            9-sep-01  gsl/xrandom
  */
 
 
@@ -60,7 +61,7 @@ nemo_main()
     vmax = getdparam("vmax");
     power = getdparam("power");
     if (power >= 3.0) error("Illegal power=%g, must be  < 3.0",power);
-    seed = set_xrandom(getiparam("seed"));
+    seed = init_xrandom(getparam("seed"));
     zerocm = getbparam("zerocm");
     mksphere();
     writegalaxy(getparam("out"), getparam("headline"));

@@ -11,6 +11,7 @@
  *		V4.2b: 24-jul-98 bit more documentation			PJT
  *		** still broken for SINGLEPREC **
  *              V4.3:  12-jun-01 allow regularly spaced (with random start) PJT
+ *              9-sep-01       a    gsl/xrandom
  */
 
 #include <stdinc.h>
@@ -39,7 +40,7 @@ string defv[] = {
     "angle=f\n          Regular angular distribution?",
     "vrad=0\n           radial velocity",
     "headline=\n	Text headline for output",
-    "VERSION=4.3\n	13-jun-01 PJT",
+    "VERSION=4.3a\n	9-sep-01 PJT",
     NULL,
 };
 
@@ -79,7 +80,7 @@ void nemo_main()
 	warning("mass=0 -- No masses created in output snapshot");
     } else
         Qmass=TRUE;
-    set_xrandom(getiparam("seed"));
+    init_xrandom(getparam("seed"));
     Qangle = getbparam("angle");
     testdisk();
     writegalaxy(getparam("out"), getparam("headline"), Qmass);

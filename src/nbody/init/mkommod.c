@@ -12,7 +12,8 @@
  *       3-jul-97   V1.2e minor code cleanup              pjt
  *	 5-jul-97   V2.0  added epsilon=		  pjt
  *	21-jul-97       a MXTB is now 1024, from 512	  pjt
- *       1-apr-01       b fixed some compiler warnings    pjt
+ *       1-apr-01       b fixed some compiler warnings    pjt 
+ *       9-sep-01       c gsl/xrandom
  */
 
 #include <stdinc.h>
@@ -91,12 +92,12 @@ void nemo_main()
 	
     btab = (Body *) allocate(nbody * sizeof(Body));
     						/* allocate body array      */
-    seed = set_xrandom(getiparam("seed"));
+    seed = init_xrandom(getparam("seed"));
     nmodel = getiparam("nmodel");
     if (nmodel < 1) error("nmodel=%d is absurd",nmodel);
 	
     outstr = stropen(getparam("out"), "w");
-    sprintf(hisline,"set_xrandom: seed used %d",seed);
+    sprintf(hisline,"init_xrandom: seed used %d",seed);
     put_string(outstr, HeadlineTag, hisline);
     if (hasvalue("headline"))
 	set_headline(getparam("headline"));

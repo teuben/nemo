@@ -9,6 +9,7 @@
  *	22-oct-90       experiment with faking different halo fraction
  *	22-jul-91	few extra NEMO V2.x and fixed the IMSL interface
  *	23-mar-97  1.2a fix protos and SINGLEPREC  fix
+ *       9-sep-01       b    gsl/xrandom
  */
 
 #include <stdinc.h>
@@ -66,7 +67,7 @@ string defv[] = {	/* DEFAULT INPUT PARAMETERS */
     "seed=0\n	          Random number seed",
     "headline=\n	  Extra text headline for output file",
     "fhalo=\n             Different halo/disk mass fraction from default",
-    "VERSION=1.2\n	  22-jul-91 PJT",
+    "VERSION=1.2b\n	  9-sep-01 PJT",
     NULL,
 };
 
@@ -113,7 +114,6 @@ nemo_main()
     rmax = getdparam("rmax");
     ratio = getdparam("ratio");
     rcsig = getdparam("rcsig");
-    seed = getiparam("seed");
 
     read_table(getparam("in"),getparam("test"));
     set_model(getparam("test"));
@@ -293,7 +293,7 @@ string testfile;
      force.  It also has already the values of the disk mass, etcetera.
      The disk mass will be corrected for the finite extent of the disk.
 */
-      seed = set_xrandom(seed);
+      seed = init_xrandom(getparam("seed"));
 
       a1 = rmin / h;
       a2 = rmax / h;
