@@ -1,0 +1,55 @@
+.TH NEMOSHOW 1NEMO "16 December 1990" 
+.SH NAME
+nemoshow \- overview of current NEMO environment
+.SH SYNOPIS
+\fBnemoshow\fP [parameter=value]
+.SH DESCRIPTION
+\fInemoshow\fP is a program that checks your NEMO environment, and gives
+optional extra help on setting it up. 
+.SH PARAMETERS
+.TP 20
+\fBenv=\fP\fIt|f\fP
+Show settings of environment variables and NEMO's hidden system
+command line parameters. [default: \fBf\fP].
+.TP 20
+\fBdef=\fP\fIt|f\fP
+Show settings of system defines as can be used in a C-program
+to separate system dependant code inbetween \fB#if defined(XXX)\fP and
+\fB#endif\fP. [default: \fBf\fP].
+.SH FILES
+The NEMO filesystem (an excerpt)
+.nf
+.ta +.5i +.5i +.5i +.5i +.5i 
+$NEMO/				-- toplevel directory
+	inc/			-- include (.h) files for compilation
+	lib/			-- library (.a, .o) files for linking
+	bin/			-- executable files
+	man/			-- manual pages
+	text/			-- alternate doc on NEMO (e.g. TEX files)
+	usr/			-- sources, per contributing user
+	src/			-- sources, per topic
+	data/			-- data files (some binary, some ascii)
+	obj/			-- object files for loadobj (all binary)
+.fi
+.SH "SEE ALSO"
+index(1NEMO), programs(1NEMO), files(1NEMO), \fIThe NEMO Users/Programmers 
+Manual\fP.
+.SH FILES
+.nf
+.ta +2i
+~/src/kernel/misc	nemoshow.c
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4i
+xx-xxx-86	in the mind..                                	JEB
+xx-apr-88	V1.0: a program \fBnemo\fP created       	PJT
+7-jun-88	V1.5: small updates                         	PJT
+7-jul-89	V1.8: more env-var's to be checked            	PJT
+11-sep-90	V2.0: renamed to nemoshow                    	PJT
+.sp 2
+\fI	It's easy to create,
+	but being responsible for what
+	the creation does is something else.
+\fP
+
