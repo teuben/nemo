@@ -41,8 +41,7 @@ FORLIBS = @FLIBS@
 #set opts="-rdynamic -ansi -fwritable-strings -Wconversion -Wnested-externs"
 #exec gcc -fPIC -Dlinux -DSYSV -I$NEMOINC -I$NEMOLIB -L$NEMOLIB $opts $* $link
 
-#NEMO_CFLAGS = -rdynamic -ansi -fwritable-strings -Wconversion -Wnested-externs -I$(NEMOINC) -I$(NEMOLIB) 
-NEMO_CFLAGS = -rdynamic -fwritable-strings -I$(NEMOINC) -I$(NEMOLIB) @LOADOBJ_MACH@
+NEMO_CFLAGS = -I$(NEMOINC) -I$(NEMOLIB) @LOADOBJ_MACH@
 NEMO_FFLAGS = -fno-globals 
 NEMO_LDFLAGS = 
 NEMO_LIBS = -L$(NEMOLIB) -lnemo @LOADOBJ_LIBS@ -lm
@@ -114,8 +113,10 @@ makedefs_help:
 	@echo CXX=@CXX@  CXXFLAGS=@CXXFLAGS@
 	@echo F77=@F77@	  FFLAGS=@FFLAGS@
 	@echo DEFS=@DEFS@
+	@echo CFLAGS=@CFLAGS@
+	@echo FFLAGS=@FFLAGS@
 	@echo LDFLAGS=@LDFLAGS@
-	@echo FC=@FC@
+	@echo FC=@F77@
 	@echo LN_S=@LN_S@
 	@echo GLLIBS=@GLLIBS@
 	@echo XLIBS=@XLIBS@

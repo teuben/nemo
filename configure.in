@@ -262,15 +262,18 @@ dnl fi
 
 dnl ---------------------------------------------------------------------
 
-LOADOBJ_MACH = ""
-LOADOBJ_LIBS = ""
+
+LOADOBJ_MACH=""
+LOADOBJ_LIBS=""
+
+echo "HOST_OS: $host_os"
 
 case $host_os in
-      *linux*)
-	LOADOBJ_MACH="-Dlinux -DSYSV"
+      linux*)
+	LOADOBJ_MACH="-Dlinux -DSYSV -rdynamic -fwritable-strings"
 	LOADOBJ_LIBS=-ldl
 	;;
-      sparc*)
+      solaris*)
 	LOADOBJ_MACH="-Dsun4 -DSOLARIS -DSYSV"
 	LOADOBJ_LIBS=-ldl
         ;;
@@ -278,6 +281,7 @@ esac
 
 AC_SUBST(LOADOBJ_MACH)
 AC_SUBST(LOADOBJ_LIBS)
+
 
 dnl ---------------------------------------------------------------------
 
