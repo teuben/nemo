@@ -21,7 +21,8 @@ string defv[] = {
     "order=0\n		Order of plane/poly fit",
     "out=\n             optional output file for some fit modes",
     "nsigma=-1\n        delete points more than nsigma away?",
-    "par=\n             initial estimates of parameters",
+    "par=\n             initial estimates of parameters, if truely non-linear fit",
+    "free=\n            free(1) or fixed(0) parameters?",
     "npar=\n            override number of parameters",
     "nmax=10000\n       Default max allocation",
     "tab=f\n            short one-line output?",
@@ -38,6 +39,7 @@ string usage="a non-linear least square fitting program";
 #endif
 
 #define MAXCOL 10
+#define MAXPAR 10
 
 typedef struct column {
     int maxdat;     /* allocated length of data */          /* not used */
@@ -61,6 +63,10 @@ real   nsigma;              /* fractional sigma removal */
 
 real  a,b;                  /* fit parameters in: y=ax+b  */
 int order;
+
+int mask[MAXPAR];           /* 1=free  0=fixed parameter */
+real par[MAXPAR];           /* initial parameters */
+int npar; 
 
 bool Qtab;                  /* do table output ? */
 
@@ -146,7 +152,9 @@ nemo_main()
 
 setparams()
 {
+    int i;
     string inname = getparam("in");
+  
     nmax = nemo_file_lines(inname,getiparam("nmax"));
     if (nmax<0) error("Error opening %s",inname);
     if (nmax==0) error("No data?");
@@ -178,11 +186,29 @@ setparams()
     order = getiparam("order");
     if (order<0) error("order=%d of %s cannot be negative",order,method);
     Qtab = getbparam("tab");
+
+    if (hasvalue("free")) {
+      int nfree;
+      nfree = nemoinpi(getparam("free"),mask,MAXPAR);
+      if (nfree < 0) error("bad free=");
+      for (i=nfree; i<MAXPAR; i++)
+	mask[i] = 1;
+    } else {
+      for (i=0; i<MAXPAR; i++)
+	mask[i] = 1;
+    }
+    if (hasvalue("par")) {
+      npar = nemoinpr(getparam("par"),par,MAXPAR);
+      if (npar < 0) error("bad par=");
+      for (i=npar; i<MAXPAR; i++)
+	par[i] = 0.0;
+    } else
+      npar = 0;
+    if (hasvalue("npar"))
+      npar = getiparam("npar");
 }
 
-setrange(rval, rexp)
-real rval[];
-string rexp;
+setrange(real *rval, string rexp)
 {
     char *cptr;
 
@@ -266,6 +292,7 @@ do_line()
   real fpar[2], epar[2];
   int its = 50;
   real tol = 0.0, lab = 0.0;
+  int lpar = 2;
     
   if (nxcol < 1) error("nxcol=%d",nxcol);
   if (nycol < 1) error("nycol=%d",nycol);
@@ -274,7 +301,10 @@ do_line()
   dy = (dycolnr>0 ? dycol.dat : NULL);
   d = (real *) allocate(npt * sizeof(real));
   
-  mpar[0] = mpar[1] = 1;    /* 1 is which parameters to fit, 0= fixed */
+  for (i=0; i<lpar; i++) {
+    mpar[i] = mask[i];
+    fpar[i] = par[i];
+  }
 
   fitfunc = func_line;
   fitderv = derv_line;
@@ -282,7 +312,7 @@ do_line()
   nrt = nllsqfit(x,1,y,dy,d,npt,  fpar,epar,mpar,2,  tol,its,lab, fitfunc,fitderv);
   printf("a+bx:  a=%g (+/-%g) b=%g (+/-%g) \n",fpar[0],epar[0],fpar[1],epar[1]);
   for (i=0; i<npt; i++)
-    dprintf(0,"%g %g %g\n",x[i],y[i],d[i]);
+    dprintf(1,"%g %g %g\n",x[i],y[i],d[i]);
 
 }
 
