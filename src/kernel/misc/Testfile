@@ -1,0 +1,45 @@
+DIR = src/kernel/misc
+NEED = $(BIN)
+BIN = xrandom nemoinp
+
+help:
+	@echo Directory $(DIR)
+
+need:
+	@echo $(NEED)
+
+all:	xrandom nemoinp
+
+clean: 
+	@echo Cleaning $(DIR)
+	@rm -f core
+
+xrandom:
+	@echo Running xrandom
+	@echo uniform seed=5 n=5
+	xrandom seed=5 n=5 report=t
+	@echo gauss seed=5 n=5
+	xrandom seed=5 n=5 gauss=t report=t
+
+xrandom_bench:
+	@echo Different centisecond runs on one line:
+	@xrandom -1;xrandom -1;xrandom -1;xrandom -1;xrandom -1;\
+	xrandom -1;xrandom -1;xrandom -1;xrandom -1;xrandom -1
+	@echo Different centisecond runs on different line:
+	@xrandom -1
+	@xrandom -1
+	@xrandom -1
+	@xrandom -1
+	@xrandom -1
+	@xrandom -1
+	@xrandom -1
+	@xrandom -1
+	@xrandom -1
+	@xrandom -1
+
+
+nemoinp:
+	@nemoinp 'sqrt(2)'
+	nemoinp 1:10:2 newline=f
+	@echo ""
+	
