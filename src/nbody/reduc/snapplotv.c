@@ -2,6 +2,7 @@
  * SNAPPLOTV.C: plot particle positions from a snapshot output file
  *              including vectors for velocity
  *      V1.0  cloned off snapplot V3.1                                    pjt
+ *       1.1  9-oct-03  support new snapshot option pos/vel               pjt
  */
 
 #include <stdinc.h>
@@ -47,7 +48,7 @@ string defv[] = {
     "color_table=\n		  specify new color table to use",
 #endif
     "frame=\n			  base filename for rasterfiles(5)",
-    "VERSION=1.0\n		  4-oct-95 PJT",
+    "VERSION=1.1\n		  9-oct-03 PJT",
     NULL,
 };
 
@@ -281,6 +282,8 @@ setcolors()
 bool scansnap()
 {
     bool success;
+    int i;
+    real *pptr, *xptr;
 
     success = FALSE;
     while (! success) {
@@ -311,6 +314,27 @@ bool scansnap()
 		    phaseptr = (real *) allocate(sizeof(real) * 2*NDIM * nbody);
 		get_data_coerced(instr, PhaseSpaceTag, RealType, phaseptr,
 				 nbody, 2, NDIM, 0);
+		success = TRUE;
+	    } else if (get_tag_ok(instr, PosTag)) {
+	        real *ptmp = (real *) allocate(sizeof(real)*nbody*NDIM);
+		if (phaseptr == NULL)
+		    phaseptr = (real *) allocate(sizeof(real) * 2*NDIM * nbody);
+		get_data_coerced(instr, PosTag, RealType, ptmp, nbody, NDIM, 0);
+
+		for (i=0, pptr=phaseptr, xptr=ptmp; i<nbody; i++) {
+		  *pptr++ = *xptr++;
+		  *pptr++ = *xptr++;
+		  if (NDIM==3) *pptr++ = *xptr++;
+		  pptr += NDIM;
+		}
+		get_data_coerced(instr, VelTag, RealType, ptmp, nbody, NDIM, 0);
+		for (i=0, pptr=phaseptr+NDIM, xptr=ptmp; i<nbody; i++) {
+		  *pptr++ = *xptr++;
+		  *pptr++ = *xptr++;
+		  if (NDIM==3) *pptr++ = *xptr++;
+		  pptr += NDIM;
+		}
+		free(ptmp);
 		success = TRUE;
 	    }
 	    if (get_tag_ok(instr, PotentialTag)) {

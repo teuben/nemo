@@ -22,6 +22,7 @@
  *      V3.4a 21-jan-00 fixed acc/phi bug				  pjt
  *          b 23-may-01 setrange() now using nemoinp()			  PJT
  *          c 7-oct-02  atof->natof					  pjt
+ *      V3.5  9-oct-03  finally able to read the new snapshot(5NEMO) style PJT
  */
 
 #include <stdinc.h>
@@ -66,7 +67,7 @@ string defv[] = {
 #endif
     "frame=\n			  base filename for rasterfiles(5)",
     "trak=\n                      alternative for trakplot (t|f)",
-    "VERSION=3.4c\n		  7-oct-02 PJT",
+    "VERSION=3.5\n		  9-oct-03 PJT",
     NULL,
 };
 
@@ -321,10 +322,13 @@ setcolors()
 bool scansnap()
 {
     bool success;
+    int i;
+    real *pptr, *xptr;
+    
 
     success = FALSE;
     while (! success) {
-	get_history(instr);			/* added march  1996 */
+	get_history(instr);
 	if (! get_tag_ok(instr, SnapShotTag))
 	    return (FALSE);
 	get_set(instr, SnapShotTag);
@@ -353,6 +357,27 @@ bool scansnap()
 		get_data_coerced(instr, PhaseSpaceTag, RealType, phaseptr,
 				 nbody, 2, NDIM, 0);
 		success = TRUE;
+	    } else if (get_tag_ok(instr, PosTag)) {
+	        real *ptmp = (real *) allocate(sizeof(real)*nbody*NDIM);
+		if (phaseptr == NULL)
+		    phaseptr = (real *) allocate(sizeof(real) * 2*NDIM * nbody);
+		get_data_coerced(instr, PosTag, RealType, ptmp, nbody, NDIM, 0);
+
+		for (i=0, pptr=phaseptr, xptr=ptmp; i<nbody; i++) {
+		  *pptr++ = *xptr++;
+		  *pptr++ = *xptr++;
+		  if (NDIM==3) *pptr++ = *xptr++;
+		  pptr += NDIM;
+		}
+		get_data_coerced(instr, VelTag, RealType, ptmp, nbody, NDIM, 0);
+		for (i=0, pptr=phaseptr+NDIM, xptr=ptmp; i<nbody; i++) {
+		  *pptr++ = *xptr++;
+		  *pptr++ = *xptr++;
+		  if (NDIM==3) *pptr++ = *xptr++;
+		  pptr += NDIM;
+		}
+		free(ptmp);
+		success = TRUE;
 	    }
 	    if (get_tag_ok(instr, PotentialTag)) {
 		if (phiptr == NULL)
@@ -376,7 +401,7 @@ bool scansnap()
 	}
 	get_tes(instr, SnapShotTag);
     }
-    return (TRUE);
+    return TRUE;
 }
 
 plotbox()
