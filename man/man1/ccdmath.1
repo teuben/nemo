@@ -1,0 +1,77 @@
+.TH CCDMATH 1NEMO "11 September 1991" 
+.SH NAME
+ccdmath \- map arithmetic using function expressions
+.SH SYNOPSIS
+.PP
+\fBccdmath in=\fP[image1[,image2,...]]  \fBout=\fPimage \fBfie=\fPexpression  
+.SH DESCRIPTION
+\fBccdmath\fP combines maps through some simple operations to make a new map.
+It also handles a few arithmetic functions, such as sqrt, exp, log10. See
+\fIfie(3NEMO)\fP for a full definition of the available functions and
+operations. Input maps are referred to by \fB%n\fP, where \fBn\fP
+is the ordinal number of the input maps (1 being the first one), 
+in the function expression \fBfie\fP.
+.PP
+The program can also be used in creation mode: when no input files are
+given, parameters \fB%x\fP and \fB%y\fP in \fBfie=\fP 
+can be used to refer to the X and
+Y pixel coordinates in the map to be created, (0,0) being the lower left
+corner.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 20
+\fBin=\fIin-file(s)\fP
+list of input file name(s), each in \fIimage(5NEMO)\fP format.
+In case of multiple files, the list must be space or comma separated.
+If no files are given, the program is in creation mode.
+.TP
+\fBout=\fIout-file\fP
+output file, will be in \fIImage(5NEMO)\fP format [no default]
+.TP
+\fBfie=\fIexpression\fP
+Expression how to manipulate the input maps or
+create output map. Input maps are referred to by \fB%n\fP or \fB$n\fP,
+in creation mode position is referred to by \fB%x\fP and \fB%y\fP
+[no default].
+.TP
+\fBsize=\fInx,ny,nz\fP
+Size of the output map in case program is in creation mode [default: 10,10,1].
+.SH EXAMPLE
+Create a 'difference' map from two input maps:
+.nf
+   % \fBccdmath inmap1,inmap2 outmap "abs(%1-%2)"\fP
+.fi
+create a map from scratch:
+.nf
+  % \fBccdmath out=newmap fie="exp(-((%x-50)/25)**2-((%y-50)/25)**2)" size=100,100\fP
+.fi
+.SH TIMING
+Performance on Rigel (SUN 3/160, 16Mhz):
+.nf
+.ta +1i +2i +2i
+100 * 100	rang: 5.8"	+: 3.4"  	sqrt: 2.6"
+200 * 200	rang: 23.2	+: 13.0"	sqrt: 8.7"
+300 * 300	rang: 51.8"	+: 31.3"	sqrt: 23.8"
+512 * 512	rang: 152.7"	+: 88.4"	sqrt: 64.2"
+.fi
+.SH "SEE ALSO"
+fie(3NEMO), image(5NEMO), tsf(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+src/image/trans  	ccdmath.c ccdmath.1
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+ 1-Jul-87	V1.0: Created	PJT
+ 6-jul-87	V1.1: order keywords changed for future enhancements	PJT
+ 1-jun-88	V2.0: new filestruct, although code is same         	PJT
+18-dec-88	V2.1: new keyword structure, fie() used.         	PJT
+22-jan-89	V2.3: can make map from scratch using %x, %y and %z 
+11-sep-91	comments                                           	PJT
+.fi
+
