@@ -1,4 +1,4 @@
-.TH POTENTIAL 5NEMO "19 November 2003"
+.TH POTENTIAL 5NEMO "19 July 2004"
 .SH NAME
 potential \- format for (flow) potential (and force field) description (functors)
 .SH SYNOPSIS
@@ -151,15 +151,18 @@ potentials to modify their code in something like the following:
     *pot += 0.5*tmp;
     acc[0] += tmp / pos[0];
 .fi
-.SH CAVEAT
+.SH "ENVIRONMENT"
+The environment variable \fBPOTPATH\fP can be used to search for potentials
+in other than the local directory. 
+.SH "CAVEAT"
 Since the old format did not use _float or _double, there will
 be some potentials with no _float support,since _double is the
 default if  not present in the symbol table.
 .SH "SEE ALSO"
-get_potential(3NEMO), orbit(5NEMO), flowcode(1NEMO), mkflowdisk(1NEMO), vpotcode(1NEMO)
-.SH AUTHOR
+get_potential(3NEMO), orbit(5NEMO), acceleration(5NEMO), flowcode(1NEMO), mkflowdisk(1NEMO), vpotcode(1NEMO)
+.SH "AUTHOR"
 Peter Teuben
-.SH FILES
+.SH "FILES"
 .nf
 .ta +2.5i
 ~/src/orbit/potential   potential.c, potential.h potentialf.c
@@ -177,4 +180,5 @@ Peter Teuben
 16-apr-96	documented 'flowcode' and 'vpotcode' deviations 	PJT
 19-sep-01	documented _float/_double                        	PJT
 19-nov-03	more flow documentation, added mkflowdisk	PJT
+19-jul-04	promote acceleration(5)	PJT
 .fi
