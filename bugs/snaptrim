@@ -1,0 +1,31 @@
+Time is looked at with a timefuzz accuracy, which is hardcoded,
+should be a parameter to the program if at all.
+Someone with different kind of time units (step=0.0000001 tstop=0.001)
+had problems extracting snapshots.
+
+----------------------------------------------------------------------
+
+From pjt@anchor Thu Jun  9 11:44:44 1988
+To: josh%guinness.ias.edu@uxc.cso.uiuc.edu, nemo@anchor
+Subject: snaptrim V1.0 times bug
+
+snaptrim version 1.0 does not interpret the 'times' keyword
+correctly for a snapshot which does not have time.
+My input file had time-stamps
+	(undef,2,4,6,...,40)
+and a request to extract 'times=20' resulted in an output
+file with the the 'undef' (actually time=0) time, and the
+snapshot at time=20.
+
+
+
+From: josh
+Subject: Re: snaptrim V1.0 times bug
+
+Yes, if a frame does not have any time-stamp at all, snaptrim
+does not check it against the specified time range.  I'll take
+this into consideration, but its really not clear what exactly
+snaptrim should do in such a case.  Perhaps the best solution
+is to only accept frames without time-stamps if times=all.
+                                        Josh
+
