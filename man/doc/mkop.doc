@@ -1,0 +1,42 @@
+%N mkop
+%D Set up a Mestel disk using 1973 Ostriker & Peebles' method
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man mkop' for more extensive online help
+  Defaults of program keywords are listed between square brackets
+%A out
+	output file name  [???]
+%A nbody
+	usual number of particles  [300]
+%A mdisk
+	disk mass  [300.0]
+%A rcut
+	outer cutoff radius  [1.00]
+%A toomresig
+	Sigma from Toomre's Q parameter  [0.454]
+%A nring
+	number of particles per ring;should divide nbody [10]
+%A nvel
+	number of measurements used to determine circ. vel. [10]
+%A nderiv
+	number of rings used to determine dv/dr [10]
+%A seed
+	usual random number seed  [12345]
+%A c
+	softening for force calculation [0.05]
+%A zerocm
+	Re-center at center of mass? [t]
+%A mode
+	creation mode: 1=OP73 2=theo. rot. curve [1]
+%A options
+	Additional output (phi,acc,rot,sig) []
+%A potname
+	OP73 potential (5NEMO) [or any other] [op73]
+%A potpars
+	.. with parameters [0,0]
+%A potfile
+	.. and optional datafile name []
+%A headline
+	text headline for output  []
+%A VERSION
+	1-nov-93 PJT [0.8]
