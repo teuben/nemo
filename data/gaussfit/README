@@ -1,0 +1,7 @@
+This directory contains some sample model files that belong
+to the gaussfit program. See manual page for gaussfit. The
+GAUSSPATH environment variable should contain this directory,
+and the NEMO version of the gaussfit program will pickup any
+of these model files.
+
+
