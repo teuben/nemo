@@ -1,0 +1,22 @@
+#! /bin/csh -f
+#	This will print out the latex manual - it needs a makeindex
+#	program, which is in $NEMO/doc/index, and can be compiled
+#	with 'mktst' in this directory
+set time1=(`date`)
+latex nemo
+latex nemo
+latex nemo
+makeindex < nemo.idx > nemo.ind
+latex nemo
+latex nemo
+latex nemo
+set time2=(`date`)
+echo Started at $time1
+echo Finished at $time2
+
+
+# to get manual pages with consequetive page numbers
+# try:
+#       groff -man -rC1 files..
+#	groff -man -rD1 files.. (different odd/even for double sided)
+
