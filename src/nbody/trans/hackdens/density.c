@@ -82,12 +82,16 @@ real hackden(p, nb, dis, newdis, ra)
 #ifdef DEBUG
     dprintf(0,"distcount returns: %f\n", rn);
 #endif
-    nbr = nb-2.0;
-    den=nbr/(rn*sqrt(rn)*FRTHRD_PI);
+    if (Qdensity) {
+      nbr = nb-2.0;
+      den=nbr/(rn*sqrt(rn)*FRTHRD_PI);
+    } else
+      den = rn;
+
 #ifdef DEBUG
     dprintf(0,"Hackden= %f\n", den);
 #endif
-    return (den);
+    return den;
 }
 
 real distcount(ra ,total, nb)

@@ -133,3 +133,4 @@ int n2bterm;                    /* number 2-body of terms evaluated */
 int nbcterm;			/* num of body-cell terms evaluated */
 
 bool debug;                     /* control debugging messages */
+bool Qdensity;                  /* output density or kth neighbor distance */

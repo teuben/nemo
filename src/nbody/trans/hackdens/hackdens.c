@@ -28,7 +28,8 @@ string defv[] = {
     "fcells=0.9\n		  cell/body allocation ratio ",
     "nudge=0\n                    nudge overlapping particles with this dispersion",
     "verbose=f\n		  flag to print # of particles finished ",
-    "VERSION=2.1\n		  29-may-02 PJT",
+    "density=t\n                  write density, or distance of Kth particle",
+    "VERSION=2.2\n		  12-may-04 PJT",
     NULL,
 };
 
@@ -54,6 +55,7 @@ inputdata()
 
     input = getparam("in");
     instr = stropen(input, "r");
+    Qdensity = getbparam("density");
     readsnapshot(&massdata, &nmass, instr);	/* read mass coord data */
     strclose(instr);
     testdata = massdata;
