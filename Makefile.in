@@ -1,4 +1,4 @@
-VERSION = NEMO V3.0 13-sep-01 PJT
+VERSION = NEMO V3.0 24-sep-01 PJT
 ################################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 ################################################################################
@@ -384,6 +384,9 @@ dist:
 	cvs -q export -D tomorrow -d $(DIST_DIR) nemo 2>&1 > /tmp/nemodist.log
 	tar -zcf $(DIST_DIR).tar.gz $(DIST_DIR)
 	rm -rf $(DIST_DIR)
+
+distcvs:
+	make dist DIST_DIR=nemo_cvs
 
 distu:
 	tar -zcf $(DIST_DIR)_cvs.tar.gz `find . -name Entries -exec src/scripts/cvsutar '{}' \;`
