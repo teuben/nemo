@@ -9,7 +9,7 @@
  *	 6-aug-96  1.1d printf -> dprintf
  *	30-dec-97  1.1e ansi 
  *      20-jun-03  1.2  using modern get_snap and put_snap
- *      13-mar-05  1.3  fix writing the time, free unused
+ *      13-mar-05  1.2a  fix writing the time, free unused
  *
  */
 #include <stdinc.h>
@@ -31,7 +31,7 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "deltav=0.0,0.0,0.0\n	  velocity of in1 wrt in2 ",
     "zerocm=true\n		  zero center of mass ",
     "headline=\n		  random verbiage ",
-    "VERSION=1.2\n		  20-jun-03 PJT",
+    "VERSION=1.2a\n		  13-mar-05 PJT",
     NULL,
 };
 
