@@ -1,0 +1,313 @@
+<html>
+<body bgcolor=white>
+
+<h1>NEMO for MASS99 users: RECIPES</h1>
+
+<h2>NEMO environment</h2>
+
+NEMO is a package that modifies your Unix environment a little bit,
+in order to use it (e.g. it adds $NEMOBIN to your $PATH), or write
+new program in it. Most users will add something like the
+following to their .cshrc file:
+<pre>
+	<B>source /home/nemo/nemo_start</B>
+</pre>
+If you don't really want it to be part of your default login, just
+make an alias to load it on demand instead.
+
+<h2>NEMO programs</h2>
+
+Once NEMO is loaded there will be a lot of programs in $NEMOBIN that
+you can execute, either from the command line, or via 'shell' scripts.
+Each NEMO program should have a Unix 'man' page. Let's take the 
+NEMO command <I>mkplummer</I>, which creates a Plummer sphere or
+particles.
+<PRE>
+  % <B>man mkplummer</B>
+MKPLUMMER(1NEMO)                                 MKPLUMMER(1NEMO)
+
+
+
+NAME
+       mkplummer  - generates a snapshot according to a truncated
+       Plummer model
+
+SYNOPSIS
+       mkplummer [parameters=values...]
+
+DESCRIPTION
+       mkplummer constructs a Plummer model, with  a  spatial  or
+       mass  cut-off, after which it performs a coordinate trans-
+..
+</PRE>
+(this also means you can use programs like 'gman' or 'tkman' to
+privide GUI based access to the manual pages. At last count we had
+well over 250 program man pages, and almost 1000 man pages (programs,
+library routines, data file info, etc.) in total.
+<P>
+In addition, each NEMO program has builtin help (after all, man pages
+are written separately from the program code and can 
+be out of sync with the executable), which you can get via a
+system keyword <B>help</B>:
+
+<PRE>
+% <B>mkplummer --help</B>
+mkplummer out=??? nbody=??? mfrac=0.999 rfrac=22.8042468 seed=0 time=0.0 zerocm=t scale=-1 quiet=0 massname= massexpr=pow(m,p) masspars=p,0.0 massrange=1,1 headline= VERSION=2.6
+
+% <B> mkplummer help=</B>
+mkplummer out=??? nbody=??? mfrac=0.999 rfrac=22.8042468 seed=0 time=0.0 zerocm=t scale=-1 quiet=0 massname= massexpr=pow(m,p) masspars=p,0.0 massrange=1,1 headline= VERSION=2.6
+
+% <B> mkplummer help=h</B>
+out              : Output file name [???]
+nbody            : Number of particles [???]
+mfrac            : Mass fraction used of Plummer distribution [0.999]
+rfrac            : Radius fraction used of Plummer distribution
+                              NOTE: the above two values are chosen so
+                                    that m( rfrac ) = mfrac                 [22.8042468]
+seed             : Seed for the random number generator [0]
+time             : Time at which snapshot is taken [0.0]
+zerocm           : Centrate snapshot (t/f)? [t]
+scale            : Model scale factor (-1=virial 1=natural) [-1]
+quiet            : 0=noisy 1=somewhat quiet 2=more quiet [0]
+massname         : If used Mass-function name (e.g. n(m)) []
+massexpr         : Mass function expression (e.g. pow(m,p)) [pow(m,p)]
+masspars         : Mass function parameters (e.g. p,0.0) [p,0.0]
+massrange        : Range for mass-spectrum (e.g. 1,2) [1,1]
+headline         : Verbiage for output []
+VERSION          : 19-oct-01 PJT [2.6]
+
+
+% <B>mkplummer help=\?</B>
+Help options are any combination of:
+
+  a       key=val   (all)
+  p,k     key       (parameter,key)
+  d,v     val       (default,value)
+  n       >> add's a newline between above
+  q       >> quit's after above work done
+  u       >> show the usage string
+  h	  >> show key and help strings
+  t       >> show as MIRIAD doc file
+  z       >> show as KHOROS pane file
+  i       >> show some internal variables
+  o       >> show the output key names
+  ?       >> this help (always quits)
+
+Numeric helplevels determine degree and type of assistence:
+They can be added to give combined functionality
+  1       keyword files used (prognam.def)
+  2       interactive prompting
+  4       menu interface using EDITOR environment variable
+  8       reserved
+ 16       reserved
+ VERSION_ID = 3.4b 1-aug-02 PJT
+ NEMO VERSION = 3.0.14
+INTERACT   on
+NEMOINP    on
+PUTPARAM   on
+MACROREAD  on
+HISTORY    on
+INTERRUPT  off
+MINMATCH   on
+TCL        off
+INDEXED    on
+OUTKEYS    on (testing)
+Precision: DOUBLEPREC
+</PRE>
+
+As you could perhaps see from the <B>help</B> system keyword, program keywords are
+used as command line parameters to pass information into the program. They
+are either fully specified by keyword=value, or by their position
+on the command line. In the latter case the 'keyword=' part can be 
+ommited (you will often find the first two or three parameters to be
+the obvious ones that make writing command lines quick).
+ For example, the follow three examples are identical:
+<PRE>
+  % <B>mkplummer p10 10</B>
+  % <B>mkplummer nbody=10 out=p10</B>
+  % <B>mkplummer - 10 > p10</B>
+</PRE>
+The last example show a feature of the NEMO user interface that is 
+often (ab)used, and that is using Unix pipes. When a filename is designated
+by a dash (-), it means the sending or receiving end of a pipe, whichever
+is appropriate. Here is another example:
+<PRE>
+  % <B>mkplummer - 100 | snapscale - - rscale=1,1,0.1 | snapprint - x,y,z > p10.tab</B>
+</PRE>
+which takes a Plummer sphere of 100 particles, flattens it by
+scaling all Z-coordinates by 0.1, and writing out all X,Y,Z coordinates
+to an ASCII file.
+
+<hr>
+<h2> Importing and plotting MASS99 data </h2>
+
+<pre>
+step1:  export as tipsy
+
+   % reduce99 input=isothermal_small.input tipsy=y
+
+
+   which will convert all MASS99 files wih the name outfile.???? to 
+ASCII tipsy files named ducky.???? 
+
+step2:  import tipsy into NEMO
+
+   % tipsysnap ducky.0001 snap.0001
+
+
+step3:  plot the distribution, using the yapp= system keyword and the case
+where NEMO was compiled with PGPLOT (yapp means Yet Another Plotting Package
+and is just an interface to PGPLOT in this case).
+
+  % snapplot snap.0001  xrange=-16:16 yrange=-16:16
+  % snapplot snap.0001  xrange=-16:16 yrange=-16:16 yapp=/vps
+  % snapplot snap.0001  xrange=-16:16 yrange=-16:16 yapp=snap.0001.gif/vgif
+
+As you can see, the first galaxy was centered at the origin, the second one
+was offset a little bit
+
+step4:  make an 'xyz' file for 3D viewing
+
+  % snapxyz snap.0001 xyz.0001
+  % xyzview xyz.0001 scale=16
+
+step4: 
+
+</pre>
+
+
+<h3>Ingredients of the 'mass.input' file</h3>
+
+This galaxy is made within the default [-1,+1] unit coordinates.
+We can specify various properties of it as given below.
+
+<h4>Our Specific Galaxy Sizes</h4>
+<li><b>TEST_NUMBER = 30000</b>, number of particles in sim
+<li><b>TEST_CASE = galaxy_disk</b>, i.e. make a galaxy, or <b>INPUT_FILE = data.0000</b>, using an already-created galaxy.  More on this in a bit.
+
+<h4>Basic Galaxy Physics</h4>
+
+<h4>Model Details</h4>
+<li><b>RESET_USER_PARAMETERS = no</b>, set to 'no' to ensure we pick up proper values above
+<li><b>DO_QUAD = yes</b>, use quad trees for calculations (faster)
+<li><b>DO_EXACT = no</b>, no need to exactly calculate forces
+<li><b>EPSILON = 0.015</b>, gravity softening length
+<li><b>NTREES = 2</b>, allows for both gravity and SPH gas
+<li><b>ENERGY_TOL =    0.1000000000000000</b>, sets our worst-case energy violation limit
+<li><b>DAMPING_COEFFICIENT = 0.0d0</b>, velocity damping to allow relaxation towards equilibrium
+<li><b>LIS_RATIO = 3.0d0</b>, lowered isothermal sphere ratio
+<li><b>ALPHA1 = 0.8d0</b>, <b>ALPHA2 = 0.8d0</b>, <b>ALPHA3 = 0.5d0</b>, gravitional courant numbers
+<li><b>TEST_DISTRIBUTION = random_distribution</b>, ensures random models when doing multiple galaxies
+
+
+<h4>Duration of Run</h4>
+The sim will run until it does 'max_steps' at at least 'timestep_floor' or
+it reaches 'time_stop'.  Thus the minimum run duration is the minimum
+of 'time_stop' or 'max_steps*timestep_floor'.  The maximum run duration
+is 'max_steps*timestep_ceiling', with a likeliest duration of 'max_steps*delta_t' or 'time_stop', whichever happens first.
+
+<li><b>MAX_STEPS = 500</b>, how many steps to run
+<li><b>TIME_STOP  = 32.d0</b>, how long to run sim in units of 'unit time'
+<li><b>DELTA_T    = 0.001</b>
+<li><b>TIMESTEP_FLOOR = 0.0d0</b>
+<li><b>TIMESTEP_CEILING = 0.05d0</b>
+
+
+<hr>
+<h3>Instructions</h3>
+
+<ol>
+<li> create a directory under the 'RUN' hierarchy for this
+<li> make one galaxy with mass99 and mass.input
+<li> make another with mass99 and mass.input
+<li> resize Galaxy B to fractional mass, offset position, initial velocity
+<li> combine Galaxy B' and Galaxy A, and check if it looks right
+<li> run with new mass.input that calls file, not test case
+</ol>
+
+<h4>Create a directory under the 'RUN' hierarchy for this</h4>
+
+And, make sure to create an initial 'mass.input' using the <em>Ingredients</em> list given above to overright the default values.  All other default parameters can be left as is, or tweaked to try different settings.
+
+<h4>Make one galaxy with mass99 and mass.input</h4>
+
+We use our initial choice of N particles (e.g. 30000).  The "LIS3" model
+creates a unit-mass, unit-sized disk galaxy.
+<p>
+Make sure you specify "TEST_CASE = galaxy_disk" in the 'mass.input' file, and not an "INPUT_FILE".  Set "MAX_STEPS = 1" so it simply creates, then ends.
+<p>
+Then, run "../create99".  Once it stops, you should have a file 'data.0000' which contains your first galaxy.  Move this to a new name (suggested, 'target.0000').
+ 
+<h4>Make another with mass99 and mass.input</h4>
+
+Simply run "../create99" again, so it makes a new 'data.0000' galaxy file.  You can rename this (suggested, 'galaxyB.0000').  If you plan for this projectile
+galaxy to be significantly smaller than our first target galaxy, you may
+want to reduce its number of constituant particles.  To do this, just
+edit "mass.input" and set <b>TEST_NUMBER = 30000</b> to some smaller
+value.
+
+<h4>Resize Galaxy B to fractional mass, offset position, initial velocity</h4>
+
+This will be our 'projectile', while Galaxy A is presumed to be the 'target', simply for nomenclature purposes.
+<p>
+You want to make our second galaxy (which initially is pretty similar to our target galaxy) be of an appropriate mass.  This can be 'the same mass', producing a collision of equal mass galaxies.  Or, you can make it smaller, for a typical Cartwheel-like collision.
+<p>
+We also need to give to move Galaxy B away from our Galaxy A, and give it
+an initial velocity towards Galaxy A (so they will collide).
+<p>
+All of this is done in one pass with the "../scale99" routine.  As this routine
+uses the 'mass.input' file, you need to comment out "TEST_CASE = galaxy_disk" and write in "INPUT_FILE = galaxyB.0000".  [Future updates will manually
+ask for a file name, since otherwise this gets ridiculous trying to track
+these things.]
+<p>
+Now run "../scale99", and answer the questions as given below.  For our coordinate scheme, the galaxies initially are created with the disk along the X-Y plane and scale heights along the Z axis.
+<p>
+In this recipe, we want to 'lift' Galaxy B up in 'Z' so that it will travel along the axis (roughly) of Galaxy A, impacting near the center of Galaxy A.  We also want to give Galaxy B some non-perpendicular orientation to add variety.
+<ol>
+<li>For "Euler rotation", choose a set of Euler angles so that you can get the desired impact positions.  Suggested is <b>0 90 0</b>, a rotation of the projectile Galaxy B to be edge-on to Galaxy A's center.  That 90 degree angle can be arbitrarily set to any orientation desired.
+<li>For "Lateral shift", we need to move Galaxy B some distance away.  We'll use a sample distance of 10 (unit lengths) away in Z, with a small shift of 0.1 units in X, zero in Y.  Thus we enter <b>0.1 0 10</b>.
+<li>Apply a "Velocity vector" so the two will collide during the simulation
+time.  This depends on your simulation time versus time step and your given problem.  Galaxies colliding rapidly are distinct from those which 'fall' together from the 10-unit-spacing distance.  For now, let's give it a nominal "0.1" Z-velocity component (so, even if there was no gravity, they would collide within 100 unit time steps).  We'll skip side motions of the projectile for now.
+So enter <b>0 0 0.1</b>.
+<li>For "Change mass", now we can adjust the projectile galaxy's size-- and thus total mass.  This so far has defaulted to '1 unit mass').  For equal masses between 'projectile' and 'target', just set this to <b>0</b>.  For a 1/10th mass projectile, set this to <b>0.1</b>.
+<li>For "Recenter or leave as positioned", enter <b>0</b>-- we don't want to recenter to the galaxy's center of mass, because that would eliminate our spatial and velocity shifts!
+<li>For "number of input files to merge", enter <b>0</b>: we're just dealing with our projectile galaxy here.
+</ol>
+<p>
+From this, our Galaxy B becomes projectile galaxy B', saved as file 'data.0000'.  Rename 'data.0000' to some better name, such as 'projectile.0000'.
+
+It is ready to hit the target.  Now we need to add the target and the projectile into one file.
+
+<h4>Combine Galaxy B' and Galaxy A</b>
+
+Again, we call up "../scale999".  This time, we answer <b>0 0 0</b> for the
+first four rescaling questions (i.e. no change).  Then answer <b>1</b>
+for the recentering question-- we do want to recenter our combined
+system after we merge them.
+
+<p>
+Now enter <b>2</b> for "Number of Input files
+to merge", and give (when promoted) their file names: <b>target.0000</b> and
+<b>projectile.0000</b>.  (This will bypass any input file names in the
+'mass.input' file so no changes need to be done to that file here.)
+<p>
+This writes out 'data.0000', which you can now rename to 'collision.0000'.
+We now have a single data file for our collision!  Run the "../reduce99"
+routine to create a set of projection files at 0,0 and 0,90 degrees to
+verify that the two galaxies are properly scaled and positioned.
+
+<h4>Run with new mass.input that calls file, not test case</h4>
+
+We are ready to do our simulation.  Edit "mass.input" to set:
+<ol>
+<li><b>INPUT_FILE = collision.0000</b>
+<li><b>MAX_STEPS = 500</b> (since we reset this to '1' earlier).
+</ol>
+
+<p>
+Now run "../mass.input" and it will do your simulations.  Your
+original 'collision.0000' file will remain untouched by this,
+so you can alter parameters and do multiple runs safely.
+
+</body>
+</html>
