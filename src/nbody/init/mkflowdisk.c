@@ -40,7 +40,7 @@ string defv[] = {
     "nmodel=1\n           number of models",
     "test=f\n             test shape of spiral",
     "headline=\n	  text headline for output ",
-    "VERSION=1.3\n	  23-nov-03 PJT",
+    "VERSION=1.3a\n	  25-nov-03 PJT",
     NULL,
 };
 
@@ -127,12 +127,12 @@ setdensity(void)
   double t;
 
 
-  dprintf(1,"setdensity - 0:360:1 steps at rmax=%g\n",rmax);
+  dprintf(1,"setdensity - 0:360:1 steps at rref=%g\n",rref);
   for (i=0; i<=360; i++) {
     theta[i] = i;
     t = i * PI/180.0;
-    pos_d[0] = rmax * cos(t);
-    pos_d[1] = rmax * sin(t);
+    pos_d[0] = rref * cos(t);
+    pos_d[1] = rref * sin(t);
     pos_d[2] = 0.0;
     (*potential)(&ndim,pos_d,vel_d,&den_d,&time_d);
     dens[i] = den_d;
@@ -202,7 +202,7 @@ testdisk(int n)
 	  theta_i = 0.0;
 	else 
 	  theta_i = frandom(0.0,360.0,density) * PI / 180.0;
-	theta_i += offset;
+	theta_i -= offset;
 	if (Qlinear) {
 	  theta_i -= SPk * (r_i-rref) * TWO_PI;    /* positive SPk is trailing SP  */
 	} else {

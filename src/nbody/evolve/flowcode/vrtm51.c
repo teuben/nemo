@@ -5,6 +5,7 @@
  *      19-nov-03  added phase equations to account for vr and vt being
  *                 constant along logarithmic arms.
  *      24-nov-03  allow multiple input files w/ added error checking
+ *      25-nov-03  ieck, another emberassing reference frame error
  */
 
 #include <stdinc.h>
@@ -13,7 +14,7 @@
 #include <table.h>
 #include <extstring.h>
 
-#define VERSION "flowcode:vrtm51 V1.5 25-nov-03"
+#define VERSION "flowcode:vrtm51 V1.6 25-nov-03"
 
 local double omega = 0.0;		/*   pattern speed  */
 local double pitch = 10.0;              /*    pitch angle   */
@@ -31,7 +32,7 @@ local int entries=0;           /* counter how often this routine was called */
 
 local real     tanp;
 
-local bool Qstick = TRUE;      /* set v=0 when hitting the inner or outer edge */
+local bool Qstick = FALSE;      /* set v=0 when hitting the inner or outer edge */
 
 
 #define MAXCOL  4
@@ -171,12 +172,12 @@ void inipotential (int *npar, double *par, string name)
     }
 }
 
-#define  UNWRAP(phi)    ((phi) - 360 * floor((phi)/ 360 ))
+#define  UNWRAP(p)    ((p) - 360 * floor((p)/ 360 ))
 
 void potential(int *ndim,double *pos,double *acc,double *pot,double *time)
 {
     real rad, phi, phase;
-    real x, y, vrad, vtan;
+    real x, y, vrad, vtan, tmp;
     int i;
 
     x = pos[0];
@@ -184,8 +185,9 @@ void potential(int *ndim,double *pos,double *acc,double *pot,double *time)
     rad = sqrt(x*x + y*y);
 
     phi = atan2(y,x)*180./PI;
-    phi -= log(rad/rref)/tanp + thetaref;
-    phase = UNWRAP(phi);    /* make sure 0..360 */
+    tmp = log(rad/rref)/tanp * 180/PI;
+    phase = phi + tmp + thetaref;
+    phase = UNWRAP(phase);        /* make sure 0..360 */
 
     if (ntab > 1) {
       i = binsearch(rad,rings,ntab+1);
@@ -206,10 +208,10 @@ void potential(int *ndim,double *pos,double *acc,double *pot,double *time)
     }
       
     vrad = seval(phase,theta[i],vr[i],coef_vr[i],nrad[i]);
-    vtan = seval(phase,theta[i],vt[i],coef_vt[i],nrad[i]);
+    vtan = seval(phase,theta[i],vt[i],coef_vt[i],nrad[i]) - omega*rad;
     *pot = seval(phase,theta[i],den[i],coef_den[i],nrad[i]);
-    dprintf(1,"x,y,rad,iring,phi,phase,vt,vr,den: %g %g   %g %d %g %g   %g %g %g\n", 
-	    x,y,rad,i,phi,phase,vtan,vrad,*pot);
+    dprintf(1,"x,y,rad,iring,phi,phase,DELTA,vt,vr,den: %g %g   %g %d %g %g [%g]  %g %g %g\n", 
+	    x,y,rad,i,phi,phase,tmp,vtan,vrad,*pot);
 
     if (rad > 0) {
         acc[0] = (vrad * x - vtan * y) / rad;
