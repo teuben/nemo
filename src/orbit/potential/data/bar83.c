@@ -13,7 +13,7 @@
  *	 potpars={\it $\Omega,f_m,f_x,{c\over a}$}}
  *
  *  Barred potential as described by Teuben and Sanders (1983),
- *  see also {\bf potname=teusan83}.
+ *  see also {\bf teusan83}.
  *
  *	Note:  the potential only valid in the z=0 plane!
  */

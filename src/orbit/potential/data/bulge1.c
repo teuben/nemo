@@ -7,9 +7,9 @@
 
 /*CTEX
  *  {\bf potname=bulge1
- *	 potpars={\it $\Omega,M,R,b/a$}}
+ *	 potpars={\it $\Omega,M,R,c/a$}}
  *
- *  homogeneous oblate bulge with mass $M$ and radius $R$ and axis ratio $b/a$
+ *  homogeneous oblate bulge with mass $M$, radius $R$, and axis ratio $c/a$
  */
  
  
