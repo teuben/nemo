@@ -9,7 +9,7 @@ extern "C" {
 
 void check_real(int size);
 
-void put_snap_c(string fname, 
+void put_snap_c(string fname, string hline,
 		 int nbody,
 		 double time,
                  double *mass, 

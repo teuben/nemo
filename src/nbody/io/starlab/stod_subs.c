@@ -9,6 +9,7 @@
 #include <stdinc.h>
 #include <vectmath.h>
 #include <filestruct.h>
+#include <history.h>
 
 #include <snapshot/body.h>
 #include <snapshot/snapshot.h>
@@ -19,7 +20,6 @@ void check_real(int size)
         error("NEMO is using %d-byte real, STARLAB is using %d real",
             sizeof(real), size);
 }
-
 
 int get_snap_c(string fname, real *time, real **mass, real **pos, real **vel)
 {
@@ -64,7 +64,7 @@ int get_snap_c(string fname, real *time, real **mass, real **pos, real **vel)
 }
 
 
-void put_snap_c(string fname, int nbody, real time, 
+void put_snap_c(string fname, string headline, int nbody, real time, 
 	real *mass, real *pos, real *vel, real *aux, real *phi, int *key)
 {
     int i;
@@ -75,6 +75,8 @@ void put_snap_c(string fname, int nbody, real time,
     if (n == 0) {
 	dprintf(1,"Opening %s to write\n",fname);
 	instr = stropen(fname,"w");                     /* open file */
+	if (strlen(headline))
+	    set_headline(headline);
 	put_history(instr);                             /* add data history */
     } else
 	dprintf(1,"Appending more data\n");

@@ -20,7 +20,8 @@ typedef char *nemo_string;
 
 nemo_string defv[] = {
     "out=???\n          Output snapshot file (input dyn from stdin)",
-    "VERSION=1.4\n      29-dec-03 PJT",
+    "headline=\n        Random verbiage for user",
+    "VERSION=1.5a\n     1-jan-04 PJT",
     NULL,
 };
 
@@ -30,9 +31,12 @@ void nemo_main(void)
 {
   pdyn *proot;
   int k, i=0, n=0, nbody=0;
-  real *mass, *pos, *vel, *aux, *phi, *mptr, *pptr, *vptr, *aptr, *hptr, tsnap;
+  real *mass, *pos, *vel, *aux, *phi, *mptr, *pptr, *vptr, *aptr, *hptr, tsnap, tsnap0;
   int *key, *kptr;
   vec temp;
+  int first = 1;
+  char *fname = getparam("out");
+  char *hline = getparam("headline");
     
   check_real(sizeof(real));   /* make sure real==double */
 
@@ -74,7 +78,14 @@ void nemo_main(void)
     }
     tsnap = proot->get_system_time();
     cerr << "output now "<< tsnap << endl;
-    put_snap_c(getparam("out"),nbody,tsnap,mass,pos,vel,aux,phi,key);
+    put_snap_c(fname,hline,nbody,tsnap,mass,pos,vel,aux,phi,key);
     rmtree(proot);
+    if (first) {
+      first = 0;
+    } else {
+      if (tsnap == tsnap0) 
+	error("Snapshots with same time not allowed: t=%g; probably bad input type from kira",tsnap);
+      tsnap0 = tsnap;
+    }
   }
 }
