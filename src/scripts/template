@@ -33,7 +33,7 @@ e '    "VERSION=0.0",'		>> $name
 e '    NULL,'			>> $name
 e '};'				>> $name
 e '' >> $name
-e 'string version="TEMPLATE program usage -- fill in yourself";' >> $name
+e 'string usage="TEMPLATE program usage -- fill in yourself";' >> $name
 e '' >> $name
 e 'nemo_main()'			>> $name
 e '{'				>> $name
