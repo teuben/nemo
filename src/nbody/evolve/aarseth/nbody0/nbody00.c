@@ -72,6 +72,7 @@ void nbody0(void)
            d1[NDIM*NMAX], d2[NDIM*NMAX], d3[NDIM*NMAX], f1[NDIM], 
 	   t0[NMAX], t1[NMAX], t2[NMAX], t3[NMAX], x0[NDIM*NMAX], 
 	   dt, deltat, dt1, dt2, dt3, eta, eps2, t1pr, t2pr, t3pr;
+    double step_t, step_b;
     int    i, j, k, n, itmp, reset;
 
 
@@ -150,8 +151,12 @@ void nbody0(void)
 	d__4 = X(d2,i);
 	d__5 = Y(d2,i);
 	d__6 = Z(d2,i);
-        step[i] = sqrt(eta * sqrt( 
-          (SQR(d__1)+SQR(d__2)+SQR(d__3)) / (SQR(d__4)+SQR(d__5)+SQR(d__6)) ) );
+	step_t = SQR(d__1)+SQR(d__2)+SQR(d__3);
+	step_b = SQR(d__4)+SQR(d__5)+SQR(d__6);
+	if (step_b == 0.0) error("You have hit upon an F2DOT=0 case");
+        step[i] = sqrt(eta * sqrt(step_t/step_b));
+	dprintf(1,"INT0: time=%g step_t=%g step_b=%g -> %g\n",
+		time,step_t,step_b,step[i]);
 	t0[i] = time;
 	t1[i] = time - step[i];
 	t2[i] = time - step[i] * 2;
@@ -206,11 +211,11 @@ L100:
     nout++;
     outene(&tnext, &nsteps, &e);
     if (time > tcrit) {
-        printf("Time spent in searching for next advancement: %g\n",
+        dprintf(0,"Time spent in searching for next advancement: %g\n",
                 time1*60.0);
-        printf("Energy conservation: %g / %g = %g\n",e-e0,e0,(e-e0)/e);
+        dprintf(0,"Energy conservation: %g / %g = %g\n",e-e0,e0,(e-e0)/e);
 	if (reset) 
-            printf("Time resets needed %d times / %d dumps\n",nreset,nout);
+            dprintf(0,"Time resets needed %d times / %d dumps\n",nreset,nout);
         return;
     } 
     tnext += deltat;
@@ -342,8 +347,12 @@ L200:
     d__4 = f2dot[0];
     d__5 = f2dot[1];
     d__6 = f2dot[2];
-    step[i] = sqrt(eta * sqrt( 
-       (SQR(d__1)+SQR(d__2)+SQR(d__3)) / (SQR(d__4)+SQR(d__5)+SQR(d__6)) ) );
+    step_t = SQR(d__1)+SQR(d__2)+SQR(d__3);
+    step_b = SQR(d__4)+SQR(d__5)+SQR(d__6);
+    if (step_b == 0.0) error("You have hit upon an F2DOT=0 case");
+    step[i] = sqrt(eta * sqrt(step_t/step_b));
+    dprintf(1,"INT1: time=%g step_t=%g step_b=%g -> %g\n",
+	    time,step_t,step_b,step[i]);
     ++nsteps;
     if (time - tnext >= 0.0) {
 	goto L100;
