@@ -8,6 +8,7 @@
  *                         periodic=f does not work either
  *     20-dec-2004    V0.2 patched up too wide edges for non-integral 2pi intervals 
  *     23-dec-2004    V0.3 fixed periodic for np=odd
+ *     24-dec-2004    V0.4 fixed for periodic=f
  *
  * TODO
  *  - check the interpolation on the 2nd and 3rd quadrant, this this is where
@@ -42,7 +43,7 @@ string defv[] = {
     "yrange=-16:16\n		Range in Y",
     "zvar=\n                    Optional selections: {vr,vt,den,vx,vy}",
     "periodic=t\n               Attempt to fill the plan by cloning the wedge N times",
-    "VERSION=0.3\n		23-dec-04 PJT",
+    "VERSION=0.3a\n		13-jan-05 PJT",
     NULL,
 };
 
@@ -149,6 +150,8 @@ void nemo_main()
 		i+1,shape[i],cmin,cmax,
 		shape[i] == 1 ? "(** dimension will be skipped **)" : "");
       }
+      if (shape[i0] < 2)
+	error("Sorry, don't know how to deal with 1D maps (phi axis has %d pixel)",shape[i0]);
       nzero = shape[i1];    /* an extra array for just 0's in case periodic=f */
       buffer1 = (float *) allocate((size+nzero) * sizeof(float));
       if (both) buffer2 = (float *) allocate((size+nzero) * sizeof(float));
