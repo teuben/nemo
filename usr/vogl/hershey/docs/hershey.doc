@@ -1,0 +1,396 @@
+
+
+
+HERSHEY(3)             C LIBRARY FUNCTIONS             HERSHEY(3)
+
+
+
+NAME
+     Hershey - A very ordinary library for using Hershey Fonts on
+     an SGI or with the VOGL(3) library.
+
+
+DESCRIPTION
+     The Hershey library is a set of C routines (with  a  FORTRAN
+     interface)  for  drawing the Hershey font data with programs
+     written with SGI-GL or the VOGL library. As Hershey  charac-
+     ters  are  defined  by a set of vectors, they are subject to
+     the current transformation matrix and  any  line  attributes
+     that have been set. There are also facilities for sizing and
+     rotating the characters in the library itself.
+
+     The character data and the fonts supplied are based  on  the
+     character set digitized by Dr Allen V. Hershey while working
+     at the U. S. National Bureau of Standards.
+
+
+     Things to keep in mind.
+
+     It should be noted that text is drawn parallel to the (x, y)
+     plane using whatever the current Z coordinate is.
+
+     These routines change the current graphics position, that is
+     they draw the characters (or string) at the current graphics
+     position by using relative move/draw sequences.
+
+     The library also supports the shortened  6  character  names
+     for  the  FORTRAN  interface. (Except for the routines hget-
+     fontheight and hgetfontwidth which have shortend 6 character
+     names of hgetfh and hgetfw respectively.
+
+
+     Loading a font.
+
+     hfont(fontname) Set the current font
+
+          Fortran:
+               subroutine hfont(fontname, len)
+               character*(*) fontname
+               integer len
+          C:
+               hfont(fontname)
+                    char *fontname
+
+          There following names are available in this library.
+
+          astrology       cursive         cyrillic        futura.l
+          futura.m        gothic.eng      gothic.ger      gothic.ita
+          greek           markers         math.low        math.upp
+          meteorology     music           script          symbolic
+
+
+
+HERSHEY 1.01        Last change: 27 Aug 1991                    1
+
+
+
+
+
+
+HERSHEY(3)             C LIBRARY FUNCTIONS             HERSHEY(3)
+
+
+
+          times.g         times.i         times.ib        times.r
+          times.rb        japanese
+
+     A markers font "markers" is also provided for doing  markers
+     -  you  need to have centertext on for this to give sensible
+     results - with the markers starting at 'A' and 'a'.
+
+     If the 'fontpath' has been set  with  hsetpath  (see  below)
+     then  hfont  looks  for  the software fonts in the directory
+     given.  Otherwise, if the environment variable "HFONTLIB" is
+     set  hfont  looks  for  the  software fonts in the directory
+     given by this value. To maintain compatiblity with VOGL  and
+     VOGLE, the envirionment variable "VFONTLIB" may be set simi-
+     larly to HFONTLIB.
+
+
+     hsetpath(fontpath)
+
+     Set the directory to search for the current font file.
+
+               Fortran:
+                    subroutine hsetpath(fontpath, len)
+                    character*(*) fontpath
+                    integer len
+               C:
+                    hsetpath(fontpath)
+                         char *fontpath
+
+
+     Setting the the character sizes
+
+     htextsize(width, height)
+          Set the maximum size of a character  in  the  currently
+          loaded  Hershey  font.   Width and height are values in
+          world units.
+
+               Fortran:
+                    subroutine htextsize(width, height)
+                    real width, height
+               C:
+                    htextsize(width, height)
+                         float     width, height;
+
+
+     hboxfit(l, h, nchars)
+          Set the scale for text so that a string of the  biggest
+          characters  in the font will fit in a box l by h. l and
+          h are real values in world dimensions.
+
+               Fortran:
+                    subroutine hboxfit(l, h, nchars)
+                    real l, h
+
+
+
+HERSHEY 1.01        Last change: 27 Aug 1991                    2
+
+
+
+
+
+
+HERSHEY(3)             C LIBRARY FUNCTIONS             HERSHEY(3)
+
+
+
+                    integer nchars
+               C:
+                    hboxfit(l, h, nchars)
+                         float     l, h
+                         int  nchars
+
+
+     Setting the text angle
+
+     htextang(ang)
+          Set the text angle. All  Hershey  text  will  be  drawn
+          rotated  about  the Z-axis by the angle specified. This
+          angle is in degrees and is a floating point number.
+
+               Fortran:
+                    subroutine htextang(ang)
+                    real ang
+               C:
+                    htextang(ang)
+                         float     ang;
+
+
+
+     Setting the text attributes
+
+     hfixedwidth(onoff)
+          Turns fixedwidth text on or off. Non-zero  (.true.)  is
+          on.  Causes  all Hershey text to be printed fixedwidth.
+          The width of each character cell is the  largest  width
+          of any character in the currently loaded font.
+
+               Fortran:
+                    subroutine hfixedwidth(onoff)
+                    logical onoff
+               C:
+                    hfixedwidth(onoff)
+                         int onoff;
+
+
+     hcentertext(onoff)
+          Turns centertext text on or off. Non-zero  (.true.)  is
+          on. This centres strings and characters.
+
+               Fortran:
+                    subroutine hcentertext(onoff)
+                    logical onoff
+               C:
+                    hcentertext(onoff)
+                         int onoff;
+
+
+     hrightjustify(onoff)
+
+
+
+HERSHEY 1.01        Last change: 27 Aug 1991                    3
+
+
+
+
+
+
+HERSHEY(3)             C LIBRARY FUNCTIONS             HERSHEY(3)
+
+
+
+          Turns rightjustify of text on or off. Non-zero (.true.)
+          is  on.  This  rightjustifies  strings  and characters.
+          Turning on rightjustify will turn  off  centertext  and
+          leftjustification.    Turning   off  rightjustification
+          returns to the default of leftjustification.
+
+               Fortran:
+                    subroutine hrightjustify(onoff)
+                    logical onoff
+               C:
+                    hrightjustify(onoff)
+                         int onoff;
+
+
+     hleftjustify(onoff)
+          Turns leftjustify of text on or off. Non-zero  (.true.)
+          is on. This leftjustifies strings and characters. Turn-
+          ing  on  leftjustify  will  turn  off  centertext,  and
+          rightjustification.  Turning off leftjustification will
+          turn on rightjustification.
+
+               Fortran:
+                    subroutine hleftjustify(onoff)
+                    logical onoff
+               C:
+                    hleftjustify(onoff)
+                         int onoff;
+
+
+
+     Getting information about the currently loaded Hershey font.
+
+     hgetcharsize(c, width, height)
+          Get the width and height of a character. At the  moment
+          the  height  returned  is always that of the difference
+          between the maximum descender and ascender.
+
+               Fortran:
+                    subroutine hgetcharsize(c, width, height)
+                    character*1 c
+                    real width, height
+               C:
+                    hgetcharsize(c, width, height)
+                         char c;
+                         float     *width, *height;
+
+
+     hgetfontsize(width, height)
+          Get the maximum width and height of a  character  in  a
+          font.
+
+               Fortran:
+
+
+
+HERSHEY 1.01        Last change: 27 Aug 1991                    4
+
+
+
+
+
+
+HERSHEY(3)             C LIBRARY FUNCTIONS             HERSHEY(3)
+
+
+
+                    subroutine hgetfs(width, height)
+                    real width, height
+
+                    subroutine hgetfontsize(width, height)
+                    real width, height
+               C:
+                    hgetfontsize(width, height)
+                         float     *width, *height;
+
+
+     hgetdescender()
+          Get the maximum descender in the current font.
+
+               Fortran:
+                    real function getdescender()
+
+               C:
+                    float
+                    getdescender();
+
+
+     Drawing characters and strings.
+
+     hdrawchar(c)
+          Draw the character c.  The  current  graphics  position
+          represents the bottom left hand corner of the character
+          space. The current graphics position  is  left  at  the
+          lower right hand side of the character.
+
+               Fortran:
+                    subroutine hdrawchar(c)
+                    character c
+               C:
+                    hdrawchar(str)
+                         char c;
+
+
+     hcharstr(str)
+          Draw the text in string at the current  graphics  posi-
+          tion.  The  current  graphics  position  is left at the
+          lower right end of the string.
+
+               Fortran:
+                    subroutine hcharstr(str, len)
+                    character*(*) str
+                    integer   len
+               C:
+                    hcharstr(str)
+                         char *str;
+
+
+     hboxtext(x, y, l, h, s)
+
+
+
+HERSHEY 1.01        Last change: 27 Aug 1991                    5
+
+
+
+
+
+
+HERSHEY(3)             C LIBRARY FUNCTIONS             HERSHEY(3)
+
+
+
+          Draw the string s so that it fits in the imaginary  box
+          defined  with bottom left hand corner at (x, y), length
+          l, and height h.
+
+               Fortran:
+                    subroutine hboxtext(x, y, l, h, s, length)
+                    real x, y, l, h, s
+                    character*(*) s
+                    integer length
+               C:
+                    hboxtext(x, y, l, h, s)
+                         float     x, y, l, h;
+                         char *s;
+
+
+BUGS
+     We had to make up the font names based on some books of type
+     faces.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+HERSHEY 1.01        Last change: 27 Aug 1991                    6
+
+
+

@@ -1,0 +1,33 @@
+F = -FPc
+CFLAGS = -c -DPC -DMSC $(F) -AL -I..\..\src
+LIB = .\hershey.lib ..\..\src\vogl.lib
+
+.c.obj:
+	cl $(CFLAGS) $*.c
+
+htext.obj: htext.c
+
+check.obj: check.c
+
+halloc.obj: halloc.c
+
+hershey.lib: htext.obj check.obj halloc.obj
+	del hershey.lib
+	lib hershey.lib+htext.obj+check.obj+halloc.obj;
+
+h2v.obj: h2v.c h2v.h
+
+getchar.obj: getchar.c
+
+hdisp.obj: hdisp.c
+
+fdisp.obj: fdisp.c
+
+h2v.exe: h2v.obj getchar.obj
+	link /ST:8192 h2v+getchar,,nul;
+
+hdisp.exe: hdisp.obj getchar.obj $(LIB)
+	link hdisp+getchar,,nul,$(LIB);
+
+fdisp.exe: fdisp.obj $(LIB)
+	link fdisp+getchar,,nul,$(LIB);

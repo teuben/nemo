@@ -1,0 +1,106 @@
+
+This directory contains the general device drivers and their makefiles
+
+The directory ibmpc contains the files specific to ibm pc's, see the pc
+makefiles in the src directory for more details on these.
+
+The driver structure is basically the same as that of VOGLE's with one
+exception, the clear routine (if it is going to behave like the one in 
+Iris GL) should only clear the current viewport, not the whole screen.
+
+-------------------------------------------------------------------------
+
+The Structure of a Device Driver.
+
+VOGL device entries are structured as follows:
+
+	three character pointers giving:
+			the name of the device,
+			the name for the small hardware font,
+			and the name for the large hardware font.
+	sixteen function pointers giving the functionality of the device.
+			If a device is not capable of some things (eg. colour 
+			changing) a no-op function should be provided which
+			has a return value of -1.
+
+	A function must also be specified in the device driver which copies
+	the device entry into the global device entry vdevice.dev. This
+	function call should be included conditionally in the file drivers.c,
+	as should the device name in the code printing the list of available
+	devices - also found in drivers.c.
+
+The twelve functions required for a complete device driver are:
+
+DEV_char
+	a routine which prints a character of hardware text. This routine must
+	doing any neccessary moving to make sure the current drawing position
+	on the device is correct, and it must leave the device in graphics
+	mode.
+
+DEV_clear
+	a routine which clears the current viewport to the current background
+	colour. Note: On hardcopy devices, as with VOGLE, clearing should still
+	eject the current page.
+
+DEV_color
+	a routine to change the current color on the device. The default
+	colors are in the man page in the docs directory.
+
+DEV_draw
+	a routine which draws from the current device position to a point (x, y)
+	in vogle device coords - note these assume that (0, 0) is the bottom
+	left hand corner. This routine must doing any neccessary moving to make
+	sure the current drawing position on the device is correct.
+
+DEV_exit
+	a routine which does the necessary cleaning up to allow vogle to exit
+	leaving the device in a usable form.
+
+DEV_fill
+	a routine for doing filled polygons, devices which do not support this
+	should just do an outline.
+
+DEV_font
+	a routine which sets up a hardware font. This should also set
+	vdevice.hwidth and vdevice.hheight, which are the width and height
+	of the current hardware font in pixels. VOGLE assumes that hardware
+	text is of a fixed width.
+
+DEV_getkey
+	a routine which gets a single character of input from a device capable
+	of providing it.
+
+DEV_init
+	a routine which enables graphics on the device, sets the default
+	colour map, and sets vdevice.maxS{x,y} and vdevice.minS{x,y} to the
+	window size in pixels.
+
+DEV_locator
+	a routine finds the mouse position for the device in vogle device
+	coordinates (returned in the arguments) and returns a bit pattern
+	giving which buttons were down at the time of the call.
+
+DEV_mapcolor
+	a routine for changing a colormap index to a given rgb value.
+
+DEV_string
+	a routine for printing a string of hardware text. This routine must
+	doing any neccessary moving to make sure the current drawing position
+	on the device is correct, and it must leave the device in graphics
+	mode.
+
+DEV_backbuf
+	a routine to initialise double buffering by selecting the back
+	drawing buffer and performing any other initialisations. If there
+	are any hassles with all this then it should return -1.
+
+	Lot's of this double buffering isn't really double buffering at
+	all. It's kind of a pseudo double buffering in that drawing is
+	done off screen and copied to the screen when needed.
+
+DEV_frontbuf
+	a routine to switch drawing into the front drawing buffer
+
+DEV_swapbuf
+	a routine to make the back buffer visible and notionally switch
+	the roles of the front and back drawing buffers.

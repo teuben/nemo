@@ -1,0 +1,27 @@
+vogl.lib
+-+msfort\farcs &
+-+msfort\fattr &
+-+msfort\fbuffer &
+-+msfort\fcurves &
+-+msfort\fdraw &
+-+msfort\fdrivers &
+-+msfort\fgetgp &
+-+msfort\fmatrix &
+-+msfort\fmove &
+-+msfort\fobjects &
+-+msfort\fpatches &
+-+msfort\fpoints &
+-+msfort\fpoly &
+-+msfort\fpref &
+-+msfort\frect &
+-+msfort\ftext &
+-+msfort\ftrans &
+-+msfort\fviewing &
+-+msfort\fviewp &
+-+msfort\fbgnend &
+-+msfort\fvcalls &
+-+msfort\fqueue &
+-+msfort\flines &
+-+msfort\fyobba
+vogl.lst
+vogl.lib

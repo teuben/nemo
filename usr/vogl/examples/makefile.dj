@@ -1,0 +1,40 @@
+#
+# examples makefile 
+#
+CC = gcc
+
+CEXAMPS = trivial simple shapes poly views circtxt moretxt curves \
+	  moretxt2 patches balls objvws world loc teapot cube lcube tetra \
+	  sinewave tmesh
+
+COBJS = trivial.o simple.o shapes.o poly.o views.o circtxt.o moretxt.o \
+	moretxt2.o curves.o patches.o balls.o objvws.o world.o loc.o \
+	teapot.o cube.o lcube.o tetra.o sinewave.o tmesh.o
+
+#
+# Where to find librarys
+#
+OURLIBS = -L../src -L../hershey/src -lhersh -lvogl
+LIBS = -lgrx
+MCFLAGS = -O -I../src
+
+CFLAGS = $(MCFLAGS)
+
+all:	$(CEXAMPS) ..\src\libvogl.a ..\hershey\src\libhersh.a
+
+$(CEXAMPS): $(COBJS) ..\src\libvogl.a
+	$(CC) $(CFLAGS) -o $@ $@.o $(OURLIBS) $(LIBS) -lm
+	aout2exe $@
+
+clean:
+	del *.o
+
+install:
+
+clobber:
+	del *.o
+	rm trivial simple shapes poly 
+	rm views circtxt moretxt curves
+	rm moretxt2 patches balls objvws 
+	rm world loc teapot cube lcube 
+	rm tetra sinewave tmesh

@@ -1,0 +1,85 @@
+#
+TESTS = trivial.exe simple.exe shapes.exe poly.exe views.exe circtxt.exe \
+	moretxt.exe curves.exe patches.exe balls.exe objvws.exe world.exe \
+	loc.exe teapot.exe cube.exe lcube.exe \
+	tetra.exe sinewave.exe moretxt2.exe \
+	tmesh.exe
+
+LIB = ..\src\vogl.lib ..\hershey\src\hershey.lib
+CFLAGS = -ml -I..\src -DTC
+
+all: $(TESTS)
+
+.c.obj:
+	tcc  -c $(CFLAGS) $<
+
+.obj.exe:
+	tcc $(CFLAGS) $*.obj $(LIB)
+
+trivial.exe: $(LIB) trivial.obj
+	tcc $(CFLAGS) trivial.obj $(LIB)
+
+simple.exe: $(LIB) simple.obj
+	tcc $(CFLAGS) simple.obj $(LIB)
+
+shapes.exe: $(LIB) shapes.obj
+	tcc $(CFLAGS) shapes.obj $(LIB)
+
+poly.exe: $(LIB) poly.obj
+	tcc $(CFLAGS) poly.obj $(LIB)
+
+
+views.exe: $(LIB) views.obj
+	tcc $(CFLAGS) views.obj $(LIB)
+
+
+circtxt.exe: $(LIB) circtxt.obj
+	tcc $(CFLAGS) circtxt.obj $(LIB)
+
+
+moretxt.exe: $(LIB) moretxt.obj
+	tcc $(CFLAGS) moretxt.obj $(LIB)
+
+moretxt2.exe: $(LIB) moretxt2.obj
+	tcc $(CFLAGS) moretxt2.obj $(LIB)
+
+curves.exe: $(LIB) curves.obj
+	tcc $(CFLAGS) curves.obj $(LIB)
+
+
+patches.exe: $(LIB) patches.obj
+	tcc $(CFLAGS) patches.obj $(LIB)
+
+
+objvws.exe: $(LIB) objvws.obj
+	tcc $(CFLAGS) objvws.obj $(LIB)
+
+
+balls.exe: $(LIB) balls.obj
+	tcc $(CFLAGS) balls.obj $(LIB)
+
+
+world.exe: $(LIB) world.obj 
+	tcc $(CFLAGS) world.obj $(LIB)
+
+loc.exe: $(LIB) loc.obj 
+	tcc $(CFLAGS) loc.obj $(LIB)
+
+teapot.exe: $(LIB) teapot.obj 
+	tcc $(CFLAGS) teapot.obj $(LIB)
+	
+cube.exe: $(LIB) cube.obj 
+	tcc $(CFLAGS) cube.obj $(LIB)
+	
+lcube.exe: $(LIB) lcube.obj 
+	tcc $(CFLAGS) lcube.obj $(LIB)
+	
+tetra.exe: $(LIB) tetra.obj 
+	tcc $(CFLAGS) tetra.obj $(LIB)
+	
+sinewave.exe: $(LIB) sinewave.obj 
+	tcc $(CFLAGS) sinewave.obj $(LIB)
+	
+tmesh.exe: $(LIB) tmesh.obj 
+	tcc $(CFLAGS) tmesh.obj $(LIB)
+	

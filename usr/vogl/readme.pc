@@ -1,0 +1,29 @@
+ Installing on a PC.
+
+a) Copy all the subdirectories from the disk(s) using cpfd.bat
+   eg: C:> a:
+       A:> cd vogl
+       A:> cpfd c:\vogl
+       A:> c:
+
+b) If you want MS-Fortran interfaces then from the vogl directory run
+   fbuild.bat with your floating point option as an argument.
+   eg: C:> cd vogl
+       C:> fbuild -FPi87
+
+c) If you don't want MS-Fortran interfaces then run build.bat instead of
+   fbuild.bat
+
+d) The above batch files stop in the examples directory. Try and run the
+   examples.
+
+e) If The examples worked then put VOGL.LIB and HERSHEY.LIB where you 
+   normally put libraries.
+
+   Notes:
+
+       Different devices are compiled in according to the flags in the
+       makefiles in the SRC directory.
+
+       Uses the Large memory model ('cause we had to also use MS-Fortran)
+

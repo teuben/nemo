@@ -1,0 +1,96 @@
+#
+# Makefile for FORTRAN vogle test programs.
+#
+F = -FPc
+LIB =  ..\hershey\src\hershey.lib ..\src\vogl.lib
+FFLAGS = -nologo -I..\src -Ox -AL -4Nt -c $(F)
+
+#
+# The -4Nt means don't truncate any names (some vogle names are 
+# quite long - more than 6 characters anyway
+#
+.for.obj:
+		fl $(FFLAGS) $*.for
+
+.obj.exe:
+		link /NOE /EXEPACK /STACK:0x2000 $*,,nul,$(LIB);
+#
+#  Note: The /STACK bit is only needed if you use lots of "Objects"
+#        like fobjvws. (Anyway, it's a bit big)
+#
+
+ftrivial.obj: ftrivial.for
+
+ftrivial.exe: ftrivial.obj $(LIB)
+
+fsimple.obj: fsimple.for
+
+fsimple.exe: fsimple.obj $(LIB)
+
+fshapes.obj: fshapes.for
+
+fshapes.exe: fshapes.obj $(LIB)
+
+fpoly.obj: fpoly.for
+
+fpoly.exe: fpoly.obj $(LIB)
+
+fviews.obj: fviews.for
+
+fviews.exe: fviews.obj $(LIB)
+
+fcirctxt.obj: fcirctxt.for
+
+fcirctxt.exe: fcirctxt.obj $(LIB)
+
+fmoretxt.obj: fmoretxt.for
+
+fmoretxt.exe: fmoretxt.obj $(LIB)
+
+fmoretx2.obj: fmoretx2.for
+
+fmoretx2.exe: fmoretx2.obj $(LIB)
+
+fcurves.obj: fcurves.for
+
+fcurves.exe: fcurves.obj $(LIB)
+
+fpatches.obj: fpatches.for
+
+fpatches.exe: fpatches.obj $(LIB)
+
+fballs.obj: fballs.for 
+
+fballs.exe: fballs.obj  $(LIB)
+
+fobjvws.obj: fobjvws.for
+
+fobjvws.exe: fobjvws.obj $(LIB)
+
+fworld.obj: fworld.for
+
+fworld.exe: fworld.obj $(LIB)
+
+floc.obj: floc.for
+
+floc.exe: floc.obj $(LIB)
+
+fcube.obj: fcube.for
+
+fcube.exe: fcube.obj $(LIB)
+
+flcube.obj: flcube.for
+
+flcube.exe: flcube.obj $(LIB)
+
+ftetra.obj: ftetra.for
+
+ftetra.exe: ftetra.obj $(LIB)
+
+fsinwave.obj: fsinwave.for
+
+fsinwave.exe: fsinwave.obj $(LIB)
+
+ftmesh.obj: ftmesh.for
+
+ftmesh.exe: ftmesh.obj $(LIB)

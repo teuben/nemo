@@ -1,0 +1,15 @@
+
+
+Compiling with DJGPP and NDMAKE
+
+Assumes ndmake is called 'make.exe'
+Assumes DJGPP is installed in c:\djgpp
+
+(You can hack the makefile.dj in each dir:src drivers examples hershey/src
+if this is not good for you).
+
+Simply "builddj"
+then   "builddj install"
+then   "builddj clobber" or "builddj clean"
+
+

@@ -1,0 +1,29 @@
+
+This directory contains 3 programs.
+
+h2v	- Usage: h2v Hershey_data_file [ fontfile name ]
+
+	if the fontfile and name are not specified h2v will read in the
+	Hershey data file and create a set of fonts according to the fonts
+	defined in h2v.h. Fonts are defined as pairs of numbers giving the
+	interval for the characters to be used. A pair which has a second
+	number of zero is considered to be one character, the number of
+	which is given by the first number in the pair.
+
+	If the fontfile and name are specified h2v reads the fontfile and
+	creates a binary suitable for use with VOGLE/VOGL in the file name from
+	the characters in the Hershey data file.
+
+hdisp	- Usage: hdisp Hershey_data_file
+
+	hdisp reads in the Hershey data file and displays each character
+	as a series of move-draws, with 64 characters to the screen.
+
+fdisp	- Usage: fdisp binary_font_file
+
+	fdisp reads in the binary font file through vogl and displays 64
+	characters to the screen.
+
+	On A PC make the programs with makefile.msc, then run mkfnts.bat
+	eg. "mkfnts \lib\hershey" (Make sure that the directory \lib\hershey
+	exists)

@@ -1,0 +1,17 @@
+F = -FPc
+FFLAGS = $(F) -4Nt -c -Fa -nologo -Fonul -Ox
+
+.for.asm:
+        fl $(FFLAGS) $*.for
+
+fhtext.asm: fhtext.for
+	fl $(FFLAGS) fhtext.for
+        ..\..\src\msfort\zap_c < $*.asm > tmp.asm
+        del $*.asm
+        ren tmp.asm $*.asm
+
+fhtext.obj: fhtext.asm
+	masm -Mx fhtext.asm;
+
+BLARK: hershey.lib fhtext.obj
+	lib hershey.lib-+fhtext.obj;

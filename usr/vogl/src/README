@@ -1,0 +1,6 @@
+
+This directory contains the src files for the upper level vogle interface. The
+directories ending in fort contain the fortran interfaces to the C routines.
+
+See the makefile appropriate to your machine for details on compilation.
+

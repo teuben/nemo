@@ -1,0 +1,32 @@
+CFLAGS = -DPC -DTC -DMSWIN -ml -I..\..\src
+LIB = .\hershey.lib ..\..\src\voglw.lib
+
+all: hershey.lib h2v.exe
+
+CC = bcc
+
+.c.obj:
+	$(CC) -c $(CFLAGS) $<
+
+htext.obj: htext.c
+	$(CC) -W $(CFLAGS) -c $*.c
+
+check.obj: check.c
+	$(CC) -W $(CFLAGS) -c $*.c
+
+halloc.obj: halloc.c
+	$(CC) -W $(CFLAGS) -c $*.c
+
+hershey.lib: htext.obj check.obj halloc.obj
+	del hershey.lib
+	tlib hershey.lib+htext.obj+check.obj+halloc.obj
+
+h2v.obj: h2v.c h2v.h
+
+getchar.obj: getchar.c
+
+# This isn't a windoze executable
+
+h2v.exe: h2v.obj getchar.obj
+	$(CC) $(CFLAGS) h2v.obj getchar.obj
+

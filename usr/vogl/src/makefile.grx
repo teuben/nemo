@@ -1,0 +1,74 @@
+#
+# Make the vogl library.
+#
+# Below are our defaults for compliers etc. These are set in the
+# main Makefile.
+#
+
+CC = gcc
+
+# Hack because our version of gcc produces code which the gnu as 
+# program can't eat. Until someone installs the patcehs then we'll
+# use the normal sun as.
+#
+
+#.c.o:
+#	$(CC) -S $(CFLAGS) $*.c
+#	as -o $*.o $*.s
+
+.SUFFIXES: .o .c .cc .s
+
+.c.o:
+	$(CC) -c $(CFLAGS) $*.c
+
+
+MCFLAGS = -g2
+
+LIB = libvogl.a
+
+RANLIB = ranlib		# = "ar ts" for SYS5
+
+#DEVICES = -DSUN -DTEK -DHPGL -DPOSTSCRIPT -DPOSTSCRIPTP -DDXY
+DEVICES = -DPOSTSCRIPT -DHPGL -DGRX
+
+DOBJS = ../drivers/grx.o ../drivers/ps.o
+
+HDRS =	vogl.h
+
+CSRC =	arcs.c attr.c buffer.c clip.c curves.c draw.c drivers.c \
+	viewing.c viewp.c mapping.c matrix.c move.c objects.c patches.c \
+	points.c polygons.c rect.c tensor.c text.c newtoken.c trans.c \
+	scale.c getgp.c valloc.c yobbaray.c pref.c vcalls.c \
+	queue.c lines.c
+
+COBJS =	$(CSRC:.c=.o)
+
+CFLAGS= $(DEVICES) $(MCFLAGS)
+LINTFLAGS=
+
+
+$(LIB): $(DOBJS) $(COBJS) vogl.h
+	rm -f $@
+	ar rcv $@ $(DOBJS) *.o
+	$(RANLIB) $@
+
+depend:
+	$(CC) $(CFLAGS) -M $(CSRC) > depend
+
+clean:
+	rm -f $(COBJS)
+	cd ../drivers; make clean
+
+clobber:
+	rm -f $(LIB) $(COBJS)
+
+$(DOBJS): vogl.h
+	>drv.bat cd ../drivers
+	>>drv.bat make -f Makefile \
+			"CC=$(CC)" \
+			MCFLAGS="$(MCFLAGS)" \
+			DOBJS="$(DOBJS)"
+	>>drv.bat cd ../src
+	drv.bat
+
+#include depend

@@ -1,0 +1,61 @@
+#
+# examples makefile 
+#
+CC = cc
+
+CEXAMPS = trivial simple shapes poly views circtxt moretxt curves \
+	  moretxt2 patches balls objvws world loc teapot cube lcube tetra \
+	  sinewave tmesh
+
+COBJS = trivial.o simple.o shapes.o poly.o views.o circtxt.o moretxt.o \
+	moretxt2.o curves.o patches.o balls.o objvws.o world.o loc.o \
+	teapot.o cube.o lcube.o tetra.o sinewave.o tmesh.o
+
+FEXAMPS = ftrivial fsimple fshapes fpoly fviews fcirctxt fmoretxt fcurves \
+	  fmoretx2 fpatches fballs fobjvws fworld floc ftetra fcube \
+	  flcube fsinwave ftmesh
+
+FOBJS = ftrivial.o fsimple.o fshapes.o fpoly.o fviews.o fcirctxt.o fmoretxt.o \
+	fmoretx2.o fcurves.o fpatches.o fballs.o fobjvws.o fworld.o floc.o \
+	ftetra.o fcube.o flcube.o fsinwave.o ftmesh.o
+
+.SUFFIXES: .F .o
+
+#
+# Where to find librarys
+#
+OURLIBS = ../hershey/src/libhershey.a
+LIBS = -lgl_s
+FLIBS = -lfgl -lgl_s
+MCFLAGS = -O -float -DSGI
+F77 = f77
+FFLAGS = -DSGI
+
+CFLAGS = $(MCFLAGS)
+
+all:	$(CEXAMPS) $(FEXAMPS)
+
+$(CEXAMPS): $(COBJS) $(OURLIBS)
+	$(CC) $(CFLAGS) -o $@ $@.o $(OURLIBS) $(LIBS) -lm
+
+$(FEXAMPS): $(FOBJS) $(LIB)
+	$(F77) $(FFLAGS) -o $@ $@.o $(OURLIBS) $(FLIBS)
+
+clean:
+	rm -f *.o core
+
+clobber:
+	rm -f $(CEXAMPS) *.o core
+	rm -f $(FEXAMPS) *.o core
+
+
+
+.F.o:
+	$(F77) -c $(FFLAGS) $*.F
+
+
+clean:
+	rm -f *.o core
+
+clobber:
+	rm -f $(FEXAMPS) *.o core

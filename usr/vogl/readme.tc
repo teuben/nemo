@@ -1,0 +1,16 @@
+TurboC users should note that TurboC defines a "poly" routine in "math.h"
+and that this sometimes conficts with our definition of "poly" in "vogle.h"
+
+To Build everything using TurboC and TurboC++ (and TASM)
+
+	Go to the top level VOGL directory and type "buildtc"
+
+To use Borland C++ then you will have to edit all the makefile.tc
+in the src, examples and hershey/src directories and change "tcc" to "bcc"
+
+Please note that VOGL isn't strictly ANSI C so you will get the odd little
+warning messages about functions like main not returning values (we have to
+use exit on some other platforms). Just ignore them.
+
+NOTE: these batch files and Makefiles assume that things are on C: drive.
+Change accordingly.

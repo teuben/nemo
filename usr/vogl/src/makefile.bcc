@@ -1,0 +1,73 @@
+#
+# This Makefile is used to compile the MSWINDOWS version of VOGL
+# with BorlandC++ 2.0. For the non-windows version you should use
+# makefile.tc
+#
+CC = bcc
+ASM = tasm
+ASMFLAGS = -mx
+#
+CFLAGSD = -W -c -w- -I. -ml -DPC -DTC -DMSWIN -DPOSTSCRIPT -DDXY -DHPGL
+CFLAGS = -W -c -w-rvl -w-pia -I. -ml -DPC -DTC
+
+LIB = VOGLW.LIB
+
+all: $(LIB)
+
+HDRS= VOGL.H VODEVICE.H
+
+OBJS = 	arcs.obj \
+	attr.obj \
+	buffer.obj \
+	clip.obj \
+	curves.obj \
+	draw.obj \
+	drivers.obj \
+	getgp.obj \
+	lines.obj \
+	mapping.obj \
+	matrix.obj \
+	move.obj \
+	newtoken.obj \
+	newtokens.obj \
+	objects.obj \
+	patches.obj \
+	points.obj \
+	polygons.obj \
+	pref.obj \
+	queue.obj \
+	rect.obj \
+	scale.obj \
+	tensor.obj \
+	text.obj \
+	trans.obj \
+	valloc.obj \
+	vcalls.obj \
+	viewing.obj \
+	viewp.obj \
+	yobbaray.obj \
+	PS.OBJ \
+	HPDXY.OBJ \
+	MSWIN.OBJ
+
+DRIVERS.OBJ: drivers.c
+	$(CC) $(CFLAGSD) drivers.c
+
+MSWIN.OBJ: ..\drivers\ibmpc\mswin.c
+	$(CC) $(CFLAGS) -I..\drivers\ibmpc ..\drivers\ibmpc\mswin.c
+
+PS.OBJ: ..\DRIVERS\PS.C
+	$(CC) $(CFLAGS) ..\drivers\ps.c
+
+HPDXY.OBJ: ..\DRIVERS\HPDXY.C
+	$(CC) $(CFLAGS)  ..\drivers\hpdxy.c
+
+$(LIB): $(OBJS)
+	DEL $(LIB)
+	TLIB $(LIB) @WTLIB.IN, VOGLEW.LST
+
+# DEFAULT RULES
+
+.C.OBJ:
+        $(CC) $(CFLAGS)  $<
+

@@ -1,0 +1,93 @@
+#
+# Makefile for C vogle test programs.
+#
+LIB =    ..\hershey\src\hershey.lib ..\src\vogl.lib
+F = -FPi87
+CFLAGS = -nologo -c -Ot -Gs -AL $(F) -I..\src
+
+# default rules
+.c.obj:
+        cl $(CFLAGS) $*.c
+
+.obj.exe:
+		link /EXEPACK /STACK:0x2000 $*,,nul,$(LIB);
+
+trivial.obj: trivial.c
+
+trivial.exe: trivial.obj $(LIB)
+
+simple.obj: simple.c
+
+simple.exe: simple.obj $(LIB)
+
+shapes.obj: shapes.c
+
+shapes.exe: shapes.obj $(LIB)
+
+poly.obj: poly.c
+
+poly.exe: poly.obj $(LIB)
+
+views.obj: views.c
+
+views.exe: views.obj $(LIB)
+
+circtxt.obj: circtxt.c
+
+circtxt.exe: circtxt.obj $(LIB)
+
+moretxt.obj: moretxt.c
+
+moretxt.exe: moretxt.obj $(LIB)
+
+moretxt2.obj: moretxt2.c
+
+moretxt2.exe: moretxt2.obj $(LIB)
+
+curves.obj: curves.c
+
+curves.exe: curves.obj $(LIB)
+
+patches.obj: patches.c
+
+patches.exe: patches.obj $(LIB)
+
+balls.obj: balls.c 
+
+balls.exe: balls.obj  $(LIB)
+
+objvws.obj: objvws.c
+
+objvws.exe: objvws.obj $(LIB)
+
+world.obj: world.c
+
+world.exe: world.obj $(LIB)
+
+loc.obj: loc.c
+
+loc.exe: loc.obj $(LIB)
+
+teapot.obj: teapot.c
+
+teapot.exe: teapot.obj $(LIB)
+
+tetra.obj: tetra.c
+
+tetra.exe: tetra.obj $(LIB)
+
+cube.obj: cube.c
+
+cube.exe: cube.obj $(LIB)
+
+lcube.obj: lcube.c
+
+lcube.exe: lcube.obj $(LIB)
+
+sinewave.obj: sinewave.c
+
+sinewave.exe: sinewave.obj $(LIB)
+
+tmesh.obj: tmesh.c
+
+tmesh.exe: tmesh.obj $(LIB)

@@ -1,0 +1,35 @@
+#
+# Changes a few names from UNIX to PC crap so that We can
+# use the SUN PC-tool
+#
+mv vogl/COPYRIGHT vogl/copyright
+mv vogl/README vogl/readme
+mv vogl/Makefile vogl/makefile
+mv vogl/Makefile.xsun vogl/makefile.xsu
+mv vogl/Makefile.xt vogl/makefile.xt
+mv vogl/Makefile.sgi vogl/makefile.sgi
+mv vogl/Makefile.xview vogl/makefile.xv
+mv vogl/Makefile.sunview vogl/makefile.sv
+mv vogl/src/Makefile vogl/src/makefile
+mv vogl/src/README vogl/src/readme
+mv vogl/src/fvodevice.h vogl/src/fvodevic.h
+mv vogl/src/newtokens.c vogl/src/newtoken.c
+mv vogl/src/yobbarays.c vogl/src/yobbaray.c
+mv vogl/src/sunfort/README vogl/src/sunfort/readme
+mv vogl/src/sunfort/Makefile vogl/src/sunfort/makefile
+mv vogl/src/sunfort/Makefile.unx vogl/src/sunfort/makefile.unx
+mv vogl/src/sunfort/fyobbarays.c vogl/src/sunfort/fyobbara.c
+mv vogl/src/msfort/README vogl/src/msfort/readme
+mv vogl/drivers/Makefile vogl/drivers/makefile
+mv vogl/drivers/README vogl/drivers/readme
+mv vogl/drivers/X11.c vogl/drivers/x11.c
+mv vogl/drivers/decX11.c vogl/drivers/decx11.c
+mv vogl/drivers/ibmpc/README vogl/drivers/ibmpc/readme
+mv vogl/examples/README vogl/examples/readme
+mv vogl/examples/Makefile vogl/examples/makefile
+mv vogl/examples/Makefile.f77 vogl/examples/makefile.f77
+mv vogl/hershey/README vogl/hershey/readme
+mv vogl/hershey/data/README vogl/hershey/data/readme
+mv vogl/hershey/fonts/README vogl/hershey/fonts/readme
+mv vogl/hershey/src/README vogl/hershey/src/readme
+mv vogl/hershey/src/Makefile vogl/hershey/src/makefile

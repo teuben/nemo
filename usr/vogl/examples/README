@@ -1,0 +1,56 @@
+
+This directory contains example programs which may also be used in testing a
+new driver. If you are testing a new driver the trivial.{c,f} is of most
+use, followed by views.{c,f}, and then poly.{c,f}. When those three work, try
+the others. loc.{c,f} can be used for testing the mouse device if you have
+one.
+
+From the point of view of learning how to use VOGL the suggested reading
+order is below.
+
+Although there is a Pascal interface to VOGLE we didn't include one here, as
+far as we know there is no such animal on an SGI.
+
+As we now #include some files for the f77 interface there are some minor
+dificulties with the way various Fortran compilers handle inclusion of
+files. Most f77 examples now have the suffix ".F" which will usually
+cause the compiler to run "cpp -P" on the file first. A notable exception
+is the IBM AIX xlf compiler, where we have to manually run cpp on the files.
+To use the AIX Fortran examples, then simply copy Makefile.xlf into 
+Makefile.f77. When writing ones own Fortran programs, you should use 
+whatever the include syntax is for the appropiate compiler.
+
+NOTE: all the examples now expect the environment variable VDEVICE to be
+set to the current device. (vinit can still be used, but it only tells
+VOGL the device name, ginit or winopen must still be called, see vogl.3
+for further details).
+
+	C			FORTRAN		
+
+	__________		__________
+
+	trivial.c		ftrivial.f
+	simple.c		fsimple.f
+	shapes.c		fshapes.f
+	sinewave.c		fsinwave.f
+	poly.c			fpoly.f
+	views.c			fviews.f
+	circtxt.c		fcirctxt.f
+	moretxt.c		fmoretxt.f
+	moretxt2.c		fmoretx2.f
+	curves.c		fcurves.f
+	patches.c		fpatches.f
+	balls.c			fballs.f
+	objvws.c		fobjvws.f
+	world.c			fworld.f
+	cube.c			fcube.f
+	tetra.c			ftetra.f
+	loc.c			floc.f
+	lcube.c			flcube.f
+
+
+teapot.c is provided for the general interest.
+
+NOTE: on an Iris these programs will all pickup the event the
+mouse generates when the mousepointer enters the window. This is
+why we usually unqdevice(INPUTCHANGE).

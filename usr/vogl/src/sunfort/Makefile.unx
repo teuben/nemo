@@ -1,0 +1,21 @@
+#
+SRC =	farcs.c fattr.c fcurves.c fclip.c fdraw.c fdrivers.c fgetgp.c \
+	fviewing.c fviewp.c fmatrix.c fmove.c fobjects.c fpatches.c fpoints.c \
+	fpoly.c frect.c ftrans.c fyobbarays.c ftext.c faspect.c fpref.c \
+	fbuffer.c flines.c
+
+OBJS =	farcs.o fattr.o fcurves.o fclip.o fdraw.o fdrivers.o fgetgp.o \
+	fviewing.o fviewp.o fmatrix.o fmove.o fobjects.o fpatches.o fpoints.o \
+	fpoly.o frect.o ftrans.o fyobbarays.o ftext.o fgetstr.o faspect.o \
+	fpref.o fbuffer.o flines.o
+
+#
+CFLAGS = -I../
+
+all:	$(OBJS)
+
+$(OBJS): ../vogl.h
+
+clean:
+	rm -f $(OBJS) core
+

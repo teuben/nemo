@@ -1,0 +1,78 @@
+
+The directories in this directory contain the source for the VOGL library
+and the library hershey which is for manipulating the Hershey font data.
+
+They are as follows:
+
+	docs		contains the documentation such as there is.
+
+	drivers		contains the source to a variety of device drivers,
+			currently restricted to: postcript, sun workstation, 
+			apollo workstations, X11 (R2, R3 & R4), tektronix 
+			(401x), hpgl, dxy, and the ibm pc cards: hercules mono,
+			cga, ega, vga and sigma.
+
+	examples	contains some C and FORTRAN programs useful both in
+			testing and (hopefully) learning how to use it.
+			There are subdirectories xview,xt and sunview showing
+			how to use an x toolkit (or sunview) with VOGL.
+
+	hershey		contains the source for the hershey library plus the
+			source for generating fonts and the hershey data for
+			the occidental and oriental character sets. Note: as
+			with VOGL this library is callable in C and FORTRAN.
+
+	src		contains the source for the C VOGL interface, and the 
+			source for the FORTRAN interfaces where available.
+			
+If you have a real SGI machine with GL on it, you can simply compile the
+Hershey library and the examples with "make -f Makefile.sgi". Otherwise,
+you will have to edit the Makefile to set various options for your machine
+and type "make".
+
+VOGL is a device portable graphics library that tries to be Silicon Graphics 
+Iris GL compatible. Our intention is that any VOGL program will compile
+unchanged on a machine running SGI GL (the examples do). VOGL is based
+entirely on our other graphics library VOGLE. While we still regard VOGLE
+as our main library (it is, and probably will be for some time to come, the
+one that gets the most use around here), we will gratefully accept any bug
+fixes or enhancements. As always suggestions are also welcome.
+
+This software may be used for any purpose commercial or otherwise. It is
+offered without any guarantee as to its suitability for any purpose or as
+to the sanity of its writers. We do ask that the source is passed on to
+anyone that requests a copy, and that people who get copies don't go round
+claiming they wrote it (that is why this one has a copyright notice in it,
+see file COPYRIGHT).
+
+Although VOGL is free we will drink any quantity of Beer you send to us.
+
+Documentation in various forms...
+	Dieter Kranzlmueller <dk@gup.uni-linz.ac.at> has created a postscript
+version of the VOGL manuals with an index. It is also available from
+gondwana.ecr.mu.oz.au in /pub/vogl.ps
+	Also, there is a html version that can be reached via
+	http://www.iqm.unicamp.br/manuals/vogl.html
+
+
+Regards,
+
+	Eric H. Echidna
+
+Snail mail correspondance and alcoholic beverages should be directed to:
+
+	The Software Support Programmer
+	Department Of Engineering Computer Resources
+	Faculty Of Engineering
+	University Of Melbourne Vic 3052
+	Australia
+
+email to 
+
+	echidna@ecr.mu.OZ.AU
+	echidna@gondwana.ecr.mu.OZ.AU
+
+VOGLE/VOGL mailing list:
+	vogle@ecr.mu.oz.au
+	vogle-request@ecr.mu.oz.au to subscribe.
+

@@ -1,0 +1,331 @@
+.TH HERSHEY 3  "27 Aug 1991" "HERSHEY 1.01"
+.UC 4
+.SH NAME
+Hershey \- A very ordinary library for using Hershey Fonts on an SGI or
+with the VOGL(3) library.
+
+.SH DESCRIPTION
+.LP
+The Hershey library is a set of C routines (with a FORTRAN interface) for
+drawing the Hershey font data with programs written with SGI-GL or the VOGL
+library. As Hershey characters are defined by a set of vectors, they are
+subject to the current transformation matrix and any line attributes that
+have been set. There are also facilities for sizing and rotating the
+characters in the library itself.
+.LP
+The character data and the fonts supplied are based on the character set
+digitized by Dr Allen V. Hershey while working at the U. S. National
+Bureau of Standards.
+.SS
+.I Things to keep in mind.
+.PP
+
+It should be noted that text is drawn parallel to the (x, y) plane
+using whatever the current Z coordinate is.
+
+These routines change the current graphics position, that is they 
+draw the characters (or string) at the current graphics position
+by using relative move/draw sequences.
+
+The library also supports the shortened 6 character names for the FORTRAN
+interface. (Except for the routines hgetfontheight and hgetfontwidth which
+have shortend 6 character names of hgetfh and hgetfw respectively.
+.LP
+.SS
+.I Loading a font.
+.PP
+.I hfont(fontname)
+Set the current font
+.nf
+
+	Fortran:
+		subroutine hfont(fontname, len)
+		character*(*) fontname
+		integer len
+	C:    
+		hfont(fontname)
+			char	*fontname
+
+	There following names are available in this library. 
+
+	astrology       cursive         cyrillic        futura.l
+	futura.m        gothic.eng      gothic.ger      gothic.ita
+	greek           markers         math.low        math.upp
+	meteorology     music           script          symbolic
+	times.g         times.i         times.ib        times.r
+	times.rb        japanese
+
+.fi
+A markers font "markers" is also provided for doing markers - you need to have
+centertext on for this to give sensible results - with the markers starting
+at 'A' and 'a'.
+.LP
+If the 'fontpath' has been set with
+.I hsetpath
+(see below) then hfont looks for the software fonts in the directory given.
+Otherwise, if the environment variable "HFONTLIB" is set hfont looks for the
+software fonts in the directory given by this value. To maintain
+compatiblity with VOGL and VOGLE, the envirionment variable "VFONTLIB"
+may be set similarly to HFONTLIB.
+
+.PP
+.I hsetpath(fontpath)
+.TP
+Set the directory to search for the current font file.
+.nf
+
+	Fortran:
+		subroutine hsetpath(fontpath, len)
+		character*(*) fontpath
+		integer len
+	C:    
+		hsetpath(fontpath)
+			char	*fontpath
+
+.fi
+.TP
+.SS
+.I Setting the the character sizes
+.TP
+.I htextsize(width, height)
+Set the maximum size of a character in the currently loaded Hershey font.
+Width and height are values in world units.
+.nf
+
+	Fortran:
+		subroutine htextsize(width, height)
+		real width, height
+	C:    
+		htextsize(width, height)
+			float	width, height;
+
+.fi
+.TP
+.I hboxfit(l, h, nchars)
+Set the scale for text so that a string of the biggest characters in the
+font will fit in a box l by h. l and h are real values in world dimensions.
+.nf
+
+	Fortran:
+		subroutine hboxfit(l, h, nchars)
+		real l, h
+		integer nchars
+	C:    
+		hboxfit(l, h, nchars)
+			float	l, h
+			int	nchars
+.fi
+.LP
+.SS
+.I Setting the text angle
+.TP
+.I htextang(ang)
+Set the text angle. All Hershey text will be drawn rotated about the Z-axis
+by the angle specified. This angle is in degrees and is a floating point
+number.
+.nf
+
+	Fortran:
+		subroutine htextang(ang)
+		real ang
+	C:    
+		htextang(ang)
+			float	ang;
+
+.fi
+.LP
+.SS
+.I Setting the text attributes
+.TP
+.I hfixedwidth(onoff)
+Turns fixedwidth text on or off. Non-zero (.true.) is on. Causes all Hershey 
+text to be printed fixedwidth. The width of each character cell is the largest
+width of any character in the currently loaded font. 
+.nf
+
+	Fortran:
+		subroutine hfixedwidth(onoff)
+		logical onoff
+	C:    
+		hfixedwidth(onoff)
+			int onoff;
+
+.fi
+.TP
+.I hcentertext(onoff)
+Turns centertext text on or off. Non-zero (.true.) is on. This centres strings
+and characters.
+.nf
+
+	Fortran:
+		subroutine hcentertext(onoff)
+		logical onoff
+	C:    
+		hcentertext(onoff)
+			int onoff;
+
+.fi
+.TP
+.I hrightjustify(onoff)
+Turns rightjustify of text on or off. Non-zero (.true.) is on. This rightjustifies strings
+and characters. Turning on rightjustify will turn off centertext and leftjustification.
+.I Turning off rightjustification returns to the 
+.I default of leftjustification.
+.nf
+
+	Fortran:
+		subroutine hrightjustify(onoff)
+		logical onoff
+	C:    
+		hrightjustify(onoff)
+			int onoff;
+
+.fi
+.LP
+.TP
+.I hleftjustify(onoff)
+Turns leftjustify of text on or off. Non-zero (.true.) is on. This leftjustifies strings
+and characters. Turning on leftjustify will turn off centertext, and rightjustification.
+.I Turning off leftjustification will turn on 
+.I rightjustification.
+.nf
+
+	Fortran:
+		subroutine hleftjustify(onoff)
+		logical onoff
+	C:    
+		hleftjustify(onoff)
+			int onoff;
+
+.fi
+.SS
+.I
+Getting information about the currently loaded Hershey font.
+.TP
+.I hgetcharsize(c, width, height)
+Get the width and height of a character. At the moment the
+height returned is always that of the difference between the maximum 
+descender and ascender. 
+.nf
+
+	Fortran:
+		subroutine hgetcharsize(c, width, height)
+		character*1 c
+		real width, height
+	C:    
+		hgetcharsize(c, width, height)
+			char	c;
+			float	*width, *height;
+
+.fi
+.TP
+.I hgetfontsize(width, height)
+Get the maximum width and height of a character in a font. 
+.nf
+
+	Fortran:
+		subroutine hgetfs(width, height)
+		real width, height
+
+		subroutine hgetfontsize(width, height)
+		real width, height
+	C:    
+		hgetfontsize(width, height)
+			float	*width, *height;
+
+.fi
+.TP
+.I hgetdescender()
+Get the maximum descender in the current font.
+.nf
+
+	Fortran:
+		real function getdescender()
+
+	C:
+		float
+		getdescender();
+
+.fi
+.TP
+.TP
+.I hgetascender()
+Get the maximum ascender in the current font.
+.nf
+
+	Fortran:
+		real function getascender()
+
+	C:
+		float
+		getascender();
+
+.fi
+.TP
+.I hstrlength(str)
+Return the length of the string s in the user's world units.
+.nf
+
+	Fortran:
+		real function hstrlength(str, len)
+		character*(*) str
+		integer	len
+	C:    
+		float
+		hstrlength(str)
+			char *str;
+
+.fi
+.TP
+.SS
+.I Drawing characters and strings.
+.TP
+.I hdrawchar(c)
+Draw the character c. The current graphics position represents the bottom
+left hand corner of the character space. The current graphics position is
+left at the lower right hand side of the character.
+.nf
+
+	Fortran:
+		subroutine hdrawchar(c)
+		character c
+	C:    
+		hdrawchar(str)
+			char c;
+
+.fi
+.TP
+.I hcharstr(str)
+Draw the text in string at the current graphics position. The current graphics
+position is left at the lower right end of the string.
+.nf
+
+	Fortran:
+		subroutine hcharstr(str, len)
+		character*(*) str
+		integer	len
+	C:    
+		hcharstr(str)
+			char *str;
+
+.fi
+.TP
+.I hboxtext(x, y, l, h, s)
+Draw the string s so that it fits in the imaginary box defined with bottom
+left hand corner at (x, y), length l, and height h.
+.nf
+
+	Fortran:
+		subroutine hboxtext(x, y, l, h, s, length)
+		real x, y, l, h, s
+		character*(*) s
+		integer length
+	C:    
+		hboxtext(x, y, l, h, s)
+			float	x, y, l, h;
+			char	*s;
+
+.fi
+.SH BUGS
+.LP 
+We had to make up the font names based on some books of type faces.

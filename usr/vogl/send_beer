@@ -1,0 +1,51 @@
+#!/bin/sh
+#
+# send_beer	- very ordinary beer submission
+#
+# Create a  beer submission report and mail to `eric@munnari.oz.au'
+# The sender will be placed in `vi' with a copy of the beer submission
+# template. When complete, simply exit the editor, and the report will be
+# mailed automatically.
+#
+#
+
+ericmail=echidna@munnari.oz.au
+
+mailer=/usr/ucb/mail
+ed=/usr/ucb/vi
+tool=`basename $0`
+vobs=/tmp/$tool.$$
+vobsb=${vobs}b
+trap "rm -f $vobs $vobsb; exit" 0 1 2 3 15
+
+sed -e "1,/^#SEND_BEER_FORMAT/d" < $0 > $vobs
+cp $vobs $vobsb
+$ed $vobs
+
+cmp -s $vobs $vobsb
+ 
+if (test $? -eq 0 -o `cat $vobs | wc -c` -le 1) then
+    echo "$tool: cancelled"
+else
+    $mailer $ericmail <$vobs
+    echo "$tool: sent"
+fi
+
+exit 0
+
+#SEND_BEER_FORMAT
+
+Dear Eric,
+I thank you kindly for your free software and hope that you continue
+to produce work of this  kind. To support you I am sending you 
+<ENTER QUANTITY> cans of <ENTER BRAND>. 
+
+
+Best Regards,
+
+<ENTER NAME>,
+<ENTER COMPANY>,
+<ENTER CONTACT>,
+<ENTER ADDRESS>,
+<ENTER PHONE>
+

@@ -1,0 +1,57 @@
+***************
+*** 5,21 ****
+  
+  CEXAMPS = trivial simple shapes poly views circtxt moretxt curves \
+      moretxt2 patches balls objvws world loc teapot cube lcube tetra \
+!     sinewave tmesh
+  
+  COBJS = trivial.o simple.o shapes.o poly.o views.o circtxt.o moretxt.o \
+    moretxt2.o curves.o patches.o balls.o objvws.o world.o loc.o \
+!   teapot.o cube.o lcube.o tetra.o sinewave.o tmesh.o
+  
+  #
+  # Where to find librarys
+  #
+! OURLIBS = -lhersh -lvogl
+! LIBS = -lgrx
+  MCFLAGS = -O 
+  
+  CFLAGS = $(MCFLAGS)
+--- 5,22 ----
+  
+  CEXAMPS = trivial simple shapes poly views circtxt moretxt curves \
+      moretxt2 patches balls objvws world loc teapot cube lcube tetra \
+!     sinewave tmesh stetra
+  
+  COBJS = trivial.o simple.o shapes.o poly.o views.o circtxt.o moretxt.o \
+    moretxt2.o curves.o patches.o balls.o objvws.o world.o loc.o \
+!   teapot.o cube.o lcube.o tetra.o sinewave.o tmesh.o stetra.o
+  
+  #
+  # Where to find librarys
+  #
+! # OURLIBS = -lhersh -lvogl
+! OURLIBS = ../src/libvogl.a ../hershey/src/libhershey.a
+! LIBS = -lm -lgrx
+  MCFLAGS = -O 
+  
+  CFLAGS = $(MCFLAGS)
+***************
+*** 22,29 ****
+  
+  all:  $(CEXAMPS)
+  
+! $(CEXAMPS): $(COBJS)
+!   $(CC) $(CFLAGS) -o $@ $@.o $(OURLIBS) $(LIBS) -lm
+  
+  clean:
+    del *.o
+--- 23,30 ----
+  
+  all:  $(CEXAMPS)
+  
+! $(CEXAMPS): $(COBJS) $(OURLIBS)
+!   $(CC) $(CFLAGS) -o $@ $@.o $(OURLIBS) $(LIBS)
+  
+  clean:
+    del *.o

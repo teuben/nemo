@@ -1,0 +1,73 @@
+#
+# Makes the hershey library.
+# Makes the binary Hershey font file for VOGL
+#
+FONTLIB=/lib/hershey
+CC = gcc
+CFLAGS = -I../../src $(MCFLAGS) -DPC
+
+OURLIBS = libhersh.a ../../src/libvogl.a
+LIBS = -lgrx -lm
+RANLIB = ranlib
+#
+# On a real SGI ...
+#
+#OURLIBS = libhershey.a
+#LIBS = -lgl
+#RANLIB = echo
+
+.SUFFIXES: .o .c .cc .s
+.c.o:
+	$(CC) $(CFLAGS) -c $*.c
+
+SHELL = 4dos
+
+# .IGNORE:
+
+HDR = h2v.h
+
+
+all:	libhersh.a h2v hdisp fdisp fonts
+
+libhersh.a: htext.o check.o halloc.o fhtext.o
+	ar rcv libhersh.a htext.o check.o halloc.o fhtext.o
+	$(RANLIB) libhersh.a
+
+
+h2v:	h2v.o getchar.o
+	$(CC) $(CFLAGS) -o $@ $@.o getchar.o
+
+hdisp:	hdisp.o getchar.o ../../src/libvogl.a libhershey.a
+	$(CC) -o $@ $@.o getchar.o $(OURLIBS) $(LIBS)
+	aout2exe hdisp
+
+fdisp:	fdisp.o ../../src/libvogl.a libhershey.a
+	$(CC) -o $@ $@.o $(OURLIBS) $(LIBS)
+	aout2exe fdisp
+
+$(FONTLIB):
+	-mkdir $(FONTLIB)
+
+fonts:	h2v $(FONTLIB)
+	go32 h2v ../data/hersh.oc
+	go32 h2v ../data/hersh.or ../fonts/japan.hmp japanese
+	mv astrology cursive cyrillic futura.l futura.m gothic.eng  $(FONTLIB)
+	mv gothic.ger gothic.ita greek japanese markers math.low  $(FONTLIB)
+	mv math.upp meteorology music script symbolic times.g   $(FONTLIB)
+	mv times.i times.ib times.r times.rb $(FONTLIB)
+	touch fonts
+
+h2v: h2v.h
+
+clean:
+	rm -f astrology cursive cyrillic futura.l futura.m gothic.eng
+	rm -f gothic.ger gothic.ita greek japanese markers math.low
+	rm -f math.upp meteorology music script symbolic times.g
+	rm -f times.i times.ib times.r times.rb *.o core fonts libhershey.a
+
+clobber:
+	rm -f astrology cursive cyrillic futura.l futura.m gothic.eng
+	rm -f gothic.ger gothic.ita greek japanese markers math.low
+	rm -f math.upp meteorology music script symbolic times.g
+	rm -f times.i times.ib times.r times.rb *.o core h2v hdisp fdisp fonts
+	rm -r libhershey.a

@@ -1,0 +1,75 @@
+#
+# Make the vogl library for DJGPP GRX
+#
+# Below are our defaults for compliers etc. These are set in the
+# main Makefile.
+#
+
+CC = gcc
+RANLIB =ranlib
+
+DEVICES=-DPOSTSCRIPT -DHPGL -DGRX
+MCFLAGS=-I../src -O
+DOBJS=../drivers/ps.o ../drivers/hpdxy.o ../drivers/grx.o
+.SUFFIXES: .o .c .cc .s
+
+.c.o:
+	$(CC) -c $(CFLAGS) $*.c -o $*.o
+
+.s.o:
+	$(CC) -c $(CFLAGS) $*.s
+
+
+LIB = libvogl.a
+
+DEVICES = -DPOSTSCRIPT -DHPGL -DGRX
+
+HDRS =	vogl.h
+
+CSRC =	arcs.c attr.c \
+	buffer.c clip.c \
+	curves.c draw.c \
+	drivers.c viewing.c \
+	viewp.c mapping.c \
+	matrix.c move.c \
+	objects.c patches.c \
+	points.c polygons.c \
+	rect.c tensor.c \
+	text.c newtoken.c \
+	trans.c scale.c \
+	getgp.c valloc.c \
+	yobbaray.c pref.c \
+	vcalls.c queue.c \
+	lines.c
+
+OBJS =	$(CSRC:.c=.o)
+
+CFLAGS= $(DEVICES) $(MCFLAGS)
+LINTFLAGS=
+
+all: $(LIB)
+
+#
+# gcc 2.4.1 gets a little confused by this one... never used to..
+# and no other compiler has problems with it... but as Ned Kelly
+# said "Such is life"
+#
+#curves.o: curves.c
+#	gcc -traditional -O2 -c curves.c
+
+$(LIB): $(DOBJS) $(OBJS) vogl.h
+	echo $(OBJS)
+	ar rcv $@ $(DOBJS) *.o
+	$(RANLIB) $@
+
+clean:
+	del *.o
+
+clobber:
+	del *.o
+	del *.a
+
+install:
+	copy libvogl.a c:\djgpp\lib
+	copy vogl.h c:\djgpp\include
+	copy vodevice.h c:\djgpp\include

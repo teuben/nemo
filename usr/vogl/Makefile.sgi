@@ -1,0 +1,60 @@
+#
+# Makefile for vogl (On SGI-GL machines)
+# Will only compile the Hershey library and the examples, linking with
+# -lgl_s
+#
+SHELL = /bin/sh
+#
+CC = cc
+
+# 
+# Where the fonts a going to live (For making the Hershey library)
+#
+#FONTLIB = /usr/local/lib/hershey/
+FONTLIB = /tmp/decr
+
+CFLAGS = -DSYS5 -O -float -DSGI
+
+#
+# The name of the library to install and where to put it.
+#
+LIBH = libhershey.a
+DEST = /usr/local/lib
+
+
+RANLIB = echo
+
+LIBS = -lgl_s
+
+all:
+	cd hershey/src; make -f Makefile.sgi \
+			CC="$(CC)" \
+			FONTLIB="$(FONTLIB)" \
+			LIBS="$(LIBS)"\
+			RANLIB="$(RANLIB)"
+
+	cd examples; make -f Makefile.sgi \
+			CC="$(CC)" \
+			CFLAGS="$(CFLAGS)" \
+			LIBS="$(LIBS)"
+
+install:
+	cp hershey/src/$(HLIB) $(DEST)
+	chmod 644 $(DEST)/$(LIB)
+	$(RANLIB) $(DEST)/$(LIB)
+
+clean:
+	cd hershey/src; make FONTLIB="$(FONTLIB)" clean
+	cd examples; make clean
+	cd examples/xt; make clobber
+	cd examples/xview; make clobber
+	cd examples/sunview; make clobber
+	cd examples; make -f Makefile.f77 clean
+
+clobber:
+	cd hershey/src; make FONTLIB="$(FONTLIB)" clobber
+	cd examples; make clobber
+	cd examples/xt; make clobber
+	cd examples/xview; make clobber
+	cd examples/sunview; make clobber
+	cd examples; make -f Makefile.f77 clobber

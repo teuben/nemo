@@ -1,0 +1,210 @@
+***************
+*** 89,102 ****
+    grx.height = vdevice.sizeSy = GrScreenY();
+    grx.planes = vdevice.depth = GrNumPlanes();
+  
+-   grx.scrsize=( GrPlaneSize(grx.width, grx.height)* grx.planes)/sizeof(long);
+- 
+    /* setup default palette */
+    GrSetRGBcolorMode();
+    grx.lopt.lno_color = grx.fg = GrWhite();
+    grx.bg = GrBlack();
+  
+!   grx.palette[BLACK] = GrAllocColor( 0, 0, 0 );
+    grx.palette[RED] = GrAllocColor( 255, 0, 0 );
+    grx.palette[GREEN] = GrAllocColor( 0, 255, 0 );
+    grx.palette[YELLOW] = GrAllocColor( 255, 255, 0 );
+--- 92,103 ----
+    grx.height = vdevice.sizeSy = GrScreenY();
+    grx.planes = vdevice.depth = GrNumPlanes();
+  
+    /* setup default palette */
+    GrSetRGBcolorMode();
+    grx.lopt.lno_color = grx.fg = GrWhite();
+    grx.bg = GrBlack();
+  
+!   grx.palette[BLACK] = GrBlack();
+    grx.palette[RED] = GrAllocColor( 255, 0, 0 );
+    grx.palette[GREEN] = GrAllocColor( 0, 255, 0 );
+    grx.palette[YELLOW] = GrAllocColor( 255, 255, 0 );
+***************
+*** 103,109 ****
+    grx.palette[BLUE] = GrAllocColor( 0, 0, 255 );
+    grx.palette[MAGENTA] = GrAllocColor( 255, 0, 255 );
+    grx.palette[CYAN] = GrAllocColor( 0, 255, 255 );
+!   grx.palette[WHITE] = GrAllocColor( 255, 255, 255 );
+  
+    /* setup back/front buffers:
+     * frontbuffer is the current screen, back is a ram context
+--- 104,110 ----
+    grx.palette[BLUE] = GrAllocColor( 0, 0, 255 );
+    grx.palette[MAGENTA] = GrAllocColor( 255, 0, 255 );
+    grx.palette[CYAN] = GrAllocColor( 0, 255, 255 );
+!   grx.palette[WHITE] = GrWhite();
+  
+    /* setup back/front buffers:
+     * frontbuffer is the current screen, back is a ram context
+***************
+*** 136,144 ****
+      };
+  
+    /* initial drawing style to thin solid lines */
+!   grx.lopt.lno_width = 1;
+    grx.lopt.lno_pattlen = 0;
+!   grx.lopt.lno_dashpat = NULL;
+    /* load initial fonts */
+    if(getenv("GRXFONT") == NULL) GrSetFontPath("fonts");
+  
+--- 137,147 ----
+      };
+  
+    /* initial drawing style to thin solid lines */
+!   grx_lwidth(1);
+! 
+    grx.lopt.lno_pattlen = 0;
+!   grx.lopt.lno_dashpat = "111";
+! 
+    /* load initial fonts */
+    if(getenv("GRXFONT") == NULL) GrSetFontPath("fonts");
+  
+***************
+*** 199,205 ****
+                 grx.bbuf, 0, 0, 
+                 grx.bbuf->gc_xmax,grx.bbuf->gc_ymax, GrWRITE );
+  
+!   MouseDisplayCursor();
+    
+  
+    }
+--- 202,208 ----
+                 grx.bbuf, 0, 0, 
+                 grx.bbuf->gc_xmax,grx.bbuf->gc_ymax, GrWRITE );
+  
+!     MouseDisplayCursor();
+    
+  
+    }
+***************
+*** 358,369 ****
+  static int
+  grx_mapcolor(int c, int r, int g, int b)
+  {
+-   int j;
+- 
+    if (c >= MAXCOLOR || vdevice.depth == 1)
+        return(-1);
+  
+    grx.palette[c] = GrAllocColor(r, g, b);
+  }
+    
+  
+--- 361,373 ----
+  static int
+  grx_mapcolor(int c, int r, int g, int b)
+  {
+    if (c >= MAXCOLOR || vdevice.depth == 1)
+        return(-1);
+  
+    grx.palette[c] = GrAllocColor(r, g, b);
++   if (grx.palette[c] == GrNOCOLOR ) return (-1);
++ 
++   return (0);
+  }
+    
+  
+***************
+*** 414,424 ****
+  /*  if (MousePendingEvent())
+    {
+  */
+!     MouseGetEvent( M_MOTION | M_BUTTON_CHANGE | M_POLL, &mEv );
+  
+!     if (mEv.flags & M_MOTION) {
+!       ox = mEv.x;
+!       oy = vdevice.sizeSy - mEv.y;
+      }
+  /*
+   *    HACK... the RIGHT button is the second button and we want it
+--- 417,427 ----
+  /*  if (MousePendingEvent())
+    {
+  */
+!     MouseGetEvent( M_MOTION | M_BUTTON_CHANGE | M_POLL, &grx.last_mouse_event );
+  
+!     if (grx.last_mouse_event.flags & M_MOTION) {
+!       ox = grx.last_mouse_event.x;
+!       oy = vdevice.sizeSy - grx.last_mouse_event.y;
+      }
+  /*
+   *    HACK... the RIGHT button is the second button and we want it
+***************
+*** 425,434 ****
+   *    to return 2...
+   */
+   
+!     if (mEv.flags & M_BUTTON_CHANGE) {
+!       obuttons = ((mEv.buttons & M_LEFT) ? 1 : 0) |
+!         ((mEv.buttons & M_MIDDLE) ? 2 : 0) |
+!           ((mEv.buttons & M_RIGHT) ? 2 : 0);
+      }
+  /*    }
+  */
+--- 428,437 ----
+   *    to return 2...
+   */
+   
+!     if (grx.last_mouse_event.flags & M_BUTTON_CHANGE) {
+!       obuttons = ((grx.last_mouse_event.buttons & M_LEFT) ? 1 : 0) |
+!         ((grx.last_mouse_event.buttons & M_MIDDLE) ? 2 : 0) |
+!           ((grx.last_mouse_event.buttons & M_RIGHT) ? 2 : 0);
+      }
+  /*    }
+  */
+***************
+*** 443,463 ****
+  int grx_lwidth( int w )
+  {
+    grx.lopt.lno_width = w;
+!   if (w == 1 && grx.lopt.lno_pattlen == 0)
+        vdevice.dev.Vdraw = grx_solid;
+    else
+        vdevice.dev.Vdraw = grx_pattern;
+  }
+  
+  static
+  int grx_lstyle( int s )
+  {
+!   /* BASICALLY UNIMPLEMENTED */
+    grx.lopt.lno_pattlen = s;
+    if (grx.lopt.lno_width == 1 && s == 0)
+        vdevice.dev.Vdraw = grx_solid;
+    else
+        vdevice.dev.Vdraw = grx_pattern;
+  }
+  
+  static DevEntry grxdev = {
+--- 446,469 ----
+  int grx_lwidth( int w )
+  {
+    grx.lopt.lno_width = w;
+!   if ((w == 1) && (grx.lopt.lno_pattlen == 0))
+        vdevice.dev.Vdraw = grx_solid;
+    else
+        vdevice.dev.Vdraw = grx_pattern;
++   return (0);
+  }
+  
+  static
+  int grx_lstyle( int s )
+  {
+!   /* BASICALLY UNIMPLEMENTED
+    grx.lopt.lno_pattlen = s;
+    if (grx.lopt.lno_width == 1 && s == 0)
+        vdevice.dev.Vdraw = grx_solid;
+    else
+        vdevice.dev.Vdraw = grx_pattern;
++  */
++   return (0);
+  }
+  
+  static DevEntry grxdev = {

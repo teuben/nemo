@@ -1,0 +1,35 @@
+#
+# Makefile for LIBGRX devices for the DJGPP compiler
+# note: -O2 will mess with the asm code in grx.c
+#
+
+CC = gcc
+RANLIB=ranlib
+
+MCFLAGS =
+DEVICES=-DPOSTSCRIPT -DHPGL -DGRX
+HDRS= ../src/vogl.h
+
+DOBJS = grx.o ps.o hpdxy.o
+
+CFLAGS= -I../src $(MCFLAGS)
+
+.SUFFIXES: .o .c .cc .s
+
+.c.o:
+	$(CC) -c $(CFLAGS) $*.c 
+
+all: depend	$(DOBJS)
+
+depend: $(CSRC)
+	$(CC) $(CFLAGS) -M $(CSRC) > depend
+
+# $(DOBJS): $(HDRS)
+
+clean:
+	rm -f core $(DOBJS)
+
+clobber:
+	rm -f core *.o
+	
+#include depend

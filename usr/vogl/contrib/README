@@ -1,0 +1,14 @@
+
+
+This directory contains things that have been contributed to VOGL.
+
+The current contents include:
+vogl.ps.gz	A postscript version of the manual with an index
+		(From Dieter Kranzlmuell dk@gup.uni-linz.ac.at)
+
+vogl.html.gz	A html version of the manual. It can be reached at
+		http://www.iqm.unicamp.br/manuals/vogl.html
+		(From  Pedro Vazque vazquez@iqm.unicamp.br)
+
+vogl.h.ansi	A partially ANSIfied version of the vogl.h header file.
+		(From Dieter Kranzlmueller dk.gup.uni-linz.ac.at)

@@ -1,0 +1,116 @@
+
+The file hersh.oc files contain approximately 19 different fonts in the
+A-Z alphabet plus greek and cyrillic, along with hundreds of special symbols,
+described generically below.
+
+Fonts:
+        Roman: Plain, Simplex, Duplex, Complex Small, Complex, Triplex
+        Italic: Complex Small, Complex, Triplex
+        Script: Simplex, Complex
+        Gothic: German, English, Italian
+        Greek: Plain, Simplex, Complex Small, Complex
+        Cyrillic: Complex
+
+Symbols:
+        Mathematical (227-229,232,727-779,732,737-740,1227-1270,2227-2270,
+                        1294-1412,2294-2295,2401-2412)
+        Daggers (for footnotes, etc) (1276-1279, 2276-2279)
+        Astronomical (1281-1293,2281-2293)
+        Astrological (2301-2312)
+        Musical (2317-2382)
+        Typesetting (ffl,fl,fi sorts of things) (miscellaneous places)
+        Miscellaneous (mostly in 741-909, but also elsewhere):
+                - Playing card suits
+                - Meteorology
+                - Graphics (lines, curves)
+                - Electrical
+                - Geometric (shapes)
+                - Cartographic
+                - Naval
+                - Agricultural
+                - Highways
+                - Etc...
+
+The Oriental Characters.
+
+	The file hersh.or contains over 1000 Kanji, or Chinese characters,
+and the Japanese Hiragana and Katakana alphabets.
+
+ASCII sequence translation files:
+
+        The Hershey glyphs, while in a particular order, are not in an
+        ASCII sequence. Translation Files are provided that give the
+        pairs of glyph numbers that make up a font. Pairs of glyph numbers
+	where the second number is zero are considered to define a single
+	character represented by the glyph number of the first.
+
+        File names are made up of fffffftt.hmp,
+
+                where ffffff is the font style, one of:
+                        roman   Roman
+                        greek   Greek (some characters not placed in 
+					sequence)
+                        italic  Italic
+                        script  Script
+                        cyril   Cyrillic (some characters not placed in
+                                           sequence)
+                        gothgr  Gothic German
+                        gothgb  Gothic English
+                        gothit  Gothic Italian
+
+                and tt is the font type, one of:
+                    p       Plain (very small, no lower case)
+                    s       Simplex (plain, normal size, no serifs)
+                    d       Duplex (normal size, no serifs, doubled lines)
+                    c       Complex (normal size, serifs, doubled lines)
+                    t       Triplex (normal size, serifs, tripled lines)
+                    cs      Complex Small (Complex, smaller than normal size)
+
+	Greek and Cyrillic have had their characters arranged appropriate
+	to similar sounding letters in the roman alphabet. This may seem
+	a little odd - but it does work rather well - well here anyway!
+
+The following is the mapping of index files to current VOGLE font names:
+
+		astrol.hmp		astrology
+		scripts.hmp		cursive
+		cyrilc.hmp		cyrillic
+		romans.hmp		futura.l
+		romand.hmp		futura.m
+		gotheng.hmp		gothic.eng
+		gothger.hmp		gothic.ger
+		gothita.hmp		gothic.ita
+		greeks.hmp		greek
+		marker.hmp		markers
+		lowmat.hmp		math.low
+		uppmat.hmp		math.upp
+		meteo.hmp		meteorology
+		music.hmp		music
+		scriptc.hmp		script
+		symbol.hmp		symbolic
+		greekc.hmp		times.g
+		italicc.hmp		times.i
+		italict.hmp		times.ib
+		romanc.hmp		times.r
+		romant.hmp		times.rb
+		japan.hmp		japanese
+
+
+The three sizes are coded with particular base line (bottom of a capital
+letter) and cap line (top of a capital letter) values for 'y':
+
+        Size            Base Line       Cap Line
+
+        Very Small         -5              +4 
+        Small              -6              +7
+        Normal             -9              +12
+
+        (Note: some glyphs in the 'Very Small' fonts are actually 'Small')
+
+The top line and bottom line, which are normally used to define vertical
+        spacing, are not given. Maybe somebody can determine appropriate
+        values for these!
+
+The left line and right line, which are used to define horizontal spacing,
+        are provided with each character in the database.
+

@@ -1,0 +1,16 @@
+These drivers are almost directly from VOGLE. The only change that has
+been made to them is to enable a viewport clearing function (as opposed to
+clearing the whole screen).
+
+Most of the line drawing and text routines for PC's comes from the book
+
+ "Programmers Guide to PC & PS/2 Video Systems" by Richard Wilton
+
+Some other stuff came from the book
+
+ "Programmers Guide to Hercules Graphics Cards" by David B. Doty
+
+and some other stuff was filtched from J.D. McDonalds Fastega libarary
+
+and last but not least, we made up lots of stuff ourselves.
+

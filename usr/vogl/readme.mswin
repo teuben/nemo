@@ -1,0 +1,7 @@
+This stuff is just a HACK from the vogle mswin driver. It hasn't been
+tested much(but at least the icon is diferent).
+
+Compiling with BorlandC++ 2.0 for windoze
+Simply "wbildbcc"
+then   "Set up the applications" in examples/mswin
+

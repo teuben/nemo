@@ -1,0 +1,26 @@
+CC = gcc
+
+MCFLAGS = -O2
+DEVICES=-DPOSTSCRIPT -DHPGL -DGRX
+HDRS= ../src/vogl.h
+
+DOBJS = grx.o ps.o hpdxy.o
+
+CFLAGS= -I../src $(MCFLAGS)
+
+.SUFFIXES: .o .c .cc .s
+
+.c.o:
+	$(CC) -c $(CFLAGS) $*.c 
+
+all: $(DOBJS)
+
+clean:
+	del *.o
+
+clobber:
+	del *.o
+
+install:
+
+	

@@ -1,0 +1,111 @@
+zap_c.exe: zap_c.c
+	cl -FPi87 -AL zap_c.c
+
+F = -FPc
+FFLAGS = -nologo -4Nt -Fa -Fonul -c -AL $(F)
+
+.for.asm:
+	fl $(FFLAGS) $*.for
+	zap_c < $*.asm > tmp.asm
+	del $*.asm
+ 	ren tmp.asm $*.asm
+
+.asm.obj:
+	masm -MX $*.asm;
+
+farcs.asm: farcs.for
+
+fattr.asm: fattr.for
+
+fbuffer.asm: fbuffer.for
+
+fpref.asm: fpref.for
+
+fcurves.asm: fcurves.for
+
+fdraw.asm: fdraw.for
+
+flines.asm: flines.for
+
+fdrivers.asm: fdrivers.for
+
+fgetgp.asm: fgetgp.for
+
+fmatrix.asm: fmatrix.for
+
+fmove.asm: fmove.for
+
+fobjects.asm: fobjects.for
+
+fpatches.asm: fpatches.for
+
+fpoints.asm: fpoints.for
+
+fpoly.asm: fpoly.for
+
+frect.asm: frect.for
+
+ftext.asm: ftext.for
+
+ftrans.asm: ftrans.for
+
+fviewing.asm: fviewing.for
+
+fviewp.asm: fviewp.for
+
+fyobba.asm: fyobba.for
+
+fbgnend.asm: fbgnend.for
+
+fvcalls.asm: fvcalls.for
+
+fqueue.asm: fqueue.for
+
+farcs.obj: farcs.asm
+
+fattr.obj: fattr.asm
+
+fbuffer.obj: fbuffer.asm
+
+fpref.obj: fpref.asm
+
+fcurves.obj: fcurves.asm
+
+fdraw.obj: fdraw.asm
+
+fdrivers.obj: fdrivers.asm
+
+fgetgp.obj: fgetgp.asm
+
+fmatrix.obj: fmatrix.asm
+
+fmove.obj: fmove.asm
+
+fobjects.obj: fobjects.asm
+
+fpatches.obj: fpatches.asm
+
+fpoints.obj: fpoints.asm
+
+fpoly.obj: fpoly.asm
+
+frect.obj: frect.asm
+
+ftext.obj: ftext.asm
+
+ftrans.obj: ftrans.asm
+
+flines.obj: flines.asm
+
+fviewing.obj: fviewing.asm
+
+fviewp.obj: fviewp.asm
+
+fyobba.obj: fyobba.asm
+
+fbgnend.obj: fbgnend.asm
+
+fvcalls.obj: fvcalls.asm
+
+fqueue.obj: fqueue.asm
+

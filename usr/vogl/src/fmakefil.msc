@@ -1,0 +1,30 @@
+#
+MFLAGS = -MX
+
+OBJS = \
+	msfort\farcs.obj \
+	msfort\fattr.obj \
+	msfort\fbuffer.obj \
+	msfort\fcurves.obj \
+	msfort\fdraw.obj \
+	msfort\fdrivers.obj \
+	msfort\fgetgp.obj \
+	msfort\fmatrix.obj \
+	msfort\fmove.obj \
+	msfort\fobjects.obj \
+	msfort\fpatches.obj \
+	msfort\fpoints.obj \
+	msfort\fpoly.obj \
+	msfort\fpref.obj \
+	msfort\frect.obj \
+	msfort\ftext.obj \
+	msfort\ftrans.obj \
+	msfort\fviewing.obj \
+	msfort\fviewp.obj \
+	msfort\fyobba.obj \
+	msfort\fbgnend.obj \
+	msfort\fqueue.obj \
+	msfort\fvcalls.obj
+
+FVOGLE.TMP: $(OBJS)
+        LIB @FLIB.IN
