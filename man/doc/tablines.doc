@@ -1,0 +1,18 @@
+%N tablines
+%D Select lines from a file
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man tablines' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	input file [???]
+%A out
+	output file [???]
+%A select
+	lines to select [all]
+%A comment
+	count comment lines too? [t]
+%A nmax
+	Default max allocation [10000]
+%A VERSION
+	14-oct-99 PJT [1.1]
