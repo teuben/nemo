@@ -1,0 +1,50 @@
+.TH RSF 1NEMO "16 December 1990"
+.ds e =\h'-0.0m'
+.SH NAME
+rsf \- read a structured file
+.SH SYNOPSIS
+\fBrsf in\*e\fPfile \fBout\*e\fPfile
+.SH DESCRIPTION
+\fIrsf\fP reads the ascii representation of a structured binary file 
+(ASF) as
+generated, for example, by \fItsf\fP(1NEMO), and writes a binary version.
+.PP
+In this fashion tsf/rsf can be used to port data between machines of a
+totally different binary data type (e.g. Cray's, Sun's, Convex, DECs, IBMs)
+.SH PARAMETERS
+The following parameters are recognized.
+.TP 24
+\fBin\*e\fP\fIfile\fP
+Input data is read from \fIfile\fP, which must be an ascii file.
+.TP 24
+\fBout\*e\fP\fIfile\fP
+Output data is written to \fIfile\fP in binary form.
+.SH SEE ALSO
+tsf(1NEMO), filestruct(3NEMO).
+.SH DEBUG
+\fBdebug=2\fP reports values of \fIMaxTagLen\fP and \fIMaxVecDim\fP
+as defined in "\fBfilestruct.h\fP".
+For \fIMaxSetLen\fP see \fItsf(1NEMO)\fP.
+.SH BUGS
+\fIrsf\fP does not recognize items which have been truncated by \fItsf\fP
+(using the \fBmaxlines=\fP keyword).
+If \fItsf\fP and \fIrsf\fP are used together, set \fBmaxlines\fP to a
+value large enough to print all the data, or use
+\fBalllines=t\fP.
+.PP
+Although \fIrsf\fP can now read multiline strings, it
+can complain on long strings that go accross a line if
+the line break occured just before a white space in the string.
+This can be solved by running 
+\fItsf\fP with a different or 
+long enough linelength (using the \fBmargin=\fP keyword).
+.SH AUTHORS
+Joshua E. Barnes, Panayotis Skordos.
+.SH HISTORY
+.ta +1i +4i
+.nf
+xx-jun-87	V1.0 first implementation	PS
+xx-apr-88	V2.0 new filestruct package	JB
+12-sep-90	V2.1 helpvec	PJT
+9-dec-90	V2.2 multiline string bug removed	PJT
+.fi
