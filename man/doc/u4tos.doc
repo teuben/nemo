@@ -1,0 +1,14 @@
+%N u4tos
+%D Convert NBODY unit-4 file to snapshot
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man u4tos' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input file (in UNIT 4 format) []
+%A out
+	Output file (snapshot(5NEMO) format) [???]
+%A nbody
+	Input Number of particles []
+%A VERSION
+	16-jun-97 PJT [1.0b]
