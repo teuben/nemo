@@ -6,9 +6,11 @@ include $(NEMOLIB)/makedefs
 # some architectures are automatically loaded, unless -DAUTO is used in CFLAGS
 
 # MACH = 
-MACH=-DDL -I$(NEMO)/host/$(NEMOHOST)/include
+# MacOS-X seems to need
+#    MACH=-DDL -I$(NEMO)/host/$(NEMOHOST)/include
+#    EL = -ldl
 # extra libraries needed in linking [-lld for SYSV, -ldl for dlopen()]
-EL = -ldl
+EL = 
 
 #
 # The -D$(MACH) is mainly for loadobj.c, to include the proper loadobj<MACH>.c 
