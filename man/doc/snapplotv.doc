@@ -1,0 +1,56 @@
+%N snapplotv
+%D plot particle positions from a snapshot file
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man snapplotv' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	input file name [???]
+%A times
+	range of times to plot [all]
+%A xvar
+	x-axis plotting variable [x]
+%A xlabel
+	x-axis label; defaults to xvar []
+%A xrange
+	x-axis variable range [-2.0:2.0]
+%A yvar
+	y-axis plotting variable [y]
+%A ylabel
+	y-axis label; defaults to yvar []
+%A yrange
+	y-axis variable range [-2.0:2.0]
+%A vxvar
+	vx-variable [vx]
+%A vyvar
+	vy-variable [vy]
+%A scale
+	mult. factor for vx/vy to make 1 cm vectors [1]
+%A visib
+	determine visibility of points [1]
+%A psize
+	point type and size [0]
+%A fill_circle
+	fill points plotted as circles [t]
+%A formal
+	produce publication-style plots [false]
+%A xbox
+	extent of frame in x direction [2.0:18.0]
+%A ybox
+	extent of frame in y direction [2.0:18.0]
+%A nobox
+	draw axis, ticks, labels [false]
+%A nxticks
+	number of ticks on x axis [7]
+%A nyticks
+	number of ticks on y axis [7]
+%A xticks
+	x-tickmark positions, if not default []
+%A yticks
+	y- []
+%A nxy
+	Number of X and Y panels per page [1,1]
+%A frame
+	base filename for rasterfiles(5) []
+%A VERSION
+	4-oct-95 PJT [1.0]
