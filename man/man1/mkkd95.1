@@ -1,4 +1,4 @@
-.TH MKKD95 1NEMO "6 March 2004"
+.TH MKKD95 1NEMO "23 March 2004"
 .SH NAME
 mkkd95 \- Kuijken-Dubinski-95 composite disk-bulge-halo model
 .SH SYNOPSIS
@@ -37,13 +37,13 @@ component.
 Notice these are the first set of particles in the final snapshot.
  [8000]  
 .TP
-\fBnbulge=\fP
-Number of particles in bulge [4000]  
-.TP
 \fBnhalo=\fP
 Number of particles in halo. 
 Notice these are the last set of particles in the final snapshot.
 [6000]  
+.TP
+\fBnbulge=\fP
+Number of particles in bulge [4000]  
 .TP
 \fBpsi0=\fP
 in.dbh: Psi0 (HALO) 
@@ -185,6 +185,13 @@ model is not set via this method.
 Number of models computed. Useful if you want to stack a large
 number of models to increase signal to noise.
 Default: 1.
+.TP
+\fBcleanup=t|f\fP
+Cleanup the temporary run directory after usage. The
+contents of this directory is probably only useful for 
+debugging, it contains the output of all the individual programs
+and temporary files before final conversion to the \fIout\fP file.
+Default: t
 .SH PROCEDURE
 Creating a galaxy model from these parameters is sort of a black art
 since the halo and bulge models are not parameterized in terms of
@@ -280,7 +287,7 @@ The default keywords are for Kuijken-Dubinski's model-A.
 % snapplot D0.dat color='i<1000?2.0/16.0:(i<2000?3.0/16.0:4.0/16.0)' yvar=z
 .fi
 .SH SEE ALSO
-gendisk, genbulge, genhalo, dbh, getfreqs, diskdf, snapmstat(1NEMO), tabtos(1NEMO)
+gendisk, genbulge, genhalo, dbh, getfreqs, diskdf, snapmstat(1NEMO), tabtos(1NEMO), magalie(1NEMO)
 .nf
 http://www.astro.rug.nl/~kuijken/galactics.html     original GalactICS distribution
 .fi
@@ -304,5 +311,6 @@ Peter Teuben (NEMO interface) -
 .ta +1.0i +4.0i
 06-Mar-04	V1.0 Created, using kd95's  README file 	PJT
 11-mar-04	V1.2 added nmodel= and warns about using model= 	PJT
+23-mar-04	V1.4 use logfile in tmpdir, added cleanup=, some key reorder	PJT
 .fi
 
