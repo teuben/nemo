@@ -1,0 +1,22 @@
+%N otos
+%D convert a binary orbit to a snapshot file
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man otos' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Orbit input file name [???]
+%A out
+	Snapshot output file name [???]
+%A orbit
+	Which orbits to take [all]
+%A maxsteps
+	Orbit size allocation [5000]
+%A stride
+	Orbit stride to snapshot [1]
+%A nbody
+	Snapshot size allocation [10000]
+%A scan
+	Scan to end of all orbits for counting? [f]
+%A VERSION
+	19-apr-96 PJT [1.2b]
