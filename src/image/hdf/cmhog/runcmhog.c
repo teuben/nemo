@@ -13,14 +13,17 @@
  *        solution:  precede keyword with "name/"
  *        no new keywords to be added, must be in replace mode
  *
+ *  14-may-2003   also be able to create a directory hierarchy in one call
  */
 
 #include <stdio.h>
 #include <string.h>
 
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <errno.h>
 
 #define MAXCARDS 256
 
@@ -30,7 +33,7 @@ static int ncards = 0;
 
 static char *haskey(char *, char *);
 
-static char *program_version = "runcmhog:  Version 1.1 7-apr-2002";
+static char *program_version = "runcmhog:  Version 1.2 14-may-2003";
 
 static int Qdebug = 0;                  /* -d (debug toggle) */
 
@@ -228,12 +231,36 @@ strinsert(char *a, char *b, int n)
 
 goto_rundir(char *name)
 {
-    if (mkdir(name, 0755)) {
-        fprintf(stderr,"Run directory %s already exists\n",name);
-        exit(1);
-    }
-    if (chdir(name)) exit(2);
+#if 1
+  char *cmd = (char *)malloc(strlen(name) + 30);
+  struct stat fbuf;
+  int retval;
+  extern int errno;
 
+  if (name == 0 || *name == 0) {
+    exit(1);
+  }
+  sprintf(cmd,"mkdir -p %s",name);
+  if (system(cmd)) {
+    fprintf(stderr,"Problem executing \"%s\"\n",cmd);
+    exit(1);    
+  }
+  sprintf(cmd,"%s/cmhogin",name);
+  retval = stat(cmd,&fbuf);
+  if (retval == 0) {
+    fprintf(stderr,"Directory %s already used\n",cmd);
+    exit(1);    
+  } else if (errno != ENOENT) {
+    fprintf(stderr,"Some problem with/in directory %s [%d]\n",cmd,errno);
+    exit(1);    
+  }
+#else
+  if (mkdir(name, 0755)) {
+    fprintf(stderr,"Run directory %s already exists\n",name);
+    exit(1);
+  }
+#endif
+  if (chdir(name)) exit(2);
 }
 
 write_namelist(char *name)
