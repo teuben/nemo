@@ -1,5 +1,5 @@
 DIR = src/image/trans
-BIN = ccdmath ccdflip ccdsmooth
+BIN = ccdmath ccdflip ccdsmooth ccdgen
 NEED = $(BIN) 
 
 help:
