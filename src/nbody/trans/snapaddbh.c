@@ -4,6 +4,8 @@
  *
  * mode 0:  the sqrt(M/r) is in the same plane as (r,v) but pure centrifugal
  * mode 1:  sqrt(M/r) is added to the original velocity the star had
+ *
+ *
  * 
  *
  *      22-mar-04:  after Nelly Mouawad's ideas originally in a modified mkplummer
@@ -24,6 +26,7 @@ string defv[] = {	                 	/* DEFAULT INPUT PARAMETERS */
     "out=???\n      Output snapshot file",
     "bh=1\n         Mass of the BH to add",
     "mode=0\n       Mode how to add",
+    "fstream=0\n    Amount of streaming added (not implemented)",
     "VERSION=1.0\n  29-mar-04 PJT",
     NULL,
 };
