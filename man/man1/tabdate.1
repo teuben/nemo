@@ -1,0 +1,49 @@
+.TH TABDATE 1NEMO "1 February 2005"
+.SH NAME
+tabdate \- Convert a date/time column
+.SH SYNOPSIS
+\fBtabdate\fP in_file out_file in_format out_format
+.SH DESCRIPTION
+\fBtabdate\fP converts a file with the string representation of one date
+format into another. It is simply a wrapper of 
+\fIstrptime(4)\fP to \fIstrftime(4)\fP.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+input file name(s). 
+No default.
+.TP 20
+\fBout=\fP
+output file name. 
+No default.
+.TP 20
+\fBformat1=\fP
+format to read with. The field descriptors are 
+explained in \fIstrptime(3)\fP and \fIdate(1)\fP.
+No default.
+.TP 20
+\fBformat2=\fP
+format to write with.
+No default.
+.SH EXAMPLES
+
+.nf
+echo '2001-11-12 18:31:01' | tabtime - - '%Y-%m-%d %H:%M:%S' '%c'
+
+date +%s | tabtime - - %s %c
+.fi
+.SH SEE ALSO
+date(1), strptime(3), strftime(3)
+.SH FILES
+.nf
+src/kernel/tab	tabdate.c
+.fi
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+01-Feb-05	V0.1 Created	PJT
+.fi
