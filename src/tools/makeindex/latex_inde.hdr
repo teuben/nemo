@@ -1,0 +1,39 @@
+Article 109 of comp.sources.misc:
+Relay-Version: version B 2.10.3 alpha 5/22/85; site osu-eddie.UUCP
+Path: osu-eddie!cbosgd!ihnp4!ptsfa!ames!necntc!ncoast!allbery
+From: simpson@trwrb.UUCP (Scott Simpson)
+Newsgroups: comp.sources.misc
+Subject: LaTeX Index Processor (Part 1 of 2)
+Message-ID: <2836@ncoast.UUCP>
+Date: 10 Jul 87 02:02:01 GMT
+Date-Received: 11 Jul 87 02:08:28 GMT
+Sender: allbery@ncoast.UUCP
+Lines: 1689
+Approved: allbery@ncoast.UUCP
+X-Archive: comp.sources.misc/8707/40
+
+This is a repost of the LaTeX index processor I posted ages ago.
+Thanks to John Renner (adobe!renner@decwrl.dec.com) it now handles
+roman numeral page numbering too.  It does not handle upper case
+roman numeral page numbering though.  You might want to install the
+libraries distributed with it, especially the profile library.  It is
+quite useful.  To make it, type "make install".  Don't worry, it
+won't actually install anything.
+		Scott Simpson
+		TRW Electronics and Defense Sector
+		...{decvax,ihnp4,ucbvax}!trwrb!simpson
+
+Article 110 of comp.sources.misc:
+Relay-Version: version B 2.10.3 alpha 5/22/85; site osu-eddie.UUCP
+Path: osu-eddie!cbosgd!ihnp4!ptsfa!ames!necntc!ncoast!allbery
+From: simpson@trwrb.UUCP (Scott Simpson)
+Newsgroups: comp.sources.misc
+Subject: LaTeX Index Processor (Part 2 of 2)
+Message-ID: <2837@ncoast.UUCP>
+Date: 10 Jul 87 02:03:15 GMT
+Date-Received: 11 Jul 87 02:08:52 GMT
+Sender: allbery@ncoast.UUCP
+Lines: 2763
+Approved: allbery@ncoast.UUCP
+X-Archive: comp.sources.misc/8707/41
+

@@ -1,0 +1,259 @@
+.\" $Header$
+.TH STANDARD 5 TRW
+.UC
+.SH NAME
+standard \- standard include file for portability
+.SH ORIGIN
+TRW
+.SH SYNOPSIS
+#include <local/standard.h>
+.SH DESCRIPTION
+.I Standard
+is a set of defines, macro definitions and typedefs that provide
+portable constructs 
+and machine specific information
+for different machine architectures and C compilers.
+Basically, the include file is divided up into four sections: 
+machine
+environment
+information,
+standard type definitions,
+useful constants and useful macros.
+.PP
+The environment of the computer a program is executing on is described by
+the following defines:
+.TP
+HAS_UNSIGNED_SHORT
+If defined, unsigned shorts are supported.
+.TP
+CHAR_IS_SIGNED
+If defined, chars are signed.
+.TP
+HAS_UNSIGNED_CHAR
+If defined, unsigned chars are supported.
+.TP
+HAS_UNSIGNED_LONG
+If defined, unsigned longs are supported.
+.TP
+HAS_VOID
+If defined, the void function type is supported.
+.TP
+BITS_PER_CHAR
+Defined as the number of bits in a char.
+.TP
+BITS_PER_SHORT
+Defined as the number of bits in a short.
+.TP
+BITS_PER_INT
+Defined as the number of bits in an int.
+.TP
+BITS_PER_LONG
+Defined as the number of bits in a long.
+.TP
+BITS_PER_POINTER
+Defined as the number of bits in a pointer.
+.PP
+There are a set of machine independent type definitions and macros.
+.TP
+Tiny
+A signed character type.
+.TP
+TINY(\fIx\fP)
+An extraction macro for a signed character.  The value of the macro is an
+integer that will be sign extended if the most significant bit of the 
+character is one.
+.TP
+UnsignedTiny
+An unsigned character type.
+.TP
+UNSIGNED_TINY(\fIx\fP)
+An extraction macro for an unsigned character.  The value of the macro is an
+integer that will not be signed extended even if the most significant bit
+of the character is one.
+.TP
+Short
+Simply a short type.  All compilers have a short type but this is included
+for lexical consistency.
+.TP
+UnsignedShort
+An unsigned short type.
+.TP
+UNSIGNED_SHORT(\fIx\fP)
+An extraction macro for an unsigned short.
+The value of the macro is an integer that will not be sign extended even if
+the most significant bit of the short is one.
+.TP
+Integer
+The int type.  Included for lexical consistency.
+.TP
+UnsignedInteger
+The unsigned integer type.
+.TP
+Long
+The long type.
+.TP
+UnsignedLong
+An unsigned long type.
+.TP
+UNSIGNED_LONG(\fIx\fP)
+An extraction macro for an unsigned long integer.
+Not all compilers support unsigned longs so we may have to simulate them.
+.TP
+TinyBoolean
+A tiny boolean value.  Boolean types take on only the values TRUE and FALSE.
+.TP
+Boolean
+A regular boolean value.
+.TP
+Character
+The char type.  Included for lexical consistency.
+.TP
+TinyBits
+A type used only for bit set, clear and test operations.
+.TP
+Bits
+The regular size bit type.
+.TP
+LongBits
+The long size bit type.
+.TP
+Void
+The void type.  If the void type is not supported then it is defined as
+an int.
+.TP
+Import
+The storage class used when importing variables from separate files.
+It is defined to be the keyword 
+.I extern.
+.TP
+Export
+The storage class used when exporting variables from separate files.
+In C, you needn't 
+declare that a variable is available to other files if it is declared
+outside a function so this is defined as a no-op.
+.TP
+Local
+The static storage class.
+.PP
+A number of useful constants are also defined.
+.TP
+TRUE and FALSE
+The values 1 and 0 respectively.
+.TP
+SUCCEED and FAIL
+The values 0 and 1 respectively.  These are normally used as exit statuses.
+.TP
+ON
+A long with all the bits set.  
+.TP
+OFF
+A long with no bits set.
+.TP
+STANDARD_IN
+Defined as 0.
+.TP
+STANDARD_OUT
+Defined as 1.
+.TP
+STANDARD_ERROR
+Defined as 2.
+.TP
+MAX_TINY
+The maximum value a Tiny type can hold.
+.TP
+MIN_TINY
+The minimum value a Tiny type can hold.
+.TP
+MAX_UNSIGNED_TINY
+The maximum value an UnsignedTiny type can hold.
+.TP
+MIN_UNSIGNED_TINY
+The minimum value an UnsignedTiny type can hold.
+.TP
+MAX_SHORT
+The maximum value a Short type can hold.
+.TP
+MIN_SHORT 
+The minimum value a Short type can hold.
+.TP
+MAX_UNSIGNED_SHORT
+The maximum value an UnsignedShort type can hold.
+.TP
+MIN_UNSIGNED_SHORT
+The minimum value an UnsignedShort type can hold.
+.TP
+MAX_INTEGER
+The maximum value an Integer type can hold.
+.TP
+MIN_INTEGER
+The minimum value an Integer type can hold.
+.TP
+MAX_UNSIGNED_INTEGER
+The maximum value an UnsignedInteger type can hold.
+.TP
+MIN_UNSIGNED_INTEGER
+The minimum value an UnsignedInteger type can hold.
+.TP
+MAX_LONG
+The maximum value a Long type can hold.
+.TP
+MIN_LONG
+The minimum value a Long type can hold.
+.TP
+MAX_UNSIGNED_LONG
+The maximum value an UnsignedLong type can hold.
+.TP
+MIN_UNSIGNED_LONG
+The minimum value an UnsignedLong type can hold.
+.TP
+BITS_PER_BYTE
+The number of bits in a byte.
+.PP
+A number of useful macro are also defined.
+.TP
+MAX(\fIx\fP, \fIy\fP)
+Returns the maximum value of 
+.I x
+and 
+.I y.
+.TP
+MIN(\fIx\fP, \fIy\fP)
+Returns the minimum value of 
+.I x
+and
+.I y.
+.TP
+ABS(\fIx\fP)
+Returns the absolute value of its parameter.  This works for integers and
+reals.
+.TP
+ROUND(\fIx\fP)
+Returns
+its parameter rounded to the nearest integer value.
+.TP
+CEILING(\fIx\fP)
+Returns the ceiling of its parameter.
+.TP
+FLOOR(\fIx\fP)
+Returns the floor of its parameter.
+.TP
+EQ(\fIs\fP, \fIt\fP)
+Returns true if the two strings passed to it as parameters are equal.
+.TP
+EQN(\fIs\fP, \fIt\fP, \fIn\fP)
+Returns true if the two strings passed to it as parameters are equal in
+the first
+.I n
+characters (as in
+.IR strcmp ).
+.SH FILES
+.nf
+.ta \w'/usr/include/local/standenviron.h   'u
+/usr/include/local/standard.h
+/usr/include/local/standenviron.h
+/usr/include/local/standtype.h
+/usr/include/local/standconst.h
+/usr/include/local/standmacro.h
+.fi
+.SH AUTHOR
+Michael Gorlick

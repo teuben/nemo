@@ -1,0 +1,278 @@
+.\" %W% (TRW) %G%
+.TH PROFILE 3 TRW
+.UC 4
+.SH NAME
+profile \- read/write configuration files
+.SH SYNOPSIS
+.nf
+.B #include <stdio.h>
+.B #include <local/profile.h>
+
+.B PROFILE_STANZA *profile_read_stanza(f)
+.B FILE *f;
+
+.B PROFILE_STANZA *profile_read_profile(f)
+.B FILE *f;
+
+.B profile_write_stanza(f, s)
+.B FILE *f;
+.B PROFILE_STANZA *s;
+
+.B profile_write_profile(f, s)
+.B FILE *f;
+.B PROFILE_STANZA *s;
+
+.B profile_free_stanza(s)
+.B PROFILE_STANZA *s;
+
+.B PROFILE_MARKER *profile_has_marker(s, m)
+.B PROFILE_STANZA *s;
+.B char *m;
+
+.B PROFILE_STANZA *profile_has_stanza(s, marker)
+.B PROFILE_STANZA *s;
+.B char *marker[];
+
+.B PROFILE_BINDING *profile_has_binding(s, b)
+.B PROFILE_STANZA *s;
+.B char *b;
+
+.B PROFILE_STANZA *profile_stanza_space()
+
+.B PROFILE_MARKER *profile_marker_space(n)
+.B int n;
+
+.B PROFILE_BINDING *profile_binding_space(n)
+.B int n;
+
+.B PROFILE_VALUE *profile_value_space(n)
+.B int n;
+.fi
+.SH DESCRIPTION
+.I Profile_read_stanza
+reads a single stanza from a configuration file returning
+a pointer to the stanza if successful and NULL on error or end of file.
+A stanza is defined as:
+.nf
+.ta 1i +\w'typedef 'u
+
+	typedef struct PROFILE_STANZA {
+		PROFILE_MARKER *marker;
+		PROFILE_BINDING *binding;
+		struct PROFILE_STANZA *previous;
+		struct PROFILE_STANZA *next;
+	} PROFILE_STANZA;
+.fi
+.PP
+.I Marker
+and
+.I binding
+point to linked lists of markers and bindings respectively.
+If
+.I marker
+is
+.B NULL
+the stanza has no markers.
+If
+.I binding
+is
+.B NULL
+the stanza has no bindings.
+.I Previous
+and
+.I next
+are ignored and may be used to doubly link successive stanzas together.
+.DT
+.PP
+A marker is defined as:
+.nf
+.ta 1i +\w'typedef 'u
+
+	typedef struct PROFILE_MARKER {
+		char *text;
+		struct PROFILE_MARKER *previous;
+		struct PROFILE_MARKER *next;
+	} PROFILE_MARKER;
+.fi
+.DT
+.PP
+.I Text
+is a string containing the literal text of the marker
+and is always nonempty.
+.IR Previous " (" next )
+is a pointer to the previous (next) marker in the sequence.
+In the first (last) marker
+.IR previous " (" next )
+is
+.BR NULL .
+.PP
+A binding is defined as:
+.nf
+.ta 1i +\w'typedef 'u
+
+	typedef struct PROFILE_BINDING {
+		char *name;
+		PROFILE_VALUE *value;
+		struct PROFILE_BINDING *previous;
+		struct PROFILE_BINDING *next;
+	} PROFILE_BINDING;
+.fi
+.DT
+.PP
+.I Name
+is the literal text of the name of the binding and is always nonempty.
+.I Value
+is a pointer to the list of values associated with the name.
+If
+.I value
+is
+.B NULL
+then the binding consists solely of a name with no associated value.
+.IR Previous " (" next )
+points to the previous (next) binding in the sequence.
+In the first (last) binding
+.IR previous " (" next )
+is
+.BR NULL .
+.PP
+A value is defined as:
+.nf
+.ta 1i +\w'typedef 'u +\w'union { 'u
+
+	typedef struct PROFILE_VALUE {
+		char class;
+		union {
+			long int i;
+			double f;
+			char c;
+			char *s;
+		} value;
+		struct PROFILE_VALUE *previous;
+		struct PROFILE_VALUE *next;
+	} PROFILE_VALUE;
+.fi
+.DT
+.PP
+.I Class
+is always one of:
+.TP
+PROFILE_CHARACTER
+the value is a character constant contained in
+.IR c .
+.TP
+PROFILE_HEX
+the value is a hex constant contained in
+.IR i .
+.TP
+PROFILE_INTEGER
+the value is an integer constant contained in
+.IR i .
+.TP
+PROFILE_FLOAT
+the value is a real constant contained in
+.IR f .
+.TP
+PROFILE_OCTAL
+the value is an octal constant contained in
+.IR i .
+.TP
+PROFILE_STRING
+the value is a string constant contained in
+.IR s .
+.TP
+PROFILE_OTHER
+the value is not recognizably
+character,
+hex,
+integer,
+float,
+octal
+or string.
+The literal text is contained in
+.IR s .
+.PP
+.IR Previous " (" next )
+points to the previous (next) value in the sequence.
+In the first (last) value
+.IR previous " (" next )
+is
+.BR NULL .
+.PP
+.I Profile_read_profile
+reads an entire configuration file and builds a bi-directional, 
+circularly linked list of stanzas using the 
+.I previous
+and 
+.I next
+pointers.
+The value returned is a pointer to the first stanza in the list.
+.PP
+.I Profile_write_stanza
+writes a stanza in a canonical form suitable for input by
+.IR profile_read_stanza .
+Markers are output one to a line.
+Each binding is indented by a single tab.
+Names and values are separated, one from the other,
+by a single blank.
+.PP
+.I Profile_write_profile
+writes all the stanzas in a linked list by applying
+.I profile_write_stanza
+to each stanza in the list.
+The list need not be doubly linked.
+.PP
+.I Profile_free_stanza
+frees all storage associated with a stanza.
+.PP
+.I Profile_has_marker
+searches the marker list of a stanza for a match to the given marker,
+.IR m .
+A pointer to the marker is returned on success and
+.B NULL
+on failure.
+.PP
+.I Profile_has_stanza
+searches a linked list of stanzas for a stanza that has all the
+markers in
+.I marker.
+.I Marker 
+must be terminated by a null entry.
+.PP
+.I Profile_has_binding
+searches the binding list of a stanza
+for a binding with a match to the given name.
+A pointer to the binding is returned on success and
+.B NULL
+on failure.
+.PP
+The following routines are useful for constructing stanzas on the fly.
+.I Profile_stanza_space
+allocates storage for a stanza.
+.I Profile_marker_space
+allocates storage for a marker including sufficient space for
+.I n
+characters of text plus a terminating null byte.
+.I Profile_binding_space
+allocates storage for a binding including sufficient space for
+.I n
+characters of name text plus a terminating null byte.
+.I Profile_value_space
+allocates storage for a value.
+If
+.I n
+is positive and non-zero the component
+.IR value . s
+is initialized as a
+.IR n +1
+character array.
+All of the above routines return a pointer on success and
+.B NULL
+on failure.
+All storage is zero filled.
+The routine
+.IR free (3)
+may be safely used to release storage allocated by these routines.
+.SH AUTHOR
+Michael Gorlick, TRW
+.SH SEE ALSO
+malloc(3), profile(5)
