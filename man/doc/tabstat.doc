@@ -1,0 +1,26 @@
+%N tabstat
+%D table column statistics
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man tabstat' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input file name (table) [???]
+%A xcol
+	x coordinate column(s) [1]
+%A iter
+	# iterations removing worst outlier [0]
+%A sigma
+	Multiple sigma above which to remove outliers [0]
+%A verbose
+	Verbose output of all iterations? [t]
+%A width
+	Width of columns to print []
+%A median
+	Compute median too? (can be time consuming) [t]
+%A method
+	Method to remove outliers (0=fast 1=slow) [0]
+%A nmax
+	maximum number of data to be read if pipe [10000]
+%A VERSION
+	9-dec-99 PJT [1.0]
