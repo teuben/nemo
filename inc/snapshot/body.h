@@ -2,6 +2,10 @@
  * BODY.H: Structure and accessor macro definitions for a vanilla-flavored
  * body structure to be used in conjunction with SnapShot binary files.
  */
+#ifndef _body_h
+#define _body_h
+
+
 
 typedef struct {
     real   bodymass;			/* mass of body			    */
@@ -11,6 +15,10 @@ typedef struct {
     real   bodyaux;			/* misc. real value assoc. w. body  */
     int    bodykey;			/* misc. int. value assoc. w. body  */
 } body;
+
+typedef int  (*btiproc)(body *, real, int);
+typedef real (*btrproc)(body *, real, int);
+
 
 #define Body     body
 
@@ -22,3 +30,5 @@ typedef struct {
 #define Acc(b)   ((b)->bodyacc)
 #define Aux(b)   ((b)->bodyaux)
 #define Key(b)   ((b)->bodykey)
+
+#endif

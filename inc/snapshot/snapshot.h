@@ -3,6 +3,9 @@
  *	sep-1990	added Story, Pos and Vel options
  */
 
+#ifndef _snapshot_h
+#define _snapshot_h
+
 /*
  * Item tags for SnapShot components.
  */
@@ -74,3 +77,5 @@
 #define EccAnomaly  (5 << 16)
 #define MeanAnomaly (6 << 16)
 #define PeriPassage (7 << 16)
+
+#endif
