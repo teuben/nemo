@@ -1,0 +1,91 @@
+%N runbody2
+%D Ahmad-Cohen N-body code
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man runbody2' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	input file (optional - see nbody= )  []
+%A outdir
+	output run directory (required) [???]
+%A nbody
+	Total particle number (<= NMAX). [???]
+%A nfix
+	Output frequency of data save or binaries; KZ(3 & 6) [1]
+%A nrand
+	Random number sequence skip [0]
+%A nnbmax
+	Maximum number of neighbours (< LMAX) [40]
+%A nrun
+	Run identification index [1]
+%A etai
+	Time-step parameter for irregular force polynomial [0.02]
+%A etar
+	Time-step parameter for regular force polynomial [0.04]
+%A rs0
+	Initial radius of neighbour sphere [1.0]
+%A deltat
+	Output time interval in units of the crossing time [0.5]
+%A tcrit
+	Termination time in units of the crossing time [5.0]
+%A tnext
+	Next output time for restart runs []
+%A qe
+	Energy tolerance (restart if DE/E > 5*QE & KZ(2) > 1) [0.00002]
+%A eps
+	Potential softening parameter [0.01]
+%A kz
+	Non-zero options for alternative paths (see below)
+ 1  COMMON save on unit 1 at end of run (=2: every 100*NMAX steps)
+ 2  COMMON save on unit 2 at output (=1); restart if DE/E > 5*QE (=2)
+ 3  Basic data written to unit 3 at output time (frequency NFIX)
+ 4  Initial conditions on unit 4 (=1: output; =2: input)
+ 5  Initial conditions (=0: uniform & isotropic; =1: Plummer model)
+ 6  Output of significant binaries (=2: frequency NFIX)
+ 7  Lagrangian radii (=1: unit 6; =2: unit 7; =3: both types)
+ 8  Core radius & density centre (N > 20 only)
+ 9  Individual bodies printed at output time (MIN(5**KZ9,N))
+ 10  No unique density centre (skips velocity modification of RS(I))
+ 11  Modification of ETAI & ETAR by tolerance QE
+ 12  Inelastic mergers (>1: diagnostic output)
+ 13  Escaper removal (R > 2*RTIDE; RTIDE = 10*RSCALE)
+ 14  Skip full predictor loop if NNB > KZ(14) = <NNB> & KZ(14) > 0
+ 15  External potential (=1: Plummer model; =2: logarithmic potential)
+ 16  No scaling of initial conditions
+ 17  Generation of two subsystems (merger experiment)
+ 18  Adjustment of coordinates & velocities to c.m. condition
+ 19  Not used at present (same for # 20) [1,2,0,0,0,0,1,1,0,0,1]
+%A xtpar1
+	Mass of external Plummer model (KZ(15) = 1; scaled units) []
+%A xtpar2
+	Length scale for Plummer model (KZ(15) = 1) []
+%A zmgas
+	Mass scale for logarithmic potential (KZ(15) = 2) []
+%A rgas
+	Length scale for logarithmic potential (KZ(15) = 2) []
+%A alphas
+	Power-law index for initial mass function [2.3]
+%A body1
+	Maximum particle mass before scaling [5.0]
+%A bodyn
+	Minimum particle mass before scaling [1.0]
+%A q
+	Virial ratio (q=0.5 for virial equilibrium) [0.0]
+%A vxrot
+	XY-velocity scaling factor (> 0 for solid-body rotation) [0.0]
+%A vzrot
+	Z-velocity scaling factor (not used if VXROT = 0) [0.0]
+%A rbar
+	Virial radius in pc (for scaling to physical units) [1.0]
+%A zmbar
+	Mean mass in solar units [1.0]
+%A xcm
+	Displacement for subsystem (routine SCALE; KZ 17) []
+%A ecc
+	Eccentricity of relative motion for subsystem (ECC =< 1) []
+%A kstart
+	Running mode (1=new 2=restart 3,4,5=restart w/ new par [1]
+%A tcomp
+	Maximum allowed running time (minutes) [40.0]
+%A VERSION
+	15-jul-97 PJT [1.2]
