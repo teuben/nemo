@@ -1,7 +1,9 @@
 /* 
- * MKTT
+ * MKTT77 - each ring in its own snapshot, use snapmerge to merge them
  *
- *   19-nov-2002	Created
+ *   19-nov-2002	0.1 Created - Q&D
+ *    4-dec-2002        0.2 Added mass=, eps= (mode= not implemetned)
+ *
  */
 
 #include <stdinc.h>
@@ -18,12 +20,15 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "radius=1:6:1\n	radii of rings",
     "seed=0\n		seed for random numbers",
     "zerocm=false\n	if true, zero center of mass",
+    "mass=1.0\n         central mass",
+    "eps=0.0\n          softening for central particle",
+    "mode=\n            number or density constant per ring?",
     "headline=\n	verbiage for output",
-    "VERSION=0.1\n	19-nov-02 PJT",
+    "VERSION=0.2\n	4-dec-02 PJT",
     NULL,
 };
 
-string usage = "Create a Toomre & Toomre 1972 test disk";
+string usage = "Create a Toomre & Toomre 1972 test disk centered around a point mass";
 
 
 #ifndef MOBJ
@@ -37,6 +42,9 @@ local int nobj;
 local real mass[MOBJ];
 local vector phase[MOBJ][2];
 local double radius[MAXRAD];
+
+local real eps2;
+local real sqrtm;
 
 local stream outstr;
 local string headline;
@@ -55,9 +63,12 @@ void nemo_main()
 	error("Too many particles requested: nbody > MOBJ [%d]", MOBJ);
     init_xrandom(getparam("seed"));
     headline = getparam("headline");
+    sqrtm = sqrt(getdparam("mass"));
+    eps2 = getdparam("eps");
+    eps2 = eps2*eps2;
 
     for (i=0; i<nrad; i++) {
-        makering(radius[i]);
+      makering(radius[i]);
         if (getbparam("zerocm"))
 	    zerocms(phase, 2 * NDIM, mass, nobj, nobj);
         writesnap(i);
@@ -67,17 +78,19 @@ void nemo_main()
 
 makering(real radius)
 {
-    int i;
-    real theta;
+  int i;
+  real theta, velo = sqrtm*radius*pow(radius*radius+eps2,-0.75);
 
-    for (i = 0; i < nobj; i++) {
-	mass[i] = 1.0 / nobj;
-	theta = TWO_PI * ((real) i) / nobj;
-	CLRV(phase[i][0]);
-	phase[i][0][0] = radius * sin(theta);
-	phase[i][0][1] = radius * cos(theta);
-	CLRV(phase[i][1]);
-    }
+  for (i = 0; i < nobj; i++) {
+    mass[i] = 0.0;
+    theta = TWO_PI * ((real) i) / nobj;
+    CLRV(phase[i][0]);
+    phase[i][0][0] = radius * cos(theta);
+    phase[i][0][1] = radius * sin(theta);
+    CLRV(phase[i][1]);
+    phase[i][1][0] = -velo * sin(theta);
+    phase[i][1][1] =  velo * cos(theta);
+  }
 }
 
 writesnap(int i)
