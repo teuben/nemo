@@ -78,9 +78,11 @@ ______________________________________________________________________________
 Preconditions to INSTALLATION
 =============================
 
-The default installation installs NEMO with no graphics library 
-(a.k.a. yapp_null). You should consider selecting a well supported
-YAPP hookup, e.g. PGPLOT. 
+The default installation installs NEMO with a simple postscript-only
+graphics library (a.k.a. yapp_ps). You should consider selecting a well 
+supported YAPP hookup, e.g. PGPLOT, which allows transparent switching
+between X (multiple persistent as well as non-persistent), postscript,
+GIF, PPM etc.
 
 a) Installing PGPLOT
 
@@ -90,7 +92,7 @@ a) Installing PGPLOT
 	or a local repository)
 
    this assumes $NEMO has a basic presence already, so don't start this
-   yet, first figure something out about the installation.
+   yet, first figure something out about the installation. See below.
 
 See also $NEMO/src/scripts/
 
@@ -98,15 +100,17 @@ See also $NEMO/src/scripts/
 		 ln -s /usr/X11R6 /usr/X11
 
 b) Installing HDF
+    
+   You only need the HDF library if you plan to work with CMHOG (hydrocode).
 	
 -- To be filled in --
 
 c) Installing CFITSIO
 
-   Be aware that at some future point when NEMO is going to use more of 
-   cfitsio, the fitsio.h header file in NEMO and CFITSIO will cause problems. 
-   Not sure of what the final resolution is. Perhaps NEMO's fitsio.h will be 
-   renamed.
+   There is no code in NEMO yet using CFITSIO, NEMO has two internal
+   routines (fits.c and fitsio.c) that handle all of the fits I/O.
+   However, we anticipate that CFITSIO will be used at some point.
+
 
 Brief overview of a Version 3.x.y INSTALLATION  
 ==============================================
@@ -134,10 +138,23 @@ Brief overview of a Version 3.x.y INSTALLATION
 
 2) Run configure and install the basic libraries:
 
-	% configure
+	% configure 
 	% source nemo_start
 	% make dirs config_extra scripts
 	% source NEMORC.local		  (or look at $NEMO/src/scripts/NEMORC)
+	% rehash
+	% make libs
+
+*) Installing PGPLOT within NEMO:
+
+	% configure 
+	% source nemo_start
+	% make dirs 
+	% make config_clean				<==
+	% src/scripts/pgplot.install			<==
+	% configure --with-pgplot-prefix=$NEMOLIB	<==
+	% make config_extra scripts
+	% source NEMORC.local
 	% rehash
 	% make libs
 
@@ -405,3 +422,24 @@ before the
 
   which stamps your local adm/Chkfile such that 'make new' works
 
+
+
+
+	
+-- 
+  Faking a host
+
+
+  If you get a message like:
+	
+	Warning: /atlas2/nemo/nemo/bin/sparc-sun-solaris2.8 does not exist
+
+  you can fix this with
+
+	make truehost TRUEHOST=....
+
+  or if you want to give an exist host other aliases, use
+
+	make fakehost FAKEHOST=....
+
+	

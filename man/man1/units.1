@@ -1,4 +1,4 @@
-.TH UNITS 1NEMO  "18 August 1993"
+.TH UNITS 1NEMO  "6 April 2001"
 .SH NAME
 units \- units conversion utility
 .SH SYNOPIS
@@ -152,6 +152,19 @@ femto-	f-	1e-15
 atto-	a-	1e-18
 zopto-	z-	1e-21
 yocto-	y-	1e-24
+.fi
+.SH G
+The gravitational constant is often set to unity in N-body codes. However, for sake
+of completeness, here are a few common values of G in some other 'common'
+unit systems, recalling that G*m/(r*v*v) is dimensionless:
+.nf
+  mass   length   velocity    G            1/G            time
+
+     g       cm       cm/s    6.6732e-8    1.49853e+07      s      (cgs)
+    kg        m        m/s    6.6732e-11   1.49853e+10      s      (SI)
+     M       pc       km/s                 2.32385e3       1e4.yr  (starcluster)
+     M       kpc      km/s                 2.32385e5       1e7.yr
+1e10.M    10.kpc  100.km/s                 2.32385         1e6.yr  (galaxy)
 .fi
 .SH BUGS
 .LP
