@@ -50,9 +50,10 @@ string defv[] = {
     "mirror=t\n                 Mirror all points?",
     "symmetry=auto\n		Override otherwise automated symmetry properties (odd|even|auto) **unused**",
     "it0=0\n			Shift THETA array (i.e. rotate grid)",
-    "phi0=0\n                   Shift THETA values (*test*)",
-    "scale0=1\n                 Scale THETA values after shift (*test*)",
-    "VERSION=2.0b\n		8-dec-04 PJT",
+    "phi1=0\n                   Shift THETA values first (*test*)",
+    "scale2=1\n                 Scale THETA values after shift (*test*)",
+    "phi3=0\n                   Shift THETA values after scale (*test*)",
+    "VERSION=2.0c\n		10-dec-04 PJT",
     NULL,
 };
 
@@ -87,7 +88,7 @@ void nemo_main()
     char ntype[32];
     string filter, zvar, infile = getparam("in");
     stream outstr;
-    real xrange[3], yrange[3], cosp, sinp, phi0, scale0;
+    real xrange[3], yrange[3], cosp, sinp, sumphi1, scalephi2, sumphi3;
     real x, y, a1, a2, c1,c2,c3,c4, cmin, cmax, dcon, tmp, vr, vt;
     real sds_time = -1.0;
     imageptr iptr;
@@ -95,8 +96,9 @@ void nemo_main()
     Qmirror  = getbparam("mirror");
 
     it0 = getiparam("it0");
-    phi0 = getdparam("phi0");
-    scale0 = getdparam("scale0");
+    sumphi1 = getdparam("phi1");
+    scalephi2 = getdparam("scale2");
+    sumphi3 = getdparam("phi3");
     nsds = DFSDndatasets(infile);
     if (nsds<0) 
         error("%s is probably not an HDF scientific dataset",infile);
@@ -259,8 +261,9 @@ void nemo_main()
     phis = coord[i0];
     create_image(&iptr, nx, ny);
     for (j=0; j<np; j++) {
-      phis[j] -= phi0;
-      phis[j] *= scale0;
+      phis[j] -= sumphi1;
+      phis[j] *= scalephi2;
+      phis[j] -= sumphi3;
     }
 
     dprintf(1,"Radius: %g %g\n",rads[0],rads[nr-1]);
