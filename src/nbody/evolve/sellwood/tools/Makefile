@@ -1,9 +1,9 @@
 #	Makefile for NEMO/src/nbody/trans
 include $(NEMOLIB)/makedefs
 
-CFLAGS = -O
-LDFLAGS = -O
-RANLIB = ranlib
+#CFLAGS = -O
+#LDFLAGS = -O
+#RANLIB = ranlib
 
 #	sub-directories to be visited, in the order given here
 #DIRS = 
@@ -63,23 +63,6 @@ install:
 	cp $? $(NEMOINC)
 	@touch .install_inc
 
-#	NEMO compile rules
-.o.a:
-	@echo "***Skipping ar for $* at this stage"
-
-.c.o:
-	$(CC) $(CFLAGS) -c $<
-
-.c.a:
-	$(CC) $(CFLAGS) -c $<
-
-.c:
-	$(CC) $(CFLAGS) -o $* $*.c $(L) -lm
-
-.o:
-	$(CC) $(CFLAGS) -o $* $*.o $(L) -lm
-#
-# Targets used by Nemo to update libraries and bins.
 
 nemo_lib: $(LIBFILE)
 
