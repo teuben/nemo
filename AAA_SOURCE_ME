@@ -62,7 +62,7 @@ rehash
 echo '++++++++++++++++++++++++++++++++++++++++' >>& install.log
 
 echo Building NEMO library 
-(cd src; make clean install) >>& install.log
+(cd src; make -i clean install) >>& install.log
 if ($status) then
     @ stat++
 endif
