@@ -29,6 +29,7 @@
  *                       but deleted the skip & stride keywords. 
  *      19-apr-01  V3.1  added comments=
  *       8-sep-01     a  init_xrandom
+ *       1-aug-02     b  using nemo_debug()
  */
 
 /**************** INCLUDE FILES ********************************/ 
@@ -52,7 +53,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "select=all\n	Select lines",
     "seed=0\n           Initial random number",
     "comments=f\n       Pass through comments?",
-    "VERSION=3.1\n      19-apr-01 PJT",
+    "VERSION=3.1b\n     1-aug-02 PJT",
     NULL
 };
 
@@ -87,7 +88,6 @@ local string *burstfie(string);
 local void tab2space(char *);
 
 extern  string *burststring(string, string);
-extern int debug_level;
 
 
 /****************************** START OF PROGRAM **********************/
@@ -144,7 +144,7 @@ local void setparams(void)
 	dprintf(1,"Saving: %s\n",fies[i]);
         inifie(fies[i]);
         if (savefie(i+1) < 0) error("Could not save fie[%d]: %s\n",i,fies[i]);
-	if(debug_level>0)dmpfie();
+	if(nemo_debug(1)) dmpfie();
     }
     Qfie = nfies > 1;
     selfie = getparam("selfie");
