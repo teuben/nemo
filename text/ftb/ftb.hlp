@@ -1,0 +1,371 @@
+.BOTTOM
+Command: BOTTOM
+Default: Bottom of current display
+
+The BOTTOM command scrolls immediately to the bottom of the current display
+screen.  In BROWSE mode and if a SELECT command is in force, the full screen
+may not be displayed, since (or all) records may be "selected out".
+
+.BROWSE
+Command: BROWSE [TABLE table-id] [RANGE start-finish]
+Default: Current table; all records in the table
+
+The BROWSE command allows one to browse through the given table. The table-id
+can be either the table number or the table name. If no table identifier is
+given, the current table (see TABLE) is browsed. The search begins at record
+"start" and runs through record "finish" inclusive, the default is to start at
+record 1 and proceed to the end of the table.
+
+.CLOSE
+Command: CLOSE [TABLE table-id]
+Default: Current table
+
+The CLOSE command closes the given table and frees all allocated memory
+attached to the table. Closing a table does not affect the ordering of the
+table identifiers for other open tables. For example,
+
+    CLOSE TABLE 2
+
+will free all resources for table 2 and delete it from the list. Subsequent
+LIST commands would show that item 2 is no longer on the list of tables, but
+tables 1, 3, 4, ..., are left intact with the same numbers.
+
+.DISPLAY
+Command: DISPLAY [TABLE table-id] [CLEAR] field-id ...
+Default: None
+
+The DISPLAY command allows the user to specify which fields are displayed by
+BROWSE. The table-id can be either the table number or the table name. If no
+table identifier is given, the field specifications apply to the current table.
+The CLEAR option clears memory of all previous field specifications.
+
+Field specifications may consist of the field number or name followed by a
+separator character, and perhaps more information. A counter is maintained
+which holds the next available screen column for a display. If a field will not
+fit because some other field is in the way, it is moved to the right
+automatically until a place is found for it, or until there is no more room.
+
+Field separator characters can be one of the following:
+
+   1. one or more blanks to indicate that a blank column should appear
+      after the field
+
+   2. a plus sign, "+", to indicate that the next field should be placed
+      adjacent to this field
+
+   3. a comma, ",", to indicate a range of fields to display, each separated
+      by a single blank
+
+   4. a slash, "/", followed by a column number to indicate that the field
+      should be placed in that column.
+
+In cases (1), (2), and (3) the display counter is incremented to point to the
+next available display position. In case (4), the display counter is not
+changed.
+
+For example, if the display counter starts at 1, the left margin, the following
+field specifications:
+
+    DISPLAY RAH RAM DECSIGN+DECD DECM MAG/30
+
+will result in field RAH displayed starting in column 1 and field RAM
+following, separated by a blank column. DECSIGN and DECD will be displayed
+together without any intervening blank column. DECM will be separated from DECD
+by a blank column, and MAG will be displayed starting in column 30. The display
+counter is set to point to the column following DECM.
+
+If those same six fields are adjacent to each other in the table (which can be
+verified with the LIST FIELDS command), then the following field specification:
+
+    DISPLAY RAH,MAG
+
+will display all six fields, each separated by a single blank.
+
+.DOWN
+Command: DOWN [PAGE | HALF | rows]
+Default: Scroll down half a page
+
+The DOWN command scrolls the display down by either a full screen "page", half
+a page, or by the given number of rows.
+
+.ECHO
+Command: ECHO [ON | OFF]
+Default: Print current ECHO setting
+
+The ECHO command starts or stops command-line echo in FTB batch files. It has
+no effect on commands entered interactively. When set (ECHO ON), every command
+line read from a batch file is echoed to the screen before it is executed.
+Command-line echo is useful for tracing the execution of an FTB batch file.
+
+.EXIT
+Command: EXIT
+Default: None
+
+The EXIT command terminates FTB, closing all open files and restoring the
+original default drive and directory.
+
+.EXTRACT
+Command: EXTRACT [TABLE table-id] [APPEND] [FITS|TEXT|DUMP]
+                 [RANGE start-finish] [filename]
+Default: Current table; FITS mode; all selected records; prompt for filename
+
+The EXTRACT command writes display fields (see DISPLAY) from selected records
+(see SELECT) into the named file. The output can be in FITS mode, which will
+write a standard FITS ASCII table, TEXT mode, which will write a text version
+of the FITS header and a separate text file for the data, or DUMP mode, which
+dump the selected records with labelled column headings. The APPEND option in
+FITS mode will append an additional ASCII Table extension to the given FITS
+file, and in TEXT or DUMP mode, will append data records to the given output
+text file.
+
+Note that if the APPEND option is used in TEXT mode, and the display format
+has changed from a previous invocation of the EXTRACT command, the text file
+will have a format inconsistent with the text file version of the FITS header.
+
+The RANGE search begins at record "start" and runs through record "finish"
+inclusive, the default is to start at record 1 and proceed to the end of the
+table.
+
+Filenames should be given without extensions, and the EXTRACT will append
+standard extensions ot the output filename(s). In FITS mode the extension is
+".fit". In TEXT mode, the extensions are ".hdr" and ".dat" for the header and
+table file, respectively.
+
+Example:
+
+   extract table 2 range 200-550 savedata.txt
+
+This will extract the records in table 2 into file SAVEDATA.TXT. The search
+begins at record 200 and proceeds through record 550. The number of records
+extracted depends on the criteria set by the SELECT command.
+
+.HELP
+Command: HELP [command]
+Default: Command list
+
+The HELP command presents informative text about the following FTB commands.
+
+ BOTTOM   BROWSE   CLOSE    DISPLAY  DOWN     EXIT     EXTRACT  HELP
+ LEFT     LIST     OPEN     QUIT     REMARK   RIGHT    SELECT   SET
+ SYSTEM   TAKE     TOP      UP
+
+                                Basic Operation
+                                ---------------
+ OPEN      Open a FITS file, which may contain more than one table
+ BROWSE    Browse through table records on the computer screen
+ CLOSE     Close a table and free its allocated resources
+ EXIT/QUIT Leave FTB
+
+                      Manipulate Table Fields and Records
+                      -----------------------------------
+ DISPLAY   Define the fields to display with BROWSE and EXTRACT
+ SELECT    Place constraints on field values to limit searches
+ EXTRACT   Write selected records to a disk file
+ UP        Scroll the display up
+ DOWN      Scroll the display down
+ LEFT      Scroll the display left
+ RIGHT     Scroll the display right
+ TOP       Scroll to the top of the display
+ BOTTOM    Scroll to the bottom of the display
+
+                            Get Further Information
+                            -----------------------
+ LIST      List information about tables, fields, and headers
+ HELP      Get help on FTB commands
+
+                          Batch and External Commands
+                          ---------------------------
+ SET       Set various operational parameters
+ TAKE      Take commands from a text file (batch processing)
+ REMARK    Ignore the remainder of the input line; used in FTB batch files
+ SYSTEM    Execute an operating system command or shell to an OS prompt
+
+.LEFT
+Command: LEFT [PAGE | HALF | columns]
+Default: Scroll left half a page
+
+The LEFT command scrolls the display left by either a full screen "page", half
+a page, or by the given number of columns.
+
+.LIST
+Command: LIST [TABLE table-id] [ FIELDS | HEADER | INFO ]
+         [SCREEN | [APPEND] FILE [filename]]
+Default: List of tables; output to screen
+
+By default, the LIST command lists the active tables by number and by name (if
+available). It will also print a listing of the field information, the actual
+FITS header for a specific table, or a more human-readable version of the
+table header information.
+
+Output can be directed to the screen or a disk file. (MS-DOS users can direct
+the output to a printer by writing the output to a printer device file, such as
+PRN or LPT1.) To send output to a file, the FILE option should always appear
+last on the command line. If no file name is given, the user is prompted for
+one. The APPEND option will append the information to the end of the named
+output file.
+
+Example:
+
+   list table 2 header file tabinfo.hdr
+
+This will generate a listing of the FITS header for table 2 in the text file
+'tabinfo.hdr' in the current working directory.
+
+.OPEN
+Command: OPEN [filename]
+Default: Prompt for filename
+
+The OPEN command opens a FITS file, scans the file for standard ASCII tables
+(XTENSION= 'TABLE '), and decodes the table headers to determine the
+information needed to browse through the table.
+
+The file must be accessible through the current working directory (listed
+following 'Path:' in the status line at the top of the screen), or by
+explicitly giving the absolute or relative pathname.
+
+.QUIT
+Command: QUIT
+Default: None
+
+The QUIT command is a synonym for EXIT, which terminates FTB, closing all open
+files and restoring the original default drive and directory.
+
+.REMARK
+Command: REMARK [comments in any format]
+Default: None
+
+The REMARK command is used to include comments in FTB batch files (see
+EXECUTE). REMARK can be entered at the FTB command prompt, although it isn't
+very useful to do so.
+
+.RIGHT
+Command: RIGHT [PAGE | HALF | columns]
+Default: Scroll right half a page
+
+The RIGHT command scrolls the display right by either a full screen "page",
+half a page, or by the given number of columns.
+
+.SELECT
+Command: SELECT [TABLE table-id] [ CLEAR | conditions ]
+Default: List of current selections
+
+The SELECT command specifies which records are displayed by placing constraints
+on field values. Only those records meeting the criteria set down by the
+conditions will be displayed by the BROWSE command or written to disk by the
+EXTRACT command. The CLEAR option clears out all previously defined
+conditions.
+
+The conditions are given by a logical expression specifying field names and
+test values.  Take care that the data type of a field and its test value are
+the same, namely character-valued fields ("A" formats) are compared to strings
+enclosed in single or double quotes and numeric fields are compared to numbers.
+It is also possible to compare one field against another of the same type.
+
+Relational operators can be alphabetic or symbolic, and both notations are
+accepted interchangeably. However, alphabetic operators (AND, OR, etc.) must be
+separated from their operands by white space. The recognized operators are
+given as follows:
+
+    Operator  Meaning                     Operator  Meaning
+    -------------------------------       ----------------------------------
+    AND && &  logical and                 OR || |   logical or
+    EQ  == =  equal to                    NE != <>  not equal to
+    LT  <     less than                   GT >      greater than
+    LE  <=    less than or equal to       GE >=     greater than or equal to
+    SE        strictly equal to           IN        contains substring
+    NOT !     unary not                   NULL()    test against null value
+
+Use of parentheses to group logical operations is allowed. Operator precedence
+is the same as C and Fortran.
+
+For strings, the operators EQ, NE, LT, GT, LE, and GE, ignore case and trailing
+blanks. The operators SE and IN are only used for string comparisons. For
+SE, strictly equal to, case and trailing blanks are significant, therefore the
+comparison value must have the same length as the field value. IN, for testing
+substrings, is case insensitive.
+
+The NULL() pseudo-function tests a field against its NULL value (given in the
+TNULL record of the FITS header).  It returns TRUE if the field equals the NULL
+value and FALSE otherwise.  The single parameter of the NULL() pseudo-function
+is the field name, see the examples given below.
+
+A maximum of 50 operands and operators for one selection expression is allowed.
+If the expression is evaluated as FALSE, the record has failed the test and
+will not be selected for display or extraction. If the expression is evaluated
+as TRUE, then the record is selected.
+
+For example, to display only the records for objects in Table 1 appearing west
+of 3 hours of right ascension, up to and including 6 hours of RA, and north of
+15 degrees declination, enter:
+
+   SELECT Table 1 RAH gt 3 and RAH le 6 and DecSign eq '+' and DecD gt 15
+
+To select all stars with visual magnitude brighter than 7 and B-V greater than
+U-B, enter:
+
+   SELECT (V < 7) && (B_V > U_B)
+
+To select all stars that have B-V equal to zero, but that are not blank (which
+is the null value), enter:
+
+   SELECT B_V = 0 && !null(B-V)
+
+To eliminate the selection criteria and display all records, enter:
+
+   SELECT CLEAR
+
+.SET
+Command: SET [parameter value]
+Default: List current settings
+
+The SET command is used to set certain global operational parameters.  If no
+parameters are given, a list of the current settings is displayed.
+
+Parameter   Value      Initially       Description
+---------+-----------+--------------------------------------------------------
+CONTINUE | char      |     \     | Command line continuation character
+DEFAULT  | command   | DOWN HALF | Default command
+ECHO     | ON|OFF    |    ON     | Batch file command echo
+NUMBER   | ON|OFF    |    OFF    | Display record numbers in browse mode
+TABLE    | table-id  | undefined | Current table identifier
+---------+-----------+--------------------------------------------------------
+
+.SYSTEM
+Command: SYSTEM [OS-command]
+Default: Shell
+
+The SYSTEM command allows the user to execute any legal operating system (OS)
+command, program, or batch/script file. The user should note that any command
+entered at the main FTB prompt that is not recognized as a valid FTB command is
+automatically passed on to the operating system. The explicit SYSTEM command is
+included to allow the user to execute an program whose name conflicts with a
+valid FTB command, for example LIST, and also as a way to "shell" out to an
+active OS command prompt. To reach an OS shell, simply enter "SYSTEM" without
+any operands. To return to FTB, enter the OS command "exit".
+
+.TAKE
+Command: TAKE [filename]
+Default: Prompt for filename
+
+The TAKE command opens a text file containing a series of FTB commands and
+executes them one at a time (batch processing). This is a convenient way of
+opening a table file and setting up the display for tables that are used often.
+
+All valid FTB commands are accepted, including those commands that are passed
+on to DOS. Comments can appear in the batch file using the REMARK command. Long
+commands can be spread out over several lines by placing the continuation
+character, "-", at the end of each line to be continued. No command line can
+total more than 255 characters in length.
+
+.TOP
+Command: TOP
+Default: Top of current display
+
+The TOP command scrolls immediately to the top of the current display screen.
+
+.UP
+Command: UP [PAGE | HALF | rows]
+Default: Scroll up half a page
+
+The UP command scrolls the display up by either a full screen "page", half a
+page, or by the given number of rows.
