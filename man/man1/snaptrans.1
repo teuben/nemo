@@ -1,0 +1,65 @@
+.TH SNAPTRANS 1NEMO "2 November 1994"
+.SH NAME
+snaptrans \- coordinate transformations of a snapshot
+.SH SYNOPSIS
+\fBsnaptrans\fP [parameter=value]
+.SH DESCRIPTION
+\fBsnaptrans\fP will perform various coordinate transformations 
+on a snapshot.
+.PP
+Currently one can only transform \fI(cart,sph)\fP 
+and \fI(cart,cyl)\fP in the default coordinate ordening:
+.nf
+.ta +1i
+cart	x,y,z
+cyl	rad,phi,z
+sph	rad,phi,theta
+.fi
+Future enhancements will allow anything to anything, including reordering
+the coordinates.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input snapshot filename      (no default)
+.TP
+\fBout=\fP
+Output snapshot filename     (no default)
+.TP
+\fBctypei=\fP
+Input coordinate system. Any of: \fIcart, sph, cyl\fP can be given.
+.TP
+\fBctypeo=\fP
+Output coordinate system. See previous keyword.
+.TP
+\fBprojpi=\fP
+Input projection parameters, if needed. Default: none provided.
+.TP
+\fBprojpo=\fP
+Output projection parameters, if needed. Default: none provided.
+.TP
+\fBscale=\fP
+Items to scale (phase,pos,vel,acc). By default all position related
+vectors are transformed, but you can select a subset this way.
+.TP
+\fBndim=\fP
+Force dimensionality, if it can be overriden. Default: NDIM, as compiled
+with the program.
+.TP
+\fBtimes=\fP\fIt1:t2,t3:t4,...\fP
+Times to select snapshots from. A series of ranges can be given.
+Default: all.
+.SH BUGS
+After a snapshot has been converted to anything else but cartesian,
+selection of body variables (e.g. see \fIbodytrans(1NEMO)\fP) is still
+by their cartesian names, \fBx, vx, ax, y\fP etc.
+.SH AUTHOR
+Peter Teuben
+.SH SEE ALSO
+snapscale(1NEMO)
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+2-nov-94	V1.0 Created	Peter Teuben
+.fi
