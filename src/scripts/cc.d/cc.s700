@@ -1,0 +1,5 @@
+#! /bin/csh -f
+#  cc script - tested for solaris2 (sunos 5.3)
+exec /bin/c89 -I$NEMOINC -L$NEMOLIB $*
+
+ 
