@@ -40,7 +40,7 @@ int    keep[MAX_COL+1];                 /* column numbers to keep */
 int    nkeep;                           /* actual number of skip columns */
 int    maxcol = 0;                      /* largest column number */
 char   colsep;                          /* character to separate columns */
-string colname[MAX_COL+1];
+string *colnames;
 bool   Qall;
 
 local void setparams(void);
@@ -95,6 +95,10 @@ local void setparams(void)
     nkeep = -1;   /* trigger that nkeep needs to be set */
     for (i=0; i<=MAX_COL; i++) keep[i] = i;
   }
+  if (hasvalue("colnames")) {
+    colnames = burststring(getparam("colnames"),",");
+  } else
+    colnames = NULL;
 }
 
 
@@ -128,7 +132,10 @@ local void convert(stream instr, stream outstr)
     if (Qall) { 
       if (first) {
 	for (i=0; i<noutv; i++)
-	  fprintf(outstr,"<FIELD datatype=\"double\" name=\"col%d\"/>\n",i+1);
+	  if (colnames)
+	    fprintf(outstr,"<FIELD datatype=\"double\" name=\"%s\"/>\n",colnames[i]);
+	  else
+	    fprintf(outstr,"<FIELD datatype=\"double\" name=\"col%d\"/>\n",i+1);
 	fprintf(outstr,"<DATA>\n");
 	fprintf(outstr,"<TABLEDATA>\n");
 	first = FALSE;
@@ -136,7 +143,10 @@ local void convert(stream instr, stream outstr)
       nkeep = noutv;
     } else if (first) {
       for (i=0; i<nkeep; i++)
-	fprintf(outstr,"<FIELD datatype=\"double\" name=col%s\"/>\n",i+1);
+	  if (colnames)
+	    fprintf(outstr,"<FIELD datatype=\"double\" name=\"%s\"/>\n",colnames[i]);
+          else
+	    fprintf(outstr,"<FIELD datatype=\"double\" name=\"col%d\"/>\n",i+1);
       fprintf(outstr,"<DATA>\n");
       fprintf(outstr,"<TABLEDATA>\n");
       first = FALSE;
