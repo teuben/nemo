@@ -22,6 +22,7 @@
  *      28-nov-01 V1.7 allow to set an exit level               pjt
  *       8-dec-01 V1.8 added errno reporting	 		pjt
  *      16-jan-01 V1.8a  calling abort() will be announced      pjt
+ *      13-feb-03 V1.8b  revoking errno reporting		pjt
  */
 
 #include <stdinc.h>
@@ -40,9 +41,12 @@ local int last_errno=0;
 
 static void report_errno(void)
 {
+#if 0
+	/* something wrong here, this thing is lying half the time  */
     if (errno)
         fprintf(stderr,"### Fatal errno %d errmsg=%s\n",
             errno, strerror(errno));
+#endif
 }
 
 void errorn(string fmt, ...)
