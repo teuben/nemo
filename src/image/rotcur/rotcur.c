@@ -336,7 +336,7 @@ stream  lunpri;       /* LUN for print output */
       colnr[2] = 3;    coldat[2] = vrad_vel;
       n_vel = get_atable(velstr,3,colnr,coldat,n_vel);
       for (i=0; i<n_vel; i++)
-	printf("%g %g %g\n",xpos_vel[i],ypos_vel[i],vrad_vel[i]);
+	dprintf(5,"%g %g %g\n",xpos_vel[i],ypos_vel[i],vrad_vel[i]);
       velptr = NULL;
     }
     strclose(velstr);                           /* and close file */
@@ -399,6 +399,7 @@ stream  lunpri;       /* LUN for print output */
       grid[1]=dy;        /*                            (dy) */
       pamp=0.0;          /* position angle of map */
     } else {
+      printf("Mapsize unkown for point data, but toarcsec = %g\n",toarcsec);
       pamp=0.0;
     }
 
@@ -595,7 +596,6 @@ stream  lunpri;       /* LUN for print output */
     printf("ROTCUR: tol=%g lab=%g iTmax=%d\n",tol,lab,itmax);
     if (lunpri) fprintf(lunpri," tol, lab, itmax     : %g %g %d\n",
                                     tol,lab,itmax);
-
 
     if (lunpri) fprintf(lunpri,"\n\n\n\n"); /* space space space... */
 
@@ -968,7 +968,7 @@ real  *q;             /* output sigma */
 {
 /******************************************************************************/
     int   nlt,nmt;                                                /* counters */
-    int   mdone,mstep,mleft,m,m1,m2,l,i;                          /* counters */
+    int   mdone,mstep,mleft,m,m1,m2,l,i,j;                        /* counters */
     bool  use;                                    /* boolean (for data point) */
     real  phi,inc,x0,y0,sinp,cosp,sini,cosi;        /* parameters for ellipse */
     real  a,b,s;                                 /* couple of dummy variables */
@@ -1038,7 +1038,7 @@ real  *q;             /* output sigma */
 	      xr=(-(rx-dx*x0)*sinp+(ry-dy*y0)*cosp);     /* X position in galplane */
 	      yr=(-(rx-dx*x0)*cosp-(ry-dy*y0)*sinp)/cosi;/* Y position in galplane */
 	      r=sqrt(xr*xr+yr*yr);                       /* distance from center */
-	      if (r < 0.1)                               /* radius to small ? */
+	      if (r < 0.01)                              /* radius too small ? */
 		theta=0.0;
 	      else
 		theta=atan2(yr,xr)/F;
@@ -1097,23 +1097,23 @@ real  *q;             /* output sigma */
 	rx = xpos_vel[i];
 	ry = ypos_vel[i];
 	v  = vrad_vel[i];
-	xr=(-(rx-dx*x0)*sinp+(ry-dy*y0)*cosp);     /* X position in galplane */
-	yr=(-(rx-dx*x0)*cosp-(ry-dy*y0)*sinp)/cosi;/* Y position in galplane */
+	xr=(-(rx-x0)*sinp+(ry-y0)*cosp);     /* X position in galplane */
+	yr=(-(rx-x0)*cosp-(ry-y0)*sinp)/cosi;/* Y position in galplane */
 	r=sqrt(xr*xr+yr*yr);                       /* distance from center */
-	if (r < 0.1)                               /* radius to small ? */
+	if (r < 0.01)                              /* radius too small ? */
 	  theta=0.0;
 	else
 	  theta=atan2(yr,xr)/F;
 	costh=ABS(cos(F*theta));       /* calculate |cos(theta)| */
-	dprintf(5,"@ %d,%d : r=%g cost=%g xr=%g yr=%g\n",l,m,r,costh,xr,yr);
 	if (r>ri && r<ro && costh>free) {     /* point inside ring ? */
+	  dprintf(5,"@ r=%g cost=%g xr=%g yr=%g\n",r,costh,xr,yr);
 	  dprintf(5," ** adding this point\n");
 	  wi=1.0;                /* calculate weight of this point */
-	  for (i=0; i<wpow; i++) 
+	  for (j=0; j<wpow; j++) 
 	    wi *= costh;
 	  xx[0]=rx;       /* x position */
 	  xx[1]=ry;       /* y position */
-	  v -= bmcorr(xx,p,l,m);  /* beam-correction factor */
+	  /* no beam correction here */
 	  use=FALSE;        /* reset logical */
 	  switch(side) {    /* which side of galaxy */
 	  case 1:             /* receding half */
