@@ -1,6 +1,6 @@
-.TH CCDSTAT 1NEMO "14 November 2004"
+.TH CCDSTAT 1NEMO "15 November 2004"
 .SH NAME
-ccdstat \- statistics (1st through 4th moment)
+ccdstat \- statistics (1st through 4th moment) and chi2
 .SH SYNOPSIS
 .PP
 \fBccdstat in=\fPimage [parameter=value]
@@ -10,10 +10,17 @@ and calculate some human understandable numbers (mean, dispersion, skewness,
 curtosis) from them. It can optionally use a weighting map, in case the 
 map needs to weighted per pixel.
 .PP
-If the map contains an error normalized difference between an
-observation and model, it can also compute the chi2 if the number of 
-of fitting parameters (\fBnpar\fP, must be > 0 to trigger this option)
-is given, as well as the number of independant points per beam (\fBnppb\fP).
+Optionally, if the map contains an error normalized difference between an
+observation and model, it can also compute a chi2 goodness of
+fit if the number of 
+of fitting parameters is given
+(\fBnpar\fP, must be > 0 to trigger this option),
+as well as the number of independant points per beam (\fBnppb\fP):
+.nf
+    chi2 = sum_{i,j}(map(i,j)^2)/(N/nppb-npar-1)
+.fi
+where N is the number of non-bad values in the map. The input 
+map is now assumed to contain a dimensionless \fI(obs-mod)/sigma\fP
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword is also
 given:
@@ -45,7 +52,8 @@ Number of fitting parameters. If given > 0, this will trigger the
 computation of chi2 goodness of fit, instead of the normal statistics.
 .TP
 \fBnppb=\fP
-Number of (independant) points per beam.
+Number of (independant) points per beam. Only used in the computation
+for chi2, and 
 .SH "EXAMPLE"
 .nf
   % ccdstat image.ccd min=-2
@@ -66,6 +74,13 @@ followed by an example of a small range around 0:
 .nf
   % ccdstat map1 bad=0
   % ccdmath map1 - 'iflt(abs(%1),0.001,0,%1)' | ccdstat - bad=0
+.fi
+Here is an example of calculating the chi2 goodness of fit for
+a gaussian distribution:
+.nf
+  % ccdmath "" - "rang(0,1)" | ccdstat - npar=1	
+Generating a map from scratch
+chi2= 0.821026
 .fi
 .SH "SEE ALSO"
 snapccd(1NEMO), image(5NEMO)
