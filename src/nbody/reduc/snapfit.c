@@ -8,6 +8,7 @@
  *	16-jun-92    0.6 rotation order -> math positive (see snaprotate(1))
  *      17-jul-03    0.7 make it compile under nemo 3.1.1
  *      29              a  : patch, since scratch files appear to not work
+ *       2-aug-03       b  : patch back, stropen() has been fixed
  */
 
 /* this code will only work in 3D */
@@ -55,7 +56,7 @@ string defv[] = {
     "contour=\n         Optional Output image file with chi-squared",
     "iter=0\n           number of more iterations after best on matrix",
     "times=all\n        Times selected from snapshot models",
-    "VERSION=0.7a\n     29-jul-03 PJT",
+    "VERSION=0.7b\n     2-aug-03 PJT",
     NULL,
 };
 
@@ -263,8 +264,7 @@ void read_data()
         } else {                /* assume it's a table */
 	   dprintf(1,"ASCII table\n");
            rewind(instr);
-	   /* scratch file I/O is broken in 3.1.1 ??? */
-           scrstr = stropen("tmp1","w!");     /* scratch file for 'cube' */
+           scrstr = stropen("xxx","s");     /* scratch file for 'cube' */
            while ( fgets(line,256,instr) != NULL) {
               if(line[0]=='#') continue;
               line[strlen(line)-1] = '\0';
@@ -284,8 +284,7 @@ void read_data()
 		ndata++;
 	      }
            }
-	   strclose(scrstr);
-           scrstr = stropen("tmp1","r");
+	   rewind(scrstr);
 	   dprintf(0,"%d valid data found\n",ndata);
            if (ndata==0) error("No data found; use different cutoff");
          
