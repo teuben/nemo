@@ -25,6 +25,7 @@
  *
  *	 6-may-95       V2.3    (hisf) allow item=headline         	PJT
  *	21-may-01	V2.4    history <old history_level> back here   PJT
+ *       1-aug-02       V2.5    increased memory a bit 256->1024        PJT
  *
  *  ToDo: not all local variables free up memory, despite that some
  *        have clearly come from allocate'd memory. 
@@ -44,12 +45,13 @@
  */
 
 #ifndef MAXHIST
-# define MAXHIST 256			/* max size of history array        */
+# define MAXHIST 1024			/* max size of history array        */
 #endif
 
 local int nhist = 0;			/* count history data stored so far */
 local string histbuf[MAXHIST+1];	/* history string array             */
 local string headline = NULL;		/* last headline read in            */
+local bool freeup[MAXHIST+1];           /* if space should be free'd        */
 
 int history = 1;               /* 1=history is auto-mode  0=no history done */
                                /* this item should eventually disappear     */
@@ -76,6 +78,7 @@ int get_history(stream instr)
 	    histbuf[nhist] = get_string(instr, HistoryTag);
 	    dprintf(5, "get_history: histbuf[%d] = %s\n",
 		    nhist, histbuf[nhist]);
+	    freeup[nhist] = FALSE;
 	    nhist++;
 	} else
             break;                          /* done with reading loop */
@@ -128,18 +131,23 @@ int app_history(string s)
 	return nhist;
     }
     histbuf[nhist] = scopy(s);
+    freeup[nhist] = TRUE;
     dprintf(9,"app_history: histbuf[%d] = %s\n", nhist, s);
     nhist++;
     return nhist;
 }
 
 /*
- * RESET_HISTORY: reset the history list
+ * RESET_HISTORY: reset the history list, and also free up all memory
  */
 
 void reset_history()
 {
-    nhist = 0;
+  int i;
+  for (i=0; i<nhist; i++)
+    if (freeup[i]) free(histbuf[i]);
+  if (headline) free(headline);
+  nhist = 0;
 }
 
 /*
