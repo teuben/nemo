@@ -5,8 +5,6 @@
 #   a directory of your choice. It then proceeds and install scripts,
 #   tries to compile the libraries, and attempts to compile a few
 #   small programs.
-#   At various stages tweeking may be needed, for which the $NEMO/README
-#   file and possibly the manual ($NEMO/text/manuals) may be needed.
 #
 #   Most common usage:
 #
@@ -19,15 +17,16 @@
 #   For problems consult:   nemo@astro.umd.edu
 #
 #   Known problems:
-#       convex: instead of make, using src/scripts/make.convex
+#       convex: instead of make, use src/scripts/make.convex as $NEMOBIN/make
 
 # set local aliases
 alias stamp 'date +%H:%M:%S'
 
 # set defaults
 set site=ftp.astro.umd.edu
+set get=wget
 set dir=pub/nemo
-set file=nemo.tar.gz
+set file=nemo_3.0.1.tar.gz
 set nemo=$cwd
 set goto=start
 set cc=""
@@ -41,7 +40,7 @@ foreach kv ($*)
 end
 
 
-set VERSION="1.7 1-apr-01"
+set VERSION="3.0 5-apr-01"
 
 
 if ($#argv == 0) then
@@ -49,16 +48,17 @@ if ($#argv == 0) then
   echo "with the following optional key=val's"
   echo ""
   echo "  [site=$site]  ## mother site"
+  echo "  [get=$get]    ## method to get file (ftp,wget)"
   echo "  [dir=$dir]    ## anon ftp directory where tar files exist"
   echo "  [file=$file]  ## nemo (compressed) tar file"
-  echo "  [nemo=$nemo]  ## name of new NEMO directory"
+  echo "  [nemo=$nemo]  ## name of new directory within which NEMO will be installed"
   echo "  [goto=$goto]  ## label to goto in this script "
   echo "                (start, tar, install, prog, test, suite)"
   echo "  [cc=$cc]      ## override C compiler from "'$NEMO/src/scripts/cc'
   echo "  [yapp=$yapp]  ## override YAPP interface choice (null, pgplot) -not active-"
   echo "  [config=$config]     ## options for configure"
   echo ""
-  echo "Bootstrap new nemo version from mother site"
+  echo "Bootstrap new nemo version from mother site or local tar file"
   echo "VERSION $VERSION"
   exit 0
 endif
@@ -83,7 +83,11 @@ goto $goto
 # ----------------------------------------------------------------------
 #
 start:
-ftp:
+
+if (! -e $file) then
+
+if ($get == ftp) then
+
 stamp;echo Running tar to pick up the tar file...
 echo "(You may be asked for a passwd for the anonymous user)"
 
@@ -97,8 +101,16 @@ get $file
 quit
 END_OF_FTP
 
+else if ($get == wget) then
+  wget ftp://$site/$dir/$file >>& $log
+else
+  echo Bad get=$get
+  exit 1
+endif
 
-stamp;echo Transferred ${file} into directory ${nemo}
+endif
+
+stamp
 ls -l $file
 
 #
@@ -113,20 +125,24 @@ endif
 
 stamp
 set e=$file:e
-echo "   ==> The following step may take a few minutes, depending on disk i/o"
 if ("$e" == "Z") then
   echo Using uncompress and tar ...
   uncompress $file | tar xf -
+  set filer=$file:r ; set dirname=$filer:r
 else if("$e" == "gz" || "$e" == "z") then
   echo Using gzip and tar ...
   gzip -dc $file | tar xf -
+  set filer=$file:r ; set dirname=$filer:r
 else if ("$e" == "tar") then
   echo Using tar ...
   tar xf $file
+  set dirname=$file:r
 else
   echo "Unknown extension of (compressed) tar file $file"
   exit 1
 endif
+
+cd $dirname
 stamp
 #
 # ----------------------------------------------------------------------
@@ -134,7 +150,7 @@ stamp
 install:
 
 stamp
-if (-e NEMORC && -e Makefile) then
+if (-e NEMORC) then
   echo Now installing NEMO:
 else
   echo Cannot install NEMO, missing Makefile or NEMORC file
@@ -143,22 +159,12 @@ endif
 
 # always get rid of unwanted pollution from an existing version
 unsetenv NEMO NEMOBIN
-if (! -e nemo_start) then
-  echo Creating missing startup files
-  make nemo_start NEMO=$nemo  >> $log
-endif
+# if (-e nemo_end) source nemo_end
 
-echo The file $nemo/nemo_start can be sourced to load NEMO
-unsetenv NEMOBIN
-source nemo_start
-echo NEMO=$NEMO is now loaded in the bootstrap for NEMOHOST=$NEMOHOST
-
-
-stamp
-echo Creating full directory structure and installing scripts.
-mkdir -p $NEMO/tmp
+# now start configuring and installing
 echo Running configure, with options:  $config
 ./configure $config >> $log
+source nemo_start
 make dirs config_extra scripts >> $log
 echo Adding in NEMORC.local 
 source NEMORC.local
@@ -198,11 +204,11 @@ test:
   stamp; echo "Running a simple test (this will install a few programs)"
   echo Running a simple test: >>& $log
   rehash
-  time mkplummer out=$tmp.1 nbody=128  >>& $log
-  time tsf in=$tmp.1 >>& $log
-  time hisf in=$tmp.1 >>& $log
-  time hackcode1 in=$tmp.1 out=$tmp.2 tstop=1 >>& $log
-  time snapscale in=$tmp.2 out=$tmp.3 mscale=2.0 >>& $log
+  mkplummer out=$tmp.1 nbody=128  >>& $log
+  tsf in=$tmp.1 >>& $log
+  hisf in=$tmp.1 >>& $log
+  hackcode1 in=$tmp.1 out=$tmp.2 tstop=1 >>& $log
+  snapscale in=$tmp.2 out=$tmp.3 mscale=2.0 >>& $log
   rm -f $tmp.*
   stamp
 
@@ -220,7 +226,7 @@ suit:
 end:
   echo "If you haven't done so, issue the following command:"
   echo "        source nemo_start"
-  echo "to load NEMO into your shell."
+  echo "to load NEMO into your C-shell."
   echo "To make it permanent, add this alias to your .cshrc file:"
   echo "  alias nemo source $nemo/nemo_start"
   echo "after the PATH has been set,"

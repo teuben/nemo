@@ -7,6 +7,7 @@
  *     24-feb-98   1.2  added inlist= to allow large in= lists  PJT
  *     25             a fixed datamin/max in the header         PJT
  *     12-feb-99      b changed for new fts_cdata 		PJT
+ *	5-apr-01      c increased default MAXIN			pjt
  *
  */
 
@@ -21,7 +22,7 @@ string defv[] = {			/* Standard NEMO keyword+help */
     "blocking=1,1\n        Blocking factors for I/O",
     "compact=f\n           Compact (move) dummy axes to the end",
     "inlist=\n             optional nemoinp(1) list expression for in=",
-    "VERSION=1.2\n         24-feb-98 PJT",
+    "VERSION=1.2c\n        5-apr-01 PJT",
     NULL,
 };
 
@@ -32,7 +33,7 @@ string usage = "catenate fits images into a fitscube";
 extern string *burststring(string,string);
 
 #ifndef MAXIN
-#define MAXIN 2048
+#define MAXIN 8096
 #endif
 
 local string minmax[] = { "DATAMIN", "DATAMAX", NULL };

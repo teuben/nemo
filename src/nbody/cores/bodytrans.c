@@ -50,6 +50,7 @@
  *              eliminated some nested extern's
  *  16-feb-97   attempt to support SINGLEPREC
  *   1-apr-01   NEMO V3 style .so file usage
+ *   5-apr-01   increased buffersize for filenames (NEMO3 uses longer $NEMOHOST names)
  *
  *  Used environment variables (normally set through .cshrc/NEMORC files)
  *      NEMO        used in case NEMOOBJ was not available
@@ -100,7 +101,7 @@ iproc btitrans(string expr)
 local bool havesyms = FALSE;       /* TRUE if symbols have been loaded */
 local int  funcmpld = 0;                /* count of functions compiled */
 #if defined(SAVE_OBJ)
-local char edb[128], edbbak[128];     /* filenames of BTNAMES database */
+local char edb[256], edbbak[256];     /* filenames of BTNAMES database */
 local int  Qflock = 0;			/* used for file locking */
 #endif
 
@@ -109,7 +110,7 @@ string type;                    /* type of function to return */
 string expr;                    /* name or C expression */
 string fname;                   /* optional filename for object file */
 {
-    char file[64], func[64], name[64], cmmd[256];
+    char file[256], func[256], name[256], cmmd[512];
     char *sname, *cp, *cflags;
     string btrpath;
     string fullfile, hexpr;
@@ -270,7 +271,7 @@ local void ini_bt()
  *           filename, e.g. x+y
  */
 
-#define NL 128
+#define NL 256
 
 local string get_bt(expr)
 string expr;

@@ -1,4 +1,4 @@
-VERSION = NEMO V3.0 5-apr-01 PJT
+VERSION = NEMO V3.0 6-apr-01 PJT
 ################################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 ################################################################################
@@ -75,6 +75,11 @@ WWWDIR = $(NEMO)/local/www
 SHELL = /bin/sh
 
 # this should remain the first target in this Makefile
+helphelphelp:
+	@echo ""
+	@echo "There is no default make in NEMO. For installation"
+	@echo "guidelines use 'make install'"
+
 helphelp:
 	@echo ""
 	@echo " ### NEMO installation help menu ###"
@@ -95,7 +100,6 @@ helphelp:
 	@echo ""
 	@echo check your .cshrc file, installation manual and the README file 
 	@echo in case some of the above environment variables are not defined.
-	@echo \(Your system may then need special cc/make scripts!\)
 	@echo ""
 	@make helpme
 helpme:
@@ -198,18 +202,17 @@ fakehost:
 	ln -s $(NEMOLIB) $(NEMO)/lib/$(FAKEHOST)
 	ln -s $(NEMOOBJ) $(NEMO)/obj/$(FAKEHOST)
 
-TRUEHOST=unknown
+TRUEHOST=$(NEMOHOST)
 truehost:
 	@echo "Creating dummy (bin,lib,obj) link for TRUEHOST=$(TRUEHOST)"
+	@rm $(NEMOBIN) $(NEMOLIB) $(NEMOOBJ)
 	ln -s $(NEMO)/bin/$(TRUEHOST) $(NEMOBIN)
 	ln -s $(NEMO)/lib/$(TRUEHOST) $(NEMOLIB)
 	ln -s $(NEMO)/obj/$(TRUEHOST) $(NEMOOBJ)
-
-
+	@echo ""
+	@ls -l $(NEMOBIN)
 
 OS = $(NEMOHOST)
-
-# 
 
 #SCRIPTS = cc f77 make ranlib	## this was NEMO V2
 SCRIPTS = 

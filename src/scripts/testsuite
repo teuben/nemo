@@ -5,6 +5,7 @@
 #
 #   22-mar-97   Orinally written                    Peter Teuben
 #   19-dec-99   -i added (doesn't seem to work?)
+#    6-apr-01   -f added
 #
 
 set testdir=$NEMO/tmp/test$$
@@ -16,6 +17,7 @@ set cleanup=0
 set clean=0
 set show=0
 set install=0
+set force=0
 set query=0
 set done=0
 set options=()
@@ -39,6 +41,9 @@ foreach arg ($*)
               breaksw
     case -i:
 	      set install=1
+	      breaksw
+    case -f:
+	      set force=1
 	      breaksw
     case -q:  
               set query=1
@@ -87,6 +92,10 @@ foreach testfile (`find $NEMO/src -name Testfile -print`)
                 if ($install) then
                     mknemo $bin
                 endif
+	    else
+		if ($force) then
+                    mknemo $bin
+		endif
             endif
         end
         continue
@@ -110,7 +119,7 @@ cleanup:
         set clean=1
     else
         echo Results in $testdir/$log
-	echo If you have any problems, this file should be sent to the nemo@astro.umd.edu
+	echo If you have any unsolved problems, this file should be sent to the nemo@astro.umd.edu
         head -1 $testdir/$log
         tail -1 $testdir/$log
     endif
@@ -133,7 +142,8 @@ help:
     echo "    -r    cleanup working directory in '$NEMO/tmp' afterwards"
     echo "    -c    clean the NEMO directory itself of Testfile in/out files"
     echo "    -s    show all the binaries that are needed for each test"
-    echo "    -i    install the binaries that are needed for all test"
+    echo "    -i    install the missing binaries that are needed for all tests"
+    echo "    -f    forced install of the binaries needed for all tests"
     echo "    -q    show all binaries that have not been installed yet"
     echo "    -h    this help"
     echo ""

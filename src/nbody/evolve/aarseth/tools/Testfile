@@ -17,8 +17,8 @@ NBODY = 10
 all: $(BIN)
 
 
-INTEST = ../nbody1/test/intest
-CMPLOG = ../nbody1/test/testrun
+INTEST = $(NEMO)/$(DIR)/../nbody1/test/intest
+CMPLOG = $(NEMO)/$(DIR)/../nbody1/test/testrun
 
 #	this also tests stou4, as it's called in runbody1
 #	then compares the two input models, one via stou4->u3tos

@@ -384,3 +384,24 @@ Abort (core dumped)
  [was up to date] Well done
 
 
+
+
+-- maintenance:
+
+before the 
+	
+	cd $NEMO
+	src/script/version inc			
+  or
+	src/script/version set 3.0.1		
+
+  then make a tar ball
+
+	make dist
+
+  which makes nemo_3.0.1.tar.gz
+
+	make stamp
+
+  which stamps your local adm/Chkfile such that 'make new' works
+

@@ -69,7 +69,8 @@ else
 endif
 if ($debug) echo "$NEMOBIN added to search path"
 if (! -d $NEMOBIN) then
-  echo "Warning: $NEMOBIN does not exist"
+  echo "Warning: $NEMOBIN does not exist (yet)"
+  echo "Look at targets fakehost and truehost in $NEMO/Makefile"
 endif
 if ($path[1] == ".") then
   set path = ( . $NEMOBIN $path[2-] )
@@ -86,7 +87,8 @@ if ($debug) echo All systems go...
 
 # if (-e $NEMO/etc/motd) cat $NEMO/etc/motd
 if ($?prompt) then
-  echo "NEMO loaded for HOST $NEMOHOST. Type 'motd' to get messages of the day"
+  echo "NEMO loaded for HOST $NEMOHOST. "
+  echo "Type 'motd' to get messages of the day"
   echo "The alias 'omen' will attempt to unload NEMO from your environment"
 endif
 

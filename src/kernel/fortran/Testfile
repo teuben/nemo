@@ -1,6 +1,9 @@
 DIR = src/kernel/fortran
-BIN = func
+BIN = 
 NEED =$(BIN)
+
+#	no testing done here yet 
+
 
 help:
 	@echo $(DIR)
