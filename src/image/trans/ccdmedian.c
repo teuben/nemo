@@ -5,6 +5,7 @@
  *      30-jan-01       PJT     experimenting with NR's sort routines
  *      30-jul-04       PJT     optional X,Y range selection
  *       1-nov-04       PJT     experiment to cf. to python kpno_soft/imsubtract.py
+ *       2-nov-04       PJT     added nstep= cheat mode for ShiPing Lai
  *                      
  */
 
@@ -21,13 +22,16 @@ string defv[] = {
 	"n=5\n		(odd) size of filter",
 	"x=\n           Optional subselection of the X range (min,max)",
 	"y=\n           Optional subselection of the Y range (min,max)",
+	"nstep=1\n      Cheat mode: replicate each nstep pixels",
 	"fraction=0.5\n Fraction of positive image values in subtract mode",
 	"mode=median\n  Mode: median, subtract",
-	"VERSION=0.4\n  1-nov-04 PJT",
+	"VERSION=0.5\n  2-nov-04 PJT",
 	NULL,
 };
 
 string usage = "median filter of an image";
+
+string cvsid = "$Id";
 
 
 
@@ -39,7 +43,8 @@ string usage = "median filter of an image";
 #define CVO(x,y)    MapValue(optr,x,y)
 #endif
 
-real median(int, real *);
+real median(int, real *, real);
+real mean(int, real *, real);
 real subtract(int, real *, real);
 void sort0(int, real *);
 void sort1(int, real *);
@@ -61,12 +66,17 @@ void nemo_main()
 {
     stream  instr, outstr;
     int     nx, ny, nz;
+    int     nstep,nstep1;
     int     i,j,k, n, n1, i1, j1, m;
     int     ix[2], iy[2];
     imageptr iptr=NULL, optr;      /* pointer to images */
     real    *vals, fraction;
     string  mode = getparam("mode");
     bool Qmedian = (*mode == 'm');
+
+    nstep = getiparam("nstep");
+    if (nstep%2 != 1) error("step size %d needs to be odd",nstep);
+    nstep1 = (nstep-1)/2;
 
     n = getiparam("n");
     if (Qmedian)
@@ -104,42 +114,78 @@ void nemo_main()
     Ymin(optr) = Ymin(iptr);
     Zmin(optr) = Zmin(iptr);
 
-    for (j=0; j<ny; j++) {
-      for (i=0; i<nx; i++) {
-	if (j<n || j > ny-n || j < iy[0] || j > iy[1]) {
-	  CVO(i,j) = CVI(i,j);
-	  continue;
+    if (nstep > 1) {
+      warning("Cheat mode nstep=%d",nstep);
+
+      for (j=nstep1; j<ny-nstep1; j+=nstep) {
+	for (i=nstep1; i<nx-nstep1; i+=nstep) {
+	  if (j<n || j > ny-n || j < iy[0] || j > iy[1]) {
+	    CVO(i,j) = CVI(i,j);
+	    continue;
+	  }
+	  if (i<n || i>nx-n || i < ix[0] || i > ix[1]) {
+	    CVO(i,j) = CVI(i,j);
+	    continue;
+	  }
+	  m = 0;
+	  for (j1=j-n1; j1<=j+n1; j1++)
+	    for (i1=i-n1; i1<=i+n1; i1++)
+	      vals[m++] = CVI(i1,j1);
+	  CVO(i,j) = median(m,vals,fraction);
+	  for (j1=j-nstep1; j1<=j+nstep1; j1++)
+	    for (i1=i-nstep1; i1<=i+nstep1; i1++)
+	      CVO(i1,j1) = CVO(i,j);
 	}
-	if (i<n || i>nx-n || i < ix[0] || i > ix[1]) {
-	  CVO(i,j) = CVI(i,j);
-	  continue;
-	}
-	m = 0;
-	for (j1=j-n1; j1<=j+n1; j1++)
-	  for (i1=i-n1; i1<=i+n1; i1++)
-	    vals[m++] = CVI(i1,j1);
-	if (Qmedian)
-	  CVO(i,j) = median(m,vals);
-	else
-	  CVO(i,j) = subtract(m,vals,fraction);
       }
+    } else {
+
+      for (j=0; j<ny; j++) {
+	for (i=0; i<nx; i++) {
+	  if (j<n || j > ny-n || j < iy[0] || j > iy[1]) {
+	    CVO(i,j) = CVI(i,j);
+	    continue;
+	  }
+	  if (i<n || i>nx-n || i < ix[0] || i > ix[1]) {
+	    CVO(i,j) = CVI(i,j);
+	    continue;
+	  }
+	  m = 0;
+	  for (j1=j-n1; j1<=j+n1; j1++)
+	    for (i1=i-n1; i1<=i+n1; i1++)
+	      vals[m++] = CVI(i1,j1);
+
+	  if (Qmedian)
+	    CVO(i,j) = median(m,vals,fraction);
+	  else
+	    CVO(i,j) = subtract(m,vals,fraction);
+	}
+      }
+
     }
     write_image(outstr, optr);
 }
 
-real median(int n, real *x)
+real median(int n, real *x, real fraction)
 {
-#if 0
+  sort(n, x);
+
+  /* TODO: do the correct thing for odd and even n 
+   * also look at Knuth's O(N) idea and ShiPing's idea of 
+   * histogram reduction 
+   * Could also consider fraction != 0.5 
+   */
+  return x[(n-1)/2];
+}
+
+real mean(int n, real *x, real fraction)
+{
   real sum = 0.0;
+  int i;
 
   sum = 0.0;
   for (i=0; i<n; i++)
     sum += x[i];
   return sum/n;
-#else
-  sort(n, x);
-  return x[(n-1)/2];
-#endif
 }
 
 real subtract(int n, real *x, real fraction)
