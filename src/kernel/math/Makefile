@@ -14,7 +14,7 @@ INCFILES =
 SRCFILES= nllsqfit.c \
 	  odeint.c rk4.c rkqc.c
 OBJFILES= nllsqfit.o \
-	  rk4.o rkqc.o
+	  odeint.o rk4.o rkqc.o 
 LOBJFILES= $L(nllsqfit.o) \
 	  $L(rk4.o) $L(rkqc.o)
 BINFILES = 
