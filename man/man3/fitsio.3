@@ -1,0 +1,186 @@
+.TH FITSIO 3NEMO "9 July 2000"
+.SH NAME
+fitopen, fitclose, fitread, fitwrite, fitsetpl, fitrdhdr, fitrdhdi,
+fitwrhdr, fitwrhdi, fitwrhdl, fitwrhda  \- simple fits I/O routines
+.SH SYNOPSIS
+.nf
+.B
+#include <fitsio.h>
+.PP
+.B FITS *fitopen(name,status,naxis,nsize)
+.PP
+.B int fitexhd(file,keyword)
+.B void fitrdhdr(file,keyword,rvaluep,rdef)
+.B void fitrdhdi(file,keyword,ivaluep,idef)
+.B void fitwrhdr(file,keyword,rvalue)
+.B void fitwrhdi(file,keyword,ivalue)
+.B void fitwrhdl(file,keyword,ivalue)
+.B void fitwrhda(file,keyword,avalue)
+.B void fitwra(file,keyword,avalue)
+.PP
+.B void fitread(file,row,data)
+.B void fitwrite(file,row,data)
+.B void fitsetpl(file,n,isize)
+.PP
+.B void fitclose(file)
+.PP
+.B void fit_setbitpix(bitpix)
+.B void fit_setscale(bscale,bzero)
+.B void fit_setblocksize(blocksize)
+.PP
+.B char *name, *status, *file;
+.B int naxis, nsize[], row, n, isize[], bitpix, blocksize;
+.B char *keyword, *avalue;
+.B FLOAT *data, 
+.B FLOAT *rvaluep, rvalue, rdef, bscale, bzero;
+.B int   *ivaluep, ivalue, idef;
+.fi
+.SH DESCRIPTION
+A simple self-contained FITS-I/O library is offered here. The 
+routines write to
+\fIstderr\fP in case of errors. Most errors however will cause it to
+call \fIexit(3)\fP. On input it does automatic data conversion to the host
+FLOAT datatype (although only BITPIX=16,32 and -32 can be read), but
+forces the output to be in the IEEE format. (BITPIX=-32).
+.PP
+\fIfitopen()\fP opens a FITS file and readies it for i/o. The \fIname\fP
+contains the name of the file, \fIstatus\fP can be "\fBnew\fP"
+or "\fBold\fP", which are the fortran equivalents of \fIfopen()\fP's
+"w" and "r". \fInaxis\fP is always an input parameter
+and gives the (used/usable) length of the \fInsize\fP array: the
+\fInsize\fP array contains the length of each axis. When a fitsfile
+is read, all unused dimensions are set to 1. On success 
+\fIfitopen\fP returns the address of an allocated \fBFITS\fP structure
+(see below), else it returns NULL. \fIfitopen\fP also does initial
+I/O on the basic FITS header keywords to determine the size of the
+data array (SIMPLE, BITPIX and NAXISn). 
+Parsing the remaining keywords are the responsibility of the user.
+A call to \fIfitread\fP, \fIfitwrite\fP or \fPfitsetpl\fP will close
+the header for access and only allow (random) access to the (image) data.
+.PP
+\fIfitclose()\fP closes a FITS file, and deletes any memory associated with it.
+The input parameter \fIfile\fP is a pointer to the FITS
+structure that was returned by \fIfitopen\fP, and is used in all subsequent
+fitsio routines as a fits file descriptor.
+.PP
+\fIfitexhd()\fP returns 1 if the \fIkeyword\fP exists in \fIfile\fP, else 0.
+.PP
+\fIfitread()\fP and \fIfitwrite()\fP read resp. write a row of a FITS image
+file, indexed to by \fIrow\fP (0 being the first row).
+I/O is done into/from the buffer pointed to 
+by \fIdata\fP. It is the callers resonsibility to make sure 
+\fIdata\fP points to enough data space (NAXIS1).
+.PP
+\fIfitsetpl()\fP is needed to select the plane to be accessed in a FITS image.
+If not called, I/O defaults to the first plane. \fIn\fP is the dimension
+of the \fIisize\fP array, and is at least 2 less than the dimension of
+the input 'cube' (\fInaxis\fP in fitopen). 
+Any unspecified elements in \fIisize\fP means the
+selected hyperplane in that dimension is the first one (0).
+The \fIisize\fP index array. Note that the fortran
+array structure is used here: first dimension is running fastest in
+memory.
+.PP
+\fIfitrdhdr()\fP and \fIfitrdhdi()\fP read the value of a 
+real- resp. integer valued FITS keyword from the file header. The 
+\fIkeyword\fP must be at most 8 (upper case) characters. If the keyword
+is not present the default input in \fIrdef\fP, resp. \fIidef\fP is
+returned in pointers \fIrvaluep\fP resp. \fIivaluep\fP. 
+Reading keywords should occur after \fIfitopen\fP, but before the 
+first \fIfitsetpl\fP or \fIfitread\fP call.
+.PP
+\fIfitwrhdr()\fP, \fIfitwrhdi()\fP, \fIfitwrhdl()\fP and \fIfitwrhda()\fP
+write the value of a real-, integer-, logical- resp. character-valued FITS 
+keyword to the file header.
+Writing keywords should occur after \fIfitopen\fP, but before the 
+first \fIfitsetpl\fP or \fIfitwrite\fP call.
+.PP
+\fIfitwra()\fP can be used to output a character-value belonging to
+a FITS keyword that does not have an '=' sign between the keyword and
+the value (e.g. HISTORY and COMMENT).
+.PP
+\fIfit_setbitpix()\fP and \fIfit_setscale()\fP can be used to set \fBbitpix\fP,
+\fBbscale\fP and \fBbzero\fP when writing fits files. Remember that
+.nf
+	\fIimage_value = fits_value * bscale + bzero\fP
+.fi
+If to be effective, they need to be called BEFORE fitopen. If called
+between \fIfitopen\fI and \fIfitwrite\fP it will not take into
+effect until the next \fIfitopen\fP.
+\fIfit_setblocksize()\fP can be used to choose another blocksize from the
+default 2880 bytes that FITS has defined. When a FITS file has been written
+with a blocking factor other than 1, the blocksize is a multiple of 2880
+bytes.
+.SH FITS STRUCTURE
+A simple basic FITS data structure (referred to as \fIfile\fP in the above
+SYNOPSIS) is used to communicate between different modules:
+.nf
+.ta +0.3i +1.5i
+
+typedef struct { 
+	int ncards;	Current number of 80 column header cards
+	int naxis;	dimension of image data
+	int axes[MAXNAX];	length of each axis
+	int offset;	current byte offset in file due to fitsetpl()
+	int type;	fits data type [TYPE_FLOAT, TYPE_16INT, TYPE_32INT]
+	int status;	file status [STATUS_OLD, STATUS_NEW, STATUS_NEW_WRITE]
+	int fd; 	file descriptor in open, seek, read, write, close
+	FLOAT bscale;	scaling factor, if bitpix > 0.
+	FLOAT bzero;	scaling factor, if bitpix > 0.
+} FITS;
+
+.fi
+in which \fBMAXNAX\fP and \fBFLOAT\fP are \fB#define\fPd in "fitsio.h".
+In standard \fIfitsio.h\fP \fB7\fP resp. \fBfloat\fP are used.
+The other upper case names are also defined in \fIfitsio.h\fP.
+.SH EXAMPLE
+The following example shows, without any bells,
+whistles and error checking, how a simple 2D data matrix can be 
+read in:
+.nf
+.ta +0.5i +3.5i
+	char *file, *malloc();
+	float *image, *ip;
+	int nx, ny, i, j, k, naxis[2];
+
+	file = \fIfitopen\fP("fits.dat","old",2,naxis); 	/* open */
+	nx = naxis[0];        	/* dimension in x */
+	ny = naxis[1];       	/* dimension in y */
+	image = (float *) malloc(nx*ny*sizeof(float));   	/* allocate */
+	k=1;                  	/* set plane to read */
+	\fIfitsetpl\fP(file,1,&k);    	/* redundant anyhow */
+	for (j=0, ip=image; i<ny; j++, ip += nx)      	/* for each row */
+	  \fIfitread\fP(file,j,ip);	/* read row into appropriate spot */
+	\fIfitclose\fP(file);         	/* close */
+
+.fi
+.SH BUGS
+Does not do a whole lot of sanity checks on the FITS header structure.
+Insane cases when e.g. NAXIS1=1 or 0 are not handled well.
+.PP
+Not so sure if defining FLOAT as double would work yet.
+.PP
+No BLANK value substitution. Doesn't work on machines which do not
+have the same host data format as FITS. Bob Sault has added the
+Miriad pack routines to his version of fitsio.c
+.PP
+No provisions to read (or write) FITS files with multiple HDUs.
+.SH SEE ALSO
+fits(3NEMO), fits(5NEMO)
+.SH AUTHOR
+Bob Sault, Peter Teuben
+.SH FILES
+.nf
+.ta +1.5i
+~/src/image/fits         fitsio.c, fitsio.h fitsio.3 (within NEMO)
+.fi
+.SH UPDATE HISTORY
+.nf
+.ta +1i +4i
+xx-jul-90       While sweating it out in India  RJS
+28-jul-90       hurah - replace wrong in NEMO   PJT
+10-oct-90	added some write routines	PJT
+12-sep-91	added fitexhd()            	PJT
+21-mar-00	fixed offset bug for raw cubes	PJT
+9-jul-00	fixed offset bug if fitsetpl called before fitwrite	PJT
+.fi
