@@ -4,7 +4,6 @@
  * Dec 10 2001 - NSA
  */
 
-#include <stdio.h>
 #include <stdinc.h>
 #include <errno.h>
 #include <setjmp.h>
@@ -15,9 +14,6 @@
 
 #define	InBlock()	((inNemo) > 0)
 
-#define	NULL		((void *)0)
-#define	TRUE		1
-#define FALSE		0
 #define SUCCESS		0
 
 
@@ -64,8 +60,10 @@ GetCurrentBlock (void)
 static BlockRes*
 RegisterBlock (void)
 {
-    if (!InBlock())
-	firstRes->headMem = firstRes->headStream = NULL;
+    if (!InBlock()) {
+	firstRes->headMem =  NULL; 
+	firstRes->headStream = NULL;
+    }
 
     return PushBlock (firstRes);
 }
