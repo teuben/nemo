@@ -1,0 +1,38 @@
+%N fitsccd
+%D convert (near)fits files into images
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man fitsccd' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input fits file [???]
+%A out
+	Output image file [???]
+%A planes
+	Planes to select from fits cube [all] []
+%A blocking
+	Extra blocking factor for input (blocksize/2880) [1]
+%A mode
+	Format mode of input file {fits,raw} [fits]
+%A blocksize
+	Blocksize in raw mode [1]
+%A offset
+	Data offset in raw mode [0]
+%A bitpix
+	Bitpix in raw mode {16,32,-32} [32]
+%A naxis
+	Length of the axes in raw mode []
+%A cdelt
+	Pixel separation in raw mode (2/naxis) []
+%A crpix
+	Reference pixel in raw mode (0) [0,0,0]
+%A crval
+	Coordinates of reference pixel in raw mode (0) [0,0,0]
+%A bscale
+	Scale conversion factor in raw mode (1) [1]
+%A bzero
+	Offset conversion factor in raw mode (0) [0]
+%A blank
+	Blank value re-substitution value? []
+%A VERSION
+	18-may-99 PJT [3.6]
