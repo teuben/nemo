@@ -36,7 +36,7 @@ string defv[] = {
     "item=\n                      Select specific item",
     "xml=f\n                      output data in XML format? (experimental)",
     "octal=f\n                    Force integer output in octal again?",
-    "VERSION=3.1b\n		  26-nov-03 PJT ",
+    "VERSION=3.1c\n		  26-nov-03 PJT ",
     NULL,
 };
 
