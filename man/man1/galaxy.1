@@ -1,0 +1,141 @@
+.TH GALAXY1 1NEMO "24 June 1997"
+.SH NAME
+galaxy \-  3D FFT N-body code
+.SH SYNOPSIS
+\fBgalaxy\fP < galaxy.dat
+.SH DESCRIPTION
+\fIgalaxy\fP 
+is a direct descendant of the code first used by James & Sellwood (1978, MNRAS
+v182, p331) with only minor refinements since.  The Poisson solver was
+written exclusively by Richard James and uses the algorithm descibed in
+James (1977, J Comp Phys v25, p71).  This algorithm determines the
+gravitational potential of an isolated mass distribution using FFTs on a
+3-D Cartesian grid without the need to remove images by doubling the grid
+size in each dimension.  The motion of particles within the grid volume is
+integrated forwards in time according to accelerations determined by
+differencing the grid potential values.  Particles that leave the grid
+volume are discarded.
+.PP
+Very large numbers of particles can be employed at little cost since most cpu
+time is taken up by the determination of the potential on the grid.  [See
+Sellwood (1997, in "Computational Astrophysics" ed Clarke & West, ASP Conf
+series v123, p215) for a performance comparison with other codes.]
+.PP
+The version of the algorithm used here requires the individual grid cells to
+be cubic, but the overall grid need not be cubic.  The FFTs supplied require
+the number of mesh spaces in each direction to be (2**n + 1), where the
+exponent n may be chosen independently for each coordinate direction.  As
+large grids require a great deal of memory (c400 MB for a 257**3 grid), it
+is recommended that the parameters set in the include file '\fBrjinclude.h\fP'
+be no larger than necessary, although the code will function correctly as long
+as the actual dimensions used do not exceed those set by the parameter
+statement at compile time.
+.PP
+Time integration follows the standard 2nd order time-centered leap-frog, with
+the velocities one half a time step out of synchrony with positions.  This
+difference is maintained in the internally stored coordinates and is created
+and can be undone, by a call to subroutine TMCENT.  For output of the particle
+coordinates at a particular instant, the velocities need to be the average of
+those before and after the time for the positions.
+.PP
+Results, in this public version, are simply the phase space coordinates of
+all the particles as often as requested, which can create a very large file.
+The authors therefore do not employ this scheme themselves, preferring
+instead to measure and save properties of the model as the simulation
+evolves.
+An example of this "on the fly" analysis is provided
+in the routines ICHECK and MEASURE
+to determine the global integrals (energy, momentum, etc)
+.PP
+The grid is set up in subroutine GRDSET using parameters
+read in from a short ASCII input file (\fIgalaxy.dat\fP).
+The positions and velocities of the particles are read in subroutine LOADUP,
+from a local file \fIgalaxy.ini\fP.
+The gravitational field is determined by a call to FINDF.
+The model is integrated forward by a call to STEP.
+After the desired evolution is completed, the positions and velocities of
+the particles are saved by a call to UNLOAD.
+.SH FILES
+.nf
+.ta +2i
+$NEMO/src/nbody/evolve/sellwood  	source code tree (w/ res2snap & snap2ini)
+.fi
+The main files associated with the run are:
+.nf
+.ta +2i
+galaxy.dat	ASCII input: grid parameters, length and time scales
+galaxy.ini	ASCII input: initial coordinates of all the particles
+galaxy.lis	ASCII output: a brief summary of progress (appended)
+galaxy.fin	ASCII output: final coordinates of all the particles
+galaxy.res	binary output: coordinates and potentials at intervals  (appended)
+galaxy.tmp	short ASCII file (deleted when closed)
+galaxy.aux	large binary file (deleted when closed)
+.fi
+.PP
+Sample \fIgalaxy.dat\fP initialization file:
+.nf
+ 33  33  33    # number of grid cells in (x,y,z)
+ 15.0          # number of grid cells per length unit
+ 0.05          # time step length
+ 0.5           # time between particle outputs
+ 0.1           # time between integral checks
+ 1.00          # end time
+.fi
+.PP
+The format of the ASCII \fIgalaxy.ini\fP (and also \fIgalaxy.fin\fP) files
+is:
+.nf
+    Time Mass Nbody
+    X_1 Y_1 Z_1 VX_1 VY_1 VZ_1
+    ....
+    X_n Y_n Z_n VX_n VY_n VZ_n
+.fi
+The \fIgalaxy.fin\fP can also be used for a restart. Note that the timestep
+is one more then the last requested time, to prevent that the 
+\fIgalaxy.res\fP file will contain a datadump on the restart timestep twice.
+.SH COMPILATION
+Note that the maximum grid size and maximum amount of particles are hardcoded
+during compilation. See comments in \fBrjinclude.h\fP how to change the
+maximum grid size and the parameter \fBmbod\fP in
+\fBgalaxy.f\fP for the maximum particle number that can be used.
+.SH RES2SNAP
+The following shell script, given as an example, will convert a particular
+snapshot from a binary "galaxy.res" file into a NEMO \fIsnapshot(5NEMO)\fP
+format.
+.PP
+.nf
+#! /bin/csh -f
+if ($#argv != 2) then
+  echo Usage: res2snap FILE N
+  echo Converts the N-th snapshot from FILE to NEMOs snapshot format
+  exit 0
+endif
+#   set command line parameters
+set file=$1
+set n=$2
+#   get header info 
+set tsnap=`unfio $file "$n*2-1" float | awk '{if (NR==1) print $1}'`
+set nbody=`unfio $file "$n*2-1" int   | awk '{if (NR==2) print $1}'`
+#   dump data and convert to snapshot
+unfio $file "$n*2" float maxbuf=100000 |\\
+   tabtos - ${file:r}.$n.snap "" pos,vel,phi options=wrap times=$tsnap nbody=$nbody
+.fi
+.SH BENCHMARKS
+1000 particles on a 32**3 cube integrating for 20 steps took 4.77" on
+a sparc Ultra-2.
+.SH SEE ALSO
+unfio(1NEMO), snapshot(5NEMO)
+.PP
+.nf
+James & Sellwood (1978, MNRAS v182, p331) 
+James (1977, J Comp Phys v25, p71).  
+Sellwood (1997, in "Computational Astrophysics" ed Clarke & West, ASP Conf series v123, p215) 
+.fi
+.SH AUTHOR
+Jerry Sellwood
+.SH HISTORY
+.nf
+.ta +1i +4i
+9-jun-97	V1.0  Sellwood public release/adopted for NEMO  	JS/PJT
+24-jun-97	V1.1  added ICHECK/MEASURE; dtlog to galaxy.dat 	JS
+.fi
