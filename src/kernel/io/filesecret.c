@@ -1375,7 +1375,7 @@ local strstkptr findstream(stream str)
 	    stfree = sspt;			/*     save free slot ptr   */
     }
     if (stfree == NULL)				/* no free slot left?	    */
-      error("findstream: no free slots");
+      error("findstream: no free slots, StrTabLen=%d",StrTabLen);
 
     stfree->ss_str = str;			/* init saved stream	    */
     stfree->ss_stk[0] = NULL;			/* clear pending item	    */

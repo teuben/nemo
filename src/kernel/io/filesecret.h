@@ -46,7 +46,7 @@ typedef struct {
  */
 
 #define SetStkLen  8
-#define StrTabLen 16
+#define StrTabLen 64
 
 typedef struct {
     stream  ss_str;		    /* pointer to stdio stream */
