@@ -1,0 +1,174 @@
+.TH NBODY2 1NEMO "18 December 1999"
+.SH NAME
+nbody2 - direct summation N-body integrator with Ahmad-Cohen scheme
+.SH SYNOPSIS
+runbody2 in=snap_in out=snap_out [keyword=value ...]
+.SH DESCRIPTION
+\fIunder development\fP
+.PP
+\fBnbody2\fP is a NEMO adaptation of version 2 of Aarseth's 
+N-body scheme in which close encounter are treated according to 
+the Ahmad-Cohen scheme (ref: A.Ahmad and L. Cohen, 
+\fI J. Comp. Phys.\fP 12, 389, 1973).
+.PP
+Each particle is followed with its own integration step - an essential
+feature when the dynamical times of different particles vary a lot.
+A complete description is given in: S.J. Aarseth, "Multiple
+Time Scales", ed. U.J. Brackhill & B.I. Cohen, pp377. Orlando:
+Academic Press. (1985).
+.PP
+For a proper choice of input parameters
+it is \fBhighly recommended\fP to read an accompanying article
+\fINBODY2: Ahmad-Cohen-N-body Code\fP by S. Aarseth. It is included
+in NEMO's distribution package in the file $NEMO/doc/nbody2.tex, and
+can be printed using TEX
+.SH PARAMETERS
+The following parameters are recognized in any order when the keyword
+is also given. Most of them have the same name as in Aarseth's 
+description, except where otherwise noted.
+.TP 25
+\fBin=\fIfile-string\fP
+Input file in snapshot format. If no input file is given, a system will
+be generated for you, but it is expected that the \fBnbody\fP keyword
+(see below) is used in this case [default: empty].
+.TP
+\fBout=\fIfile-string\fP
+Output file in snapshot format [no default].
+.TP
+\fBrestart=\fIfile-string\fP
+Input file in local binary dump format. If output option kz(1) is
+choosen, this file will be overwritten. [default: not used].
+.TP
+\fBdump=\fIfile-string\fP
+Output file where last dump for restarts (option kz(2) is stored)
+[default: not used]
+.TP
+\fBnbody=\fIint\fP
+Number of bodies to create system with, in case no filename was given.
+Was called N in Aarseth's original description. [default: 32]
+.TP
+\fBnfix=\fIint\fP
+Output frequency of binaries or data save (options 3 & 6)
+[default: \fB1\fP].
+.TP
+\fBnnbmax=\fIint\fP
+Maximum number of neighbours (option 5 needs one more) [default: \fB10\fP].
+.TP
+\fBetai=\fIreal\fP
+Time step parameter for irregular force calculation [default: \fB0.02\fP].
+.TP
+\fBetar=\fIreal\fP
+Time step parameter for regular force calculation [default: \fB0.02\fP].
+.TP
+\fBrs0=\fIreal\fP
+Initial radius of neighbour spheres [default: \fB0.5\fP].
+.TP
+\fBdeltat=\fIreal\fP
+Output time interval, expressed in units of the crossing time
+[default: \fB0.25\fP].
+.TP
+\fBtcrit=\fIreal\fP
+Termination time, expressed in units of the crossing time
+[default: \fB2.0\fP].
+.TP
+\fBqe=\fIreal\fP
+Relative energy tolerance allowed per output time \fBdeltat\fP.
+(restart if de/e>5*qe and option 2(kz[1])>0) [default: \fB0.01\fP]
+.TP
+\fBsmin=\fIreal\fP
+Close encounter time step for neighbour retention (option 5)
+[default: \fP0.01\fB].
+.TP
+\fBeps=\fIreal\fP
+Softening length for potential (was called cutoff in Aarseth's original
+version) [default: \fB0.05\fP].
+.TP
+\fBkz=\fIint array\fP
+Array of options, at most 20 in number. A non-zero number sets some
+activity, either output or control. A full description 
+is given below [Default: \fB1::20\fP].
+.TP
+\fBcpumax=\fIvalue\fP
+Maximum CPU time allowed for the process. If the value is 0.0 or negative,
+the value is acutally ignored. Was called tcomp in Aarseth's original
+program  [default: \fB0.0\fP].
+.SH OPTIONS ARRAY
+The options array \fBkz\fP, introduced as a keyword, requires
+some additonal explanation, it usually takes some time to understand
+the interaction between all other keywords and the \fBkz\fP.
+.PP
+Basic output occurs every \fBdeltat\fP crossing times, but the 
+frequency parameter \fBnfix\fP then still controls
+(together with certain options from the kz array) which
+other major items will be output at which frequency,
+such as a full body dump in the form of snapshots or
+restart dumps.
+.PP
+Basic output consists of 1) time, virial ratio (T/U) q,
+number of steps taken so far nstepn (6 numbers), radius of
+center of mass, relative energy error de, and the
+time in crossing times, tcr. Then 2) total angular momentum
+in z, az, average number of near neighbours nnbn, ???, virial
+radius and maximum 'rs' density.
+.PP
+A full snapshot dump to \fBout\fP can be obtained at every
+\fBnfix*deltat\fP time-interval when kz(6)=1. nfix strangely
+enough also controls the standard ascii output of information
+on significant binaries.
+.PP
+kz(7) and kz(9) control the amount of standard ascii output 
+of (all/a few(5)) bodies: stepsize, positions and velocities, 
+regular and irregular forces and rs.
+.PP
+kz(1) and kz(2) control if dumps are to be done on unit 1 or 2.
+Unit 1 is used only at the end of calculation, for a continuation
+or restart. Unit 2, when activated, stores all relevant information
+for (autoatic) restarts when energy conservation is not
+acceptable (see \fBqe\fP above).
+.PP
+.SH TIMING
+xxx
+.SH LIMITATIONS
+If an input snapshot is given, it must ALWAYS start at T=0. The 
+fortran code has too many assumptions that this is the case. Of
+course if the internal binary dump (restart) files are used,
+integrations can be continued from the end on, but not from
+a middle random snapshot without resetting the time.
+.PP
+/fIobsoleted?/fP:
+The code has a hardcoded maximum number of particles in the fortran
+code (nbody2.f), and C code (nbodyio.c), however both are transferred
+through their own header file: nmax.inc for the FORTRAN code and 
+nmax.h for the C code.
+Whenever a new version is needed, use the makefile target 'nmax',
+\fIe.g.\fP \fBmake nmax NMAX=256;make nbody2\fP, to create
+new header files.
+.SH STORAGE 
+The \fBFORTRAN\fP code uses 4 large common blocks (named
+block1,block2,block3,and block4) which can also be communicated
+to the C code. These use \fI460.NMAX\fP bytes.
+The \fBC\fP code allocated its space dynamically during runtime,
+and uses it's regular \fI100.NMAX\fP bytes units (assuming the
+standard \fI<snapshot/body.h>\fP).
+.PP
+The total is hence \fI560.NMAX\fP bytes.
+.SH AUTHOR
+Sverre Aarseth, Peter Teuben (NEMO adaptations)
+.SH FILES
+.nf
+~/src/aarseth/nbody2	
+$NEMO/doc/nbody2.tex
+.fi
+.SH SEE ALSO
+nbody0(1NEMO), hackcode1(1NEMO), quadcode(1NEMO), newton0(1NEMO)
+.SH HISTORY
+.nf
+.ta +1i +4i
+3-jul-89	V1.0: created + NEMO interfaces to fortran source	PJT
+27-oct-89	-cosmetic-   	PJT
+mar-93    	initial formal release     	SJA
+dec-93    	released (u3 and u4 modified)                 	SJA
+16-mar-95	fixed a rand->rand2 common block name conflict	SJA
+jun-97     	adopted into NEMO (usr->src)
+18-dec-99       1/2 bug fix in ALPHAS line in define.f  PJT/SJA/xxx
+.fi
