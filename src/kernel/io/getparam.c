@@ -114,6 +114,7 @@
  *  5-feb-02       k  findaparam return NULL if illegal indexed
  * 24-apr-02    3.4   added placeholder for new outparam() stuff
  *  1-aug-02       a  try and free() some allocated local data
+ *  2-aug-02       b  write kiddy version of outkeys= processing
 
   TODO:
       - what if there is no VERSION=
@@ -145,7 +146,7 @@
 	gengetopt http://www.gnu.org/software/gengetopt/gengetopt.html
  */
 
-#define VERSION_ID  "3.4 1-aug-02 PJT"
+#define VERSION_ID  "3.4b 3-aug-02 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -345,6 +346,7 @@ local void set_tcl(string);
 local void set_yapp(string);
 local void set_outkeys(string);
 local void local_error(string);
+local void local_exit(int);
 
 /* external NEMO functions */
 
@@ -375,6 +377,7 @@ void initparam(string argv[], string defv[])
     string name;
     keyword *kw;
 
+    progname = argv[0];        /* cheat in case local_error called early on */
     scan_environment();              /* scan env.var and set what is needed */
 #if defined(sun) && defined(USE_IEEE)
     if(ieee_handler("set","common",ieee_nemo))    /* need to trap FP errors */
@@ -601,8 +604,7 @@ void initparam(string argv[], string defv[])
 
     if (useflag) {
         printusage(defv);                  /* give minimum 'usage' and exit */
-	finiparam();
-        exit(0);
+        local_exit(0);
         /*NOTREACHED*/
     }
 #if defined(INTERRUPT)
@@ -859,7 +861,7 @@ local void printhelp(string help)
         printf("  z       >> show as KHOROS pane file\n");
         printf("  i       >> show some internal variables\n");
 	printf("  o       >> show the output key names\n");
-        printf("  ?       >> this help (always quit)\n\n");
+        printf("  ?       >> this help (always quits)\n\n");
         printf("Numeric helplevels determine degree and type of assistence:\n");
         printf("They can be added to give combined functionality\n");
         printf("  1       keyword files used (prognam.def)\n");
@@ -870,8 +872,7 @@ local void printhelp(string help)
         printf(" VERSION_ID = %s\n",VERSION_ID);
         printf(" NEMO VERSION = %s\n",NEMO_VERSION);
         showconfig();
-	finiparam();
-        exit(0);
+        local_exit(0);
         /*NOTREACHED*/
     }
     if (strchr(help,'i')) {
@@ -891,16 +892,14 @@ local void printhelp(string help)
                 printf("%s  %s (%s)\n",
                        keys[0].val,keys[i].val,keys[i].help);
 
-	finiparam();
-        exit(0);
+        local_exit(0);
         /*NOTREACHED*/
     }
 
     if (strchr(help,'h')) {
         for (i=1; i<nkeys; i++)
             printf("%-16s : %s [%s]\n",keys[i].key, keys[i].help, keys[i].val);
-	finiparam();
-        exit(0);
+        local_exit(0);
         /*NOTREACHED*/
     }
 
@@ -914,8 +913,7 @@ local void printhelp(string help)
         }
         newline(1);
         if (strpbrk(help,"oapdqntvkzu")==NULL) {
-	  finiparam();
-	  exit(0);
+	  local_exit(0);
             /*NOTREACHED*/
         }
     }
@@ -953,8 +951,7 @@ local void printhelp(string help)
       } else {
 	warning("No output keys defined for this program");
       }
-      finiparam();
-      exit(0);
+      local_exit(0);
       /*NOTREACHED*/
     }
 
@@ -970,8 +967,7 @@ local void printhelp(string help)
                     keys[i].key,
                     keys[i].help ? keys[i].help : "No help",
                     keys[i].val);
-	finiparam();
-        exit(0);                    /* always exit in this case */
+        local_exit(0);                    /* always exit in this case */
         /*NOTREACHED*/
     } /* 't' */
 
@@ -1012,13 +1008,11 @@ local void printhelp(string help)
         printf("-R 1 0 1 13x2+39+%d 'Run' 'RunMe' khoros2nemo %s\n",
                             vcount, progname);
         printf("-E\n-E\n-E\n");
-	finiparam();
-        exit(0);                    /* always exit in this case */
+        local_exit(0);                    /* always exit in this case */
         /*NOTREACHED*/
     } /* 'z' */
     if (strchr(help,'q')) {
-	finiparam();
-        exit(0);                        /* quit - don't run program */
+        local_exit(0);                        /* quit - don't run program */
         /*NOTREACHED*/
     }
 }
@@ -1089,8 +1083,9 @@ local void showconfig()
 #else
     printf("off\n");
 #endif
+    printf("OUTKEYS    ");
 #if defined(OUTKEYS)
-    printf("on\n");
+    printf("on (testing)\n");
 #else
     printf("off\n");
 #endif
@@ -2207,8 +2202,7 @@ local void review()
            fgets(stdin,80,cmd);
 #endif
            if (strcmp(cmd,"end")==0 || strcmp(cmd,"quit")==0) { /* all done */
-	     finiparam();
-	     exit(0);                                    /* plain exit */
+	     local_exit(0);                                    /* plain exit */
 	     /*NOTREACHED*/
            }
            if (strcmp(cmd,"stop")==0) {                 
@@ -2225,7 +2219,7 @@ local void review()
               } else if (pid==0) {      /* child - will run the job */
                  /* execvp(path,args); */    /* do it */
                  dprintf(0,"[STILL TO DO] Unable to execute: %s\n",cmd);
-                 exit(1);   /* if child didn't work out, kill this thread */
+                 local_exit(1);   /* if child didn't work out, kill this thread */
                  /*NOTREACHED*/
               } 
               /* now in parent : can just live on...and on...and on...*/
@@ -2445,7 +2439,7 @@ int cmdTest(ClientData cd, Tcl_Interp *ip, int argc, char *argv[])
     } else if (pid==0) {				/* child */
     	execvp(argv[0],argv);
     	sprintf(ip->result,"Failed to exec process %s",argv[0]);
-    	exit(1);
+    	local_exit(1);
     } else {					/* parent */
     	while ( i != wait(&status))		/* wait for child to finish */
     		;
@@ -2677,7 +2671,7 @@ local void set_outkeys(string arg)
 #ifdef OUTKEYS    
     warning("No output key processing done yet (%s)",arg);
 #else
-    error("outkeys= not supported");
+    error("outkeys= not supported, or recompile with -DOUTKEYS");
 #endif
 
 }
@@ -2710,8 +2704,13 @@ local void set_error(string arg)
 
 local void local_error(string msg)
 {
-    fprintf(stderr,"### Fatal error [UNKNOWN]: %s\n", msg);
+    fprintf(stderr,"### Fatal error in getparam.c: %s\n", msg);
     exit(-1);
+}
+local void local_exit(int level)
+{
+    finiparam();
+    exit(level);
 }
 
 #if defined(TESTBED)
