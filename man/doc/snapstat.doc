@@ -1,0 +1,34 @@
+%N snapstat
+%D determine various statistics from an N-body system
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man snapstat' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	input file name  [???]
+%A times
+	range of times to plot  [all]
+%A exact
+	use hackforces or exact forces  [f]
+%A minradfrac
+	<1, for core radius det.  [0.1]
+%A all
+	want to do all? [false]
+%A pot
+	don't  all N*N calcu's  [false]
+%A eps
+	Softening length, if needed  [0.025]
+%A r_h
+	Want half-mass radius [false]
+%A r_v
+	Want Virial radius [false]
+%A r_c
+	Want core radius [false]
+%A rms
+	Want rms [false]
+%A ecutoff
+	Cutoff for bound particles [0.0]
+%A verbose
+	verbose mode? [t]
+%A VERSION
+	25-mar-94 PJT [1.5d]
