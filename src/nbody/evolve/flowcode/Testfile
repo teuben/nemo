@@ -17,6 +17,8 @@ PAR1 = potname=vrtm51 potpars=0,0.1,1,0,1,2 potfile=bench.tab
 
 bench.in:
 	nemoinp 0:360 | tabmath - - "0,1,1" > bench.tab
+	cp $(NEMO)/$(DIR)/vrtm51.c .
+	make -f $(NEMOLIB)/Makefile.lib vrtm51.so
 	mkflowdisk bench.in $(NBODY) \
 	  seed=123 \
 	  rmin=1 rmax=2 pitch=0.1 \
@@ -30,7 +32,6 @@ all: flowcode
 flowcode: bench.in
 	@echo Running $@
 	@rm -f bench.dat bench.log
-	@(cp $(NEMO)/$(DIR)/vrtm51.c .; make vrtm51.so)
 	flowcode in=bench.in out=bench.dat \
 		freq=100 mode=4 tstop=1 \
 		$(PAR1) \
