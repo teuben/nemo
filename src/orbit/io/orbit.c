@@ -165,6 +165,7 @@ int allocate_orbit(orbitptr *optr, int ndim, int nsteps)
     PhasePath(*optr) = (real* ) allocate(nsteps*ndim*2*sizeof(real));
     dprintf (2,"  Phasepath allocated @ %x\n",PhasePath(*optr));
     Size(*optr) = ndim*nsteps;
+    MAXsteps(*optr) = nsteps;  /* ??? */
 
     return 1;      /* succes */
 }
@@ -181,7 +182,8 @@ void copy_orbit(orbitptr iptr, orbitptr optr)
         if (optr==NULL) error("copy_orbit: Output orbit not allocated");
 	
 	if (Nsteps(optr) < Nsteps(iptr)) 
-		error("copy_orbit: not enough space in orbit to copy to");
+	  error("copy_orbit: not enough space in orbit to copy to: out->%d < in->%d",
+		Nsteps(optr),Nsteps(iptr));
         
         Ndim(optr) = Ndim(iptr);
         CoordSys(optr) = CoordSys(iptr);
