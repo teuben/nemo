@@ -18,7 +18,7 @@ SRCFILES= axis.c besselfunc.c erf.c fie.c \
 	  frandom.c grid.c \
 	  hash.c herinp.c layout.c linreg.c log2.c \
 	  lsq.c matinv.c nemofie.c imsl.c \
-	  match.c median.c minmax.c moment.c \
+	  match.c mdarray.c median.c minmax.c moment.c \
 	  nemoinp.c nemomain.c newextn.c scanopt.c \
 	  setfblank.c spline.c sqr.c vectmath.c within.c \
 	  xrand.c xrandom.c \
@@ -28,7 +28,7 @@ OBJFILES= axis.o besselfunc.o erf.o fie.o \
 	  frandom.o grid.o \
 	  hash.o herinp.o layout.o linreg.o log2.o \
 	  lsq.o matinv.o nemofie.o imsl.o \
-	  match.o median.o minmax.o moment.o \
+	  match.o mdarray.o median.o minmax.o moment.o \
 	  nemoinp.o nemomain.o newextn.o scanopt.o \
 	  setfblank.o spline.o sqr.o vectmath.o within.o \
 	  xrand.o xrandom.o \
@@ -38,7 +38,7 @@ LOBJFILES= $L(axis.o) $L(besselfunc.o) $L(erf.o) $L(fie.o) $L(layout.o) \
 	  $L(frandom.o) $L(grid.o) \
 	  $L(hash.o) $L(herinp.o) $L(linreg.o) $L(log2.o) \
 	  $L(lsq.o) $L(matinv.o) $L(nemofie.o) $L(imsl.o) \
-	  $L(match.o) $L(median.o) $L(minmax.o) $L(moment.o) \
+	  $L(match.o) $L(mdarray) $L(median.o) $L(minmax.o) $L(moment.o) \
 	  $L(nemoinp.o) $L(nemomain.o) $L(newextn.o) $L(scanopt.o) \
 	  $L(setfblank.o) $L(spline.o) $L(sqr.o) $L(vectmath.o) $L(within.o) \
 	  $L(xrand.o) $L(xrandom.o) \
@@ -47,7 +47,8 @@ LOBJFILES= $L(axis.o) $L(besselfunc.o) $L(erf.o) $L(fie.o) $L(layout.o) \
 BINFILES = nemoinp nemoshow layout xrandom scanopt 
 
 TESTFILES = vecttest axistest splinetest withintest \
-	matchtest linreg momenttest gridtest unwraptest frandomtest
+	matchtest linreg momenttest gridtest unwraptest frandomtest \
+	mdarraytest
 
 #	update the library: direct comparison with modules inside L
 help:
@@ -161,6 +162,9 @@ frandomtest: frandom.c
 
 hashtest: hash.c 
 	$(CC) $(CFLAGS) -o hashtest -DTESTBED hash.c $(NEMO_LIBS)
+
+mdarraytest: mdarray.c 
+	$(CC) $(CFLAGS) -o mdarraytest -DTESTBED mdarray.c $(NEMO_LIBS)
 
 axistest: axis.c
 	$(CC) $(CFLAGS) -o axistest -DTESTBED axis.c $(NEMO_LIBS)
