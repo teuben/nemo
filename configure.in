@@ -282,12 +282,18 @@ NEMO_CFLAGS="$NEMO_CFLAGS $prec_flag"
 
 AC_MSG_CHECKING(whether we have PGPLOT)
 if test -d "$PGPLOT_DIR"; then
-      pgplot_dir="$PGPLOT_DIR"
+    pgplot_dir="$PGPLOT_DIR"
 else
-      pgplot_dir="/usr/lib/pgplot"
+    for dir in /usr/lib/pgplot /usr/local/pgplot /usr/local/lib/pgplot /opt/pgplot
+    do
+        if test -f $dir/grfont.dat; then
+            pgplot_dir="$dir"
+            break;
+        fi
+    done
 fi
-AC_ARG_WITH(pgplot-prefix, 
-        [  --with-pgplot-prefix=PFX     Prefix where PGPLOT was installed (pgplot,ps,..)], 
+AC_ARG_WITH(pgplot-dir, 
+        [  --with-pgplot-dir=DIR   Directory where PGPLOT was installed], 
         pgplot_config_prefix="$withval", 
         pgplot_config_prefix="$pgplot_dir")
 
@@ -300,10 +306,11 @@ if test x$pgplot_config_prefix != x; then
                 PGPLOT_LIB="-L$pgplot_config_prefix"
                 PGPLOT_LIB="$PGPLOT_LIB -lcpgplot -lpgplot"
 dnl                CFLAGS="$PGPLOT_INCLUDE $CFLAGS"
-                AC_DEFINE(HAVE_PGPLOT) 
+                AC_DEFINE(HAVE_LIBPGPLOT) 
                 graphtype=pgplot
                 AC_MSG_RESULT(yes)
 		yapp_default="pgplot"
+                echo " PGPLOT_DIR =  $PGPLOT_DIR"
 
         else
                 AC_MSG_RESULT(no)
@@ -382,7 +389,7 @@ for dir in $hdf $hdf/include $hdf/hdf $hdf/include/hdf
 if test "X$HDF_INC" != "X"; then
     HDF_LIB="-L$hdf -ldf -ljpeg -lz"
     AC_DEFINE(HAVE_HDF)
-    AC_MSG_RESULT(yes: hdf4)    
+    AC_MSG_RESULT([yes: hdf4, $HDF_INC])
 else
     HDF_INC=""
     HDF_LIB=""
@@ -395,6 +402,11 @@ AC_SUBST(HDF_LIB)
 
 dnl##--------------------------------------------------------------------
 dnl   Could also check FTOOLS_INCLUDE and/or FTOOLS_DIR for cfitsio....
+dnl   Note again, there are two ideas on where to store CFITSIO:
+dnl     library in PREFIX/lib 
+dnl     header  in PREFIX/include or PREFIX/include/cfitsio
+dnl   This section also allows --with-cfitsio-prefix to point to the 
+dnl   source code tree, since that is where the *.a and *.h files live
 
 AC_MSG_CHECKING(whether we have CFITSIO)
 
@@ -406,14 +418,14 @@ AC_ARG_WITH(cfitsio-prefix,
 if test x$cfitsio_config_prefix != x; then
     cdir="$cfitsio_config_prefix"
     found="no"
-    for dir in $cdir/include 
+    for dir in $cdir/include $cdir
       do
         if test -f ${dir}/fitsio.h ; then
                 CFITSIO_INC="-I${dir}"
     		CFITSIO_LIB="-L$cdir/lib"
     		CFITSIO_LIB="$CFITSIO_LIB -lcfitsio"
-                AC_DEFINE(HAVE_LIBCFITSIO) 
-                AC_MSG_RESULT(yes)
+                AC_DEFINE(HAVE_LIBCFITSIO)
+                AC_MSG_RESULT([yes: $CFITSIO_INC])
                 found="yes"
                 break;
 	elif test -f ${dir}/cfitsio/fitsio.h ; then
@@ -421,7 +433,7 @@ if test x$cfitsio_config_prefix != x; then
     		CFITSIO_LIB="-L$cdir/lib"
     		CFITSIO_LIB="$CFITSIO_LIB -lcfitsio"
                 AC_DEFINE(HAVE_LIBCFITSIO) 
-                AC_MSG_RESULT(yes)
+                AC_MSG_RESULT([yes: $CFITSIO_INC])
                 found="yes"
                 break;
 	elif test -f ${dir}/fitsio/fitsio.h ; then
@@ -429,7 +441,7 @@ if test x$cfitsio_config_prefix != x; then
 		CFITSIO_LIB="-L$cdir/lib"
     		CFITSIO_LIB="$CFITSIO_LIB -lcfitsio"
                 AC_DEFINE(HAVE_LIBCFITSIO) 
-                AC_MSG_RESULT(yes)
+                AC_MSG_RESULT([yes: $CFITSIO_INC])
                 found="yes"
                 break;
         fi
@@ -635,7 +647,7 @@ AC_C_BIGENDIAN
 dnl -- some final YAPP stuff
 
 AC_ARG_WITH(yapp,
-	[  --with-yapp=YAPPNAME    Yapp module to make default],
+	[  --with-yapp=YAPPNAME    Yapp module to make default (pgplot, ps, ..)],
 	yapp_name="$withval",
 	yapp_name="$yapp_default")
 
