@@ -1,4 +1,4 @@
-.TH TABSPLINE 1NEMO "23 January 2001"
+.TH TABSPLINE 1NEMO "5 April 2001"
 .SH NAME
 tabspline \- interpolate in a table
 .SH SYNOPSIS
@@ -35,6 +35,10 @@ Can be an array using \fInemoinp(3NEMO)\fP notation.
 \fBn=\fP
 How many to find. By default it will find all possible roots, but
 one can limit the number using this keyword. (0=all). [0]
+.TP
+\fBformat=\fP\fIC-fmt\fP
+Output format in C format (\fIprintf(3)\fP) notation.
+[Default: \fB%g\fP]
 .SH EXAMPLES
 Here is an cute way to estimate sqrt(2):
 .nf
@@ -58,4 +62,5 @@ Peter Teuben
 15-Apr-98	V2.0 TOOLBOX made functional for Sally	PJT
 16-apr-98	split code and placed in src/kernel/tab 	PJT
 23-jan-01	V2.1 added x=,y= arrays for Mousumi	PJT
+5-apr-01	V2.2: added format=	PJT
 .fi

@@ -5505,6 +5505,9 @@ fi
 
 YAPP_NAME="$yapp_name"
 
+
+echo $ac_n "checking looking for a reasonable YAPP""... $ac_c" 1>&6
+echo "configure:5511: checking looking for a reasonable YAPP" >&5
 case $yapp_name in
         ps)
           YAPP_LIBS=""
@@ -5513,6 +5516,7 @@ case $yapp_name in
 	  YAPP_LIBS="-L$PGPLOT_DIR -lpgplot $XLIBS $FLIBS"
           ;;
 esac
+echo "$ac_t""$YAPP_NAME" 1>&6
 
 
 

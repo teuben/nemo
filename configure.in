@@ -190,6 +190,7 @@ dnl ----
   
 dnl ---------------------------------------------------------------------
 
+dnl TODO: allow to choose a compiler, e.g. --with-fortran=f90
 
 if test "$enable_fortran" = "yes"; then
   AC_MSG_CHECKING(whether we have a FORTRAN 77 compiler)
@@ -612,6 +613,8 @@ AC_ARG_WITH(yapp,
 
 YAPP_NAME="$yapp_name"
 
+
+AC_MSG_CHECKING(looking for a reasonable YAPP)
 case $yapp_name in
         ps)
           YAPP_LIBS=""
@@ -620,6 +623,7 @@ case $yapp_name in
 	  YAPP_LIBS="-L$PGPLOT_DIR -lpgplot $XLIBS $FLIBS"
           ;;
 esac
+AC_MSG_RESULT($YAPP_NAME)
 
 AC_SUBST(YAPP_NAME)
 AC_SUBST(YAPP_LIBS)
