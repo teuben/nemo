@@ -37,7 +37,7 @@ string defv[] = {
     "lab=\n             Mixing parameter for nllsqfit",
     "itmax=50\n         Maximum number of allowed nllsqfit iterations",
     "numrec=f\n         Try the numrec routine instead?",
-    "VERSION=1.1b\n     17-jul-02 PJT",
+    "VERSION=1.1c\n     18-jul-02 PJT",
     NULL
 };
 
