@@ -222,7 +222,7 @@ string defv[] = {
     "gsl=\n         If given, GSL distribution name",
     "pars=\n        Parameters for GSL distribution",
 #endif
-    "VERSION=2.0\n  8-sep-01 PJT",
+    "VERSION=2.0a\n 10-sep-01 PJT",
     NULL,
 };
 
@@ -258,7 +258,7 @@ nemo_main()
     seed = init_xrandom(getparam("seed"));
     Qbench = (n==4 && seed==1);
 
-    printf("#Seed used = %d\n",seed);
+    printf("Seed used = %d\n",seed);
 
     sum[0] = sum[1] = sum[2] = sum[3] = sum[4] = 0.0;
     if (Qgauss) {
