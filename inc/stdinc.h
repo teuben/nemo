@@ -306,7 +306,7 @@ extern "C" {
 
 /* io/stropen.c */
 
-extern stream stropen(string, string);
+extern stream stropen(const string, string);
 extern int    strdelete(stream, bool);
 extern string strname(stream);
 extern bool   strseek(stream);
