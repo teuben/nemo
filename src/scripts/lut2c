@@ -1,15 +1,22 @@
 #! /bin/csh -f
 # 
 #  transform a table of 256 RGB values into a float[256][3] array
-#
+#  e.g.    lut2c $NEMODAT/lut/*lut > all_lut.c
+#    
 
 set testbed=0
 
-foreach file ($*)
+set names=()
 
-  set name=$file:r
+foreach file ($*)
+  set last=$file:t
+  set name=$last:r
+  set names=($names $name)
+
   echo "/* automatically generated from NEMO's $0 script - do not edit */"
-  echo "static float ${name}[256][3] = { "
+
+#  echo "static float ${name}[256][3] = { "
+  echo "static float ${name}[256*3] = { "
   awk '{printf("   %s , %s , %s ,\n",$1,$2,$3)}' $file
   echo "};"
 
@@ -28,3 +35,20 @@ foreach file ($*)
 
 end
 
+
+# now write all the names....
+
+echo ""
+echo "/* ------------------------------------------------- */"
+echo ""
+echo "typedef struct RGB_s {"
+echo "   char *name;"
+echo "   float *rgb;"
+echo "} RGB;"
+
+echo "static RGB rgb[] = {"
+foreach name ($names)
+   echo '    {"'${name}'", '$name'},'
+end
+echo "    {0,0}"
+echo "};"
