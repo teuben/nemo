@@ -4,8 +4,9 @@
  *	quick and dirty: 10-aug-93
  *	something...	  6-sep-93
  *	n[xy]aver=	  5-nov-93 	puzzling.....
- * 
-		something is wrong here                     
+ *		something is wrong here                     
+ * 1.3  added some z stuff for Martin Bureau       1-may-2002      PJT
+ * 1.4  added reorder=
 
     TODO:  wcs is wrong on output
  */
@@ -26,15 +27,17 @@ string defv[] = {
 	"aver=\n	Coordinates to average",
 	"nxaver=1\n	Number X to aver (size remains same)",
 	"nyaver=1\n	Number Y to aver (size remains same)",
-	"skip=xyz\n	Coordinates to skip",
-	"VERSION=1.2\n  5-nov-93 PJT",
+	"nzaver=1\n	Number Z to aver (size remains same)",
+	"skip=xyz\n	Coordinates to skip (** ignored **)",
+	"reorder=\n     New coordinate ordering",
+	"VERSION=1.4\n  2-may-2002 PJT",
 	NULL,
 };
 
 string usage = "sub/average of an image";
 
 
-#define MAXDIM 4096
+#define MAXDIM 8192
 
 int  ix[MAXDIM], iy[MAXDIM], iz[MAXDIM];
 
@@ -45,14 +48,17 @@ void nemo_main()
     stream  instr, outstr;
     int     nx, ny, nz;        /* size of scratch map */
     int     nx1,ny1,nz1;
-    int     nxaver, nyaver;
-    int     i,j, i0,j0, i1,j1;
+    int     nxaver, nyaver,nzaver;
+    int     i,j,k, i0,j0,k0, i1,j1,k1;
     imageptr iptr=NULL, iptr1=NULL;      /* pointer to images */
     real    sum, tmp, zzz;
+    bool    Qreorder;
+    string  reorder;
 
     instr = stropen(getparam("in"), "r");
     nxaver=getiparam("nxaver");
     nyaver=getiparam("nyaver");
+    nzaver=getiparam("nzaver");
 
     nx1 = nemoinpi(getparam("x"),ix,MAXDIM);
     ny1 = nemoinpi(getparam("y"),iy,MAXDIM);
@@ -63,37 +69,65 @@ void nemo_main()
 
     nx = Nx(iptr);	
     ny = Ny(iptr);
-
-    nx1 = ax_index("x",nx,nx1,ix);
-    ny1 = ax_index("y",ny,ny1,iy);
+    nz = Nz(iptr);
+    if (hasvalue("reorder")) {
+      reorder = getparam("reorder");
+      if (strlen(reorder) != 3) error("Reorder must have 3 letters");
+      for (i=0; i<3; i++)
+	switch (reorder[i]) {
+	case 'x','X':
+	case 'y','Y':
+	case 'z','Z':
+	default:
+	  error("...");
+	}
+    } else {
+      nx1 = ax_index("x",nx,nx1,ix);
+      ny1 = ax_index("y",ny,ny1,iy);
+      nz1 = ax_index("z",nz,nz1,iz);
+    }
 
     outstr = stropen(getparam("out"), "w");
 
-    if (nxaver>1 || nyaver>1) {      /*  averaging, but retaining size */
-        dprintf(0,"Averaging map %d *%d pixels; mapsize %d * %d\n",
-                   nxaver,nyaver,nx,ny);
+    if (nxaver>1 || nyaver>1 || nzaver>1) {  /*  averaging, but retaining size */
+        dprintf(0,"Averaging map %d * %d * %d pixels; mapsize %d * %d * %d\n",
+                   nxaver,nyaver,nzaver,nx,ny,nz);
         nx1 = nx/nxaver;
         ny1 = ny/nyaver;
-        for (j1=0; j1<ny1; j1++) {
+        nz1 = nz/nzaver;
+        for (k1=0; k1<nz1; k1++) {
+	  k = k1*nzaver;
+	  for (j1=0; j1<ny1; j1++) {
             j = j1*nyaver;
             for (i1=0; i1<nx1; i1++) {
                 i = i1*nxaver;
                 sum = 0.0;
                 for (j0=0; j0<nyaver; j0++)
                     for (i0=0; i0<nxaver; i0++)
-                        sum += MapValue(iptr,i+i0, j+j0);
-                sum /= (real) (nxaver*nyaver);
-                for (j0=0; j0<nyaver; j0++)
+                        sum += CubeValue(iptr,i+i0, j+j0, k+k0);
+                sum /= (real) (nxaver*nyaver*nzaver);
+                for (k0=0; k0<nzaver; k0++)
+		  for (j0=0; j0<nyaver; j0++)
                     for (i0=0; i0<nxaver; i0++)
-                        MapValue(iptr,i+i0, j+j0) = sum;
+                        CubeValue(iptr,i+i0, j+j0, k+k0) = sum;
             }
-        }
+	  }
+	}
         write_image(outstr, iptr);
-    } else {            	/* straight sub-sampling */
-        create_image(&iptr1,nx1,ny1);
-        for (j=0; j<ny1; j++)
+    } else if (Qreorder) {            	/* reordering */
+        create_cube(&iptr1,nx1,ny1,nz1);
+        for (k=0; k<nz1; k++)
+	  for (j=0; j<ny1; j++)
             for (i=0; i<nx1; i++)
-                MapValue(iptr1,i,j) = MapValue(iptr,ix[i],iy[j]);
+                CubeValue(iptr1,i,j,k) = CubeValue(iptr,px[i],py[j],iz[k]);
+        write_image(outstr, iptr1);
+    } else {            	/* straight sub-sampling */
+        create_cube(&iptr1,nx1,ny1,nz1);
+        for (k=0; k<nz1; k++)
+	  for (j=0; j<ny1; j++)
+            for (i=0; i<nx1; i++)
+                CubeValue(iptr1,i,j,k) = CubeValue(iptr,ix[i],iy[j],iz[k]);
+	/* need to do WCS here */
         write_image(outstr, iptr1);
     }                    
 }
