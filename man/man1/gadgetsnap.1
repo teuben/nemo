@@ -1,0 +1,110 @@
+.TH GADGETSNAP 1NEMO "2 Jun 2003"
+.SH NAME
+gadgetsnap \- convert gadget files to snapshot format
+.SH SYNOPSIS
+\fBgadgetsnap\fP [parameter=value]
+.SH DESCRIPTION
+\fBgadgetsnap\fP converts  data from \fIgadget(lNEMO)\fP into
+standard \fIsnapshot(5NEMO)\fP format. Currently limited
+to only output \fImass,pos,vel\fP and all of the
+potentially 5 particles typed are stacked in the order of how
+GADGET has stored them.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input file (gadget format). No default, and currently only one file
+at the time can be processed.
+.TP 20
+\fBout=\fP
+Output file (snapshot format). No default.
+.TP 20
+\fBswap=\fP
+Force swaping bytes for non-native machines [f] 
+.SH EXAMPLES
+The following example converts a standard sample dataset \fIlcdm_gas.dat\fP
+from the directory \fB$GADGET_DIR/ICs\fP to a NEMO snapshot file,
+and piped into \fItsf(1NEMO)\fP for a quick look:
+.nf
+% gadgetsnap lcdm_gas.dat - swap=t | tsf -
+reading `lcdm_gas.dat.intel' ...
+Header:
+npart:  32768 32768 0 0 0 0
+mass:  4.23508 27.528 0 0 0 0
+time: 0.0909091
+redshift: 10
+flag_sfr: 0
+flag_feedback: 0
+npartTotal:  32768 32768 0 0 0 0
+flag_cooling: 424242
+num_files: 0
+BoxSize: 0
+Omega0: 0
+OmegaLambda: 0
+HubbleParam: 0
+char History[44] "gadgetsnap lcdm_gas.dat.intel - VERSION=0.1"
+set SnapShot
+  set Parameters
+    int Nobj 65536
+    double Time 0.0909091
+  tes
+  set Particles
+    int CoordSystem 66306
+    double Mass[65536] 4.23508 4.23508 4.23508 4.23508 4.23508 4.23508
+      4.23508 4.23508 4.23508 4.23508 4.23508 4.23508 4.23508 4.23508
+      4.23508 4.23508 4.23508 4.23508 4.23508 4.23508 4.23508 4.23508
+      4.23508 4.23508 4.23508 4.23508 4.23508 4.23508 4.23508 4.23508
+      . . .
+    double PhaseSpace[65536][2][3] 395.234 395.752 1244.31 -232.532
+      -232.220 278.943 310.173 440.217 2817.06 -283.772 -205.434
+      285.119 191.957 465.572 4430.20 -354.984 -190.161 315.622
+      71.5493 452.081 6047.62 -427.516 -198.288 348.702 72.7101
+      . . .
+  tes
+tes
+
+.fi
+.SH HEADER
+The 256 byte GADGET header contains information on how the subsequent data
+is structured:
+.PP
+Npart(6): number of particles in each of up to 5 particle types (6th one is unused)
+.PP
+Mass(6): mass of a single particle in the particle types. If a particle type has
+varying masses, the entry will contain 0.0
+.PP
+Time/a: expansion factor of output (for cosmological) or time of output
+(for non-cosmological)
+.PP
+Redshift: z = 1/a-1 (only set for cosmological)
+.PP
+FlagSfr: flag for starformation (not used in the public release)
+.PP
+FLagFeedback: flag for feedback (not used in the public release)
+.PP
+Nall(6): total number of particles of each type in the simulation. This
+field differs from Npart if the particle dump is distributed accross
+several files
+.PP
+FlagCooling
+.PP
+NumFiles
+.PP
+BoxSize
+.PP
+Omega0
+.PP
+OmegaLambda
+.PP
+HubbleParam
+.SH SEE ALSO
+snapshot(5NEMO)
+.SH FILES
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+02-Jun-03	V0.1 Created	PJT
+.fi
