@@ -1,0 +1,115 @@
+Please read this file before you install the program.
+
+tr2latex: Troff-to-TeX translator
+$Id$
+Copyright (C) by 1987 Kamal Al-Yahya, 1991,1992 Christian Engel.
+
+This directory contains a program developed at the Stanford Exploration
+Project, Geophysics Department, by Kamal Al-Yahya.  It was modified and
+enhanced substantially by Christian Engel at the Rheinisch-Westfaelische
+Technische Hochschule at Aachen, Germany, Department of Computer Science 4.
+Copying the sources and the program to any other machine is permitted
+without prior permission provided that copyright messages are kept, no
+profit is made by copying the files, and modifications are clearly
+documented.
+
+I would very much appreciate any comments or suggestions. My e-net
+address is
+		kamal@hanauma.stanford.edu
+If it doesn't work try
+		kamal%hanauma@score.stanford.edu
+
+-----------------------------------------------------------------------------
+
+It seems as if Kamal isn't to the net anymore.
+
+I have made several modifications on Kamal's version 0.93 from the net.
+Thus I continued my revision numbering with 1.00. The actual revision is
+version $Revision$, $Date$.
+
+If you modify this source, if you found some bugs, or if you have some
+suggestions for improvements then e-mail me as well:
+        krischan@informatik.rwth-aachen.de
+
+-----------------------------------------------------------------------------
+
+			INSTALLATION INSTRUCTIONS
+
+!!! No support of K&R anymore !!!
+Everything turned to ANSI-C. If you only have a K&R compiler transform
+the sources by a K&R to ANSI translator (e.g. ansi2knr from anonymous
+ftp: bongo.cc.utexas.edu, /source/X11R5/contrib/clients/xv-2.00/jpeg)
+or use tr2latex V1.04. Read file ``History'' for further informations.
+
+In short, type ``make'' and then run it on the document (try the testfile):
+		tr2latex testfile > testfile.tex
+
+In details:
+
+- Use the adaequate Makefile: ``Makefile.unix'' under any *NIX system, 
+  ``Makefile.vms'' under VMS with public domain make, ``Makefile.mms''
+  under VMS with DEC MMS make package, ``Makefile.msc'' if you're running
+  Microsoft-C under MS-DOS, and ``Makefile.tc'' under Turbo-C. Copy it to
+  ``Makefile''.
+  Warning: I have developed and tested tr2latex just on SUNs.
+  Thus I've tested only the UNIX distribution. Other machines have been
+  supported by other people.
+- In the Makefile, define some macros adaequately. Read the comments in the
+  Makefile. Also, add the -O flag in CFLAGS if you want to (and the optimizer
+  is not buggy). The -O flag causes long compilation time but experience has
+  shown that it is unnecessary for this package; time saved in running time
+  is extremely small in the computers I used.
+- If the limit on your unsigned int is not 65535, change MAXLEN in
+  setups.h accordingly.
+- If you are installing on a MIPS M/2000, running RISCos, comment out the
+  line ``#    error "The COMPACT model is needed"'' from setups.h. Otherwise
+  an strange error
+  occurs through compilationAs
+  David Osborne <cczdao@mips.ccc.nottingham.ac.uk> noted a strange error
+  occurs through compilation
+  
+- In tr2latex.c, change the document type if you want. The default is article.
+  Also, change the style options to suit your taste. The default is
+  [troffms,11pt] if no flag is used and [troffman] if the -m flag is used.
+- Add necessary -D's to CFLAGS if you need them. The program recognizes the
+  following compiler-time definitions:
+	   -Dtops20, -DANSI, -DMSC, -DNO_SGTTY
+- type ``make'' to produce the executable, called ``tr2latex''.
+- Run the translator on ``testfile'' and the manual page as follows
+		tr2latex testfile > testfile.tex
+		tr2latex -m tr2latex.man > tr2latex.man.tex
+  The first command will come up with the following warning:
+        > illegal TeX macro, ((, replacing it
+        > illegal TeX macro, )), replacing it
+        > I am not very good at tables
+        > I can only do very simple ones. You may need to check what I've done
+  Compare ``testfile.tex'' with ``testfile.tex-orig'' and
+  ``tr2latex.man.tex'' with ``tr2latex.man-tex-orig'':
+        diff testfile.tex testfile.tex-orig
+        diff tr2latex.man.tex tr2latex.man-tex-orig
+  If they are not identical (except for the date of conversion), you have not
+  installed it properly.
+- Modify troffms.sty and troffman.sty to suit your taste but keep the
+  necessary macro definitions as they will be needed when running latex.
+  Make sure the font names exist on your site. Change them if necessary.
+- Install tr2latex, the style files, and the manual page by running
+        make install
+  This is only possible for the super user on UNIX machines.
+
+
+			USING THE TRANSLATOR
+
+You can run the program either by
+		tr2latex < file  > file.tex
+or
+		tr2latex file  > file.tex
+You are most likely to get messages on the standard error telling
+you about things it encounters and cannot do.
+
+Now you have the translated document. Look at it and see if you
+can spot a major error. Run it through latex. If it runs and produces
+the dvi file, then print it. If you get latex error messages modify
+the translated document accordingly and repeat the latex run, and so on.
+I usually get away with one or two iterations.
+
+

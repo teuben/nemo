@@ -1,0 +1,63 @@
+#-----------------------------------------------------------------------
+# Makefile for troff-to-TeX translator using MS-DOS
+# Make targets:
+#	(none)    same as tr2latex
+#	tr2latex  build translator
+#	lint      run lint on sources
+#	clean     remove object and executable files
+#	share     make ../ttr.sh for mailing
+#
+# Author: Nelson H.F. Beebe	 25-Oct-86
+
+# choose compiling options in CFLAGS:
+# -DMSC *must* be given!
+# The -O flag causes long compilation time but experience has shown that it is
+# unnecessary for this package; time saved in running time is extremely small
+# in the computers I used.
+# Add -DDEBUG for some additional debugging code.
+CFLAGS = -O -DMSC
+CFILES = tr2latex.c tr.c subs.c version.c
+LINTFLAGS = -abchnpux
+
+# BINDIR is the path where the executable should be placed
+BINDIR = .
+
+# TEXDIR gives the path where the tex library resides (fonts, macros ...)
+TEXDIR = tex
+
+# MANSECTION gives the section number of the online manual pages where to
+# place the tr2latex manual page. Should be 1 or l (``ell'').
+# MANDIR gives the path of your online manual pages.
+MANSECTION = l
+MANDIR = man
+
+tr2latex:	tr2latex.o tr.o subs.o version.o
+	cc $(CFLAGS) tr2latex.o tr.o subs.o version.o -o tr2latex
+
+share:
+	make clean
+	makescript ../ttr.sh *
+
+tr2latex.o:	tr2latex.c setups.h
+	cc $(CFLAGS) -c tr2latex.c
+
+tr.o:	tr.c setups.h
+	cc $(CFLAGS) -c tr.c
+
+subs.o:	subs.c setups.h similar.h greek.h flip.h troff_mac.h mathcom.h
+	cc $(CFLAGS) -c subs.c
+
+version.o:	version.c
+	cc $(CFLAGS) -c version.c
+
+lint:
+	lint $(LINTFLAGS) $(CFILES) > lint.lst
+
+clean:
+	\rm -f *.o core *junk* tr2latex lint.lst
+
+install:
+	copy tr2latex $(BINDIR)/tr2latex
+	copy troffman.sty $(TEXDIR)/macros/troffman.sty
+	copy troffms.sty $(TEXDIR)/macros/troffms.sty
+	copy tr2latex.man $(MANDIR)/man$(MANSECTION)/tr2latex.$(MANSECTION)

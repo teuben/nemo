@@ -1,0 +1,108 @@
+			HISTORY
+
+Copyright (C) by 1986, 1987 Kamal Al-Yahya
+
+
+$Log$
+Revision 1.1  1992/04/27 15:21:35  teuben
+Initial revision
+
+# Revision 2.2  1992/04/27  15:13:51  Christian_Engel
+# - Fixed a bug in flip_twice I have brought in with revision 1.02 but didn't
+#   notice earlier. It lead to wrong translation of nested flipping math
+#   commands like ``a under hat''.
+#   Bug reported by Richard Walker <richard@cs.anu.edu.au>.
+# - Some modifications to calm down some strange warnings on strange
+#   compilers reported from the net
+# - Fixed bug in getopts: now input of stdin by pure command line argument `-'
+#   works properly.
+# - Fixed bug in main: multiple command line arguments work properly now.
+#
+# Revision 2.1  1992/04/24  13:57:46  Christian_Engel
+# - Fixed inconsistend declaration of variable ``man''
+# - Fixed some smaller bugs and inconsistencies reported by netlanders after
+#   releasing Version 2.0
+# - Introduced for use of the CenterLine Objectcenter C development software,
+#   i.e. some directives to suppress intended anomalies, as /*EMPTY*/
+#   while statements
+#
+# Revision 2.0  1992/04/22  14:17:26  Christian_Engel
+# I have turned to version 2 for some important changes:
+# - No support of K&R anymore. Everything turned to ANSI-C. If you only have a
+#   K&R compiler transform the sources by a K&R to ANSI translator (e.g. )
+#   or use tr2latex V1.04.
+# - The Revisions of tr2latex are controlled by RCS.
+# Furthermore, there have been some smaller improvements:
+# - added support of MMS package for make under VMS. Thanks to
+#   Richard L. Dyson.
+#   New files: Makefile.mms, make_tr2latex.com, tr2latex.hlp, vaxcrtl.opt.
+# - fixed some problems compiling on a MIPS M/2000 running RISCos
+#   Thanks to David Osborne <cczdao@mips.ccc.nottingham.ac.uk>
+#
+# Revision 1.05, December 9, 1991, Christian Engel
+# This version hasn't been released. It turned out to be completed and
+# released as Revision 2.0.
+# - Moved completely to ANSI, no support of K&R anymore.
+# - managed troffms.sty to place the output correctly on the page.
+# - replaced version.h by version.c to make compilation shorter.
+# - added automatical generation of version numbers and dates
+#   (generation not visible to distributuion package).
+# 
+# Revision 1.04, July 15, 1991, Christian Engel
+# - added missing IPlist environment to troffms.sty
+# 
+# Revision 1.03, June 14, 1991, Christian Engel
+# - added M. Kaczmarczik's VMS support (thanks to Richard L. Dyson, and
+#   Johannes Braams). This includes the introduction of the -o option.
+# - changed all names tr2tex.* to tr2latex.*
+# - added documentation for all new features to tr2latex.man
+# 
+# Revision 1.02, June 11, 1991, Christian Engel
+# - fixed some bugs (thank you to Bill Metzenthen and Arjan de Vet)
+# - now running with Turbo-C (thank you to Bill Metzenthen once more)
+# - introduced first command line option for for debugging: watch output
+#   immediately if compiled with -DDEBUG and command line option -do is
+#   given.
+# - support of man macro .P
+# - now several macros for change of font (.I, .B, .R, .P) work correctly
+#   with more than one argument
+# 
+# Revision 1.01, May 3, 1991, Christian Engel
+# - fixed bug with get_multargs() concerning end of line
+# - introduced command line options -t, -<n>, -s <style>
+# 
+# Revision 1.00, May 2, 1991, Christian Engel
+# Enhancements:
+# - file version.h
+# - support of following man macros:
+# 	.MS
+# 	.PN
+# 	.EX
+# 	.EE
+# 	.NT
+# - new macros in troffman.sty:
+# 	\beginnotec
+# 	\beginnote
+# 	\endnote
+# 	\IPlist
+# - correction of bugs in ANSI version
+# - fixed a bug in getarg that lead to an infinite loop in alternate with
+#   an argument containing '$' or '}'.
+# 
+# Revision .93, March 4, 1987
+# Posted to comp.sources.unix on 2 Jul 87 by Kamal Al-Yahya
+# 
+
+-----------------------------------------------------------------------------
+
+TO BE DONE:
+
+	- handling of tables
+	- handling of tabs
+
+	- handling of troff commands:
+	  .bd
+	  .nr
+	  .pl
+	  .ps
+	  .ds

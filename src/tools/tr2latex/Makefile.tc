@@ -1,0 +1,68 @@
+# Makefile for Turbo C
+# By W. Metzenthen, based upon the UNIX makefile.
+# Works with GNU make, probably with Borland make too.
+
+
+# Use the COMPACT model (for lots of data space)
+MODEL = c
+
+# -v for Turbo Debugger info, -N for stack checking
+# -wnod to warn of no function declaration
+DEBUG = -wnod -N
+
+# -DANSI for the source modules,
+# (don't use -A to tell Turbo C to do ANSI C; it won't then know fileno()).
+# -O turns optimizations on.
+CFLAGS = -DANSI -m$(MODEL) -O $(DEBUG)
+
+# If lint is available, but why bother with Turbo C ?
+LINTFLAGS = -abchnpux
+
+# All the source files
+CFILES = tr2latex.c tr.c subs.c version.c
+
+# All the local header files
+HFILES = setups.h simil.h greek.h macros.h maths.h flip.h forbid.h
+
+# BINDIR is the path where the executable should be placed
+BINDIR = .
+
+# TEXDIR gives the path where the tex library resides (fonts, macros ...)
+TEXDIR = tex
+
+# MANSECTION gives the section number of the online manual pages where to
+# place the tr2latex manual page. Should be 1 or l (``ell'').
+# MANDIR gives the path of your online manual pages.
+MANSECTION = l
+MANDIR = man
+
+# Yep, Turbo C
+CC = tcc
+
+######################################################################
+
+default: tr2latex.exe
+
+tr2latex.exe: tr2latex.obj tr.obj subs.obj version.obj
+	$(CC) $(CFLAGS) -etr2latex -ls tr2latex.obj tr.obj subs.obj version.obj
+
+tr2latex.obj: tr2latex.c setups.h
+	$(CC) $(CFLAGS) -c tr2latex.c
+tr.obj: tr.c setups.h
+	$(CC) $(CFLAGS) -c tr.c
+subs.obj: subs.c $(HFILES)
+	$(CC) $(CFLAGS) -c subs.c
+version.obj: version.c
+	$(CC) $(CFLAGS) -c version.c
+
+lint:
+	lint $(LINTFLAGS) $(CFILES) > lint.lst
+
+clean:
+	\rm -f *.obj core *junk* tr2latex lint.lst
+
+install:
+	copy tr2latex $(BINDIR)/tr2latex
+	copy troffman.sty $(TEXDIR)/macros/troffman.sty
+	copy troffms.sty $(TEXDIR)/macros/troffms.sty
+	copy tr2latex.man $(MANDIR)/man$(MANSECTION)/tr2latex.$(MANSECTION)
