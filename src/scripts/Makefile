@@ -22,7 +22,7 @@ CFLAGS = -O
 LDFLAGS = -O
 
 SCRIPTS = mknemo mkpdoc manlaser nemoman ldso nemo.version
-MAKES = Makefile.lib Makefile.obj
+MAKES = Makefile.lib 
 FAKES = cc make f77 ranlib
 
 help:

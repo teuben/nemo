@@ -23,7 +23,7 @@ help:
 
 # Targets used to install code in Nemo.
 
-install: .install_inc .install_obj
+install: .install_obj
 
 .install_inc: $(INC)
 	cp $(INC) $(NEMOINC)
@@ -31,7 +31,6 @@ install: .install_inc .install_obj
 
 .install_obj: $(OBJ)
 	cp $? $(OBJ_DIR)
-	@touch .install_obj
 
 .install_src: Makefile $(SRC) $(INC)
 	cp $? $(SRC_DIR)

@@ -6,7 +6,7 @@
 #   29-jun-96   fixed SGI since we sort of use one NEMOHOST now
 #   22-oct-96   added linux ELF
 #    1-apr-97   I never added -shared to SGI...
-#    1-apr-01   changed .o to .so for shared objects now
+#    1-apr-01   changed .o to .so for shared objects now (NEMO V3)
 
 if ($#argv == 0) then
   echo Usage: $0 basename
@@ -40,6 +40,7 @@ endif
 
 #				normal exits
 ok:
+  mv $1.o $1.so
   exit 0
 
 ren1:
