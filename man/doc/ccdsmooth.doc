@@ -1,0 +1,24 @@
+%N ccdsmooth
+%D smooth image cube in XYZ
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man ccdsmooth' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input filename [???]
+%A out
+	Output filename [???]
+%A gauss
+	FWHP gaussian beamwidth, if used []
+%A dir
+	Coordinates to smooth (xyz) [xy]
+%A smooth
+	ALternate smoothing array if gauss= not used [0.25,0.5,0.25]
+%A nsmooth
+	Number of smoothings [1]
+%A bad
+	Optional ignoring this bad value []
+%A cut
+	Cutoff value for gaussian, if used [0.01]
+%A VERSION
+	12-mar-98 PJT [3.1]
