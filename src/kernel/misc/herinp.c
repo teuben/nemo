@@ -60,6 +60,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <string.h>
 #include <math.h>
 #include "gipsyc.h"
 
@@ -655,7 +656,7 @@ static void dcd_loop()
          for ( i=0; i<listlen[0]; i++ ) {
             dcd_evaluate(i);
             dcd_movenum();
-         };
+         }
       } else {
          dcd_evaluate(q);
          dcd_movenum();
@@ -674,7 +675,7 @@ static void dcd_expression()
       dcd_nextsym();
       dcd_term();
       if (s == plus) dcd_gencode(add); else dcd_gencode(sub);
-   };
+   }
 }
 
 static void dcd_term()
@@ -688,7 +689,7 @@ static void dcd_term()
       dcd_nextsym();
       dcd_factor();
       if (s == times) dcd_gencode(mul); else dcd_gencode(div);
-   };
+   }
 }
 
 static void dcd_factor()
@@ -714,12 +715,12 @@ static void dcd_factor()
          break;
       }
       default    : dcd_error(-13); break;
-   };
+   }
    if (sym == power) {
       dcd_nextsym();
       dcd_factor();
       dcd_gencode(pwr);
-   };
+   }
 }
 
 static void dcd_function()
@@ -735,10 +736,10 @@ static void dcd_function()
          dcd_expression();
          if (--n > 0) {
             if (sym == comma) dcd_nextsym(); else dcd_error(-16);
-         };
-      };
+         }
+      }
       if (sym == rpar) dcd_nextsym(); else dcd_error(-16);
-   };
+   }
    dcd_gencode( fie + f );
 }
 
@@ -761,7 +762,7 @@ static void dcd_dump()
    do {
       if (list) op = lstfiecode[c].opcode[o++]; 
       else      op = fiecode[c].opcode[o++];
-      if (o == bid) { c++ ; o = 0; };
+      if (o == bid) { c++ ; o = 0; }
       opc = op>fie ? fie : op;
       printf("     %s",mnem[opc]);
       if (opc == fie) {
@@ -791,8 +792,7 @@ static double stack[stackmax];
 
 static int sp;
 
-static void dcd_push(r)
-double r;
+static void dcd_push(double r)
 {
    stack[++sp] = r;
 }
@@ -802,8 +802,7 @@ static double dcd_pop()
    return(stack[sp--]);
 }
 
-static double dcd_add(arg1,arg2)
-double arg1, arg2;
+static double dcd_add(double arg1, double arg2)
 {
    if ((arg1 == DCDBLANK) || (arg2 == DCDBLANK)) {
       return(DCDBLANK);
@@ -812,8 +811,7 @@ double arg1, arg2;
    }
 }
 
-static double dcd_sub(arg1,arg2)
-double arg1, arg2;
+static double dcd_sub(double arg1, double arg2)
 {
    if ((arg1 == DCDBLANK) || (arg2 == DCDBLANK)) {
       return(DCDBLANK);
@@ -822,8 +820,7 @@ double arg1, arg2;
    }
 }
 
-static double dcd_mul(arg1,arg2)
-double arg1, arg2;
+static double dcd_mul(double arg1, double arg2)
 {
    if ((arg1 == DCDBLANK) || (arg2 == DCDBLANK)) {
       return(DCDBLANK);
@@ -840,8 +837,7 @@ double arg1, arg2;
    }
 }
 
-static double dcd_div(arg1,arg2)
-double arg1, arg2;
+static double dcd_div(double arg1, double arg2)
 {
    if ((arg1 == DCDBLANK) || (arg2 == DCDBLANK)) {
       return(DCDBLANK);
@@ -861,8 +857,7 @@ double arg1, arg2;
    }
 }
 
-static double dcd_neg(arg1)
-double arg1;
+static double dcd_neg(double arg1)
 {
    if (arg1 == DCDBLANK) {
       return(DCDBLANK);
@@ -871,15 +866,14 @@ double arg1;
    }
 }
 
-static double dcd_pwr(arg1,arg2)
-double arg1, arg2;
+static double dcd_pwr(double arg1, double arg2)
 {
    if ((arg1 == DCDBLANK) || (arg2 == DCDBLANK)) {
       return(DCDBLANK);
    } else if (arg1 >= 0.0) {
       return(pow(arg1,arg2));
    } else {
-      int p = arg2, t;
+      int p = (int) arg2, t;
       double epsilon = 0.000001;
       if (fabs(arg2 - p) <= epsilon) {
          t = (p % 2 == 0) ? 1 : -1;
@@ -891,8 +885,7 @@ double arg1, arg2;
    }
 }
 
-static double dcd_sin(arg1)
-double arg1;
+static double dcd_sin(double arg1)
 {
    if (arg1 == DCDBLANK) {
       return(DCDBLANK);
@@ -901,8 +894,7 @@ double arg1;
    }
 }
 
-static double dcd_asin(arg1)
-double arg1;
+static double dcd_asin(double arg1)
 {
    if (arg1 == DCDBLANK) {
       return(DCDBLANK);
@@ -914,8 +906,7 @@ double arg1;
    return(0.0);     /* make stringent compilers happy */
 }
 
-static double dcd_sinh(arg1)
-double arg1;
+static double dcd_sinh(double arg1)
 {
    if (arg1 == DCDBLANK) {
       return(DCDBLANK);
@@ -927,8 +918,7 @@ double arg1;
    return(0.0);     /* make stringent compilers happy */
 }
 
-static double dcd_cos(arg1)
-double arg1;
+static double dcd_cos(double arg1)
 {
    if (arg1 == DCDBLANK) {
       return(DCDBLANK);
@@ -937,8 +927,7 @@ double arg1;
    }
 }
 
-static double dcd_acos(arg1)
-double arg1;
+static double dcd_acos(double arg1)
 {
    if (arg1 == DCDBLANK) {
       return(DCDBLANK);
@@ -950,8 +939,7 @@ double arg1;
    return(0.0);     /* make stringent compilers happy */
 }
 
-static double dcd_cosh(arg1)
-double arg1;
+static double dcd_cosh(double arg1)
 {
    if (arg1 == DCDBLANK) {
       return(DCDBLANK);
@@ -963,8 +951,7 @@ double arg1;
    return(0.0);     /* make stringent compilers happy */
 }
 
-static double dcd_tan(arg1)
-double arg1;
+static double dcd_tan(double arg1)
 {
    if (arg1 == DCDBLANK) {
       return(DCDBLANK);
@@ -973,8 +960,7 @@ double arg1;
    }
 }
 
-static double dcd_atan(arg1)
-double arg1;
+static double dcd_atan(double arg1)
 {
    if (arg1 == DCDBLANK) {
       return(DCDBLANK);
@@ -982,8 +968,7 @@ double arg1;
       return(atan(arg1));
    }
 }
-static double dcd_tanh(arg1)
-double arg1;
+static double dcd_tanh(double arg1)
 {
    if (arg1 == DCDBLANK) {
       return(DCDBLANK);
@@ -995,8 +980,7 @@ double arg1;
    return(0.0);     /* make stringent compilers happy */
 }
 
-static double dcd_atan2(arg1,arg2)
-double arg1, arg2;
+static double dcd_atan2(double arg1, double arg2)
 {
    if ((arg1 == DCDBLANK) || (arg2 == DCDBLANK)) {
       return(DCDBLANK);
@@ -1005,8 +989,7 @@ double arg1, arg2;
    }
 }
 
-static double dcd_rad(arg1)
-double arg1;
+static double dcd_rad(double arg1)
 {
    if (arg1 == DCDBLANK) {
       return(DCDBLANK);
@@ -1015,8 +998,7 @@ double arg1;
    }
 }
 
-static double dcd_deg(arg1)
-double arg1;
+static double dcd_deg(double arg1)
 {
    if (arg1 == DCDBLANK) {
       return(DCDBLANK);
@@ -1032,8 +1014,7 @@ static double dcd_pi()
    return(val);
 }
 
-static double dcd_exp(arg1)
-double arg1;
+static double dcd_exp(double arg1)
 {
    if (arg1 == DCDBLANK) {
       return(DCDBLANK);
@@ -1045,8 +1026,7 @@ double arg1;
    }
 }
 
-static double dcd_ln(arg1)
-double arg1;
+static double dcd_ln(double arg1)
 {
    if (arg1 == DCDBLANK) {
       return(DCDBLANK);
@@ -1058,8 +1038,7 @@ double arg1;
    }
 }
 
-static double dcd_log(arg1)
-double arg1;
+static double dcd_log(double arg1)
 {
    if (arg1 == DCDBLANK) {
       return(DCDBLANK);
@@ -1071,8 +1050,7 @@ double arg1;
    }
 }
 
-static double dcd_sqrt(arg1)
-double arg1;
+static double dcd_sqrt(double arg1)
 {
    if (arg1 == DCDBLANK) {
       return(DCDBLANK);
@@ -1084,8 +1062,7 @@ double arg1;
    }
 }
 
-static double dcd_abs(arg1)
-double arg1;
+static double dcd_abs(double arg1)
 {
    if (arg1 == DCDBLANK) {
       return(DCDBLANK);
@@ -1094,8 +1071,7 @@ double arg1;
    }
 }
 
-static double dcd_sinc(arg1)
-double arg1;
+static double dcd_sinc(double arg1)
 {
    if (arg1 == DCDBLANK) {
       return(DCDBLANK);
@@ -1106,8 +1082,7 @@ double arg1;
    }
 }
 
-static double dcd_max(arg1,arg2)
-double arg1,arg2;
+static double dcd_max(double arg1, double arg2)
 {
    if ((arg1 == DCDBLANK) || (arg2 == DCDBLANK)) {
       return(DCDBLANK);
@@ -1118,8 +1093,7 @@ double arg1,arg2;
    }
 }
 
-static double dcd_min(arg1,arg2)
-double arg1,arg2;
+static double dcd_min(double arg1, double arg2)
 {
    if ((arg1 == DCDBLANK) || (arg2 == DCDBLANK)) {
       return(DCDBLANK);
@@ -1130,8 +1104,7 @@ double arg1,arg2;
    }
 }
 
-static double dcd_erf(arg1)
-double arg1;
+static double dcd_erf(double arg1)
 {
    if (arg1 == DCDBLANK) {
       return(DCDBLANK);
@@ -1152,8 +1125,7 @@ double arg1;
    }
 }
 
-static double dcd_erfc(arg1)
-double arg1;
+static double dcd_erfc(double arg1)
 {
    if (arg1 == DCDBLANK) {
       return(DCDBLANK);
@@ -1162,8 +1134,7 @@ double arg1;
    }
 }
 
-static double dcd_mod(arg1,arg2)
-double arg1,arg2;
+static double dcd_mod(double arg1, double arg2)
 {
    if ((arg1 == DCDBLANK) || (arg2 == DCDBLANK)) {
       return(DCDBLANK);
@@ -1171,35 +1142,32 @@ double arg1,arg2;
       dcd_error(-17);
       return(DCDBLANK);
    } else {
-     int   xxx = arg1/arg2;
+     int   xxx = (int) (arg1/arg2);
      return(arg1 - xxx * arg2);
    }
 }
 
-static double dcd_int(arg1)
-double arg1;
+static double dcd_int(double arg1)
 {
    if (arg1 == DCDBLANK) {
       return(DCDBLANK);
    } else {
-     int xxx = arg1;  /* this could be dangerous */
+     int xxx = (int) arg1;  /* this could be dangerous */
      return((double) xxx);
    }
 }
 
-static double dcd_nint(arg1)
-double arg1;
+static double dcd_nint(double arg1)
 {
    if (arg1 == DCDBLANK) {
       return(DCDBLANK);
    } else {
-     int xxx = (arg1 + 0.5);  /* this could be dangerous */
+     int xxx = (int)(arg1 + 0.5);  /* this could be dangerous */
      return((double) xxx);
    }
 }
 
-static double dcd_sign(arg1)
-double arg1;
+static double dcd_sign(double arg1)
 {
    if (arg1 == DCDBLANK) {
       return(DCDBLANK);
@@ -1212,8 +1180,7 @@ double arg1;
    }
 }
 
-static double dcd_ifgt(arg1,arg2,arg3,arg4)
-double arg1, arg2, arg3, arg4;
+static double dcd_ifgt(double arg1, double arg2, double arg3, double arg4)
 {
    if ((arg1 == DCDBLANK) || (arg2 == DCDBLANK)) {
       return(DCDBLANK);
@@ -1224,8 +1191,7 @@ double arg1, arg2, arg3, arg4;
    }
 }
 
-static double dcd_iflt(arg1,arg2,arg3,arg4)
-double arg1, arg2, arg3, arg4;
+static double dcd_iflt(double arg1, double arg2, double arg3, double arg4)
 {
    if ((arg1 == DCDBLANK) || (arg2 == DCDBLANK)) {
       return(DCDBLANK);
@@ -1236,8 +1202,7 @@ double arg1, arg2, arg3, arg4;
    }
 }
 
-static double dcd_ifge(arg1,arg2,arg3,arg4)
-double arg1, arg2, arg3, arg4;
+static double dcd_ifge(double arg1, double arg2, double arg3, double arg4)
 {
    if ((arg1 == DCDBLANK) || (arg2 == DCDBLANK)) {
       return(DCDBLANK);
@@ -1248,8 +1213,7 @@ double arg1, arg2, arg3, arg4;
    }
 }
 
-static double dcd_ifle(arg1,arg2,arg3,arg4)
-double arg1, arg2, arg3, arg4;
+static double dcd_ifle(double arg1, double arg2, double arg3, double arg4)
 {
    if ((arg1 == DCDBLANK) || (arg2 == DCDBLANK)) {
       return(DCDBLANK);
@@ -1260,8 +1224,7 @@ double arg1, arg2, arg3, arg4;
    }
 }
 
-static double dcd_ifeq(arg1,arg2,arg3,arg4)
-double arg1, arg2, arg3, arg4;
+static double dcd_ifeq(double arg1, double arg2, double arg3, double arg4)
 {
    if (arg1 == arg2) {
       return(arg3);
@@ -1270,8 +1233,7 @@ double arg1, arg2, arg3, arg4;
    }
 }
 
-static double dcd_ifne(arg1,arg2,arg3,arg4)
-double arg1, arg2, arg3, arg4;
+static double dcd_ifne(double arg1, double arg2, double arg3, double arg4)
 {
    if (arg1 != arg2) {
       return(arg3);
@@ -1286,8 +1248,7 @@ static double dcd_ran()
    return((xxx+1) / 2147483648.0);
 }
 
-static double dcd_ranu(arg1,arg2)
-double arg1,arg2;
+static double dcd_ranu(double arg1, double arg2)
 {
    if ((arg1 == DCDBLANK) || (arg2 == DCDBLANK)) {
       return(DCDBLANK);
@@ -1296,8 +1257,7 @@ double arg1,arg2;
    }
 }
 
-static double dcd_rang(arg1,arg2)
-double arg1,arg2;
+static double dcd_rang(double arg1,double arg2)
 {
    if ((arg1 == DCDBLANK) || (arg2 == DCDBLANK)) {
       return(DCDBLANK);
@@ -1315,8 +1275,7 @@ double arg1,arg2;
    }
 }
 
-static double dcd_ranp(arg1)
-double arg1;
+static double dcd_ranp(double arg1)
 {
    if (arg1 == DCDBLANK) {
       return(DCDBLANK);
@@ -1326,7 +1285,7 @@ double arg1;
    } else {
       double val, cum, p, f;
       if (arg1 < 40) {
-         int xxx = dcd_rang(arg1,sqrt(arg1))+0.5;
+         int xxx = (int)(dcd_rang(arg1,sqrt(arg1))+0.5);
          val = xxx;
       } else {
          cum = exp(-arg1);
@@ -1343,8 +1302,7 @@ double arg1;
    }
 }
      
-static void dcd_evaluate(q)
-int q;
+static void dcd_evaluate(int q)
 {
    int c, o, opc;
    double s,r;			/* s,r are never used */
@@ -1468,15 +1426,15 @@ int q;
 }
 
 /* this is the routine */
-void herinp(expr,nchr,type,length,outv,nout,nret,ierd)
-char   *expr;
-int    *nchr;
-char   *type;
-int    *length;
-char   *outv;
-int    *nout;
-int    *nret;
-int    *ierd;
+void herinp(
+    char   *expr,
+    int    *nchr,
+    char   *type,
+    int    *length,
+    char   *outv,
+    int    *nout,
+    int    *nret,
+    int    *ierd)
 {
    int    i;
    
@@ -1571,7 +1529,7 @@ int    *ierd;
                curlog = 0;
                while (( curlog < maxbools) && strncmp(logc,bools[curlog],i)) {
                   curlog++;
-               }; 
+               }
                if (curlog == maxbools) dcd_error(-13); /* syntax error */
                else {
                   switch(ilen) {
@@ -1617,95 +1575,57 @@ int    *ierd;
    *ierd = errornum;
 }
 
+#if NEED_DCD
+
 /* for integers */
-integer dcdint_( expr, outv, nout, ierd, nchr)
-char    *expr;
-integer *outv, *nout, *ierd, nchr;
+int dcdint_(
+    char    *expr,
+    int *outv, int *nout, int *ierd, int nchr)
 {
-   integer nret, length = sizeof(integer);
+   int nret, length = sizeof(int);
    char    type = 'I';
    herinp(expr,&nchr,&type,&length,outv,nout,&nret,ierd);   /* BAD_PARM */
    return(nret);
 }
-#if defined(VMS)
-integer dcdint( expr, outv, nout, ierd )	/* JUNK JUNK PJT */
-character *expr;
-integer   *outv, *nout, *ierd;
-{
-   int   nchr;
-   fchar fs;
 
-   nchr = strlen(expr);
-   fs.a = expr;
-   fs.l = strlen(expr);
-
-   return(dcdint_(expr->dsc$a_pointer,outv,nout,ierd,expr->dsc$w_length));
-}
-#endif
 /* for logicals */
-integer dcdlog_( expr, outv, nout, ierd, nchr)
-char    *expr;
-integer *outv, *nout, *ierd, nchr;
+int dcdlog_( 
+    char    *expr,
+    int     *outv, int *nout, int *ierd, int nchr)
 {
-   integer nret, length = sizeof(logical);
+   int     nret, length = sizeof(logical);
    char    type = 'L';
    herinp(expr,&nchr,&type,&length,outv,nout,&nret,ierd);   /* BAD_PARM */
    return(nret);
 }
  
-#if defined(VMS)
-integer dcdlog( expr, outv, nout, ierd )
-character *expr;
-integer   *outv, *nout, *ierd;
-{
-   return(dcdlog_(expr->dsc$a_pointer,outv,nout,ierd,expr->dsc$w_length));
-}
-#endif
-
 /* for reals */
-integer dcdreal_( expr, outv, nout, ierd, nchr)
-char    *expr;
-integer *outv, *nout, *ierd, nchr;
+int dcdreal_( 
+    char    *expr,
+    int *outv, int *nout, int *ierd, int nchr)
 {
-   integer nret, length = sizeof(real);
+   int     nret, length = sizeof(real);
    char    type = 'F';
    herinp(expr,&nchr,&type,&length,outv,nout,&nret,ierd);   /* BAD_PARM */
    return(nret);
 }
  
-#if defined(VMS)
-integer dcdreal( expr, outv, nout, ierd )
-character *expr;
-integer   *outv, *nout, *ierd;
-{
-   return(dcdreal_(expr->dsc$a_pointer,outv,nout,ierd,expr->dsc$w_length));
-}
-#endif
 
 /* for double precision */
-integer dcddble_( expr, outv, nout, ierd, nchr)
-char    *expr;
-integer *outv, *nout, *ierd, nchr;
+int dcddble_( 
+    char    *expr,
+    int *outv, int *nout, int *ierd, int nchr)
 {
-   integer nret, length = sizeof(double);
+   int     nret, length = sizeof(double);
    char    type = 'F';
    herinp(expr,&nchr,&type,&length,outv,nout,&nret,ierd);   /* BAD_PARM */
    return(nret);
 }
  
-#if defined(VMS)
-integer dcddble( expr, outv, nout, ierd )
-character *expr;
-integer   *outv, *nout, *ierd;
-{
-   return(dcddble_(expr->dsc$a_pointer,outv,nout,ierd,expr->dsc$w_length));
-}
-#endif
-
 /* for characters */
-integer dcdchar_( expr, outv, nout, ierd, nchr, nlen )
-char    *expr, *outv;
-integer *nout, *ierd, nchr, nlen;
+int dcdchar_( 
+    char    *expr, char *outv,
+    int     *nout, int *ierd, int nchr, int nlen)
 {
    integer nret, length = nlen;
    char    type = 'C';
@@ -1713,15 +1633,8 @@ integer *nout, *ierd, nchr, nlen;
    return(nret);
 }
 
-#if defined(VMS)
-integer dcdchar( expr, outv, nout, ierd )
-character *expr, *outv;
-integer   *nout, *ierd;
-{
-   return(dcdchar_(expr->dsc$a_pointer,outv->dsc$a_pointer,nout,ierd,
-   expr->dsc$w_length,outv->dsc$w_length));
-}
 #endif
+
 
 #if defined(TESTBED)
 main(char *argc[], int argv)
