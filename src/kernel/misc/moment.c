@@ -37,7 +37,7 @@ void ini_moment(Moment *m, int mom, int ndat)
     }
     m->ndat = ndat;
 
-    if (ndat > 0) {
+    if (ndat > 0) {     /* moving moments */
       m->idat = -1;
       m->dat = (real *) allocate(ndat*sizeof(real));
       m->wgt = (real *) allocate(ndat*sizeof(real));
@@ -46,8 +46,7 @@ void ini_moment(Moment *m, int mom, int ndat)
 
 void accum_moment(Moment *m, real x, real w)
 {
-    register real sum = w;
-    real xx;
+    real xx, sum = w;
     int i;
 
     if (m->n == 0) {
@@ -90,7 +89,7 @@ void accum_moment(Moment *m, real x, real w)
 
 void decr_moment(Moment *m, real x, real w)
 {
-    register real sum = w;
+    real sum = w;
     int i;
 
     if (m->ndat > 0) 
