@@ -33,6 +33,7 @@
  *	 1-apr-01     V5.3  converted for NEMO V3 with .so files           pjt
  *      13-sep-01     V5.4  support for potential_double and potential_float   pjt
  *      18-sep-01           auto-detecting which type is present
+ *      17-may-02     V5.4a fix ambiguity about float/double if generic present WD
  *------------------------------------------------------------------------------
  */
 
@@ -175,38 +176,44 @@ local proc load_potential(string fname, string parameters, string dataname, char
 
     dprintf (1,"[%c potential loaded from object file %s]\n",type,fullname);
 
-    strcpy(pname,"potential");
-    mapsys(pname);
-    pot = (proc) findfn (pname);             /* try C-routine */
-    if (pot==NULL) {                          
-      strcat(pname,"_");
-      pot = (proc) findfn (pname);          /* try F77-routine */
-      if (pot) 
-	Qfortran = TRUE;		    /* must be F77 then... */		
-    }
+    /*
+     * changed code 17/05/02 WD
+     *
+     * after finding the .o file, we still need to find the proper 
+     * routine to link with. This is controlled by the type.
+     * if type = 'r',  we look for "potential" and restore to 
+     *                 "potential_double" if no "potential" found
+     * if type = 'd',  we first look for "potential_double" and
+     *                 restore to "potential" if no "potential_double" found
+     * if type = 'f',  we only look for "potential_float"
+     *
+     * macro FIND(POTENTIAL) tries to find routine POTENTIAL          WD
+     */
+#define FIND(POTENTIAL)								 \
+    strcpy(pname,POTENTIAL);                 /*   try potential           */	 \
+    mapsys(pname);								 \
+    pot = (proc) findfn (pname);             /*   try C-routine           */	 \
+    if (pot==NULL) {                         /*   IF not found          > */	 \
+      strcat(pname,"_");							 \
+      pot = (proc) findfn (pname);           /*     try F77-routine       */	 \
+      if (pot)                               /*     found!                */	 \
+	Qfortran = TRUE;	 	     /*       must be F77 then    */	 \
+    }                                        /*   <                       */
 
-    if (pot==NULL && (type=='d' || type=='r')) {
-      strcpy(pname,"potential_double");
-      mapsys(pname);
-      pot = (proc) findfn (pname);             /* try C-routine */
-      if (pot==NULL) {
-	strcat(pname,"_");
-	pot = (proc) findfn (pname);          /* try F77-routine */
-	if (pot)
-	  Qfortran = TRUE;
+    if        (type=='r') {                  /* IF type==r,             > */
+      FIND("potential")                      /*   try "potential"         */
+      if( pot==NULL) {                       /*   IF not found          > */
+	FIND("potential_double")             /*   try "potential_double"  */
       }
-    }
-    if (pot==NULL && type=='f') {
-      strcpy(pname,"potential_float");
-      mapsys(pname);
-      pot = (proc) findfn (pname);             /* try C-routine */
-      if (pot==NULL) {
-	strcat(pname,"_");
-	pot = (proc) findfn (pname);          /* try F77-routine */
-	if (pot)
-	  Qfortran = TRUE;
+    } else if(type=='d') {                   /* > ELSE, type=d          > */
+      FIND("potential_double")               /*   try "potential_double"  */
+      if( pot==NULL) {                       /*   IF not found          > */
+	FIND("potential")                    /*   try "potential"         */
       }
+    } else if(type=='f') {                   /* > ELSE, type=r          > */
+      FIND("potential_float")                /*   try "potential_float"   */
     }
+#undef FIND
     /* it is perhaps possible that some fortran compilers will add __ for */
     /* routines that have embedded _ in their name.... we're not catching */
     /* those here yet !!!                                                 */
