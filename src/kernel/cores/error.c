@@ -21,6 +21,7 @@
  *      21-mar-01 V1.6 removed old <varargs> code, only allow ANSI compilers 	PJT
  *      28-nov-01 V1.7 allow to set an exit level               pjt
  *       8-dec-01 V1.8 added errno reporting	 		pjt
+ *      16-jan-01 V1.8a  calling abort() will be announced      pjt
  */
 
 #include <stdinc.h>
@@ -70,7 +71,11 @@ void error(string fmt, ...)
     va_end(ap);                      /* end varargs */
     
     if (cleanup==NULL){		    /* if no cleanup set */
-      if (debug_level>5) abort();   /* produce coredump if requested */
+      if (debug_level>5) {          /* produce coredump if requested */
+        fprintf(stderr,"Now aborting....\n");
+	fflush(stderr);                
+	abort();
+      }
       if (exit_level)
         stop(exit_level);
       else
@@ -100,6 +105,8 @@ void fatal(string fmt, ...)
         fprintf(stderr,"\n");       /* and print it anyhow */
     fflush(stderr);                 /* flush it NOW */
     va_end(ap);                     /* end varargs */
+    fprintf(stderr,"Now aborting....\n");
+    fflush(stderr);                
     abort();                        /* nasty, but writes a core dump and dies */
 }
 
