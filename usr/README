@@ -4,6 +4,8 @@ aarseth/hermit/		a Hermite integrator
 dehnen/falcON/		Dehnen's improved treecode
        yanc/		older version
 
+heggie/                 Heggie & Hut (2003) codes
+
 manybody/		placeholder for the manybody packages (sans NEMO)
 
 vogl/			a simple old-style GL library that works on non-accellerated X displays
