@@ -1,0 +1,20 @@
+%N snapshift
+%D shift an N-body system
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man snapshift' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input file (snapshot) [???]
+%A out
+	Output file (snapshot) [???]
+%A rshift
+	Shift in position [0,0,0]
+%A vshift
+	Shift in velocity [0,0,0]
+%A times
+	Which times to work on [all]
+%A mode
+	Add or subtract the shift? [add|sub] [add]
+%A VERSION
+	15-mar-95 pjt [3.1a]
