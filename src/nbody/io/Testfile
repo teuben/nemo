@@ -1,6 +1,6 @@
 DIR = src/nbody/io
-BIN = stoa atos tabtos
-NEED = $(BIN) mkplummer snapprint
+BIN = snaptipsy tipsysnap stoa atos tabtos 
+NEED = $(BIN) mkplummer snapprint snapcmp
 
 help:
 	@echo $(DIR)
@@ -10,7 +10,8 @@ need:
 
 clean:
 	@echo Cleaning $(DIR)
-	@rm -f stoa.out stoa.cmp atos.out tabtos.in tabtos.out tabtos.cmp
+	@rm -f stoa.out stoa.cmp atos.out st.out ts.out mp.out \
+		tabtos.in tabtos.out tabtos.cmp
 
 NBODY = 10
 
@@ -27,6 +28,19 @@ atos:
 	@echo Running diff stoa.out stoa.cmp
 	diff stoa.out stoa.cmp
 
+T = dark
+
+snaptipsy:
+	@echo Running snaptipsy:
+	mkplummer mp.out $(NBODY) ; snaptipsy mp.out st.out mode=$(T)
+
+tipsysnap:
+	@echo Running tipsysnap
+	tipsysnap st.out ts.out mode=binary options=$(T)
+	@echo Running snapcmp
+	tsf ts.out; tsf mp.out
+	snapcmp ts.out mp.out
+
 tabtos:
 	@echo Running tabtos
 	mkplummer - $(NBODY) | snapprint - m,x,y,z,vx,vy,vz > tabtos.in
@@ -34,5 +48,3 @@ tabtos:
 	snapprint tabtos.out m,x,y,z,vx,vy,vz > tabtos.cmp
 	@echo Running diff tabtos.in tabtos.cmp
 	diff tabtos.in tabtos.cmp
-
-
