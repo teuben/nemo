@@ -13,7 +13,7 @@
  *              V4.3:  12-jun-01 allow regularly spaced (with random start) PJT
  *              9-sep-01       a    gsl/xrandom
  *              8-apr-03      b     forgot timebit
- *              5-may-03  v4.4   add
+ *              6-may-03  v4.4b   fixed bug when ndisk=1
  */
 
 #include <stdinc.h>
@@ -42,7 +42,7 @@ string defv[] = {
     "angle=f\n          Regular angular distribution?",
     "vrad=0\n           radial velocity",
     "headline=\n	Text headline for output",
-    "VERSION=4.4a\n	6-may-03 PJT",
+    "VERSION=4.4b\n	6-may-03 PJT",
     NULL,
 };
 
@@ -151,7 +151,10 @@ testdisk()
     t = 0;    /* dummy time ; we do not support variable time yet */
     for (dp=disk, i = 0; i < ndisk; dp++, i++) {	/* loop all stars */
 	Mass(dp) = mass;
-	r_i = sqrt(rmin2 + i * (rmax2 - rmin2) / (ndisk - 1.0));
+	if (ndisk == 1)
+	  r_i = rmin;
+	else
+	  r_i = sqrt(rmin2 + i * (rmax2 - rmin2) / (ndisk - 1.0));
 	if (Qangle) {
 	  theta_i += TWO_PI/ndisk;
 	} else {
@@ -171,7 +174,7 @@ testdisk()
         sigma_z = grandom(0.0,frac[2]*vcir_i);
 
         dv_t = sigma_t;
-        dv_r = sigma_t * took(r_i) + vrad;
+        dv_r = sigma_r * took(r_i) + vrad;
         cost = cos(theta_i);  
         sint = sin(theta_i);
 	Vel(dp)[0] =  -vcir_i * sint * jz_sign;
