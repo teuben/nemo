@@ -100,7 +100,8 @@
  *  3-jul-01       e  keybuf always present, not just in INTERACT mode
  * 12-sep-01       f  nemo_file_size now
  * 15-sep-01    3.3   indexed keywords, but oops, can't do MINMATCH
- *                    and does not do keyword files, nor macroread
+ *                    and does not do keyword file I/O yet, no macroread 
+ * 16              a  fixed macroread
 
   TODO:
       - what if there is no VERSION=
@@ -122,7 +123,7 @@
       - indexing can't handle macros
  */
 
-#define VERSION_ID  "3.3 15-sep-01 PJT"
+#define VERSION_ID  "3.3a 16-sep-01 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -280,6 +281,7 @@ local string parvalue(string arg);
 local string parhelp(string arg);
 local int findkey(string name);
 local int isindexed(string name, int *idx);
+local int addindexed(int j, string keyval, int idx);
 local void writekeys(char *mesg);
 local void readkeys(string mesg, bool first);
 local void set_argv(string);
@@ -396,10 +398,14 @@ void initparam(string argv[], string defv[])
 	      keys[j].count++;
 	    } else if (j=isindexed(name,&idx)) {       /* enter indexed keywords */
        	      dprintf(1,"Entering indexed %s, j=%d",argv[i],j);
+#if 0
+	      addindexed(j, argv[i], idx);
+#else
 	      kw = &keys[j];       /* start at the indexed (base) keyword */
 	      while (kw->next) {        /* link through all indexed ones */
 		dprintf(1,"Link List Skipping %s\n",kw->key);
 		kw = kw->next;
+		if (kw->indexed == idx) error("Duplicated indexed keyword %s",name);
 	      }
 	      kw->next = (keyword *) allocate(sizeof(keyword));
 	      kw = kw->next;
@@ -411,6 +417,7 @@ void initparam(string argv[], string defv[])
 	      kw->upd = 0;
 	      kw->indexed = idx;
 	      kw->next = NULL;
+#endif
 	      dprintf(1,"Link List new keyword %s, idx=%d\n",argv[i],idx);
             } else {                            /*     not listed in defv?  */
 	      if (streq(name, "help"))       /* got system help keyword?  */
@@ -1116,7 +1123,7 @@ string getparam(string name)
 string getparam_idx(string name, int idx)
 {
     int i;
-    char *cp, key[MAXKEYLEN+1];
+    char *cp, *cp1, key[MAXKEYLEN+1];
     keyword *kw;
 
     if (nkeys == 0)  error("(getparam) called before initparam");
@@ -1130,6 +1137,14 @@ string getparam_idx(string name, int idx)
       dprintf(1,"Checking linked list w/ %s for %d, %d\n",kw->key,kw->indexed,idx);
       kw = kw->next;
       if (kw->indexed == idx) {
+#if defined(MACROREAD)
+	cp = kw->val;
+	if (*cp == '@') {
+	  cp1 = kw->val;
+	  kw->val = get_macro(cp);
+	  free(cp1);
+	}
+#endif
 	return kw->val;
       }
     }
@@ -1600,6 +1615,29 @@ local int isindexed(string name, int *idx)
   if (j>0) return j;
   return 0;
 }
+
+local int addindexed(int i, string keyval, int idx)
+{
+  keyword *kw;
+
+  kw = &keys[i];       /* start at the indexed (base) keyword */
+  while (kw->next) {        /* link through all indexed ones */
+    dprintf(1,"Link List Skipping %s\n",kw->key);
+    kw = kw->next;
+    if (kw->indexed == idx) error("Duplicated indexed keyword %s",keyval);
+  }
+  kw->next = (keyword *) allocate(sizeof(keyword));
+  kw = kw->next;
+  kw->keyval = scopy(keyval);
+  kw->key = scopy(parname(keyval));
+  kw->val = scopy(parvalue(keyval));
+  kw->help = 0;
+  kw->count = 0;
+  kw->upd = 0;
+  kw->indexed = idx;
+  kw->next = NULL;
+  return 0;
+}
 
 #if defined(INTERACT)
 
@@ -1613,13 +1651,13 @@ local int isindexed(string name, int *idx)
  *  The writekeys routine always writes out the internal version
  *  ID, not the external. This may result in excessive warnings
  *  when lot's of keyroutine I/O is done with an old key file
- *
  */
 
 local void writekeys(string mesg)
 {
     FILE *keyfile;
     int i;
+    keyword *kw;
 
     keyfile = fopen(key_filename,"w");           /* open to (over) write */
     if (keyfile==NULL)
@@ -1632,9 +1670,18 @@ local void writekeys(string mesg)
         "# keyword file written by nemo (help level=%d)\n",help_level);
     for (i=1; i<nkeys; i++) {
         if (streq(keys[i].key,"VERSION"))
-            fprintf(keyfile,"VERSION=%s\n",version_i);
-        else
+	  fprintf(keyfile,"VERSION=%s\n",version_i);
+        else {
+	  if (keys[i].indexed) {
+	    warning("writing indexed keys");
+	    kw = &keys[i];
+	    while (kw->next) {
+	      kw = kw->next;
+	      fprintf(keyfile,"%s=%s\n",kw->key,kw->val);
+	    }
+	  } else
             fprintf(keyfile,"%s=%s\n",keys[i].key,keys[i].val);
+	}
     }
     fprintf(keyfile,
         "#### end of keywords - Save file and exit editor to execute program\n");
@@ -1656,7 +1703,8 @@ local void writekeys(string mesg)
 local void readkeys(string mesg, bool first)
 {
     FILE *keyfile;
-    int i;
+    keyword *kw;
+    int i, idx;
 
     keyfile = fopen(key_filename,"r");
     if (keyfile==NULL && !first)
@@ -1677,8 +1725,11 @@ local void readkeys(string mesg, bool first)
 
         i = findkey(parname(keybuf));             /* get index */
         if (i<=0) {                                  /* illegal keyword ? */
-            warning("initparam: ignoring erroneous keyword %s",keybuf);
-            continue;
+	  i = isindexed(parname(keybuf),&idx);
+	  if (i)
+	    warning("Found indexed keyword, but not implemented yet");
+	  warning("initparam: ignoring erroneous keyword %s",keybuf);
+	  continue;
         }
         if (keys[i].count && first) {
             continue;    /* ignore: it was already in argv */
@@ -2230,7 +2281,10 @@ string defv[] = {
     "foobar=12345\n     just some digits",
     "donot=read\n       check if complains about never read params",
     "prompt=t\n		Checking interactive prompting routines?",
-    "VERSION=1.3\n      12-feb-95 PJT",
+#ifdef INDEXED
+    "naxis#=\n          testing an indexed keyword",
+#endif
+    "VERSION=1.4\n      16-sep-01 PJT",
     NULL,
 };
 
@@ -2242,6 +2296,7 @@ void nemo_main(void)
 {
     bool flag2, prompt;
     double tstop;
+    int i, n;
 
     printf("===> program %s: <===\n", getargv0());
     check("argv0");
@@ -2257,6 +2312,17 @@ void nemo_main(void)
     dprintf(2,"debug level 2 printout\n");
     dprintf(9,"debug level 9 printout\n");
     dprintf(11,"debug level 11 printout\n");
+
+#ifdef INDEXED
+    n = indexparam("naxis");
+    if (n<1) warning("No indexed keyword naxis### used");
+    printf("Indexed keyword:\n");
+    for (i=1; i<=n; i++)
+      if (getparam_idx("naxis",i))
+            printf("naxis%d=%s\n",i,getparam_idx("naxis",i));
+     
+#endif
+
 
     flag2 = getbparam("flag2");    
     tstop = getdparam("tstop");
