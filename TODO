@@ -1,15 +1,16 @@
 for 3.1.1
   - make sure cfitsio stuff is ok in configure
+  - the change in get_atable() should mean routines need to work
+    on buffered table read better
+  - ccdmath WCS is broken
 
 
 --------------------------------------------------------------------------------
 
 some other help on configure:
 	http://www.airs.com/ian/configure/
-- io_nemo library written by JCL in Marseille
 
-- add better 'automatic' html production of man pages, mostly for the
-  web site  (** more or less done **)
+- io_nemo library written by JCL in Marseille
 
 - add the self-exploding problem for treecodes (Salmon ...)
   into NEMODAT
