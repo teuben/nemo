@@ -1,0 +1,102 @@
+.TH UNFIO 3NEMO "8 august 1995"
+.SH NAME
+unfscan, unfread, unfswap \- unformatted FORTRAN I/O data access from C
+.SH SYNOPSIS
+.nf
+.B #include <stdinc.h>
+.B #include <unfio.h>
+.PP
+\fBint unfscan(stream instr)\fP
+\fBint unfread(stream instr, char *buf, int bufsize)\fP
+\fBint unfswap(bool do_swap)\fP
+.PP
+.SH DESCRIPTION
+\fIunfio\fP are a set of routines that allow you to (sequentially)
+access 
+binary files that have been created with most FORTRAN compilers 
+in unformatted I/O access. The datafile should have been created with an
+\fIform='unformatted'\fP OPEN statement. \fIunfscan\fP can be used
+to scan unformatted records, returning the size (in bytes) of the
+data-section of each record. End of file and various others 
+errors are returned as 0 and some negative number resp. 
+\fIunfread\fP can be used in the same way, except you give it a buffer
+in which the data can be stored. In good old fortran tradition you
+must know the largest buffer size this routine can expect to see.
+.PP
+For example, the file created from the following snippet of code
+.PP
+.nf
+        INTEGER unit,n
+        REAL x,y(3),z(n)
+
+        OPEN(unit,file='test.dat',form='unformatted')
+        WRITE(unit) n
+        WRITE(unit) x,y,z
+        CLOSE(unit)
+
+.fi
+can be read with the following snippet of C code:
+.nf
+        char buf[MAXBUF];
+        int *ip = (int *) buf;
+        float *fp = (float *) buf;
+        double *dp = (double *) buf;
+        int n;
+        float x, y[3], z[MAXN];
+
+        instr = stropen(...,"r");
+
+        count = unfread(instr,buf,MAXBUF);
+        if (count < 1) error("first block");
+        n = ip[0];
+
+        count = unfread(instr,buf,MAXBUF);
+        if (count < 1) error("second block");
+        x = fp[0];
+        y[0] = fp[1]; y[1] = fp[2]; y[2] = fp[3];
+        for (i=0; i<n; i++)
+            z[i] = fp[4+i];
+
+        strclose(instr);
+.fi
+.SH LIMITATIONS
+Currently only tested on a limited number of machines (SunOS, HP/UX),
+or any machine where 
+\fIunformatted\fP binary output surrounds the data with
+4 bytes designating the size of the data written, i.e. what 
+a single WRITE statement block writes to disk can be represented
+as:
+.nf
+    struct block {
+        int size;
+        char buf[size];
+        int size;
+    } block
+.fi
+.PP
+Access is sequential. If the user keeps a record of the file pointer,
+and knows the low level filestructure is that of \fIblock\fP described
+above, a call to \fIfseek(3)\fP can in principle be used to re-read
+previous blocks.
+.SH BUGS
+Alignment restrictions on some architectures (e.g. sparc) may 
+make reading certain datafiles hard. This feature has not been
+implemented. It is up to the user to define their data-alignment
+structures/unions, or perform the necessary data copy before
+casting is attempted.
+.SH SEE ALSO
+filestruct(5NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +1.5i
+~/src/fortran/  	unfio.c
+.fi
+.SH UPDATE HISTORY
+.nf
+.ta +1i +4i
+xx-may-94	V1.0 Created for prun       	PJT
+8-aug-95	V1.1 added support for swap for NBODY5 (u3tos)	PJT
+.fi
+
