@@ -1,0 +1,27 @@
+%N hackdens
+%D ### NEMO program with unknown intent...(missing usage)
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man hackdens' for more online help
+%A in
+	input file with mass coordinates  [???]
+%A out
+	output file with f.c. results  []
+%A neib
+	number of neibours to define local density  [6]
+%A rneib
+	initial guess for neighbour sphere radius  [0.1]
+%A write_at_phi
+	flag to write density in place of Phi  [t]
+%A rsize
+	side-length of initial box [4.0]
+%A rmin
+	lower left corner of initial box []
+%A options
+	misc. control options {phase, mass} [phase,mass]
+%A fcells
+	cell/body allocation ratio  [0.9]
+%A verbose
+	flag to print # of particles finished  [f]
+%A VERSION
+	23-oct-90 PJT [1.2]
