@@ -1,4 +1,4 @@
-.TH ROTCURSHAPE 1NEMO "20 July 2002"
+.TH ROTCURSHAPE 1NEMO "21 July 2002"
 .SH NAME
 rotcurshape \- fit kinematic parameters from velocity field using shaped rotation curve
 .SH SYNOPSIS
@@ -17,18 +17,13 @@ It does a non-linear least-squares-fitting to the function:
 .nf
          v(x,y) = VSYS + VROT(r) * cos(theta) * sin(INC)
 
-                      - (x-XPOS) * sin(PA) -/+ (y-YPOS) * cos(PA) ?
-where:   cos(theta) = -----------------------------------------
+                      - (x-XPOS) * sin(PA) -/+ (y-YPOS) * cos(PA)  ?
+where:   cos(theta) = ------------------------------------------
                                        r
-
-                      - (x-XPOS) * cos(PA) - (y-YPOS) * sin(PA)
-and:     sin(theta) = -----------------------------------------
-                                   r * cos(INC)
-
 
 .cs 1
 .fi
-where the radius \fIr\fP is measured in the plane of the galaxy:
+and where the radius \fIr\fP is measured in the plane of the galaxy:
 .cs 1 20
 .ss 20
 .nf
@@ -65,7 +60,8 @@ Values equal the undefined value (currently 0.0) are ignored in the
 fit. See \fIccdmath(1NEMO)\fP or \fIfitsccd(1NEMO)\fP on how to
 create a velocity field with such undefined values.
 .SH PARAMETERS
-The following parameters are known:
+The following parameters are known (those with ** are still here
+since we clones this off rotcur, but are likely to be slashed shortly):
 .TP 25
 \fBin\fP=\fIimage_vel\fP
 Input velocity field map, must be in \fIimage(5NEMO)\fP format.
@@ -82,20 +78,18 @@ Array of rotation (or expansion) velocities, one for each ring.
 If less than the number of rings is
 given, the trailing ones are filled with the last supplied value.
 .TP
-\fBpa\fP=\fIp1,p2,...pN\fP
-Array of position angles (degrees), one for each ring.
-See also \fBvrot=\fP.
+\fBpa\fP=\fIpa\fP
+Position angles (degrees) of the disk.
 .TP
-\fBinc\fP=\fIi1,i2,...iN\fP
-Array of inclinations (degrees), one for each ring.
-See also \fBvrot=\fP.
+\fBinc\fP=\fIinc\fP
+Inclination (degrees) of the disk.
 .TP
 \fBvsys\fP=\fIv0\fP
-Systemic velocity. Only one number applies.
+Systemic velocity.
 .TP
 \fBcenter\fP=\fIx0,y0\fP
 Rotation center (grid units w.r.t. lower left corner being
-0,0). Two numbers are required.
+0,0 for NEMO maps). Two numbers are required.
 Default: center of map.
 .TP
 \fBfrang\fP=
@@ -103,7 +97,7 @@ free angle around minor axis (degrees), in the plane of
 the galaxy, from which data is excluded from
 the fit (thus the total cone size of ignored data around
 the minor axis is 2*\fBfrang\fP)
-[Default: \fB20.0\fP].
+[Default: \fB0.0\fP].
 .TP
 \fBside\fP=
 Choose the side of the galaxy to fit the velocity field to.
@@ -198,7 +192,7 @@ in other columns.
 [Default: t]
 .TP
 \fBload=\fP
-Name of a shared object file containing a rotation curve.
+Name of a shared object file containing a rotation curve. ** Not implemented yet **
 .TP
 \fBrotcur1=\fP
 Name of first rotation curve, followed by the initial estimates of its
@@ -206,14 +200,75 @@ parameters, followed by an equal number of 1s (free) and 0s (fixed) to denote
 which parameters are free to fixed during the fitting process. 
 .TP
 \fBrotcur2=\fP
+see rotcur1
 .TP
 \fBrotcur3=\fP
+see rotcur1
 .TP
 \fBrotcur4=\fP
-.SH ROTCUR
-A rotation curve has
+see rotcur1
+.TP
+\fBrotcur5=\fP
+see rotcur1
+.SH ROTCUR FUNCTIONS
+A rotation curve function in terms of a least squares fitting need to provide
+its caller with the rotation curve value, and all its partial derivates w.r.t.
+the parameters. Most rotation curve shapes have two dimensional parameters,
+a velocity and radial parameter, and are usually the first and second parameter.
+Here are two examples, a simple linear rotation curve, and a  
+slightly more involved Plummer disk/sphere rotation curve:
 .nf
+#include <nemo.h>
+
+real rotcur_linear(real r, int n, real *p, real *d)
+{
+  d[0] = r;
+  return p[0] * r;
+}
+
+real rotcur_plummer(real r, int np, real *p, real *d)
+{
+  real x = radius/p[1];
+  real y = pow(1+x*x,-0.75);
+  d[0] = y;
+  d[1] = -x*p[0]/p[1]*(1-x*x/2)/(1+x*x)/y;
+  return p[0] * x * y;
+}
 .fi
+.PP
+Here is a list of the builtin rotation curves, where x=r/a is the dimensionless radius:
+.nf
+.ta +1i +2i
+Name:   Parameters:	Formula:
+-----	-----------	--------
+linear	omega(dv/dr)	v=omega*r
+flat	v0		v=v0
+plummer	v0,a		v=v0*x/(1+x^2)^(3/4)
+core1	v0,a		v=v0*x/(1+x)
+core2	v0,a		v=v0*x/(1+x^2)^(1/2)
+.fi
+.SH EXAMPLE
+Here is an example of creating a synthetic velocity field with
+ccdvel, and analysing it with rotcur:
+.nf
+    % set r=`nemoinp 0:60`
+    % set v=`nemoinp 0:60 | tabmath - - "100*%1/(20+%1)" all`
+    % ccdvel out=map1.vel rad="$r" vrot="$v" pa=30 inc=60
+    % rotcurshape in=map1.vel radii=0,50 pa=30 inc=60 vsys=0 units=arcsec,1 \
+         rotcur1=core1,100,20,1,1 tab=-
+....
+
+VSYS: 6.14085e-17 0.0272559
+XPOS: 63.5 0.0171391
+YPOS: 63.5 0.0225175
+PA:   30.0004 0.0293586
+INC:  60.0033 0.0645938
+P1:  83.2638 0.155903
+P2:  13.1505 0.0844784
+NPT:  3926
+
+	(NB: bad example)
+
 .SH SEE ALSO
 rotcur(1NEMO), ccdvel(1NEMO), tabcomment(1NEMO), rotcurves(1NEMO), pvtrace(1NEMO), ccdmom(1NEMO)
 .SH AUTHOR
