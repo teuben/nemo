@@ -24,7 +24,7 @@ MAN5FILES =
 INCFILES = 
 SRCFILES= Makefile \
 	athan92.f \
-	bar83.c bulge1.c ccd.c cp80.c dehnen.c expdisk.c flatz.c halo.c \
+	bar83.c bulge1.c ccd.c cp80.c dehnen.c dublinz.c expdisk.c flatz.c halo.c \
 	GalPot.cc grow_plum.c Grow_plum.c \
 	harmonic.c harmonicf.f hernquist.c hom.c hubble.c kuzmindisk.c \
 	isochrone.c jaffe.c log.c mestel.c miyamoto.c nfw.c null.c \
@@ -32,7 +32,7 @@ SRCFILES= Makefile \
 	twofixed.c plummer4.c vertdisk.c tidaldisk.c polynomial.c wada94.c
 OBJFILES=\
 	athan92.so \
-	bar83.so bulge1.so ccd.so cp80.so dehnen.so expdisk.so flatz.so halo.so \
+	bar83.so bulge1.so ccd.so cp80.so dehnen.so dublinz.so expdisk.so flatz.so halo.so \
 	GalPot.so grow_plum.so Grow_plum.so \
 	harmonic.so harmonicf.so hernquist.so hom.so hubble.so kuzmindisk.so \
 	isochrone.so jaffe.so log.so mestel.so miyamoto.so nfw.so null.so \
