@@ -1,7 +1,7 @@
 #! /bin/csh -f
 #
-#  P600/     116.510u 17.390s 2:41.66 82.8%     0+0k 0+0io 778435pf+0w
-# P1600/
+#  P500/     431.720u 58.010s 10:52.41 75.0% 0+0k 0+0io 1841259pf+0w
+# P1600/     
 
 set pgplot=1
   
@@ -35,11 +35,9 @@ else
   set cvs_rev=()
 endif
 
-#		get  the source
+#		get  the source ($pgplot is done below)
+echo Getting the NEMO source code via CVS
 time cvs -Q checkout $cvs_rev nemo
-if ($pgplot) then
-   (mkdir nemo/borrow; cd nemo; cvs -Q checkout pgplot)
-endif
 
 # --disable-gsl
 # --enable-single
@@ -50,6 +48,15 @@ cd nemo
 #./configure --with-yapp=ps 
 ./configure --with-yapp=pgplot 
 source nemo_start
+if ($pgplot) then
+  make dirs config_clean
+  rm NEMORC.local
+  echo Getting the PGPLOT source code via CVS
+  (cd local; cvs -Q checkout pgplot)
+  (cd src/scripts; ./pgplot.install dir=$NEMO/local/pgplot) >& pgplot.install.log
+  setenv PGPLOT_DIR $NEMOLIB
+  ./configure --with-pgplot-prefix=$NEMOLIB --with-yapp=pgplot
+endif
 make dirs config_extra scripts
 source NEMORC.local
 rehash
