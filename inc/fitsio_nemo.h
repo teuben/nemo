@@ -18,6 +18,7 @@
 #ifndef _fitsio_nemo_h
 #define _fitsio_nemo_h
 
+/*  NOTE:   this also assumed cfitsio was installed in its own directory/namespace ... */
 #ifdef HAVE_LIBCFITSIO
 #include <cfitsio/fitsio.h>
 #endif
@@ -72,6 +73,11 @@ typedef unsigned char byte;
 #define TYPE_64INT  4
 #define TYPE_FLOAT  5
 #define TYPE_DOUBLE 6
+
+#ifdef SUPPORT_64BIT_INTEGERS
+/* this is from cfitsio */
+#endif
+
 
 #define STATUS_OLD 1		/* reading a fits file */
 #define STATUS_NEW 2		/* writing, but still in header */
