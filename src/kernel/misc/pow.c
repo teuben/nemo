@@ -1,8 +1,9 @@
 
 /*
- *   pow:  some specialized & optimized versions of the pow() function
+ *   pow.c:  some specialized & optimized versions of the pow() function
  *
  *   powi(double,int)      especially for low order
+ *   powd(double,double)   to handle NaN's
  *     
  */
 
@@ -38,7 +39,7 @@ double powi(double x, int p)
 
 
 /* 
- * powr(x,p):  we need  our own, to prevent NaN's for x < 0
+ * powd(x,p):  we need  our own, to prevent NaN's for x < 0
  */
 
 double powd(double x, double p)

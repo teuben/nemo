@@ -6,6 +6,7 @@
  *      28-mar-05       log2 now under configure control        PJT
  * 
  *   Warning: gcc3 has log2
+ *            cygwin uses a macro, and doesn't detect it via configure
  */
 
 #include <stdinc.h>
