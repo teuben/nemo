@@ -22,7 +22,7 @@ snap.in:
 
 snapxyz: snap.in
 	@echo Running $*
-	snapxyz snap.in -  color=i | tsf -
+	snapxyz snap.in -  color=i | tsf -  ; nemo.coverage snapxyz.c
 
 p64.out:
 	mkplummer p64.a $(NBODY) seed=123
@@ -30,7 +30,7 @@ p64.out:
 	snapstack p64.a p64.b p64.in deltar=6,0,0 deltav=-1,0,0
 	hackcode1 p64.in p64.out seed=123 tstop=16 freqout=8 fcells=4 > /dev/null
 p64.xyz:
-	snapxyz p64.out p64.xyz
+	snapxyz p64.out p64.xyz ; nemo.coverage snapxyz.c
 xyzview:  p64.out p64.xyz
 	@echo Running $*
 	xyzview p64.xyz scale=10 maxframe=160

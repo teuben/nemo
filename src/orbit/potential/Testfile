@@ -18,23 +18,23 @@ all:    $(BIN)
 
 potlist: 
 	@echo Running $@
-	potlist harmonic  x=1 dr=0.001
-	potlist plummer   x=1 dr=0.001
-	potlist isochrone x=1 dr=0.001
-	potlist athan92   x=0.00001
+	potlist harmonic  x=1 dr=0.001 ; nemo.coverage potlist.c
+	potlist plummer   x=1 dr=0.001 ; nemo.coverage potlist.c
+	potlist isochrone x=1 dr=0.001 ; nemo.coverage potlist.c
+	potlist athan92   x=0.00001	 ; nemo.coverage potlist.c
 
 rotcurves:
 	rotcurves isochrone 0,1,1 - halo 0,1,1 - plummer 0,0.15,0.05 \
-		radii=0:4:0.02 
+		radii=0:4:0.02 ;  nemo.coverage rotcurves.c
 
 plummer.ccd:
-	potccd out=plummer.ccd potname=plummer x=-2:2:0.05 y=-2:2:0.05
+	potccd out=plummer.ccd potname=plummer x=-2:2:0.05 y=-2:2:0.05 ; nemo.coverage potccd.c
 
 potccd: plummer.ccd
 	potccd - harmonic x=-1:1:0.2 y=-1:1:0.2 |\
-		ccdprint - x= y= format=%4.3f label=x,y
+		ccdprint - x= y= format=%4.3f label=x,y ; nemo.coverage potccd.c
 	potccd - harmonic x=-1:1:0.2 y=-1:1:0.2 dr=0.01 |\
-		ccdprint - x= y= format=%4.3f label=x,y
+		ccdprint - x= y= format=%4.3f label=x,y ; nemo.coverage potccd.c
 	potlist ccd potfile=plummer.ccd x=0:2:0.1 dr=0.001 | awk '{print $$1,$$4,$$7,$$11}' > plummer1.tab
 	potlist plummer                 x=0:2:0.1 dr=0.001 | awk '{print $$1,$$4,$$7,$$11}' > plummer2.tab
 	tabmath plummer1.tab,plummer2.tab - %1,%2-%6,%3-%7,%4-%8 all format=%f

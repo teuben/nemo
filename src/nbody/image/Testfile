@@ -22,14 +22,14 @@ snap.in:
 
 snapccd:
 	@echo Running $@
-	snapccd snap.in . 
+	snapccd snap.in . ; nemo.coverage snapccd.c
 
 snapgrid:
 	@echo Running $@
-	snapgrid snap.in . 
+	snapgrid snap.in .  ; nemo.coverage snapgrid.c
 
 snapslit:
 	@echo Running $@
-	snapslit snap.in  width=1 length=4 zvar=vy
+	snapslit snap.in  width=1 length=4 zvar=vy ; nemo.coverage snapsplit.c
 
 

@@ -33,7 +33,7 @@ map1.den:
 	@echo Creating $@
 	@nemoinp $(R) > map1.r
 	@nemoinp $(R) | tabmath - - 'exp(-%1/20)' all > map1.d
-	ccdvel map1.den radii=@map1.r vrot=@map1.d pa=$(PA) inc=$(INC) amp=t
+	ccdvel map1.den radii=@map1.r vrot=@map1.d pa=$(PA) inc=$(INC) amp=t; nemo.coverage ccdvel.c
 
 
 ccdvel:	map1.den
@@ -42,17 +42,17 @@ ccdvel:	map1.den
 rotcur: map1.vel
 	@echo Running $@
 	rotcur in=map1.vel radii=$(R) vrot=10,100 pa=$(PA) inc=$(INC) vsys=0 \
-	   tab=map1.rotcur units=sec,1 > /dev/null
+	   tab=map1.rotcur units=sec,1 > /dev/null ; nemo.coverage rotcur.c
 	@tail -7 map1.rotcur
 
 rotcurshape: map1.vel
 	rotcurshape in=map1.vel radii=0,60 pa=$(PA) inc=$(INC) vsys=0 \
-	   tab=map1.rotcurshape units=sec,1 rotcur1=core1,100,20,1,1 > /dev/null
+	   tab=map1.rotcurshape units=sec,1 rotcur1=core1,100,20,1,1 > /dev/null; nemo.coverage rotcurshape.c
 	@tail -11 map1.rotcurshape
 
 
 power: map1.vel
 	rotcurshape in=map1.vel radii=0,60 pa=$(PA) inc=$(INC) vsys=0 \
-	   tab=map1.rotcurshape units=sec,1 rotcur1=power,100,20,1,1,1,1
+	   tab=map1.rotcurshape units=sec,1 rotcur1=power,100,20,1,1,1,1; nemo.coverage rotcurshape.c
 	@tail -11 map1.rotcurshape
 

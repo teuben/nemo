@@ -15,8 +15,8 @@ all:	$(BIN)
 
 bodytrans:
 	@echo Running $@
-	bodytrans x
-	bodytrans y
-	bodytrans z
-	bodytrans r
+	bodytrans x; nemo.coverage bodytrans.c
+	bodytrans y; nemo.coverage bodytrans.c
+	bodytrans z; nemo.coverage bodytrans.c
+	bodytrans r; nemo.coverage bodytrans.c
 

@@ -22,8 +22,8 @@ ccd.in:
 
 ccdprint: ccd.in
 	@echo Running $@
-	ccdprint ccd.in x= y= format=%7.3f
+	ccdprint ccd.in x= y= format=%7.3f; nemo.coverage ccdprint.c
 
 ccddump: ccd.in
 	@echo Running $@
-	ccddump ccd.in .
+	ccddump ccd.in . ; nemo.coverage ccddump.c

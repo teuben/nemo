@@ -23,23 +23,23 @@ rsf:
 	@echo '  int MyI2 01' >> rsf.in
 	@echo 'tes' >> rsf.in
 	@echo Running rsf
-	rsf rsf.in rsf.out
+	rsf rsf.in rsf.out; nemo.coverage rsf.c ; nemo.coverage rsf.c
 
 tsf:
 	@echo Running tsf
-	tsf rsf.out maxprec=t
+	tsf rsf.out maxprec=t			; nemo.coverage tsf.c
 
 csf:
 	@echo Running csf
-	csf rsf.out csf.out MySet
-	csf rsf.out - MyD | tsf - maxprec=t
-	csf rsf.out - MyD convert=d2f | tsf - maxprec=t
-	csf rsf.out - MyF | tsf - maxprec=t
+	csf rsf.out csf.out MySet		; nemo.coverage csf.c
+	csf rsf.out - MyD | tsf - maxprec=t	; nemo.coverage csf.c tsf.c
+	csf rsf.out - MyD convert=d2f | tsf - maxprec=t ; nemo.coverage csf.c tsf.c
+	csf rsf.out - MyF | tsf - maxprec=t	; nemo.coverage csf.c tsf.c
 # oops,there is a problem here, can't do this
 #	csf rsf.out - MyF convert=f2d | tsf - maxprec=t
-	tsf csf.out
+	tsf csf.out				; nemo.coverage tsf.c
 
 hisf:
 	@echo Running hisf
-	hisf csf.out
+	hisf csf.out				; nemo.coverage history.c
 

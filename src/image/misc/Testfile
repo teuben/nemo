@@ -30,11 +30,11 @@ ccdmom.in:
 
 ccdplot: ccd.in
 	@echo Running $@
-	ccdplot ccd.in $(C) yapp=$(YAPP)
+	ccdplot ccd.in $(C) yapp=$(YAPP) ; nemo.coverage ccdplot.c
 
 ccdstat: ccd.in
 	@echo Running $@
-	ccdstat ccd.in
+	ccdstat ccd.in ; nemo.coverage ccdstat.c
 
 ccdsub: ccd.in
 	@echo Running $@
@@ -42,8 +42,8 @@ ccdsub: ccd.in
 
 ccdmom: ccdmom.in
 	@echo Running $@
-	ccdmom ccdmom.in - 1 | ccdstat -
-	ccdmom ccdmom.in - 2 | ccdstat -
-	ccdmom ccdmom.in - 3 | ccdstat -
+	ccdmom ccdmom.in - 1 | ccdstat - ; nemo.coverage ccdmom.c ccdstat.c
+	ccdmom ccdmom.in - 2 | ccdstat - ; nemo.coverage ccdmom.c ccdstat.c
+	ccdmom ccdmom.in - 3 | ccdstat - ; nemo.coverage ccdmom.c ccdstat.c
 
 

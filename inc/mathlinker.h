@@ -8,7 +8,7 @@
               
 static void force_math()
 {
-    error("mathlinker cannot be called");
+    error("mathlinker should never be called");
     
     (void) cbrt(1.0);
     (void) sqrt(1.0);

@@ -20,24 +20,25 @@ tab.in:
 
 tabmath: tab.in
 	@echo Running $@
-	tabmath tab.in tab.out 'sqrt(%1)'
+	tabmath tab.in tab.out 'sqrt(%1)'; nemo.coverage tabmath.c
 
 tabplot:
 	@echo Running $@
-	tabmath tab.in - 'sqrt(%1)' | tabplot -
+	tabmath tab.in - 'sqrt(%1)' | tabplot - ; nemo.coverage tabplot.c
 
 tabhist:
 	@echo Running $*
-	nemoinp 1:1000 | tabmath - - 'rang(0,1)' all seed=123 | tabhist -
+	nemoinp 1:1000 | tabmath - - 'rang(0,1)' all seed=123 | tabhist - ; nemo.coverage tabhist.c
 
 tabspline:
 	@echo Running $*
-	nemoinp 1:2:0.001 | tabmath - - '%1*%1' | tabspline - y=2
+	nemoinp 1:2:0.001 | tabmath - - '%1*%1' | tabspline - y=2;  nemo.coverage tabspline.c
 
 tablsqfit:
 	@echo Running $*
-	nemoinp 1:2:0.001 | tabmath - - '%1+rang(0,0.1)' seed=123 | tablsqfit -
+	nemoinp 1:2:0.001 | tabmath - - '%1+rang(0,0.1)' seed=123 | tablsqfit - ; nemo.coverage tablsqfit.c
 
 tabnllsqfit:
 	@echo Running $*
-	nemoinp 1:100 | tabmath - - '4+exp(-(%1-50)**2/(200))+rang(0,0.1)' seed=123 | tabnllsqfit - fit=gauss par=4,1,50,10
+	nemoinp 1:100 | tabmath - - '4+exp(-(%1-50)**2/(200))+rang(0,0.1)' seed=123 |\
+		tabnllsqfit - fit=gauss par=4,1,50,10; nemo.coverage tabnllsqfit.c

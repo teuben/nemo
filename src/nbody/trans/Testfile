@@ -26,25 +26,25 @@ snap.in:
 
 snapcenter:
 	@echo Running snapcenter
-	snapcenter snap.in . weight=r report=t 
+	snapcenter snap.in . weight=r report=t  ; nemo.coverage snapcenter.c
 
 snaprotate:
 	@echo Running snaprotate
-	snaprotate snap.in - 45,60,45 xyz | csf - .
+	snaprotate snap.in - 45,60,45 xyz | csf - . ; nemo.coverage snaprotate.c
 
 snaprect:
 	@echo Running snaprect
-	snaprect snap.in .
+	snaprect snap.in . ; nemo.coverage snaprect.c
 
 snapinert:
 	@echo Running snapinert
-	snapinert snap.in -
+	snapinert snap.in - ; nemo.coverage snapintert.c
 
 snapsplit:
 	@echo Running $@
-	snapsplit snap.in - nbody=1 | csf - .
+	snapsplit snap.in - nbody=1 | csf - . ; nemo.coverage snapsplit.c
 
 snapcopy:
 	@echo Running $*
-	snapcopy snap.in - select=i | csf - .
+	snapcopy snap.in - select=i | csf - . ; nemo.coverage snapcopy.c
 
