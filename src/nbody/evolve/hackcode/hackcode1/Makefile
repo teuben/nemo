@@ -33,7 +33,6 @@ SRCDIR = $(NEMOPATH)/src/nbody/evolve/hackcode/source1
 
 #install: .install_bin
 install:
-	@echo Nothing to install to NEMOLIB
 
 .install_man: $(MANFILES)
 	cp $? $(NEMOPATH)/man/man1
