@@ -52,6 +52,7 @@
  *  13-jun-02   fix permissions problem (Jean-Charles Lambert)
  *  31-dec-02   gcc3/SINGLEPREC; allow longer filenames (should use autoconf?)
  *  14-feb-04   proper prototypes, updated documentation
+ *  21-feb-04   fixed expression->file matching criterion (pretty bad bug)
  *
  *  Used environment variables (normally set through .cshrc/NEMORC files)
  *      NEMO        used in case NEMOOBJ was not available
@@ -289,18 +290,17 @@ local string get_bt(string expr)
 
     fp = fopen(edb, "r");
     if (fp==NULL)
-        return(NULL);
+        return NULL;
     nexpr = strlen(expr);
-    while (fgets(line, NL, fp))
-        if (strncmp(expr,line,nexpr)==0) {
-            cp = &line[nexpr];
-            if (*cp != ' ')
-                continue;                   /* not found yet */
-            while (*cp==' ' || *cp=='\t')
-                cp++;
-            cp[strlen(cp)-1] = '\0';        /* strip '\n' */
-            return(cp);
-        }
+    while (fgets(line, NL, fp)) {
+    	cp = &line[strlen(line)-1];
+    	*cp = 0;                       /* remove terminathing newline */
+    	while (*cp != ' ')             /* move backwards until space */  
+    	    cp--;
+        *cp++ = 0;
+        if (strcmp(line,expr)==0)
+            return cp;
+    }
 #endif
     return NULL;    			/* return as if nothing was found */
 }
@@ -465,7 +465,7 @@ string defv[] = {
     "i=1\n		Index",
     "alias=\n		Filename to save expression in (bt<TYPE>_<ALIAS>)",
     "btnames=\n		BTNAMES filename to regenerate .o files",
-    "VERSION=3.0\n	14-feb-04 PJT",
+    "VERSION=3.1\n	21-feb-04 PJT",
     NULL,
 };
 
