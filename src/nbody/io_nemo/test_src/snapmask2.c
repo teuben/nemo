@@ -1,5 +1,4 @@
 /* -------------------------------------------------------------- *\
-|* $Id$
 |*
 |* snapmask2.c :	JC LAMBERT	 14-Mar-95	V1.0
 |*					 15-Nov-95      V1.1
@@ -28,6 +27,7 @@
 
 #include <snapshot/snapshot.h>	
 #include <snapshot/body.h>
+#include <history.h>
 #define REALLOC
 
 /* -------------------------------------------------------------- *\
@@ -62,6 +62,7 @@ int save_parameter(outstr,time_d,nbody)
   put_data(outstr, TimeTag, RealType, &time, 0);
   put_data(outstr, NobjTag, IntType, &nbody, 0);
   put_tes(outstr, ParametersTag);  
+  return 1;
 }
 /* -------------------------------------------------------------- *\ 
 |* copy_onedim :
@@ -85,6 +86,7 @@ int copy_onedim(Qsel,oneptr,nbody)
     *dp = *op;         /* Output = Input */
     dp++;
   }
+  return 1;
 }
 /* -------------------------------------------------------------- *\ 
 |* copy_onedim_int :
@@ -108,6 +110,7 @@ int copy_onedim_int(Qsel,oneptr,nbody)
     *dp = *op;         /* Output = Input */
     dp++;
   }
+  return 1;
 }
 /* -------------------------------------------------------------- *\ 
 |* copy_twodim :
@@ -129,12 +132,13 @@ int copy_twodim(Qsel,twoptr,nbody,step)
 	dp[j] = op[j]; /* Output = Input for x,y,z,vx,vy,vz */
     dp+=step;
   }
+  return 1;
 }
 
 /* -------------------------------------------------------------- *\ 
 |* Main program
 \* -------------------------------------------------------------- */ 
-nemo_main()         
+void nemo_main()         
 {
   stream instr,      /* input stream */
     outstr;          /* output stream */
@@ -157,7 +161,7 @@ nemo_main()
   real   * accptr   = NULL;
   int    * keyptr   = NULL;
 
-  int    i, j,nbody, bits,nbody_out=0,step,n_step;
+  int    i, j,nbody,nbody_out=0,step,n_step;
 
   bool   first = TRUE, out=FALSE,
     * Qsel[1];           
@@ -210,7 +214,7 @@ nemo_main()
 
     if (get_tag_ok(instr,ParticlesTag) &&
 	(timeptr == NULL || streq(timu, "all") ||
-	 within((real) *timeptr, timu, (real) TIMEFUZZ)))
+	 within((real) *timeptr, timu, (real) TIMEFUZZ))) {
 
       if (n_step == step) {
 	n_step= 1;
@@ -410,11 +414,14 @@ nemo_main()
 	get_tes(instr, ParticlesTag);
 	put_tes(outstr, ParticlesTag);
       }
-      else
+      else {
 	n_step++;
+      }
+    }
     get_tes(instr, SnapShotTag);   
-    if (out)
+    if (out) {
       put_tes(outstr,SnapShotTag);  
+    }
     out = FALSE;  
   }
   strclose(instr);    /* close input file  */
