@@ -19,6 +19,7 @@
  *	24-jun-99 pjt  fixed reading tables important from DOS
  *	20-jun-01 pjt  gcc 3
  *       8-dec-01 pjt  MAX_LINELEN
+ *      11-jun-03 pjt  fixed bug in skipping a line in buffered reads
  */
 
 #include <stdinc.h>
@@ -65,10 +66,6 @@ int get_atable(
         n = xstrlen(sp,sizeof(string))-1;   /* number of items found */
         dprintf(3,"[%d] %s\n",n,line);
         if (n==0) continue;                 /* skip empty lines ? */
-        if (npt >= ndat) { 
-            npt = -ndat;                /* signal more data to come */
-            break;
-        }
         bad = FALSE;
         for (i=0; i<ncol; i++) {            /* process and fill each column */
             nr = colnr[i];		/* column number : >= 1 */
@@ -91,6 +88,10 @@ int get_atable(
 	freestrings(sp);
         if (bad) continue;
         npt++;                              /* count how much data filled */
+	if (npt == ndat) {
+	  npt = -ndat;
+	  break;
+	}
     } /* while (fgets) */
     dprintf(1,"%d lines read from table file, %d data used \n",nline, npt);
     return npt;
