@@ -1,4 +1,4 @@
-.TH SNAPPRINT 1NEMO "4 September 2003"
+.TH SNAPPRINT 1NEMO "18 March 2003"
 .SH NAME
 snapprint \- print out items of a snapshot in table format
 .SH SYNOPSIS
@@ -50,6 +50,10 @@ Add a header to the output? The header will contain the number of particles,
 followed by the timestamp, of the snapshot. If masses, position and velocities
 are output in the table, this format is also referred to
 as the \fIntmpv(5NEMO)\fP format.
+[Default: \fBf\fP]
+.TP
+Should newlines be added between the header elements?
+\fBnewline=f|t\fP
 [Default: \fBf\fP]
 .TP
 \fBcsv=f|t\fP
