@@ -1,0 +1,26 @@
+%N ccdsub
+%D sub/average of an image
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man ccdsub' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input image file [???]
+%A out
+	Output image file [???]
+%A x
+	X coordinates to select []
+%A y
+	Y coordinates to select []
+%A z
+	Z coordinates to select []
+%A aver
+	Coordinates to average []
+%A nxaver
+	Number X to aver (size remains same) [1]
+%A nyaver
+	Number Y to aver (size remains same) [1]
+%A skip
+	Coordinates to skip [xyz]
+%A VERSION
+	5-nov-93 PJT [1.2]

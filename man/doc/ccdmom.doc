@@ -1,0 +1,18 @@
+%N ccdmom
+%D moment along an axis of an image (unfinished)
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man ccdmom' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input image file [???]
+%A out
+	Output image file [???]
+%A axis
+	Axis to take moment along (1=x 2=y 3=z) [1]
+%A mom
+	Moment to take [0,1,2] [0]
+%A keep
+	Keep moment axis, and replace values [f]
+%A VERSION
+	31-dec-98 PJT [0.4]
