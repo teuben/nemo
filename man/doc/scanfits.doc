@@ -1,0 +1,42 @@
+%N scanfits
+%D scan fits files, optionally repair (and output) them
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man scanfits' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input fits file [???]
+%A out
+	Output fits file (optional) []
+%A hdu
+	Select which HDU's? [0=all] [0]
+%A delete
+	...Delete (blank out) headers which match any of these []
+%A keep
+	...Or keep headers which match any of these []
+%A insert
+	file(s) with header items to insert before END []
+%A fix
+	What kind of fix [ING,TUCSON,LF,CRLF,BLANK]
+	ING      Shift left 13 chars special ING card images
+	TUCSON   Shift left 18 chars special SINGLDSH card images
+	LF       Make ascii editable by inserting a LF in column 80
+	BLANK    Delete blank lines (used with keep= and delete=)
+	ZERO     Replace zeros by blanks
+	DECORDER Delete DECORDER, if present, and then swap the bytes
+	BSWAP    swap the bytes anyways
+	IRAF0	 Replace HISTORY by COMMENT
+	MSDOS	 Replace any non-printable header ASCII by blanks
+	FIRST    Retain only first occurance of true keywords
+	PROMOTE  Promote XTENSION to SIMPLE header
+	LAST     Retain only last occurance of true keywords []
+%A print
+	Additional items to print from header? []
+%A blocking
+	Two blocking factors (blocksize/2880) for i&o [1,1]
+%A select
+	Select header, data, ...? [header,data]
+%A split
+	Split fits file into HDU pieces '<out>.#' [f]
+%A VERSION
+	12-feb-99 PJT [1.8a]
