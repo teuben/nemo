@@ -58,11 +58,11 @@ string defv[] = {
   "bin=.\n           directory in which KD95 binaries live",
   "model=A\n         Select base model A, B, C or D",
 
-  "VERSION=1.1\n     6-mar-04 PJT",
+  "VERSION=1.1a\n    7-mar-04 PJT",
   NULL,
 };
 
-string usage="Kuijken-Dubinsky-95 composite bulge-disk-halo model";
+string usage="Kuijken-Dubinski-95 composite bulge-disk-halo model";
 
 void goto_rundir(string name);
 void make_rundir(string name);
@@ -223,9 +223,9 @@ typedef struct _mpar {
 
 
 mpar ModelPars[] = {
-  { "nbulge",  { "4000", "1000",  "2000", "2000" }},
+  { "nbulge",  { "4000", "1000",  "2000", "1000" }},
   { "ndisk",   { "8000", "1000",  "4000", "1000" }},
-  { "nhalo",   { "6000", "1000",  "1000", "1000" }},
+  { "nhalo",   { "6000", "1000", "10000", "1000" }},
   { "fstreamb",{ "0.75", "0.5",   "0.5",  "0.5" }},
   { "fstreamh",{ "0.5",  "0.5",   "0.5",  "0.5" }},
 
