@@ -1,0 +1,71 @@
+.TH SNAPTRIM 1NEMO "5 March 1998"
+.SH NAME
+snaptrim \- select a subset of the snapshot frames in a file
+.SH SYNOPSIS
+\fBsnaptrim in=\fIin_file\fP \fBout=\fIout_file\fP [parameter=value] .\|.\|.
+.SH DESCRIPTION
+\fIsnaptrim\fP reads \fIsnapshot\fP(5NEMO) data from \fBin\fP and
+copies a subset of the frames to \fBout\fP.  Frames may be selected by
+specifying either a time range, or sampling frequencies for particle
+and diagnostic frames.
+.PP
+\fIsnaptrim\fP has the option of assuming the input file contains
+a sorted series (in time) of snapshots, in which case the
+scanning stops immediately after the last needed snapshot is
+written. (see keyword \fBcheckall=\fP below).
+.SH PARAMETERS
+The following parameters are recognized:
+.TP 24
+\fBin=\fIin_file\fP
+Input data is read from \fIin_file\fP, in \fIsnapshot\fP(5NEMO)
+format.  Default: none.
+.TP
+\fBout=\fIout_file\fP
+Selected frames are written to \fIout_file\fP.  Default: none.
+.TP
+\fBtimes=\fItime_range\fP
+Select frames with time values within \fItime_range\fP, which is of a
+form such as \fB1.0:1.5,2.5,3.0\fP. A special format is allowed to
+select the Nth snapshot using \fBtimes=#\P\fIN\fP, where
+the first snapshot is counted as 1. Special values are 
+\fBfirst\fP, \fBlast\fP and \fBall\fP.
+Default: \fBall\fP.
+.TP
+\fBpartcyc=\fIinterval\fP
+Select one out of every \fIinterval\fP particle frames within
+\fItime_range\fP; if \fB0\fP, select none.  Default: \fB1\fP,
+which selects all.
+.TP
+\fBdiagcyc=\fIinterval\fP
+Select one out of every \fIinterval\fP diagnostic frames within
+\fItime_range\fP; if \fB0\fP, select none.  Default: \fB1\fP,
+which selects all.
+.TP
+\fBamnesia=t|f\fP
+Set it to true if you don't want history records to be in the output
+file. Default: \fBfalse\fP.
+.TP
+\fBcheckall=t|f\fP
+Set it to true if you really want to be sure all snapshots are checked
+if to be copied. This keyword must be set to true when the input 
+snapshot is not sorted in time. By setting it to false, it can speed
+up scanning enormously. Default: \fBfalse\fP.
+.TP
+\fBheadline=\fItext\fP
+Random text which is prepended to output file only if a nonempty value
+is specified.  Default: nothing.
+.SH "SEE ALSO"
+snapsample(1NEMO), snapshot(5NEMO)
+.SH BUGS
+For \fBtimes=last\fP you should not use a pipe in the input stream, i.e.
+\fBin=-\fP.
+.SH AUTHOR
+Joshua E. Barnes
+.SH UPDATE HISTORY
+.ta +1i +4i
+.nf
+xx-xxx-8x	V1.0 Created	JEB
+xx-mar-89	V1.2 keyword amnesia= added	JEB
+12-apr-89	V1.3 keyword checkall= added	PJT
+5-maar-98	V1.6 added first/last times	PJT
+.fi
