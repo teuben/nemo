@@ -1,5 +1,4 @@
-.\" $Id$
-.TH IO_NEMO 3NEMO "18 March 2004"
+.TH IO_NEMO 3NEMO "03 March 2005"
 .SH NAME
 \fBio_nemo\fP \(em High level C function to read/save NEMO snapshot from a
 C program.
@@ -11,7 +10,8 @@ C program.
 \fBchar * param;   /* parameters list */\fP
 .SH DESCRIPTION
 \fIio_nemo\fP is a high level C function which allows the user to
-perform I/O operations on NEMO snapshot files from a C program. 
+perform I/O operations on NEMO snapshot files from a C program. It
+works quite like C printf function.
 .PP
 The use of this function is very simple and require only some basic
 knowledge of how to program in NEMO.
@@ -84,14 +84,11 @@ Match to the particle \fIsoftening\fP.
 \fBh|history\fP
 Match to the NEMO file name that you want to keep track about the history.
 .TP
-
-.TP
 \fBst\fP
 Select snapshot's times. You have to  put the selected
 time in a string. Example "100:150"
 select the time beween 100 and 150. The string is fully compatible
 with the expression usually given to \fBnemoinpi\fP (Cf man nemoinpi).
-
 .TP
 \fBsp\fP
 Select snapshot's particles. You have to  put the selected
@@ -100,19 +97,41 @@ select the particles beween 0 and 299999. The \fBreturned nbody\fP
 corresponds to the \fBselected\fP nbody.
 In the example above it would thus be 300000. The string is fully compatible
 with the expression usually given to \fBnemoinpi\fP (Cf man nemoinpi).
-
 .TP
+\fBb\fP
+Integer variable to store input/output bit flags (see
+$NEMOINC/snapshot/snapshot.h). During \fBread\fP operation, this
+variable is filled up with OR bit operation according to the
+components requested and the existing components in the file. Example:
+if you ask for positons and potentials and no potentials exist on the
+snapshot, then bit flags will contain only PosBit. During \fBwrite\fP
+operation, if it is used, io_nemo engine will only save components, which have
+their bits positionned on it, AND requested to be saved. (see a
+complete example here: $NEMOSRC/nbody/io_nemo/test_src/io_nemo_test.c).
 
-.SH
+.SH ARGUMENTS
 The \fIvariable flags\fP specify which data you will
 get/put from/into the NEMO file, hence after the selection
 string \fIparam\fP, you must insert all the selected
-variables in the same order with which they have been declared in \fIparam\fP.
+variables (arguments) in the same order with which they have been
+declared in \fIparam\fP. For each of the following requested flags:
+\fIn,t,m,x,v,a,p,b,k,e\fP you **must** give as argument an address of
+pointer. During read opreation, io_nemo check NULL pointer for each
+arguments. In case of NULL pointer the memory is automatically
+allocated to fill up with the requested component. If not NULL, io_nemo
+supposed that the pointer is already allocated. For the flags \fIsp,st,h\fP
+you just have to give the pointer as argument.
+
+.SH RETURN VALUE
+The function return 1 if successfull, 0 if the end of snapshot has been
+reached, or -1 if at least one of the components requested does not exist (in that
+case you should use 'b' parameter to filter existing components).
 
 .SH EXAMPLE
 Here is a simple NEMO C program to illustrate the use of the function
 \fIio_nemo()\fP. The program reads all the time steps into a NEMO a
-file, and saves the data in another NEMO file.
+file, and saves the data in another NEMO file. (See a more complete
+example here: $NEMOSRC/nbody/io_nemo/test_src/io_nemo_test.c).
 .PP
 .nf
 /* ----------------------------------------------------- *\\ 
@@ -216,9 +235,11 @@ Jean-Charles.Lambert@oamp.fr
 .SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
-15-Nov-96	 V1.0 : created                       JCL
-21-Feb-97	 V1.1 : memory optimisation           JCL
-16-Apr-97	 V1.11: manual created                JCL 
-19-Jul-02	 V1.2 : io_nemo and io_nemo_f unified JCL
-18-Mar-04	 V1.21: bugs fixed, softening added   JCL
+15-Nov-96	 V1.0 : created                           JCL
+21-Feb-97	 V1.1 : memory optimisation               JCL
+16-Apr-97	 V1.11: manual created                    JCL 
+19-Jul-02	 V1.2 : io_nemo and io_nemo_f unified     JCL
+18-Mar-04	 V1.21: bugs fixed, softening added       JCL
+03-Mar-05	 V1.30: memory bugs fixed, keybits added  JCL
+	                valgrind mem/leak safe            
 .fi

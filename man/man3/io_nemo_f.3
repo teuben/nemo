@@ -1,5 +1,4 @@
-.\" $Id$
-.TH IO_NEMO_F 3NEMO "18 March 2004"
+.TH IO_NEMO_F 3NEMO "03 March 2005"
 .SH NAME
 \fBio_nemo_f\fP \(em High level C function to read/save NEMO snapshot from a
 FORTRAN program.
@@ -121,20 +120,24 @@ corresponds to the \fBselected\fP nbody.
 In the example above it would thus be 300000. The string is fully compatible
 with the expression usually given to \fBnemoinpi\fP (Cf man nemoinpi).
 
-.TP
+.PP
 
-.SH
+.SH ARGUMENTS
 The \fIvariable flags\fP specify which data you will
 get/put from/into the NEMO file, hence after the
 selection string \fIparam\fP, you must insert all the selected
-variables in the same order with which they have been declared in
+variables (arguments) in the same order with which they have been declared in
 \fIparam\fP.
 
+.SH RETURN VALUE
+The function return 1 if successfull, 0 if the end of snapshot has been
+reached.
 
 .SH EXAMPLE
 Here is a FORTRAN program to illustrate the use of the function
 \fIio_nemo_f()\fP. The program reads all the time steps into a NEMO a
-file, and saves the data in another NEMO file.
+file, and saves the data in another NEMO file. Source file of the
+example below is located here: $NEMOSRC/nbody/io_nemo/test_src/nemo_fortran_d_3n.F
 .PP
 .nf
 C----------------------------------------------------------- 
@@ -168,7 +171,8 @@ c get output snapshot filename
       i = 1
       do while (i.gt.0) 
 
-c read the snapshot up to the end of file ( i <= 0 )
+c read the snapshot up to the end of file 
+c at the end of snapshot, io_nemo_f return 0
          i=io_nemo_f(infile,80,MAXBODY,"real8,3n,read,n,m,x,v,t,info\\0",
      $        nbody,mass,pos,vel,ts)
 
@@ -222,7 +226,7 @@ LIBS = -L$(NEMOLIB)
 # - - - - - - - - - - - - - - - - - - - -
 # compilation with g77 compiler
 # - - - - - - - - - - - - - - - - - - - -
-G77FLAGS = -fno-second-underscore -fwritable-strings
+G77FLAGS = -fno-second-underscore -Wno-globals
 
 nemo_fortran_g77 : nemo_fortran.F
 	g77 $(G77FLAGS)  -o $@ nemo_fortran.F $(LIBS) \\
@@ -254,14 +258,15 @@ Jean-Charles.Lambert@oamp.fr
 .SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
-15-Jun-95	 V1.0 : created                     JCL
-21-Jun-95	 V1.10: bugs fixes                  JCL
-12-Dec-95	 V1.11: possibility to close file   JCL
-11-Mar-96	 V1.12: acceleration I/O added      JCL
-04-Apr-97	 V1.13: generic real format         JCL
-07-Apr-97	 V1.14: manual created              JCL 
-19-Jul-02	 V1.20: io_nemo/io_nemo_f unified   JCL 
-18-Mar-04	 V1.21: bugs fixed, softening added JCL
+15-Jun-95	 V1.0 : created                      JCL
+21-Jun-95	 V1.10: bugs fixes                   JCL
+12-Dec-95	 V1.11: possibility to close file    JCL
+11-Mar-96	 V1.12: acceleration I/O added       JCL
+04-Apr-97	 V1.13: generic real format          JCL
+07-Apr-97	 V1.14: manual created               JCL 
+19-Jul-02	 V1.20: io_nemo/io_nemo_f unified    JCL 
+18-Mar-04	 V1.21: bugs fixed, softening added  JCL
+03-Mar-05	 V1.30: code cleaning, valgrind safe JCL
 .fi
 
 
