@@ -117,8 +117,8 @@ Precision: DOUBLEPREC
 
 As you could perhaps see from the <B>help</B> system keyword, program keywords are
 used as command line parameters to pass information into the program. They
-are either fully specified by keyword=value, or by their position
-on the command line. In the latter case the 'keyword=' part can be 
+are either fully specified by <I>keyword=value</I>, or by their position (order)
+on the command line. In the latter case the <I>keyword=</I> part can be 
 ommited (you will often find the first two or three parameters to be
 the obvious ones that make writing command lines quick).
  For example, the follow three examples are identical:
@@ -127,10 +127,10 @@ the obvious ones that make writing command lines quick).
   % <B>mkplummer nbody=10 out=p10</B>
   % <B>mkplummer - 10 > p10</B>
 </PRE>
-The last example show a feature of the NEMO user interface that is 
+This last example shows a feature of the NEMO user interface that is 
 often (ab)used, and that is using Unix pipes. When a filename is designated
-by a dash (-), it means the sending or receiving end of a pipe, whichever
-is appropriate. Here is another example:
+by a dash (-), it means it is at the sending or receiving end of a pipe, 
+whichever is appropriate. Here is another example:
 <PRE>
   % <B>mkplummer - 100 | snapscale - - rscale=1,1,0.1 | snapprint - x,y,z > p10.tab</B>
 </PRE>
@@ -141,40 +141,69 @@ to an ASCII file.
 <hr>
 <h2> Importing and plotting MASS99 data </h2>
 
-<pre>
-step1:  export as tipsy
+Although NEMO can read many snapshot-like formats, the easiest is probably to use
+the (ascii) <I>tipsy</I>  format.
 
-   % reduce99 input=isothermal_small.input tipsy=y
+<PRE>
+   % <B>reduce99 input=isothermal_small.input tipsy=y</B>
+</PRE>
+which will convert all MASS99 files wih the name outfile.???? to 
+ASCII tipsy files named ducky.????.
 
+Next the tipsy data will be converted to the NEMO snapshot format. Some information
+will be lost, since this program does not import pure gas properties in
+mixed-particle mode.
 
-   which will convert all MASS99 files wih the name outfile.???? to 
-ASCII tipsy files named ducky.???? 
+<PRE>
+   % <B>tipsysnap ducky.0001 snap.0001</B>
+or
+   % <B>zcat ducky.0001.gz | tipsysnap - snap.0001</B>
+</PRE>
 
-step2:  import tipsy into NEMO
-
-   % tipsysnap ducky.0001 snap.0001
+Next we can do some simple plotting using NEMO's snapplot program:
 
 
 step3:  plot the distribution, using the yapp= system keyword and the case
 where NEMO was compiled with PGPLOT (yapp means Yet Another Plotting Package
 and is just an interface to PGPLOT in this case).
-
-  % snapplot snap.0001  xrange=-16:16 yrange=-16:16
-  % snapplot snap.0001  xrange=-16:16 yrange=-16:16 yapp=/vps
-  % snapplot snap.0001  xrange=-16:16 yrange=-16:16 yapp=snap.0001.gif/vgif
-
+<PRE>
+  % <B>snapplot snap.0001  xrange=-32:32 yrange=-32:32</B> <A HREF=plot1.gif>plot1</A>
+  % <B>snapplot snap.0001  xrange=-32:32 yrange=-32:32 yapp=/vps</B>
+  % <B>snapplot snap.0001  xrange=-32:32 yrange=-32:32 yapp=snap.0001.gif/vgif</B>
+</PRE>
 As you can see, the first galaxy was centered at the origin, the second one
-was offset a little bit
+was offset a little bit. Probably in velocity too:
+<PRE>
+  % <B>snapplot snap.0001  xrange=-32:32 yrange=-4:4 yvar=vx</B> <A HREF=plot2.gif>plot2</A>
+</PRE>
 
-step4:  make an 'xyz' file for 3D viewing
+To visualize the 3D structure interactively, a crude program xyzview was written a long
+time ago, and it needs data in a simpler <I>xyz</I> format. So, before viewing, the snapshot
+is transformed into yet another format....:
+<PRE>
+  % <B>snapxyz snap.0001 xyz.0001</B>
+  % <B>xyzview xyz.0001 scale=32</B>  <A HREF=plot3.gif>plot3</A>
+</PRE>
+When the image comes up, you can use hold the '1', '2' or '3' keys, while moviing the mouse
+and resp. rotate, zoom or add velocity vectors to the image. Also note that as soon as you
+started interactive work, only a subset of the particles (nfast=2048 by default) is displayed.
+The ESC key will exit the window.
+<p>
+This is not a very interesting plot, as all three components are colored boring red. Luckily
+snapxyz can add colors to the particles, and like most NEMO programs, handles arbitrary
+expressions containing body variables. For example, color=1 is red, color=2 yellow, color=3 green
+we will paint the dark particles red, the gas particles yellow, and the star (i.e. disk) particles
+green.
+<PRE>
+  % <B>rm snap.001.xyz</B>
+  % <B> snapxyz snap.0001 xyz.0001 color='i<4000?2:i<12000?1:3' </B>
+  % <B> tsf xyz.0001 allline=t item=Color | more </B>
+  % <B> xyzview xyz.0001 scale=32 nfast=20000 </B>  <A HREF=plot4.gif>plot4</A>
+</PRE>
+surely a much more interesting view.
 
-  % snapxyz snap.0001 xyz.0001
-  % xyzview xyz.0001 scale=16
-
-step4: 
-
-</pre>
-
+<hr>
+Below this line not yet updated....
 
 <h3>Ingredients of the 'mass.input' file</h3>
 
