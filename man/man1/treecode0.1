@@ -1,0 +1,88 @@
+.TH TREECODE0 1NEMO " 25 October 1991"
+.SH NAME
+treecode0 \- NEMO frontend for the TREECODE family of programs
+.SH SYNOPSIS
+\fBtreecode0\fP [parameter=value]
+.SH DESCRIPTION
+\fItreecode0\fP is a NEMO frontend to run any of the TREECODE family of
+programs. Standard NEMO datafiles are given, converted on the fly to
+"205" format, the specified TREECODE integrator is run, and output
+files in "205" format are converted back to NEMO's \fIsnapshot(5NEMO)\fP 
+format.
+.PP 
+This program works by writing a C-shell script \fBtmpscript.\fP\fIpid\fP, 
+where \fIpid\fP is the process ID (see \fIgetpid(3)\fP). This script
+is then executed via \fIexecl(3)\fP, and kept in the current working
+directory. 
+.PP
+Since this program uses the following NEMO programs, they need
+to have been installed: \fIstoa, treecode*, \fP and \fIatos\fP.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBprog=\fP\fIprogname\fP
+Name of the TREECODE program to be run. [Default: \fBtreecode2\fP].
+.TP
+\fBin=\fP\fIinsnap\fP
+Snapshot input filename. This snapshot is converted to \fBTREEBI\fP by
+\fIstoa(1NEMO)\fP. No default.
+.TP
+\fBout=\fP\fIoutsnap\fP
+Snapshot output filename. This is the ascii output \fBTREEBOA\fP converted
+back to snapshot by \fIatos(1NEMO)\fP. No default.
+Note that the working directory for TREECODE will be
+\fIoutsnap\fP\fB_dir\fP.
+.TP
+\fBlog=\fP\fIlogfile\fP
+Output logfile. This is the \fBTREELOG \fP file. No default.
+.TP
+\fBclean=\fP\fBt|f\fP
+Clean up temp files? [Default: \fBt\fP].
+.TP
+\fBexec=\fP\fBt|f\fP
+Execute the script? [Default: \fBt\fP].
+.TP
+ ......................  The remaining parameters are for the TREECODE  ................
+.TP 20
+\fBtext=\fP
+Title for the run. Maximum string length is limited by the declared 
+string lenght in the called fortran program. \fItreecode2\fP has a
+maximum of 50 characters.
+.TP
+\fBnsteps=\fP
+Total number of steps for this run [64].
+.TP
+\fBnoutbod=\fP
+Number of steps before major output of mass,phase,phi [8].
+.TP
+\fBnoutlog\fP
+Number of steps before output in logfile [1].
+.TP
+\fBdt=\fP
+Integration timestep [0.03125].
+.TP
+\fBtol=\fP
+Tolerance, the accuracy of the treecode, also called the opening 
+angle [1.0].
+.TP
+\fBeps=\fP
+Softening length [0.05].
+.TP
+\fBusequad=\fP\fBt|f\fP
+Use quadrupole moments? [f].
+.SH SEE ALSO
+treecode2(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+~/src/nbody/evolve/treecode2/	
+.fi
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+26-Jul-91	V0.0 document created for NEMO	PJT
+23-oct-91       V1.1 added exec=, extra tr to delete , in script	PJT
+.fi
