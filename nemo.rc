@@ -88,7 +88,7 @@ if ($debug) echo "and rehashed it"
 rehash
 
 # provide alias to end NEMO
-alias omen 'source $NEMO/nemo_end'
+alias omen 'source $NEMO/nemo_end; unalias omen; alias nemo source $NEMO/nemo_start'
 
 if ($debug) echo All systems go...
 
