@@ -4661,7 +4661,7 @@ c Set default value for gas particle number
    10	FORMAT(' Number of disk star-particles? ',$)
 	
         READ(5,*) ndstars
-        write(6,'(a20,i10,)') ' ndstars =  ', ndstars 
+        write(6,'(a20,i10)') ' ndstars =  ', ndstars 
 
         WRITE(6,11)
    11   FORMAT(' Mass of disk ? ',$)
