@@ -99,6 +99,12 @@ typedef struct {
 
 #define Subp(x) (((cellptr) (x))->subp)
 
+/* 
+ * int_hack
+ */
+
+typedef int int_hack;
+
 /*
  * ROOT: origin of tree; declared as nodeptr for tree with only 1 body.
  */
