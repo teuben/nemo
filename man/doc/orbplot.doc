@@ -1,0 +1,32 @@
+%N orbplot
+%D Plot an orbit trajectory
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man orbplot' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	input file name  [???]
+%A times
+	range of times to plot  [all]
+%A nplot
+	skip intermaediates?  [1]
+%A xvar
+	x-axis plotting variable  [x]
+%A xlabel
+	x-axis label; defaults to xvar  []
+%A xrange
+	x-axis variable range  [-2.0:2.0]
+%A yvar
+	y-axis plotting variable  [y]
+%A ylabel
+	y-axis label; defaults to yvar  []
+%A yrange
+	y-axis variable range  [-2.0:2.0]
+%A visib
+	determine visibility of points  [1]
+%A psize
+	point type and size  [0]
+%A maxsteps
+	max. number of steps per orbit [5000]
+%A VERSION
+	20-feb-97 PJT [2.3e]
