@@ -262,6 +262,43 @@ real rotcur_plummer(real r, int np, real *p, real *d)
   return p[0] * x * y;
 }
 
+real rotcur_tanh(real r, int np, real *p, real *d)
+{
+#if 0
+  v = tanh(x);
+  dvdx = sqr(sech(x));
+#endif
+}
+
+/*
+ * iso-thermal sphere:
+ *    rho  = rho0/(1+x^2)                    x = r/r0
+ *    vrot = vrot0*(1-atan(x)/x)^(1/2)   ,   vrot0 = sqrt(4.pi.G.rho0*r0^2)
+ *    
+
+
+In[7]:=D[Sqrt[1-ArcTan[x]/x],x]
+
+              1         ArcTan[x]
+        -(----------) + ---------
+                  2         2
+          x (1 + x )       x
+Out[7]= -------------------------
+                     ArcTan[x]
+          2 Sqrt[1 - ---------]
+                         x
+*/
+
+
+real rotcur_iso(real r, int np, real *p, real *d)
+{
+  real x = r/p[1];
+  real v = 1-atan(x)/x;
+  d[0] = v;
+  d[1] = -p[0]/p[1]*(1/(1+x*x) - v);
+  return p[0] * v;
+}
+
 
 /******************************************************************************/
 nemo_main()
