@@ -10,7 +10,7 @@
  *	It's a kludge until better potential interface is designed.
  *
  *	 9-Jun-92	Created		PJT
- *	22-feb-94   documentewd that since oct-93 this routine is obsolete
+ *	22-feb-94   documented that since oct-93 this routine is obsolete
  *		    however the get[dsub]param may be interesting enough
  *		    to save		PJT
  */
@@ -22,10 +22,7 @@
 extern string  *burststring(string, string);
 extern void     freestrings string *);
 
-real getdsubparam(key, n, def)
-string key;
-int n;
-real def;
+real getdsubparam(string key, int n, real def)
 {
     string *vp;
     int i;
