@@ -10,6 +10,7 @@
 #   17-jul-01   kludge hackforce, and rotcur
 #   15-feb-03   nemo.coverage 
 #   29-mar-04   documented -b; email now to teuben@astro.umd.edu
+#   24-dec-04   support to run with EXEC= for e.g. valgrind using -v
 #
 #
 # BUG:  -b  does not remove executable, so you never know if new binary did
@@ -30,6 +31,7 @@ set done=0
 set bootstrap=0
 set local=0
 set options=()
+set exec=()
 foreach arg ($*)
     switch ($arg)
     case -b:
@@ -51,6 +53,13 @@ foreach arg ($*)
     case -c:  
               set clean=1
               breaksw
+    case -v:
+    case -v0:
+	      set exec=(valgrind --tool=memcheck)
+	      breaksw
+    case -v1:
+	      set exec=(valgrind --tool=addcheck)
+	      breaksw
     case -s:  
               set show=1
               breaksw
@@ -124,7 +133,7 @@ foreach testfile (`find $NEMO/src -name Testfile -print | sort`)
     echo -n TESTSUITE: $testfile:h
     echo "==========================================================" >>  $log
     if ($local) pushd $testfile:h >& /dev/null
-    make -f $testfile clean all  $options                             >>& $log
+    make -f $testfile clean all  $options EXEC="$exec"                >>& $log
     if ($status) then
         echo " Problems"
     else
