@@ -4,6 +4,7 @@
  *	28-jan-98	0.2a   isolated beta functions in numrec 
  *       5-oct-00       0.3    added KStwo test
  *      23-mar-01       0.3a   more sanity check of input
+ *      29-sep-01       0.3c   handle identical tables
  */
 
 #include <stdinc.h>
@@ -15,7 +16,7 @@ string defv[] = {
     "col1=1\n           Column from 1st dataset",
     "col2=1\n           Column from 2nd dataset",
     "nmax=10000\n       Max lines in data, if pipe",
-    "VERSION=0.3b\n	23-sep-01 PJT",
+    "VERSION=0.3c\n	29-sep-01 PJT",
     NULL,
 };
 
@@ -153,8 +154,13 @@ void tptest(real data1[], real data2[], int  n, real *t,
 		cov += (data1[j]-ave1)*(data2[j]-ave2);
 	cov /= df=n-1;
 	sd=sqrt((var1+var2-2.0*cov)/n);
-	*t=(ave1-ave2)/sd;
-	*prob=betai(0.5*df,0.5,df/(df+(*t)*(*t)));
+	if (sd > 0.0) {
+	  *t=(ave1-ave2)/sd;
+	  *prob=betai(0.5*df,0.5,df/(df+(*t)*(*t)));
+	} else {
+	  *t = 0.0;
+	  *prob = 1.0;
+	}
 }
 
 void ttest(real data1[], int  n1, real data2[], int  n2,
@@ -198,4 +204,11 @@ void avevar(real data[], int  n, real *ave, real *var)
 	}
 	*var=(*var-ep*ep/n)/(n-1);
 }
+
+
+
+
+
+
+
 

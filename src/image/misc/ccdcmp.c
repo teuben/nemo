@@ -3,6 +3,7 @@
  *	8-oct-97	0.2
  *	28-jan-98	0.2a   isolated beta functions in numrec
  *      12-jan-99     0.3 - cloned off tabcmp for images
+ *      29-sep-01     0.3a - don't fatal if two images identical
  */
 
 #include <stdinc.h>
@@ -17,7 +18,7 @@ string defv[] = {
     "xmin=\n            In case minimum used (need both minmax)",
     "xmax=\n            In case maximum used (need both minmax)",
     "bins=16\n          Bins (number in min-max range, or boundaries)",
-    "VERSION=0.3\n	11-jan-99 PJT",
+    "VERSION=0.3a\n	29-sep-01 PJT",
     NULL,
 };
 
@@ -155,9 +156,15 @@ void tptest(real data1[], real data2[], unsigned long n, real *t,
 	for (j=1;j<=n;j++)
 		cov += (data1[j]-ave1)*(data2[j]-ave2);
 	cov /= df=n-1;
-	sd=sqrt((var1+var2-2.0*cov)/n);
-	*t=(ave1-ave2)/sd;
-	*prob=betai(0.5*df,0.5,df/(df+(*t)*(*t)));
+	sd=sqrt((var1+var2-2.0*cov)/n);	
+	dprintf(1,"sd = %g\n",sd);
+	if (sd > 0.0) {
+	  *t=(ave1-ave2)/sd;
+	  *prob=betai(0.5*df,0.5,df/(df+(*t)*(*t)));
+	} else {
+	  *t = 0.0;
+	  *prob = 1.0;
+	}
 }
 
 void ttest(real data1[], unsigned long n1, real data2[], unsigned long n2,
