@@ -1,0 +1,24 @@
+#
+set dir=$NEMO/opt/
+
+   if ($path[1] == ".") then
+	set path=(. $dir/bin $path[2-])
+   else
+	set path=($dir/bin $path)
+   endif
+   rehash
+
+   if ($?LD_LIBRARY_PATH) then
+     setenv LD_LIBRARY_PATH $dir/lib:${LD_LIBRARY_PATH}
+   else
+     setenv LD_LIBRARY_PATH $dir/lib
+   endif
+
+   if ($?MANPATH) then
+     setenv MANPATH $dir/man:${MANPATH}
+   else
+     setenv MANPATH $dir/man
+   endif
+
+unset dir
+
