@@ -265,6 +265,11 @@ toomre.dat.
 using an input file.
 .PP
 \fBmergerv\fP is a small shell script that merges the 3 ascii files.
+.SH PERFORMANCE
+The bulk of the CPU is in creating the disk particles, the bulge and halo are 
+a much smaller fraction of the cpu. On a 1.6 GHz Pentium-4 laptop the cpu cost is
+about \fI(Ndisk/1000)+32\fP secs for the gnu compiler (the 32 secs is to account for
+building tables, which is independantly of the number of particles.
 .SH EXAMPLES
 The default keywords are for Kuijken-Dubinski's model-A.
 

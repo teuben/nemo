@@ -178,8 +178,9 @@ roundbulge      ! name of dataset (note - truncated at cr character)
 .fi
 .SH PERFORMANCE
 The bulk of the CPU is in creating the disk particles, the bulge and halo are 
-a minor fraction of the cpu. On a 3 GHz Pentium-4 the cpu cost is
-about (Ndisk/630) secs. for the gnu compiler.
+a much smaller fraction of the cpu. On a 3 GHz Pentium-4 the cpu cost is
+about (Ndisk/630) secs for the gnu compiler. On a 1.6 P4 laptop this
+was about (Ndisk/420) secs.
 .SH BUGS
 There have been reported cases where magalie just seems to continue to
 compute in an infinite loop.
