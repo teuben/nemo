@@ -17,6 +17,7 @@
  *  18-may-99	 V6.0 placement for the CD_i_j matrix used in FITS
  *  21-feb-00    V6.1 added mapX_image() routines to return pointer arrays 
  *   9-sep-02    V6.2 added copy_image()
+ *  13-nov-02    V6.3 added image masks as a boolean image
  */
 #ifndef _h_image
 #define _h_image
@@ -40,6 +41,16 @@ typedef struct {
 
     real *val;              /* array of length 'nr' for coordinates */
 } image_ax, *image_axptr;
+
+typedef struct {
+    bool  *frame;	/* pointer to a contiguous block of data */
+    bool  **matrix;     /* 2D special case: pointers to pointers */
+    bool  ***cube;      /* 3D special case: ptr to ptr to ptr's  */
+    int   nx;		/* dimensions in X, Y and Z */
+    int   ny;
+    int   nz;
+} image_mask, *image_maskptr;
+
 
 typedef struct {
     real  *frame;	/* pointer to a contiguous block of data */
@@ -69,6 +80,7 @@ typedef struct {
     string unit;        /* units (could be a NULL) */
     real   time;	/* time tag */
     string storage;	/* array stored in Fortran or C definition */
+    image_mask *mask;   /* optional image mask */
 } image, *imageptr;
 
 typedef struct {
@@ -93,6 +105,7 @@ typedef struct {
     string storage;	/* array stored in Fortran or C definition */
 } new_image, *new_imageptr;
 
+
 #define Frame(iptr)	((iptr)->frame)
 #define Nx(iptr)	((iptr)->nx)
 #define Ny(iptr)	((iptr)->ny)
@@ -115,6 +128,7 @@ typedef struct {
 #define Unit(iptr)      ((iptr)->unit)
 #define Time(iptr)	((iptr)->time)
 #define Storage(iptr)   ((iptr)->storage)
+#define Mask(iptr)      ((iptr)->mask)
 
 #if defined(CDEF)
 #define MapValue(iptr,ix,iy)	(*( (iptr)->frame + iy + Ny(iptr)*(ix)))
