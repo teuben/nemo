@@ -1,0 +1,44 @@
+%N tabtos
+%D convert ASCII tabular information to snapshot format
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man tabtos' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input file name - ascii (structured) table [???]
+%A out
+	Output file name - snapshot []
+%A header
+	Header scalars (nbody, ndim, time, skip) []
+%A block1
+	What's in first block of nbody lines - mass []
+%A block2
+	- pos(ndim) []
+%A block3
+	- vel(ndim) []
+%A block4
+	- phase(2*ndim) []
+%A block5
+	- acc(ndim) []
+%A block6
+	- phi []
+%A block7
+	- aux []
+%A block8
+	- key []
+%A block9
+	- skip []
+%A nbody
+	Number of bodies, if needed []
+%A ndim
+	Dimension of pos,vel,acc arrays, if needed []
+%A times
+	Time(s) of snapshot, if needed, or override []
+%A options
+	Other processing options (scan|comment|wrap|spill) []
+%A nskip
+	Number of lines skipped before each (header+block1+...) [0]
+%A headline
+	Random mumblage for humans []
+%A VERSION
+	7-jul-98 PJT [1.3c]
