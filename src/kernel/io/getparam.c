@@ -118,7 +118,8 @@
  *  4-dec-02       c  use MAXBUF for keys - btw, wc is not 2800+ lines :-(
  * 21-may-03       d  document the system keywords in help=\?
  * 12-jul-03       e  allow -- to stop parsing
- * 15-oct-03       f  fix for version.h to give multiple static's in g++
+ * 15-oct-03       f  fix for version.h to give multiple static's in g++ 
+ * 23-jan-04       g  fix prototypes for intel compiler
 
   TODO:
       - what if there is no VERSION=
@@ -159,9 +160,10 @@
 	opt
         getopt
 	gengetopt http://www.gnu.org/software/gengetopt/gengetopt.html
+	opag      http://www.zero-based.org/software/opag/
  */
 
-#define GETPARAM_VERSION_ID  "3.4g 24-oct-03 PJT"
+#define GETPARAM_VERSION_ID  "3.4g 23-jan-04 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -196,6 +198,7 @@
 #include <extstring.h>
 #include <filefn.h>
 #include <strlib.h>
+#include <history.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -370,7 +373,6 @@ local void local_exit(int);
 /* external NEMO functions */
 
 extern int nemo_file_size(string);
-extern void app_history(string);
 extern string date_id(void);
 extern double cputime(void);
 

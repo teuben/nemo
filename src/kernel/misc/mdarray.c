@@ -10,12 +10,12 @@
 #include <nemo.h>
 #include <mdarray.h>
 
-mdarray1 allocate_mdarray1(n1)
+mdarray1 allocate_mdarray1(int n1)
 {
   return (mdarray1 )allocate(n1*sizeof(real));
 }
 
-mdarray2 allocate_mdarray2(n2,n1)
+mdarray2 allocate_mdarray2(int n2,int n1)
 {
   mdarray2 x = (mdarray2)allocate(sizeof(mdarray2)*n2);
   int i;
@@ -24,7 +24,7 @@ mdarray2 allocate_mdarray2(n2,n1)
   return x;
 }
 
-mdarray3 allocate_mdarray3(n3,n2,n1)
+mdarray3 allocate_mdarray3(int n3,int n2,int n1)
 {
   mdarray3 x = (mdarray3)allocate(sizeof(mdarray3)*n3);
   int i;
@@ -33,7 +33,7 @@ mdarray3 allocate_mdarray3(n3,n2,n1)
   return x;
 }
 
-mdarray4 allocate_mdarray4(n4,n3,n2,n1)
+mdarray4 allocate_mdarray4(int n4,int n3,int n2,int n1)
 {
   mdarray4 x = (mdarray4)allocate(sizeof(mdarray4)*n4);
   int i;
@@ -42,7 +42,7 @@ mdarray4 allocate_mdarray4(n4,n3,n2,n1)
   return x;
 }
 
-mdarray5 allocate_mdarray5(n5,n4,n3,n2,n1)
+mdarray5 allocate_mdarray5(int n5,int n4,int n3,int n2,int n1)
 {
   mdarray5 x = (mdarray5)allocate(sizeof(mdarray5)*n5);
   int i;
@@ -51,7 +51,7 @@ mdarray5 allocate_mdarray5(n5,n4,n3,n2,n1)
   return x;
 }
 
-mdarray6 allocate_mdarray6(n6,n5,n4,n3,n2,n1)
+mdarray6 allocate_mdarray6(int n6,int n5,int n4,int n3,int n2,int n1)
 {
   mdarray6 x = (mdarray6)allocate(sizeof(mdarray6)*n6);
   int i;
@@ -60,7 +60,7 @@ mdarray6 allocate_mdarray6(n6,n5,n4,n3,n2,n1)
   return x;
 }
 
-mdarray7 allocate_mdarray7(n7,n6,n5,n4,n3,n2,n1)
+mdarray7 allocate_mdarray7(int n7,int n6,int n5,int n4,int n3,int n2,int n1)
 {
   mdarray7 x = (mdarray7)allocate(sizeof(mdarray7)*n7);
   int i;

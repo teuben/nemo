@@ -29,6 +29,7 @@
 #include "history_data.h"
 #include "flags_data.h"
 #include "io_nemo_data.h"
+#include "parameters.h"
 
 
 #define TIMEFUZZ 0.0000001

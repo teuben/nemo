@@ -91,7 +91,6 @@ void nr_funclx(float *xa, float *a, int na)
     a[i+1] = (*old_f)(x, p, na);
     p[i] = 0;
   }
-  dprintf(2,"nr_funcl(%d): x=%g\n",na,x);
 }
 
 int nr_nllsqfit(

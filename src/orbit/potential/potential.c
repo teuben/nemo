@@ -294,11 +294,13 @@ void local dummy_for_c()
 #if defined(FORTRAN)
 void local dummy_for_fortran()
 {
-	zzzzzz_();			/* force loading of Fortran I/O */
+  extern void zzzzzz_(void);
+  zzzzzz_();			/* force loading of Fortran I/O */
 }
 #endif
 
 void local dummy_for_fortran_math()
 {
-	fmath_();
+  extern void fmath_(void);
+  fmath_();
 }

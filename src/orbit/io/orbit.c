@@ -217,7 +217,11 @@ void list_orbit (orbitptr optr, double tstart, double tend, int n, string f)
     dprintf (0,"Integrals of Motion (IOM) = ");
     for (i=0; i<Ndim(optr); i++)
         dprintf (0," %f ",*(IOM(optr)+i));
+#ifdef PJT312
     dprintf (0," ( ",*(IOM(optr)+i));
+#else
+    dprintf (0," ( ");
+#endif
     for (i=0; i<Ndim(optr); i++)
         dprintf (0," %f ",*(IOMERR(optr)+i));
     dprintf (0," )\n");

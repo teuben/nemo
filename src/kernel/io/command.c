@@ -7,7 +7,12 @@
 
 
 #include <nemo.h>
+#include <extstring.h>
 #include <command.h>
+#ifdef HAVE_LIBREADLINE
+#include <readline/readline.h>
+#include <readline/history.h>
+#endif
 
 extern string *burststring(string,string);
 extern void freestrings(string *);
@@ -69,7 +74,7 @@ void command_register(command *c, string cmd, string type, string help)
       if (strchr(VALID_TYPES,cp[i]) == NULL)
 	error("Command arguments to %s are %s, should only contain \"%s\"",
 	      cmd,type,VALID_TYPES);
-      if (cp[i] == ".") {
+      if (cp[i] == '.') {
 	*cp = 0;
 	break;
       }
@@ -119,7 +124,7 @@ string *command_get(command *c)
   if (line[0] == 0)
     goto again;
 
-  if (line[0] == ".")                           /* internal quit command */
+  if (line[0] == '.')                           /* internal quit command */
     return NULL;
 
   if (line[0] == '?') {                         /* internal help command */

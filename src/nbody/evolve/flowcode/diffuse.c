@@ -1,8 +1,8 @@
 /*
  *  DIFFUSE:   diffuse orbits a bit, but conserve energy : XY plane only
  *
- *
- *       20-jan-04     special version for flowcode, where Acc = Vel
+ *		Peter Teuben - june 1992
+ *		20-jun-92   fiddled with -DSPIN ... ???
  *
  */
 
@@ -19,31 +19,30 @@ real  sigma;
 {
     real p, s, c, vx, vy;
     Body *b;
-    bool Qspin = ome != 0.0;
+    double cos(), sin(), grandom(), sqrt();
     
     if (sigma==0.0) return 1;          /* no work to do ... */
-    dprintf(1,"diffuse %d\n",nb);
 
     for (b=btab; b<btab+nb; b++) {              /* loop over all bodies */
         p = grandom(0.0,sigma);         /* get random angle +/- sigma */
         s = sin(p);
         c = cos(p);
 #ifdef SPIN
-	if (Qspin) {                       /* correct for rot. frame */
-	    Acc(b)[0] -= ome*Pos(b)[1];
-            Acc(b)[1] += ome*Pos(b)[0];
+	if (ome != 0.0) {                       /* correct for rot. frame */
+	    Vel(b)[0] -= ome*Pos(b)[1];
+            Vel(b)[1] += ome*Pos(b)[0];
 	}
 #endif
-        vx = Acc(b)[0] * c  -  Acc(b)[1] * s;   /* rotate the vector */
-        vy = Acc(b)[0] * s  +  Acc(b)[1] * c;
+        vx = Vel(b)[0] * c  -  Vel(b)[1] * s;   /* rotate the vector */
+        vy = Vel(b)[0] * s  +  Vel(b)[1] * c;
 	if (b==btab+50) dprintf(1,"#50: %20.16g\n",
-		dotvp(Acc(b),Acc(b))/(vx*vx+vy*vy));
-        Acc(b)[0] = vx;
-        Acc(b)[1] = vy;
+		dotvp(Vel(b),Vel(b))/(vx*vx+vy*vy));
+        Vel(b)[0] = vx;
+        Vel(b)[1] = vy;
 #ifdef SPIN
-        if (Qspin) {                       /* correct back to rot. frame */
-            Acc(b)[0] += ome*Pos(b)[1];
-            Acc(b)[1] -= ome*Pos(b)[0];
+        if (ome != 0.0) {                       /* correct back to rot. frame */
+            Vel(b)[0] += ome*Pos(b)[1];
+            Vel(b)[1] -= ome*Pos(b)[0];
         }
 #endif
     }

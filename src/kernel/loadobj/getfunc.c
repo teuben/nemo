@@ -59,7 +59,7 @@ rproc getrfunc(string defin, string expr, string pars, int *nexpvar)
     if (namelen==MAXNAMELEN) 
         dprintf(0,"Warning: name too long in: %s\n",expr);
     if (*cp != '(') {
-        dprintf(0,"setfunc_name: no arguments supplied (%s)\n,expr");
+        dprintf(0,"setfunc_name: no arguments supplied (%s)\n",expr);
     } else
         cp++;
 

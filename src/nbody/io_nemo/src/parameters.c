@@ -163,6 +163,7 @@ int chk_parameters(bool io_op,int size_array, int rtype)
   }
   else                  /* 'io_nemo' mode (C)          */
     fprintf(stderr," <%s> ]\n",tab_info_real[rtype-1]);
+  return 0;
 }
 
 /* -------------------------------------------------------------- *\

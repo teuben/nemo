@@ -7,6 +7,7 @@
 
 #include <stdinc.h>
 #include <stdlib.h>
+#include <getparam.h>
 
 #include "io_nemo_tools.h"
 

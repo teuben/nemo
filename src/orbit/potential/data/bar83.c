@@ -24,12 +24,14 @@ static double ca    = 0.2;		/* bar axial ratio */
 static double    M_core, M_h, M_b, M_c, A_b, B_b, A_c, A_h;  /* handy */
 static double    Grav_Const;
 
-static prol6();
+static void prol6 (double elipm,
+		   double a,double b,double c, 
+		   double x,double y,double z,
+		   double *ax,double *ay,double *az,
+		   double *ept);
 
-void inipotential (npar, par, name)
-int    *npar;
-double par[];
-char *name;
+
+void inipotential (int *npar, double *par, char *name)
 {
     int i;
 
@@ -56,9 +58,7 @@ char *name;
     dprintf (1,"fm=%f   fx=%f  ca=%f\n\n",fm,fx,ca);
 }
     
-void potential (ndim,pos,acc,pot,time)
-int    *ndim;
-double pos[], acc[], *pot,*time;
+void potential (int *ndim,double *pos,double *acc,double *pot,double *time)
 {
 	double rr, r;
 	double q_h, q_c, pot_h, pot_c, acc_h, acc_c;
@@ -81,7 +81,7 @@ double pos[], acc[], *pot,*time;
 	*pot *= Grav_Const;		/* rescale */
 
 	if (r==0.0)			/* no forces at r=0 */
-		return;			
+	  return;			
 
 	acc_h = pot_h/(q_h*r);
 	acc[0] -= acc_h * pos[0];
@@ -100,11 +100,6 @@ double pos[], acc[], *pot,*time;
 
 }
 
-/*------------------------------------------------------------------------------
- * utilities for (ini_)potential: sqr()
- *------------------------------------------------------------------------------
- */
-  
 /*
  *    PROL6:	the funny bar
  *		input:	a,b,c	axes of bar (b is dummy)
@@ -112,10 +107,13 @@ double pos[], acc[], *pot,*time;
  *		     ax,ay,az	forces at point
  *		          ept   potential at point
  */
-static prol6 (elipm,a,b,c,x,y,z,ax,ay,az,ept)
-double elipm,a,b,c,x,y,z;	/* input */
-double *ax,*ay,*az,*ept;	/* output */
 
+static void prol6 (double elipm,
+		   double a,double b,double c, 
+		   double x,double y,double z,
+		   double *ax,double *ay,double *az,
+		   double *ept)
+     
 {
     double aa,cc,xx,yy,zz,rr,gi,side,em,ee,e,lne;
     double kappa,i,a1,a3,a11,a13,a33,a111,a113,a133,a333,aconst;
@@ -195,10 +193,10 @@ double *ax,*ay,*az,*ept;	/* output */
 
 #ifdef TESTBED
 
+#include <stdio.h>
+
 main()
 {
-
-#include <stdio.h>
 
 	double x,y,z,ax,ay,az,ept;
 

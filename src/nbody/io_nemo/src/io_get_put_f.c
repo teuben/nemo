@@ -12,6 +12,7 @@
 #include <getparam.h>
 #include <vectmath.h>		
 #include <filestruct.h>
+#include <history.h>
 
 #include <snapshot/snapshot.h>	
 #include <snapshot/body.h>
@@ -27,6 +28,7 @@
 #include "check_file.h"
 #include "io_nemo_tools.h"
 #include "get_data_wrapper.h"
+#include "parameters.h"
 
 
 #define TIMEFUZZ 0.0000001

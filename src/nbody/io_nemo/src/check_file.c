@@ -27,6 +27,7 @@ int get_history_input_file(char * hist_file)
   instr=stropen(hist_file,"r");
   get_history(instr);
   strclose(instr);
+  return 0;
 }
 /* -------------------------------------------------------------- *\ 
 |* get_old_file :
@@ -44,7 +45,7 @@ int get_old_file(char * curr_file,
   for (i=0; i < MAXIO; i++) {
     if (io_one[i]) {
       if (!strcmp(curr_file, io_file[i]))
-	return(i);
+	return i;
     }
   }
   return -1;

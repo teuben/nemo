@@ -10,6 +10,7 @@
 #  9-apr-02     fixed caltech links
 #  5-dec-02     added tcl/tk driver for carma
 # 29-jun-03     added darwin (tested w/ MacOSX 10.2)
+# 23-jan-04     fixed linux when CC and F77 present (e.g. intel compiler)
 
 
 #			 	.. command line keywords ..
@@ -88,7 +89,11 @@ switch ($host)
     breaksw
   case linux:
   case *linux-gnu:
-    $NEMO/local/pgplot/makemake  $NEMO/local/pgplot linux g77_gcc
+    if ($?CC && $?F77) then
+        $NEMO/local/pgplot/makemake  $NEMO/local/pgplot linux ${F77}_${CC}
+    else
+        $NEMO/local/pgplot/makemake  $NEMO/local/pgplot linux g77_gcc
+    endif
     if (! -e /usr/X11) then
         echo You may need to patch your Linux distribution:
         echo ln -s /usr/X11R6 /usr/X11
