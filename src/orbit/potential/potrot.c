@@ -21,7 +21,7 @@ string defv[] = {
     "format=%g\n    Format used to print numbers",
     "niter=10\n     Iteration max",
     "eps=0.001\n    Accuracy",
-    "VERSION=0.1\n  7-feb-05 PJT",
+    "VERSION=0.2\n  7-feb-05 PJT",
     NULL,
 };
 
@@ -45,7 +45,7 @@ void nemo_main(void)
   int    i, j, k, nr,np, nstep;
   double pos[3],acc[3],pot, time;
   real   radii[MAXPT],phis[MAXPT],xarr[MAXPT],yarr[MAXPT],zarr[MAXPT];
-  double dr, dphi, phi, fr, vrot;
+  double dr, dphi, phi, fr, f1, f0, df, vrot;
   double fourpi = 4*PI;
   double omega, qt, qt0, dq;
   char *fmt, s[20], pfmt[256];
@@ -75,82 +75,45 @@ void nemo_main(void)
     strcat(s," ");      /* append separator if none specified */
   ini_moment(&m,2,0);
 
-#if 1
-  for (i=0;i<nr;i++) {
-    reset_moment(&m);
-    for (j=0; j<np; j++) {
-      fr = force(radii[i],phis[j]);
-      accum_moment(&m,fr,1.0);
+  if (niter>0 && np == 2) {
+    warning("Testing an iterative procedure: niter=%d eps=%f",niter,eps);
+    for (i=0;i<nr;i++) {
+      reset_moment(&m);
+      accum_moment(&m, force(radii[i],phis[0]),1.0);
+      accum_moment(&m, force(radii[i],phis[1]),1.0);
+      accum_moment(&m, force(radii[i],0.5* (phis[0]+phis[1])),1.0);
+      f0 = mean_moment(&m);
+      dphi  = (phis[1]-phis[0])/2.0;
+      nstep = 2;
+      for (j=0; j<niter; j++) {
+	for (k=0, phi = dphi/2.0; k<nstep-1; k++, phi += dphi) {
+	  accum_moment(&m, force(radii[i],phi),1.0);
+	}
+	f1 = mean_moment(&m);
+	df = (f1-f0)/f0;
+	df = ABS(df);
+	if (df < eps && j>5) {
+	  // warning("Early convergence after %d iterations",j);
+	  break;
+	}
+	nstep *= 2;
+	dphi  /= 2.0;
+      }
+      vrot = sqrt(-f1*radii[i]);
+      printf("%g %g %g %d\n",radii[i],fr,vrot,j);
     }
-    fr = mean_moment(&m);
-    vrot = sqrt(-fr*radii[i]);            /* force better be inward bound ! */
-    printf("%g %g %g\n",radii[i],fr,vrot); 
-  }
-#endif
-
-
-#if 0
-  for (i=0;i<nr;i++) {
-
-    reset_q();
-
-    add_q(radii[i], 0);
-    add_q(radii[i], HALF_PI);
-    add_q(radii[i], HALF_PI/2.0);
-    qt0 = report_q(1,-1.0);
-    
-    dphi  = HALF_PI/2.0;
-    nstep = 2;
-    for (j=0; j<niter; j++) {
-      for (k=0, phi = dphi/2.0; k<nstep-1; k++, phi += dphi) {
-	add_q(radii[i], phi);
+  } else {
+    for (i=0;i<nr;i++) {
+      reset_moment(&m);
+      for (j=0; j<np; j++) {
+	fr = force(radii[i],phis[j]);
+	accum_moment(&m,fr,1.0);
       }
-      qt0 = qt;
-      qt = report_q(1,qt0);
-      dq = (qt-qt0)/qt;
-      dq = ABS(dq);
-      if (dq < eps && j>5) {
-	// warning("Early convergence after %d iterations",j);
-	break;
-      }
-      nstep *= 2;
-      dphi  /= 2.0;
+      fr = mean_moment(&m);
+      vrot = sqrt(-fr*radii[i]);            /* force better be inward bound ! */
+      printf("%g %g %g\n",radii[i],fr,vrot); 
     }
-    qt = report_q(0,qt0);
   }
-#endif
-
-#if 0
-  for (i=0;i<nr;i++) {
-
-    reset_q();
-
-    add_q(radii[i], 0);
-    add_q(radii[i], HALF_PI);
-    add_q(radii[i], HALF_PI/2.0);
-    qt0 = report_q(1,-1.0);
-    
-    dphi  = HALF_PI/2.0;
-    nstep = 2;
-    for (j=0; j<niter; j++) {
-      for (k=0, phi = dphi/2.0; k<nstep-1; k++, phi += dphi) {
-	add_q(radii[i], phi);
-      }
-      qt0 = qt;
-      qt = report_q(1,qt0);
-      dq = (qt-qt0)/qt;
-      dq = ABS(dq);
-      if (dq < eps && j>5) {
-	// warning("Early convergence after %d iterations",j);
-	break;
-      }
-      nstep *= 2;
-      dphi  /= 2.0;
-    }
-    qt = report_q(0,qt0);
-  }
-#endif
-
 }
 
 /* radial force */
@@ -183,62 +146,3 @@ double force (double rad, double phi)
 #endif
 }
 
-
-double rad_q;
-double sum_fr;
-double max_ft;
-int    nsum;
-int    iter;
-
-reset_q()
-{
-  sum_fr = max_ft = 0.0;
-  nsum = 0;
-  iter = 0;
-}
-
-add_q (double rad, double phi)
-{
-  double pos[3], acc[3], pot, r, fr, ft, time = 0.0;
-  int ndim = 3;
-
-  pos[0] = rad * cos(phi);
-  pos[1] = rad * sin(phi);
-  pos[2] = 0.0;
-
-  (*mypotd)(&ndim, pos, acc, &pot, &time);
-
-  r  = pos[0]*pos[0] + pos[1]*pos[1];
-  fr = (pos[0]*acc[0] + pos[1]*acc[1])/sqrt(r);
-  ft = sqrt( (acc[0]*acc[0] + acc[1]*acc[1]) - fr*fr);
-  dprintf(2,"r,fr,ft=%g %g %g\n",r,fr,ft);
-
-  sum_fr += fr;
-  nsum++;
-  if (ft > max_ft) max_ft = ft;
-
-  rad_q = rad;
-  iter++;
-  
-}
-
-double report_q(int debug, double old)
-{
-  double x, eps;
-
-  x = nsum * max_ft/sum_fr;
-  x = ABS(x);
-
-  if (old > 0) {
-    eps = (x-old)/x;
-    eps = ABS(eps);
-  } else {
-    eps = 0.0;
-  }
-
-  if (debug)
-    dprintf(1,"%g %d %g %g = %g %g\n",rad_q,iter,sum_fr/nsum,max_ft,x,eps);
-  else
-    printf("%g %g %g\n",rad_q,x,eps);
-  return x;
-}
