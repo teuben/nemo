@@ -1,62 +1,94 @@
-.TH MKKING 1NEMO "12 May 2004"
-.SH NAME
-mkking \- construct a King model
-.SH SYNOPSIS
+.TH mkking 1falcON "18 May 2004"
+
+.SH name
+mkking \- initial conditions from a King model
+
+.SH synopsis
 \fBmkking\fP [parameter=value]
-.SH DESCRIPTION
-No description available. This manual page was created by mkman
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword
-is also given:
-.TP 20
-\fBout=\fP
-output file [???]     
-.TP 20
-\fBnbody=\fP
-number of bodies [???]    
-.TP 20
-\fBW0=\fP
-W0 = Psi0/sigma [???]    
-.TP 20
-\fBseed=\fP
-seed for the randum number generator [0] 
-.TP 20
-\fBtime=\fP
-simulation time of snapshot [0]   
-.TP 20
-\fBmass=\fP
-total mass [1]     
-.TP 20
-\fBr_c=\fP
-core radius [1]     
-.TP 20
-\fBr_t=\fP
-tidal radius (don't use r_c) []  
-.TP 20
-\fBeps=\fP
-output softening length eps with every body []
-.TP 20
-\fBWD_units=\fP
-input: kpc, solar masses    
-.TP 20
-\fBoutput:=\fP
-kpc/Gyr, G=1 (-> mass unit) [f]  
-.TP 20
-\fBq-ran=\fP
-use quasi- instead of pseudo-random numbers [f] 
-.TP 20
-\fBoutputs=\fP
-give some global quantities to stderr [f] 
-.TP 20
-\fBtable=\fP
-file for table of r,Phi,rho,M(<r) []  
-.SH EXAMPLES
-.SH SEE ALSO
-.SH FILES
-.SH AUTHOR
-Walter Dehnen 
-.SH UPDATE HISTORY
+
+.SH requirement
+requires NEMO version 3.0.13 or higher, see http://www.astro.umd.edu/nemo.
+
+
+.SH description
+\fBmkking\fP creates N-body initial conditions from an isotropic single-mass
+Plummer model and writes them in NEMO snapshot format.
+
+.SH parameters
+
+.TP 10
+\fBout=\fP\fIfile\fP
+The initial conditions are written in NEMO snapshot format to \fIfile\fP.
+If \fIfile\fP=-, output is made to stdout. Default: \fBrequired\fP.
+.TP
+\fBnbody=\fP\fInum\fP
+The initial conditions will contain \fInum\fP body masses, positions,
+and velocities. Default: \fBrequired\fP.
+.TP
+\fBW0=\fP\fIval\fP
+The dimensionless central potential depth of the King model is set to
+\fIval\fP. Default: \fBrequired\fP.
+.TP
+\fBseed=\fP\fInum\fP
+We will use \fInum\fP as seed for the (pseudo-) random number generator.  If
+\fInum\fP=0, a unique new seed is created from the current value of the time,
+otherwise, the seed actually provided is used. Default: \fB0\fP.
+.TP
+\fBtime=\fP\fIval\fP
+The simulation time associated with the initial conditions is set to \fIval\fP.
+Default: \fB0\fP.
+.TP
+\fBmass=\fP\fIval\fP
+The total mass of the King model is set to \fIval\fP. Default: \fB1\fP.
+.TP
+\fBr_c=\fP\fIval\fP
+The core radius of the King model is set to \fIval\fP. Default: \fB1\fP.
+.TP
+\fBr_t=\fP\fIval\fP
+If given, the limiting (or truncation) radius of the King model
+is set to \fIval\fP and the core radius given with the parameter
+\fBr_c\fP is ignored. No default.
+.TP
+\fBeps=\fP\fIval\fP
+If given, a softening length \fIval\fP is written out with each body.
+No default.
+.TP
+\fBq_ran=t|f\fP
+If true, quasi-random rather than pseudo-random numbers are used. In this case,
+the \fBseed\fP value becomes meaningless.  Default: \fBf\fP.
+.TP
+\fBWD_units=t|f\fP
+If true, units for \fBmass\fP and \fBr_c\fP or \fBr_t\fP will be taken as solar
+mass and kpc, respectively, but output units will be in kpc (positions), kpc/Gyr
+(velocities), and 222288.47 solar masses (implying Newton's G=1).  Default:
+\fBf\fP.
+.TP
+\fBoutputs=t|f\fP
+If true, some global properties of the King model, like W0, total mass, core,
+truncation & half-mass radius, central velocity dispersion and density, and
+total energy are printed to stderr. Default: \fBf\fP.
+.TP
+\fBtable=\fP\fIfile\fP
+If given, a table with radii \fBr\fP, potential \fBPhi(r)\fP, density
+\fBrho(r)\fP, and cumulative mass \fBM(r)\fP are written to \fIfile\fP.  No
+default.
+
+.SH see also
+mkdehnen(1falcON), mkplum(1falcON)
+.PP
+
+.SH files
+.ta +3i
 .nf
-.ta +1.0i +4.0i
-30-apr-2004	1.4.1 added to NEMO	WD
+falcON/doc/user_guide.pdf                         \fIUser Guide for falcON\fP
 .fi
+.SH author
+.nf
+Walter Dehnen                              walter.dehnen@astro.le.ac.uk
+.SH update history of this man page
+.nf
+.ta +1.0i +2.0i
+18-May-2004	first version of manual  WD
+.fi
+
+
