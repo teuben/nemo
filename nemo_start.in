@@ -7,7 +7,5 @@
 #
 if ($?NEMO == 0) then
    setenv NEMO @NEMO@
-else
-   echo nemo-start Warning: using NEMO=$NEMO
 endif
 source $NEMO/nemo.rc
