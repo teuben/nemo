@@ -1,0 +1,68 @@
+.TH FITSGLUE 1NEMO "24 February 1998"
+.SH NAME
+fitsglue \- catenate fits images into a fitscube
+.SH SYNOPSIS
+\fBfitsglue\fP [parameter=value]
+.SH DESCRIPTION
+
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input fits files. No default.
+.TP
+\fBout=\fP
+Output fits file.
+.TP
+\fBmultiple=\fP
+Check for multiple fits files on input? 
+Default: t
+.TP
+\fBnaxis3=\fP
+Preset NAXIS3 here, or let program scan first. Setting this parameter
+to 0 will cause it to scan the files first.
+Default: 0
+.TP
+\fBblocking=\fP
+Blocking factors for I/O.
+Default: 1,1
+.TP
+\fBcompact=\fP
+Compact (move) dummy axes to the end 
+Default: f
+.TP
+\fBinlist=\fP
+Optional list of integers, which if properly used with a template filename
+in \fBin=\fP can be used to process a large number of input files. This
+is needed if the shell doesn't allow you to build large strings that
+may be needed to pass to \fIin=\fP. Default: not used.
+.SH EXAMPLE
+Catenating three fitsfiles map001.fits, map002.fits and map003.fits can be
+done in two ways:
+.nf
+
+    % fitsglue in=map001.fits,map002.fits,map003.fits out=cube.fits
+    % fitsglue in=map%03d.fits out=cube.fits inlist=1:3
+
+.fi
+where the compact second form can be useful if the stringlenght becomes
+too long for a shell to handle. Notice that the \fBin=\fP keyword does
+not directly support the usual unix wildcard, although an extra pass
+with sed may be used:
+.nf
+
+    % set in=`echo map*.fits | sed 's/\ /,/g'`
+    % fitsglue in=$in out=cube.fits
+.fi
+.SH BUGS
+Header of the resulting cube is quite bare, and the DATAMIN/MAX are probably
+wrong.
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+28-Aug-96	man page written	PJT
+24-feb-98	1.2 added inlist= to process many planes	PJT
+.fi
