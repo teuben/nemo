@@ -28,7 +28,7 @@ string defv[] = {
   "crval=\n        Override/Set crval (0,0,0) // ignored",
   "cdelt=\n        Override/Set cdelt (1,1,1) // ignored",
   "seed=0\n        Random seed",
-  "VERSION=0.5\n   5-jan-05 PJT",
+  "VERSION=0.5a\n  5-jan-05 PJT",
   NULL,
 };
 
@@ -437,6 +437,7 @@ local void object_spiral(int npars, real *pars)
   if (npar > 4) r0 = pars[4];
   if (npar > 5) p0 = pars[5];
   p0 *= PI/180.0;  /* convert from degrees to radians */
+  k *= TWO_PI;     /* angles are 2.PI.k.r , so absorb 2.PI.k in one */
 
   lmax = Qtotflux ? 2 : 1;
 
