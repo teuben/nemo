@@ -1,0 +1,36 @@
+%N mkplummer
+%D construct a Plummer model
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man mkplummer' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A out
+	Output file name [???]
+%A nbody
+	Number of particles [???]
+%A mfrac
+	Mass fraction used of Plummer distribution [0.999]
+%A rfrac
+	Radius fraction used of Plummer distribution
+                              NOTE: the above two values are chosen so
+                                    that m( rfrac ) = mfrac                 [22.8042468]
+%A seed
+	Seed for the random number generator [0]
+%A time
+	Time at which snapshot is taken [0.0]
+%A zerocm
+	Centrate snapshot (t/f)? [t]
+%A quiet
+	0=noisy 1=somewhat quiet 2=more quiet [0]
+%A massname
+	If used Mass-function name (e.g. n(m)) []
+%A massexpr
+	Mass function expression (e.g. pow(m,p)) [pow(m,p)]
+%A masspars
+	Mass function parameters (e.g. p,0.0) [p,0.0]
+%A massrange
+	Range for mass-spectrum (e.g. 1,2) [1,1]
+%A headline
+	Verbiage for output []
+%A VERSION
+	6-jun-96 PJT [2.5d]
