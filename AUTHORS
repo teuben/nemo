@@ -1,8 +1,9 @@
-NEMO was originally written by Joshua Barnes, Piet Hut, and Peter
-Teuben, Initial development occured mostly in 1985-1987 at the Institute
+NEMO was originally written by Joshua Barnes, Piet Hut, and Peter Teuben.
+
+Initial development occured mostly in 1985-1987 at the Institute
 for Advanced Study, Princeton, NJ by these authors. Peter Teuben has
 been the maintainer of NEMO since. There is also a derived version,
 ZENO, in development by Joshua Barnes.
 
-There have been many contributions, authors are listed in the 
-unix manual page "man/man5/authors.5".
+There have been many many contributions, authors are (hopefully all) 
+listed in the unix manual page "man/man5/authors.5".
