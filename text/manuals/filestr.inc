@@ -11,8 +11,9 @@ the disk format. The popular memory (object) models,
 and how they interact with persistent data on disk, are discussed in
 Chapter~\ref{c:progr}}.
 Most of the data handled by NEMO is in the form of a
-specially designed binary format, although exceptions like ASCII
-files/tables will also be discussed. Ample examples
+specially designed XML-like binary format, 
+although exceptions like ASCII files/tables will also be discussed. 
+Ample examples
 illustrate creation, manipulation and data transfer.
 We close this chapter with two examples that make use of
 the native object file format of your operating system ({\it a.out(5)}).
@@ -124,14 +125,16 @@ code (executable) itself:
 
 \begin{verbatim}
     4% tsf help=h
-    in                   : input file name 
-    maxprec              : print nums with max precision 
-    maxline              : max lines per item 
-    allline              : print all lines (overrides maxline) 
-    indent               : indentation of compound items 
-    margin               : righthand margin 
-    item                 : Select specific item
-    VERSION              : 12-jun-91 PJT
+    in               : input file name  [???]
+    maxprec          : print nums with max precision  [false]
+    maxline          : max lines per item  [4]
+    allline          : print all lines (overrides maxline)  [false]
+    indent           : indentation of compound items  [2]
+    margin           : righthand margin  [72]
+    item             : Select specific item []
+    xml              : output data in XML format? (experimental) [f]
+    octal            : Force integer output in octal again? [f]
+    VERSION          : 29-aug-02 PJT  [3.1]
 \end{verbatim}
 
 \section{Pipes}
@@ -268,8 +271,8 @@ shell ({\tt /bin/sh})\index{bourne shell} this is accomplished much
 easier:
 
 \begin{verbatim}
-    7$ tsf r001.dat debug=2 2>debug.out
-\end{verbatim}
+    7% tsf r001.dat debug=2 2>debug.out
+\end{verbatim} 
 
 One last word of caution regarding tables: tables can also be used
 very effectively in pipes, for example take the first example,
