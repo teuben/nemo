@@ -1,0 +1,40 @@
+%N tabhist
+%D General 1D statistics and histogram program
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man tabhist' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input file name [???]
+%A xcol
+	Column to use (or use: all) [1]
+%A xmin
+	In case minimum used (need both minmax) []
+%A xmax
+	In case maximum used (need both minmax) []
+%A bins
+	Number of bins [16]
+%A maxcount
+	Maximum along count-axis [0]
+%A nmax
+	maximum number of data to be read if pipe [10000]
+%A ylog
+	log scaling in Y? [f]
+%A xlab
+	Optional Label along X [value]
+%A ylab
+	Optional Label along Y [N]
+%A headline
+	Optional headline in graph []
+%A tab
+	Table (t) or Plot( f) [f]
+%A gauss
+	Overlay gaussian plot? [t]
+%A residual
+	Overlay residual data-gauss(fit) [t]
+%A cumul
+	Override and do cumulative histogram instead [f]
+%A median
+	Compute median too (can be time consuming) [t]
+%A VERSION
+	15-feb-99 PJT [3.1]
