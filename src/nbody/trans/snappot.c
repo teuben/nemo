@@ -92,7 +92,7 @@ void nemo_main(void)
       Phi(bp) = lphi;
       SETV(Acc(bp),lacc);
     }
-    bits |= (PotentialBit|AccelerationBit);
+    bits |= (PotentialBit|AccelerationBit|TimeBit);
     put_snap(outstr, &btab, &nbody, &tsnap, &bits);
   }
   strclose(instr);
