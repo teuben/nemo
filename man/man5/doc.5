@@ -1,0 +1,72 @@
+.TH DOC 5MIR "13 October 1991"
+.SH NAME
+doc \- documentation format for miriad
+.SH DESCRIPTION
+Each MIRIAD/NEMO program using the online help feature in
+their respective shells (such as \fImiriad\fP and \fImirtool\fP)
+has a simple ASCII file in \fB$MIRPDOC\fP (for NEMO: \fB$NEMODOC\fP)
+with the name \fIprogram\fP\fB.doc\fP. In addition a \fBcdoc\fP is
+used to document shell scripts.
+.PP
+This file contains the text displayed with the \fBhelp\fP command
+in \fImiriad\fP or when online help is requested in
+\fImirtool\fP with a context sensitive mouse button click.
+.PP
+Within the various packages that use the \fIdoc(5MIR)\fP format,
+special programs exist that extract the doc-file from the
+source code \fIdoc(1MIR)\fP, or the executable \fImkpdoc(8NEMO)\fP
+.SH FORMAT
+Format of .doc files associated with tasks; or of .sdoc files for routines:
+.nf
+
+%N taskname [%F filename]
+multi-line program description
+%D one-line description (note: maximum length is 65 characters)
+%P person responsible for maintaining the task
+%: section(s) in systematic list of tasks
+%A keyword
+multi-line keyword description
+[%B
+multi-line description block]
+.PP
+ > The %A and %B directives may be repeated many times
+ > in multi-line description blocks lines may start with <TAB> or ' '
+ > they must not pass column 72
+ > Descriptions may contain any character. Characters special to (La)TeX
+ > ($&%#{}_~^|<>) (but not \) are escaped; " is changed into `` and ''.
+ > If character 1 and 2 are ' ' or <TAB> line is set in (La)TeX's verbatim mode.
+.fi
+.SH FORMAT FOR .for, .f AND .c FILES:
+Within MIRIAD programs, it is common to include directives 
+for \fIdoc(1MIR)\fP to extract a .doc file. The format for this is:
+.nf
+  c= [module name] [one-line description] for tasks
+  c* [module name] [filename] [one-line description] for subroutines
+  c& person responsible for maintaining the routine
+  c: comma separated list of keywords pertaining to the routine
+  c+ this starts a multi-line documentation block.
+  [c@ keyword
+  multi-line keyword description]
+  [c< keyword]
+  c-- this ends a multi-line documentation block.
+.PP
+> The documentation block between c+ and c-- may contain any character,
+> except that the tilde (~) cannot be used inside a verbatim block
+> Lines with descriptions should not pass column 72
+> The flag character 'c' may also be 'C' or '\*' (the latter for .c files)
+> In case the extension-override option -e was used, directives should
+> start with # or $!
+> Descriptions may contain any character. Characters special to (La)TeX
+> ($&%#{}_~^|<>) (but not \) are escaped; " is changed into `` and ''.
+> If character 1 and 2 are ' ' or <TAB> line is set in (La)TeX's verbatim mode.
+.fi
+.SH "SEE ALSO"
+mkpdoc(8NEMO), mknemo(8NEMO), doc(1MIR)
+.SH AUTHOR
+Bart Wakker, Peter Teuben
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+21-jun-91	doc created  	PJT
+13-oct-91	more documentation - made it MIR ownership	PJT
+.fi
