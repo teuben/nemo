@@ -1,0 +1,136 @@
+.TH FITSGIDS 1NEMO "13 April 1995"
+.SH NAME
+fitsgids, mirgids \- display an image on the GIDS display server
+.SH SYNOPSIS
+\fBfitsgids\fP \fBin=\fP\fIfits_file\fP [parameter=value]
+.SH DESCRIPTION
+\fBfitsgids\fP loads an image from (the primary HDU of) 
+a fitsfile into the \fBgids\fP display
+server (see also \fIgids(lNEMO)\fP).
+Through the server program the images can then be manipulated, although
+there is a selection of a transfer function (see \fBfilter=\fP below).
+By default all planes from the input file are loaded,
+and GIDS can also be used to display them
+in \fImovie\fP mode XY-XZ-YZ \fIslice\fP mode (see EXAMPLES below).
+.PP
+\fBfitsgids\fP also prepares GIDS automatically for movie sequencing, 
+such that the plane numbers do not have to be typed in, one can directly
+go to the \fBLoop\fP command. This is however not the case for \fIslice\fP 
+mode.
+.PP
+\fBmirgids\fP expects a miriad dataset instead of a fits file, but
+is otherwise the same.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP\fIfits_file\fP
+Input file. Expected to be in \fIfits(5NEMO)\fP format for 
+\fBfitsgids\fP, and a miriad image dataset for \fBmirgids\fP.
+No default.
+.TP
+\fBdatamin=\fP
+Datamin, if to override. By default the value of the DATAMIN 
+fits header keyword will be used, otherwise no default.
+The value applies to the actual physical datavalue, not the filtered value
+(see \fBfilter=\fP below). The datamin/max values the program reports at the
+end are the filtered values.
+.TP
+\fBdatamax=\fP
+Datamax, if to override. By default the value of the DATAMAX
+fits header keyword will be used, otherwise no default.
+.TP
+\fBx=\fP
+List of X pixels to display. This can be any \fInemoinpi(3NEMO)\fP expression,
+and does not have to be in order. Must be in range 1..NAXIS1. [all].
+.TP
+\fBy=\fP
+List of Y pixels to display. Valid ranges 1..NAXIS2, see above. [all]. 
+.TP
+\fBz=\fP
+List of Z pixels to display. Valid ranges 1..NAXIS3, see above. [all].
+.TP
+\fBplane=\fP\fIfirst_plane\fP
+Plane to start recording in. Valid planes are 1 to the largest number
+your GIDS server allows. Any other number is invalid, and bypasses
+calls to the GIDS server. Default: 1.
+.TP
+\fBfilter=\fP\fItransfer_function\fP
+An additional transfer function can be supplied here by which the data
+will be ``scaled''. Valid options are \fBlinear, sqrt, sqr, log, exp\fP.
+[Default: \fBlinear\fP].
+.SH EXAMPLES
+The following command loads all planes from a datacube \fIm51.cube.fits\fP 
+(assumed to contain 41 planes in this example)
+with a stretch from -10 to 90:
+.nf
+    % \fBfitsgids m51.cube.fits -10 90\fP
+.fi
+Next, to get into GIDS \fImovie\fP mode,
+go through the \fBEtcetera/Recording\fP menus and type in the
+planes that you want to see in a movie in the 7th (blank) widget in
+the upper left corner of the GIDS server, i.e.
+.nf
+    \fBEtcetera\fP
+    \fBRecording\fP
+    \fB1:41\fP    (\fI in the entry window -- not required if auto-sequenced\fP)
+    \fBLoop\fP
+.fi
+will show planes 1 through 41 (press the middle
+mouse button on \fBLoop\fP menu for context sensitive help), 
+and use the middle mouse
+button in the display window to control the speed. Exit from this
+with \fBReturn\fP.
+.PP
+To get into \fIslice\fP mode  (3 simultaneous orthogonal views of 
+the datacube) from the previous (movie) setup type:
+.nf
+    \fBReturn\fP
+    \fBSlice\fP
+    \fB1:41\fP        (\fI in the entry window\fP)
+    \fBXslice\fP
+    \fBZoom X\fP
+    \fB1:41\fP        (\fI in the entry window\fP)
+    \fBYslice\fP
+.fi
+and point with any mousebutton on features in any of the 3 windows, and
+watch the display change.
+.SH BUGS
+If you do not have the \fIgipsy\fP environment loaded,
+and/or the \fBgids\fP server program has not been loaded yet,
+\fBfitsgids\fP will attempt to do this for you, 
+but may not be able to find the help file. 
+To remidy this, start up \fBgids\fP manually, with enough
+memory allocated to store images, before. For example:
+.nf
+    % gids -memory 10000
+.fi
+would allocate 10,000 Kb. Remember you can always use \fBResize\fP to
+a smaller display, and hence allocate more image planes to use for
+storing movies. The  \fIgipsy\fP environment should define an environment
+variable \fB$gids_setup\fP
+.PP
+Program needs to be compiled with the \fIlibgdi.a\fP, not GIPSY's
+\fPgiplib.a\fP. Various fortran I/O libraries would otherwise be needed
+to complete linking.
+.SH SEE ALSO
+gids(lNEMO), saoimage(1), ds(1), fitsio(3NEMO), nemoinpi(3NEMO), fits(5NEMO)
+.SH FILES
+.ta +2i
+.nf
+$gids_setup	directory in which the tvdevices file lives
+DEFAULT_DISPLAY	temp file, created by ... contains
+src/image/fits	fitsgids.c (main), look_nemo.c (nemo-gipsy interface)
+usr/gipsy	gids, libgdi (see also ftp://kapteyn.astro.rug.nl/gids/gids-export.tar.Z)
+.fi
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+140may-93	V0.x initial rough cut version written	PJT
+21-Jul-94	V1.0 implemented x,y,z= and fixed scaling; added much needed cache	PJT
+27-mar-95	documented some of the peculiarities of startup files	PJT
+13-apr-95	V1.1 added filter=	PJT
+1-feb-98	V1.1a more verbose error messages	PJT
+.fi
