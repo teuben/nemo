@@ -45,11 +45,15 @@ usage of the bind/listen/accept causes TCP/IP to lock that port
 for a few minutes:
 .nf
 
+   dd if=/dev/zero of=zero1 bs=1024 count=1024
+   dd if=/dev/zero of=zero10 bs=1024 count=10240
+   dd if=/dev/zero of=zero100 bs=1024 count=102400
+
    set port=3000
    set host=192.168.1.6
    set buf=10240
-   cat zero1 | ./tcppipe port=$port bufsize=$buf ; @ port++
-   ./tcppipe $host report=t port=$port bufsize=$buf; @ port++
+   cat zero1 | tcppipe port=$port bufsize=$buf ; @ port++
+   tcppipe $host report=t port=$port bufsize=$buf; @ port++
 
    @ port--
 
