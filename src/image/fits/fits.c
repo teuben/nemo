@@ -54,6 +54,7 @@
  *              16-jan-03       warning if one of CROTA1/2 is missing      PJT
  *               3-may-04       add fts_read_img_coord                     PJT
  *               4-may-04       conform more to fits standard              PJT
+ *               1-jul-04       quick fix transform BITPIX8 to 16 images   PJT
  *
  * Places where this package will call error(), and hence EXIT program:
  *  - invalid BITPIX
@@ -586,6 +587,30 @@ int fts_chead(fits_header *fh, stream outstr)
 #endif
     return 1;
 }
+
+int fts_chead816(fits_header *fh, stream outstr)
+{
+    int n, nread;
+    char *cp;
+
+    if (ftsblksiz_o > ftsblksiz_i) warning("possibly trailing garbage");
+
+    n = fh->hlen;           /* size of header through END keyword */
+    n = ROUNDUP(n,ftsblksiz_o);
+
+    /* patch BITPIX from 8 to 16 */
+    cp = strchr(&fts_buffer[80],'8');
+    if (cp == NULL) 
+      error("BITPIX not 8 ???");
+    *(cp-1) = '1';
+    *cp = '6';
+
+    nread = fwrite(fts_buffer,sizeof(char),n,outstr);
+    if (nread != n) 
+        error("Tried to write %d header, could only write %d",n,nread);
+    return 1;
+}
+
 /*
  *  fts_thead:  type out the fits header (the one in memory)
  *		and do not print trailing blanks. Really meant
@@ -2030,6 +2055,47 @@ int fts_cdata(
             error("Tried to write %d, could only write %d\n",n,nwrite);
         ntoread -= nread;
     }
+    return 1;
+}
+
+int fts_cdata816(
+	      fits_header *fh,                /*  (i) pointer to fits header */
+	      stream instr,           /* (i) file pointer for input */
+	      stream outstr,           /* (i) file pointer  for output  */
+	      bool trailr,			/* (i) need to read trailing end too ? */
+	      bool trailw)			/* (i) need to write trailing end too ? */
+{
+    int  nread, nwrite, n, ntowrite, ntoread, itemlen, nitems;
+    char buffer[CONVBUFLEN];
+    char zero[1];
+
+    if (fh->bitpix != 8) error("fts_cdata816: illegal bitpix=%d",fh->bitpix);
+
+    itemlen = 1;
+    n = fts_dsize(fh);                  /* real data size  */
+    zero[0] = 0;
+    if (trailr) {
+      ntoread  = ROUNDUP(n,ftsblksiz_i);  /* total size to read though */
+    } else
+      ntoread = n;
+    if (trailw) {
+      ntowrite = ROUNDUP(n,ftsblksiz_o);  /* .. and to write */
+    } else
+      ntowrite = n;
+    ntowrite *= 2;         /* 8 -> 16 conversion */
+    if (n==0) ntoread=0;                /* no data? */
+    dprintf(2,"fts_cdata816: ntoread=%d   ntowrite=%d\n",ntoread,ntowrite);
+    while (ntoread > 0) {
+        nread = fread(buffer,sizeof(char),1,instr);
+        if (nread != 1) error("Tried to read 1, could only read %d",nread);
+	fh->nread += nread;
+        nwrite = fwrite(zero,sizeof(char),1,outstr);
+        if (nwrite != 1) error("Tried to write 1, could only write %d\n",nwrite);
+        nwrite = fwrite(buffer,sizeof(char),1,outstr);
+        if (nwrite != 1) error("Tried to write 1, could only write %d\n",nwrite);
+        ntoread -= nread;
+    }
+    fh->bitpix = 16;
     return 1;
 }
 
