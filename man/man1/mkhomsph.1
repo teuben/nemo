@@ -1,0 +1,73 @@
+.TH MKHOMSPH 1NEMO "20 May 1997"
+.SH NAME
+mkhomsph \- make homogeneous sphere
+.SH SYNOPSIS
+\fBmkhomsph out=\fPsnapshot [parameters=values ...]
+.SH DESCRIPTION
+\fImkhomsph\fP creates a perfectly cold homogeneouss phere with unity mass.
+Options exist to add random velocities and use a power density law.
+.PP
+Models are not stable of course, but fun to play with or to study
+collapse and violent relaxtion. More serious homogeneous models
+can be found in \fImkhom(1NEMO)\fP. Friedman & Polyachenko (1986?, Part I)
+discuss how to make equilibrium models.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 25
+\fBout=\fIout_file\fP
+The data are written to this file in \fISnapShot(5NEMO)\fP 
+format [no default].
+.TP
+\fBnbody=\fInum_bodies\fP
+Number of stars in sphere [default: \fB2048\fP]
+.TP
+\fBrmin=\fImin_radius\fP
+Inner cutoff radius of the sphere. [Default: \fB0.0\fP].
+.TP
+\fBrmax=\fImax_radius\fP
+Outer cutoff radius of the sphere. [Default: \fB1.2\fP].
+.TP
+\fB2t/w=\fIratio\fP
+Virial ratio which measures deviation from virial equilibrium
+(two times the ratio of kinetic to potential energy, \fB2t/w\fP
+must be positive).  Only accurate for a homogenous sphere
+(\fBpower=0\fP and \fBrmin=0\fP). See also \fBvmax=\fP for an
+alternate means to specify scaling velocities.
+[default: \fB0\fP].
+.TP
+\fBvmax=\fIvmax\fP
+Maximum of isotropic velocities. No scaling as function of radius
+is applied. 
+[default: \fB0\fP].
+.TP
+\fBpower=\fIp\fP
+Power law exponent of the density as function of radius, Density
+\fIrho = r^{-p}\fP, thus centrally concentrated models have
+\fIp > 0 \fP . Values of \fI p > 3\fP are illegal.
+[default: \fB0\fP].
+.TP
+\fBseed=\fIrandom_seed\fP
+Use random number seed. 
+[default: \fB0\fP].
+.TP
+\fBzerocm=\fBt|f\fP
+Center coordinates on center of mass after generation? [default: \fBt\fP].
+.TP
+\fBheadline=\fImessage\fP
+Text headline for output file [default: not used].
+.SH BUGS
+When shells are created (non-zero \fBrmin\fP) the calculation of 'virial
+equilibrium' velocity dispersions is not correct anymore. See 
+snapvirial(1NEMO) for a slightly better approach.
+.SH "SEE ALSO"
+snapmass(1NEMO), snapcenter(1NEMO), mkhom(1NEMO), snapvirial(1NEMO)
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.5i
+20-mar-89	V1.0 created  	PJT
+28-mar-89	V1.1 keyword 'rmin' added	PJT
+5-apr-89	V1.2 keyword 2t/w implemented when rmin=0	PJT
+6-apr-89	V1.3 keyword zerocm added	PJT
+20-may-97	V1.4 added vmax=, power=	PJT
+.fi

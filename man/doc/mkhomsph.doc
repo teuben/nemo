@@ -1,0 +1,28 @@
+%N mkhomsph
+%D create a uniform sphere of equal massive stars
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man mkhomsph' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A out
+	Output file name [???]
+%A nbody
+	Number of particles [2048]
+%A rmin
+	Inner cutoff radius [0]
+%A rmax
+	Outer cutoff radius [1.2]
+%A 2t/w
+	Virial ratio (isotropic velocities) [0.0]
+%A vmax
+	alternative Vmax for isotropic velocities [0]
+%A power
+	Power index for density rho= r^{-p} [0]
+%A seed
+	Random number seed [0]
+%A zerocm
+	Center c.o.m. ? [t]
+%A headline
+	Text headline for output []
+%A VERSION
+	20-may-97 [1.4]
