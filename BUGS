@@ -1,3 +1,26 @@
+- install on solaris:
+	awk cannot handle too many in src/scripts/need/
+	exception.c does not compile for gcc3 as well as solaris' cc
+
+- filestruct:
+  The following snippet of code stores only  "1" for the value of pi,
+  3 times. ZENO actually does it correct.
+    put_set(ostr,"par");
+    pi = 1;
+    put_data(ostr, "pi", DoubleType, &pi, 0);
+    pi = 2;
+    put_data(ostr, "pi", DoubleType, &pi, 0);
+    pi = 3;
+    put_data(ostr, "pi", DoubleType, &pi, 0);
+    put_tes(ostr,"par");
+  ZENO also reads correctly, and if no more 'same name' items are present,
+  it will repeat the last one read. But the ZENO reader will serially
+  read (and remember?)
+
+- filestruct history: long character strings are broken in silly places,
+	and don't port very well between tsf/rsf
+
+
 - comment from Walter:
 
 > I tried to make my own potential very much in the same way in which
