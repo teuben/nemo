@@ -56,8 +56,10 @@ echo $version                                             >! $v
 
 echo updating $h
 echo "/* do not edit - created by the version script */"  >! $h
+echo "#if defined(GETPARAM_VERSION_ID)"                   >>! $h
 echo -n 'static char *version_h = "$'                    >>! $h
-echo 'Id: $";'                                           >>! $h 
+echo 'Id: $";'                                           >>! $h
+echo "#endif"                                            >>! $h 
 echo '#define NEMO_VERSION "'$version'"'                 >>! $h
 
 #  touch it again, so it's the last one touched :-)

@@ -118,6 +118,7 @@
  *  4-dec-02       c  use MAXBUF for keys - btw, wc is not 2800+ lines :-(
  * 21-may-03       d  document the system keywords in help=\?
  * 12-jul-03       e  allow -- to stop parsing
+ * 15-oct-03       f  fix for version.h to give multiple static's in g++
 
   TODO:
       - what if there is no VERSION=
@@ -160,7 +161,7 @@
 	gengetopt http://www.gnu.org/software/gengetopt/gengetopt.html
  */
 
-#define VERSION_ID  "3.4e 12-jul-03 PJT"
+#define GETPARAM_VERSION_ID  "3.4f 15-oct-03 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -892,7 +893,7 @@ local void printhelp(string help)
         printf("  4       menu interface using EDITOR environment variable\n");
 	printf("  8       reserved\n");
 	printf(" 16       reserved\n");
-        printf(" VERSION_ID = %s\n",VERSION_ID);
+        printf(" VERSION_ID = %s\n",GETPARAM_VERSION_ID);
         printf(" NEMO VERSION = %s\n",NEMO_VERSION);
         showconfig();
 	showsystem();
@@ -2306,7 +2307,7 @@ local void review()
               fprintf(stderr,"help=%d\n",help_level);
               fprintf(stderr,"yapp=%d (%s)\n",yapp_dev,yapp_string);
            } else if (strcmp(cmd,"version")==0) {
-              fprintf(stderr,"version id = %s\n",VERSION_ID);
+              fprintf(stderr,"version id = %s\n",GETPARAM_VERSION_ID);
            } else if (strcmp(cmd,"time")==0) {
               fprintf(stderr,"cputime = %g\n",cputime());
            } else if (cmd[0]=='!' && cmd[1] != '\0') {  /* run a command */
