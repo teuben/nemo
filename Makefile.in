@@ -643,6 +643,10 @@ install:
 	@echo ""
 	@echo "If you want to compile a small standard test of binaries:"
 	@echo "      src/scripts/testsuite -b"
+	@echo ""
+	@echo "Any subsquent programs should be installed with the mknemo script,"
+	@echo "eg."
+	@echo "      mknemo mkplummer snapplot tabhist orbsos"
 
 helpconfig:
 	@echo config, configure, config_extra, config_clean
