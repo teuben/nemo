@@ -25,10 +25,10 @@ echo -n "<A HREF=index3.html>man3</A>,"
 echo -n "<A HREF=index5.html>man5</A>,"
 echo -n "<A HREF=index6.html>man6</A>,"
 echo -n "<A HREF=index8.html>man8</A>,"
-echo -n "<A HREF=indexl.html>manl</A>".
+echo -n "<A HREF=indexl.html>manl</A>,"
 echo -n "<A HREF=whatis.html>whatis</A>]".
 echo "</CENTER>"
-echo "<H1>Nemo Reference Manual</H1>"
+echo "<H1>Nemo Reference Manual($sec)</H1>"
 echo "Created on `hostname`: `date` <P>"
 
 #echo "<DIR COMPACT>"
