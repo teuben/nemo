@@ -4,6 +4,7 @@
  *	5-may-01	created			PJT
  *      6-may-01    V1.1    added clip=, center= and linear interpolation
  *                          to get the trace velocity
+ *                    a     fixed RPD !!
  *
  */
 
@@ -24,14 +25,13 @@ string defv[] = {
   "vsys=0\n      System velocity",
   "inc=90\n      Inclination of disk",
   "center=0\n    Center of galaxy along position axis",
-  "VERSION=1.1\n 6-may-01 PJT",
+  "VERSION=1.1a\n 7-may-01 PJT",
   NULL,
 };
 
 string usage="PV diagram envelope tracing ";
 
-#define HPI  1.5702
-#define RPD (3.1415/360.0)
+#define RPD (PI/180.0)
 #ifndef HUGE
 #define HUGE 1.0e20
 #endif
@@ -98,8 +98,8 @@ local void pv_trace(imageptr iptr, int vsign,
   imax = MapMax(iptr);
 
   it = sqrt(sqr(eta*imax)+sqr(ilc));
-  dprintf(0,"Map [%d POS x %d VEL] I_t=%g\n",nx,ny,it);
-
+  dprintf(0,"Map [%d POS x %d VEL] I_t=%g vsys=%g sini=%g\n",
+	  nx,ny,it,vsys,sini);
 
   for (ix=0; ix<nx; ix++) {
     pos = ix*Dx(iptr) + Xmin(iptr) - psys;

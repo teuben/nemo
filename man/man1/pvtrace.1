@@ -68,16 +68,16 @@ Clipping values. If value(s) given, signal will be clipped as follows:
 if one value given, clipping occurs between -clip and clip. If two numbers
 given, clipping occurs between clip(1) and clip(2). Default: None
 .TP
-\fBvsys=0\fP
+\fBvsys=\fP
 Systemic velocity of the galaxy.
 Since the velocity axis (assumed to be the 2nd or Y-axis), this number
 is simply subtraced from each velocity determination. [Default: 0]
 .TP
-\fBinc=90\fP
+\fBinc=\fP
 Inclination of the galaxy. Each rotation speed is corrected by sin(inc).
 [Default: 90]
 .TP
-\fBcenter=0\fP
+\fBcenter=\fP
 Center of the galaxy along the Position axis. 
 [Default: 0]
 .SH OUTPUT
@@ -98,9 +98,15 @@ Position axis must be carefully created such that the galaxy center is at P=0,
 whereas for velocity it can be corrected with VSYS=.
 .SH SEE ALSO
 rotcur(1NEMO), ccdvel(1NEMO), snapgrid(1NEMO)
+.PP
+.nf
+Sofue, Y. 1996 ApJ 458, 120
+Sofue et al 1997 PASJ 49, 17
+Sofue et al 523, 136
+.fi
 .SH FILES
 .nf
-.ta +1i
+.ta +2i
 src/image/rotcur	sources
 .fi
 .SH AUTHOR
