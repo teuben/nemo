@@ -1,0 +1,111 @@
+.TH Remotename 1 "19 Dec 1990" Local
+.SH NAME
+remotename \- return name of system from which one has remotely logged in
+.SH SYNOPSIS
+If the current login session was a remote login from another computer
+the program
+.B remotename
+prints on the standard output the name of the machine that was the source of
+the remote login.
+If the current login session was not a remote login but instead was a direct
+login to this computer then
+.B remotename
+prints the name of this computer on the standard output. 
+.SH DESCRIPTION
+.LP
+This program is intended for use in a situation where a person logged into
+a computer with windowing logs into another computer and runs a program there.
+.B Remotename
+helps this client program locate and rendezvous with a display server program
+running on the users system. 
+.B Remotename
+uses the ut_host field of the /etc/utmp file (see
+.BR utmp (5)
+to determine the source of the login.
+If the ut_host field is null (i.e. this is a local login) the hostname as
+returned by a
+.BR gethostname (2)
+call is instead returned.
+.PP
+Since the ut_host field is typically only 16 characters long a typical fully
+domain qualified host name will usually be longer than the 16 character limit.
+Then a heuristic has to be used to guess the missing part of the name. The
+assumption is made that the missing part of the name will be some component
+of the local domain.  An attempt is made to match a component of a name (from
+the location after a period to where the name was truncated by the 16 character
+limit) to a component of the local domain (a location after a period).  If
+a match succeeds the name is returned filled out by the guess.  If no match
+succeeds the name is returned as is and an EX_NOHOST return status code is
+returned.
+.PP
+The local domain is determined in the following way:
+.IP 1)
+If the local host name contains a period then
+the local domain name is assumed to be the part of the name after the first
+period.
+.IP 2)
+If the
+.BR getdomainname (2)
+call exists then the part of that name after the first period is used.
+.IP 3)
+For systems that do not have the getdomainname() call, if
+.B remotename
+Is compiled with the
+.RI -DDOMAIN= domain
+option, then "domain"
+is used as the domain instead of the getdomainname() call. 
+.SH EXAMPLES
+It is assumed here that the local domain is
+.I astro.umd.edu
+.
+.LP
+.I aries.astro.umd.edu
+is truncated to 16 characters as
+.I aries.astro.umd.
+.
+.B Remotename
+correctly guess the relevant part of the local domain as astro.umd.edu and
+returns the correct answer.
+.LP
+.I alborz.eng.umd.edu
+is truncated to 16 characters as
+.I alborz.eng.umd.e
+.
+.B Remotename
+correctly guess the relevant part of the local domain as umd.edu and returns
+the correct answer.
+.LP
+.I meto-climo.umd.edu 
+is truncated to 16 characters as 
+.I meto-climo.umd.e
+.B Remotename
+correctly guess the relevant part of the local domain as umd.edu and returns
+the correct answer.
+.LP
+However,
+.I astro.princeton.edu
+is truncated to 16 characters as
+.I astro.princeton.
+There is nothing there in common with the local domain.
+.B Remotename
+prints
+.I astro.princeton.
+on the standard output and returns with EX_NOHOST return code.
+.SH RETURN CODES
+.IP EX_OK
+Everything in order.
+.IP EX_NOHOST
+A truncated name could not be successfully guessed.  The truncated name is
+printed as is.
+.IP EX_OSERR
+Some operating system error.  The name of the local system is printed.
+.SH BUGS
+It is possible for guess of truncated host names to be wrong.  There should
+be some way of supplying a list of suggested domains to try as well as the
+local domain.
+.SH SEE ALSO
+.BR utmp (5) ,
+.BR gethostname (2) ,
+.BR getdomainname (2)
+.SH AUTHOR
+William L. Sebok (wls@astro.umd.edu)
