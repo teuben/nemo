@@ -11,6 +11,7 @@
  *      22-dec-02  1.3a fixing code to make it work for -DSINGLEPREC
  *      12-feb-03  1.3b add "fourier m=2' mode as arm3 for Rahul by Rahul
  *      14-feb-03  1.6  back to PJT style (version # got screwed up)
+ *      18-feb-03  1.6a changed named of output variables in arm and arm3
  *
  *  line       a+bx
  *  plane      p0+p1*x1+p2*x2+p3*x3+.....     up to 'order'   (a 2D plane in 3D has order=2)
@@ -46,7 +47,7 @@ string defv[] = {
     "itmax=50\n         Maximum number of allowed nllsqfit iterations",
     "format=%g\n        Output format for fitted values and their errors",
     "numrec=f\n         Try the numrec routine instead?",
-    "VERSION=1.6\n      14-feb-03 PJT",
+    "VERSION=1.6a\n     18-feb-03 PJT",
     NULL
 };
 
@@ -866,16 +867,16 @@ do_arm()
       printf("Fitting a+b.cos(x-c)/DPR:  \na= %g %g \nb= %g %g\nc= %g %g\n", 
       fpar[0],epar[0],fpar[1],epar[1],fpar[2],epar[2]);
 #else
-    printf("Fitting a + c.cos(x/DPR) + s.sin(y/DPR): ");
-    printf("[x now in degrees]  \na= %g %g \nc= %g %g\ns= %g %g\n", 
+    printf("Fitting a0 + c1.cos(x/DPR) + s1.sin(y/DPR): ");
+    printf("[x now in degrees]  \na0= %g %g \nc1= %g %g\ns1= %g %g\n", 
 	 fpar[0],epar[0],fpar[1],epar[1],fpar[2],epar[2]);
-    printf("Converting to amp/phase: (Fitting as a + amp.cos((x-pha)/DPR)\n");
+    printf("Converting to amp/phase: (Fitting as a0 + a1.cos((x-p1)/DPR)\n");
     amp = sqrt(sqr(fpar[1])+sqr(fpar[2]));
     pha = atan2(fpar[2],fpar[1])*DPR;
     amperr = sqrt(sqr(fpar[1]*epar[1]) + sqr(fpar[2]*epar[2]))/amp;
     phaerr = sqrt(sqr(fpar[1]*epar[2]) + sqr(fpar[2]*epar[1]))/(amp*amp)*DPR;
-    printf("amp= %g %g\n",amp,amperr); 
-    printf("pha= %g %g\n",pha,phaerr);
+    printf("a1= %g %g\n",amp,amperr); 
+    printf("p1= %g %g\n",pha,phaerr);
 #endif
 
     npt1 = remove_data(x,1,y,dy,d,npt,nsigma[iter]);
@@ -924,23 +925,23 @@ do_arm3()
       error("Bad fit, nrt=%d",nrt); 
     
     printf("nrt=%d\n",nrt);  
-    printf("Fitting a + c1.cos(x/DPR) + s1.sin(y/DPR) + c3.sin(3x/DPR) + s3.cos(3x/DPR): ");
-    printf("[x now in degrees]  \na= %g %g \nc1= %g %g\ns1= %g %g \nc3= %g %g \ns3= %g %g \n", 
+    printf("Fitting a0 + c1.cos(x/DPR) + s1.sin(y/DPR) + c3.sin(3x/DPR) + s3.cos(3x/DPR): ");
+    printf("[x now in degrees]  \na0= %g %g \nc1= %g %g\ns1= %g %g \nc3= %g %g \ns3= %g %g \n", 
 	 fpar[0],epar[0],fpar[1],epar[1],fpar[2],epar[2],fpar[3],epar[3],fpar[4],epar[4]);
-    printf("Converting to amp/phase: (Fitting as a + amp.cos((x-pha)/DPR) + amp3.cos(3(x-pha3)/DPR)\n");
+    printf("Converting to amp/phase: (Fitting as a0 + a1.cos((x-p1)/DPR) + a3.cos(3(x-p3)/DPR)\n");
     amp = sqrt(sqr(fpar[1])+sqr(fpar[2]));
     pha = atan2(fpar[2],fpar[1])*DPR;
     amperr = sqrt(sqr(fpar[1]*epar[1]) + sqr(fpar[2]*epar[2]))/amp;
     phaerr = sqrt(sqr(fpar[1]*epar[2]) + sqr(fpar[2]*epar[1]))/(amp*amp)*DPR;
-    printf("amp= %g %g\n",amp,amperr);
-    printf("pha= %g %g\n",pha,phaerr);
+    printf("a1= %g %g\n",amp,amperr);
+    printf("p1= %g %g\n",pha,phaerr);
 
     amp3 = sqrt(sqr(fpar[3])+sqr(fpar[4]));
     pha3 = atan2(fpar[4],fpar[3])*DPR/3;
     amperr3 = sqrt(sqr(fpar[3]*epar[3]) + sqr(fpar[4]*epar[4]))/amp3;
     phaerr3 = sqrt(sqr(fpar[3]*epar[4]) + sqr(fpar[4]*epar[3]))/(amp3*amp3)*DPR/3;
-    printf("amp3= %g %g\n",amp3,amperr3);
-    printf("pha3= %g %g\n",pha3,phaerr3);
+    printf("a3= %g %g\n",amp3,amperr3);
+    printf("p3= %g %g\n",pha3,phaerr3);
 
 
     npt1 = remove_data(x,1,y,dy,d,npt,nsigma[iter]);
