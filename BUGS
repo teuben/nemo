@@ -30,7 +30,13 @@
 - Suse didn't resolve fortran binding to C too well for potentials
   (.so object files, e.g. athan92)
 
+- sol8:  potlist does not built due to __powf missing....   (cc)
+
 - sgi: loadobjDL works for bodytrans, but not potentials....
+
+potlist: rld: Fatal Error: attempted access to unresolvable symbol in
+/home/starlab/nemo_3.0.6/obj/mips-sgi-irix6.5/potential/athan92.so: __powdi
+
 
   Also, for the SGI at sulfur.amnh.org (where there is some problem with
   the default f77 license) one needs to do
@@ -56,3 +62,6 @@
 
 - kawaii/nbody does not seem to work, neither in IONEMO mode, nor default I/O mode
   (at least on linux)
+
+
+

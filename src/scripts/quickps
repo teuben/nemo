@@ -5,8 +5,11 @@
 #  linux:   src/scripts/quickps
 #  sol:     src/scripts/quickps cc=gcc f77=f77          ok
 #           src/scripts/quickps cc=gcc f77=g77          bad
-#           src/scripts/quickps cc=cc                   bad
+#           src/scripts/quickps cc=cc                   ok, but __powf
+#           src/scripts/quickps cc=gcc                  
+#
 #  sgi:     src/scripts/quickps cc=cc  f77=f90          ok
+#
 
 #			set defaults for command line arguments
 set cc=""
@@ -31,7 +34,7 @@ if ("x$f77" != "x") setenv F77 $f77
 set log=quick.log
 
 echo "### Start:"
-echo "### Configure"
+echo "### Running Configure"
 ./configure --with-yapp=ps        >& $log 
 if ($?NEMO) then
   source nemo_end                >>& $log

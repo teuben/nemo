@@ -205,6 +205,9 @@ AC_CHECK_FUNCS(XMesaGetBackBuffer)
 LIBS="$save_LIBS"
 
 dnl ----
+
+AC_CANONICAL_HOST
+
   
 dnl ---------------------------------------------------------------------
 
@@ -218,7 +221,6 @@ if test "$enable_fortran" = "yes"; then
     if test -n "$GCC"; then
       AC_F77_LIBRARY_LDFLAGS
       ACX_F77_FUNC_MANGLE
-      AC_CANONICAL_HOST
       case $host_os in
         ultrix*)
           CC="$CC -Dmain=MAIN_"
@@ -320,7 +322,11 @@ esac
 AC_SUBST(LOADOBJ_MACH)
 AC_SUBST(LOADOBJ_LIBS)
 
-MATH_LIBS="-lm"
+#
+# Find math library, and add ccmalloc support if needed
+#
+MATH_LIBS=''
+AC_CHECK_LIB(m,sqrt,MATH_LIBS="-lm",,)
 
 if test "$with_ccmalloc" = "yes"; then
   MATH_LIBS="-lccmalloc $MATH_LIBS"
