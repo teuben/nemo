@@ -20,6 +20,8 @@ PA = 30
 INC = 60
 SIG = 1
 
+NULL = /dev/null
+
 all:	$(BIN) 
 
 
@@ -56,12 +58,12 @@ ccdvel:	map1.den
 rotcur: map1.vel
 	@echo Running $@
 	rotcur in=map1.vel radii=$(R) vrot=10,100 pa=$(PA) inc=$(INC) vsys=0 \
-	   tab=map1.rotcur units=sec,1 > /dev/null ; nemo.coverage rotcur.c
+	   tab=map1.rotcur units=sec,1 > $(NULL) ; nemo.coverage rotcur.c
 	@tail -7 map1.rotcur
 
 rotcurshape: map1.vel
 	rotcurshape in=map1.vel radii=0,60 pa=$(PA) inc=$(INC) vsys=0 \
-	   tab=map1.rotcurshape units=sec,1 rotcur1=core1,100,20,1,1 > /dev/null; nemo.coverage rotcurshape.c
+	   tab=map1.rotcurshape units=sec,1 rotcur1=core1,100,20,1,1 > $(NULL); nemo.coverage rotcurshape.c
 	@tail -11 map1.rotcurshape
 
 
