@@ -5,9 +5,10 @@ include $(NEMOLIB)/makedefs
 # a #ifdef switch table is then present in loadobj.c
 # some architectures are automatically loaded, unless -DAUTO is used in CFLAGS
 
-# MACH = MACH=
+# MACH = 
+MACH=-DDL -I$(NEMO)/host/$(NEMOHOST)/include
 # extra libraries needed in linking [-lld for SYSV, -ldl for dlopen()]
-EL =
+EL = -ldl
 
 #
 # The -D$(MACH) is mainly for loadobj.c, to include the proper loadobj<MACH>.c 
