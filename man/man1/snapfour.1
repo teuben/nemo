@@ -1,0 +1,85 @@
+.TH SNAPFOUR 1NEMO "10 November 1993"
+.SH NAME
+snapfour \- fourier analyze a snapshot
+.SH SYNOPSIS
+\fBsnapfour in=\fPsnapshot_file  [parameters=values...]
+.SH DESCRIPTION
+\fIsnapfour\fP computes a number of requested fourier
+coefficients in a user determined part of the snapshot
+By default the snapshot is divided in a set of concentric
+cylindrical rings, and a fourier analysis is done in 
+cylindrical coordinates.
+.PP
+The observable quantity \fIf\fP is fitted as
+.nf
+  f(r,theta) = sum_{cmi..}{A(r)cos(cmi*theta) + sum_{smi..}{B(r)sin(smi*theta) 
+.fi
+where \fIx\fP, \fIy\fP as well as \fIf\fP
+.fi
+  r = sqrt(x*x+y*y) , theta=atan2(y,x)
+.fi
+can be any arbitrary \fIbodytrans(3NEMO)\fP expression using the
+\fBxvar\fP, \fByvar\fP and \fBfvar\fP keywords. The least squares
+is done using normalized equations, which are known for roundoff
+problem in case a large number of coefficients or points are used.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is
+also given:
+.TP 25
+\fBin=\fIin_file\fP
+Input data file, must be in standard \fIsnapshot(5NEMO)\fP 
+format [No default].
+.TP
+\fBradii=\fIrmin,r1,..,rmax\fP
+Radii of the rings (but see \fBxvar\fP and \fByvar\fP below)
+within which the fourier coefficients are computed.
+[Default: \fB0:2:0.2\fP].
+.TP
+\fBcos=\fIcm1,cm2,..\fP
+Set of integers for which the cosine amplitudes need to be computed.
+[Default: \fB0:4\fP].
+.TP
+\fBsin=\fIsm1,sm2,..\fP
+Set of integers for which the sine amplitudes need to be computed.
+[Default: \fB1:4\fP].
+.TP
+\fBxvar=\fIx-variable\fP
+X-variable which is used to compute the radius and angle used
+in the fourier decomposition. [Default: \fBx\fP].
+.TP
+\fByvar=\fIy-variable\fP
+Y-variable which is used to compute the radius and angle used
+in the fourier decomposition. [Default: \fBy\fP].
+.TP
+\fBfvar=\fIf-variable\fP
+Fourier-variable which is the variable used in
+in the fourier decomposition. [Default: \fBx\fP].
+.TP
+\fBweight=\fIw-variable\fP
+Weight-variable which is the weight applied to the
+observable. [Default: \fB1\fP].
+.TP
+\fBamode=t|f\fP
+Logical; if true it displays the sin and cos terms, if false,
+the amplitudes and phases (in degrees). [Default: \fBt\fP]
+.TP
+\fBtimes=\fP\fIt1,t2,...\fP
+Times to select for analysis. 
+[Default: \fBall\fP].
+.SH "SEE ALSO"
+bodytyrans(1NEMO), snapshot(5NEMO)
+.PP
+Binney, J.J. & Spergel, D. (1982) ApJ 253, 308.
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +1.5i
+~/src/nbody/reduc	snapfour.c 
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+3-dec-90	V1.0: written	PJT
+17-feb-92	V1.1: added weight=	PJT
+10-nov-93	V1.2: added times=	pjt
