@@ -62,6 +62,8 @@
  *              26-jun-02 : 2.8  allow input to be an ascii table instead of image
  *              19-jul-02      a optional compilation for numrec
  *              11-sep-02   2.9  compute residuals as in rotcurshape       pjt
+ *              13-nov-02        reuse= allow used points to be flagged as used (unfinished) PJT
+ *              30-jan-03   2.10 allow vel.error  in tabular input if dens=t    pjt
  ******************************************************************************/
 
 
@@ -70,12 +72,13 @@
  *	- keep track of pixel usage. debug output a map how many times
  *	  a pixel has been used by different rings
  *
- *      - weights for tabular input
+ *      - weights for tabular input (DONE 30-jan)
  *
  *      - clarify that our X,Y input coordinate system (even for images)
  *        is a  right-handed mathematical system, "X to the right, Y up"
  *        and that we screw the astronomical one, and force dx and dy > 0
  *        for images (mostly they will have dx < 0 , dy > 0)
+ *
  */
 
 #include <stdinc.h>
@@ -122,10 +125,11 @@ string defv[] = {
     "units=deg,1\n   Units of input {deg, arcmin, arcsec, rad, #},{#} for length and velocity",
     "blank=0.0\n     Value of the blank pixel to be ignored",
     "inherit=t\n     Inherit initial conditions from previous ring",
+    "reuse=f\n       Reuse points from previous rings if used before?",
     "fitmode=cos,1\n Basic Fitmode: cos(n*theta) or sin(n*theta)",
     "nsigma=-1\n     Iterate once by rejecting points more than nsigma resid",
     "imagemode=t\n   Input image mode? (false means ascii table)",
-    "VERSION=2.8c\n  28-jul-02 PJT",
+    "VERSION=3.0\n   12-nov-02 PJT",
     NULL,
 };
 
@@ -134,6 +138,7 @@ string usage="nonlinear fit of kinematical parameters to a velocity field";
 
 
 imageptr denptr, velptr, resptr;    /* pointers to Images, if applicable */
+image_maskptr   maskptr;
 int   lmin, mmin, lmax, mmax;              /* boundaries of map */
 real  grid[2];    /* grid separations in x and y (arcsec.) */
 real  beam[2];    /* size of beam in arcseconds            */
@@ -141,13 +146,14 @@ real  dx,dy;      /* grid separation in x and y */
 real  undf;       /* undefined value in map */
 real  pamp;       /* position angle of map */
 
-real  *xpos_vel, *ypos_vel, *vrad_vel;
+real  *xpos_vel, *ypos_vel, *vrad_vel, *verr_vel;
 int  n_vel = 0;
 
 real tol,lab;     /* parameters that go into nllsqfit */
 int  itmax;
 bool Qimage;      /* input mode */   
 bool Qfirstring;
+bool Qreuse;      /* reuse points from other rings ? */
 
 /* Compute engine, derivative and beam smearing correction functions:
  * _c1 = cos(theta)	
@@ -332,7 +338,7 @@ stream  lunpri;       /* LUN for print output */
     real center[2], toarcsec, tokms;
     stream velstr, denstr;
     string *burststring(), *fmode;
-    bool scanopt();
+    bool Qdens, scanopt();
     real *coldat[3];
     int colnr[3];
 
@@ -349,20 +355,40 @@ stream  lunpri;       /* LUN for print output */
 			Qimage ? "image" : "ascii table");
 
     velstr = stropen(input,"r");                /* open velocity field */   
+    Qdens = hasvalue("dens");                /* check if density given */
     if (Qimage) {
       read_image(velstr,&velptr);                 /* get data */
       copy_image(velptr,&resptr);
+      if (Qreuse) {
+	create_image_mask(velptr,&maskptr);
+	for (i=0; i<Nx(maskptr); i++)
+	for (j=0; j<Ny(maskptr); j++)
+	  MapValue(maskptr,i,j) = TRUE;
+      }
     } else {
       n_vel = nemo_file_lines(input,100000);
       xpos_vel = (real *) allocate(n_vel * sizeof(real));
       ypos_vel = (real *) allocate(n_vel * sizeof(real));
       vrad_vel = (real *) allocate(n_vel * sizeof(real));
+      if (Qdens) verr_vel = (real *) allocate(n_vel * sizeof(real));
       colnr[0] = 1;    coldat[0] = xpos_vel;
       colnr[1] = 2;    coldat[1] = ypos_vel;
       colnr[2] = 3;    coldat[2] = vrad_vel;
-      n_vel = get_atable(velstr,3,colnr,coldat,n_vel);
-      for (i=0; i<n_vel; i++)
-	dprintf(5,"%g %g %g\n",xpos_vel[i],ypos_vel[i],vrad_vel[i]);
+      if (Qdens) {
+	colnr[3] = 4;    coldat[3] = verr_vel;
+	n_vel = get_atable(velstr,4,colnr,coldat,n_vel);
+	dprintf(1,"Found %d entries X,Y,V,DV in %s\n",input);
+	for (i=0; i<n_vel; i++) {
+	  dprintf(5,"%g %g %g %g\n",xpos_vel[i],ypos_vel[i],vrad_vel[i],verr_vel[i]);
+	  verr_vel[i] = 1/sqr(verr_vel[i]);
+	}
+      } else {
+	verr_vel = NULL;
+	n_vel = get_atable(velstr,3,colnr,coldat,n_vel);
+	dprintf(1,"Found %d entries X,Y,V in %s\n",input);
+	for (i=0; i<n_vel; i++)
+	  dprintf(5,"%g %g %g\n",xpos_vel[i],ypos_vel[i],vrad_vel[i]);
+      }
       velptr = NULL;
     }
     strclose(velstr);                           /* and close file */
@@ -435,7 +461,7 @@ stream  lunpri;       /* LUN for print output */
     n = nemoinpr(getparam("beam"),beam,2);   /* get size of beam from user */
     if (n==2 || n==1) {       /* OK, got a beam, now get density map ... */
          if (n==1) beam[1] = beam[0];
-         if (hasvalue("dens")) {
+         if (Qdens) {
             input = getparam("dens");
             if (lunpri) fprintf(lunpri," density file        : %s  beam: %g %g\n",
                                     input,beam[0],beam[1]);	
@@ -658,11 +684,13 @@ stream  lunpri;       /* LUN for print output */
     }
 
     *nsigma = getdparam("nsigma");
+
+    Qreuse = getbparam("reuse");
 }
 
 /*
  *    ROTFIT does a  least  squares fit to the radial velocity
- *    field.
+ *    field. It can be called in two modes: nsigma=0 and nsigma>0
  *
  *    RI       real            inner radius of ring
  *    RO       real            outer radius of ring
@@ -772,7 +800,7 @@ stream lunres;   /* file for residuals */
 	   break;
 	 }
          if (nrt<0) {
-            warning("nllsqfit=%d<0: KGB must find better solution (n=%d)",
+            warning("nllsqfit=%d<0: KGB must find better solution (npoints=%d)",
 		    nrt,n);
             break;    /* ???? could also try and continue here (like KGB did) */
 	 }
@@ -1155,6 +1183,7 @@ real  *q;             /* output sigma */
 	rx = xpos_vel[i];
 	ry = ypos_vel[i];
 	v  = vrad_vel[i];
+	wi = (verr_vel ? verr_vel[i] : 1.0);      /* weight */
 	if (v == undf) continue;
 	xr=(-(rx-x0)*sinp+(ry-y0)*cosp);     /* X position in galplane */
 	yr=(-(rx-x0)*cosp-(ry-y0)*sinp)/cosi;/* Y position in galplane */
@@ -1167,7 +1196,6 @@ real  *q;             /* output sigma */
 	if (r>ri && r<ro && costh>free) {     /* point inside ring ? */
 	  dprintf(5,"@ r=%g cost=%g xr=%g yr=%g\n",r,costh,xr,yr);
 	  dprintf(5," ** adding this point\n");
-	  wi=1.0;                /* calculate weight of this point */
 	  for (j=0; j<wpow; j++) 
 	    wi *= costh;
 	  xx[0]=rx;       /* x position */
