@@ -12,7 +12,7 @@ help:
 	@echo "If any of these are not present, STARLAB is probably not loaded"
 
 
-CFLAGS = -O
+#CFLAGS = -O
 
 BIN = stod dtos
 OBJ = stod_subs.o nemomain.o 
@@ -26,8 +26,8 @@ LIBSTAR = -L$(STARLAB_PATH)/lib  -ldyn -lnode -lstd
 .SUFFIXES: .C
 
 #	nemo:
-.c.o:
-	$(CC) $(CFLAGS) -c $*.c
+#.c.o:
+#	$(CC) $(CFLAGS) -c $*.c
 
 # 	starlab:
 .C.o:
