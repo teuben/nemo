@@ -89,6 +89,7 @@ int merge2(FILE *, FILE *);
 string *burststring(string, string);
 void freestrings(string *);
 void example(void);
+void usage(void);
 
 
 int main(int argc, char **argv)
@@ -103,10 +104,7 @@ int main(int argc, char **argv)
     fprintf(stderr,"%s\n",VERSION);
 
     if (argc == 1) {
-        fprintf(stderr,"Usage: %s [-options] script\n",argv[0]);
-        fprintf(stderr,"  Extracts simple widgets from \"script\", writes a tcl/tk script\n");
-        fprintf(stderr,"  and runs this script to execute \"script\"\n");
-        exit(0);
+      usage();
     } else {
         runpath = NULL;
         scriptpath = NULL;
@@ -135,8 +133,12 @@ int main(int argc, char **argv)
                 case 'e':
                     example();      /* will exit the program */
                     break;
+                case 'h':
+		    usage();
+                    break;
     	        default:
     	            fprintf(stderr,"Option -%s not supported yet\n",cp);
+		    usage();
     	            break;
     	        }
     	    }
@@ -670,4 +672,19 @@ void example(void)
 
     exit(0);
 
+}
+
+void usage(void)
+{
+  fprintf(stderr,"Usage: tkrun [-options] script\n");
+  fprintf(stderr,"  Extracts simple widgets from \"script\", writes a tcl/tk script\n");
+  fprintf(stderr,"  and runs this script to execute \"script\"\n");
+  fprintf(stderr,"Command line flags:\n");
+  fprintf(stderr,"  -h            this help\n");
+  fprintf(stderr,"  -r runpath    run path\n");
+  fprintf(stderr,"  -w wishpath   wish path\n");
+  fprintf(stderr,"  -t tkpath     tcl/tk path\n");
+  fprintf(stderr,"  -x            don't run it\n");
+  fprintf(stderr,"  -e            show example \n");
+  exit(0);
 }
