@@ -1,0 +1,40 @@
+%N hispectrum
+%D HI spectrum extraction
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man hispectrum' for more extensive online help
+  Defaults of program keywords are listed between square brackets
+%A hi
+	Input dataset id {hh,pk,ar,bl,ww,lb} [???]
+%A lon
+	Desired galactic longitude (l) in spectrum search mode []
+%A lat
+	Desired galactic latitude  (b) in spectrum search mode []
+%A vlsr
+	Regridded velocity axis (e.g. -10:80:5) []
+%A cube
+	Output cube; if requested. [FITS VXY cube] []
+%A xgrid
+	X-ranges and step in output cube (l) []
+%A ygrid
+	Y-ranges and step in output cube (b) []
+%A bscale
+	Scale factor for input spectra (one for each dataset) [1.0]
+%A bzero
+	Offset for input spectra (one for each dataset) [0.0]
+%A weight
+	Weight given each dataset [1.0]
+%A ncell
+	Number of neighbor cells to use in gridding [0]
+%A sigma
+	Core weighting scale for neighbor cell contributions [1]
+%A dist
+	Minimum distance (override from dataset default) []
+%A clip
+	Clipping parameters (**not implemented**) []
+%A outfreq
+	Output frequency (debug=2) [100]
+%A headline
+	Comments added to table/fits file []
+%A VERSION
+	7-jul-92 PJT [0.2]
