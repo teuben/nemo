@@ -1,4 +1,4 @@
-.TH TREECODE1 1NEMO "23 June 2001"
+.TH TREECODE1 1NEMO "25 April 2004"
 .SH NAME
 treecode1 \- Hierarchical N-body code (theta scan)
 .SH SYNOPSIS
@@ -28,7 +28,7 @@ If given, is a pattern naming output files for N-body snapshots taken at
 regular intervals. This pattern is used as an argument to sprintf, along
 with the integration step number, to generate an actual file name. If
 the resulting file already exists, the new data is appended. The format
-used is similar to the format used for input files. 
+used is similar to the format used for input files.  See below.
 .TP
 \fBdtime=\fP
 is the integration time-step. It's convenient to use a timestep which
@@ -73,7 +73,8 @@ to set critical cell radii.
 is the time at which the N-Body integration terminates.  [2.0]   
 .TP
 \fBdtout=\fP
-is the time interval between output files. To insure that outputs are performed when expected, dtout should be a multiple of
+is the time interval between output files. 
+To insure that outputs are performed when expected, dtout should be a multiple of
 dtime. Like dtime, this parameter may be specified as a fraction.  
 [1/4]    
 .TP
@@ -132,9 +133,23 @@ minutes.
     stoa std4k std4k.tab
     time treecode1 std4k.tab > std4k.log
 .fi
+.SH DATA FORMAT
+The data format used for in= and out= depends on the compilation option.
+If compiled with the USE_NEMO_IO flag, the dataformat is in
+\fIsnapshot(5NEMO)\fP format, with a separate \fIPosition\fP
+and \fIVelocity\fP, instead of the original \fIPhaseSpace\fP
+.SH COMPILATION
+The code can be compiled with various flags that will change the behavior of the code:
+.nf
+.ta +1.5i
+USE_NEMO_IO	use NEMO I/O, thus snapshots (default in NEMO), instead of the "205" format (atos) 
+BINARYIO	use binary output, complementary to the non-NEMO ascii I/O (default: none)
+USEFREQ		use freq,freqout instead of dtime,dtout (the default)
+QUICKSCAN	use the theta= accuracy parameter (the default) instead of a theta-scan
+.fi
 .SH SEE ALSO
 .nf
-hackcode1(1NEMO), treecode(1NEMO)
+hackcode1(1NEMO), treecode(1NEMO), atos(1NEMO), snapshot(5NEMO)
 http://www.ifa.hawaii.edu/faculty/barnes/treecode/treeguide.html
 .fi
 .SH FILES
@@ -146,4 +161,5 @@ Joshua Barnes, Peter Teuben (NEMO adaptation)
 .ta +1.0i +4.0i
 1999       	written, Tokyo, Japan	JEB
 22-jun-01	V1.4 NEMO adaptation	PJT
+25-apr-04	V1.4.2 added USE_NEMO_IO to do snapshot I/O	PJT
 .fi
