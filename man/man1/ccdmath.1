@@ -69,6 +69,10 @@ create the maximum of two maps:
 .nf
    % \fBccdmath inmap1,inmap2 outmap "ifgt(%1,%2,%1,%2)"\fP
 .fi
+create the difference of two maps if either of the two is not zero:
+.nf
+   % \fBccdmath inmap1,inmap2 outmap "ifne(%1,0,%1-%2,ifne(%2,0,%1-%2,0))"\fP
+.fi
 create a map from scratch:
 .nf
   % \fBccdmath out=newmap fie="exp(-((%x-50)/25)**2-((%y-50)/25)**2)" size=100,100\fP
