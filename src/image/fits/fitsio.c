@@ -79,7 +79,7 @@ typedef long int8;              /* e.g. alpha 64's */
 #elif SIZEOF_INT==8
 typedef int int8;               /* will never happen ? */
 #else
-#error "No 8 byte integer type?"
+typedef long int8;		/* some stupid fallback, probably wrong */
 #endif
 
 local int  fitsrch    (FITS *, char *, char *);
