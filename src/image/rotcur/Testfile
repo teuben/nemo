@@ -1,8 +1,9 @@
 DIR = src/image/rotcur
-BIN = ccdvel rotcur rotcurshape
-NEED = $(BIN) nemoinp
+BIN = ccdvel rotcur rotcurshape velcube
+NEED = $(BIN) nemoinp ccdmom
 
-DATA = map1.vel map1.den map1.rotcur map1.r map1.v map1.d map1.rotcurshape
+DATA = map1.vel map1.den map1.rotcur map1.r map1.v map1.d map1.rotcurshape \
+	map00.vel map0.vel map0.diff cube1 cube1.den cube1.vel cube1.sig
 
 help:
 	@echo $(DIR)
@@ -22,6 +23,12 @@ SIG = 1
 all:	$(BIN) 
 
 
+map0.vel:
+	ccdmath out=map00.vel fie="rang(0,$(SIG))" size=128,128
+	rotcurshape map00.vel 0,100 30 45 -50 blank=-999 resid=map0.vel \
+	  rotcur1=core1,200,10,0,0 fixed=all units=arcsec,1
+	rotcurshape map0.vel 0,100 30+180 45 50 \
+	  rotcur1=core1,200,10,1,1 units=arcsec,1 nsigma=2 
 
 map1.vel:
 	@echo Creating $@
@@ -35,6 +42,13 @@ map1.den:
 	@nemoinp $(R) | tabmath - - 'exp(-%1/20)' all > map1.d
 	ccdvel map1.den radii=@map1.r vrot=@map1.d pa=$(PA) inc=$(INC) amp=t; nemo.coverage ccdvel.c
 
+
+velcube: map1.den map1.vel
+	@echo Running $@
+	velcube cube1 map1.vel map1.den sigdefault=5
+	ccdmom cube1 cube1.den 3 0; ccdmath map1.den,cube1.den - %1-%2 | ccdstat - bad=0
+	ccdmom cube1 cube1.vel 3 1; ccdmath map1.vel,cube1.vel - %1-%2 | ccdstat - bad=0
+	ccdmom cube1 cube1.sig 3 2; ccdstat cube1.sig bad=0
 
 ccdvel:	map1.den
 	@echo Running $@
