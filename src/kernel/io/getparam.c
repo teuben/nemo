@@ -121,7 +121,8 @@
  * 15-oct-03       f  fix for version.h to give multiple static's in g++ 
  * 23-jan-04       g  fix prototypes for intel compiler
  * 13-may-04       h  add cpu/real time reporting for help=c 
- * 23-jun-05       i  fix bug free's version_  (JC Lambert)
+ * 23-jun-04       i  fix bug free's version_  (JC Lambert)
+ * 20-sep-04       j  disabled the version checking by default
 
   TODO:
       - what if there is no VERSION=
@@ -165,7 +166,7 @@
 	opag      http://www.zero-based.org/software/opag/
  */
 
-#define GETPARAM_VERSION_ID  "3.4i 23-jun-04 PJT"
+#define GETPARAM_VERSION_ID  "3.4j 20-sep-04 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -663,6 +664,7 @@ void initparam(string argv[], string defv[])
         
 #endif    
 
+#if 0
     if (debug_level > 0) {              /* version check : via external */
         i = findkey("VERSION"); 
         if (i>0) {
@@ -671,6 +673,7 @@ void initparam(string argv[], string defv[])
         } else
             warning("No VERSION keyword");
     }
+#endif
     initparam_out();
     clock1 = times(&tms1);
 
