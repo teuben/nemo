@@ -1,4 +1,4 @@
-.TH TABTOS 1NEMO "24 January 2002"
+.TH TABTOS 1NEMO "28 May 2002"
 .SH NAME
 tabtos \- convert structured ASCII tables into snapshot format
 .SH SYNOPSIS
@@ -45,10 +45,10 @@ No default.
 A list of variables that are present in the header, in
 the order given. They do not need to be present on the same line.
 
-Recognized are: \fBnbody, ndim, time, skip\fP. If they do not
+Recognized are: \fBnbody, ndim, time, skip (-)\fP. If they do not
 appear in the header, their value should be set via the
-equivalent keyword (see below). The special value \fBskip\fP is
-allowed to skip header items that have no current meaning in
+equivalent keyword (see below). The special value \fBskip\fP (or \fB-\fP) 
+is allowed to skip header items that have no current meaning in
 parsing the data into snapshot format (e.g. SPH files have 
 \fBngas\fP, but this is currently not processed).
 Default: none supplied.
@@ -61,8 +61,10 @@ Recognized are: \fBmass, pos, vel, phase, acc, phi,
 aux\fP for real-valued and \fBkey\fP for integer valued
 columns (see also \fIsnapshot(5NEMO)\fP). In addition, single
 elements from the \fBndim\fP vector are recognized as
-\fBx, y, z, vx, vy, vz, ax, ay, az\fP.
-As before, the name \fBskip\fP can be used to skip a column.
+\fBx, y, z, vx, vy, vz, ax, ay, az\fP. \fBm\fP is also
+recognized as \fBmass\fP, to be symmetric with the
+standard \fIbodytrans(5NEMO)\fP names.
+As before, the name \fBskip\fP (or \fB-\fP) can be used to skip a column.
 If the variable \fBskip\fP appears are the only item in a block,
 all \fBnbody\fP rows in that block are skipped, independant of 
 the number of columns (NOTE: this cannot be done if
