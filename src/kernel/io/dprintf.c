@@ -1,8 +1,10 @@
 /*
- * DPRINTF.C: print debug messages, if requested debug level high enough
+ * (NEMO_)DPRINTF.C: print debug messages, if requested debug level enough
  *
  *	Note dprintf(int,char *,...) is now used by the snprintfv package
  *	see http://www.gnu.org/software/autogen/
+ *	MacOS is also known to have this function, with exactly the same
+ *	purpose as NEMO's original dprintf()
  *	The official name for NEMO's function is now nemo_dprintf()
  *	although a macro will accept dprintf() since their prototype
  *	*happens* to be the same as ours. You just don't have acccess
