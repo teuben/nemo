@@ -1,4 +1,4 @@
-.TH POTENTIAL 3NEMO "11 October 1993"
+.TH POTENTIAL 3NEMO "13 September 2001"
 .SH NAME
 get_potential \- obtain potential descriptor and pattern speed
 .SH SYNOPSIS
@@ -7,6 +7,8 @@ get_potential \- obtain potential descriptor and pattern speed
 .B #include <stdinc.h>
 .PP
 .B proc get_potential (potname, potpars, potfile)
+.B potproc_double get_potential_double (potname, potpars, potfile)
+.B potproc_float  get_potential_float (potname, potpars, potfile)
 .B string potname;    	/* generic name of potential */
 .B string potpars;    	/* parameters, separated by comma's */
 .B string potfile;     	/* optional (file) name or string */
@@ -24,7 +26,11 @@ forces etc.
 (see \fIpotential(5NEMO)\fP).
 \fIpotname\fP is the generic name of the filename, which \fBmust\fP
 contain at least two entry points \fBinipotential\fP and 
-\fBpotential\fP with a predefined parameter sequence. 
+\fBpotential\fP with a predefined parameter sequence. Modern compilers
+with stricter prototyping should use the _double or _float versions
+of the same function.
+
+
 A default search
 path is provided by an environment variable \fBPOTPATH\fP, normally
 set by the NEMO environment startup script \fBNEMORC\fP.
@@ -49,7 +55,7 @@ initializes the potential. In this way one could re-initialize
 and re-use the potential. 
 .SH EXAMPLE
 .nf
-.B proc mypot, get_potential();
+.B potproc mypot, get_potential();
 .B double pot,time;
 .B vector pos, acc;
 .B int ndim=NDIM;
@@ -61,18 +67,19 @@ and re-use the potential.
 .SH "SEE ALSO"
 potlist(1NEMO),potential(5NEMO),loadobj(3NEMO)
 .SH BUGS
-Uses a very system dependant object loader. See loadobj(3NEMO) for
+Uses a dynamic object loader. See loadobj(3NEMO) for
 implementations, but see below for a standalone loader.
 .PP
-Fortran C interface only works on BSD implementation where the fortran
-character strings get their length passed by value as the last argument.
+Fortran C interface only works on certain implementation where
+a fortran 
+character string gets its length passed by value as the last argument.
 .SH EXAMPLES
 The non-loadobj version of the potential loader is called 
 \fIpotential0.c\fP and it can compile programs as follows:
 .nf
     make orbint L="$NEMOLIB/potential0.o -lnemo $NEMOOBJ/potential/plummer.o"
 .fi
-make sure \fIpotential0.o\fP is loaded before the nemo library.
+and make sure \fIpotential0.o\fP is loaded before the nemo library.
 .SH AUTHOR
 Peter Teuben
 .SH FILES
@@ -90,4 +97,5 @@ Peter Teuben
 25-oct-90	V3.2: minor upgrades	PJT
 10-mar-93	-- also added potential0.c when loadobj doesn't work	PJT
 11-oct-93	V5.0: added get_pattern   	PJT
+13-sep-01	V5.4: added _float/_double versions w/ prototyping	PJT
 .fi
