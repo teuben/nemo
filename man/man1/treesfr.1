@@ -1,0 +1,89 @@
+.TH TREECODE2 1NEMO "15 June 1992"
+.SH NAME
+treesfr - treecode with sticky particle ISM model and star formation
+.SH SYNOPSIS
+treesfr
+.SH DESCRIPTION
+\fItreesfr\fP is the Hernquist fortran version 
+of the Barnes and Hut treecode, with an added sticky particle 
+ISM model and star formation. Details on the N-body code
+can be found in \fItreesfr.f\fP, though is largely the same
+as that described in the original
+\fItreecode.f\fP (see \fItreecode2(1NEMO)\fP), whereas all details
+on the ISM/SFR modeling can be found in \fItreeism.f\fP.
+.PP
+Computational units are such that the gravitational constant G=1.
+.SH PARAMETERS
+Two input (ASCII) files must be present at runtime:
+.PP
+A parameter file with the name \fBTREEPAR\fP contains, line by line, the
+input parameters for this run (the names of the variables in the first
+column are actually the names of the variables in the program):
+.PP
+.nf
+.ta +2i
+\fB headline\fP  	Identification string for the run (max 50 char)
+\fB nsteps\fP    	Number of timesteps
+\fB noutbod\fP       	frequency of TREEBO, TREECONT, and TREEISM writes
+\fB noutlog\fP   	Output logfile data once every nsteps/noutlog steps (\fBTREELOG\fP)
+\fB dtime\fP     	The timestep
+\fB tol\fP         	Error tolerance; 0.0=exact
+\fB seps\fP      	Potential softening parameter for stellar particles
+\fB geps\fP      	Potential softening parameter for cloud particles
+\fB usequad\fP   	Option to include quadrupole terms (.TRUE./.FALSE.)
+\fB minit\fP      	initial ISM cloud mass
+\fB r0\fP           	initial ISM cloud size
+\fB tau0\fP       	coefficient for cloud lifetime calculation
+\fB sfrcoeff\fP    	coefficient for SFR law
+\fB rcrit\fP      	radius for determining ambient ISM density
+\fB ismrate\fP      	rate at which ISM properties are calculated
+\fB iseed\fP       	random number seed
+.fi
+.PP
+In addition there must be a file \fBTREEBI\fP, containing the input 
+bodies. This is a slightly modified version of the format used
+in  \fPtreecode2\fP, where an array of \fBnbody\fP logicals
+signifies if that particle is gas 
+(\fBT\fP)  or stellar (\fBF\fP).
+.PP
+Output files created are the regular output from \fItreecode2\fP
+\fBTREEBOA\fP, which contains all the
+requested snapshots in ascii \fIatos(1NEMO)\fP format, \fBTREELOG\fP,
+which contains a log of the run and \fBTREEBO\fP, which contains
+a binary (machine dependable) dump of the last snapshot. In addition,
+ISM/SPH specific files are \fBTREEISM\fP, \fBTREEILOG\fP and
+\fITREECONT\fP.
+\fI Note that these three output files must not be present when the 
+program is to be run.\fP
+.PP
+To avoid excessive overhead, \fBnoutlog\fP should be larger than 1,
+typically ~ 10, depending on total number of steps though.
+.SH MAKE
+The accompanying Makefile has ready made targets to compile treecode2
+on the Cray, Sun and Vax, by appropiately defining the OS macro in
+the Makefile, as well as running benchmarks within NEMO's environment.
+See Makefile for details.
+.SH AUTHOR
+Chris Mihos
+.SH FILES
+~/usr/cmihos/treesfr/
+~/usr/lars/treecode2/        	
+~/src/nbody/evolve/treecode2/	official NEMO version
+.PP
+.nf
+.ta +2i
+TREEBI  	input bodies
+TREEPAR     	input parameters
+TREEBO       	output bodies
+TREELOG    	output logfile
+TREEBOA      	output bodies, last snapshot??
+TREEISM     	output ISM cloud properties
+TREEILOG   	output logfile of cloud interactions
+TREECONT     	output continuation file (same format as TREEBI)
+.SH SEE ALSO
+hackcode1(1NEMO), treecode(1NEMO), newton0(1NEMO), nbody0(1NEMO)
+.SH HISTORY
+.nf
+.ta +1i +4i
+15-jun-92	Put formal version into usr/cmihos/treesfr	PJT
+.fi
