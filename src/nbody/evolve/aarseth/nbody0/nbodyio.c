@@ -5,6 +5,7 @@
  *		 6-jan-00  converted to F77_FUNC macros
  *		21-jan-00  added reset option 
  *		 9-apr-01  fixed some -DSINGLEPREC errors
+ *              21-feb-04  prototypes to keep -Wall silent
  */
 
 #include <stdinc.h>
@@ -12,6 +13,7 @@
 #include <vectmath.h>
 
 #include <filestruct.h>
+#include <history.h>
 #include <snapshot/snapshot.h>
 #include <snapshot/body.h>
 #include <snapshot/get_snap.c>
@@ -44,7 +46,7 @@ extern double cputime(void);
  *
  */
 
-pars_2_aarseth()
+void pars_2_aarseth(void)
 {
     real time;
     
@@ -87,7 +89,7 @@ pars_2_aarseth()
 /* 
  *  call_2_aarseth:	the actual routine which does the fortran calling
  */
-call_2_aarseth()
+void call_2_aarseth(void)
 {
     nbody0();           /* call fortran hard core worker routine */
 }
@@ -165,7 +167,7 @@ int   *nsteps;
 {
     real time;
 
-    printf("time = %g   steps = %d   energy = %g cpu = %10.3g min\n",
+    dprintf(0,"time = %g   steps = %d   energy = %g cpu = %10.3g min\n",
             *tnext, *nsteps, *e, cputime());
 
     time = (real) *tnext;
