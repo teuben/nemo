@@ -168,7 +168,7 @@
 	opag      http://www.zero-based.org/software/opag/
  */
 
-#define GETPARAM_VERSION_ID  "3.4l 28-dec-04 PJT"
+#define GETPARAM_VERSION_ID  "3.4m 15-mar-05 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -1707,7 +1707,7 @@ local void setparam (string par, string val, string prompt)
       i=set_indexed(par,&idx);
       if (i==0)
 	error("setparam: parameter \"%s\" unknown",par);
-      keyval = allocate(strlen(par)+strlen(val)+2);
+      keyval = (char *) allocate(strlen(par)+strlen(val)+2);
       strcpy(keyval,par);
       strcat(keyval,"=");
       strcat(keyval,val);
