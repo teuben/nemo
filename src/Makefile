@@ -88,7 +88,7 @@ junk:
 
 dot:
 	-@for i in $(DIRS); do\
-	(find $$i -type f -name .\*.\* -print); done
+	(find $$i -type f -name \.\* -print); done
 
 cc:
 	@echo "Your CC compiler is: CC=$(CC)"
