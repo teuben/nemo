@@ -1,4 +1,4 @@
-.TH SQRT 3NEMO "5 March 1989"
+.TH SQR 3NEMO "5 March 1989"
 .SH NAME
 sqr, qbe, log2, dex \- some additional math functions: square, cube, log
 .SH SYNOPSIS
@@ -24,6 +24,8 @@ returns the cube root of \fBx\fP,
 returns 10 to the power of \fBx\fP, and
 .BI log2 (x)
 returns the log to the base two of \fBx\fP.
+.SH CAVEAT
+some systems may actually implement some of these functions in their math (-lm) library
 .SH FILES
 .ta +1i
 .nf
