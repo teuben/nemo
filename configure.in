@@ -71,19 +71,19 @@ fi
 
 AC_MSG_CHECKING(which precision NEMO is going to use)
 prec_flag=""
-AC_ARG_ENABLE(single, [  --enable-single          single-precision], ok=$enableval, ok=no)
+AC_ARG_ENABLE(single, [  --enable-single         single-precision], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then
 	prec_flag="-DSINGLEPREC"
 fi
-AC_ARG_ENABLE(float, [  --enable-float            single-precision], ok=$enableval, ok=no)
+AC_ARG_ENABLE(float,  [  --enable-float          single-precision], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then
 	prec_flag="-DSINGLEPREC"
 fi
-AC_ARG_ENABLE(double, [  --enable-double          double-precision], ok=$enableval, ok=no)
+AC_ARG_ENABLE(double, [  --enable-double         double-precision], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then
 	prec_flag="-DDOUBLEPREC"
 fi
-AC_ARG_ENABLE(mixed, [  --enable-mixed           mixed-precision], ok=$enableval, ok=no)
+AC_ARG_ENABLE(mixed,  [  --enable-mixed          mixed-precision], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then
 	prec_flag="-DMIXEDPREC"
 fi
@@ -91,11 +91,12 @@ AC_MSG_RESULT($prec_flag)
 
 
 dnl check FFTW configure
-AC_ARG_ENABLE(fortran, [  --disable-fortran   don't use any Fortran], enable_fortran=$enableval, enable_fortran=yes)
+AC_ARG_ENABLE(fortran,[  --disable-fortran       don't use any Fortran], enable_fortran=$enableval, enable_fortran=yes)
 
-AC_ARG_WITH(mesa, [  --with-mesa        force the use of Mesa instead of other graphics libs], with_mesa=$withval, with_mesa=maybe)
-AC_ARG_WITH(hdf, [  --with-hdf          force the use of HDF], with_hdf=$withval, with_hdf=maybe)
-AC_ARG_WITH(ccmalloc, [  --with-ccmalloc    use CCMALLOC for malloc], with_malloc=$withval, with_ccmalloc=no)
+AC_ARG_WITH(mesa, [  --with-mesa             force the use of Mesa instead of other graphics libs], with_mesa=$withval, with_mesa=maybe)
+AC_ARG_WITH(hdf,  [  --with-hdf              force the use of HDF], with_hdf=$withval, with_hdf=maybe)
+AC_ARG_WITH(ccmalloc, 
+		  [  --with-ccmalloc         use CCMALLOC for malloc], with_malloc=$withval, with_ccmalloc=no)
 
 dnl ---------------------------------------------------------------------
 dnl             Check for basic X windows stuff
@@ -286,7 +287,7 @@ else
       pgplot_dir="/usr/lib/pgplot"
 fi
 AC_ARG_WITH(pgplot-prefix, 
-        [  --with-pgplot-prefix=PFX     Prefix where PGPLOT was installed], 
+        [  --with-pgplot-prefix=PFX     Prefix where PGPLOT was installed (pgplot,ps,..)], 
         pgplot_config_prefix="$withval", 
         pgplot_config_prefix="$pgplot_dir")
 
@@ -393,8 +394,10 @@ AC_SUBST(HDF_INC)
 AC_SUBST(HDF_LIB)
 
 dnl##--------------------------------------------------------------------
+dnl   Could also check FTOOLS_INCLUDE and/or FTOOLS_DIR for cfitsio....
 
 AC_MSG_CHECKING(whether we have CFITSIO)
+
 AC_ARG_WITH(cfitsio-prefix, 
         [  --with-cfitsio-prefix=PFX     Prefix where CFITSIO was installed], 
         cfitsio_config_prefix="$withval", 
@@ -403,12 +406,28 @@ AC_ARG_WITH(cfitsio-prefix,
 if test x$cfitsio_config_prefix != x; then
     cdir="$cfitsio_config_prefix"
     found="no"
-    for dir in $cdir $cdir/include $cdir/include/cfitsio
+    for dir in $cdir/include 
       do
         if test -f ${dir}/fitsio.h ; then
                 CFITSIO_INC="-I${dir}"
-                CFITSIO_LIB="-L$cfitsio_config_prefix/lib"
-                CFITSIO_LIB="$CFITSIO_LIB -lcfitsio"
+    		CFITSIO_LIB="-L$cdir/lib"
+    		CFITSIO_LIB="$CFITSIO_LIB -lcfitsio"
+                AC_DEFINE(HAVE_LIBCFITSIO) 
+                AC_MSG_RESULT(yes)
+                found="yes"
+                break;
+	elif test -f ${dir}/cfitsio/fitsio.h ; then
+                CFITSIO_INC="-I${dir}/cfitsio"
+    		CFITSIO_LIB="-L$cdir/lib"
+    		CFITSIO_LIB="$CFITSIO_LIB -lcfitsio"
+                AC_DEFINE(HAVE_LIBCFITSIO) 
+                AC_MSG_RESULT(yes)
+                found="yes"
+                break;
+	elif test -f ${dir}/fitsio/fitsio.h ; then
+                CFITSIO_INC="-I${dir}/fitsio"
+		CFITSIO_LIB="-L$cdir/lib"
+    		CFITSIO_LIB="$CFITSIO_LIB -lcfitsio"
                 AC_DEFINE(HAVE_LIBCFITSIO) 
                 AC_MSG_RESULT(yes)
                 found="yes"
@@ -455,7 +474,7 @@ else
 fi
 
 AC_ARG_WITH(miriad-prefix, 
-        [  --with-miriad-prefix=MIRIAD    Directory where MIRIAD was installed], 
+        [  --with-miriad-prefix=PFX    Root directory where MIRIAD was installed], 
         miriad_config_prefix="$withval", 
         miriad_config_prefix="$mir")
 if test -f ${miriad_config_prefix}/src/inc/maxdim.h ; then
@@ -491,7 +510,8 @@ dnl## --  Also note the -DHAVE_GSL is a bit of a kludge, since i cannot
 dnl## --  figure out how to do this properly through config.h
 dnl##--------------------------------------------------------------------
 
-AC_ARG_ENABLE(gsl, [  --disable-gsl   don't use any GSL], ok=$enableval, ok=yes)
+
+AC_ARG_ENABLE(gsl, [  --enable-gsl            use GSL], ok=$enableval, ok=no)
 
 if test "$ok" = "yes"; then
   AM_PATH_GSL(0.9.2, ok=yes, ok=no)
@@ -501,10 +521,34 @@ if test "$ok" = "yes"; then
   else
     AC_MSG_WARN([could not find GSL library])
   fi
+else
+  AC_MSG_WARN([GSL disabled])
 fi
 
 AC_SUBST(GSL_CFLAGS)
 AC_SUBST(GSL_LIBS)
+
+
+dnl##-----------------------------------------------------------------------
+dnl##
+dnl## TCL
+dnl##
+dnl##-----------------------------------------------------------------------
+AC_ARG_ENABLE(tcl, [  --enable-tcl            use TCL], ok=$enableval, ok=no)
+
+if test "$ok" = "yes"; then
+  if test "$ok" = "yes"; then
+    TCL_CFLAGS="$TCL_CFLAGS -DHAVE_TCL"
+    AC_DEFINE(HAVE_TCL)
+  else
+    AC_MSG_WARN([could not find TCL library])
+  fi
+else
+  AC_MSG_WARN([TCL disabled])
+fi
+
+AC_SUBST(TCL_CFLAGS)
+AC_SUBST(TCL_LIBS)
 
 dnl##--------------------------------------------------------------------
 dnl##
