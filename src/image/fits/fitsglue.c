@@ -12,9 +12,11 @@
  *     10-aug-02   1.4  copy over WCS of the first file         pjt
  *      3-oct-02   1.4a flush 0s to fill to 2880 
  *                        fts_cdata_(....,TRUE) does not work   PJT
+ *     14-jan-03   1.5  fix when CROTA is present               PJT
  *
  * TODO:
  *   if no WCS, wcs=t coredumps the program
+ *   CROTA, various CD matrix
  */
 
 #include <stdinc.h>
@@ -28,7 +30,7 @@ string defv[] = {			/* Standard NEMO keyword+help */
     "compact=f\n           Compact (move) dummy axes to the end",
     "inlist=\n             optional nemoinp(1) list expression for in=",
     "wcs=f\n               try and copy a reasonably WCS from input to output",
-    "VERSION=1.4a\n        3-oct-02 PJT",
+    "VERSION=1.5\n         15-jan-03 PJT",
     NULL,
 };
 
@@ -49,13 +51,14 @@ typedef struct fts_wcs {
   double crval;
   double crpix;
   double cdelt;
+  double crota;    /* ieck */
   char ctype[32];
   char cunit[32];  /* optional */
 } fts_wcs;
 
 void fts_iniwcs(int, fts_wcs *);
-void fts_addwcs(struct fits_header *,int ,fts_wcs *);
-void fts_setwcs(struct fits_header *,int ,fts_wcs *);
+void fts_addwcs(fits_header *,int ,fts_wcs *);
+void fts_setwcs(fits_header *,int ,fts_wcs *);
 
 void nemo_main()
 {
@@ -194,7 +197,7 @@ void fts_iniwcs(int ndim, fts_wcs *wcs)
     wcs[i].naxis = 0;
 }
 
-void fts_addwcs(struct fits_header *fh,int ndim,fts_wcs *wcs)
+void fts_addwcs(fits_header *fh, int ndim, fts_wcs *wcs)
 {
   int i;
 
@@ -205,6 +208,7 @@ void fts_addwcs(struct fits_header *fh,int ndim,fts_wcs *wcs)
       wcs[i].crpix = fh->crpixn[i];   /* need to check if they exist */
       wcs[i].crval = fh->crvaln[i];
       wcs[i].cdelt = fh->cdeltn[i];
+      wcs[i].crota = fh->crotan[i];
       strcpy(wcs[i].ctype, fh->ctypen[i]);
     }
     if (wcs[2].naxis == 0) {
@@ -212,6 +216,7 @@ void fts_addwcs(struct fits_header *fh,int ndim,fts_wcs *wcs)
       wcs[2].crval = 0;
       wcs[2].cdelt = 1;
       wcs[2].crpix = 1;
+      wcs[2].crota = 0;
       strcpy(wcs[2].ctype,"UNKNOWN");
     }
     dprintf(0,"fts_addwcs: Starting at %d x %d x %d [%s %s]\n",
@@ -228,7 +233,7 @@ void fts_addwcs(struct fits_header *fh,int ndim,fts_wcs *wcs)
   }
 }
 
-void fts_setwcs(struct fits_header *fh,int ndim,fts_wcs *wcs)
+void fts_setwcs(fits_header *fh, int ndim, fts_wcs *wcs)
 {
   int i,n;
 
@@ -238,6 +243,7 @@ void fts_setwcs(struct fits_header *fh,int ndim,fts_wcs *wcs)
   fh->crvaln = (double *) allocate(n*sizeof(double));
   fh->crpixn = (double *) allocate(n*sizeof(double));
   fh->cdeltn = (double *) allocate(n*sizeof(double));
+  fh->crotan = (double *) allocate(n*sizeof(double));
   fh->ctypen = (char **) allocate(n*sizeof(char *));
 
   for (i=0; i<n; i++) {
@@ -248,5 +254,6 @@ void fts_setwcs(struct fits_header *fh,int ndim,fts_wcs *wcs)
     fh->crpixn[i] = wcs[i].crpix;
     fh->cdeltn[i] = wcs[i].cdelt;
     fh->ctypen[i] = wcs[i].ctype;
+    fh->crotan[i] = wcs[i].crota;
   }
 }

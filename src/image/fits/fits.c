@@ -49,7 +49,8 @@
  *              28-sep-01       'K' format for 64 bit integers (*long*) pjt
  *                              endian swap is done in the show_ routines
  *                              which is bad !!!!
- *    		12-oct-01 new standard added FITS reference
+ *    		12-oct-01       new standard added FITS reference
+ *              15-jan-03       write floating #'s in header w/ more precision PJT
  *
  * Places where this package will call error(), and hence EXIT program:
  *  - invalid BITPIX
@@ -63,7 +64,11 @@
 #include <ctype.h>              /* needs: isdigit() */
 #include <fits.h>
 
-#define ROUNDUP(a,b) ((b)*(((a)-1)/(b)+1))
+#define   ROUNDUP(a,b) ((b)*(((a)-1)/(b)+1))
+#if 0
+/* from stdinc.h now */
+#define   ROUNDUP(a,b) ((b)*(((a)+(b)-1)/(b)))
+#endif
 
 #if SIZEOF_LONG_LONG==8
 typedef long long int8;         /* e.g. i386; sparc <= sol7; ppc ? */
@@ -2307,6 +2312,8 @@ int fts_whead(fits_header *fh, stream ostr)
         fts_wvard_a(ostr,"CRVAL",fh->naxis,fh->crvaln,NULL);
     if (fh->cdeltn)
         fts_wvard_a(ostr,"CDELT",fh->naxis,fh->cdeltn,NULL);
+    if (fh->crotan)
+        fts_wvard_a(ostr,"CROTA",fh->naxis,fh->crotan,NULL);
     if (fh->ctypen)
         fts_wvarc_a(ostr,"CTYPE",fh->naxis,fh->ctypen,NULL);
 
@@ -2521,8 +2528,7 @@ int fts_wvard(   /* write single double variable */
 	      string comment)
 {
     char stmp[21];
-
-    sprintf(stmp,"%g",value);
+    sprintf(stmp,"%18.11g",value);
     sprintf(fline,"%-8s= %20s ",key,stmp);
     if (comment) {
         strcat(fline,"/ ");
