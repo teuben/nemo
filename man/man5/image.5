@@ -119,7 +119,14 @@ the commonly used array syntax:
         for (j=0; j<nx; j++)
             a[i][j] = 0.0;
 .fi
-
+.SH LIMITATIONS
+The current default images (axis=0) have their original at the
+first (lower-left = 0,0) pixel. In FITS parlance, there is no
+freedom in the location of the reference pixel, it's (0,0).
+For axis=1 (only a few programs now support it, notably
+\fIccdfits(1NEMO)\fP and \fIfitsccd(1NEMO)\fP) this limitation
+will go away, but only simple cartesian coordinate systems are
+supported.
 .SH "FUTURE EXPANSIONS"
 Code could be modified to use dynamem(3NEMO). Allows more flexable
 use by addressing image[i][j] instead of slower macros MapValue(iptr,i,j)
