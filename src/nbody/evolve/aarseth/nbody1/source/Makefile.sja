@@ -1,0 +1,20 @@
+FFLAGS = -O
+FORTRAN = f77
+
+SOURCE = \
+nbody1.f block.f bodies.f cmcorr.f \
+check.f cputim.f data.f define.f energy.f \
+escape.f fpoly1.f fpoly2.f frame.f \
+input.f intgrt.f modify.f mydump.f \
+nbint.f output.f ran2.f remove.f \
+scale.f start.f stepi.f steps.f \
+subsys.f verify.f xvpred.f zero.f
+
+OBJECTS = $(SOURCE:.f=.o)
+
+nbody1:	$(OBJECTS)
+	$(FORTRAN) $(FFLAGS) $(OBJECTS) -o nbody1
+
+print:
+	@- \rm -f NBODY1.TEXT
+	@cat $(SOURCE) > NBODY1.TEXT
