@@ -65,14 +65,14 @@ initoutput()
            "nbody", "freq", "eps", "tol");
     printf("%12d%12.2f%12.4f%12.4f\n\n",
            nbody, freq, eps, tol);
-    if (*options != NULL)
+    if (*options)
         printf("\toptions: %s\n", options);
-    if (*outfile != NULL) {                     /* output file specified?   */
+    if (*outfile) { 		                /* output file specified?   */
         outstr = stropen(outfile, "w");         /*   setup output stream    */
 	put_history(outstr);			/*   write file history     */
     } else
         outstr = NULL;				/*   prevent binary output  */
-    if (*savefile != NULL)			/* state file specified?    */
+    if (*savefile)				/* state file specified?    */
 	savestate(savefile);			/*   save inital data       */
 }
 
@@ -146,7 +146,7 @@ output()
 	if (bits & PhaseSpaceBit)
 	    printf("\n\tparticle data written\n");
     }
-    if (*savefile != NULL)			/* state file specified?    */
+    if (*savefile)				/* state file specified?    */
 	savestate(savefile);			/*   save system data       */
 }
 

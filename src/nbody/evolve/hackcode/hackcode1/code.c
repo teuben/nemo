@@ -74,9 +74,9 @@ startrun()
     savefile = getparam("save");
     options = getparam("options");		/* set control options      */
     debug = getbparam("debug");
-    if (*contfile != NULL)			/* resume interrupted run   */
+    if (*contfile)				/* resume interrupted run   */
 	restorestate(contfile);
-    else if (*restfile != NULL) {		/* resume w/ new parameters */
+    else if (*restfile) {			/* resume w/ new parameters */
 	restorestate(restfile);
 	/* NOTE: someday, I will have a way to tell which, if any, of these *
 	 * parameters are actually input from the command line, and only    *
@@ -93,7 +93,7 @@ startrun()
 	    minor_tout = tnow + 1 / minor_freqout;
 	}
     } else {					/* start new calculation    */
-	if (*infile != NULL)			/*   was data file given?   */
+	if (*infile)				/*   was data file given?   */
 	    inputdata(infile);			/*     read inital data     */
 	else {					/*   make initial conds?    */
 	    nbody = getiparam("nbody");		/*     get nbody parameter  */
