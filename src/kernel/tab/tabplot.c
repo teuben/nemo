@@ -31,7 +31,7 @@
  *      23-sep-01      a : ->nemo_file_lines
  *       6-oct-01  V2.4  : fixed Y autoscale if all Y's have the same value
  *       2-aug-02  V2.5  : allow multiple X columns, forces pairwise xcol,ycol plotting
- *                     a : fix old semi-autoscaling bug while fixing it for multicol
+ *                     b : fix old semi-autoscaling bug while fixing it for multicol
  *
  */
 
@@ -85,7 +85,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "fullscale=f\n       Use full autoscale in one axis if other autoscaled?",
     "cursor=\n           Optional output file to retrieve cursor coordinates",
     "layout=\n           Optional input layout file",
-    "VERSION=2.5a\n	 3-aug-02 PJT",
+    "VERSION=2.5b\n	 3-aug-02 PJT",
     NULL
 };
 
@@ -375,28 +375,26 @@ void plot_data()
      *  we can recompute the Ymin and/or Ymax based on fixed Xmin/Xmax
      *  for those points which are within Xmin/Xmax
      */
-
     if (!Qfull && (Qautoy0 || Qautoy1) && !Qautox0 && !Qautox1) {
       first = TRUE;
-      /*      for (i=npt-1; i>=0; i--) {     /* go through data, find Y min and max again */
-      for (i=0; i<npt; i++) {     /* go through data, find Y min and max again */
-	if (xmin < xmax && (x[0][i] < xmin || x[0][i] > xmax)) continue;
-	if (xmin > xmax && (x[0][i] < xmax || x[0][i] > xmin)) continue;
+      for (i=0; i<npt; i++) {     /* go through data, find X min and max again */
+	for (j=0; j<nxcol; j++) {
+	  if (xmin < xmax && (x[j][i]<xmin || x[j][i]>xmax)) break;
+	  if (xmax < xmin && (x[j][i]<xmax || x[j][i]>xmin)) break;
+	}
+	if (j<nxcol) continue;
+	
 	if (first) {
 	  if (Qautoy0) ymin = y[0][i];
 	  if (Qautoy1) ymax = y[0][i];
-	  dprintf(0,"min %d %g\n",i,ymin);	
-	  dprintf(0,"max %d %g\n",i,ymax);
 	  first = FALSE;
 	}
-
 	for (j=0; j<nycol; j++) {
-	  if (Qautoy0 && y[j][i] < ymin) { ymin=y[j][i]; dprintf(0,"min %d %g\n",i,ymin); }
-	  if (Qautoy1 && y[j][i] > ymax) { ymax=y[j][i]; dprintf(0,"max %d %g\n",i,ymax); }
+	  if (Qautoy0) ymin=MIN(y[j][i],ymin);
+	  if (Qautoy1) ymax=MAX(y[j][i],ymax);
 	}
       }
       dprintf(0,"Y:min and max value re-reset to : [%f : %f]\n",ymin,ymax);
-      /* should 5% be added to the edges ? */
     }
 
     /*
@@ -406,19 +404,21 @@ void plot_data()
     if (!Qfull && (Qautox0 || Qautox1) && !Qautoy0 && !Qautoy1) {
         first = TRUE;
         for (i=0; i<npt; i++) {     /* go through data, find X min and max again */
-            for (j=0; j<nycol; j++) {
-                if (ymin < ymax && (y[j][i]<ymin || y[j][i]>ymax)) break;
-                if (ymin > ymax && (y[j][i]>ymin || y[j][i]<ymax)) break;
-            }
-            if (j<nycol) continue;
-
-            if (first) {
-                if (Qautox0) xmin = x[0][i];
-                if (Qautox1) xmax = x[0][i];
-                first = FALSE;
-            }
-            if (Qautox0) xmin=MIN(x[0][i],xmin);
-            if (Qautox1) xmax=MAX(x[0][i],xmax);
+	  for (j=0; j<nycol; j++) {
+	    if (ymin < ymax && (y[j][i]<ymin || y[j][i]>ymax)) break;
+	    if (ymax < ymin && (y[j][i]<ymax || y[j][i]>ymin)) break;
+	  }
+	  if (j<nycol) continue;
+	  
+	  if (first) {
+	    if (Qautox0) xmin = x[0][i];
+	    if (Qautox1) xmax = x[0][i];
+	    first = FALSE;
+	  }
+	  for (j=0; j<nxcol; j++) {
+	    if (Qautox0) xmin=MIN(x[j][i],xmin);
+	    if (Qautox1) xmax=MAX(x[j][i],xmax);
+	  }
         }
         dprintf(0,"X:min and max value re-reset to : [%f : %f]\n",xmin,xmax);
 	/* should 5% be added to the edges ? */
