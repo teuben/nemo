@@ -11,6 +11,7 @@
 #  5-dec-02     added tcl/tk driver for carma
 # 29-jun-03     added darwin (tested w/ MacOSX 10.2)
 # 23-jan-04     fixed linux when CC and F77 present (e.g. intel compiler)
+# 21-mar-04     force rebuilding some executables upon reload
 
 
 #			 	.. command line keywords ..
@@ -62,7 +63,6 @@ cp drivers.list old.list
 
 echo Building drivers for $drivers
 
-
 foreach d (`echo $drivers | sed 's/,/ /g'`)
    sed 's/\! '$d/$d/g < old.list > new.list
    cp new.list old.list
@@ -71,6 +71,8 @@ end
 mv new.list drivers.list
 rm old.list
 
+echo Renaming old X server to force it to rebuild
+mv pgxwin_server pgxwin_server pgxwin_server.old
 
 # Solaris
 switch ($host)
