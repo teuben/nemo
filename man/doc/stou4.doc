@@ -1,0 +1,14 @@
+%N stou4
+%D convert snapshot to unit-4 for NBODYx
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man stou4' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	input file name [???]
+%A out
+	output file name [fort.4] []
+%A nbody
+	test if this nbody is ok (0=no test) [0]
+%A VERSION
+	11-jul-97 PJT [1.1]
