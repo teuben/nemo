@@ -18,7 +18,7 @@ extern string usage;		/* One line description of the program    */
 
 extern void nemo_main(void);	/* this is the programmer's 'main' */
 
-void main(int argc,char *argv[])
+int main(int argc,char *argv[])
 {
     if(argv[argc] != NULL) {
         warning("Your C compiler seems to have an old-style (short) argv[] %d",
@@ -28,5 +28,5 @@ void main(int argc,char *argv[])
     initparam(argv,defv);		/* start  */
     nemo_main();			/* call his/her main program */
     finiparam();			/* end */
-    exit(0);                            /* return normal status to shell */
+    return 0;                           /* return normal status to shell */
 }
