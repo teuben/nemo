@@ -30,7 +30,7 @@
 #if !defined(AUTO)
 # if defined(sun) && defined(sparc) && defined(SYSV)
 #  define DL 1
-# elif defined(sgi) || defined(alpha)
+# elif defined(sgi) || defined(alpha) || defined(__alpha) 
 #  define DL 1
 # elif defined(linux) && defined(SYSV)
 #  define DL 1
