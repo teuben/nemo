@@ -24,6 +24,7 @@
 /* TO DO:
  *	sort input contours before plotting, now they have to be in order
  *	If used on a cube, can only plot first plane
+ *	allow color input, use the color tables in $NEMODAT/lut
  *
  * BUGS:
  *	plotting subregions using xrange,yrange does not work
