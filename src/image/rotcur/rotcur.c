@@ -124,7 +124,7 @@ string defv[] = {
     "fitmode=cos,1\n Basic Fitmode: cos(n*theta) or sin(n*theta)",
     "nsigma=-1\n     Iterate once by rejecting points more than nsigma resid",
     "imagemode=t\n   Input image mode? (false means ascii table)",
-    "VERSION=2.8a\n  19-jul-02 PJT",
+    "VERSION=2.8b\n  20-jul-02 PJT",
     NULL,
 };
 
@@ -949,15 +949,16 @@ stream lunpri;
 void stat2(real *a,int n,real *mean,real *sig)
 {
     real s=0, sx=0, sxx=0;
+    int i;
 
     if (n<=0) return;
-    while (n--) {
+    for (i=0; i<n; i++) {
         s += 1.0;
         sx += *a;
         sxx += sqr(*a++);
     }
     *mean = sx/s;
-    *sig = sqrt(sxx-s*sqr(*mean)) / MAX(1.0,s-1);
+    *sig = n>1 ? sqrt(sxx-s*sqr(*mean)) / MAX(1.0,s-1)  :  0.0;
 }
 
 /* 
