@@ -180,8 +180,10 @@ Results in /home/teuben/nemo_3.0.4/tmp/test22005/testsuite.log
 
 
 *) Installing PGPLOT within NEMO is a bit cumbersome, but not
-   impossible
+   impossible. The following sessions assumes you have an official
+   tar release from the Caltech site ftp://astro.caltech.edu/pub/pgplot
 
+	% setenv F77 f77 ; setenv CC cc			<== optional
 	% ./configure 
 	% source nemo_start
 	% make dirs 
