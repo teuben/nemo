@@ -1,27 +1,13 @@
-prefix = /usr/local
-exec_prefix = $(prefix)
-bindir = $(exec_prefix)/bin
+include $(NEMOLIB)/makedefs
 
-CC = gcc
-INSTALL = install
-CFLAGS = -Wformat
-INSTALLFLAGS = -s
+# sun doesn't work yet, but you'd also need these :-0
+SUNFLAGS = -lsocket -lnsl -lm -ldl
 
-programs = tcppipe
-
-.PHONY: all clean install uninstall ed
-
-all: $(programs)
+tcppipe:	tcppipe_nemo.c
+	$(CC) $(CFLAGS) tcppipe_nemo.c -o tcppipe $(NEMOLIB)/libnemo.a -lm
 
 clean:
-	rm -f $(programs)
+	rm -f tcppipe *.o core
 
-install: $(programs)
-	$(INSTALL) $(INSTALLFLAGS) $(programs) $(bindir)
-
-uninstall:
-	for prog in $(programs); do rm -f $(bindir)/$$prog; done
-
-ed:
-	vi tcppipe.c
-	make
+install:	tcppipe
+	mv tcppipe $(NEMOBIN)
