@@ -16,6 +16,7 @@
 #include <stdinc.h>  
 #include <getparam.h>
 #include <loadobj.h>
+#include <filefn.h>
 
 string defv[] = {
     "in=???\n           input (table) file name",
@@ -351,16 +352,17 @@ read_data()
 
 load_function(string fname,string method)
 {
-  char path[256];  /* Yuck, need something for this */
   char func_name[80], derv_name[80];
+  string path;
 
   mysymbols(getargv0());
+  path = pathfind(".",fname);
+  if (path == NULL) error("Cannot open %s",fname);
+
   if (method) {
-    sprintf(path,"./%s.so",fname);
     sprintf(func_name,"func_%s",method);
     sprintf(derv_name,"derv_%s",method);
   } else {
-    sprintf(path,"./%s.so",fname);
     sprintf(func_name,"func_loadobj");
     sprintf(derv_name,"derv_loadobj");
   }

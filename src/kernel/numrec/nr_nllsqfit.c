@@ -53,7 +53,7 @@ void nr_funcx(float *x, float *a, float *y, float *dyda, int na)
   (*old_df)(old_x, old_a, old_d, na);
   for (i=0; i<na; i++)
     dyda[i+1] = old_d[i];
-  dprintf(2,"nr_funcx(%d): x=%g y=%g a[1]=%g a[2]=%g\n",na,x,*y,a[1],a[2]);
+  dprintf(2,"nr_funcx(%d): x=%g y=%g a[1]=%g a[2]=%g\n",na,*x,*y,a[1],a[2]);
 }
 
 /* nr_funcl: for linear fits using lfit(), just returns the basis functions */

@@ -35,11 +35,12 @@ void mrqcof(float x[], float y[], float sig[], int ndata, float a[], int ia[],
 		for (k=1;k<j;k++) alpha[k][j]=alpha[j][k];
 	free_fvector(dyda,1,ma);
 }
+
 void mrqcofx(float x[], int xdim, float y[], float sig[], int ndata, float a[], int ia[],
 	int ma, float **alpha, float beta[], float *chisq,
 	void (*funcs)(float *, float [], float *, float [], int))
 {
-	int i,j,k,l,m,mfit=0;
+	int i,i2,j,k,l,m,mfit=0;
 	float ymod,wt,sig2i,dy,*dyda;
 
 	dyda=fvector(1,ma);
@@ -50,8 +51,8 @@ void mrqcofx(float x[], int xdim, float y[], float sig[], int ndata, float a[], 
 		beta[j]=0.0;
 	}
 	*chisq=0.0;
-	for (i=1;i<=ndata*xdim;i+=xdim) {
-		(*funcs)(&x[i],a,&ymod,dyda,ma);
+	for (i=1,i2=1;i<=ndata; i++,i2+=xdim) {
+		(*funcs)(&x[i2],a,&ymod,dyda,ma);
 		sig2i=1.0/(sig[i]*sig[i]);
 		dy=y[i]-ymod;
 		for (j=0,l=1;l<=ma;l++) {
