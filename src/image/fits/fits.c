@@ -2254,9 +2254,9 @@ local char *atoa(char *s)
 {
     char *cp;
     
-    cp = allocate(strlen(s));
+    cp = allocate(strlen(s)+1);
     strcpy(cp,s);
-    return(cp);
+    return cp;
 }
 
 #if 0
