@@ -1,0 +1,47 @@
+%N hackcode3
+This doc file has been produces with help=t option
+No further help is available, try 'man hackcode3'
+%A in
+	Snapshot of initial conditions
+%A out
+	Stream of output snapshots
+%A restart
+	Input state and set controls
+%A continue
+	Input state and continue run
+%A save
+	Output state as code runs
+%A nbody
+	Number of particles to generate
+%A seed
+	Random number generator seed
+%A cencon
+	Centrally concentrated system
+%A freq
+	Fundamental integration frequency
+%A eps
+	Usual potential softening
+%A tol
+	Cell subdivision tolerence
+%A fcells
+	Cell allocation parameter
+%A options
+	Misc. control options
+%A nrigid
+	Number of rigid particles
+%A tstop
+	Time to stop integration
+%A freqout
+	Major data-output frequency
+%A minor_freqout
+	Minor data-output frequency
+%A potname
+	Name for potential(5)
+%A potpars
+	Parameters for potential(5)
+%A potfile
+	Filename for potential(5)
+%A debug
+	Turn on debugging messages
+%A VERSION
+	PJT 2-apr-90
