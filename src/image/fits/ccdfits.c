@@ -63,7 +63,7 @@ string defv[] = {
 	"dummy=t\n       Write dummy axes also ?",
 	"nfill=0\n	 Add some dummy comment cards to test fitsio",
 	"ndim=\n         Testing if only that many dimensions need to be written",
-        "VERSION=4.0a\n  5-may-02 PJT",
+        "VERSION=4.0b\n  6-may-02 PJT",
         NULL,
 };
 
