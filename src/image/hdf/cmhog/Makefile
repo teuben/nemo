@@ -26,8 +26,8 @@ help:
 	@echo OBJFILES=$(OBJFILES)
 	@echo bin: BINFILES=$(BINFILES)
 	@echo tests: TESTFILES=$(TESTFILES)
-	@echo HDFINC=$(HDFINC)
-	@echo HDFLIB=$(HDFLIB)
+	@echo HDF_INC=$(HDF_INC)
+	@echo HDF_LIB=$(HDF_LIB)
 	@echo 'on e.g. linux you also need CLFLAGS="-DPC -DPC386 -Dunix"'
 clean:
 	rm -f *.o *.a *~ core $(BINFILES) $(TESTFILES)

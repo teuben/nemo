@@ -1,8 +1,8 @@
 #	Makefile for NEMO/src/kernel/hdf
 
 include $(NEMOLIB)/makedefs
-LOCAL_INC = $(HDFINC)
-LOCAL_LIB = $(HDFLIB)
+LOCAL_INC = $(HDF_INC)
+LOCAL_LIB = $(HDF_LIB)
 
 #	sub-directories to be visited, in the order given here
 #DIRS = 
@@ -27,8 +27,8 @@ help:
 	@echo OBJFILES=$(OBJFILES)
 	@echo bin: BINFILES=$(BINFILES)
 	@echo tests: TESTFILES=$(TESTFILES)
-	@echo HDFINC=$(HDFINC)
-	@echo HDFLIB=$(HDFLIB)
+	@echo HDF_INC=$(HDF_INC)
+	@echo HDF_LIB=$(HDF_LIB)
 	@echo 'on e.g. linux you also need CLFLAGS="-DPC -DPC386 -Dunix"'
 clean:
 	rm -f *.o *.a *~ core $(BINFILES) $(TESTFILES)
