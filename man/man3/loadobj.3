@@ -6,14 +6,9 @@ loadobj, findfn, mysymbols \- dynamic object file loader
 .B #include <stdinc.h>
 .B #include <loadobj.h>
 .PP
-.B void loadobj(pathname)
-.B string pathname
-.PP
-.B proc findfn(fname)
-.B string fname;
-.PP
-.B void mysymbols(progname)
-.B string progname;
+.B void loadobj(string pathname)
+.B proc findfn(string fname)
+.B void mysymbols(string progname)
 .SH DESCRIPTION
 These routines provide a uniform low-level I/O interface to loading
 object modules. 
