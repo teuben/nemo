@@ -39,6 +39,7 @@
  *                 V3.3: add fourier mode (see also snapfour)
  *                     a: add out= for fourier
  *      24-feb-03  V3.4  add fit=zero
+ *       4-oct-03      a fix nsigma>0 for fit=line
  */
 
 /*
@@ -78,7 +79,7 @@ string defv[] = {
     "estimate=\n        optional estimates (e.g. for ellipse center)",
     "nmax=10000\n       Default max allocation",
     "tab=f\n            short one-line output?",
-    "VERSION=3.4\n      24-feb-03 PJT",
+    "VERSION=3.4a\n     4-oct-03 PJT",
     NULL
 };
 
@@ -301,55 +302,59 @@ do_line()
     for(mwt=0;mwt<=1;mwt++) {
 
 #if 1
-                if ( (mwt>0) && (dycolnr==0) )
-                        continue;               /* break off */
-                fit(x,y,npt,dy,mwt,&b,&a,&sigb,&siga,&chi2,&q);
+      if (mwt>0 && nsigma>0) {
+	fit(x,y,npt,dy,0,&b,&a,&sigb,&siga,&chi2,&q);
+      } else {
+	if (mwt>0 && dycolnr==0)
+	  continue;             
+	fit(x,y,npt,dy,mwt,&b,&a,&sigb,&siga,&chi2,&q);
+      }
 #else
-		if (mwt==0)
-                    fit(x,y,npt,dy,mwt,&b,&a,&sigb,&siga,&chi2,&q);
-                else
-                  myfit(x,y,npt,dy,mwt,&b,&a,&sigb,&siga,&chi2,&q);
+      if (mwt==0)
+	fit(x,y,npt,dy,mwt,&b,&a,&sigb,&siga,&chi2,&q);
+      else
+	myfit(x,y,npt,dy,mwt,&b,&a,&sigb,&siga,&chi2,&q);
 #endif
-                dprintf(2,"\n");
-                dprintf (1,"Fit:   y=ax+b\n");
-                if (mwt == 0)
-                        dprintf(1,"Ignoring standard deviations\n");
-                else
-                        dprintf(1,"Including standard deviation\n");
-                printf("%12s %9.6f %18s %9.6f \n",
-                        "a  =  ",a,"uncertainty:",siga);
-                printf("%12s %9.6f %18s %9.6f \n",
-                        "b  =  ",b,"uncertainty:",sigb);
-                printf("%19s %14.6f \n","chi-squared: ",chi2);
-                printf("%23s %10.6f %s\n","goodness-of-fit: ",q,
-                	q==1 ? "(no Y errors supplied [dycol=])" : "");
-
-                pearsn(x, y, npt, &r, &prob, &z);
-                
-                printf("%9s %g\n","r: ",r);
-                printf("%12s %g\n","prob: ",prob);
-                printf("%9s %g\n","z: ",z);
-                
-            if (nsigma>0) {                
-                sigma = 0.0;
-                for(i=0; i<npt; i++)
-                    sigma += sqr(y[i] - a*x[i] - b);
-                sigma /= (real) npt;
-                sigma = nsigma * sqrt(sigma);   /* critical distance */
-    
-                for(i=0, j=0; i<npt; i++) {
-                    d = ABS(y[i] - a*x[i] - b);
-                    if (d > sigma) continue;
-                    x[j] = x[i];
-                    y[j] = y[i];
-                    if (dy) dy[j] = dy[i];
-                    j++;
-                }
-                dprintf(0,"%d/%d points outside %g*sigma (%g)\n",
-                        npt-j,npt,nsigma,sigma);
-                npt = j;
-            }
-
+      dprintf(2,"\n");
+      dprintf (1,"Fit:   y=ax+b\n");
+      if (mwt == 0)
+	dprintf(1,"Ignoring standard deviations\n");
+      else
+	dprintf(1,"Including standard deviation\n");
+      printf("%12s %9.6f %18s %9.6f \n",
+	     "a  =  ",a,"uncertainty:",siga);
+      printf("%12s %9.6f %18s %9.6f \n",
+	     "b  =  ",b,"uncertainty:",sigb);
+      printf("%19s %14.6f \n","chi-squared: ",chi2);
+      printf("%23s %10.6f %s\n","goodness-of-fit: ",q,
+	     q==1 ? "(no Y errors supplied [dycol=])" : "");
+      
+      pearsn(x, y, npt, &r, &prob, &z);
+      
+      printf("%9s %g\n","r: ",r);
+      printf("%12s %g\n","prob: ",prob);
+      printf("%9s %g\n","z: ",z);
+      
+      if (mwt==0 && nsigma>0) {                
+	sigma = 0.0;
+	for(i=0; i<npt; i++)
+	  sigma += sqr(y[i] - a*x[i] - b);
+	sigma /= (real) npt;
+	sigma = nsigma * sqrt(sigma);   /* critical distance */
+	
+	for(i=0, j=0; i<npt; i++) {     /* loop over points */
+	  d = ABS(y[i] - a*x[i] - b);
+	  if (d > sigma) continue;
+	  x[j] = x[i];                  /* shift them over */
+	  y[j] = y[i];
+	  if (dy) dy[j] = dy[i];
+	  j++;
+	}
+	dprintf(0,"%d/%d points outside %g*sigma (%g)\n",
+		npt-j,npt,nsigma,sigma);
+	npt = j;
+      }
+      
     } /* mwt */
     
     if (outstr) write_data(outstr);
