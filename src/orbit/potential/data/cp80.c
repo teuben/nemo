@@ -9,6 +9,7 @@
  *
  *	7-mar-92   happy gcc2.0				pjt
  *	  oct-93   get_pattern
+ *        feb-03   ANSI coding
  *
  *
  */
@@ -49,12 +50,7 @@ local double iso_radius = 1.0;
 
 local double iso_radius2;
 
-double sqrt(), sqr();
-
-void inipotential (npar, par, name)
-    int    *npar;
-    double par[];
-    char *name;
+void inipotential (int *npar, double *par, char *name)
 {
     int n;
 
@@ -70,9 +66,7 @@ void inipotential (npar, par, name)
     par[0] = omega;
 }
     
-void potential (ndim,pos,acc,pot,time)
-    int    *ndim;
-    double pos[], acc[], *pot, *time;
+void potential (int *ndim,double *pos,double *acc,double *pot,double *time)
 {
     double a, tmp, rad2, rad, rads, ft, fr, cosp, sinp, costp, sintp;
 
