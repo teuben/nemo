@@ -143,7 +143,8 @@ c Enter halo parameters
       read(*,'(a)') ans
 
       if( ans .eq. 'y' ) then
-         write(*,*) 'central potential, v0, q, coreparam (=Rc/rK)^2, halo Ra?'
+         write(*,*) 'central potential, v0, q, 
+     +               coreparam (=Rc/rK)^2, halo Ra?'
          read(*,*) psi00,v0,q,coreparam,ra
          ihaloflag = 1
          v02 = v0**2
@@ -151,7 +152,8 @@ c Enter halo parameters
          rhochalo=3*v02/(4*pi*ra**2)
          write(*,*) 'rhochalo = ', rhochalo
          r1=v0/sqrt(4*pi*rhochalo)*exp(-psi00/v02)
-c  fix Evans's B constant such that the core radius R_c is prop. to the King radius of the model.
+c  fix Evans's B constant such that the core radius R_c is 
+c  prop. to the King radius of the model.
          a=(2/pi)**2.5*(1-q**2)/q**2/v03/r1**4
          b=0
          c=(2*q**2-1)/(4*pi**2.5*q**2*v0)/r1**2
@@ -161,7 +163,8 @@ c Enter disk parameters
       write(*,*) 'Include disk?'
       read(*,'(a)') ans
       if( ans .eq. 'y' ) then
-         write(*,*) 'Disk mass, scale length, radius, scale height and trunc. width?'
+         write(*,*) 'Disk mass, scale length, radius, 
+     +	             scale height and trunc. width?'
          read(*,*) rmdisk, rdisk, outdisk, zdisk, drtrunc
          idiskflag = 1
 
@@ -187,7 +190,8 @@ c Enter bulge parameters
       write(*,*) 'Include bulge?'
       read(*,'(a)') ans
       if( ans .eq. 'y' ) then
-         write(*,*) 'Bulge central density (ish), cutoff potential, velocity dispersion?'
+         write(*,*) 'Bulge central density (ish), cutoff potential, 
+     +               velocity dispersion?'
          read(*,*) rho1,psiout,sigbulge
          sigbulge2=sigbulge**2
          bulgea=rho1*exp((psi00-psiout)/sigbulge2)
@@ -336,14 +340,15 @@ c  Simpson's rule integration.
          do l=0,lmax,2
             s1(0)=0
             r = 2*dr
-            s1(2)=(r*dr/3.)*(4*adens(l/2+1,1)*(1.0-dr/r)**(l+2)+adens(l/2+1,2))
+            s1(2)=(r*dr/3.)*(4*adens(l/2+1,1)*(1.0-dr/r)**(l+2)+
+     +             adens(l/2+1,2))
             rold = r 
 c  doesn't matter but should be nonzero
 c  to avoid round-off error
             do ir=4,nr,2
                r=ir*dr
                s1a = (r*dr/3.)*(adens(l/2+1,ir-2)*(1.0-2*dr/r)**(l+2)+
-     &              4*adens(l/2+1,ir-1)*(1.0-dr/r)**(l+2)+adens(l/2+1,ir))
+     &           4*adens(l/2+1,ir-1)*(1.0-dr/r)**(l+2)+adens(l/2+1,ir))
                s1(ir) = s1a + s1(ir-2)*(rold/r)**(l+1)
                rold = r
             enddo
@@ -352,7 +357,7 @@ c  to avoid round-off error
             do ir=nr-2,2,-2
                r=ir*dr
                s2a = (r*dr/3.)*(adens(l/2+1,ir+2)*(1.0+2*dr/r)**(1-l)+
-     &              4*adens(l/2+1,ir+1)*(1.0+dr/r)**(1-l)+adens(l/2+1,ir))
+     &          4*adens(l/2+1,ir+1)*(1.0+dr/r)**(1-l)+adens(l/2+1,ir))
                s2(ir) = s2a + s2(ir+2)*(r/rold)**l
                rold = r
             enddo
@@ -362,7 +367,7 @@ c  if this is the first time this harmonic is calculated, use the entire new
 c  value.
             do ir=2,nr,2
                if (l.le.lmaxold) then
-                  apot(l/2+1,ir)=0.25*apot(l/2+1,ir)-0.75*4*pi/(2.*l+1.)*
+                 apot(l/2+1,ir)=0.25*apot(l/2+1,ir)-0.75*4*pi/(2.*l+1.)*
      +                 (s1(ir)+s2(ir))
                else
                   apot(l/2+1,ir)=-4*pi/(2.*l+1.)*
@@ -416,7 +421,8 @@ c  Note that the fake disk potential is zero at the origin.
             iteroutside = iteroutside + 1
             if( iteroutside .gt. 20 ) then
                 write(*,'(''nr='',i4,'' is too small'',
-     +           '', try larger number of radial bins  - exiting program'')') nr
+     +           '', try larger number of radial bins  
+     +          - exiting program'')') nr
                 goto 12345
             endif
             drtidal = 2.0*dr

@@ -26,7 +26,8 @@ c      write(0,*) 'read harmonic file',filename1
 c
 c Read in the correction functions
 c
-      write(0,*) 'Reading disk DF correction functions from cor'//filename
+      write(0,*) 'Reading disk DF correction functions 
+     +            from cor'//filename
 
       open(17,file='cor'//filename,status='old')
       read(17,'(2x, 2g17.7,x,i4)') sigr0,disksr,nrspl

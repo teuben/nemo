@@ -15,8 +15,9 @@
          if( t1 .gt. 80) then
             t1 = 80
          endif
-c         bulgedenspsi=bulgea*(exp(t1)*erf(t1)-sqrt(4*t1/pi)*(1-0.6666667*t1))
-         bulgedenspsi=bulgea*(exp(t1)*erf(sqrt(t1))-sqrt(4*t1/pi)*(1+0.6666667*t1))
-         endif
+c  bulgedenspsi=bulgea*(exp(t1)*erf(t1)-sqrt(4*t1/pi)*(1-0.6666667*t1))
+         bulgedenspsi=bulgea*(exp(t1)*erf(sqrt(t1))-
+     +   sqrt(4*t1/pi)*(1+0.6666667*t1))
+      endif
       return
       end

@@ -11,7 +11,8 @@
 
       real adens(20,0:20000),potmaj(0:20000),
      +     potmajtot(0:20000),potup(0:20000),surden(0:20000),
-     +     potmin(0:20000),vcmaj(0:20000),vctot(0:20000),vertfreq(0:20000),vcbulge(0:20000),
+     +     potmin(0:20000),vcmaj(0:20000),vctot(0:20000),
+     +     vertfreq(0:20000),vcbulge(0:20000),
      +     vertfreqbulge(0:20000),psi2(0:20000)
 
 c  constants for legendre polynomials
@@ -174,7 +175,8 @@ c      enddo
          if (ir.eq.0) then
             vertfreq(ir)=0
          else
-            vertfreq(ir)=sqrt(max(0.,vcmaj(ir)**2+2.*(potup(ir)-potmaj(ir))/0.05**2))/r
+            vertfreq(ir)=sqrt(max(0.,vcmaj(ir)**2+2.*(potup(ir)-
+     +      potmaj(ir))/0.05**2))/r
          endif
       enddo
 
@@ -246,7 +248,8 @@ c      enddo
          if (ir.eq.0) then
             vertfreqbulge(ir)=0
          else
-            vertfreqbulge(ir)=sqrt(vcbulge(ir)**2+2.*(potup(ir)-potmaj(ir))/0.05**2)/r
+            vertfreqbulge(ir)=sqrt(vcbulge(ir)**2+2.*(potup(ir)-
+     +      potmaj(ir))/0.05**2)/r
          endif
       enddo
 
@@ -257,9 +260,11 @@ c      enddo
       write(15,'(''#'')')
 
       ir=0
-      write(15,'(9g16.8)') 0.,vcmaj(1)/dr,(4*vertfreq(1)-vertfreq(2))/3.,
+      write(15,'(9g16.8)') 0.,vcmaj(1)/dr,(4*vertfreq(1)-
+     +     vertfreq(2))/3.,
      +     surden(ir),
-     +     vctot(ir),vcbulge(ir),(4*vertfreqbulge(1)-vertfreqbulge(2))/3.,
+     +     vctot(ir),vcbulge(ir),(4*vertfreqbulge(1)-
+     +     vertfreqbulge(2))/3.,
      +     potmajtot(ir),
      +     psi2(ir)
 

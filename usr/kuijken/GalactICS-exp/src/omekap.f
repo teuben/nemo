@@ -21,7 +21,8 @@ c the boundary condition at r=0 to be even for pot, omega and kappa.
         nreq=0
 c read only every other step, since remainder was linearly 
 c interpolated anyway
-77      read(13,*,end=99) rr(nreq+2),t,t,t,vc,t,t,psi(nreq+2),psirr(nreq+2)
+77      read(13,*,end=99) rr(nreq+2),t,t,t,vc,t,t,
+     +  psi(nreq+2),psirr(nreq+2)
         om(nreq+2)=vc/rr(nreq+2)
         nreq=nreq+1
         read(13,*,end=99) 
@@ -76,6 +77,7 @@ c in this potential om^2=a/r^3+3b/r^5, kap^2=a/r^3-3b/r^5
          call splintd(rr,ak,ak2,nreq,r,fka)
          endif
       return
-999   write(0,*) 'no file with frequencies corresponding to the potential!'
+999   write(0,*) 'no file with frequencies corresponding 
+     +            to the potential!'
       stop
       end

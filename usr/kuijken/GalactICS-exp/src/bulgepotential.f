@@ -53,20 +53,23 @@ c               endif
 c      write(*,*) 'a(',l,') =',s,'at r=',r
             enddo
  77      enddo
-c now get the potential harmonics of this new density. Simpson's rule integration. (BT 2-208)
+c now get the potential harmonics of this new density. 
+C Simpson's rule integration. (BT 2-208)
       do l=0,lmax,2
          s1(0)=0
          do ir=2,nr,2
             r=ir*dr
             s1(ir)=s1(ir-2)+(dr/3.)*
-     +           (adens(l/2+1,ir-2)*(r-2*dr)**(l+2)+4*adens(l/2+1,ir-1)*(r-dr)**(l+2)+
+     +           (adens(l/2+1,ir-2)*(r-2*dr)**(l+2)+4*adens(l/2+
+     +           1,ir-1)*(r-dr)**(l+2)+
      +           adens(l/2+1,ir)*r**(l+2))
             enddo
          s2(nr)=0
          do ir=nr-2,2,-2
             r=ir*dr
             s2(ir)=s2(ir+2)+(dr/3.)*
-     +           (adens(l/2+1,ir+2)*(r+2*dr)**(1-l)+4*adens(l/2+1,ir+1)*(r+dr)**(1-l)+
+     +           (adens(l/2+1,ir+2)*(r+2*dr)**(1-l)+4*adens(l/2+
+     +            1,ir+1)*(r+dr)**(1-l)+
      +           adens(l/2+1,ir)*r**(1-l))
             enddo
          do ir=2,nr,2
@@ -78,7 +81,8 @@ c  Calculate the radial gradients
 c
          do ir=2,nr,2
             bulgefr(l/2+1,ir)=-4*pi/(2.*l+1.)*
-     +              (-(l+1)*s1(ir)/(ir*dr)**(l+2)+ l*s2(ir)*(ir*dr)**(l-1))
+     +              (-(l+1)*s1(ir)/(ir*dr)**(l+2)+ 
+     +              l*s2(ir)*(ir*dr)**(l-1))
             enddo
          enddo
 c now interpolate the gaps 
@@ -92,8 +96,10 @@ c the remaining multipoles are zero there.
          enddo
       do ir=1,nr-1,2
          do l=0,lmax,2
-            bulgepot(l/2+1,ir)=(bulgepot(l/2+1,ir-1)+bulgepot(l/2+1,ir+1))/2.
-            bulgefr(l/2+1,ir)=(bulgefr(l/2+1,ir-1)+bulgefr(l/2+1,ir+1))/2.
+            bulgepot(l/2+1,ir)=(bulgepot(l/2+1,ir-1)+
+     +      bulgepot(l/2+1,ir+1))/2.
+            bulgefr(l/2+1,ir)=(bulgefr(l/2+1,ir-1)+
+     +      bulgefr(l/2+1,ir+1))/2.
             enddo
          enddo
 c finally reset the potential at the origin to psi00
