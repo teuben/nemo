@@ -1,0 +1,46 @@
+.TH ROSTAT 1NEMO "2 April 1993"
+.SH NAME
+rostat \- ROSTAT statistical routines
+.SH SYNOPSIS
+\fBrostat\fP \fBin=... out=...\fP [parameter=value] \fB| rostat.exe\fP
+.SH DESCRIPTION
+\fIrostat\fP contains the current versions of statistical
+routines being tested by T. Beers, K. Flynn, and K. Gebhardt for robust
+estimation of simple statistics.
+.PP
+Alternative means to classify coefficients of skewness and kurtosis, called
+symmetry and tail indeces, can be used as a more reliable and robust 
+means of comparing
+two different datasets to detect deviations from gaussian (normal)
+distribution.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP\fItable\fP
+Input file, a table. No default.
+.TP 20
+\fBout=\fP\fIlog-file\fP
+Output logfile. No default.
+.TP 20
+\fBerrors=\fP\fBt|f\fP
+Include errors. Default: \fBt\fP.
+.TP 20
+\fBnsim=\fP\fIint\fP
+Number of simulations in Boot. [Default: \fB1\fP].
+.SH FILES
+Various 
+.SH AUTHOR
+.nf
+Timothy Beers.
+.fi
+.SH SEE ALSO
+.nf
+Beers, T.C., Flynn, K. and Gebhardt, K. 1990, \fIA.J.\fP \fB100\fP, 32.
+Bird, T. and Beers, T. 1993, \fIA.J.\fP \fB105\fP, 1596.
+.fi
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+02-apr-93	V1.0 NEMO driver created	PJT
+.fi
