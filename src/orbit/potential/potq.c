@@ -2,6 +2,7 @@
  * POTQ: query a potential with various properties
  *
  *	Peter Teuben		23-feb-02       Created
+ *                              13-aug-02
  */
 
 #include <stdinc.h>
@@ -11,7 +12,7 @@
 
 string defv[] = {
     "potname=???\n  Name of potential",
-    "potpars=\n     Parambeters for potential (1st one is pattern speed)",
+    "potpars=\n     Parameters for potential (1st one is pattern speed)",
     "potfile=\n     Any optional data file associated with potential",
     "r=0:2:0.1\n    Radii to sample to find Qt_max",
     "t=0.0\n        Time to test potential at, if relevant",
@@ -19,7 +20,7 @@ string defv[] = {
     "format=%g\n    Format used to print numbers",
     "niter=10\n     max #iterations to ",
     "eps=0.001\n    minimal fractional change in qt to abort iterations",
-    "VERSION=1.0a\n 23-feb-02 PJT",
+    "VERSION=1.0b\n 13-aug-02 PJT",
     NULL,
 };
 
