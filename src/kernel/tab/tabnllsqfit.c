@@ -7,6 +7,7 @@
  *      11-sep-02  1.1e error/warning if fit is bad, but can still write out residuals
  *      31-oct02   1.2  add "fourier m=1" mode as 'arm' for Rahul - problems fitting  as 
  *                      AMPHASE though
+ *      21-nov-02  1.3  implemented nsigma for "line" and "arm"
  *
  *
  *  line       a+bx
@@ -41,7 +42,7 @@ string defv[] = {
     "lab=\n             Mixing parameter for nllsqfit",
     "itmax=50\n         Maximum number of allowed nllsqfit iterations",
     "numrec=f\n         Try the numrec routine instead?",
-    "VERSION=1.2\n      31-oct-02 PJT",
+    "VERSION=1.3\n      21-nov-02 PJT",
     NULL
 };
 
@@ -483,7 +484,7 @@ do_line()
 {
   real *x, *y, *dy, *d;
   int i,j, nrt, mpar[2];
-  real fpar[2], epar[2];
+  real fpar[2], epar[2], sigma, s;
   int lpar = 2;
     
   if (nxcol < 1) error("nxcol=%d",nxcol);
@@ -505,6 +506,23 @@ do_line()
   fitderv = derv_line;
 
   nrt = (*my_nllsqfit)(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
+  if (nsigma > 0) {
+    for(i=0, sigma=0.0; i<npt; i++)
+      sigma += sqr(d[i]);
+    sigma /= (real) npt;
+    sigma = nsigma*sqrt(sigma);
+    for (i=0, j=0; i<npt; i++) {
+      s = ABS(d[i]);
+      if (s > sigma) continue;
+      x[j] = x[i];
+      y[j] = y[i];
+      if (dy) dy[j] = dy[i];
+      j++;
+    }
+    dprintf(0,"%d/%d points outside %g*sigma (%g)\n",npt-j,npt,nsigma,sigma);
+    npt = j;
+    nrt = (*my_nllsqfit)(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
+  }
   printf("nrt=%d\n",nrt);
   printf("Fitting a+bx:  \na= %g %g \nb= %g %g\n", fpar[0],epar[0],fpar[1],epar[1]);
   if (nrt==-2)
@@ -734,7 +752,7 @@ do_arm()
 {
   real *x, *y, *dy, *d;
   int i,j, nrt, mpar[3];
-  real fpar[3], epar[3],amp,pha,amperr,phaerr;
+  real fpar[3], epar[3],amp,pha,amperr,phaerr,sigma,s;
   int lpar = 3;
     
   if (nxcol < 1) error("nxcol=%d",nxcol);
@@ -756,6 +774,23 @@ do_arm()
   fitderv = derv_arm;
 
   nrt = (*my_nllsqfit)(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
+  if (nsigma > 0.0) {
+    for(i=0, sigma=0.0; i<npt; i++)
+      sigma += sqr(d[i]);
+    sigma /= (real) npt;
+    sigma = nsigma*sqrt(sigma);
+    for (i=0, j=0; i<npt; i++) {
+      s = ABS(d[i]);
+      if (s > sigma) continue;
+      x[j] = x[i];
+      y[j] = y[i];
+      if (dy) dy[j] = dy[i];
+      j++;
+    }
+    dprintf(0,"%d/%d points outside %g*sigma (%g)\n",npt-j,npt,nsigma,sigma);
+    npt = j;
+    nrt = (*my_nllsqfit)(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
+  }
   printf("nrt=%d\n",nrt);
 #ifdef PHASEAMP
   printf("Fitting a+b.cos(x-c)/DPR:  \na= %g %g \nb= %g %g\nc= %g %g\n", 
