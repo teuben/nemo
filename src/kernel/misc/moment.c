@@ -27,8 +27,6 @@ void ini_moment(Moment *m, int mom, int ndat)
 {
     int i;
 
-    dprintf(1,"ini_moment(%d,%d)\n",mom,ndat);
-
     m->n = 0;
     m->mom = mom;
     if (mom < 0)
@@ -64,29 +62,25 @@ void accum_moment(Moment *m, real x, real w)
         m->sum[i] += sum;
         sum *= x;
     }
-    if (m->ndat > 0) {     /* if moving moments .... */
-      if (m->idat < 0)            /* first time around */
-	m->idat=0;
-      else if (m->n <= m->ndat)    /* buffer not full yet */
+    if (m->ndat > 0) {                   /* if moving moments .... */
+      if (m->idat < 0)                        /* first time around */
+	m->idat=0;  
+      else if (m->n <= m->ndat)             /* buffer not full yet */
 	m->idat++;
-      else {                      /* buffer full, first remove old */
+      else {                            /* buffer full, remove old */
 	m->idat++;
-	if (m->idat == m->ndat) m->idat = 0;
-	i = m->idat + 1;
-	if (i == m->ndat)  i = 0;
+	if (m->idat == m->ndat) m->idat = 0;      /* new point loc */
 
-	dprintf(1,"del: %d\n",i);
-	xx = m->dat[i];                  /* remove the old point */
-	sum = m->wgt[i];
+	xx = m->dat[ m->idat ];            /* remove the old point */
+	sum = m->wgt[ m->idat ];
+	dprintf(2,"del: %g\n",xx);
 	for (i=0; i<= m->mom; i++) {
 	  m->sum[i] -= sum;
 	  sum *= xx;
 	}
-#if 0
 	m->n--;
-#endif
       }
-      dprintf(1,"add: %d\n",m->idat);
+      dprintf(2,"add: %d\n",m->idat,x);
 
       m->dat[m->idat] = x;
       m->wgt[m->idat] = w;
@@ -222,12 +216,26 @@ real kurtosis_moment(Moment *m)
 
 real min_moment(Moment *m)
 {
-    return m->datamin;
+  int i, n;
+  if (m->ndat > 0) {
+    n = MIN(m->ndat, m->n);
+    m->datamin = m->dat[0];
+    for (i=1; i<n; i++)
+      m->datamin = MIN(m->dat[i], m->datamin);
+  }
+  return m->datamin;
 }                                        
 
 real max_moment(Moment *m)
 {
-    return m->datamax;
+  int i, n;
+  if (m->ndat > 0) {
+    n = MAX(m->ndat, m->n);
+    m->datamax = m->dat[0];
+    for (i=1; i<n; i++)
+      m->datamax = MAX(m->dat[i], m->datamax);
+  }    
+  return m->datamax;
 }                                        
 
 #ifdef TESTBED
@@ -237,13 +245,25 @@ string defv[] = {
     "in=???\n       Table with values in column 1",
     "moment=-1\n    Moment to compute (-4..-1 special, 0,1,2,...)",
     "minmax=f\n     Show datamin & max instead ? ",
-    "median=t\n     Show median ?",
+    "median=f\n     Show median ?",
     "maxsize=0\n    If > 0, size for moving moments instead\n",
     "VERSION=0.2\n  2-feb-05 PJT",
     NULL,
 };
 
 string usage = "(Moving)Moments TESTBED";
+
+void debug_moment(int d, Moment *m)
+{
+  int i, n;
+  if (m->ndat == 0) return;
+
+  n = MIN(m->ndat, m->n);
+  dprintf(d,"moment data[%d]: ",n);
+  for (i=0; i<n; i++)
+    dprintf(d,"%g ",m->dat[i]);
+  dprintf(d,"\n");
+}
 
 void nemo_main(void)
 {
@@ -261,19 +281,22 @@ void nemo_main(void)
       x = atof(line);
       accum_moment(&m,x,1.0);
       if (maxsize > 0) {
+	debug_moment(1,&m);
+	printf("%d ",n_moment(&m));
 	if (Qminmax)
 	  printf("%g %g\n",min_moment(&m), max_moment(&m));
 	else if (Qmedian)
-	  printf("%d %g\n",n_moment(&m),median_moment(&m));
+	  printf("%g\n",median_moment(&m));
 	else
-	  printf("%d %g\n",n_moment(&m),show_moment(&m,mom));
+	  printf("%g\n",show_moment(&m,mom));
       }
     }
     if (maxsize == 0) {
+      printf("%d ",n_moment(&m));
       if (Qminmax)
         printf("%g %g\n",min_moment(&m), max_moment(&m));
       else if (Qmedian)
-	printf("%d %g\n",n_moment(&m),median_moment(&m));
+	printf("%g\n",median_moment(&m));
       else
         printf("%g\n",show_moment(&m,mom));
     }
