@@ -1,18 +1,22 @@
-.TH HDFGRID 1NEMO "3 December 2004"
+.TH HDFGRID 1NEMO "15 December 2004"
 .SH NAME
 hdfgrid \- Regrid a polar HDF4 SDS to cartesian image
 .SH SYNOPSIS
 \fBhdfgrid\fP [parameter=value]
 .SH DESCRIPTION
 \fBhdfgrid\fP regrids HDF (SDS) output files that are assumed to
-be in polar (rad-phi) coordinates. This program was developed 
+be in polar (rad-phi) coordinates. This program was initially developed 
 for the bar-hydro project (Piner, Stone & Teuben, ApJ - nov 1995)
-using a version of \fBcmhog\fP, though it can also handle
-rank=3 SDS files for which the last dimension is 1, as long
+using a version of \fBcmhog\fP, though it can now also handle
+rank=3 SDS files for which the last dimension (in HDF the first)
+is 1, as long
 as the first two dimensions are radius and angle. Another constraint
 is that the data must fill half the plane (mirror=t) or a full
 plane (mirror=f), otherwise interpolation errors will dominate
-the gaps in the region of missing data.
+the gaps in the region of missing data. There are some 
+keywords (\fBphi1, scale2, phi3\fP) that allow you to rotate and
+scale your data around the positive X-axis into
+either -pi/2:pi/2 (mirror=t) or -pi:pi (mirror=f).
 .PP
 The (2D) four-point interpolation that is used in regridding is
 based on the one in \fIcmhog/movie.src\fP, but includes correct
@@ -20,6 +24,8 @@ interpolations for points near the Y axis that need contributions
 from the phantom "mirror" points (recall that the files are
 assumed to contain X>0 information only, the X<0 plane is assumed
 from point symmetry around the origin). 
+.PP
+It is also possible to simply average the polar grid values 
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -31,7 +37,7 @@ Input file (HDF SD). No default.
 Output file, in \fIimage(5NEMO)\fP format.
 .TP
 \fBselect=\fP\fIframe_no\fP
-Select which SDS from the file (1=first). 
+Select which SDS from the file (1=first). See also \fBzvar=\fP below.
 [Default: \fB1\fP].
 .TP
 \fBnx=\fP\fIX_pixels\fP
@@ -62,6 +68,13 @@ a linear combination of \fBvx\fP, \fBvy\fP
 to get an idea of the velocity field under a "middle" position angle.
 Default: not used, select= is used.
 .TP
+\fBpic=t|f\P
+Use the Particle In Cell method of gridding? This method is simular, but
+not as sophisticated as \fIsnapgrid(1NEMO)\fP. The alternative, and also
+the default method, is 4-point interpolation from the corner cell in
+polar coordinates in which the cartesian cell center lies.
+[Default: \fBt\fP].
+.TP
 \fBmirror=t|f\P
 Mirror points? [Default: \fBt\fP].
 .TP
@@ -74,6 +87,25 @@ Shifts the values in theta by \fBit0\fP pixels. This is equivalent
 by rotating the image counterclockwise by that many pixels. Useful
 for double bars and manually rotating the frame of reference
 (Maciejewski et al). [Default: \fB0\fP]
+.TP
+\fBphi1=\fP
+The first operation is a rotation. This angle (in radians) will be added to the 
+angles. 
+Default: 0
+.TP
+\fBscale2=\fP
+The second operation is a scaling. All angles are multiplies by this number.
+.TP
+\fBphi3=\fP
+The third, and last, operation is a rotation again. 
+This angle (in radians) will be added to the angles after the previous two.
+It was added for convenience, since in principle \fBphi1\fP and 
+\fPscale2\fP can get you anywhere on the plane. The resulting formulae
+is:
+.nf
+	phi_out = (phi  + \fBphi1\fP) * \fBscale2\fP  + \fBphi3\fP
+.fi
+Default: 0
 .SH EXAMPLES
 Often used in scripts, here is a snippet from a script that regrids an
 HDF file into TIFF for movie recording, but applying a non-linear scaling
@@ -93,7 +125,7 @@ could not be used. (2) fitstiff cannot read from a pipe,  hence the extra
 annoying disk file \fBtmp$$\fP. (3) Lookup RGB color tables are in 
 \fB$NEMODAT/lut\fP.
 .SH FILES
-~/usr/pjt/cmhog  	hdfgrid.c
+src/image/hdf/cmhog  	hdfgrid.c
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
@@ -103,4 +135,5 @@ Peter Teuben
 12-dec-99	V1.3 added it0= shifting arrays to fake a rotation, for Witold	PJT
 27-aug-02	V1.5 added mirror= to allow for full grid simulations	PJT
 3-dec-04	V2.0 increased MAXRANK to handle 2+1 dim input files	PJT
+15-dec-04	V2.1 added pic=, and documented the new phi1,scale2,phi3 transformations	PJT
 .fi
