@@ -53,6 +53,7 @@
 /*    28-sep-01 added bitpix=64 support - portability not solved yet    */
 /*              seems bitpix=-64 is working ok                          */
 /*    12-oct-01 new standard added FITS reference                       */
+/*    23-jul-02 add fitresize                                           */
 /* ToDo:                                                                */
 /*  - BLANK substitution                                                */
 /************************************************************************/
@@ -260,6 +261,23 @@ FITS *fitopen(string name,string status,int naxis,int *nsize)
 
   return f; /* Return an opaque (although typed) pointer */
 }
+
+/* Warning: should not use this for the miriad based version......
+ */
+
+#if 0
+void fitresize(FITS *file,int naxis,int *nsize)
+{
+  int i;
+  char keyword[9];
+
+  for(i=0; i < naxis; i++) {
+      file->axes[i] = nsize[i];
+      sprintf(keyword,"NAXIS%d",i+1);
+      fitwrhdi(file,keyword,nsize[i]);
+  }
+}
+#endif
 /**********************************************************************/
 void fitclose(FITS *file)
 /*

@@ -12,6 +12,7 @@
  *    7-aug-01  clarified ncards
  *   18-dec-01  renamed this file from fitsio.h to fitsio_nemo.h
  *              and added optional CFITSIO wrapper stuff
+ *   23-jul-02  add fitresize
  */
 
 #ifndef _fitsio_nemo_h
@@ -101,6 +102,7 @@ typedef struct {
 
 FITS *fitopen (string, string, int, int *);
 void fitclose (FITS *),
+     fitresize(FITS *, int, int *),
      fitsetpl (FITS *, int, int *),
      fitread  (FITS *, int, FLOAT *),
      fitwrite (FITS *, int, FLOAT *),
