@@ -106,6 +106,7 @@ string action;
 extern string *burststring(string,string);
 
 /* local functions */
+int zoom(void);
 real xtrans(real), ytrans(real), ixtrans(real), iytrans(real);
 int pl_cursor(real*, real*, char *);
 int pl_cursor1(real, real, real*, real*, char *);
@@ -343,21 +344,34 @@ gettable()
 
 } /* gettable */
 
-void tryme(void)
+int zoom(void)
 {
   int mode, posn;
   char c;
   float xref, yref, x, y;
 
   /* assume it has cursor mode */
+  printf("Old box: X: %g %g Y: %g %g\n", xplot[0], xplot[1], yplot[0], yplot[1]);
+
   mode = 0;
   posn = 0;
   pgband_(&mode, &posn, &xref, &yref, &x, &y, &c, 1);
+  if (c=='X') return 0;
   mode = 2;
   xref = x;
   yref = y;
   pgband_(&mode, &posn, &xref, &yref, &x, &y, &c, 1);
   printf("Box: %g %g %g %g Char: %c\n", xref, yref, x, y, c);
+  if (c=='X') return 0;
+
+  xmin = ixtrans((double)xref);
+  xmax = ixtrans((double)x);
+  ymin = iytrans((double)yref);
+  ymax = iytrans((double)y);
+
+  ini_display();
+  printf("New box: X: %g %g Y: %g %g\n", xplot[0], xplot[1], yplot[0], yplot[1]);
+  return 1;
 }
 
 
@@ -539,7 +553,8 @@ interact()
       }
       break;
     case 'z':  
-      tryme();    /* draw a box to zoom into */
+      while (zoom())
+	;
       break;
     case '\0':
       if (sliders[s].stepper == 1) {
@@ -563,9 +578,7 @@ interact()
   return s+1;
 }
 
-char *word(s,n)
-char *s;
-int n;
+char *word(char *s,int n)
 {
     string *sp;
     permanent char wordn[40];
@@ -579,8 +592,7 @@ int n;
     return wordn;
 }
 
-char *show_slider(s)
-int s;
+char *show_slider(int s)
 {
     permanent char line[MAXLINLEN];
 
@@ -589,8 +601,7 @@ int s;
     return line;
 }
 
-table_output(name)
-string name;
+table_output(string name)
 {
     int i, j, nvis=0;
     stream ostr;
@@ -779,14 +790,12 @@ re_display(int k)       /* redisplay all, or slider 'k' (1..nsliders) */
     plflush();
 }	
 
-real xtrans(x)
-real x;
+real xtrans(real x)
 {
     return (2.0 + 16.0*(x-xplot[0])/(xplot[1]-xplot[0]));
 }
 
-real ytrans(y)
-real y;
+real ytrans(real y)
 {
     return (2.0 + 16.0*(y-yplot[0])/(yplot[1]-yplot[0]));
 }
