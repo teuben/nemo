@@ -12,6 +12,7 @@
  *     21-jun-92 V3.2a  fixed the integrator error when faking diss/diff   PJT
  *     29-sep-92 V4.0 allow max grid size                       PJT
  *		      options= fix in code_io.c
+ *     16-feb-03 V4.0a use get_pattern()			pjt
  *
  * To improve:  use allocate() for number of particles; not static
  */
@@ -37,7 +38,7 @@ string defv[] = {
     "sigma=0\n            diffusion angle (degrees) per timestep",
     "seed=0\n		  random seed",
     "headline=PotCode\n   random mumble for humans",
-    "VERSION=4.0\n	  6-oct-92 PJT",
+    "VERSION=4.0a\n	  15-feb-03 PJT",
     NULL,
 };
 
@@ -72,7 +73,7 @@ void setparams()
     pot = get_potential (getparam("potname"),
        			 getparam("potpars"), 
 			 getparam("potfile"));
-    ome = getdparam("potpars");     /* pattern speed first par of potential */
+    ome = get_pattern();     /* pattern speed first par of potential */
     ome2 = ome*ome;
     half_ome2 = 0.5 * ome2;
     two_ome = 2.0 * ome;
@@ -104,7 +105,6 @@ real time;			/* current time */
     vector lacc,lpos;
     real   lphi;
     int    ndim=NDIM;
-    double sqr();
 
     for (p = btab; p < btab+nb; p++) {		/* loop over bodies */
         SETV(lpos,Pos(p));
