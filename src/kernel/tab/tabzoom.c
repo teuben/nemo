@@ -349,11 +349,12 @@ gettable()
 
 } /* gettable */
 
+
 int zoom(void)
 {
   int mode, posn;
   char c;
-  float xref, yref, x, y;
+  float xref, yref, x, y, tmp;
 
   /* assume it has cursor mode */
   printf("Old box: X: %g %g Y: %g %g\n", xplot[0], xplot[1], yplot[0], yplot[1]);
@@ -368,6 +369,9 @@ int zoom(void)
   pgband_(&mode, &posn, &xref, &yref, &x, &y, &c, 1);
   printf("Box: %g %g %g %g Char: %c\n", xref, yref, x, y, c);
   if (c=='X') return 0;
+
+  if (x < xref) {  tmp=x; x=xref; xref=tmp; }
+  if (y < yref) {  tmp=y; y=yref; yref=tmp; }
 
   xmin = ixtrans((double)xref);
   xmax = ixtrans((double)x);
@@ -405,7 +409,7 @@ string interact_help = "Menu of commands:\n\n\
     q           quit\n\
     !cmd        execute a shell command 'cmd'\n\
     |cmd        pipe visible data as ascii table to 'cmd'\n\
-    ?           this help plus status\n\n";
+    ?           this help plus status";
 
 interact()
 {
@@ -508,7 +512,7 @@ interact()
       done = TRUE;
       break;
     case '?':  
-      printf("%s\n",interact_help);
+      printf("%s\n\n",interact_help);
       printf("Xvar=%s Yvar=%s\n",xname,yname);
       break;
     case 'q':  
@@ -743,13 +747,14 @@ stop_display()
 re_display(int k)       /* redisplay all, or slider 'k' (1..nsliders) */
 {
     permanent int color=-1;	/* remember current paint color */
-    int i, j, nplot, jhi, jlo, p_color;
+    int i, j, nplot, jhi, jlo, p_color, nzoom;
     real s, t1, t2, slo, shi;
     bool vis, Qerase;
     slider *sp;
     point *pp;
 	
     nplot = 0;  /* counter of points plotted this turn */
+    nzoom = 0;  /* counter of points within zoomed box */
     Qerase = TRUE;	/* can this yapp erase points or not ? */
     if (k==0) {
        jlo = 0;   jhi = nsliders;	/* do all */
@@ -784,8 +789,9 @@ re_display(int k)       /* redisplay all, or slider 'k' (1..nsliders) */
         }
       	points[i].oldvis = points[i].visib;
 	points[i].visib  = vis;
-
-    }		
+	if (2 < points[i].x && points[i].x < 18 &&
+	    2 < points[i].y && points[i].y < 18) nzoom++;
+    }
 
     t2 = 60000.0*cputime();
     dprintf(1,"CPU select = %g ms\n",t2-t1);
@@ -817,7 +823,7 @@ re_display(int k)       /* redisplay all, or slider 'k' (1..nsliders) */
     t2 = 60000.0*cputime();
     dprintf(1,"CPU display = %g ms\n",t2-t1);
     t1=t2;
-    dprintf(0,"DISPLAY: %d/%d points visible\n",nplot,npoints);
+    dprintf(0,"DISPLAY: %d/%d/%d points visible\n",nzoom,nplot,npoints);
     plflush();
 }	
 
