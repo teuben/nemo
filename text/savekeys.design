@@ -1,0 +1,52 @@
+"savekeys" design (external)
+
+
+The idea is to not only be able to set input parameters to a program,
+the ones that control the program and its output, but also have
+output parameters be set, that can be used in programs along the pipe.
+
+
+An example of internal parameters re-use within a program:
+(there often is not a good reason for this)
+
+   snapgrid in=snap.dat out=ccd.dat nx=200 ny=\$nx
+
+An example of keyword macro files:
+
+   nemoinp 1:10:2 > c.lis
+   ccdplot in=ccd.dat contour=@c.lis
+
+
+
+
+
+New safekeys:
+
+
+Each program, like the string defv[] array, will need to define an array
+of keywords that can be exported. Sort of as follows:
+(we use a similar structure to defv[], so we can re-use the routines
+in getparam.c)
+
+string savekeys[] = {
+	"rms=d\n	RMS value in a selection region of the map",
+	"mean=d\n	MEAN value in a selection region of the map",
+	"n=i\n          Number of pixels in selected region of map",
+	"quartiles=d4\n Quartiles (an array)",
+	NULL,
+};
+
+
+User code would do something like this:
+
+
+  double rms, q[4];
+
+  save_key("rms",1, &rms);
+  save_key("quartiles", 4, q);
+  
+It also turns out I once did write a prototype for this
+	void kprintf(string key, const string fmt, ...)
+but this was designed to store keywords in ascii format, which we are
+now arguing we should do in binary using NEMO's filestruct(3NEMO)
+format. Also , the name is in use in the kernel and may cause confusion.
