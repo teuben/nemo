@@ -3,6 +3,16 @@
  *        for a given probability distribution f(x),
  *        taken between values a and b.
  *
+ *
+One normally uses acceptance-rejection methods, which are
+in the literature, including Knuth, or acceptance-replacement
+methods, which are not.  Even then, there are lots of choices.
+
+One of the best sources of algorithms is the book by
+Luc Devroye.  There are also programs in many of the
+libraries.  I find most of them at best fair.
+ *
+ *
  *	25-feb-92  pjt   happy gccV2.0 
  *       7-sep-95  pjt   prototyping
  *	16-feb-97  pjt   fixed for SINGLEPREC 
