@@ -1,0 +1,140 @@
+.TH SNAPFIT 1NEMO "5 June 1992"
+.SH NAME
+snapfit \- fit a (6D) snapshot to a (3D) data cube \fI** in development ** \fP
+.SH SYNOPSIS
+\fBsnapfit\fP [parameter=value]
+.SH DESCRIPTION
+\fIsnapfit\fP attempts to match an observed 3D datacube
+(X and Y are positions on the sky, Z is the radial velocity) with
+a 6D model snapshot (with the usual \fBx,y,z,vx,vy,vz\fP coordinates,
+see \fIbodytrans(1NEMO)\fP). It finds the best match by varying
+the two viewing angles, two scale factors and three offsets of the model.
+The scalefactors in X and Y are forced to be the same, 
+whereas the one in Z is usually independantly determined
+(though this can be changed with the parameter \fBzmode\fP).
+.PP
+Weights can be given to invidual model points, as
+well as (to some degree) the data points. 
+The weight of the data will be taken
+as the intensity at the observed pixel, it's up to pre-processing
+to set proper weights. The weight of the model can be modified using a
+standard \fIbodytrans(5)\fP expression, applied to each particle
+individually, using the \fBweight\fP parameter.
+.PP
+Currently the match is done in a rather primitive way: 
+with respect to their center of mass 
+the two moments of inertia 
+(see \fIsnapinert(1NEMO)\fP) of the model and data are compared,
+after which
+the rotation matrix for each is derived
+(see also \fIsnaprect(1NEMO)\fP). Then
+the product of one and the inverse of the other is compared with the unity
+matrix, and the norm of this difference matrix is going to be
+minimized (a perfect fit should return 0). We shall refer to this norm
+as \fBsum\fP. The output will contain the \fBlog(sum)\fP.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP\fIin_snapshot\fP
+Input model \fIsnapshot(5NEMO)\fP. No default.
+.TP 20
+\fBcube=\fP\fIin_image\fP
+Input data. This can be either a 3D datacube in standard
+\fIimage(5NEMO)\fP format or an ascii table, with \fBx,y,vz,I\fP in the
+first four columns. In the latter case 
+the intensity \fBI\fP is optional, a default
+value of 1.0 will be taken for data with missing intensity.
+No default.
+.TP 20
+\fBcutoff=\fP\fIdata_cutoff\fP
+Cutoff applied to data cube, if needed: data values less then
+\fIdata_cutoff\fP are ignored. Default: no cutoff given,
+all data from image (table) are used.
+.TP 20
+\fBweight=\fP\fIbody_weight\fP
+Weight (see \fIbodytrans(1NEMO)\fP)
+given to model particles. Bodies with weight less or equal zero
+are ignored. [default: \fB1\fP].
+.TP
+\fBout=\fP\fIout_snapshot\fP
+Optional output \fIsnapshot(1NEMO)\fP. It can also be
+controlled by the \fBminchi\fP and \fBframe\fP
+parameters. No name, and this is the
+default, there will be no output snapshot. If selected, 
+of the phase space coordinates
+only the \fBx\fP, \fBy\fP and \fBz\fP coordinates are
+written. \fI ** not implemented ** \fP
+.TP
+\fBminchi=\fP
+Minimum \fBlog(sum)\fP needed for an output snapshot.
+ \fI ** not implemented ** \fP
+.TP
+\fBframe=model|data\fP
+Select to output the re-oriented snapshot in \fBmodel\fP or
+\fBdata\fP coordinates. [Default: \fBmodel\fP].
+ \fI ** not implemented ** \fP
+.TP
+\fBzmode=sim|sep\fP
+Selection if the \fBzvar\fP coordinate should be treated equal
+(\fBsim\fP)
+or seperately (\fBsep\fP) in the minimization. [Default: \fBsep\fP].
+.TP
+\fBtheta1=\fP\fIi1,i2,...\fP
+the first rotation angle to fit. Fixed values can be given, in which
+case these are tested against. By default no values are given.
+This angle can be associated with the inclination of a disk, if this
+is kept in mind.
+.TP
+\fBtheta2=\fP\fIp1,p2,...\fP
+the second rotation angle to fit. \fIsee comments above.\fP
+This angle can be associated with the position angle of a disk, if this
+is kept in mind.
+.TP
+\fBcontour=\fP\fIout_image\fP
+Optional output file, in which for all input angles
+(\fItheta1,theta2\fP)
+the values of the logarithm of the norm of the difference
+matrix (\fBlog(sum)\fP) is stored in standard
+\fIimage(5NEMO)\fP format. 
+Contour plots can be made with \fIccdplot(1NEMO)\fP
+Default: none.
+.TP
+\fBiter=\fP
+Number of extra iterations needed for the best model from choosen
+values of the matrix of \fItheta1,theta2\fP angles to narrow down
+the search.
+\fI ** not implemented ** \fP
+.TP
+\fBtimes=\fP\fIt1:t2,t3,...\fP
+Standard selection of the (ranges of) times to be selected from the
+input snapshot [Default: \fBall\fP].
+.\" .TP
+.\" \fBmaxreport=\fP\fI
+.\" In case any of the initial conditions \fBtheta1\fP or \fBtheta2\fP
+.\" were given, this will be the maximum number of best chi-squares.
+.\" By default, all will be given. With this keyword the output can
+.\" be controlled.
+.\"  \fI ** not implemented ** \fP
+.SH BUGS
+A \fItime-scale\fP factor should be absorbed by the 
+user into the \fBzvar\fP
+expression.  This is the factor by which the
+(model/data?) velocities are multiplied in order to
+compute a properly dimensioned for chi-squared. This problem is only
+partially overcome by using \fBzmode=separate\fP
+.PP
+\fIsnapfit\fI only works for \fBNDIM=3\fP: the input data must be
+a 3D datacube.
+.PP
+May work reasonably well for single features to fit, for double features
+a principle component analysis may have to be done beforehand.
+.SH SEE ALSO
+tablsqfit(1NEMO), snaprect(1NEMO), snapinert(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+30-May-92	V0.0 Prototype created               	PJT
+.fi
