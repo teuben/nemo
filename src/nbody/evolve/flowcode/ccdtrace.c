@@ -6,6 +6,7 @@
  *
  *  31-jul-96  Created (for use by Mike Regan to aid printing
  *             out additional values from "orbits" produced by flowcode)
+ *  26-sep-02  file_lines fix
  *
  */
 
@@ -19,7 +20,7 @@ string defv[] = {
     "out=???\n      Output table of X,Y,I coordinates",
     "xytab=???\n    Input table of X,Y coordinates",
     "nmax=10000\n   Allocation space for input XY table, if needed",
-    "VERSION=1.0\n  31-jul-96 PJT",
+    "VERSION=1.0a\n  26-sep-02 PJT",
     NULL,
 };
 
@@ -87,7 +88,7 @@ get_table()
     int nmax=getiparam("nmax");
 
     input = getparam("xytab");
-    nmax = file_lines(input,nmax);
+    nmax = nemo_file_lines(input,nmax);
     dprintf(0,"Allocated %d lines for table %s\n",nmax,input);
     if (nmax < 1) error("Empty table");
 
