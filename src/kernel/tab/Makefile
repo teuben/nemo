@@ -14,7 +14,7 @@ SRCFILES = table.c gettab.c tabselect.c funtab.c getaline.c
 OBJFILES=  table.o gettab.o tabselect.o funtab.o getaline.o
 LOBJFILES= $L(table.o) $L(gettab.o) $L(tabselect.o) $L(funtab.o) $L(getaline.o)
 BINFILES = tabhist tablst tabplot tablsqfit tabmath gettab funtab \
-	   tabcomment tabspline
+	   tabcomment tabspline tab2xml
 TESTFILES= getaline
 
 help:
@@ -83,6 +83,10 @@ tabplot: tabplot.c
 	$(CC) $(CFLAGS) -o tabplot tabplot.c \
 		$(NEMO_LIBS) $(YAPPLIB) $(EL) -lm
 
+tabplot_command: tabplot_command.c
+	$(CC) $(CFLAGS) -o tabplot_command tabplot_command.c \
+		$(NEMO_LIBS) $(YAPPLIB) $(EL) -lm
+
 tabview: tabview.c
 	$(CC) $(CFLAGS) -o tabview tabview.c \
 		$(NEMO_LIBS) $(YAPPLIB) $(EL) -lm
@@ -105,6 +109,10 @@ tabnllsqfit: tabnllsqfit.c
 
 tabspline: tabspline.c
 	$(CC) $(CFLAGS) -o tabspline tabspline.c \
+		$(NEMO_LIBS) $(EL) -lm
+
+tab2xml: tab2xml.c
+	$(CC) $(CFLAGS) -o  tab2xml tab2xml.c \
 		$(NEMO_LIBS) $(EL) -lm
 
 tabpoly: tabpoly.c
