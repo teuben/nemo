@@ -46,6 +46,8 @@
 /*    21-mar-00 fixed offset bug for raw mode - using WORDS_BIGENDIAN   */
 /*     9-jul-00 added message in first fitopen reporting endianism      */
 /*              fixed offset bug when fitsetpl called before fitwrite   */
+/*     7-aug-01 fixed bug rounding bug getting offset in reading        */
+/*              (redefined f->ncards now to be 1-based upon reading too)*/
 /* ToDo:                                                                */
 /*  - BLANK substitution                                                */
 /*  - finish bitpix=-64 support						*/
@@ -168,14 +170,15 @@ FITS *fitopen(string name,string status,int naxis,int *nsize)
     f->fd = stropen(name,"r");
 
 /* Check it has SIMPLE and END keywords. Calculate the byte offset to
-   the start of the image data. */
+   the start of the image data. -- ncards is now 1 based ! */
 
-    if(fitsrch(f,"SIMPLE  ",line) != 0 || 
+    if(fitsrch(f,"SIMPLE  ",line) != 1 || 
       (f->ncards = fitsrch(f,"END     ",line)) < 0){
-      error("File \'%s\' does not appear to be FITS",name);
+      error("no END found: File \'%s\' does not appear to be FITS",name);
     }
-    f->offset = blocksize*((80*f->ncards + (blocksize-1))/blocksize);
+    f->offset = blocksize*((80*f->ncards + (blocksize-1))/blocksize); /* round up */
     f->skip = f->offset;		/* offset can change !!! */
+    dprintf(1,"END found at card %d, offset=%d\n",f->ncards,f->offset);
 
 /* Determine things about the file. */
 
@@ -723,6 +726,7 @@ int fitexhd(FITS *f, string keyword)
 /*
   Public routine to check for a FITS keyword existence in a file.
   Returns 1 if found, 0 if not.
+  Does not work on NEW files !!!
 ----------------------------------------------------------------------*/
 {
   char card[81];
@@ -735,6 +739,7 @@ int fitexhd(FITS *f, string keyword)
 local int fitsrch(FITS *f,string keyword,char *card)
 /*
   This searches for a FITS keyword in a file.
+  Returns -1 if not found, and 1 or higher if found
 ----------------------------------------------------------------------*/
 {
   int length,ncard;
@@ -744,7 +749,7 @@ local int fitsrch(FITS *f,string keyword,char *card)
   fseek(f->fd,0,0);
   while(fread(card,1,80,f->fd) == 80){
     if((card[length] == ' ' || card[length] == '=') &&
-       !strncmp(card,keyword,length))return(ncard);
+       !strncmp(card,keyword,length))return(ncard+1);
     else if(!strncmp(card,"END     ",8)) return(-1);
     ncard++;
   }
