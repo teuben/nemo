@@ -19,6 +19,7 @@
  *  22-feb-95   V3.2a ansi					pjt
  *  17-apr-95   V3.2b compacted needed header files		pjt
  *  19-apr-96       c initialize strings to "" instead of NULL  pjt
+ *   1-mar-03   V3.3  added stuff for iom_err			pjt
  *------------------------------------------------------------------------------
  */
 
@@ -40,6 +41,7 @@ void write_orbit (stream outstr, orbitptr optr)
             put_data (outstr,NdimTag,    IntType, &(Ndim(optr)),   0);
             put_data (outstr,MassTag,    RealType,&(Masso(optr)),   0);
             put_data (outstr,IOMTag,     RealType,  IOM(optr), Ndim(optr), 0);
+            put_data (outstr,IOMERRTag,  RealType,  IOMERR(optr), Ndim(optr), 0);
 	    /* note we don't write MAXsteps(optr) to disk */
             put_data (outstr,NstepsTag,  IntType, &(Nsteps(optr)), 0);
         put_tes (outstr,ParametersTag);
@@ -96,6 +98,10 @@ int read_orbit (stream instr, orbitptr *optr)
             }
             get_data (instr, MassTag, RealType, &(Masso(*optr)), 0);
             get_data (instr, IOMTag, RealType, IOM(*optr), Ndim(*optr), 0);
+            if (get_tag_ok(instr,IOMERRTag))
+                get_data (instr, IOMERRTag, RealType, IOMERR(*optr), Ndim(*optr), 0);
+            else
+                IE1(*optr) = IE3(*optr) = IE3(*optr) = 0.0;
         get_tes (instr,ParametersTag);
 
 #if 0
@@ -149,8 +155,10 @@ int allocate_orbit(orbitptr *optr, int ndim, int nsteps)
     dprintf (1,"Allocate_Orbit @ %x with ndim=%d nsteps=%d\n",
                 *optr, ndim, nsteps);
     Ndim(*optr) = ndim;
-    IOM(*optr) = (real *) allocate(ndim*sizeof(real));
+    IOM(*optr)    = (real *) allocate(ndim*sizeof(real));
     dprintf (2,"   IOM allocated @ %x\n",IOM(*optr)); 
+    IOMERR(*optr) = (real *) allocate(ndim*sizeof(real));
+    dprintf (2,"   IOMERR allocated @ %x\n",IOMERR(*optr)); 
     Nsteps(*optr) = nsteps;
     TimePath(*optr) = (real *) allocate(nsteps*sizeof(real));
     dprintf (2,"   Timepath allocated @ %x\n",TimePath(*optr));
@@ -178,7 +186,8 @@ void copy_orbit(orbitptr iptr, orbitptr optr)
         Ndim(optr) = Ndim(iptr);
         CoordSys(optr) = CoordSys(iptr);
         Masso(optr) = Masso(iptr);
-        IOM(optr) = IOM(iptr);
+        IOM(optr) = IOM(iptr);                 /* needs a copy, not a link ?? */
+        IOMERR(optr) = IOMERR(iptr);
         nsteps = Nsteps(optr) = Nsteps(iptr);
         for (i=0; i<nsteps; i++) {
             Torb(optr,i) = Torb(iptr,i);
@@ -208,7 +217,10 @@ void list_orbit (orbitptr optr, double tstart, double tend, int n, string f)
     dprintf (0,"Integrals of Motion (IOM) = ");
     for (i=0; i<Ndim(optr); i++)
         dprintf (0," %f ",*(IOM(optr)+i));
-    dprintf (0,"\n");
+    dprintf (0," ( ",*(IOM(optr)+i));
+    for (i=0; i<Ndim(optr); i++)
+        dprintf (0," %f ",*(IOMERR(optr)+i));
+    dprintf (0," )\n");
     dprintf (0,"Potential: Name: %s Pars: %s File: %s\n",
         PotName(optr), PotPars(optr), PotFile(optr));
     kount = 0;

@@ -14,6 +14,7 @@
  *   6-dec-93    V3.1  added maxsteps, to be able to re-allocate
  *  22-feb-93    V3.1a ansi header
  *  11-apr-95    V3.1b no more ARGS, included more header files here
+ *   1-mar-03    V3.3  added iom_err, errors in the integrals of motion
  */
 
 #include <filestruct.h>
@@ -26,6 +27,7 @@ typedef struct {
 	int   size;
         real  mass;
         real  *iom;
+        real  *iom_err;
         int   nsteps;
         int   maxsteps;
         real  *time;
@@ -38,6 +40,7 @@ typedef struct {
 #define Size(optr)      ((optr)->size)
 #define Masso(optr)     ((optr)->mass)
 #define IOM(optr)       ((optr)->iom)
+#define IOMERR(optr)    ((optr)->iom_err)
 #define Nsteps(optr)    ((optr)->nsteps)
 #define MAXsteps(optr)  ((optr)->maxsteps)
 #define TimePath(optr)  ((optr)->time)
@@ -49,6 +52,9 @@ typedef struct {
 #define I1(optr)        (*(IOM(optr)))
 #define I2(optr)        (*(IOM(optr)+1))
 #define I3(optr)        (*(IOM(optr)+2))
+#define IE1(optr)        (*(IOMERR(optr)))
+#define IE2(optr)        (*(IOMERR(optr)+1))
+#define IE3(optr)        (*(IOMERR(optr)+2))
 /*      OLD V1.x structure
 #define Torb(optr,i)    *(TimePath(optr)+i)
 #define Xorb(optr,i)    *(PhasePath(optr)+i)
@@ -83,6 +89,7 @@ typedef struct {
 #define     CoordSysTag         "CoordSys"
 #define     MassTag             "Mass"
 #define     IOMTag              "IOM"
+#define     IOMERRTag           "IOM_error"
 
 #define PotentialTag		"Potential"
 #define     PotNameTag		"Name"

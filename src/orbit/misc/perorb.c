@@ -34,6 +34,9 @@
  *			-- oops, not neeeded, just use period=1	--
  *      10-apr-97       c no more 'this is beta' message                   pjt
  *      10-jan-03       d SGN -> SIGN                                      pjt
+ *       1-feb-03       e report energy conservation, use new IOM errors   pjt
+ *
+ *  TODO:   check why rk2 and rk4 both seem to converge at the same rate
  */
 
 #include <stdinc.h>
@@ -64,7 +67,7 @@ string defv[] = {
     "tab=\n                    Optional table with x,vy,y,vx,nsteps,T,E",
     "mode=rk4\n                integration method (euler,leapfrog,rk2,rk4)",
     "headline=\n               Random verbiage for output file",
-    "VERSION=1.5d\n            10-jan-03 PJT",
+    "VERSION=1.5e\n            1-mar-03 PJT",
     NULL,
 };
 
@@ -92,8 +95,12 @@ double omega, omegasq, omegato;         /* pattern speed, and related ^2,*2 */
 FILE *tab;
 bool  Qfix;                             /* flag if to step in Energy instead */
 iproc cycle;                            /* integrator */
-int   cycle_euler(orbitptr), cycle_leapfrog(orbitptr),
-      cycle_rk2(orbitptr), cycle_rk4(orbitptr);
+
+string integration_modes = "euler leapfrog rk2 rk4";
+int   cycle_euler(orbitptr), 
+      cycle_leapfrog(orbitptr),
+      cycle_rk2(orbitptr), 
+      cycle_rk4(orbitptr);
 
 /*----------------------------------------------------------------------------*/
 
@@ -225,7 +232,7 @@ setparams()
     } else
         error("Need ncross>0 (%d)\n",ncross);
     if (ncross>1)
-        dprintf(0,"OK, PerOrb is now in interactive mode - no output\n");
+        dprintf(0,"PERORB is now in interactive mode - no output\n");
 
     period = getiparam("period");
     if (period < 1 || period > 2) error("This version needs period to be 1 or 2");
@@ -278,7 +285,7 @@ setparams()
     } else
         tab = stdout;        
 
-    match(getparam("mode"),"euler leapfrog rk2 rk4",&imode);
+    match(getparam("mode"),integration_modes,&imode);
     if (imode==0x01)
         cycle = cycle_euler;
     else if (imode==0x02)
@@ -288,7 +295,8 @@ setparams()
     else if (imode==0x08)
         cycle = cycle_rk4;
     else
-        error("imode=0x%x; Illegal integration mode=",imode);
+      error("imode=0x%x; Illegal integration mode=%s, try one of: %s",
+	    imode,getparam("mode"),integration_modes);
 }
 
 
@@ -384,9 +392,10 @@ prepare()
 iterate() 
 {
   int i, iter, l1, l2, h, ndim, dir0;
-  double eps, x1_s, x2_s, u1_s, u2_s, x1_e, x2_e, u1_e, u2_e;
+  double eps, x1_s, x2_s, u1_s, u2_s, x1_e, x2_e, u1_e, u2_e, de;
   double a_s, b_s, a_e, b_e, xnew, vnew, time, e_pot, e_tot, lz_mean;
   double pos[NDIM], acc[NDIM];
+  static bool first_out = TRUE;
 
   time = 0.0;   /* keep it fixed */
   ndim = Ndim(o1);
@@ -416,7 +425,9 @@ iterate()
   (*pot)(&ndim, pos, acc, &e_pot, &time); /* e_pot; to get e_tot */
   e_pot -= 0.5*omegasq*(sqr(pos[0]) + sqr(pos[1]));
   e_pot += 0.5*(sqr(Uorb(o1,l1-1)) + sqr(Vorb(o1,l1-1)) + sqr(Worb(o1,l1-1)));
-  dprintf(1,"Etot                = %f after 1st cycle\n",e_pot);
+  de = (e_pot-I1(o1))/I1(o1);
+  IE1(o1) = de;
+  dprintf(1,"Etot                = %f after 1st cycle (dE/E=%g)\n",e_pot,de);
 
   if(ncross>1) return(l1);      /* if interactive SOS mode: don't iterate */
 
@@ -492,10 +503,18 @@ iterate()
         lz_mean /= l2;
 
         h = (period==1 ? l2/4 : l2/2);       /* where to get the other */
-        fprintf(tab,"%f %f %f %f %d %d %f %f %f\n",
+	if (first_out) {
+	  fprintf(tab,"# %s   %s   %s   %s   NPT   NITER   PERIOD   ETOT   LZ_MEAN   ETOT_ERR\n",
+		  dirint ? "x0" : "y0",
+		  dirint ? "v0" : "u0",
+		  dirint ? "y1" : "u1",
+		  dirint ? "x1" : "v1");
+	  first_out = FALSE;
+	}
+        fprintf(tab,"%f %f %f %f %d %d %f %f %f %g\n",
             Posorb(o2,0,dirint), Velorb(o2,0,1-dirint),
             Posorb(o2,h,1-dirint),Velorb(o2,h,dirint),
-            l2,iter+1,period*Torb(o2,l2-1),e_tot,lz_mean);
+	    l2,iter+1,period*Torb(o2,l2-1),e_tot,lz_mean, de);
         dprintf(1,"Final orbit #%d: %f %f %f %f %f %f %f %f\n", iorb+1,
            Xorb(o2,0), Yorb(o2,0), Uorb(o2,0), Vorb(o2,0),
            Xorb(o2,l2-1), Yorb(o2,l2-1), Uorb(o2,l2-1), Vorb(o2,l2-1));
@@ -506,7 +525,7 @@ iterate()
     if (iter==maxiter) 
         break;
   }
-  return(0);
+  return 0;
 }
 
 
