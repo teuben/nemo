@@ -31,8 +31,8 @@ SRCDIR = $(NEMOPATH)/src/nbody/evolve/hackcode/source1
 
 # Targets used to export files to Nemo.
 
-#install: .install_bin
-install:
+install: .install_bin
+#install:
 
 .install_man: $(MANFILES)
 	cp $? $(NEMOPATH)/man/man1
