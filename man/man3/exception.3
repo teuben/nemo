@@ -15,16 +15,29 @@ BeginBlock, EndBlock, (Un)RegisterPointer,  (Un)RegisterStream, RaiseException, 
 .B extern void RestoreUserContext (void);
 .SH DESCRIPTION
 Exception handling is an alternative error handling mechanism in NEMO, much
-like the C++ exception handling.
+like exception handling in C++.
+
 NEMO can optionally be compiled (see options.h or the autoconf mechanism, see
-installation manual)
-such that that main trouble points in NEMO's libraries (e.g.
-allocate.c and stropen.c) can use this mechanism. It has the advantage 
-that .... bla bla bla
+installation manual) such that that main trouble points in NEMO's libraries
+(e.g.  allocate.c and stropen.c) can use this mechanism. It has the 
+advantage that programs written using the NEMO library can recover from 
+errors. 
+
+Users using NEMO routines can designate blocks of code that will recover
+from any NEMO error, transferring control to a user defined exception 
+handler.
+
+A \fIBeginBlock\fP call marks the beginning of a block and an \fIEndBlock\fP 
+marks the end of a block. Every \fIBeginBlock\fP is matched to the closest 
+\fIEndBlock\fP. Blocks may be nested by nested \fIBeginBlock/EndBlock\fP 
+pairs, but the effect is the same as if only the outermost 
+\fIBeginBlock/EndBlock\fP pair was present. We plan to implement nested 
+blocks, with nested recovery, in future versions.
 
 .PP
 
-\fIBeginBlock\fP marks point of return from exception handler.
+\fIBeginBlock\fP marks the beginning of a block of code and the point of 
+return from exception handler.
 
 \fIEndBlock\fP turns off exception handling for the block begun
 with the last BeginBlock; does cleanup of memory and streams.
@@ -40,13 +53,15 @@ when it is freed.
 \fIRegisterStream\fP and \fIUnRegisterStream \fP .... bla bla ..
 
 \fIRaiseException\fP
-raises an exception when irretrievable error occurs.
+raises an exception when an irretrievable error occurs.
 It transfers control to exception handling mechanism.
 
 \fIRestoreUserContext\fP
 restores the context after exception handling is done.
 .SH EXAMPLES
 In the following example a lower level routine is entered ....
+
+
 .nf
 .fi
 .SH SEE ALSO
