@@ -1,4 +1,4 @@
-.TH ROTCUR 1NEMO "26 January 2002"
+.TH ROTCUR 1NEMO "25 June 2002"
 .SH NAME
 rotcur \- fit kinematic parameters from velocity field
 .SH SYNOPSIS
@@ -205,6 +205,13 @@ parameters keep of course their fixed value. [Default: \fBt\fP]
 \fBnsigma=\fP
 Reject outlier points will fall outside nsigma times the dispersion 
 away from the mean velocity in a ring. By default, it will not reject any outliers.
+.TP
+\fBimagemode=t|f\fP
+Image input file mode? By default the input file is an image, alternatively a simple
+ascii table with X and Y positions in columns 1 and 2, and radial velocities
+in column 3. Future expansion will likely allow weight factors to be added
+in other columns.
+[Default: t]
 .SH AWK
 The standard output is normally not very useful; it displays, for each
 iteration, the run of parameters plus the number of points and mean
@@ -237,7 +244,7 @@ ccdvel, and analysing it with rotcur:
 .nf
     % set r=`nemoinp 0:100:5`
     % set v=`nemoinp 0:100:5 | tabmath - - "100*%1/(20+%1)" all`
-    % ccdvel out=map1.vel rad="$r" vel="$v" pa=30 inc=60
+    % ccdvel out=map1.vel rad="$r" vrot="$v" pa=30 inc=60
     % rotcur in=map1.vel radii=0:100:5 vrot=0:100:5 pa=30 inc=60 vsys=0 tab=map1.rotcur
 
     % head map1.rotcur
@@ -300,4 +307,5 @@ P. J. Teuben (NEMO C version)
 9-may-01	V2.6a: corrected error correction factor	PJT
 10-aug-01	clarified some differences between NEMO and GIPSY versions	PJT
 26-jan-02	Added unit (scale factor) for velocity too	PJT
+25-jun-02	V2.8: added tabular input for irregular spaced data	PJT
 .fi

@@ -59,6 +59,7 @@
  *               5-jun-01 : 2.7  allow density map also used as weight     PJT
  *               8-aug-01 :    a allow error correction factor 1.0  pjt
  *              26-jan-02      b allow scale factor for velocity    pjt
+ *              25-jun-02 : .28  allow input to be an ascii table instead of image
  ******************************************************************************/
 
 
@@ -109,7 +110,8 @@ string defv[] = {
     "inherit=t\n     Inherit initial conditions from previous ring",
     "fitmode=cos,1\n Basic Fitmode: cos(n*theta) or sin(n*theta)",
     "nsigma=-1\n     Iterate once by rejecting points more than nsigma resid",
-    "VERSION=2.7b\n  26-jan-02 PJT",
+    "imagemode=t\n   Input image mode? (false means ascii table)",
+    "VERSION=2.8\n   25-jun-02 PJT",
     NULL,
 };
 
@@ -117,7 +119,7 @@ string usage="nonlinear fit of kinematical parameters to a velocity field";
 
 
 
-imageptr denptr, velptr;       /* pointers to Images */
+imageptr denptr, velptr;       /* pointers to Images, if applicable */
 int   lmin, mmin, lmax, mmax;              /* boundaries of map */
 real  grid[2];    /* grid separations in x and y (arcsec.) */
 real  beam[2];    /* size of beam in arcseconds            */
@@ -125,8 +127,12 @@ real  dx,dy;      /* grid separation in x and y */
 real  undf;       /* undefined value in map */
 real  pamp;       /* position angle of map */
 
-real tol,lab;      /* parameters that go into nllsqfit */
+real  *xpos_vel, *ypos_vel, *vrad_vel;
+int  n_vel = 0;
+
+real tol,lab;     /* parameters that go into nllsqfit */
 int  itmax;
+bool Qimage;      /* input mode */   
 
 /* Compute engine, derivative and beam smearing correction functions:
  * _c1 = cos(theta)	
@@ -134,9 +140,25 @@ int  itmax;
  * _c2 = cos(2*theta)
  * _s2 = sin(2*theta)  etc.
  */
-real vobs_c1(),  vobs_s1();
-void vobsd_c1(), vobsd_s1();
-void vcor_c1(),  vcor_s1();
+
+real vobs_c1(real *c, real *p, int m);
+void vobsd_c1(real *c, real *p, real *d, int m);
+void vcor_c1(real *c, real *p, real *vd, real *dn);
+real vobs_s1(real *c, real *p, int m);
+void vobsd_s1(real *c, real *p, real *d, int m);
+void vcor_s1(real *c, real *p, real *vd, real *dn);
+
+
+
+
+int rotinp(real *rad, real pan[], real inc[], real vro[], int *nring, int ring, real *vsys, real *x0, real *y0, real *thf, int *wpow, int mask[], int *side, int cor[], int *inh, int *fitmode, real *nsigma, stream lunpri);
+int rotfit(real ri, real ro, real p[], real e[], int mask[], int wpow, int side, real thf, real elp4[], int cor[], int *npt, int fitmode, real nsigma, stream lunres);
+int perform_out(int h, real p[6], int n, real q);
+int rotplt(real rad[], real vsy[], real evs[], real vro[], real evr[], real pan[], real epa[], real inc[], real ein[], real xce[], real exc[], real yce[], real eyc[], int mask[], int ifit, real elp[][4], stream lunpri, int cor[], int npt[], real factor);
+void stat2(real a[], int n, real *mean, real *sig);
+int getdat(real x[], real y[], real w[], int *n, int nmax, real p[], real ri, real ro, real thf, int wpow, real *q, int side, bool *full, int nfr);
+real bmcorr(real xx[2], real p[], int l, int m);
+int perform_init(real *p, real *c);
 
 rproc vobs;
 proc vobsd, vcor;			/* pointers to the correct functions */
@@ -178,6 +200,7 @@ nemo_main()
         lunpri=stropen(getparam("tab"),"a");  /* pointer to table stream output */
     else
         lunpri=NULL;                    /* no table output */
+    Qimage = getbparam("imagemode");
 
     if (hasvalue("resid"))
         lunres=stropen(getparam("resid"),"a");  /* pointer to table stream output */
@@ -285,6 +308,8 @@ stream  lunpri;       /* LUN for print output */
     stream velstr, denstr;
     string *burststring(), *fmode;
     bool scanopt();
+    real *coldat[3];
+    int colnr[3];
 
     dprintf(0,"%s: NEMO VERSION %s\n", 
                         getparam("argv0"), getparam("VERSION"));
@@ -295,9 +320,25 @@ stream  lunpri;       /* LUN for print output */
 
     input = getparam("in");
     if (lunpri) fprintf(lunpri," file                : %s\n",input);
-    if (lunpri) fprintf(lunpri," velocity field file : %s\n",input);
-    velstr = stropen(input,"r");                /* open velocity field */    
-    read_image(velstr,&velptr);                 /* get data */
+    if (lunpri) fprintf(lunpri," velocity field file : %s (%s)\n",input,
+			Qimage ? "image" : "ascii table");
+
+    velstr = stropen(input,"r");                /* open velocity field */   
+    if (Qimage) {
+      read_image(velstr,&velptr);                 /* get data */
+    } else {
+      n_vel = nemo_file_lines(input,100000);
+      xpos_vel = (real *) allocate(n_vel * sizeof(real));
+      ypos_vel = (real *) allocate(n_vel * sizeof(real));
+      vrad_vel = (real *) allocate(n_vel * sizeof(real));
+      colnr[0] = 1;    coldat[0] = xpos_vel;
+      colnr[1] = 2;    coldat[1] = ypos_vel;
+      colnr[2] = 3;    coldat[2] = vrad_vel;
+      n_vel = get_atable(velstr,3,colnr,coldat,n_vel);
+      for (i=0; i<n_vel; i++)
+	printf("%g %g %g\n",xpos_vel[i],ypos_vel[i],vrad_vel[i]);
+      velptr = NULL;
+    }
     strclose(velstr);                           /* and close file */
     
     inputs = burststring(getparam("units"),",");
@@ -325,37 +366,41 @@ stream  lunpri;       /* LUN for print output */
     else
       tokms = 1.0;
 
-    lmin=0;                         /* coordinates of map (xlo) */
-    lmax=Nx(velptr)-1;              /*                    (xhi) */
-    mmin=0;                         /*                    (ylo) */
-    mmax=Ny(velptr)-1;              /*                    (yhi) */
-    dx=toarcsec*Dx(velptr);         /* separation in X (in arcsec.) */
-    dy=toarcsec*Dy(velptr);         /* separation in Y (in arcsec.) */
-    if (dx<0) {
+    if (velptr) {
+      lmin=0;                         /* coordinates of map (xlo) */
+      lmax=Nx(velptr)-1;              /*                    (xhi) */
+      mmin=0;                         /*                    (ylo) */
+      mmax=Ny(velptr)-1;              /*                    (yhi) */
+      dx=toarcsec*Dx(velptr);         /* separation in X (in arcsec.) */
+      dy=toarcsec*Dy(velptr);         /* separation in Y (in arcsec.) */
+      if (dx<0) {
         warning("Repairing negative dx");
         dx = -dx;
-    }
-    if (dy<0) {
+      }
+      if (dy<0) {
         warning("Repairing negative dy");
         dy = -dy;
-    }
+      }
 
-    undf=getdparam("blank");        /* the undefined value */
-    n = 0;                          /* count # blank values in velmap */
-    for (j=0; j<Ny(velptr); j++)
+      undf=getdparam("blank");        /* the undefined value */
+      n = 0;                          /* count # blank values in velmap */
+      for (j=0; j<Ny(velptr); j++)
         for (i=0; i<Nx(velptr); i++) 
-            if (MapValue(velptr,i,j)==undf)
-	      n++;
-            else
-	      MapValue(velptr,i,j) *= tokms;
-	    
-    printf("Mapsize is %g * %g arcsec; Found %d/%d undefined map values\n",
-            ABS(dx*(lmax-lmin+1.0)), ABS(dy*(mmax-mmin+1.0)), 
-            n, Nx(velptr)*Ny(velptr));
-
-    grid[0]=dx;        /* grid-separations in VELPAR (dx) */
-    grid[1]=dy;        /*                            (dy) */
-    pamp=0.0;          /* position angle of map */
+	  if (MapValue(velptr,i,j)==undf)
+	    n++;
+	  else
+	    MapValue(velptr,i,j) *= tokms;
+      
+      printf("Mapsize is %g * %g arcsec; Found %d/%d undefined map values\n",
+	     ABS(dx*(lmax-lmin+1.0)), ABS(dy*(mmax-mmin+1.0)), 
+	     n, Nx(velptr)*Ny(velptr));
+      
+      grid[0]=dx;        /* grid-separations in VELPAR (dx) */
+      grid[1]=dy;        /*                            (dy) */
+      pamp=0.0;          /* position angle of map */
+    } else {
+      pamp=0.0;
+    }
 
     n = nemoinpr(getparam("beam"),beam,2);   /* get size of beam from user */
     if (n==2 || n==1) {       /* OK, got a beam, now get density map ... */
@@ -806,9 +851,7 @@ stream lunres;   /* file for residuals */
     return ier;
 } /* rotfit */
 
-perform_out(h,p,n,q)
-int h, n;
-real p[PARAMS], q;
+perform_out(int h,real *p,int n,real q)
 {
 /*  FORMAT(1H ,I4,4X,3(F7.2,2X),F5.2,2X,2(F7.2,2X),I5,2X,F8.3) eq.fortran */
     printf(" %4d    %7.2f  %7.2f  %7.2f  %5.2f  %7.2f  %7.2f  %5d  %8.3f\n",
@@ -874,11 +917,9 @@ stream lunpri;
                                               mean,    sig);
 }
 
-/* stat2: for an input array a[] of lenght n, get the mean and dispersion */
+/* stat2: for an input array a[] of length n, get the mean and dispersion */
 
-stat2(a,n,mean,sig)
-real a[], *mean, *sig;
-int n;
+void stat2(real *a,int n,real *mean,real *sig)
 {
     real s=0, sx=0, sxx=0;
 
@@ -937,7 +978,6 @@ real  *q;             /* output sigma */
     real  wi;                                         /* weight of data point */
     real  theta,costh,xr,yr,r,rx,ry;        /* coordinates in plane of galaxy */
     int   llo,lhi,mlo,mhi;
-    real  bmcorr();
 
     *full = FALSE;        /* reset logical for output */
     *q=0.0;               /* reset sigma for output */
@@ -955,107 +995,160 @@ real  *q;             /* output sigma */
     a=sqrt(1.0-cosp*cosp*sini*sini);       /* find square around ellipse */
     b=sqrt(1.0-sinp*sinp*sini*sini);
 
-    /* BUG:  need to fix this, there is a rounding problem near center */
-    /*       although this is where rotcur isn't quite all that valid  */
-    llo=MAX(lmin,(int)(x0-a*ro/dx));        /* square around ellipse */
-    mlo=MAX(mmin,(int)(y0-b*ro/dy));
-    lhi=MIN(lmax,(int)(x0+a*ro/dx));
-    mhi=MIN(mmax,(int)(y0+b*ro/dy));
-    if (llo > lhi || mlo > mhi) {
-         error("ring not inside map [%d %d %d %d]",llo,mlo,lhi,mhi);
-         *n = 0;                        /* continue here ??? */
+    if (Qimage) {
+      /* BUG:  need to fix this, there is a rounding problem near center */
+      /*       although this is where rotcur isn't quite all that valid  */
+      llo=MAX(lmin,(int)(x0-a*ro/dx));        /* square around ellipse */
+      mlo=MAX(mmin,(int)(y0-b*ro/dy));
+      lhi=MIN(lmax,(int)(x0+a*ro/dx));
+      mhi=MIN(mmax,(int)(y0+b*ro/dy));
+      if (llo > lhi || mlo > mhi) {
+	error("ring not inside map [%d %d %d %d]",llo,mlo,lhi,mhi);
+	*n = 0;                        /* continue here ??? */
         return;
-    } else {
+      } else {
         dprintf(1,"getdat: P=%g %g %g %g %g %g\n",
-            p[0],p[1],p[2],p[3],p[4],p[5]);
+		p[0],p[1],p[2],p[3],p[4],p[5]);
         dprintf(1,"getdat: box [%d %d %d %d]\n",llo,mlo,lhi,mhi);
         dprintf(1,"getdat: box [%g %g %g %g]\n",
 		x0-a*ro/dx,y0-b*ro/dy,x0+a*ro/dx,y0+b*ro/dy);
-    }
-
-    nlt=lmax-lmin+1;       /* number of pixels in X (not used) */
-    nmt= mhi- mlo+1;       /* number of pixels in Y */
-
+      }
+      
+      nlt=lmax-lmin+1;       /* number of pixels in X (not used) */
+      nmt= mhi- mlo+1;       /* number of pixels in Y */
+      
       mdone=0;      /* number of lines done */
       mstep=1;      /* number of lines to read in one call (old GIPSY relic) */
       mleft=nmt;    /* number of lines left to do */
       do {                      /* big loop */
-         mstep=MIN(mstep,mleft);     /* number of lines to do in this run */
-         m1=mlo+mdone;       /* first line in this run */
-         m2=m1+mstep-1;      /* last line in this run */
-         m=m1-1;             /* line counter */
-         while (m < m2) {       /* loop */
-            m=m+1;                 /* increment line counter */
-            ry=dy*(real)(m);       /* Y position in plane of galaxy */
-            l=llo-1;               /* line position counter */
-            while (l < lhi) {   /* loop */
-               l++;        /* increment line position counter */
-               rx=dx*(real)(l);       /* X position in plane of galaxy */
-               /***** i=(m-m1)*nlt+l-lmin+1;        /* array pointer */
-               v = MapValue(velptr,l,m);        /* velocity at (l,m) */
-               if (v != undf) {       /* undefined value ? */
-                xr=(-(rx-dx*x0)*sinp+(ry-dy*y0)*cosp);     /* X position in galplane */
-                yr=(-(rx-dx*x0)*cosp-(ry-dy*y0)*sinp)/cosi;/* Y position in galplane */
-                r=sqrt(xr*xr+yr*yr);                       /* distance from center */
-                if (r < 0.1)                               /* radius to small ? */
-                   theta=0.0;
-                else
-                   theta=atan2(yr,xr)/F;
-                costh=ABS(cos(F*theta));       /* calculate |cos(theta)| */
-		dprintf(5,"@ %d,%d : r=%g cost=%g xr=%g yr=%g\n",l,m,r,costh,xr,yr);
-                if (r>ri && r<ro && costh>free) {     /* point inside ring ? */
-		  dprintf(5," ** adding this point\n");
-		  if (denptr) 
-		    wi = MapValue(denptr,l,m);
-		  else
-                    wi=1.0;                /* calculate weight of this point */
-
-                    for (i=0; i<wpow; i++) 
-                        wi *= costh;
-                    xx[0]=rx;       /* x position */
-                    xx[1]=ry;       /* y position */
-                    v -= bmcorr(xx,p,l,m);  /* beam-correction factor */
-                    use=FALSE;        /* reset logical */
-                    switch(side) {    /* which side of galaxy */
-                     case 1:             /* receding half */
-                        use=(ABS(theta)<=90.0);        /* use this data point ? */
-                        break;
-                     case 2:             /* approaching half */
-                        use=(ABS(theta)>=90.0);        /* use this data point ? */
-                        break;
-                     case 3:             /* both halves */
-                        use=TRUE;         /* use this data point */
-                        break;
-                     default:
-                        error("wrong side (%d) of galaxy",side);
-                    }
-                    if (use) {
-                        *full = (*n==(nmax-1));    /* buffers full */
-                        if (! *full) {         /* save data ? */
-                           x[*n*2]=rx;        /* load X-coordinate */
-                           x[*n*2+1]=ry;      /* load Y-coordinate */
-                           y[*n]=v;           /* load radial velocity */
-                           w[*n]=wi;          /* load weight */
-                           s=(v-vobs(xx,p,PARAMS));  /* corrected difference */
-                           *q += s*s*wi;       /* calculate chi-squared */
-                           *n += 1;           /* increment number of pixels */
-                        }
-                    }
-                }
-                if (*full) break;      /* if buffers are filled - quit */
-               } /* v != undf */
-               if (*full) break;       /* if buffers are filled - quit */
-            }  /* l-loop */
-            if (*full) break;          /* if buffers are filled - quit */
-         } /*  mloop */
-         mdone += mstep;      /* number of lines done */
-         mleft -= mstep;      /* number of lines left */
-    } while (mleft>0);        /* big loop */
+	mstep=MIN(mstep,mleft);     /* number of lines to do in this run */
+	m1=mlo+mdone;       /* first line in this run */
+	m2=m1+mstep-1;      /* last line in this run */
+	m=m1-1;             /* line counter */
+	while (m < m2) {       /* loop */
+	  m=m+1;                 /* increment line counter */
+	  ry=dy*(real)(m);       /* Y position in plane of galaxy */
+	  l=llo-1;               /* line position counter */
+	  while (l < lhi) {   /* loop */
+	    l++;        /* increment line position counter */
+	    rx=dx*(real)(l);       /* X position in plane of galaxy */
+	    /***** i=(m-m1)*nlt+l-lmin+1;        /* array pointer */
+	    v = MapValue(velptr,l,m);        /* velocity at (l,m) */
+	    if (v != undf) {       /* undefined value ? */
+	      xr=(-(rx-dx*x0)*sinp+(ry-dy*y0)*cosp);     /* X position in galplane */
+	      yr=(-(rx-dx*x0)*cosp-(ry-dy*y0)*sinp)/cosi;/* Y position in galplane */
+	      r=sqrt(xr*xr+yr*yr);                       /* distance from center */
+	      if (r < 0.1)                               /* radius to small ? */
+		theta=0.0;
+	      else
+		theta=atan2(yr,xr)/F;
+	      costh=ABS(cos(F*theta));       /* calculate |cos(theta)| */
+	      dprintf(5,"@ %d,%d : r=%g cost=%g xr=%g yr=%g\n",l,m,r,costh,xr,yr);
+	      if (r>ri && r<ro && costh>free) {     /* point inside ring ? */
+		dprintf(5," ** adding this point\n");
+		if (denptr) 
+		  wi = MapValue(denptr,l,m);
+		else
+		  wi=1.0;                /* calculate weight of this point */
+		
+		for (i=0; i<wpow; i++) 
+		  wi *= costh;
+		xx[0]=rx;       /* x position */
+		xx[1]=ry;       /* y position */
+		v -= bmcorr(xx,p,l,m);  /* beam-correction factor */
+		use=FALSE;        /* reset logical */
+		switch(side) {    /* which side of galaxy */
+		case 1:             /* receding half */
+		  use=(ABS(theta)<=90.0);        /* use this data point ? */
+		  break;
+		case 2:             /* approaching half */
+		  use=(ABS(theta)>=90.0);        /* use this data point ? */
+		  break;
+		case 3:             /* both halves */
+		  use=TRUE;         /* use this data point */
+		  break;
+		default:
+		  error("wrong side (%d) of galaxy",side);
+		}
+		if (use) {
+		  *full = (*n==(nmax-1));    /* buffers full */
+		  if (! *full) {         /* save data ? */
+		    x[*n*2]=rx;        /* load X-coordinate */
+		    x[*n*2+1]=ry;      /* load Y-coordinate */
+		    y[*n]=v;           /* load radial velocity */
+		    w[*n]=wi;          /* load weight */
+		    s=(v-vobs(xx,p,PARAMS));  /* corrected difference */
+		    *q += s*s*wi;       /* calculate chi-squared */
+		    *n += 1;           /* increment number of pixels */
+		  }
+		}
+	      }
+	      if (*full) break;      /* if buffers are filled - quit */
+	    } /* v != undf */
+	    if (*full) break;       /* if buffers are filled - quit */
+	  }  /* l-loop */
+	  if (*full) break;          /* if buffers are filled - quit */
+	} /*  mloop */
+	mdone += mstep;      /* number of lines done */
+	mleft -= mstep;      /* number of lines left */
+      } while (mleft>0);        /* big loop */
+    } else {
+      for (i=0; i<n_vel; i++) {
+	rx = xpos_vel[i];
+	ry = ypos_vel[i];
+	v  = vrad_vel[i];
+	xr=(-(rx-dx*x0)*sinp+(ry-dy*y0)*cosp);     /* X position in galplane */
+	yr=(-(rx-dx*x0)*cosp-(ry-dy*y0)*sinp)/cosi;/* Y position in galplane */
+	r=sqrt(xr*xr+yr*yr);                       /* distance from center */
+	if (r < 0.1)                               /* radius to small ? */
+	  theta=0.0;
+	else
+	  theta=atan2(yr,xr)/F;
+	costh=ABS(cos(F*theta));       /* calculate |cos(theta)| */
+	dprintf(5,"@ %d,%d : r=%g cost=%g xr=%g yr=%g\n",l,m,r,costh,xr,yr);
+	if (r>ri && r<ro && costh>free) {     /* point inside ring ? */
+	  dprintf(5," ** adding this point\n");
+	  wi=1.0;                /* calculate weight of this point */
+	  for (i=0; i<wpow; i++) 
+	    wi *= costh;
+	  xx[0]=rx;       /* x position */
+	  xx[1]=ry;       /* y position */
+	  v -= bmcorr(xx,p,l,m);  /* beam-correction factor */
+	  use=FALSE;        /* reset logical */
+	  switch(side) {    /* which side of galaxy */
+	  case 1:             /* receding half */
+	    use=(ABS(theta)<=90.0);        /* use this data point ? */
+	    break;
+	  case 2:             /* approaching half */
+	    use=(ABS(theta)>=90.0);        /* use this data point ? */
+	    break;
+	  case 3:             /* both halves */
+	    use=TRUE;         /* use this data point */
+	    break;
+	  default:
+	    error("wrong side (%d) of galaxy",side);
+	  }
+	  if (use) {
+	    *full = (*n==(nmax-1));    /* buffers full */
+	    if (! *full) {         /* save data ? */
+	      x[*n*2]=rx;        /* load X-coordinate */
+	      x[*n*2+1]=ry;      /* load Y-coordinate */
+	      y[*n]=v;           /* load radial velocity */
+	      w[*n]=wi;          /* load weight */
+	      s=(v-vobs(xx,p,PARAMS));  /* corrected difference */
+	      *q += s*s*wi;       /* calculate chi-squared */
+	      *n += 1;           /* increment number of pixels */
+	    }
+	  }
+	  if (*full) break;      /* if buffers are filled - quit */
+	} /* inside ring ? */
+      } /* loop over all points */
+    }
 
     if (*n > nfr)  /* enough data points ? */
-        *q=sqrt(*q/(real)(*n-nfr));     /* calculate sigma */
+      *q=sqrt(*q/(real)(*n-nfr));     /* calculate sigma */
     else
-        *q=1.0e+30;      /* some extreme value */
+      *q=1.0e+30;      /* some extreme value */
 } /* getdat */
 
 real bmcorr(xx,p,l,m)
@@ -1118,18 +1211,14 @@ real vn,v2;                                  /* correction to radial velocity */
  *    DN       real array       contains dN/dx/N and dN/dy/N
  */
 
-real vobs_c1(c,p,m)
-int   m;		/* m=6 */
-real  c[],p[];
+real vobs_c1(real *c,real *p,int m)
 {
       perform_init(p,c);
       return( vs+vc*sini1*cost1 );      /* circular motion */
 }
 
 
-void vobsd_c1(c,p,d,m)
-int   m;		/* m=6 */
-real  c[],p[], d[];
+void vobsd_c1(real *c,real *p,real *d,int m)
 {
     perform_init(p,c);
 
@@ -1141,8 +1230,7 @@ real  c[],p[], d[];
     d[5]=-grid[1]*vc*(sint1*cosp1+cost1*sinp1/cosi1)*sint1*sini1*r1;  /* Y0 */
 }
 
-void vcor_c1(c,p,vd,dn)
-real  c[], p[], dn[], *vd;
+void vcor_c1(real *c,real *p,real *vd,real *dn)
 {
     perform_init(p,c);
 
@@ -1204,17 +1292,13 @@ real  c[], p[], dn[], *vd;
  *  rotation
  */
 
-real vobs_s1(c,p,m)
-int   m;		/* m=6 */
-real  c[],p[];
+real vobs_s1(real *c,real *p,int m)
 {
       perform_init(p,c);
       return vs+vc*sini1*sint1;      /* radial outflow motion */
 }
 
-void vobsd_s1(c,p,d,m)
-int   m;		/* m=6 */
-real  c[],p[], d[];
+void vobsd_s1(real *c,real *p,real *d,int m)
 {
     perform_init(p,c);
 
@@ -1227,8 +1311,7 @@ real  c[],p[], d[];
 }
 
 
-void vcor_s1(c,p,vd,dn)
-real  c[], p[], dn[], *vd;
+void vcor_s1(real *c,real *p,real *vd,real *dn)
 {
     error("vcor_s1 NOT IMPLEMENTED");
 
@@ -1287,8 +1370,7 @@ real  c[], p[], dn[], *vd;
 }
 
 
-perform_init(p,c)
-real p[], c[];
+perform_init(real *p,real *c)
 {
     vs=p[0];                 /* systemic velocity */
     vc=p[1];                 /* circular velocity */
