@@ -1,5 +1,7 @@
 /*
  * WCS: wrapper to worldpos/xypix WCS
+ *
+ *	2-mar-03	1.1	fixed pos->pix- conversion
  */
 
 #include <stdinc.h>
@@ -15,7 +17,7 @@ string defv[] = {
     "format=%g\n Output format",
     "pix=\n     (optional) Input Pixel number coordinates",
     "pos=\n     (optional) Input Coordinates",
-    "VERSION=1.0\n  14-oct-94",
+    "VERSION=1.1\n  2-mar-03",
     NULL,
 };
 
@@ -93,7 +95,7 @@ int my_worldpos(double *pix,double *ref,double *refpix,double *inc,
 int my_xypix(double *pos,double *ref,double *refpix,double *inc,
             double rot,string proj,double *pix)
 {
-    return worldpos(pos[0],pos[1], ref[0],ref[1], refpix[0],refpix[1],
+    return xypix(pos[0],pos[1], ref[0],ref[1], refpix[0],refpix[1],
         inc[0],inc[1], rot, proj, &pix[0], &pix[1]);
 }
 
