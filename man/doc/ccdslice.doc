@@ -1,0 +1,16 @@
+%N ccdslice
+%D takes slices from a cube
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man ccdslice' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input filename (image) [???]
+%A out
+	Output filename (image) [???]
+%A zvar
+	Slice variable (x,y,z) [z]
+%A zrange
+	Slices to select (1..n<zvar>) []
+%A VERSION
+	6-may-95 PJT [1.0]
