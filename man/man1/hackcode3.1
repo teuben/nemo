@@ -1,0 +1,142 @@
+.TH HACKCODE3 1NEMO "15 October 1993"
+.SH NAME
+hackcode3, hackcode3_qp \- hierarchical N-body code (3)
+.SH SYNOPSIS
+\fBhackcode3\fP [\fIparameter\fP=\fIvalue\fP] .\|.\|.
+.SH DESCRIPTION
+\fIhackcode3\fP is fully based on hackcode1, except it allows you to
+fiddle with the potential in various ways. They all have as a result that
+the total energy of the system is (generally) not conserved.
+.PP
+The keyword \fBnrigid\fP allows you to fix the first \fInrigid\fP
+particles in space.
+.PP
+The keywords \fBpotname, potpars\fP and \fBpotfile\fP allow you to add
+a "static" background potential in the \fIpotential(5NEMO)\fP formulation.
+.SH PARAMETERS
+The following parameters are recognized; they may be given in any order.
+.TP 24
+\fBin\fP=\fIin-file\fP
+If given, initial conditions will be read from \fIin-file\fP in
+snapshot format.
+At most one of \fBin\fP, \fBrestart\fP, or \fBcontinue\fP may be specified.
+.TP
+\fBout\fP=\fIout-file\fP
+If given, results are written to \fIout-file\fP in snapshot format.
+.TP
+\fBrestart\fP=\fIstate-file\fP
+If given, the system state will be read from \fIstate-file\fP.
+New values are accepted for the following parameters:
+\fBout\fP, \fBsave\fP, \fBeps\fP, \fBtol\fP, \fBoptions\fP,
+\fBfcells\fP, \fBtstop\fP, \fBfreqout\fP, \fBminor_freqout\fP,
+and \fBdebug\fP.
+At most one of \fBin\fP, \fBrestart\fP, or \fBcontinue\fP may be specified.
+.TP
+\fBcontinue\fP=\fIstate-file\fP
+If given, the system state will be read from \fIstate-file\fP.
+New values are accepted for the following parameters:
+\fBout\fP, \fBsave\fP, and \fBdebug\fP.
+At most one of \fBin\fP, \fBrestart\fP, or \fBcontinue\fP may be specified.
+.TP
+\fBsave\fP=\fIstate-file\fP
+If given, the system state will be saved in \fIstate-file\fP after each
+timestep.
+.TP
+\fBnbody\fP=\fInbody-value\fP
+Number of bodies for test data, generated only if none of
+\fBin\fP, \fBrestart\fP, or \fBcontinue\fP are specified.
+Default is \fB128\fP.
+.TP
+\fBseed\fP=\fIrandom-seed\fP
+Random number seed used in generating initial conditions.
+Default is \fB123\fP.
+.TP
+\fBcencon\fP=\fIcencon-flag\fP
+If \fBtrue\fP, generate centrally concentrated test system.
+Default is \fBfalse\fP.
+.TP
+\fBfreq\fP=\fIinteg-freq\fP
+Inverse time-step, to be used with a leap-frog integrator.
+Default is \fB32.0\fP (32 steps per unit time).
+.TP
+\fBeps\fP=\fIsoft-length\fP
+Force softening parameter.
+Default is \fB0.05\fP.
+.TP
+\fBtol\fP=\fItheta-value\fP
+Opening-angle tolerence parameter.
+Default is \fB1.0\fP.
+.TP
+\fBfcells\fP=\fIfcells-value\fP
+Ratio of cells to bodies, used when allocating cells.
+Default is \fB0.75\fP.
+.TP
+\fBoptions\fP=\fIoption-string\fP
+Miscellaneous control options, specified as a comma-separated list
+of keywords.
+Currently recognized keywords are:
+\fBreset_time\fP: when reading initial data, set \fItnow\fP to zero;
+\fBnew_tout\fP: when restarting, set new output times;
+\fBmass\fP, \fBphi\fP, \fBacc\fP: output mass, potential,
+acceleration data with major data outputs.
+.TP
+\fBnrigid\fP=\fInrigid\fP
+The first \fInrigid\fP particles are taken as rigid. [default: \fB0\fP]
+.TP
+\fBtstop\fP=\fIstop-time\fP
+Time to stop integration in N-body model units.
+Default is \fB2.0\fP.
+.TP
+\fBfreqout\fP=\fIout-freq\fP
+Frequency of major N-body data outputs.
+Default is \fB4.0\fP (4 frames per unit time).
+.TP
+\fBminor_freqout\fP=\fIout-freq\fP
+Frequency of minor diagnostic outputs.
+If this frequency is not a simple fraction of \fBfreq\fP (see above),
+the program can waiste significant amounts of time.
+Default is \fB32.0\fP (32 diagnostic measurements per unit time).
+.TP
+\fBpotname\fP=\fIpot_name\fI
+Descriptor name for potential(5). [default: none].
+.TP
+\fBpotpars\fP=\fIparameters\fP
+Parameters for potential(5). The first one is normally reserverd for 
+pattern speed, and is now set to 0.0.
+If a name for the potential is given, and no parameters
+are given here, intrinsic defaults are used. [default: none].
+.TP
+\fBpotfile\fP=\fIfile\fP
+Optional additional filename for potential(5). For historic reasons the 
+parameter list in \fBpotpars\fP can only contain numbers. If for any
+reason it also needs a character string (often a filename associated
+with the potential), the \fBpotfile\fP parameter is used.
+[default: none].
+.TP
+\fBdebug\fP=\fIdebug-flag\fP
+Debugging switch; generates lots of output.
+Default is \fBfalse\fP.
+.SH SEE ALSO
+newton0(1NEMO).
+.SH BUGS/LIMITATIONS
+When a \fBrestart\fP is specified, values must be given for \fBALL\fP
+legal parameters which do not take default values.
+.PP
+For relatively large values of \fBnrigid\fP the code is inefficient,
+because it still calculates the forces for all rigid particles on
+every timestep. It would only be necessary when diagnostics
+are computed.
+.PP
+The \fBnrigid\fP algorithm used will only work when the force does
+not depend on the velocities of the particles.
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+$NEMO/src/nbody/evolve/hackcode/hackcode3
+.SH HISTORY
+.nf
+.ta +1i +4i
+26-Jan-90	V1.2  nrigid added	PJT
+2-apr-90	V1.2a etot bug removed	PJT
+8-may-92	formally added to NEMO	PJT
+.fi

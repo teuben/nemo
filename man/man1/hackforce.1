@@ -1,0 +1,70 @@
+.TH HACKFORCE 1NEMO "7 July 1989"
+.SH NAME
+hackforce, hackforce_qp \- hierarchical force calculation
+.SH SYNOPSIS
+\fBhackforce in=\fP\fIin-file\fP [\fIparameter\fP=\fIvalue\fP] .\|.\|.
+.SH DESCRIPTION
+\fIhackforce\fP calculates the forces on particles due to
+a particle distribution (not necessarely the same) using an
+an adaptave Eulerian tree to reduce the number of interactions
+to \fIO\fP(\fIN\fPlog\fIN\fP). 
+.PP
+\fIhackforce_qp\fP is similar, but includes quadrupole corrections to
+body-cell interactions (L. Hernquist, \fIApp. J. Suppl.\fP, 1987).
+.SH PARAMETERS
+The following parameters are recognized; they may be given in any order
+if the keyword is also given.
+.TP 24
+\fBin\fP=\fIin-file\fP
+Input snapshot file, which contain the particles for which the forces
+need to be calculated [no default].
+.TP
+\fBout\fP=\fIout-file\fP
+Output file to which, if given, the results are written to.
+Wil be in snapshot format.
+.TP
+\fBtest\fP=\fItest-file\fP
+Test file, which contains the set of particle from which the forces are
+calculated. If not given, the particle distribution is taken from the
+\fIin-file\fP [default: not used].
+.TP
+\fBtol\fP=\fItheta-value\fP
+Opening-angle tolerence parameter.
+Default is \fB1.0\fP.
+.TP
+\fBeps\fP=\fIsoft-length\fP
+Force softening parameter.
+Default is \fB0.05\fP.
+.TP
+\fBrsize\fP=\fIlength\fP
+Initial guess of size of box which should contain all the particles.
+This may be of the
+[default: \fB4\fP].
+.TP
+\fBrmin\fP=\fI
+Lower left corner of the initial corner. May be of the form
+"num,num,num" [default: -rmin/2, i.e. a centered box].
+.TP
+\fBoptions\fP=\fIoption-string\fP
+Miscellaneous control options, specified as a comma-separated list
+of keywords.
+Currently recognized keywords are:
+\fBmass\fP, \fBphase\fP: outputs as extra the mass
+and phase coordinates. Potential and acceleration data are always
+output. [default: mass,phase].
+.TP
+\fBfcells\fP=\fIfcells-value\fP
+Ratio of cells to bodies, used when allocating cells.
+Default is \fB0.75\fP.
+.SH SEE ALSO
+hackcode1(NEMO)
+.SH AUTHOR
+Joshua E. Barnes.
+.SH FILES
+~/src/josh/hackcode/source1/*
+.SH HISTORY
+.nf
+.ta +1i +4i
+xx-xxx-87	V0: created	JEB
+7-jul-89	V1.1 doc written, keyorder and some defaults changed	PJT
+.fi
