@@ -42,7 +42,7 @@ string defv[] = {
     "out=\n         Filename for output table",
     "options=i,x,y,data\n   Output options",
     "maxstat=1\n    Max amount of statistics printed out",
-    "VERSION=1.0a\n  2-jul-03 PJT",
+    "VERSION=1.0b\n  3-jul-03 PJT",
     NULL,
 };
 
@@ -793,7 +793,26 @@ re_display(int k)       /* redisplay all, or slider 'k' (1..nsliders) */
                 plcolor(color); 
             }
             dprintf(1,"%d %d %g %g\n",i+1,color,points[i].xd, points[i].yd);
+#if 0
             plpoint(points[i].x, points[i].y);
+#else
+	    switch (points[i].ptype) {
+	    case 0:
+	      plpoint(points[i].x, points[i].y);
+	      break;
+	    case 1:
+	      plcircle(points[i].x, points[i].y, points[i].psize);
+	      break;
+	    case 2:
+	      plcross(points[i].x, points[i].y, points[i].psize);
+	      break;
+	    case 3:
+	      plbox(points[i].x, points[i].y, points[i].psize);
+	      break;
+	    default:
+	      error("Bad point type");
+	    }
+#endif
         }
       	points[i].oldvis = points[i].visib;
 	points[i].visib  = vis;
