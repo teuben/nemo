@@ -198,7 +198,7 @@ void show_wcs(string id, real longitude, real latitude)
     double xpix, ypix;
 
     if (worldpos(xpos, ypos, xref, yref, xrefpix, yrefpix, xinc, yinc, rot, proj, &xpix, &ypix))
-      error("problem-2 with WCS conversion");
+      warning("problem-2 with WCS conversion");
 
     to_dms(xpix,&d1,&m1,&s1);
     to_dms(ypix,&d2,&m2,&s2);
@@ -386,8 +386,9 @@ allocate_image()
       Yref(iptr) = yrefpix;
       Zref(iptr) = 0.0;
       
-      Namex(iptr) = sconc("RA---",proj);
-      Namey(iptr) = sconc("DEC--",proj);
+      
+      Namex(iptr) = hasvalue("xlab") ? xlab : sconc("RA---",proj);
+      Namey(iptr) = hasvalue("ylab") ? ylab : sconc("DEC--",proj);
       Namez(iptr) = zlab;
       
     } else {
