@@ -70,7 +70,7 @@
 #endif
 
 extern logical fblank_(int *);	
-extern void    setfblank_(int *);
+extern void    setfblank_(void *);
 
 #define byte    char
 #define bool    int
