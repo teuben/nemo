@@ -1,4 +1,4 @@
-.TH ALLOCATE 3NEMO "5 May 2003"
+.TH ALLOCATE 3NEMO "19 September 2003"
 .SH NAME
 allocate, reallocate \- memory allocation with error control.
 .SH SYNOPSIS
@@ -10,7 +10,7 @@ allocate, reallocate \- memory allocation with error control.
 .fi
 .SH DESCRIPTION
 \fIallocate\fP and \fIreallocate\fP are the NEMO counterparts
-of \fImalloc(3)\fP and \fIrealloc(3)\fP, but with guaranteed
+of \fIcalloc(3)\fP and \fIrealloc(3)\fP, but with guaranteed
 to return a sufficient amount of memory. The caller does not
 have to do any error control, instead the NEMO routines will
 call \fIerror(3NEMO)\fP and in general exit when memory is
@@ -40,7 +40,9 @@ immediately.
 We don't supply a good solution to this, other than error control
 (see \fIerror(3NEMO)\fP).
 .SH HISTORY
+.nf
 .ta +1.0i +3.0i
 5-mar-94	man created 	PJT
 5-may-03	added an example	PJT
+19-sep-03	documented that calloc is used (since april 2001)	PJT
 .fi
