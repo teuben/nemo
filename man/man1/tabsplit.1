@@ -1,0 +1,37 @@
+.TH TABSPLIT 1NEMO "7 Dec 1988" 
+.SH NAME
+tabsplit \- split the input table file into two tables
+.SH SYNOPSIS
+.PP
+\fBtabsplit in=\fPtable_file \fBlistin=\fPtable_file
+\fBout1=\fPtable-file
+\fBout2=\fPtable-file
+.SH DESCRIPTION
+\fBtabsplit\fP selects lines in the \fBin\fP file whose line number is
+included in the \fBlistin\fP file, abd stores them in \fBout1\fP file. The
+lines that are not selected are stored in \fBout2\fP file.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 20
+\fBin=\fIin-file\fP
+input table file, must be ASCII format [no default].
+.TP
+\fBlistin=\fIin-file\fP
+input list file, must be ASCII format and each line must be made of one
+integer number. Numbers must be pre-sorted to asending order.  [no default].
+.TP
+\fBout1=\fIout-file\fP
+output file 1. in the same format as \fIin-file\fP [no default].
+.TP
+\fBout2=\fIout-file\fP
+output file 2. in the same format as \fIin-file\fP [no default].
+
+
+.SH AUTHOR
+Jun Makino
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+15-Dec-88	V1.0: Created	JM
+.fi
