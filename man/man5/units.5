@@ -1,0 +1,57 @@
+.TH UNITS 5NEMO "8 April 1997"
+.SH NAME
+units \- units used in simulations
+.SH DESCRIPTION
+Most NEMO programs use the "virial" units as described by
+Heggie & Mathieu (1986), but we also list a few other common
+units, and the value of the gravitational constant in these.
+Notably some of the \fIpotential(5NEMO)\fP descriptors use
+other unit systems.
+.nf
+.ta +1i +1i +1i +1i +1i
+G	Length	Velocity       	Mass	Time
+
+0.4300	10 kpc	100 km/s	10**10	100 Myr
+4300	1 kpc	1 km/s      	10**9	1 Gyr
+4300	1 pc	1 km/s      	10**6	1 Myr
+.fi
+.SH UNITS
+For the purpose of comparison of results obtained by different authors,
+it is very convenient if they share a common system of units. The following
+system of units seems to find quite wide (if not universal) favor. The units
+are such that:
+.nf
+            G = 1
+            M = 1
+            E = -1/4
+where G is the gravitational constant, M the total initial mass, and E the
+initial energy. The corresponding units of mass, length and time are then
+            U_m = M
+            U_l = - G M^2 / (4E)
+            U_t = G M^2.5 / (-4E)^1.5
+(cf. Henon, 1972).
+
+The choice for E looks odd, but corresponds to a virial radius R (harmonic
+mean particles separation) equal to unity for a system in virial equilibrium.
+In N-body work a somewhat different, actually N-dependant, system is often
+used (cf. Aarseth 1972), but leads to a crossing time scale proportional
+to N^(-1/2). This system is also unsuitable for galaxy simulations, where 
+neither the number of stars nor the number of particles in the simulation
+is relevant to the imortant dynamical timescales. There are of course
+stellar dynamical calculations for which the above described units are
+unsuitable, e.g. unbound systems or cosmological simulations.
+.fi
+.SH "SEE ALSO"
+units(1NEMO), nemoinp(1NEMO)
+.nf
+Heggie, D.C. and Mathieu, R.D. 
+\fIStandardized Units and Time Scales\fP, in:
+\fIThe Use of Supercomputers in Stellar Dynamics\fP, ed. P. Hut and
+S. McMillan. (1986, Spinger Verlag)
+.SH AUTHOR
+Peter Teuben
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+7-may-96	Created  	PJT
+.fi
