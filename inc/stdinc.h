@@ -154,9 +154,11 @@ typedef unsigned char byte;
 
 /*
  * STRING: for null-terminated strings which are not taken apart.
+ * CONST_STRING:  and read-only strings (useful for C++)
  */
 
-typedef char *string;
+typedef char* string;
+typedef const char* const_string;
 
 /*
  * STREAM: a replacement for 'FILE *'.
@@ -332,7 +334,7 @@ extern "C" {
 
 /* io/stropen.c */
 
-extern stream stropen(const string, string);
+extern stream stropen(const_string, string);
 extern int    strdelete(stream, bool);
 extern string strname(stream);
 extern bool   strseek(stream);
