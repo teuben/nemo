@@ -1,0 +1,27 @@
+DIR = src/nbody/evolve/hackcode/hackcode1
+BIN = hackcode1
+NEED = $(BIN) 
+
+help:
+	@echo $(DIR)
+
+need:
+	@echo $(NEED)
+
+clean:
+	@echo Cleaning $(DIR)
+	@rm -fr core bench.dat bench.log
+
+NBODY = 10
+
+all: hackcode1
+
+hackcode1:	
+	@echo Running $@
+	@rm -f bench.dat bench.log
+	hackcode1 out=bench.dat > bench.log
+	@head -14 bench.log
+	@echo "..."
+	@tail -8 bench.log
+
+
