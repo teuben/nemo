@@ -1,0 +1,77 @@
+.TH COMMAND 3NEMO "24 December 2003"
+.SH NAME
+command_init, command_register, command_get, command_close - command parser
+.SH SYNOPSIS
+.nf
+.B #include <command.h>
+.PP
+.B command *command_init(string name);
+.B void command_register(command *c, string cmd, string argtypes);
+.B string *command_get(command *c);
+.B void command_close(command *c);
+.fi
+.SH DESCRIPTION
+These routines allow you to define a set of commands that
+can be used to interactively marshall a set of functions with
+checked and optional arguments.
+All information 
+is stored in a data structure \fBcommand\fP (which should remain opaque).
+.PP
+After obtaining this data structure with \fBcommand_init\fP
+(the \fBname\fP is merely used to allow multiple commands to
+live peacefully together when doing disk I/O operations), commands
+(or actions if you wish) need to be registered with
+\fBcommand_register\fP. In addition to the command, the argument types
+also need to be supplied. Currently only integer, real, string and
+optional arguments are allowed, designated by the characters
+\fB"irs."\fP resp. If no arguments are allowed, the \fBargtypes\fP
+string should be left blank (but not NULL).
+.PP
+The command parser returns a valid \fIargv\fP like array of strings from
+\fPcommand_get\fP, but it is currentlyu left to the user to parse these
+correctly, despite the earlier registration requirements (e.g. they lack a
+function pointer).
+.PP
+\fPcommand_close\fP is called to free up all memory associated with the
+command parser.
+.SH EXAMPLE
+A good full example can be found in the TESTBED section of command.c, producing
+a commandtest executable with which features can be excersized. Here is a 
+brief outline:
+.nf
+
+  #include <command.h>
+  ...
+  void do_a(int), do_b(int, double);
+  ...
+  string *argv;
+  ..
+  command cmd = command_init(name);                 /* initialize */
+  command_register(cmd,"a","i");                    /* register commands */
+  command_register(cmd,"b","ir");
+  command_register(cmd,"quit","");
+
+  while((argv=command_get(cmd))) {                  /* loop getting arguments */
+    na = xstrlen(argv,sizeof(string))-1;
+    if (streq(argv[0],"quit")) {
+	break
+    } else if (streq(argv[0],"a")) {
+      do_a(natoi(argv[1]));
+    } else if (streq(argv[0],"b")) {
+      do_b(natoi(argv[1]), natof(argv[2]));
+    } 
+    freestrings(argv);
+  }
+  
+
+.fi
+.SH SEE ALSO
+getparam(3NEMO), promptparam(3NEMO)
+.SH CAVEATS
+There is no programming language associates with this command parser
+.SH HISTORY
+.nf
+.ta +1i +3i
+24-dec-2003	V1.0 - written for SIRTF's map2 project		PJT
+.fi
+
