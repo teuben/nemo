@@ -1,32 +1,33 @@
 #
-# Source this file to install and build NEMO from scratch (manybody method)
+# Source this file to install and build NEMO from scratch ("manybody method")
 #
-# In order to get a distribution to get an easy PGPLOT enabled version you
-# need a NEMO/local/pgplot source directory, e.g. via the following method:
-#	cvs co nemo
+# This script also supports building with the PGPLOT and CFITSIO packages that
+# have to be in NEMO/local to be triggered. Here is an example how to do this:
+#
+#	cvs -Q co nemo
 #	cd nemo
-#	mkdir local; cd local; cvs co pgplot; cd ..
-# And an optional CFITSIO directory in a similar way:
+#	mkdir local
+#       cd local; cvs -Q co pgplot; cd ..
 #       cd local; wget -q ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio2500.tar.gz
 #       tar zxf cfitsio2500.tar.gz
 #       cd ..
 #
+# after this the install can be done as follows (your shell must be (t)csh !!)
+#
 #       source AAA_SOURCE_ME
 #
 # to clean up the closest approach is:
+#
 #	make distclean          # cleans most of the things created
 #	omen                    # remove NEMO* and YAPP* things, cleans the path
 #
 #
-# See also approach in other 'manybody' modules, e.g. starlab, partiview
-#
 # Within NEMO there are a few other scripts which have been used to automate
 # installations:
-#    src/scripts/quickps
-#    src/scripts/bootstrap
+#    src/scripts/quickps		(deprecated)
+#    src/scripts/bootstrap		(deprecated)
 #    src/scripts/test_a_new_nemo_cvs
 #
-# for other approaches we used to have.
 #
 # 25-jul-01  Peter Teuben       created, for MANYBODY
 # 18-jan-02  PJT                added optional PGPLOT if detected
@@ -35,7 +36,7 @@
 # 17-jun-03  PJT                better path, rehash for immediate use
 # 15-oct-03  PJT                added gyfalcON
 # 23-mar-04  PJT                for NEMO 3.2 - no more NEMOHOST
-# 29-jul-04  PJT                make PGPLOT and CFITSIO optional bootstrappable
+# 30-jul-04  PJT                make PGPLOT and CFITSIO optional bootstrappable
 
 rm -f install.log >& /dev/null
 touch install.log
@@ -89,6 +90,8 @@ echo Building html files for all the manual pages
 echo '++++++++++++++++++++++++++++++++++++++++' >>& install.log
 
 echo Building some sample executables by running the testsuite with -b:
+echo '   You can later build all executables with "cd $NEMO;make bins"'
+echo '   or using "mknemo <programname>" on a per-case basis'
 
 src/scripts/testsuite -b >>& install.log
 
