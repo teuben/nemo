@@ -60,11 +60,11 @@ string defv[] = {
     "bzero=0\n          Offset conversion factor in raw mode (0)",
     "blank=\n           Blank value re-substitution value?",
     "relcoords=f\n      Use relative (to crpix) coordinates instead abs",
-    "VERSION=4.0b\n	14-apr-03 PJT",
+    "VERSION=4.0c\n	2-mar-04 PJT",
     NULL,
 };
 
-string usage = "convert (near)fits files into images";
+string usage = "convert (near)fits files into ccd images";
 
 #define MAXPLANES 512
 
@@ -110,8 +110,8 @@ void nemo_main()
     ny = naxis[1];
     nz = (npl>0) ? npl : naxis[2];
     if (nx*ny*nz==0) error("Bad fits image: nx*ny*nz=0");
-    if (nx==1) warning("Fits image: nx=1 ???");
-    if (ny==1) warning("Fits image: ny=1 ???");
+    if (nx==1) warning("Fits image: nx=1");
+    if (ny==1) warning("Fits image: ny=1");
     if (nz > 1) {
         dprintf(0,"FITS file: Image size %d %d %d\n",nx,ny,nz);
         create_cube(&iptr,nx,ny,nz);

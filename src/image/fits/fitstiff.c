@@ -11,6 +11,8 @@
  *			      if not compressed
  *	 5-oct-95       0.3     ??
  *	18-jul-01	added usage line
+ *      17-dec-03       0.4   optional 
+ *
  * Note: the compres=f may now have a bug due to random access of TIFF ???
  */
 
@@ -91,7 +93,7 @@ nemo_main()
      */
  
     tif = TIFFOpen(getparam("out"),"w");
-    if (tif==NULL) error("Could not open tif file %s",getparam("out"));
+    if (tif==NULL) error("Could not open TIFF file %s",getparam("out"));
     TIFFSetField(tif,TIFFTAG_IMAGEWIDTH, (short) nx);
     TIFFSetField(tif,TIFFTAG_IMAGELENGTH, (short) ny);
     TIFFSetField(tif,TIFFTAG_BITSPERSAMPLE, 8);

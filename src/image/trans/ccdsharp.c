@@ -3,7 +3,7 @@
  *
  *	19-sep-96   q&d                             pjt
  *      5-apr-96    added divergence and vorticity  PJT
- *	11-apr-96   forgot to copy proper header elemtns   PJT
+ *	11-apr-96   forgot to copy proper header elements   PJT
  *                      
  */
 
