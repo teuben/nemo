@@ -1,4 +1,4 @@
-.TH FLOWCODE 1NEMO "11 April 1996"
+.TH FLOWCODE 1NEMO "20 January 2004"
 .SH NAME
 flowcode \- evolve an N-body system based on a given flow (2D only)
 .SH SYNOPSIS
@@ -112,7 +112,8 @@ This in effect gives a dissipation dependant heating source. See also
 .TP
 \fBsigma\fP=\fIangle\fP
 Diffusion angle, gaussian distributed with this sigma, about which
-each velocity vector is rotated after each timestep.
+each velocity vector is rotated after each timestep. Diffusion
+is used only when \fIsigma > 0\fP.
 [Default: \fB0\fP].
 .TP
 \fBseed\fP=\fIrandom-seed\fP
@@ -123,7 +124,7 @@ Random number seed, only used when diffusion (\fBsigma=\fP) is used.
 \fBheadline\fP=
 Identifying text for this run. Default: not used.
 .SH BUGS
-RK, PC and PC1 don't work in rotating potential - use EULER or RK4.
+RK, PC and PC1 don't work in rotating potentials - use EULER or RK4.
 .PP
 Since \fBcell\fP is a fixed number throughout the execution,
 is doesn't deal well with systems who's lenght-scale changes,

@@ -49,6 +49,19 @@ the actual data. Programmers must still do this themselves. If using a
 specific block to display, the data bytes are swapped based on the
 data type given by \fBtype=\fP.
 .SH EXAMPLES
+Suppose we have a dataset that somebody dumped via fortran, and 
+.nf
+unfio dump.dat
+52
+2400000
+2400000
+.fi
+which after knowing from the author that there are 200,000 bodies in here,
+and positions and velocities are written seperately, we can decipher in
+the following way
+.nf
+unfio dump.dat - 2 f maxbuf=2400000 | tabtos - pos.snap nbody=200000 time=1
+.fi
 .SH SEE ALSO
 bswap(1NEMO), unfio(3NEMO), bswap(3NEMO)
 .SH AUTHOR
