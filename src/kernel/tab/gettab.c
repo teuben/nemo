@@ -8,7 +8,7 @@
  *  
  *  get_Xtable:  return:   N > 0    N rows read, end of file
  *                         N = 0    nothing read, end of file
- *                         N < 0    abs(N) rows read, but no end of file yet 
+ *                         N < 0    abs(N) rows read, but possibly no end of file yet 
  *
  *	 8-apr-92 PJT  Skip lines where #columns not correct
  *	22-jul-92 PJT  dprintf() comment lines 
@@ -20,6 +20,7 @@
  *	20-jun-01 pjt  gcc 3
  *       8-dec-01 pjt  MAX_LINELEN
  *      11-jun-03 pjt  fixed bug in skipping a line in buffered reads
+ *      12-jul-03 pjt  changed the logic due to previous bug fix
  */
 
 #include <stdinc.h>
@@ -36,6 +37,7 @@ extern void freestrings(string *);
 
 /*
  *  get_atable:  get table in memory, using free format
+ *               can be used in multiple passes
  *
  */
 
@@ -44,17 +46,23 @@ int get_atable(
     int ncol,                       /* in: number of columns to read */
     int colnr[],                    /* in: column numbers to read */
     real *coldat[],                 /* out: array of pointers to data */
-    int ndat)                       /* in: length of dat arrays */
+    int ndat)                       /* in: length of dat arrays ; if < 0, repeat */
 {
     string *sp;
     int i, n, nr, nret, nline=0, npt=0;
     bool bad;
-    char line[MAX_LINELEN];
+    static char line[MAX_LINELEN];
     real *dat;
 
-    if (ndat<=0 || ncol<=0) error("Illegal ndat=%d ncol=%d",ndat,ncol);
+    if (ndat==0 || ncol<=0) error("Illegal ndat=%d ncol=%d",ndat,ncol);
     dprintf(2,"get_atable: parsing into %d columns\n",ncol);
-    while (fgets(line,MAX_LINELEN,instr) != NULL) {
+    for(;;) {
+        if (ndat < 0) {    /* line[] was filled from previous iteration */
+	  ndat = -ndat;
+        } else {
+	  if (fgets(line,MAX_LINELEN,instr) == NULL) 
+	    break;
+        }
         n = strlen(line);
         nline++;                        /* count number of lines read */
         if (line[n-1]=='\n') line[n-1]='\0';      /* patch line */
@@ -66,6 +74,10 @@ int get_atable(
         n = xstrlen(sp,sizeof(string))-1;   /* number of items found */
         dprintf(3,"[%d] %s\n",n,line);
         if (n==0) continue;                 /* skip empty lines ? */
+	if (npt >= ndat) {
+	  npt = -ndat;
+	  break;
+	}
         bad = FALSE;
         for (i=0; i<ncol; i++) {            /* process and fill each column */
             nr = colnr[i];		/* column number : >= 1 */
@@ -88,11 +100,7 @@ int get_atable(
 	freestrings(sp);
         if (bad) continue;
         npt++;                              /* count how much data filled */
-	if (npt == ndat) {
-	  npt = -ndat;
-	  break;
-	}
-    } /* while (fgets) */
+    } /* for(;;) */
     dprintf(1,"%d lines read from table file, %d data used \n",nline, npt);
     return npt;
 }
