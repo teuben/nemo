@@ -1,0 +1,28 @@
+%N snapfour
+%D Fourier coefficients of an N-body distribution
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man snapfour' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input snapshot [???]
+%A radii
+	Radii [0:2:0.1]
+%A cos
+	List of noj-zero cos(m.phi) terms [0:4:1]
+%A sin
+	List of non-zero sin(m.phi) terms [1:4:1]
+%A xvar
+	X variable [x]
+%A yvar
+	Y variable [y]
+%A fvar
+	Fourier Observable to be decomposed [vy]
+%A weight
+	Weight applied to observable [1]
+%A amode
+	Display amps or amp/phase if possible? [t]
+%A times
+	Snapshots to select [all]
+%A VERSION
+	9-nov-93 PJT [1.2]
