@@ -1,0 +1,173 @@
+#! /bin/csh -f
+#
+# This script returns a unique system dependant variable that sets
+# the hosttype for your distribution. You can preset it by making
+# sure the environment variable NEMOHOST is set
+#
+#	15-apr-92	Created		Peter Teuben
+#	26-mar-94	NEMO V2.2 - NEMOHOST instead of HOSTTYPE	pjt
+#	 4-aug-94	Added linux and convex
+#	 3-apr-96       the UltraSparc thought it was a sun4...
+#	28-jun-96       changed over to ``uname''
+#                       linux is now default ELF, linux-aout is other   pjt
+
+# Some sample 'uname -a' return values:
+# sun5:   SunOS taurus 5.3 Generic_101318-12 sun4m sparc
+# sun4:   SunOS saturn 4.1.3 1 sun4c
+# sgi:    IRIX ophir 4.0.5F 08280217 IP20 (indigo)
+# sgi_pc: IRIX64 leonardo 6.0 08241804 IP21 mips  (power challenge)
+# convex: ConvexOS c3.ncsa.uiuc.edu C3880 11.0 convex
+# linux:  Linux darkstar 1.1.59 #5 Fri Feb 3 21:52:57 EST 1995 i486 
+# linux:  Linux peter 2.0.0 #12 Fri Jun 28 00:38:30 EDT 1996 i486
+
+# if NEMOHOST was already present, simply return it.
+
+if ($?NEMOHOST != 0) then
+  if ($NEMOHOST != "") then
+    echo $NEMOHOST
+    exit 0
+  endif
+endif
+
+set uname=`uname`
+if ($status) set uname=unknown
+
+if ($uname == Linux) then
+            # Linux darkstar 1.1.59 #5 Fri Feb 3 21:52:57 EST 1995 i486
+            # Linux peter 2.0.0 #12 Fri Jun 28 00:38:30 EDT 1996 i486
+            # uname [-amnrsv]
+    file /bin/ls | grep -q ELF
+    if ($status) then
+        set uname=linux-a.out     
+    else
+        set uname=linux     
+    endif
+else if ($uname == SunOS) then          # sun3, sun4, sun5
+            # sun3:
+            #   SunOS suns 4.1.1 1 sun3
+            #   uname [-snrvma]
+            # sun4:
+            #   SunOS astro 4.1.3 1 sun4
+            #   uname [-snrvma]
+            # sun5:
+            #   SunOS ara 5.4 Generic_101945-37 sun4m sparc
+            #   SunOS earth 5.5 Generic sun4u sparc SUNW,Ultra-1
+            #   uname [-snrvmap]
+    set m=`uname -m`
+    switch ($m)
+    case sun3*:
+        set uname=sun3          ; breaksw
+    case sun4*:
+        set r=`uname -r`
+        switch ($r)
+        case 4*:
+            set uname=sun4          ; breaksw
+        case 5*:
+            set uname=sun5          ; breaksw
+        default:
+            set uname=sun-unknown   ; breaksw
+        endsw
+				; breaksw
+    default:
+        set uname=sun-unknown   ; breaksw
+    endsw
+else if ($uname == HP-UX) then          # HP-UX
+            # hpux:
+            #   HP-UX helios B.10.10 A 9000/735 2013768327 two-user license  
+            #   uname [-amnrsvil] [-S nodename]
+    set uname=hpux
+else if ($uname == OSF1) then           # Dec Alpha
+            # alpha:
+            #   OSF1 saturn.avl.umd.edu V3.2 214 alpha  (Alpha DS3000/400)
+    set uname=`uname -m`
+else if ($uname == IRIX) then           # SGI
+            # IRIX ophir 4.0.5F 08280217 IP20           (SGI Indigo r4000)
+            # uname [-snrvma]
+            # IRIX miranda 5.2 02282016 IP22 mips
+            # uname [-snrvmpad]
+            # IRIX neptune 5.3 11091812 IP22 mips       (SGI IndigoII Extreme)
+            # uname [-snrvmpad]
+    #set uname=sgi_`uname -m`
+    set uname=sgi
+else if ($uname == IRIX64) then         # SGI
+    #set uname=sgi_`uname -m`
+    set uname=sgi
+else if ($uname == ULTRIX) then         # DEC stations
+            # ULTRIX phoebe 4.2 0 RISC			DECstation 5000/25
+            # uname [-snrvma]
+    set uname=ultrix
+endif 
+
+echo $uname
+exit 0
+
+
+
+# Last resort to get system information         (not used anymore)
+
+set OS=()
+set ARCH=()
+set OSVER=()
+if (-e /vmlinuz) then				# linux (actually dangerous)
+        set ARCH=linux        
+else if (-f /bin/arch) then			# SunOS (linux too)
+	set OS=sunos
+	set ARCH=`/bin/arch`
+	if (-d /kernel) then
+ 	  set ARCH=sun5
+	endif
+#					this confuses sunos 5.5+
+#	if ( -f /usr/lib/libdl.so* ) then
+#                set OSVER=4.1
+#	else if ( -f /usr/lib/ld.so ) then
+#                set OSVER=4.0
+#	else
+#		set OSVER=3.5
+#	endif
+else if (-f /bin/machine) then			# DEC Ultrix (sometimes)
+	set OS=ultrix
+	set ARCH=`/bin/machine`
+else if (-f /hp-ux) then			# HP-UX
+	set OS=hp
+	file /hp-ux | grep s800 >& /dev/null
+	if ($status == 0) then
+		set ARCH=s700
+	else
+		set ARCH=s300
+	endif
+else if (-f /bin/4d) then			# SGI Irix (indigo/power c)
+        set cpu=`uname -m`
+	set OS=irix
+	set ARCH=sgi_$cpu
+else if ( -f /dev/root) then			# Mips
+	set OS=mips
+	set ARCH=mips
+else if (-d /usr/convex) then			# CONVEX
+	set ARCH=convex
+else if (-f /vmunix) then			# DEC Ultrix  (CONVEX too)
+	set OS=ultrix
+	file /vmunix | grep mips >& /dev/null
+	if ($status == 0) then
+	  set ARCH=mips
+	else
+	  set ARCH=vax
+	endif
+else if (-x /bin/smit) then			# IBM
+	set OS=ibm
+	set ARCH=rs6000
+#else if (-b /dev/root) then			# Mips
+#	set OS=mips
+#	set ARCH=mips
+else if (-f /etc/nextpasswd) then
+	set ARCH=next
+else if (-d /kernel) then			# sun solaris 2.x
+	set ARCH=sun5
+else
+	set ARCH=unknown
+endif
+
+echo $ARCH
+exit 0
+
+
+
