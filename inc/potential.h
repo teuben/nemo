@@ -3,7 +3,7 @@
  *	interfaces to aid in dynamically loading potentials
  *
  *	jul 1987:	original implementation
- *	sep 2001:	added C++ support
+ *	sep 2001:	added C++ support, including const'ing 
  */
 
 #ifndef _potential_h
@@ -19,9 +19,9 @@ typedef struct a_potential {
 
 /* should we make args 1,2 and 5 const ?? */
 
-typedef void (*potproc)       (int *, double *, double *, double *, double *);
-typedef void (*potproc_double)(int *, double *, double *, double *, double *);
-typedef void (*potproc_float) (int *,  float *,  float *,  float *,  float *);
+typedef void (*potproc)       (const int *, const double *, double *, double *, const double *);
+typedef void (*potproc_double)(const int *, const double *, double *, double *, const double *);
+typedef void (*potproc_float) (const int *, const float *,  float *,  float *,  const float *);
 
 
 #if defined(__cplusplus)
@@ -29,9 +29,9 @@ extern "C" {
 #endif
 
 
-potproc        get_potential        (string, string, string);
-potproc_float  get_potential_float  (string, string, string);
-potproc_double get_potential_double (string, string, string);
+potproc        get_potential        (const string, const string, const string);
+potproc_float  get_potential_float  (const string, const string, const string);
+potproc_double get_potential_double (const string, const string, const string);
 potproc        get_inipotential     (void);
 real           get_pattern          (void);
 
