@@ -26,9 +26,12 @@ tabplot:
 	@echo Running $@
 	tabmath tab.in - 'sqrt(%1)' | tabplot - ; nemo.coverage tabplot.c
 
+NMAX = 100000
+
 tabhist:
 	@echo Running $*
 	nemoinp 1:1000 | tabmath - - 'rang(0,1)' all seed=123 | tabhist - ; nemo.coverage tabhist.c
+	nemoinp 1:$(NMAX) nmax=$(NMAX) | tabmath - - 'rang(0,1)' all seed=123 | tabhist - nmax=-$(NMAX); nemo.coverage tabhist.c
 
 tabspline:
 	@echo Running $*
