@@ -19,6 +19,9 @@ N = 16 32 64 128 256
 
 bench: firstn
 	-@for i in $(N); do\
-        (time firstn < input$$i > bench$$i.log); done
+	(echo $$i 12.0 0.0 1.0 10.0 > input$$i;\
+	 echo 1.0 1.0 1.0 0 >> input$$i;\
+	 echo 0.5 0 >> input$$i;\
+         time firstn < input$$i > bench$$i.log); done
  
 
