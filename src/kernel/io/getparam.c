@@ -199,6 +199,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/file.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <ctype.h>
@@ -731,6 +732,11 @@ void finiparam()
     free(version_i);
 }
 
+/*
+ * nemokeys:  set the location of the nemokeys file, since it depends
+ *            on the value of NEMODEF
+ */
+
 local string nemokeys(void)
 {
   static char path[256];
@@ -765,16 +771,16 @@ local void finiparam_out(void)
 
   /* if it exists */
   fd = open(fn,O_CREAT|O_RDWR|O_APPEND,S_IRUSR|S_IWUSR);
-  if (fd<0) local_error("can't open");
+  if (fd<0) local_error("finiparam_out: can't open");
   err = flock(fd,LOCK_EX);
-  if (err < 0) local_error("can't lock");
+  if (err < 0) local_error("finiparam_out: can't lock");
   err = write(fd,msg,strlen(msg));
-  if (err < 0) local_error("can't write");
+  if (err < 0) local_error("finiparam_out: can't write");
   /* should use fcntl() really, for NFS */
   err = flock(fd,LOCK_UN);
-  if (err < 0) local_error("can't unlock");
+  if (err < 0) local_error("finiparam_out: can't unlock");
   err = close(fd);
-  if (err < 0) local_error("can't close");
+  if (err < 0) local_error("finiparam_out: can't close");
 #endif
 }
 
