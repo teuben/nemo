@@ -1,0 +1,12 @@
+#! /bin/csh -f
+#
+if ($#argv == 0) then
+  echo Usage: $0 name
+  echo "Finds source code with 'name' in it"
+  exit 0
+endif
+
+foreach name ($*)
+ find $NEMO/src -type f -name \*$name\* -print
+ find $NEMO/usr -type f -name \*$name\* -print
+end
