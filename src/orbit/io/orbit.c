@@ -32,9 +32,7 @@
  *------------------------------------------------------------------------------
  */
 
-void write_orbit (outstr,optr)
-stream   outstr;
-orbitptr optr;
+void write_orbit (stream outstr, orbitptr optr)
 {
     /* No history written here, user should do this on his own */
     put_set (outstr,OrbitTag);
@@ -67,9 +65,7 @@ orbitptr optr;
  *------------------------------------------------------------------------------
  */
  
-int read_orbit (instr,optr)
-stream   instr;
-orbitptr *optr;
+int read_orbit (stream instr, orbitptr *optr)
 {
     int  maxsize, ndim, nsteps;
     orbitptr otmp;
@@ -132,8 +128,7 @@ orbitptr *optr;
     return 1;
 }
 
-void free_orbit(optr)
-orbitptr optr;
+void free_orbit(orbitptr optr)
 {
     free( (char *) TimePath(optr) );
     free( (char *) PhasePath(optr) );
@@ -148,9 +143,7 @@ orbitptr optr;
  *------------------------------------------------------------------------------
  */
  
-int allocate_orbit(optr,ndim,nsteps)
-orbitptr *optr;
-int ndim,nsteps;
+int allocate_orbit(orbitptr *optr, int ndim, int nsteps)
 {
     *optr = (orbitptr ) allocate(sizeof(orbit));
     dprintf (1,"Allocate_Orbit @ %x with ndim=%d nsteps=%d\n",
@@ -173,8 +166,7 @@ int ndim,nsteps;
  *------------------------------------------------------------------------------
  */
  
-void copy_orbit(iptr,optr)
-orbitptr iptr, optr;
+void copy_orbit(orbitptr iptr, orbitptr optr)
 {
         int i, nsteps;
         
@@ -204,10 +196,7 @@ orbitptr iptr, optr;
  *------------------------------------------------------------------------------
  */
  
-void list_orbit (optr, tstart, tend, n)
-orbitptr optr;
-double tstart, tend;
-int n;
+void list_orbit (orbitptr optr, double tstart, double tend, int n)
 {
     int i, kount;
         

@@ -20,6 +20,7 @@
  *	17-dec		 3.2a fixed bug when vz != 0		pjt
  *	22-feb-95           b ansi headers
  *	17-apr-95           c compacted header file 		pjt
+ *      14-sep-01	    d using potproc_ types		pjt
  */
 
 #include <stdinc.h>
@@ -91,7 +92,7 @@ void nemo_main ()
 
 void setparams()
 {
-    proc pot;
+    potproc_double pot;
     double pos[3],acc[3],epot;
     int ndim=3;
 
@@ -104,7 +105,7 @@ void setparams()
  	   etot = getdparam("etot");
            if(!hasvalue("potname"))
               error("No potential given (potname=)");
-	   pot = get_potential(p.name, p.pars, p.file);
+	   pot = get_potential_double(p.name, p.pars, p.file);
 	   if (pot==NULL) 
 		error("potential %s cannot be loaded",p.name);
 	   omega = get_pattern();
@@ -155,7 +156,7 @@ void setparams()
 	   w = getdparam("vz");
 	   
            if(hasvalue("potname")) {
-    	       pot = get_potential(p.name, p.pars, p.file);
+    	       pot = get_potential_double(p.name, p.pars, p.file);
 	       if (pot==NULL) {
 		  warning("potential %s cannot be loaded",p.name);
                   etot = 0.0;
