@@ -1,0 +1,148 @@
+.TH CCDVEL 1NEMO "14 October 1999"
+.SH NAME
+ccdvel \- create a velocity field; grid or retrace
+.SH SYNOPSIS
+\fBccdvel out=\fPvelfie [parameters=values ...]
+.SH DESCRIPTION
+\fIccdvel\fP creates a velocity field for a disk with material
+in circular orbits. The user supplies the
+program with a rotation curve with number of radii and associated 
+rotation velocities. The position
+angle and inclination of each 'ring' can also be varied to simulate a 
+galactic warp. 
+.PP
+Two gridding methods exist: 
+.PP
+\fIretracing:\fP the GIPSY 
+method retraces each pixel in the sky plane to its (smallest) 
+radius in the (warped) galactic disk: it's ring parameters 
+(velocity, position angle, and inclination) are then
+linearly \fIinterpolated\fP from the input arrays, and that point is
+appropriately projected into that pixel (\fIhmmm, it might then
+wind up in the next pixel\fP)
+.PP
+\fIgridding:\fP the NEMO method places particles in rings, as prescribed
+by the input values, and computes a properly intensity weighted
+(number of particles in this case) mean velocity per pixel. This
+may however results in a 'meaningless' mean velocity in areas where
+rings are projected on top of each other.
+\fINote:\fP This mode, originally the only one, 
+merely served as a shortcut between 
+the various N-body creators, followed by subsequent gridding with 
+\fIsnapgrid\fP.
+.PP
+The center coordinates and systemic velocity are currently fixed for
+all rings.
+.SH PARAMETERS
+The following parameters are recognized:
+.TP 25
+\fBout\fP=\fIimage_out\fP
+Output velocity field map, will be in \fIimage(5NEMO)\fP format.
+No default.
+.TP
+\fBradii\fP=\fIr1,r2,...\fP
+Radii (arcsec). Note they must be sorted by increasing radius.
+The default is taken from the \fIrotcur_table\fP table below, or
+from this keyword.
+.TP
+\fBvrot\fP=\fIv1,v2,...\fP
+Array of rotation velocities, one for each radius,
+If less than the number of radii is
+given, the trailing ones are filled with the last supplied value.
+The default values from the \fIrotcur_table\fP table below can be also 
+be overridden with this keyword.
+.TP
+\fBinc\fP=\fIi1,i2,...\fP
+Array of inclinations (degrees), one for each radius.
+The default values from the \fIrotcur_table\fP table below can be also 
+be overridden with this keyword.
+.TP
+\fBpa\fP=\fIp1,p2,...\fP
+Array of  position angles (degrees), one for each radius.
+The default values from the \fIrotcur_table\fP table below can be also 
+be overridden with this keyword.
+.TP
+\fBsize\fP=\fInx,ny\fP
+Size of map, up to two numbers.
+If one number supplied, the map will be
+square. [Default: \fB128\fP].
+.TP
+\fBcell\fP=\fIdx,dy\fP
+Cell size, up to two numbers.
+If one number supplied, the cells will be
+square. [Default: \fB1\fP].
+.TP
+\fBcenter\fP=\fIx0,y0\fP
+Rotation center (grids with lower left corner being 0,0). 
+Default: center of map if \fIrotcur_table\fP is not used, else
+the \fIcenter_ring\fP entry from the \fIrotcur_table\fP. 
+.TP
+\fBvsys\fP=\fIvsys\fP
+Systemic velocity. 
+Default: \fB0\fP if \fIrotcur_table\fP is not used, else
+the \fIcenter_ring\fP entry from the \fIrotcur_table\fP.
+.TP
+\fBrotcurfit=\fP\fIrotcur_table\fP
+All ring parameters can also be read from this table, 
+that is normally output by \fIrotcur(1NEMO)\fP's \fBtab=\fP keyword.
+That table needs to be commented with \fItabcomment(1NEMO)\fP.
+.TP
+\fBfixring=\fP\fIcenter_ring\fP
+Ring number (1..Nring), from the \fIrotcur_table\fP, of which 
+the center (\fBvsys, center\fP) is used.
+If \fB0\fP is used, they must have been given by the appropriate
+keywords. If a large number is given, the last table entry
+is used. 
+.TP
+\fBnoise=\fP\fIv_sigma\fP
+Dispersion of the gaussian noise added to the map. Default: 0
+.TP
+\fBseed=\fP\fIinitial_seed\fP
+Initial seed used by the random number generator. If 0 is used,
+the time of the day is used instead. Default: 0
+.TP
+\fBheadline=\fP\fIcomments\fP
+Random verbiage added to the output image [Default: none].
+.SH EXAMPLE
+A velocity field in a file \fImap1\fP is fitted with \fIrotcur\fP, 
+starting at the outskirts of the galaxy, 100", and working on inwards
+to 10", the table is commented to feed it into \fIccdvel\fP
+(note the numeric sort) and compute a model velocity field, after which
+that is subtracted from the observations 
+(only in points were both model and observations
+are not undefined, i.e. 0.0):
+
+.nf
+
+    1% \fIrotcur in=map1 radii=100:10:-5 vrot=100 pa=20 inc=45 vsys=1200 \\
+        center=100,110 fixed=center,vsys,inc tab=map1.tmp units=arcsec\fP
+    2% \fItabcomment map1.rotcur - | sort -n > map1.rotcur\fP
+    3% \fIccdvel out=map1.model rotcurfit=map1.rotcur\fP
+    4% \fIccdmath in=map1,map1.model out=map1.diff \\
+            fie="ifeq(%1,0.0,0.0,ifeq(%2,0.0,0.0,%1-%2))"\fP
+
+.fi
+.SH ROTCURFIT
+The table \fBrotcurfit\fP assumes the
+radius, systemic velocity, rotation velocity, 
+position angle, inclination, x center and y center 
+are in columns 1, 2, 4, 6, 8, 10 and 12 resp.
+.SH SEE ALSO
+snapgrid(1NEMO), ccdgrid(1NEMO), snapslit(1NEMO), rotcur(1NEMO), velfi(GIPSY)
+.SH AUTHOR
+P. J. Teuben
+.SH BUGS
+The output map is patched with the undefined value 0.0 whereever
+no information is requested for these pixels.
+.PP
+The \fIgridding\fP method is currently not available. The \fPretracing\fP
+method will be used.
+.SH UPDATE HISTORY
+.nf
+.ta +1i +4i
+20-may-91	original program                     	PJT
+31-jul-92	V1.3 new rotcurfit=; rings are now radii    	PJT
+3-aug-92	(b) fixed mapsize bug; overrid center=   	PJT
+12-aug-92  	(d) added headline=                      	PJT
+oct-99       	doc additions                               	PJT
+.fi
