@@ -1,0 +1,83 @@
+.TH YANCNEMO 1NEMO "29 May 2001"
+.SH NAME
+YancNemo \- Yet Another N-body Code (NEMO version)
+.SH SYNOPSIS
+\fBYancNemo\fP [parameter=value]
+.SH DESCRIPTION
+\fBYancNemo\fP is Dehnen's version of the 
+tree code, where the approximate evaluation of gravitational forces is
+extended and substantially accelerated by including mutual cell-cell
+interactions. These are computed by a Taylor series in Cartesian coordinates
+and in a completely symmetric fashion, such that Newton's third law is now
+satisfied by construction and hence momentum exactly conserved. The
+computational effort is further reduced by exploiting the mutual symmetry of
+the interactions. For typical astrophysical problems with N=10^5 and at the
+same level of accuracy, the new code is about four times faster than the tree
+code. For large N, the computational costs are found to scale almost linearly
+with N, which can also be supported by a theoretical argument, and the
+advantage over the tree code increases with ever larger N.
+.PP
+\fBYancNemo\fP is the NEMOfied version, the barebone version is named YANC.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input file, needs to be in \fIsnapshot(5NEMO)\fP format. [???]
+.TP
+\fBout=\fP
+Output file, will be in \fIsnapshot(5NEMO)\fP format. [???]     
+.TP
+\fBtstop=\fP
+Time at which integration is stopped. Also called \fBtcrit\fP in
+Aarseth's nbody* series. [10]     
+.TP
+\fBstep=\fP
+Output integration step. Some other codes use 1/freqout, or \fBdeltat\fP for this
+ [1]    
+.TP
+\fBtheta=\fP
+Opening angle parameter at M=M_root [0.5]   
+.TP
+\fBeps=\fP
+Softening length [0.05]     
+.TP
+\fBkernel=\fP
+Type of softening kernel. This is an integer, with n/(10+n)/20/21
+for Fn/Kn/Plummer/Improved, and will likely add more kernels in the
+future. [21]
+.TP
+\fBhmin=\fP
+Timestep indicator such that tau_min = (1/2)^hmin. [Default: 6] 
+.TP
+\fBgive_pot=\fP
+Output potentials? Valid values are 0/1, which output none or all
+potentials. 
+Potentials are returned in the usual \fBPotential\fP slot of a \fISnapShot(5NEMO)\fP.
+[0]    
+.TP
+\fBgive_rho=\fP
+Output densities? Valid values are 0/1/2, which output none/density/surface density.
+Densities are returned in the \fBAux\fP slot of a \fISnapShot(5NEMO)\fP.
+[Default: 0].
+.TP
+\fBNlev=\fP
+# time-step levels [1]    
+.TP
+\fBNref=\fP
+# bodies in cell for density estimate [16]
+.TP
+\fBfac=\fP
+factor in tau < fac / rho. Only used if Nlev > 1. []
+.SH EXAMPLES
+.SH SEE ALSO
+YANC(1NEMO)
+.SH FILES
+.SH AUTHOR
+Walter Dehnen
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+29-May-01	V1.0 manual written, at GH-2001 workshop at INAOE 	PJT
+.fi
+
