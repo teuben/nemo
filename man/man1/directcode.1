@@ -1,0 +1,78 @@
+.TH DIRECTCODE1 1NEMO "17 February 2004"
+.SH NAME
+directcode \- simple direct N-body code
+.SH SYNOPSIS
+\fBdirectcode\fP [\fIparameter\fP=\fIvalue\fP] .\|.\|.
+.SH DESCRIPTION
+\fIdirectcode\fP is an leapfrog equal-timestepping direct N-body code.
+.SH PARAMETERS
+The following parameters are recognized; they may be given in any order.
+.TP 24
+\fBin\fP=\fIin-file\fP
+If given, initial conditions will be read from \fIin-file\fP in
+snapshot format.
+At most one of \fBin\fP, \fBrestart\fP, or \fBcontinue\fP may be specified.
+.TP
+\fBout\fP=\fIout-file\fP
+If given, results are written to \fIout-file\fP in snapshot format.
+.TP
+\fBnbody\fP=\fInbody-value\fP
+Number of bodies for test data, generated only if none of
+\fBin\fP, \fBrestart\fP, or \fBcontinue\fP are specified.
+Default is \fB128\fP.
+.TP
+\fBseed\fP=\fIrandom-seed\fP
+Random number seed used in generating initial conditions.
+Default is \fB123\fP.
+.TP
+\fBcencon\fP=\fIcencon-flag\fP
+If \fBtrue\fP, generate centrally concentrated test system.
+Default is \fBfalse\fP.
+.TP
+\fBfreq\fP=\fIinteg-freq\fP
+Inverse time-step, to be used with a leap-frog integrator.
+Default is \fB32.0\fP (32 steps per unit time).
+.TP
+\fBeps\fP=\fIsoft-length\fP
+Force softening parameter.
+Default is \fB0.05\fP.
+.TP
+\fBoptions\fP=\fIoption-string\fP
+Miscellaneous control options, specified as a comma-separated list
+of keywords.
+Currently recognized keywords are:
+\fBreset_time\fP: when reading initial data, set \fItnow\fP to zero;
+\fBnew_tout\fP: when restarting, set new output times;
+\fBmass\fP, \fBphi\fP, \fBacc\fP: output mass, potential,
+acceleration data with major data outputs. The phase space coordinates
+are always output.  It also seems that the reset_time and new_tout
+options have not been implemented yet.
+Default: \fBmass,phase\fP.
+.TP
+\fBtstop\fP=\fIstop-time\fP
+Time to stop integration in N-body model units.
+Default is \fB2.0\fP.
+.TP
+\fBfreqout\fP=\fIout-freq\fP
+Frequency of major N-body data outputs.
+Default is \fB4.0\fP (4 frames per unit time).
+.TP
+\fBminor_freqout\fP=\fIout-freq\fP
+Frequency of minor diagnostic outputs.
+If this frequency is not a simple fraction of \fBfreq\fP (see above),
+the program can waiste significant amounts of time.
+Default is \fB32.0\fP (32 diagnostic measurements per unit time).
+.SH SEE ALSO
+newton0(1NEMO), hackcode1(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.ta +1.5i
+.nf
+src/nbody/evolve/directcode/	source code
+.fi
+.SH HISTORY
+.nf
+.ta +1i +4i
+17-feb-04	V1.0  code written, cloned off hackcode1	PJT
+.fi
