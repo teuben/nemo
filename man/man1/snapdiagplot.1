@@ -30,6 +30,25 @@ Default: \fB0.05\fP.
 If set, generate publication-style plot.  Default: \fBfalse\fP.
 .SH SEE ALSO
 snapplot(1NEMO), snapshot(5NEMO).
+.SH DATA FORMAT
+\fIsnapdiagplot\fP expects a \fBDiagnostics\fP set inside a \fPSnapShot\fP.
+Here is an example of the current contents. Note not all elements are
+currently being used.
+.nf
+ set Diagnostics
+    double Energy[3] -0.250646 0.252928 -0.503574
+    double KETensor[3][3] 0.0895620 -0.000171242 -0.00146190
+      -0.000171242 0.0829969 -0.00185623 -0.00146190 -0.00185623
+      0.0803691
+    double PETensor[3][3] -0.167254 0.00296881 -0.00315221 0.00356183
+      -0.165142 0.000637358 -0.00312277 0.000509798 -0.163122
+    double AMTensor[3][3] 0.00000 0.00675746 0.00892347 -0.00675746
+      0.00000 0.0221447 -0.00892347 -0.0221447 0.00000
+    double CMPhaseSpace[2][3] 7.16658e-17 1.24737e-16 3.34476e-17
+      1.90820e-17 7.69784e-18 -2.33103e-18
+    double cputime 0.000833333
+  tes
+.fi
 .SH AUTHOR
 Joshua E. Barnes
 .SH HISTORY
