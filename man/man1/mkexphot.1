@@ -1,0 +1,127 @@
+.TH MKEXPHOT 1NEMO "22 July 1991"
+.SH NAME
+mkexphot \- make an exponential disk (hot) embedded in a halo
+.SH SYNOPSIS
+\fBmkexphot out=\fPout_file [parameter=value] .\|.\|.
+.SH DESCRIPTION
+\fImkexphot\fP makes an N-body realization of a hot exponential disk.
+It lives inside an assumed dark halo. To evolve such a model the
+halo has to be made seperately and added to the output snapshot,
+or an N-body integrator which can handle a fixed external analytical
+potential, like \fIhackcode3\fP, must be used.
+.PP
+The input file is an ASCII table, 
+consisting of two lines with header information, and for each radius
+local information of the disk and halo. It is described in more
+detail below.
+.SH PARAMETERS
+The following parameters are recognized.
+.TP 24
+\fBin=\fP\fIin_table\fP
+Table with as a function of radius the density, various
+radial forces and velocity dispersions. If \fIin_table\fP is not
+found in the current working directory, the directory \fB$NEMO/data\fP
+is also searched [No default].
+.TP
+\fBout=\fP\fIout_file\fP
+The exponential disk is written to \fIout_file\fP 
+in \fIsnapshot(5NEMO)\fP format. [No default]
+.TP
+\fBtest=\fP\fItest_file\fP
+Optional input snapshot file. If provided, the particles 
+in this file are used to define the positions. The keyword \fBnbody\fP
+is then not used, but taken from this input file.
+[default: \fInot-used\fP].
+.TP
+\fBnbody=\fP\fInum_bodies\fP
+Number of particles for the disk. Only used when \fItest_file\fP not
+provided.
+[Default: \fB1024\fP].
+.TP
+\fBrmin=\fP\fIdisk_cutoff\fP
+Inner cutoff radius of disk. [Default: \fB0.0\fP].
+.TP
+\fBrmax=\fP\fIdisk_cutoff\fP
+Outer cutoff radius of disk. [Default: \fB25.0\fP].
+.TP
+\fBratio=\fP\fIsigma-ratio\fP
+Ratio used to convert vertical velocity dispersion into
+radial velocity dispersion. [Default: \fB2???\fP].
+.TP
+\fBrcsig=\fP\fIsigma-scale\fP
+Scalelenght used in conversion from vertical velocity dispersion
+into radial velocity dispersion [Default: \fB1???\fP].
+.TP
+\fBseed=\fP\fIrandom_seed\fP
+Random number seed. [Default: \fB0\fP.]
+.TP
+\fBheadline=\fP\fImessage\fP
+Additional random verbiage headline for output file. 
+[Default: \fInone\fP.]
+.TP
+\fBfhalo=\fIfraction\fP
+Force a different mass fraction of halo to disk. This is not
+recommended, since the proper value is taken from the input
+table. A different value will most likely not produce a well
+behaved disk. [default: not used]
+.SH TABLE FORMAT
+The table is plain ASCII. First two lines are header information, 
+followed by a table of information for each radius.
+.nf
+\fB  nrad, rout, h, z0, dens0\fP
+\fB  vhmax, rhcore, q2i, dkmass, hamass\fB
+\fB  radius, densit, frdis0, frhal0, frtot0, frdis2, frhal2, frtot2,
+         vdisk, vhalo, vrot, sigmad, sigmah, sigmaz\fP
+.fi
+.PP
+The first line contains information for the exponential disk: 
+\fBnrad\fP = number of radii in table,
+\fBrout\fP = outer radius, 
+\fBh\fP = disk scale-lenght, 
+\fBz0\fP = disk vertical scaleheight, and 
+\fBdens0\fP = central disk density.
+.PP
+The second line contains information for the halo:
+\fBvhmax\fP = maximum halo velocity, 
+\fBrhcore\fP = halo core radius, 
+\fBq2i\fP = halo flattening parameter,
+\fBdkmass\fP = disk mass (actually redundant), and 
+\fBhamass\fP = the halo mass. 
+.PP
+The q2i parameter is currently not used.
+.PP
+All subsequent \fBnrad\fP lines contain: 
+the radius, density, radial force of disk,
+halo and sum, second radial force of disk, halo and sum, 
+rotational velocity of disk, halo and sum and finally the velocity
+dispersion in disk, halo and z. See code for more details.
+.SH "SEE ALSO"
+mkexpdisk(1NEMO)
+.PP
+\fIN-Body realizations of compound galaxies\fP,
+Hernquist, L. (ApJ Suppl, \fB86\fP:389-400, 1993 June)
+.SH FILES
+.nf
+.ta +2i
+src/nbody/init	mkexphot.c
+dat           	expmodel.inp (example input table)
+.fi
+.SH AUTHOR
+Stefano Casertano (Fortran version), Peter Teuben (C version)
+.SH HISTORY
+.nf
+.ta +1i +4i
+xx-xxx-8x	Created in the Dark Ages        	Stefano
+xx-sep-90	Adapted for Nemo, converted into C	PJT/RAG
+23-oct-90	Fake different halo/disk ratio   	PJT
+22-jul-91	doc improvements - formalized IMSL interface	PJT
+.fi
+
+
+
+
+
+
+
+
+
