@@ -32,11 +32,12 @@ echo "Created on `hostname`: `date` <P>"
 if (1) then
 
 echo "Apologies for the formatting bug"
+echo "See also: <A HREF=whatis.html>whatis</A> pages."
 
 echo "<PRE>"
 # ok for sunos
 # (cd man_html; ls *.$sec.html | awk -F. '{a=$1"</a>";printf ("<a href=man_html/%s>%-20s\n",$0,a)}' | pr -s" " -l1 -t -5 -w200)
-(cd man_html; ls *.$sec.html | awk -F. '{a=$1"</a>";printf ("<a href=man_html/%s>%s\n",$0,a)}' | pr -s"" -t -5 -w512)
+(cd html; ls *.$sec.html | awk -F. '{a=$1"</a>";printf ("<a href=%s>%s\n",$0,a)}' | pr -s"" -t -5 -w512)
 echo "</PRE>"
 
 else
@@ -44,9 +45,9 @@ else
 echo "<CENTER>"
 echo "<TABLE BORDER>"
 
-pushd man_html > /dev/null
+pushd html > /dev/null
 ls *.$sec.html | awk -F. '{print $1}' | pr -t -8 |\
-  awk '{print "<tr>";for(i=1; i<=8; i++) printf("<td width=20%%><a href=man_html/%s'.$sec.html'>%s</a></td>\n",$i,$1); print "</tr>"}'
+  awk '{print "<tr>";for(i=1; i<=8; i++) printf("<td width=20%%><a href=%s'.$sec.html'>%s</a></td>\n",$i,$1); print "</tr>"}'
 popd > /dev/null
 
 echo "</TABLE>"

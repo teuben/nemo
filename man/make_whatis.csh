@@ -11,6 +11,6 @@ echo "Created on: `date` by `whoami`@`hostname``domainname`<P>"
 echo "<\!-- Created by $0 - do not edit -->"
 echo "Note: this page may still have some bad cross-references"
 echo "<DIR COMPACT>"
-awk -f whatis.awk man/whatis
+awk -f whatis.awk whatis
 echo "</DIR></BODY></HTML>"
 

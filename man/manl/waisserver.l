@@ -40,7 +40,7 @@ used.  If it is not supplied then the Z39.50 port (210) is used.
 .TP 10
 \fB\-s
 listen to standard I/O for queries.
-.TP10
+.TP 10
 \fB\-d\fI directory
 Use this directory as the default location of the indexes.  Therefore if
 the directory were /usr/local, then the database foo would be found in
