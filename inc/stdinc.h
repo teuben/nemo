@@ -347,7 +347,7 @@ extern void   strclose(stream);
 void error(string, ...);
 void warning(string, ...);
 #ifndef HAVE_DPRINTF
-int dprintf(int, const string, ...);
+int dprintf(int, const_string, ...);    /* NEMO has same name as libc */
 #endif
 /* eprintf is ZENO's "warning" */
 #define eprintf warning
