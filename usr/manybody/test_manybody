@@ -3,4 +3,25 @@
 #  16-mar-2004     for nbody-school            PJT 
 #
 
+set clean=1
+
 echo "testing manybody .. hang on"
+
+
+set tmp=tmp$$
+set log=$tmp.log
+
+echo `date` > $log
+
+mkplummer $tmp.1 100              >>& $log
+if ($status) echo mkplummer failed
+hackcode1 $tmp.1 $tmp.2 tstop=1   >>& $log
+if ($status) echo hackcode1 failed
+gyrfalcON $tmp.1 $tmp.3 tstop=1   >>& $log
+if ($status) echo gyrfalcON failed
+
+
+
+if ($clean) then
+  rm -rf $tmp.*
+endif
