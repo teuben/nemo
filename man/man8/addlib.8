@@ -1,0 +1,39 @@
+.TH ADDLIB 8NEMO "8 Octoberr 1990"
+.SH NAME
+addlib \- add module(s) to a library
+.SH SYNOPSIS
+.PP
+\fBaddlib \fIlib-name\fP \fImodule-file(s)s\fP
+.SH DESCRIPTION
+\fBaddlib\fP adds modules to a library. The module
+names way be in the form of source files
+(extensions must be .c or .f) or may already be in
+object form (extension .o). Source file modules
+are compiled using \fIcc(1)\fP or \fIf77(1)\fP
+.PP
+The modules are added using \fIar(1)\fP and
+\fIranlib(1)\fP will be run after all modules
+have been added/replaced.
+.PP
+\fBaddlib\fP is not NEMO specific, no NEMO environment
+variables are used (see below)
+.SH ENVIRONMENT VARIABLES
+.nf
+.ta +1i
+CFLAGS	flags for the \fIcc(1)\fP C compiler
+FFLAGS	flags for the \fIf77(1)\fP fortran compiler
+.fi
+.SH "SEE ALSO"
+mklib(8NEMO), mkbin(8NEMO)
+.SH FILES
+.nf
+.ta +1.5i
+src/nemo/lib	source code for addlib, mklib, mkbin
+.fi
+.SH AUTHOR
+Peter Teuben
+.SH "UPDATE HISTORY"
+.nf
+.ta +1i +4i
+22-Nov-89	V1.0: created for miriad          	PJT
+.fi
