@@ -1,0 +1,103 @@
+.TH TABLE 3NEMO "6 August 1992"
+.SH NAME
+get_atable, get_ftable, get_line, parse, strinsert \- table manipulator routines
+.SH SYNOPSIS
+.nf
+.B #include <stdinc.h>
+.PP
+.B int get_atable(instr,ncol,colnr,coldat,ndat)
+.B stream instr;
+.B int ncol;    
+.B int colnr[]; 
+.B real *coldat[];
+.B int ndat;      
+.PP
+.B int get_ftable(instr,ncol,colpos,colfmt,coldat,ndat)
+.B stream instr;  
+.B int ncol;      
+.B int colpos[];  
+.B string *colfmt[];
+.B real *coldat[];  
+.B int ndat;        
+.PP
+.B int get_line (instr, line)
+.B stream instr;
+.B char *line;
+.PP
+.B int parse(linenr, line, dat, ndat)
+.B int linenr;
+.B char *line;
+.B double *dat;
+.B int ndat;
+.PP
+.B int strinsert(a, b, n)
+.B char *a;
+.B char *b;
+.B int n;
+.PP
+.B int iscomment(line)
+.B char *line;
+.fi
+.SH DESCRIPTION
+Both \fIget_atable\fP
+and \fIget_ftable\fP parse an ascii table, pointed by the \fIinstr\fP stream,
+into \fIncol\fP columns and up to \fIndat\fP rows of \fBreal\fP numbers
+into memory. The input table may contain comment lines, as well as columns
+which are not numbers. Badly parsed lines are simply skipped.
+Other common parameters to both routines 
+are \fIcoldat, ncol\fP and \fIndat\fP:
+\fIcoldat\fP is an array of \fIncol\fP pointers to 
+previously allocated data, each of them \fIndat\fP \fBreal\fP elements.
+The number of valid rows read is then returned.
+.PP
+\fIget_atable\fP parses the table in free format.
+\fIcolnr\fP an array of length \fIncol\fP
+of the column numbers to read (1 being the first column),
+If any of the \fIcolnr\fP is 0, it is 
+interpreted as referring to the line number in the
+original input file (including comment lines), 1 being the first line, and the
+corresponding entry in \fIcoldat\fP is set as such.
+Columns are separated by whitespace or commas.
+.PP
+\fIget_ftable\fP parses the table in fixed format.
+\fIcolpos\fP is an array with 
+positions in the rows to start reading (1 being the first position),
+\fIcolfmt\fP an array of pointers to the format string
+used to parse a \fBreal\fP number
+(note \fBreal\fP normally requires \fI%lf\fP).
+If any of the \fIcolpos\fP is 0, it is interpreted as referring to the line 
+number in the
+original input file (including comment lines), 1 being the first line, and the
+corresponding entry in \fIcoldat\fP is set as such.
+.PP
+The \fIget_line(3)\fP gets the next line from a stream \fIinstr\fP, stored
+into \fIline\fP. It returns the length of the string read, 0 if end of file.
+.PP
+\fIparse\fP parses the character string in \fIline\fP into the double array
+\fPdat\fP, which has at most \fIndat\fP entries. Parsing means that 
+\fB%n\fP refers to column \fBn\fP in the character string (\fBn\fP must
+be larger than 0. Also \fB%0\fP may be referenced, meaning the current
+line number, to be entered in the argument \fIlinenr\fP.
+.PP
+\fIstrinsert\fP inserts the string \fIb\fP into \fIa\fP, replacing \fIn\fP
+characters of \fIa\fP.
+.PP
+\fIiscomment\fP returns 1 if the line appears to be a comment
+(starts with ';', '#', '!' or a blank/newline)
+.SH DIAGNOSTICS
+Low-level catastrophies (eg, parsing errors, wrong delimiters)
+generate messages via \fIerror\fP(3NEMO).
+.SH FILES
+.nf
+.ta +2.0i
+src/kernel/tab  	table.c gettab.c
+.fi
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +3i
+xx-sep-88	V1.0 written	PJT
+6-aug-92	documented get_Xtable functions  	PJT
+1-sep-95	added iscomment()	pjt
+.fi
