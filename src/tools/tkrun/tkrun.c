@@ -248,7 +248,7 @@ int parse(FILE *fp, FILE *tp, FILE *sp, int maxw, Widget *w)
         len = strlen(line);
         if (line[len-1]=='\n') line[len-1]='\0';
  
-        if (strncmp(line,keycdef,cdeflen)==0) {
+        if (strncmp(line,keycdef,cdeflen)==0) {    /* if line starts with "#<"  */
             cp = strchr(line,'-');
             if (cp) {
                 if (nw==0) continue;
@@ -260,9 +260,9 @@ int parse(FILE *fp, FILE *tp, FILE *sp, int maxw, Widget *w)
             continue;
         }
 
-        if (strncmp(line,keypdef,pdeflen)==0) {
-            fprintf(tp,"%s\n",line);
-            wp = burststring(line," \t");
+	if ( (cp=strstr(line,keypdef)) ) {
+            fprintf(tp,"%s      <#\n",cp);
+            wp = burststring(cp," \t");
 
             if (wp[0]==0 || wp[1]==0) continue;
 
@@ -577,8 +577,8 @@ int parse(FILE *fp, FILE *tp, FILE *sp, int maxw, Widget *w)
                 fprintf(stderr,"### Warning: skipping unknown tag %s\n",wp[1]);
                 continue;
             }
-        }
-    }
+        } /* if keypdef */
+    } /* while fgets() */
 
     return nw;
 }
@@ -666,8 +666,18 @@ void example(void)
     printf("#>  CHECK   options=mean,sigma      sum,mean,sigma,skewness,kurtosis\n");
     printf("#>  SCALE   n=3.141592              0:10:0.01\n");
     printf("#\n");
+    printf("# In csh scripts you can also now merge the \"set\" and \"#>\" lines, e.g.\n");
+    printf("#\n");
+    printf("set a=1     #> SLIDER a=1  0:10:0.1\n");
+    printf("#\n");
+    printf("foreach _arg ($*)\n");
+    printf("  set $_arg\n");
+    printf("end\n");
+
+#if 0
     printf("# Here is an example of automatically setting default:\n");
     printf("awk '{if ($1==\"#>\") print \"set\",$3}' $0 > $0.keys; source $0.keys\n");
+#endif
 
 
     exit(0);

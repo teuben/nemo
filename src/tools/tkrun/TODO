@@ -4,6 +4,11 @@ Short term:
 
   - inline help as the cursor moves over the keyword (can tk do that?)
   - read keyword files for persistent execution
+  - allow in /bin/csh script to also accept the following type of construct
+
+	set a=1		#> SLIDER 	0,10,0.1
+
+    notice the missing a=1 in that case... is that really wise?
 
 Longer term:
 
