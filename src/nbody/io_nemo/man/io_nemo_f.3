@@ -226,7 +226,7 @@ LIBS = -L$(NEMOLIB)
 # - - - - - - - - - - - - - - - - - - - -
 # compilation with g77 compiler
 # - - - - - - - - - - - - - - - - - - - -
-G77FLAGS = -fno-second-underscore -fwritable-strings -Wno-globals
+G77FLAGS = -fno-second-underscore -Wno-globals
 
 nemo_fortran_g77 : nemo_fortran.F
 	g77 $(G77FLAGS)  -o $@ nemo_fortran.F $(LIBS) \\
