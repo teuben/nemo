@@ -2,8 +2,10 @@
  * MKFLOWDISK.C: set up a disk with initial conditions taken from 
  *               a potential flow (see also flowcode)
  *
- *	original version: 18-nov-03	Peter Teuben - Maryland
- *                        20-nov-03     changed meaning of angles, and thus signs of k/pitch
+ *   18-nov-03   1.0 cloned off mkspiral - 	Peter Teuben - Maryland
+ *   20-nov-03   1.1 changed meaning of angles, and thus signs of k/pitch
+ *   21-nov-03   1.2 changed signs once again, make is consistent w/ vrtm51.c
+ *
  */
 
 #include <stdinc.h>
@@ -36,7 +38,7 @@ string defv[] = {
     "nmodel=1\n           number of models",
     "test=f\n             test shape of spiral",
     "headline=\n	  text headline for output ",
-    "VERSION=1.1\n	  20-nov-03 PJT",
+    "VERSION=1.2\n	  21-nov-03 PJT",
     NULL,
 };
 
@@ -45,10 +47,10 @@ string usage = "toy spiral density perturbation in a uniform disk";
 
 local real rmin, rmax, rref;
 local int  ndisk, nmodel;
-local real SPk;     /* spiral parameters */
-local real pitch;
+local real SPk;     /* linear spiral wavenumber */
+local real pitch;   /* log spiral pitch */
 local real totmass;
-local real offset;
+local real offset;  /* phase offset at rref */
 local bool Qtest;
 local bool Qlinear;
 
@@ -57,8 +59,6 @@ local real theta[361], dens[361];
 
 local proc potential;
 
-extern double xrandom(double, double);
-extern double grandom(double, double);
 
 void nemo_main()
 {
@@ -80,9 +80,9 @@ void nemo_main()
 
     Qlinear = hasvalue("k");
     if (Qlinear)
-      SPk = -getdparam("k");	/* corrected for rot counter clock wise */
+      SPk = getdparam("k");	/* corrected for rot counter clock wise */
     else if (hasvalue("pitch"))
-      pitch = -getdparam("pitch"); /* corrected for rot counter clock wise */
+      pitch = getdparam("pitch"); /* corrected for rot counter clock wise */
     else
       error("Either k= (linear) or pitch= (logarithmic) spiral indicator needed");
     
@@ -197,9 +197,9 @@ testdisk(int n)
 	  theta_i = frandom(0.0,360.0,density) * PI / 180.0;
 	theta_i += offset;
 	if (Qlinear) {
-	  theta_i += SPk * (r_i-rref) * TWO_PI;    /* positive SPk is trailing SP  */
+	  theta_i -= SPk * (r_i-rref) * TWO_PI;    /* positive SPk is trailing SP  */
 	} else {
-	  theta_i += log(r_i/rref)/tani;
+	  theta_i -= log(r_i/rref)/tani;
 	}
         cost = cos(theta_i);
         sint = sin(theta_i);
