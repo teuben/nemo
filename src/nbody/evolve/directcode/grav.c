@@ -1,28 +1,35 @@
 /*
  * GRAV.C: routines to compute gravity.
  *   
- *      16-feb-04    for DirectCode
+ *      16-feb-04    cloned from hackcode1 for DirectCode
  *
  */
 
 #include "code.h"
 
+
+/* must define either USE_LOCAL *or* USE_STACK here  */
+
 /*
  * HACKGRAV: evaluate grav field at a given particle.
+ *           for a Direct N-body code this is awfully simple:
+ *           loop over all particles, but yourself, and accumulate
+ *           the forces, and potential
  */
 
-local bodyptr p0;			/* body itself  */
-local vector pos0;			/* point to evaluate field at */
-local real phi0;			/* resulting potential at pos0 */
-local vector acc0;			/* resulting acceleration at pos0 */
 
-local vector dr;			/* between gravsub and subdivp */
-local real drsq;
-local real drabs, phii, mor3;
-local vector ai;
 
 void hackgrav(bodyptr p)
 {
+  bodyptr p0;			/* body itself  */
+  vector pos0;			/* point to evaluate field at */
+  real phi0;			/* resulting potential at pos0 */
+  vector acc0;			/* resulting acceleration at pos0 */
+  vector dr;			/* between gravsub and subdivp */
+  real drsq;
+  real drabs, phii, mor3;
+  vector ai;
+
   p0 = p;					/* exclude p from f.c.      */
   SETV(pos0, Pos(p));				/* set field point          */
   phi0 = 0.0;					/* init potential, etc      */

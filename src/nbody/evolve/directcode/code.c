@@ -1,5 +1,5 @@
 /*
- * CODE.C: simple direct N-body code.
+ * CODE.C: simple direct N-body code (directcode)
  *	
  * updates:
  *     16-feb-04  V1.0   example, prove a point to Jim       PJT
@@ -27,7 +27,7 @@ string defv[] = {		/* DEFAULT PARAMETER VALUES */
     "freqout=4.0\n		  major data-output frequency ",
     "minor_freqout=32.0\n	  minor data-output frequency ",
 
-    "VERSION=1.0\n		  16-feb-04 PJT",
+    "VERSION=1.0a\n		  17-feb-04 PJT",
     NULL,
 };
 
@@ -39,10 +39,10 @@ extern  bool scanopt(string, string);
 
 void nemo_main(void)
 {
-  startrun();					/* set params, input data   */
+  startrun();				/* set params, input data   */
   initoutput();				/* begin system output      */
-  while (tnow < tstop + 0.1/freq)		/* while not past tstop     */
-    stepsystem();				/*   advance N-body system  */
+  while (tnow < tstop + 0.1/freq)	/* while not past tstop     */
+    stepsystem();			/*   advance N-body system  */
   stopoutput();				/* finish up output         */
 }
 
@@ -58,17 +58,17 @@ void startrun(void)
   
   if (hasvalue("in"))
     inputdata(infile);			/*     read inital data     */
-  else {					/*   make initial conds?    */
+  else {				/*   make initial conds?    */
     nbody = getiparam("nbody");		/*     get nbody parameter  */
     if (nbody < 1)			/*     is value absurd?     */
-      error("startrun: absurd nbody");
+      error("invalid nbody=%d",nbody);
     init_xrandom(getparam("seed"));	/*     set random generator */
     testdata(getbparam("cencon"));	/*     make test model      */
   }
   freq = getdparam("freq");		/*   get various parameters */
-  eps = getdparam("eps");
-  tstop = getdparam("tstop");
-  freqout = getdparam("freqout");
+  eps = getdparam("eps");               /*   softening length       */
+  tstop = getdparam("tstop");           /*   stop time              */
+  freqout = getdparam("freqout");       /*   output frequency       */
   minor_freqout = getdparam("minor_freqout");
   nstep = 0;				/*   start counting steps   */
   minor_tout = tout = tnow;		/*   schedule first output  */
@@ -76,7 +76,7 @@ void startrun(void)
 
 /*
  * TESTDATA: generate initial conditions for test runs.
- * NOTE: Should really make a Plummer Model! 
+ *           this is exactly the same code as in hackcode1
  */
 
 void testdata(bool cencon)
@@ -86,12 +86,12 @@ void testdata(bool cencon)
   
   headline = "Direct code: test data";	/* supply default headline  */
   tnow = 0.0;					/* pos, vel set at t = 0    */
-  bodytab = (bodyptr) allocate(nbody * sizeof(body));      /* MEMORY LEAK */
+  bodytab = (bodyptr) allocate(nbody * sizeof(body));      /* MEMORY LEAK   */
   CLRV(cmr);					/* init cm pos, vel         */
   CLRV(cmv);
   for (p = bodytab; p < bodytab+nbody; p++) {	/* loop over particles      */
     Mass(p) = 1.0 / nbody;			/*   set masses equal       */
-    pickvec(Pos(p), cencon);		/*   pick position          */
+    pickvec(Pos(p), cencon);		        /*   pick position          */
     ADDV(cmr, cmr, Pos(p));
     pickvec(Vel(p), FALSE);			/*   pick velocity          */
     ADDV(cmv, cmv, Vel(p));
@@ -99,13 +99,13 @@ void testdata(bool cencon)
   DIVVS(cmr, cmr, (real) nbody);		/* normalize cm coords      */
   DIVVS(cmv, cmv, (real) nbody);
   for (p = bodytab; p < bodytab+nbody; p++) {	/* loop over particles      */
-    SUBV(Pos(p), Pos(p), cmr);		/*   offset by cm coords    */
+    SUBV(Pos(p), Pos(p), cmr);	         	/*   offset by cm coords    */
     SUBV(Vel(p), Vel(p), cmv);
   }
 }
 
 /*
- * STEPSYSTEM: advance N-body system one time-step.
+ * STEPSYSTEM: advance N-body system one time-step using a leapfrog stepper
  */
 
 void stepsystem(void)
@@ -116,22 +116,22 @@ void stepsystem(void)
 
   dt = 1.0 / freq;				/* get basic time-step      */
   dthf = 0.5 * dt;				/* and basic half-step      */
-  for (p = bodytab; p < bodytab+nbody; p++) { /* loop over particles      */
-    SETV(acc1, Acc(p));			/*   save old acceleration  */
+  for (p = bodytab; p < bodytab+nbody; p++) {   /* loop over particles      */
+    SETV(acc1, Acc(p));			        /*   save old acceleration  */
     hackgrav(p);				/*   compute new acc for p  */
-    if (nstep > 0) {			/*   if past first step?    */
-      SUBV(dacc, Acc(p), acc1);		/*     use change in accel  */
-      MULVS(dvel, dacc, dthf);		/*     to make 2nd order    */
+    if (nstep > 0) {			        /*   if past first step?    */
+      SUBV(dacc, Acc(p), acc1);		        /*     use change in accel  */
+      MULVS(dvel, dacc, dthf);		        /*     to make 2nd order    */
       ADDV(Vel(p), Vel(p), dvel);		/*     correction to vel    */
     }
   }
   output();					/* do major or minor output */
   for (p = bodytab; p < bodytab+nbody; p++) {	/* loop advancing bodies    */
-    MULVS(dvel, Acc(p), dthf);		/*   use current accel'n    */
-    ADDV(vel1, Vel(p), dvel);		/*   find vel at midpoint   */
+    MULVS(dvel, Acc(p), dthf);		        /*   use current accel'n    */
+    ADDV(vel1, Vel(p), dvel);		        /*   find vel at midpoint   */
     MULVS(dpos, vel1, dt);			/*   find pos at endpoint   */
-    ADDV(Pos(p), Pos(p), dpos);		/*   advance position       */
-    ADDV(Vel(p), vel1, dvel);		/*   advance velocity       */
+    ADDV(Pos(p), Pos(p), dpos);		        /*   advance position       */
+    ADDV(Vel(p), vel1, dvel);		        /*   advance velocity       */
   }
   nstep++;					/* count another mu-step    */
   tnow = tnow + dt;				/* finally, advance time    */

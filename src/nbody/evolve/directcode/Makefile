@@ -10,6 +10,8 @@ SRCFILES = code.c code.h code_io.c defs.h grav.c util.c
 
 SRCDIR = $(NEMOPATH)/src/nbody/evolve/directcode
 
+all:	$(BINFILES)
+
 # Targets used to export files to Nemo.
 
 install: .install_bin

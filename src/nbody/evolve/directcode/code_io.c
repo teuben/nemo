@@ -2,7 +2,7 @@
  * CODE_IO.C: I/O routines for a simple direct N-body code.
  * Public routines: inputdata(), initoutput(), stopoutput(), output(),
  *
- *   16-feb-04   cleanup 
+ *   16-feb-04   cleanup while cloning from hackcode1
  */
 
 #include "code.h"
@@ -16,12 +16,11 @@
 local void put_snap_diagnostics(stream, int *);
 #include <snapshot/put_snap.c>
 
-/* forward declarations: */
+
 local void diagnostics(void);
 
 extern bool scanopt(string, string);
 extern double cputime(void);
-
 
 /*
  * INPUTDATA: read initial conditions from input file.
@@ -42,7 +41,7 @@ void inputdata(string file)
     						/* invoke generic input     */
     strclose(instr);				/* close input stream       */
     if ((bits & MassBit) == 0 || (bits & PhaseSpaceBit) == 0)
-	error("inputdata: essential data missing\tbits = %o\n", bits);
+	error("inputdata: essential data missing\tbits = 0x%x", bits);
     if ((bits & TimeBit) == 0 || scanopt(options, "reset_time"))
 						/* time missing or reset?   */
 	tnow = 0.0;				/*   then supply default    */
@@ -76,8 +75,7 @@ void initoutput(void)
 
 void stopoutput(void)
 {
-  if (outstr != NULL)
-    strclose(outstr);
+  if (outstr) strclose(outstr);
 }
 
 /*
@@ -143,7 +141,7 @@ void output(void)
 
 local void diagnostics(void) 
 {
-    register bodyptr p;
+    bodyptr p;
     real velsq;
     vector tmpv;
     matrix tmpt;
