@@ -268,7 +268,7 @@ int close_io_nemo(char * iofile)
     free((char *) io_in[no_io]);
     code=1;
   }
-  //reset_history();
+  /* reset_history();  */
   return code;
 }
 /* -------------------------------------------------------------- *\ 
