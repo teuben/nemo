@@ -9,7 +9,7 @@ README.pjt
 cmhog.sm		SM example macro to plot output of cmhog
 hdf100bg		example HDF file from CMHOG project
 hdfall.src		original fortran code
-hdfgrid.1		man page, final one should be in $NEMO/man/man1
+hdfgrid.1		man page, now located $NEMO/man/man1
 hdfgrid.c		
 runcmhog.1
 runcmhog.c		interesting wrapper program
