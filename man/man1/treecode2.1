@@ -1,0 +1,113 @@
+.TH TREECODE2 1NEMO "19 April 1994"
+.SH NAME
+treecode2 - fortran version of hackcode, with Cray optimizations and 
+no recursion
+.SH SYNOPSIS
+treecode2
+.SH DESCRIPTION
+\fBtreecode2\fP is the Hernquist version (Version 2, November 1988)
+of the Barnes and Hut treecode (see also \fIhackcode1(1NEMO)\fP.
+This version is written in fortran, 
+has been optimized for supercomputers and
+is fully vectorized, no recursion used. See the file \fItreecode.f\fP for 
+many more details.
+.PP
+Computational units can be anything, but the gravitational constant G=1.
+.SH PARAMETERS
+Two files (both in ascii) determine the input parameters and input
+condition, and must be present at the start of the program.
+.PP
+The first one is the
+input parameter file with the name \fBTREEPAR\fP. It 
+contains, line by line, the input parameters for this run. In the table 
+below the values for the benchmark input parameter file are given
+in square brackets:
+.PP
+.nf
+.ta +0.5i +1i
+	\fB headline\fP  	Identification string for the run (max 50 char) [\fBstandard NEMO bench\fP]
+	\fB nsteps\fP    	Number of timesteps [\fB64\fP]
+	\fB noutbod\fP   	Output system state (file \fBTREEBOA\fP) once every nsteps/noutbod steps [\fB100\fP]
+	\fB noutlog\fP   	Output logfile data (file \fBTREELOG\fP) once every nsteps/noutlog steps [\fB1\fP]
+	\fB dtime\fP     	Integration timestep [\fB0.03125\fP]
+	\fB tol\fP         	Error tolerance; 0.0=exact [\fB1.0\fP]
+	\fB eps\fP      	Potential softening parameter [\fB0.05\fP]
+	\fB usequad\fP   	Option to include quadrupole terms (.TRUE./.FALSE.) [\fB.FALSE.\fP]
+.fi
+.PP
+The second file has to be named \fBTREEBI\fP, and contains the input 
+bodies in a format described in \fIstoa(1NEMO)\fP.
+.PP
+Output files created are \fBTREEBOA\fP, which contains all the
+requested (see \fBnoutbod\fP) output snapshots 
+in ascii \fIatos(1NEMO)\fP format, \fBTREELOG\fP,
+which contains a log (see \fBnoutlog\fP)
+of the run and \fBTREEBO\fP, which contains
+a binary (machine dependable) dump of the last snapshot.
+\fINote that these three output files must not be present when the 
+program is to be run.\fP (ANSI FORTRAN) 
+.PP
+To avoid excessive overhead, \fBnoutlog\fP should be larger than 1,
+typically ~ 10, depending on total number of steps though.
+.SH RUNNING
+A shell script \fBruntreecode2\fP is available to ease running this
+program slightly, and also prevents you from running two versions of
+\fBtreecode2\fP in the same directory.
+Script usage:
+.PP
+\fBruntreecode2\fP \fIinput_snapshot output_snapshot pars_file\fP
+.PP
+The \fIinput_snapshot\fP and 
+\fIoutput_snapshot\fP are now in \fIsnapshot(5NEMO)\fP
+format, whereas the \fIpars_file\fP is in the format described in
+the previous \fBPARAMETERS\fP section.
+.PP
+A regular NEMO program \fBtreecode0\fP can also be used. Although
+very similar in operation to the abovementioned script, it makes
+running multiple versions of the programs a bit more transparant,
+and equal to running other programs in the NEMO environment.
+.SH MAKE
+The accompanying Makefile has targets to compile treecode2
+on the Cray, Sun and Vax, by appropiately defining the \fBOS=\fP macro in
+the Makefile, as well as running benchmarks within NEMO's environment.
+See Makefile for details.
+.SH BENCHMARKS
+Timings from the running the standard benchmark (see also
+\fIhackcode1(1NEMO)\fP from the makefile (cpu times are in seconds):
+.nf
+.ta +1i +1i +2i +1i
+machine 	cpu	compiler	OS
+
+Cray YMP	1.625	cf77 -dp	Unicos ...
+SGI     	8.5	f77 -O3     	IRIX Release 4.0.5F System V	
+SGI     	11.9	f77 -O     	IRIX Release 4.0.5F System V	
+Sparc 10/30	9.3	f77 -cg89 -dalign -fast -O	SUN OS 4.1.3 - SC1.0
+Sparc 10/30	8.6	f77 -cg92 -dalign -fast -O	SUN OS 4.1.3 - SC2.0.1
+Sparc 10/30	8.0	f77 -cg92 -dalign -fast -O4 -libmil	SUN OS 4.1.3 - SC2.0.1
+Sparc 10/51	6.6	f77 -cg92 -dalign -fast -O4 -libmil	SUN OS 5.3 - SC2.0.1
+Sparc 1 (4/60)	68.5	f77 -O      	SUN OS 4.1.3 - SC1.0
+Sparc 1 (4/60)	56.2	f77 -cg89 -dalign -fast -O	SUN OS 4.1.3 - SC1.0
+Sun 3/60	1784.0	f77 -O     	SUN OS 4.1.1 - SC1.0
+.fi
+.SH AUTHOR
+Lars Hernquist
+.SH FILES
+.nf
+.ta +2i
+~/usr/lars/treecode2/        	original LARS version
+~/src/nbody/evolve/treecode2/	official NEMO version (ASCII \fIatos/stoa\fP I/O)
+.fi
+.SH SEE ALSO
+hackcode1(1NEMO), treecode(1NEMO), nbody0(1NEMO), atos(1NEMO), tabtos(1NEMO)
+.SH HISTORY
+.nf
+.ta +1i +4i
+xx-xxx-xx	V2 allows quadrupole terms	Lars Hernquist (@UCB)
+xx-xxx-xx	V2.1 optimized 2D and 3D versions of the code	LH
+1-sep-86	V2.2 allow arbitrary large values of tol=	LH
+18-nov-88	'V2' non-recursive vectorized version         	LH (@IAS)
+xx-apr-90	Directory made for NEMO's export           	PJT
+5-jun-90	Document created                        	PJT
+23-oct-91	Cray tests - disabled SECOND in treeutil.f	PJT
+15-apr-94	added benchmark docs                    	PJT
+.fi
