@@ -1,0 +1,57 @@
+/* yapp_ps_new */
+main(argc, argv)
+int argc;
+string argv[];
+{
+    int i, j;
+    real x,y,dx,dy,gray;
+
+    plinit("", 0.0, 20.0, -2.5, 22.5);
+    plmove(0.0, 0.0);
+    plline(20.0, 0.0);
+    plline(20.0, 20.0);
+    plline(0.0, 20.0);
+    plline(0.0, 0.0);
+    plline(20.0, 20.0);
+    plmove(20.0, 0.0);
+    plline(0.0, 20.0);
+    plltype(12, 0);
+    plmove(4.0, 18.0);
+    plline(16.0, 18.0);
+    plltype(-6, 0);
+    plmove(6.0, 18.0);
+    plline(14.0, 18.0);
+    for (i = 1; i <= 5; i++) {
+	plltype(2*i, 1);
+        plmove(1.0, 13.5 - i);
+        plline(3.0, 13.5 - i);
+        plpoint(3.5, 13.5 - i);
+	plltype(1, i);
+	for (j = 1; j <= 4; j++) {
+	    plmove(1.5, 13.5 - i - 0.2*j);
+	    plline(1.5 + j, 13.5 - i - 0.2*j);
+	}
+    }
+    plltype(1, 1);
+    for (i = 0; i < 8; i++) {
+	plcross(  7.5, 2.0 + 0.5*i, -0.4 / (1 + i));
+	plbox(    8.5, 2.0 + 0.5*i, -0.4 / (1 + i));
+	plcircle( 9.5, 2.0 + 0.5*i, -0.4 / (1 + i));
+	plcircle(10.5, 2.0 + 0.5*i,  0.4 / (1 + i));
+	plbox(   11.5, 2.0 + 0.5*i,  0.4 / (1 + i));
+	plcross( 12.5, 2.0 + 0.5*i,  0.4 / (1 + i));
+    }
+    pltext("Foo Bar!", 8.0, 16.0, 0.5, 0.0);
+    pltext("Fum Bar!", 8.0, 15.0, 0.25, 0.0);
+    for (i = 0; i <= 4; i++)
+	pltext(" testing angles", 16.0, 10.0, 0.32, 45.0*i);
+    plmove(10.0, 8.5);
+    plline(10.0, 11.5);
+    pljust(-1);
+    pltext("left justified",  10.0,  9.0, 0.25, 0.0);
+    pljust(0);
+    pltext("centered",        10.0, 10.0, 0.25, 0.0);
+    pljust(1);
+    pltext("right justified", 10.0, 11.0, 0.25, 0.0);
+    plstop();
+}
