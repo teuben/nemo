@@ -1,0 +1,56 @@
+#! /bin/csh -f
+#
+#	V1.0  21-jun-91  Created
+#	V1.0a 15-jun-92  verbosed some messages
+#	V1.0b 20-may-94  warning when doc not exists
+#
+set version="MKPDOC: Version 1.0b 20-may-94"
+
+if ($#argv == 0) then
+ echo "$version"
+ echo "Usage: $0 files"
+ echo ""
+ echo "Install .doc files in NEMODOC from NEMOBIN binaries"
+ exit 0
+endif
+
+set docdir=$NEMO/man/doc
+if (! -d $docdir) then
+  echo "### Warning: doc directory $docdir does not exist"
+  exit 0
+endif
+
+
+set tmp=tmp.$$
+foreach file ($*)
+set bin=$file:t ; set bin=$bin:r
+set doc=$bin.doc
+
+
+if (-e $NEMOBIN/$bin) then
+  echo -n "$doc "
+  $NEMOBIN/$bin help=t > $tmp.1
+  if (! -e $docdir/$doc) then
+     echo -n " [Created] "
+     mv $tmp.1 $docdir/$doc
+  else 
+     cmp -s $tmp.1 $docdir/$doc
+     if ($status != 0) then
+        echo -n " [Updated] "
+        mv $tmp.1 $docdir/$doc
+     else
+ 	echo -n " [was up to date] "
+	rm -f $tmp.1
+     endif
+   endif
+else
+   echo ""
+   echo " ** executable not found **"
+   echo ""
+endif
+end
+
+
+
+
+
