@@ -1,0 +1,34 @@
+%N bodytrans
+%D bodytrans manipulator
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man bodytrans' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A expr
+	Expression to test and/or save [x]
+%A type
+	Function type : real/integer [real]
+%A mass
+	A mass [0.125]
+%A pos
+	Positions [0.5,-0.5,1.0]
+%A vel
+	Velocities [0.1,0.2,-0.3]
+%A phi
+	Potential [-1.2]
+%A acc
+	Accellerations [-0.5,0.7,0.1]
+%A aux
+	Auxiliary [3.141592]
+%A key
+	Key [3]
+%A t
+	Time [2.5]
+%A i
+	Index [1]
+%A file
+	Filename to save expression in (btTYPE_FILE) []
+%A btnames
+	BTNAMES filename to regenerate .o files []
+%A VERSION
+	15-aug-93 PJT [1.6]
