@@ -15,6 +15,9 @@
 /*CTEX
  *  {\bf potname=hubble
  *       potpars={\it $\Omega,M,R,b,c$}} 
+ *  where $M$ and $R$ are the core mass and radius. $b$ and $c$ are, if
+ *  given, the intermediate and short axes can be different from the
+ *  core radius.
  * 
  *  The Hubble profile (BT, pp 39, req. 2-37 and 2-41) has a density
  *  law:

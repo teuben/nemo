@@ -11,14 +11,18 @@
  *
  * Kuzmin (1956) found a closed expression for the potential of 
  * an infinitesimally thin disk with a Plummer potential in the
- * plane of the disk:
+ * plane of the disk (see also BT pp43, eq. 2-49a and 2-49b):
  * $$
- * \Phi = - {  G M \over {\sqrt{r^2 + (a+\abs{z})^2}}}
+ * \Phi = - {  G M \over {\sqrt{r^2 + (a+{|z|})^2}}}
  * $$
  * and corresponding surface brightness (check units)
  * $$
- * \Sigma = - {  {G M} \over {2 \pi}} {\sqrt{1 + (r/a)^2}^{3/2}}
+ * \Sigma = {  {a M} \over {2 \pi {(1 + (r/a)^2)}^{-3/2}}}
  * $$
+ * With $GMa^2 = V_0^2$.
+ * This potential is also known as a Toomre n=1 disk, since it
+ * was re-derived by Toomre (1963) as part of a series of disks
+ * with index $n$, where this disk has $n=1$.
  */
  
  
