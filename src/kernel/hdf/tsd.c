@@ -33,7 +33,7 @@ string defv[] = {
     "format=%g\n                Format used in dump",
     "coord=f\n                  Add coordinates?",
     "select=all\n               Select which SDS for display?",
-    "VERSION=1.4\n		6-dec-04 PJT",
+    "VERSION=1.4a\n		6-dec-04 PJT",
     NULL,
 };
 
@@ -60,7 +60,7 @@ void nemo_main()
 scan_sd(string infile)		/* this is the fancy new version */
 {
     float **dump, **coord;
-    int i, j, k, ret, old_size, size, type, nsds;
+    int i, j, k, ret, old_size, size, type, nsds, old_rank;
     char ntype[32];
     bool *visib;
     int nselect, select[MAXSDS];
@@ -80,7 +80,7 @@ scan_sd(string infile)		/* this is the fancy new version */
     } else
         outstr = NULL;
 
-    for (k=0; k<nsds; k++)
+    for (k=0; k<nsds; k++)    /* first flag all SDS to be shown */
         visib[k] = TRUE;
 
     sselect = getparam("select");
@@ -100,11 +100,20 @@ scan_sd(string infile)		/* this is the fancy new version */
       dprintf(1,"%d: %s\n", k+1, visib[k] ? "OK" : "hidden");
 
     old_size = -1;
-    for (k=0; k<nsds; k++) {
-        if (! visib[k]) continue;
+    for (k=0; k<nsds; k++) {               /* loop over all SDS to get the rank, shape, size and info */
     	ret = DFSDgetdims(infile,&rank, shape, MAXRANK);
     	if (ret < 0) error("Problem getting rank/shape at SDS #%d",k+1);
-        if (k==0) {         /* first time around allocate coordinates */
+
+    	label[0] = unit[0] = fmt[0] = coordsys[0] = 0;
+        ret = DFSDgetdatastrs(label, unit, fmt, coordsys);
+	if (ret < 0) error("Problem getting labels at SDS #%d",k+1);
+
+        ret = DFSDgetNT(&type);
+	if (ret < 0) error("Problem getting data type at SDS #%d",k+1);
+
+        if (! visib[k]) continue;
+
+        if (old_size < 0) {                /* first time around allocate coordinates */
             if (getbparam("coord")) {
                 coord = (float **) allocate(rank*sizeof(float *));
             } else {
@@ -112,9 +121,6 @@ scan_sd(string infile)		/* this is the fancy new version */
             }
         }
 
-    	label[0] = unit[0] = fmt[0] = coordsys[0] = 0;
-        ret = DFSDgetdatastrs(label, unit, fmt, coordsys);
-        ret = DFSDgetNT(&type);
     	dprintf(0,"%d: %s(",k+1,label);
     	for (i=0, size=1; i<rank; i++) {
     	    if (i==rank-1)
@@ -123,7 +129,7 @@ scan_sd(string infile)		/* this is the fancy new version */
                 dprintf(0,"%d,",shape[i]);
     	    size *= shape[i];
 
-            if (k==0 && coord) {
+            if (old_size < 0 && coord) {
                 coord[i] = (float *) allocate(shape[i] * sizeof(float));
                 ret = DFSDgetdimscale(i+1, shape[i],coord[i]);
                 if (ret<0) error("getting shape[%d]",i+1);
@@ -138,14 +144,18 @@ scan_sd(string infile)		/* this is the fancy new version */
             ret = DFSDgetdata(infile,rank,shape,dump[k]);
         }
 
-	if (old_size < 0)        /* first time around */
+	if (old_size < 0) {       /* first time around */
 	  old_size = size;
-	else {                   /* make sure subsequent ones have the same size for display */
+	  old_rank = rank;
+	} else {                   /* make sure subsequent ones have the same size for display */
 	  if (old_size != size) {
 	    warning("bad shape for SDS #%d, removing from selection list",k+1);
 	    visib[k] = FALSE;
 	    size = old_size;
-	  }
+	  } else if (old_rank != rank)
+	    warning("bad rank for SDS #%d, removing from selection list",k+1);
+	    visib[k] = FALSE;
+	    rank = old_rank;
 	}
     } /* k */
 
