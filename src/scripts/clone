@@ -1,0 +1,36 @@
+#! /bin/csh -f
+#
+# This script is an example how to make an export tar file,
+# and how to clone the system.
+#
+# Benchmarks (the bootstrap part)
+#   laptop 333 (roald):     105.610u 22.660s 3:07.04 68.5%  //  2:24 @ 75%
+#   ultra10/366 (atlas):    131.55u  59.20s  3:41.49 86.1%
+#   laptop 500 (nemo):       60.690u 14.160s 1:29.71 83.4%
+#   laptop 600 (nemo):       48.940u 11.650s 1:12.10 84.0%	
+#                            47.920u 11.650s 1:06.00 90.2%   
+#
+
+# to prepare the export:::::::::
+#   (cd src; make clean)
+#   make new
+#   make ftp FTPDIR=/data/nemo
+#
+set old=/home/teuben/nemo
+set new=/data/teuben/nemo
+set dir=/data/nemo/
+set tar=$dir/nemo_2.5.6.tar.gz
+
+echo old=$old
+echo new=$new
+echo tar=$tar
+
+if ($?NEMO) then
+  cd $NEMO
+  make ftp FTPDIR=$dir USR="usr/vogl"
+endif
+
+cd $new
+$old/src/scripts/bootstrap file=$tar nemo=$new goto=tar "config=--enable-debug"
+
+  
