@@ -70,7 +70,7 @@ string defv[] = {
     "rotcur3=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur4=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur5=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
-    "VERSION=0.9e\n  28-jul-02 PJT",
+    "VERSION=0.9f\n  9-sep-02 PJT",
     NULL,
 };
 
@@ -423,6 +423,14 @@ rotcurparse()
 	mpar[nmod][0] = natof(sp[1]);
 	mmsk[nmod][0] = natoi(sp[2]);
 	rcfn[nmod] = rotcur_flat;
+      } else if (streq(sp[0],"plummer")) {
+	if (nsp != 4) error("plummer needs 2 numbers");
+	npar[nmod] = 2;
+	mpar[nmod][0] = natof(sp[1]);
+	mpar[nmod][1] = natof(sp[2]);
+	mmsk[nmod][0] = natoi(sp[3]);
+	mmsk[nmod][1] = natoi(sp[4]);
+	rcfn[nmod] = rotcur_plummer;
       } else if (streq(sp[0],"core1")) {
 	if (nsp != 4) error("core1 needs 2 numbers");
 	npar[nmod] = 2;
