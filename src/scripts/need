@@ -5,11 +5,13 @@
 #  programs are attempted installed
 #
 #	2-apr-97    sort list and remove duplicates
+#       9-apr-01    -m now also forces remakes if they exist
 
 if ($#argv == 0) goto usage
 
 set mknemo=0	# -m switch (default doesn't make them)
 set show=1	# -s switch (default is verbose)
+set debug=0     # -d switch (debug/verbose option)
 
 set err=0	# count errors
 set make=()	# list of uninstalled programs to make
@@ -23,11 +25,17 @@ loop:
     case -s*:
 	set show=0
 	breaksw
+    case -d*:
+	set debug=1
+	breaksw
     default:
+        if ($debug) echo $argv[1]
         if (! -e $NEMOBIN/$argv[1]) then
             if ($show == 1) echo "$argv[1] not present in NEMOBIN"
 	    set make=($make $argv[1])
             @ err++
+	else
+	    if ($mknemo) set make=($make $argv[1])
         else
         endif
         breaksw

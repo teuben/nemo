@@ -72,7 +72,7 @@ echo "NEMO version $NEMOVER `hostname` ($NEMOHOST)"                   >> $log
 
 #   using $NEMO instead of $NEMO/src really makes it run slow on solaris
 
-foreach testfile (`find $NEMO/src -name Testfile -print`)
+foreach testfile (`find $NEMO/src -name Testfile -print | sort`)
     if ($norun) then
         echo $testfile
         continue

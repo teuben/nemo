@@ -611,5 +611,8 @@ bins:
 	@echo NEMO does not have a bins yet...try testsuite
 
 testsuite:
-	@(mknemo `$(NEMO)/src/scripts/testsuite -s | awk '{for (i=1;i<=NF;i++)print $$i}' | sort | uniq`)
+	@echo ISSUE the following command:
+	@echo '(cd src/scripts; need -m `testsuite -s`; mknemo -c history hisf; testsuite)'
+
+#	@(cd src/scripts; mknemo `testsuite -s`)
 
