@@ -1,0 +1,60 @@
+.TH TABDMS 1NEMO "24 January 2000"
+.SH NAME
+tabdms \- Convert to HMS/DMS tables
+.SH SYNOPSIS
+\fBtabdms\fP [parameter=value]
+.SH DESCRIPTION
+\fBtabdms\fP replaces selected column(s) from a table to their
+HMS/DMS format. 
+.PP
+Currently the format is fixed.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+input file name, an ascii table. No Default.
+.TP 20
+\fBout=\fP
+output file name, an ascii table. No Default.
+.TP 20
+\fBtodms=\fP
+list of columns (1..) to convert to dms. 
+Negative columns should be used if the format is to be interpreted
+as ".DMS" instead of the default "D.MS". 
+The D ins DMS is normally assumed to be modulo 360.
+Default: none.
+.TP 20
+\fBtohms=\fP
+list of columns (1..) to convert to hms.
+Negative columns should be used if the format is to be interpreted
+as ".HMS" instead of the default "H.MS".
+The H ins HMS is normally assumed to be modulo 24.
+Default: none.
+.TP 20
+\fBseparator=\fP
+separator between output D-M-S.S 
+[Default: \fB:\fP]
+.SH EXAMPLES
+The following example prints out the 4 possible ways to convert the
+number "12.51" to DMS or HMS:
+.nf
+% echo 11.51 11.51 11.51 11.51 11.51 | tabdms - - todms=1,-2 tohms=3,-4
+11:30:36.000 11:183:35:60.000 11:30:36.000 11:12:14:24.000 11.51 
+.fi
+Column 1 in .DMS, 2 as D.MS, 3 as .HMS, 4 as H.MS and 5 is the
+original column copied.
+.SH LIMITATIONS
+The code is compiled with a maximum number of columns, MAXCOL, typically
+256.
+.SH SEE ALSO
+tabmath(1NEMO)
+.SH FILES
+src/kernel/tab/tabdms.c      source code
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+24-Jan-00	V0.4 doc written	PJT
+.fi
