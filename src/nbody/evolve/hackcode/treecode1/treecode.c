@@ -2,6 +2,7 @@
 /* TREECODE.C: new hierarchical N-body code.                                */
 /* Copyright (c) 2001 by Joshua E. Barnes, Honolulu, Hawai`i.               */
 /* 22-jun-01   NEMOfied for NEMO V3                                         */
+/* 22-feb-04   dtime->dtimes                                                */
 /****************************************************************************/
 
 #include <stdinc.h>
@@ -39,7 +40,7 @@ string defv[] = {
     "seed=123\n                  Random number seed for test run",
     "save=\n                     Write state file as code runs",
     "restore=\n                  Continue run from state file",
-    "VERSION=1.4\n               22-jun-01 PJT",
+    "VERSION=1.4a\n              22-feb-04 PJT",
     NULL,
 };
 
@@ -77,8 +78,8 @@ int nemo_main()
             output();                           /* and output results       */
         }
 #else
-    if (dtime != 0.0)                           /* if time steps requested  */
-        while (tstop - tnow > 0.01 * dtime) {   /* while not past tstop     */
+    if (dtimes != 0.0)                          /* if time steps requested  */
+        while (tstop - tnow > 0.01 * dtimes) {  /* while not past tstop     */
             stepsystem();                       /* advance step by step     */
             output();                           /* and output results       */
         }
@@ -108,20 +109,20 @@ local void treeforce(void)
 local void stepsystem(void)
 {
 #if defined(USEFREQ)
-    real dtime = 1.0 / freq;                    /* set basic time-step      */
+    real dtimes = 1.0 / freq;                   /* set basic time-step      */
 #endif
     bodyptr p;
 
     for (p = bodytab; p < bodytab+nbody; p++) { /* loop over all bodies     */
-        ADDMULVS(Vel(p), Acc(p), 0.5 * dtime);  /* advance v by 1/2 step    */
-        ADDMULVS(Pos(p), Vel(p), dtime);        /* advance r by 1 step      */
+        ADDMULVS(Vel(p), Acc(p), 0.5 * dtimes); /* advance v by 1/2 step    */
+        ADDMULVS(Pos(p), Vel(p), dtimes);       /* advance r by 1 step      */
     }
     treeforce();                                /* perform force calc.      */
     for (p = bodytab; p < bodytab+nbody; p++) { /* loop over all bodies     */
-        ADDMULVS(Vel(p), Acc(p), 0.5 * dtime);  /* advance v by 1/2 step    */
+        ADDMULVS(Vel(p), Acc(p), 0.5 * dtimes); /* advance v by 1/2 step    */
     }
     nstep++;                                    /* count another time step  */
-    tnow = tnow + dtime;                        /* finally, advance time    */
+    tnow = tnow + dtimes;                       /* finally, advance time    */
 }
 
 /*
@@ -130,10 +131,6 @@ local void stepsystem(void)
 
 local void startrun(void)
 {
-#if !defined(USEFREQ)
-    double dt1, dt2;
-#endif
-
     infile = getparam("in");                    /* set I/O file names       */
     outfile = getparam("out");
     savefile = getparam("save");
@@ -142,8 +139,7 @@ local void startrun(void)
 #if defined(USEFREQ)
         freq = getdparam("freq");
 #else
-        dtime = (sscanf(getparam("dtime"), "%lf/%lf", &dt1, &dt2) == 2 ?
-                 dt1 / dt2 : getdparam("dtime"));
+        dtimes = getdparam("dtime");
 #endif
 #if !defined(QUICKSCAN)
         theta = getdparam("theta");
@@ -153,8 +149,7 @@ local void startrun(void)
 #if defined(USEFREQ)
         freqout = getdparam("freqout");
 #else
-        dtout = (sscanf(getparam("dtout"), "%lf/%lf", &dt1, &dt2) == 2 ?
-                 dt1 / dt2 : getdparam("dtout"));
+        dtout = getdparam("dtout");
 #endif
         options = getparam("options");
         if (! strnull(infile))                  /* if data file was given   */
@@ -162,7 +157,7 @@ local void startrun(void)
         else {                                  /* else make initial data   */
             nbody = getiparam("nbody");         /* get number of bodies     */
             if (nbody < 1)                      /* check for silly values   */
-                error("startrun: absurd value for nbody\n");
+                error("startrun: %d is an absurd value for nbody",nbody);
             srandom(getiparam("seed"));         /* set random number gen.   */
             testdata();                         /* and make plummer model   */
             tnow = 0.0;                         /* reset elapsed model time */
@@ -193,8 +188,7 @@ local void startrun(void)
         if (scanopt(options, "new-tout"))       /* if output time reset     */
             tout = tnow + 1 / freqout;          /* then offset from now     */
 #else
-            dtout = (sscanf(getparam("dtout"), "%lf/%lf", &dt1, &dt2) == 2 ?
-                      dt1 / dt2 : getdparam("dtout"));
+	dtout = getdparam("dtout");
         if (scanopt(options, "new-tout"))       /* if output time reset     */
             tout = tnow + dtout;                /* then offset from now     */
 #endif

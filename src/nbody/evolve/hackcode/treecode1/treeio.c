@@ -3,6 +3,7 @@
 /* inputdata(), startoutput(), output(), savestate(), restorestate().       */
 /* Copyright (c) 2001 by Joshua E. Barnes, Honolulu, Hawai`i.               */
 /* 22-jun-01  adapted for NEMO                                              */
+/* 22-feb-04  dtime->dtimes                                                 */
 /****************************************************************************/
 
 #include <stdinc.h>
@@ -93,7 +94,7 @@ void startoutput(void)
     printf("%8d%10.2f%10.4f", nbody, freq, eps);
 #else
     printf("%10s%10s%10s\n", "usequad", "dtout", "tstop");
-    printf("%8d%10.5f%10.4f", nbody, dtime, eps);
+    printf("%8d%10.5f%10.4f", nbody, dtimes, eps);
 #endif
 #if !defined(QUICKSCAN)
     printf("%10.2f", theta);
@@ -142,7 +143,7 @@ void output(void)
 #if defined(USEFREQ)
     teff = tnow + (freq > 0 ? 0.125/freq : 0);  /* anticipate slightly...   */
 #else
-    teff = tnow + dtime/8;                      /* anticipate slightly...   */
+    teff = tnow + dtimes/8;                     /* anticipate slightly...   */
 #endif
     if (! strnull(outfile) && teff >= tout)     /* time for data output?    */
         outputdata();
@@ -342,7 +343,7 @@ void savestate(string pattern)
 #if defined(USEFREQ)
     safewrite(&freq, sizeof(real), str);
 #else
-    safewrite(&dtime, sizeof(real), str);
+    safewrite(&dtimes, sizeof(real), str);
 #endif
 #if !defined(QUICKSCAN)
     safewrite(&theta, sizeof(real), str);
@@ -394,7 +395,7 @@ void restorestate(string file)
 #if defined(USEFREQ)
     saferead(&freq, sizeof(real), str);
 #else
-    saferead(&dtime, sizeof(real), str);
+    saferead(&dtimes, sizeof(real), str);
 #endif
 #if !defined(QUICKSCAN)
     saferead(&theta, sizeof(real), str);
