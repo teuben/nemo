@@ -22,12 +22,18 @@ CXX = @CXX@
 HDFINC = @HDF_INC@
 HDFLIB = @HDF_LIB@
 
+#  PVM library
 
-# CFITSIO library
+PVMINC = @PVM_INC@
+PVMLIB = @PVM_LIB@
+
+
+#  CFITSIO library
 FITSIOINC = @FITSIO_INC@
 FITSIOLIB = @FITSIO_LIB@
 
-#			miriad
+#			miriad 
+#	(could also depend on $(MIR) and $(MIRLIB) if you don't like these)
 MIRIAD_INC = @MIRIAD_INC@
 MIRIAD_LIB = @MIRIAD_LIB@
 

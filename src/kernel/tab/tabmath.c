@@ -26,7 +26,8 @@
  *	20-nov-96  V2.1a skip blank lines (old behavior: no more input)
  *	11-jun-98      b fix problem with TAB's in lines
  *      13-jun-98  V3.0  add selfie= to select rows based on column evaluations
- *                       but deleted the skip & stride keywords.
+ *                       but deleted the skip & stride keywords. 
+ *      19-apr-01  V3.1  added comments=
  */
 
 /**************** INCLUDE FILES ********************************/ 
@@ -49,7 +50,8 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "format=%g\n        format for new output columns",
     "select=all\n	Select lines",
     "seed=0\n           Initial random number",
-    "VERSION=3.0\n      13-jun-98 PJT",
+    "comments=f\n       Pass through comments?",
+    "VERSION=3.1\n      19-apr-01 PJT",
     NULL
 };
 
@@ -75,6 +77,8 @@ int    ndelc;                           /* actual number of skip columns */
 string *fies, selfie;                   /* fie pointers */
 int    nfies;                           /* number of fie pointers */
 bool   Qfie;				/* boolean if multiple fie's loaded */
+
+bool   Qcomment;
 
 local void setparams(void);
 local void convert(int, stream *, stream);
@@ -149,6 +153,7 @@ local void setparams(void)
         Qfie = nfies > 0;
     }
     set_xrandom(getiparam("seed"));
+    Qcomment = getbparam("comments");
 }
 
 
@@ -171,14 +176,23 @@ local void convert(int ninput, stream *instr, stream outstr)
         for(i=0, cp=line; i<ninput; i++) { /* append all lines into one line */
             if (!get_line(instr[i], cp))           
                 return; 					      /* EOF */
-            if(iscomment(cp)) continue;	   	  /* don't use comment lines */
+            if(iscomment(cp)) {
+	      if (Qcomment)
+		fprintf(outstr,"%s",cp);
+	      else
+		continue;	               	  /* don't use comment lines */
+	    }
             if(i<ninput-1) {                         /* if not the last one: */
                 cp += strlen(cp);		       /* append a blank for */
                 *cp++ = ' ';	      		               /* catenation */
             }
         }
         dprintf(3,"LINE: (%s)\n",line);
-        if (iscomment(line)) continue;
+        if (iscomment(line)) {
+	  if (Qcomment)
+	    fprintf(outstr,"\n",line);
+	  continue;
+	}
         nlines++;
         tab2space(line);	          /* work around a Gipsy (?) problem */
         if (nfies>0 || *selfie) {              	/* if a new column requested */

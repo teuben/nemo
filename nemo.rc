@@ -14,6 +14,7 @@
 #		      3-mar-92  doc		    PJT
 #                     6-jul-92  denemo              PJT
 #                    26-mar-94  NEMO V2.2           pjt
+#    		     10-apr-01  NEMO V3 - small verbosity changes 	PJT
 
 #                           decide if to be run in more verbose way
 if ($?DEBUG == 0) then
@@ -91,7 +92,7 @@ if ($debug) echo All systems go...
 
 # if (-e $NEMO/etc/motd) cat $NEMO/etc/motd
 if ($?prompt) then
-  echo "NEMO loaded for HOST $NEMOHOST. "
+  echo "NEMO $NEMOVER loaded for HOST $NEMOHOST from $NEMO"
   echo "Type 'motd' to get messages of the day"
   echo "The alias 'omen' will attempt to unload NEMO from your environment"
 endif

@@ -145,15 +145,16 @@ Brief overview of a Version 3.x.y INSTALLATION
 	% rehash
 	% make libs
 
-*) Installing PGPLOT within NEMO:
+*) Installing PGPLOT within NEMO is a bit cumbersome, but not
+   impossible
 
 	% configure 
 	% source nemo_start
 	% make dirs 
 	% make config_clean				<==
-	% src/scripts/pgplot.install			<==
-	% configure --with-pgplot-prefix=$NEMOLIB	<==
-	% make config_extra scripts
+	% src/scripts/pgplot.install dir=/tmp		<==
+	% configure --with-pgplot-prefix=$NEMOLIB --with-yapp=pgplot
+	% make dirs config_extra scripts
 	% source NEMORC.local
 	% rehash
 	% make libs
@@ -199,6 +200,14 @@ Brief overview of a Version 3.x.y INSTALLATION
 
 	--with-cfitsio-prefix=PFX 
 
+
+	LAM/MPI: lam-6.3.1-4.i386.rpm 
+
+	PVM:	 pvm-3.4.3-4.i386.rpm  pvm-gui-3.4.3-4.i386.rpm
+	   needs  env.var   PVM_ROOT=/usr/share/pvm3/
+		            PVM_ARCH=LINUX
+
+
 * Known configurations to work:
 
 	    NEMOHOST			"uname -a" for the machine that worked
@@ -211,10 +220,17 @@ Brief overview of a Version 3.x.y INSTALLATION
 
 
 
+3) Running a small test of tests to see if everything works fine
+
+ 	src/scripts/testsuite
+
 *** TODO:
 
      	- more consistent way between usage of variables in the NEMORC chain, 
 	  and the 'makedefs' list.
+
+
+
 
 	
 

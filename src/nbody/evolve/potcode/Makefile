@@ -4,7 +4,9 @@ include $(NEMOLIB)/makedefs
 
 MBODY=16384
 
-CFLAGS = -O -DMBODY=$(MBODY)
+LOCAL_INC=-DMBODY=$(MBODY)
+
+#CFLAGS = -O -DMBODY=$(MBODY)
 LDFLAGS =
 L = $(NEMOLIB)/libnemo.a
 
@@ -14,6 +16,7 @@ MAN1FILES = potcode.1
 INCFILES = 
 BINFILES = potcode
 SRCFILES = defs.h potcode.c code_io.c orbstep.c dissipate.c diffuse.c
+OBJFILES =        potcode.o code_io.o orbstep.o dissipate.o diffuse.o
 SRCDIR = $(NEMO)/src/nbody/evolve/potcode
 #
 help:
@@ -21,7 +24,7 @@ help:
 
 # Targets used to install potpole code in Nemo.
 
-install: .install_inc .install_man .install_src
+install: 
 
 .install_man: $(MAN1FILES)
 	cp $(MAN1FILES) $(NEMO)/man/man1
@@ -54,9 +57,8 @@ nemo_bin: $(BINFILES)
 clean:
 	rm -f *.o *.BAK *.CKP potcode core
 
-potcode: potcode.o orbstep.o code_io.o dissipate.o diffuse.o
-	$(CC) $(CFLAGS) -o potcode potcode.o orbstep.o dissipate.o diffuse.o \
-	    code_io.o $(L) -lm
+potcode: $(OBJFILES)
+	$(CC) $(CFLAGS) -o potcode $(OBJFILES) $(NEMO_LIBS) $(FORLIBS)
 
 potcode.o: potcode.c defs.h
 	$(CC) $(CFLAGS) -c potcode.c

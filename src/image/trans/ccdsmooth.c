@@ -13,6 +13,7 @@
  *      13-feb-97  V3.0  added bad= to ignore bad values	   PJT
  *	 7-mar-98      a attempted to handle maps with < 0 Dx/Dy/Dz	PJT
  *      12-mar-98  V3.1  handle gauss=0 and added cut= keyword          PJT
+ *	20-apr-01      a bigger default size for MSIZE			pjt
  *
  *	"Smoothing is art, not science"
  *				- Numerical Recipies, p495
@@ -34,7 +35,7 @@ string defv[] = {
 	"nsmooth=1\n            Number of smoothings",
 	"bad=\n			Optional ignoring this bad value",
 	"cut=0.01\n             Cutoff value for gaussian, if used",
-	"VERSION=3.1\n          12-mar-98 PJT",
+	"VERSION=3.1a\n         20-apr-01 PJT",
 	NULL,
 };
 
@@ -47,7 +48,7 @@ string usage = "smooth image cube in XYZ";
 string	infile, outfile;			/* file names */
 stream  instr, outstr;				/* file streams */
 
-#define MSIZE  2048		      /* maximum # pixels along one dimension */
+#define MSIZE  8196		      /* maximum # pixels along one dimension */
 #define MSMOOTH 101 		    /* maximum full beam-size (has to be odd) */
 	              /* because of symmetry, you could try and be smart here */
 

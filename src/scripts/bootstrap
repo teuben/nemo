@@ -78,7 +78,6 @@ endif
 date;stamp; 
 echo "### Working with nemo=$nemo"
 echo "### Logfile maintained in log=$log"
-
 goto $goto
 
 #
@@ -183,8 +182,7 @@ source NEMORC.local
 rehash
 stamp
 echo "Installing the libraries ..."
-echo "   (this will take a few minutes, go and have a coffee)"
-(cd src; make -i clean install >>& $log)
+make libs
 
 prog:
 
@@ -240,15 +238,9 @@ end:
   echo "        source nemo_start"
   echo "to load NEMO into your C-shell."
   echo "To make it permanent, add this alias to your .cshrc file:"
+  echo ""
   echo "  alias nemo source $nemo/nemo_start"
-  echo "after the PATH has been set,"
-  echo "or the following series of commands before PATH is set:"
-  echo "  setenv NEMO $nemo"
-  echo '  source $NEMO/NEMORC'
-  echo "  ..."
-  echo '  set path=( ... $NEMOBIN ...)'
-  echo ' '
-  echo ' '
+  echo ""
   echo 'Please register your usage by email:  nemo@astro.umd.edu'
   echo 'and let us know if you do/do not wish to be informed of updates'
   echo ""

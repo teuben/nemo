@@ -30,6 +30,7 @@
  *	17-apr-00     d fixed edge finding in do_peak()
  *      14-aug-00  V3.0 added tab=t|f for tabular short output
  *      23-mar-01     a fixed xrange=  for singular column files
+ *      14-apr-01  V3.1 added convex hull computation as 'area'
  */
 
 /*
@@ -52,14 +53,14 @@ string defv[] = {
     "ycol=2\n           column(s) for y",
     "dycol=\n           column for sigma-y, if used",
     "xrange=\n          in case restricted range is used (1D only)",
-    "fit=line\n         fitmode (line, ellipse, imageshift, plane, poly, peak)",
+    "fit=line\n         fitmode (line, ellipse, imageshift, plane, poly, peak, area)",
     "order=0\n		Order of plane/poly fit",
     "out=\n             optional output file for some fit modes",
     "nsigma=-1\n        delete points more than nsigma away?",
     "estimate=\n        optional estimates (e.g. for ellipse center)",
     "nmax=10000\n       Default max allocation",
     "tab=f\n            short one-line output?",
-    "VERSION=3.0a\n     23-mar-01 PJT",
+    "VERSION=3.1\n      14-apr-01 PJT",
     NULL
 };
 
@@ -119,10 +120,12 @@ nemo_main()
     	do_plane();
     } else if (scanopt(method,"poly")) {
     	do_poly();
+    } else if (scanopt(method,"area")) {
+        do_area();
     } else if (scanopt(method,"peak")) {
     	do_peak();
     } else
-        error("fit=%s invalid; try [line,ellipse,imageshift,plane,poly,peak]",
+        error("fit=%s invalid; try [line,ellipse,imageshift,plane,poly,peak,area]",
 	      getparam("fit"));
 
     if (outstr) strclose(outstr);
@@ -627,6 +630,36 @@ do_peak()
     printf("Peak:x,y= %g %g\n",
             x[j] - sol[1]/(2*sol[2]),
             sol[0]+sqr(sol[1])/(2*sol[2]));
+}
+
+do_area()
+{
+    real *x, *y, ymax, xmean, ymean;
+    int i, j, k;
+
+    order = 2;
+
+    if (nycol<1) error("Need 1 value for ycol=");
+
+    x = xcol[0].dat;
+    y = ycol[0].dat;
+    for (i=0; i<npt; i++) {
+      xmean += x[i];
+      ymean += y[i];
+    }
+    xmean /= npt;
+    ymean /= npt;
+
+    error("ah, not done coding here yet");
+
+    /* allocate temp array, 
+       compute angles 
+       sort an index array by angles
+       compute half the sum of x[i+1]*y[i]-x[i]*y[i+1]
+       that's the area
+    */
+       
+
 }
 
 

@@ -3,6 +3,7 @@
 % mirtool - A SunView Front End
 %
 %       19-feb-91   updated for new usersguide from older..nemotool  PJT
+%        7-apr-01   now deprecated in NEMO V3
 %
 \myfile{mirtool.inc}
 \mylabel{s:mirtool}

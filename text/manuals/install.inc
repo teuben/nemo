@@ -10,10 +10,12 @@ currently consists of about 10Mb of ASCII (source, documentation etc.)
 files, mostly obtained as a (compressed) tar file. For some machines a
 bootstrap loader is present, which makes the initial  installation
 extremely straightforward (however, with frequently some subsequent
-tweeking, e.g. choosing the right graphics drivers).
+tweaking, e.g. choosing the right graphics drivers). In NEMO V3 the
+installation has been simplified using autoconf.
 
-The first Section \ref{as:suninst} walks you through an installation on
-a Sun workstation. For the most it is likely to be close to the
+The first Section \ref{as:suninst} walks you through an installation 
+using the new configure script.
+For the most it is likely to be close to the
 procedure on any standard UNIX system, although a number of known
 deviations are described in Section \ref{as:otherinst}. Exporting a
 working NEMO system is described in Section \ref{as:export}. Incremental
@@ -30,11 +32,11 @@ an excersize for the reader (:-).
 \section{Bootstrap}
 
 
-\section{SUN workstations - NEMO V2.x}
+\section{Linux workstations - NEMO V3.x}
 \mylabel{as:suninst}
 
 We are going to install NEMO in the directory designated
-by the environment variable {\tt\$NEMO} on a SUN
+by the environment variable {\tt\$NEMO} on a Linux
 workstation. \index{NEMO, environment} The {\bf NEMO} 
 environment variable will be needed (see also 
 Appendix~\ref{a:setup}),
@@ -477,107 +479,10 @@ time when BSD and SYSV UNIX merge
 % '-L' and '-I' flags to their {\it cc(1)} compiler, as do more vendors
 % these days.
 
-\subsection{CC replacement script}
+\subsection{Replacement scripts in NEMOBIN}
 
-% \underline{{\tt CC compiler replacement script/preprocessor:}} src/scripts/cc*
-
-\index{cc, installation}
-The directory {\tt \$NEMO/src/scripts} contains a number of CC shell
-scripts, check presence of the '-I' and '-L' switches of your C-compiler
-({\tt cc} or {\tt cpp}):
-
-\begin{verbatim}
-    % cd $NEMO/src/scripts
-\end{verbatim}
-        look at the {\tt cc.*} shell scripts which one suits
-\index{cc, script}
-        your operating system. Some of them already have explicit
-names, such as {\bf cc.ultrix}
-You should either take one
-        of these shell scripts, {\it e.g.}
-\begin{verbatim}
-    % cp cc.ultrix $NEMOBIN/cc
-\end{verbatim}
-        or use the compiled {\tt mycc.c} version:
-\begin{verbatim}
-    % cc -o cc mycc.c ; mv cc $NEMOBIN
-\end{verbatim}
-\index{mycc, cc replacement}
-command line 
-references such as ``{\bf -lJ}'' would be expanded by the preprocessor to
-``{\bf \$NEMOLIB/libJ.a}', in the usual UNIX tradition.  
-This is really only needed when the ``{\bf -L}''
-switch of the host cc-compiler is absent.  It also requires you to use
-the INCLUDE and LIBRARY environment variables.  The {\tt mycc} does 
-nothing more {\it *** check ***} than the following shell script:
-\begin{verbatim}
-#! /bin/csh -f
-#
-exec /bin/cc -I$NEMOINC -L$NEMOLIB $*
-\end{verbatim}
-
-When {\it cc} does not support the {\bf -I} flag for an alternate
-include directory some other mechanism needs to be used. One 
-terrible last resort would be something like the 
-following:\footnote{You most likely need 
-superuser\index{superuser}\index{root, su}
-priviliges for this, hence the \# prompt}
-
-\begin{verbatim}
-    # cd $NEMO
-    # mv -i inc/* /usr/include
-    # rmdir inc
-    # ln -s /usr/include inc
-\end{verbatim}  
-
-A similar trick can be used with {\tt /usr/lib} if the {\bf -L} switch
-is absent, although officially we do not make use of this flag anymore.
-To supply the script with {\bf -L\$NEMOLIB} is however pleasant to
-support short compile commands like:
-\begin{verbatim}
-    % cc -o snapprint snapprint.c -lnemo -lm
-\end{verbatim}
-
-\subsection{MAKE replacement script}
-
-% \underline{{\tt MAKE utility replacement script:}} src/scripts/make/*
-
-\index{make utility, installation}
-The 'make' utility on some BSD implementations 
-does not include environment variables
-automatically, whereas NEMO's Makefile's depend on that feature.
-Try using one of the {\tt make.*} script, and
-copy it into NEMO's bin directory, {\it e.g.}:
-
-\begin{verbatim}
-    % cp make.ULTRIX $NEMOBIN/make
-\end{verbatim}
-        after the usual
-\begin{verbatim}
-    % rehash
-\end{verbatim}
-        'cc' and 'make' in {\tt \$NEMOBIN} become new 
-defaults\footnote{check this with 'which cc' and 'which make'.}.
-To check and see if your name ``make'' now imports environment
-variables, try the root makefile, and see if it complains or
-has missing environment variables:
-\begin{verbatim}
-    % cd $NEMO
-    % make
-\end{verbatim}
-
-\subsection{RANLIB replacement script}
-
-On systems where this is needed, mostly\index{ranlib} 
-UNIX System V ({\it e.g.} Solaris, SGI), ranlib does not exist,
-because the library archiver ({\tt ar}\index{ar}) does all this
-work, a dummy script {\tt ranlib} is used by NEMO to fool the
-Makefiles. If your system needs this script, and for some reason
-the bootstrap process has not installed it, use:
-
-\begin{verbatim}
-    % cp ranlibNULL $NEMOBIN/ranlib
-\end{verbatim}
+Before NEMO V3 programs like cc, make and ranlib were sometimes 
+replaced with a script in \$NEMOBIN.
 
 \subsection{YAPP graphics device driver}
 
@@ -858,20 +763,6 @@ needs to turned off. All of NEMO's programs would need to be recompiled
 of course.
 \end{itemize}
 
-\section{Porting to non-UNIX systems: MSDOS, VMS}
-
-Experimental porting to MSDOS has been done with some success using the
-Turbo-C (V2.0) compiler.  The compiler \index{Turbo-c} needs different
-macros for variable\index{MSDOS}\index{VMS}
-argument handling, as they don't use
-the 'standard' ones.  Until at least this is fixed, we don't recommend
-you try.  Borland also has the habit of changing their definitions from
-version to version.  The new C++ compiler should stand a better chance. 
-There is a working yapp interface for the Turbo-C graphics package
-available.  Porting the dynamic object loading is near impossible at the
-current stage.  With the gnu {\tt gcc} compiler now available for Intel
-386+ and VAX architecturesm the more serious machines have a better
-chance of correct compilation. 
 
 
 

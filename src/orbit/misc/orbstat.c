@@ -2,6 +2,7 @@
  * ORBSTAT:	 tabulate orbit and some of their statistics
  *
  *	23-mar-95 V1	Created					pjt
+ *	14-apr-01       header now in dprintf()
  *
  */
 
@@ -13,7 +14,7 @@
 
 string defv[] = {
     "in=???\n		Input orbit",
-    "VERSION=1.0\n  	23-mar-95 PJT",
+    "VERSION=1.0a\n  	14-apr-01 PJT",
     NULL,
 };
 
@@ -66,7 +67,7 @@ stat_orbit(orbitptr o)
     t = Torb(o,Nsteps(o)-1);
     e = I1(o);
     if (first) {
-    	printf("# T\tE\tx_max\ty_max\tu_max\tv_max\tj_mean\tj_sigma\n");
+    	dprintf(0,"# T\tE\tx_max\ty_max\tu_max\tv_max\tj_mean\tj_sigma\n");
     	first=FALSE;
     }
     printf("%g %g %g %g %g %g %g %g\n",t,e,

@@ -28,6 +28,9 @@
  *      15-oct-99  V2.9  force a more silly RA---SIN/DEC--SIN axis      pjt
  *      23-mar-01  V3.0  allow fits reference image to inherit WCS from PJT
  *       8-apr-01      a fixed SINGLEPREC operation
+ *
+ *  TODO:
+ *      reference mapping has not been well tested, especially for 2D
  */
 
 
@@ -71,8 +74,9 @@ bool Qcdmatrix;         /* writing out new-style cdmatrix ? */
 bool Qradecvel;         /* fake astronomy WCS header */
 bool Qrefmap;
 
+int   nref = 0;
 FLOAT ref_crval[3], ref_crpix[3], ref_cdelt[3];
-char  ref_ctype[3][32];
+char  ref_ctype[3][80];
 
 void setparams(void);
 void write_fits(string,imageptr);
@@ -121,8 +125,8 @@ void setparams(void)
   if (Qrefmap) {
     set_refmap(getparam("refmap"));
     if (hasvalue("refpix")) {
-      n =  nemoinpr(getparam("refpix"),tmpr,3);
-      for (i=0; i<n; i++)
+      nref =  nemoinpr(getparam("refpix"),tmpr,3);
+      for (i=0; i<nref; i++)
 	ref_crpix[i] = tmpr[i];
     }
   }

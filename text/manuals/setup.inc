@@ -1,6 +1,7 @@
 %% This file is to be included by latex in nemo.tex
 %
 %  26-mar-94  for V2.2
+%   7-apr-01  for V3.0
 % Appendix: setup
 \myfile{setup.inc}
 \mylabel{a:setup}
@@ -43,8 +44,7 @@ Add the following line to your
 environment} should be set
 to refer to the HOSTTYPE\index{HOSTTYPE, environment} you want to run.
 If not present, NEMO will attempt to resolve it. Some UNIX shells 
-define an environment variable HOSTTYPE, which can sometimes
-be used.
+define an environment variable HOSTTYPE, which could also be used.
 
 (3) Add the statement\index{NEMORC, file}\index{startup file, NEMORC}
 
@@ -91,12 +91,10 @@ procedure:
 
 Note the single quotes, to allow so-called late evaluation.
 Whenever the command ``{\tt nemo}'' is issued, the NEMO environment
-is loaded. After this has been done, the {\tt nemo} alias is 
+is loaded with whatever the current value of \$NEMO is.
+After this has been done, the {\tt nemo} alias is 
 replaced by another one to prevent re-entry. The alias
-{\tt denemo}\index{denemo} will unload NEMO from the environment.
-
-% Note: This procedure is quite useful for users of NEMO, but
-% has proven to give some difficulties for application programmers.
+{\tt omen}\index{omen} will unload NEMO from the environment.
 
 \section{Tailoring}
 \mylabel{s:tailoring}

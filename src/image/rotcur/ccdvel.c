@@ -42,6 +42,11 @@
  *  29-aug-95   V1.4  added toy spiral perturbations            pjt
  *  22-feb-97	    a made sure it worked with SINGLEPREC	pjt
  *		      and kept variables local
+ *  12-apr-01   V1.5  make some crude (no neighbor voxel pollution) 
+ *                    cubes optionally
+ *  20-apr-01       a cube creation not worked too well yet, but fixed
+ *                    some backwards compatibility problems
+ *   1-may-01   V1.6  Added amp= keyword for fudzing density maps    PJT/LGM
  */
 
 #include <stdinc.h>
@@ -54,7 +59,7 @@
 string defv[] = {
         "out=???\n      Output file name (an image)",
         "radii=\n       Radii in disk",
-        "vrot=\n        Rotation velocities",
+        "vrot=\n        Rotation velocities (or intensity if amp=1)",
         "inc=\n         Inclinations",
         "pa=\n          Position angle: C.C.W. from +Y-axis",
 #if 0
@@ -69,39 +74,48 @@ string defv[] = {
         "nspiral=2\n    measure of inverse width of spiral",
 	"tspiral=0\n	phase of spiral w.r.t. line of nodes", 
 
-        "size=128\n     Map size (number of pixels)",
+        "size=128\n     Map/Cube size",
         "cell=1\n       Cell size",
         "center=\n      Rotation center of disk [default: map center]",
         "vsys=\n        Systemic velocity",
         "rotcurfit=\n   initial conditions from rotcur output table",
         "fixring=1\n    ring to use for center, and vsys",
         "noise=0\n      Gaussian noise added to velocities",
+	"amp=f\n        Cretae density maps instead of velocity?",
         "seed=0\n       Initial random seed",
+	"in=\n          Template 2D image for cube generation",
 	"headline=\n	Optional random verbiage",
-        "VERSION=1.4a\n 22-feb-97 PJT",
+        "VERSION=1.6a\n 1-may-01 PJT/LGM",
         NULL,
 };
 
 string usage="create a velocity field from a rotation curve";
 
 #define RPD  PI/180
+#ifndef HUGE
 #define HUGE 1.0e20
+#endif
 
 local stream  outstr;                    /* output file */
 
-local int  size[2];                /* 2D size of maps   */
-local real cell[2];                /* cell sizes of map */
-local real center[2];              /* rot center of map */
-local real rmin, rmax;             /* extent of disk    */
-local real vsys;                   /* some constants */
+local int  size[3];                /* 2D/3D size of map/cube   */
+local real cell[3];                /* cell sizes */
+local real center[3];              /* rot center */
+local real rmin, rmax;             /* spatial extent of disk  */
+local real vsys = 0.0;             /* systemic velocity */
 local real noise;                  /* noise ?? */
 local int  out_mode;               /* output mode       */
+local imageptr iptr;               /* template image */
+
                              /* 1 = sky -> gal */
                              /* 2 = gal -> sky */
 local real aspiral, pspiral, kspiral, nspiral;    /* spiral parameters */
 local real vrotfac, vexpfac, theta0;
 
+local real Qamp;   /* use amplitudes instead of velocities */
+
 local real undef = 0.0;            /* could also use IEEE NaN ??? set_fblank ? */
+local bool Qcube = FALSE;
 
 #define MAXCOL    7     /* columns to read from rotcur table file */
 #if !defined(MAXRAD)
@@ -115,10 +129,11 @@ local real rad_i[MAXRAD],                                      /* radii */
            xpos_i[MAXRAD], ypos_i[MAXRAD], vsys_i[MAXRAD];    /* center */
 local int  nrad;
 
-local int gridx(real), gridy(real);
+local int gridx(real), gridy(real), gridz(real);
 local void vel_create_1(stream), vel_create_2(stream);
 local real radius(real, real , real , real , real, real);
 local real linfit(real *, real *, real, int, int);
+local real my_image(real, real);
 
 extern double grandom(double,double);
 
@@ -140,24 +155,39 @@ setparams()
 {
     int i,n, ifix, colnr[MAXCOL];
     real *coldat[MAXCOL];
+    stream tstr;
+
+    Qcube = hasvalue("in");
+    if (Qcube) {
+      warning("New experimental CUBE mode");
+      tstr = stropen(getparam("in"),"r");
+      read_image(tstr,&iptr);
+      strclose(tstr);
+    }
 
     out_mode = 1;       /* fix to 'sky -> gal plane' mode */
 
-    switch ( nemoinpi(getparam("size"),size,2) ) {  /* MAPSIZE */
+    switch ( nemoinpi(getparam("size"),size,3) ) {  /* MAPSIZE */
        case 1:                  /*  nx[,ny] */
                 size[1] = size[0];
+		size[2] = 1;
                 break;
        case 2:                  /*  nx,ny */
+		size[2] = 1;
+                break;
+       case 3:                  /*  nx,ny */
                 break;
        default:                 /* --- some error --- */
                 error("Need size= keyword");
     }
 
-    switch ( nemoinpr(getparam("cell"),cell,2) ) {   /* CELL SIZE */
+    switch ( nemoinpr(getparam("cell"),cell,3) ) {   /* CELL SIZE */
        case 1:                  /*  dx[,dy] */
-                cell[1] = cell[0];
+                cell[2] = cell[1] = cell[0];
                 break;
        case 2:                  /*  dx,dy */
+                break;
+       case 3:                  /*  dx,dy */
                 break;
        default:                 /* --- some error --- */
                 error("Need cell= keyword");
@@ -241,7 +271,7 @@ setparams()
         if (nrad<2) error("radii=: Need at least two radii (%d)",nrad);
         dprintf(0,"Found %d radii\n",nrad);
 
-        n = nemoinpr(getparam("vrot"),vrot_i,MAXRAD);
+        n = nemoinpr(getparam("vrot"),vrot_i,nrad);
         if (n<1) error("vrot=: Need at least one (%d)",n);
         dprintf(0,"Found %d velocities\n",n);
         for (i=n; i<nrad; i++) vrot_i[i] = vrot_i[n-1];
@@ -281,8 +311,8 @@ setparams()
    rmax = rad_i[nrad-1];
 
    /* output to user */
-   printf("Mapsize: %d * %d\n",size[0],size[1]);
-   printf("Cell size: %g * %g\n",cell[0],cell[0]);
+   printf("Mapsize: %d * %d * %d\n",size[0],size[1],size[2]);
+   printf("Cell size: %g * %g * %g\n",cell[0],cell[1],cell[2]);
    printf("Center: %g * %g pixels\n",center[0],center[1]);
    printf("Systemic velocity: %g\n",vsys);
 
@@ -291,6 +321,8 @@ setparams()
       if (rad_i[n] < rad_i[n-1]) error("Radii not sorted (%d)",n);
 
    if (hasvalue("headline")) set_headline(getparam("headline"));
+
+   Qamp = getbparam("amp");
 }
 
 
@@ -301,11 +333,11 @@ setparams()
  */
 local void vel_create_1(stream outstr)
 {
-    int  i, j, n, nx, ny, ir, nr, ip, np;
-    real x, y, vrot, vexp;
+    int  i, j, k, n, nx, ny, nz, ir, nr, ip, np;
+    real x, y, vrot, vexp, ival;
     real cost, sint, cosk, sink, rad, drad, phi, dphi, sinth, costh;
     real omega, kappa, bigx, bigy, p, r, m_min, m_max, delta1, delta2;
-    real x0, y0, dx, dy, eps, theta, inc, e1, e2, vspi;
+    real x0, y0, z0, dx, dy, dz, eps, theta, inc, e1, e2, vspi, vobs;
     imageptr vptr;
     real e[MAXRAD], sinp[MAXRAD], cosp[MAXRAD], cosi[MAXRAD];
 
@@ -314,14 +346,22 @@ local void vel_create_1(stream outstr)
     m_min = HUGE; m_max = -HUGE;
     nx = size[0];
     ny = size[1];
+    nz = size[2];
     dx = cell[0];   /* ??? perhaps -cell[0] = astro. convention */
     dy = cell[1];
+    dz = cell[2];
     x0 = center[0];
     y0 = center[1];
+    z0 = center[2];
     eps = 0.1 * sqrt(dx*dx+dy*dy);
 
-    if (!create_image(&vptr, nx, ny))   /* velocity image */
+    if (Qcube) {
+      if (!create_cube(&vptr, nx, ny, nz))   /* image cube */
+        error("Could not create cube from scratch");
+    } else {
+      if (!create_image(&vptr, nx, ny))   /* velocity image */
         error("Could not create image from scratch");
+    }
 
     for (n=0; n<nrad; n++) {
         sinp[n] = sin(theta_i[n]);
@@ -333,8 +373,8 @@ local void vel_create_1(stream outstr)
         y = dy*(j-y0);
         for (i=0; i<nx; i++) {      
             x = dx*(i-x0);
-
-            MapValue(vptr,i,j) = undef;       /* set to 'undefined' */
+	    for (k=0; k<nz; k++)
+	      CubeValue(vptr,i,j,k) = undef;       /* set to 'undefined' */
             
             r = sqrt(sqr(x)+sqr(y));        /* get projected radius */
             if (r > rmax) continue;          /*  certainly outside disk */
@@ -375,30 +415,46 @@ local void vel_create_1(stream outstr)
                     vrot += vrotfac * vspi;
                     vexp += vexpfac * vspi;
                 }
-                MapValue(vptr,i,j) = vsys + (vrot*cost+vexp*sint)*sin(inc);
+		if (Qamp)
+		  vobs = vsys + vrot;
+		else
+		  vobs = vsys + (vrot*cost+vexp*sint)*sin(inc);
             } else
-                MapValue(vptr,i,j) = vsys;        
-            if (noise>0.0)
-                MapValue(vptr,i,j) += grandom(0.0,(double)noise);
+ 	        vobs = vsys;
+
+	    if (Qcube) {
+	      k = gridz(vobs);
+	      if (k >= 0 && k < nz) {
+		ival = my_image(x,y);
+		CubeValue(vptr,i,j,k) = ival;
+		dprintf(1,"%d %d %d %g\n",i,j,k,vobs);
+	      }
+	    } else {
+	      CubeValue(vptr,i,j,0) = vobs;
+	      if (noise>0.0)
+                CubeValue(vptr,i,j,0) += grandom(0.0,(double)noise);
+	    }
         }
     }
 
     n=0;
-    for (j=0; j<ny; j++)        /* get min and max in map */
+    for (k=0; k<nz; k++)        /* get min and max in map */
+      for (j=0; j<ny; j++)
         for (i=0; i<nx; i++) 
-            if (MapValue(vptr,i,j) != undef) {
-                m_min = MIN(MapValue(vptr,i,j),m_min);
-                m_max = MAX(MapValue(vptr,i,j),m_max);
+            if (CubeValue(vptr,i,j,k) != undef) {
+                m_min = MIN(CubeValue(vptr,i,j,k),m_min);
+                m_max = MAX(CubeValue(vptr,i,j,k),m_max);
             } else
                 n++;
     MapMin(vptr) = m_min;
     MapMax(vptr) = m_max;
     Dx(vptr) = dx;
     Dy(vptr) = dy;
+    Dz(vptr) = dz;
 
-    if (n>0) warning("%d/%d cells with no signal",n,nx*ny);
+    if (n>0) warning("%d/%d cells with no signal",n,nx*ny*nz);
     printf("Min and max in map: %g %g\n",m_min,m_max);
-    write_image (outstr,vptr);      /* write out the velocity field */
+    write_image (outstr,vptr);      /* write out the velocity field/ data cube */
 }
 /*
  * RADIUS:  find out how much a point is inside or outside a
@@ -558,3 +614,38 @@ local int gridy(real y)
      else
         return i;
 }
+
+local int gridz(real z)
+{
+     int i;
+
+     i = (int) floor(0.5+center[2]+z/cell[2]) ;
+#if 1
+     i += size[2]/2;
+#endif
+     if (i<0 || i>=size[2]) 
+        return -1;
+     else
+        return i;
+}
+
+
+
+real  xim = 2517;
+real  yim = 2573;
+real dxim = 0.025;
+real dyim = 0.025;
+
+real my_image(real x, real y)
+{
+  int i, j;
+
+  i = (int) floor(0.5 + xim/2 + x/dxim);
+  j = (int) floor(0.5 + yim/2 + y/dyim);
+
+  if (i<0 || i>=Nx(iptr) || j<0 || j>=Ny(iptr)) return 0.0;
+
+  return 255-MapValue(iptr,i,j);
+}
+
+

@@ -5,6 +5,7 @@
  *
  *    6-oct-92  repaired the long_changed convention out_mass -> mass 
  *              as was done in hackcode1 ages ago                       PJT
+ *   10-apr-01  gcc warnings
  */
 
 #include "defs.h"
@@ -18,6 +19,7 @@
 
 #include <snapshot/put_snap.c>
 
+local diagnostics(void);
 /*
  * INPUTDATA: read initial conditions from input file.
  */
@@ -60,7 +62,7 @@ local stream quadstr = NULL;		/* quadrupole field output */
 initoutput()
 {
     printf("\n%s\n\n", headline);               /* headline log stream      */
-    if (*outfile != NULL) {                     /* output file given?       */
+    if (*outfile != 0) {                        /* output file given?       */
         outstr = stropen(outfile, "w");         /*   setup out. stream      */
 	put_history(outstr);			/* output history */
         put_string(outstr, HeadlineTag, headline);
@@ -70,10 +72,10 @@ initoutput()
            "nbody", "freq", "eta", "sigma", "ome  ", "mode", "tstop");
     printf("%12d%12.4f%12.4f%12.4f%12.4f%12d%12.2f\n\n",
 	   nbody, freq, eta, sigma, ome, mode, tstop);
-    if (*options != NULL)
+    if (*options != 0)
 	printf("\toptions: %s\n\n", options);
     minor_tout = tout = tnow;			/* schedule 1st outputs     */
-    if (*savefile != NULL)			/* restart file enabled?    */
+    if (*savefile != 0)	          		/* restart file enabled?    */
 	savestate(savefile);			/*   save inital state      */
 }
 
@@ -147,7 +149,7 @@ output()
     }
 
 
-    if (*savefile != NULL)			/* state file specified?    */
+    if (*savefile != 0)	          		/* state file specified?    */
 	savestate(savefile);			/*   save system data       */
 }
 
@@ -155,7 +157,7 @@ output()
  * DIAGNOSTICS: compute set of dynamical diagnostics.
  */
 
-local diagnostics()
+local diagnostics(void)
 {
     int i;
     register bodyptr p;

@@ -6,6 +6,7 @@
  *	12-apr-95	fixed potential stack problem, no more ARGS
  *      16-sep-96  0.1  added init= keyword             pjt 
  *       7-apr-01       gcc warnings                    pjt
+ *      14-apr-01       added color
  *
  */
 
@@ -27,6 +28,7 @@ local struct www {                  /*  List of all basic YAPP commands */
     { Ltype,  "ltype",    "ii"   },
     { Line,   "line",     "rr"   },
     { Move,   "move",     "rr"   },
+    { Color,  "color",    "i"    },
     { Point,  "point",    "rrr"  },
     { Circle, "circle",   "rrr"  },
     { Cross,  "cross",    "rrr"  },
@@ -138,6 +140,8 @@ void pl_exec(plcommand *p)
 	    case Line:   plline(p->pars[0].r,p->pars[1].r);
 			 break;
 	    case Move:   plmove(p->pars[0].r,p->pars[1].r);
+			 break;
+	    case Color:  plcolor(p->pars[0].i);
 			 break;
 	    case Point:	 plpoint(p->pars[0].r,p->pars[1].r);
 			 break;

@@ -52,6 +52,7 @@
  *              15-oct-99 : 2.4  added residual computations        
  *                               to nllsqfit using resid=           pjt
  *              14-mar-01 : 2.5  added nsigma=                      pjt 
+ *              23-apr-01 : 2.6  added central dv/dr estimator      pjt
  ******************************************************************************/
 
 #include <stdinc.h>
@@ -95,7 +96,7 @@ string defv[] = {
     "inherit=t\n     Inherit initial conditions from previous ring",
     "fitmode=cos,1\n Basic Fitmode: cos(n*theta) or sin(n*theta)",
     "nsigma=-1\n     Iterate once by rejecting points more than nsigma resid",
-    "VERSION=2.5\n   14-mar-01 PJT",
+    "VERSION=2.6\n   23-apr-01 PJT",
     NULL,
 };
 

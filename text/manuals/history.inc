@@ -26,15 +26,16 @@ version of the program is needed.
 
 {\it E.g.} on the SUN we could use:
 \begin{description}
-\item{yapp\_core: }   generic yapp using suntools
-\item{yapp\_cg: }       extended suntools version with color support
+\item{yapp\_core: }   generic yapp using suntools (deprecated)
+\item{yapp\_cg: }       extended suntools version with color support (deprecated)
 \item{yapp\_ps: }       output to a postscript file, 
-        for Postscript device.
-\item{yapp\_mongo: } interface which connects to mongo-87. This
+        for Postscript device. (color not yet implemented)
+\item{yapp\_mongo: } interface which connects to mongo-87. (deprecated)
 \item{yapp\_pgplot: } interface which connects to pgplot package. This
 implementation also has
 the great advantage of being able to handle a variety of
-terminals and printers fairly transparent. 
+terminals and printers fairly transparent. This is the one we use mostly.
+\item{yapp\_plplot: } interface which connects to plplot package. 
 \end{description}
 
 We use the environment variable YAPPLIB\index{YAPPLIB,
@@ -76,6 +77,8 @@ names in them:
 
 Currently the file structure is tied in with the operating system
 routines {\it fread(3)} and {\it fwrite(3)}, and binary files cannot be
+guarenteed\footnote{for IEEE and twos-complement data 
+automatic byte-swap detection this problem has been solved} to be 
 used across \index{data, format problem} machines with different data
 types (size/floating point conventions etc.).  This problem is only
 partially solved by using programs such as {\it tsf(1NEMO)} and {\it
@@ -278,6 +281,35 @@ and making small updates to the package will be a lot easier.
 \newpage
 
 \section{New Features}
+
+\subsection{Release 3.0}
+Was released April 1, 2001. Certainly not a joke. Source code has been released within
+CVS for subsquent development with the partiview and starlab modules, also under
+CVS.
+Installation has now completely been done using configure, an
+autoconf product. 3.0.0 was never released, 3.0.1 was the first official release that
+worked under linux. Solaris and SGI.
+
+\begin{description}
+
+\item{$\bullet$}
+configure support
+
+\item{$\bullet$}
+loadobj support now using .so files, not .o files.
+
+
+\end{description}
+
+
+\subsection{Release MD-2.5}
+Was released December 1999, with initial support for configure. This series had 5 subreleased
+though 2.5.5, but 2.5.6 was never released in favor of 3.0.0. No major changes through this
+release.
+
+\subsection{Release MD-2.4}
+Was released April 1, 1997. 
+
 \subsection{Release MD-2.3}
 
 \begin{description}
@@ -613,6 +645,7 @@ sites for export maintained.
 \item[Winter 1995] Linux, Dec Alpha and SGI support added, since they allow
 dynamic object loading. Manual in html (latex2html)
 
+\item[Spring 2001] Installation converted to configure/autoconf.
 
 
 \end{description}

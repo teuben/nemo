@@ -10,6 +10,7 @@
  */
 
 typedef enum { End, Swap, Xscale, Yscale, Ltype, Line, Move,    /* Valid Yapp */
+	       Color,
                Point, Circle, Cross, Box, Just, Text, Flush,
                Frame, Init, Stop, NOP} pl_id;
 

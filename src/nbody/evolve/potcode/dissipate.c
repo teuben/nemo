@@ -6,11 +6,14 @@
  *	   17-jun-92    attempt to conserve energy better	PJT
  *			(what we had so far, was momentum conservation)	PJT
  *         29-sep-92    added 'grid' parameter to set largest possible grid PJT
+ *         10-apr-01    gcc warnings
  *
  */
 
 #include "defs.h"
+#ifndef HUGE
 #define HUGE 1E20
+#endif
  
 static int *c = NULL;
 static int    size = 0;

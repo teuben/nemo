@@ -1,4 +1,4 @@
-.TH CCDVEL 1NEMO "14 October 1999"
+.TH CCDVEL 1NEMO "1 May 2001"
 .SH NAME
 ccdvel \- create a velocity field; grid or retrace
 .SH SYNOPSIS
@@ -97,9 +97,18 @@ is used.
 \fBnoise=\fP\fIv_sigma\fP
 Dispersion of the gaussian noise added to the map. Default: 0
 .TP
-\fBseed=\fP\fIinitial_seed\fP
-Initial seed used by the random number generator. If 0 is used,
-the time of the day is used instead. Default: 0
+\fBamp=\fP\fIt|f\fP
+If set to true (or 1) it will create an amplitude (surface brightness)
+map, instead of a velocity
+field. In this case, the rotation speed is taken as the amplitude of
+the density map.
+.TP
+\fBseed=\fP
+Initial seed for random number generator. See \fIxrandom(3NEMO)\fP
+for defaults. Default: 0
+.TP
+\fBin=\fP\fIccd-file\fP
+Template (2d) image to provide the WCS for a cube. (deprecated)
 .TP
 \fBheadline=\fP\fIcomments\fP
 Random verbiage added to the output image [Default: none].
@@ -114,13 +123,26 @@ are not undefined, i.e. 0.0):
 
 .nf
 
-    1% \fIrotcur in=map1 radii=100:10:-5 vrot=100 pa=20 inc=45 vsys=1200 \\
-        center=100,110 fixed=center,vsys,inc tab=map1.tmp units=arcsec\fP
-    2% \fItabcomment map1.rotcur - | sort -n > map1.rotcur\fP
-    3% \fIccdvel out=map1.model rotcurfit=map1.rotcur\fP
-    4% \fIccdmath in=map1,map1.model out=map1.diff \\
-            fie="ifeq(%1,0.0,0.0,ifeq(%2,0.0,0.0,%1-%2))"\fP
+    1% rotcur in=map1 radii=100:10:-5 vrot=100 pa=20 inc=45 vsys=1200 \\
+         center=100,110 fixed=center,vsys,inc tab=map1.tmp units=arcsec
+    2% tabcomment map1.rotcur - | sort -n > map1.rotcur
+    3% ccdvel out=map1.model rotcurfit=map1.rotcur
+    4% cdmath in=map1,map1.model out=map1.diff \\
+            fie="ifeq(%1,0.0,0.0,ifeq(%2,0.0,0.0,%1-%2))"
 
+.fi
+.PP
+One can also use ccdvel to create a surface brightness. Creating a functional
+form for the density can be done using \fItabmath(1NEMO)\fP. E.g. the following
+example creates an exponential surface density profile:
+.nf
+    1% set rad=`nemoinp 0:100:5`
+    2% set den=`nemoinp 0:100:5 | tabmath - - "exp(-%1/20)" all`
+    3% ccdvel out=map1.den radii="$rad" vrot="$den" pa=30 inc=60 amp=t
+or
+    1% nemoinp 0:100:5 > map1.radt
+    2% nemoinp 0:100:5 | tabmath - - "exp(-%1/20)" all > map1.dent
+    3% ccdvel out=map1.den radii=@map1.radt vrot=@map1.dent pa=30 inc=60 amp=t
 .fi
 .SH ROTCURFIT
 The table \fBrotcurfit\fP assumes the
@@ -130,19 +152,24 @@ are in columns 1, 2, 4, 6, 8, 10 and 12 resp.
 .SH SEE ALSO
 snapgrid(1NEMO), ccdgrid(1NEMO), snapslit(1NEMO), rotcur(1NEMO), velfi(GIPSY)
 .SH AUTHOR
-P. J. Teuben
+Peter Teuben
 .SH BUGS
-The output map is patched with the undefined value 0.0 whereever
+The output map is patched with the undefined value 0.0 where-ever
 no information is requested for these pixels.
 .PP
 The \fIgridding\fP method is currently not available. The \fPretracing\fP
 method will be used.
+.PP
+Different versions of rotcur exist (NEMO, Gipsy) that use different columns,
+so the \fBrotcurfit=\fP tables should be used with caution.
 .SH UPDATE HISTORY
 .nf
 .ta +1i +4i
 20-may-91	original program                     	PJT
 31-jul-92	V1.3 new rotcurfit=; rings are now radii    	PJT
-3-aug-92	(b) fixed mapsize bug; overrid center=   	PJT
+3-aug-92	(b) fixed mapsize bug; override center=   	PJT
 12-aug-92  	(d) added headline=                      	PJT
 oct-99       	doc additions                               	PJT
+apr-01		V1.5b added in=, but deprecated it		PJT
+1-may-01	V1.6 added amp= for CARMA simulations		PJT/LGM
 .fi

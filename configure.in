@@ -359,6 +359,26 @@ fi
 
 dnl##--------------------------------------------------------------------
 
+AC_MSG_CHECKING(almost whether we have LAM/MPI)
+AC_MSG_RESULT(not yet)
+
+dnl##--------------------------------------------------------------------
+
+AC_MSG_CHECKING(whether we have PVM_ROOT and PVM_ARCH)
+
+if test -d "$PVM_ROOT"; then
+  PVM_LIB="-L$PVM_ROOT/lib/$PVM_ARCH -lpvm3 -lgpvm3"
+  PVM_INC="-I$PVM_ROOT/include"
+  AC_MSG_RESULT(yes)
+else
+  PVM_LIB=""
+  PVM_INC=""
+  AC_MSG_RESULT(no)
+fi
+AC_SUBST(PVM_LIB)
+AC_SUBST(PVM_INC) 
+dnl##--------------------------------------------------------------------
+
 AC_MSG_CHECKING(whether we have MIRIAD)
 if test -d "$MIR"; then
   mir="$MIR"

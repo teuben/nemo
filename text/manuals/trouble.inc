@@ -250,9 +250,10 @@ Normally set to {\tt ".:\$NEMOOBJ/bodytrans"} in {\tt NEMORC}.
 \index{BTRPATH, environment}
 
 \item[{\bf CFLAGS}]    Options for the C compiler for on-the fly
-compilations. See e.g. {\it bodytrans(1NEMO)}. When not set, no
+compilations under NEMO V2. Not used for NEMO V3.
+See e.g. {\it bodytrans(1NEMO)}. When not set, no
 compilation options used. When set, some make(1) implementations
-will also use it when the environment is imported.
+will also use it when the environment is imported. 
 \index{CFLAGS, environment}
 
 \item[{\bf DEBUG}]  Debug level, must be between 0 and 9. The higher the
@@ -389,32 +390,6 @@ a program which the default YAPP graphics device. No default.
 
 See also the manual pages of {\it files(1NEMO)}.
 
-
-\section{NemoNew(s) and NemoBug(s)}
-
-In this section we describe the use of {\it nemonew(1NEMO)}, {\it
-nemonews(1NEMO)}, {\it nemobug(1NEMO)}, and {\it nemobugs(1NEMO)}, 
-which are particularly handy in an environment of more than one
-NEMO user.
-\begin{itemize}
-\item{\tt nemonew} is to be used when users want to notify the NEMO users that
-something has been added or modified in NEMO. Either programs, or 
-functions/subroutines, or directory structure etc. \index{nemonew(1)}
-\index{new, nemonew} 
-
-\item{\tt nemonews} is to interrogate various online databases what's
-new in NEMO.  \index{nemonews(1)} \index{news, nemonews}
-
-\item{\tt nemobug} is to be used when users found problems, bugs in programs
-etc. It can also send mail to certain users who might be able to
-solve the problems. \index{nemobug(1)}
-\index{bug, nemobug}
-
-\item{\tt nemobugs} is to interrogate various online databases on known bugs.
-\index{nemobugs(1)} \index{bugs, nemobugs}
-\end{itemize}
-
-{\it Do we need local directories for this?}
 
 
 \section{Known Bugs and Features}

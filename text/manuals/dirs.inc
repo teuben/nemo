@@ -84,7 +84,7 @@ on these in the Programmers Guide (see \ref{ss:makefile}).
 \footnotesize\begin{verbatim}
   * src/                  THE SOURCE TREE
         kernel/            All of these needed for full NEMO implementation
-             core/          independent but otherwise essential utilities for IO
+             cores/         independent but otherwise essential utilities for IO
              io/            getparam & filestruct (user interface, database i/o)
              misc/          miscellaneous library utilities
              yapp/          YAPP plotting device drivers
@@ -92,7 +92,7 @@ on these in the Programmers Guide (see \ref{ss:makefile}).
              tab/           Table manipulation stuff
              fortran/       Fortran to C interface
         nbody/             Nbody
-             core/          essential utilities for Nbody
+             cores/         essential utilities for Nbody
              io/            I/O get_snap etc.
              init/          create models
              evolve/        Evolve (integrate) models
@@ -109,13 +109,13 @@ on these in the Programmers Guide (see \ref{ss:makefile}).
              trans/         Transformation utilities for snapshots
              reduc/         Analysis utilities
         image/             2- and 3D image analysis
-             core/
+             cores/
              io/            
              fits/
              misc/
         orbit/             Orbit analysis
              io/
-             core/
+             cores/
              potential/      Potentials
                 data/         repository of potential source code files
         tools/             Tools, independent and mostly (PD) borroware

@@ -1,4 +1,4 @@
-.TH CCDFITS 1NEMO "19 December 1999"
+.TH CCDFITS 1NEMO "17 April 2001"
 .SH NAME
 ccdfits \- write a fits file to disk
 .SH SYNOPSIS
@@ -36,6 +36,22 @@ Comment using the COMMENT keyword. [default: none]
 \fBblocking=\fIfactor\fP
 Blocking factor (multiplicity of blocksize in terms of 2880 bytes) used
 when writing the fits file. [default: \fB1\fP].
+.TP
+\fPrefmap=\fP
+Reference map or cube (a fits file) from which the WCS is inherited. 
+It has to match the output cube which is created.
+By default none is used. 
+.TP
+\fIrefpix=\fP
+Use these pixels (2 or 3 need to be given, depending if a map or cube
+is output) as reference pixel, instead of the one defined in the
+reference map. By default not used.
+.TP
+\fIradecvel=t|f\fP
+If no reference map used, this can be used to enforce a more reasonable
+axis descriptor (RA/DEC/VEL) for astronomical data packages which 
+cannot handle theory data too well (e.g. miriad, karma etc.).
+[Default: \fBf\fP].
 .SH EXAMPLES
 To convert an image to unsigned 16 bit integers use the following math:
 .nf
@@ -121,5 +137,5 @@ Peter Teuben
 11-oct-90	V2.2: added blocking= factor                     	PJT
 nov-92     	documented the FITFITS VMS procedure            	PJT
 dec-99     	some more documentation             	PJT
-
+apr-01		V3.0 reference map/pixel to inherit a WCS from  	PJT
 .fi

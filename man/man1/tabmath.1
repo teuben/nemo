@@ -1,4 +1,4 @@
-.TH TABMATH 1NEMO "13 June 1998"
+.TH TABMATH 1NEMO "19 April 2001"
 .SH NAME
 tabmath \- general table manipulator
 .SH SYNOPSIS
@@ -74,6 +74,11 @@ Integer initial seed in case random numbers have been used in the expression.
 If 0 is given, the time of the day will be used (see 
 \fIxrandom(3NEMO)\fP for other special seed values)
 to initialize the random number generator. [Default: \fB0\fP].
+.TP
+\fBcomments=f|t\fP
+Should comments be passed through to the output, or discarded. By default comments
+are ignored, but with comments=t they can be output unmodified also . Be careful
+with multiple input files that do not have the same amount of comment lines.
 .SH EXAMPLE
 To use \fItabmath\fP as a function calculator, uses stdin (-) and stdout (-)
 as filenames for input and output, e.g.
@@ -121,6 +126,9 @@ As an example to look at a running derivative between two columns,
 .fi
 .SH SEE ALSO
 colrm(1), expand(1), awk(1), cut(1), paste(1), tabplot(1NEMO), table(5NEMO)
+.PP
+jdb (http://www.isi.edu/~johnh/SOFTWARE/JDB/): 
+a package of commands for manipulating flat-ASCII databases from shell scripts.
 .SH AUTHOR
 Peter Teuben
 .SH BUGS
@@ -129,6 +137,9 @@ is space sensitive. Parsing allows more than one value,
 e.g. "1 _+ 1" is interpreted as two values, instead of the number 2.
 "1+1" would be interpreted as 2. Hence multiple columns (with probably the
 wrong value) would be created in the first example.
+.PP
+If comments are passed on, processing multiple input files which do not
+have matching comment lines will cause the output to have odd lines.
 .SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
@@ -141,4 +152,5 @@ xx-jun-88	V1.2 added stride keyword	PJT
 18-feb-92	V2.0 turbospeed parsing now done by fie()	PJT
 13-jun-98	V3.0 deleted stride/skip keywords, added selfie=	PJT
 24-feb-00	document improved	PJT/VS
+18-apr-01	V3.1 added comments=	PJT
 .fi
