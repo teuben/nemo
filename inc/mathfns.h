@@ -14,6 +14,10 @@
 
 #include <math.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*
  * System math functions.  Use double-precision versions in mixed or
  * double precision, and single-precisions versions otherwise.
@@ -169,5 +173,9 @@ void pickball(real *, int, real);
 void pickbox(real *, int, real);
 
 #endif /* !NEMO */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  /* ! _mathfns_h */
