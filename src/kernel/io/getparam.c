@@ -110,7 +110,7 @@
  * 16-jan-02       g  wrote findakey to fix various indexing shortcomings
  * 17-jan-02       h  fix minor indexing, fix khoros output
  * 18-jan-02       i  fix reading indexed from keyword (.def) files
- * 20-jan-02       j  putparam
+ * 20-jan-02       j  putparam can now create indexed keywords on the fly
 
   TODO:
       - what if there is no VERSION=
@@ -143,7 +143,7 @@
         getopt
  */
 
-#define VERSION_ID  "3.3i 18-jan-02 PJT"
+#define VERSION_ID  "3.3j 20-jan-02 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
