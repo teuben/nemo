@@ -1,0 +1,9 @@
+some other help on configure:
+	http://www.airs.com/ian/configure/
+- io_nemo library written by JCL in Marseille
+
+
+- add the self-exploding problem for treecodes (Salmon ...)
+  into NEMODAT
+
+- clean code so it can write > 2GB datafiles
