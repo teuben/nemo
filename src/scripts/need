@@ -1,0 +1,57 @@
+#! /bin/csh -f
+#
+#  Check if these programs are in $NEMOBIN, if not, exit with error
+#  code, unless the mknemo flag (-m) is given, in which case those
+#  programs are attempted installed
+#
+#	2-apr-97    sort list and remove duplicates
+
+if ($#argv == 0) goto usage
+
+set mknemo=0	# -m switch (default doesn't make them)
+set show=1	# -s switch (default is verbose)
+
+set err=0	# count errors
+set make=()	# list of uninstalled programs to make
+
+loop:
+    if ($#argv == 0) goto check
+    switch ($argv[1])
+    case -m*:
+        set mknemo=1
+        breaksw
+    case -s*:
+	set show=0
+	breaksw
+    default:
+        if (! -e $NEMOBIN/$argv[1]) then
+            if ($show == 1) echo "$argv[1] not present in NEMOBIN"
+	    set make=($make $argv[1])
+            @ err++
+        else
+        endif
+        breaksw
+    endsw
+    shift argv
+    goto loop
+
+check:
+  if ($mknemo == 0) goto done
+  foreach m (`echo $make|awk '{for(i=1;i<=NF;i++)printf("%s\n",$i)}'|sort|uniq`)
+    mknemo $m
+    if ($status == 0) @ err--
+  end
+
+done:
+  exit $err
+
+usage:
+    echo "Usage: $0 [-s] [-m] nemo-programs"
+    echo ""
+    echo " Check if nemo programs are present; return the amount not present"
+    echo " as the shell status. Normally the program is verbose, unless the"
+    echo " -s switch is used. If the -m switch is used, programs are also"
+    echo " attempted to install. If successfull, the returned error count"
+    echo " will be appropriately decreased."
+    echo ""
+    exit 0
