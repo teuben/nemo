@@ -1,0 +1,30 @@
+.TH CCDCLIP 1NEMO "22 March 1999"
+.SH NAME
+ccdclip \- clip an image
+.SH SYNOPSIS
+\fBccdclip\fP [parameter=value]
+.SH DESCRIPTION
+\fBccdclip\fP clips an image with a minimum and/or maximum value, as 
+supplied.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input image file     
+.TP 20
+\fBout=\fP
+Output file      
+.TP
+\fBmin=\fP
+Minimum value below which replace w/ clipvalue. Default: not clipped
+.TP 20
+\fBmax=\fP
+Maximum value below which replace w/ clipvalue.  Default: not clipped
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+22-Mar-99	V1.0 Created in a boring minute  	PJT
+.fi
