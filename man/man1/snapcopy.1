@@ -1,0 +1,65 @@
+.TH SNAPCOPY 1NEMO "26 September 1989"
+.SH NAME
+snapcopy - copy particles of snapshot subject to conditions
+.SH SYNOPSIS
+\fBsnapcopy in=\fIin_file\fP \fBout=\fIout_file\fP [parameter=value] .\|.\|.
+.SH DESCRIPTION
+\fIsnapcopy\fP copies an N-body system from \fBin\fP to \fBout\fP,
+subjecting the individual particles to certain conditions.
+.PP
+It should be noted that there are a variety of other programs
+which can perform copy functions under better circumstances.
+\fIsnapsort\fP will rearrange the order of the particles in the
+file, after which a number of them can be trimmed of
+using either \fIsnapmask\fP or \fIsnapsample\fP. The program
+\fIsnapplotedit\fP is an interactive editor, which allows 
+the user to edit snapshots using polygonic areas in 2D projections
+of 6D-phase space using the snapplot-interface. It requires a
+special version of \fIyapp(3NEMO)\fP, which may not be implemented
+on all systems.
+.SH PARAMETERS
+The following parameters are recognized:
+.TP 24
+\fBin=\fIin_file\fP
+input file, in \fIsnapshot\fP(5NEMO) format.  [Default: none.]
+.TP
+\fBout=\fIout_file\fP
+output file,  also \fIsnapshot\fP format.  [Default: none.]
+.TP
+\fBselect=\fIselect-string\fP
+expression which evaluates to an integer, only particles with
+non-zero expression will be copied to the output file. The ranking
+of the particles is copied to the \fBKey\fI array in the snapshot
+if not all particles were selected. The default is all particles will 
+be copied. [default: \fB1\fP].
+.TP
+\fBtimes=\fItime-ranges\fP
+Only snapshots with time values within \fItimes-ranges\fP, which is
+of the form \fBts[:te],...\fP, will be copied. [default: \fBall\fP].
+.TP
+\fBprecision=\fBdouble|single\fP
+Precision of variables to be stored. The default for snapshots is
+\fBdouble\fP (double precision), but many snapshot programs now
+recognize data in single precision format. [default: \fBdouble\fP].
+\fI *** This option is not implemented yet ***\fP
+.TP
+\fBkeep=\fIitems-list\fP
+List of items to keep in the snapshot. The list may contain
+any of \fBtime,mass,phase,phi,acc,aux\fP and \fBkey\fP.
+.SH "SEE ALSO"
+snapsort(1NEMO), snapmask(1NEMO), snapplotedit(5NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +3.0i
+~/src/pjt/nbody   	snapcopy.1
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+12-apr-87	V1.0: document created          	PJT
+26-sep-89	V1.1: debugged and exported to NEMO	PJT
+.fi
+
+
