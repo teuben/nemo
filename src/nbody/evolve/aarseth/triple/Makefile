@@ -8,9 +8,9 @@ FC = f77
 #SL=/star/lib
 #LIBP = -L$(SL) `pgplot_link`
 
-LIBP = -lpgplot -L/usr/X11/lib -lX11
+LIBP = -L$(PGPLOT_DIR) -lpgplot -L/usr/X11R6/lib -lX11
 
-LIBX = -L/usr/X11/lib -lX11
+LIBX = -L/usr/X11R6/lib -lX11
 
 SOURCE = triple.f binary.f block.f data.f derqp.f difsy1.f impact.f \
          peri.f transf.f wait.f
