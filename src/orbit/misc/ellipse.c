@@ -3,6 +3,8 @@
  *
  *   0.2  4-nov-02    original                  PJT
  *   0.3 23-apr-03    added phi_kin to try M51's oval           PJT
+ *   0.4 27-aug-03    mode to compute errors in bar length from stick formulae     PJT
+ *
  */
 
 #include <stdinc.h>
@@ -15,11 +17,13 @@ string defv[] = {
   "inc=???\n     Inclination of galaxy",
   "phi=\n        Angle between bar and disk in sky plane ",
   "theta=\n      Angle between bar and disk in galax plane",
+  "a=\n          Bar length (only used for stick formulae)",
   "dba=0.0\n     Error term in b/a, if determined",
   "dphi=0.0\n    Error term in phi, if determined",
+  "da=0.0\n      Error term in a, if determined (only for stick formulae)",
   "nsim=0\n      Number of monte carlo to perform to compute an error term",
   "seed=0\n      Seed for random number generator",
-  "VERSION=0.3\n 23-apr-03 PJT",
+  "VERSION=0.4\n 27-aug-03 PJT",
   NULL,
 };
 
@@ -67,11 +71,12 @@ nemo_main()
 {
   bool Qtheta = hasvalue("theta");
   bool Qphi = hasvalue("phi");
+  bool Qstick = hasvalue("a");
   bool Qerrba;
   int nsim = getiparam("nsim");
   int seed = init_xrandom(getparam("seed"));
-  double ba[MAXP], inc[MAXP], ang[MAXP], x,y,z;
-  double dba;
+  double ba[MAXP], inc[MAXP], ang[MAXP], x,y,z, a,a1, t1,t2,t3;
+  double dba, da;
   int nba, ninc, nang;
   int i,j,k;
   string fmt="%g";
@@ -79,37 +84,78 @@ nemo_main()
   nba = nemoinpd(getparam("ba"),ba,MAXP);
   ninc = nemoinpd(getparam("inc"),inc,MAXP);
 
-  if (Qtheta) {                                    /* theta given, so project it */
-    dprintf(0,"Projecting ellipse:\n");
-    dprintf(0,"b/a  inc  theta     b/a'  phi\n");
-    nang = nemoinpd(getparam("theta"),ang,MAXP);
-    for (i=0; i<nang; i++)
-      for (j=0; j<ninc; j++)
-	for (k=0; k<nba; k++) {
-	  project(ba[k],inc[j],ang[i],&x,&y);
-	  printf("%g %g %g    %g %g \n",ba[k],inc[j],ang[i],x,y);
-	}
-  } else if (Qphi) {                               /* phi given, so deproject */
-    dprintf(0,"De-projecting ellipse:\n");
-    dprintf(0,"b/a  inc  phi    b/a'  theta    phi_kin\n");
-    nang = nemoinpd(getparam("phi"),ang,MAXP);
-    for (i=0; i<nang; i++)
-      for (j=0; j<ninc; j++)
-	for (k=0; k<nba; k++) {
-	  if (nsim > 0) {
-	    double dba = getdparam("dba");
+  if (Qstick) {
+    /* 
+     * A = a*sqrt(cosp^2+sinp^2/cosi^2)
+     * a = A*sqrt(cost^2+sint^2*cosi^2)
+     */
+    if (hasvalue("da"))
+      da = getdparam("da");
+    else
+      da = 0.0;
+    if (Qphi) {
+      dprintf(0,"Projecting stick formulae ellipse:\n");
+      dprintf(0,"a   inc  theta     A  dA/A\n");
+      nang = nemoinpd(getparam("phi"),ang,MAXP);
+      a = getdparam("a");
+      for (i=0; i<nang; i++)
+	for (j=0; j<ninc; j++)
+	  for (k=0; k<nba; k++) {
+	    double cosi = cos(inc[j]*RPD);
+	    double sini = sin(inc[j]*RPD);
+	    double cosp = cos(ang[i]*RPD);
+	    double sinp = sin(ang[i]*RPD);
 	    double dphi = getdparam("dphi");
-	    int l;
-	    for (l=0; l<nsim; l++) {
-	      deproject(ba[k]+grandom(0.0,dba),inc[j],ang[i]+grandom(0.0,dphi),&x,&y,&z);
+	    x = sqrt(cosp*cosp+sinp*sinp/(cosi*cosi));
+	    a1 = a*x;
+	    t1 = cosp*sinp;
+	    t2 = cosp*sinp/(cosi*cosi);
+	    t3 = sini*sinp*sinp/(cosi*cosi*cosi);
+	    y = sqrt(t1*t1 + t2*t2 + t3*t3)*dphi*RPD/(x*x);
+	    if (da > 0) {
+	      z = sqrt(y*y + sqr(da/a));
+	    } else
+	      z = y;
+	    printf("%g %g %g    %g %g %g\n",a,inc[j],ang[i],a1,y,z);
+	  }
+    } else if (Qtheta) {
+      error("theta= not supported yet");
+    } else
+      error("Need phi= or theta=");
+  } else { 
+    
+    if (Qtheta) {                                    /* theta given, so project it */
+      dprintf(0,"Projecting ellipse:\n");
+      dprintf(0,"b/a  inc  theta     b/a'  phi\n");
+      nang = nemoinpd(getparam("theta"),ang,MAXP);
+      for (i=0; i<nang; i++)
+	for (j=0; j<ninc; j++)
+	  for (k=0; k<nba; k++) {
+	    project(ba[k],inc[j],ang[i],&x,&y);
+	    printf("%g %g %g    %g %g \n",ba[k],inc[j],ang[i],x,y);
+	  }
+    } else if (Qphi) {                               /* phi given, so deproject */
+      dprintf(0,"De-projecting ellipse:\n");
+      dprintf(0,"b/a  inc  phi    b/a'  theta    phi_kin\n");
+      nang = nemoinpd(getparam("phi"),ang,MAXP);
+      for (i=0; i<nang; i++)
+	for (j=0; j<ninc; j++)
+	  for (k=0; k<nba; k++) {
+	    if (nsim > 0) {
+	      double dba = getdparam("dba");
+	      double dphi = getdparam("dphi");
+	      int l;
+	      for (l=0; l<nsim; l++) {
+		deproject(ba[k]+grandom(0.0,dba),inc[j],ang[i]+grandom(0.0,dphi),&x,&y,&z);
+		printf("%g %g %g    %g %g %g\n",ba[k],inc[j],ang[i],x,y,z);
+	      }
+	    } else {
+	      deproject(ba[k],inc[j],ang[i],&x,&y,&z);
 	      printf("%g %g %g    %g %g %g\n",ba[k],inc[j],ang[i],x,y,z);
 	    }
-	  } else {
-	    deproject(ba[k],inc[j],ang[i],&x,&y,&z);
-	    printf("%g %g %g    %g %g %g\n",ba[k],inc[j],ang[i],x,y,z);
 	  }
-	}
-  } else
-    error("Need phi= or theta=");
+    } else
+      error("Need phi= or theta=");
+  }
 }
 
