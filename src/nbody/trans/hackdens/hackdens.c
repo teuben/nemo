@@ -6,6 +6,7 @@
  *     18-jul-92  V1.3   replaced many if(debug)printf(...) by dprintf(1,...)
  *			 Also nemo_main() and usage	PJT
  *	1-apr-01      a  compiler warning
+ *     24-may-02  V2.0   fixed for high-N system by using int_hack in load.c
  */
 
 #include "defs.h"
@@ -14,7 +15,7 @@
 
 #include <archaic/snapshot.h>
 
-string defv[] = {		/* DEFAULT INPUT PARAMETERS */
+string defv[] = {	
     "in=???\n			  input file with mass coordinates ",
     "out=\n			  output file with f.c. results ",
     "neib=6\n			  number of neibours to define local density ",
@@ -25,7 +26,7 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "options=phase,mass\n	  misc. control options {phase, mass}",
     "fcells=0.9\n		  cell/body allocation ratio ",
     "verbose=f\n		  flag to print # of particles finished ",
-    "VERSION=1.3a\n		  1-apr-01 PJT",
+    "VERSION=2.0\n		  24-may-02 PJT",
     NULL,
 };
 
