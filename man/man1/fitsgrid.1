@@ -1,0 +1,61 @@
+.TH FITSGRID 1NEMO "16 August 1993"
+.SH NAME
+fitsgrid \- convert fits binary table to regular fits image by gridding
+.SH SYNOPSIS
+\fBfitsgrid\fP [parameter=value] ...
+.SH DESCRIPTION
+\fBfitsgrid\fP grids a FITS binary table into a FITS image. Currently
+the program can only handle a DIRBE bintable, from the COBE
+database (released: august 1993). Future versions will be more
+flexible in selecting which columns to use for gridding, and 
+which for emission, much like \fIsnapgrid(1NEMO)\fP. A new package
+\fIfitstrans\fP, modeled after \fIbodytrans\fP. must be written for
+this. Work is in progress.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP\fIbintable\fP
+Input fits table file. The \fIfits(3NEMO)\fP package is used to read
+the binary table.
+No default.
+.TP 20
+\fBout=\fP\fIimage\fP
+Output fits image. The \fIfitsio(3NEMO)\fP package is used to write
+the image. 
+No default.
+.TP 20
+\fBlong=\fP\fIlmin,lmax\fP
+Range in (galactic) longitudes. Note that \fIlmin\fP is normally
+larger than \fIlmax\fP. Although longitudes are in the range 0..360,
+when the sign of \fIlmin\fP and \fIlmax\fP are
+different (i.e. the galactic center is in the middle), angles are
+reduced to -180..180. Note that \fIlmin,lmax\fP are the edges of
+the grid, and that the pixels coordinates are defined in the center
+of a pixel. Your FITS header for \fBCRPIX1\fP may hence look odd.
+[Default: \fB180,-180\fP].
+.TP 20
+\fBlat=\fP\fIlmin,lmax\fP
+Range in (galactic) latitudes    .
+[Default: \fB -15,15\fP].
+.TP 20
+\fBnlong=\fP
+Number of pixels in longitude   
+[Default: \fB360\fP].
+.TP 20
+\fBnlat=\fP
+Number of pixels in latitude   
+[Default: \fB30\fP].
+.TP 20
+\fBband=\fP
+DIRBE Band to process. Valid bands are numbered 1 through 10.
+[Default: \fB1\fP].
+.SH AUTHOR
+Peter Teuben
+.SH SEE ALSO
+scanfits(1NEMO), fitshead(1NEMO), fits(3NEMO), fitsio(3NEMO), fits(5NEMO)
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+13-Aug-93	V1.0 Created    	PJT
+.fi
