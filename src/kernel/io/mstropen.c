@@ -7,16 +7,17 @@
  *   21-may-2002  oops, template is a reserved word in C++ :-)                   pjt
  *   23-may-2002  added mode to mstr_open; though currently only write allowed
  *   14-sep-2002  added query what counter we're in                              pjt
+ *    2-jul-2004  g++ safer
  */
 
 #include <stdinc.h>
 
 mstr *mstr_init(string tmplate)
 {
-  mstr *mp = allocate(sizeof(mstr));
+  mstr *mp = (mstr *) allocate(sizeof(mstr));
 
-  mp->tmplate = allocate(strlen(tmplate)+1);
-  mp->filename = allocate(strlen(tmplate)+20);
+  mp->tmplate = (char *) allocate(strlen(tmplate)+1);
+  mp->filename = (char *) allocate(strlen(tmplate)+20);
   strcpy(mp->tmplate,tmplate);
   mp->status = 0;
   mp->count = 0;

@@ -8,6 +8,7 @@
  * V 2.1: Peter Teuben 13-oct-90  random access
  * V 2.2: 26-feb-94   ansi				PJT
  *	  14-mar-95   minor cleanup
+ *   3.1?  7-jan-03   g++ cleanup using proper function prototypes (not used yet)
  */
  
 #define RANDOM  /* allow random access */
@@ -67,6 +68,14 @@ typedef struct {
     string tl_typ;			/* type string (see filestruct.h)   */
     int    tl_len;			/* length of elements in bytes      */
 } typlen, *typlenptr;
+
+/* PROC_COPY's :
+ *    replace the old "proc" type unsafe stuff  (for g++)
+ */
+typedef void (*proc_copy)(void *, int, int, itemptr, stream);
+typedef void (*proc_copy_d)(double *, int, int, itemptr, stream);
+typedef void (*proc_copy_f)(float  *, int, int, itemptr, stream);
+
 
 /*
  * Function declarations.
@@ -85,7 +94,11 @@ local itemptr readitem ( stream str, itemptr first );
 local itemptr getitem  ( stream str );
 local itemptr gethdr   ( stream str );
 local void getdat      ( itemptr ipt, stream str );
+#if 1
 local proc copyfun     ( string srctyp, string destyp );
+#else
+local proc_copy copyfun     ( string srctyp, string destyp );
+#endif
 local void copydata    ( void *dat, int, int, itemptr ipt, stream str );
 local void copydata_f2d ( double *dat, int, int, itemptr ipt, stream str );
 local void copydata_d2f ( float  *dat, int, int, itemptr ipt, stream str );
