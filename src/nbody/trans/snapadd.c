@@ -7,13 +7,15 @@
  *	13-may-92  2.2 Allow concurrent adding; default zerocm=false now
  *	22-nov-92  2.3 options= to be able to also read phi,acc 
  *	mar-94 ansi
- *      20-nov-03  2.5 add sync option
+ *      20-nov-03  2.5 add sync option (but isn't doing much but warning)
+ *      23-nov-03  2.5a carry over Key if present (but only if all snapshots have it)
  *
  * Some limitations:
  *  snapshots should be not change in size, or else reallocate perhaps
  *      and change nbodytot for output
  *  if masses are on/off later on, this is not treated the best of possible 
  *      ways
+ *  same for keys
  *
  */
 
@@ -30,7 +32,7 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "options=\n         Forced output of: {acc, phi}",
     "sync=f\n           Force time sync, based on first file in list",
     "headline=\n	random verbiage",
-    "VERSION=2.4\n	20-nov-03 PJT",
+    "VERSION=2.5a\n	23-nov-03 PJT",
     NULL,
 };
 
@@ -46,7 +48,8 @@ real *masstot=NULL, *mass[MAXSNAP];
 real *phasetot=NULL, *phase[MAXSNAP];
 real *phitot=NULL, *phi[MAXSNAP];
 real *acctot=NULL, *acc[MAXSNAP];
-bool Qmass, Qzerocm, Qsync, needphi, needacc;
+int  *keytot=NULL, *key[MAXSNAP];
+bool Qmass, Qzerocm, Qsync, needphi, needacc, needkey;
 real tsnap;
 int nsnap;
 
@@ -76,6 +79,7 @@ setparams()
     options = getparam("options");
     needphi = scanopt(options,"phi");
     needacc = scanopt(options,"acc");
+    needkey = scanopt(options,"key");
 
     pp = burststring(getparam("in"),", \t");    /* tokenize in= */
     nsnap = xstrlen(pp,sizeof(string))-1;       /* find how many there are */
@@ -135,8 +139,7 @@ int readdata()
         } else
             n += nbody[i];
 
-
-    } /* for (i) */
+    } /* for (i) to find total nbody */
 
     if (n!=nbodytot) error("Snapshots of different size");
 
@@ -155,12 +158,18 @@ int readdata()
         acctot = (real *) allocate(sizeof(real) * NDIM * nbodytot);
     	dprintf(0,"Also writing accelerations\n");
     }
+    if (needkey) {
+        keytot = (int *) allocate(sizeof(int) * NDIM * nbodytot);
+    	dprintf(0,"Also writing keys\n");
+    }
+
     offset = 0;
     for (i=0; i<nsnap; i++) {           /* read in data */
         mass[i] = masstot + offset;
         phase[i] = phasetot + 2 * NDIM * offset;
         if(needphi) phi[i] = phitot + offset;
         if(needacc) acc[i] = acctot + NDIM * offset;
+        if(needkey) key[i] = keytot + offset;
         offset += nbody[i];
 
 	if (get_tag_ok(instr[i], MassTag)) {
@@ -176,6 +185,13 @@ int readdata()
         if (needacc)
             get_data_coerced(instr[i], AccelerationTag, RealType, acc[i],
 		             nbody[i], NDIM, 0);
+        if (needkey) {
+	  if (get_tag_ok(instr[i], KeyTag))
+	    get_data(instr[i], KeyTag, IntType, key[i], nbody[i], 0);
+	  else
+	    needkey = FALSE;
+	}
+		             
         get_tes(instr[i], ParticlesTag);
         get_tes(instr[i], SnapShotTag);
     }
@@ -223,6 +239,8 @@ writedata()
           put_data(outstr, PotentialTag, RealType, phitot, nbodytot,0);
         if(needacc)
           put_data(outstr, AccelerationTag, RealType, acctot, nbodytot,NDIM,0);
+        if(needkey)
+          put_data(outstr, KeyTag, IntType, keytot, nbodytot,0);
       put_tes(outstr, ParticlesTag);
     put_tes(outstr, SnapShotTag);
 }
