@@ -1,0 +1,68 @@
+.TH BODYTRANS 5NEMO "27 November 1990"
+.SH NAME
+bodytrans \- dataformat for body to scalar mapping functions
+.SH DESCRIPTION
+\fIbodytrans\fP files are binary, loadable, images (see also 
+\fIa.out(5)\fP)
+which are functions to represent a body to scalar
+transformation (see also \fIbodytrans(1NEMO)\fP). 
+They are generated on the fly (as a user runs a program)
+by the host C-compiler (see \fIcc(1)\fP). If an environment
+variable CFLAGS is present, it is also used in the compilation.
+.PP
+The dynamic object loader package (\fIloadobj(3NEMO)\fP) 
+provides a lower level interface to load the images in memory 
+return pointers to requested functions, but in the case of
+bodytrans, a higher level interface is available (\fIbodytrans(3NEMO)\fP).
+.PP
+The file \fB$NEMOOBJ/bodytrans/BTNAMES\fP contains a table with entries of
+non-standard \fIbodytrans\fP functions. The first column is the full expression
+used to return a scalar value, and the second column the file name under which
+this function is saved in that same directory. This file must be writable
+by NEMO users if the SAVE_OBJ function is turned on in \fBbodytrans(3NEMO)\fP.
+.SH LIST OF FUNCTIONS
+.sp 2
+.nf
+.ta \w'vtimes'u+6n +\w'vtimes.3c'u+10n
+\fIName\fP	\fIType\fP	\fIDescription\fP
+.ta \w'vtimes'u+8n +\w'vtimes.3c'u+8n
+.sp 5p
+0	int	constant, always returns 0 (or: FALSE)	
+1	int	constant, always returns 1 (or: TRUE)	
+i	int	returns \fBi\fP, the index of the particle (0..nbody-1)
+key	int	returns \fBkey\fP, auxilliary integer of a Body
+0	real	constant, always returns 0.0
+1	real	constant, always returns 1.0
+aux	real	returns \fBaux\fP, the auxilliary part of a Body
+ax	real	returns \fBax\fP, the X-accelleration
+ay	real	returns \fBay\fP, the Y-accelleration
+az	real	returns \fBaz\fP, the Z-accelleration
+etot	real	returns \fBphi + 0.5*(vx*vx + vy*vy + vz*vz)\fP, the total energy
+i	real	returns \fBi\fP, the index of a particle, as a real
+jtot	real	returns total angular momentum of a Body
+key	real	returns \fBkey\fP, as a real
+m	real	returns the \fBmass\fP of a Body
+phi	real	returns the potential, \fPphi\fP, of a Body
+r	real	returns the radius of a Body
+t	real	returns the radius \fBtime\fP of a Body (snapshot)
+v	real	returns velocity of a Body
+vr	real	returns radial velocity of a Body
+vt	real	returns absolute value of tangential velocity of a Body
+vx	real	returns \fBvx\fP, the X-velocity
+vy	real	returns \fBvy\fP, the Y-velocity
+vz	real	returns \fBvz\fP, the Z-velocity
+x	real	returns \fBx\fP, the X-position
+y	real	returns \fBy\fP, the Y-position
+z	real	returns \fBz\fP, the Z-position
+.fi
+.SH SEE ALSO 
+a.out(5), bodytrans(1NEMO), bodytrans(3NEMO), loadobj(3NEMO)
+.SH AUTHOR
+Josh Barnes, Peter Teuben
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+20-nov-89	Created    	PJT
+27-nov-90	Added table of functions	PJT
+.fi
+

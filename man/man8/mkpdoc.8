@@ -1,0 +1,30 @@
+.TH MKPDOC 8NEMO "21 June 1991"
+.SH NAME
+mkpdoc \- update doc files
+.SH SYNOPSIS
+.PP
+\fBmkpdoc \fIprogram-name(s)\fP 
+.SH DESCRIPTION
+\fImkpdoc\fP is a script that
+extracts the \fIdoc(5)\fP from (a) NEMO executable(s)
+Within the NEMO environment the following procedure works:
+.nf
+.B	program help=t > program.doc
+.fi
+for any NEMO \fBprogram\fP.
+The script then compares 
+\fBprogram.doc\fP with the same file present in the standard
+NEMODOC directory. If different, or not present, it is
+moved over, else skipped.
+.PP
+\fImkpdoc\fP is called by \fImknemo\fP, and normally does not have
+to be called during the installation procedure.
+.SH SEE ALSO
+mknemo(8NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH "UPDATE HISTORY"
+.nf
+.ta +1i +4i
+21-jun-91	V1.0: doc created       	PJT
+.fi
