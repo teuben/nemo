@@ -8,6 +8,7 @@
  *      14-jan-03       V1.4  add flip= for Eve Ostriker          pjt
  *       2-dec-03       V1.5  add dummy=                          pjt
  *      11-dec-04       V1.6  add wcs=
+ *      16-dec-04       V1.6a fixed up reorder=f for wcs          pjt
  */
 
 #include <stdinc.h>
@@ -17,7 +18,7 @@
 
 /* #include <hdf.h> */
 
-string defv[] = {		/* DEFAULT INPUT PARAMETERS */
+string defv[] = {	
     "in=???\n			Input file (SDS HDF file)",
     "out=\n			Optional output FITS file",
     "select=1\n			Select which SDS (1=first)",
@@ -25,7 +26,7 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "reorder=f\n                Reorder the axes (true means memory intensive)",
     "dummy=t\n                  Write dummy axes also ?",
     "wcs=f\n                    Write a WCS of some sort",
-    "VERSION=1.6\n		11-dec-03 PJT",
+    "VERSION=1.6a\n	        16-dec-03 PJT",
     NULL,
 };
 
@@ -45,7 +46,7 @@ void nemo_main()
   float *buff, *fp, fmin, fmax, ratio, **coord;
   float crpix[MAXRANK], crval[MAXRANK], cdelt[MAXRANK];
   char ctype[3][80];
-  int i, j, k, nsds, ret, size, rank, dimsizes[MAXRANK];
+  int i, j, k, nsds, ret, size, rank, new_rank, dimsizes[MAXRANK], idx[MAXRANK];
   int nx, ny, nz, num_type, select, axis, axlen, count = 0;
   FITS *ff;
   bool Qreorder = getbparam("reorder");
@@ -144,6 +145,7 @@ void nemo_main()
 	  }
 	}
 
+
         /*
          *  revert axes for output FITS file (HDF is native C, so by default
 	 *  it reverts the axis; our keyword reorder=t restores the C order)
@@ -153,6 +155,9 @@ void nemo_main()
     	outfile = getparam("out");
         dprintf(0,"%s: writing as FITS file\n",outfile);
 	if (Qreorder) {                    /* Reordering can be a lot of work */
+	  strcpy(ctype[0],"XREV");   /* by lack of anything better....*/
+	  strcpy(ctype[1],"YREV");
+	  strcpy(ctype[2],"ZREV");
 	  warning("if wcs=t and/or rank=3 be warned output may be flawed");
 	  buff = reorder_array(buff, size, rank, dimsizes);
 	  if (rank==2) {
@@ -165,7 +170,11 @@ void nemo_main()
             nx = dimsizes[0];
 	  } else
             error("(%d) Cannot deal with rank != 2 or 3",rank);
-	} else {                        /* this is actually the default */
+	} else {               /* this should be the default with minimal data shuffling */
+	  strcpy(ctype[0],"X");   /* by lack of anything better....*/
+	  strcpy(ctype[1],"Y");
+	  strcpy(ctype[2],"Z");
+  
 	  invert_array(rank,dimsizes);
 	  if (rank==2) {
      	    nz = 1;
@@ -175,33 +184,53 @@ void nemo_main()
 	    nz = dimsizes[2];
             ny = dimsizes[1];
             nx = dimsizes[0];
-	    if (!Qdummy && nx==1) {
-	      warning("trying to dummyfy NAXIS1");
-	      rank=2;
-	      nz = 1;
-	      ny = dimsizes[2];
-	      nx = dimsizes[1];
-	      dimsizes[0] = nx;
-	      dimsizes[1] = ny;
-	    }
 	  } else
-            error("(%d) Cannot deal with rank != 2 or 3",rank);
+            error("(%d) Cannot deal with rank != 2 or 3 yet",rank);
+	  /* note, reordering doesn't deal with dummyfying axes yet */
+	  for (i=0; i<rank; i++) {
+	    idx[i] = i;
+	  }
+	  if (!Qdummy) {
+	      new_rank = 0;
+	      for (i=0; i<rank; i++) {
+		if (dimsizes[i] > 1) new_rank++;
+		idx[i] = i;
+	      }
+	      if (new_rank != rank) {
+		warning("trying to dummyfy %d axes",rank-new_rank);
+		for (i=0; i<rank; i++) {         /* loop over all dimensions */
+		  if (dimsizes[idx[i]] == 1) {   /* shift the remaining ones to the left */
+		    dprintf(0,"Dummy axis %d\n",idx[i]);
+		    for (j=i+1; j<rank; j++) {
+		      idx[j-1] = idx[j];
+		    }
+		  }
+		}
+		for (i=0; i<new_rank; i++) {
+		  dimsizes[i] = dimsizes[idx[i]];
+		  dprintf(0,"dummyfied idx[%d] = %d\n",i,idx[i]);
+		}
+		for (i=new_rank; i<rank; i++)
+		  dimsizes[i] = 1;
+		rank = new_rank;
+	      }
+	  }
+	  nx = dimsizes[0];
+	  ny = dimsizes[1];
+	  nz = dimsizes[2];
 	}
+	dprintf(0,"FITOPEN:  %d x %d x %d ; with rank=%d\n",nx,ny,nz,rank);
 	ff = fitopen(outfile,"new",rank, dimsizes);
 
-	strcpy(ctype[0],"X");   /* by lack of anything better....*/
-	strcpy(ctype[1],"Y");
-	strcpy(ctype[2],"Z");
-  
-	for (i=0; i<rank; i++) {
+	for (i=0; i<rank; i++) {                         /* WCS header */
 	  sprintf(fitskey,"CRPIX%d",i+1);
-	  fitwrhdr(ff,fitskey,crpix[i]);
+	  fitwrhdr(ff,fitskey,crpix[idx[i]]);
 	  sprintf(fitskey,"CDELT%d",i+1);
-	  fitwrhdr(ff,fitskey,cdelt[i]);
+	  fitwrhdr(ff,fitskey,cdelt[idx[i]]);
 	  sprintf(fitskey,"CRVAL%d",i+1);
-	  fitwrhdr(ff,fitskey,crval[i]);
+	  fitwrhdr(ff,fitskey,crval[idx[i]]);
 	  sprintf(fitskey,"CTYPE%d",i+1);
-	  fitwrhda(ff,fitskey,ctype[i]);
+	  fitwrhda(ff,fitskey,ctype[idx[i]]);
 	}
 
         /*
@@ -240,7 +269,7 @@ void nemo_main()
 
         if (Qreorder) error("Cannot deal with reorder=t here");
     	outfile = getparam("out");
-        dprintf(0,"%s: writing axis %d as FITS file\n",outfile,axis);
+        dprintf(0,"%s: writing axis %d with length %d as FITS file\n",outfile,axis,axlen);
         rank = 2;
 	dimsizes[0] = axlen;
         dimsizes[1] = 1;
@@ -257,7 +286,7 @@ void nemo_main()
 	/* only write 1 line */
 	hitem = ask_history();
 	fitwra(ff,"HISTORY",*hitem);
-	fitwra(ff,"COMMENT","Note the data are coordinate values, no WSC defined");
+	fitwra(ff,"COMMENT","The data are coordinate values, no WSC defined");
 
 	if (fmin == fmax) {
 	    fmin = fmax = coord[axis-1][0];
