@@ -1,0 +1,102 @@
+.TH ORBINT 1NEMO "3 February 1998"
+.SH NAME
+orbint \- integrating single stellar orbit
+.SH SYNOPSIS
+.PP
+\fBorbint in=\fPorbit \fBout=\fPorbit [parameter=value]
+.SH DESCRIPTION
+\fBorbint\fP will integrate a stellar orbit. It is currently implemented
+with a few simple constant-timestepping algorithms with
+minimal support for diagnostics and restart options. For fancy
+integrators see for example
+the \fInewton0(1NEMO)\fP family of orbit integrators.
+.PP
+Non-rotating potentials are also supported, but only with the
+rotation axis defined along the Z-axis.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 20
+\fBin=\fIin-file\fP
+input file, in \fIorbit(5NEMO)\fP format [no default]
+.TP
+\fBout=\fIout-file\fP
+output file, will be in \fIorbit(5NEMO)\fP format [no default]
+.TP
+\fBnsteps=\fInumber\fP
+number of integration steps [default: \fB10\fP].
+.TP
+\fBdt=\fItime-step\fP
+time step (constant) to be taken [default: \fB0.1\fP].
+.TP
+\fBndiag=\fInumber\fP
+number of timesteps when diagnostics are checked and output
+to \fIstdout\fP.
+[default: \fB10\fP].
+.TP
+\fBnsave=\fInumber\fP
+number of timesteps when data must be save to output orbit-file.
+Note that the program must have run to completion before the
+actual saved data are saved to the specified output file.
+[default: \fB1\fP].
+.TP
+\fBpotname=\fIname\fP
+name of file of \fIpotential(5NEMO)\fP descriptor. If no name
+given, the potential name of the input orbit is used.
+[default: none].
+.TP
+\fBpotpars=\fIpar-list\fP
+List of parameters to the potential descriptor. The first
+parameter MUST be the pattern speed in the x-y plane.
+The remaining parameters are used by the
+\fI_inipotential()\fP routine in the potential descriptor.
+[default: none - use default from input orbit].
+.TP
+\fBpotfile=\fIname\fP
+name of an optional datafile to the potential descriptor.
+This might be an N-body snapshot or list of spline fit
+coefficients etc. [default: none - use default from input
+orbit].
+.TP
+\fBmode=\fIint_mode\fP
+Specify the integration mode. Any one of \fBeuler\fP,
+\fBleapfrog1\fP, \fBleapfrog2\fP or \fBrk4\fP can be given.
+[Default: \fBrk4\fP].
+.TP
+\fBeta=\fP
+Relative error allowed in energy conservation. Integration is
+terminated if the relative error (|dE/E|) is too large. By default
+not used.
+.SH "SEE ALSO"
+potential(5NEMO), newton0(1NEMO)
+.SH TIMING
+.nf
+.ta +2.0i
+With fpa on SUN 3/50 (~16Mhz) 1000 integration steps
+potential=harmonic	1"
+potential=plummer	1"
+potential=bar83  	3"
+potential=hackforce	10" (100 bodies, standard Plummer model)
+potential=hackforce	30" (500 bodies)
+potential=hackforce	50" (2000 bodies)
+potential=hackforce	80" (8000 bodies)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+src/orbit/misc  	orbint.c
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+xx-jul-87	V1.0: Created: simple Eulerian	PJT
+2-May-88	V2.2: many changes + doc; leapfrog implemented	PJT
+2-Jun-88	V2.3: new filestruct, code same   	PJT
+14-jun-91	V2.5: added variety of options, removed various bugs	PJT
+26-mar-92	V2.5b: documented that rot.potentials are OK -   	PJT
+24-may-92	V2.6: default potential now taken from orbit	PJT
+9-jun-92	V2.7: fixed rotating potential bug	PJT
+19-apr-95	V3.1: various, rk4 is now default integrator	PJT
+3-feb-98	V3.4: added eta= to control termination if errors bad 	PJT
+.fi

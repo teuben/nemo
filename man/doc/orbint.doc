@@ -1,0 +1,30 @@
+%N orbint
+%D testroutine to integrate stellar orbits
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man orbint' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	input filename (an orbit)  [???]
+%A out
+	output filename (an orbit)  [???]
+%A nsteps
+	number of steps [10]
+%A dt
+	timestep [0.1]
+%A ndiag
+	frequency of diagnostics output (0=none) [0]
+%A nsave
+	frequency of storing  [1]
+%A potname
+	potential name (default from orbit) []
+%A potpars
+	parameters of potential  []
+%A potfile
+	extra data-file for potential  []
+%A mode
+	integration method (euler,leapfrog,rk2,rk4) [rk4]
+%A eta
+	if used, stop if abs(de/e) > eta []
+%A VERSION
+	3-feb-98 PJT [3.4]
