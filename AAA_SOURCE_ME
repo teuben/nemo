@@ -1,5 +1,6 @@
 
-# Source this file to install and build NEMO from scratch.
+# Source this file to install and build NEMO from scratch with 'manybody'
+#
 #
 # See also approach in other 'manybody' modules, e.g. starlab, partiview
 #
@@ -8,6 +9,8 @@
 #
 # 25-jul-01  Peter Teuben		created
 # 18-jan-02  PJT                added optional PGPLOT if detected
+#  3-dec-02  PJT                added vogl stuff
+#  1-mar-03  PJT                added make_html 
 
 rm -f install.log >& /dev/null
 touch install.log
@@ -56,6 +59,11 @@ if ($status) then
     @ stat++
 endif
 rehash
+echo '++++++++++++++++++++++++++++++++++++++++' >>& install.log
+
+echo Building html files for all the manual pages
+(cd man; ./make_html)  >>& install.log
+
 echo '++++++++++++++++++++++++++++++++++++++++' >>& install.log
 
 echo Building some sample exectuables by running testsuite:
