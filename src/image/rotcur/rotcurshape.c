@@ -64,17 +64,17 @@ string defv[] = {
     "nsigma=-1\n     Iterate once by rejecting points more than nsigma resid",
     "imagemode=t\n   Input image mode? (false means ascii table)",
     "rotcurmode=f\n  Full velocity field, or rotcur (r,v) fit only",
-    "load=\n         Load rotcur object file",
-    "rotcur1=\n      Rotation curve name, parameters and set of free(1)/fixed(0) values",
-    "rotcur2=\n      Rotation curve name, parameters and set of free(1)/fixed(0) values",
-    "rotcur3=\n      Rotation curve name, parameters and set of free(1)/fixed(0) values",
-    "rotcur4=\n      Rotation curve name, parameters and set of free(1)/fixed(0) values",
-    "rotcur5=\n      Rotation curve name, parameters and set of free(1)/fixed(0) values",
-    "VERSION=0.9\n   21-jul-02 PJT",
+    "load=\n         dynamically loadobject file with rotcur_<NAME>",
+    "rotcur1=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
+    "rotcur2=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
+    "rotcur3=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
+    "rotcur4=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
+    "rotcur5=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
+    "VERSION=0.9b\n  22-jul-02 PJT",
     NULL,
 };
 
-string usage="nonlinear fit of kinematical parameters to a disk velocity field";
+string usage="nonlinear fit of kinematical parameters to the velocity field of a coplanar disk";
 
 
 
@@ -188,7 +188,7 @@ real rotcur_poly(real r, int np, real *p, real *d)
 }
 
 
-real rotcur_core1(real r, int n, real *p, real *d)
+real rotcur_core1(real r, int n, real *p, real *d)     /* power, with c=1 */
 {
   real x = r / p[1];
   d[0] = x/(1+x);
@@ -196,16 +196,61 @@ real rotcur_core1(real r, int n, real *p, real *d)
   return p[0] * d[0];
 }
 
-real rotcur_core2(real r, int n, real *p, real *d)
+real rotcur_core2(real r, int n, real *p, real *d)     /* power, with c=2 */
 {
   real x = r/p[1];
   real y1 = 1+x*x;
   real y2 = sqrt(y1);
   real v = x / y2;
 
-  d[0] = x;
-  d[1] = -x*p[0]/(y1*y2*p[1]);
+  d[0] = v;
+  d[1] = -p[0]*v/(y1*p[1]);
   return p[0] * v;
+}
+
+real rotcur_core(real r, int np, real *p, real *d)
+{
+  real x = r/p[1];
+  real c = p[2];
+  real q1 = pow(x,c);
+  real q = 1+q1;
+  real lnx = log(x);
+  real lnq = log(q);
+  real y = pow(q,1/c);
+  real v;
+
+  d[0] = x / y;
+  d[1] = -p[0]*d[0]/(p[1]*q);
+  /* CForm[D[(1+x^c)^(-1/c),c]]  */
+#if 0
+  d[2] = (-((pow(x,c)*log(x))/(c*(1 + pow(x,c)))) + 
+	  log(1 + pow(x,c))/pow(c,2))/pow(1 + pow(x,c),1/c);     /* 2.54" */
+  d[2] = (-((q1*lnx)/(c*(1 + pow(x,c)))) + 
+	  log(1 + pow(x,c))/pow(c,2))/pow(1 + pow(x,c),1/c);
+  d[2] = (-((q1*lnx)/(c*(1 + q1))) + 
+	  log(1 + pow(x,c))/pow(c,2))/pow(1 + pow(x,c),1/c);
+  d[2] = (-((q1*lnx)/(c*(1 + q1))) + 
+	  log(1 + q1)/pow(c,2))/pow(1 + pow(x,c),1/c);
+  d[2] = (-((q1*lnx)/(c*(1 + q1))) + 
+	  log(1 + q1)/pow(c,2))/pow(1 + q1,1/c);
+  d[2] = (-((q1*lnx)/(c*q)) + log(q)/pow(c,2))/pow(1 + q1,1/c);
+  d[2] = (-((q1*lnx)/(c*q)) + lnq/(c*c))/pow(q,1/c);
+
+  d[2] = (-((q1*lnx)/q) + lnq/c)/(y*c);       /* not good  1.35" */
+  d[2] = (-((q1*lnx)/(c*q)) + lnq/(c*c))/y;   /* better    1.15" */
+
+#else
+  d[2] = (-((q1*lnx)/(c*q)) + lnq/(c*c))/y;
+#endif
+  d[2] *= p[0] * x;
+
+	   /* 
+	      P1:  98.0657 1.09572
+	      P2:  20.5109 0.625982
+	      P3:  2.24942 0.172386
+	   */
+
+  return p[0] * d[0];
 }
 
 real rotcur_plummer(real r, int np, real *p, real *d)
@@ -380,6 +425,16 @@ rotcurparse()
 	mmsk[nmod][0] = natoi(sp[3]);
 	mmsk[nmod][1] = natoi(sp[4]);
 	rcfn[nmod] = rotcur_core2;
+      } else if (streq(sp[0],"core")) {
+	if (nsp != 6) error("core needs 3 numbers");
+	npar[nmod] = 3;
+	mpar[nmod][0] = natof(sp[1]);
+	mpar[nmod][1] = natof(sp[2]);
+	mpar[nmod][2] = natof(sp[3]);
+	mmsk[nmod][0] = natoi(sp[4]);
+	mmsk[nmod][1] = natoi(sp[5]);
+	mmsk[nmod][2] = natoi(sp[6]);
+	rcfn[nmod] = rotcur_core;
       } else if (streq(sp[0],"poly")) {
 	if (nsp % 2) error("poly really needs an even number of parameters");
 	npar[nmod] = nsp/2;
@@ -450,7 +505,7 @@ stream  lunpri;       /* LUN for print output */
 {
     char *input;
     string *inputs;
-    int iret, i, j, n, nfixed, fixed, ninputs;
+    int iret, i, j, k, n, nfixed, fixed, ninputs;
     real center[2], toarcsec, tokms;
     stream velstr, denstr;
     real *coldat[3];
@@ -656,9 +711,9 @@ stream  lunpri;       /* LUN for print output */
       dprintf(1,"%d ",mask[i]);
     dprintf(1,"\n");
 
-    for (i=0; i<nmod; i++) {
-      /* count fixed/free for models -- fix this */
-      mask[i+GPARAM] = 1;
+    for (i=0, k=0; i<nmod; i++) {
+      for (j=0; j<npar[i]; j++, k++)
+	mask[k+GPARAM] = mmsk[i][j];
     }
 
     for (nfixed=0,i=0; i<nparams; i++)      /* count number of fixed par's */
@@ -687,7 +742,7 @@ stream  lunpri;       /* LUN for print output */
         if (lunpri) fprintf(lunpri," inc");
     }
     for (i=GPARAM; i<nparams; i++) {
-      if (mask[i]) {
+      if (mask[i]==1) {
 	printf("       - P%d \n",i-GPARAM+1);
 	if (lunpri) fprintf(lunpri," P%d",i-GPARAM+1);
       }
@@ -1105,7 +1160,7 @@ real  *q;             /* output sigma */
 	*n = 0;                        /* continue here ??? */
         return;
       } else {
-        dprintf(1,"getdat: P=%g %g %g %g %g %g\n",
+        dprintf(1,"getdat: GEOM-Par=%g %g %g %g %g RC-Par=%g\n",
 		p[0],p[1],p[2],p[3],p[4],p[5]);
         dprintf(1,"getdat: box [%d %d %d %d]\n",llo,mlo,lhi,mhi);
         dprintf(1,"getdat: box [%g %g %g %g]\n",
