@@ -1,13 +1,57 @@
-MICRO-NEMO is the most basic set of kernel functions needed to access the NEMO  I/O
-library, without the need to use the whole baggage of user interface, yapp, etc.etc.
+MICRO-NEMO is the most basic set of kernel functions needed to access
+the NEMO  I/O library, without the need to use the whole baggage of user
+interface, yapp, etc.etc.
 
-This worked by copying a small (13) set of files  from NEMO/src/kernel/{io,cores,misc}
-and a number of header files from $NEMOINC and sadly now $NEMOLIB into this directory.
+This worked by copying a small (13) set of files  from
+NEMO/src/kernel/{io,cores,misc} and a number of header files from
+$NEMOINC and one configuration dependant file from $NEMOLIB into 
+this directory.
 
-The makefile in this directory can be used standalone to build a libunemo.
+The makefile in this directory can then be used standalone to build a
+libunemo.
 
-Exception is getparam_fake.c, which defines two dummy functions from getparam.c,
-namely 
+Exception is getparam_fake.c, which defines two dummy functions from
+getparam.c, namely 
 	string getparam(string);
 	void finiparam(void);
 
+Two example I/O routines are given in simple_read.c and simple_write.c
+
+Makefile		local Makefile, to compile libunemo.a
+README			this file
+getparam_fake.c		use this instead of getparam.o
+simple_write.c		example usage to write a snapshot
+simple_read.c		example usage to read a snapshot
+
+
+From the $NEMO/src/ and $NEMO/inc tree the following files need to
+be copied (the Makefile can do this by:
+		make cp
+and you can difference a current version with the official NEMO
+version with
+		make diff
+
+allocate.c
+bswap.c
+config.h		$NEMOLIB (this is the tricky one!!!)
+convert.c
+date_id.c
+dprintf.c
+error.c
+extstring.c
+extstring.h		$NEMOINC
+filefn.c
+filefn.h		$NEMOINC
+filesecret.c
+filesecret.h		$NEMO/src/kernel/io
+filestruct.h		$NEMOINC
+getparam.h		$NEMOINC
+history.c
+history.h		$NEMOINC
+options.h		$NEMOINC
+snapshot.h		$NEMOINC/snapshot
+stdinc.h		$NEMOINC
+strlib.c
+strlib.h		$NEMOINC
+stropen.c
+version.h		$NEMOINC
