@@ -58,7 +58,7 @@ ERROR!  Sorry, NEMO now requires an ANSI C compiler
 
 
 /*
- * Always include stdio.h and stdlib.h
+ * Always include stdio.h and stdlib.h and ....
  */
 
 #include <stdio.h>
@@ -314,12 +314,14 @@ typedef real (*rproc)();
 #endif
 #define   MAX(x,y)     (((x) > (y)) ? (x) : (y))
 #define   SGN(x)       (((x) < 0) ? (-1) : ((x) > 0) ? 1 : 0)
+#if 0
+/* nrutil.h defines SIGN(a,b) */
 #define   SIGN(x)      (((x) < 0) ? (-1) : ((x) > 0) ? 1 : 0)
+#endif
 #define   RND(x,y)     ((y)*(((x)+(y)-1)/(y)))
 #define   ROUNDUP(x,y) ((y)*(((x)+(y)-1)/(y)))
 #define   RNG(x,l,h)   (((x) > (h)) ? (h) : (((x) < (l)) ? (l) : (x)))
 #define   RANGE(x,l,h) (((x) > (h)) ? (h) : (((x) < (l)) ? (l) : (x)))
-
 
 
 /*
