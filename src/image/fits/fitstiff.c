@@ -9,6 +9,8 @@
  *			 0.2  and added compress=t
  *                            and enforce FITS to be read contiguously
  *			      if not compressed
+ *	 5-oct-95       0.3     ??
+ *	18-jul-01	added usage line
  * Note: the compres=f may now have a bug due to random access of TIFF ???
  */
 
@@ -28,9 +30,11 @@ string defv[] = {
     "lut=\n             Associated colormap; greyscale if none",
     "invert=f\n		Invert the colortable?",
     "compress=t\n	LZW Compression turned on?",
-    "VERSION=0.3\n	5-oct-95 PJT",
+    "VERSION=0.3a\n	19-jul-01 PJT",
     NULL,
 };
+
+string usage="convert fits files to tiff files";
 
 #define MAXPLANES 512
 #define MAXCOLOR  256

@@ -100,3 +100,8 @@ fitsgids: fitsgids.c look_nemo.c
 sdsfits: sdsfits.c 
 	$(CC) $(CFLAGS) -o sdsfits sdsfits.c $(HDFLIB) $(NEMO_LIBS) $(EL)
 
+
+fitstiff: fitstiff.c 
+	$(CC) $(CFLAGS) -o fitstiff fitstiff.c \
+		 $(NEMO_LIBS) $(EL) -ltiff
+
