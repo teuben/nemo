@@ -9,6 +9,7 @@
  *      17-jul-03    0.7 make it compile under nemo 3.1.1
  *      29              a  : patch, since scratch files appear to not work
  *       2-aug-03       b  : patch back, stropen() has been fixed
+ *	20-may-04       c  : declare local variables for times()
  */
 
 /* this code will only work in 3D */
@@ -56,7 +57,7 @@ string defv[] = {
     "contour=\n         Optional Output image file with chi-squared",
     "iter=0\n           number of more iterations after best on matrix",
     "times=all\n        Times selected from snapshot models",
-    "VERSION=0.7b\n     2-aug-03 PJT",
+    "VERSION=0.7c\n     20-may-04 PJT",
     NULL,
 };
 
@@ -65,38 +66,43 @@ string usage = "fit snapshots to some model";
 /* -------------------------------------------------------------------------- */
 
     /* Model: Snapshot */
-stream instr, outstr=NULL;   /* file pointer to input and output */
-body *btab=NULL;             /* snapshot */
-cube *mtab=NULL;	     /* to be fitted coordinates out of the snapshot */
-int nmodel=0;		     /* number of model bodies */
-real tsnap;
-string times;
-rproc weight;
+local stream instr, outstr=NULL;   /* file pointer to input and output */
+local body *btab=NULL;             /* snapshot */
+local cube *mtab=NULL;	     /* to be fitted coordinates out of the snapshot */
+local int nmodel=0;		     /* number of model bodies */
+local real tsnap;
+local string times;
+local rproc weight;
 
     /* Data: A special 3D {x,y,v} body */
-cube *dtab=NULL;	/* observed data */
-int ndata=0;		/* number of observed data */
+local cube *dtab=NULL;	/* observed data */
+local int ndata=0;		/* number of observed data */
 
     /* placeholders for array of angles to test */
-real theta1[MAXANG], theta2[MAXANG];
-int ntheta1, ntheta2;
+local real theta1[MAXANG], theta2[MAXANG];
+local int ntheta1, ntheta2;
 
-stream constr=NULL;   /* images of chi-squared country */
+local stream constr=NULL;   /* images of chi-squared country */
 
-int my_debug=2;
-bool Qsimul;
-real rscale, vscale;
-int maxiter=0;
+local int my_debug=2;
+local bool Qsimul;
+local real rscale, vscale;
+local int maxiter=0;
 
 
-    
+/* forward declarations */
 
-   /* local forward declarations */
-void setparams(), read_data(), snap_fit();
-void printvec(), yrotate(), zrotate();
-real *mk_coords();
-int read_model();
- 
+void setparams(void);
+int read_model(void);
+void read_data(void);
+real *mk_coords(int n, real start, real incr);
+void printvec(string name, vector vec);
+void snap_fit(void);
+int write_snapshot(stream outstr, int nbody, body *btab, real t1, real t2, real rscale, real vscale);
+void yrotate(matrix mat, real theta);
+void zrotate(matrix mat, real theta);
+int eigenframe(vector frame[], matrix mat);
+int invert(vector frame[]);
 
 /* -------------------------------------------------------------------------- */
 
