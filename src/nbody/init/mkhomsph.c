@@ -8,6 +8,7 @@
  *	     23-mar-97  cleanup protos          pjt
  *           20-may-97  added vmax, power for rho=r^{-p}  PJT
  *            9-sep-01  gsl/xrandom
+ *           21-mar-04  forgotten initialization  pjt
  */
 
 
@@ -15,6 +16,7 @@
 #include <getparam.h>
 #include <vectmath.h>
 #include <filestruct.h>
+#include <history.h>
 
 #include <snapshot/snapshot.h>
 #include <snapshot/body.h>
@@ -31,7 +33,7 @@ string defv[] = {	/* DEFAULT INPUT PARAMETERS */
     "seed=0\n       Random number seed",
     "zerocm=t\n     Center c.o.m. ?",
     "headline=\n    Text headline for output",
-    "VERSION=1.4\n  20-may-97",
+    "VERSION=1.4a\n 21-mar-04",
     NULL,
 };
 
@@ -46,7 +48,12 @@ local int nbody;
 
 extern double xrandom(double,double), grandom(double,double);
 
-nemo_main()
+void writegalaxy(string name, string headline);
+void mksphere(void);
+void centersnap(body *btab, int nb);
+
+
+void nemo_main(void)
 {
     int seed;
 
@@ -71,9 +78,7 @@ nemo_main()
  * WRITEGALAXY: write galaxy model to output.
  */
 
-writegalaxy(name, headline)
-string name;
-string headline;
+void writegalaxy(string name, string headline)
 {
     stream outstr;
     real tsnap = 0.0;
@@ -91,11 +96,11 @@ string headline;
  * MKSPHERE: homogeneous sphere
  */
 
-mksphere()
+void mksphere(void)
 {
     Body *bp;
-    real rmin3, rmax3, r_i, v_i, theta_i, phi_i, mass_i, sigma;
-    int i, ndim=NDIM;
+    real rmin3, rmax3, r_i, v_i, theta_i, phi_i, mass_i, sigma = 0.0;
+    int i;
 
     btab = (Body *) allocate(nbody * sizeof(Body));
 #ifdef OLD
@@ -141,9 +146,7 @@ mksphere()
         centersnap(btab,nbody);
 }
 
-centersnap(btab, nb)
-Body *btab;
-int nb;
+void centersnap(Body *btab, int nb)
 {
     real mtot;
     vector cmphase[2], tmp;
