@@ -49,6 +49,24 @@ obtained from mapheader].
 \fByrange=\fIvalues\fP
 Range in y to plot. See \fBxrange\fP.
 \fIWarning: BUG, don't used\fP
+.TP
+\fIheadline=\fP
+optional header above plot  [Default: not used]
+.TP
+\fItab=\fP
+Output table of contour segments. Default not used.
+.TP
+\fIformat=\fP
+Format for above table [Default: %g]
+.TP
+\fIcmode=\fP
+Contour mode (0=orginal 1=pgplot) [Default: 0]
+.TP
+\fIblankval=\fP
+if used, use this as blankval. Default not used.
+.TP
+\fIltype=\fP
+width and type for contour. Default: 1,1
 .SH EXAMPLES
 .nf
 .ta +3i
@@ -89,4 +107,5 @@ Peter Teuben
  3-apr-91	V2.2: documented that big bug	PJT
 13-jan-92	V2.3: added greyscale as plotlabel	PJT
 29-mar-97	fixed outdated doc	PJT
+20-feb-02	2.8: added ltype; also documented new parameters	PJT
 .fi

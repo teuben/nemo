@@ -1,0 +1,49 @@
+.TH POTQ 1NEMO "23 February 2002"
+.SH NAME
+potq \- query a NEMO potential in the XY plane
+.SH SYNOPSIS
+\fBpotq\fP [parameter=value]
+.SH DESCRIPTION
+\fBpotq\fP queries a potential and forcefield in the XY plane and reports 
+a number of parameter.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBpotname=\fP
+Name of potential. No default.
+.TP
+\fBpotpars=\fP
+Parameters for potential (1st one is pattern speed)
+.TP
+\fBpotfile=\fP
+Any optional data file associated with potential []
+.TP
+\fBr=\fP
+Radii to sample to find Qt_max [0:2:0.1] 
+.TP
+\fBt=\fP
+Time to test potential at, if relevant [0.0]
+.TP
+\fBomega=\fP
+Use this instead of any returned pattern speed. Not used.
+.TP
+\fBformat=\fP
+Format used to print numbers [%g]  
+Not used.
+.TP
+\fBniter=\fP
+#iterations [10]      
+.TP
+\fBeps=\fP
+#or minimal change [0.001]    
+.SH EXAMPLES
+.SH SEE ALSO
+.SH FILES
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+23-Feb-02	V1.0 Created	PJT
+.fi
