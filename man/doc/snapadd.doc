@@ -1,0 +1,18 @@
+%N snapadd
+%D add N-body systems on top of each other.
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man snapadd' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	input file names (separated by commas) [???]
+%A out
+	output file name [???]
+%A zerocm
+	zero new center of mass [false]
+%A options
+	Forced output of: {acc, phi} []
+%A headline
+	random verbiage []
+%A VERSION
+	8-mar-94 PJT [2.3a]
