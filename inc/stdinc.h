@@ -231,7 +231,7 @@ typedef float real, *realptr;
 #define Precision "SINGLEPREC"
 #endif
 
-/*
+/* NOTE: to be deprecated
  * The following conveniences cannot be used in full ANSI C or C++:
  * one needs a new type for each kind of function pointer, i.e.
  * not only dependant on the return type, but also on the arguments.
@@ -247,6 +247,8 @@ typedef void (*proc)();
 typedef bool (*bproc)();	/* problems on sun3 ??? aix too */
 typedef int (*iproc)();
 typedef real (*rproc)();
+
+typedef int(*qsort_proc)(const void *, const void *);
 
 /*
  * LOCAL: declare something to be local to a file.
