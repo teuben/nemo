@@ -297,6 +297,9 @@ else
   AC_MSG_WARN(no FORTRAN compiler)
 fi
 
+dnl Fortran/C linkeage : defines F77_CMAIN_FFLAGS
+ACX_F77_CMAIN_FFLAGS([],[AC_MSG_WARN([problems fortran-c interface])])
+
 dnl Solaris gcc doesn't know -rdynamics, linux needs it for dlopen()
 if test "$GCC" = "yes"; then
   NEMO_CFLAGS="$NEMO_CFLAGS -rdynamic -fwritable-strings $gcov_flag"
