@@ -22,6 +22,8 @@ potlist:
 	potlist plummer   x=1 dr=0.001 ; nemo.coverage potlist.c
 	potlist isochrone x=1 dr=0.001 ; nemo.coverage potlist.c
 	potlist athan92   x=0.00001	 ; nemo.coverage potlist.c
+	# New style accelleration
+	potlist Plummer 0,1,1
 
 rotcurves:
 	rotcurves isochrone 0,1,1 - halo 0,1,1 - plummer 0,0.15,0.05 \
