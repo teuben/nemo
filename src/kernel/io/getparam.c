@@ -161,7 +161,7 @@
 	gengetopt http://www.gnu.org/software/gengetopt/gengetopt.html
  */
 
-#define GETPARAM_VERSION_ID  "3.4f 15-oct-03 PJT"
+#define GETPARAM_VERSION_ID  "3.4g 24-oct-03 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -371,6 +371,7 @@ local void local_exit(int);
 extern int nemo_file_size(string);
 extern void app_history(string);
 extern string date_id(void);
+extern double cputime(void);
 
 /* Mask values for help levels */
 
@@ -2224,8 +2225,7 @@ local void readkeys(string mesg, bool first) {}
 local void review()
 {
         char cmd[80], *key, *cp, prompt;
-        int  i, pid, getpid();
-        double cputime();
+        int  i, pid;
 
         if (!initparam_done) {
             fprintf(stderr,"Cannot interrupt yet, let initparam() finish\n");
@@ -2363,7 +2363,7 @@ local int check_syskey(char *cmd,char *syskey,int *value)
 
 local void review_help(char *cmd)
 {
-    char command[MAXBUF], *pager, *getenv();
+    char command[MAXBUF], *pager;
     
     pager = getenv("PAGER");
 
