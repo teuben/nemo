@@ -71,7 +71,8 @@ static GalaxyPotential *POT = 0;
 void inipotential(int *npar, double *par, char *file) {
   double omega = (*npar>0)? par[0] : 0.;
   if (*npar>1) warning("Skipped potential parameters for GalPot beyond 1");
-  if (file==0) error  ("Need potfile to initialize GalPot");
+  if (file==0) 
+    error("Need potfile to initialize GalPot, please consult $NEMODAT/GalPot");
   ifstream from(file);
   if (!from)   error  ("Cannot open potfile in initialization of GalPot");
   if(POT) delete POT;
