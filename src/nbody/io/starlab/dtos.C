@@ -54,16 +54,16 @@ void nemo_main(void)
   int bits, first = 1;
   char *fname = getparam("out");
   char *hline = getparam("headline");
-  string options = getparam("options");
+  char *options = getparam("options");
     
   check_real(sizeof(real));   /* make sure real==double */
-#if 0
+#if 1
   bits = TimeBit | MassBit | PhaseSpaceBit;
 #endif
-  if (scanopt(options,"aux") bits |= AuxBit;
-  if (scanopt(options,"phi") bits |= PotentialBit;
-  if (scanopt(options,"acc") bits |= AccelerationBit;
-  if (scanopt(options,"key") bits |= KeyBit;
+  if (scanopt(options,"aux")) bits |= AuxBit;
+  if (scanopt(options,"phi")) bits |= PotentialBit;
+  if (scanopt(options,"acc")) bits |= AccelerationBit;
+  if (scanopt(options,"key")) bits |= KeyBit;
 
   while ((proot = getpdyn(cin)) != NULL) {
     

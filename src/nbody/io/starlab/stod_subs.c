@@ -71,6 +71,7 @@ void put_snap_c(string fname, string headline, int nbody, real time,
     real *mptr, *pptr, *vptr, *ptr, *phase;
     static stream instr;
     static int n=0;
+    int cs = CSCode(Cartesian, NDIM, 2);
 
     if (n == 0) {
 	dprintf(1,"Opening %s to write\n",fname);
@@ -91,6 +92,7 @@ void put_snap_c(string fname, string headline, int nbody, real time,
 
 
     put_set(instr, ParticlesTag);
+    put_data(instr, CoordSystemTag, IntType, &cs, 0);
     put_data(instr, MassTag, RealType, mass, nbody, 0);
 
     ptr = phase = (real *) allocate(2 * NDIM * nbody * sizeof(real));
