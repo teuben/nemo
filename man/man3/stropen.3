@@ -1,0 +1,79 @@
+.TH STROPEN 3NEMO "22 March 2000"
+.SH NAME
+stropen, strclose, strdelete, strname, strseek \- file-stream enhanced utilities
+.SH SYNOPSIS
+.nf
+.B #include <stdinc.h>
+.PP
+.B stream stropen(filename,mode)
+.B void strclose(str)
+.B void strdelete(str,scratch)
+.B string strname(str)
+.B bool strseek(str)
+.PP
+.B stream str;
+.B stream str;
+.B bool scratch;
+.SH DESCRIPTION
+\fIstropen()\fP opens a file by filename and associates a stream
+with it, much like \fIfopen(3)\fP does. It has a few additional
+features:
+.PP
+(1) existing files cannot be opened for writing unless 
+\fBmode=w!\fP (\fBmode=a!\fP is also permitted),
+.PP
+(2) names of form \fB-\fP map to \fIstdin/stdout\fP, depending on mode,
+.PP
+(3) names of the form \fB-num\fP for some small num set up a
+stream to read/write file descriptor \fBnum\fP.
+.PP
+(4) With \fBmode=s\fP a file is opened in write-scratch mode. Whenever
+\fIstrclose\fP is called, the file is also deleted. When the \fBfilename\fP
+does not start with a "/", a unique temporary filename is automatically
+created.
+.PP
+(5) Output file with the name "\fB.\fP" (dot) are equivalent to
+a bit sink (\fB/dev/null\fP).
+.PP
+Note that \fIfopen(3)\fP itself officially recognizes the following 
+modes:\fBr, w, a, r+, w+, a+\fP.
+.PP
+\fIstrclose()\fP closes a stream, which is the recommended practice 
+within NEMO (formally, an exit from the program using
+\fIexit(3)\fP also closes all open files properly).
+Each opened stream uses additional space in internal tables that are
+free'd when \fIstrclose\fP is called. 
+.PP
+\fIstrdelete()\fP deletes the file associated with the stream \fBstr\fP 
+previously opened with \fIstropen\fP. 
+If \fBscratch\fP is set TRUE it will always delete the file, if set to 
+FALSE the file must have been opened in scratch mode to be deleted.
+This routine also clears the internal filetable, that was used 
+when \fIstropen\fP was called.
+.PP
+\fIstrname()\fP returns the name of the file that had been opened by
+\fIstropen\fP. Note it returns a pointer to an internal static table, and
+should not be overwritten. See also \fIscopy(3NEMO)\fP.
+.PP
+\fIstrseek\fP returns seekability of a stream. This is primarely useful
+for \fIfilestruct\fP, which might need to know if stream i/o
+can be optimized with deferred input.
+.SH SEE ALSO
+fopen(3), fclose(3), filestruct(3NEMO), strlib(3NEMO), getparam(3NEMO)
+.SH AUTHOR
+Joshua Barnes, Peter Teuben
+.SH FILES
+.nf
+.ta +1.5i
+~/src/kernel/io  	stropen.c, filesecret.c
+.fi
+.SH UPDATE HISTORY
+.nf
+.ta +1i +4i
+23-jul-90	created            	Josh
+5-oct-90	added strdelete and strname; man page written	PJT
+1-mar-91	fixed bug in stropen - improved doc	PJT
+19-may-92	added strseek - fixed verbosity in strdelete	PJT
+5-nov-93	added special "." filename mode for /dev/null	pjt
+22-mar-00	scratch files cannot exist, otherwise error	pjt
+.fi
