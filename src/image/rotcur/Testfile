@@ -26,7 +26,7 @@ all:	$(BIN)
 map1.vel:
 	@echo Creating $@
 	@nemoinp $(R) > map1.r
-	@nemoinp $(R) | tabmath - - "100*%1/(20+%1)+rang(0,$(SIG))" all > map1.v
+	@nemoinp $(R) | tabmath - - "100*%1/(20+%1)+rang(0,$(SIG))" all seed=123 > map1.v
 	ccdvel map1.vel radii=@map1.r vrot=@map1.v pa=$(PA) inc=$(INC)
 
 map1.den:

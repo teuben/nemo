@@ -54,9 +54,9 @@ radprof:   snap.in
 
 real:
 	@echo Checking d2f for snapfour
-	mkplummer - 100 | csf - - convert=d2f | snapfour - radii=0:2
+	mkplummer - 100 seed=123 | csf - - convert=d2f | snapfour - radii=0:2
 	@echo Checking f2d for snapfour
-	mkplummer - 100 | csf - - convert=f2d | snapfour - radii=0:2
+	mkplummer - 100 seed=123 | csf - - convert=f2d | snapfour - radii=0:2
 
 snapfit: cube.in hack.out
 	@echo Running $@

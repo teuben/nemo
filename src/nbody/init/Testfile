@@ -63,7 +63,7 @@ mkhomsph:
 
 mkommod:
 	@echo Running $@
-	mkommod $(NEMODAT)/k5isot.dat mkommod.out $(NBODY)
+	mkommod $(NEMODAT)/k5isot.dat mkommod.out $(NBODY) seed=123
 	tsf mkommod.out
 
 real:
