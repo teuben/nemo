@@ -1,0 +1,95 @@
+	Some comments on the Groningen installation of NEMO:
+					 ( June 1989 - Peter Teuben)
+
+to keep in mind:
+  SUN is now running SUN OS 4.0 (later to be upgraded to 4.0.1 and so on)
+  hence you cannot recompile programs using old 3.5 libraries. I 
+  started compiling the 4.0 libraries ($NEMO/lib), but graphics is
+  not on brahe yet - gave up for now).
+
+  Alliant version has only hackcode/gravsim installed - as to use this as
+  a `remote observatory'. Your data-analysis & display should then
+  be done on the SUN. (NEMO's binary files are exchangable between
+  Alliant and Sun!!).
+
+  The binary-directories are for now in a number of formats:
+
+  sun (4.0.x):     bin    obj    lib        CSHRC
+  sun (3.5)        bin3   obj3   lib3       CSHRC
+  alliant          bina   obja   liba       CSHRCA
+
+  Note that all makefiles assume for installing and compiling the
+  directory names without the appending 3/4/a, i.e. the current setup 
+  as listed above will let you do 4.0 stuff.
+
+  The 'loadobj' module in $NEMO/src/josh/clib does not work on the
+  Allaitn yet - until that one works it does not make much sense to 
+  install NEMO in its full glory, as quite a number of useful programs 
+  depend on the dynamic object loader.
+
+
+Some benchmarks: (default pars: 128 particles, 64 timesteps, tol=1)
+
+                    hackcode1   hackcode1_qp       gravsim		
+
+        SUN 3/60:         148"      240" (R: 1.6)     -
+        Alliant  (cc)      48"        -              26" (R: 1.8)
+                (fxc)      38"       50" (R: 1.3)     B
+
+                       (R: 3.9)   (R: 4.8)        (R: 5.7)
+
+
+        (- = not tried   B = buggy program - no bench possible)
+
+    Keep in mind that hackcode is a very recursive algorithm, which
+    in the current C version is not very vectorizable and is not easily
+    made into concurrent code. The Alliant is about 4-5 times faster
+    then the Sun 3/60. Interesting to note is that the inclusion of
+    quadrupole corrections results in an extra 20% speedup on the 
+    vectorized Alliant code version.
+    Hernquist has a vectorized code which runs very fast on a Cray,
+    should be useful for an Alliant too.
+
+
+    A final note, in case you might have wondered: it so happens that
+    the binary data (filestruct) format of NEMO is the same on Alliant
+    and sun. Very convienient indeed - don't expect this on all machines.
+
+------------------------------------------------------------------------
+5-jun:
+   split binary directory (bin,obj,lib) into 3 (3/4/a) for 
+   SUN OS 3.5, 4.0.x and alliant Concentrix.
+ 
+6-jun:
+  graphics libraries on 'brahe' not present - cannot install
+    yapp's and graphics programs.
+
+7-jun:
+  pjt/clib/herinp:   the version in the export version apparently
+	did not have the gipsic.h include file - took Groningen's
+	latest version for NEMO. 
+
+	   fie:	new gipsy version merged with nemo version
+
+9-jun:
+  Alliant:
+  Hackcode1 has been compiled with `cc` as well as `fxc`
+  Since `fxc` version is faster, those have been saved
+  in the $NEMO/bina directory.
+
+10-jun:
+  Alliant:
+  Gravsim modules have been compiled -
+  first with 'cc', then with 'fxc' It was already shown that
+  hackcode1 gains about 20-30% in speed from 'cc' to 'fxc'
+  version (fortunately mixed libraries works).
+      uniform.c: some info's complaints by fxc - an empty file???
+      y.tab.c  : some warn complaints by fxc (grammer.y)
+      util.c   : one info in line 27: sum += (*xp++) * (*yp++) ;
+          i.e. 
+          fxc - info  : ( ) statement is data dependent on variable sum
+      plummer.c: lot's of warn's
+      
+      etc. etc.
+
+  The resulting story is that the 'fxc' version does not run...!!!!!!!
