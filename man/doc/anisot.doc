@@ -1,0 +1,37 @@
+%N /saturn/nemo/bin/sun3/anisot
+This doc file has been produces with help=t option
+No further help is available, try 'man anisot'
+%A out
+	model=plummer
+%A model
+	rmax=100
+%A rmax
+	b=0
+%A b
+	nrad=512
+%A nrad
+	stride=1
+%A stride
+	ngauss=48
+%A ngauss
+	sigma=0.53192304
+%A sigma
+	r0=0.58904862
+%A r0
+	w0=1
+%A w0
+	emtot=-1
+%A emtot
+	rc=1
+%A rc
+	in=
+%A in
+	radcol=1
+%A radcol
+	denscol=2
+%A denscol
+	masscol=0
+%A masscol
+	VERSION=1.1
+%A VERSION
+	

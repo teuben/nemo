@@ -1,0 +1,47 @@
+%N /saturn/nemo/bin/sun3/snapplotedit
+This doc file has been produces with help=t option
+No further help is available, try 'man snapplotedit'
+%A in
+	Input file name
+%A out
+	Output file name
+%A times
+	Range of times to plot
+%A xvar
+	X-axis plotting variable
+%A xlabel
+	X-axis label; defaults to xvar
+%A xrange
+	X-axis variable range
+%A yvar
+	Y-axis plotting variable
+%A ylabel
+	Y-axis label; defaults to yvar
+%A yrange
+	Y-axis variable range
+%A visib
+	Determine visibility of points
+%A psize
+	Point type and size
+%A fill_circle
+	Fill points plotted as circles
+%A formal
+	Produce publication-style plots
+%A xbox
+	Extent of frame in x direction
+%A ybox
+	Extent of frame in y direction
+%A nobox
+	Draw axis, ticks, labels
+%A nxticks
+	Number of ticks on x axis
+%A nyticks
+	Number of ticks on y axis
+%A xticks
+	Position of tickmarks in X
+%A yticks
+	Position of tickmarks in Y
+%A frame
+	Filename for rasterfiles(5) frame[.NNN]
+%A VERSION
+	10-nov-89	PJT
