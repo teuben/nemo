@@ -4,13 +4,17 @@
 
 
 typedef struct moment {
-    int n;		    /* number of data accumulated */
     int mom;		    /* highest moment (use -1 if minmax is all) */
+    int n;		    /* number of data accumulated so far */
+    int ndat;               /* max number of data for moving moments */
+    int idat;               /* index to last written data for moving moments */
+    real *dat;              /* data[ndata] if moving moments used */
+    real *wgt;              /* weight[ndata] if moving moments used */
     real *sum;		    /* mom+1 length array with moment^{0..mom} sums */
     real datamin, datamax;  /* min & max of data */
 } Moment, *MomentPtr; 
 
-void ini_moment   (Moment *, int);		/* allocates */
+void ini_moment   (Moment *, int, int);		/* allocates */
 void accum_moment (Moment *, real, real);	/* accumulates */
 void decr_moment  (Moment *, real, real);	/* decrements (dangerous) */
 void reset_moment (Moment *);       	/* resets */
@@ -26,3 +30,5 @@ real kurtosis_moment (Moment *);	/* computes special 4th moment (mom=-4) */
 
 real min_moment (Moment *);
 real max_moment (Moment *);
+
+

@@ -8,6 +8,7 @@
  *  13-jun-95   added decr_moment, but min/max become invalid
  *  16-sep-95   fixed more bugs if no data accumulated
  *   9-dec-99   fix min/max when data deleted
+ *   2-feb-05   added moving moments
  */
 
 
@@ -20,9 +21,11 @@
 #define sum3 m->sum[3]
 #define sum4 m->sum[4]
 
-void ini_moment(Moment *m, int mom)
+void ini_moment(Moment *m, int mom, int ndat)
 {
     int i;
+
+    dprintf(1,"ini_moment(%d,%d)\n",mom,ndat);
 
     m->n = 0;
     m->mom = mom;
@@ -32,12 +35,19 @@ void ini_moment(Moment *m, int mom)
       m->sum = (real *) allocate((mom+1) * sizeof(real));
       for (i=0; i<=mom; i++) m->sum[i] = 0.0;
     }
-      
+    m->ndat = ndat;
+
+    if (ndat > 0) {
+      m->idat = -1;
+      m->dat = (real *) allocate(ndat*sizeof(real));
+      m->wgt = (real *) allocate(ndat*sizeof(real));
+    } 
 }
 
 void accum_moment(Moment *m, real x, real w)
 {
     register real sum = w;
+    real xx;
     int i;
 
     if (m->n == 0) {
@@ -52,12 +62,37 @@ void accum_moment(Moment *m, real x, real w)
         m->sum[i] += sum;
         sum *= x;
     }
+    if (m->ndat > 0) {
+      if (m->idat < 0)            /* first time around */
+	m->idat=0;
+      else if (m->n < m->ndat)    /* buffer not full yet */
+	m->idat++;
+      else {                      /* buffer full, first remove old */
+	i = m->idat;
+	if (i==0)  i = m->ndat-1;
+	m->idat++;
+	if (m->idat == m->ndat) m->idat = 0;
+	xx = m->dat[i];
+	sum = m->wgt[i];
+	for (i=0; i<= m->mom; i++) {
+	  m->sum[i] -= sum;
+	  sum *= xx;
+	}
+      }
+
+      m->dat[m->idat] = x;
+      m->wgt[m->idat] = w;
+    }
 }
+
 
 void decr_moment(Moment *m, real x, real w)
 {
     register real sum = w;
     int i;
+
+    if (m->ndat > 0) 
+      error("decr_moment: cannot be used in moving moments mode");
 
     if (m->n == 0) {
 	warning("Cannot decrement a moment with no data accumulated");
@@ -107,7 +142,7 @@ int n_moment(Moment *m)
 
 real sum_moment(Moment *m)
 {
-    return sum0;
+    return sum0;   /* BAD BOY: should this not be sum1 ?? */
 }
 
 real mean_moment(Moment *m)
@@ -174,7 +209,7 @@ real max_moment(Moment *m)
 {
     return m->datamax;
 }                                        
-    
+
 #ifdef TESTBED
 #include <getparam.h>
 
@@ -182,29 +217,39 @@ string defv[] = {
     "in=???\n       Table with values in column 1",
     "moment=-1\n    Moment to compute (-4..-1 special, 0,1,2,...)",
     "minmax=f\n     Show datamin & max instead ? ",
-    "VERSION=0.1\n  3-nov-93 PJT",
+    "maxsize=0\n    If > 0, size for moving moments instead\n",
+    "VERSION=0.2\n  2-feb-05 PJT",
     NULL,
 };
 
-string usage = "Moments TESTBED";
+string usage = "(Moving)Moments TESTBED";
 
-nemo_main()
+void nemo_main(void)
 {
     char line[80];
     stream instr = stropen(getparam("in"),"r");
     int mom = getiparam("moment");
+    int maxsize = getiparam("maxsize");
     real x;
     Moment m;
 
-    ini_moment(&m,ABS(mom));
+    ini_moment(&m,ABS(mom),maxsize);
     while (fgets(line,80,instr) != NULL) {
-        x = atof(line);
-        accum_moment(&m,x,1.0);
+      x = atof(line);
+      accum_moment(&m,x,1.0);
+      if (maxsize > 0) {
+	if (getbparam("minmax"))
+	  printf("%g %g\n",min_moment(&m), max_moment(&m));
+	else
+	  printf("%g\n",show_moment(&m,mom));
+      }
     }
-    if (getbparam("minmax"))
+    if (maxsize == 0) {
+      if (getbparam("minmax"))
         printf("%g %g\n",min_moment(&m), max_moment(&m));
-    else
+      else
         printf("%g\n",show_moment(&m,mom));
+    }
 }
 
 #endif
