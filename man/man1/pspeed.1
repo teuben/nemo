@@ -6,11 +6,24 @@ pspeed \- calculate the pattern speed of a stellar system.
 \fBpspeed int=\fPccd-intensity \fBvel=\fPccd-velocity [parameter=value]
 .SH DESCRIPTION
 \fIpspeed\fP calculates the pattern speed of a stellar system using
- 1984ApJ...282L...5T
 Tremaine & Weinberg's method (1984ApJ...282L...5T). For this
 a line parallel but offset to the line of nodes
 of a galaxy must have information on intensity and radial velocity.
 \fIpspeed\fP assumes the line of nodes is along the X-axis.
+.PP
+In the following (x,y) are defined along the major and minor axis of
+the galaxy resp., and
+\fPpspeed\fP will then compute the numerical sums 
+.nf
+        V(y) =  SUM ( vel(x,y) * den(x,y)) / SUM ( den(x,y) )
+
+        X(y) =  SUM ( x * den(x,y)) / SUM ( den(x,y) )
+.fi
+where the summation is along \fIx\fP. This will result in a correlation
+.nf
+	V = Omega * SIN(inc) * X
+.fi
+The output will be a table 
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword is also
 given:
