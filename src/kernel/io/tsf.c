@@ -17,6 +17,7 @@
  * V2.7   pjt 21-mar-01         XML output option, written in 
  *                              "Coffee Plantation", Tucson, AZ.
  * V3.0   pjt 14-jun-02         integer output not in octal anymore
+ * V3.1   pjt 29-aug-02         confirmed bug item=XXX doesn't work anymore
  *
  */
 
@@ -34,7 +35,7 @@ string defv[] = {
     "item=\n                      Select specific item",
     "xml=f\n                      output data in XML format? (experimental)",
     "octal=f\n                    Force integer output in octal again?",
-    "VERSION=3.0\n		  14-jun-02 PJT ",
+    "VERSION=3.1\n		  29-aug-02 PJT ",
     NULL,
 };
 
@@ -72,6 +73,7 @@ void nemo_main()
     indent = getiparam("indent");
     margin = getiparam("margin");
     allline = getbparam("allline");
+    if (hasvalue("item")) warning("item= is broken");
     testtag = getparam("item");
     xml = getbparam("xml");
     if (xml) {     /* if XML output used, it should print all items */
@@ -85,8 +87,7 @@ void nemo_main()
     }
 }
 
-void print_item(tag)
-string tag;
+void print_item(string tag)
 {
     string type, *tags, *tp;
     int *dims;
@@ -178,14 +179,15 @@ void print_data(string tag, string type, int *dims)
     int dlen;
     char buf[128];
     byte *dat, *dp;
+    bool Qprint;
 
-    if (*testtag && streq(tag,testtag)==0)       /* if only print testtag... */
-        return;
+    Qprint = !(*testtag && streq(tag,testtag)==0);  /* if only print testtag... */
+
     fmt = find_fmt(type);
     dlen = get_dlen(instr, tag);
     dat = allocate(dlen);
     get_data_sub(instr, tag, type, dat, dims, FALSE);
-    if (streq(type, CharType))
+    if (streq(type, CharType) && Qprint)
 	(void) outstr(dims != NULL ? "\"" : "\'");
     for (dp = dat; dp < dat + dlen; ) {		/* loop over data array     */
 	if (streq(type, AnyType)) {		/*   output generic data?   */
@@ -214,12 +216,13 @@ void print_data(string tag, string type, int *dims)
 	    dp += sizeof(double);
 	} else
 	    error("print_data: type %s unknown\n", type);
-	if (! outstr(buf))
+	if (Qprint)
+	  if (! outstr(buf))
 	    break;
     }
-    if (streq(type, CharType))
+    if (streq(type, CharType) && Qprint)
 	(void) outstr(dims != NULL ? "\"" : "\'");
-    if (xml) {
+    if (xml && Qprint) {
       sprintf(buf," </%s>",tag);
       outstr(buf);
     }
