@@ -46,7 +46,7 @@ if ($cvs) then
   echo CVS: pgplot
   (cd nemo; mkdir local; cvs -Q co pgplot)
   echo TAR: $fltk
-  tar -C partiview/src -zxf $fltk)
+  tar -C partiview/src -zxf $fltk
 else 
   echo TAR: 
   mkdir manybody
@@ -61,6 +61,7 @@ endif
 #                                                   starlab
 pushd starlab
   source AAA_SOURCE_ME
+  echo STARLAB-COUNT: `ls $STARLAB/bin|wc -l`
 popd
 
 #                                                   fltk (internal build only)
@@ -75,11 +76,19 @@ pushd partiview/src
   ./configure --with-fltk=`pwd`/fltk-1.1.4 >& install.log
   make >>& install.log
   if ($status) echo ERRORS compiling partiview, check install.log
+  cp partiview $STARLAB/bin
 popd
 
 #                                                   nemo
 pushd nemo
   source AAA_SOURCE_ME
+  echo NEMOBIN-COUNT: `ls $NEMOBIN|wc -l`
+popd
+
+#
+pushd nemo/usr/kuijken/GalactICS-exp/src
+   make all
+   cp dbh genhalo genbulge gendisk diskdf tobinary getfreqs dbh vcirc plothalo plotforce mergerv $NEMOBIN
 popd
 
 #                                                   GSL
@@ -118,3 +127,11 @@ pushd $NEMO/usr
     ln -s `pwd`/hnbody-$hnbody/bin/$bin $NEMOBIN
   end
 popd
+
+#                                                   ds9
+pushd $NEMOBIN
+  tar zxf $pkg/ds9/ds9.tar.gz
+popd
+
+
+# -- end of install --
