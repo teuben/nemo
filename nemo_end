@@ -13,7 +13,8 @@ if ($?NEMOBIN == 1) then
 endif
 
 # provide alias to reload this version of NEMO again
-alias nemo   'source $NEMO/nemo_start'
+#alias nemo   'source $NEMO/nemo_start'
+alias nemo   "source $NEMO/nemo_start"
 
 # now remove all NEMO and YAPP env.variables
 foreach evar (`printenv|awk -F= '{print $1}'|egrep '(NEMO|YAPP)'`)
