@@ -17,10 +17,12 @@
 #include <stdinc.h>
 #include <errno.h>
 
+#ifdef  NEW_EH
 #include "exception.h"
 
 // #define calloc my_calloc
 // #define NEW_EH
+#endif
 
 void *allocate(int nb)
 {
@@ -31,7 +33,7 @@ void *allocate(int nb)
 	return NULL;
     }
 #endif
-    // how should this kind of error be processed ?
+    /* how should this kind of error be processed ? */
     if (nb < 0) error("allocate: cannot allocate %d bytes",nb);
     if (nb==0) nb++;
     mem = (void *) calloc((size_t)nb, 1);
@@ -59,7 +61,7 @@ void *reallocate(void *bp, int nb)
 	return NULL;
     }
 #endif
-    // how should this kind of error be processed ?
+    /* how should this kind of error be processed ? */
     if (nb < 0) error("reallocate: cannot allocate %d bytes",nb);
     if (nb == 0) nb++;
     if(bp==NULL)
