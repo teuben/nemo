@@ -25,6 +25,7 @@
  * V 2.7  20-jun-01   pjt       no more NOPROTO, fixed protos for gcc3
  *      a  8-oct-01   pjt       flush buffer when put_tes() at top level
  * V 3.0  23-may-02   pjt    Support for >2GB (large file size)
+ *        17-mar-03   pjt    fix serious memory usage bug for f2d conversion
  *
  *  Although the SWAP test is done on input for every item - for deferred
  *  input it may fail if in the mean time another file was read which was
@@ -131,15 +132,16 @@ void copy_item_cvt(stream ostr, stream istr, string tag, string *cvt)
             if (streq(cp,"f2d")) {		/* convert float to double */
                 dprintf(1,"Converting %s in %s\n",cp,tag);
                 ipt = makeitem(DoubleType,tag,NULL,dims);    /* silly */
-                bufout = (byte *) realloc(bufin, sizeof(double)/sizeof(float));
+                bufout = (byte *) allocate(datlen(ipt,0));
                 if (bufout == NULL)
                	    error("copy_item_cvt: item %s: (f2d) not enuf memory", tag);
                 convert_f2d(eltcnt(ipt,0),(float*)bufin,(double*)bufout);
 	        put_data_sub(ostr, tag, DoubleType, bufout,  dims, FALSE); 
-                freeitem(ipt,FALSE);
+                freeitem(ipt,0);
             } else {
             	warning("Cannot convert %s yet in %s",cp,tag);
 	        put_data_sub(ostr, tag, type, bufin,  dims, FALSE); 
+
 	    }
 	} else if (streq(type,IntType)) {
             warning("Cannot convert %s yet in %s",cp,tag);
@@ -154,7 +156,7 @@ void copy_item_cvt(stream ostr, stream istr, string tag, string *cvt)
 						/*   and write it to output */
 	if (dims != NULL)			/*   free dimension list    */
 	    free(dims);
-	free(bufin);				/*   free temporary buffer  */
+	free(bufin);		                /*   free temporary buffer  */
         if (bufout) free(bufout);               /* if used: free this too   */
     } else {					/* a set of other items?    */
 	get_set(istr, tag);			/*   access set's contents  */
