@@ -7,7 +7,10 @@ tabclip \- clip a table
 \fBtabclip\fP removes points from a table based on some "smoothness"
 criteria. Examples are when there is a jump larger than a
 critical amount it can be flagged. Or when the derivative exceeds
-a certain amount,
+a certain amount.
+.PP
+Fitting programs, such \fItabnllsqfit(1NEMO)\fP can also be used
+to remove points that are not close to a global model.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -43,7 +46,7 @@ Hardcoded allocation space, if needed for piped data.TP
 Keep the clipped points as comments in the output file? By
 default they are left out.
 .SH SEE ALSO
-tabmath(1NEMO)
+tabmath(1NEMO), tabnllsqfit(1NEMO)
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY

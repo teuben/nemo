@@ -1,9 +1,13 @@
 .TH NLLSQFIT 3NEMO "10 September 2002"
 .SH NAME
-nllsqfit \- (non)linear least squares fit
+nllsqfit, nr_nllsqfit \- (non)linear least squares fit
 .SH SYNOPSIS
 .nf
 \fBint nllsqfit(xdat, xdim, ydat, wdat, ddat, ndat, 
+		fpar, epar, mpar, npar, 
+		tol, its, lab, f, df)
+
+int nr_nllsqfit(xdat, xdim, ydat, wdat, ddat, ndat, 
 		fpar, epar, mpar, npar, 
 		tol, its, lab, f, df)
 
@@ -11,6 +15,8 @@ nllsqfit \- (non)linear least squares fit
   int  xdim, ndat, *mpar, npar, its;
   rproc f;
   iproc df;\fP
+
+
 .fi
 .SH DESCRIPTION
 \fInllsqfit\fP is a routine for making a least-squares fit of a
@@ -36,6 +42,10 @@ continued because a fatal error occurred:
 
 .fi
 A linear fit (\fBlab=0\fP) returns 0.
+.PP
+\fInr_nllsqfit\fP is a wrapper routine with the same calling sequence,
+but calls the (NEMO adapted) Numerical Recipes routine mrqmin() and its
+helper functions.
 .SH PARAMETERS
 .TP 20
 \fBxdat\fP      
