@@ -3,7 +3,7 @@ Preconditions to INSTALLATION
 =============================
 
 The default installation installs NEMO with a simple postscript-only
-graphics library (a.k.a. yapp_ps). You should consider selecting a
+graphics library (a.k.a. yapp_ps). You should probably consider selecting a
 more versatile YAPP hookup with multiple output devices, e.g. PGPLOT.
 It allows transparent switching between X (multiple persistent as well
 as non-persistent), postscript, GIF, PPM etc.
@@ -45,38 +45,30 @@ c) Installing CFITSIO
 Brief overview of a Version 3.x INSTALLATION  
 ============================================
 
- (there is also a bootstrap loader that is a lot easier to use; 
-  you may however keep this file at hand when you use that, the procedure
-  you follow below is basically what bootstrap does by itself automatically)
-
 1) To untar a compressed tar file the following will do just fine, and
    you never need to save the uncompressed version:
 
         % gzip -cd nemo_3.x.y.tar.gz | tar xf -
+   or
+	% gtar -zxf nemo_3.x.y.tar.gz
 
-   You can also (if your ftp allows this) do this from within the ftp
-   program:
+   and now change directory to the newly made nemo directory:
 
-	% cd /usr/nemo
-	% ftp astro.umd.edu
-	...			(login as anonymous)
-	ftp> binary
-	ftp> cd pub/teuben/nemo
-	ftp> get nemo.tar.gz "|zcat|tar xf -"
-	ftp> quit
 	% cd nemo_3.x.y
 
-2) Run configure and install the basic libraries:
+
+2) Run configure and install the basic NEMO libraries:
 
 	% ./configure 
-		(sometimes you may need to do
+		(sometimes you may need to set your default compiler, e.g.
 			setenv F77 g77
 		 or whichever is applicable, if the fortran compiler does not
 		 get detected properly, the run configure again)
+		 Check the file config.log if configure fails
 	% source nemo_end		(only if you have an old NEMO running)
 	% source nemo_start
 	% make dirs config_extra scripts
-	% source NEMORC.local		  (or look at $NEMO/src/scripts/NEMORC)
+	% source NEMORC.local		 
 	% rehash
 	% make libs
 
@@ -84,9 +76,9 @@ Brief overview of a Version 3.x INSTALLATION
 3) Run the testsuite, which also installs a pretty basic set of NEMO executables:
 
 	%  setenv YAPP /vps			## only needed if you're on a remote link,
-						## otherwise leave it as /xs 
+						## otherwise leave it as /xs or yapp.ps
 
-	%  ( cd src/scripts ; need -m `testsuite -s` ; mknemo -c history hisf ; testsuite )
+	%  src/scripts/testsuite -b		# run test testsuite
 
 
    Study the output of the lines that do not contain the word 'OK' at the end, e.g.
@@ -98,9 +90,9 @@ Working on /home/teuben/nemo_3.0.4/src/image/trans OK
 Working on /home/teuben/nemo_3.0.4/src/kernel/fortran OK
 Working on /home/teuben/nemo_3.0.4/src/kernel/io OK
 Working on /home/teuben/nemo_3.0.4/src/kernel/misc OK
-Working on /home/teuben/nemo_3.0.4/src/kernel/tab Problems				<<------
+Working on /home/teuben/nemo_3.0.4/src/kernel/tab Problems			<<------
 Working on /home/teuben/nemo_3.0.4/src/nbody/cores OK
-Working on /home/teuben/nemo_3.0.4/src/nbody/evolve/aarseth/nbody0 Problems		<<------
+Working on /home/teuben/nemo_3.0.4/src/nbody/evolve/aarseth/nbody0 Problems	<<------
 Working on /home/teuben/nemo_3.0.4/src/nbody/evolve/aarseth/tools OK
 Working on /home/teuben/nemo_3.0.4/src/nbody/evolve/hackcode/hackcode1 OK
 Working on /home/teuben/nemo_3.0.4/src/nbody/evolve/scfm OK
@@ -111,7 +103,7 @@ Working on /home/teuben/nemo_3.0.4/src/nbody/io/starlab OK
 Working on /home/teuben/nemo_3.0.4/src/nbody/reduc OK
 Working on /home/teuben/nemo_3.0.4/src/nbody/trans OK
 Working on /home/teuben/nemo_3.0.4/src/nbody/xyz OK
-Working on /home/teuben/nemo_3.0.4/src/orbit/potential Problems				<<------
+Working on /home/teuben/nemo_3.0.4/src/orbit/potential Problems			<<------
 Results in /home/teuben/nemo_3.0.4/tmp/test22005/testsuite.log
 
 

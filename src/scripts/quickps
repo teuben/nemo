@@ -2,20 +2,26 @@
 #
 #  make sure this is executed from the $NEMO directory
 #
+#  linux:   src/scripts/quickps
+#  sol:     src/scripts/quickps cc=gcc f77=f77          ok
+#           src/scripts/quickps cc=gcc f77=g77          bad
+#  sgi:     src/scripts/quickps cc=cc  f77=f90          ok
 
+#			set defaults for command line arguments
 set cc=""
 set f77=""
 
+#			parse command line
 foreach arg ($*)
   set $arg
 end
 
-if (-e nemo_end) then
-   source nemo_end
-else
+#			can only run from $NEMO
+if (! -e nemo_end) then
    exit 1
 endif
 
+#			set compilers defaults via environment variables
 if ("x$cc" != "x") setenv CC $cc
 if ("x$f77" != "x") setenv F77 $f77
 
@@ -23,19 +29,20 @@ if ("x$f77" != "x") setenv F77 $f77
 
 set log=/tmp/nemo_quick.log
 
-
-echo Configure
+echo "### Start:"
+echo "### Configure"
 ./configure --with-yapp=ps        >& $log 
+if ($?NEMO) then
+  source nemo_end                >>& $log
+endif
 source nemo_start		 >>& $log 
-echo Installing scripts
+echo "### Installing scripts"
 make dirs config_extra scripts   >>& $log 
 source NEMORC.local              >>& $log 
 rehash
-echo Making library
+echo "### Making library"
 make libs                        >>& $log 
-echo Running testsuite
+echo "### Running testsuite"
 src/scripts/testsuite -b         >>& $log 
-echo DONE:
-grep TESTSUITE $log | grep -v OK
-
-
+echo "### Done:"
+grep TESTSUITE: $log | grep -v OK

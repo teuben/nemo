@@ -24,12 +24,20 @@
   gcc3.0 is ok again, as is 2.95.3
 
 - solaris: still get -rdynamic in the link options, it works, but it
-  does not look nice. this is for gcc, didn't try /opt/SUNSWpro
+  does not look nice. this is for gcc, didn't try /opt/SUNSWpro yet
+	(doesn't work for getparam, loadobj)
 
 - Suse didn't resolve fortran binding to C too well for potentials
   (.so object files, e.g. athan92)
 
 - sgi: loadobjDL works for bodytrans, but not potentials....
+
+  Also, for the SGI at sulfur.amnh.org (where there is some problem with
+  the default f77 license) one needs to do
+
+	setenv F77 f90
+
+  This is a "mips-sgi-irix6.5" machine.
 
 - -DSINGLEPREC:  scfm does not work
  		 athan92 shows some significant force differences

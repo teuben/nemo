@@ -57,7 +57,7 @@ FORLIBS = $(FLIBS)
 #set opts="-rdynamic -ansi -fwritable-strings -Wconversion -Wnested-externs"
 #exec gcc -fPIC -Dlinux -DSYSV -I$NEMOINC -I$NEMOLIB -L$NEMOLIB $opts $* $link
 
-NEMO_CFLAGS = @NEMO_CFLAGS@ -I$(NEMOINC) -I$(NEMOLIB) @XINCS@ @LOADOBJ_MACH@
+NEMO_CFLAGS = @NEMO_CFLAGS@ -I$(NEMOINC) -I$(NEMOLIB) @XINCS@ $(MACH)
 NEMO_FFLAGS = @NEMO_FFLAGS@
 NEMO_LDFLAGS = 
 NEMO_LIBS   = -L$(NEMOLIB)          -lnemo @LOADOBJ_LIBS@ @MATH_LIBS@
@@ -131,10 +131,14 @@ RANLIB = @RANLIB@
 makedefs_help:
 	@echo ========================================================================
 	@echo NEMOVER=$(NEMOVER)
-	@echo CC=$(CC)    CFLAGS=$(CFLAGS)
-	@echo CPP=$(CPP)  CPPFLAGS=$(CPPFLAGS)
-	@echo CXX=$(CXX)  CXXFLAGS=$(CXXFLAGS)
-	@echo F77=$(F77)	  FFLAGS=$(FFLAGS)
+	@echo CC=$(CC)
+	@echo CFLAGS=$(CFLAGS)
+	@echo CPP=$(CPP)
+	@echo CPPFLAGS=$(CPPFLAGS)
+	@echo CXX=$(CXX)
+	@echo CXXFLAGS=$(CXXFLAGS)
+	@echo F77=$(F77)
+	@echo FFLAGS=$(FFLAGS)
 	@echo DEFS=$(DEFS)
 	@echo CFLAGS=$(CFLAGS)
 	@echo FFLAGS=$(FFLAGS)

@@ -1,8 +1,9 @@
 #! /bin/csh -f
 #
 #   april-2001		allow making from file+ext (e.g. scfm.exe) too
+#   jul-2001            fixed -n bug
 #
-set version="MKNEMO Version 1.3a  9-apr-01"
+set version="MKNEMO Version 1.3b  17-jul-01"
 if ($#argv == 0) goto usage
 
 onintr error
@@ -34,7 +35,7 @@ endif
 # set defaults which can be modified by command line options
 
 set src=$NEMO/src
-set n=1
+set n=0
 set d=0
 set code=""
 set tidy=""
@@ -117,7 +118,7 @@ foreach f ($argv)
  set mk="#"
  set err=0
 
- if ($n > 1) then
+ if ($n > 0) then
     if ($n > $#l) then
     echo Too few elements in the list for your selection
       @ errs++
