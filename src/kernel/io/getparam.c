@@ -113,6 +113,7 @@
  * 20-jan-02       j  putparam can now create indexed keywords on the fly
  *  5-feb-02       k  findaparam return NULL if illegal indexed
  * 24-apr-02    3.4   added placeholder for new outparam() stuff
+ *  1-aug-02       a  try and free() some allocated local data
 
   TODO:
       - what if there is no VERSION=
@@ -141,9 +142,10 @@
 	parseargs
 	opt
         getopt
+	gengetopt http://www.gnu.org/software/gengetopt/gengetopt.html
  */
 
-#define VERSION_ID  "3.4 25-apr-02 PJT"
+#define VERSION_ID  "3.4 1-aug-02 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -158,6 +160,7 @@
 #define HISTORY         /* have history.c implemented ?           */
 #define MINMATCH	/* allow keywords to be minimum matched?  */
 #define INDEXED         /* allow keywords to be dynamically indexed */
+#define OUTKEYS         /* allows writing binary export keyword   */
 
 #if 0
 #define TCL7		/* TCL (old V7) support?		  */
@@ -176,8 +179,13 @@
 #include <extstring.h>
 #include <filefn.h>
 #include <strlib.h>
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <unistd.h>
 #include <ctype.h>
+
 
 #if defined(TCL7)
 # include <tcl.h>
@@ -235,7 +243,7 @@
  *   keys[4]    d
  */
 
-typedef struct keyword {    /* holds old all keyword information             */
+typedef struct keyword {      /* holds old all keyword information           */
   string keyval;              /* pointer to original R/O (defv) data         */
   string key;                 /* keyword/name                                */
   string val;                 /* value                                       */
@@ -306,6 +314,8 @@ string error_string = NULL;
 local void initparam_out(void);
 local void finiparam_out(void);
 local void writparam_out(string key, char type, int ndat, void *dat);
+local string nemokeys(void);
+
 local void scan_environment(void);
 local void save_history(string *argv);
 local void printhelp(string help);
@@ -320,7 +330,7 @@ local void beep(void);
 local string parname(string arg);
 local string parvalue(string arg);
 local string parhelp(string arg);
-local int findkey(string name);     /* to be obsoleted */
+local int findkey(string name);     // to be obsoleted
 local keyword *findakey(string name);
 local int set_indexed(string name, int *idx);
 local int addindexed(int j, string keyval, int idx);
@@ -443,7 +453,7 @@ void initparam(string argv[], string defv[])
 	      keys[j].val = scopy(parvalue(argv[i]));        /* get value */
 	      keys[j].count++;
 	    } else if (j=set_indexed(name,&idx)) {       /* enter indexed keywords */
-	      /* process this indexed keyword */
+	      // process this indexed keyword
 #if 1
 	      addindexed(j,argv[i],idx);
 #else
@@ -591,6 +601,7 @@ void initparam(string argv[], string defv[])
 
     if (useflag) {
         printusage(defv);                  /* give minimum 'usage' and exit */
+	finiparam();
         exit(0);
         /*NOTREACHED*/
     }
@@ -638,9 +649,8 @@ local void initparam_out()
 
 
 /*
- * FINIPARAM: finish up any outstanding requests. If INTERACT is not defined
- *            this amazing function does nothing!
- *
+ * FINIPARAM: finish up any outstanding requests before the program exists
+ *            (users can use stop() to exit and bypass this routine)
  */
 
 void finiparam()
@@ -676,9 +686,38 @@ void finiparam()
 
 #endif
 
+    finiparam_out();
+
+    /* free up some junk malloc checkers complain about */
+
+    dprintf(1,"finiparam: now freeup some final memory\n");
+    reset_history();
+    free(yapp_string);
+    for (i=0; i<nkeys; i++) {
+      free(keys[i].key); 
+      free(keys[i].val);
+      free(keys[i].help);
+    }
+    free(keys);
+    free(version_i);
 }
 
-local void finiparam_out()
+local string nemokeys(void)
+{
+  static char path[256];
+  char *nemodef;
+  string fn;
+
+  nemodef = getenv("NEMODEF");
+  if (nemodef)
+    sprintf(path,"%s/nemokeys.dat",nemodef);
+  else
+    sprintf(path,"./nemokeys.dat");
+  dprintf(1,"NEMOKEYS: using %s\n",path);
+  return path;
+}
+
+local void finiparam_out(void)
 {
   /*
    * this will
@@ -687,7 +726,30 @@ local void finiparam_out()
    *    - write the $NEMODEF/nemokeys.dat file
    * Also needs to take care of file locking ..
    */
+  string fn = nemokeys();
+  int fd, err;
+  pid_t pid = getpid();
+  char msg[128];
+  sprintf(msg,"%s(%d)\n",progname,pid);
+#if 0
+  dprintf(1,"writing to %s\n",fn);
+
+  /* if it exists */
+  fd = open(fn,O_CREAT|O_RDWR|O_APPEND,S_IRUSR|S_IWUSR);
+  if (fd<0) local_error("can't open");
+  err = flock(fd,LOCK_EX);
+  if (err < 0) local_error("can't lock");
+  err = write(fd,msg,strlen(msg));
+  if (err < 0) local_error("can't write");
+  /* should use fcntl() really, for NFS */
+  err = flock(fd,LOCK_UN);
+  if (err < 0) local_error("can't unlock");
+  err = close(fd);
+  if (err < 0) local_error("can't close");
+#endif
 }
+
+
 
 
 /*
@@ -808,6 +870,7 @@ local void printhelp(string help)
         printf(" VERSION_ID = %s\n",VERSION_ID);
         printf(" NEMO VERSION = %s\n",NEMO_VERSION);
         showconfig();
+	finiparam();
         exit(0);
         /*NOTREACHED*/
     }
@@ -827,7 +890,8 @@ local void printhelp(string help)
             if (streq(keys[i].key,"VERSION")) 
                 printf("%s  %s (%s)\n",
                        keys[0].val,keys[i].val,keys[i].help);
-                            
+
+	finiparam();
         exit(0);
         /*NOTREACHED*/
     }
@@ -835,6 +899,7 @@ local void printhelp(string help)
     if (strchr(help,'h')) {
         for (i=1; i<nkeys; i++)
             printf("%-16s : %s [%s]\n",keys[i].key, keys[i].help, keys[i].val);
+	finiparam();
         exit(0);
         /*NOTREACHED*/
     }
@@ -849,7 +914,8 @@ local void printhelp(string help)
         }
         newline(1);
         if (strpbrk(help,"oapdqntvkzu")==NULL) {
-            exit(0);
+	  finiparam();
+	  exit(0);
             /*NOTREACHED*/
         }
     }
@@ -879,7 +945,7 @@ local void printhelp(string help)
     if (strchr(help,'o')) {
       string *sp = outdefv;
 
-      warning("New option o in the user interface\nUnformatted output");
+      warning("New option help=o in the user interface\nUnformatted output");
       if (sp) {
 	while (*sp) {
 	  printf("%s\n",*sp++);
@@ -887,6 +953,7 @@ local void printhelp(string help)
       } else {
 	warning("No output keys defined for this program");
       }
+      finiparam();
       exit(0);
       /*NOTREACHED*/
     }
@@ -903,6 +970,7 @@ local void printhelp(string help)
                     keys[i].key,
                     keys[i].help ? keys[i].help : "No help",
                     keys[i].val);
+	finiparam();
         exit(0);                    /* always exit in this case */
         /*NOTREACHED*/
     } /* 't' */
@@ -944,10 +1012,12 @@ local void printhelp(string help)
         printf("-R 1 0 1 13x2+39+%d 'Run' 'RunMe' khoros2nemo %s\n",
                             vcount, progname);
         printf("-E\n-E\n-E\n");
+	finiparam();
         exit(0);                    /* always exit in this case */
         /*NOTREACHED*/
     } /* 'z' */
     if (strchr(help,'q')) {
+	finiparam();
         exit(0);                        /* quit - don't run program */
         /*NOTREACHED*/
     }
@@ -1015,6 +1085,11 @@ local void showconfig()
 #endif
     printf("INDEXED    ");
 #if defined(INDEXED)
+    printf("on\n");
+#else
+    printf("off\n");
+#endif
+#if defined(OUTKEYS)
     printf("on\n");
 #else
     printf("off\n");
@@ -1185,7 +1260,7 @@ bool hasvalue(string name)
   keyword *kw;
 
   strcpy(key,name);
-  dprintf(1,"Checking indexing on %s\n",key);
+  dprintf(2,"hasvalue: checking indexing on %s\n",key);
 
   kw = findakey(name);
   if (kw == NULL) error("keyword %s does not exist",name);
@@ -1529,7 +1604,7 @@ local void setparam (string par, string val, string prompt)
 
     kw = findakey(par);
     if (kw == NULL) {
-      /* check if it's an indexed keyword, we'll allow a new one to be entered */
+      // check if it's an indexed keyword, we'll allow a new one to be entered
       char *keyval;
       i=set_indexed(par,&idx);
       if (i==0)
@@ -1551,7 +1626,7 @@ local void setparam (string par, string val, string prompt)
 #if 0
         if (gets(line) == NULL) error("Null input");
 #else
-        /* if (fgets(line,80,stdin) == NULL) error("Null input"); */
+        // if (fgets(line,80,stdin) == NULL) error("Null input");
 	error("Can't do prompting anymore until fgets() is fixed");
 #endif
         val = line;
@@ -1581,7 +1656,7 @@ local void writparam_out(string key, char type, int ndat, void *dat)
    * if so, copy dat into
    * for strings, need to free(), malloc() and strdup()
    */
-  warning("writeparam_out: not implemented yet");
+  warning("writeparam_out(%s,%c,%d,0x%x) not implemented yet",key,type,ndat,dat);
 }
 
 void outparam(string key, string val)
@@ -1850,7 +1925,7 @@ local keyword *findakey(string name)
   keyword *kw;
 
   strcpy(key,name);
-  dprintf(1,"findakey: checking indexing on %s\n",key);
+  dprintf(2,"findakey: checking indexing on %s\n",key);
 
   /* split basename from index number by working from the back */
   /* should go in a private function , a.k.a. refactoring :-)  */
@@ -1865,7 +1940,7 @@ local keyword *findakey(string name)
     strcat(key,"#");
     n = findkey(key);
     if (n < 0)  return NULL;
-    /*  error("findakey:  #=%d findkey(%s) -> %d NOT INDEXED",idx,key,n); */
+    // error("findakey:  #=%d findkey(%s) -> %d NOT INDEXED",idx,key,n);
     kw = &keys[n];
     if (kw->indexed < -1) 
       error("findakey(%s): not an indexed keyword, %s: %d n=%d", 
@@ -1890,8 +1965,8 @@ local keyword *findakey(string name)
   }
 
   n = indexparam(key,idx);
-  dprintf(1,"Re-Checking indexparam(%s,%d) -> %d\n",key,idx,n);
-  /* return n>0; */
+  dprintf(2,"Re-Checking indexparam(%s,%d) -> %d\n",key,idx,n);
+  //return n>0;
   return NULL;
   }
 #endif
@@ -1920,7 +1995,7 @@ local keyword *findakey(string name)
   }
 #endif
 
-  return NULL;    /*  will it ever get here....  it should not !  */
+  return NULL;    // will it ever get here....  it should not !
 }
 
 /* 
@@ -2132,8 +2207,9 @@ local void review()
            fgets(stdin,80,cmd);
 #endif
            if (strcmp(cmd,"end")==0 || strcmp(cmd,"quit")==0) { /* all done */
-              exit(0);                                    /* plain exit */
-              /*NOTREACHED*/
+	     finiparam();
+	     exit(0);                                    /* plain exit */
+	     /*NOTREACHED*/
            }
            if (strcmp(cmd,"stop")==0) {                 
               stop(0);                                   /* graceful exit */
@@ -2598,8 +2674,12 @@ local void set_help(string arg)
 local void set_outkeys(string arg)
 {
     char *cp;
-    
+#ifdef OUTKEYS    
     warning("No output key processing done yet (%s)",arg);
+#else
+    error("outkeys= not supported");
+#endif
+
 }
 
 local void set_debug(string arg)
