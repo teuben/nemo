@@ -7,6 +7,7 @@
  *			 Also nemo_main() and usage	PJT
  *	1-apr-01      a  compiler warning
  *     24-may-02  V2.0   fixed for high-N system by using int_hack in load.c
+ *     29-may-02  V2.1   add nudge= keyword to nudge overlapping particles
  */
 
 #include "defs.h"
@@ -25,8 +26,9 @@ string defv[] = {
     "rmin=\n			  lower left corner of initial box",
     "options=phase,mass\n	  misc. control options {phase, mass}",
     "fcells=0.9\n		  cell/body allocation ratio ",
+    "nudge=0\n                    nudge overlapping particles with this dispersion",
     "verbose=f\n		  flag to print # of particles finished ",
-    "VERSION=2.0\n		  24-may-02 PJT",
+    "VERSION=2.1\n		  29-may-02 PJT",
     NULL,
 };
 
@@ -120,7 +122,7 @@ real cputree, cpufcal;		/* CPU time to build tree, compute forces */
 dencalc()
 {
     real hackden(), directden();
-    real *pp, *work, rneib, newrneib;
+    real *pp, *work, rneib, newrneib, nudge;
     int neibnum;
     double cputime(), cpubase, atof();
     string *burststring(), *rminxstr;
@@ -131,6 +133,17 @@ dencalc()
     verbose=getbparam("verbose");
     rneib=getdparam("rneib");
     neibnum=getiparam("neib")+1;
+    nudge = getdparam("nudge");
+    if (nudge > 0) {
+      set_xrandom(0);
+#if 0
+      warning("Nudging all particles by +/-%s",nudge);
+      for (bp=massdata; bp<massdata+nmass; bp++) {
+	for (i=0; i<NDIM; i++)
+	  Pos(bp)[i] += xrandom(-nudge,nudge);
+      }
+#endif
+    }
 #ifdef DEBUG
     dprintf(0,"neib=%d rneib=%f\n", neibnum, rneib);
 #endif    
@@ -150,7 +163,7 @@ dencalc()
 	error("forcecalc: not enuf memory for results\n");
     }
     cpubase = cputime();
-    maketree(massdata, nmass);
+    maketree(massdata, nmass,nudge);
     cputree = cputime() - cpubase;
     dprintf(0,"  final rsize: %8f    rmin: %8f  %8f  %8f\n",
 	   rsize, rmin[0], rmin[1], rmin[2]);
