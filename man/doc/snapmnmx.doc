@@ -1,0 +1,18 @@
+%N snapmnmx
+%D find min and/or max of snapshot variables
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man snapmnmx' for more extensive online help
+  Defaults of program keywords are listed between square brackets
+%A in
+	Input file (snapshot) [???]
+%A var
+	Variables to find min/max of [x,y,z]
+%A mode
+	Modes: {time,min,max,mean,sigma} [min,max]
+%A times
+	Times of snapshot [all]
+%A format
+	Format to print with [%g]
+%A VERSION
+	6-nov-93 pjt [1.2]
