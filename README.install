@@ -334,6 +334,26 @@ make install
 
 in some subsequent release these will be automatically taken care of..
 
+RE-INSTALLING NEMO
+==================
+
+Sometimes the compiler or operating system has changed under you, and
+due to their use of shared libraries NEMO has stopped working. You can
+re-install it from scratch, or use something like the following set
+of commands:
+
+    cd $NEMO
+    make config_clean
+    ./configure --with-yapp=pgplot --with-pgplot-prefix=$NEMOLIB
+    make postconfig 
+    source NEMORC.local 
+    make libs                   # make new library
+    make pgplot                 # probably need a new pgplot too
+    make vogl                   # GL library for xyz programs
+    mknemo tsf tabhist          # just to test if it's all looking good
+    make bins                   # go for all of them
+    src/scripts/testsuite       # run the testsuite if all was well
+
 
 SUPPORTED ARCHITECTURES:
 ========================
