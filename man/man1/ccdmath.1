@@ -46,6 +46,10 @@ create a map from scratch:
 .nf
   % \fBccdmath out=newmap fie="exp(-((%x-50)/25)**2-((%y-50)/25)**2)" size=100,100\fP
 .fi
+create a cube from scratch:
+.nf
+  % \fBccdmath "" cube0 "%x+10*%y+100*%z" 4,4,4\fP
+.fi
 .SH TIMING
 Performance on Rigel (SUN 3/160, 16Mhz):
 .nf

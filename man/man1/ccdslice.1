@@ -35,7 +35,8 @@ Any \fInemoinp(1NEMO)\fP expression can be given, but only regular
 ranges will result in a correct coordinate system.
 Default: the whole \fIzvar\fP axis is extracted.
 .SH EXAMPLES
-Here is a cube, if which only the 2nd plane is selected
+Here is a cube, in which only the 2nd plane (z=1) is selected, the output
+'cube' is hence two-dimensional
 .nf
     ccdslice cube.in cube.out z 2
 .fi
@@ -52,11 +53,11 @@ and the same for selecting a subset of the Y axis, now in two steps:
 .fi
     ccdslice cube.in - y 2:10:2 | ccdslice - cube.out y
 .fi
-.SH BUGS
+.SH BUGS/CAVEATS
 This code depends on the fact that the data is 3-dimensional, i.e. an
 image cube. This is a limitation of the \fIimage(5NEMO)\fP format.
 .PP
-The coordynate system description of the new \fIzvar\fP axis can easily 
+The coordinate system description of the new \fIzvar\fP axis can easily 
 be corrupted by choosing an irregular layout with \fBxrange=\fP.
 .SH SEE ALSO
 ccdsub(1NEMO), image(5NEMO)

@@ -11,9 +11,9 @@ factor, is the material with the maximum amount of tangential
 motion.
 This is particularly appropriate for high-inclination 
 galaxies, where significant amounts of gas is observed below
-the rotation speed, due to line-of-sight integrations and the
-tilted ring algorithms like the one in \fIrotcur(1NEMO)\fP will
-fail. 
+the rotation speed, due to line-of-sight integrations and simple
+moments in velocity or gaussian fits fail to recover the appropriate
+rotation speed.
 .PP
 The rotation velocity, V, is determined from a terminal velocity V_t
 in the usual way:
@@ -81,7 +81,7 @@ Inclination of the galaxy. Each rotation speed is corrected by sin(inc).
 Center of the galaxy along the Position axis. 
 [Default: 0]
 .SH OUTPUT
-Output of the program will be a table, with various derived velocities
+Output of the program will be an ASCII table, with various derived velocities
 as function of position along the P axis in the PV-diagram. The following
 columns are returned:
 .PP
@@ -90,14 +90,14 @@ columns are returned:
 1	position from the P-axis of the PV diagram
 2	envelope tracing (corrected with vsys, sini, and sigma)
 3	first moment (sum(I*v)/sum(I))  (corrected with vsys, sini)
-3	velocity at peak of signal
+4	velocity at peak of signal
 5	velocity at peak of parabolic fit of 3 points at peak signal
 .fi
 .SH CAVEATS
 Position axis must be carefully created such that the galaxy center is at P=0,
 whereas for velocity it can be corrected with VSYS=.
 .SH SEE ALSO
-rotcur(1NEMO), ccdvel(1NEMO), snapgrid(1NEMO)
+rotcur(1NEMO), ccdvel(1NEMO), snapgrid(1NEMO), ccdmom(1NEMO)
 .PP
 .nf
 Sofue, Y. 1996 ApJ 458, 120
