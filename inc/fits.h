@@ -200,6 +200,7 @@ typedef struct fits_header {
 
 
 int fts_rhead    (fits_header *, stream);
+char *fts_shead    (fits_header *, string);
 int fts_lhead    (fits_header *);
 int fts_chead    (fits_header *, stream);
 int fts_thead    (fits_header *);
@@ -224,6 +225,9 @@ int fts_wdata    (fits_header *, stream, int, char *);
 int fts_rrow     (fits_header *, stream, int, char *);
 int fts_wrow     (fits_header *, stream, int, char *);
 int fts_zero     (fits_header *);
+
+int fts_chead816 (fits_header *, stream);
+int fts_cdata816 (fits_header *, stream, stream, bool, bool);
 
 int fts_wvar     (stream, string, string);
 int fts_wvarc    (stream, string, string, string);
