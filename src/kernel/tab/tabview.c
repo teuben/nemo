@@ -94,6 +94,10 @@ real xmin, xmax, ymin, ymax, xplot[2], yplot[2];
 string xname, yname;
 plcommand *layout;
 
+/* extern */
+
+extern string *burststring(string,string);
+
 /* local functions */
 real xtrans(real), ytrans(real), ixtrans(real), iytrans(real);
 int pl_cursor(real*, real*, char *);
@@ -519,7 +523,7 @@ string name;
     bool scanopt(), Qi, Qx, Qy, Qd;
     char *show_slider(), *fname;
 
-    if (name!=NULL && *name != NULL)
+    if (name!=NULL && *name != 0)
         fname = name;
     else if (outname == NULL) {
         warning("No out= was ever supplied");

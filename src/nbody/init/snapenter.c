@@ -11,6 +11,7 @@
  *                        and fixed order of things done....
  *	24-mar-94  V2.2   added verbose=
  *       1-apr-97     a   fixed r-format bug
+ *       1-apr-01     b   compiler warnings
  */
 
 #include <stdinc.h>
@@ -30,7 +31,7 @@ string  defv[] = {              /* DEFAULT INPUT PARAMETERS */
     "time=0.0\n     Time at which snapshot taken",
     "headline=\n    Verbiage for output",
     "verbose=t\n    Be verbose when input requested",
-    "VERSION=2.2a\n 1-apr-94 PJT",
+    "VERSION=2.2b\n 1-apr-01 PJT",
     NULL,
 };
 
@@ -76,7 +77,7 @@ void nemo_main()
     headline = getparam("headline");
     Qverbose = getbparam("verbose");
 
-    if (*oname == NULL) {
+    if (*oname == 0) {
         if (Qverbose) printf(">> output file name = ");
         oname = getstring();
     }
@@ -127,7 +128,7 @@ local writesnap(stream outpt)
     int     bits = TimeBit | MassBit | PhaseSpaceBit;
 
     put_history(outpt);
-    if (*headline != NULL)                      /* non-trivial headline? */
+    if (*headline != 0)                      /* non-trivial headline? */
         put_string(outpt, HeadlineTag, headline);
     put_snap(outpt,&btab,&nobj,&tsnap,&bits);
 }
@@ -147,7 +148,7 @@ local string  getstring(void)
     bp = buf;
     while (--i && !isspace(c = getchar()))
         *bp++ = c;
-    *bp = NULL;
+    *bp = 0;  /* terminate string */
     if (i)
         return (copxstr(buf, sizeof(char)));
     else
