@@ -31,6 +31,7 @@
  *      19-aug-00       d   fixed TABs correctly                        pjt
  *	23-sep-01       e   ->nemo_file_lines
  *      24-jan-02       f   to block10, time to use indexed parameter   pjt
+ *       3-feb-02       g   fixed bug if time in header, nbody not      pjt
  */
 
 #include <stdinc.h>
@@ -62,7 +63,7 @@ string defv[] = {
     "options=\n    Other processing options (scan|comment|wrap|spill)",
     "nskip=0\n     Number of lines skipped before each (header+block1+...)",
     "headline=\n   Random mumblage for humans",
-    "VERSION=1.3f\n 24-jan-02 PJT",
+    "VERSION=1.3g\n 3-feb-02 PJT",
     NULL,
 };
 
@@ -236,11 +237,13 @@ local bool get_header(void)
             else
                 warning("Skipping unknown header name %s",header[i]);
         }
-    } else if (nbody==0) {
-        if (hasvalue("nbody")) nbody=getiparam("nbody");
-        ndim = hasvalue("ndim") ? getiparam("ndim") : NDIM;
     } else
 	if (feof(instr)) return FALSE;
+
+    if (nbody==0) {
+        if (hasvalue("nbody")) nbody=getiparam("nbody");
+        ndim = hasvalue("ndim") ? getiparam("ndim") : NDIM;
+    }
 
     if (ndim>0 && ndim != NDIM)
 	error("got ndim = %d, not %d", ndim, NDIM);
@@ -409,7 +412,7 @@ local int get_double(int n, double *d)
         tab2space(line);
         i = nemoinpd(line,&d[k],n-k);
         if (i==0) return k;
-        if (i<0) error("Error parsing %s",line);
+        if (i<0) error("(%d) Error parsing %s",i,line);
         k += i;
     }
     return k;
