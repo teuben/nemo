@@ -1,0 +1,29 @@
+.TH STATUS 3NEMO "1 February 1992"
+.SH NAME
+status \- write out status-line information
+.SH SYNOPSIS
+.nf
+\fB#include <stdinc.h>\fP
+.PP
+\fBstatus(format [ , arg ] ... )\fP
+.PP
+.B char *format;
+.fi
+.SH DESCRIPTION
+\fIstatus\fP prints out a formattable status string to \fIstdout\fP.
+The status string should not have any newlines (\n) in them, it
+will supply a carriage return (\r), such that the next status
+call will overwrite the current one.
+.PP
+Each of these functions converts, formats,  and  prints  its
+\fBargs\fP under control of the \fBformat\fP, as described in
+\fIprintf(3)\fP.
+.SH SEE ALSO
+dprintf(3NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH HISTORY
+.nf
+.ta +1i +4i
+1-feb-92	Created  	Peter
+.fi
