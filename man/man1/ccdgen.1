@@ -21,10 +21,16 @@ Input file (optional) to be added to the
 Output file [???]     
 .TP
 \fBobject=\fP
-Object type []     
+Object type. Valid are flat, exp, gauss, bar. See below for
+an explanation and their parameters. Default: flat
 .TP
 \fBspar=\fP
-Parameters for this object []   
+Parameters for this object. The first parameter is often the peak 
+value, and the second one a scale length. Some object have more
+complex geometries and require more parameters. The meaning
+of the peak value can be modified by setting \fBtotflux=t\fP
+(see below). The defaults are defined per object, but
+are typically 1,1...
 .TP
 \fBcenter=\fP
 Center of object (defaults to mapcenter) in pixels
@@ -41,6 +47,11 @@ Position Angle of disk in which object lives
 \fBinc=\fP
 Inclination Angle of disk in which object lives
 .TP
+\fBtotflux=t|f\fP
+If set to true, the amplitude (always the first parameter in
+\fBspar\fP is interpreted as the total integrated intensity
+instead of the peak value of the object
+.TPtotflux
 \fBcrpix=\fP
 Override/Set crpix (1,1,1) // ignored []  
 .TP
@@ -51,7 +62,15 @@ Override/Set crval (0,0,0) // ignored []
 Override/Set cdelt (1,1,1) // ignored []  
 .TP
 \fBseed=\fP
-Random seed [0]     
+Random seed [0]    
+.SH OBJECTS
+.nf
+.ta +1i +2i
+const	A		A
+exp	A.exp(-r/h)	A,h
+gauss	A.exp(-r^2/(2h^2))	A,h
+bar	A.exp(-r/h)	A,h,e,b   (e=1-minor/major   b=bar position angle w.r.t. disk)
+.fi 
 .SH EXAMPLES
 .SH SEE ALSO
 ccdmath(1NEMO), image(5NEMO)
