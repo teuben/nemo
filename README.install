@@ -140,6 +140,21 @@ Results in /home/teuben/nemo_3.0.4/tmp/test22005/testsuite.log
 	  Sometimes the cause is a rather trivial one, e.g. missing licences 
 	  or a bad path or a bad shell.
 
+*) pieces of configure out of date?  Encountering a new machine?
+
+	1) you can update the config.guess and config.sub
+
+		wget ftp://ftp.gnu.org/pub/gnu/config/config.guess
+		wget ftp://ftp.gnu.org/pub/gnu/config/config.sub
+		chmod a+x config.guess config.sub
+
+	2) regenerate configure from configure.in
+
+		autoconf
+
+	3) replace some *.m4 files
+
+
 
 *) Configuration options known to work:
 
