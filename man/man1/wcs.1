@@ -1,4 +1,4 @@
-.TH WCS 1NEMO "2 April 1996"
+.TH WCS 1NEMO "2 March 2003"
 .SH NAME
 wcs \- coordinate transforms 
 .SH SYNOPSIS
@@ -6,27 +6,33 @@ wcs \- coordinate transforms
 .SH DESCRIPTION
 \fBwcs\fP is really a wrapper for AIPS worldpos/xypix WCS routines
 (\fIworldpos(3NEMO)\fP), much like the \fItestpos.c\fP routine that
-is publicly available, but with a typical NEMO user interface.
+is publicly available, but with a more typical NEMO 
+command line user interface.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBref=\fP
 The reference coordinates (deg) at the reference pixel. Two numbers
-are required.
+are required. 
+These will typically be the equivalent of the \fBcrval\fP in \fIfits(5NEMO)\fP.
 .TP
 \fBrefpix=\fP
 The reference pixels (pixels). They can be floating point numbers and
 do not have to be on or inside a 'grid'. Two numbers are required.
+These will typically be the equivalent of the \fBcrpix\fP in \fIfits(5NEMO)\fP.
 .TP
 \fBinc=\fP
 Increment at the reference pixel.
+These will typically be the equivalent of the \fBcdelt\fP in \fIfits(5NEMO)\fP.
 .TP
 \fBrot=\fP
-Rotation angle (deg) (from N through E) at the reference pixel.
+Rotation angle (deg) (from N through E) at the reference pixel
+These will typically be the equivalent of the \fBcrota\fP in \fIfits(5NEMO)\fP..
 .TP
 \fBtype=\fP
 Projection type (SIN, TAN, ARC, NCP, GLS, MER, AIT).
+These will typically the last 4 characters in the \fBctype\fP in \fIfits(5NEMO)\fP.
 .TP
 \fBformat=\fP
 Output \fIprintf(3)\fP-style format. [Default: %g].
@@ -34,15 +40,16 @@ Output \fIprintf(3)\fP-style format. [Default: %g].
 \fBpix=\fP
 Input Pixel number coordinates. Either one of \fBpix=\fP
 or \fBpos=\fP must be given, if this one is given, conversion
-to world coordinates is done.
+to world coordinates is done. Note that pixels are 1-based in FITS,
+and 0-based in NEMO.
 .TP
 \fBpos=\fP
 Input World Coordinates. If this one is given, conversion
 to pixel coordinates is done.
-.SH EXAMPLES
 .SH SEE ALSO
 worldpos(3NEMO)
 .SH FILES
+src/image/wcs	 - source code
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
@@ -50,4 +57,5 @@ Peter Teuben
 .ta +1.0i +4.0i
 14-oct-94	written	PJT
 2-apr-96	V1.0 man page created	PJT
+2-mar-03	V1.1 fixed pos->pix error; finally added to NEMO	PJT
 .fi

@@ -67,10 +67,11 @@ where "(RA,Dec)" are more generically (long,lat). These functions
 are based on the WCS implementation of Classic AIPS, an
 implementation which has been in production use for more than ten
 years. See the two memos by Eric Greisen
-.nf
-        \fIftp://fits.cv.nrao.edu/fits/documents/wcs/aips27.ps.Z\fP
-        \fIftp://fits.cv.nrao.edu/fits/documents/wcs/aips46.ps.Z\fP
-.fi
+.PP
+        ftp://fits.cv.nrao.edu/fits/documents/wcs/aips27.ps.Z
+.PP
+        ftp://fits.cv.nrao.edu/fits/documents/wcs/aips46.ps.Z
+.PP
 for descriptions of the 8 projective geometries and the
 algorithms.  Footnotes in these two documents describe the
 differences between these algorithms and the 1993-94 WCS draft
@@ -83,11 +84,9 @@ proposal.  The NCP projection is now obsolete (it is a special
 case of SIN).  WCS syntax and semantics for various advanced
 features is discussed in the draft WCS proposal by Greisen and
 Calabretta at:
-.nf    
-        \fIftp://fits.cv.nrao.edu/fits/documents/wcs/wcs.all.ps.Z\fP
-.fi    
 .PP
-.nf
+        ftp://fits.cv.nrao.edu/fits/documents/wcs/wcs.all.ps.Z
+.PP
 \fBworldpos\fP determines accurate position for pixel coordinates.
 It returns 0 if successful, 1 if the angle too large for projection.
 .nf
@@ -227,6 +226,8 @@ Correspondence concerning AIPS should be addressed as follows:
 .fi
 .SH SEE ALSO
 aips
+.PP
+Mark Calabretta's WCSLIB:  http://www.atnf.csiro.au/computing/software/wcslib.html 
 .SH AUTHOR
 Peter Teuben (man page)
 .SH UPDATE HISTORY
