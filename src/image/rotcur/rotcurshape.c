@@ -72,7 +72,7 @@ string defv[] = {
     "rotcur3=\n      Rotation curve name, parameters and set of free(1)/fixed(0) values",
     "rotcur4=\n      Rotation curve name, parameters and set of free(1)/fixed(0) values",
     "rotcur5=\n      Rotation curve name, parameters and set of free(1)/fixed(0) values",
-    "VERSION=1.0\n   20-jul-02 PJT",
+    "VERSION=1.0\n   21-jul-02 PJT",
     NULL,
 };
 
@@ -170,6 +170,28 @@ real rotcur_core1(real r, int n, real *p, real *d)
   return p[0] * d[0];
 }
 
+real rotcur_core2(real r, int n, real *p, real *d)
+{
+  real x = r/p[1];
+  real y1 = 1+x*x;
+  real y2 = sqrt(y1);
+  real v = x / y2;
+
+  d[0] = x;
+  d[1] = -x*p[0]/(y1*y2*p[1]);
+  return p[0] * v;
+}
+
+real rotcur_plummer(real r, int np, real *p, real *d)
+{
+  real x = radius/p[1];
+  real y = pow(1+x*x,-0.75);
+  d[0] = y;
+  d[1] = -x*p[0]/p[1]*(1-x*x/2)/(1+x*x)/y;
+  return p[0] * x * y;
+}
+
+
 
 
 /******************************************************************************/
@@ -208,23 +230,6 @@ nemo_main()
 
     rotcurparse();
     if (nmod==0) error("No rotcur models specified");
-
-#if 0
-    /* 1 model, linear */
-    nmod = 1;
-    ipar[0] = 0;
-    npar[0] = 1;
-    rcfn[0] = rotcur_linear;
-    mpar[0][0] = 4;
-    mmsk[0][0] = 1;
-#endif
-#if 0
-    npar[0] = 2;
-    rcfn[0] = rotcur_core1;
-    mpar[0][0] = 20;
-    mpar[0][1] = 10;
-    mmsk[0][0] = mmsk[0][0] = 1;
-#endif
 
     for (i=0, nparams=GPARAM; i<nmod; i++)     /* count total number of parameters */
       nparams += npar[i];
@@ -305,37 +310,67 @@ rotcurparse()
 {
   string *sp;
   string *burststring(string,string);
-  int nsp;
+  char keyname[30];
+  int i, nsp;
 
   nmod = 0;
-  if (hasvalue("rotcur1")) {
-    sp = burststring(getparam("rotcur1"),", ");
-    nsp = xstrlen(sp,sizeof(string))-2;
-    if (streq(sp[0],"linear")) {
-      if (nsp != 2) error("linear needs 2 numbers");
-      npar[nmod] = 1;
-      mpar[nmod][0] = natof(sp[1]);
-      mmsk[nmod][0] = natoi(sp[2]);
-      rcfn[0] = rotcur_linear;
-    } else if (streq(sp[0],"flat")) {
-      if (nsp != 2) error("flat needs 2 numbers");
-      npar[nmod] = 1;
-      mpar[nmod][0] = natof(sp[1]);
-      mmsk[nmod][0] = natoi(sp[2]);
-      rcfn[0] = rotcur_flat;
-    } else if (streq(sp[0],"core1")) {
-      if (nsp != 4) error("core1 needs 2 numbers");
-      npar[nmod] = 2;
-      mpar[nmod][0] = natof(sp[1]);
-      mpar[nmod][1] = natof(sp[2]);
-      mmsk[nmod][0] = natoi(sp[3]);
-      mmsk[nmod][1] = natoi(sp[4]);
-      rcfn[0] = rotcur_core1;
-    } else {
-      error("Don't have code for %s",sp[0]);
+  for (i=0; i<MAXMOD; i++) {
+    sprintf(keyname,"rotcur%d",i+1);
+    if (hasvalue(keyname)) {
+      sp = burststring(getparam(keyname),", ");
+      nsp = xstrlen(sp,sizeof(string))-2;
+      if (streq(sp[0],"linear")) {
+	if (nsp != 2) error("linear needs 2 numbers");
+	npar[nmod] = 1;
+	mpar[nmod][0] = natof(sp[1]);
+	mmsk[nmod][0] = natoi(sp[2]);
+	rcfn[0] = rotcur_linear;
+      } else if (streq(sp[0],"flat")) {
+	if (nsp != 2) error("flat needs 2 numbers");
+	npar[nmod] = 1;
+	mpar[nmod][0] = natof(sp[1]);
+	mmsk[nmod][0] = natoi(sp[2]);
+	rcfn[0] = rotcur_flat;
+      } else if (streq(sp[0],"core1")) {
+	if (nsp != 4) error("core1 needs 2 numbers");
+	npar[nmod] = 2;
+	mpar[nmod][0] = natof(sp[1]);
+	mpar[nmod][1] = natof(sp[2]);
+	mmsk[nmod][0] = natoi(sp[3]);
+	mmsk[nmod][1] = natoi(sp[4]);
+	rcfn[0] = rotcur_core1;
+      } else if (streq(sp[0],"core2")) {
+	if (nsp != 4) error("core2 needs 2 numbers");
+	npar[nmod] = 2;
+	mpar[nmod][0] = natof(sp[1]);
+	mpar[nmod][1] = natof(sp[2]);
+	mmsk[nmod][0] = natoi(sp[3]);
+	mmsk[nmod][1] = natoi(sp[4]);
+	rcfn[0] = rotcur_core2;
+      } else {
+	error("Don't have code for %s",sp[0]);
+      }
+      nmod++;
     }
-    nmod++;
   }
+
+#if 0
+    /* 1 model, linear */
+    nmod = 1;
+    ipar[0] = 0;
+    npar[0] = 1;
+    rcfn[0] = rotcur_linear;
+    mpar[0][0] = 4;
+    mmsk[0][0] = 1;
+#endif
+#if 0
+    npar[0] = 2;
+    rcfn[0] = rotcur_core1;
+    mpar[0][0] = 20;
+    mpar[0][1] = 10;
+    mmsk[0][0] = mmsk[0][0] = 1;
+#endif
+
 }
 
 /*
