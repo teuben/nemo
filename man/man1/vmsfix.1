@@ -1,0 +1,81 @@
+.TH VMSFIX 1NEMO "11 June 1990" 
+.SH NAME
+vmsfix \- attempt to fix up mangled VMS FITS files
+.SH SYNOPSIS
+.PP
+\fBvmsfix in=\fPinfile \fBout=\fPoutfile [parameter=value]
+.SH DESCRIPTION
+\fIvmsfix\fP can fix up funny ``FITS'' files, e.g. the ones
+written with the VMS copy command and winding up on a Unix
+machine. 
+.PP
+For example, the Unix command \fIdd(1)\fP
+.nf
+   % \fBdd if=/dev/rmt5 of=temp bs=1024\fP 
+.fi
+can be used to extract the mangled FITS files from tape, which is then
+followed by a conversion to true FITS using \fIvmsfix\fP:
+.nf
+   % \fBvmsfix in=temp out=1.fits\fP
+.fi
+(Note: \fIzodiac(1L)\fP can process both DECORDER=T and F files - see the
+\fBswap\fB keyword below).
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 20
+\fBin=\fIinfile\fP
+input file, in funny VMS fits format [no default].
+.TP
+\fBout=\fIoutfile\fP
+output file, more proper FITS format without the VMS headers and trailers.
+[No default].
+.TP
+\fBswap=t|f\fP
+If set to true, swaps the DECORDERed bytes, corrects
+fits SIMPLE keyword to T and DECORDER keyword to F.
+This is needed for display with programs like \fIds(1L)\fP or if
+true FITS files are needed. If \fIzodiac\fP processes the \fIoutfile\fP,
+\fBswap=f\fP can be used though, as long as DECORDER is specified
+correctly. Note: DECORDER is not a standard FITS keyword, and its
+use is not recommended.
+[Default: \fBt\fP].
+.TP
+\fBoffset=\fIpixel-offset\fP
+Extra offset into the FITS data block. The first \fIoffset-pixel\fPs are
+skipped in order to get the bias strip lined up on the left part of the image.
+At this stage it is not understood why this is needed, merely
+introduced as a kludge. It may also results into a few bad pixels near the
+end of the image file, the last row(s). Perhaps the default is
+NAXIS1/2+1? [Default: \fB521\fP]
+.SH BUGS and other FILE FORMAT NOTES
+Can only handle two-dimensional (NAXIS=2) and BITPIX=16 image FITS files.
+.PP
+The input file is not truely 28800 blocked in the FITS sense. The header
+appears in the first 28800 bytes, together with the first part of the data.
+The data in the second and subsequent blocks is indeed in
+chunks of 28800 bytes, preceded by a 1024 byte VMS header 
+(denoting the 28800 size
+of the block to come), and (since apparently written in VMS 30 blocks of 1024
+blocks) trailed by a small 896 byte block garbage to be skipped too.
+.PP
+The very first block of 1024
+characters starting with (0xFF,0xFF) is optional, followed by a 1024
+VMS block size designator. The program detect such not understood anomalies,
+and reports how many bytes needed to be skipped to get at the FITS
+header.
+.SH "SEE ALSO"
+scanfits(1NEMO), fits(5NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +3.0i
+~/usr/pjt/clib	vmsfix.c
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+9-jun-91	V1.0: kludged created for Zodiac         	PJT
+11-jun-91	V1.2: finally got the real story, apart from offset=	PJT
+.fi
