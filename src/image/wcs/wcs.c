@@ -31,7 +31,7 @@ nemo_main()
     char proj[10];
     bool Qworldpos;
     string type, fmt = getparam("format"), sexa;
-    int  n, hh,mm;
+    int  n, hh,dd,mm;
     
 
     if (!hasvalue("pix") && !hasvalue("pos")) error("Need pix= or pos=");
@@ -91,14 +91,37 @@ nemo_main()
     printf(fmt,outval[0]);
     printf(" ");
     printf(fmt,outval[1]);
-#if 0    
+    printf(" ");
     if (Qworldpos) {
       to_hms(outval[0],&hh,&mm,&ss);
+      printf("%3d:%02d:%06.3f ",hh,mm,ss);
+      to_dms(outval[1],&dd,&mm,&ss);
+      printf("%03d:%02d:%06.3f",dd,mm,ss);
     }
-#endif
     printf("\n");
 }
 
+to_hms(double dval, int *dd, int *mm, double *ss)
+{
+  int sign = SIGN(dval);
+  dval = ABS(dval)/15.0;
+  *dd = (int) floor(dval);
+  dval = (dval-(*dd))*60.0;
+  *mm = (int) floor(dval);
+  *ss = (dval-(*mm))*60.0;
+  *dd *= sign;
+}
+
+to_dms(double dval, int *dd, int *mm, double *ss)
+{
+  int sign = SIGN(dval);
+  dval = ABS(dval);
+  *dd = (int) floor(dval);
+  dval = (dval-(*dd))*60.0;
+  *mm = (int) floor(dval);
+  *ss = (dval-(*mm))*60.0;
+  *dd *= sign;
+}
 
 
 
