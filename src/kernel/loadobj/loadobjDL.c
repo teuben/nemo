@@ -17,6 +17,7 @@
 /*              ld -o ld-tmp.so ld-tmp.o                       */
 /* 20-jan-94   only works for SUN OS 5.x now 		       */
 /*             but also works for ELF linux                    */ 
+/*  2-may-03   using RTLD_LAZY instead of 1                    */
 /*                                                             */
 /***************************************************************/
 
@@ -42,7 +43,7 @@ void loadobj(string pathname)
             warning("loadobj: Some error closing old handle");
     }
 #endif
-    dl_handle = dlopen(pathname,1);
+    dl_handle = dlopen(pathname,RTLD_LAZY);  /* used to be 1 */
     err = dlerror();
     if (err != NULL) error("loadobj: error from dlopen: %s",err);
 }
