@@ -16,7 +16,8 @@ loadobj, findfn, mysymbols \- dynamic object file loader
 .B string progname;
 .SH DESCRIPTION
 These routines provide a uniform low-level I/O interface to loading
-object modules. Higher level I/O interfaces are present for a few
+object modules. 
+Higher level I/O interfaces are present for a few
 standard operations (see e.g. \fIpotential(3NEMO)\fP and 
 \fIbodytrans(3NEMO))\fP.
 .PP
@@ -56,7 +57,7 @@ In the following section of code gives an example of use.
     (*fn)();         /* execute routine test() in test.o */
 .fi
 .SH SEE ALSO
-a.out(4), potential(3NEMO), bodytrans(3NEMO))
+a.out(4), potential(3NEMO), bodytrans(3NEMO)), dlopen(3), dyld(3)
 .SH AUTHOR
 Eric Roberts (original SunOS version), Peter Teuben (sun4, coff, dl)
 .SH FILES
@@ -71,4 +72,5 @@ different operating systems.
 .ta +1i +4i
 23-jul-90       created         PJT
 6-nov-91	slight doc improvements; loadobjNEXT.c   	PJT
+30-jun-03	documented mach's dyld    	PJT
 .fi
