@@ -43,7 +43,7 @@
 rm -f install.log >& /dev/null
 touch install.log
 
-set nexec=118            
+set nexec=120            
 
 set stat = 0
 echo \(Sending output to install.log\)
