@@ -28,8 +28,35 @@ Here is an example of how to reverse the columns from a table with 4 columns:
 .nf
     tab2xml a.tab > a.xml
 .fi
+.SH LIMITATION
+Currently can only do a subset of the \fIVOTable(5NEMO)\fP version 1.0 standard,
+as shown below:
+.nf
+<?xml version='1.0'?>
+<!DOCTYPE VOTABLE SYSTEM 'http://us-vo.org/xml/VOTable.dtd'>
+<VOTABLE version='1.0'>
+<!--
+ !  VOTable written by NEMO's tab2xml program
+ !-->
+<RESOURCE>
+<TABLE name="a.tab">
+<FIELD datatype="double" name="col1"/>
+...
+<DATA>
+<TABLEDATA>
+  <TR>
+    <TD>0.666451</TD>
+    ...
+  </TR>
+  ...
+</TABLEDATA>
+</DATA>
+</TABLE>
+</RESOURCE>
+</VOTABLE>
+.fi
 .SH SEE ALSO
-tabcols(1NEMO), tabmath(1NEMO), awk(1)
+tabcols(1NEMO), tabmath(1NEMO), awk(1), VOTable(5NEMO)
 .SH FILES
 src/kernel/tab/tab2xml.c   source code
 .SH AUTHOR
