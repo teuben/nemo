@@ -1,0 +1,11 @@
+%N plummer
+This doc file has been produced with help=t option
+No further help is available, try 'man plummer'
+%A out
+	output file, written in binary format [???]
+%A anisorad
+	anisotropy radius (if le 0, isotropic) [-1.0]
+%A mcutoff
+	fractional mass cutoff for finite radius [0.999999]
+%A VERSION
+	15-nov-90 PJT [1.2]
