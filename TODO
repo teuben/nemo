@@ -19,3 +19,5 @@ some other help on configure:
 	  -R /opt/SUNWspro/lib -L/opt/SUNWspro/lib -lF77 -lM77 -lV77 -lsunmath 
 	  type solution for pgplot, and if so,
 	- FORLIBS need to be added to YAPPLIB
+
+- compile under cygwin
