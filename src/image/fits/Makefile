@@ -104,7 +104,7 @@ fitsgids: fitsgids.c look_nemo.c
 		 $(NEMO_LIBS) -lgdi
 
 sdsfits: sdsfits.c 
-	$(CC) $(CFLAGS) -o sdsfits sdsfits.c $(HDF_LIB) $(NEMO_LIBS) $(EL)
+	$(CC) $(CFLAGS) -o sdsfits sdsfits.c $(HDF_LIB) $(NEMO_LIBS)  $(CFITSIO_LIB) $(EL)
 
 mkfits: mkfits.c 
 	$(CC) $(CFLAGS) -o mkfits mkfits.c $(NEMO_LIBS) $(CFITSIO_LIB) $(EL)
