@@ -1,4 +1,4 @@
-.TH EXTSTRING 3NEMO "24 July 1995"
+.TH EXTSTRING 3NEMO "18 February 2004"
 .SH NAME
 getxstr, putxstr, copxstr, xstrlen, xstreq \- extended string functions
 .SH SYNOPSIS
@@ -6,25 +6,25 @@ getxstr, putxstr, copxstr, xstrlen, xstreq \- extended string functions
 .B #include <stdinc.h>
 .B #include <extstring.h>
 .PP
-.B char *getxstr(str, nbyt)
+.B void *getxstr(str, nbyt)
 .B stream str;
 .B int nbyt;
 .PP
 .B bool putxstr(str, xstr, nbyt)
 .B stream str;
-.B char *xstr;
+.B void *xstr;
 .B int nbyt;
 .PP
-.B char *copxstr(xstr, nbyt)
-.B char *xstr;
+.B void *copxstr(xstr, nbyt)
+.B void *xstr;
 .B int nbyt;
 .PP
 .B int xstrlen(xstr, nbyt)
-.B char *xstr;
+.B void *xstr;
 .B int nbyt;
 .PP
 .B bool xstreq(xstr1, xstr2, nbyt)
-.B char *xstr1, *xstr2;
+.B void *xstr1, *xstr2;
 .B int nbyt;
 .fi
 .SH DESCRIPTION
@@ -57,4 +57,8 @@ stdio(3), malloc(3)
 .SH DIAGNOSTICS
 Low-level catastrophies (eg, running out of memory) generate messages via
 \fIerror\fP(3).
-
+.SH HISTORY
+.nf
+.ta +1i +3i
+24-jul-95	document written	JEB
+18-feb-04	char->void	PJT
