@@ -96,6 +96,7 @@ string outoptions;
 
 int maxstat;
 
+real gxmin, gxmax, gymin, gymax;
 real xmin, xmax, ymin, ymax, xplot[2], yplot[2];
 string xname, yname;
 plcommand *layout;
@@ -301,6 +302,10 @@ gettable()
         ymax = dmean + 0.5*drange*1.05;
     }
     dprintf(0,"Yvar %s: displayed min= %g max= %g\n",yname,ymin,ymax);
+    gxmin = xmin;
+    gxmax = xmax;
+    gymin = ymin;
+    gymax = ymax;
 
     /* careful: the color stuff doesn't work */
     inifie(getparam("color"));
@@ -368,6 +373,7 @@ int zoom(void)
   xmax = ixtrans((double)x);
   ymin = iytrans((double)yref);
   ymax = iytrans((double)y);
+  printf("New min/max: X: %g %g Y: %g %g\n", xmin,xmax, ymin,ymax);
 
   ini_display();
   printf("New box: X: %g %g Y: %g %g\n", xplot[0], xplot[1], yplot[0], yplot[1]);
@@ -388,8 +394,9 @@ string interact_help = "Menu of commands:\n\n\
     h s <step>  set step in 'hi' slider\n\
     b <step>    step both 'lo' and 'hi' slider\n\
     <digit>     change slider to interact with\n\
-    c           cursor mode\n\
-    z           zoom with a box\n\
+    c           cursor mode (EXP)\n\
+    z           zoom with a box (EXP)\n\
+    Z           zoom reset to original setting\n\
     r           reset lo/hi to min/max for this slider\n\
     s           show min/lo/hi/max for all sliders\n\
     u		update screen new\n\
@@ -520,7 +527,7 @@ interact()
 	      ycm > 2 && ycm < 18) {
 	    xp = ixtrans(xcm);
 	    yp = iytrans(ycm);
-	    dprintf(0,"POINT: %g %g\n",xp,yp);
+	    dprintf(1,"POINT: %g %g\n",xp,yp);
 	  }
 	} else if (c=='A') {
 	  pl_getpoly(xpol, ypol, MAXPOL);
@@ -554,7 +561,15 @@ interact()
       break;
     case 'z':  
       while (zoom())
-	;
+	re_display(0);
+      break;
+    case 'Z':  
+      xmin = gxmin;
+      xmax = gxmax;
+      ymin = gymin;
+      ymax = gymax;
+      ini_display();
+      re_display(0);
       break;
     case '\0':
       if (sliders[s].stepper == 1) {
@@ -673,6 +688,7 @@ funny_table_output(FILE *fp)
 ini_display()
 {
     int i;
+    static bool first = TRUE;
 
     plinit("***",0.0,20.0,0.0,20.0);
 
@@ -681,16 +697,31 @@ ini_display()
     yplot[0] = ymin;        /* set scales for ytrans() */
     yplot[1] = ymax;
 
-    for (i=0; i<npoints; i++) {     /* rescale all points to cm */
-        points[i].xd = points[i].x;
+    if (first) {
+      dprintf(1,"Initializing points\n");
+      dprintf(1,"0: %g %g %g %g\n",points[0].x,points[0].y,points[0].xd,points[0].yd);
+      for (i=0; i<npoints; i++) {     /* rescale all points to cm */
+        points[i].xd = points[i].x;             /* xd,yd in physical */
         points[i].yd = points[i].y;
-        points[i].x = xtrans(points[i].x);
+        points[i].x = xtrans(points[i].x);      /* x,y now in cm (plot) */
         points[i].y = ytrans(points[i].y);
         points[i].visib = TRUE;
         points[i].oldvis = TRUE;
+      }
+      dprintf(0,"1: %g %g %g %g\n",points[0].x,points[0].y,points[0].xd,points[0].yd);
+    } else {
+      plframe();
+      dprintf(0,"Resetting points\n");
+      dprintf(0,"1: %g %g %g %g\n",points[0].x,points[0].y,points[0].xd,points[0].yd);
+      for (i=0; i<npoints; i++) { 
+        points[i].x = xtrans(points[i].xd);    /* put x,y back in cm */
+        points[i].y = ytrans(points[i].yd);
+      }
+      dprintf(0,"1: %g %g %g %g\n",points[0].x,points[0].y,points[0].xd,points[0].yd);
     }
     box_display();
     if (layout) pl_exec(layout);
+    first = FALSE;
 }
 
 box_display()
