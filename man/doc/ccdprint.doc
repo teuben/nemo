@@ -1,0 +1,26 @@
+%N ccdprint
+%D print values at gridpoints of an image
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man ccdprint' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input filename [???]
+%A x
+	Pixels in X to print [0]
+%A y
+	Pixels in Y to print [0]
+%A z
+	Pixels in Z to print [0]
+%A scale
+	Scale factor for printout [1.0]
+%A format
+	Format specification for output [%g]
+%A newline
+	Force newline between each number? [f]
+%A label
+	Add x, y and or z labels add appropriate labels []
+%A offset
+	Offset (0 or 1) to index coordinates X,Y,Z [0]
+%A VERSION
+	14-oct-99 PJT [1.2b]
