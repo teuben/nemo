@@ -6,6 +6,7 @@
 #
 #	2-apr-97    sort list and remove duplicates
 #       9-apr-01    -m now also forces remakes if they exist
+#      28-jun-02    fix script for solaris to handle large # entries 
 
 if ($#argv == 0) goto usage
 
@@ -45,7 +46,8 @@ loop:
 
 check:
   if ($mknemo == 0) goto done
-  foreach m (`echo $make|awk '{for(i=1;i<=NF;i++)printf("%s\n",$i)}'|sort|uniq`)
+#  foreach m (`echo $make|awk '{for(i=1;i<=NF;i++)printf("%s\n",$i)}'|sort|uniq`)
+  foreach m (`echo $make|tr " " "\n" |sort|uniq`)
     mknemo $m
     if ($status == 0) @ err--
   end
