@@ -21,6 +21,7 @@
  *   7-may-04    V7.0 added the notion of a reference point and value
  *                    by (for now optionally) using
  *                    why was i so lazy and didn't do this in 1987.....
+ *   6-jan-05         added prototypes for wcsio.c
  */
 #ifndef _h_image
 #define _h_image
@@ -228,6 +229,10 @@ real ***map3_image( imageptr );
 /* worldpos.c */
 int worldpos(double xpix, double ypix, double xref, double yref, double xrefpix, double yrefpix, double xinc, double yinc, double rot, char *type, double *xpos, double *ypos);
 int xypix(double xpos, double ypos, double xref, double yref, double xrefpix, double yrefpix, double xinc, double yinc, double rot, char *type, double *xpix, double *ypix);
+
+/* wcsio.c */
+void wcs_f2i(int ndim, double *crpix, double *crval, double *cdelt,            image *iptr);
+void wcs_i2f(image *iptr, 	     int ndim, double *crpix, double *crval, double *cdelt);
 
 
 #endif
