@@ -3,6 +3,7 @@
  *		22-mar-94
  *		12-apr-97	SINGLEPREC
  *		18-jul-01	read more times?
+ *              14-oct-03       ieck, keeping up with many starlab changes...
  */
 
 #include <stdinc.h>                 /* NEMO */
@@ -14,24 +15,26 @@
 
 #include "pdyn.h"	            /* STARLAB */
 
-string defv[] = {
+typedef char *nemo_string;
+
+nemo_string defv[] = {
     "out=???\n          Output snapshot file (input dyn from stdin)",
-    "VERSION=1.2b\n     21-jul-01 PJT",
+    "VERSION=1.3\n      14-oct-03 PJT",
     NULL,
 };
 
-string usage = "convert STARLAB dyn to NEMO snapshot";
+nemo_string usage = "convert STARLAB dyn to NEMO snapshot";
 
 void nemo_main(void)
 {
   pdyn *proot;
   int k, i=0, n=0, nbody=0;
   real *mass, *pos, *vel, *aux, *mptr, *pptr, *vptr, *aptr, tsnap;
-  vector temp;
+  vec temp;
     
-  check_real(sizeof(real));
+  check_real(sizeof(real));   /* make sure real==double */
 
-  while ((proot = get_pdyn(cin)) != NULL) {
+  while ((proot = getpdyn(cin)) != NULL) {
     
     if (nbody == 0) {
       for_all_leaves(pdyn, proot, bi) {
