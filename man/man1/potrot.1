@@ -4,17 +4,11 @@ potrot \- query a NEMO potential in the XY plane, and derive a rotation curve
 .SH SYNOPSIS
 \fBpotrot\fP [parameter=value]
 .SH DESCRIPTION
-  I've tried out the alternative approach to get a rotation curve from  
-a potential. I might move this over into the potq program, but for now
-it's implemented in potrot (it should have a manual page by the time
-you read this). Basically it uses the grid to derive a radial force,
-which can be averaged over a number of angles (but e.g. by using p=0
-or p=90 you can get a major or minor axis ration curve),from whidhc then
-the averages rotation curve is derived   v=sqrt(<force>*r)
-Looks nice and smooth for N4303 which i tried, as attached. I've done
-this:
-
-
+\fBpotrot\fP computed the "rotation curve" (as defined by
+\fIsqrt(radius*radial_force)\fP) of a potential. Single slit
+rotation curves can be defined (by using a single given 
+angle \fBp=\fP) as well as averaged along a set of position
+angles (e.g. \fBp=0:90:2\fP).
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -29,7 +23,8 @@ Parameters for potential (1st one is pattern speed)
 Any optional data file associated with potential []
 .TP
 \fBr=\fP
-Radii to sample [0:2:0.1]    
+Radii to sample. Notice for most potentials r=0 results in NaN's or 
+divisions by zero and generally bad output.  [0:2:0.1]    
 .TP
 \fBp=\fP
 Angles to sample (degrees) [0]   
