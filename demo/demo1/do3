@@ -1,0 +1,13 @@
+#! /bin/csh -f
+#
+
+set run=run1
+set times=0
+
+foreach a ($*)
+  set $a
+end
+
+snapprint $run.02 r,phi times=$times > tab1
+snaptrim $run.02 - times=$times | hackdens - - | snapprint - r,phi > tab2
+paste tab1 tab2 | tabmath - - '%2,log(%4)' all | tabplot - 

@@ -1,0 +1,39 @@
+#! /bin/csh -f
+#
+# study a selected orbit from demo1, this script is 'tkrun' enabled
+#
+
+#> ENTRY run=run1 	
+#> SCALE orbit=0 	0:1000:1
+#> SCALE omega=1.3	-2:2:0.01
+#> SCALE range=2        0:10:0.1
+#> SCALE tstop=10       0:100:0.1
+#> SCALE dt=0.01        0.0001:0.1:0.0001
+
+set run=run1
+set orbit=0
+set omega=1.3
+set range=2
+set tstop=10
+set dt=0.01
+
+foreach a ($*)
+  set $a
+end
+
+#	set some useful shorthands
+set xyrange=-${range}:${range}
+set nsteps=`nemoinp $tstop/$dt format=%d`
+
+#       no printouts to for tkrun  to run quiet
+setenv DEBUG -1
+
+snapmask $run.13 - $orbit |\
+ snapscale - - rscale=1,1,0 vscale=1,1,0 |\
+ stoo - - |\
+ orbint - $run.tmp nsteps=$nsteps dt=$dt potname=ccd potfile=$run.112 potpars=$omega
+orbplot $run.tmp xrange=$xyrange yrange=$xyrange "xlabel=x orbit $orbit" yapp=1/xs
+orbsos $run.tmp y | tabplot - 3 4 point=2,0.1 color=2 yapp=2/xs
+
+# 	cleanup temporary file(s)
+rm -f $run.tmp
