@@ -1,0 +1,233 @@
+.TH IO_NEMO_F 3NEMO "07 April 1997"
+.SH NAME
+io_nemo_f \(em High level C function to read/save NEMO snapshot from a
+FORTRAN program.
+.SH SYNOPSIS
+.nf
+.PP
+\fBio_nemo_f(filename, slen, MAXBODY, param, ....)\fP
+\fBcharacter * filename(*);/* input/output file name */\fP
+\fBinteger     slen;       /* #characters in 'infile' */\fP
+\fBinteger     MAXBODY;    /* maximun bodies allowed */\fP
+\fBcharacter * param(*);   /* parameters list */\fP
+.SH DESCRIPTION
+\fIio_nemo_f\fP is a high level C function which allows the user to
+perform I/O operations on NEMO snapshot files from a FORTRAN program. 
+.PP
+The use of this function is very simple and doesn't require any
+knowledge of how to program in NEMO.
+.PP
+.SH PARAMETERS
+ 
+.TP 10
+\fBfilename\fP=\fIcharacter variable\fP
+Input/Output file name of the \fINEMO\fP snapshot
+that you want to read/save. (this CHARACTER string must be a
+VARIABLE, not a constant !)
+.TP
+\fBslen\fP=\fIinteger\fP
+Lenght of the file name. 
+(We need this information because of the interface bettween FORTRAN
+and C language)
+.TP
+\fBMAXBODY\fP=\fIinteger\fP
+Size of array that you use to get/put the data. Match the size of the
+array to the maximum number of bodies that you are able to read/save.
+
+.TP
+\fBparam\fP=\fIcharacter\fP
+Param is a string in which you specify what you want to do with
+the NEMO file. Each choice is defined with a flag separated with ','.
+There are two kind of flags. (1) \fIInformation flags\fP allow to
+specify some actions during the I/O.
+(2) \fIVariables flags\fP allow to specify what you want to get/put
+from/into the NEMO file. The FLAGS list is described below.
+.PP
+.SH (1) Information flags
+.TP 10
+\fBs | save\fP
+Specify that you want to save data to a NEMO file.
+.TP 
+\fBr | read\fP
+Specify that you want to read data from a NEMO file.
+.TP
+\fBreal4|single\fP
+Specify that the variables that you use to get/put data from/into NEMO
+files have been declared in \fIsingle precision\fP. (real * 4).
+.TP
+\fBreal8|double\fP
+Specify that the variables you use to get/put data from/into NEMO
+files have been declared in \fIdouble precision\fP. (real * 8).
+.TP
+\fBf | n3\fP
+Assumes that you declared yours two-dimensionnal FORTRAN arrays (pos,
+vel, acc) using the number of bodies for the first dimension and the
+number of space coordinates (always 3D) for the second dimension. (example : real * 4 pos(\fI10000\fP,\fI3\fP) ).
+.TP 
+\fBc | 3n\fP
+Assumes that you declared yours two-dimensionnal FORTRAN arrays (pos,
+vel, acc) using the number of space coordinates (always 3D)  for the
+first dimension and the number of bodies for the second
+dimension. (example : real * 4 vel(\fI3\fP,\fI10000\fP)
+).
+.TP
+\fBinfo | diag\fP
+Gives some informations during the runtime execution.
+.PP
+
+.SH (2) Variables flags
+
+.TP 10
+\fBn|nbody\fP
+Match to the number of \fIbodies\fP.
+.TP
+\fBt|time\fP
+Match to the snapshot \fItime\fP.
+.TP
+\fBm|mass\fP
+Match to the particle \fImasses\fP.
+.TP
+\fBx|pos\fP
+Match to the particle \fIpositions\fP.
+.TP
+\fBv|vel\fP
+Match to the particle \fIvelocities\fP.
+.TP
+\fBp|pot\fP
+Match to the particle \fIpotentials\fP.
+.TP
+\fBa|acc\fP
+Match to the particle \fIaccelerations\fP.
+.TP
+\fBst\fP
+Select snapshot's times. You have to  put the selected
+time in a string limited by the character '#'. Example "100:150#"
+select the time beween 100 and 150.
+
+.TP
+
+.SH
+The \fIvariable flags\fP specify which data you will
+get/put from/into the NEMO file, hence after the
+selection string \fIparam\fP, you must insert all the selected
+variables in the same order with which they have been declared in \fIparam\fP.
+
+.SH EXAMPLE
+Here is a FORTRAN program to illustrate the use of the function
+\fIio_nemo_f()\fP. The program reads all the time steps into a NEMO a
+file, and saves the data in another NEMO file.
+.PP
+.nf
+C----------------------------------------------------------- 
+      program nemo_fortran
+      implicit none
+
+c maximum # of bodies
+      integer MAXBODY	
+      parameter (MAXBODY=100000)
+
+      real*8  
+c particle masses.
+     +     mass(1:MAXBODY),
+c particle positions and velocities    
+     +     pos(3,MAXBODY), vel(3,MAXBODY),
+c snapshot time
+     +     ts
+
+c file names
+      character infile*80,outfile*80
+      integer i,j,k,nbody,io_nemo_f,close_io_nemo_f
+
+c get input snapshot filename
+      write(*,*)'Infile name : '
+      read(*,'(a80)')infile
+
+c get output snapshot filename
+      write(*,*)'outfile name : '
+      read(*,'(a80)')outfile
+
+      i = 1
+      do while (i.gt.0) 
+
+c read the snapshot up to the end of file ( i <= 0 )
+         i=io_nemo_f(infile,80,MAXBODY,"real8,3n,read,n,m,x,v,t,info",
+     $        nbody,mass,pos,vel,ts)
+
+c save the snapshot
+         if (i.gt.0) then
+            j=io_nemo_f(outfile,80,MAXBODY,"real8,3n,save,n,m,x,v,t, 
+     $           info",nbody,mass,pos,vel,ts)
+         endif
+      end do
+
+c close the snapshot 'outfile'
+      k= close_io_nemo_f(outfile,80)
+      end
+C----------------------------------------------------------- 
+.SH IMPORTANT THINGS
+a) Notice in the example above, that in the parameter list, 'n' matches
+\'nbody', 'm' matches 'mass', 'x' matches 'pos', 'v' matches 'vel', 't' matches 'ts'. 
+All the variables are in the same order that they have been
+declared in the \fIparam list\fP.
+
+b) You must declare all the two-dimensionnal arrays in the same way.
+That means all the dimensions must be the same for all the
+arrays, moreover both one-dimensional and two-dimensional array must
+have the same size for the maximum of bodies.
+
+c) All the arrays must be declared in the same floating type.
+
+d) During a "read" operation, the function io_nemo_f() return '0' if
+it is the end of the NEMO file. That means that no new values have
+been read.
+
+.fi
+.PP
+.SH COMPILATION
+To use the function \fIio_nemo_f()\fP from a FORTRAN program you must
+link your program with the library 
+\fIlibio_nemo_f.a\fP as described in the Makefile below. 
+Under g77 compiler, it's necessary to compile your FORTRAN code with 
+the following options:
+.PP
+\fIFFLAGS = -fno-second-underscore -fwritable-strings\fP
+.PP
+.PP
+.nf
+# ----------------------------------------
+# MAKEFILE to use IO_NEMO_F
+# 
+# ----------------------------------------
+
+# path for NEMO Library and IO_NEMO_F library
+LIBS = -L$(NEMOLIB) -L/usr/local/lib
+FFLAGS = $(OPT) -fno-second-underscore -fwritable-strings
+
+nemo_fortran : nemo_fortran.o
+	$(FC) -o $@ nemo_fortran.o $(LIBS) \\
+                  -lio_nemo_f -lm
+
+# ----------------------------------------
+.fi
+.SH SEE ALSO
+.nf
+nemo(1NEMO), snapshot(5NEMO).
+.fi
+.SH AUTHOR
+Jean-Charles LAMBERT
+
+.SH BUGS and COMMENT
+Please, report all bugs and comment to : 
+jcl@ouzo.cnrs-mrs.fr
+
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+15-Jun-95	 V1.0 : created                   JCL
+21-Jun-95	 V1.1 : bugs fixes                JCL
+12-Dec-95	 V1.2 : possibility to close file JCL
+11-Mar-96	 V1.3 : acceleration I/O added    JCL
+04-Apr-97	 V1.4 : generic real format       JCL
+07-Apr-97	 V1.41: manual created            JCL 
+09-Apr-97	 V1.42: manual corrections         AS
+.fi
