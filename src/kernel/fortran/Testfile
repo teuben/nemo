@@ -1,6 +1,6 @@
 DIR = src/kernel/fortran
 BIN = 
-NEED =$(BIN)
+NEED =$(BIN) unfio ftoc
 
 #	no testing done here yet 
 
