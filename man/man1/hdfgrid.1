@@ -7,14 +7,19 @@ hdfgrid \- Regrid a polar HDF4 SDS to cartesian image
 \fBhdfgrid\fP regrids HDF (SDS) output files that are assumed to
 be in polar (rad-phi) coordinates. This program was developed 
 for the bar-hydro project (Piner, Stone & Teuben, ApJ - nov 1995)
-using a version of \fBcmhog\fP.
+using a version of \fBcmhog\fP, though it can also handle
+rank=3 SDS files for which the last dimension is 1, as long
+as the first two dimensions are radius and angle. Another constraint
+is that the data must fill half the plane (mirror=t) or a full
+plane (mirror=f), otherwise interpolation errors will dominate
+the gaps in the region of missing data.
 .PP
 The (2D) four-point interpolation that is used in regridding is
 based on the one in \fIcmhog/movie.src\fP, but includes correct
 interpolations for points near the Y axis that need contributions
 from the phantom "mirror" points (recall that the files are
 assumed to contain X>0 information only, the X<0 plane is assumed
-from point symmetry around the origin).
+from point symmetry around the origin). 
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
