@@ -46,6 +46,9 @@ extern int nemoinpf (string, float *, int);
 extern int nemoinpl (string, long *, int);
 extern int nemoinpb (string, bool *, int);
 
+extern int    natoi(string);
+extern double natof(string);
+
 #if !defined(SINGLEPREC)
 # define nemoinpr  nemoinpd
 # define getrparam getdparam
