@@ -1,5 +1,5 @@
 DIR = src/nbody/init
-BIN = snapenter mkplummer mkexpdisk real
+BIN = snapenter mkplummer mkexpdisk real mkommod mkhomsph
 NEED = $(BIN) tsf snapprint
 
 help:
@@ -11,6 +11,7 @@ need:
 clean:
 	@echo Cleaning $(DIR)
 	@rm -f snapenter.in snapenter.out snapenter.cmp mkplummer.out mkexpdisk.out
+	@rm -f mkhomsph.out mkommod.out
 
 NBODY = 10
 
@@ -54,6 +55,16 @@ mkexpdisk:
 	@echo Running $@
 	mkexpdisk mkexpdisk.out $(NBODY) seed=123 ; nemo.coverage mkexpdisk.c
 	tsf mkexpdisk.out
+
+mkhomsph:
+	@echo Running $@
+	mkhomsph mkhomsph.out $(NBODY) seed=123
+	tsf mkhomsph.out
+
+mkommod:
+	@echo Running $@
+	mkommod $(NEMODAT)/k5isot.dat mkommod.out $(NBODY)
+	tsf mkommod.out
 
 real:
 	@echo f2d conversion:
