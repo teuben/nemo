@@ -1,8 +1,8 @@
 /*  magalie:   make a galaxy (MaGalie; Boily et al. prescription)
  *
  *  <dark-ages> Original fortran code               Boily et al.
- *  21-mar-04   interface created in rainy Strasbourg           PJT/CB
- *
+ *  21-mar-04   1.1 interface created in rainy Strasbourg           PJT/CB
+ *  24-mar-04   1.2 added most primary keywords, at 37,000ft        PJT
  *
  */
 
@@ -21,9 +21,30 @@ string defv[] = {
   "ndisk=20000\n  Number of particles in disk  (use 0 to skip this component)",
   "nbulge=5000\n  Number of particles in bulge (use 0 to skip this component)",
   "nhalo=40000\n  Number of particles in halo  (use 0 to skip this component)",
+
+  "hdisk=0.2\n    Scaleheight of the disk (in units of scale length)",
+  "rsolar=2.43\n  Solaris radius for calibration of Vsolar=220",
+  "Qtoomre=1.5\n  Toomre stability parameter",
+  "cdisk=10\n     Cutoff radius of disk",
+  "zdisk=2\n      Height cutoff of disk",
+
+  "mbulge=0.25\n  Mass of bulge (in units of disk mass)",
+  "rbulge=2\n     Scalelength of bulge",
+  "cbulge=10\n    Cutoff radius of bulge",
+  "zbulge=1\n     Cutoff height of bulge",
+  "qbulge=\n      Axis ratio C/A of bulge, in case flattened",
+  "fbulge=\n      Streaming fraction of bulge, in case streaming",
+
+  "mhalo=5\n      Mass of halo (in units of disk mass)",
+  "rhalo=2\n      Scalelength of halo",
+  "chalo=20\n     Cutoff radius of halo",
+  "c2halo=20\n    Cutoff radius of halo for ISO (for LH it is c2halo)",
+  "qhalo=\n      Axis ratio C/A of halo, in case flattened",
+  "type=LH\n      Type of halo: LH or ISO",
+
   "seed=0\n       Random seed",
   "cleanup=f\n    cleanup run directory after use (not used yet)",
-  "VERSION=1.1\n  23-mar-04 PJT",
+  "VERSION=1.2\n  24-mar-04 PJT",
   NULL,
 };
 
@@ -32,6 +53,9 @@ string usage="Boily et al. composite bulge-disk-halo model";
 void goto_rundir(string name);
 void make_rundir(string name);
 void run_program(string cmd);
+
+double getdparamq(string,double);
+string getsparamq(string);
 
 void nemo_main(void)
 {
@@ -61,14 +85,14 @@ void nemo_main(void)
   fprintf(datstr,"%d             !! Random generator seed (ran1)\n",seed);
   fprintf(datstr,"n               ! Output particles smooth length?\n");
   fprintf(datstr,"%d             !! Number of disc particles (M_d=1)\n",ndisk);
-  fprintf(datstr,"3.              ! Mass of disk (reset = 1 for default)\n");
+  fprintf(datstr,"1.              ! Mass of disk (reset = 1 for default)\n");
   fprintf(datstr,"1.              ! Disc scalelength\n");
-  fprintf(datstr,".1              ! Disc scale height ( = 1/5 length )\n");
-  fprintf(datstr,"2.43            ! Solar radius\n");
-  fprintf(datstr,"1.5             ! Toomre Q parameter @ Sun ( was 3/2 -> close to 1)\n");
+  fprintf(datstr,"%g             !! Disc scale height ( = 1/5 length )\n",getdparam("hdisk"));
+  fprintf(datstr,"%g             !! Solar radius\n",getdparam("rsolar"));
+  fprintf(datstr,"%g             !! Toomre Q parameter @ Sun ( was 3/2 -> close to 1)\n",getdparam("Qtoomre"));
   fprintf(datstr,".1              ! disc particle smoothing length (set to numerical resolution)\n");
-  fprintf(datstr,"2.              ! z-max (= 10.*scale height)\n");
-  fprintf(datstr,"10.             ! Max disc part radius\n");
+  fprintf(datstr,"%g             !! z-max (= 10.*scale height)\n",getdparam("zdisk"));
+  fprintf(datstr,"%g             !! Max disc part radius\n",getdparam("cdisk"));
   
   fprintf(datstr,"n               ! Gas in disc?\n");
   fprintf(datstr,"0               ! Number of disc gas particles\n");
@@ -81,30 +105,31 @@ void nemo_main(void)
   fprintf(datstr,"n               ! include gas self-gravity (in disc)? [y/n]\n");
   
   fprintf(datstr,"y               ! Add bulge?\n");
-  fprintf(datstr,"0.75            ! Mass of bulge\n");
-  fprintf(datstr,"2.              ! Bulge scale length (hernquist 'a')\n");
+  fprintf(datstr,"%g             !! Mass of bulge\n",getdparam("rbulge"));
+  fprintf(datstr,"%g             !! Bulge scale length (hernquist 'a')\n",getdparam("rbulge"));
   fprintf(datstr,"y               ! bulge self-gravity?\n");
   fprintf(datstr,"%d             !! N part in  bulge\n",nbulge);
-  fprintf(datstr,"10.             ! max radius for bulge particles\n");
+  fprintf(datstr,"%g             ! max radius for bulge particles\n",getdparam("cdisk"));
   fprintf(datstr,".01             ! softening length for particles\n");
-  fprintf(datstr,"n               ! Non-spherical bulge?\n");
-  fprintf(datstr,".89             ! Value of minor axis ratio ( c/a < 1 )\n");
-  fprintf(datstr,"1.              ! Z-max value for bulge particles\n");
+  fprintf(datstr,"%s             *! Non-spherical bulge?\n", getsparamq("qbulge"));
+  fprintf(datstr,"%g             *! Value of minor axis ratio ( c/a < 1 )\n",getdparamq("qbulge",1.0));
+  fprintf(datstr,"%g             !! Z-max value for bulge particles\n",getdparam("zbulge"));
   fprintf(datstr,"5               ! Number of Simpson integration steps\n");
-  fprintf(datstr,"n               ! Include rotation ? (flip z-momentum component)\n");
-  fprintf(datstr,".0              ! Fraction of stars with aligned momentum (0<f<1)\n");
+  fprintf(datstr,"%s             *! Include rotation ? (flip z-momentum component)\n",getsparamq("fbulge"));
+  fprintf(datstr,"%g             *! Fraction of stars with aligned momentum (0<f<1)\n",getdparamq("fbulge",0.0));
   
   fprintf(datstr,"y               ! Include a halo?\n");
   fprintf(datstr,"y               ! halo self-gravity ?\n");
-  fprintf(datstr,"20.             ! max radius of halo\n");
+  fprintf(datstr,"%g             !! max radius of halo\n",getdparam("chalo"));
   fprintf(datstr,"%d             !! Halo particle number\n",nhalo);
   fprintf(datstr,"0.01            ! halo particle softening length\n");
-  fprintf(datstr,"LH              ! Halo type (LH or IS)\n");
-  fprintf(datstr,"10.             ! Halo mass\n");
-  fprintf(datstr,"2.              ! Halo core radius  (need two lengths if IS halo)\n");
+  fprintf(datstr,"%s             !! Halo type (LH or IS)\n",getparam("type"));
+  fprintf(datstr,"%g             !! Halo mass\n",getdparam("mhalo"));
+  fprintf(datstr,"%g             !! Halo core radius  (need two lengths if IS halo)\n",getdparam("c2halo"));
   fprintf(datstr,"2.              ! Second length : dummy (LH) or truncation radius (IS)\n");
-  fprintf(datstr,"n               ! Non-spherical halo?\n");
-  fprintf(datstr,".5              ! aspect ratio (spheroid only)\n");
+  fprintf(datstr,"%s             *! Non-spherical halo?\n",getsparamq("qhalo"));
+  fprintf(datstr,"%g             *! aspect ratio (spheroid only)\n",getdparamq("qhalo",1.0));
+
   fprintf(datstr,"n               ! Galactic satellite\n");
   fprintf(datstr,".1              ! Satellite mass\n");
   fprintf(datstr,"1.              ! Satellite scale length (LH model only)\n");
@@ -113,6 +138,7 @@ void nemo_main(void)
   fprintf(datstr,"y               ! Include satellite self-gravity ? (yes = live model only)\n");
   fprintf(datstr,"0               ! number of satellite particles\n");
   fprintf(datstr,"0.1             ! smoothing length for satelllite particles\n");
+
   fprintf(datstr,"b               ! data format for output (a)scii or (b)inary\n");
   fprintf(datstr,"nbody           ! formatted as LH, nbody\n");
   fprintf(datstr,"m.dat           ! name of dataset (note - truncated at cr character)\n");
@@ -130,7 +156,7 @@ void nemo_main(void)
   fprintf(datstr,"unfio in=m.dat block=0 type=f | tabtos - ../%s block1=m,x,y,z,vx,vy,vz options=wrap nbody=%d\n",
 	  out, ndisk+nbulge+nhalo);
   strclose(datstr);
-  run_program("chmod +x make-it; ./make-it");   /* run it ! */
+  run_program("chmod +x make-it; ./make-it > magalie.log 2>&1");   /* run it ! */
   if (Qcleanup) {
     dprintf(0,"Removing the run directory %s.tmpdir\n",out);  
     sprintf(rundir,"cd ..; rm -rf %s.tmpdir",out);  
@@ -153,4 +179,14 @@ void make_rundir(string name)
 void run_program(string cmd)
 {
   system(cmd);
+}
+
+double getdparamq(string key, double def)
+{
+  return hasvalue(key) ? getdparam(key) : def ;
+}
+
+string getsparamq(string key)
+{
+  return hasvalue(key) ? "y" : "n";
 }

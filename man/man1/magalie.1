@@ -1,4 +1,4 @@
-.TH MKKD95 1NEMO "21 March 2004"
+.TH MKKD95 1NEMO "24 March 2004"
 .SH NAME
 magalie \- Boily et al. composite disk-bulge-halo model
 .SH SYNOPSIS
@@ -7,10 +7,28 @@ magalie \- Boily et al. composite disk-bulge-halo model
 \fBmagalie\fP creates a composite Disk-Bulge-Halo galaxy in 
 near equilibrium following the procedure described in
 Boily et al.(2000). This program is merely a NEMO wrapper
-that assembles all the correct parameters, runs the fortran
+to Version 1 of the fortran program \fImagalie.exe\fP.
+It assembles all the correct parameters, runs the fortran
 namesake program in a temporary rundirectory and converts the
 ascii output to a NEMO \fIsnapshot(5NEMO)\fP.
 .PP
+The galaxy is scaled based on the disk with mass=1 and 
+(exponential) scalelength=1. In addition, a
+selection of the solar radius (2.43 scale lenghts is the
+current default) will fix the rotation speed at the
+IAU value of 220 km/s, though the velocity is also normalized
+to this value.
+.PP
+This NEMO frontend only controls a number of parameters, to match
+the functionality of \fImkkd95(1NEMO)\fP, however there are quite
+a few more options in the original program, e.g.. adding a gas disk,
+satellited, individual smoothing lengths. These will be implemented
+in a future release. It is easy for the user to manually create
+such models those, by setting \fBcleanup=f\fP and editing the
+input parameter file \fImagalie.in\fP in the temporary run directory,
+and running the \fImake-it\fP shell script. Careful not to change
+the number of particles, or modify the corresponding keyword
+in this script.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -32,6 +50,63 @@ Number of particles in bulge [4000]
 Number of particles in halo. 
 Notice these are the last set of particles in the final snapshot.
 [6000]  
+.TP 20
+\fBhdisk=\fP
+Scaleheight of the disk (in units of scale
+.TP 20
+\fBrsolar=\fP
+Solaris radius for calibration of Vsolar=220 [2.43]
+.TP 20
+\fBQtoomre=\fP
+Toomre stability parameter [1.5]
+.TP 20
+\fBcdisk=\fP
+Cutoff radius of disk [10]
+.TP 20
+\fBzdisk=\fP
+Height cutoff of disk [2]
+.TP 20
+\fBmbulge=\fP
+Mass of bulge (in units of disk mass)
+.TP 20
+\fBrbulge=\fP
+Scalelength of bulge [2]
+.TP 20
+\fBcbulge=\fP
+Cutoff radius of bulge [10]
+.TP 20
+\fBzbulge=\fP
+Cutoff height of bulge [1]
+.TP 20
+\fBqbulge=\fP
+Axis ratio C/A of bulge [1]
+.TP 20
+\fBfbulge=\fP
+Streaming fraction of bulge [0]
+.TP 20
+\fBmhalo=\fP
+Mass of halo (in units of disk mass)
+.TP 20
+\fBrhalo=\fP
+Scalelength of halo [2]
+.TP 20
+\fBchalo=\fP
+Cutoff radius of halo [20]
+.TP 20
+\fBc2halo=\fP
+Cutoff radius of halo for ISO (for LH
+.TP 20
+\fBqhalo=\fP
+Axis ratio C/A of halo [1]
+.TP 20
+\fBtype=\fP
+Type of halo: LH or ISO [LH]
+.TP 20
+\fBseed=\fP
+Random seed [0]
+.TP 20
+\fBcleanup=\fP
+cleanup run directory after use (not used yet)
 .TP
 \fBseed=\fP
 Random seed.
@@ -125,5 +200,6 @@ Peter Teuben (NEMO interface) -
 .ta +1.0i +4.0i
 dark ages	V1.0 See their NewA paper	Boily et al.
 21-Mar-04	V1.1 Created at the Nbody school	PJT
+24-mar-04	V1.2 added most primary keywords, at 37,000ft	PJT
 .fi
 
