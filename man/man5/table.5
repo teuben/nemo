@@ -1,0 +1,42 @@
+.TH TABLE 5NEMO "13 January 1995"
+.SH NAME
+table \- table format
+.SH DESCRIPTION
+A \fBtable\fP file is a simple ASCII text file, 
+structured in rows and columns, with one row per line. 
+Columns can be separated by spaces or tabs.
+The number of columns per row does not have to be the same,
+as long as the columns accessed are in the specified range
+(although some programs, e.g. \fItablint(1NEMO)\fP may
+put restriction on this).
+.PP
+Comments can be entered by using the octothorpe
+('\fB#\fP') symbol on the
+first column in a row. 
+Empty lines will generally be skipped too.
+.SH EXAMPLE
+The following listing is an example of a valid table:
+.nf
+
+    # This is the first line of the table
+    # I    N     Q
+    1.0   2.0   4.0
+    # 2.0 3.0   5.0     bad data, commented out.
+    3.0   5.1   6.32
+    # End of table
+    
+.fi
+Here is an example how to make a table from scratch. It contains 
+one column, with numbers 1 through 100:
+.nf
+    nemoinp 1:100 newline=t > 100.tab
+.fi
+.SH "SEE ALSO"
+nemoinp(1NEMO), table(3NEMO), awk(1)
+.SH AUTHOR
+Peter Teuben
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+1-feb-93	document created  	PJT
+.fi
