@@ -671,21 +671,22 @@ diff_new:
 config_clean:
 	rm -f $(CONFIG_CLEAN)
 
-CLEAN = bin lib obj adm/TIMESTAMP etc/motd $(CONFIG_CLEAN)
+CLEAN = host bin lib obj adm/TIMESTAMP etc/motd $(CONFIG_CLEAN)
 
 CONFIG_CLEAN = config.h makedefs config.cache config.log config.status
 
 clean:
-	@echo There is no clean, cleanall would delete the following files and directories:
+	@echo There is no clean, there is cleanall  and config_clean:
+	@echo ""
 	@echo There is also a config_clean, which only removes:
-	@echo
+	@echo ""
 	@echo $(CONFIG_CLEAN)
-	@echo
+	@echo ""
 	@echo '"make cleanall" would remove' $(CLEAN)
-	@echo
+	@echo ""
 	@echo $(CLEAN)
 	@echo ""
-	@echo '"make cleansrc" would clean the src tree'
+	@echo '"make cleansrc" would clean the src tree (of .o files and such)'
 
 cleanall:
 	rm -rf $(CLEAN)
