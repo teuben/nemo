@@ -16,6 +16,7 @@
  *                      but actually was still broken for SINGLEPREC
  *      10-mar-01 V1.7  allow sigma= to have 3 parameters
  *       8-sep-01       a   init_xrandom
+ *       8-apr-03       b   timebit
  */
 
 #include <stdinc.h>
@@ -46,7 +47,7 @@ string defv[] = {
     "sigma=0\n            velocity dispersion, plus optional central offset and exp scalelength",
     "nmodel=1\n           number of models",
     "headline=\n	  text headline for output ",
-    "VERSION=1.7a\n	  8-sep-01 PJT",
+    "VERSION=1.7b\n	  8-apr-03 PJT",
     NULL,
 };
 
@@ -111,7 +112,7 @@ nemo_main()
 writegalaxy(stream outstr)
 {
     real tsnap = 0.0;
-    int bits = MassBit | PhaseSpaceBit;
+    int bits = MassBit | PhaseSpaceBit | TimeBit;
 
     put_snap(outstr, &disk, &ndisk, &tsnap, &bits);
 }

@@ -12,6 +12,7 @@
  *		** still broken for SINGLEPREC **
  *              V4.3:  12-jun-01 allow regularly spaced (with random start) PJT
  *              9-sep-01       a    gsl/xrandom
+ *              8-apr-03      b     forgot timebit
  */
 
 #include <stdinc.h>
@@ -40,7 +41,7 @@ string defv[] = {
     "angle=f\n          Regular angular distribution?",
     "vrad=0\n           radial velocity",
     "headline=\n	Text headline for output",
-    "VERSION=4.3a\n	9-sep-01 PJT",
+    "VERSION=4.3b\n	8-apr-03 PJT",
     NULL,
 };
 
@@ -104,9 +105,9 @@ bool Qmass;
     outstr = stropen(name, "w");
     put_history(outstr);
     if (Qmass)
-        bits = MassBit | PhaseSpaceBit;
+        bits = MassBit | PhaseSpaceBit | TimeBit;
     else
-        bits = PhaseSpaceBit;
+        bits = PhaseSpaceBit | TimeBit;
     put_snap(outstr, &disk, &ndisk, &tsnap, &bits);
     strclose(outstr);
 }
