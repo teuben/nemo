@@ -223,7 +223,15 @@ if the first snapshot is not the largest one in that file.
 This is a complicated program to understand, but can often read complicated
 ascii files.
 .PP
-This program cannot parse fixed column files if they are not separeted by whitespace.
+This program cannot parse fixed column files if they are not separated by whitespace.
+.PP
+Files with comment lines cannot be parsed. Use \fItabcomment(1NEMO)\fP to
+delete them:
+.nf
+    tabcomment tab.in - delete=t | tabtos - snap.out ....
+.fi
+though the drawback of using a pipe in this example is that typically 
+the keyword \fBnbody=\fP needs to be supplied.
 .SH SEE ALSO
 atos(1NEMO), atosph(1NEMO), snapprint(1NEMO), snapshot(5NEMO), unfio(1NEMO)
 .SH AUTHOR
