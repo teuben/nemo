@@ -1,0 +1,41 @@
+.TH GETFUNC 3NEMO "17 September 1990"
+.SH NAME
+getrfunc - arbitrary function parser
+.SH SYNOPSIS
+.nf
+.B #include <stdinc.h>
+.PP
+.B rproc getrfunc(defin,expr,pars)
+.B string defin,expr,pars;
+.B int *nexpvar;
+.B int size;
+.SH DESCRIPTION
+These routines provide a mechanism to use arbitrary functions
+using the dynamic object loader \fIloadobj(3NEMO)\fP.
+The function definition is in the string \fIdefin\fP, and must contain
+the name of the function plus its variable arguments. The expression
+of the function is contained in the string \fIexpr\fP, and may also
+contain fixed parameters (by name), which are then supplied by an
+alternating array of names and values, separated by comma`s, in the
+\fIpars\fP array.
+\fIgetrfunc\fP returns a (real) function pointer.
+.PP
+Since no database is created (cf. \fIbodytrans(3NEMO)\fP) the C compiler
+is called for every expression and hence this mechanism is
+not very fast for quick and dirty things. In this case an
+interpreter, such as \fInemofie(3NEMO)\fP is more appropriate.
+.SH BUGS
+All variables and parameters are to be taken as \fIreal\fP, there
+is no provision for typing of variables and parameters.
+.PP
+The DLOPEN interface (\fIdlopen(3X)\fP) doesn't quite work on 
+SUN OS 4.1. Seems to work for one parameter though.
+.SH SEE ALSO
+bodytrans(3NEMO), loadobj(3NEMO), dlopen(3X)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1i +4i
+17-sep-90	created for mass-spectra	PJT
+.fi
