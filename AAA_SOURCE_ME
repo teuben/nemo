@@ -37,6 +37,7 @@
 # 15-oct-03  PJT                added gyfalcON
 # 23-mar-04  PJT                for NEMO 3.2 - no more NEMOHOST
 # 30-jul-04  PJT                make PGPLOT and CFITSIO optional bootstrappable
+# 26-dec-04  PJT       		make HDF optional bootstrappable
 
 rm -f install.log >& /dev/null
 touch install.log
@@ -49,7 +50,7 @@ echo \(Sending output to install.log\)
 set copts=()
 
 if (-d local/pgplot) then
-  echo "Assuming we're using the local pgplot"
+  echo "Found a local pgplot, Assuming we're using it"
   set copts=($copts --with-yapp=pgplot --with-pgplot-prefix=`pwd`/lib)
   set pgplot=1
 else 
@@ -62,6 +63,15 @@ if (-e local/cfitsio) then
   if (! -e include) ln -s inc include
   src/scripts/cfitsio.install >& install.cfitsio.log
 endif
+
+if (-e local/hdf) then
+  echo "Installing from the local hdf source:"
+  ls -l local/hdf
+  set copts=($copts --enable-hdf --with-hdf-prefix=`pwd`)
+  if (! -e include) ln -s inc include
+  src/scripts/hdf.install >& install.hdf.log  
+endif
+
 
 ./configure $copts >>& install.log
 
@@ -101,7 +111,7 @@ if (-d CVS) then
   echo or
   echo '                mknemo -u -l <programname>'
   echo if the library also needs to be rebuild.
-end
+endif
 
 src/scripts/testsuite -b >>& install.log
 
