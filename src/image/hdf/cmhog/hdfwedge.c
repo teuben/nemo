@@ -3,7 +3,17 @@
  *            can optionally be made into a full plane using a periodic=t
  *            keyword.  Shetty, Ostriker, Teuben
  *
- *     17-dec-2004    V0.1 Initial version
+ *     17-dec-2004    V0.1 Initial version, only deals with select=
+ *                         no copies of data made, so zvar= does not work
+ *                         periodic=f does not work either
+ *
+ * TODO
+ *  - check the interpolation on the 2nd and 3rd quadrant, this this is where
+ *    hdfgrid and hdfwedge differ on the rounding level
+ *    but with the jp=idx[ip+1] it's bad (rounding or higher) all over the plane
+ *  - enable zvar=
+ *  - see if messy data where the integral number of data in TWO_PI doesn't quite match
+ *
  */
 
  
@@ -52,7 +62,6 @@ local void setrange(real *rval, string rexp, int nr);
 local real string_real(string,string);
 float *expand_array(float *a, int size, int n, int *idx);
 
-extern string *burststring(string, string);
 
 void nemo_main()
 {
@@ -222,12 +231,13 @@ void nemo_main()
   rads = coord[i1];
   phis = coord[i0];
 
-  /* i0 is the angle axis  */
+  /* 2st method, see how many sections of the phi range fit in 2.pi */
   pratio = TWO_PI/(phis[np-1]-phis[0]);
   ncopy = (int) lrint(pratio);    /* nearest integer ? */
   dprintf(0,"Periodicity (%g) appears to be %d\n",pratio,ncopy);
 
   /* 2nd method, count steps to patch lower and upper coordinates into -pi .. pi */
+  /* this is subject to rounding error, since we're using float's and add them   */
   deltap = phis[1]-phis[0];
   dprintf(1,"dPHI=%g Range=%g\n",deltap,phis[np-1]-phis[0]);
   if (deltap < 0) error("Cannot handle inverted PHI axis: dPHI=%g",deltap);
@@ -300,16 +310,16 @@ void nemo_main()
       rad = sqrt(x*x + y*y);
       phi = atan2(y,x);               /* phi will be in the -pi : pi range */
       
-      if (rad > rads[nr-1] || rad < rads[0]) {   /* outside grid... */	
-	dprintf(3,"rad %g not in  %g : %g range....???\n",rad,rads[0],rads[nr-1]);
+      if (rad > rads[nr-1] || rad < rads[0]) {     /* outside radial grid... */	
+	dprintf(3,"rad %g not in  %g : %g range\n",rad,rads[0],rads[nr-1]);
 	MapValue(iptr,i,j) = 0.0;
 	n1++;
 	continue;
       }
-      if (phi > phisf[npf+1] || phi < phisf[0]) {
+      if (phi > phisf[npf+1] || phi < phisf[0]) {  /* should never happen */
 	dprintf(0,"%g not in %g : %g range....???\n",phi,phisf[0],phisf[npf-1]);
 	MapValue(iptr,i,j) = 0.0;
-	n1++;
+	n2++;
 	continue;
       }
       for (ir=0; ir<nr-1; ir++)           /* simple search in Rad */
@@ -318,23 +328,30 @@ void nemo_main()
       rad1 = rads[ir];
       rad2 = rads[jr];
 
-      for (ip=0; ip<npf-1; ip++)
+      for (ip=0; ip<npf+1; ip++)
 	if (phisf[ip+1] > phi) break;
       /* get full angles */
       phi1 = phisf[ip];
       phi2 = phisf[ip+1];
-      /* but index in original range */
+      /* but index in original range to get at the data */
       ip = idx[ip];
-      jp = idx[ip+1];
-
-      dprintf(2,"(x,y)%d %d (r,p) %g %g [@ %d %d] LL: %g %g\n",
-	      i,j,rad,phi,ir,ip,rads[ir],phis[ip]);
+#if 1
+      jp = ip+1;
+      if (jp==np) jp=0;    /* this is a nasty hack but doesn't work for data where delta_shadow > 1 */
+#else
+      jp = idx[ip+1];      /* something wrong with this :-) */
+#endif
+      dprintf(2,"(x,y)%d %d (r,p) %g %g [@ %d:%d %d:%d] LL: %g %g\n",
+	      i,j,rad,phi,ir,jr,ip,jp,rads[ir],phi1);
       
       c1 = (rad-rad2)/(rad1-rad2);
       c2 = (rad-rad1)/(rad2-rad1);
-      c3 = (phi-phi2)/(phi1-phi2);
-      c4 = (phi-phi1)/(phi2-phi1);
-      dprintf(1,"c1234= %g %g %g %g\n",c1,c2,c3,c4);
+      c3 = (phi-phi2)/(phi1-phi2); 
+      c4 = (phi-phi1)/(phi2-phi1); 
+      if (c1<0 || c2<0 || c3<0 || c4<0 || c1>1 || c2>1 || c3>1 || c4>1) {  /* should not happen */
+	dprintf(0,"c1234= %g %g %g %g\n",c1,c2,c3,c4);
+	dprintf(0,"  phi: %g < %g < %g ? %d \n",phi1,phi,phi2,ip);
+      } 
       a1 = image[ip][ir]*c1 + image[ip][jr]*c2;
       a2 = image[jp][ir]*c1 + image[jp][jr]*c2;
       if (both) { 
@@ -344,7 +361,7 @@ void nemo_main()
 	else if (mirror)
 	  MapValue(iptr,i,j) = -a1*c3 - a2*c4;
       } else
-	MapValue(iptr,i,j) = a1*c3 + a2*c4;
+	MapValue(iptr,i,j) = a1*c3 + a2*c4; 
 
       if (first) {
 	dmin = dmax = MapValue(iptr,i,j);
@@ -355,8 +372,7 @@ void nemo_main()
       }
     } /* i */
   } /* j */
-  n2 = nx*ny;
-  dprintf(0,"%d/%d points outside grid\n",n1,n2);
+  dprintf(0,"%d/%d out of %d points outside grid in rad/phi\n",n1,n2,nx*ny);
   
   /* finish off the header */
   Xmin(iptr) = xrange[0];
