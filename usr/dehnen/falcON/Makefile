@@ -42,9 +42,9 @@ $(FS):
 	@echo 'setenv FALCONLIB $$FALCONBIN/lib'                               >> $(FS)
 	@echo 'setenv PATH $${FALCONBIN}:$$PATH'                               >> $(FS)
 	@echo 'if ( $$?LD_LIBRARAY_PATH) then'                                 >> $(FS)
-	@echo '  setenv LD_LIBRARAY_PATH $${FALCONLIB}:$$LD_LIBRARY_PATH'      >> $(FS) 
+	@echo '  setenv LD_LIBRARY_PATH $${FALCONLIB}:$$LD_LIBRARY_PATH'      >> $(FS) 
 	@echo 'else'                                                           >> $(FS)
-	@echo '  setenv LD_LIBRARAY_PATH $${FALCONLIB}'                        >> $(FS)
+	@echo '  setenv LD_LIBRARY_PATH $${FALCONLIB}'                        >> $(FS)
 	@echo 'endif'                                                          >> $(FS)
 
 ifdef NEMO
