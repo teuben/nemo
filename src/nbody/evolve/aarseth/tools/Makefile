@@ -70,6 +70,9 @@ update: .update_src .update_man
 # in those cases link with CC and find out the fortran libraries
 # needed to link
 
+# may also need to switch some FC <-> CC, i.e. it's important who does the linking
+# some compilers like to see -nofor_main 
+
 u3tos_f: u3tos.o nbody_io.o
 	$(FC) $(F77_CMAIN_FFLAGS) $(FFLAGS) -o u3tos u3tos.o nbody_io.o  $(NEMO_LIBS)
 
