@@ -15,6 +15,8 @@
  *              8-apr-03      b     forgot timebit
  *              6-may-03  v4.4b   fixed bug when ndisk=1
  *              8-may-03  V4.5    added energy=
+ *              5-jul-03  V4.6 fixed energy= bug ; also
+ *                             store Acc and Phi of particles    PJT
  */
 
 #include <stdinc.h>
@@ -44,7 +46,7 @@ string defv[] = {
     "vrad=0\n           radial velocity",
     "energy=f\n         preserve energy if random motions added?",
     "headline=\n	Text headline for output",
-    "VERSION=4.5\n	8-may-03 PJT",
+    "VERSION=4.6\n	5-jul-03 PJT",
     NULL,
 };
 
@@ -129,6 +131,8 @@ bool Qmass;
         bits = MassBit | PhaseSpaceBit | TimeBit;
     else
         bits = PhaseSpaceBit | TimeBit;
+    bits |= AuxBit;
+    bits |= PotentialBit;
     put_snap(outstr, &disk, &ndisk, &tsnap, &bits);
     strclose(outstr);
 }
@@ -168,12 +172,12 @@ testdisk()
         sint = sin(theta_i);
 	Pos(dp)[0] = pos_d[0] = r_i * cost;		/* set positions */
 	Pos(dp)[1] = pos_d[1] = r_i * sint;
-	Pos(dp)[2] = pos_d[2] = 0.0;                      /* it's a DISK */
+	Pos(dp)[2] = pos_d[2] = 0.0;                    /* it's a DISK ! */
         (*potential)(&ndim,pos_d,acc_d,&pot_d,&time_d); /* get forces    */
         SETV(acc_i,acc_d);
-	vcir_i = sqrt(r_i * absv(acc_i));
-
-	do {
+	vcir_i = sqrt(r_i * absv(acc_i));               /* v^2 / r = force */
+#if 1
+	do {                         /* iterate, if needed, to get vrandom */
 	  sigma_r = grandom(0.0,frac[0]*vcir_i);
 	  sigma_t = grandom(0.0,frac[1]*vcir_i);
 	  sigma_z = grandom(0.0,frac[2]*vcir_i);
@@ -185,13 +189,37 @@ testdisk()
 	} while (Qenergy &&  vrandom > vcir_i);
 	vcir_i = sqrt((vcir_i-vrandom)*(vcir_i+vrandom));
 	dv_r += vrad;
-        cost = cos(theta_i);  
-        sint = sin(theta_i);
 	Vel(dp)[0] =  -vcir_i * sint * jz_sign;
 	Vel(dp)[1] =   vcir_i * cost * jz_sign;
 	Vel(dp)[0] += cost*dv_r - sint*dv_t;  /* add dispersions */
 	Vel(dp)[1] += sint*dv_r + cost*dv_t;
+#else
+	sigma_r = grandom(0.0,frac[0]*vcir_i);
+	sigma_t = grandom(0.0,frac[1]*vcir_i);
+	sigma_z = grandom(0.0,frac[2]*vcir_i);
+	dv_t = sigma_t;
+	dv_r = sigma_r * took(r_i) ;
+
+	/* Qenergy only uses radial motion: thus preserving the 
+	 * guiding center for epicycles ?? (Olling 2003)
+	 */
+
+	if (Qenergy)
+	  vcir_i = sqrt((vcir_i-dv_r)*(vcir_i+dv_r));
+	Vel(dp)[0] =  -vcir_i * sint * jz_sign;
+	Vel(dp)[1] =   vcir_i * cost * jz_sign;
+	Vel(dp)[0] += cost*dv_r;
+	Vel(dp)[1] += sint*dv_r;
+	if (!Qenergy) {
+	  Vel(dp)[0] += -sint*dv_t;
+	  Vel(dp)[1] +=  cost*dv_t;
+	}
+
+#endif
 	Vel(dp)[2] = sigma_z;
+	/* store potential and total energy for debugging */
+	Phi(dp) = pot_d;
+	Aux(dp) = pot_d + 0.5*(sqr(Vel(dp)[0]) + sqr(Vel(dp)[1]) + sqr(Vel(dp)[2]));
     }
     if (ncirc) dprintf(0,"Had to respin random %d times\n",ncirc);
 }
