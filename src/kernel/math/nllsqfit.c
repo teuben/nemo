@@ -369,6 +369,7 @@ int nllsqfit(
    }
    labda = fabs( lab ) * LABFAC;       /* start value for mixing parameter */
    for (i = 0; i < npar; i++) {
+      epar[i] = 0.0;
       if (mpar[i]) {
          if (nfree > MAXPAR) return( -1 );      /* too many free parameters */
          parptr[nfree++] = i;           /* a free parameter */
@@ -380,7 +381,9 @@ int nllsqfit(
      else nuse++;
    }
    if (nfree >= nuse) return( -3 );     /* no degrees of freedom */
+
    if (labda == 0.0) {                  /* linear fit */
+
       for (i = 0; i < nfree; fpar[parptr[i++]] = 0.0);
       getmat( xdat, xdim, ydat, wdat, ddat, ndat, fpar, epar, npar );
       r = getvec( xdat, xdim, ydat, wdat, ndat, fpar, epar, npar );
@@ -402,6 +405,7 @@ int nllsqfit(
       }
 
    } else {                             /* Non-linear fit */
+
       /*
        * The non-linear fit uses the steepest descent method in combination
        * with the Taylor method. The mixing of these methods is controlled
@@ -415,6 +419,7 @@ int nllsqfit(
        * the fit and if this satisfies the tolerance we calculate the
        * errors of the fitted parameters.
        */
+
       while (!found) {                          /* iteration loop */
          if (itc++ == its) return( -4 );     /* increase iteration counter */
          getmat( xdat, xdim, ydat, wdat, ddat, ndat, fpar, epar, npar );
@@ -465,6 +470,15 @@ int nllsqfit(
             found = 1;                  /* we found a solution */
          }
       }
+   }
+   if (ddat) {
+     real chisq = 0.0;
+     real w;
+     for (n = 0; n < ndat; n++) {
+       w = wdat ? wdat[i] : 1.0;
+       chisq += sqr(ddat[i]/w);
+     }
+     dprintf(1,"chisq:=%g\n",chisq);
    }
    return itc;                       /* return number of iterations (0 for linear) */
 }
