@@ -3,9 +3,9 @@
  *
  *	26-jul-02   q&d, from Gipsy's potential.dc1  (the slow coffee way)  pjt
  *                  dumb coding:  128*128 takes 47.8" on a P600 (pjt's laptop)
+ *                  using dptr    128*128 takes  9.7" (speedup 5)
  *                      
  */
-
 
 #include <stdinc.h>
 #include <getparam.h>
@@ -50,16 +50,13 @@ void nemo_main()
     Xmin(optr) = Xmin(iptr);
     Ymin(optr) = Ymin(iptr);
 
-#if 0
     create_image(&dptr,nx,ny);
     for (j=0; j<ny; j++)
       for (i=0; i<nx; i++)
 	if (i>0 || j>0) 
-	  DIS(i,j) = 1.0/sqrt((double)(i**2 + j**2));
+	  DIS(i,j) = 1.0/sqrt((double)(i*i + j*j));
 	else
 	  DIS(0,0) = 3.54;
-#endif
-
 
     for (j=0; j<ny; j++) {
       for (i=0; i<nx; i++) {
@@ -68,14 +65,7 @@ void nemo_main()
 	  l1 = QABS(j,l);
 	  for (k=0; k<nx; k++) {
 	    k1 = QABS(k,i);
-	    val = CVI(k,l);
-	    if (k==i && l==j)
-	      add = 3.54 * val;
-	    else {
-	      d = (i-k)*(i-k) + (j-l)*(j-l);
-	      add = val / sqrt(d);
-	    }
-	    sum += add;
+	    sum += CVI(k,l)*DIS(k1,l1); 
 	  }
 	}
 	CVO(i,j) = sum;
