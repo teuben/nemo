@@ -48,11 +48,11 @@ The TESTBED function excersizes a simple initialization of all array elements, a
 summing them up. This clearly shows how reversing the order of array access 
 affects the CPU speed , viz. timings on a P4/1600 laptop:
 .nf
-    % time mdarraytest 4,4,4 flip=f
+    % time mdarraytest 4,4,4 iter=1000000  flip=f
     Working with ndim=3 MD_Array[[4][4][4]
     2.110u 0.010s 0:02.31 91.7%     0+0k 0+0io 135pf+0w
 
-    % time mdarraytest 4,4,4 flip=t
+    % time mdarraytest 4,4,4 iter=1000000  flip=t
     Working with ndim=3 MD_Array[[4][4][4]
     2.050u 0.000s 0:02.14 95.7%     0+0k 0+0io 135pf+0w
 
@@ -64,6 +64,7 @@ affects the CPU speed , viz. timings on a P4/1600 laptop:
     Working with ndim=3 MD_Array[[100][100][100]
     30.530u 0.040s 0:31.85 95.9%    0+0k 0+0io 135pf+0w
 .fi
+On grus (P3/930) 5.0 vs. 19.9 sec.  On chand (P4/2500)  1.1 vs. 12.3 sec CPU. 
 .SH SEE ALSO
 .nf
 vectmath(3NEMO)
