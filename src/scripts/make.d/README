@@ -1,0 +1,6 @@
+For some systems, these 'make' scripts used to be placed in $NEMOBIN/make, but should not be
+used anymore.
+
+As of version 3.0 with a full implementation of autoconf this feature has been
+disabled, although these scripts remain here for posterity.
+

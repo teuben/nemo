@@ -1,0 +1,6 @@
+These 'cc' scripts used to be placed in $NEMOBIN/cc, but  caused too much trouble when
+other packages had to be installed, and users were hardcoding NEMO in their environment.
+
+As of version 3.0 with a full implementation of autoconf this feature has been
+disabled, although these scripts remain here for posterity.
+
