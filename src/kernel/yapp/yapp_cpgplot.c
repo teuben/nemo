@@ -34,7 +34,7 @@ local int    iterm;     /* terminal number */
 int plinit(string pltdev, real xmin, real xmax, real ymin, real ymax)
 {
     float width, height, x1,x2,y1,y2, zero, one;
-    int   dummy, nx, ny, ask, units;
+    int   nx, ny, ask, units, dummy = 0;
     
     iterm = 1;
     if (yapp_string == NULL || *yapp_string == 0) {
@@ -93,7 +93,7 @@ int plinit(string pltdev, real xmin, real xmax, real ymin, real ymax)
  * PLSWAP: does nothing.
  */
 
-plswap() { }
+int plswap() { return 0; }
 
 /*
  * PLXSCALE, PLYSCALE: transform from usr to plotting coordinates.
@@ -114,11 +114,11 @@ real plyscale(real x, real y)
  * PLLTYPE: select line width and dot-dash pattern.
  */
 
-plltype(int lwid, int lpat)
+int plltype(int lwid, int lpat)
 {
     int lw, ls;
 
-    if (iterm==0) return;       /* no graphics output requested */
+    if (iterm==0) return 0;       /* no graphics output requested */
 
     if (lwid > 0) {
         lw = lwid;
@@ -128,56 +128,57 @@ plltype(int lwid, int lpat)
         ls = lpat;
 	cpgsls(ls);			/* set line style */
     }
+    return 0;
 }
 
 /*
  * PLLINE, PLMOVE, PLPOINT: plot lines, moves, and points.
  */
 
-plline(real x, real y)
+int plline(real x, real y)
 {
     float xp,yp;
 
-    if (iterm==0) return;       /* no graphics output requested */
+    if (iterm==0) return 0;       /* no graphics output requested */
 
     xp=x; yp=y;         /* RECALC !! */
     cpgdraw(xp,yp);
-
+    return 0;
 }
 
-plmove(real x, real y)
+int plmove(real x, real y)
 {
    float xp,yp;
 
-   if (iterm==0) return;       /* no graphics output requested */
+   if (iterm==0) return 0;       /* no graphics output requested */
 
    xp=x; yp=y;          /* RECALC !! */
    cpgmove(xp,yp);
-
+   return 0;
 }
 
-plpoint(real x, real y)
+int plpoint(real x, real y)
 {
-    int n=0,istyle=0;           /* just a dot */
     int ipoint=-1, npoint=1;
     float xp,yp;
     
-    if (iterm==0) return;       /* no graphics output requested */
+    if (iterm==0) return 0;       /* no graphics output requested */
 
     xp=x; yp=y;                             /* RECALC !! */
     cpgpt(npoint, &xp, &yp, ipoint);       /* draw 1 dot */
+    return 0;
 }
 
 /*
  * PLCIRCLE, PLCROSS, PLBOX: plot various symbols.
  */
 
-plcircle(real x, real y, real r)
+int plcircle(real x, real y, real r)
 {
     int npnts, i;
     real theta;
 
-    if (iterm==0) return;       /* no graphics output requested */
+    if (iterm==0) return 0;       /* no graphics output requested */
 
     npnts = MAX(2400 * r / dxymax, 6.0);
     plmove(x + r, y);
@@ -185,11 +186,12 @@ plcircle(real x, real y, real r)
         theta = TWO_PI * ((real) i) / ((real) npnts);
         plline(x + r * cos(theta), y + r * sin(theta));
     }
+    return 0;
 }
 
-plcross(real x, real y, real s)
+int plcross(real x, real y, real s)
 {
-    if (iterm==0) return;       /* no graphics output requested */
+    if (iterm==0) return 0;       /* no graphics output requested */
 
     if (s > 0.0) {
         plmove(x - s, y);
@@ -203,11 +205,12 @@ plcross(real x, real y, real s)
         plmove(x - s, y + s);
         plline(x + s, y - s);
     }
+    return 0;
 }
 
-plbox(real x, real y, real s)
+int plbox(real x, real y, real s)
 {
-    if (iterm==0) return;       /* no graphics output requested */
+    if (iterm==0) return 0;       /* no graphics output requested */
 
     if (s > 0.0) {
         plmove(x - s, y - s);
@@ -223,6 +226,7 @@ plbox(real x, real y, real s)
         plline(x, y + s);
         plline(x - s, y);
     }
+    return 0;
 }
 
 /*
@@ -232,25 +236,24 @@ plbox(real x, real y, real s)
 
 static float fjust = 0.0;   /* pgplot default: left justified */
 
-pljust(int jus)       /* -1, 0, 1 for left, mid, right just */
+int pljust(int jus)       /* -1, 0, 1 for left, mid, right just */
 {
-    if (iterm==0) return;       /* no graphics output requested */
+    if (iterm==0) return 0;       /* no graphics output requested */
 
     fjust = (jus < -1 ? 0.0 : (jus > 1 ? 1.0 : 0.5));
+    return 0;
 }
 
 /*
  * PLTEXT: plot a text string.
  */
 
-pltext(string msg, real x, real y, real hgt, real ang)
+int pltext(string msg, real x, real y, real hgt, real ang)
 {
-    real c, s;
-    float dx, dy, xp, yp, ap;
-    float newsize, sl, sh;
-    int   n;
+    float xp, yp, ap;
+    float newsize;
 
-    if (iterm==0) return;       /* no graphics output requested */
+    if (iterm==0) return 0;       /* no graphics output requested */
 
     xp=x; yp=y; ap=ang;         /* copy into local variables */
 
@@ -258,28 +261,31 @@ pltext(string msg, real x, real y, real hgt, real ang)
     cpgsch(newsize);           /* set height of char */
 
     cpgptxt(xp, yp, ap, fjust, msg);        /* plot it */
+    return 0;
 }
 
 /*
  * PLFLUSH: output any pending graphics.
  */
 
-plflush() 
+int plflush() 
 { 
-    if (iterm==0) return;
+    if (iterm==0) return 0;
 
     cpgupdt();
+    return 0;
 }
 
 /*
  * PLFRAME: advance to next frame.
  */
 
-plframe()
+int plframe()
 {
-    if (iterm==0) return;       /* no graphics output requested */
+    if (iterm==0) return 0;       /* no graphics output requested */
 
     cpgpage();
+    return 0;
 }
 
 /*
@@ -288,20 +294,19 @@ plframe()
 
 #define ONEMIN (60 * 1000 * 1000)
 
-plstop()
+int plstop()
 {
-    int nvec, bell=0x07;
-
-    if (iterm==0) return;       /* no graphics output requested */
+    if (iterm==0) return 0;       /* no graphics output requested */
 
 
     if (debug_level > 0)
         cpgiden();    
 
     cpgend();
+    return 0;
 }
 
-pl_matrix(real *frame,int nx,int ny,real xmin,real ymin,
+int pl_matrix(real *frame,int nx,int ny,real xmin,real ymin,
 	  real cell,real fmin,real fmax,real findex)
 {
     int ix,iy,ix0,ix1,iy0,iy1;
@@ -357,11 +362,10 @@ pl_matrix(real *frame,int nx,int ny,real xmin,real ymin,
 
 /* not functional yet */
 
-pl_contour(real *frame,int nx,int ny, int nc, real *c)
+int pl_contour(real *frame,int nx,int ny, int nc, real *c)
 {
     int ix,iy,ix0,ix1,iy0,iy1;
     float tr[6], *data, *dp, *cnt;
-    real dval,dfac;
     
     if (iterm==0) return 0;       /* no graphics output requested */
 
@@ -389,21 +393,23 @@ pl_contour(real *frame,int nx,int ny, int nc, real *c)
 }
 
 
-pl_screendump(string fname)
+int pl_screendump(string fname)
 {
   printf("pl_screendump(%s): Not implemented for yapp_pgplot\n",fname);
+  return 0;
 }
 
-local bell()
+int local bell()
 {
     int ring=7;
     putchar(ring);
     putchar('\n');		/* send a line feed to flush the buffer */
+    return 0;
 }
 
-pl_getpoly(float *x, float *y, int n)
+int pl_getpoly(float *x, float *y, int n)
 {
-    int nn, delay, loc, k, symbol;
+    int nn, k, symbol;
     float xold,yold, xnew,ynew;
     char ch[10];
 
