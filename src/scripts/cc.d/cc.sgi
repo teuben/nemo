@@ -1,0 +1,26 @@
+#! /bin/csh -f
+#  cc script for IRIS workstation
+#  See also:
+#  http://techpubs.sgi.com/library/manuals/3000/007-3511-001/html/O2000Tuning.0.html
+#    (s)random are in the BSD library...  
+#	not needed for IRIX 6.x I believe
+# On: IRIX 6.2 (and possibly up) I needed an extra      -lisam
+exec /usr/bin/cc -DSGI -L$NEMOLIB -I$NEMOINC $* -lbsd -lm
+
+
+# here is an old one from IRIX 4.0.5F
+# (we have to fake -D__STDC__ becuase the compiler hasn't done it for us!!!)
+# exec /usr/bin/cc -L$NEMOLIB -I$NEMOINC -D__STDC__ $* -lbsd -lm
+
+
+# Here is an optimized one for IP28/25(?) for 6.2
+#OPTS   = -c -O3 -64 -mips4 -col120 -OPT:fold_arith_limit=10000 \
+#        -OPT:IEEE_arithmetic=3 -OPT:roundoff=3 -TENV:X=4 -r10000
+#CC     = cc -64
+#LDR    = f77 -64
+#LIB    = -lfastm
+
+
+
+
+
