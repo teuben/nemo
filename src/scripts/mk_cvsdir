@@ -1,0 +1,15 @@
+#! /bin/csh -f
+#
+#   create a tar ball that could be dropped inside an 'old'
+#   $NEMO to make it (anonymoous) cvs enabled
+#
+
+set nemo=nemo_tmp
+
+setenv CVSROOT :pserver:anonymous@cvs.astro.umd.edu:/home/cvsroot
+if (! -d $nemo) then
+  echo Getting new NEMO
+  cvs -Q co -d $nemo nemo
+endif
+cd $nemo
+tar zcf ../nemo_cvsdir.tar.gz `find . -type d -name CVS -print`
