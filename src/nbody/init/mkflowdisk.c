@@ -6,6 +6,7 @@
  *   20-nov-03   1.1 changed meaning of angles, and thus signs of k/pitch
  *   21-nov-03   1.2 changed signs once again, make is consistent w/ vrtm51.c
  *   23-nov-03   1.3 add key=
+ *   26-nov-03   1.3b   fixed final bugs in sign errors and indexing in binsearch()
  *
  */
 
@@ -32,15 +33,15 @@ string defv[] = {
     "rref=\n              reference radius for spiral phase (defaults to rmax)",
     "mass=0\n             total mass of disk",
     "uniform=t\n          uniform surface density, or use density from potfile?",
-    "k=\n                 spiral wavenumber for linear spirals (> 0 trailing spirals)",
-    "pitch=\n             pitch angle for log spirals",
+    "k=\n                 spiral wavenumber for linear spirals (> 0 trailing arms)",
+    "pitch=\n             pitch angle for log spirals (>0 trailing arms)",
     "phase=0\n            phase offset of spiral at rmax (in degrees)",
     "key=\n               Add a key, if present",
     "seed=0\n		  random number seed",
     "nmodel=1\n           number of models",
     "test=f\n             test shape of spiral",
     "headline=\n	  text headline for output ",
-    "VERSION=1.3a\n	  25-nov-03 PJT",
+    "VERSION=1.3b\n	  26-nov-03 PJT",
     NULL,
 };
 
@@ -124,15 +125,17 @@ setdensity(void)
 {
   int i, ndim=NDIM;
   double pos_d[NDIM], vel_d[NDIM], den_d, time_d = 0.0;
-  double t;
+  double t, tref;
+  double rmean = 0.5*(rmin+rmax);
+  double tanp = tan(pitch*PI/180.0);
 
-
-  dprintf(1,"setdensity - 0:360:1 steps at rref=%g\n",rref);
+  tref = log(rmean/rref)/tanp - offset;
+  dprintf(1,"setdensity - 0:360:1 steps at rref=%g tref=%g\n",rref,tref);
   for (i=0; i<=360; i++) {
     theta[i] = i;
     t = i * PI/180.0;
-    pos_d[0] = rref * cos(t);
-    pos_d[1] = rref * sin(t);
+    pos_d[0] = rmean * cos(t-tref);
+    pos_d[1] = rmean * sin(t-tref);
     pos_d[2] = 0.0;
     (*potential)(&ndim,pos_d,vel_d,&den_d,&time_d);
     dens[i] = den_d;
@@ -161,7 +164,7 @@ local int binsearch(real u, real *x, int n)
             else
                 k = j;
         }
-        return i;
+        return i+1;
     }
 }
 
@@ -202,11 +205,11 @@ testdisk(int n)
 	  theta_i = 0.0;
 	else 
 	  theta_i = frandom(0.0,360.0,density) * PI / 180.0;
-	theta_i -= offset;
+	theta_i += offset;
 	if (Qlinear) {
-	  theta_i -= SPk * (r_i-rref) * TWO_PI;    /* positive SPk is trailing SP  */
+	  theta_i -= SPk * (r_i-rref) * TWO_PI;    /* linear spiral arm */
 	} else {
-	  theta_i -= log(r_i/rref)/tani;
+	  theta_i -= log(r_i/rref)/tani;           /* logaarithmic spiral arm */
 	}
         cost = cos(theta_i);
         sint = sin(theta_i);
