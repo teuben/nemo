@@ -2,10 +2,11 @@
 #
 #   april-2001		allow making from file+ext (e.g. scfm.exe) too
 #   jul-2001            fixed -n bug
+#   jun-2003            optional -u "cd $NEMO;cvs update"
 #
 #  BIG BUG: 'mknemo mkplummer.c' would remove the sourcecode and put it into $NEMOBIN !!!!!
 #
-set version="MKNEMO Version 1.3b  17-jul-01 - +NEMOBIN bug"
+set version="MKNEMO Version 1.4  20-jun-03 - +NEMOBIN bug"
 if ($#argv == 0) goto usage
 
 onintr error
@@ -41,6 +42,7 @@ set n=0
 set d=0
 set code=""
 set tidy=""
+set u=0
 
 # process command line options
 loop:
@@ -81,6 +83,10 @@ loop:
   case -r:
     shift argv
     breaksw
+  case -u:
+    set u=1
+    shift argv
+    breaksw
   case -*:
     echo "MKNEMO> Option $argv[1] not understood"
     shift argv
@@ -94,6 +100,10 @@ loop:
 process:
 
 if ($#argv == 0) goto noargs
+
+if ($u) then
+  (cd $NEMO; cvs update)
+endif
 
 foreach f ($argv)
  # strip any extensions from the arguments, we're looking to make executables
@@ -220,4 +230,5 @@ usage:
   echo "  -r        remove lockfile before starting"
   echo "  -d        also make doc file (only for true NEMO programs)"
   echo "  -t        cleanup after having made the binaries"
+  echo "  -u        applied 'cvs update' to NEMO before making"
   exit 1
