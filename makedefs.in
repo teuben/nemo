@@ -33,7 +33,8 @@ MACH = @LOADOBJ_MACH@
 #	if you need to use fortran names from your C code, or if you
 #	need to define C code that is to be called from Fortran
 FLIBS = @FLIBS@
-FORLIBS = @FLIBS@
+FORLIBS = $(FLIBS)
+
 
 # Solaris 2.6: -L/opt/SUNWspro/lib -lF77 -lM77 -lV77 -lsunmath  
 
