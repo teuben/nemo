@@ -13,6 +13,7 @@
  *              V4.3:  12-jun-01 allow regularly spaced (with random start) PJT
  *              9-sep-01       a    gsl/xrandom
  *              8-apr-03      b     forgot timebit
+ *              5-may-03  v4.4   add
  */
 
 #include <stdinc.h>
@@ -52,7 +53,7 @@ local int  jz_sign;
 local bool Qangle;
 
 local int ndisk;
-local real frac, vrad;
+local real frac[NDIM], vrad;
 local Body *disk;
 
 proc potential;
@@ -64,17 +65,33 @@ local real took(real);
 void nemo_main()
 {
     bool Qmass;
+    int nfrac;
     
     if (hasvalue("in")) error("\"in=\" not implemented yet");
     potential = get_potential(getparam("potname"),
                     getparam("potpars"), getparam("potfile"));
     rmin = getdparam("rmin");
     rmax = getdparam("rmax");
-    frac = getdparam("frac");
     vrad = getdparam("vrad");
     ndisk = getiparam("nbody");
     jz_sign = getiparam("sign");
     if (ABS(jz_sign) != 1) error("%d: sign must be +1 or -1",jz_sign);
+    nfrac = nemoinpd(getparam("frac"),frac,NDIM);
+    switch (nfrac) {
+    case 1:
+      frac[1] = frac[0];
+      frac[2] = 0.0;
+      break;
+    case 2:
+      frac[2] = 0.0;
+      break;
+    case 3:
+      break;
+    default:
+      error("%d: bad parsing frac=%s",nfrac,getparam("frac"));
+    }
+    dprintf(1,"frac: %g %g %g\n",frac[0],frac[1],frac[2]);
+
     mass = getdparam("mass") / ndisk;
     if (mass==0.0)  {
 	Qmass=FALSE;
@@ -121,7 +138,8 @@ testdisk()
 {
     Body *dp;
     real rmin2, rmax2, r_i, theta_i, vcir_i, pot_i, t;
-    real  dv_r, dv_t, sint, cost, sigma_i, theta_0;
+    real  dv_r, dv_t, sint, cost, theta_0;
+    real sigma_r, sigma_t, sigma_z;
     vector acc_i;
     int i, ndim=NDIM;
     double pos_d[NDIM], acc_d[NDIM], pot_d, time_d = 0.0;
@@ -146,17 +164,20 @@ testdisk()
 	Pos(dp)[2] = pos_d[2] = 0.0;                      /* it's a DISK */
         (*potential)(&ndim,pos_d,acc_d,&pot_d,&time_d); /* get forces    */
         SETV(acc_i,acc_d);
+        sigma_r = grandom(0.0,frac[0]*vcir_i);
+        sigma_t = grandom(0.0,frac[1]*vcir_i);
+        sigma_z = grandom(0.0,frac[2]*vcir_i);
+
 	vcir_i = sqrt(r_i * absv(acc_i));
-        sigma_i = grandom(0.0,frac*vcir_i);
-        dv_t = sigma_i;
-        dv_r = sigma_i * took(r_i) + vrad;
+        dv_t = sigma_t;
+        dv_r = sigma_t * took(r_i) + vrad;
         cost = cos(theta_i);  
         sint = sin(theta_i);
 	Vel(dp)[0] =  -vcir_i * sint * jz_sign;
 	Vel(dp)[1] =   vcir_i * cost * jz_sign;
 	Vel(dp)[0] += cost*dv_r - sint*dv_t;  /* add dispersions */
 	Vel(dp)[1] += sint*dv_r + cost*dv_t;
-	Vel(dp)[2] = 0.0;                     /* it's a DISK ! */
+	Vel(dp)[2] = sigma_z;
     }
 }
 
