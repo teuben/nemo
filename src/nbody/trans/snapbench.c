@@ -51,17 +51,15 @@ nemo_main()
       dprintf(0,"bodytrans scaling, iter=%d\n",n);
       bfunc = btrtrans(getparam("mass"));     /* use bodytrans expression */
 
-      for (j=0; j<n; j++) {
+      for (j=0; j<n; j++)
 	for (bp=btab, i=0; i<nbody; bp++,i++)
 	  Mass(bp) = bfunc(bp, tsnap, i);
-      }
     } else {
       dprintf(0,"simple inline scaling, iter=%d\n",n);
       mscale = getdparam("mass");
-      for (j=0; j<n; j++) {
+      for (j=0; j<n; j++)
 	for (bp=btab, i=0; i<nbody; bp++,i++)
 	  Mass(bp) = mscale*Mass(bp);
-      }
     }
 
     strclose(instr);
