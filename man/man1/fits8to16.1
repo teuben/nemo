@@ -1,0 +1,34 @@
+.TH FITS8TO16 1NEMO "1 July 2004"
+.SH NAME
+fits8to16 \- convert 8bit fits image to a 16bit fits image
+.SH SYNOPSIS
+.PP
+\fBfits8to16 in=\fPfits_file  out=\fPfits_file  [parameter=value]
+.SH DESCRIPTION
+\fIfits8to16\fP reads a 8bit (BITPIX=8) FITS file, and convert 
+them to a 16bit (BITPIX=16) image. This can be portably done,
+since 8bit images are unsigned, while 16bit are twos compliment.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is 
+also given:
+.TP 20
+\fBin=\fIfits-infile\fP
+input file, in \fIfits(5)\fP format, and must be an 8bit primary
+array. Multiple HDUs are supported, they must all be 8bit.
+.TP
+\fBout=\fIfits-outfile\fP
+output file, in \fIfits(5)\fP format, now converted to 16bit.
+.SH "SEE ALSO"
+scanfits(1NEMO), fits(5NEMO), fitshead(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+~/src/image/fits	fits8to16.c
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+1-jul-04	V1.0 created	PJT
+.fi
