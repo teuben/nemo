@@ -21,16 +21,16 @@
 string defv[] = {
         "in=???\n       Input image file",
 	"out=???\n      Output image file",
-	"x=\n		X coordinates to select",
-	"y=\n		Y coordinates to select",
-	"z=\n		Z coordinates to select",
+	"x=\n		X coordinates to select (1..nx)",
+	"y=\n		Y coordinates to select (1..ny)",
+	"z=\n		Z coordinates to select (1..nz)",
 	"aver=\n	Coordinates to average",
 	"nxaver=1\n	Number X to aver (size remains same)",
 	"nyaver=1\n	Number Y to aver (size remains same)",
 	"nzaver=1\n	Number Z to aver (size remains same)",
 	"skip=xyz\n	Coordinates to skip (** ignored **)",
 	"reorder=\n     New coordinate ordering",
-	"VERSION=1.4\n  2-may-2002 PJT",
+	"VERSION=1.4a\n  12-aug-2002 PJT",
 	NULL,
 };
 
@@ -71,6 +71,7 @@ void nemo_main()
     ny = Ny(iptr);
     nz = Nz(iptr);
     if (hasvalue("reorder")) {
+#if 0    
       reorder = getparam("reorder");
       if (strlen(reorder) != 3) error("Reorder must have 3 letters");
       for (i=0; i<3; i++)
@@ -81,6 +82,9 @@ void nemo_main()
 	default:
 	  error("...");
 	}
+#else
+	  error("...this option not implemented yet...");
+#endif
     } else {
       nx1 = ax_index("x",nx,nx1,ix);
       ny1 = ax_index("y",ny,ny1,iy);
@@ -119,7 +123,7 @@ void nemo_main()
         for (k=0; k<nz1; k++)
 	  for (j=0; j<ny1; j++)
             for (i=0; i<nx1; i++)
-                CubeValue(iptr1,i,j,k) = CubeValue(iptr,px[i],py[j],iz[k]);
+                CubeValue(iptr1,i,j,k) = CubeValue(iptr,ix[i],iy[j],iz[k]);
         write_image(outstr, iptr1);
     } else {            	/* straight sub-sampling */
         create_cube(&iptr1,nx1,ny1,nz1);
