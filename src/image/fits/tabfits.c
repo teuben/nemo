@@ -26,7 +26,7 @@ string defv[] = {
     "ny=\n              Y-Size of data, or else specify NAXIS2 in header",
     "nz=\n              Z-Size of data, or else specify NAXIS3 in header",
     "nmax=100000\n      Allocation space for piped I/O",
-    "VERSION=3.2\n	22-jul-02 PJT",
+    "VERSION=3.2a\n	8-nov-02 PJT",
     NULL,
 };
 
@@ -34,7 +34,9 @@ string usage = "convert tables into FITS images";
 
 #define MAXCOL 2048
 #define MAXDAT 2048
-#define MAX_LINELEN   16384
+#ifndef MAX_LINELEN
+#define MAX_LINELEN  16384
+#endif
 
 int get_key(char *line, char *key, char *value);
 
@@ -206,7 +208,7 @@ static active_row = 0;
 static active_col = 0;
 static icol = 0;
 
-void init_data(dcol)
+void init_data(int dcol)
 {
     int ierr;
 
