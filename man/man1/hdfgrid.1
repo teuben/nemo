@@ -1,0 +1,89 @@
+.TH HDFGRID 1NEMO "12 December 1999"
+.SH NAME
+hdfgrid \- Regrid a polar HDF SDS to cartesian image
+.SH SYNOPSIS
+\fBhdfgrid\fP [parameter=value]
+.SH DESCRIPTION
+\fBhdfgrid\fP regrids HDF (SDS) output files that are assumed to
+be in polar (rad-phi) coordinates. This program was developed 
+for the bar-hydro project (Piner, Stone & Teuben, ApJ - nov 1995)
+using a version of \fBcmhog\fP.
+.PP
+The (2D) four-point interpolation that is used in regridding is
+based on the one in \fIcmhog/movie.src\fP, but includes correct
+interpolations for points near the Y axis that need contributions
+from the phantom "mirror" points (recall that the files are
+assumed to contain X>0 information only, the X<0 plane is assumed
+from point symmetry around the origin).
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP\fIhdf_sds\fP
+Input file (HDF SD). No default.
+.TP
+\fBout=\fP\fIimage\fP
+Output file, in \fIimage(5NEMO)\fP format.
+.TP
+\fBselect=\fP\fIframe_no\fP
+Select which SDS from the file (1=first). 
+[Default: \fB1\fP].
+.TP
+\fBnx=\fP\fIX_pixels\fP
+Number of pixels in X.
+[Default: \fB256\fP]
+.TP
+\fBny=\fP\fIY_pixels\fP
+Number of pixels in Y   
+[Default: \fB256\fP].
+.TP
+\fBxrange=\fP\fIxmin:xmax\fP
+Range in X     
+[Default: \fB-16:16\fP].
+.TP
+\fByrange=\fP\fIymin:ymax\fP
+Range in Y     
+[Default: \fB-16:16\fP].
+.TP
+\fBzvar=\fP\fIgrid_var\fP
+Gridding variable. Normally left alone, unless certain allowed mathematical
+expressions on the direct griddable variables (as defined by \fBselect=\fP)
+need to be overriden. Allowed are vr (select=1), vt (select=2),
+den (select=3), vx, vy. Default: not used, select= is used.
+.TP
+\fBsymmetry=odd|even\fP
+Override symmetry properties of the variable to be gridded. This option is
+not used yet.
+.TP
+\fBit0=\fP
+Shifts the values in theta by \fBfBit0\fP pixels. This is equivalent 
+by rotating the image counterclockwise by that many pixels. 
+Default: 0
+.SH EXAMPLES
+Often used in scripts, here is a snippet from a script that regrids an
+HDF file into TIFF for movie recording, but applying a non-linear scaling
+to the data. 
+.nf
+
+  hdfgrid hdf001 - select=3 nx=256 ny=256 xrange=-8:8 yrange=-8:8 |\\
+     ccdmath - - "log(%1)" |\\
+     ccdmath - - "ifeq(%1,0.0,$dmin,%1)" |\\
+     ccdfits - tmp$$
+  fitstiff tmp$$ movie1.$i.tiff datamin=-1 datamax=2 lut=ds
+
+.fi
+Several interesting peculiarities are to be noted: (1) ccdmath is called
+twice, because of a bug in combining the two; \fBifeq(%1,0.0,$dmin,log(%1))\fP
+could not be used. (2) fitstiff cannot read from a pipe,  hence the extra
+annoying disk file \fBtmp$$\fP. (3) Lookup RGB color tables are in 
+\fB$NEMODAT/lut\fP.
+.SH FILES
+~/usr/pjt/cmhog  	hdfgrid.c
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+25-May-95	V1.0 Created for IAU157 movie	PJT
+12-dec-99	V1.3 added it0= shifting arrays to fake a rotation	PJT
+.fi
