@@ -1,0 +1,77 @@
+                    G l n e m o         M a n u a l
+                    = = = = = = = = = = = = = = = =
+                    
+                    
+  Here is a brief description about how to use 'glnemo' program.
+  
+  glnemo is a program with NEMO philosophy. You start the command:
+glnemo help=
+ and you'll see the command line parameters.
+ 
+But glnemo is also an interactive program, so you can start it without 
+command line parameters, just enter : glnemo
+
+
+  Let's start playing with a 10000 particles plummer:
+  
+mkplummer p.10k 10000
+glnemo p.10k
+
+ glnemo should start and load the snapshot p.10k.  
+
+- To rotate: click left or right mouse boutton and move the
+mouse. 
+  
+- zoom  in/out : use the wheel mouse or press '+' or '-' keys. 
+
+- to translate : CTRL + (left or right) mouse button and move the mouse.
+
+- toggle grid : press g  (or click 'grid' icon)
+
+- toggle options : press o ( or click 'tools' icon)
+     a dialog box appear and you can play with different options:
+     -> use the slide button to increase/decrease particles size.
+     -> 'blending' check box, turn on/off blending color.
+     -> 'depth buffer' check box, turn on/off opengl depth buffer.
+     -> grids X,Y,Z check box, turn on/off drawing of a grid
+        in X plane, Y plane or Z plane. 
+     -> 'polygones' check box (not yet implemented).
+     -> 'HUD' (head up display) check box, turn on/off text on screen.
+        (might be usefull if you want to take a screenshot).
+
+- toggle particles range : press r  ( or click 'color' icon)
+     a dialog box appear which allow you to change the range of selected 
+     particles and their colors (click on the color to change it, and a
+     intuitive color dialog box appears to help you to select a new color).
+
+- to reset rotation and translation press CTRL+R (or click 'target' icon).
+
+- to fit all the particles on screen press CTRL + A ( or click 'wire box' icon).
+
+- to take a snapshot : press s  ( or click 'camera' icon).
+
+- to play all the snapshot time steps : press p ( or click 'arrow" icon).
+
+- to toggle fullscreen : press f ( or click 'monitor' icon).
+
+ Notice that all these options can be selected via the interface (click on 
+the different icons on the left vertical menu bar).
+        
+ You can also load a new snapshot from top menu bar :
+File -> Open file
+
+
+ Now imagine that you have a snapshot (mysnapshot) with a disc (range from
+0:199999)  and a halo (range from 200000:999999). You can start glnemo
+like this :
+ glnemo in=mysnapshot select=0:199999,200000:999999
+
+  glnemo will load the snapshot and will give different colors for the 
+disc and the halo. You can change these colors when pressing 'r' key. You 
+can also select or deselect all the objects (check or uncheck 'visible' 
+field in range particles dialog box 'r').
+
+ If there are many time steps in the snapshot, press 'p' (or clik 'arrow' icon) to
+ load them successively.
+                     
+ 

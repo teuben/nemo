@@ -1,0 +1,35 @@
+                             
+                             --  Glnemo --
+                                 
+                   Copyright © Jean-Charles LAMBERT 2004
+                              Version 0.5
+                              
+                       jean-charles.lambert@oamp.fr
+                         Dynamique des Galaxies
+                  Laboratoire d'Astrophysique de Marseille
+                           (CNRS U.M.R 6110)
+                          2 place Le Verrier
+                      13248 Marseille Cedex 4 France
+
+                      
+                      
+ Glnemo is  an interactive 3D plotting program  , using OpenGL and trolltech 
+QT API. It allows to plot in 3D, the positions x,y,z of a NEMO snapshot. You can 
+zoom in/out, rotate, scale, translate, save a screenshot, select different particles 
+and plot them in different blending colors. It gives you a good information of 
+the shape of the snaphot.
+
+0) how to compile and install glnemo, see "INSTALL".
+ 
+1) how to use it, see "MANUAL".
+ 
+
+
+ License :
+ -------
+Glnemo is governed by the CeCILL  license under French law and
+abiding by the rules of distribution of free software.  You can  use, 
+modify and/ or redistribute the software under the terms of the CeCILL
+license as circulated by CEA, CNRS and INRIA at the following URL
+"http://www.cecill.info" and/or LICENSE file.                       
+              
