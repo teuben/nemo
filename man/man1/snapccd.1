@@ -1,0 +1,135 @@
+.TH SNAPCCD 1NEMO "30 January 1989"
+.SH NAME
+snapccd \- top view integrated velocity moment ccd-like image
+.SH SYNOPSIS
+.PP
+\fBsnapccd in=\fPsnapshot \fBout=\fPimage [parameter=value]
+.SH DESCRIPTION
+\fBsnapccd\fP makes a ccd frame from an N-body snapshot, by
+binning the (projected) x-y coordinates of all stars on a regular 
+rectangular (square) grid and
+assigning a mean integrated 'surface density' (integrated along z-axis, i.e. 
+the line of sight,
+The ccd frame is written to a standard \fIImage(5NEMO)\fP output file, and can
+be accessed by various other programs for smoothing, display etc.
+.PP
+\fBsnapccd\fP can also create channel maps, where only signal near a
+specified velocity is copied. See the \fBvrange\fP and \fBmoment\fP
+keywords below. One can use either an exact velocity window, or
+a gaussian beam in velocity space.
+.PP
+Note that the radial velocity has the astronomical convention. The observer
+is located at infinity at the positive Z-axis: a positive z velocity
+(\fBvz\fP) means stars are approaching, i.e. negative radial velocity.
+.PP
+\fIsnaprotate(1NEMO)\fP has to be used first to do any other than a top-view.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 20
+\fBin=\fIin-file\fP
+input file, must be in \fISnapShot(5NEMO)\fP format [no default].
+.TP
+\fBout=\fIout-file\fP
+output file, will be in \fIImage(5NEMO)\fP format [no default].
+.TP
+\fBorigin=\fIx,y\fP
+The origin \fI(x,y)\fP of the center of the ccd [default: \fB0,0\fP].
+.TP
+\fBsize=\fIvalue\fP
+Full size of the CCD frame in 'physical' units. Note that the picture 
+is forced to be square [default: \fB4.0\fP].
+.TP
+\fBcell=\fIvalue\fP
+Cell- or pixel size. Again they will be square. For a 2D matrix
+this value will be set by the header of that dataset.
+[default: \fB0.1\fP].
+.TP
+\fBvrange=\fIvmin:vmax | vmean,vsig\fP
+Range in (astronomical) radial velocity (\fB-vz\fP) to be used
+only while binning the data. One can also give a mean and dispersion
+in velocity space to weigh the data with. In this case the range in
+velocity space is somewhat arbitrarely taken from
+\fIvmean-3*vsig:vmean+3*vsig\fP. This last procedure is somewhat more
+realistic for astronomical applications, unless the package where the
+data will be transported to has decent smoothing utilities in velocity
+space also. 
+The default of this keyword is to take all data along the vz axis.
+It does not make sense to select data along the z-axis when the
+\fBmoment\fP (see below) is non-zero. [default: \fB-infinity:infinity\fP].
+.TP
+\fBmoment=\fInumber\fP
+Order of the velocity moment: must be a non-negative number.
+Most commonly choosen are: \fB0\fP (total intensity), \fB1\fP 
+(velocity weighted intensity) and \fB2\fP (velocity square weighted intensity),
+where 'intensity' should really be read as surface density per square unit length.
+[default: \fB0\fP].
+.SH EXAMPLE
+The following example makes (three) CCD frames from an N-body snapshot,
+smoothes the three moment maps
+and combines them into an 'intensity' (\fBint\fP), 'mean velocity' (\fBvel\fP)
+and 'velocity dispersion' (\fBsig\fP) map. 
+.PP
+Note that the moment maps must be smoothed \fIbefore\fP they
+can be combined to the proper velocity and dispersion maps.
+.nf
+   % \fBsnapccd in=nbody.dat out=map0 moment=0\fP
+   % \fBsnapccd in=nbody.dat out=map1 moment=1\fP
+   % \fBsnapccd in=nbody.dat out=map2 moment=2\fP
+   % \fBccdsmooth in=map0 out=map00 gauss=0.1\fP
+   % \fBccdsmooth in=map1 out=map11 gauss=0.1\fP
+   % \fBccdsmooth in=map2 out=map22 gauss=0.1\fP
+   % \fBmv map00 int\fP
+   % \fBccdmath in=int,map11     out=vel  fie=%2/%1\fP
+   % \fBccdmath in=int,vel,map22 out=sig  fie="sqrt(%3/%1-%2*%2)"\fP
+   % \fBrm map11 map22\fP
+\fP
+.fi
+.SH UNITS
+Units are maintained in the same way as in snapshots, they don't have
+a specific name, but carry their normal meaning 'length', 'velocity'
+and 'mass'. Since \fIsnapccd\fP calculates surface densities,
+its units are formally 'mass' per square 'length' times 'velocity'
+to the power \fBmoment\fP. 
+.PP
+When channel maps are produced (\fBmoment=0\fP), 
+the data are not normalized w.r.t. the
+convolving velocity beam. For a rectangular beam (\fBvrange=vmin:vmax\fP)
+the data should formally be divided by \fB(vmax-vmin)\fP, for a 
+gaussian beam (\fBvrange=vmean,vsig\fP) by \fBvsig*sqrt(2*pi)\fP.
+Also remember that a gaussian beam has \fBFWHM = 2.355*sigma\fP.
+.SH FUTURE
+\fIsnapccd(1NEMO)\fP's function is rather similar to that of
+\fIsnapplot(1NEMO)\fP,
+except of plotting the position of the stars, its bins the data.
+It would be a nice idea to combine both programs.
+.SH BUGS
+Large snapshots (of order 4k or more) will have problems when also
+large images (512 square) or so are used. Need larger memory machine.
+.PP
+The program gracefully allows the user to use nonzero \fBmoment\fP
+and a non-infinite \fBvrange\fP. No warnings here.
+.SH "SEE ALSO"
+snaprotate(1NEMO), snapslit(1NEMO), snapsmooth(1NEMO), snapaxsym(1NEMO), 
+tsf(1NEMO), ccdgrid(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+src/pjt/image	snapccd.c, snapccd.1
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+17-Jun-87	V1.0: Created	PJT
+25-jun-87	V1.1: grayscale possibility added	PJT
+29-jun-87	V2.0: image-format + three programs: ccd, smooth, look	PJT
+30-Jun-87	V2.1: improved 'struct' filestructure	PJT
+ 1-Jul-87	V2.2: added velocity-moments option 	PJT
+ 8-jul-87	V2.4: proper defn. of cell position	PJT
+ 9-Mar-88	V3.0: added data history		PJT
+ 1-jun-88	V4.0: new filestruct, renamed programname	PJT
+22-dec-88	V4.1: channel maps can be produces, keyword vrange	PJT
+30-jan-89	V4.2: vel is now Zmin, also proper dimensions	PJT
+.fi
