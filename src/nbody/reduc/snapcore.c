@@ -103,4 +103,5 @@ void write_tmr(string potfile, real  t1, real m1, real r1)
   put_data(f,"Mass",RealType,&m1,0);
   put_data(f,"Radius",RealType,&r1,0);
   put_tes(f,"plummerv");
+  strclose(f);
 }
