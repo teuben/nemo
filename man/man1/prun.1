@@ -1,0 +1,156 @@
+.TH PRUN 1NEMO "16 May 1995"
+.SH NAME
+prun \- cosmological particle-mesh (AP3M) integration code
+.SH SYNOPSIS
+\fBprun\fP  \fBdir=\fP\fIrun_directory\fP [parameter=value]
+.SH DESCRIPTION
+\fBprun\fP is a cosmological particle code, with the aim
+to follow the evolution of a large number of 
+interacting particles under Newtonian gravity. A unique 
+aspect of this version is the adaptive nature of the 
+P3M method. A max number of refinements of the mesh
+calculations can be set, to be able to follow the
+evolution at small scales when large degrees of clustering
+occur.
+.PP
+The equations of motion governing the evolution of the particle
+distribution in an expanding cosmological model are solved in
+comoving coordinates. A time-centered leapfrog integration is
+used.
+.PP
+The current NEMO implementation of \fPprun\fP is a wrapper program,
+with the usual nemo user interface. It creates
+a parameter file and calls the fortran executable. In this way
+it also hides some of the complexities of the fortran user interface.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBdir=\fP
+working run directory. Must already exist yet (see \fIpstart(1NEMO)\fP)
+Inside the working directory
+a ASCII
+parameter file, \fIprun.dat\fP will be created, which contains the
+input parameters for the program. This run directory will also contain
+logfiles, and subdirectories where the data and Green's functions are
+stored (but see below to override).
+No default.
+.TP
+\fBirun=\fP
+run label. This is a non-negative integer, not to exceed 9999, which is
+used as a ID label. Data and log filenames 
+are automatically derived from this label id. 
+[\fB9999\fP]
+.TP
+\fBipstop=\fP
+final step. Normally you want this to be a multiple of \fBipout=\fP (see 
+below). 
+[\fB75\fP]
+.TP
+\fBipout=\fP
+steps between data output. The first step is not output (since it already
+exists), but each multiple of \fBipout\fP (called \fIiout\fP)
+is output. One file is
+created per data output. The filename is 
+\fI$datadir/rv$irun(%04d).$iout(%04d)\fP
+[\fB25\fP]
+.TP
+\fBipdump=\fP
+steps between restart dump output. The filename is
+\fI$datadir/rvdump.dat1\fP.
+[\fB4\fP]
+.TP
+\fBdpnp1=\fP
+delta-p, the time step. The starting time of these cosmological
+simulations is always defined to be 1.0.
+[\fB0.84\fP].
+.TP
+\fBalpha=\fP
+Accuracy parameter, see also eq. (11.2)  in Couchman (1994).
+[\fB1.5\fP].    
+.TP
+\fBsftinit=\fP
+initial softening.
+[\fB0.6\fP].
+.TP
+\fBsftmin=\fP
+minimum softening allowed. Setting \fIsftinit = sftmin >= 3.5\fP
+makes the code run in PM mode, which speeds up the code
+by several (13) factors.
+[\fB0.03\fP].
+.TP
+\fBperr=\fP
+maximum pairwise force error (%). 
+This also influences the efficiency of P3M and AP3M. Small errors
+require large mesh-force softenings and hence large chaining cells.
+This value must be in the range of 3 to 10%.
+[\fB6.0\fP].
+.TP
+\fBnlmx=\fP
+maximum refinement level. By setting this to 0 no mesh refinements
+are done, and you can use this to estimate the time saving of the
+A3PM algorithm. (In the standard case this 
+saves about 40% for the final steps)
+[\fB4\fP].
+.TP
+\fBexe=\fP
+Name of the fortran derived \fPpstart\P executable file, which can reside 
+anywhere as long as the host OS can resolve it's location
+(e.g. under UNIX anywhere in the \fI$path\fP command search path)
+[\fBpstart.exe\fP].
+.TP
+\fBgreendir=\fP
+Directory to store Green's functions. Can require up to 5Mb. By default
+it is placed inside the working run directory (see \fBdir=\fP)
+[\fBgreenfn/\fP].
+.TP
+\fBdatadir=\fP
+Directory to store data file storage. Requires about \fB6 Nobj\fP words
+(normally 4 bytes/word) times the number of snapshots (\fBipout/ipstop + 1\fP)
+By default it is placed inside the working run directory (see \fBdir=\fP)
+[\fBdata/\fP].
+.TP 
+\fBstartfile=\fP
+initial data file. By default it is derived from the one presumably
+created by \fIpstart(1NEMO)\fP, \fI$datadir/rv$irun(%04d).0000\fP.
+File must be in \fIrvc(5NEMO)\fP format.
+.SH EXAMPLES
+The following experiment sets up initial condition using \fIpstart(1NEMO)\fP,
+integrates them using \fIprun(1NEMO)\fP, converts data to
+NEMO's \fIsnapshot(5NEMO)\fP format and plots the projected particle
+positions in a 2 by 2 panel using \fIsnapplot(1NEMO)\fP:
+.PP
+.nf
+        % pstart dir=run123 istart=123
+        % prun dir=run123 irun=123
+        % cat run123/data/rv* | rvcsnap - run123.snap
+        % snapplot run123.snap xrange=1:33 yrange=1:33 nxy=2,2
+.fi
+.PP
+Note on the third line that 
+we can use a wildcard in the conversion pipe, because the
+the lexicographically order is also in time order.
+.SH TIMING
+On a Sparc 10-30 with the default parametrs
+.nf
+    pstart   64"
+    prun   5938"
+.fi
+.SH SEE ALSO
+pstart(1NEMO), snapcomove(1NEMO), rvcsnap(1NEMO), rvc(5NEMO)
+.PP
+``\fICosmological Simulations Using Particle-Mesh Methods\fP'', H. Couchman,
+Ch. 11 in: XXX ed. Benz et al. 1994.
+.PP
+``\fIXXX\fP'', H. Couchman, (1991) ApJLett 368, L23-26.
+.SH FILES
+~/usr/couchman/adap
+.SH AUTHOR
+Hugh Couchman (fortran), Peter Teuben (C)
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+xx-xxx-xx	Fortran version \fBprun\fP       	HMPC
+7-may-94	V1.0 NEMO wrapper written        	PJT
+16-may-95	V1.1 new version from Couchman   	PJT
+.fi
