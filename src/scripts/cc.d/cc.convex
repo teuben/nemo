@@ -1,0 +1,4 @@
+#! /bin/csh -f
+#  cc script for convex  (__convexc__ is their own trigger, convex is ours)
+#exec /bin/cc -I$NEMOINC -L$NEMOLIB -Dconvex $*
+exec /bin/cc -I$NEMOINC -Dconvex -pcc $*
