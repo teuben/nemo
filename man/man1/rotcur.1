@@ -1,0 +1,260 @@
+.TH ROTCUR 1NEMO "13 March 2001"
+.SH NAME
+rotcur \- fit kinematic parameters from velocity field
+.SH SYNOPSIS
+\fBrotcur in=\fPvelfie [parameters=values ...]
+.SH DESCRIPTION
+\fIrotcur\fP derives the kinematical parameters from the observed
+velocity field by fitting a tilted-rings model to the velocity field.  It
+does a non-linear least-squares-fitting to the function:
+.PP
+.cs 1 20
+.ss 20
+.nf
+         v(x,y) = VSYS + VROT * cos(theta) * sin(INC)
+
+                      - (x-XPOS) * sin(PA) -/+ (y-YPOS) * cos(PA) ?
+where:   cos(theta) = -----------------------------------------
+                                       r
+
+                      - (x-XPOS) * cos(PA) - (y-YPOS) * sin(PA)
+and:     sin(theta) = -----------------------------------------
+                                   r * cos(INC)
+
+
+.cs 1
+.fi
+where the radius \fIr\fP is measured in the plane of the galaxy:
+.cs 1 20
+.ss 20
+.nf
+
+         r = sqrt( (x-XPOS)**2 + (y-YPOS)**2/cos(INC)**2 )
+
+.cs 1
+.fi
+.PP
+In the above formula
+\fIv(x,y)\fP denotes the radial velocity at rectangular sky
+coordinates \fIx\fP and \fIy\fP, \fIVSYS\fP the systemic 
+velocity, \fIVROT\fP the rotational
+velocity, \fIINC\fP the inclination angle and \fItheta\fP the 
+azimuthal distance
+from the major axis in the plane of the galaxy.  
+In itself, \fItheta\fP is a function of
+the inclination (\fIINC\fP) and the 
+position angle (\fIPA\fP) of the major axis.
+\fIXPOS\fP and \fIYPOS\fP denote the position of the rotation center
+in pixels w.r.t. 0,0 being the lower left corner of the map.  \fIrotcur\fP
+can fit for each ring the 6 parameters
+\fIVSYS\fP, \fIVROT\fP, \fIINC\fP, \fIPA\fP, \fIXPOS\fP
+and \fIYPOS\fP, though any combination of them can be fixed
+(see \fBfixed=\fP).
+The position angle \fIPA\fP of the major axis is defined as the
+angle, taken in anti-clockwise direction between the north direction on
+the ``sky'' and the major axis of the receding half (positive 
+radial velocity) of the galaxy. 
+.PP
+Values equal the undefined value (currently 0.0) are ignored in the
+fit. See \fIccdmath(1NEMO)\fP or \fIfitsccd(1NEMO)\fP on how to
+create a velocity field with such undefined values.
+.PP
+By setting the keyword \fBfitmode=\fP appropriately, \fIrotcur\fP can
+also be used to fit a model of pure expansional velocities:
+.cs 1 20
+.ss 20
+.nf
+
+         v(x,y) = VSYS + VROT * sin(theta) * sin(INC)
+
+.cs 1
+.fi
+use \fBfitmode=sin,1\fP in this case. \fIcurrently XPOS and YPOS \fBmust\fP
+be held fixed in this case\fP.
+.PP
+For a detailed discussion of this method see K. Begeman,
+\fIAstr. & Astrophys. \fP \fB223\fP, 47. (1989) and references
+therein.
+.SH PARAMETERS
+The following parameters are recognized:
+.TP 25
+\fBin\fP=\fIimage_vel\fP
+Input velocity field map, must be in \fIimage(5NEMO)\fP format.
+No default.
+.TP
+\fBradii\fP=\fIr0,r1,r2,...rN\fP
+Inner and outer radii for \fIN\fP touching rings (in arcsec).
+Remember that the number of radii is hence one more
+than the number of rings. The \fBunits=\fP keyword can be used to
+scale your physical units in the header to ``human readable'' units
+(arcsec). Radii must be either all increasing or decreasing.
+No default.
+.TP
+\fBvrot\fP=\fIv1,v2,...vN\fP
+Array of rotation (or expansion) velocities, one for each ring. 
+If less than the number of rings is
+given, the trailing ones are filled with the last supplied value.
+.TP
+\fBpa\fP=\fIp1,p2,...pN\fP
+Array of position angles (degrees), one for each ring.
+See also \fBvrot=\fP.
+.TP
+\fBinc\fP=\fIi1,i2,...iN\fP
+Array of inclinations (degrees), one for each ring.
+See also \fBvrot=\fP.
+.TP
+\fBvsys\fP=\fIv0\fP
+Systemic velocity. Only one number applies.
+.TP
+\fBcenter\fP=\fIx0,y0\fP
+Rotation center (grid units w.r.t. lower left corner being
+0,0). Two numbers are required.
+Default: center of map.
+.TP
+\fBfrang\fP=
+free angle around minor axis (degrees) from which data is not
+taken into the fit (thus the total cone size of ignored data around
+the minor axis is 2*\fBfrang\fP)
+[Default: \fB20.0\fP].
+.TP
+\fBside\fP=
+Choose the side of the galaxy to fit the velocity field to.
+Valid options are \fBreceding\fP, \fBapproaching\fP 
+or \fBboth\fP side(s). [Default: \fBboth\fP].
+.TP
+\fBweight\fP=
+Choice of weighting function with which points are weighed into
+the least squares solution as a function of galactic angle away
+from the major axis. Valid options are: \fBuniform\fP, \fBcosine\fP,
+and \fBcos-squared\fP.
+[Default: \fBcosine\fP].
+.TP
+\fBfixed\fP=
+List of parameters, separated by commas, to be kept fixed during the fit.
+Choose any of the
+following: \fBvsys, vrot, pa, inc, xpos, ypos\fP, although at least
+one parameters should be kept free. [Default: none, i.e. all parameters
+free.
+.TP
+\fBellips\fP=
+The names of two parameters for which to calculate an error ellips. 
+(see \fBfixed=\fP). For the two parameters it shows the major
+and minor axis, position angle of the one sigma deviation ellipse.
+[Default: not used]
+.TP
+\fBbeam\fP=
+The beam size (FWHM) for beam correction. One or two numbers required.
+Currently these are only used to correct error bars for the number
+of independant points per beam. If not given, each point is assumed
+independant. [no correction].
+.TP
+\fBdens\fP=\fIimage_den\fP
+Image containing the density. From this local derivatives
+\fI(dN/dx)/N\fP and 
+\fI(dN/dy)/N\fP are computed numerically, and used for an 
+estimate of beam smearing corrections.
+[Default: required if a beam is supplied].
+.TP
+\fBtab\fP=
+If specified, this output table is used in \fIappend\fP mode!
+This table can be piped through \fItabcomment(1NEMO)\fP and 
+fed to \fIccdvel(1NEMO)\fP to create model velocity fields.
+[Default: not used].
+.TP
+\fBresid\fP=
+If specified, this output table will contain a listing of X, Y, Velocity
+and Residual Velocities in each ring. Each ring will be separated from
+the previous one with a simple commented line specifying which ring
+it refers to. It is mostly intended for debugging purposes.
+[Default: not used].
+.TP
+\fBtol\fP=
+Tolerance for convergence of \fInllsqfit\fP [Default: \fB0.001\fP].
+.TP
+\fBlab\fP=
+Mixing parameter for \fInllsqfit\fP [Default: \fB0.001\fP]
+.TP
+\fBitmax\fP=
+Maximum number of allowed \fInllsqfit\fP iterations [Default: \fB50\fP]
+.TP
+\fBunits\fP=
+Units of input axes. Valid options are
+\fBdeg, arcmin, arcsec, rad\fP. A numeric value can also be given,
+in which case your image pixel separation from the
+image header is multiplied by this
+number to get to the ``arcsec'' that will be quoted in
+the tables.
+[Default: \fBdeg\fP]
+.TP
+\fBblank=\fP
+Value of the blank pixel that needs to be ignored. [Default: \fB0.0\fP].
+.TP
+\fBinherit=t|f\fP
+Logical denoting if the initial conditions for subsequent fitted rings
+should be inherited from the previous successfully fitted ring. The fixed
+parameters keep of course their fixed value. [Default: \fBt\fP]
+.TP
+\fBfitmode=\fP\fBcos|sin\fP\fB,1\fP
+.TP
+\fBnsigma=\fP
+Reject outlier points will fall outside nsigma times the dispersion 
+away from the mean velocity in a ring. By default, it will not reject any outliers.
+.SH AWK
+The standard output is normally not very useful; it displays, for each
+iteration, the run of parameters plus the number of points and mean
+error in the ring. The following \fIawk(1)\fP
+scripts may be useful to extract
+information per ring:
+\fIiter. number, vsys, vrot, pa, icn, xpos, ypos, npoints, sigma_vel\fP.
+.nf
+
+BEGIN{count=0;line="";}
+{
+  if ($1 == "radius"){
+    if (count != 0){
+      printf("%s  %s\n",rad,line);
+      rad=$4;
+    }else{
+      count=1; 
+      rad=$4;
+    }
+  }else{
+    line=$0
+  }
+}
+END{printf("%s  %s\n",rad,line);}
+
+.fi
+.SH BUGS
+Failures in \fInllsqfit\fP are not handled gracefully, and may
+\fIerror\fP out the program. Usage of the \fBerror=\fP system
+keyword can be used to bypass such bad rings, use with caution
+though and study the output.
+.PP
+Errorbars quoted in the table are only an estimate since the beam
+size is not known. Multiply these numbers by the square root
+of the number of pixels per beam to get a more realistic estimate.
+.PP
+Sign of \fIDx,Dy\fP in the CCD header is ignored, and an astronomical
+image is assumed.
+.SH SEE ALSO
+ccdvel(1NEMO), tabcomment(1NEMO)
+.SH AUTHOR
+K. Begeman, P. J. Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1i +4i
+19/jul/83	original program                     	KGB
+9/mar/85	revision of program                 	KGB
+23/may/86	migrated to VAX-VMS                  	KGB
+27/nov/88	UNIX version                           	pjt
+8-feb-91	flushed buffers ROTCUR.DAT each write	pjt
+30-apr-91	moved to NEMO into C                   	pjt
+10-sep-91	documentation improved           	pjt
+17-oct-91	added Npts to table output      	pjt
+21-may-92	added Bob Gruendl's rotcur awk scripts	PJT
+12-jun-92	added inherit=t as default      	PJT
+13-aug-92	implemented fitmode= without XPOS,YPOS	PJT
+15-oct-99	compute residuals and add resid=	PJT
+14-mar-01	V2.5: clarifications, added nsigma=    	PJT
+.fi
