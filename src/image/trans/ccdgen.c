@@ -28,7 +28,7 @@ string defv[] = {
   "crval=\n        Override/Set crval (0,0,0) // ignored",
   "cdelt=\n        Override/Set cdelt (1,1,1) // ignored",
   "seed=0\n        Random seed",
-  "VERSION=0.4\n   5-jan-05 PJT",
+  "VERSION=0.5\n   5-jan-05 PJT",
   NULL,
 };
 
@@ -61,7 +61,6 @@ bool Qtotflux;
 
 local int set_axis(string var, int n, double *xvar, double defvar);
 local void do_create(int nx, int ny, int nz);
-local void do_combine(void);
 local void wcs_f2i(             int ndim, double *crpix, double *crval, double *cdelt, image *iptr);
 local void wcs_i2f(image *iptr, int ndim, double *crpix, double *crval, double *cdelt);
 
@@ -419,7 +418,59 @@ local void object_bar(int npars, real *pars)
 
 local void object_spiral(int npars, real *pars)
 {
-  warning("no spiral yet");
+  int i,nx = Nx(iptr);
+  int j,ny = Ny(iptr);
+  int l, lmax;
+  real A = 1.0;
+  real h = 1.0;
+  real k = 1.0;   /* wave number */
+  real p = 1.0;   /* 1/2 power of cos */
+  real r0 = 0.0;  /* starting radius */
+  real p0 = 0.0;  /* starting angle */
+  real x1,y1,x2,y2,x3,y3,r,arg;
+  real amp,phi,value,sum;
+
+  if (npar > 0) A = pars[0];
+  if (npar > 1) h = pars[1];
+  if (npar > 2) k = pars[2];
+  if (npar > 3) p = pars[3];
+  if (npar > 4) r0 = pars[4];
+  if (npar > 5) p0 = pars[5];
+  p0 *= PI/180.0;  /* convert from degrees to radians */
+
+  lmax = Qtotflux ? 2 : 1;
+
+  for (l=0; l<lmax; l++) {     /* 1st loop: sum up the flux   if in 2nd loop: normalize */
+    if (l==0) 
+      sum = 0.0;
+    else {
+      A /= sum;
+      dprintf(0,"spiral: A->%g\n",A);
+    } 
+    for (j=0; j<ny; j++) {
+      y1 = (j-center[1])*Dy(iptr) + Ymin(iptr);
+      for (i=0; i<nx; i++) {
+	x1 = (i-center[0])*Dx(iptr) + Xmin(iptr);
+	
+	x2 =  -x1*sinp - y1*cosp;
+	y2 =  (x1*cosp - y1*sinp)/cosi;
+	r = sqrt(x2*x2+y2*y2);
+	if (r < r0) continue;
+	/* ? should match this up better so we can connect bar and spiral ? */
+	phi = atan2(y2,x2) + k*(r-r0) + p0;
+	amp = pow(cos(phi),2*p);
+	arg = r/h;
+	value = (arg < 100) ? A * amp * exp(-arg) :  0.0;
+	if (Qtotflux) {   
+	  if (l==0) 
+	    sum += value;
+	  else
+	    MapValue(iptr,i,j) += value;
+	} else
+	  MapValue(iptr,i,j) += value;
+      } /* i */
+    } /* j */
+  } /* k */
 }
 
 local void object_noise(int npars, real *pars)
@@ -446,13 +497,4 @@ local void object_noise(int npars, real *pars)
 }
 
 
-
-/* 
- *  combine input maps into an output map  -- still 2D only
- */
-local void do_combine()
-{
-
-    
-}
 
