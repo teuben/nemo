@@ -49,6 +49,9 @@ echo '++++++++++++++++++++++++++++++++++++++++' >>& install.log
        src/scripts/pgplot.install dir=$NEMO/tmp  >>& install.log
        ./configure --with-yapp=pgplot --with-pgplot-prefix=$NEMOLIB >>& install.log
        make dirs config_extra scripts >>& install.log
+    else
+       echo "Did not find a directory \$NEMO/local/pgplot, skipping pgplot install"
+       echo "Using a simple postscript-only graphics driver for yapp"
     endif
 
 
