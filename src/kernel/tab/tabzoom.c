@@ -114,7 +114,7 @@ int pl_cursor1(real, real, real*, real*, char *);
 void show_lr(int,int);
 void show_mr2(int);
 real pearson(int,int);
-void do_action(string);
+void do_action(int, string);
 
 
 nemo_main()
@@ -557,7 +557,7 @@ interact()
 	  }
 	  if (dmax/dmaxold < 0.1) {
 	    dprintf(0,"Found point %d\n",imax);
-	    do_action(points[imax].spar);
+	    do_action((c=='A'), points[imax].spar);
 	  } else
 	    warning("Not near enuf to point %d",imax);
 	}
@@ -970,14 +970,14 @@ real pearson(int i, int j)
     return sum1/sqrt(sum2*sum3);
 }
 
-void do_action(string s)
+void do_action(int run, string s)
 {
   char cmd[MAXLINLEN];
 
   if (*action) {
-    dprintf(1,"ACTION(%s): %s\n",action,s);
+    dprintf(run ? 1 : 0,"ACTION(%s): %s\n",action,s);
     sprintf(cmd,"%s %s",action,s);
-    system(cmd);
+    if (run) system(cmd);
   } else
     dprintf(1,"noACTION(): %s\n",s);
 }
