@@ -1,9 +1,6 @@
 #include <bodytrans.h>
 
-real btr_phi(b,t,i)
-Body *b;
-real t;
-int  i;
+real btr_phi(Body *b,real t,int  i)
 {
     return (phi);
 }

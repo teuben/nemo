@@ -1,9 +1,6 @@
 #include <bodytrans.h>
 
-real btr_mub(b,t,i)
-Body *b;
-real t;
-int  i;
+real btr_mub(Body *b,real t,int  i)
 {
     real r2 = x*x+y*y;
     real r = sqrt(r2+z*z);

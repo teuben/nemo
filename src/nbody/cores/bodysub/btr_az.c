@@ -1,9 +1,6 @@
 #include <bodytrans.h>
 
-real btr_az(b,t,i)
-Body *b;
-real t;
-int  i;
+real btr_az(Body *b,real t,int  i)
 {
     return (az);
 }

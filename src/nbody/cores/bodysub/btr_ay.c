@@ -1,9 +1,6 @@
 #include <bodytrans.h>
 
-real btr_ay(b,t,i)
-Body *b;
-real t;
-int  i;
+real btr_ay(Body *b,real t,int  i)
 {
     return (ay);
 }
