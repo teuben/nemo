@@ -1,4 +1,4 @@
-.TH TABNLLSQFIT 1NEMO "21 November 2002"
+.TH TABNLLSQFIT 1NEMO "14 February 2003"
 .SH NAME
 tabnllsqfit \- general purpose non-linear least squares fitting program
 .SH SYNOPSIS
@@ -17,7 +17,7 @@ The inputfile is an ascii file in a tabular format, where on every line
 there must be an assigned column for the X- and Y-coordinate(s). 
 An optional column can be assigned to the errors in Y 
 (the DY-coordinates, the inverse square of these being used as
-a weight column). If no
+a weight). If no
 DY-column is assigned, it is assumed that the errors in Y are all the
 same and equal to 1. Lines starting with the '#' symbol are comment 
 lines. Certain models (see \fBfit=\fP below) allow multiple X or Y
@@ -122,11 +122,14 @@ Maximum number of allowed \fInllsqfit\fP iterations [Default: \fB50\fP]
 .SH FIT PARAMETERS
 Parameters are referred to as p0,p1,p2,p3,.....
 .nf
-.ta +1i
+.ta +1.5i
 line     	y=p0+p1*x                        (same as poly,order=1)
 plane       	z=p0+p1*x+p2*y                   (example order=2)
 polynomial  	y=p0+p1*x+p2*x^2+p3*x^3...       (example order=3)
 gauss       	y=p0+p1*exp(-(x-p2)^2/(2*p3^2))
+exp		y=p0+p1*exp(-(x-p2)/p3)
+arm		y=p0+p1*cos(x)+p2*sin(x)
+arm3		y=p0+p1*cos(x)+p2*sin(x)+p3*cos(3*x)+p4*sin(3*x) 
 .fi
 .SH EXAMPLE
 Here is an example of a linear fit: a straight 
@@ -232,7 +235,7 @@ void derv_line(real *x, real *p, real *e, int np)
 
 .fi
 .SH CAVEATS
-It will not recognize linear fits is the non-linear parameters are kept fixed,
+It will not recognize linear fits if the non-linear parameters are kept fixed,
 e.g. the offset p0 in fit=gauss.
 .SH SEE ALSO
 tablsqfit(1NEMO),hist(1NEMO), tabmath(1NEMO), 
@@ -257,5 +260,6 @@ Peter Teuben
 17-jul-02	V1.1 added load=, x=, numrec=		PJT
 11-sep-02	V1.1e  changes error/warning to accomodate residual writen	PJT
 21-nov-02	V1.4 nsigma= can be an array of iterations	PJT
+14-feb-03	V1.6 arm,arm3 for Rahul		PJT
 .fi
 
