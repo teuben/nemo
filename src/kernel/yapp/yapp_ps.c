@@ -17,6 +17,7 @@
  *                              21 jan 00  stub pl_cursor
  *				 5 apr 01  added plswap/plxscale/plyscale for completeness
  *					   and plcolor (but this ought to do color too) + friends
+ *                                         allow yapp.ps to be overwritten; others not
  */
 
 #define VERSIONID "Version 3.2 5-may-95 PJT"
@@ -101,7 +102,10 @@ plinit(string opt, real x0, real x1, real y0, real y1)
     } else {
       dprintf(0,"YAPP_PS %s:\n do \'lpr %s\' to print\n", VERSIONID, yappfile);
     }
-    psst = stropen(yappfile, "w");
+    if (streq(yappfile,"yapp.ps")
+        psst = stropen(yappfile, "w!");
+    else
+        psst = stropen(yappfile, "w");
     if (psst == NULL)
 	error("plinit: can't open %s", yappfile);
     did = date_id();
