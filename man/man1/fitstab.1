@@ -1,0 +1,77 @@
+.TH FITSTAB 1NEMO "30 September 1996"
+.SH NAME
+fitstab \- convert fits table to ascii table
+.SH SYNOPSIS
+.PP
+\fBfitstab in=\fPfits_table [parameter=value]
+.SH DESCRIPTION
+\fBfitstab\fP reads a fits table file from disk and converts it to
+an ascii table. The input file must be in \fIfits(5NEMO)\fP format,  
+the output will be on \fIstdout\fP. Tables can be selected by their
+HDU number; HDU's which do not have the ascii table extension (TABLE) 
+are automatically skipped.
+.PP
+See notes in \fIccdfits(1NEMO)\fP how to process fits files from
+tape instead disk.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 20
+\fBin=\fIfits-file\fP
+input file, must be \fIfits(5)\fP format. 
+[no default].
+.TP
+\fBhdu=\fInumber\fP
+HDU number to be processed. The first one counts as 1. A 0 will
+convert all. 
+HDU's which do not have the table extension 
+(\fBXTENSION='TABLE     '\fP) are automatically skipped.
+[Default: 0].
+.TP
+\fBselect=\fP
+Comma separated list of 
+selections which determines the parts of the table that is output.
+Valid options are \fBdata\fP, \fBheader\fP and \fBrow\fP:
+\fBdata\fP will list the table data itself, with an added
+row number if the option \fBrow\fP is also supplied, and
+\fBheader\fP lists the column names and their attributes from
+the FITS header. The parameters from a random group HDU can also
+be printed using \fBgroup\fP.
+[Default: \fBdata\fP].
+.TP
+\fBcol=\fIcolumn_names\fP
+Column (or random group parameter)
+names selected for output. Default is all columns, in the original
+format (no extra blanks). If columns are selected by their name
+(FITS keyword \fBTTYPE\fPn), the output
+will contains an extra blank inbetween columns, UNLESS that column was
+followed by a \fB+\fP sign, for example \fBcol=DecSign+DecD\fP will not
+put an extra space between \fBDecSign\fP and \fBDecD\fP. \fI*** this last
+item not implemented yet ***\fP
+[Default: all].
+.SH BUGS
+Columns are output in the order that they appear in the table, not
+as specified with the \fBcol=\fP keyword.
+.PP
+no magic blanking substitution, no scaling TSCALnnn, TZEROnnn ?
+.PP
+column names are treated case sensitive. 
+.PP
+X format not understood yet
+.SH "SEE ALSO"
+ccdfits(1NEMO), fits(5NEMO), dd(1), FTB (\fIADC Fits Table Browser\fP)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+~/src/image/fits  	fitstab.c
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+8-apr-92	V1.0 Written	PJT
+13-apr-92	V1.0x Renamed file= to hdu=	PJT
+30-sep-96	V1.3 added output of random group parameters	PJT
+.fi
+
