@@ -31,7 +31,9 @@ LIBMONGO    = /usr/local/lib/libmongo.a $(LIBSUNVIEW) $(FORLIBS)
 #LIBPGPLOT   = $(NEMOLIB)/libpgplot.a $(LIBSUNVIEW) -lX11 $(FORLIBS)
 # linux:
 LIBPGPLOT   = $(NEMOLIB)/libpgplot.a $(LIBX) $(FORLIBS)
-LIBPLPLOT   = -lplplotftk -ltk -litcl -ltcl $(LIBX) -lieee -lm -lf2c
+#LIBPLPLOT   = -lplplotftk -ltk -litcl -ltcl $(LIBX) -lieee -lm -lf2c
+LIBPLPLOT   = -lplplot -ltk -ltcl  $(LIBX)
+# -lieee -lm
 # LIBSM       = /saturn/teuben/sm/callable/dummy.o 
 #  this is an SM without sunview, only X11 (check your sm/src/options.h)
 LIBSM       =  -L$(NEMOLIB) -lplotsub -ldevices -lutils $(LIBX)
@@ -44,7 +46,7 @@ LIBMESA	    = -lGL $(LIBX)
 # Files exported to $NEMOLIB 
 
 OBJFILES = yapp.o
-YAPPOBJS = yapp_ps.o yapp_null.o yapp_pgplot.o 
+YAPPOBJS = yapp_ps.o yapp_null.o yapp_pgplot.o yapp_plplot.o
 BINFILES = catps catpgps pltext_ps plarrow_ps
 TESTFILES = yapptest \
 	   yapptest_mongo yapptest_pgplot yapptest_core yapptest_suntools \

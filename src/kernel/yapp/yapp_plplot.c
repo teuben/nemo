@@ -1,5 +1,6 @@
 /*
- * YAPP: Yet Another Plotting Package. - calling PLPLOT package
+ * YAPP: Yet Another Plotting Package. - calling PLPLOT package 
+ *       See also:  http://plplot.sourceforge.net/ 
  *
  *	8-oct-94  Created - note: need -DYAPP_LONG since plinit() is
  *		  used by both NEMO and the PLPLOT library
@@ -7,8 +8,13 @@
  *                but need to declare them here ... can't use plplot.h
  *	7-feb-95  proper real=float version
  *     12-mar-97  non COLOR version didn't link properly
+ *  
+ *     25-oct-03  various fixed for the new CVS 5.x series of plplot
  *
  *  ToDo: colors
+ *        fix the --without-double requirement
+ *        fix aspect ratio problems
+ *        presistent plots on the screen
  */
 
  
@@ -18,6 +24,7 @@
 
 /* we use the c_ versions since NEMO uses the same namespace ... */
 /* this means we cannot include the plplot.h header as is ...... */
+/* and be warned about double vs. float mis-use                  */
 
 extern string yapp_string;	/* a kludge, see: getparam.c */
 
@@ -47,7 +54,7 @@ extern string *burststring(string, string);
 
 /* make COLOR and PG6 now the defaults */
 
-/* #define COLOR */
+#define COLOR  1
 
 local real dxymax;    /* size of user window */
 local float xcur=0.0, ycur=0.0;
@@ -90,7 +97,7 @@ plinit(string pltdev, real xmin, real xmax, real ymin, real ymax)
     } else
         warning("No device name specified - plplot running interactive");
 
-    c_plsori(3);     /* 0=landscape 1=portrait upside 3=portrait ?*/
+    c_plsori(0);     /* 0=landscape 1=portrait upside 3=portrait ?*/
     
     c_plinit();
     c_pladv(0);
@@ -520,3 +527,8 @@ void pllut(string fname, bool compress)
 }
 
 #endif
+
+int pl_cursor(real *x, real *y, char *c)
+{
+  return 0;
+}
