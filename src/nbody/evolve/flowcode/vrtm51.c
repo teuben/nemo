@@ -9,6 +9,7 @@
  *      24-nov-03  allow multiple input files w/ added error checking
  *      25-nov-03  ieck, another emberassing reference frame error
  *      26-nov-03  indexing error in binsearch; sign error in thetaref
+ *       1-jan-04  option to use constant vt in ring after omega*r
  */
 
 #include <stdinc.h>
@@ -17,14 +18,14 @@
 #include <table.h>
 #include <extstring.h>
 
-#define VERSION "flowcode:vrtm51 V1.7 26-nov-03"
+#define VERSION "flowcode:vrtm51 V1.8 1-jan-04"
 
 local double omega = 0.0;		/*   pattern speed  */
 local double pitch = 10.0;              /*    pitch angle   */
 local double rref = 1.0;                /* reference radius */
 local double thetaref = 0.0;            /*  reference angle */
 
-#define MAXTAB  32
+#define MAXTAB  64
 
 local int nrad[MAXTAB], nmax;
 local real *theta[MAXTAB], *vr[MAXTAB], *vt[MAXTAB], *den[MAXTAB], 
@@ -36,6 +37,7 @@ local int entries=0;           /* counter how often this routine was called */
 local real     tanp;
 
 local bool Qstick = TRUE;      /* set v=0 when hitting the inner or outer edge */
+local bool Qconst = FALSE;     /* testing */
 
 
 #define MAXCOL  4
@@ -110,6 +112,8 @@ void inipotential (int *npar, double *par, string name)
     dprintf (1,"  Parameters : Pitch Angle = %f\n",pitch);
     dprintf (1,"  Parameters : Reference Radius = %f\n",rref);
     dprintf (1,"  Parameters : Reference Angle = %f\n",thetaref);
+    dprintf (1,"  Constant_vt: %s (hardcoded)\n",Qconst ? "TRUE" : "FALSE");
+    dprintf (1,"  Sticky     : %s (hardcoded)\n",Qstick ? "TRUE" : "FALSE");
     dprintf (1,"  Table = %s\n",name);
 
     if (pitch == 0) error("inipotential: Need a non-zero pitch angle");
@@ -179,7 +183,7 @@ void inipotential (int *npar, double *par, string name)
 
 void potential(int *ndim,double *pos,double *acc,double *pot,double *time)
 {
-    real rad, phi, phase;
+    real rad, rad0, rad1, phi, phase;
     real x, y, vrad, vtan, tmp;
     int i;
 
@@ -209,9 +213,11 @@ void potential(int *ndim,double *pos,double *acc,double *pot,double *time)
       /* if only one ring, all radii are valid, even if bad */
       i = 0;
     }
+
+    rad1 = Qconst ? rad0 : rad ;
       
     vrad = seval(phase,theta[i],vr[i],coef_vr[i],nrad[i]);
-    vtan = seval(phase,theta[i],vt[i],coef_vt[i],nrad[i]) - omega*rad;
+    vtan = seval(phase,theta[i],vt[i],coef_vt[i],nrad[i]) - omega*rad1;
     *pot = seval(phase,theta[i],den[i],coef_den[i],nrad[i]);
     dprintf(1,"x,y,rad,iring,phi,phase,DELTA,vt,vr,den: %g %g   %g %d %g %g [%g]  %g %g %g\n", 
 	    x,y,rad,i,phi,phase,tmp,vtan,vrad,*pot);
