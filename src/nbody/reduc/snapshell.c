@@ -3,6 +3,7 @@
  *              
  * 
  *     13-nov-01     V1.0   derived from snapkinem                          PJT
+ *     16-nov-01            implemente more....
  */
 
 #include <stdinc.h>
@@ -22,7 +23,9 @@ string defv[] = {
     "svar=\n                     sorting variable if shells sorted by an expression",
     "weight=1\n			 weighting for particles",
     "axes=1,1,1\n                X,Y,Z axes for spatial spheroidal normalization",
-    "VERSION=1.0\n		 13-nov-01 PJT",
+    "stats=mean,disp,n\n         Statistics to print (mean,disp,skew,kurt,min,max,median,n)",
+    "normalized=t\n              Use normalized radii is svar= is used?",
+    "VERSION=1.0a\n		 16-nov-01 PJT",
     NULL,
 };
 
@@ -70,7 +73,6 @@ nemo_main()
     get_snap(instr, &btab, &nbody, &tsnap, &bits);
     if (bits & PhaseSpaceBit) {
       snapkinem();
-      /* showkinem(); */
     }
 }
 
@@ -152,57 +154,6 @@ findmoment()
   }
 }
 
-old_findmoment()
-{
-    int i;
-    Body *b;
-    real w_b;
-    vector tmpv, pos_b, vel_b;
-    matrix tmpm;
-
-    CLRV(w_jvec);
-    CLRM(w_qpole);
-    CLRM(w_keten);
-    for (i = 0, b = btab; i < nbody; i++, b++) {
-	w_b = (weight)(b, tsnap, i);
-	if (w_b > 0.0 && (rcut <= 0.0 || distv(Pos(b), cm_pos) < rcut)) {
-	    SUBV(pos_b, Pos(b), w_pos);
-	    SUBV(vel_b, Vel(b), w_vel);
-	    CROSSVP(tmpv, pos_b, vel_b);        /* jun-92: repaired sign */
-	    MULVS(tmpv, tmpv, w_b);
-	    ADDV(w_jvec, w_jvec, tmpv);
-	    MULVS(tmpv, pos_b, w_b);
-	    OUTVP(tmpm, tmpv, pos_b);
-	    ADDM(w_qpole, w_qpole, tmpm);
-	    MULVS(tmpv, vel_b, w_b);
-	    OUTVP(tmpm, tmpv, vel_b);
-	    ADDM(w_keten, w_keten, tmpm);
-	}
-    }
-    DIVVS(w_jvec, w_jvec, w_sum);
-    DIVMS(w_qpole, w_qpole, w_sum);
-    DIVMS(w_keten, w_keten, w_sum);
-}
-
-showkinem()
-{
-    printf("\n");
-    printf("time:%7.3f    n_tot:%6d    n_sum:%6d    w_sum:%6g\n",
-	   tsnap, n_tot, n_sum, w_sum);
-    printf("\n");
-    printf("%12s  %10s  %10s  %10s  %10s\n",
-	   "            ", "length", "x", "y", "z");
-    printvec("pos:", w_pos);
-    printvec("vel:", w_vel);
-    printvec("jvec:", w_jvec);
-    printf("\n");
-    printf("%12s  %10s  %10s  %10s  %10s\n",
-	   "            ", "eigval", "x", "y", "z");
-    printeig("qpole:", w_qpole);
-    printf("\n");
-    printeig("keten:", w_keten);
-}
-
 printvec(name, vec)
 string name;
 vector vec;
@@ -211,27 +162,3 @@ vector vec;
 	   name, absv(vec), vec[0], vec[1], vec[2]);
 }
 
-#include "nrutil.h"
-
-printeig(name, mat)
-string name;
-matrix mat;
-{
-    float **q, *d, **v;
-    int i, j, nrot;
-
-    q = fmatrix(1, 3, 1, 3);
-    for (i = 1; i <= 3; i++)
-	for (j = 1; j <= 3; j++)
-	    q[i][j] = mat[i-1][j-1];
-    d = fvector(1, 3);
-    v = fmatrix(1, 3, 1, 3);
-    jacobi(q, 3, d, v, &nrot);
-    eigsrt(d, v, 3);
-    printf("%12s  %10.5f  %10.5f  %10.5f  %10.5f\n", name,
-	   d[1], v[1][1], v[2][1], v[3][1]);
-    printf("%12s  %10.5f  %10.5f  %10.5f  %10.5f\n", "            ",
-	   d[2], v[1][2], v[2][2], v[3][2]);
-    printf("%12s  %10.5f  %10.5f  %10.5f  %10.5f\n", "            ",
-	   d[3], v[1][3], v[2][3], v[3][3]);
-}
