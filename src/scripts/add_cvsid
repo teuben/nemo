@@ -1,0 +1,21 @@
+#! /bin/csh -f
+#
+#   add a cvsid to a nemo_main program  (18-oct-2004   PJT)
+#
+
+foreach file ($*)
+  set nl=`grep 'nemo_main()' $file | wc -l`
+  if ($nl == 1) then
+    cp $file /tmp
+    set tmp=/tmp/$file:t
+    if (-e $tmp) then
+      sed 's/nemo_main()/string cvsid="$Id$";\n\nvoid nemo_main()/'   < $tmp > $file
+    else
+      echo $tmp  : suddenly disappeared
+    endif
+  else if ($nl == 0) then
+    echo $file : skipping, no nemo_main
+  else
+    echo $file : skipping, too many nemo_main
+  endif
+end
