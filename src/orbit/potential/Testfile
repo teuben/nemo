@@ -10,7 +10,7 @@ need:
 
 clean:
 	@echo Cleaning $(DIR)
-	@rm -f plummer.ccd plummer1.tab plummer2.tab
+	@rm -f plummer.ccd plummer1.tab plummer2.tab map0.ccd map0.tab
 
 NBODY = 10
 
@@ -38,4 +38,7 @@ potccd: plummer.ccd
 	potlist ccd potfile=plummer.ccd x=0:2:0.1 dr=0.001 | awk '{print $$1,$$4,$$7,$$11}' > plummer1.tab
 	potlist plummer                 x=0:2:0.1 dr=0.001 | awk '{print $$1,$$4,$$7,$$11}' > plummer2.tab
 	tabmath plummer1.tab,plummer2.tab - %1,%2-%6,%3-%7,%4-%8 all format=%f
+	nemoinp 0:10 | tabmath - - '1/(sqrt(4+%1)' > map0.tab
+	potccd map0.ccd rotcur 0 map0.tab x=-10:10:0.1 y=-10:10:0.1
+	ccdstat map0.ccd
 
