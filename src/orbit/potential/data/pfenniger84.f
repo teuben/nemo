@@ -467,7 +467,7 @@ c
       T = 0D0
       I = 1D0
 
-      DO 
+      DO WHILE (I.GT.0D0)
          I = I + I
          P = P + INT(P/PI + 0.5D0)*PI + ATAN(TAN(P2) * B/A)
          P2 = MOD(P,TPI)
