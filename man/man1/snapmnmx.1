@@ -1,0 +1,62 @@
+.TH SNAPMNMX 1NEMO "8 November 1993"
+.SH NAME
+snapmnmx \- show statistics of snapshot variables
+.SH SYNOPSIS
+.PP
+\fBsnapmnmx in=\fPsnap_in  [parameter=value]
+.SH DESCRIPTION
+\fIsnapmnmx\fP produces a table of a number of selected statistics
+of requested quantities of the bodies in a snapshot. It can also add
+the selected times to the table.
+.SH PARAMETERS
+The following parameters are recognized in any order if the 
+keyword is also given:
+.TP 20
+\fBin=\fIin-file\fP
+Input file, in \fIsnapshot(5NEMO)\fP format [no default].
+.TP
+\fBvar=\fIvar_list\fP
+List of data-items for which statistics will be output;
+any of the \fIbodytrans(3NEM0)\fP
+functions can be used in an arbitry expression.
+The order in the table is the order of the variables given 
+within this keyword, within each selected mode (see next keyword).
+[default: \fBx,y,z\fP].
+.TP
+\fBmode=\fImode_list\fP
+List modes of output, which can be combined. Valid 
+options are: \fBtime, min, max, mean\fP and \fBsigma\fP. 
+Multiple options must be separated by a comma. The columns
+are printed in the order of the list above. However,
+the \fBvar=\fP is the ``fastest'' variable of this two dimensional
+matrix. Example: with the defaults (\fBmode=min,max\fP 
+and \fBvar=x,y,z\fP)
+the program would print \fIxmin, ymin, zmin, xmax, ymax, xmax\fP.
+[default: \fBmin,max\fP].
+.TP
+\fBtimes=\fItimes-string\fP
+Time values/intervals of which snapshots should be used. 
+[default: \fBall\fP]
+.TP
+\fBformat=\fIformat=-string\fP
+Format string (in the C language notation) of the output numbers.
+If no space is used in the format description, the program will
+add one for you. [default: \fB%g\fP (free format)].
+.SH SEE ALSO
+snapstat(1NEMO), snaprstat(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +3.0i
+~/src/nbody/reduc     snapmnmx.c
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+16-Apr-91	V1.0: created          	PJT
+13-may-91	V1.1: added time to mode, added more doc	PJT
+8-nov-93	V1.2: using moment.h	PJT
+.fi
+
+
