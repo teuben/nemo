@@ -1,102 +1,65 @@
-##############################################################################
-# MAKEFILE: compile and link treecode executable files                       #
-# Copyright (c) 2001 by Joshua E. Barnes, Honolulu, Hawai`i.                 #
-##############################################################################
+include $(NEMOLIB)/makedefs
 
-########################################################################
-# DIRECTIONS: to tune this Makefile to your system, edit the definitions
-# of CCFLAGS, LDFLAGS, OPTFLAG, and PREC below.  Suggested values
-# are provided for LINUX, Sun, and SGI systems.
+# adapted from 'treecode 1.4' for NEMO V3
 
-########################################################################
-# Compiler options.
+#	choose from:  -DQUICKSCAN, -DUSEFREQ, -DBINARYIO
+TFLAGS = -DLINUX
 
-# LINUX:
-CCFLAGS = -DLINUX
-LDFLAGS =
-OPTFLAG = -O3
+L= $(NEMOLIB)/libnemo.a
+LIBN = $(L)
 
-# Sun:
-# CCFLAGS =
-# LDFLAGS =
-# OPTFLAG = -xO3
+BINFILES = treecode1 treecode1_q
 
-# SGI:
-# CCFLAGS = -n32
-# LDFLAGS = -n32
-# OPTFLAG = -O3
+#SRCFILES = code.c code.h code_io.c defs.h grav.c load.c util.c hackforce.c
+SRCFILES = treecode.c  treegrav.c  treeio.c  treeload.c
 
-########################################################################
-# Precision.  Possible values are SINGLEPREC, MIXEDPREC, and DOUBLEPREC.
 
-# LINUX, SGI:
-PREC = SINGLEPREC
+SRCDIR = $(NEMOPATH)/src/nbody/evolve/hackcode/source1
 
-# Sun:
-# PREC = MIXEDPREC
+all:	$(BINFILES)
 
-########################################################################
-# Variations:
+clean:
+	rm -f *.o *.a core $(BINFILES)
 
-# Uncomment the next line to use freq instead of dtime:
-# USEFREQ = -DUSEFREQ
+tidy:
+	rm -f *.o $(BINFILES)
 
-# Uncomment the next line to use binary I/O:
-# BINARYIO = -DBINARYIO
+treecode1: treecode.o  treegrav.o  treeio.o  treeload.o
+	$(CC) $(CFLAGS) $(TFLAGS) -o treecode1 \
+	   treecode.o  treegrav.o  treeio.o  treeload.o \
+	  $(LIBN) -lm
 
-########################################################################
-# Vanila treecode:
+treecode1_q: treecode_q.o  treegrav_q.o  treeio_q.o  treeload_q.o
+	$(CC) $(CFLAGS) -o treecode1_q \
+	   treecode_q.o  treegrav_q.o  treeio_q.o  treeload_q.o \
+	  $(LIBN) -lm
 
-treecode: treecode.o treeio.o treeload.o treegrav.o libZeno.a
-	$(CC) $(LDFLAGS) -o treecode \
-	  treecode.o treeio.o treeload.o treegrav.o libZeno.a -lm
+# --- 
 
-treecode.o: treecode.c treecode.h treedefs.h
-	$(CC) $(CCFLAGS) -D$(PREC) $(USEFREQ) -c treecode.c
+treecode_q.o:	treecode.c
+	$(CC) $(CFLAGS) $(TFLAGS) -DQUICKSCAN -c treecode.c -o treecode_q.o
 
-treeio.o: treeio.c treecode.h treedefs.h
-	$(CC) $(CCFLAGS) -D$(PREC) $(USEFREQ) $(BINARYIO) -c treeio.c
+treegrav_q.o:	treegrav.c
+	$(CC) $(CFLAGS) $(TFLAGS) -DQUICKSCAN -c treegrav.c -o treegrav_q.o
 
-treeload.o: treeload.c treedefs.h
-	$(CC) $(CCFLAGS) -D$(PREC) -c treeload.c
+treeio_q.o:	treeio.c
+	$(CC) $(CFLAGS) $(TFLAGS) -DQUICKSCAN -c treeio.c -o treeio_q.o
 
-treegrav.o: treegrav.c treedefs.h
-	$(CC) $(CCFLAGS) -D$(PREC) $(OPTFLAG) -c treegrav.c
+treeload_q.o:	treeload.c
+	$(CC) $(CFLAGS) $(TFLAGS) -DQUICKSCAN -c treeload.c -o treeload_q.o
 
-########################################################################
-# Quick-scan treecode:
+# ---
 
-treecode_q: treecode_q.o treeio_q.o treeload_q.o treegrav_q.o libZeno.a
-	$(CC) $(LDFLAGS) -o treecode_q \
-	  treecode_q.o treeio_q.o treeload_q.o treegrav_q.o libZeno.a -lm
+treecode.o:	treecode.c
+	$(CC) $(CFLAGS) $(TFLAGS) -c treecode.c -o treecode.o
 
-treecode_q.o: treecode.c treecode.h treedefs.h
-	$(CC) $(CCFLAGS) -D$(PREC) -DQUICKSCAN $(USEFREQ) -c \
-	  -o treecode_q.o treecode.c
+treegrav.o:	treegrav.c
+	$(CC) $(CFLAGS) $(TFLAGS) -c treegrav.c -o treegrav.o
 
-treeio_q.o: treeio.c treecode.h treedefs.h
-	$(CC) $(CCFLAGS) -D$(PREC) -DQUICKSCAN $(USEFREQ) $(BINARYIO) -c \
-	  -o treeio_q.o treeio.c
+treeio.o:	treeio.c
+	$(CC) $(CFLAGS) $(TFLAGS) -c treeio.c -o treeio.o
 
-treeload_q.o: treeload.c treedefs.h
-	$(CC) $(CCFLAGS) -D$(PREC) -DQUICKSCAN -c \
-	  -o treeload_q.o treeload.c
+treeload.o:	treeload.c
+	$(CC) $(CFLAGS) $(TFLAGS) -c treeload.c -o treeload.o
 
-treegrav_q.o: treegrav.c treedefs.h
-	$(CC) $(CCFLAGS) -D$(PREC) -DQUICKSCAN $(OPTFLAG) -c \
-	  -o treegrav_q.o treegrav.c
-
-########################################################################
-# Zeno library:
-
-libZeno.a: clib.o getparam.o mathfns.o
-	ar ruv libZeno.a clib.o getparam.o mathfns.o
-
-clib.o: clib.c stdinc.h
-	$(CC) $(CCFLAGS) -D$(PREC) -c clib.c
-
-getparam.o: getparam.c stdinc.h getparam.h
-	$(CC) $(CCFLAGS) -D$(PREC) -c getparam.c
-
-mathfns.o: mathfns.c stdinc.h mathfns.h
-	$(CC) $(CCFLAGS) -D$(PREC) -c mathfns.c
+# ---

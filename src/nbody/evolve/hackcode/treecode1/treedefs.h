@@ -3,10 +3,22 @@
 /* These definitions are needed for treeload.c and treegrav.c, but this     */
 /* file does not provide definitions for other parts of the N-body code.    */
 /* Copyright (c) 1999 by Joshua E. Barnes, Tokyo, JAPAN.                    */
+/* 22-jun-01  adapted for NEMO                                              */
 /****************************************************************************/
 
 #ifndef _treedefs_h
 #define _treedefs_h
+
+/* fix for NEMO, once we've sorted out the PRECISION flag stuff ZENO uses */
+#if 0
+#define rsqrt sqrt
+#define rabs  abs
+#define rpow  pow
+#define rsqr  sqr
+#endif
+/* in NEMO there is a function 'root', so root needs to be redefined */
+
+#define root treecode_root
 
 /*
  * NODE: data common to BODY and CELL structures.
@@ -116,3 +128,4 @@ global int nbccalc;                     /* total body-cell interactions     */
 global real cpuforce;                   /* CPU time for force calc          */
 
 #endif /* ! _treedefs_h */
+

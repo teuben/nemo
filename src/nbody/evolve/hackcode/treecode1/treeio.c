@@ -2,12 +2,13 @@
 /* TREEIO.C: I/O routines for hierarchical N-body code. Public routines:    */
 /* inputdata(), startoutput(), output(), savestate(), restorestate().       */
 /* Copyright (c) 2001 by Joshua E. Barnes, Honolulu, Hawai`i.               */
+/* 22-jun-01  adapted for NEMO                                              */
 /****************************************************************************/
 
-#include "stdinc.h"
-#include "mathfns.h"
-#include "vectmath.h"
-#include "getparam.h"
+#include <stdinc.h>
+#include <mathfns.h>
+#include <vectmath.h>
+#include <getparam.h>
 #include "treecode.h"
 
 #include <sys/types.h>
@@ -418,3 +419,7 @@ void restorestate(string file)
     saferead(bodytab, nbody * sizeof(body), str);
     fclose(str);
 }
+
+
+
+

@@ -1,11 +1,12 @@
 /****************************************************************************/
 /* TREELOAD.C: routines to create tree.  Public routines: maketree().       */
 /* Copyright (c) 1999 by Joshua E. Barnes, Tokyo, JAPAN.                    */
+/* 22-jun-01: adapted for NEMO                                              */
 /****************************************************************************/
 
-#include "stdinc.h"
-#include "mathfns.h"
-#include "vectmath.h"
+#include <stdinc.h>
+#include <mathfns.h>
+#include <vectmath.h>
 #include "treedefs.h"
 
 /*
@@ -190,7 +191,6 @@ local void hackcofm(cellptr p, real psize, int lev)
     vector cmpos, tmpv;
     int i, k;
     nodeptr q;
-    real dpq;
 
     tdepth = MAX(tdepth, lev);                  /* remember maximum level   */
     cellhist[lev]++;                            /* count cells by level     */

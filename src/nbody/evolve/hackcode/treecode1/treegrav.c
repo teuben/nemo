@@ -1,11 +1,12 @@
 /****************************************************************************/
 /* TREEGRAV.C: routines to compute gravity. Public routines: gravcalc().    */
 /* Copyright (c) 2001 by Joshua E. Barnes, Honolulu, Hawai`i.               */
+/* 22-jun-01  adapted for NEMO                                              */
 /****************************************************************************/
 
-#include "stdinc.h"
-#include "mathfns.h"
-#include "vectmath.h"
+#include <stdinc.h>
+#include <mathfns.h>
+#include <vectmath.h>
 #include "treedefs.h"
 
 /* Local routines to perform force calculations. */

@@ -1,12 +1,13 @@
 /****************************************************************************/
 /* TREECODE.C: new hierarchical N-body code.                                */
 /* Copyright (c) 2001 by Joshua E. Barnes, Honolulu, Hawai`i.               */
+/* 22-jun-01   NEMOfied for NEMO V3                                         */
 /****************************************************************************/
 
-#include "stdinc.h"
-#include "mathfns.h"
-#include "vectmath.h"
-#include "getparam.h"
+#include <stdinc.h>
+#include <mathfns.h>
+#include <vectmath.h>	
+#include <getparam.h>
 #define global                                  /* don't default to extern  */
 #include "treecode.h"
 
@@ -14,38 +15,40 @@
  * Default values for input parameters.
  */
 
-string defv[] = {               ";Hierarchical N-body code "
-#if defined(QUICKSCAN)
-                                    "(quick scan)",
-#else
-                                    "(theta scan)",
-#endif
-    "in=",                      ";Input file with initial conditions",
-    "out=",                     ";Output file of N-body frames",
+string defv[] = {
+    "in=\n                       Input file with initial conditions",
+    "out=\n                      Output file of N-body frames",
 #if defined(USEFREQ)
-    "freq=32.0",                ";Leapfrog integration frequency",
+    "freq=32.0\n                 Leapfrog integration frequency",
 #else
-    "dtime=1/32",               ";Leapfrog integration timestep",
+    "dtime=1/32\n                Leapfrog integration timestep",
 #endif
-    "eps=0.025",                ";Density smoothing length",
+    "eps=0.025\n                 Density smoothing length",
 #if !defined(QUICKSCAN)
-    "theta=1.0",                ";Force accuracy parameter",
+    "theta=1.0\n                 Force accuracy parameter",
 #endif
-    "usequad=false",            ";If true, use quad moments",
-    "options=",                 ";Various control options",
-    "tstop=2.0",                ";Time to stop integration",
+    "usequad=false\n             If true, use quad moments",
+    "options=\n                  Various control options",
+    "tstop=2.0\n                 Time to stop integration",
 #if defined(USEFREQ)
-    "freqout=4.0",              ";Data output frequency",
+    "freqout=4.0\n               Data output frequency",
 #else
-    "dtout=1/4",                ";Data output timestep",
+    "dtout=1/4\n                 Data output timestep",
 #endif
-    "nbody=4096",               ";Number of bodies for test run",
-    "seed=123",                 ";Random number seed for test run",
-    "save=",                    ";Write state file as code runs",
-    "restore=",                 ";Continue run from state file",
-    "VERSION=1.4",              ";Joshua Barnes  February 21 2001",
+    "nbody=4096\n                Number of bodies for test run",
+    "seed=123\n                  Random number seed for test run",
+    "save=\n                     Write state file as code runs",
+    "restore=\n                  Continue run from state file",
+    "VERSION=1.4\n               22-jun-01 PJT",
     NULL,
 };
+
+#if defined(QUICKSCAN)
+string usage = "Hierarchical N-body code (quick scan)";
+#else
+string usage = "Hierarchical N-body code (theta scan)";
+#endif
+
 
 /* Prototypes for local procedures. */
 
@@ -58,10 +61,9 @@ local void testdata(void);                      /* generate test data       */
  * MAIN: toplevel routine for hierarchical N-body code.
  */
 
-int main(int argc, string argv[])
+int nemo_main()
 {
-    initparam(argv, defv);                      /* initialize param access  */
-    headline = defv[0] + 1;                     /* skip ";" in headline     */
+    headline = usage;                           /* headline                 */
     startrun();                                 /* get params & input data  */
     startoutput();                              /* activate output code     */
     if (nstep == 0) {                           /* if data just initialized */
@@ -81,7 +83,7 @@ int main(int argc, string argv[])
             output();                           /* and output results       */
         }
 #endif
-    return (0);                                 /* end with proper status   */
+    return 0;                                   /* end with proper status   */
 }
 
 /*
@@ -169,6 +171,9 @@ local void startrun(void)
         nstep = 0;                              /* begin counting steps     */
         tout = tnow;                            /* schedule first output    */
     } else {                                    /* else restart old run     */
+#if 1
+      error("restore= not yet implemented for NEMO version");
+#else
         restorestate(getparam("restore"));      /* read in state file       */
         if (getparamstat("eps") & ARGPARAM)     /* if given, set new params */
             eps = getdparam("eps");
@@ -193,12 +198,13 @@ local void startrun(void)
         if (scanopt(options, "new-tout"))       /* if output time reset     */
             tout = tnow + dtout;                /* then offset from now     */
 #endif
+#endif
     }
 }
 
 /*
  * TESTDATA: generate Plummer model initial conditions for test runs,
- * scaled to units such that M = -4E = G = 1 (Henon, Hegge, etc).
+ * scaled to units such that M = -4E = G = 1 (Henon, Heggie, etc).
  * See Aarseth, SJ, Henon, M, & Wielen, R (1974) Astr & Ap, 37, 183.
  */
 
