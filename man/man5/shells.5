@@ -1,0 +1,49 @@
+.TH SHELLS 5NEMO "7 April 2001"
+.SH NAME
+shells \- a quick reminder to some shell languages
+.SH DESCRIPTION
+Whether you write in sh, csh, perl or any language, sometimes
+switching between them causes the personal memory to leak. 
+Here is a simple table that side-by-side compares different
+common shells.
+.SH SHELL
+.nf
+sh                          csh                         perl
+-------------------------   -------------------------   -------------------------
+
+a="Hi world"                set a="Hi world"            $a="Hi World";
+echo $a                     echo $a                     print a,"\n";
+.PP
+if [ $a = "yes" ];then      if ($a == "yes") then       if ( a eq "yes" ) {
+else if [ ... ]; then       else if ( ... ) then        } elsif {  # notice spelling
+else                        else                        } else {
+fi                          endif                       }
+.PP
+read a                      set a=$<                    chomp ( $a = <> );
+.PP
+while                       while ($n > 0)              while ( $a > 0 ) {
+end?                        end                         }
+.PP
+                                                        for ( $n = 99; $n > 0; $n-- ) { 
+                                                        }
+.PP
+                            foreach n (1 2 3)           foreach $n ( 1..3 ) {
+                            end                         }
+.PP
+                            set a=(1 2 3)               @a=("a", "b", "c");
+.PP
+                            Int  Str                         Num     Str
+                            ==   ==                     ==      eq
+                            !=   !=                     !=      ne
+                            <                           <       lt
+                            >                           >       gt
+                            <=                          <=      le
+                            >=                          >=      ge
+.fi                                 
+.SH AUTHOR
+Peter Teuben
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+7-apr-01   document created     PJT
+.fi
