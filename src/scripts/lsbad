@@ -1,0 +1,26 @@
+#! /bin/csh -f
+#
+#  list all files which don't seem source code in NEMO
+#   PjT - jun 1992
+
+#
+
+if ($#argv > 0) then
+  if ($1 == help) then
+    echo "Usage: $0 [directory]"
+    echo Lists all non-abvious source code recursively from current directory
+    echo or the one given as the first argument.
+    exit 0
+  endif
+  set dir=$1
+else
+  set dir=.
+endif
+
+find $dir -type f \
+ \( \! -name Makefile -a \! -name \*.c    -a \! -name \*.f   \
+    \! -name \*.h     -a \! -name \*.for  -a \! -name \*.\[0-9\] \
+    \! -name \*.html  -a \! -name Testfile \
+    \! -name \*.csh   -a \! -name .install\* -a \! -name README\* \
+    \! -name \*.inc \
+ \) -print
