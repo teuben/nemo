@@ -7,7 +7,9 @@ snaprotate \- rotate N-body snapshot file about principle axes.
 \fIsnaprotate\fP rotates the positions and velocities of an
 N-body snapshot file. A maximum of 3 rotations around either the x, y or
 z axes can be applied in any order. An Eulerian rotation
-is a rotation around the z, y and z axes respectively.
+is a rotation around the z, y and z axes respectively. Some common examples
+for projections of barred and unbarred galaxies are given in the examples
+below.
 .PP
 The rotation is counter clock-wise (i.e., mathematically positive, unless 
 \fBinvert=f\fP is used) as seen from the right-handed \fIxyz\fP-axes;
@@ -61,6 +63,25 @@ where \fBpsize\fP was choosen such that ``near'' (z>0)
 particles were plotted a bit bigger to accentuate
 the near side of the model. Flipping the sign if $inc will flip the near
 and far side.
+.PP
+For 'normal' spiral galaxies the following example shows how to
+project them into their normaly sky view, taking the sense of
+rotation into account:
+.nf
+   set pa=170             # M51, use pa=-160 for M33
+   set inc=22             # M51, use inc=30 for M33
+   set sign=-1            # M51, use sign=1 for M33
+   set sinc=`nemoinp "iflt($sign,0,$inc,-$inc)"`
+   mkdisk - 1000 sign=$sign |\\
+      snaprotate - - theta=$sinc,$pa order=yz |\\
+      snapgrid - velfie.ccd mom=-1
+   nds9 velfie.ccd        # view the velocity field using 'ds9'
+.fi
+With sign=-1 it will create a counter-clockwise rotating disk
+and project it using \fB$inc,$pa\fP, For a clock-wise rotating disk the math is nearly
+the same, except the sign for the inclination needs to be flipped, 
+or \fB-$inc,$pa\fP, 
+hence the somewhat awkward looking expressing to compute \fBsinc\fP.
 .SH SEE ALSO
 snapshift(1NEMO), snapshot(5NEMO)
 .SH AUTHOR
