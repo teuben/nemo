@@ -1,16 +1,16 @@
 This is:	A blurb on NEMO V3, what it is, how to install and use 
-Last updated:   4-apr-01
+Last updated:   4-apr-2001
 By:		Peter Teuben
 Disclaimer:	The manual is now out of date, the autoconf based 
 		installation instructions here are now more up to date.
 
-________________________________________________________________________________
+______________________________________________________________________________
 
 (for INSTALLATION instructions see below)
 
 Using NEMO (i.e. when somebody had already installed it for you) requires
 just a few changes modifications to your .cshrc/.login script: 
-(sorry, no sh support yet)
+(sorry, no sh support yet). The most simplest would be
 
     1)	source the "nemo_start" file. You may have to ask your system
 	manager where it is kept. For example:
@@ -20,9 +20,11 @@ just a few changes modifications to your .cshrc/.login script:
 or the long way:
 
     1)  define the environment variable NEMO where NEMO's root directory is.
-    2)  optionally define NEMOHOST if you want to override an automatic determination.
-	Although you can use anything you want, check the subdirectories in $NEMO/bin
-	for valid names on your system.
+    2)  optionally define NEMOHOST if you want to override an automatic 
+	determination.
+	Although you can use anything you want, check the subdirectories 
+	in $NEMO/bin for valid names on your system, but you better know
+	what you are doing, since by default NEMO will figure it out.
     3)  source the $NEMO/NEMORC file.
     4)  add $NEMOBIN to you search path. Note that in NEMO V3+ the system 'cc'
 	command should now be available again, as NEMOBIN/cc has disappeared
@@ -45,7 +47,7 @@ and the reverse to remove it:
 
 
 See also Appendix A of the manual for more details of installation.
-________________________________________________________________________________
+______________________________________________________________________________
 
 
 The NEMO (latex) manual is located in $NEMO/text/manuals, as nemo.tex
@@ -66,11 +68,11 @@ a dummy file nemo.ind, to prevent latex screaming about a missing file,
 but the nemo.ind file that exists is a current one.
 
 (a version of the makeindex utility also lives in $NEMO/src/tools/makeindex)
-________________________________________________________________________________
+______________________________________________________________________________
 
 There may also a demo in the $NEMO/demo area. Run it after NEMO has been
 installed.
-________________________________________________________________________________
+______________________________________________________________________________
 
 
 Preconditions to INSTALLATION
@@ -101,9 +103,10 @@ b) Installing HDF
 
 c) Installing CFITSIO
 
-   Be aware that at some future point when NEMO is going to use more of cfitsio,
-   the fitsio.h header file in NEMO and CFITSIO will cause problems. Note sure
-   of what the final resolution is. Perhaps NEMO's fitsio.h will be renamed.
+   Be aware that at some future point when NEMO is going to use more of 
+   cfitsio, the fitsio.h header file in NEMO and CFITSIO will cause problems. 
+   Not sure of what the final resolution is. Perhaps NEMO's fitsio.h will be 
+   renamed.
 
 Brief overview of a Version 3.x.y INSTALLATION  
 ==============================================
@@ -134,7 +137,7 @@ Brief overview of a Version 3.x.y INSTALLATION
 	% configure
 	% source nemo_start
 	% make dirs config_extra scripts
-	% source NEMORC.local			(or look at $NEMO/src/scripts/NEMORC)
+	% source NEMORC.local		  (or look at $NEMO/src/scripts/NEMORC)
 	% rehash
 	% make libs
 
@@ -146,11 +149,12 @@ Brief overview of a Version 3.x.y INSTALLATION
 	- edit NEMORC.local (came from NEMORC.gen.in)
 		source NEMORC.local
 
-	- edit $NEMOLIB/makedefs (but danger, configure/config_extra can overwrite this)
+	- edit $NEMOLIB/makedefs (but danger, configure/config_extra can 
+	  overwrite this)
 
-	- if 'configure' fails for some reason, check the config.log file. Sometimes
-	  the cause is a rather trivial one, e.g. missing licences or a bad path or
-	  a bad shell.
+	- if 'configure' fails for some reason, check the config.log file. 
+	  Sometimes the cause is a rather trivial one, e.g. missing licences 
+	  or a bad path or a bad shell.
 
 
 *) Configuration options known to work:
@@ -163,8 +167,8 @@ Brief overview of a Version 3.x.y INSTALLATION
 
 	--with-hdf-prefix=PFX
 
-		expects hdf.h to be found somewhere in an {include,hdf} subdirectory
-		and will link with 'df', 'jpeg' and 'z' library.
+		expects hdf.h to be found somewhere in an {include,hdf} 
+		subdirectory and will link with 'df', 'jpeg' and 'z' library.
 
 	--with-miriad-prefix=PFX
 		if $MIR is present, it will use this variable
@@ -192,8 +196,8 @@ Brief overview of a Version 3.x.y INSTALLATION
 
 *** TODO:
 
-     	- more consistent way between usage of variables in the NEMORC chain, and the 
-	  'makedefs' list.
+     	- more consistent way between usage of variables in the NEMORC chain, 
+	  and the 'makedefs' list.
 
 	
 
@@ -380,152 +384,3 @@ Abort (core dumped)
  [was up to date] Well done
 
 
-
-
-Peculiar things:
-=--------------=
-
-strip: do not strip programs which use the dynamic object loader, they
-       will not be able to find local code
-
-DS:   A display program for images (autodetects FITS, IRAF, NEMO, etc. format)
-
-      % cd $NEMO/src/tools/ds
-      % <edit the "conf.h" file appropriately (usually check if NEMO is set to 1)
-      % make ds EXTRALIBS=$NEMOLIB/libnemo.a
-      % rm ds
-      % make ds CC=/bin/cc EXTRALIBS=$NEMOLIB/libnemo.a
-      % mv ds $NEMOBIN
-      % make clean
-
-      Deleting 'ds' and remaking it with different CC makes it load in
-      dynamic mode, otherwise the binary 'ds' would be very large due to
-      forced static loading (-Bstatic) that is normally needed in Nemo
-      these days. Check out the $NEMOBIN/cc script in case of doubt.
-
-      There is now an X version of 'ds' available. This will overwrite
-      the sunview version in NEMO at some time soon.
-
-NEMOTOOL/NEMO:
-      See miriad target in $NEMO/Makefile. It should install miriad
-      from $NEMO/src/tools/miriad/miriad and nemotool from
-      from $NEMO/src/tools/miriad/mirtool.
-      
-
-
-Troubleshooting:
-
-In case of reporting errors it helps to have the following information
-available:
-
-  - your architecture (hardware and operating system version, amount of
-    memory, disk space etc.)
-  - your NEMORC.local file
-  - any other modifications you've made to NEMO
-
-
-
-Other miscellanious items:
-
-     By the way, the best run-time performance from Sun compilers for
-     compute-bound applications is usually obtained from some combination of the
-     following compile-time options:
-     
-     Fortran 1.3.1:
-             -O4 -cg89 -libmil -dalign -fnonstd -Bstatic
-     C 1.0:
-             -O4 -cg89 -libmil -dalign -fnonstd -Bstatic -fsingle
-    
-     These are discussed in the Numerical Computation Guide which accompanies C 1.0
-     and Fortran 1.3.1.  Also the default swap and /tmp partitions supplied by
-     SunOS are often insufficient to fully optimize some large programs.  Use
-     swapon(8) in the first instance and -temp=..., described in cc(1) and f77(1),
-     in the second instance.
-		     
-		     (dgh@validgh.com)
-
-Programming development:
-========================
-
-bake prog
-
-	Compiles and links prog.c with nemo
-
-IBM Risc (IBM AIX 3.1)
-======================
-
-- cc compiler needs -qnoro (like gnu's -fwriteable-strings)
-  We use -Daix to create the trigger needed to resolve some
-  NULL issues. In this respect /bin/cc and /bin/xlc behave
-  differently? The solution was to bypass the 
-	#define NULL (void *)0
-  in their <stdio.h> and use ours
-	#define NULL 0
-  Since the former is ANSI, we should do something about this in
-  NEMO.
-
-- Fortran_to_C linking: symbol names are the same, i.e. not the
-  BSD convention of appending underscores. All else seems to be
-  the same, in particular using character variables. Not tested
-  well though. (nbody0)
-  If you use the default FC to link, it will fail in e..g. getenv,
-  because the wrong getenv (fortran) is loaded by the linker;
-  instead this will compile nbody0:
-  First compile all in .o files:
-        make nbody0
-  it WILL create a binary, but it won't run. Then
-        rm nbody0
-        make nbody0 FC=cc FORLIBS=
-  which links and suggests that cc is smart enough to find any
-  needed FORLIBS, since we supplied none (the standard libF77.a
-  et al. are absent on AIX)
-
-
-
-
-Example:	SGI/SOLARIS installations
-
-mkdir nemo_2.4.0
-cd nemo_2.4.0
-ncftp ftp.astro.umd.edu:/progs/nemo/nemo_2.4.0.tar.gz	12 Mb uncompressed
-time gtar zxf nemo_2.4.0.tar.gz	    3.123u 11.620s 2:43.59	(wang)
-                                    1.337u 6.916s 1:08.23	(onyx)
-				    0.88u 3.72s 1:17.66 5.9% (ultra)
-
-
-	-> alternatively: 
-			src/scripts/bootstrap goto=install nemo=$cwd
-setenv NEMO `pwd`
-source NEMORC
-set path=(. $NEMOBIN $path[2-])
-rehash
-
-make dirs scripts
-which cc 			<-- make sure it's $NEMOBIN/cc
-which make			<-- make sure it's $NEMOBIN/make
-cd src
-time make install >& make1.log	40.499u 41.344s 3:25.73 39.7% (wang's machine)
-                                12.394u 17.417s 0:33.37 89.3% (onyx)
-				37.58u 19.00s 1:34.53 59.8% (ultra)
-
-mknemo tsf
-mknemo -c history hisf
-mknemo hackcode1
-time hackcode1 > /dev/null      1.923u 0.021s 0:02.79 69.5%
-                                0.555u 0.010s 0:00.57 98.2% (onyx)
-				1.46u 0.02s 0:01.86 79.5% (ultra)
-
-cd $NEMO/src/scripts
-need -m `testsuite -s` > $NEMO/tmp/log1
-testsuite -q
-time testsuite			(wang's sgi)
-				(onyx)
-				5.54u 5.62s 0:15.05 74.1% (ultra)
-
-Problems:
-
-    IRIX 6 doezn't appear to need -lbsd aymore, IRIX 5 needs it?    .
-    IRIX 6 cannot handle fitsio?                                    fixed
-    tabmath fails: no EOF on getc ?                                 .
-    yapp_gl:    how to do null output?                              .
-    IRIX cannot handle with out MANPATH method

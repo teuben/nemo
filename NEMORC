@@ -158,6 +158,7 @@ alias lmake 'make -f $NEMOLIB/Makefile.lib'
 alias omake 'make -f $NEMOLIB/Makefile.obj'
 alias bake  'make -f $NEMOLIB/Makefile.lib'
 alias Test  'make -f Testfile'
+alias makedefs 'make -f $NEMOLIB/makedefs makedefs_help'
 
 
 # Required dummy defaults that should be overriden in NEMORC.local

@@ -108,6 +108,29 @@ When a \fBrestart\fP is specified, values must be given for \fBALL\fP
 legal parameters which do not take default values.
 .PP
 \fIcontinue=\fP does not seem to work. Use \fIrestart=\fP
+.SH BENCHMARK
+Running \fBhackcode1\fP with all default parameters will
+integrate a 128 body plummer sphere for 64 timesteps to time 2
+with softening 0.05 and critical opening angle 1 and a seed of
+123. Assuming the standard portable 'ran3' from NumRec
+is being used in \fIxrandom(3NEMO)\fP, we get the following 
+initial and final printout:
+.nf
+  tnow       T+U       T/U     nttot     nbavg     ncavg   cputime
+ 0.000   -0.2675   -0.5434      3864         9        20      0.00
+
+          cm pos   -0.0000    0.0000    0.0000
+          cm vel   -0.0000    0.0000   -0.0000
+
+...
+
+  tnow       T+U       T/U     nttot     nbavg     ncavg   cputime
+ 2.000   -0.2647   -0.4857      4899        17        20      0.00
+
+          cm pos    0.0002   -0.0018    0.0007
+          cm vel    0.0003   -0.0019    0.0009
+
+.fi
 .SH AUTHOR
 Joshua E. Barnes.
 .SH FILES

@@ -70,7 +70,7 @@ funcc:
 	$(CC) $(CFLAGS) -c funcc.c
 	$(FC) $(FFLAGS) -c funcf.f
 	$(CC) $(CFLAGS) -c mainfuncc.c
-	$(CC) $(LDFLAGS) -o funcc mainfuncc.o funcc.o funcf.o -lnemo $(FLIBS) -lm
+	$(CC) $(LDFLAGS) -o funcc mainfuncc.o funcc.o funcf.o $(NEMO_LIBS) $(FLIBS)
 
 funcf:
 	$(CC) $(CFLAGS) -c funcc.c
@@ -78,6 +78,6 @@ funcf:
 	$(FC) $(FFLAGS) -c mainfuncf.f
 	ftoc mainfuncf.f > mainfuncf_tmp.c
 	$(CC) $(CCFLAGS) -c mainfuncf_tmp.c
-	$(CC) $(LDFLAGS) -o funcf mainfuncf_tmp.o mainfuncf.o funcc.o funcf.o -lnemo $(FLIBS) -lnemo -lm
+	$(CC) $(LDFLAGS) -o funcf mainfuncf_tmp.o mainfuncf.o funcc.o funcf.o $(NEMO_LIBS) $(FLIBS)
 
 

@@ -138,52 +138,52 @@ bin: $(BINFILES)
 tests: $(TESTFILES) 
 
 vecttest: vecttest.c vectmath.h vectmath.c
-	$(CC) $(CFLAGS) -o vecttest vecttest.c $(L)-lm
+	$(CC) $(CFLAGS) -o vecttest vecttest.c  $(NEMO_LIBS)
 
 xrandom: xrandom.c 
-	$(CC) $(CFLAGS) -o xrandom -DTOOLBOX xrandom.c $(L) -lm
+	$(CC) $(CFLAGS) -o xrandom -DTOOLBOX xrandom.c $(NEMO_LIBS)
 
 scanopt: scanopt.c
-	$(CC) $(CFLAGS) -o scanopt -DTOOLBOX scanopt.c $(L) -lm
+	$(CC) $(CFLAGS) -o scanopt -DTOOLBOX scanopt.c $(NEMO_LIBS)
 
 xrandomtest: xrandom.c 
-	$(CC) $(CFLAGS) -o xrandomtest -DTESTBED xrandom.c $(L) -lm
+	$(CC) $(CFLAGS) -o xrandomtest -DTESTBED xrandom.c $(NEMO_LIBS)
 
 frandomtest: frandom.c 
-	$(CC) $(CFLAGS) -o frandomtest -DTESTBED frandom.c $(L) -lm
+	$(CC) $(CFLAGS) -o frandomtest -DTESTBED frandom.c $(NEMO_LIBS)
 
 hashtest: hash.c 
-	$(CC) $(CFLAGS) -o hashtest -DTESTBED hash.c $(L) -lm
+	$(CC) $(CFLAGS) -o hashtest -DTESTBED hash.c $(NEMO_LIBS)
 
 axistest: axis.c
-	$(CC) $(CFLAGS) -o axistest -DTESTBED axis.c $(L) -lm
+	$(CC) $(CFLAGS) -o axistest -DTESTBED axis.c $(NEMO_LIBS)
 
 axistest_ps: axis.c
-	$(CC) $(CFLAGS) -o axistest_ps -DTESTBED axis.c $(L) -lm
+	$(CC) $(CFLAGS) -o axistest_ps -DTESTBED axis.c $(NEMO_LIBS)
 
 splinetest: spline.c
-	$(CC) $(CFLAGS) -o splinetest -DTESTBED spline.c $(L) -lm
+	$(CC) $(CFLAGS) -o splinetest -DTESTBED spline.c $(NEMO_LIBS)
 
 withintest: within.c
-	$(CC) $(CFLAGS) -o withintest -DTESTBED within.c $(L) -lm
+	$(CC) $(CFLAGS) -o withintest -DTESTBED within.c $(NEMO_LIBS)
 
 besseltest: besselfunc.c
-	$(CC) $(CFLAGS) -o besseltest -DTESTBED besselfunc.c $(L) -lm
+	$(CC) $(CFLAGS) -o besseltest -DTESTBED besselfunc.c $(NEMO_LIBS)
 
 matchtest: match.c
-	$(CC) $(CFLAGS) -o matchtest -DTESTBED match.c $(L) -lm
+	$(CC) $(CFLAGS) -o matchtest -DTESTBED match.c $(NEMO_LIBS)
 
 linreg: linreg.c
-	$(CC) $(CFLAGS) -o linreg -DTESTBED linreg.c $(L) -lm
+	$(CC) $(CFLAGS) -o linreg -DTESTBED linreg.c $(NEMO_LIBS)
 
 momenttest: moment.c
-	$(CC) $(CFLAGS) -o momenttest -DTESTBED moment.c $(L) -lm
+	$(CC) $(CFLAGS) -o momenttest -DTESTBED moment.c $(NEMO_LIBS)
 
 gridtest: grid.c
-	$(CC) $(CFLAGS) -o gridtest -DTESTBED grid.c $(L) -lm
+	$(CC) $(CFLAGS) -o gridtest -DTESTBED grid.c $(NEMO_LIBS)
 
 unwraptest: unwrap.c
-	$(CC) $(CFLAGS) -o unwraptest -DTESTBED unwrap.c $(L) -lm
+	$(CC) $(CFLAGS) -o unwraptest -DTESTBED unwrap.c $(NEMO_LIBS)
 
 
 # special targets

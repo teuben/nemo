@@ -68,6 +68,9 @@ else
   echo "Running NEMO on your own risk"
 endif
 if ($debug) echo "$NEMOBIN added to search path"
+if (! -d $NEMOBIN) then
+  echo "Warning: $NEMOBIN does not exist"
+endif
 if ($path[1] == ".") then
   set path = ( . $NEMOBIN $path[2-] )
 else
@@ -77,7 +80,7 @@ if ($debug) echo "and rehashed it"
 rehash
 
 # provide alias to end NEMO
-alias omen "source $NEMO/nemo_end"
+alias omen 'source $NEMO/nemo_end'
 
 if ($debug) echo All systems go...
 

@@ -123,99 +123,99 @@ yapp_suntools.o: yapp_suntools.c
 #OK
 yapptest: yapp.c
 	$(CC) $(CFLAGS) -DYAPP_$(YAPP) -o yapptest yapp.c -DTESTBED \
-		$(L) $(EL) -lm
+		$(NEMO_LIBS) $(EL) -lm
 #OK
 yapptest_cg: yapp_cg.c
 	$(CC) $(CFLAGS) -o yapptest_cg yapp_cg.c -DTESTBED \
-		$(L) $(LIBSUNTOOLS) $(EL) -lm
+		$(NEMO_LIBS) $(LIBSUNTOOLS) $(EL) -lm
 #OK
 yapptest_mongo: yapp_mongo.c testyapp.c
 	$(CC) $(CFLAGS) -o yapptest_mongo yapp_mongo.c testyapp.c \
-		$(L) $(LIBMONGO) $(EL) -lm
+		$(NEMO_LIBS) $(LIBMONGO) $(EL) -lm
 #OK
 yapptest_suntools: yapp_suntools.c testyapp.c
 	$(CC) $(CFLAGS) -o yapptest_suntools yapp_suntools.c testyapp.c \
-		$(L) $(LIBSUNTOOLS) $(EL) -lm
+		$(NEMO_LIBS) $(LIBSUNTOOLS) $(EL) -lm
 #OK
 yapptest_pgplot: yapp_pgplot.c testyapp.c
 	$(CC) $(CFLAGS) -o yapptest_pgplot yapp_pgplot.c testyapp.c \
-		$(L) $(LIBPGPLOT) $(EL) -lm
+		$(NEMO_LIBS) $(LIBPGPLOT) $(EL) -lm
 
 yapptest_plplot: yapp_plplot.c testyapp.c
 	$(CC) $(CFLAGS) -o yapptest_plplot yapp_plplot.c testyapp.c \
-		$(L) $(LIBPLPLOT) $(EL) -lm
+		$(NEMO_LIBS) $(LIBPLPLOT) $(EL) -lm
 #OK???
 yapptest_cg_new: yapp_cg.c testyapp.c
 	$(CC) $(CFLAGS) -o yapptest_cg_new yapp_cg_new.c -DTESTBED \
-	   	$(L) $(LIBSUNTOOLS) $(EL) -lm
+	   	$(NEMO_LIBS) $(LIBSUNTOOLS) $(EL) -lm
 #OK
 yapptest_core: yapp_core.c testyapp.c
 	$(CC) $(CFLAGS) -o yapptest_core yapp_core.c testyapp.c \
-	   	$(L) $(LIBSUNTOOLS) $(EL) -lm
+	   	$(NEMO_LIBS) $(LIBSUNTOOLS) $(EL) -lm
 #OK
 yapptest_ps: yapp_ps.c testyapp.c
 	$(CC) $(CFLAGS) -o yapptest_ps yapp_ps.c testyapp.c \
-		$(L) $(EL) -lm
+		$(NEMO_LIBS) $(EL) -lm
 
 #OK
 yapptest_psg: yapp_psg.c testyapp.c
 	$(CC) $(CFLAGS) -o yapptest_psg yapp_psg.c testyapp.c \
-		$(L) $(EL) -lm
+		$(NEMO_LIBS) $(EL) -lm
 
 #OK
 yapptest_x: testyapp.c
 	$(CC) $(CFLAGS) -o yapptest_x testyapp.c \
-		$(L) -lyapp_x $(YAPP_X11) $(EL) -lm
+		$(NEMO_LIBS) -lyapp_x $(YAPP_X11) $(EL) -lm
 
 yapptest_sv: yapp_sv.c testyapp.c
 	$(CC) $(CFLAGS) -o yapptest_sv yapp_sv.c testyapp.c \
-		$(L) $(LIBSUNVIEW) -lm
+		$(NEMO_LIBS) $(LIBSUNVIEW) -lm
 
 yapptest_gl: yapp_gl.c testyapp.c
 	$(CC) $(CFLAGS) -o yapptest_gl yapp_gl.c testyapp.c \
-		$(L) $(LIBGL) -lm
+		$(NEMO_LIBS) $(LIBGL) -lm
 
 yapptest_mesa: yapp_mesa.c testyapp.c
 	$(CC) -DMESA $(CFLAGS) -o yapptest_mesa yapp_mesa.c testyapp.c \
-		$(L) $(LIBMESA) -lm
+		$(NEMO_LIBS) $(LIBMESA) -lm
 
 yapptest_sm: yapp_sm.c testyapp.c
 	$(CC) $(CFLAGS) -o yapptest_sm yapp_sm.c testyapp.c \
-		$(L) $(LIBSM) -lm
+		$(NEMO_LIBS) $(LIBSM) -lm
 
 yapptest_gt: yapp_gt.c testyapp.c
 	$(CC) $(CFLAGS) -o yapptest_gt yapp_gt.c testyapp.c \
-		$(L) $(LIBGT) -lm
+		$(NEMO_LIBS) $(LIBGT) -lm
 
 #OK
 yapptest_ps_new: yapp_ps_new.c testyapp.c
 	$(CC) $(CFLAGS) -o yapptest_ps_new yapp_ps_new.c testyapp.c \
-		$(L) $(EL) -lm
+		$(NEMO_LIBS) $(EL) -lm
 
 txttst: txttst.c
-	$(CC) $(CFLAGS) -o txttst txttst.c $(YAPPO) $(L) $(EL) -lm
+	$(CC) $(CFLAGS) -o txttst txttst.c $(YAPPO) $(NEMO_LIBS) $(EL) -lm
 
 txttst_ps: txttst.c yapp_ps.o
-	$(CC) $(CFLAGS) -o txttst_ps txttst.c yapp_ps_new.o $(L) -lm
+	$(CC) $(CFLAGS) -o txttst_ps txttst.c yapp_ps_new.o $(NEMO_LIBS) -lm
 
 # Utilities
 
 catps: catps.c
-	$(CC) $(CFLAGS) -o catps catps.c $(L) -lm
+	$(CC) $(CFLAGS) -o catps catps.c $(NEMO_LIBS) -lm
 
 catpgps: catpgps.c
-	$(CC) $(CFLAGS) -o catpgps catpgps.c $(L) -lm
+	$(CC) $(CFLAGS) -o catpgps catpgps.c $(NEMO_LIBS) -lm
 
 pltext: pltext.c
-	$(CC) -o pltext pltext.c  $(YAPPO) $(L) $(YAPPLIB) -lm
+	$(CC) -o pltext pltext.c  $(YAPPO) $(NEMO_LIBS) $(YAPPLIB) -lm
 
 pltext_ps: pltext.c
-	$(CC) -o pltext_ps pltext.c $(NEMOLIB)/yapp_ps_new.o $(L) -lm
+	$(CC) -o pltext_ps pltext.c $(NEMOLIB)/yapp_ps_new.o $(NEMO_LIBS) -lm
 
 plarrow: plarrow.c
-	$(CC) -o plarrow plarrow.c $(YAPPO) $(L) $(YAPPLIB) -lm
+	$(CC) -o plarrow plarrow.c $(YAPPO) $(NEMO_LIBS) $(YAPPLIB) -lm
 
 plarrow_ps: plarrow.c
-	$(CC) -o plarrow_ps plarrow.c $(NEMOLIB)/yapp_ps_new.o $(L) -lm
+	$(CC) -o plarrow_ps plarrow.c $(NEMOLIB)/yapp_ps_new.o $(NEMO_LIBS) -lm
 
 # the end

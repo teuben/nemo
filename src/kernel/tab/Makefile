@@ -81,31 +81,31 @@ tests: $(TESTFILES)
 
 tabplot: tabplot.c
 	$(CC) $(CFLAGS) -o tabplot tabplot.c \
-		$(L) $(YAPPLIB) $(EL) -lm
+		$(NEMO_LIBS) $(YAPPLIB) $(EL) -lm
 
 tabview: tabview.c
 	$(CC) $(CFLAGS) -o tabview tabview.c \
-		$(L) $(YAPPLIB) $(EL) -lm
+		$(NEMO_LIBS) $(YAPPLIB) $(EL) -lm
 
 tabhist: tabhist.c
 	$(CC) $(CFLAGS) -DYAPP -o tabhist tabhist.c \
-		$(L) $(YAPPLIB) $(EL) -lm
+		$(NEMO_LIBS) $(YAPPLIB) $(EL) -lm
 
 tablsqfit: tablsqfit.c
 	$(CC) $(CFLAGS) -o tablsqfit tablsqfit.c \
-		$(L) $(EL) -lm
+		$(NEMO_LIBS) $(EL) -lm
 
 tabspline: tabspline.c
 	$(CC) $(CFLAGS) -o tabspline tabspline.c \
-		$(L) $(EL) -lm
+		$(NEMO_LIBS) $(EL) -lm
 
 gettab: gettab.c
 	$(CC) -DTOOLBOX $(CFLAGS) -o gettab gettab.c \
-		$(L) $(EL) -lm
+		$(NEMO_LIBS) $(EL) -lm
 
 funtab: funtab.c
 	$(CC) -DTOOLBOX $(CFLAGS) -o funtab funtab.c \
-		$(L) $(EL) -lm
+		$(NEMO_LIBS) $(EL) -lm
 
 
 

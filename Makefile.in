@@ -143,7 +143,7 @@ dirs: nemo_start
 	@if [ ! -f $(MOTD) ]; then \
             echo Creating $(MOTD) file on `date`; \
             echo "***********************************************" > $(MOTD);\
-            echo "Nemo Release 2 ($(VERSION)) installed: " >> $(MOTD);\
+            echo "Nemo Release 3 ($(VERSION)) installed: " >> $(MOTD);\
 	    echo "  NEMOVER = $(NEMOVER)" >> $(MOTD); \
 	    echo "  `date` on `whoami`@`hostname`" >> $(MOTD); \
             echo "***********************************************">> $(MOTD);\
