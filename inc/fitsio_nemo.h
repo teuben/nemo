@@ -1,5 +1,6 @@
 /*
  *  fitsio_nemo.h: header for NEMO's fitsio.c, with optional wrapper for CFITSIO
+ *                 (this file used to be called fitsio.h, but CFITSIO is using it also)
  *    	
  *      sep-91      added DOUBLE                          PJT
  *      dec-91      added BYTE                            PJT
