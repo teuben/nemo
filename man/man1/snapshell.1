@@ -1,0 +1,41 @@
+.TH SNAPKINEM 1NEMO "13 November 2001"
+.SH NAME
+snapshell \- compute various diagnostics on a set of shells
+.SH SYNOPSIS
+\fBsnapshell in=\fPsnap_file [parameter=value] .\|.\|.
+.SH DESCRIPTION
+\fIsnapshell\fP computes various kinematic diagnostics from the input
+N-body snapshot on a set of shells. The snapshot must have been
+properly centered using other tools (e.g. \fIsnapcenter(1NEMO)\fP or
+\fIsnaprect(1NEMO)\fP or
+An arbitrary weighting may be specified for each particle.
+.SH PARAMETERS
+The following parameters are recognized.
+.TP 24
+\fBin=\fP\fIsnap_file\fP
+Input data is read from \fIsnap_file\fP, which must be in
+\fIsnapshot\fP(5NEMO) format.  Notice only the first snapshot
+found in this file will be used. Default: \fIrequired\fP.
+.TP
+\fBweight=\fP\fIbody_weight\fP
+Expression used to compute the weight of each body.
+See \fIbodytrans\fP(1NEMO) for the form of \fIbody_weight\fP.
+Default: \fB1.0\fP.
+.TP
+\fBradii=\fP\fIshell_radii\fP
+A set of radii in \fInemoinp(3NEMO)\fP format
+(normalized to 1 when selected by 
+.TP
+\fBsvar=\fP\fIsort_variable\fP
+If selected, this variable will be used to sort the particles by, the
+normalized radii (between 0 and 1) will then be used as the shells
+within which the diagnostics are computed. Default: not used.
+.SH SEE ALSO
+snapkinem(1NEMO), snaprect(1NEMO), snapshot(5NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH HISTORY
+.nf
+.ta +1.0i +4.0i
+13-nov-01	V1.0	new program for Lia	PJT
+.fi
