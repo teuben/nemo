@@ -500,7 +500,7 @@ nemo_main()
     Key(&b) = getiparam("key");
     t = getdparam("t");
     i = getiparam("i");
-    fname = getparam("file");
+    fname = getparam("alias");
 
     if (type[0] == 'r') {
         rtrans = (rproc_body) bodytrans("real", expr, fname);
