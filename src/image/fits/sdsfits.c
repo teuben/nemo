@@ -8,7 +8,7 @@
 
 #include <stdinc.h>
 #include <getparam.h>
-#include <fitsio.h>
+#include <fitsio_nemo.h>
 
 /* #include <hdf.h> */
 
@@ -17,7 +17,7 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "out=\n			Optional output FITS file",
     "select=1\n			Select which SDS (1=first)",
     "axis=0\n                   Select this axis for 1D fits output",
-    "VERSION=1.2\n		13-apr-96 PJT",
+    "VERSION=1.2a\n		3-apr-02 PJT",
     NULL,
 };
 
