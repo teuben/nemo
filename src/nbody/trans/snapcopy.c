@@ -32,7 +32,7 @@ string defv[] = {
     "times=all\n        Times to select",
     "precision=double\n Precision of results to store (double/single) [unused]",
     "keep=all\n         Items to copy in snapshot",
-    "VERSION=1.1f\n     13-feb-04 PJT",
+    "VERSION=1.1g\n     20-feb-04 PJT",
     NULL,
 };
 
@@ -55,8 +55,8 @@ void nemo_main(void)
     instr = stropen(getparam("in"), "r");
     outstr = stropen(getparam("out"), "w");
     precision = getparam("precision");	/* unused */
-    if (!strcmp(precision,"double")) {
-        warning("Precision %s not supported yet, use csf convert=d2f/f2d",
+    if (!streq(precision,"double")) {
+        warning("Precision \"%s\" not supported yet, use csf convert=d2f/f2d",
             precision);
     }
     keep = getparam("keep");
