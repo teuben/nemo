@@ -1,0 +1,112 @@
+.TH XVP 5NEMO "7 June 1994" 
+.SH NAME
+xvp, xvm \- direct access binary format for N-body data
+.SH SYNOPSIS
+.nf
+\fBxvpread(model,filename,header,x,y,z,vx,vy,vz,pmass,ppot,ierr)\fP
+\fBxvpwrite(model,filename,header,x,y,z,vx,vy,vz,pmass,ppot,ierr)\fP
+.fi
+.SH DESCRIPTION
+\fBxvp\fP is a format-compatible \fIBalcells\fP extension to the \fBxvm\fP
+format in use by \fIQuinn\fP to store fixed size N-body data using FORTRAN
+direct access I/O. 
+.PP
+In the original \fBxmv\fP (\fIQuinn\fP) version
+(3-dimensional) positions, velocities, and masses were stored, 
+including a header, which describes the size of the upcoming data.
+.PP
+In the \fBxvp\fP \fIBalcells\fP-extension the
+masses are stored in the header (assuming the masses come in up to 13 groups)
+and the column which used to store the masses now contain
+the potentials. 
+.PP
+Since this extension is annotated in the header,
+the \fBxvp\fP format is upward compatible with the \fBxvm\fP format.
+.SH FORMAT
+The format consist of one header block, followed by many data blocks.
+Each block (excluding the VMS case) has a size of \fI7*128*NOBYTES\fP
+bytes, with all atomic data being floating point numbers with 
+\fINOBYTES\fP bytes per number (being 4 or 8). 
+.SH HEADER
+The header consists of 128 real numbers,
+with the following conventions (\fInew upward compatible ones may be added
+in the future\fP):
+.nf
+.ta +5i
+     header(1)=number of particles in this (and all subsequent) snapshot(s)
+     header(2)=iteration number
+     header(3)=time
+     header(4)=total energy
+     header(5)=total angular momentum
+     header(6)=total mass
+     header(8)=G (Newton's constant)
+     header(9)=epsilon (the gravitational softening length)
+
+     header(18)=1 if a satellite is present , 0 if not. 	| ???
+     header(19)=ndim (only 3 is supported)
+
+     header(20)=1 if two-galaxies model, 0 otherwise
+     header(21)=ngal1+1  	| gal2 comes after gal1
+     header(22)=mtot1
+     header(23)=r0 galaxy 1 (half mass radius)
+     header(24)=rmax galaxy 1 (initial rmax)
+     header(25,26,27)= am(x,y,z) galaxy 1
+     header(28)=mtot2
+     header(29)=r0 galaxy 2 (half mass radius)
+     header(30)=rmax galaxy 2 (initial rmax)
+     header(31,32,33)= am(x,y,z) galaxy 2
+
+     header(100) = 1         file contains xvp, not xvm, 0 otherwise
+     header(101) = nmasses   number of body mass groups
+     header(102) = n1        bodies 1:n1 have mass m1
+     header(103) = m1        the body mass m1
+     header(104) = n2        bodies n1+1:n2 have mass m2
+     header(105) = m2
+     header(106) = n3
+     header(107) = m3        etc.    max 13 mass groups
+     ...
+     header(126) = n13
+     header(127) = m13
+	
+     header(128)	| currently unused 
+
+     header(129)	| remainder unused 
+     ...
+     header(896) 	| last header element
+.fi
+Note that formally up to 7*128 are available, 
+but the last 6*128 are currently not in use.
+.SH DATA
+The data consist of records of 128 particles each, with positions, velocities
+and an auxiliary (masses or potentials, as determined from the header)
+.nf
+    data(1,2,3)     positions (NDIM=3 assumed here)
+    data(4,5,6)     velocities
+    data(7)         auxilliary (mass/potential)
+    data(8,9,10)    positions
+    ... etc.
+.fi
+.SH BUGS
+\fIxvp\fP multi-snapshot files must contain snapshots of equal size, so you
+cannot concatenate files of different particle size.
+.PP
+The header has no record of \fINOBYTES\fP (4 or 8) or a version number (sic).
+.PP
+.PP
+VMS may not be supported in NEMO.
+.SH "SEE ALSO"
+nora(l), snapshot(5NEMO)
+.SH AUTHOR
+Peter Quinn, Marc Balcells, Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+~/src/nbody/io/xvpsnap.c	sample conversion code
+~/usr/balcells/nora/{xvpread.f,xvpwrite.f}	sample I/O routines
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +2.0i +2.0i
+25-may-94	documentation written    	PJT
+.fi
+
