@@ -1,0 +1,22 @@
+%N snapdens
+%D ### NEMO program with unknown intent...(missing usage)
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man snapdens' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	input file name (snapshot)  [???]
+%A out
+	optional output file (snapshot)  []
+%A kmax
+	number of nearest neighbours  [6]
+%A dens
+	density or phase space density  [t]
+%A tab
+	get an ascii table of all  [f]
+%A format
+	format for numbers in table  [%e]
+%A tfactor
+	conversion factor v->r [virial=sqrt(2)] [-1.0]
+%A VERSION
+	15-apr-91 PJT [1.4a]
