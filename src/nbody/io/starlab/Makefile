@@ -21,6 +21,7 @@ SRC = stod_subs.c nemomain.C stod.C $(INC) Makefile
 SRCDIR = $(NEMO)/src/nbody/io/starlab
 
 LIBNEMO = -L$(NEMOLIB) -lnemo
+#LIBSTAR = -L$(STARLAB_PATH)/lib  -ltdyn -ldyn -lnode -lstd -lsstar
 LIBSTAR = -L$(STARLAB_PATH)/lib  -ltdyn -ldyn -lnode -lstd 
 
 .SUFFIXES: .C

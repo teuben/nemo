@@ -13,7 +13,7 @@ void put_snap_c(string fname, string hline,
 		 int nbody,
 		 double time,
                  double *mass, 
-                 double *pos, double *vel, double *aux, double *phi, int *key);
+                 double *pos, double *vel, double *acc, double *aux, double *phi, int *key);
 
 int get_snap_c(string fname, 
 		 double *time,

@@ -65,7 +65,7 @@ int get_snap_c(string fname, real *time, real **mass, real **pos, real **vel)
 
 
 void put_snap_c(string fname, string headline, int nbody, real time, 
-	real *mass, real *pos, real *vel, real *aux, real *phi, int *key)
+	real *mass, real *pos, real *vel, real *acc, real *aux, real *phi, int *key)
 {
     int i;
     real *mptr, *pptr, *vptr, *ptr, *phase;
@@ -106,6 +106,7 @@ void put_snap_c(string fname, string headline, int nbody, real time,
     }       
     put_data(instr, PhaseSpaceTag, RealType, phase, nbody,2,NDIM,0);
     put_data(instr, AuxTag, RealType, aux, nbody, 0);
+    put_data(instr, AccelerationTag, RealType, acc, nbody,NDIM, 0);
     put_data(instr, PotentialTag, RealType, phi, nbody, 0);
     put_data(instr, KeyTag, IntType, key, nbody, 0);
     put_tes(instr, ParticlesTag);

@@ -5,6 +5,7 @@
  *		18-jul-01	read more times?
  *              14-oct-03       ieck, keeping up with many starlab changes...
  *              29-dec-03       also added phi into the output stream, key as well
+ *               2-jan-04       attempt to get some UBV info for nvodemo2004
  */
 
 #include <stdinc.h>                 /* NEMO */
@@ -16,12 +17,17 @@
 
 #include "pdyn.h"	            /* STARLAB */
 
+#if 1
+/* my own test version, that doesn't need -lsstar */
+#include "ubvri.C"
+#endif
+
 typedef char *nemo_string;
 
 nemo_string defv[] = {
     "out=???\n          Output snapshot file (input dyn from stdin)",
     "headline=\n        Random verbiage for user",
-    "VERSION=1.5a\n     1-jan-04 PJT",
+    "VERSION=1.6\n      2-jan-04 PJT",
     NULL,
 };
 
@@ -32,6 +38,9 @@ void nemo_main(void)
   pdyn *proot;
   int k, i=0, n=0, nbody=0;
   real *mass, *pos, *vel, *aux, *phi, *mptr, *pptr, *vptr, *aptr, *hptr, tsnap, tsnap0;
+  real *acc, *pacc, u_out, b_out, v_out;
+  double umag,bmag,vmag,rmag,imag;
+  double m,logl,logt;
   int *key, *kptr;
   vec temp;
   int first = 1;
@@ -53,11 +62,13 @@ void nemo_main(void)
       vptr = vel  = (real *) allocate(3*nbody*sizeof(real));
       aptr = aux  = (real *) allocate(nbody*sizeof(real));
       hptr = phi  = (real *) allocate(nbody*sizeof(real));
+      pacc = acc  = (real *) allocate(3*nbody*sizeof(real));
       kptr = key  = (int *)  allocate(nbody*sizeof(int));
     } else {
       mptr = mass;
       pptr = pos; 
-      vptr = vel; 
+      vptr = vel;
+      pacc = acc;
       aptr = aux;
       hptr = phi;
       kptr = key;
@@ -65,20 +76,30 @@ void nemo_main(void)
 
     for_all_leaves(pdyn, proot, bi) {
       
-      *mptr++ = bi->get_mass();                      // mass
+      m = *mptr++ = bi->get_mass();                  // mass
 	
       temp = bi->get_pos();                          // position
       for (k = 0; k < 3; k++) *pptr++ = temp[k];
       
       temp = bi->get_vel();                          // velocity
       for (k = 0; k < 3; k++) *vptr++ = temp[k];
-      *aptr++ = bi->get_luminosity();                // luminosity
-      *hptr++ = bi->get_temperature();               // temperature
+      logl = *aptr++ = bi->get_luminosity();         // luminosity
+      logt = *hptr++ = bi->get_temperature();        // temperature
       *kptr++ = bi->get_stellar_type();              // stellar type
+      logl = log(logl);
+      logt = log(logt);
+      nemo_ltm_to_ubvri(logl,logt,m, umag,bmag,vmag,rmag,imag);
+      dprintf(1,"UBVRI: %g %g %g %g %g\n",umag,bmag,vmag,rmag,imag);
+      u_out = -2.5*log(umag);
+      b_out = -2.5*log(bmag);
+      v_out = -2.5*log(vmag);
+      *pacc++ = u_out;            /*   U, V, B-V */
+      *pacc++ = v_out;
+      *pacc++ = b_out-v_out;
     }
     tsnap = proot->get_system_time();
     cerr << "output now "<< tsnap << endl;
-    put_snap_c(fname,hline,nbody,tsnap,mass,pos,vel,aux,phi,key);
+    put_snap_c(fname,hline,nbody,tsnap,mass,pos,vel,acc,aux,phi,key);
     rmtree(proot);
     if (first) {
       first = 0;
@@ -89,3 +110,5 @@ void nemo_main(void)
     }
   }
 }
+
+

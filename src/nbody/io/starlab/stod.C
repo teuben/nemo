@@ -11,6 +11,7 @@
  *	- stod_subs.c is the accompanying snapshot I/O routines in C
  *
  *  15-oct-03   1.3    fixed for starlab4             PJT
+ *   2-jan-03   1.4    attempt to integrated getting UBVRI for nvodemo2004
  */
 
 
@@ -29,7 +30,7 @@ nemo_string defv[] = {
     "in=???\n           Input snapshot file (dyn to stdout)",
     "headline=\n        Additional comment line",
     "label=f\n          Add labels to stars?",
-    "VERSION=1.3\n	15-oct-03 PJT",
+    "VERSION=1.4\n	2-jan-04 PJT",
     NULL,
 };
 
