@@ -1,0 +1,269 @@
+.TH SNAP 5NEMO "21 November 1993"
+.SH NAME
+snap \- (fortran binary) format for N-body simulations - version 2
+.SH SYNOPSIS
+\fB     include 'snap.inc'\fP
+.SH DESCRIPTION
+\fISNAP\fP is a  (fortran-based) binary format used in Aguilar's (3D) 
+N-body simulations. 
+It has a fixed sized header and a variable sized data 
+part (this format has gone through some revisions, see "VERSION 1" below)
+The header defines the maximum number of particles, with information
+place holders for a number of individual sub-components 
+(dubbed ``galaxies'').
+.PP
+Each ``galaxy'' can have different combinations of density profiles,
+velocity distributions and spatial shapes, the center of mass and
+velocity can be specified individually for each one.
+.SH EXAMPLE
+The disk and memory image of \fIsnap\fP are very closely related.
+The following code sections explains the include file, and how to 
+read/write a single snapshot.
+.nf
+.ta +0.5i +3.5i +0i +0i +0i
+\fB
+	PARAMETER (Npmx = 50000)	!\fIMaximum number of particles\fP
+	PARAMETER (Ngmx = 50)		!\fIMaximum number of galaxies\fP
+
+	INTEGER iseed			!\fIrandom number generator seed\fP
+	CHARACTER*72 comment		!\fIgeneral commentary for init. cond.\fP
+	INTEGER Np			!\fI# of points in simulation\fP
+	INTEGER Ngals			!\fI# of galaxies\fP
+	INTEGER nframe			!\fI# of frame\fP
+	REAL time			!\fItime for frame\fP
+
+	CHARACTER*72 cparam(Ngmx)	!\fIgalaxies' character string array\fP
+	LOGICAL lparam(16,Ngmx)		!\fIgalaxies' logical parameters array\fP
+	INTEGER iparam(12,Ngmx)		!\fIgalaxies' integer parameters array\fP
+	REAL rparam(40,Ngmx)		!\fIgalaxies' real parameters array\fP
+
+	INTEGER index(Npmx)		!\fIarray used to indicate unbound particles\fP
+	REAL lum(Npmx), m(Npmx), x(3,Npmx), v(3,Npmx)	!\fIpart. lum, mass, pos. & vel.\fP
+
+	COMMON /snapshot/ iseed,comment,Np,Ngals,nframe,time,
+	*                  cparam,lparam,iparam,rparam,index,m,lum,x,v
+
+\fP
+.fi
+The following snippet of code would have written the unformatted version
+of this \fBSNAP\fP data:
+.nf
+\fB
+     open(99, file = snapfile // 'SNAP_u.dat ', form='unformatted',status='new')
+
+     write(99) iseed,comment,Np,Ngals,nframe,time,
+                (cparam(i),i=1,Ngals),
+                ((lparam(i,j),i=1,16),j=1,Ngals),
+                ((iparam(i,j),i=1,12),j=1,Ngals),
+                ((rparam(i,j),i=1,40),j=1,Ngals),
+                (index(i),i=1,Np),(m(i),i=1,Np),
+                (lum(i),i=1,Np),
+                ((x(i,j),i=1,3),j=1,Np),((v(i,j),i=1,3),j=1,Np)
+
+\fP
+.fi
+Reading this format is exactly the same. 
+Note the convention that the filename has a fixed
+extension \fBSNAP_u.dat\fP for unformatted format, and the extension
+\fBSNAP_f.dat\fP for the formatted version. To convert between these
+two, see \fIsnapformat(1LAAC)\fP. 
+.PP
+The size of this data is \fB92 + 344*Ngals + 36*Np\fP, assuming 4 bytes
+per \fBREAL\fP and \fBINTEGER\fP.
+.SH GLOBAL INFORMATION
+.PP
+PARAMETERS:
+.ta +0.5i +2.5i +0i +0i +0i
+.nf
+	Npmx:	Maximum number of particles
+	Ngmx:	Maximum number of galaxies
+.fi
+.PP
+CHARACTER VARIABLES:
+.nf
+	comment:	Commentary
+.fi
+.PP
+INTEGER VARIABLES:
+.nf
+	iseed:		seed for random number generator
+	Np:		Number of points in initial conditions
+	ngals:		Number of galaxies
+	nframe:     	Frame number in a series of snapshots (1=first)
+	time:      	Time of the snapshot
+	index(Npmx):	If (0), bound particle; if (1), unbound.
+.fi
+.PP
+REAL VARIABLES:
+.nf
+	m(Npmx):	masses of individual particles
+	lum(Npmx):	light to mass ratio for each particle
+	x(3,Npmx):	spatial cartesian coordinates of particles
+	v(3,Npmx):	cartesian velocity components of particles
+.fi
+.SH INDIVIDUAL GALAXY INFORMATION:
+In each of the following arrays, the index, or second index if a matrix,
+refers to the galaxy to which the information applies.
+.PP
+CHARACTER VARIABLES:
+.nf
+	cparam*72(Ngmx)	Comment
+.fi
+.PP
+LOGICAL VARIABLES:
+.nf
+	lparam(16,Ngmx)
+		i=1:	Equal masses for particles?
+		  2:	Non-spherical shape?
+		  3:	Rotation measured?
+		  4:	Softened velocities?
+		  5:	Principal axes aligned with frame of reference?
+		  6:	Unbound particles marked?
+		  7:	Density profile fitted?
+
+		  8-16:	Not used
+.fi
+.PP
+INTEGER VARIABLES:
+.nf
+	iparam(12,Ngmx)
+		i=1:	Number of points
+		  2:	Density profile code:
+				1) constant density
+				2) power-law
+				3) isochrone
+				4) Plummer
+				5) Rood (modified Hubble)
+				6) King
+				7) de-Vaucouleurs
+				8) Jaffe
+				9) Hernquist
+		  3:	Velocity distribution:
+				1) isotropic
+				2) anisotropic (Opsikov-Merritt)
+				3) Circular orbits
+		  4:	Mass function:
+				1) equal masses
+				2) power-law
+		  5:	Number of bound particles
+
+		  6-12:	Not used
+.fi
+.PP
+REAL VARIABLES:
+.nf
+	rparam(40,Ngmx):
+		i=1: 	pwr-law index, concentr., or 1D central vel. disp.
+		  2:	rt (total radius)
+		  3:	rh (half mass radius)
+		  4:	Mg (Mass of galaxy)
+		  5:	Ug (Potential energy of galaxy)
+		  6:	ro (core radius)
+		  7:	dens_o (central density)
+		  8:	ra (anisotropy radius)
+		  9:	(2T/U)tot (total virial ratio)
+		 10:	(2T/U)rot (virial ratio for rotation)
+		 11:	(X/Z) (major to minor axis ratio at 80% mass fract.)
+		 12:	(Y/Z) (interm. to minor axis ratio at 80% ......   )
+		 13-15:	(xo,yo,zo) (coordinates of center of galaxy)
+		 16-18:	(vxo,vyo,vzo) (vel. comp. of center of galaxy)
+		 19:	m1/<mi> (mass ratio of 1st part. to mean of others)
+		 20:	Mass function index
+		 21:	m_max/m_min (mass dynamical range)
+		 22:	e1i^2 (squared soft. length for 1-i interaction)
+		 23:	eij^2 (squared soft. length for i-j interaction)
+		 24:	T (Kinetic energy of galaxy)
+		 25:	E (Total energy of galaxy)
+		 26:	vrms (rms velocity of galaxy)
+		 27:	Tb (Kinetic energy of bound galaxy)
+		 28:	Ub (potential energy of bound galaxy)
+		 29:	Eb (total energy of bound galaxy)
+		 30:	Mbnd (mass of bound galaxy)
+		 31:	Tcm (kinetic energy of center of mass motion)
+		 32:	DE/E (fractional change in total energy)
+	 	 33:	DM/M (fractional change in mass)
+
+		 34-40:	Not used
+.fi
+.SH LIMITATIONS
+As defined by the PARAMETER statements,
+the maximum number of particles is \fBNpmx\fP [50000],
+with a maximum of \fBNgmx\fP [50] galaxies allowed. 
+These can be easily changed by changing their declared values.
+In addition, the length of the
+different \fIparam\fP blocks is limited to
+72 for character, 16 for logical, 12 for integer and 40 for real,
+each per galaxy. These are fixed and cannot be changed without
+violating this format.
+.PP
+Machine dependant FORTRAN binary format.
+.SH BUGS
+ANSI Fortran doesn't allow common blocks with characters mixed with 
+real/integer/double precision.
+.SH SEE ALSO
+fsnapio(3NEMO), snapshot(5NEMO), galmaker(1LAAC), snapformat(1LAAC)
+.SH FILES
+.ta +1i
+.nf
+usr/aguilar/galmaker	examples
+snap.inc	The COMMON/SNAP/ definition
+.fi
+.SH VERSION 1
+The format that predated this version 2 we call version 1, and was derived
+from Josh Barnes \fI/SNAPSHOT/\fP format he used in the early 80s.
+The following section explains his format:
+.nf
+.ta +0.5i +3.5i +0i +0i +0i
+\fB
+	CHARACTER*72 comment		!\fIgeneral commentary for init. cond.\fP
+	INTEGER Np			!\fI# of points in simulation\fP
+	REAL time			!\fItime for frame\fP
+	INTEGER nframe			!\fI# of frame\fP
+
+	REAL soften, m1, m2, mi,
+	     e12, e1i, eij, Vrms, Tcross,
+	     u, k, e
+	REAL x(3,*),v(3,*)            	!\fIpart. lum, mass, pos. & vel.\fP
+
+	COMMON /SNAPSHOT/ iseed,comment,Np,Ngals,nframe,time,
+	*                  cparam,lparam,iparam,rparam,index,m,lum,x,v
+
+\fP
+.fi
+The following snippet of code would have written the unformatted version
+of this \fBSNAP\fP data:
+.nf
+\fB
+     open(99, file = snapfile // 'SNAP_u.dat ', form='unformatted',status='new')
+
+     write(99) iseed,comment,Np,Ngals,nframe,time,
+                (cparam(i),i=1,Ngals),
+                ((lparam(i,j),i=1,16),j=1,Ngals),
+                ((iparam(i,j),i=1,12),j=1,Ngals),
+                ((rparam(i,j),i=1,40),j=1,Ngals),
+                (index(i),i=1,Np),(m(i),i=1,Np),
+                (lum(i),i=1,Np),
+                ((x(i,j),i=1,3),j=1,Np),((v(i,j),i=1,3),j=1,Np)
+
+\fP
+.fi
+Reading this format is exactly the same. 
+Note that the filename has a fixed
+extension \fBSNAP_u.dat\fP for unformatted format, and an extension
+\fBSNAP_f.dat\fP for the formatted version. To convert between these
+two, see \fIsnapformat(1LAAC)\fP. 
+
+.SH AUTHOR
+Luis A. Aguilar
+.SH HISTORY
+.nf
+.ta +1i +4i
+2/10/92  	Created   	Luis A. Aguilar			
+21-nov-93	man5 created	PJT
+14-jun-94	documented v1 and v2	PJT
+.fi
+
+
+
+
+
