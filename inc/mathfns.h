@@ -4,6 +4,7 @@
 /* for square root) and zeno functions (eg, seval), depending on precision  */
 /* switch (MIXEDPREC, SINGLEPREC, or DOUBLEPREC).                           */
 /* Copyright (c) 2001 by Joshua E. Barnes, Honolulu, Hawai`i.               */
+/*                                                                          */
 /* 22-jun-01:    adapted for NEMO - included by stdinc.h                    */
 /*               note, NEMO does not use MIXEDPREC yet                      */
 /****************************************************************************/

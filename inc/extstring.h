@@ -3,6 +3,9 @@
  * strings to strings of n-byte (nonzero) values, terminated by a
  * marker of n zero bytes.
  *
+ * These should not be confused with unicode type extensions to strings,
+ * but more general.
+ *
  *  20-sep-93       ANSI header file created                pjt
  *
  */

@@ -33,6 +33,7 @@
  *  7-may-02    removed some old starlab crap, added strneq
  * 13-mar-03    macros MIN,MAX deleted before redefinition
  * 12-jul-03    WD's macro name changed backfitted
+ * 24-nov-03    include mathfns.h, which includes forced math.h
  */
 
 #ifndef _stdinc_h      /* protect against re-entry */
@@ -73,6 +74,10 @@ ERROR!  Sorry, NEMO now requires an ANSI C compiler
 #endif
 
 /*
+ * our own math functions
+ */
+
+/*
  * string stuff, hopefully handled via the configure script (config.h)
  */
 
@@ -84,12 +89,13 @@ ERROR!  Sorry, NEMO now requires an ANSI C compiler
 #   define strrchr rindex
 # endif
 
-char *strchr(), *strrchr();
+  char *strchr(), *strrchr();
 
 # ifndef HAVE_MEMCPY
-# define memcpy(d,s,n)  bcopy((s),(d),(n))
-# define memmove(d,s,n) bcopy((s),(d),(n))
+#  define memcpy(d,s,n)  bcopy((s),(d),(n))
+#  define memmove(d,s,n) bcopy((s),(d),(n))
 # endif
+
 #endif
 
 /*
@@ -371,6 +377,10 @@ typedef real (*rproc)();
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+/* various math */
+
+#include <mathfns.h>
 
 /* io/stropen.c */
 
