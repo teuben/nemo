@@ -1,3 +1,6 @@
+- don't call this file BUGS, some cvs implementations cannot handle
+  lower and upper case.... notably on MacOS-X !!!
+
 - install on darwin:
 	- FORLIBS get crt1.o or something, and this is not needed,
 	and will cause linkers to fail. It needs to be removed
