@@ -29,6 +29,13 @@ setenv PGPLOT_DIR  @PGPLOT_DIR@
 setenv PGPLOT_LIB  @PGPLOT_DIR@
 setenv PGPLOT_FONT @PGPLOT_DIR@/grfont.dat
 
+# you can optionally uncomment and set some of the following PGPLOT variables
+# see also "man 5 yapp" for more info
+#setenv PGPLOT_BACKGROUND  0     # 0=black in /xs
+#setenv PGPLOT_FOREGROUND  1     # 1=white in /xs
+#setenv PGPLOT_GIF_WIDTH   512
+#setenv PGPLOT_GIF_HEIGHT  512
+
 #  If you use the VoGL library for xyzview, this is the only reasonable default
 setenv VDEVICE X11
 
