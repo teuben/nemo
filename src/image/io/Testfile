@@ -1,0 +1,29 @@
+DIR = src/image/io
+BIN = ccddump ccdprint
+NEED = $(BIN) ccdmath
+
+help:
+	@echo $(DIR)
+
+need:
+	@echo $(NEED)
+
+clean:
+	@echo Cleaning $(DIR)
+	@rm -f ccd.in
+
+NBODY = 10
+
+all:	$(BIN)
+
+ccd.in:
+	@echo Creating $@
+	ccdmath out=ccd.in "fie=10*%x+sqrt(%y)"  size=10,10,1
+
+ccdprint: ccd.in
+	@echo Running $@
+	ccdprint ccd.in x= y= format=%7.3f
+
+ccddump: ccd.in
+	@echo Running $@
+	ccddump ccd.in .
