@@ -1,0 +1,49 @@
+.TH MAXSIZES 5NEMO "8 February 2005"
+.SH NAME
+maxsizes \- parameters limiting code
+.SH DESCRIPTION
+Most NEMO programs use dynamic memory to allocate 
+arrys and other opjects where it is not practical to 
+know the size of in advance.
+.nf
+.ta +1i +1i +1i +1i +1i
+NEMO_MAXFD	64	maximum number of files simultaneously open
+MAX_COL     	256	maximum number of columns
+MAX_LINELEN	16384	maximum linelength for ascii files
+.fi
+.SH CAVEATS
+Various other maximum sizes sometimes creep up in the user interface.
+The unix shell is a notable example. Each shell can handle a different
+size.
+An example is \fIfitsglue(1NEMO)\fP, where a set of files is pasted
+together into a fits cube. Instead of a long string
+.nf
+
+	set in=f1.fits,f2.fits,f3.fits,....
+	fitsglue in=$in ...
+
+.fi
+you can also use the macro facility, and create a file with all filenames
+
+.nf
+	cat file1
+	f1.fits
+	f2.fits
+	...
+	fitsglue in=@in
+.fi
+.SH FILES
+.nf
+.ta +2i
+$NEMO/inc/max/maxizes.h  	template, to be copied into $NEMOLIB
+$NEMOLIB/maxsizes.h         	user maintained to taylor their version of NEMO
+.fi
+.SH "SEE ALSO"
+getparam(3NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+7-feb-05	Created  	PJT
+.fi
