@@ -42,6 +42,8 @@ nbody1:
 	       "`awk '{if(NR==4)print $$0}'  $(INTEST)`" \
 		`awk '{if(NR==5)print $$0}'  $(INTEST)` \
 		`awk '{if(NR==6)print $$0}'  $(INTEST)`	> run1.log
+
+nbody1_cmp:
 	@echo Comparing with standard version:
 	@-diff run1.log $(CMPLOG)
 	@echo Comparison done

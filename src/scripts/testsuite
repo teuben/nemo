@@ -6,6 +6,7 @@
 #   22-mar-97   Orinally written                    Peter Teuben
 #   19-dec-99   -i added (doesn't seem to work?)
 #    6-apr-01   -f added
+#   20-jun-01   -b added
 #
 
 set testdir=$NEMO/tmp/test$$
@@ -20,9 +21,13 @@ set install=0
 set force=0
 set query=0
 set done=0
+set bootstrap=0
 set options=()
 foreach arg ($*)
     switch ($arg)
+    case -b:
+              set bootstrap=1
+              breaksw
     case -n:  
               if ($done) then
                 set options=($options $arg)                
@@ -59,6 +64,12 @@ foreach arg ($*)
               breaksw
     endsw
 end
+
+if ($bootstrap) then
+  set blog=/tmp/testsuite_b.log
+  echo Rebuilding testsuite executables, hang on.....see $blog 
+  (cd $NEMO/src/scripts; ./need -m `./testsuite -s`; mknemo -c history hisf) >& $blog
+endif
 
 mkdir $testdir
 pushd $testdir >& /dev/null

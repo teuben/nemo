@@ -10,10 +10,8 @@
  *  6-apr-93  pjt: took debug_level back into this routine
  * 21-sep-93  pjt: ANSI
  *  4-mar-96  pjt: format string now a 'const'
- * 20-jun-01  pjt: gcc0, no more non-ansi
+ * 20-jun-01  pjt: gcc0, no more non-ansi code
  *
- *	GCC complains about va_start() being not OK
- *	GCC v1.39 stopped complaining.... but actually doesn't work
  */
 
 #include <stdinc.h>
@@ -43,5 +41,5 @@ int dprintf(int debug, const string fmt, ...)
 	fflush(stderr);			/*   drain std error buffer */
         va_end(ap);
     }
-    return 0;
+    return nret;
 }

@@ -7,6 +7,7 @@
 #   22-oct-96   added linux ELF
 #    1-apr-97   I never added -shared to SGI...
 #    1-apr-01   changed .o to .so for shared objects now (NEMO V3)
+#   20-jun-01   sgi better detected
 
 if ($#argv == 0) then
   echo "Usage: $0 <BASENAME>"
@@ -29,7 +30,7 @@ switch ($NEMOHOST)
     if ($status) goto error1
     rm -f so_locations
     breaksw
-  case sgi* :
+  case *sgi* :
     ld -shared $1.o -o $1.so >& $log
     if ($status) goto error1
     breaksw

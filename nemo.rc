@@ -1,4 +1,5 @@
-# This file is to be sourced to add NEMO to your environment
+# This file is to be sourced to add NEMO to your environment, but
+# is mostly called by "nemo_start"
 #
 # Normally sourcing this file (in csh) will only be allowed
 # once, because an assumed alias 'nemo' does it. If this is done
@@ -15,6 +16,7 @@
 #                     6-jul-92  denemo              PJT
 #                    26-mar-94  NEMO V2.2           pjt
 #    		     10-apr-01  NEMO V3 - small verbosity changes 	PJT
+#		     20-jun-01  no more bells		pjt
 
 #                           decide if to be run in more verbose way
 if ($?DEBUG == 0) then
@@ -34,7 +36,7 @@ endif
 
 #                           See if NEMO had been set....
 if ($?NEMO == 0) then
-  echo "Environment variable NEMO is not set, NEMO cannot be set up"
+  echo "Environment variable NEMO is not set, NEMO cannot be set up"
   echo "add something like:   setenv NEMO /xxx/yyy"
   echo "to denote the root directory of NEMO to your .cshrc file"
   goto done
@@ -48,7 +50,7 @@ if ($?NEMOBIN != 0) then
     echo "NEMOBIN=$NEMOBIN"
     echo "PATH=$PATH"
     echo ""
-    echo "NEMOBIN had already been set, NEMO cannot be re-initialized"
+    echo "NEMOBIN had already been set, NEMO cannot be re-initialized"
     echo ""
     echo "   Use:  'unsetenv NEMOBIN' to get rid of the environment variable"
     echo "          NEMOBIN, and run 'nemo' again to (re)initialize NEMO"
@@ -65,7 +67,7 @@ if (-e $NEMO/NEMORC) then
   if ($debug) echo "Sourcing $NEMO/NEMORC ..."
   source $NEMO/NEMORC
 else
-  echo "NEMO startup file $NEMO/NEMORC does not exist"
+  echo "NEMO startup file $NEMO/NEMORC does not exist"
   echo "Running NEMO on your own risk"
 endif
 if ($debug) echo "$NEMOBIN added to search path"

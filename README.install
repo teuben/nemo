@@ -1,80 +1,4 @@
-This is:	A blurb on NEMO V3, what it is, how to install and use 
-Last updated:   1-jun-2001
-By:		Peter Teuben
-Disclaimer: 	The manual is now out of date, the autoconf based 
-		installation instructions here are now more up to date.
 
-______________________________________________________________________________
-
-(for INSTALLATION instructions see below)
-
-Using NEMO (i.e. when somebody had already installed it for you) requires
-just a few changes modifications to your .cshrc/.login script: 
-(sorry, no sh support yet). The most simplest would be
-
-    1)	source the "nemo_start" file. You may have to ask your system
-	manager where it is kept. For example:
-
-		source ~nemo/nemo_start
-
-or the long way:
-
-    1)  define the environment variable NEMO where NEMO's root directory is.
-    2)  optionally define NEMOHOST if you want to override an automatic 
-	determination.
-	Although you can use anything you want, check the subdirectories 
-	in $NEMO/bin for valid names on your system, but you better know
-	what you are doing, since by default NEMO will figure it out.
-    3)  source the $NEMO/NEMORC file.
-    4)  add $NEMOBIN to you search path. Note that in NEMO V3+ the system 'cc'
-	command should now be available again, as NEMOBIN/cc has disappeared
-	in favor of setting all flags through the makedefs file.
-
-	        setenv NEMO /home/nemo		             (1)
-	        source $NEMO/NEMORC			     (3)
-	        set path = ( . xxx $NEMOBIN yyy zzz)	     (4)
-
-where xxx, yyy  and zzz are other directories you may want in there. 
-
-Alternatively, you can set up a dynamic NEMO installation, which means
-that NEMO is by default not present after you have logged in.  The
-dynamic installation requires a special command (normally an alias
-'nemo') to be issued in order to ``load'' NEMO into the environment. 
-e.g. I use:
-	alias nemo 'source ~nemo/nemo_start; unalias nemo'
-and the reverse to remove it:
-	alias omen 'source ~nemo/nemo_end'
-
-
-   (See also Appendix A of the manual for more details of installation)
-______________________________________________________________________________
-
-
-The NEMO (latex) manual is located in $NEMO/text/manuals, as nemo.tex
-with many small include (.inc) files. There may also be a final nemo.dvi, 
-or even nemo.ps file. If not, use the Makefile in there, and try
-	make nemo
-to create a full manual. If, for one particular include (.inc) file, you 
-need a copy one can use:
-	make test TEST=setup.inc
-and turn the 'latest.dvi' file into a 'latest.ps' file for printing.
-
-The 'nemo.tex' file also generates a table of contents and an index, which
-requires you to run the program latex more than once. Also the index
-file is not all done by 'latex'. An additional program 'makeindex', which
-turns an .idx file into an .ind file, is required. If this is not
-present - you'll have to live without the index. Best is to create
-a dummy file nemo.ind, to prevent latex screaming about a missing file,
-but the nemo.ind file that exists is a current one.
-
-(a version of the makeindex utility also lives in $NEMO/src/tools/makeindex)
-______________________________________________________________________________
-
-There may also a demo in the $NEMO/demo area. Run it after NEMO has been
-installed.
-______________________________________________________________________________
-
-
 Preconditions to INSTALLATION
 =============================
 
@@ -88,7 +12,7 @@ a) Installing PGPLOT
 
 	cd $NEMO/local
 	$NEMO/src/scripts/pgplot.install
-	(you may need to get the pgplot5.2.tar.gz file from caltech
+	(you may need to get the pgplot522.tar.gz file from caltech
 	or a local repository)
 
    this assumes $NEMO has a basic presence already, so don't start this
@@ -103,7 +27,10 @@ b) Installing HDF
     
    You only need the HDF library if you plan to work with CMHOG (hydrocode).
 	
--- To be filled in --
+   This requires:
+	libdf.a
+	libz.a	(often comes with the system)
+	/usr/local/include/df.h   -- and many others
 
 c) Installing CFITSIO
 
@@ -236,6 +163,8 @@ Results in /home/teuben/nemo_3.0.4/tmp/test22005/testsuite.log
 	--with-ccmalloc
 		use CCMALLOC to debug malloc usage
 
+	--with-yapp=ps
+
 * Configuration options that we are working on:
 
 	--with-cfitsio-prefix=PFX 
@@ -259,6 +188,10 @@ Results in /home/teuben/nemo_3.0.4/tmp/test22005/testsuite.log
 	sparc-sun-solaris2.8
 
 
+	sulfur SGI: needs
+		setenv F77 f90
+	or		   g77
+
 
 3) Running a small test of tests to see if everything works fine
 
@@ -268,8 +201,6 @@ Results in /home/teuben/nemo_3.0.4/tmp/test22005/testsuite.log
 
      	- more consistent way between usage of variables in the NEMORC chain, 
 	  and the 'makedefs' list.
-
-
 
 
 	

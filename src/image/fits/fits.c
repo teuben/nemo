@@ -45,6 +45,7 @@
  *              15-oct-99       fixed Y2K problem			pjt
  *              28-nov-00       fixed some NULL -> 0's                  pjt
  *              30-may-01       proper prototypes                       pjt
+ *              20-jun-01       a few gcc3 fixes
  *
  * Places where this package will call error(), and hence EXIT program:
  *  - invalid BITPIX
@@ -133,7 +134,7 @@ int fts_rhead(fits_header *fh, stream instr)
         /* breaks this infinite for(icard) loop - if not, return < 0 */
         
         if (fh->ascii) {           /* horrendous misFITS trick */
-            if (*fgets(buf,FTSLINSIZ,instr) == EOF) return -1; /* !! never !! */
+            if (fgets(buf,FTSLINSIZ,instr) == 0) return -1; /* !! never !! */
             n = strlen(buf);
             if (buf[n-1] == '\n') n--;
             for (i=n; i<FTSLINSIZ; i++) buf[i] = ' ';	/* patch it */
@@ -428,9 +429,8 @@ int fts_rhead(fits_header *fh, stream instr)
 int fts_xhead(fits_header *fh, stream instr,
 	      int bitpix, int naxis, int *naxisn, int skip)
 {
-    int k, n, i, icard;
+    int  i;
     char buf[80];
-    struct arglist *p;
 
     if (fh->naxis >= 0) {         /* we could force a fts_zero here, but ala */
         dprintf(0,"### fts_rhead: fits_header not initialized (use debug>0)\n");
@@ -1328,16 +1328,16 @@ int fts_ptable(
                     dp = &card[fh->tbcoln[i]];
                     if (strrchr(fh->tformn[i],'E')) {
                       for (k=0; k<fh->tbitems[i]; k++)
-                        printf(" %f",show_e(dp,k));
+                        printf(" %f",show_e((float *)dp,k));
                     } else if (strrchr(fh->tformn[i],'D')) {
                       for (k=0; k<fh->tbitems[i]; k++)
-                        printf(" %lf",show_d(dp,k));
+                        printf(" %lf",show_d((double *)dp,k));
                     } else if (strrchr(fh->tformn[i],'I')) {
                       for (k=0; k<fh->tbitems[i]; k++)
-                        printf(" %d",show_i(dp,k));
+                        printf(" %d",show_i((short *) dp,k));
                     } else if (strrchr(fh->tformn[i],'J')) {
                       for (k=0; k<fh->tbitems[i]; k++)
-                        printf(" %d",show_j(dp,k));
+                        printf(" %d",show_j((int *) dp,k));
                     } else if (strrchr(fh->tformn[i],'A')) {
                       printf(" ");
                       for (k=0; k<fh->tbitems[i]; k++)
@@ -1389,12 +1389,11 @@ string *col,                /* (i)  optional selection of fields to print */
 string select,              /* (i)  output mode: header and/or data */
 int *row)                   /* (i)  list of rows to display; NULL or 1.. */
 {
-    char *card, *dp, rowfmt[10];
-    int ncards, i, j, k, n, w, len, nitems, pos, *colsel;
-    int bytpix, check, idx, nskip, ntail;
-    bool colall, addrow, ascii;
+    char *card, rowfmt[10];
+    int ncards, i, j, k, n, w, len, nitems;
+    int bytpix, idx, nskip, ntail;
+    bool colall, addrow;
     real pscal, pzero;
-    string *sp;
     bool Qpar, Qval, Qraw;
 
     Qpar = scanopt(select,"group");
@@ -1480,13 +1479,13 @@ int *row)                   /* (i)  list of rows to display; NULL or 1.. */
                     }
                     printf(" ");
                     if (fh->bitpix == -32)
-                        printf("%g",show_e(card,k)*pscal+pzero);
+                        printf("%g",show_e((float *)card,k)*pscal+pzero);
                     else if (fh->bitpix == -64)
-                        printf("%g",show_d(card,k)*pscal+pzero);
+                        printf("%g",show_d((double *)card,k)*pscal+pzero);
                     else if (fh->bitpix == 32)
-                        printf("%g",show_j(card,k)*pscal+pzero);
+                        printf("%g",show_j((int *)card,k)*pscal+pzero);
                     else if (fh->bitpix == 16)
-                        printf("%g",show_i(card,k)*pscal+pzero);
+                        printf("%g",show_i((short *)card,k)*pscal+pzero);
                     else
                       error ("RANDOM GROUPS not encoded format yet");
                 }
@@ -1574,7 +1573,7 @@ local int put_ivals (
         for (idx=0; idx<(*nvals); idx++) ip[idx] = 0;
     } else {
         ip = *ivals;
-        if (ip ==NULL)
+        if (ip == NULL) {
             if (*nvals < 0)
                     error("%s has no dimension yet\n",key);
             else {
@@ -1582,6 +1581,7 @@ local int put_ivals (
                 *ivals = ip;
                 for (idx=0; idx<(*nvals); idx++) ip[idx] = 0;
             }
+	}
         idx = atoi(&key[strlen(fitsname)]) - 1;
         dprintf(3,"DEBUG> (%s) ip[idx = %d] = %d\n",key,idx,ivalue);
         if (idx < *nvals)
@@ -1610,7 +1610,7 @@ local int put_dvals (
     } else {
         dvalue = atof(val);
         fp = *dvals;
-        if (fp ==NULL)
+        if (fp == NULL) {
             if (*nvals < 0)
                     error("%s has no dimension yet\n",key);
             else {
@@ -1618,6 +1618,7 @@ local int put_dvals (
                 *dvals = fp;
                 for (idx=0; idx<(*nvals); idx++) fp[idx] = 0.0;
             }
+	}
         idx = atoi(&key[strlen(fitsname)]) - 1;
         dprintf(3,"DEBUG> (%s) fp[idx = %d] = %f\n",key,idx,dvalue);
         if (idx < *nvals)
@@ -1647,7 +1648,7 @@ local int put_cvals (
     } else {
         svalue = val;
         sp = *cvals;
-        if (sp ==NULL)
+        if (sp == NULL) {
             if (*nvals < 0)
                     error("%s has no dimension yet\n",key);
             else {
@@ -1656,6 +1657,7 @@ local int put_cvals (
                 for (idx=0; idx<(*nvals); idx++)
                     sp[idx] = NULL;
             }
+	}
         idx = atoi(&key[strlen(fitsname)]) - 1;
         dprintf(3,"DEBUG> (%s) cp[idx = %d] = %s\n",key,idx,svalue);
         if (idx < *nvals)
@@ -1735,7 +1737,7 @@ local int parse_card (int icard, char *card, char *a1, char *a2, char *a3, char 
         }  
         for (cp=a3; i<FTSLINSIZ; i++)  /* and copy into a3 */
             *cp++ = *buf++;
-        return(1);
+        return 1;
     } else {
         a2[0] = *buf++;               /* put '=' string in a2 */
         a2[1] = 0;                   /* terminate */
@@ -1873,7 +1875,7 @@ int fts_cdata(
 	      bool trailr,			/* (i) need to read trailing end too ? */
 	      bool trailw)			/* (i) need to write trailing end too ? */
 {
-    int  nread, nwrite, n, ntowrite, ntoread, itemlen, nitems, totwrite=0;
+    int  nread, nwrite, n, ntowrite, ntoread, itemlen, nitems;
     char buffer[CONVBUFLEN];
 
     itemlen = ABS(fh->bitpix)/8;        /* # bytes in an item */
@@ -1955,10 +1957,9 @@ int fts_rdata(
 	      char *buf)
 {
     double *outp, convbuf[CONVBUFLEN];   /* local buffer used for conversion */
-    int nread, nskip, ntail;      /* number of bytes to read */
+    int nread, nskip;      /* number of bytes to read */
     int i, *ip;
     short *sp;
-    char c;
     double *dp;
     float *fp;
 

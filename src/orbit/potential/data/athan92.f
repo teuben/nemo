@@ -9,6 +9,7 @@ C
 C   21-oct-93   Put into potential(5NEMO) format                PJT
 C		Special case for (0,0,0) -- doesn't work because of LOG()
 c   23-apr-96   removed fortran specific things for loadobj()       pjt
+c   20-jun-01   geez, SGI doesn't like ctrl-L in the file....       pjt
 C
 C   ToDO:
 C	code DACSH()
@@ -225,7 +226,6 @@ C
 C 
       RETURN
       END
-
 C-----------------------------------------------------------------------
       SUBROUTINE FORAX( X, Y, Z, FX, FY, FZ)
 C-----------------------------------------------------------------------
@@ -258,7 +258,6 @@ C
       FZ = 0.
       RETURN
       END
-
 C-----------------------------------------------------------------------
       SUBROUTINE FORBA( XINPUT, YINPUT, Z, AXOUT, AYOUT, AZ)
 C-----------------------------------------------------------------------
@@ -328,7 +327,6 @@ C     EPT = -EPT * ACONST
       AYOUT=AX
       RETURN
       END
-
 C-------------------------------------------------------------------------------
       SUBROUTINE FORBA0( X, Y, Z, FX, FY, FZ)
 C-------------------------------------------------------------------------------
@@ -411,7 +409,6 @@ C     TOTAL
       POT = POTBU + POTDI
       RETURN
       END
-
 C-----------------------------------------------------------------------
       SUBROUTINE POTBA( XINPUT, YINPUT, Z, EPT)
 C-----------------------------------------------------------------------
@@ -472,7 +469,6 @@ C     ACONST = ELIPM*4.027209375/(A*C*C)
       EPT = -EPT * ACONST
       RETURN
       END
-
 C-------------------------------------------------------------------------------
       SUBROUTINE POTBA0( X, Y, Z, POT) 
 C-------------------------------------------------------------------------------

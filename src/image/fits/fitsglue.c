@@ -8,6 +8,7 @@
  *     25             a fixed datamin/max in the header         PJT
  *     12-feb-99      b changed for new fts_cdata 		PJT
  *	5-apr-01      c increased default MAXIN			pjt
+ *     20-jun-01   1.3  removed the blocking= keyword           pjt
  *
  */
 
@@ -19,10 +20,9 @@ string defv[] = {			/* Standard NEMO keyword+help */
     "out=???\n	           Output fits file",
     "multiple=t\n          Check for multiple fits files on input?",
     "naxis3=0\n            Preset NAXIS3 here, or let program scan first",
-    "blocking=1,1\n        Blocking factors for I/O",
     "compact=f\n           Compact (move) dummy axes to the end",
     "inlist=\n             optional nemoinp(1) list expression for in=",
-    "VERSION=1.2c\n        5-apr-01 PJT",
+    "VERSION=1.3\n         20-jun-01 PJT",
     NULL,
 };
 
@@ -41,7 +41,7 @@ local string minmax[] = { "DATAMIN", "DATAMAX", NULL };
 void nemo_main()
 {
     stream instr, outstr;
-    int    i,j, n, blocking[2], planesize, totsize;
+    int    i,j, n, planesize, totsize;
     int    zbufsiz, ninfiles, naxis, naxis1, naxis2, naxis3, naxisn[3], ntmp;
     bool   Qmultiple, Qcompact = getbparam("compact");
     struct fits_header fh, fh_out;
@@ -68,12 +68,6 @@ void nemo_main()
         }
     }
     outname = getparam("out"); 
-
-    n = nemoinpi(getparam("blocking"),blocking,2);
-    if (n<1 || (outstr!=NULL && n<2))
-        error("Not enough blocking factors supplied");
-    fts_setiblk(blocking[0]);    /* set input blocking factor */
-    fts_setoblk(blocking[1]);    /* set input blocking factor */
 
     Qmultiple = getbparam("multiple");
     naxis3 = getiparam("naxis3");

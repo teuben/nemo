@@ -34,17 +34,17 @@ nbody0.in:
 
 nbody0:	nbody0.in
 	@echo Running $@
-	time nbody0 nbody0.in nbody0.out tcrit=$(TCRIT) > nbody0.log
+	nbody0 nbody0.in nbody0.out tcrit=$(TCRIT) > nbody0.log
 	snaptrim nbody0.out - times=$(TCRIT) | tsf -
 
 nbody00:	nbody0.in
 	@echo Running $@
-	time nbody00 nbody0.in nbody00.out tcrit=$(TCRIT) > nbody00.log
+	nbody00 nbody0.in nbody00.out tcrit=$(TCRIT) > nbody00.log
 	snaptrim nbody00.out - times=$(TCRIT) | tsf -
 
 nbody0_ff:	nbody0.in
 	@echo Running $@
-	time nbody0_ff < nbody0.tab
+	nbody0_ff < nbody0.tab
 
 compare: 
 	snapcmp nbody0.out nbody00.out

@@ -18,9 +18,10 @@
  *				 5 apr 01  added plswap/plxscale/plyscale for completeness
  *					   and plcolor (but this ought to do color too) + friends
  *                                         allow yapp.ps to be overwritten; others not
+ *                              20 jun 01  debug level now 1
  */
 
-#define VERSIONID "Version 3.2 5-may-95 PJT"
+#define VERSIONID "Version 3.2d 20-jun-01 PJT"
 
 #include <stdinc.h>
 
@@ -100,7 +101,7 @@ plinit(string opt, real x0, real x1, real y0, real y1)
       yappfile = "yapp.tmp.ps";
       lpr = TRUE;
     } else {
-      dprintf(0,"YAPP_PS %s:\n do \'lpr %s\' to print\n", VERSIONID, yappfile);
+      dprintf(1,"YAPP_PS %s:\n do \'lpr %s\' to print\n", VERSIONID, yappfile);
     }
     if (streq(yappfile,"yapp.ps"))
         psst = stropen(yappfile, "w!");
@@ -109,7 +110,7 @@ plinit(string opt, real x0, real x1, real y0, real y1)
     if (psst == NULL)
 	error("plinit: can't open %s", yappfile);
     did = date_id();
-    dprintf(0,"Date_id=%s\n",did);
+    dprintf(1,"Date_id=%s\n",did);
     dx = x1 - x0;
     dy = y1 - y0;
     if (dx / dy < XRANGE / YRANGE)

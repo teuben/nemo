@@ -719,7 +719,7 @@ int savefie(int slot)
 
     if (save_fie==NULL) {
         save_fie = (struct fie_slot *) allocate(sizeof(struct fie_slot));
-        /* if (save_fie==NULL) return(-1);     /* couln't allocate */
+        /* if (save_fie==NULL) return -1;  */   /* couln't allocate */
         save_fie->slot = 1;
         save_fie->fwd = NULL;
     }

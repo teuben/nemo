@@ -1,4 +1,4 @@
-VERSION = NEMO V3.0 6-apr-01 PJT
+VERSION = NEMO V3.0 20-jun-01 PJT
 ################################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 ################################################################################
@@ -617,7 +617,5 @@ bins:
 
 testsuite:
 	@echo ISSUE the following command:
-	@echo '(cd src/scripts; ./need -m `./testsuite -s`; mknemo -c history hisf; ./testsuite)'
-
-#	@(cd src/scripts; mknemo `testsuite -s`)
+	@echo 'src/scripts/testsuite -b'
 
