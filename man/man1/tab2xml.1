@@ -1,0 +1,41 @@
+.TH TAB2XML 1NEMO "13 February 2004"
+.SH NAME
+tabcols \- Select columns, and output a VOTable (xml) file
+.SH SYNOPSIS
+\fPtab2xml\fP [parameter=value] ...
+.SH DESCRIPTION
+\fBtab2xml\fP selects columns from a file, and outputs
+the columns in VOTable format.
+.PP
+To select lines, use \fItablines(1NEMO)\fP or \fItabmath(1NEMO)\fP.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+input file name(s). No default.
+.TP
+\fBcol=\fP
+list of columns to select. Any \fInemoinp(1NEMO)\fP  expression can be used.
+Columns can be repeated, and in any order. The output will be in exactly
+the same order as given with this keyword. First column is 1.
+[all]    
+.TP
+\fBcolnames=\fP
+Column names. Not implemented yet.
+.SH EXAMPLE
+Here is an example of how to reverse the columns from a table with 4 columns:
+.nf
+    tab2xml a.tab > a.xml
+.fi
+.SH SEE ALSO
+tabcols(1NEMO), tabmath(1NEMO), awk(1)
+.SH FILES
+src/kernel/tab/tab2xml.c   source code
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+13-feb-04	V1.0 Created 	PJT
+.fi
