@@ -1,0 +1,32 @@
+.TH ORBSTAT 1NEMO "23 March 1995"
+.SH NAME
+orbstat \- tabulate some orbital statistics
+.SH SYNOPSIS
+.PP
+\fBorbstat in=\fPorbit  [parameter=value]
+.SH DESCRIPTION
+\fBorbstat\fP will tabulate some statistical properties of a series
+or orbits, as given in an input file. Currently time, energy (or first
+integral of motion), the maximum extent in X, Y, VX and VY are given,
+as well as the mean and dispersion in the angular momentum for 
+(XY) planar orbits are given.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 20
+\fBin=\fIin-file\fP
+Input file, which must be an \fIorbit(5NEMO)\fP. [No default].
+.SH "SEE ALSO"
+orblist(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+~/src/orbit/misc 	orbstat.c
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+23-mar-95	V1.0 Created	PJT
+.fi
