@@ -1,3 +1,8 @@
+- install on darwin:
+	- FORLIBS get crt1.o or something, and this is not needed,
+	and will cause linkers to fail. It needs to be removed
+	from the $NEMOLIB/makedefs and NEMORC.local - if  present -
+
 - install on solaris:
 	awk cannot handle too many in src/scripts/need/
 	exception.c does not compile for gcc3 as well as solaris' cc
