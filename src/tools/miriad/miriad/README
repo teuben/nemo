@@ -1,0 +1,12 @@
+Miriad shell
+
+1) To compile standard miriad shell
+ 1) make miriad
+
+2) To include the GNU readline library (command line editing)
+
+ 1) install or find where libreadline.a is located
+    (The bash shell also has the code for readline in it, see bash/readline)
+ 2) make gnu [NEMOLIB=readline_dir]
+
+
