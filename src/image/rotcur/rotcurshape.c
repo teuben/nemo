@@ -70,7 +70,7 @@ string defv[] = {
     "rotcur3=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur4=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur5=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
-    "VERSION=0.9d\n  28-jul-02 PJT",
+    "VERSION=0.9e\n  28-jul-02 PJT",
     NULL,
 };
 
@@ -553,7 +553,7 @@ stream  lunpri;       /* LUN for print output */
 	dprintf(0,"[Found %d points in rotation curve]\n",n_vel);
 	for (i=0; i<n_vel; i++) {
 	  xpos_vel[i] = 0.0;
-	  vsig_vel[i] = 1.0;
+	  vsig_vel[i] = 1.0;  /* not used yet */
 	}
       } else {
 	colnr[0] = 1;    coldat[0] = xpos_vel;
@@ -562,7 +562,7 @@ stream  lunpri;       /* LUN for print output */
 	n_vel = get_atable(velstr,3,colnr,coldat,n_vel);
 	dprintf(0,"[Found %d points in velocity field table]\n",n_vel);
 	for (i=0; i<n_vel; i++) {
-	  vsig_vel[i] = 1.0;
+	  vsig_vel[i] = 1.0;   /* not used yet */
 	}      
       }
       for (i=0; i<n_vel; i++) {
@@ -664,7 +664,7 @@ stream  lunpri;       /* LUN for print output */
     }
 
     *nring = nemoinpr(getparam("radii"),rad,ring+1);
-    if (*nring<2) error("radii=: Need at least two radii for one ring");
+    if (*nring != 2) error("radii=: Need two radii for a disk");
     *vsys = getdparam("vsys");
     n = nemoinpr(getparam("pa"),pan,ring);
     if (n<1) error("pa=: need at least one position angle (%d)",n);
@@ -733,9 +733,21 @@ stream  lunpri;       /* LUN for print output */
     if (iret<0) error("Illegal option in fixed=%s",getparam("fixed"));
     dprintf(1,"MASK: 0x%x ",fixed);
     if (Qrotcur) {
-      if (mask[1]==1) warning("rotcurmode: XPOS should be fixed at 0");
-      if (mask[3]==1) warning("rotcurmode: PA should be fixed at 0");
-      if (mask[4]==1) warning("rotcurmode: INC should be fixed at 90");
+      if (mask[1]==1) {
+	warning("rotcurmode: XPOS fixed at 0");
+	*x0 = 0.0;
+	mask[1]=1;
+      }
+      if (mask[3]==1) {
+	warning("rotcurmode: PA fixed at 0");
+	pan[0] = 0.0;
+	mask[3]=1;
+      }
+      if (mask[4]==1) {
+	warning("rotcurmode: INC fixed at 30");
+	inc[0] =  30.0;
+	mask[4]=1;
+      }
     }
     if (fixed & (1<<GPARAM)) {
       for (i=0; i<GPARAM; i++) mask[i] = 0;
@@ -1010,7 +1022,7 @@ stream lunres;   /* file for residuals */
             xc1 = x[2*i]-dx*p[1];
             yc1 = x[2*i+1]-dy*p[2];
             xc2 =   xc1*cosp + yc1*sinp;
-            yc2 = (-xc1*sinp + yc1*cosp)/cosi;
+            yc2 = (-xc1*sinp + yc1*cosp)/cosi;   /* Qrotcur */
             fprintf(lunres,"%g %g %g %g %g %g %g %g\n",
                     xc1, yc1, y[i], res[i],
                     xc2, yc2, sqrt(xc2*xc2+yc2*yc2),atan2(yc2,xc2)/F);
@@ -1178,15 +1190,10 @@ real  *q;             /* output sigma */
     x0=p[1];              /* x-position of center */
     y0=p[2];              /* y-position of center */
     free=ABS(sin(F*thf)); /* free angle in terms of sine */
-    if (Qrotcur) {
-      cosi = sinp = 0.0;
-      cosp = sini = 1.0;
-    } else {
-      sinp=sin(F*phi);       /* sine of pa. */
-      cosp=cos(F*phi);       /* cosine of pa. */
-      sini=sin(F*inc);       /* sine of inc. */
-      cosi=cos(F*inc);       /* cosine of inc. */
-    }
+    sinp=sin(F*phi);       /* sine of pa. */
+    cosp=cos(F*phi);       /* cosine of pa. */
+    sini=sin(F*inc);       /* sine of inc. */
+    cosi=cos(F*inc);       /* cosine of inc. */
     a=sqrt(1.0-cosp*cosp*sini*sini);       /* find square around ellipse */
     b=sqrt(1.0-sinp*sinp*sini*sini);
 
@@ -1231,7 +1238,7 @@ real  *q;             /* output sigma */
 	    v = MapValue(velptr,l,m);        /* velocity at (l,m) */
 	    if (v != undf) {       /* undefined value ? */
 	      xr=(-(rx-dx*x0)*sinp+(ry-dy*y0)*cosp);     /* X position in galplane */
-	      yr = (cosi==0 ? 0 : (-(rx-dx*x0)*cosp-(ry-dy*y0)*sinp)/cosi);
+	      yr=(-(rx-dx*x0)*cosp-(ry-dy*y0)*sinp)/cosi;
 	      r=sqrt(xr*xr+yr*yr);                       /* distance from center */
 	      if (r < 0.01)                              /* radius too small ? */
 		theta=0.0;
@@ -1294,7 +1301,7 @@ real  *q;             /* output sigma */
 	v  = vrad_vel[i];
 	if (v == undf) continue;
 	xr=(-(rx-x0)*sinp+(ry-y0)*cosp);     /* X position in galplane */
-	yr=(cosi==0 ? 0 : (-(rx-x0)*cosp-(ry-y0)*sinp)/cosi);
+	yr=(-(rx-x0)*cosp-(ry-y0)*sinp)/cosi;
 	r=sqrt(xr*xr+yr*yr);                       /* distance from center */
 	if (r < 0.01)                              /* radius too small ? */
 	  theta=0.0;
@@ -1369,8 +1376,9 @@ int l,m;        /* grid coordinates w.r.t. 0,0 */
 
 /* global parameters for the local nllsqfit routines */
 
+int  p_init = 1;
 int  i,j;                                                    /* loop counters */
-real vs,vc,phi=0.0,inc=0.0;                   /* parameters of velocity field */
+real vs,vc,phi,inc;                           /* parameters of velocity field */
 real cosp1,cosp2,sinp1,sinp2,cosi1,cosi2,sini1,sini2;     /* different angles */
 real x,y;                                                  /* sky coordinates */
 real cost1,cost2,sint1,sint2,xx1,yy1,r,r1;  /* coordinates in plane of galaxy */
@@ -1582,20 +1590,21 @@ perform_init(real *p,real *c)
   int i;
 
   vs=p[0];                 /* systemic velocity */
-  if (p[3] != phi) {   /* new position angle ? */
+  if (p[3] != phi || p_init) {   /* new position angle ? */
     phi=p[3];               /* position angle */
     cosp1=cos(F*phi);       /* cosine */
     cosp2=cosp1*cosp1;      /* cosine squared */
     sinp1=sin(F*phi);       /* sine */
     sinp2=sinp1*sinp1;      /* sine squared */
   }
-  if (p[4] != inc) {   /* new inclination ?  */
+  if (p[4] != inc || p_init) {   /* new inclination ?  */
     inc=p[4];               /* inclination */
     cosi1=cos(F*inc);       /* cosine */
     cosi2=cosi1*cosi1;      /* cosine squared */
     sini1=sin(F*inc);       /* sine */
     sini2=sini1*sini1;      /* sine squared */
   }
+  p_init = 0;                   /* academic case :-) */
   x=c[0]-p[1]*grid[0];          /* calculate x */
   y=c[1]-p[2]*grid[1];          /* calcualte y */
   xx1=(-x*sinp1+y*cosp1);        /* x in plane of galaxy */
