@@ -1,0 +1,13 @@
+#! /bin/csh -f
+#	link this program with one that is bad or so
+#	ln -s BADPROGGRAM name-of-the-bad-program
+set prg=$0
+if ($?NEMOHOST == 0) then
+  set NEMOHOST=this
+endif
+echo Sorry, you cannot run $prg:t on a $NEMOHOST machine - due to 
+echo "circumstances it is currently not available here (`hostname`)"
+echo Just open a window on one of the other non-$NEMOHOST machines, 
+echo and run it there. Sorry for the inconvenience.
+echo "		Your NEMO System Manager. "
+exit 1

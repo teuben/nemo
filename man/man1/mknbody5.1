@@ -1,0 +1,110 @@
+.TH MKNBODY5 1NEMO "10 June 1995"
+.SH NAME
+mknbody5 \- Create initial conditions using the NBODY5 program
+.SH SYNOPSIS
+\fBmknbody5\fP [parameter=value]
+.SH DESCRIPTION
+\fBmknbody5\fP is a NEMO frontend to Aarseth's \fPnbody5(1NEMO)\fP
+program with which you can create initial conditions. This is done by
+creating an input parameter file for nbody5, which sets up the
+initial conditions but doesn't integrate (TCRIT=0.0). The nbody5
+output file is then converted to standard \fIsnapshot(5NEMO)\fP
+format using \fIu3tos(1NEMO)\fP.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBout=\fP
+Output \fIsnapshot(5NEMO)\fP file.
+No default.
+.TP
+\fBnbody=\fP
+Number of bodies.
+[Default: \fBt\fP].
+.TP
+\fBseed=\fP
+Random number seed. 0 takes a random number from the time of the
+day.
+[Default: \fB0\fP].
+.TP
+\fBnbin=\fP
+Number of initial binaries.
+[Default: \fB0\fP].
+.TP
+\fBrbar=\fP
+Virial radius in pc (for scaling)  
+[Default: \fB1.0\fP].
+.TP
+\fBzmbar=\fP
+Mean mass in solar mass (for scaling) 
+[Default: \fB6.0\fP].
+.TP
+\fBmass0=\fP
+Lower mass cutoff     
+[Default: \fB1.0\fP].
+.TP
+\fBmass1=\fP
+Upper mass cutoff     
+[Default: \fB6.0\fP].
+.TP
+\fBalpha=\fP
+Power law index for Initial Mass Function 
+(as defined by N(m) = m**(-alpha)).
+[Default: \fB2.5\fP].
+.TP 
+\fBimf=\fP
+Choice of IMF (Valid options are: \fBscalo, kroupa, eggleton\fP).
+[Default: \fBscalo\fP].
+.TP
+\fBvirial=\fP
+Initial virial (1=equilibrium)     
+[Default: \fBt\fP].
+.TP
+\fBvxrot=\fP
+XY-velocity scaling factor (>0 for solid body) 
+[Default: \fBt\fP].
+.TP
+\fBvzrot=\fP
+Z-velocity scaling factor (not used of vxrot=0) 
+[Default: \fBt\fP].
+.TP
+\fBrun=t|f\fP
+Run nbody5 and convert the data to snapshot format?
+Note: if you choose to use this option any existing file \fBOUT3\fP
+will be removed prior to running \fNbody5\fP.
+.TP
+\fBsave=t|f\fP
+COMMON save on unit 1? This may be useful if you want to restart
+a similation (KSTART>1) from these initial conditions with different
+paramters. It is (I believe) not possible (as in NBODY1/2 ??) to read
+initial conditions from a file compatible with UNIT 3.
+[Default: \fBf\fP].
+.SH CAVEATS
+Not all features have been implemented, in particular features
+that cannot be exported through a simple mass and phase-space
+format snapshot-like output format (e.g. mass loss, molecular clouds,
+external force field etc.)
+.PP
+Since some file names (see FILES below) are fixed, it is dangerous
+to run this program in parallel.
+.PP
+The \fBout=\fP output file does not contain the full history,
+i.e. input paramaters of this program.
+.PP
+Small number of particles (\fBnbody=\fP) will not work properly
+yet. Some paramters need to scale with N for small N.
+.SH EXAMPLES
+.SH SEE ALSO
+nbody5(1), u3tos(1NEMO)
+.SH FILES
+.nf
+.ta +1i
+OUT3        NBODY5 binary snapshot (see also \fIu3tos(1NEMO)\fP)
+nbody5.in   input parameter file
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+10-jun-95	V0.1 Created a basic version	PJT
+.fi

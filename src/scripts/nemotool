@@ -1,0 +1,22 @@
+#! /bin/csh -f
+#
+#   spawn mirtool for NEMO users, even those who don't have miriad set
+#
+if ($?MIR == 0) then
+  # this will only work in Maryland of course ...
+  if (-d /lma/mirth) then
+    setenv MIR /lma/mirth
+    setenv MIRBIN $MIR/bin/$NEMOHOST
+  else
+    echo "Cannot install nemotool - consult NEMO/MIRIAD"
+    exit 0
+  endif
+endif
+
+if ($term == xterm || $term != sun) then
+  echo "### Warning: You must be in SUNTOOLS for this command to work"
+endif
+
+$MIRBIN/mirtool -b $NEMOBIN -p $NEMODOC &
+
+

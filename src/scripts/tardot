@@ -1,0 +1,30 @@
+#! /bin/csh -f
+#
+#	script that gathers all non-zero versioned dot files 
+#	that we use as backup files (.name.VERSION)
+#
+if ($#argv != 2) then
+  echo "Usage $0 root-dir tarfile"
+  echo "Makes tarbackup of all versioned dotfiles"
+  exit 0
+endif
+
+set root=$1
+if (! -d $root) then
+  echo "Root Directory $root does not exist"
+  exit 0
+endif
+
+set tar=$2
+if (-e $tar) then
+  echo "File $tar exists"
+  exit 0
+endif
+
+set curdir=`pwd`
+
+cd $root
+echo -n "Finding file list..."
+set all=(`find . -type f -name '.*.[0-9]*' -print`)
+echo "OK, found $#all files ; bundling now:"
+tar cvf $curdir/$tar $all
