@@ -15,6 +15,7 @@
  *     16-feb-03 V4.0a use get_pattern()			pjt
  *     24-feb-03      initial  framework for epicycle mode      pjt
  *      5-mar-03 V5.0 analytical epicyclic orbits               pjt
+ *      6-may-03     a  missing factor 2 for A ???              pjt
  *
  * To improve:  use allocate() for number of particles; not static
  */
@@ -40,7 +41,7 @@ string defv[] = {
     "sigma=0\n            diffusion angle (degrees) per timestep",
     "seed=0\n		  random seed",
     "headline=PotCode\n   random mumble for humans",
-    "VERSION=5.0\n        5-mar-03 PJT",
+    "VERSION=5.0a\n       6-may-03 PJT",
     NULL,
 };
 
@@ -134,6 +135,10 @@ real time;			/* current time */
  *        - (x0,y0) is the guiding center, (u,v) can be the deviant into the epicycle 
  *          and a (u0,v0) is the deviation from circular motion
  *    *** for now the Z oscillations are not solved for ***
+ *
+ *   Recall:
+ *      A = -1/2 R d(Omega)/dR
+ *      Kappa^2 = R d(Omega^2)/dR + 4 Omega^2
  */
 
 
@@ -167,8 +172,8 @@ real time;			/* current time */
 
     /* should do iteration until converging, for now slightly asymmetric results */
     tolmin = 1e-7;   /*  tolerance to achieve */
-    eps = 0.001;       /*  first small fractional step in radius */
-    for (iter=0; iter<10; iter++) {                  /* iterate to find kappa */
+    eps = 0.01;       /*  first small fractional step in radius */
+    for (iter=0; iter<15; iter++) {                  /* iterate to find kappa */
       MULVS(lpos,Pos(p), 1+eps);
       (*pot)(&ndim,lpos,a1,&lphi,&time);
       MULVS(lpos,Pos(p), 1-eps);
@@ -176,7 +181,7 @@ real time;			/* current time */
       
       f1 = sqrt(sqr(a1[0]) + sqr(a1[1]))/(r*(1+eps));
       f2 = sqrt(sqr(a2[0]) + sqr(a2[1]))/(r*(1-eps));
-      kap2 = (f1-f2)/(2*eps) + 4*ome2;
+      kap2 = (f1-f2)/(2*eps) + 4*ome2;     /* Kappa^2 = R d(Omega^2)/dR + 4 Omega^2 */
       kap1 = sqrt(kap2);
       
       if (iter==0) {
@@ -186,9 +191,9 @@ real time;			/* current time */
       } else {
 	tol = (kap1-oldkap)/kap1;
 	tol = ABS(tol);
-	if (tol < tolmin) break;
+	if (iter>1 && tol < tolmin) break;
 	eps = eps/2;
-	dprintf(1,"%g : %d %g %g %g\n",r,iter,eps,kap1,tol);
+	dprintf(1,"%g : iter1 %d %g %g %g\n",r,iter,eps,kap1,tol);
       }
     }
     eps2 = 0.001;
@@ -205,12 +210,15 @@ real time;			/* current time */
       } else {
 	tol2 = (nu-oldnu)/nu;
 	tol2 = ABS(tol2);
-	if (tol2 < tolmin) break;
+	if (iter2>1 && tol2 < tolmin) break;
 	eps2 /= 2.0;
-	dprintf(1,"%g : %d %g %g %g\n",r,iter2,eps2,nu,tol2);
+	dprintf(1,"%g : iter2 %d %g %g %g\n",r,iter2,eps2,nu,tol2);
       }
     }
-    A = -0.25*(f1-f2)/(2*eps)/ome1;
+    A = -0.25*(f1-f2)/(2*eps)/ome1;     /*  A = -1/2 R d(Omega)/dR   */
+#if 1
+    A /= 2;  /* ??? */
+#endif
     B = A - ome1;
     printf("%g %g %g %g %g %g %g %d %d %g %g  %g %g %g %g\n",
 	   r,ome1,kap1,A,B,ome1-kap1/2.0,nu,iter,iter2,tol,tol2,vr,vt,vz,lz);
