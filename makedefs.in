@@ -61,7 +61,8 @@ FORLIBS = $(FLIBS)
 NEMO_CFLAGS = @NEMO_CFLAGS@ -I$(NEMOINC) -I$(NEMOLIB) @LOADOBJ_MACH@
 NEMO_FFLAGS = @NEMO_FFLAGS@
 NEMO_LDFLAGS = 
-NEMO_LIBS = -L$(NEMOLIB) -lnemo @LOADOBJ_LIBS@ @MATH_LIBS@
+NEMO_LIBS   = -L$(NEMOLIB)          -lnemo @LOADOBJ_LIBS@ @MATH_LIBS@
+NEMO_LIBSPP = -L$(NEMOLIB) -lnemo++ -lnemo @LOADOBJ_LIBS@ @MATH_LIBS@
 
 #			some graphics libraries:
 GLLIBS = @GLLIBS@
@@ -87,6 +88,9 @@ RANLIB = @RANLIB@
 .c.o:
 	$(CC) $(CFLAGS) $(LOCAL_INC) -c $<
 
+.cc.o:
+	$(CXX) $(CFLAGS) $(LOCAL_INC) -c $<
+
 .c.so:
 	$(CC) $(CFLAGS) $(LOCAL_INC) -c $<
 	ldso $*
@@ -100,6 +104,9 @@ RANLIB = @RANLIB@
 
 .c:
 	$(CC) $(CFLAGS) $(LOCAL_INC) -o $* $*.c $(NEMO_LIBS) $(LOCAL_LIB) $(FORLIBS) $(EL)
+
+.cc:
+	$(CXX) $(CFLAGS) $(LOCAL_INC) -o $* $*.c $(NEMO_LIBSPP) $(LOCAL_LIB) $(FORLIBS) $(EL)
 
 .o:
 	$(CC) $(CFLAGS) $(LOCAL_INC) -o $* $*.o $(NEMO_LIBS) $(LOCAL_LIB) $(FORLIBS) $(EL)

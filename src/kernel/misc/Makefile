@@ -5,6 +5,9 @@ include $(NEMOLIB)/makedefs
 L = $(NEMOLIB)/libnemo.a
 .PRECIOUS: $(L)
 
+LPP = $(NEMOLIB)/libnemo++.a
+.PRECIOUS: $(LPP)
+
 # Files etc. in this directory
 
 MAN1FILES = 
@@ -77,11 +80,15 @@ $(L):	$(LOBJFILES)
 	rm -f $?
 
 #	install the library: can be (re)done from scratch by removing .o files
-install:   .install_lib 
+install:   .install_lib   .install_lib++
 
 .install_lib: $(OBJFILES)
 	ar ruv $(L) $?
 	$(RANLIB) $(L)
+
+.install_lib++: nemomain++.o
+	ar ruv $(LPP) $?
+	$(RANLIB) $(LPP)
 
 .install_inc: $(INCFILES)
 	cp $? $(NEMOINC)

@@ -1,6 +1,8 @@
+#
+include $(NEMOLIB)/makedefs
 #   Example Makefile for hello.c within NEMO environment
-CFLAGS = -g
-LDFLAGS = -g
+#CFLAGS = -g
+#LDFLAGS = -g
 BIN = hello hello++ bye
 SRC = hello.c
 MAN = hello.1
@@ -25,14 +27,9 @@ nemo_src:  $(BIN)
 	enddo
 
 #	default rules
-.c.o:
-	$(CC) $(CFLAGS) -c $<
-.o:
-	$(CC) $(CFLAGS) -o $@ $*.o $(L) $(EL) -lm
-.c:
-	$(CC) $(CFLAGS) -o $@ $*.c $(L) $(EL) -lm
+
 .cc:
-	$(CCC) $(CFLAGS) -o $@ $*.cc -lnemo++ $(L) $(EL) -lm
+	$(CXX) $(CFLAGS) -o $@ $*.cc -L$(NEMOLIB) -lnemo++ $(L) $(EL) -lm
 
 #	optional user install targets (for user installation)
 install:	install_src install_bin install_man

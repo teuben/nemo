@@ -21,7 +21,7 @@ string defv[] = {       /* standard keywords and default values */
 
 string usage = "Example NEMO C/C++ program";      /* usage text */
 
-void nemo_main(void)      /* standard start of any NEMO program */
+void nemo_main()      /* standard start of any NEMO program */
 {
     bool verbose;                  /* declaration of local var. */
 
