@@ -10,36 +10,37 @@
  *	 3-jul-94       hmmm, allow 0 bytes, but alloc 1!   pjt
  *	22-jan-95	proto
  *	 3-may-95	added dprintf() 
+ *	 6-apr-01	changed malloc -> calloc		pjt
  */
 
 #include <stdinc.h>
 
 void *allocate(int nb)
 {
-    char *mem;
+    void *mem;
 
-    dprintf(8,"allocate: %d bytes\n",nb);
     if (nb < 0) error("allocate: cannot allocate %d bytes",nb);
     if (nb==0) nb++;
-    mem = (char *) malloc((size_t)nb);
+    mem = (void *) calloc((size_t)nb, 1);
     if (mem == NULL)
 	error("allocate: not enough memory for %d bytes", nb);
+    dprintf(8,"allocate: %d bytes @ %d \n",nb, mem);
     return mem;
 }
 
 void *reallocate(void *bp, int nb)
 {
-    char *mem;
+    void *mem;
 
-    dprintf(8,"reallocate: %d bytes\n",nb);
     if (nb < 0) error("reallocate: cannot allocate %d bytes",nb);
     if (nb == 0) nb++;
     if(bp==NULL)
-        mem = (char *) malloc((size_t)nb);
+        mem = (void *) calloc((size_t)nb, 1);
     else
-        mem = (char *) realloc((char *)bp,(size_t)nb);
+        mem = (void *) realloc((void *)bp,(size_t)nb);
     if (mem == NULL)
 	error("reallocate: not enuf memory (%d bytes)", nb);
+    dprintf(8,"reallocate: %d bytes @ %d \n",nb, mem);
     return mem;
 }
 
