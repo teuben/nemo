@@ -1,0 +1,34 @@
+%N mkrich
+%D ### NEMO program with unknown intent...(missing usage)
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man mkrich' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A out
+	output file name  [???]
+%A alpha
+	inverse exponential scale length  [4.0]
+%A rcut
+	outer cutoff radius  [1.25]
+%A mdisk
+	disk mass  [1.0]
+%A Qtoomre
+	Toomre's Q parameter  [1.0]
+%A gamma
+	fudge factor for v_eff(r) if > 0  [1.0]
+%A ndisk
+	usual number of particles  [1024]
+%A z0
+	vertical scaleheight (softening)  [0.025]
+%A seed
+	usual random number seed  [12345]
+%A mode
+	creation mode: 1=josh 2=kruit/searle  [1]
+%A tab
+	table output also?  [f]
+%A headline
+	text headline for output  []
+%A vzgrad
+	gradient in vcirc(z) [0]
+%A VERSION
+	20-nov-95 PJT [1.2]
