@@ -18,6 +18,7 @@ BINFILES = flowcode
 SRCFILES = defs.h flowcode.c code_io.c orbstep.c dissipate.c diffuse.c vxy.c
 OBJFILES =        flowcode.o code_io.o orbstep.o dissipate.o diffuse.o
 SRCDIR = $(NEMO)/src/nbody/evolve/flowcode
+OBJ = vrt.so  vrtd.so  vxy.so
 
 TARFILES = $(MAN1FILES) $(SRCFILES) Makefile
 
@@ -87,4 +88,11 @@ dissipate.o: dissipate.c defs.h
 diffuse.o: diffuse.c defs.h
 	$(CC) $(CFLAGS) -c diffuse.c
 
+
+#
+
+
+
+
+obj:  $(OBJ)
 
