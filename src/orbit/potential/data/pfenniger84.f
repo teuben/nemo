@@ -467,7 +467,7 @@ c
       T = 0D0
       I = 1D0
 
-      DO WHILE (I.GT.0D0)
+ 999  CONTINUE
          I = I + I
          P = P + INT(P/PI + 0.5D0)*PI + ATAN(TAN(P2) * B/A)
          P2 = MOD(P,TPI)
@@ -477,8 +477,7 @@ c
          A = A1
          S = S + C * C * I
          T = T + C * SIN(P2)
-         IF (C .LT. 1D-15) EXIT
-      END DO
+      IF (C .GE. 1D-15) GOTO 999
 
       F = P / (I * A)
       E = T + F * (1D0 - 0.5D0 * S)
