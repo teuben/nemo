@@ -19,19 +19,19 @@ help:
 
 clean:
 	-@for i in $(DIRS); do\
-	(cd $$i;echo "### Dir: `pwd`";$(MAKE) $(MFLAGS) clean); done
+	(cd $$i;$(MAKE) $(MFLAGS) clean); done
 
 cleanlib:
 	-@for i in $(DIRS); do\
-	(cd $$i;echo "### Dir: `pwd`";$(MAKE) $(MFLAGS) cleanlib); done
+	(cd $$i;$(MAKE) $(MFLAGS) cleanlib); done
 
 install:
 	-@for i in $(DIRS); do\
-	(cd $$i;echo "### Dir: `pwd`";$(MAKE) $(MFLAGS) install); done
+	(cd $$i;$(MAKE) $(MFLAGS) install); done
 
 update:
 	-@for i in $(DIRS); do\
-	(cd $$i;echo "### Dir: `pwd`";$(MAKE) $(MFLAGS) update); done
+	(cd $$i;$(MAKE) $(MFLAGS) update); done
 
 tar:
 	@echo Creating tarfile TARNAME=$(TARNAME) from DIRS=$(DIRS)
