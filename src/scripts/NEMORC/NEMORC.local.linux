@@ -1,0 +1,42 @@
+# This file is a template for the NEMORC.local file, which should be
+# in your $NEMO root directory. Copy this file as 'NEMORC.local' and
+# make appropriate changes to the variables from the NEMORC file itself
+# that you want to have modified, and set variables like NEMOSITE
+# and YAPPLIB. Never edit this file as NEMORC.gen, as you will most likely
+# loose any changes in future updates.
+
+#  Each site should really have an identification name in 'NEMOSITE';
+#  could be as complicated as to include machine name via `hostname`,
+#  version numbers etc. But could also be a fixed name for your site.
+#  Your choice, it is merely used as an identifcation in some programs
+#  when data is generated/exported (e.g. in FITS)
+setenv NEMOSITE `hostname`
+
+
+#   check your system:		redhat 5.x=-lf2c    redhat 6.x=-lg2c
+setenv FORLIBS   -lg2c
+
+
+#  Set your default YAPPLIB, the current YAPP_NULL will do nothing.
+#  most likely you want to make it $YAPP_PGPLOT or so, but in most of
+#  those cases you will need to tailor various path elements.
+
+#  Here's a PGPLOT YAPP, uncomment and suit your needs
+setenv YAPPLIB "$NEMOLIB/yapp_pgplot.o -lpgplot -L/usr/X11R6/lib -lX11 $FORLIBS"
+setenv YAPP       /xs
+setenv PGPLOT_LIB /usr/lib/pgplot
+setenv PGPLOT_FONT /usr/lib/pgplot/grfont.dat
+setenv PGPLOT_DIR /usr/lib/pgplot
+
+
+#  Particularly if you use shared libraries (e.g. pgplot in $NEMOLIB) you
+#  may need to change LD_LIBRARY_PATH;
+#  Change 0 -> 1 if you need this
+
+if (0) then
+  if ($?LD_LIBRARY_PATH) then
+    setenv LD_LIBRARY_PATH ${NEMOLIB}:${LD_LIBRARY_PATH}
+  else
+    setenv LD_LIBRARY_PATH ${NEMOLIB}
+  endif
+endif
