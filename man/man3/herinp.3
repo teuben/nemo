@@ -1,0 +1,110 @@
+.TH HERINP 3NEMO "5 December 1993"
+.SH NAME
+herinp \- decode string into reals, integers, logicals, characters or bytes
+.SH SYNOPSIS
+.nf
+CALL HERINP(EXPR,TYPE,LENGTH,OUTV,NOUT,NRET,IER)
+          arg.   I/O type  description
+          EXPR    I  A**   Byte array containing the expressions to
+                           evaluate. Last byte should be a 0.
+          TYPE    I  A*1   Byte denoting type of conversion wanted.
+                           Possible types are: 'F'   reals
+                                               'I'   integers
+                                               'L'   logicals
+                                               'A'   bytes
+                                               'C'   characters
+          LENGTH  I  I*4   Length of type in bytes. Possible lengths
+                           depend on type:
+                                   TYPE       LENGTH
+                                    'F'         4,8
+                                    'I'         2,4
+                                    'L'         1,2,4
+                                    'A'         any
+                                    'C'         any
+          OUTV    O  A**   Array containing the decoded values.
+          NOUT    I  I*4   Length of OUTV in units of LENGTH.
+          NRET    O  I*4   Number of items found.
+          IERD    O  I*4   Error return code. The following error codes
+                           can be returned:
+                           IER   explanation
+                             0   no error
+                           -11   bad call
+                           -12   unknown function
+                           -13   syntax error
+                           -14   illegal character
+                           -15   wrong repeat argument
+                           -16   wrong number of arguments
+                           -17   arithmetic error
+                           -18   not enough internal memory
+                           -19   conversion error
+                           -20   unequal list length
+                           -21   empty list
+                           -22   nested lists
+                           -23   output buffer overflow
+                           -24   floating overflow/underflow in conversion
+.fi
+.SH INPUT
+	- Reals or Integers (TYPE = 'F' or 'I').
+          Reals or Integers can be typed as numbers and/or as expressions.
+          The numbers/expressions can be typed on one line, separated by
+          blanks and/or a comma. There is a loop-facility implemented, which
+          has the format s:e[:i], where s = startvalue, e = endvalue and
+          i = incrementvalue (default: 1), and a repeat-facility, which
+          has the format v::n, where v = value to be repeated and n
+          the repeat-count of v. There is also a list-facility, which is
+          a string of numbers/expressions enclosed between [square brackets].
+          A list is treated in expressions as a kind of array. The expression
+          is evaluated for each list element (from left to right) separately.
+.nf
+          Examples: 1 2 3/3  sin(pi)      yields       1.0 2.0 1.0 0.0
+                    log(10)::4            yields       1.0 1.0 1.0 1.0
+                    log(10):log(100):2/4  yields       1.0 1.5 2.0
+                    10**[0 1 2 3]         yields       1.0 10.0 100.0 1000.0
+          Notes:    loops, repeats and lists cannot be nested!!
+.fi
+.PP
+          - Logicals (TYPE = 'L').
+          Logicals are decoded in the following way: YES, JA and TRUE result
+          in a logical which is true, NO, NEE and FALSE give a logical which
+          is false. It is sufficient to give the first letter of the possible
+          affirmative and negative replies. Any other answer will result in
+          a syntax error.
+.PP
+          - Bytes (TYPE = 'A').
+          Bytes are not decoded, they are just passed through. The end of
+          the output string is denoted by a zero byte.
+.PP
+          - Characters (TYPE = 'C').
+          The character strings are separated by blanks and/or a comma.
+          If a character string exceeds the value of LENGTH, an error
+          message will be generated.
+.SH FUNCTIONS
+Functions and constants can be referenced in uppercase also.
+.PP
+sin(x), asin(x), sinh(x), cos(x), acos(x), cosh(x),
+tan(x), atan(x), tanh(x), atan2(y,x), rad(x), deg(x),
+pi, exp(x), ln(x), log(x), sqrt(x), abs(x),
+sinc(x), c, g, m, erf(x), erfc(x),
+k, h, p, s, max(x1,x2), min(x1,x2),
+mod(i,n), int(x), nint(x), sign(x), undef, ifgt(x,y,zf,zf)
+iflt(x,y,zf,zf), ifge(x,y,zf,zf), ifle(x,y,zf,zf), ifeq(x,y,zf,zf), ifne(x,y,zf,zf), 
+ranu(x,y), rang(x,y), ranp(x), 
+sind(x), asind(x), cosd(x), acosd(x), tand(x), atand(x), atand2(y,x)
+.PP
+Constants are in mks units!!
+c=speed of light, g=gravitational constant, m=solar mass, k=boltzmann's constant,
+h=planck's constant, p= ,s=.
+.SH AUTHOR
+K. G. Begeman
+.SH UPDATE HISTORY
+.nf
+.ta +2i
+xx/xxx/xx	Created for GIPSY - (c) University of Groningen - Netherlands
+16/dec/87	Type C implemented (KGB)
+25/jan/88	Document created (KGB)
+26/feb/88	In GENLIB (KGB)
+18/may/88	Implemented for NEMO (PJT)
+25/nov/88	Some global variables are now local (PJT)
+6/dec/88	New version (V1.1) from Groningen installed (PJT)
+5/dec/93	Allow DO loops to go > 32768 (PJT)
+.fi
