@@ -8,7 +8,19 @@ Computes the potential in the plane of an infinitesimally thin
 disk. The method
 here is VERY slow, since it evaluates the integral exactly
 given as Eq. 2-3 in the 1987 book \fIGalactic Dynamics\fP by
-Binney and Tremaine.  A faster way is to use FFT's, as described by
+Binney and Tremaine.  The integral is replaced by a sum over
+the pixel values of the input image of 
+.nf
+                             Sigma(p)
+   Pot(P) = -Gravc * SUM   ---------- dx dy 
+                            | p - P |
+.fi
+
+P, and p are vector positions, Sigma(p) is the surface density 
+at position p. dx and dy are pixel sizes and the 
+distance |p-P| is measured in pixels. 
+.PP
+A faster way is to use FFT's, as described by
 Hockney & Eastwood (1978), and implemented in MIRIAD's potfft program.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
@@ -16,15 +28,30 @@ is also given:
 .TP 20
 \fBin=\fP
 Input image file, in \fIimage(5NEMO)\fP format. No default.
-.TP 20
+.TP
 \fBout=\fP
 Output image file. No default.
+.TP
+\fBgravc=\fP
+Gravitional constant. Normally taken as 1, but this allows you 
+to more easily convert to your own units already. See also
+\fIunits(5NEMO)\fP.
+Default: 1
 .SH SEE ALSO
 potential(GIPSY), potfft(MIRIAD), image(5NEMO)
+.SH TIMING
+Since for each of the N^2 pixels, all other N^2 pixels will
+be interrogated, this algorithm is O(N^4). In practice you
+will find it to be more like O(N^5). The code precomputes
+a kernel, which is simplified if we can assume the pixel
+size in X and Y are the same. If not, the program will
+currently probably compute it terribly wrong.
 .SH AUTHOR
 Peter Teuben 
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
 26-Jul-02	V0.1 Created to check potfft   PJT
+22-oct-02	V0.2 correct kernel at (0,0)	PJT
+28-feb-03	V0.3 added gravc=	PJT
 .fi
