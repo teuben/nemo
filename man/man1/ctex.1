@@ -1,0 +1,83 @@
+.TH CTEX 1NEMO "14 November 1993"
+.SH NAME
+ctex \- extract tex comments from C/C++ source code
+.SH SYNOPSIS
+\fBctex [-tex|-latex|-raw]\fP\fI file(s)...\fP
+.SH DESCRIPTION
+\fIctex\fP is a very simple awk-based filter that
+extracts tex(t) comments from C/C++ source code. The comments
+must currently be structured in the following way:
+.nf
+
+    /*CTEX
+     *  text can start here,
+     *  as long as there is a space after the first * on
+     *  the line, everything is output verbatim
+     *  The '*' followed by '/' will terminate the text
+     *  section, i.e. this line is the last CTEX output line
+     */
+
+.fi
+Output mode mode can be selected.
+In (la)tex mode a small header and footer are added, as to be able
+to directly use the output of ctex by (la)tex.
+.PP
+Each \fI/*CTEX\fP section generates a new \fITeX\fP paragraph, but
+you can always add your own tex command, such as \fI \\bigskip\fP.
+.SH COMMAND LINE SWITCHES
+.TP 15
+.B -latex
+Output in latex mode. 
+.TP
+.B -tex
+Output in tex mode, which is the default.
+.TP
+.B -raw
+Output in raw mode. No (la)tex headers and footers added to
+the output stream.
+.TP
+.B -section
+Each new file causes a \fIsection{file}\fP command, should be used in
+latex mode only
+.TP
+.B -subsection
+Each new file causes a \fIsubsection{file}\fP command, should be used in
+latex mode only
+.TP
+.B -centerline
+Each new file causes a \fIcenterline{file}\fP command, can be used in tex and
+latex mode.
+.TP
+.B -noheader
+No (la)tex header before all files are processed.
+.TP
+.B -nofooter
+No (la)tex footer after all files have been processed.
+.TP 
+.B -index
+Add latex \fIindex{potential, file}\fP commands.
+.SH EXAMPLE
+The following example extracts all potential formalae, and
+formats them in tex:
+.nf
+
+    % ctex -tex $NEMO/orbit/potential/data/*.c > pot.tex
+    % tex pot
+    % dvips pot
+
+.fi
+.SH FILES
+.nf
+.ta +1i
+ctex      	c-shell script, wrapper for ctex.awk
+ctex.awk	simple awk script needed to parse the file
+.fi
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+30-oct-93	created for mkop.c 	PJT
+14-nov-93	added many more options	PJT
+.fi
+
