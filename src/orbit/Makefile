@@ -10,19 +10,19 @@ CHKFILE = Last_update
 
 clean:
 	-@for i in $(DIRS); do\
-	(cd $$i;echo "### Dir: `pwd`";$(MAKE) clean); done
+	(cd $$i;$(MAKE) clean); done
 
 cleanlib:
 	-@for i in $(DIRS); do\
-	(cd $$i;echo "### Dir: `pwd`";$(MAKE) cleanlib); done
+	(cd $$i;$(MAKE) cleanlib); done
 
 install:
 	-@for i in $(DIRS); do\
-	(cd $$i;echo "### Dir: `pwd`";$(MAKE) install); done
+	(cd $$i;$(MAKE) install); done
 
 update:
 	-@for i in $(DIRS); do\
-	(cd $$i;echo "### Dir: `pwd`";$(MAKE) update); done
+	(cd $$i;$(MAKE) update); done
 
 tar:
 	@echo Creating tarfile TARNAME=$(TARNAME) from DIRS=$(DIRS)
