@@ -1,0 +1,514 @@
+TESTSUITE started Thu Apr  3 20:13:06 EST 1997
+NEMO version 2.4.1 surya (sun5)
+==========================================================
+Cleaning src/kernel/io
+Creating rsf.in
+Running rsf
+rsf rsf.in rsf.out
+Running tsf
+tsf rsf.out maxprec=t
+int MyI 04 
+float MyF  1.23450005e+00 
+double MyD  9.8765432099999995e+00 
+char MyS[5] "nemo"
+set MySet
+  int MyI2 01 
+tes
+Running csf
+csf rsf.out csf.out MySet
+On top-level: 1 items  read, 1 items written
+csf rsf.out - MyD | tsf - maxprec=t
+On top-level: 1 items  read, 1 items written
+double MyD  9.8765432099999995e+00 
+csf rsf.out - MyD convert=d2f | tsf - maxprec=t
+On top-level: 1 items  read, 1 items written
+float MyD  9.87654305e+00 
+csf rsf.out - MyF | tsf - maxprec=t
+On top-level: 1 items  read, 1 items written
+float MyF  1.23450005e+00 
+tsf csf.out
+set MySet
+  int MyI2 01 
+tes
+Running hisf
+hisf csf.out
+==========================================================
+Cleaning src/kernel/misc
+Running xrandom
+uniform seed=5 n=5
+xrandom seed=5 n=5 report=t
+Seed used = 5
+0.283561
+0.56069
+0.53493
+0.109894
+0.481819
+Mean and dispersion  : 0.394179 0.172204
+Skewness and kurtosis: -0.636453 -1.202954
+gauss seed=5 n=5
+xrandom seed=5 n=5 gauss=t report=t
+Seed used = 5
+-1.72184
+0.0881416
+-0.0142263
+-0.10322
+0.449392
+Mean and dispersion  : -0.260350 0.754505
+Skewness and kurtosis: -1.258614 -0.016127
+1.41421
+nemoinp 1:10:2 newline=f
+1 3 5 7 9
+==========================================================
+Cleaning src/kernel/tab
+Creating tab.in
+nemoinp 1:100 > tab.in
+Running tabmath
+tabmath tab.in tab.out 'sqrt(%1)'
+Running tabplot
+tabmath tab.in - 'sqrt(%1)' | tabplot -
+Allocated 10000 lines for table
+100 values read
+min and max value in xcolumn  1: [1.000000 : 100.000000]
+min and max value in ycolumns 2: [1.000000 : 10.000000]
+X:min and max value reset to : [-3.950000 : 104.950000]
+Y:min and max value reset to : [0.550000 : 10.450000]
+Xlib: connection to "annex9-37.dial.umd.edu:0.0" refused by server
+Xlib: Client is not authorized to connect to Server
+PGPLOT /xw: cannot connect to X server [annex9-37.dial.umd.edu:0]
+Running
+nemoinp 1:1000 | tabmath - - 'rang(0,1)' all seed=123 | tabhist -
+1000 values read
+min and max value in column 1: [-2.73132 : 3.34828]
+Number of points     : 1000
+Mean and dispersion  : 0.112975 1.00499
+Skewness and kurtosis: 0.0091138 -0.0715222
+Median               : 0.111046
+Xlib: connection to "annex9-37.dial.umd.edu:0.0" refused by server
+Xlib: Client is not authorized to connect to Server
+PGPLOT /xw: cannot connect to X server [annex9-37.dial.umd.edu:0]
+==========================================================
+Cleaning src/nbody/io
+Running stoa
+mkplummer - 10 | stoa - stoa.out
+[stoa: writing 10 bodies at time 0.000000]
+Running atos
+atos stoa.out atos.out
+[atos: reading 10 bodies at time 0.000000]
+stoa atos.out stoa.cmp
+[stoa: writing 10 bodies at time 0.000000]
+Running diff stoa.out stoa.cmp
+diff stoa.out stoa.cmp
+Running tabtos
+mkplummer - 10 | snapprint - m,x,y,z,vx,vy,vz > tabtos.in
+m x y z vx vy vz 
+tabtos tabtos.in tabtos.out "" mass,pos,vel times=0
+Assuming nbody=10
+[reading 10 bodies at time 0.000000]
+snapprint tabtos.out m,x,y,z,vx,vy,vz > tabtos.cmp
+m x y z vx vy vz 
+Running diff tabtos.in tabtos.cmp
+diff tabtos.in tabtos.cmp
+==========================================================
+Cleaning src/nbody/evolve/aarseth/nbody0
+Creating nbody0.in
+mkplummer nbody0.in 10 seed=123
+Running nbody0
+nbody0 nbody0.in nbody0.out tcrit=2 > nbody0.log
+snaptrim nbody0.out - times=2 | tsf -
+time =   2.000	npart =   1	ndiag =   0	outputing particles
+char Headline[27] "set_xrandom: seed used 123"
+char History[43] "snaptrim nbody0.out - times=2 VERSION=1.5d"
+char History[49] "nbody0 nbody0.in nbody0.out tcrit=2 VERSION=1.2b"
+char History[45] "mkplummer nbody0.in 10 seed=123 VERSION=2.5d"
+set SnapShot
+  set Parameters
+    int Nobj 012 
+    double Time 2.00000 
+  tes
+  set Particles
+    int CoordSystem 0201402 
+    double Mass[10] 0.100000 0.100000 0.100000 0.100000 0.100000 
+      0.100000 0.100000 0.100000 0.100000 0.100000 
+    double PhaseSpace[10][2][3] 0.133770 0.208902 0.290496 0.556938 
+      1.00051 -0.149690 5.59113 -0.246792 -1.04959 0.365162 0.120751 
+      0.244250 -0.107936 0.270052 0.167487 0.102121 -0.264031 0.272652 
+      -0.889786 0.697413 0.0176442 -0.270412 -0.136473 0.123635 
+      . . .
+  tes
+tes
+==========================================================
+Cleaning src/nbody/reduc
+Creating snap.in
+mkplummer snap.in 10 seed=123
+Creating hack.out
+hackcode1 snap.in hack.out fcells=4 tstop=2 freqout=1 > /dev/null
+Running snapplot
+snapplot hack.out nxy=2,2 nxticks=3 nyticks=3
+Xlib: connection to "annex9-37.dial.umd.edu:0.0" refused by server
+Xlib: Client is not authorized to connect to Server
+PGPLOT /xw: cannot connect to X server [annex9-37.dial.umd.edu:0]
+Running snapdiagplot
+snapdiagplot hack.out 
+Xlib: connection to "annex9-37.dial.umd.edu:0.0" refused by server
+Xlib: Client is not authorized to connect to Server
+PGPLOT /xw: cannot connect to X server [annex9-37.dial.umd.edu:0]
+65 diagnostic frames read
+Worst fractional energy loss dE/E = (E_t-E_0)/E_0 = -0.0705389 at T = 1.5
+Running snapplotv
+snapplotv hack.out nxy=2,2 nxticks=3 nyticks=3
+Xlib: connection to "annex9-37.dial.umd.edu:0.0" refused by server
+Xlib: Client is not authorized to connect to Server
+PGPLOT /xw: cannot connect to X server [annex9-37.dial.umd.edu:0]
+Creating hack2.out
+hackcode1 snap.in hack2.out fcells=4 tstop=10 freqout=8 > /dev/null
+Running snapmradii
+snapmradii hack2.out | tabplot - 1 2:9 line=1,1
+Allocated 10000 lines for table
+81 values read
+min and max value in xcolumn  1: [0.000000 : 10.000000]
+min and max value in ycolumns 2:9: [0.089977 : 3.660350]
+X:min and max value reset to : [-0.500000 : 10.500000]
+Y:min and max value reset to : [-0.088542 : 3.838869]
+Xlib: connection to "annex9-37.dial.umd.edu:0.0" refused by server
+Xlib: Client is not authorized to connect to Server
+PGPLOT /xw: cannot connect to X server [annex9-37.dial.umd.edu:0]
+==========================================================
+Cleaning src/nbody/init
+Creating snapenter.in
+snapenter < snapenter.in verbose=f headline="test suite"
+### Warning [snapenter]: Center of mass not necesseraly at origin
+Snapshot with 2 particle(s) written to file snapenter.out
+Running tsf
+tsf snapenter.out
+char History[53] "snapenter verbose=f headline=test suite VERSION=2.2a"
+char Headline[11] "test suite"
+set SnapShot
+  set Parameters
+    int Nobj 02 
+    double Time 0.00000 
+  tes
+  set Particles
+    int CoordSystem 0201402 
+    double Mass[2] 1.00000 0.500000 
+    double PhaseSpace[2][2][3] -1.00000 0.00000 0.00000 0.00000 
+      -0.125000 0.00000 2.00000 0.00000 0.00000 0.00000 0.250000 
+      0.00000 
+  tes
+tes
+Running snapprint
+snapprint snapenter.out m,x,y,z,vx,vy,vz
+m x y z vx vy vz 
+1 -1 0 0 0 -0.125 0 
+0.5 2 0 0 0 0.25 0 
+Comparing snapenter.out snapenter.cmp
+tsf snapenter.out | rsf - snapenter.cmp ; cmp snapenter.cmp snapenter.out
+Running mkplummer
+mkplummer mkplummer.out 10 seed=123
+tsf mkplummer.out
+char Headline[27] "set_xrandom: seed used 123"
+char History[49] "mkplummer mkplummer.out 10 seed=123 VERSION=2.5d"
+set SnapShot
+  set Parameters
+    int Nobj 012 
+    double Time 0.00000 
+  tes
+  set Particles
+    int CoordSystem 0201402 
+    double Mass[10] 0.100000 0.100000 0.100000 0.100000 0.100000 
+      0.100000 0.100000 0.100000 0.100000 0.100000 
+    double PhaseSpace[10][2][3] -0.609486 -0.221687 -0.450963 
+      -0.0766784 -0.209397 0.396561 4.80925 -0.486182 -1.52575 
+      0.418474 0.117766 0.230193 0.545314 0.0795464 0.0632245 
+      0.0867019 -0.109128 -0.282036 0.377209 -0.213318 -0.0118330 
+      . . .
+  tes
+tes
+mkplummer - 10 seed=123 |\
+	massname="n(m)" masspars=p,-2 massrange=0.5,10 |\
+	tsf -
+==========================================================
+Cleaning src/nbody/core
+Running bodytrans
+bodytrans x
+x = 0.5 (bti__85)
+bodytrans y
+y = -0.5 ()
+bodytrans z
+z = 1 ()
+bodytrans r
+r = 1.22474 ()
+==========================================================
+Cleaning src/nbody/image
+Creating snap.in
+mkplummer snap.in 10 seed=123
+Running snapccd
+snapccd snap.in . 
+Running snapgrid
+snapgrid snap.in . 
+New data for times=0; bits=0x7
+Running snapslit
+snapslit snap.in  width=1 length=4 zvar=vy
+Convolving with 3-length beam: 0.250000 0.500000 0.250000 
+Xlib: connection to "annex9-37.dial.umd.edu:0.0" refused by server
+Xlib: Client is not authorized to connect to Server
+PGPLOT /xw: cannot connect to X server [annex9-37.dial.umd.edu:0]
+mmax=0.750000 vmin=-0.463708 vmax=0.649302 smax=0.051491  reset to:
+mmax=0.750000 vmin=-0.463708 vmax=0.649302 smax=0.051491           
+==========================================================
+Cleaning src/nbody/trans
+Creating snap.in
+mkplummer snap.in 10 seed=123
+Running snapcenter
+snapcenter snap.in . weight=r report=t 
+0.086054 0.073293 -0.271331 0.149832 -0.039546 0.064694 
+Running snaprotate
+snaprotate snap.in - 45,60,45 xyz | csf - .
+On top-level: 4 items  read, 4 items written
+Running snaprect
+snaprect snap.in .
+        e_x:     1.00000     0.96860    -0.13576    -0.20831   102.0   -8.0
+        e_y:     1.00000     0.22502     0.12223     0.96666    14.8   28.5
+        e_z:     1.00000    -0.10577    -0.98317     0.14894    81.4  -96.1
+Running snapinert
+snapinert snap.in -
+Time: 0.000000
+      4.614957     -0.617361     -0.930503
+     -0.617361      0.275200      0.144610
+     -0.930503      0.144610      0.480631
+Eigenvalues:
+      4.901603  :        0.968595     -0.135763     -0.208306
+      0.282311  :        0.225021      0.122231      0.966657
+      0.186874  :        0.105775      0.983172     -0.148943
+Running snapsplit
+snapsplit snap.in - nbody=1 | csf - .
+Snapshot time=0.000000 to be copied
+Wrote 10 1-body snapshots
+On top-level: 13 items  read, 13 items written
+Running
+snapcopy snap.in - select=i | csf - .
+On top-level: 4 items  read, 4 items written
+==========================================================
+Cleaning src/nbody/xyz
+Creating snap.in
+mkplummer snap.in 10 seed=123
+Running
+snapxyz snap.in -  color=i | tsf -
+[snapxyz: npoint = 10  time = 0.00]
+char Headline[27] "set_xrandom: seed used 123"
+char History[38] "snapxyz snap.in - color=i VERSION=2.1"
+char History[43] "mkplummer snap.in 10 seed=123 VERSION=2.5d"
+set PointData
+  double Tpoint 0.00000 
+  int Npoint 012 
+  double Position[10][3] -0.609486 -0.221687 -0.450963 4.80925 
+    -0.486182 -1.52575 0.545314 0.0795464 0.0632245 0.377209 -0.213318 
+    -0.0118330 -0.0724005 0.706104 0.0899005 -0.561212 -0.324160 
+    1.18761 -0.312291 -0.902718 -0.451821 0.369670 0.154617 0.681866 
+    . . .
+  double Velocity[10][3] -0.0766784 -0.209397 0.396561 0.418474 
+    0.117766 0.230193 0.0867019 -0.109128 -0.282036 -0.739982 0.649302 
+    -0.0595349 0.158021 0.0702185 0.316083 0.379356 0.257397 0.0247723 
+    0.669557 -0.463708 -0.117066 -0.0283658 -0.0937881 -0.135925 
+    . . .
+  int Color[10] 0 01 02 03 04 05 06 07 010 011 
+tes
+==========================================================
+Cleaning src/orbit/potential
+Running potlist
+potlist harmonic  x=1 dr=0.001
+x y z ax ay az phi phixx phiyy phizz rho dr time
+1 0 0 -1 -0 -0 0.5 1 1 0 0.159155 0.001 0 
+potlist plummer   x=1 dr=0.001
+INIPOTENTIAL Plummer: [3d version]
+x y z ax ay az phi phixx phiyy phizz rho dr time
+1 0 0 -0.353553 -0 -0 -0.707107 -0.176909 0.353553 0 0.0140569 0.001 0 
+potlist isochrone x=1 dr=0.001
+x y z ax ay az phi phixx phiyy phizz rho dr time
+1 0 0 -0.12132 -0 -0 -0.414214 -0.0104751 0.12132 0 0.00882078 0.001 0 
+potlist athan92   x=0.00001
+x y z ax ay az phi time
+1e-05 0 0 -4.27731 -0 0 -252017 0 
+rotcurves isochrone 0,1,1 - halo 0,1,1 - plummer 0,0.15,0.05 \
+	radii=0:4:0.02 
+INIPOTENTIAL Plummer: [3d version]
+Xlib: connection to "annex9-37.dial.umd.edu:0.0" refused by server
+Xlib: Client is not authorized to connect to Server
+PGPLOT /xw: cannot connect to X server [annex9-37.dial.umd.edu:0]
+potccd out=plummer.ccd potname=plummer x=-2:2:0.05 y=-2:2:0.05
+Creating image 81 * 81 * 1
+INIPOTENTIAL Plummer: [3d version]
+Omega = 0
+potccd - harmonic x=-1:1:0.2 y=-1:1:0.2 |\
+	ccdprint - x= y= format=%4.3f label=x,y
+Creating image 11 * 11 * 1
+Omega = 0
+ Y\X -1.000 -0.800 -0.600 -0.400 -0.200 -0.000 0.200 0.400 0.600 0.800 1.000 
+
+1.000  1.000 0.820 0.680 0.580 0.520 0.500 0.520 0.580 0.680 0.820 1.000 
+0.800  0.820 0.640 0.500 0.400 0.340 0.320 0.340 0.400 0.500 0.640 0.820 
+0.600  0.680 0.500 0.360 0.260 0.200 0.180 0.200 0.260 0.360 0.500 0.680 
+0.400  0.580 0.400 0.260 0.160 0.100 0.080 0.100 0.160 0.260 0.400 0.580 
+0.200  0.520 0.340 0.200 0.100 0.040 0.020 0.040 0.100 0.200 0.340 0.520 
+-0.000  0.500 0.320 0.180 0.080 0.020 0.000 0.020 0.080 0.180 0.320 0.500 
+-0.200  0.520 0.340 0.200 0.100 0.040 0.020 0.040 0.100 0.200 0.340 0.520 
+-0.400  0.580 0.400 0.260 0.160 0.100 0.080 0.100 0.160 0.260 0.400 0.580 
+-0.600  0.680 0.500 0.360 0.260 0.200 0.180 0.200 0.260 0.360 0.500 0.680 
+-0.800  0.820 0.640 0.500 0.400 0.340 0.320 0.340 0.400 0.500 0.640 0.820 
+-1.000  1.000 0.820 0.680 0.580 0.520 0.500 0.520 0.580 0.680 0.820 1.000 
+
+
+potccd - harmonic x=-1:1:0.2 y=-1:1:0.2 dr=0.01 |\
+	ccdprint - x= y= format=%4.3f label=x,y
+Creating image 11 * 11 * 1
+2D-Poisson density map with delta-r=0.01
+Omega = 0
+ Y\X -1.000 -0.800 -0.600 -0.400 -0.200 -0.000 0.200 0.400 0.600 0.800 1.000 
+
+1.000  4.000 4.000 4.000 4.000 4.000 4.000 4.000 4.000 4.000 4.000 4.000 
+0.800  4.000 4.000 4.000 4.000 4.000 4.000 4.000 4.000 4.000 4.000 4.000 
+0.600  4.000 4.000 4.000 4.000 4.000 4.000 4.000 4.000 4.000 4.000 4.000 
+0.400  4.000 4.000 4.000 4.000 4.000 4.000 4.000 4.000 4.000 4.000 4.000 
+0.200  4.000 4.000 4.000 4.000 4.000 4.000 4.000 4.000 4.000 4.000 4.000 
+-0.000  4.000 4.000 4.000 4.000 4.000 4.000 4.000 4.000 4.000 4.000 4.000 
+-0.200  4.000 4.000 4.000 4.000 4.000 4.000 4.000 4.000 4.000 4.000 4.000 
+-0.400  4.000 4.000 4.000 4.000 4.000 4.000 4.000 4.000 4.000 4.000 4.000 
+-0.600  4.000 4.000 4.000 4.000 4.000 4.000 4.000 4.000 4.000 4.000 4.000 
+-0.800  4.000 4.000 4.000 4.000 4.000 4.000 4.000 4.000 4.000 4.000 4.000 
+-1.000  4.000 4.000 4.000 4.000 4.000 4.000 4.000 4.000 4.000 4.000 4.000 
+
+
+potlist ccd potfile=plummer.ccd x=0:2:0.1 dr=0.001 | awk '{print $1,$4,$7,$11}' > plummer1.tab
+x y z ax ay az phi phixx phiyy phizz rho dr time
+potlist plummer                 x=0:2:0.1 dr=0.001 | awk '{print $1,$4,$7,$11}' > plummer2.tab
+INIPOTENTIAL Plummer: [3d version]
+x y z ax ay az phi phixx phiyy phizz rho dr time
+tabmath plummer1.tab,plummer2.tab - %1,%2-%6,%3-%7,%4-%8 all format=%f
+0.000000 0.000000 0.000000 -0.000693 
+0.100000 0.000600 0.000000 -0.000609 
+0.200000 0.001084 0.000000 -0.000449 
+0.300000 0.001381 0.000000 -0.000263 
+0.400000 0.001481 0.000000 -0.000096 
+0.500000 0.001427 0.000000 0.000028 
+0.600000 0.001276 0.000000 0.000103 
+0.700000 0.001082 0.000000 0.000137 
+0.800000 0.000885 0.000000 0.000144 
+0.900000 0.000705 0.000000 0.000135 
+1.000000 0.000552 0.000000 0.000118 
+1.100000 0.000429 0.000000 0.000099 
+1.200000 0.000331 0.000000 0.000081 
+1.300000 0.000255 0.000000 0.000066 
+1.400000 0.000196 0.000000 0.000053 
+1.500000 0.000151 0.000000 0.000042 
+1.600000 0.000118 0.000000 0.000033 
+1.700000 0.000092 0.000000 0.000026 
+1.800000 0.000072 0.000000 0.000021 
+1.900000 0.000056 0.000000 0.000017 
+2.000000 0.178885 0.447214 0.002843 
+==========================================================
+Cleaning src/image/misc
+Creating ccd.in
+ccdmath out=ccd.in "fie=10/sqrt((abs(%x-31.5))**1.1+(abs(%y-31.5))**1.1)" size=64,64,1
+Generating a map from scratch
+Running ccdplot
+ccdplot ccd.in 0.01,0.1,1:9,9.9,9.99  yapp=/xs
+Xlib: connection to "annex9-37.dial.umd.edu:0.0" refused by server
+Xlib: Client is not authorized to connect to Server
+PGPLOT /xw: cannot connect to X server [annex9-37.dial.umd.edu:0]
+Running ccdstat
+ccdstat ccd.in
+Min=1.060264  Max=10.352650
+Mean and dispersion  : 1.711598 0.690818
+Skewness and kurtosis: 4.406508 34.555860
+0/4096 out-of-range points discarded
+Creating ccdmom.in
+ccdmath out=ccdmom.in fie=%x+%y+%z size=2,2,2
+Generating a map from scratch
+Running ccdmom
+ccdmom ccdmom.in - 1 | ccdstat -
+Min=0.007813  Max=2.000000
+Mean and dispersion  : 1.001953 0.788102
+Skewness and kurtosis: 0.004442 -1.642986
+0/4 out-of-range points discarded
+ccdmom ccdmom.in - 2 | ccdstat -
+Min=0.007813  Max=2.000000
+Mean and dispersion  : 1.001953 0.788102
+Skewness and kurtosis: 0.004442 -1.642986
+0/4 out-of-range points discarded
+ccdmom ccdmom.in - 3 | ccdstat -
+Min=0.500000  Max=2.500000
+Mean and dispersion  : 1.500000 0.707107
+Skewness and kurtosis: 0.000000 -1.000000
+0/4 out-of-range points discarded
+==========================================================
+Cleaning src/image/trans
+Creating ccd.in
+ccdmath out=ccd.in "fie=10*%x+sqrt(%y)"  size=5,5,1
+Generating a map from scratch
+Running ccdmath
+ccdmath ccd.in - %1 | ccdprint - x= y= format=%7.3f
+  2.000  12.000  22.000  32.000  42.000 
+  1.732  11.732  21.732  31.732  41.732 
+  1.414  11.414  21.414  31.414  41.414 
+  1.000  11.000  21.000  31.000  41.000 
+  0.000  10.000  20.000  30.000  40.000 
+
+
+Running ccdflip
+ccdflip ccd.in - xy | ccdprint - x= y= format=%7.3f
+ 40.000  41.000  41.414  41.732  42.000 
+ 30.000  31.000  31.414  31.732  32.000 
+ 20.000  21.000  21.414  21.732  22.000 
+ 10.000  11.000  11.414  11.732  12.000 
+  0.000   1.000   1.414   1.732   2.000 
+
+
+==========================================================
+Cleaning src/image/io
+Creating ccd.in
+ccdmath out=ccd.in "fie=10*%x+sqrt(%y)"  size=10,10,1
+Generating a map from scratch
+Running ccddump
+ccddump ccd.in .
+Running ccdprint
+ccdprint ccd.in x= y= format=%7.3f
+  3.000  13.000  23.000  33.000  43.000  53.000  63.000  73.000  83.000  93.000 
+  2.828  12.828  22.828  32.828  42.828  52.828  62.828  72.828  82.828  92.828 
+  2.646  12.646  22.646  32.646  42.646  52.646  62.646  72.646  82.646  92.646 
+  2.449  12.449  22.449  32.449  42.449  52.449  62.449  72.449  82.449  92.449 
+  2.236  12.236  22.236  32.236  42.236  52.236  62.236  72.236  82.236  92.236 
+  2.000  12.000  22.000  32.000  42.000  52.000  62.000  72.000  82.000  92.000 
+  1.732  11.732  21.732  31.732  41.732  51.732  61.732  71.732  81.732  91.732 
+  1.414  11.414  21.414  31.414  41.414  51.414  61.414  71.414  81.414  91.414 
+  1.000  11.000  21.000  31.000  41.000  51.000  61.000  71.000  81.000  91.000 
+  0.000  10.000  20.000  30.000  40.000  50.000  60.000  70.000  80.000  90.000 
+
+
+==========================================================
+Cleaning src/image/fits
+Creating ccd.in
+ccdmath out=ccd.in "fie=10*%x+sqrt(%y)"  size=10,10,1
+Generating a map from scratch
+Running ccdfits
+ccdfits ccd.in fits.in
+Running fitsccd
+fitsccd fits.in ccd.out
+FITS file: Image size 10 10
+ccdmath ccd.in,ccd.out - %1-%2 | ccdstat -
+Min=0.000000  Max=0.000000
+Mean and dispersion  : -0.000000 0.000000
+Skewness and kurtosis: 0.000000 0.000000
+0/100 out-of-range points discarded
+Running scanfits
+scanfits fits.in	
+__________________________________________________________
+______________________ FITS HEADER _______________________
+Primary header: standard SIMPLE
+BITPIX = -32
+NAXIS  = 2
+###	NAXIS#	CTYPE#  	CDELT#	CRVAL#	CRPIX#
+ 1:	10	X       	1	0	1
+ 2:	10	Y       	1	0	1
+headersize = 1680 bytes = 1 2880-records
+datasize = 400 bytes = 1 2880-records
+__________________________________________________________
+TESTSUITE   ended Thu Apr  3 20:14:38 EST 1997
