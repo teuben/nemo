@@ -1,0 +1,56 @@
+.TH SNAPADD 1NEMO "13 May 1992" 
+.SH NAME
+snapadd \- adds N-body systems on top of each other
+.SH SYNOPSIS
+.PP
+\fBsnapadd in=\fPin1,in2,...\fBout=\fPsnap_out [parameter=value ...]
+.SH DESCRIPTION
+This program adds up N-body systems by appending a number of snapshots
+to each other. Optionally the snapshots can be re-centered to their
+center of mass, though this is not the default. If the input files
+contain more than one snapshot, they are concurrently added
+(copying over the timestamp of the snapshot in the first file)
+until any of the files is exhausted.
+.PP
+If only two snapshots are added, 
+\fIsnapstack(1NEMO)\fP offers some more options, such as adding
+a relative shift in phase space. If more complicated shifts are necessary,
+\fIsnapshift(1NEMO)\fP can be used before \fIsnapadd\fP.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 20
+\fBin=\fIin1, in2, ..\fP
+A number of input files can be supplied, separated by comma's.
+They must all be in \fIsnapshot(5NEMO)\fP format [no default].
+.TP
+\fBout=\fIout_file\fP
+output file,  in \fIsnapshot(5NEMO)\fP format [no default]
+.TP
+\fBzerocm=t|f\fP
+If true, translate to center of mass
+before output.  [Default: \fBf\fP].
+.TP
+\fBheadline=\fIstring\fP
+Message header appended to any existing ones in the input files [default: none].
+.SH LIMITATIONS
+Snapshots only copy accross \fIMass\fP (if they have it) and 
+\fIPhaseSpace\fP.
+.SH "SEE ALSO"
+snapstack(1NEMO), snapcenter(1NEMO), snapshot(5NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.0i
+~/src/nbody/trans	snapadd.c
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+ 6-May-87	V1.0: created          	PJT
+ 8-Mar-87	V1.1: data history	PJT
+xx-xxx-87	snapstack written by JEB
+18-nov-90	V2.0: snapadd revived with multiple input	PJT
+13-may-92	V2.2: added concurrent reading  	PJT
+.fi
