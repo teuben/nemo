@@ -49,21 +49,21 @@ local void tab2space(char *);
 
 extern  string *burststring(string, string);
 
-local vot_header=
-"<?xml version='1.0'?>
-<!DOCTYPE VOTABLE SYSTEM 'http://us-vo.org/xml/VOTable.dtd'>
-<VOTABLE version='1.0'>
-<!--
- !  VOTable written by NEMO's tab2xml program
- !-->
-<RESOURCE>";
+local string vot_header=
+"<?xml version='1.0'?>\n"
+"<!DOCTYPE VOTABLE SYSTEM 'http://us-vo.org/xml/VOTable.dtd'>\n"
+"<VOTABLE version='1.0'>\n"
+"<!--\n"
+" !  VOTable written by NEMO's tab2xml program\n"
+" !-->\n"
+"<RESOURCE>";
 
 local string vot_trailer=
-"</TABLEDATA>
-</DATA>
-</TABLE>
-</RESOURCE>
-</VOTABLE>";
+"</TABLEDATA>\n"
+"</DATA>\n"
+"</TABLE>\n"
+"</RESOURCE>\n"
+"</VOTABLE>";
 
 
 nemo_main()
@@ -76,14 +76,13 @@ nemo_main()
 
 local void setparams(void)
 {
-  string select;                          /* which columns not to write */
   int i;
   
   input = getparam("in");
   
   if (hasvalue("col")) {
     Qall = FALSE;
-    nkeep = nemoinpi(select,keep,MAX_COL);
+    nkeep = nemoinpi(getparam("col"),keep,MAX_COL);
     if (nkeep<=0 || nkeep>MAX_COL)
       error("Too many columns given (%d) to keep (MAX_COL %d)",
 	    nkeep,MAX_COL);
