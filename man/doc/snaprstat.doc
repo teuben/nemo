@@ -1,0 +1,10 @@
+%N snaprstat
+%D ### NEMO program with unknown intent...(missing usage)
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man snaprstat' for more extensive online help
+  Defaults of program keywords are listed between square brackets
+%A in
+	Input file name (snapshot) [???]
+%A VERSION
+	22-oct-90 PJT [1.0]
