@@ -95,6 +95,10 @@ tablsqfit: tablsqfit.c
 	$(CC) $(CFLAGS) -o tablsqfit tablsqfit.c \
 		$(NEMO_LIBS) $(EL) -lm
 
+tabnllsqfit: tabnllsqfit.c
+	$(CC) $(CFLAGS) -o tabnllsqfit tabnllsqfit.c \
+		$(NEMO_LIBS) $(EL) -lm
+
 tabspline: tabspline.c
 	$(CC) $(CFLAGS) -o tabspline tabspline.c \
 		$(NEMO_LIBS) $(EL) -lm
