@@ -17,7 +17,7 @@ BINFILES = snapplot snapdiagplot snapmstat snapprint \
     snapcmp snapcmphist snapcmpplot snapsample snapstat \
     snapmnmx radprof snapkinplot \
     snapfour snapkinem snapmradii snapopt snaprstat snaptrak  \
-    snapvratio 
+    snapvratio snapshell
 TESTFILES= 
 
 help:
