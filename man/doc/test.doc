@@ -1,0 +1,26 @@
+%N test
+%D ### NEMO program with unknown intent...(missing usage)
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man test' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A x0
+	Initial x coordinate [1]
+%A y0
+	Initial y coordinate [0]
+%A u0
+	Initial u velocity [0]
+%A v0
+	Initial v velocity [1]
+%A per
+	Period [3]
+%A type
+	Type of orbit {1,2,3} [1]
+%A ome
+	Pattern speed of potential [0.0]
+%A norbit
+	Number of orbits to compute [1]
+%A step
+	Step to increase non-zero position [0.1]
+%A VERSION
+	18-sep-91 PJT [1.0]
