@@ -55,6 +55,8 @@
  *               3-may-04       add fts_read_img_coord                     PJT
  *               4-may-04       conform more to fits standard              PJT
  *               1-jul-04       quick fix transform BITPIX8 to 16 images   PJT
+ *              30-dec-04       don't shorted blank keyval's to appease VALGRIND and common sense ?     PJT
+ *                              also made a3..a5 1 char longer to make room for the terminating 0
  *
  * Places where this package will call error(), and hence EXIT program:
  *  - invalid BITPIX
@@ -68,12 +70,6 @@
 #include <ctype.h>              /* needs: isdigit() */
 #include <fits.h>
 
-#if 0
-/* from stdinc.h now */
-#define   ROUNDUP(a,b) ((b)*(((a)-1)/(b)+1))
-#define   ROUNDUP(a,b) ((b)*(((a)+(b)-1)/(b)))
-#endif
-
 #if SIZEOF_LONG_LONG==8
 typedef long long int8;         /* e.g. i386; sparc <= sol7; ppc ? */
 #elif SIZEOF_LONG==8
@@ -81,6 +77,7 @@ typedef long int8;              /* e.g. alpha 64's */
 #elif SIZEOF_INT==8
 typedef int int8;               /* will never happen ? */
 #else
+#error FITS.C code probably needs to be checked for this architecture
 typedef long int8;              /* some stupid fallback, probably wrong */
 #endif
 
@@ -97,7 +94,7 @@ local string cfits1="FITS (Flexible Image Transport System) format is defined in
 local string cfits2="and Astrophysics', volume 376, page 359; bibcode: 2001A&A...376..359H";
 
 
-/* fits.c */
+/* local functions in fits.c */
 static int fix_ing(fits_header *fh);
 static int fix_tucson(fits_header *fh);
 static int fix_nl(fits_header *fh, int mode);
@@ -147,7 +144,7 @@ static int colmask(int n, string key[],string col[],int colsel[]);
 int fts_rhead(fits_header *fh, stream instr)
 {
     char buf[FTSLINSIZ+2];                /* buffer to hold one card image */
-    char a1[9], a2[2], a3[FTSLINSIZ],a4[FTSLINSIZ],a5[FTSLINSIZ];  /* args */
+    char a1[9], a2[2], a3[FTSLINSIZ+1],a4[FTSLINSIZ+1],a5[FTSLINSIZ+1];  /* args */
     int k, n, i, icard;
     struct arglist *p;
 
@@ -190,6 +187,7 @@ int fts_rhead(fits_header *fh, stream instr)
             dprintf(2,"### (Card %d) Skipping blank line\n",icard);
             continue;
         }
+	buf[FTSLINSIZ] = 0;                         /* make sure it ends */
         n = parse_card(icard,buf, a1,a2,a3,a4,a5);     /* break in parts */
         if (n<=0)               /* for bad looking records */
             continue;           /* go to the next one */
@@ -1123,7 +1121,7 @@ int fts_phead(fits_header *fh, string *print)
 {
     int i,istart,naxis, pcount, gcount, n, ncards;
     char *card, buf[FTSLINSIZ+1];
-    char a1[9], a2[2], a3[FTSLINSIZ],a4[FTSLINSIZ],a5[FTSLINSIZ];  /* args */
+    char a1[9], a2[2], a3[FTSLINSIZ+1],a4[FTSLINSIZ+1],a5[FTSLINSIZ+1];  /* args */
     string *sp;
 
     printf("__________________________________________________________\n");
@@ -1838,7 +1836,7 @@ local int parse_card (int icard, char *card, char *a1, char *a2, char *a3, char 
     char *cp, *buf;
 
     buf = card;
-    *a1 = *a2 = *a3 = *a4 = *a5 = 0;
+    *a1 = *a2 = *a3 = *a4 = *a5 = 0;       /* empty all 5 components */
     if (strlen(buf) != FTSLINSIZ)
         dprintf(0,"### Card %d does not contain %d characters, len=%d\n",
                           icard, FTSLINSIZ, strlen(buf));
@@ -1865,7 +1863,7 @@ local int parse_card (int icard, char *card, char *a1, char *a2, char *a3, char 
             if (strchr(KEYVALID,*cp)==NULL)
                 i++;        /* count number of invalid characters */
         }
-    }
+    } /* a1 */
     if (i>0)
         dprintf(0,"### Keyword %s has %d invalid character(s).\n",a1,i);
             
@@ -1912,8 +1910,11 @@ local int parse_card (int icard, char *card, char *a1, char *a2, char *a3, char 
         *cp = 0;             /* terminate a3 string */
         if ((int)strlen(a3) < 8)
             dprintf(2,"### Keyword %s = %s has length < 8",a1,a3);
+#if 0
+	/* VALGRIND unitialized for fully blank keyword values */
         for (i=strlen(a3)-1; i>=0, a3[i]==' '; i--)
             a3[i] = 0;       /* get rid of end spaces in string */
+#endif
         if (strlen(a3)==0)
             dprintf(2,"### Keyword %s has effectively zero length\n",a1);
         a4[0] = 0;
