@@ -282,6 +282,26 @@ and making small updates to the package will be a lot easier.
 
 \section{New Features}
 
+This section is not updated frequently, for more timely information it is probably
+better to consult
+{\tt http://www.astro.umd.edu/nemo/whatsnew.html}.
+
+\subsection{Release 3.2}
+Was released April 11, 2003, just after the Strasbourg N-body school. The multi-CPU
+directory tree often made the bootstrap installation with libraries such as
+pgplot, gsl, cfitsio etc. harder. Also the installation on MacOSX 10.3 was now
+streamlined, though still not perfect "out of the box" like it still does on 
+most solaris and linux boxes.
+
+\begin{description}
+
+\item{$\bullet$}
+back to a top level {\tt make bins}, which creates "all" binaries. It currently creates
+about twice as many binaries as the old more reliable/robust 
+{\tt src/scripts/testsuite -b} method.
+
+\end{description}
+
 \subsection{Release 3.0}
 Was released April 1, 2001. Certainly not a joke. Source code has been released within
 CVS for subsquent development with the partiview and starlab modules, also under
@@ -646,6 +666,13 @@ sites for export maintained.
 dynamic object loading. Manual in html (latex2html)
 
 \item[Spring 2001] Installation converted to configure/autoconf.
+
+\item[April 2004] Slight directory change for the directories created
+during the installation, this ends the era of the multi-CPU tree.
+Also removed a last environment variable that was used in Makefiles,
+now they are all inherited from the ones created by configure.
+Released between the Strasbourg Nbody-school and the College Park FAM04
+tutorial/workshop weeks.
 
 
 \end{description}

@@ -50,7 +50,7 @@ Sun 20/61                    & 0.020 & hackcode1 & \\
 HP/UX 700                    & 0.020 & hackcode1 &  \\
 Sun Ultra-140		     & 0.024 & hackcode1 & default \\
 Sun 20/??		     & 0.024 & hackcode1 & -xO4 -xcg92 -dalign -xlibmil \\
-G3 PowerPC 250Mhz	     & 0.026 & hackcode1 & -O
+G3 PowerPC 250Mhz	     & 0.026 & hackcode1 & -O \\
 Sun 10/51                    & 0.029 & hackcode1 & -O -fast -fsingle \\
 Cray-2                       & 0.029 & TREECODE2   & REAL - Pitt, oct 91\\
 % SGI ???                      & 0.030 & hackcode1   & John Wangs machine

@@ -5,13 +5,13 @@
 \myfile{install.inc}
 \mylabel{a:install}
 
-This Appendix describes installation and maintenance of NEMO. NEMO
-currently consists of about 10Mb of ASCII (source, documentation etc.)
-files, mostly obtained as a (compressed) tar file. For some machines a
-bootstrap loader is present, which makes the initial  installation
-extremely straightforward (however, with frequently some subsequent
-tweaking, e.g. choosing the right graphics drivers). In NEMO V3 the
-installation has been simplified using autoconf.
+This Appendix describes installation and maintenance of NEMO. 
+NEMO currently consists of about 35MB of source, documentation, datafiles etc.
+obtained either as a compressed tar file (around 6MB) or, preferably 
+actually, via CVS.\index{CVS}
+In NEMO V3 the installation has been simplified using autoconf, and
+users are encouraged to use CVS to install and update  their version
+of NEMO.
 
 The first Section \ref{as:suninst} walks you through an installation 
 using the new configure script.
@@ -29,10 +29,39 @@ commands such as {\tt setenv}, {\tt source}, {\tt rehash}, {\tt set} etc.
 by the appropriate ones for another shell.  We mereley leave this as
 an excersize for the reader (:-).
 
+\section{CVS - NEMO V3.2}
+
+Most of this is now described in more detail in the file 
+{\tt README.install}, but
+briefly here are the steps of a typical current NEMO install, using PGPLOT,
+in csh (there still is no proper sh support):
+
+\begin{verbatim}
+  setenv CVSROOT :pserver:anonymous@cvs.astro.umd.edu:/home/cvsroot
+  cvs login			(a one-time only RETURN)
+  cvs -Q co nemo
+  cd nemo
+  (mkdir local; cd local; cvs -Q co pgplot)
+
+  ./configure --with-yapp=pgplot --with-pgplot-prefix=`pwd`/lib
+  source nemo_start
+  make postconfig
+  source NEMORC.local
+
+  make pgplot
+  make vogl
+  make libs
+  make bins
+ 
+\end{verbatim}
+
+This process takes currently 2.5 minutes (P1.6GHz laptop, redhat 9) 
+and produces about 190 programs and occupies about 125MB of diskspace
+
 \section{Bootstrap}
 
 
-\section{Linux workstations - NEMO V3.x}
+\section{Linux workstations - NEMO V3.0 and V3.1}
 \mylabel{as:suninst}
 
 We are going to install NEMO in the directory designated

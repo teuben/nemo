@@ -34,7 +34,7 @@ on these in the Programmers Guide (see \ref{ss:makefile}).
     adm/                        local administrativia
         export/                 - exported tar files
         import/                 - imported tar files from other sites
-    BIN/                        executables (NEMOHOST)
+    bin/                        executables ($NEMOBIN)
   * bugs/                       ... the known ones (optional)
   * csh/                        example shell scripts
   * data/                       NEMO data files
@@ -44,7 +44,7 @@ on these in the Programmers Guide (see \ref{ss:makefile}).
         fortran/                -- fortran I/O routines
         multicode/              -- josh' multicode
         snapshot/               -- snapshot
-    LIB/                        object libraries (NEMOHOST)
+    lib/                        object libraries ($NEMOLIB)
     local/                      things local to your site
   * man/                        manual pages
         man1/                   -- programs
@@ -53,7 +53,7 @@ on these in the Programmers Guide (see \ref{ss:makefile}).
         man8/                   -- miscellaneous/maintenance
         doc/                    -- inline .doc for miriad/nemotool
   * news/                       news on new/modified software
-    OBJ/                        dynamic object loader files (NEMOHOST)
+    obj/                        dynamic object loader files ($NEMOOBJ)
         bodytrans/              
         potential/
   * src/                        The whole source tree: (see also next page)
