@@ -1,20 +1,25 @@
-.TH CCDPLOT 1NEMO "29 March 1997"
+.TH CCDPLOT 1NEMO "16 March 2005"
 .SH NAME
 ccdplot \- display program for 2D image maps (contour and/or gray-scale)
 .SH SYNOPSIS
 .PP
 \fBccdplot in=\fPsnapshot [parameter=value]
 .SH DESCRIPTION
-\fBccdplot\fP plots a contour representation of a 2D image map.
-It can also superimpose a 32-level grayscale represention (only
-very few yapp devices support this though), or
+\fBccdplot\fP is a quick and dirty way
+to plot a contour representation of a 2D image map.
+It can also superimpose a grayscale represention (not 
+all yapp devices support this though), or
 optionally leave out the contour values.
+.PP
+3D images cannot be plotted, but data files that 
+contain multiple 2D images are plotted in succession.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword is also
 given:
 .TP 20
 \fBin=\fIin-file\fP
-input file, must be in \fIImage(5)\fP format [no default]
+input file, must be in \fIImage(5)\fP format. 
+[no default]
 .TP
 \fBcontour=\fIvalues\fP
 A list of contour values to be plotted. If the keyword is not used
@@ -35,11 +40,13 @@ Minimum mapvalue to be plotted. [default: auto-scaled].
 Maximum mapvalue to be plotted [default: auto-scaled].
 .TP
 \fBpower=\fIvalue\fP
-Power of the transfer function for a grayscale display. Only values between
+Power of the transfer function for a grayscale display, also known as the
+gamma factor. Only values between
 \fBmmin\fP and \fBmmax\fP are plotted. A power greater than one will
 enhance the higher intensities, smaller than 1 the lower intensities.
- [default: \fB1\fP, i.e. a linear
-transfer function].
+Another possibility is to apply a mathematical transformation using
+\fIccdmath(1NEMO)\fP before this program.
+[default: \fB1\fP, i.e. a linear transfer function].
 .TP
 \fBxrange=\fIvalues\fP
 Range in x to plot, e.g. \fB-2:2\fP [default: whole matrix, sizes are
@@ -83,7 +90,7 @@ Sorting contour values must be done (sort of a bug really)
 image(5NEMO), ccddisplay(1NEMO)
 .SH BUGS
 Not always greyscale map produced, you may need an old version of my yapp_ps.
-We haven't decided on a proper way to call/define plmatrix(3NEMO) I guess.
+We haven't decided on a proper way to call/define pl_matrix(3NEMO) I guess.
 .PP
 Clipping absent, produces awkward pictures when not whole area to be 
 displayed.
@@ -108,4 +115,5 @@ Peter Teuben
 13-jan-92	V2.3: added greyscale as plotlabel	PJT
 29-mar-97	fixed outdated doc	PJT
 20-feb-02	2.8: added ltype; also documented new parameters	PJT
+16-mar-05	3.0: added timestep label + multiple timestep plot	PJT
 .fi
