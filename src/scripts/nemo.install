@@ -1,0 +1,75 @@
+#! /bin/csh -f
+#
+#  P600/     116.510u 17.390s 2:41.66 82.8%     0+0k 0+0io 778435pf+0w
+# P1600/
+
+set pgplot=1
+  
+if ($?NEMO) then
+  echo Cannot test if NEMO=$NEMO is present already
+  exit 1
+endif
+
+if (1) then
+ setenv CVSROOT :pserver:anonymous@cvs.astro.umd.edu:/home/cvsroot
+endif
+
+#		pick another GNU compiler
+if (0) then
+    source /astromake/astromake_start
+    astroload -v 3.2.1 gcc
+endif
+
+#		pick intel compiler
+if (0) then
+  source /astromake/astromake_start
+  astroload intel
+  setenv CC icc
+  setenv F77 ifc
+endif
+
+#		pick a certain CVS release
+if (0) then
+  set cvs_rev=(-r nemo_3_0_16)
+else
+  set cvs_rev=()
+endif
+
+#		get  the source
+time cvs -Q checkout $cvs_rev nemo
+if ($pgplot) then
+   (mkdir nemo/borrow; cd nemo; cvs -Q checkout pgplot)
+endif
+
+# --disable-gsl
+# --enable-single
+
+cd nemo
+#./configure --with-pgplot-prefix=/astromake/opt/pgplot --with-yapp=pgplot 
+#./configure --with-pgplot-prefix=/astromake/opt/pgplot
+#./configure --with-yapp=ps 
+./configure --with-yapp=pgplot 
+source nemo_start
+make dirs config_extra scripts
+source NEMORC.local
+rehash
+make libs
+src/scripts/testsuite -b
+
+if (1) then
+if (-d usr/dehnen/falcON) then
+  # falcON
+  set fbins=(TestGrav gyrfalcON)
+  set arch=i386_linux
+  echo Compiling $fbins for $arch
+  ( cd usr/dehnen/falcON; make ; make $fbins; cd $arch; cp $fbins $NEMOBIN)  >& install_falcON.log
+else
+  # YancNemo
+  echo Compiling YancNemo
+  ( cd usr/dehnen/yanc; mkdir -p lib; make ; make YancNemo mkking; cp YancNemo mkking $NEMOBIN )  >& install_yanc.log
+endif
+endif
+
+# src/scripts/nemo.vogl
+
+echo All done.
