@@ -1,0 +1,4 @@
+#! /bin/csh -f
+#  generic cc script for 
+exec /bin/cc -I$NEMOINC -L$NEMOLIB -Daix -qnoro $*
+# exec /bin/xlc -I$NEMOINC -L$NEMOLIB -Daix -qnoro $*
