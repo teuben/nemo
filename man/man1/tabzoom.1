@@ -109,6 +109,11 @@ for valid \fIptype\fP's. Default: 0 (a point)
 Filename with \fIlayout(5NEMO)\fP commands to be added to plot? 
 Default: none.
 .TP
+\fBaction=\fP\fIaction_script\fP
+If given, this program is executed with a command line argument list 
+which is the complete string that belongs to the selected point.
+By default no action is defined.
+.TP
 \fBout=\fP\fIout_table\fP
 Whenever output is requested (the \fBo\fP command, see below),
 it is written to this file. 
@@ -124,17 +129,34 @@ when \fBout=\fP has been selected. Valid values are
 Note that the order is always \fBi, x, y, data\fP
 [Default: \fBi,x,y,data\fP]
 .TP
-\fBheadline=\fItext\fP
-Random verbiage, will be plotted along right top of plot for id. [default: none].
-
-
-.SH
 \fBmaxstat=\fP\fIlevel\fP
 Select a level of statistics output at startup of the program. 
 At the lowest level (0) an overview of the read data is given, including
 min, max, mean, dispersion, skewness and kurtosis. At level 1 the Pearson
 correlation matrix is given. At level 2 all possible linear regressions
 are given. At level 3 at multiple regressions are given. [Default: \fB1\fP]
+.TP
+\fBcursor=t|f\fP
+Go into cursor mode directly? 
+[Default: \fBt\fP]
+.TP
+\fBheadline=\fItext\fP
+Random verbiage, will be plotted along right top of plot for id. [default: none].
+.SH EXAMPLE
+tabzoom does everything tabview does, and more. The new interactive commands
+are 'c', 'z' and 'Z'. First create a simple table, and tabzoom it:
+.nf
+  nemoinp 1:100 | tabmath - - 'ranu(0,1),sqrt(%1)+%2,%1/%3' > tab0
+  tabzoom tab0 action=echo1
+.fi
+.PP
+with this a simple \fBaction\fP script that simply prints out the information belonging
+to the selected point:
+.nf
+  #! /bin/csh -f
+  #
+  echo ECHO1 ::  $*
+.fi
 .SH INTERACTIVE SLIDER COMMANDS
 Although the final program will have (X-window) 
 graphic sliders, the prototype
@@ -159,6 +181,10 @@ The following commands are recognized:
 	\fBb\fP \fI<step>\fP	set both lo and hi stepper to <step> [0]
 	\fBq\fP         	quit
 	[\fB0\fP-\fB9\fP]*     	select a new slider by number (>0)
+	\fBc\fP			* cursor mode (NEW)
+	\fBz\fP			* zoom with a box (NEW)
+	\fBZ\fP			zoom reset to original setting
+	\fBf\fP			* cursor flagging (EXPERIMENTAL)
 	\fBr\fP         	force full redisplay
 	\fBs\fP         	show all sliders info
 	\fBo\fP         	(over)write output (needs \fBout=\fP keyword)
@@ -184,39 +210,13 @@ can be done using the
         \fB|\fP
 .fi
 command itself, since it remembers the last used \fB|\fP\fIcmd\fP. 
-.SH TIMING
-Clearly updating the screen is the dominant factor in the dynamic
-nature of \fItabview\fP. On a SPARC-1 a single average selection
-takes about 30ms for N=1000 rows and M=4 columns. Updating a dummy
-\fIyapp\fP display took 200ms in this case, but the dependance on
-N is highly nonlinear.
-.SH FUTURE
-Recognize ASCII as well as FITS tables (\fBTABLE\fP 
-and \fBBINTABLE\fP). See also \fIfitstab(1NEMO)\fP.
-.PP
-Need an improved yapp interface - PGPLOT is clearly too slow.
-Graphical user interface. 
-.PP
-Maximum number of rows, columns and linelength
-are defined in the program, no
-dynamic memory allocation in this sense yet. Recompilation using
--DMAXPOINTS, -DMAXSLIDERS and -DMAXLINE resp. would be required.
-.PP
-Improve selection algorithm.
 .SH SEE ALSO
-tabplot(1NEMO), fie(3NEMO), layout(3NEMO), xgobi(l)
+tabview(1NEMO), tabplot(1NEMO), fie(3NEMO), layout(3NEMO), xgobi(l)
 .SH AUTHOR
-.nf
 Peter Teuben
-with ack to: \fIHuman-Computer Interaction Laboratory\fP - Ben Schneiderman \fIet al.\fP.
-Univ.of Maryland
-.fi
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.5i
-8-oct-92	V0.0 prototyped  	PJT
-11-oct-92	V0.1 added more commandline functionality	PJT
-2-dec-92	V0.2 added | and ! commands - corrected doc	PJT
-4-mar-94	V0.3 aded 'b' command, more moment stats 	PJT
-1-nov-95	V0.4 documented new features             	PJT
+1-jul-03	V1.0 cloned off tabview			PJT
+22-oct-03	V1.2 added xlab, ylab, headline		PJT
 .fi
