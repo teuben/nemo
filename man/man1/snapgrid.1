@@ -159,6 +159,24 @@ interpolated grid with more pixels for a seemingly higher
 sampled map. Most likely the option \fBmean=t\fP will have
 to be used to conserve units between runs with different
 values of K.
+.PP
+Here is an example of making a gridded map of ungridded data. Both
+unweighted, and weighted. Suppose the snapshot has the weights stored
+in the \fIAux\fP field, and we use these as weights
+(i.e. sum(mass*Aux)/sum(Aux) would be the quantity of interest).
+The unweighted average uses the \fBmean=t\fP key:
+.nf
+    snapgrid ... out=map0 evar=m mean=t
+.fi
+but the weighted average computes the two maps seperately and uses
+\fIccdmath(1NEMO)\fP to divide them to get the desired result:
+.nf
+    snapgrid ... out=map1 evar='m*aux' 
+    snapgrid ... out=map2 evar='aux' 
+    ccdmath in=map1,map2 out=map3 fie="ifeq(%2,0,0,%1/%2)"
+.fi
+with an additional safeguard to set cells to 0 if no emission with
+found in them.
 .SH UNITS
 Units are maintained in the same way as in snapshots, they don't have
 a specific name, but carry their normal meaning 'length', 'velocity'
