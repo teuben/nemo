@@ -1,6 +1,6 @@
-.TH ROTCURSHAPE 1NEMO "21 July 2002"
+.TH ROTCURSHAPE 1NEMO "26 July 2002"
 .SH NAME
-rotcurshape \- fit parameters to a velocity field using shaped rotation curves
+rotcurshape \- fit parameters to a velocity field using shaped rotation curves in a co-planar disk
 .SH SYNOPSIS
 \fBrotcurshape in=\fPvelfie [parameters=values ...]
 .SH DESCRIPTION
@@ -8,19 +8,22 @@ rotcurshape \- fit parameters to a velocity field using shaped rotation curves
 velocity field of a coplanar galactic disk by fitting a rotation curve shape.
 Instead of dividing the galactic disk in a set of rings (see \fIrotcur(1NEMO)\fP)
 it fits the shape of the rotation curve to a single plane. This is particularly
-useful for low inclination galaxies and/or for central regions of a galaxy.
+useful for low inclination galaxies and/or for central regions of a galaxy where
+normally the rotation curve would vary accross the ring.
 
 
 .PP
-It does a non-linear least-squares-fitting to the function:
+Much like \fIrotcur\fP, this program does a non-linear least-squares-fitting to the function:
 .PP
 .cs 1 20
 .ss 20
 .nf
          v(x,y) = VSYS + VROT(r) * cos(theta) * sin(INC)
 
+where
+
                       - (x-XPOS) * sin(PA) -/+ (y-YPOS) * cos(PA)  ?
-where:   cos(theta) = ------------------------------------------
+          cos(theta) = ------------------------------------------
                                        r
 
 .cs 1
@@ -82,10 +85,11 @@ scale your physical units in the header to ``human readable'' units
 (arcsec). By default the whole disk will be used.
 .TP
 \fBpa\fP=\fIpa\fP
-Kinematic position angle (in degrees) of the disk (i.e. receiding side).
+Kinematic position angle (in degrees) of the disk (i.e. receding side).
+Angles can be 0..360 or -180..180.
 .TP
 \fBinc\fP=\fIinc\fP
-Inclination (degrees) of the disk.
+Inclination (degrees) of the disk. Angles can be 0..90.
 .TP
 \fBvsys\fP=\fIv0\fP
 Systemic velocity.
@@ -142,15 +146,13 @@ estimate of beam smearing corrections.
 .TP
 \fBtab\fP=
 If specified, this output table is used in \fIappend\fP mode!
-This table can be piped through \fItabcomment(1NEMO)\fP and 
-fed to \fIccdvel(1NEMO)\fP to create model velocity fields.
+**deprecated**
 [Default: not used].
 .TP
 \fBresid\fP=
 If specified, this output table will contain a listing of X, Y, Velocity
-and Residual Velocities in each ring. Each ring will be separated from
-the previous one with a simple commented line specifying which ring
-it refers to. It is mostly intended for debugging purposes.
+and Residual Velocities in the disk.
+It is mostly intended for debugging purposes.
 [Default: not used].
 .TP
 \fBtol\fP=
@@ -179,11 +181,13 @@ Value of the blank pixel that needs to be ignored. [Default: \fB0.0\fP].
 \fBnsigma=\fP
 Reject outlier points will fall outside nsigma times the dispersion 
 away from the mean velocity in a ring. By default, it will not reject any outliers.
+**not re-implemented yet**
 .TP
 \fBimagemode=t|f\fP
 Image input file mode? By default the input file is an image, alternatively a simple
 ascii table with X and Y positions in columns 1 and 2, and radial velocities
-in column 3. Future expansion will likely allow weight factors to be added
+in column 3 can be used by the \fIxyv_tab\fP (see in=).
+Future expansion will likely allow weight factors to be added
 in other columns.
 [Default: t]
 .TP
@@ -191,37 +195,46 @@ in other columns.
 Input table is just a rotation curve (R,V) instead. ** not implemented yet **
 Note that \fItabnllsqfit(1NEMO)\fP is also quite efficient to use, except
 the rotation curve functions would need to be re-written in their
-function interface.
+function interface. See also func_rotcur.c for a useful helper routine.
 .TP
 \fBload=\fP
 Name of a shared object file containing rotation curve(s). The function names 
 must be \fBrotcur_\fP\fIname\fP, where \fIname\fP is the identifier name of the
 rotation curve used in the subsquent \fBrotcur#=\fP keywords.
 .TP
-\fBrotcur1=\fP
+\fBrotcur1=\fP\fIname1,p1,p2,...pN,m1,m2,..mN\fP
 Name of first rotation curve, followed by the initial estimates of its
-parameters, followed by an equal number of 1s (free) and 0s (fixed) to denote
+parameters (you do need to know how many there are),
+followed by an equal number of 1s (free) and 0s (fixed) to denote
 which parameters are free to fixed during the fitting process. 
 .TP
-\fBrotcur2=\fP
+\fBrotcur2=\fP\fIname2...\fP
 see rotcur1
 .TP
-\fBrotcur3=\fP
+\fBrotcur3=\fP\fIname3...\fP
 see rotcur1
 .TP
-\fBrotcur4=\fP
+\fBrotcur4=\fP\fIname4...\fP
 see rotcur1
 .TP
-\fBrotcur5=\fP
-see rotcur1
+\fBrotcur5=\fP\fIname5...\fP
+see rotcur1.  The final composite rotation curve will be the sum
+(in quadrature) of up to these 5 components.
 .SH ROTCUR FUNCTIONS
-A rotation curve function in terms of a least squares fitting need to provide
-its caller with the rotation curve value, and all its partial derivates w.r.t.
+A \fIrotcur\fP function needs to provide the least square fitting routine
+with the rotation curve value, and all its partial derivates w.r.t.
 the parameters. Most rotation curve shapes have two dimensional parameters,
-a velocity and radial parameter, and are usually the first and second parameter.
-Here are two examples, a simple linear rotation curve, and a  
+a velocity and a radial scale parameter, and they are usually
+the first and second parameter. Note that the user needs to know how
+many parameters a \fIrotcur\fP function has. Apart from a number
+of pre-defined ones, the user can write his/her own in the C language
+and loaded via the \fBload=\fP keyword (see also 
+\fIloadobj(3NEMO)\fP.
+.PP
+Here are two examples, a simple linear rotation curve with one parameter, and a  
 slightly more involved Plummer disk/sphere rotation curve:
 .nf
+
 #include <nemo.h>
 
 real rotcur_linear(real r, int n, real *p, real *d)
@@ -243,15 +256,16 @@ real rotcur_plummer(real r, int np, real *p, real *d)
 Here is a list of the builtin rotation curves, where x=r/a is the dimensionless radius:
 .nf
 .ta +1i +2i
-Name:   Parameters:	Formula:
+Name:	Parameters:	Formula:
 -----	-----------	--------
-linear	omega(dv/dr)	v=omega*r
+linear	omega   	v=omega*r
 flat	v0		v=v0
 plummer	v0,a		v=v0*x/(1+x^2)^(3/4)
 core1	v0,a		v=v0*x/(1+x)
 core2	v0,a		v=v0*x/(1+x^2)^(1/2)
 core	v0,a,c		v=v0*x/(1+x^c)^(1/c)
 poly	v0,a,p2,p3,..	v=v0*(x+p2*x^2+p3*x^3+.....pN*x^N)
+iso	v0,a		v=v0*(1-atan(x)/x)
 .fi
 .SH EXAMPLE
 Here is an example of creating a synthetic velocity field with
@@ -274,14 +288,35 @@ P2:  20.2883 0.0045192
 NPT:  5658
 
 		(this is also the Testfile version)
+.fi
+.PP
+Here is an example to write your own C code with a rotation curve, and load it
+in during runtime:
+.nf
+    % cat mylinear.c
+
+    #include <nemo.h>
+    real rotcur_linear(real r, int n, real *p, real *d)
+    {	
+	d[0] = r;
+	return p[0] * r;
+    }
+    % bake mylinear.so
+    % rotcurshape in=map1.vel radii=0,10 load=mylinear.so rotcur1=linear,10,1
+.fi
+.SH FILES
+.fi
+.ta +1i
+func_rotcur	helper routine for tabnllsqfit
+.nf
 .SH CAVEAT
 Parameters and fix/free masks to rotation curve parameters should be all set, in order
-for the respective routines to figure out the number of parameters. For example,
+for the respective routines to figure out the correct number of parameters. For example,
 the \fIpoly\fP rotation curve can only determine the correct order  of the polynomial
 by counting the number of arguments given in that option, e.g.
 \fBrotcur1=poly,100,10,2,2,1,1,1,1\fP  would use a 3th order polynomial.
 .SH SEE ALSO
-rotcur(1NEMO), ccdvel(1NEMO), tabcomment(1NEMO), rotcurves(1NEMO), pvtrace(1NEMO), ccdmom(1NEMO), tabnllsqfit(1NEMO)
+rotcur(1NEMO), ccdvel(1NEMO), tabcomment(1NEMO), rotcurves(1NEMO), pvtrace(1NEMO), ccdmom(1NEMO), tabnllsqfit(1NEMO),loadobj(3NEMO)
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
