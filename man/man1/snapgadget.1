@@ -1,0 +1,39 @@
+.TH SNAPGADGET 1NEMO "8 September 2003"
+.SH NAME
+snapgadget \- convert NEMO snapshot files to gadget files
+.SH SYNOPSIS
+\fBsnapgadget\fP [parameter=value]
+.SH DESCRIPTION
+\fBsnapgadget\fP converts  data
+from standard \fIsnapshot(5NEMO)\fP format into
+\fIgadget(lNEMO)\fP. There are probably some limitations to be listed here...
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Output file (snapshot format). No default.
+.TP 
+\fBout=\fP
+Input file (gadget format). No default.
+.TP
+\fBN=\fP\fINhalo,Ndisk,Nbulge,Nstars\fP
+Nhalo,Ndisk,Nbulge,Nstars needs to be specified for
+the sub-components as GADGET wants them. No default.
+.TP
+\fBtimes=\fP
+Times of the snapshots to select for output. Default: all
+.TP 
+\fBswap=\fP
+Force swaping bytes for other-endian machines [f] 
+.SH SEE ALSO
+gadgetsnap(1NEMO), snapshot(5NEMO)
+.SH FILES
+.SH AUTHOR
+Jeremy Bailin
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+8-sep-03	V0.1 Created	J.Bailin
+8-sep-03	V0.2 minor mods on order of arguments, fix missing %t case	PJT
+.fi
