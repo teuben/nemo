@@ -1,0 +1,40 @@
+.TH MKTT72 1NEMO "19 November 2002"
+.SH NAME
+mktt72 \- Create a Toomre & Toomre 1972 test disk
+.SH SYNOPSIS
+\fBmktt72\fP [parameter=value]
+.SH DESCRIPTION
+\fBmktt72\fP creates a test disk of particles as used in Toomre & Toomre's 1972
+paper (ApJ...1972..). Currently each ring is placed in a separate snapshot. Use
+\fIsnapmerge(1NEMO)\fP if they must be in a single snapshot.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBout=\fP
+output file name, in standard \fIsnapshot(5NEMO)\fP format [???]     
+.TP 20
+\fBnbody=\fP
+number of particles per ring [100]  
+.TP 20
+\fBradius=\fP
+radii of rings [1:6:1]    
+.TP 20
+\fBseed=\fP
+seed for random numbers [0]   
+.TP 20
+\fBzerocm=\fP
+if true, zero center of mass [false] 
+.TP 20
+\fBheadline=\fP
+verbiage for output []    
+.SH SEE ALSO
+mkconfig(1NEMO)
+.SH FILES
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+19-Nov-02	V0.1 Created	PJT
+.fi
