@@ -6,17 +6,14 @@ mkflowdisk \- uniform-density test disk plus spiral in spherical potential
 .SH DESCRIPTION
 \fImkflowdisk\fP sets up a thin disk of test particles 
 in a user-supplied flow potential (in
-\fIpotential(5NEMO)\fP format). In addition a spiral is added with
-constant width in degrees along a galactic circle. For given ratio
-of spiral/disk perturbation \fBa\fP and width \fBw\fP (now measured in
-radians) the fraction of particles in the disk will be about
-\fB pi / (pi + a.w.sqrt(2.pi))\fP for not too large \fBw\fP.
+\fIpotential(5NEMO)\fP format). 
 The inverse wavelenght of the spiral (related to the pitch angle)
 will be positive for a \fItrailing spiral pattern\fP.
 .PP
 \fIsnapmass(1NEMO)\fP and \fIsnapcenter(1NEMO)\fP have to be used if
 for some reason the user want finite mass particles and a perfectly
 centered set of particles.
+.PP
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword is also
 given:
@@ -25,13 +22,13 @@ given:
 The data are written to this file in \fISnapShot(5NEMO)\fP 
 format [no default].
 .TP
-\fBndisk=\fInum_bodies\fP
+\fBnbody=\fInum_bodies\fP
 Number of disk particles [default: \fB2048\fP]
 .TP
 \fBpotname=\fIpotential_name\fP
 name of the potential, see $NEMO/obj/potential for the current
 repository. The user can supply his own, see potential(5NEMO).
-[default: \fBplummer\fP].
+[default: \fBvrtm51\fP].
 .TP
 \fBpotpars=\fIpot_pars\fP
 Paramaters to the user supplied potential. The number of parameters
@@ -40,9 +37,10 @@ for a pattern speed in future implementation.
 [default: not supplied, parameters as defined by potential(5)].
 .TP
 \fBpotfile=\fIpot_file\fP
-Data_file(s) to the user supplied potential. The number of files depends
-on the potential supplied.
-[default: not supplied, datafile(s) defined by potential(5)].
+Data_file(s) to the user supplied flow potential. 
+The number of files depends on the potential supplied. It
+is important the "potential" should be a linear measure of
+the requested surface density of particles in the disk.
 .TP
 \fBrmin=\fImin_disk_radius\fP
 Inner cutoff radius of test-particle disk. [Default: \fB0.0\fP].
@@ -50,8 +48,12 @@ Inner cutoff radius of test-particle disk. [Default: \fB0.0\fP].
 \fBrmax=\fImax_disk_radius\fP
 Outer cutoff radius of test-particle disk. [Default: \fB1.0\fP].
 .TP
-\fBa=\fIratio\fP
-Ratio of maximum spiral perturbation w.r.t. base disk. [default: \fB1\fP].
+\fBmass=
+
+.TP
+\fBuniform=t|f\fP
+Override the densities from the flow potential and create a uniform disk?
+Default: f.
 .TP
 \fBk=\fIinv_rad\fP
 Wavenumber of the spiral pattern, such that \fB2.pi.k.r\fP is the phase of
@@ -59,25 +61,12 @@ the spiral density maximum.  Positive \fB\fP means trailing spiral pattern.
 (note that this is defined in term of \fBsign=\fP, see below)
 [default: \fB1\fP]. 
 .TP
-\fBw=\fIwidth\fP
-Width of the spiral arm along a galactic circle. Depending on the next keyword
-this width is either is degrees along a galactic circle if that is to be 
-constant, or in length units if the width of the spiral is to be constant.
-[default: \fB15\fP].
-.TP
-\fBangular=t|f\fP
-Is the width of the spiral defined in angular terms, in which case the
-physical real width linearly increases with distance from the galactic
-center, or is is constant as a function of radius. [default: \fBt\fP,
-i.e. defined in angular terms].
+\fBphase=\fI\fP
+Phase offset of the spiral at the outer radius (rmax) of the disk.
 .TP
 \fBseed=\fIrandom_seed\fP
 Use random number seed. A zero seed will generate a system-time
 dependant seed. [default: \fB0\fP].
-.TP
-\fBsign=-1|+1\fP
-Sign of the angular moment vector. Positive means counter-clock wise 
-rotation. Not
 .TP
 \fBnmodel=\fP\fIn_models\fP
 Number of output models. [Default: \fB1\fP].
