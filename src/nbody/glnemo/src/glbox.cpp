@@ -23,7 +23,7 @@
 #define LOCAL_DEBUG 0
 #include "print_debug.h"
 
-#define POLY 1
+#define POLY 0
 using namespace std;
 
 // Initialize static class variables:
