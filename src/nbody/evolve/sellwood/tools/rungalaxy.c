@@ -3,11 +3,12 @@
  *
  *  The first argument must be a (non-existent) directory name, in
  *  which a new 'galaxy.dat' file will be written, and in which
- *  galaxy will be run. The 'galaxy' program is allowed to be in the
- *  unix PATH
-
+ *  galaxy will be run. The 'galaxy' program is assumed to be in the
+ *  PATH
+ *
  *	24-jun-1997		written
  *	18-jul-2001		default is galaxy.exe
+ *      18-mar-2004             finally made it work
  *
  * Todo:  incoorporate some kind of snap2ini script in the code.
  */
@@ -29,7 +30,7 @@ string defv[] = {
     "tstop=1.0\n     end time",
     "grid=33,33,33\n  number of grid cells in (x,y,z,)",
     "exe=galaxy.exe\n name of GALAXY executable",
-    "VERSION=1.2\n    18-jul-01 PJT",
+    "VERSION=1.3\n    18-jul-01 PJT",
     NULL,
 };
 
@@ -41,8 +42,6 @@ static char *database[MAXCARDS];    /* full lines */
 static char *names[MAXCARDS];       /* individual namelist */
 static int ncards = 0;
 
-static char *haskey(char *, char *);
-
 int nemo_main()
 {
     int i, n, ngrid[3];
@@ -51,6 +50,7 @@ int nemo_main()
     string rundir = getparam("out");
     stream datstr;
     char fullname[256];
+    char command[256];
 
     n = nemoinpi(getparam("grid"),ngrid,3);
     if (n>0 && n<=3) {
@@ -78,12 +78,18 @@ int nemo_main()
     fprintf(datstr,"%g\n",tstop);
     strclose(datstr);
 
-
+#if 0
     sprintf(fullname,"%s/%s",rundir,"galaxy.ini");
     datstr = stropen(fullname,"w");
     strclose(datstr);
-
+#else
+    sprintf(command,"snap2ini %s > %s/%s",
+	    getparam("in"),rundir,"galaxy.ini");
+    dprintf(1,"COMMAND: %s\n",command);
+    system(command);
+#endif
     goto_rundir(rundir);
+
     run_program(exefile);
 }
 
