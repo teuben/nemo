@@ -27,7 +27,7 @@ clean:
 	rm -f cat?/*
 	
 CATMANFLAGS = 
-SECTIONS=1358l
+SECTIONS=13568l
 
 # install: easier target for updates
 install:
