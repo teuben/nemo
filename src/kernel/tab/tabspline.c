@@ -60,6 +60,8 @@ nemo_main()
 #if HAVE_GSL
     gsl_interp_accel *acc = gsl_interp_accel_alloc();
     gsl_spline *spline;
+#else
+    if (nder > 0) warning("non-GSL enabled :  can't computer derivatives yet");
 #endif
 
     if (nzero > MAXZERO)
