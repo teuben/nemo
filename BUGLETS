@@ -1,6 +1,14 @@
 - don't call this file BUGS, some cvs implementations cannot handle
   lower and upper case.... notably on MacOS-X !!!
 
+- gcc3:  when using c++ NEMO's "string" will now collide with the 
+         default C++ type 'string'....
+
+	 -DSINGLEPREC does not work for a number of programs due to
+	bad prototyping of the "proc" functions. This will be fixed,
+	and is also needed in preparation for NEMO V4 when a C++ compiler
+	will be the default compiler.
+
 - install on darwin:
 	- FORLIBS get crt1.o or something, and this is not needed,
 	and will cause linkers to fail. It needs to be removed
