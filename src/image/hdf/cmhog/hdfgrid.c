@@ -43,8 +43,9 @@ string defv[] = {
     "yrange=-16:16\n		Range in Y",
     "zvar=\n                    Optional selections: {vr,vt,den,vx,vy}",
     "symmetry=\n		Override symmetry properties (odd|even)",
+    "mirror=t\n                 Allow non-mirroring",
     "it0=0\n			Shift THETA array (i.e. rotate grid)",
-    "VERSION=1.4c\n		10-sep-00 PJT",
+    "VERSION=1.5\n		27-aug-02 PJT",
     NULL,
 };
 
@@ -79,7 +80,8 @@ void nemo_main()
     real x, y, a1, a2, c1,c2,c3,c4, cmin, cmax, dcon, tmp, vr, vt;
     real sds_time = -1.0;
     imageptr iptr;
-    bool mirror, first = TRUE, both = FALSE, flip=FALSE;
+    bool mirror, first = TRUE, both = FALSE, flip=FALSE, 
+      Qmirror  = getbparam("mirror");
 
     it0 = getiparam("it0");
     nsds = DFSDndatasets(infile);
@@ -218,7 +220,7 @@ void nemo_main()
             rad = sqrt(x*x + y*y);
             phi = atan2(y,x);               /* make sure phi in -pi/2 : pi/2  */
 
-            mirror = x < 0;
+            mirror = x < 0 && Qmirror;
             if (mirror) {
                 phi_orig = phi;
 	        if (phi >  HALF_PI) phi -= PI;

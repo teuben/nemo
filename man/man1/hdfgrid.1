@@ -1,4 +1,4 @@
-.TH HDFGRID 1NEMO "12 December 1999"
+.TH HDFGRID 1NEMO "27 August 2002"
 .SH NAME
 hdfgrid \- Regrid a polar HDF SDS to cartesian image
 .SH SYNOPSIS
@@ -53,12 +53,16 @@ den (select=3), vx, vy. Default: not used, select= is used.
 .TP
 \fBsymmetry=odd|even\fP
 Override symmetry properties of the variable to be gridded. This option is
-not used yet.
+not used yet. See mirror= below
+.TP
+\fBmirror=t|f\P
+Mirror points? [Default: \fBt\fP].
 .TP
 \fBit0=\fP
-Shifts the values in theta by \fBfBit0\fP pixels. This is equivalent 
-by rotating the image counterclockwise by that many pixels. 
-Default: 0
+Shifts the values in theta by \fBit0\fP pixels. This is equivalent 
+by rotating the image counterclockwise by that many pixels. Useful
+for double bars and manually rotating the frame of reference
+(Maciejewski et al). [Default: \fB0\fP]
 .SH EXAMPLES
 Often used in scripts, here is a snippet from a script that regrids an
 HDF file into TIFF for movie recording, but applying a non-linear scaling
@@ -85,5 +89,6 @@ Peter Teuben
 .nf
 .ta +1.0i +4.0i
 25-May-95	V1.0 Created for IAU157 movie	PJT
-12-dec-99	V1.3 added it0= shifting arrays to fake a rotation	PJT
+12-dec-99	V1.3 added it0= shifting arrays to fake a rotation, for Witold	PJT
+27-aug-02	V1.5 added mirror= to allow for full grid simulations	PJT
 .fi
