@@ -111,6 +111,7 @@
  * 17-jan-02       h  fix minor indexing, fix khoros output
  * 18-jan-02       i  fix reading indexed from keyword (.def) files
  * 20-jan-02       j  putparam can now create indexed keywords on the fly
+ *  5-feb-02       k  findaparam return NULL if illegal indexed
 
   TODO:
       - what if there is no VERSION=
@@ -143,7 +144,7 @@
         getopt
  */
 
-#define VERSION_ID  "3.3j 20-jan-02 PJT"
+#define VERSION_ID  "3.3k 5-feb-02 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -1726,8 +1727,8 @@ local keyword *findakey(string name)
     *cp = 0;
     strcat(key,"#");
     n = findkey(key);
-    if (n < 0) 
-      error("findakey:  #=%d findkey(%s) -> %d NOT INDEXED",idx,key,n);
+    if (n < 0)  return NULL;
+    // error("findakey:  #=%d findkey(%s) -> %d NOT INDEXED",idx,key,n);
     kw = &keys[n];
     if (kw->indexed < -1) 
       error("findakey(%s): not an indexed keyword, %s: %d n=%d", 
