@@ -1,0 +1,51 @@
+.TH MILLER 1NEMO "12 Jul 1994"
+.SH NAME
+miller \- convert Miller's (ascii) plot file to snapshot format
+.SH SYNOPSIS
+\fBmiller\fP \fBin=\fP\fIplot_file\fP [parameter=value]
+.SH DESCRIPTION
+\fBmiller\fP converts \fImiller(5NEMO)\fP (ascii) plot
+files to NEMO \fIsnapshot(5NEMO)\fP format.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input file name. Must be in \fImiller(5NEMO)\fP ascii  plot file format.
+No default.
+.TP
+\fBout=\fP
+Output file name, in \fIsnapshot(5NEMO)\fP format. If no
+name given, the input plot file is scanned.
+Default: none.
+.TP
+\fBheadline=\fP
+Random mumblage for humans. This would overwrite the run_id that is
+stored in the header of the plot file. Default: none.
+.SH DEFICIENCIES
+You can only read \fImiller(5NEMO)\fP files, not write them.
+.PP
+Since the input format does not contain velocity information,
+the output snapshot file has zero velocities. By differencing
+two adjacent snapshots, this program could derive velocities
+compute new positions at the midpoint. This is currently not
+done.
+.PP
+No snapshot selection yet. Keywords \fBtimes=\fP (to select by
+time ranges) and \fBselect=\fP (to select by snapshot numbers) are 
+anticipated for this.
+.PP
+Reading is done rather liberally. For example, the header is assumed
+to contain a run id (a string on the first non-blank line), followed
+by 30 integers and 32 reals. The data (4 integers per line) is followed
+by two blank lines, but the number of blank lines is actually irrelevant
+(could even be 0).
+.SH SEE ALSO
+tabtos(1NEMO), miller(5NEMO), snapshot(5NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+12-jul-94	V1.0 Created	Peter Teuben
+.fi
