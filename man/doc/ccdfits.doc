@@ -1,0 +1,26 @@
+%N ccdfits
+%D convert image to a fits file
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man ccdfits' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input image filename [???]
+%A out
+	Output fits filename [???]
+%A bitpix
+	FITS bitpix value {16,32,-32} [-32]
+%A scale
+	Extra scalefactor for cdelt&crval [1,1,1]
+%A iscale
+	Scale and Offset Intensity conversion factor [1,0]
+%A object
+	Object name []
+%A comment
+	Extra comments []
+%A cdmatrix
+	Use standard CD matrix instead of CDELT? [f]
+%A blocking
+	Blocking factor for output (blocksize/2880) [1]
+%A VERSION
+	21-mar-99 PJT [2.7]
