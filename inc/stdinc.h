@@ -432,6 +432,18 @@ extern double qbe(double);
 extern double dex(double);
 extern double log2(double);
 
+/* cores/bswap.c */
+extern void bswap(void *vdat, int len, int cnt);
+#define bswapr(p,cnt)  bswap(p,sizeof(real),cnt)
+#define bswapd(p,cnt)  bswap(p,sizeof(double),cnt)
+#define bswapf(p,cnt)  bswap(p,sizeof(float),cnt)
+#define bswapl(p,cnt)  bswap(p,sizeof(long),cnt)
+#define bswapi(p,cnt)  bswap(p,sizeof(int),cnt)
+#define bswaps(p,cnt)  bswap(p,sizeof(short),cnt)
+
+
+
+
 #if defined(__cplusplus)
 }
 #endif
