@@ -15,31 +15,60 @@ area is 20cm by 20cm).
 .TP
 \fBstop\fP 
 Close graphics device.
+
 .TP
 \fBltype\fP \fIwidth pattern\fP
 0 will not change the current value. \fIwidth\fP: 1 thin and increasing
 thickness. \fIpattern\fP: 1 is solid, subsequents are graphics device
 dependant, but typically dashed, dotted etc.
+
 .TP
 \fBline\fP \fIx y\fP
 Draw a line from current point to \fI(x,y)\fP [units in cm]
+
 .TP
 \fBmove\fP \fIx y\fP
 Move the current point to \fI(x,y)\fP [units in cm]
+
+.TP
+\fBcolor\fP \fIi\fP
+Set current color from 0 to plncolors-1 (an integer)
+
 .TP
 \fBpoint\fP \fIa b\fP
 Draw a point at \fI(x,y)\fP [units in cm]
+
+.TP
+\fBcircle\fP \fIx y s\fP
+Draw a circle at \fI(x,y)\fP with size \fIs\fP [units in cm]
+
+.TP
+\fBcross\fP \fIx y s\fP
+Draw a cross at \fI(x,y)\fP with size \fIs\fP [units in cm]
+
+.TP
+\fBbox\fP \fIx y s\fP
+Draw a square box at \fI(x,y)\fP with size \fIs\fP [units in cm]
+
+.TP
+\fBjust\fP \fIi\fP
+Set text justification to \fIi\fP. -1 is left, 0 centered,
+and +1 right justified.
+
 .TP
 \fBtext\fP \fIs x y h a\fP
 Plot a string \fItext\fP (enclose in double quotes if spaces
 are required) at \fI(x,y)\fP with character height \fIh\fP
 [all units in cm] and at angle \fIa\fP degrees,
 counterclockwise from the positive X-axis.
+
 .TP
 \fB#\fP
 A comment.
 .SH BUGS
 There are some more commands, but see \fIyapp(3NEMO)\fP.
+.SH FILES
+src/kernel/misc/layout.c	source code
 .SH "SEE ALSO"
 layout(3NEMO), yapp(3NEMO)
 .SH AUTHOR
