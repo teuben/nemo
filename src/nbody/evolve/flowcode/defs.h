@@ -70,5 +70,26 @@ int nbody;			/* number of bodies simulated */
 
 body bodytab[MBODY];		/* array representing state */
 
-#define OutAngle 0x01
-#define OutKappa 0x02
+typedef void (*fproc)(bodyptr p, int np, real time, bool Qnew);
+
+/* flowcode.c */
+
+extern void setparams(void);
+extern void force(bodyptr btab, int nb, real time, bool Qnew);
+
+/* diffuse.c */
+extern void rotate_aux(bodyptr btab, int nb);
+extern void diffuse(body *btab, int nb, int ndim, real sigma, bool Qrotate);
+
+/* code_io.c */
+
+extern void inputdata(void);
+extern void initoutput(void);
+extern void stopoutput(void);
+extern void output(void);
+extern void savestate(string file);
+extern void restorestate(string file);
+
+/* orbstep.c */
+extern void initstep(bodyptr btab, int nb, real *tptr, fproc force);
+extern void orbstep(bodyptr btab, int nb, real *tptr, fproc force, real dt, int mode);

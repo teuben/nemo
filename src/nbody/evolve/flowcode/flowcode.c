@@ -35,7 +35,7 @@ string defv[] = {
     "freqdiff=\n          frequency of diffusion [freq]",
     "seed=0\n		  random seed",
     "headline=\n          random verbiage",
-    "VERSION=0.5\n	  3-feb-04 PJT",
+    "VERSION=0.6\n	  6-feb-04 PJT",
     NULL,
 };
 
@@ -45,8 +45,6 @@ local proc pot;
 
 void nemo_main()
 {
-    void force(), setparams();
-
     setparams();
     inputdata();
     initoutput();
@@ -59,7 +57,7 @@ void nemo_main()
     stopoutput();
 }
 
-void setparams()
+void setparams(void)
 {
     infile = getparam("in");
     outfile = getparam("out");
@@ -93,22 +91,25 @@ void setparams()
     set_xrandom(getiparam("seed"));
 }
 
+
 /*
  * FORCE: 'force' calculation routine.
  *		Note: we simply copy the computed flow at the new
  *		position into the force array for further processing later
+ *              (see orbstep)
  */
 
-void force(btab, nb, time)
-bodyptr btab;			/* array of bodies */
-int nb;				/* number of bodies */
-real time;			/* current time */
+void force(bodyptr btab, int nb, real time, bool Qnew)
 {
     bodyptr p;
     vector lacc,lpos;
     real   lphi;
     int    ndim=NDIM;
     static real time_next_diff = 0.0;
+    static int count=0;
+
+    count += nb;
+    dprintf(1,"force %d %d \n",nb,count);
 
     for (p = btab; p < btab+nb; p++) {		/* loop over bodies */
         SETV(lpos,Pos(p));
@@ -116,9 +117,11 @@ real time;			/* current time */
         Phi(p) = lphi;
         SETV(Acc(p),lacc);
     }
+    if (sigma > 0.0) rotate_aux(btab,nb);
+    if (sigma == 0.0) return;
 
-    if (time > time_next_diff && nb > 1) {
-      diffuse(btab, nb, NDIM, sigma);
+    if (time >= time_next_diff && Qnew) {
+      diffuse(btab, nb, NDIM, sigma, FALSE);       /* get new diffusion angles */  
       time_next_diff += 1.0/freqdiff;
     }
 }

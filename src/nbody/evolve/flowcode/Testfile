@@ -13,17 +13,22 @@ clean:
 	@rm -fr core bench.tab bench.in bench.dat bench.log
 
 
-PAR1 = potname=vrtm51 potpars=0,0.1,1,0,1,2 potfile=bench.tab
+.PHONY: $(BIN)
 
-bench.in:
+PAR1 = potname=vrtm51 potpars=0,0.1,1,0,1,2 potfile=bench.tab
+PAR2 = sigma=10
+
+bench.in:	vrtm51.c
 	nemoinp 0:360 | tabmath - - "0,1,1" > bench.tab
-	cp $(NEMO)/$(DIR)/vrtm51.c .
-	make -f $(NEMOLIB)/Makefile.lib vrtm51.so
 	mkflowdisk bench.in $(NBODY) \
 	  seed=123 \
 	  rmin=1 rmax=2 pitch=0.1 \
 	  $(PAR1)
 
+vrtm51.c:
+	@echo Copying vrtm51.c locally
+	cp $(NEMO)/$(DIR)/vrtm51.c .
+	make -f $(NEMOLIB)/Makefile.lib vrtm51.so
 
 NBODY = 100
 
@@ -33,8 +38,8 @@ flowcode: bench.in
 	@echo Running $@
 	@rm -f bench.dat bench.log
 	flowcode in=bench.in out=bench.dat \
-		freq=100 mode=4 tstop=1 \
-		$(PAR1) \
+		freq=200 tstop=1 \
+		$(PAR1)  $(PAR2) \
 		> bench.log; nemo.coverage flowcode.c
 	@head -14 bench.log
 	@echo "..."

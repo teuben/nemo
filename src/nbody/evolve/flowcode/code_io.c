@@ -9,17 +9,18 @@
  */
 
 #include "defs.h"
+
 #include <filestruct.h>
-
+#include <history.h>
 #include <snapshot/snapshot.h>
-
 #include <snapshot/get_snap.c>
 
-#define put_snap_diagnostics  _put_snap_diagnostics
+extern void _put_snap_diagnostics(stream outstr, int *ofptr);
 
+#define put_snap_diagnostics  _put_snap_diagnostics
 #include <snapshot/put_snap.c>
 
-local diagnostics(void);
+local void diagnostics(void);
 
 local bool Qkey, Qaux;
 
@@ -27,7 +28,7 @@ local bool Qkey, Qaux;
  * INPUTDATA: read initial conditions from input file.
  */
 
-inputdata()
+void inputdata(void)
 {
     stream instr;
     bodyptr btab, bp;
@@ -62,9 +63,7 @@ inputdata()
 
 local stream outstr = NULL;		/* output stream pointer */
 
-local stream quadstr = NULL;		/* quadrupole field output */
-
-initoutput()
+void initoutput(void)
 {
     printf("\n%s\n\n", headline);               /* headline log stream      */
     if (*outfile != 0) {                        /* output file given?       */
@@ -88,10 +87,9 @@ initoutput()
  * STOPOUTPUT: finish up after a run.
  */
 
-stopoutput()
+void stopoutput(void)
 {
-    if (outstr != 0)
-        strclose(outstr);
+  if (outstr) strclose(outstr);
 }
 
 /*
@@ -111,9 +109,8 @@ local vector cmphase[2];	/* center of mass coordinates */
 
 local bool firstmass = TRUE;	/* set if masses have yet to be output */
 
-output()
+void output(void)
 {
-    double cputime();
     int k, bits;
     bodyptr btab;
 
@@ -146,7 +143,7 @@ output()
 	    bits |= PotentialBit;
 	if (scanopt(options, "acc"))
 	    bits |= AccelerationBit;
-        if (scanopt(options, "angle") || scanopt(options,"kappa"))
+        if (scanopt(options, "aux"))
             bits |= AuxBit;
     }
     if (bits != 0 && outstr != NULL) {
@@ -164,9 +161,8 @@ output()
  * DIAGNOSTICS: compute set of dynamical diagnostics.
  */
 
-local diagnostics(void)
+local void diagnostics(void)
 {
-    int i;
     register bodyptr p;
     real velsq;
     vector tmpv;
@@ -208,11 +204,8 @@ local diagnostics(void)
  * PUT_SNAP_DIAGNOSTICS: output various N-body diagnostics.
  */
 
-local _put_snap_diagnostics(outstr, ofptr)
-stream outstr;
-int *ofptr;
+void _put_snap_diagnostics(stream outstr, int *ofptr)
 {
-    double cputime();
     real cput;
 
     cput = cputime();
@@ -231,8 +224,7 @@ int *ofptr;
  * SAVESTATE: write current state to disk file.
  */
 
-savestate(file)
-string file;
+void savestate(string file)
 {
     stream str;
 
@@ -262,8 +254,7 @@ string file;
  * RESTORESTATE: restore state from disk file.
  */
 
-restorestate(file)
-string file;
+void restorestate(string file)
 {
     stream str;
     string program, version;

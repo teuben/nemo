@@ -1,6 +1,15 @@
 /* 
  * VRT: flow potential : derives vx and vy velocities given vr and vt.
  *
+ *  Example use:
+ *
+ *   potname=vrtm51 
+ *   potfile=tab1,tab2,...,tabN
+ *   potpars=omega,pitch_angle,radius_ref,theta_ref,r0,r1,...,rN
+ *
+ *   potfiles are ascii tables with <angle(deg),vr,vt,den
+ *
+ *
  *      ** ONLY WORKS FOR LOG SPIRALS **
  *
  *	18-nov-03  cloned off vrt.c for the M51 project     Rahul & Peter
@@ -18,7 +27,7 @@
 #include <table.h>
 #include <extstring.h>
 
-#define VERSION "flowcode:vrtm51 V1.8 1-jan-04"
+#define VERSION "flowcode:vrtm51 V1.8a 7-feb-04"
 
 local double omega = 0.0;		/*   pattern speed  */
 local double pitch = 10.0;              /*    pitch angle   */
