@@ -1,0 +1,17 @@
+%N /smc/teuben/nemo/bin/sun4/mkhom
+This doc file has been produced with help=t option
+No further help is available, try 'man mkhom'
+%A out
+	Output file (snapshot) [???]
+%A nbody
+	Number of bodies [256]
+%A seed
+	Random seed [0]
+%A shape
+	Velocity shape (iso, tang, radial) [isotropic]
+%A extent
+	Boundness [l]
+%A headline
+	Random extra text []
+%A VERSION
+	16-jul-91 PJT [1.2]
