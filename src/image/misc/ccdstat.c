@@ -8,6 +8,7 @@
  *       5-jun-03  V1.4 added win=, a weight map
  *      14-nov-04   1.5 provide nppb= correction for chi2 computation   PJT
  *       5-jan-05   1.6 added a total
+ *      30-jan-05   1.7 added an optional median
  *
  */
 
@@ -25,7 +26,9 @@ string defv[] = {
     "win=\n         Optional input map for weights",
     "npar=0\n       Number of fitting parameters assumed for chi2 calc",
     "nppb=1\n       Optional correction 'number of points per beam' for chi2 calc",
-    "VERSION=1.6\n  5-jan-05 PJT",
+    "median=f\n     Optional display of the median value",
+    "sort=qsort\n   Sorting routine (not activated yet)",
+    "VERSION=1.7\n  30-jan-05 PJT",
     NULL,
 };
 
@@ -45,17 +48,19 @@ double xmin,ymin,zmin,dx,dy,dz;
 double size;				/* size of frame (square) */
 double cell;				/* cell or pixel size (square) */
 
+real get_median(int n, real *x);
 
 
 nemo_main()
 {
     int  i, j, k;
-    real x, xmin, xmax, mean, sigma, skew, kurt, bad, w;
+    real x, xmin, xmax, mean, sigma, skew, kurt, median, bad, w, *data;
     Moment m;
-    bool Qmin, Qmax, Qbad, Qw;
+    bool Qmin, Qmax, Qbad, Qw, Qmedian;
     real nu, nppb = getdparam("nppb");
     int npar = getiparam("npar");
-    
+    int ngood = 0;
+
     instr = stropen (getparam("in"), "r");
     read_image (instr,&iptr);
     strclose(instr);
@@ -80,7 +85,10 @@ nemo_main()
     if (Qmax) xmax = getdparam("max");
     Qbad = hasvalue("bad");
     if (Qbad) bad = getdparam("bad");
-
+    Qmedian = getbparam("median");
+    if (Qmedian)
+      data = (real *) allocate(nx*ny*nz*sizeof(real));
+    
     ini_moment(&m,4);
     for (i=0; i<nx; i++) {
       for (j=0; j<ny; j++) {
@@ -91,6 +99,7 @@ nemo_main()
             if (Qbad && x==bad) continue;
 	    w = Qw ? CubeValue(wptr,i,j,k) : 1.0;
             accum_moment(&m,x,w);
+	    if (Qmedian) data[ngood++] = x;
         }
       }
     }
@@ -112,6 +121,22 @@ nemo_main()
       printf ("Mean and dispersion  : %f %f\n",mean,sigma);
       printf ("Skewness and kurtosis: %f %f\n",skew,kurt);
       printf ("Sum                  : %f\n",show_moment(&m,1));
+      if (Qmedian)
+	printf ("Median               : %f\n",get_median(ngood,data));
       printf ("%d/%d out-of-range points discarded\n",nsize-n_moment(&m), nsize);
     }
+}
+
+int compar_real(real *a, real *b)
+{
+  return *a < *b ? -1 : *a > *b ? 1 : 0;
+}
+
+real get_median(int n, real *x)
+{
+  qsort(x,n,sizeof(real),compar_real);
+  if (n % 2)
+    return  x[(n-1)/2];
+  else
+    return 0.5 * (x[n/2] + x[n/2-1]);
 }
