@@ -1,0 +1,33 @@
+.TH MASS99 5NEMO "3 February 2003" 
+.SH NAME
+mass99 \- binary format 
+.SH DESCRIPTION
+\fImass99\fP is the binary format used in the
+MASS99 (Many-body Astrophysical Simulation Software) package
+their N-body codes. It typically only outputs a fraction of the particles
+used in the integration, and does not contain velocity information.
+Instead, two adjacent snapshots are used to construct velocities.
+A sample implementation of converting this format to \fIsnapshot(5NEMO)\fP.
+.SH INPUT/EXPORT
+The perl script \fIquick_tipsy\fP comes with the MASS99 package and used
+\fIreduce99\fP to convert the \fImass99\fP file to a standard
+(ascii) \fItipsy(5NEMO)\fP format. 
+.PP
+Here's another simple recipe to convert a MASS99 file to tipsy format:
+.nf
+    % cp some_data.mass99 outfile.0000
+    % reduce99 input=mass.input tipsy=y
+    % cp ducky.0000 some_data.tipsy
+.fi
+.SH "SEE ALSO"
+.nf
+snapshot(5NEMO), tipsy(5NEMO), quick_tipsy(1MASS99)
+http://bima.astro.umd.edu/nemo/mass99/
+.fi
+.SH AUTHOR
+J. Wallin, S. Antunes, J. Harrell, S. Milder, G. Page, and J. Waltz  (2003)
+.SH "UPDATE HISTORY"
+.nf
+.ta +2.0i +2.0i
+3-feb-03	man written 	PJT
+.fi
