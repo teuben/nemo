@@ -25,18 +25,12 @@ string usage="convert image to a PPM file, with optional color cable";
 
 string	infile, outfile;       		/* file names */
 stream  instr, outstr;			/* file streams */
-
 imageptr iptr=NULL;			/* will be allocated dynamically */
 int    nx,ny,nz;			/* actual size of map */
 
-real Red[256];
-real Green[256];
-real Blue[256];
+real Red[256], Green[256], Blue[256];
 
-void       get_rgb(real data, real min, real max, int *pR, int *pG, int *pB);
-void      get_gray(real data, real min, real max, int *pR, int *pG, int *pB);
-void stern_special(real data, real min, real max, int *pR, int *pG, int *pB);
-
+void get_rgb(real data, real min, real max, int *pR, int *pG, int *pB);
 int  get_lut(string, int, real*, real*, real*);
 
 void nemo_main()
@@ -52,7 +46,6 @@ void nemo_main()
   
   nx = Nx(iptr);	
   ny = Ny(iptr);
-  nz = Nz(iptr);
   Qmin = hasvalue("min");
   if (Qmin) xmin = getdparam("min");
   Qmax = hasvalue("max");
@@ -80,7 +73,7 @@ void nemo_main()
     }
   }
   
-  if (Qbad) {
+  if (Qbad) {                              /* loop over data to flag bad data */
     if (xmin<0)
       low = 2*xmin;
     else if (xmin>0)
@@ -96,39 +89,31 @@ void nemo_main()
   }
   
   fprintf(outstr,"P6\n%d %d\n255\n",nx,ny);
-  
   for (j=ny-1; j>=0; j--) {
     for (i=0; i<nx; i++) {
       x = MapValue(iptr,i,j);
-#if 0
       get_rgb(x,xmin,xmax,&red,&green,&blue);
-      get_grey(x,xmin,xmax,&red,&green,&blue);      
-      stern_special(x,xmin,xmax,&red,&green,&blue);
-#else
-      get_rgb(x,xmin,xmax,&red,&green,&blue);
-#endif
       fputc(red,outstr);
       fputc(green,outstr);
       fputc(blue,outstr);
     }
   }
 }
-
-void get_grey(real data, double min, double max, int *R, int *G, int *B)
+
+int  get_lut(string fn, int n, real *r, real *g, real *b)
 {
-  real x;
-  if (min==max) {
-    *R = *G = *B = (data > max ? 255 : 0);    
-    return;
-  }
-  x = (data-min)*255.0/(max-min);
-  if (x<=0.0 || x>=255.0) {         /* out of bounds */
-    *R = *G = *B = (x <= 0.0 ? 0 : 255);
-    return;
-  }
-  *R = *G = *B = (int) x;
-  dprintf(0,"grey: %g\n",x);
+  real *coldat[3];
+  int ncol, colnum[3];
+  stream instr = stropen(fn,"r");
+
+  colnum[0] = 1;    coldat[0] = r;
+  colnum[1] = 2;    coldat[1] = g;
+  colnum[2] = 3;    coldat[2] = b;
+  ncol = get_atable(instr,3,colnum,coldat,256);
+  if (ncol < 0) error("Problem %d reading %s",ncol,fn);
+  return ncol;
 }
+
 
 void get_rgb(real data, double min, double max, int *R, int *G, int *B)
 {
@@ -163,10 +148,7 @@ void get_rgb(real data, double min, double max, int *R, int *G, int *B)
   printf("%g [%g %g] -> %d %d %d %d\n",data,min,max,i,*R, *G, *B);
 #endif
 }
-
-/* ========================================================================== */
-
-
+
 void stern_special(real data, real min, real max, int *pRed, int *pGreen, int *pBlue)
 {
   real max_min = max - min;
@@ -207,19 +189,3 @@ void stern_special(real data, real min, real max, int *pRed, int *pGreen, int *p
   return;
 }
 
-
-/* ========================================================================== */
-
-int  get_lut(string fn, int n, real *r, real *g, real *b)
-{
-  real *coldat[3];
-  int ncol, colnum[3];
-  stream instr = stropen(fn,"r");
-
-  colnum[0] = 1;    coldat[0] = r;
-  colnum[1] = 2;    coldat[1] = g;
-  colnum[2] = 1;    coldat[2] = b;
-  ncol = get_atable(instr,3,colnum,coldat,256);
-  if (ncol < 0) error("Problem %d reading %s",ncol,fn);
-  return ncol;
-}
