@@ -70,7 +70,7 @@ string defv[] = {
     "rotcur3=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur4=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur5=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
-    "VERSION=0.9c\n  28-jul-02 PJT",
+    "VERSION=0.9d\n  28-jul-02 PJT",
     NULL,
 };
 
@@ -562,13 +562,11 @@ stream  lunpri;       /* LUN for print output */
 	n_vel = get_atable(velstr,3,colnr,coldat,n_vel);
 	dprintf(0,"[Found %d points in velocity field table]\n",n_vel);
 	for (i=0; i<n_vel; i++) {
-	  xpos_vel[i] = 0.0;
 	  vsig_vel[i] = 1.0;
 	}      
       }
       for (i=0; i<n_vel; i++) {
-	vsig_vel[i] = 1.0;
-	dprintf(5,"%g %g %g %g\n",xpos_vel[i],ypos_vel[i],vrad_vel[i],vsig_vel[i]);
+	dprintf(8,"%g %g %g %g\n",xpos_vel[i],ypos_vel[i],vrad_vel[i],vsig_vel[i]);
       }
       velptr = NULL;
     }
@@ -624,19 +622,21 @@ stream  lunpri;       /* LUN for print output */
 	  else
 	    MapValue(velptr,i,j) *= tokms;
       
-      printf("Mapsize is %g * %g arcsec; Found %d/%d undefined map values\n",
+      printf("Mapsize is %g * %g arcsec , pixel=%g*%g; Found %d/%d undefined map values\n",
 	     ABS(dx*(lmax-lmin+1.0)), ABS(dy*(mmax-mmin+1.0)), 
+	     dx,dy,
 	     n, Nx(velptr)*Ny(velptr));
       
       grid[0]=dx;        /* grid-separations in VELPAR (dx) */
       grid[1]=dy;        /*                            (dy) */
       pamp=0.0;          /* position angle of map */
     } else {
-      printf("Mapsize unkown for point data, but toarcsec = %g\n",toarcsec);
       undf=getdparam("blank");        /* the undefined value */
-      grid[0]=1.0;
-      grid[1]=1.0;
+      grid[0]=dx=1.0;
+      grid[1]=dy=1.0;
       pamp=0.0;
+      printf("Mapsize unkown for point data, but toarcsec = %g, dx=%g\n",
+	     toarcsec,dx);
     }
 
     n = nemoinpr(getparam("beam"),beam,2);   /* get size of beam from user */
@@ -1294,7 +1294,7 @@ real  *q;             /* output sigma */
 	v  = vrad_vel[i];
 	if (v == undf) continue;
 	xr=(-(rx-x0)*sinp+(ry-y0)*cosp);     /* X position in galplane */
-	yr=(cosi==0 ? 0 : (-(rx-dx*x0)*cosp-(ry-dy*y0)*sinp)/cosi);
+	yr=(cosi==0 ? 0 : (-(rx-x0)*cosp-(ry-y0)*sinp)/cosi);
 	r=sqrt(xr*xr+yr*yr);                       /* distance from center */
 	if (r < 0.01)                              /* radius too small ? */
 	  theta=0.0;
@@ -1302,7 +1302,7 @@ real  *q;             /* output sigma */
 	  theta=atan2(yr,xr)/F;
 	costh=ABS(cos(F*theta));       /* calculate |cos(theta)| */
 	if (r>ri && r<ro && costh>free) {     /* point inside ring ? */
-	  dprintf(5,"@ r=%g cost=%g xr=%g yr=%g\n",r,costh,xr,yr);
+	  dprintf(5,"@ (%g,%g,%g) r=%g cost=%g xr=%g yr=%g\n",rx,ry,v,r,costh,xr,yr);
 	  dprintf(5," ** adding this point\n");
 	  wi=1.0;                /* calculate weight of this point */
 	  for (j=0; j<wpow; j++) 
