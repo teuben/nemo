@@ -535,6 +535,7 @@ AC_CHECK_LIB(vogl, foreground)
 AC_CHECK_LIB(z, inflate)
 AC_CHECK_LIB(c, strtoll)
 AC_CHECK_LIB(c, strtoull)
+dnl AC_CHECK_LIB(c, dprintf)
 
 AC_CHECK_LIB(dl, dlopen)	# Dynamic linking for SunOS/Solaris and SYSV
 AC_CHECK_LIB(dld, shl_load)	# Dynamic linking for HP-UX
@@ -551,6 +552,7 @@ dnl AC_CHECK_LIB(gsl, main)
 AC_SEARCH_LIBS(sin, m)
 AC_SEARCH_LIBS(cblas_daxpy, gslcblas)
 AC_SEARCH_LIBS(gsl_version, gsl)
+AC_SEARCH_LIBS(dprintf, c)
 
 
 dnl AC_CHECK_LIB(c, strsignal)
