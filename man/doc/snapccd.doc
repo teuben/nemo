@@ -1,0 +1,22 @@
+%N snapccd
+%D simple conversion of snapshot to image
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man snapccd' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	input filename (a snapshot) [???]
+%A out
+	output filename (an image) [???]
+%A origin
+	origin of CCD on 'sky' [0,0]
+%A size
+	size (will be square) [4.0]
+%A cell
+	cellsize : 64 pixels if size=4 [0.0625]
+%A vrange
+	range in velocity space [-infinity:infinity]
+%A moment
+	velocity moment to weigh with [0]
+%A VERSION
+	4-mar-97 PJT [4.6]

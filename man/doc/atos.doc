@@ -1,0 +1,18 @@
+%N atos
+%D convert ASCII N-body file to binary format
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man atos' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input file name [???]
+%A out
+	Output file name (in append mode) [???]
+%A options
+	Information to output [mass,phase]
+%A hexpack
+	If true, read packed hex data [false]
+%A headline
+	Random mumblage for humans []
+%A VERSION
+	2-sep-94 PJT [2.6]
