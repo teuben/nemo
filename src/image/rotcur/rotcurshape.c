@@ -12,6 +12,7 @@
  *     and a functional parameterized form for VROT(r)
  *
  *     History: 19/jul/02 : cloned off rotcur                       pjt
+ *              10-sep-02 : implemented resid= for images           pjt
  *
  ******************************************************************************/
 
@@ -20,7 +21,9 @@
 #include <image.h>
 #include <filefn.h>
 
-/*     Set this appropriate if you want to use NumRec's mrqmin() based engine */
+/*     Set this appropriately if you want to use NumRec's mrqmin() based engine */
+/*     right now it appears as if the NR routine does not work as well          */
+/*     See also tabnllsqfit                                                     */
 #if 0
 #define nllsqfit nr_nllsqfit
 #endif
@@ -70,7 +73,7 @@ string defv[] = {
     "rotcur3=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur4=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur5=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
-    "VERSION=0.9g\n  9-sep-02 PJT",
+    "VERSION=1.0a\n  9-sep-02 PJT",
     NULL,
 };
 
@@ -81,7 +84,7 @@ string usage="nonlinear fit of kinematical parameters to the velocity field of a
 typedef real (*rcproc)(real, int, real *, real *);
 
 
-imageptr denptr, velptr;       /* pointers to Images, if applicable */
+imageptr denptr, velptr;       /* pointers to Images, if applicable - velptr is recycled */
 int   lmin, mmin, lmax, mmax;              /* boundaries of map */
 real  grid[2];    /* grid separations in x and y (arcsec.) */
 real  beam[2];    /* size of beam in arcseconds            */
@@ -137,7 +140,7 @@ int rotplt(real rad[], real vsy[], real evs[], real pan[], real epa[],
 	   real p[], real e[],
 	   int mask[], int ifit, real elp[][4], stream lunpri, int cor[], int npt[], real factor);
 void stat2(real a[], int n, real *mean, real *sig);
-int getdat(real x[], real y[], real w[], int *n, int nmax, real p[], real ri, real ro, real thf, 
+int getdat(real x[], real y[], real w[], int idx[], int *n, int nmax, real p[], real ri, real ro, real thf, 
 	   int wpow, real *q, int side, bool *full, int nfr);
 real bmcorr(real xx[2], real p[], int l, int m);
 int perform_init(real *p, real *c);
@@ -322,10 +325,13 @@ nemo_main()
     Qrotcur = getbparam("rotcurmode");
     if (Qrotcur) Qimage=FALSE;
 
-    if (hasvalue("resid"))
+    if (hasvalue("resid")) {
+      if (Qimage)
+	lunres=stropen(getparam("resid"),"w");  /* pointer to table stream output */
+      else
         lunres=stropen(getparam("resid"),"a");  /* pointer to table stream output */
-    else
-        lunres=NULL;                    /* no residual table output */
+    } else
+        lunres=NULL;                    /* no residual table or image output */
 
     rotinp(rad,pan,inc,vro,&nring,RING,     /* get input parameters */
            &vsys,&x0,&y0,&thf,
@@ -882,6 +888,7 @@ stream lunres;   /* file for residuals */
     int   h, k;                                              /* loop counters */
     int   nrt;                       /* error return code from subroutine FIT */
     real  x[2*MAXPTS],y[MAXPTS],w[MAXPTS];/* arrays for coords, vels and wgts */
+    int   idx[2*MAXPTS];
     int   iblank[MAXPTS];
     real  res[MAXPTS];                        /* array for y-x, the residuals */
     real  pf[PARAMS];               /* array for storing intermediate results */
@@ -915,7 +922,7 @@ stream lunres;   /* file for residuals */
 
     printf("  \n");
 
-    getdat(x,y,w,&n,MAXPTS,p,ri,ro,thf,wpow,&q,side,&full,nfr);  /* this ring */
+    getdat(x,y,w,idx,&n,MAXPTS,p,ri,ro,thf,wpow,&q,side,&full,nfr);  /* this ring */
     for (i=0;i<n;i++) iblank[i] = 1;
 
     h=0;                                          /* reset itegration counter */
@@ -967,7 +974,7 @@ stream lunres;   /* file for residuals */
             for(k=0; k<nparams; k++)       /* loop to calculate new parameters */
                pf[k]=flip*df[k]+p[k];                       /* new parameters */
             pf[4]=MIN(pf[4],180.0-pf[4]);         /* in case inclination > 90 */
-            getdat(x,y,w,&n,MAXPTS,pf,ri,ro,thf,wpow,&q,side,&full,nfr);
+            getdat(x,y,w,idx,&n,MAXPTS,pf,ri,ro,thf,wpow,&q,side,&full,nfr);
 	    for (i=0;i<n;i++) w[i] *= iblank[i];            /* apply blanking */
             if (q < chi) {                                     /* better fit ?*/
                perform_out(h,pf,n,q);                   /* show the iteration */
@@ -1029,20 +1036,37 @@ stream lunres;   /* file for residuals */
     }
 
     if (lunres) {
+      if (Qimage) {
+	for (i=0;i<Nx(velptr);i++)
+	  for (j=0;j<Ny(velptr);j++)
+	    MapValue(velptr,i,j) = 0.0;
+      } else {
         fprintf(lunres,"#  %d : New ring %g - %g\n",n,ri,ro);
         fprintf(lunres,"#  Xsky Ysky Vobs Vobs-Vmod Xgal Ygal Rgal THETAgal\n");
-        cosp = cos((p[3]+90)*F);
-        sinp = sin((p[3]+90)*F);
-        cosi = cos(p[4]*F);
-        for (i=0; i<n; i++) {
-            xc1 = x[2*i]-dx*p[1];
-            yc1 = x[2*i+1]-dy*p[2];
-            xc2 =   xc1*cosp + yc1*sinp;
-            yc2 = (-xc1*sinp + yc1*cosp)/cosi;   /* Qrotcur */
-            fprintf(lunres,"%g %g %g %g %g %g %g %g\n",
-                    xc1, yc1, y[i], res[i],
-                    xc2, yc2, sqrt(xc2*xc2+yc2*yc2),atan2(yc2,xc2)/F);
+      }
+      cosp = cos((p[3]+90)*F);
+      sinp = sin((p[3]+90)*F);
+      cosi = cos(p[4]*F);
+      for (i=0; i<n; i++) {
+	xc1 = x[2*i]-dx*p[1];
+	yc1 = x[2*i+1]-dy*p[2];
+	xc2 =   xc1*cosp + yc1*sinp;
+	yc2 = (-xc1*sinp + yc1*cosp)/cosi;   /* Qrotcur */
+	if (Qimage) {
+	  MapValue(velptr,idx[2*i],idx[2*i+1]) = res[i];
+	  if (i==0)
+	    MapMin(velptr) = MapMax(velptr) = res[i];
+	  else {
+	    MapMin(velptr) = MIN(MapMin(velptr), res[i]);
+	    MapMax(velptr) = MAX(MapMax(velptr), res[i]);
+	  }
+	} else {
+	  fprintf(lunres,"%g %g %g %g %g %g %g %g\n",
+		xc1, yc1, y[i], res[i],
+		xc2, yc2, sqrt(xc2*xc2+yc2*yc2),atan2(yc2,xc2)/F);
 	}
+      }
+      if (Qimage) write_image(lunres,velptr);
     }
 
     if (ier==1 && cor[0]>0 && cor[1]>0) {   /* calculate ellipse parameters ? */
@@ -1154,11 +1178,12 @@ void stat2(real *a,int n,real *mean,real *sig)
 /* 
  *    GETDAT gets data from disk and calculates differences.
  *
- *    SUBROUTINE GETDAT(X,Y,W,N,NMAX,P,RI,RO,THF,WPOW,Q,SIDE,FULL,NFR)
+ *    SUBROUTINE GETDAT(X,Y,W,IDX,N,NMAX,P,RI,RO,THF,WPOW,Q,SIDE,FULL,NFR)
  *
  *    X        real array       sky coordinates of pixels inside ring
  *    Y        real array       radial velocities
  *    W        real array       weights of radial velocities
+ *    IDX      integer array    sky coordinates in integer pixels
  *    N        integer          number of pixels inside ring
  *    NMAX     integer          maximum number of pixels
  *    P        real array       parameters of ring
@@ -1172,13 +1197,14 @@ void stat2(real *a,int n,real *mean,real *sig)
  *    NFR      integer          number of degrees of freedom
  */
 
-getdat(x,y,w,n,nmax,p,ri,ro,thf,wpow,q,side,full,nfr)
+getdat(x,y,w,idx,n,nmax,p,ri,ro,thf,wpow,q,side,full,nfr)
 int   *n,nmax;       /* number of pixels loaded (O), max. number (I) */
 int   nfr;           /* number of degrees of freedom */
 int   wpow;          /* weigthing function */
 int   side;          /* part of galaxy */
 bool  *full;         /* output if data overflow */
 real  x[],y[],w[];   /* arrays to store coords., vels. and weights */
+int   idx[];         /* coordinates in pixel units (0,0 is lower left) */
 real  p[];           /* parameters of ring */
 real  ri,ro;         /* inner and outer radius of ring */
 real  thf;           /* free angle */
@@ -1295,6 +1321,8 @@ real  *q;             /* output sigma */
 		    x[*n*2+1]=ry;      /* load Y-coordinate */
 		    y[*n]=v;           /* load radial velocity */
 		    w[*n]=wi;          /* load weight */
+		    idx[*n*2]=l;       /* load integer X-coordinate */
+		    idx[*n*2+1]=m;     /* load integer Y-coordinate */
 		    s=(v-vobs(xx,p,nparams));  /* corrected difference */
 		    *q += s*s*wi;       /* calculate chi-squared */
 		    *n += 1;           /* increment number of pixels */

@@ -1,4 +1,4 @@
-.TH ROTCURSHAPE 1NEMO "28 July 2002"
+.TH ROTCURSHAPE 1NEMO "10 September 2002"
 .SH NAME
 rotcurshape \- fit parameters to a velocity field using shaped rotation curves in a co-planar disk
 .SH SYNOPSIS
@@ -154,8 +154,11 @@ If specified, this output table is used in \fIappend\fP mode!
 .TP
 \fBresid\fP=
 If specified, this output table will contain a listing of X, Y, Velocity
-and Residual Velocities in the disk.
-It is mostly intended for debugging purposes.
+and Residual Velocities in the disk. If the input map was an image, this
+will be an output image of the residual (OBS-FIT). ** under development **
+Note for \fBnsigma>0\fP the residual map will be two maps, and
+you will need \fBcsf(1NEMO)\fP to get access to the 2nd (supposedly improved)
+residual map.
 [Default: not used].
 .TP
 \fBtol\fP=
@@ -333,4 +336,5 @@ Peter Teuben
 .nf
 .ta +1i +4i
 20-jul-02	0.9 cloned off rotcur		PJT
+10-sep-02	1.0 implemented an image version for resid=	PJT
 .fi
