@@ -1,0 +1,181 @@
+.TH UNITS 1NEMO  "18 August 1993"
+.SH NAME
+units \- units conversion utility
+.SH SYNOPIS
+\fBunits from=\fP\fIfrom\fP \fBto=\fP\fIto\fP  [parameter=value ...]
+.SH DESCRIPTION
+The units program converts quantities expression in various scales to 
+their equivalents in other scales.  The units program can only
+handle multiplicative (linear) scale changes.  This means
+it cannot convert Centigrade to Fahrenheit, for example.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBfrom=\fP\fIunit_from\fP.
+Unit to convert from. No default.
+.TP 20
+\fBto=\fP\fIunit_to\fP
+Unit to convert to. No default.
+.TP 20
+\fBunit=\fP\fIunit_file\fP
+Units database file. Multiple files can be given, separated by commas.
+A search path "\fB.:$NEMODAT\fP" is employed, so a local
+file is always tried before a file in \fB$NEMODAT\fP.
+Default: \fBunits.lib\fP.
+.TP 20
+\fBshow=mul|div\fP
+Option to select the multiplicative or it's inverse
+factor you need to convert from \Iunit_from\fP to \fIunit_to\fP, i.e.
+.nf
+	unit_from = unit_to * mul
+	unit_from = unit_to / div
+.fi
+Valid options are \fBmul\fP and \fBdiv\fP.
+You can also select to show both, although
+the \fBmul\fP is always shown first, irrespective of
+the order given.
+[Default: \fBmul\fP].
+.TP 20
+\fBquiet=t|f\fP
+Be quiet in interactive mode? [Default: \fBt\fP]   
+\fINOTE: interactive mode not implemented\fP
+.SH EXAMPLES
+It takes about 977 km/s to make one kpc in 10^6 yr:
+.nf
+
+    % units kpc/Myr km/s 
+    977.81311
+
+.fi
+or a bit more mondaine:
+.nf
+
+    % units meters feet
+    3.2808399
+
+.fi
+.PP
+You can also use constants in the units expressions.
+For example, if you need to know the length of something 
+in multiples of \fI5 cm\fP, 
+but know it's \fI3 feet\fP, try
+.nf
+    % units "3*feet" "5*cm"
+      18.288 
+.fi
+Note the usage of the (single or double) quotes to prevent the shell
+from interpreting the * meta character.
+.PP
+Powers of units can be specified using the '^' character as shown in
+the example, or by simple concatenation: 'cm3' is equivalent to 'cm^3'.
+Multiplication of units can be specified by using spaces, a dash or
+an asterisk.  Division of units is indicated by the slash ('/').  
+Note that multiplication has a higher precedence than division, so
+'m/s/s' is the same as 'm/s^2' or 'm/s s'
+If the user enters incompatible unit types, the units program will
+print a message indicating that the units are not conformable and
+it will display the reduced form for each unit:
+.nf
+
+    % units ergs/hour "fathoms kg^2 / day"
+    conformability error
+            2.7777778e-11 kg m^2 / sec^3
+            2.1166667e-05 kg^2 m / sec
+.fi
+Also note the use of double quotes 
+in order for NEMO to read the \fIunit_to\fP
+in the second argument/keyword.
+.LP
+The conversion information is read from a units data file.  The default
+file includes definitions for most familiar units, abbreviations and
+metric prefixes.  Some constants of nature included are:
+.in +4m
+.ta
+.ta 9m
+.nf
+
+pi	ratio of circumference to diameter
+c	speed of light
+e	charge on an electron
+g	acceleration of gravity
+force	same as g
+mole	Avogadro's number
+water	pressure per unit height of water
+mercury	pressure per unit height of mercury
+au	astronomical unit
+
+.fi
+.in -4m
+\'Pound' is a unit of mass.  Compound names are run together
+so 'poundforce' is a unit of force.  British units that differ from their
+US counterparts are prefixed with 'br', and currency is prefixed with
+its country name: 'belgiumfranc', 'britainpound'.  When searching for
+a unit, if the specified string does not appear exactly as a unit
+name, then the units program will try to remove a trailing 's' or
+a trailing 'es' and check again for a match.  
+.LP
+All of these definitions can be read in the standard units file, or you
+can supply your own file.  A unit is specified on a single line by
+giving its name and an equivalence.  One should be careful to define
+new units in terms of old ones so that a reduction leads to the
+primitive units which are marked with '!' characters.  
+The units program will not detect infinite loops that could be caused
+by careless unit definitions.
+.LP
+Prefixes are defined in the same was as standard units, but with 
+a trailing dash at the end of the prefix name.  
+.PP
+.nf
+.ta +1i +1i
+
+prefix	abbrev.	factor
+
+yotta-	Y-	1e24
+zetta-	Z-	1e21
+exa-	E-	1e18
+peta-	P-	1e15
+tera-	T-	1e12
+giga-	G-	1e9
+mega-	M-	1e6
+myria-		1e4
+kilo-	k-	1e3
+hecto-	h-	1e2
+deka-	da-	1e1
+deci-	d-	1e-1
+centi-	c-	1e-2
+milli-	m-	1e-3
+micro-		1e-6
+nano-		1e-9
+pico-	p-	1e-12
+femto-	f-	1e-15
+atto-	a-	1e-18
+zopto-	z-	1e-21
+yocto-	y-	1e-24
+.fi
+.SH BUGS
+.LP
+The effect of including a '/' in a prefix is surprising.
+.LP
+Exponents entered by the user can be only one digit.
+.LP
+The user must use | to indicate division of numbers and / to
+indicate division of symbols.  This distinction should not
+be necessary.
+.LP
+The program contains various arbitrary limits on the length
+of the units converted and on the length of the data file.
+.SH SEE ALSO
+expr(1), units(1), nemoinp(1NEMO)
+.SH FILES
+$NEMODAT/units.lib - the standard units library 
+/usr/lib/units     - original units library from units(1)
+.SH AUTHOR
+Adrian Mariano (adrian@u.washington.edu or mariano@geom.umn.edu)
+.SH UPDATE HISTORY
+.nf
+.ta +1i +4i
+14-jul-93	V1.0 Original version	AM
+21-jul-93	V2.0 Conversion to nemo	PJT
+8-aug-93	V2.1 cleanup, reset defaults, switch key order	PJT
+.fi

@@ -1,0 +1,153 @@
+.TH COOKBOOK 8NEMO "8 October 1990"
+.SH NAME
+cookbook \- a quick list of what to do to run treecode on the 205 (outdated)
+.SH DESCRIPTION
+Sample steps to run N-body programs on CYBER 205, as starting on SUN's. The 
+\fBboldface\fP is what you type on the keyboard. I will assume that you will
+do your work in some subdirectory on JVNC
+.TP 10
+\fB(-)\fP
+prepare your input data file, in (binary) snapshot format, on the sun. Call it 
+\fBi001.dat\fP. There are various programs available to make these startup
+files. See \fIPrograms(1)\fP
+.TP
+\fB(-)\fP
+convert the snapshot to ascii, using STOA:
+.nf
+sun>\fBstoa i001.dat i001.data\fB
+.fi
+.TP
+\fB(-)\fP
+prepare a parameter file with input parameters for the hackcode
+to run, call it \fBi001.par\fP. This is a regular ascii file.
+See \fItreecode(1)\fP for a description what should be in, although
+it may deviate somewhat if you change your I/O in CODE.UPD on the JVNC/205.
+.TP
+\fB(-)\fP
+copy (\fBFTP\fP) both (ascii) files over to JVNC (currently through IASVAX)
+.nf
+sun>\fBftp iasvax\fP
+-...Name: \fBscratch\fP
+-...Password: \fB<CR>\fP (give a carriage return)
+ftp> \fBput i001.data\fP
+ftp> \fBput i001.par\fP
+ftp> \fBquit\fP
+.fi
+.TP
+\fB(-)\fP
+log in on JVNC (you will never directly talk to the 205);
+.nf
+sun>\fBtelnet iasvax\fP
+-...Username: \fBNETWORK\fP
+-...Enter node name..: \fBJVNC\fP
+-...Username: \fI<your JVNC Username>\fP
+-...Password: \fI<your JVNC Password>\fP
+JVNC>
+.fi
+.TP
+\fB(-)\fP
+go over to the proper dir and get the input files from IASVAX
+.nf
+JVNC> \fBCD WORK\fP or \fBSET DEF [.WORK]\fP
+JVNC> \fBFTP IASVAX\fP
+* \fBUSER SCRATCH\fP
+Password:\fB<CR>\fP (give a Carriage Return)
+* \fBGET I001.DATA\fP
+* \fBGET I001.PAR\fP
+* \fBQUIT\fP
+.fi
+.TP
+\fB(-)\fP
+put the files on the 205:
+.nf
+JVNC> \fBPEPPUT I001.DATA TREEBODI \fP
+JVNC> \fBPEPPUT I001.PAR TREEPARS \fP
+.fi
+.TP
+\fB(-)\fP
+make sure that the exectuable code is present on the cyber by e.g.
+running PEPFILES and see if the controllee file (\fBCODEGO\fP) is
+on your user area on the 205; otherwise, regenerate it by
+.pp
+JVNC> \fB@CODECL\fP
+.pp
+and wait for a CODE.LOG to come back on VAX and check if compilation
+was OK.
+.TP
+\fB(-)\fP
+run it (perhaps after modifying the time limit and queue in the RESOURCE statement
+in the CODEGO.COM file.
+.nf
+JVNC> \fB@CODEGO\fP
+.fi
+.TP
+\fB(-)\fP
+check status using PEPSTAT or check if a new CODE.LOG file has
+arrived in your directory
+.TP
+\fB(-)\fP
+rename the funny 205 output filenames to more appropriate names:
+.nf
+JVNC> \fBRENAME TREEBODO R001.DATA\fP
+JVNC> \fBRENAME TREELOGS R001.LOG \fP
+JVNC> \fBRENAME CODE.LOG C001.LOG \fP
+.fi
+.TP
+\fB(-)\fP
+copy (\fBFTP\fP) your output files back to IASVAX first
+.nf
+JVNC> \fBFTP IASVAX\fP
+* \fBUSER SCRATCH\fP
+Password:\fB<CR>\fP (give a Carriage Return)
+* \fBPUT R001.DATA\fP
+* \fBPUT R001.LOG\fP
+* \fBPUT C001.LOG\fP
+* \fBQUIT\fP
+.fi
+.TP
+\fB(-)\fP
+go back to your favourite SUN:
+.nf
+JVNC> \fBlogout\fP
+Enter Node...:\fB<CR>\fP (give a carriage return)
+sun> \fBls\fP
+.TP
+get the files from IASVAX
+.nf
+sun> \fBftp iasvax\fP
+-...Name: \fBscratch\fP
+-...Password: \fB<CR>\fP (give a carriage return)
+ftp> \fBget r001.data\fP
+ftp> \fBget r001.log\fP
+ftp> \fBget c001.log\fP
+ftp> \fBquit\fP
+.fi
+.TP
+\fB(-)\fP
+convert the output ascii file to snapshot and delete the (huge) .data file(s).
+.nf
+sun> \fBatos r001.data r001.dat \fP
+sun> \fBrm r001.data i001.data \fP
+.TP
+\fB(-)\fP
+start analysing...... (see \fIPrograms(1)\fP)
+.nf
+sun> \fBsnapplot r001.dat\fP
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +3.5i
+JVNCC::DISK27:[TEUBEN1P.CODE]CODE*.COM	some (edited) PEP command files
+.fi
+.SH BUGS
+JVNC went out of business in the spring of 1990. Their 5 year contract
+with NSF was not extended.... The manual page is kept for historical reasons.
+.SH "SEE ALSO"
+update(1NEMO), usage205(8NEMO)
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.5i
+ 6-May-87	document created         	PJT
+25-Jun-87	extensive example session	PJT
+9-oct-90	OLD but Kept for Historical Reasons	PJT
