@@ -57,6 +57,11 @@ Potential problems:
     adding or removing printf() statements the code runs quicker, the pipe produces
     the "tmr" file at a different rate and you get different results.
 
+  - the potfile= example in snapcore.c does not retain a history, in case the
+    user wants that, so it has to be kept another way. In the current example 
+    the numbers in snapcore and plummerv are printed to <stderr> and can be 
+    easily compared for heisebugs or synchronization problems.
+
   - since i could not get the dynamic object loader work with stat64() [in the
     fexist routine in plummerv.c], currently you probably should make a dummy file
     plummerv.dat, e.g. as shown in the following simple shell script:
