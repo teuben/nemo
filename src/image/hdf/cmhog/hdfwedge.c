@@ -56,17 +56,18 @@ extern string *burststring(string, string);
 
 void nemo_main()
 {
-  float **image, **coord, *buffer, *rads, *phis, rad, phi, phi_orig, 
+  float **image, **coord, *buffer, *rads, *phis, *phisf, rad, phi, phi_orig, 
     dmin, dmax, phi1, phi2, rad1, rad2;
   float *buffer1, *buffer2, *buffer3;
   float **image1, **image2;
   int i0, i1, i, j, k, ret, size, type, nsds, isel, nx, ny;
-  int ir, ip, jr, jp, nr, np, n1, n2, is, ix, iy, ncopy;
+  int ir, ip, jr, jp, nr, np, n1, n2, is, ix, iy, ncopy,nu,nl,n,npf;
+  int *idx;
   char **output, *cbuff;
   char ntype[32];
   string filter, zvar, infile = getparam("in");
   stream outstr;
-  real xrange[3], yrange[3], cosp, sinp, pratio;
+  real xrange[3], yrange[3], cosp, sinp, pratio, deltap,edge;
   real x, y, a1, a2, c1,c2,c3,c4, cmin, cmax, dcon, tmp, vr, vt;
   real sds_time = -1.0;
   imageptr iptr, iptr0;
@@ -115,10 +116,10 @@ void nemo_main()
 	if (shape[0] == 1) 
 	  i0=1;    /* skip this first dummy dimension */
 	else
-	  error("Rank=%d shape[0]=%d not 2D map",rank,shape[0]);
+	  error("Rank=%d shape[0]=%d does not appear like a 2D map?",rank,shape[0]);
       } else
-	i0=0;      /* start at the first dummy dimension */
-      i1=i0+1;     /* radius dim is always one higher than angle */
+	i0=0;      /* start at the first dimension */
+      i1=i0+1;     /* radius dim is always one higher than angle (in HDF) */
       coord = (float **) allocate(rank*sizeof(float *));
       for (i=0, size=1; i<rank; i++) {     /*  process all axes */
 	size *= shape[i];
@@ -160,7 +161,9 @@ void nemo_main()
   image1 = (float **) allocate(shape[i0] *sizeof(float *));
   for (i=0; i<shape[i0]; i++)
     image1[i] = &buffer1[i*shape[i1]];
+
   if (both) {
+    error("Cannot combine SDS yet");
     image2 = (float **) allocate(shape[i0] *sizeof(float *));
     for (i=0; i<shape[i0]; i++)
       image2[i] = &buffer2[i*shape[i1]];
@@ -219,21 +222,77 @@ void nemo_main()
   rads = coord[i1];
   phis = coord[i0];
 
-
   /* i0 is the angle axis  */
   pratio = TWO_PI/(phis[np-1]-phis[0]);
-  ncopy = (int) lrint(pratio);
+  ncopy = (int) lrint(pratio);    /* nearest integer ? */
   dprintf(0,"Periodicity (%g) appears to be %d\n",pratio,ncopy);
 
+  /* 2nd method, count steps to patch lower and upper coordinates into -pi .. pi */
+  deltap = phis[1]-phis[0];
+  dprintf(1,"dPHI=%g Range=%g\n",deltap,phis[np-1]-phis[0]);
+  if (deltap < 0) error("Cannot handle inverted PHI axis: dPHI=%g",deltap);
+  for (nu=0, edge=phis[np-1]; ;nu++) {
+    edge += deltap;
+    dprintf(2,"Upper test: %d %g\n",nu,edge);
+    if (edge > PI) break;
+  }
+  for (nl=0, edge=phis[0]; ;nl++) {
+    edge -= deltap;
+    dprintf(2,"Lower test: %d %g\n",nl,edge);
+    if (edge < -PI) break;
+  }
+  npf = nl + np + nu;
+  if (npf != ncopy*np)
+    warning("Lower (%d) and Upper (%d) patch to fill %d into -pi..pi not exactly even (%d)",
+	    nl,nu,np,ncopy*np);
+  dprintf(1,"Nupper=%d Nlower=%d totals %d, compare to %d\n",
+	  nu,nl,npf,ncopy*np);
 
-  warning("This program isn't designed to run any further");
-  
+  /* now create an index array such that image_filled[idx[i]] points to image[i] */
+  /* and patch the upper and lower pieces to point to each other                 */
+  /* also make a new 'phis' coordinate array for the full  plane, called 'phisf' */
+  idx = (int *) allocate((npf+2)*sizeof(int));
+  phisf = (float *) allocate((npf+2)*sizeof(float));
+  if (nl+nu > 0) {
+    for (i=0; i<np; i++) {                              /* place the original array with the known offset */
+      idx[i+nl+1] = i;
+      phisf[i+nl+1] = phis[i];
+    }
+    for (i=0, j=0; i<nu; i++) {                         /* iteratively add in the upper parts */
+      idx[i+nl+np+1] = j;
+      phisf[i+nl+np+1] = phisf[i+nl+np] + deltap;
+      j++;
+      if (j==np) j=0;    }
+    for (i=0, j=np-1; i<nl; i++) {                      /* iteratively add in the lower parts */
+      idx[nl-i] = j;
+      phisf[nl-i] = phisf[nl-i+1] - deltap;
+      if (j==0) j=np;
+      j--;
+    }
+    idx[0] = idx[npf];
+    idx[npf+1] = idx[1];
+    phisf[0]     = phisf[npf] - TWO_PI;
+    phisf[npf+1] = phisf[1]   + TWO_PI;
+
+    n = idx[1]-idx[0];
+    if (n != 1) warning("First shadow cell covers %d",n);
+    n = idx[npf+1]-idx[npf];
+    if (n != 1) warning("Last shadow cell covers %d",n);
+  } else {
+    warning("should not have to do this section ?? ");
+    idx[0] = np-1;
+    for (i=0; i<np; i++) idx[i+1] = i;
+    idx[np+1] = 0;
+  }
+
+  for (i=0; i<npf+2; i++)
+    dprintf(1,"idx[%d] = %d/%d    %g   %d %d\n",i,idx[i],np,phisf[i],nl,nu);
+
   outstr = stropen(getparam("out"),"w");
   create_image(&iptr, nx, ny);
   
   n1 = n2 = 0;
-  
-  
+  dmin = dmax = 0.0;    /* just in case all points outside grid */
   for (j=0; j<ny; j++) {                  /* loop over all rows */
     y = yrange[0] + (j+0.5)*yrange[2];
     for (i=0; i<nx; i++) {              /* loop over all columns */
@@ -241,7 +300,14 @@ void nemo_main()
       rad = sqrt(x*x + y*y);
       phi = atan2(y,x);               /* phi will be in the -pi : pi range */
       
-      if (rad > rads[nr-1] || rad < rads[0]) {   /* outside grid... */
+      if (rad > rads[nr-1] || rad < rads[0]) {   /* outside grid... */	
+	dprintf(3,"rad %g not in  %g : %g range....???\n",rad,rads[0],rads[nr-1]);
+	MapValue(iptr,i,j) = 0.0;
+	n1++;
+	continue;
+      }
+      if (phi > phisf[npf+1] || phi < phisf[0]) {
+	dprintf(0,"%g not in %g : %g range....???\n",phi,phisf[0],phisf[npf-1]);
 	MapValue(iptr,i,j) = 0.0;
 	n1++;
 	continue;
@@ -252,11 +318,14 @@ void nemo_main()
       rad1 = rads[ir];
       rad2 = rads[jr];
 
-      for (ip=0; ip<np-1; ip++)
-	if (phis[ip+1] > phi) break;
-      jp = ip+1;
-      phi1 = phis[ip];
-      phi2 = phis[jr];
+      for (ip=0; ip<npf-1; ip++)
+	if (phisf[ip+1] > phi) break;
+      /* get full angles */
+      phi1 = phisf[ip];
+      phi2 = phisf[ip+1];
+      /* but index in original range */
+      ip = idx[ip];
+      jp = idx[ip+1];
 
       dprintf(2,"(x,y)%d %d (r,p) %g %g [@ %d %d] LL: %g %g\n",
 	      i,j,rad,phi,ir,ip,rads[ir],phis[ip]);
@@ -265,15 +334,18 @@ void nemo_main()
       c2 = (rad-rad1)/(rad2-rad1);
       c3 = (phi-phi2)/(phi1-phi2);
       c4 = (phi-phi1)/(phi2-phi1);
+      dprintf(1,"c1234= %g %g %g %g\n",c1,c2,c3,c4);
       a1 = image[ip][ir]*c1 + image[ip][jr]*c2;
       a2 = image[jp][ir]*c1 + image[jp][jr]*c2;
-      MapValue(iptr,i,j) = a1*c3 + a2*c4;
       if (both) { 
+	error("cannot handle two images yet");
 	if (flip) 
 	  MapValue(iptr,i,j) = -a1*c3 + a2*c4;
 	else if (mirror)
 	  MapValue(iptr,i,j) = -a1*c3 - a2*c4;
-      } 
+      } else
+	MapValue(iptr,i,j) = a1*c3 + a2*c4;
+
       if (first) {
 	dmin = dmax = MapValue(iptr,i,j);
 	first = FALSE;
@@ -283,6 +355,7 @@ void nemo_main()
       }
     } /* i */
   } /* j */
+  n2 = nx*ny;
   dprintf(0,"%d/%d points outside grid\n",n1,n2);
   
   /* finish off the header */
