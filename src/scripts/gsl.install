@@ -25,6 +25,7 @@ end
 if (! -e $src) then
   echo GSL source directory src=$src does not exist, try NEMO=
   echo or:
+  echo " mkdir -p $NEMO/local"
   echo " cd $NEMO/local"
   echo " wget http://www.network-theory.co.uk/download/gsl/$gsl.tar.gz"
   echo " tar zxf $gsl.tar.gz"
