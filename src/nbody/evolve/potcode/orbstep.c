@@ -24,7 +24,29 @@ local real abak1[MCOR];
 local real abak2[MCOR];
 local real abak3[MCOR];
 
-local void moveaccel(bodyptr btab, int nb);
+/* 
+ * MOVEACCEL: local helper utility to stack back old values of the
+ *	      forces. Only used in RK, PC and PC1.
+ */
+
+local void moveaccel(bodyptr btab, int nb)
+{
+    bodyptr p;
+    int i, k;
+    register real *aptr;
+
+    for (p = btab, i = 0; p < btab+nb; p++) {	/* loop over bodies */
+        aptr = Acc(p);				/*   get body accel */
+	for (k = 0; k < NDIM; k++, i++) {	/*   loop over coords */
+	    abak3[i] = abak2[i];		/*     copy history back */
+	    abak2[i] = abak1[i];
+	    abak1[i] = abak0[i];
+	    abak0[i] = *aptr++;			/*     copy latest accel */
+	}
+    }
+}
+
+
 
 /*
  * INITSTEP: initialize the orbit-integrator.
@@ -308,8 +330,10 @@ real dt;		/* integration time step */
     Pos(p)[1] = dy;
 
 
-    Acc(p)[0] = -p->xiv0*coskt/(2*p->B) + p->etav0*(p->A*kt - (p->A - p->B)*sinkt)/(p->kappa * p->B);
-    Acc(p)[1] =  p->xiv0*sinkt/p->kappa + p->etav0*coskt/(2*p->B);
+    Acc(p)[0] = -p->xiv0*coskt/(2*p->B) + 
+                 p->etav0*(p->A*kt - (p->A - p->B)*sinkt)/(p->kappa * p->B);
+    Acc(p)[1] =  p->xiv0*sinkt/p->kappa + 
+                 p->etav0*coskt/(2*p->B);
 #if 0
     Acc(p)[2] =  p->zetav0*sin(p->nu * t);
 #endif
@@ -320,26 +344,4 @@ real dt;		/* integration time step */
   }
 }
 
-
-
-/* 
- * MOVEACCEL: local utility to stack back old values of the
- *	      forces. Only used in RK, PC and PC1.
- */
-local void moveaccel(bodyptr btab, int nb)
-{
-    bodyptr p;
-    int i, k;
-    register real *aptr;
-
-    for (p = btab, i = 0; p < btab+nb; p++) {	/* loop over bodies */
-        aptr = Acc(p);				/*   get body accel */
-	for (k = 0; k < NDIM; k++, i++) {	/*   loop over coords */
-	    abak3[i] = abak2[i];		/*     copy history back */
-	    abak2[i] = abak1[i];
-	    abak1[i] = abak0[i];
-	    abak0[i] = *aptr++;			/*     copy latest accel */
-	}
-    }
-}
 
