@@ -2,6 +2,8 @@
 #
 #  5-mar-2004     for nbody-school            PJT 
 #
+#  Example usage:
+#  CHARA:: manybody_pkg/install_manybody cvs=0 pkg=`pwd`/manybody_pkg > & LOG1
 #  
 
 set pgplot=1
@@ -44,12 +46,15 @@ if ($cvs) then
   echo CVS: pgplot
   (cd nemo; mkdir local; cvs -Q co pgplot)
   echo TAR: $fltk
-  tar -C partiview/src -zxf $fltk
+  tar -C partiview/src -zxf $fltk)
 else 
   echo TAR: 
+  mkdir manybody
+  cd manybody
   tar zxf $pkg/nemo/nemo.tar.gz
   tar zxf $pkg/starlab/starlab.tar.gz
   tar zxf $pkg/partiview/partiview.tar.gz
+  (cd partiview/src ; tar zxf $fltk)
 endif
 
 
@@ -60,14 +65,16 @@ popd
 
 #                                                   fltk (internal build only)
 pushd partiview/src/fltk-1.1.4
-  ./configure
-  make
+  ./configure >& install.log
+  make >>& install.log
+  if ($status) echo ERRORS compiling fltk, check install.log
 popd
 
 #                                                   partiview
 pushd partiview/src
-  ./configure --with-fltk=`pwd`/fltk-1.1.4
-  make
+  ./configure --with-fltk=`pwd`/fltk-1.1.4 >& install.log
+  make >>& install.log
+  if ($status) echo ERRORS compiling partiview, check install.log
 popd
 
 #                                                   nemo
@@ -79,21 +86,26 @@ popd
 pushd $NEMO/local
   tar zxf $pkg/gsl/gsl-$gsl.tar.gz
   cd gsl-$gsl
-  ./configure --prefix=$NEMO/host/$NEMOHOST
-  make
-  make install
+  ./configure --prefix=$NEMO/host/$NEMOHOST  >& install.log
+  if ($status) echo ERRORS 1 compiling partiview, check install.log
+  make >>& install.log
+  if ($status) echo ERRORS 2 compiling partiview, check install.log
+  make install >>& install.log
+  if ($status) echo ERRORS 3 compiling partiview, check install.log
 popd
 
 #                                                   fewbody, glstarview
 pushd $NEMO/usr/fregeau
   tar zxf $pkg/fregeau/fewbody-$fewbody.tar.gz
   pushd fewbody-$fewbody
-    make all  LIBFLAGS="-L$NEMOLIB -lgsl -lgslcblas -lm"
+    make all  LIBFLAGS="-L$NEMOLIB -lgsl -lgslcblas -lm" >& install.log
+    if ($status) echo ERRORS compiling fewbody, check install.log
     cp cluster triplebin binbin binsingle $NEMOBIN
   popd
   tar zxf $pkg/fregeau/glstarview-$glstarview.tar.gz
   pushd glstarview-$glstarview
     make -f Makefile.rh9 all
+    if ($status) echo ERRORS compiling glstarview, check install.log
     cp glstarview $NEMOBIN
   popd
 popd
