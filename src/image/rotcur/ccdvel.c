@@ -348,7 +348,8 @@ setparams()
    printf("Systemic velocity: %g\n",vsys);
 
    for (n=1; n<nrad; n++)
-      if (rad_i[n] < rad_i[n-1]) error("Radii not sorted (%d)",n);
+      if (rad_i[n] < rad_i[n-1]) error("Radii not sorted (@%d: %g < %g)",
+				       n,rad_i[n] < rad_i[n-1]);
 
    if (hasvalue("headline")) set_headline(getparam("headline"));
 
