@@ -1,4 +1,4 @@
-.TH SNAPSHELL 1NEMO "15 November 2001"
+.TH SNAPSHELL 1NEMO "17 November 2001"
 .SH NAME
 snapshell \- compute statistics of bodyvariables in a set of shells
 .SH SYNOPSIS
@@ -18,8 +18,7 @@ An arbitrary weighting may be specified for each particle.
 The output will be an ascii table, in which for each variable it will
 print a
 selected set of statistics (mean, dispersion, min, max, skewness, kurtosis,
-number of particles) can be selected for printout.
-
+number of particles). Shells with no particles are not output.
 .SH PARAMETERS
 The following parameters are recognized.
 .TP 24
@@ -61,8 +60,19 @@ Statistics selected to print. Allowed values are
 \fBformat=\fIstring\fP
 Valid C-format descriptor, as used in \fIprintf(3)\fP, for tabular output.
 [default: \fB%g\fP].
+.TP
+\fBnormalized=t|f\fP
+Should \fBsvar=\fP (if used) be done in normalized (0..1) space, and therefore
+easily allow equal size bins, or in direct svar space (this requires knowledge
+of the range of the \fBsvar\fP variable.
+[Default: \fBt\fP]
+.TP
+\fBsort=t|f\fP
+Should the snapshot be sorted? Normally true, and a basic shell sort is applied.
+See \fIsnapsort(1NEMO)\fP if more advanced sorting is required.
+[Default: \fBt\fP]
 .SH SEE ALSO
-snapkinem(1NEMO), snaprect(1NEMO), snapshot(5NEMO)
+snapkinem(1NEMO), snaprect(1NEMO), snapsort(1NEMO), snapshot(5NEMO)
 .SH EXAMPLES
 To get a mean rotation speed in the disk, and the velocity dispersion, for a set of
 rings:
@@ -83,9 +93,15 @@ normalized and must not exceed the interval 0-1:
 .nf
     % \fBmkdisk - rmax=10 | snapsort - - r | snapshell - 0:1:0.01 svar=r\fP
 .fi
-or in case the particles are sorted by potential from an N-body simulation:
+In case the particles are sorted by potential from an N-body simulation, one can
+select shells by particle number (easy way to make the binsizes the same)
 .nf
-    % \fBsnapsort run01.dat - -phi times=4.0 | snapshell - 0:1:0.01 svar=-phi\fP
+    % \fBsnapsort run01.dat - phi times=4.0 | snapshell - 0:1:0.01 svar=phi\fP
+.fi
+or assign the shells directly in \fBsvar\fP space (this requires you to know the
+values in svar space):
+.nf
+    % \fBsnapsort run01.dat - -phi times=4.0 | snapshell - -400:-200:10 svar=phi normalized=f\fP
 .fi
 .SH CAVEAT
 Ellipsoidal shells may need reshape/sort/reshape?
