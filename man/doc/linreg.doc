@@ -1,0 +1,18 @@
+%N linreg
+%D six linear regressions
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man linreg' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input ascii table [???]
+%A xcol
+	Column for X coordinates [1]
+%A ycol
+	Column for Y coordinates [2]
+%A mode
+	Output mode (0=all, 1..6=various methods [0]
+%A maxline
+	Maximum size of columns [10000]
+%A VERSION
+	22-sep-95 PJT [1.2a]
