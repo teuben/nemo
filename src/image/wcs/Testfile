@@ -1,5 +1,5 @@
 DIR = src/image/wcs
-BIN = wcs
+BIN = wcs testpos
 NEED = wcs
 
 help:
