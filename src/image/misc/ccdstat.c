@@ -7,6 +7,7 @@
  *       9-may-03  V1.3 added bad=, and added #points,
  *       5-jun-03  V1.4 added win=, a weight map
  *      14-nov-04   1.5 provide nppb= correction for chi2 computation   PJT
+ *       5-jan-05   1.6 added a total
  *
  */
 
@@ -24,11 +25,13 @@ string defv[] = {
     "win=\n         Optional input map for weights",
     "npar=0\n       Number of fitting parameters assumed for chi2 calc",
     "nppb=1\n       Optional correction 'number of points per beam' for chi2 calc",
-    "VERSION=1.5\n  15-nov-04 PJT",
+    "VERSION=1.6\n  5-jan-05 PJT",
     NULL,
 };
 
 string usage="basic statistics of an image, optional chi2 calculation";
+
+string cvsid="$Id$";
 
 string	infile;	        		/* file names */
 stream  instr;				/* file streams */
@@ -108,6 +111,7 @@ nemo_main()
       printf ("Number of points     : %d\n",n_moment(&m));
       printf ("Mean and dispersion  : %f %f\n",mean,sigma);
       printf ("Skewness and kurtosis: %f %f\n",skew,kurt);
+      printf ("Sum                  : %f\n",sum_moment(&m));
       printf ("%d/%d out-of-range points discarded\n",nsize-n_moment(&m), nsize);
     }
 }
