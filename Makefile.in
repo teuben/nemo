@@ -445,6 +445,7 @@ cvslogin:
 cvstar:
 	cvs -Q -d $(ACVSROOT) co -d nemo_cvs nemo
 	date > nemo_cvs/VERSION_cvs
+	echo "$(ACVSROOT) A" > nemo_cvs/.cvspass
 	cp nemo_cvs/VERSION_cvs /tmp
 	gtar zcf nemo_cvs.tar.gz nemo_cvs
 	rm -rf nemo_cvs
