@@ -18,6 +18,8 @@
  *	21-jan-00       added pl_cursor from tabplot			  PJT
  *      31-dec-03       added yapp_meta                                   PJT
  *      28-mar-04       fixed color problem in multipanel programs        PJT
+ *      25-jun-04       document that amazing X windows bug Ashley Zauderer ran into    PJT
+ *                      startx -- -dpi 140    (or whatever DPI works)
  */
 
 #include <stdinc.h>
@@ -92,6 +94,10 @@ plinit(string pltdev, real xmin, real xmax, real ymin, real ymax)
     units = 2;
     pgqvsz_(&units, &x1, &x2, &y1, &y2);
     dprintf(1,"PGQVSZ: X= %g - %g Y= %g - %g\n",x1,x2,y1,y2);
+    if (x2 < x1 || y1 < y2) {
+      warning("yapp_pgplot: (plinit) weird screen layout, or your X server things the DPI is wrong");
+      warning("              check w/ xdpyinfo if your dpi is ok, else use startx -- -dpi 140 or so");
+    }
     zero = 0.0;  one = 1.0;    /* zero is good for "max size of device" */
     pgsvp_(&zero,&one,&zero,&one);
 #if 0
