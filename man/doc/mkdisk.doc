@@ -1,0 +1,34 @@
+%N mkdisk
+%D set up a uniform-density test disk in a spherical potential
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man mkdisk' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A out
+	Output file name (snapshot) [???]
+%A nbody
+	Number of disk particles [2048]
+%A potname
+	Name of potential(5) [plummer]
+%A potpars
+	Parameters to potential(5); omega needed but not used []
+%A potfile
+	Optional data file with potential(5) []
+%A rmin
+	Inner disk radius [0]
+%A rmax
+	Outer cutoff radius [1]
+%A mass
+	Total mass of disk (0 means no masses supplied) [0]
+%A frac
+	Relative vel.disp w.r.t. local rotation speed [0]
+%A seed
+	Usual random number seed [0]
+%A sign
+	Sign of Z-angular momentum vector of disk [1]
+%A in
+	If given, these are initial positions []
+%A headline
+	Text headline for output []
+%A VERSION
+	24-jul-98 PJT [4.2b]
