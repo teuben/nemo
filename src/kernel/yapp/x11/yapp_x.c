@@ -427,8 +427,8 @@ plstop()
     close_X();
 }
 
-pl_matrix(frame,nx,ny,xmin,ymin,cell,fmin,fmax,findex)
-real *frame, xmin, ymin, cell, fmin, fmax, findex;
+pl_matrix(frame,nx,ny,xmin,ymin,cell,fmin,fmax,findex,blankval)
+real *frame, xmin, ymin, cell, fmin, fmax, findex, blankval;
 int nx, ny;
 {
     warning("pl_matrix: unsupported in yapp_x");

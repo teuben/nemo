@@ -402,14 +402,14 @@ pl_matrix(
     static bool virgin = TRUE;
 
     if (virgin) {
-	printf("pl_matrix: not yet implemented\n");
+	warning("pl_matrix: not yet implemented");
 	virgin = FALSE;
     }
 }
 
 pl_contour (real *frame, int nx, int ny, int ncntval, real *cntval)
 {
-    printf("pl_contour: not yet implemented for yapp_ps\n");
+    warning("pl_contour: not yet implemented for yapp_ps");
 }
 
 pl_cursor(float *x,float *y, char *c)      
@@ -420,7 +420,7 @@ pl_cursor(float *x,float *y, char *c)
 
 pl_screendump (string fname)
 {
-    printf("yapp_ps_new: pl_screendump not implemented\n");
+    warning("yapp_ps_new: pl_screendump not implemented");
 }
 /*
  * XSCALE, YSCALE: user to pt transformations.

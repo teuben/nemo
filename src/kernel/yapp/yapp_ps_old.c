@@ -370,8 +370,8 @@ double x,y;
  *	findex = power of transfer function (0,infinity) 1=linear
  */
 
-pl_matrix (frame,nx,ny,xmin,ymin,cell,fmin,fmax,findex)
-double *frame, xmin, ymin, cell, fmin, fmax, findex;
+pl_matrix (frame,nx,ny,xmin,ymin,cell,fmin,fmax,findex,blank)
+double *frame, xmin, ymin, cell, fmin, fmax, findex, blank;
 int nx, ny;
 {
 	double x,y,f,grayscale,ds,pow();

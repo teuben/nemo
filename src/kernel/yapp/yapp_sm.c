@@ -374,8 +374,8 @@ local int more()
     sm_hardcopy();
 }
 
-pl_matrix(frame,nx,ny,xmin,ymin,cell,fmin,fmax,findex)
-real *frame, xmin, ymin, cell, fmin, fmax, findex;
+pl_matrix(frame,nx,ny,xmin,ymin,cell,fmin,fmax,findex,blankval)
+real *frame, xmin, ymin, cell, fmin, fmax, findex, blankval;
 int nx, ny;
 {
     real x,y,f,grayscale,ds;

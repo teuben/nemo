@@ -301,13 +301,14 @@ int j;
  * PL_MATRIX: paint a matrix (someday).
  */
 
-pl_matrix(frame, nx, ny, xmin, ymin, cell, fmin, fmax, findex)
+pl_matrix(frame, nx, ny, xmin, ymin, cell, fmin, fmax, findex, blank)
 real *frame;		/* image array, stored in 1-D */
 int nx, ny;		/* size of image */
 real xmin, ymin;	/* lower-left corner */
 real cell;		/* pixel size in user units */
 real fmin, fmax;	/* values mapped to white, black */
 real findex;
+real blank;
 {
     static bool virgin = TRUE;
 
