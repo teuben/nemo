@@ -7,6 +7,7 @@
 # set default keywords
 set nbody=16384
 set tmp=tmp
+set pipe=1
 
 # read commandline where defaults can be overriden
 foreach a ($argv)
@@ -18,7 +19,7 @@ rm -f $tmp.* >& /dev/null
 #time mkplummer out=. nbody=$nbody
 #time mkplummer out=$tmp.1 nbody=$nbody
 
-if (0) then
+if ($pipe) then
  date
  mkplummer - $nbody zerocm=f |\
   snapscale - - 0.1 |\
