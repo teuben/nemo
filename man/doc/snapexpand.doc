@@ -1,0 +1,13 @@
+%N /smc/teuben/nemo/bin/sun4/snapexpand
+This doc file has been produced with help=t option
+No further help is available, try 'man snapexpand'
+%A in
+	Input file name [???]
+%A out
+	Output file name [???]
+%A exp
+	Expansion factor [0.0]
+%A times
+	Times to select snapshots from [all]
+%A VERSION
+	27-may-90 PJT [1.0]
