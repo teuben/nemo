@@ -1,0 +1,67 @@
+.TH COMMON 3NEMO "7 January 1999"
+.SH NAME
+common \- access routines for high speed I/O common blocks
+.SH SYNOPSYS
+.nf
+.ta +5i
+.PP
+.B set_common(cid, byte_size)
+.B int cid, byte_size;
+.PP
+.B int get_common(cid, elt_size, bucket_size)
+.B int cid, elt_size, bucket_size;
+.PP
+.B byte *open_common(cid)
+.B int cid;
+.PP
+.B close_common(cid)
+.B int cid;
+.SH DESCRIPTION
+\fIcommon\fP provide a set of simple interface routines to safely define
+and access a common block in memory which can be used for high speed
+I/O operations. A common block can be useful to prevent frequent
+allocation and de-allocation of memory in a long serialized 
+operation, or to prevent allocating large buffers when multi-dimensional
+data need to be transposed between disk and memory
+(see e.g. \Iget_snap(3NEMO)\fP).
+.PP
+Although a common block will have a default size (commonly 1024 bytes),
+one can re-define
+its size with \fBset_common(cid, byte_size)\fP, with \fBcid\fP
+the common id (any non-zero integer up to a maximum define by the
+library code), and \fBbyte_size\fP the size of the common in bytes.
+.PP
+The address of a common block can be obtained with 
+\fBopen_common(cid)\fP, however, it is often useful how many
+buckets of a certain size fit in this common block. 
+\fBget_common(cid, elt_size, bucket_size)\fP will return this.
+.PP
+Finally, \fBclose_common(cid)\fP should be called to free the common
+for subsequent use.
+.SH EXAMPLES
+Here is some code to transfer data from a large array to a small array
+using random access I/O routines:
+.nf
+
+    int n;
+    float *fp;
+
+    set_common(0, 8196);
+    n = get_common(0, sizeof(float), nx);
+    fp = open_common(0);
+    ..
+    close_common(0);
+    
+.fi
+.SH BUGS
+The common id (\fIcid\fP) is not used yet, just one "blank" common can
+be defined.
+.SH AUTHOR
+Peter Teuben
+.SH SEE ALSO
+filestruct(3NEMO)
+.SH UPDATE HISTORY
+.nf
+.ta +1i +4i
+7-jan-99	developed for get_snap/put_snap              	PJT
+.fi
