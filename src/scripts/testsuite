@@ -161,6 +161,7 @@ help:
     echo ""
     echo "Options:"
     echo "    -n    dry-run, only show which directories have Testfile's"
+    echo "    -l    run test in local (where Testfile is) directory"
     echo "    -r    cleanup working directory in '$NEMO/tmp' afterwards"
     echo "    -c    clean the NEMO directory itself of Testfile in/out files"
     echo "    -s    show all the binaries that are needed for each test"
