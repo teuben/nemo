@@ -10,6 +10,7 @@
  *	 9-nov-93   1.4 optional non-reporting mode PJT
  *	 7-jan-96   1.5 optional output of COM system instead	PJT
  *	26-feb-97   1.6 made report=f the default               pjt
+ *      31-dec-02   1.7 fixed for gccd3/SINGLEPREC              pjt
  */
 
 #include <stdinc.h>
@@ -22,27 +23,29 @@
 #include <snapshot/snapshot.h>
 #include <snapshot/get_snap.c>
 #include <snapshot/put_snap.c>
+#include <bodytransc.h>
 
-string defv[] = {		/* DEFAULT INPUT PARAMETERS */
+string defv[] = {	
     "in=???\n       input file name ",
     "out=???\n	    output file name ",
     "weight=1\n	    factor used finding center ",
     "times=all\n    range of times to process ",
     "report=f\n	    report the c.o.m shift",
     "one=f\n        Only output COM as a snapshot?",
-    "VERSION=1.6\n  26-feb-97 PJT",
+    "VERSION=1.7\n  31-dec-02 PJT",
     NULL,
 };
 
 string usage="Center a snapshot based on a weighed subset of particles";
 
-void snapcenter();
+
+void snapcenter(Body*, int, real, rproc_body, vector, vector, bool);
 
 void nemo_main()
 {
     stream instr, outstr;
     string times;
-    rproc btrtrans(), weight;
+    rproc_body weight;
     Body *btab = NULL, *b;
     int i, nbody, bits;
     real tsnap, mass;
@@ -88,13 +91,14 @@ void nemo_main()
     strclose(outstr);
 }
 
-void snapcenter(btab, nbody, tsnap, weight, w_pos, w_vel, Qreport)
-Body *btab;
-int nbody;
-real tsnap;
-rproc weight;
-vector w_pos, w_vel;
-bool Qreport;
+void snapcenter(
+		Body *btab,
+		int nbody,
+		real tsnap,
+		rproc_body weight,
+		vector w_pos, 
+		vector w_vel,
+		bool Qreport)
 {
     int i;
     Body *b;

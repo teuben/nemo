@@ -6,6 +6,7 @@
  *    16-jun-92   V1.3   usage; fixed bug with sandwiched history   PJT
  *    21-dec-92   V1.4   selectable sort routine                    PJT
  *    10-jun-95       a  declaration fix (linux) n                  pjt
+ *    31-dec-02   V1.5   gcc3/SINGLEPREC                            pjt
  */
 
 #include <stdinc.h>
@@ -17,14 +18,15 @@
 #include <snapshot/snapshot.h>
 #include <snapshot/get_snap.c>
 #include <snapshot/put_snap.c>
+#include <bodytransc.h>
 
-string defv[] = {		/* DEFAULT INPUT PARAMETERS */
+string defv[] = {	
     "in=???\n		Input file name (snapshot)",
     "out=???\n		Output file name (snapshot)",
     "rank=etot\n	Value used in ranking particles",
     "times=all\n        Range of times to process ",
     "sort=qsort\n       Sort mode {qsort;...}",
-    "VERSION=1.4\n      10-jun-95 PJT ",
+    "VERSION=1.5\n      31-dec-02 PJT ",
     NULL,
 };
 
@@ -32,11 +34,14 @@ string usage="sort particles according to a user-specified ranking";
 
 /* #define FLOGGER 1       /* merge in the cute flogger test routines */
 
+void snapsort(Body *, int , real , rproc_body, iproc);
+
+
 nemo_main()
 {
     stream instr, outstr;
     string times;
-    rproc btrtrans(), rank;
+    rproc_body rank;
     iproc mysort, getsort();
     Body *btab = NULL;
     int nbody, bits;
@@ -61,14 +66,20 @@ nemo_main()
     strclose(outstr);
 }
 
-snapsort(btab, nbody, tsnap, rank, mysort)
-Body *btab;
-int nbody;
-real tsnap;
-rproc rank;
-iproc mysort;
+
+int rank_aux(Body *a, Body *b)
 {
-    int i, rank_aux();
+    return (Aux(a) < Aux(b) ? -1 : Aux(a) > Aux(b) ? 1 : 0);
+}
+
+void snapsort(
+	 Body *btab,
+	 int nbody,
+	 real tsnap,
+	 rproc_body rank,
+	 iproc mysort)
+{
+    int i;
     Body *b;
 
     for (i = 0, b = btab; i < nbody; i++, b++)
@@ -76,11 +87,6 @@ iproc mysort;
     (mysort)(btab, nbody, sizeof(Body), rank_aux);
 }
 
-int rank_aux(a, b)
-Body *a, *b;
-{
-    return (Aux(a) < Aux(b) ? -1 : Aux(a) > Aux(b) ? 1 : 0);
-}
 
 
 /*
@@ -101,8 +107,11 @@ typedef struct sortmode {
 /* List of externally available sort routines */
 
 /* extern int qsort();         /* Standard Unix : stdlib.h */
-
-extern int bubble_sort();   /* Flogger library routines */
+/* or:  void qsort(void *base, size_t nmemb, size_t size,
+ *                 int(*compar)(const void *, const void *));
+ */
+                  
+extern int bubble_sort();          /* Flogger library routines */
 extern int heap_sort();
 extern int insertion_sort();
 extern int merge_sort();
@@ -119,12 +128,11 @@ local sortmode smode[] = {
     "quick",    quick_sort,
     "shell",    shell_sort,
 #endif
-    "qsort",    qsort,              /* standard Unix qsort() */
+    "qsort",    (iproc) qsort,      /* standard Unix qsort() */
     NULL, NULL,
 };
 
-iproc getsort(name)
-string name;
+iproc getsort(string name)
 {
     sortmode *s;
 
@@ -134,5 +142,5 @@ string name;
             return SortProc(s);
     }
     error("No valid sortname");
-    return NULL;
+    return NULL;     /* better not get here ... */
 }

@@ -8,7 +8,9 @@
  *  4-jul-94    V1.3b also output theta,phi of principle axes		pjt
  *			only now implemented test=
  * 22-aug-00        c bit more ansi cc					pjt
- * 15-mat=02        d added option log to allow piping of output        WD 
+ * 15-mar-02        d added option log to allow piping of output        WD 
+ * 31-dec-02    V1.4  gcc3/SINGLEPREC
+ *
  */
 
 #include <stdinc.h>
@@ -20,6 +22,7 @@
 #include <snapshot/body.h>
 #include <snapshot/get_snap.c>
 #include <snapshot/put_snap.c>
+#include <bodytransc.h>
 
 string defv[] = {
     "in=???\n			  input file name",
@@ -29,7 +32,7 @@ string defv[] = {
     "times=all\n		  range of times to transform",
     "log=\n                       write to this file instead of stdout",
     "test=\n                      Use this snapshot instead, to transform",
-    "VERSION=1.3d\n		  15-Mar-02 WD",
+    "VERSION=1.4\n		  31-dec-02 PJT",
     NULL,
 };
 
@@ -41,12 +44,9 @@ real tsnap = 0.0;		/* time associated with data		    */
 Body *testtab = NULL;
 bool Qtest;
 
-rproc weight;			/* weighting function for bodies	    */
+rproc_body weight;		/* weighting function for bodies	    */
 
 real rcut;			/* cutoff to suppress outlying bodies	    */
-
-extern  rproc btrtrans();
-
 
 nemo_main()
 {
@@ -95,8 +95,7 @@ vector w_vel;			/* weighted center of mass velocity	    */
 
 matrix w_qpole;			/* weighted quadrupole moment		    */
 
-roughcenter(btab)
-Body *btab;
+roughcenter(Body *btab)
 {
     int i;
     real w_tot, w_b;
@@ -121,8 +120,7 @@ Body *btab;
     dprintf(1,"Roughcenter: %g %g %g\n",cm_pos[0], cm_pos[1], cm_pos[2]);
 }
 
-findcenter(btab)
-Body *btab;
+findcenter(Body *btab)
 {
     int i;
     Body *b;
@@ -149,8 +147,7 @@ Body *btab;
     dprintf(1,"Findcenter: %g %g %g\n",w_pos[0], w_pos[1], w_pos[2]);
 }
 
-findmoment(btab)
-Body *btab;
+findmoment(Body *btab)
 {
     int i;
     Body *b;
@@ -178,8 +175,7 @@ vector oldframe[3] = {
     { 0.0, 0.0, 1.0, },
 };
 
-snaptransform(out)
-stream out;
+snaptransform(stream out)
 {
     vector frame[3], pos_b, vel_b, acc_b;
     Body *b;
@@ -212,9 +208,7 @@ stream out;
 
 #include "nrutil.h"
 
-eigenframe(frame, mat)
-vector frame[];
-matrix mat;
+eigenframe(vector frame[], matrix mat)
 {
     float **q, *d, **v;
     int i, j, nrot;
@@ -232,10 +226,7 @@ matrix mat;
 	    frame[i-1][j-1] = v[j][i];
 }
 
-printvec(name, vec, out)
-string name;
-vector vec;
-stream out;
+printvec(string name, vector vec, stream out)
 {
     vector rtp;	/* radius - theta - phi */
     xyz2rtp(vec,rtp);
@@ -244,8 +235,7 @@ stream out;
 	    rtp[1]*180.0/PI, rtp[2]*180.0/PI);
 }
 
-xyz2rtp( xyz, rtp)
-vector xyz, rtp;
+xyz2rtp(vector xyz, vector rtp)
 {
     real z = xyz[2];
     real w = sqrt(sqr(xyz[0])+sqr(xyz[1]));

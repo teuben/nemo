@@ -9,6 +9,7 @@
  *	1-jun-92    V1.4  usage
  *     12-apr-97       a  fixed bug (free_fmatrix -> free_convert_matrix)
  *     17-jul-02    V2.0  convert to use with the nemofied NumRec2 routines
+ *     31-dec-02    V2.1  gcc3/SINGLEPREC 
  *	
  *  Note: this program only works for NDIM=3
  */
@@ -23,16 +24,18 @@
 #include <snapshot/get_snap.c>
 #include <snapshot/put_snap.c>
 
+#include <bodytransc.h>
+
 #include <nrutil.h>
 
-string defv[] = {		/* DEFAULT INPUT PARAMETERS */
+string defv[] = {	
     "in=???\n			  Input snapshot file name",
     "out=???\n			  Output file name (ascii table)",
     "times=all\n		  range of times to transform",
     "weight=m\n		          factor to use in computing center/inertia  ",
     "per_weight=t\n		  flag to give inertia per weight basis  ",
     "tab=f\n			  flag to produce one-line output",
-    "VERSION=2.0\n		  17-jul-02 PJT",
+    "VERSION=2.1\n		  31-dec-02 PJT",
     NULL,
 };
 
@@ -40,14 +43,15 @@ string usage="get inertia tensor & its eigenvectors, eigenvalues";
 
 #define TIMEFUZZ 0.001          /* slop tolerated in time comparisons */
 
-extern rproc btrtrans(string);
+void snapinert(Body *, int, real, rproc_body, float i[3][3]);
+
 
 nemo_main()
 {
     stream instr, outstr;
     string times;
     bool oneline;
-    rproc weight;
+    rproc_body weight;
     Body *btab=NULL;
     int nbody, bits, nrot, i, j;
     real tsnap;
@@ -65,7 +69,7 @@ nemo_main()
     eigenvs=fmatrix(1,3,1,3);
 
     do {
-        get_history(instr); /* read history - also for sandwitched cases */
+        get_history(instr);
 	get_snap(instr, &btab, &nbody, &tsnap, &bits);
 
 	if ((bits & PhaseSpaceBit) != 0 &&
@@ -107,13 +111,13 @@ nemo_main()
     } while (bits != 0);
 }
 
-snapinert(btab, nbody, tsnap, weight, inert)
-Body *btab;
-int nbody;
-real tsnap;
-rproc weight;
-float inert[3][3];
-{
+void snapinert(
+	       Body *btab,
+	       int nbody,
+	       real tsnap,
+	       rproc_body weight,
+	       float inert[3][3])
+  {
     int i,j,k;
     Body *b;
     real w_i, w_sum;

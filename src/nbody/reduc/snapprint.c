@@ -17,6 +17,7 @@
  *	20-nov-96	V2.0 added header=		pjt
  *				for nbody,time
  *       9-oct-01          a  toying with time selection pjt
+ *      31-dec-02       V2.1 gcc3/SINGLEPREC             pjt
  */
 
 #include <stdinc.h>
@@ -29,8 +30,9 @@
 #include <snapshot/snapshot.h>	
 #include <snapshot/body.h>
 #include <snapshot/get_snap.c>
+#include <bodytransc.h>
 
-string defv[] = {		/* DEFAULT INPUT PARAMETERS */
+string defv[] = {
     "in=???\n			Input file (snapshot)",
     "options=x,y,z,vx,vy,vz\n	Things to output",
     "format=%g\n		Format used to output numbers",
@@ -38,13 +40,15 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "times=all\n		Times to select snapshot",
     "tab=\n			Standard output or table file?",
     "header=f\n			Add header to output?",
-    "VERSION=2.0a\n		9-oct-01 PJT",
+    "VERSION=2.1\n		31-dec-02 PJT",
     NULL,
 };
 
 string usage="tabulate a snapshot";
 
 #define MAXOPT    50
+
+extern string *burststring(string,string);
 
 void nemo_main()
 {
@@ -55,8 +59,8 @@ void nemo_main()
     bool   Qsepar, Qhead;
     int i, n, nbody, bits, nsep, isep, nopt, ParticlesBit;
     char fmt[20],*pfmt;
-    string *burststring(), *opt;
-    rproc btrtrans(), fopt[MAXOPT];
+    string *opt;
+    rproc_body fopt[MAXOPT];
 
     ParticlesBit = (MassBit | PhaseSpaceBit | PotentialBit | AccelerationBit |
             AuxBit | KeyBit | DensBit | EpsBit);

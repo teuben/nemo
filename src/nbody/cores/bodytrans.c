@@ -3,8 +3,8 @@
  * and return a pointer to the function so defined.
  * 
  * public routines:
- *      rproc btrtrans(expr)
- *      iproc btitrans(expr)
+ *      rproc_body btrtrans(expr)
+ *      iproc_body btitrans(expr)
  *
  *  -DTOOLBOX  version of this file can test bodytrans(5) files
  *  -DSAVE_OBJ will save bodytrans(5) files
@@ -52,6 +52,7 @@
  *   1-apr-01   NEMO V3 style .so file usage
  *   5-apr-01   increased buffersize for filenames (NEMO3 uses longer $NEMOHOST names)
  *  13-jun-02   fix permissions problem (Jean-Charles Lambert)
+ *  31-dec-02   gcc3/SINGLEPREC; allow longer filenames (should use autoconf?)
  *
  *  Used environment variables (normally set through .cshrc/NEMORC files)
  *      NEMO        used in case NEMOOBJ was not available
@@ -66,7 +67,10 @@
 #include <loadobj.h>
 #include <ctype.h>
 #include <unistd.h>
-#include <mathlinker.h>		/* force inclusion of some basic math */
+#include <mathlinker.h>
+#include <bodytransc.h>
+
+#define SHORT_FNAMELEN   64
 
 local proc   bodytrans();
 local void   ini_bt(), end_bt(), make_bt();
@@ -77,14 +81,14 @@ local string get_bt(), put_bt();
  * valued function, and return a pointer.
  */
 
-rproc btrtrans(string expr)
+rproc_body btrtrans(string expr)
 {
-    return (rproc) bodytrans("real", expr, NULL);
+    return (rproc_body) bodytrans("real", expr, NULL);
 }
 
-iproc btitrans(string expr)
+iproc_body btitrans(string expr)
 {
-    return (iproc) bodytrans("int", expr, NULL);
+    return (iproc_body) bodytrans("int", expr, NULL);
 }
 
 /*
@@ -134,7 +138,7 @@ string fname;                   /* optional filename for object file */
         hexpr = fname;               /* set expression to 'filename' */
     else
         hexpr = expr;                  /* point to expr to try first */
-    if ((int)strlen(hexpr) < 15) {
+    if ((int)strlen(hexpr) < SHORT_FNAMELEN) {
 #if defined(LOADOBJ3)
         sprintf(file, "bt%c_%s.so", type[0], hexpr);     /* make filename */
 #else
@@ -143,7 +147,7 @@ string fname;                   /* optional filename for object file */
         dprintf(2,"bodytrans: trying file %s\n",file);
         btrpath = getenv("BTRPATH");
         fullfile = pathfind(btrpath != NULL ? btrpath : DEFPATH, file);
-    } else {
+    } else {    /* safeguard: function will be used, but not saved */
         warning("bodytrans: skipping attempt to create file %s",hexpr);
         fullfile = NULL;
     }
