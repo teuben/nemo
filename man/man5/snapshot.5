@@ -67,6 +67,17 @@ system (typically 1, 2 or 3, but higher values should not be
 illegal if the code handles it), and \tBtype\fP, which is an
 enumerated number that signifies the coordinate type
 (from \fI<snapshot/snapshot.h>\fP: \fICartesian, Spherical, \fP etc.)
+.SH CONVERSIONS
+In newer versions of NEMO you may find a SnapShot format with a split
+\fIPosition\fP and \fIVelocity\fP, instead of the classic combined 
+\fIPhaseSpace\fP. In such case, most conversion programs stubbornly
+convert the datastream to the classic \fIPhaseSpace\fP format. E.g.
+\fYgyrfalcON(1NEMO)\fP produces output data in the new format.
+.nf
+    mkplummer p100 100
+    gyrfalcON p100 p100.out
+    snapscale p100.out - | stoa - p100.atos
+.fi
 .SH "SEE ALSO"
 filestruct(5NEMO)
 .PP
