@@ -34,8 +34,10 @@ cleanlib:
 	(cd $$i;$(MAKE) cleanlib); done
 
 install:
+	@echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 	-@for i in $(DIRS); do\
 	(cd $$i;$(MAKE) install); done
+	@echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 
 update:
 	-@for i in $(DIRS); do\
