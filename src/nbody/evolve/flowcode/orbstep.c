@@ -49,11 +49,11 @@ real atmp1[];		/* scratch accelerations */
     dt2 = dt / 2;
     for (p = btab; p < btab+nb; p++) {		/* loop over bodies */
         pptr = Pos(p);				/*   get body coords */
-	vptr = Vel(p);
+	vptr = Acc(p);
 	for (k = 0; k < NDIM; k++)		/*   loop over coords */
 	    *pptr++ += dt2 * (*vptr++);		/*     set position x_1 */
     }
-    (*force)(btab, nb, *tptr + dt2,FALSE);	/* get accel a_1 */
+    (*force)(btab, nb, *tptr + dt2, FALSE);	/* get accel a_1 */
     dts4 = dt2 * dt2;
     for (p = btab, i = 0; p < btab+nb; p++) {	/* loop over bodies */
         pptr = Pos(p);				/*   get body coords */
@@ -63,10 +63,10 @@ real atmp1[];		/* scratch accelerations */
 	    atmp1[i] = *aptr++;			/*     save accel a_1 */
 	}
     }
-    (*force)(btab, nb, *tptr + dt2,FALSE);	/* get accel a_2 */
+    (*force)(btab, nb, *tptr + dt2, FALSE);	/* get accel a_2 */
     for (p = btab, i = 0; p < btab+nb; p++) {	/* loop over bodies */
         pptr = Pos(p);				/*   get body coords */
-	vptr = Vel(p);
+	vptr = Acc(p);
 	aptr = Acc(p);
 	for (k = 0; k < NDIM; k++, i++) {	/*   loop over coords */
 	    *pptr++ += dt2 * (*vptr++) + dts4 * (2*atmp1[i] - abak0[i]);
@@ -74,12 +74,12 @@ real atmp1[];		/* scratch accelerations */
 	    atmp2[i] = *aptr++;			/*     save accel a_2 */
 	}
     }
-    (*force)(btab, nb, *tptr + dt,TRUE);	/* get accel a_3 */
+    (*force)(btab, nb, *tptr + dt, TRUE);	/* get accel a_3 */
     dt6 = dt / 6;
     dts6 = dt * dt6;
     for (p = btab, i = 0; p < btab+nb; p++) {	/* loop over bodies */
         pptr = Pos(p);				/*   get body coords */
-	vptr = Vel(p);
+	vptr = Acc(p);
 	aptr = Acc(p);
 	for (k = 0; k < NDIM; k++, i++) {	/*   loop over coords */
 	    *vptr++ += dt6 * (abak0[i] + 2*atmp1[i] + 2*atmp2[i] + *aptr++);
