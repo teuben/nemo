@@ -45,19 +45,20 @@ The following example prints the radius, Q_b and an estimate of the
 uncertainty in Q_b based on the convergence speed (\fBeps=\fP):
 .nf
 % potq pfenniger84 r=1:10:1
- 1 0.497721   0.00100091
- 2 0.517117   0.000606655
- 3 0.426776   0.000922551
- 4 0.275563   0.000832961
- 5 0.10667    0.000569431
- 6 0.0305462  0.000926259
- 7 0.0177048  0.000573299
- 8 0.0118711  0.000401105
- 9 0.00860622 0.000298991
-10 0.00656493 0.000234145
+ 1 0.497721   0           10
+ 2 0.517117   0.000606655 8
+ 3 0.426776   0.000922551 8
+ 4 0.275563   0.000832961 8
+ 5 0.10667    0.000569431 8
+ 6 0.0305462  0.000926259 6
+ 7 0.0177048  0.000573299 6
+ 8 0.0118711  0.000401105 6
+ 9 0.00860622 0.000298991 6
+10 0.00656493 0.000234145 6
 .fi
+where the last column is the number of iterations.
 .SH SEE ALSO
-potccd(1NEMO), potential(5NEMO)
+potccd(1NEMO), potrot(1NEMO), potential(5NEMO)
 .SH FILES
 src/orbit/potential	source code
 .SH AUTHOR
@@ -66,6 +67,7 @@ Peter Teuben
 .nf
 .ta +1.0i +4.0i
 23-Feb-02	V1.0 Created	PJT
+8-feb-05	V1.0c  fixed initialization bug 	PJT
 .fi
 
 
