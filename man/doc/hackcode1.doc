@@ -1,0 +1,42 @@
+%N hackcode1
+%D hierarchical N-body code
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man hackcode1' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	snapshot of initial conditions  []
+%A out
+	stream of output snapshots  []
+%A restart
+	input state and set controls  []
+%A continue
+	input state and continue run  []
+%A save
+	output state as code runs  []
+%A nbody
+	number of particles to generate  [128]
+%A seed
+	random number generator seed  [123]
+%A cencon
+	centrally concentrated system  [false]
+%A freq
+	fundamental integration frequency  [32.0]
+%A eps
+	usual potential softening  [0.05]
+%A tol
+	cell subdivision tolerence  [1.0]
+%A fcells
+	cell allocation parameter  [1.0]
+%A options
+	misc. control options  [mass,phase]
+%A tstop
+	time to stop integration  [2.0]
+%A freqout
+	major data-output frequency  [4.0]
+%A minor_freqout
+	minor data-output frequency  [32.0]
+%A debug
+	turn on debugging messages  [false]
+%A VERSION
+	18-jan-94 PJT [1.3]

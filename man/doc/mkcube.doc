@@ -1,0 +1,22 @@
+%N mkcube
+%D create a uniform cube of equal massive stars
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man mkcube' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A out
+	Output file name [???]
+%A nbody
+	Number of particles [256]
+%A size
+	Size of cube [1.0]
+%A sigma
+	Isotropic velocity dispersion [0.0]
+%A seed
+	Random number seed [0]
+%A zerocm
+	Center c.o.m. ? [t]
+%A headline
+	Text headline for output []
+%A VERSION
+	25-mar-94 PJT [1.0a]
