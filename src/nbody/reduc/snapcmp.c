@@ -8,6 +8,7 @@
  *	27-jan-00   V1.4b  more usefule error messages                 pjt
  *       9-apr-01       c  added header in output   pjt
  *      14-apr-04   V1.5  added headline= to plots                     pjt
+ *      15-apr-05         add RMS to output
  */
 
 #include <stdinc.h>
@@ -15,6 +16,7 @@
 #include <filestruct.h>
 #include <history.h>
 #include <vectmath.h>
+#include <moment.h>
 #include <yapp.h>
 #include <axis.h>
 #include <snapshot/snapshot.h>
@@ -51,7 +53,7 @@ string defv[] = {			/* DEFAULT INPUT PARAMETERS         */
     "formal=false\n			  if true, make publication plot",
     "headline=\n                          header",
 #endif
-    "VERSION=1.5\n			  14-apr-04 PJT",
+    "VERSION=1.5a\n			  15-apr-04 PJT",
     NULL,
 };
 
@@ -172,19 +174,27 @@ local real *snapcmp(Body *btab1, Body *btab2, int nbody, real tsnap)
 local void printquart(real result[], int nbody, real tsnap)
 {
   static int Qheader = 1;
+  int i;
+  Moment m;
 
   if (Qheader) {
-    printf("# time  Min  Qlow Median Qhigh  Max\n");
+    printf("# time  Min  Qlow Median Qhigh  Max   Mean Sigma\n");
     Qheader = 0;
   }
   qsort(result, nbody, sizeof(real), cmpreal);
-  printf("%g   %g %g %g %g %g\n",
-           tsnap,
-	   result[0],
-	   result[nbody/4],
-	   result[nbody/2-1],
-	   result[3*nbody/4-1],
-	   result[nbody-1]);
+  ini_moment(&m,2);
+  for (i=0; i<nbody; i++)
+    accum_moment(&m,result[i],1.0);
+  printf("%g   %g %g %g %g %g  %g %g\n",
+	 tsnap,
+	 result[0],
+	 result[nbody/4],
+	 result[nbody/2-1],
+	 result[3*nbody/4-1],
+	 result[nbody-1],
+	 mean_moment(&m),
+	 sigma_moment(&m));
+	 
 }
 
 /* should have prototype :: int (*compar)(const void *, const void *)) */
