@@ -115,7 +115,7 @@
  * 24-apr-02    3.4   added placeholder for new outparam() stuff
  *  1-aug-02       a  try and free() some allocated local data
  *  2-aug-02       b  write kiddy version of outkeys= processing
- *  4-dec-02       c  use MAXBUF for keys
+ *  4-dec-02       c  use MAXBUF for keys - btw, wc is not 2800+ lines :-(
 
   TODO:
       - what if there is no VERSION=
