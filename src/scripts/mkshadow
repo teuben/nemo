@@ -1,0 +1,32 @@
+#! /bin/csh -f
+#
+#   make a local RCS link in the current NEMO tree
+
+
+
+set move=0
+if (X$1 == X-m) then
+  set move=1
+endif
+
+set root=$NEMO
+set rel=`echo $cwd | sed s,$root,,g`
+set rcs=$root/RCS/$rel
+
+echo Creating $rcs
+mkdir -p $rcs
+
+if (! -e RCS) then
+  echo Making symlink
+  ln -s $rcs RCS
+else
+  if ($move) then
+    echo Moving over any existing files
+    mv RCS/* $rcs
+    rmdir RCS
+    ln -s $rcs RCS
+  else
+    echo Skipping, link already present
+  endif
+endif
+
