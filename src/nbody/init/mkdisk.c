@@ -42,7 +42,7 @@ string defv[] = {
     "angle=f\n          Regular angular distribution?",
     "vrad=0\n           radial velocity",
     "headline=\n	Text headline for output",
-    "VERSION=4.3b\n	8-apr-03 PJT",
+    "VERSION=4.4a\n	6-may-03 PJT",
     NULL,
 };
 
