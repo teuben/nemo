@@ -1,4 +1,4 @@
-VERSION = NEMO V3.1 27-dec-03 PJT
+VERSION = NEMO V3.2 6-apr-04 PJT
 ################################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 ################################################################################
@@ -16,8 +16,9 @@ CHECKDIR1 = data inc news tmp csh \
             adm/import adm/export adm/install adm/submit adm/purge 
 
 # absolute (derived) directories & files
-CHECKDIR2 = $(NEMOBIN) $(NEMOLIB) $(NEMOOBJ) host host/include host/$(NEMOHOST) \
-            $(NEMOOBJ)/bodytrans $(NEMOOBJ)/potential
+CHECKDIR2 = $(NEMOBIN) $(NEMOLIB) $(NEMOOBJ) \
+            $(NEMOOBJ)/bodytrans $(NEMOOBJ)/potential \
+	    opt opt/include opt/lib opt/bin
 
 CHECKFIL2 = $(NEMO)/adm/Usage \
 	    $(NEMO)/adm/install/mknemo.log \
@@ -88,11 +89,6 @@ helphelp:
 	@echo NEMO=$(NEMO)
 	@echo NEMOSITE=$(NEMOSITE)
 	@echo NEMOHOST=$(NEMOHOST)
-	@echo NEMOBIN=$(NEMOBIN)
-	@echo NEMOLIB=$(NEMOLIB)
-	@echo NEMOOBJ=$(NEMOOBJ)
-	@echo FLOAT_OPTION=$(FLOAT_OPTION)
-	@echo "HOSTTYPE=$(HOSTTYPE) (deprecated - see NEMOHOST above)"
 	@echo SHELL=$(SHELL)
 	@echo CC=$(CC)  CFLAGS=$(CFLAGS)
 	@echo FC=$(FC)  FFLAGS=$(FFLAGS)
@@ -109,48 +105,26 @@ dirs: nemo_start
 	@echo Checking directory structure on `date`
 	@echo By `whoami` on `hostname`
 	-@for i in $(CHECKDIR1) $(ASCIIDIRS); do \
-	(if [ -d $(NEMO)/$$i ]; \
-	then \
-	    echo DIR $(NEMO)/$$i exists; \
-	else \
+	(if [ ! -d $(NEMO)/$$i ]; then \
 	    echo DIR $(NEMO)/$$i created; \
 	    mkdir $(NEMO)/$$i; \
 	    chmod a+w $(NEMO)/$$i; \
 	fi); done
 	-@for i in $(CHECKDIR2); do \
-	(if [ -d $$i ]; \
-	then \
-	    echo DIR $$i exists; \
-	else \
+	(if [ ! -d $$i ]; then \
 	    echo DIR $$i created; \
 	    mkdir $$i; \
 	    chmod a+w $$i; \
 	fi); done
-	-@for i in bin lib ; do \
-	(if [ -d host/$(NEMOHOST)/$$i ]; \
-	then \
-	    echo SYMLINK $$i exists; \
-	else \
-	    echo SYMLINK $$i created; \
-	    ln -s $(NEMO)/$$i/$(NEMOHOST) host/$(NEMOHOST)/$$i; \
-	fi); done
-	@if [ -d host/$(NEMOHOST)/include ]; \
-	then \
-	    echo SYMLINK include exists; \
-	else \
-	    echo SYMLINK include created; \
-	    ln -s $(NEMO)/host/include host/$(NEMOHOST)/include; \
-	fi
 	-@for i in $(CHECKFIL2); do \
-	(if [ -f $$i ]; \
-	then \
-	    echo FILE $$i exists; \
-	    chmod a+w $$i; \
-	else \
+	(if [ ! -f $$i ]; then \
 	    echo FILE $$i created; \
 	    touch $$i; \
 	    chmod a+w $$i; \
 	fi); done
+	@if [ ! -d include ]; then \
+	    ln -s inc include; \
+	fi
 	@if [ ! -f $(TIMESTAMP) ]; then \
             echo Updating $(TIMESTAMP) file on `date`; \
 	    echo `date` `hostname` `whoami` > $(TIMESTAMP); \
@@ -210,29 +184,12 @@ nemo_start:
 	echo 'source $$NEMO/nemo.rc'                      >> nemo_start
 
 start:
-	make nemo_start NEMO=`pwd`
+	$(MAKE) nemo_start NEMO=`pwd`
 
 alias:
 	@echo "# add these lines to your .cshrc file:"
 	@echo "alias nemo 'setenv NEMO "$(NEMO)" ; source $$NEMO/nemo_start'"
 
-# fake a hosttype for current NEMO: (usage: make fakehost FAKEHOST=alias)
-FAKEHOST=unknown
-fakehost:
-	@echo "Creating dummy (bin,lib,obj) link for FAKEHOST=$(FAKEHOST)"
-	ln -s $(NEMOBIN) $(NEMO)/bin/$(FAKEHOST)
-	ln -s $(NEMOLIB) $(NEMO)/lib/$(FAKEHOST)
-	ln -s $(NEMOOBJ) $(NEMO)/obj/$(FAKEHOST)
-
-TRUEHOST=$(NEMOHOST)
-truehost:
-	@echo "Creating dummy (bin,lib,obj) link for TRUEHOST=$(TRUEHOST)"
-	@rm -f $(NEMOBIN) $(NEMOLIB) $(NEMOOBJ)
-	ln -s $(NEMO)/bin/$(TRUEHOST) $(NEMOBIN)
-	ln -s $(NEMO)/lib/$(TRUEHOST) $(NEMOLIB)
-	ln -s $(NEMO)/obj/$(TRUEHOST) $(NEMOOBJ)
-	@echo ""
-	@ls -l $(NEMOBIN)
 
 OS = $(NEMOHOST)
 
@@ -242,7 +199,7 @@ SCRIPTS =
 scripts:
 	@echo Installing scripts on `date` 
 	@echo By `whoami` on `hostname`
-	(cd $(NEMO)/src/scripts; make install)
+	(cd $(NEMO)/src/scripts; $(MAKE) install)
 
 scripts_old:
 	-@for i in $(SCRIPTS); do \
@@ -412,7 +369,7 @@ dist:
 	fi;
 
 distcvs:
-	make dist DIST_DIR=nemo
+	$(MAKE) dist DIST_DIR=nemo
 
 distu:
 	tar -zcf $(DIST_DIR)_cvs.tar.gz `find . -name Entries -exec src/scripts/cvsutar '{}' \;`
@@ -474,11 +431,11 @@ export:
 
 usrftp:
 	@echo Creating usr tarfile for USR=$(USR)
-	@make tarfile EXPORTA=$(USR) FILE=$(FTPDIR)/$(USRTAR)
+	@$(MAKE) tarfile EXPORTA=$(USR) FILE=$(FTPDIR)/$(USRTAR)
 
 ftp:
 	@echo Working from FTPDIR=$(FTPDIR) :;df -k $(FTPDIR)
-	@make tarfile "SRC=$(SRC)" "USR=$(USR)" FILE=$(FTPDIR)/$(NEMOTAR)
+	@$(MAKE) tarfile "SRC=$(SRC)" "USR=$(USR)" FILE=$(FTPDIR)/$(NEMOTAR)
 	@echo Compressing
 	@$(COMPRESS) $(FTPDIR)/$(NEMOTAR)
 	@cp VERSION src/scripts/bootstrap README $(FTPDIR)
@@ -498,12 +455,12 @@ stamp:
 	@echo "   src/scripts/version inc"
 
 ftp_patch:
-	tar cvf $(FTPDIR)/$(PATCHTAR) `make new CHKFILE=$(CHKFILE)`
+	tar cvf $(FTPDIR)/$(PATCHTAR) `$(MAKE) new CHKFILE=$(CHKFILE)`
 	@echo "<A HREF=ftp://ftp.astro.umd.edu/pub/nemo/$(PATCHTAR)> $(PATCHTAR) </A>"  > $(WWWDIR)/lastpatch
 	@echo "(`date`)" >> $(WWWDIR)/lastpatch
 
 new_patch:
-	@make new CHKFILE=$(FTPDIR)/$(PATCHTAR)
+	@$(MAKE) new CHKFILE=$(FTPDIR)/$(PATCHTAR)
 
 new_time:
 	@echo "`cat $(NEMO)/VERSION` `date +%m%d%H%M%y` `whoami` `date`" >> $(CHKFILE)
@@ -523,35 +480,35 @@ new_ftp:
 
 tarkernel:
 	@echo KERNEL+SCRIPTS only for small bootstrap
-	@make tarfile ASCIIDIRS="inc src/kernel src/scripts" FILE=kernel.tar
+	@$(MAKE) tarfile ASCIIDIRS="inc src/kernel src/scripts" FILE=kernel.tar
 	@$(COMPRESS) kernel.tar
 	@echo All done
 	@ls -l kernel.tar*
 
 tarnbody:
 	@echo NBODY only 
-	@make tarfile ASCIIDIRS="src/nbody" FILE=nbody.tar
+	@$(MAKE) tarfile ASCIIDIRS="src/nbody" FILE=nbody.tar
 	@$(COMPRESS) nbody.tar
 	@echo All done
 	@ls -l nbody.tar*
 
 tarorbit:
 	@echo ORBIT only 
-	@make tarfile ASCIIDIRS="src/orbit" FILE=orbit.tar
+	@$(MAKE) tarfile ASCIIDIRS="src/orbit" FILE=orbit.tar
 	@$(COMPRESS) orbit.tar
 	@echo All done
 	@ls -l orbit.tar*
 
 tarman:
 	@echo MAN only 
-	@make tarfile ASCIIDIRS= FILE=man.tar \
+	@$(MAKE) tarfile ASCIIDIRS= FILE=man.tar \
            ASCIIFILES="man/man? man/Makefile man/tmac.an man/w*"
 	@$(COMPRESS) man.tar
 	@echo All done
 	@ls -l man.tar*
 
 tarbima: 
-	make tarfile FILE=checker.tar \
+	$(MAKE) tarfile FILE=checker.tar \
 	 "ASCIIDIRS=inc usr/bima\
 	  src/Makefile src/kernel/Makefile \
 	  src/kernel/io src/kernel/core src/kernel/misc src/scripts \
@@ -599,57 +556,39 @@ purge:
 
 
 ##############################################################################
-#	Machine non-NEMO targets, mostly for specific machines
-
-ds:
-	@echo "Installing DS...needs libnemo.a"
-	@if test -f $(NEMOLIB)/libnemo.a ; \
-	then \
-	   cd $(NEMO)/src/tools/ds ; \
-           grep NEMO conf.h ;\
-	   $(MAKE) ds EXTRALIBS=$(NEMOLIB)/libnemo.a ; \
-	   mv ds $(NEMOBIN) ; \
-	   $(MAKE) clean ; \
-        else \
-	   echo "Library libnemo.a is absent." ; \
-	fi
-
-movie:
-	@echo "Installing MOVIEs for a SUN3/4..."
-	@echo "### [movie compiled with /bin/cc ]"
-	(cd $(NEMO)/src/tools/movie; \
-	 $(MAKE) movie movie_sv CC=/bin/cc; \
-	 mv movie movie_sv $(NEMOBIN) )
-	@echo "...done"
+#	Some helpful non-NEMO targets
 
 miriad:
 	@echo "Installing miriad shells..."
 	(cd $(NEMO)/src/tools/miriad/miriad;\
-	 $(MAKE) miriad ; mv miriad $(NEMOBIN); make clean)
+	 $(MAKE) miriad ; mv miriad $(NEMOBIN); $(MAKE) clean)
 	(cd $(NEMO)/src/tools/miriad/mirtool;\
-	 $(MAKE) nemotool ; mv nemotool $(NEMOBIN); make clean)
+	 $(MAKE) nemotool ; mv nemotool $(NEMOBIN); $(MAKE) clean)
 
 makeindex:
 	@echo "Installing makeindex utility for LaTeX manuals"	(cd $(NEMO)/src/tools/makeindex;\
-	 make;mv indexsrc/index $(NEMOBIN)/makeindex;make clean)
+	 $(MAKE);mv indexsrc/index $(NEMOBIN)/makeindex;$(MAKE) clean)
+
+#	internal PGPLOT install
+pgplot:
+	src/scripts/pgplot.install
+
+vogl:
+	src/scripts/nemo.vogl
+
 #	END
 
 
-#	non-advertised help target
-
-OSS = sun3 sun4 mf sun3_old sun4_old sparc
-
 install:
-	@echo "There is no official install from the root menu yet"
+	@echo "There is no official install from the root menu"
 	@echo "see also src/scripts/bootstrap how to bootstrap NEMO"
+	@echo "      or AAA_SOURCE_ME"
 	@echo ""
-	@echo "However, typically you would do the following: (must be in (t)csh)"
+	@echo "Typically you would do the following: (must be in (t)csh)"
 	@echo "      ./configure        -- run configure, with lots of options"
 	@echo "      source nemo_end    -- if you have an *old* NEMO env"
 	@echo "      source nemo_start  -- load the NEMO environment"
-	@echo "      make dirs          -- creates directory structure and admin stuff"
-	@echo "      make config_extra  -- copy configure created files into dirs"
-	@echo "      make scripts       -- distribute basic scripts to NEMOBIN"
+	@echo "      make postconfig    -- basic post configure things"
 	@echo "      source NEMORC.local   -- any last minute local changes"
 	@echo "      rehash                -- update search path" 
 	@echo "      make libs             -- install the libraries"
@@ -663,6 +602,8 @@ install:
 
 helpconfig:
 	@echo config, configure, config_extra, config_clean
+
+postconfig:	dirs config_extra scripts
 
 config:	configure
 	./configure
@@ -689,27 +630,36 @@ CLEAN = host bin lib obj adm/TIMESTAMP etc/motd $(CONFIG_CLEAN)
 CONFIG_CLEAN = config.h makedefs config.cache config.log config.status
 
 clean:
-	@echo There is no clean, there is cleanall  and config_clean:
+	@echo There is no single clean, there is cleanall, config_clean and distclean:
 	@echo ""
-	@echo There is also a config_clean, which only removes:
+	@echo '"make config_clean" would remove' 
 	@echo ""
 	@echo $(CONFIG_CLEAN)
 	@echo ""
-	@echo '"make cleanall" would remove' $(CLEAN)
+	@echo '2) "make cleanall" would remove' 
 	@echo ""
 	@echo $(CLEAN)
 	@echo ""
-	@echo '"make cleansrc" would clean the src tree (of .o files and such)'
+	@echo '3) "make cleansrc" would clean the src tree (of .o files and such)'
+	@echo ""
+	@echo '"make distclean" would remove NEMORC.local as well as'
+	@echo ""
+	@echo $(CHEDKDIR2)
+
+distclean: config_clean cleansrc
+	@echo Cleaning as much as one can to simulate a distribution
+	rm -rf $(CHECKDIR2)
+	rm -f NEMORC.local
 
 cleanall:
 	rm -rf $(CLEAN)
 
 cleansrc:
-	(cd src; make clean)
+	(cd src; $(MAKE) clean)
 
 libs:
 	@echo Starting at `date`, tail -f $(NEMO)/install.log
-	cd src;make -i clean install > ../install.log 2>&1 
+	cd src;$(MAKE) -i clean install > ../install.log 2>&1 
 	@echo Done at `date`
 
 bins:

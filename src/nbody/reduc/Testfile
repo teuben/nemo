@@ -1,5 +1,5 @@
 DIR = src/nbody/reduc
-BIN = snapplot snapdiagplot snapplotv snapmradii radprof real snapfit
+BIN = snapplot snapdiagplot snapplotv snapmradii radprof real snapfit snapprint
 NEED = $(BIN) hackcode1 mkplummer tabplot snapfour snapgrid snaprotate
 
 help:
@@ -65,5 +65,8 @@ snapfit: cube.in hack.out
 snapprint: snap.in
 	@echo Running $@
 	snapprint snap.in x+y,x+z,y+z
+	snapprint snap.in x+y | head -1
+	snapprint snap.in x+z | head -1
+	snapprint snap.in y+z | head -1
 	snapprint snap.in x-y | head -1
 	

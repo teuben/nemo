@@ -12,6 +12,7 @@ extern string yapp_string;
 
 local stream yappstr = NULL;
 local string yapp_dev;
+local int ncolors = 16;      /* kind of faking pgplot */
 
 plinit(string pltdev, real xmin, real xmax, real ymin, real ymax)
 {
@@ -96,6 +97,23 @@ plstop()
     strclose(yappstr);
     yappstr=NULL;
 }
+
+int plncolors()
+{
+  return ncolors;
+}
+
+void plcolor(int color)
+{
+    fprintf(yappstr,"color %d\n",color);
+}
+
+void plpalette(real *r, real *g, real *b, int n)
+{
+    /* cannot handle them */
+    fprintf(yappstr,"# pallete %d\n",n);
+}
+
 
 pl_matrix(frame,nx,ny,xmin,ymin,cell,fmin,fmax,findex)
 real *frame, xmin, ymin, cell, fmin, fmax, findex;

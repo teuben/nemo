@@ -9,7 +9,7 @@
 #include "defs.h"
 #include <getparam.h>
 #include <filestruct.h>
-#include <snapshot.h>
+/* #include <snapshot.h> */
 
 string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "in=???\nInput file with mass coordinates",

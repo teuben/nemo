@@ -20,7 +20,9 @@ NMAX = 2048
 L = $(NEMOLIB)/libnemo.a
 # linking is now done via f77 command, hence no LIBF77 needed anymore
 #LIBF77 = -lF77 -lI77 -lU77 -lF77 -lI77 -lU77
-LIBF77 =
+
+# on MacOSX we need this line uncommented still.
+# LIBF77 = -lcc_dynamic
 
 #  should use makedefs piece here, on mac one otherwise needs -lcc_dynamic
 
@@ -61,8 +63,6 @@ nemo_bin:	$(BIN)
 nemo_src:
 	-@for i in $(BIN); do \
 	echo `pwd` $$i ; done 
-		
-		
 #									#
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 

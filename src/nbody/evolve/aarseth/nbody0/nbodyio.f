@@ -1,4 +1,4 @@
-      SUBROUTINE INPARS(nmax,n,eta,deltat,tcrit,eps2,reset
+      SUBROUTINE INPARS(nmax,n,eta,deltat,tcrit,eps2,reset)
 C
 C Input:
 C   nmax     max number particles in workspace

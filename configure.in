@@ -39,6 +39,13 @@ dnl ---			Nemo version - just for fun for now
 NEMOVER="`cat VERSION`"
 AC_SUBST(NEMOVER)
 
+dnl ---                 Create needed libraries for next step
+for i in bin lib ojb; do
+ if ! test -e $i ; then
+   mkdir $i
+ fi
+done
+
 dnl ----                Architecture stuff we need to know
 AC_CANONICAL_HOST
 echo "Found CANONICAL_HOST = $host_os"
@@ -218,7 +225,8 @@ if test -z "$GLLIBS"; then
                 else
                         # this could happen if the user specified a bogus
                         # PEXUT_LIB environment variable:
-                        AC_MSG_ERROR($PEXUT_LIB is not readable)
+                        AC_MSG_ERROR([$PEXUT_LIB is not readable])
+
                 fi
         fi
 
@@ -289,49 +297,63 @@ if test "$enable_fortran" = "yes"; then
   else
     F77="echo"
     fortran=no
-    AC_MSG_WARN(no FORTRAN compiler)
+    AC_MSG_WARN([no FORTRAN compiler])
   fi
 else
   F77="echo"
   fortran=no
-  AC_MSG_WARN(no FORTRAN compiler)
+  AC_MSG_WARN([no FORTRAN compiler])
 fi
 
 dnl Fortran/C linkeage : defines F77_CMAIN_FFLAGS
 ACX_F77_CMAIN_FFLAGS([],[AC_MSG_WARN([problems fortran-c interface])])
 
-dnl Solaris gcc doesn't know -rdynamics, linux needs it for dlopen()
+dnl MacOS (darwin) needs -lcc_dynamic
+dnl Only linux wants -rdynamic, for dlopen()
 if test "$GCC" = "yes"; then
-  NEMO_CFLAGS="$NEMO_CFLAGS -rdynamic -fwritable-strings $gcov_flag"
+  NEMO_CFLAGS="$NEMO_CFLAGS -fwritable-strings $gcov_flag"
 fi
 NEMO_CFLAGS="$NEMO_CFLAGS $prec_flag"
 
 AC_SUBST(CCSHARED)
-CCSHARED=""
+CCSHARED="-fpic"
+AC_SUBST(MACOS_LIBS)
+MACOS_LIBS=""
 AC_MSG_CHECKING(what flags we need to created shared libs)
-CCSHARED=-fpic  
 
 case $host_os in
   linux*|Linux*)
     CCSHARED="-fpic"
+    if test "$GCC" = "yes"; then
+       NEMO_CFLAGS="$NEMO_CFLAGS -rdynamic" 
+    fi				   
     ;;
   darwin*)
-    CCSHARED="-fpic -fno-common"
+    CCSHARED="-fPIC -fno-common"
+    MACOS_LIBS="-lcc_dynamic"
     ;;
   sol*)
+#   -PIC ??
     CCSHARED="-KPIC"
     ;;
 esac
 AC_MSG_RESULT([$CCSHARED])
 
+
+
 dnl ---------------------------------------------------------------------------
+dnl PGPLOT detection: (NEMO allows PGPLOT to be built internally in $NEMO/lib)
+dnl if $PGPLOT_DIR exists, take that as the default
+dnl else, check a few standard places
+dnl if all that fails and --with-pgplot-prefix is also not good, bail out.
 
-
+AC_SUBST(PGPLOT_DIR)
 AC_MSG_CHECKING(whether we have PGPLOT)
 if test -d "$PGPLOT_DIR"; then
     pgplot_dir="$PGPLOT_DIR"
+    AC_MSG_RESULT([yes, found \$PGPLOT_DIR=$PGPLOT_DIR])
 else
-    for dir in /usr/lib/pgplot /usr/local/pgplot /usr/local/lib/pgplot /opt/pgplot
+    for dir in lib /usr/lib/pgplot /usr/local/lib/pgplot /usr/local/pgplot /opt/pgplot 
     do
         if test -f $dir/grfont.dat; then
             pgplot_dir="$dir"
@@ -340,27 +362,22 @@ else
     done
 fi
 AC_ARG_WITH(pgplot-prefix, 
-        [  --with-pgplot-prefix=DIR   Directory where PGPLOT was installed], 
+        [  --with-pgplot-prefix=DIR   Directory where PGPLOT was installed, aka PGPLOT_DIR], 
         pgplot_config_prefix="$withval", 
         pgplot_config_prefix="$pgplot_dir")
 
 yapp_default="ps"
 if test x$pgplot_config_prefix != x; then
-        if test -f ${pgplot_config_prefix}/grfont.dat ; then
-		PGPLOT_DIR="$pgplot_config_prefix"
-		AC_SUBST(PGPLOT_DIR)
-                PGPLOT_INCLUDE="-I$pgplot_config_prefix"
-                PGPLOT_LIB="-L$pgplot_config_prefix"
-                PGPLOT_LIB="$PGPLOT_LIB -lcpgplot -lpgplot"
-dnl                CFLAGS="$PGPLOT_INCLUDE $CFLAGS"
-                AC_DEFINE(HAVE_LIBPGPLOT) 
-                graphtype=pgplot
-                AC_MSG_RESULT([yes, $PGPLOT_DIR])
-		yapp_default="pgplot"
-        else
-                AC_MSG_RESULT(no)
-                AC_MSG_WARN([could not find PGPLOT library in 1st: $pgplot_dir])
+        if ! test -f ${pgplot_config_prefix}/grfont.dat ; then
+                AC_MSG_WARN([could not find PGPLOT library in $pgplot_dir yet])
         fi
+	PGPLOT_DIR="$pgplot_config_prefix"
+        PGPLOT_INCLUDE="-I$pgplot_config_prefix"
+        PGPLOT_LIB="-L$pgplot_config_prefix"
+        PGPLOT_LIB="$PGPLOT_LIB -lcpgplot -lpgplot"
+        AC_DEFINE(HAVE_LIBPGPLOT) 
+        AC_MSG_RESULT([yes, $PGPLOT_DIR])
+	yapp_default="pgplot"
 else
 	AC_MSG_WARN([could not find PGPLOT library in 2nd: $pgplot_config_prefix])
 fi
@@ -395,6 +412,10 @@ case $host_os in
 	;;
       solaris*)
 	LOADOBJ_MACH="-Dsun4 -DSOLARIS -DSYSV"
+	LOADOBJ_LIBS=-ldl
+	;;
+      darwin*)
+	LOADOBJ_MACH="-Ddarwin -DDL"
 	LOADOBJ_LIBS=-ldl
         ;;
       irix*)
@@ -441,7 +462,7 @@ else
     HDF_INC=""
     HDF_LIB=""
     AC_MSG_RESULT(no)
-    AC_MSG_WARN(could not find HDF library)
+    AC_MSG_WARN([could not find HDF library])
 fi   
 
 AC_SUBST(HDF_INC)
@@ -568,7 +589,7 @@ else
         MIRIAD_INC=""
         MIRIAD_LIB=""
         AC_MSG_RESULT(no)
-        AC_MSG_WARN(could not find MIRIAD library...)
+        AC_MSG_WARN([could not find MIRIAD library...])
 fi
 AC_SUBST(MIRIAD_INC)
 AC_SUBST(MIRIAD_LIB)
@@ -749,7 +770,16 @@ case $yapp_name in
 	  YAPP_DEF="yapp.ps"
           ;;
 	pgplot)
-	  YAPP_LIBS="-L$PGPLOT_DIR -lpgplot $XLIBS $FLIBS"
+	  if test "$PGPLOT_DIR" = "$NEMOLIB" ; then
+	    YAPP_LIBS="-L\$NEMOLIB -lpgplot $XLIBS $FLIBS"
+	    PGPLOT_DIR="\$NEMOLIB"
+	    AC_MSG_WARN(using dollar)
+	    echo $PGPLOT_DIR
+	    echo $NEMOLIB
+	  else
+   	    YAPP_LIBS="-L$PGPLOT_DIR -lpgplot $XLIBS $FLIBS"
+	    AC_MSG_WARN(using classic)
+	  fi
 	  YAPP_DEF="/xs"
           ;;
 esac
@@ -763,7 +793,6 @@ if test -d "$NEMODAT"; then
   echo "*** Warning: NEMO=$NEMO, maybe you are running NEMO already"
   echo "*** you probably should source $NEMO/nemo_end"
 fi
-
 
 AC_OUTPUT(NEMORC.gen Makefile makedefs nemo_start nemo.pl)
 

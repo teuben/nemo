@@ -17,6 +17,7 @@
  *                      and trying a new pl_contour() from PGPLOT         PJT
  *	21-jan-00       added pl_cursor from tabplot			  PJT
  *      31-dec-03       added yapp_meta                                   PJT
+ *      28-mar-04       fixed color problem in multipanel programs        PJT
  */
 
 #include <stdinc.h>
@@ -558,7 +559,8 @@ local cms_rgbsetup()
 
 /*
  * PLCOLOR: specify new plotting color as an integer between 0 and ncolors-1;
- * values outside this range are mapped to the nearest endpoint.
+ * normally values outside this range are mapped to the nearest endpoint.
+ * For PGPLOT however, color 0 is the background, 1 the foreground
  */
 
 void plcolor(int color)
@@ -566,7 +568,7 @@ void plcolor(int color)
     if (color < 0)
 	color = 0;
     else if (color > ncolors - 1)
-	color = ncolors - 1;
+        color = 1;
     pgsci_(&color);
 }
 

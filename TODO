@@ -1,4 +1,19 @@
-for 3.1.2
+Remaining MacOSX problems:
+  - configure leaves -lcrt.o etc. in, so they need manual removal
+    from makedefs and NEMORC.gen before continuing on
+
+  - src/nbody/evolve/aarseth/nbody0/Makefile
+	need to activate F77LIBS to include -lcc_dynamic
+
+  - directcode doesn't compile since it was derived from an earlier
+    release of hackcode1 with the multiple externs included by the
+    linker
+
+
+-------------------------------------------------------------------------------
+
+
+for 3.2.0
   - make sure cfitsio stuff is ok in configure
   - the change in get_atable() should mean routines need to work
     on buffered table read better
@@ -8,6 +23,7 @@ for 3.1.2
 	(fmath in potential not needed)
 	(some potential/data not needed)
   - intel linker problems (use different technique to force loading?)
+  - get a mini-NEMO going (Dehnen, BIMA/CARMA)
 
 --------------------------------------------------------------------------------
 

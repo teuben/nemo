@@ -9,6 +9,13 @@ switch (`uname -s`)
     make -f Makefile.linux -i DEST=$NEMOLIB  install clobber
     mknemo snapxyz xyzview
     breaksw
+ case "Darwin":
+    echo Darwin selected, but experimental
+    cd $NEMO/usr/vogl
+    make -f Makefile.linux -i DEST=$NEMOLIB 
+    make -f Makefile.linux -i DEST=$NEMOLIB  install clobber
+    mknemo snapxyz xyzview
+    breaksw
   default:
     echo System `uname -s` not known to me yet....
     breaksw

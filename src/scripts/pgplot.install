@@ -11,7 +11,7 @@
 #  5-dec-02     added tcl/tk driver for carma
 # 29-jun-03     added darwin (tested w/ MacOSX 10.2)
 # 23-jan-04     fixed linux when CC and F77 present (e.g. intel compiler)
-# 21-mar-04     force rebuilding some executables upon reload
+# 27-mar-04     force rebuilding some executables upon reload (+typo fix)
 
 
 #			 	.. command line keywords ..
@@ -72,7 +72,7 @@ mv new.list drivers.list
 rm old.list
 
 echo Renaming old X server to force it to rebuild
-mv pgxwin_server pgxwin_server pgxwin_server.old
+if (-e pgxwin_server) mv pgxwin_server pgxwin_server.old
 
 # Solaris
 switch ($host)
@@ -109,9 +109,9 @@ switch ($host)
     exit 1
 endsw
 
-make
-make cpg
-make clean
+make -i
+make -i cpg
+make -i clean
 \rm -fr pgdemo*
 
 #  may also need to change LD_LIBRARY_PATH with $NEMOLIB

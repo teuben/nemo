@@ -1,18 +1,35 @@
-
-# Source this file to install and build NEMO from scratch with 'manybody'
+#
+# Source this file to install and build NEMO from scratch (manybody method)
+#
+# In order to get a distribution to get an easy PGPLOT enabled version you
+# need a NEMO/local/pgplot source directory, e.g. via the following method:
+#	cvs co nemo
+#	cd nemo
+#	mkdir local; cd local; cvs co pgplot; cd ..
+#       source AAA_SOURCE_ME
+#
+# to clean up the cloest approach is:
+#	make distclean          # cleans most of the things created
+#	omen                    # remove NEMO* and YAPP* things, cleans the path
 #
 #
 # See also approach in other 'manybody' modules, e.g. starlab, partiview
 #
-# Within NEMO see also 'src/scripts/quickps' and 'src/scripts/bootstrap'
+# Within NEMO there are a few other scripts which have been used to automate
+# installations:
+#    src/scripts/quickps
+#    src/scripts/bootstrap
+#    src/scripts/test_a_new_nemo_cvs
+#
 # for other approaches we used to have.
 #
-# 25-jul-01  Peter Teuben		created
+# 25-jul-01  Peter Teuben       created, for MANYBODY
 # 18-jan-02  PJT                added optional PGPLOT if detected
 #  3-dec-02  PJT                added vogl stuff
 #  1-mar-03  PJT                added make_html 
 # 17-jun-03  PJT                better path, rehash for immediate use
 # 15-oct-03  PJT                added gyfalcON
+# 23-mar-04  PJT                for NEMO 3.2 - no more NEMOHOST
 
 rm -f install.log >& /dev/null
 touch install.log
@@ -20,49 +37,31 @@ touch install.log
 set stat = 0
 echo \(Sending output to install.log\)
 
-    echo Running configure
+if (-d local/pgplot) then
+    echo "Running configure, assuming we're using the local pgplot"
+    ./configure --with-yapp=pgplot --with-pgplot-prefix=`pwd`/lib >>& install.log
+    echo Initializing NEMO environment
+    source nemo_start >>& install.log
+    echo Postconfig
+    make postconfig >>& install.log
+    source NEMORC.local
+    echo Installing pgplot library
+    make pgplot >>& install.log
+else
+    echo "Running configure with full autodetection (good luck)"
+    echo "    [hint: you may be better off by putting pgplot in NEMO/local/pgplot]"
     ./configure >>& install.log
-    if ($status) then
-	@ stat++
-    endif
-    echo '++++++++++++++++++++++++++++++++++++++++' >>& install.log
-
-echo Initializing NEMO environment
-source nemo_start >>& install.log
-if ($status) then
-    @ stat++
+    echo Initializing NEMO environment
+    source nemo_start >>& install.log
+    echo Postconfig
+    make postconfig >>& install.log
+    source NEMORC.local
 endif
-echo '++++++++++++++++++++++++++++++++++++++++' >>& install.log
 
-
-    echo Installing configuration files
-    make dirs config_extra scripts >>& install.log
-    if ($status) then
-	@ stat++
-    endif
-    echo '++++++++++++++++++++++++++++++++++++++++' >>& install.log
-
-    if (-d local/pgplot) then
-       echo 'Compiling an internal PGPLOT'
-       make config_clean >>& install.log
-       rm -f NEMORC.local
-       src/scripts/pgplot.install dir=$NEMO/tmp  >>& install.log
-       ./configure --with-yapp=pgplot --with-pgplot-prefix=$NEMOLIB >>& install.log
-       make dirs config_extra scripts >>& install.log
-    else
-       echo 'Did not find a directory $NEMO/local/pgplot, skipping pgplot install'
-       echo "Using a simple postscript-only graphics driver for yapp"
-    endif
-
-
-source NEMORC.local >>& install.log
-if ($status) then
-    @ stat++
-endif
 rehash
 echo '++++++++++++++++++++++++++++++++++++++++' >>& install.log
 
-echo Building NEMO \(this may take a few minutes\)...
+echo Building NEMO library 
 (cd src; make clean install) >>& install.log
 if ($status) then
     @ stat++
@@ -75,7 +74,7 @@ echo Building html files for all the manual pages
 
 echo '++++++++++++++++++++++++++++++++++++++++' >>& install.log
 
-echo Building some sample exectuables by running testsuite:
+echo Building some sample executables by running the testsuite with -b:
 
 src/scripts/testsuite -b >>& install.log
 
@@ -86,6 +85,7 @@ if (0) then
   ( cd usr/dehnen/falcON; make ; make $fbins; cd $arch; cp $fbins $NEMOBIN)  >& install_falcON.log
 endif
 
+if ($stat == 0) then
     echo "Note: Although your current shell now has the NEMO environment loaded,"
     echo "      new shells will not have NEMO pre-loaded. You would need to add"
     echo "      the following command/alias to your .cshrc (or equivalent) file:"
@@ -95,3 +95,5 @@ else
     echo Install failed: stat = $stat
 endif
 
+
+grep TESTSUITE: install.log | grep -v OK

@@ -53,6 +53,8 @@
  *  31-dec-02   gcc3/SINGLEPREC; allow longer filenames (should use autoconf?)
  *  14-feb-04   proper prototypes, updated documentation
  *  21-feb-04   fixed expression->file matching criterion (pretty bad bug)
+ *  28-mar-04   V3.2 added extra counter to random name to work around loadobj() problem
+ *                   redirect output of make to a logfile for pipes to work in NEMO
  *
  *  Used environment variables (normally set through .cshrc/NEMORC files)
  *      NEMO        used in case NEMOOBJ was not available
@@ -115,6 +117,8 @@ local int  funcmpld = 0;                /* count of functions compiled */
 local char edb[256], edbbak[256];     /* filenames of BTNAMES database */
 local int  Qflock = 0;			/* used for file locking */
 #endif
+
+local int pid_counter = 0;
 
 local proc bodytrans(string type, string expr, string fname)
      /* string type;                    type of function to return */
@@ -185,7 +189,7 @@ local proc bodytrans(string type, string expr, string fname)
         if (fname!=NULL && *fname!=0)
             sprintf(name,"bt%c_%s",type[0],fname);      /* base name */
         else
-            sprintf(name, "bt%c_%d", type[0], getpid()); /* temp name */
+            sprintf(name, "bt%c_%d%d", type[0], getpid(), pid_counter++); /* temp name */
         dprintf(2,"bodytrans: base name = %s\n",name);
 
 	sname = put_bt(expr, type[0], fname);	/* saved function name */
@@ -201,7 +205,7 @@ local proc bodytrans(string type, string expr, string fname)
         fclose(cdstr);
 	cflags = getenv("CFLAGS");
 #if defined(LOADOBJ3)
-        sprintf(cmmd, "cd /tmp;make -f $NEMOLIB/Makefile.lib %s.so",name);
+        sprintf(cmmd, "cd /tmp;make -f $NEMOLIB/Makefile.lib %s.so > $s.log 2>&1",name,name);
 #else
         sprintf(cmmd, "cd /tmp;cc %s -c %s.c",
 		(cflags==NULL) ? "" : cflags,name);
@@ -229,13 +233,14 @@ local proc bodytrans(string type, string expr, string fname)
         if (!Qflock) {      /* copy when no file locking encountered */
 #if defined(LOADOBJ3)
             sprintf(cmmd, 
-            "cp /tmp/%s.so $NEMOOBJ/bodytrans/%s.so;chmod a+rw %s;chmod a+r $NEMOOBJ/bodytrans/%s.so",
-             name,sname,edbbak,sname);
+	     "cp /tmp/%s.so $NEMOOBJ/bodytrans/%s.so;chmod a+rw %s;chmod a+r $NEMOOBJ/bodytrans/%s.so; rm /tmp/%s.*",
+	     name,sname,edbbak,sname,name);
 #else
             sprintf(cmmd, 
-            "cp /tmp/%s.o $NEMOOBJ/bodytrans/%s.o;chmod a+rw %s;chmod a+r $NEMOOBJ/bodytrans/%s.o ",
-             name,sname,edbbak,sname);
+             "cp /tmp/%s.o $NEMOOBJ/bodytrans/%s.o;chmod a+rw %s;chmod a+r $NEMOOBJ/bodytrans/%s.o; rm /tmp/%s.*",
+             name,sname,edbbak,sname,name);
 #endif
+	    dprintf(2,"cmd: %s\n",cmmd);
             if (system(cmmd) != 0) {
                 sprintf(cmmd,"rm -f %s",edbbak);    /* end file locking */
                 system(cmmd);
@@ -469,7 +474,7 @@ string defv[] = {
     "i=1\n		Index",
     "alias=\n		Filename to save expression in (bt<TYPE>_<ALIAS>)",
     "btnames=\n		BTNAMES filename to regenerate .o files",
-    "VERSION=3.1\n	21-feb-04 PJT",
+    "VERSION=3.2\n	28-mar-04 PJT",
     NULL,
 };
 

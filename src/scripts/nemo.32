@@ -1,0 +1,84 @@
+#! /bin/csh -f
+#
+#   Conversion script from versions before nemo.32 to nemo.32
+#   where NEMO/{lib,bin,obj} do not have the NEMOHOST subdirectories
+#   anymore. (as developed on branchname: NemoHost3)
+#
+#   28-mar-04   Created                      -   Peter Teuben  
+#    4-apr-04   protect against re-(ab)use       PJT
+#
+
+set version=10-apr-04
+
+#     check NEMO, bail if not
+echo nemo.32 patch script: version=$version
+if ($?NEMO == 0) then
+  echo No NEMO environment present yet
+  exit 0
+else
+  echo Found NEMO=$NEMO
+endif
+
+cd $NEMO
+if (-e  host_31) then
+  echo it appears that your $NEMO has already been patched with the nemo.32 script
+  exit 0
+endif
+
+#     check config.status if there was an installation, bail if not
+if (! -e config.status) then
+   echo NEMO was never installed. Cannot patch this system, 
+   echo please cvs update your system first and install it
+   exit 0
+endif
+
+#     check if the old style directories exist, bail if not
+foreach d (bin lib obj) 
+  if (! -d $NEMO/$d/$NEMOHOST) then
+    echo No $NEMO/$d/$NEMOHOST, maybe your system was already patched for V3.2
+    exit 0
+  else
+    echo Found $NEMO/$d/$NEMOHOST 
+  endif
+end
+
+#   move the contents of the directories in the right place
+foreach d (bin lib obj) 
+  mv $NEMO/$d/$NEMOHOST/* $NEMO/$d
+  rmdir $NEMO/$d/$NEMOHOST
+end
+
+#   create the new opt tree, and 
+#   move the old style host tree out of the way
+cd $NEMO
+./config.status
+make dirs
+mv host host_31
+
+
+echo ""
+echo "---------------------------------------------------------------------------"
+echo ""
+echo Successfully modified your NEMO tree. Your current shell
+echo does not function anymore, please issue the following
+echo commands:
+echo "   omen"
+echo "   nemo"
+echo or:
+echo "   cd $NEMO"
+echo "   source nemo_end"
+echo "   source nemo_start"
+echo ""
+echo 'You should also look at the output of the command'
+echo '   diff $NEMO/makedefs $NEMOLIB'
+echo 'and decide if to copy/modify any, or all, to the $NEMOLIB version'
+echo 'alternatively rerun:'
+echo '   ./configure ....'
+echo '   ./config.status'
+echo ""
+echo 'Notably watch out for the pgplot library locations if you were using '
+echo 'a version internal to NEMO'
+echo 'Alternatively.... you can also re-install NEMO from scratch, since it is '
+echo 'a lot easier now.'
+echo "---------------------------------------------------------------------------"
+

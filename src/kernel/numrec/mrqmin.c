@@ -1,4 +1,5 @@
 #define NRANSI
+#include "nr.h"
 #include "nrutil.h"
 
 void mrqmin(float x[], float y[], float sig[], int ndata, float a[], int ia[],

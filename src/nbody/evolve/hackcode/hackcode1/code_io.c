@@ -7,32 +7,35 @@
  *	20-may-92 extra forward decl for SGI
  *	26-jun-92 fixed allocate decl. once more ... ???   	PJT
  *	24-mar-94 ansi fixes
+ *      29-mar-04 prototypes
  */
 
 #include "code.h"
 #include <filestruct.h>
+#include <history.h>
 
 /*	Snapshot I/O routines - special local one for diagnostics */
 #include <snapshot/snapshot.h>
 #include <snapshot/get_snap.c>
 #define put_snap_diagnostics  my_put_snap_diagnostics
-local put_snap_diagnostics();
+local void put_snap_diagnostics(stream, int *);
 #include <snapshot/put_snap.c>
 
 /* forward declarations: */
-local diagnostics();
+local void diagnostics(void);
+
+extern double cputime(void);
+extern bool scanopt(string,string);
+
 
 /*
  * INPUTDATA: read initial conditions from input file.
  */
 
-inputdata(file)
-string file;			/* input file name */
+void inputdata(string file)
 {
     stream instr;
-    string ask_headline();
     int bits;
-    bool scanopt();
     bodyptr p;
 
     instr = stropen(file, "r");			/* open input stream        */
@@ -58,7 +61,7 @@ string file;			/* input file name */
 
 local stream outstr;                  /* output stream pointer */
 
-initoutput()
+void initoutput(void)
 {
     printf("\n%s\n\n", headline);               /* print headline, params   */
     printf("%12s%12s%12s%12s\n",
@@ -80,7 +83,7 @@ initoutput()
  * STOPOUTPUT: finish up after a run.
  */
 
-stopoutput()
+void stopoutput(void)
 {
     if (outstr != NULL)
         strclose(outstr);
@@ -103,11 +106,9 @@ local vector cmphase[2];	/* center of mass coordinates */
 
 local bool firstmass = TRUE;	/* if true, output mass data */
 
-output()
+void output(void)
 {
     int nttot, nbavg, ncavg, k, bits;
-    double cputime();
-    bool scanopt();
 
     diagnostics();				/* compute std diagnostics  */
     nttot = n2bcalc + nbccalc;
@@ -154,7 +155,7 @@ output()
  * DIAGNOSTICS: compute set of dynamical diagnostics.
  */
 
-local diagnostics()
+local void diagnostics(void)
 {
     register bodyptr p;
     real velsq;
@@ -197,11 +198,8 @@ local diagnostics()
  * MY_PUT_SNAP_DIAGNOSTICS: output various N-body diagnostics.
  */
 
-local my_put_snap_diagnostics(outstr, ofptr)
-stream outstr;
-int *ofptr;
+local void my_put_snap_diagnostics(stream outstr, int *ofptr)
 {
-    double cputime();
     real cput;
 
     cput = cputime();
@@ -219,8 +217,7 @@ int *ofptr;
  * SAVESTATE: write current state to disk file.
  */
 
-savestate(file)
-string file;
+void savestate(string file)
 {
     stream str;
 
@@ -252,8 +249,7 @@ string file;
  * RESTORESTATE: restore state from disk file.
  */
 
-restorestate(file)
-string file;
+void restorestate(string file)
 {
     stream str;
     string program, version;

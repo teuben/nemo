@@ -8,20 +8,21 @@
  *	24-mar-94 ansi
  *	 4-mar-96 removed redundant (bad prototype) floor() definition
  *      28-nov-00 fixed bad index bug in printf() - documented a leak
+ *      29-mar-04 prototyped
  */
 
-#include "defs.h"
+#include "code.h"
 
 local cellptr ctab = NULL;	/* cells are allocated from here */
 local int ncell, maxcell;	/* count cells in use, max available */
 
 /* local forward declarations: */
-local expandbox();
-local loadtree();
-local bool intcoord();
-local int subindex();
-local hackcofm();
-local cellptr makecell();
+static void expandbox(bodyptr p);
+static void loadtree(bodyptr p);
+static bool intcoord(int xp[3], vector rp);
+static int subindex(int x[3], int l);
+static void hackcofm(nodeptr q);
+static cellptr makecell(void);
 
 /*
  * MAKETREE: initialize tree structure for hack force calculation.
@@ -52,13 +53,11 @@ int nbody;			/* number of bodies in above array */
  * EXPANDBOX: enlarge cubical "box", salvaging existing tree structure.
  */
 
-local expandbox(p)
-bodyptr p;                      /* body to be loaded */
+local void expandbox(bodyptr p)                       /* body to be loaded */
 {
-    bool intcoord();
-    int k, xtmp[NDIM], xmid[NDIM], subindex();
+    int k, xtmp[NDIM], xmid[NDIM];
     vector rmid;
-    cellptr makecell(), newt;
+    cellptr newt;
 
     while (! intcoord(xtmp, Pos(p))) {		/* expand box (rarely)      */
         if (debug)
@@ -87,13 +86,11 @@ bodyptr p;                      /* body to be loaded */
  * LOADTREE: descend tree and insert particle.
  */
 
-local loadtree(p)
-bodyptr p;			/* body to load into tree */
+local void loadtree(bodyptr p)			/* body to load into tree */
 {
-    int l, xp[NDIM], xq[NDIM], subindex();
+    int l, xp[NDIM], xq[NDIM];
     nodeptr *qptr;
-    cellptr c, makecell();
-    bool intcoord();
+    cellptr c;
 
     assert(intcoord(xp, Pos(p)));		/* form integer coords      */
     l = IMAX >> 1;				/* start with top bit       */
@@ -123,9 +120,9 @@ bodyptr p;			/* body to load into tree */
  * Returns: TRUE unless rp was out of bounds.
  */
 
-local bool intcoord(xp, rp)
-int xp[NDIM];			/* integerized coordinate vector [0,IMAX) */
-vector rp;			/* real coordinate vector (system coords) */
+local bool intcoord(
+		    int xp[NDIM],   /* integerized coordinate vector [0,IMAX) */
+		    vector rp)      /* real coordinate vector (system coords) */
 {
     register int k;
     bool inb;
@@ -143,16 +140,16 @@ vector rp;			/* real coordinate vector (system coords) */
     }
     if (debug)
         printf("\t  xp = [%8x,%8x,%8x]\tinb = %d\n", xp[0], xp[1], xp[2], inb);
-    return (inb);
+    return inb;
 }
 
 /*
  * SUBINDEX: determine which subcell to select.
  */
 
-local int subindex(x, l)
-int x[NDIM];		        /* integerized coordinates of particle */
-int l;			        /* current level of tree */
+local int subindex(
+		   int x[NDIM],	       /* integerized coordinates of particle */
+		   int l)	       /* current level of tree */
 {
     register int i, k;
 
@@ -171,15 +168,16 @@ int l;			        /* current level of tree */
  * HACKCOFM: descend tree finding center-of-mass coordinates.
  */
 
-local hackcofm(q)
-register nodeptr q;             /* pointer into body-tree */
+local void hackcofm(nodeptr q)                   /* pointer into body-tree */
 {
     register int i;
     register nodeptr r;
-    static vector tmpv, dr;
+    static vector tmpv;
+#ifdef QUADPOLE
+    static vector dr;
     static real drsq;
     static matrix drdr, Idrsq, tmpm;
-
+#endif
     if (Type(q) == CELL) {                      /* is this a cell?          */
         Mass(q) = 0.0;                          /*   init total mass        */
         CLRV(Pos(q));				/*   and c. of m.           */
@@ -219,7 +217,7 @@ register nodeptr q;             /* pointer into body-tree */
  * MAKECELL: allocation routine for cells.
  */
 
-local cellptr makecell()
+local cellptr makecell(void)
 {
     register cellptr c;
     register int i;
@@ -234,5 +232,5 @@ local cellptr makecell()
     Type(c) = CELL;
     for (i = 0; i < NSUB; i++)
 	Subp(c)[i] = NULL;
-    return (c);
+    return c;
 }

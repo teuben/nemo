@@ -3,7 +3,7 @@
 #  P600/     116.510u 17.390s 2:41.66 82.8%     0+0k 0+0io 778435pf+0w
 # P1600/
 #
-#  History:     19-mar-2004   finally recording history of this file
+#  History:     29-mar-2004   for NEMO V3.2
 
 set pgplot=1
 set intel=0
@@ -12,6 +12,7 @@ set falcon=1
 set anonymous=1
 set cvsroot=0
 set vogl=1
+set branch=()
 
 foreach _a ($*)
   set $_a
@@ -41,48 +42,48 @@ if ($intel) then
   source /astromake/astromake_start
   astroload intel
   setenv CC icc
-  setenv CXX icc
+  setenv CXX icpc
   setenv F77 ifort
 endif
 
-#		pick a certain CVS release
-if (0) then
-  set cvs_rev=(-r nemo_3_0_16)
+#		pick a certain CVS release, if requested
+if ($#branch) then
+  echo Using branch $branch
+  set cvs_rev=(-r $branch)
 else
+  echo Using default MAIN branch
   set cvs_rev=()
 endif
 
 #		get  the source
 time cvs -Q checkout $cvs_rev nemo
-if ($pgplot) then
-   (mkdir nemo/local; cd nemo/local; cvs -Q checkout pgplot)
-endif
-
-# --disable-gsl
-# --enable-single
-
 cd nemo
-if ($pgplot) then
-  # first do a dummy to get the architecture libraries done.... a kludge
-  ./configure 
-  source nemo_start
-  make dirs config_clean
-  rm NEMORC.local
-  # dir= not used ??
-  src/scripts/pgplot.install dir=$NEMO/tmp
 
-  #./configure --with-pgplot-prefix=/astromake/opt/pgplot --with-yapp=pgplot 
-  #./configure --with-pgplot-prefix=/astromake/opt/pgplot
-  ./configure --with-yapp=pgplot --with-pgplot-prefix=$NEMOLIB
-else
- ./configure --with-yapp=ps 
+if ($pgplot) then   
+  (mkdir local; cd local; cvs -Q checkout pgplot)
 endif
+
+
+set copts=()
+# set copts=($copts --disable-gsl)
+# set copts=($copts --enable-single)
+if ($pgplot) set copts=($copts --with-yapp=pgplot --with-pgplot-prefix=`pwd`/lib)
+
+./configure  $copts
 source nemo_start
-make dirs config_extra scripts
+make postconfig
+
 source NEMORC.local
+if ($pgplot) then
+  echo "Compiling internal pgplot (logfile: install.pgplot.log)"
+  make pgplot >& install.pgplot.log
+endif
 rehash
 make libs
-if ($vogl) $NEMO/src/scripts/nemo.vogl
+if ($vogl) then
+  echo "Compiling vogl (logfile: install.vogl.log)"
+  $NEMO/src/scripts/nemo.vogl >& install.vogl.log
+endif
 
 src/scripts/testsuite -b
 

@@ -3,7 +3,7 @@
  *	21-may-92 extra forward decl for SGI
  */
 
-#include "defs.h"
+#include "code.h"
 
 /*
  * HACKGRAV: evaluate grav field at a given particle.
@@ -15,19 +15,18 @@ local real phi0;			/* resulting potential at pos0 */
 local vector acc0;			/* resulting acceleration at pos0 */
 
 /* forward declarations: */
-local walksub();
-local bool subdivp();
-local gravsub();
+local void walksub(nodeptr, real);
+local bool subdivp(nodeptr, real);
+local void gravsub(nodeptr);
 
-hackgrav(p)
-bodyptr p;
+void hackgrav(bodyptr p)
 {
     pskip = p;					/* exclude p from f.c.      */
     SETV(pos0, Pos(p));				/* set field point          */
     phi0 = 0.0;					/* init potential, etc      */
     CLRV(acc0);
     n2bterm = nbcterm = 0;
-    hackwalk(gravsub);				/* recursively compute      */
+    hackwalk((proc)gravsub);				/* recursively compute      */
     Phi(p) = phi0;				/* stash the pot.           */
     SETV(Acc(p), acc0);				/* and the acceleration     */
 }
@@ -40,10 +39,8 @@ local nodeptr pmem;                     /* for memorized data to be shared */
 local vector dr;			/* between gravsub and subdivp */
 local real drsq;
 
-local gravsub(p)
-register nodeptr p;                     /* body or cell to interact with */
+local void gravsub(nodeptr p)                   /* body or cell to interact with */
 {
-    double sqrt();
     static real drabs, phii, mor3;
     static vector ai, quaddr;
     static real dr5inv, phiquad, drquaddr;
@@ -82,8 +79,7 @@ register nodeptr p;                     /* body or cell to interact with */
 local proc hacksub;
 local real tolsq;
 
-hackwalk(sub)
-proc sub;				/* routine to do calculation */
+void hackwalk(proc sub)				/* routine to do calculation */
 {
     hacksub = sub;
     tolsq = tol * tol;
@@ -94,11 +90,9 @@ proc sub;				/* routine to do calculation */
  * WALKSUB: recursive routine to do hackwalk operation.
  */
 
-local walksub(p, dsq)
-register nodeptr p;                     /* pointer into body-tree */
-real dsq;                               /* size of box squared */
+local void walksub(nodeptr p,                          /* pointer into body-tree */
+		   real dsq)                              /* size of box squared */
 {
-    bool subdivp();
     register nodeptr *pp;
     register int k;
 
@@ -125,9 +119,8 @@ real dsq;                               /* size of box squared */
  * Side effects: sets pmem, dr, and drsq.
  */
 
-local bool subdivp(p, dsq)
-register nodeptr p;                     /* body/cell to be tested */
-real dsq;                               /* size of cell squared */
+local bool subdivp(nodeptr p,      /* body/cell to be tested */
+		   real dsq)       /* size of cell squared */
 {
     if (Type(p) == BODY)                        /* at tip of tree?          */
         return (FALSE);                         /*   then cant subdivide    */

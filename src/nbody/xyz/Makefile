@@ -11,7 +11,7 @@ XYZFLAG = -DXYZVEL
 #  for SGI you probably need to use:
 #		VOGLINC= VOGLLIB=-lgl
 VOGLINC = -I$(NEMOINC)/vogl
-VOGLLIB = $(NEMOLIB)/libvogl.a $(NEMOXLIB)
+VOGLLIB = $(NEMOLIB)/libvogl.a $(XLIBS)
 
 
 #	NEMO Library, and make it a precious one

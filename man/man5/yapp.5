@@ -70,8 +70,8 @@ a stubbed list of all required and optional routines which gets
 you going on a machine with no proper yapp implementation yet.
 .TP
 \fByapp_pgplot	\fP
-uses Tim Pierson`s (Caltech) PGPLOT package. We now support PGPLOT V5.
-(PJT)
+uses Tim Pierson`s (Caltech) PGPLOT package. We now support PGPLOT V5
+as well as an experimental version of CPGPLOT (PJT)
 .TP
 \fByapp_plplot	\fP
 uses the U. Texas PLPLOT package, a PGPLOT lookalike written in C. (PJT)
@@ -104,6 +104,43 @@ the plot comes out square when it is meant to be square.
 .PP
 Treatment of colors, in particular what the background and foreground
 color is, is not uniform. 
+.SH PGPLOT
+PGPLOT uses a number of environment variables that control the behavior
+of the plotting device. The PGPLOT_DIR, PGPLOT_FONT and PGPLOT_LIB variables
+(should) have been set via the normal NEMO procedure, but the following
+environment variables can be useful (and confusing):
+.nf
+.ta +2i +1i
+PGPLOT_BACKGROUND	n/a	0 is the background color ("black" for /xs)
+PGPLOT_FOREGROUND	n/a	1 is the foreground color ("white" for /xs)
+
+PGPLOT_GIF_WIDTH	850	pixels for /gif (interchange for /vgif)
+PGPLOT_GIF_HEIGHT	680	pixels for /gif (i.e. 85 dpi)
+
+PGPLOT_PPM_WIDTH	850	pixels for /ppm (interchange for /vppm)
+PGPLOT_PPM_HEIGHT	680	pixels for /ppm (i.e. 85 dpi)
+
+PGPLOT_PS_MARKERS	n/a	use "NO" if no postscript font for markers to be used
+PGPLOT_PS_COLOR		n/a	color mode
+PGPLOT_PS_WIDTH		7800	width in milli-inches (these are for 8.5x11 inches)
+PGPLOT_PS_HEIGHT	10500	height in milli-inches
+PGPLOT_PS_HOFFSET	350	horizontal offset from bottom left
+PGPLOT_PS_VOFFSET	250	vertical offset from bottom left
+
+PGPLOT_PS_EOF		n/a	EOF marker, useful for apple laserwriters (^D)
+PGPLOT_PS_BBOX		n/a	if set to "MAX", max bounding box written, else
+PGPLOT_IDENT		n/a	if set, user name, date and time written in bottom right corner
+PGPLOT_PS_DRAW_BBOX
+
+.fi
+For X windows drivers (e.g. /xs and /xw) a number of X resources are used
+(see \fIxrd(1)\fP), e.g.
+.nf
+
+pgxwin.Win.geometry: WIDTHxHEIGHT+X+Y
+pgxwin.Win.iconGeometry: +X+Y
+
+.fi
 .SH FILES
 .nf
 .ta +2.5i
@@ -112,7 +149,7 @@ NEMO/src/kernel/yapp	various yapp_* implementations
 .SH AUTHOR
 Joshua E. Barnes, Peter Teuben
 .SH SEE ALSO
-catps(1NEMO), yapp(3NEMO)
+catps(1NEMO), catpgps(1NEMO), yapp(3NEMO)
 .SH UPDATE HISTORY
 .nf
 .ta +1i +4i
@@ -120,5 +157,5 @@ catps(1NEMO), yapp(3NEMO)
 16-nov-88	yapp_suntools added             	PJT
 26-oct-90	updated outdated documentation  	PJT
 11-nov-94	added yapp_meta 	PJT
-6-jul-01	
+28-mar-04	added some useful PGPLOT info	PJT
 .fi

@@ -58,6 +58,8 @@ MACH = @LOADOBJ_MACH@
 #	if you need to use fortran names from your C code, or if you
 #	need to define C code that is to be called from Fortran
 #       F77_CMAIN_FFLAGS is needed if you link with fortran, but main is in C
+#  on MacOS you need to remove the -lcrt1.o and -lcrt2.o (or the like) references
+#  they may also occur in YAPPLIB in the NEMORC.local file   
 FLIBS = @FLIBS@
 FORLIBS = $(FLIBS)
 F77_CMAIN_FFLAGS = @F77_CMAIN_FFLAGS@
@@ -71,8 +73,8 @@ F77_CMAIN_FFLAGS = @F77_CMAIN_FFLAGS@
 NEMO_CFLAGS = @NEMO_CFLAGS@ -I$(NEMOINC) -I$(NEMOLIB) @XINCS@ $(GSL_CFLAGS) $(MACH)
 NEMO_FFLAGS = @NEMO_FFLAGS@
 NEMO_LDFLAGS = 
-NEMO_LIBS   = -L$(NEMOLIB)          -lnemo @LOADOBJ_LIBS@ $(GSL_LIBS) $(RDL_LIBS) @MATH_LIBS@
-NEMO_LIBSPP = -L$(NEMOLIB) -lnemo++ -lnemo @LOADOBJ_LIBS@ $(GSL_LIBS) $(RDL_LIBS) @MATH_LIBS@
+NEMO_LIBS   = -L$(NEMOLIB)          -lnemo @LOADOBJ_LIBS@ $(GSL_LIBS) $(RDL_LIBS) @MATH_LIBS@ @MACOS_LIBS@
+NEMO_LIBSPP = -L$(NEMOLIB) -lnemo++ -lnemo @LOADOBJ_LIBS@ $(GSL_LIBS) $(RDL_LIBS) @MATH_LIBS@ @MACOS_LIBS@
 
 #			some graphics libraries:
 GLLIBS = @GLLIBS@
@@ -164,7 +166,7 @@ makedefs_help:
 	@echo LN_S=$(LN_S)
 	@echo GLLIBS=$(GLLIBS)
 	@echo XLIBS=$(XLIBS)
-	@echo LIBS=$(LIBS)
+	@echo LIBS=@LIBS@
 	@echo RANLIB=$(RANLIB)
 	@echo YAPPLIB=$(YAPPLIB)
 	@echo ========================================================================

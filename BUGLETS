@@ -2,7 +2,9 @@
   MacOS-X cannot handle multiple mixed-case filenames! WTF....
 
 - intel 8.0 - some linkeage problems left with loadobj based
-  routines
+  routines, e.g. vrtm51.so can't  find get_atable
+
+- intel 8.0 - io_nemo doesn't compile
 
 - intel 7.1 also has some remaining problems. Linking needs to
   be done with fortran and the -Vaxlib library
@@ -33,6 +35,8 @@
 * LFS seems to work, but keep an eye open on e.g.
 	http://freshmeat.net/articles/view/709/
 
+- runbody1/2 : input files can have velocities changed by 2t/w ??
+	also needs nbody= when really not needed?
 
 - filestruct:
   The following snippet of code stores only  "1" for the value of pi,

@@ -5,10 +5,11 @@
 #   jun-2003            optional -u "cd $NEMO;cvs update"
 #   feb-2004            both -t and -T flag
 #   mar-2004            no more NEMOBIN bug; added -d flag to cvs update
+#   apr-2004            handle make vs. gmake and other names of make
 #
 #  BIG BUG: 'mknemo mkplummer.c' would remove the sourcecode and put it into $NEMOBIN !!!!!
 #
-set version="MKNEMO Version 2.3 23-mar-04"
+set version="MKNEMO Version 2.4 6-apr-04"
 if ($#argv == 0) goto usage
 set old_argv=($*)
 
@@ -17,6 +18,7 @@ onintr error
 set newbins=0
 set errs=0
 set logfile=$NEMO/adm/install/mknemo.log
+set make=make
 if (! -w $logfile) then
   echo "MKNEMO> Warning: you have no write permission on $logfile; using /dev/null instead"
   set logfile=/dev/null
@@ -69,6 +71,10 @@ loop:
     set l=1
     set go=1
     breaksw
+  case -g:
+    shift argv
+    set make=gmake
+    breaksw
   case -n:
     shift argv
     if ($#argv == 0) goto noargs
@@ -88,11 +94,11 @@ loop:
     shift argv
     breaksw
   case -t:
-    set pre_tidy="make clean"
+    set pre_tidy="$make clean"
     shift argv
     breaksw
   case -T:
-    set post_tidy="make clean"
+    set post_tidy="$make clean"
     shift argv
     breaksw
   case -r:
@@ -134,7 +140,7 @@ if ($u) then
 endif
 
 if ($l) then
-  (cd $NEMO; make libs)
+  (cd $NEMO; $make libs)
 endif
 
 foreach f ($argv)
@@ -186,7 +192,7 @@ foreach f ($argv)
      if (-e $l/Makefile) then
        set mk=$ft
        if (! -e $NEMOBIN/$mk) set newbins=1
-       (cd $l;$pre_tidy;make $mk; set err=$status; mv $mk $NEMOBIN; $post_tidy)
+       (cd $l;$pre_tidy;$make $mk; set err=$status; mv $mk $NEMOBIN; $post_tidy)
        @ errs += $status
        if ($d) then
            mkpdoc $mk
@@ -218,7 +224,7 @@ foreach f ($argv)
       set mf=""
    endif
    if (! -e $NEMOBIN/$mk) set newbins=1
-   (cd $dir ; $pre_tidy; make $mf $mk; set err=$status; mv $mk $NEMOBIN; $post_tidy)
+   (cd $dir ; $pre_tidy; $make $mf $mk; set err=$status; mv $mk $NEMOBIN; $post_tidy)
    @ errs += $err
    # see if new doc file needed...
    if ($d) then
@@ -269,4 +275,5 @@ usage:
   echo "  -T        cleanup before making the binaries"
   echo "  -u        run 'cvs update -d' to NEMO before making"
   echo "  -l        recompile the library by running 'make libs'"
+  echo "  -g        use gmake, instead of make"
   exit 1

@@ -46,7 +46,8 @@ LIBMESA	    = -lGL $(LIBX)
 # Files exported to $NEMOLIB 
 
 OBJFILES = yapp.o
-YAPPOBJS = yapp_ps.o yapp_null.o yapp_pgplot.o yapp_plplot.o yapp_cpgplot.o
+YAPPOBJS = yapp_ps.o yapp_null.o yapp_pgplot.o yapp_plplot.o \
+	yapp_cpgplot.o yapp_meta.o
 BINFILES = catps catpgps pltext_ps plarrow_ps
 TESTFILES = yapptest \
 	   yapptest_mongo yapptest_pgplot yapptest_core yapptest_suntools \

@@ -4,18 +4,15 @@
 #
 #   nemo_start:
 #
-#   source this file to start NEMO. You can override root and architecture
-#   by presetting NEMO and NEMOHOST. In particular, NEMOHOST has been known
-#   to give problems (see also fakehost/truehost targets in Makefile) 
+#   source this file to start NEMO. You can override the root by presetting NEMO.
+# 
+#   this file reads nemo.rc, which is a control file that source the following
+#   files (and checke for their precense) in the order given
+#         NEMORC
+#         NEMORC.local
 #
 
-if ($?NEMO == 0) then
-   # this is where this version of NEMO was originally installed
-   # but has long as $NEMO is predefined before this routine, you
-   # should be able to re-locate it anywhere
-   setenv NEMO @NEMO@
-   # un-comment next line if NEMOHOST gives you problems in detection mode
-   # setenv NEMOHOST @NEMOHOST@
-endif
+#  set a reasonable NEMO if it's not present (from original dir hostinstallation)
+if ($?NEMO == 0) setenv NEMO @NEMO@
 
 source $NEMO/nemo.rc

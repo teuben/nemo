@@ -17,9 +17,11 @@
  *     22-jul-93  V1.5  fixed bug when handling multisnapshots      PJT/JAN
  *	7-aug-94  V1.5a declaration of atof() fails on macro-versions (linux)
  *     20-sep-01      b NULL -> 0
+ *     29-mar-04  V1.6  using 'global' macro to prevent mu;ltiple definitons
  */
 
-#include "defs.h"
+#define global                                  /* don't default to extern  */
+#include "code.h"
 #include <getparam.h>
 #include <filestruct.h>
 #include <extstring.h>
@@ -42,7 +44,7 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "rmin=\n    Lower left corner of initial box [default is -rsize/2 (centered)",
     "options=mass,phase\n Output options: phase and/or mass",
     "fcells=0.75\n        Cell/body allocation ratio",
-    "VERSION=1.5b\n       30-sep-01 PJT",
+    "VERSION=1.6\n        29-mar-04 PJT",
     NULL,
 };
 
@@ -53,26 +55,27 @@ extern string *burststring(string, string);
 extern bool scanopt(string, string);
 
 
-nemo_main()
+void nemo_main(void)
 {
-    while (inputdata())	{			/* input mass and test data */
-       forcecalc();				/* find force at test pos */
-       outresult();				/* write snap with results */
+    while (input_data())	{			/* input mass and test data */
+       force_calc();				/* find force at test pos */
+       out_result();				/* write snap with results */
     }
 }
 
-bodyptr massdata;	/* array of mass points */
-int nmass;		/* number of mass points */
 
-bodyptr testdata;	/* array of test points */
-int ntest;		/* number of test points */
+static bodyptr massdata;	/* array of mass points */
+static int nmass;		/* number of mass points */
 
-real tsnap;              /* some time that was obtained from input/test */
+static bodyptr testdata;	/* array of test points */
+static int ntest;		/* number of test points */
 
-stream instr=NULL;	/* input file for masses */
-stream tststr=NULL;	/* file for which force calc done (def: in-file */
+static real tsnap;              /* some time that was obtained from input/test */
 
-inputdata()
+static stream instr=NULL;	/* input file for masses */
+static stream tststr=NULL;	/* file for which force calc done (def: in-file */
+
+int input_data(void)
 {
     string input, test;
     int    i;
@@ -87,27 +90,28 @@ inputdata()
 
     if (tststr==NULL) {                     /* if no testfile, data from in */
         get_history(instr);
-        i = readsnapshot(&massdata, &nmass, instr); /* read mass coord data */
-        if (i==0) return(0);
+        i = read_snapshot(&massdata, &nmass, instr); /* read mass coord data */
+        if (i==0) return 0;
 	testdata = massdata;			/* use mass data for tests */
 	ntest = nmass;
     } else {                                /* else data from test */
         if (massdata==NULL) {                   /* on first pass read masses */
             get_history(instr);            
-            i=readsnapshot(&massdata, &nmass, instr);
-            if (i==0) return(0);
+            i=read_snapshot(&massdata, &nmass, instr);
+            if (i==0) return 0;
         }
 	get_history(tststr);                    /* read (next) testdata */
-	i=readsnapshot(&testdata, &ntest, tststr);
+	i=read_snapshot(&testdata, &ntest, tststr);
         if (i==0) return(0);
     }
-    return(1);
+    return 1;
 }
 
-readsnapshot(btab_ptr, nobj_ptr, instr)
-bodyptr *btab_ptr;				/* gets particle array */
-int *nobj_ptr;					/* gets number of bodies */
-stream instr;					/* stream to read from */
+int read_snapshot(
+		   bodyptr *btab_ptr,	     /* gets particle array */
+		   int *nobj_ptr,	     /* gets number of bodies */
+		   stream instr              /* stream to read from */
+		   )
 {
   int nobj, cs, i;
   real *mbuf, *mp, *pbuf, *pp;
@@ -115,7 +119,7 @@ stream instr;					/* stream to read from */
 
   for(;;) {                        /* loop until done or proper snapshot */
     if (!get_tag_ok(instr,SnapShotTag))
-        return(0);
+        return 0;
     get_set(instr, SnapShotTag);
     if (!get_tag_ok(instr,ParametersTag)) {
     	get_tes(instr,SnapShotTag);
@@ -124,7 +128,7 @@ stream instr;					/* stream to read from */
     get_set(instr, ParametersTag);
     get_data(instr, NobjTag, IntType, &nobj, 0);
     if (nobj < 1)
-	error("readsnapshot: %s = %d  is absurd", NobjTag, nobj);
+	error("read_snapshot: %s = %d  is absurd", NobjTag, nobj);
     if (get_tag_ok(instr,TimeTag))
         get_data(instr,TimeTag, RealType, &tsnap, 0);
     else {
@@ -139,7 +143,7 @@ stream instr;					/* stream to read from */
     get_set(instr, ParticlesTag);
     get_data(instr, CoordSystemTag, IntType, &cs, 0);
     if (cs != CSCode(Cartesian, NDIM, 2))
-	error("readsnapshot: cannot handle %s = %d", CoordSystemTag, cs);
+	error("read_snapshot: cannot handle %s = %d", CoordSystemTag, cs);
     mbuf = mp = (real *) allocate(nobj * sizeof(real));
     pbuf = pp = (real *) allocate(nobj * 2 * NDIM * sizeof(real));
     get_data(instr, MassTag, RealType, mbuf, nobj, 0);
@@ -159,7 +163,7 @@ stream instr;					/* stream to read from */
     free(mbuf);
     free(pbuf);
     *nobj_ptr = nobj;
-    return(1);
+    return 1;
   }
 }
 
@@ -169,7 +173,7 @@ int n2btot, nbctot;		/* body-body, body-cell interactions */
 
 real cputree, cpufcal;		/* CPU time to build tree, compute forces */
 
-forcecalc()
+void force_calc(void)
 {
     real *pp, *ap;
     double cpubase;
@@ -211,7 +215,7 @@ forcecalc()
 
 stream outstr=NULL;
 
-outresult()
+void out_result(void)
 {
     string out;
 
@@ -220,10 +224,10 @@ outresult()
 	outstr = stropen(out, "w");
 	put_history(outstr);
     }
-    writesnapshot();			/* output testdata results */
+    write_snapshot();			/* output testdata results */
 }
 
-writesnapshot()
+void write_snapshot(void)
 {
     real *mbuf, *mp, *pspbuf, *pspp;
     bodyptr bp;

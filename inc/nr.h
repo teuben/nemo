@@ -184,7 +184,7 @@ void fitexy(float x[], float y[], int ndat, float sigx[], float sigy[],
 void fixrts(float d[], int m);
 void fleg(float x, float pl[], int nl);
 void flmoon(int n, int nph, long *jd, float *frac);
-#if defined(darwin)
+#if !defined(darwin)
 /* double fmin(double,double); for darwin */
 float fmin(float x[]);
 #endif
