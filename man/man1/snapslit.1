@@ -1,0 +1,119 @@
+.TH SNAPSLIT 1NEMO "23 April 1992"
+.SH NAME
+snapslit \- slit spectrum of an N-body snapshot
+.SH SYNOPSIS
+.PP
+\fBsnapslit in=\fPsnapshot [parameter=value]
+.SH DESCRIPTION
+\fIsnapsplit\fP simulates taking a slit 
+spectrogram of an N-body snapshot.
+The first three moments in a user supplied body variable
+(normally the radial velocity \fB-vz\fP as seen by an
+observer from the positive Z axis),
+are calculated and plotted in three panels
+in one graph. The emission variable (defaults to the mass variable
+\fBm\fP) is used to weight the moments. 
+.PP
+In addition the slit must be completely supplied:
+slitwidth, pixel size and position angle.
+.PP
+See \fIsnapgrid(1NEMO)\fP to make a full moment CCD-type map 
+CCD frame of a snapshot, again with arbitrary ``observables''. 
+.PP
+The three moments computed are the total emission (\fBevar\fP), 
+mean and dispersion in the \fBzvar\fP variable:
+.nf
+        m0 = sum(evar)
+        m1 = sum(evar*zvar)/m0
+        m2 = sqrt(sum(evar*zvar*zvar)/m0 - m1*m1)
+.fi
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 20
+\fBin=\fIin-file\fP
+input file, in \fIsnapshot(5NEMO)\fP format [no default]
+.TP
+\fBxvar=\fP\fIxvar_bodyvar\fP
+The X variables to be gridded. Any body
+variable (see \fIbodtrans(1NEMO)\fP)
+can be used.
+[Default: \fBx\fP].
+.TP
+\fByvar=\fP\fIyvar_bodyvar\fP
+The Y variable to be gridded. [Default: \fBy\fP].
+.TP
+\fBzvar=\fP\fIzvar_bodyvar\fP
+The Z variable to take the moment of. [Default: \fB-vz\fP].
+.TP
+\fBevar=\fP\fIevar_bodyvar\fP
+The emission variable used to weight the moment. [Default: \fBm\fP].
+.TP
+\fBorigin=\fIx,y\fP
+The origin \fI(x,y)\fP of the center of the slit on the 'sky'
+[default: \fB0,0\fP].
+.TP
+\fBpa=\fIvalue\fP
+Position angle of the slit in degrees with respect to the 'North'
+(astronomical convention and counterclockwise rotating through 'East')
+[default: \fB0\fP].
+.TP
+\fBwidth=\fIvalue\fP
+Width of the slit in sky units [default: \fB0.1\fP].
+.TP
+\fBlength=\fIvalue\fP
+Length of the slit in sky units [default: \fB10.0\fP].
+.TP
+\fBcell=\fIvalue\fP
+Cell- or pixel size of the slit pixels [default: \fB0.1\fP].
+.TP
+\fBsmooth=\fIarray\fP
+Smoothing along the slit, should be at least 1 number, prefarebly normalized 
+to unity for sake for conservation of units (mass per square length).
+Example is e.g. the Hanning smoothing: "0.25,0.5,0.25".
+[default: \fB0.25,0.5,0.25\fP].
+.TP
+\fBnsmooth=\fIvalue\fP
+Number of times the above smoothing kernel is applied over the data
+[default: \fB0\fP or \fB1\fP (only if gauss-beam is used)].
+.TP
+\fBgauss=\fIvalue\fP
+Beam size (FWHM, note FWHM = 2.355 * sigma) of a gaussian smoothing kernel.
+If this parameter is given, the previously mentioned parameter \fBsmooth\fP
+is ignored, and the default value for \fBnsmooth\fP becomes 1.
+[default: not used].
+.TP
+\fBmmax=\fImmax\fP
+Maximum surface density to be plotted [default: \fB0.0\fP=auto-scaled].
+.TP
+\fBvmin=\fIvmin\fP
+Minimum velocity to be plotted [default: \fB0.0\fP=auto-scaled].
+.TP
+\fBvmax=\fIvmax\fP
+Maximum velocity to be plotted [default: \fB0.0\fP=auto-scaled].
+.TP
+\fBsmax=\fIsmax\fP
+Maximum velocity dispersion to be plotted [default: \fB0.0\fP=auto-scaled].
+.TP
+tab=\fBt|f\fP
+Produces a table of slitposition, surface density, velocity and
+velocity dispersion. When this options is choosed, no plot will be
+made [default: \fBf\fP].
+.SH "SEE ALSO"
+snaprotate(1NEMO), snapccd(1NEMO), snapgrid(1NEMO), snapshot(5NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+~/src/pjt/nbody  	snapslit.c snapslit.1
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +2.0i +2.0i
+27-May-87	document created + V1.0 coding    	PJT
+17-Jun-87	V1.0b: recreated after system crash, parameter gauss added.	PJT
+8-jun-88	V1.1: new filestruct	PJT
+21-feb-89	V1.4: tab=t will produce no output	PJT
+22-apr-92	V2.0: added xvar=,yvar=,zvar=,evar=	PJT
+.fi
