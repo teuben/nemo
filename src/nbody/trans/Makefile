@@ -24,7 +24,7 @@ TESTFILES =
 help:
 	@echo NEMO V2.2 NEMO/src/nbody/trans
 
-clean:
+clean:	cleanbench
 	-rm -f *.o *.a core $(BINFILES) $(TESTFILES)
 	-(cd hackdens; make clean)
 
@@ -88,14 +88,19 @@ nemo_src:
 	echo `pwd` $$i ; done 
 
 # benchmark
+ITER= 10
+NP6 = 1000000
 
 p6:
-	mkplummer p6 1000000 massname='n(m)' massrange=1,2
+	mkplummer p6 $(NP6) massname='n(m)' massrange=1,2
+
 
 bench1: snapbench p6
-	time ./snapbench p6 'mass=3.1415'   bodytrans=f iter=10
-	time ./snapbench p6 'mass=3.1415*m' bodytrans=f iter=10 
+	time ./snapbench p6 'mass=3.1415'   bodytrans=f iter=$(ITER)
+	time ./snapbench p6 'mass=3.1415*m' bodytrans=f iter=$(ITER)
 
+cleanbench:
+	rm -f p6
 
 # Targets used to assemble object library.
 
