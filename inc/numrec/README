@@ -1,0 +1,10 @@
+This directory contains a few of the essential things from Numerical
+Recipes  that may be used in NEMO.
+
+To use them:
+
+1)  options.h must #define the NUMREC macro
+
+2)  -I$NEMO/inc/numrec must be a switch in 'cc' to include NumRec include
+    directory; we don't want you to use <numrec/file.c> but rather
+    <file.c> ...
