@@ -14,7 +14,7 @@ Category:     MATH
 
 File:         nllsqfit.c
 
-Author:       K.G. Begeman, P.J. Teuben
+Author:       K.G. Begeman, P.J. Teuben (NEMO adaptations)
 
 Use:          INTEGER NLLSQFIT( XDAT ,    Input      REAL ARRAY
                                 XDIM ,    Input      INTEGER
@@ -125,30 +125,29 @@ Updates:      May  7, 1990: KGB, Document created.
               Apr 30, 1991: PJT, NEMO version, more like old 'fit'
               Oct 15, 1999: PJT  Added residual computations
               Jun 20, 2001: PJT  gcc3 prototpypes 
+	      Jul 12, 2002: PJT  allow wdat to be NULL, in which case all weights = 1 (deja vu???)
 
 */
 
 /*
- *		Here are the steps that every nonlinear regression program follows: (or should?)
+ *    Here are the steps that every nonlinear regression program follows: (or should?)
 
-		    1.Start with an initial estimated value for each variable in the equation. 
-                    2.Generate the curve defined by the initial values. Calculate the sum-of-squares (the
-                      sum of the squares of the vertical distances of the points from the curve). 
-                    3.Adjust the variables to make the curve come closer to the data points. There are
-                      several algorithms for adjusting the variables. The most commonly used method was
-                      derived by Levenberg and Marquardt (often called simply the Marquardt method). 
-                    4.Adjust the variables again so that the curve comes even closer to the points. 
-                    5.Keep adjusting the variables until the adjustments make virtually no difference in the
-                      sum-of-squares. 
-                    6.Report the best-fit results. The precise values you obtain will depend in part on the
-                      initial values chosen in step 1 and the stopping criteria of step 5. This means that
-                      repeat analyses of the same data will not always give exactly the same results. 
-
+    1.Start with an initial estimated value for each variable in the equation. 
+    2.Generate the curve defined by the initial values. Calculate the sum-of-squares (the
+      sum of the squares of the vertical distances of the points from the curve). 
+    3.Adjust the variables to make the curve come closer to the data points. There are
+      several algorithms for adjusting the variables. The most commonly used method was
+      derived by Levenberg and Marquardt (often called simply the Marquardt method). 
+    4.Adjust the variables again so that the curve comes even closer to the points. 
+    5.Keep adjusting the variables until the adjustments make virtually no difference in the
+      sum-of-squares. 
+    6.Report the best-fit results. The precise values you obtain will depend in part on the
+      initial values chosen in step 1 and the stopping criteria of step 5. This means that
+      repeat analyses of the same data will not always give exactly the same results. 
 
  */
 
 #include <stdinc.h>
-/* #include <float.h> */			/* ANSI */
 #if !defined(FLT_EPSILON)
 #define FLT_EPSILON 1.0e-6
 #endif
@@ -261,7 +260,7 @@ static void getmat(             /* build the matrix */
    }
    chi2 = 0.0;                                  /* reset reduced chi-squared */
    for (n = 0; n < ndat; n++) {              /* loop trough data points */
-      wn = wdat[n];
+      wn = wdat ? wdat[n] : 1.0;
       if (wn > 0.0) {                           /* legal weight ? */
          (*fitderv_c)( &xdat[xdim * n], fpar, epar, npar );
          yd = ydat[n] - (*fitfunc_c)( &xdat[xdim * n], fpar, npar );
@@ -329,16 +328,15 @@ static int getvec(
    }
    chi1 = 0.0;                                  /* reset reduced chi-squared */
    for (n = 0; n < ndat; n++) {                 /* loop through data points */
-      wn = wdat[n];                             /* get weight */
+      wn = wdat ? wdat[n] : 1.0;                /* get weight */
       if (wn > 0.0) {                           /* legal weight */
          dy = ydat[n] - (*fitfunc_c)( &xdat[xdim * n], epar, npar );
-         chi1 += wdat[n] * dy * dy;
+         chi1 += wn * dy * dy;
       }
    }
    return( 0 );
 } /* getvec */
 
-#if 1
 int nllsqfit(
     real *xdat, 
     int xdim, 
@@ -355,14 +353,6 @@ int nllsqfit(
     real lab, 
     rproc f, 
     iproc df)
-#else
-int nllsqfit(xdat, xdim, ydat, wdat, ddat, ndat, fpar, epar,
-              mpar, npar, tol, its, lab, f, df)
-real *xdat,*ydat, *wdat, *ddat, *fpar, *epar, tol, lab;
-int  xdim, ndat, *mpar, npar, its;
-rproc f;
-iproc df;
-#endif
 {
    int   i, n, r;
 
@@ -386,7 +376,8 @@ iproc df;
    }
    if (nfree == 0) return( -2 );        /* no free parameters */
    for (n = 0; n < ndat; n++) {
-      if (wdat[n] > 0.0) nuse++;        /* legal weight */
+     if (wdat && wdat[n] > 0.0) nuse++;        /* legal weight */
+     else nuse++;
    }
    if (nfree >= nuse) return( -3 );     /* no degrees of freedom */
    if (labda == 0.0) {                  /* linear fit */
@@ -475,7 +466,7 @@ iproc df;
 /*
  * For testing purposes only. We try to fit a one-dimensional Gaussian
  * to data with a uniform noise distribution. Although the algorithm
- * is developped for Gaussian noise patterns, it should not cause to
+ * is developed for Gaussian noise patterns, it should not cause to
  * much problems. For Poison noise the algorithm is not suitable!
  */
 
@@ -533,6 +524,7 @@ void derv_c( real *xdat, real *fpar, real *epar, int *npar )
       epar[3] = x * x * x;      
    }
 }
+
 #if defined(mc68k)
 #define RAND_MAX 32767
 #else

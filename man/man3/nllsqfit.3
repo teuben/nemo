@@ -1,12 +1,13 @@
-.TH NLLSQFIT 3NEMO "20 August 1992"
+.TH NLLSQFIT 3NEMO "12 July 2002"
 .SH NAME
 nllsqfit \- (non)linear least squares fit
 .SH SYNOPSIS
 .nf
-\fBint nllsqfit(xdat, xdim, ydat, wdat, ndat, fpar, epar,
-                mpar, npar, tol, its, lab, f, df)
+\fBint nllsqfit(xdat, xdim, ydat, wdat, ddat, ndat, 
+		fpar, epar, mpar, npar, 
+		tol, its, lab, f, df)
 
-  real *xdat, f*ydat, *wdat, *fpar, *epar, tol, lab;
+  real *xdat, *ydat, *wdat, *ddat, *fpar, *epar, tol, lab;
   int  xdim, ndat, *mpar, npar, its;
   rproc f;
   iproc df;\fP
@@ -51,6 +52,9 @@ contains the data points.
 .TP
 \fBwdat\fP      
 contains the weigths for the data points.
+.TP
+\fBddat\fP      
+contains the difference between fit and data
 .TP
 \fBndat\fP      
 is the number of data points.
@@ -142,8 +146,7 @@ linreg(3NEMO), matinv(3NEMO), FIT.DC2(GIPSY)
 .SH AUTHOR
 K.G. Begeman (originally named FIT.SHL, in Sheltran), P.J. Teuben (C)
 .SH COPYRIGHT
-Copyright (c) Kapteyn Laboratorium Groningen 1990; 
-All Rights Reserved.
+Copyright (c) Kapteyn Laboratorium Groningen 1990; All Rights Reserved.
 .SH HISTORY
 .nf
 .ta +1.5i
@@ -151,4 +154,5 @@ May  7, 1990    Document created(KGB), document refereed(MXV)
 Apr 30, 1991    NEMO version written for rotcur, as old PJT
 July 23, 1992   manual page written PJT
 Aug 20, 1992    turbocharged getvec() considerably  PJT
+July 12, 2002	allow 'wdat' to be a NULL vector if all weights the same	PJT
 .fi
