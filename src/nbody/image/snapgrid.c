@@ -65,7 +65,7 @@ string defv[] = {		/* keywords/default values/help */
 	"mean=f\n			  mean (moment=0) or sum per cell",
 	"stack=f\n			  Stack all selected snapshots?",
 	"proj=\n                          Sky projection (SIN, TAN, ARC, NCP, GLS, MER, AIT)",
-	"VERSION=5.0a\n			  8-may-04 PJT",
+	"VERSION=5.0b\n			  11-may-04 PJT",
 	NULL,
 };
 
@@ -176,6 +176,7 @@ void wcs(real *x, real *y)
     error("problem-1 with WCS conversion");
   *x = xpix;
   *y = ypix;
+  /* dprintf(0,"xypix %s %15.10g %15.10g %15.10g %15.10g\n",proj,xpos,ypos,xpix,ypix); */
 }
 
 
@@ -230,6 +231,8 @@ void setparams()
     Qwcs = hasvalue("proj");
     if (Qwcs) {  /* X and Y are now interpreted as a LONGITUDE / LATITUDE paid, in degrees */
       proj = getparam("proj");
+      if (*proj != '-')
+	error("proj=%s should be 4 uppercase letters starting with -, e.g. proj=-TAN",proj);
       rot = 0.0;                   /* we can only handle non-rotated frames */
 
       /* first save the astro WCS */
@@ -387,8 +390,8 @@ allocate_image()
       Zref(iptr) = 0.0;
       
       
-      Namex(iptr) = hasvalue("xlab") ? xlab : sconc("RA---",proj);
-      Namey(iptr) = hasvalue("ylab") ? ylab : sconc("DEC--",proj);
+      Namex(iptr) = hasvalue("xlab") ? xlab : sconc("RA--",proj);
+      Namey(iptr) = hasvalue("ylab") ? ylab : sconc("DEC-",proj);
       Namez(iptr) = zlab;
       
     } else {
