@@ -11,9 +11,10 @@ CFLAGS = -g
 INC = config.h filefn.h	filestruct.h history.h snapshot.h  strlib.h \
 	extstring.h filesecret.h getparam.h options.h stdinc.h version.h
 
+LOCAL_SRC = getparam_fake.c simple_read.c simple_write.c
 
 SRC = allocate.c bswap.c convert.c dprintf.c error.c extstring.c filefn.c \
-	filesecret.c getparam_fake.c history.c strlib.c stropen.c date_id.c
+	filesecret.c history.c strlib.c stropen.c date_id.c
 
 
 OBJ = allocate.o bswap.o convert.o dprintf.o error.o extstring.o filefn.o \
@@ -30,7 +31,10 @@ help:
 	@echo there is no help here .... yet
 
 clean:
-	rm -f $(LIB)  *.o core  $(BIN)
+	rm -f $(LIB)  *.o core  $(BIN) junk.dat
+
+clean_all:
+	@rm -f $(SRC) $(INC)
 
 lib:	$(OBJ)
 	ar ruv $(LIB) $?
