@@ -1,0 +1,101 @@
+.TH DEMFITS 1NEMO "27 March 1999"
+.SH NAME
+demfits \- Read DEM (Digital Elevation Maps) from USGS
+.SH SYNOPSIS
+\fBdem\fP [parameter=value]
+.SH DESCRIPTION
+\fBdemfits\fP (previously called \fBdem\fP) converts ASCII DEM
+(Digital Elevation Maps) from the USGS into a FITS file. 
+Currrently it converts the 1:250,000-scale 
+1 degree (with 3 arcseconds resolution )
+which have a size of 1201 by 1201 pixels, as well
+as the 7.5 arcmin maps (with 1 arcsec resolution)
+The output file is a FITS data-unit (no header currently written).
+You need to use a script (see EXAMPLE below) 
+to add a header and flip the X and Y
+axes. Note that North will be Right, and East Up if you display this
+block of data in the usual convention of
+the first data in the lower left corner
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input DEM file     
+.TP
+\fBout=\fP
+Output FITS data unit file     
+.TP
+\fBnaxis=\fP\fInx,ny\fP
+Preset the size of the output map
+.TP
+\fBcrval=\fP\fIx0,y0\fP
+Preset the lower left corner of the image. The output dataset will have
+pixels not within the region set to 0.
+.TP
+\fBnewfmt=t|f\fP
+New format has to be used if data items 17-28 are present in the 
+A record. Default: f
+.TP
+\fBc=t|f\fP
+Force reading of a trailing C record (not implemented yet). Default: f.
+.TP
+\fBtab=\fP
+If given, this will be the name of an ascii table file that contains
+a listing of the extracted X,Y,Z values. Default: not used.
+.SH UNITS
+Units are directly taken from the USGS maps. E.g. the 1-degree maps are
+in standard arcseconds, maps are 1201 by 1201 pixels. The 7.5 arcmin maps
+are in Universal Transverse Mercator (UTM) projection, units in meters
+(x=Easting, y=Northing; after the proper
+transformation). Height is in meters in both cases.
+.SH CAVEATS
+Lots of header variables not properly checked, and hardcoded/assumed
+in the source code. Once a proper FITS file is be written, this will
+be cleaned up.
+.PP
+1 degree maps should be processed with \fBdem1\fP (the first version),
+7.5 arcmin maps with \fBdem\fP, but not after the proper coordinate
+system (\fBnaxis=, crval=\fP) has been found out, otherwise you will
+probably wind up with a map with lots of zeros :-)
+.SH EXAMPLES
+Here is a very simple shell script that adds a FITS header to a block of 
+data of which you know the size:
+
+.nf
+#! /bin/csh -f
+#       Usage:  SCRIPTNAME NX NY BASENAME
+#       Input:  BASENAME
+#       Output: BASENAME.fits
+set nx=$1
+set ny=$2
+set base=$3
+set tmp=tmp$$
+
+echo "SIMPLE  =                    T /"   >  $tmp.txt
+echo "BITPIX  =                   16 /"  >>  $tmp.txt
+echo "NAXIS   =                    2 /"  >>  $tmp.txt
+echo "NAXIS1  =                 $nx"     >>  $tmp.txt
+echo "NAXIS2  =                 $ny"     >>  $tmp.txt
+echo "END"                               >>  $tmp.txt
+
+fitshead in=$tmp.txt out=$tmp.fitshead
+cat $tmp.fitshead $base > $base.fits
+
+.fi
+.SH SEE ALSO
+ftp://edcftp.cr.usgs.gov/pub/
+.SH FILES
+.nf
+NEMO/usr/pjt/usgs    - more formal releases
+/bootes3/teuben/usgs - development
+.fi
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+10-dec-96	V0.0 handle 1-degree maps (kludged)	pjt
+11-dec-96	V0.1 handle 7.5 arcmin maps (more kludged)	pjt
+23-mar-99	V0.3 added some doc and better 7.5arcmin support	Pjt
+.fi
