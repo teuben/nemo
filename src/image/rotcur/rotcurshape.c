@@ -11,10 +11,10 @@
  * 
  *     and a functional parameterized form for VROT(r)
  *
- *     History: 19/jul/02 : cloned off rotcur                       pjt
+ *     History: 19/jul/02 : cloned off rotcur                                  pjt
  *              10-sep-02 : implemented resid= for images, more pts for disk   pjt
  *              19-sep-02 : added a few more rotcur's (exp, nfw)               pjt
- *              12-dec-02 : power law rotation curve for Josh Simon            pjt
+ *              13-dec-02 : added power law rotation curve for Josh Simon      pjt
  *
  ******************************************************************************/
 
@@ -32,8 +32,8 @@
 
 #define GPARAM  5           /* number of geometric parameters for a disk */
 #define PARAMS  50          /* (max) number of parameters */
-#define MAXMOD  5           /* number of rotation curve models */
-#define MAXPAR  5           /* number of parameters per model */
+#define MAXMOD  5           /* number of rotation curve models (should match rotcur#) */
+#define MAXPAR  5           /* number of parameters per model (can be made larger) */
 
 #define RING         10     /* maximum number of rings (17 arrays) */
 #define MAXPTS   100000     /* maximum number of pixels per ring (4 arrays) */
@@ -55,7 +55,7 @@ string defv[] = {
     "frang=0\n       Free angle around minor axis (degrees)",
     "side=\n         Side to fit: receding, approaching or [both]",
     "weight=u\n      Weighting function: {uniform,[cosine],cos-squared}",
-    "fixed=\n        Parameters to be kept fixed {vsys,xpos,ypos,pa,inc}",
+    "fixed=\n        Geometric parameters to be kept fixed {vsys,xpos,ypos,pa,inc}",
     "ellips=\n       ** Parameters for which to plot error ellips",
     "beam=\n         ** Beam (arcsec) for beam correction [no correction]",
     "dens=\n         Image containing containing density map to be used as weight",
@@ -75,7 +75,7 @@ string defv[] = {
     "rotcur3=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur4=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur5=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
-    "VERSION=1.0f\n  12-dec-02 PJT",
+    "VERSION=1.0h\n  13-dec-02 PJT",
     NULL,
 };
 
@@ -94,11 +94,20 @@ real  dx,dy;      /* grid separation in x and y */
 real  undf;       /* undefined value in map */
 real  pamp;       /* position angle of map */
 
+typedef struct {
+  int    npar;
+  int    ipar;
+  real   mpar[MAXPAR];
+  int    mmsk[MAXPAR];
+  rcproc rcfn;
+} rotcurz[MAXMOD];
+
 int    npar[MAXMOD];            /* active number of parameters per model */
 int    ipar[MAXMOD];
 real   mpar[MAXMOD][MAXPAR];    /* parameters per model */
 int    mmsk[MAXMOD][MAXPAR];    /* mask per model (1=free 0=fixed) */
 rcproc rcfn[MAXMOD];
+
 int    nmod = 0;                /* number of models actually used */
 int    nparams = 0;             /* total number of parameters (5 + # for models) */
 
@@ -125,8 +134,6 @@ void vcor_c1 (real *c, real *p, real *vd, real *dn);
 real vobs_s1 (real *c, real *p, int m);
 void vobsd_s1(real *c, real *p, real *d, int m);
 void vcor_s1 (real *c, real *p, real *vd, real *dn);
-
-
 
 
 int rotinp(real *rad, real pan[], real inc[], real vro[], int *nring, int ring, real *vsys, 
@@ -176,8 +183,8 @@ real rotcur_poly(real r, int np, real *p, real *d)
   i = np-1;
   v = 0;
   dp = 0;
-  d[1] = p[0] * x;   /* fake placeholder for recursion */
-  while (i > 1) {  /* p[0] and p[1] are special, p[2] last one in loop */
+  d[1] = p[0] * x;   /* fake placeholder for recursion coming up */
+  while (i > 1) {    /* p[0] and p[1] are special, p[2] last one in loop */
     v = v*x + p[i];
     dp = dp*x + i*p[i];
     d[np+1-i] = d[np-i] * x;
@@ -286,9 +293,8 @@ real rotcur_iso(real r, int np, real *p, real *d)
  *
  *    V/Vmax = 1 - e^{-ln{100) R/Rmax}
  *  or as we write:
- *    V = Vmax ( 1 - e^{R/Rmax} )
+ *    V = Vmax ( 1 - e^{-R/Rmax} )
  *
- *   !!! NOT CHECKED !!!
  */
 
 real rotcur_exp(real r, int np, real *p, real *d)
@@ -296,7 +302,7 @@ real rotcur_exp(real r, int np, real *p, real *d)
   real x = r/p[1];
   real y = exp(-x);
   d[0] = 1-y;
-  d[1] = p[0]*y/p[1];
+  d[1] = -p[0]*y/p[1]*x;
   return p[0] * d[0];
 }
 
@@ -326,7 +332,7 @@ real rotcur_nfw(real r, int np, real *p, real *d)
  *
  * rho \propto  r^{-3/2}
  * i.e.
- * v   \propto  r^{1/4}
+ * v   \propto  r^{1/4}      ->   see 'power' with P3=0.25
  */
 
 real rotcur_moore(real r, int np, real *p, real *d)
@@ -345,7 +351,14 @@ real rotcur_moore(real r, int np, real *p, real *d)
 
 real rotcur_brandt(real r, int np, real *p, real *d)
 {
-  return 0.0;
+  real x = r/p[1];
+  real n = p[2];
+  real dn = pow(1.0/3.0+1.5*pow(x,n), 1.5/n);
+  real v = x/dn;
+  d[0] = v;
+  d[1] = 0.0;   /* to do !! */
+  d[2] = 0.0;   /* to do !! */
+  return p[0] * v;
 }
 
 /* 
@@ -361,7 +374,7 @@ real rotcur_power(real r, int np, real *p, real *d)
   real v = pow(x,a);
   d[0] = v;
   d[1] = -a*p[0]*v/p[1];
-  d[2] = p[0]*v*log10(x);
+  d[2] = p[0]*v*log(x);
   return p[0] * d[0];
 }
 
@@ -491,7 +504,7 @@ rotcurparse()
   bool Qext = hasvalue("load");
   char func_name[80];
 
-  if (Qext) {
+  if (Qext) {                          /* load= was used, load potentials from this file */
     fname = getparam("load");
     mysymbols(getargv0());
     path = pathfind(".",fname);
@@ -499,28 +512,28 @@ rotcurparse()
     loadobj(path);
   }
 
-  nmod = 0;
+  nmod = 0;                                 /* number of rotcur# keywords used */
   for (i=0; i<MAXMOD; i++) {                 /* process all rotcur#= keywords */
     sprintf(keyname,"rotcur%d",i+1);
     if (hasvalue(keyname)) {
       sp = burststring(getparam(keyname),", ");
-      nsp = xstrlen(sp,sizeof(string))-2;
-      if (nsp % 2) warning("%s= needs an even number of parameters",keyname);
+      nsp = xstrlen(sp,sizeof(string))-2;  /* one for name, one for terminating 0 */
+      if (nsp % 2) warning("%s= should use an even number of numbers",keyname);
 
       if (streq(sp[0],"linear")) {             /* first check for predefined ones */
-	if (nsp != 2) error("linear needs 2 numbers");
+	if (nsp != 2) error("linear needs 1 parameter");
 	npar[nmod] = 1;
 	mpar[nmod][0] = natof(sp[1]);
 	mmsk[nmod][0] = natoi(sp[2]);
 	rcfn[nmod] = rotcur_linear;
       } else if (streq(sp[0],"flat")) {
-	if (nsp != 2) error("flat needs 2 numbers");
+	if (nsp != 2) error("flat needs 1 parameter");
 	npar[nmod] = 1;
 	mpar[nmod][0] = natof(sp[1]);
 	mmsk[nmod][0] = natoi(sp[2]);
 	rcfn[nmod] = rotcur_flat;
       } else if (streq(sp[0],"plummer")) {
-	if (nsp != 4) error("plummer needs 2 numbers");
+	if (nsp != 4) error("plummer needs 2 parameters");
 	npar[nmod] = 2;
 	mpar[nmod][0] = natof(sp[1]);
 	mpar[nmod][1] = natof(sp[2]);
@@ -528,7 +541,7 @@ rotcurparse()
 	mmsk[nmod][1] = natoi(sp[4]);
 	rcfn[nmod] = rotcur_plummer;
       } else if (streq(sp[0],"core1")) {
-	if (nsp != 4) error("core1 needs 2 numbers");
+	if (nsp != 4) error("core1 needs 2 parameters");
 	npar[nmod] = 2;
 	mpar[nmod][0] = natof(sp[1]);
 	mpar[nmod][1] = natof(sp[2]);
@@ -536,7 +549,7 @@ rotcurparse()
 	mmsk[nmod][1] = natoi(sp[4]);
 	rcfn[nmod] = rotcur_core1;
       } else if (streq(sp[0],"core2")) {
-	if (nsp != 4) error("core2 needs 2 numbers");
+	if (nsp != 4) error("core2 needs 2 parameters");
 	npar[nmod] = 2;
 	mpar[nmod][0] = natof(sp[1]);
 	mpar[nmod][1] = natof(sp[2]);
@@ -544,7 +557,7 @@ rotcurparse()
 	mmsk[nmod][1] = natoi(sp[4]);
 	rcfn[nmod] = rotcur_core2;
       } else if (streq(sp[0],"iso")) {
-	if (nsp != 4) error("iso needs 2 numbers");
+	if (nsp != 4) error("iso needs 2 parameters");
 	npar[nmod] = 2;
 	mpar[nmod][0] = natof(sp[1]);
 	mpar[nmod][1] = natof(sp[2]);
@@ -552,7 +565,7 @@ rotcurparse()
 	mmsk[nmod][1] = natoi(sp[4]);
 	rcfn[nmod] = rotcur_iso;
       } else if (streq(sp[0],"power")) {
-	if (nsp != 6) error("iso needs 3 numbers");
+	if (nsp != 6) error("power needs 3 parameters");
 	npar[nmod] = 3;
 	mpar[nmod][0] = natof(sp[1]);
 	mpar[nmod][1] = natof(sp[2]);
@@ -561,8 +574,18 @@ rotcurparse()
 	mmsk[nmod][1] = natoi(sp[5]);
 	mmsk[nmod][2] = natoi(sp[6]);
 	rcfn[nmod] = rotcur_power;
+      } else if (streq(sp[0],"brandt")) {
+	if (nsp != 6) error("brandt needs 3 parameters");
+	npar[nmod] = 3;
+	mpar[nmod][0] = natof(sp[1]);
+	mpar[nmod][1] = natof(sp[2]);
+	mpar[nmod][2] = natof(sp[3]);
+	mmsk[nmod][0] = natoi(sp[4]);
+	mmsk[nmod][1] = natoi(sp[5]);
+	mmsk[nmod][2] = natoi(sp[6]);
+	rcfn[nmod] = rotcur_brandt;
       } else if (streq(sp[0],"exp")) {
-	if (nsp != 4) error("exp needs 2 numbers");
+	if (nsp != 4) error("exp needs 2 parameter");
 	npar[nmod] = 2;
 	mpar[nmod][0] = natof(sp[1]);
 	mpar[nmod][1] = natof(sp[2]);
@@ -570,7 +593,7 @@ rotcurparse()
 	mmsk[nmod][1] = natoi(sp[4]);
 	rcfn[nmod] = rotcur_exp;
       } else if (streq(sp[0],"nfw")) {
-	if (nsp != 6) error("nfw needs 3 numbers, although 3rd cannot be varied");
+	if (nsp != 6) error("nfw needs 3 parameters, although 3rd cannot be varied");
 	npar[nmod] = 3;
 	mpar[nmod][0] = natof(sp[1]);
 	mpar[nmod][1] = natof(sp[2]);
@@ -580,7 +603,7 @@ rotcurparse()
 	mmsk[nmod][2] = natoi(sp[6]);
 	rcfn[nmod] = rotcur_nfw;
       } else if (streq(sp[0],"core")) {
-	if (nsp != 6) error("core needs 3 numbers");
+	if (nsp != 6) error("core needs 3 parameters");
 	npar[nmod] = 3;
 	mpar[nmod][0] = natof(sp[1]);
 	mpar[nmod][1] = natof(sp[2]);
@@ -590,7 +613,7 @@ rotcurparse()
 	mmsk[nmod][2] = natoi(sp[6]);
 	rcfn[nmod] = rotcur_core;
       } else if (streq(sp[0],"poly")) {
-	if (nsp % 2) error("poly really needs an even number of parameters");
+	if (nsp % 2) error("poly really needs an even number of numbers");
 	npar[nmod] = nsp/2;
 	for (j=0; j<npar[nmod]; j++) {
 	  mpar[nmod][j] = natof(sp[j+1]);
@@ -605,7 +628,7 @@ rotcurparse()
 	  rcfn[nmod] = (rcproc) findfn(func_name);
 	  if (rcfn[nmod]==NULL) error("Could not find %s in %s",func_name,fname);
 
-	  if (nsp % 2) error("%s really needs an even number of parameters",sp[0]);
+	  if (nsp % 2) error("%s really needs an even number of numbers",sp[0]);
 	  npar[nmod] = nsp/2;
 	  for (j=0; j<npar[nmod]; j++) {
 	    mpar[nmod][j] = natof(sp[j+1]);
