@@ -35,7 +35,7 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "times=all\n		  times select string ",
     "keyfile=\n			  file with Key field to select from ",
     "keyoffset=0\n                offsets to be applied extra to outkey ",
-    "VERSION=1.7d\n		  10-jun-01",
+    "VERSION=1.7f\n		  17-jan-02 PJT",
     NULL,
 };
 
@@ -73,7 +73,7 @@ nemo_main()
     instr = stropen (getparam("in"), "r");
     outstr = stropen (getparam("out"), "w");
 
-    if (*fname != NULL) {    /* get initial selection from file */
+    if (*fname != 0) {    /* get initial selection from file */
         fstr = stropen(fname,"r");
         get_history(fstr);                      /* get history */
         while (get_tag_ok(instr, HeadlineTag))  /* skip headlines */
@@ -98,7 +98,7 @@ nemo_main()
 
     get_history(instr);
     put_history(outstr);
-    for(;;) {			/* do the work in an infinite loop */
+    for(;;) {			/* loop until done reading snapshots */
     	get_history(instr);
         while (get_tag_ok(instr, HeadlineTag))
         	headline = get_string(instr, HeadlineTag);
@@ -165,7 +165,7 @@ nemo_main()
             bq++;
         }
         nbody_out = bq - btab;
-/*        bits = bits & (TimeBit | MassBit | PhaseSpaceBit | KeyBit);	 */
+/*      bits = bits & (TimeBit | MassBit | PhaseSpaceBit | KeyBit);	 */
         put_snap(outstr, &btab, &nbody_out, &tsnap, &bits);
         nbody_old = nbody;   /* remember last allocated space */
         first = FALSE;
