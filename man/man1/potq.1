@@ -4,8 +4,9 @@ potq \- query a NEMO potential in the XY plane
 .SH SYNOPSIS
 \fBpotq\fP [parameter=value]
 .SH DESCRIPTION
-\fBpotq\fP queries a potential and forcefield in the XY plane and reports 
-a number of parameter.
+\fBpotq\fP queries a potential and forcefield in the XY plane for
+a number of radii, and reports some quantities of the
+potential.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -40,7 +41,8 @@ max #iterations to find qt.
 minimal fractional change in qt to abort iterations 
 [0.001]    
 .SH EXAMPLES
-The following example prints the 
+The following example prints the radius, Q_b and an estimate of the
+uncertainty in Q_b based on the convergence speed (\fBeps=\fP):
 .nf
 % potq pfenniger84 r=1:10:1
  1 0.497721   0.00100091
