@@ -1,0 +1,60 @@
+.TH CCDGOAT 1NEMO "22 December 1995"
+.SH NAME
+ccdgoat \- LV diagram diagnostics
+.SH SYNOPSIS
+\fBccdgoat\fP [parameter=value]
+.SH DESCRIPTION
+\fBccdgoat\fP computes various galactic LV diagram diagnostics, to
+investigate asymmetries. 
+.PP
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input image file - must be an LV map. The X axis must have GLON, and
+must be descreasing. If the galactic center is not in/near  the center,
+the program will swap the galactic quadrants such that they are
+ordered 4,3,2 to 1. 
+No default
+.TP
+\fBtemp=\fP
+Temperature (in map units, presumable K) to measure isotherms at
+for \fIVdiff\fP. Default: 1.
+.TP
+\fBvel=\fP
+Velocity cutoff (in map units, presumably km/s but 
+some maps may use m/s if derived from FITS) for \fINdiff\fP table. Default: 0
+.TP
+\fBmode=\fP
+Mode {\fBgoat, int, vdiff, diffmap\fP}. Default: \fBgoat\fP
+.TP
+\fBout=\fP\fIout_image\fP
+Output dataset, required for \fBmode=diffmap\fP.
+.SH EXAMPLES
+An example of plotting vdiff from fits file, given in m/s, but plotting
+at a fixed scale in km/s
+.nf 
+    fitsccd hiplane.fits - |\\
+        ccdgoat - - 0 1 vdiff |\\
+        tabmath - - %1,%4/1000 all |\\
+        tabplot - 1 2 0 180 -60 60
+.fi
+.SH BUGS
+For LV maps where the galactic center is 'in the middle' 
+(assumed when the centeral pixel is close to the galactic center
+or even when Xmin > 0 and Xmax < 0) the northern hemisphere
+is assumed to be in the first half of the X pixels, and the
+southern in the second half. They will then be swapped, but 
+one can think of pathological cases where this should not be done.
+.SH SEE ALSO
+hispectrum(1NEMO), himap(1NEMO)
+.SH AUTHOR
+Brian Sutin/Leo Blitz (original) - Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+31-oct-90	various old 'goat'/vdiff programs merged into ccdgoat	pjt
+21-dec-95	manual page written	pjt
+22-dec-95       added diffmap       pjt
+.fi
