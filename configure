@@ -8643,15 +8643,15 @@ if test "${enable_cfitsio+set}" = set; then
   enableval="$enable_cfitsio"
   ok=$enableval
 else
-  ok=yes
+  ok=no
 fi;
 
 if test "$ok" = "yes"; then
 
-   echo "$as_me:$LINENO: checking whether we have CFITSIO" >&5
+  echo "$as_me:$LINENO: checking whether we have CFITSIO" >&5
 echo $ECHO_N "checking whether we have CFITSIO... $ECHO_C" >&6
 
-   cfdefault=/usr/local
+  cfdefault=/usr/local
 
 
 # Check whether --with-cfitsio-prefix or --without-cfitsio-prefix was given.
@@ -8662,22 +8662,22 @@ else
   cfitsio_config_prefix="use_default"
 fi;
 
-if test "$cfitsio_config_prefix" = "use_default"; then
-  if test -n "$CFITSIO"; then
-    cfitsio_config_prefix="$CFITSIO"
-  else
-    cfitsio_config_prefix="$cfdefault"
+  if test "$cfitsio_config_prefix" = "use_default"; then
+    if test -n "$CFITSIO"; then
+      cfitsio_config_prefix="$CFITSIO"
+    else
+      cfitsio_config_prefix="$cfdefault"
+    fi
   fi
-fi
 
-if test x$cfitsio_config_prefix != x; then
+  if test x$cfitsio_config_prefix != x; then
     cdir="$cfitsio_config_prefix"
     for dir in $cdir/include $cdir/cfitsio $cdir/include/cfitsio $cdir
       do
         if test -f ${dir}/fitsio.h ; then
-            CFITSIO_INC="-I${dir}"
-            incdir="$dir"
-            break;
+          CFITSIO_INC="-I${dir}"
+          incdir="$dir"
+          break;
         fi
       done
 
@@ -8685,29 +8685,30 @@ if test x$cfitsio_config_prefix != x; then
       for dir in $cdir/lib $cdir
         do
           if test -f ${dir}/libcfitsio.a ; then
-              CFITSIO_LIB="-L${dir}"
-              break;
+            CFITSIO_LIB="-L${dir}"
+            break;
           fi
         done
     fi
 
-     if test -z "$CFITSIO_LIB"; then
-       echo "$as_me:$LINENO: result: $cdir (invalid)" >&5
+    if test -z "$CFITSIO_LIB"; then
+      echo "$as_me:$LINENO: result: $cdir (invalid)" >&5
 echo "${ECHO_T}$cdir (invalid)" >&6
-       if test -z "$CFITSIO_INC"; then who="header"; else who="library"; fi
-       { { echo "$as_me:$LINENO: error: CFITSIO ${who} not found, please specify valid --with-cfitsio-prefix=DIR" >&5
+      if test -z "$CFITSIO_INC"; then who="header"; else who="library"; fi
+      { { echo "$as_me:$LINENO: error: CFITSIO ${who} not found, please specify valid --with-cfitsio-prefix=DIR" >&5
 echo "$as_me: error: CFITSIO ${who} not found, please specify valid --with-cfitsio-prefix=DIR" >&2;}
    { (exit 1); exit 1; }; }
-     else
-       echo "$as_me:$LINENO: result: ${cdir}" >&5
+    else
+      echo "$as_me:$LINENO: result: ${cdir}" >&5
 echo "${ECHO_T}${cdir}" >&6
-       cat >>confdefs.h <<\_ACEOF
+      cat >>confdefs.h <<\_ACEOF
 #define HAVE_LIBCFITSIO 1
 _ACEOF
 
-       CFITSIO_LIB="$CFITSIO_LIB -lcfitsio"
-       rm -f src/include/cfitsio ; ln -s $incdir src/include/cfitsio
-     fi
+      CFITSIO_LIB="$CFITSIO_LIB -lcfitsio"
+      rm -f src/include/cfitsio ; ln -s $incdir src/include/cfitsio
+    fi
+  fi
 else
   CFITSIO_INC=""
   CFITSIO_LIB=""
