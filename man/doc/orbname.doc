@@ -1,0 +1,24 @@
+%N orbname
+%D Orbit classification and plotting
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man orbname' for more extensive online help
+  Defaults of program keywords are listed between square brackets
+%A in
+	Input orbit [???]
+%A taumin
+	minimum mean/sigma needed to count as ang.mom. [1]
+%A numin
+	minimum range/2/sigma needed to count as ang.mom. [1]
+%A plot
+	Plot 6 panels XY,XZ,YZ and Jx,Jy,Jz evolution? [f]
+%A tmax
+	maximum time extent to plot (0:tmax) []
+%A rmax
+	maximum spatial extent to plot (-rmax:rmax) []
+%A jmax
+	maximum angular momentum extent to plot (-jmax:jmax) []
+%A orbit
+	select orbit numbers to process (0=first) []
+%A VERSION
+	6-dec-93 pjt [1.2]
