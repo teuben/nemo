@@ -134,3 +134,5 @@ try2: try2.cc
 	$(CXX) $(CFLAGS) -o try2 try2.cc $(NEMO_LIBSPP) $(EL) $(FORLIBS) -lm
 
 
+potlist++: potlist.c
+	$(CXX) $(CFLAGS) -o potlist++ potlist.c $(NEMO_LIBSPP) $(EL) $(FORLIBS) -lm
