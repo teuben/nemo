@@ -24,6 +24,7 @@
  *                 a 19-feb-01  bad bug in mode=LV, used the wrong radius
  *      	   b 13-sep-01  better prototype for proc
  *             V1.7   7-jul-02  added format=
+ *                 a  9-jan-03  more C++ friendly
  */
 
 #include <stdinc.h>
@@ -60,7 +61,7 @@ string defv[] = {
     "headline=\n         Optional plot label for identification",
     "in=\n               Optional input rotation curve table",
     "cols=1,2\n          Columns for r, v, dr, dv (use 0 when not present)",
-    "VERSION=1.7\n       7-jul-02 PJT",
+    "VERSION=1.7a\n      9-jan-03 PJT",
     NULL,
 };
 
@@ -75,7 +76,6 @@ potproc_double mypot1, mypot2, mypot3, mypot4;
 real xplot[2], yplot[2];
 char plotmsg[256];
 
-extern int get_atable(stream ,int, int *, real **, int);
 
 local real xtrans(real), ytrans(real);
 local void lindblad(int, real *, real *, real *, real *, real *, real *, int);
@@ -83,12 +83,12 @@ local void goodness(int ,real *, real *, int, real *, real *, real *);
 local int  read_table(stream, int, real *, real *, real *, real *, int *);
 local void lv(int nrad, real *, real *, real, real, int, real *);
 local int  read_table(stream, int, real *, real *, real *, real *,int *);
-local int  peak(int, real *, real *, int, int, real *, real *);
+local void peak(int, real *, real *, int, int, real *, real *);
 
+extern int get_atable(stream ,int, int *, real **, int);
 extern void lsq_zero(int n, real *mat, real *vec);
 extern void lsq_accum(int n, real *mat, real *vec, real *a, real w);
 extern void lsq_solve(int n, real *mat, real *vec, real *sol);
-
 
 
 void nemo_main()
@@ -614,7 +614,7 @@ local void goodness(int n,real *x, real *y, int m,
 
 
 
-local int peak(int n, real *x, real *y, int idx, int mode,
+local void peak(int n, real *x, real *y, int idx, int mode,
                real *xmax, real *ymax)
 {
     int i, k, order = 2;
