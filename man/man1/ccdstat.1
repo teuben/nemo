@@ -49,6 +49,12 @@ Here is an example how to created a weight file which is a circular annulus:
   % ccdmath out=map2 "fie=iflt(%r,20,1,0)" size=200,200 crpix=100,100
   % ccdmath map1,map2 map3 %1-%2
 .fi
+Here is an two masking example: firstignoring the exact value of 0, 
+followed by an example of a small range around 0:
+.nf
+  % ccdstat map1 bad=0
+  % ccdmath map1 - 'iflt(abs(%1),0.001,0,%1)' | ccdstat - bad=0
+.fi
 .SH "SEE ALSO"
 snapccd(1NEMO), image(5NEMO)
 .SH AUTHOR
