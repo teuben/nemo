@@ -1,0 +1,131 @@
+This package contains the source code for the fitsverify FITS file
+conformance verification program.  It is maintained by the HEASARC
+at NASA/GSFC (http://heasarc.gsfc.nasa.gov).  This is a stand-alone
+version of the fverify task in the FTOOLS package.
+
+The CFITSIO library, also available from the HEASARC, is required
+to compile and build fitsverify.  In particular, the fitsio.h, and
+longnam.h include files are needed to compile the program, which
+must then be linked  with the CFITSIO library itself (i.e., the file
+libcfitsio.a on unix systems).
+
+fitsverify can be built on most unix machines with a command similar
+to the following:
+
+gcc -o fitsverify ftverify.c fvrf_data.c fvrf_file.c fvrf_head.c fvrf_key.c
+    fvrf_misc.c -DSTANDALONE -L. -lcfitsio -lm -lnsl -lsocket
+
+(The '-lm' and '-lnsl' library directives may not be required on all
+platforms.)
+
+To build fitsverify with Visual C++ on Windows PCs, first execute the 
+vcvars32.bat file that is distributed with vcc,  unpack the fitverify
+.zip file, then excute the following command:
+
+cl /MD ftverify.c fvrf_data.c fvrf_file.c fvrf_head.c fvrf_key.c
+    fvrf_misc.c -DSTANDALONE cfitsio.lib
+
+A help file describing the features of fitsverify can be produced
+by entering the command 'fitsverify -h'.  The help file
+is reproduced below:
+
+----------------------------------------------------------------
+fitsverify -- Verify that the input files conform to the FITS Standard.
+
+USAGE:   fitsverify filename ...  - verify one or more FITS files
+                                    (may use wildcard characters)
+   or    fitsverify @filelist.txt - verify a list of FITS files
+      
+   Optional flags:
+          -l  list all header keywords
+          -q  quiet; print one-line pass/fail summary per file
+          -e  only test for error conditions (ignore warnings)
+ 
+   fitsverify exits with a status equal to the number of errors + warnings.
+        
+EXAMPLES:
+     fitsverify -l m101.fits    - produce a detailed verificaton report of
+                                  a single file, including a keyword listing
+     fitsverify -q *.fits *.fit - verify all files with .fits or .fit 
+                                  extensions, writing a 1-line pass/fail 
+                                  message for each file
+ 
+DESCRIPTION:
+    
+    This task reads one or more input FITS files and verifies that the
+    files conform to the specifications of the FITS Standard document
+    (known as the NASA/Science Office of Standards and Technology 'Definition
+    of the Current  FITS Standard', document number, NOST 100-2.0, available
+    online  at http://fits.gsfc.nasa.gov/).  The input filename template may
+    contain wildcard characters, in which case all matching files will be 
+    tested.  Alternatively, the name of an ASCII text file containing a list
+    of file names, one per line, may be entered preceded by an '@' character.
+    The following error or warning conditions will be reported:
+    
+    ERROR CONDITIONS
+    
+     - Mandatory keyword not present or out of order
+     - Mandatory keyword has wrong datatype or illegal value
+     - END header keyword is not present
+     - Sum of table column widths is inconsistent with NAXIS1 value
+     - BLANK keyword present in image with floating-point datatype
+     - TNULLn keyword present for floating-point binary table column
+     - Bit column has non-zero fill bits or is not left adjusted 
+     - ASCII TABLE column contains illegal value inconsistent with TFORMn
+     - Address to a variable length array not within the data heap 
+     - Extraneous bytes in the FITS file following the last HDU    
+     - Mandatory keyword values not expressed in fixed format
+     - Mandatory keyword duplicated elsewhere in the header
+     - Header contains illegal ASCII character (not ASCII 32 - 126)
+     - Keyword name contains illegal character
+     - Keyword value field has illegal format
+     - Value and comment fields not separated by a slash character
+     - END keyword not filled with blanks in columns 9 - 80
+     - Reserved keyword with wrong datatype or illegal value
+     - EXTEND not present in the primary array if there are extensions
+     - BLOCKED, if present, not among the first 36 keywords
+     - XTENSION keyword in the primary array
+     - Column related keyword (TFIELDS, TTYPEn,TFORMn, etc.) in an image
+     - SIMPLE, EXTEND, or BLOCKED keyword in any extension
+     - BSCALE, BZERO, BUNIT, BLANK, DATAMAX, DATAMIN keywords in a table
+     - Image WCS keywords (CTYPEn, CRPIXn, CRVALn, etc.) in a table
+     - Table WCS keywords (TCTYPn, TCRPXn, TCRVLn, etc.) in an image
+     - TDIMn or THEAP keyword in an ASCII table 
+     - TBCOLn keyword in a Binary table
+     - THEAP keyword in a binary table that has PCOUNT = 0 
+     - XTENSION, TFORMn, TDISPn or TDIMn value contains leading space(s)
+     - Index of any WCS keyword (CRPIXn, CRVALn, etc.) greater than 
+       value of WCSNAXES
+     - Index of any table column descriptor keyword (TTYPEn, TFORMn,
+       etc.) greater than value of TFIELDS
+     - TSCALn or TZEROn present for an ASCII, logical, or Bit column
+     - TDISPn value is inconsistent with the column datatype 
+     - Length of a variable length array greater than the maximum 
+       length as given by the TFORMn keyword
+     - Logical column contains illegal value not equal to 'T', 'F', or 0
+     - Character string column contains non-ASCII text character
+     - Header fill bytes not all blanks
+     - Data fill bytes not all blanks in ASCII tables or all zeros 
+       in any other type of HDU 
+     - Gaps between defined ASCII table columns contain characters with
+       ASCII value > 127
+    
+    WARNING CONDITIONS
+    
+     - SIMPLE = F
+     - Presence of deprecated keywords BLOCKED or EPOCH
+     - 2 HDUs have identical EXTNAME, EXTVER, and EXTLEVEL values
+     - BSCALE or TSCALn value = 0.
+     - BLANK OR TNULLn value exceeds the legal range
+     - TFORMn has 'rAw' format and r is not a multiple of w
+     - DATE = 'dd/mm/yy' and yy is less than 10 (Y2K problem??)
+     - Index of any WCS keyword (CRPIXn, CRVALn, etc.) greater than
+       value of NAXIS, if the WCSAXES keyword is not present
+     - Duplicated keyword (except COMMENT, HISTORY, blank, etc.)
+     - Column name (TTYPEn) does not exist or contains characters 
+       other than letter, digit and underscore
+     - Calculated checksum inconsistent with CHECKSUM or DATASUM keyword
+        
+    This is the stand alone version of the FTOOLS 'fverify' program.  It is
+    maintained by the HEASARC at NASA/GSFC.  Any comments about this program
+    should be submitted to http://heasarc.gsfc.nasa.gov/cgi-bin/ftoolshelp
