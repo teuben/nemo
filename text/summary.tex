@@ -1,0 +1,171 @@
+%	12-sep-89 : summary created in LaTeX		- PJT
+%	16-nov-89 : updated for new HOSTTYPE environments - PJT
+%	12-jun-94 : updated for NEMOHOST and new 2.2 mosaic based export - PJT
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                                                                          %%
+%% To print this LaTex document:                                            %%
+%%                                                                          %%
+%%	latex summary							    %%
+%%	dvipr summary				                            %%
+%%                                                                          %%
+%%                              Peter Teuben                                %%
+%%                                                                          %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentstyle[]{report}
+
+\title{NEMO USERS/PROGRAMMERS MANUAL - SUMMARY SHEET}
+
+\date{Alpha Version 2.2-MD \\
+ June 12 1994 \\
+ Document revised: \today\ by P. Teuben}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{2.5mm}
+
+\centerline{SUMMARY - USER INSTALL}
+
+To {\underline {\bf use}} NEMO make sure the following is present in
+your default startup file(s) {\tt .cshrc}/{\tt .login}:
+
+\begin{itemize}
+\item Setting the root directory
+    of NEMO: 
+\begin{verbatim}
+	setenv NEMO /home/nemo
+\end{verbatim}
+    Of course the rootname of NEMO on your system will probably differ 
+    from the one listed in this example.
+
+\item  Executing the startup script for NEMO, which sets other 
+    environment variables etc: 
+\begin{verbatim}
+	source $NEMO/NEMORC
+\end{verbatim}
+
+\item Add NEMOs bin directory (NEMOBIN, which is set by NEMORC)
+    to your search path. 
+    An example could be:
+\begin{verbatim}
+ 	set path=( . $NEMOBIN $path )
+\end{verbatim}
+\end{itemize}
+
+A second method to load NEMO is by demand only, (so-called dynamic loading)
+by adding the following alias anywhere in your .cshrc file:
+\begin{verbatim}
+ 	alias nemo 'source /home/nemo/nemo_start'
+\end{verbatim}
+
+\newpage
+\centerline{SUMMARY - USER INTERFACES}
+
+Most NEMO programs are invoked from the commandline, just like any other
+UNIX program, with a series of parameters of the form `{\it
+keyword=value}'.  We call these {\bf program keywords}, as the names of
+the keywords are unique to a program.  The {\it keyword=} part is not
+needed in case the original order of the keywords is used.  Once a
+keyword is specifically named, all remaining keywords need the keyword
+name too, e.g.  `{\tt prognam val1 val2 key6=val6 key7=val7}'.  The
+value of a keyword can also be obtained from an 'include' file by using
+the {\it keyword=@file} construct. 
+
+There also exist a fixed set of {\bf system keywords}, which are defined
+for \underline{every} NEMO program. They are:
+
+\begin{itemize}
+\item {\bf help} Sets help level to program\footnote{inline version: help='?'}
+and can aid in command
+completion. Consist of a {\it numeric} and {\it alpha} part. The 
+{\it numeric} part is a mask of individual help levels which are powers
+of 2:
+  \begin{itemize}
+  \item[1.] restore and save keywords in keyword file {\tt prognam.def}.
+  \item[2.] interactive prompting per keyword
+  \item[4.] menu interface using environment variable {\bf EDITOR}.
+  \item[8.] curses based menu interface.
+  \item[16.] reserved
+  \end{itemize}
+For example, {\tt help=5} would no only use the menu interface, but
+also restore and save the keyword file.
+   
+The {\it alpha} part typically shows 
+inline\footnote{as opposed to online help, which are the manual pages}
+help:
+  \begin{itemize}
+  \item[?]  list of options of help keyword (this list)
+  \item[h]  list keywords plus help string (requires new defv-format)
+  \item[a]  show the {\it keyword=value} strings.
+  \item[p,k] show the {\it keyword} strings.
+  \item[d,v] show the {\it value} strings.
+  \item[n]  add newline between {\it keyword=value} strings
+  \item[t]  output in {\tt exectool} format
+  \item[q]  quit
+  \end{itemize}
+The {\bf HELP}
+environment variable will be used if keyword is not used.
+
+% \item {\bf host} Define the remote host on which this program is
+% to be executed. The {\tt rsh} command must have been installed,
+% and the remote host must have the same disk name. No environment
+% variable used.
+
+\item {\bf debug} Define debug output level between 0 and 9. Negative
+numbers are allowed, and should produce absolutely no warning messages.
+The higher the level, the more warnings and debug output. The
+routine {\it dprintf(3NEMO)} uses the debug value. The {\bf DEBUG}
+environment variable will be used if keyword is not used.
+
+\item{\bf error} Bypass a number of fatal {\it error(3NEMO)} calls. It's really
+cheating, use at your own risk. The {\bf ERROR}
+environment variable will be used if keyword is not used.
+
+\item {\bf yapp} Define graphics device, if applicable, for the program.
+The  {\bf YAPP} environment variable will be used if keyword is not used.
+
+\end{itemize}
+
+Reminder: environment variables can be set/reset using the shell commands
+{\tt setenv} and {\tt unsetenv}.
+
+\newpage
+\centerline{SUMMARY - ADVANCED USER INTERFACES}
+
+There are two more advanced (sometimes considered more user friendly)
+pieces of user interfaces to NEMO that are worth mentioning:
+
+\begin{itemize}
+
+\item {\bf miriad:} Within NEMO the {\tt miriad} shell can also be
+used to present a user interface that 
+bears some similarity to AIPS. Usage:
+
+\begin{verbatim}
+	% miriad -b $NEMOBIN -p $NEMODOC
+\end{verbatim}
+
+
+\item {\bf nemoman:} The command {\tt nemoman} is a front-end
+to a variety of manual browsers. Currently implemented are 
+the {\tt xman} (default, or -x flag) 
+and {\tt tkman} (using -tk flag). Your local system manager must
+have installed the programs themselves, {\tt nemoman} merely calls
+them with the correct parameters. Examples:
+
+\begin{verbatim}
+	% mirman
+	% mirman -tk
+	% manlaser snapplot
+\end{verbatim}
+
+The last command pertains to be smart about the NEMO manual pages, and
+searches for and prints the manual page for snapplot on your default
+laserprinter. Works fine on SUN workstations, but may need patchwork.
+
+
+\end{itemize}
+
+\end{document}
+
