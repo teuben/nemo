@@ -1,0 +1,42 @@
+DIR = src/nbody/evolve/flowcode
+BIN = flowcode
+NEED = $(BIN) mkflowdisk nemoinp
+
+help:
+	@echo $(DIR)
+
+need:
+	@echo $(NEED)
+
+clean:
+	@echo Cleaning $(DIR)
+	@rm -fr core bench.tab bench.in bench.dat bench.log
+
+
+PAR1 = potname=vrtm51 potpars=0,0.1,1,0,1,2 potfile=bench.tab
+
+bench.in:
+	nemoinp 0:360 | tabmath - - "0,1,1" > bench.tab
+	mkflowdisk bench.in $(NBODY) \
+	  seed=123 \
+	  rmin=1 rmax=2 pitch=0.1 \
+	  $(PAR1)
+
+
+NBODY = 100
+
+all: flowcode
+
+flowcode: bench.in
+	@echo Running $@
+	@rm -f bench.dat bench.log
+	make vxy.so vrtm51.so
+	flowcode in=bench.in out=bench.dat \
+		freq=100 mode=4 tstop=1 \
+		$(PAR1) \
+		> bench.log; nemo.coverage flowcode.c
+	@head -14 bench.log
+	@echo "..."
+	@tail -8 bench.log
+
+
