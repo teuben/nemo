@@ -18,7 +18,8 @@
  *	 3-nov-00  V2.7 added blankval=		PJT
  * 	 7-may-01     a cleaned up some superfluous #define's	PJT
  *      19-feb-02  V2.8 added ltype=				pjt
- *      16-mar-05  V3.0 loop over all images if more found      pJT
+ *      16-mar-05  V3.0 loop over all images if more found      PJT
+ *                     a   added blankval to the new pl_matrix routine    PJT
  *	
  */
 
@@ -54,7 +55,7 @@ string defv[] = {
 	"cmode=0\n	Contour mode (0=orginal 1=pgplot)",
 	"blankval=\n	if used, use this as blankval",
 	"ltype=\n	width and type for contour",
-	"VERSION=3.0\n	16-mar-05 PJT",
+	"VERSION=3.0a\n	16-mar-05 PJT",
 	NULL,
 };
 
@@ -75,10 +76,11 @@ real    power;
 
 
 imageptr iptr=NULL;			/* will be allocated dynamically */
-int    nx,ny,nsize;			/* size of matrix as allocated "" */
+int    nx,ny,nz,nsize;			/* size of matrix as allocated "" */
 real   origin[2];			/* from header: in sky coordinates */
-real xsize,ysize,size;		/* frame dimension */
+real xsize,ysize,size;		        /* frame dimension */
 real xmin,ymin,dx,dy,cell;		/* frame dimensions */
+real blankval;                          /* blank value */
 
 #define MCNTVAL	100			/* maximum contour levels */
 string cntstr;				/* string of contour levels */
@@ -105,9 +107,11 @@ nemo_main()
     setparams();                    /* set globals */
 
     instr = stropen (infile, "r");
-    while (read_image(instr,&iptr)) {
-      nx=Nx(iptr);			/* get stuff from header of image */
+    while (read_image(instr,&iptr)) {   /* loop while more images found */
+      nx=Nx(iptr);			
       ny=Ny(iptr);
+      nz=Nz(iptr);
+      if (nz > 1) error("Cannot handle 3D images [%d,%d,%d]",nx,ny,nz);
       xmin=Xmin(iptr);
       ymin=Ymin(iptr);
       dx=Dx(iptr);
@@ -172,8 +176,12 @@ setparams()
             sprintf(format4,"%s %s %s %s\n",tmpstr,tmpstr,tmpstr,tmpstr);
 	}
 	cmode = getiparam("cmode");
-	if (hasvalue("blankval"))
-	    contour_setdef(1,getrparam("blankval"));
+	if (hasvalue("blankval")) {
+	  blankval = getrparam("blankval");
+	  contour_setdef(1,blankval);
+	} else
+	  blankval = -999.9; /* only relevant for greyscale now , use NaN ?? */
+			   
 	if (hasvalue("ltype")) {
             lwidth = getiparam("ltype");
             /* oops, skip ltype for now */
@@ -239,7 +247,7 @@ plot_map ()
 				/* gray-scale */
        dcm = Dx(iptr) / (xplot[1]-xplot[0]) * 16.0;
        pl_matrix (Frame(iptr), nx, ny, 
-           xtrans(Xmin(iptr)), ytrans(Ymin(iptr)), dcm , mmin, mmax, power);
+		  xtrans(Xmin(iptr)), ytrans(Ymin(iptr)), dcm , mmin, mmax, power, blankval);
            /*  color_bar (100.0,500.0,32);  */
      } 
      		/* OLD ROUTINE, has to call relocate/frame ---> plcontour */
