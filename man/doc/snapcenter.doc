@@ -1,0 +1,20 @@
+%N snapcenter
+%D Center a snapshot based on a weighed subset of particles
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man snapcenter' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	input file name  [???]
+%A out
+	output file name  [???]
+%A weight
+	factor used finding center  [1]
+%A times
+	range of times to process  [all]
+%A report
+	report the c.o.m shift [f]
+%A one
+	Only output COM as a snapshot? [f]
+%A VERSION
+	26-feb-97 PJT [1.6]
