@@ -291,6 +291,7 @@ int create_image_mask(imageptr iptr, image_maskptr *mptr)
   Nx(*mptr) = nx;
   Ny(*mptr) = ny;
   Nz(*mptr) = nz;
+  return 1;
 }
 
 int copy_image (imageptr iptr, imageptr *optr)
@@ -301,8 +302,7 @@ int copy_image (imageptr iptr, imageptr *optr)
   nz = Nz(iptr);
 
   *optr = (imageptr ) allocate(sizeof(image));
-  dprintf (DLEV,"copy_image:Allocated image @ %d size=%d * %d",*iptr,nx,ny,nz);
-  if (*optr == NULL) return 0;	/* no memory available */
+  dprintf (DLEV,"copy_image:Allocated image @ %d size=%d * %d * %d",*optr,nx,ny,nz);
     	
   Frame(*optr) = (real *) allocate(nx*ny*nz*sizeof(real));	
   dprintf (DLEV,"Frame allocated @ %d ",Frame(*optr));
