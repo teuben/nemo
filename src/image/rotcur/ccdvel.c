@@ -5,6 +5,7 @@
  *      - general epicyclic orbits (re-introduce 'q' and 'alpha'
  *      - check 1-based and 0-based versions of rotcur/tables
  *        for the center position
+ *      - allow vz motions
  *
  *  One could either invert the sky and find out in which ring
  *  that pixel lies, and compute the radial velocity, which means

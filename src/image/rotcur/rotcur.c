@@ -58,6 +58,7 @@
  *               9-may-01 : 2.6a fixed error correction factor      pjt
  *               5-jun-01 : 2.7  allow density map also used as weight     PJT
  *               8-aug-01 :    a allow error correction factor 1.0  pjt
+ *              26-jan-02      b allow scale factor for velocity    pjt
  ******************************************************************************/
 
 
@@ -103,12 +104,12 @@ string defv[] = {
     "tol=0.001\n     Tolerance for convergence of nllsqfit",
     "lab=0.001\n     Mixing parameter for nllsqfit",
     "itmax=50\n      Maximum number of allowed nllsqfit iterations",
-    "units=deg\n     Units of input axes {deg, arcmin, arcsec, rad}",
+    "units=deg,1\n   Units of input {deg, arcmin, arcsec, rad, #},{#} for length and velocity",
     "blank=0.0\n     Value of the blank pixel to be ignored",
     "inherit=t\n     Inherit initial conditions from previous ring",
     "fitmode=cos,1\n Basic Fitmode: cos(n*theta) or sin(n*theta)",
     "nsigma=-1\n     Iterate once by rejecting points more than nsigma resid",
-    "VERSION=2.7\n   4-jun-01 PJT",
+    "VERSION=2.7b\n  26-jan-02 PJT",
     NULL,
 };
 
@@ -278,15 +279,16 @@ real *nsigma;
 stream  lunpri;       /* LUN for print output */
 {
     char *input;
-    int iret, i, j, n, nfixed, fixed;
-    real center[2], toarcsec;
+    string *inputs;
+    int iret, i, j, n, nfixed, fixed, ninputs;
+    real center[2], toarcsec, tokms;
     stream velstr, denstr;
     string *burststring(), *fmode;
     bool scanopt();
 
     dprintf(0,"%s: NEMO VERSION %s\n", 
                         getparam("argv0"), getparam("VERSION"));
-    if (lunpri) fprintf(lunpri,"%s: VERSION %s [NEMO2.x]\n\n",
+    if (lunpri) fprintf(lunpri,"%s: VERSION %s [NEMO]\n\n",
                         getparam("argv0"), getparam("VERSION"));
 
     for (i=0; i<PARAMS; i++) mask[i] = 1;       /* default: set all free */
@@ -297,20 +299,31 @@ stream  lunpri;       /* LUN for print output */
     velstr = stropen(input,"r");                /* open velocity field */    
     read_image(velstr,&velptr);                 /* get data */
     strclose(velstr);                           /* and close file */
+    
+    inputs = burststring(getparam("units"),",");
+    ninputs = xstrlen(inputs,sizeof(string))-1;
+    if (ninputs > 0) {
+      if (streq(inputs[0],"deg"))
+	toarcsec = 3600.0;
+      else if (streq(inputs[0],"arcmin") || streq(inputs[0],"min"))
+	toarcsec = 60.0;
+      else if (streq(inputs[0],"arcsec") || streq(inputs[0],"sec"))
+	toarcsec = 1.0;
+      else if (streq(inputs[0],"rad"))
+	toarcsec = 3600.0 * 180/PI;
+      else {
+	toarcsec = natof(inputs[0]);
+	printf("Conversion factor %g used to get arcsec\n",toarcsec);
+      }
+    } else if (ninputs == 0)
+      toarcsec = 1.0;
+    else if (ninputs < 0)
+      error("Bad units");
 
-    input = getparam("units");
-    if (streq(input,"deg"))
-        toarcsec = 3600.0;
-    else if (streq(input,"arcmin"))
-        toarcsec = 60.0;
-    else if (streq(input,"arcsec"))
-        toarcsec = 1.0;
-    else if (streq(input,"rad"))
-        toarcsec = 3600.0 * 180/PI;
-    else {
-        toarcsec = getdparam("units");
-        printf("Conversion factor %g used to get arcsec\n",toarcsec);
-    }
+    if (ninputs > 1)
+      tokms = natof(inputs[1]);
+    else
+      tokms = 1.0;
 
     lmin=0;                         /* coordinates of map (xlo) */
     lmax=Nx(velptr)-1;              /*                    (xhi) */
@@ -331,7 +344,11 @@ stream  lunpri;       /* LUN for print output */
     n = 0;                          /* count # blank values in velmap */
     for (j=0; j<Ny(velptr); j++)
         for (i=0; i<Nx(velptr); i++) 
-            if (MapValue(velptr,i,j)==undf) n++;
+            if (MapValue(velptr,i,j)==undf)
+	      n++;
+            else
+	      MapValue(velptr,i,j) *= tokms;
+	    
     printf("Mapsize is %g * %g arcsec; Found %d/%d undefined map values\n",
             ABS(dx*(lmax-lmin+1.0)), ABS(dy*(mmax-mmin+1.0)), 
             n, Nx(velptr)*Ny(velptr));
