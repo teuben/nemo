@@ -1,6 +1,13 @@
 /*
  * DPRINTF.C: print debug messages, if requested debug level high enough
  *
+ *	Note dprintf(int,char *,...) is now used by the snprintfv package
+ *	see http://www.gnu.org/software/autogen/
+ *	The official name for NEMO's function is now nemo_dprintf()
+ *	although a macro will accept dprintf() since their prototype
+ *	*happens* to be the same as ours. You just don't have acccess
+ *	to their code.
+ *
  * xx-Mar-88  Peter Teuben: created
  * 14-Jun-88  Josh Barnes: moved to seperate source file.
  * 10-sep-90  PJT: routines to set_ and get_ the debug level
