@@ -8,7 +8,7 @@
 
 /*CTEX
  *  {\bf potname=rotcur0
- *       potpars={\it $\Omega,r_0,v_0$}
+ *       potpars={\it $\Omega,r_0,v_0$}}
  *	 
  * The forces returned are the axisymmetric forces as defined by
  * a linear-flat rotation curve as defined by the turnover point $r_0,v_0$.
