@@ -1,0 +1,65 @@
+.TH LOADOBJ 3NEMO "6 November 1991"
+.SH NAME
+loadobj, findfn, mysymbols \- dynamic object file loader
+.SH SYNOPSIS
+.nf
+.B #include <stdinc.h>
+.B #include <loadobj.h>
+.PP
+.B void loadobj(pathname)
+.B string pathname
+.PP
+.B proc findfn(fname)
+.B string fname;
+.PP
+.B void mysymbols(progname)
+.B string progname;
+.SH DESCRIPTION
+These routines provide a uniform low-level I/O interface to loading
+object modules. Higher level I/O interfaces are present for a few
+standard operations (see e.g. potential(3NEMO) and bodytrans(3NEMO))
+.PP
+The routine \fImysymbols\fP is generally called once and in the beginning
+of the program. It loads all symbols from the program pointed to
+by the argument \fIprogname\fP, which is normally the current 
+program. These symbols are then stored in an internally defined symbol tree
+\fBsymtree\fP. In case \fIprogname\fP is not the complete name, the
+\fBPATH\fP environment variable is used (see \fIpathopen(3NEMO)\fP).
+.PP
+The undefined symbols in each object module that is loaded with 
+\fIloadobj\fP are resolved against the already existing symbol tree, 
+and new symbols are added to the tree. If a symbol is not found to
+be resolved, this is considered an error, and \fIerror(3NEMO)\fP is
+called, which aborts the program. In addition the code loaded into
+memory is properly relocated using information in the object
+code. The argument \fIpathname\fP must be the proper filename, no
+search path is provided for.
+.PP
+After all symbols have been defined, the programmer can obtain
+pointers to functions which is specified by name using \fIfindfn\fP.
+.SH EXAMPLE
+In the following section of code gives an example of use.
+.nf
+    proc fn;                   /* see defs in <stdinc.h> */
+
+    mysymbols(getparam("argv0"));   /* get local symbols */
+    loadobj("test.o");               /* load object code */
+    fn = (proc) findfn("_test");       /* find function  */
+    if (fn==NULL) error("No test");       /* catch error */
+    (*fn)();         /* execute routine test() in test.o */
+.fi
+.SH SEE ALSO
+a.out(4), potential(3NEMO), bodytrans(3NEMO))
+.SH AUTHOR
+Eric Roberts, Peter Teuben
+.SH FILES
+.nf
+.ta +1.5i
+~/src/kernel/loadobj         loadobj.c, loadobj*.c
+.fi
+.SH UPDATE HISTORY
+.nf
+.ta +1i +4i
+23-jul-90       created         PJT
+6-nov-91	slight doc improvements; loadobjNEXT.c   	PJT
+.fi
