@@ -1,0 +1,14 @@
+%N /saturn/nemo/bin/sun4/snapdist
+
+This doc file has been produces with help=t option
+No further help is available, try 'man snapdist'
+
+%A in1
+     1st input file name
+
+%A in2
+     snd input file name
+
+%A VERSION
+     25-jul-89 PJT
+

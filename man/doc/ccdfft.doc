@@ -1,0 +1,20 @@
+%N /saturn/nemo/bin/sun4/ccdfft
+
+This doc file has been produces with help=t option
+No further help is available, try 'man ccdfft'
+
+%A inr
+     Input (real) map (optional)
+
+%A ini
+     Input (imag) map (optional)
+
+%A outr
+     Output (real) map
+
+%A outi
+     Output (imag) map
+
+%A VERSION
+     13-jul-89 PJT
+

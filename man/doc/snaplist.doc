@@ -1,0 +1,14 @@
+%N /saturn/nemo/bin/sun4/snaplist
+
+This doc file has been produces with help=t option
+No further help is available, try 'man snaplist'
+
+%A in
+     Input file name
+
+%A maxnum
+     Max number of particles to list
+
+%A VERSION
+     25-jul-89 PJT
+
