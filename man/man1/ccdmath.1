@@ -86,6 +86,10 @@ assuming you know the size of the cube (nx,ny,nz) and pixel sizes (dx,dy,dz):
 .nf
   % \fBccdmath cube0 cube1 %1 crpix=$nx/2+0.5,$ny/2+0.5,$nz/2+0.5 crval=0,0,0 cdelt=$dx,$dy,$dz\fP
 .fi
+and creating an annulus:
+.nf
+  %  \fBccdmath "" map0 "ifgt(%w,20,1,iflt(%w,10,1,0))" size=512 crpix=256,256\fP
+.fi
 .SH TIMING
 Performance on Rigel (SUN 3/160, 16Mhz):
 .nf
