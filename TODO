@@ -43,7 +43,7 @@ general things for 3.2.x
 
 things for 3.4
 
-  - -fwritable-strings is deprecated;
+  - -fwritable-strings is deprecated, from NEMO 3.2.3 this is taken out
   + linking with unused functions (e.g. to aid loadobj) can now cause
     failure. we've repaired/kludged most, but the flag
 		-fno-unit-at-a-time
