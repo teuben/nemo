@@ -1,0 +1,117 @@
+*
+*
+*               COMMON2 variables
+*               *****************
+*
+*       ---------------------------------------------------------------------
+*       ALPHA   Density contrast factor (NNBMAX*sqrt(0.08*RSCALE**3/N)).
+*       BE      Total energy (=1: initial; =2: previous; =3: current).
+*       BODY    Mass of an individual body.
+*       BODY1   Maximum particle mass.
+*       BODYM   Average particle mass.
+*       CGAS    Scale factor for logarithmic potential (KZ(15) = 2).
+*       CMR     Centre of mass coordinates and scalar value.
+*       CMRDOT  Centre of mass velocity and scalar value.
+*       CPU     Maximum computing time in minutes.
+*       CPU0    Elapsed computing time at last output.
+*       CPUTOT  Total computing time (including previous runs).
+*       D1      First divided difference of the irregular force.
+*       D1R     First divided difference of the regular force.
+*       D2      Second divided difference of the irregular force.
+*       D2R     Second divided difference of the regular force.
+*       D3      Third divided difference of the irregular force.
+*       D3R     Third divided difference of the regular force.
+*       DELTAT  Time interval for output.
+*       DTLIST  Time interval for updating the time-step list.
+*       EPS2    Softening distance squared.
+*       ERRTOT  Accumulated sum of relative energy errors (DE/E).
+*       ETA0    Initial value of irregular time-step parameter.
+*       ETAI    Time-step parameter for the irregular force polynomial.
+*       ETAR    Time-step parameter for the regular force polynomial.
+*       F       One-half the total force on a particle.
+*       FDOT    One-sixth the total force derivative on a particle.
+*       FI      Irregular force due to neighbours.
+*       FR      Regular force due to distant particles.
+*       ICOMP   Index of first merger component.
+*       ILIST   Temporary neighbour list array.
+*       IPHASE  Flow control indicator for decision-making.
+*       JCOMP   Index of second merger component.
+*       JLIST   Temporary array for sorting and working space.
+*       KZ      Options for alternative paths at run time.
+*       LIST    Neighbour list (LIST(1,I) = membership).
+*       LMAX    Maximum size of neighbour list (PARAMETER).
+*       MODEL   Model identification index (option 3; frequency NFIX).
+*       N       Total particle number.
+*       NAME    Initial particle name.
+*       NBCORR  Force polynomial corrections.
+*       NBFULL  Too many neighbours with standard criterion.
+*       NBVOID  No neighbours inside 1.26 of basic sphere radius.
+*       NC      Number of particles inside the core radius.
+*       NDUMP   Automatic restart counter (maximum 2 restarts; option 2).
+*       NESC    Number of escaped particles (option 13).
+*       NFIX    Output frequency for optional data bank or binary search.
+*       NLIST   Time-step list for determining next body to be advanced.
+*       NMAX    Maximum size of particle arrays (PARAMETER).
+*       NMERG   Inelastic mergers (option 12).
+*       NMTRY   Merger attempts.
+*       NNBMAX  Maximum number of neighbours.
+*       NNPRED  Full N coordinate predictions.
+*       NPRINT  Output counter (reset to zero when NPRINT = NFIX).
+*       NRUN    Run identification index.
+*       NSTEPI  Irregular integration steps.
+*       NSTEPR  Regular integration steps.
+*       NSTEPS  Time-step counter for COMMON save (100*NMAX steps; KZ(1) >1).
+*       NTIMER  Time-step counter for checking elapsed cpu time.
+*       ONE12   The constant 1.0/12.0.
+*       ONE3    The constant 1.0/3.0.
+*       ONE6    The constant 1.0/6.0.
+*       ONE9    The constant 1.0/9.0.
+*       POT     Total potential energy at output time (positive).
+*       QE      Relative energy tolerance for error control.
+*       RBAR    Virial cluster radius in pc (assumed = 1 if zero input).
+*       RC      Core radius (generalized Casertano-Hut algorithm; option 8).
+*       RC2     Square core radius.
+*       RDENS   Density centre (Casertano-Hut algorithm).
+*       RGAS    Scale factor for logarithmic potential (KZ(15) = 2).
+*       RHOD    Average core density (scaled by mean density).
+*       RHOM    Maximum core density (scaled by mean density).
+*       RS      Radius of the neighbour sphere.
+*       RSCALE  Half-mass radius (from potential energy or Lagrange radii).
+*       RSMIN   Minimum neighbour radius since last output.
+*       RTIDE   Tidal radius (2*RTIDE for escaper removal; option 13).
+*       STAB1   Lower stabilization limit for time-step list interval.
+*       STAB2   Upper stabilization limit for time-step list interval.
+*       STEP    Time-step for an irregular force polynomial.
+*       STEPR   Time-step for a regular force polynomial.
+*       T0      Time of last irregular force calculation.
+*       T0R     Time of last regular force calculation.
+*       T1      Time of first backwards irregular force calculation.
+*       T1R     Time of first backwards regular force calculation.
+*       T2      Time of second backwards irregular force calculation.
+*       T2R     Time of second backwards regular force calculation.
+*       T3      Time of third backwards irregular force calculation.
+*       T3R     Time of third backwards regular force calculation.
+*       TCR     Standard crossing time (from total mass and energy).
+*       TCR0    Initial crossing time (2*sqrt(2) in standard units).
+*       TCRIT   Termination time in scaled units.
+*       TIME    Physical integration time in scaled units.
+*       TLIST   Time for next updating of the time-step list.
+*       TNEXT   Time for next output.
+*       TSTAR   Time unit for scaling to 10**6 yrs.
+*       VC      Root mean square velocity in the core.
+*       VIR     Total virial energy (= POT with no softening).
+*       VSTAR   Velocity unit for scaling to km/sec.
+*       X       Coordinates of a particle at current time.
+*       X0      Coordinates at the beginning of a step.
+*       X0DOT   Velocities at the beginning of a step.
+*       XDOT    Velocities at beginning of step and at output time.
+*       XTPAR   Mass & square softening for external potential (KZ(15) = 1).
+*       ZKIN    Total kinetic energy at output time.
+*       ZMASS   Current total mass (initial value = 1 in standard units).
+*       ZMBAR   Mean stellar mass in solar masses.
+*       ZMC     Core mass.
+*       ZMGAS   Mass scale for logarithmic potential (KZ(15) = 2).
+*       ZNBMAX  Maximum predicted neighbour number.
+*       ZNBMIN  Minimum predicted neighbour number.
+*       ---------------------------------------------------------------------
+*
