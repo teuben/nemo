@@ -1,0 +1,5 @@
+#! /bin/csh -f
+#    very liberal cc script, 
+# The -L flag allows you to use '-lNbody' instead of
+# '$NEMOPATH/lib/libNbody.a'
+exec /bin/cc -I$NEMOINC -L$NEMOLIB $*
