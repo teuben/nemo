@@ -50,11 +50,13 @@ extern void outparam (string, string);
 extern void outiparam(string, int);
 extern void outlparam(string, long);
 extern void outdparam(string, double);
+extern void outfparam(string, float);
 extern void outbparam(string, bool);
 
 extern void outiparams(string, int, int *);
 extern void outlparams(string, int, long *);
 extern void outdparams(string, int, double *);
+extern void outfparams(string, int, float *);
 extern void outbparams(string, int, bool *);
 
 

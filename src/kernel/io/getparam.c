@@ -117,8 +117,6 @@
   TODO:
       - what if there is no VERSION=
       - process system keywords in readkeys()
-      - write out selected results in a keywords database using
-	a new system keyword
       - allow a (file) keyword to not signify a pipe
         (-) but a popen() based process (POPENIO)
 
@@ -249,6 +247,13 @@ typedef struct keyword {    /* holds old all keyword information             */
   struct keyword *next;       /* pointer to next indexed keyword             */
 } keyword;
 
+typedef struct keyword_out {  /* a simple keyword, only meant for outkeys=   */
+  string key;                 /* keyword name                                */
+  char type;                  /* data type: 'c', 'd', 'f', 'i', 'l', 'b'     */
+  int ndat;                   /* number of data elements                     */
+  void *dat;                  /* pointer to data (malloc/free)-able          */
+} keyword_out;
+
 /*      *       *       *       variables        *       *       */
 
 /* local variables - not visible to outside world */
@@ -300,6 +305,7 @@ string error_string = NULL;
 
 local void initparam_out(void);
 local void finiparam_out(void);
+local void writparam_out(string key, char type, int ndat, void *dat);
 local void scan_environment(void);
 local void save_history(string *argv);
 local void printhelp(string help);
@@ -623,8 +629,8 @@ local void initparam_out()
      nout = xstrlen(outdefv, sizeof(string));     /* count # params + progname */  
   /*  
    * here comes 
-   *      - parsing code for outdefv[]
-   *      - build linear list
+   *      - parsing code for outdefv[]         'key=[n]t\n    help'
+   *      - build linear list of this
    */
 
   dprintf(1,"Found %d output keywords\n",nout);
@@ -1540,6 +1546,86 @@ local void setparam (string par, string val, string prompt)
     error("setparam: not compiled into getparam.c");
 #endif /* PUTPARAM && INTERACT */
 }
+
+/*
+ * OUTPARAM:  a set of routines that store keyword values
+ *            in the registered database of valid keywords meant
+ *            for output
+ *            For efficiency one local routine, writeparam_out
+ *            does all the work talking to the database, is has
+ *            a number of derived functions that deal with each
+ *            type, to ensure type-safety.
+ *
+ *             
+ */
+local void writparam_out(string key, char type, int ndat, void *dat)
+{
+  /* find the entry that matches key
+   * then check ndat and type
+   * if so, copy dat into
+   * for strings, need to free(), malloc() and strdup()
+   */
+  warning("writeparam_out: not implemented yet");
+}
+
+void outparam(string key, string val)
+{
+  int n = strlen(val)+1;    /* count the terminating 0 as part of the data */
+  writparam_out(key, 'c', n, val);
+}
+
+void outdparam(string key, double val)
+{
+  writparam_out(key, 'd', 1, &val);
+}
+
+void outfparam(string key, float val)
+{
+  writparam_out(key, 'f', 1, &val);
+}
+
+void outlparam(string key, long val)
+{
+  writparam_out(key, 'l', 1, &val);
+}
+
+void outiparam(string key, int val)
+{
+  writparam_out(key, 'i', 1, &val);
+}
+
+void outbparam(string key, bool val)
+{
+  writparam_out(key, 'b', 1, &val);
+}
+
+
+
+void outdparams(string key, int n, double *val)
+{
+  writparam_out(key, 'd', n, val);
+}
+
+void outfparams(string key, int n, float *val)
+{
+  writparam_out(key, 'f', n, val);
+}
+
+void outlparams(string key, int n, long *val)
+{
+  writparam_out(key, 'l', n, val);
+}
+
+void outiparams(string key, int n, int *val)
+{
+  writparam_out(key, 'i', n, val);
+}
+
+void outbparams(string key, int n, bool *val)
+{
+  writparam_out(key, 'b', n, val);
+}
+
 
 #if defined(INTERACT)
 #define ESC 0x1b

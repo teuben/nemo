@@ -47,7 +47,9 @@ getXparam, hasvalue, isaparam, initparam, finiparam, stop \- main startup and co
 .fi
 .SH DESCRIPTION
 These functions provide a simple and uniform mechanism for 
-command line processing (see also nemomain(3NEMO))
+command line processing (see also nemomain(3NEMO)). Input as well
+as output (storage) of selected parameters can be controlled via
+command line parameters.
 First, \fIinitparam\fP is called to set up values associated with a
 (fixed) set of possible keyword names; 
 after this \fIgetparam\fP and any of its children may be called
@@ -266,6 +268,10 @@ program (not recommended).
 An environment variable \fBHELP\fP or the system keyword \fBhelp=\fP
 can be set to a non-zero number to change to
 various levels of interactive input if implemented.
+.SH OUTPUT KEYS
+The system keyword \fBoutkeys=\fP\fIkey1,key2,...\fP controls which 
+pre-defined output keys (see \fIoutparam(3NEMO)\fP) are going to 
+output to NEMO's persistent global keyword database.
 .SH DEBUGGING
 The system keyword \fBdebug=\fP\fIdebug_level\fP is checked
 for by the \fIinitparam\fP call. It sets the \fBdebug_level\fP to the
