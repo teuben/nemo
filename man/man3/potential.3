@@ -1,0 +1,93 @@
+.TH POTENTIAL 3NEMO "11 October 1993"
+.SH NAME
+get_potential \- obtain potential descriptor and pattern speed
+.SH SYNOPSIS
+.nf
+.ta +3i
+.B #include <stdinc.h>
+.PP
+.B proc get_potential (potname, potpars, potfile)
+.B string potname;    	/* generic name of potential */
+.B string potpars;    	/* parameters, separated by comma's */
+.B string potfile;     	/* optional (file) name or string */
+.PP
+.B proc get_inipotential ()
+.B real get_pattern()
+.fi
+.SH DESCRIPTION
+\fIpotential(3NEMO)\fP provides a uniform interface to handle
+the input of the \fIpotential(5NEMO)\fP 'datafile' format. 
+It returns a pointer to the function wich computes potentials,
+forces etc.
+.PP
+\fIget_potential\fP reads a formulation file of a potential
+(see \fIpotential(5NEMO)\fP).
+\fIpotname\fP is the generic name of the filename, which \fBmust\fP
+contain at least two entry points \fBinipotential\fP and 
+\fBpotential\fP with a predefined parameter sequence. 
+A default search
+path is provided by an environment variable \fBPOTPATH\fP, normally
+set by the NEMO environment startup script \fBNEMORC\fP.
+Potential datafiles can be stored in c-source
+form (\fB.c\fP) or (e.g. in case you only them available
+in another language) object form (\fB.o\fP). In case only
+the source is available, it is compiled to an object file with a
+simple system call to the \fIcc(1)\fP compiler.
+.PP
+Once a potential has been loaded, two additional routines allow
+access to intrinsic properties of that potential:
+.PP
+\fIget_pattern\fP returns the pattern speed of the potential, which
+is conventionally the first parameter of the \fIpotpars\fP list.
+Potentials which compute the pattern speed from another parameter
+(e.g. from the lagrangian radius) should return the pattern speed
+in the first array element of \fIini_potential\fP. This routine
+is heavily used by routines which need the pattern speed.
+.PP
+\fIget_inipotential\fP returns a pointer to the function which
+initializes the potential. In this way one could re-initialize
+and re-use the potential. 
+.SH EXAMPLE
+.nf
+.B proc mypot, get_potential();
+.B double pot,time;
+.B vector pos, acc;
+.B int ndim=NDIM;
+.B ...
+.B mypot = get_potential("harmonic","0.0,1.0,0.5",NULL);
+.B (*mypot)(&ndim,pos,acc,&pot,&time);
+.B ...
+.fi
+.SH "SEE ALSO"
+potlist(1NEMO),potential(5NEMO),loadobj(3NEMO)
+.SH BUGS
+Uses a very system dependant object loader. See loadobj(3NEMO) for
+implementations, but see below for a standalone loader.
+.PP
+Fortran C interface only works on BSD implementation where the fortran
+character strings get their length passed by value as the last argument.
+.SH EXAMPLES
+The non-loadobj version of the potential loader is called 
+\fIpotential0.c\fP and it can compile programs as follows:
+.nf
+    make orbint L="$NEMOLIB/potential0.o -lnemo $NEMOOBJ/potential/plummer.o"
+.fi
+make sure \fIpotential0.o\fP is loaded before the nemo library.
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+~/src/orbit/potential  	potential.c potential0.c
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+13-Jul-87	V1.0: Original created	PJT
+8-Apr-88	V2.0: added 'name' parameter for hackforce	PJT
+13-mar-89	V2.1: 'name_len' in case Fortran was used	PJT
+9-feb-89	V3.0: added time parameter to potential()-repair doc	PJT
+25-oct-90	V3.2: minor upgrades	PJT
+10-mar-93	-- also added potential0.c when loadobj doesn't work	PJT
+11-oct-93	V5.0: added get_pattern   	PJT
+.fi
