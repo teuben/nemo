@@ -1,5 +1,5 @@
 DIR = src/image/trans
-BIN = ccdmath ccdflip
+BIN = ccdmath ccdflip ccdsmooth
 NEED = $(BIN) 
 
 help:
@@ -10,9 +10,7 @@ need:
 
 clean:
 	@echo Cleaning $(DIR)
-	@rm -f ccd.in
-
-NBODY = 10
+	@rm -f ccd.in ccd.smooth
 
 all:	$(BIN)
 
@@ -24,6 +22,15 @@ ccdmath: ccd.in
 	@echo Running $@
 	ccdmath ccd.in - %1 | ccdprint - x= y= format=%7.3f ; nemo.coverage ccdmath.c
 
-ccdflip:
+ccdflip: ccd.in
 	@echo Running $@
 	ccdflip ccd.in - xy | ccdprint - x= y= format=%7.3f ; nemo.coverage ccdflip.c
+
+ccdsmooth: ccd.in
+	@echo Running $@
+	ccdsmooth ccd.in - 1 | ccdprint - x= y= format=%7.3f ; nemo.coverage ccdsmooth.c
+
+
+ccdintpol:
+	@echo Running $@
+
