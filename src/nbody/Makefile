@@ -2,7 +2,8 @@
 include $(NEMOLIB)/makedefs
 
 #	Directories to be visited, in this order
-DIRS = cores cores/bodysub io io_nemo tools init evolve trans reduc fits kepler image xyz
+DIRS = cores cores/bodysub io io_nemo tools init evolve trans reduc \
+	fits kepler image xyz acceleration
 
 TARNAME = stuff.tar
 CHKFILE = Last_update
