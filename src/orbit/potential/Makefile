@@ -124,6 +124,8 @@ potfortest: potentialf.o
 	@echo POTNAME=$(POTNAME)
 	$(FC) $(FFLAGS) -o potfortest potfortest.f potentialf.o $(POTOBJ)
 
+# 
+#  C++ testing; these are clones of e.g. potlist, but for double and float
 #
 try1: try1.cc
 	$(CXX) $(CFLAGS) -o try1 try1.cc $(NEMO_LIBSPP) $(EL) $(FORLIBS) -lm

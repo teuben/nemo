@@ -1,5 +1,5 @@
-/* potential.c - proc get_potential, local load_potential */
-/*               double get_pattern                       */
+/* potential.c - proc get_potential, local proc load_potential */
+/*               double get_pattern                            */
 
 /*------------------------------------------------------------------------------
  *  POTENTIAL:  procedures for finding fixed potential, initially written 
@@ -29,6 +29,8 @@
  *      13-dec-95     V5.2  Now using ldso to access shared objects        pjt 
  *                          fixed small CFLAGS bug
  *	 1-apr-01     V5.3  converted for NEMO V3 with .so files           pjt
+ *      13-sep-01     V5.4  support for potential_double and potential_float   pjt
+ *
  *------------------------------------------------------------------------------
  */
 
@@ -50,7 +52,7 @@ local bool first = TRUE;        /* see if first time called for mysymbols()  */
 
 /* forward declarations */
 
-local proc load_potential(string, string, string); /* load by name    */
+local proc load_potential(string, string, string, char); /* load by name    */
 
 /*-----------------------------------------------------------------------------
  *  get_potential --  returns the pointer ptr to the function which carries out
@@ -61,8 +63,24 @@ proc  get_potential(string potname, string potpars, string potfile)
 {
     if (potname == NULL || *potname == 0)	/* if no name provided */
         return NULL;				/* return no potential */
-    l_potential = load_potential(potname, potpars, potfile);
+    l_potential = load_potential(potname, potpars, potfile,'r');
     return l_potential;
+}
+
+potproc_double get_potential_double(string potname, string potpars, string potfile)
+{
+    if (potname == NULL || *potname == 0)	/* if no name provided */
+        return NULL;				/* return no potential */
+    l_potential = load_potential(potname, potpars, potfile,'d');
+    return (potproc_double) l_potential;
+}
+
+potproc_float  get_potential_float(string potname, string potpars, string potfile)
+{
+    if (potname == NULL || *potname == 0)	/* if no name provided */
+        return NULL;				/* return no potential */
+    l_potential = load_potential(potname, potpars, potfile,'f');
+    return (potproc_float) l_potential;
 }
 
 /*-----------------------------------------------------------------------------
@@ -96,10 +114,10 @@ real get_pattern()
  *		since it can't take strlen(NULL)
  *-----------------------------------------------------------------------------
  */
-local proc load_potential(string fname,string parameters, string dataname)
+local proc load_potential(string fname, string parameters, string dataname, char type)
 {
     char  name[256], cmd[256], path[256], pname[32];
-    char  *fullname, *nemopath, *potpath, *cflags;
+    char  *fullname, *nemopath, *potpath;
     proc  pot, ini_pot;
 
     if (parameters!=NULL && *parameters!=0) {              /* get parameters */
@@ -129,12 +147,7 @@ local proc load_potential(string fname,string parameters, string dataname)
        strcat (path,"/obj/potential");		/* ".:$NEMO/obj/potential" */
     }
     strcpy (name,fname);
-#if 1
     strcat (name,".so");
-#else
-    strcat (name,".o");
-#endif
-
     fullname = pathfind (potpath, name);
     if (fullname!=NULL) {			/* .o found !! */
         dprintf (2,"Attempt to load potential from %s\n",name);
@@ -146,41 +159,52 @@ local proc load_potential(string fname,string parameters, string dataname)
 	if (pathfind(".",name)==NULL)
 	    error("get_potential: no potential %s found",name);
 	dprintf (0,"[Compiling potential %s]\n",name);	
-	cflags = getenv("CFLAGS");
-#if 1
 	sprintf (cmd,"make -f $NEMOLIB/Makefile.lib %s.so",name);
-#else
-	sprintf (cmd,"cc %s -c %s",cflags ? cflags : "",name);
-#endif
 	dprintf (1,"%s\n",cmd);
 	if (system(cmd)!=0)
 	    error ("Error in compiling potential file");
-#if 1
 	strcpy (name,fname);
 	strcat (name,".so");
-#else
-	sprintf(cmd,"ldso %s",fname);
-        dprintf(1,"%s\n",cmd);
-	if (system(cmd)!=0)
-		error("Error in making shared object");
-	strcpy (name,fname);
-	strcat (name,".o");
-#endif
 	fullname = name;	/* or use: findpath ? */
 	loadobj (name);
     }
 
     dprintf (1,"[Potential loaded from object file %s]\n",fullname);
+
     strcpy(pname,"potential");
     mapsys(pname);
     pot = (proc) findfn (pname);             /* try C-routine */
     if (pot==NULL) {                          
-        Qfortran = TRUE;		      /* must be F77 then... */		
-        strcat(pname,"_");
-        pot = (proc) findfn (pname);          /* try F77-routine */
-        if (pot==NULL)                        /* blasted programmer? */
-            error ("getpotential: %s() not present",pname);
+      strcat(pname,"_");
+      pot = (proc) findfn (pname);          /* try F77-routine */
+      if (pot) 
+	Qfortran = TRUE;		    /* must be F77 then... */		
     }
+    if (pot==NULL && type=='d') {
+      strcpy(pname,"potential_double");
+      mapsys(pname);
+      pot = (proc) findfn (pname);             /* try C-routine */
+      if (pot==NULL) {
+	strcat(pname,"_");
+	pot = (proc) findfn (pname);          /* try F77-routine */
+	if (pot)
+	  Qfortran = TRUE;
+      }
+    }
+    if (pot==NULL && type=='f') {
+      strcpy(pname,"potential_float");
+      mapsys(pname);
+      pot = (proc) findfn (pname);             /* try C-routine */
+      if (pot==NULL) {
+	strcat(pname,"_");
+	pot = (proc) findfn (pname);          /* try F77-routine */
+	if (pot)
+	  Qfortran = TRUE;
+      }
+    }
+    if (pot==NULL)
+      error ("getpotential: %s() or _double/_float not present",pname);
+
     strcpy(pname,"inipotential");
     mapsys(pname);
     ini_pot = (proc) findfn (pname);              		/* C */

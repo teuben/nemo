@@ -29,9 +29,11 @@ extern "C" {
 #endif
 
 
-potproc get_potential    (string, string, string);
-potproc get_inipotential (void);
-real    get_pattern      (void);
+potproc        get_potential        (string, string, string);
+potproc_float  get_potential_float  (string, string, string);
+potproc_double get_potential_double (string, string, string);
+potproc        get_inipotential     (void);
+real           get_pattern          (void);
 
 #if defined(__cplusplus)
 }
