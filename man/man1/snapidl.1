@@ -51,9 +51,10 @@ to a pipe, which is then read by IDL into arrays \fIx,y,z\fP.
 mkplummer snap000 100
 idl
 IDL> SPAWN, ['snapidl','snap000','x,y,z'], UNIT=LUN, /NOSHELL
-IDL> READU,LUN,nbody,nvec,tsnap  # !!! NOTE BUG BELOW !!!
+IDL> nbody=0L
+IDL> nvec=0L 
+IDL> READU,LUN,nbody,nvec,tsnap
 IDL> PRINT,"Found a snapshot with ",nbody," particles at time", tsnap
-IDL> nbody=100                    # !!! note i need to know nbody !!!
 IDL> x=FLTARR(nbody)
 IDL> y=FLTARR(nbody)
 IDL> z=FLTARR(nbody)
@@ -69,10 +70,10 @@ mkplummer snap111 100
 snapidl snap111 x,y,z out=snap111.dat fortran=t
 idl
 IDL> OPENR,LUN,'snap111.dat',/F77_UNFORMATTED
-IDL> READU,LUN,nbody,nvec,tsnap  # !!! NOTE BUG BELOW !!!
+IDL> nbody=0L
+IDL> nvec=0L 
+IDL> READU,LUN,nbody,nvec,tsnap
 IDL> PRINT,"Found a snapshot with ",nbody," particles at time", tsnap
-IDL> nbody=100                    # !!! note i need to know nbody !!!
-IDL> nvec=3                       # !!! note i need to know nvec  !!!
 IDL> x=FLTARR(nbody)
 IDL> y=FLTARR(nbody)
 IDL> z=FLTARR(nbody)
@@ -97,10 +98,6 @@ In fortran, without any error control and array overflow checking,
 	end
 
 .fi
-.SH BUGS
-I don't know how to read an integer instead of a float in IDL yet,
-nbody and nvec are currently interpreted as a float 
-by IDL.
 .SH SEE ALSO
 snapprint(1NEMO), snapshot(5NEMO)
 .SH FILES
