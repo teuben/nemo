@@ -6,6 +6,7 @@
  *    8-may-2002  created on Amtrak,  Amar suggesting this for the 2GB problem   PJT
  *   21-may-2002  oops, template is a reserved word in C++ :-)                   pjt
  *   23-may-2002  added mode to mstr_open; though currently only write allowed
+ *   14-sep-2002  added query what counter we're in                              pjt
  */
 
 #include <stdinc.h>
@@ -55,6 +56,16 @@ void mstr_close(mstr *mp)
   free(mp->filename);
   free(mp->tmplate);
   free(mp);
+}
+
+int mstr_count(mstr *mp)
+{
+  return mp->count;
+}
+
+int mstr_multi(mstr *mp)
+{
+  return mp->mode;
 }
 
 

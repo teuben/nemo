@@ -353,9 +353,11 @@ extern string strname(stream);
 extern bool   strseek(stream);
 
 /* io/mstropen.c */
-extern mstr *mstr_init(string tmplate);
+extern mstr  *mstr_init(string tmplate);
 extern stream mstr_open(mstr *mp, string mode);
-extern void mstr_close(mstr *mp);
+extern void   mstr_close(mstr *mp);
+extern int    mstr_count(mstr *mp);
+extern int    mstr_multi(mstr *mp);
 
 /* io/filesecret.c */
 extern void   strclose(stream);

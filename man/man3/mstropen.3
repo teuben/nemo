@@ -1,6 +1,6 @@
-.TH MSTROPEN 3NEMO "23 May 2002"
+.TH MSTROPEN 3NEMO "14 September 2002"
 .SH NAME
-mstr_init, mstr_open, mstr_close \- multiple template based file-stream utilities
+mstr_init, mstr_open, mstr_close, mstr_count, mstr_multi \- multiple template based file-stream utilities
 .SH SYNOPSIS
 .nf
 .B #include <stdinc.h>
@@ -8,6 +8,8 @@ mstr_init, mstr_open, mstr_close \- multiple template based file-stream utilitie
 .B mstr *mstr_init(string template)
 .B stream mstr_open(mstr *mp, string mode)
 .B void mstr_close(mstr *mp)
+.B int mstr_count(mstr *mp)
+.B int mstr_multi(mstr *mp)
 .SH DESCRIPTION
 \fImstr_init()\fP returns a structure that is used
 to aid in writing to a set of related files
@@ -27,12 +29,18 @@ there was such one.
 .PP
 \fImstr_close()\fP closes access to an \fBmstr\fP and free's all
 allocated memory associated with it.
+.PP
+\fImstr_count()\fP returns the number of previous calls to mstr_open.
+.PP
+\fImstr_multi()\fP returns if multiple files will be used in mstr_open
+(currently set by checking for the existence of the \fB%\fP character
+in the filename.
 .SH EXAMPLE
 .nf
 	mstr *mp = mstr_init("test%03d.dat");
 	for (int i=0; i<10; i++) {
 	   stream ostr = mstr_open(mp,"w");
-	   fprintf(mp,"Hello world, i=%d\\n",i);
+	   fprintf(ostr,"Hello world, i=%d\\n",i);
 	}
 	mstr_close(mp);
 .fi
@@ -51,4 +59,5 @@ Peter Teuben
 .nf
 .ta +1i +4i
 8-may-2002	created, on Amtrak	Peter
+14-sep-2002	added mstr_count,mode	Peter
 .fi
