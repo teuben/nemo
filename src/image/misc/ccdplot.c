@@ -55,7 +55,7 @@ string defv[] = {
 	"cmode=0\n	Contour mode (0=orginal 1=pgplot)",
 	"blankval=\n	if used, use this as blankval",
 	"ltype=\n	width and type for contour",
-	"VERSION=3.0a\n	16-mar-05 PJT",
+	"VERSION=3.0b\n	16-mar-05 PJT",
 	NULL,
 };
 
@@ -104,27 +104,29 @@ extern int contour(real*, int, int, real*, int, real, real, real, real, proc);
 
 nemo_main()
 {
-    setparams();                    /* set globals */
+  int n = 0;
+  setparams();                    /* set globals */
 
-    instr = stropen (infile, "r");
-    while (read_image(instr,&iptr)) {   /* loop while more images found */
-      nx=Nx(iptr);			
-      ny=Ny(iptr);
-      nz=Nz(iptr);
-      if (nz > 1) error("Cannot handle 3D images [%d,%d,%d]",nx,ny,nz);
-      xmin=Xmin(iptr);
-      ymin=Ymin(iptr);
-      dx=Dx(iptr);
-      dy=Dy(iptr);
-
-      xsize = nx * dx;
-      ysize = ny * dy;
-      
-      plinit ("***", 0.0, 20.0, 0.0, 20.0);       /* init yapp */
-      plot_map();                                 /* plot the map */
-      plstop();                                   /* end of yapp */
-    }
-    strclose(instr);
+  instr = stropen (infile, "r");
+  plinit ("***", 0.0, 20.0, 0.0, 20.0);       /* init yapp */
+  while (read_image(instr,&iptr)) {   /* loop while more images found */
+    nx=Nx(iptr);			
+    ny=Ny(iptr);
+    nz=Nz(iptr);
+    if (nz > 1) error("Cannot handle 3D images [%d,%d,%d]",nx,ny,nz);
+    xmin=Xmin(iptr);
+    ymin=Ymin(iptr);
+    dx=Dx(iptr);
+    dy=Dy(iptr);
+    xsize = nx * dx;
+    ysize = ny * dy;
+    if (n==0)
+      plframe();
+    plot_map();                                 /* plot the map */
+    n++;
+  }
+  plstop();                                   /* end of yapp */
+  strclose(instr);
 }
 
 setparams()
