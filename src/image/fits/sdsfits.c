@@ -7,6 +7,7 @@
  *      10-nov-02       V1.3  add HISTORY
  *      14-jan-03       V1.4  add flip= for Eve Ostriker          pjt
  *       2-dec-03       V1.5  add dummy=                          pjt
+ *      11-dec-04       V1.6  add wcs=
  */
 
 #include <stdinc.h>
@@ -21,13 +22,16 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "out=\n			Optional output FITS file",
     "select=1\n			Select which SDS (1=first)",
     "axis=0\n                   Select this axis for 1D fits output",
-    "reorder=f\n                Reorder the axes (true means expensive)",
+    "reorder=f\n                Reorder the axes (true means memory intensive)",
     "dummy=t\n                  Write dummy axes also ?",
-    "VERSION=1.5\n		2-dec-03 PJT",
+    "wcs=f\n                    Write a WCS of some sort",
+    "VERSION=1.6\n		11-dec-03 PJT",
     NULL,
 };
 
 string usage="convert SDS HDF to FITS";
+
+string cvsid="$Id$";
 
 #define MAXRANK    3
 
@@ -37,8 +41,10 @@ float *reorder_array(float *a, int size, int n, int *idx);
 void nemo_main()
 {
   string infile, outfile, *hitem;
-  char label[128], unit[128], format[128], coordsys[128];
-  float *buff, *fp, fmin, fmax, *coord = 0;
+  char label[128], unit[128], format[128], coordsys[128],  fitskey[80];
+  float *buff, *fp, fmin, fmax, ratio, **coord;
+  float crpix[MAXRANK], crval[MAXRANK], cdelt[MAXRANK];
+  char ctype[3][80];
   int i, j, k, nsds, ret, size, rank, dimsizes[MAXRANK];
   int nx, ny, nz, num_type, select, axis, axlen, count = 0;
   FITS *ff;
@@ -49,52 +55,65 @@ void nemo_main()
   axis = getiparam("axis");
 
   /*
-   *  Open SDS and read and display it's header
+   *  Open SDS and read and display it's header how many SDS# we have
    */
 
   infile = getparam("in");
   nsds = DFSDndatasets(infile);
   if (nsds<0) error("Error interpreting SDS file %s",infile);
   dprintf(0,"%s: has %d scientific data sets\n",infile,nsds);
-  
+  if (select < 1 || select > nsds)
+    error("Illegal select=%d, #SDS=%d\n",select,nsds);
 
-  for (count=1; count<=select; count++) {
+  for (count=1; count<=select; count++) {      /* loop over the SDS until we got the right one */
     
     ret = DFSDgetdims(infile, &rank, dimsizes, MAXRANK);
     if (ret)
-        error("Error obtaining rank and dimensions (MAXRANK=%d)",MAXRANK);
+      error("Error obtaining rank and dimensions (MAXRANK=%d)",MAXRANK);
     dprintf(0,"%s: found SDS rank %d: (",infile, rank);
-    for (i=rank-1, size=1; i>=0; i--) {		/* reverse order !! */
-    	dprintf(0,"%d%s",dimsizes[i], i==0 ? ")" : ",");
-    	size *= dimsizes[i];
-    }
-    dprintf(0," - total of %d \"pixels\"\n",size);
+    for (i=0, size=1; i<rank; i++) {
+      dprintf(0,"%d%s",dimsizes[i], i==rank-1 ? ")" : ",");
+      size *= dimsizes[i];
+    } /* i */
+    dprintf(0," - total of %d \"%s\"\n", 
+	    size,
+	    rank == 3 ? "voxels" : (rank == 2 ? "pixels" : "thingos"));
     
     for (i=rank-1, j=1; i>=0; i--, j++) {		/* reverse order !! */
-    	ret = DFSDgetdimstrs(i+1,label,unit,format);
-    	if (ret) {
-            warning("Problem getdimstr for axis %s -- ignoring",j);
-            continue;
-    	}
-    	dprintf(0,"Axis %d: %s %s %s\n",j,label,unit,format);
-    	if (count==select && axis==j) {          /* get coordinate info */
-    	    axlen = dimsizes[i];
-    	    dprintf(0,"Also retrieving axis %d with length %d\n",axis,axlen);
-            coord = (float *) allocate(axlen*sizeof(float));
-            ret = DFSDgetdimscale(i+1,axlen,coord);    	    
-    	}
+      ret = DFSDgetdimstrs(i+1,label,unit,format);
+      if (ret) {
+	warning("Problem getdimstr for axis %s -- ignoring",j);
+	continue;
+      }
+      dprintf(0,"Axis %d [%d] %s %s %s\n",
+	      j,dimsizes[i],
+	      label,unit,format);
+    } /* i,j */
+    if (count==select) { 
+      if (axis > 0) {
+	axlen = dimsizes[rank-axis];
+	dprintf(0,"Also retrieving axis %d with length %d\n",axis,axlen);
+      }
+      coord = (float **) allocate(rank*sizeof(float *));
+      for (i=0; i<rank; i++) {
+	coord[i] = (float *) allocate(dimsizes[i]*sizeof(float));
+	ret = DFSDgetdimscale(i+1,dimsizes[i],coord[i]);
+	dprintf(0,"Axis %d [%d] WCS range: %g : %g \n",
+	      rank-i,dimsizes[i],
+	      coord[i][0], coord[i][dimsizes[i]-1]);
+      }
     }
     ret = DFSDgetdatastrs(label,unit,format,coordsys);
     if (ret==0)
-        dprintf(0,"Data: %s %s %s %s\n",label,unit,format,coordsys);
+      dprintf(0,"Data: %s %s %s %s\n",label,unit,format,coordsys);
     fmax = fmin = 0.0;
-  }
-
+  } /* count */
+  
     /*
      * If some kind of output requested
      */
-
-    if (hasvalue("out") && axis==0) {
+  
+  if (hasvalue("out") && axis==0) {                 /* dump out the data for this SDS */
         /* 
          * read all the SDS data; this must happen around here ...
          */
@@ -105,6 +124,25 @@ void nemo_main()
         buff = (float *) allocate(sizeof(float)*size);
         ret = DFSDgetdata(infile, rank, dimsizes, buff);   /* get all data */
         if (ret) error("%d: Error reading data from SDS %s",ret,infile);
+	for (i=0; i<rank; i++) {
+	  j = rank-i-1;
+	  crpix[j] = 1.0;
+	  crval[j] = coord[i][0];
+	  if (dimsizes[i] == 1) {
+	    cdelt[j] = 1.0;
+	  } else {
+	    cdelt[j] = coord[i][1] - coord[i][0];
+	    if (cdelt[j] == 0) {
+	      warning("axis %d: resetting cdelt=0 -> 1",j+1);
+	      cdelt[j] = 1;
+	    }
+	    if (dimsizes[i] > 2) {
+	      ratio = (coord[i][2] - coord[i][1])/cdelt[j];
+	      if (ratio != 1) warning("axis %d: cdelt_growth=%g\n",j+1,ratio);
+	      dprintf(1,"axis %d: cdelt_growth=%g\n",j+1,ratio);
+	    }
+	  }
+	}
 
         /*
          *  revert axes for output FITS file (HDF is native C, so by default
@@ -115,6 +153,7 @@ void nemo_main()
     	outfile = getparam("out");
         dprintf(0,"%s: writing as FITS file\n",outfile);
 	if (Qreorder) {                    /* Reordering can be a lot of work */
+	  warning("if wcs=t and/or rank=3 be warned output may be flawed");
 	  buff = reorder_array(buff, size, rank, dimsizes);
 	  if (rank==2) {
      	    nz = 1;
@@ -136,7 +175,7 @@ void nemo_main()
 	    nz = dimsizes[2];
             ny = dimsizes[1];
             nx = dimsizes[0];
-	    if (Qdummy && nx==1) {
+	    if (!Qdummy && nx==1) {
 	      warning("trying to dummyfy NAXIS1");
 	      rank=2;
 	      nz = 1;
@@ -149,6 +188,21 @@ void nemo_main()
             error("(%d) Cannot deal with rank != 2 or 3",rank);
 	}
 	ff = fitopen(outfile,"new",rank, dimsizes);
+
+	strcpy(ctype[0],"X");   /* by lack of anything better....*/
+	strcpy(ctype[1],"Y");
+	strcpy(ctype[2],"Z");
+  
+	for (i=0; i<rank; i++) {
+	  sprintf(fitskey,"CRPIX%d",i+1);
+	  fitwrhdr(ff,fitskey,crpix[i]);
+	  sprintf(fitskey,"CDELT%d",i+1);
+	  fitwrhdr(ff,fitskey,cdelt[i]);
+	  sprintf(fitskey,"CRVAL%d",i+1);
+	  fitwrhdr(ff,fitskey,crval[i]);
+	  sprintf(fitskey,"CTYPE%d",i+1);
+	  fitwrhda(ff,fitskey,ctype[i]);
+	}
 
         /*
          * and stuff it into fits format
@@ -182,7 +236,7 @@ void nemo_main()
             }
 	}
         fitclose(ff);
-    } else if (hasvalue("out") && axis > 0) {
+  } else if (hasvalue("out") && axis > 0) {     /* dump out this coordinate */
 
         if (Qreorder) error("Cannot deal with reorder=t here");
     	outfile = getparam("out");
@@ -203,19 +257,20 @@ void nemo_main()
 	/* only write 1 line */
 	hitem = ask_history();
 	fitwra(ff,"HISTORY",*hitem);
+	fitwra(ff,"COMMENT","Note the data are coordinate values, no WSC defined");
 
 	if (fmin == fmax) {
-	    fmin = fmax = coord[0];
+	    fmin = fmax = coord[axis-1][0];
 	    for (i=0; i<axlen; i++) {
-	        fmin = MIN(fmin, coord[i]);
-	        fmax = MAX(fmax, coord[i]);
+	        fmin = MIN(fmin, coord[axis-1][i]);
+	        fmax = MAX(fmax, coord[axis-1][i]);
 	    }
 	    dprintf(0,"Data min/max = %g %g\n",fmin,fmax);
 	}
 	if (fmin==fmax) warning("DATAMIN and DATAMAX are the same");
         fitwrhdr(ff,"DATAMIN", fmin);
         fitwrhdr(ff,"DATAMAX", fmax);
-	fitwrite(ff, 0, coord);         /* write one line */
+	fitwrite(ff, 0, coord[axis-1]);         /* write one line */
         fitclose(ff);
     } 
 
