@@ -38,11 +38,29 @@ one double and 5 integers, some architectures may read this as
 in this case, data with 28 byte headers can still be read. Equally
 so, the opposite can also happen, in which case offset=4 is needed.
 Default: 0
+.SH DATA FORMAT
+See also \fItipsy(5NEMO)\fP on some basic concepts of tipsy data. The
+ascii format of a TIPSY "\fIgds\fP" (gas-dark-star) snapshot is essentially
+a single long column of data with the following items
+.nf
+ntot ngas nstar      [noting that ndark=ntot-ngas-nstar]
+ndim                 [usually 3, i've not see ndim=2 data]
+time                 [a floating point number]
+M(g),M(d),M(s)       [but all of these in 1 column]
+X(g),X(d),X(s)
+Y(g),Y(d),Y(s)
+Z(g),Z(d),Z(s)
+VX(g),VX(d),VX(s)
+VY(g),VY(d),VY(s)
+VZ(g),VZ(d),VZ(s)
+EPS(d), EPS(s)
+\.\.\.
+.fi
 .SH BUGS
 In \fBmode=binary\fP the gas, dark and star particles are output
 in separate snapshots.
 .SH SEE ALSO
-snaptipsy(1NEMO), stoa_tip(1ZENO)
+snaptipsy(1NEMO), stoa_tip(1ZENO), tipsy(5NEMO)
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
