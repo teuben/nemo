@@ -68,6 +68,7 @@
  *              12-feb-03   2.10a  fix residual velfie as done in rotcurshape   PJT
  *
  *               4-oct-03   2.11 added option to use the WWB73 method     PJT
+ *              25-may-04       a    fixed sqrt(N) problem in sigma estimate for nsigma    PJT
  ******************************************************************************/
 
 
@@ -140,7 +141,7 @@ string defv[] = {
     "nsigma=-1\n     Iterate once by rejecting points more than nsigma resid",
     "imagemode=t\n   Input image mode? (false means ascii table)",
     "wwb73=f\n       Use simpler WWB73 linear method of fitting",
-    "VERSION=2.11\n  4-oct-03 PJT",
+    "VERSION=2.11a\n 25-may-04 PJT",
     NULL,
 };
 
@@ -1035,7 +1036,7 @@ void stat2(real *a,int n,real *mean,real *sig)
         sxx += sqr(*a++);
     }
     *mean = sx/s;
-    *sig = n>1 ? sqrt(sxx-s*sqr(*mean)) / MAX(1.0,s-1)  :  0.0;
+    *sig = n>1 ? sqrt((sxx-s*sqr(*mean)) / MAX(1.0,s-1))  :  0.0;
 }
 
 /* 

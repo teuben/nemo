@@ -20,6 +20,7 @@
  *              19-mar-03 : 1.2  clean up weights map dens= if beam= not given   pjt
  *               2-sep-03 : 1.2a  fix rotcurmode=t default masks                 pjt
  *              22-dec-03 : 1.2b  fix error estimates for the shape pars         pjt
+ *              25-may-04 : 1.2c  fix sigma computation (sqrt(N))                pjt
  *
  ******************************************************************************/
 
@@ -82,7 +83,7 @@ string defv[] = {
     "rotcur3=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur4=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur5=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
-    "VERSION=1.2b\n  22-dec-03 PJT",
+    "VERSION=1.2c\n  25-may-04 PJT",
     NULL,
 };
 
@@ -1377,7 +1378,7 @@ void stat2(real *a,int n,real *mean,real *sig)
     }
     *mean = sx/s;
     if (n > 1)
-      *sig = sqrt(sxx-s*sqr(*mean)) / MAX(1.0,s-1);
+      *sig = sqrt( (sxx-s*sqr(*mean)) / MAX(1.0,s-1) );
     else
       *sig = 0.0;
 }
