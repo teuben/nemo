@@ -557,55 +557,51 @@ void grav_kern_all::direct(cell_iter const&C) const
 void grav_kern_base::many_AA(leaf_iter const&A0, uint const&NA,
 			     leaf_iter const&B0, uint const&NB) const
 {
-  const    leaf_iter AN=A0+NA, BN=B0+NB;
-  register leaf_iter A,B;
+  const leaf_iter AN=A0+NA, BN=B0+NB;
 #ifdef falcON_INDI
   if(INDI_SOFT)
-    for(A=A0; A!=AN; ++A) Direct<1>::many_YA(KERN,A,B0,BN,EQ,HQ,QQ);
+    for(leaf_iter A=A0; A!=AN; ++A) Direct<1>::many_YA(KERN,A,B0,BN,EQ,HQ,QQ);
   else
 #endif
-    for(A=A0; A!=AN; ++A) Direct<0>::many_YA(KERN,A,B0,BN,EQ,HQ,QQ);
+    for(leaf_iter A=A0; A!=AN; ++A) Direct<0>::many_YA(KERN,A,B0,BN,EQ,HQ,QQ);
 }
 //------------------------------------------------------------------------------
 void grav_kern_base::many_AS(leaf_iter const&A0, uint const&NA,
 			     leaf_iter const&B0, uint const&NB) const
 {
   const    leaf_iter AN=A0+NA, BN=B0+NB;
-  register leaf_iter A,B;
 #ifdef falcON_INDI
   if(INDI_SOFT)
-    for(A=A0; A!=AN; ++A) Direct<1>::many_YS(KERN,A,B0,BN,EQ,HQ,QQ);
+    for(leaf_iter A=A0; A!=AN; ++A) Direct<1>::many_YS(KERN,A,B0,BN,EQ,HQ,QQ);
   else
 #endif
-    for(A=A0; A!=AN; ++A) Direct<0>::many_YS(KERN,A,B0,BN,EQ,HQ,QQ);
+    for(leaf_iter A=A0; A!=AN; ++A) Direct<0>::many_YS(KERN,A,B0,BN,EQ,HQ,QQ);
 }
 //------------------------------------------------------------------------------
 void grav_kern_base::many_AN(leaf_iter const&A0, uint const&NA,
 			     leaf_iter const&B0, uint const&NB) const
 {
-  const    leaf_iter AN=A0+NA, BN=B0+NB;
-  register leaf_iter A,B;
+  const leaf_iter AN=A0+NA, BN=B0+NB;
 #ifdef falcON_INDI
   if(INDI_SOFT)
-    for(A=A0; A!=AN; ++A) Direct<1>::many_YN(KERN,A,B0,BN,EQ,HQ,QQ);
+    for(leaf_iter A=A0; A!=AN; ++A) Direct<1>::many_YN(KERN,A,B0,BN,EQ,HQ,QQ);
   else
 #endif
-    for(A=A0; A!=AN; ++A) Direct<0>::many_YN(KERN,A,B0,BN,EQ,HQ,QQ);
+    for(leaf_iter A=A0; A!=AN; ++A) Direct<0>::many_YN(KERN,A,B0,BN,EQ,HQ,QQ);
 }
 //------------------------------------------------------------------------------
 void grav_kern_base::many_SA(leaf_iter const&A0, uint const&NA,
 			     leaf_iter const&B0, uint const&NB) const
 {
-  const    leaf_iter AN=A0+NA, BN=B0+NB;
-  register leaf_iter A,B;
+  const leaf_iter AN=A0+NA, BN=B0+NB;
 #ifdef falcON_INDI
   if(INDI_SOFT) {
-    for(A=A0; A!=AN; ++A)
+    for(leaf_iter A=A0; A!=AN; ++A)
       if(is_active(A)) Direct<1>::many_YA(KERN,A,B0,BN,EQ,HQ,QQ);
       else             Direct<1>::many_NA(KERN,A,B0,BN,EQ,HQ,QQ);
   } else
 #endif
-    for(A=A0; A!=AN; ++A)
+    for(leaf_iter A=A0; A!=AN; ++A)
       if(is_active(A)) Direct<0>::many_YA(KERN,A,B0,BN,EQ,HQ,QQ);
       else             Direct<0>::many_NA(KERN,A,B0,BN,EQ,HQ,QQ);
 }
@@ -613,16 +609,15 @@ void grav_kern_base::many_SA(leaf_iter const&A0, uint const&NA,
 void grav_kern_base::many_SS(leaf_iter const&A0, uint const&NA,
 			     leaf_iter const&B0, uint const&NB) const
 {
-  const    leaf_iter AN=A0+NA, BN=B0+NB;
-  register leaf_iter A,B;
+  const leaf_iter AN=A0+NA, BN=B0+NB;
 #ifdef falcON_INDI
   if(INDI_SOFT) {
-    for(A=A0; A!=AN; ++A)
+    for(leaf_iter A=A0; A!=AN; ++A)
       if(is_active(A)) Direct<1>::many_YS(KERN,A,B0,BN,EQ,HQ,QQ);
       else             Direct<1>::many_NS(KERN,A,B0,BN,EQ,HQ,QQ);
   } else
 #endif
-    for(A=A0; A!=AN; ++A) 
+    for(leaf_iter A=A0; A!=AN; ++A) 
       if(is_active(A)) Direct<0>::many_YS(KERN,A,B0,BN,EQ,HQ,QQ);
       else             Direct<0>::many_NS(KERN,A,B0,BN,EQ,HQ,QQ);
 }
@@ -630,42 +625,39 @@ void grav_kern_base::many_SS(leaf_iter const&A0, uint const&NA,
 void grav_kern_base::many_SN(leaf_iter const&A0, uint const&NA,
 			     leaf_iter const&B0, uint const&NB) const
 {
-  const    leaf_iter AN=A0+NA, BN=B0+NB;
-  register leaf_iter A,B;
+  const leaf_iter AN=A0+NA, BN=B0+NB;
 #ifdef falcON_INDI
   if(INDI_SOFT) {
-    for(A=A0; A!=AN; ++A)
+    for(leaf_iter A=A0; A!=AN; ++A)
       if(is_active(A)) Direct<1>::many_YN(KERN,A,B0,BN,EQ,HQ,QQ);
   } else
 #endif
-    for(A=A0; A!=AN; ++A) 
+    for(leaf_iter A=A0; A!=AN; ++A) 
       if(is_active(A)) Direct<0>::many_YN(KERN,A,B0,BN,EQ,HQ,QQ);
 }
 //------------------------------------------------------------------------------
 void grav_kern_base::many_NA(leaf_iter const&A0, uint const&NA,
 			     leaf_iter const&B0, uint const&NB) const
 {
-  const    leaf_iter AN=A0+NA, BN=B0+NB;
-  register leaf_iter A,B;
+  const leaf_iter AN=A0+NA, BN=B0+NB;
 #ifdef falcON_INDI
   if(INDI_SOFT)
-    for(A=A0; A!=AN; ++A) Direct<1>::many_NA(KERN,A,B0,BN,EQ,HQ,QQ);
+    for(leaf_iter A=A0; A!=AN; ++A) Direct<1>::many_NA(KERN,A,B0,BN,EQ,HQ,QQ);
   else
 #endif
-    for(A=A0; A!=AN; ++A) Direct<0>::many_NA(KERN,A,B0,BN,EQ,HQ,QQ);
+    for(leaf_iter A=A0; A!=AN; ++A) Direct<0>::many_NA(KERN,A,B0,BN,EQ,HQ,QQ);
 }
 //------------------------------------------------------------------------------
 void grav_kern_base::many_NS(leaf_iter const&A0, uint const&NA,
 			     leaf_iter const&B0, uint const&NB) const
 {
-  const    leaf_iter AN=A0+NA, BN=B0+NB;
-  register leaf_iter A,B;
+  const leaf_iter AN=A0+NA, BN=B0+NB;
 #ifdef falcON_INDI
   if(INDI_SOFT)
-    for(A=A0; A!=AN; ++A) Direct<1>::many_NS(KERN,A,B0,BN,EQ,HQ,QQ);
+    for(leaf_iter A=A0; A!=AN; ++A) Direct<1>::many_NS(KERN,A,B0,BN,EQ,HQ,QQ);
   else
 #endif
-    for(A=A0; A!=AN; ++A) Direct<0>::many_NS(KERN,A,B0,BN,EQ,HQ,QQ);
+    for(leaf_iter A=A0; A!=AN; ++A) Direct<0>::many_NS(KERN,A,B0,BN,EQ,HQ,QQ);
 }
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -716,13 +708,13 @@ namespace {
     } };
   //----------------------------------------------------------------------------
   template<> struct __block<p0,1> : public __setE<p0> {
-    static const int ND=2;
+    enum { ND=2 };
     sv b(real&X, real*D, real const&EQ, real const&HQ, real const&QQ) {
       D[0] *= sqrt(X);
       D[1]  = X * D[0];
     } };
   template<int K> struct __block<p0,K> : public __setE<p0> {
-    static const int ND=K+1, F=K+K-1;
+    enum { ND=K+1, F=K+K-1 };
     sv b(real&X, real*D, real const&EQ, real const&HQ, real const&QQ) {
       __block<p0,K-1>::b(X,D,EQ,HQ,QQ);
       D[K] = F * X * D[K-1];
@@ -736,7 +728,7 @@ namespace {
     } };
   //----------------------------------------------------------------------------
   template<> struct __block<p1,1> : public __setE<p1> {
-    static const int ND=3;
+    enum { ND=3 };
     sv b(real&X, real*D, real const&EQ, real const&HQ, real const&QQ) {
       D[0] *= sqrt(X);
       D[1]  =     X * D[0];
@@ -745,7 +737,7 @@ namespace {
       D[1] += HQ*D[2];
     } };
   template<int K> struct __block<p1,K> : public __setE<p1> {
-    static const int ND=K+2, F=K+K+1;
+    enum { ND=K+2, F=K+K+1 };
     sv b(real&X, real*D, real const&EQ, real const&HQ, real const&QQ) {
       __block<p1,K-1>::b(X,D,EQ,HQ,QQ);
       D[K+1] = F * X * D[K];
@@ -760,7 +752,7 @@ namespace {
     } };
   //----------------------------------------------------------------------------
   template<> struct __block<p2,1> : public __setE<p2> {
-    static const int ND=4;
+    enum { ND=4 };
     sv b(real&X, real*D, real const&EQ, real const&HQ, real const&QQ) {
       D[0] *= sqrt(X);
       D[1]  =     X * D[0];
@@ -770,7 +762,7 @@ namespace {
       D[1] += HQ*(D[2]+HQ*D[3]);
     } };
   template<int K> struct __block<p2,K> : public __setE<p2> {
-    static const int ND=K+3, F=K+K+3;
+    enum { ND=K+3, F=K+K+3 };
     sv b(real&X, real*D, real const&EQ, real const&HQ, real const&QQ) {
       __block<p2,K-1>::b(X,D,EQ,HQ,QQ);
       D[K+2] = F * X * D[K+1];
@@ -786,7 +778,7 @@ namespace {
     } };
   //----------------------------------------------------------------------------
   template<> struct __block<p3,1> : public __setE<p3> {
-    static const int ND=5;
+    enum { ND=5 };
     sv b(real&X, real*D, real const&EQ, real const&HQ, real const&QQ) {
       D[0] *= sqrt(X);
       D[1]  =     X * D[0];
@@ -797,7 +789,7 @@ namespace {
       D[1] += HQ*(D[2]+QQ*(D[3]+HQ*D[4]));
     } };
   template<int K> struct __block<p3,K> : public __setE<p3> {
-    static const int ND=K+4, F=K+K+5;
+    enum { ND=K+4, F=K+K+5 };
     sv b(real&X, real*D, real const&EQ, real const&HQ, real const&QQ) {
       __block<p3,K-1>::b(X,D,EQ,HQ,QQ);
       D[K+3] = F * X * D[K+2];
@@ -811,22 +803,22 @@ namespace {
   template<kern_type,int,bool,bool=0> struct kernel;
   //////////////////////////////////////////////////////////////////////////////
   template<kern_type P, int K> struct kernel<P,K,0,0> : private __block<P,K> {
-    static const int ND=K+1;
+    enum { ND=K+1 };
     sv a(ARGS_B) { LOAD_G b(XX,D,EQ,HQ,QQ); CellLeaf(A,B,D,0,R); }
     sv a(ARGS_C) { LOAD_G b(XX,D,EQ,HQ,QQ); CellCell(A,B,D,0,R); }
   };
   template<kern_type P, int K> struct kernel<P,K,0,1> : private __block<P,K> {
-    static const int ND=K+1;
+    enum { ND=K+1 };
     sv a(ARGS_B) { LOAD_I b(XX,D,EQ,HQ,QQ); CellLeaf(A,B,D,0,R); }
     sv a(ARGS_C) { LOAD_I b(XX,D,EQ,HQ,QQ); CellCell(A,B,D,0,R); }
   };
   template<kern_type P, int K> struct kernel<P,K,1,0> : private __block<P,K> {
-    static const int ND=K+1;
+   enum { ND=K+1 };
     sv a(ARGS_B) { LOAD_G b(XX,D,EQ,HQ,QQ); CellLeafAll(A,B,D,0,R); }
     sv a(ARGS_C) { LOAD_G b(XX,D,EQ,HQ,QQ); CellCellAll(A,B,D,0,R); }
   };
   template<kern_type P, int K> struct kernel<P,K,1,1> : private __block<P,K> {
-    static const int ND=K+1;
+    enum { ND=K+1 };
     sv a(ARGS_B) { LOAD_I b(XX,D,EQ,HQ,QQ); CellLeafAll(A,B,D,0,R); }
     sv a(ARGS_C) { LOAD_I b(XX,D,EQ,HQ,QQ); CellCellAll(A,B,D,0,R); }
   };

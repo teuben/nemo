@@ -24,9 +24,10 @@
 // v 1.2    20/03/2003  WD gravity, action reporting                           |
 // v 1.3    23/05/2003  WD automated NEMO history                              |
 // v 1.3.1  23/05/2003  WD automated version & compile information             |
+// v 1.4    06/05/2004  WD new body.h; write=read + gravity                    |
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "1.3.1"
-#define falcON_VERSION_D "07-nov-2003 Walter Dehnen                          "
+#define falcON_VERSION   "1.4"
+#define falcON_VERSION_D "06-may-2004 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO
 #error You need NEMO to compile "addgravity.cc"
@@ -35,8 +36,6 @@
 #include <falcON.h>                                   // falcON                 
 #include <public/nmio.h>                              // WDs C++ NEMO I/O       
 #include <main.h>                                     // main & NEMO stuff      
-
-using namespace nbdy;
 //------------------------------------------------------------------------------
 string defv[] = {
   "in=???\n           input file                                         ",
@@ -49,7 +48,7 @@ string defv[] = {
   "\n                 tolerance parameter at M=M_tot                     ",
   "Ncrit="falcON_NCRIT_TEXT
   "\n                 max # bodies in un-split cells                     ",
-  version, compiled, NULL };
+  falcON_DEFV, NULL };
 //------------------------------------------------------------------------------
 string usage = "addgravity -- adds pot & acc to a snapshot using\n"
                "falcON = Force ALgorithm with Complexity O(N)\n";
@@ -58,25 +57,24 @@ void nbdy::main()
 {
   nemo_in  IN (getparam("in"));
   nemo_out OUT;
-  unsigned       NCRIT(getiparam("Ncrit"));
+  unsigned NCRIT(getiparam("Ncrit"));
   io       READ;
-  const io WRITE = io::mxv | io::p | io::a;
-  real     TIME;
-  sbodies  BODIES;
+  double   TIME;
+  bodies   BODIES(0,io::mx|io::ap|io::f);
   falcON   FALCON(&BODIES,
 		  getdparam("eps"),
 		  getdparam("theta"),
 		  kern_type(getiparam("kernel")));
   while(IN.is_present(nemo_io::snap)) {
-    if(! BODIES.read_nemo_snapshot(IN,READ,&TIME,
-				   io::mxv,getparam("times")))
+    if(! BODIES.read_nemo_snapshot(IN,READ,&TIME,io::all,getparam("times"),0))
       continue;
-    if(READ & io::mxv) {
+    if(READ & io::mx) {
       if(!OUT.is_open()) OUT.open(getparam("out"));
       BODIES.flag_all_as_active();
       FALCON.grow(NCRIT);
       FALCON.approximate_gravity();
-      BODIES.write_nemo_snapshot(OUT,&TIME,WRITE);
-    }
+      BODIES.write_nemo_snapshot(OUT,&TIME,READ|io::ap);
+    } else
+      warning("bodies' mx not read at time %f: cannot compute gravity",TIME);
   }
 }

@@ -16,6 +16,10 @@
 //-----------------------------------------------------------------------------+
 #include <public/stic.h>
 #include <public/tree.h>
+#include <body.h>
+#ifdef falcON_MPI
+#  include <walter/pody.h>
+#endif
 #include <public/iact.h>
 
 namespace {
@@ -247,7 +251,7 @@ namespace {
       register real
 	Vq = norm(V),                              // V^2 = (v-distance)^2      
 	t  = (wq>=Vq)? TAU :                       // v-size too large          
-	min(TAU, (w*sqrt((Rq*Vq-RVq)/(Vq-wq))-RV)/Vq );// t of min dist         
+	min(TAU, (w*real(sqrt((Rq*Vq-RVq)/(Vq-wq)))-RV)/Vq );// t of min dist   
       if(norm(R+t*V) < square(x+t*w)) return false;// possible overlap          
       return true;                                 // no overlap -> discard     
     }
@@ -272,7 +276,7 @@ namespace {
       register real
 	Vq = norm(V),                              // V^2 = (v-distance)^2      
 	t  = (wq>=Vq)? TAU :                       // v-size too large          
-	min(TAU, (w*sqrt((Rq*Vq-RVq)/(Vq-wq))-RV)/Vq );// t of min dist         
+	min(TAU, (w*real(sqrt((Rq*Vq-RVq)/(Vq-wq)))-RV)/Vq );// t of min dist   
       if(norm(R+t*V) < square(x+t*w)) return false;// possible overlap          
       return true;                                 // no overlap -> discard     
     }
@@ -392,47 +396,6 @@ namespace {
   };
   //////////////////////////////////////////////////////////////////////////////
   typedef stsp_estimator::cell_iterator StSpCellIter;
-  //----------------------------------------------------------------------------
-  inline stsp_leaf*
-  first_sph_leaf_kid(stsp_estimator::cell_iterator const&C) {
-    LoopStSpLeafKids(StSpCellIter,C,l,sph) return l;
-    return 0;
-  }
-  //----------------------------------------------------------------------------
-  inline stsp_cell*
-  first_sph_cell_kid(stsp_estimator::cell_iterator const&C) {
-    LoopStSpCellKids(StSpCellIter,C,c,sph) return c;
-    return 0;
-  }
-  //----------------------------------------------------------------------------
-  inline vect first_sph_kid_pos(stsp_estimator::cell_iterator const&C) {
-    register stsp_cell*c = first_sph_cell_kid(C);
-    if(c) return pos(c);
-    register stsp_leaf*l = first_sph_leaf_kid(C);
-    if(l) return pos(l);
-    return center(C);
-  }
-  //============================================================================
-  inline stsp_leaf*
-  first_sticky_leaf_kid(stsp_estimator::cell_iterator const&C) {
-    LoopStSpLeafKids(StSpCellIter,C,l,sticky) return l;
-    return 0;
-  }
-  //----------------------------------------------------------------------------
-  inline stsp_cell*
-  first_sticky_cell_kid(stsp_estimator::cell_iterator const&C) {
-    LoopStSpCellKids(StSpCellIter,C,c,sticky) return c;
-    return 0;
-  }
-  //----------------------------------------------------------------------------
-  inline 
-  void first_sticky_kid_pos_and_vel(stsp_estimator::cell_iterator const&C,
-				    vect&X, vect&V) {
-    register stsp_cell*c = first_sticky_cell_kid(C);
-    if(c) { X=pos(c); V=vel(c); return; }
-    register stsp_leaf*l = first_sticky_leaf_kid(C);
-    if(l) { X=pos(l); V=vel(l); return; }
-  }
   //////////////////////////////////////////////////////////////////////////////
   // struct CountBodiesSticky                                                 //
   //////////////////////////////////////////////////////////////////////////////
@@ -724,11 +687,11 @@ void stsp_estimator::count_sph_partners()
   partner_counter scount;
   MutualInteractor<partner_counter> MI(&scount,TREE->depth());
   MI.cell_self(root());
-  if     (TREE->use_sbodies()) copy_to_bodies_num(TREE->my_sbodies());
+  if     (TREE->use_bodies ()) copy_to_bodies_num(TREE->my_bodies());
 #ifdef falcON_MPI
   else if(TREE->use_pbodies()) copy_to_bodies_num(TREE->my_pbodies());
 #endif
-  else if(TREE->use_abodies()) copy_to_bodies_num(TREE->my_abodies());
+  else if(TREE->use_ebodies()) copy_to_bodies_num(TREE->my_ebodies());
   else falcON_Error("tree has neither bodies nor arrays for data");
   TREE->mark_stsp_usage();
 }

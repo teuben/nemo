@@ -273,13 +273,13 @@ void nemo_io::read_N() const
   else NS=0;
 }
 //------------------------------------------------------------------------------
-nbdy::real nemo_io::read(const SingleScalar X) const {
-  real scal;
-  get_data_coerced(mystream,tag(X),FalconType,&scal,0);
+double nemo_io::read(const SingleScalar X) const {
+  double scal;
+  get_data_coerced(mystream,tag(X),DoubleType,&scal,0);
   return scal;
 }
-void nemo_io::read(const SingleScalar X, real*Y) const {
-  get_data_coerced(mystream,tag(X),FalconType,Y,0);
+void nemo_io::read(const SingleScalar X, double*Y) const {
+  get_data_coerced(mystream,tag(X),DoubleType,Y,0);
 }
 //------------------------------------------------------------------------------
 void nemo_io::read(const SingleVector X) const {
@@ -371,33 +371,38 @@ void nemo_io::write(const CoSys X) const
 //------------------------------------------------------------------------------
 void nemo_io::write(const SingleScalar X, real const&scal) const
 {
-  real s = scal;
+  double s = scal;
   put_data(mystream,tag(X),FalconType,&s,0);
 }
 //------------------------------------------------------------------------------
-void nemo_io::write(const SingleVector X, real* Y) const {
-  put_data(mystream,tag(X),FalconType,Y,NDM,0);
+void nemo_io::write(const SingleScalar X, double const&scal) const
+{
+  put_data(mystream,tag(X),DoubleType,const_cast<double*>(&scal),0);
+}
+//------------------------------------------------------------------------------
+void nemo_io::write(const SingleVector X, const real* Y) const {
+  put_data(mystream,tag(X),FalconType,const_cast<real*>(Y),NDM,0);
 }
 void nemo_io::write(const SingleVector X) const {
   put_data(mystream,tag(X),FalconType,SINGLEVECTOR,NDM,0);
 }
 //------------------------------------------------------------------------------
-void nemo_io::write(const SinglePhases X, real* Y) const {
-  put_data(mystream,tag(X),FalconType,Y,2,NDM,0);
+void nemo_io::write(const SinglePhases X, const real* Y) const {
+  put_data(mystream,tag(X),FalconType,const_cast<real*>(Y),2,NDM,0);
 }
 void nemo_io::write(const SinglePhases X) const {
   put_data(mystream,tag(X),FalconType,SINGLEPHASES,2,NDM,0);
 }
 //------------------------------------------------------------------------------
-void nemo_io::write(const SingleMatrix X, real* Y) const {
-  put_data(mystream,tag(X),FalconType,Y,NDM,NDM,0);
+void nemo_io::write(const SingleMatrix X, const real* Y) const {
+  put_data(mystream,tag(X),FalconType,const_cast<real*>(Y),NDM,NDM,0);
 }
 void nemo_io::write(const SingleMatrix X) const {
   put_data(mystream,tag(X),FalconType,SINGLEMATRIX,NDM,NDM,0);
 }
 //------------------------------------------------------------------------------
-void nemo_io::write(const BodiesScalar X, real* Y) const {
-  put_data(mystream,tag(X),FalconType,Y,N,0);
+void nemo_io::write(const BodiesScalar X, const real* Y) const {
+  put_data(mystream,tag(X),FalconType,const_cast<real*>(Y),N,0);
 }
 void nemo_io::write(const BodiesScalar X) const {
   if(BODIESSCALAR==0)
@@ -405,8 +410,8 @@ void nemo_io::write(const BodiesScalar X) const {
   else  put_data(mystream,tag(X),FalconType,BODIESSCALAR,N,0);
 }
 //------------------------------------------------------------------------------
-void nemo_io::write(const SPHScalar X, real* Y) const {
-  put_data(mystream,tag(X),FalconType,Y,N,0);
+void nemo_io::write(const SPHScalar X, const real* Y) const {
+  put_data(mystream,tag(X),FalconType,const_cast<real*>(Y),N,0);
 }
 void nemo_io::write(const SPHScalar X) const {
   if(BODIESSCALAR==0)
@@ -414,8 +419,8 @@ void nemo_io::write(const SPHScalar X) const {
   else  put_data(mystream,tag(X),FalconType,BODIESSCALAR,NS,0);
 }
 //------------------------------------------------------------------------------
-void nemo_io::write(const BodiesVector X, real* Y) const {
-  if(Y)           put_data(mystream,tag(X),FalconType,Y,N,NDM,0);
+void nemo_io::write(const BodiesVector X, const real* Y) const {
+  if(Y) put_data(mystream,tag(X),FalconType,const_cast<real*>(Y),N,NDM,0);
 }
 void nemo_io::write(const BodiesVector X) const {
   if(BODIESARRAYS==0)
@@ -425,8 +430,8 @@ void nemo_io::write(const BodiesVector X) const {
   else       put_data(mystream,tag(X),FalconType,BODIESARRAYS,N,NDM,0);
 }
 //------------------------------------------------------------------------------
-void nemo_io::write(const BodiesPhases X, real* Y) const {
-  put_data(mystream,tag(X),FalconType,Y,N,2,NDM,0);
+void nemo_io::write(const BodiesPhases X, const real* Y) const {
+  put_data(mystream,tag(X),FalconType,const_cast<real*>(Y),N,2,NDM,0);
 }
 void nemo_io::write(const BodiesPhases X) const {
   if(BODIESARRAYS==0)
@@ -434,8 +439,8 @@ void nemo_io::write(const BodiesPhases X) const {
   else  put_data(mystream,tag(X),FalconType,BODIESARRAYS,N,2,NDM,0);
 }
 //------------------------------------------------------------------------------
-void nemo_io::write(const BodiesInteger X, int* Y) const {
-  put_data(mystream,tag(X),IntType,Y,N,0);
+void nemo_io::write(const BodiesInteger X, const int* Y) const {
+  put_data(mystream,tag(X),IntType,const_cast<int*>(Y),N,0);
 }
 void nemo_io::write(const BodiesInteger X) const {
   if(BODIESINTEGER==0)
@@ -443,8 +448,8 @@ void nemo_io::write(const BodiesInteger X) const {
   else  put_data(mystream,tag(X),IntType,BODIESINTEGER,N,0);
 }
 //------------------------------------------------------------------------------
-void nemo_io::write(const BodiesShort X, short* Y) const {
-  put_data(mystream,tag(X),ShortType,Y,N,0);
+void nemo_io::write(const BodiesShort X, const short* Y) const {
+  put_data(mystream,tag(X),ShortType,const_cast<short*>(Y),N,0);
 }
 void nemo_io::write(const BodiesShort X) const {
   if(BODIESSHORT==0)

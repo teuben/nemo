@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iomanip>
 #include <ctime>
+#include <main.h>
 #include <body.h>
 #include <falcON.h>
 
@@ -31,7 +32,7 @@ void dmintmin(const body A, const body B, const real T, real&dmin, real&tmin)
   }
 }
 
-int main(int argc, char* argv[])
+int nbdy::main(int argc, char* argv[])
 {
   if(argc < 6 || argc > 9) {
     cerr<<"\n Testing tree sticky/SPH particle support with a Plummer sphere\n\n"

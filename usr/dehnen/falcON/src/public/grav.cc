@@ -15,6 +15,10 @@
 //                                                                             |
 //-----------------------------------------------------------------------------+
 #include <public/grav.h>
+#include <body.h>
+#ifdef falcON_MPI
+#  include <walter/pody.h>
+#endif
 #include <public/iact.h>
 #include <public/kern.h>
 #include <public/Pi.h>
@@ -46,8 +50,8 @@ namespace nbdy {
     real             *Z,*Y;                        // tables                    
     //--------------------------------------------------------------------------
     real z(const real y) const {                   // z(y) = 1/theta - 1        
-      if(y < Y[ 0]) return pow(y,hA);
-      if(y > Y[N1]) return pow(y,sA);
+      if(y < Y[ 0]) return std::pow(y,hA);
+      if(y > Y[N1]) return std::pow(y,sA);
       return polev(y,Y,Z,N);
     }    
   public:

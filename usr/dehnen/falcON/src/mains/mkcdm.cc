@@ -24,23 +24,22 @@
 // v 2.0    24/09/2002  WD enabled MPI                                         |
 // v 2.0.1  13/11/2002  WD typo in tabfile output corrected                    |
 // v 2.1    19/04/2004  WD made it work again using nsam.h                     |
+// v 2.2    04/05/2004  WD happy icc 8.0; new body.h; new make                 |
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "2.1"
-#define falcON_VERSION_D "19-mar-2004 Walter Dehnen                          "
+#define falcON_VERSION   "2.2"
+#define falcON_VERSION_D "04-may-2004 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile mkcdm
 #endif
 #define falcON_RepAction 0                         // no action reporting       
-#include <proper/nsam.h>                           // my N-body sampler         
+#include <public/nsam.h>                           // my N-body sampler         
 #include <public/nmio.h>                           // my NEMO file I/O          
 #include <public/ionl.h>                           // my I/O utilities          
 #include <proper/tcdm.h>                           // my truncated CDM models   
 #include <fstream>                                 // C++ file I/O              
 #include <iomanip>                                 // C++ I/O formatting        
 #include <main.h>                                  // main & NEMO stuff         
-using namespace nbdy;
-using std::setw;
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
   using namespace nbdy;
@@ -97,14 +96,18 @@ string defv[] = {
   "                   output: kpc, kpc/Gyr, G=1 (-> mass unit)           ",
   "outputs=f\n        give some global quantities to stderr              ",
   "tabfile=\n         write table with r, pot, vc, sigma to file         ",
-  version, compiled, NULL };
+  falcON_DEFV, NULL };
+//------------------------------------------------------------------------------
 string usage =
-"mkcdm -- construct a truncated CDM model with density\n\n"
+"mkcdm -- construct a truncated CDM model with density\n"
+"\n"
 "                          sech(r/b)\n"
 "           rho(r) = C ----------------\n"
-"                       r^g (r+a)^(2-g)\n\n"
-"         and constant anisotropy beta = 1-(sigma_theta/sigma_r)^2\n\n";
-////////////////////////////////////////////////////////////////////////////////
+"                       r^g (r+a)^(2-g)\n"
+"\n"
+"         and constant anisotropy beta = 1-(sigma_theta/sigma_r)^2\n"
+"\n";
+//------------------------------------------------------------------------------
 void nbdy::main()
 {
   const double vf = 0.977775320024919;             // km/s  in WD_units         
@@ -137,13 +140,13 @@ void nbdy::main()
 		     Rad,nb,
 		     getdparam("fac"),
 		     getbparam("peri"));
-  sbodies BB(getiparam("nbody"), data);
+  bodies BB(getiparam("nbody"), data);
   TS.sample(BB,getbparam("q-ran"),Ran,getdparam("f_pos"),getdparam("epar"));
   //----------------------------------------------------------------------------
   // 3. output of snapshot                                                      
   //----------------------------------------------------------------------------
   nemo_out out(getparam("out"));
-  real time = getdparam("time");
+  double time = getdparam("time");
   BB.write_nemo_snapshot(out,&time,data);
   //----------------------------------------------------------------------------
   // 4. optional outputs of global quantities                                   

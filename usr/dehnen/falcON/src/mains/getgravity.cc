@@ -41,40 +41,37 @@ string defv[] = {
   "\n                  tolerance parameter at M=M_tot  ",
   "Ncrit="falcON_NCRIT_TEXT
   "\n                  max # bodies in un-split cells  ",
-  "VERSION=0.3" falcON_PSIFLAG "\n       23-may-2003 WD\n"
-  "                   compiled " __DATE__ ", " __TIME__ "  ",
-  NULL};
+  falcON_DEFV, NULL };
+//------------------------------------------------------------------------------
 string usage = "getgravity -- computes gravity at test positions using\n"
                "falcON = Force ALgorithm with Complexity O(N)\n";
 //------------------------------------------------------------------------------
 void nbdy::main()
 {
-  nbdy::nemo_in  IN[2];
+  nemo_in  IN[2];
   IN[0].open(getparam("srce"));
-  nbdy::nemo_out OUT;
-  unsigned       NCRIT(getiparam("Ncrit"));
-  nbdy::io       READ[2],TOREAD[2] = {nbdy::io::mx, nbdy::io::x};
-  const nbdy::io WRITE = nbdy::io::x | nbdy::io::p | nbdy::io::a;
-  nbdy::real     TIME;
-  nbdy::uint     NN[2];
-  nbdy::sbodies  BODIES;
-  nbdy::falcON   FALCON(&BODIES,
-			nbdy::real(getdparam("eps")),
-			nbdy::real(getdparam("theta")),
-			nbdy::kern_type(getiparam("kernel")));
-  while(IN[0].is_present(nbdy::nemo_io::snap)) {
+  nemo_out OUT;
+  unsigned NCRIT(getiparam("Ncrit"));
+  io       READ[2],TOREAD[2] = {io::mx, io::x};
+  const io WRITE = io::x | io::p | io::a;
+  double   TIME;
+  uint     NN[2];
+  bodies   BODIES;
+  falcON   FALCON(&BODIES,getrparam("eps"), getrparam("theta"),
+		  kern_type(getiparam("kernel")));
+  while(IN[0].is_present(nemo_io::snap)) {
     IN[1].open(getparam("sink"));
     if(BODIES.read_nemo_snapshots(IN,2,READ,NN,&TIME,TOREAD,getparam("times"))
        && READ[0] & TOREAD[0]
        && READ[1] & TOREAD[1]) {
-      register nbdy::real mass = BODIES.mass(0);
-      for(register nbdy::uint i=0; i!=NN[0]; ++i) {
-	BODIES.flg(i).un_set(nbdy::flag::ACTIVE);
+      register real mass = BODIES.mass(0);
+      for(register uint i=0; i!=NN[0]; ++i) {
+	BODIES.flg(i).un_set(flag::ACTIVE);
 	if(BODIES.mass(i) < mass) mass = BODIES.mass(i);
       }
-      mass *= 1.e-10/nbdy::real(NN[1]);
-      for(register nbdy::uint i=NN[0]; i!=BODIES.N_bodies(); ++i) {
-	BODIES.flg(i).add(nbdy::flag::ACTIVE);
+      mass *= 1.e-10/real(NN[1]);
+      for(register uint i=NN[0]; i!=BODIES.N_bodies(); ++i) {
+	BODIES.flg(i).add(flag::ACTIVE);
 	BODIES.mass(i) = mass;
       }
       FALCON.grow(NCRIT);

@@ -61,7 +61,7 @@
 //                                                                             |
 // Naming                                                                      |
 // Throughout this file, we use the following names:                           |
-// body:     iterator through either sbodies or pbodies                        |
+// body:     iterator through either bodies or ebodies                         |
 // leaf:     body-representative in the cell-leaf tree.                        |
 //           Here, we assume that the template parameter LEAF is a class that  |
 //           has been derived from class basic_leaf of tree.h .                |
@@ -83,6 +83,10 @@
 
 #include <public/tree.h>
 #include <public/memo.h>
+#include <body.h>
+#ifdef falcON_MPI
+#  include <walter/pody.h>
+#endif
 
 #ifdef  falcON_PROPER
 #  define falcON_track_bug
@@ -149,7 +153,7 @@ namespace {
   // auxiliarty macros                                                        //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
-#define LoopDims for(register int d=0; d<Ndim; d++)
+#define LoopDims for(register int d=0; d<Ndim; ++d)
   //----------------------------------------------------------------------------
 #define __LoopLeafKids(TREE,CELL,KID)			\
     for(register BL KID = LeafNo(TREE,fcleaf(CELL));	\
@@ -392,7 +396,6 @@ namespace {
     node() {}                                      // default constructor       
     vect             &pos()             { return POS; }
     vect        const&pos() const       { return POS; }
-    friend vect const&pos(const node*N) { return N->POS; }
   };
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
@@ -445,7 +448,7 @@ namespace {
     int  SIZE;                                     // size of list              
     //--------------------------------------------------------------------------
     dot_list() : HEAD(0), SIZE(0) {}
-    dot_list(dot* const&L, int const&N) : HEAD(L), SIZE(N) {}
+//     dot_list(dot* const&L, int const&N) : HEAD(L), SIZE(N) {}
   private:
     dot_list(const dot_list&L);                    // not implemented           
     dot_list& operator=(const dot_list&);          // not implemented           
@@ -506,9 +509,6 @@ namespace {
     //--------------------------------------------------------------------------
     bool marked_as_box  (int const&i) const{return TYPE & BIT[i]; }
     bool marked_as_dot  (int const&i) const{return !marked_as_box(i); }
-    bool octant_is_empty(int const&i) const{return OCT[i]==0; }
-    bool octant_is_box  (int const&i) const{return OCT[i] && marked_as_box(i);}
-    bool octant_is_dot  (int const&i) const{return OCT[i] && marked_as_dot(i);}
     vect const&center   ()            const{return pos(); }
     //--------------------------------------------------------------------------
     int octant(const vect&x) const {               // I: pos  (must be in box)  
@@ -523,13 +523,9 @@ namespace {
       return ::octant(pos(),P->pos());
     }
     //--------------------------------------------------------------------------
-    int octant(const basic_cell* const&C) const {  // I: cell (must be in box)  
-      return ::octant(pos(),nbdy::center(C));
-    }
-    //--------------------------------------------------------------------------
-    bool is_empty(int const&i) const {
-      return OCT[i] == 0;
-    }
+//     int octant(const basic_cell* const&C) const {  // I: cell (must be in box)  
+//       return ::octant(pos(),nbdy::center(C));
+//     }
     //--------------------------------------------------------------------------
     bool is_twig() const {
       return DOTS != 0;
@@ -754,11 +750,11 @@ namespace {
     }
     //--------------------------------------------------------------------------
     // provides a new box with same properties as box Po                        
-    inline box* make_copybox(                      // R: new box                
-			     box    const&Po,      // I: box to copy            
-			     size_t const&nl) {    // I: # dots added sofar     
-      return &((new_box(nl))->operator= (Po));
-    }
+//     inline box* make_copybox(                      // R: new box                
+// 			     box    const&Po,      // I: box to copy            
+// 			     size_t const&nl) {    // I: # dots added sofar     
+//       return &((new_box(nl))->operator= (Po));
+//     }
     //--------------------------------------------------------------------------
     // This routines splits a box:                                              
     // The dots in the linked list are sorted into octants. Octants with one    
@@ -925,6 +921,7 @@ namespace {
       P0->center() = x0;
     }
     //--------------------------------------------------------------------------
+#if (0) // "...was defined but never used ...
     box_dot_tree(CBT    const&t,                   // I: tree to be build       
 		 int    const&nc,                  // I: N_crit                 
 		 int    const&nu,                  // I: N_cut                  
@@ -950,6 +947,7 @@ namespace {
       P0->center() = x0;
       P0->LEVEL    = l0;
     }
+#endif
     //--------------------------------------------------------------------------
     ~box_dot_tree()
     {
@@ -960,16 +958,16 @@ namespace {
     // const public methods (all inlined)                                       
     //--------------------------------------------------------------------------
   public:
-    inline size_t       N_allocated() const { return BM->N_allocated(); }
-    inline size_t       N_used     () const { return BM->N_used(); }
+//     inline size_t       N_allocated() const { return BM->N_allocated(); }
+//     inline size_t       N_used     () const { return BM->N_used(); }
     inline size_t       N_boxes    () const { return BM->N_used(); }
-    inline size_t       N_free     () const { return N_allocated()-N_used(); }
+//     inline size_t       N_free     () const { return N_allocated()-N_used(); }
     inline int    const&depth      () const { return DEPTH; }
     inline int    const&maxdepth   () const { return DMAX; }
     inline int    const&Ncrit      () const { return NCRIT; }
     inline size_t const&N_dots     () const { return NDOTS; }
     inline int          N_levels   () const { return DMAX - P0->LEVEL; }
-    inline box   *const&root       () const { return P0; }
+//     inline box   *const&root       () const { return P0; }
     inline real   const&root_rad   () const { return RA[P0->LEVEL]; }
     //--------------------------------------------------------------------------
     // non-const public methods                                                 
@@ -1212,46 +1210,28 @@ namespace {
     void build_from_tree();
     //--------------------------------------------------------------------------
 #define CBB const bodies_type*
-    typedef const abodies* CBA;
     //--------------------------------------------------------------------------
     template<typename bodies_type>
-    void setup_from_scratch_bodies(CBB  const&,
-				   uint const& = 0u,
-				   uint        = 0u,
-				   int  const& = 0);
+    void setup_from_scratch(CBB  const&,
+			    uint const& = 0u,
+			    uint        = 0u,
+			    int  const& = 0);
     //--------------------------------------------------------------------------
     template<typename bodies_type>
-    void setup_from_scratch_bodies(CBB  const&,
-				   vect const&,
-				   vect const&,
-				   uint const& = 0u,
-				   uint        = 0u,
-				   int  const& = 0);
-    //--------------------------------------------------------------------------
-    void setup_from_scratch_arrays(CBA  const&,
-				   uint const& = 0u,
-				   uint        = 0u,
-				   int  const& = 0);
-    //--------------------------------------------------------------------------
-    void setup_from_scratch_arrays(CBA  const&,
-				   vect const&,
-				   vect const&,
-				   uint const& = 0u,
-				   uint        = 0u,
-				   int  const& = 0);
+    void setup_from_scratch(CBB  const&,
+			    vect const&,
+			    vect const&,
+			    uint const& = 0u,
+			    uint        = 0u,
+			    int  const& = 0);
     //--------------------------------------------------------------------------
     template<typename bodies_type>
-    void setup_leaf_order_bodies(CBB  const&,
-				 uint const& = 0u,
-				 uint        = 0u);
-    //--------------------------------------------------------------------------
-    bool setup_leaf_order_arrays(CBA  const&,
-				 uint const& = 0u,
-				 uint        = 0u);
+    void setup_leaf_order(CBB  const&,
+			  uint const& = 0u,
+			  uint        = 0u);
     //--------------------------------------------------------------------------
     template<typename bodies_type>
-    void setup_old_tree_bodies(CBB const&);
-    bool setup_old_tree_arrays(CBA const&);
+    void setup_old_tree(CBB const&);
     //--------------------------------------------------------------------------
   public:
     //--------------------------------------------------------------------------
@@ -1267,8 +1247,6 @@ namespace {
     //--------------------------------------------------------------------------
     // 1   completely from scratch                                              
     //--------------------------------------------------------------------------
-    // 1.1 for the use with bodies with and without input of X_min/max          
-    //--------------------------------------------------------------------------
     template<typename bodies_type>
     tree_builder(CBT        const&,                // I: tree to be build       
 		 const vect*const&,                // I: pre-determined center  
@@ -1285,28 +1263,6 @@ namespace {
 		 int        const&,                // I: Ncrit                  
 		 int        const&,                // I: Dmax                   
 		 CBB        const&,                // I: body sources           
-		 vect       const&,                // I: x_min                  
-		 vect       const&,                // I: x_max                  
-		 int        const& = 0,            //[I: flag specifying bodies]
-		 uint       const& = 0u,           //[I: first body]            
-		 uint       const& = 0u);          //[I: number of bodies]      
-    //--------------------------------------------------------------------------
-    // 1.2 for the use with abodies                                             
-    //--------------------------------------------------------------------------
-    tree_builder(CBT        const&,                // I: tree to be build       
-		 const vect*const&,                // I: pre-determined center  
-		 int        const&,                // I: Ncrit                  
-		 int        const&,                // I: Dmax                   
-		 CBA        const&,                // I: body source arrays     
-		 int        const& = 0,            //[I: flag specifying bodies]
-		 uint       const& = 0u,           //[I: first body]            
-		 uint       const& = 0u);          //[I: number of bodies]      
-    //--------------------------------------------------------------------------
-    tree_builder(CBT        const&,                // I: tree to be build       
-		 const vect*const&,                // I: pre-determined center  
-		 int        const&,                // I: Ncrit                  
-		 int        const&,                // I: Dmax                   
-		 CBA        const&,                // I: body source arrays     
 		 vect       const&,                // I: x_min                  
 		 vect       const&,                // I: x_max                  
 		 int        const& = 0,            //[I: flag specifying bodies]
@@ -1419,10 +1375,10 @@ namespace {
   }
   //----------------------------------------------------------------------------
   template<typename bodies_type> void tree_builder::
-  setup_from_scratch_bodies(CBB  const&BB,
-			    uint const&b0,
-			    uint       nb,
-			    int  const&SP)
+  setup_from_scratch(CBB  const&BB,
+		     uint const&b0,
+		     uint       nb,
+		     int  const&SP)
   {
     if(nb == 0) nb=BB->N_bodies();                 // number of bodies          
     D0 = falcON_New(dot,nb);                       // allocate dots             
@@ -1444,12 +1400,12 @@ namespace {
   }
   //----------------------------------------------------------------------------
   template<typename bodies_type> void tree_builder::
-  setup_from_scratch_bodies(CBB  const&BB,
-			    vect const&xmin,
-			    vect const&xmax,
-			    uint const&b0,
-			    uint       nb,
-			    int  const&SP)
+  setup_from_scratch(CBB  const&BB,
+		     vect const&xmin,
+		     vect const&xmax,
+		     uint const&b0,
+		     uint       nb,
+		     int  const&SP)
   {
     if(nb == 0u) nb=BB->N_bodies();                // number of bodies          
     D0 = falcON_New(dot,nb);                       // allocate dots             
@@ -1469,61 +1425,10 @@ namespace {
     XAVE /= real(DN-D0);                           // set: X_ave                
   }
   //----------------------------------------------------------------------------
-  void tree_builder::
-  setup_from_scratch_arrays(CBA  const&BA,
-			    uint const&b0,
-			    uint       nb,
-			    int  const&SP)
-  {
-    if(nb == 0u) nb=BA->N_bodies();                // number of bodies          
-    D0 = falcON_New(dot,nb);                       // allocate dots             
-    register dot* Di=D0;                           // current dot               
-    XAVE = zero;                                   // reset X_ave               
-    XMAX = XMIN = BA->pos(b0);                     // reset X_min/max           
-    const uint bn=b0+nb;                           // end bodies                
-    for(register uint b=b0; b!=bn; ++b)            // LOOP body flags & pos's   
-      if(is_in_tree(BA->flg(b))                    //   IF body is in tree      
-	 && SP==0 | is_set(BA->flg(b),SP)) {       //      AND specified        
-	Di->set_up(BA,b);                          //     initialize dot        
-	XMAX.up_max(Di->pos());                    //     update X_max          
-	XMIN.up_min(Di->pos());                    //     update X_min          
-	XAVE += Di->pos();                         //     sum up X              
-	Di++;                                      //     incr current dot      
-      }                                            // END LOOP                  
-    DN    = Di;                                    // set: beyond last dot      
-    XAVE /= real(DN-D0);                           // set: X_ave                
-  }
-  //----------------------------------------------------------------------------
-  void tree_builder::
-  setup_from_scratch_arrays(CBA  const&BA,
-			    vect const&xmin,
-			    vect const&xmax,
-			    uint const&b0,
-			    uint       nb,
-			    int  const&SP)
-  {
-    if(nb == 0u) nb=BA->N_bodies();                // number of bodies          
-    D0 = falcON_New(dot,nb);                       // allocate dots             
-    register dot* Di=D0;                           // current dot               
-    XAVE = zero;                                   // reset X_ave               
-    XMIN = xmin;                                   // believe delivered x_min   
-    XMAX = xmax;                                   // believe delivered x_max   
-    const uint bn=b0+nb;                           // end bodies                
-    for(register uint b=b0; b!=bn; ++b)            // LOOP body flags & pos's   
-      if(is_in_tree(BA->flg(b))                    //   IF body is in tree      
-	 && SP==0 | is_set(BA->flg(b),SP)) {       //      AND specified        
-	Di->set_up(BA,b);                          //     initialize dot        
-	XAVE += Di->pos();                         //     sum up X              
-	Di++;                                      //     incr current dot      
-      }                                            // END LOOP                  
-    DN    = Di;                                    // set: beyond last dot      
-    XAVE /= real(DN-D0);                           // set: X_ave                
-  }
-  //----------------------------------------------------------------------------
   template<typename bodies_type> void tree_builder::
-  setup_leaf_order_bodies(CBB  const&BB,
-			  uint const&b0,
-			  uint       nb)
+  setup_leaf_order(CBB  const&BB,
+		   uint const&b0,
+		   uint       nb)
   {
     if(nb==0u) nb=TREE->N_leafs();                 // number of leafs to add    
     D0 = falcON_New(dot,nb);                       // allocate dots             
@@ -1542,58 +1447,14 @@ namespace {
     XAVE /= real(DN-D0);                           // set: X_ave                
   }
   //----------------------------------------------------------------------------
-  bool tree_builder::
-  setup_leaf_order_arrays(CBA  const&BB,
-			  uint const&b0,
-			  uint       nb)
-  {
-    if(nb==0u) nb=TREE->N_leafs();                 // number of leafs to add    
-    D0 = falcON_New(dot,nb);                       // allocate dots             
-    register dot* Di = D0;                         // current dot               
-    XAVE = zero;                                   // reset X_ave               
-    XMAX =XMIN =BB->pos(mybody(LeafNo(TREE,b0)));  // reset x_min & x_max       
-    const uint bn=b0+nb;                           // end leafs                 
-    __LoopLeafsRange(TREE,b0,bn,Li)                // LOOP leaf                 
-      if(is_in_tree(BB->flg(mybody(Li)))) {        //   IF leaf's body in tree  
-	Di->set_up(BB,mybody(Li));                 //     initialize dot        
-	XMAX.up_max(Di->pos());                    //     update X_max          
-	XMIN.up_min(Di->pos());                    //     update X_min          
-	XAVE += Di->pos();                         //     sum up X              
-	Di++;                                      //     incr current dot      
-      } else {                                     //   ELSE(body not in tree)  
-	delete D0;                                 //     delete allocated dots 
-	return false;                              //     return unsuccessful   
-      }                                            //   ENDIF                   
-    DN    = Di;                                    // set: beyond last dot      
-    XAVE /= real(DN-D0);                           // set: X_ave                
-    return true;                                   // successful                
-  }
-#undef LoopDims
-  //----------------------------------------------------------------------------
   template<typename bodies_type> void tree_builder::
-  setup_old_tree_bodies(CBB const&BB)
+  setup_old_tree(CBB const&BB)
   {
     __LoopLeafs(TREE,Li)                           // LOOP leafs of tree        
       Li->copy_from_bodies_pos(BB);                //   copy pos: body -> leaf  
     REBUILD = true;                                // we may rebuild            
     D0      = falcON_New(dot,TREE->N_leafs());     // allocate dots             
     DN      = D0 + TREE->N_leafs();                // set: beyond last dot      
-  }
-  //----------------------------------------------------------------------------
-  bool tree_builder::
-  setup_old_tree_arrays(const abodies*const&BB)
-  {
-    __LoopLeafs(TREE,Li)                           // LOOP leafs of tree        
-      if(is_in_tree(BB->flg(mybody(Li))))          //   IF(body is active)      
-        Li->copy_from_bodies_pos(BB);              //   copy pos: body -> leaf  
-      else {                                       //   ELSE(body not in tree)  
-	REBUILD=false;                             //     tree is useless       
-	return false;                              //     return unsuccessful   
-      }                                            //   ENDIF                   
-    REBUILD = true;                                // tree is still useful      
-    D0      = falcON_New(dot,TREE->N_leafs());     // allocate dots             
-    DN      = D0 + TREE->N_leafs();                // set: beyond last dot      
-    return true;                                   // successful                
   }
   //----------------------------------------------------------------------------
   // constructor 1.1.1                                                          
@@ -1609,7 +1470,7 @@ namespace {
     ROOTCENTER(x0), REBUILD(false)
   {
     report REPORT("tree_builder::tree_builder(): 1.1.1");
-    setup_from_scratch_bodies(bb,b0,nb,sp);
+    setup_from_scratch(bb,b0,nb,sp);
     register vect X0 = root_center();
     box_dot_tree::reset(t,nc,0,dm,DN-D0,X0,root_radius(X0));
   }
@@ -1629,47 +1490,11 @@ namespace {
     ROOTCENTER(x0), REBUILD(false)
   {
     report REPORT("tree_builder::tree_builder(): 1.1.2");
-    setup_from_scratch_bodies(bb,xmin,xmax,b0,nb,sp);
+    setup_from_scratch(bb,xmin,xmax,b0,nb,sp);
     register vect X0 = root_center();
     box_dot_tree::reset(t,nc,0,dm,DN-D0,X0,root_radius(X0));
   }
 #undef CBB
-  //----------------------------------------------------------------------------
-  // constructor 1.2.1                                                          
-  tree_builder::tree_builder(CBT        const&t,
-			     const vect*const&x0,
-			     int        const&nc,
-			     int        const&dm,
-			     CBA        const&BA,
-			     int        const&sp,
-			     uint       const&b0,
-			     uint       const&nb) :
-    ROOTCENTER(x0), REBUILD(false)
-  {
-    report REPORT("tree_builder::tree_builder(): 1.2.1");
-    setup_from_scratch_arrays(BA,b0,nb,sp);
-    register vect X0 = root_center();
-    box_dot_tree::reset(t,nc,0,dm,DN-D0,X0,root_radius(X0));
-  }
-  //----------------------------------------------------------------------------
-  // constructor 1.2.2                                                          
-  tree_builder::tree_builder(CBT        const&t,
-			     const vect*const&x0,
-			     int        const&nc,
-			     int        const&dm,
-			     CBA        const&BA,
-			     vect       const&xmin,
-			     vect       const&xmax,
-			     int        const&sp,
-			     uint       const&b0,
-			     uint       const&nb) :
-    ROOTCENTER(x0), REBUILD(false)
-  {
-    report REPORT("tree_builder::tree_builder(): 1.2.2");
-    setup_from_scratch_arrays(BA,xmin,xmax,b0,nb,sp);
-    register vect X0 = root_center();
-    box_dot_tree::reset(t,nc,0,dm,DN-D0,X0,root_radius(X0));
-  }
   //----------------------------------------------------------------------------
   // constructor 2                                                              
   tree_builder::tree_builder(CBT        const&t,
@@ -1682,24 +1507,26 @@ namespace {
   {
     TREE = t;                                      // set tree                  
     report REPORT("tree_builder::tree_builder(): 2");
-    if       (TREE->use_sbodies()) {               // CASE 1: use sbodies       
-      const sbodies* BB=TREE->my_sbodies();        //   get bodies              
+    if       (TREE->use_bodies()) {                // CASE 1: use bodies        
+      const bodies* BB=TREE->my_bodies();          //   get bodies              
       if(BB->changes_in_tree_usage_flags())        //   IF(tree-usage changed)  
-	setup_from_scratch_bodies(BB,b0,nb);       //     build from scratch    
+	setup_from_scratch(BB,b0,nb);              //     build from scratch    
       else                                         //   ELSE                    
-	setup_leaf_order_bodies(BB,b0,nb);         //     use leaf order        
+	setup_leaf_order(BB,b0,nb);                //     use leaf order        
 #ifdef falcON_MPI
     } else if(TREE->use_pbodies()) {               // CASE 2: use pbodies       
       const pbodies* BB=TREE->my_pbodies();        //   get bodies              
       if(BB->changes_in_tree_usage_flags())        //   IF(tree-usage changed)  
-	setup_from_scratch_bodies(BB,b0,nb);       //     build from scratch    
+	setup_from_scratch(BB,b0,nb);              //     build from scratch    
       else                                         //   ELSE                    
-	setup_leaf_order_bodies(BB,b0,nb);         //     use leaf order        
+	setup_leaf_order(BB,b0,nb);                //     use leaf order        
 #endif
-    } else if(TREE->use_abodies()) {               // CASE 3: use abodies       
-      const abodies* BA=TREE->my_abodies();        //   get bodies              
-      if(!setup_leaf_order_arrays(BA,b0,nb))       //   use leaf order          
-	setup_from_scratch_arrays(BA,b0,nb,TREE->SP_flag());
+    } else if(TREE->use_ebodies()) {               // CASE 3: use abodies       
+      const ebodies* BB=TREE->my_ebodies();        //   get bodies              
+      if(BB->changes_in_tree_usage_flags())        //   IF(tree-usage changed)  
+	setup_from_scratch(BB,b0,nb);              //     build from scratch    
+      else                                         //   ELSE                    
+	setup_leaf_order(BB,b0,nb);                //     use leaf order        
     } else 
       error("cannot build from old tree");
     register vect X0 = root_center();
@@ -1716,41 +1543,39 @@ namespace {
   {
     TREE = t;                                      // set tree                  
     report REPORT("tree_builder::tree_builder(): 3");
-    if       (TREE->use_sbodies()) {               // CASE 1: use sbodies       
-      const sbodies* BB=TREE->my_sbodies();        //   get bodies              
+    if       (TREE->use_bodies()) {                // CASE 1: use bodies        
+      const  bodies* BB=TREE->my_bodies();         //   get bodies              
       if(BB->changes_in_tree_usage_flags())        //   IF(tree-usage changed)  
-	setup_from_scratch_bodies(BB,b0,nb,TREE->SP_flag());// build frm scratch
+	setup_from_scratch(BB,b0,nb,TREE->SP_flag());//   build frm scratch
       else if(nu <= nc)                            //   ELIF(Ncut<=Ncrit)       
-	setup_leaf_order_bodies(BB,b0,nb);         //     use leaf order        
+	setup_leaf_order(BB,b0,nb);                //     use leaf order        
       else if(nb != 0u)                            //   ELIF(not all)           
 	error("cannot partially rebuild");         //     fatal error           
       else                                         //   ELSE(Ncut >Ncrit)       
-	setup_old_tree_bodies(BB);                 //     use old tree fully    
+	setup_old_tree(BB);                        //     use old tree fully    
 #ifdef falcON_MPI
     } else if(TREE->use_pbodies()) {               // CASE 2: use pbodies       
       const pbodies* BB=TREE->my_pbodies();        //   get bodies              
       if(BB->changes_in_tree_usage_flags())        //   IF(tree-usage changed)  
-	setup_from_scratch_bodies(BB,b0,nb,TREE->SP_flag());// build frm scratch
+	setup_from_scratch(BB,b0,nb,TREE->SP_flag());//   build frm scratch
       else if(nu <= nc)                            //   ELIF(Ncut<=Ncrit)       
-	setup_leaf_order_bodies(BB,b0,nb);         //     use leaf order        
+	setup_leaf_order(BB,b0,nb);                //     use leaf order        
       else if(nb != 0u)                            //   ELIF(not all)           
 	error("cannot partially rebuild");         //     fatal error           
       else                                         //   ELSE(Ncut >Ncrit)       
-	setup_old_tree_bodies(BB);                 //     use old tree fully    
+	setup_old_tree(BB);                        //     use old tree fully    
 #endif
-    } else if(TREE->use_abodies()) {               // CASE 3: use arrays        
-      const abodies* BA=TREE->my_abodies();        //   get bodies              
-      if(nu <= nc) {                               //   IF   (Ncut<=Ncrit)     >
-	if(!setup_leaf_order_arrays(BA,b0,nb))     //   use leaf order          
-	  setup_from_scratch_arrays(BA,b0,nb,TREE->SP_flag());
-      } else if(nb != 0u)                          //   ELIF(not all)           
+    } else if(TREE->use_ebodies()) {               // CASE 3: use arrays        
+      const ebodies* BB=TREE->my_ebodies();        //   get bodies              
+      if(BB->changes_in_tree_usage_flags())        //   IF(tree-usage changed)  
+	setup_from_scratch(BB,b0,nb,TREE->SP_flag());//   build frm scratch
+      else if(nu <= nc)                            //   ELIF(Ncut<=Ncrit)       
+	setup_leaf_order(BB,b0,nb);                //     use leaf order        
+      else if(nb != 0u)                            //   ELIF(not all)           
 	error("cannot partially rebuild");         //     fatal error           
-      else {                                       //   ELSE (Ncut >Ncrit)      
-	if(!setup_old_tree_arrays(BA))             //     use old tree fully    
-	  setup_from_scratch_arrays(BA,b0,nb,TREE->SP_flag());
-      }
-    } else 
-      error("cannot build from old tree");
+      else                                         //   ELSE(Ncut >Ncrit)       
+	setup_old_tree(BB);                        //     use old tree fully    
+    }
     if(REBUILD) {
       box_dot_tree::reset(t,nc,nu,dm,DN-D0,t->root_center(),t->root_radius(),
 			  TREE->N_cells()+10*int(sqrt(TREE->N_cells())),4);
@@ -1864,14 +1689,14 @@ inline void oct_tree::set_depth(uint const&dp) {
   DUINT[2] = dp;
 }
 //------------------------------------------------------------------------------
-// construction from sbodies                                                    
+// construction from bodies                                                     
 //------------------------------------------------------------------------------
-oct_tree::oct_tree(const sbodies*const&bb,         // I: body sources           
-		   int           const&nc,         // I: N_crit                 
-		   const vect   *const&x0,         // I: pre-determined center  
-		   int           const&dm,         // I: max tree depth         
-		   int           const&sp) :       // I: flag specifying bodies 
-  BSRCES(bb), ASRCES(0),
+oct_tree::oct_tree(const bodies*const&bb,          // I: body sources           
+		   int          const&nc,          // I: N_crit                 
+		   const vect  *const&x0,          // I: pre-determined center  
+		   int          const&dm,          // I: max tree depth         
+		   int          const&sp) :        // I: flag specifying bodies 
+  BSRCES(bb), ESRCES(0),
 #ifdef falcON_MPI
   PSRCES(0),
 #endif
@@ -1898,16 +1723,16 @@ oct_tree::oct_tree(const sbodies*const&bb,         // I: body sources
   RCENTER = center(root());                        // set root center           
 }  
 //------------------------------------------------------------------------------
-// construction from sbodies with X_min/max known already                       
+// construction from bodies with X_min/max known already                        
 //------------------------------------------------------------------------------
-oct_tree::oct_tree(const sbodies*const&bb,         // I: body sources           
-		   vect          const&xi,         // I: x_min                  
-		   vect          const&xa,         // I: x_max                  
-		   int           const&nc,         // I: N_crit                 
-		   const vect   *const&x0,         // I: pre-determined center  
-		   int           const&dm,         // I: max tree depth         
-		   int           const&sp) :       // I: flag specifying bodies 
-  BSRCES(bb), ASRCES(0),
+oct_tree::oct_tree(const bodies*const&bb,          // I: body sources           
+		   vect         const&xi,          // I: x_min                  
+		   vect         const&xa,          // I: x_max                  
+		   int          const&nc,          // I: N_crit                 
+		   const vect  *const&x0,          // I: pre-determined center  
+		   int          const&dm,          // I: max tree depth         
+		   int          const&sp) :        // I: flag specifying bodies 
+  BSRCES(bb), ESRCES(0),
 #ifdef falcON_MPI
   PSRCES(0),
 #endif
@@ -1942,7 +1767,7 @@ oct_tree::oct_tree(const pbodies*const&bb,         // I: body sources
 		   const vect   *const&x0,         // I: pre-determined center  
 		   int           const&dm,         // I: max tree depth         
 		   int           const&sp) :       // I: flag specifying bodies 
-  BSRCES(0), ASRCES(0), PSRCES(bb),
+  BSRCES(0), ESRCES(0), PSRCES(bb),
   SPFLAG(sp), LEAFS(0), CELLS(0), ALLOC(0), NALLOC(0u),
   STATE(fresh), USAGE(un_used)
 {
@@ -1975,7 +1800,7 @@ oct_tree::oct_tree(const pbodies*const&bb,         // I: body sources
 		   const vect   *const&x0,         // I: pre-determined center  
 		   int           const&dm,         // I: max tree depth         
 		   int           const&sp) :       // I: flag specifying bodies 
-  BSRCES(0), ASRCES(0), PSRCES(bb),
+  BSRCES(0), ESRCES(0), PSRCES(bb),
   SPFLAG(sp), LEAFS(0), CELLS(0), ALLOC(0), NALLOC(0u),
   STATE(fresh), USAGE(un_used)
 {
@@ -2000,14 +1825,14 @@ oct_tree::oct_tree(const pbodies*const&bb,         // I: body sources
 }
 #endif
 //------------------------------------------------------------------------------
-// construction from abodies                                                    
+// construction from ebodies                                                    
 //------------------------------------------------------------------------------
-oct_tree::oct_tree(const abodies*const&ba,         // I: body arrays            
+oct_tree::oct_tree(const ebodies*const&bb,         // I: body arrays            
 		   int           const&nc,         //[I: N_crit]                
 		   const vect   *const&x0,         // I: pre-determined center  
 		   int           const&dm,         //[I: max tree depth]        
 		   int           const&sp) :       //[I: flag specifying bodies]
-  BSRCES(0), ASRCES(ba),
+  BSRCES(0), ESRCES(bb),
 #ifdef falcON_MPI
   PSRCES(0),
 #endif
@@ -2015,7 +1840,7 @@ oct_tree::oct_tree(const abodies*const&ba,         // I: body arrays
   STATE(fresh), USAGE(un_used)
 {
   SET_I
-  tree_builder TB(this,x0,nc,dm,ba,sp);            // initiliaze tree_builder   
+  tree_builder TB(this,x0,nc,dm,bb,sp);            // initiliaze tree_builder   
   SET_T(" time for tree_builder::tree_builder(): ");
   if(TB.N_dots()) {                                // IF(dots in tree)          
     TB.build();                                    //   build box-dot tree      
@@ -2033,16 +1858,16 @@ oct_tree::oct_tree(const abodies*const&ba,         // I: body arrays
   RCENTER = center(root());                        // set root center           
 }
 //------------------------------------------------------------------------------
-// construction from abodies  with X_min/max known already                      
+// construction from ebodies  with X_min/max known already                      
 //------------------------------------------------------------------------------
-oct_tree::oct_tree(const abodies*const&ba,         // I: body arrays            
+oct_tree::oct_tree(const ebodies*const&bb,         // I: body arrays            
 		   vect          const&xi,         // I: x_min                  
 		   vect          const&xa,         // I: x_max                  
 		   int           const&nc,         //[I: N_crit]                
 		   const vect   *const&x0,         // I: pre-determined center  
 		   int           const&dm,         //[I: max tree depth]        
 		   int           const&sp) :       //[I: flag specifying bodies]
-  BSRCES(0), ASRCES(ba),
+  BSRCES(0), ESRCES(bb),
 #ifdef falcON_MPI
   PSRCES(0),
 #endif
@@ -2050,7 +1875,7 @@ oct_tree::oct_tree(const abodies*const&ba,         // I: body arrays
   STATE(fresh), USAGE(un_used)
 {
   SET_I
-  tree_builder TB(this,x0,nc,dm,ba,xi,xa,sp);      // initiliaze tree_builder   
+  tree_builder TB(this,x0,nc,dm,bb,xi,xa,sp);      // initiliaze tree_builder   
   SET_T(" time for tree_builder::tree_builder(): ");
   if(TB.N_dots()) {                                // IF(dots in tree)          
     TB.build();                                    //   build box-dot tree      
@@ -2073,8 +1898,8 @@ oct_tree::oct_tree(const abodies*const&ba,         // I: body arrays
 oct_tree::oct_tree(const oct_tree*const&par,       // I: parent tree            
 		   int            const&F,         // I: flag specif'ing subtree
 		   int            const&Ncrit) :   //[I: N_crit]                
-  BSRCES(par->my_sbodies()),                       // copy parent's sbodies     
-  ASRCES(par->my_abodies()),                       // copy parent's abodies     
+  BSRCES(par->my_bodies()),                        // copy parent's  bodies     
+  ESRCES(par->my_ebodies()),                       // copy parent's ebodies     
 #ifdef falcON_MPI
   PSRCES(par->my_pbodies()),                       // copy parent's pbodies     
 #endif
@@ -2100,7 +1925,7 @@ oct_tree::oct_tree(const oct_tree*const&par,       // I: parent tree
 //------------------------------------------------------------------------------
 oct_tree::oct_tree(const oct_tree* const&par,
 		   bool(*prune)(const basic_cell*const&)) :
-  BSRCES(0), ASRCES(0),
+  BSRCES(0), ESRCES(0),
 #ifdef falcON_MPI
   PSRCES(0),
 #endif
@@ -2191,9 +2016,9 @@ void oct_tree::reuse() {
     for(register leaf_iterator Li=begin_leafs(); Li!=end_leafs(); ++Li)
       Li->copy_from_bodies_pos(PSRCES);
 #endif
-  else if(ASRCES)
+  else if(ESRCES)
     for(register leaf_iterator Li=begin_leafs(); Li!=end_leafs(); ++Li)
-      Li->copy_from_bodies_pos(ASRCES);
+      Li->copy_from_bodies_pos(ESRCES);
   else
     error("oct_tree::reuse(): without bodies");
   STATE = state((STATE & origins) | re_used);      // reset state               

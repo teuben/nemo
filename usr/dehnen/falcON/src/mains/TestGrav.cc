@@ -103,7 +103,7 @@ void nbdy::main(int argc, char* argv[])
       " EPS                 : softening length\n"
 #endif
       " Ngrow(default   0)  : # additional grow()s\n"
-      " theta(default "<<std::setw(3)<<Default::theta
+      " theta(default "<<std::setw(4)<<Default::theta
 	<<") : accuracy parameter\n"
       " K    (default   "<<falcON_KERNEL_TEXT<<")  : P_n softening kernel\n"
 #ifdef falcON_INDI
@@ -146,7 +146,7 @@ void nbdy::main(int argc, char* argv[])
   kern_type         K   = Default::kernel;
   long              Seed;
   unsigned          N, Nact, split=1, Ngrow=0;
-  int               Ncrit=Default::Ncrit, Ncut=0, 
+  int               Ncrit=Default::Ncrit, 
                     DIR[4]={Default::direct[0],Default::direct[1],
 			    Default::direct[2],Default::direct[3]};
   real              EPS, theta=Default::theta, MTOT=one;
@@ -186,12 +186,10 @@ void nbdy::main(int argc, char* argv[])
   if(argc>p) DIR[3] = atoi(argv[p++]);
   if(argc>p) rmax   = atoi(argv[p++]);
   if(argc>p) dump   = atoi(argv[p++]);
-  sbodies *BODIES    = 
+  bodies __BODIES(N), *BODIES=&__BODIES;
 #ifdef falcON_INDI
-    indiv_soft?
-    new sbodies(N,sbodies::DEFBITS() | io::e) :
+  if(indiv_soft) BODIES->add_fields(io::e);
 #endif
-    new sbodies(N);
   EPS  = nbdy::abs(EPS);
   vect  *A = new vect[N];
   real *RH = new real[N];
@@ -207,7 +205,7 @@ void nbdy::main(int argc, char* argv[])
 #endif
   register double sph,cph,rho=0.;
   register double mi = MTOT/real(N);
-  LoopBodies(sbodies,BODIES,Bi) {
+  LoopBodies(bodies,BODIES,Bi) {
     do {
       switch(MOD) {
 #if falcON_NDIM == 3
@@ -257,14 +255,14 @@ void nbdy::main(int argc, char* argv[])
 #else
     cth = (MOD==3) ? zero : 2*drand48()-1;
     R   = r*sqrt(1.-cth*cth);
-    Bi.pos(2) = r * cth;
+    Bi.pos()[2]   = r * cth;
 #endif
-    phi       = TPi*drand48();
-    sph       = sin(phi);
-    cph       = cos(phi);
-    Bi.pos(0) = R * sph;
-    Bi.pos(1) = R * cph;
-    Bi.mass() = mi;
+    phi           = TPi*drand48();
+    sph           = sin(phi);
+    cph           = cos(phi);
+    Bi.pos()[0]   = R * sph;
+    Bi.pos()[1]   = R * cph;
+    Bi.mass()     = mi;
     Bi.flag_as_active();
     A [index(Bi)] = MTOT * fr * pos(Bi);   // exact force
     RH[index(Bi)] = rh;                    // exact density
@@ -305,9 +303,9 @@ void nbdy::main(int argc, char* argv[])
       <<(cpu1 - cpu0)/real(CLOCKS_PER_SEC)<<endl;
   cpu0 = cpu1;
 #ifdef falcON_INDI
-  falcON falcon(BODIES,EPS,theta,K,indiv_soft,MAC);
+  falcON falcon(BODIES,EPS,theta,K,indiv_soft,one,MAC,DIR);
 #else
-  falcON falcon(BODIES,EPS,theta,K,MAC,DIR);
+  falcON falcon(BODIES,EPS,theta,K,one,MAC,DIR);
 #endif
   for(register unsigned ig=0; ig<=Ngrow; ++ig) {
 #if (0)
@@ -344,7 +342,7 @@ void nbdy::main(int argc, char* argv[])
   register real ase=0.,damx=0.,dacc;
   register vect SF=zero;
   register bool pot_pos=0;
-  LoopBodies(sbodies,BODIES,Bi) if(is_active(Bi)) {
+  LoopBodies(bodies,BODIES,Bi) if(is_active(Bi)) {
     dacc = norm(A[index(Bi)] - acc(Bi));
     ase += dacc;
     damx = max(damx,dacc);
@@ -396,7 +394,7 @@ void nbdy::main(int argc, char* argv[])
     std::ofstream FILE("test.in");
     if(FILE.is_open()) {
       FILE<<setfill(' ')<<N<<' '<<Nsoft<<"\n";
-      LoopBodies(sbodies,BODIES,Bi)
+      LoopBodies(bodies,BODIES,Bi)
 	FILE
 	  <<setw(13)<<setprecision(8)<<Bi.pos()[0]<<" "
 	  <<setw(13)<<setprecision(8)<<Bi.pos()[1]<<" "
@@ -413,7 +411,7 @@ void nbdy::main(int argc, char* argv[])
     std::ofstream FILE("test.gl");
     if(FILE.is_open()) {
       FILE<<setfill(' ')<<N<<' '<<EPS<<"\n";
-      LoopBodies(sbodies,BODIES,Bi)
+      LoopBodies(bodies,BODIES,Bi)
 	FILE
 	  <<setw(13)<<setprecision(8)<<Bi.pos()[0]<<" "
 	  <<setw(13)<<setprecision(8)<<Bi.pos()[1]<<" "
@@ -428,6 +426,5 @@ void nbdy::main(int argc, char* argv[])
   }
 #endif
 #endif
-  delete BODIES;
 
 }

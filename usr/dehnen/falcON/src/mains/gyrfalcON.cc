@@ -88,20 +88,19 @@
 // v 1.9.2   27/02/2004  WD use nemo::error() instead of nbdy::error()         |
 // v 2.0     11/03/2004  WD elimated yanc.h & yanc.cc                          |
 // v 2.0.1   31/03/2004  WD log format changed slightly; change in ext pot     |
+// v 2.1     30/04/2004  WD happy icc 8.0; new body.h;                         |
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "2.0.1"
-#define falcON_VERSION_D "31-mar-2004 Walter Dehnen                          "
+#define falcON_VERSION   "2.1"
+#define falcON_VERSION_D "30-apr-2004 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need "NEMO" to compile gyrfalcON
 #endif
 #include <nbdy.h>                                  // the N-body code           
-#include <pext.h>                                  // external potential        
 #include <iostream>                                // C++ I/O                   
 #include <fstream>                                 // C++ file I/O              
 #include <main.h>                                  // main & NEMO stuff         
 
-using namespace nbdy;
 //------------------------------------------------------------------------------
 string defv[] = {
   "in=???\n           input file                                         ",
@@ -203,8 +202,8 @@ void nbdy::main()
     Nlev    = getiparam("Nlev"),                      // # time step levels     
     logstep = getiparam("logstep");                   // # blocksteps/logoutput 
   const io
-    wr0(getparam("give")),                            // what to output 0?      
-    wr1(getparam("give2"));                           // what to output 1?      
+    wr0 = getioparam("give"),                         // what to output 0?      
+    wr1 = getioparam("give2");                        // what to output 1?      
   const nemo_grav*pex = hasvalue("potname")?          // IF(potname given) THEN 
     new nemo_grav(getparam  ("potname"),              //   initialize external  
 		  getparam_z("potpars"),              //   gravity              

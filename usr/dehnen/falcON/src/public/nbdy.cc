@@ -31,7 +31,7 @@ using namespace nbdy;
 // useful macro looping bodies                                                //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
-#define LoopMyBodies       LoopBodies(sbodies,BODIES,Bi)
+#define LoopMyBodies       LoopBodies(bodies,BODIES,Bi)
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
 // class nbdy::basic_nbody                                                    //
@@ -138,9 +138,9 @@ void basic_nbody::reset_softening(
 }
 //------------------------------------------------------------------------------
 inline
-basic_nbody::basic_nbody(const sbodies*const&b,    // I: bodies                 
+basic_nbody::basic_nbody(const bodies *const&b,    // I: bodies                 
 			 real          const&e,    // I: eps/eps_max            
-			 real          const&ti,   // I: t_initial              
+			 double        const&ti,   // I: t_initial              
 			 real          const&th,   // I: tolerance parameter    
 			 int           const&nc,   // I: N_crit                 
 			 const vect*   const&x0,   // I: pre-determined center  
@@ -377,9 +377,9 @@ inline void basic_nbody::stats_line_back(ostream& to) const
 // class nbdy::LeapFrogCode                                                   //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
-LeapFrogCode::LeapFrogCode(const sbodies*const&b,  // I: bodies                 
+LeapFrogCode::LeapFrogCode(const bodies *const&b,  // I: bodies                 
 			   real          const&e,  // I: eps/eps_max            
-			   real          const&ti, // I: t_initial              
+			   double        const&ti, // I: t_initial              
 			   int           const&h0, // I: h0                     
 			   int           const&hg, // I: h_grow                 
 			   real          const&th, // I: tolerance parameter    
@@ -406,7 +406,7 @@ LeapFrogCode::LeapFrogCode(const sbodies*const&b,  // I: bodies
 #endif
 #endif
 		      p,nd ),
-  LeapFrog<sbodies> ( h0, ti, (1<<hg)-1 )
+  LeapFrog<bodies> ( h0, ti, (1<<hg)-1 )
 {
   register clock_t  cpu = clock();                 // cpu time                  
   reset_cpus();                                    // reset CPU time counters   
@@ -469,7 +469,7 @@ void BlockStepCode::reset_stepping(real const&fa,
 				   real const&fc,
 				   real const&fe)
 {
-  GravBlockStep<sbodies>::reset_scheme(fa,fp,fc,fe,using_extpot());
+  GravBlockStep<bodies>::reset_scheme(fa,fp,fc,fe,using_extpot());
 }
 //------------------------------------------------------------------------------
 #define ForAll       LoopMyBodies
@@ -532,7 +532,7 @@ void BlockStepCode::prepare(int const&h0,          // I: h0
   report REPORT("BlockStepCode::prepare(%d,%d)",h0,nl);
   register clock_t cpu = clock();                  // local CPU counter         
   reset_cpus();                                    // reset CPU counters        
-  GravBlockStep<sbodies>::reset_steps(h0,nl,TINI); // set time steps            
+  GravBlockStep<bodies>::reset_steps(h0,nl,TINI);  // set time steps            
   LoopMyBodies Bi.flag_as_active();                // flag every body as active 
   set_gravity(true,                                // set eps & get acc         
 	      true                                 // for all leafs             
@@ -542,7 +542,7 @@ void BlockStepCode::prepare(int const&h0,          // I: h0
 	      );
   diagnose();                                      // energy et al. at t=t0     
   DIAG = true;                                     // diagnose up-to-date       
-  GravBlockStep<sbodies>::reset_counts();          // reset counts              
+  GravBlockStep<bodies>::reset_counts();           // reset counts              
   LoopMyBodies                                     // loop bodies               
     assign_level(Bi);                              //   assign step level       
   record_cpu(cpu,CPU_STEP);                        // record total CPU          
@@ -550,9 +550,9 @@ void BlockStepCode::prepare(int const&h0,          // I: h0
 }
 //------------------------------------------------------------------------------
 BlockStepCode::
-BlockStepCode(const sbodies*const&b,               // I: bodies                 
+BlockStepCode(const bodies *const&b,               // I: bodies                 
 	      real          const&e,               // I: eps/eps_max            
-	      real          const&ti,              // I: t_initial              
+	      double        const&ti,              // I: t_initial              
 	      int           const&h0,              // I: h0                     
 	      int           const&nl,              // I: # levels               
 	      real          const&fa,              // I: f_a: for stepping      
@@ -584,11 +584,11 @@ BlockStepCode(const sbodies*const&b,               // I: bodies
 #endif
 #endif
 			  p,nd),
-  GravBlockStep<sbodies> (),
+  GravBlockStep<bodies>  (),
   LGROW                  ((nl <= hg)? 1 : nl-hg),
   W                      (max(5, 1+int(log10(double(b->N_bodies())))))
 {
-  GravBlockStep<sbodies>::reset_scheme(fa,fp,fc,fe,using_extpot());
+  GravBlockStep<bodies>::reset_scheme(fa,fp,fc,fe,using_extpot());
   if(!BODIES->has(io::l))
     falcON_ErrorF("bodies::has(io::l) == false","BlockStepCode");
   prepare(h0,nl);
@@ -599,7 +599,7 @@ void BlockStepCode::stats(ostream& to) const
   stats_front(to); to<<' ';
   if(highest_level()) {
     ios::fmtflags old = to.setf(ios::right);
-    GravBlockStep<sbodies>::short_stats(to,W);
+    GravBlockStep<bodies>::short_stats(to,W);
     to.flags(old);
   }
   stats_back (to); to << endl;
@@ -690,13 +690,13 @@ NbodyCode::NbodyCode(const char         *file,     //   I: input file
   INPUT  ( io::mxv | read_more |
 	   (soften==basic_nbody::individual_fixed? io::e : io::o) ),
   NEMO   ( ND>0? new nemo_out[ND] : 0 ),
-  BODIES ( new sbodies(0, SUPPORT) ),
+  BODIES ( new bodies(0, SUPPORT) ),
   IFILE  ( file ),
   NBODY  ( 0 )
 {
   nemo_in NemoIn(IFILE.c_str());                   // open nemo input           
-  io   got;                                        // what did we get?          
-  real tini, cini;                                 // initial time, CPU time    
+  io      got;                                     // what did we get?          
+  double  tini, cini;                              // initial time, CPU time    
   if(resume) {                                     // IF (resuming old sim)     
     do {                                           //   DO: read particles      
       NemoIn.open_set(nemo_io::snap);              //     open nemo snapshot    
@@ -793,7 +793,7 @@ void NbodyCode::write_nemo(io   const&w,           //[I: what to write out]
     error("NbodyCode::write_nemo(): nemo device %d not open\n",d);
   register uint        i,j;
   OUT->open_set(nemo_io::snap);                    // OPEN a new nemo snapshot  
-  real t_now = time();
+  double t_now = time();
   BODIES->write_nemo_particles(*OUT, &t_now,       //   write out particles     
 #ifdef falcON_INDI
 			       (NBODY->use_individual_eps() ? io::e : io::o) |

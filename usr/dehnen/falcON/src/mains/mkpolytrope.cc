@@ -39,7 +39,6 @@
 #include <main.h>                                  // main & NEMO stuff         
 #include <fstream>                                 // C++ file I/O              
 #include <iomanip>                                 // C++ I/O formatting        
-using namespace nbdy;
 ////////////////////////////////////////////////////////////////////////////////
 string defv[] = {
   "out=???\n          output file                                        ",
@@ -81,7 +80,7 @@ void nbdy::main()
   const int N    = getiparam("nbody");
   const io write(getparam("write"));
   const io data(io::mxvf | io::U  | io::H | io::N);
-  sbodies BB(N, data, N);
+  bodies   BB(N, data, N);
   PackDenseBodies(&BB);
   //----------------------------------------------------------------------------
   // 4. set body masses, re-scale positions, set rho, Uin and sizes             
@@ -105,7 +104,7 @@ void nbdy::main()
   const    real   hmax = getdparam("h_max");
   const    double a1   = a+1;
   register double M    = 0.;
-  LoopBodies(sbodies,&BB,Bi) {
+  LoopBodies(bodies,&BB,Bi) {
     const double x  = sqrt(norm(pos(Bi)));
     const double xc = cube(x);
     const double mu = a1 - twice(a*xc);
@@ -121,7 +120,7 @@ void nbdy::main()
     Bi.vel()  = zero;
   }
   M = mass/M;
-  LoopBodies(sbodies,&BB,Bi) {
+  LoopBodies(bodies,&BB,Bi) {
     Bi.mass() *= M;
     if(size(Bi) > hmax) Bi.size() = hmax;
   }
@@ -135,6 +134,6 @@ void nbdy::main()
   // 6. output of snapshot                                                      
   //----------------------------------------------------------------------------
   nemo_out out(getparam("out"));
-  real time = getdparam("time");
+  double time = getdparam("time");
   BB.write_nemo_snapshot(out,&time,write);
 }

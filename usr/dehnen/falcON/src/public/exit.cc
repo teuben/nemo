@@ -29,7 +29,9 @@ extern "C" {
 }
 #endif
 
-static char main_name[200] = {0};
+namespace {
+  char main_name[200] = {0};
+}
 //------------------------------------------------------------------------------
 void nbdy::set_name(const char* name)
 {
