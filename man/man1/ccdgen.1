@@ -79,6 +79,7 @@ gauss	A.exp(-r^2/(2h^2))	A,h
 bar	A.exp(-r/h)	A,h,e,b   (e=1-minor/major   b=bar position angle w.r.t. disk)
 noise	gaussian(m,s)	mean,sigma
 spiral  A.exp(-r/h)	A,h,k,p,r0,p0
+ferrers A.(1-r^2)^p	A,h,e,b,p (h=size of bar, p=power to 1-r^2)
 .fi 
 .SH EXAMPLES
 Here's how to make a barred galaxy:
