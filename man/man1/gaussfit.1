@@ -1,0 +1,242 @@
+.TH GAUSSFIT 1NEMO "19 July 1994"
+.SH NAME
+gaussfit \- Least Squares and Robust Estimation
+.SH SYNOPSIS
+\fBgaussfit\fP [parameter=value]
+.SH DESCRIPTION
+\fBgaussfit\fP is a least squares and robust estimator of an
+arbitrary parameterized model to observed data. This program
+is a slight NEMO adapation of the University of Texas program
+\fIgaussfit\fP. 
+.PP
+This version of 
+\fBgaussfit\fP can be run in two modes. In the first mode 
+an existing \fImodel\fP and \fIenvironment\fP file are given,
+which contain all the initial conditions to run the program.
+In this mode the program runs exactly as in the original
+\fIgaussfit\fP program. 
+In the second mode the \fIenvironment\fP file is either
+created or modified from the remaining 
+\fIenvironment\fP variables based 
+program keywords (in NEMO style). This
+is triggered by using any (but the correct combination) 
+of those remaining parameters
+This approach will not work in all
+gaussfit application, but are fine for small problems with a 
+simple set of parameters.
+.PP
+This manual page merely serves as a reminder for the somewhat
+more efficient NEMO mode to run large amounts of fits, but it
+is highly recommended to read the \fIGaussFit User Guide\fP (see below).
+.PP
+The datafiles in \fIgaussfit\fP must be specially formatted
+(MIDAS-like) table format. 
+Two useful tools that come with the \fIgaussfit\fP distribution are
+\fImkgf(1gaussfit)\fP and \fIcjoin(1gaussfit)\fP.  
+\fImkgf\fP will add a gaussfit header 
+interactively to files that have data in columnar format.  \fIcjoin\fP will
+strip off leading lines, and extract columns from different datafiles and
+put them into a single file. See also \fItabs(1NEMO)\fP for converting
+ascii tables to MIDAS format within NEMO.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBmodel=\fP\fImodel_file\fP
+The input \fImodel\fP filename, which contains the mathematical
+description of the model (see EXAMPLE below) to be used to fit the data,
+in a C-like programming language. Within NEMO the model files can
+also be located anywhere in the \fBGAUSSPATH\fP (unix) environment
+variable. No default.
+.TP
+\fBenv=\fP\fIenv_file\fP
+The input \fIenvironment\fP filename. Initial parameters and relevant
+datafiles are described in this file, wich is a list 
+of FITS-header formatted \fIkeyword=value\fP pairs. This environment file
+can either be created from scratch (see remaining paramters below),
+or an existing one is used. 
+If left blank, a name with
+an extension of \fImodel_file\fP is replaced with '\fBenv\fP'.
+.TP
+\fBdata=\fP\fIdata1,data2,...\fP
+Name of the datafile(s) in \fIMIDAS\fP format. Up to 99 datafiles
+can be used. See \fItabs(1NEMO)\fP how to format file this way. 
+No default.
+.TP
+\fBparams=\fP\fIp1,v1,p2,v2,...\fP
+Pairs of parameter names and values, separated by a comma. 
+If this keyword is used
+to update an environment file, you only need to specify the pairs
+that will be different, if it's the first time around, you need to supply
+initial values for all of the \fBparameters\fP in the \fImodel\fP file.
+This parameter list translates into a parameter file, fed to \fIgaussfit\fP,
+whose name is derived by replacing the \fImodel_file\fP extension with
+'\fBpar\fP'. This file, in MIDAS-like table format, contains final fit.
+.TP
+\fBfair=\fP
+The \fIasymptotic relative efficiency\fP (ARE) used by this 
+Huber-type robust estimation method.
+Select only one value for any of
+the following \fBfair, huber, tukey, minsum\fP keywords. Their value should
+be in the range 0.8 - 0.95, the authors suggest 0.9 or 0.95. 
+Note that \fBfair\fP or \fBhuber\fP ~ \fB0.8\fP approaches
+the \fIminsum\fP method. If none of these four were selected, 
+the \fBstandard\fP least squares is used.
+.TP
+\fBhuber=\fP
+see above. 
+.TP
+\fBtukey=\fP
+see above. 
+.TP
+\fBminsum=\fP
+Median type estimator, using Barrodale & Roberts algorithm. Probably
+not good when more than one observation per equation of condition.
+Set to 0 or 1. See also above.
+.TP
+\fBorm=\fP
+Use orthogonal regression M-estimate. It measures the metric for 
+goodness-of-fit orthogonally to the fitted function. 
+By default true, use this to turn it off. Although recommended 
+if \fBfair\fP or \fBtukey\fP is used, it *must* be used for
+\fBhuber\fP.
+.TP
+\fBlambda=\fP
+Marquardt-Levenberg. 
+To activate set to a non-zero value. Typically 0.0001.
+.TP
+\fBfactor=\fP
+Marquardt-Levenberg factor by which \fBlambda\fP is decreased when a
+new chi-squared is less than the old.
+To activate set to a non-zero value. Typically 0.1.
+.TP
+\fBirls=\fP
+Two methods for iteration are provided. Newton's method, and
+the method of iteratively reweighted least squares (IRLS). 
+Set this parameter to true if you want to use IRLS since the
+default is Newton. Note: variances cannot be computed in IRLS mode.
+See also \fBdouble=\fP below.
+.TP
+\fBdouble=\fP
+Two styles of iteration are provided. Single or double iteration.
+.TP
+\fBiters=\fP
+Maximum number of iterations allowed. Default, if not used, will be 10.
+.TP
+\fBtol=\fP
+Relative tolerance.
+.TP
+\fBtriang=\fP
+Set this to true if you want to attempt to use triangularize the
+matrix of conditions (keeps the size of matrix down). 
+.TP
+\fBprmat=\fP
+Set this to true if you want to see intermediate matrices.
+.TP
+\fBprvar=\fP
+Set this to true if you want to see the correlation matrix and
+standard deviations (sigma's) of the parameters. Files 
+\fIresults_file\fP\fB.corr\fP and
+\fIresults_file\fP\fB.cov\fP will be created. Co-variances of the
+parameters are listed in the parameter file.
+.TP
+\fBresults=\fP\fIresults_file\fP
+Output logfile for results. If not given, the name
+is derived from the model by replacing it's extension with \fBlog\fP.
+.TP
+\fBftn=\fP
+Set this to turn on debugging output to a file \fBFTN\fP, which contains
+a dump of the function interpreter. By default it's off.
+.TP
+\fBscale=\fP
+Scale paramter that gaussfit computes if a robust estimation
+was employed. Exact meaning to be published. Placed at output in the
+environment file.
+.TP
+\fBsigma=\fP
+Variance of unit weight of the solution. Placed at output in the
+environment file.
+.TP
+\fBreset=t|f\fP
+If set, all input files will be reset, and overwriting will be allowed.
+This applies to the parameter and environment file. Only useful in case
+the program in run in NEMO mode. Default: \fBf\fP.
+.TP
+\fBreport=t|f\fP
+If set, at the end of the run, the parameter file is read and the
+parameters and their errors (if available) are reported, one at a line.
+.SH MODEL FILE
+Here is a sample \fImodel\fP file for the linear least squares problem:
+(\fIy=a+bx\fP, with no errors in \fIx\fP):
+.nf
+
+parameter a, b;
+observation y;
+data x;
+
+main()
+{
+        while(import())
+                export(y - (a + b*x));
+}
+
+.fi
+.SH DATA
+Input datafiles are in MIDAS format: columns separated by a TAB,
+the first row containing the names of the columns, the second
+row their types, and subsequent rows form the data.
+.PP
+The names of columns must correspond to the \fBobservation\fP and 
+\fBdata\fP variables in the model file, and variances and co-variances
+can be given in a column \fIx_x\fP and \fIx_y\fP (or \fIy_x\fP) resp.
+.PP
+An example how to create a MIDAS table from an ascii table which
+contains 4 columns:
+.nf
+    % tabs in=test.table out=test.tab col=x,y,x_x,y_y
+.fi
+.SH DEFICIENCES
+The NEMO approach cannot easily handle cases where the parameters
+are indexed.
+.PP
+Fixing parameters can only be done by editing the model file, and
+either changing a \fBparameter\fP into a \fBconstant\fP (this keeps
+the paramter in the parameter file, or \fBparams=\fP keyword), or
+adding constraints to the model file. Examples are in the manual.
+.SH SEE ALSO
+linreg(1NEMO), tablsqfit(1NEMO), tabs(1NEMO), mkgf(1gaussfit), cjoin(1gaussfit)
+.PP
+\fIGaussFit: A System of Least Squares and Robust Estimation\fP, USERS MANUAL,
+by William H. Jeffreys, Micheal J. Fitzpatrick., Barbara E. McArthur,
+and James E. McCartney. University of Texas at Austin.
+.fi
+.SH FILES
+.nf
+$NEMO/usr/tools/gaussfit/ 	V3.04 release
+$NEMODAT/gaussfit         	repository of some example model files
+ftp://clyde.as.utexas.edu/pub/gaussfit/  	official (anonymous ftp) release
+.fi
+.SH ENVIRONMENT
+The following UNIX environment variables are used by \fIgaussfit\fP:
+.ta +1i
+.nf
+
+\fBGAUSSFIT\fP  	colon separated list of directories searched for model files
+
+.fi
+.SH AUTHOR
+.nf
+Barbara McArthur (mca@astro.as.utexas.edu0)
+        Source Code Copyright (C) 1987 by William H. Jefferys,
+        Michael J. Fitzpatrick and Barbara E. McArthur
+        All Rights Reserved.
+Peter Teuben (this NEMO interface)
+.fi
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+11-aug-92	first nemo version	pjt
+xx-apr-94	v3.04 new improved compiler, wobble fix, more env,... 	mca
+14-Jul-94	(nemo) added second mode option to run gaussfit  	pjt
+26-may-96	installed the 3.53 version (sep 95)	pjt
+.fi
