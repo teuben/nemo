@@ -99,6 +99,10 @@ tabspline: tabspline.c
 	$(CC) $(CFLAGS) -o tabspline tabspline.c \
 		$(NEMO_LIBS) $(EL) -lm
 
+tabpoly: tabpoly.c
+	$(CC) $(CFLAGS) -o tabpoly tabpoly.c \
+		$(NEMO_LIBS) $(EL) -lm
+
 gettab: gettab.c
 	$(CC) -DTOOLBOX $(CFLAGS) -o gettab gettab.c \
 		$(NEMO_LIBS) $(EL) -lm
