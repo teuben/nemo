@@ -34,12 +34,12 @@ nbody0.in:
 
 nbody0:	nbody0.in
 	@echo Running $@
-	nbody0 nbody0.in nbody0.out tcrit=$(TCRIT) > nbody0.log
+	nbody0 nbody0.in nbody0.out tcrit=$(TCRIT) > nbody0.log 2>&1
 	snaptrim nbody0.out - times=$(TCRIT) | tsf -
 
 nbody00:	nbody0.in
 	@echo Running $@
-	nbody00 nbody0.in nbody00.out tcrit=$(TCRIT) > nbody00.log
+	nbody00 nbody0.in nbody00.out tcrit=$(TCRIT) > nbody00.log 2>&1
 	snaptrim nbody00.out - times=$(TCRIT) | tsf -
 
 nbody0_ff:	nbody0.in
