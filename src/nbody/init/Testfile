@@ -40,7 +40,7 @@ snapenter:
 	@echo Running snapprint
 	snapprint snapenter.out m,x,y,z,vx,vy,vz
 	@echo Comparing snapenter.out snapenter.cmp
-	tsf snapenter.out | rsf - snapenter.cmp ; cmp snapenter.cmp snapenter.out
+	tsf snapenter.out octal=t | rsf - snapenter.cmp ; cmp snapenter.cmp snapenter.out
 
 mkplummer:
 	@echo Running $@
