@@ -14,6 +14,7 @@
  */
 
 #include <stdinc.h>
+#include <errno.h>
 
 #include "exception.h"
 
@@ -32,6 +33,7 @@ void *allocate(int nb)
     if (nb==0) nb++;
     mem = (void *) calloc((size_t)nb, 1);
     if (mem == NULL)  {
+	errno = ENOMEM;
 	RaiseException (errno);
 	// error("allocate: not enough memory for %d bytes", nb);
     }

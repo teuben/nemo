@@ -50,6 +50,7 @@ PushBlock (BlockRes* blkResources) // function will do more if full scale
     return blkResources;
 }
 
+
 static BlockRes*
 GetCurrentBlock (void)
 {
@@ -64,6 +65,7 @@ RegisterBlock (void)
     if (!InBlock()) {
 	firstRes->headMem =  NULL; 
 	firstRes->headStream = NULL;
+	firstRes->next = NULL;
     }
 
     return PushBlock (firstRes);
@@ -76,12 +78,13 @@ RegisterBlock (void)
 int
 BeginBlock (void)
 {
-    sigjmp_buf	context;
     BlockRes*	blkResources = NULL;
 
     blkResources = RegisterBlock();
-    if (sigsetjmp (blkResources->context, 1) != 0)
+    assert (blkResources == firstRes);
+    if (sigsetjmp (blkResources->context, 1) != 0)  {
 	return -1;
+    }
 	
     return 0;
 }
@@ -146,7 +149,7 @@ UnwindBlock (BlockRes* blkResources)
 // open files and allocated memory are still required, so dont free them.
 // Instead transfer them to the next higher block if there is one. 
 // QQQ What do we do if there isnt one ? QQQ AAA There should always be one !
-void
+static void
 UnRegisterBlock (void)
 {
     BlockRes*		blkResources = NULL;
@@ -313,8 +316,6 @@ EndBlock (void)
 
 
 
-static void	ExceptionHandler (int signal);
-
 static int	nemoError	= 0;
 
 static sigset_t	sigMask;
@@ -323,7 +324,7 @@ static struct sigaction		oldAction;
 static struct sigaction		nemoErrorAction;
 
 
-void
+static void
 ExceptionHandler (int signal)
 {
     sigjmp_buf	context;
@@ -339,6 +340,7 @@ ExceptionHandler (int signal)
     assert (firstRes->next == NULL);
 
     siglongjmp (blkRes->context, -1);
+    assert (FALSE);		// shouldnt be here
 }
 
 
@@ -350,7 +352,7 @@ RaiseException (int errNumber)
 
     nemoError = errNumber;	// save system error; restore for processing
     				// by Nemo user
-    nemoErrorAction.sa_handler = ExceptionHandler;
+    nemoErrorAction.sa_handler = (sa_handler)ExceptionHandler;
     sigfillset (&sigMask);
     nemoErrorAction.sa_mask = sigMask;
     nemoErrorAction.sa_flags = SA_ONESHOT;
