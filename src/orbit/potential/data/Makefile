@@ -24,14 +24,14 @@ SRCFILES= Makefile \
 	bar83.c bulge1.c ccd.c cp80.c dehnen.c expdisk.c halo.c \
 	harmonic.c harmonicf.f hernquist.c hom.c hubble.c \
 	isochrone.c jaffe.c log.c mestel.c miyamoto.c null.c \
-	op73.c piner94.f plummer.c rh84.c rotcur.c teusan85.c triax.c \
+	op73.c piner94.f plummer.c rh84.c rotcur0.c rotcur.c teusan85.c triax.c \
 	twofixed.c plummer4.c vertdisk.c tidaldisk.c
 OBJFILES=\
 	athan92.so \
  	bar83.so bulge1.so ccd.so cp80.so expdisk.so halo.so \
 	harmonic.so harmonicf.so hernquist.so hom.so hubble.so \
 	isochrone.so jaffe.so log.so mestel.so miyamoto.so null.so \
-	op73.so piner94.so plummer.so rh84.so rotcur.so teusan85.so triax.so \
+	op73.so piner94.so plummer.so rh84.so rotcur0.so rotcur.so teusan85.so triax.so \
 	twofixed.so plummer4.so vertdisk.so tidaldisk.so
 
 BINFILES = 
