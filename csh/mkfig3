@@ -1,0 +1,13 @@
+#! /bin/csh -f
+#
+rm -f disk1 disk1.*
+mkdisk out=disk1 potname=plummer potpars=0,1,0.5 rmax=2 mass=1
+snaprotate in=disk1 out=disk1.r theta=60 order=x
+#snapplot in=disk1.r psize=0.1*vz
+snapgrid in=disk1.r out=mom0 moment=0 zvar=-vz evar=m
+snapgrid in=disk1.r out=mom1 moment=1 zvar=-vz evar=m
+
+ccdsmooth in=mom0 out=mom0s gauss=0.15
+ccdsmooth in=mom1 out=mom1s gauss=0.15
+ccdmath in=mom0s,mom1s out=disk1.vel fie=%2/%1
+
