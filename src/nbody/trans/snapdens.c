@@ -14,6 +14,7 @@
  *	1-apr-01 	    b   compiler warning
  *     23-may-01            c   cleanup code a bit (sleepy in mexico)
  *     12-apr-03        V1.5 add nn= keyword for atlas  PJT
+ *     29-dec-04            a   forgotten m2tot=0       PJT
  */
 
 #include <stdinc.h>
@@ -37,11 +38,13 @@ string defv[] = {
     "tfactor=-1.0\n               conversion factor v->r [virial=sqrt(2)]",
     "nn=f\n                       add NN index to the Key field?",
     "ndim=3\n                     3dim or 2dim densities?",
-    "VERSION=1.5\n		  12-apr-03 PJT",
+    "VERSION=1.5a\n		  29-dec-04 PJT",
     NULL,
 };
 
 string usage="density estimator using Kth-nearest neighbor";
+
+string cvsid="$Id$";
 
 
 #define FAC1   4.188790203	/* 3.pi/4 */
@@ -135,7 +138,7 @@ local void density(void)
     rdtot = 0.0;
     for (j=0; j<NDIM; j++)
         rmtot[j] = 0.0;
-    mtot = 0.0;
+    mtot = m2tot = 0.0;
     for (i=0, bi=btab; i<nbody; i++, bi++) {
         klen = 0;                   /* reset nearest neighbours list length */
         for (k=0; k<=kmax; k++) {          /* .. and index pointers etc */
