@@ -15,6 +15,7 @@
  *					   the official YAPP_PS 
  *                               5 dec 99  stub pl_contour
  *                              21 jan 00  stub pl_cursor
+ *				 5 apr 01  added plswap/plxscale/plyscale for completeness
  */
 
 #define VERSIONID "Version 3.2 5-may-95 PJT"
@@ -299,6 +300,27 @@ pltext(string msg, real x, real y, real hgt, real ang)
 pljust(int j)
 {
     just = (j < -1 ? -1 : (j > 1 ? 1 : j));
+}
+
+/*
+ * PLSWAP: does nothing.  
+ */
+
+plswap() { }
+
+/*
+ * PLXSCALE, PLYSCALE: transform from usr to plotting coordinates.
+ * At present, these do nothing (identity transformation).
+ */
+
+real plxscale(real x, real y)
+{
+    return x;
+}
+
+real plyscale(real x, real y)
+{
+    return y;
 }
 
 /*
