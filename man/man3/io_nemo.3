@@ -1,6 +1,7 @@
-.TH IO_NEMO 3NEMO "07 April 1997"
+.\" $Id$
+.TH IO_NEMO 3NEMO "19 July 2002"
 .SH NAME
-io_nemo \(em High level C function to read/save NEMO snapshot from a
+\fBio_nemo\fP \(em High level C function to read/save NEMO snapshot from a
 C program.
 .SH SYNOPSIS
 .nf
@@ -100,9 +101,9 @@ file, and saves the data in another NEMO file.
 #include <getparam.h>
 
 string defv[]=  
-{ "in=???\n       input snapshot",
-  "out=???\n      output snapshot",
-  "VERSION=1.0\n  16-April-97 jcl",
+{ "in=???\\n       input snapshot",
+  "out=???\\n      output snapshot",
+  "VERSION=1.0\\n  16-April-97 jcl",
   NULL
 };
 
@@ -122,8 +123,7 @@ nemo_main()
   out =  getparam("out");
 
   i = 1;
-  while (i!=0)
-    {   
+  while (i!=0) {
       /* read the NEMO snapshot */
       i=io_nemo(in,"float,n,t,x,v,m,read,info",
 		&nbody,&time,&pos,&vel,&mass);
@@ -133,7 +133,7 @@ nemo_main()
 	j=io_nemo(out,"float,n,t,x,v,m,h,save,info",
 		  &nbody,&time,&pos,&vel,&mass,in);
 
-    }
+  }
   /* close the output NEMO snapshot */
   io_nemo(out,"close");
 }
@@ -162,8 +162,8 @@ been read.
 .PP
 .SH COMPILATION
 To use the function \fIio_nemo()\fP from a C program you must
-link your program with the library \fIlibnemo.a\fP and
-\fIlibio_nemo.a\fP as described in the Makefile below.
+link your program with the library \fIlibnemo.a\fP 
+as described in the Makefile below.
 .PP
 .nf
 # ----------------------------------------
@@ -175,8 +175,8 @@ link your program with the library \fIlibnemo.a\fP and
 LIBS = -L$(NEMOLIB) -L/usr/local/lib
 
 io_nemo_test : io_nemo_test.o
-	$(FC) -o $@ io_nemo_test.o $(LIBS) \\
-                  -lio_nemo -lnemo -lm
+	$(CC) -o $@ io_nemo_test.o $(LIBS) \\
+                  -lnemo -lm
 
 # ----------------------------------------
 .fi
@@ -194,7 +194,8 @@ jcl@ouzo.cnrs-mrs.fr
 .SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
-15-Nov-96	 V1.0 : created                   JCL
-21-Feb-97	 V1.1 : memory optimisation       JCL
-16-Apr-97	 V1.11: manual created            JCL 
+15-Nov-96	 V1.0 : created                       JCL
+21-Feb-97	 V1.1 : memory optimisation           JCL
+16-Apr-97	 V1.11: manual created                JCL 
+19-Jul-02	 V1.2 : io_nemo and io_nemo_f unified JCL
 .fi

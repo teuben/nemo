@@ -1,6 +1,7 @@
-.TH IO_NEMO_F 3NEMO "07 April 1997"
+.\" $Id$
+.TH IO_NEMO_F 3NEMO "19 July 2002"
 .SH NAME
-io_nemo_f \(em High level C function to read/save NEMO snapshot from a
+\fBio_nemo_f\fP \(em High level C function to read/save NEMO snapshot from a
 FORTRAN program.
 .SH SYNOPSIS
 .nf
@@ -23,7 +24,7 @@ knowledge of how to program in NEMO.
 \fBfilename\fP=\fIcharacter variable\fP
 Input/Output file name of the \fINEMO\fP snapshot
 that you want to read/save. (this CHARACTER string must be a
-VARIABLE, not a constant !)
+VARIABLE, not a constant !).
 .TP
 \fBslen\fP=\fIinteger\fP
 Lenght of the file name. 
@@ -42,6 +43,8 @@ There are two kind of flags. (1) \fIInformation flags\fP allow to
 specify some actions during the I/O.
 (2) \fIVariables flags\fP allow to specify what you want to get/put
 from/into the NEMO file. The FLAGS list is described below.
+.TP
+\fBDO NOT FORGET TO ADD A \\0 at the end of Param variable\fP as you can see in the example below.
 .PP
 .SH (1) Information flags
 .TP 10
@@ -160,13 +163,13 @@ c get output snapshot filename
       do while (i.gt.0) 
 
 c read the snapshot up to the end of file ( i <= 0 )
-         i=io_nemo_f(infile,80,MAXBODY,"real8,3n,read,n,m,x,v,t,info",
+         i=io_nemo_f(infile,80,MAXBODY,"real8,3n,read,n,m,x,v,t,info\\0",
      $        nbody,mass,pos,vel,ts)
 
 c save the snapshot
          if (i.gt.0) then
             j=io_nemo_f(outfile,80,MAXBODY,"real8,3n,save,n,m,x,v,t, 
-     $           info",nbody,mass,pos,vel,ts)
+     $           info\\0",nbody,mass,pos,vel,ts)
          endif
       end do
 
@@ -178,7 +181,7 @@ C-----------------------------------------------------------
 a) Notice in the example above, that in the parameter list, 'n' matches
 \'nbody', 'm' matches 'mass', 'x' matches 'pos', 'v' matches 'vel', 't' matches 'ts'. 
 All the variables are in the same order that they have been
-declared in the \fIparam list\fP.
+declared in the \fIparam list\fP. Notice also that you must add \\0 at the end of Param variable "real8,3n,read,n,m,x,v,t,info\\0".
 
 b) You must declare all the two-dimensionnal arrays in the same way.
 That means all the dimensions must be the same for all the
@@ -195,8 +198,10 @@ been read.
 .PP
 .SH COMPILATION
 To use the function \fIio_nemo_f()\fP from a FORTRAN program you must
-link your program with the library \fIlibnemo.a\fP and
-\fIlibio_nemo_f.a\fP as described in the Makefile below.
+link your program with the library \fIlibnemo.a\fP as described 
+in the Makefile below. Notice that there are specials compilation flags 
+and linking options according to you use \fBg77 compiler\fP or
+\fBABSOFT fortran compiler\fP.
 .PP
 .nf
 # ----------------------------------------
@@ -205,11 +210,26 @@ link your program with the library \fIlibnemo.a\fP and
 # ----------------------------------------
 
 # path for NEMO Library and IO_NEMO_F library
-LIBS = -L$(NEMOLIB) -L/usr/local/lib
+LIBS = -L$(NEMOLIB)
 
-nemo_fortran : nemo_fortran.o
-	$(FC) -o $@ nemo_fortran.o $(LIBS) \\
-                  -lio_nemo_f -lnemo -lm
+
+# - - - - - - - - - - - - - - - - - - - -
+# compilation with g77 compiler
+# - - - - - - - - - - - - - - - - - - - -
+G77FLAGS = -fno-second-underscore -fwritable-strings
+
+nemo_fortran_g77 : nemo_fortran.F
+	g77 $(G77FLAGS)  -o $@ nemo_fortran.F $(LIBS) \\
+                  -lnemomaing77 -lnemo -lm
+
+# - - - - - - - - - - - - - - - - - - - -
+# compilation with absoft f77 compiler
+# - - - - - - - - - - - - - - - - - - - -
+ABFFLAGS = -B108 -K
+
+nemo_fortran_ABSOFT : nemo_fortran.F
+	$(ABSOFT)/bin/f77 $(ABFFLAGS)  -o $@ nemo_fortran.F $(LIBS) \\
+                   -lnemo -lm
 
 # ----------------------------------------
 .fi
@@ -228,11 +248,12 @@ jcl@ouzo.cnrs-mrs.fr
 .nf
 .ta +1.0i +4.0i
 15-Jun-95	 V1.0 : created                   JCL
-21-Jun-95	 V1.1 : bugs fixes                JCL
-12-Dec-95	 V1.2 : possibility to close file JCL
-11-Mar-96	 V1.3 : acceleration I/O added    JCL
-04-Apr-97	 V1.4 : generic real format       JCL
-07-Apr-97	 V1.41: manual created            JCL 
+21-Jun-95	 V1.10: bugs fixes                JCL
+12-Dec-95	 V1.11: possibility to close file JCL
+11-Mar-96	 V1.12: acceleration I/O added    JCL
+04-Apr-97	 V1.13: generic real format       JCL
+07-Apr-97	 V1.14: manual created            JCL 
+19-Jul-02	 V1.20: io_nemo/io_nemo_f unified JCL 
 .fi
 
 
