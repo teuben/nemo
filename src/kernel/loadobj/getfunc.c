@@ -7,11 +7,13 @@
  *	6-jun-96   fixed solaris search path problem	pjt   (D-day)
  *     16-sep-00   changed from TESTBED to TOOLBOX      pjt
  *      1-apr-01   new '.so' based for NEMO V3		pjt
+ *     20-jun-01   fix header				pjt
  */
 
 
 #include <stdinc.h>
 #include <loadobj.h>
+#include <getparam.h>
 
 extern string *burststring(string, string);
 
@@ -130,7 +132,7 @@ string defv[] = {
     "z=0:2:1\n         	Z-Values to test for...",
     "ndim=1\n           Dimensionality of output 1=x 2=x,y 3=x,y,z",
     "format=%g\n        Output format",
-    "VERSION=3.0\n      1-apr-01 PJT",
+    "VERSION=3.0a\n     20-jun-01 PJT",
     NULL,
 };
 

@@ -10,6 +10,7 @@
  *
  *      20-nov-93  added options MAIN_ symbol to fool the fortran compiler
  *	21-nov-94  correct C++ version for C++ main
+ *      21-jun-01  should not be used anymore !! use nemomain++.cc !!
  */
 
 #include <stdinc.h>

@@ -12,6 +12,7 @@
  *   21-jun-97  added select= keyword (1-based)
  *    7-feb-98  2.0  added out= to replace the 'cf' utility (src/image/fits/)
  *   19-mar-99  2.1  out= now also listens to select= (albeit slowly)
+ *   20-jun-01  gcc3
  *   
  */
 
@@ -19,6 +20,9 @@
 #include <unfio.h>
 
 static bool do_swap;    /* (re)set in a call to unfswap() */
+
+extern void bswap(void *vdat, int len, int cnt);
+
 
 /*
  * unfswap: set swapping mode, by default, no swapping performed
@@ -110,18 +114,17 @@ string defv[] = {
         "count=f\n          display element counter too?",
         "maxbuf=10000\n     buffersize in bytes, to read a block",
 	"swap=f\n           swapped read?",
-        "VERSION=2.1\n	    19-mar-99 PJT",
+        "VERSION=2.1a\n	    21-jun-01 PJT",
         NULL,
 };
 
 string usage = "access fortran unformatted I/O files";
 
-
 void my_display(int, char *, string, string, int, int *, bool, bool, stream);
 
-nemo_main()
+void nemo_main()
 {
-    int i, n, iblock, block=0;
+    int n, iblock, block=0;
     stream instr = stropen(getparam("in"),"r");
     stream ostr = NULL;
     bool Qdisp = hasvalue("block");

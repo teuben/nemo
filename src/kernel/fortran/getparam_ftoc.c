@@ -25,7 +25,7 @@ local char *stoc(string, int);
 #define fgetdparam F77_FUNC(getdparam,GETDPARAM)
 #define fgetiparam F77_FUNC(getiparam,GETIPARAM)
 
-fgetparam(retval,retval_len, key,key_len)
+void fgetparam(retval,retval_len, key,key_len)
     string key,     retval;
     int    key_len, retval_len;
 {
@@ -106,9 +106,7 @@ local int stof(s, fs, fs_len)	/* return 0 if OK, 1 if not s not fitted in fs */
     return(retval);
 }
 
-local len1(s, s_len)      /* true used length of a fortran character string */
-    char *s;
-    int s_len;
+local int len1(char *s, int s_len)   /* true used length of a fortran character string */
 {
     char *cp;
     int l = s_len;

@@ -244,7 +244,7 @@ static bool   list;
 static int    pos, mpos, errorpos, errornum;
 static char   ch;
 static int    sym;
-static int    curpar, curfun, npar;	/* curpar never used */
+static int    curfun, npar;
 static double curconst;
 static int    oddran;
 static char   *cptr, *dptr;
@@ -754,10 +754,9 @@ static void dcd_list()
    } while ((sym == blank)||(sym == comma));
 }
 
-static void dcd_dump()
+static void dcd_dump()  /* never used */
 {
    int    c, o, opc, op;
-   double v;			/* never used */
    if (sym == err) return;
    c = o = 0;
    do {
@@ -1306,7 +1305,6 @@ static double dcd_ranp(double arg1)
 static void dcd_evaluate(int q)
 {
    int c, o, opc;
-   double s,r;			/* s,r are never used */
    double arg[maxarg];
    double arg1,arg2;		/* fix order evalution bug PJT */
       

@@ -59,7 +59,8 @@ ftoc:	ftoc.c
 
 
 unfio:	unfio.c
-	$(CC) -DTOOLBOX -o unfio unfio.c -lnemo -lm
+	$(CC) $(CFLAGS) $(LOCAL_INC) -DTOOLBOX \
+		-o unfio unfio.c $(NEMO_LIBS) $(LOCAL_LIBS) $(EL)
 
 testunfio: testunfio.f
 	$(FC) $(FFLAGS) -o testunfio testunfio.f

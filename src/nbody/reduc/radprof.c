@@ -18,17 +18,19 @@
  *	16-feb-97           d support for SINGLEPREC	   pjt
  *	23-jul-97	V3.0 Added k= for # neighbors	   pjt
  *      28-jul-97           a check if first particle at 0,0,0  pjt
+ *      20-jun-01           c gcc3 pr
  */
 
 #include <stdinc.h>
 #include <getparam.h>
+#include <history.h>
 #include <vectmath.h>
 #include <filestruct.h>
 #include <snapshot/snapshot.h>
 #include <yapp.h>
 #include <axis.h>
 
-string defv[] = {		/* DEFAULT INPUT PARAMETERS */
+string defv[] = {		
     "in=???\n			  ascii input file name ",
     "center=0,0,0\n               center of the system",
     "mode=density\n		  options: mass, density, rotcur ",
@@ -39,14 +41,14 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "kmax=1\n			  number of nearest 'radial' neighbors",
     "tab=f\n			  need a table ? ",
     "headline=\n                  random verbiage for plot",
-    "VERSION=3.0b\n		  30-jul-97 PJT",
+    "VERSION=3.0c\n		  20-jun-01 PJT",
     NULL,
 };
 
 string usage = "radial profile of an N-body system";
 
-string headline;		/* random text message */
-string iname;			/* input file  name */
+local string headline;		/* random text message */
+local string iname;		/* input file  name */
 
 local real pos0[NDIM];		/* center */
 
@@ -54,7 +56,7 @@ local real pos0[NDIM];		/* center */
 #define MOBJ 8192               /* maximum particles */
 #endif
 
-local int  nobj;			/* globals for writesnap */
+local int  nobj;		/* globals for writesnap */
 local real mass[MOBJ];
 local real phase[MOBJ][2*NDIM];
 local real rad[MOBJ];
@@ -62,19 +64,29 @@ local int  irad[MOBJ];
 local real dens[MOBJ];		/* in case of space problem */
 local real vel[MOBJ];		/* these two can be computed on the fly */
 
-local string mode;                    /* output plot mode */
-local real rmax;			/* actual maxima on axes in plot_ routines */
-local real dmax;                    /* density */
-local real mmax;                    /* mass */
-local real vmax;                    /* velocity */
+local string mode;              /* output plot mode */
+local real rmax;		/* actual maxima on axes in plot_ routines */
+local real dmax;                /* density */
+local real mmax;                /* mass */
+local real vmax;                /* velocity */
 local int  k;
 
 local bool   Qtab;                    /* table output? */
 local void   read_snap(string);
 
 local real xtrans(real), ytrans(real);
+
+local void setparams(void);
+local void sort_rad(void);
+local void plot_cum_mass(void);
+local void plot_density(void);
+local void plot_rotcur(void);
+
+extern void sortptr (real *x ,int *idx, int n);
+
+
 
-nemo_main()
+void nemo_main()
 {
     setparams();
 
@@ -95,7 +107,7 @@ nemo_main()
 }
 
 
-setparams()
+local void setparams()
 {
     int n;
         
@@ -166,7 +178,7 @@ local real ytrans(real y)
 
 #define FUDGE  0.1
 
-sort_rad()
+local void sort_rad(void)
 {
     int i,j,l,u;
     real dr, radmax, cum_mass, densmax, velmax, mtot;
@@ -186,7 +198,7 @@ sort_rad()
     if (!Qtab)
        dprintf (1,"maximum radius is %lf, will be set to %lf\n",radmax,rmax);
                                            /*   sort radii */
-    sortptr (rad,irad,nobj);       /*   rad[irad[0..nobj-1]] is now sorted */
+    sortptr(rad,irad,nobj);       /*   rad[irad[0..nobj-1]] is now sorted */
     
                 /* first compute smallest projected interparticle distance */
     drmin = rad[irad[nobj-1]];              /* largest */
@@ -253,7 +265,7 @@ sort_rad()
 } /* sort_rad */
 
 /*	Some higher level YAPP interface routines */
-plot_cum_mass()
+local void plot_cum_mass(void)
 {
 	real cum_mass, radius;
 	int    i;
@@ -283,7 +295,7 @@ plot_cum_mass()
 	}
 }	
 
-plot_rotcur()
+local void plot_rotcur(void)
 {
 	real velocity, radius, cum_mass;
 	real rv, rlen, vlen, vrad;
@@ -331,7 +343,7 @@ plot_rotcur()
 }	
  
 
-plot_density()
+local void plot_density(void)
 {
 	real density, radius;
 	int    i;

@@ -10,7 +10,7 @@
  *
  *      20-nov-93  added options MAIN_ symbol to fool the fortran compiler
  *	21-nov-94  correct C++ version for C++ main
- *	20-jun-01  must be an int
+ *	20-jun-01  gcc3, must be an int
  */
 
 #include <stdinc.h>
@@ -29,11 +29,13 @@ int main(int argc,char *argv[])
     nemo_main();			/* call program */
     finiparam();			/* end */
     exit(0);                            /* return normal status to shell */
+    return 0;
 }
 
 #if defined(MAIN)
 int MAIN_()
 {
   error("MAIN_ called; some fortran inconsistency");
+  return 0;
 }
 #endif

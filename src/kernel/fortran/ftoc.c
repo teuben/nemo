@@ -9,9 +9,11 @@
  *      20-may-94 added hpux to not convert fortran external name
  *	 7-jan-00 F77_FUNC conversion		PJT
  *      30-mar-01 doc/typos	PJT
+ *      20-jun-01 gcc3 
  */
 
 #include <nemo.h>
+#include <strlib.h>
 #include <ctype.h>
 
 string defv[] = {
@@ -19,7 +21,7 @@ string defv[] = {
     "out=-\n            Output nemo_main module [- means stdout]",
     "call=nemomain\n    Your fortran main subroutine (no args!)",
     "options=\n         define your own options (lower,upper,under)",
-    "VERSION=2.0a\n     30-mar-01 PJT",
+    "VERSION=2.0b\n     20-jun-01 PJT",
     NULL,
 };
 
@@ -28,67 +30,14 @@ string e_usage=NULL;
 
 #define MAXLINE 512
 
-bool process();
-char *scopy();
+extern bool scanopt(string, string);
 
-nemo_main()
-{
-    stream instr, outstr;
-    bool notdone=TRUE;
-    char line[MAXLINE+1];
-
-    instr = stropen(getparam("in"),"r");
-    outstr = stropen(getparam("out"),"w");
-
-    header(outstr);
-    while(notdone) {
-        if (fgets(line,MAXLINE,instr)==0)
-            break;
-        notdone = process(outstr,line);
-    }
-    if (notdone)
-        error("Input file does not have properly closed defv section");
-    strclose(instr);
-    footer(outstr,getparam("call"),getparam("options"));
-    strclose(outstr);
-}
-
-header(outstr)
-stream outstr;
-{
-    fprintf(outstr,"/* THIS FILE HAS BEEN CREATED BY %s - do not edit */\n\n",
-            getargv0());
-    fprintf(outstr,"#include <stdinc.h>\n\n");
-    fprintf(outstr,"string defv[] = {\n");
-}
-
-footer(outstr,callname,options)
-stream outstr;
-string callname, options;
-{
-    char name[MAXLINE];
-
-    if (*callname)
-        strcpy(name,callname);
-    else
-        strcpy(name,"nemomain");
-    mksymname(name, options);
-    
-    fprintf(outstr,"    NULL,\n};\n\n");
-    fprintf(outstr,"string usage=\"%s\";\n\n",
-        (e_usage ? e_usage : "NEMO program with unknown intent"));
-    fprintf(outstr,"nemo_main()\n{\n");
-    fprintf(outstr,"    %s();\n}\n",name);
-}
-
-
-mksymname(name, options)
-char *name, *options;
+void mksymname(char *name, char *options)
 {
     char *cp=name;
     int upper=0, lower=0, underend=0;
 
-    if (name==0 || *name==0) return 0;
+    if (name==0 || *name==0) return;
 
     if (options==0 || *options == 0) {
 #if FORTRANIZE_LOWERCASE
@@ -139,15 +88,43 @@ char *name, *options;
     }
 }
 
+
+
+
+void header(stream outstr)
+{
+    fprintf(outstr,"/* THIS FILE HAS BEEN CREATED BY %s - do not edit */\n\n",
+            getargv0());
+    fprintf(outstr,"#include <stdinc.h>\n\n");
+    fprintf(outstr,"string defv[] = {\n");
+}
+
+void footer(stream outstr, string callname, string options)
+{
+    char name[MAXLINE];
+
+    if (*callname)
+        strcpy(name,callname);
+    else
+        strcpy(name,"nemomain");
+    mksymname(name, options);
+    
+    fprintf(outstr,"    NULL,\n};\n\n");
+    fprintf(outstr,"string usage=\"%s\";\n\n",
+        (e_usage ? e_usage : "NEMO program with unknown intent"));
+    fprintf(outstr,"extern void %s(void);\n",name);
+    fprintf(outstr,"void nemo_main()\n{\n");
+    fprintf(outstr,"    %s();\n}\n",name);
+}
+
 /* kept here for historic reasons, before usage of the FORTRAN.... macros */
 
-int old_mksymname(name, machname)
-char *name, *machname;
+void old_mksymname(char *name, char *machname)
 {
     char *cp=name;
     int upper=0, underend=0;
 
-    if (name==0 || *name==0) return 0;
+    if (name==0 || *name==0) return;
 
     if (machname==0 || *machname == 0) {
 #if defined(unicos) || defined(cray) || defined(cray2)
@@ -188,9 +165,7 @@ char *name, *machname;
     }
 }
 
-bool process(outstr,line)
-stream outstr;
-char *line;
+bool process(stream outstr,char *line)
 {
     char *cp;
     static int doc_status = -1;     /* -1: no started 0:inside   1: done */
@@ -228,4 +203,26 @@ char *line;
         cp[strlen(cp)-1] = '\0';
     fprintf(outstr,"    \"%s\",\n",cp);
     return TRUE;
+}
+
+void nemo_main()
+{
+    stream instr, outstr;
+    bool notdone=TRUE;
+    char line[MAXLINE+1];
+
+    instr = stropen(getparam("in"),"r");
+    outstr = stropen(getparam("out"),"w");
+
+    header(outstr);
+    while(notdone) {
+        if (fgets(line,MAXLINE,instr)==0)
+            break;
+        notdone = process(outstr,line);
+    }
+    if (notdone)
+        error("Input file does not have properly closed defv section");
+    strclose(instr);
+    footer(outstr,getparam("call"),getparam("options"));
+    strclose(outstr);
 }

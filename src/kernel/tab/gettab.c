@@ -105,8 +105,7 @@ int get_ftable(
     real *coldat[],                 /* out: array of pointers to data */
     int ndat)                       /* in: length of dat arrays */
 {
-    string *sp;
-    int i, n, npos, nret, nline=0, npt=0, ecount=0;
+    int i, n, npos, nline=0, npt=0, ecount=0;
     bool bad;
     char line[MAXLINELEN];
     real *dat;

@@ -4,7 +4,7 @@
 	a[k][l]=h+s*(g-h*tau);
 
 extern double *dvector();
-extern void nrerror(),free_fvector();
+extern void nrerror(),free_dvector();
 
 void jacobi_d(a,n,d,v,nrot)
 double **a,d[],**v;

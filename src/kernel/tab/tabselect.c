@@ -27,7 +27,6 @@ extern void strinsert(char *a, char *b, int n);
 bool num_select(string *cnam, string *cval, string *sels)
 {
     string *s;
-    char sel[128];
     int retval = 1;     /* set return value initially to TRUE */
     real a,b;
 
@@ -86,28 +85,28 @@ local int substitute(string s, string *cnam, string *cval,
         
     }
 
-    if (cp=strchr(sel,'<')) {               /* find what the operand is */
+    if ((cp=strchr(sel,'<'))) {               /* find what the operand is */
         *cp++ = 0;
         if (*cp == '=') {
             retval = ISLE;
             *cp++ = 0;
         } else
             retval = ISLT;
-    } else if (cp=strchr(sel,'>')) {
+    } else if ((cp=strchr(sel,'>'))) {
         *cp++ = 0;
         if (*cp == '=') {
             retval = ISGE;
             *cp++ = 0;
         } else
             retval = ISGT;
-    } else if (cp=strchr(sel,'=')) {
+    } else if ((cp=strchr(sel,'='))) {
         *cp++ = 0;
         if (*cp == '=') {
             retval = ISEQ;
             *cp++ = 0;
         } else
             retval = ISBAD;
-    } else if (cp=strchr(sel,'!')) {
+    } else if ((cp=strchr(sel,'!'))) {
         *cp++ = 0;
         if (*cp == '=') {
             retval = ISNE;

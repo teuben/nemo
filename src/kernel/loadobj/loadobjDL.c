@@ -67,8 +67,6 @@ proc findfn(string fnname)
 
 void mysymbols(string progname)
 {
-    char *err;
-
     dprintf(1,"MySymbols: NULL code in loadobjDL\n");
 
     if (dl_handle) {

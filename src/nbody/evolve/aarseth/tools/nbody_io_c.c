@@ -8,15 +8,19 @@
  * and INTEGER*2 datasets in 'older' data.
  *
  *  8-aug-95    created             pjt
+ * 20-jun-01    gcc3 casting        pjt
  */
 
 #include <stdinc.h>
+#include <unfio.h>
 
 
 static stream unit3 = NULL;
 static int sizeof_name = sizeof(int);
 static int sizeof_data = sizeof(float);
 static int Qswap;
+
+extern void bswap(void *vdat, int len, int cnt);
 
 void nb3open_c(string fname, int ilen, bool swap)
 {
@@ -38,7 +42,7 @@ void nb3header_c(int *n, int *model, int *nrun, int *nk)
     unfswap(Qswap);
     if (*nk == 0) {
         /* READ (3, ERR=99, END=99)  n, model, nrun */
-        nread = unfread(unit3, header, 3*sizeof(int));
+        nread = unfread(unit3, (char *)header, 3*sizeof(int));
 	if (nread < 1) {
 	    *n = 0;
 	    return;
@@ -46,7 +50,7 @@ void nb3header_c(int *n, int *model, int *nrun, int *nk)
         if (Qswap) bswap(header, sizeof(int), 3);
     } else {
         /* READ (3, ERR=99, END=99)  n, model, nrun, nk */
-        nread = unfread(unit3, header, 4*sizeof(int));
+        nread = unfread(unit3, (char *)header, 4*sizeof(int));
 	if (nread < 1) {
 	    *n = 0;
 	    return;

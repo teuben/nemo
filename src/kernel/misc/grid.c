@@ -3,6 +3,7 @@
  *
  *      4-mar-94    ansi            pjt
  *     22-jan-95    fixed real=float problems
+ *     20-jun-01    gcc3
  *
  */
 
@@ -89,10 +90,11 @@ int index_grid(
                         if (idx==g->n) idx--;   /* right edge exception */
                         break;
       case GRID_ARRAY:
-      			if (g->up)
+      			if (g->up) {
 	                    if (x < g->gmin || x > g->gmax) return -1;
-	                else
+	                } else {
 	                    if (x < g->gmax || x > g->gmin) return -1;
+			}
                         imin = 0;
                         imax = g->n;
                         error("grid_array not implemented yet");

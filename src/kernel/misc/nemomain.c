@@ -10,6 +10,7 @@
  *
  *      20-nov-93  added options MAIN_ symbol to fool the fortran compiler
  *      13-jul-96  use optional MAIN, MAIN_ and MAIN__ symbols
+ *      20-jun-01  gcc3
  */
 
 #include <stdinc.h>
@@ -34,6 +35,7 @@ int main(int argc,char *argv[])
 int MAIN()
 {
   error("MAIN called; some fortran inconsistency");
+  return 0;
 }
 #endif
 
@@ -41,6 +43,7 @@ int MAIN()
 int MAIN_()
 {
   error("MAIN_ called; some fortran inconsistency");
+  return 0;
 }
 #endif
 
@@ -48,6 +51,7 @@ int MAIN_()
 int MAIN__()
 {
   error("MAIN__ called; some fortran inconsistency");
+  return 0;
 }
 #endif
 

@@ -64,6 +64,7 @@
 #include <filefn.h>
 #include <loadobj.h>
 #include <ctype.h>
+#include <unistd.h>
 #include <mathlinker.h>		/* force inclusion of some basic math */
 
 local proc   bodytrans();

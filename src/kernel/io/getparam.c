@@ -302,7 +302,6 @@ extern string date_id(void);
 void initparam(string argv[], string defv[])
 {
     int i, j, nzeno;
-    char *cp;
     bool posflag, useflag, defflag;
     string name;
 
@@ -423,10 +422,8 @@ void initparam(string argv[], string defv[])
 
     if (help_level & HELP_PROMPT) {
 #if defined(INTERACT)
-        char  *cp;
         string key, val;
         int    go=0;            /* set immediate go to false */
-        int    v;
         
         if (!isatty(fileno(stdin)) || !isatty(fileno(stdout)))
             error("(initparam) Can only INTERACT with terminal");
@@ -658,7 +655,7 @@ local void save_history(string *argv)
 
 local void printhelp(string help)
 {
-    string *bp, *hp;
+    string *bp;
     int i, numl;
 
     dprintf(1,"printhelp: help_string=%s\n",help);

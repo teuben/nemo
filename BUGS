@@ -22,3 +22,5 @@
 
 - Suse didn't resolve fortran binding to C too well for potentials
   (.so object files, e.g. athan92)
+
+- sgi: loadobjDL works for bodytrans, but not potentials....
