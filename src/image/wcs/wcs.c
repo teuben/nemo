@@ -17,37 +17,62 @@ string defv[] = {
     "format=%g\n Output format",
     "pix=\n     (optional) Input Pixel number coordinates",
     "pos=\n     (optional) Input Coordinates",
-    "VERSION=1.1\n  2-mar-03",
+    "VERSION=1.2\n  4-mar-03",
     NULL,
 };
 
 string usage = "coordinate transforms";
 
+bool is_sexa(string);
+
 nemo_main() 
 {
-    double pix[2], pos[2], ref[2], refpix[2], inc[2], rot, *outval;
+    double pix[2], pos[2], ref[2], refpix[2], inc[2], rot, ss, *outval;
     char proj[10];
     bool Qworldpos;
-    string type, fmt = getparam("format");
-    int  n;
+    string type, fmt = getparam("format"), sexa;
+    int  n, hh,mm;
     
 
     if (!hasvalue("pix") && !hasvalue("pos")) error("Need pix= or pos=");
     if (hasvalue("pix") && hasvalue("pos")) error("Need one of pix= or pos=");
 
     Qworldpos = hasvalue("pix");
-    if (Qworldpos)
+    if (Qworldpos) {
         n = nemoinpd(getparam("pix"),pix,2);
-    else
-        n = nemoinpd(getparam("pos"),pos,2);
+	dprintf(1,"pix: %g %g\n",pix[0],pix[1]);
+    } else {
+	if (is_sexa(getparam("pos"))) {
+	  n = nemoinpx(getparam("pos"),pos,2);
+	  pos[0] *= 15;   /* assume that was hms :-) */
+	} else {
+	  n = nemoinpd(getparam("pos"),pos,2);
+	}
+	dprintf(1,"pos: %g %g\n",pos[0],pos[1]);
+    }
     if (n!=2) error("%d: error parsing pix/pos=",n);
 
-    n = nemoinpd(getparam("ref"),ref,2);
+    
+    if (is_sexa(getparam("ref"))) {
+      n = nemoinpx(getparam("ref"),ref,2);
+      ref[0] *= 15;   /* assume that was hms :-) */
+    } else {
+      n = nemoinpd(getparam("ref"),ref,2);
+    }
     if (n!=2) error("%d: parsing ref",n);
     n = nemoinpd(getparam("refpix"),refpix,2);
     if (n!=2) error("%d: parsing refpix",n);
-    n = nemoinpd(getparam("inc"),inc,2);
+    
+    if (is_sexa(getparam("inc"))) {
+      n = nemoinpx(getparam("inc"),inc,2);
+      ref[0] *= 15;   /* assume that was hms :-) */
+    } else {
+      n = nemoinpd(getparam("inc"),inc,2);
+    }
     if (n!=2) error("%d: parsing inc",n);
+    dprintf(1,"ref: %g %g  refpix: %g %g  inc: %g %g\n",
+	    ref[0],ref[1],refpix[0],refpix[1],inc[0],inc[1]);
+
     rot = getdparam("rot");
     type = getparam("type");
     if (*type == '-') 
@@ -66,9 +91,15 @@ nemo_main()
     printf(fmt,outval[0]);
     printf(" ");
     printf(fmt,outval[1]);
+#if 0    
+    if (Qworldpos) {
+      to_hms(outval[0],&hh,&mm,&ss);
+    }
+#endif
     printf("\n");
-   
 }
+
+
 
 
 
@@ -106,6 +137,12 @@ strtoupper(char *text)
         if (islower(*cp)) *cp = toupper(*cp);
         cp++;
     }
+}
+
+bool is_sexa(string s) 
+{
+  char *cp = strchr(s, ':');
+  return (cp != 0);
 }
     
 
