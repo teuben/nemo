@@ -17,9 +17,9 @@ clean:
 xrandom:
 	@echo Running xrandom
 	@echo uniform seed=5 n=5
-	xrandom seed=5 n=5 report=t		; nemo.coverage xrandom.c
+	$(EXEC) xrandom seed=5 n=5 report=t		; nemo.coverage xrandom.c
 	@echo gauss seed=5 n=5
-	xrandom seed=5 n=5 gauss=t report=t	; nemo.coverage xrandom.c
+	$(EXEC) xrandom seed=5 n=5 gauss=t report=t	; nemo.coverage xrandom.c
 
 xrandom_bench:
 	@echo Different centisecond runs on one line:
@@ -40,6 +40,6 @@ xrandom_bench:
 
 nemoinp:
 	@nemoinp 'sqrt(2)'
-	nemoinp 1:10:2 newline=f	 ; nemo.coverage nemoinp.c
+	$(EXEC) nemoinp 1:10:2 newline=f	 ; nemo.coverage nemoinp.c
 	@echo ""
 	

@@ -19,7 +19,7 @@ all: treecode1
 treecode1:
 	@echo Running $@
 	@rm -f bench.dat bench.log
-	treecode1 out=bench.dat nbody=$(NBODY) > bench.log; nemo.coverage treecode.c
+	$(EXEC) treecode1 out=bench.dat nbody=$(NBODY) > bench.log; nemo.coverage treecode.c
 	@head -14 bench.log
 	@echo "..."
 	@tail -8 bench.log

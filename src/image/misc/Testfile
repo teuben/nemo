@@ -20,30 +20,30 @@ all:	$(BIN)
 
 ccd.in:
 	@echo Creating $@
-	ccdmath out=ccd.in "fie=10/sqrt((abs(%x-31.5))**$(P)+(abs(%y-31.5))**$(P))" size=64,64,1
+	$(EXEC) ccdmath out=ccd.in "fie=10/sqrt((abs(%x-31.5))**$(P)+(abs(%y-31.5))**$(P))" size=64,64,1
 
 N = 2
 ccdmom.in:
 	@echo Creating $@
-	ccdmath out=ccdmom.in "fie=%x+2*%y+4*%z" size=$(N),$(N),$(N)
+	$(EXEC) ccdmath out=ccdmom.in "fie=%x+2*%y+4*%z" size=$(N),$(N),$(N)
 
 
 ccdplot: ccd.in
 	@echo Running $@
-	ccdplot ccd.in $(C) yapp=$(YAPP) ; nemo.coverage ccdplot.c
+	$(EXEC) ccdplot ccd.in $(C) yapp=$(YAPP) ; nemo.coverage ccdplot.c
 
 ccdstat: ccd.in
 	@echo Running $@
-	ccdstat ccd.in ; nemo.coverage ccdstat.c
+	$(EXEC) ccdstat ccd.in ; nemo.coverage ccdstat.c
 
 ccdsub: ccd.in
 	@echo Running $@
-	ccdsub ccd.in
+	$(EXEC) ccdsub ccd.in
 
 ccdmom: ccdmom.in
 	@echo Running $@
-	ccdmom ccdmom.in - 1 | ccdstat - ; nemo.coverage ccdmom.c ccdstat.c
-	ccdmom ccdmom.in - 2 | ccdstat - ; nemo.coverage ccdmom.c ccdstat.c
-	ccdmom ccdmom.in - 3 | ccdstat - ; nemo.coverage ccdmom.c ccdstat.c
+	$(EXEC) ccdmom ccdmom.in - 1 | $(EXEC) ccdstat - ; nemo.coverage ccdmom.c ccdstat.c
+	$(EXEC) ccdmom ccdmom.in - 2 | $(EXEC) ccdstat - ; nemo.coverage ccdmom.c ccdstat.c
+	$(EXEC) ccdmom ccdmom.in - 3 | $(EXEC) ccdstat - ; nemo.coverage ccdmom.c ccdstat.c
 
 

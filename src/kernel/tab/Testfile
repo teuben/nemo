@@ -16,32 +16,32 @@ all:	tab.in $(BIN)
 
 tab.in:
 	@echo Creating $@
-	nemoinp 1:100 > tab.in
+	$(EXEC) nemoinp 1:100 > tab.in
 
 tabmath: tab.in
 	@echo Running $@
-	tabmath tab.in tab.out 'sqrt(%1)'; nemo.coverage tabmath.c
+	$(EXEC) tabmath tab.in tab.out 'sqrt(%1)'; nemo.coverage tabmath.c
 
 tabplot:
 	@echo Running $@
-	tabmath tab.in - 'sqrt(%1)' | tabplot - ; nemo.coverage tabplot.c
+	$(EXEC) tabmath tab.in - 'sqrt(%1)' | $(EXEC) tabplot - ; nemo.coverage tabplot.c
 
 NMAX = 100000
 
 tabhist:
 	@echo Running $*
-	nemoinp 1:1000 | tabmath - - 'rang(0,1)' all seed=123 | tabhist - ; nemo.coverage tabhist.c
-	nemoinp 1:$(NMAX) nmax=$(NMAX) | tabmath - - 'rang(0,1)' all seed=123 | tabhist - nmax=-$(NMAX); nemo.coverage tabhist.c
+	$(EXEC) nemoinp 1:1000 | $(EXEC) tabmath - - 'rang(0,1)' all seed=123 | $(EXEC) tabhist - ; nemo.coverage tabhist.c
+	$(EXEC) nemoinp 1:$(NMAX) nmax=$(NMAX) | $(EXEC) tabmath - - 'rang(0,1)' all seed=123 | $(EXEC) tabhist - nmax=-$(NMAX); nemo.coverage tabhist.c
 
 tabspline:
 	@echo Running $*
-	nemoinp 1:2:0.001 | tabmath - - '%1*%1' | tabspline - y=2;  nemo.coverage tabspline.c
+	$(EXEC) nemoinp 1:2:0.001 | $(EXEC) tabmath - - '%1*%1' | $(EXEC) tabspline - y=2;  nemo.coverage tabspline.c
 
 tablsqfit:
 	@echo Running $*
-	nemoinp 1:2:0.001 | tabmath - - '%1+rang(0,0.1)' seed=123 | tablsqfit - ; nemo.coverage tablsqfit.c
+	$(EXEC) nemoinp 1:2:0.001 | $(EXEC) tabmath - - '%1+rang(0,0.1)' seed=123 | $(EXEC) tablsqfit - ; nemo.coverage tablsqfit.c
 
 tabnllsqfit:
 	@echo Running $*
-	nemoinp 1:100 | tabmath - - '4+exp(-(%1-50)**2/(200))+rang(0,0.1)' seed=123 |\
-		tabnllsqfit - fit=gauss par=4,1,50,10; nemo.coverage tabnllsqfit.c
+	$(EXEC) nemoinp 1:100 | $(EXEC) tabmath - - '4+exp(-(%1-50)**2/(200))+rang(0,0.1)' seed=123 |\
+		$(EXEC) tabnllsqfit - fit=gauss par=4,1,50,10; nemo.coverage tabnllsqfit.c

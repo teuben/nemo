@@ -15,9 +15,9 @@ all:	$(BIN)
 
 bodytrans:
 	@echo Running $@
-	bodytrans x; nemo.coverage bodytrans.c
-	bodytrans y; bodytrans z; bodytrans r; 
-	bodytrans 'sqrt(x*x+y*y)>0' int
-	bodytrans 'sqrt(x*x+y*y)>1' int
-	bodytrans 'sqrt(x*x+y*y)>2' int
+	$(EXEC) bodytrans x; nemo.coverage bodytrans.c
+	$(EXEC) bodytrans y; $(EXEC) bodytrans z; $(EXEC) bodytrans r; 
+	$(EXEC) bodytrans 'sqrt(x*x+y*y)>0' int
+	$(EXEC) bodytrans 'sqrt(x*x+y*y)>1' int
+	$(EXEC) bodytrans 'sqrt(x*x+y*y)>2' int
 

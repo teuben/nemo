@@ -19,8 +19,8 @@ PAR1 = potname=vrtm51 potpars=0,0.1,1,0,1,2 potfile=bench.tab
 PAR2 = sigma=10
 
 bench.in:	vrtm51.c
-	nemoinp 0:360 | tabmath - - "0,1,1" > bench.tab
-	mkflowdisk bench.in $(NBODY) \
+	$(EXEC)	nemoinp 0:360 | tabmath - - "0,1,1" > bench.tab
+	$(EXEC) mkflowdisk bench.in $(NBODY) \
 	  seed=123 \
 	  rmin=1 rmax=2 pitch=0.1 \
 	  $(PAR1)
@@ -37,7 +37,7 @@ all: flowcode
 flowcode: bench.in
 	@echo Running $@
 	@rm -f bench.dat bench.log
-	flowcode in=bench.in out=bench.dat \
+	$(EXEC) flowcode in=bench.in out=bench.dat \
 		freq=200 tstop=1 \
 		$(PAR1)  $(PAR2) \
 		> bench.log; nemo.coverage flowcode.c

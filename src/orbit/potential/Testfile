@@ -18,29 +18,29 @@ all:    $(BIN)
 
 potlist: 
 	@echo Running $@
-	potlist harmonic  x=1 dr=0.001 ; nemo.coverage potlist.c
-	potlist plummer   x=1 dr=0.001 ; nemo.coverage potlist.c
-	potlist isochrone x=1 dr=0.001 ; nemo.coverage potlist.c
-	potlist athan92   x=0.00001	 ; nemo.coverage potlist.c
+	$(EXEC) potlist harmonic  x=1 dr=0.001 ; nemo.coverage potlist.c
+	$(EXEC) potlist plummer   x=1 dr=0.001 ; nemo.coverage potlist.c
+	$(EXEC) potlist isochrone x=1 dr=0.001 ; nemo.coverage potlist.c
+	$(EXEC) potlist athan92   x=0.00001	 ; nemo.coverage potlist.c
 	# New style accelleration
-	potlist Plummer 0,1,1
+	$(EXEC) potlist Plummer 0,1,1
 
 rotcurves:
-	rotcurves isochrone 0,1,1 - halo 0,1,1 - plummer 0,0.15,0.05 \
+	$(EXEC) rotcurves isochrone 0,1,1 - halo 0,1,1 - plummer 0,0.15,0.05 \
 		radii=0:4:0.02 ;  nemo.coverage rotcurves.c
 
 plummer.ccd:
-	potccd out=plummer.ccd potname=plummer x=-2:2:0.05 y=-2:2:0.05 ; nemo.coverage potccd.c
+	$(EXEC) potccd out=plummer.ccd potname=plummer x=-2:2:0.05 y=-2:2:0.05 ; nemo.coverage potccd.c
 
 potccd: plummer.ccd
-	potccd - harmonic x=-1:1:0.2 y=-1:1:0.2 |\
-		ccdprint - x= y= format=%4.3f label=x,y ; nemo.coverage potccd.c
-	potccd - harmonic x=-1:1:0.2 y=-1:1:0.2 dr=0.01 |\
-		ccdprint - x= y= format=%4.3f label=x,y ; nemo.coverage potccd.c
-	potlist ccd potfile=plummer.ccd x=0:2:0.1 dr=0.001 | awk '{print $$1,$$4,$$7,$$11}' > plummer1.tab
-	potlist plummer                 x=0:2:0.1 dr=0.001 | awk '{print $$1,$$4,$$7,$$11}' > plummer2.tab
-	tabmath plummer1.tab,plummer2.tab - %1,%2-%6,%3-%7,%4-%8 all format=%f
-	nemoinp 0:10 | tabmath - - '1/(sqrt(4+%1)' > map0.tab
-	potccd map0.ccd rotcur 0 map0.tab x=-10:10:0.1 y=-10:10:0.1
-	ccdstat map0.ccd
-	potlist GalPot potfile=$(NEMODAT)/GalPot/pot.2a x=1
+	$(EXEC) potccd - harmonic x=-1:1:0.2 y=-1:1:0.2 |\
+		$(EXEC) ccdprint - x= y= format=%4.3f label=x,y ; nemo.coverage potccd.c
+	$(EXEC) potccd - harmonic x=-1:1:0.2 y=-1:1:0.2 dr=0.01 |\
+		$(EXEC) ccdprint - x= y= format=%4.3f label=x,y ; nemo.coverage potccd.c
+	$(EXEC) potlist ccd potfile=plummer.ccd x=0:2:0.1 dr=0.001 | awk '{print $$1,$$4,$$7,$$11}' > plummer1.tab
+	$(EXEC) potlist plummer                 x=0:2:0.1 dr=0.001 | awk '{print $$1,$$4,$$7,$$11}' > plummer2.tab
+	$(EXEC) tabmath plummer1.tab,plummer2.tab - %1,%2-%6,%3-%7,%4-%8 all format=%f
+	$(EXEC) nemoinp 0:10 | $(EXEC) tabmath - - '1/(sqrt(4+%1)' > map0.tab
+	$(EXEC) potccd map0.ccd rotcur 0 map0.tab x=-10:10:0.1 y=-10:10:0.1
+	$(EXEC) ccdstat map0.ccd
+	$(EXEC) potlist GalPot potfile=$(NEMODAT)/GalPot/pot.2a x=1

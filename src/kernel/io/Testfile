@@ -23,23 +23,23 @@ rsf:
 	@echo '  int MyI2 01' >> rsf.in
 	@echo 'tes' >> rsf.in
 	@echo Running rsf
-	rsf rsf.in rsf.out; nemo.coverage rsf.c ; nemo.coverage rsf.c
+	$(EXEC) rsf rsf.in rsf.out; nemo.coverage rsf.c ; nemo.coverage rsf.c
 
 tsf:
 	@echo Running tsf
-	tsf rsf.out maxprec=t			; nemo.coverage tsf.c
+	$(EXEC) tsf rsf.out maxprec=t			; nemo.coverage tsf.c
 
 csf:
 	@echo Running csf
-	csf rsf.out csf.out MySet		; nemo.coverage csf.c
-	csf rsf.out - MyD | tsf - maxprec=t	; nemo.coverage csf.c tsf.c
-	csf rsf.out - MyD convert=d2f | tsf - maxprec=t ; nemo.coverage csf.c tsf.c
-	csf rsf.out - MyF | tsf - maxprec=t	; nemo.coverage csf.c tsf.c
+	$(EXEC) csf rsf.out csf.out MySet		; nemo.coverage csf.c
+	$(EXEC) csf rsf.out - MyD | $(EXEC) tsf - maxprec=t	; nemo.coverage csf.c tsf.c
+	$(EXEC) csf rsf.out - MyD convert=d2f | $(EXEC) tsf - maxprec=t ; nemo.coverage csf.c tsf.c
+	$(EXEC) csf rsf.out - MyF | $(EXEC) tsf - maxprec=t	; nemo.coverage csf.c tsf.c
 # oops,there is a problem here, can't do this
 #	csf rsf.out - MyF convert=f2d | tsf - maxprec=t
-	tsf csf.out				; nemo.coverage tsf.c
+	$(EXEC) tsf csf.out				; nemo.coverage tsf.c
 
 hisf:
 	@echo Running hisf
-	hisf csf.out				; nemo.coverage history.c
+	$(EXEC) hisf csf.out				; nemo.coverage history.c
 

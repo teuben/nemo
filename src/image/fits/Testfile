@@ -23,47 +23,47 @@ all:	$(BIN)
 ccd.in:
 	@echo Creating $@
 #	ccdmath out=ccd.in "fie=10*%x+sqrt(%y)"  size=10,10,1
-	ccdmath out=ccd.in "fie=$(FIE)"  size=10,10,1	
+	$(EXEC) ccdmath out=ccd.in "fie=$(FIE)"  size=10,10,1	
 
 map001.fits:
-	ccdmath "" - "rang(0,1)" size=10,10,1 seed=1 | ccdfits - map001.fits ; nemo.coverage ccdfits.c
+	$(EXEC) ccdmath "" - "rang(0,1)" size=10,10,1 seed=1 | $(EXEC) ccdfits - map001.fits ; nemo.coverage ccdfits.c
 
 map002.fits:
-	ccdmath "" - "rang(0,1)" size=10,10,1 seed=2 | ccdfits - map002.fits; nemo.coverage ccdfits.c
+	$(EXEC) ccdmath "" - "rang(0,1)" size=10,10,1 seed=2 | $(EXEC) ccdfits - map002.fits; nemo.coverage ccdfits.c
 
 map003.fits:
-	ccdmath "" - "rang(0,1)" size=10,10,1 seed=3 | ccdfits - map003.fits; nemo.coverage ccdfits.c
+	$(EXEC) ccdmath "" - "rang(0,1)" size=10,10,1 seed=3 | $(EXEC) ccdfits - map003.fits; nemo.coverage ccdfits.c
 
 bitpix64:
-	ccdmath "" map004.ccd "%x+%y" size=10,10,1 
-	ccdfits map004.ccd map004.fits bitpix=64 ; nemo.coverage ccdfits.c
-	fitsccd map004.fits map004a.ccd; nemo.coverage fitsccd.c
-	ccdmath map004a.ccd,map004.ccd - %1-%2 | ccdstat -
+	$(EXEC) ccdmath "" map004.ccd "%x+%y" size=10,10,1 
+	$(EXEC) ccdfits map004.ccd map004.fits bitpix=64 ; nemo.coverage ccdfits.c
+	$(EXEC) fitsccd map004.fits map004a.ccd; nemo.coverage fitsccd.c
+	$(EXEC) ccdmath map004a.ccd,map004.ccd - %1-%2 | ccdstat -
 
 ccdfits: ccd.in
 	@echo Running $@
-	ccdfits ccd.in fits.in; nemo.coverage ccdfits.c
+	$(EXEC) ccdfits ccd.in fits.in; nemo.coverage ccdfits.c
 
 fitsccd: ccdfits
 	@echo Running $@
-	fitsccd fits.in ccd.out; nemo.coverage fitsccd.c
+	$(EXEC) fitsccd fits.in ccd.out; nemo.coverage fitsccd.c
 	@echo Testing ccd-fits-ccd with "FIE=$(FIE)"
-	ccdmath ccd.in,ccd.out - %1-%2 | ccdstat -
+	$(EXEC) ccdmath ccd.in,ccd.out - %1-%2 | ccdstat -
 
 scanfits: ccdfits
 	@echo Running $@
-	scanfits fits.in	; nemo.coverage scanfits.c
+	$(EXEC) scanfits fits.in	; nemo.coverage scanfits.c
 
 
 fitsglue: map001.fits map002.fits map003.fits
 	@echo Running $@
-	fitsglue map%03d.fits cube.fits inlist=1:3 ; nemo.coverage fitsglue.c
-	fitshead map001.fits | grep DATA; nemo.coverage fitshead.c
-	fitshead map002.fits | grep DATA
-	fitshead map003.fits | grep DATA
-	fitshead cube.fits | grep DATA ; nemo.coverage fitshead.c
+	$(EXEC) fitsglue map%03d.fits cube.fits inlist=1:3 ; nemo.coverage fitsglue.c
+	$(EXEC) fitshead map001.fits | grep DATA; nemo.coverage fitshead.c
+	$(EXEC) fitshead map002.fits | grep DATA
+	$(EXEC) fitshead map003.fits | grep DATA
+	$(EXEC) fitshead cube.fits | grep DATA ; nemo.coverage fitshead.c
 	
 
 fitshead: map003.fits
 	@echo Running $@
-	fitshead map003.fits; nemo.coverage fitshead.c
+	$(EXEC) fitshead map003.fits; nemo.coverage fitshead.c

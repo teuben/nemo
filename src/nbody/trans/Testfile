@@ -23,45 +23,45 @@ all:	snap.in $(BIN)
 
 snap.in:
 	@echo Creating snap.in
-	mkplummer snap.in $(NBODY) seed=123
+	$(EXEC) mkplummer snap.in $(NBODY) seed=123
 
 snapcenter:
 	@echo Running snapcenter
-	snapcenter snap.in . weight=r report=t  ; nemo.coverage snapcenter.c
+	$(EXEC) snapcenter snap.in . weight=r report=t  ; nemo.coverage snapcenter.c
 
 snaprotate:
 	@echo Running snaprotate
-	snaprotate snap.in - 45,60,45 xyz | csf - . ; nemo.coverage snaprotate.c
+	$(EXEC) snaprotate snap.in - 45,60,45 xyz | csf - . ; nemo.coverage snaprotate.c
 
 snaprect:
 	@echo Running snaprect
-	snaprect snap.in . ; nemo.coverage snaprect.c
+	$(EXEC) snaprect snap.in . ; nemo.coverage snaprect.c
 
 snapinert:
 	@echo Running snapinert
-	snapinert snap.in - ; nemo.coverage snapintert.c
+	$(EXEC) snapinert snap.in - ; nemo.coverage snapintert.c
 
 snapsplit:
 	@echo Running $@
-	snapsplit snap.in - nbody=1 | csf - . ; nemo.coverage snapsplit.c
+	$(EXEC) snapsplit snap.in - nbody=1 | csf - . ; nemo.coverage snapsplit.c
 
 snapcopy:
 	@echo Running $*
-	snapcopy snap.in - select=i | csf - . ; nemo.coverage snapcopy.c
+	$(EXEC) snapcopy snap.in - select=i | csf - . ; nemo.coverage snapcopy.c
 
 snapadd:
 	@echo Running $*
-	snapadd snap.in,snap.in - | tsf -; nemo.coverage snapadd.c
+	$(EXEC) snapadd snap.in,snap.in - | tsf -; nemo.coverage snapadd.c
 
 snapdens: snap.in
 	@echo Running $*
-	snapdens snap.in - | tsf -; nemo.coverage snapdens.c
+	$(EXEC) snapdens snap.in - | tsf -; nemo.coverage snapdens.c
 
 snapshift: snap.in
 	@echo Running $*
-	snapshift snap.in snap.in2 rshift=1,2,3 vshift=4,5,6;\
+	$(EXEC) snapshift snap.in snap.in2 rshift=1,2,3 vshift=4,5,6;\
 	 nemo.coverage snapshift.c
 
 snapstack: snap.in
-	snapstack snap.in snap.in2 - deltar=10,0,0 deltav=-1,0,0 | tsf -;\
+	$(EXEC) snapstack snap.in snap.in2 - deltar=10,0,0 deltav=-1,0,0 | tsf -;\
 	 nemo.coverage snapstack.c

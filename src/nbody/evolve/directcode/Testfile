@@ -21,7 +21,7 @@ all: directcode
 directcode:
 	@echo Running $@
 	@rm -f bench.dat bench.log
-	directcode out=bench.dat > bench.log; nemo.coverage code.c
+	$(EXEC) directcode out=bench.dat > bench.log; nemo.coverage code.c
 	@head -14 bench.log
 	@echo "..."
 	@tail -8 bench.log

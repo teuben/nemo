@@ -17,14 +17,14 @@ all:	$(BIN)
 
 wcs:
 	@echo Running $@
-	wcs ref=30,30 refpix=128,128 inc=0.1,0.1 pix=10,10
+	$(EXEC) wcs ref=30,30 refpix=128,128 inc=0.1,0.1 pix=10,10
 	@echo 18.2 18.2 should be on the line before
-	wcs ref=30,30 refpix=128,128 inc=0.1,0.1 pos=10,10
+	$(EXEC) wcs ref=30,30 refpix=128,128 inc=0.1,0.1 pos=10,10
 	@echo -72 -72 should be on the line before
 
 _testpos:
 	make testpos
-	testpos > testpos.test 
+	$(EXEC) testpos > testpos.test 
 	diff testpos.ref testpos.test
 
 

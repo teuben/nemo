@@ -16,4 +16,4 @@ clean:
 all:	$(BIN)
 
 func:
-	(make funcc; funcc)
+	($(MAKE) funcc; $(EXEC) funcc)

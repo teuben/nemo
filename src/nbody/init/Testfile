@@ -35,45 +35,45 @@ snapenter:
 	@echo "0" >> snapenter.in
 	@echo "0.25" >> snapenter.in
 	@echo "0" >> snapenter.in
-	snapenter < snapenter.in verbose=f headline="test suite"  ; nemo.coverage snapenter.c
+	$(EXEC) snapenter < snapenter.in verbose=f headline="test suite"  ; nemo.coverage snapenter.c
 	@echo Running tsf
-	tsf snapenter.out
+	$(EXEC) tsf snapenter.out
 	@echo Running snapprint
-	snapprint snapenter.out m,x,y,z,vx,vy,vz
+	$(EXEC) snapprint snapenter.out m,x,y,z,vx,vy,vz
 	@echo Comparing snapenter.out snapenter.cmp
-	tsf snapenter.out octal=t | rsf - snapenter.cmp ; cmp snapenter.cmp snapenter.out
+	$(EXEC) tsf snapenter.out octal=t | $(EXEC) rsf - snapenter.cmp ; cmp snapenter.cmp snapenter.out
 
 mkplummer:
 	@echo Running $@
-	mkplummer mkplummer.out $(NBODY) seed=123 ; nemo.coverage mkplummer.c
-	tsf mkplummer.out
-	mkplummer - $(NBODY) seed=123 |\
+	$(EXEC) mkplummer mkplummer.out $(NBODY) seed=123 ; nemo.coverage mkplummer.c
+	$(EXEC) tsf mkplummer.out
+	$(EXEC) mkplummer - $(NBODY) seed=123 |\
 		massname="n(m)" masspars=p,-2 massrange=0.5,10 |\
 		tsf - ;  nemo.coverage mkplummer.c
 
 mkexpdisk:
 	@echo Running $@
-	mkexpdisk mkexpdisk.out $(NBODY) seed=123 ; nemo.coverage mkexpdisk.c
-	tsf mkexpdisk.out
+	$(EXEC) mkexpdisk mkexpdisk.out $(NBODY) seed=123 ; nemo.coverage mkexpdisk.c
+	$(EXEC) tsf mkexpdisk.out
 
 mkommod:
 	@echo Running $@
-	mkommod $(NEMODAT)/k5isot.dat mkommod.out $(NBODY) seed=123
-	tsf mkommod.out
+	$(EXEC) mkommod $(NEMODAT)/k5isot.dat mkommod.out $(NBODY) seed=123
+	$(EXEC) tsf mkommod.out
 
 mkhomsph:
 	@echo Running $@
-	mkhomsph mkhomsph.out $(NBODY) seed=123
-	tsf mkhomsph.out
+	$(EXEC) mkhomsph mkhomsph.out $(NBODY) seed=123
+	$(EXEC) tsf mkhomsph.out
 
 mkspiral:
 	@echo Running $@
-	mkspiral mkspiral.out $(NBODY) seed=123 a=100
-	tsf mkspiral.out
+	$(EXEC) mkspiral mkspiral.out $(NBODY) seed=123 a=100
+	$(EXEC) tsf mkspiral.out
 
 real:
 	@echo f2d conversion:
-	mkplummer - 100 | csf - - convert=f2d | snapplot - 
+	$(EXEC) mkplummer - 100 | $(EXEC) csf - - convert=f2d | $(EXEC) snapplot - 
 	@echo d2f conversion:
-	mkplummer - 100 | csf - - convert=d2f | snapplot - 
+	$(EXEC) mkplummer - 100 | $(EXEC) csf - - convert=d2f | $(EXEC) snapplot - 
 

@@ -18,55 +18,55 @@ all:	snap.in hack.out $(BIN)
 
 snap.in:
 	@echo Creating $@
-	mkplummer snap.in $(NBODY) seed=123
+	$(EXEC) mkplummer snap.in $(NBODY) seed=123
 
 cube.in: snap.in
 	@echo Creating $@
-	snaprotate snap.in - 30,45,20 zyz | snapgrid - cube.in nx=32 ny=32 nz=32 zrange=-2:2
+	$(EXEC) snaprotate snap.in - 30,45,20 zyz | $(EXEC) snapgrid - cube.in nx=32 ny=32 nz=32 zrange=-2:2
 
 hack.out: snap.in
 	@echo Creating $@
-	hackcode1 snap.in hack.out fcells=4 tstop=2 freqout=1 > /dev/null
+	$(EXEC) hackcode1 snap.in hack.out fcells=4 tstop=2 freqout=1 > /dev/null
 
 hack2.out: snap.in
 	@echo Creating $@
-	hackcode1 snap.in hack2.out fcells=4 tstop=10 freqout=8 > /dev/null
+	$(EXEC) hackcode1 snap.in hack2.out fcells=4 tstop=10 freqout=8 > /dev/null
 
 snapplot: hack.out
 	@echo Running $@
-	snapplot hack.out nxy=2,2 nxticks=3 nyticks=3 ; nemo.coverage  snapplot.c
+	$(EXEC) snapplot hack.out nxy=2,2 nxticks=3 nyticks=3 ; nemo.coverage  snapplot.c
 
 snapplotv: hack.out
 	@echo Running $@
-	snapplotv hack.out nxy=2,2 nxticks=3 nyticks=3 ; nemo.coverage snapplotv.c
+	$(EXEC) snapplotv hack.out nxy=2,2 nxticks=3 nyticks=3 ; nemo.coverage snapplotv.c
 
 snapdiagplot:  hack.out
 	@echo Running $@
-	snapdiagplot hack.out  ; nemo.coverage snapdiagplot.c
+	$(EXEC) snapdiagplot hack.out  ; nemo.coverage snapdiagplot.c
 
 snapmradii: hack2.out
 	@echo Running $@
-	snapmradii hack2.out | tabplot - 1 2:9 line=1,1 ; nemo.coverage snapmradii.c
+	$(EXEC) snapmradii hack2.out | tabplot - 1 2:9 line=1,1 ; nemo.coverage snapmradii.c
 
 radprof:   snap.in
 	@echo Running $@
-	radprof snap.in tab=t > /dev/null ; nemo.coverage radprof.c
+	$(EXEC) radprof snap.in tab=t > /dev/null ; nemo.coverage radprof.c
 
 real:
 	@echo Checking d2f for snapfour
-	mkplummer - 100 seed=123 | csf - - convert=d2f | snapfour - radii=0:2
+	$(EXEC)	mkplummer - 100 seed=123 | $(EXEC) csf - - convert=d2f | $(EXEC) snapfour - radii=0:2
 	@echo Checking f2d for snapfour
-	mkplummer - 100 seed=123 | csf - - convert=f2d | snapfour - radii=0:2
+	$(EXEC) mkplummer - 100 seed=123 | $(EXEC) csf - - convert=f2d | $(EXEC) snapfour - radii=0:2
 
 snapfit: cube.in hack.out
 	@echo Running $@
-	snapfit hack.out cube.in theta1=-30:30:10 theta2=-30:30:10
+	$(EXEC) snapfit hack.out cube.in theta1=-30:30:10 theta2=-30:30:10
 
 snapprint: snap.in
 	@echo Running $@
-	snapprint snap.in x+y,x+z,y+z
-	snapprint snap.in x+y | head -1
-	snapprint snap.in x+z | head -1
-	snapprint snap.in y+z | head -1
-	snapprint snap.in x-y | head -1
+	$(EXEC) snapprint snap.in x+y,x+z,y+z
+	$(EXEC) snapprint snap.in x+y | head -1
+	$(EXEC) snapprint snap.in x+z | head -1
+	$(EXEC) snapprint snap.in y+z | head -1
+	$(EXEC) snapprint snap.in x-y | head -1
 	

@@ -16,19 +16,19 @@ all:	$(BIN)
 
 ccd.in:
 	@echo Creating $@
-	ccdmath out=ccd.in "fie=10*%x+sqrt(%y)"  size=5,5,1 ; nemo.coverage ccdmath.c
+	$(EXEC) ccdmath out=ccd.in "fie=10*%x+sqrt(%y)"  size=5,5,1 ; nemo.coverage ccdmath.c
 
 ccdmath: ccd.in
 	@echo Running $@
-	ccdmath ccd.in - %1 | ccdprint - x= y= format=%7.3f ; nemo.coverage ccdmath.c
+	$(EXEC) ccdmath ccd.in - %1 | $(EXEC) ccdprint - x= y= format=%7.3f ; nemo.coverage ccdmath.c
 
 ccdflip: ccd.in
 	@echo Running $@
-	ccdflip ccd.in - xy | ccdprint - x= y= format=%7.3f ; nemo.coverage ccdflip.c
+	$(EXEC) ccdflip ccd.in - xy | $(EXEC) ccdprint - x= y= format=%7.3f ; nemo.coverage ccdflip.c
 
 ccdsmooth: ccd.in
 	@echo Running $@
-	ccdsmooth ccd.in - 1 | ccdprint - x= y= format=%7.3f ; nemo.coverage ccdsmooth.c
+	$(EXEC) ccdsmooth ccd.in - 1 | $(EXEC) ccdprint - x= y= format=%7.3f ; nemo.coverage ccdsmooth.c
 
 
 ccdintpol:

@@ -19,7 +19,7 @@ all: hackcode1
 hackcode1:	
 	@echo Running $@
 	@rm -f bench.dat bench.log
-	hackcode1 out=bench.dat > bench.log; nemo.coverage hackcode1.c
+	$(EXEC) hackcode1 out=bench.dat > bench.log; nemo.coverage hackcode1.c
 	@head -14 bench.log
 	@echo "..."
 	@tail -8 bench.log

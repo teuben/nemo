@@ -18,10 +18,10 @@ all: runscfm
 
 scfm.in:
 	@echo Creating scfm.in
-	mkplummer scfm.in $(NBODY) seed=123
+	$(EXEC) mkplummer scfm.in $(NBODY) seed=123
 
 runscfm:	scfm.in
 	@echo Running $@
-	runscfm `pwd`/scfm.in scfm.run > scfm.log
-	tsf scfm.run/scfm.dat
+	$(EXEC) runscfm `pwd`/scfm.in scfm.run > scfm.log
+	$(EXEC) tsf scfm.run/scfm.dat
 
