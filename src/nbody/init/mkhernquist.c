@@ -16,6 +16,7 @@
  *                   - removed sorting and fcut stuff (snapsort,unbind)
  *                   - float->real (including the NR stuff; no query/ran1)
  *      9-sep-01    gsl/xrandom
+ *     27-mar-03    fixed double/float usage or qromb (it never worked before)
  *
  */
 
@@ -38,7 +39,7 @@ string  defv[] = {
     "addphi=f\n               Add potentials to snapshot",
     "zerocm=t\n               Centrate snapshot (t/f)?",
     "headline=\n              Optional verbiage",
-    "VERSION=1.0a\n           9-sep-01 PJT",
+    "VERSION=1.1\n            27-mar-03 PJT",
     NULL,
 };
 
@@ -57,11 +58,12 @@ double a, b, mu, E;
 
 /* local functions */
 
-double rad(double eta), f(double E2), drho2(double u), pot(double r),
+double rad(double eta), f(double E2), drho2_d(double u), pot(double r),
        radpsi(double p), radmass(double m), rho1(double r), rho2(double r);
 void   cofm(void);
+float  drho2(float u);
 
-extern double qromb(double (*func)(), double a, double b);
+extern float qromb(float (*func)(float), float a, float b);
 
 extern double xrandom(double,double);
 extern int set_xrandom(int);
@@ -219,7 +221,12 @@ double f(double E2)
 	return ans;
 }
 
-double drho2(double u)
+float drho2(float u)
+{
+  return (float)drho2_d( (double) u);
+}
+
+double drho2_d(double u)
 {
 	double ans;
 	double r;
