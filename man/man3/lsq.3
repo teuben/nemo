@@ -1,0 +1,65 @@
+.TH LSQ 3NEMO "19 February 1992"
+.SH NAME
+lsq_zero, lsq_accum, lsq_solve - least squares fitting utilities
+.SH SYNOPSIS
+.nf
+\fBint lsq_zero (n, mat, vec)\fP
+\fBint lsq_accum (n, mat, vec, a, w)\fP
+\fBint lsq_solve (n, mat, vec, sol)\fP
+.PP
+\fBint n;\fP
+\fBreal mat[n*n], vec[n], sol[n], a[n+1], w;\fP
+.SH DESCRIPTION
+These routines provide a low level interface to solving linear
+least squares problems using 
+the \fBNormal Equations\fP (see e.g.\fI Numerical Recepies\fP, Press et al.).
+These routines have the advantage that they don't need the extra
+temporary arrays containing the data, i.e. the \fBDesign Matrix\fP,
+and directly accumulate the data in the appropriate spots in the
+symmetric \fBNormal Matrix\fP.
+.PP
+\fIlsq_accum\fP
+accumulates the data into the normal equations matrix that is 
+inverted in \fIlsq_solve\fP. Before the data is accumulated, the matrix 
+and right hand side vector need to be reset using \fIlsq_zero\fP.
+During accumulation, a weight, \fBw\fP, can be given to each datapoint
+(Note: this is a linear weight, by which the data is multiplied. If you're
+used to enter the dispersion, you should enter 1/sigma^2).
+On output the matrix \fBmat\fP contains the inverse of the normal
+matrix, and hence its diagonal elements the square of the errors of the
+fitted parameters. The fitted parameters themselves are
+returned in the array \fBsol\fP.
+.SH EXAMPLE
+In this example a large 2D image matrix is fitted with an intensity gradient
+of the form \fII(x,y)=a+bx+cy\fP:
+.nf
+    double mat[3*3],vec[3],a[4],
+    real data[nx*ny];
+
+    lsq_zero(3,mat,vec);
+    for (ix=0; ix<nx; ix++)
+    for (iy=0; iy<ny; iy++) {
+        a[0] = 1.0
+        a[1] = ix;
+        a[2] = iy;
+        a[3] = data[ix*ny+iy];
+        lsq_accum(3,mat,vec,a,1.0);
+    }
+    lsq_solve(3,mat,vec,a);
+    printf("a+bx+cy:  a=%f b=%f c=%f\n,a[0],a[1],a[2]);
+.fi
+.SH SEE ALSO
+lsqfit(3NEMO), matinv(3NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +1.5i
+~/src/kernel/misc  	lsq.c
+.fi
+.SH UPDATE HISTORY
+.nf
+.ta +1i +4i
+29-sep-90	created  	PJT
+19-feb-92	updated doc, and properly redfined the weights	PJT
+.fi
