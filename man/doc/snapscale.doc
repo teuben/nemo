@@ -1,0 +1,28 @@
+%N snapscale
+%D rescale a snapshot
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man snapscale' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input file name [???]
+%A out
+	Output file name [???]
+%A mscale
+	Mass scale factor [1.0] [1.0]
+%A rscale
+	Position scale factor [1.0[,1.0,1.0]] [1.0]
+%A vscale
+	Velocity scale factor [1.0[,1.0,1.0]] [1.0]
+%A pscale
+	Potential scale factor [1.0] [1.0]
+%A ascale
+	Accelerations scale factor [1.0[,1.0,1.0]] [1.0]
+%A xscale
+	Aux scale factor [1.0] [1.0]
+%A kscale
+	Key scale factor [1] [1]
+%A times
+	Times to select snapshots from [all]
+%A VERSION
+	16-feb-97 PJT [3.1a]
