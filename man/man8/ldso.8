@@ -1,0 +1,27 @@
+.TH LDSO 8NEMO "13 December 1995"
+.SH NAME
+ldso \- NEMO's shared object creator
+.SH SYNOPSIS
+\fBldso\fP \fIobjectfile\fP
+.SH DESCRIPTION
+The \fBldso\fP command 
+converts an existing object file (normally .o) into a shared
+object file (also called .o in NEMO).
+On most systems that support these, they are 
+often called .so, but NEMO renames them back to .o for sake
+of keeping old Makefiles and source code simple (i.e. the
+way they were). On some other systems (old sun3 and sun4)
+this script is a no-op.
+.SH FILES
+.nf
+.ta +2i
+$NEMO/src/scripts	original
+src/nbody/core    	bodytrans.c - example of usage
+src/orbit/potential	potential.c - example of usage
+.fi
+.SH "SEE ALSO"
+dlopen(3), a.out(4), loadobj(3NEMO)
+.SH HISTORY
+.nf
+.ta +1i +4i
+13-dec-95	Created	pjt
