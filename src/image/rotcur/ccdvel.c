@@ -94,11 +94,11 @@ string defv[] = {
         "rotcurfit=\n   initial conditions from rotcur output table",
         "fixring=1\n    ring to use for center, and vsys",
         "noise=0\n      Gaussian noise added to velocities",
-	"amp=f\n        Cretae density maps instead of velocity?",
+	"amp=f\n        Create density maps instead of velocity?",
         "seed=0\n       Initial random seed",
 	"in=\n          Template 2D image for cube generation",
 	"headline=\n	Optional random verbiage",
-        "VERSION=2.0\n  6-feb-03 PJT",
+        "VERSION=2.0a\n 7-feb-03 PJT",
         NULL,
 };
 
@@ -117,7 +117,7 @@ local real center[3];              /* rot center */
 local real blc[3];                 /* bottom left corner */
 local real rmin, rmax;             /* spatial extent of disk  */
 local real vsys = 0.0;             /* systemic velocity */
-local real noise;                  /* noise ?? */
+local real noise;                  /* some noise added to the velocities */
 local int  out_mode;               /* output mode       */
 local imageptr iptr;               /* template image */
 
@@ -362,7 +362,7 @@ setparams()
    vexpfac = aspiral * sin(pspiral*RPD);
    theta0 = getdparam("tspiral") * RPD;
 
-/* set for convenience */
+   /* set for convenience */
 
    rmin = rad_i[0];
    rmax = rad_i[nrad-1];
@@ -388,6 +388,7 @@ setparams()
  * create a velocity field (GIPSY method)
  *              0..nx-1 and 0..ny-1 
  *      start from pixel, work back to gal plane and interpolate
+ *      (a.k.a. retracing method)
  *
  */
 local void vel_create_1(stream outstr)
@@ -412,7 +413,7 @@ local void vel_create_1(stream outstr)
     x0 = center[0];
     y0 = center[1];
     z0 = center[2];
-    eps = 0.1 * sqrt(dx*dx+dy*dy);
+    eps = 0.1 * sqrt(dx*dx+dy*dy);       /* some small fraction of a pixel */
 
     if (Qcube) {
       if (!create_cube(&vptr, nx, ny, nz))   /* image cube */
@@ -431,11 +432,11 @@ local void vel_create_1(stream outstr)
     for (j=0; j<ny; j++) {          /* Loop over all pixels */
         y = dy*(j-y0) + blc[1];
         for (i=0; i<nx; i++) {      
-            x = dx*(i-x0) + blc[0];
+	    x = dx*(i-x0) + blc[0];        /* (x,y) are w.r.t. center */
 	    for (k=0; k<nz; k++)
 	      CubeValue(vptr,i,j,k) = undef;       /* set to 'undefined' */
             
-            r = sqrt(sqr(x)+sqr(y));        /* get projected radius */
+            r = sqrt(sqr(x)+sqr(y));        /* get projected radius on sky */
             if (r > rmax) continue;          /*  certainly outside disk */
 
             delta1 = e[0] = radius(rad_i[0], sinp[0], cosp[0], cosi[0], x, y);
@@ -443,15 +444,14 @@ local void vel_create_1(stream outstr)
             delta2 = e[n] = radius(rad_i[n], sinp[n], cosp[n], cosi[n], x, y);
             if (delta1*delta2 > 0) continue;        /* not in disk at all ? */
 
-            nr = -1;
-            for (n=1; n<nrad; n++) {            /* find in which 'ring' */
+            for (n=1, nr=-1; n<nrad; n++) {    /* find in which 'ring' (x,y) is */
                 e[n] = radius(rad_i[n], sinp[n], cosp[n], cosi[n], x, y);
                 if (e[n-1]*e[n] <= 0.0) {   /* found it, interpolate to rad */
                     e1 = e[n-1]/(rad_i[n-1]+sqrt(sqr(rad_i[n-1])-e[n-1]));
                     e2 = e[n]  /(rad_i[n]  +sqrt(sqr(rad_i[n])  -e[n]));
                     rad = (rad_i[n]*e1 - rad_i[n-1]*e2)/(e1-e2);
                     nr = n;
-                    break;
+                    break;    /* 'got it: rad' is the innermost galactic radius */
                 }
             }   
             if (nr<0) {     /* should not happen? perhaps with strange warps? */
@@ -484,8 +484,8 @@ local void vel_create_1(stream outstr)
 		  vobs = vsys + vrot;
 		else
 		  vobs = vsys + (vrot*cost+vexp*sint)*sin(inc);
-            } else
- 	        vobs = vsys;
+            } else 
+	        vobs = vsys;   /* near the center math goes wrong, set to vsys */
 
 	    if (Qcube) {
 	      k = gridz(vobs);
@@ -548,7 +548,8 @@ local real radius(real r, real sinp, real cosp, real cosi, real x, real y)
 }
 
 /*
- * LINFIT: linear interpolation
+ * LINFIT: linear interpolation into an array with known offsets (m,n)
+ *          
  */
  
 local real linfit(real *f, real *x, real x0, int m, int n)
@@ -557,7 +558,7 @@ local real linfit(real *f, real *x, real x0, int m, int n)
 }
 
 /*
- * create a velocity field (NEMO)
+ * create a velocity field (NEMO method)
  *              0..nx-1 and 0..ny-1 
  *      start from gal plane, and project; needs to do a particle simulation
  *   
@@ -701,7 +702,7 @@ local int gridz(real z)
         return i;
 }
 
-
+/* ... and now for something different ....  */
 
 real  xim = 2517;
 real  yim = 2573;
