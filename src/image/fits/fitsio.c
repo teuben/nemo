@@ -52,6 +52,7 @@
 /*              (redefined f->ncards now to be 1-based upon reading too)*/
 /*    28-sep-01 added bitpix=64 support - portability not solved yet    */
 /*              seems bitpix=-64 is working ok                          */
+/*    12-oct-01 new standard added FITS reference                       */
 /* ToDo:                                                                */
 /*  - BLANK substitution                                                */
 /************************************************************************/
@@ -106,6 +107,10 @@ local FLOAT w_bscale = 1.0;             /* see: fit_setscale()     */
 local FLOAT w_bzero = 0.0;              /* see: fit_setscale()     */
 local int blocksize= 2880;	        /* See: fit_setblocksize() */
 local int first_message = 1;		/* See: fitopen */
+
+local string cfits1="FITS (Flexible Image Transport System) format is defined in 'Astronomy";
+local string cfits2="and Astrophysics', volume 376, page 359; bibcode: 2001A&A...376..359H";
+
 /**********************************************************************/
 FITS *fitopen(string name,string status,int naxis,int *nsize)
 /*
@@ -186,6 +191,8 @@ FITS *fitopen(string name,string status,int naxis,int *nsize)
     }
     f->bscale = w_bscale;
     f->bzero  = w_bzero;
+    fitwra(f,"COMMENT",cfits1);
+    fitwra(f,"COMMENT",cfits2);
 
 /* Handle an old file. */
 

@@ -49,6 +49,7 @@
  *              28-sep-01       'K' format for 64 bit integers (*long*) pjt
  *                              endian swap is done in the show_ routines
  *                              which is bad !!!!
+ *    		12-oct-01 new standard added FITS reference
  *
  * Places where this package will call error(), and hence EXIT program:
  *  - invalid BITPIX
@@ -82,6 +83,10 @@ local int ftsblksiz_i=FTSBLKSIZ;	/* blocksize for i and o */
 local int ftsblksiz_o=FTSBLKSIZ;
 local int ftslpb_i=FTSLPB;		/* lines per block for i and o */
 local int ftslpb_o=FTSLPB;
+
+local string cfits1="FITS (Flexible Image Transport System) format is defined in 'Astronomy";
+local string cfits2="and Astrophysics', volume 376, page 359; bibcode: 2001A&A...376..359H";
+
 
 /* fits.c */
 static int fix_ing(fits_header *fh);
@@ -2270,9 +2275,11 @@ int fts_whead(fits_header *fh, stream ostr)
     fts_wvard(ostr,"BSCALE",fh->bscale,NULL);
     fts_wvard(ostr,"BZERO",fh->bzero,NULL);
     if (fh->extend >= 0)
-        fts_wvarb  (ostr,"EXTEND",fh->extend,NULL);
+      fts_wvarb  (ostr,"EXTEND",fh->extend,NULL);
     if (fh->extname)
-        fts_wvarc  (ostr,"EXTNAME",fh->extname,NULL);
+      fts_wvarc  (ostr,"EXTNAME",fh->extname,NULL);
+    fts_wvar(ostr,"COMMENT",cfits1);
+    fts_wvar(ostr,"COMMENT",cfits2);
     if (fh->comment) 
         for (i=0; fh->comment[i] != NULL; i++)
             fts_wvar(ostr,"COMMENT",fh->comment[i]);
