@@ -1,0 +1,183 @@
+.TH SNAPGRID 1NEMO "18 June 1998"
+.SH NAME
+snapgrid \- grid a snapshot into a 2D or 3D image (cube)
+.SH SYNOPSIS
+.PP
+\fBsnapgrid in=\fPsnapshot \fBout=\fPimage [parameter=value]
+.SH DESCRIPTION
+\fIsnapgrid\fP grids three arbitrary bodytrans expressions 
+(default: \fBx\fP, \fBy\fPand \fB-vz\fP) of a snapshot into a datacube
+(or image plane).
+.PP
+The X and Y coordinates of the datacube can only
+be reularly gridded in histogram fashion 
+(for spatial XY-smoothing see \fIccdsmooth(1NEMO)\fP),
+however the Z coordinate has the property that it can take moments in this
+variable, pick a number of planes or planes with smoothing.
+.PP
+The image cube is written as a standard \fIimage(5NEMO)\fP file, and can
+be accessed by various other programs for smoothing, display etc.
+.SH PARAMETERS
+The following parameters ...
+.TP 20
+\fBin=\fIin-file\fP
+input file, must be in \fIsnapshot(5NEMO)\fP format. Multiple snapshots can
+be stacked uses the \fBtimes=\fP keyword: see \fBstack\fP below.  [no default].
+.TP
+\fBout=\fIout-file\fP
+output file, will be in \fIImage(5NEMO)\fP format [no default].
+.TP
+\fBtimes=\fP\fIt1:t2,t3,..\fP
+Selection of the times of snapshots to be selected for gridding.
+For \fBstack=t\fP all snapshots will be co-added into one image,
+however selecting \fBstack=f\fP or selecting multiple \fBevar\fP's
+one can request multiple output images.
+[Default: \fBall\fP].
+.TP
+\fBxrange=\fIxb:xe\fP
+Range in \fBxvar\fP to bin [default: \fB-2:2\fP].
+.TP
+\fByrange=\fIxb:xe\fP
+Range in \fByvar\fP to bin [default: \fB-2:2\fP].
+.TP
+\fBzrange=\fIxb:xe\fP
+Range in \fBzvar\fP to bin, or take moments of
+[default: \fB-infinity:infinity\fP].
+.TP
+\fBxvar\*e\fP\fIx-expression\fP
+The value of \fIx-expression\fP is gridded along the X axis.
+[default: \fBx\fP].
+.TP
+\fByvar\*e\fP\fIy-expression\fP
+The value of \fIy-expression\fP is gridded along the Y axis.
+[default: \fBy\fP].
+.TP
+\fBzvar\*e\fP\fIz-expression\fP
+The value of \fIz-expression\fP is gridded along the Z axis (\fBnz\fP>1), 
+or moments taken off (\fBnz=1\fP). [default: \fBz\fP].
+.TP
+\fBevar=\fIemisivity\fP
+Variable to denote emissivity per particle. You can select more than 1
+expressions, in which case different images will be written out
+(only in \fBstack=f\fP mode)
+[default: \fBm\fP].
+.TP
+\fBtvar=\fIemisivity\fP
+Variable to denote the optical depth of a particle. [Default: 0]
+.TP
+\fBdvar=\fIemisivity\fP
+Variable to denote the line of sight. [Default: z]
+.TP
+\fBsvar=\fIemisivity\fP
+Variable to denote gaussian smoothing 
+.TP
+\fBnx=\fIx-pixels\fP
+Number of pixels along the X axis of the cube [default: \fB64\fP].
+.TP
+\fBny=\fIy-pixels\fP
+Number of pixels along the Y axis of the cube [default: \fB64\fP].
+.TP
+\fBnz=\fIz-pixels\fP
+Number of pixels along the Z axis of the cube. If one pixel is choosen,
+moments can be taken (see below), else a simple gridding is used.
+[default: \fB1\fP].
+.TP
+\fBxlab=\fIx-label\fP
+Text used to label the X-axis. By default the \fBxvar\fP expression is used.
+It may be useful in certain astronomical environment to label the axis
+with recognized labels like RA---TAN, DEC--SIN, GLON etc.
+.TP
+\fBylab=\fIy-label\fP
+Same for the Y-axis.
+.TP
+\fBzlab=\fIz-label\fP
+Same for the Z-axis.
+.TP
+\fBmoment=\fInumber\fP
+Order of the Z-gridding.
+Most commonly choosen are: \fB0\fP (total intensity), \fB1\fP 
+(velocity weighted intensity) and \fB2\fP (velocity square weighted intensity),
+where 'intensity' should really be read as surface density per 
+square unit length. Special values of \fB-1\fP and \fB-2\fP can be
+used to directly compute the mean and the dispersion from the mean.
+[default: \fB0\fP].
+.TP
+\fBmean=t|f\fP
+This controls the units of the gridding. By selecting \fBt\fP a density
+is computed, otherwise data are added. The latter makes it more difficult
+to compare images of different cell sizes.
+ [Default: \fBf\fP].
+.TP
+\fBstack=t|f\fP
+Should all snapshots from the input file be stacked, or write one
+image per selected (see \fBtimes=\fP) time? [default: \fBf\fP].
+.SH EXAMPLE
+The following example makes three moment images from an N-body snapshot,
+then smooths
+and combines them into an 'intensity' (\fBint\fP), 'mean velocity' (\fBvel\fP)
+and 'velocity dispersion' (\fBsig\fP) map using a CCD math operator.
+.PP
+Note that the moment maps must be smoothed \fIbefore\fP they
+can be combined to the proper velocity and dispersion maps.
+.nf
+   % \fBsnapgrid in=nbody.dat out=map0 moment=0\fP
+   % \fBsnapgrid in=nbody.dat out=map1 moment=1\fP
+   % \fBsnapgrid in=nbody.dat out=map2 moment=2\fP
+   % \fBccdsmooth in=map0 out=map00 gauss=0.1\fP
+   % \fBccdsmooth in=map1 out=map11 gauss=0.1\fP
+   % \fBccdsmooth in=map2 out=map22 gauss=0.1\fP
+   % \fBmv map00 int\fP
+   % \fBccdmath in=int,map11     out=vel  fie=%2/%1\fP
+   % \fBccdmath in=int,vel,map22 out=sig  fie="sqrt(%3/%1-%2*%2)"\fP
+   % \fBrm map11 map22\fP
+.fi
+Alternatively, with the option of using negative \fBmoment\fPs, one can
+also use (assuming no smoothing implemented):
+.nf
+    % \fBsnapgrid in=nbody.dat out=int moment=0\fP
+    % \fBsnapgrid in=nbody.dat out=vel moment=-1\fP
+    % \fBsnapgrid in=nbody.dat out=sig moment=-2\fP
+.fi
+.SH UNITS
+Units are maintained in the same way as in snapshots, they don't have
+a specific name, but carry their normal meaning 'length', 'velocity'
+and 'mass'. Since \fIsnapgrid\fP calculates (surface/space) densities,
+its units are formally 'mass' per square 'length' times 'velocity'
+to the power \fBmoment\fP. 
+.PP
+When channel maps are produced (\fBmoment=0\fP), 
+the data are not normalized w.r.t. the
+convolving velocity beam. For a rectangular beam (\fBvrange=vmin:vmax\fP)
+the data should formally be divided by \fB(vmax-vmin)\fP, for a 
+gaussian beam (\fBvrange=vmean,vsig\fP) by \fBvsig*sqrt(2*pi)\fP.
+Also remember that a gaussian beam has \fBFWHM = 2.355*sigma\fP.
+.SH BUGS
+Combinations of large snapshots and large images may run into memory
+problems since both the snapshot and the image(s) must fit into memory
+to obtain turbo speeds. Use non-negative \fBmoment\fPs to avoid
+having to allocate one or two extra images in addition to the
+snapshot and the image. 
+.SH "SEE ALSO"
+snaprotate(1NEMO), snapslit(1NEMO), snapsmooth(1NEMO), snapaxsym(1NEMO), 
+tsf(1NEMO), snapccd(1NEMO)
+.PP
+http://www.iinet.com.au/~watson/nngridr.html
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+src/nbody/image  	snapgrid.c
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+19-jan-89	V1.0: Created	PJT
+12-mar-89	V1.1: added emisitivity evar	PJT
+2-nov-90	V2.0: allow stacked snapshots	PJT
+21-oct-91	V3.0: moment -1,-2 implemented	PJT
+12-jun-92	V3.1: added times=	PJT
+18-jul-92	V3.2: fixed bug when moment<0 and stacked snapshots	PJT
+30-jul-93	V4.0: allow multiple  evar's - default is now stack=f	PJT
+18-jun-98	V4.4: added xlab/ylab/zlab and allow range[0]>range[1]	PJT
+.fi
