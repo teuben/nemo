@@ -1,0 +1,58 @@
+#! /bin/csh -f
+#   make a shared object for the dynamic object loader
+#   should work on most system - on some systems (old sun3/4) it's a no-op
+#
+#   13-dec-95   created for dec alpha, and quickly got the SGI working too
+#   29-jun-96   fixed SGI since we sort of use one NEMOHOST now
+#   22-oct-96   added linux ELF
+#    1-apr-97   I never added -shared to SGI...
+#    1-apr-01   changed .o to .so for shared objects now
+
+if ($#argv == 0) then
+  echo Usage: $0 basename
+  echo NEMO system utility that converts an object file  BASENAME.o 
+  echo into a shared object file BASENAME.o, if needed. On some machines
+  echo this is a no-op
+  exit 0
+endif
+
+if (! -e $1.o) then
+  echo File $1.o does not exist
+  exit 1
+endif
+
+if ($NEMOHOST == alpha) then
+  ld -shared $1.o -o $1.so >& /dev/null
+  if ($status) goto error1
+  rm -f so_locations
+  # goto ren1
+else if ($NEMOHOST == sgi_IP22 || $NEMOHOST == sgi) then
+  ld -shared $1.o -o $1.so >& /dev/null 
+  if ($status) goto error1
+  # goto ren1
+else if ($NEMOHOST == linux) then
+  ld -shared -o $1.so $1.o
+  if ($status) goto error1
+  # goto ren1
+endif
+
+
+
+#				normal exits
+ok:
+  exit 0
+
+ren1:
+  mv $1.so $1.o
+  if ($status) goto error2
+  exit 0
+
+# 				problematic exits
+
+error1:
+  echo "### Error: $0 problem make shared object for $*"
+  exit 1
+
+error2:
+  echo "### Error: $0 problem renaming $1.so to $1.o"
+  exit 2
