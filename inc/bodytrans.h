@@ -43,3 +43,8 @@
 #define aux   Aux(b)
 
 #define key   Key(b)
+
+#define dens  Dens(b)
+
+#define eps   Eps(b)
+
