@@ -58,32 +58,34 @@ static gsl_rng *my_r = NULL;
 static const gsl_rng_type *my_T;
 #endif
 
+static string env_type = "GSL_RNG_TYPE";
+static string env_seed = "GSL_RNG_SEED";
+
 int init_xrandom(string init)
 {
 #ifdef HAVE_GSL
-    char my_gsl_info[128], *cp;
+    char my_gsl_type[128], my_gsl_seed[128], *cp;
     string *is;
     int nis;
 
     is = burststring(init,", ");                /* parse init as "[seed[,name]]"  */
     nis = xstrlen(is,sizeof(string))-1;
     if (nis > 0) {                                          /* seed is first, but optional */
-        sprintf(my_gsl_info,"GSL_RNG_SEED=%s",is[0]);
-        putenv(my_gsl_info);
-        putenv(my_gsl_info);
-	dprintf(1,"putenv: %s\n",my_gsl_info);
+        sprintf(my_gsl_seed,"%s=%s",env_seed,is[0]);
+        putenv(my_gsl_seed);
+	dprintf(1,"putenv: %s\n",my_gsl_seed);
         if (nis > 1) {                                      /* name is second, also optional */
-            sprintf(my_gsl_info,"GSL_RNG_TYPE=%s",is[1]);
-            putenv(my_gsl_info);
-	    dprintf(1,"putenv: %s\n",my_gsl_info);
+            sprintf(my_gsl_type,"%s=%s",env_type,is[1]);
+            putenv(my_gsl_type);
+	    dprintf(1,"putenv: %s\n",my_gsl_type);
         }
     }
 
 
-    cp = getenv("GSL_RNG_SEED");
-    printf("SEED -> %s\n",cp);
-    cp = getenv("GSL_RNG_TYPE");
-    printf("TYPE -> %s\n",cp);
+    cp = getenv(env_seed);
+    printf("%s -> %s\n",env_seed,cp);
+    cp = getenv(env_type);
+    printf("%s -> %s\n",env_type,cp);
     
 
     gsl_rng_env_setup();                                /* initialize the rng (name/seed) setup */
