@@ -112,7 +112,7 @@ rotcurves_ps: rotcurves.c
 #
 
 tests: 
-	
+        
 
 potential.src:
 	ixfile potential.{3,5,h} > potential.src
@@ -123,3 +123,12 @@ potential.src:
 potfortest: potentialf.o
 	@echo POTNAME=$(POTNAME)
 	$(FC) $(FFLAGS) -o potfortest potfortest.f potentialf.o $(POTOBJ)
+
+#
+try1: try1.cc
+	$(CXX) $(CFLAGS) -o try1 try1.cc $(NEMO_LIBSPP) $(EL) $(FORLIBS) -lm
+
+try2: try2.cc
+	$(CXX) $(CFLAGS) -o try2 try2.cc $(NEMO_LIBSPP) $(EL) $(FORLIBS) -lm
+
+

@@ -7,6 +7,7 @@
  *	 2-jul-95	documented bug fix on rotating potentials 	pjt
  *      19-apr-96       improved error reporting        pjt
  *      12-jun-98       made ndim=3 the default, like potlist           pjt
+ *	13-sep-01	better prototype for proc			pjt
  *	
  */
 
@@ -26,7 +27,7 @@ string defv[] = {
     "t=0.0\n        Time to test potential at",
     "dr=\n          Differential step for (Poisson) density map",
     "ndim=3\n       Poisson map using 2D or 3D derivatives",
-    "VERSION=1.2\n  12-jun-98 PJT",
+    "VERSION=1.2a\n 13-sep-01 PJT",
     NULL,
 };
 
@@ -36,7 +37,7 @@ string usage = "Create potential or density image from a NEMO potential";
 # define MAXPT 2048
 #endif
 
-local proc mypot;             /* pointer to potential calculator function */
+local potproc_double mypot;    /* pointer to potential calculator function */
 
 void nemo_main(void)
 {

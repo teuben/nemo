@@ -22,6 +22,7 @@
  *		   c 20-feb-97  fixed for SINGLEPREC
  *	       V1.6   8-apr-97  find resonances, more SINGLEPREC needed PJT
  *                 a 19-feb-01  bad bug in mode=LV, used the wrong radius
+ *      	   b 13-sep-01  better prototype for proc
  */
 
 #include <stdinc.h>
@@ -57,7 +58,7 @@ string defv[] = {
     "headline=\n         Optional plot label for identification",
     "in=\n               Optional input rotation curve table",
     "cols=1,2\n          Columns for r, v, dr, dv (use 0 when not present)",
-    "VERSION=1.6a\n      19-feb-01 PJT",
+    "VERSION=1.6b\n      13-sep-01 PJT",
     NULL,
 };
 
@@ -67,7 +68,7 @@ string usage = "display rotation curve of composite potentials";
 #define MAXPT 10000
 #endif
 
-proc mypot1, mypot2, mypot3, mypot4;
+potproc_double mypot1, mypot2, mypot3, mypot4;
 
 real xplot[2], yplot[2];
 char plotmsg[256];

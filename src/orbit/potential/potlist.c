@@ -16,6 +16,7 @@
  *			    c   22-mar-95       print out pattern speed
  *			    d   20-feb-97	adapted for SINGLEPREC
  *                          e   12-jun-98       fixed bug in NDIM=3
+ *			    f   13-sep-01       potproc prototypes
  */
 
 #include <stdinc.h>
@@ -35,7 +36,7 @@ string defv[] = {
     "omega=\n       Use this instead of any returned pattern speed",
     "format=%g\n    Format used to print numbers",
     "ndim=3\n       Poission test in 3-dim  (XYZ) or 2-dim (XY)",
-    "VERSION=3.2e\n 12-jun-98 PJT",
+    "VERSION=3.2f\n 13-sep-01 PJT",
     NULL,
 };
 
@@ -45,7 +46,7 @@ string usage = "show a NEMO potential";
 #define MAXPT 10001
 #endif
 
-proc mypot;             /* pointer to potential calculator function */
+potproc_double mypot;     /* pointer to potential calculator function */
 
 void nemo_main(void)
 {
