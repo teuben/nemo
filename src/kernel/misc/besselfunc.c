@@ -1,10 +1,16 @@
 /*
  * BESSELFUNC.C: polynomial approximations to Bessel functions.
+ *		 bessi0, bessi1, bessk0, bessk1
  *
  * Reference: Abramowitz & Stegun, chapter 9.
  *
  *	29-jul-92   deleted explicit math.h references for convex    PJT
  *	22-jan-95   ansi prototypes				     pjt
+ *
+ *  TODO:  gnu-C libraries have the bessel functions builtin...
+ *         check out:
+ *		 besj0  besj1  besjn  besy0  besy1  besyn
+ *		dbesj0 dbesj1 dbesjn dbesy0 dbesy1 dbesyn
  */
 
 #include <stdinc.h>
