@@ -1,0 +1,167 @@
+#! /bin/csh -f
+# 
+# This script compares two directory trees.
+#
+# 13-aug-99     documented a bit
+# 16-dec-99     only compare makefiles, source code etc.
+# 27-aug-00     fix foreach() loop pickup up wildcards from `ls`
+# 11-mar-01     optionally take dir1 from a list
+# 18-mar-01     also report how many were worked on in the end
+# 30-mar-01     allow dir1/dir2 to be relative directories
+
+if ($#argv < 2) then
+  echo "Usage: $0 [-option] dir1 dir2"
+  echo "    -c        count, don't diff"
+  echo "    -m        also report missing files in dir2"
+  echo "    -tk       use tkdiff instead of diff"
+  echo "    -s N      start at difference file N instead of 1"
+  echo "    -1 list   take dir1"
+  echo Compare all files from dir1 with those in dir2
+  echo Directory name dirs must be absolute
+  exit 1
+endif
+
+set count=0
+set total=0
+set missing=0
+set start=0
+set diff=diff
+
+set list=()
+
+
+# -----------------------------------------------------------------------
+#			parse command line options
+loop:
+
+if ("X$1" == "X-c") then
+  set count=1
+  shift argv
+endif
+
+if ("X$1" == "X-m") then
+  set missing=1
+  shift argv
+endif
+
+if ("X$1" == "X-tk") then
+  set diff=tkdiff
+  shift argv
+endif
+
+if ("X$1" == "X-s") then
+  shift argv
+  set start=$1
+  shift argv
+endif
+
+if ("X$1" == "X-1") then
+  shift argv
+  echo Processing list $1
+  set list=(`cat $1`)
+  shift argv
+endif
+
+if ($#argv > 2) goto loop
+#
+# -----------------------------------------------------------------------
+
+if ($#argv != 2) then
+  echo "Need 2 more arguments for dir1 and dir2 ($*)"
+  exit 0
+endif
+
+set dir1=$1
+set dir2=$2
+
+#set diff=(runpjt ~/bin/tkdiff)
+#set diff=echo
+
+# compare a list with another directory
+
+if ($#list > 0) then
+  foreach file ($list)
+    set h=$file:h
+    set t=$file:t
+    ls -l $dir1/$file $dir2/$file
+    $diff $dir1/$file $dir2/$file
+  end
+  exit 0
+endif
+
+
+# compare two directories
+
+if (`echo $dir1 | cut -c1` != "/") then
+  echo "### Warning: Making relative directory $dir1 absolute"
+  set tmp=$dir1
+  set dir1=`pwd`/$tmp
+endif
+
+if (`echo $dir2 | cut -c1` != "/") then
+  echo "### Warning: Making relative directory $dir1 absolute"
+  set tmp=$dir2
+  set dir2=`pwd`/$tmp
+endif
+
+dir2:
+
+echo "----------------------------------------------------------------------"
+echo "Comparing Full dir1=$dir1 with Optional dir2=$dir2"
+cd $dir1
+set dirs=(`find . -type d -print`)
+echo Found $#dirs directories in the $dir1 distribution
+
+foreach d ($dirs)
+  set r=$dir2/$d
+  if (-d $r) then
+    pushd $dir1/$d >& /dev/null
+    foreach f (`echo *`)
+        if (! -d $f) then
+          if (-e $r/$f) then
+             cmp -s $f $r/$f 
+             if ($status) then
+                set rn=(`find $dir2/$d -maxdepth 1 -name $f -newer $dir1/$d/$f -print`)
+                echo $#rn $d/$f
+                if ($count) then
+		  @ count++
+		endif
+		if ($count == 0) then
+		    @ start--
+		    if ($start < 0) then
+  		        ls -l $f 
+           	        ls -l $r/$f 
+			echo $start ... $d/$f
+                        $diff $dir1/$d/$f $dir2/$d/$f 
+		    else
+			echo $start ... Skipping $d/$f
+	            endif
+                endif
+	     else
+		if ($count) then
+		   @ total++
+		endif
+	     endif
+	  else
+	     if ($missing) then
+	       echo "MISSING $dir1/$d/$f $r/$f "
+	       @ missing++
+	     endif
+          endif
+        endif
+    end
+    popd >& /dev/null
+  else
+    echo "### Directory $r does not exist in dir2"
+  endif
+end
+
+if ($count) then
+  @ count--
+  echo Counted $count / $total files different
+endif
+if ($missing) then
+  @ missing--
+  echo Found $missing files that were not in $dir2
+endif
+echo "----------------------------------------------------------------------"
