@@ -1,0 +1,27 @@
+#! /bin/csh -f
+#
+unsetenv MANPATH
+if ($?TIPSYHELPDIR) then
+  setenv MANPATH $TIPSYHELPDIR
+else if ($?NEMO) then
+  set t=(`ls -d $NEMO/usr/washington/tipsy* $NEMO/usr/tipsy/tipsy*`)
+  foreach man ($t/man)
+    if (-d $man) then
+       setenv MANPATH $man
+    endif
+  endif
+else
+  echo "TIPSYHELPDIR not set .. cannnot determine tipsy man"
+  echo "Also, no NEMO/src/washington/tipsy* found"
+  exit 0
+endif
+
+
+if ($?MANPATH == 0) exit 0
+
+if ($#argv == 0) then
+  echo "xman -notopbox -bothshown -helpfile $MANPATH/cat1/tipsy.1"
+  xman -notopbox -bothshown -helpfile $MANPATH/cat1/tipsy.1 &
+else
+  man $*
+endif
