@@ -299,6 +299,7 @@ string error_string = NULL;
 /* local functions */
 
 local void initparam_out(void);
+local void finiparam_out(void);
 local void scan_environment(void);
 local void save_history(string *argv);
 local void printhelp(string help);
@@ -326,6 +327,7 @@ local void set_help(string);
 local void set_review(string);
 local void set_tcl(string);
 local void set_yapp(string);
+local void set_outkeys(string);
 local void local_error(string);
 
 /* external NEMO functions */
@@ -473,6 +475,8 @@ void initparam(string argv[], string defv[])
 		set_tcl(parvalue(argv[i]));
 	      else if (streq(name, "error")) /*    allowed error count? */
 		set_error(parvalue(argv[i]));
+	      else if (streq(name, "outkeys")) /*    output keywords ? */
+		set_outkeys(parvalue(argv[i]));
 	      else
 		error("Parameter \"%s\" unknown", name);
             } /* j>0 (i.e. program/system keyword) */
@@ -617,8 +621,15 @@ local void initparam_out()
   int nout = -1;
   if (outdefv && *outdefv)
      nout = xstrlen(outdefv, sizeof(string));     /* count # params + progname */  
-  dprintf(0,"Found %d output keywords\n",nout);
+  /*  
+   * here comes 
+   *      - parsing code for outdefv[]
+   *      - build linear list
+   */
+
+  dprintf(1,"Found %d output keywords\n",nout);
 }
+
 
 /*
  * FINIPARAM: finish up any outstanding requests. If INTERACT is not defined
@@ -660,6 +671,18 @@ void finiparam()
 #endif
 
 }
+
+local void finiparam_out()
+{
+  /*
+   * this will
+   *    - read the $NEMODEF/nemokeys.dat file
+   *    - replace values from outdefv[] 
+   *    - write the $NEMODEF/nemokeys.dat file
+   * Also needs to take care of file locking ..
+   */
+}
+
 
 /*
  * scan the environment variables, and set the ones NEMO wants to
@@ -2468,6 +2491,13 @@ local void set_help(string arg)
     help_string = scopy(arg);
     if ((cp = strpbrk(help_string,"0123456789"))!=NULL)  /* isnum? */
         help_level = atoi(cp);  /* if so, change help_level */
+}
+
+local void set_outkeys(string arg)
+{
+    char *cp;
+    
+    warning("No output key processing done yet (%s)",arg);
 }
 
 local void set_debug(string arg)
