@@ -17,6 +17,8 @@ string defv[] = {
 
 string usage = "Unwrap a f90 table";
 
+string cvsid = "$Id$;
+
 #ifndef MAX_LINELEN
 #define MAX_LINELEN  128
 #endif
