@@ -1,0 +1,72 @@
+.TH SNAPVIRIAL 1NEMO "8 April 1997"
+.SH NAME
+snapvirial \- scale snapshots while retaining or setting virial ratio
+.SH SYNOPSIS
+\fBsnapvirial in=\fIin_file\fP \fBout=\fIout_file\fP [parameter=value] .\|.\|.
+.SH DESCRIPTION
+\fIsnapvirial\fP copies an N-body system from \fBin\fP to \fBout\fP,
+scaling particle qantities such that the virial ratio is either
+retained or gets a specified value. For a more manual rescale use
+\fIsnapscale(1NEMO)\fP.
+.PP
+The input snapshot must not only contain masses and phase space
+information, but also potential, as to make the rescaling computation
+a linear operation. Depending on accuracy needed, a general algorithm as
+in \fIhackforce(1NEMO)\fP can be used to add potentials and forces 
+to a snapshot.
+.SH PARAMETERS
+The following parameters are recognized:
+.TP 24
+\fBin=\fIin_file\fP
+input file, in \fIsnapshot\fP(5NEMO) format.  Default: none.
+.TP
+\fBout=\fIout_file\fP
+output file, also \fIsnapshot\fP format.  Default: none.
+.TP
+\fBmscale=\fIbool\fP
+Scale the masses? [default: \fBf\fP].
+.TP
+\fBrscale=\fIbool\fP
+Scale the positions? [default: \fBt\fP].
+.TP
+\fBvscale=\fIbool\fP
+Scale the velocities? [default: \fBt\fP].
+.TP
+\fBtimes=\fItime-ranges\fP
+Only snapshots with time values within \fItimes-ranges\fP, which is
+of the form \fBts[:te],...\fP, will be scaled and 
+copied. [default: \fBall\fP].
+.TP
+\fBvirial=\fP\fIpositive ratio\fP
+Virial ratio (must be non-negative) to be obtained - rescaling is done
+such that a virial ratio of |2T/W| is obtained. If no value is given,
+the old virial ratio is retained [default: not used].
+.SH "SEE ALSO"
+snapscale(1NEMO), hackforce(1NEMO), snapshot(5NEMO), units(5NEMO)
+.SH BUGS
+It is considered an error when either the potential energy is
+positive or the kinetic energy is negative. This usually requires the
+snapshot to be in the center of mass frame. Use \fIsnapcenter(1NEMO)\fP
+if need be. 
+.PP
+This program has no intelligence about the shape of the system, and hence
+does a simple rescaling of the required quantities. 
+It thus works quite well for spherical galaxies.
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +3.0i
+~/src/nbody/trans   	snapvirial.c
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+12-March-89	V1.0: created          	PJT
+ 6-apr-89	V1.1: added keywords 2t/w (bug?)	PJT
+11-aug-89	V1.2: mscale added and logic improved       PJT
+29-oct-90	V1.3: fixed decision bug	PJT
+11-nov-91	V1.3a: man page clarifications	PJT
+.fi
+
+
