@@ -26,6 +26,7 @@
  *      a  8-oct-01   pjt       flush buffer when put_tes() at top level
  * V 3.0  23-may-02   pjt    Support for >2GB (large file size)
  *        17-mar-03   pjt    fix serious memory usage bug for f2d conversion
+ *        18-jun-03   pjt    <docs>
  *
  *  Although the SWAP test is done on input for every item - for deferred
  *  input it may fail if in the mean time another file was read which was
@@ -43,7 +44,6 @@
 
 extern int convert_d2f (int, double *, float *);
 extern int convert_f2d (int, float *, double *);
-extern int bswap (void *, int, int);
 
 
 /*
@@ -1375,7 +1375,8 @@ local strstkptr findstream(stream str)
 	    stfree = sspt;			/*     save free slot ptr   */
     }
     if (stfree == NULL)				/* no free slot left?	    */
-	error("findstream: no free slots");
+      error("findstream: no free slots");
+
     stfree->ss_str = str;			/* init saved stream	    */
     stfree->ss_stk[0] = NULL;			/* clear pending item	    */
     stfree->ss_stp = -1;			/* empty item stack	    */
@@ -1422,6 +1423,6 @@ void strclose(stream str)
     sspt->ss_str = NULL;			/* remove from strtable	    */
     last = NULL;                                /* also removed quick access*/
     strdelete(str,FALSE);                       /* delete file if scratch   */
-    fclose(str);				/* and close it up	    */
+    fclose(str);				/* and close it up for sure */
 }
 
