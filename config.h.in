@@ -169,6 +169,9 @@
 /* The size of a `float', as computed by sizeof. */
 #undef SIZEOF_FLOAT
 
+/* The size of a `double', as computed by sizeof. */
+#undef SIZEOF_DOUBLE
+
 /* The size of a `int', as computed by sizeof. */
 #undef SIZEOF_INT
 
