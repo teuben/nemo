@@ -1,4 +1,4 @@
-.TH SNAPSPLIT 1NEMO "22 July 1995"
+.TH SNAPSPLIT 1NEMO "2 June 2004"
 .SH NAME
 snapsplit \- split a snapshot into pieces
 .SH SYNOPSIS
@@ -25,24 +25,32 @@ is also given:
 \fBin=\fP
 Input snapshot      
 No default.
-.TP 20
+.TP
 \fBout=\fP
 Output snapshot. If a \fIprintf(3)\fP-like format specification
 is used.
 No default.
-.TP 20
+.TP
 \fBtimes=\fP
-Times to select     
+Times to select. 
 default: \fIall\fP.
-.TP 20
+.TP
 \fBnbody=\fP
 Size of one snapshot . At least one of \fBnbody=\fP and
 \fBnsnap=\fP needs to be given. 
 No default.
-.TP 20
+.TP
 \fBnsnap=\fP
 Number of pieces to cut a snapshot into.
 No default.
+.SH EXAMPLE
+The following example splits a 1000 body snapshot in pieces of 250 bodies, and views
+the 2nd piece:
+.nf
+  % mkplummer p1000 1000
+  % snapsplit p1000 p1000.split nbody=250
+  % snapplot p1000.split times=#2
+.fi
 .SH SEE ALSO
 snapmerge(1NEMO)
 .SH FILES
