@@ -1,8 +1,7 @@
 /*
  * MKFLOWDISK.C: set up a disk with initial conditions taken from 
- *               a potential flow (see flowcode)
+ *               a potential flow (see also flowcode)
  *
- *	
  *	original version: 18-nov-03	Peter Teuben - Maryland
  */
 
@@ -27,22 +26,25 @@ string defv[] = {
     "mass=0\n             total mass of disk",
     "uniform=t\n          uniform surface density, or use density from potfile?",
     "k=1\n                spiral wavenumber  (> 0 trailing spirals)",
-    "phase=0\n            phase offset of spiral at rmax",
+    "phase=0\n            phase offset of spiral at rmax (in degrees)",
     "seed=0\n		  random number seed",
     "nmodel=1\n           number of models",
+    "test=f\n             test shape of spiral",
     "headline=\n	  text headline for output ",
-    "VERSION=1.0\n	  18-nov-03 PJT",
+    "VERSION=1.0\n	  19-nov-03 PJT",
     NULL,
 };
 
 string usage = "toy spiral density perturbation in a uniform disk";
 
 
-local real rmin, rmax, sigma[3];
+local real rmin, rmax;
 local int  ndisk, nmodel;
-local real SPa, SPk, SPw;     /* spiral parameters */
+local real SPk;     /* spiral parameters */
 local real width;
 local real totmass;
+local real offset;
+local bool Qtest;
 
 local Body *disk = NULL;
 
@@ -62,12 +64,11 @@ nemo_main()
     ndisk = getiparam("nbody");
     nmodel = getiparam("nmodel");
     totmass = getdparam("mass");
+    offset = getdparam("phase") * PI / 180.0;    
+    Qtest = getbparam("test");
     
-    SPa = 1.0;   /* getdparam("a") */
     SPk = - getdparam("k");	/* corrected for rot counter clock wise */
     
-    SPw = 1.0;  /* SPw = getdparam("w"); */
-
     init_xrandom(getparam("seed"));
 
     outstr = stropen(getparam("out"), "w");
@@ -103,10 +104,9 @@ writegalaxy(stream outstr)
 testdisk(int n)
 {
     Body *dp;
-    real rmin2, rmax2, r_i, theta_i, msph_i, vcir_i, pot_i, mass_i, sigma_i;
+    real rmin2, rmax2, r_i, theta_i, msph_i, vcir_i, pot_i, mass_i;
     real uni, gau, unifrac, f;
     real cost, sint;
-    bool Qsigma = (sigma[0]>0.0 || sigma[1]>0.0);
     int i, ndim=NDIM;
     double pos_d[NDIM], acc_d[NDIM], vel_d[NDIM], pot_d, time_d = 0.0;
 
@@ -118,8 +118,12 @@ testdisk(int n)
     for (dp=disk, i = 0; i < ndisk; dp++, i++) {
 	Mass(dp) = mass_i;
         r_i = sqrt(rmin2 + xrandom(0.0,1.0) * (rmax2 - rmin2));
-        theta_i = grandom(0.0,TWO_PI);
-        theta_i -= SPk * r_i * TWO_PI;    /* positive SPk is trailing SP  */
+	if (Qtest)
+	  theta_i = 0.0;
+	else
+	  theta_i = grandom(0.0,TWO_PI);
+	theta_i += offset;
+        theta_i -= SPk * (r_i-rmax) * TWO_PI;    /* positive SPk is trailing SP  */
         cost = cos(theta_i);
         sint = sin(theta_i);
 	Phase(dp)[0][0] = pos_d[0] = r_i * sint;        /* set positions      */
