@@ -2,8 +2,15 @@
  * CCDGEN:   create 2D 'astronomical' type objects, modeled after MIRIAD'd imgen
  *
  *      4-jan-05        V0.1: for Kartik's bars modeling experiment 
- *                      (IMGEN is just tooooo cumbersome, and so is ccdmath)
+ *                      (IMGEN is just tooooo cumbersome, and so is ccdmath) 
+ *      6-jan-05        V0.7: added many more models and features. added factor=
  *                      
+ * TODO:
+ *    - find out why the normalization was PI, and not TWO_PI, which worked before.
+ *       (this happened when I changed from 1 to 1/3600 scaling factor in the examples)
+ *    - add a few more of the imgen models
+ *    - replace crpix/crval/cdelt with cell= and maybe radec= ? as in imgen
+ *    - if A=0, then factor most like won't work
  */
 
 #include <stdinc.h>
@@ -25,11 +32,12 @@ string defv[] = {
   "pa=0\n          Position Angle of disk in which object lives",
   "inc=0\n         Inclination Angle of disk in which object lives",
   "totflux=f\n     Interpret peak values (spar[0]) as total flux instead",
+  "factor=1\n      Factor to multiple input image by before adding object",
   "crpix=\n        Override/Set crpix (1,1,1) // ignored",
   "crval=\n        Override/Set crval (0,0,0) // ignored",
   "cdelt=\n        Override/Set cdelt (1,1,1) // ignored",
   "seed=0\n        Random seed",
-  "VERSION=0.6\n   5-jan-05 PJT",
+  "VERSION=0.7\n   6-jan-05 PJT",
   NULL,
 };
 
@@ -58,6 +66,7 @@ real pa,inc,center[2];
 real sinp, cosp, sini, cosi;
 
 bool Qtotflux;
+real factor;
 real surface=1.0;
 
 
@@ -73,7 +82,11 @@ local void object_bar(int npars, real *pars);
 local void object_ferrers(int npars, real *pars);
 local void object_spiral(int npars, real *pars);
 local void object_noise(int npars, real *pars);
-
+local void object_j1x(int npars, real *pars);
+local void object_isothermal(int npars, real *pars);
+local void object_comet(int npars, real *pars);
+local void object_jet(int npars, real *pars);
+local void object_shell(int npars, real *pars);
 
 extern string *burststring(string,string);
 
@@ -93,6 +106,7 @@ void nemo_main ()
   if (npar < 0) error("Syntax error %s",getparam("spar"));
 
   Qtotflux = getbparam("totflux");
+  factor = getdparam("factor");
 
   pa = getdparam("pa");
   inc = getdparam("inc");
@@ -161,6 +175,16 @@ void nemo_main ()
     object_spiral(npar,spar);
   else if (streq(object,"noise"))
     object_noise(npar,spar);
+  else if (streq(object,"jet"))
+    object_jet(npar,spar);
+  else if (streq(object,"j1x"))
+    object_j1x(npar,spar);
+  else if (streq(object,"isothermal"))
+    object_isothermal(npar,spar);
+  else if (streq(object,"comet"))
+    object_comet(npar,spar);
+  else if (streq(object,"shell"))
+    object_shell(npar,spar);
   else
     error("Unknown object %g",object);
   
@@ -320,7 +344,8 @@ local void object_flat(int npars, real *pars)
 
   for (j=0; j<ny; j++)
     for (i=0; i<nx; i++)
-      MapValue(iptr,i,j) += A;
+      MapValue(iptr,i,j) = factor*MapValue(iptr,i,j) + A;
+
 }
 
 local void object_exp(int npars, real *pars)
@@ -329,7 +354,7 @@ local void object_exp(int npars, real *pars)
   int j,ny = Ny(iptr);
   real A = 1.0;
   real h = 1.0;
-  real x1,y1,x2,y2,r,arg;
+  real x1,y1,x2,y2,r,arg,value;
 
   if (npar > 0) A = pars[0];
   if (npar > 1) h = pars[1];
@@ -351,7 +376,8 @@ local void object_exp(int npars, real *pars)
       r = sqrt(x2*x2 + sqr(y2/cosi));
       arg = r/h;
       dprintf(2,"%d %d : %g %g %g %g  %g\n",i,j,x1,y1,x2,y2,arg);
-      if (arg < 100) MapValue(iptr,i,j) += A * exp(-arg);
+      value = (arg < 100) ? A * exp(-arg) : 0.0;
+      MapValue(iptr,i,j) = factor*MapValue(iptr,i,j) + value;
     }
   }
 }
@@ -362,7 +388,7 @@ local void object_gauss(int npars, real *pars)
   int j,ny = Ny(iptr);
   real A = 1.0;
   real h = 1.0;
-  real x1,y1,x2,y2,r,arg;
+  real x1,y1,x2,y2,r,arg,value;
 
   if (npar > 0) A = pars[0];
   if (npar > 1) h = pars[1];
@@ -384,7 +410,8 @@ local void object_gauss(int npars, real *pars)
       r = sqrt(x2*x2 + sqr(y2/cosi));
       arg = r/h;
       dprintf(2,"%d %d : %g %g %g %g   %g\n",i,j,x1,y1,x2,y2,arg);
-      if (arg < 100) MapValue(iptr,i,j) += A * exp(-0.5*arg*arg);
+      value = (arg < 100) ?  A * exp(-0.5*arg*arg) : 0.0;
+      MapValue(iptr,i,j)  = factor*MapValue(iptr,i,j) + value;
     }
   }
 }
@@ -397,7 +424,7 @@ local void object_bar(int npars, real *pars)
   real h = 1.0;
   real e = 0.0;
   real b = 0.0;
-  real x1,y1,x2,y2,x3,y3,r,arg;
+  real x1,y1,x2,y2,x3,y3,r,arg,value;
   real sinb,cosb,omba;
 
   if (npar > 0) A = pars[0];
@@ -430,7 +457,8 @@ local void object_bar(int npars, real *pars)
 
       r = sqrt(x3*x3+y3*y3);
       arg = r/h;
-      if (arg < 100) MapValue(iptr,i,j) += A * exp(-arg);
+      value = (arg < 100) ? A * exp(-arg) : 0.0;
+      MapValue(iptr,i,j) = factor*MapValue(iptr,i,j) + value;
     }
   }
 }
@@ -446,8 +474,8 @@ local void object_ferrers(int npars, real *pars)
   real e = 0.0;   /* 1-b/a */
   real b = 0.0;   /* phi */
   real p = 1.0;   /* power factor */
-  real x1,y1,x2,y2,x3,y3,r,arg;
-  real amp,phi,value,sum;
+  real x1,y1,x2,y2,x3,y3,r,arg,value;
+  real amp,phi,sum;
   real sinb,cosb;
 
   if (npar > 0) A = pars[0];
@@ -455,7 +483,7 @@ local void object_ferrers(int npars, real *pars)
   if (npar > 2) e = pars[2];
   if (npar > 3) b = pars[3];
   if (npar > 4) p = pars[4];
-  dprintf(0,"ferrers: %g %g %g %g %g %g\n",A,h,b,p,e);
+  dprintf(0,"ferrers: %g %g %g %g %g\n",A,h,e,b,p);
 
   if (A==0) return;
 
@@ -483,16 +511,15 @@ local void object_ferrers(int npars, real *pars)
 	y3 = (x2*sinb  + y2*cosb)/(1-e);
 
 	r = (x3*x3+y3*y3)/(h*h);
-	if (r > 1) continue;
+	value = r < 1 ? A * pow(1.0-r, p) : 0.0;
 
-	value = A * pow(1.0-r, p);
 	if (Qtotflux) {   
 	  if (l==0) 
 	    sum += value;
 	  else
-	    MapValue(iptr,i,j) += value;
+	    MapValue(iptr,i,j) = factor*MapValue(iptr,i,j) + value;
 	} else
-	  MapValue(iptr,i,j) += value;
+	  MapValue(iptr,i,j) = factor*MapValue(iptr,i,j) + value;
       } /* i */
     } /* j */
   } /* k */
@@ -509,8 +536,8 @@ local void object_spiral(int npars, real *pars)
   real p = 1.0;   /* 1/2 power of cos */
   real r0 = 0.0;  /* starting radius */
   real p0 = 0.0;  /* starting angle */
-  real x1,y1,x2,y2,x3,y3,r,arg;
-  real amp,phi,value,sum;
+  real x1,y1,x2,y2,x3,y3,r,arg,value;
+  real amp,phi,sum;
 
   if (npar > 0) A = pars[0];
   if (npar > 1) h = pars[1];
@@ -542,19 +569,22 @@ local void object_spiral(int npars, real *pars)
 	x2 =  -x1*sinp - y1*cosp;
 	y2 =  (x1*cosp - y1*sinp)/cosi;
 	r = sqrt(x2*x2+y2*y2);
-	if (r < r0) continue;
-	/* ? should match this up better so we can connect bar and spiral ? */
-	phi = atan2(y2,x2) + k*(r-r0) + p0;
-	amp = pow(cos(phi),2*p);
-	arg = r/h;
-	value = (arg < 100) ? A * amp * exp(-arg) :  0.0;
+	if (r < r0) 
+	  value = 0.0;
+	else {
+	  /* ? should match this up better so we can connect bar and spiral ? */
+	  phi = atan2(y2,x2) + k*(r-r0) + p0;
+	  amp = pow(cos(phi),2*p);
+	  arg = r/h;
+	  value = (arg < 100) ? A * amp * exp(-arg) :  0.0;
+	}
 	if (Qtotflux) {   
 	  if (l==0) 
 	    sum += value;
 	  else
-	    MapValue(iptr,i,j) += value;
+	    MapValue(iptr,i,j) = factor*MapValue(iptr,i,j) + value;
 	} else
-	  MapValue(iptr,i,j) += value;
+	  MapValue(iptr,i,j) = factor*MapValue(iptr,i,j) + value;
       } /* i */
     } /* j */
   } /* k */
@@ -581,11 +611,80 @@ local void object_noise(int npars, real *pars)
     dprintf(0,"noise: m->%g  s->%g\n",m,s);
   }
   
-
   for (j=0; j<ny; j++)
     for (i=0; i<nx; i++)
-      MapValue(iptr,i,j) += grandom(m,s);
+      MapValue(iptr,i,j) = factor*MapValue(iptr,i,j) + grandom(m,s);
 }
 
 
 
+local void object_j1x(int npars, real *pars)
+{
+  warning("alas, j1x not supported yet");
+}
+
+local void object_isothermal(int npars, real *pars)
+{
+  int i,nx = Nx(iptr);
+  int j,ny = Ny(iptr);
+  int l, lmax;
+  real A = 1.0;   /* peak */
+  real h = 1.0;   /* size */
+  real p = -0.5;  /* power factor */
+  real x1,y1,x2,y2,x3,y3,r,arg,value;
+  real amp,phi,sum;
+  real sinb,cosb;
+
+  if (npar > 0) A = pars[0];
+  if (npar > 1) h = pars[1];
+  if (npar > 2) p = pars[2];
+  dprintf(0,"isothermal: %g %g %g \n",A,h,p);
+
+  if (A==0) return;
+
+  lmax = Qtotflux ? 2 : 1;
+
+  for (l=0; l<lmax; l++) {     /* 1st loop: sum up the flux   if in 2nd loop: normalize */
+    if (l==0) 
+      sum = 0.0;
+    else {
+      A /= sum;
+      dprintf(0,"isothermal: A->%g\n",A);
+    } 
+    for (j=0; j<ny; j++) {
+      y1 = (j-center[1])*Dy(iptr) + Ymin(iptr);
+      for (i=0; i<nx; i++) {
+	x1 = (i-center[0])*Dx(iptr) + Xmin(iptr);
+	
+	x2 =  -x1*sinp - y1*cosp;
+	y2 =  (x1*cosp - y1*sinp)/cosi;
+
+	r = (x2*x2+y2*y2)/(h*h);
+	value = A * pow(1.0+r, p);
+
+	if (Qtotflux) {   
+	  if (l==0) 
+	    sum += value;
+	  else
+	    MapValue(iptr,i,j) = factor*MapValue(iptr,i,j) + value;
+	} else
+	  MapValue(iptr,i,j) = factor*MapValue(iptr,i,j) + value;
+      } /* i */
+    } /* j */
+  } /* k */
+}
+
+local void object_comet(int npars, real *pars)
+{
+  warning("alas, comet not supported yet");
+}
+
+local void object_jet(int npars, real *pars)
+{
+  warning("alas, jet not supported yet");
+}
+
+local void object_shell(int npars, real *pars)
+{
+  warning("alas, shell not supported yet");
+}
