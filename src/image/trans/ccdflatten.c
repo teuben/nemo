@@ -1,5 +1,6 @@
 /* 
- * CCDFLATTEN: flattening an image of peaks
+ * CCDFLATTEN: flattening an image of single pixel peaks, 
+ *             a quick alternative to ccdmedian
  *
  *       2-aug-04       PJT     written
  *                      
@@ -18,12 +19,13 @@ string defv[] = {
 	"out=???\n      Output image file",
 	"nsigma=20\n	cutoff in terms of sigma",
 	"n=1\n          width of area around pixel to get sigma",
-	"VERSION=0.1\n  2-aug-04 PJT",
+	"VERSION=0.1a\n 2-feb-05 PJT",
 	NULL,
 };
 
 string usage = "flattening an image of single pixel peaks";
 
+string cvsid = "$Id$";
 
 
 #if 0
@@ -65,7 +67,7 @@ void nemo_main()
     count = 0;
     for (j=n; j<ny-n; j++) {
       for (i=n; i<nx-n; i++) {
-	ini_moment(&m,2);
+	ini_moment(&m,2,0);
 	for (j1=j-n; j1<=j+n; j1++) {
 	  for (i1=i-n; i1<=i+n; i1++)
 	    if (i1!=i || j1!=j)
