@@ -7,9 +7,10 @@
 #   mar-2004            no more NEMOBIN bug; added -d flag to cvs update
 #   apr-2004            handle make vs. gmake and other names of make
 #   nov-2004            be more generous if full filenames are used: chop them off
+#   dec-2004            look for mknemo.d scripts first
 #
 #
-set version="MKNEMO Version 2.6 11-nov-04"
+set version="MKNEMO Version 3.0 3-dec-04"
 if ($#argv == 0) goto usage
 set old_argv=($*)
 
@@ -19,6 +20,7 @@ set newbins=0
 set errs=0
 set logfile=$NEMO/adm/install/mknemo.log
 set make=make
+set sdir=$NEMO/src/scripts/mknemo.d
 if (! -w $logfile) then
   echo "MKNEMO> Warning: you have no write permission on $logfile; using /dev/null instead"
   set logfile=/dev/null
@@ -160,6 +162,11 @@ foreach f ($argv)
  set file=$ft:r
  # echo FILE=$file F=$f FT=$ft
  set err=0
+ # if there is a mknemo.d script, use it.
+ if (-e $sdir/$file) then
+   $sdir/$file
+   continue
+ endif
  # if a local file, use that to compile, don't search for it
  if (-e $file.c) then
    echo -n "MKNEMO> Using local ${file}.c: "
