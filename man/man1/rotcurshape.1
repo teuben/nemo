@@ -1,15 +1,15 @@
-.TH ROTCURSHAPE 1NEMO "19 March 2003"
+.TH ROTCURSHAPE 1NEMO "11 October 2003"
 .SH NAME
 rotcurshape \- fit parameters to a velocity field using shaped rotation curves in a co-planar disk
 .SH SYNOPSIS
 \fBrotcurshape in=\fPvelfie [parameters=values ...]
 .SH DESCRIPTION
-\fIrotcurshape\fP derives kinematic parameters from an observed
+\fIrotcurshape\fP derives the rotation curve and kinematic parameters from an observed
 velocity field of a coplanar galactic disk by fitting a (set of) rotation curve shape(s).
 Instead of dividing the galactic disk in a set of rings (see \fIrotcur(1NEMO)\fP)
-it fits the shape of the rotation curve in a single plane. This is particularly
+it fits the shape of the rotation curve in an annulus of a planar disk. This is particularly
 useful for low inclination galaxies and/or for central regions of a galaxy where
-normally the rotation curve would vary accross the ring.
+normally the rotation curve would vary accross the ring/annulus.
 .PP
 Much like \fIrotcur\fP, this program does a non-linear least-squares-fit to the function:
 .PP
@@ -18,7 +18,7 @@ Much like \fIrotcur\fP, this program does a non-linear least-squares-fit to the 
 .nf
          v(x,y) = VSYS + VROT(r) * cos(theta) * sin(INC)
 
-where
+where again
 
                       - (x-XPOS) * sin(PA) + (y-YPOS) * cos(PA) 
           cos(theta) = -----------------------------------------
@@ -58,16 +58,17 @@ radial velocity) of the galaxy.
 .PP
 Values equal the undefined value (currently 0.0) are ignored in the
 fit. See \fIccdmath(1NEMO)\fP or \fIfitsccd(1NEMO)\fP on how to
-create a velocity field with such undefined values. See also
-the EXAMPLES below.
+create a velocity field with such undefined values (see also
+EXAMPLES below).
 .SH PARAMETERS
 The following parameters are known (those with ** are still here
-since we clones this off rotcur, but are likely to be slashed shortly):
+since we cloned this program off rotcur, but are likely to be slashed or
+(re)implemented):
 .TP 25
 \fBin\fP=\fIv_image|xyv_tab|rv_tab\fP
 Input velocity field map, normally in \fIimage(5NEMO)\fP format.
 Input data can also be a table, see \fBimagemode=\fP and \fBrotcurmode=\fP below
-how to control input tables.
+how to control the input table.
 No default.
 .TP
 \fBradii\fP=\fIr0,r1\fP
@@ -105,12 +106,12 @@ Valid options are \fBreceding\fP, \fBapproaching\fP
 or \fBboth\fP side(s). [Default: \fBboth\fP].
 .TP
 \fBweight\fP=
-Choice of weighting function with which points are weighed into
+Choice of geometric weighting function with which points are weighed into
 the least squares solution as a function of galactic angle away
 from the major axis. Valid options are: \fBuniform\fP, \fBcosine\fP,
 and \fBcos-squared\fP.  If a density is given (see \fBdens=\fP),
 the weight function is multiplied by this geometric weight factor.
-[Default:q \fBuniform\fP].
+[Default: \fBuniform\fP].
 .TP
 \fBfixed\fP=
 List of disk geometry parameters to be kept fixed during the fit.
@@ -144,13 +145,12 @@ If specified, this output table is used in \fIappend\fP mode!
 [Default: not used].
 .TP
 \fBresid\fP=
-If specified, this will contain a listing of X, Y, Velocity
-and Residual Velocities in the disk if the input file was a 
-table (see also \fBimagemode=\fP).
-If however the input map was an image, this
-will be an \fIimage(5NEMO)\fP of the residual (OBS-FIT).
+Residuals (OBS-FIT) if specified. If the input file was a table
+(see also \fBimagemode=\fP), this will contain a listing of X, 
+Y, Velocity and Residual Velocities in the disk, else
+it will be an \fIimage(5NEMO)\fP of the residuals.
 Note for \fBnsigma>0\fP the residual map will be two maps, and
-you will need \fBcsf(1NEMO)\fP to get access to the 2nd (supposedly improved)
+you will need \fIcsf(1NEMO)\fP to get access to the 2nd (supposedly improved)
 residual map.
 [Default: not used].
 .TP
@@ -188,9 +188,9 @@ need to be removed.
 \fBimagemode=t|f\fP
 Image input file mode? By default the input file is an image, alternatively a simple
 ascii table with X and Y positions in columns 1 and 2, and radial velocities
-in column 3 can be used by the \fIxyv_tab\fP (see in=).
-The units of the spatial coordinates now need to be the same as center=,
-and the units= factor is ignored in this case.
+in column 3 can be used by the \fIxyv_tab\fP (see \fBin=\fP).
+The units of the spatial coordinates now need to be the same as \fBcenter=\fP,
+and the \fBunits=\fP factor is ignored in this case.
 Future expansion will likely allow weight factors to be added
 in other columns.
 [Default: t]
@@ -203,7 +203,7 @@ Note that \fItabnllsqfit(1NEMO)\fP is also quite efficient to use, except
 the rotation curve functions would need to be re-written in their
 function interface. See also func_rotcur.c for a useful helper routine.
 .TP
-\fBload=\fP
+\fBload=\fP\fIso_file\fP
 Name of a shared object file containing rotation curve(s). The function names 
 must be \fBrotcur_\fP\fIname\fP, where \fIname\fP is the identifier name of the
 rotation curve used in the subsquent \fBrotcur#=\fP keywords.
@@ -261,19 +261,19 @@ real rotcur_plummer(real r, int np, real *p, real *d)
 .PP
 Here is a list of the builtin rotation curves, where x=r/a is the dimensionless radius:
 .nf
-.ta +1i +1i +1i
+.ta +0.6i +0.6i +2.5i
 Name:	Parameters:	Formula:				Comments:
 -----	-----------	--------				---------
 linear	omega   	v=omega*r				-
-flat	v0		v=v0					should return rotcur solution
-plummer	v0,a		v=v0*x/(1+x^2)^(3/4)			-
-core1	v0,a		v=v0*x/(1+x)				-
-core2	v0,a		v=v0*x/(1+x^2)^(1/2)			-
-core	v0,a,c		v=v0*x/(1+x^c)^(1/c)			-
-poly	v0,a,p2,p3,..	v=v0*(x+p2*x^2+p3*x^3+.....pN*x^N)	a needs to be fixed !
-iso	v0,a		v=v0*sqrt(1-atan(x)/x)			-
+flat	v0       	v=v0					should return rotcur solution
+plummer	v0,a    	v=v0*x/(1+x^2)^(3/4)			-
+core1	v0,a      	v=v0*x/(1+x)				-
+core2	v0,a    	v=v0*x/(1+x^2)^(1/2)			-
+core	v0,a,c  	v=v0*x/(1+x^c)^(1/c)			-
+poly	v0,a,p2,.. 	v=v0*(x+p2*x^2+p3*x^3+.....pN*x^N) 	a needs to be fixed !
+iso	v0,a    	v=v0*sqrt(1-atan(x)/x)			-
 exp	v0,a         	v=v0*(1-exp(-x))                 	-
-nfw	v0,a,c		v=v0*sqrt((ln(1+cx)-cx/(1+cx))/x/(ln(1+c)-c/(1+c)))	needs a fixed 'c' 	
+nfw	v0,a,c  	v=v0*sqrt((ln(1+cx)-cx/(1+cx))/x/(ln(1+c)-c/(1+c)))	needs a fixed 'c' 	
 power	v0,a,p      	v=v0*x^p                         	a needs to be fixed (scale free)!
 .fi
 .SH EXAMPLE
@@ -331,10 +331,11 @@ but still. It is an alternative to \fIccdvel(1NEMO)\fP
 	rotcur1=plummer,200,10,0,0 fixed=all units=arcsec,1 
 .fi
 .SH FILES
-.fi
-.ta +1i
+.nf
+.ta +2i
 func_rotcur.c	helper routine for tabnllsqfit to use rotcur functions
 $NEMO/src/image/rotcur/shape/	directory with other example shape functions
+.fi
 .nf
 .SH CAVEAT
 Parameters and fix/free masks to rotation curve parameters should be all set, in order
@@ -353,10 +354,10 @@ to converge, and more than often complains with the infamous
 ### Warning [rotcurshape]: ROTCUR: problems with matrix inversion
 .fi
 .PP
-if beam= is used, the map is also used to estimate beam smearing corrections. 
-This is a totally untested  feature of the code.
+if \fBbeam=\fP is used, the map is also used to estimate beam smearing corrections. 
+This is still a totally untested  feature of the code.
 .SH SEE ALSO
-rotcur(1NEMO), ccdvel(1NEMO), tabcomment(1NEMO), rotcurves(1NEMO), pvtrace(1NEMO), ccdmom(1NEMO), tabnllsqfit(1NEMO), loadobj(3NEMO), gal(AIPS)
+rotcur(1NEMO), ccdvel(1NEMO), tabcomment(1NEMO), rotcurves(1NEMO), pvtrace(1NEMO), ccdmom(1NEMO), tabnllsqfit(1NEMO), loadobj(3NEMO), gal(AIPS), nllsqfit(3NEMO)
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
@@ -366,4 +367,5 @@ Peter Teuben
 10-sep-02	1.0 implemented an image version for resid=	PJT
 19-sep-02	1.0d added exp (vMoorsel&Wells 1985), and nfw	PJT
 13-dec-02 	1.0h added (corrected) power law rotcur	PJT
+11-oct-03	fixed up for adass 2003  	PJT
 .fi

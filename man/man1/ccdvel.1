@@ -1,4 +1,4 @@
-.TH CCDVEL 1NEMO "11 September 2003"
+.TH CCDVEL 1NEMO "11 October 2003"
 .SH NAME
 ccdvel \- create a velocity field; grid or retrace
 .SH SYNOPSIS
@@ -6,8 +6,9 @@ ccdvel \- create a velocity field; grid or retrace
 .SH DESCRIPTION
 \fIccdvel\fP creates a model velocity field for a disk with material
 in circular orbits. The user supplies the
-program with a rotation curve with a number of radii and 
-rotation velocities. The position
+program with a table of a rotation curve (see also
+\fIrotcurshape(3NEMO) for another approach)
+with a set of radii and rotation velocities. The position
 angle and inclination of each 'ring' can also be varied to simulate 
 geometrical warps.
 .PP
