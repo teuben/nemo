@@ -105,6 +105,7 @@
  * 19-oct-01       b  fixed recursion for those not using nemo_main
  * 24-oct-01       c  some parsing error warning's are now fatal errors
  * 13-nov-01       d  demoted some warnings to dprintf's
+ * 25-nov-01       e  fixed hasvalue() for indexed keywords
 
   TODO:
       - what if there is no VERSION=
@@ -131,7 +132,7 @@
       - indexing can't handle macros
  */
 
-#define VERSION_ID  "3.3d 13-nov-01 PJT"
+#define VERSION_ID  "3.3e 25-nov-01 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -592,6 +593,9 @@ void finiparam()
     int i, n=0;
     for (i=1; i<nkeys; i++)
         n += keys[i].upd ? 1 : 0;
+
+    /* TODO:::   fix this for indexed keywords */
+
     if (n && debug_level > 0) {
 	dprintf(1,"There were %d parameters used on the commandline\n",
 		getparam_argc);
@@ -1092,7 +1096,35 @@ bool isaparam(string name)
 
 bool hasvalue(string name)     
 {
+#ifdef INDEXED
+  char *cp, key[MAXKEYLEN];
+  int n = strlen(name);
+  int idx;
+
+  strcpy(key,name);
+  dprintf(1,"Checking indexing on %s\n",key);
+
+  /* split basename from index number by working from the back */
+  /* should go in a private function */
+
+  cp = &key[n-1];
+  while (isdigit(*cp))
+    cp--;
+  if (*(cp+1)) {        /* ok, this keyword name appears to be indexed */
+    idx = atoi(cp+1);
+    cp++;
+    *cp = 0;
+  } else {              /* keyword was definitely not indexed */
     return !streq(getparam(name), "");
+  }
+
+
+  n = indexparam(key,idx);
+  dprintf(1,"Re-Checking indexparam(%s,%d) -> %d\n",key,idx,n);
+  return n>0;
+#else
+  return !streq(getparam(name), "");
+#endif
 }
 
 /*
@@ -1160,7 +1192,14 @@ string getparam_idx(string name, int idx)
     return NULL;
 }
 
-int indexparam(string name)
+/*
+ * indexparam: return largest index available in an indexed parameter
+ *       return -1 if the parameter is not index at all
+ *
+ *       if IDX > 0 is given, it will check for that index
+ */
+
+int indexparam(string name, int idx)
 {
     int i, idxmax = 0;
     char *cp, key[MAXKEYLEN+1];
@@ -1172,16 +1211,24 @@ int indexparam(string name)
     i = findkey(key);
     if (i<0) {
       i = findkey(name);
-      if (i < 0) error("(getparam) \"%s\" unknown indexed keyword", name);
-      return 0;
+      if (i < 0) return -1;
     }
     kw = &keys[i];
     if (kw->indexed == 0) error("%s is not an indexed keyword",name);
-    while (kw->next) {
-      kw = kw->next;
-      idxmax = MAX(idxmax, kw->indexed);
+    if (idx > 0) {
+      while (kw->next) {
+	kw = kw->next;
+	if (idx == kw->indexed) return idx;
+      }
+      return 0;
+    } else {
+      while (kw->next) {
+	kw = kw->next;
+	idxmax = MAX(idxmax, kw->indexed);
+      }
+      return idxmax;
     }
-    return idxmax;
+    return -1;   /* never reached */
 }
 
 /*
@@ -2329,7 +2376,7 @@ void nemo_main(void)
     dprintf(11,"debug level 11 printout\n");
 
 #ifdef INDEXED
-    n = indexparam("naxis");
+    n = indexparam("naxis",0);
     if (n<1) warning("No indexed keyword naxis### used");
     printf("Indexed keyword:\n");
     for (i=1; i<=n; i++)

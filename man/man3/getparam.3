@@ -1,4 +1,4 @@
-.TH GETPARAM 3NEMO "16 September 2001"
+.TH GETPARAM 3NEMO " 25 November 2001"
 .SH NAME
 getXparam, initparam, finiparam, stop \- main startup and command line processing.
 .SH SYNOPSIS
@@ -31,11 +31,12 @@ getXparam, initparam, finiparam, stop \- main startup and command line processin
 .B double getdparam(string name)
 .B bool getbparam(string name)
 .PP
-.B string getparam_idx(string name,int idx)
-.B int getiparam_idx(string name,int idx)
-.B long getlparam_idx(string name,int idx)
-.B double getdparam_idx(string name,int idx)
-.B bool getbparam_idx(string name,int idx)
+.B int indexparam(string basename, int idx)
+.B string getparam_idx(string basename,int idx)
+.B int getiparam_idx(string basename,int idx)
+.B long getlparam_idx(string basename,int idx)
+.B double getdparam_idx(string basename,int idx)
+.B bool getbparam_idx(string basename,int idx)
 .PP
 .B void putparam(string name,string value)
 .B void promptparam(string name,string prompt)
@@ -162,6 +163,18 @@ programs to refuse execution if the internal and
 external VERSION id do not match. We do not currently employ this
 technique. Most NEMO programs have a section labeled \fBUPDATE HISTORY\fP
 in which old version ID's are labeled by time and author, 
+.SH INDEXED KEYWORDS
+The \fBindexparam\fP and \fBgetparam_idx\fP family provide access to
+indexed keywords. Indexed keywords are defined in the \fBdefv\fP vector
+by a name that ends in with the \fB#\fP symbol, which can at runtime
+be replaced by an positive integer, e.g. \fBnaxis#\fP can be used
+to for example define \fBnaxis1=10\fP, \fBnaxis4=4\fP. It is up to the
+programmer to decipher missing elements. \fIindexparam(basename,0)\fP can
+be used to return the largest index, whereas \fIindexparam(basename,idx)\fP
+will check for a specific index. Although \fIhasvalue(name)\fP will also
+check for indexed keywords, the \fIgetparam(name)\fP family will not,
+instead the \fIgetparam_idx(basename,idx)\fP needs to be used to retrieve
+values of an indexed keyword.
 .SH HELP FUNCTIONS
 Besides interpreting the command line, \fIinitparam\fP provides some
 assistance to the user via an additional argument (in addition to those

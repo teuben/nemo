@@ -26,7 +26,7 @@ extern int     cntparam (void);
 extern bool    isaparam (string);
 extern bool    hasvalue (string);
 extern bool    updparam (string);
-extern int     indexparam(string);
+extern int     indexparam(string, int);
 
 extern string  getparam  (string);
 extern int     getiparam (string);
