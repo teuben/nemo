@@ -1,0 +1,36 @@
+#!/bin/csh -f
+# 
+#
+if ($?NEMOHOST == 0) then
+  echo "Need to setenv NEMOHOST to one of:"
+  echo "sun convex"
+  exit 0
+endif
+
+echo "----- ----- ----- ----- ----- ----- ----- -----"
+echo "Begin loading NEMO PGPLOT on $NEMOHOST."
+echo "`date`"
+echo "----- ----- ----- ----- ----- ----- ----- -----"
+#
+set src   = $NEMO/local/pgplot
+set lib   = $NEMOLIB
+
+
+if (! -e $src/drivers.list ) then
+  echo "File $src/drivers.list does not exist, is this really a PGPLOT dir?"
+  exit 1
+endif
+
+
+cp $src/drivers.list $NEMOLIB
+cd $NEMOLIB
+$EDITOR drivers.list
+$src/makemake $src irix
+
+echo Watch this line:
+grep X11 makefile
+echo On some irix6.2 is has to be X11, not X11_s
+make >& pgplot.make.log
+#
+exit 0
+
