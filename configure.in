@@ -317,8 +317,8 @@ else
         fi
     done
 fi
-AC_ARG_WITH(pgplot-dir, 
-        [  --with-pgplot-dir=DIR   Directory where PGPLOT was installed], 
+AC_ARG_WITH(pgplot-prefix, 
+        [  --with-pgplot-prefix=DIR   Directory where PGPLOT was installed], 
         pgplot_config_prefix="$withval", 
         pgplot_config_prefix="$pgplot_dir")
 
@@ -337,8 +337,10 @@ dnl                CFLAGS="$PGPLOT_INCLUDE $CFLAGS"
 		yapp_default="pgplot"
         else
                 AC_MSG_RESULT(no)
-                AC_MSG_WARN(could not find PGPLOT library)
+                AC_MSG_WARN([could not find PGPLOT library in 1st: $pgplot_dir])
         fi
+else
+	AC_MSG_WARN([could not find PGPLOT library in 2nd: $pgplot_config_prefix])
 fi
 
 

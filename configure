@@ -894,7 +894,7 @@ Optional Packages:
   --with-hdf              force the use of HDF
   --with-ccmalloc         use CCMALLOC for malloc
   --with-x                use the X Window System
-  --with-pgplot-dir=DIR   Directory where PGPLOT was installed
+  --with-pgplot-prefix=DIR   Directory where PGPLOT was installed
   --with-hdf-prefix=PFX     Prefix where HDF was installed
   --with-cfitsio-prefix=PFX
                           CFITSIO installation prefix (default: $cfdefault)
@@ -8473,9 +8473,9 @@ else
     done
 fi
 
-# Check whether --with-pgplot-dir or --without-pgplot-dir was given.
-if test "${with_pgplot_dir+set}" = set; then
-  withval="$with_pgplot_dir"
+# Check whether --with-pgplot-prefix or --without-pgplot-prefix was given.
+if test "${with_pgplot_prefix+set}" = set; then
+  withval="$with_pgplot_prefix"
   pgplot_config_prefix="$withval"
 else
   pgplot_config_prefix="$pgplot_dir"
@@ -8500,9 +8500,12 @@ echo "${ECHO_T}yes, $PGPLOT_DIR" >&6
         else
                 echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
-                { echo "$as_me:$LINENO: WARNING: could not find PGPLOT library" >&5
-echo "$as_me: WARNING: could not find PGPLOT library" >&2;}
+                { echo "$as_me:$LINENO: WARNING: could not find PGPLOT library in 1st: $pgplot_dir" >&5
+echo "$as_me: WARNING: could not find PGPLOT library in 1st: $pgplot_dir" >&2;}
         fi
+else
+	{ echo "$as_me:$LINENO: WARNING: could not find PGPLOT library in 2nd: $pgplot_config_prefix" >&5
+echo "$as_me: WARNING: could not find PGPLOT library in 2nd: $pgplot_config_prefix" >&2;}
 fi
 
 
