@@ -1,4 +1,4 @@
-.TH ROTCUR 1NEMO "11 October 2003"
+.TH ROTCUR 1NEMO "2 June 2004"
 .SH NAME
 rotcur \- fit parameters to velocity field using tilted rings
 .SH SYNOPSIS
@@ -212,7 +212,9 @@ parameters keep of course their fixed value. [Default: \fBt\fP]
 \fBreuse=t|f\fP
 Reuse pixels between rings. If neighboring rings have a different geometries,
 it can occur that pixels will be reused. This flag will prevent that.
-[Default: \fBf\fP]
+Note, if you don't reuse pixels, rotcur will more likely produce a different
+rotation curve if you start at outer rings,e.g. radii=100:0:-10.
+[Default: \fBt\fP]
 .TP
 \fBfitmode=\fP\fBcos|sin\fP\fB,1\fP
 .TP
@@ -328,4 +330,5 @@ P. J. Teuben (NEMO C version)
 26-jun-02	V2.8: added tabular input for irregular spaced data, fixed example	PJT
 11-sep-02	V2.9: implemented map residual velocity field	PJT
 30-jan-03	V2.10: allow tables to use error in velocity	PJT
+2-jun-04	V2.12: finally implemented the reuse= option	PJT
 .fi
