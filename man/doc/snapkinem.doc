@@ -1,0 +1,16 @@
+%N snapkinem
+%D compute various diagnostics with specified weights.
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man snapkinem' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	input file name (snapshot) [???]
+%A weight
+	weighting for particles [1]
+%A rcut
+	cutoff radius effective if > 0.0 [0.0]
+%A times
+	range of times to analyze [all]
+%A VERSION
+	11-jun-92 PJT [2.0]
