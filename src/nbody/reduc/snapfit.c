@@ -4,8 +4,11 @@
  *  Originally designed to match an observed 3D datacube to 
  *  a 6D model. 
  *      28-may-92   V0.0 Initial design - fairly interactive
- *		     0.4 fixed matrix rotation order bug
+ *	 4-may-92    0.4 fixed matrix rotation order bug
+ *	16-jun-92    0.6 rotation order -> math positive (see snaprotate(1))
  */
+
+/* this code will only work in 3D */
 #define THREEDIM
 
 #include <stdinc.h>
@@ -38,14 +41,13 @@ string defv[] = {
     "out=\n             Optional output",
     "minchi=\n          Min chi-quared to trigger output",
     "frame=model\n      Output in model|data units",
-    "zmode=simult\n     zvar needs simultaneous|separate fit",
+    "zmode=separ\n      zvar needs simultaneous|separate fit",
     "theta1=\n          Inclination Angles to test",
     "theta2=\n          Position Angle Angles to test",
-    "maxreport=\n       Max. best chi-squares reported if fixed thetas",
     "contour=\n         Optional Output image file with chi-squared",
     "iter=0\n           number of more iterations after best on matrix",
     "times=all\n        Times selected from snapshot models",
-    "VERSION=0.4\n      5-jun-92 PJT",
+    "VERSION=0.6\n      16-jun-92 PJT",
     NULL,
 };
 
@@ -58,9 +60,9 @@ stream instr, outstr=NULL;   /* file pointer to input and output */
 body *btab=NULL;             /* snapshot */
 cube *mtab=NULL;	     /* to be fitted coordinates out of the snapshot */
 int nmodel=0;		     /* number of model bodies */
-rproc weight;
 real tsnap;
 string times;
+rproc weight;
 
     /* Data: A special 3D {x,y,v} body */
 cube *dtab=NULL;	/* observed data */
@@ -385,7 +387,7 @@ void snap_fit()
     int i, i1, i2, i1_min=-1, i2_min=-1;
     matrix mat1, mat2, rot, tmpm, w_qpole;
     vector tmpv, tmpr, w_pos, frame[3], framet[3];
-    real w_sum, sum, sum_min=1000.0, w_rscale=1, w_vscale=1;
+    real w_sum, sum, sum_min=1000.0, w_rscale=1, w_vscale=1, rscale_min, vscale_min;
     Body tmpp, *bp, *qp=&tmpp;
     imageptr iptr=NULL;
     double log10();
@@ -507,6 +509,8 @@ void snap_fit()
                 sum_min = sum;
                 i1_min = i1;
                 i2_min = i2;
+                rscale_min = w_rscale;
+                vscale_min = w_vscale;
             }
             printf(" %5.2f",sum);
             MapValue(iptr,i1,i2) = sum;
@@ -518,8 +522,9 @@ void snap_fit()
     printf("       ");
     for (i1=0; i1<ntheta1; i1++)
         printf(" %5.1f",theta1[i1]);
-    printf("\nMinimum at theta1=%g theta2=%g log10(sum)=%g\n",
-            theta1[i1_min], theta2[i2_min], sum_min);
+    printf("\nMin: theta1= %g theta2= %g log10(sum)= %g time= %g scale= %g %g %g %g\n",
+            theta1[i1_min], theta2[i2_min], sum_min, tsnap,
+            rscale, vscale, rscale_min, vscale_min);
     if (constr) write_image(constr,iptr);
     if (outstr) write_snapshot( outstr,
 				nmodel,btab,
@@ -536,6 +541,11 @@ real t1, t2, rscale,vscale;
 {
     warning("output snapshot not supported yet");
 }
+
+/* rotating: is positive when rotating counter-clockwise, or math
+ *           positive 
+ */
+
 /*
  * yrotate: construct a rotation matrix for a rotation of 'theta' 
  *          around the y-axis
@@ -547,7 +557,9 @@ real theta;
 {
     SETMI(mat);         /* unit matrix */
     mat[2][2] =    mat[0][0] = cos(DEG2RAD * theta);
-    mat[0][2] =  -(mat[2][0] = sin(DEG2RAD * theta));
+    mat[2][0] =  -(mat[0][2] = sin(DEG2RAD * theta)); /* PJT */
+/*  mat[0][2] =  -(mat[2][0] = sin(DEG2RAD * theta)); /* JEB */
+
 }
 
 /*
@@ -561,7 +573,8 @@ real theta;
 {
     SETMI(mat);         /* unit matrix */
     mat[1][1] =    mat[0][0] = cos(DEG2RAD * theta);
-    mat[1][0] =  -(mat[0][1] = sin(DEG2RAD * theta));
+    mat[0][1] =  -(mat[1][0] = sin(DEG2RAD * theta)); /* PJT */
+/*  mat[1][0] =  -(mat[0][1] = sin(DEG2RAD * theta)); /* JEB */
 }
 
 
@@ -569,7 +582,7 @@ real theta;
 
 #if 1
 
-eigenframe(frame, mat)
+eigenframe(frame, mat)          /* float version */
 vector frame[];
 matrix mat;
 {   
@@ -591,7 +604,7 @@ matrix mat;
 
 #else
 
-eigenframe(frame, mat)
+eigenframe(frame, mat)          /* double version */
 vector frame[];
 matrix mat;
 {   
