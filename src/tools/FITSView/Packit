@@ -1,0 +1,2 @@
+# shar -c will force a word count check upon unpacking. -v is verbose.
+shar -c -v DISCLAIMER README FITSView.doc Makefile fits.c fits.h fitskeywords.h loadimage.c movie.c movie_help.h movie.icon ql.c ql.h rainbow.c rgb.c rgb24.c writeTGA.c> FITSView.package
