@@ -15,7 +15,7 @@ SRCFILES = $(INCFILES)
 OBJFILES = snapserial.o
 SRCDIR = $(NEMO)/src/nbody/io
 BINFILES = atos atos_sp atosph atosph_sp stoa stoa_sp tabtos \
-	   rvsnap snaprv
+	   rvsnap snaprv snaptipsy tipsysnap
 
 TESTFILES = testss testio
 

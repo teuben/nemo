@@ -7,7 +7,7 @@
 
 include $(NEMOLIB)/makedefs
 
-DIRS = kernel nbody image orbit
+DIRS = tools kernel nbody image orbit 
 
 TARDIRS = kernel nbody
 TARNAME = kernel.tar

@@ -16,8 +16,10 @@ OBJFILES=
 LOBJFILES=
 BINFILES = snapcenter snapsort snapstack snaptrim snaprotate snapdens \
 	snapscale unbind snapmask snapadd snaprect \
-        snapsphere snapmass snapspin snaptrans snapvirial
-TESTFILES= snapcopy snapinert snapmerge snapshift snapsplit
+        snapsphere snapmass snapspin snaptrans snapvirial \
+        snapcopy snapinert snapmerge snapshift snapsplit
+
+TESTFILES =
 
 help:
 	@echo NEMO V2.2 NEMO/src/nbody/trans

@@ -3,7 +3,8 @@ include $(NEMOLIB)/makedefs
 #
 
 #	Directories to be visited, in this order
-DIRS = hackcode1 treecode1
+DIRS = hackcode1 hackcode3 
+#treecode1
 
 TARNAME = stuff.tar
 CHKFILE = Last_update
