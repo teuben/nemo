@@ -7,6 +7,7 @@
  *
  *      June 1987  -  Piet Hut  @ Inst. f. Adv. Study, Princeton, NJ 08540, USA
  *      Feb  2001  - resurrected for the current NEMO release
+ *      Feb  2004  - added to NEMO's official release
  */
    
 #include  "newton0.h"
@@ -97,22 +98,19 @@ string  defv[] =            /* DEFAULT INPUT PARAMETERS                      */
     "niter=3\n               number of iterations in arriving at the correct output times",
 #endif
     "headline=\n             verbiage for output",
-    "VERSION=2.0\n          5-feb-01 PJT",
+    "VERSION=2.0a\n          20-feb-04 PJT",
     NULL,
     };
 
 
 /*-----------------------------------------------------------------------------
  *  main  --  read the command line arguments, and pass control to newton0
+ *  nemo_main in NEMO V3
  *-----------------------------------------------------------------------------
  */
-main(argc, argv)
-int  argc;
-string  argv[];
+void nemo_main()
     {
-    initparam(argv, defv);     		           /* setup parameter access */
-
-    newton0();
+        newton0();
     }
 
 /*-----------------------------------------------------------------------------
