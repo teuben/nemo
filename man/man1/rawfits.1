@@ -1,0 +1,48 @@
+.TH RAWFITS 1NEMO "11 February 1999"
+.SH NAME
+rawfits \- raw image to fits format conversion
+.SH SYNOPSIS
+\fBrawfits\fP [parameter=value]
+.SH DESCRIPTION
+Converts raw data to fits file. The user needs to know all the details
+on the raw format. Some examples on common "raw" formats are given in the
+EXAMPLES section below.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input raw image.
+.TP 20
+\fBout=\fP
+Output fits file.     
+.TP 20
+\fBbitpix=\fP
+Bitpix of the raw image. Valid are 8, 16, 32, -32, -64. No default.
+.TP 20
+\fBnaxis=\fP
+Size of image (naxis1,naxis2). If naxis2 absent, it will be taken as naxis1.
+No default.
+.TP 20
+\fBskip=\fP
+Number of bytes to skip before data . Default: 0
+.SH EXAMPLES
+The UMD "img" format is a 384 by 576 INTEGER*2 image, with a 160 byte header. 
+It converts as follows:
+.nf
+    rawfits a.img a.fits bitpix=16 naxis=384,576 skip=160
+.fi
+.SH BUGS
+Writes bogus DATAMIN/DATAMAX header entries, and the entry for
+BSCALE/BZERO is not always appropriate either.
+.P
+The keyword swap=t|f should be added for convenience.
+.SH SEE ALSO
+ccdfits(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+11-Feb-99	V1.0 Created for A310 as alternative to a J routine       PJT
+.fi
