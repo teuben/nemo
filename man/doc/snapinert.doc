@@ -1,0 +1,20 @@
+%N snapinert
+%D get inertia tensor & its eigenvectors, eigenvalues
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man snapinert' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input snapshot file name [???]
+%A out
+	Output file name (ascii table) [???]
+%A times
+	range of times to transform [all]
+%A weight
+	factor to use in computing center/inertia   [m]
+%A per_weight
+	flag to give inertia per weight basis   [t]
+%A tab
+	flag to produce one-line output [f]
+%A VERSION
+	12-apr-97 PJT [1.4a]
