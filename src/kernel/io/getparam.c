@@ -112,6 +112,7 @@
  * 18-jan-02       i  fix reading indexed from keyword (.def) files
  * 20-jan-02       j  putparam can now create indexed keywords on the fly
  *  5-feb-02       k  findaparam return NULL if illegal indexed
+ * 24-apr-02    3.4   added placeholder for new outparam() stuff
 
   TODO:
       - what if there is no VERSION=
@@ -144,7 +145,7 @@
         getopt
  */
 
-#define VERSION_ID  "3.3k 5-feb-02 PJT"
+#define VERSION_ID  "3.4 24-apr-02 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -273,6 +274,7 @@ extern int debug_level; /* see dprintf.c   from DEBUG env.var. */
 extern int error_level; /* see error.c     from ERROR env.var. */
 extern string usage;    /* see program.c or usage.c */
 extern string defv[];   /* see program.c or defv.c */
+extern string outdefv;  /* see program.c or outdefv.c */
 extern char **environ;  /* environment variables */
 
 extern int history;     /* 0=no history written; see history.c */
@@ -296,6 +298,7 @@ string error_string = NULL;
 
 /* local functions */
 
+local void initparam_out(void);
 local void scan_environment(void);
 local void save_history(string *argv);
 local void printhelp(string help);
@@ -606,7 +609,16 @@ void initparam(string argv[], string defv[])
         } else
             warning("No VERSION keyword");
     }
+    initparam_out();
 } /* initparam */
+
+local void initparam_out()
+{
+  int nout = -1;
+  if (outdefv && *outdefv)
+     nout = xstrlen(outdefv, sizeof(string));     /* count # params + progname */  
+  dprintf(0,"Found %d output keywords\n",nout);
+}
 
 /*
  * FINIPARAM: finish up any outstanding requests. If INTERACT is not defined

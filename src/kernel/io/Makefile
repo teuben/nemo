@@ -14,14 +14,14 @@ MAN3FILES =
 MAN5FILES = 
 INCFILES = story.h
 SRCFILES = dprintf.c convert.c defv.c extstring.c \
-	   filesecret.[ch] getparam.[ch] history.[ch] memio.c \
+	   filesecret.[ch] getparam.[ch] history.[ch] memio.c outdefv.c \
 	   story.[ch] stropen.c usage.c \
 	   filestruct.h Makefile
 OBJFILES=  dprintf.o convert.o defv.o extstring.o \
-	   filesecret.o getparam.o history.o memio.o \
+	   filesecret.o getparam.o history.o memio.o outdefv.o \
 	   stropen.o usage.o 
 LOBJFILES= $L(dprintf.o) $L(convert.o) $L(defv.o) $L(extstring.o) \
-           $L(filesecret.o) $L(getparam.o) $L(history.o) $L(memio.o) \
+           $L(filesecret.o) $L(getparam.o) $L(history.o) $L(memio.o) $L(outdefv.o) \
 	   $L(stropen.o) $L(usage.o)
 BINFILES = csf tsf rsf hisf
 TESTFILES= getpartest stropentest extstrtest \
@@ -116,6 +116,9 @@ memiotest: memio.c
 
 testio:
 	$(CC) $(CFLAGS) -o testio test/testio.c $(NEMO_LIBS)
+
+testi:  getparam.c testi.c
+	$(CC) $(CFLAGS) -o testi testi.c $(NEMO_LIBS)
 
 testfs:
 	$(CC) $(CFLAGS) -o testfs test/testfs.c $(NEMO_LIBS)
