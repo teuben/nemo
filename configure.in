@@ -67,7 +67,6 @@ CFLAGS="$CFLAGS $X_CFLAGS"
 XLIBS="$X_LIBS $X_PRE_LIBS -lXext -lX11 $X_EXTRA_LIBS"
 AC_SUBST(XLIBS)
 
-
 dnl ---------------------------------------------------------------------
 dnl 3D Graphics Libraries (see also vis5d's configure.in)
 
@@ -229,6 +228,8 @@ AC_ARG_WITH(pgplot-prefix,
 
 if test x$pgplot_config_prefix != x; then
         if test -f ${pgplot_config_prefix}/grfont.dat ; then
+		PGPLOT_DIR="$pgplot_config_prefix"
+		AC_SUBST(PGPLOT_DIR)
                 PGPLOT_INCLUDE="-I$pgplot_config_prefix"
                 PGPLOT_LIB="-L$pgplot_config_prefix"
                 PGPLOT_LIB="$PGPLOT_LIB -lcpgplot -lpgplot"
@@ -561,7 +562,7 @@ AC_CHECK_FUNCS(ftime gethostname gettimeofday getwd mkdir select strdup strtod s
 
 AC_C_BIGENDIAN
 
-AC_OUTPUT(Makefile makedefs nemo_start)
+AC_OUTPUT(NEMORC.gen Makefile makedefs nemo_start)
 
 echo "
 -------------------------------------------------------------------------
