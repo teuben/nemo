@@ -1,0 +1,21 @@
+#!/bin/sh
+# remove old version
+rm -f ../galaxy.a
+# get names of all fortran files in this directory
+ls *.f > aaa
+# remove suffix ".f" from all
+cut -d. -f1 aaa > aab
+rm -f aaa
+# work through list of files
+for i in `cat aab`
+do
+  f77 -c -O -u ${i}.f
+# q option here makes the rebuild much faster
+  ar q ../galaxy.a ${i}.o
+  rm -f ${i}.o
+  echo "done" ${i}
+done
+# delete file list
+rm -f aab
+cd ..
+ranlib ../galaxy.a
