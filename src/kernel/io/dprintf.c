@@ -11,6 +11,7 @@
  * 21-sep-93  pjt: ANSI
  *  4-mar-96  pjt: format string now a 'const'
  * 20-jun-01  pjt: gcc0, no more non-ansi code
+ * 26-sep-01  name now nemo_dprintf(), to avoid conflict with new dprintf(3?)
  *
  */
 
@@ -25,7 +26,7 @@ int debug_level=0;	/* needs to be global; see also getparam.c */
  *	    as set by the user interface (debug=)
  */
 
-int dprintf(int debug, const_string fmt, ...)
+int nemo_dprintf(int debug, const_string fmt, ...)
 {
     va_list ap;
     int nret = 0;
