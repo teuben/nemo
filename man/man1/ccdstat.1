@@ -1,4 +1,4 @@
-.TH CCDSTAT 1NEMO "9 May 2003"
+.TH CCDSTAT 1NEMO "5 June 2003"
 .SH NAME
 ccdstat \- statistics (1st through 4th moment)
 .SH SYNOPSIS
@@ -7,7 +7,8 @@ ccdstat \- statistics (1st through 4th moment)
 .SH DESCRIPTION
 This program will calculate all moments (up to fourt order) of the mapvalues,
 and calculate some human understandable numbers (mean, dispersion, skewness,
-curtosis) from them.
+curtosis) from them. It can optionally use a weighting map, in case the 
+map needs to weighted per pixel.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword is also
 given:
@@ -16,15 +17,32 @@ given:
 input file, in \fIImage(5)\fP format [no default]
 .TP
 \fBmin=\fImin_value\fP
-If given, all values below this value are ignored in the statistics.
+If given, all values below this value are ignored in the statistics. 
+By default no lower limit is used.
 .TP
 \fPmax=\fImax_value\fP
 If given, all values above this value are ignored in the statistics.
+By default no upper limit is used.
 .TP
 \fBbad=\fIbad_value\fP
 If given, all values identical to this value are ignored in the statistics.
 Note that, apart for bad=0, it is dangerous to use equating to a real value
 as a masking operating.
+.TP
+\fBwin=\fIweight-file\fP
+optional input file, in \fIImage(5)\fP format, of which the mapvalues
+are used as a relative weight factor. Should be all positive, with 0
+meaning no weight.
+[no default]
+.SH "EXAMPLE"
+.nf
+  % ccdstat image.ccd min=-2
+Min=-1.879409  Max=2.265516
+Number of points     : 95
+Mean and dispersion  : 0.097891 0.956030
+Skewness and kurtosis: -0.059936 -0.654776
+5/100 out-of-range points discarded
+.fi
 .SH "SEE ALSO"
 snapccd(1NEMO), image(5NEMO)
 .SH AUTHOR
@@ -37,6 +55,7 @@ src/image/misc	ccdstat.c
 .SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
- 4-Oct-88	V1.0: Created             	PJT
+ 4-Oct-88	V1.0: Created		PJT
 9-may-03	V1.3: added bad=	PJT
+5-jun-03	V1.4: added win=	PJT
 .fi

@@ -1,4 +1,4 @@
-.TH TABLE 5NEMO "13 January 1995"
+.TH TABLE 5NEMO "4 June 2003"
 .SH NAME
 table \- table format
 .SH DESCRIPTION
@@ -8,12 +8,13 @@ Columns can be separated by spaces or tabs.
 The number of columns per row does not have to be the same,
 as long as the columns accessed are in the specified range
 (although some programs, e.g. \fItablint(1NEMO)\fP may
-put restriction on this).
+put restrictions on this).
 .PP
-Comments can be entered by using the octothorpe
-('\fB#\fP') symbol on the
-first column in a row. 
-Empty lines will generally be skipped too.
+Comments can be entered by using the octothorpe ('\fB#\fP') symbol 
+on the first character on a line.
+Empty lines will generally be skipped too, and some programs
+even skip lines starting with the ! or ; symbol. See also
+\fItabcomment\fP for some other filtering techniques.
 .SH EXAMPLE
 The following listing is an example of a valid table:
 .nf
@@ -31,12 +32,19 @@ one column, with numbers 1 through 100:
 .nf
     nemoinp 1:100 newline=t > 100.tab
 .fi
+.SH OTHER TABLE FORMATS
+Another popular table format is that of ESO/Midas, where all columns
+are separated by TABs. The unix program \fIpaste(1)\fP will generally
+put a TAB between the columns.
+.PP
+FITS uses the 'TABLE' (ascii tables) and BINTABLE (binary tables) format.
 .SH "SEE ALSO"
-nemoinp(1NEMO), table(3NEMO), awk(1)
+nemoinp(1NEMO), tabcomment(1NEMO), table(3NEMO), awk(1), paste(1)
 .SH AUTHOR
 Peter Teuben
 .SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
 1-feb-93	document created  	PJT
+4-jun-2003	various docs on other table formats	PJT
 .fi
