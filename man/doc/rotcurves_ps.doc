@@ -1,0 +1,43 @@
+%N rotcurves
+This doc file has been produced with help=t option
+No further help is available, try 'man rotcurves'
+%A name1
+	Name of potential_1 []
+%A pars1
+	Parameters for potential_1 (1st one is pattern speed) []
+%A file1
+	Optional data file associated with potential_1 []
+%A name2
+	--same for potential_2 []
+%A pars2
+	--same for potential_2 []
+%A file2
+	--same for potential_2 []
+%A name3
+	--same for potential_3 []
+%A pars3
+	--same for potential_3 []
+%A file3
+	--same for potential_3 []
+%A name4
+	--same for potential_4 []
+%A pars4
+	--same for potential_4 []
+%A file4
+	--same for potential_4 []
+%A radii
+	Radii to sample rotation curve [0:1:0.1]
+%A axis
+	Axis along which to sample rotation curve [x]
+%A mode
+	Output mode: {velocity, omega} [velocity]
+%A plot
+	Make Plot ? [t]
+%A tab
+	Make table ? [f]
+%A xrange
+	X-Plotrange (radius) []
+%A yrange
+	Y-Plotrange (velocity/omega) []
+%A VERSION
+	29-oct-90 PJT [1.1]
