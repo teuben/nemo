@@ -37,6 +37,7 @@
  *	28-nov-00    casted fdopen so compilers don't complain
  *	29-may-01    stropen using const now
  *      14-feb-02    mktemp -> mkstemp 					pjt
+ *       2-aug-03    scratchfile was broken                             pjt
  */
 #include <stdinc.h>
 #include <getparam.h>
@@ -219,7 +220,7 @@ string defv[] = {
     "mode=w\n		r(read),w(write),w!(write-on),a(append),s(scratch)",
     "text=boo hoo foo\n Text to write to file if w/a-option",
     "delete=f\n         Try and strdelete it?",
-    "VERSION=1.2\n      19-may-92 PJT",
+    "VERSION=1.3\n      2-aug-03 PJT",
     NULL,
 };
 
@@ -236,13 +237,28 @@ nemo_main()
     str = stropen(name, mode);
     dprintf(0,"%s has strname -> %s\n", name, strname(str));
     dprintf(0,"%s has strseek -> %d\n", name, strseek(str)?1:0);
-    if (streq(mode, "r")) {
+
+    if (streq(mode, "a") || streq(mode, "r")) {
+        printf("READING\n");
 	while (fgets(buf, 127, str) != NULL)
 	    printf("%s", buf);
-    } else {
-	sprintf(buf, "%s\n", text);
+    }
+
+
+    if (streq(mode, "w") || streq(mode,"s") || streq(mode,"a")) {
+        printf("WRITING\n");
+        sprintf(buf, "%s\n", text);
 	fputs(buf, str);
     }
+
+    if (streq(mode, "s")) {
+        printf("REWIND AND READING: %ld\n",ftell(str));
+        rewind(str);
+        printf("REWIND AND READING: %ld\n",ftell(str));
+	while (fgets(buf, 127, str) != NULL)
+	    printf("%s", buf);
+    }
+
     if (getbparam("delete"))
         strdelete(str,TRUE);
     else
