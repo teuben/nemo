@@ -1,0 +1,64 @@
+.TH SNAPOPT 1NEMO "11 November 1993"
+.SH NAME
+snapopt \- Special Ostriker-Peebles 't' calculator
+.SH SYNOPSIS
+\fBsnapopt\fP \fBin=\fP\fIsnapshot\fP [parameter=value ...]
+.SH DESCRIPTION
+\fIsnapopt\fP computes, or aids in computing, \fIt\fP (little-t) from
+Ostriker & Peebles 1973 (OP73) paper.
+\fIt\fP  is
+defined as the ratio of bulk kinetic energy to the potential
+energy (\fIcf.\fP eq.(3) and eq. (11) in OP73).
+.PP
+For this the snapshot is divided in concentric 
+cylinders (i.e. the angular momentum
+axis is assumed to be along the Z-axis) of specified width.
+In each cylinder the mean velocity in the angular direction
+is computed (hence backward-moving particles are counted
+as negative), and with the total mass in a ring this gives the
+total bulk motion in the galaxy. If potentials are present in 
+the snapshot, the total potential energy is also computed.
+Output contains time, bulk kinetic and potential energy.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP\fIsnap_file\fP
+Input file, in standard \fIsnapshot(5NEMO)\fP format.
+No default.
+.TP
+\fBdr=\fP\fIwidth\fP
+Ringsize for binning radii.
+[Default \fB0.1\fP]
+.TP
+\fBrmax=\fP\fIglobal_rmax\fP
+If set, this will be the maximum radius used for binning. All particles
+outside this (cylindrical) radius will be discarded.
+Default: not used.
+.TP
+\fBw=\fP
+Total Potential energy of the external halo. Note this has to be 
+of the same sign as your potential values in the snapshot, in 
+general NEMO uses negative potentials
+[Default: \fB0\fP].
+.TP
+\fBtimes=\fP\fIt1,t2,...\fP
+Times to select snapshot. 
+Default: all.
+.SH BUGS
+Cannot handle external potentials properly, since the external
+potential contributions is only counted half.
+.SH SEE ALSO
+OP73 = J.P. Ostriker & P.J.E. Peebles - ApJ \fB186\fP, 467-480, 1973.
+\fIA numerical study of the stability of flattened galaxies: or,
+can cold galaxies survive?\fP
+.PP
+snapkinem(1NEMO), snapprint(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+29-Oct-93	V1.0 Created     	Peter
+12-nov-93	V1.1 added rmax= and allow non-equal size snapshots 	PJT
+.fi
