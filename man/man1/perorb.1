@@ -122,6 +122,15 @@ Specify the integration mode. Any one of \fBeuler\fP,
 \fBleapfrog\fP, \fBrk2\fP or \fBrk4\fP 
 can be given.
 [Default: \fBrk4\fP].
+.SH EXAMPLES
+By default, perorb will find a circular orbit in a plummer potential
+near R=1:
+.nf
+perorb
+INIPOTENTIAL Plummer: [3d version]
+### Warning [perorb]: DRY RUN: No output orbit file created
+1.007320 0.595679 1.007323 -0.595674 533 3 10.625226 -0.527107 -0.600039
+.fi
 .SH "SEE ALSO"
 potlist(1NEMO), orbint(1NEMO), newton0(1NEMO), potential(5NEMO)
 .SH AUTHOR

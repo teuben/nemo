@@ -47,7 +47,7 @@ dnl AC_ARG_ASSIGN(pgplot-link-flags,   [  --pgplot-link-flags=flags   PGPLOT lin
 dnl AC_ARG_ASSIGN(pgplot-link-search,  [  --pgplot-link-search=flags  PGPLOT search flags])
 
 
-AC_ARG_ENABLE(debug, [  --enable-debug          compile for debugging], ok=$enableval, ok=yes)
+AC_ARG_ENABLE(debug, [  --enable-debug          compile for debugging], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then
         CFLAGS="-g"
         FFLAGS="-g"
@@ -55,11 +55,13 @@ if test "$ok" = "yes"; then
         # should we define DEBUG too?
 fi
 
-AC_ARG_ENABLE(fortran, [ --disable-fortran   don't use any Fortran], enable_fortran=$enableval, enable_fortran=yes)
+AC_ARG_ENABLE(fortran, [  --disable-fortran   don't use any Fortran], enable_fortran=$enableval, enable_fortran=yes)
 
 AC_ARG_WITH(mesa, [  --with-mesa        force the use of Mesa instead of other graphics libs], with_mesa=$withval, with_mesa=maybe)
 AC_ARG_WITH(hdf, [  --with-hdf          force the use of HDF], with_hdf=$withval, with_hdf=maybe)
+AC_ARG_WITH(ccmalloc, [  --with-ccmalloc    use CCMALLOC for malloc], with_malloc=$withval, with_ccmalloc=no)
 
+echo FORTRAN: $enable_fortran
 
 dnl ---------------------------------------------------------------------
 dnl             Check for basic X windows stuff
@@ -196,38 +198,45 @@ dnl ----
 dnl ---------------------------------------------------------------------
 
 
-AC_MSG_CHECKING(whether we have a FORTRAN 77 compiler)
-AC_CHECK_PROGS(F77, f77 g77 xlf xlf77 fl32 fort77 fc cf77 frt f90 xlf90)
-AC_PROG_F77
-if test -n "$F77"; then
-  if test -n "$GCC"; then
-    AC_F77_LIBRARY_LDFLAGS
-    dnl -- next one doesn't work on our solaris??
-    ACX_F77_FUNC_MANGLE
-    AC_CANONICAL_HOST
-    case $host_os in
-      ultrix*)
-        CC="$CC -Dmain=MAIN_"
-        ;;
-      osf*)
-        CC="$CC -Dmain=MAIN__"
-        ;;
-      sunos*)
-        CC="$CC -Dmain=MAIN_"
-        ;;
-    esac
+if test "$enable_fortran" = "yes"; then
+  AC_MSG_CHECKING(whether we have a FORTRAN 77 compiler)
+  AC_CHECK_PROGS(F77, f77 g77 xlf xlf77 fl32 fort77 fc cf77 frt f90 xlf90)
+  AC_PROG_F77
+  if test -n "$F77"; then
+    if test -n "$GCC"; then
+      AC_F77_LIBRARY_LDFLAGS
+      ACX_F77_FUNC_MANGLE
+      AC_CANONICAL_HOST
+      case $host_os in
+        ultrix*)
+          CC="$CC -Dmain=MAIN_"
+          ;;
+        osf*)
+          CC="$CC -Dmain=MAIN__"
+          ;;
+        sunos*)
+          CC="$CC -Dmain=MAIN_"
+          ;;
+      esac
+    fi
+    if test "$G77" = "yes"; then
+       NEMO_FFLAGS="$NEMO_FFLAGS -fno-globals"
+    fi
+  else
+    F77="echo"
+    fortran=no
+    AC_MSG_WARN(no FORTRAN compiler)
   fi
 else
-  F77="$CC"
+  F77="echo"
   fortran=no
   AC_MSG_WARN(no FORTRAN compiler)
 fi
 
-if test "G77" == yes; then
-  NEMO_FFLAGS="-fno-globals"
-  AC_MSG_WARN(adding -fno-globals to NEMO_FFLAGS)  
+if test "$GCC" = "yes"; then
+  NEMO_CFLAGS="$NEMO_CFLAGS -rdynamic -fwritable-strings"
 fi
-AC_SUBST(NEMO_FFLAGS)
+
 
 AC_MSG_CHECKING(whether we have PGPLOT)
 AC_ARG_WITH(pgplot-prefix, 
@@ -236,6 +245,7 @@ AC_ARG_WITH(pgplot-prefix,
         pgplot_config_prefix="/usr/lib/pgplot")
 
 
+yapp_default="ps"
 if test x$pgplot_config_prefix != x; then
         if test -f ${pgplot_config_prefix}/grfont.dat ; then
 		PGPLOT_DIR="$pgplot_config_prefix"
@@ -244,19 +254,17 @@ if test x$pgplot_config_prefix != x; then
                 PGPLOT_LIB="-L$pgplot_config_prefix"
                 PGPLOT_LIB="$PGPLOT_LIB -lcpgplot -lpgplot"
                 CFLAGS="$PGPLOT_INCLUDE $CFLAGS"
-dnl             LIBS="$PGPLOT_LIB $LIBS"
                 AC_DEFINE(_WITH_PGPLOT) 
                 graphtype=pgplot
                 AC_MSG_RESULT(yes)
+		yapp_default="pgplot"
+
         else
                 AC_MSG_RESULT(no)
                 AC_MSG_WARN(could not find PGPLOT library)
         fi
-
 fi
 
-echo ""
-echo "PGPLOT_CONFIG_PREFIX: $pgplot_config_prefix"
 
 
 dnl ---------------------------------------------------------------------
@@ -278,11 +286,9 @@ dnl ---------------------------------------------------------------------
 LOADOBJ_MACH=""
 LOADOBJ_LIBS=""
 
-echo "HOSTOS: $host_os"
-
 case $host_os in
       linux*)
-	LOADOBJ_MACH="-Dlinux -DSYSV -rdynamic -fwritable-strings"
+	LOADOBJ_MACH="-Dlinux -DSYSV"
 	LOADOBJ_LIBS=-ldl
 	;;
       solaris*)
@@ -294,6 +300,12 @@ esac
 AC_SUBST(LOADOBJ_MACH)
 AC_SUBST(LOADOBJ_LIBS)
 
+MATH_LIBS="-lm"
+
+if test "$with_ccmalloc" = "yes"; then
+  MATH_LIBS="-lccmalloc $MATH_LIBS"
+fi
+AC_SUBST(MATH_LIBS)
 
 dnl ---------------------------------------------------------------------
 
@@ -303,20 +315,27 @@ AC_ARG_WITH(hdf-prefix,
         [  --with-hdf-prefix=PFX     Prefix where HDF was installed], 
         hdf_config_prefix="$withval", 
         hdf_config_prefix="/usr/local")
+dnl			this assumes people will use include <hdf.h>, not <hdf/hdf.h>
+hdf=$hdf_config_prefix
+for dir in $hdf $hdf/include $hdf/hdf $hdf/include/hdf
+    do
+	if test -f $dir/hdf.h; then
+		HDF_INC="-I$dir"
+		break;
+	fi
+    done
 
-if test -f $hdf_config_prefix/hdf.h -o -f $hdf_config_prefix/include/hdf.h; then
-                HDF_INC="-I$hdf_config_prefix -I$hdf_config_prefix/include"
-                HDF_LIB="-L$hdf_config_prefix/lib -ldf -ljpeg -lz"
-                CFLAGS="$HDF_INCLUDE $CFLAGS"
-                LIBS="$HDF_LIB $LIBS"
-                AC_DEFINE(_WITH_HDF) 
-                AC_MSG_RESULT(yes)
+if test "X$HDF_INC" != "X"; then
+    HDF_LIB="-L$hdf -ldf -ljpeg -lz"
+    AC_DEFINE(_WITH_HDF)
+    AC_MSG_RESULT(yes: hdf4)    
 else
-                HDF_INC=""
-                HDF_LIB=""
-                AC_MSG_RESULT(no)
-                AC_MSG_WARN(could not find HDF library)
-fi
+    HDF_INC=""
+    HDF_LIB=""
+    AC_MSG_RESULT(no)
+    AC_MSG_WARN(could not find HDF library)
+fi   
+
 AC_SUBST(HDF_INC)
 AC_SUBST(HDF_LIB)
 
@@ -347,16 +366,30 @@ fi
 dnl##--------------------------------------------------------------------
 
 AC_MSG_CHECKING(whether we have MIRIAD)
+if test -d "$MIR"; then
+  mir="$MIR"
+else
+  mir="/usr/local/miriad/current"
+fi
+
 AC_ARG_WITH(miriad-prefix, 
         [  --with-miriad-prefix=MIRIAD    Directory where MIRIAD was installed], 
         miriad_config_prefix="$withval", 
-        miriad_config_prefix="/usr/local/miriad/current")
+        miriad_config_prefix="$mir")
 if test -f ${miriad_config_prefix}/src/inc/maxdim.h ; then
         MIRIAD_INC="-I$miriad_config_prefix/src/inc -I$miriad_config_prefix/src/subs"
         MIRIAD_LIB="-L$miriad_config_prefix/lib"
         MIRIAD_LIB="$MIRIAD_LIB -lmir"
         AC_DEFINE(_WITH_MIRIAD) 
-        AC_MSG_RESULT(yes)
+        AC_DEFINE(_WITH_MIRIAD_BIMA)
+        AC_MSG_RESULT(yes: bima-miriad)
+elif test -f ${miriad_config_prefix}/inc/maxdim.h ; then
+	MIRIAD_INC="-I$miriad_config_prefix/inc -I$miriad_config_prefix/subs"
+        MIRIAD_LIB="-L$miriad_config_prefix/lib"
+        MIRIAD_LIB="$MIRIAD_LIB -lmir"
+        AC_DEFINE(_WITH_MIRIAD) 
+        AC_DEFINE(_WITH_MIRIAD_ATNF)
+        AC_MSG_RESULT(yes: atnf-miriad)
 else
         MIRIAD_INC=""
         MIRIAD_LIB=""
@@ -389,7 +422,6 @@ fi
 
 dnl AC_CHECK_FUNC(vprintf, AC_DEFINE(HAVE_VPRINTF))
 dnl if test "$ac_cv_func_vprintf" != yes; then
-
 
 dnl AC_CHECK_FUNC(_doprnt, AC_DEFINE(HAVE_DOPRNT))
 dnl fi
@@ -477,8 +509,8 @@ dnl Replace `main' with a function in -ldwi18n:
 dnl AC_CHECK_LIB(dwi18n, main)
 dnl Replace `main' with a function in -ldyn:
 dnl AC_CHECK_LIB(dyn, main)
-AC_CHECK_LIB(f2c, s_stop)
-AC_CHECK_LIB(g2c, s_stop)
+dnl AC_CHECK_LIB(f2c, s_stop)
+dnl AC_CHECK_LIB(g2c, s_stop)
 dnl Replace `main' with a function in -lgdi:
 dnl AC_CHECK_LIB(gdi, main)
 dnl Replace `main' with a function in -lids:
@@ -577,6 +609,30 @@ AC_FUNC_VPRINTF
 AC_CHECK_FUNCS(ftime gethostname gettimeofday getwd mkdir select strdup strtod strtol strtoul)
 
 AC_C_BIGENDIAN
+
+dnl -- some final YAPP stuff
+
+AC_ARG_WITH(yapp,
+	[  --with-yapp=YAPPNAME    Yapp module to make default],
+	yapp_name="$withval",
+	yapp_name="$yapp_default")
+
+YAPP_NAME="$yapp_name"
+
+case $yapp_name in
+        ps)
+          YAPP_LIBS=""
+          ;;
+	pgplot)
+	  YAPP_LIBS="-L$PGPLOT_DIR -lpgplot $XLIBS $FLIBS"
+          ;;
+esac
+
+AC_SUBST(YAPP_NAME)
+AC_SUBST(YAPP_LIBS)
+
+AC_SUBST(NEMO_FFLAGS)
+AC_SUBST(NEMO_CFLAGS)
 
 AC_OUTPUT(NEMORC.gen Makefile makedefs nemo_start)
 

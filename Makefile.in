@@ -360,6 +360,7 @@ PATCHTAR=patch_`cat $(NEMO)/VERSION`.tar
 
 export:
 	@echo "Steps to update NEMO:"
+	@echo "make dist                        CVS based distribution maker"
 	@echo "make new                         to see what's new for ftp"
 	@echo "make ftp_patch                   export a new patch (can redo)"
 	@echo "make new_patch                   show new since last patch"
@@ -593,8 +594,6 @@ libs:
 	cd src;make install > ../install.log 2>&1 
 	@echo Done at `date`
 
-cleanlibs:
-	(cd src;make clean)
 
 
 bins:

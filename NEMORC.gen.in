@@ -10,19 +10,16 @@
 #  version numbers etc. But could also be a fixed name for your site.
 #  Your choice, it is merely used as an identifcation in some programs
 #  when data is generated/exported (e.g. in FITS)
+
 setenv NEMOSITE `hostname`
-
-
-#   check your system:		redhat 5.x=-lf2c    redhat 6.x=-lg2c
-# setenv FORLIBS   -lg2c
 
 
 #  Set your default YAPPLIB, the current YAPP_NULL will do nothing.
 #  most likely you want to make it $YAPP_PGPLOT or so, but in most of
 #  those cases you will need to tailor various path elements.
 
-#  Here's a PGPLOT YAPP, uncomment and suit your needs
-setenv YAPPLIB     "$NEMOLIB/yapp_pgplot.o -lpgplot @XLIBS@ @FLIBS@"
+#  Here's your default YAPP library
+setenv YAPPLIB     $NEMOLIB/yapp_@YAPP_NAME@.o @YAPP_LIBS@
 setenv YAPP        /xs
 setenv PGPLOT_DIR  @PGPLOT_DIR@
 setenv PGPLOT_LIB  @PGPLOT_DIR@
@@ -33,7 +30,7 @@ setenv PGPLOT_FONT @PGPLOT_DIR@/grfont.dat
 #  may need to change LD_LIBRARY_PATH;
 #  Change 0 -> 1 if you need this
 
-if (0) then
+if (1) then
   if ($?LD_LIBRARY_PATH) then
     setenv LD_LIBRARY_PATH ${NEMOLIB}:${LD_LIBRARY_PATH}
   else
@@ -42,10 +39,10 @@ if (0) then
 endif
 
 
-#### Order of "nemorc" startup files:
-#### 	$NEMO/NEMORC
-#### 	$NEMO/NEMORC.local
-####	$NEMOLIB/NEMORC
-####	$HOME/.nemorc
+#### NOTE: The order of "nemorc" startup files is:
+#### 	1)  	$NEMO/NEMORC
+#### 	2)	$NEMO/NEMORC.local
+####	3)	$NEMOLIB/NEMORC
+####	4)	$HOME/.nemorc
 
 

@@ -144,6 +144,10 @@ Brief overview of a Version 3.x.y INSTALLATION
 
 	- edit $NEMOLIB/makedefs (but danger, configure/config_extra can overwrite this)
 
+	- if 'configure' fails for some reason, check the config.log file. Sometimes
+	  the cause is a rather trivial one, e.g. missing licences or a bad path or
+	  a bad shell.
+
 
 *) Configuration options known to work:
 
@@ -153,11 +157,32 @@ Brief overview of a Version 3.x.y INSTALLATION
 		($NEMO/src/scripts/pgplot.install will help you
 		installing pgplot in $NEMOLIB)
 
-	--with-hdf-prefix=PFX     
-	--with-cfitsio-prefix=PFX 
+	--with-hdf-prefix=PFX
+
+		expects hdf.h to be found somewhere in an {include,hdf} subdirectory
+		and will link with 'df', 'jpeg' and 'z' library.
+
 	--with-miriad-prefix=PFX
+		if $MIR is present, it will use this variable
+
+	--disable-fortran
+		if you don't have a working fortran compiler
+	--with-ccmalloc
+		use CCMALLOC to debug malloc usage
 
 * Configuration options that we are working on:
+
+	--with-cfitsio-prefix=PFX 
+
+* Known configurations to work:
+
+	    NEMOHOST			"uname -a" for the machine that worked
+
+	mips-sgi-irix6.5	IRIX64 sulfur 6.5 01101245 IP27
+	i686-pc-linux-gnu	Linux nemo 2.2.14-5.0 #1 Tue Mar 7 21:07:39 EST 2000 i686 unknown
+	sparc-sun-solaris2.6	SunOS atlas 5.6 Generic_105181-20 sun4u sparc SUNW,Ultra-5_10
+	sparc-sun-solaris2.7
+	sparc-sun-solaris2.8
 
 
 

@@ -3,6 +3,12 @@
 # handy for recursion
 @SET_MAKE@
 
+# Compilers:
+
+CC  = @CC@
+FC  = @F77@
+F77 = @F77@
+CXX = @CXX@
 
 # HDF library
 
@@ -18,9 +24,13 @@ HDFLIB = @HDF_LIB@
 
 
 # CFITSIO library
-
 FITSIOINC = @FITSIO_INC@
 FITSIOLIB = @FITSIO_LIB@
+
+#			miriad
+MIRIAD_INC = @MIRIAD_INC@
+MIRIAD_LIB = @MIRIAD_LIB@
+
 
 
 # LOADOBJ stuff; -DMACH=.....
@@ -42,10 +52,10 @@ FORLIBS = $(FLIBS)
 #set opts="-rdynamic -ansi -fwritable-strings -Wconversion -Wnested-externs"
 #exec gcc -fPIC -Dlinux -DSYSV -I$NEMOINC -I$NEMOLIB -L$NEMOLIB $opts $* $link
 
-NEMO_CFLAGS = -I$(NEMOINC) -I$(NEMOLIB) @LOADOBJ_MACH@
+NEMO_CFLAGS = @NEMO_CFLAGS@ -I$(NEMOINC) -I$(NEMOLIB) @LOADOBJ_MACH@
 NEMO_FFLAGS = @NEMO_FFLAGS@
 NEMO_LDFLAGS = 
-NEMO_LIBS = -L$(NEMOLIB) -lnemo @LOADOBJ_LIBS@ -lm
+NEMO_LIBS = -L$(NEMOLIB) -lnemo @LOADOBJ_LIBS@ @MATH_LIBS@
 
 #			some graphics libraries:
 GLLIBS = @GLLIBS@
@@ -57,12 +67,6 @@ FFLAGS = @FFLAGS@ $(NEMO_FFLAGS)
 LDFLAGS = @LDFLAGS@ $(NEMO_LDFLAGS)
 
 RANLIB = @RANLIB@
-
-#			miriad
-MIRIAD_INC = @MIRIAD_INC@
-MIRIAD_LIB = @MIRIAD_LIB@
-
-
 
 # -----------------------------------------------------------------------------
 #  rules
@@ -124,17 +128,6 @@ makedefs_help:
 	@echo LIBS=@LIBS@
 	@echo RANLIB=@RANLIB@
 	@echo ========================================================================
-
-
-
-
-
-
-
-
-
-
-
 
 
 
