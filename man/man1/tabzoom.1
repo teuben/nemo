@@ -1,0 +1,222 @@
+.TH TABZOOM 1NEMO "22 October 2003"
+.SH NAME
+tabzoom \- dynamic query table viewer with interactive zoom and action
+.SH SYNOPSIS
+\fBtabzoom in=\fP\fItable_file\fP [\fIparameter=value\fP]
+.SH DESCRIPTION
+\fItabzoom\fP is an interactive program that
+displays numeric data from an ASCII table in a 2D
+plot (see also \fItabplot(1NEMO)\fP and \fItabview(1NEMO)\fP),
+while dynamically querying related columns from the same table,
+and allowing zooming and performing an action on a selected point.
+Dynamic Query (DQ) is an effective way to visualize an N-dimensional
+dataset in 2D.
+Two variables are selected to be plotted, they can either be directly 
+taken as a column
+from the table, or computed via a \fIfie(3NEMO)\fP 
+expression involving any column, e.g. \fI"sqrt(%1**2+%2**2)"\fP.
+.PP
+Each selected 'column' can be manipulated using sliders.
+Between the \fImin\fP (on the left) and \fImax\fP (on the right) of
+a column, 
+two sliders, called \fIlo\fP and \fIhi\fP can be moved around
+independantly.
+\fIlo\fP is a lower limit, and \fIhi\fP the higher limit, for data
+to be included in the display:
+.nf
+
+      lo  <  hi                 MIN-------[lo=======hi]--------MAX
+.fi
+and
+.nf
+      lo  >  hi                 MIN=======hi]--------[lo=======MAX
+
+.fi
+The \fIlo\fP slider can also be moved to the right of the
+\fIhi\fP slider, as the diagram shows, in which case the
+sample will include data between 
+\fImin\fP and \fIhi\fP as well as
+\fIlo\fP and \fImax\fP. This is like swapping the 
+\fIlo\fP and \fIhi\fP sliders and corresponds to negating the
+logic of the first case.
+.PP
+Finally, only data are displayed for which
+the corresponding slider value of all values falls in the 
+selected range. In SQL language, this means all queries
+are AND-ed. 
+.PP
+\fINote:\fP in this prototype the words \fIslider\fP and \fIcolumn\fP
+can be used interchangebly.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP\fIin_table\fP
+Input table filename. No default.
+.TP
+\fBcol=\fP\fIname1, name2,..\fP
+Columns to be named and selected as sliders. 
+The default column names are 1,2,3,... for ascii tables. The default is
+that all columns are selected to become sliders.
+.TP
+\fBxvar=\fP\fIX_expression\fP
+X-variable to plot. Any \fIfie(3NEMO)\fP expression involving input columns
+(see \fBcol=\fP) can be given. The first extracted column given by
+\fBcol=\fP is referred to as %1 etc.
+[Default: \fB%1\fP].
+.TP
+\fByvar=\fP\fIY_expression\fP
+Y-variable to plot (see \fBxvar=\fP).
+[Default: \fB%2\fP].
+.TP
+\fBxrange=\fP\fIxmin,xmax\fP
+Range in X from \fIxmin\fP to \fIxmax\fP [autoscale + 5% edges].
+.TP
+\fByrange=\fP\fIymin,ymax\fP
+Range in Y from \fIymin\fP to \fIymax\fP [autoscale + 5% edges].   
+.TP
+\fBxlab=\fIx-label\fP
+Label along the X-axis [default \fIxcol\fP]
+.TP
+\fBylab=\fIy-label\fP
+Label along the Y-axis [default: \fIycol\fP]
+
+.TP
+\fBcolor=\fP\fIC_expression\fP
+A \fIfie(3NEMO)\fP expression 
+which is used to colorize the particles. Color will be an integer,
+0 being invisible (actually: background color), 1 the foreground color,
+and 2,3,4... the colors your graphics device has.
+[Default: \fB1\fP].
+
+.TP
+\fBpsize=\fP\fIS_expression\fP
+Size of points in cm. This is allowed to be a \fIfie(3NEMO)\fP
+expression, in terms of
+other columns. It must evaluate in cm.
+Default: 0 (dots - this is also the fastest and
+highly recommended)
+\fI *** not implemented *** \fP
+.TP
+\fBptype=\fP\fIP_expression\fP
+Point type. This is allowed to be  a \fIfie(3NEMO)\fP
+expression, in terms of other columns.
+After evaluation, is is converted to an integer, see \fIyapp(3NEMO)\fP
+for valid \fIptype\fP's. Default: 0 (a point)
+\fI *** not implemented *** \fP
+.TP
+\fBlayout=\fP\fIlayout_file\fP
+Filename with \fIlayout(5NEMO)\fP commands to be added to plot? 
+Default: none.
+.TP
+\fBout=\fP\fIout_table\fP
+Whenever output is requested (the \fBo\fP command, see below),
+it is written to this file. 
+\fIWarning: \fP Any previously existing file \fBwill\fP be overwritten.
+Default: none.
+.TP
+\fBoptions=\fP\fIo1,o2,..\fP
+List of options, separated by comma's, that determine the output
+when \fBout=\fP has been selected. Valid values are
+\fBi\fP: the ordinal (1 being the first in the original data)
+\fBx,y\fP: the plotted data,
+\fBdata\fP: the original (\fBcols=\fP only) data from the input table.
+Note that the order is always \fBi, x, y, data\fP
+[Default: \fBi,x,y,data\fP]
+.TP
+\fBheadline=\fItext\fP
+Random verbiage, will be plotted along right top of plot for id. [default: none].
+
+
+.SH
+\fBmaxstat=\fP\fIlevel\fP
+Select a level of statistics output at startup of the program. 
+At the lowest level (0) an overview of the read data is given, including
+min, max, mean, dispersion, skewness and kurtosis. At level 1 the Pearson
+correlation matrix is given. At level 2 all possible linear regressions
+are given. At level 3 at multiple regressions are given. [Default: \fB1\fP]
+.SH INTERACTIVE SLIDER COMMANDS
+Although the final program will have (X-window) 
+graphic sliders, the prototype
+has a simple command line interface to select and manipulate sliders
+which provide the dynamic query. Only the first character
+is matched, and for some commands the second parameter is also used.
+.PP
+The prompt 
+.nf
+    \fBSlider 2 [0.0387063 0.0387063 0.998341 0.998341]:\fP
+.fi
+shows the slider name (normally numbers 1...\fInsliders\fP), followed
+by the \fImin\fP, \fIlo\fP, \fIhi\fP and \fImax\fP  along the slider.
+The \fImin\fP and \fImax\fP can currently not be modified. 
+The following commands are recognized:
+.nf
+.ta +1i +2i
+	\fBl\fP \fI<val>\fP	set lo slider to <val> [0]
+	\fBh\fP \fI<val>\fP	set hi slider to <val> [0]
+	\fBl s\fP \fI<step>\fP	set lo stepper to <step> [0]
+	\fBh s\fP \fI<step>\fP	set hi stepper to <step> [0]
+	\fBb\fP \fI<step>\fP	set both lo and hi stepper to <step> [0]
+	\fBq\fP         	quit
+	[\fB0\fP-\fB9\fP]*     	select a new slider by number (>0)
+	\fBr\fP         	force full redisplay
+	\fBs\fP         	show all sliders info
+	\fBo\fP         	(over)write output (needs \fBout=\fP keyword)
+	\fB!\fP\fIcmd\fP	run (previous) unix command
+	\fB|\fP\fIcmd\fP	run data through (previous) pipe
+	\fB?\fP          	this help
+.fi
+.PP
+Noteworthy are the \fB!\fP and \fB|\fP commands. They both
+have an optional \fIcmd\fP argument, which allows the user to 
+repeat a previously set \fIcmd\fP for this command. The \fB!\fP
+simply runs the \fIcmd\fP command through the shell,
+whereas the \fB|\fP pipes
+all currently visible data into the \fIcmd\fP command.
+For example
+to do a linear least squares fit to the visible data,
+.nf
+        \fB|tablsqfit -\fP
+.fi
+would be needed (see \fItablsqfit(1NEMO)\fP), all subsequents fits
+can be done using the
+.nf
+        \fB|\fP
+.fi
+command itself, since it remembers the last used \fB|\fP\fIcmd\fP. 
+.SH TIMING
+Clearly updating the screen is the dominant factor in the dynamic
+nature of \fItabview\fP. On a SPARC-1 a single average selection
+takes about 30ms for N=1000 rows and M=4 columns. Updating a dummy
+\fIyapp\fP display took 200ms in this case, but the dependance on
+N is highly nonlinear.
+.SH FUTURE
+Recognize ASCII as well as FITS tables (\fBTABLE\fP 
+and \fBBINTABLE\fP). See also \fIfitstab(1NEMO)\fP.
+.PP
+Need an improved yapp interface - PGPLOT is clearly too slow.
+Graphical user interface. 
+.PP
+Maximum number of rows, columns and linelength
+are defined in the program, no
+dynamic memory allocation in this sense yet. Recompilation using
+-DMAXPOINTS, -DMAXSLIDERS and -DMAXLINE resp. would be required.
+.PP
+Improve selection algorithm.
+.SH SEE ALSO
+tabplot(1NEMO), fie(3NEMO), layout(3NEMO), xgobi(l)
+.SH AUTHOR
+.nf
+Peter Teuben
+with ack to: \fIHuman-Computer Interaction Laboratory\fP - Ben Schneiderman \fIet al.\fP.
+Univ.of Maryland
+.fi
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.5i
+8-oct-92	V0.0 prototyped  	PJT
+11-oct-92	V0.1 added more commandline functionality	PJT
+2-dec-92	V0.2 added | and ! commands - corrected doc	PJT
+4-mar-94	V0.3 aded 'b' command, more moment stats 	PJT
+1-nov-95	V0.4 documented new features             	PJT
+.fi
