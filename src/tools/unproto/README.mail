@@ -1,0 +1,465 @@
+From wietse@wzv.win.tue.nl Sat Mar  5 04:47:17 1994
+Return-Path: <wietse@wzv.win.tue.nl>
+From: wietse@wzv.win.tue.nl (Wietse Venema)
+Subject: Re: unproto
+To: teuben@astro.umd.edu
+Date: Fri, 4 Mar 94 21:50:29 MET
+Cc: wietse@wzv.win.tue.nl (Wietse Venema)
+In-Reply-To: <199403032021.AA18641@bootes.astro.umd.edu>; from "teuben@astro.UMD.EDU" at Mar 3, 94 3:21 pm
+X-Mailer: ELM [version 2.3 PL11]
+
+teuben@astro.UMD.EDU wrote:
+> 
+> 
+> Dag Wietse,
+> 
+>    excuus the taal, ik neem maar aan dat dit wel werkt. Ik heb je
+> unproto programma maar eens zitten uit te testen (tot dusver geen
+> problemen hoor), en stuur het (met de juist ack. natuurlijk) in een
+> pakket dat ik verzorg mee. Op dit moment zie ik in de manual page
+> 
+> LAST MODIFICATION
+>      92/02/15 17:17:09
+> 
+> VERSION/RELEASE
+>      1.5
+> 
+> Ik heb het uit comp.sources.misc geloof ik gehaald, volume 26 of
+> daaromtrent, met een patch01 een volume later. Heb je sindsdien
+> nog updates verzorgd, of serieuze klachten ontvangen. Graag hoor
+> ik er meer over mocht je iets horen.
+
+Er is een patch achteraangekomen. Hoofdzakelijk cosmestisch.
+Verder geen klachten, het ding lijkt niet kapot te krijgen.
+
+	Wietse
+
+Newsgroups: comp.sources.misc
+Path: wzv.win.tue.nl!svin09.info.win.tue.nl!tuegate.tue.nl!sun4nl!mcsun!uunet!sparky!kent
+From: wietse@wzv.win.tue.nl (Wietse Venema)
+Subject: v38i013: unproto - ANSI C with old-style C compiler, Patch02
+Message-ID: <1993Jun20.230147.9326@sparky.imd.sterling.com>
+Followup-To: comp.sources.d
+X-Md4-Signature: 3481182d4ce7b771221fb35f96d59f11
+Sender: kent@sparky.imd.sterling.com (Kent Landfield)
+Organization: Eindhoven University of Technology, The Netherlands
+Date: Sun, 20 Jun 1993 23:01:47 GMT
+Approved: kent@sparky.imd.sterling.com
+Lines: 413
+
+Submitted-by: wietse@wzv.win.tue.nl (Wietse Venema)
+Posting-number: Volume 38, Issue 13
+Archive-name: unproto/patch02
+Environment: UNIX, PCC
+Patch-To: unproto: Volume 27, Issue 85-86
+
+This is the second patch to the unproto release that appeared in this
+news group (volume 27, issues 85 and 86). The first patch appeared in
+volume 28, issue 69.  A fully patched version of the unproto source can
+be obtained from ftp.win.tue.nl, file /pub/unix/unproto5.shar.Z
+
+This patch fixes one bug and adds more support for weird compilers.
+
+- Incorrect code could be generated for functions with anonymous struct
+declarations within argument lists. For example, foo(struct {...} blah)
+instead of properly-used typedefs. The result would be rejected by the
+compiler, so no harm was done.
+
+- Support for systems with a non-empty "va_dcl" definition in their
+varargs.h system include file. For example, the M88k Greenhills C
+compiler.
+
+In addition, the unprototyper now comes with an `acc' shell script that
+emulates most of an ANSI C compiler with SunOS 4.x, Ultrix 4.x, System
+V.2 and other UNIX versions, and that hides the gory details of how to
+run alternate C preprocessors.
+
+        Wietse Venema
+        wietse@wzv.win.tue.nl
+        Mathematics and Computing Science
+        Eindhoven University of Technology
+        The Netherlands
+
+*** ./example.c-	Sat Feb 15 17:17:00 1992
+--- ./example.c	Fri Jun 18 22:29:47 1993
+***************
+*** 1,5 ****
+   /*
+!   * @(#) example.c 1.4 92/02/15 17:17:05
+    * 
+    * Examples of things that can be done with the unproto package
+    */
+--- 1,5 ----
+   /*
+!   * @(#) example.c 1.5 93/06/18 22:29:46
+    * 
+    * Examples of things that can be done with the unproto package
+    */
+***************
+*** 214,216 ****
+--- 214,222 ----
+  int (*(*test26(foo))())()
+  long foo;
+  { /* body */ }
++ 
++ #define ARGSTR()   struct {int l; char c[1];}
++ 
++ void functie(ARGSTR() *cmdlin, ARGSTR() *c1)
++ {
++ }
+*** ./unproto.c-	Sat Feb 15 17:17:12 1992
+--- ./unproto.c	Fri Jun 18 22:29:39 1993
+***************
+*** 125,136 ****
+  /*	Department of Mathematics and Computer Science
+  /*	Den Dolech 2, P.O. Box 513, 5600 MB Eindhoven, The Netherlands
+  /* LAST MODIFICATION
+! /*	92/02/15 17:17:09
+  /* VERSION/RELEASE
+! /*	1.5
+  /*--*/
+  
+! static char unproto_sccsid[] = "@(#) unproto.c 1.5 92/02/15 17:17:09";
+  
+  /* C library */
+  
+--- 125,136 ----
+  /*	Department of Mathematics and Computer Science
+  /*	Den Dolech 2, P.O. Box 513, 5600 MB Eindhoven, The Netherlands
+  /* LAST MODIFICATION
+! /*	93/06/18 22:29:37
+  /* VERSION/RELEASE
+! /*	1.6
+  /*--*/
+  
+! static char unproto_sccsid[] = "@(#) unproto.c 1.6 93/06/18 22:29:37";
+  
+  /* C library */
+  
+***************
+*** 370,376 ****
+  
+      if (!LAST_ARG_AND_EQUAL(t->head, VOID_ARG)) {
+  	for (s = t->head; s; s = s->next) {	/* foreach argument... */
+! 	    if (!LAST_ARG_AND_EQUAL(s, "...")) {
+  		if (s->head != s->tail) {	/* really new-style argument? */
+  		    show_type(s);		/* rewrite type info */
+  		    put_ch(';');
+--- 370,381 ----
+  
+      if (!LAST_ARG_AND_EQUAL(t->head, VOID_ARG)) {
+  	for (s = t->head; s; s = s->next) {	/* foreach argument... */
+! 	    if (LAST_ARG_AND_EQUAL(s, "...")) {
+! #ifdef _VA_DCL_					/* see ./stdarg.h */
+! 		put_str(_VA_DCL_);		/* varargs magic */
+! 		put_nl();			/* make output look nicer */
+! #endif
+! 	    } else {
+  		if (s->head != s->tail) {	/* really new-style argument? */
+  		    show_type(s);		/* rewrite type info */
+  		    put_ch(';');
+***************
+*** 463,468 ****
+--- 468,494 ----
+      fpf_header_types(l1);			/* show argument types */
+  }
+  
++ /* skip_enclosed - skip over enclosed tokens */
++ 
++ static struct token *skip_enclosed(p, stop)
++ register struct token *p;
++ register int stop;
++ {
++     register int start = p->tokno;
++ 
++     /* Always return a pointer to the last processed token, never NULL. */
++ 
++     while (p->next) {
++ 	p = p->next;
++ 	if (p->tokno == start) {
++ 	    p = skip_enclosed(p, stop);		/* recurse */
++ 	} else if (p->tokno == stop) {
++ 	    break;				/* done */
++ 	}
++     }
++     return (p);
++ }
++ 
+  /* show_arg_name - extract argument name from argument type info */
+  
+  static void show_arg_name(s)
+***************
+*** 477,482 ****
+--- 503,510 ----
+  	for (p = s->head; p; p = p->next) {
+  	    if (p->tokno == TOK_WORD) {
+  		t = p;				/* remember last word */
++ 	    } else if (p->tokno == '{') {
++ 		p = skip_enclosed(p, '}');	/* skip structured stuff */
+  	    } else if (p->tokno == '[') {
+  		break;				/* dimension may be a macro */
+  	    } else if (IS_FUNC_PTR_TYPE(p)) {
+*** ./acc.sh-	Fri Jun 18 22:06:05 1993
+--- ./acc.sh	Fri Jun 18 22:29:43 1993
+***************
+*** 0 ****
+--- 1,35 ----
++ #!/bin/sh
++ 
++ # @(#) acc.sh 1.1 93/06/18 22:29:42
++ #
++ # Script to emulate most of an ANSI C compiler with a traditional UNIX
++ # C compiler.
++ 
++ # INCDIR should be the directory with auxiliary include files from the
++ # unproto source distribution (stdarg.h, stdlib.h, stddef.h, and other
++ # stuff that is missing from your compilation environment). With Ultrix
++ # 4.[0-2] you need unproto's stdarg.h even though the system provides
++ # one.
++ #
++ INCDIR=.
++ 
++ # CPPDIR should be the directory with the unprototypeing cpp filter
++ # (preferably the version with the PIPE_THROUGH_CPP feature).
++ #
++ CPPDIR=.
++ 
++ # DEFINES: you will want to define volatile and const, and maybe even
++ # __STDC__.
++ #
++ DEFINES="-Dvolatile= -Dconst= -D__STDC__"
++ 
++ # Possible problem: INCDIR should be listed after the user-specified -I
++ # command-line options, not before them as we do here. This is a problem
++ # only if you attempt to redefine system libraries.
++ #
++ # Choose one of the commands below that is appropriate for your system.
++ #
++ exec cc -Qpath ${CPPDIR} -I${INCDIR} ${DEFINES} "$@"	# SunOS 4.x
++ exec cc -tp -h${CPPDIR} -B -I${INCDIR} ${DEFINES} "$@"	# Ultrix 4.2
++ exec cc -Yp,${CPPDIR} -I${INCDIR} ${DEFINES} "$@"	# M88 SysV.3
++ exec cc -B${CPPDIR}/ -tp -I${INCDIR} ${DEFINES} "$@"	# System V.2
+*** ./stdarg.h-	Wed Jan 15 21:53:25 1992
+--- ./stdarg.h	Fri Jun 18 22:29:45 1993
+***************
+*** 1,5 ****
+   /*
+!   * @(#) stdarg.h 1.3 92/01/15 21:53:24
+    * 
+    * Sample stdarg.h file for use with the unproto filter.
+    * 
+--- 1,5 ----
+   /*
+!   * @(#) stdarg.h 1.4 93/06/18 22:29:44
+    * 
+    * Sample stdarg.h file for use with the unproto filter.
+    * 
+***************
+*** 7,16 ****
+--- 7,22 ----
+    * 
+    * 1 - On systems that do not have a /usr/include/stdarg.h file, it should be
+    * included by C source files that implement ANSI-style variadic functions.
++   * Ultrix 4.[0-2] comes with stdarg.h but still needs the one that is
++   * provided with the unproto filter.
+    * 
+    * 2 - To configure the unprototyper itself. If the _VA_ALIST_ macro is
+    * defined, its value will appear in the place of the "..." at the end of
+    * argument lists of variadic function *definitions* (not declarations).
++   * Some compilers (such as Greenhills m88k) have a non-empty va_dcl
++   * definition in the system header file varargs.h. If that is the case,
++   * define "_VA_DCL_" with the same value as va_dcl. If _VA_DCL_ is defined,
++   * the unprototyper will emit its value just before the opening "{".
+    * 
+    * Compilers that always pass arguments via the stack can use the default code
+    * at the end of this file (this usually applies for the vax, mc68k and
+***************
+*** 34,44 ****
+  #define va_arg(ap, type)	((type *) __builtin_va_arg_incr((type *) ap))[0]
+  #define va_end(ap)
+  
+! #elif defined(mips) /* tested with Ultrix 4.0 and 4.2 */
+  
+  #define _VA_ALIST_		"va_alist"
+! #include <stdarg.h>		/* huh? */
+  
+  #else /* vax, mc68k, 80*86 */
+  
+  typedef char *va_list;
+--- 40,78 ----
+  #define va_arg(ap, type)	((type *) __builtin_va_arg_incr((type *) ap))[0]
+  #define va_end(ap)
+  
+! #else
+! #ifdef mips /* tested with Ultrix 4.0 and 4.2 */
+  
+  #define _VA_ALIST_		"va_alist"
+! #include "/usr/include/stdarg.h"
+  
++ #else
++ #ifdef m88k /* Motorola SYSTEM V/88 R32V3 */
++ 
++ #define _VA_ALIST_		"va_alist"
++ #define _VA_DCL_		"va_type va_alist;"
++ typedef struct _va_struct {
++     int va_narg;
++     int *va_stkaddr;
++     int *va_iregs;
++ } va_list;
++ #define va_start(ap, p) \
++ ((ap).va_narg=(int *)&va_alist-va_stkarg, \
++  (ap).va_stkaddr=va_stkarg, \
++  (ap).va_iregs=(int *)va_intreg)
++ #define va_end(p)
++ #if defined(LittleEndian)
++ #define va_arg(p,mode) \
++     (*(mode *)_gh_va_arg(&p, va_align(mode), va_regtyp(mode), sizeof(mode)))
++ #else /* defined(LittleEndian) */
++ #define va_arg(p,mode) ( \
++     (p).va_narg += ((p).va_narg & (va_align(mode) == 8)) + \
++                       (sizeof(mode)+3)/4, \
++     ((mode *)((va_regtyp(mode) && (p).va_narg <= 8 ? \
++              (p).va_iregs: \
++              (p).va_stkaddr) + (p).va_narg))[-1])
++ #endif /* defined(LittleEndian) */
++ 
+  #else /* vax, mc68k, 80*86 */
+  
+  typedef char *va_list;
+***************
+*** 46,49 ****
+  #define va_arg(ap, type)	((type *) (ap += sizeof(type)))[-1]
+  #define va_end(ap)
+  
+! #endif
+--- 80,85 ----
+  #define va_arg(ap, type)	((type *) (ap += sizeof(type)))[-1]
+  #define va_end(ap)
+  
+! #endif /* m88k */
+! #endif /* mips */
+! #endif /* sparc */
+*** ./README-	Sat Feb 15 17:17:02 1992
+--- ./README	Fri Jun 18 22:29:36 1993
+***************
+*** 1,4 ****
+! @(#) README 1.5 92/02/15 17:17:00
+  
+  unproto - Compile ANSI C with traditional UNIX C compiler
+  
+--- 1,4 ----
+! @(#) README 1.6 93/06/18 22:29:34
+  
+  unproto - Compile ANSI C with traditional UNIX C compiler
+  
+***************
+*** 61,67 ****
+  
+      System V.2: cc -Bdirectory_with_alternate_cpp/ -tp ...
+  
+! Your C compiler manual page should provide the necessary information.
+  
+  A more portable, but less efficient, approach relies on the observation
+  that almost every UNIX C compiler supports the -E (write preprocessor
+--- 61,69 ----
+  
+      System V.2: cc -Bdirectory_with_alternate_cpp/ -tp ...
+  
+! Examples of these, and others, can be found in the acc.sh shell script
+! that emulates an ANSI C compiler.  Your C compiler manual page should
+! provide the necessary information.
+  
+  A more portable, but less efficient, approach relies on the observation
+  that almost every UNIX C compiler supports the -E (write preprocessor
+***************
+*** 136,151 ****
+  available from ftp.uu.net as comp.sources.misc/volume10/config42.Z).
+  
+  If you run the unprototyper with "cc -E" just install the `unproto'
+! binary; the `cpp' shell script will not be needed.
+  
+  If you use the `cpp' shell script to pipe the preprocessor output
+  through the unprototyper program, install the `unproto' binary in a
+  place where the `cpp' shell script can find it, and install the `cpp'
+! shell script in a suitable place.
+  
+  If the unprototyper itself opens the pipe to the C preprocessor (i.e.
+  the unprototyper was built with the `PIPE_THROUGH_CPP' macro defined),
+! install the `cpp' unprototyper binary in a suitable place.
+  
+  	Wietse Venema
+  	wietse@wzv.win.tue.nl
+--- 138,157 ----
+  available from ftp.uu.net as comp.sources.misc/volume10/config42.Z).
+  
+  If you run the unprototyper with "cc -E" just install the `unproto'
+! binary; the `cpp' and `acc' shell scripts will not be needed.
+  
+  If you use the `cpp' shell script to pipe the preprocessor output
+  through the unprototyper program, install the `unproto' binary in a
+  place where the `cpp' shell script can find it, and install the `cpp'
+! shell script in a suitable place. Edit the `acc' shell script and
+! install it in a suitable place. From now on, type `acc' instead of
+! `cc'.
+  
+  If the unprototyper itself opens the pipe to the C preprocessor (i.e.
+  the unprototyper was built with the `PIPE_THROUGH_CPP' macro defined),
+! install the `cpp' unprototyper binary in a suitable place. Edit the
+! `acc' shell script and install it in a suitable place. From now on,
+! type `acc' instead of `cc'.
+  
+  	Wietse Venema
+  	wietse@wzv.win.tue.nl
+*** ./example.out-	Sat Feb 15 17:17:09 1992
+--- ./example.out	Fri Jun 18 22:30:54 1993
+***************
+*** 259,261 ****
+--- 259,271 ----
+  int (*(*test26(foo))())()
+  long foo;
+  {/*1*/  }/*1*/
++ 
++ 
++ 
++ void functie(cmdlin,c1)
++ # 220 "example.c"
++ struct {int l; char c[1];} *cmdlin;
++ # 220 "example.c"
++ struct {int l; char c[1];} *c1;
++ {/*1*/
++ }/*1*/
+*** ./Makefile-	Sat Feb 15 17:17:04 1992
+--- ./Makefile	Fri Jun 18 22:29:42 1993
+***************
+*** 1,4 ****
+! # @(#) Makefile 1.5 92/02/15 17:17:03
+  
+  ## BEGIN CONFIGURATION STUFF
+  
+--- 1,4 ----
+! # @(#) Makefile 1.6 93/06/18 22:29:40
+  
+  ## BEGIN CONFIGURATION STUFF
+  
+***************
+*** 74,80 ****
+  CFILES	= unproto.c tok_io.c tok_class.c tok_pool.c vstring.c symbol.c error.c \
+  	hash.c strsave.c
+  HFILES	= error.h token.h vstring.h symbol.h
+! SCRIPTS	= cpp.sh
+  SAMPLES	= stdarg.h stddef.h stdlib.h varargs.c example.c example.out
+  SOURCES	= README $(CFILES) $(HFILES) Makefile $(SCRIPTS) $(SAMPLES)
+  FILES	= $(SOURCES) unproto.1
+--- 74,80 ----
+  CFILES	= unproto.c tok_io.c tok_class.c tok_pool.c vstring.c symbol.c error.c \
+  	hash.c strsave.c
+  HFILES	= error.h token.h vstring.h symbol.h
+! SCRIPTS	= cpp.sh acc.sh
+  SAMPLES	= stdarg.h stddef.h stdlib.h varargs.c example.c example.out
+  SOURCES	= README $(CFILES) $(HFILES) Makefile $(SCRIPTS) $(SAMPLES)
+  FILES	= $(SOURCES) unproto.1
+
+exit 0 # Just in case...
+
+
+
