@@ -1,0 +1,91 @@
+.TH FILEFN 3NEMO "24 March 1994"
+.SH NAME
+root, extension, head, tail, defext, pathopen, pathfind, _mappath, \- file operations
+.SH SYNOPSIS
+.nf
+.B #include <stdinc.h>
+.B #include <filefn.h>
+.PP
+.B string root(filename)
+.B string extension(filename)
+.B string head(filename)
+.B string tail(filename)
+.PP
+.B string defext(filename,ext)
+.B stream pathopen(path, filename, mode)
+.B string pathfind(path, filename)
+.B string _mappath(fn, path, filename, arg)
+.PP
+.B string filename, ext, mode, path;
+.SH DESCRIPTION
+The first four functions 
+.I root(),
+.I extension(),
+.I head(),
+and
+.I tail(),
+returns a component of a file
+name and are equivalent to the C shell substitution
+characters \fB:r, :e, :h,\fP and \fB:t\fP, respectively. 
+.PP
+\fIdefext()\fP adds an extension to a file name
+if none already exists.  Alternatively, if the extension
+field \fBext\fP begins with a *, any old extension in
+\fBfilename\fP is replaced with the given extension.              
+.nf                                                             
+     defext(filename, ".xxx")   --  add .xxx if no ext       
+     defext(filename, "*.xxx")  --  force .xxx as ext        
+.fi                                                             
+Note:  defext returns a pointer to dynamically-allocated    
+string storage which is never freed.  This is necessary     
+to ensure safety on multiple calls in a single statement.   
+.PP
+\fIpathopen()\fP is used to open files using a      
+search path similar to that used, for example, by csh       
+in searching for a command.  The pathopen routine has       
+the same structure as \fIfopen(3)\fP and
+the \fBfilename\fP and \fBmode\fP arguments are the same as in that     
+call.  The path argument consists of a list of directories  
+which are prepended to the filename, unless the filename    
+begins with either a / or a ~.  The directories in the      
+list are separated by colons as in the definition of the    
+PATH environment variable.  White space and empty fields    
+are ignored to simplify formatting of paths in a definition 
+file.                                                       
+.PP                                                             
+After each directory name has been added, the           
+\fIpathopen\fP performs ~ (tilde) expansion in the same form as  
+csh.  The path argument may be NULL, in which case no
+directories are prepended.  This is useful if ~ expansion   
+is the only required function.                              
+.PP                                                             
+\fIpathopen()\fP returns an open stream to         
+the indicated file, or NULL, if no existing file is
+found.                                                      
+.PP
+\fIpathfind()\fP
+is similar to \fIpathopen\fP, except     
+that it does not try to open the file but instead returns   
+the full name of the first file that exists along the path, 
+or NULL if none exist.                                      
+.PP
+.I _mappath()
+maps the string function \fBfn\fP over each path/filename     
+combination, stopping when \fBfn(name, arg)\fP returns non-null.  
+That value is returned.  If the function always returns a
+NULL value for each element in the path, NULL is returned   
+from _mappath.                                              
+.SH AUTHOR
+Eric Roberts
+.SH FILES
+.nf
+.ta +1.5i
+~/src/kernel/core	filefn.c
+.fi
+.SH UPDATE HISTORY
+.nf
+.ta +1i +4i
+11-jan-86	Last modified   	Roberts
+6-dec-86	Fixed some bugs and updated for Nemo	Josh
+6-oct-90	Manual page written	Peter
+.fi
