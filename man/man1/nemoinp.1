@@ -1,0 +1,63 @@
+.TH NEMOINP 1NEMO "28 August 2000"
+.SH NAME
+nemoinp \- parse a user supplied number string
+.SH SYNOPSIS
+.PP
+\fBnemoinp [parameter=value] ...
+.SH DESCRIPTION
+\fInemoinp\fP parses an expression supplied by the user, using the
+rules as given by \fInemoinp(3NEMO)\fP. The output format can be
+defined too, separators, newlines etc. can be choosen at will.
+.PP
+It may come in handy to set an array in a shell variable or to
+initialize tables, e.g. \fBset x=(`nemoinp 1:10:2`)\fI will then
+result in \fBx\fP having \fB1 3 5 7 9\fP.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 20
+\fBexpression=\fIexpr-string\fP
+expression to be parsed [default: empty ].
+.TP
+\fBsepar=\fIstring\fP
+The string which is appended to the format string described in previous
+keyword and is used to separate the numbers output. When no string is
+supplied, a blank is used.
+[default: empty].
+.TP
+\fBformat=\fIstring\fP
+Valid C-format descriptor used in \fIprintf(3)\fP to output
+the numbers. When %d is used, integer math is forced.
+See also next keyword for output number separator.
+[default: \fB%g\fP].
+.TP
+\fBnewline=t|f\fP
+Should a newline be added after each number parsed. This is often
+useful in cases \fInemoinp\fP is used to generate the independant
+coordinate when tables have to be generated from scratch.
+[Default: \fBf\fP].
+.TP
+\fBnmax=\fIinteger\fP
+Size of scratch array to be allocated dynamically for the parsed
+number
+[default: \fB32768\fP].
+.TP
+\fBtab=\fItable_file\fP
+Optional table output. Default: none
+.TP
+\fBseed=\fIinitial_seed\fP
+Seed for \fIxrandom(3NEMO)\fP. Default: 0
+.SH SEE ALSO
+various tab* programs, nemoinp(3NEMO), getrange(3NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+18-apr-89	V1.0 created	PJT
+20-jun-89	V1.0a small changed - doc updated	PJT
+ 5-jul-89	V1.1 added nmax parameter	PJT
+18-may-92	documentation
+16-jun-97	V1.6 %d forces integer math	PJT
+28-aug-00	V1.7 documented tab= and seed=	PJT
+.fi
