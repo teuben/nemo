@@ -1,0 +1,37 @@
+DIR = src/nbody/xyz
+BIN = snapxyz
+NEED = $(BIN) mkplummer tsf
+
+help:
+	@echo $(DIR)
+
+need:
+	@echo $(NEED)
+
+clean:
+	@echo Cleaning $(DIR)
+	@rm -f snap.in p64.a p64.b p64.in p64.out p64.xyz
+
+NBODY = 10
+
+all:	snap.in $(BIN)
+
+snap.in:
+	@echo Creating snap.in
+	mkplummer snap.in $(NBODY) seed=123
+
+snapxyz: snap.in
+	@echo Running $*
+	snapxyz snap.in -  color=i | tsf -
+
+p64.out:
+	mkplummer p64.a $(NBODY) seed=123
+	mkplummer p64.b $(NBODY) seed=321
+	snapstack p64.a p64.b p64.in deltar=6,0,0 deltav=-1,0,0
+	hackcode1 p64.in p64.out seed=123 tstop=16 freqout=8 fcells=4 > /dev/null
+p64.xyz:
+	snapxyz p64.out p64.xyz
+xyzview:  p64.out p64.xyz
+	@echo Running $*
+	xyzview p64.xyz scale=10 maxframe=160
+
