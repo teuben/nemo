@@ -1,0 +1,22 @@
+%N makedraw
+%D ### NEMO program with unknown intent...(missing usage)
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man makedraw' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input teams for this draw [???]
+%A out
+	Output draw, can be used in e.g. drawplot [-]
+%A p
+	level depth ; 2**n is number of players  [4]
+%A seed
+	Random seed [0]
+%A full
+	Finish a full random draw [f]
+%A nrandom
+	Set slot beyond which to randomize [1..2**p] [0]
+%A matchid
+	Add match id ; one offset per round []
+%A VERSION
+	4-nov-99 PJT [0.6]
