@@ -1,0 +1,20 @@
+%N u3tos
+%D Convert NBODY output to snapshot
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man u3tos' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input file (in NBODY's OUT3 format) [???]
+%A out
+	Output file (snapshot(5NEMO) format) [???]
+%A frame
+	Frames to read (0=all) [0]
+%A alen
+	If given, override length of A array (0=do not read A) []
+%A swap
+	Swap byte (big vs. little endian only) [f]
+%A integer
+	Size of integers in dataset (2 or 4) [4]
+%A VERSION
+	16-jun-97 PJT [1.3a]
