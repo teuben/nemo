@@ -11,6 +11,7 @@
  *       6-dec-04       V1.4: warn and disable SDS maps that differ in size
  *                            allow user to select different SDS
  *      10-dec-04       V1.5: dummy= introduced
+ *      14-dec-05       V1.6  changed order of keywords, select= now 3rd as with other hdf tools
  *
  *  TODO: fix rank=3 with coordinates and select=
  *     
@@ -31,11 +32,11 @@
 string defv[] = {
     "in=???\n			Input file (HDF SD)",
     "out=\n                     ascii dump of the data to this file?",
+    "select=all\n               Select which SDS# for display? (all|1..)",
     "format=%g\n                Format used in dump",
     "coord=f\n                  Add coordinates?",
-    "select=all\n               Select which SDS# for display? (all|1..)",
     "dummy=t\n                  Also print out dummy axis (axis with length 1)",
-    "VERSION=1.5a\n		10-dec-04 PJT",
+    "VERSION=1.6\n		14-dec-04 PJT",
     NULL,
 };
 
