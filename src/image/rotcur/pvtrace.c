@@ -2,6 +2,8 @@
  * PVTRACE:   PV diagram envelope tracing
  *
  *	5-may-01	created			PJT
+ *      6-may-01    V1.1    added clip=, center= and linear interpolation
+ *                          to get the trace velocity
  *
  */
 
@@ -18,9 +20,11 @@ string defv[] = {
   "ilc=0\n       Lowest Contour value",
   "sign=1\n      1: Rotation largest for positive coordinates, -1: reverse",
   "sigma=0\n	 Velocity dispersion correction factor",
+  "clip=\n       One (for -clip:clip) or Two clipping values",
   "vsys=0\n      System velocity",
   "inc=90\n      Inclination of disk",
-  "VERSION=1.0\n 5-may-01 PJT",
+  "center=0\n    Center of galaxy along position axis",
+  "VERSION=1.1\n 6-may-01 PJT",
   NULL,
 };
 
@@ -33,8 +37,9 @@ string usage="PV diagram envelope tracing ";
 #endif
 
 local void pv_trace(imageptr iptr, int vsign, 
-		    real eta, real ilc, real sigma, real vsys, real sini);
-local int get_vels(int n, real *s, real v, real dv, real it,
+		    real eta, real ilc, real sigma, real vsys, real sini, real psys,
+                    real *clip);
+local int get_vels(int n, real *s, real v, real dv, real it, real *clip,
 		   real *vels);
 
 
@@ -42,8 +47,8 @@ nemo_main()
 {
     stream  instr;
     imageptr iptr = NULL;
-    real vel, eta, ilc, sigma, sini, vsys;
-    int vsign = getiparam("sign");
+    real vel, eta, ilc, sigma, sini, vsys, psys, clip[2];
+    int nc, vsign = getiparam("sign");
     string mode;
 
     instr = stropen(getparam("in"), "r");     /* get file name and open file */
@@ -55,8 +60,18 @@ nemo_main()
     sigma = getdparam("sigma");
     vsys = getdparam("vsys");
     sini = sin(RPD * getdparam("inc"));
+    psys = getdparam("center");
+    nc = nemoinpd(getparam("clip"),clip,2);
+    if (nc == 1) {
+      clip[1] = clip[0];
+      clip[0] = -clip[0];
+    } else if (nc == 0) {
+      clip[0] = clip[1] = 0.0;
+    } else if (nc != 2)
+      error("Syntax error; need 0, 1 or 2 numbers for clip=%s",
+	    getparam("clip"));
 
-    pv_trace(iptr, vsign, eta, ilc, sigma, vsys, sini);
+    pv_trace(iptr, vsign, eta, ilc, sigma, vsys, sini, psys, clip);
 }
 
 /*
@@ -67,7 +82,8 @@ nemo_main()
 #define MAXV  32
 
 local void pv_trace(imageptr iptr, int vsign, 
-		    real eta, real ilc, real sigma, real vsys, real sini)
+		    real eta, real ilc, real sigma, real vsys, real sini, real psys,
+		    real *clip)
 {
   int  ix, iy, j, nx, ny, nv;
   real pos, v0, dv, it, imax, vel_corr;
@@ -86,7 +102,7 @@ local void pv_trace(imageptr iptr, int vsign,
 
 
   for (ix=0; ix<nx; ix++) {
-    pos = ix*Dx(iptr) + Xmin(iptr);
+    pos = ix*Dx(iptr) + Xmin(iptr) - psys;
     v0 = Ymin(iptr);
     dv = Dy(iptr);
     if (pos*vsign > 0.0) {
@@ -104,9 +120,13 @@ local void pv_trace(imageptr iptr, int vsign,
       v0 = v0 + (ny-1)*dv;     
       dv = -dv;
     }
-    nv = get_vels(ny,spec,v0,dv,it,vels);
+    nv = get_vels(ny,spec,v0,dv,it,clip,vels);
     printf("%g ",pos);
-    vel_corr = (vels[0]-vsys)/sini-sigma;
+    vel_corr = (vels[0]-vsys)/sini;
+    if (vel_corr > 0)
+      vel_corr -= sigma;
+    else
+      vel_corr += sigma;
     printf(" %g", vel_corr);
 
     for (j=1; j<nv; j++) {
@@ -119,19 +139,21 @@ local void pv_trace(imageptr iptr, int vsign,
 }
 
 
-local int get_vels(int n, real *s, real v0, real dv, real smin, real *vels)
+local int get_vels(int n, real *s, real v0, real dv, real smin, real *clip, real *vels)
 {
   real sum1=0.0, sum0=0.0, v = v0, speak = s[0], vpeak, vfit;
   real v1, v2, v3;
   int i, nret = 0, ipeak = 0, itrace = -1;
 
-  for (i=0; i<n; i++) {       /* loop over spectrum and get basics */
-    sum0 += s[i];
-    sum1 += s[i]*v;
-    if (s[i] >= speak) {
-      ipeak = i;
-      vpeak = v;
-      speak = s[i];
+  for (i=0; i<n; i++) {       /* loop over spectrum and get basics: mom1 and peak */
+    if (s[i] <= clip[0] || s[i] >= clip[1]) { /* but only outside clipping interval */
+      sum0 += s[i];
+      sum1 += s[i]*v;
+      if (s[i] >= speak) {
+	ipeak = i;
+	vpeak = v;
+	speak = s[i];
+      }
     }
     v += dv;
   }
@@ -143,10 +165,13 @@ local int get_vels(int n, real *s, real v0, real dv, real smin, real *vels)
   }
 
   /* envelope trace */
-  if (itrace >= 0) {
-    vfit = dv*itrace + v0;
+  vfit = v0 + dv*itrace;      /* pixel at which s[i] > smin */
+  if (itrace > 0) {
+    vfit += dv * (smin-s[itrace])/(s[itrace+1]-s[itrace]); /* small linear correction */
+  } else if (itrace == 0 || itrace == n-1) {
+    vfit += 0.0;    /* no correction can be made, vfit outside V range !! */
   } else
-    vfit = 0.0;
+    vfit = 0.0;     /* bad itrace, should not happen */
   vels[nret++] = vfit;
 
   /* simple 1st order moment */
@@ -170,6 +195,10 @@ local int get_vels(int n, real *s, real v0, real dv, real smin, real *vels)
     }
   }
   vels[nret++] = vfit;
+
+  /* AIPS++ window method */
+
+  /* simple gaussian fit */
 
   return nret;
 }
