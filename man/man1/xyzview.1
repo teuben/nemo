@@ -1,4 +1,4 @@
-.TH XYZVIEW 1NEMO "4 September 2000"
+.TH XYZVIEW 1NEMO "10 December 2003"
 .SH NAME
 xyzview \- Display 3-D point (velocity) and time data 
 .SH SYNOPSIS
@@ -97,6 +97,11 @@ of. This is done by creating pseudo-particles, and hence is
 somewhat memory consumptive if a lot of snapshots are used. If
 this option is used, all particles are loaded automatically.
 [Default: -1]
+.TP
+\fBmovie=t|f\fP
+If set, snapshots from subsequent times will be automatically loaded. This 
+is equivalent to hitting the 'l' (load all frames) as soon as the first
+snapshot would have been loaded. Default: false.
 .SH COLORS
 The standard color indices on the SGI GL are:
 .nf
@@ -179,4 +184,5 @@ xx-xxx-90	V1.0 Created                      	JEB
 30-mar-97	V2.0b formally released, added examples	PJT
 4-apr-97	V2.1a made the '4' key equivalent to 'm'	PJT
 3-sep-00	V2.2 added orbit=  orbit viewing	PJT
+10-dec-03	V3.0 added movie=	PJT
 .fi

@@ -12,6 +12,7 @@
  *	 4-sep-00  V2.2  select some point always visible	  pjt
  *                       with orbit=
  *      19-may-00  V2.3  if input is SnapShot, autoconvert to PointData
+ *      10-dec-03  V3.0  added movie=t|f option
  *
  *
  *  Bugs: VOGL has an event stack which is only one deep, reason
@@ -71,7 +72,8 @@ string defv[] = {
     "viewfile=view.dat\n	Output viewing parameters",
     "maxframe=500\n             Maximum frames for movie storage",
     "orbit=\n                   Select this point/star always visible",
-    "VERSION=2.2\n		5-sep-00 PJT",
+    "movie=f\n                  If true, start loading all frames",
+    "VERSION=3.0\n		10-dec-03 PJT",
     NULL,
 };
 
@@ -88,8 +90,11 @@ bool get_xyz(), handle_que(), within();
 extern string *burststring();
 extern int xstrlen();
 
+static bool Qmovie;
+
 nemo_main()
 {
+    Qmovie = getbparam("movie");
     init_display();
     if (hasvalue("colormap")) setcolors(getparam("colormap"));
     if (!get_xyz(TRUE)) error("no data in file");
@@ -500,6 +505,9 @@ bool handle_que()
 {
     bool newmouse, exitflag;
     short dev, val;
+
+    if (Qmovie)
+      loadkey();
 
     getorigin(&xorig, &yorig);      /* why do this again and again */
     getsize(&xsize, &ysize);        /* aren't they fixed ?? */
