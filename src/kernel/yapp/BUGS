@@ -1,0 +1,4 @@
+- there is no good definition of what the background and what the foreground
+  color is for drawing. The background color is intended to be used only
+  for erasing previous drawings. It's usually color 0.
+  The forground color is either 1, or plncolor()-1
