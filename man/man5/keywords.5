@@ -1,0 +1,131 @@
+.TH KEYWORDS 5NEMO "12 June 1992"
+.SH NAME
+keywords \- list of standard keywords in NEMO. 
+.SH DESCRIPTION
+Some keywords in NEMO have a ``\fIreserved\fP'' meaning. Thus, if
+the meaning of a desired keyword can be found in the description
+below, you should use that keyword given with that description.
+They often come with associated subroutines which aid in parsing,
+making it's parsing (and error messages) even more uniform
+to users.
+It significantly eases the pain of users if
+keywords are used consistently.
+Also, parsing rules should be the same. 
+For example \fBxrange\fP always
+has two numbers, separated with a \fB:\fP.
+.PP
+The \fB?\fP in the keywords below denotes 
+any character, e.g. \fBxrange\fP and \fByrange\fP both apply to  the
+comments under \fB
+.SH KEYWORDS
+.TP 20
+.B in	
+Any input file (snapshot, image, table, orbit, fits)
+.TP
+.B out	
+Any output file, though not necessarely the same as the \fBin=\fP
+format if used in the same program. Conversion programs are
+notorious for this.
+.TP
+.B times	
+Selection of times: \fBall\fP or \fIt1:t2,t3,...\fP, frequently
+used in snapshots (and orbits?). Note that this keyword is the one
+where the \fInemoinp\fP parsing rules do not apply.
+.TP
+.B ?range	
+Two numbers, separated by a colon,
+to select a min and max \fIx1:x2\fP {x,y,z,}
+.TP
+.B ?var	
+Expression (normally used in \fIbodytrans\fP variables) {x,y,z,e,f,}
+.TP
+.B ?col	
+Columns {x,y}
+.TP
+.B ?label  
+Labels with a graph {x,y}
+.TP
+.B n?ticks	
+Number of tickmarks an on axis in a graph {x,y}
+.TP
+.B ?box	
+Location of a box on graph. Two numbers, separated by a colon.
+The location is in yapp units, i.e. \fIcm\fP, ranging from 0 to 20
+on a full plot. {x,y}
+.TP
+.B ?ticks	
+Tickmark values, that belong to an axis. By default the number of
+tickmarks (\fBn?ticks\fP and their range (\fB?range\fP) will
+determine the tickmark values, but the user can also supply his
+own array. It must be a comma separated array, normal \fInemoinp\fP
+parsing rules apply. {x,y}. 
+.TP
+.B visib	
+Visibility of points, used in snapplot and clones. Must evaluate
+as an integer, 0 meaning no visible, anything else is.
+.TP
+.B headline	
+Random verbiage, often added to a datafile, or labeling graphs.
+.TP
+.B seed	
+Random number seed. If 0 is used, the time of the day is used
+as seed. Most programs should use 0 is the default.
+.TP
+.B potname	
+Name of a potential(5NEMO) descriptor; normally required, rarely
+a default is given.
+.TP
+.B potpars 
+Parameters of a potential(5NEMO) descriptor; The first one is always
+the pattern speed. Defaults depend on \fBpotname=\fP.
+.TP
+.B potfile 
+Optional datafiles belonging to a potential(5NEMO) descriptor.
+If it's used or if a default is allows, depends on \fBpotname=\fP.
+.TP
+.B nbody	
+Number of bodies used in nbody creators. Some ancient programs will
+use \fBndisk=\fP.
+.TP
+.B eps	
+Gravitational softening length, in the usual meaning
+(1/sqrt(r^2 + eps^2)).
+.TP
+.B freq
+(Integration) frequency, 1/t
+.TP
+.B tstop	
+Final time of integration.
+.TP
+.B options 
+Selections of options, minimum match should be applied here. Options
+are separated by comma's.
+.SH EXAMPLES
+The following example extracts a list of all used keywords used in
+NEMO, assuming the $MIRPDOC database is up to date.
+.nf
+
+  grep %A $NEMODOC/*.doc | awk '{print $2}' | sort | uniq -c | more
+
+.fi
+and sorted by frequency
+.nf
+
+  grep %A $NEMODOC/*.doc | awk '{print $2}' | sort | uniq -c | sort -nr | more
+
+.fi
+.SH "SEE ALSO"
+getparam(3NEMO), nemoinp(3NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+\fIprogram\fP.\fBdef\fP  	keyword database used in advanced \fBhelp=\fP
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+12-jun-92	document created  	PJT
+14-nov-93	minor updates    	PJT
+.fi
