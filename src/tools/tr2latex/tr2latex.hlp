@@ -1,0 +1,41 @@
+1 tr2LaTeX
+        Tr2Latex converts  a  document  typeset  in  troff  to a LaTeX
+    format.  It  is  intended  to do the first pass of the conversion.
+    The user should then  finish  up  the  rest  of the conversion and
+    customize the converted manuscript to  their  own  tastes.  It can
+    also serve as a tutor for  those who want to convert from troff to
+    LaTeX.
+
+        Format:
+
+            tr2LaTeX [switches] troff_filename
+
+2 parameter
+    troff_filename
+        The troff file name to be converted by tr2LaTeX.
+
+2 switches
+        Command line  switch  options  that can be used to control the
+    output document.
+
+3 -m
+        Use if the troff input file is a "man" page.
+
+3 -o
+    -o <output_file_name>
+        The name  of  the  output  file  where  tr2LaTeX  puts    it's
+    TeX conversion.  The default is the terminal (Sys$Output).
+
+3 -s
+    -s <style>
+        Use the LaTex  documentstyle  <style>  instead  of the default
+    "article" style.
+
+3 -t
+        Use a two-page documentstyle  instead  of  the  default single
+    page style.
+
+3 -<n>
+        A  number <n> gives the font size  to  use  for  the  document
+    instead of the default of 12pt for man 11pt otherwise.
+

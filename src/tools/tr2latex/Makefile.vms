@@ -1,0 +1,26 @@
+#
+#  Makefile for tr2latex using PD make and VAX C
+#  thanks to Richard L. Dyson
+#
+CFLAGS = $(DEBUG) $(OPTIMIZE) /Define = ("HAVE_SGTTY=0","NO_SGTTY")
+CFILES = tr2latex.c tr.c subs.c version.c
+HFILES = setups.h simil.h greek.h macros.h maths.h flip.h forbid.h
+DEBUG  = /NoDebug
+OPTIMIZE = /Optimize
+
+default: tr2latex.exe
+
+tr2latex.exe: tr2latex.obj tr.obj subs.obj version.obj vaxcrtl.opt
+	Link $(DEBUG) tr2latex,tr,subs,version,vaxcrtl.opt /Option
+
+tr2latex.obj: tr2latex.c setups.h
+	Cc $(CFLAGS) tr2latex.c
+
+tr.obj: tr.c setups.h
+	Cc $(CFLAGS) tr.c
+
+subs.obj: subs.c $(HFILES)
+	Cc $(CFLAGS) subs.c
+
+version.obj: version.c
+	Cc $(CFLAGS) version.c
