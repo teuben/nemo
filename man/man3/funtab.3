@@ -1,0 +1,64 @@
+.TH FUNTAB 3NEMO "5 March 1994"
+.SH NAME
+ft_open, ft_spline, ft_close - function table processing routines
+.SH SYNOPSIS
+.nf
+.B
+#include <funtab.h>
+.PP
+\fBFunctionTable *ft_open(string fname, int mode, int xcol, int ycol);\fP
+\fBreal ft_spline(FunctionTable *ft, real x);\fP
+\fBint ft_close(FunctionTable *ft);\fP
+.fi
+.SH DESCRIPTION
+A \fIFunctionTable\fP is a data structure, defined in \fI<funtab.h>\fP, with
+which ASCII tables can be used to interpolate values from. The
+\fIFunctionTable\fP can be considered an opaque pointer: it should be
+of no concern to the applications programmer what's inside.
+.PP
+\fIft_open\fP is used to initialize an interpolation table. Inputs are
+the filename \fIfname\fP, a \fImode\fP of interpolation
+(currently FUNTAB_LINEAR, and FUNTAB_SPLINE have been implemented),
+and the two columns from the table (1 being the first column) that
+are used for X and Y.
+.PP
+\fPft_spline\fP returns a spline interpolated value for a given input
+value \fBx\fP.
+.PP
+\fIft_close\fP must be called if you want to free up memory used by these
+routines. 
+.SH FUNCTION-TABLE STRUCTURE
+.nf
+.ta +0.3i +1.5i
+
+typedef struct FunctionTable {
+    string name;        /* ID or filename */
+    int mode;           /* lookup mode (one of the FUNTAB_xxx modes) */
+    int n;              /* Number of points in table */
+    real *x;            /* pointer to array of X values */
+    real *y;            /* pointer to array of Y values */
+    real *coeff;        /* (spline) coefficients, if used */
+    int errors;         /* cumulative errors in interpolation */
+} FunctionTable;
+.fi
+from the standard include file \fIfuntab.h\fP.
+.SH BUGS
+Files larger than MAXLINES (see \fItable(3NEMO)\fP and stdinc.h) may have 
+problems being fully processed.
+.PP
+Linear interpolation isn't even working.
+.SH SEE ALSO
+spline(3NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +1.5i
+~/src/kernel/tab	funtab.c
+.fi
+.SH UPDATE HISTORY
+.nf
+.ta +1i +4i
+4-oct-93	Created   	PJT
+5-mar-94	Documented	PJT
+.fi
