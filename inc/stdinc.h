@@ -43,7 +43,9 @@
 
 /* 	some backwards compat things */
 #if defined(HAVE_LIBGSL)
-#define HAVE_GSL
+#ifndef  HAVE_GSL
+#define HAVE_GSL  1
+#endif
 #endif
 
 
