@@ -1,0 +1,108 @@
+.TH lagrange_radii 1falcON "19 May 2004"
+
+.SH name
+lagrange_radii \- find the Lagrange radii of a stellar system
+
+.SH synopsis
+\fBlagrange_radii\fP [parameter=value]
+
+requires NEMO version 3.0.13 or higher, see
+http://www.astro.umd.edu/nemo.
+
+
+.SH description
+\fBlagrange_radii\fP finds the radii of spheres centred at the
+origin \fBx\fP=(0,0,0) that contain a given fraction of the total
+mass. The code is significantly faster than a full sort of all
+body radii.
+
+\fBlagrange_radii\fP may be used to create a \fBstopfile\fP to trigger
+the stopping of a running N-body simulations that is being analysed by
+\fBlagrange_radii\fP.
+
+.SH parameters
+
+.TP 16
+\fBin=\fP\fIfile\fP
+Input snapshots are read from \fIfile\fP, which must be in NEMO
+snapshot format. If \fIfile\fP=-, input is expected from stdin,
+useful for piping data from another program. Default: \fBrequired\fP
+.TP
+\fBmasses=\fP\fIlist\fP
+The lagrange radii are computed for every fractional mass contained in
+the comma separated list (up to 100).  Default:
+\fB0.01,0.03,0.1,0.3,0.5,0.7,0.9,0.97,0.99\fP
+.TP
+\fBtimes=\fP\fItime range(s)\fP
+Range(s) of simulation times, for which snapshots shall be processed.
+Default: \fBall\fP.
+.TP
+\fBout=\fP\fIfile\fP
+If given, snapshots are written in NEMO snapshot format to
+\fIfile\fP with same body data as the input, unless \fBgive\fP
+specifies otherwise. No default.
+.TP
+\fBgive=\fP\fIIOstring\fP
+If given, only body data indicated by \fIIOstring\fP (and present in
+the input) are written out with the snapshot output. No default.
+.TP
+\fBstep=\fP\fIval\fP
+If snapshots are written out, the outputs are made every \fIval\fP
+simulation time units.  If \fIval\fP=0, every snapshot processed is
+written out.  Default: \fB0\fP.
+.TP
+\fBtabfile=\fP\fIfile\fP
+A table of the simulation time and Lagrange radii (in the order the
+fractional masses are given) is written to \fIfile\fP, appending
+an existing file, if applicable. If not given, Lagrange radii are
+written to stdout. No default.
+.TP
+\fBstopfile=\fP\fIfile\fP
+If given, the a stopfile will be created, IF the condition defined
+with the next options is satisfied. See also gyrfalcON(1falcON).
+No default.
+.TP
+\fBstopindex=\fP\fInum\fP
+If \fBstopfile\fP is given, R_stop is the \fInum\fPth Lagrange radius.
+Default: \fB0\fP.
+.TP
+\fBstopvalue=\fP\fIval\fP
+If \fIval\fP>0, the stop condition is R_stop <  \fIval\fP.
+
+If \fIval\fP<0, the stop condition is R_stop > |\fIval\fP|.
+
+No default.
+.TP
+\fBstoprelative=t|f\fP
+If true, use R_stop/R_stop(t_initial) instead of R_stop in the stop
+condition. Default: \fBf\fP.
+.TP
+\fBstopafter=\fP\fIval\fP
+If given, do not stop before simulation time \fIval\fP. No default.
+.TP
+\fBstopdelay=\fP\fIval\fP
+Create the \fBstopfile\fP \fIval\fP simulation time units after the
+stop condition was first satisfied. Default: \fB0\fP.
+
+.SH remark
+Useful for isolated stellar systems only.
+
+.SH see also
+density_centre(1falcON), gyrfalcON(1falcON)
+.PP
+
+.SH files
+.ta +3i
+.nf
+falcON/doc/user_guide.pdf                         \fIUser Guide for falcON\fP
+.fi
+.SH author
+.nf
+Walter Dehnen                              walter.dehnen@astro.le.ac.uk
+.SH update history of this man page
+.nf
+.ta +1.0i +2.0i
+18-May-2004	first version of manual  WD
+.fi
+
+

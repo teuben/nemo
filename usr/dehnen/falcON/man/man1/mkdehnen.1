@@ -1,0 +1,95 @@
+.TH mkdehnen 1falcON "18 May 2004"
+.SH name
+mkdehnen \- initial conditions from a Dehnen model (public version)
+
+.SH synopsis
+\fBmkdehnen\fP [parameter=value]
+
+.SH requirement
+requires NEMO version 3.0.13 or higher, see http://www.astro.umd.edu/nemo.
+
+.SH description
+\fBmkdehnen\fP creates N-body initial conditions from an isotropic Dehnen (1993)
+model, which has density
+.nf
+
+	          3-gamma            M * r_s
+	rho(r) = --------- -------------------------------,
+	                      gamma           (4-gamma)
+	            4*Pi     r      * (r + r_s) 
+
+.if
+
+with total mass M and scale radius r_s.
+
+.SH parameters
+
+.TP 12
+\fBout=\fP\fIfile\fP
+The initial conditions are written in NEMO snapshot format to \fIfile\fP.
+If \fIfile\fP=-, output is made to stdout. Default: \fBrequired\fP.
+.TP
+\fBnbody=\fP\fInum\fP
+The initial conditions will contain \fInum\fP body masses, positions,
+and velocities. Default: \fBrequired\fP.
+.TP
+\fBgamma=\fP\fIval\fP
+The inner logarithmic slope of the Dehnen model is set to \fIval\fP.
+Default: \fBrequired\fP.
+.TP
+\fBmass=\fP\fIval\fP
+The total mass of the Dehnen sphere is set to \fIval\fP. Default: \fB1\fP.
+.TP
+\fBr_s=\fP\fIval\fP
+The scale radius of the Dehnen sphere is set to \fIval\fP. Default: \fB1\fP.
+.TP
+\fBseed=\fP\fInum\fP
+We will use \fInum\fP as seed for the (pseudo-) random number generator.
+If \fInum\fP=0, a unique new seed is created from the current value of
+the time, otherwise, the seed actually provided is used. Default: \fB0\fP.
+.TP
+\fBq_ran=t|f\fP
+If true, we use quasi-random rather than pseudo-random numbers for
+drawing position and angles in velocity space. Pseudo-random numbers
+are still used in the rejection-method to draw the total velocity from
+the DF. Default: \fBf\fP.
+.TP
+\fBtime=\fP\fIval\fP
+The simulation time associated with the initial conditions is set to \fIval\fP.
+Default: \fB0\fP.
+.TP
+\fBf_pos=\fP\fIval\fP
+The fraction of bodies with positive sense of rotation
+about the z-axis is set to \fIval\fP. Default: \fB0.5\fP.
+.TP
+\fBrmax=\fP\fIval\fP
+If given, only bodies with radius < \fIval\fP are created.
+No default.
+.TP
+\fBWD_units=t|f\fP
+If true, units for \fBmass\fP and \fBr_s\fP will be taken as solar
+mass and kpc, respectively, but output units will be in kpc (positions),
+kpc/Gyr (velocities), and 222288.47 solar masses (implying Newton's G=1).
+Default: \fBf\fP.
+
+.SH see also
+mkplum(1falcON), mkking(1falcON)
+.PP
+.nf
+Dehnen, W., 1993, MNRAS, 265, 250
+
+.SH files
+.ta +3i
+.nf
+falcON/doc/user_guide.pdf                         \fIUser Guide for falcON\fP
+.fi
+.SH author
+.nf
+Walter Dehnen                              walter.dehnen@astro.le.ac.uk
+.SH update history of this man page
+.nf
+.ta +1.0i +2.0i
+18-May-2004	first version of manual  WD
+.fi
+
+

@@ -1,0 +1,95 @@
+.TH density_centre 1falcON "19 May 2004"
+
+.SH name
+density_centre \- find the global density maximum; center snapshots
+
+.SH synopsis
+\fBdensity_centre\fP [parameter=value]
+
+.SH requirement
+requires NEMO version 3.0.13 or higher, see
+http://www.astro.umd.edu/nemo.
+
+
+.SH description
+\fBdensity_centre\fP finds the position \fBx\fP_c at which
+.nf
+
+	               1              |\fBx\fP_c-\fBx\fP_i|
+(1)	rho_h(\fBx\fP_c) = ----- Sum m_i W( --------- )
+	              h^3   i             h
+
+has a global maximum.  The  kernel  W(r) is  proportional  to (1-r^2)^3
+for r<1  and  W=0 for r>1  (Ferrers n=3 sphere),   while the  smoothing
+length h is determined such that a fixed number of bodies contribute to
+the density estimate.
+
+The routine  first builds an  oct-tree with final cells containing less
+then  Ncen/4  bodies  and then  uses the  center of mass of the densest
+final  cell  as  the  initial  guess for   \fBx\fP_c,   which  is iteratively
+improved.  This process is  somewhat  slow, but reliable,  i.e.  really
+finds even a weak density peak.  (If you think you have a better/faster
+way to do it, I would like  to test it on some snapshots which my older
+versions failed.)
+
+.SH parameters
+
+.TP 16
+\fBin=\fP\fIfile\fP
+Input snapshots are read from \fIfile\fP, which must be in NEMO
+snapshot format and contain at least masses and positions. If
+\fIfile\fP=-, input is expected from stdin, useful for piping data
+from another program. Default: \fBrequired\fP
+.TP
+\fBout=\fP\fIfile\fP
+If given, snapshots are first centred on the position and velocity of
+the density centre found and then written in NEMO snapshot format to
+\fIfile\fP with same body data as the input, unless \fBgive\fP
+specifies otherwise. No default.
+.TP
+\fBgive=\fP\fIIOstring\fP
+If given, only body data indicated by \fIIOstring\fP (and present in
+the input) are written out with the snapshot output. No default.
+.TP
+\fBstep=\fP\fIval\fP
+If snapshots are written out, the outputs are made every \fIval\fP
+simulation time units.  If \fIval\fP=0, every snapshot processed is
+written out.  Default: \fB0\fP.
+.TP
+\fBtimes=\fP\fItime range(s)\fP
+Range(s) of simulation times, for which snapshots shall be processed.
+Default: \fBall\fP.
+.TP
+\fBNcen=\fP\fInum\fP
+The smoothing length h is set such that \fInum\fP bodies contribute
+to the density estimate (1). Default: \fB200\fP
+.TP
+\fBcentrefile=\fP\fIfile\fP
+Simulation time, position \fBx\fP_c, velocity \fBv\fP_c (if body
+velocities are given), and density rho_h(\fBx\fP_c) of the centre are
+written to \fIfile\fP for every snapshot processed.  If \fIfile\fP=-,
+output is made to stdout, while if \fIfile\fP=. no output is
+made. Default: \fB - \fP.
+.TP
+\fBcenterfile=\fP\fIfile\fP
+If given, this superseeds the \fIfile\fP given with \fBcentrefile\fP.
+(to please American spellers)
+
+.SH remark
+Useful for isolated stellar systems only.
+
+.SH files
+.ta +3i
+.nf
+falcON/doc/user_guide.pdf                         \fIUser Guide for falcON\fP
+.fi
+.SH author
+.nf
+Walter Dehnen                              walter.dehnen@astro.le.ac.uk
+.SH update history of this man page
+.nf
+.ta +1.0i +2.0i
+18-May-2004	first version of manual  WD
+.fi
+
+

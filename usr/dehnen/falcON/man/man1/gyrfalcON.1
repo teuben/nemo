@@ -1,0 +1,274 @@
+.TH gyrfalcON 1falcON "18 May 2004"
+
+.SH name
+gyrfalcON \- a superberb N-body code (public version)
+
+.SH synopsis
+\fBgyrfalcON\fP [parameter=value]
+
+.SH requirement
+requires NEMO version 3.0.13 or higher, see
+http://www.astro.umd.edu/nemo. It is recommended to configure NEMO
+with \fBconfigure --enable-single --enable-lfs\fP.
+
+.SH description
+\fBgyrfalcON\fP stands for "GalaxY simulatoR using \fBfalcON\fP". It is a
+full-fledged N-body code using Walter Dehnen's force algorithm of
+complexity O(N) (\fBfalcON\fP), which is about 10 times faster than an
+optimally coded tree code. \fBgyrfalcON\fP features individual
+adaptive time steps and individual (but fixed) softening lengths.
+
+.SH parameters controlling I/O
+
+.TP 14
+\fBin=\fP\fIfile\fP
+Input data is read from \fIfile\fP, which must be in NEMO
+snapshot format.  If \fIfile\fP=-, input is expected from
+stdin, useful for piping data from another program. Default: \fBrequired\fP.
+.TP
+\fBout=\fP\fIfile\fP
+Unless \fBresume=t\fP (see below), primary output is written to
+\fIfile\fP in NEMO snapshot format. If
+\fIfile\fP=-, output is written to stdout; If
+\fIfile\fP=., no output is made. Default: \fBrequired\fP unless
+\fBresume=t\fP.
+.TP
+\fBgive=\fP\fIIOstring\fP
+Specifies which data are given with primary data
+output. \fIIOstring\fP must be an unbroken string of characters, each
+of which indicates a datum (per body) to be written. The meanings are
+as follows. \fBm\fP=mass, \fBx\fP=position, \fBv\fP=velocity,
+\fBp\fP=N-body potential, \fBq\fP=external potential (to be added to
+the N-body potential), \fBa\fP=acceleration, \fBe\fP=individual
+softening lengths, and \fBl\fP=time-step levels. Default: \fBmxv\fP.
+.TP
+\fBstep=\fP\fIval\fP
+Primary data output is made every \fIval\fP simulation time units.
+If \fIval\fP=0 output is made every blockstep. Default: \fB1\fP.
+.TP
+\fBstartout=t|f\fP
+Write primary output at the initial simulation time. Default \fBt\fP.
+.TP
+\fBlastout=t|f\fP
+Write primary output at the last simulation time, even if not at an
+ordinary output step. Default: \fBt\fP.
+.TP
+\fBout2=\fP\fIfile\fP
+If given, secondary output is written to \fIfile\fP in NEMO snapshot
+format. If \fIfile\fP=-, output is written to stdout; If \fIfile\fP=.,
+no secondary output is made. No default.
+.TP
+\fBgive2=\fP\fIIOstring\fP
+Specifies which data are given with primary data output; same format
+as for \fBgive\fP. Default: \fBmxv\fP.
+.TP
+\fBstep2=\fP\fIval\fP
+Scondary data output is made every \fIval\fP simulation time units.
+If \fIval\fP=0, output is made every blockstep. Useful for piping results
+to an analysing programm. Default: \fBmxv\fP.
+.TP
+\fBlogfile=\fP\fIfile\fP
+Log output (time, total energy, angular momentum, CPU time consumption
+etc) is written to \fIfile\fP. If \fIfile\fP=-, log output is
+made to stdout. Default: \fB-\fP.
+.TP
+\fBlogstep=\fP\fInum\fP
+Log output is made every \fInum\fP blocksteps. Default \fB1\fP.
+.TP
+\fBresume=t|f\fP
+Resume an old simulation: input is read from the last snapshot in the
+\fBin\fPput file; primary data output is appended to the same file
+(\fIout\fP is ignored). Default: \fBf\fP.
+
+.SH parameters controlling the time integration
+
+.TP 14
+\fBtstop=\fP\fIval\fP
+The simulation shall be halted at simulation time=\fIval\fP. By
+default, the simulation will not be stopped at a pre-defined time, see
+also \fBstopfile\fP. If \fIval\fP equals the initial simulation time,
+the initial forces are computed and, if so desired, output is made for
+this time only. No Default.
+.TP
+\fBstopfile=\fP\fIfile\fP
+If given, the code stops as soon as \fIfile\fP is found to exist. If
+\fBlastout=t\fP, a final output is made. This mechanism allows a
+controlled end of a simulation: an analyzing tool, which obtains the
+simulation data via the pipe from \gyrfalcON\ may find that a pre-set
+condition for ending the simulation is satisfied and create a
+stopfile. No Default.
+.TP
+\fBhmin=\fP\fIval\fP
+The shortest time step is taken to be \fBtau\fP=2^(-\fIval\fP)
+simulation time units long. Default: 6.
+.TP
+\fBNlev=\fP\fInum\fP
+\fInum\fP time-step levels will be used. If \fInum\fP=1, a leap-frog
+integrator with constant global time step \fBtau\fP is
+used. Otherwise, if \fInum\fP>1, a block-step scheme with \fInum\fP
+time-step levels is used, i.e. the longest step contains
+2^(\fInum\fP-1) shortest steps. The bodies' individual time-step
+levels are adapted in an (almost) time symmetric fashion as controlled
+by the parameters \fBfac\fP, \fBfph\fP, \fBfpa\fP, and \fBfea\fP.
+.TP
+\fBfac=\fP\fIfac\fP \fBfph=\fP\fIfph\fP \fBfpa=\fP\fIfpa\fP \fBfea=\fP\fIfea\fP
+These factors control the average time step of a body to be the
+minimum of
+
+\fIfac\fP/|\fBa\fP|,
+
+\fIfph\fP/|\fBPhi\fP|,
+
+\fIfpa\fP*sqrt(|\fBPhi\fP|)/|\fBa\fP|, and
+
+\fIfea\fP*sqrt(\fBe\fP/|\fBa\fP|),
+
+where \fBa\fP, \fBPhi\fP, and \fBe\fP denote the acceleration,
+potential and softening length, respectively. If either of these
+factors is zero, it is ignored.
+
+In order to make a sensible choice for \fBhmin\fP, \fBNlev\fP,
+\fBfac\fP, \fBfph\fP, \fBfpa\fP, and \fBfea\fP, use the following
+method. (1) Decide on the smallest time step: think what time step you
+would use in a single-time-step leap-frog scheme and then set
+\fBtau\fP (via \fBhmin\fP) to about half of that. (2) Decide on the
+largest time step, whereby ensuring that orbits in regions of very low
+density are accurately integrated when using the above criterion.  (3)
+Do some tests with varying \fBfac\fP, \fBfph\fP, \fBfpa\fP, and
+\fBfea\fP (set \fBtstop=0\fP), in order to check that the distribution
+of bodies over the time steps is reasonable, in particular there
+should be a few percent in the smallest time step.
+
+Note that using this scheme is sensible only if you really have a very
+inhomogeneous stellar system, because otherwise, the simple
+single-time-step leap-frog is only slightly less efficient but somewhat
+more accurate. In particular, with the block-step scheme, the total
+momentum is not conserved, but with the single-time-step leap-frog it
+is. No defaults.
+
+.SH parameters controlling  Gravity
+
+.TP 14
+\fBtheta=\fP\fIval\fP
+The tolerance parameter for \fBfalcON\fP is set to \fIval\fP. It is
+recommended to stick to the default or smaller value, but see the
+discussion in the \fBfalcON\fP user guide Default: \fB0.6\fP.
+.TP
+\fBNcrit=\fP\fInum\fP
+In building the tree, a cell containg \fInum\fP bodies or less is not
+splitted. This parameter controls the speed with which the tree is
+build. The default is chosen to yield best performance for a single
+time step leap-frog scheme. If you are using individual adaptive time
+steps (see above), you may consider to increase \fInum\fP
+somewhat. This has little effect on the forces (actually makes them
+slightly more accurate) but may reduce the CPU time consumption (only
+with individual adaptive time steps). Default: \fB6\fP.
+.TP
+\fBeps=\fP\fIval\fP
+If \fIval\fP>=0, \fIval\fP is taken to be the (globally constant)
+softening length. If \fIval\fP<0, bodies are assumed to have inidividual
+softening lengths, which must be provided with the input data. The
+individual softening lengths will be kept fixed at their initial
+values throughout the simulation. With this method, you can have
+larger softening length for more massive bodies, in order to have the
+same maximum force (requiring individual softening lengths
+proporptional to the square root of the body mass). Default: \fB0.05\fP.
+.TP
+\fBkernel=\fP\fInum\fP
+The softening kernel is taken to be the P\fInum\fP kernel (see the
+documentation in the user guide). Default: \fB1\fP.
+.TP
+\fBGrav=\fP\fIval\fP
+The numerical value of Newton's constant of gravity is set to
+\fIval\fP. Default: \fB1\fP.
+.TP
+\fBhgrow=\fP\fInum\fP
+With this option you can suppress the re-growing of the tree every
+(shortest) time step. Instead, the tree is grown only every
+2^(\fInum\fP) shortest steps and re-used otherwise. Note, however that
+re-using the tree violates time symmetry. I have not much experience
+with this option and recommend not to use it, unless you want to
+validate it first.
+.TP
+\fBroot_center=\fP\fIx,y,z\fP
+If given, the root cell of the oct-tree used in the \fBfalcON\fP
+algorithm is centred on the position \fIx,y,z\fP. No default.
+.TP
+\fBpotname=\fP\fIname\fP
+If given, an external gravitational potential with that name is
+used. The code searches for a shared object file and loads it
+dynamically. No default.
+.TP
+\fBpotpars=\fP\fIparameter list\fP
+If \fBpotname\fP is given, the external potential is using the
+\fIparameter list\fP, a comma-separated list of floating point
+numbers, for initialisation. No default.
+.TP
+\fBpotfile=\fP\fIfile\fP
+If \fBpotname\fP is given, the external potential is using the
+the \fIfile\fP, if any, for initialisation. No default.
+
+.SH example
+
+In order to integrate a Plummer sphere with N=10^5 particles, you may
+issue the command
+.PP
+\fBmkplum - 100000 seed=1 | gyrfalcON - plum.snp tstop=10 eps=0.1
+.PP
+which first creates initial conditions from a Plummer model, which are
+then piped into \fBgyrfalcON\fP. \fBgyrfalcON\fP creates an output
+file \fBplum.snp\fP containing output every full time unit until time
+t=10. The log output looks like this:
+.PP
+.nf
+# ---------------------------------------------------------------------------------------------------------------------
+# "gyrfalcON - plum.snp tstop=10 eps=0.1 VERSION=2.1Igcc-3.2"
+#
+# run at  Tue May 18 16:23:55
+#     by  "wd11"
+#     on  "andromeda.star.le.ac.uk"
+#     pid  30313
+#
+#    time       E=T+V        T          V_in        W         -2T/W     |L|      |v_cm|   tree  grav  step  accumulated
+# ---------------------------------------------------------------------------------------------------------------------
+ 0.0000     -0.1461342    0.14677    -0.29290    -0.29161    1.0066  0.0021715  0.0017    0.13  0.99  1.13   0:00:01.13
+ 0.015625   -0.1461343    0.14677    -0.29290    -0.29161    1.0066  0.0021715  0.0017    0.09  1.01  1.11   0:00:02.29
+ 0.031250   -0.1461347    0.14677    -0.29290    -0.29161    1.0066  0.0021714  0.0017    0.08  1.02  1.12   0:00:03.43
+ 0.046875   -0.1461345    0.14677    -0.29290    -0.29161    1.0066  0.0021714  0.0017    0.07  0.99  1.09   0:00:04.54
+ .
+ .
+ .
+ 9.9531     -0.1461328    0.14451    -0.29065    -0.28940    0.99873 0.0021646  0.0017    0.08  1.00  1.11   0:11:53.60
+ 9.9688     -0.1461329    0.14451    -0.29065    -0.28940    0.99873 0.0021646  0.0017    0.08  1.01  1.10   0:11:54.72
+ 9.9844     -0.1461330    0.14451    -0.29065    -0.28939    0.99872 0.0021646  0.0017    0.08  1.01  1.11   0:11:55.85
+ 10.000     -0.1461333    0.14451    -0.29064    -0.28940    0.99870 0.0021647  0.0017    0.07  0.99  1.08   0:11:56.95
+.if
+
+.SH output data warning (NEMO)
+\fBgyrfalcON\fP, much like ZENO programs, writes a new type of SnapShot files,
+in which the \fIPhaseSpace\fP array has been split into a
+\fIPosition\fP and \fIVelocity\fP array. The \fIget_snap\fP macros 
+understand this flavor, but will - for now - convert the data back
+into the less flexible type with combined \fIPhaseSpace\fP coordinates.
+
+.SH see also
+addgravity(1falcON), getgravity(1falcON)
+.PP
+.nf
+Dehnen, W., 2000, ApJ, 536, L39
+Dehnen, W., 2001, MNRAS, 324, 273
+Dehnen, W., 2002, JCP, 179, 27
+
+.SH files
+.ta +3i
+.nf
+falcON/doc/user_guide.pdf                         \fIUser Guide for falcON\fP
+.fi
+.SH author
+.nf
+Walter Dehnen                              walter.dehnen@astro.le.ac.uk
+.SH update history of this man page
+.nf
+.ta +1.0i +2.0i
+18-May-2004	first version of manual  WD
+.fi

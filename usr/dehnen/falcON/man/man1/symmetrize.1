@@ -1,0 +1,66 @@
+.TH symmetrize 1falcON "19 May 2004"
+
+.SH name
+symmetrize \- symmetrizes snapshots
+
+.SH synopsis
+\fBsymmetrize\fP [parameter=value]
+
+.SH requirement
+requires NEMO version 3.0.13 or higher, see
+http://www.astro.umd.edu/nemo.
+
+
+.SH description
+\fBsymmetrize\fP takes input snapshots, symmetrizes them by
+reflecting the bodies at the origin and the equator, and
+writes them out again.
+
+
+.SH parameters
+
+.TP 12
+\fBin=\fP\fIfile\fP
+Input snapshots are read from \fIfile\fP, which must be in NEMO
+snapshot format and contain at least positions. If \fIfile\fP=-, input
+is expected from stdin, useful for piping data from another
+program. Default: \fBrequired\fP
+.TP
+\fBout=\fP\fIfile\fP
+Snapshots are written in NEMO snapshot format to \fIfile\fP with same
+body data as the input. Default: \fBrequired\fP.
+.TP
+\fBtimes=\fP\fItime range(s)\fP
+Range(s) of simulation times, for which snapshots shall be processed.
+Default: \fBall\fP.
+.TP
+\fBuse=\fP\fInum\fP
+Every \fInum\fPth body of the input snapshot is processed.
+Default: \fB2\fP.
+.TP
+\fBcopy=\fP\fInum\fP [0,1,2]
+Every processed body is replaced by 2^\fInum\fP (up to 4) copies. If
+\fInum\fP=0, the body is simply copied. \fInum\fP=1, the body is 
+replaced by its very copy and another body obtained by reflection
+at the origin. \fInum\fP=2, each body is replaced by four copies
+obtained by reflection at the origin and the equator (z=0 plane).
+Default: \fB1\fP.
+
+.SH remark
+Useful for isolated stellar systems only.
+
+.SH files
+.ta +3i
+.nf
+falcON/doc/user_guide.pdf                         \fIUser Guide for falcON\fP
+.fi
+.SH author
+.nf
+Walter Dehnen                              walter.dehnen@astro.le.ac.uk
+.SH update history of this man page
+.nf
+.ta +1.0i +2.0i
+19-May-2004	first version of manual  WD
+.fi
+
+

@@ -1,0 +1,59 @@
+.TH scale_eps 1falcON "19 May 2004"
+
+.SH name
+scale_eps \- scales individual softening lengths
+
+.SH synopsis
+\fBscale_eps\fP [parameter=value]
+
+.SH requirement
+requires NEMO version 3.0.13 or higher, see
+http://www.astro.umd.edu/nemo.
+
+
+.SH description
+\fBscale_eps\fP scales individual softening lengths for all
+snapshots in a given time range in a NEMO snapshot file and
+writes desired body data out in NEMO snapshot format.
+
+.SH parameters
+
+.TP 16
+\fBin=\fP\fIfile\fP
+Input snapshots are read from \fIfile\fP, which must be in NEMO
+snapshot format. If \fIfile\fP=-, input is expected from stdin, useful
+for piping data from another program. If individual softening lengths
+are not given, a fatal error is issued.  Default: \fBrequired\fP
+.TP
+\fBout=\fP\fIfile\fP
+Snapshots are written in NEMO snapshot format to \fIfile\fP with same
+body data as the input, unless \fBgive\fP specifies
+otherwise. Default: \fBrequired\fP.
+.TP
+\fBfac=\fP\fIval\fP
+All individual softening lengths are multiplied by \fIval\fP.
+Default: \fBrequired\fP.
+.TP
+\fBgive=\fP\fIIOstring\fP
+If given, only body data indicated by \fIIOstring\fP (and present in
+the input) are written out with the snapshot output. No default.
+.TP
+\fBtimes=\fP\fItime range(s)\fP
+Range(s) of simulation times, for which snapshots shall be processed.
+Default: \fBall\fP.
+
+.SH files
+.ta +3i
+.nf
+falcON/doc/user_guide.pdf                         \fIUser Guide for falcON\fP
+.fi
+.SH author
+.nf
+Walter Dehnen                              walter.dehnen@astro.le.ac.uk
+.SH update history of this man page
+.nf
+.ta +1.0i +2.0i
+18-May-2004	first version of manual  WD
+.fi
+
+

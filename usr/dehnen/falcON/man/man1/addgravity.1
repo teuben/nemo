@@ -1,0 +1,75 @@
+.TH addgravity 1falcON "18 May 2004"
+
+.SH name
+addgravity \- adds gravity to a snapshot; using falcON (public version)
+
+.SH synopsis
+\fBaddgravity\fP [parameter=value]
+
+.SH requirement
+requires NEMO version 3.0.13 or higher, see
+http://www.astro.umd.edu/nemo.
+
+
+.SH description
+\fBaddgravity\fP uses Walter Dehnen's force algorithm of complexity
+O(N) (\fBfalcON\fP), to add the gravitational potential and
+accelerations to NEMO snapshots.
+
+.SH parameters
+
+.TP 12
+\fBin=\fP\fIfile\fP
+Input snapshots are read from \fIfile\fP, which must be in NEMO
+snapshot format. If \fIfile\fP=-, input is expected from stdin,
+useful for piping data from another program. Default: \fBrequired\fP
+.TP
+\fBout=\fP\fIfile\fP
+Snapshots are written in NEMO snapshot format to \fIfile\fP with same
+body data as the input plus acceleration and potential.  Default:
+\fBrequired\fP.
+.TP
+\fBtimes=\fP\fItime range(s)\fP
+Range(s) of simulation times, for which snapshots shall be processed.
+Default: \fBall\fP.
+.TP
+\fBeps=\fP\fIval\fP
+The (globally constant) softening length is set to \fIval\fP. For
+details, see documentation in the user guide. Default: \fB0.05\fP.
+.TP
+\fBkernel=\fP\fInum\fP
+The softening kernel is taken to be the P\fInum\fP kernel (see the
+documentation in the user guide). Default: \fB1\fP.
+.TP
+\fBtheta=\fP\fIval\fP
+The tolerance parameter for \fBfalcON\fP is set to \fIval\fP. It is
+recommended to stick to the default or smaller value, but see the
+discussion in the \fBfalcON\fP user guide Default: \fB0.6\fP.
+.TP
+\fBNcrit=\fP\fInum\fP
+In building the tree, a cell containg \fInum\fP bodies or less is not
+splitted. Default: \fB6\fP.
+
+.SH see also
+gyrfalcON(1falcON), getgravity(1falcON)
+.PP
+.nf
+Dehnen, W., 2000, ApJ, 536, L39
+Dehnen, W., 2002, JCP, 179, 27
+
+.fi
+.SH files
+.ta +3i
+.nf
+falcON/doc/user_guide.pdf                         \fIUser Guide for falcON\fP
+.fi
+.SH author
+.nf
+Walter Dehnen                              walter.dehnen@astro.le.ac.uk
+.SH update history of this man page
+.nf
+.ta +1.0i +2.0i
+18-May-2004	first version of manual  WD
+.fi
+
+
