@@ -30,7 +30,7 @@
  *                          fixed small CFLAGS bug
  *	 1-apr-01     V5.3  converted for NEMO V3 with .so files           pjt
  *      13-sep-01     V5.4  support for potential_double and potential_float   pjt
- *
+ *      18-sep-01           and auto-detecting which type is present
  *------------------------------------------------------------------------------
  */
 
@@ -169,7 +169,7 @@ local proc load_potential(string fname, string parameters, string dataname, char
 	loadobj (name);
     }
 
-    dprintf (1,"[Potential loaded from object file %s]\n",fullname);
+    dprintf (1,"[%c potential loaded from object file %s]\n",type,fullname);
 
     strcpy(pname,"potential");
     mapsys(pname);
@@ -181,7 +181,7 @@ local proc load_potential(string fname, string parameters, string dataname, char
 	Qfortran = TRUE;		    /* must be F77 then... */		
     }
 
-    if (pot==NULL && type=='d') {
+    if (pot==NULL && (type=='d' || type=='r')) {
       strcpy(pname,"potential_double");
       mapsys(pname);
       pot = (proc) findfn (pname);             /* try C-routine */
