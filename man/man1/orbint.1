@@ -1,4 +1,4 @@
-.TH ORBINT 1NEMO "19 February 2003"
+.TH ORBINT 1NEMO "10 February 2004"
 .SH NAME
 orbint \- integrating single stellar orbit
 .SH SYNOPSIS
@@ -67,6 +67,12 @@ Specify the integration mode. Any one of \fBeuler\fP,
 Relative error allowed in energy conservation. Integration is
 terminated if the relative error (|dE/E|) is too large. By default
 not used.
+.TP
+\fBvariable=t|f\fP
+Use variable timesteps? If so, the error control parameter
+\fBeta=\fP needs to be specified. Also note that not all integration
+methods support variable timesteps.
+Default: \fBf\fP.
 .SH EXAMPLES
 The following example launches a particle from the Y axis (at y=1)
 in the X direction (speed 0.4) in a plummer potential. Although
@@ -132,4 +138,5 @@ xx-jul-87	V1.0: Created: simple Eulerian	PJT
 19-apr-95	V3.1: various, rk4 is now default integrator	PJT
 3-feb-98	V3.4: added eta= to control termination if errors bad 	PJT
 19-feb-03	examples...	PJT
+10-feb-04	V4.0: started variable timestepping	PJT
 .fi

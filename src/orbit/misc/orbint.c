@@ -30,6 +30,7 @@
  *       3-feb-98       V3.4 stop criterion if energy not conserved
  *				well enough			PJT
  *      29-oct-00       a    don't report of ndiag=0 given      PJT
+ *      10-feb-04       V4.0 variable timestepping              PJT
  *
  */
 
@@ -42,7 +43,7 @@ string defv[] = {
     "in=???\n		  input filename (an orbit) ",
     "out=???\n		  output filename (an orbit) ",
     "nsteps=10\n          number of steps",
-    "dt=0.1\n             timestep",
+    "dt=0.1\n             (initial) timestep",
     "ndiag=0\n		  frequency of diagnostics output (0=none)",
     "nsave=1\n		  frequency of storing ",
     "potname=\n	  	  potential name (default from orbit)",
@@ -50,20 +51,20 @@ string defv[] = {
     "potfile=\n		  extra data-file for potential ",
     "mode=rk4\n           integration method (euler,leapfrog,rk2,rk4)",
     "eta=\n               if used, stop if abs(de/e) > eta",
-    "VERSION=3.4a\n	  29-sep-00 PJT",
+    "variable=f\n         Use variable timesteps (needs eta=)",
+    "VERSION=4.0a\n       15-mar-04 PJT",
     NULL,
 };
 
-string usage = "testroutine to integrate stellar orbits";
-
+string usage = "integrate stellar orbits";
 
 
 #ifndef HUGE
 #  define HUGE 1.0e20
 #endif
 
-string	infile,outfile;			/* file names */
-stream  instr,outstr;			/* file streams */
+string	infile, outfile;		/* file names */
+stream  instr, outstr;			/* file streams */
 
 orbitptr o_in  = NULL;			/* pointer to input orbit */
 orbitptr o_out = NULL;			/* pointer to output orbit */
@@ -74,10 +75,11 @@ real   omega, omega2, tomega;  		/* pattern speed */
 real   tdum=0.0;                        /* time used in potential() */
 real   eta = -1.0;                      /* stop criterion parameter */
 bool   Qstop = FALSE;                   /* global flag to stop intgr. */
+bool   Qvar;
 
 
 
-extern void match();
+extern int match(string, string, int *);
 
 
 proc pot;				/* pointer to the potential */
@@ -151,12 +153,17 @@ void setparams()
     dt2 = 0.5*dt;
     ndiag=getiparam("ndiag");
     nsave=getiparam("nsave");
-    if (hasvalue("eta")) eta = getdparam("eta");
+    Qvar = getbparam("variable");
+    if (hasvalue("eta")) 
+      eta = getdparam("eta");
+    else if (Qvar)
+      error("Variable timesteps choosen, it needs a control parameter eta=");
+    
 }
 
 void prepare()
 {
-	Masso(o_out) = Masso(o_in);
+    Masso(o_out) = Masso(o_in);
 }
 
 /* Standard Euler integration */
