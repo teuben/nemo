@@ -4,6 +4,8 @@
  *
  *	19-jun-92  PJT  replaced an 'assert' by 'error' call
  *      18-jul-92  PJT  replaced many if(debug)printf(...) by dprintf(1,...)
+ *      24-may-02  pjt  while waiting for the coffee to brew.... laptop on lap....
+ *                      changed the 32bit depth treebuild to 64bit... (see int_hack)
  */
 
 #include "defs.h"
@@ -11,13 +13,23 @@
 local cellptr ctab = NULL;	/* cells are allocated from here */
 local int ncell, maxcell;	/* count cells in use, max available */
 
+
+static expandbox(bodyptr p);
+static loadtree(bodyptr p);
+static bool intcoord(int_hack xp[3], vector rp);
+static int_hack subindex(int_hack x[3], int_hack l);
+static hackcofm(register nodeptr q);
+static cellptr makecell(void);
+
+
+
 /*
  * MAKETREE: initialize tree structure for hack force calculation.
  */
 
-maketree(btab, nbody)
-bodyptr btab;			/* array of bodies to build into tree */
-int nbody;			/* number of bodies in above array */
+maketree(
+	 bodyptr btab,			/* array of bodies to build into tree */
+	 int nbody)			/* number of bodies in above array */
 {
     register bodyptr p;
 
@@ -42,11 +54,11 @@ int nbody;			/* number of bodies in above array */
  * EXPANDBOX: enlarge cubical "box", salvaging existing tree structure.
  */
 
-local expandbox(p)
-bodyptr p;                      /* body to be loaded */
+local expandbox(
+		bodyptr p)                      /* body to be loaded */
 {
     bool intcoord();
-    int k, xtmp[NDIM], xmid[NDIM], subindex();
+    int_hack k, xtmp[NDIM], xmid[NDIM], subindex();
     vector rmid;
     cellptr makecell(), newt;
 
@@ -75,12 +87,13 @@ bodyptr p;                      /* body to be loaded */
  * LOADTREE: descend tree and insert particle.
  */
 
-local loadtree(p)
-bodyptr p;			/* body to load into tree */
+local loadtree(
+	       bodyptr p)			/* body to load into tree */
 {
-    int l, xp[NDIM], xq[NDIM], subindex();
+    int_hack l, xp[NDIM], xq[NDIM], subindex();
     nodeptr *qptr;
     cellptr c, makecell();
+    
 
     assert(intcoord(xp, Pos(p)));		/* form integer coords      */
     l = IMAX >> 1;				/* start with top bit       */
@@ -108,9 +121,9 @@ bodyptr p;			/* body to load into tree */
  * Returns: TRUE unless rp was out of bounds.
  */
 
-local bool intcoord(xp, rp)
-int xp[NDIM];			/* integerized coordinate vector [0,IMAX) */
-vector rp;			/* real coordinate vector (system coords) */
+local bool intcoord(
+		    int_hack xp[NDIM],		/* integerized coordinate vector [0,IMAX) */
+		    vector rp)			/* real coordinate vector (system coords) */
 {
     register int k;
     bool inb;
@@ -133,11 +146,11 @@ vector rp;			/* real coordinate vector (system coords) */
  * SUBINDEX: determine which subcell to select.
  */
 
-local int subindex(x, l)
-int x[NDIM];		        /* integerized coordinates of particle */
-int l;			        /* current level of tree */
+local int_hack subindex(
+			int_hack x[NDIM],	/* integerized coordinates of particle */
+			int_hack l)		/* current level of tree */
 {
-    register int i, k;
+    register int_hack i, k;
 
     dprintf(1,"subindex: x = [%8x,%8x,%8x]\tl = %8x\n", x[0],x[1],x[2],l);
     i = 0;                                      /* sum index in i           */
@@ -145,15 +158,15 @@ int l;			        /* current level of tree */
         if (x[k] & l)                           /*   if beyond midpoint     */
             i += NSUB >> (k + 1);               /*     skip over subcells   */
     dprintf(1,"          returning %d\n", i);
-    return (i);
+    return i;
 }
 
 /*
  * HACKCOFM: descend tree finding center-of-mass coordinates.
  */
 
-local hackcofm(q)
-register nodeptr q;             /* pointer into body-tree */
+local hackcofm(
+	       register nodeptr q)             /* pointer into body-tree */
 {
     register int i;
     register nodeptr r;

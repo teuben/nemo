@@ -217,6 +217,15 @@ typedef float real, *realptr;
 #define Precision "SINGLEPREC"
 #endif
 
+/*
+ *  int_hack:  a long integer that is used by e.g. hackcode and hackdens
+ *	       it should be at least 64 bit deep, but in the future
+ *             if you ever use Nbody systems where a treebuild is
+ *             more than 64 levels.... gotta increase this again.....
+ */
+
+typedef long long int_hack;
+
 
 /*
  * The following conveniences cannot be used in full ANSI C or C++:
