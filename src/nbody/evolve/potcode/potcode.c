@@ -125,7 +125,8 @@ real time;			/* current time */
         SETV(Acc(p),lacc);
     }
 }
-
+
+
 /*
  * FORCE: 'force' calculation routine for epicyclic orbits
  *        where we assume that the particles are:
@@ -220,11 +221,11 @@ real time;			/* current time */
     p->xiv0 = -vr;
     p->etav0 =  vt;             /* check sign  */
     p->zetav0 =  vz;
-    Acc(p)[0] = Pos(p)[0];
+    Acc(p)[0] = Pos(p)[0];      /* Guiding Center is stored in the acc's */
     Acc(p)[1] = Pos(p)[1];
-    Acc(p)[2] = Pos(p)[2];
+    Acc(p)[2] = 0.0;            /* force guiding center in the galactic plane */
     Phi(p) = -1.0;
-    Key(p) = p-btab+1;     /* label particles 1....nb */
+    Key(p) = p-btab+1;          /* label particles 1....nb */
   }
   printf("### This section of the code is under development, don't believe anything it does\n");
 }

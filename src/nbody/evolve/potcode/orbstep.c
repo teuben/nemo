@@ -325,16 +325,16 @@ real dt;		/* integration time step */
     Pos(p)[1] = Acc(p)[1];
     Pos(p)[2] = Acc(p)[2];   /* this one better be 0 */
 
-#if 0
+#if 1
     dx = cosodt * Pos(p)[0] - sinodt * Pos(p)[1];    /* incr rotate by Omega * dt */
     dy = sinodt * Pos(p)[0] + cosodt * Pos(p)[1];
 #else
-    dx = Pos(p)[0];                                  /* don't rotate, to test just epi's */
+    dx = Pos(p)[0];                           /* don't rotate, to test just epi's */
     dy = Pos(p)[1];
 #endif
     Acc(p)[0] = dx;          /* cheat: store guiding center in Acc */
     Acc(p)[1] = dy;
-    Acc(p)[1] = 0.0;
+    Acc(p)[2] = 0.0;
     r = sqrt(dx*dx+dy*dy);
 
     xi =   p->xiv0  * sinkt/p->kappa   + 
@@ -343,10 +343,15 @@ real dt;		/* integration time step */
            p->etav0 * (p->A*kt - (p->A - p->B)*sinkt)/(p->kappa * p->B);
     zeta = p->zetav0* sin(p->nu * t) / p->nu;
 
+#if 0
+    /* turn off epi's */
+    xi = eta = zeta = 0.0;
+#endif
+
+    f = 1-xi/r;         /* xi is positive if pointing inward */
     phi = eta/r;        /* eta is positive in direction of motion */
     cosp = cos(phi);
     sinp = sin(phi);
-    f = 1-xi/r;         /* xi is positive if pointing inward */
     Pos(p)[0] = (cosp * dx - sinp * dy)*f;    /* check sign */
     Pos(p)[1] = (sinp * dx + cosp * dy)*f;
     Pos(p)[2] = zeta;
