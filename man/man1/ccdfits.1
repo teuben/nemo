@@ -1,0 +1,125 @@
+.TH CCDFITS 1NEMO "19 December 1999"
+.SH NAME
+ccdfits \- write a fits file to disk
+.SH SYNOPSIS
+.PP
+\fBccdfits in=\fPimage \fBout=\fPfits [parameter=value]
+.SH DESCRIPTION
+\fBccdfits\fP writes a fits file to disk. The input must be in 
+\fIimage(5NEMO)\fP format, the output will be in standard \fIfits(5NEMO)\fP
+format on disk.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 20
+\fBin=\fIimage-file\fP
+input file, in \fIimage(5NEMO)\fP format [no default].
+.TP
+\fBout=\fIfits-file\fP
+output file, will be in \fIfits(5NEMO)\fP format [no default].
+.TP
+\fBbitpix=\fInumber\fP
+Bitpix applied for scaling. Options are 16, 32 or -32. 
+[default: -32].
+.TP
+\fBscale=\fInumber\fP
+Scaling factors for CDELT keyword. If the second or third number is
+omitted, it is repeated from the previous number.
+[default: \fB1,1,1\fP].
+.TP
+\fBobject=\fIname\fP
+Name of your object/image [default: none].
+.TP
+\fBcomment=\fIcomments\fP
+Comment using the COMMENT keyword. [default: none]
+.TP
+\fBblocking=\fIfactor\fP
+Blocking factor (multiplicity of blocksize in terms of 2880 bytes) used
+when writing the fits file. [default: \fB1\fP].
+.SH EXAMPLES
+To convert an image to unsigned 16 bit integers use the following math:
+.nf
+        a = "(a < 0 ? a+65536 : a)" 
+.fi
+or using \fIccdmath\fP:
+.nf
+        ccdmath in=map1 out=map2 fie="iflt(%1,0,%1+65536,%1)"
+.fi
+.SH DATA
+Note that not all image processing systems can read FITS files from
+disk. In such cases it should however be possible to read a fits
+file from tape. The disk-fits file must be written to tape in 'raw'
+format with a block length of 2880 bytes (although the AIPS package has
+now the options of having blocksize a multiple of 2880 bytes - see manual
+what blocking factor is). Within UNIX \fIdd(1)\fP
+can do this:
+.PP
+.nf
+.ta +1i
+	% \fBdd if=fits.dat of=/dev/rmt0 obs=2880\fP
+.fi
+.PP
+For multiple files the appropriate number of files/records have
+to be skipped before writing, or better is to use the non-rewinding
+tape device. Don't use simple catenated disk files, since it is not
+guaranteed that they have a size which is a multiple of 2880 bytes.
+.PP
+Under VMS the tape has to be mounted with the blocksize:
+.PP
+.nf
+.ta +1i
+	$ \fBMOUNT MT:/FOREIGN/BLOCK=2880/RECORD=2880\fP
+	$ \fBCOPY MT: FITS.DAT\fP
+.fi
+.PP
+and the file on disk must be recorded to have a 2880 blocksize:
+.PP
+.nf
+	$ \fBFIXATR/RFM=FIX:2880 FITS.DAT\fP
+.fi
+.PP
+In case FTP is used to transfer files, remember that FTP cannot handle
+files with this format (some FTP's at least). So it's best to have them
+in regular 512 byte blocks before moving, and at 2880 blocksize
+when using programs such as DISKFITS in GIPSY.
+.PP
+You could also try the following command procedure on VMS (Bob Hanisch, ST ScI):
+.nf
+ $!----------------------------------------------------------------------
+ $!   FIXFITS filename
+ $!   FIXFITS CONVERTs a file to the desired AIPSFITS disk format
+ $!----------------------------------------------------------------------
+ $ create/fdl=sys$input: temp.dat
+ RECORD
+       CARRIAGE_CONTROL        NONE
+       SIZE                    2880
+       FORMAT                  FIXED
+ $!                                      now convert - old fails some
+ $! convert/append 'P1' TEMP.DAT
+ $!                                      now convert - new method
+ $ copy 'P1' TEMP.DAT/overlay
+ $ rename temp.dat 'P1'
+ $!                                      clean up
+ $ purge 'P1'
+ $!
+.fi
+.SH "SEE ALSO"
+snapccd(1NEMO), ccdmath(1NEMO), image(5NEMO), fits(5NEMO), dd(1)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.0i
+~/src/pjt/image  	ccdfits.c ccdfits.1
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+29-apr-88	V1.0: created, calling WERONG fortran subroutines	PJT
+2-jun-88	V1.1: new filestruct, renamed wfits to ccdfits   	PJT
+1-oct-90	V2.1: new fitsio and keyword comment=, scale now 1	PJT
+11-oct-90	V2.2: added blocking= factor                     	PJT
+nov-92     	documented the FITFITS VMS procedure            	PJT
+dec-99     	some more documentation             	PJT
+
+.fi
