@@ -1,0 +1,232 @@
+.TH TABPP 1NEMO "15 May 1998"
+.SH NAME
+tabpp \- Poynter-Pickett spectral line catalogue manipulator
+.SH SYNOPSIS
+\fBtabpp\fP \fBspecies=\fPs1,s2... \fBmode=\fP [parameter=value]
+.SH DESCRIPTION
+\fItabpp\fP manipulates the Poynter-Pickett catalogue of 
+Submillimeter, Millimeter, and Microwave spectral lines
+in the frequency range between 0 and 10000 Ghz (i.e.
+wavelengths longer then 30 um).
+The catalogue can be used as a planning guide or as an
+aid in the identification and analysis of observed
+spectral lines. The information listed for each spectral 
+line includes the frequency and its estimated error, the
+intensity, lower state energy, and quantum number assignment.
+.PP
+The catalogue has been constructed by using 
+theoretical least squares fits of published spectral
+lines to accepted molecular models. The associated
+predictions and their estimated errors are based upon
+the resultant fitted parameters and their covariances. Future versions
+of this catalogue will add more atoms and molecules and 
+update the present listing (331 species) as new data appear.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 20
+\fBspecies=\fP
+Species to check for. The default is \fBall\fP. To get a listing of
+all valid (known) species in the catalogue, try the shorthand
+command "\fB tabpp all species name | more \fP".
+Species examples: \fIH-atom, D-atom, OH, C-13-O, 
+HNO3, HCOOD, O2, HOCl, NNH+\fP. Note names are case sensitive.
+.TP
+\fBmode=\fP
+Output mode. Either the \fBspecies\fP can be listed, or the 
+spectral \fPlines\fP. Minimum match applies. No default.
+.TP
+\fBcol=\fP
+Columns to print out. In \fBlines\fP mode (see previous) you can choose
+any of \fIfreq, err, lgint, dr, elow, gup, tag, qnform, qn1, qn2\fP,
+or choose \fIall\fP.
+In \fBspecies\fP mode any of \fI tag, name, nline, qlog, version\fP, or
+\fIall\fP. In \fBlines\fP mode, you can also print out any of the
+\fBspecies\fP  columns.
+\fI ** Note **\fP Currently selection by column names is not active. In
+\fBlines\fP mode  you can
+either choose \fIall\fP, or something else, in which case a shorter 
+version with  \fIfreq, err, lgint, dr, elow, gup, tag\fP,
+will be output, with the \fIname\fP and computed \fImu2\fP in the last 
+two columns.
+.TP
+\fBfreq=\fP
+Frequency range to select. Two numbers are required, with an optional
+third character string specifying the frequency
+units given and requested (the catalogue's numbers are listed in
+Mhz, and this is the default). Note that if the units of \fIfreq\fP 
+are changed, so will be units of \fIerr\fP and \fPlgint\fP. 
+We only support \fBMHz, GHz\fP and \fPTHz\fP (case insensitive).
+See example below. 
+.TP
+\fBcutoff=\fP
+Lower line intensity cutoff applied to the output. Any LGINT's smaller than
+the cutoff, will not be printed. Default: all will be printed.
+.TP
+\fBselect=\fP
+A comma separated list of numerical comparisons expressions that are
+logically AND'ed. Each expression much be of the form \fBa OPER b\fP,
+where \fBOPER\fP is any of "<", "<=", ">", ">=", "==", "!=", and
+\fBa\fP and \fBb\fP are  \fInemoinp(3NEMO)\fP 
+expressions that may also contain references to the column names
+if they are preceded by a "%" symbol. 
+Example: 
+.nf
+            \fIselect="sqrt(%Rad) < %lum**2/(%D_0 + %R_0)"\fP
+.fi
+.TP
+\fBfmt=\fP
+\fI**not implemented**\fP
+.TP
+\fBtab=\fP
+Table name, in which output is gathered. Default: terminal.
+\fINot implemented\fP
+.TP
+\fBdir=\fP
+Up to three string can be given, separated with comma's.
+The first one is the name of the unix directory where the catalogue
+is located. If none is provided, the environment variable
+\fB$PP_DIR\fP is tried, or the local directory, if all
+else fails.
+The second string is the (C) format specification how the
+species filesname are constructed (default is
+\fBc%s.cat.Z\fP, where \fB%s\fP is the 6 digit species
+identification TAG). The third string is the filename of
+the species-directory filename. It defaults to \fBcatdir.cat\fP.
+It is not advised to use this keyword, as \fItabpp\fP should have
+been setup properly.
+.PP
+Note: the old pre-1994 catalog will need \fBc%s.ed4.gz\fP and \fBcatdir.ed4\fP.
+The maryland version needs TAB_PP set to /lma/spectra.
+.SH EXAMPLES
+The following command lists all species present in the catalogue
+.nf
+    % tabpp species=all mode=species col=name | more
+or shorthand, since these are the first three program keywords:
+    % tabpp all species name | more
+.fi
+this can be followed up by a frequency search of a few species:
+.nf
+    % tabpp species=HCOOH,HOCL mode=lines col=mu2 freq=80,115,ghz | more
+  or shorthand:
+    % tabpp HCOOH,HOCL lines name,freq,err 80,115,ghz | more
+.fi
+.SH FORMAT
+The line catalogue files are in the Footran format:
+.nf
+.ta +1i
+ FREQ,  ERR,  LGINT,DR, ELOW,  GUP,TAG,QNFORM, QN1, QN2
+(F13.4, F8.4, F8.4, I2, F10.4, I3, I7, I4,     6I2, 6I2, 1X)
+
+FREQ	frequency of line (by default in Mhz, but you can change it)
+ERR	estimated or experimental error in FREQ
+LGINT	base 10 logarithm of the integrated intensity 
+DR	degree of freedom in the rotatational partition function
+ELO	lower state energy relative to ground state
+GUP	upper state degeneracy
+TAG	species tag or molecular identifier. Negative means laboratory freq.
+QNFMT	identifies format of the quantum numbers in QN
+QN'	quantum numbers of the upper state coded according to ANFMT
+QN''	quantum numbers of the lower state 
+.nf
+.PP
+The species-directory file is in the Footran format:
+.nf
+TAG,    NAME, NLINE, QLOG,  VERSION
+(I6,1X, A14,  I5,    7F7.4, I2)
+.fi
+.PP
+A special column name, \fBmu2\fP identifies the electric dipole matrix,
+which can be printed out too. It's units are Debye**2
+.PP
+.nf
+.ta +1i
+TAG	species tag number in format \fBWWWWXXXX\fP, \fBWWW\fP=weight, \fBXXX\fP=ordinal
+NAME	ASCII name for the species
+NLINE	number of lines for this species
+QLOG	log10 of the partition function for 300, 225, 150, 75, 37.5, 18.75, 9.375 K
+VERSION	version number of this species
+.fi
+.SH UNITS
+.nf
+.ta +1i +1i
+freq	MHz     	(optionally GHz, THz; see \fBfreq=\fP keyword)
+err	MHz      	(optionally GHz, THz)
+lgint	nm^2.Mhz  	(optionally nm^2.GHz, nm^2.THz)
+elow	cm^-1
+qlog	...
+mu2	Debye^2         (computed from other quantities)
+.fi
+.SH TIMING
+The full catalogue of 206 species contains 20Mb of compressed ascii data, 
+and hence browsing through the whole catalogue will take time. For example,
+to find ALL lines between 80 and 81 Ghz, we could issue the following
+commands:
+.nf
+    % time tabpp all lines mu2 80,81,Ghz > log1
+    2092.020u 118.850s 40:33.46 90.8% 0+116k 2300+29io 2248pf+0w
+.fi
+whereas using the (slow) \fBselect=\fP keyword took much longer:
+.nf
+    % time tabpp all lines mu2 select="%freq < 81000,%freq > 80000" > log2
+
+.fi
+.SH SEE ALSO
+awk(1), grep(1v), tablovas(1NEMO)
+.PP
+JPL Molecular Spectroscopy: http://spec.jpl.nasa.gov/
+.PP
+\fIThe Fitting and Prediction of Vibration-Rotation Spectra 
+with Spin Interactions\fP,
+H. M. Pickett. J. Molec. Spectroscopy 148, 371-377 (1991). 
+.PP
+\fISubmillimeter, Millimeter, and Microwave Spectral Line Catalogue\fP,
+R.L. Poynter and H.M. Pickett. 
+Applied Optics 24, 2335-2240 (1985).
+This catalogue is also available from these authors as a magnetic
+tape recorded in card images and as a set of microfishe records,
+or from anonymous ftp \fIftp://spec.jpl.nasa.gov:/pub/catalog/\fP.
+.PP
+Anderson, Herbst and De Lucia's list for methanol lines (unknown ref)
+.PP
+Atomic Data for Astrophysics: http://www.pa.uky.edu/~verner/atom.html
+.PP
+Table of Isotopes: http://isotopes.lbl.gov/isotopes/toi.html
+.PP
+Chemical MIME draft: http://www.ch.ic.ac.uk/chemime2.html
+.SH ENVIRONMENT
+.nf
+.ta +1i
+PP_DIR             	Home directory of the catalogue
+.fi
+.SH FILES
+.nf
+.ta +1.5i
+$PP_DIR           	home directory of the catalogue (at UMD: /lma/pp)
+catdir.cat        	species data for the new (>1994) edition
+cWWWXXX.cat.gz       	XXXth (gzip compressed) line data for a species with mol.weight WWW
+catdir.ed4       	species data for the old 4th edition
+cWWWXXX.ed4.Z    	XXXth (compressed) line data for a species with mol.weight WWW
+.fi
+.SH BUGS
+Cannot search for isotopes yet - this complicates the search, since 
+HCN may appear as HCN, HCN-15 in the PP catalogue. The Lovas
+catalogue seems to use a different isotope notation, e.g.
+HC15N, where it can also be confused with multiplicities, e.g.
+HC9N (here they mean 9 C's on a row).
+.SH AUTHOR
+Peter Teuben
+.SH HISTORY
+.nf +1i +4.5i
+29-feb-92	V1.0 Created - data has 206 species         	PJT
+24-mar-92	V1.1 compute mu^2 to appease lgm/joe 	PJT
+3-oct-92	V1.2 implemented select= 	PJT
+18-jan-95	V1.3 made it work for the new 1994 edition of PP_DIR=/lyra/pp
+11-sep-95	V1.3a new unofficial edition, now 228 species
+	22 new species: SiC, SiC-v1, SiC-13, HCP, DCP, CH3OCH3, HCCNC,
+	  HCCNC-v7, HCCNC-v6, CCS, C-13CCS, CC-13S, CCS-34, 
+	  CH3OCHO-A, CH3OCHO-E, OS-34-O, HC6, HOBr-79, HOBr-81, HC7N, HC9N, HC11N
+	corrected spelling error H2C-13-S
+9-oct-95	V1.3b updated, now 272 species / 1041209 lines
+15-may-98	V1.4 merged two diverged versions, now 331 species / 1747809 lines
+.fi
