@@ -3,6 +3,9 @@
 #  normally this script is called in Testfile's
 #  which are called by src/script/testsuite
 #
+#  for the gnu compiler, add these flags to CFLAGS:
+#	-fprofile-arcs -ftest-coverage
+#  after running the program
 
 if ($?NEMO_COVERAGE == 0) exit 0
 
