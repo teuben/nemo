@@ -14,7 +14,7 @@
 #define CHKSWAP /* allow mixed endian datasets - this is a bit dangerous */
 
 /*
- * New-style magic numbers, for FITS type machines (like SUN)
+ * New-style magic numbers, for (bigendian) FITS type machines (like SUN)
  * Note: If they appear swapped, filestruct() runs in swapped mode !
  */
 

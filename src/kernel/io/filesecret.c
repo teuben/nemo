@@ -23,6 +23,7 @@
  *      f  6-apr-01   pjt       malloc->calloc
  *      g  7-jun-01   pjt       aptr -> ap (why did the compiler not warn?)
  * V 2.7  20-jun-01   pjt       no more NOPROTO, fixed protos for gcc3
+ *      a  7-oct-01   pjt       flush buffer when set_tes() at top level
  *
  *  Although the SWAP test is done on input for every item - for deferred
  *  input it may fail if in the mean time another file was read which was
@@ -208,6 +209,10 @@ void put_tes(stream str, string tag)
     freeitem(ipt, FALSE);			/* and reclaim storage      */
     ss_pop(sspt);				/* flush stacked item       */
     put_data(str, NULL, TesType, NULL, 0);	/* output external token    */
+    if (sspt->ss_stp == -1) {                   /* if at top level          */
+      dprintf(1,"\nget_tes(%s) flushing\n",tag);
+      fflush(str);                              /* flush buffer for Walter  */ 
+    }
 }
 
 /*
