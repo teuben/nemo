@@ -27,6 +27,7 @@
  * V 3.0  23-may-02   pjt    Support for >2GB (large file size)
  *        17-mar-03   pjt    fix serious memory usage bug for f2d conversion
  *        18-jun-03   pjt    <docs>
+ * V 3.1  15-mar-05   pjt    C++ compilable
  *
  *  Although the SWAP test is done on input for every item - for deferred
  *  input it may fail if in the mean time another file was read which was
@@ -476,7 +477,7 @@ void get_data_sub(
 {
     strstkptr sspt;
     itemptr ipt;
-    proc cop;
+    copyproc cop;
 
     sspt = findstream(str);			/* access assoc. info	    */
     ipt = scantag(sspt, tag);			/* scan input for tag	    */
@@ -486,7 +487,7 @@ void get_data_sub(
 	if(! streq(typ, ItemTyp(ipt)))		/*   and types dont match?  */
 	    error("get_data_sub: item %s: types %s, %s don't match",
 		  tag, ItemTyp(ipt), typ);
-	cop = copydata;				/*   get default routine    */
+	cop = copydata;				/*   get default routine    */ /*C++*/
     } else {
 	cop = copyfun(ItemTyp(ipt), typ);	/*   get specialist routine */
 	if (cop == NULL)			/*   but be sure one exists */
@@ -500,7 +501,7 @@ void get_data_sub(
 	error("get_data_sub: item %s: can't copy plural to scalar", tag);
     else if (dim != NULL && ItemDim(ipt) == NULL)
 	error("get_data_sub: item %s: can't copy scalar to plural", tag);
-    (cop)(dat, 0, eltcnt(ipt,0), ipt, str);    	/* copy data from input     */
+    (cop)(dat, 0, eltcnt(ipt,0), ipt, str);    	/* copy data from input     */ /*C++*/
     if (sspt->ss_stp == -1)			/* was input at top level?  */
 	freeitem(ipt, TRUE);			/*   yes, free saved item   */
 }
@@ -1075,14 +1076,14 @@ local void getdat(itemptr ipt, stream str)
  * COPYFUN: select copy routine for given data types.
  */
 
-local proc copyfun(string srctyp, string destyp)
+local copyproc copyfun(string srctyp, string destyp)
 {
     if (streq(srctyp, destyp))
 	return copydata;
     if (streq(srctyp, FloatType) && streq(destyp, DoubleType))
-	return copydata_f2d;
+	return (copyproc) copydata_f2d;
     if (streq(srctyp, DoubleType) && streq(destyp, FloatType))
-	return copydata_d2f;
+	return (copyproc) copydata_d2f;
     return NULL;
 } /* copyfun */
 
