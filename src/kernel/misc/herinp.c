@@ -53,6 +53,7 @@
  *		16-feb-97: removed some nexted external decl's             pjt
  *               7-apr-01: gcc warning                                     pjt
  *		20-jun-01: gcc3, const->hconst				   pjt
+ *               3-nov-01: use NEMO's random numbers, not rand()           pjt
  */
 
 #define BIGLOOP /* comment this our if you want MAXSHORT as largest count */
@@ -77,6 +78,8 @@ extern void    setfblank_(void *);
 #define byte    char
 #define bool    int
 #define DEFAULT 1
+
+#define NATIVE_RAND  0
 
 static void dcd_inifblank(void);
 static int  dcd_round(double arg);
@@ -1244,8 +1247,13 @@ static double dcd_ifne(double arg1, double arg2, double arg3, double arg4)
 
 static double dcd_ran()
 {
+#if NATIVE_RAND
    int xxx = rand();
    return((xxx+1) / 2147483648.0);
+#else
+   extern double xrandom(double, double);
+   return xrandom(0.0,1.0);
+#endif
 }
 
 static double dcd_ranu(double arg1, double arg2)
