@@ -1,0 +1,64 @@
+.TH VELCUBE 1NEMO "29 May 2004"
+.SH NAME
+velcube \- create a data cube from a velocity field 
+.SH SYNOPSIS
+\fBvelcube\fP [parameter=value]
+.SH DESCRIPTION
+\fBvelcube\fP creates a theoretical position-position-velocity
+data cube with signal derived from a velocity field (required)
+surface density and velocity dispersion map (both optional).
+.PP
+
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBout=\fP
+Output file name (a cube) in \fIimage(5NEMO)\fP format. 
+The X,Y coordinates will be inherited from the input velocity
+field, the Z coordinates set via \fBnz=\fP 
+and \fBzrange=\fP (see below).
+No default.
+.TP
+\fBinvel=\fP
+Input velocity field. No default. This map
+.TP
+\fBinden=\fP
+Input surface density (optional). 
+Should be 0 or positive
+Negative densities are skipped and reported.
+.TP
+\fBinsig=\fP
+Input velocity dispersion map (optional).
+Should be 0 or positive
+Negative dispersions are skipped and reported. Zero
+dispersion amounts to only 1 slice to be populated.
+.TP
+\fBzrange=\fP\fIlow:high\fP
+Range in (Z) velocity. The lower value must really be lower than the higher
+value.  [-2:2].
+.TP
+\fBnz=\fP
+Number of gridding pixels in Z [64]  
+.TP
+\fBsigdefault=\fP
+Default (constant)
+velocity dispersion in case no dispersion map is given. [0].
+.SH EXAMPLES
+A model velocity field can be easily made with \fIccdvel(1NEM0)\fP, and 
+using the \fBamp=t\fP keyword density and dispersion (sigma) maps can also
+be created. Another way to create a smooth velocity field is using 
+\fIrotcurshape(1NEMO)\fP using a 0 input map and fixing all fittable parameters.
+The resulting output residual map then contains -1 times the desired
+velocity field. 
+.SH SEE ALSO
+ccdvel(1NEMO) , rotcurshape(1NEMO)
+.SH FILES
+src/image/rotcur/velcube.c
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+29-May-04	V1.0 Created	PJT
+.fi
