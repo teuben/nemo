@@ -361,7 +361,7 @@ real rotcur_power(real r, int np, real *p, real *d)
   real v = pow(x,a);
   d[0] = v;
   d[1] = -a*p[0]*v/p[1];
-  d[2] = 0.0;         /* fix that !! */
+  d[2] = p[0]*v*log10(x);
   return p[0] * d[0];
 }
 
