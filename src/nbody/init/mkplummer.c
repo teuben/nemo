@@ -24,13 +24,13 @@
 #include  <getparam.h>
 #include  <vectmath.h>
 #include  <filestruct.h>
+#include  <history.h>
 #include  <loadobj.h>
 
 #include <snapshot/snapshot.h>  
 #include <snapshot/body.h>
 #include <snapshot/put_snap.c>
 
-extern double xrandom(), frandom();
 extern rproc  getrfunc();
 Body    *mkplummer();
 
@@ -55,7 +55,7 @@ string  defv[] = {                        /* DEFAULT INPUT PARAMETERS */
     "masspars=p,0.0\n         Mass function parameters (e.g. p,0.0)",
     "massrange=1,1\n          Range for mass-spectrum (e.g. 1,2)",
     "headline=\n	      Verbiage for output",
-    "VERSION=2.6\n            19-oct-01 PJT",
+    "VERSION=2.6a\n           8-dec-03 PJT",
     NULL,
 };
 
