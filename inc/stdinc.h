@@ -465,6 +465,10 @@ extern double qbe(double);
 extern double dex(double);
 extern double powi(double,int);
 extern double powd(double,double);
+  /* cygwin defines log2 as a macro */
+#if defined(log2)
+#define HAVE_LOG2
+#endif
 #if !defined(HAVE_LOG2)
 extern double log2(double);
 #endif
