@@ -1,0 +1,26 @@
+.TH RVC 5NEMO "10 May 1994" 
+.SH NAME
+rvc \- binary format for N-body snapshot files
+.SH SYNOPSIS
+.nf
+.B    fortran record: nbody,ips,aexp,p,dpnp1,dpn
+.B    fortran record: ibuf(100)
+.B    fortran record: r(3,nbody)
+.B    fortran record: v(3,nbody)
+.fi
+.SH DESCRIPTION
+\fIRVC\fP is the format used by Couchman in his A3PM fortran code 
+(see \fIprun(1NEMO)\fP) to
+store N-particle data. Be careful when trying to read data, as it
+may be machine dependant. Within NEMO the \fPunfio(3NEMO)\fP routines
+may be useful to decode the format. See \fIrvcsnap(1NEMO)\fP for
+an implementation.
+.SH "SEE ALSO"
+snapshot(5NEMO), rvcsnap(1NEMO), prun(1NEMO), unfio(3NEMO), rv(5NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH "UPDATE HISTORY"
+.nf
+.ta +2.0i +2.0i
+3-may-94	man written 	PJT
+.fi
