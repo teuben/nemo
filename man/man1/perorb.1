@@ -1,0 +1,140 @@
+.TH PERORB 1NEMO "19 April 1995"
+.SH NAME
+perorb \- interactive/iterative search for XY-periodic orbits in symmetric 
+potentials
+.SH SYNOPSIS
+.PP
+\fBperorb \fBout=\fPorbit [parameter=value]
+.SH DESCRIPTION
+\fIperorb\fP searches for periodic orbits in two ways:
+.PP
+In the iterative mode it will integrate an orbit for a half or
+whole period, and iteratively converge towards a periodic orbit
+assuming regular phase space. It uses a convergence criterion
+in the surface of section coordinates.
+It then can proceed, and attempt to find family members
+with slightly different energies or spatial extent.
+The orbits can be stored in a binary file along the way, and also a table
+with major an minor axis rotation curves, period and energy can be
+stored in a table.
+.PP
+In the interactive mode the selected orbits are integrated for a
+specified number of surface of section (S.O.S.)
+crossings, and their S.O.S. 
+coordinates are plotted; from a visual inspection the central 
+periodic orbit(s) can then be estimated at this energy, and
+used to get good estimates in the iterative mode to find
+the periodic orbits.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 20
+\fBout=\fIout-file\fP
+output file, into which the orbits are accumulated.
+The file is in standard \fIorbit(5NEMO)\fP format.
+If no filename is given, the iterative mode is followed.
+[Default: none].
+.TP
+\fBfreqout=\fIrate\fP
+Frequency for output of the timeslots for the periodic
+orbits. 
+\fIOnly used in iterative mode.\fP
+[default: \fB1\fP].
+.TP
+\fBmaxsteps=\fInumber\fP
+maximum number of reserved integration steps. [default: \fB5000\fP].
+.TP
+\fBdt=\fItime-step\fP
+time step (constant) to be taken [default: \fB0.05\fP].
+.TP
+\fBphase=\fItrial-phase\fP
+Initial trial phase space coodinates for orbit. Although currently
+only planar orbits in the XY-plane can be investigated, all 
+6 phase-space coordinates need to be specified. There should be only
+two non-zero entries in this case as the launch coordinates.
+If a 7th number is given (optional), 
+this is taken as the trial energy for the
+first orbit. The trial launch velocity is then calculated from the
+available potential at the specified launch position.
+.TP
+\fBphasestep=\fIstep\fP
+Step in phase space to take to get next orbit. Only
+one number can be given, step in the direction
+as given by the \fBdir\fP keyword. Only used when more
+than one orbit (\fBnorbit\fP) is to be searched for.
+.TP
+\fBdir=x|y\fP
+Direction in which to step for next orbit.
+This also determines in which
+surface of section the searching for the periodic orbit
+is done. Only \fBx\fP and \fBy\fP are allowed for now, since only
+planar XY-orbits are handled properly.
+.TP
+\fBnorbit=\fIn\fP
+Number of orbits to investigate. [Default: 1]
+.TP
+\fBaccuracy=\fIeps\fP
+A relative accuracy parameter to which the final
+surface of section coordinate is to be accurate. 
+\fIOnly used in iterative mode.\fP
+[Default: 0.001].
+.TP
+\fBncross=\fIcount\fP
+Number of crossings through surface of section
+used to plot/iterate. This count does include the 
+half-period crossings if the keyword \fBperiod=2\fP
+is choosen. [default: \fB1\fP]
+.TP
+\fBperiod=2|1\fP
+The number of surface of section coordinates to generate
+per period. Must be either 1 or 2. A value of 2 make
+search faster, but a bit more difficult for irregular orbits
+or near resonances. Also non-symmetric orbits cannot be found
+this way. [default: \fB2\fP].
+.TP
+\fBpotname=\fIname\fP
+name of file of \fIpotential(5NEMO)\fP descriptor 
+[default: \fBplummer\fP].
+.TP
+\fPpotpars=\fIpar-list\fP
+List of parameters to the potential descriptor. The first
+parameter must be the pattern speed in the x-y plane,
+although rotating frames of reference are not
+yet supported. The remaining parameters are used by the
+\fI_inipotential()\fP routine in the potential descriptor.
+[default: none - let them be defined by routine itself].
+.TP
+\fBpotfile=\fIname\fP
+name of an optional datafile to the potential descriptor.
+This might be an N-body snapshot or list of spline fit
+coefficients etc. [default: none].
+.TP
+\fBtab=\fItable_file\fP
+If set to a filename, a table, which normally appears on
+\fIstdout\fP is now written to a file. It contains the
+two axes rotation curves, number of steps in the orbit,
+numer of iterations in surface of section, the full period and 
+the energy: \fIpos,vel,pos,vel,nsteps,niter,period,energy\fP.
+[Default: none].
+.TP
+\fBmode=\fIint_mode\fP
+Specify the integration mode. Any one of \fBeuler\fP,
+\fBleapfrog\fP, \fBrk2\fP or \fBrk4\fP 
+can be given.
+[Default: \fBrk4\fP].
+.SH "SEE ALSO"
+potlist(1NEMO), orbint(1NEMO), newton0(1NEMO), potential(5NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+pjt/orbit	original sources
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+22-may-90	V1.0 created from old Cyber program 'PERORB'  PJT
+24-may-91	V1.1 rotating XY-frames, fixed energy option  PJT
+19-apr-95	V1.4 various, rk4 is now default integrator	PJT
+.fi
