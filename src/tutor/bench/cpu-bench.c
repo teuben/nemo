@@ -10,13 +10,22 @@
 typedef int (*action)(int);
 
 #define MAXTEST 11
-#define NMAX  30000
+#define NMAX  300000
+/* #define VSTATIC  */
 
 /* Work vectors: */
 
-real v1[NMAX], v2[NMAX], v3[NMAX], v4[NMAX];
-int  iv1[NMAX], iv2[NMAX], iv3[NMAX];
-int  ind1[NMAX], ind2[NMAX];
+#if defined(VSTATIC)
+ real v1[NMAX], v2[NMAX], v3[NMAX], v4[NMAX];
+ int  iv1[NMAX], iv2[NMAX], iv3[NMAX];
+ int  ind1[NMAX], ind2[NMAX];
+ int  v_size = NMAX;
+#else
+ real *v1, *v2, *v3, *v4;
+ int  *iv1, *iv2, *iv3;
+ int  *ind1, *ind2;
+ int  v_size = 0;
+#endif
 
 real s1, s2;
 real x = 1.0, y = -2.5, z = 3.14;
@@ -63,7 +72,7 @@ string defv[] = {
   "n=30000\n         max size of arrays",
   "vlen=0,3,10,30,100,300,1000,3000,30000\n     Vector lengths to try",
   "count=300000\n    how often shoudl the largest vlen be run",
-  "VERSION=2.2\n     4-apr-2004 PJT",
+  "VERSION=3.0\n     4-apr-2004 PJT",
   NULL,
 };
 
@@ -108,14 +117,30 @@ void reset_v1(int l)
 	v1[i] = i / (i + 1.0);
 }
 
-void initialize()
+void initialize(int n)
 {
     int i;
     real jreal = 58427.0;	/* Random numbers! */
 
-    reset_v1(NMAX);
+#if !defined(VSTATIC)
+    if (v_size == 0) {
+      v1 = (real *) allocate(n*sizeof(real));
+      v2 = (real *) allocate(n*sizeof(real));
+      v3 = (real *) allocate(n*sizeof(real));
+      v4 = (real *) allocate(n*sizeof(real));
 
-    for (i = 0; i < NMAX; i++) {
+      iv1 = (int *) allocate(n*sizeof(int));
+      iv2 = (int *) allocate(n*sizeof(int));
+      iv3 = (int *) allocate(n*sizeof(int));
+      ind1 = (int *) allocate(n*sizeof(int));
+      ind2 = (int *) allocate(n*sizeof(int));
+      v_size = n;
+    }
+#endif
+
+    reset_v1(n);
+
+    for (i = 0; i < n; i++) {
 
       v2[i] = 1.0 + 0.00001/(i+1); /* Make sure v2 > 0 for sqrt and / tests,
 				      and close to 1 for repeated multiplies. */
@@ -129,19 +154,24 @@ void initialize()
       while (jreal >= 2147483648.0) jreal /= 2147483648.0;
 
       ind1[i] = i;
-      ind2[i]  = (int)(NMAX*jreal/2147483648.0);
-      if (ind2[i] < 0 || ind2[i] >= NMAX)
+      ind2[i]  = (int)(n*jreal/2147483648.0);
+      if (ind2[i] < 0 || ind2[i] >= n)
 	  error("ind2[%d] = %d\n", i, ind2[i]);
 
       v4[i] = jreal/2147483648.0 - 0.5;
 
   }
 
-  s1 = v1[NMAX/2];
-  s2 = v2[NMAX/2];
+  s1 = v1[n/2];
+  s2 = v2[n/2];
 
   cpu_init();
   printf("sizeof(real) = %d\n", sizeof(real));
+#if defined(VSTATIC)
+  printf("Using static arrays\n");
+#else
+  printf("Using dynamic arrays\n");
+#endif
 }
 
 int dummy(int n)
@@ -219,12 +249,14 @@ nemo_main()
     int test = getiparam("test");
 
     if (hasvalue("n")) n = getiparam("n");
+#if defined(VSTATIC)
     if (n > NMAX) {
       warning("n=%d , NMAX=%d cannot be exceeded",n,NMAX);
       n = NMAX;
     }
+#endif
 
-    initialize();
+    initialize(n);
 
     if (do_test(test,1)) time_action(itor, 1, "vr = vi", n);
     if (do_test(test,2)) time_action(rtoi, 1, "vi = vr", n);
