@@ -1,0 +1,78 @@
+.TH DIRECT4 1NEMO "19 May 1997"
+.SH NAME
+direct4 \- simple N-body integrator for GRAPE-4 Pipelined N-body engine
+.SH SYNOPSIS
+\fBdirect4 in=\fIin_file\fP \fBout=\fIout_file\fP [parameter=value]
+.SH DESCRIPTION
+\fBdirect4\fP is a simple equal timestep
+direct N-body integrator that is used with the
+GRAPE-4 Pipelined N-body engine by compiling it with the grape I/O
+libraries. 
+.PP
+With a special compile flag this program can also compute the forces
+on the front-end instead of the GRAPE4 board.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+input file name, in standard \fIsnapshot(5NEMO)\fP format.
+No default.
+.TP
+\fBout=\fP
+output file name, in \fIsnapshot(5NEMO)\fP format.
+No default.
+.TP
+\fBdt=\fP
+integration timestep.
+[Default: 1/32]
+.TP
+\fBtstop=\fP
+Stoptime       
+[Default: 2.0]
+.TP
+\fBdtout=\fP
+Output timestep of datadumps.
+[Default: 0.25]
+.TP
+\fBdtlog=\fP
+Output timestep for the logfile.
+[Default: 0.25]
+.TP
+\fBeps=\fP
+Standard softening length. All particles share the same gravitational
+softening length.
+[Default: 0.05]
+.TP
+\fBpcmode=t|f\fP
+Add a Predictor-Corrector step to the leapfrog integrator.
+[Default: f]
+.SH COMPILATION
+The original program source code (\fBgrape.c\fP) could be compiled with
+many flags (-Dxxx) to target different hardware boards (GRAPE1, GRAPE2,
+GRAPE3, HARP3). Although this was a flexible solution to code
+maintenance, the current source code (\fbdirect4.c\fP) is a severely
+trimmed version of the original for HARP3=1 and NOSHARE. 
+.PP
+Here are the compilation options: (not some will be mutually exclusive of
+others):
+.nf
+	EXACT_CALCULATION	no GRAPE, use exact calculations on HOST 
+	CHECK_GRAPE		compare GRAPE with exact HOST calculations
+.fi
+.SH SEE ALSO
+hackcode1(1NEMO), nbody0(1NEMO), snapshot(5NEMO), atos(1NEMO), stoa(1NEMO)
+.SH FILES
+.ta +1i
+.nf
+usr/pjt/grape	direct4.c
+[makino]	grape.c (original code, compilable for all boards)
+.fi
+.SH AUTHOR
+Jun Makino, Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+16-sep-89	V1.0 Initial workbench version w/ exact force calculation	JM
+17-May-97	V2.0 Simplified version for NEMO and GRAPE4	PJT
+.fi
