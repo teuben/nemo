@@ -24,6 +24,7 @@
  *      g  7-jun-01   pjt       aptr -> ap (why did the compiler not warn?)
  * V 2.7  20-jun-01   pjt       no more NOPROTO, fixed protos for gcc3
  *      a  8-oct-01   pjt       flush buffer when put_tes() at top level
+ * V 3.0  23-may-02   pjt    Support for >2GB (large file size)
  *
  *  Although the SWAP test is done on input for every item - for deferred
  *  input it may fail if in the mean time another file was read which was
@@ -296,8 +297,8 @@ void put_data_set(stream str, string tag, string typ, int dim1, ...)
     sspt->ss_ran = ipt;
     puthdr(str,ipt);                           /* write the header right now */
 
-    ItemPos(ipt) = ftell(str);                       /* begin of random data */
-    sspt->ss_pos = ftell(str) + datlen(ipt,0);         /* end of random data */
+    ItemPos(ipt) = ftello(str);                      /* begin of random data */
+    sspt->ss_pos = ftello(str) + datlen(ipt,0);         /* end of random data */
 }
 
 /*
@@ -315,7 +316,7 @@ void put_data_tes(stream str, string tag)
     if (ipt == NULL) error("put_data_tes: item %s is not random",tag);
     ipt = sspt->ss_ran;
     if (!streq(tag,ItemTag(ipt))) error("put_data_tes: invalid tag name %s",tag);
-    fseek(str,sspt->ss_pos,0);      /* go where we left off */
+    fseeko(str,sspt->ss_pos,0);      /* go where we left off */
     sspt->ss_pos = 0L;              /* mark file i/o sequential again */
     sspt->ss_ran = NULL;            /* reset pointer to the random item */
     free( ItemDim(ipt));
@@ -344,7 +345,7 @@ void put_data_ran(
     length *= ItemLen(ipt);     /* in units of itemlen !!! */
     if (offset+length > datlen(ipt,0))
         error("put_data_ran: tag %s cannot write beyond allocated boundary",tag);
-    fseek(str,offset + ItemPos(ipt),0);
+    fseeko(str,offset + ItemPos(ipt),0);
     if (length != fwrite((char *)dat,sizeof(byte),length,str))
         error("put_data_ran: error writing tag %s",tag);
 }
@@ -1063,7 +1064,7 @@ local void getdat(itemptr ipt, stream str)
 						/*   read data in now       */
     } else {					/* too big, so skip now     */
 	ItemDat(ipt) = NULL;			/*   no data in core	    */
-	ItemPos(ipt) = ftell(str);		/*   remember this place    */
+	ItemPos(ipt) = ftello(str);		/*   remember this place    */
 	safeseek(str, dlen, 1);			/*   skip over data	    */
     }
 } /* getdat */
@@ -1095,7 +1096,7 @@ local void copydata(
     stream str)
 {
     char *src, *dat = (char *) vdat;
-    long oldpos;
+    off_t oldpos;
       
     off *= ItemLen(ipt);                        /* offset bytes from start  */
     if (ItemDat(ipt) != NULL) {			/* data already in core?    */
@@ -1104,7 +1105,7 @@ local void copydata(
 	while (--len >= 0)			/*   loop copying data      */
 	    *dat++ = *src++;			/*     byte by byte         */
     } else {					/* time to read data in     */
-	oldpos = ftell(str);                    /*   save current place     */
+	oldpos = ftello(str);                   /*   save current place     */
 	safeseek(str, ItemPos(ipt) + off, 0);   /*   seek back to data      */
 	saferead(dat, ItemLen(ipt), len, str);	/*   read data and check it */
 	safeseek(str, oldpos, 0);               /*   reset file pointer     */
@@ -1119,7 +1120,7 @@ local void copydata_f2d(
     stream str)
 {
     float *src;
-    long oldpos;
+    off_t oldpos;
       
     off *= ItemLen(ipt);
     if (ItemDat(ipt) != NULL) {			/* data already in core?    */
@@ -1128,7 +1129,7 @@ local void copydata_f2d(
 	while (--len >= 0)			/*   loop converting data   */
 	    *dat++ = (double) *src++;		/*     float to double      */
     } else {					/* time to read data in     */
-	oldpos = ftell(str);                    /*   save this position     */
+	oldpos = ftello(str);                   /*   save this position     */
 	safeseek(str, ItemPos(ipt) + off, 0);	/*   seek back to data      */
 	while (--len >= 0)			/*   loop reading data      */
 	    *dat++ = (double) getflt(str);	/*     float to double      */
@@ -1144,7 +1145,7 @@ local void copydata_d2f(
     stream str)
 {
     double *src;
-    long oldpos;
+    off_t oldpos;
       
     off *= ItemLen(ipt);
     if (ItemDat(ipt) != NULL) {			/* data already in core?    */
@@ -1153,7 +1154,7 @@ local void copydata_d2f(
 	while (--len >= 0)			/*   loop converting data   */
 	    *dat++ = (float) *src++;		/*     double to float      */
     } else {					/* time to read data in     */
-	oldpos = ftell(str);                    /*   save this position     */
+	oldpos = ftello(str);                   /*   save this position     */
 	safeseek(str, ItemPos(ipt) + off, 0);	/*   seek back to data      */
 	while (--len >= 0)			/*   loop reading data      */
 	    *dat++ = (float) getdbl(str);	/*     double to float      */
@@ -1192,11 +1193,11 @@ local void saferead(
 
 local void safeseek(
     stream str,
-    long offset,
+    off_t offset,
     int key)	      /* 0: start of file, 1: current point, 2: end */
 {
-    if (fseek(str, offset, key) == -1)
-	error("safeseek: error calling fseek %d bytes from %d",
+    if (fseeko(str, offset, key) == -1)
+	error("safeseek: error calling fseeko %d bytes from %d",
 	      offset, key);
 }
 
@@ -1227,7 +1228,7 @@ local int eltcnt(
  * DATLEN: compute length in bytes of subspace of item.
  */
 
-local int datlen(
+local size_t datlen(
     itemptr ipt,            	/* pointer to item w/ possible vector dims */
     int skp)                	/* num of dims to skip, starting with dimN */
 {

@@ -27,11 +27,11 @@
 
 typedef struct {
     string itemtyp;		/* type string, listed in filestruct.h */
-    int    itemlen;		/* length associated with above type */
+    long   itemlen;		/* length associated with above type */
     string itemtag;		/* name given this item by application */
     int   *itemdim;		/* int-string of dimensions, or NULL */
     void  *itemdat;		/* the real goodies, if any, or NULL */
-    long   itempos;		/* where the item began in stream (i/o) */
+    off_t  itempos;		/* where the item began in stream (i/o) */
 } item, *itemptr;    
 
 #define ItemTyp(ip)  ((ip)->itemtyp)
@@ -54,7 +54,7 @@ typedef struct {
     int     ss_stp;		    /* item stack pointer */
     bool    ss_seek;		    /* permit seeks on this stream ? */
 #if defined(RANDOM)
-    long    ss_pos;                 /* tail of file, in case random access */
+    off_t   ss_pos;                 /* tail of file, in case random access */
     itemptr ss_ran;                 /* pointer to random access item */
 #endif
 } strstk, *strstkptr;
@@ -92,9 +92,9 @@ local void copydata_d2f ( float  *dat, int, int, itemptr ipt, stream str );
 local float getflt     ( stream str );
 local double getdbl    ( stream str );
 local void saferead    ( void *dat, int siz, int cnt, stream str );
-local void safeseek    ( stream str, long offset, int key );
+local void safeseek    ( stream str, off_t offset, int key );
 local int eltcnt       ( itemptr ipt, int skp );
-local int datlen       ( itemptr ipt, int skp );
+local size_t datlen    ( itemptr ipt, int skp );
 local itemptr makeitem ( string typ, string tag, void *dat, int *dim );
 local void freeitem    ( itemptr ipt, bool flg);
 local int baselen      ( string typ );
