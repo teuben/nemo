@@ -3,7 +3,9 @@
 #   april-2001		allow making from file+ext (e.g. scfm.exe) too
 #   jul-2001            fixed -n bug
 #
-set version="MKNEMO Version 1.3b  17-jul-01"
+#  BIG BUG: 'mknemo mkplummer.c' would remove the sourcecode and put it into $NEMOBIN !!!!!
+#
+set version="MKNEMO Version 1.3b  17-jul-01 - +NEMOBIN bug"
 if ($#argv == 0) goto usage
 
 onintr error

@@ -7,6 +7,8 @@
 # the Ultrix /bin/sh does not understand shell functions! (try /bin/sh5!)
 # also, the Ultrix "test" command does not understand the -x flag!
 
+## can also try:    gcc -E -dM   on an empty .c file
+
 path="`echo $PATH | sed -e 's/:/ /g'`"
 cc=`for dir in $path ; do
     if [ -r $dir/cc ] ; then

@@ -1,27 +1,15 @@
-# 	$NEMOPATH/src/scripts/Makefile
+# 	$NEMO/src/scripts/Makefile
+
 include $(NEMOLIB)/makedefs
-#
-#	warm-boot script utilities (such as cc and make)
-#	8-jun-88	Peter Teuben
-#	21-nov-89	HOSTTYPE
-#	8-apr-90	cc compiler selected by HOSTTYPE (cc.HOSTTYPE)
-#			hosttype taken out - cc.xxx make.xxx in
-#	jun-90		added miriad as standard install
-#	nov-90		moved over to new location in NEMO V2.x
-#	jun-91		got rid of some old stuff from V1.x
-#	feb-94		bake and omake now aliases in NEMORC
-#	15-dec-95	added ldso
-#	18-dec-97	added nemo.version
-#	 8-feb-98	do not overwrite $NEMOBIN versions (cc,f77,make,ranlib)
-#	 6-apr-99	cc, make, ranlib, f77 are now subdirectories;
-#
-#	default extension for cc and make scripts (you need one!)
+
+#	default extension for cc and make scripts (not used anymore)
 OS=
 #
-CFLAGS = -O
-LDFLAGS = -O
+#CFLAGS = -O
+#LDFLAGS = -O
 
-SCRIPTS = mknemo mkpdoc manlaser nemoman ldso nemo.version
+SCRIPTS = mknemo mkpdoc manlaser nemoman ldso nemo.version \
+	fitsedit
 MAKES = Makefile.lib 
 FAKES = cc make f77 ranlib
 
