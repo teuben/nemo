@@ -1,0 +1,20 @@
+%N tabcomment
+%D Add comments to a table, or comments certain lines
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man tabcomment' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	input ascii table [???]
+%A out
+	output ascii table [???]
+%A alpha
+	Comment lines that start with alpha? [t]
+%A blank
+	Comment blank lines? [t]
+%A punct
+	Comment lines seem punctiation? [t]
+%A delete
+	Delete those comment lines? [f]
+%A VERSION
+	18-jun-98 PJT [1.1a]
