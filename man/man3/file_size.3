@@ -1,34 +1,37 @@
-.TH FILE_SIZE 3NEMO "7 June 1996"
+.TH FILE_SIZE 3NEMO "19 September 2003"
 .SH NAME
-file_size, file_time, file_lines \- get size (in bytes/lines) of a file
+nemo_file_size, nemo_file_time, nemo_file_lines \- get size (in bytes/lines) of a file
 .SH SYNOPSIS
 .nf
-.B int file_size(name)
+.B int nemo_file_size(name)
 .B char *name;
 .PP
-.B int file_time(name)
+.B int nemo_file_time(name)
 .B char *name;
 .PP
-.B int file_lines(name, deflen)
+.B int nemo_file_lines(name, deflen)
 .B char *name
 .B int deflen
 .fi
 .SH DESCRIPTION
-\fIfile_size\fP can be used to check for the existence of
+\fInemo_file_size\fP can be used to check for the existence of
 a file. It returns, as a non-negative number, the file size in
 bytes. If the file is not found, or an error was detected 
 in the \fIstat(2)\fP call, -1 is returned and errno is set
 to indicate the error. The file must be a regular file, not part
 of a pipe \fIstdin/out\fP stream.
 .PP
-\fIfile_time\fP is simulat to \fIfile_size\fP., except it returns
+\fInemo_file_time\fP is simulat to \fInemo_file_size\fP., except it returns
 the age of a file in seconds, since 1970.0 in the  usual fashion
 (see also \fIstat(2)\fP).
 .PP
-\fIfile_lines\fP counts the number of lines in a text file but 
+\fInemo_file_lines\fP counts the number of lines in a text file but 
 counting the number of occurences of a newline. This routine
-will hence not work correctly on MSDOS. Again, the file must 
+will hence not work correctly on MSDOS. Also, the file must 
 be a proper file, as detected with \fIisatty(3)\fP.
+.SH NAMESPACE
+Earlier versions did not have the name \fInemo_\fP prepended, 
+until some library was using the same name as ours....
 .SH BUGS
 If \fIstropen(3NEMO)\fP is used to open the file, \fIisatty(3)\fP
 does not properly report the file status anymore.
@@ -48,4 +51,5 @@ Peter Teuben
 25-nov-90	V1.1 doc written for earlier released file_lines  	PJT
 7-jun-96	documented outstanding (nov93) argument change in file_lines	pjt
 24-oct-97	added file_time()	PJT
+19-sep-03	documented that nemo_ has been added to the routine names	PJT
 .fi
