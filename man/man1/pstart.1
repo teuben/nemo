@@ -1,0 +1,114 @@
+.TH PSTART 1NEMO "16 May 1995"
+.SH NAME
+pstart \- initialization routines for cosmological particle-mesh (AP3M) code
+.SH SYNOPSIS
+\fBpstart\fP \fBdir=\fP\fIrun_directory\fP [parameter=value]
+.SH DESCRIPTION
+\fPpstart\fP sets up an initial distribution of particles
+in a cubic region 
+for use with the \fIprun(1NEMO)\fP AP3M N-body integrator.
+.PP
+Particles can be randomly placed within the computational cube
+or placed uniformly on a cubic lattice. In the latter case the number
+of particles needs to be a perfect cube. On this initial distribution,
+a low amplitude 
+fluctuation spectrum is imposed. A Zel'dovich potential is
+derived on the grid, which is differenced and used to displace
+the particles.
+.PP
+The current NEMO implementation of \fPpstart\fP is a wrapper program,
+with the usual nemo user interface. It creates a parameter file
+and calls the fortran executable. In this way
+it also hides some of the complexities of the fortran user interface.
+SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBdir=\fP
+working run directory. Must not exist yet. Inside the working directory
+an ASCII
+parameter file, \fIpstart.dat\fP will be created, which contains the
+input parameters for the chained program. 
+This run directory will also contain
+logfiles, and subdirectories where the data and Green's functions are
+stored (but see below to override).
+No default.
+.TP 20
+\fBistart=\fP
+start label. This is a non-negative integer, not to exceed 9999, which is
+used as a ID label. Data and log filenames are automatically derived from this
+label id. 
+[\fB9999\fP]
+.TP 20
+\fBnobj=\fP
+number of particles 
+[\fB32768\fP].
+.TP 20
+\fBl=\fP
+mesh points per side. Must be a power or 2.
+[\fB32\fP].
+.TP 20
+\fBsoft=\fP
+softening used in potential calculations for initial conditions.
+[\fB0.6\fP].
+.TP 20
+\fBperr=\fP
+max force error (%)
+[\fB.0\fP].
+.TP 20
+\fBalpha=\fP
+Accuracy parameter, see also eq. (11.2)  in Couchman (1994).
+[\fB1.5\fP].
+.TP 20
+\fBiru=\fP
+initial particle distribution (0=uniform 1=random). For a uniform
+particle distribution \fIiru\fP needs to be a perfect cube.
+[\fB0\fP].
+.TP 20
+\fBiseed1=\fP
+Random number seed 1.
+[\fB-1001\fP].
+.TP 20
+\fBiseed2=\fP
+Random number seed 2, phi_k   
+[\fB-10001\fP].
+.TP 20
+\fBrlbox=\fP
+physical scaling of the box in Mpc (?)
+[\fB80\fP].
+.TP 20
+\fBdelta=\fP
+amplitude applied to input fourier modes.
+[\fB0.0004\fP].
+.TP 20
+\fBexe=\fP
+Name of the fortran derived \fPpstart\P executable file, which can reside 
+anywhere as long as the host OS can resolve it's location
+(e.g. under UNIX anywhere in the \fI$path\fP command search path)
+[\fBpstart.exe\fP].
+.TP 20
+\fBgreendir=\fP
+Directory to store Green's functions. Can require up to 5Mb. By default
+it is placed inside the working run directory (see \fBdir=\fP)
+[\fBgreenfn/\fP].
+.TP 20
+\fBdatadir=\fP
+Directory to store data file storage. Requires about \fB6 Nobj\fP words
+(normally 4 bytes/word) times the number of snapshots (\fBipout/ipstop + 1\fP)
+By default it is placed inside the working run directory (see \fBdir=\fP)
+[\fBdata/\fP].
+.SH EXAMPLES
+See \fIprun(1NEMO)\fP.
+.SH SEE ALSO
+prun(1NEMO), rvc(5NEMO)
+.SH FILES
+~/usr/couchman/adap
+.SH AUTHOR
+Hugh Couchman (fortran), Peter Teuben (C)
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+xx-xxx-xx	Fortran version \fBprun\fP       	HMPC
+7-may-94	V1.0 NEMO wrapper written        	PJT
+16-may-95	V1.1 new version from Couchman   	PJT
+.fi
