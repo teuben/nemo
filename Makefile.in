@@ -588,7 +588,7 @@ cleansrc:
 
 libs:
 	@echo Starting at `date`, tail -f $(NEMO)/install.log
-	cd src;make install 2>&1 > ../install.log
+	cd src;make install >> ../install.log 2>&1 
 	@echo Done at `date`
 
 
