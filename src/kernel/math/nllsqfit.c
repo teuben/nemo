@@ -171,13 +171,17 @@ static  int    nfree;                          /* number of free parameters */
 static  int    nuse;                           /* number of useable data points */
 static  int    parptr[MAXPAR];                 /* parameter pointer */
 
-static rproc fitfunc_c;
-static iproc fitderv_c;
+typedef real (*my_proc1)(real *, real *, int);
+typedef void (*my_proc2)(real *, real *, real *, int);
+
+static my_proc1 fitfunc_c;
+static my_proc2 fitderv_c;
 
 static int invmat()
 /*
  * invmat calculates the inverse of matrix2. The algorithm used is the
  * Gauss-Jordan algorithm described in Stoer, Numerische matematik, 1 Teil.
+ * Did Tom Oosterloo write the original version of this routine?
  */
 {
    real even;
@@ -240,7 +244,7 @@ static int invmat()
 } /* invmat */
 
 
-static void getmat(             /* build the matrix */
+static void getmat(                             /* build up the matrix */
         real *xdat, int xdim, 
         real *ydat, real *wdat, real *ddat, int ndat,
         real *fpar, real *epar, int npar)
@@ -289,16 +293,8 @@ static int getvec(
  * vector.
  */
 {
-   real dj;
-   real dy;
-   real mii;
-   real mji;
-   real mjj;
-   real wn;
-   int   i;
-   int   j;
-   int   n;
-   int   r;
+   real dj, dy, mii, mjj, mji, wn;
+   int   i, j, n, r;
 
    for (j = 0; j < nfree; j++) {                /* loop to modify and ... */
       mjj = matrix1[j][j];                      /* scale the matrix */
@@ -351,8 +347,8 @@ int nllsqfit(
     real tol, 
     int its, 
     real lab, 
-    rproc f, 
-    iproc df)
+    my_proc1 f, 
+    my_proc2 df)
 {
    int   i, n, r;
 
@@ -502,7 +498,7 @@ int nllsqfit(
    int  fopt = 1;
 #endif
 
-real func_c( real *xdat, real *fpar, int *npar )
+real func_c( real *xdat, real *fpar, int npar )
 /*
  * if *fopt == 1:
  * f(x) = a + b * exp( -1/2 * (c - x)^2 / d^2 ) (one-dimension Gauss)
@@ -527,7 +523,7 @@ real func_c( real *xdat, real *fpar, int *npar )
    return( 0.0 );
 }
 
-void derv_c( real *xdat, real *fpar, real *epar, int *npar )
+void derv_c( real *xdat, real *fpar, real *epar, int npar )
 {
    if (fopt == 1) {
       real a;
@@ -557,7 +553,7 @@ void derv_c( real *xdat, real *fpar, real *epar, int *npar )
 #define RAND_MAX 2147483647
 #endif
 
-void main( )
+int main( )
 {
    int  m;
    int  n;
@@ -577,6 +573,7 @@ void main( )
    real xdat[30];
    real ydat[30];
    real wdat[30];
+   real ddat[30];
    real fpar[4];
    real epar[4];
 
@@ -588,7 +585,7 @@ void main( )
          real rndm;
          xdat[n] = (real) n;
          wdat[n] = 1.0;
-         ydat[n] = func_c( &xdat[n], fpar, &npar );
+         ydat[n] = func_c( &xdat[n], fpar, npar );
          rndm = ((real) ( rand( ) - RAND_MAX / 2 )) / (real) RAND_MAX * 1.0;
 #if defined(SCALE)
 	 rndm *= (real) nfit;
@@ -602,7 +599,7 @@ void main( )
       }
       printf( "nllsqfit: on entry\n" );
       printf( "fpar: %10f %10f %10f %10f\n", fpar[0], fpar[1], fpar[2], fpar[3] );
-      r = nllsqfit( xdat, xdim, ydat, wdat, ndat, fpar, epar, mpar, npar, tol, 
+      r = nllsqfit( xdat, xdim, ydat, wdat, ddat, ndat, fpar, epar, mpar, npar, tol, 
                 its, lab, func_c, derv_c );
       printf( " %ld", r );
       if (r < 0) {
@@ -613,5 +610,6 @@ void main( )
          printf( "epar: %10f %10f %10f %10f\n", (real) epar[0], (real) epar[1], (real) epar[2], (real) epar[3] );
       }
    }
+   return 0;
 }
 #endif
