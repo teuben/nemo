@@ -1,0 +1,61 @@
+.TH ORBSOS 1NEMO "30 December 1993"
+.SH NAME
+orbsos \- compute SOS coordinates from an orbit
+.SH SYNOPSIS
+.PP
+\fBorbsos in=\fPorbit  [parameter=value]
+.SH DESCRIPTION
+\fBorbsos\fP will compute the Surface of Section (SOS) coordinates
+from an orbit. Currently one can only do this for 2D orbits, in the
+x-y plane. There is an option to compute the X-VX or Y-VY SOS
+coordinates.
+.PP
+The output is a simple ascii table with 4 columns: number, time,
+position and velocity. Example of use with \fPtabplot(1NEMO)\fP
+.nf
+	% orbsos orbit.out x | tabplot - 3 4 xlab=x ylab=vx
+	% orbsos orbit.out y | tabplot - 3 4 xlab=y ylab=vy
+	% orbsos orbit.out x,y | tabplot - 3 4 xlab=x,y ylab=vx,vy
+.fi
+.PP
+\fIorbsos\fP can be useful in locating unknown orbital families. 
+Finding periodic orbits can be automated, but is easier through
+programs like \fIperorb(1NEMO)\fP and \fIhenyey(1NEMO)\fP.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 20
+\fBin=\fIin-file\fP
+Input file, which must be an \fIorbit(5NEMO)\fP. [No default].
+.TP
+\fBmode=x|y|x,y|
+Mode to tabulate. \fBx\fP computes the \fIx-vx\fP, and \fBy\fP
+computes the \fIy-vy\fP SOS coordinates.
+[default: \fBx\fP].
+.TP
+\fBpabs=t|f\fP
+Compute absolute values in the surface of section position coordinate?
+Only useful for non-rotating potentials.
+[Default: \fBf\fP]
+.TP
+\fBvabs=t|f\fP
+Compute absolute values in the surface of section velocity coordinate?
+Usually useful, as a surface of section is symmetric w.r.t. to the
+position axis.
+[Default: \fBf\fP]
+.SH "SEE ALSO"
+perorb(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+~/src/orbit/misc 	orbsos.c
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+ 9-jun-88	V1.0 Created  	PJT
+22-mar-92	V1.1 added mode= and documented  	PJT
+30-dec-93	V1.2 added pabs= and vabs=	PJT
+.fi
