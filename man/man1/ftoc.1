@@ -1,0 +1,126 @@
+.TH FTOC 1NEMO "January 7, 2000"
+.SH NAME
+ftoc \- nemo_main() builder from fortran source code
+.SH SYNOPSIS
+\fBftoc\fP [parameter=value]
+.SH DESCRIPTION
+\fIftoc\fP is a C-source extracter (from fortran) that
+can be useful if you need to add the NEMO user interface
+to a FORTRAN program. The FORTRAN \fBPROGRAM\fP statement must
+not appear in the source code, instead there must be a subroutine,
+preferably with the name \fBNEMOMAIN\fP, that the NEMO user interface
+will consider the MAIN fortran program. Example see below.
+.PP
+This manual page also documents the usage of the F77_FUNC macros
+to aid C programmers importing/exporting their fortran/C code
+to C/Fortran resp.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input source code to extract defv[] from. No default.
+.TP 20
+\fBout=\fP
+Output nemo_main module [- means stdout]. [Default: \fB-\fP].
+.TP 20
+\fBcall=\fP
+You fortran main subroutine (no args!)  [Default: \fBnemomain\fP].
+.TP 20
+\fBmachine=\fP
+machine for symbols name conversions. 
+Recognized machines for symbol
+name conversion are \fBcray\fP, \fBbsd\fP, \fBvms\fP. They
+upper case the symbol, add a trailing underscore or leave the 
+symbol alone, resp. 
+By default, \fIftoc\fP will try and figure it out by itself. 
+.SH EXAMPLE
+Let's take a routine, \fBtest.f\fP displayed below, that needs the
+NEMO user interface:
+.nf
+C
+C:      Test program for NEMO's footran interface
+C+
+C   in=???\\n            Required (dummy) filename
+C   n=1000\\n            Test integer value
+C   pi=3.1415\\n         Test real value
+C   e=2.3\\n             Another test value
+C   text=hello world\\n  Test string
+C   VERSION=1.1\\n       24-may-92 PJT
+C-
+C
+      SUBROUTINE nemomain
+C
+      .......
+.fi
+with the following command
+.nf
+    % \fBftoc test.f > test_main.c\fP
+    % \fBf77 -c test.f test_main.c -L$NEMOLIB -lnemo\fP
+.fi
+a non-graphics program can be compiled. It is assumed, that
+the fortran callable \fIgetparam(3NEMO)\fP has also been added
+to the NEMO library.
+.SH NEMOMAIN
+A NEMO C-main will use the routine name \fInemo_main\fP, whereas 
+a Fortran-main will use the name \fInemomain\fP. ANSI rules do not
+clearly define (or may even forbid) use of embedded underscores.
+In fact, on linux a fortran symbol name like \fIa_b\fP will get exported
+as \fIa_b__\fP. You may have to add the 
+-fno-underscoring  and/or  -fno-second-underscore options to the
+fortran compiler (FFLAGS).
+.SH F77_FUNC
+A macro called F77_FUNC is defined through config.h (created at
+installation time by the configure script) that aids the programmer
+to re-define the name of a C function, such that it can be used
+by fortran code, or by defining the name of an extern fortran module
+such that C can call it. For example, look at the following contrived example.
+.PP
+In fortran:
+.nf
+
+        DOUBLE PRECISION FUNCTION FUNCF(X)
+        DOUBLE PRECISION X, FUNCC
+        IF (X.LT.1.0d0) THEN
+            FUNCF = SQRT(X)
+        ELSE
+            FUNCF = FUNCC(1.0d0/X)
+        ENDIF 
+        END
+
+.fi
+and in C:
+.nf
+
+    #define funcc F77_FUNC(funcc,FUNCC)
+    #define funcf F77_FUNC(funcf,FUNCF)
+        
+    extern double funcf(double *);
+   
+    double funcc(double * xp) {
+        double x = *xp;
+        if (x < 1.0)
+            return  sqrt(x);
+        else {
+            x = 1.0/x;
+            return  funcf(&x);
+        }
+    }
+
+.nf
+
+
+
+
+.SH SEE ALSO
+nm(1)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+xx-jun-92	V1.0 Created	PJT
+25-May-92	V1.1 added c: to signal usage line	PJT
+20-jan-98	more doc
+7-jan-00	V2.0 changed to use F77_FUNC; machine -> options    	PJT
+.fi
