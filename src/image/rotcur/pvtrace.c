@@ -1,0 +1,181 @@
+/* 
+ * PVTRACE:   PV diagram envelope tracing
+ *
+ *	5-may-01	created			PJT
+ *
+ */
+
+
+#include <stdinc.h>
+#include <getparam.h>
+#include <vectmath.h>
+#include <filestruct.h>
+#include <image.h>
+
+string defv[] = {
+  "in=???\n      Input image file - must be an PV diagram",
+  "eta=0.2\n	 [0..1] weight factor for I_max adding to I_lc",
+  "ilc=0\n       Lowest Contour value",
+  "sign=1\n      1: Rotation largest for positive coordinates, -1: reverse",
+  "sigma=0\n	 Velocity dispersion correction factor",
+  "vsys=0\n      System velocity",
+  "inc=90\n      Inclination of disk",
+  "VERSION=1.0\n 5-may-01 PJT",
+  NULL,
+};
+
+string usage="PV diagram envelope tracing ";
+
+#define HPI  1.5702
+#define RPD (3.1415/360.0)
+#ifndef HUGE
+#define HUGE 1.0e20
+#endif
+
+local void pv_trace(imageptr iptr, int vsign, 
+		    real eta, real ilc, real sigma, real vsys, real sini);
+local int get_vels(int n, real *s, real v, real dv, real it,
+		   real *vels);
+
+
+nemo_main()
+{
+    stream  instr;
+    imageptr iptr = NULL;
+    real vel, eta, ilc, sigma, sini, vsys;
+    int vsign = getiparam("sign");
+    string mode;
+
+    instr = stropen(getparam("in"), "r");     /* get file name and open file */
+    read_image( instr, &iptr);                /* read image */
+    strclose(instr);                          /* close file */
+
+    eta = getdparam("eta");
+    ilc = getdparam("ilc");
+    sigma = getdparam("sigma");
+    vsys = getdparam("vsys");
+    sini = sin(RPD * getdparam("inc"));
+
+    pv_trace(iptr, vsign, eta, ilc, sigma, vsys, sini);
+}
+
+/*
+ * TRACE:  trace around in PV diagram
+ *
+ */
+
+#define MAXV  32
+
+local void pv_trace(imageptr iptr, int vsign, 
+		    real eta, real ilc, real sigma, real vsys, real sini)
+{
+  int  ix, iy, j, nx, ny, nv;
+  real pos, v0, dv, it, imax, vel_corr;
+  real *spec, *vel, vels[MAXV];
+
+    
+  nx = Nx(iptr);     /* assumed to be position for now */
+  ny = Ny(iptr);     /* assumed to be velocity for now */
+  spec = (real *) allocate(ny*sizeof(real));
+  vel  = (real *) allocate(ny*sizeof(real));
+
+  imax = MapMax(iptr);
+
+  it = sqrt(sqr(eta*imax)+sqr(ilc));
+  dprintf(0,"Map [%d POS x %d VEL] I_t=%g\n",nx,ny,it);
+
+
+  for (ix=0; ix<nx; ix++) {
+    pos = ix*Dx(iptr) + Xmin(iptr);
+    v0 = Ymin(iptr);
+    dv = Dy(iptr);
+    if (pos*vsign > 0.0) {
+      for (iy=0; iy<ny; iy++) {
+	vel[iy] = v0 + iy*dv;
+	spec[iy] = MapValue(iptr,ix,iy);
+      }
+    } else {
+      for (iy=0; iy<ny; iy++) {
+	vel[ny-iy-1] = v0 + iy*dv;
+	spec[ny-iy-1] = MapValue(iptr,ix,iy);
+      }
+    }
+    if (pos*vsign < 0.0) {           /* fix up */
+      v0 = v0 + (ny-1)*dv;     
+      dv = -dv;
+    }
+    nv = get_vels(ny,spec,v0,dv,it,vels);
+    printf("%g ",pos);
+    vel_corr = (vels[0]-vsys)/sini-sigma;
+    printf(" %g", vel_corr);
+
+    for (j=1; j<nv; j++) {
+      printf(" %g",(vels[j]-vsys)/sini);
+    }
+    printf("\n");
+  }
+  
+  free(spec);
+}
+
+
+local int get_vels(int n, real *s, real v0, real dv, real smin, real *vels)
+{
+  real sum1=0.0, sum0=0.0, v = v0, speak = s[0], vpeak, vfit;
+  real v1, v2, v3;
+  int i, nret = 0, ipeak = 0, itrace = -1;
+
+  for (i=0; i<n; i++) {       /* loop over spectrum and get basics */
+    sum0 += s[i];
+    sum1 += s[i]*v;
+    if (s[i] >= speak) {
+      ipeak = i;
+      vpeak = v;
+      speak = s[i];
+    }
+    v += dv;
+  }
+
+  for (i=n-1; i>=0; i--) {      /* find the first pixels above smin */
+    if (itrace < 0 && s[i] > smin) {
+      itrace = i;
+    }
+  }
+
+  /* envelope trace */
+  if (itrace >= 0) {
+    vfit = dv*itrace + v0;
+  } else
+    vfit = 0.0;
+  vels[nret++] = vfit;
+
+  /* simple 1st order moment */
+  vels[nret++] = (sum0 == 0.0 ? 0.0 : sum1/sum0);
+
+  /* peak location */
+  vels[nret++] = vpeak;
+
+  /* peak location, from fitting paraboloid */
+  if (ipeak == 0 || ipeak == n-1)
+    vfit = vpeak;
+  else {
+    v1 = s[ipeak-1];
+    v2 = s[ipeak];
+    v3 = s[ipeak+1];
+    if (v1+v3 == 2*v2) 
+      vfit = 0.0;
+    else {
+      vfit = 0.5*(v1-v3)/(v1+v3-2*v2);
+      vfit = dv*vfit + vpeak;
+    }
+  }
+  vels[nret++] = vfit;
+
+  return nret;
+}
+
+
+
+
+
+

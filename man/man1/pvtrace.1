@@ -1,0 +1,102 @@
+.TH PVTRACE 1NEMO "5 May 2001"
+.SH NAME
+pvtrace \- PV diagram envelope tracing 
+.SH SYNOPSIS
+\fBccdtrace\fP in=image [parameter=value] 
+.SH DESCRIPTION
+\fBpvtrace\fP tries to recover the rotation curve from a single 
+position-velocity (PV) diagram, by tracing the outer edges of
+the signal that, after correction for a velocity dispersion
+factor, is the material with the maximum amount of tangential
+motion.
+This is particularly appropriate for high-inclination 
+galaxies, where significant amounts of gas is observed below
+the rotation speed, due to line-of-sight integrations. For
+lower inclinations, the envelope tracing method should give
+simular results to the other methods mentioned below.
+.PP
+The rotation velocity, V, is determined from a terminal velocity V_t
+in the usual way:
+.nf
+	V = (V_t - V_sys)/sin(i) - sigma
+.fi
+but corrected for a dispersion factor sigma.
+The terminal velocity is defined by the velocity at which the intensity
+becomes equal to
+.nf
+	I_t = sqrt( (eta*I_max)^2 + (I_lc)^2 )
+.fi
+where I_max is the maximum intensity in the map, and I_lc the lowest counter
+(usually 3 times the noise in the PV diagram). Both eta and I_lc can be
+set via parameters to the program. Typical values for eta = 0.2 - 0.5.
+.PP
+In addition, this program will also perform the usual peak fit,
+gaussian fit, and simple first moment analysis. See OUTPUT below for
+the output format.
+.SH PARAMETERS
+.TP 20
+\fBin=\fP
+Input image file - must be an PV \fIimage(5NEMO)\fP with position
+along the 1st axis, and velocity along the 2nd. Units are not
+important, however, the position axis should be centered on
+the center of the galaxy to distinguish the receding and approaching 
+side.
+.TP
+\fBeta=\fP
+[0..1] weight factor for I_max adding to I_lc
+.TP
+\fBilc=\fP
+Lowest Contour value. Normally taken as something like 3 times the noise level. [0]
+.TP
+\fBsign=-1|1\fP
+Designtes rotation of the galaxy. This is only important for tracing the 'right'
+part of the PV diagram. sign=1 is meant for PV diagrams where the approaching
+side is for positive positions. By using the "wrong" value of sign you can
+find out something about the radial extent of the tracer, as for large
+radii this would cause small values of dV/dR. [Default: 1]
+.TP
+\fBsigma=\fP
+Velocity dispersion correction factor. This includes both the observational
+resolution as well as the velocity dispersion of the tracer component that is
+being observed. [Default: 0]
+.TP
+\fBclip=\fP
+Clipping values. If value(s) given, signal will be clipped as follows:
+if one value given, clipping occurs between -clip and clip. If two numbers
+given, clipping occurs between clip(1) and clip(2). Default: None
+.TP
+\fBvsys=0\fP
+Systemic velocity of the galaxy.
+Since the velocity axis (assumed to be the 2nd or Y-axis), this number
+is simply subtraced from each velocity determination. [Default: 0]
+.TP
+\fBinc=90\fP
+Inclination of the galaxy. Each rotation speed is corrected by sin(inc).
+[Default: 90]
+.SH OUTPUT
+Output of the program will be a table, with various derived velocities
+as function of position along the P axis in the PV-diagram. The following
+columns are returned:
+.PP
+.nf
+.ta +0.5i
+1	position
+2	envelope tracing (corrected with vsys, sini, and sigma)
+3	first moment (sum(I*v)/sum(I))
+3	velocity of peak signal
+5	velocity of peak of parabolic fit of 3 points at peak signal
+.fi
+.SH SEE ALSO
+rotcur(1NEMO), ccdvel(1NEMO), snapgrid(1NEMO)
+.SH FILES
+.nf
+.ta +1i
+src/image/rotcur	sources
+.fi
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+05-May-01	V1.0 Created	PJT
+.fi
