@@ -32,7 +32,7 @@ string defv[] = {
     "fit=line\n         fitmode (line, plane, poly, gauss, exp)",
     "order=2\n		Order of plane/poly fit",
     "out=\n             output file for some fit modes",
-    "nsigma=-1\n        ** delete points more than nsigma away?",
+    "nsigma=-1\n        delete points more than nsigma away?",
     "par=\n             initial estimates of parameters (p0,p1,p2,...)",
     "free=\n            free(1) or fixed(0) parameters? [1,1,1,....]",
     "load=\n            If used, uses this dynamic object function (full path)",
@@ -42,7 +42,7 @@ string defv[] = {
     "lab=\n             Mixing parameter for nllsqfit",
     "itmax=50\n         Maximum number of allowed nllsqfit iterations",
     "numrec=f\n         Try the numrec routine instead?",
-    "VERSION=1.3\n      21-nov-02 PJT",
+    "VERSION=1.4\n      21-nov-02 PJT",
     NULL
 };
 
@@ -56,6 +56,7 @@ string usage="a non-linear least square fitting program for tabular data";
 
 #define MAXCOL 10
 #define MAXPAR 10
+#define MAXSIG 10
 
 typedef struct column {
     int maxdat;     /* allocated length of data */          /* not used */
@@ -75,7 +76,8 @@ stream instr, outstr;       /* input / output file */
 
 int    nmax;                /* allocated space */
 int    npt;                 /* actual number of points from table */
-real   nsigma;              /* fractional sigma removal */
+real   nsigma[MAXSIG];      /* fractional sigma removals */
+int    msigma;              /* max number of iterations in nsigma removals */
 real   tol = -1;            /* tolerance for M-L convergence, if used */ 
 real   lab = -1;            /* mixing parameter for M-L convergence, if used  */
 int    itmax;               /* max. number of iterations */
@@ -300,7 +302,7 @@ setparams()
     itmax = getiparam("itmax");
     
     method = getparam("fit");
-    nsigma = getdparam("nsigma");
+    msigma = nemoinpd(getparam("nsigma"),nsigma,MAXSIG);
     order = getiparam("order");
     if (order<0) error("order=%d of %s cannot be negative",order,method);
 
@@ -389,6 +391,7 @@ read_data()
        
     if (npt==0) error("No data");
 }
+
 
 load_function(string fname,string method)
 {
@@ -475,6 +478,31 @@ do_function_test(string xvals)
 
 
 
+int remove_data(real *x, int nx, real *y, real *dy, real *d, int npt, real nsigma) 
+{
+  int i, j;
+  real sigma, s;
+
+  if (nsigma <= 0.0) return npt;           /* pass data through unchanged */
+
+  for(i=0, sigma=0.0; i<npt; i++)
+    sigma += sqr(d[i]);
+  sigma /= (real) npt;
+  sigma = nsigma*sqrt(sigma);
+  for (i=0, j=0; i<npt; i++) {             /* loop over data, shift data in arrays */
+    s = ABS(d[i]);
+    if (s > sigma) continue;
+    x[j] = x[i];
+    y[j] = y[i];
+    if (dy) dy[j] = dy[i];
+    j++;
+  }
+  dprintf(0,"%d/%d points outside %g*sigma (%g)\n",npt-j,npt,nsigma,sigma);
+  return j;
+}
+
+
+
 /*
  * LINE:     y = a + b * x
  *    See also: poly(order=1)
@@ -483,7 +511,7 @@ do_function_test(string xvals)
 do_line()
 {
   real *x, *y, *dy, *d;
-  int i,j, nrt, mpar[2];
+  int i,j, nrt, npt1, iter, mpar[2];
   real fpar[2], epar[2], sigma, s;
   int lpar = 2;
     
@@ -505,36 +533,30 @@ do_line()
   fitfunc = func_line;
   fitderv = derv_line;
 
-  nrt = (*my_nllsqfit)(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
-  if (nsigma > 0) {
-    for(i=0, sigma=0.0; i<npt; i++)
-      sigma += sqr(d[i]);
-    sigma /= (real) npt;
-    sigma = nsigma*sqrt(sigma);
-    for (i=0, j=0; i<npt; i++) {
-      s = ABS(d[i]);
-      if (s > sigma) continue;
-      x[j] = x[i];
-      y[j] = y[i];
-      if (dy) dy[j] = dy[i];
-      j++;
-    }
-    dprintf(0,"%d/%d points outside %g*sigma (%g)\n",npt-j,npt,nsigma,sigma);
-    npt = j;
+  for (iter=0; iter<=msigma; iter++) {
     nrt = (*my_nllsqfit)(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
+    if (nrt==-2)
+      warning("No free parameters");
+    else if (nrt<0)
+      error("Bad fit, nrt=%d",nrt);
+    printf("nrt=%d\n",nrt);
+    printf("Fitting a+bx:  \na= %g %g \nb= %g %g\n", fpar[0],epar[0],fpar[1],epar[1]);
+
+    npt1 = remove_data(x,1,y,dy,d,npt,nsigma[iter]);
+#if 0
+    if (npt1 == npt) iter=msigma+1;       /* signal early bailout */
+#else
+    if (npt1 == npt) break;
+#endif
+    npt = npt1;
   }
-  printf("nrt=%d\n",nrt);
-  printf("Fitting a+bx:  \na= %g %g \nb= %g %g\n", fpar[0],epar[0],fpar[1],epar[1]);
-  if (nrt==-2)
-    warning("No free parameters");
-  else if (nrt<0)
-    error("Bad fit, nrt=%d",nrt);
 
   if (outstr)
     for (i=0; i<npt; i++)
       fprintf(outstr,"%g %g %g\n",x[i],y[i],d[i]);
 
 }
+
 
 /*
  * PLANE:       y = b_0 + b_1 * x_1 + b_2 * x_2 + ... + b_n * x_n
@@ -751,8 +773,8 @@ do_poly()
 do_arm()
 {
   real *x, *y, *dy, *d;
-  int i,j, nrt, mpar[3];
-  real fpar[3], epar[3],amp,pha,amperr,phaerr,sigma,s;
+  int i,j, nrt, npt1, iter, mpar[3];
+  real fpar[3], epar[3],amp,pha,amperr,phaerr;
   int lpar = 3;
     
   if (nxcol < 1) error("nxcol=%d",nxcol);
@@ -773,44 +795,36 @@ do_arm()
   fitfunc = func_arm;
   fitderv = derv_arm;
 
-  nrt = (*my_nllsqfit)(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
-  if (nsigma > 0.0) {
-    for(i=0, sigma=0.0; i<npt; i++)
-      sigma += sqr(d[i]);
-    sigma /= (real) npt;
-    sigma = nsigma*sqrt(sigma);
-    for (i=0, j=0; i<npt; i++) {
-      s = ABS(d[i]);
-      if (s > sigma) continue;
-      x[j] = x[i];
-      y[j] = y[i];
-      if (dy) dy[j] = dy[i];
-      j++;
-    }
-    dprintf(0,"%d/%d points outside %g*sigma (%g)\n",npt-j,npt,nsigma,sigma);
-    npt = j;
+  
+  for (iter=0; iter<=msigma; iter++) {
     nrt = (*my_nllsqfit)(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
-  }
-  printf("nrt=%d\n",nrt);
+    if (nrt==-2)
+      warning("No free parameters");
+    else if (nrt<0)
+      error("Bad fit, nrt=%d",nrt);
+    
+    printf("nrt=%d\n",nrt);
 #ifdef PHASEAMP
-  printf("Fitting a+b.cos(x-c)/DPR:  \na= %g %g \nb= %g %g\nc= %g %g\n", 
+    printf("Fitting a+b.cos(x-c)/DPR:  \na= %g %g \nb= %g %g\nc= %g %g\n", 
 	 fpar[0],epar[0],fpar[1],epar[1],fpar[2],epar[2]);
 #else
-  printf("Fitting a + c.cos(x/DPR) + s.cos(y/DPR): [x now in degrees]  \na= %g %g \nc= %g %g\ns= %g %g\n", 
+    printf("Fitting a + c.cos(x/DPR) + s.cos(y/DPR): [x now in degrees]  \na= %g %g \nc= %g %g\ns= %g %g\n", 
 	 fpar[0],epar[0],fpar[1],epar[1],fpar[2],epar[2]);
-  printf("Converting to amp/phase: (Fitting as a + amp.cos((x-pha)/DPR)\n");
-  amp = sqrt(sqr(fpar[1])+sqr(fpar[2]));
-  pha = atan2(fpar[2],fpar[1])*DPR;
-  amperr = sqrt(sqr(fpar[1]*epar[1]) + sqr(fpar[2]*epar[2]))/amp;
-  phaerr = sqrt(sqr(fpar[1]*epar[2]) + sqr(fpar[2]*epar[1]))/(amp*amp)*DPR;
-  printf("amp= %g %g\n",amp,amperr);
-  printf("pha= %g %g\n",pha,phaerr);
-
+    printf("Converting to amp/phase: (Fitting as a + amp.cos((x-pha)/DPR)\n");
+    amp = sqrt(sqr(fpar[1])+sqr(fpar[2]));
+    pha = atan2(fpar[2],fpar[1])*DPR;
+    amperr = sqrt(sqr(fpar[1]*epar[1]) + sqr(fpar[2]*epar[2]))/amp;
+    phaerr = sqrt(sqr(fpar[1]*epar[2]) + sqr(fpar[2]*epar[1]))/(amp*amp)*DPR;
+    printf("amp= %g %g\n",amp,amperr);
+    printf("pha= %g %g\n",pha,phaerr);
 #endif
-  if (nrt==-2)
-    warning("No free parameters");
-  else if (nrt<0)
-    error("Bad fit, nrt=%d",nrt);
+
+    npt1 = remove_data(x,1,y,dy,d,npt,nsigma[iter]);
+    if (npt1 == npt) iter=msigma+1;       /* signal early bailout */
+    npt = npt1;
+  }
+
+
 
   if (outstr)
     for (i=0; i<npt; i++)
