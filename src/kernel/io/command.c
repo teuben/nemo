@@ -1,8 +1,6 @@
 /*
  * COMMAND:   interactive command parser
  *
- *  #define's
- *  READLINE:      use GNU readline (-lreadline)      
  *  MIR_READLINE:  use miriad's save/load feature (not implemented)
  *
  */
@@ -15,8 +13,6 @@ extern string *burststring(string,string);
 extern void freestrings(string *);
 
 #define VALID_TYPES "irs."
-
-#define READLINE 1 
 
 static int todo_readline=0;
 static char prompt[64];
@@ -31,7 +27,7 @@ command *command_init(string name)
   c = (command *) allocate(sizeof(command));
   c->name = strdup(name);
   c->ncmd = 0;
-#if (READLINE)
+#ifdef HAVE_LIBREADLINE
     dprintf(0,"[readline library installed]\n");
 #endif
 #if (MIR_READLINE==1)
@@ -95,7 +91,7 @@ string *command_get(command *c)
   sprintf(prompt,"%s> ",c->name);
   
  again:
-#if (READLINE==1)
+#ifdef HAVE_LIBREADLINE
   for(;;) {
     if ((s=readline(prompt)) != (char *)NULL) {
       /* stripwhite(s); */
@@ -166,7 +162,7 @@ string *command_get(command *c)
       return argv;         /* return this argv[] vector to the user */
     }
   }
-  warning("%s: not a valid command",argv[0]);
+  warning("%s: not a valid command, try '?'",argv[0]);
   freestrings(argv);
   goto again;
 }

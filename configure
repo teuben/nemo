@@ -312,7 +312,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS NEMO NEMOHOST NEMO_LIBS NEMO_CFLAGS NEMO_FFLAGS WARNING NEMOVER CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP EGREP CXX CXXFLAGS ac_ct_CXX AWK INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA LN_S SET_MAKE RANLIB ac_ct_RANLIB X_CFLAGS X_PRE_LIBS X_LIBS X_EXTRA_LIBS XLIBS XINCS GLLIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os F77 FFLAGS ac_ct_F77 FLIBS PGPLOT_DIR LOADOBJ_MACH LOADOBJ_LIBS MATH_LIBS HDF_INC HDF_LIB CFITSIO_INC CFITSIO_LIB PVM_LIB PVM_INC MIRIAD_INC MIRIAD_LIB GSL_CONFIG GSL_CFLAGS GSL_LIBS TCL_CFLAGS TCL_LIBS LIBOBJS YAPP_NAME YAPP_LIBS YAPP_DEF LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS NEMO NEMOHOST NEMO_LIBS NEMO_CFLAGS NEMO_FFLAGS WARNING NEMOVER CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP EGREP CXX CXXFLAGS ac_ct_CXX AWK INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA LN_S SET_MAKE RANLIB ac_ct_RANLIB X_CFLAGS X_PRE_LIBS X_LIBS X_EXTRA_LIBS XLIBS XINCS GLLIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os F77 FFLAGS ac_ct_F77 FLIBS PGPLOT_DIR LOADOBJ_MACH LOADOBJ_LIBS MATH_LIBS HDF_INC HDF_LIB CFITSIO_INC CFITSIO_LIB PVM_LIB PVM_INC MIRIAD_INC MIRIAD_LIB GSL_CONFIG GSL_CFLAGS GSL_LIBS TCL_CFLAGS TCL_LIBS RDL_LIBS LIBOBJS YAPP_NAME YAPP_LIBS YAPP_DEF LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -9162,6 +9162,392 @@ fi
 
 
 
+unset tcap
+for termlib in ncurses curses termcap terminfo termlib; do
+    as_ac_Lib=`echo "ac_cv_lib_${termlib}''_tputs" | $as_tr_sh`
+echo "$as_me:$LINENO: checking for tputs in -l${termlib}" >&5
+echo $ECHO_N "checking for tputs in -l${termlib}... $ECHO_C" >&6
+if eval "test \"\${$as_ac_Lib+set}\" = set"; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-l${termlib}  $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char tputs ();
+int
+main ()
+{
+tputs ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  eval "$as_ac_Lib=yes"
+else
+  echo "$as_me: failed program was:" >&5
+cat conftest.$ac_ext >&5
+eval "$as_ac_Lib=no"
+fi
+rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+echo "$as_me:$LINENO: result: `eval echo '${'$as_ac_Lib'}'`" >&5
+echo "${ECHO_T}`eval echo '${'$as_ac_Lib'}'`" >&6
+if test `eval echo '${'$as_ac_Lib'}'` = yes; then
+  tcap="-l$termlib"
+fi
+
+    test -n "$tcap" && break
+done
+RDL_LIBS=""
+if test "${ac_cv_header_readline_history_h+set}" = set; then
+  echo "$as_me:$LINENO: checking for readline/history.h" >&5
+echo $ECHO_N "checking for readline/history.h... $ECHO_C" >&6
+if test "${ac_cv_header_readline_history_h+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+fi
+echo "$as_me:$LINENO: result: $ac_cv_header_readline_history_h" >&5
+echo "${ECHO_T}$ac_cv_header_readline_history_h" >&6
+else
+  # Is the header compilable?
+echo "$as_me:$LINENO: checking readline/history.h usability" >&5
+echo $ECHO_N "checking readline/history.h usability... $ECHO_C" >&6
+cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
+$ac_includes_default
+#include <readline/history.h>
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_header_compiler=yes
+else
+  echo "$as_me: failed program was:" >&5
+cat conftest.$ac_ext >&5
+ac_header_compiler=no
+fi
+rm -f conftest.$ac_objext conftest.$ac_ext
+echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
+echo "${ECHO_T}$ac_header_compiler" >&6
+
+# Is the header present?
+echo "$as_me:$LINENO: checking readline/history.h presence" >&5
+echo $ECHO_N "checking readline/history.h presence... $ECHO_C" >&6
+cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
+#include <readline/history.h>
+_ACEOF
+if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
+  (eval $ac_cpp conftest.$ac_ext) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } >/dev/null; then
+  if test -s conftest.err; then
+    ac_cpp_err=$ac_c_preproc_warn_flag
+  else
+    ac_cpp_err=
+  fi
+else
+  ac_cpp_err=yes
+fi
+if test -z "$ac_cpp_err"; then
+  ac_header_preproc=yes
+else
+  echo "$as_me: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  ac_header_preproc=no
+fi
+rm -f conftest.err conftest.$ac_ext
+echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
+echo "${ECHO_T}$ac_header_preproc" >&6
+
+# So?  What about this header?
+case $ac_header_compiler:$ac_header_preproc in
+  yes:no )
+    { echo "$as_me:$LINENO: WARNING: readline/history.h: accepted by the compiler, rejected by the preprocessor!" >&5
+echo "$as_me: WARNING: readline/history.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
+    { echo "$as_me:$LINENO: WARNING: readline/history.h: proceeding with the preprocessor's result" >&5
+echo "$as_me: WARNING: readline/history.h: proceeding with the preprocessor's result" >&2;};;
+  no:yes )
+    { echo "$as_me:$LINENO: WARNING: readline/history.h: present but cannot be compiled" >&5
+echo "$as_me: WARNING: readline/history.h: present but cannot be compiled" >&2;}
+    { echo "$as_me:$LINENO: WARNING: readline/history.h: check for missing prerequisite headers?" >&5
+echo "$as_me: WARNING: readline/history.h: check for missing prerequisite headers?" >&2;}
+    { echo "$as_me:$LINENO: WARNING: readline/history.h: proceeding with the preprocessor's result" >&5
+echo "$as_me: WARNING: readline/history.h: proceeding with the preprocessor's result" >&2;};;
+esac
+echo "$as_me:$LINENO: checking for readline/history.h" >&5
+echo $ECHO_N "checking for readline/history.h... $ECHO_C" >&6
+if test "${ac_cv_header_readline_history_h+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_cv_header_readline_history_h=$ac_header_preproc
+fi
+echo "$as_me:$LINENO: result: $ac_cv_header_readline_history_h" >&5
+echo "${ECHO_T}$ac_cv_header_readline_history_h" >&6
+
+fi
+if test $ac_cv_header_readline_history_h = yes; then
+  echo "$as_me:$LINENO: checking for append_history in -lhistory" >&5
+echo $ECHO_N "checking for append_history in -lhistory... $ECHO_C" >&6
+if test "${ac_cv_lib_history_append_history+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lhistory  $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char append_history ();
+int
+main ()
+{
+append_history ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_lib_history_append_history=yes
+else
+  echo "$as_me: failed program was:" >&5
+cat conftest.$ac_ext >&5
+ac_cv_lib_history_append_history=no
+fi
+rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+echo "$as_me:$LINENO: result: $ac_cv_lib_history_append_history" >&5
+echo "${ECHO_T}$ac_cv_lib_history_append_history" >&6
+if test $ac_cv_lib_history_append_history = yes; then
+
+           RDL_LIBS="-lhistory"
+           cat >>confdefs.h <<\_ACEOF
+#define HAVE_LIBHISTORY 1
+_ACEOF
+
+fi
+
+fi
+
+
+if test "${ac_cv_header_readline_readline_h+set}" = set; then
+  echo "$as_me:$LINENO: checking for readline/readline.h" >&5
+echo $ECHO_N "checking for readline/readline.h... $ECHO_C" >&6
+if test "${ac_cv_header_readline_readline_h+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+fi
+echo "$as_me:$LINENO: result: $ac_cv_header_readline_readline_h" >&5
+echo "${ECHO_T}$ac_cv_header_readline_readline_h" >&6
+else
+  # Is the header compilable?
+echo "$as_me:$LINENO: checking readline/readline.h usability" >&5
+echo $ECHO_N "checking readline/readline.h usability... $ECHO_C" >&6
+cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
+$ac_includes_default
+#include <readline/readline.h>
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_header_compiler=yes
+else
+  echo "$as_me: failed program was:" >&5
+cat conftest.$ac_ext >&5
+ac_header_compiler=no
+fi
+rm -f conftest.$ac_objext conftest.$ac_ext
+echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
+echo "${ECHO_T}$ac_header_compiler" >&6
+
+# Is the header present?
+echo "$as_me:$LINENO: checking readline/readline.h presence" >&5
+echo $ECHO_N "checking readline/readline.h presence... $ECHO_C" >&6
+cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
+#include <readline/readline.h>
+_ACEOF
+if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
+  (eval $ac_cpp conftest.$ac_ext) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } >/dev/null; then
+  if test -s conftest.err; then
+    ac_cpp_err=$ac_c_preproc_warn_flag
+  else
+    ac_cpp_err=
+  fi
+else
+  ac_cpp_err=yes
+fi
+if test -z "$ac_cpp_err"; then
+  ac_header_preproc=yes
+else
+  echo "$as_me: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  ac_header_preproc=no
+fi
+rm -f conftest.err conftest.$ac_ext
+echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
+echo "${ECHO_T}$ac_header_preproc" >&6
+
+# So?  What about this header?
+case $ac_header_compiler:$ac_header_preproc in
+  yes:no )
+    { echo "$as_me:$LINENO: WARNING: readline/readline.h: accepted by the compiler, rejected by the preprocessor!" >&5
+echo "$as_me: WARNING: readline/readline.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
+    { echo "$as_me:$LINENO: WARNING: readline/readline.h: proceeding with the preprocessor's result" >&5
+echo "$as_me: WARNING: readline/readline.h: proceeding with the preprocessor's result" >&2;};;
+  no:yes )
+    { echo "$as_me:$LINENO: WARNING: readline/readline.h: present but cannot be compiled" >&5
+echo "$as_me: WARNING: readline/readline.h: present but cannot be compiled" >&2;}
+    { echo "$as_me:$LINENO: WARNING: readline/readline.h: check for missing prerequisite headers?" >&5
+echo "$as_me: WARNING: readline/readline.h: check for missing prerequisite headers?" >&2;}
+    { echo "$as_me:$LINENO: WARNING: readline/readline.h: proceeding with the preprocessor's result" >&5
+echo "$as_me: WARNING: readline/readline.h: proceeding with the preprocessor's result" >&2;};;
+esac
+echo "$as_me:$LINENO: checking for readline/readline.h" >&5
+echo $ECHO_N "checking for readline/readline.h... $ECHO_C" >&6
+if test "${ac_cv_header_readline_readline_h+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_cv_header_readline_readline_h=$ac_header_preproc
+fi
+echo "$as_me:$LINENO: result: $ac_cv_header_readline_readline_h" >&5
+echo "${ECHO_T}$ac_cv_header_readline_readline_h" >&6
+
+fi
+if test $ac_cv_header_readline_readline_h = yes; then
+  echo "$as_me:$LINENO: checking for readline in -lreadline" >&5
+echo $ECHO_N "checking for readline in -lreadline... $ECHO_C" >&6
+if test "${ac_cv_lib_readline_readline+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lreadline $tcap $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char readline ();
+int
+main ()
+{
+readline ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_lib_readline_readline=yes
+else
+  echo "$as_me: failed program was:" >&5
+cat conftest.$ac_ext >&5
+ac_cv_lib_readline_readline=no
+fi
+rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+echo "$as_me:$LINENO: result: $ac_cv_lib_readline_readline" >&5
+echo "${ECHO_T}$ac_cv_lib_readline_readline" >&6
+if test $ac_cv_lib_readline_readline = yes; then
+
+           RDL_LIBS="-lreadline $RDL_LIBS $tcap"
+           cat >>confdefs.h <<\_ACEOF
+#define HAVE_LIBREADLINE 1
+_ACEOF
+
+fi
+
+fi
+
+
+
 
 
 echo "$as_me:$LINENO: checking for DFSDndataset in -ldf" >&5
@@ -9219,65 +9605,6 @@ if test $ac_cv_lib_df_DFSDndataset = yes; then
 _ACEOF
 
   LIBS="-ldf $LIBS"
-
-fi
-
-
-echo "$as_me:$LINENO: checking for read_history in -lreadline" >&5
-echo $ECHO_N "checking for read_history in -lreadline... $ECHO_C" >&6
-if test "${ac_cv_lib_readline_read_history+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lreadline  $LIBS"
-cat >conftest.$ac_ext <<_ACEOF
-#line $LINENO "configure"
-#include "confdefs.h"
-
-/* Override any gcc2 internal prototype to avoid an error.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-/* We use char because int might match the return type of a gcc2
-   builtin and then its argument prototype would still apply.  */
-char read_history ();
-int
-main ()
-{
-read_history ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-         { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  ac_cv_lib_readline_read_history=yes
-else
-  echo "$as_me: failed program was:" >&5
-cat conftest.$ac_ext >&5
-ac_cv_lib_readline_read_history=no
-fi
-rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-echo "$as_me:$LINENO: result: $ac_cv_lib_readline_read_history" >&5
-echo "${ECHO_T}$ac_cv_lib_readline_read_history" >&6
-if test $ac_cv_lib_readline_read_history = yes; then
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBREADLINE 1
-_ACEOF
-
-  LIBS="-lreadline $LIBS"
 
 fi
 
@@ -13388,6 +13715,7 @@ s,@GSL_CFLAGS@,$GSL_CFLAGS,;t t
 s,@GSL_LIBS@,$GSL_LIBS,;t t
 s,@TCL_CFLAGS@,$TCL_CFLAGS,;t t
 s,@TCL_LIBS@,$TCL_LIBS,;t t
+s,@RDL_LIBS@,$RDL_LIBS,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t
 s,@YAPP_NAME@,$YAPP_NAME,;t t
 s,@YAPP_LIBS@,$YAPP_LIBS,;t t

@@ -1,6 +1,7 @@
 dnl Process this file with autoconf to produce a new configure script
 dnl if it has changed. See also the Makefile in $NEMO  how to automate
 dnl this.
+dnl http://www-106.ibm.com/developerworks/linux/library/l-debcon.html
 dnl ---------------------------------------------------------------------------------
 
 AC_MSG_CHECKING([NEMO config])
@@ -633,10 +634,26 @@ dnl AC_CHECK_FUNC(_doprnt, AC_DEFINE(HAVE_DOPRNT))
 dnl fi
 dnl ---------------------------------------------------------------------
 
+dnl check for terminal library. this is a very cool solution
+dnl from octave's configure.in
 
+unset tcap
+for termlib in ncurses curses termcap terminfo termlib; do
+    AC_CHECK_LIB(${termlib}, tputs, [tcap="-l$termlib"])
+    test -n "$tcap" && break
+done
+RDL_LIBS=""
+AC_CHECK_HEADER(readline/history.h,
+    AC_CHECK_LIB(history, append_history,[
+           RDL_LIBS="-lhistory"
+           AC_DEFINE(HAVE_LIBHISTORY)]))
+AC_CHECK_HEADER(readline/readline.h,
+    AC_CHECK_LIB(readline, readline,[
+           RDL_LIBS="-lreadline $RDL_LIBS $tcap"
+           AC_DEFINE(HAVE_LIBREADLINE)], , $tcap))
+AC_SUBST(RDL_LIBS)
 
 AC_CHECK_LIB(df, DFSDndataset)
-AC_CHECK_LIB(readline, read_history)
 AC_CHECK_LIB(vogl, foreground)
 AC_CHECK_LIB(z, inflate)
 AC_CHECK_LIB(c, strtoll)
