@@ -1,14 +1,21 @@
 #! /bin/csh
-#   nemo_start:
-#   source this file to start NEMO. You can override root and architecture
-#   by presetting NEMO and NEMOHOST, but it is probably not a good idea
-#   to do this?
-# -- do don't edit, overwritten by configure
 #
+#   @WARNING@
+#
+#   nemo_start:
+#
+#   source this file to start NEMO. You can override root and architecture
+#   by presetting NEMO and NEMOHOST. In particular, NEMOHOST has been known
+#   to give problems (see also fakehost/truehost targets in Makefile) 
+#
+
 if ($?NEMO == 0) then
    # this is where this version of NEMO was originally installed
    # but has long as $NEMO is predefined before this routine, you
    # should be able to re-locate it anywhere
    setenv NEMO @NEMO@
+   # un-comment next line if NEMOHOST gives you problems in detection mode
+   # setenv NEMOHOST @NEMOHOST@
 endif
+
 source $NEMO/nemo.rc
