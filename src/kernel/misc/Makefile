@@ -135,10 +135,10 @@ vectmath_f.o: vectmath.h vectmath.c
 # Nostandard targets
 
 nemoinp: nemoinp.c
-	$(CC) $(CFLAGS) -o nemoinp nemoinp.c -DTOOLBOX $(L) -lm
+	$(CC) $(CFLAGS) -o nemoinp nemoinp.c -DTOOLBOX $(NEMO_LIBS) -lm
 
 layout: layout.c
-	$(CC) $(CFLAGS) -o layout layout.c -DTOOLBOX $(L) $(YAPPLIB) -lm
+	$(CC) $(CFLAGS) -o layout layout.c -DTOOLBOX $(NEMO_LIBS) $(YAPPLIB) -lm
 
 obj: $(OBJFILES)
 bin: $(BINFILES)
