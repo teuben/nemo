@@ -1,0 +1,16 @@
+%N stoo
+%D convert a snapshot file to an orbit
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man stoo' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	snapshot input file name [???]
+%A out
+	orbit output file name [???]
+%A ibody
+	which particle to take [0]
+%A nsteps
+	alloctation default [1]
+%A VERSION
+	18-apr-95 PJT [2.6]
