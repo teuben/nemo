@@ -1,0 +1,7 @@
+!  merge this in your X resources if you need a square display:
+!  		xrdb -merge ptriple.xrdb
+! All PGPLOT /xs or /xw windows:
+pgxwin.Win.geometry:	512x512+0+0
+! Or single selected ones:
+! pgxwin.win1.geometry:	384x384+0+0
+
