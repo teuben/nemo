@@ -1,0 +1,139 @@
+
+
+# handy for recursion
+@SET_MAKE@
+
+
+# HDF library
+
+#HDFINC=-I/local/include -I/usr/local/include -I/usr/include/hdf
+#
+#HDFLIB=-ldf -lz
+#  Might need to add something like:   -L/local/lib -R /local/lib
+#  if your solaris system requires that
+#HDFLIB=-ldf -ljpeg -lz
+
+HDFINC = @HDF_INC@
+HDFLIB = @HDF_LIB@
+
+
+# CFITSIO library
+
+FITSIOINC = @FITSIO_INC@
+FITSIOLIB = @FITSIO_LIB@
+
+
+# LOADOBJ stuff; -DMACH=.....
+
+MACH = @LOADOBJ_MACH@
+
+
+# 	Fortran: you need FLIBS if you link using 'cc' and link 
+#	with (certain) fortran. See also F77_FUNC macros (config.h)
+#	if you need to use fortran names from your C code, or if you
+#	need to define C code that is to be called from Fortran
+FLIBS = @FLIBS@
+FORLIBS = @FLIBS@
+
+# Solaris 2.6: -L/opt/SUNWspro/lib -lF77 -lM77 -lV77 -lsunmath  
+
+## C compiler:
+#set opts="-rdynamic -ansi -fwritable-strings -Wconversion -Wnested-externs"
+#exec gcc -fPIC -Dlinux -DSYSV -I$NEMOINC -I$NEMOLIB -L$NEMOLIB $opts $* $link
+
+#NEMO_CFLAGS = -rdynamic -ansi -fwritable-strings -Wconversion -Wnested-externs -I$(NEMOINC) -I$(NEMOLIB) 
+NEMO_CFLAGS = -rdynamic -fwritable-strings -I$(NEMOINC) -I$(NEMOLIB) @LOADOBJ_MACH@
+NEMO_FFLAGS = -fno-globals 
+NEMO_LDFLAGS = 
+NEMO_LIBS = -L$(NEMOLIB) -lnemo @LOADOBJ_LIBS@ -lm
+
+#			some graphics libraries:
+GLLIBS = @GLLIBS@
+XLIBS = @XLIBS@
+
+#			generic compile flags for C,Fortran,Linker
+CFLAGS = @CFLAGS@ $(NEMO_CFLAGS)
+FFLAGS = @FFLAGS@ $(NEMO_FFLAGS)
+LDFLAGS = @LDFLAGS@ $(NEMO_LDFLAGS)
+
+RANLIB = @RANLIB@
+
+#			miriad
+MIRIAD_INC = @MIRIAD_INC@
+MIRIAD_LIB = @MIRIAD_LIB@
+
+
+
+# -----------------------------------------------------------------------------
+#  rules
+
+.SUFFIXES:  .so .doc
+
+#	NEMO compile rules
+
+.o.a:
+	@echo "***Skipping ar for $* at this stage"
+
+.c.o:
+	$(CC) $(CFLAGS) $(LOCAL_INC) -c $<
+
+.c.so:
+	$(CC) $(CFLAGS) $(LOCAL_INC) -c $<
+	ldso $*
+
+.f.so:
+	$(FC) $(FFLAGS) -c $<
+	ldso $*
+
+.c.a:
+	$(CC) $(CFLAGS) $(LOCAL_INC) -c $<
+
+.c:
+	$(CC) $(CFLAGS) $(LOCAL_INC) -o $* $*.c $(NEMO_LIBS) $(LOCAL_LIB) $(FORLIBS) $(EL)
+
+.o:
+	$(CC) $(CFLAGS) $(LOCAL_INC) -o $* $*.o $(NEMO_LIBS) $(LOCAL_LIB) $(FORLIBS) $(EL)
+
+
+# -----------------------------------------------------------------------------
+
+
+# some fortran code needs a REAL FUNCTIONS SECOND (e.g. scfm)
+# this macro should point to the .o file (if needed)
+# Sometimes it is FORLIBS, sometimes your etime.o or second.o
+
+# On Solaris you need second.o; Linux can keep it blank (it's in libg2c)
+# SECOND = $(NEMOLIB)/second.o
+
+
+makedefs_help:
+	@echo ========================================================================
+	@echo NEMOVER=@NEMOVER@
+	@echo CC=@CC@    CFLAGS=@CFLAGS@
+	@echo CPP=@CPP@  CPPFLAGS=@CPPFLAGS@
+	@echo CXX=@CXX@  CXXFLAGS=@CXXFLAGS@
+	@echo F77=@F77@	  FFLAGS=@FFLAGS@
+	@echo DEFS=@DEFS@
+	@echo LDFLAGS=@LDFLAGS@
+	@echo FC=@FC@
+	@echo LN_S=@LN_S@
+	@echo GLLIBS=@GLLIBS@
+	@echo XLIBS=@XLIBS@
+	@echo LIBS=@LIBS@
+	@echo RANLIB=@RANLIB@
+	@echo ========================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
