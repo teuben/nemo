@@ -1,0 +1,64 @@
+.TH HELLERSNAP 1NEMO "28 June 1998"
+.SH NAME
+hellersnap \- convert Heller's SPH dumps to snapshot
+.SH SYNOPSIS
+\fBhellersnap\fP [parameter=value]
+.SH DESCRIPTION
+Converts Clayton Heller's NBODY+SPH dump files  into standard 
+\fIsnapshot(5NEMO)\fP format.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input dump file. No default.
+.TP
+\fBout=\fP
+Output snapshot file. No default.
+.TP
+\fBheadline=\fP
+Random verbiage      
+.SH FORMAT
+Dump files are unformatted FORTRAN, that can also be inspected with NEMO's
+\fIunfio(1NEMO)\fP program. The following blocks are dumped:
+.nf
+    1. dmpindx,date,ndim,eqnindx,version,gamma,poly,lsfm    (64 bytes)
+    2. tframe,n1,n2 (16 bytes)
+    3. class(n0)
+    4. state(n0)
+    5. mass(n0)
+    6. x(n0)
+    7. y(n0)
+    8. z(n0)
+    9. vx(n0)
+    10. vy(n0)
+    11. vz(n0)
+        
+        12. eps(n0)    : dmpindx > 1
+        13. phi(n0)
+        14. ax(n0)
+        15. ay(n0)
+        16. az(n0)
+
+        17. u(n2)      : dmpindx > 2 && n2 > 0
+        18. d(n2)
+        19. divv(n2)
+        20. udot1(n2)
+        21. udot2(n2)
+        22. h(n2)
+
+.fi
+.SH SEE ALSO
+unfio(1NEMO), snapshot(5NEMO)
+.SH FILES
+.ta +2i
+.nf
+src/nbody/io	hellersnap.c
+.fi
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+26-jun-98	V1.0 Created	NEMO
+.fi
