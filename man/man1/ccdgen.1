@@ -1,6 +1,6 @@
 .TH CCDGEN 1NEMO "5 January 2005"
 .SH NAME
-ccdgen \- image creation with objects
+ccdgen \- create or add objects to an image
 .SH SYNOPSIS
 \fBccdgen\fP [parameter=value]
 .SH DESCRIPTION
@@ -8,7 +8,7 @@ ccdgen \- image creation with objects
 adding simple parameterized two-dimensional objects. For arbitrary
 expressions use \fIccdmath(1NEMO)\fP instead. 
 .PP
-An additional feature is that the objects can be added as if they are
+An odd feature is that the objects can be added as if they are
 in a "galactic" disk with given inclination and position angle. The
 default is a "face-on" view. No corrections for brightness
 due to inclination are made however.
@@ -58,15 +58,15 @@ Default: 0
 If set to true, the amplitude (always the first parameter in
 \fBspar\fP is interpreted as the total integrated intensity
 instead of the peak value of the object
-.TPtotflux
+.TP
 \fBcrpix=\fP
-Override/Set crpix (1,1,1) // ignored []  
+Override/Set crpix (1,1,1) 
 .TP
 \fBcrval=\fP
-Override/Set crval (0,0,0) // ignored []  
+Override/Set crval (0,0,0) 
 .TP
 \fBcdelt=\fP
-Override/Set cdelt (1,1,1) // ignored []  
+Override/Set cdelt (1,1,1) 
 .TP
 \fBseed=\fP
 Random seed [0]    
@@ -78,6 +78,7 @@ exp	A.exp(-r/h)	A,h
 gauss	A.exp(-r^2/(2h^2))	A,h
 bar	A.exp(-r/h)	A,h,e,b   (e=1-minor/major   b=bar position angle w.r.t. disk)
 noise	gaussian(m,s)	mean,sigma
+spiral  A.exp(-r/h)	A,h,k,p,r0,p0
 .fi 
 .SH EXAMPLES
 Here's how to make a barred galaxy:
@@ -94,6 +95,12 @@ ccdgen out=- object=exp spar=1,40/3600 pa=60 inc=45 size=256 cdelt=-1/3600,1/360
  ccdgen - - object=bar spar=10,6/3600,0.5,70 pa=60 inc=45 |\\
  ccdfits - bar.fits radecvel=t
 .fi
+.PP
+Spirals are a bit more complex: A and h are the usual peak and exponential scale-length.
+k is the wavenumber (related the pitch angles, see also \fImkspiral(1NEMO)\fP), 
+p controls the relative width of the spiral (assumed to be cos^2p, thus you 
+should set p>1), r0 the starting radius of the spiral (defaults to 0), and p0 the
+phase of the spiral at radius r0.
 .SH SEE ALSO
 ccdmath(1NEMO), image(5NEMO)
 .SH FILES
