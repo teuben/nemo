@@ -1,11 +1,12 @@
 .TH ERROR 3NEMO "5 March 1994"
 .SH NAME
-error, warning, recover, stop \- handle errors and warnings and system exit
+error, errorn, warning, recover, stop \- handle errors and warnings and system exit
 .SH SYNOPSIS
 .nf
 \fB#include <stdinc.h>\fP
 .PP
 \fBvoid error(string format, ... )\fP
+\fBvoid errorn(string format, ... )\fP
 \fBvoid warning(string format, arg ... )\fP
 \fBvoid recover(proc cleanup)\fP
 .fi
@@ -19,6 +20,10 @@ This functionality is
 similar to the \fIsignal(2)\fP concept. No arguments can
 be given to the \fBcleanup()\fP function. After \fIcleanup\fP
 has been called the program continues. (hmmm)
+.PP
+\fIerrorn\fP prints a descriptive message based on 
+an assumed last system error, as set by 
+errno (see also \fIerrno(3)\fP).
 .PP
 \fIwarning\fP prints out a warning string to \fIstderr\fP,
 but always continues the program.
@@ -48,4 +53,5 @@ xx-xxx-86	Created in the dark ages	Josh
 4-oct-90	Upgraded with warning() and recover()	Peter
 29-oct-90	abort for large enough debug_level	Peter
 5-mar-94	documented stop                     	peter
+8-dec-01	added errorn                      	peter
 .fi
