@@ -64,7 +64,16 @@
 
 #define ROUNDUP(a,b) ((b)*(((a)-1)/(b)+1))
 
-typedef long long int int8;
+#if SIZEOF_LONG_LONG==8
+typedef long long int8;         /* e.g. i386; sparc <= sol7; ppc ? */
+#elif SIZEOF_LONG==8
+typedef long int8;              /* e.g. alpha 64's */
+#elif SIZEOF_INT==8
+typedef int int8;               /* will never happen ? */
+#else
+#error "No 8 byte integer type?"
+#endif
+
 
 local char *fts_buffer = NULL; /* buffer for exact header in memory */
 local int  fts_buflen = 0;

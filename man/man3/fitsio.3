@@ -1,7 +1,7 @@
-.TH FITSIO 3NEMO "9 July 2000"
+.TH FITSIO 3NEMO "29 September 2001"
 .SH NAME
 fitopen, fitclose, fitread, fitwrite, fitsetpl, fitrdhdr, fitrdhdi,
-fitwrhdr, fitwrhdi, fitwrhdl, fitwrhda  \- simple fits I/O routines
+fitwrhdr, fitwrhdi, fitwrhdl, fitwrhda  \- simple image fits I/O routines
 .SH SYNOPSIS
 .nf
 .B
@@ -38,14 +38,17 @@ fitwrhdr, fitwrhdi, fitwrhdl, fitwrhda  \- simple fits I/O routines
 .SH DESCRIPTION
 A simple self-contained FITS-I/O library is offered here. The 
 routines write to
-\fIstderr\fP in case of errors. Most errors however will cause it to
+\fIstderr\fP in case of errors.  Fatal errors will cause it to
 call \fIexit(3)\fP. On input it does automatic data conversion to the host
-FLOAT datatype (although only BITPIX=16,32 and -32 can be read), but
+FLOAT datatype (although only BITPIX=16, 32 and -32 can be read ??), but
 forces the output to be in the IEEE format. (BITPIX=-32).
 .PP
 \fIfitopen()\fP opens a FITS file and readies it for i/o. The \fIname\fP
-contains the name of the file, \fIstatus\fP can be "\fBnew\fP"
-or "\fBold\fP", which are the fortran equivalents of \fIfopen()\fP's
+contains the name of the file, \fIstatus\fP can be "\fBnew\fP" 
+("\fBw\fP" also accepted)
+or "\fBold\fP"
+("\fBr\fP" also accepted),
+which are the fortran equivalents of \fIfopen()\fP's
 "w" and "r". \fInaxis\fP is always an input parameter
 and gives the (used/usable) length of the \fInsize\fP array: the
 \fInsize\fP array contains the length of each axis. When a fitsfile
@@ -105,7 +108,7 @@ the value (e.g. HISTORY and COMMENT).
 	\fIimage_value = fits_value * bscale + bzero\fP
 .fi
 If to be effective, they need to be called BEFORE fitopen. If called
-between \fIfitopen\fI and \fIfitwrite\fP it will not take into
+between \fIfitopen\fP and \fIfitwrite\fP it will not take into
 effect until the next \fIfitopen\fP.
 \fIfit_setblocksize()\fP can be used to choose another blocksize from the
 default 2880 bytes that FITS has defined. When a FITS file has been written
@@ -115,7 +118,7 @@ bytes.
 A simple basic FITS data structure (referred to as \fIfile\fP in the above
 SYNOPSIS) is used to communicate between different modules:
 .nf
-.ta +0.3i +1.5i
+.ta +0.5i +2.0i
 
 typedef struct { 
 	int ncards;	Current number of 80 column header cards
@@ -139,11 +142,11 @@ whistles and error checking, how a simple 2D data matrix can be
 read in:
 .nf
 .ta +0.5i +3.5i
-	char *file, *malloc();
+	char *file;
 	float *image, *ip;
 	int nx, ny, i, j, k, naxis[2];
 
-	file = \fIfitopen\fP("fits.dat","old",2,naxis); 	/* open */
+	file = \fIfitopen\fP("fits.dat","r",2,naxis);      	/* open */
 	nx = naxis[0];        	/* dimension in x */
 	ny = naxis[1];       	/* dimension in y */
 	image = (float *) malloc(nx*ny*sizeof(float));   	/* allocate */
@@ -160,13 +163,15 @@ Insane cases when e.g. NAXIS1=1 or 0 are not handled well.
 .PP
 Not so sure if defining FLOAT as double would work yet.
 .PP
-No BLANK value substitution. Doesn't work on machines which do not
-have the same host data format as FITS. Bob Sault has added the
-Miriad pack routines to his version of fitsio.c
+No BLANK value substitution. 
 .PP
-No provisions to read (or write) FITS files with multiple HDUs.
+No provisions to read (or write) FITS files with multiple HDUs. Use
+\fIscanfits(1NEMO)\fP to extract the required HDU.
+.SH CAVEATS
+"fitsio.h" is a poorly choosen name, as the name conflicts with at least one
+other package (Pence' cfitsio library).
 .SH SEE ALSO
-fits(3NEMO), fits(5NEMO)
+fits(3NEMO), fits(5NEMO), cfitsio
 .SH AUTHOR
 Bob Sault, Peter Teuben
 .SH FILES
@@ -174,7 +179,7 @@ Bob Sault, Peter Teuben
 .ta +1.5i
 ~/src/image/fits         fitsio.c, fitsio.h fitsio.3 (within NEMO)
 .fi
-.SH UPDATE HISTORY
+.SH HISTORY
 .nf
 .ta +1i +4i
 xx-jul-90       While sweating it out in India  RJS
@@ -183,4 +188,5 @@ xx-jul-90       While sweating it out in India  RJS
 12-sep-91	added fitexhd()            	PJT
 21-mar-00	fixed offset bug for raw cubes	PJT
 9-jul-00	fixed offset bug if fitsetpl called before fitwrite	PJT
+29-sep-01	added experimental BITPIX 64, removed some lies	PJT
 .fi

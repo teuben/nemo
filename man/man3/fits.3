@@ -1,4 +1,4 @@
-.TH FITS 3NEMO "23 May 1995"
+.TH FITS 3NEMO "29 September 2001"
 .SH NAME
 fts_rhead, fts_whead, fts_rdata, fts_wdata, fts_sdata, fts_zero, fts_dsize -
 fits I/O routines
@@ -86,7 +86,7 @@ whistles and error checking, how a simple data matrix can be read in:
 .PP
 The program \fIscanfits(1NEMO)\fP provides an excellent example how
 this package can be used. The program \fIccdfits(1NEMO)\fP is a more
-common example where \fIfits(3NEMO)\fP is sufficient.
+common example where \fIfitsio(3NEMO)\fP is sufficient.
 .SH SEE ALSO
 fseek(3), ftell(3), fitsio(3NEMO), scanfits(1NEMO), fitshead(3NEMO)
 .SH AUTHOR
@@ -101,8 +101,11 @@ Reading multiple open fits files in parallel has not been secured
 since there is only one slot for the memory copy of the FITS header.
 .PP
 No support for machines whos native format is not floating point
-IEEE and integer twos complement, although byte-swapping is supported.
-.SH UPDATE HISTORY
+IEEE and integer twos complement, although some byte-swapping is supported.
+.SH CAVEATS
+Poor support for endian swapping, current done when output requested,
+through internal show_X() functions
+.SH HISTORY
 .nf
 .ta +1i +4i
 xx-mar-90	created  	PJT
@@ -115,4 +118,6 @@ xx-mar-90	created  	PJT
 29-jun-94	added fts_rrow/wrow and keep track of all I/O	PJT
 7-oct-94	added argument to fts_cdata	PJT
 23-may-95	added argument to fts_chead and fts_thead	PJT
+29-sep-01	experimental 64 bitpix, removed some lies    	PJT
 .fi
+

@@ -2,7 +2,8 @@ DIR = src/image/fits
 BIN = ccdfits fitsccd scanfits fitsglue fitshead
 NEED = $(BIN) ccdmath ccdstat
 
-DATA = ccd.in ccd.out fits.in map001.fits map002.fits map003.fits cube.fits
+DATA = ccd.in ccd.out fits.in map001.fits map002.fits map003.fits cube.fits \
+	map004.fits  map004.ccd map004a.ccd 
 
 help:
 	@echo $(DIR)
@@ -15,12 +16,14 @@ clean:
 	@rm -f $(DATA)
 
 NBODY = 10
+FIE = 10*%x+sqrt(%y)
 
-all:	$(BIN)
+all:	$(BIN) bitpix64
 
 ccd.in:
 	@echo Creating $@
-	ccdmath out=ccd.in "fie=10*%x+sqrt(%y)"  size=10,10,1
+#	ccdmath out=ccd.in "fie=10*%x+sqrt(%y)"  size=10,10,1
+	ccdmath out=ccd.in "fie=$(FIE)"  size=10,10,1
 
 map001.fits:
 	ccdmath "" - "rang(0,1)" size=10,10,1 seed=1 | ccdfits - map001.fits
@@ -31,6 +34,12 @@ map002.fits:
 map003.fits:
 	ccdmath "" - "rang(0,1)" size=10,10,1 seed=3 | ccdfits - map003.fits
 
+bitpix64:
+	ccdmath "" map004.ccd "%x+%y" size=10,10,1 
+	ccdfits map004.ccd map004.fits bitpix=64
+	fitsccd map004.fits map004a.ccd
+	ccdmath map004a.ccd,map004.ccd - %1-%2 | ccdstat -
+
 ccdfits: ccd.in
 	@echo Running $@
 	ccdfits ccd.in fits.in
@@ -38,6 +47,7 @@ ccdfits: ccd.in
 fitsccd: ccdfits
 	@echo Running $@
 	fitsccd fits.in ccd.out
+	@echo Testing ccd-fits-ccd with "FIE=$(FIE)"
 	ccdmath ccd.in,ccd.out - %1-%2 | ccdstat -
 
 scanfits: ccdfits

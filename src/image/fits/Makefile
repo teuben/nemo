@@ -100,8 +100,17 @@ fitsgids: fitsgids.c look_nemo.c
 sdsfits: sdsfits.c 
 	$(CC) $(CFLAGS) -o sdsfits sdsfits.c $(HDFLIB) $(NEMO_LIBS) $(EL)
 
+mkfits: mkfits.c 
+	$(CC) $(CFLAGS) -o mkfits mkfits.c $(NEMO_LIBS) $(CFITSIOLIB) $(EL)
+
+ccdfitsio: ccdfitsio.c 
+	$(CC) $(CFLAGS) -o ccdfitsio ccdfitsio.c $(NEMO_LIBS) $(CFITSIOLIB) $(EL)
+
 
 fitstiff: fitstiff.c 
 	$(CC) $(CFLAGS) -o fitstiff fitstiff.c \
 		 $(NEMO_LIBS) $(EL) -ltiff
 
+
+ccd_cfitsio.o:		ccd_cfitsio.c
+	$(CC) $(OPT) $(CFITSIOINC) -c $*.c

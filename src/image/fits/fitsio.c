@@ -51,9 +51,9 @@
 /*     7-aug-01 fixed bug rounding bug getting offset in reading        */
 /*              (redefined f->ncards now to be 1-based upon reading too)*/
 /*    28-sep-01 added bitpix=64 support - portability not solved yet    */
+/*              seems bitpix=-64 is working ok                          */
 /* ToDo:                                                                */
 /*  - BLANK substitution                                                */
-/*  - finish bitpix=-64 support						*/
 /************************************************************************/
 
 #include <stdinc.h>
@@ -68,10 +68,18 @@
  * autoconf generated include files)
  */
 
-#if 1
-typedef long long int int8;         /* e.g. i386; 
+#if 0
+#define DEBUG 1
+#endif
+
+#if SIZEOF_LONG_LONG==8
+typedef long long int8;         /* e.g. i386; sparc <= sol7; ppc ? */
+#elif SIZEOF_LONG==8
+typedef long int8;              /* e.g. alpha 64's */
+#elif SIZEOF_INT==8
+typedef int int8;               /* will never happen ? */
 #else
-typedef long int8;                  /* e.g. alpha 64's */
+#error "No 8 byte integer type?"
 #endif
 
 local int  fitsrch    (FITS *, char *, char *);
@@ -91,7 +99,7 @@ local void fitpad     (FITS *, int, char),
            fitcvt_rf  (FLOAT *, char *, int),
            fitcvt_rd  (DOUBLE *, char *, int);
 
-local char *buf1=NULL, *buf2=NULL;	/* local buffers for conversions */
+local char *buf1=NULL, *buf2=NULL;	/* local conversion buffers */
 local int maxdim=0;
 local int w_bitpix = -32;               /* see: fit_setbitpix()    */
 local FLOAT w_bscale = 1.0;             /* see: fit_setscale()     */
@@ -156,7 +164,7 @@ FITS *fitopen(string name,string status,int naxis,int *nsize)
       case   8:    f->type = TYPE_8INT;   break;
       case  16:    f->type = TYPE_16INT;  break;
       case  32:    f->type = TYPE_32INT;  break;
-      case  64:    f->type = TYPE_64INT;  break;
+      case  64:    f->type = TYPE_64INT;  break;  /* experimental */
       case -32:    f->type = TYPE_FLOAT;  break;
       case -64:    f->type = TYPE_DOUBLE; break;
       default:
@@ -202,7 +210,7 @@ FITS *fitopen(string name,string status,int naxis,int *nsize)
     if(bitpix ==   8)      f->type = TYPE_8INT;
     else if(bitpix == 16)  f->type = TYPE_16INT;
     else if(bitpix ==  32) f->type = TYPE_32INT;
-    else if(bitpix ==  64) f->type = TYPE_64INT;
+    else if(bitpix ==  64) f->type = TYPE_64INT;  /* experimental */
     else if(bitpix == -32) f->type = TYPE_FLOAT;
     else if(bitpix == -64) f->type = TYPE_DOUBLE;
     else
@@ -325,7 +333,7 @@ void fitread(FITS *file, int j, FLOAT *data)
     fitcvt_32i(buf1,jdat,f->axes[0]);
     for(i=0; i < f->axes[0]; i++) *data++ = bscale * *jdat++ + bzero;
   } else if(f->type == TYPE_64INT){
-#if 0
+#ifdef DEBUG
     kdat = (int8 *)buf1;
     /* print out raw data, will be in the wrong endian on e.g. i386 */
     /* also note %lld format may not be supported on all versions of printf.. */
@@ -333,7 +341,7 @@ void fitread(FITS *file, int j, FLOAT *data)
 #endif
     kdat = (int8 *)buf2;
     fitcvt_64i(buf1,kdat,f->axes[0]);
-#if 0
+#ifdef DEBUG
     kdat = (int8 *)buf2;
     for(i=0; i < f->axes[0]; i++) dprintf(1,"DEBUG2: %d -> %lld\n",i,kdat[i]);
 #endif

@@ -1,40 +1,45 @@
-.TH FITS 5NEMO "3 July 1994" 
+.TH FITS 5NEMO "29 September 2001"
 .SH NAME
 fits \- standard astronomical data interchange format 
 .SH DESCRIPTION
-\fIfits\fP is \fBTHE\fP standard format for the interchange
+\fIFITS\fP (Flexible Image/Information Transport System)
+is \fBTHE\fP standard format for the interchange
 of astronomical images and other digital arrays (ascii and binary 
-tables, random groups).
+tables, random groups, etc.).
 A \fIfits\fP file consists of several, not necceseraly related,
 Header-Data-Units (HDUs), of which the Data part may be absent.
 .PP
 The header has an unlimited number of parameters in the form
 \fIkey=value / comment\fP that may be associated with 
 and describe the data. The header consists of 
-ASCII records of 80 characters (without line separators) each; 
+ASCII records of 80 characters (with optional line separators) each; 
 both header and data have a blocksize of a 2880 bytes (or a small integer (1-10)
 factor thereof - the blocking factor). All major astronomical
 data reduction packages (AIPS, GIPSY, MIRIAD, IRAF, MIDAS etc.).
 can import/export their data from/to FITS format in some extent. 
-However, there are some FITS ``dialects''.
+However, there are some known FITS ``dialects''.
 .PP
-The FITS format was originally described in a classic paper by D.H. Wells, 
-E.W. Greisen and R.H. Harten in \fIAstronomy and Astrophysics 
-Supplement Series, Vol. 44 (1981), pp. 363-370\fP.
+The FITS format was originally described in a classic paper 
+by D.H. Wells, E.W. Greisen and R.H. Harten in 
+\fIAstronomy and Astrophysics Supplement Series, Vol. 44 (1981), pp. 363-370\fP.
 A number of addenda have been published since then, which describe
 various extensions to the format. There is often information
-in the manuals of packages like AIPS and IRAF.
+in the manuals of packages like AIPS and IRAF. An updated version
+is published by
+R. Hanish \fIet al.\fP in 
+\fIAstronomy and Astrophysics, Vol. 3xx (2001), pp. 3xx-3xx\fP.
 .PP
 NEMO has two library routines available to process \fIfits\fP
 files: \fIfits(3NEMO)\fP and \fIfitsio(3NEMO)\fP, the latter
-more specialized to read and write images.
+more specialized to read and write images and derived (and compatible
+with) from the MIRIAD fitsio interface.
 .SH KEYWORDS
 The following header keywords describe the most important
 facts about the data (or at least enables a reader to skip data)
 .nf
 .ta +1i
 SIMPLE	T (standard FITS file)
-BITPIX	Number of bits per datum [choice of 8, 16, 32, -32, -64)
+BITPIX	Number of bits per datum [choice of 8, 16, 32, -32, -64, (experimental 64)
 	(-32,-64 IEEE floating point, 8 unsigned, 16,32 twos-complement ints)
 NAXIS	total number of axes (0, 1, 2, ... 999) in cube
 NAXISn	size of a particular axis (n=1 through NAXIS) in cube
@@ -110,4 +115,5 @@ fitsio(3NEMO), fits(3NEMO), image(5NEMO)
 30-may-88	written  	PJT
 20-mar-90	Nemo's FITS I/O library is being tested  	PJT
 3-jul-94	doc updated with PCOUNT/GCOUNT	PJT
+28-sep-01	experimental bitpix 64 added	PJT
 .fi
