@@ -7,6 +7,7 @@
  *      
  *
  *	21-jun-00	PJT @ AMNH - figuring out pieces of star encounter histo
+ *       1-mar-03       fixed file_lines
  *
  */
 
@@ -25,7 +26,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "count=f\n           Count occurance of all stars?",
     "delete=0\n		 Iteration count to delete obvious combo/split pairs?",
     "nmax=10000\n        maximum number of data to be read if pipe",
-    "VERSION=1.0\n	 22-jun-00 PJT",
+    "VERSION=1.0a\n	 1-mar-03 PJT",
     NULL
 };
 
@@ -92,7 +93,7 @@ void setparams(void)
     Qcount = getbparam("count");
     iter_del = getiparam("delete");
     
-    nmax = file_lines(input,getiparam("nmax"));
+    nmax = nemo_file_lines(input,getiparam("nmax"));
     dprintf(0,"Allocated %d lines for table\n",nmax);
 
 }
