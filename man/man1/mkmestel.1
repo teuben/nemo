@@ -1,0 +1,44 @@
+.TH MKMESTEL 1NEMO "5 March 1990"
+.SH NAME
+mkmestel \- make a finite Mestel disk
+.SH SYNOPSIS
+\fBmkmestel out=\fPsnapshot [parameters=values ...]
+.SH DESCRIPTION
+\fImkmestel\fP creates a Mestel disk (cumulative mass increases
+linearly with radius). Particles orbit clockwise, and
+can be given some initial velocity dispersion through the user
+supplied Toomre parameter.
+.PP
+\fIsnapmass(1NEMO)\fP and \fIsnapcenter(1NEMO)\fP have to be used if
+for some reason the user want finite mass particles and a perfectly
+centered set of particles.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 25
+\fBout=\fIout_file\fP
+The data are written to this file in \fISnapShot(5NEMO)\fP 
+format [no default].
+.TP
+\fBrcut=\fImax_disk_radius\fP
+Cutoff radius of disk. [Default: \fB1\fP].
+.TP
+\fBndisk=\fInum_bodies\fP
+Number of disk particles [default: \fB2048\fP]
+.TP
+\fBQtoomre=\fIQ\fP
+Toomre's stability parameter, which scales the 
+velocity dispersion in the disk. [\fB1\fP]
+.TP
+\fBseed=\fIrandom_seed\fP
+Use random number seed. [default: \fB0\fP].
+.TP
+\fBheadline=\fImessage\fP
+Text headline for output file [default: not used].
+.SH "SEE ALSO"
+mktestdisk(1NEMO), mkbaredisk(1NEMO), snapmass(1NEMO), snapcenter(1NEMO)
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.5i
+5-mar-90	V1.0 Created	PJT
+.fi
