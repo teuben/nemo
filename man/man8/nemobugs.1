@@ -1,0 +1,29 @@
+.TH BUGS 1NEMO "6 March 1989"
+.SH NAME
+bugs \- show NEMO's bug reports
+.SH SYNOPSIS
+\fBbugs [subject]\fP
+.SH DESCRIPTION
+\fBbugs\fP is an interactive shell script which allows you to peek into NEMO's
+bug reports file. The default is the file to which latest general
+one-line bug reports are added. An optional filename \fBfile\fP will 
+allow you to peek into
+various files which live in $NEMOPATH/bugs directory.
+.PP
+The program \fIbug(1NEMO)\fP can be used to add one line comments to
+the bug description file.
+.SH SEE ALSO
+bug(1NEMO)
+.SH FILES
+.nf
+.ta +3.0i
+~/src/nemo/news   	sources
+~/bugs             	bug reports directory
+.fi
+.SH AUTHOR
+Peter Teuben
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.5i
+6-Mar-89	created         	PJT
+.fi

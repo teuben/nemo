@@ -1,0 +1,48 @@
+.TH NEWS 1NEMO "6 March 1989"
+.SH NAME
+news \- shell scripts to interact with nemo's news facility
+.SH SYNOPSIS
+\fBnews [folder]\fP
+.SH DESCRIPTION
+\fBnews\fP is a shell script which allows you to peek into NEMO's
+private mail folder (usually lives in /usr/spool/mail/nemo, assuming
+nemo's username is nemo). An optional foldername \fBfolder\fP will 
+allow you to peek into
+various folders which live in $NEMOPATH/mail.
+.SH "SENDING MAIL TO OTHER SITES"
+Use the standard UNIX \fImail(1)\fP to send mail to all other
+sites connected with your current one. Check the $NEMOPATH/.forward
+file to see which sites are supported. 
+.PP
+A potential very dangerous situation has been taken care of by the
+\fImail(1)\fP utility: two users with a .forward file which forwards
+the mail to the other user could in princeple flood the filesystem,
+however (at least SUN's \fImail(1)\fP) stops the forwarding when
+it sees  that it has to forward the mail to the one who send it!
+.SH BUGS
+The NEMO manager should never empty its system mailbox, otherwise
+the default protection (0600 = RW for user only) will prevent other
+users to read news next time around. Reset it with
+"\fBchmod 644 /usr/spool/mail/nemo\fP".
+.PP
+Potential danger with multiple .forward files, see section SENDING MAIL
+TO OTHER SITES above.
+.SH BUGS - FUTURE
+Currently the mail  faclity has been turned off - the repository directory
+is now $NEMO/news. Perhaps the mail directory will disappear.
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +3.0i
+~/src/nemo/news  	sources
+~/news              	repository
+~/mail          	old repository
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.5i
+24-Jun-87	created                                 	PJT
+2-Jun-88	renamed to news using standard unix mail	PJT
+6-Mar-89	changed again - now scanning ~/news      	PJT	
+.fi
