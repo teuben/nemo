@@ -1,0 +1,68 @@
+.TH MKNSH96 1NEMO "3 May 2002"
+.SH NAME
+mknsh96 \- set up a Kuzmin disk in an external potential (NSH96)
+.SH SYNOPSIS
+\fBmknsh96\fP [parameter=value]
+.SH DESCRIPTION
+\fBmknsh96\fP sets up a 2-dimensional Kuzmin disk in an external potential
+as prescribed in the paper \fBbla bla\fP by
+Norman, Sellwood & Hasan (1996, ApJ 462, 114).
+If you follow the NSH96 paper, the NEMO potential 'nsh96'
+(\fBpotname=nsh96\fP) should be used appropriately (see EXAMPLES below).
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBout=\fP
+output file name, in standard snapshot format. 
+No default.
+.TP 20
+\fBnbody=\fP
+number of particles 
+[1024]    
+.TP 20
+\fBpotname=\fP
+External potential []     
+.TP 20
+\fBpotpars=\fP
+Potential parameters []     
+.TP 20
+\fBpotfile=\fP
+Potential data []     
+.TP 20
+\fBQtoomre=\fP
+Toomre's Q parameter [1.0]    
+.TP 20
+\fBgamma=\fP
+fudge factor for v_eff(r) if > 0 [1.0]
+.TP 20
+\fBseed=\fP
+usual random number seed [0]   
+.TP 20
+\fBrmax=\fP
+Cutoff radius [6]     
+.TP 20
+\fBtime=\fP
+tag a time, normally skipped [0.0]  
+.TP 20
+\fBtab=\fP
+table output also? [f]    
+.TP 20
+\fBzerocm=\fP
+center the snapshot? [t]    
+.TP 20
+\fBheadline=\fP
+text headline for output []   
+.SH EXAMPLES
+The usage of the standard \fBnsh96\fP potential is slighly tricky, since
+the potential of the self-consistent part (the Kuzmin disk) can (and should) be
+used in this routine, but not in the integrator.
+.SH SEE ALSO
+snapshot(5NEMO), mkexpdisk(1NEMO), mkdisk(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+3-may-02	V1.0 Created	PJT
+.fi
