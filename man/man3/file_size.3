@@ -1,0 +1,51 @@
+.TH FILE_SIZE 3NEMO "7 June 1996"
+.SH NAME
+file_size, file_time, file_lines \- get size (in bytes/lines) of a file
+.SH SYNOPSIS
+.nf
+.B int file_size(name)
+.B char *name;
+.PP
+.B int file_time(name)
+.B char *name;
+.PP
+.B int file_lines(name, deflen)
+.B char *name
+.B int deflen
+.fi
+.SH DESCRIPTION
+\fIfile_size\fP can be used to check for the existence of
+a file. It returns, as a non-negative number, the file size in
+bytes. If the file is not found, or an error was detected 
+in the \fIstat(2)\fP call, -1 is returned and errno is set
+to indicate the error. The file must be a regular file, not part
+of a pipe \fIstdin/out\fP stream.
+.PP
+\fIfile_time\fP is simulat to \fIfile_size\fP., except it returns
+the age of a file in seconds, since 1970.0 in the  usual fashion
+(see also \fIstat(2)\fP).
+.PP
+\fIfile_lines\fP counts the number of lines in a text file but 
+counting the number of occurences of a newline. This routine
+will hence not work correctly on MSDOS. Again, the file must 
+be a proper file, as detected with \fIisatty(3)\fP.
+.SH BUGS
+If \fIstropen(3NEMO)\fP is used to open the file, \fIisatty(3)\fP
+does not properly report the file status anymore.
+.SH SEE ALSO
+stat(2), isatty(3), stropen(3NEMO)
+.SH FILES
+.nf
+.ta +2.0i
+~/src/kernel/core  	file_size.c file_size.3
+.fi
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1i +4i
+8-feb-90	V1.0 created for SUN's	PJT
+25-nov-90	V1.1 doc written for earlier released file_lines  	PJT
+7-jun-96	documented outstanding (nov93) argument change in file_lines	pjt
+24-oct-97	added file_time()	PJT
+.fi
