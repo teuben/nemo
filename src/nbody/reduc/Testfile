@@ -1,6 +1,6 @@
 DIR = src/nbody/reduc
-BIN = snapplot snapdiagplot snapplotv snapmradii radprof real
-NEED = $(BIN) hackcode1 mkplummer tabplot snapfour
+BIN = snapplot snapdiagplot snapplotv snapmradii radprof real snapfit
+NEED = $(BIN) hackcode1 mkplummer tabplot snapfour snapgrid snaprotate
 
 help:
 	@echo $(DIR)
@@ -10,7 +10,7 @@ need:
 
 clean:
 	@echo Cleaning $(DIR)
-	@rm -f snap.in hack.out hack2.out
+	@rm -f snap.in cube.in hack.out hack2.out
 
 NBODY = 10
 
@@ -19,6 +19,10 @@ all:	snap.in hack.out $(BIN)
 snap.in:
 	@echo Creating $@
 	mkplummer snap.in $(NBODY) seed=123
+
+cube.in: snap.in
+	@echo Creating $@
+	snaprotate snap.in - 30,45,20 zyz | snapgrid - cube.in nx=32 ny=32 nz=32 zrange=-2:2
 
 hack.out: snap.in
 	@echo Creating $@
@@ -54,3 +58,6 @@ real:
 	@echo Checking f2d for snapfour
 	mkplummer - 100 | csf - - convert=f2d | snapfour - radii=0:2
 
+snapfit: cube.in hack.out
+	@echo Running $@
+	snapfit hack.out cube.in theta1=-30:30:10 theta2=-30:30:10
