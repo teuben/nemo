@@ -18,6 +18,9 @@ code. For large N, the computational costs are found to scale almost linearly
 with N, which can also be supported by a theoretical argument, and the
 advantage over the tree code increases with ever larger N.
 .PP
+The (NEMO) programs \fIaddgravity\fP and  \fIgetgravity\fP can be used
+to obtain \fIfalcON\fP forces without the need of going through the integrator.
+.PP
 For a detailed description of usage, see also the \fIUser Guide for falcON\fP.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
@@ -172,5 +175,6 @@ Walter Dehnen
 16-nov-01	1.0.15: aligned man page with actual code	PJT
 4-jun-02	added theta=, and corrected log/linear statement	PJT
 13-jun-02	1.2: imported into NEMO 	PJT
-2jan-03		1.5: renamed YancNemo to gyrfalcON, (WD version 091202)	PJT
+2-jan-03		1.5: renamed YancNemo to gyrfalcON, (WD version 091202) 	PJT
+28-jul-03	1.6.1: also for gcc 3.3 (WD version 280703)	PJT
 .fi
