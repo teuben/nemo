@@ -352,8 +352,8 @@ RaiseException (int errNumber)
 
     nemoError = errNumber;	// save system error; restore for processing
     				// by Nemo user
-#if 0
-    nemoErrorAction.sa_handler = (sa_handler)ExceptionHandler;
+#if 1
+    nemoErrorAction.sa_handler = ExceptionHandler;
     sigfillset (&sigMask);
     nemoErrorAction.sa_mask = sigMask;
     nemoErrorAction.sa_flags = SA_ONESHOT;
