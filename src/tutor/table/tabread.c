@@ -7,11 +7,6 @@
 
 #include <nemo.h>
 
-
-#define MAXCOL  256
-#define MAXCOORD 16
-
-
 string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "in=???\n            Input file name (table)",
     "xcol=1,2\n		 x coordinate column(s) to read",
@@ -22,12 +17,12 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
 
 string usage = "tutorial: example table reader";
 
+#define MAXCOL  16
 
 nemo_main()
 {
-  real xmin, xmax;
-  real *coldat[1+MAXCOL];
-  int i, j, nxcol, colnr[1+MAXCOL], nmax, npt;
+  int i, j, nxcol, colnr[MAXCOL], nmax, npt;
+  real xmin, xmax, *coldat[MAXCOL];
   string input;
   stream instr;
 
@@ -35,14 +30,15 @@ nemo_main()
 
   nmax = nemo_file_lines(input,getiparam("nmax"));
   dprintf(0,"Allocated %d lines for table\n",nmax);
+  instr = stropen(input,"r");
 
   nxcol = nemoinpi(getparam("xcol"),colnr,MAXCOL);
   if (nxcol < 1) error("Error parsing xcol=%s",getparam("xcol"));
 
-  dprintf(0,"Reading columns: ");
+  dprintf(0,"Reading %d column(s): ",nxcol);
   for (j=0; j<nxcol; j++) {
     dprintf(0," %d",colnr[j]);
-    coldat[j] = (real *) allocate(sizeof(real) * (nmax+1));
+    coldat[j] = (real *) allocate(sizeof(real)*nmax);
   }
   dprintf(0,"\n");
 
@@ -62,6 +58,7 @@ nemo_main()
       xmin=MIN(coldat[j][i],xmin);
     }
   }
+  dprintf(0,"MinMax in the data: %g %g\n",xmin,xmax);
 }
 
 
