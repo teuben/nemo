@@ -101,10 +101,10 @@ sdsfits: sdsfits.c
 	$(CC) $(CFLAGS) -o sdsfits sdsfits.c $(HDFLIB) $(NEMO_LIBS) $(EL)
 
 mkfits: mkfits.c 
-	$(CC) $(CFLAGS) -o mkfits mkfits.c $(NEMO_LIBS) $(CFITSIOLIB) $(EL)
+	$(CC) $(CFLAGS) -o mkfits mkfits.c $(NEMO_LIBS) $(CFITSIO_LIB) $(EL)
 
 ccdfitsio: ccdfitsio.c 
-	$(CC) $(CFLAGS) -o ccdfitsio ccdfitsio.c $(NEMO_LIBS) $(CFITSIOLIB) $(EL)
+	$(CC) $(CFLAGS) -o ccdfitsio ccdfitsio.c $(NEMO_LIBS) $(CFITSIO_LIB) $(EL)
 
 
 fitstiff: fitstiff.c 
