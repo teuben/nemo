@@ -34,6 +34,7 @@ void inipotential (int *npar, double *par, string name)
     if (n>0) omega = par[0];
     na = n-1;
     if (na < 1) error("polynomial potential: needs coefficients");
+    if (na > MAXPOW) error("polynomial potential: MAXPOW=%d, you requested %d",MAXPOW,na);
     for (i=0; i<na; i++)
       a[i] = par[i+1];
     dprintf(0,"polynomial: Found %d polynomial coefficients %g .. %g\n",
