@@ -1,0 +1,59 @@
+DIR = src/image/fits
+BIN = ccdfits fitsccd scanfits fitsglue fitshead
+NEED = $(BIN) ccdmath ccdstat
+
+DATA = ccd.in ccd.out fits.in map001.fits map002.fits map003.fits cube.fits
+
+help:
+	@echo $(DIR)
+
+need:
+	@echo $(NEED)
+
+clean:
+	@echo Cleaning $(DIR)
+	@rm -f $(DATA)
+
+NBODY = 10
+
+all:	$(BIN)
+
+ccd.in:
+	@echo Creating $@
+	ccdmath out=ccd.in "fie=10*%x+sqrt(%y)"  size=10,10,1
+
+map001.fits:
+	ccdmath "" - "rang(0,1)" size=10,10,1 seed=1 | ccdfits - map001.fits
+
+map002.fits:
+	ccdmath "" - "rang(0,1)" size=10,10,1 seed=2 | ccdfits - map002.fits
+
+map003.fits:
+	ccdmath "" - "rang(0,1)" size=10,10,1 seed=3 | ccdfits - map003.fits
+
+ccdfits: ccd.in
+	@echo Running $@
+	ccdfits ccd.in fits.in
+
+fitsccd: ccdfits
+	@echo Running $@
+	fitsccd fits.in ccd.out
+	ccdmath ccd.in,ccd.out - %1-%2 | ccdstat -
+
+scanfits: ccdfits
+	@echo Running $@
+	scanfits fits.in	
+
+
+fitsglue: map001.fits map002.fits map003.fits
+	@echo Running $@
+	fitsglue map%03d.fits cube.fits inlist=1:3
+	fitshead map001.fits | grep DATA
+	fitshead map002.fits | grep DATA
+	fitshead map003.fits | grep DATA
+	fitshead cube.fits | grep DATA
+	
+
+fitshead: map003.fits
+	@echo Running $@
+	fitshead map003.fits
