@@ -2,6 +2,10 @@
 #
 #  5-mar-2004     for nbody-school            PJT 
 #
+#  Removed any local directory called manybody and installs a new manybody tree
+#  The default should be executed from the home directory, such that
+#  MANYBODY becomes $HOME/manybody
+#
 #  Example usage:
 #  CHARA:: manybody_pkg/install_manybody cvs=0 pkg=`pwd`/manybody_pkg > & LOG1
 #  
@@ -9,7 +13,7 @@
 set pgplot=1
 set gcc=0
 set falcon=1
-set cvs=1
+set cvs=0
 
 #  things that have versions
 set gsl=1.4
@@ -100,8 +104,8 @@ popd
 
 # GalactICS
 pushd $NEMO/usr/kuijken/GalactICS-exp/src
-   make all
-   cp dbh genhalo genbulge gendisk diskdf tobinary getfreqs dbh vcirc plothalo plotforce mergerv $NEMOBIN
+   make -f Makefile.nemo all install
+   mknemo mkkd95
 popd
 
 #                                                   GSL
@@ -109,18 +113,20 @@ pushd $NEMO/local
   tar zxf $pkg/gsl/gsl-$gsl.tar.gz
   cd gsl-$gsl
   ./configure --prefix=$NEMO/host/$NEMOHOST  >& install.log
-  if ($status) echo ERRORS 1 compiling partiview, check install.log
+  if ($status) echo ERRORS 1 compiling gsl, check install.log
   make >>& install.log
-  if ($status) echo ERRORS 2 compiling partiview, check install.log
+  if ($status) echo ERRORS 2 compiling gsl, check install.log
   make install >>& install.log
-  if ($status) echo ERRORS 3 compiling partiview, check install.log
+  if ($status) echo ERRORS 3 compiling gsl, check install.log
 popd
 
 #                                                   fewbody, glstarview
 pushd $NEMO/usr/fregeau
   tar zxf $pkg/fregeau/fewbody-$fewbody.tar.gz
   pushd fewbody-$fewbody
-    make all  LIBFLAGS="-L$NEMOLIB -lgsl -lgslcblas -lm" >& install.log
+    make all  \
+	CFLAGS="-I$NEMO/host/include -Wall -O3" \
+	LIBFLAGS="-L$NEMOLIB -lgsl -lgslcblas -lm" >& install.log
     if ($status) echo ERRORS compiling fewbody, check install.log
     cp cluster triplebin binbin binsingle $NEMOBIN
   popd
@@ -137,7 +143,7 @@ pushd $NEMO/usr
   tar zxf $pkg/hnbody/hnbody-$hnbody.tgz
   ln -s hnbody-$hnbody hnbody
   foreach bin (ems  hnarith  hnbody  hnconvert  hnpaste  hnstats  hntac  lunar)
-    ln -s `pwd`/hnbody-$hnbody/bin/$bin $NEMOBIN
+    mv hnbody/bin/$bin $NEMOBIN
   end
 popd
 
@@ -146,5 +152,8 @@ pushd $NEMOBIN
   tar zxf $pkg/ds9/ds9.tar.gz
 popd
 
+#  xyz stuff
+$NEMO/src/scripts/nemo.vogl
+mknemo xyzview
 
 # -- end of install --
