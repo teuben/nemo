@@ -1,17 +1,25 @@
 /*
    Wrapper routines for the public routines in the NEMO fitsio.c file,
    which call the CFITSIO library.
+   This code also includes the old MIRIAD-style code if CFITSIO is not
+   available
 
    16-dec-2001     Original version sketched                 Bill Pence
    18-dec-2001     finalized with the new fitsio_nemo.h      Peter Teuben
+   19-dec-2001     shift over comment/history cards          PJT
 */
 
 #include <nemo.h>
-#include "fitsio_nemo.h"  /* this is the CFITSIO include file, not the NEMO file */
+#include "fitsio_nemo.h" 
+
+#ifndef HAVE_LIBCFITSIO
+#include "fitsio.c"       /* old self-coded MIRIAD-style interface */
+#else
 
 static int w_bitpix = -32;               /* see: fit_setbitpix()    */
 static FLOAT w_bscale = 1.0;             /* see: fit_setscale()     */
 static FLOAT w_bzero = 0.0;              /* see: fit_setscale()     */
+static char *cvs_id="$Id$ fitsio_nemo.c";
 
 /**********************************************************************/
 FITS *fitopen (char *name, char *status, int naxis, int *nsize)
@@ -315,12 +323,19 @@ void fitwra(FITS *file, string keyword, string value)
 {
     char tmp[100], card[100];
     int status = 0, dummy;
-
+#if 0
     strcpy(tmp, keyword);   /* construct template */
     strcat(tmp, " ");
     strncat(tmp, value, 70);
-    fits_parse_template(tmp, card, &dummy, &status); /* make formated card */
+    fits_parse_template(tmp, card, &dummy, &status); /* make formatted card */
     card[8] = ' ';   /* erase the '=' from the card, if present */
+#else
+    if ((int)strlen(value)>71) {
+      strncpy(tmp,value,80);  /* chop */
+      sprintf(card,"%-8s %-71s",keyword,tmp);
+    } else
+      sprintf(card,"%-8s %s",keyword,value);
+#endif
     fits_write_record(file, card, &status);
     return;
 }
@@ -398,3 +413,4 @@ int  fitexhd (FITS *fptr, char *keyword)
         return 1;   /* keyword does exist */
 }
 /**********************************************************************/
+#endif

@@ -61,6 +61,8 @@
 #include <ctype.h>
 #include <fitsio_nemo.h>
 
+static char *cvs_id="$Id$ fitsio.c";
+
 /* 
  * this next #def's obviously needs to be refined. 
  * This file can currently only deal with simple endian swappings

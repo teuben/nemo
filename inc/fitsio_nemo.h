@@ -14,6 +14,8 @@
  *              and added optional CFITSIO wrapper stuff
  */
 
+#ifndef _fitsio_nemo_h
+#define _fitsio_nemo_h
 
 #ifdef HAVE_LIBCFITSIO
 #include <cfitsio/fitsio.h>
@@ -116,3 +118,4 @@ void fit_setbitpix (int),
      fit_setscale  (FLOAT, FLOAT),
      fit_setblocksize (int);
 int  fitexhd (FITS *, string);
+#endif
