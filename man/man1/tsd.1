@@ -1,0 +1,67 @@
+.TH TSD 1NEMO "27 August 1996"
+.SH NAME
+tsd \- scan and report contents of an HDF SDS
+.SH SYNOPSIS
+\fBtsd\fP [parameter=value]
+.SH DESCRIPTION
+\fBtsd\fP lists the contents of a HDF Scientific Data Set (SDS). 
+It can optionally print
+out all data (in ascii format) to a specified file, with or without
+the coordinate system.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP\fIhdf_file\fP
+Input file (HDF FLOAT32 SDS), no default.
+.TP
+\fBout=\fP\fItable_file\fP
+Optional output file in which an ascii dump of all SDS, printed side by side,
+are dumped. Obviously in this mode all datasets must have the same rank and
+shape. Currently all the data are accumulated in memory.
+Default: none.
+.TP
+\fBformat=\fP\fIC_fmt\fP
+\fIprintf(3)\fP-like Format specification, in which the data will be dumped
+if output requested. A space is automatically inserted between the columns
+representing an SDS.
+[Default: \fB%g\fP].
+.TP
+\fBcoord=t|f\fP
+Print out the coordinate system too? 
+[Default: \fBf\fP].
+.SH EXAMPLE
+.nf
+    % tsd hdf000bg
+Found 3 scientific data sets in /d/hdf000bg
+1: Y-VELOCITY AT TIME=0.00E+00(40,67) cm/sec  -> [2680 elements of type: 5 (FLOAT32)]
+2: Z-VELOCITY AT TIME=0.00E+00(40,67) cm/sec  -> [2680 elements of type: 5 (FLOAT32)]
+3: DENSITY AT TIME=0.00E+00(40,67) gms/cm**3  -> [2680 elements of type: 5 (FLOAT32)]
+.fi
+Note that the dimensions listed, (40,67) in the example above, are not
+the usual FORTRAN-convention. The last index (67) will be the one running
+fastest, i.e. data is stored (and dumped if requested) in 
+column-major mode. For example, in the FITS 
+conversion program (see \fIsdsfits(1NEMO)\fP) 
+the header is rearranged as to make it appear row-major, but the data is not.
+.SH LIMITATIONS
+If multiple SDS exist, they must all have the same shape (or at least
+have as much data as the first SDS in the file), otherwise un-allocated
+memory is being accessed. Error control in that case depends on the
+operating system.
+.PP
+If output (ascii) requested, all data from all SDS is allocated in memory.
+.PP
+The datatype of the SDS must be FLOAT32 (normally in fortran: \fIREAL*4\fP, 
+and in C: \fIfloat\fP)
+.SH SEE ALSO
+hdf(1), hdfls(1), fitssds(1NEMO), sdsfits(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+25-dec-94	V1.0 Created	PJT
+21-may-95	V1.1/2 fixed a bug, added new output features	PJT
+27-aug-96	V1.3 header output now to stderr (dprintf)	pjt
+.fi
