@@ -1,0 +1,76 @@
+.TH GETTAB 1NEMO "15 August 1992"
+.SH NAME
+gettab \- extract real table from a table
+.SH SYNOPSIS
+\fBgettab\fP \fBin=\fP\fIin_table\fP \fBout=\fP\fIout_table\fP   [parameter=value]
+.SH DESCRIPTION
+\fIgettab\fP extracts numeric portions of a table. A table can either be processed
+in free format (in which case only column numbers need to be given), or
+in fixed format (in which case the starting position and format specification
+need to be supplied).
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP\fIin_tab\fP
+Input (ascii) table, no default.
+.TP 20
+\fBout=\fP\fIout_tab\fP
+Output (ascii) table, no default.
+.TP 20
+\fBcolnr=\fP\fIc1,c2,...cN\fP
+Input column numbers to extract. Column numbers only need to be supplied
+in the free format case. \fBcolpos\fP and \fBcolfmt\fP are then ignored.
+Column numbers are numbered 1 through N, columns are separated by
+whitespace or a comma.
+If a 0 is specified, the return value is filled in with the line
+number from the input file, 1 being the first.
+Default: none.
+.TP 20
+\fBcolpos=\fP\fIi1,i2,...iL\fP
+Input column positions to extract in fixed format case.
+Column positions can be numbered 1 through the
+line length. This keyword is equivalent to the FITS
+\fBTBCOL\fP keyword.
+If a 0 is specified, the returned value is filled in with the line
+number from the input file, 1 being the first.
+Default: none.
+.TP 20
+\fBcolfmt=\fP\fIf1, f2...fL\fP
+Input format for fixed fmt case. Format specification can be in standard C
+\fIprintf\fP format, though a limited number of fortran format
+specifications are also understood (\fBF\fP\fIn.m\fP, \fBG\fP\fIn.m\fP)
+This keyword is equivalent to the FITS \fBTFORM\fP keyword.
+Default: none.
+.TP 20
+\fBfmt=\fP\fIout_fmt\fP
+Output format. All columns are currently printed using this format.
+[Default: \fB%g\fP].
+.TP 20
+\fBnmax=\fP\fImax_row\fP
+Maximum number of rows (data) to read. In reality this is a local buffer size,
+and tables with more than \fImax_row\fP can be comfortably read.
+[Default: \fB1000\fP]
+.SH EXAMPLE
+The following two examples extracts column 3 and 4 in free format, the first
+one using \fBgettab\fP, the second one using \fIawk\fP:
+.nf
+
+    1% \fIgettab in_tab out_tab 1,2\fP
+    2% \fIawk '{print $1,$2}' < in_tab > out_tab\fP
+
+.fi
+.SH SEE ALSO
+awk(1), table(3NEMO)
+.SH FILES
+.nf 
+.ta +2i
+~/src/kernel/tab	gettab.c
+.nf
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+06-Aug-92	V1.0 Created	PJT
+.fi
