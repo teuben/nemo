@@ -1,0 +1,50 @@
+.TH NEMOFIE 3NEMO "20 July 1989"
+.SH NAME
+inifien, dofien, dmpfien \- expression parser (C)
+.SH SYNOPSIS
+.nf
+.B int inifien(code)
+.B char *code;
+.PP
+.B void dofie(pars,n,result,errval)
+.B float *pars;
+.B int    n;
+.B float *result;
+.B float  errval;
+.PP
+.B void dmpfie()
+.fi
+.SH DESSCRIPTION
+\fIinifien\fP parses an input string which contains a mathematical
+formula, given by the string \fBcode\fP. It returns the actual number
+of parameters used. Parameters in the string can be designated by 
+a $ or %, followed by a positive digit. \fIdofien\fP does the actual 
+calculation: \fBpars\fP contains the array of input parameters: an array
+of parameters 1 are stored in the first \fBn\fP array elements of \fBpars\fP,
+the second parameters in the second \fBn\fP array elements, until 
+the last, i.e. the \fBinifien\fP-th block of \fBn\fP numbers.
+The result is stored in the first \fBn\fP array elements of the
+output array \fBresult\fP. If any error occured, the value \fBerrval\fP
+is stored in that particular location.
+\fIdmpfien\fP
+is merely included as a debugging aid, it lists the operations which
+are performed in dofien to output.
+.PP
+The above functions were created for ease of use with NEMO when programming
+in C. For a full description of the original Fortran/C interface, see
+\fIfie(3)\fP.
+.SH SEE ALSO
+fie(3NEMO)
+.SH AUTHORS
+P.J. Teuben
+.SH FILES
+.nf
+.ta +2i
+$NEMO/src/pjt/clib	nemofie.c
+.fi
+.SH UPDATE HISTORY
+.nf
+.ta +1i +4i
+xx-dec-88	original NEMO version adapted from groningen's fie(3)	PJT
+19-jun-89	updated NEMO version to standard F2C interface	PJT
+.fi

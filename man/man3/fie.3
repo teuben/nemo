@@ -1,0 +1,189 @@
+.TH FIE 3NEMO "19 June 1989"
+.SH NAME
+inifie, dofie, dmpfie \- expression parser
+.SH DESSCRIPTION
+\fIinifie\fP parses an input string which contains a mathematical
+formula, and \fIdofie\fP does the actual calculation. \fIdmpfie\fP
+is merely included as a debugging aid, it lists the operations which
+are performed in dofie.
+.PP
+The above routines can be called by FORTRAN. Their standard C counterparts
+have an appended _c, i.e. \fIinifie_c, dofie_c\fP and \fIdmpfie_c\fP.
+.PP
+For ease of use NEMO has defined counterparts where input variables can
+be entered by value, return valued must be obtained by reference always.
+In this case the names become \fIinifien, dofien\fP and \fIdmpfien\fP.
+.SH SYNOPSIS
+\fBint inifie(code)\fP
+.nf
+            parse code for DOFIE
+
+            CODE    Input   Array of bytes (with trailing zero byte) or
+                            fortran character string containing the 
+                            mathematical formula. 
+                            Maximum number of bytes is 255.
+                            String may contain:
+                            functions    fff(..)   see below for a list
+                                                   of available functions
+                            constants    ccc       see below 
+                            operators    opr       see below
+                            parameters   $n        a parameter is a value
+                                                   taken from a real*4 array
+                                                   inserted at the position of
+                                                   $n in the expression.
+                                                   1 <= n <= 32.
+
+            INIFIE  Output  Integer return value. A value >= 0 indicates
+                            the number of parameters, a value < 0 indicates
+                            that an error has occured during the parsing of
+                            CODE near byte number -INIFIE.
+
+.fi
+\fBsubroutine dofie(pars,n,result,errval)\fP
+.nf
+            evaluates the expression processed by INIFIE for N parameter sets. 
+            does not return a useful thing, i.e. a C (void).
+
+            
+            PARS    Input   Real*4 array of parameters. The parameters are
+                            stored in the following way: The first N elements
+                            contain parameter 1, the next N elements 
+                            parameter 2, etc. The total size of pars is
+                            INIFIE * N.
+
+            N       Input   Integer*4 number of parameter sets.
+                            (used to be Integer*2 !!!)
+
+            RESULT  Output  Real*4 array contains the results
+
+            ERRVAL  Input   Real*4 value to be put in RESULT if an error
+                            occurred while evaluating CODE
+
+.fi
+\fBsubroutine dmpfie()\fP
+.nf
+            dumps contents of expression stack to output
+
+
+\fIoperators\fP:  The following operators are known:
+            +          addition               -          subtraction
+            *          multiplication         /          division
+            **         power
+
+\fIconstants\fP:  The following constants are implemented:
+            pi         3.14159....            c          speed of light (SI)
+            h          Planck (SI)            k          Boltzmann (SI)
+            g          gravitation (SI)       s          Stefan-Boltzman (SI)
+            m          mass of sun (SI)       p          parsec (SI)
+            undef      errorval (see DOFIE)
+            Note: the Hubble constant is not included.
+
+\fIfunctions\fP:  The following mathematical functions are implemented:
+            abs(x)    absolute value of x   sqrt(x)    square root of x
+            sin(x)    sine of x             asin(x)    inverse sine of x
+            cos(x)    cosine of x           acos(x)    inverse cosine of x
+            tan(x)    tangent of x          atan(x)    inverse tan of x
+            exp(x)    exponential of x      sinh(x)    hyperbolic sine of x
+            ln(x)     natural log of x      cosh(x)    hyperbolic cosine of x
+            log(x)    log (bas 10) of x     tanh(x)    hyperbolic tangent of x
+            rad(x)    convert x to radians  deg(x)     convert x to degrees
+            erf(x)    error function of x   erfc(x)    1-error function
+            max(x,y)  maximum of x and y    min(x,y)   minimum of x and y
+            sinc(x)   sin(x)/x              atan2(x,y) inverse tan (mod 2pi)
+                                                       x = sin, y = cos
+            sign(x)   sign of x (-1,0,1)    mod(x,y)   gives remainder of x/y
+            int(x)    truncates to integer  nint(x)    nearest integer
+            ranu(x,y) generates uniform noise between x and y
+            rang(x,y) generates gaussian noise with mean x and dispersion y
+            ranp(x)   generates poisson noise with mean x
+            ifeq(x,y,a,b)  returns a if x equal y, else b
+            ifne(x,y,a,b)  returns a if x not equal y, else b
+            ifgt(x,y,a,b)  returns a if x greater y, else b
+            ifge(x,y,a,b)  returns a if x greater or equal y, else b
+            iflt(x,y,a,b)  returns a if x less y, else b
+            ifle(x,y,a,b)  returns a if x less or equal y, else b
+
+\fINotes\fP:      The calculations are all done in double precision (double), although the
+            input and output arrays are in single precision (float).
+
+\fIRemarks\fP:    If you cannot find your favorite constant or function in the list,
+            please contact Kor Begeman. He might be persuaded to put it in.
+.fi
+.SH EXAMPLE
+.nf
+                  PROGRAM TEST
+C == warning; program not conform to fortran77 and f2c interface definition
+
+                  logical*1 string(255)
+                  integer*2 inifie
+                  integer*2 i, npar
+                  real*4    pars(20), result(10), errval
+
+            C     get wanted function from user
+                  read(*,'(q,<n>a1)') N,(string(k),k=1,N)
+            C     suppose user gave:  sin($1) + ln($2)
+            C     add zero byte at the end of string
+                  string(n+1)=0
+            C     parse the  string
+                  npar = INIFIE( string )
+            C     $1 indicates the first parameter, $2 the second
+            C     npar contains the number of parameters (here 2)
+            C     now check whether an error occurred while parsing
+                  IF (npar .lt. 0)
+                  THEN
+                     write(*,*) ' error at position',-npar,' in code'
+                     STOP
+                  CIF
+            C     now load the parameters
+                  FOR i = 1, 10
+                     read(*,*) pars(i)                ! load $1
+                  CFOR
+                  FOR i = 11, 20
+                     read(*,*) pars(i)                ! load $2
+                  CFOR
+            C     set error value and evaluate the function with the
+            C     parameters stored in pars.
+                  errval = -9999.9                    ! error value
+                  call DOFIE(pars,10,result,errval)
+            C     The last two statements would be equivalent to the 
+            C     following statements:
+            C     FOR i = 1,10
+            C        p1 = pars(i)                     ! $1 parameters
+            C        p2 = pars(i+10)                  ! $2 parameter
+            C        IF (p2 .le. 0.0)
+            C        THEN
+            C           result(i) = errval            ! error value
+            C        ELSE
+            C           result(i) = sin(p1) + log(p2) ! do the fie
+            C        CIF
+            C     CFOR
+
+                  STOP 
+                  END
+
+VMS Notes:  If you want to use this routine in one of your programs,
+            an extra C library (sys$library:vaxcrtl.olb) is needed 
+            by the linker. Gipsy programmers should use a command
+            file <programname>.COM, which should contain:
+             <programname>,lib:genlib/lib,sys$library:vaxcrtl/lib
+
+.fi
+.SH SEE ALSO
+herinp(3NEMO), nemoinp(3NEMO)
+.SH AUTHORS
+R. Kiel (and K.G. Begeman, P.J. Teuben)
+.SH FILES
+.nf
+.ta +2i
+$NEMO/src/pjt/clib	fie.c (fortran callable) nemofie.c (C-callable) fie_ftoc.c
+.fi
+.SH UPDATE HISTORY
+.nf
+.ta +1i +4i
+12-mar-87	document created                      	KGB
+25-mar-87	small change in document              	KGB
+28-may-87	RJK bug removed                      	KGB
+27-oct-87	KGB bug removed                   	RJK
+15-dec-88	Minor things for INTEGER*4 unix version  	PJT
+19-jun-89	Merged new GR version with NEMO again - routinenames appending _c	PJT
+.fi
