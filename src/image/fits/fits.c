@@ -52,6 +52,7 @@
  *    		12-oct-01       new standard added FITS reference
  *              15-jan-03       write floating #'s in header w/ more precision PJT
  *              16-jan-03       warning if one of CROTA1/2 is missing      PJT
+ *               4-may-04       conform more to fits standard              PJT
  *
  * Places where this package will call error(), and hence EXIT program:
  *  - invalid BITPIX
@@ -65,9 +66,9 @@
 #include <ctype.h>              /* needs: isdigit() */
 #include <fits.h>
 
-#define   ROUNDUP(a,b) ((b)*(((a)-1)/(b)+1))
 #if 0
 /* from stdinc.h now */
+#define   ROUNDUP(a,b) ((b)*(((a)-1)/(b)+1))
 #define   ROUNDUP(a,b) ((b)*(((a)+(b)-1)/(b)))
 #endif
 
@@ -2300,6 +2301,10 @@ int fts_whead(fits_header *fh, stream ostr)
     fts_wvari  (ostr,"BITPIX",fh->bitpix,NULL);
     fts_wvari  (ostr,"NAXIS",fh->naxis,NULL);
     fts_wvari_a(ostr,"NAXIS",fh->naxis,fh->naxisn,NULL);
+    if (fh->extend >= 0)
+      fts_wvarb  (ostr,"EXTEND",fh->extend,NULL);
+    if (fh->extname)
+      fts_wvarc  (ostr,"EXTNAME",fh->extname,NULL);
     if (fh->groups >= 0) {
         fts_wvarb  (ostr,"GROUPS",fh->groups,NULL);
         fts_wvari  (ostr,"PCOUNT",fh->pcount,NULL);
@@ -2322,10 +2327,6 @@ int fts_whead(fits_header *fh, stream ostr)
     fts_wvard(ostr,"DATAMAX",fh->datamax,NULL);
     fts_wvard(ostr,"BSCALE",fh->bscale,NULL);
     fts_wvard(ostr,"BZERO",fh->bzero,NULL);
-    if (fh->extend >= 0)
-      fts_wvarb  (ostr,"EXTEND",fh->extend,NULL);
-    if (fh->extname)
-      fts_wvarc  (ostr,"EXTNAME",fh->extname,NULL);
     fts_wvar(ostr,"COMMENT",cfits1);
     fts_wvar(ostr,"COMMENT",cfits2);
     if (fh->comment) 

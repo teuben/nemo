@@ -21,6 +21,7 @@
 
 #include <stdinc.h>
 #include <getparam.h>
+#include <fits.h>
 
 string defv[] = {			/* Standard NEMO keyword+help */
     "in=???\n              Input fits files or template for list",
@@ -30,13 +31,11 @@ string defv[] = {			/* Standard NEMO keyword+help */
     "compact=f\n           Compact (move) dummy axes to the end",
     "inlist=\n             optional nemoinp(1) list expression for in=",
     "wcs=f\n               try and copy a reasonably WCS from input to output",
-    "VERSION=1.5\n         15-jan-03 PJT",
+    "VERSION=1.5a\n        4-may-04 PJT",
     NULL,
 };
 
 string usage = "catenate fits images into a fitscube";
-
-#include <fits.h>
 
 extern string *burststring(string,string);
 
