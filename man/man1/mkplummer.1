@@ -1,4 +1,4 @@
-.TH MKPLUMMER 1NEMO "22 May 1997"
+.TH MKPLUMMER 1NEMO "19 October 2001"
 .SH NAME
 mkplummer \- generates a snapshot according to a truncated Plummer model
 .SH SYNOPSIS
@@ -52,6 +52,13 @@ Time at which the snapshot applies (default: \fItime\fP=0.0).
 .TP
 \fBzerocm=t|f\fP
 Reset center of mass to zero? [default: \fBt\fP].
+.TP
+\fBscale=\fP\fIscale_factor\fP
+A scale factor or scale to virial units (M=G=-4E=1). Use -1 for
+virial units, and 1 to get a model in structural (natural) units.
+Note: large scale factors means small systems with large velocity
+disperson.
+[Default: \fB-1\fP].
 .TP
 \fBquit=\fIlevel\fP
 Level of quit start. 0 is noisy, 1=somewhat quiet, 2=more quiet

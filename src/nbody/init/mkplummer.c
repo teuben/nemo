@@ -16,6 +16,7 @@
  *	11-jan-95	V2.5c ??? (or was it march 1994)
  *	 6-jun-96       V2.6d report total mass before rescaling  pjt
  *       8-sep-01       e   init_xrandom
+ *      19-oct-01       V3.0  add a scale= parameter (defaults to virial units) pjt
  */
 
 
@@ -47,13 +48,14 @@ string  defv[] = {                        /* DEFAULT INPUT PARAMETERS */
     "seed=0\n                 Seed for the random number generator",
     "time=0.0\n               Time at which snapshot is taken",
     "zerocm=t\n               Centrate snapshot (t/f)?",
+    "scale=-1\n               Model scale factor (-1=virial 1=natural)",
     "quiet=0\n                0=noisy 1=somewhat quiet 2=more quiet",
     "massname=\n              If used Mass-function name (e.g. n(m))",
     "massexpr=pow(m,p)\n      Mass function expression (e.g. pow(m,p))",
     "masspars=p,0.0\n         Mass function parameters (e.g. p,0.0)",
     "massrange=1,1\n          Range for mass-spectrum (e.g. 1,2)",
     "headline=\n	      Verbiage for output",
-    "VERSION=2.5e\n           7-sep-01 PJT",
+    "VERSION=2.6\n            19-oct-01 PJT",
     NULL,
 };
 
@@ -69,7 +71,7 @@ nemo_main()
 {
     bool    zerocm;
     int     nbody, seed, bits, quiet, n;
-    real    snap_time, rfrac, mfrac, mrange[2];
+    real    snap_time, rfrac, mfrac, mrange[2], scale;
     Body    *btab;
     stream  outstr;
     string  massname;
@@ -83,6 +85,7 @@ nemo_main()
     snap_time = getdparam("time");
     zerocm = getbparam("zerocm");
     quiet = getiparam("quiet");
+    scale = getdparam("scale");
     headline = getparam("headline");
     massname = getparam("massname");
     if (*massname) {
@@ -98,7 +101,7 @@ nemo_main()
 
     outstr = stropen(getparam("out"), "w");
 
-    btab = mkplummer(nbody, mfrac, rfrac, seed, snap_time, zerocm, 
+    btab = mkplummer(nbody, mfrac, rfrac, seed, snap_time, zerocm, scale,
                 quiet,mrange,mfunc);
     bits = (MassBit | PhaseSpaceBit | TimeBit);
     sprintf(hisline,"init_xrandom: seed used %d",seed);
@@ -154,13 +157,14 @@ nemo_main()
  *-----------------------------------------------------------------------------
  */
 
-Body *mkplummer(nbody, mfrac, rfrac, seed, snap_time,zerocm,quiet,mr,mf)
+Body *mkplummer(nbody, mfrac, rfrac, seed, snap_time,zerocm,scale,quiet,mr,mf)
 int   nbody;
 real  mfrac;
 real  rfrac;
 int   seed;
 real  snap_time;
 bool  zerocm;
+real  scale;
 int   quiet;
 real  mr[2];
 rproc mf;
@@ -208,7 +212,7 @@ rproc mf;
  *                and
  *                       vel(new) = sqrt(C) * vel(old)  .
  */
-    scalefactor = 16.0 / (3.0 * PI);
+    scalefactor = (scale < 0 ?  16.0 / (3.0 * PI)  : scale);
     inv_scalefactor = 1.0 / scalefactor;
     sqrt_scalefactor = sqrt( scalefactor );
 /*
