@@ -1,0 +1,38 @@
+.TH SQRT 3NEMO "5 March 1989"
+.SH NAME
+sqr, qbe, log2, dex \- some additional math functions: square, cube, log
+.SH SYNOPSIS
+.nf
+.B #include <stdinc.h>
+.LP
+.B double sqr(double x)
+.B double qbe(double x)
+.B double log2(double x)
+.B double dec(double x)
+.fi
+.SH DESCRIPTION
+.IX sqr() "" "\fLsqr()\fR \(em square function"
+.IX qbr() "" "\fLqbe()\fR \(em cube function"
+.IX dex() "" "\fLdec()\fR \(em power-10 function"
+.IX log2() "" "\fLqbe()\fR \(em cube function"
+.LP
+.BI sqr( x )
+returns the square of \fBx\fP,
+.BI qbe( x )
+returns the cube root of \fBx\fP,
+.BI dec (x)
+returns 10 to the power of \fBx\fP, and
+.BI log2 (x)
+returns the log to the base two of \fBx\fP.
+.SH FILES
+.ta +1i
+.nf
+src/kernel/misc  	log2.c sqr.c
+.fi
+.SH SEE ALSO
+.BR matherr (3M)
+.SH HISTORY
+.ta +1i +4i
+.nf
+4-mar-94	documented	pjt
+.fi
