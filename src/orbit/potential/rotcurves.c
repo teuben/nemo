@@ -23,6 +23,7 @@
  *	       V1.6   8-apr-97  find resonances, more SINGLEPREC needed PJT
  *                 a 19-feb-01  bad bug in mode=LV, used the wrong radius
  *      	   b 13-sep-01  better prototype for proc
+ *             V1.7   7-jul-02  added format=
  */
 
 #include <stdinc.h>
@@ -53,12 +54,13 @@ string defv[] = {
     "r0l=1,90,0:1:0.1\n  Solar radius and longitude in lv-mode; sample radii",
     "plot=t\n            Make Plot (t|f)?",
     "tab=f\n             Make table (t|f)?",
+    "format=%f\n         Format for table output",
     "xrange=\n           X-range for plot (radius)",
     "yrange=\n           Y-range for plot (velocity/omega)",
     "headline=\n         Optional plot label for identification",
     "in=\n               Optional input rotation curve table",
     "cols=1,2\n          Columns for r, v, dr, dv (use 0 when not present)",
-    "VERSION=1.6b\n      13-sep-01 PJT",
+    "VERSION=1.7\n       7-jul-02 PJT",
     NULL,
 };
 
@@ -99,7 +101,7 @@ void nemo_main()
     real   inrad[MAXPT], invel[MAXPT], inrade[MAXPT], invele[MAXPT];
     double pos[3], acc[3], pot, time = 0.0;
 /*    char   *fmt, s[20], pfmt[256];    */
-    char   headline[256];
+    char   headline[256], fmt1[80];
     string axis, mode, infile, plotlabel;
     stream instr;
     bool   Qtab, Qplot, Qome, Qvel, Qlv, Qin, QoILR;
@@ -107,6 +109,7 @@ void nemo_main()
     mode = getparam("mode");
     n = getiparam("n");
     plotlabel = getparam("headline");
+    sprintf(fmt1,"%s ",getparam("format"));
     Qome = (*mode == 'o');      /*  options are: velocity|omega|lv */
     Qlv = (*mode == 'l');
     Qvel = (*mode == 'v');
@@ -295,15 +298,22 @@ void nemo_main()
         }
     }
     for (i=0; i<nrad; i++) {                            /* loop to print */
-        if (Qtab) printf("%f %f",  rad[i], vel[i]);
+        if (Qtab) {
+	  printf(fmt1,rad[i]);
+	  printf(fmt1,vel[i]);
+	}
 	if (Qtab && npots>1 && !Qome) {
-	    if (mypot1) printf(" %f",vel1[i]);
-	    if (mypot2) printf(" %f",vel2[i]);
-	    if (mypot3) printf(" %f",vel3[i]);
-	    if (mypot4) printf(" %f",vel4[i]);
+	    if (mypot1) printf(fmt1,vel1[i]);
+	    if (mypot2) printf(fmt1,vel2[i]);
+	    if (mypot3) printf(fmt1,vel3[i]);
+	    if (mypot4) printf(fmt1,vel4[i]);
         }
-        if (Qtab && Qome)
-            printf(" %f %f %f %f",ome[i], kap[i], opk[i], omk[i]);
+        if (Qtab && Qome) {
+	  printf(fmt1,ome[i]);
+	  printf(fmt1,kap[i]);
+	  printf(fmt1,opk[i]);
+	  printf(fmt1,omk[i]);
+	}
 	if (Qtab) printf("\n");
         if (Qome)
             pmax = MAX(pmax,opk[i]);
