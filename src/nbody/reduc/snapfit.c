@@ -6,6 +6,7 @@
  *      28-may-92   V0.0 Initial design - fairly interactive
  *	 4-may-92    0.4 fixed matrix rotation order bug
  *	16-jun-92    0.6 rotation order -> math positive (see snaprotate(1))
+ *      15-jul-03    0.7 make it compile under nemo 3.1.1
  */
 
 /* this code will only work in 3D */
@@ -20,6 +21,7 @@
 #include <snapshot/body.h>
 #include <snapshot/get_snap.c>
 #include <image.h>
+#include <bodytrans.h>
 
 typedef struct {    /* special fake cube particle to aid coding */
     vector r;		/* position in the cube */
@@ -47,7 +49,7 @@ string defv[] = {
     "contour=\n         Optional Output image file with chi-squared",
     "iter=0\n           number of more iterations after best on matrix",
     "times=all\n        Times selected from snapshot models",
-    "VERSION=0.6\n      16-jun-92 PJT",
+    "VERSION=0.7\n      15-jul-03 PJT",
     NULL,
 };
 
@@ -103,7 +105,6 @@ void nemo_main()
 void setparams()
 {
     string zmode;
-    rproc btrtrans();
 
     if (hasvalue("theta1")) {
         ntheta1 = nemoinpd(getparam("theta1"),theta1,MAXANG);
@@ -140,7 +141,6 @@ int read_model()
     real x,y,z, w;
     int i, bits, count;
     Body *bp, *bq;
-    byte *allocate();
 
     for(;;) {       /* infinite loop until some data found, or nothing */
         get_history(instr);             /* skip over stuff we can forget */
@@ -198,7 +198,6 @@ void read_data()
     vector tmpv, tmpr, data_com, frame[3];
     matrix tmpm, qpole;
     char line[256];
-    byte *allocate();
 
     if (hasvalue("cube")) {
         Qall = !hasvalue("cutoff");
@@ -351,7 +350,6 @@ real *mk_coords(n, start, incr)
 int n;
 real start, incr;
 {
-    byte *allocate();
     real *a;
     int i;
 
@@ -390,7 +388,6 @@ void snap_fit()
     real w_sum, sum, sum_min=1000.0, w_rscale=1, w_vscale=1, rscale_min, vscale_min;
     Body tmpp, *bp, *qp=&tmpp;
     imageptr iptr=NULL;
-    double log10();
 
 
     if (ntheta1==0 || ntheta2==0) {

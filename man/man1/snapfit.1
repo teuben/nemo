@@ -1,4 +1,4 @@
-.TH SNAPFIT 1NEMO "5 June 1992"
+.TH SNAPFIT 1NEMO "15 July 2003"
 .SH NAME
 snapfit \- fit a (6D) snapshot to a (3D) data cube \fI** in development ** \fP
 .SH SYNOPSIS
@@ -38,7 +38,7 @@ is also given:
 .TP 20
 \fBin=\fP\fIin_snapshot\fP
 Input model \fIsnapshot(5NEMO)\fP. No default.
-.TP 20
+.TP
 \fBcube=\fP\fIin_image\fP
 Input data. This can be either a 3D datacube in standard
 \fIimage(5NEMO)\fP format or an ascii table, with \fBx,y,vz,I\fP in the
@@ -46,12 +46,12 @@ first four columns. In the latter case
 the intensity \fBI\fP is optional, a default
 value of 1.0 will be taken for data with missing intensity.
 No default.
-.TP 20
+.TP
 \fBcutoff=\fP\fIdata_cutoff\fP
 Cutoff applied to data cube, if needed: data values less then
 \fIdata_cutoff\fP are ignored. Default: no cutoff given,
 all data from image (table) are used.
-.TP 20
+.TP
 \fBweight=\fP\fIbody_weight\fP
 Weight (see \fIbodytrans(1NEMO)\fP)
 given to model particles. Bodies with weight less or equal zero
@@ -137,4 +137,5 @@ Peter Teuben
 .nf
 .ta +1.0i +4.0i
 30-May-92	V0.0 Prototype created               	PJT
+15-jul-03	V0.7 documentated past changes	PJT
 .fi
