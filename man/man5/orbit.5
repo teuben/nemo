@@ -1,0 +1,81 @@
+.TH ORBIT 5NEMO "6 December 1993" 
+.SH NAME
+orbit \- binary format for stellar orbits 
+.SH SYNOPSIS
+.nf
+\fB#include <stdinc.h>
+#include <filestruct.h>
+#include <potential.h>
+#include <orbit.h>\fP
+.fi
+.SH DESCRIPTION
+\fIorbit(5NEMO)\fP  is a filestructure which utilizes 
+the general binary
+structured fileformat as described in \fIfilestruct(3NEMO)\fP.
+It is accompanied by a package of functions that make the calculation,
+display and analysis of simple stellar orbits a simpler task.
+.SH FORMAT
+.nf
+typedef struct {
+	int   ndim;
+	int   coordsys;
+	real  mass;
+	real  *iom;
+	int   maxsteps;
+	int   nsteps;
+	real  *time;
+	real  *phase;
+	a_potential pot;
+} orbit, *orbitptr;
+.fi
+.PP
+General access macro's are available by including \fBorbit.h\fP.
+.nf
+#define Ndim(optr)      ((optr)->ndim)
+#define CoordSys(optr)  ((optr)->coordsys)
+#define Size(optr)      ((optr)->size)
+#define Masso(optr)     ((optr)->mass)
+#define IOM(optr)       ((optr)->iom)
+#define Nsteps(optr)    ((optr)->nsteps)
+#define MAXsteps(optr)  ((optr)->maxsteps)
+#define TimePath(optr)  ((optr)->time)
+#define PhasePath(optr) ((optr)->phase)
+#define Potential(optr) ((optr)->pot)
+
+#define I1(optr)        (*(IOM(optr)))
+#define I2(optr)        (*(IOM(optr)+1))
+#define I3(optr)        (*(IOM(optr)+2))
+
+#define Torb(optr,i)    (*(TimePath(optr)+(i)))
+#define Posorb(o,i,j)   (*(PhasePath(o)+Ndim(o)*2*(i)+j))
+#define Velorb(o,i,j)   (*(PhasePath(o)+Ndim(o)*2*(i)+Ndim(o)+j))
+#define Xorb(optr,i)    (*(PhasePath(optr)+Ndim(optr)*2*(i)))
+#define Yorb(optr,i)    (*(PhasePath(optr)+Ndim(optr)*2*(i)+1))
+#define Zorb(optr,i)    (*(PhasePath(optr)+Ndim(optr)*2*(i)+2))
+#define Uorb(optr,i)    (*(PhasePath(optr)+Ndim(optr)*2*(i)+Ndim(optr)))
+#define Vorb(optr,i)    (*(PhasePath(optr)+Ndim(optr)*2*(i)+Ndim(optr)+1))
+#define Worb(optr,i)    (*(PhasePath(optr)+Ndim(optr)*2*(i)+Ndim(optr)+2))
+
+#define PotName(optr)   (Potential(optr).name)
+#define PotPars(optr)   (Potential(optr).pars)
+#define PotFile(optr)   (Potential(optr).file)
+
+.fi
+.SH "SEE ALSO"
+orbit(3NEMO), filestruct(3NEMO), potential(5NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+src/orbit/io	orbit.c
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+13-Jul-87	V1.0: Original created	PJT
+16-jul-87	V1.1: small mod  	PJT
+27-jul-87	V1.2: naming changed	PJT
+24-may-92	V2.0: added potential	PJT
+6-dec-93	V3.x: added maxsteps for re-allocation	PJT
+.fi
