@@ -8,6 +8,7 @@
  *	 oct-93 get_pattern
  *	15-apr-98  oops, made forces now negative
  *      23-jun-01  gcc warnings
+ *      26-feb-03  potential now contains the "rotation curve" (or whatever)
  */
 
 /*CTEX
@@ -66,8 +67,8 @@ void inipotential (int *npar, double *par, string name)
     coef = (real *) allocate(nrad*3*sizeof(real));
     spline(coef, rad, vel, nrad);
     par[0] = omega;
-        dprintf(2,"rotcur[1]: %g %g\n",rad[0],vel[0]);
-        dprintf(2,"rotcur[%d]: %g %g\n",nrad,rad[nrad-1],vel[nrad-1]);
+    dprintf(2,"rotcur[1]: %g %g\n",rad[0],vel[0]);
+    dprintf(2,"rotcur[%d]: %g %g\n",nrad,rad[nrad-1],vel[nrad-1]);
 }
     
 void potential (int *ndim, double *pos,double *acc,double *pot,double *time)
@@ -89,7 +90,7 @@ void potential (int *ndim, double *pos,double *acc,double *pot,double *time)
     	f = 0;
     dprintf(2,"r=%g v=%g f=%g\n",r,v,f);
 
-    *pot = 0.0;             /* can't compute potentials that easily ... yet */
+    *pot = v;             /* can't compute potentials .. so just stuff the rotation curve */
     acc[0] = -f*pos[0]; 
     acc[1] = -f*pos[1]; 
     acc[2] = 0.0;
