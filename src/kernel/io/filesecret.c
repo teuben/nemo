@@ -21,6 +21,7 @@
  *      d 16-feb-97   pjt       extra protection to malloc(<0)
  *      e 13-jan-99   pjt       defer free in random I/O
  *      f  6-apr-01   pjt       malloc->calloc
+ *      g  7-jun-01   pjt       aptr -> ap (why did the compiler not warn?)
  *
  *  Although the SWAP test is done on input for every item - for deferred
  *  input it may fail if in the mean time another file was read which was
@@ -453,7 +454,7 @@ void get_data(stream str, string tag, string typ, void *dat, int dim1, ...)
 	    error("get_data: item %s: too many dims", tag);
 	dim[n] = va_arg(ap, int);		/*   else get next argument */
     } 
-    va_end(aptr);
+    va_end(ap);
     						/* call next level routine  */
     get_data_sub(str, tag, typ, dat, (dim[0] != 0 ? dim : NULL), FALSE);
 }
@@ -476,7 +477,7 @@ void get_data_coerced(stream str,string tag,string typ,void *dat,int dim1, ...)
 	    error("get_data_coerced: item %s: too many dims", tag);
 	dim[n] = va_arg(ap, int);		/*   else get next argument */
     } 
-    va_end(aptr);
+    va_end(ap);
     						/* call next level routine  */
     get_data_sub(str, tag, typ, dat, (dim[0] != 0 ? dim : NULL), TRUE);
 }
@@ -548,7 +549,7 @@ void get_data_set(stream str, string tag, string typ, int dim1, ...)
 	    error("put_data_set: too many dims; item %s", tag);
 	dim[n] = va_arg(ap, int);		/*   else get next argument */
     } 
-    va_end(aptr);
+    va_end(ap);
 
     sspt = findstream(str);
     if (sspt->ss_ran)
@@ -1476,6 +1477,11 @@ stream str;
     last = NULL;                                /* also removed quick access*/
     strdelete(str,FALSE);                       /* delete file if scratch   */
     fclose(str);				/* and close it up	    */
+#ifdef NOPROTO
+    dprintf(1,"filesecret.c: NOPROTO is defined\n");
+#else
+    dprintf(1,"filesecret.c: NOPROTO is not defined\n");
+#endif
 }
 
 /* now the ... routines that need <varargs.h> */
