@@ -1,11 +1,13 @@
 /*
- * MKNSH96:   set up a Kuzmin disk in an external potential
+ * MKNSH96:   set up a Kuzmin disk in a special external potential 
+ *
  *         See also Norman, Sellwood & Hasan (1996, ApJ 462, 114)
  *         for a description and usage of this 2D model
  *         If you follow the NSH96 paper, the NEMO potential 'nsh96'
  *         (potname=nsh96) should be used
  *          
  *     3-may-2002   initial writeup             Peter Teuben
+ *    15-may-2002
  */
 
 #include <stdinc.h>
@@ -26,18 +28,20 @@
 string defv[] = {
     "out=???\n		  output file name ",
     "nbody=1024\n	  number of particles ",
-    "potname=\n           External potential (**not used yet**)",
-    "potpars=\n           Potential parameters",
+    "potname=nsh96\n      External potential (needs to be nsh96-like)",
+    "potpars=\n           Potential parameters (careful: watch mkuz=,akuz=)",
     "potfile=\n           Potential data",
+    "mkuz=0.75\n          Mass of Nbody (Kuzmin) disk",
+    "akuz=1\n             Length scale of Nbody (Kuzmin) disk",
     "Qtoomre=1.0\n	  Toomre's Q parameter ",
     "seed=0\n      	  usual random number seed ",
     "mode=1\n             Disk mode (0,1)",
     "rmax=6\n             Cutoff radius",
-    "time=0.0\n           tag a time, normally skipped",
+    "time=0.0\n           Time of snapshot",
     "tab=f\n		  table output also? ",
     "zerocm=t\n           center the snapshot?",
     "headline=\n	  text headline for output ",
-    "VERSION=0.2\n	  6-may-02 PJT",
+    "VERSION=0.3\n	  15-may-02 PJT",
     NULL,
 };
 
@@ -52,6 +56,8 @@ local int  Kuzmin_only = 1;    /* sigma = M/(2.pi) (1+r^2)^{-3/2} */
 
 local Body *disktab;
 local potproc_double mypot;    /* pointer to potential calculator function */
+
+local mkuz, akuz;
 
 
 local real gdisk(real);
@@ -115,8 +121,8 @@ local real gdisk(real rad)
   int maxdim = 3;
   int probe = 0;   /* along X axis */
 
-  if (Kuzmin_only)
-    return rad/qbe(sqrt(1+rad*rad));     /* pure simple Kuzmin disk */
+  if (kuzmin_only)
+    return mkuz*rad/qbe(sqrt(rad*rad+akuz*akuz));
   else {
     pos[0] = pos[1] = pos[2] = 0;
     pos[probe] = rad;
