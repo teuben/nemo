@@ -1,0 +1,114 @@
+observed.lis	fixed records, 132 characters per line (plus the newline char)
+		first 8 lines are the header
+                See also: J.Phys.Chem.Ref.Data (1986) 15, 251.
+                          ApJ Suppl. (1989) 70, 833.
+#>
+      Table 2. Recommended Rest Frequencies for Observed Interstellar Molecular Lines.
+
+_____________________________________________________________________________________________________________
+
+  Frequency  Unc.  Formula    Quantum Numbers              Tr(K)  Source         Telescope    Astr.  Lab.
+                                                          /Ta(K)                              Ref.   Ref.
+____________________________________________________________________________________________________________
+
+0.........1.........2.........3.........4.........5.........6.........7.........8.........9.........0.........1.........2.........3..
+     701.679 ( 4) CH         2P3/2 J=3/2 F=2-2            -0.6   W51             Arecibo350m  Ziu85  Ziu85
+     724.791 ( 4) CH         2P3/2 J=3/2 F=1-1            -0.5   W51             Arecibo350m  Ziu85  Ziu85
+     834.267 ( 2) CH3OH      1(1)-1(1) A                   0.58  Sgr A           NRAO    43m  Bal70  Rad72
+    1065.075 ( 5) CH3CHO     1(1,0)-1(1,1) A               0.3   Sgr A           NRAO    43m  Got73  Got73
+
+    9237.700*( 1) NH2CHO     3(1,2)-3(1,3) F=2-2            b    Sgr B2          NRAO    43m  God84
+U   9486.71       unidentified                             0.025 TMC-1           NRAO    43m  Mat83a
+    9493.061*( 4) C4H        1-0 J=3/2-1/2 F=1-0           0.090 TMC-1           NARO    43m  Bel83a Got83
+   68972.154*( 4) SO2        6(1,5)-6(0,6)                 0.8   OriMC-1         NRAO    11m  Joh76                                 
+   69464.094*( 9) SO2        14(4,10)-15(3,13)             0.70  OriMC-1         OSO     20m  Sch83                                 
+   69607.15  (10) CH3OH vt=1? 9(1)-10(2) A+                0.30  OriMC-1         OSO     20m  Joh84                                 
+   69653.586*( 5) SO2        3(2,2)-4(1,3)                 0.60  OriMC-1         OSO     20m  Sch83                                 
+   73044.01  (10) CH3NH2     5(1,5)-5(0,5) F=4-4            b    Sgr B2          TAO      6m  Kai74  Kai74                          
+   73842.    ( 1) CH3OH vt=1? 9(1)-10(2) A-                0.30  OriMC-1         OSO     20m  Joh84                                 
+   75862.87  ( 5) CH3SH      3( 0)-2( 0) A                 0.19b Sgr B2          BTL      7m  Lin79  Lee80                          
+   82686.50  (10) CH3OCH3    4(2,2)-4(1,3) AE+EA           0.10  OriMC-1         NRAO    11m  Cla79  Cla79                          
+   99392.645*(27) SO2        29(4,26)-28(5,23)            ~0.50  OriMC-1         OSO     20m  Fri84                                 
+U 103915.         unidentified (H56 gamma?)                0.1   OriMC-1         NRAO    11m  Kui77                                 
+  115894.368*(14) CH3CH2CN   12(2,12)-12(2,11)             0.09  OriMC-1         NRAO    11m  Joh77                                 
+--------------
+#>
+col fmt     name
+
+1       A1      ident   'U' or ' '; if 'U', only 'freq' is given; no formula/quantum numbers
+        1x
+2       F10.3   freq    trailing 0's are missing
+3       A1      ?       '*' or ' '
+        '('
+4       I2      unc     2 std.dev. uncertainty
+        ')'
+        1x
+5       A10     formula
+        1x
+6/29    A27     quantum numbers
+        1x
+7       F7.3    Tr/Ta   can also contain a 'b'
+        1x
+8       A15     source
+        1x
+9       A7      telescope
+10      I3      diameter
+11      A2      diameter unit  (m,ft)
+        1x
+12      A6      Astr.ref.
+        1x
+13      A6      Lab.ref.
+
+
+		The last line of the table starts with '----', after that comments follow, names of telescopes,
+		and references
+
+
+
+345365.dat:	Some specific data between 345 and 365 Ghz (again fixed 132 characters per line, plus newline char)
+master.lis:	all data 
+
+0.........1.........2.........3.........4.........5.........6.........7.........8.........9.........0.........1.........2.........3..
+ 16O18O16O     345026.821(   470)              729.119   36( 8,28)- 37( 7,31)                                5.710  4.973
+ HCOOCH3       345068.510(    98)              245.406   28(14,15)- 27(14,14)  A                            21.017  3.329
+ HCOOCH3       345068.510(    98)              245.406   28(14,14)- 27(14,13)  A                            21.017  3.329
+ HCOOCH3       345073.641(    96)               61.068   16( 6,11)- 15( 5,10)  A                             5.910  4.402
+ D2CO          345074.757(   846)              245.998   15( 2,13)- 15( 2,14)                                 .404  4.470
+ HCOOCH3       345131.045(   217)              144.300   19(13, 7)- 19(12, 8)  A                             6.213  4.453
+ HCOOCH3       345131.045(   217)              144.300   19(13, 6)- 19(12, 7)  A                             6.213  4.453
+ 32SO2         345149.093(    52)               40.715    5( 5, 1)-  6( 4, 2)                                 .085  5.008
+ 34SO2         345168.780(   146)               37.795    8( 4, 4)-  8( 3, 5)                                3.667  3.560
+
+ HCOOCH3       345466.552(    93)  345466.941  233.030   28(13,16)- 27(13,15)  A                            21.982  3.308 C2H4O2-3
+ NH2CHO        345325.386(*  139)               89.369   16( 1,15)- 15( 1,14)                         1.000 15.895  2.520
+ H12C16O       345743.972(M    2)  345743.972             4( 2, 2)-  3( 2, 1)     4.5  5  -  3.5  4                       CHO-6
+...
+ D2CO                .022(     0)             1833.401   36(12,24)- 36(12,25)                                7.770 25.176
+0.........1.........2.........3.........4.........5.........6.........7.........8.........9.........0.........1.........2.........3..
+
+  Format looks like:
+
+column  format  description
+------  ------  -----------
+        1x
+1/2     A14     name
+2/15    F10.3   freq(MHz)
+        1x      '('
+        A1      '*' or ' ' or 'M' (measured)
+        I5      ???
+        1x      ')'
+        2x
+3       F10.3   measured freq(MHz)
+        1x
+4       F8.3    E (cm^-1)
+5               rotational quantum numbers
+6               symmetrix state (E,AA)
+7               hyperfine quantum numbers (F,F1)
+8               ...
+9     ? F5.3    line strength Sij
+10      F6.3    -log(A), A=einstein coefficient
+11      A..     references
+
+masterref.lis:	References
+
+lovas.dat:	fixed 132 chars/line, but no newlines!!!   51711 records
