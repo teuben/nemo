@@ -104,6 +104,8 @@ stream stropen(const string name, string mode)
             if (*name != '/') {     /* ignore name: make a new one */
                 strcpy(tempname,"/tmp/scrNemo.XXXXXX");
                 mktemp(tempname);    /* should become mkstemp !!  */
+		/* but there is no way to get a FILE* from a fileno  */
+		/* so we're stuck here with an insecure mktemp()     */
             } 
             if (stat(tempname,&buf)==0)
                 error("stropen: scratch file \"%s\" already exists", tempname);

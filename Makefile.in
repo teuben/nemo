@@ -361,6 +361,9 @@ dist:
 	tar -zcf $(DIST_DIR).tar.gz $(DIST_DIR)
 	rm -rf $(DIST_DIR)
 
+cvsnew:
+	cvs -n -q update
+
 
 # The following 'ftp' targets only supposed to work at the master site
 # Warning:  (COMPRESS) .gz extensions have been hardcoded here
@@ -614,7 +617,7 @@ bins:
 
 testsuite:
 	@echo ISSUE the following command:
-	@echo '(cd src/scripts; ./need -m `testsuite -s`; mknemo -c history hisf; ./testsuite)'
+	@echo '(cd src/scripts; ./need -m `./testsuite -s`; mknemo -c history hisf; ./testsuite)'
 
 #	@(cd src/scripts; mknemo `testsuite -s`)
 
