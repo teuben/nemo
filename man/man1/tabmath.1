@@ -1,0 +1,144 @@
+.TH TABMATH 1NEMO "13 June 1998"
+.SH NAME
+tabmath \- general table manipulator
+.SH SYNOPSIS
+.PP
+\fBtabmath in=\fPtable-file \fBout=\fPtable-file  [parameter=value] ...
+.SH DESCRIPTION
+\fItabmath\fP has a few simple functions to modify a file in tabular
+format, similar to a spreadsheet calculator. It can handle an arbitrary
+number of files, though the total number of columns (old and new) is
+limited (currently 256). Column operations are most common, although
+a limited number of row operations are also possible.
+.PP
+New columns are computed with
+the keyword \fBnewcol\fP, and needs a functional description of the new
+columns, usually in terms of previous columns.
+Any previous columns (including the ones just created)
+must be referenced by number through
+an escape (\fB%\fP) command. \fIe.g.\fP \fBnewcol=sqrt(%1)\fP creates
+a new column which is the \fIsqrt\fP of the first one. Valid column
+references are %1 and up. Column reference to 0 (i.e. %0) is interpreted
+as the line number (1 and up, excluding comment lines).
+Although the escape command can also be
+a dollar (\fB$\fP) sign, this creates some discomfort in a Unix
+command line environment.
+.PP
+The keyword \fBdelcol\fP has to be used to delete computed columns,
+the word \fBall\fP can be used to delete all original input columns.
+.PP
+Rows can also be deleted/selected based on a function evaluation of
+the current column values. For this the \fBselfie=\fP keyword can
+be used. It uses the same \fInemoinp(3NEMO)\fP
+syntax as those for the new column
+expressions. It must evaluate to exactly 0 in order for a row not to
+be written. For example "\fIselfie=iflt(%1,3,1,0)\fP" would only output
+rows in which the first column is less than 3.
+.PP
+Tablefiles are simple ascii files in a columnar format. Lines which start
+with a # symbol are interpreted as comment lines and are skipped.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 20
+\fBin=\fIin-file\fP
+input (ascii) file, a table of values from which data is taken. Multiple
+files must be separated by comma's. [no default].
+.TP
+\fBout=\fIout-file\fP
+Output filename where the output data are written [no default].
+.TP
+\fBnewcol=\fIexpression\fP
+Expression with which the newly added column(s) will be calculated. Parsing
+will be done by \fIfie(3NEMO)\fP, see the man pages for specific
+rules. [no default].
+.TP
+\fBdelcol=\fIexpression\fP
+\fIexpression\fP is an integer range to denote the columns not to be
+copied to output, e.g. \fB3,5:10,14\fP would select columns 3, 5 through 
+10, and 14.
+The word \fBall\fP may also
+be used, in which case all columns from the input file(s) are deleted,
+and only 
+[Default: not used, i.e. all columns, old and new, are output].
+.TP
+\fBselfie=\fIexpression\fP
+Expression which must evaluate to 0 if a row is not to be output.
+.TP
+\fBformat=\fIexpression\fP
+A (\fIprintf(3)\fP) format specification
+with which the new columns are written to output [\fB%g\fP].
+.TP
+\fBseed=\fP\fIseed\fP
+Integer initial seed in case random numbers have been used in the expression.
+If 0 is given, the time of the day will be used (see 
+\fIxrandom(3NEMO)\fP for other special seed values)
+to initialize the random number generator. [Default: \fB0\fP].
+.SH EXAMPLE
+To use \fItabmath\fP as a function calculator, uses stdin (-) and stdout (-)
+as filenames for input and output, e.g.
+.nf
+\fBtabmath - - "sqrt(%1)" all\fPb
+.fi
+Then for every number you input, it returns the function value.
+.PP
+Here are two examples how to create a table from scratch:
+.nf
+    nemoinp 1:100:2 newline=t > odd.tab
+    nemoinp 1::50   newline=t > one.tab
+.fo
+will contain a table with all odd numbers from 1 through 99, and
+another table with all 1s. Both tables have 50 rows.
+.PP
+Most table programs in NEMO only operate on columns. 
+No functions exist yet to operate
+on rows, other than selecting rows for output (see \fBselfie=\fP).
+As an example to look at a running derivative between two columns,
+\fIawk(1)\fP can be used as follows:
+.nf
+
+% nemoinp 1:10 | tabmath - - '%1*2+rang(0,0.1)' seed=1 | diffs.awk
+2 3.94938 1 2.08013 1.5 1.86925
+3 6.07426 2 3.94938 2.5 2.12488
+4 8.14975 3 6.07426 3.5 2.07549
+5 9.96586 4 8.14975 4.5 1.81611
+6 11.8817 5 9.96586 5.5 1.91584
+7 13.9754 6 11.8817 6.5 2.0937
+8 16.0503 7 13.9754 7.5 2.0749
+9 17.9156 8 16.0503 8.5 1.8653
+10 19.8898 9 17.9156 9.5 1.9742
+
+% cat diffs.awk
+#! /bin/awk -f
+#
+{
+  if (NR > 1) {
+    print $1, $2, xold, yold, ($1+xold)/2, ($2-yold)/($1-xold);
+  }
+  xold = $1;
+  yold = $2;
+}
+.fi
+.SH SEE ALSO
+colrm(1), expand(1), awk(1), cut(1), paste(1), tabplot(1NEMO), table(5NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH BUGS
+Parsing of \fBnewcol\fP expression is done by \fInemoinp(3NEMO)\fP, and 
+is space sensitive. Parsing allows more than one value,
+e.g. "1 _+ 1" is interpreted as two values, instead of the number 2.
+"1+1" would be interpreted as 2. Hence multiple columns (with probably the
+wrong value) would be created in the first example.
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+18-May-88	V1.0 created	PJT
+1-Jun-88	V1.1 name changed nemotable->tabmath	PJT
+xx-jun-88	V1.2 added stride keyword	PJT
+23-aug-88	V1.3 added in2 keyword, removed stride bug	PJT
+27-oct-88	V1.4 multiple new columns and %0 reference allowed	PJT
+10-nov-88	V1.5 allow tab;s also as column separators	PJT
+18-feb-92	V2.0 turbospeed parsing now done by fie()	PJT
+13-jun-98	V3.0 deleted stride/skip keywords, added selfie=	PJT
+24-feb-00	document improved	PJT/VS
+.fi
