@@ -20,14 +20,19 @@
  *  20-jan-99   add tab= to optionally output all random numbers  PJT
  *  24-feb-01   added comments to grandrom() and return both #'s  PJT
  *   7-apr-01   fixed grandom() bug, introduced 24-feb
- *   7-sep-01   added GSL testing for ran3 :-)
+ *   7-sep-01   (V2.0) added GSL 
  */
 
 #include <stdinc.h>
+#include <extstring.h>
+
 #include <unistd.h>
 #include <time.h>
 #include <sys/types.h>
 #include <sys/times.h>
+
+
+extern string *burststring(string,string);
 
 #if defined(mc68k)
 # define RAND48
@@ -49,13 +54,62 @@ local int idum;            /* local variable to store used seed */
 
 #ifdef HAVE_GSL
 #include <gsl/gsl_rng.h>
+static gsl_rng *my_r = NULL;
+static const gsl_rng_type *my_T;
 #endif
+
+int init_xrandom(string init)
+{
+#ifdef HAVE_GSL
+    char my_gsl_info[128], *cp;
+    string *is;
+    int nis;
+
+    is = burststring(init,", ");                /* parse init as "[seed[,name]]"  */
+    nis = xstrlen(is,sizeof(string))-1;
+    if (nis > 0) {                                          /* seed is first, but optional */
+        sprintf(my_gsl_info,"GSL_RNG_SEED=%s",is[0]);
+        putenv(my_gsl_info);
+        putenv(my_gsl_info);
+	dprintf(1,"putenv: %s\n",my_gsl_info);
+        if (nis > 1) {                                      /* name is second, also optional */
+            sprintf(my_gsl_info,"GSL_RNG_TYPE=%s",is[1]);
+            putenv(my_gsl_info);
+	    dprintf(1,"putenv: %s\n",my_gsl_info);
+        }
+    }
+
+
+    cp = getenv("GSL_RNG_SEED");
+    printf("SEED -> %s\n",cp);
+    cp = getenv("GSL_RNG_TYPE");
+    printf("TYPE -> %s\n",cp);
+    
+
+    gsl_rng_env_setup();                                /* initialize the rng (name/seed) setup */
+    my_T = gsl_rng_default;
+    my_r = gsl_rng_alloc(my_T);
+
+
+    dprintf(1,"GSL generator type: %s\n",gsl_rng_name(my_r));
+    dprintf(1,"GSL seed = %u\n",gsl_rng_default_seed);
+    dprintf(1,"GSL first value = %u\n",gsl_rng_get(my_r));
+
+    return (int) gsl_rng_default_seed;
+#else
+    return set_xrandom(natoi(init));
+#endif
+}
 
 
 int set_xrandom(int dum)
 {
     int retval;
     struct tms buffer;
+
+#if defined(HAVE_GSL)
+    warning("set_xrandom called with GSL enabled");
+#endif
 
     if (dum <= 0) {
 	if (dum == -1)
@@ -87,7 +141,10 @@ double xrandom(double xl, double xh)
     double retval;
 
     for(;;) {
-#if defined(NUMREC)
+#if defined(HAVE_GSL)
+        if (my_r == NULL) error("GSL init_xrandom was never called");
+        retval = gsl_rng_uniform(my_r);
+#elif defined(NUMREC)
         retval = ((double) portable_ran(&idum));
 #elif defined(RAND48)
         retval = drand48();
@@ -151,12 +208,20 @@ double grandom(double mean, double sdev)
 #include <getparam.h>
 
 string defv[] = {
-    "seed=0\n       Seed [0=seconds_1970, -1=centisec_boot -2=pid",
+#ifdef HAVE_GSL
+    "seed=\n        GSL Seed name, and optional arguments",
+#else
+    "seed=0\n       Seed [0=seconds_1970, -1=centisec_boot -2=pid]",
+#endif
     "n=0\n          Number of random numbers to draw",
     "gauss=f\n      gaussian or uniform noise?",
     "report=f\n     Report mean/dispersian/skewness/kurtosis?",
     "tab=t\n        Tabulate all random numbers?",
-    "VERSION=1.2\n  7-20-jan-99 PJT",
+#ifdef HAVE_GSL
+    "gsl=\n         If given, GSL distribution name",
+    "pars=\n        Parameters for GSL distribution",
+#endif
+    "VERSION=2.0\n  8-sep-01 PJT",
     NULL,
 };
 
@@ -183,10 +248,9 @@ nemo_main()
     string *sp;
 
     n = getiparam("n");
-    seed = getiparam("seed");
+    seed = init_xrandom(getparam("seed"));
     Qbench = (n==4 && seed==1);
 
-    seed = set_xrandom(seed);
     printf("Seed used = %d\n",seed);
 
     sum[0] = sum[1] = sum[2] = sum[3] = sum[4] = 0.0;
