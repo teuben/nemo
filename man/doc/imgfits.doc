@@ -1,0 +1,14 @@
+%N imgfits
+%D raw image to fits format conversion
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man imgfits' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input raw image bytes [???]
+%A out
+	Output fits file [???]
+%A naxis
+	Size of image (naxis1,naxis2) []
+%A VERSION
+	11-feb-99 PJT [1.0]
