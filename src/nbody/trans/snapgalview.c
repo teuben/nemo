@@ -35,7 +35,7 @@ void nemo_main()
     stream instr, outstr;
     string times, ctypei, ctypeo;
     vector pos, vel;
-    real   tsnap, phi, r2, sinp, cosp, xnew, ynew;
+    real   tsnap, phi, r2, v2,sinp, cosp, xnew, ynew;
     int i, nbody, bits, mode, center;
     Body *btab = NULL, *bp;
 
@@ -76,15 +76,17 @@ void nemo_main()
 	  error("center=%d is too large, nbody=%d",center,nbody);
 	}
 
-	r2 = sqrt(sqr(pos[0])+sqr(pos[1]));     /* figure rotation angle */
+	r2 = sqrt(sqr(pos[0])+sqr(pos[1]));     /* rotation angle */
 	if (r2 > 0) {
 	  cosp = pos[0]/r2;
 	  sinp = pos[1]/r2;
 	} else
 	  phi = 0.0;
+	v2 = sqrt(sqr(vel[0])+sqr(vel[1]));    /* LSR planar velocity  */
 
-	dprintf(-1,"LSR(%d): Pos:%g %g %g  Vel: %g %g %g\n", center,
-		pos[0],pos[1],pos[2],vel[0],vel[1],vel[2]);
+	
+	dprintf(0,"LSR(%d):  Pos:%g %g %g  |%g|    Vel: %g %g %g |%g|\n", center,
+		pos[0],pos[1],pos[2],r2,vel[0],vel[1],vel[2],v2);
 
         for (bp = btab; bp < btab+nbody; bp++) {
 	  for (i=0; i<NDIM; i++)                    /* shift POS */

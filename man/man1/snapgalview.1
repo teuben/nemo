@@ -34,6 +34,16 @@ Star # to represent LSR (0=first). By default not used.
 \fBtimes=\fP
 Times to select snapshots from [all]  
 .SH EXAMPLES
+Here is something close enough to our galactic disk, and after transforming
+to a particle (half way out to the edge of 20 kpc),
+of a galactic GLON-VRAD diagram. Notice the proper way of viewing
+angular sky coordinates from right to left:
+.nf
+    % mkdisk out=disk1 nbody=100000 potname=halo potpars=0,200,1 rmin=0 rmax=20 mass=1 sign=-1
+    % set i=25000
+    % snapgalview disk1 - center=$i | snapplot - xvar=glon yvar=vr xrange=180:-180 yrange=-200:200 
+      LSR(25000):  Pos:9.54165 -2.99296 0  |10.0001|    Vel: -59.5619 -189.885 0 |199.007|
+.fi
 .PP
 Useful bodytrans functions that have been predefined are:
 .nf
