@@ -7,6 +7,8 @@
 
 void get_nanf(float *x)
 {
+    int i_nan = 0x7f8fffffL;
+
 	union {
 	  float f;
 	  int i;
