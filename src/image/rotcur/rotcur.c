@@ -69,13 +69,15 @@
  *
  *               4-oct-03   2.11 added option to use the WWB73 method     PJT
  *              25-may-04       a    fixed sqrt(N) problem in sigma estimate for nsigma    PJT
- ******************************************************************************/
-
-
-/*
+ *               2-jun-04   2.12 finally implemented the reuse= option     PJT
+ *
+ ******************************************************************************
+ *
  * TODO:
  *	- keep track of pixel usage. debug output a map how many times
  *	  a pixel has been used by different rings
+ *        In V2.12 this became reuse= and in essense pixel values in a used
+ *        ring were set to 'undefined' so they would not be reused
  *
  *      - weights for tabular input (DONE 30-jan)
  *
@@ -88,7 +90,7 @@
  *        over a set of rings, but still find their errors.
  *        This is a big change, and it will need new fitting functions
  *
- *      - allow expansion term, and person elliptical like streaming
+ *      - allow expansion term, and elliptical like streaming
  *
  */
 
@@ -136,12 +138,12 @@ string defv[] = {
     "units=deg,1\n   Units of input {deg, arcmin, arcsec, rad, #},{#} for length and velocity",
     "blank=0.0\n     Value of the blank pixel to be ignored",
     "inherit=t\n     Inherit initial conditions from previous ring",
-    "reuse=f\n       Reuse points from previous rings if used before?",
+    "reuse=t\n       Reuse points from previous rings if used before?",
     "fitmode=cos,1\n Basic Fitmode: cos(n*theta) or sin(n*theta)",
     "nsigma=-1\n     Iterate once by rejecting points more than nsigma resid",
     "imagemode=t\n   Input image mode? (false means ascii table)",
     "wwb73=f\n       Use simpler WWB73 linear method of fitting",
-    "VERSION=2.11a\n 25-may-04 PJT",
+    "VERSION=2.12\n  2-jun-04 PJT",
     NULL,
 };
 
@@ -189,14 +191,14 @@ int rotinp(real *rad, real pan[], real inc[], real vro[], int *nring, int ring, 
 	   real *x0, real *y0, real *thf, int *wpow, int mask[], int *side, int cor[], 
 	   int *inh, int *fitmode, real *nsigma, stream lunpri);
 int rotfit(real ri, real ro, real p[], real e[], int mask[], int wpow, int side, real thf, 
-	   real elp4[], int cor[], int *npt, int fitmode, real nsigma, stream lunres);
+	   real elp4[], int cor[], int *npt, int fitmode, real nsigma, bool useflag, stream lunres);
 int perform_out(int h, real p[6], int n, real q);
 int rotplt(real rad[], real vsy[], real evs[], real vro[], real evr[], real pan[], real epa[], 
 	   real inc[], real ein[], real xce[], real exc[], real yce[], real eyc[], 
 	   int mask[], int ifit, real elp[][4], stream lunpri, int cor[], int npt[], real factor);
 void stat2(real a[], int n, real *mean, real *sig);
 int getdat(real x[], real y[], real w[], int idx[], real res[], int *n, int nmax, real p[], 
-	   real ri, real ro, real thf, int wpow, real *q, int side, bool *full, int nfr);
+	   real ri, real ro, real thf, int wpow, real *q, int side, bool *full, int nfr, bool useflag);
 real bmcorr(real xx[2], real p[], int l, int m);
 int perform_init(real *p, real *c);
 
@@ -277,29 +279,31 @@ nemo_main()
          p[4] = (mask[4] && ifit>0 && inherit) ? xce[ifit-1] : x0;
          p[5] = (mask[5] && ifit>0 && inherit) ? yce[ifit-1] : y0;
 
-         ier = rotfit(ri,ro,p,e,mask,wpow,side,thf,elp4,cor,&n,fitmode,-1.0,lunres);
+         ier = rotfit(ri,ro,p,e,mask,wpow,side,thf,elp4,cor,&n,fitmode,-1.0,FALSE,lunres);
 	 if (ier > 0 && nsigma > 0)
-	   ier = rotfit(ri,ro,p,e,mask,wpow,side,thf,elp4,cor,&n,fitmode,nsigma,lunres);
+	   ier = rotfit(ri,ro,p,e,mask,wpow,side,thf,elp4,cor,&n,fitmode,nsigma,FALSE,lunres);
          if (ier>0) {           /* only if fit OK, store fit */
-            rad[ifit]=r;            /*  radius of ring */
-            vsy[ifit]=p[0];         /*  systemic velocity */
-            evs[ifit]=e[0]*factor;  /*  error in systemic velocity */
-            vro[ifit]=p[1];         /*  circular velocity */
-            evr[ifit]=e[1]*factor;  /*  error in circular velocity */
-            pan[ifit]=p[2];         /*  position angle */
-            epa[ifit]=e[2]*factor;  /*  error in position angle */
-            inc[ifit]=p[3];         /*  inclination */
-            ein[ifit]=e[3]*factor;  /*  error in inclination */
-            xce[ifit]=p[4];         /*  x-position */
-            exc[ifit]=e[4]*factor;  /*  error in x-position */
-            yce[ifit]=p[5];         /*  y-position */
-            eyc[ifit]=e[5]*factor;  /*  error in y-position */
-            elp[ifit][0]=elp4[0];   /*  save ellipse parameters */
-            elp[ifit][1]=elp4[1];   /* NOT corrected by 'factor' */
-            elp[ifit][2]=elp4[2];
-            elp[ifit][3]=elp4[3];
-	    npt[ifit] = n;
-            ifit++;
+	   if (!Qreuse)
+	     (void)rotfit(ri,ro,p,e,mask,wpow,side,thf,elp4,cor,&n,fitmode,nsigma,TRUE,lunres);
+	   rad[ifit]=r;            /*  radius of ring */
+	   vsy[ifit]=p[0];         /*  systemic velocity */
+	   evs[ifit]=e[0]*factor;  /*  error in systemic velocity */
+	   vro[ifit]=p[1];         /*  circular velocity */
+	   evr[ifit]=e[1]*factor;  /*  error in circular velocity */
+	   pan[ifit]=p[2];         /*  position angle */
+	   epa[ifit]=e[2]*factor;  /*  error in position angle */
+	   inc[ifit]=p[3];         /*  inclination */
+	   ein[ifit]=e[3]*factor;  /*  error in inclination */
+	   xce[ifit]=p[4];         /*  x-position */
+	   exc[ifit]=e[4]*factor;  /*  error in x-position */
+	   yce[ifit]=p[5];         /*  y-position */
+	   eyc[ifit]=e[5]*factor;  /*  error in y-position */
+	   elp[ifit][0]=elp4[0];   /*  save ellipse parameters */
+	   elp[ifit][1]=elp4[1];   /* NOT corrected by 'factor' */
+	   elp[ifit][2]=elp4[2];
+	   elp[ifit][3]=elp4[3];
+	   npt[ifit] = n;
+	   ifit++;
          }
     } /* end of loop through rings */
     if (lunres && Qimage) write_image(lunres,resptr);
@@ -700,6 +704,9 @@ stream  lunpri;       /* LUN for print output */
 
     Qreuse = getbparam("reuse");
     Qwwb73 = getbparam("wwb73");
+
+    if (!Qreuse)
+      warning("New feature: fitted points will not be reused: reuse=f");
 }
 
 /*
@@ -723,7 +730,7 @@ stream  lunpri;       /* LUN for print output */
  *    NPT      integer         number of points in ring
  */
 
-rotfit(ri, ro, p, e, mask, wpow, side, thf, elp4, cor, npt, fitmode, nsigma, lunres)
+rotfit(ri, ro, p, e, mask, wpow, side, thf, elp4, cor, npt, fitmode, nsigma, useflag, lunres)
 real ri,ro;      /* inner and outer radius of ring */
 int mask[];      /* mask for free/fixed parameters */
 int wpow;        /* weighting function */
@@ -735,6 +742,7 @@ real thf;        /* free angle around minor axis (I) */
 int *npt;	 /* number of points in ring (0) */
 int fitmode;     /* basic fitmode (I) */
 real nsigma;     /* if positive, remove outliers and fit again */
+bool useflag;    /* flag: if TRUE, flag all ring points to undf, no fitting */
 stream lunres;   /* file for residuals */
 {
     int ier;                                             /* error return code */
@@ -772,9 +780,11 @@ stream lunres;   /* file for residuals */
     printf("  number velocity velocity   angle  nation ");
     printf("position position        velocity\n");
 
-    getdat(x,y,w,idx,res,&n,MAXPTS,p,ri,ro,thf,wpow,&q,side,&full,nfr);  /* this ring */
-    for (i=0;i<n;i++) iblank[i] = 1;
+    getdat(x,y,w,idx,res,&n,MAXPTS,p,ri,ro,thf,wpow,&q,side,&full,nfr,useflag);  /* this ring */
+    if (useflag)
+      return;
 
+    for (i=0;i<n;i++) iblank[i] = 1;
 
     h=0;                                           /* reset itegration counter */
     nblank=0;
@@ -832,7 +842,7 @@ stream lunres;   /* file for residuals */
             for(k=0; k<PARAMS; k++)       /* loop to calculate new parameters */
                pf[k]=flip*df[k]+p[k];                       /* new parameters */
             pf[3]=MIN(pf[3],180.0-pf[3]);         /* in case inclination > 90 */
-            getdat(x,y,w,idx,res,&n,MAXPTS,pf,ri,ro,thf,wpow,&q,side,&full,nfr);
+            getdat(x,y,w,idx,res,&n,MAXPTS,pf,ri,ro,thf,wpow,&q,side,&full,nfr,useflag);
 	    for (i=0;i<n;i++) w[i] *= iblank[i];            /* apply blanking */
             if (q < chi) {                                     /* better fit ?*/
                perform_out(h,pf,n,q);                   /* show the iteration */
@@ -1042,7 +1052,7 @@ void stat2(real *a,int n,real *mean,real *sig)
 /* 
  *    GETDAT gets data from disk and calculates differences.
  *
- *    SUBROUTINE GETDAT(X,Y,W,IDX,RES,N,NMAX,P,RI,RO,THF,WPOW,Q,SIDE,FULL,NFR)
+ *    SUBROUTINE GETDAT(X,Y,W,IDX,RES,N,NMAX,P,RI,RO,THF,WPOW,Q,SIDE,FULL,NFR,UFLAG)
  *
  *    X        real array       sky coordinates of pixels inside ring
  *    Y        real array       radial velocities
@@ -1060,9 +1070,10 @@ void stat2(real *a,int n,real *mean,real *sig)
  *    SIDE     integer          receding or approaching side
  *    FULL     logical          too many points in ring
  *    NFR      integer          number of degrees of freedom
+ *    UFLAG    logical          flag points in ring
  */
 
-getdat(x,y,w,idx,res,n,nmax,p,ri,ro,thf,wpow,q,side,full,nfr)
+getdat(x,y,w,idx,res,n,nmax,p,ri,ro,thf,wpow,q,side,full,nfr,useflag)
 int   *n,nmax;       /* number of pixels loaded (O), max. number (I) */
 int   nfr;           /* number of degrees of freedom */
 int   wpow;          /* weigthing function */
@@ -1075,6 +1086,7 @@ real  p[];           /* parameters of ring */
 real  ri,ro;         /* inner and outer radius of ring */
 real  thf;           /* free angle */
 real  *q;             /* output sigma */
+bool  useflag;
 {
 /******************************************************************************/
     int   nlt,nmt;                                                /* counters */
@@ -1193,6 +1205,10 @@ real  *q;             /* output sigma */
 		    res[*n] = s;
 		    *q += s*s*wi;       /* calculate chi-squared */
 		    *n += 1;           /* increment number of pixels */
+		    if (useflag) {
+		      MapValue(velptr,l,m) = undf;
+		      continue;
+		    }
 		  }
 		}
 	      }
