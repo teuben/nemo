@@ -1,4 +1,4 @@
-.TH RUNCMHOG 1NEMO "19 February 1997"
+.TH RUNCMHOG 1NEMO "29 June 2002"
 .SH NAME
 runcmhog \- preprocess a CMHOG namelist and run program in a new directory
 .SH SYNOPSIS
@@ -15,6 +15,12 @@ run. The 'cmhog' program is allowed to be in the unix PATH
 The following options are recognized, they must appear before
 the \fIrun_directory\fP name
 .TP 20
+\fB-d\fP
+Turn debugging on.
+.TP 
+\fB-h\fP
+show brief options reminder/help message
+.TP 
 \fB-n\fP \fInamelist\fP
 Optional name of the \fInamelist\fP file. Default: \fBcmhogin\fP.
 .TP
@@ -40,12 +46,16 @@ in the current directory.
 .SH SEE ALSO
 hdfgrid(1NEMO), sdsfits(1NEMO)
 .SH FILES
-NEMO/usr/pjt/cmhog	cmhog project
+.nf
+NEMO/src/image/hdf/cmhog      cmhog utility tools
+WASP2                         cmhog2 code (may be out of date)
+.fi
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
-15-Jun-96	man written	pjt
-19-feb-97	implemented -e and -n flags	pjt
+15-Jun-96	man written	PJT
+19-feb-97	implemented -e and -n flags	PJT
+29-jun-02	documented some more flags	PJT
 .fi
