@@ -32,7 +32,7 @@
 #define     AuxTag              "Aux"
 #define     KeyTag              "Key"
 #define     DensityTag          "Density"
-#define     GasDenTag           "GasDensity"
+#define     GasDensTag          "GasDensity"
 #define     EpsTag              "Eps"
 #define     StoryTag		"Story"
 
