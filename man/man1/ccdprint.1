@@ -1,4 +1,4 @@
-.TH CCDPRINT 1NEMO "13 July 1993"
+.TH CCDPRINT 1NEMO "28 July 2002"
 .SH NAME
 ccdprint \- print out map values
 .SH SYNOPSIS
@@ -63,6 +63,16 @@ column of Y coordinates, if selected. Each new plane is preceded with
 a plane coordinate also. This option is more readable for humans, but
 not easily processed by other programs.
 [Default: no labels].
+.TP
+\fBoffset=0|1\fP
+Should X,Y,Z be 0- or 1- based. NEMO images use 0-based images,
+but to appease fortran users, 1-based input can be given here
+if this parameter is set to 1. Default: 0
+Appease
+.TP
+\fBpixel=t|f\fP
+Print out X,Y,Z labels in physical or pixel coordinates. By default
+physical. [Default: \fBf\fP]
 .SH "SEE ALSO"
 printf(3), image(5NEMO)
 .SH AUTHOR
@@ -78,4 +88,5 @@ Peter Teuben
 23-jan-89	V1.0: Created             	PJT
 8-jul-93	V1.1: added defaults 'all' for blank x=, y=, z=  	PJT
 9-jul-93	V1.2: added label=	PJT
+28-jul-02	V1.3: documented offset=, added pixel=	PJT
 .fi

@@ -7,6 +7,7 @@
  *		    and  fixep various old style coding
  *	 14-sep-93  V1.2 Added index mode keyword offset=	pjt
  *	 14-oct-99  V1.2b fixed bug printing WCS labels		pjt
+ *       28-jul-02  V1.3  allow coordinates printed as pixel (0...N-1) pjt
  *
  */
 
@@ -26,17 +27,20 @@ string defv[] = {
 	"newline=f\n        Force newline between each number?",
 	"label=\n	    Add x, y and or z labels add appropriate labels",
 	"offset=0\n         Offset (0 or 1) to index coordinates X,Y,Z",
-	"VERSION=1.2b\n     14-oct-99 PJT",
+	"pixel=f\n          Labels in Pixel or Physical coordinates?",
+	"VERSION=1.3\n      28-jul-02 PJT",
 	NULL,
 };
 
 string usage = "print values at gridpoints of an image";
 
+void myprintf(string fmt,real v);
+
 
 nemo_main()
 {
     int     *ix, *iy, *iz, i, j, k, nx, ny, nz, nxpos, nypos, nzpos, offset;
-    bool    newline, xlabel, ylabel, zlabel;
+    bool    newline, xlabel, ylabel, zlabel, Qpixel;
     real    f;
     string  infile;			        /* file name */
     stream  instr;				/* file stream */
@@ -51,6 +55,7 @@ nemo_main()
     fmt = getparam("format");
     instr = stropen (getparam("in"), "r");
     newline = getbparam("newline");
+    Qpixel = getbparam("pixel");
     label = getparam("label");
     xlabel = scanopt(label,"x");
     ylabel = scanopt(label,"y");
@@ -73,30 +78,30 @@ nemo_main()
         z = Zmin(iptr) + iz[k] * Dz(iptr);
         if (!newline && zlabel) {
             printf("plane Z = ");
-            myprintf(fmt,z);
+	    myprintf(fmt, Qpixel ? (real)k : z);
             printf("\n\n");
         }
         for (j=nypos-1; j>=0; j--) {			/* over all rows */
             y = Ymin(iptr) + iy[j] * Dy(iptr);
             if (j==(nypos-1) && !newline && xlabel) {    /* pr. row of X coords */
-                if (ylabel) printf(" Y\\X "); /* ? how to get correct length ? */
-                for (i=0; i<nxpos; i++) {
-                    x = Xmin(iptr) + ix[i] * Dx(iptr);
-                    myprintf(fmt,x);
-                }
-                printf("\n\n");
+	      if (ylabel) printf(" Y\\X "); /* ? how to get correct length ? */
+	      for (i=0; i<nxpos; i++) {
+		x = Xmin(iptr) + ix[i] * Dx(iptr);
+		myprintf(fmt, Qpixel ? (real)i : x);
+	      }
+	      printf("\n\n");
             }
             if (!newline && ylabel) {   /* print first column of Y coord */
-                myprintf(fmt,y);
-                printf(" ");
+	      myprintf(fmt, Qpixel ? (real) j : y);
+	      printf(" ");
             }
             for (i=0; i<nxpos; i++) {			/* over all columns */
                 f = CubeValue(iptr,ix[i],iy[j],iz[k]);
                 if (newline) {
                     x = Xmin(iptr) + ix[i] * Dx(iptr);
-                    if (xlabel) myprintf(fmt,x);
-                    if (ylabel) myprintf(fmt,y);
-                    if (zlabel) myprintf(fmt,z);
+                    if (xlabel) myprintf(fmt,Qpixel ? (real)i : x);
+                    if (ylabel) myprintf(fmt,Qpixel ? (real)j : y);
+                    if (zlabel) myprintf(fmt,Qpixel ? (real)k : z);
                 } 
                 printf (fmt,f*scale_factor);
                 if (newline)
@@ -111,11 +116,11 @@ nemo_main()
     strclose(instr);
 }
 
-ini_array(key, dat, ndat, offset)
-string key;             /* keyword */
-int *dat;               /* array */
-int ndat;               /* length of array */
-int offset;             /* offset applied to index array */
+ini_array(
+	  string key,             /* keyword */
+	  int *dat,               /* array */
+	  int ndat,               /* length of array */
+	  int offset)             /* offset applied to index array */
 {
     int i, n;
 
@@ -136,9 +141,7 @@ int offset;             /* offset applied to index array */
     return n;
 }
 
-myprintf(fmt,v)
-string fmt;
-real v;
+void myprintf(string fmt,real v)
 {
     printf(fmt,v);
     printf(" ");
