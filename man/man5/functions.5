@@ -1,0 +1,52 @@
+.TH FUNCTIONS 5NEMO "1 February 1993"
+.SH NAME
+functions \- math functions in various packages
+.SH DESCRIPTION
+Although most standard mathematical functions (log, sin, sqrt) are
+available in most languages and interpeters, they sometimes go under
+different names. This table summarized the most common ones.
+The choices of columns is mostly due to preferences of the author
+more than anything else. Notably absent are Pascal.
+.SH FUNCTIONS
+.nf
+.ta +0.75i +0.75i +0.75i +0.75i +0.75i +0.75i +0.75i
+F77	C	fie(3)	sm(1)	awk(1)	bc(1)	comment
+
+SQRT	sqrt	sqrt	SQRT	sqrt	-
+-	cbrt	-	-	.	-
+.PP
+SIN	sin	sin	SIN	sin	s	\fIradians\fP
+COS	cos	cos	COS	cos	c	\fIradians\fP
+TAN	tan	tan	TAN	.	-	\fIradians\fP
+ASIN	asin	asin	ACOS	.	-	\fIradians\fP
+ACOS	acos	acos	ASIN	.	-	\fIradians\fP
+ATAN	atan	atan	ATAN	.	a	\fIradians\fP
+ATAN2	atan2	atan2	ATAN2	atan2	-	\fIradians\fP
+.PP
+SINH	sinh
+COSH	cosh
+TANH	tanh
+-	asinh
+-	acosh
+-	atanh
+.PP
+EXP	exp	exp	EXP	exp	e
+LOG	log	ln	LN	log	l	
+LOG10	log10	log	LG	.	-
+.PP
+-	-	-	-	.	j	\fIbessel j(n,x)\fP
+
+F77	C	fie(3)	sm(1)	awk(1)	bc(1)	comment
+.fi
+.SH COMMENTS
+In \fBF77\fP the generic name is listed, for \fBC\fP the common names
+available by including  \fI<math.h>\fP, but not all functions have
+been listed here. \fIfie(3NEMO)\fP.
+
+.SH AUTHOR
+Peter Teuben
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+1-feb-94	document created  	PJT
+.fi
