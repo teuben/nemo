@@ -100,7 +100,7 @@ foreach testfile (`find $NEMO/src -name Testfile -print | sort`)
         end
         continue
     endif
-    echo -n Working on $testfile:h
+    echo -n TESTSUITE: $testfile:h
     echo "==========================================================" >>  $log
     make -f $testfile clean all  $options                             >>& $log
     if ($status) then
