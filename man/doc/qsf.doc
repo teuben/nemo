@@ -1,0 +1,9 @@
+%N qsf
+%D check if a file is a structured file
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man qsf' for more online help
+%A in
+	input file name to test [???]
+%A VERSION
+	13-feb-92 PJT  [1.0]
