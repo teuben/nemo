@@ -1,0 +1,18 @@
+%N hisf
+%D list history items from a binary structured file
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man hisf' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input file name []
+%A out
+	If given, output history []
+%A item
+	Show which items [all]
+%A history
+	If given, add this text to history []
+%A skip
+	Number to skip before display (0 or 1) [1]
+%A VERSION
+	6-may-95 PJT [2.3]
