@@ -1,0 +1,84 @@
+# Local site stuff: last updated 30-jan-96 (pjt) for non-miriad pgplot users
+#
+#  Each site should really have this identification name 'NEMOSITE'
+#  could be as complicated as to include machine name via `hostname`,
+#  version numbers etc. Choose whatever you like.....
+setenv NEMOSITE UMd
+
+#  Set your default YAPPLIB 
+# PGPLOT 1.2 needs CLICK_LEFT if you don't want it to disappear automatically
+setenv YAPPLIB "$YAPP_PGPLOT"
+if ($?PGPLOT_XW_CLICKLEFT == 0) setenv PGPLOT_XW_CLICKLEFT 1
+if ($?PGPLOT_DIR == 0) setenv PGPLOT_DIR $NEMOLIB
+# if your screen is too small, you may want to set PGPLOT_XW_WIDTH < 1
+# setenv PGPLOT_XW_WIDTH 0.75
+
+# 2.0.1 needs extra -lM77 if you want it. Our system default is 1.0 though
+# if (`uname -n` != gemini) then
+# setenv FORLIBS "-L/usr/lang/SC1.0  -lF77"
+# endif
+# ??? 	Solve the hybrid fortran compiler problem for SunOS @ UMD
+if ($NEMOHOST == sun4) then
+   setenv NEMOSITE $NEMOSITE+SC1.0
+endif
+
+# PGPLOT 1.5 (renders defaults for : PGPLOT_FONT - PGPLOT_RGB)
+# also PGPLOT_DEV may interfere with YAPP
+
+  if ($?MIRLIB == 0) then
+    setenv PGPLOT_DIR $NEMOLIB
+  else
+    setenv PGPLOT_DIR $MIRLIB
+  endif
+  if ($?PGPLOT_FONT == 0) then
+    setenv PGPLOT_FONT $PGPLOT_DIR/grfont.dat
+  endif
+
+
+if ($NEMOHOST == sun5 || $NEMOHOST == sun4_gcc) then
+  set Xpath="/usr/Local/lib/X11R6 /local/lib/X11R6 $PGPLOT_DIR /opt/SUNWspro/lib"
+  set Ropt="-R `echo $Xpath | sed 's/ /:/g'`"
+  set Lopt="-L`echo $Xpath | sed 's/ / -L/g'`"
+  # add sunmath *after* a certain version..
+  if (-d /opt/SUNWspro/SC3.0.1) setenv FORLIBS "$FORLIBS -lsunmath"
+  setenv YAPPLIB "$NEMOLIB/yapp_pgplot.o $Lopt $Ropt -lpgplot $YAPP_XLIB $FORLIBS"  
+  setenv NEMOXLIB "-L/usr/Local/lib/X11R6 -L/local/lib/X11R6 -R /usr/Local/lib/X11R6:/local/lib/X11R6 -lX11 -lsocket -lnsl"
+else
+  # umd has a funny hybrid C and F77 compiler on sun4s....
+  # but since February 1997 we don't have them anymore
+  set Xpath="-L/local/lib"
+  setenv YAPPLIB "$NEMOLIB/yapp_pgplot.o -L$PGPLOT_DIR -lpgplot $Xpath $YAPP_XLIB -L/usr/lang/SC1.0 -lF77 -lm"
+  setenv NEMOXLIB "-L/local/lib/X11R6 -lX11"
+endif
+
+#
+if ($?term) then
+  if ($term == xterm) then
+    setenv YAPP /xs
+  else if ($term == sun) then
+      setenv YAPP /sun
+  else
+      setenv YAPP /null
+  endif
+endif
+
+setenv PP_DIR /lma/pp			# see tabpp - old: /lma/spectra
+setenv HI_DIR /lma/hi   		# see hispectrum
+setenv COBE_DIR /leo/cobe		# see fitsgrid
+setenv GAUSSPATH ".:$NEMODAT/gaussfit"	# see gaussfit
+#setenv gids_setup /home/gipsy/loc	# see fitsgids/gids
+setenv gids_setup $NEMO/local/gipsy	# see fitsgids/gids
+
+setenv FTB $NEMO/text/ftb
+
+# Hut, Makino, McMillan: STarLab-C++ (note:
+#setenv STARLAB_PATH $NEMO/usr/starlab/`cat $NEMO/usr/starlab/version`
+#alias starlab 'echo Loading $STARLAB_PATH; source $STARLAB_PATH/local/starlab_setup'
+alias starlab 'source $NEMO/usr/starlab/starlab_start'
+
+
+# trial WWW interface
+#alias tkWWW /home/teuben/tcl/WWW/TkWWW/Tcl/tkWWW
+
+# tipsy
+setenv TIPSYHELPDIR $NEMO/usr/washington/tipsy-2.1.5/man
