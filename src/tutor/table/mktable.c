@@ -1,10 +1,12 @@
-/*   MKTABLE:    create an interesting table 
+/*   MKTABLE:    create an 'interesting' table 
+ *   
+ *   See also: $NEMO/src/tutor/table/mktable.c
  *
  *   compile and link with e.g.
  *
  *               cc -g -o mktable mktable.c -lm
  * 
- *      2-oct-2003     created                    PJT
+ *      7-oct-2003     created                  PJT
  */
 
 #include <stdio.h>
@@ -24,6 +26,8 @@ void normalize(double *a, int n)
   for (i=0; i<n; i++)
     a[i] /= n;            /* same as:    a[i] = a[i]/n   */
 }
+
+
 
 /*
  *  start of main program
