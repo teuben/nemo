@@ -28,7 +28,7 @@ string defv[] = {
     "nppb=1\n       Optional correction 'number of points per beam' for chi2 calc",
     "median=f\n     Optional display of the median value",
     "sort=qsort\n   Sorting routine (not activated yet)",
-    "VERSION=1.7\n  30-jan-05 PJT",
+    "VERSION=1.7a\n 2-feb-05 PJT",
     NULL,
 };
 
@@ -89,7 +89,7 @@ nemo_main()
     if (Qmedian)
       data = (real *) allocate(nx*ny*nz*sizeof(real));
     
-    ini_moment(&m,4);
+    ini_moment(&m,4,0);
     for (i=0; i<nx; i++) {
       for (j=0; j<ny; j++) {
         for (k=0; k<nz; k++) {
