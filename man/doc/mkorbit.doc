@@ -1,0 +1,36 @@
+%N mkorbit
+%D Make an orbit with from given initial conditions
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man mkorbit' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A out
+	output filename (an orbit) [???]
+%A x
+	x-position []
+%A y
+	y- []
+%A z
+	z- []
+%A vx
+	x-velocity []
+%A vy
+	y- []
+%A vz
+	z- []
+%A etot
+	total energy (ekin+epot) []
+%A lz
+	angular momentum in z (**ignored**) []
+%A time
+	time [0.0]
+%A potname
+	optional potential(5NEMO) []
+%A potpars
+	.. with optional parameters []
+%A potfile
+	.. and optional datafile name []
+%A headline
+	random verbiage []
+%A VERSION
+	22-feb-94 PJT [3.2b]
