@@ -4,6 +4,7 @@
  *
  *       9-dec-99   V1.0    Created
  *       6-jun-01   V1.1    renamed sigma= to nsigma= as in other programs PJT
+ * 	 2-mar-01   V1.2    added sum to the output			   pjt
  *
  */
 
@@ -25,7 +26,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "median=t\n          Compute median too? (can be time consuming)",
     "method=0\n          Method to remove outliers (0=fast 1=slow)",
     "nmax=10000\n        maximum number of data to be read if pipe",
-    "VERSION=1.1b\n	 29-sep-01 PJT",
+    "VERSION=1.2\n	 2-mar-02 PJT",
     NULL
 };
 
@@ -129,7 +130,7 @@ void stat_data()
         }
     }
 
-    do {                                /* iteration loop */
+    do {                                /* iteration loop to reject outliers */
 
         if (Qverbose || iter==0) {          /* always print out last iter */
                                             /* and in verbose all iters */
@@ -154,6 +155,13 @@ void stat_data()
             }
             printf("\n");
     
+            printf("sum:   ");
+            for (j=0; j<nxcol; j++) {
+	        sprintf(fmt," %g",sum_moment(&m[j]) * mean_moment(&m[j]));
+                out(fmt);
+            }   
+            printf("\n");
+
             printf("mean:  ");
             for (j=0; j<nxcol; j++) {
                 sprintf(fmt," %g",mean_moment(&m[j]));
