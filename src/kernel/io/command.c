@@ -16,7 +16,7 @@ extern void freestrings(string *);
 
 #define VALID_TYPES "irs."
 
-/* #define READLINE 1 */
+#define READLINE 1 
 
 static int todo_readline=0;
 static char prompt[64];
@@ -90,7 +90,7 @@ string *command_get(command *c)
 {
   char *s, line[1024];
   string *argv;
-  int i, na;
+  int i, n, na;
 
   sprintf(prompt,"%s> ",c->name);
   
@@ -110,12 +110,18 @@ string *command_get(command *c)
   }
   add_history(line);
 #else
-  printf("%s> ",prompt);
+  printf("%s",prompt);
   fflush(stdout);
   clearerr(stdin);
   if (fgets(line,1024,stdin) == NULL)
     return NULL;
 #endif
+  n = strlen(line);
+  if (n>0 && line[n-1]=='\n')
+    line[n-1]=0;
+
+  if (line[0] == 0)
+    goto again;
 
   if (line[0] == ".")                           /* internal quit command */
     return NULL;
@@ -145,8 +151,9 @@ string *command_get(command *c)
 
   /* having come here, parse input into an argv[] vector of strings */
 
-  argv = burststring(line," \n");
+  argv = burststring(line," \n\t");
   na = xstrlen(argv,sizeof(string))-2;
+  if (na<0) goto again;
   for (i=0; i<c->ncmd; i++) {
     if (streq(c->cmd[i],argv[0])) {
       dprintf(0,"Found matching command %s, needs %d, got %d\n",
