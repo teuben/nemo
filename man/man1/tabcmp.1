@@ -1,4 +1,4 @@
-.TH TABCMP 1NEMO "5 October 2000"
+.TH TABCMP 1NEMO "10 August 2003"
 .SH NAME
 tabcmp \- Student T and F test for mean and variance comparisons
 .SH SYNOPSIS
@@ -60,6 +60,8 @@ seed=-1 in tabmath):
 Paired t-Test cannot handle identical arrays.
 .SH SEE ALSO
 tabhist(1NEMO), tabplot(1NEMO), table(5NEMO), nemoinp(1NEMO), tabmath(1NEMO)
+.nf
+http://www.physics.csbsju.edu/stats/KS-test.n.plot_form.html
 .SH FILES
 src/kernel/tab/tabcmp.c
 .SH AUTHOR
@@ -70,4 +72,5 @@ Peter Teuben
 7-Oct-97	V0.1 adopted from Numerical Recipes routines	PJT
 8-oct-97	V0.2 added col1=,col2= and same-table processing	PJT
 5-oct-00	V0.3 added KS2 test, also from NR	PJT
+10-aug-03	fixed kstwo() indexing error	PJT
 .fi
