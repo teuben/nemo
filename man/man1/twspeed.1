@@ -25,7 +25,9 @@ where the summation is along \fIx\fP. This will result in a correlation
 .nf
 	V = Omega * SIN(inc) * X
 .fi
-The output will be a table 
+The output will be a table which can be inspected for signal and noise,
+and fed into a least squared fitter, such as \fItablsqfit(1NEMO)\fP
+or \fItabnllsqfit(1NEMO)\fP.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword is also
 given:
@@ -33,15 +35,18 @@ given:
 \fBvel=\fIvel-file\fP
 input file, must be the radial velocity in
 \fIimage(5NEMO)\fP format [no default].
-.TP 
-\fBxin=\fIint-file\fP
-input mean position image.
 .TP
 \fBden=\fIint-file\fP
 input file, must be the intensity in \fIimage(5NEMO)\fP format [no default].
+.TP 
+\fBxin=\fIint-file\fP
+input mean position image (optional)
 .TP
 \fBpa=\fP
 *** Position Angle of disk [90]
+.TP
+\fBinc=\fP
+*** Inclincation of the disk [0]
 .TP
 \fBcenter=\fP
 *** Center of galaxy (map-center) []
@@ -49,7 +54,7 @@ input file, must be the intensity in \fIimage(5NEMO)\fP format [no default].
 \fBstep=\fP
 Slit width in pixels [1]
 .SH "SEE ALSO"
-snapslit(1NEMO), snaprotate(1NEMO), pspeed(1NEMO), snapshot(5NEMO), image(5NEMO)
+snapslit(1NEMO), snaprotate(1NEMO), tabnllsqfit(1NEMO), tablsqfit(1NEMO), snapshot(5NEMO), image(5NEMO)
 .SH AUTHOR
 Peter Teuben
 .SH FILES
@@ -60,8 +65,8 @@ Peter Teuben
 .SH "UPDATE HISTORY"
 .nf
 .ta +2.0i +4.0i
-17-Aug-87	Original created as pspeed	PJT
+17-Aug-87	Original created as pspeed (though never made it into NEMO)	PJT
 18-nov-03	1.0: documented the new twspeed version 	PJT
-
+22-apr-04	1.1: changed order of keywords  	PJT
 .fi
 
