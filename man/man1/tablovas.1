@@ -1,0 +1,127 @@
+.TH TABLOVAS 1NEMO "3 March 2001"
+.SH NAME
+tablovas \- Lovas spectral line catalogue manipulator (**preliminary**)
+.SH SYNOPSIS
+\fBtablovas\fP in=\fP... [parameter=value]
+.SH DESCRIPTION
+\fItablovas\fP manipulates the Lovas spectral line catalogue 
+in the frequency range between 0 and about 3.4 THz
+(wavelengths longer then about 0.1 mm).
+.PP
+Selecting \fBcol=all\fP has been specifically designed to maintain
+the \fBexact\fP format of the database, such that 
+subselections can be made.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 20
+\fBin=\fP
+Input table, in fixed 132-characters-per-line format. [No default].
+.TP
+\fBspecies=\fP
+Species to check for. The default is \fBall\fP. 
+There are currently about 
+155 species in the catalogue. Note names are case sensitive.
+.TP
+\fBcol=\fP
+Columns to print out. [Default: \fBall\fP].
+\fI ** Note **\fP Currently selection by column names is not active. 
+You can either choose \fIall\fP, or something else, in which case 
+a shorter version with only \fIname, freq\fP will be output.
+.TP
+\fBfreq=\fP
+Frequency range to select. Two numbers are required, with an optional
+third character string specifying the frequency
+units given and requested (the catalogue's numbers are listed in
+Mhz, and this is the default). Note that if the units of \fIfreq\fP 
+are changed, so will be units of \fIerr\fP and \fPlgint\fP. 
+We only support \fBMHz, GHz\fP and \fPTHz\fP. See example below. 
+.TP
+\fBcutoff=\fP
+Lower line intensity cutoff applied to the output. 
+Default: all will be printed.
+\fI ** Note **: not implemented\fP 
+.TP
+\fBtab=\fP
+Table name, in which output is gathered. Default: terminal.
+\fINot implemented\fP
+.SH TABLE
+The format of the columns is as follows:
+.TP 15
+1. \fIname\fP
+molecular formulae
+.TP
+2. \fIfreq\fP
+calculated frequency, with 2 std.dev uncertainty. between brackets.
+(Units: MHz).
+.TP
+3. \fIfreqobs\fP
+measured frequency, if available.
+(Units: MHz).
+.TP
+4. \fIelow\fP
+Lower energy level (Units: cm-1)
+.TP
+5. \fIrqn\fP
+Rotational quantum numbers
+.TP
+6. \fIss\fP
+symmetric state (E, AA etc.)
+.TP
+7. \fIhqn\fP
+hyperfine quantum numbers F,F1
+.TP
+8. \fIri\fP
+Relative intensity for hfs, spin weights for CH3OCH3
+.TP
+9. \fIsij\fP
+line strength, \fISij\fP.($S_{ij}$) For several species \fP(u**2)Sij\fP is
+also listed.
+.TP
+10. \fIa\fP
+Negative logarithm of the Einstein coefficient, \fI-log(A)\fP.
+.TP
+11. \fIrefs\fP
+references (Roman Numerals)
+.SH EXAMPLES
+The following command lists all species present in the catalogue
+.nf
+    % tablovas in=master.lis species=all col=name | awk '{print $1}' | sort | uniq
+  or shorthand:
+    % tablovas master.lis all name | awk '{print $1}' | sort | uniq
+.fi
+\fItablovas\fP is also suitable to be chained using Unix pipes and NEMO's
+convention to use \fI'-'\fP to designate a file on \fIstdin/out\fP
+(see \fIgetparam(3NEMO)\fP).
+.nf
+    % cat master.list | tablovas  - ... | tablovas - ... | more
+.fi
+.SH SEE ALSO
+tabpp(1NEMO), awk(1), grep(1v), perl(1)
+
+Lovas, Frank J. (1986) \fIJ.Phys.Chem.Ref.Data\fP \fB15\fP, 251.
+
+\fIRecommended Restfrequencies for Observed Interstellar 
+Molecular Microwave Transitions\fP
+1991 Revision" appeared in J. Phys. Chem. Ref. Data 21, pp181-272 (1992).
+
+http://physics.nist.gov/PhysRefData/micro/html/contents.html
+.fi
+.SH FILES
+.nf
+.ta +1.2i
+master.lis	the big database (~46575 lines)
+345365.dat	small database for lines in the 345-365GHz range (634 lines)
+.fi
+.SH BUGS
+frequency selection does not include errors in frequency determination
+yet.
+.SH AUTHOR
+Peter Teuben
+.SH HISTORY
+.nf
+.ta +0.5i +4i
+29-apr-92	V1.0 Created                     	PJT
+17-apr-96	documented the new URL         	PJT
+3-mar-01	documented another new URL         	PJT
+.fi
