@@ -1,0 +1,74 @@
+#! /bin/csh -f
+#
+#  Install PGPLOT from $NEMO/local/pgplot into $NEMOLIB
+#  this is known to work under:
+#	linux redhat 6.0		(dec 1999)
+#
+#			command line keywords
+#
+set version=5.2
+set ftp=astro.caltech.edu
+set dir=$NEMO/local
+set drivers=GIDRIV,NUDRIV,PGDRIV,PPDRIV,PSDRIV,WDDRIV,XWDRIV
+set host=$NEMOHOST
+
+foreach arg ($*)
+   set check = `echo $argv[1] | awk -F= '{print NF}'`
+   if ("$check" == 1) break
+   echo Setting: $arg
+   set $arg
+end
+
+cd $NEMO/local/
+
+if (! -e $dir/pgplot$version.tar.gz) then
+  echo No file $dir/pgplot$version.tar.gz, you need to pick it up, e.g.
+  echo ncftp ftp://astro.caltech.edu/pub/pgplot/pgplot${version}.tar.gz
+  exit 1
+else
+  echo Found $dir/pgplot$version.tar.gz
+endif
+gunzip -dc $dir/pgplot${version}.tar.gz | tar xf -
+cd pgplot
+cp drivers.list $NEMOLIB
+cd $NEMOLIB
+
+
+cp drivers.list new.list
+cp drivers.list old.list
+
+echo Building drivers for $drivers
+
+
+foreach d (`echo $drivers | sed 's/,/ /g'`)
+   sed 's/\! '$d/$d/g < old.list > new.list
+   cp new.list old.list
+end
+
+mv new.list drivers.list
+rm old.list
+
+
+# Solaris
+if ($host == sun5) then
+  $NEMO/local/pgplot/makemake  $NEMO/local/pgplot sol2 f77_cc
+else if ($host == linux) then
+  $NEMO/local/pgplot/makemake  $NEMO/local/pgplot linux g77_elf
+  if (! -e /usr/X11) then
+    echo You may need to patch your Linux distribution:
+    echo ln -s /usr/X11R6 /usr/X11
+  endif
+else if ($host == sgi) then
+  $NEMO/local/pgplot/makemake  $NEMO/local/pgplot irix
+else
+  echo NEMOHOST=$NEMOHOST not supported yet
+endif
+
+make
+make clean
+\rm -fr pgdemo*
+
+#  may also need to change LD_LIBRARY_PATH with $NEMOLIB
+
+# set PGPLOT_DIR to $NEMOLIB
+
