@@ -1,0 +1,20 @@
+%N nemoinp
+%D expression parser and evaluator; also does lists
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man nemoinp' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A expression
+	Expression to parse [help] []
+%A separ
+	Separator between numbers on output []
+%A format
+	Format used to print numbers [%g]
+%A newline
+	Use newline between numbers? [t]
+%A nmax
+	Size of output buffer [32768]
+%A tab
+	Optional table output []
+%A VERSION
+	16-jun-97 PJT [1.6]
