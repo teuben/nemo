@@ -1,4 +1,4 @@
-/*******************************************************************************
+ /*******************************************************************************
  *    ROTCURSHAPE derives the kinematical parameters from the observed
  *    velocity field by fitting tilted-rings to the velocity field.  It
  *    does a least-squares-fitting to the function:
@@ -24,7 +24,8 @@
 #define nllsqfit nr_nllsqfit
 #endif
 
-#define PARAMS  6           /* number of geometry parameters */
+#define GPARAM  5           /* number of geometric parameters for a disk */
+#define PARAMS  50          /* (max) number of parameters */
 #define MAXMOD  5           /* number of rotation curve models */
 #define MAXPAR  5           /* number of parameters per model */
 
@@ -79,6 +80,9 @@ string usage="nonlinear fit of kinematical parameters to a velocity field";
 
 
 
+typedef real (*rcproc)(real, int, real *, real *);
+
+
 imageptr denptr, velptr;       /* pointers to Images, if applicable */
 int   lmin, mmin, lmax, mmax;              /* boundaries of map */
 real  grid[2];    /* grid separations in x and y (arcsec.) */
@@ -87,15 +91,15 @@ real  dx,dy;      /* grid separation in x and y */
 real  undf;       /* undefined value in map */
 real  pamp;       /* position angle of map */
 
-int   npar[MAXMOD];            /* active number of parameters per model */
-int   ipar[MAXMOD];
-real  mpar[MAXMOD][MAXPAR];    /* parameters per model */
-int   mmsk[MAXMOD][MAXPAR];    /* mask per model (1=free 0=fixed) */
-int   nmod = 0;                /* number of models actually used */
-
-typedef real (*rcproc)(real, int, real *, real *);
-
+int    npar[MAXMOD];            /* active number of parameters per model */
+int    ipar[MAXMOD];
+real   mpar[MAXMOD][MAXPAR];    /* parameters per model */
+int    mmsk[MAXMOD][MAXPAR];    /* mask per model (1=free 0=fixed) */
 rcproc rcfn[MAXMOD];
+int    nmod = 0;                /* number of models actually used */
+int    nparams = 0;             /* total number of parameters (5 + # for models) */
+
+
 
 
 bool Qimage;                             /* input mode (false means tables are used) */
@@ -112,12 +116,12 @@ int  itmax;
  * _s2 = sin(2*theta)  etc.
  */
 
-real vobs_c1(real *c, real *p, int m);
+real vobs_c1 (real *c, real *p, int m);
 void vobsd_c1(real *c, real *p, real *d, int m);
-void vcor_c1(real *c, real *p, real *vd, real *dn);
-real vobs_s1(real *c, real *p, int m);
+void vcor_c1 (real *c, real *p, real *vd, real *dn);
+real vobs_s1 (real *c, real *p, int m);
 void vobsd_s1(real *c, real *p, real *d, int m);
-void vcor_s1(real *c, real *p, real *vd, real *dn);
+void vcor_s1 (real *c, real *p, real *vd, real *dn);
 
 
 
@@ -128,8 +132,9 @@ int rotinp(real *rad, real pan[], real inc[], real vro[], int *nring, int ring, 
 int rotfit(real ri, real ro, real p[], real e[], int mask[], int wpow, int side, real thf, 
 	   real elp4[], int cor[], int *npt, int fitmode, real nsigma, stream lunres);
 int perform_out(int h, real p[6], int n, real q);
-int rotplt(real rad[], real vsy[], real evs[], real vro[], real evr[], real pan[], real epa[], 
+int rotplt(real rad[], real vsy[], real evs[], real pan[], real epa[], 
 	   real inc[], real ein[], real xce[], real exc[], real yce[], real eyc[], 
+	   real p[], real e[],
 	   int mask[], int ifit, real elp[][4], stream lunpri, int cor[], int npt[], real factor);
 void stat2(real a[], int n, real *mean, real *sig);
 int getdat(real x[], real y[], real w[], int *n, int nmax, real p[], real ri, real ro, real thf, 
@@ -140,15 +145,31 @@ int perform_init(real *p, real *c);
 rproc vobs;
 proc vobsd, vcor;			/* pointers to the correct functions */
 
-/* a bunch of rotation curves */
 
+/* a bunch of rotation curves and parameter derivatives */
 
 
 real rotcur_linear(real r, int n, real *p, real *d)
 {
   d[0] = r;
+  dprintf(1,"Linear:  r=%g  omega=%g\n",r,p[0]);
   return p[0] * r;
 }
+
+real rotcur_flat(real r, int n, real *p, real *d)
+{
+  d[0] = 1.0;
+  return p[0];
+}
+
+real rotcur_core1(real r, int n, real *p, real *d)
+{
+  real x = r / p[1];
+  d[0] = x/(1+x);
+  d[1] = -p[0]*d[0]/(p[1]*(1+x));
+  return p[0] * d[0];
+}
+
 
 
 /******************************************************************************/
@@ -182,6 +203,32 @@ nemo_main()
     real thf;     /* var  denoting free angle around minor axis */
     real nsigma;
     real old_factor, factor;    /* factor > 1, by which errors need be multiplied */
+    int i,j,k;
+
+
+    rotcurparse();
+    if (nmod==0) error("No rotcur models specified");
+
+#if 0
+    /* 1 model, linear */
+    nmod = 1;
+    ipar[0] = 0;
+    npar[0] = 1;
+    rcfn[0] = rotcur_linear;
+    mpar[0][0] = 4;
+    mmsk[0][0] = 1;
+#endif
+#if 0
+    npar[0] = 2;
+    rcfn[0] = rotcur_core1;
+    mpar[0][0] = 20;
+    mpar[0][1] = 10;
+    mmsk[0][0] = mmsk[0][0] = 1;
+#endif
+
+    for (i=0, nparams=GPARAM; i<nmod; i++)     /* count total number of parameters */
+      nparams += npar[i];
+    printf("Total of %d parameters to be fitted\n",nparams);
 
     if (hasvalue("tab"))
         lunpri=stropen(getparam("tab"),"a");  /* pointer to table stream output */
@@ -209,9 +256,6 @@ nemo_main()
     for (irng=0; irng<nring-1; irng++) {  /* loop for each ring */
          ri=rad[irng];          /* inner radius of ring */
          ro=rad[irng+1];        /* outer radius of ring */
-         if (ri > ro) {         /* check if need to be swapped */
-            r = ri;  ri = ro;  ro = r;
-         }
          r=0.5*(ri+ro);         /* mean radius of ring */
 
          p[0] = (mask[0] && ifit>0 && inherit) ? vsy[ifit-1] : vsys;
@@ -219,7 +263,12 @@ nemo_main()
          p[2] = (mask[2] && ifit>0 && inherit) ? yce[ifit-1] : y0;
          p[3] = (mask[3] && ifit>0 && inherit) ? pan[ifit-1] : pan[irng];
          p[4] = (mask[4] && ifit>0 && inherit) ? inc[ifit-1] : inc[irng];
-         p[5] = (mask[5] && ifit>0 && inherit) ? vro[ifit-1] : vro[irng];
+	 for (i=0, k=0; i<nmod; i++) {
+	   for (j=0; j<npar[i]; j++, k++) {
+	     p[GPARAM+k] = mpar[i][j];
+	     mask[GPARAM+k] = mmsk[i][j];
+	   }
+	 }
 
          ier = rotfit(ri,ro,p,e,mask,wpow,side,thf,elp4,cor,&n,fitmode,-1.0,lunres);
 	 if (ier > 0 && nsigma > 0)
@@ -247,9 +296,46 @@ nemo_main()
          }
     } /* end of loop through rings */
 
-    rotplt(rad,vsy,evs,vro,evr,pan,epa,         /* output the results */
-           inc,ein,xce,exc,yce,eyc,
+    rotplt(rad,vsy,evs,pan,epa,         /* output the results */
+           inc,ein,xce,exc,yce,eyc,p,e,
            mask,ifit,elp,lunpri,cor,npt,factor);
+}
+
+rotcurparse()
+{
+  string *sp;
+  string *burststring(string,string);
+  int nsp;
+
+  nmod = 0;
+  if (hasvalue("rotcur1")) {
+    sp = burststring(getparam("rotcur1"),", ");
+    nsp = xstrlen(sp,sizeof(string))-2;
+    if (streq(sp[0],"linear")) {
+      if (nsp != 2) error("linear needs 2 numbers");
+      npar[nmod] = 1;
+      mpar[nmod][0] = natof(sp[1]);
+      mmsk[nmod][0] = natoi(sp[2]);
+      rcfn[0] = rotcur_linear;
+    } else if (streq(sp[0],"flat")) {
+      if (nsp != 2) error("flat needs 2 numbers");
+      npar[nmod] = 1;
+      mpar[nmod][0] = natof(sp[1]);
+      mmsk[nmod][0] = natoi(sp[2]);
+      rcfn[0] = rotcur_flat;
+    } else if (streq(sp[0],"core1")) {
+      if (nsp != 4) error("core1 needs 2 numbers");
+      npar[nmod] = 2;
+      mpar[nmod][0] = natof(sp[1]);
+      mpar[nmod][1] = natof(sp[2]);
+      mmsk[nmod][0] = natoi(sp[3]);
+      mmsk[nmod][1] = natoi(sp[4]);
+      rcfn[0] = rotcur_core1;
+    } else {
+      error("Don't have code for %s",sp[0]);
+    }
+    nmod++;
+  }
 }
 
 /*
@@ -488,14 +574,20 @@ stream  lunpri;       /* LUN for print output */
     }
 
     fixed = 0;
-    iret=match(getparam("fixed"),"vsys,xpos,ypos,pa,inc,vrot",&fixed);
+    iret=match(getparam("fixed"),"vsys,xpos,ypos,pa,inc",&fixed);
     if (iret<0) error("Illegal option in fixed=%s",getparam("fixed"));
     dprintf(1,"MASK: 0x%x ",fixed);
-    for (i=0; i<PARAMS; i++) {
+    for (i=0; i<GPARAM; i++) {
       mask[i] = (fixed & (1<<i)) ? 0 : 1;
       dprintf(1,"%d ",mask[i]);
     }
     dprintf(1,"\n");
+
+
+    for (i=0; i<nmod; i++) {
+      /* count fixed/free for models -- fix this */
+      mask[i+GPARAM] = 1;
+    }
 
     for (nfixed=0,i=0; i<PARAMS; i++)      /* count number of fixed par's */
         if (mask[i]==0) nfixed++; 
@@ -522,12 +614,9 @@ stream  lunpri;       /* LUN for print output */
         printf("       - Inclination \n");
         if (lunpri) fprintf(lunpri," inc");
     }
-    if (mask[5]==1) {
-        printf("       - Rotational velocity \n");
-        if (lunpri) fprintf(lunpri," vrot");
-    }
     if (lunpri) fprintf(lunpri,"\n");
-    if (nfixed==PARAMS) error("no free parameters left");
+
+    /*******  FIX THIS OLD ROTCUR CODE **********/
 
     input = getparam("ellips");
     n=0;
@@ -630,20 +719,26 @@ stream lunres;   /* file for residuals */
     real  sinp, cosp, cosi, xc1, xc2, yc1, yc2;    	     /* ring elements */
     real  resmean, ressig, ratio;
     int   nblank;
-    int   i, n;                               /* n=number of points in a ring */
+    int   i, j, n;                            /* n=number of points in a ring */
    
     nfr=0;                                 /* reset number of free parameters */
-    for (i=0; i<PARAMS; i++) {
+    for (i=0; i<nparams; i++) {
         nfr += mask[i];                /* calculate number of free parameters */
         eps[i] = 0.1;                           /* and init the eps parameter */
     }
     r=0.5*(ri+ro);                                     /* mean radius of ring */
 
     printf(" Disk range: %g %g\n",ri,ro); 
-    printf("  iter.  systemic rotation position incli- ");
-    printf("x-center y-center points  sigma\n");
-    printf("  number velocity velocity   angle  nation ");
-    printf("position position        velocity\n");
+    printf("  iter.  systemic position incli- ");
+    printf("x-center y-center ");
+    for (i=0; i<nmod; i++) {
+      for (j=0; j<npar[i]; j++)
+	printf("p[%d][%d] ",i,j);
+    }
+    printf("points  sigma\n");
+
+    printf("  number velocity   angle  nation ");
+    printf("position position   \n");
 
     getdat(x,y,w,&n,MAXPTS,p,ri,ro,thf,wpow,&q,side,&full,nfr);  /* this ring */
     for (i=0;i<n;i++) iblank[i] = 1;
@@ -655,11 +750,10 @@ stream lunres;   /* file for residuals */
     do {                                   /* and start the outer REPEAT loop */
          h++;                                               /* next iteration */
          chi=q;                                           /* save chi-squared */
-         for(k=0;k<PARAMS;k++)              /* loop to save initial estimates */
+         for(k=0;k<nparams;k++)              /* loop to save initial estimates */
             pf[k]=p[k];                                       /* save p in pf */
-         nrt = nllsqfit(x,2,y,w,res,n,pf,e,mask,PARAMS,tol,itmax,lab,
-                        vobs,vobsd);
-	 
+         nrt = nllsqfit(x,2,y,w,res,n,pf,e,mask,nparams,tol,itmax,lab,
+			vobs,vobsd);
 	 if (nsigma > 0 && h==1) {
 	   stat2(res,n,&resmean,&ressig);
 	   dprintf(1,"Refit: mean=%g sigma=%g nsigma=%g\n",resmean,ressig,nsigma);
@@ -681,36 +775,35 @@ stream lunres;   /* file for residuals */
 	   }
 	   if (nblank) {
 	     dprintf(0,"Rejecting %d/%d points\n",nblank,n);
-	     nrt = nllsqfit(x,2,y,w,res,n,p,e,mask,PARAMS,tol,itmax,lab,
-                        vobs,vobsd);
+	     nrt = nllsqfit(x,2,y,w,res,n,p,e,mask,nparams,tol,itmax,lab,
+			    vobs,vobsd);
 	   }
 	   break;
 	 }
          if (nrt<0) {
-            warning("nllsqfit=%d<0: KGB must find better solution (n=%d)",
-		    nrt,n);
+            warning("nllsqfit=%d: must find better solution (n=%d)",nrt,n);
             break;    /* ???? could also try and continue here (like KGB did) */
 	 }
-         for (k=0; k<PARAMS; k++) 
+         for (k=0; k<nparams; k++) 
             df[k]=pf[k]-p[k];                  /* calculate difference vector */
          flip=1.0;                                   /* factor for inner loop */
          for(;;) {                                        /* inner WHILE loop */
             stop = FALSE;
-            for(k=0; k<PARAMS; k++)       /* loop to calculate new parameters */
+            for(k=0; k<nparams; k++)       /* loop to calculate new parameters */
                pf[k]=flip*df[k]+p[k];                       /* new parameters */
             pf[4]=MIN(pf[4],180.0-pf[4]);         /* in case inclination > 90 */
             getdat(x,y,w,&n,MAXPTS,pf,ri,ro,thf,wpow,&q,side,&full,nfr);
 	    for (i=0;i<n;i++) w[i] *= iblank[i];            /* apply blanking */
             if (q < chi) {                                     /* better fit ?*/
                perform_out(h,pf,n,q);                   /* show the iteration */
-               for(k=0;k<PARAMS;k++)            /* loop to save new estimates */
+               for(k=0;k<nparams;k++)            /* loop to save new estimates */
                   p[k]=pf[k];
                 stop=FALSE;  /* but make sure it doesn't quit from outer loop */
                 dprintf(1,"Found a solution\n");
                 break;                             /* leave inner XWHILE loop */
             } else {                                      /* not a better fit */
                stop=TRUE;                                    /* reset logical */
-               for (k=0; k<PARAMS; k++)            /* loop through parameters */
+               for (k=0; k<nparams; k++)            /* loop through parameters */
                   stop = stop && (ABS(flip*df[k]) < eps[k]);
                stop = (ABS(q-chi)/chi < tol);      /* difference small enough */
                if (stop) {                                      /* is it so ? */
@@ -783,11 +876,11 @@ stream lunres;   /* file for residuals */
          a12=0.0;
          a22=0.0;
          for (i=0; i<n; i++) {                    /* loop through data points */
-            vobsd(&x[2*i],p,b,PARAMS);            /* calculate derivatives */
+            vobsd(&x[2*i],p,b,nparams);            /* calculate derivatives */
             a11=a11+w[i]*b[cor[0]-1]*b[cor[0]-1];   /* calc ellips parameters */
             a22=a22+w[i]*b[cor[1]-1]*b[cor[1]-1]; 
             a12=a12+w[i]*b[cor[0]-1]*b[cor[1]-1]; 
-            sigma2=sigma2+w[i]*sqr(y[i]-vobs(&x[2*i],p,PARAMS));
+            sigma2=sigma2+w[i]*sqr(y[i]-vobs(&x[2*i],p,nparams));
          }
          sigma2=sigma2/(real)n;                        /* calculate new sigma */
          elp4[0]=a11;                              /* save ellipse parameters */
@@ -803,9 +896,12 @@ stream lunres;   /* file for residuals */
 
 perform_out(int h,real *p,int n,real q)
 {
-/*  FORMAT(1H ,I4,4X,3(F7.2,2X),F5.2,2X,2(F7.2,2X),I5,2X,F8.3) eq.fortran */
-    printf(" %4d    %7.2f  %7.2f  %7.2f  %5.2f  %7.2f  %7.2f  %5d  %8.3f\n",
-              h,    p[0],   p[5],  p[3],  p[4],  p[1],  p[2],  n,   q);
+  int i;
+  printf(" %4d    %7.2f  %7.2f  %5.2f  %7.2f  %7.2f",
+	 h,    p[0],   p[3],  p[4],  p[1],  p[2]);
+  for (i=GPARAM; i<nparams; i++)  
+    printf(" %7.2f",p[i]);
+  printf("  %5d  %8.3f\n", n,   q);
 }
 /******************************************************************************/
 
@@ -814,14 +910,14 @@ perform_out(int h,real *p,int n,real q)
  *  is set. Otherwise it exits.
  */
 
-rotplt(rad,vsy,evs,vro,evr,pan,epa,inc,ein,xce,exc,yce,eyc,
+rotplt(rad,vsy,evs,pan,epa,inc,ein,xce,exc,yce,eyc,p,e,
        mask,ifit,elp,lunpri,cor,npt,factor)
-real rad[],vsy[],evs[],vro[],evr[],pan[],epa[],inc[],ein[],
+     real rad[],vsy[],evs[],pan[],epa[],inc[],ein[],p[],e[],
      xce[],exc[],yce[],eyc[],elp[][4], factor;
 int  mask[],ifit,cor[],npt[];
 stream lunpri;
 {
-  int i;
+  int i,j;
   real mean, sig;
 
   if (lunpri==NULL) return;         /* determine if work to be done */
@@ -834,7 +930,8 @@ stream lunpri;
     fprintf(lunpri,"YPOS: %g %g\n",yce[i],eyc[i]);
     fprintf(lunpri,"PA:   %g %g\n",pan[i],epa[i]);
     fprintf(lunpri,"INC:  %g %g\n",inc[i],ein[i]);
-    fprintf(lunpri,"VROT: %g %g\n",vro[i],evr[i]);
+    for (j=GPARAM; j<nparams;j++)
+      fprintf(lunpri,"P%d:  %g %g\n",j-GPARAM+1,p[j],e[j]);
     fprintf(lunpri,"NPT:  %d\n",npt[i]);
   }
   fprintf(lunpri,"\n");
@@ -1023,7 +1120,7 @@ real  *q;             /* output sigma */
 		    x[*n*2+1]=ry;      /* load Y-coordinate */
 		    y[*n]=v;           /* load radial velocity */
 		    w[*n]=wi;          /* load weight */
-		    s=(v-vobs(xx,p,PARAMS));  /* corrected difference */
+		    s=(v-vobs(xx,p,nparams));  /* corrected difference */
 		    *q += s*s*wi;       /* calculate chi-squared */
 		    *n += 1;           /* increment number of pixels */
 		  }
@@ -1082,7 +1179,7 @@ real  *q;             /* output sigma */
 	      x[*n*2+1]=ry;      /* load Y-coordinate */
 	      y[*n]=v;           /* load radial velocity */
 	      w[*n]=wi;          /* load weight */
-	      s=(v-vobs(xx,p,PARAMS));  /* corrected difference */
+	      s=(v-vobs(xx,p,nparams));  /* corrected difference */
 	      *q += s*s*wi;       /* calculate chi-squared */
 	      *n += 1;           /* increment number of pixels */
 	    }
@@ -1163,27 +1260,27 @@ int nrcpar = 0;
 real vobs_c1(real *c,real *p,int m)
 {
       perform_init(p,c);
-      return( vs+vc*sini1*cost1 );      /* circular motion */
+      return vs+vc*sini1*cost1;          /* circular motion */
 }
 
 
 void vobsd_c1(real *c,real *p,real *d,int m)
 {
-    perform_init(p,c);
+  int i;
+  perform_init(p,c);
 
     /* disk geometry parameters (Vsys,X0,Y0,PA,INC) */
 
-    d[0]=1.0;                    /* partial derivative with respect to Vsys */
-    d[1]= grid[0]*vc*(sint1*sinp1-cost1*cosp1/cosi1)*sint1*sini1*r1;  /* X0 */
-    d[2]=-grid[1]*vc*(sint1*cosp1+cost1*sinp1/cosi1)*sint1*sini1*r1;  /* Y0 */
-    d[3]=F*vc*(cosi2+sini2*cost2)*sint1*sini1/cosi1;                  /* PA */
-    d[4]=F*vc*(cosi2-sini2*sint2)*cost1/cosi1;                       /* Inc */
+  d[0]=1.0;                    /* partial derivative with respect to Vsys */
+  d[1]= grid[0]*vc*(sint1*sinp1-cost1*cosp1/cosi1)*sint1*sini1*r1;  /* X0 */
+  d[2]=-grid[1]*vc*(sint1*cosp1+cost1*sinp1/cosi1)*sint1*sini1*r1;  /* Y0 */
+  d[3]=F*vc*(cosi2+sini2*cost2)*sint1*sini1/cosi1;                  /* PA */
+  d[4]=F*vc*(cosi2-sini2*sint2)*cost1/cosi1;                       /* Inc */
+  
+  /* d[5] and up are rotation curve parameters */
 
-    /* the remainder are rotation curve parameters */
-
-    /* linear rotation curve */
-    d[5]=r*sini1*cost1;                                             /* Vrot */
-
+  for (i=GPARAM; i<m; i++)
+    d[i] = rcderv[i-GPARAM] *sini1*cost1;
 }
 
 void vcor_c1(real *c,real *p,real *vd,real *dn)
@@ -1251,6 +1348,7 @@ void vcor_c1(real *c,real *p,real *vd,real *dn)
 
 real vobs_s1(real *c,real *p,int m)
 {
+  error("cannot do inflow yet");
       perform_init(p,c);
       return vs+vc*sini1*sint1;      /* radial outflow motion */
 }
@@ -1258,7 +1356,7 @@ real vobs_s1(real *c,real *p,int m)
 void vobsd_s1(real *c,real *p,real *d,int m)
 {
     perform_init(p,c);
-
+  error("cannot do inflow yet");
     d[0]=1.0;                    /* partial derivative with respect to Vsys */
     d[1]= grid[0]*vc*(0);
     d[2]=-grid[1]*vc*(0);
@@ -1357,19 +1455,13 @@ perform_init(real *p,real *c)
   cost2=cost1*cost1;     /* cosine squared */
   sint2=sint1*sint1;     /* sine squared */
 
-#if 1 
-  /* assume linear rotation curve  with p[5] for now as dV/dR */
-  vc=p[5]*r;
-#else
-  /*  nmod of these are needed: rpar[]   ipar[]  npar[] */
   if (nmod > 1) {
     vc = 0;
     for (i=0; i<nmod; i++)
-      vc += sqr( (*rcfn[0])(r,npar[i],&p[5+ipar[i]],&rcderv[ipar[i]]) );
+      vc += sqr( (*rcfn[0])(r,npar[i],&p[GPARAM+ipar[i]],&rcderv[ipar[i]]) );
     vc = sqrt(vc);
   } else
-    vc = (*rcfn[0])(r,npar[0],&p[5],&rcderv[0]);
-#endif
+    vc = (*rcfn[0])(r,npar[0],&p[GPARAM],&rcderv[0]);
 }
 
 
