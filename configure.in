@@ -535,7 +535,6 @@ AC_CHECK_LIB(vogl, foreground)
 AC_CHECK_LIB(z, inflate)
 AC_CHECK_LIB(c, strtoll)
 AC_CHECK_LIB(c, strtoull)
-AC_CHECK_LIB(c, dprintf)
 
 AC_CHECK_LIB(dl, dlopen)	# Dynamic linking for SunOS/Solaris and SYSV
 AC_CHECK_LIB(dld, shl_load)	# Dynamic linking for HP-UX
@@ -579,7 +578,7 @@ AC_FUNC_MMAP
 AC_TYPE_SIGNAL
 AC_FUNC_VFORK
 AC_FUNC_VPRINTF
-AC_CHECK_FUNCS(ftime gethostname gettimeofday getwd mkdir select strdup strtod strtol strtoul)
+AC_CHECK_FUNCS(ftime gethostname gettimeofday getwd mkdir select strdup strtod strtol strtoul dprintf)
 
 AC_CHECK_SIZEOF(float, 0)
 AC_CHECK_SIZEOF(int, 0)
