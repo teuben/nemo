@@ -1,3 +1,9 @@
+for 3.1.1
+  - make sure cfitsio stuff is ok in configure
+
+
+--------------------------------------------------------------------------------
+
 some other help on configure:
 	http://www.airs.com/ian/configure/
 - io_nemo library written by JCL in Marseille
@@ -47,3 +53,4 @@ some other help on configure:
 
 
 	
+- getparam:  an option to produce an iraf .par file?
