@@ -41,6 +41,8 @@
 rm -f install.log >& /dev/null
 touch install.log
 
+set nexec=117            
+
 set stat = 0
 echo \(Sending output to install.log\)
 
@@ -114,7 +116,7 @@ set n1=(`grep TESTSUITE: install.log | grep -v OK | wc -l`)
 set n2=(`grep TESTSUITE: install.log | wc -l`)
 set n3=(`ls bin|wc -l`)
 
-echo "Found $n3 executables"
+echo "Found $n3 executables ($nexec at last count)"
 echo "Found $n1/$n2 problems with the TESTSUITE"
 if ($n1 > 0) then
   grep TESTSUITE: install.log | grep -v OK 
