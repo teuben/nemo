@@ -1,0 +1,2 @@
+Each executable that follows non-standard procedures to be installed,
+should have a corresponding shell script in this directory.
