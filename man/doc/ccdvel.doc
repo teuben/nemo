@@ -1,0 +1,28 @@
+%N ccdvel
+%D ### NEMO program with unknown intent...(missing usage)
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man ccdvel' for more extensive online help
+  Defaults of program keywords are listed between square brackets
+%A out
+	Output file name [???]
+%A radii
+	Radii of rings in disk [1,10]
+%A vrot
+	Rotation velocity [100]
+%A inc
+	Inclination of disk w.r.t. sky plane [45]
+%A theta
+	Rotation (C.C.W.) from +X-axis [0]
+%A q
+	Axis ratio of orbit [1]
+%A alpha
+	Axis ratio of epicycle (1<alpha<2) [1]
+%A size
+	Size of map [128]
+%A cell
+	Cell size [1]
+%A center
+	Rotation center of disk [default: center] []
+%A VERSION
+	20-may-91 PJT [1.0]
