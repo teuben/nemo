@@ -31,7 +31,7 @@ string defv[] = {
 #endif
     "color=1\n			Expression for point color",
     "visib=1\n			Expression for point visibility",
-    "VERSION=2.1a\n		22-aug-00 PJT",
+    "VERSION=2.1b\n		30-may-04 PJT",
     NULL,
 };
 string usage = 	"Convert snapshot to xyzc data";
@@ -44,14 +44,15 @@ local bool  Qvelout;
 
 local iproc vfunc, cfunc;
 
-string times;
+local string times;
 
+void setparams(void);
+bool get_frame(stream instr);
+void put_points(stream outstr);
+void convert(void);
 
-bool get_frame();
-
-extern rproc btrtrans();
+extern rproc btrtrans();    /* ??? */
 extern iproc btitrans();
-
 
 nemo_main()
 {
@@ -71,7 +72,7 @@ nemo_main()
     }
 }
 
-setparams()
+void setparams(void)
 {
     xfunc = btrtrans(getparam("xvar"));
     yfunc = btrtrans(getparam("yvar"));
@@ -93,8 +94,7 @@ local Body *btab = NULL;
 local int nbody, nmax = 0;
 local real tsnap = 0.0;
 
-bool get_frame(instr)
-stream instr;
+bool get_frame(stream instr)
 {
     int bits;
 
@@ -114,8 +114,7 @@ local int *ctab = NULL;
 local int npoint;
 local bool cnew;
 
-put_points(outstr)
-stream outstr;
+void put_points(stream outstr)
 {
     put_set(outstr, "PointData");
     put_data(outstr, "Tpoint", RealType, &tsnap, 0);
@@ -131,7 +130,7 @@ stream outstr;
 }
 
 
-convert()
+void convert(void)
 {
     int visnow, vismax, new_color, i, ip, vis;
     Body b;
