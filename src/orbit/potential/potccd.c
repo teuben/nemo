@@ -10,7 +10,7 @@
  *	13-sep-01	better prototype for proc			pjt
  *       4-dec-01       also compute min/max
  *      12-sep-02       optionally output a force                       pjt
- *	
+ *	22-oct-02       also allow ar,at                                pjt
  */
 
 #include <stdinc.h>
@@ -27,11 +27,11 @@ string defv[] = {
     "y=0\n          Y-coordinate(s) to test potential at",
     "z=0\n          Z-coordinate(s) to test potential at",
     "t=0.0\n        Time to test potential at",
-    "mode=pot\n     Output pot,ax,ay,az",
+    "mode=pot\n     Output pot,ax,ay,az,ar,at",
     "dr=\n          Differential step for (Poisson) density map",
     "omega=\n       Use this instead of any returned pattern speed",
     "ndim=3\n       Poisson map using 2D or 3D derivatives",
-    "VERSION=1.4\n  30-sep-02 PJT",
+    "VERSION=1.5\n  22-oct-02 PJT",
     NULL,
 };
 
@@ -92,6 +92,10 @@ void nemo_main(void)
       idx = 2;
     else if (streq(mode,"az"))
       idx = 3;
+    else if (streq(mode,"ar"))
+      idx = 4;
+    else if (streq(mode,"at"))
+      idx = 5;
     else if (streq(mode,"den")) {
       idx = 0;
       if (dr < 0) error("Need to supply a small positive value for dr=");
@@ -139,8 +143,19 @@ void nemo_main(void)
 	    if (omega != 0.0) {
 	      pot -= 0.5*sqr(omega)*(sqr(pos[0])+sqr(pos[1]));
 	    }
-	  } else 
+	  } else if (idx < 4) {
 	    pot = acc[idx-1];
+	  } else {
+	    /* 2D only */
+	    real vv,vr,rr;
+	    vv = acc[0]*acc[0] + acc[1]*acc[1];
+	    vr = acc[0]*pos[0] + acc[1]*pos[1];
+	    rr = pos[0]*pos[0] + pos[1]*pos[1];
+	    if (idx == 4)
+	      pot = vr/sqrt(rr);
+	    else
+	      pot = sqrt(vv-vr*vr/rr);
+	  }
 	  CubeValue(iptr,ix,iy,iz) = pot;
 	  if (first) {
 	    dmin = dmax = pot;
