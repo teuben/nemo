@@ -88,7 +88,7 @@ clean:
 all:   $(BIN)
 
 nbody0: main.o nbody0.o nbodyio.o
-	$(FC) $(FFLAGS) -o nbody0 main.o nbodyio.o nbody0.o \
+	$(FC) $(F77_CMAIN_FFLAGS) $(FFLAGS) -o nbody0 main.o nbodyio.o nbody0.o \
  		$(L) $(LIBF77) -lm
 
 nbody00: main.o nbody00.o nbodyio.o
