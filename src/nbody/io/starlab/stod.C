@@ -1,0 +1,86 @@
+/*
+ *  STOD: convert snapshot to dyn
+ *
+ *  16-jul-93   1.0     written
+ *  31-jul-96   1.1     for starlab 2.1
+ *  
+ *  This has to be a C++ main, otherwise won't link ???
+ *      - nemomain.c ported to nemomain.C (very small mod)
+ *	- stod_subs.c is the accompanying snapshot I/O routines in C
+ */
+
+
+#include <stdinc.h>                 /* NEMO */
+#include <getparam.h>
+#include <history.h>
+#include <extstring.h>
+
+#include "stod_subs.h"              /* NEMO-STARLAB interface */
+
+#include "dyn.h"                    /* STARLAB */
+
+
+string defv[] = {
+    "in=???\n           Input snapshot file (dyn to stdout)",
+    "headline=\n        Additional comment line",
+    "label=f\n          Add labels to stars?",
+    "VERSION=1.0\n	31-jul-96 PJT",
+    NULL,
+};
+
+string usage = "convert NEMO snapshot to STARLAB dyn";
+
+void nemo_main(void)
+{
+    int i, nbody, hisc;
+    double *mass, *pos, *vel, *mptr, *pptr, *vptr;
+    dyn *b = new dyn();
+    dyn *bo = new dyn();
+    dyn *by, *bi;
+    bool i_flag = getbparam("label");
+    string *hisv, headline = getparam("headline");
+
+    check_real(sizeof(real));
+
+    nbody = get_snap_c(getparam("in"), &mass, &pos, &vel);
+
+    if (i_flag) bo->set_label(1);
+    b->set_oldest_daughter(bo);
+    bo->set_parent(b);
+
+    for (i = 1; i < nbody; i++) {
+        by = new dyn();
+        if (i_flag) by->set_label(i+1);
+        bo->set_younger_sister(by);
+        by->set_elder_sister(bo);
+        bo = by;
+    }
+
+    if (*headline == 0) 
+        headline = ask_headline();
+    if (headline && *headline)
+        b->log_comment(headline);
+    b->log_comment(" ### This is still an experimental conversion ### ");
+    hisv = ask_history();
+    hisc = xstrlen(hisv,sizeof(string)) - 1;
+    b->log_history(hisc,hisv);
+
+
+// Do not store top level info - BUG? does seem to be created anyways.
+//
+//    b->set_mass(1); 
+
+    mptr = mass;    // set pointers 
+    pptr = pos;
+    vptr = vel;
+    for (bi = b->get_oldest_daughter(); bi != NULL;     // loop over stars
+         bi = bi->get_younger_sister()) {
+	bi->set_mass(*mptr);	
+        bi->set_pos(vector(pptr[0],pptr[1],pptr[2]));
+        bi->set_vel(vector(vptr[0],vptr[1],vptr[2]));
+        mptr++;
+        pptr += 3;  // NDIM really
+        vptr += 3;
+    }
+    put_node(cout,*b);
+}
