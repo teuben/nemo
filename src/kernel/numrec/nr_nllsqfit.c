@@ -84,12 +84,12 @@ int nr_nllsqfit(
   old_f  = f;
   old_df = df;
 
-  x   = vector(1,ndat);            /* allocate NumRec arrays and matrices */
-  y   = vector(1,ndat);
-  sig = vector(1,ndat);
-  covar = matrix(1,npar,1,npar);
-  alpha = matrix(1,npar,1,npar);
-  a = vector(1,npar);
+  x   = fvector(1,ndat);            /* allocate NumRec arrays and matrices */
+  y   = fvector(1,ndat);
+  sig = fvector(1,ndat);
+  covar = fmatrix(1,npar,1,npar);
+  alpha = fmatrix(1,npar,1,npar);
+  a = fvector(1,npar);
   ia = ivector(1,npar);
 
   for (i=0; i<ndat; i++) {          /* copy our input data into NumRec ones */
@@ -144,11 +144,11 @@ int nr_nllsqfit(
     fpar[i] = a[i+1];
   }
 
-  free_matrix(alpha,1,npar,1,npar);      /* free up the NumRec arrays and matrices */
-  free_matrix(covar,1,npar,1,npar);
-  free_vector(sig,1,ndat);
-  free_vector(y,1,ndat);
-  free_vector(x,1,ndat);
+  free_fmatrix(alpha,1,npar,1,npar);      /* free up the NumRec arrays and matrices */
+  free_fmatrix(covar,1,npar,1,npar);
+  free_fvector(sig,1,ndat);
+  free_fvector(y,1,ndat);
+  free_fvector(x,1,ndat);
   free_ivector(ia,1,npar);
 
   return itc;                       /* return number of iterations */
