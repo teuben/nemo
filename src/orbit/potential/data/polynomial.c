@@ -19,11 +19,11 @@
 #include <stdinc.h>
 #include <vectmath.h>
 
-#define MAXN  16
+#define MAXPOW  16
  
 local double omega = 0.0;
 
-local double a[MAXN];
+local double a[MAXPOW];
 local int na = 0;
 
 void inipotential (int *npar, double *par, string name)
