@@ -138,9 +138,9 @@ double frandom(double, double, rproc);
 
 #ifdef NEMO
 
-void pickshell(double *, int, double);
-void pickball(double *, int, double);
-void pickbox(double *, int, double);
+void pickshell(real *, int, double);
+void pickball(real *, int, double);
+void pickbox(real *, int, double);
 
 #else
 /*
