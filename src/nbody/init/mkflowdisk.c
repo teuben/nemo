@@ -33,7 +33,7 @@ string defv[] = {
     "rmax=1.0\n		  outer cutoff radius",
     "rref=\n              reference radius for spiral phase (defaults to rmax)",
     "mass=0\n             total mass of disk",
-    "uniform=t\n          uniform surface density, or use density from potfile?",
+    "uniform=f\n          uniform surface density, or use density from potfile?",
     "k=\n                 spiral wavenumber for linear spirals (> 0 trailing arms)",
     "pitch=\n             pitch angle for log spirals (>0 trailing arms)",
     "phase=0\n            phase offset of spiral at rmax (in degrees)",
@@ -42,7 +42,7 @@ string defv[] = {
     "nmodel=1\n           number of models",
     "test=f\n             test shape of spiral",
     "headline=\n	  text headline for output ",
-    "VERSION=1.3c\n	  3-dec-03 PJT",
+    "VERSION=1.3d\n	  4-dec-03 PJT",
     NULL,
 };
 
