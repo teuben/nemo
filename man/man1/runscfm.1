@@ -1,0 +1,63 @@
+.TH RUNSCFM 1NEMO "22 January 1998"
+.SH NAME
+runscfm \- Self Consistent Field Method N-body code
+.SH SYNOPSIS
+\fBrunscfm\fP [parameter=value]
+.SH DESCRIPTION
+runscfm is a NEMO frontend to the \fBscfm\fP program. See 
+\fIscfm(1NEMO)\fP for more details.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+input file (standard snapshot)    
+.TP
+\fBoutdir=\fP
+output run directory (required)    
+.TP
+\fBnsteps=\fP
+Number of timesteps
+.TP
+\fBnoutbod=\fP
+Output system state (on SNAPxxx)   
+.TP
+\fBnoutlog=\fP
+Output logfile data (on SCFLOG)   
+.TP
+\fBdtime=\fP
+Integration timestep      
+.TP
+\fBgravconst=\fP
+Gravitional Constant      
+.TP
+\fBselfgrav=t|f\fP
+include selfgravity?      
+.TP
+\fBinptcoef=t|f\fP
+       
+.TP
+\fBoutpcoef=t|f\fP
+       
+.TP
+\fBzeroodd=t|f\fP
+       
+.TP
+\fBzeroeven=t|f\fP
+       
+.TP
+\fBfixacc=t|f\fP
+       
+.TP
+\fBheadline=\fP
+comment line added to the run. Default: none.
+.SH EXAMPLES
+.SH SEE ALSO
+scfm(1NEMO), tabtos(1NEMO), snapprint(1NEMO), snapshot(5NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+22-Jan-98	V1.0 Created	PJT
+.fi
