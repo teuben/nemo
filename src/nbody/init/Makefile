@@ -80,6 +80,7 @@ mkplummer: mkplummer.c
 	$(CC) $(CFLAGS) -DTOOLBOX -o mkplummer mkplummer.c \
 			$(NEMO_LIBS) $(EL) -lm
 
+mkkd95:	kd95
 
 kd95:
 	(cd $(NEMO)/usr/kuijken/GalactICS-exp/src; make -f Makefile.nemo clean all install)
