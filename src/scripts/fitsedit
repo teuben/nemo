@@ -1,0 +1,36 @@
+#! /bin/csh -f
+#
+if ($?EDITOR) then
+  set edit=$EDITOR
+else if ($?VISUAL) then
+  set edit=$VISUAL
+else
+  set edit=vi
+endif
+echo Using editor $edit
+set tmp=tmp$$
+set bad=0
+
+foreach f ($*)
+  if ($bad) then
+     echo "### Warning: problems converting $oldfile, skipped"
+  else if ($?oldfile) then
+     echo "Overwritten $oldfile"
+  endif
+  set oldfile=$f
+  set bad=1
+  \rm -f $tmp.* >& /dev/null
+
+  fitshead $f > $tmp.txt
+  if ($status) continue
+  $edit $tmp.txt
+  if ($status) continue
+  fitshead $tmp.txt out=$tmp.head
+  if ($status) continue
+  scanfits $f $tmp.data select=data
+  if ($status) continue
+  cat $tmp.head $tmp.data > $f
+  set bad=0
+end
+
+\rm -f $tmp.* >& /dev/null
