@@ -14,6 +14,7 @@
  *              9-sep-01       a    gsl/xrandom
  *              8-apr-03      b     forgot timebit
  *              6-may-03  v4.4b   fixed bug when ndisk=1
+ *              8-may-03  V4.5    added energy=
  */
 
 #include <stdinc.h>
@@ -41,8 +42,9 @@ string defv[] = {
     "in=\n              If given, these are initial positions",
     "angle=f\n          Regular angular distribution?",
     "vrad=0\n           radial velocity",
+    "energy=f\n         preserve energy if random motions added?",
     "headline=\n	Text headline for output",
-    "VERSION=4.4b\n	6-may-03 PJT",
+    "VERSION=4.5\n	8-may-03 PJT",
     NULL,
 };
 
@@ -51,6 +53,7 @@ string usage="set up a uniform-density test disk in a spherical potential";
 local real rmin, rmax, mass;
 local int  jz_sign;
 local bool Qangle;
+local bool Qenergy;
 
 local int ndisk;
 local real frac[NDIM], vrad;
@@ -100,6 +103,7 @@ void nemo_main()
         Qmass=TRUE;
     init_xrandom(getparam("seed"));
     Qangle = getbparam("angle");
+    Qenergy = getbparam("energy");
     testdisk();
     writegalaxy(getparam("out"), getparam("headline"), Qmass);
 }
@@ -138,10 +142,10 @@ testdisk()
 {
     Body *dp;
     real rmin2, rmax2, r_i, theta_i, vcir_i, pot_i, t;
-    real  dv_r, dv_t, sint, cost, theta_0;
+    real  dv_r, dv_t, sint, cost, theta_0, vrandom;
     real sigma_r, sigma_t, sigma_z;
     vector acc_i;
-    int i, ndim=NDIM;
+    int i, ncirc, ndim=NDIM;
     double pos_d[NDIM], acc_d[NDIM], pot_d, time_d = 0.0;
 
     disk = (Body *) allocate(ndisk * sizeof(Body));
@@ -149,7 +153,7 @@ testdisk()
     rmax2 = rmax * rmax;
     theta_i = xrandom(0.0, TWO_PI);
     t = 0;    /* dummy time ; we do not support variable time yet */
-    for (dp=disk, i = 0; i < ndisk; dp++, i++) {	/* loop all stars */
+    for (dp=disk, i = 0, ncirc=0; i < ndisk; dp++, i++) {	/* loop all stars */
 	Mass(dp) = mass;
 	if (ndisk == 1)
 	  r_i = rmin;
@@ -169,12 +173,18 @@ testdisk()
         SETV(acc_i,acc_d);
 	vcir_i = sqrt(r_i * absv(acc_i));
 
-        sigma_r = grandom(0.0,frac[0]*vcir_i);
-        sigma_t = grandom(0.0,frac[1]*vcir_i);
-        sigma_z = grandom(0.0,frac[2]*vcir_i);
+	do {
+	  sigma_r = grandom(0.0,frac[0]*vcir_i);
+	  sigma_t = grandom(0.0,frac[1]*vcir_i);
+	  sigma_z = grandom(0.0,frac[2]*vcir_i);
 
-        dv_t = sigma_t;
-        dv_r = sigma_r * took(r_i) + vrad;
+	  dv_t = sigma_t;
+	  dv_r = sigma_r * took(r_i) ;
+	  vrandom = sqrt(dv_t*dv_t + dv_r*dv_r);
+	  if (vrandom > vcir_i) ncirc++;
+	} while (Qenergy &&  vrandom > vcir_i);
+	vcir_i = sqrt((vcir_i-vrandom)*(vcir_i+vrandom));
+	dv_r += vrad;
         cost = cos(theta_i);  
         sint = sin(theta_i);
 	Vel(dp)[0] =  -vcir_i * sint * jz_sign;
@@ -183,6 +193,7 @@ testdisk()
 	Vel(dp)[1] += sint*dv_r + cost*dv_t;
 	Vel(dp)[2] = sigma_z;
     }
+    if (ncirc) dprintf(0,"Had to respin random %d times\n",ncirc);
 }
 
 

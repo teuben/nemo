@@ -1,4 +1,4 @@
-.TH MKDISK 1NEMO "5 May 2003"
+.TH MKDISK 1NEMO "8 May 2003"
 .SH NAME
 mkdisk \- create a uniform-density test disk in an external potential
 .SH SYNOPSIS
@@ -76,6 +76,24 @@ Input file, in \fIsnapshot(5NEMO)\fP format, of which the positions
 are used as initial conditions. [Default: not used].
 *** \fI lost the implementation ** \fP
 .TP
+\fBangle=t|f\fP
+Normally the particles are distributed randomly in phase, but setting this
+to true, they will be regularly spread between 0 and TWO_PI. 
+Default: f
+.TP
+\fBvrad=\fP
+A constant radial velocity (>0 means outward motion) added to all particles.
+Default: 0.
+.TP
+\fBenergy=t|f\fP
+If random motions are added (see frac=), the energy of each particle will
+change. By setting \fBenergy=t\fP the energy is conserved and the "circular"
+speed will be reduced. This way the guiding center for epicyclic orbits
+will also be conserved. Note that this only applies to motion in XY.
+For stars with too much random motion (if \fBfrac\fP too high), the
+random number generator is run again to ensure conserving the planar
+motion kinetic energy. Default: false.
+.TP
 \fBheadline=\fImessage\fP
 Text headline for output file [default: not used].
 .SH "SEE ALSO"
@@ -93,4 +111,5 @@ xx-feb-87	coding, still debugging  	PJT
 22-oct-91	V4.1: added in= optional input file      	PJT
 12-jun-92	V4.2: nbody= is now second parameter, lost in=	PJT
 5-may-03	V4.4: added random Z motions by using frac=	PJT
+8-may-03	V4.5: added energy=	PJT
 .fi
