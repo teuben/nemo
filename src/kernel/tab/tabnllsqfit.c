@@ -11,7 +11,8 @@
  *      22-dec-02  1.3a fixing code to make it work for -DSINGLEPREC
  *      12-feb-03  1.3b add "fourier m=2' mode as arm3 for Rahul by Rahul
  *      14-feb-03  1.6  back to PJT style (version # got screwed up)
- *      18-feb-03  1.6a changed named of output variables in arm and arm3
+ *      18-feb-03  1.6a changed named of output variables in arm and arm3 
+ *      21-mar-03  1.7  optional bootstrapping to check on errors
  *
  *  line       a+bx
  *  plane      p0+p1*x1+p2*x2+p3*x3+.....     up to 'order'   (a 2D plane in 3D has order=2)
@@ -26,6 +27,7 @@
 #include <getparam.h>
 #include <loadobj.h>
 #include <filefn.h>
+#include <moment.h>
 
 string defv[] = {
     "in=???\n           input (table) file name",
@@ -46,8 +48,10 @@ string defv[] = {
     "lab=\n             Mixing parameter for nllsqfit",
     "itmax=50\n         Maximum number of allowed nllsqfit iterations",
     "format=%g\n        Output format for fitted values and their errors",
+    "bootstrap=0\n      Bootstrapping to estimate errors",
+    "seed=0\n           Random seed initializer",
     "numrec=f\n         Try the numrec routine instead?",
-    "VERSION=1.6a\n     18-feb-03 PJT",
+    "VERSION=1.7\n      21-mar-03 PJT",
     NULL
 };
 
@@ -71,7 +75,7 @@ typedef struct column {
 } a_column;
 
 int nxcol, nycol, xcolnr[MAXCOL], ycolnr[MAXCOL], dycolnr; 
-a_column            xcol[MAXCOL],   ycol[MAXCOL],   dycol;
+a_column            xcol[MAXCOL],   ycol[MAXCOL],   dycol,  bcol;
 
 real xrange[MAXCOL*2];      /* ??? */
 
@@ -98,6 +102,8 @@ string format;
 
 bool Qtab;                  /* do table output ? */
 
+int  nboot;
+
 typedef real (*my_proc1)(real *, real *, int);
 typedef void (*my_proc2)(real *, real *, real *, int);
 typedef int  (*my_proc3)(real *, int, real *, real *, real *, int, real *, real *, int *, 
@@ -112,6 +118,8 @@ extern int nr_nllsqfit(real *, int, real *, real *, real *, int, real *, real *,
 		       int, real, int, real, my_proc1, my_proc2);
 extern int    nllsqfit(real *, int, real *, real *, real *, int, real *, real *, int *, 
 		       int, real, int, real, my_proc1, my_proc2);
+
+extern double  xrandom(double a, double b);
 
 my_proc3 my_nllsqfit;    /* set via numrec= to be the Gipsy or NumRec routine */
 
@@ -362,6 +370,8 @@ setparams()
     else
       my_nllsqfit = nllsqfit;
     format = getparam("format");
+    nboot = getiparam("bootstrap");
+    init_xrandom(getparam("seed"));
 }
 
 setrange(real *rval, string rexp)
@@ -398,6 +408,9 @@ read_data()
         coldat[ncols] = dycol.dat = (real *) allocate(nmax * sizeof(real));
         colnr[ncols] = dycolnr;
         ncols++;
+    }
+    if (nboot>0) {
+      bcol.dat = (real *) allocate(nmax * sizeof(real));
     }
     
     npt = get_atable(instr,ncols,colnr,coldat,nmax);
@@ -536,7 +549,76 @@ int remove_data(real *x, int nx, real *y, real *dy, real *d, int npt, real nsigm
   return j;
 }
 
+/*
+ *  random_permute:  make a new random permutation
+ */
 
+random_permute(int n, int *idx) 
+{
+  int i, j, k, tmp;
+  double xn = n;
+
+  for (i=0; i<n; i++) {
+    j = (int) xrandom(0.0,xn);
+    k = (int) xrandom(0.0,xn);
+    tmp = idx[j];
+    idx[j] = idx[k];
+    idx[k] = tmp;
+  }
+}
+
+/* 
+ * bootstrap:  take a number of new samples of the errors and distribute them 
+ *             on the first fit. then refit and see what the distrubution of
+ *             the errors is.
+ */
+
+void bootstrap(int nboot, 
+	       int npt, int ndim, real *x, real *y, real *dy, real *d, 
+	       int npar, real *fpar, real *epar, int *mpar)
+{
+  real *y1, *d1, *bpar;
+  int *perm, i, j, nrt;
+  Moment *m;
+
+  if (nboot < 1) return;
+
+  warning("Trying out bootstrap");
+
+  perm = (int *) allocate(npt*sizeof(int));
+  y1 = (real *) allocate(npt*sizeof(real));
+  d1 = (real *) allocate(npt*sizeof(real));
+  bpar = (real *) allocate(npar*sizeof(real));
+  m = (Moment *) allocate(npar*sizeof(Moment));
+
+  for (i=0; i<npt; i++)
+    perm[i] = i;
+  for (i=0; i<npar; i++) {
+    bpar[i] = fpar[i];
+    ini_moment(&m[i],2);
+  }
+  
+  for (j=0; j<nboot; j++) {
+    random_permute(npt,perm);
+    for (i=0; i<npt; i++) {
+      y1[i] = (*fitfunc)(&x[i],bpar,npar) + d[perm[i]];
+    }
+    nrt = (*my_nllsqfit)(x,ndim,y1,dy,d1,npt,fpar,epar,mpar,npar,tol,itmax,lab, fitfunc,fitderv);
+    dprintf(1,"%g %g %g %g\n", fpar[0],fpar[1],epar[0],epar[1]);
+    for (i=0; i<npar; i++) {
+      accum_moment(&m[i],fpar[i],1.0);
+    }
+  }
+  for (i=0; i<npar; i++)
+    printf("%g %g ",mean_moment(&m[i]),sigma_moment(&m[i]));
+  printf("\n");
+
+  free(y1);
+  free(d1);
+  free(bpar);
+  free(perm);
+  free(m);
+}
 
 /*
  * LINE:     y = a + b * x
@@ -545,9 +627,9 @@ int remove_data(real *x, int nx, real *y, real *dy, real *d, int npt, real nsigm
 
 do_line()
 {
-  real *x, *y, *dy, *d;
-  int i,j, nrt, npt1, iter, mpar[2];
-  real fpar[2], epar[2], sigma, s;
+  real *x, *y, *dy, *d, *y1, *d1;
+  int i,j, nrt, npt1, iter, mpar[2], *perm;
+  real fpar[2], epar[2], sigma, s, bpar[2];
   int lpar = 2;
     
   if (nxcol < 1) error("nxcol=%d",nxcol);
@@ -582,10 +664,33 @@ do_line()
     if (npt1 == npt) break;
     npt = npt1;
   }
-
+#if 1
+  if (nboot) {
+    warning("Trying out bootstrap");
+    y1 = (real *) allocate(npt*sizeof(real));
+    d1 = (real *) allocate(npt*sizeof(real));
+    perm = (int *) allocate(npt*sizeof(int));
+    for (i=0; i<npt; i++)
+      perm[i] = i;
+    for (i=0; i<lpar; i++)
+      bpar[i] = fpar[i];
+    for (iter=0; iter<nboot; iter++) {
+      random_permute(npt,perm);
+      for (i=0; i<npt; i++) {
+	y1[i] = fitfunc(&x[i],bpar,lpar) + d[perm[i]];
+      }
+      nrt = (*my_nllsqfit)(x,1,y1,dy,d1,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
+      printf("%g %g %g %g\n", fpar[0],fpar[1],epar[0],epar[1]);
+    }
+    free(y1);
+  }
+#else
+  bootstrap(nboot, npt,1,x,y,dy,d, lpar,fpar,epar,mpar);
+#endif
   if (outstr)
     for (i=0; i<npt; i++)
       fprintf(outstr,"%g %g %g\n",x[i],y[i],d[i]);
+  free(d);
 }
 
 
@@ -706,7 +811,7 @@ do_gauss()
     if (npt1 == npt) iter=msigma+1;       /* signal early bailout */
     npt = npt1;
   }
-    
+  bootstrap(nboot, npt,1,x,y,dy,d, lpar,fpar,epar,mpar);    
 
   if (outstr)
     for (i=0; i<npt; i++)
@@ -761,6 +866,7 @@ do_exp()
     if (npt1 == npt) iter=msigma+1;       /* signal early bailout */
     npt = npt1;
   }
+  bootstrap(nboot, npt,1,x,y,dy,d, lpar,fpar,epar,mpar);
 
   if (outstr)
     for (i=0; i<npt; i++)
@@ -814,6 +920,7 @@ do_poly()
     if (npt1 == npt) iter=msigma+1;       /* signal early bailout */
     npt = npt1;
   }
+  bootstrap(nboot, npt,1,x,y,dy,d, lpar,fpar,epar,mpar);
 
   if (outstr)
     for (i=0; i<npt; i++)
@@ -883,7 +990,7 @@ do_arm()
     if (npt1 == npt) iter=msigma+1;       /* signal early bailout */
     npt = npt1;
   }
-
+  bootstrap(nboot, npt,1,x,y,dy,d, lpar,fpar,epar,mpar);
 
 
   if (outstr)
@@ -948,7 +1055,7 @@ do_arm3()
     if (npt1 == npt) iter=msigma+1;       /* signal early bailout */
     npt = npt1;
   }
-
+  bootstrap(nboot, npt,1,x,y,dy,d, lpar,fpar,epar,mpar);
 
 
   if (outstr)
