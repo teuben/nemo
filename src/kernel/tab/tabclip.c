@@ -1,7 +1,8 @@
 /*
  * TABCLIP:  clips points from a table based on some smoothness criteria
  *
- *    23-nov-2002  Simple version, with just beta=
+ *    23-nov-2002  0.1 Simple version, with just beta=
+ *    27-nov-2002  0.3 merged 0.2 with Rahul/Stuart's afternoon hacking
  */
 
 /**************** INCLUDE FILES ********************************/ 
@@ -19,13 +20,14 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "xcol=1\n		 x coordinate column",
     "ycol=2\n		 y coordinate column",
     "deriv=\n            Clipping if abs(derivative) exceeds this value",
+    "eta=\n              Max deviation of local 2nd order polynomial allowed",
     "nmax=100000\n       Hardcoded allocation space, if needed for piped data",
     "comment=f\n         Keep clipped points as commented lines?",
-    "VERSION=0.2\n	 25-nov-02 PJT",
+    "VERSION=0.3\n	 27-nov-02 PJT",
     NULL
 };
 
-string usage = "clip a table";
+string usage = "clip points from a table based on some criteria";
 
 /**************** GLOBAL VARIABLES ************************/
 
@@ -52,6 +54,7 @@ nemo_main()
     outstr = stropen(output,"w");
     read_data();
     if (hasvalue("deriv")) deriv_data();
+    if (hasvalue("eta"))     eta_data();
     write_data();
 }
 
@@ -105,7 +108,7 @@ read_data()
 deriv_data()
 {
   int    i;
-  real d1, d2, dmin = getdparam("deriv");
+  real d1, d2, d1a, d2a, dmin = getdparam("deriv");
   real d_min, d_max;
   bool first = TRUE;
 
@@ -118,6 +121,14 @@ deriv_data()
       }
     } else
       d1 = dmin+1;
+    if (i>2 )
+      d1a = (y[i]-y[i-2]);
+    else
+      d1a = 0;
+    if (i<npt-2)
+      d2a = y[i]-y[i+2];
+    else
+      d2a = 0.;
     if (i<npt-1) {
       d2 = (y[i]-y[i+1])/(x[i]-x[i+1]);
       if (first) {
@@ -128,6 +139,8 @@ deriv_data()
       d2 = dmin+1;
     d1 = ABS(d1);  
     d2 = ABS(d2);  
+    d1a = ABS(d1a);
+    d2a = ABS(d2a);
     if (d1 < dmin) {
       d_min = MIN(d_min,d1);
       d_min = MIN(d_min,d2);
@@ -135,9 +148,51 @@ deriv_data()
     if (d2 < dmin) {
       d_max = MAX(d_max,d1);
       d_max = MAX(d_max,d2);}
-    if (d1 > dmin && d2 > dmin) ok[i] = FALSE;
+    if (d1 > dmin || d2 > dmin || d1a > dmin || d2a > dmin) ok[i] = FALSE;
+    dprintf(1,"DERIV: %d %g %g %g %g %g %g %g %g %d\n",i,y[i],y[i-1],dmin,dmin,d1,d2,d1a,d2a,ok[i]);
   }
   dprintf(0,"Min/Max for deriv = %g %g (dmin=%g)\n",d_min,d_max,dmin);
+}
+
+/*
+ * fit a local polynomial to the 3 points defined by 0,1,2
+ * and compute the 'velocity' and 'acceleration'
+ * then predict the 'position' where it should be at point 3
+ */
+real get_av(int i0, int i1, int i2, int i3)
+{
+  real t0 = x[i0];
+  real t1 = x[i1]-t0;
+  real t2 = x[i2]-t0;
+  real t3 = x[i3]-t0;
+  real x0 = y[i0];
+  real x1 = y[i1]-x0;
+  real x2 = y[i2]-x0;
+  real x,a,v;
+
+  a =  2*(t1*x2-t2*x1)/(t1*t2*(t2-t1));
+  v = (t1*t1*x2-t2*t2*x1)/(t1*t2*(t1-t2));
+  x = x0 + v*t3 + 0.5*a*t3*t3;
+  return x;
+}
+
+eta_data()
+{
+  int    i;
+  real d1, d2, d1a, d2a, dmin = getdparam("deriv");
+  real eta = getdparam("eta");
+  real d_min, d_max;
+  bool first = TRUE;
+  dprintf(0,"ETA: Using eta=%g\n",eta);
+
+  for (i=3; i<npt-3; i++) {                  /* loop over all points */
+    d1 = get_av(i-3,i-2,i-1,i);
+    d2 = get_av(i+3,i+2,i+1,i);
+    d1 = ABS(d1-y[i]);
+    d2 = ABS(d2-y[i]);
+    if (d1 > eta && d2 > eta) ok[i] = FALSE;
+    dprintf(1,"ETA: %d %g %g %g %g\n",i,x[i],y[i],d1,d2);
+  }
 }
 
 write_data()
