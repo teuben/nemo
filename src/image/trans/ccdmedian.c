@@ -3,6 +3,7 @@
  *
  *	29-jan-01	PJT	q&d for Mark Wolfire
  *      30-jan-01       PJT     experimenting with NR's sort routines
+ *      30-jul-04       PJT     optional X,Y range selection
  *                      
  */
 
@@ -17,7 +18,9 @@ string defv[] = {
         "in=???\n       Input image file",
 	"out=???\n      Output image file",
 	"n=5\n		(odd) size of filter",
-	"VERSION=0.1\n  29-jan-01 PJT",
+	"x=\n           Optional subselection of the X range (min,max)",
+	"y=\n           Optional subselection of the Y range (min,max)",
+	"VERSION=0.3\n  30-jul-04 PJT",
 	NULL,
 };
 
@@ -34,17 +37,28 @@ string usage = "median filter of an image";
 #endif
 
 real median(int, real *);
+void sort0(int, real *);
 void sort1(int, real *);
 void sort2(int, real *);
 void sort3(int, real *);
 
-#define sort sort1
+#define sort sort0
+
+void get_range(string axis, int *ia)
+{
+  int n = nemoinpi(getparam(axis),ia,2);
+  if (n==2) return;
+  if (n<0) 
+    error("%s=%s parsing error: needs two values (min,max)",axis,getparam(axis));
+  error("%s=%s needs two values (min,max)",axis,getparam(axis));
+}
 
 void nemo_main()
 {
     stream  instr, outstr;
     int     nx, ny, nz, mode;
     int     i,j,k, n, n1, i1, j1, m;
+    int     ix[2], iy[2];
     imageptr iptr=NULL, optr;      /* pointer to images */
     real    *vals;
 
@@ -52,7 +66,7 @@ void nemo_main()
     dprintf(0,"Median filter size %d\n",n);
     if (n%2 != 1) error("filter size %d needs to be odd",n);
     n1 = (n-1)/2;
-    vals = (real *) allocate (1 + sizeof(real) * n * n);
+    vals = (real *) allocate (sizeof(real) * (n*n + 1));
 
     instr = stropen(getparam("in"), "r");
     read_image( instr, &iptr);
@@ -61,6 +75,16 @@ void nemo_main()
     nz = Nz(iptr);
     if (nz > 1) error("Cannot do 3D cubes properly; use 2D");
 
+    if (hasvalue("x") && hasvalue("y")) {
+      get_range("x",ix);
+      get_range("y",iy);
+    } else {
+      ix[0] = 0;
+      ix[1] = nx-1;
+      iy[0] = 0;
+      iy[1] = ny-1;
+    }
+      
     outstr = stropen(getparam("out"), "w");
     create_cube(&optr,nx,ny,nz);
     Dx(optr) = Dx(iptr);
@@ -71,21 +95,21 @@ void nemo_main()
     Zmin(optr) = Zmin(iptr);
 
     for (j=0; j<ny; j++) {
-        for (i=0; i<nx; i++) {
-            if (j<n || j > ny-n) {
-                CVO(i,j) = CVI(i,j);
-                continue;
-            }
-            if (i<n || i>nx-n) {
-                CVO(i,j) = CVI(i,j);
-                continue;
-            }
-	    m = 0;
-	    for (j1=j-n1; j1<=j+n1; j1++)
-	    for (i1=i-n1; i1<=i+n1; i1++)
-	      vals[m++] = CVI(i1,j1);
-	    CVO(i,j) = median(m,vals);
-        }
+      if (j<n || j > ny-n || j < iy[0] || j > iy[1]) {
+	CVO(i,j) = CVI(i,j);
+	continue;
+      }
+      for (i=0; i<nx; i++) {
+	if (i<n || i>nx-n || i < ix[0] || i > ix[1]) {
+	  CVO(i,j) = CVI(i,j);
+	  continue;
+	}
+	m = 0;
+	for (j1=j-n1; j1<=j+n1; j1++)
+	  for (i1=i-n1; i1<=i+n1; i1++)
+	    vals[m++] = CVI(i1,j1);
+	CVO(i,j) = median(m,vals);
+      }
     }
     write_image(outstr, optr);
 }
