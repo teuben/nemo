@@ -32,12 +32,13 @@
  *      19-jun-92 renamed string not to clash with NEMO's type      PJT
  *      27-feb-94 ansi + <stdinc.h> now
  *	12-apr-95 no more ARGS, full prototypes
+ *	 7-apr-01 gcc warning         
  */
 
 #include <stdinc.h>
 
 int match(string, string, int *);
-int partialstrcmp(char *, int, int, char *, int, int);
+int partialstreq (char *, int ,int, char *, int, int);
 
 #define INTLEN 32	/* length of an integer in bits, i.e. max ss's */
 
@@ -120,12 +121,14 @@ int match (char *istring, char *compar, int *mask)
 	for (j=1; j<=numcom; j++) {	 /* check every ss in COMPAR */
 	    j1=ecom[j]-lcom[j];
 	    j2=j1+lmat[i]-1;
-	    if (lmat[i] <= lcom[j])     /* match string short enough */
-	        if (partialstreq(compar,j1,j2,istring,i1,i2)) 
+	    if (lmat[i] <= lcom[j]) {    /* match string short enough */
+	        if (partialstreq(compar,j1,j2,istring,i1,i2)) {
 		    if (imatch<0)        /* is it a first match? */
 		        imatch=j-1;       /* set substring bit code */
 		    else
 			return(-2);
+		}
+	    }
 	}
 	if (imatch<0) 
 	    return (-3);

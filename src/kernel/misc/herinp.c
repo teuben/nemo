@@ -51,11 +51,14 @@
  *		 7-jan-94: atand() bug resolved				   pjt
  *		           and atand2() also with dcd_ calls instead	   pjt
  *		16-feb-97: removed some nexted external decl's             pjt
+ *               7-apr-01: gcc warning                                     pjt
  */
 
 #define BIGLOOP /* comment this our if you want MAXSHORT as largest count */
 
+/* if we use NEMO.H here, string.h seems to cause a linux parse problem */
 #include <stdio.h>
+#include <stdlib.h>
 #include <ctype.h>
 #include <math.h>
 #include "gipsyc.h"
@@ -66,79 +69,79 @@
 #define toupper(ch) (((ch >= 'a') && (ch <= 'z')) ?  (ch - 'a' + 'A') : (ch))
 #endif
 
-extern logical fblank_();		/* f2c */
-extern void    setfblank_();		/* f2c */
+extern logical fblank_(int *);	
+extern void    setfblank_(int *);
 
 #define byte    char
 #define bool    int
 #define DEFAULT 1
 
-static void   dcd_inifblank();
-static int    dcd_round();
-static void   dcd_error();
-static void   dcd_gencode();
-static void   dcd_genconst();
-static void   dcd_inilist();
-static void   dcd_beginlist();
-static void   dcd_endlist();
-static void   dcd_putlist();
-static void   dcd_nextch();
-static void   dcd_nextsym();
-static void   dcd_nextwr();
-static void   dcd_movenum();
-static void   dcd_loop();
-static void   dcd_expression();
-static void   dcd_term();
-static void   dcd_factor();
-static void   dcd_function();
-static void   dcd_list();
-static void   dcd_dump();	/* never used */
-static void   dcd_push();
-static double dcd_pop();
-static double dcd_add();
-static double dcd_sub();
-static double dcd_mul();
-static double dcd_div();
-static double dcd_neg();
-static double dcd_pwr();
-static double dcd_sin();
-static double dcd_asin();
-static double dcd_sinh();
-static double dcd_cos();
-static double dcd_acos();
-static double dcd_cosh();
-static double dcd_tan();
-static double dcd_atan();
-static double dcd_tanh();
-static double dcd_atan2();
-static double dcd_rad();
-static double dcd_deg();
-static double dcd_pi();
-static double dcd_exp();
-static double dcd_ln();
-static double dcd_log();
-static double dcd_sqrt();
-static double dcd_abs();
-static double dcd_sinc();
-static double dcd_max();
-static double dcd_min();
-static double dcd_erf();
-static double dcd_erfc();
-static double dcd_mod();
-static double dcd_int();
-static double dcd_nint();
-static double dcd_sign();
-static double dcd_ifgt();
-static double dcd_iflt();
-static double dcd_ifge();
-static double dcd_ifle();
-static double dcd_ifeq();
-static double dcd_ifne();
-static double dcd_ran();
-static double dcd_ranu();
-static double dcd_rang();
-static double dcd_ranp();
-static void   dcd_evaluate();
+static void dcd_inifblank(void);
+static int  dcd_round(double arg);
+static void dcd_error(int errnum);
+static void dcd_gencode(int opc);
+static void dcd_genconst(double cst);
+static void dcd_inilist(void);
+static void dcd_beginlist(void);
+static void dcd_endlist(void);
+static void dcd_putlist(void);
+static void dcd_nextch(void);
+static void dcd_nextsym(void);
+static void dcd_nextwr(void);
+static void dcd_movenum(void);
+static void dcd_loop(void);
+static void dcd_expression(void);
+static void dcd_term(void);
+static void dcd_factor(void);
+static void dcd_function(void);
+static void dcd_list(void);
+static void dcd_dump(void);
+static void dcd_push(double r);
+static double dcd_pop(void);
+static double dcd_add(double arg1, double arg2);
+static double dcd_sub(double arg1, double arg2);
+static double dcd_mul(double arg1, double arg2);
+static double dcd_div(double arg1, double arg2);
+static double dcd_neg(double arg1);
+static double dcd_pwr(double arg1, double arg2);
+static double dcd_sin(double arg1);
+static double dcd_asin(double arg1);
+static double dcd_sinh(double arg1);
+static double dcd_cos(double arg1);
+static double dcd_acos(double arg1);
+static double dcd_cosh(double arg1);
+static double dcd_tan(double arg1);
+static double dcd_atan(double arg1);
+static double dcd_tanh(double arg1);
+static double dcd_atan2(double arg1, double arg2);
+static double dcd_rad(double arg1);
+static double dcd_deg(double arg1);
+static double dcd_pi(void);
+static double dcd_exp(double arg1);
+static double dcd_ln(double arg1);
+static double dcd_log(double arg1);
+static double dcd_sqrt(double arg1);
+static double dcd_abs(double arg1);
+static double dcd_sinc(double arg1);
+static double dcd_max(double arg1, double arg2);
+static double dcd_min(double arg1, double arg2);
+static double dcd_erf(double arg1);
+static double dcd_erfc(double arg1);
+static double dcd_mod(double arg1, double arg2);
+static double dcd_int(double arg1);
+static double dcd_nint(double arg1);
+static double dcd_sign(double arg1);
+static double dcd_ifgt(double arg1, double arg2, double arg3, double arg4);
+static double dcd_iflt(double arg1, double arg2, double arg3, double arg4);
+static double dcd_ifge(double arg1, double arg2, double arg3, double arg4);
+static double dcd_ifle(double arg1, double arg2, double arg3, double arg4);
+static double dcd_ifeq(double arg1, double arg2, double arg3, double arg4);
+static double dcd_ifne(double arg1, double arg2, double arg3, double arg4);
+static double dcd_ran(void);
+static double dcd_ranu(double arg1, double arg2);
+static double dcd_rang(double arg1, double arg2);
+static double dcd_ranp(double arg1);
+static void   dcd_evaluate(int q);
 
 /*  definitions/declarations for the function code  */
 
@@ -287,8 +290,7 @@ static void dcd_inifblank()
    DCDBLANK = dcd_blank.dd;
 }
 
-static int dcd_round(arg)
-double arg;
+static int dcd_round(double arg)
 {
    int val;
    if (arg > 0.0) {
@@ -299,8 +301,7 @@ double arg;
    return(val);
 }
 
-static void dcd_error(errnum)
-int errnum;
+static void dcd_error(int errnum)
 {
    if (errornum == 0) {
       if (errorpos == 0) errorpos = pos;
@@ -309,8 +310,7 @@ int errnum;
    }
 }
 
-static void dcd_gencode(opc)
-int opc;
+static void dcd_gencode(int opc)
 {
    if (errornum != 0) return;
    if (list) {
@@ -330,8 +330,7 @@ int opc;
    }
 }
 
-static void dcd_genconst(cst)
-double cst;
+static void dcd_genconst(double cst)
 {
    dcd_gencode(ldc);
    if (errornum != 0) return;
@@ -473,12 +472,12 @@ static void dcd_nextsym()
       while ((isalpha(ch)||isdigit(ch)) && (i < maxfunlen)) {
          fun[i++] = toupper(ch);
          dcd_nextch();
-      };
+      }
       fun[i] = 0;
       curfun = 0;
       while ((curfun < maxfuncts) && strcmp(fun,functs[curfun])) {
          curfun++;
-      };
+      }
       sym = funct;
       if (curfun == maxfuncts) dcd_error(-12);  /* unknown function */
    } else switch(ch) {
@@ -489,7 +488,7 @@ static void dcd_nextsym()
          sym = times; dcd_nextch();
          if (ch == '*') {
             sym = power; dcd_nextch();
-         };
+         }
          break;
       }
       case '/'  : sym = divide; dcd_nextch(); break;
@@ -1725,9 +1724,7 @@ integer   *nout, *ierd;
 #endif
 
 #if defined(TESTBED)
-main(argc, argv)
-char    *argv[];
-int     argc;
+main(char *argc[], int argv)
 {
    double outv[256];
    char   expr[256];

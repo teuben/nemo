@@ -4,6 +4,7 @@
  *   16-apr-98   2.0 : split off from TOOLBOX in spline.c  (kernel/misc)    pjt
  *   22-jan-01   2.1 : allow x= and y= to be arrays, for Mousumi Das	    pjt
  *   5-apr-01	 2.2 : added format=					    pjt
+ *   8-apr-01       a: fixed SINGLEPREC operation
  *
  *   TODO:
  *      - spline vs. linear
@@ -21,7 +22,7 @@ string defv[] = {
     "y=\n           For these Y's, find X",
     "n=0\n          Which one to find (0=all)",
     "format=%g\n    Output format",
-    "VERSION=2.2\n  5-apr-01 PJT",
+    "VERSION=2.2a\n 8-apr-01 PJT",
     NULL,
 
 };
@@ -75,7 +76,7 @@ nemo_main()
     dprintf(1,"Xrange: %g : %g  Yrange: %g : %g\n",xmin,xmax,ymin,ymax);
 
     if (Qx) {
-      nx = nemoinpd(getparam("x"),xp,MAXDATA);
+      nx = nemoinpr(getparam("x"),xp,MAXDATA);
       if (nx<0) error("Parsing x=%s",getparam("x"));
       for (j=0; j<nx; j++) {
         x = xp[j];
@@ -97,7 +98,7 @@ nemo_main()
     }
 
     if (Qy) {
-      ny = nemoinpd(getparam("y"),yp,MAXDATA);
+      ny = nemoinpr(getparam("y"),yp,MAXDATA);
       if (ny<0) error("Parsing y=%s",getparam("y"));
       for (j=0; j<ny; j++) {
         y = yp[j];

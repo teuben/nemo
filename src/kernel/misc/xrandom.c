@@ -19,9 +19,12 @@
  *   8-dec-96   rearranged order in TOOLBOX, also report output for unifom
  *  20-jan-99   add tab= to optionally output all random numbers  PJT
  *  24-feb-01   added comments to grandrom() and return both #'s  PJT
+ *   7-apr-01   fixed grandom() bug, introduced 24-feb
  */
 
 #include <stdinc.h>
+#include <unistd.h>
+#include <time.h>
 #include <sys/types.h>
 #include <sys/times.h>
 
@@ -100,9 +103,9 @@ double xrandom(double xl, double xh)
  *	    Gauss also attributes it to Laplace.
  * See also: Knuth, vol. 2, p. 104.
  */
-#if 0
-	/* check */
 
+#if 0
+	/* better check */
 do {
      v1=2.0*ran2()-1.0;
      v2=2.0*ran2()-1.0;
@@ -113,9 +116,10 @@ r1=v1*sqrt(-(ar+ar)/s)*sig-mu;
 r2=v2*sqrt(-(ar+ar)/s)*sig-mu;
 
 #endif
+
 double grandom(double mean, double sdev)
 {
-    double v1, v2, s;
+    static double v1, v2, s;
     static int gcount = 0;
 
     if (gcount) {

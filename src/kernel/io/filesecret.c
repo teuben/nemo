@@ -20,6 +20,7 @@
  *	  12-apr-05   pjt       use NOPROTO instead of PROTO
  *      d 16-feb-97   pjt       extra protection to malloc(<0)
  *      e 13-jan-99   pjt       defer free in random I/O
+ *      f  6-apr-01   pjt       malloc->calloc
  *
  *  Although the SWAP test is done on input for every item - for deferred
  *  input it may fail if in the mean time another file was read which was
@@ -64,7 +65,7 @@ string tag;				/* tag of item to copy */
 	dims = get_dims(istr, tag);		/*   find out about shape   */
 	dlen = get_dlen(istr, tag);		/*   and length in bytes    */
 	if(dlen<0) error("copy_item: %s with dlen=%d",tag,dlen);    /* yuck */
-	buf = (byte *) malloc(dlen);		/*   get space for a buffer */
+	buf = (byte *) calloc(dlen,1);		/*   get space for a buffer */
 	if (buf == NULL)			/*   and check for error    */
 	    error("copy_item: item %s: not enuf memory", tag);
 	get_data_sub(istr, tag, type, buf, dims, FALSE);
@@ -112,7 +113,7 @@ string *cvt;				/* list of conversions */
 	dims = get_dims(istr, tag);		/*   find out about shape   */
 	dlen = get_dlen(istr, tag);		/*   and length in bytes    */
 	if(dlen<0) error("copy_item_cvt: %s with dlen=%d",tag,dlen); 
-	bufin = (byte *) malloc(dlen);		/*   get space for a buffer */
+	bufin = (byte *) calloc(dlen,1);	/*   get space for a buffer */
 	if (bufin == NULL)			/*   and check for error    */
 	    error("copy_item_cvt: item %s: not enuf memory", tag);
 	get_data_sub(istr, tag, type, bufin, dims, FALSE);
@@ -535,7 +536,7 @@ bool con)			/* coercion flag */
 void get_data_set(stream str, string tag, string typ, int dim1, ...)
 {
     va_list ap;
-    int dim[MaxVecDim], *buf, n = 0;
+    int dim[MaxVecDim], n = 0;
     itemptr ipt;
     strstkptr sspt;
 
@@ -629,7 +630,7 @@ string get_string(
 	error("get_string: item %s: not plural char", tag);
     dlen = datlen(ipt,0);
     if(dlen<0) error("get_string: %s with dlen=%d",tag,dlen);       /* yuck */
-    dat = (char *) malloc(dlen);        	/* alloc memory for string  */
+    dat = (char *) calloc(dlen,1);        	/* alloc memory for string  */
     if (dat == NULL)				/* did alloc fail?          */
 	error("get_string: item %s: not enuf memory", tag);
     copydata(dat, 0, dlen, ipt, str);		/* copy string from input   */
@@ -1101,7 +1102,7 @@ stream str;
     if (dlen <= MaxReadNow || !strseek(str)) {  /* force read               */
 #endif
 	if(dlen<0) error("get_dat: dlen=%d",dlen);   
-	ItemDat(ipt) = (byte *) malloc(dlen);	/*   then alloc space now   */
+	ItemDat(ipt) = (byte *) calloc(dlen,1);	/*   then alloc space now   */
 	if (ItemDat(ipt) == NULL)		/*   did alloc fail?	    */
 	    error("getdat: no memory (%d bytes)", dlen);
 	saferead(ItemDat(ipt), ItemLen(ipt), elen, str);
@@ -1294,7 +1295,7 @@ int *dim;                  	/* dims, terminated with 0 */
 {
     itemptr ipt;
 
-    ipt = (itemptr) malloc(sizeof(item));	/* get space for item       */
+    ipt = (itemptr) calloc(sizeof(item),1);	/* get space for item       */
     if (ipt == NULL)				/* check malloc worked      */
 	error("makeitem: tag %s: malloc failed", tag);
     ItemTyp(ipt) = typ;				/* set type code string     */

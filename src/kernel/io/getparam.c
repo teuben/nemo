@@ -91,6 +91,8 @@
  *  6-jan-00       c  fixed bug in fgets() arguments
  * 18-jan-00       d  added cntparam; added [defaults] to help=h; 
  *                    also use 'help' and '-h' to give help.
+ *                 e  gcc warnings
+ *  8-apr-01    3.2   added getfparam()
  *
   TODO:
       - what if there is no VERSION=
@@ -111,7 +113,7 @@
       - @macro and $key references get expanded as strings.
  */
 
-#define VERSION_ID  "3.1d 18-jan-00 PJT"
+#define VERSION_ID  "3.2 8-apr-01 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -142,6 +144,8 @@
 #include <extstring.h>
 #include <filefn.h>
 #include <strlib.h>
+#include <unistd.h>
+#include <ctype.h>
 
 #if defined(TCL)
 # include <tcl.h>
@@ -150,10 +154,13 @@
 #if defined(READLINE)
   extern char *readline(string);
 #endif
+
+#if defined(TCL)
   local void myreadline(string,int);
   local void ini_readline(void);
   local void end_readline(void);
   local void stripwhite(char *);
+#endif
 
 #if defined(sun)
 #   include <floatingpoint.h>               /* special IEEE handler for Sun's */
@@ -927,16 +934,18 @@ local string get_macro(char *mname)
     strclose(fstr);                 /* file is read in 'as is' in binary   */
     mp[n] = 0;  /* terminate - since mp could point anywhere */
 
-    for (cp=mp; *cp; cp++)      
-        if (*cp=='\n')
-            if (cp[1]==0)
-                *cp = 0;            /* last line: newline trimmed */
-            else
-                *cp=' ';            /* replace newline with blanks */
+    for (cp=mp; *cp; cp++) {
+      if (*cp=='\n') {
+	if (cp[1]==0)
+	  *cp = 0;            /* last line: newline trimmed */
+	else
+	  *cp=' ';            /* replace newline with blanks */
+      }
+    }
     return mp;
 #else
     if (*mname == '@') 
-        warning("getparam.c: macro not compiled (use: -DMACROREAD)");
+      warning("getparam.c: macro not compiled (use: -DMACROREAD)");
     return mname;              /* no processing, return string */
 #endif
 }
@@ -1146,6 +1155,11 @@ double getdparam(string par)
                             par,val,nret,dpar);
     return (nret==0) ? 0.0 : dpar;
 #endif /* !NEMOINP */
+}
+
+float getfparam(string par)
+{
+    return (float) getdparam(par);
 }
 
 /*
@@ -1451,7 +1465,7 @@ local void writekeys(string mesg)
 local void readkeys(string mesg, bool first)
 {
     FILE *keyfile;
-    int i, i1;
+    int i;
 
     keyfile = fopen(key_filename,"r");
     if (keyfile==NULL && !first)

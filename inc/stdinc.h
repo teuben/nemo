@@ -181,7 +181,7 @@ typedef FILE *stream;
  */
 
 typedef void (*proc)();
-/*typedef bool (*bproc)();*/	/* problems on sun3 ??? aix too */
+typedef bool (*bproc)();	/* problems on sun3 ??? aix too */
 typedef int (*iproc)();
 typedef real (*rproc)();
 

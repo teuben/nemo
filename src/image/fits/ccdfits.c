@@ -27,6 +27,7 @@
  *      18-may-99  V2.8  cdmatrix optional output                       pjt
  *      15-oct-99  V2.9  force a more silly RA---SIN/DEC--SIN axis      pjt
  *      23-mar-01  V3.0  allow fits reference image to inherit WCS from PJT
+ *       8-apr-01      a fixed SINGLEPREC operation
  */
 
 
@@ -51,7 +52,7 @@ string defv[] = {
 	"refmap=\n       reference map to inherit WCS from",
 	"refpix=\n       reference pixel, if different from default",
 	"radecvel=f\n    Enforce reasonable RA/DEC/VEL axis descriptor",
-        "VERSION=3.0\n   23-mar-01 PJT",
+        "VERSION=3.0a\n  8-apr-01 PJT",
         NULL,
 };
 
@@ -120,7 +121,7 @@ void setparams(void)
   if (Qrefmap) {
     set_refmap(getparam("refmap"));
     if (hasvalue("refpix")) {
-      n =  nemoinpd(getparam("refpix"),tmpr,3);
+      n =  nemoinpr(getparam("refpix"),tmpr,3);
       for (i=0; i<n; i++)
 	ref_crpix[i] = tmpr[i];
     }

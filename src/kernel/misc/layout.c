@@ -4,7 +4,8 @@
  *      20-oct-92       original version                pjt
  *	22-jan-95	ansi prototypes			pjt
  *	12-apr-95	fixed potential stack problem, no more ARGS
- *      16-sep-96  0.1  added init= keyword             pjt
+ *      16-sep-96  0.1  added init= keyword             pjt 
+ *       7-apr-01       gcc warnings                    pjt
  *
  */
 
@@ -13,33 +14,35 @@
 #include <strlib.h>
 #include <ctype.h>
 #include <layout.h>
+#include <extstring.h>
 
 local struct www {                  /*  List of all basic YAPP commands */
     pl_id id;                       /* YAPP function id; see layout.h */
     char *command;                  /* name of YAPP function command */
     char *args;                     /* type encoding, one char for each par */
 }  www[] = {
-    Swap,   "swap",     "", 
-    Xscale, "xscale",   "rr",
-    Yscale, "yscale",   "rr",
-    Ltype,  "ltype",    "ii",
-    Line,   "line",     "rr",
-    Move,   "move",     "rr",
-    Point,  "point",    "rrr",
-    Circle, "circle",   "rrr",
-    Cross,  "cross",    "rrr",
-    Box,    "box",      "rrr",
-    Just,   "just",     "i",
-    Text,   "text",     "srrrr",
-    Flush,  "flush",    "",
-    Frame,  "frame",    "",
-    Init,   "init",     "srrrr",
-    Stop,   "stop",     "",
-    NOP,    "#",        "",
-    NOP,    NULL,       NULL,
+    { Swap,   "swap",     ""     }, 
+    { Xscale, "xscale",   "rr"   },
+    { Yscale, "yscale",   "rr"   },
+    { Ltype,  "ltype",    "ii"   },
+    { Line,   "line",     "rr"   },
+    { Move,   "move",     "rr"   },
+    { Point,  "point",    "rrr"  },
+    { Circle, "circle",   "rrr"  },
+    { Cross,  "cross",    "rrr"  },
+    { Box,    "box",      "rrr"  },
+    { Just,   "just",     "i"    },
+    { Text,   "text",     "srrrr"},
+    { Flush,  "flush",    ""     },
+    { Frame,  "frame",    ""     },
+    { Init,   "init",     "srrrr"},
+    { Stop,   "stop",     ""     },
+    { NOP,    "#",        ""     },
+    { NOP,    NULL,       NULL   },
 };
 
 local string *split(string);
+
 
 
 /*
@@ -52,7 +55,6 @@ plcommand *pl_fread(string file)
 {
     stream fp=stropen(file,"r");
     char line[128];
-    int n;
     plcommand *p, *start;
 
     start = (plcommand *) allocate(sizeof(plcommand));  /* alloc first */

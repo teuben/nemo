@@ -71,6 +71,10 @@ if ($debug) echo "$NEMOBIN added to search path"
 if (! -d $NEMOBIN) then
   echo "Warning: $NEMOBIN does not exist (yet)"
   echo "Look at targets fakehost and truehost in $NEMO/Makefile"
+else
+  if (-e $NEMOBIN/cc) then
+    echo "Warning: you still carry $NEMOBIN/cc, which is not NEMO V3 compliant"
+  endif
 endif
 if ($path[1] == ".") then
   set path = ( . $NEMOBIN $path[2-] )

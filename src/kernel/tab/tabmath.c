@@ -156,8 +156,8 @@ local void setparams(void)
 local void convert(int ninput, stream *instr, stream outstr)
 {
     char   line[MLINELEN];          /* input linelength */
-    double dval[MAXCOL];            /* number of items (values on line) */
-    double retval;
+    real   dval[MAXCOL];            /* number of items (values on line) */
+    real   retval;
     char   newdat[MNEWDAT];         /* to store new column in ascii */
     int    nval, i, nlines, one=1;
     string *outv;                   /* pointer to vector of strings to write */
@@ -182,7 +182,7 @@ local void convert(int ninput, stream *instr, stream outstr)
         nlines++;
         tab2space(line);	          /* work around a Gipsy (?) problem */
         if (nfies>0 || *selfie) {              	/* if a new column requested */
-            nval = nemoinpd(line,dval,MAXCOL);         /* split into numbers */
+            nval = nemoinpr(line,dval,MAXCOL);         /* split into numbers */
             dprintf (3,"nval=%d \n",nval);
             if (nval>MAXCOL)
                 error ("Too many numbers: %s",line);

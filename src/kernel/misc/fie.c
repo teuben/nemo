@@ -33,6 +33,7 @@
  *	       25-feb-92 happy gcc2.0			  PJT
  *             18-may-92 set_xrandom for NEMO             PJT
  *             16-dec-96 moved xrandom decl. up	          PJT
+ *              7-apr-01 gcc warnings                     pjt
  *
  */
 #include <stdinc.h>   /* stdinc is NEMO's stdio =- uses real{float/double} */
@@ -76,14 +77,34 @@ static int codeptr = 0;
 static int opcodeptr = 0;
 static int npar = 0;
 
-static void fie_expression(), fie_term(), fie_factor();
-static void fie_gencode(), fie_genconst(), fie_nextsym(), fie_nextch();
-static void fie_error(), fie_function(), fie_push();
+static void fie_gencode(int opc);
+static void fie_genconst(double cst);
+static void fie_nextch(void);
+static void fie_nextsym(void);
+static void fie_expression(void);
+static void fie_term(void);
+static void fie_factor(void);
+static void fie_function(void);
+static void fie_error(void);
+static void fie_push(double r);
+static double fie_pi(void);
+static double fie_rad(double arg1);
+static double fie_deg(double arg1);
+static double fie_sinc(double arg1);
+static double fie_max(double arg1, double arg2);
+static double fie_min(double arg1, double arg2);
+static double fie_erf(double arg1);
+static double fie_erfc(double arg1);
+static double fie_mod(double arg1, double arg2);
+static double fie_int(double arg1);
+static double fie_sign(double arg1);
+static double fie_ran(void);
+static double fie_ranu(double arg1, double arg2);
+static double fie_rang(double arg1, double arg2);
+static double fie_ranp(double arg1);
+static double fie_pop(void);
 
-int /* printf(),*/ rand();
-
-static void fie_gencode(opc)
-int opc;
+static void fie_gencode(int opc)
 {
    fiecode[codeptr].opcode[opcodeptr++] = opc;
    if (opcodeptr == bid) {
@@ -242,8 +263,7 @@ static void fie_nextsym()
 	  }
 }
 
-int inifie(expr)			/* PJT: now int instead of short */
-char *expr;
+int inifie(char *expr)			/* PJT: now int instead of short */
 {
 	int i;
 	
@@ -346,7 +366,7 @@ static void fie_error()
 	sym = end;
 }
 
-void dmpfie()
+void dmpfie(void)
 {
 	int c,o,opc,op;
 
@@ -382,8 +402,7 @@ static double stack[stackmax];
 static int sp;
 
 
-static void fie_push(r)
-double r;
+static void fie_push(double r)
 {
 	stack[++sp] = r;
 }
@@ -395,24 +414,21 @@ static double fie_pi()
 	return(val);
 }
 
-static double fie_rad(arg1)
-double arg1;
+static double fie_rad(double arg1)
 {
 	double val;
 	val = arg1 * 0.017453292519943295769237;
 	return(val);
 }
 
-static double fie_deg(arg1)
-double arg1;
+static double fie_deg(double arg1)
 {
 	double val;
 	val = arg1 * 57.295779513082320876798155;
 	return(val);
 }
 
-static double fie_sinc(arg1)
-double arg1;
+static double fie_sinc(double arg1)
 {
 	double val;
 	if (fabs(arg1) < 1.0e-30) val = 1.0;
@@ -420,24 +436,21 @@ double arg1;
 	return(val);
 }
 
-static double fie_max(arg1,arg2)
-double arg1,arg2;
+static double fie_max(double arg1,double arg2)
 {
 	double val;
 	if (arg1 > arg2) val = arg1; else val = arg2;
 	return(val);
 }
 
-static double fie_min(arg1,arg2)
-double arg1,arg2;
+static double fie_min(double arg1,double arg2)
 {
 	double val;
 	if (arg1 < arg2) val = arg1; else val = arg2;
 	return(val);
 }
 
-static double fie_erf(arg1)
-double arg1;
+static double fie_erf(double arg1)
 {
    double p  =  0.327591100;
    double a1 =  0.254829592;
@@ -454,14 +467,12 @@ double arg1;
    }
 }
 
-static double fie_erfc(arg1)
-double arg1;
+static double fie_erfc(double arg1)
 {
    return(1.0 - fie_erf(arg1));
 }
 
-static double fie_mod(arg1,arg2)
-double arg1,arg2;
+static double fie_mod(double arg1,double arg2)
 {
 	double val;
 	int   xxx = arg1/arg2;
@@ -469,8 +480,7 @@ double arg1,arg2;
 	return(val);
 }
 
-static double fie_int(arg1)
-double arg1;
+static double fie_int(double arg1)
 {
 	double val;
 	int xxx = arg1;
@@ -478,8 +488,7 @@ double arg1;
 	return(val);
 }
 
-static double fie_sign(arg1)
-double arg1;
+static double fie_sign(double arg1)
 {
 	if (arg1 == 0.0) return(0.0);
 	else if (arg1 > 0.0) return(1.0);
@@ -497,16 +506,14 @@ static double fie_ran(){
 #endif
 }
 
-static double fie_ranu(arg1,arg2)
-double arg1,arg2;
+static double fie_ranu(double arg1,double arg2)
 {
 	double val;
         val = arg1 + fie_ran() * (arg2 - arg1);
         return(val);
 }
 
-static double fie_rang(arg1,arg2)
-double arg1,arg2;
+static double fie_rang(double arg1,double arg2)
 {
 	double val, r1, r2;
 	r1 = fie_ran();
@@ -522,8 +529,7 @@ double arg1,arg2;
 	return(val);
 }
 
-static double fie_ranp(arg1)
-double arg1;
+static double fie_ranp(double arg1)
 {
 	double val, cum, p, f;
 	if (arg1 < 40) {
@@ -548,11 +554,7 @@ static double fie_pop()
 	return( stack[sp--] );
 }
 
-void dofie(data,nop,results,errorval)
-real data[];      /* dimensions: <npar> * <nop> */
-int   *nop;        /* number of operations : PJT: now int instead of short */
-real results[];   /* dim. <nop> */
-real *errorval;
+void dofie(real *data, int *nop, real *results, real *errorval)
 {
 	int iop, i, c, o, opc;
 	double undef = *errorval;
@@ -707,8 +709,7 @@ static struct fie_slot {
  *      return:         actual slot saved in (-1 means error)
  */
 
-int savefie(slot)
-int slot;
+int savefie(int slot)
 {
     struct fie_slot *psfie, *new;
     int found=0, count=0;
@@ -761,8 +762,7 @@ int slot;
  *                      0 = didn't find it, use old default 
  */
 
-int loadfie(slot)
-int slot;
+int loadfie(int slot)
 {
     struct fie_slot *psfie;
 
