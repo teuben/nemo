@@ -1,4 +1,4 @@
-.TH NEMOINP 1NEMO "31 May 2001"
+.TH NEMOINP 1NEMO "4 March 2003"
 .SH NAME
 nemoinp \- parse a user supplied number string
 .SH SYNOPSIS
@@ -53,6 +53,12 @@ Seed for \fIxrandom(3NEMO)\fP. Default: 0
 Merely provided to test what \fInatof\fP returns. Note that this
 function does not perform any error checking and can return the wrong
 number. 
+.TP
+\fBdms=t|f\fP
+Force parsing the (optionally comma separated) string(s) as D:M:S.S, converting 
+them to fractional degrees. For H:M:S parsing the user is
+responsible for the extra factor of 15.
+Default: \fBf\fP.
 .SH SEE ALSO
 tabmath(1NEMO), nemoinp(3NEMO), getrange(3NEMO)
 .SH EXAMPLES
@@ -74,4 +80,5 @@ Peter Teuben
 16-jun-97	V1.6 %d forces integer math	PJT
 28-aug-00	V1.7 documented tab= and seed=	PJT
 31-may-01	V1.8 added atof=	PJT
+4-mar-03	V1.9 added dms=  	PJT
 .fi

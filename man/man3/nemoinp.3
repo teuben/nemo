@@ -1,4 +1,4 @@
-.TH NEMOINP 3NEMO "31 May 2001"
+.TH NEMOINP 3NEMO "4 March 2003"
 .SH NAME
 nemoinp, natof, natoi \- decode and parse string into reals, integers, logicals
 .SH SYNOPSIS
@@ -9,6 +9,7 @@ int nemoinpr (expr,routv,nout)
 int nemoinpi (expr,ioutv,nout)
 int nemoinpl (expr,loutv,nout)
 int nemoinpb (expr,boutv,nout)
+int nemoinpx (expr,doutv,nout)
 double natof(expr)
 int  natoi(expr)
 
@@ -22,7 +23,7 @@ bool   boutv[];
 int    nout;\fP
 .fi
 .SH DESCRIPTION
-\fInemoinpX(3NEMO)\fP parses the input character string \fBXexpr\fP into 
+\fInemoinp*(3NEMO)\fP parses the input character string \fBXexpr\fP into 
 a list of basic C-data structure items, pointed to by \fBXoutv\fP.
 The input string must be comma, space or
 colon separated (TABs are considered dangerous). A colon is used as 
@@ -48,6 +49,11 @@ parts.
 An expression can have basic mathematical functions, such as addition,
 most transcendental functions and  even some mathematical and physical
 constants. See also \fIherinp(3NEMO)\fP.
+.PP 
+The only exception to \fIherinp(3NEMO)\fP parsing is \fInemoinpx\fP, 
+which parses a string in \fBd:m:s.s\fP format, returning the number(s)
+in fractional degrees. For h:m:s conversion, the user is responsible for
+the extra factor of 15 between d:m:s and h:m:s.
 .SH OPERATORS
 The following operators are known:
 .nf
@@ -163,4 +169,5 @@ xx-feb-89	nemoinp made archaic - must now call nemoinpX	PJT
 20-jun-89	doc updated	PJT
 4-mar-94	added nemoinpf/r	PJT
 31-may-01	added natof/natoi	PJT
+4-mar-03	1.9 added nemoinpx()	PJT
 .fi
