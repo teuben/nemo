@@ -1,0 +1,51 @@
+.TH TABCOMMENT 1NEMO "20 May 1993"
+.SH NAME
+tabcomment \- Add comments to a table, or comment certain lines
+.SH SYNOPSIS
+\fBtabcomment\fP \fBin=\fP \fBout=\fP [parameter=value]
+.SH DESCRIPTION
+\fItabcomment\fP comments selected lines of a text file.
+.PP
+A comment line is a line that starts with a \fB#\fP symbol, and is
+recognized as such by many NEMO and other kind of programs.
+.PP
+Comment lines can be selected as lines that are blank,
+start with an alpha or start with punctuation (
+in particular the functions 
+\fIisspace\fP, \fIisalpha\fP and \fIispunct\fP
+from \fIctype(3)\fP are used to detect this, always
+skipping initial whitespace of course)
+Individual control over each of these types can be given, see below.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+input ascii table. No Default.
+.TP 20
+\fBout=\fP
+output ascii table. No Default.
+.TP 20
+\fBalpha=t|f\fP
+Comment lines that start with alpha? [Default: \fBt\fP].
+.TP 20
+\fBblank=t|f\fP
+Comment blank lines (lines that only contain
+blanks, see \fIisspace\fP) [Default: \fBt\fP].
+.TP
+\fBpunct=t|f\fP
+Comment lines that start with a punctuation character
+(neither control nor alphanumeric, see also \fIispunct\fP).
+[Default: \fBt\fP].
+.TP
+\fBdelete=t|f\fP
+Delete comment lines from output? [Default: \fBf\fP].
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+01-aug-92	V1.0 Created	PJT
+14-sep-92	V1.1 added delete=; also updated man	PJT
+20-may-93	updated man	PJT
+.fi
