@@ -1,4 +1,4 @@
-.TH POTCCD 1NEMO "12 September 2002"
+.TH POTCCD 1NEMO "26 February 2003"
 .SH NAME
 potccd \- Create an image with potentials or densities from a potential
 .SH SYNOPSIS
@@ -54,6 +54,21 @@ be 2 or 3.
 .SH BUGS
 With \fBndim=2\fP the Z-coordinate is not ignored, and hence may
 give meaningless results if forces depend on Z.
+.SH EXAMPLES
+First a somewhat obscure way in to create a map of an arbitrary function
+using the \fBpotname=rotcur\fP lookup table. It will use
+a spline interpolation, and if \fBmode=pot\fP is used, the "potential"
+is actually the "rotation curve" itself, since in general one cannot
+easily compute the potential from a rotation curve without knowing
+the full geometry. Here is an example how to create a smooth
+radial profile of the function "f(x)=1/sqrt(4+x)" on a grid from
+-10..10:
+.nf
+    % nemoinp 0:10 | tabmath - - '1/(sqrt(4+%1)' > map0.tab
+    % potccd map0 rotcur 0 map0.tab x=-10:10:0.1 y=-10:10:0.1
+.fi
+If the functional form is know, \fIccdmath(1NEMO)\fP will perhaps
+do better, if not a little more involved to type.
 .SH SEE ALSO
 potlist(1NEMO), image(5NEMO), potential(3NEMO), potential(5NEMO)
 .SH AUTHOR
