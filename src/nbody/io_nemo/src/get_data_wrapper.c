@@ -1,13 +1,18 @@
-/* -------------------------------------------------------------- *\
-|* $Id$
-|*
-|* Wrapper of basic NEMO procedure, it makes me life easiest :)
-|*
-\* -------------------------------------------------------------- */
+/* ================================================================
+|  Copyright Jean-Charles LAMBERT - 2005                           
+|  e-mail:   Jean-Charles.Lambert@oamp.fr                          
+|  address:  Dynamique des galaxies                                
+|            Laboratoire d'Astrophysique de Marseille              
+|            2, place Le Verrier                                   
+|            13248 Marseille Cedex 4, France                       
+|            CNRS U.M.R 6110                                       
+| =================================================================
+|* Wrapper of basic NEMO procedure, it makes me life easiest :)    
++---------------------------------------------------------------- */
 
-/* -------------------------------------------------------------- *\
-|* Include files
-\* -------------------------------------------------------------- */
+/* ----------------------------------------------------------------
+|  Include files                                                   
++---------------------------------------------------------------- */
 #include <stdinc.h>
 #include <getparam.h>
 #include <vectmath.h>		
@@ -17,10 +22,10 @@
 #include <snapshot/body.h>
 
 
-/* -------------------------------------------------------------- *\ 
-|* get_data_gen :
-|* 
-\* -------------------------------------------------------------- */
+/* ----------------------------------------------------------------
+|  get_data_gen :                                                  
+|                                                                  
++---------------------------------------------------------------- */
 int get_data_gen(stream instr, char * TypeTag,char * DataType,
 		 int size_alloc, int nbody, int dim1,int dim2,void ** genptr)
 {
@@ -30,10 +35,10 @@ int get_data_gen(stream instr, char * TypeTag,char * DataType,
                    dim1,dim2,0);
   return 0;
 }
-/* -------------------------------------------------------------- *\ 
-|* get_data_time :
-|* Get Time from a Nemo snapshot
-\* -------------------------------------------------------------- */
+/* ----------------------------------------------------------------
+|  get_data_time :                                                 
+|  Get Time from a Nemo snapshot                                   
++---------------------------------------------------------------- */
 int get_data_time(stream instr, char * DataType, int size_type,
 		  void ** timeptr)
 {
@@ -50,10 +55,10 @@ int get_data_time(stream instr, char * DataType, int size_type,
     status = 0;
   return status;
 }
-/* -------------------------------------------------------------- *\ 
-|* get_data_nbody :
-|* Get Nbody from aNEMO snapshot
-\* -------------------------------------------------------------- */
+/* ----------------------------------------------------------------
+|  get_data_nbody :                                                
+|  Get Nbody from aNEMO snapshot                                   
++---------------------------------------------------------------- */
 int get_data_nbody(stream instr, char * DataType, int size_type, void ** nbodyptr)
 {
   int status;
@@ -69,10 +74,10 @@ int get_data_nbody(stream instr, char * DataType, int size_type, void ** nbodypt
     status = 0;
   return status;
 }
-/* -------------------------------------------------------------- *\ 
-|* get_data_mass :
-|* Get Masses from a NEMO snapshot
-\* -------------------------------------------------------------- */
+/* ----------------------------------------------------------------
+|  get_data_mass :                                                 
+|  Get Masses from a NEMO snapshot                                 
++---------------------------------------------------------------- */
 int get_data_mass(stream instr, char * DataType, int nbody, int size_type,
 		  void ** massptr)
 {
@@ -90,10 +95,10 @@ int get_data_mass(stream instr, char * DataType, int nbody, int size_type,
     status = 0;
   return status;
 }
-/* -------------------------------------------------------------- *\ 
-|* get_data_pos :
-|* Get Positions from a NEMO snapshot
-\* -------------------------------------------------------------- */
+/* ----------------------------------------------------------------
+|  get_data_pos :                                                  
+|  Get Positions from a NEMO snapshot                              
++---------------------------------------------------------------- */
 int get_data_pos(stream instr, char * DataType, int nbody, int size_type,
 		  void ** posptr, int ndim)
 {
@@ -112,10 +117,10 @@ int get_data_pos(stream instr, char * DataType, int nbody, int size_type,
     status = 0;
   return status;
 }
-/* -------------------------------------------------------------- *\ 
-|* get_data_vel :
-|* Get Velocities from a NEMO snapshot
-\* -------------------------------------------------------------- */
+/* ----------------------------------------------------------------
+|  get_data_vel :                                                  
+|  Get Velocities from a NEMO snapshot                             
++---------------------------------------------------------------- */
 int get_data_vel(stream instr, char * DataType, int nbody, int size_type,
 		  void ** velptr, int ndim)
 {
@@ -133,10 +138,10 @@ int get_data_vel(stream instr, char * DataType, int nbody, int size_type,
     status = 0;
   return status;
 }
-/* -------------------------------------------------------------- *\ 
-|* get_data_phase :
-|* Get Phase Space coordinates from a NEMO snapshot
-\* -------------------------------------------------------------- */
+/* ----------------------------------------------------------------
+|  get_data_phase :                                                
+|  Get Phase Space coordinates from a NEMO snapshot                
++---------------------------------------------------------------- */
 int get_data_phase(stream instr, char * DataType, int nbody, 
 		   int size_type, void ** phaseptr, int ndim)
 {
@@ -158,10 +163,10 @@ int get_data_phase(stream instr, char * DataType, int nbody,
 }
 
 
-/* -------------------------------------------------------------- *\ 
-|* get_data_pot :
-|* Get Potential from a NEMO snapshot
-\* -------------------------------------------------------------- */
+/* ----------------------------------------------------------------
+|  get_data_pot :                                                  
+|  Get Potential from a NEMO snapshot                              
++---------------------------------------------------------------- */
 int get_data_pot(stream instr, char * DataType, int nbody, int size_type,
 		 void ** potptr)
 {
@@ -179,10 +184,10 @@ int get_data_pot(stream instr, char * DataType, int nbody, int size_type,
     status = 0;
   return status;
 }
-/* -------------------------------------------------------------- *\ 
-|* get_data_acc :
-|* Get Acceleration from a NEMO snapshot
-\* -------------------------------------------------------------- */
+/* ----------------------------------------------------------------
+|  get_data_acc :                                                  
+|  Get Acceleration from a NEMO snapshot                           
++---------------------------------------------------------------- */
 int get_data_acc(stream instr, char * DataType, int nbody, int size_type,
 		 void ** accptr, int ndim)
 {
@@ -200,10 +205,10 @@ int get_data_acc(stream instr, char * DataType, int nbody, int size_type,
     status = 0;
   return status;
 }
-/* -------------------------------------------------------------- *\ 
-|* get_data_keys :
-|* Get Keys from a NEMO snapshot
-\* -------------------------------------------------------------- */
+/* ----------------------------------------------------------------
+|  get_data_keys :                                                 
+|  Get Keys from a NEMO snapshot                                   
++---------------------------------------------------------------- */
 int get_data_keys(stream instr, char * DataType, int nbody, int size_type,
 		  void ** keysptr)
 {
@@ -221,10 +226,10 @@ int get_data_keys(stream instr, char * DataType, int nbody, int size_type,
     status = 0;
   return status;
 }
-/* -------------------------------------------------------------- *\ 
-|* get_data_eps :
-|* Get Eps from a NEMO snapshot
-\* -------------------------------------------------------------- */
+/* ----------------------------------------------------------------
+|  get_data_eps :                                                  
+|  Get Eps from a NEMO snapshot                                    
++---------------------------------------------------------------- */
 int get_data_eps(stream instr, char * DataType, int nbody, int size_type,
 		  void ** epsptr)
 {
@@ -242,6 +247,6 @@ int get_data_eps(stream instr, char * DataType, int nbody, int size_type,
     status = 0;
   return status;
 }
-/* -------------------------------------------------------------- *\ 
-|* End of [get_dat_nemo.c]
-\* -------------------------------------------------------------- */ 
+/* ----------------------------------------------------------------
+|  End of [get_dat_nemo.c]                                         
++---------------------------------------------------------------- */ 

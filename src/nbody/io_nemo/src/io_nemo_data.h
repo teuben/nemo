@@ -1,23 +1,18 @@
-/* -------------------------------------------------------------- *\
-|* $Id$
-|*
-|* Shared data imported from "io_nemo.c"
-|*
-\* -------------------------------------------------------------- */
-extern char 
-  * pos,   ** pos_p,    /* position */
-  * vel,   ** vel_p,    /* velocity */
-  * phase, ** phase_p,  /* phase */
-  * pot,   ** pot_p,    /* potential */
-  * acc,   ** acc_p,    /* acceleration */
-  * mass,  ** mass_p,   /* mass */
-  * eps,   ** eps_p,    /* softening */
-  * keys,  ** keys_p,   /* keys */
-  * timu,  ** time_p,   /* time steps */
-  * selt,  ** selt_p,   /* selected time */
-  *SelectionString123;  /* selected particles */
+/* =================================================================
+|  Copyright Jean-Charles LAMBERT - 2005                            
+|  e-mail:   Jean-Charles.Lambert@oamp.fr                           
+|  address:  Dynamique des galaxies                                 
+|            Laboratoire d'Astrophysique de Marseille               
+|            2, place Le Verrier                                    
+|            13248 Marseille Cedex 4, France                        
+|            CNRS U.M.R 6110                                        
+| ==================================================================
+|* Shared data imported from "io_nemo.c"                            
++----------------------------------------------------------------- */
 
-extern int   * nbody,** nbody_p;   /* nbody */
-/* -------------------------------------------------------------- *\
-|* End of io_nemo_data.h
-\* -------------------------------------------------------------- */
+#ifndef IO_NEMO_DATA_H
+#define IO_NEMO_DATA_H
+#endif /* IO_NEMO_DATA_H */
+/* -----------------------------------------------------------------
+|  End of io_nemo_data.h                                            
++----------------------------------------------------------------- */

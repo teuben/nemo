@@ -1,13 +1,20 @@
-/* -------------------------------------------------------------- *\
-|* $Id$
-|*
-|* Get/Put selected Data from io_nemo_f
-|*
-\* -------------------------------------------------------------- */
+/* =================================================================
+|  Copyright Jean-Charles LAMBERT - 2005                            
+|  e-mail:   Jean-Charles.Lambert@oamp.fr                           
+|  address:  Dynamique des galaxies                                 
+|            Laboratoire d'Astrophysique de Marseille               
+|            2, place Le Verrier                                    
+|            13248 Marseille Cedex 4, France                        
+|            CNRS U.M.R 6110                                        
+| ==================================================================
+|* Get/Put selected Data from io_nemo_f                             
+| ==================================================================
+| 03-Mar-05 :                                                       
++----------------------------------------------------------------- */
 
-/* -------------------------------------------------------------- *\
-|* Nemo include files
-\* -------------------------------------------------------------- */
+/* ----------------------------------------------------------------
+|  Nemo include files                                              
++---------------------------------------------------------------- */
 #include <stdinc.h>
 #include <getparam.h>
 #include <vectmath.h>		
@@ -17,9 +24,9 @@
 #include <snapshot/snapshot.h>	
 #include <snapshot/body.h>
 
-/* -------------------------------------------------------------- *\
-|* Local include files
-\* -------------------------------------------------------------- */
+/* ----------------------------------------------------------------
+|  Local include files                                             
++---------------------------------------------------------------- */
 #include "history_data_f.h"
 #include "flags_data.h"
 #include "io_nemo_data_f.h"
@@ -40,10 +47,10 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
-/* -------------------------------------------------------------- *\ 
-|* put_data_select :
-|* Save the snapshot in NEMO format.
-\* -------------------------------------------------------------- */
+/* ----------------------------------------------------------------
+|  put_data_select :                                               
+|  Save the snapshot in NEMO format.                               
++---------------------------------------------------------------- */
 int put_data_select_f(char * outfile,
 		      int  * size_array,
 		      int    rtype,
@@ -53,13 +60,13 @@ int put_data_select_f(char * outfile,
 		      int    MAXIO)
 {
   int coordsys =	CSCode(Cartesian, NDIM, 2),
-    i,j,k,no_io;
-  char * phasep;	/* Phase space coordinates */
+    i,k,no_io;
+  /* char * phasep;*/	/* Phase space coordinates */
   char * accptr;	/* Accelerations array     */
   char * posptr;	/* Positions array         */
   char * velptr;	/* Velocities array        */
 	
-  int jump = rtype*4,jump3=3*jump,jump6=6*jump;
+  int jump = rtype*4,jump3=3*jump; /*jump6=6*jump;*/
   char *  OutType;
 	
   if (rtype==1)
@@ -256,10 +263,10 @@ int put_data_select_f(char * outfile,
   save_one[no_io] = TRUE;
   return 1;
 }
-/* -------------------------------------------------------------- *\ 
-|* get_data_select :
-|* Read the snapshot in NEMO format.
-\* -------------------------------------------------------------- */
+/* ----------------------------------------------------------------
+|  get_data_select :                                               
+|  Read the snapshot in NEMO format.                               
++---------------------------------------------------------------- */
 int get_data_select_f(char * infile,
 		      int  * size_array,
 		      int    rtype,
@@ -287,9 +294,9 @@ int get_data_select_f(char * infile,
   int nParticlesRead = 0;
   char * select_time = NULL;
 
-  double real_time, * p1, *p2;
+  double real_time;
 
-  int i,j,k, no_io,i_jump,jump=rtype*4,jump3=3*jump,jump6=6*jump;
+  int i,k, no_io,i_jump,jump=rtype*4,jump3=3*jump,jump6=6*jump;
   char * OutType;
 	
   string headline;
@@ -409,9 +416,10 @@ int get_data_select_f(char * infile,
 		
     if (get_tag_ok(instr[no_io], ParticlesTag)) {
       get_set(instr[no_io], ParticlesTag);
-      
+            
       /* get masses */
-      if (M_io)
+      if (M_io) {
+	dprintf(1,"Getting Masses....\n");
 	if (!get_data_mass(instr[no_io],OutType,*nbodyptr,
 			   rtype*4,&massptr)) {
 	  fprintf(stderr,"Snap error ### No Mass\n");
@@ -430,9 +438,11 @@ int get_data_select_f(char * infile,
 		   *nbodyptr * jump);
 	  /*fprintf(stderr,"\n\nmass adress[%x]\n\n",massptr);*/
 	  free((char *) massptr);
-	}  
+	}
+      }  
       /* pos or/and vel selected */
-      if (X_io || V_io  )
+      if (X_io || V_io  ) {
+	dprintf(1,"Getting Phase Space....\n");
 	if (get_data_phase(instr[no_io],OutType,*nbodyptr,
 			   rtype*4,&phaseptr,NDIM)) {
 
@@ -467,7 +477,7 @@ int get_data_select_f(char * infile,
 	    }
 	  } /* get_data_phase && SP_io */
 	  else { /* get_data_phase && !SP_io */
-	    
+
 	    /* copy positions and velocities from NEMO to FORTRAN */
 	    if (!F_dim) { /* Fortran array : Tab(3,MAXBODY) */
 	      for(i=0; i<*nbodyptr; i++) {
@@ -504,6 +514,7 @@ int get_data_select_f(char * infile,
 	else { /* get_data_pos || get_data_vel */
 
 	  if (X_io) {
+	    dprintf(1,"Getting Positions....\n");
 	    if (!get_data_pos(instr[no_io],OutType,*nbodyptr,
 			      rtype*4,&posptr,NDIM)) {
 	      fprintf(stderr,"Snap error ### No Positions array\n");
@@ -550,6 +561,7 @@ int get_data_select_f(char * infile,
 	    } /* > get_data_pos */
 	  }
 	  if (V_io) {
+	    dprintf(1,"Getting Velocities....\n");
 	    if (!get_data_vel(instr[no_io],OutType,*nbodyptr,
 			      rtype*4,&velptr,NDIM)) {
 	      fprintf(stderr,"Snap error ### No Velocities array\n");
@@ -596,8 +608,10 @@ int get_data_select_f(char * infile,
 	    } /* > get_data_vel */
 	  }
 	} /* else get_data_pos || get_data_vel */
+      } /* if (X_io || V_io  ) { */
       /* get potentials */
-      if (P_io)
+      if (P_io) {
+	dprintf(1,"Getting Potentials....\n");
 	if (!get_data_pot(instr[no_io],OutType,*nbodyptr,
 			  rtype*4,&potptr)) {
 	  fprintf(stderr,"Snap error ### No Potential\n");
@@ -616,9 +630,11 @@ int get_data_select_f(char * infile,
 		   (char *) (potptr),
 		   *nbodyptr * jump);		
 	  free(potptr);
-	} 				 
+	}
+      } 				 
       /* get accelerations */
-      if (A_io)
+      if (A_io) {
+	dprintf(1,"Getting Accelerations....\n");
 	if (!get_data_acc(instr[no_io],OutType,*nbodyptr,
 			  rtype*4,&accptr,NDIM)) {
 	  fprintf(stderr,"Snap error ### No Acceleration array\n");
@@ -663,9 +679,10 @@ int get_data_select_f(char * infile,
 	  }
 	  free((char *) accptr);
 	}
-
+      } /* if (A_io) { */
       /* get Keys data */
-      if (K_io)
+      if (K_io) {
+	dprintf(1,"Getting Keys....\n");
 	if (!get_data_keys(instr[no_io],IntType,*nbodyptr,
 			   sizeof(int),&keysptr)) {
 	  fprintf(stderr,"Snap error ### No KeyTag\n");
@@ -685,9 +702,10 @@ int get_data_select_f(char * infile,
 						
 	  free(keysptr);
 	}  
-
+      } /* if (K_io) { */
       /* get Eps data */
-      if (EPS_io)
+      if (EPS_io) {
+	dprintf(1,"Getting Eps....\n");
 	if (!get_data_eps(instr[no_io],OutType,*nbodyptr,
 			   rtype*4,&epsptr)) {
 	  fprintf(stderr,"Snap error ### No EpsTag\n");
@@ -707,7 +725,7 @@ int get_data_select_f(char * infile,
 						
 	  free(epsptr);
 	}  
-
+      } /* if (EPS_io) { */
       /* garbage collecting */
       free((int *) nbodyptr); 
       free((char *) timeptr);
@@ -725,16 +743,17 @@ int get_data_select_f(char * infile,
     /* get_tes(instr[no_io], SnapShotTag); */
   }
   /* free allocated memory */
-  if (ST_io)
+  if (ST_io) {
     free((char *) select_time);
-
+  }
   if (SP_io) {
     free((int *) SelectedPart);
     free((char*) SelString);
     *nbody_f=nBodySelected;
   }
+  dprintf(1,"End of [get_data_select_f]....\n");
   return 1;
 }
-/* -------------------------------------------------------------- *\
-|* End of io_get_put_f.c
-\* -------------------------------------------------------------- */
+/* ----------------------------------------------------------------
+|  End of io_get_put_f.c                                           
++---------------------------------------------------------------- */
