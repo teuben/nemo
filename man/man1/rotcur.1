@@ -1,4 +1,4 @@
-.TH ROTCUR 1NEMO "10 August 2001"
+.TH ROTCUR 1NEMO "26 January 2002"
 .SH NAME
 rotcur \- fit kinematic parameters from velocity field
 .SH SYNOPSIS
@@ -181,12 +181,14 @@ Mixing parameter for \fInllsqfit\fP [Default: \fB0.001\fP]
 Maximum number of allowed \fInllsqfit\fP iterations [Default: \fB50\fP]
 .TP
 \fBunits\fP=
-Units of input axes. Valid options are
-\fBdeg, arcmin, arcsec, rad\fP. A numeric value can also be given,
+Units of input axes for radius and velocity. Valid options are
+\fBdeg, arcmin, arcsec, rad\fP for radius.
+A numeric value can also be given,
 in which case your image pixel separation from the
 image header is multiplied by this
 number to get to the ``arcsec'' that will be quoted in
-the tables.
+the tables. The units for velocity can only be numeric, and will be the
+factor by which the velocities in the map are multiplied.
 [Default: \fBdeg\fP]
 .TP
 \fBblank=\fP
@@ -228,6 +230,32 @@ BEGIN{count=0;line="";}
 END{printf("%s  %s\n",rad,line);}
 
 .fi
+.SH EXAMPLE
+Here is an example of creating a synthetic velocity field with
+ccdvel, and analysing it with rotcur:
+.nf
+    % set r=`nemoinp 0:100:5`
+    % set v=`nemoinp 0:100:5 | tabmath - - "100*%1/(20+%1)" all`
+    % ccdvel out=map1.vel rad="$r" vel="$v" pa=30 inc=60
+    % rotcur in=map1.vel radii=0:100:5 vrot=0:100:5 pa=30 inc=60 vsys=0 tab=map1.rotcur
+
+    % head map1.rotcur
+  radius   systemic   error  rotation   error position    error   inclination  error   x-position   error   y-position   error
+          velocity           velocity           angle               angle               of center            of center
+ (arcsec)   (km/s)   (km/s)   (km/s)    (km/s)(degrees)  (degrees)  (degrees)   (degrees) (grids w.r.t. (0,0))  (grids w.r.t. (0,0))
+     7.50      0.00     0.44     27.08    0.50    30.45       1.09      59.72       2.47      63.50      0.20      63.50      0.30 96
+    12.50     -0.00     0.24     38.54    0.28    30.66       0.41      59.27       0.94      63.50      0.13      63.50      0.20 150
+    ...
+
+    % tail map1.rotcur
+ average inclination      :    59.93  (   0.043)  degrees
+ average position angle   :    30.05  (   0.044)  degrees
+ average systemic velocity:    -0.00  (   0.001)  km/s
+ average x-position       :    63.50  (   0.000)  grids
+ average y-position       :    63.50  (   0.001)  grids
+
+
+.fi
 .SH BUGS
 Failures in \fInllsqfit\fP are not handled gracefully, and may
 \fIerror\fP out the program. Usage of the \fBerror=\fP system
@@ -250,7 +278,8 @@ image is assumed.
 .SH SEE ALSO
 ccdvel(1NEMO), tabcomment(1NEMO), rotcurves(1NEMO)
 .SH AUTHOR
-K. Begeman (original GIPSY Sheltran version), P. J. Teuben (NEMO C version)
+K. Begeman (original GIPSY Sheltran version, now also available in C),
+P. J. Teuben (NEMO C version)
 .SH UPDATE HISTORY
 .nf
 .ta +1i +4i
@@ -269,4 +298,5 @@ K. Begeman (original GIPSY Sheltran version), P. J. Teuben (NEMO C version)
 14-mar-01	V2.5: clarifications, added nsigma=    	PJT
 9-may-01	V2.6a: corrected error correction factor	PJT
 10-aug-01	clarified some differences between NEMO and GIPSY versions	PJT
+26-jan-02	Added unit (scale factor) for velocity too	PJT
 .fi
