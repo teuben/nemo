@@ -1,4 +1,4 @@
-converting from old-style K&R-C to prototyped C:
+1) converting newton0 from old-style K&R-C to prototyped C:       (feb 2001)
 
 - define all static's at the top of each source code, use
 
@@ -16,4 +16,54 @@ converting from old-style K&R-C to prototyped C:
     -DTREE -DQUADPOLE       ok
     -DREGULARIZATION
     -DEXTRAPOLATION 
+
+
+
+2) merged in Piet's "oldnemo" directory, which appears to be a called
+   multiscatter, a derived product from newton0.   Since there is code
+   shared with newton0, we have merged in this code into the newton0
+   directory, instead of extracting a library from newton0, moving some
+   files to NEMOINC and sharing code that way..... so be it. It's done
+   for historic reasons.
+
+
+essentially the same:
+---------------------
+timestep.c
+bodyconversion.c
+bodyalgebra.c
+integrate.c
+binaryin.c
+binaryout.c
+create.c
+differentiate.c
+soften.c
+statealgebra.c
+systemalgebra.c
+save.c
+systemconversion.c
+
+state.h
+body.h
+bodyext.h
+ctrl.h			DEmax() -> DErelmax()
+node.h
+spec.h
+syst.h
+
+
+substantially different:
+------------------------
+orbit.c			 	lots of new routines, but also lots of mods
+				new TURBO mode
+		bool  too_much_energy_drift
+		turbo_system_step
+		turbo_helper
+		hier_turbo_system_step
+		print_bodies
+				but probably re-usable
+
+
+out.c				lots of new
+
 
