@@ -24,7 +24,7 @@ INCFILES =
 SRCFILES = 
 OBJFILES=  
 LOBJFILES= 
-BINFILES = ccdvel rotcur
+BINFILES = ccdvel rotcur rotcurshape pvtrace
 TESTFILES= 
 
 help:
