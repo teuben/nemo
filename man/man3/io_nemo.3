@@ -1,5 +1,5 @@
 .\" $Id$
-.TH IO_NEMO 3NEMO "19 July 2002"
+.TH IO_NEMO 3NEMO "18 March 2004"
 .SH NAME
 \fBio_nemo\fP \(em High level C function to read/save NEMO snapshot from a
 C program.
@@ -78,8 +78,29 @@ Match to the particle \fIpotentials\fP.
 \fBa|acc\fP
 Match to the particle \fIaccelerations\fP.
 .TP
+\fBe|eps\fP
+Match to the particle \fIsoftening\fP.
+.TP
 \fBh|history\fP
 Match to the NEMO file name that you want to keep track about the history.
+.TP
+
+.TP
+\fBst\fP
+Select snapshot's times. You have to  put the selected
+time in a string. Example "100:150"
+select the time beween 100 and 150. The string is fully compatible
+with the expression usually given to \fBnemoinpi\fP (Cf man nemoinpi).
+
+.TP
+\fBsp\fP
+Select snapshot's particles. You have to  put the selected
+particles in a string. Example "0:299999"
+select the particles beween 0 and 299999. The \fBreturned nbody\fP
+corresponds to the \fBselected\fP nbody.
+In the example above it would thus be 300000. The string is fully compatible
+with the expression usually given to \fBnemoinpi\fP (Cf man nemoinpi).
+
 .TP
 
 .SH
@@ -189,8 +210,9 @@ Jean-Charles LAMBERT
 
 .SH BUGS and COMMENT
 Please, report all bugs and comment to : 
-jcl@ouzo.cnrs-mrs.fr
-
+.nf
+Jean-Charles.Lambert@oamp.fr
+.fi
 .SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
@@ -198,4 +220,5 @@ jcl@ouzo.cnrs-mrs.fr
 21-Feb-97	 V1.1 : memory optimisation           JCL
 16-Apr-97	 V1.11: manual created                JCL 
 19-Jul-02	 V1.2 : io_nemo and io_nemo_f unified JCL
+18-Mar-04	 V1.21: bugs fixed, softening added   JCL
 .fi
