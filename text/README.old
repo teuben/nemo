@@ -1,0 +1,437 @@
+This is:	A blurb on NEMO, what it is, how to install and use 
+Last updated:   1-apr-97 [with expanded Release 2.x installation notes]
+By:		Peter Teuben
+Disclaimer:	See $NEMO/README for introductions, this README file
+		is the old version from NEMO V2.
+
+________________________________________________________________________________
+
+Using NEMO (i.e. after it has been installed) requires a few changes/
+modifications to your .cshrc/.login script: (sorry, no sh support yet)
+
+    1)	source the nemo_start file. You may have to ask your system
+	manager where it's kept. For example:
+
+		source ~nemo/nemo_start
+
+or:
+
+    1)  define the environment variable NEMO where NEMO's root directory is.
+    2)  source the $NEMO/NEMORC file.
+    3)  add $NEMOBIN to you search path, preferably at start of the 
+	search path when you also intend to do programming within the 
+	NEMO environment. Nota that $NEMOBIN will contain a 'cc' script
+	that may interfere with your other programming habits. For example:
+
+
+	        setenv NEMO /saturn/nemo		     (1)
+	        source $NEMO/NEMORC			     (2)
+	        set path = ( . $NEMOBIN xxx yyy zzz)	     (3)
+
+where xxx, yyy  and zzz are other directories you may want in there. 
+
+you can also use, with some caution, an incremental technique:
+
+		set path = ( . $NEMOBIN $path[2-] )
+
+
+This is called a static installation, and means that NEMO is present in
+your environment each time you log in.  
+
+Alternatively, you can set up a dynamic NEMO installation, which means
+that NEMO is by default not present after you have logged in.  The
+dynamic installation requires a special command (normally an alias
+'nemo') to be issued in order to ``load'' NEMO into the environment. 
+e.g. I use:
+	alias nemo 'source ~nemo/nemo_start'
+	alias omen 'source ~nemo/nemo_end'
+This can be done at any stage during an interactive terminal session. 
+More details can be found in Appendix A of the manual. 
+________________________________________________________________________________
+
+
+The NEMO (latex) manual is located in $NEMO/text/manuals, as nemo.tex
+with many small include (.inc) files. There may also be a final nemo.dvi, 
+or even nemo.ps file. If not, use the Makefile in there, and try
+	make nemo
+to create a full manual. If, for one particular include (.inc) file, you 
+need a copy one can use:
+	make test TEST=setup.inc
+and turn the 'latest.dvi' file into a 'latest.ps' file for printing.
+
+The 'nemo.tex' file also generates a table of contents and an index, which
+requires you to run the program latex more than once. Also the index
+file is not all done by 'latex'. An additional program 'makeindex', which
+turns an .idx file into an .ind file, is required. If this is not
+present - you'll have to live without the index. Best is to create
+a dummy file nemo.ind, to prevent latex screaming about a missing file,
+but the nemo.ind file that exists is a current one.
+
+(a version of the makeindex utility lives in $NEMO/src/tools/makeindex)
+________________________________________________________________________________
+
+There may also a demo in the $NEMO/demo area. Run it after NEMO has been
+installed.
+________________________________________________________________________________
+
+
+Brief overview of a Version 2.4.x INSTALLATION  
+==============================================
+
+ (there is also a bootstrap loader that is a lot easier to use; 
+  you may however keep this file at hand when you use that, the procedure
+  you follow below is basically what bootstrap does by itself automatically)
+
+1) To untar a compressed tar file the following will do just fine, and
+   you never need to save the uncompressed version:
+
+	% zcat nemo.tar.Z | tar xf -
+   or
+        % gzip -cd nemo.tar.gz | tar xf -
+
+   Make sure you do this in NEMO's root directory (what we later refer to
+   as $NEMO)
+ 
+   You can also (if your ftp allows this) do this from within the ftp
+   program:
+
+	% cd /usr/nemo
+	% ftp astro.umd.edu
+	...			(login as anonymous)
+	ftp> binary
+	ftp> cd pub/teuben/nemo
+	ftp> get nemo.tar.gz "|zcat|tar xf -"
+	ftp> quit
+	%
+
+2) Copy the NEMORC.gen file to NEMORC.local, and edit it to reflect your
+   local site. This file is meant to set environment variables that
+   had already been set in the NEMORC file, and you need to override.
+   It is recommended to study this in some detail, particularly if you're
+   not on one of machine to which I don't have frequent access.
+
+   Take particular care to the following ones (sometimes you don't discover
+   to reset them after an initial installation has failed in certain areas,
+   and you'll have to do it all over again):
+
+    FORLIBS:    choose the appropriate one, SUN OS 4.1 has now only one
+                fortran library libF77.a (-lF77) in a strange new location.
+                Keep track of changes as SUN OS upgrades their software
+		e.g. on a sun4, with FPVERSION either cg87 or cg89 (default) 
+		one needs sometimes:
+	setenv FORLIBS "-L/usr/lang/SC0.0 -lF77 \
+		/usr/lang/SC0.0/$FPVERSION/libm.a \
+		/usr/lang/SC0.0/$FPVERSION/_crt1.o"
+		but on a sun3 the last _crt1.o needs to be omitted, i.e.
+	setenv FORLIBS "-L/usr/lang/SC0.0 -lF77 \
+		/usr/lang/SC0.0/$FPVERSION/libm.a \
+		/usr/lang/SC0.0/$FPVERSION/_crt1.o"
+		To me still totally incomprehencable. You'll have to find
+		out empirically I guess......
+    YAPPLIB:    set it to the YAPP_* library you want it to be the default
+                In order to test which one works on your system, you'd have
+                to go through at least installing 
+                $NEMO/src/kernel/io and $NEMO/src/kernel/core.
+
+   In particular one should pay attention if your system supports multiple
+   float_options (e.g. -f68881, -ffpa, -fswitch etc. on a Sun3). If so, make
+   sure the (graphics) libraries you will use have the same setting as how
+   you compile NEMO. In case of tricky things, the cc script (see in: (2) 
+   below) can be adapted too.
+
+2b) The installation was also designed to allow upgrading your existing
+    NEMO version by placing the new tar file on top of your own directory.
+    If you are not sure you changed any source code, try this:
+        cd $NEMO
+        make new
+    which  is supposed to check new sourcecode since the last official
+    install.  ** i need to write more about this, this can be tricky **
+
+
+3a) follow the $NEMO/src/bootstrap script to install a fairly complete
+    system:
+
+	src/scripts/bootstrap goto=install nemo=$cwd
+
+    this will install all the way through the testsuite, but you will
+    probably have to repeat this procedure since the default bootstrap
+    currently does not install any graphics (yapp) libraries, just
+    yapp_null.
+	
+
+3b) follow installation instructions as if NEMO was installed, i.e. add stuff
+   to your .cshrc file:
+
+	setenv NEMO /usr/nemo		(or whereever)
+	source $NEMO/NEMORC
+	...
+	set path = ( . $NEMOBIN ... )
+
+4) Bootstrap the system with a replacement 'cc' and/or 'make' script
+
+   % cd $NEMO   
+   % make dirs scripts
+
+    If your local 'make' does not import environment variables, you
+    may need a make script in $NEMOBIN too.. Have to do this by hand,
+    the $NEMO/src/scripts area has some examples)
+    for example,
+
+   % make SHELL=/bin/sh dirs scripts
+   % make SHELL=/bin/sh cc make OS=linux    (for example)
+   % rehash
+   % which cc make
+
+    And make sure your getting the $NEMOBIN versions of cc and make
+
+5) Make the library ($NEMOLIB/libnemo.a)
+
+   % cd $NEMO/src
+   % make -i clean install
+
+   Before you run this, you may want to check/change 
+
+   a) which loadobj to use - this MUST be choosen correctly
+      by using the right CC flag, or fiddling with $NEMOINC/options.h
+
+      For the following machines this is all pre-defined:
+            sun3
+            sun4 (sparc/sunos)
+            sun5 (sparc/solaris)
+            alpha (tested on: OSF1 V3.2, but V2.x probably won't work)
+            sgi (tested on: IRIX V5.2, but V4.x probably won't work)
+            linux (tested on 2.x, slackware 3.1)
+		
+   b) all yapp's are compiled into .o files, and not
+      put into library; in accordance with using YAPPLIB
+      environment variable at compile time to set it
+
+   c) which options to (un)set in src/kernel/io/getparam.c (the
+      user interface). A dryrun with 
+            cc -c getparam.c 
+      will do fine. Don't forget to remove getparam.o before
+      official installation.
+
+
+6) Compile hackcode, the C version of the treecode
+
+   % cd $NEMO/src/nbody/evolve/hackcode/hackcode1; make hackcode1;
+        mv hackcode1 $NEMOBIN
+or equivalently:
+   % mknemo hackcode1
+
+
+6) Compile a few utilities, pick what you want....
+
+   % cd $NEMO/src/nbody/tools ; make atos stoa ; mv atos stoa $NEMOBIN
+   or
+   % mknemo atos stoa tabtos tsf
+   and a somewhat special
+   % mknemo -c history hisf
+ 
+
+   % cd $NEMO/src/nbody/init  ; make mkplummer ; mv mkplummer $NEMOBIN
+   or
+   % mknemo mkplummer
+
+   % cd $NEMO/src/nbody/reduc ; make snapplot snapdiagplot ;
+            mv snapplot snapdiagplot $NEMOBIN
+   These last two will also tell you if the proper YAPPLIB was choosen.
+   (Otherwise the EL macro may be used, e.g. as in:
+		make snapplot EL="$YAPP_MONGO"
+   The NEMORC must be setup for this properly. Local things should really
+   be done in the NEMORC.local file. If it is not present, create one.
+   Preferably you would want to keep away from editing the NEMORC file,
+   since in updates you'd have to figure out what to retain and what to
+   keep from this file, and again create you private version....
+
+Again, if you want to change the default yapp graphics device; the
+environment variable YAPPLIB needs to be reset to any of the YAPP_... 
+ones in $NEMO/NEMORC file. 
+
+
+Some examples of patch work, mostly using the local Makefile's:
+
+* Updating libnemo.a with a fixed set of routines:
+
+	make install OBJFILES="a.o b.o c.o"
+
+* Compiling a graphics program with another library:
+
+	make snapplot YAPPLIB="$YAPP_MONGO"
+
+* Compiling something with an extra library:
+
+	make ccdfft EL=-lfft
+
+* Compiling a program that does not need loadobj() and can hence be
+  compiled without the -Bstatic in $NEMOBIN/cc. This is peculiar to
+  some architectures, e.g.
+
+	make atos CC="/bin/cc -I$NEMOINC"
+
+  It will create significantly smaller executables since shared
+  libraries are used. On Solaris this will be the default.
+
+* Testbed functions:
+
+  Some functions in the $NEMO/src/kernel tree, and in some of the other
+  places, can be compiled into an exectuable, for debugging purposes.
+  Compilation of such testbed routines is accomplished by a piece of
+  main() code [or nemo_main() for all that matters] #ifdeffed by a
+  TESTBED test.
+  To compile them, one can generally use
+
+        make getparam CFLAGS="-g -DTESTBED"
+
+  or, if provided for in the Makefile:
+
+        make getpartest
+
+Peculiar things:
+=--------------=
+
+strip: do not strip programs which use the dynamic object loader, they
+       will not be able to find local code
+
+DS:   A display program for images (autodetects FITS, IRAF, NEMO, etc. format)
+
+      % cd $NEMO/src/tools/ds
+      % <edit the "conf.h" file appropriately (usually check if NEMO is set to 1)
+      % make ds EXTRALIBS=$NEMOLIB/libnemo.a
+      % rm ds
+      % make ds CC=/bin/cc EXTRALIBS=$NEMOLIB/libnemo.a
+      % mv ds $NEMOBIN
+      % make clean
+
+      Deleting 'ds' and remaking it with different CC makes it load in
+      dynamic mode, otherwise the binary 'ds' would be very large due to
+      forced static loading (-Bstatic) that is normally needed in Nemo
+      these days. Check out the $NEMOBIN/cc script in case of doubt.
+
+      There is now an X version of 'ds' available. This will overwrite
+      the sunview version in NEMO at some time soon.
+
+NEMOTOOL/NEMO:
+      See miriad target in $NEMO/Makefile. It should install miriad
+      from $NEMO/src/tools/miriad/miriad and nemotool from
+      from $NEMO/src/tools/miriad/mirtool.
+      
+
+
+Troubleshooting:
+
+In case of reporting errors it helps to have the following information
+available:
+
+  - your architecture (hardware and operating system version, amount of
+    memory, disk space etc.)
+  - your NEMORC.local file
+  - any other modifications you've made to NEMO
+
+
+
+Other miscellanious items:
+
+     By the way, the best run-time performance from Sun compilers for
+     compute-bound applications is usually obtained from some combination of the
+     following compile-time options:
+     
+     Fortran 1.3.1:
+             -O4 -cg89 -libmil -dalign -fnonstd -Bstatic
+     C 1.0:
+             -O4 -cg89 -libmil -dalign -fnonstd -Bstatic -fsingle
+    
+     These are discussed in the Numerical Computation Guide which accompanies C 1.0
+     and Fortran 1.3.1.  Also the default swap and /tmp partitions supplied by
+     SunOS are often insufficient to fully optimize some large programs.  Use
+     swapon(8) in the first instance and -temp=..., described in cc(1) and f77(1),
+     in the second instance.
+		     
+		     (dgh@validgh.com)
+
+Programming development:
+========================
+
+bake prog
+
+	Compiles and links prog.c with nemo
+
+IBM Risc (IBM AIX 3.1)
+======================
+
+- cc compiler needs -qnoro (like gnu's -fwriteable-strings)
+  We use -Daix to create the trigger needed to resolve some
+  NULL issues. In this respect /bin/cc and /bin/xlc behave
+  differently? The solution was to bypass the 
+	#define NULL (void *)0
+  in their <stdio.h> and use ours
+	#define NULL 0
+  Since the former is ANSI, we should do something about this in
+  NEMO.
+
+- Fortran_to_C linking: symbol names are the same, i.e. not the
+  BSD convention of appending underscores. All else seems to be
+  the same, in particular using character variables. Not tested
+  well though. (nbody0)
+  If you use the default FC to link, it will fail in e..g. getenv,
+  because the wrong getenv (fortran) is loaded by the linker;
+  instead this will compile nbody0:
+  First compile all in .o files:
+        make nbody0
+  it WILL create a binary, but it won't run. Then
+        rm nbody0
+        make nbody0 FC=cc FORLIBS=
+  which links and suggests that cc is smart enough to find any
+  needed FORLIBS, since we supplied none (the standard libF77.a
+  et al. are absent on AIX)
+
+
+
+
+Example:	SGI/SOLARIS installations
+
+mkdir nemo_2.4.0
+cd nemo_2.4.0
+ncftp ftp.astro.umd.edu:/progs/nemo/nemo_2.4.0.tar.gz	12 Mb uncompressed
+time gtar zxf nemo_2.4.0.tar.gz	    3.123u 11.620s 2:43.59	(wang)
+                                    1.337u 6.916s 1:08.23	(onyx)
+				    0.88u 3.72s 1:17.66 5.9% (ultra)
+
+
+	-> alternatively: 
+			src/scripts/bootstrap goto=install nemo=$cwd
+setenv NEMO `pwd`
+source NEMORC
+set path=(. $NEMOBIN $path[2-])
+rehash
+
+make dirs scripts
+which cc 			<-- make sure it's $NEMOBIN/cc
+which make			<-- make sure it's $NEMOBIN/make
+cd src
+time make install >& make1.log	40.499u 41.344s 3:25.73 39.7% (wang's machine)
+                                12.394u 17.417s 0:33.37 89.3% (onyx)
+				37.58u 19.00s 1:34.53 59.8% (ultra)
+
+mknemo tsf
+mknemo -c history hisf
+mknemo hackcode1
+time hackcode1 > /dev/null      1.923u 0.021s 0:02.79 69.5%
+                                0.555u 0.010s 0:00.57 98.2% (onyx)
+				1.46u 0.02s 0:01.86 79.5% (ultra)
+
+cd $NEMO/src/scripts
+need -m `testsuite -s` > $NEMO/tmp/log1
+testsuite -q
+time testsuite			(wang's sgi)
+				(onyx)
+				5.54u 5.62s 0:15.05 74.1% (ultra)
+
+Problems:
+
+    IRIX 6 doezn't appear to need -lbsd aymore, IRIX 5 needs it?    .
+    IRIX 6 cannot handle fitsio?                                    fixed
+    tabmath fails: no EOF on getc ?                                 .
+    yapp_gl:    how to do null output?                              .
+    IRIX cannot handle with out MANPATH method
