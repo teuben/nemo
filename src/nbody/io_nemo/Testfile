@@ -1,0 +1,25 @@
+# $Id$
+#
+
+SHELL = /bin/csh
+DIR = src/nbody/io_nemo
+BIN = testc testf
+NEED = mkplummer snapmask hackforce
+
+help:
+	@echo $(DIR)
+
+need:
+	@echo $(NEED)
+
+clean:
+	@echo Cleaning $(DIR)
+
+all:	$(BIN)
+
+testc:	
+	(cd $(NEMO)/$(DIR) ; make test  ; script/test_io_nemo.csh)
+
+testf:
+	(cd $(NEMO)/$(DIR) ; make testf ; script/fortran_test_io_nemo.csh)
+#
