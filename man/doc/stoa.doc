@@ -1,0 +1,18 @@
+%N stoa
+%D convert binary N-body file to ASCII format
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man stoa' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	input file name [???]
+%A out
+	output file name [???]
+%A options
+	information to output {mass,phase,phi} [mass,phase]
+%A iformat
+	output format for integers [%d]
+%A rformat
+	output format for floating-point [%21.13E]
+%A VERSION
+	22-feb-94 PJT [2.3c]

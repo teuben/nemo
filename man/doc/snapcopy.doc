@@ -1,0 +1,20 @@
+%N snapcopy
+%D copy an N-body snapshot
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man snapcopy' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input snapshot [???]
+%A out
+	Output snapshot [???]
+%A select
+	Selection expression [1]
+%A times
+	Times to select [all]
+%A precision
+	Precision of results to store (double/single) [unused] [double]
+%A keep
+	Items to copy in snapshot [all]
+%A VERSION
+	25-mar-97 PJT [1.1c]

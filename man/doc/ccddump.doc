@@ -1,0 +1,20 @@
+%N ccddump
+%D dump the bytes of an image, optional scaling
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man ccddump' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	Input filename (image) [???]
+%A out
+	Output filename (dump) [???]
+%A option
+	Dump option [byte|float|double] [float]
+%A range
+	Range in case scaling is needed (A:B) []
+%A mode
+	Output mode [row|column] [row]
+%A swap
+	Swap bytes?[t|f] [false]
+%A VERSION
+	27-mar-97 PJT [1.1c]
