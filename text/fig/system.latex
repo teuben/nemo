@@ -1,0 +1,42 @@
+\setlength{\unitlength}{0.0125in}%
+\begin{picture}(560,380)(80,380)
+\thicklines
+\put( 80,720){\framebox(560,40){}}
+\put(100,520){\framebox(100,40){}}
+\put(120,560){\framebox(60,40){}}
+\put(240,520){\framebox(100,40){}}
+\put(260,560){\framebox(60,40){}}
+\put(380,520){\framebox(100,40){}}
+\put(400,560){\framebox(60,40){}}
+\put(520,520){\framebox(100,40){}}
+\put(540,560){\framebox(60,40){}}
+\put(150,520){\vector( 0, 1){  0}}
+\put(150,520){\vector( 0,-1){100}}
+\put(290,520){\vector( 0, 1){  0}}
+\put(290,520){\vector( 0,-1){100}}
+\put(430,520){\vector( 0, 1){  0}}
+\put(430,520){\vector( 0,-1){100}}
+\put(570,520){\vector( 0, 1){  0}}
+\put(570,520){\vector( 0,-1){100}}
+\put( 80,380){\framebox(560,40){}}
+\put(150,720){\vector( 0, 1){  0}}
+\put(150,720){\vector( 0,-1){120}}
+\put(290,720){\vector( 0, 1){  0}}
+\put(290,720){\vector( 0,-1){120}}
+\put(430,720){\vector( 0, 1){  0}}
+\put(430,720){\vector( 0,-1){120}}
+\put(570,720){\vector( 0, 1){  0}}
+\put(570,720){\vector( 0,-1){120}}
+\put(340,620){\framebox(60,40){}}
+\put(170,730){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\twtyrm             User Interface}}}
+\put(220,390){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\twtyrm Binary File Structure}}}
+\put(355,635){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\twtyrm Fits}}}
+\put(555,575){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\twtybf tab}}}
+\put(275,575){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\twtybf ccd}}}
+\put(130,575){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\twtybf snap}}}
+\put(410,575){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\twtybf orb}}}
+\put(550,535){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\twtyrm Table}}}
+\put(410,535){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\twtyrm Orbit}}}
+\put(270,535){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\twtyrm Image}}}
+\put(115,535){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\twtyrm Snapshot}}}
+\end{picture}
