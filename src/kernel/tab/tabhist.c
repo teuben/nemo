@@ -31,6 +31,10 @@
  *	15-feb-99   3.1:  median can be turned off now		pjt
  *	22-dec-99   3.1a: fix reporting bug when 1 point read	pjt
  *       3-jun-01   3.2 : added nsigma=                         pjt
+ * 
+ * TODO:
+ *     option to do dual-pass to subtract the mean before computing
+ *     the higher order moments.
  */
 
 /**************** INCLUDE FILES ********************************/ 
