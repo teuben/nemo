@@ -11,31 +11,37 @@
  *	26-feb-94   ansi and better TESTBED defaults	pjt
  *      20-jun-01   prototypes 
  *	12-sep-01   nemo_
+ *      21-sep-03   changed meaning of 'deflen' in nemo_file_lines    PJT
  */
 
 #include <stdinc.h>
 
+#include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
 int nemo_file_size(char *name)
 {
-    struct stat buf;
-    
-    if (stat(name,&buf) == 0)
-        return( buf.st_size );
-    else
-        return(-1);                 /* see errno error code */
+  struct stat buf;
+  
+  if (stat(name,&buf) == 0)
+    return buf.st_size;
+  else {
+    dprintf(1,"nemo_file_size: stat returned errno=%d\n",errno);
+    return -1;
+  }
 }
 
 int nemo_file_time(char *name)
 {
-    struct stat buf;
-    
-    if (stat(name,&buf) == 0)
-        return( (int)buf.st_mtime );
-    else
-        return(-1);                 /* see errno error code */
+  struct stat buf;
+  
+  if (stat(name,&buf) == 0)
+    return (int)buf.st_mtime;
+  else {
+    dprintf(1,"nemo_file_time: stat returned errno=%d\n",errno);
+    return -1;
+  }
 }
 
 /*
@@ -53,8 +59,12 @@ int nemo_file_lines(char *name, int deflen)
     stream str;
 
     len = nemo_file_size(name);
-    if (len<0) return deflen;
-    if (len==0) return 0;
+    if (len<0) {       /* probably a pipe or special NEMO thing, so we need hints */
+      if (deflen == 0) return MAXLINES;
+      return ABS(deflen);
+    }
+    if (len==0) return 0;    /* file has 0 length, so no lines */
+    if (deflen > 0) return deflen;
     
 #if 0
     if (isatty(fileno(str))) {
@@ -65,6 +75,10 @@ int nemo_file_lines(char *name, int deflen)
 
     buf = (char *) allocate(BUFSIZE);
     str = stropen(name,"r");
+
+    /* this is a very expensive operation, preferred it to pass
+     * an estimated length to the program 
+     */
 
     while ( (n=fread(buf,1,BUFSIZE,str)) > 0) {
         cp = buf;
@@ -101,7 +115,7 @@ nemo_main()
     printf("%s file_size() = %d %d\n",
         fname, nemo_file_size(fname), nemo_file_time(fname));
     if (errno != 0)
-        perror("Error in file_size");
+        perror("perror::Error in file_size");
 
     printf("%s file_lines() = %d\nwc: ",
         fname, nemo_file_lines(fname,deflen));
