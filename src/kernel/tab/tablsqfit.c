@@ -484,6 +484,8 @@ do_ellipse()
         ab = (2/(sol[0]+sol[2] + 2*sol[1]/sinpp));
 
     /* compute error in axis ratio : for this one we only need 3 partial derivitives */
+	/* see also:  http://iraf.noao.edu/ADASS/adass_proc/adass_95/buskoi/buskoi.html */
+	/* and the Jedrzejewski, R. 1987, MNRAS, 226, 747 reference */
 #if 1
     /* first Mousumi version */
     warning("old math");

@@ -1,7 +1,9 @@
 /*
  * TABNLLSQFIT: a general (non-linear) fitting program for tabular data 
  *
- *      12-jul-02  derived from tablsqfit, but using nllsqfit() now
+ *      12-jul-02  1.0  derived from tablsqfit, but using nllsqfit() now
+ *      17-jul-02  1.1  allow NR's mrqmin() to be used via an emulator (nr_nllsqfit)
+ *                      added initial code for dynamic object loading functions
  *
  *
  *  line       a+bx
@@ -13,6 +15,7 @@
 
 #include <stdinc.h>  
 #include <getparam.h>
+#include <loadobj.h>
 
 string defv[] = {
     "in=???\n           input (table) file name",
@@ -26,11 +29,13 @@ string defv[] = {
     "nsigma=-1\n        ** delete points more than nsigma away?",
     "par=\n             initial estimates of parameters (p0,p1,p2,...)",
     "free=\n            free(1) or fixed(0) parameters? [1,1,1,1,....]",
+    "load=\n            If used, uses this dynamic object function (full path)",
     "nmax=10000\n       Default max allocation",
     "tol=\n             Tolerance for convergence of nllsqfit",
     "lab=\n             Mixing parameter for nllsqfit",
     "itmax=50\n         Maximum number of allowed nllsqfit iterations",
-    "VERSION=1.0c\n     13-jul-02 PJT",
+    "numrec=f\n         Try the numrec routine instead?",
+    "VERSION=1.1a\n     17-jul-02 PJT",
     NULL
 };
 
@@ -76,8 +81,18 @@ int npar;
 
 bool Qtab;                  /* do table output ? */
 
-rproc fitfunc;
-proc  fitderv;
+typedef real (*my_proc1)(real *, real *, int);
+typedef void (*my_proc2)(real *, real *, real *, int);
+
+my_proc1 fitfunc;
+my_proc2 fitderv;
+
+extern int nr_nllsqfit(real *, int, real *, real *, real *, int, real *, real *, int *, 
+		       int, real, int, real, my_proc1, my_proc2);
+extern int    nllsqfit(real *, int, real *, real *, real *, int, real *, real *, int *, 
+		       int, real, int, real, my_proc1, my_proc2);
+
+iproc my_nllsqfit;    /* set via numrec= to be the Gipsy or NumRec routine */
 
 
 
@@ -186,7 +201,10 @@ nemo_main()
     setparams();
     read_data();
 
-    if (scanopt(method,"line")) {
+    if (hasvalue("load")) {
+      load_function(getparam("load"),method);
+      do_function(method);
+    } else if (scanopt(method,"line")) {
         do_line();
     } else if (scanopt(method,"plane")) {
     	do_plane();
@@ -199,8 +217,6 @@ nemo_main()
     } else
         error("fit=%s invalid; try [line,plane,poly,gauss]",
 	      getparam("fit"));
-
-    if (outstr) strclose(outstr);
 }
 
 setparams()
@@ -261,6 +277,10 @@ setparams()
       for (i=0; i<MAXPAR; i++)
 	mask[i] = 1;
     }
+    if (getbparam("numrec"))
+      my_nllsqfit = nr_nllsqfit;
+    else
+      my_nllsqfit = nllsqfit;
 }
 
 setrange(real *rval, string rexp)
@@ -324,6 +344,65 @@ read_data()
        
     if (npt==0) error("No data");
 }
+
+load_function(string fname,string method)
+{
+  char path[256];  /* Yuck, need something for this */
+  char func_name[80], derv_name[80];
+
+  mysymbols(getargv0());
+  if (method) {
+    sprintf(path,"%s_%s.so",fname,method);
+    sprintf(func_name,"func_%s",method);
+    sprintf(derv_name,"derv_%s",method);
+  } else {
+    sprintf(path,"%s_%s.so",fname,"loadobj");
+    sprintf(func_name,"func_loadobj");
+    sprintf(derv_name,"derv_loadobj");
+  }
+  loadobj(fname);
+  
+  fitfunc = (my_proc1) findfn(func_name);
+  fitderv = (my_proc2) findfn(derv_name);
+  if (fitfunc==NULL) error("Could not find func_loadobj in %s",fname);
+  if (fitderv==NULL) error("Could not find derv_loadobj in %s",fname);
+}
+
+do_function(string method)
+{
+  real *x, *y, *dy, *d;
+  int i,j,k,nrt, mpar[MAXPAR];
+  real fpar[MAXPAR], epar[MAXPAR];
+  int lpar = npar;        /* MUST be set */
+
+  if (npar == 0) error("You must specify initial conditions for all parameters");
+    
+  if (nxcol < 1) error("nxcol=%d",nxcol);
+  if (nycol < 1) error("nycol=%d",nycol);
+  if (tol < 0) tol = 0.0;
+  if (lab < 0) lab = 0.0;
+
+  x = xcol[0].dat;
+  y = ycol[0].dat;
+  dy = (dycolnr>0 ? dycol.dat : NULL);
+  d = (real *) allocate(npt * sizeof(real));
+  
+  for (i=0; i<lpar; i++) {
+    mpar[i] = mask[i];
+    fpar[i] = par[i];
+  }
+
+  nrt = (*my_nllsqfit)(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
+  printf("nrt=%d\n",nrt);
+  printf("Fitting LOADED function \"%s\":  \n",method);
+  for (k=0; k<lpar; k++)
+    printf("p%d= %g %g\n",k,fpar[k],epar[k]);
+
+  if (outstr)
+    for (i=0; i<npt; i++)
+      fprintf(outstr,"%g %g %g\n",x[i],y[i],d[i]);
+
+}
 
 
 
@@ -357,7 +436,7 @@ do_line()
   fitfunc = func_line;
   fitderv = derv_line;
 
-  nrt = nllsqfit(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
+  nrt = (*my_nllsqfit)(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
   printf("nrt=%d\n",nrt);
   printf("Fitting a+bx:  \na= %g %g \nb= %g %g\n", fpar[0],epar[0],fpar[1],epar[1]);
   if (outstr)
@@ -404,7 +483,7 @@ do_plane()
   fitfunc = func_plane;
   fitderv = derv_plane;
 
-  nrt = nllsqfit(x,2,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
+  nrt = (*my_nllsqfit)(x,2,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
   printf("nrt=%d\n",nrt);
   printf("Fitting p0+p1*x1+p2*x2+.....pN*xN: (N=%d)\n",order);
   for (k=0; k<lpar; k++)
@@ -453,7 +532,7 @@ do_gauss()
   fitfunc = func_gauss1d;
   fitderv = derv_gauss1d;
 
-  nrt = nllsqfit(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
+  nrt = (*my_nllsqfit)(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
   printf("nrt=%d\n",nrt);
   printf("Fitting a+b*exp(-(x-c)^2/(2*d^2)):  \na= %g %g \nb= %g %g \nc= %g %g\nd= %g  %g\n",
 	 fpar[0],epar[0],fpar[1],epar[1],fpar[2],epar[2],fpar[3],epar[3]);
@@ -497,7 +576,7 @@ do_exp()
   fitfunc = func_exp;
   fitderv = derv_exp;
 
-  nrt = nllsqfit(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
+  nrt = (*my_nllsqfit)(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
   printf("nrt=%d\n",nrt);
   printf("Fitting a+b*exp(-(x-c)/d):  \na= %g %g \nb= %g %g \nc= %g %g\nd= %g  %g\n",
 	 fpar[0],epar[0],fpar[1],epar[1],fpar[2],epar[2],fpar[3],epar[3]);
@@ -521,7 +600,7 @@ do_poly()
   real fpar[MAXPAR], epar[MAXPAR];
   int lpar = order+1;
     
-  if (nxcol<order) error("Need %d value(s) for xcol=",order);
+  if (nxcol < 1) error("nxcol=%d",nxcol);
   if (nycol < 1) error("nycol=%d",nycol);
   if (tol < 0) tol = 0.0;
   if (lab < 0) lab = 0.0;
@@ -539,7 +618,7 @@ do_poly()
   fitfunc = func_poly;
   fitderv = derv_poly;
 
-  nrt = nllsqfit(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
+  nrt = (*my_nllsqfit)(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
   printf("nrt=%d\n",nrt);
   printf("Fitting p0+p1*x+p2*x^2+.....pN*x^N: (N=%d)\n",order);
   for (i=0; i<lpar; i++)

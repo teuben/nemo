@@ -311,7 +311,7 @@ static int getvec(
       }
       matrix2[j][j] = 1.0 + labda;              /* scaled value on diagonal */
    }
-   if (r = invmat( )) return( r );              /* invert matrix inlace */
+   if (r = invmat( )) return( r );              /* invert matrix inplace */
    for (i = 0; i < npar; i++) epar[i] = fpar[i];
    for (j = 0; j < nfree; j++) {                /* loop to calculate ... */
       dj = 0.0;                                 /* correction vector */
@@ -394,6 +394,13 @@ int nllsqfit(
          if ((matrix1[i][i] <= 0.0) || (matrix2[i][i] <= 0.0)) return( -7 );
          epar[parptr[i]] = chi1 * sqrt( matrix2[i][i] ) / sqrt( matrix1[i][i] );
       }
+      /* somehow ddat is not set in linear mode in getmat()..... */
+      if (ddat) {
+	for (n = 0; n < ndat; n++) {
+	  ddat[n] = ydat[n] - (*fitfunc_c)( &xdat[xdim * n], fpar, npar );
+	}
+      }
+
    } else {                             /* Non-linear fit */
       /*
        * The non-linear fit uses the steepest descent method in combination
@@ -459,7 +466,7 @@ int nllsqfit(
          }
       }
    }
-   return( itc );                       /* return number of iterations */
+   return itc;                       /* return number of iterations (0 for linear) */
 }
 
 #if     defined(TESTBED)

@@ -51,10 +51,12 @@ is the dimension of the fit.
 contains the data points.
 .TP
 \fBwdat\fP      
-contains the weigths for the data points.
+contains the weigths for the data points. 
+Can be a NULL pointer, in which case all weights are equal.
 .TP
 \fBddat\fP      
-contains the difference between fit and data
+contains the difference between fit and data. 
+Can be a NULL pointer, in which case no fit differences are returned.
 .TP
 \fBndat\fP      
 is the number of data points.

@@ -1,4 +1,4 @@
-.TH TABNLLSQFIT 1NEMO "12 July 2002"
+.TH TABNLLSQFIT 1NEMO "17 July 2002"
 .SH NAME
 tabnllsqfit \- general purpose non-linear least squares fitting program
 .SH SYNOPSIS
@@ -55,7 +55,7 @@ given, the other one is considered zero.
 .TP
 \fBfit=\fP\fImodel\fP
 Model name what to fit. Currently implemented are \fIline\fP, \fIplane\fP,
-\fIpoly\fP, and \fIgauss\fP.
+\fIpoly\fP, \fIgauss\fP, and \fIexp\fP.
 [default: \fBline\fP].
 .TP
 \fBorder=\fP\fIorder\fP
@@ -86,6 +86,13 @@ A list of 1's and 0's to set which parameters are to be kept free (1) and which
 are fixed (0). By default all parameters are free, i.e. fitted. If any
 parameter is fixed, initial estimates for all need to be given (see \fBpar=\fP).
 Default: all parameters free.
+.TP
+\fBload=\fP
+If given, this should contain the full path to a compiled and 
+shared object (.so) file) that contains the function to be fitted 
+in terms of the \fInllsqfit\fP parameters \fIf\fP and \fIdf\fP. They
+must be named \fBfunc_loadobj\fP and \fBderv_loadobj\fP
+(maybe modified with fit=). **under development**
 .TP
 \fBnmax=\fP\fImax_lines\fP
 Maximum number of lines allocated if the input file was being read
@@ -147,8 +154,37 @@ b= 1.84855 0.0708969
 c= 50.0317 0.381753
 d= 9.05587  0.43685
 .fi
+.SH LOAD FUNCTIONS
+With the \fBload=\fP keyword dynamic object files can be loaded using the
+\fIloadobj(3NEMO)\fP mechanism. The convention is that two functions
+must be externally visible, and named \fIfunc_\fP\fImethod\fP and
+\fIderv_\fP\fImethod\fP  (where \fImethod\fP is the same as the
+\fBfit=\fP keyword.
+.PP
+Here is an example of the file \fBline.c\fP that can
+be used with \fBfit=line load=line\fP and compiled with
+.nf
+	bake line.so
+.fi
+
+.nf
+
+#include <stdinc.h>
+
+real func_line(real *x, real *p, int np) 
+{
+  return p[0] + p[1]*x[0];
+}
+void derv_line(real *x, real *p, real *e, int np) 
+{
+  e[0] = 1.0;
+  e[1] = x[0];
+}
+
+
+.fi
 .SH SEE ALSO
-tablsqfit(1NEMO), tabhist(1NEMO), tabmath(1NEMO), 
+tablsqfit(1NEMO),hist(1NEMO), tabmath(1NEMO), 
 gaussfit(1NEMO), linreg(1NEMO), nllsqfit(3NEMO), fit(DC1)
 \fINumerical Recipies in C, Ch.14\fP
 .SH AUTHOR
@@ -156,7 +192,7 @@ Peter Teuben
 .SH FILES
 .nf
 .ta +2.5i
-~/src/kernel/tab	tablsqfit.c
+~/src/kernel/tab	tabnllsqfit.c
 .fi
 .SH "UPDATE HISTORY"
 .nf
