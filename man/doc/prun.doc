@@ -1,0 +1,38 @@
+%N prun
+%D NEMO wrapper for Couchman's prun
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man prun' for more extensive online help
+  Defaults of program keywords are listed between square brackets
+%A dir
+	working run directory [???]
+%A irun
+	run label [9001]
+%A ipstop
+	final step [75]
+%A ipout
+	steps between data output [25]
+%A ipdump
+	steps between restart dump output [4]
+%A dpnp1
+	delta-p [0.84]
+%A alpha
+	eq. (11.2) [1.5]
+%A sftinit
+	initial softening [0.6]
+%A sftmin
+	minimum softening [0.03]
+%A perr
+	max force error (%s) [6.0]
+%A nlmx
+	max refinement level [4]
+%A exe
+	Name of true fortran prun executable [prun.exe]
+%A greendir
+	directory to store Green's functions [greenfn]
+%A datadir
+	directory to store data file storage [data]
+%A startfile
+	initial data file []
+%A VERSION
+	6-may-94 PJT [1.0]
