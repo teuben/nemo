@@ -39,7 +39,7 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
 string usage="add N-body systems on top of each other";
 
 #if !defined(MAXSNAP)
-# define MAXSNAP 32
+# define MAXSNAP 64
 #endif
 
 stream instr[MAXSNAP], outstr=NULL;
@@ -152,15 +152,15 @@ int readdata()
         phasetot = (real *) allocate(sizeof(real) * 2*NDIM * nbodytot);
     if (needphi) {
         phitot = (real *) allocate(sizeof(real) * nbodytot);
-	dprintf(0,"Also writing potentials\n");
+	dprintf(1,"Also writing potentials\n");
     }
     if (needacc) {
         acctot = (real *) allocate(sizeof(real) * NDIM * nbodytot);
-    	dprintf(0,"Also writing accelerations\n");
+    	dprintf(1,"Also writing accelerations\n");
     }
     if (needkey) {
         keytot = (int *) allocate(sizeof(int) * NDIM * nbodytot);
-    	dprintf(0,"Also writing keys\n");
+    	dprintf(1,"Also writing keys\n");
     }
 
     offset = 0;
