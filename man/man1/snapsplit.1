@@ -1,0 +1,54 @@
+.TH SNAPSPLIT 1NEMO "22 July 1995"
+.SH NAME
+snapsplit \- split a snapshot into pieces
+.SH SYNOPSIS
+\fBsnapsplit\fP \fbin= out=\fP [parameter=value]
+.SH DESCRIPTION
+\fIsnapsplit\fP is modeled after the unix program split(1), and splits
+a snapshot up into pieces of equal length, except perhaps for the last
+one which may be ''incomplete''. It's purpose is solely to be able
+to process snapshots which are too big to fit into memory.
+You can either specify the size of the new snapshot, or the number
+of pieces you want to have a snapshot split into.
+.PP
+Note that not all programs can correctly handle snapshots in
+this serialized mode. For example, \fIradprof(1NEMO)\fP needs
+all particles in memory at the same time.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input snapshot      
+No default.
+.TP 20
+\fBout=\fP
+Output snapshot      
+No default.
+.TP 20
+\fBtimes=\fP
+Times to select     
+default: \fIall\fP.
+.TP 20
+\fBnbody=\fP
+Size of one snapshot . At least one of \fBnbody=\fP and
+\fBnsnap=\fP needs to be given. 
+No default.
+.TP 20
+\fBnsnap=\fP
+Number of pieces to cut a snapshot into.
+No default.
+.SH SEE ALSO
+snapmerge(1NEMO)
+.SH FILES
+.nf
+.ta +2i
+~src/nbody/trans	snapsplit.c
+.fi
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+27-Jan-94	V1.0 Created	PJT
+.fi
