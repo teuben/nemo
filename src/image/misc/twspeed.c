@@ -17,12 +17,12 @@ OLD::
 
 string defv[] = {
     "vel=???\n       Input mean velocity image",
-    "xin=\n       Input mean position image",
     "den=???\n       Input density image",
+    "xin=\n          Input mean position image",
     "pa=90\n         *** Position Angle of disk",
     "center=\n       *** Center of galaxy (map-center)",
     "step=1\n        Slit width in pixels",
-    "VERSION=1.0\n   30-mar-03 PJT",
+    "VERSION=1.1\n   22-apr-04 PJT",
     NULL,
 };
 
@@ -42,11 +42,10 @@ double cell;				/* cell or pixel size (square) */
 
 
 
-nemo_main()
+void nemo_main(void)
 {
   int  i, j, k, dir;
   real sum0, sum1, sum2, sum11,sum00, xmean;
-
     
   vinstr = stropen (getparam("vel"), "r");         /* velocity map */
   read_image (vinstr,&viptr);
@@ -71,6 +70,8 @@ nemo_main()
   dx = Dx(iptr);
   dy = Dy(iptr);
   
+
+  printf("# j sum0 sum1 sum2  sum1/sum0  sum2/sum0\n");
   for (j=0; j<ny; j++) {     /* loop over all lines parallel to the major axis */
     sum0 = sum1 = sum2 = sum11 = sum00 = 0;
     for (i=0; i<nx; i++) {
@@ -79,14 +80,18 @@ nemo_main()
     }
     xmean = sum11/sum00;
     for (i=0; i<nx; i++) {          /* integrate TW quantaties */
-      sum0 += MapValue(iptr,i,j);     /* integrate DEN map */
-      sum1 += MapValue(viptr,i,j);    /* integrate VEL map */
+      sum0 += MapValue(iptr,i,j);                        /* integrate DEN map */
+      sum1 += MapValue(viptr,i,j)*MapValue(iptr,i,j);    /* integrate VEL map */
       if (xiptr)
-	sum2 += MapValue(xiptr,i,j);    /* compute on the fly from 'iptr' map */
+	sum2 += MapValue(xiptr,i,j); 
       else
 	sum2 += xmean;
     }
     if (sum0 != 0)
-      printf("%d %g %g %g     %g %g\n",j,sum0,sum1,sum2,sum1/sum0,sum2/sum0);
+      printf("%g %g   %d %g %g %g     %g %g\n",
+	     xmean, sum1/sum0,
+	     j,sum0,sum1,sum2,sum1/sum0,sum2/sum0);
+
   }
+  printf("# xmean vmean   j sum0 sum1 sum2  sum1/sum0  sum2/sum0\n");
 }
