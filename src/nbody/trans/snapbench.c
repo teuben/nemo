@@ -1,6 +1,10 @@
 /*
  *  SNAPBENCH:  snapshot benchmark to scale masses
  *
+ *    mkplummer p6 1000000 massname='n(m)' massrange=1,2
+ *    time snapbench p6 'mass=3.1415'   bodytrans=f iter=10
+ *    time snapbench p6 'mass=3.1415*m' bodytrans=f iter=10  
+ *  
  *     13-mar-05  Created after Walter's comment at Vegas05          PJT
  */
 #include <stdinc.h>

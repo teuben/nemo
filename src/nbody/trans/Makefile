@@ -87,6 +87,16 @@ nemo_src:
 	-@for i in $(BINFILES); do \
 	echo `pwd` $$i ; done 
 
+# benchmark
+
+p6:
+	mkplummer p6 1000000 massname='n(m)' massrange=1,2
+
+bench1: snapbench p6
+	time ./snapbench p6 'mass=3.1415'   bodytrans=f iter=10
+	time ./snapbench p6 'mass=3.1415*m' bodytrans=f iter=10 
+
+
 # Targets used to assemble object library.
 
 bin: $(BINFILES)
@@ -96,3 +106,5 @@ hackdens: .hackdens
 
 .hackdens:
 	(cd hackdens ; $(MAKE) hackdens)
+
+
