@@ -318,7 +318,7 @@ int get_data_select_f(char * infile,
   /* read the snapshot */
   for (;;) {
     get_history(instr[no_io]);	
-    
+
     while (get_tag_ok(instr[no_io],HeadlineTag))
       headline = get_string(instr[no_io],HeadlineTag);
 		
@@ -330,10 +330,7 @@ int get_data_select_f(char * infile,
       }
 
       /* end of snapshot reached */
-      fprintf(stderr,"WARNING!! end of snapshot reached, automatically closed\n");
-      read_one[no_io] = FALSE;
-      free(io_in[no_io]);
-      strclose(instr[no_io]);
+      fprintf(stderr,"WARNING!! end of snapshot reached.\n");
       
       return 0;
     }
