@@ -4,10 +4,10 @@ rotcurshape \- fit parameters to a velocity field using shaped rotation curves i
 .SH SYNOPSIS
 \fBrotcurshape in=\fPvelfie [parameters=values ...]
 .SH DESCRIPTION
-\fIrotcurshape\fP derives the kinematical parameters from an observed
+\fIrotcurshape\fP derives kinematic parameters from an observed
 velocity field of a coplanar galactic disk by fitting a (set of) rotation curve shape(s).
 Instead of dividing the galactic disk in a set of rings (see \fIrotcur(1NEMO)\fP)
-it fits the shape of the rotation curve to a single plane. This is particularly
+it fits the shape of the rotation curve in a single plane. This is particularly
 useful for low inclination galaxies and/or for central regions of a galaxy where
 normally the rotation curve would vary accross the ring.
 
@@ -22,8 +22,8 @@ Much like \fIrotcur\fP, this program does a non-linear least-squares-fit to the 
 
 where
 
-                      - (x-XPOS) * sin(PA) -/+ (y-YPOS) * cos(PA)  ?
-          cos(theta) = ------------------------------------------
+                      - (x-XPOS) * sin(PA) + (y-YPOS) * cos(PA) 
+          cos(theta) = -----------------------------------------
                                        r
 
 .cs 1
@@ -38,7 +38,8 @@ and where the radius \fIr\fP is measured in the plane of the galaxy:
 .cs 1
 .fi
 The parameterized  rotation curve VROT(r;p1,p2,...pN) can be selected from a number of predefined
-shapes or dynamically loaded from a C-coded routine (see ROTCUR FUNCTIONS below).
+shapes or dynamically loaded from a C-coded routine (see ROTCUR FUNCTIONS below). Up to 5
+functions can be added in quadrature.
 .PP
 In the above formula
 \fIv(x,y)\fP denotes the radial velocity at rectangular sky
@@ -74,13 +75,13 @@ since we clones this off rotcur, but are likely to be slashed shortly):
 .TP 25
 \fBin\fP=\fIv_image|xyv_tab|rv_tab\fP
 Input velocity field map, normally in \fIimage(5NEMO)\fP format.
-Input data can also be a table, see \fBimagemode=\fP and \fBrotcurmode\fP below
+Input data can also be a table, see \fBimagemode=\fP and \fBrotcurmode=\fP below
 how to control input tables.
 No default.
 .TP
 \fBradii\fP=\fIr0,r1\fP
-Inner and outer radius for the disk area to fit (in arcsec).
-The \fBunits=\fP keyword can be used to
+Inner and outer radius of the disk to fit (in arcsec).
+For images, the \fBunits=\fP keyword can be used to
 scale your physical units in the header to ``human readable'' units
 (arcsec). By default the whole disk will be used.
 .TP
@@ -184,7 +185,7 @@ Value of the blank pixel that needs to be ignored. [Default: \fB0.0\fP].
 .TP
 \fBnsigma=\fP
 Reject outlier points will fall outside nsigma times the dispersion 
-away from the mean velocity in a ring. By default, it will not reject any outliers.
+away from the mean velocity in the disk. By default, it will not reject any outliers.
 Use with care, only useful if close enough to a solution and just a few outliers
 need to be removed.
 .TP
@@ -201,7 +202,7 @@ in other columns.
 \fBrotcurmode=t|f\fP
 Input table is a rotation curve (R,V) in columns 1 and 2. Radius is allowed
 to be negative, as this option is implemted as a special version of XYV where
-we fix XPOS=0,INC=90,PA=90. The center can therefore be fitted via YPOS.
+we fix XPOS=0,INC=30,PA=0. The center can therefore be fitted via YPOS.
 Note that \fItabnllsqfit(1NEMO)\fP is also quite efficient to use, except
 the rotation curve functions would need to be re-written in their
 function interface. See also func_rotcur.c for a useful helper routine.
@@ -241,7 +242,7 @@ and loaded via the \fBload=\fP keyword (see also
 \fIloadobj(3NEMO)\fP.
 .PP
 Here are two examples, a simple linear rotation curve with one parameter, and a  
-slightly more involved Plummer disk/sphere rotation curve:
+slightly more involved Plummer disk/sphere rotation curve with two parameters:
 .nf
 
 #include <nemo.h>
@@ -264,17 +265,17 @@ real rotcur_plummer(real r, int np, real *p, real *d)
 .PP
 Here is a list of the builtin rotation curves, where x=r/a is the dimensionless radius:
 .nf
-.ta +1i +2i
-Name:	Parameters:	Formula:
------	-----------	--------
-linear	omega   	v=omega*r
-flat	v0		v=v0
-plummer	v0,a		v=v0*x/(1+x^2)^(3/4)
-core1	v0,a		v=v0*x/(1+x)
-core2	v0,a		v=v0*x/(1+x^2)^(1/2)
-core	v0,a,c		v=v0*x/(1+x^c)^(1/c)
-poly	v0,a,p2,p3,..	v=v0*(x+p2*x^2+p3*x^3+.....pN*x^N)
-iso	v0,a		v=v0*(1-atan(x)/x)
+.ta +1i +1i +1i
+Name:	Parameters:	Formula:				Comments:
+-----	-----------	--------				---------
+linear	omega   	v=omega*r				-
+flat	v0		v=v0					should return rotcur solution
+plummer	v0,a		v=v0*x/(1+x^2)^(3/4)			-
+core1	v0,a		v=v0*x/(1+x)				-
+core2	v0,a		v=v0*x/(1+x^2)^(1/2)			-
+core	v0,a,c		v=v0*x/(1+x^c)^(1/c)			-
+poly	v0,a,p2,p3,..	v=v0*(x+p2*x^2+p3*x^3+.....pN*x^N)	a needs to be fixed !
+iso	v0,a		v=v0*(1-atan(x)/x)			-
 .fi
 .SH EXAMPLE
 Here is an example of creating a synthetic velocity field with
@@ -316,7 +317,7 @@ in during runtime:
 .SH FILES
 .fi
 .ta +1i
-func_rotcur	helper routine for tabnllsqfit
+func_rotcur.c	helper routine for tabnllsqfit to use rotcur functions
 .nf
 .SH CAVEAT
 Parameters and fix/free masks to rotation curve parameters should be all set, in order
