@@ -121,6 +121,7 @@
  * 15-oct-03       f  fix for version.h to give multiple static's in g++ 
  * 23-jan-04       g  fix prototypes for intel compiler
  * 13-may-04       h  add cpu/real time reporting for help=c 
+ * 23-jun-05       i  fix bug free's version_  (JC Lambert)
 
   TODO:
       - what if there is no VERSION=
@@ -150,7 +151,7 @@
 	C-shell variables and command line argument handling all
 	have different maxima, however 2000 seems to be ok. Much
 	higher, C-shell seems to die around  4000, argv[] around
-	10000 on linux-20002.  On solaris they both seem to be 
+	10000 on linux-2002.  On solaris they both seem to be 
 	around 1000
  
   SOME ALTERNATIVE RESOURCES
@@ -164,7 +165,7 @@
 	opag      http://www.zero-based.org/software/opag/
  */
 
-#define GETPARAM_VERSION_ID  "3.4h 13-may-04 PJT"
+#define GETPARAM_VERSION_ID  "3.4i 23-jun-04 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -291,8 +292,8 @@ typedef struct keyword_out {  /* a simple keyword, only meant for outkeys=   */
 
    local char key_filename[MAXBUF];         /* filename to store keywords */
    local char keybuf[MAXBUF];               /* buffer for keyword i/o to file */
-   local string version_e=NULL; /* extern version (keyfile or commandline)    */
-   local string version_i="*";  /* internal version (executable)              */
+   local string version_e=NULL;  /* extern version (keyfile or commandline)    */
+   local string version_i=NULL;  /* internal version (executable)              */
 
 #if defined(INTERRUPT)
    local int initparam_done=0;                 /* trap for too early review() */
@@ -756,7 +757,7 @@ void finiparam()
       free(keys[i].help);
     }
     free(keys);
-    free(version_i);
+    if (version_i) free(version_i);
 }
 
 /*
@@ -878,7 +879,8 @@ local void save_history(string *argv)
         }
         sprintf(&hist[strlen(hist)]," help=%d",help_level);     /* add help */
     } else {                /* save the argv[] command line */
-        histlen = strlen(progname) + strlen(version_i) + 11;
+        histlen = strlen(progname) + 11;
+	if (version_i) histlen += strlen(version_i);
         for (i = 1; argv[i] != NULL; i++)
             histlen += strlen(argv[i]) + 1;
         hist = (char *) allocate(histlen);
@@ -888,7 +890,7 @@ local void save_history(string *argv)
             strcat(hist, argv[i]);
         }
         strcat(hist," VERSION=");            /* append version identifcation */
-        strcat(hist, version_i);
+	if (version_i) strcat(hist, version_i);
     }
     app_history(hist);
     free(hist);
@@ -2179,7 +2181,7 @@ local void writekeys(string mesg)
         "# keyword file written by nemo (help level=%d)\n",help_level);
     for (i=1; i<nkeys; i++) {
         if (streq(keys[i].key,"VERSION"))
-	  fprintf(keyfile,"VERSION=%s\n",version_i);
+	  fprintf(keyfile,"VERSION=%s\n",version_i ? version_i : "*");
         else {
 	  if (keys[i].next) {
 	    dprintf(1,"writing indexed keys");
@@ -2228,7 +2230,7 @@ local void readkeys(string mesg, bool first)
             warning("readkeys: reading incomplete lines from %s",key_filename);
         keybuf[strlen(keybuf)-1] = '\0';          /* get rid of newline */
         if(streq(parname(keybuf),"VERSION")) 
-            if(!streq(version_i,parvalue(keybuf)))
+	  if (version_i && !streq(version_i,parvalue(keybuf)))
                 warning("readkeys: internal[%s] and external[%s] VERSION differ",
                     version_i,parvalue(keybuf));
         /* should process system keywords here... */
