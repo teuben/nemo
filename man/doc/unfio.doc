@@ -1,0 +1,26 @@
+%N unfio
+%D access fortran unformatted I/O files
+%B
+  This doc file has been produced with NEMO help=t option
+  Try 'man unfio' for more extensive online help
+  Defaults of keywords are given between square brackets
+%A in
+	input [???]
+%A out
+	output []
+%A block
+	which block to display (0=all, default: scan) []
+%A type
+	format {int, float, double} [i]
+%A select
+	which elements from this block to select (1=first) []
+%A format
+	printf format to use if block display [%d,%g] []
+%A count
+	display element counter too? [f]
+%A maxbuf
+	buffersize in bytes, to read a block [10000]
+%A swap
+	swapped read? [f]
+%A VERSION
+	19-mar-99 PJT [2.1]
