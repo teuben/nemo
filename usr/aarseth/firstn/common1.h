@@ -1,7 +1,7 @@
 *       common1.
 *       --------
 *
-      PARAMETER (NMAX=100)
+      PARAMETER (NMAX=256)
       IMPLICIT REAL*8  (A-H,O-Z)
 *
       COMMON/NBODY/  BODY(NMAX),X(3,NMAX),XDOT(3,NMAX),F(3,NMAX),
