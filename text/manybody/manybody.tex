@@ -24,6 +24,9 @@
 	   { \bf School on Numerical N-Body Dynamics }\\
 	   { \bf \'Ecole de Dynamique Numerique Ncorps }\\
 { Observatoire astronomique de Strasbourg, France, 19-22 March 2004}\\
+	   and\\
+	   {\bf MODEST5c} \\
+	   { Astronomical Institute {\it 'Anton Pannekoek'}, Amsterdam, 24-30 July 2005}
 }
 
 
@@ -33,8 +36,8 @@
 % Douglas Heggie - Piet Hut - Jun Makino
        }
 
-\date{{\small Version 1.1} \\
-      {\small Nearly-Spring 2004} \\
+\date{{\small Version 1.2} \\
+      {\small Summer 2005} \\
       {\small Last document revised: \today} \\ \\
      }
 
@@ -119,30 +122,31 @@ page (this page). Small latex2html conversion problems remain.
 \chapter*{Preface}
 
 What lies in front of you is an accompanying guide to some of 
-the ``other'' software you will hopefully also find useful this weekend.
+the ``other'' software you will hopefully also find useful this week.
 Although
-the main material from the book {\it Moving Stars Around}
+the main material from the book(s) {\it Moving Stars Around}, and now
+{\tt Kali},
 has already been made available via the ACS
 website\footnote{\tt http://www.ArtCompSci.org (ACS)},
 a number of related
 software packages and programs that deal with the N-body problem have been
 assembled for you on a CD so you can use it on your laptop,
-and also made available on the Strasbourg linux 
+and also made available on your local 
 cluster for the course of 
-this school\footnote{see {\tt /home/instructeur/manybody}}.
+this school\footnote{see {\tt /home/blabla/manybody}}.
 
-Most of this software are the NEMO  and Starlab packages, though
-a number of useful programs and smaller packages
+Most of this programs are within the NEMO  and Starlab packages, 
+though a number of useful programs and smaller packages
 that are available elsewhere have been assembled here
 and made available via this {\it manybody} environment.
 See also Appendix B for a more detailed description.
 
 One word of caution though: this Guide is {\bf not} a coherent
-story that you should read front to back, it is more encyclopedic
+story that you should necessarily read front to back, it is more encyclopedic
 and will hopefully give you an impression of the capabilities
-of this software in case you may need it during the weekend or in
+of this software in case you may need it during this week or in
 your subsequent research. On most topics in this guide you can find
-more in-depth information in other manuals and of course 
+much more in-depth information in other manuals and of course 
 the source code (needless to say, we would like to advocate some
 type of open source policy for our codes).
 
@@ -155,7 +159,10 @@ type of open source policy for our codes).
 \section*{Unix Shell}
 
 The {\it manybody} guide that lies here in front of you assumes some knowledge
-of Unix. Most examples show simple snippets
+of Unix. This means Linux and Mac are fine, but although cygwin on MS-Windows
+gets fairly close, your author couldn't 
+stomach its limitation\footnote{YMMV, as they say in this business}.
+Most examples show simple snippets
 of C-shell command lines; their prompt (e.g. \verb+2%+) 
 contains a counter which is normally started at 1 for each section
 for easy reference.
@@ -203,7 +210,7 @@ reading this document:
 For most programs the {\tt -h} and/or the {\tt --help} flag will give a short
 reminder of the options and their defaults. This is true for NEMO as well
 as Starlab programs.
-For NEMO programs the option {\tt help=h} will give more extensive help
+For NEMO programs the option {\tt help=h} will give much more extensive help
 on the valid keywords.
 
 \item
@@ -576,6 +583,8 @@ FINAL:
    # and since it uses Starlab 'dyn' format
 3% xstarplot < try1
 
+
+% there is a recent AISRP project by Duncan et al. called SWIFT
 
 \section{hnbody}
 
@@ -1494,6 +1503,21 @@ the continues orbit for one selected star from the simulation.
 \end{verbatim}\normalsize
 
 
+\section{xstarplot}
+
+Starlab's visualization program is called {\tt xstarplot}. More to say on this.
+
+\footnotesize\begin{verbatim}
+   # create a plummer
+1% makeplummer ...
+
+   # integrate it
+2% kira ...
+
+   # display it
+3% xstarplot ....
+\end{verbatim}\normalsize
+
 \section{partiview}
 
 An NCSA product. Excellent interactive capabilities. Uses GL. A special
@@ -1528,10 +1552,22 @@ See {\tt http://www.psc.edu/Packages/StarSplatter\_Home/}
 You can also find tools here to help you setup a scene, choose a pan and
 zoom around.
 
+\section{gravit}
+
+The program has recently been developed, but has various neat visualizaton
+options and animates simulations. It also displays the oct-tree of the
+underlying Barnes \& Hut treecode. There are plans to integrate this with
+some of the existing codes.
+
+{\tt http://gravit.slowchop.com/}
+
 \section{povray}
 
-
 {\tt http://www.povray.org/}
+
+\section{visit}
+
+{\tt http://www.llnl.gov/visit/}
 
 \section{OpenDX}
 
@@ -1686,11 +1722,12 @@ White \& Barnes - 1984 - {\bf 1984MNRAS.211..753B.pdf}
 
 \begin{verbatim}
 
-http://astro.u-strasbg.fr/scyon/School/     this N-body School
-http://www.artcompsci.org/                  The Art of Computational Science
-http://www.manybody.org/                    Manybody portal (including MODEST)
-http://www.astro.umd.edu/nemo               NEMO website
-http://www.ids.ias.edu/~starlab/            Starlab website
+http://astro.u-strasbg.fr/scyon/School/                   the previous N-body School
+http://modesta.science.uva.nl/modest/modest5c/index.html  this N-body school
+http://www.artcompsci.org/                                The Art of Computational Science
+http://www.manybody.org/                                  Manybody portal (including MODEST)
+http://www.astro.umd.edu/nemo                             NEMO website
+http://www.ids.ias.edu/~starlab/                          Starlab website
 
 \end{verbatim}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1709,7 +1746,7 @@ Easiest is to add the following
 command to your {\tt .cshrc} file:
 
 \begin{verbatim}
-    source /home/instructeur/manybody/manybody_start
+    source /home/blabla/manybody/manybody_start
 \end{verbatim}
 
 This will add the NEMO and STARLAB packages to your environment, and
@@ -1729,7 +1766,7 @@ the {\tt manybody} root directory.
 \begin{enumerate}
 
 \item
-{\tt mozilla /home/instructeur/manybody/index.html} : local HTML 
+{\tt mozilla /home/blabla/manybody/index.html} : local HTML 
 
 \item
 {\tt mkplummer p1 1000} : NEMO, create a Plummer sphere
@@ -1802,9 +1839,9 @@ Left mouse down rotates. Right mouse down zooms. $>>$ button starts movie.
 % \part{Appendices}
 \chapter                {N-body Compute Toolbox}
 
-\section{ncorps.u-strasbg.fr} 
+\section{blabla.ncorps.u-strasbg.fr}
 
-The directory {\tt /home/instructeur/manybody} on  {\tt ncorps.u-strasbg.fr} 
+The directory {\tt /home/blabla/manybody} on  {\tt blabla.ncorps.u-strasbg.fr} 
 contains all the {\it manybody} software (and then some)  
 we are discussing at this school. We have
 also made a CD available, from which you should be able to reproduce this
@@ -1875,8 +1912,8 @@ laptop.
 
 If you have never heard of CVS, or just casually, 
 it is worth reading
-this page and considering to use it (a few packages
-in manybody are CVS enables, encouraging you to use this feature).
+this appendix and considering to use it (a few packages
+in manybody are CVS enables, encourage you to use this timesaving mode).
 CVS is one of the more popular
 source code control systems, which simplifies keeping your source code
 up to date with a master version. 
@@ -1904,7 +1941,7 @@ this once per account, as the account information is added to a file
 
 \item The environment variable CVSROOT, or the -d flag to the cvs command,
 is needed to get accesss to a repository. Use the one listed in the
-previous section.
+previous section.  
 
 \item You then need to checkout a new sandbox that mirrors a repository
 module:
@@ -1924,7 +1961,7 @@ module:
 \end{enumerate}
 
 
-\section{Starting in the middle}
+\section{Starting with an existing package that is CVS enabled}
 
 If you already have a directory tree that is ``CVS enabled'' (each
 directory will have a {\tt CVS} subdirectory in which administrative
@@ -2042,6 +2079,8 @@ One or two overview plots on the packages and file formats in NEMO will now foll
 \chapter                {Using Starlab}
 
 A summary of useful things to know about Starlab:
+
+
 \begin{enumerate}
 
 \item
@@ -2233,7 +2272,7 @@ contours in the bar region, due to the elliptical orbits.
 \chapter                {NEMO programming}
 
 NEMO is written in vanilla (mostly ANSI) C, with moderate use of
-macros. Most of this is written up well in the 
+macros. Most of this is written up in the 
 {\it NEMO Users and Programmers Guide}. We'll just highlight a few 
 things you might encounter if you would browse the source code:
 
@@ -2250,11 +2289,12 @@ Instead of the laborious work of opening files and error checking
     }
 \end{verbatim}\normalsize
 
-we use
+we typically use one-liners
 \footnotesize\begin{verbatim}
 
     stream istr = stropen(getparam("in"),"r");
 \end{verbatim}\normalsize
+which fatal error in the common cases of ``not found'', ``no permission'' etc.etc.
 
 \item
 Instead of different types of {\tt printf()} statements, use
@@ -2263,19 +2303,19 @@ Instead of different types of {\tt printf()} statements, use
     warning("Fixing n=%d",n);
     dprintf(1,"Iteration n=%d sum=%g",n,sum);
 \end{verbatim}\normalsize
-controlled with the {\tt error=} and {\tt warning=} system keywords.
+controlled with the {\tt error=} and {\tt debug=} system keywords.
 
 \item
-Instead of 
+Random number are normally initialized in a generic way, as follows:
 \footnotesize\begin{verbatim}
     iseed = set_xrandom(getparam("seed"))
 
 with the following meaning for seed:
 
     -2   pid
-    -1   cs since boot
-    0    s since 1970.0
-    n>0  the seed
+    -1   centi-seconds since boot
+    0    seconds since 1970.0
+    n>0  your personal seed selection
 \end{verbatim}\normalsize
 
 there are controlled with the  {\tt seed=} program keyword.
@@ -2323,7 +2363,7 @@ previous comments on Makefile, Testfile and mknemo.
 Updates to the code can either be done via releases (tar files or
 tagged CVS) or in a ``continuum'' (CVS).
 
-\section{NEMO (version 3.1.2)}
+\section{NEMO (version 3.1.2 - now 3.2.3)}
 After installation, it can (and will) occur that it appears 
 as if you have a missing program in NEMO, despite that a 
 manual page exists.
@@ -2350,6 +2390,9 @@ should be recompiled and/or relinked:
 \end{enumerate}
 
 \section{STARLAB (version 4.2.1)}
+
+{\it be sure to update this: since the last summerschool starlab install
+was overhauled}
 
 Similar to NEMO there is a script {\tt mkstarlab} available which
 makes it relatively easy to update or recompile the code under
@@ -2387,7 +2430,7 @@ package (needed for partiview).
 \begin{enumerate}
 
 \item
-The default shell must be csh, only limited (ba)sh support. Command: {\tt chsh}.
+The default shell must be csh, only limited (ba)sh support. Use {\tt tcsh}.
 
 \item
 nbody4 is actually not available
@@ -2396,7 +2439,7 @@ nbody4 is actually not available
 {\tt kira --help} sometimes will complain ``source file unavailable''
 
 \item
-The {\tt gman} appears to be missing on {\tt ncorps}
+The {\tt gman} command could be be missing on your machine. It's very nice to have!
 
 \end{enumerate}
 
@@ -2407,24 +2450,24 @@ The {\tt gman} appears to be missing on {\tt ncorps}
 Q=0 for runbody1 when in= is used...   bug in the wrapper interface
 
 \item
-dtos suffers from some quick hacks put in for the AAS NVO demo:
+{\tt dtos} suffers from some quick hacks put in for the AAS NVO demo:
 Aux/Acceleration/Potential are meaningless.
 
 \item
-(run)galaxy (sellwood) has problems with post-run dataconversion. 
-unfio has changed interface.
+{\tt (run)galaxy} (Sellwood) has problems with post-run dataconversion. 
+{\tt unfio} has changed interface.
 
 \item
-GalactICS has not been properly checked 
+{\tt GalactICS} has not been properly checked 
 
 \item
-snapplot multipanel has odd colors (grey) showing up
+{\tt snapplot} multipanel has odd colors (grey) showing up
 
 \item
 fix MANPATH for NEMO under linux
 
 \item
-tkrun demos
+{\tt tkrun} demos
 
 \item
 overview diagrams of the hierarchy and layout of NEMO, Starlab, Manybody
@@ -2436,7 +2479,7 @@ add Kawaii's code
 units(1) and units(5) unfinished
 
 \item
-python
+python, ruby
 
 \end{enumerate}
 
