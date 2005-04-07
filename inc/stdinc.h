@@ -139,8 +139,6 @@ ERROR!  Sorry, NEMO now requires an ANSI C compiler
 #endif
 #endif
 
-#endif
-
 #if !defined(FALSE)
 #  define FALSE (0)      
 #  define TRUE  (1)
