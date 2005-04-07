@@ -38,6 +38,8 @@
  *                        allow either xmin or xmax set, 
  *                        sortidx -> sort selected by name
  *                        fixed median & histogram if nsigma outliers 
+ *      11-mar-05   5.1   added xcoord= keyword                 pjt
+ *       7-apr-05   5.2   under and overflow reporting fixed    pjt
  *                        
  * 
  * TODO:
@@ -75,9 +77,10 @@ string defv[] = {
     "cumul=f\n                    Override and do cumulative histogram instead",
     "median=t\n			  Compute median too (can be time consuming)",
     "nsigma=-1\n                  delete points more than nsigma",
+    "xcoord=\n		          Draw additional vertical coordinate lines along these X values",
     "sort=qsort\n                 Sort mode {qsort;...}",
     "dual=f\n                     Dual pass for large number",
-    "VERSION=5.0a\n		  2-feb-05 PJT",
+    "VERSION=5.2\n		  7-apr-05 PJT",
     NULL
 };
 
@@ -94,6 +97,8 @@ string cvsid = "$Id$";
 #ifndef MAXCOL
 #define MAXCOL 256
 #endif
+
+#define MAXCOORD 16
 
 local string input;			/* filename */
 local stream instr;			/* input file */
@@ -125,6 +130,9 @@ local string headline;			/* text string above plot */
 local string xlab, ylab;		/* text string along axes */
 local bool   ylog;			/* count axis in logarithmic scale? */
 local real   xplot[2],yplot[2];		/* borders of plot */
+
+local real xcoord[MAXCOORD];            /* coordinate lines */
+local int nxcoord;
 
 local iproc  mysort, getsort();
 
@@ -184,6 +192,8 @@ local void setparams()
     nmax = nemo_file_lines(input,getiparam("nmax"));
     if (nmax<1) error("Problem reading from %s",input);
 
+    nxcoord = nemoinpr(getparam("xcoord"),xcoord,MAXCOORD);
+
     nsigma = getdparam("nsigma");
     mysort = getsort(getparam("sort"));
     instr = stropen (input,"r");
@@ -218,21 +228,25 @@ local void read_data()
     } else
       dual_mean = 0.0;
 
+    Nunder = Nover = 0;
     for (i=0, k=0; i<ncol; i++) {
       for (j=0; j<npt; j++) {
 	md2[i][j] -= dual_mean;
-	if (Qmin && md2[i][j] < xrange[0]) continue;
-	if (Qmax && md2[i][j] > xrange[1]) continue;
+	if (Qmin && md2[i][j] < xrange[0]) { Nunder++; continue;}
+	if (Qmax && md2[i][j] > xrange[1]) { Nover++;  continue;}
 	x[k++] = md2[i][j];
       }
     }
     npt = k;
+    dprintf(0,"Under/Over flow: %d %d\n",Nunder,Nover);
 
     free_mdarray2(md2,ncol,nmax);
 
     minmax(npt, x, &xmin, &xmax);
     if (!Qmin) xrange[0] = xmin;
     if (!Qmax) xrange[1] = xmax;
+
+
     /*  allocate index arrray , and compute sorted index for median */
     if (Qmedian) 
       (mysort)(x,npt,sizeof(real),compar_real);
@@ -438,7 +452,7 @@ local void histogram(void)
             else
                 r = 1.0;
             printf("  Bin    Value          Number\n");
-            printf("       Underflow   %g\n",under);
+            printf("       Underflow   %d\n",Nunder);
             for (k=0; k<nsteps; k++) {
                 j = (int) (r*count[k]) + 1;
                 if (ylog) printf("%3d %13.6g %13.6g ", 
@@ -448,7 +462,7 @@ local void histogram(void)
                 while (j-- > 0) printf("*");
                 printf("\n");
             }
-            printf("       Overflow    %g\n",over);
+            printf("       Overflow    %d\n",Nover);
 	    stop(0);
 	}
 
@@ -483,7 +497,12 @@ local void histogram(void)
 		plline (xplt,yplt);	
 	}
 	plline(xplt,ytrans(0.0));
-	
+
+	for (i=0; i<nxcoord; i++) {
+	  plmove(xtrans(xcoord[i]),ytrans(yplot[0]));
+	  plline(xtrans(xcoord[i]),ytrans(yplot[1]));
+	}
+
 	if (Qgauss) {                   /* plot model and residuals */
             if (ylog)
 		plmove(xtrans(xmin),ytrans(-1.0));
