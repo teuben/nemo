@@ -59,7 +59,7 @@ string  defv[] = {                        /* DEFAULT INPUT PARAMETERS */
     "massrange=1,1\n          Range for mass-spectrum (e.g. 1,2)",
     "headline=\n	      Verbiage for output",
     "nmodel=1\n               number of models to produce",
-    "VERSION=2.8\n            31-mar-05 PJT",
+    "VERSION=2.8a\n           11-apr-05 PJT",
     NULL,
 };
 
@@ -109,7 +109,7 @@ void nemo_main(void)
     outstr = stropen(getparam("out"), "w");
 
     for (i=0; i<nmodel; i++) {
-      if (nmodel>0) dprintf(0,".");
+      if (nmodel>1) dprintf(0,".");
       btab = mkplummer(nbody, mlow, mfrac, rfrac, seed, snap_time, zerocm, scale,
 		       quiet,mrange,mfunc);
       bits = (MassBit | PhaseSpaceBit | TimeBit);
@@ -123,7 +123,7 @@ void nemo_main(void)
       put_snap (outstr, &btab, &nbody, &snap_time, &bits);
       free(btab);
     }
-    if (nmodel>0) dprintf(0,"\n");
+    if (nmodel>1) dprintf(0,"\n");
     strclose(outstr);
 }
 
