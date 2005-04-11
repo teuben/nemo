@@ -1,4 +1,4 @@
-.TH MKPLUMMER 1NEMO "21 November 2004"
+.TH MKPLUMMER 1NEMO "11 April 2005"
 .SH NAME
 mkplummer \- generates a snapshot according to a truncated Plummer model
 .SH SYNOPSIS
@@ -90,6 +90,13 @@ mass M=1. [default: \fB1,1\fP].
 \fBheadline=\fP\fIstring\fP
 Optional headline, which is written as the first item in the snapshot
 file, the next item being the snapshot itself. [default: not used].
+.TP
+\fBnmodel=\fP\fIinteger\fP
+Number of models to generate. Although mostly meant for benchmarks,
+generating more then 1 model can be useful to process very large
+snapshots (which won't fit in memory) in a serialized fashion. See
+also \fIsnapsplit\fP. 
+Default: \fB1\fP.
 .SH BUGS
 A non-delta function mass-spectrum will not create a properly
 virialized system yet. See \fIsnapvirial(1NEMO)\fP
@@ -104,7 +111,7 @@ a Salpeter mass spectrum with
   % mkplummer salpeter.dat 10000 massname='n(m)' massexpr='pow(m,p)' masspars=p,-2.35 massrange=0.1,10
 .fi
 .SH SEE ALSO
-snapvirial(1NEMO), mkplummer(3NEMO), snapmass(1NEMO)
+snapvirial(1NEMO), mkplummer(3NEMO), snapmass(1NEMO), snapsplit(1NEM0)
 .PP
 H.C.Plummer (1911), \fIMNRAS\fP, \fB71\fP, 460.
 .PP
@@ -127,3 +134,4 @@ xx-Mar-89	V2.0: full new snapshot version	+ doc PJT
 15-nov-90	V2.3: mass-spectrum and cleanup	for NEMO 2.x	PJT
 6-jun-96	V2.5d: report total mass before scaling  	PJT
 21-mar-04	V2.7: added mlow=	PJT+NCM
+11-apr-05	V2.8: added nmodel=	PJT
