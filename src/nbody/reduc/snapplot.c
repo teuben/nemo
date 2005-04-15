@@ -29,6 +29,7 @@
 #include <getparam.h>
 #include <vectmath.h>
 #include <filestruct.h>
+#include <filefn.h>
 #include <snapshot/snapshot.h>
 #include <snapshot/body.h>
 #include <loadobj.h>
@@ -67,7 +68,7 @@ string defv[] = {
 #endif
     "frame=\n			  base filename for rasterfiles(5)",
     "trak=\n                      alternative for trakplot (t|f)",
-    "VERSION=3.5\n		  9-oct-03 PJT",
+    "VERSION=3.5a\n		  15-apr-05 PJT",
     NULL,
 };
 
@@ -108,6 +109,8 @@ local real *auxptr = NULL;
 
 real xtrans(real), ytrans(real);
 
+local bool scansnap(void);
+
 #ifndef FRAMEDELAY
 #  define FRAMEDELAY 1
 #endif
@@ -116,7 +119,6 @@ nemo_main()
 {
     permanent bool first=TRUE;
     int frameno;
-    bool scansnap();
 
     setparams();
     instr = stropen(input, "r");
@@ -176,8 +178,6 @@ nemo_main()
 
 setparams()
 {
-    string tail();
-
     trakflag = (strncmp(tail(getargv0()), "trak", 4) == 0);
     if (hasvalue("trak"))       /* override name of executable */
         trakflag = getbparam("trak");
@@ -319,7 +319,7 @@ setcolors()
 #  define TIMEFUZZ  0.001
 #endif
 
-bool scansnap()
+bool scansnap(void)
 {
     bool success;
     int i;
