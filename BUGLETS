@@ -142,3 +142,13 @@ potlist: rld: Fatal Error: attempted access to unresolvable symbol in
   but not via ccdmath/tabmath, e.g.
    echo -10 | tabmath - - 'ifgt(%1,0,log(%1),%1)'
 
+
+- cygwin
+     mathfns.h   :  rlog2 needs to be #if 0'd because of the macro cygwin is using
+     falcON/make.defs:  no -ldl needed
+	(also the gcc 3.3 with const in falcON/inc/public/nsam.h is needed)
+     falcON/src/public/tool.cc: std::isnan(t)) commented out, doesn't seem to exist
+
+     in addition, tools like mknemo won't copy the executable to $NEMOBIN/ since
+     it doesn't know about the .exe  extension thatg cygwin is using
+
