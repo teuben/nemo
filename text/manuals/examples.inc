@@ -881,6 +881,160 @@ because the scaling is arbitrary:
 
 ........... {\it more to come}
 
+\subsection{Extracting Rotation Curves from Galactic Velocity Fields}
+
+As an example of image analysis we consider the extraction of a
+rotation curve from an (axisymmetric)
+disk galaxy. We shall assume the velocities
+have been extracted already, but not consider the various 
+tricky methods that exist to do this.
+
+\smallskip
+Two programs exist with which most scenarios can be played out to extract
+rotation curves: {\tt rotcur} applies the tilted ring method, 
+where a fixed rotation speed is assumed in a set of rings, of which
+all geometric parameters (center, systemic velocity, position angle and
+inclincation) can be either fitted or kept fixed at a given value. For
+well behaving galaxies better signal to noise in the fitted parameters can
+be achieved by the second program, {\tt rotcurshape}, which fits a shape
+function to a disk. In both cases fitting occurs in a fully non-linear
+sense, so initial values for all parameters need to be supplied. The
+programs have not been written as to make reasonable estimates.
+
+\smallskip
+It is also worth noting that the output units in this program are
+arcsec for radii, and km/s for velocities, since we are often using
+real observations\footnote{note FITS files use degrees and m/s for 
+distances and velocities}
+For simulations you will need to use an appropriate
+mnemonic or actual number for scaling in both distance and velocity
+to get the output format with the appropriate precision. As an example,
+if you use (Nbody based) virial units, you will most likely want to
+use {\tt units=arcmin,100} or even {\tt units=1000,1000}, depending
+on your taste.
+
+\subsubsection{rotcur}
+
+{\tt rotcur} applies the tilted ring method. This particular version has
+been derived from the original sheltran version within GIPSY, although
+many things still work the same compared to the 
+current GIPSY version.
+
+\small\begin{verbatim}
+  1% rotcur help=h
+in               : Input image velocity field [???]
+radii            : Radii of rings (arcsec) []
+vrot             : Rotation velocity []
+pa               : Position angle (degrees) []
+inc              : Inclination (degrees) []
+vsys             : Systemic velocity []
+center           : Rotation center (grids w.r.t. 0,0) [center of map] []
+frang            : Free angle around minor axis (degrees) [20]
+side             : Side to fit: receding, approaching or [both] []
+weight           : Weighting function: {uniform,[cosine],cos-squared} []
+fixed            : Parameters to be kept fixed {vsys,vrot,pa,inc,xpos,ypos} []
+ellips           : Parameters for which to plot error ellips []
+beam             : Beam (arcsec) for beam correction [no correction] []
+dens             : Image containing containing density map []
+tab              : If specified, this output table is used in append mode []
+resid            : Output of residuals in a complicated plot []
+tol              : Tolerance for convergence of nllsqfit [0.001]
+lab              : Mixing parameter for nllsqfit [0.001]
+itmax            : Maximum number of allowed nllsqfit iterations [50]
+units            : Units of input {deg, arcmin, arcsec, rad, #},{#} for length and velocity [deg,1]
+blank            : Value of the blank pixel to be ignored [0.0]
+inherit          : Inherit initial conditions from previous ring [t]
+reuse            : Reuse points from previous rings if used before? [t]
+fitmode          : Basic Fitmode: cos(n*theta) or sin(n*theta) [cos,1]
+nsigma           : Iterate once by rejecting points more than nsigma resid [-1]
+imagemode        : Input image mode? (false means ascii table) [t]
+wwb73            : Use simpler WWB73 linear method of fitting [f]
+VERSION          : 2-jun-04 PJT [2.12]
+\end{verbatim}\normalsize
+
+As an example we shall consider the galaxy NGC 6503, for which VLA
+data are publicly available on 
+ADIL\footnote{NCSA ::}.
+
+\small\begin{verbatim}
+   1% fits in=NGC6503.MOM1 - | ccdmath - vel1.ccd %1/1000
+\end{verbatim}\normalsize
+
+notice we're already converting the m/s in FITS to km/s in the {\tt ccd} file.
+The angular distances are in degrees. In the printout below the output of
+{\tt tsf} and relevant sections of {\tt fitshead} have been merged:
+
+\small\begin{verbatim}
+  set Parameters
+    int Nx 512
+    int Ny 512
+    int Nz 1
+    double Xmin 267.533                   // CRVAL1  =    2.67250000000E+02 /
+    double Ymin 69.8322                   // CRVAL2  =    7.01166666667E+01 /
+    double Zmin 1.00000
+    double Dx -0.00111111                 // CDELT1  =     -1.111111138E-03
+    double Dy 0.00111111                  // CDELT2  =      1.111111138E-03 
+    double Dz 1.00000
+    double Xrefpix 0.00000		  // CRPIX1  =      2.560000000E+02
+    double Yrefpix 0.00000                // CRPIX2  =      2.570000000E+02
+    double Zrefpix 0.00000
+    double MapMin -102.844                // DATAMIN =     -1.028444453E+05
+    double MapMax 144.537                 // DATAMAX =      1.445368906E+05
+    int BeamType 0
+    double Beamx 0.00000
+    double Beamy 0.00000
+    double Beamz 0.00000
+    char Namex[9] "RA---SIN"
+    char Namey[9] "DEC--SIN"
+    double Time 0.00000
+    char Storage[5] "CDef"
+    int Axis 0
+  tes
+\end{verbatim}\normalsize
+
+
+
+\small\begin{verbatim}
+\end{verbatim}\normalsize
+
+\subsubsection{rotcurshape}
+
+\small\begin{verbatim}
+  1% rotcurshape help=h
+in               : Input image velocity field [???]
+radii            : Radii of rings (arcsec) []
+pa               : Position angle (degrees) []
+inc              : Inclination (degrees) []
+vsys             : Systemic velocity []
+center           : Rotation center (grids w.r.t. 0,0) [center of map] []
+frang            : Free angle around minor axis (degrees) [0]
+side             : Side to fit: receding, approaching or [both] []
+weight           : Weighting function: {[uniform],cosine,cos-squared} [u]
+fixed            : Geometric parameters to be kept fixed {vsys,xpos,ypos,pa,inc} []
+ellips           : ** Parameters for which to plot error ellips []
+beam             : ** Beam (arcsec) for beam correction [no correction] []
+dens             : Image containing containing density map to be used as weight []
+tab              : If specified, this output table is used in append mode []
+resid            : Output of residual field []
+fit              : Output the fit? or the residuals [f]
+tol              : Tolerance for convergence of nllsqfit [0.001]
+lab              : Mixing parameter for nllsqfit [0.001]
+itmax            : Maximum number of allowed nllsqfit iterations [50]
+units            : Units of input {deg, arcmin, arcsec, rad, #},{#} for length and velocity [deg,1]
+blank            : Value of the blank (pixel) value to be ignored [0.0]
+nsigma           : Iterate once by rejecting points more than nsigma resid [-1]
+imagemode        : Input image mode? (false means ascii table) [t]
+rotcurmode       : Full velocity field, or rotcur (r,v) fit only [f]
+load             : dynamically loadobject file with rotcur_<NAME> []
+rotcur1          : Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values []
+rotcur2          : Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values []
+rotcur3          : Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values []
+rotcur4          : Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values []
+rotcur5          : Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values []
+VERSION          : 13-jan-05 PJT [1.3b]
+\end{verbatim}\normalsize
+
+
 \section{Tables}
 
 NEMO has a few programs that manipulate table files,
