@@ -10,6 +10,11 @@ To what degree does optimization/vectorizing help? When do
 programs become I/O dominated? Some of the numbers quoted below should
 be taken with great care, since a lot of other factors can go into
 the timing result. 
+\bigskip
+A number of programs in NEMO have a command line parameter such as
+{\tt nmodel=}$N$ or {\tt nbench=}$N$ that is normally set to 1, but together
+with {\tt help=c} will give an accurate measurement how long
+the code takes to execute $N$ loops of a particular algorithm.
 
 
 \section{N-body integration}
