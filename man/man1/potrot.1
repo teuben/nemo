@@ -33,7 +33,8 @@ and \fBniter\fP > 0, an iterative approach is used (similar to the
 one in \fIpotq(1NEMO)\fP) and is generally more accurate. If One
 angle is given, an exact "rotation curve" along that (position)
 angle is give, else an average force is used to derive the 
-"rotation curve". Default: 0.
+"rotation curve". Default: 0. (meaning slit rotation curve along 
+the X axis)
 .TP
 \fBt=\fP
 Time to test potential at, if relevant [0.0]
@@ -53,7 +54,7 @@ requirements.
 [10]     
 .TP
 \fBeps=\fP
-Accuracy that also stops the iterations. [0.001]      
+Relative accuracy that stops the iterations. [0.001]      
 .SH EXAMPLES
 Here is an example of taking a "rotation curve" along the major, minor and force average
 of a Pfenniger(1984) bar. The three tables are then cut into a simpler form
