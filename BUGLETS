@@ -152,3 +152,6 @@ potlist: rld: Fatal Error: attempted access to unresolvable symbol in
      in addition, tools like mknemo won't copy the executable to $NEMOBIN/ since
      it doesn't know about the .exe  extension thatg cygwin is using
 
+
+- falcON:
+     currently contain two (language) bugs, which require you to use gcc 3.2.2
