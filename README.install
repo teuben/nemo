@@ -1,31 +1,28 @@
 Installation overview:
 ----------------------
 
-Installation of NEMO V3.x now follows that of most open source
-packages. Although this would normally be something like
-
-	configure
-	make
-	make install
-
-except NEMO does not install binaries in some external directory like
-/usr/local/bin, but keeps them "in-place" and bootstraps a special
-NEMO environment by sourcing a NEMORC file where the search path and
-other NEMOisms are defined for your shell.  Hence the basic scheme is
-more one of (except commands are different and detailed below!!!):
+Installation of NEMO V3.x roughly follows that of most open source
+packages, except that NEMO does not install its products in an
+external prefix like /usr/local, but keeps them "in-place" and
+bootstraps a special NEMO environment by sourcing a NEMORC file where
+the search path and other NEMOisms are defined for your shell.  Hence
+the basic scheme is more one of (except commands are different and
+detailed below!!!):
 
 	configure
 	source NEMORC
 	make
 
-This installation has recently been changed and simplified in VERSION
+This installation has recently been slightly modified in VERSION
 3.2, and you will also need to run a conversion script if you upgrade
 from a VERSION 3.1 or below source code tree. There is no support for
-such upgrades from a 2.x version though.
+such upgrades from a 2.x version though, since the installation procedure
+between version 2 and 3 is too major.
 
 It may be handy to pre-install a few libraries and packages on your
-system, if they do not exist yet, though we do now support a much
-easier pgplot install within the NEMO tree.
+system, if they do not exist yet, though for a few common ones
+(e.g. pgplot, gsl, hdf) we do have some support to pre-install them
+within the NEMO tree.
 
 Preconditions to INSTALLATION
 =============================
@@ -109,6 +106,7 @@ d) If you are on a system where you need to install NEMO and other packages,
 	pgplot ?
 	cfitsio		configure --prefix=$NEMO
 	plplot
+	gcc
 
    most of these use GNU autoconf and can be installed in the NEMO hierarchy with
    the commands
@@ -125,6 +123,7 @@ d) If you are on a system where you need to install NEMO and other packages,
 	configure --enable-gsl
 	configure --disable-gsl		(the default)
 
+
 
 Brief overview of a Version 3.x INSTALLATION  
 ============================================
@@ -133,7 +132,9 @@ Brief overview of a Version 3.x INSTALLATION
    and uncompress it anywhere where you have enough (at least 150MB, but more is better):
 
         % gzip -cd nemo_VERSION.tar.gz | tar xf -
-   or
+
+   or more compact:
+
 	% gtar -zxf nemo_VERSION.tar.gz
 
    and now change directory to the newly made "nemo" directory:
@@ -161,7 +162,7 @@ Brief overview of a Version 3.x INSTALLATION
 3) Run the testsuite, which also installs a pretty basic set of NEMO executables:
 
 	%  setenv YAPP /vps		## only needed if you're on a remote link,
-					## otherwise leave it as /xs or yapp.ps
+					## otherwise leave it as the default /xs 
 
 	%  src/scripts/testsuite -b	# run test testsuite
 
@@ -447,11 +448,11 @@ NEMO from scratch again.
 For those who upgrade, you will probably do the following:
 
     cd $NEMO
-    cvs update         # you will see lots of messages
-                       # the file "VERSION" should now read 3.2.1
-    nemo.32            # this will warn you that you current NEMO is unusable
-    omen               # unload the current dis-functional NEMO
-    nemo               # and load it back in
+    cvs update           # you will see lots of messages
+                         # the file "VERSION" should now read 3.2.1
+    src/scripts/nemo.32  # this will warn you that you current NEMO is unusable
+    omen                 # unload the current dis-functional NEMO
+    nemo                 # and load it back in
 
 this probably will work. To make sure see if you can compile, in fact you
 should, since some library routines have been fixed:
