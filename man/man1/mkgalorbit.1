@@ -1,0 +1,67 @@
+.TH MKGALORBIT 1NEMO "18 April 2005"
+.SH NAME
+mkgalorbit \- Make a galactic orbit with from given initial conditions
+.SH SYNOPSIS
+\fBmkgalorbit\fP [parameter=value]
+.SH DESCRIPTION
+Unlike \fImkorbit(1NEMO)\fP where an arbitrary orbit can be initialized,
+\fImkgalorbit(1NEMO)\fP is specifically intended to initialize orbits
+in a galactic potential w.r.t. an assumed solar motion (LSR).
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBout=\fP
+output filename (an orbit) [???]   
+.TP
+\fBlon=\fP
+Longitude (in degrees) []    
+.TP
+\fBlat=\fP
+Latitude (in degrees) []    
+.TP
+\fBpmlon=\fP
+Proper Motion in Longitude (mas/yr) []  
+.TP
+\fBpmlon=\fP
+Proper Motion in Latitude (mas/yr) []  
+.TP
+\fBdist=\fP
+Distance (in kpc) []    
+.TP
+\fBR0=\fP
+LSR distance (in kpc) [8.0]   
+.TP
+\fBV0=\fP
+LSR velocities (in km/s) [220.0]   
+.TP
+\fBlsr=\fP
+Use LSR correction of sun going (-9,12,7) [f]
+.TP
+\fBcoordsys=\fP
+lon/lat coordinate system: equ=RA/DEC gal=GLON/GLAT [gal]  
+.TP
+\fBtime=\fP
+time [0.0]      
+.TP
+\fBpotname=\fP
+optional potential(5NEMO) []     
+.TP
+\fBpotpars=\fP
+.. with optional parameters []   
+.TP
+\fBpotfile=\fP
+.. and optional datafile name []  
+.TP
+\fBheadline=\fP
+random verbiage []     
+.SH SEE ALSO
+mkorbit(1NEMO), potcode(1NEMO), potential(5NEMO)
+.SH FILES
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+18-Apr-05	V0.1 Created	PJT
+.fi
