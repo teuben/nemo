@@ -7,6 +7,9 @@ mkgalorbit \- Make a galactic orbit with from given initial conditions
 Unlike \fImkorbit(1NEMO)\fP where an arbitrary orbit can be initialized,
 \fImkgalorbit(1NEMO)\fP is specifically intended to initialize orbits
 in a galactic potential w.r.t. an assumed solar motion (LSR).
+.PP
+The sun is assumed to be along the negative X axis, i.e. at (-R0,0,0)
+and rotate clock wise, i.e. (0,V0,0).
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
