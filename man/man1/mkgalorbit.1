@@ -1,4 +1,4 @@
-.TH MKGALORBIT 1NEMO "18 April 2005"
+.TH MKGALORBIT 1NEMO "19 April 2005"
 .SH NAME
 mkgalorbit \- Make a galactic orbit with from given initial conditions
 .SH SYNOPSIS
@@ -23,14 +23,14 @@ Longitude (in degrees) []
 \fBlat=\fP
 Latitude (in degrees) []    
 .TP
+\fBdist=\fP
+Distance (in kpc). []
+.TP
 \fBpmlon=\fP
 Proper Motion in Longitude (mas/yr) []  
 .TP
 \fBpmlon=\fP
 Proper Motion in Latitude (mas/yr) []  
-.TP
-\fBdist=\fP
-Distance (in kpc) []    
 .TP
 \fBR0=\fP
 LSR distance (in kpc) [8.0]   
@@ -58,10 +58,33 @@ optional potential(5NEMO) []
 .TP
 \fBheadline=\fP
 random verbiage []     
+.SH EXAMPLES
+Here's an orbit representing the LSR 
+.nf
+   % mkgalorbit orb1    0 0 0   0 0 0
+   ...
+   pos: -8.000000 0.000000 0.000000
+   vel: 0.000000 220.000000 0.000000
+.fi
+and solar motion
+.nf
+   % mkgalorbit orb2    0 0 0   0 0 0
+   ...
+   pos: -8.000000 0.000000 0.000000
+   vel: -9.000000 232.000000 7.000000 
+.fi
+and the benchmark case, the
+example from the gal_uvw IDL script, HD 6755 from the Hipparcos catalog:  (**not working yet**)
+.nf
+   % mkgalorbit orb3 ten(1,9,42.3)*15. ten(61,32,49.5)  0.144       627.89 77.84  -321.4    coordsys=equ
+	===>  u=154  v = -493  w = 97        ;km/s
+.fi
 .SH SEE ALSO
 mkorbit(1NEMO), potcode(1NEMO), potential(5NEMO)
 .nf
 http://idlastro.gsfc.nasa.gov/ftp/pro/astro/gal_uvw.pro
+Johnson & Soderblom (1987, AJ, 93,864)   -- though they define U 
+Hipparcos catalog - introduction contains the J2000 transformation matric (ra,dec) -> (glon,glat)
 .fi
 .SH AUTHOR
 Peter Teuben
