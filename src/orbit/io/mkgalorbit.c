@@ -52,7 +52,10 @@ double R0, V0;
 double lon, lat, pmlon, pmlat, dist, vrad;
 
 int  Dpos, Dvel;
-bool Qgal;
+bool Qgal, Qlsr;
+double u_lsr = -9.0;    /* UVW motion of LSR in km/s */
+double v_lsr = 12.0;
+double w_lsr =  7.0;
 
 string coordsys;
 
@@ -76,14 +79,16 @@ void setparams()
   lon = getdparam("lon") * D2R;
   lat = getdparam("lat") * D2R;
 
-  pmlon = getdparam("lon") * k;
-  pmlat = getdparam("lat") * k;
-
   R0 = getdparam("R0");
   V0 = getdparam("V0");
 
   dist = getdparam("dist");
   vrad = getdparam("vrad");
+
+  pmlon = getdparam("lon") * k / dist;
+  pmlat = getdparam("lat") * k / dist;
+
+  Qlsr = getbparam("lsr");
 
   coordsys = getparam("coordsys");
   if (streq(coordsys,"gal"))
@@ -108,9 +113,15 @@ void setparams()
 
   /* U,V,W are -vx,vy,vz */
 
-  u =      pmlon * cos(lat)  + pmlat * sin(lat)    - vrad * cos(lat) * cos(lon);
-  v = V0 + pmlon * cos(lat)  + pmlat * cos(lat)    + vrad * cos(lat) * sin(lon);
-  w =                                              + vrad * sin(lat);
+  u =      pmlon * cos(lat)  + pmlat * sin(lat) * cos(lon)  - vrad * cos(lat) * cos(lon);
+  v = V0 + pmlon * cos(lat)  + pmlat * sin(lat) * sin(lon)  + vrad * cos(lat) * sin(lon);
+  w =                          pmlat * cos(lat)             + vrad * sin(lat);
+  
+  if (Qlsr) {
+    u += u_lsr;
+    v += v_lsr;
+    w += w_lsr;
+  }
 
   pos[0] = x;
   pos[1] = y;
