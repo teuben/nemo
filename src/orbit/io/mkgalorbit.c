@@ -30,7 +30,7 @@ string defv[] = {
     "potpars=\n	          .. with optional parameters",
     "potfile=\n		  .. and optional datafile name",
     "headline=\n          random verbiage",
-    "VERSION=0.1\n        18-apr-05 PJT",
+    "VERSION=0.2\n        19-apr-05 PJT",
     NULL,
 };
 
@@ -85,8 +85,8 @@ void setparams()
   dist = getdparam("dist");
   vrad = getdparam("vrad");
 
-  pmlon = getdparam("lon") * k / dist;
-  pmlat = getdparam("lat") * k / dist;
+  pmlon = getdparam("lon") * k * dist;
+  pmlat = getdparam("lat") * k * dist;
 
   Qlsr = getbparam("lsr");
 
@@ -106,15 +106,13 @@ void setparams()
   dprintf(0,"Using pattern speed = %g\n",omega);
 
   /* sun is at (-R0,0,0) with LSR moving at (0,V0,0) */
-
   x = -R0 + dist * cos(lat) * cos(lon);
   y =       dist * cos(lat) * sin(lon);
   z =       dist * sin(lat);
 
   /* U,V,W are -vx,vy,vz */
-
   u =      pmlon * cos(lat)  + pmlat * sin(lat) * cos(lon)  - vrad * cos(lat) * cos(lon);
-  v = V0 + pmlon * cos(lat)  + pmlat * sin(lat) * sin(lon)  + vrad * cos(lat) * sin(lon);
+  v = V0 + pmlon * sin(lat)  + pmlat * sin(lat) * sin(lon)  + vrad * cos(lat) * sin(lon);
   w =                          pmlat * cos(lat)             + vrad * sin(lat);
   
   if (Qlsr) {
@@ -122,7 +120,6 @@ void setparams()
     v += v_lsr;
     w += w_lsr;
   }
-
   pos[0] = x;
   pos[1] = y;
   pos[2] = z;
@@ -132,7 +129,6 @@ void setparams()
   
   if (hasvalue("headline")) set_headline(getparam("headline"));
 }
-
 
 void nemo_main ()
 {
