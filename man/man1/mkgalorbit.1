@@ -1,8 +1,8 @@
-.TH MKGALORBIT 1NEMO "19 April 2005"
+.TH MKGALORBIT 1NEMO "20 April 2005"
 .SH NAME
 mkgalorbit \- Make a galactic orbit with from given initial conditions
 .SH SYNOPSIS
-\fBmkgalorbit\fP [parameter=value]
+\fBmkgalorbit\ out=\fPorbit-file [parameter=value]
 .SH DESCRIPTION
 Unlike \fImkorbit(1NEMO)\fP where an arbitrary orbit can be initialized,
 \fImkgalorbit(1NEMO)\fP is specifically intended to initialize orbits
@@ -30,18 +30,23 @@ Distance (in kpc). []
 \fBpmlon=\fP
 Proper Motion in Longitude (mas/yr) []  
 .TP
-\fBpmlon=\fP
+\fBpmlat=\fP
 Proper Motion in Latitude (mas/yr) []  
+\fBvrad=\fP
+Radial velocity (in km/s) []
 .TP
 \fBR0=\fP
 LSR distance (in kpc) [8.0]   
 .TP
 \fBV0=\fP
-LSR velocities (in km/s) [220.0]   
+LSR clockwise velocity (in km/s) [220.0]   
 .TP
 \fBlsr=\fP
-Use LSR correction of sun going (-9,12,7) [f]
-*** unclear, does the lsr=t mean we're on an LSR orbit now, or .... what's the  units of vrad ??? heliocentric ?
+Use LSR correction [f]
+.TP
+\fBsolar=u,v,w\fP
+U,V,W space velocities of the SUN w.r.t. LSR in a right-handed
+coordinate system. [Default: 9,12,7]
 .TP
 \fBcoordsys=\fP
 lon/lat coordinate system: equ=RA/DEC gal=GLON/GLAT [gal]  
@@ -76,14 +81,18 @@ and solar motion
    vel: -9.000000 232.000000 7.000000 
 .fi
 and the benchmark case, the
-example from the gal_uvw IDL script, HD 6755 from the Hipparcos catalog:  (**not working yet**)
+example from the gal_uvw IDL script:
 .nf
-   At RA = 1h 9m 43.3s  DEC=61d 32m 49.5s  Distance=144 pc   mu_ra= 627.89 mas/yr  mu_dec=77.84 mas/yr  VRAD=-311.4 km/s
-   % mkgalorbit orb3 "(1+(9+42.3/60)/60)*15" "61+(32+49.5/60)/60" 0.144       627.89 77.84  -321.4    coordsys=equ
-	===>  u=154  v = -493  w = 97        ;km/s
+   HD 6755 from the Hipparcos catalog:
+   RA=1h 9m 43.3s  DEC=61d 32m 49.5s  Distance=144 pc  mu_ra=627.89 mas/yr  mu_dec=77.84 mas/yr  VRAD=-321.4 km/s
+
+   % mkgalorbit orb3 "(1+(9+42.3/60)/60)*15" "61+(32+49.5/60)/60" 0.144 627.89 77.84 -321.4 coordsys=equ lsr=t
    ...
-   pos: -7.934542 0.020546 0.126606
-   vel:
+   pos: -8.083536 0.117269 -0.002398
+   vel: -149.906969 -493.963608 99.641915
+
+	(gal_uvw.pro gives UVW = -154 -493  97 as answer)
+
 .fi
 To use a particular galaxy model in an external potential, we first need to compute the phase space coordinates
 of the LSR in that model.
@@ -91,17 +100,18 @@ of the LSR in that model.
    % 
 .fi
 .SH COORDINATE SYSTEMS
-In galactic astronomy you will sometimes find papers that use a right handed as well as
-left handed coordinate system for space velocities. It seems more natural to use the
-more common right-handed coordinate system (e.g. as defined by Johnson & Soderblom 1987).
+In galactic astronomy you will sometimes find papers that use a right handed or a
+left handed coordinate system for the UVW space velocities. It seems more natural to use the
+more right-handed coordinate system (e.g. as argued by Johnson & Soderblom 1987), which
+we also adopt internally to the program (also UVW match our defintion of vx,vy-V0,vz).
 In order for (u,v,w) to be compatible with the (vx,vy,vz) we use in NEMO, the sun must
 be placed at (-R,0,0) and since the galaxy is rotating clock wise, with a velocity
-of (0,V,0).
+of (0,V,0). If you want something else, you can always use \fPsnaprotate(1NEMO)\fP
 .SH SEE ALSO
-mkorbit(1NEMO), potcode(1NEMO), snapgalview(1NEMO), potential(5NEMO)
+mkorbit(1NEMO), potcode(1NEMO), snapgalview(1NEMO), snaprotate(1NEMO), potential(5NEMO)
 .nf
-http://idlastro.gsfc.nasa.gov/ftp/pro/astro/gal_uvw.pro
-Johnson & Soderblom (1987, AJ, 93,864)   -- though they define U 
+http://idlastro.gsfc.nasa.gov/ftp/pro/astro/gal_uvw.pro - used the opposite U definition
+Johnson & Soderblom (1987, AJ, 93,864)
 Mignard [2002, A&A, 354, 522]
 Olling & Dehnen [2003ApJ...599..275]
 Hipparcos catalog - introduction contains the J2000 transformation matric (ra,dec) -> (glon,glat)
@@ -112,4 +122,5 @@ Peter Teuben
 .nf
 .ta +1.0i +4.0i
 18-Apr-05	V0.1 Created	PJT
+20-apr-05	V0.6 finally got the math right 	PJT
 .fi
