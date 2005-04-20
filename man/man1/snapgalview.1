@@ -9,6 +9,11 @@ if it was our galaxy. For this the "LSR" needs to be defined,
 either by giving a phase space coordinate (via \fBpos=\fP
 and \fBvel=\fP) or by referring to a specific particle in
 the snapshot (see \fBcenter=\fP).
+.PP
+The snapshot is then recentered in phase space as to be at rest
+w.r.t. that LSR point, and oriented such that the "galactic center"
+(defined as 0,0,0 in the input snapshot)
+would be seen towards the positive X-axis (glat=glon=0).
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -71,7 +76,7 @@ and
 	r mu_b = -vx cos(l) sin(b) - vy sin(l) sin(b) + vz cos(b)
 .fi
 .SH SEE ALSO
-snaptrans(1NEMO), snapshift(1NEMO), snaprotate(1NEMO)
+snaptrans(1NEMO), snapshift(1NEMO), snaprotate(1NEMO), mkgalorbit(1NEMO)
 .SH FILES
 .SH AUTHOR
 Peter Teuben
