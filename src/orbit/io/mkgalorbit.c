@@ -31,7 +31,7 @@ string defv[] = {
     "potpars=\n	          .. with optional parameters",
     "potfile=\n		  .. and optional datafile name",
     "headline=\n          random verbiage",
-    "VERSION=0.5\n        20-apr-05 PJT",
+    "VERSION=0.6\n        20-apr-05 PJT",
     NULL,
 };
 
@@ -104,7 +104,7 @@ void set_matrix()
 {
   int i,j;
   /* pick which one you want: T0, T1, or even T2 */
-  SETM(T,T3);
+  SETM(T,T1);
 
   dprintf(1,"T matrix:\n");
   for (i=0; i<3; i++) {
@@ -146,6 +146,12 @@ void set_T2(double theta, double ra, double dec)
   MULM(T2,t,da);
 }
 
+/* 
+ * convert RA/DEC to Glon,Glat, and also convert the 
+ * radial,ra,dec velocity vector into a UVW version
+ * using J&S 1987 formula (1)
+ */
+
 void equ2gal(double ra, double dec, double *glon, double *glat, double *vel)
 {
   matrix a,d, A, B;
@@ -182,6 +188,12 @@ void equ2gal(double ra, double dec, double *glon, double *glat, double *vel)
   MULMV(yy,B,vel);
   SETV(vel,yy);
 }
+
+/*
+ *  convert a radial,glon,glat velocity vector into a UVW version
+ *  (formulae should be double checked, since derived from scratch)
+ *  (better use NEMO's matrix/vector mode also)
+ */
 
 void gal2uvw(double glon, double glat, double *vel)
 {
@@ -248,15 +260,15 @@ void setparams()
   if (Qequ) {
     double ra = lon;
     double dec = lat;
-    dprintf(0,"EQU-VEL: %g %g %g\n",vel[0],vel[1],vel[2]);
+    dprintf(1,"EQU-VEL: %g %g %g\n",vel[0],vel[1],vel[2]);
     equ2gal(ra,dec,&lon,&lat,vel);
-    dprintf(0,"GAL-VEL: %g %g %g\n",vel[0],vel[1],vel[2]);
-    dprintf(0,"EQU2GAL: %g %g -> %g %g\n",ra/DD2R, dec/DD2R, lon/DD2R, lat/DD2R);
+    dprintf(1,"GAL-VEL: %g %g %g\n",vel[0],vel[1],vel[2]);
+    dprintf(1,"EQU2GAL: %g %g -> %g %g\n",ra/DD2R, dec/DD2R, lon/DD2R, lat/DD2R);
   } else {
-    dprintf(0,"GAL-VEL: %g %g %g\n",vel[0],vel[1],vel[2]);
+    dprintf(1,"GAL-VEL: %g %g %g\n",vel[0],vel[1],vel[2]);
     gal2uvw(lon,lat,vel);
-    dprintf(0,"GAL-UVW: %g %g %g\n",vel[0],vel[1],vel[2]);
-    dprintf(0,"    GAL: %g %g\n", lon/DD2R, lat/DD2R);
+    dprintf(1,"GAL-UVW: %g %g %g\n",vel[0],vel[1],vel[2]);
+    dprintf(1,"    GAL: %g %g\n", lon/DD2R, lat/DD2R);
   }
 
   tnow = getdparam("time");
@@ -273,7 +285,7 @@ void setparams()
   y =       dist * cos(lat) * sin(lon);
   z =       dist * sin(lat);
   u = vel[0];
-  v = vel[1];
+  v = vel[1] + V0;
   w = vel[2];
 
   if (Qlsr) {
@@ -312,7 +324,8 @@ void nemo_main ()
   
   dprintf(0,"pos: %f %f %f  \nvel: %f %f %f  \netot: %f\nlz=%f\n",
 	  x,y,z,u,v,w,etot,lz);
-  dprintf(0,"benchmark uvw=  u = -154  v = -493  w = 97 km/s\n");
+  dprintf(1,"benchmark uvw=  u = -154  v = -493  w = 97 km/s\n");
+  dprintf(1,"               vx        vy-V0      w\n");
   
   outstr = stropen (outfile,"w");		/* write to file */
   put_history(outstr);
