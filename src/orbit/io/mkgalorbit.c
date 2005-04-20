@@ -31,7 +31,7 @@ string defv[] = {
     "potpars=\n	          .. with optional parameters",
     "potfile=\n		  .. and optional datafile name",
     "headline=\n          random verbiage",
-    "VERSION=0.4\n        19-apr-05 PJT",
+    "VERSION=0.5\n        20-apr-05 PJT",
     NULL,
 };
 
@@ -62,33 +62,56 @@ local string coordsys;
 
 local matrix T;
 
-local matrix T0 = { { -0.0548755604, -0.8734370902,  -0.4838350155},
+local matrix T0 = { { -0.0548755604, -0.8734370902,  -0.4838350155},     /* J&S 1987 */
 		    { +0.4941094279, -0.4448296300,  +0.7469822445},
 		    { -0.8676661490, -0.1980763734,  +0.4559837762}};
 
-local matrix T1 = { { -0.06699,  -0.87276,  -0.48354},
+local matrix T1 = { { -0.06699,  -0.87276,  -0.48354},                   /* IDL code */
 		    { +0.49273,  -0.45035,  +0.74458},
 		    { -0.86760,  -0.18837,  +0.46020}};
 
 local matrix T2;    /* see set_T2 */
 
+local matrix T3 = { { -0.0669887394, -0.8727557659 , -0.4835389146} ,    /* miriad */
+		    { +0.4927284660, -0.450346958  , +0.7445846333} ,
+		    { -0.8676008112, -0.1883746012 , +0.4601997848}};
 
 local double k = 4.74047;     /*  conversion factor for 1 AU/yr in km/s */
 
 
+/* BENCHMARK:
+ * mkgalorbit . "(1+(9+42.3/60)/60)*15" "61+(32+49.5/60)/60" 0.144 627.89 77.84 -321.4 coordsys=equ
+
+pos: -8.083536 0.117269 -0.002398
+
+using T0:
+GAL-VEL: -162.932 -505.095 90.3593
+EQU2GAL: 17.4262 61.5471 -> 125.106 -1.24752
+
+using T1:
+
+GAL-VEL: -158.907 -505.964 92.6419
+EQU2GAL: 17.4262 61.5471 -> 125.464 -0.953999
+
+using T3:
+
+GAL-VEL: -158.906 -505.963 92.6406
+EQU2GAL: 17.4262 61.5471 -> 125.464 -0.954067
+
+*/
+
 void set_matrix()
 {
   int i,j;
   /* pick which one you want: T0, T1, or even T2 */
-  SETM(T,T0);
+  SETM(T,T3);
 
-  dprintf(0,"T matrix:\n");
+  dprintf(1,"T matrix:\n");
   for (i=0; i<3; i++) {
     for (j=0; j<3; j++)
-      dprintf(0,"%g ",T[i][j]);
-    dprintf(0,"\n");
+      dprintf(1,"%g ",T[i][j]);
+    dprintf(1,"\n");
   }
-    
 }
 
 /*
@@ -138,8 +161,7 @@ void equ2gal(double ra, double dec, double *glon, double *glat, double *vel)
 
   MULMV(yy,T,xx);
   *glon = atan2(yy[1],yy[0]);
-  *glat = atan2(sqrt(sqr(yy[0]) + sqr(yy[1])), yy[2]);
-
+  *glat = atan2( yy[2], sqrt(sqr(yy[0]) + sqr(yy[1])) );
 
   CLRM(a);
   CLRM(d);
@@ -156,7 +178,6 @@ void equ2gal(double ra, double dec, double *glon, double *glat, double *vel)
 
   MULM(A,a,d);    /* */
   MULM(B,T,A);    /* matrix for space velocity computations */
-
 
   MULMV(yy,B,vel);
   SETV(vel,yy);
