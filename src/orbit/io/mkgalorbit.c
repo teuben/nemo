@@ -25,6 +25,7 @@ string defv[] = {
     "lsr=f\n              Use LSR correction of sun going (-9,12,7)",
     "solar=9,12,7\n       Solar Motion in a right handed UVW system in km/s",
     "coordsys=gal\n       lon/lat coordinate system: equ=RA/DEC gal=GLON/GLAT",
+    "tmode=0\n            T matrix mode:  0=idl 1=J&S1987 2=n/a 3=miriad",
 
     "time=0.0\n           time",
     "potname=zero\n	  optional potential(5NEMO)",
@@ -62,11 +63,11 @@ local string coordsys;
 
 local matrix T;
 
-local matrix T0 = { { -0.0548755604, -0.8734370902,  -0.4838350155},     /* J&S 1987 */
+local matrix T0 = { { -0.0548755604, -0.8734370902,  -0.4838350155},     /* IDL code */
 		    { +0.4941094279, -0.4448296300,  +0.7469822445},
 		    { -0.8676661490, -0.1980763734,  +0.4559837762}};
 
-local matrix T1 = { { -0.06699,  -0.87276,  -0.48354},                   /* IDL code */
+local matrix T1 = { { -0.06699,  -0.87276,  -0.48354},                   /* J&S 198J&S 1987 */
 		    { +0.49273,  -0.45035,  +0.74458},
 		    { -0.86760,  -0.18837,  +0.46020}};
 
@@ -100,13 +101,23 @@ EQU2GAL: 17.4262 61.5471 -> 125.464 -0.954067
 
 */
 
-void set_matrix()
+void set_matrix(int mode)
 {
   int i,j;
-  /* pick which one you want: T0, T1, or even T2 */
-  SETM(T,T1);
 
-  dprintf(1,"T matrix:\n");
+  if (mode==0) {
+    SETM(T,T0);
+  } else if (mode==1) {
+    SETM(T,T1);
+  } else if (mode==2) {
+    SETM(T,T2);
+  } else if (mode==3) {
+    SETM(T,T3);
+  } else {
+    SETM(T,T0);
+  }
+
+  dprintf(1,"T matrix: mode=%d\n",mode);
   for (i=0; i<3; i++) {
     for (j=0; j<3; j++)
       dprintf(1,"%g ",T[i][j]);
@@ -223,7 +234,7 @@ void setparams()
   int signcount;
   int lzsign;
 
-  set_matrix();
+  set_matrix(getiparam("tmode"));
   
   p.name = getparam("potname");
   p.pars = getparam("potpars");
@@ -325,8 +336,10 @@ void nemo_main ()
   dprintf(0,"pos: %f %f %f  \nvel: %f %f %f  \netot: %f\nlz=%f\n",
 	  x,y,z,u,v,w,etot,lz);
   dprintf(1,"benchmark uvw=  u = -154  v = -493  w = 97 km/s\n");
+  dprintf(1,"  -153.932     -493.095      97.3592\n");
+  dprintf(1,"  -162.932     -505.095      90.3592 without lsr correction\n");
   dprintf(1,"               vx        vy-V0      w\n");
-  
+
   outstr = stropen (outfile,"w");		/* write to file */
   put_history(outstr);
   PotName(optr) = p.name;
