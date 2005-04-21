@@ -86,12 +86,23 @@ example from the gal_uvw IDL script:
    HD 6755 from the Hipparcos catalog:
    RA=1h 9m 43.3s  DEC=61d 32m 49.5s  Distance=144 pc  mu_ra=627.89 mas/yr  mu_dec=77.84 mas/yr  VRAD=-321.4 km/s
 
-   % mkgalorbit orb3 "(1+(9+42.3/60)/60)*15" "61+(32+49.5/60)/60" 0.144 627.89 77.84 -321.4 coordsys=equ lsr=t
+   % mkgalorbit . "(1+(9+42.3/60)/60)*15" "61+(32+49.5/60)/60" 0.144 627.89 77.84 -321.4 coordsys=equ lsr=t V0=0
    ...
-   pos: -8.083536 0.117269 -0.002398
-   vel: -149.906969 -493.963608 99.641915
+   pos: -8.082794 0.117776 -0.003135
+   vel: -153.932343 -493.094568 97.359254
 
-	(gal_uvw.pro gives UVW = -154 -493  97 as answer)
+	(V0=0 was set to get the local UVW's, to get the numbers from IDL below)
+
+   % idl
+   IDL> .run gal_uvw
+   IDL> ra = ten(1,9,42.3)*15.    & dec = ten(61,32,49.5)
+   IDL> pmra = 627.89  &  pmdec = 77.84 
+   IDL> dis = 144    &  vrad = -321.4
+   IDL> gal_uvw,u,v,w,ra=ra,dec=dec,pmra=pmra,pmdec=pmdec,vrad=vrad,dis=dis,/lsr
+   IDL> print,-u,v,w
+         -153.932     -493.095      97.3592
+ 
+
 
 .fi
 To use a particular galaxy model in an external potential, we first need to compute the phase space coordinates
