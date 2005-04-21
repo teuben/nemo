@@ -32,7 +32,7 @@ string defv[] = {
     "potpars=\n	          .. with optional parameters",
     "potfile=\n		  .. and optional datafile name",
     "headline=\n          random verbiage",
-    "VERSION=0.6\n        20-apr-05 PJT",
+    "VERSION=0.7\n        21-apr-05 PJT",
     NULL,
 };
 
@@ -48,7 +48,7 @@ local stream  instr,outstr;			/* file streams */
 local orbitptr optr;
 local a_potential p;
 
-local double x,y,z,u,v,w;
+local double x,y,z,u,v,w;         /* UVW are really vx,vy,vz, not the galactic UVW */
 local double etot, lz;
 local double tnow, omega;
 local double R0, V0;
@@ -57,9 +57,9 @@ local double lon, lat, pmlon, pmlat, dist, vrad;
 local int  Dpos, Dvel;
 local bool Qequ, Qlsr;
 
-local double solar_uvw[3];  /* 9,12,7 */
+local double solar_uvw[3];  /* solar motion w.r.t. LSR 9,12,7 */
 
-local string coordsys;
+local string coordsys;      /* 'equ' or 'gal' are supported */
 
 local matrix T;
 
@@ -81,7 +81,7 @@ local double k = 4.74047;     /*  conversion factor for 1 AU/yr in km/s */
 
 
 /* BENCHMARK:
- * mkgalorbit . "(1+(9+42.3/60)/60)*15" "61+(32+49.5/60)/60" 0.144 627.89 77.84 -321.4 coordsys=equ
+ * mkgalorbit . "(1+(9+42.3/60)/60)*15" "61+(32+49.5/60)/60" 0.144 627.89 77.84 -321.4 coordsys=equ lsr=t V0=0
 
 pos: -8.083536 0.117269 -0.002398
 
@@ -317,7 +317,6 @@ void setparams()
 
 void nemo_main ()
 {
-  warning("new program, hasn't been tested out well");
   setparams();
 
   optr = NULL;				/* make an orbit */
@@ -333,7 +332,7 @@ void nemo_main ()
   I1(optr) = etot;			/*  energy (zero if not used) */
   I2(optr) = lz;                          /* angular momentum */
   
-  dprintf(0,"pos: %f %f %f  \nvel: %f %f %f  \netot: %f\nlz=%f\n",
+  dprintf(0,"pos: %f %f %f  \nvel: %f %f %f  \netot: %f\nlz: %f\n",
 	  x,y,z,u,v,w,etot,lz);
   dprintf(1,"benchmark uvw=  u = -154  v = -493  w = 97 km/s\n");
   dprintf(1,"  -153.932     -493.095      97.3592\n");
