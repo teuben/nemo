@@ -13,6 +13,10 @@ the \fInewton0(1NEMO)\fP family of orbit integrators.
 .PP
 Non-rotating potentials are also supported, but only with the
 rotation axis defined along the Z-axis.
+.PP
+Integrations backwards in time can be achieved by setting dt<0, since no
+stop time is given, but the number of steps is used to terminate
+the integration.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword is also
 given:
@@ -27,7 +31,8 @@ output file, will be in \fIorbit(5NEMO)\fP format [no default]
 number of integration steps [default: \fB10\fP].
 .TP
 \fBdt=\fItime-step\fP
-time step (constant) to be taken [default: \fB0.1\fP].
+time step (constant) to be taken. Negative values are allowed
+to achieve integrations backwards in time. [default: \fB0.1\fP].
 .TP
 \fBndiag=\fInumber\fP
 number of timesteps when diagnostics are checked and output
