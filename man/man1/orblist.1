@@ -5,8 +5,8 @@ orblist \- list an orbit
 .PP
 \fBorbint in=\fPorbit [parameter=value]
 .SH DESCRIPTION
-\fBorblist\fP will list positions and velocities of an orbit. Lists all
-available timesteps for the moment.
+\fBorblist\fP will list the time, the X, Y, Z positions and 
+VX, VY, VZ velocities of an orbit.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword is also
 given:
@@ -15,7 +15,9 @@ given:
 input file, in \fIorbit(5NEMO)\fP format [no default]
 .TP
 \fBn=\fInumber\fP
-number of steps to skip between each listed timestep [default: \fB1\fP].
+stride through the data. \fBn=2\fP would list only
+the even timesteps.
+[default: \fB1\fP].
 .TP
 \fBformat=\fIformat\fP
 format to be used for printing [default: \fB%f\fP].
