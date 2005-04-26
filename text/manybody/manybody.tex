@@ -37,7 +37,7 @@
 % Douglas Heggie - Piet Hut - Jun Makino
        }
 
-\date{{\small Version 1.2} \\
+\date{{\small Version 1.3} \\
       {\small Summer 2005} \\
       {\small Last document revised: \today} \\ \\
      }
@@ -810,7 +810,7 @@ Worst fractional energy loss dE/E = (E_t-E_0)/E_0 = 0.0602005 at T = 3.03125
 \caption{Collision between two Plummer spheres ({\tt hackcode1}) 
 and the diagnostics overview ({\tt snapdiagplot})
 }
-\label{f:kira}
+\label{f:coll}
 \end{figure}
 
 
@@ -1026,6 +1026,13 @@ of this in quite a few places, e.g.\\
 {\tt \$NEMO/src/nbod4y/init/mkplummer.c}\\
 {\tt \$STARLAB/src/node/dyn/init/makeplummer.C}\\
 {\tt \$NEMO/src/nbody/evolve/aarseth/nbody1/source/data.f}
+
+\section{Pythagoran Problem}
+
+A really fun setup which has been used by a number of people
+is 3 particles on a Pythagoran Triangle with sides 3-4-5 
+and relative masses 3:4:5. See Section~\ref{s:pyth} for more
+details.
 
 
 \section{Kang et al. - Cosmological Hydrodynamics - 1994}
@@ -2112,6 +2119,7 @@ in NEMO, unknown data is generally passed onwards unmodified.
 The figures on the cover page were made in the following way:
 
 \section{Collisional Orbit}
+\label{s:pyth} 
 
 Although the Figure8 orbit is very artistic, it is not very representative
 for orbits in collisional systems, in fact, almost more appropriate
