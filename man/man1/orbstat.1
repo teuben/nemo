@@ -1,4 +1,4 @@
-.TH ORBSTAT 1NEMO "21 February 2003"
+.TH ORBSTAT 1NEMO "25 April 2005"
 .SH NAME
 orbstat \- tabulate some orbital statistics
 .SH SYNOPSIS
@@ -22,6 +22,15 @@ Check how well the orbit is ellipsoidal.  If set to true, it
 will print 
 \fIT, E, r2_min, r2_max, v2_min, v2_max, r2_mean, r2_sigma, v2_mean, v2_sigma, Lmin/Lmax\fP.
 Default: \fBf\fP.
+.TP
+\fBrelative=t|f\fP
+Should energy statistics be done relative to the "known" value by subtracting it?
+This is to improve the statistics if the integration is very accurate.
+Default: \fBf\fP.
+.TP
+\fBtab=t|f\fP
+Output a table with quantities
+Default: \fBf\fP.
 .SH CAVEAT
 The \fBellipse=t\fP option only makes sense for closed orbits, since
 the maximum extent in position and velocity is used for scaling factors
@@ -40,4 +49,5 @@ Peter Teuben
 .ta +1.0i +4.0i
 23-mar-95	V1.0 Created	PJT
 21-feb-03	V1.1 check how well ellipsoidal 	PJT
+25-apr-05	V2.0 add relative= and tab=	PJT
 .fi
