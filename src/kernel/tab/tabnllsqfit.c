@@ -16,6 +16,7 @@
  *       4-apr-03  1.8  added dypow= keyword, and fixed bug in handling dycol=
  *      10-mar-04  1.8b added Lorentzian fitting, fixed setting lab= for loadable functions
  *      17-apr-04  1.9a added printing out the chi-squared or RMS or whatever it can do
+ *       3-may-05  1.9b add x/x0+y/y0=1 variant for a linear fit
  *
  *  line       a+bx
  *  plane      p0+p1*x1+p2*x2+p3*x3+.....     up to 'order'   (a 2D plane in 3D has order=2)
@@ -56,7 +57,7 @@ string defv[] = {
     "bootstrap=0\n      Bootstrapping to estimate errors",
     "seed=0\n           Random seed initializer",
     "numrec=f\n         Try the numrec routine instead?",
-    "VERSION=1.9a\n     2-feb-05 PJT",
+    "VERSION=1.9b\n     3-may-05 PJT",
     NULL
 };
 
@@ -741,7 +742,8 @@ do_line()
   if (nycol < 1) error("nycol=%d",nycol);
   if (tol < 0) tol = 0.0;
   if (lab < 0) lab = 0.0;
-  sprintf(fmt,"Fitting a+bx:  \na= %s %s \nb= %s %s\n", format,format,format,format);
+  sprintf(fmt,"Fitting a+bx:  \na= %s %s \nb= %s %s\nx0= %s %s\ny0= %s %s\n", 
+	  format,format,format,format,format,format,format,format);
 
   x = xcol[0].dat;
   y = ycol[0].dat;
@@ -763,7 +765,9 @@ do_line()
     else if (nrt<0)
       error("Bad fit, nrt=%d",nrt);
     printf("nrt=%d\n",nrt);
-    printf(fmt, fpar[0],epar[0],fpar[1],epar[1]);
+    printf(fmt, fpar[0],epar[0],fpar[1],epar[1],
+	   -fpar[0]/fpar[1], sqrt( sqr(epar[0]/fpar[1]) + sqr(epar[1]*fpar[0]/(fpar[1]*fpar[1])) ),
+	   fpar[0],epar[0]);
 
     npt1 = remove_data(x,1,y,dy,d,npt,nsigma[iter]);
     if (npt1 == npt) break;

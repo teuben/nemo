@@ -40,6 +40,7 @@
  *                     a: add out= for fourier
  *      24-feb-03  V3.4  add fit=zero
  *       4-oct-03      a fix nsigma>0 for fit=line
+ *       3-may-05  V3.4b add x/x0+y/y0=1 variant for a linear fit
  *
  * TODO:   check 'r', wip gives slightly different numbers
  */
@@ -82,7 +83,7 @@ string defv[] = {
     "estimate=\n        optional estimates (e.g. for ellipse center)",
     "nmax=10000\n       Default max allocation",
     "tab=f\n            short one-line output?",
-    "VERSION=3.4b\n     17-apr-04 PJT",
+    "VERSION=3.4b\n     3-may-05 PJT",
     NULL
 };
 
@@ -328,6 +329,12 @@ do_line()
 	     "a  =  ",a,"uncertainty:",siga);
       printf("%12s %9.6f %18s %9.6f \n",
 	     "b  =  ",b,"uncertainty:",sigb);
+
+      printf("%12s %9.6f %18s %9.6f \n",
+	     "x0 =  ",-b/a,"uncertainty:",sqrt(sqr(sigb/a)+sqr(siga*b/(a*a))));
+      printf("%12s %9.6f %18s %9.6f \n",
+	     "y0 =  ",b,"uncertainty:",sigb);
+
       printf("%19s %14.6f \n","chi-squared: ",chi2);
       printf("%23s %10.6f %s\n","goodness-of-fit: ",q,
 	     q==1 ? "(no Y errors supplied [dycol=])" : "");
