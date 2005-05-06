@@ -6472,7 +6472,6 @@ done
 
 
 
-# Use native cc if present
 echo "$as_me:$LINENO: checking for vendor's cc to be used instead of gcc" >&5
 echo $ECHO_N "checking for vendor's cc to be used instead of gcc... $ECHO_C" >&6
 # Extract the first word of "cc", so it can be a program name with args.
@@ -10443,7 +10442,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:10446:" \
+echo "$as_me:10445:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -10641,7 +10640,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_verb"
-(eval echo $as_me:10644: \"$ac_link\") >&5
+(eval echo $as_me:10643: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -10719,7 +10718,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_cv_prog_f77_v"
-(eval echo $as_me:10722: \"$ac_link\") >&5
+(eval echo $as_me:10721: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -11410,7 +11409,8 @@ case $host_os in
     ;;
   darwin*)
     CCSHARED="-fPIC -fno-common"
-    MACOS_LIBS="-lcc_dynamic"
+    MACOS_LIBS="-lcc_dynamic -L/sw/lib"
+    NEMO_CFLAGS="$NEMO_CFLAGS -I/sw/include"
     ;;
   sol*)
 #   -PIC ??

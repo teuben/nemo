@@ -66,7 +66,7 @@ AC_CHECK_FUNCS(strchr memcpy)
 
 dnl AC_PROG_CPP
 
-# Use native cc if present
+dnl Use native cc if present
 AC_MSG_CHECKING([for vendor's cc to be used instead of gcc])
 AC_CHECK_PROG(CC, cc, cc)
 
@@ -322,7 +322,7 @@ fi
 dnl Fortran/C linkeage : defines F77_CMAIN_FFLAGS
 ACX_F77_CMAIN_FFLAGS([],[AC_MSG_WARN([problems fortran-c interface])])
 
-dnl MacOS (darwin) needs -lcc_dynamic
+dnl MacOS (darwin) needs -lcc_dynamic, might need /sw stuff from FINK
 dnl Only linux wants -rdynamic, for dlopen()
 if test "$GCC" = "yes"; then
   NEMO_CFLAGS="$NEMO_CFLAGS $gcov_flag"
@@ -344,7 +344,8 @@ case $host_os in
     ;;
   darwin*)
     CCSHARED="-fPIC -fno-common"
-    MACOS_LIBS="-lcc_dynamic"
+    MACOS_LIBS="-lcc_dynamic -L/sw/lib"
+    NEMO_CFLAGS="$NEMO_CFLAGS -I/sw/include"
     ;;
   sol*)
 #   -PIC ??
