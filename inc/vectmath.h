@@ -2,6 +2,7 @@
  * VECTMATH.H: include file for vector/matrix operations.
  *  1-Dec-86    Created         		Joshua Barnes  Princeton, NJ.
  * 16-sep-90	merged Nemo/Starlab header files 	PJT/PxH
+ *              (note starlab does not have them anymore)
  * 22-oct-90    added some impure vector operations	PJT
  * 27-apr-92    added SMULVV				PJT
  * 16-feb-97    sqrt() from math.h			pjt
