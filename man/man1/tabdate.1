@@ -1,4 +1,4 @@
-.TH TABDATE 1NEMO "1 February 2005"
+.TH TABDATE 1NEMO "9 May 2005"
 .SH NAME
 tabdate \- Convert a date/time column
 .SH SYNOPSIS
@@ -14,29 +14,49 @@ is also given:
 \fBin=\fP
 input file name(s). 
 No default.
-.TP 20
+.TP
 \fBout=\fP
 output file name. 
 No default.
-.TP 20
+.TP
 \fBformat1=\fP
 format to read with. The field descriptors are 
 explained in \fIstrptime(3)\fP and \fIdate(1)\fP.
 No default.
-.TP 20
+.TP
 \fBformat2=\fP
 format to write with.
 No default.
+.TP
+\fBtcol=\fP
+Columns to use for the input time. A number of columns can be give, but they
+will be pasted together
+If none supplied, the whole line will be used to extract the time from.
+.TP
+\fBtime0=\fP
+If given, this will be the format (as used by \fBformat1=\fP) to reference the
+time to. The output is now forced to be \fBformat0=%s\fP, i.e. number of seconds
+since \fBtime0\fP. The special value 0 is used to define the reference time as
+the first timestamp in the file. Default: none.
 .SH EXAMPLES
 
 .nf
-  echo '2001-11-12 18:31:01' | tabtime - - '%Y-%m-%d %H:%M:%S' '%c'
+  % echo '2001-11-12 18:31:01' | tabtime - - '%Y-%m-%d %H:%M:%S' '%c'
+  Mon Nov 12 18:31:01 2001
 
-  date +%s | tabtime - - %s %c
+  % date +%s | tabtime - - %s %c
+  Mon May  9 16:16:06 2005
 .fi
 and a contrived way to turn time into seconds
 .nf
   tabdate tab0 - %T "1970 %T" | tabdate - - "%Y %T" %s
+.fi
+and here an example to find the number of seconds between two time-stamps:
+.nf
+  % set t0="`date +%s`"
+  ...
+  % set t1="`date +%s`"
+  % printf "%s\n%s\n" "$a"  "$b" | tabdate - - "%c" %s time0=0
 .fi
 .SH BUGS
 Cannot handle fractional seconds.
@@ -51,5 +71,6 @@ Peter Teuben
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
-01-Feb-05	V0.1 Created	PJT
+1-Feb-05	V0.1 Created	PJT
+9-may-05	V0.2 added a working time0= and future tcol=	PJT
 .fi
