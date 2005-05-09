@@ -13,6 +13,12 @@
 - intel 7.1 also has some remaining problems. Linking needs to
   be done with fortran and the -Vaxlib library
 
+- install on machines where IRAF's f77 is in the path before the 
+  system version: you will need to
+	setenv F77 g77
+  or whichever appropriate. the IRAF script will cause various
+  fortran-c link schemes to fail.
+
 - gcc3:  when using c++ NEMO's "string" will now collide with the 
          default C++ type 'string'....
 
