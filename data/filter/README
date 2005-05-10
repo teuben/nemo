@@ -1,3 +1,12 @@
 Example filters can be found on:
 
 http://voservices.net/filter/
+
+Filenames have been modified to something a bit shorter, and extensions are .tab, not .txt
+
+e.g. Two_Micron_All_Sky_Survey_2MASS_H.txt    ->     2MASS_H.tab
+     Two_Micron_All_Sky_Survey_2MASS_J.txt           2MASS_J.tab
+     Two_Micron_All_Sky_Survey_2MASS_KS.txt          2MASS_Ks.tab
+
+     SDSS_u'.txt                                     SDSS_u.tab
+
