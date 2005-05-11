@@ -23,6 +23,7 @@
  *       1-mar-03       3.0  new keywords to set/change WCS              PJT 
  *      19-jun-03       3.1  allow %w, %r for 2d/3d radii; allow crpix offset     PJT
  *      26-aug-04       3.2  fix bad error in setting crpix for cube generation   PJT
+ *      10-may-05       3.2a use the wcs routines that have moved to wcsio.c      PJT
  *
  *       because of the float/real conversions and
  *       to eliminate excessive memory usage, operations 'fie' are
@@ -47,11 +48,13 @@ string defv[] = {
   "crval=\n        Override/Set crval (0,0,0)",
   "cdelt=\n        Override/Set cdelt (1,1,1)",
   "seed=0\n        Random seed",
-  "VERSION=3.2\n   26-aug-04 PJT",
+  "VERSION=3.2a\n  10-may-05 PJT",
   NULL,
 };
 
 string usage = "image arithmetic and wcs";
+
+string cvsid="$Id$";
 
 #ifndef HUGE
 # define HUGE 1.0e20
@@ -74,8 +77,6 @@ local int set_axis(string var, int n, double *xvar, double defvar);
 local int fie_remap(char *fie, bool map_create);
 local void do_create(int nx, int ny, int nz);
 local void do_combine(void);
-local void wcs_f2i(             int ndim, double *crpix, double *crval, double *cdelt, image *iptr);
-local void wcs_i2f(image *iptr, int ndim, double *crpix, double *crval, double *cdelt);
 
 extern  int debug_level;		/* see initparam() */
 extern    void    dmpfien();
@@ -192,61 +193,6 @@ local int set_axis(string var, int n, double *xvar, double defvar)
   return 999;
 }
 
-/*
- *    FITS: x = (i-crpix)*cdelt + crval        lower/left is 1 (i=1...naxis)
- *    NEMO: x = i*Dx + Xmin                    lower/left is 0 (i=0...naxis-1)
- */
-
-local void wcs_f2i(int ndim, double *crpix, double *crval, double *cdelt, image *iptr)
-{
-  int i;
-  if (ndim<1) return;
-
-  for (i=0; i<ndim; i++)
-    dprintf(1,"axis %d: %g %g %g\n",i+1,crpix[i],crval[i],cdelt[i]);
-  
-  Dx(iptr) = cdelt[0];
-  Xmin(iptr) = (1.0-crpix[0])*cdelt[0] + crval[0];
-  if (ndim==1) return;
-  
-  Dy(iptr) = cdelt[1];
-  Ymin(iptr) = (1.0-crpix[1])*cdelt[1] + crval[1];
-  if (ndim==2) return;
-
-  Dz(iptr) = cdelt[2];
-  Zmin(iptr) = (1.0-crpix[2])*cdelt[2] + crval[2];
-
-  dprintf(1,"XYZMin/Dxyz: %g %g %g %g 5g 5g\n",
-	  Xmin(iptr),Ymin(iptr),Zmin(iptr),Dx(iptr),Dy(iptr),Dz(iptr));
-
-}
-
-local void wcs_i2f(image *iptr, int ndim, double *crpix, double *crval, double *cdelt)
-{
-  int i;
-  if (ndim<1) return;
-
-  dprintf(1,"XYZMin/Dxyz: %g %g %g %g 5g 5g\n",
-	  Xmin(iptr),Ymin(iptr),Zmin(iptr),Dx(iptr),Dy(iptr),Dz(iptr));
-
-  crpix[0] = 1.0;
-  crval[0] = Xmin(iptr);
-  cdelt[0] = Dx(iptr);
-  if (ndim==1) return;
-  
-  crpix[1] = 1.0;
-  crval[1] = Ymin(iptr);
-  cdelt[1] = Dy(iptr);
-  if (ndim==2) return;
-
-  crpix[2] = 1.0;
-  crval[2] = Ymin(iptr);
-  cdelt[2] = Dy(iptr);
-
-  for (i=0; i<ndim; i++)
-    dprintf(1,"axis %d: %g %g %g\n",i+1,crpix[i],crval[i],cdelt[i]);
-
-}
 
 
 /* 
