@@ -1,0 +1,50 @@
+.TH TABFILTER 1NEMO "11 May 2005"
+.SH NAME
+tabfilter \- flux derived from convolving a filter with a spectrum
+.SH SYNOPSIS
+\fBtabfilter\fP [parameter=value]
+.SH DESCRIPTION
+\fBtabfilter\fP convolves a filter (a simple table of an instrumental
+spectral response as function of wavelength) with a
+model or observed spectrum, and computes the resulting flux.
+.PP
+Example filters are in $NEMODAT/filters, and for good measure 
+should contain a 0 response at the lower and upper end of the
+filter.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBfilter=\fP
+Filter mnemonic (U,B,V,R,I,H,J,K) or full spectrum name [???]
+.TP
+\fBspectrum=\fP
+Input spectrum table file (column 1 must contain the wavelength (in 
+Angstrom, column 2 the flux. Default: not used.
+.TP
+\fBtbb=\fP
+Black Body temperature. Default: not used.
+.TP
+\fBxscale=\fP
+Scale factor applied to input spectrum wavelength [1]
+.TP
+\fByscale=\fP
+Scale factor applied to input spectrum flux [1]
+.TP
+\fBstep=\fP
+Integration step in Angstrom. If too large compared to the width
+of the filter, the program will stubbornly decrease it to 1/100 of
+the filterwidth. Default: 1.
+.SH EXAMPLES
+.SH SEE ALSO
+tabmath(1NEMO), tabspline(1NEMO)
+.PP
+Filters: http://voservices.net/filter/
+.SH FILES
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+11-May-05	V0.1 Created	PJT
+.fi
