@@ -1,8 +1,20 @@
-/* TABFILTER:   convolved a filter with a spectrum to get a flux
+/* TABFILTER:   convolve a filter with a spectrum to get a flux
  *
  *
  *      10-may-05    first version, cloned off tabspline
  *
+ * instr     suggested mnemonics        rough wavelengths (Angstrom)
+ * -----     -------------------        ---------------------------------
+ * GALEX:    NUV,FUV                    1000
+ * SDSS:     u,g,r,i,z                  3000-6000
+ *           U,B,V,R,I
+ * 2MASS:    J,H,K                      10000-20000
+ * SPITZER:  I1,I2,I3,I4,M1,M2,M3       [3.6,4.5,5.8,8.0,24,70,1xx]*10000
+ *
+ *
+ * TODO:
+ *   - flux calibration
+ *   - tabular spectra
  */
 
 #include <stdinc.h> 
@@ -16,7 +28,7 @@ string defv[] = {
   "xscale=1\n       Scale factor applied to input spectrum wavelength",
   "yscale=1\n       Scale factor applied to input spectrum flux",
   "step=1\n         Initial integration step (in Angstrom)",
-  "VERSION=0.1\n    11-may-05 PJT",
+  "VERSION=0.2\n    11-may-05 PJT",
   NULL,
 
 };
@@ -37,11 +49,20 @@ string cvsid="$Id$";
 
 real planck(real wavelen, real T_b)
 {
+#if 0
   real w = wavelen/1e8;      /* w in cm now , for cgs units used here */
-  real C1 = 3.74185e-5;
-  real C2 = 1.43883;
-  real x = C1/w/T_b;
+  real C1 = 3.74185e-5;      /* 3.74e28 */
+  real C2 = 1.43883;         /* 1.44e8 */
+  real x = C2/w/T_b;
   return C1/(w*sqr(sqr(w))*(exp(x)-1))*1e8;
+#else
+  /* w in Angstrom, output in watts/m^2 */
+  real w = wavelen;
+  real C1 = 3.74e28;
+  real C2 = 1.44e8;
+  real x = C2/w/T_b;
+  return C1/(w*sqr(sqr(w))*(exp(x)-1));
+#endif
 }
 
 nemo_main()
@@ -104,9 +125,9 @@ nemo_main()
       sum += y;
     }
     sum *= dx;
-    printf("flux = %g   mag=%g\n",sum,-2.5*log10(sum));
+    printf("%g %g %g\n",tbb,sum,-2.5*log10(sum));
   } else if (hasvalue("spectrum")) {
-    warning("not implemented yet");
+    warning("tabular spectrum not implemented yet");
   } else
     warning("Either spectrum= or tbb= must be used");
 }
