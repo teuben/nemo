@@ -5,6 +5,12 @@
  *	 8-jul-03       written, cloned off ccdfill,  Q&D again  PJT
  *                      only useable for regular good data rows/cols
  *                      use for the DH barfitting project
+ *
+ * some refs:
+ *  http://www.library.cornell.edu/nr/bookcpdf/c3-6.pdf
+ *  http://encyclopedia.thefreedictionary.com/Bilinear%20interpolation
+ *  http://ct.radiology.uiowa.edu/~jiangm/courses/dip/html/node67.html
+ *  http://bilinear-interpolation.wikiverse.org/
  */
 
 
