@@ -11,6 +11,10 @@
  * 15-mar-02        d added option log to allow piping of output        WD 
  * 31-dec-02    V1.4  gcc3/SINGLEPREC
  *
+ *  TODO:
+ *    might need a snapshape program, see e.g.
+ *	astro-ph/0505179 (Lee & Kang 2005)
+ *      Reconstructing the Triaxial Shapes of Dark Matter Halos from the Anisotropic Spatial Distributions of their Substructures
  */
 
 #include <stdinc.h>
