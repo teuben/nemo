@@ -1,6 +1,7 @@
 DIR = src/kernel/tab
 BIN = tabmath tabplot tabhist tabspline tablsqfit tabnllsqfit tabdate \
-      tabfilter
+      tabfilter tabtrend
+
 NEED = $(BIN) nemoinp
 
 help:
@@ -49,9 +50,12 @@ tabnllsqfit:
 
 tabdate:
 	@echo Running $*
-	@echo "2001-11-12 18:31:01"
+	@echo 1000000000 | $(EXEC) tabdate - - %s %c
 
 tabfilter:
 	@echo Running $*
 	$(EXEC) tabfilter g tbb=1000
 
+tabtrend:
+	@echo Running $*
+	@nemoinp 0:4 | $(EXEC) tabmath - - '%1*%1' all | $(EXEC) tabtrend -
