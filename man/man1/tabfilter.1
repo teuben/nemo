@@ -4,7 +4,8 @@ tabfilter \- flux derived from convolving a filter with a spectrum
 .SH SYNOPSIS
 \fBtabfilter\fP [parameter=value]
 .SH DESCRIPTION
-\fBtabfilter\fP convolves a filter (a simple table of an instrumental
+\fBtabfilter\fP convolves a filter (in the form of
+a simple table of the instrumental
 spectral response as function of wavelength) with a
 model or observed spectrum, and computes the resulting flux.
 .PP
@@ -16,31 +17,69 @@ The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBfilter=\fP
-Filter mnemonic (U,B,V,R,I,H,J,K) or full spectrum name [???]
+Filter mnemonic (U,B,V,R,I,H,J,K) or full filter file name. 
+No Default.
 .TP
 \fBspectrum=\fP
 Input spectrum table file (column 1 must contain the wavelength (in 
-Angstrom, column 2 the flux. Default: not used.
+Angstrom), column 2 the flux. Default: not used.
 .TP
 \fBtbb=\fP
 Black Body temperature. Default: not used.
 .TP
 \fBxscale=\fP
-Scale factor applied to input spectrum wavelength [1]
+Scale factor applied to input spectrum wavelength 
+[1]
 .TP
 \fByscale=\fP
-Scale factor applied to input spectrum flux [1]
+Scale factor applied to input spectrum flux 
+** not used** 
+[1]
 .TP
 \fBstep=\fP
 Integration step in Angstrom. If too large compared to the width
 of the filter, the program will stubbornly decrease it to 1/100 of
 the filterwidth. Default: 1.
 .SH EXAMPLES
+What is the SDSS "g-r" color for a T=5000 star?
+.nf
+   % tabfilter g tbb=5000
+   5000 1.46959e+10 -25.418
+   % tabfilter r tbb=5000
+   5000 2.15063e+10 -25.8314
+   % nemoinp -25.41--25.8314 format=%.2f
+   0.42
+.fi
+here the output of tabfilter are 3 numbers: the input Black Body temperature, 
+the linear flux and the "astronomical" (-2.5log(Flux)) magnitude.
+.PP
+Here's a snippet of csh code to tabulate the colors for a range of
+BB temperatures:
+.nf
+  % foreach t (`nemoinp 2000:9000:1000`)
+  ?   set g=(`tabfilter g tbb=$t`)
+  ?   set r=(`tabfilter r tbb=$t`)
+  ?   echo $t `nemoinp $g[3]-$r[3]`
+  ? end
+2000 2.5357
+3000 1.3928
+4000 0.7875
+5000 0.4134
+6000 0.1615
+7000 -0.018
+8000 -0.151
+9000 -0.2529
+.fi
 .SH SEE ALSO
 tabmath(1NEMO), tabspline(1NEMO)
 .PP
 Filters: http://voservices.net/filter/
 .SH FILES
+.fi +2i
+.nf
+NEMODAT/filters/	directory with filters
+NEMODAT/filters/Fnames	translation file between short and full names
+.fi
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
