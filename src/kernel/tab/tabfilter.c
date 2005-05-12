@@ -21,15 +21,18 @@
 #include <getparam.h>
 #include <spline.h>
 #include <extstring.h>
+#include <table.h>
 
 string defv[] = {
   "filter=???\n     Filter mnemonic (U,B,V,R,I,H,J,K) or full spectrum name",
   "spectrum=\n      Input spectrum table file (1=wavelength(A) 2=flux)",
-  "tbb=\n           Black Body temperature, in case used",
+  "xcol=1\n         Wavelength column for spectrum",
+  "ycol=2\n         Flux column for spectrum",
   "xscale=1\n       Scale factor applied to input spectrum wavelength",
   "yscale=1\n       Scale factor applied to input spectrum flux",
   "step=1\n         Initial integration step (in Angstrom)",
-  "VERSION=0.2\n    11-may-05 PJT",
+  "tbb=\n           Black Body temperature, in case used",
+  "VERSION=0.3\n    12-may-05 PJT",
   NULL,
 
 };
@@ -39,7 +42,6 @@ string usage="flux derived from convolving a filter with a spectrum";
 string cvsid="$Id$";
 
 
-#define MAXZERO     64
 #define MAXDATA  16384
 
 extern string *burststring(string, string);
@@ -103,18 +105,16 @@ string filtername(string shortname)
 }
 
 
-nemo_main()
+void nemo_main()
 {
   int colnr[2];
   real *coldat[2], *xdat, *ydat, xmin, xmax, ymin, ymax;
-  real fy[MAXZERO], fx[MAXZERO], xp[MAXDATA], yp[MAXDATA], x, y, xd, yd, dx;
+  real *udat, *vdat, umin, umax, vmin, vmax;
+  real x, y1, y2, dx;
   real tbb,sum;
   stream instr;
-  string fmt, stype;
-  char fmt1[100], fmt2[100];
-  int i, j, n, nx, ny, nmax, izero;
-  bool Qx, Qy, Qxall, Qyall;
-  real *sdat;
+  int i, n, ns, nmax;
+  real *sdat, *spdat;
   string filter = filtername(getparam("filter"));
   
   nmax = nemo_file_lines(filter,MAXLINES);
@@ -122,12 +122,12 @@ nemo_main()
   ydat = coldat[1] = (real *) allocate(nmax*sizeof(real));
   colnr[0] = 1;  /* wavelenght in angstrom */
   colnr[1] = 2;  /* normalized filter response [0,1] */
-  
   instr = stropen(filter,"r");
   n = get_atable(instr,2,colnr,coldat,nmax);
+  strclose(instr);
   
   for(i=0; i<n; i++) {
-    dprintf(2,fmt,xdat[i],ydat[i]);
+    dprintf(2,"%g %g\n",xdat[i],ydat[i]);
     if (i==0) {
       xmin = xmax = xdat[0];
       ymin = ymax = ydat[0];
@@ -158,15 +158,60 @@ nemo_main()
     
     sum = 0;
     for (x = xmin; x <= xmax; x += dx) {
-      y = seval(x,xdat,ydat,sdat,n);    /* filter */
-      dprintf(3,"%g %g\n",x,y);
-      y *= planck(x,tbb);
-      sum += y;
+      y1 = seval(x,xdat,ydat,sdat,n);    /* filter */
+      y2 = planck(x,tbb);
+      dprintf(3,"%g %g %g\n",x,y1,y2);
+      sum += y1*y2;
     }
     sum *= dx;
     printf("%g %g %g\n",tbb,sum,-2.5*log10(sum));
   } else if (hasvalue("spectrum")) {
-    warning("tabular spectrum not implemented yet");
+    warning("spectrum= is a new feature");
+    nmax = nemo_file_lines(getparam("spectrum"),MAXLINES);
+    udat = coldat[0] = (real *) allocate(nmax*sizeof(real));
+    vdat = coldat[1] = (real *) allocate(nmax*sizeof(real));
+    colnr[0] = getiparam("xcol");
+    colnr[1] = getiparam("ycol");
+    instr = stropen(getparam("spectrum"),"r");
+    ns = get_atable(instr,2,colnr,coldat,nmax);
+    strclose(instr);
+
+    for(i=0; i<ns; i++) {
+      dprintf(2,"%g %g\n",udat[i],vdat[i]);
+      if (i==0) {
+	umin = umax = udat[0];
+	vmin = vmax = vdat[0];
+      } else {
+	umax = MAX(umax,udat[i]);
+	vmax = MAX(vmax,vdat[i]);
+	umin = MIN(umin,udat[i]);
+	vmin = MIN(vmin,vdat[i]);
+      }
+    }
+    dprintf(1,"Spectrum wavelength range: %g : %g\n",umin,umax);
+    dprintf(1,"Spectrum response range: %g : %g\n",vmin,vmax);
+
+    if (umax < xmin || umin >xmax)
+      error("Spectrum and filter do not overlap");
+
+
+    /* setup a spline interpolation table into the spectrum */
+    spdat = (real *) allocate(sizeof(real)*n*3);
+    spline(spdat,udat,vdat,ns);
+
+    sum = 0;
+    for (x = xmin; x <= xmax; x += dx) {
+      y1 = seval(x,xdat,ydat,sdat,n);    /* filter */
+      if (umin < x && x <umax)
+	y2 = seval(x,udat,vdat,spdat,ns);  /* spectrum */
+      else
+	y2 = 0.0;
+      dprintf(3,"%g %g %g\n",x,y1,y2);
+      sum += y1*y2;
+    }
+    sum *= dx;
+    printf("0   %g %g\n",sum,-2.5*log10(sum));
+
   } else
     warning("Either spectrum= or tbb= must be used");
 }
