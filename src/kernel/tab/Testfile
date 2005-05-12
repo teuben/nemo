@@ -1,5 +1,6 @@
 DIR = src/kernel/tab
-BIN = tabmath tabplot tabhist tabspline tablsqfit tabnllsqfit tabtime
+BIN = tabmath tabplot tabhist tabspline tablsqfit tabnllsqfit tabdate \
+      tabfilter
 NEED = $(BIN) nemoinp
 
 help:
@@ -46,6 +47,11 @@ tabnllsqfit:
 	$(EXEC) nemoinp 1:100 | $(EXEC) tabmath - - '4+exp(-(%1-50)**2/(200))+rang(0,0.1)' seed=123 |\
 		$(EXEC) tabnllsqfit - fit=gauss par=4,1,50,10; nemo.coverage tabnllsqfit.c
 
-tabtime:
+tabdate:
 	@echo Running $*
 	@echo "2001-11-12 18:31:01"
+
+tabfilter:
+	@echo Running $*
+	$(EXEC) tabfilter g tbb=1000
+
