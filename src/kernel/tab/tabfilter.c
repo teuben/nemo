@@ -14,7 +14,6 @@
  *
  * TODO:
  *   - flux calibration
- *   - tabular spectra
  */
 
 #include <stdinc.h> 
@@ -85,7 +84,7 @@ string filtername(string shortname)
   if (fpath == 0) error("NEMODAT does not exist");
 
   sprintf(fullname,"%s/filter/Fnames",fpath);
-  dprintf(1,"Trying %s\n",fullname);
+  dprintf(1,"Alias table %s\n",fullname);
   fstr = stropen(fullname,"r");
   while (fgets(line,MAX_LINELEN,fstr)) {
     if (line[0] == '#') continue;
@@ -94,7 +93,7 @@ string filtername(string shortname)
     if (nsp > 1) {
       if (streq(shortname,sp[0])) {
 	sprintf(fullname,"%s/filter/%s",fpath,sp[1]);
-	dprintf(1,"Match! Assuming %s\n",fullname);
+	dprintf(1,"Matching %s\n",fullname);
 	freestrings(sp);
 	return fullname;
       }
@@ -115,7 +114,7 @@ void nemo_main()
   stream instr;
   int i, n, ns, nmax;
   real *sdat, *spdat;
-  string filter = filtername(getparam("filter"));
+  string spectrum, filter = filtername(getparam("filter"));
   
   nmax = nemo_file_lines(filter,MAXLINES);
   xdat = coldat[0] = (real *) allocate(nmax*sizeof(real));
@@ -132,6 +131,8 @@ void nemo_main()
       xmin = xmax = xdat[0];
       ymin = ymax = ydat[0];
     } else {
+      if (xdat[i] <= xdat[i-1]) 
+	error("Filter %s must be sorted in wavelength",filter);
       xmax = MAX(xmax,xdat[i]);
       ymax = MAX(ymax,ydat[i]);
       xmin = MIN(xmin,xdat[i]);
@@ -167,12 +168,13 @@ void nemo_main()
     printf("%g %g %g\n",tbb,sum,-2.5*log10(sum));
   } else if (hasvalue("spectrum")) {
     warning("spectrum= is a new feature");
-    nmax = nemo_file_lines(getparam("spectrum"),MAXLINES);
+    spectrum = getparam("spectrum");
+    nmax = nemo_file_lines(spectrum,MAXLINES);
     udat = coldat[0] = (real *) allocate(nmax*sizeof(real));
     vdat = coldat[1] = (real *) allocate(nmax*sizeof(real));
     colnr[0] = getiparam("xcol");
     colnr[1] = getiparam("ycol");
-    instr = stropen(getparam("spectrum"),"r");
+    instr = stropen(spectrum,"r");
     ns = get_atable(instr,2,colnr,coldat,nmax);
     strclose(instr);
 
@@ -182,6 +184,8 @@ void nemo_main()
 	umin = umax = udat[0];
 	vmin = vmax = vdat[0];
       } else {
+	if (udat[i] <= udat[i-1])
+	  error("Spectrum %s must be sorted in wavelength",spectrum);
 	umax = MAX(umax,udat[i]);
 	vmax = MAX(vmax,vdat[i]);
 	umin = MIN(umin,udat[i]);
