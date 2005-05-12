@@ -31,7 +31,8 @@ string defv[] = {
   "yscale=1\n       Scale factor applied to input spectrum flux",
   "step=1\n         Initial integration step (in Angstrom)",
   "tbb=\n           Black Body temperature, in case used",
-  "VERSION=0.4\n    12-may-05 PJT",
+  "normalize=f\n    Normalize integral by filter integral",
+  "VERSION=0.5\n    12-may-05 PJT",
   NULL,
 
 };
@@ -110,11 +111,12 @@ void nemo_main()
   real *coldat[2], *xdat, *ydat, xmin, xmax, ymin, ymax;
   real *udat, *vdat, umin, umax, vmin, vmax;
   real x, y1, y2, dx, xscale, yscale;
-  real tbb,sum;
+  real tbb,sum,sum0;
   stream instr;
   int i, n, ns, nmax;
   real *sdat, *spdat;
   string spectrum, filter = filtername(getparam("filter"));
+  bool Qnorm = getbparam("normalize");
   
   nmax = nemo_file_lines(filter,MAXLINES);
   xdat = coldat[0] = (real *) allocate(nmax*sizeof(real));
@@ -157,14 +159,18 @@ void nemo_main()
   if (hasvalue("tbb")) {                /* using a Planck curve */
     tbb = getdparam("tbb");
     
-    sum = 0;
+    sum = sum0 = 0;
     for (x = xmin; x <= xmax; x += dx) {
       y1 = seval(x,xdat,ydat,sdat,n);    /* filter */
       y2 = planck(x,tbb);
       dprintf(3,"%g %g %g\n",x,y1,y2);
       sum += y1*y2;
+      sum0 += y1;
     }
-    sum *= dx;
+    if (Qnorm)
+      sum /= sum0;
+    else
+      sum *= dx;
     printf("%g %g %g\n",tbb,sum,-2.5*log10(sum));
   } else if (hasvalue("spectrum")) {
     warning("spectrum= is a new feature");
@@ -208,7 +214,7 @@ void nemo_main()
     spdat = (real *) allocate(sizeof(real)*n*3);
     spline(spdat,udat,vdat,ns);
 
-    sum = 0;
+    sum = sum0 = 0;
     for (x = xmin; x <= xmax; x += dx) {
       y1 = seval(x,xdat,ydat,sdat,n);    /* filter */
       if (umin < x && x <umax)
@@ -217,8 +223,12 @@ void nemo_main()
 	y2 = 0.0;
       dprintf(3,"%g %g %g\n",x,y1,y2);
       sum += y1*y2;
+      sum0 += y1;
     }
-    sum *= dx;
+    if (Qnorm)
+      sum /= sum0;
+    else
+      sum *= dx;
     printf("0   %g %g\n",sum,-2.5*log10(sum));
 
   } else
