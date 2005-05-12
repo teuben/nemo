@@ -31,7 +31,7 @@ string defv[] = {
   "yscale=1\n       Scale factor applied to input spectrum flux",
   "step=1\n         Initial integration step (in Angstrom)",
   "tbb=\n           Black Body temperature, in case used",
-  "VERSION=0.3\n    12-may-05 PJT",
+  "VERSION=0.4\n    12-may-05 PJT",
   NULL,
 
 };
@@ -109,7 +109,7 @@ void nemo_main()
   int colnr[2];
   real *coldat[2], *xdat, *ydat, xmin, xmax, ymin, ymax;
   real *udat, *vdat, umin, umax, vmin, vmax;
-  real x, y1, y2, dx;
+  real x, y1, y2, dx, xscale, yscale;
   real tbb,sum;
   stream instr;
   int i, n, ns, nmax;
@@ -178,8 +178,13 @@ void nemo_main()
     ns = get_atable(instr,2,colnr,coldat,nmax);
     strclose(instr);
 
+    xscale = getdparam("xscale");
+    yscale = getdparam("yscale");
+
     for(i=0; i<ns; i++) {
       dprintf(2,"%g %g\n",udat[i],vdat[i]);
+      udat[i] *= xscale;
+      vdat[i] *= yscale;
       if (i==0) {
 	umin = umax = udat[0];
 	vmin = vmax = vdat[0];
