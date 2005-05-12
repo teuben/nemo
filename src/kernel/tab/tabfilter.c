@@ -20,6 +20,7 @@
 #include <stdinc.h> 
 #include <getparam.h>
 #include <spline.h>
+#include <extstring.h>
 
 string defv[] = {
   "filter=???\n     Filter mnemonic (U,B,V,R,I,H,J,K) or full spectrum name",
@@ -41,6 +42,8 @@ string cvsid="$Id$";
 #define MAXZERO     64
 #define MAXDATA  16384
 
+extern string *burststring(string, string);
+extern void freestrings(string *);
 /*
  * Planck curve,  output in ergs/cm2/s/A
  *
@@ -65,6 +68,41 @@ real planck(real wavelen, real T_b)
 #endif
 }
 
+
+string filtername(string shortname)
+{
+  int nsp;
+  static char fullname[256];
+  char line[MAX_LINELEN];
+  string *sp, fpath;
+  stream fstr;
+
+  if (nemo_file_size(shortname) > 0) return shortname;
+
+  fpath = getenv("NEMODAT");
+  if (fpath == 0) error("NEMODAT does not exist");
+
+  sprintf(fullname,"%s/filter/Fnames",fpath);
+  dprintf(1,"Trying %s\n",fullname);
+  fstr = stropen(fullname,"r");
+  while (fgets(line,MAX_LINELEN,fstr)) {
+    if (line[0] == '#') continue;
+    sp = burststring(line," \n");
+    nsp = xstrlen(sp,sizeof(sp))-1;
+    if (nsp > 1) {
+      if (streq(shortname,sp[0])) {
+	sprintf(fullname,"%s/filter/%s",fpath,sp[1]);
+	dprintf(1,"Match! Assuming %s\n",fullname);
+	freestrings(sp);
+	return fullname;
+      }
+    }
+    freestrings(sp);
+  }
+  return shortname;
+}
+
+
 nemo_main()
 {
   int colnr[2];
@@ -77,14 +115,15 @@ nemo_main()
   int i, j, n, nx, ny, nmax, izero;
   bool Qx, Qy, Qxall, Qyall;
   real *sdat;
+  string filter = filtername(getparam("filter"));
   
-  nmax = nemo_file_lines(getparam("filter"),MAXLINES);
+  nmax = nemo_file_lines(filter,MAXLINES);
   xdat = coldat[0] = (real *) allocate(nmax*sizeof(real));
   ydat = coldat[1] = (real *) allocate(nmax*sizeof(real));
   colnr[0] = 1;  /* wavelenght in angstrom */
   colnr[1] = 2;  /* normalized filter response [0,1] */
   
-  instr = stropen(getparam("filter"),"r");
+  instr = stropen(filter,"r");
   n = get_atable(instr,2,colnr,coldat,nmax);
   
   for(i=0; i<n; i++) {
@@ -131,6 +170,4 @@ nemo_main()
   } else
     warning("Either spectrum= or tbb= must be used");
 }
-
-
 
