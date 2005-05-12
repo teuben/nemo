@@ -12,6 +12,11 @@ model or observed spectrum, and computes the resulting flux.
 Example filters are in $NEMODAT/filters, and for good measure 
 should contain a 0 response at the lower and upper end of the
 filter.
+.PP
+Currently the program just integrates \int{S(l)*F(l)*dl}
+and ignores any units, though filters F(l) are typically between
+0 and 1 (but not necessarely peaked at 1), and wavelength l
+in Angstrom.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -24,8 +29,11 @@ No Default.
 Input spectrum table file (column 1 must contain the wavelength (in 
 Angstrom), column 2 the flux. Default: not used.
 .TP
-\fBtbb=\fP
-Black Body temperature. Default: not used.
+\fBxcol=\fP
+Column for wavelength in the spectrum [1]
+.TP
+\fBycol=\fP
+Column for flux in the spectrum [2]
 .TP
 \fBxscale=\fP
 Scale factor applied to input spectrum wavelength 
@@ -33,13 +41,20 @@ Scale factor applied to input spectrum wavelength
 .TP
 \fByscale=\fP
 Scale factor applied to input spectrum flux 
-** not used** 
 [1]
 .TP
 \fBstep=\fP
 Integration step in Angstrom. If too large compared to the width
 of the filter, the program will stubbornly decrease it to 1/100 of
 the filterwidth. Default: 1.
+.TP
+\fBtbb=\fP
+Black Body temperature. This is needed if no spectrum is given.
+Default: not used.
+.TP
+\fBnormalize=t|f\fP
+Normalize the flux by the integral over the filter shape? 
+[no].
 .SH EXAMPLES
 What is the SDSS "g-r" color for a T=5000 star?
 .nf
@@ -70,6 +85,12 @@ BB temperatures:
 8000 -0.151
 9000 -0.2529
 .fi
+.SH CAVEATS
+Absolute units are not taken into account, though with xscale=,yscale= some
+flexibility is possible.
+.PP
+The integration is a simple eulerian one, though 1A should be sufficient 
+for most application. In case of doubt, check with a smaller or bigger value.
 .SH SEE ALSO
 tabmath(1NEMO), tabspline(1NEMO)
 .PP
