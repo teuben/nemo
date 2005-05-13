@@ -4,7 +4,20 @@ tabextinct \- extinct a spectrum
 .SH SYNOPSIS
 \fBtabextinct\fP [parameter=value]
 .SH DESCRIPTION
-No description available. This manual page was created by mkman
+\fBtabextinct\fP takes a model extinction curve (defined as a simple table with
+C as function of wavelength) and applies it to an input spectrum. Although
+the model MUST have the wavelength and extinction in columns 1 and 2, the
+columns in the input spectrum can be selected. The output is a simple table
+with only two columns: wavelength and extincted spectrum.
+.PP
+A spline interpolation is used into the extinction curve to find the appropriate
+extinction at the requested wavelenghts of the spectrum. Therefore the
+extinction model should cover the whole spectrum, currently the program
+does not allow otherwise.
+.PP
+This program can also be used to multiply two curves with each other, 
+using \fBextinct=f\fP.
+
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -25,14 +38,19 @@ Flux column for spectrum [2]
 Av to apply extinction curve with [1] 
 .TP
 \fBextinct=\fP
-Extinction law, or some other linear law [t]
+Extinction law (t), or a simple linear law (f)
+[Default: t]
 .SH EXAMPLES
+.nf
+  % tabextinct model=model1.tab in=spectrum.tab Av=2.3 > spectrum23.tab
+.fi
 .SH SEE ALSO
+tabfilter(1NEMO), tabmath(1NEMO)
 .SH FILES
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
-13-May-05	V0.1 Created	PJT
+13-May-05	V0.1 Created on Friday 13th, so don't expect too much	PJT
 .fi
