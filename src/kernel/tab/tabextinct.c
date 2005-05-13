@@ -1,5 +1,5 @@
 /* TABEXTINCT:   extinct a spectrum
-   17.21.25
+ * written and tested  17.21.25 - 17.34.43
  *
  *
  *      13-may-05    first version, cloned off tabfilter
@@ -13,10 +13,11 @@
 
 string defv[] = {
   "model=???\n      Extinction model (table with C(wave) in col 1/2)",
-  "in=???\n         Input spectrum table file"
+  "in=???\n         Input spectrum table file",
   "xcol=1\n         Wavelength column for spectrum",
   "ycol=2\n         Flux column for spectrum",
   "Av=1\n           Av to apply extinction curve with",
+  "extinct=t\n      Extinction law, or some other linear law",
   "VERSION=0.1\n    13-may-05 PJT",
   NULL,
 
@@ -79,6 +80,9 @@ void nemo_main()
   real *sdat;
   string spectrum = getparam("in");
   string model = getparam("model");
+  bool Qextinct = getbparam("extinct");
+
+  Av = getdparam("Av");
   
   nmax = nemo_file_lines(model,MAXLINES);
   xdat = coldat[0] = (real *) allocate(nmax*sizeof(real));
@@ -141,11 +145,14 @@ void nemo_main()
   if (xmin > umin || xmax < umax)
     error("Spectrum in not embedded inside Extinction curve");
 
-
   for (i=0; i<ns; i++) {           /* loop over the spectrum */
-    C = seval(udat[i],xdat,ydat,sdat,n);    /* filter */
-    vdat[i] *= pow(10.0,-0.4*Av*C);
+    C = seval(udat[i],xdat,ydat,sdat,n);    /* model */
+    dprintf(1,"%g %g %g %g\n",udat[i],vdat[i],C,vdat[i]*C);
+    if (Qextinct)
+      vdat[i] *= pow(10.0,-0.4*Av*C);       /* extinction law */
+    else
+      vdat[i] *= Av*C;                      /* simple linear law */
+    printf("%g %g\n",udat[i],vdat[i]);
   }
-  printf("%g %g\n",udat[i],vdat[i]);
 }
 
