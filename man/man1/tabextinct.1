@@ -13,7 +13,11 @@ with only two columns: wavelength and extincted spectrum.
 A spline interpolation is used into the extinction curve to find the appropriate
 extinction at the requested wavelenghts of the spectrum. Therefore the
 extinction model should cover the whole spectrum, currently the program
-does not allow otherwise.
+does not allow otherwise. Extincton occurs with the standard formulae
+.PP
+.nf
+        S = S0 . 10**(-0.4 * Av * C(lambda))
+.fi
 .PP
 This program can also be used to multiply two curves with each other, 
 using \fBextinct=f\fP.
