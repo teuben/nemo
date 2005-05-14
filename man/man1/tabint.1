@@ -5,30 +5,41 @@ tabint \- integrate a sorted table
 \fBtabint\fP [parameter=value]
 .SH DESCRIPTION
 \fBtabint\fP integrates a function Y=F(X) that is defined by a set of (X,Y) points
-though a table. The function can either be resampled using a spline interpolation,
+obtained via an ASCII table.
+The function can either be resampled using a spline interpolation,
 or directly summed.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBin=\fP
-Input table file [???]    
+Input table file. No default.
 .TP
 \fBxcol=\fP
-Column with X coordinate (better be sorted in
+Column with X coordinate. The X coordinates must be sorted
+in increasing X. Default: 1
 .TP
 \fBycol=\fP
-Column with Y coordinate of function [2] 
+Column with Y coordinate of function [Default: 2] 
 .TP
 \fBstep=\fP
-Integration step if resampling used []  
+Integration step if resampling used. By default the datapoints themselves
+are used, but by setting an integration \fBstep\fP here, the function
+is resampled using a spline and numerically integrated that way.
 .TP
 \fBnormalize=\fP
-Normalize integral [f]     
+Normalize integral. If set, the integral is normalized by the integration
+interval. Default: f
 .SH EXAMPLES
+.nf
+ % nemoinp 0:1:0.1 | tabmath - - '%1*%1' | tabint -
+ 0.335
+ % nemoinp 0:1:0.1 | tabmath - - '%1*%1' | tabint - step=0.01
+ 0.33335
 .SH SEE ALSO
-tabfilter(1NEMO), tabmath(1NEMO)
+tabfilter(1NEMO), tabmath(1NEMO), table(5NEMO)
 .SH FILES
+src/kernel/tab
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
