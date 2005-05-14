@@ -4,6 +4,9 @@
  *		   when initialized with large idum's
  *       9-may-97: option to view long as int for 64bit machines to keep
  *                 it portable
+ *      13-may-05: made int the default, which works fine as long
+ *                 as sizeof(int) = 4; 
+ *                 Also fixed the prototype for ran3()
  *
  *  Although based on his original version, Knuth has since then published
  *  a much improved version of ran3() in
@@ -21,24 +24,26 @@
 
 #define REDIAL      /* Set this if you want to check for inbounds & redial */
 
-                    /* find the 64 bit machines ... */
-#if defined(alpha) || defined(__alpha)
-#define long int
+
+#if 1
+typedef int mylong;
+#else
+typedef long mylong;  /* this is the original definition, but may fail on IA64 */
 #endif
 
-real ran3(long *idum)
+real ran3(int *idum)
 {
     /* -- save inbetween calls */
     local int inext,inextp;
-    local long ma[56];		/* never modify this !! (see Knuth) */
+    local mylong ma[56];		/* never modify this !! (see Knuth) */
     local int iff=0;
     /* -- scratch variables */
-    long mj,mk;
+    mylong mj,mk;
     int i,ii,k;
 
     if (*idum < 0 || iff == 0) {		/* initialize */
-        if (sizeof(long) != 4) 
-	    warning("ran3: may not be portable: sizeof(long)=%d",sizeof(long));
+        if (sizeof(mylong) != 4) 
+	    warning("ran3: may not be portable: sizeof(mylong)=%d",sizeof(mylong));
         iff=1;
 	mj=MSEED-(*idum < 0 ? -*idum : *idum);
 #ifdef REDIAL
