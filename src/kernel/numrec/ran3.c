@@ -1,5 +1,5 @@
 /*
- * RAN3: from Numerical Recipes,
+ * RAN3: based on ran3() from Numerical Recipes,
  *	17-sep-95: addition safeguard against out of bounds
  *		   when initialized with large idum's
  *       9-may-97: option to view long as int for 64bit machines to keep
@@ -83,8 +83,5 @@ real ran3(int *idum)
     ma[inext]=mj;
     return mj*FAC;
 }
-#undef MBIG
-#undef MSEED
-#undef MZ
-#undef FAC
+
 /* (C) Copr. 1986-92 Numerical Recipes Software ?421.1-9. */
