@@ -16,9 +16,11 @@ string defv[] = {
   "in=???\n         Input spectrum table file",
   "xcol=1\n         Wavelength column for spectrum",
   "ycol=2\n         Flux column for spectrum",
+  "xscale=1\n       Scale input wavelength to match the model",
+  "yscale=1\n       Scale spectrum for your preferred units",
   "Av=1\n           Av to apply extinction curve with",
   "extinct=t\n      Extinction law, or some other linear law",
-  "VERSION=0.1\n    13-may-05 PJT",
+  "VERSION=0.2\n    13-may-05 PJT",
   NULL,
 
 };
@@ -74,7 +76,7 @@ void nemo_main()
   int colnr[2];
   real *coldat[2], *xdat, *ydat, xmin, xmax, ymin, ymax;
   real *udat, *vdat, umin, umax, vmin, vmax;
-  real Av, C;
+  real Av, C, xscale, yscale;
   stream instr;
   int i, n, ns, nmax;
   real *sdat;
@@ -83,6 +85,8 @@ void nemo_main()
   bool Qextinct = getbparam("extinct");
 
   Av = getdparam("Av");
+  xscale = getdparam("xscale");
+  yscale = getdparam("yscale");
   
   nmax = nemo_file_lines(model,MAXLINES);
   xdat = coldat[0] = (real *) allocate(nmax*sizeof(real));
@@ -127,6 +131,8 @@ void nemo_main()
 
   for(i=0; i<ns; i++) {
     dprintf(2,"%g %g\n",udat[i],vdat[i]);
+    udat[i] *= xscale;
+    vdat[i] *= yscale;
     if (i==0) {
       umin = umax = udat[0];
       vmin = vmax = vdat[0];
