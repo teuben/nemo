@@ -1,4 +1,4 @@
-.TH TABFILTER 1NEMO "11 May 2005"
+.TH TABFILTER 1NEMO "13 May 2005"
 .SH NAME
 tabfilter \- flux derived from convolving a filter with a spectrum
 .SH SYNOPSIS
@@ -9,7 +9,7 @@ a simple table of the instrumental
 spectral response as function of wavelength) with a
 model or observed spectrum, and computes the resulting flux.
 .PP
-Example filters are in $NEMODAT/filters, and for good measure 
+Example filters are in $NEMODAT/filter, and for good measure 
 should contain a 0 response at the lower and upper end of the
 filter.
 .PP
@@ -17,6 +17,9 @@ Currently the program just integrates \int{S(l)*F(l)*dl}
 and ignores any units, though filters F(l) are typically between
 0 and 1 (but not necessarely peaked at 1), and wavelength l
 in Angstrom. The spectrum S(l) has arbitrary units.
+.PP
+Using \fBxscale=\fP and \fByscale=\fP the input spectrum can be scaled
+to match that of the filter.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -30,18 +33,18 @@ Input spectrum table file (column 1 must contain the wavelength (in
 Angstrom), column 2 the flux. Default: not used.
 .TP
 \fBxcol=\fP
-Column for wavelength in the spectrum [1]
+Column for wavelength in the spectrum [Default: 1]
 .TP
 \fBycol=\fP
-Column for flux in the spectrum [2]
+Column for flux in the spectrum [Default: 2]
 .TP
 \fBxscale=\fP
-Scale factor applied to input spectrum wavelength 
-[1]
+Scale factor applied to input spectrum wavelength in order to match that
+of the filter. [Default 1]
 .TP
 \fByscale=\fP
-Scale factor applied to input spectrum flux 
-[1]
+Scale factor applied to input spectrum flux for your preferred 
+flux scaling. [Default: 1]
 .TP
 \fBstep=\fP
 Integration step in Angstrom. If too large compared to the width
@@ -53,8 +56,7 @@ Black Body temperature. This is needed if no spectrum is given.
 Default: not used.
 .TP
 \fBnormalize=t|f\fP
-Normalize the flux by the integral over the filter shape? 
-[no].
+Normalize the flux by the integral over the filter shape? [no].
 .SH EXAMPLES
 What is the SDSS "g-r" color for a T=5000 star?
 .nf
@@ -92,14 +94,14 @@ flexibility is possible.
 The integration is a simple eulerian one, though 1A should be sufficient 
 for most application. In case of doubt, check with a smaller or bigger value.
 .SH SEE ALSO
-tabmath(1NEMO), tabspline(1NEMO)
+tabmath(1NEMO), tabspline(1NEMO), tabint(1NEMO)
 .PP
 Filters: http://voservices.net/filter/
 .SH FILES
 .fi +2i
 .nf
-NEMODAT/filters/	directory with filters
-NEMODAT/filters/Fnames	translation file between short and full names
+NEMODAT/filter/ 	directory with filters
+NEMODAT/filter/Fnames	translation file between short and full names
 .fi
 .SH AUTHOR
 Peter Teuben

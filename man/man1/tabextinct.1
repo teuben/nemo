@@ -19,6 +19,9 @@ does not allow otherwise. Extincton occurs with the standard formulae
         S = S0 . 10**(-0.4 * Av * C(lambda))
 .fi
 .PP
+Using \fBxscale=\fP and \fByscale=\fP the input spectrum can be scaled
+to match that of the model.
+.PP
 This program can also be used to multiply two curves with each other, 
 using \fBextinct=f\fP.
 
@@ -37,6 +40,15 @@ Wavelength column for spectrum [1]
 .TP
 \fBycol=\fP
 Flux column for spectrum [2]   
+.TP
+\fBxscale=\fP
+Scale factor applied to input spectrum wavelength in order to match that
+of the model. [Default 1]
+.TP
+\fByscale=\fP
+Scale factor applied to input spectrum flux for your preferred 
+flux scaling. [Default: 1]
+.TP
 .TP
 \fBAv=\fP
 Av to apply extinction curve with [1] 
