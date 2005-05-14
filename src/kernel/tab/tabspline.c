@@ -42,12 +42,14 @@ string defv[] = {
     "type=cspline\n Spline interpolation type (only for GSL)",
 #endif
     "nder=0\n       Number of derivates to show (0,1,2)",
-    "VERSION=3.3\n  31-aug-02 PJT",
+    "VERSION=3.3a\n 13-may-05 PJT",
     NULL,
 
 };
 
 string usage="interpolation and first two derivatives of a function table";
+
+string cvsid="$Id$";
 
 #define MAXZERO     64
 #define MAXDATA  16384
