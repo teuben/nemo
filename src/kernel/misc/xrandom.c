@@ -22,9 +22,11 @@
  *   7-apr-01   fixed grandom() bug, introduced 24-feb
  *   8-sep-01   (V2.0) added GSL 
  *  24-nov-03   V2.0b  some prototypes for -Wall added            PJT
+ *  13-may-05   
  */
 
 #include <stdinc.h>
+#include <getparam.h>
 #include <extstring.h>
 
 #include <unistd.h>
@@ -48,7 +50,7 @@ extern string *burststring(string,string);
 
 #if defined(NUMREC)
 # define portable_ran  ran3
-real portable_ran(int *);
+real portable_ran(int *);     /* ieck, this is a long */
 #endif
 
 local int idum;            /* local variable to store used seed */
@@ -63,8 +65,6 @@ local int idum;            /* local variable to store used seed */
  static string env_seed = "GSL_RNG_SEED";    /* used by GSL_RNG routines */
 
 #endif
-
-extern int natoi(char *expr);
 
 
 int init_xrandom(string init)
@@ -211,8 +211,6 @@ double grandom(double mean, double sdev)
 
 #if defined(TOOLBOX)
 
-#include <getparam.h>
-
 string defv[] = {
 #ifdef HAVE_GSL
   "seed=0,mt19937\n Seed [0=seconds_1970, -1=centisec_boot -2=pid], and optional GSL name",
@@ -296,8 +294,8 @@ nemo_main()
 
         
     if (!Qgauss && Qbench) {
-            dprintf(1,"Known n=4 seed=1 cases are:\n");
-            for (sp=defaults; *sp; sp++) dprintf(1,"%s\n",*sp);
+            dprintf(0,"Known n=4 seed=1 cases are:\n");
+            for (sp=defaults; *sp; sp++) dprintf(0,"%s\n",*sp);
     }
 #ifdef HAVE_GSL
     if (hasvalue("gsl")) {
