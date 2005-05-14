@@ -191,7 +191,7 @@ nemo_main()
 	nx = nemoinpr(getparam("x"),xp,MAXDATA);
 	if (nx<0) error("Parsing x=%s",getparam("x"));
       }
-      dprintf(0,"[Using spline.c]\n");
+      dprintf(1,"[Using spline.c]\n");
       sdat = (real *) allocate(sizeof(real)*n*3);
       spline(sdat,xdat,ydat,n);
       for (j=0; j<nx; j++) {
