@@ -10,3 +10,8 @@ e.g. Two_Micron_All_Sky_Survey_2MASS_H.txt    ->     2MASS_H.tab
 
      SDSS_u'.txt                                     SDSS_u.tab
 
+
+Spitzer filters:
+ http://ssc.spitzer.caltech.edu/irac/spectral_response.html
+ http://ssc.spitzer.caltech.edu/mips/MIPSfiltsumm.txt
+
