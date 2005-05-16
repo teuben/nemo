@@ -1,9 +1,17 @@
 /* TABEXTINCT:   extinct a spectrum
- * written and tested  17.21.25 - 17.34.43
  *
  *
  *      13-may-05    first version, cloned off tabfilter
  *      16-may-05    added xmin,xmax
+ *
+ *  A note on intervals:  we need 'model' to encompass 'in' completely, 
+ *                        but with xmin= (xQmin) and xmax= (xQmax) can now cheat
+ *
+ *     xmin                                                    xmax
+ *       [-------------------- model ----------------------------]
+ *
+ *                 [----------- in ---------------]
+ *               umin                           umax
  */
 
 #include <stdinc.h> 

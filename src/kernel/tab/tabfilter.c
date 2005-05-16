@@ -15,6 +15,16 @@
  *
  * TODO:
  *   - flux calibration
+ *
+ *  A note on intervals:  we need 'in' to encompass 'filter' completely, 
+ *                        but with xmin= (xQmin) and xmax= (xQmax) can now cheat
+ *
+ *     umin                                                 umax
+ *       [---------------------- in --------------------------]
+ *
+ *                 [----------- filter ---------------]
+ *               xmin                               xmax
+
  */
 
 #include <stdinc.h> 
@@ -162,8 +172,15 @@ void nemo_main()
   spline(sdat,xdat,ydat,n);
 
   /* override any min/max rules ? */
-  if (Qmin) xQmin = getdparam("xmin");
-  if (Qmax) xQmax = getdparam("xmax");
+  if (Qmin) {
+    xQmin = getdparam("xmin");
+    if (xQmin > xmin) warning("xmin=%g greater than minimum in filter (%g)",xQmin,xmin);
+  }
+
+  if (Qmax) {
+    xQmax = getdparam("xmax");
+    if (xQmax < xmax) warning("xmax=%g less than maximum in filter (%g)",xQmax,xmax);
+  }
   
   if (hasvalue("tbb")) {                /* using a Planck curve */
     tbb = getdparam("tbb");
@@ -218,7 +235,6 @@ void nemo_main()
 
     if (umax < xmin || umin >xmax)
       error("Spectrum and filter do not overlap");
-
 
     /* setup a spline interpolation table into the spectrum */
     spdat = (real *) allocate(sizeof(real)*n*3);
