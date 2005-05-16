@@ -2,6 +2,7 @@
  *
  *
  *      10-may-05    first version, cloned off tabspline
+ *      16-may-05    added xmin,xmax
  *
  * instr     suggested mnemonics        rough wavelengths (Angstrom)
  * -----     -------------------        ---------------------------------
@@ -29,10 +30,12 @@ string defv[] = {
   "ycol=2\n         Flux column for spectrum",
   "xscale=1\n       Scale factor applied to input spectrum wavelength",
   "yscale=1\n       Scale factor applied to input spectrum flux",
+  "xmin=\n          Ignore points below this value",
+  "xmax=\n          Ignore points above this value",
   "step=1\n         Initial integration step (in Angstrom)",
   "tbb=\n           Black Body temperature, in case used",
   "normalize=f\n    Normalize integral by filter integral",
-  "VERSION=0.5\n    12-may-05 PJT",
+  "VERSION=0.6\n    16-may-05 PJT",
   NULL,
 
 };
@@ -110,13 +113,15 @@ void nemo_main()
   int colnr[2];
   real *coldat[2], *xdat, *ydat, xmin, xmax, ymin, ymax;
   real *udat, *vdat, umin, umax, vmin, vmax;
-  real x, y1, y2, dx, xscale, yscale;
+  real x, y1, y2, dx, xscale, yscale, xQmin, xQmax;
   real tbb,sum,sum0;
   stream instr;
   int i, n, ns, nmax;
   real *sdat, *spdat;
   string spectrum, filter = filtername(getparam("filter"));
   bool Qnorm = getbparam("normalize");
+  bool Qmin = hasvalue("xmin");
+  bool Qmax = hasvalue("xmax");
   
   nmax = nemo_file_lines(filter,MAXLINES);
   xdat = coldat[0] = (real *) allocate(nmax*sizeof(real));
@@ -155,9 +160,14 @@ void nemo_main()
   /* setup a spline interpolation table into the filter */
   sdat = (real *) allocate(sizeof(real)*n*3);
   spline(sdat,xdat,ydat,n);
+
+  /* override any min/max rules ? */
+  if (Qmin) xQmin = getdparam("xmin");
+  if (Qmax) xQmax = getdparam("xmax");
   
   if (hasvalue("tbb")) {                /* using a Planck curve */
     tbb = getdparam("tbb");
+    if (Qmin || Qmax) warning("ignoring xmin/xmax in T_bb mode");
     
     sum = sum0 = 0;
     for (x = xmin; x <= xmax; x += dx) {
@@ -216,6 +226,8 @@ void nemo_main()
 
     sum = sum0 = 0;
     for (x = xmin; x <= xmax; x += dx) {
+      if (Qmin && x < xQmin) continue;
+      if (Qmax && x > xQmax) continue;
       y1 = seval(x,xdat,ydat,sdat,n);    /* filter */
       if (umin < x && x <umax)
 	y2 = seval(x,udat,vdat,spdat,ns);  /* spectrum */

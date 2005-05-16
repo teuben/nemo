@@ -3,6 +3,7 @@
  *
  *
  *      13-may-05    first version, cloned off tabfilter
+ *      16-may-05    added xmin,xmax
  */
 
 #include <stdinc.h> 
@@ -18,9 +19,11 @@ string defv[] = {
   "ycol=2\n         Flux column for spectrum",
   "xscale=1\n       Scale input wavelength to match the model",
   "yscale=1\n       Scale spectrum for your preferred units",
+  "xmin=\n          Ignore points below this value",
+  "xmax=\n          Ignore points above this value",
   "Av=1\n           Av to apply extinction curve with",
   "extinct=t\n      Extinction law, or some other linear law",
-  "VERSION=0.2\n    13-may-05 PJT",
+  "VERSION=0.3\n    16-may-05 PJT",
   NULL,
 
 };
@@ -79,11 +82,12 @@ void nemo_main()
   real Av, C, xscale, yscale;
   stream instr;
   int i, n, ns, nmax;
-  real *sdat;
+  real *sdat, xQmin, xQmax;
   string spectrum = getparam("in");
   string model = getparam("model");
   bool Qextinct = getbparam("extinct");
-
+  bool Qmin = hasvalue("xmin");
+  bool Qmax = hasvalue("xmax");
   Av = getdparam("Av");
   xscale = getdparam("xscale");
   yscale = getdparam("yscale");
@@ -117,7 +121,9 @@ void nemo_main()
   /* setup a spline interpolation table into the extinction curve */
   sdat = (real *) allocate(sizeof(real)*n*3);
   spline(sdat,xdat,ydat,n);
-  
+
+  if (Qmin) xQmin = getdparam("xmin");
+  if (Qmax) xQmax = getdparam("xmax");
 
   spectrum = getparam("in");
   nmax = nemo_file_lines(spectrum,MAXLINES);
@@ -152,6 +158,8 @@ void nemo_main()
     error("Spectrum in not embedded inside Extinction curve");
 
   for (i=0; i<ns; i++) {           /* loop over the spectrum */
+    if (Qmin && udat[i] < xQmin) continue;
+    if (Qmax && udat[i] > xQmax) continue;
     C = seval(udat[i],xdat,ydat,sdat,n);    /* model */
     dprintf(1,"%g %g %g %g\n",udat[i],vdat[i],C,vdat[i]*C);
     if (Qextinct)
