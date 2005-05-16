@@ -10,7 +10,7 @@
 #   dec-2004            look for mknemo.d scripts first
 #
 #
-set version="MKNEMO Version 3.0 3-dec-04"
+set version="MKNEMO Version 3.1 16-may-05"
 if ($#argv == 0) goto usage
 set old_argv=($*)
 
@@ -212,6 +212,8 @@ foreach f ($argv)
        if (! -e $NEMOBIN/$mk) set newbins=1
        (cd $l;$pre_tidy;$make $mk; set err=$status; mv $mk $NEMOBIN; $post_tidy)
        @ errs += $status
+       echo help=I: `$NEMOBIN/$mk help=I`
+       echo help=V: `$NEMOBIN/$mk help=V`
        if ($d) then
            mkpdoc $mk
 	   @ errs += $status
@@ -244,6 +246,8 @@ foreach f ($argv)
    if (! -e $NEMOBIN/$mk) set newbins=1
    (cd $dir ; $pre_tidy; $make $mf $mk; set err=$status; mv $mk $NEMOBIN; $post_tidy)
    @ errs += $err
+   echo help=I: `$NEMOBIN/$mk help=I`
+   echo help=V: `$NEMOBIN/$mk help=V`
    # see if new doc file needed...
    if ($d) then
 	mkpdoc $mk
