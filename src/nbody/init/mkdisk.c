@@ -41,12 +41,12 @@ string defv[] = {
     "frac=0\n           Relative vel.disp w.r.t. local rotation speed",
     "seed=0\n		Usual random number seed",
     "sign=1\n           Sign of Z-angular momentum vector of disk",
-    "in=\n              If given, these are initial positions",
+    "in=\n              If given, these are initial positions **not implemented**",
     "angle=f\n          Regular angular distribution?",
     "vrad=0\n           radial velocity",
     "energy=f\n         preserve energy if random motions added?",
     "headline=\n	Text headline for output",
-    "VERSION=4.6a\n	15-jul-04 PJT",
+    "VERSION=4.6b\n	15-may-05 PJT",
     NULL,
 };
 
@@ -61,7 +61,7 @@ local int ndisk;
 local real frac[NDIM], vrad;
 local Body *disk;
 
-proc potential;
+local proc potential;
 
 extern double xrandom(double,double), grandom(double,double);
 
@@ -70,7 +70,7 @@ local real took(real);
 void nemo_main()
 {
     bool Qmass;
-    int nfrac;
+    int nfrac, seed;
     
     if (hasvalue("in")) error("\"in=\" not implemented yet");
     potential = get_potential(getparam("potname"),
@@ -103,7 +103,8 @@ void nemo_main()
 	warning("mass=0 -- No masses created in output snapshot");
     } else
         Qmass=TRUE;
-    init_xrandom(getparam("seed"));
+    seed = init_xrandom(getparam("seed"));
+    dprintf(1,"Seed=%d\n",seed);
     Qangle = getbparam("angle");
     Qenergy = getbparam("energy");
     testdisk();
