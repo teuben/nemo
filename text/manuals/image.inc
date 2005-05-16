@@ -1,5 +1,6 @@
 % This file is to be included by latex in nemo.tex
 %
+
 % \section{Images}
 
 
@@ -7,13 +8,9 @@
 \mylabel{s:image}
 
 
-In this section we will some examples of NEMO's image format.
-The manual pages {\it image(5NEMO)}) describes the data format,
-whereas {\it image(3NEMO)}) introduces image I/O library routines.
+\subsection{Initializing Images}
 
-\subsection{Initializing}
-
-There are a few programs with which orbits can be initialized:
+There are a few programs with which images can be initialized:
 
 \begin{itemize}
 
@@ -107,18 +104,16 @@ The following programs are available:
 	rotcurshape	annulus rotation curve shape fitting to a velocity field
 
 
-           % set r=$(B!F(Bnemoinp 0:60$(B!F(B
-           % set v=$(B!F(Bnemoinp 0:60 | tabmath - - "100*%1/(20+%1)" all$(B!F(B
-           % ccdvel out=map1.vel rad="$r" vrot="$v" pa=30 inc=60
-           % rotcurshape in=map1.vel radii=0,60 pa=30 inc=60 vsys=0 units=arcsec,1 \
-                rotcur1=core1,100,20,1,1 tab=-
+    % set r=`nemoinp 0:60`
+    % set v=`nemoinp 0:60 | tabmath - - "100*%1/(20+%1)" all`
+    % ccdvel out=map1.vel rad="$r" vrot="$v" pa=30 inc=60
+    % rotcurshape in=map1.vel radii=0,60 pa=30 inc=60 vsys=0 units=arcsec,1 \
+                  rotcur1=core1,100,20,1,1 tab=-
  
 
-
-
-          % ccdmath out=map0.vel fie=0 size=128,128
-           % rotcurshape map0.vel 0,40 30 45 0 blank=-999 resid=map.vel \
-             rotcur1=plummer,200,10,0,0 fixed=all units=arcsec,1
+    % ccdmath out=map0.vel fie=0 size=128,128
+    % rotcurshape map0.vel 0,40 30 45 0 blank=-999 resid=map.vel \
+                  rotcur1=plummer,200,10,0,0 fixed=all units=arcsec,1
 
 
 

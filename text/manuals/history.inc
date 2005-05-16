@@ -665,7 +665,8 @@ sites for export maintained.
 \item[Winter 1995] Linux, Dec Alpha and SGI support added, since they allow
 dynamic object loading. Manual in html (latex2html)
 
-\item[Spring 2001] Installation converted to configure/autoconf.
+\item[Spring 2001] Installation converted to configure/autoconf, also 
+using CVS for source code control now.
 
 \item[April 2004] Slight directory change for the directories created
 during the installation, this ends the era of the multi-CPU tree.
@@ -674,5 +675,7 @@ now they are all inherited from the ones created by configure.
 Released between the Strasbourg Nbody-school and the College Park FAM04
 tutorial/workshop weeks.
 
+\item[Summer 2005] Second summerschool, at MODEST-5c, In Amsterdam. Manual
+expanded with more examples.
 
 \end{description}

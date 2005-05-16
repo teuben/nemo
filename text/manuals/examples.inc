@@ -6,7 +6,7 @@
 \mylabel{c:examples}
 
 Now that we have a reasonable idea how NEMO is structured and used, we
-should be ready to go through some real exercises.  Some of the examples
+should be ready to go through some real examples  Some of the examples
 below are short versions of shell scripts\footnote{where applicable, the
 examples in this chapter are written in the C-shell language}
 available online in one of the directories
@@ -34,8 +34,9 @@ MODel") \index{Osipkov-Merritt, models} \index{Merritt - see Osipkov}
 to make two random N-body realizations of a King model \index{King, models}
 with dimensionless central potential $W_c = 7$ and 100 particles each. 
 The small number of particles is solely for the purpose of getting
-results within reasonable time. Adjust it to whatever you can afford
-on your CPU and test your patience (see Appendix~\ref{a:bench} benchmarks).
+results within a reasonable time. Adjust it to whatever you can afford
+on your CPU and test your patience and integrator
+(see Appendix~\ref{a:bench} benchmarks).
 
 \small\begin{verbatim}
     1% mkommod in=$NEMODAT/k7isot.dat out=tmp1 nbody=100 seed=280158
@@ -45,9 +46,9 @@ on your CPU and test your patience (see Appendix~\ref{a:bench} benchmarks).
 These models are produced in so-called RMS-units \index{units, rms}
 in which the
 gravitational constant G=1, the total mass M=1, and binding energy E=--1/2.
-In case you would like virial units 
-(E=--1/4)\footnote{Virial units are the preferred units, see also:
-Heggie\index{Heggie D.} \& Mathieu\index{Mathieu R.}, 
+In case you would like virial units
+\footnote{Virial units are the preferred units, see also:
+Heggie\index{Heggie D.} \& Mathieu\index{Mathieu R.}, E=--1/4,
 in: {\it The use of supercomputers in stellar
 dynamics} ed. Hut\index{Hut P} \& McMillan\index{McMillan S}, 
 Springer 1987, pp.233}\index{units, virial}
@@ -60,7 +61,7 @@ to be rescaled using {\tt snapscale}:\index{snapscale(1)}
 
 In the case that your user interface was not compiled with the 
 {\bf NEMOINP}\footnote{This can be found out by 
-using the program nemoinp(1NEMO) or {\tt help=\\?}.}
+using the program nemoinp(1NEMO) or \verb+help=\?+.}
 directive, the {\tt vscale} expression has to be calculated by you,
 {\it i.e.} {\tt vscale=0.707107}. Also note the use of the quotes in
 the expression, to prevent the shell to give special meaning to
@@ -82,7 +83,7 @@ This second galaxy needs to be rescaled too, if you want virial units:
 \end{verbatim}\normalsize
 
 We then set up the collision by stacking the two snapshots, albeit with
-a relative displacement.  The program {\tt snapstack} was exactly
+a relative displacement in phase space.  The program {\tt snapstack} was exactly
 written for this purpose:\index{snapstack(1)}
 
 
@@ -576,7 +577,7 @@ to the number of particles it can handle in a snapshot. By
 default\footnote{one can recompile NEMO in single precision and define
 {\tt body.h} with less wastefull members}
 a particle takes up about 100 bytes, which limits the size of a 
-snapshot to about 50,000 on most current workstations.
+snapshots on workstations somewhat.
 
 It may happen that your data was generated on a machine which had
 a lot more memory\index{memory, large}\index{data, large}
@@ -608,23 +609,26 @@ that needs a lot of extra memory, the following may work:
 
 \section{Images}
 
-In this section examples are given how to create an image
-(from a snapshot), show a contour\index{contour diagram} diagram, and
+In this section we will some examples of NEMO's image format.
+The manual pages {\it image(5NEMO)}) describes the data format,
+whereas {\it image(3NEMO)}) introduces image I/O library routines.
+
+We will give some examples on how to create an image,
+create a contour\index{contour diagram} diagram, and
 export the image as a FITS file and use it within another package. 
 Specific examples are also given how to read in that FITS file
-in AIPS and IRAF without having to deal with tapes.  In case one really has
-to do the FITS I/O via tape, the standard UNIX program {\it dd(1)} can
-be used.  See also {\it ccdfits(1NEMO)} for details how to do this. 
-\index{ccdfits(1)}
+in AIPS and IRAF.
 
-Images in NEMO are currently completely stored (in memory as well as
-disk) as double
-precision floating point numbers, which limits programs to of order
-1024 square maps, depending how much memory your machine has. 
-There are also the {\it xyio(3NEMO)} routines which allow more
-atomic (line oriented) access to the image data, but programs
-generally don't use them.
+Images in NEMO are stored (in memory as well as
+disk) as double precision floating point 
+numbers\footnote{one can re-install NEMO to work in single precision},
+which limits 
+programs to how large an image can be dealt with.
+There are also the {\it xyio(3NEMO)} routines which allow 
+row oriented access to the image data, but there are not
+many programs who use these routines.
 
+\input image.inc
 
 
 
@@ -691,6 +695,10 @@ saved ({\tt snapgrid moment=0,1})
 and smoothed ({\tt ccdsmooth}) after which they can be divided
 ({\tt ccdmath}) \index{ccdmath(1)}
 resulting in a velocity map. \index{position-velocity maps}
+Shortcuts are available for mean velocity and dispersion
+using {\tt moment=-1} and  {\tt moment=-2} resp., though these modes
+allocate extra memory for the additional images needed to perform
+the operations inside of snapgrid.
 Position-velocity diagrams
 can be directly generated using {\tt snapplot/grid xvar=x yvar=-vz}. If 
 position-velocity maps need to be smoothed, remember that it may have 
@@ -706,7 +714,10 @@ galaxy before all these operations are performed.
 For galactic objects: \index{galactic, observing}
 one must choose an internal viewpoint (x,y,z) and (vx,vy,vz) somewhere
 ``inside'' the object, and make this the new origin \index{snapspin(1)}
-using {\tt snapspin}.
+using {\tt snapspin} or {\tt snapshift}.
+%% PJT CHECK: they both seemingly do the same thing, yet snapshift should
+%% be the right one
+
 
 A rotation ({\tt snaprotate}) \index{snaprotate(1)}
 may also be necessary.
@@ -953,8 +964,8 @@ VERSION          : 2-jun-04 PJT [2.12]
 \end{verbatim}\normalsize
 
 As an example we shall consider the galaxy NGC 6503, for which VLA
-data are publicly available on 
-ADIL\footnote{NCSA ::}.
+data are publicly available on \index{ADIL}\index{NGC, 6503}
+ADIL\footnote{NCSA :: ADIL code number 95.DW.01.01}.
 
 \small\begin{verbatim}
    1% fits in=NGC6503.MOM1 - | ccdmath - vel1.ccd %1/1000
