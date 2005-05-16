@@ -45,7 +45,7 @@ string defv[] = {
   "step=1\n         Initial integration step (in Angstrom)",
   "tbb=\n           Black Body temperature, in case used",
   "normalize=f\n    Normalize integral by filter integral",
-  "VERSION=0.6\n    16-may-05 PJT",
+  "VERSION=0.7\n    16-may-05 PJT",
   NULL,
 
 };
