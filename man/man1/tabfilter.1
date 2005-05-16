@@ -46,6 +46,17 @@ of the filter. [Default 1]
 Scale factor applied to input spectrum flux for your preferred 
 flux scaling. [Default: 1]
 .TP
+\fBxmin=\fP
+(Wavelength) value below which no data are printed or used. 
+This is useful if you input spectrum has a broad range you are
+not interested in, but can be dangerous if this cuts into your
+filter.
+Default: not used
+.TP
+\fBxmax=\fP
+(Wavelength) value above which no data are printed or used. 
+Default: not used
+.TP
 \fBstep=\fP
 Integration step in Angstrom. If too large compared to the width
 of the filter, the program will stubbornly decrease it to 1/100 of
@@ -109,4 +120,5 @@ Peter Teuben
 .nf
 .ta +1.0i +4.0i
 11-May-05	V0.1 Created	PJT
+16-may-06	V0.6 added xmin/xmax	PJT
 .fi

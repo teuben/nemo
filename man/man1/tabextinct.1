@@ -1,4 +1,4 @@
-.TH TABEXTINCT 1NEMO "13 May 2005"
+.TH TABEXTINCT 1NEMO "16 May 2005"
 .SH NAME
 tabextinct \- extinct a spectrum
 .SH SYNOPSIS
@@ -49,6 +49,15 @@ of the model. [Default 1]
 Scale factor applied to input spectrum flux for your preferred 
 flux scaling. [Default: 1]
 .TP
+\fBxmin=\fP
+(Wavelength) value below which no data are printed or used. 
+This is useful if you input spectrum has a broad range you are
+not interested in.
+Default: not used
+.TP
+\fBxmax=\fP
+(Wavelength) value above which no data are printed or used. 
+Default: not used
 .TP
 \fBAv=\fP
 Av to apply extinction curve with [1] 
@@ -63,10 +72,15 @@ Extinction law (t), or a simple linear law (f)
 .SH SEE ALSO
 tabfilter(1NEMO), tabmath(1NEMO)
 .SH FILES
+.nf
+.ta +3i
+http://www.astro.princeton.edu/~draine/dust/dustmix.html	example extincton tables
+.fi
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
 13-May-05	V0.1 Created on Friday 13th, so don't expect too much	PJT
+16-may-06	V0.3 added xmin/xmax	PJT
 .fi
