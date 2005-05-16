@@ -31,7 +31,7 @@ string defv[] = {
   "xmax=\n          Ignore points above this value",
   "Av=1\n           Av to apply extinction curve with",
   "extinct=t\n      Extinction law, or some other linear law",
-  "VERSION=0.3\n    16-may-05 PJT",
+  "VERSION=0.4\n    16-may-05 PJT",
   NULL,
 
 };
@@ -164,6 +164,10 @@ void nemo_main()
 
   if (xmin > umin || xmax < umax)
     error("Spectrum in not embedded inside Extinction curve");
+  if (Qmin && xQmin < umin) warning("xmin=%g less than minimum (%g)",xQmin,umin);
+  if (Qmax && xQmax < umax) warning("xmax=%g greater than maximum (%g)",xQmax,umax);
+  if (Qmin && xQmin > umax) error("xmin=%g greater than maximum (%g)",xQmin,umax);
+  if (Qmax && xQmax > umin) error("xmax=%g less than minimum (%g)",xQmax,umin);
 
   for (i=0; i<ns; i++) {           /* loop over the spectrum */
     if (Qmin && udat[i] < xQmin) continue;
