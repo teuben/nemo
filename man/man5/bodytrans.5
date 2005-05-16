@@ -1,19 +1,24 @@
-.TH BODYTRANS 5NEMO "27 November 1990"
+.TH BODYTRANS 5NEMO "15 May 2005"
 .SH NAME
 bodytrans \- dataformat for body to scalar mapping functions
 .SH DESCRIPTION
-\fIbodytrans\fP files are binary, loadable, images (see also 
-\fIa.out(5)\fP)
+\fIbodytrans\fP files are binary loadable files (see also 
+\fIa.out(5)\fP or \fIelf(5)\fP)
 which are functions to represent a body to scalar
 transformation (see also \fIbodytrans(1NEMO)\fP). 
-They are generated on the fly (as a user runs a program)
-by the host C-compiler (see \fIcc(1)\fP). If an environment
+They are either generated on the fly (as a user runs a program)
+by the host C-compiler (see \fIcc(1)\fP), or if available, a number
+of precompiled frequently used mappings.
+If the environment
 variable CFLAGS is present, it is also used in the compilation.
 .PP
 The dynamic object loader package (\fIloadobj(3NEMO)\fP) 
 provides a lower level interface to load the images in memory 
 return pointers to requested functions, but in the case of
 bodytrans, a higher level interface is available (\fIbodytrans(3NEMO)\fP).
+Although on most modern computers this is implemented via
+\fIdlopen(3)\fP, at the time when NEMO was developed, in the mid-80s,
+this was by no means common place.
 .PP
 The file \fB$NEMOOBJ/bodytrans/BTNAMES\fP contains a table with entries of
 non-standard \fIbodytrans\fP functions. The first column is the full expression
@@ -26,7 +31,7 @@ by NEMO users if the SAVE_OBJ function is turned on in \fBbodytrans(3NEMO)\fP.
 .ta \w'vtimes'u+6n +\w'vtimes.3c'u+10n
 \fIName\fP	\fIType\fP	\fIDescription\fP
 .ta \w'vtimes'u+8n +\w'vtimes.3c'u+8n
-.sp 5p
+.sp 5
 0	int	constant, always returns 0 (or: FALSE)	
 1	int	constant, always returns 1 (or: TRUE)	
 i	int	returns \fBi\fP, the index of the particle (0..nbody-1)
@@ -37,17 +42,24 @@ aux	real	returns \fBaux\fP, the auxilliary part of a Body
 ax	real	returns \fBax\fP, the X-accelleration
 ay	real	returns \fBay\fP, the Y-accelleration
 az	real	returns \fBaz\fP, the Z-accelleration
+ekin	real	returns \fB 0.5*(vx*vx + vy*vy + vz*vz)\fP, the kinetic energy
+eps	real	returns smoothing length
 etot	real	returns \fBphi + 0.5*(vx*vx + vy*vy + vz*vz)\fP, the total energy
+glon	real	returns the galactic longitude atan2(y,x)*180/pi in degrees (GC at +x-axis)
+glat	real	returns the galactic latitude atan2(z,w)*180/pi in degrees (GC at +x-axis)
 i	real	returns \fBi\fP, the index of a particle, as a real
 jtot	real	returns total angular momentum of a Body
 key	real	returns \fBkey\fP, as a real
 m	real	returns the \fBmass\fP of a Body
+mub	real	returns proper motion in galactic latitude B
+mul	real	returns proper motion in galactic longitude L
 phi	real	returns the potential, \fPphi\fP, of a Body
 r	real	returns the radius of a Body
 t	real	returns the radius \fBtime\fP of a Body (snapshot)
 v	real	returns velocity of a Body
 vr	real	returns radial velocity of a Body
 vt	real	returns absolute value of tangential velocity of a Body
+vp	real	returns rotational parallax vt/r
 vx	real	returns \fBvx\fP, the X-velocity
 vy	real	returns \fBvy\fP, the Y-velocity
 vz	real	returns \fBvz\fP, the Z-velocity
@@ -56,7 +68,7 @@ y	real	returns \fBy\fP, the Y-position
 z	real	returns \fBz\fP, the Z-position
 .fi
 .SH SEE ALSO 
-a.out(5), bodytrans(1NEMO), bodytrans(3NEMO), loadobj(3NEMO)
+elf(5), a.out(5), bodytrans(1NEMO), bodytrans(3NEMO), loadobj(3NEMO)
 .SH AUTHOR
 Josh Barnes, Peter Teuben
 .SH "UPDATE HISTORY"
@@ -64,5 +76,6 @@ Josh Barnes, Peter Teuben
 .ta +1.0i +4.0i
 20-nov-89	Created    	PJT
 27-nov-90	Added table of functions	PJT
+15-may-05	Some long overdue updates	PJT
 .fi
 
