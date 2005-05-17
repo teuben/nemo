@@ -93,12 +93,16 @@ line, with some added noise and random weights between 1 and 2:
 % nemoinp 1:100 | tabmath - - "%1+rang(0,10),ranu(1,2)" seed=123 | tablsqfit -
       a  =    0.974146       uncertainty:  0.039389 
       b  =    1.755022       uncertainty:  2.291149 
+      x0 =   -1.801599       uncertainty:  2.353083
+      y0 =    1.755022       uncertainty:  2.291149
       chi-squared:    12668.983284 
       goodness-of-fit:    1.000000 (no Y errors supplied [dycol=])
       r:  0.92923
       prob:  3.65557e-44
       z:  1.65272
 .fi
+The fitted line is written either as \fBy=ax+b\fP or alternatively
+with their (x0,y0) intercepts as \fBx/x0 + y/y0=1\fP.
 .SH SEE ALSO
 tabhist(1NEMO), tabmath(1NEMO), gaussfit(1NEMO), linreg(1NEMO), tabnllsqfit(1NEMO)
 \fINumerical Recipies in C, Ch.14\fP
