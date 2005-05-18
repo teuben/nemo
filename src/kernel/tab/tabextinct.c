@@ -31,7 +31,7 @@ string defv[] = {
   "xmax=\n          Ignore points above this value",
   "Av=1\n           Av to apply extinction curve with",
   "extinct=t\n      Extinction law, or simple linear law",
-  "VERSION=0.5\n    18-may-05 PJT",
+  "VERSION=0.6\n    18-may-05 PJT",
   NULL,
 
 };
@@ -104,7 +104,7 @@ void nemo_main()
   xdat = coldat[0] = (real *) allocate(nmax*sizeof(real));
   ydat = coldat[1] = (real *) allocate(nmax*sizeof(real));
   colnr[0] = 1;  /* wavelenght in angstrom */
-  colnr[1] = 2;  /* C */
+  colnr[1] = 2;  /* C: the extinction curve */
   instr = stropen(model,"r");
   n = get_atable(instr,2,colnr,coldat,nmax);
   strclose(instr);
@@ -116,7 +116,8 @@ void nemo_main()
       ymin = ymax = ydat[0];
     } else {
       if (xdat[i] <= xdat[i-1]) 
-	error("Model %s must be sorted in wavelength",model);
+	error("Model %s must be sorted in wavelength: @ %d %g <= %g",
+	      model,i,xdat[i],xdat[i-1]);
       xmax = MAX(xmax,xdat[i]);
       ymax = MAX(ymax,ydat[i]);
       xmin = MIN(xmin,xdat[i]);
@@ -163,14 +164,18 @@ void nemo_main()
   dprintf(1,"Spectrum response range: %g : %g\n",vmin,vmax);
 
   if (Qmin) {
-    if (xmin > xQmin) error("xmin spectrum in not embedded inside Extinction curve: %g > %g",xmin,xQmin);
+    if (xmin > xQmin) 
+      error("xmin Spectrum (%g) below minimum of Extinction curve: try xmin=%g",xQmin,xmin);
   } else {
-    if (xmin > umin)  error("full spectrum in not embedded inside Extinction curve: %g > %g",xmin,umin);
+    if (xmin > umin)  
+      error("min Spectrum (%g) below minimum of Extinction curve: try xmin=%g",umin,xmin);
   }
   if (Qmax) {
-    if (xmax < xQmax) error("xmax spectrum in not Q-embedded inside Extinction curve: %g < %g",xmax,xQmax);
+    if (xmax < xQmax) 
+      error("xmax Spectrum (%g) above  maximum of Extinction curve: try xmax=%g",xQmax,xmax);
   } else {
-    if (xmax < umax)  error("full spectrum in not embedded inside Extinction curve: %g < %g",xmax,umax);
+    if (xmax < umax)  
+      error("max Spectrum (%g)  above maximum of Extinction curve: try xmax=%g",umax,xmax);
   }
   if (Qmin && xQmin < umin) warning("xmin=%g less than minimum (%g)",xQmin,umin);
   if (Qmax && xQmax < umax) warning("xmax=%g greater than maximum (%g)",xQmax,umax);
