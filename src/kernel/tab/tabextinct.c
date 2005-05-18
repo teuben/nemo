@@ -30,8 +30,8 @@ string defv[] = {
   "xmin=\n          Ignore points below this value",
   "xmax=\n          Ignore points above this value",
   "Av=1\n           Av to apply extinction curve with",
-  "extinct=t\n      Extinction law, or some other linear law",
-  "VERSION=0.4\n    16-may-05 PJT",
+  "extinct=t\n      Extinction law, or simple linear law",
+  "VERSION=0.5\n    18-may-05 PJT",
   NULL,
 
 };
@@ -162,8 +162,16 @@ void nemo_main()
   dprintf(1,"Spectrum wavelength range: %g : %g\n",umin,umax);
   dprintf(1,"Spectrum response range: %g : %g\n",vmin,vmax);
 
-  if (xmin > umin || xmax < umax)
-    error("Spectrum in not embedded inside Extinction curve");
+  if (Qmin) {
+    if (xmin > xQmin) error("xmin spectrum in not embedded inside Extinction curve: %g > %g",xmin,xQmin);
+  } else {
+    if (xmin > umin)  error("full spectrum in not embedded inside Extinction curve: %g > %g",xmin,umin);
+  }
+  if (Qmax) {
+    if (xmax < xQmax) error("xmax spectrum in not Q-embedded inside Extinction curve: %g < %g",xmax,xQmax);
+  } else {
+    if (xmax < umax)  error("full spectrum in not embedded inside Extinction curve: %g < %g",xmax,umax);
+  }
   if (Qmin && xQmin < umin) warning("xmin=%g less than minimum (%g)",xQmin,umin);
   if (Qmax && xQmax < umax) warning("xmax=%g greater than maximum (%g)",xQmax,umax);
   if (Qmin && xQmin > umax) error("xmin=%g greater than maximum (%g)",xQmin,umax);
