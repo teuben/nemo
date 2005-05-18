@@ -308,4 +308,5 @@ usage:
   echo "  -l        recompile the library by running 'make libs'"
   echo "  -g        use gmake, instead of make"
   echo "  -a        use all directories, usr and src, to find code to update"
+  echo "  -v        more verbose, it will report version and cvsid of program"
   exit 1
