@@ -1,23 +1,34 @@
-.TH TABLINT 1NEMO "13 January 1995"
+.TH TABLINT 1NEMO "18 May 2005"
 .SH NAME
 tablint \- \fIprototype\fP table syntax checker
 .SH SYNOPSIS
 \fBtablint\fP in= lint= [parameter=value]
 .SH DESCRIPTION
 \fItablint\fP checks tables and can optionally apply selections and output
-this in the same format.
+this in the same format. 
+.PP
+The current version only checks for a consistent number of columns in the
+file, by default the first non-empty/comment line determines the number of
+columns, unless \fBmaxcol=\fP was used to set it.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBin=\fP
 input file name     
-.TP 20
+.TP
 \fBlint=\fP\fIlint_form\fP
 lint specification      
 .TP
+\fBmaxcol=\fP
+Number of columns allowed. If set to 0, it will use the first row that looks like
+data to count the number of columns. Default: 0
+.TP
+\fBlinelen=\fP
+Override some sensible maximum linelength (normally 16384 in maxsizes.h).
+.TP
 \fBout=\fP
-For those rows that pass the criteria specified in \fIlint_form\fP
+For those rows that pass the criteria specified in \fIlint_form\fP ** not used **
 .SH LINT FORMAT
 The \fIlint_form\fP is a simple ASCII file that describes the table
 is some uniform way. You can also apply checks on any column, set
@@ -74,4 +85,5 @@ Peter Teuben
 .nf
 .ta +1.0i +4.0i
 13-Jan-95	V0.1 Prototype created  	PJT
+18-may-05	V0.3 deprecate lint= for now, and just simple column counting check	PJT
 .fi
