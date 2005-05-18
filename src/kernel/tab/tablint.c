@@ -5,6 +5,7 @@
  *      16-feb-95  V0.1 added col*= keywords, out=, 
  *       8-dec-01  V0.2b   std. MAX_  
  *      18-may-05  V0.3 various to get it running for NEMO V3.x
+ *                      also deprecated lintfile for now, and reused maxcol=0
  */
  
 /**************** INCLUDE FILES ********************************/ 
@@ -21,7 +22,7 @@
 string defv[] = {
     "in=???\n           input ASCII table filename",
     "lint=\n            lint specification file",
-    "maxcol=\n          override max number of columns to check",
+    "maxcol=0\n         number of columns to check for (0 means auto-detecting)",
     "coltype=\n         * set/override type of columns",
     "colrange=\n        * set/override ranges in numeric columns",
     "colblank=\n        * set/override blank value for columns",
@@ -29,11 +30,14 @@ string defv[] = {
     "collength=\n       * set/override length of columns",
     "linelen=\n         override max linelength of a row",
     "out=\n             * optional output file of selected rows",
-    "VERSION=0.3\n      18-may-05 PJT",
+    "VERSION=0.3a\n     18-may-05 PJT",
     NULL
 };
 
 string usage = "table syntax checker";
+
+string cvsid="$Id$";
+
 
 
 
@@ -95,7 +99,7 @@ typedef struct col {            /* definition of a column */
 } col, *colptr;
 
 
-int maxcol, ncol=0;
+int maxcol=0, ncol=0;
 col *cols = NULL;
 int nlines = 0;
 int linelen = MAX_LINELEN;
@@ -110,27 +114,28 @@ local col *get_col(int);
 
 void nemo_main()
 {
-    int linelen;
-
-    maxcol = (hasvalue("maxcol") ? getiparam("maxcol") : -1);
-
-    if (hasvalue("lint")) {
-        linstr = stropen(getparam("lint"),"r"); 
-        read_lintfile(linstr);
-    }
-    read_col_param("type");
-    read_col_param("range");
-    read_col_param("blank");
-    read_col_param("match");
-    read_col_param("length");
-
-    if (hasvalue("out")) outstr = stropen(getparam("out"),"w");
-    if (hasvalue("linelen")) linelen = getiparam("linelen");
-    else linelen = MAX_LINELEN;
-
-    infile = getparam("in");
-    instr  = stropen(infile,"r");               
-    lint(instr,linelen,outstr);
+  int linelen;
+  
+  maxcol = (hasvalue("maxcol") ? getiparam("maxcol") : -1);   /* just geti? */
+  
+  if (hasvalue("lint")) {
+    warning("lint= feature not tested");
+    linstr = stropen(getparam("lint"),"r"); 
+    read_lintfile(linstr);
+  }
+  read_col_param("type");
+  read_col_param("range");
+  read_col_param("blank");
+  read_col_param("match");
+  read_col_param("length");
+  
+  if (hasvalue("out")) outstr = stropen(getparam("out"),"w");
+  if (hasvalue("linelen")) linelen = getiparam("linelen");
+  else linelen = MAX_LINELEN;
+  
+  infile = getparam("in");
+  instr  = stropen(infile,"r");               
+  lint(instr,linelen,outstr);
 }
 
 
@@ -143,6 +148,7 @@ read_lintfile(stream instr)
     string *sp;
         
     nlines=0;                       /* count lines read so far */
+    if (maxcol==0) warning("maxcol=0; using deprecated code?");
 
     for(;;) {                       /* loop over all lines in lintfile */
 
@@ -386,23 +392,25 @@ lint( stream instr, int maxline, stream outstr)
     if (fgets(line,maxline+1,instr)==NULL) break;
     nlines++;
     dprintf(3,"LINE: %s",line);
-    if(line[0] == '#' || line[0] == '\\' || line[0] == '|') {
-      /* if (Qcomment && Qoutput) .... output .... */
+    if(line[0] == '#' || line[0] == '\\' || line[0] == '|' || line[0] == ';')
       continue;		/* skip comment lines */
-    }
     nilines++;
     sp = burststring(line," ,\t\n");
     n = xstrlen(sp,sizeof(string))-1;
-    if (n==0) continue;                 /* blank line */
+    if (n==0) continue;                 /* a blank line */
     
     if (first) {
       first = FALSE;
+#if 1
+      ncol = (maxcol==0) ? n : maxcol;
+#else
       if (cols==NULL) {
 	if (ncol == 0) ncol = n;
       } else {
 	if (ncol == 0) ncol = maxcol;       
       }
-      dprintf(1,"Found %d columns\n",ncol);
+#endif
+      dprintf(1,"Assuming %d columns\n",ncol);
     }
     if (cols) {
       doout = TRUE;            
