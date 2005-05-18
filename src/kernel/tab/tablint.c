@@ -3,7 +3,8 @@
  *
  *      13-jan-95  V0.1 prototype - Arie's initial idea
  *      16-feb-95  V0.1 added col*= keywords, out=, 
- *       8-dec-01  V0.2b   std. MAX_ 
+ *       8-dec-01  V0.2b   std. MAX_  
+ *      18-may-05  V0.3 various to get it running for NEMO V3.x
  */
  
 /**************** INCLUDE FILES ********************************/ 
@@ -28,7 +29,7 @@ string defv[] = {
     "collength=\n       * set/override length of columns",
     "linelen=\n         override max linelength of a row",
     "out=\n             * optional output file of selected rows",
-    "VERSION=0.2b\n     8-dec-01 PJT",
+    "VERSION=0.3\n      18-may-05 PJT",
     NULL
 };
 
@@ -38,6 +39,7 @@ string usage = "table syntax checker";
 
 /**************** GLOBAL VARIABLES *******************************/
 
+string infile;
 stream instr, linstr;			/* file streams */
 stream outstr = NULL;
 
@@ -93,7 +95,7 @@ typedef struct col {            /* definition of a column */
 } col, *colptr;
 
 
-int maxcol, ncol;
+int maxcol, ncol=0;
 col *cols = NULL;
 int nlines = 0;
 int linelen = MAX_LINELEN;
@@ -124,8 +126,10 @@ void nemo_main()
 
     if (hasvalue("out")) outstr = stropen(getparam("out"),"w");
     if (hasvalue("linelen")) linelen = getiparam("linelen");
-        
-    instr  = stropen(getparam("in"),"r");               
+    else linelen = MAX_LINELEN;
+
+    infile = getparam("in");
+    instr  = stropen(infile,"r");               
     lint(instr,linelen,outstr);
 }
 
@@ -360,64 +364,66 @@ parse_length(col *cp, string s)
 /*
  * LINT: read lines from a file; each line can have up to maxline
  *       characters (excluding the newline?)
- *       This routine can also be used to check ascii fits tables
+ *       This routine could also be used to check ascii fits tables
  *       that do not have newlines but fixed record length, in which
  *       maxline must be set to NAXIS1 of that table.
  */
 
 lint( stream instr, int maxline, stream outstr)
 {
-    char   *line, msg[64];
-    int    n, i, nlines, nilines, nolines;
-    string *sp;
-    col    *cp;    
-    bool   doout, first = TRUE;
-
-    line = (char *) allocate((maxline+1)*sizeof(char));
-        
-    nlines=0;               /* count lines read so far */
-    nilines = nolines = 0;
-
-    for(;;) {                   /* loop over all lines in file(s) */
-
-        if (fgets(line,maxline+1,instr)==NULL) {
-            break;
-        }
-        nlines++;
-        dprintf(3,"LINE: %s",line);
-	if(line[0] == '#') {
-            /* if (Qcomment && Qoutput) .... output .... */
-            continue;		/* don't use comment lines */
-        }
-        nilines++;
-        sp = burststring(line," ,\t\n");
-        n = xstrlen(sp,sizeof(string))-1;
-        if (n==0) continue;                 /* blank line */
-
-        if (first) {
-            first = FALSE;
-            if (cols==NULL) {
-                if (ncol < 0) ncol = n;
-            } else {
-                if (ncol < 0) ncol = maxcol;       
-            }
-        }
-        doout = TRUE;            
-        for (i=0, cp=cols; i<n; i++, cp++) {       /* check all columns */
-            if (!check_col(cp, sp[i], nlines, msg)) {
-                dprintf(1,"# %s\n",msg);
-                doout=FALSE;
-            }
-        }
-        if (doout) nolines++;
-        if (outstr && doout) fputs(line,outstr);
-    } /* for(;;) */
-    dprintf(0,"Read %d lines from datafile\n",nlines);
-    dprintf(0,"Read %d data lines from datafile\n",nilines);
-    if (outstr)
-        dprintf(0,"Wrote %d data lines to output\n",nolines);
-    else
-        dprintf(0,"Selected %d data lines\n",nolines);
+  char   *line, msg[64];
+  int    n, i, nlines, nilines, nolines;
+  string *sp;
+  col    *cp;    
+  bool   doout, first = TRUE;
+  
+  line = (char *) allocate((maxline+1)*sizeof(char));
+  
+  nlines=0;               /* count lines read so far */
+  nilines = nolines = 0;
+  
+  for(;;) {                   /* loop over all lines in file(s) */
+    if (fgets(line,maxline+1,instr)==NULL) break;
+    nlines++;
+    dprintf(3,"LINE: %s",line);
+    if(line[0] == '#' || line[0] == '\\' || line[0] == '|') {
+      /* if (Qcomment && Qoutput) .... output .... */
+      continue;		/* skip comment lines */
+    }
+    nilines++;
+    sp = burststring(line," ,\t\n");
+    n = xstrlen(sp,sizeof(string))-1;
+    if (n==0) continue;                 /* blank line */
+    
+    if (first) {
+      first = FALSE;
+      if (cols==NULL) {
+	if (ncol == 0) ncol = n;
+      } else {
+	if (ncol == 0) ncol = maxcol;       
+      }
+      dprintf(1,"Found %d columns\n",ncol);
+    }
+    if (cols) {
+      doout = TRUE;            
+      for (i=0, cp=cols; i<n; i++, cp++) {       /* check all columns */
+	if (!check_col(cp, sp[i], nlines, msg)) {
+	  dprintf(1,"# %s\n",msg);
+	  doout=FALSE;
+	}
+      }
+      if (doout) nolines++;
+      if (outstr && doout) fputs(line,outstr);
+    }
+    if (n != ncol)
+      warning("%s: line %d found %d/%d columns",infile,nlines,n,ncol);
+  } /* for(;;) */
+  dprintf(1,"Read %d lines from datafile\n",nlines);
+  dprintf(1,"Read %d data lines from datafile\n",nilines);
+  if (outstr)
+    dprintf(1,"Wrote %d data lines to output\n",nolines);
+  else
+    dprintf(1,"Selected %d data lines\n",nolines);
 }
 
 int check_col(col *cp, string c, int linenr, char *msg)
@@ -425,6 +431,8 @@ int check_col(col *cp, string c, int linenr, char *msg)
     int ival;
     float fval;
     char *p = c;
+
+    if (cp==0) return 0;
 
     msg[0] = 0;
     if (cp->type == COL_INT) {
