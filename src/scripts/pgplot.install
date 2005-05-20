@@ -30,7 +30,7 @@
 #  wip/pgplot.install dir=$w lib=$w/lib host=linux
 #  rm lib/libpgplot.so
 #  cd wip
-#  ./makewip -pgplot $w/lib -wip $w/wip -bin $w/lib -xlib /usr/X11R6/lib -readline ""
+#  ./makewip -pgplot $w/lib -wip $w/wip -bin $w/lib -xlib /usr/X11R6/lib -readline "" -wiphelp $w/lib
 #      (bug: wiphelp is kept in wip directory, not in lib)
 # ------------------------------------------------------------------------------------------
 
