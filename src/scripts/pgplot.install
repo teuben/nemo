@@ -1,6 +1,11 @@
 #! /bin/csh -f
 #
-#  Install PGPLOT from $NEMO/local/pgplot into $NEMOLIB
+#  Install PGPLOT from dir=$NEMO/local/pgplot into lib=$NEMOLIB
+#
+#  NOTE: Although meant for ease of install within $NEMO, you 
+#  may also find this file within the WIP distribution.
+#  The master version should however stay within NEMO
+#  
 #
 #  3-apr-01	allowed final directory also to be configurable
 #		and some NEMO V3 support added
@@ -13,19 +18,40 @@
 # 23-jan-04     fixed linux when CC and F77 present (e.g. intel compiler)
 # 27-mar-04     force rebuilding some executables upon reload (+typo fix)
 # 28-jun-04     debug option
+# 20-may-05     make script more generic, less dependant on NEMO, and distribute with WIP
+
+
+
+# Example standalone WIP install outside of MIRIAD or NEMO
+# ------------------------------------------------------------------------------------------
+#  cvs co wip
+#  cvs co pgplot
+#  set w=`pwd`
+#  wip/pgplot.install dir=$w lib=$w/lib host=linux
+#  rm lib/libpgplot.so
+#  cd wip
+#  ./makewip -pgplot $w/lib -wip $w/wip -bin $w/lib -xlib /usr/X11R6/lib -readline ""
+#      (bug: wiphelp is kept in wip directory, not in lib)
+# ------------------------------------------------------------------------------------------
 
 
 # TODO:
 #   $F77 and $CC should be obtained from NEMO's configure process
 #
 
-#			 	.. command line keywords ..
+#			 	.. command line keywords that can be modifid ..
 set version=522
 set ftp=ftp.astro.caltech.edu
-set dir=$NEMO/local
-set lib=$NEMOLIB
+if ($?NEMO) then
+  set dir=$NEMO/local
+endif
+if ($?NEMOLIB) then
+  set lib=$NEMOLIB
+endif
 set drivers=CGDRIV,GIDRIV,NUDRIV,PGDRIV,PPDRIV,PSDRIV,WDDRIV,XWDRIV,TKDRIV
-set host=$NEMOHOST
+if ($?NEMOHOST) then
+  set host=$NEMOHOST
+endif
 set debug=0
 
 #  dir:  where the source code will be extracted
@@ -39,19 +65,32 @@ foreach arg ($*)
    set $arg
 end
 
+#  basic check of the command line arguments
+if ($?dir == 0) goto usage
+if ($?lib == 0) goto usage
+if ($?host == 0) goto usage
 
 if (! -e $lib) mkdir $lib
-if ($status) exit 1
+if ($status) goto usage
 
-cd $NEMO/local
+if ($?f77) then
+  setenv F77 $f77
+endif
+
+if ($?cc) then
+  setenv CC $cc
+endif
+
+cd $dir
 
 if (-d pgplot) then
-  echo Assuming your $NEMO/local/pgplot is current
+  echo Assuming your $dir/pgplot is current
 else
   if ($?file == 0) set file=$dir/pgplot${version}.tar.gz
   if (! -e $file) then
     echo No file $file, you need to pick it up, e.g.
     echo ncftp ftp://ftp.astro.caltech.edu/pub/pgplot/pgplot${version}.tar.gz
+    echo Or use the slightly improved MIRIAD cvs version
     exit 1
   else
     echo Found $file
@@ -80,27 +119,28 @@ rm old.list
 echo Renaming old X server to force it to rebuild
 if (-e pgxwin_server) mv pgxwin_server pgxwin_server.old
 
-# Solaris
 switch ($host)
   case *darwin*:
-    $NEMO/local/pgplot/makemake   $NEMO/local/pgplot darwin g77_gcc
+    $dir/pgplot/makemake   $dir/pgplot darwin g77_gcc
     breaksw
+  case SunOS:
   case solaris*:
   case sparc*:
   case sun5:
     if ($?CC && $?F77) then
       echo ${F77}_${CC}
-      $NEMO/local/pgplot/makemake  $NEMO/local/pgplot sol2 ${F77}_${CC}
+      $dir/pgplot/makemake  $dir/pgplot sol2 ${F77}_${CC}
     else 
-      $NEMO/local/pgplot/makemake  $NEMO/local/pgplot sol2 f77_cc
+      $dir/pgplot/makemake  $dir/pgplot sol2 f77_cc
     endif
     breaksw
+  case Linux:
   case linux:
   case *linux-gnu:
     if ($?CC && $?F77) then
-        $NEMO/local/pgplot/makemake  $NEMO/local/pgplot linux ${F77}_${CC}
+        $dir/pgplot/makemake  $dir/pgplot linux ${F77}_${CC}
     else
-        $NEMO/local/pgplot/makemake  $NEMO/local/pgplot linux g77_gcc
+        $dir/pgplot/makemake  $dir/pgplot linux g77_gcc
     endif
     if (! -e /usr/X11) then
         echo You may need to patch your Linux distribution:
@@ -108,11 +148,16 @@ switch ($host)
     endif
     breaksw
   case sgi:
-    $NEMO/local/pgplot/makemake  $NEMO/local/pgplot irix
+    $dir/pgplot/makemake  $dir/pgplot irix
     breaksw
   default:
-    echo host=$host not supported yet
-    exit 1
+    if (-d $dir/sys_$host) then
+      $dir/pgplot/makemake  $dir/pgplot $host
+      breaksw
+    else
+      echo host=$host not supported yet
+      exit 1
+    endif
 endsw
 
 make -i
@@ -126,3 +171,18 @@ endif
 
 # set PGPLOT_DIR to $NEMOLIB
 
+exit 0
+
+
+
+usage:
+  echo "The most common non-NEMO usage will be:"
+  echo "get a pgplot directory in your current directory"
+  echo "and use/override any of the following commandline parameters:"
+  echo "  drivers=$drivers"
+  echo "  dir=`pwd`            directory within which pgplot/ resides"
+  echo "  lib=`pwd`/lib        directory where PGPLOT_DIR will be"
+  echo "  host=`uname -s`      host type (examples are in pgplot/sys_*)"
+  echo "  debug=0              clean demo example from lib"
+  echo "  cc=gcc               changed a (supperted) C compiler for this system"
+  echo "  f77=g77              changed a (supperted) Fortran compiler for this system"
