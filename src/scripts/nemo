@@ -1,0 +1,30 @@
+#! /bin/csh -f
+#
+
+alias e echo
+
+if ($#argv == 0) then
+
+e 'NEMO is a software package that provides you with a basic set of programs'
+e 'and libraries (so you can make new programs)'
+e 'You will need to change your shell to fully make use of NEMO. For example,'
+e 'in the tcsh/csh shell the command'
+e '              source PATH_TO_NEMO/nemo_start'
+e 'will load NEMO.'
+e ''
+e 'For most NEMO programs the following command line arguments will give you '
+e 'more help'
+e '       NEMO_PROGRAM help='
+e '       NEMO_PROGRAM help=h'
+e '       man NEMO_PROGRAM'
+e 'The command            ls $NEMOBIN'
+e 'or the URL http://astro.umd.edu/nemo/'
+e 'will give information what command are/can be available in NEMO'
+e ''
+
+
+exit 0
+
+endif
+
+================================================================================
