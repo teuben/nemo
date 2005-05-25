@@ -45,9 +45,9 @@ string defv[] = {
   "step=1\n         Initial integration step (in Angstrom)",
   "tbb=\n           Black Body temperature, in case used",
   "normalize=f\n    Normalize integral by filter integral",
-  "VERSION=0.7\n    16-may-05 PJT",
+  "out=\n           Optional filtered output spectrum",
+  "VERSION=0.8\n    25-may-05 PJT",
   NULL,
-
 };
 
 string usage="flux derived from convolving a filter with a spectrum";
@@ -56,15 +56,16 @@ string cvsid="$Id$";
 
 
 #define MAXDATA  16384
+#define DATAMIN  1e-36
 
 extern string *burststring(string, string);
 extern void freestrings(string *);
+
 /*
  * Planck curve,  output in ergs/cm2/s/A
  *
  * @index Planck curve, input: angstrom, kelvin   output: ergs/cm2/s/A
  */
-
 real planck(real wavelen, real T_b)
 {
 #if 0
@@ -83,7 +84,10 @@ real planck(real wavelen, real T_b)
 #endif
 }
 
-
+/*
+ * return the full path to a filter based on a short name
+ * or, if the shortname is the full path, return itself 
+ */
 string filtername(string shortname)
 {
   int nsp;
@@ -125,13 +129,14 @@ void nemo_main()
   real *udat, *vdat, umin, umax, vmin, vmax;
   real x, y1, y2, dx, xscale, yscale, xQmin, xQmax;
   real tbb,sum,sum0;
-  stream instr;
+  stream instr, tabstr;
   int i, n, ns, nmax;
   real *sdat, *spdat;
   string spectrum, filter = filtername(getparam("filter"));
   bool Qnorm = getbparam("normalize");
   bool Qmin = hasvalue("xmin");
   bool Qmax = hasvalue("xmax");
+  bool Qtab = hasvalue("out");
   
   nmax = nemo_file_lines(filter,MAXLINES);
   xdat = coldat[0] = (real *) allocate(nmax*sizeof(real));
@@ -141,6 +146,8 @@ void nemo_main()
   instr = stropen(filter,"r");
   n = get_atable(instr,2,colnr,coldat,nmax);
   strclose(instr);
+
+  if (Qtab) tabstr = stropen(getparam("out"),"w");
   
   for(i=0; i<n; i++) {
     dprintf(2,"%g %g\n",xdat[i],ydat[i]);
@@ -184,13 +191,15 @@ void nemo_main()
   
   if (hasvalue("tbb")) {                /* using a Planck curve */
     tbb = getdparam("tbb");
-    if (Qmin || Qmax) warning("ignoring xmin/xmax in T_bb mode");
-    
+    if (Qmin) xmin = xQmin;
+    if (Qmax) xmax = xQmax;
+
     sum = sum0 = 0;
     for (x = xmin; x <= xmax; x += dx) {
       y1 = seval(x,xdat,ydat,sdat,n);    /* filter */
       y2 = planck(x,tbb);
       dprintf(3,"%g %g %g\n",x,y1,y2);
+      if (Qtab) fprintf(tabstr,"%g %g\n",x,MAX(DATAMIN,y1*y2));
       sum += y1*y2;
       sum0 += y1;
     }
@@ -198,8 +207,13 @@ void nemo_main()
       sum /= sum0;
     else
       sum *= dx;
-    printf("%g %g %g\n",tbb,sum,-2.5*log10(sum));
+    if (Qtab)
+      dprintf(0,"%g %g %g\n",tbb,sum,-2.5*log10(sum));
+    else
+      printf("%g %g %g\n",tbb,sum,-2.5*log10(sum));
+
   } else if (hasvalue("spectrum")) {
+
     warning("spectrum= is a new feature");
     spectrum = getparam("spectrum");
     nmax = nemo_file_lines(spectrum,MAXLINES);
@@ -241,15 +255,16 @@ void nemo_main()
     spline(spdat,udat,vdat,ns);
 
     sum = sum0 = 0;
+    if (Qmin) xmin = xQmin;
+    if (Qmax) xmax = xQmax;
     for (x = xmin; x <= xmax; x += dx) {
-      if (Qmin && x < xQmin) continue;
-      if (Qmax && x > xQmax) continue;
       y1 = seval(x,xdat,ydat,sdat,n);    /* filter */
       if (umin < x && x <umax)
 	y2 = seval(x,udat,vdat,spdat,ns);  /* spectrum */
       else
 	y2 = 0.0;
       dprintf(3,"%g %g %g\n",x,y1,y2);
+      if (Qtab) fprintf(tabstr,"%g %g\n",x,MAX(DATAMIN,y1*y2));
       sum += y1*y2;
       sum0 += y1;
     }
@@ -257,7 +272,10 @@ void nemo_main()
       sum /= sum0;
     else
       sum *= dx;
-    printf("0   %g %g\n",sum,-2.5*log10(sum));
+    if (Qtab)
+      dprintf(0,"0   %g %g\n",sum,-2.5*log10(sum));
+    else
+      printf("0   %g %g\n",sum,-2.5*log10(sum));
 
   } else
     warning("Either spectrum= or tbb= must be used");
