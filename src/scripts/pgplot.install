@@ -21,6 +21,10 @@
 # 20-may-05     make script more generic, less dependant on NEMO, and distribute with WIP
 
 
+# Other places to get pgplot from
+# cvs -d :pserver:anonymous@cvs.starlink.ac.uk:/cvs co thirdparty/caltech/pgplot
+# ftp://ftp.astro.caltech.edu/pub/pgplot/pgplot522.tar.gz   (or whichever version)
+
 
 # Example standalone WIP install outside of MIRIAD or NEMO
 # ------------------------------------------------------------------------------------------
