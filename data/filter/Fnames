@@ -2,8 +2,15 @@
 #   in $NEMODAT/filters.  See tabfilter(1NEMO) for an application
 #
 1   flat.tab
+#
 FUV GALEX_FUV.tab
 NUV GALEX_NUV.tab
+#
+U   Landolt92-U.tab
+B   Landolt92-B.tab
+V   Landolt92-V.tab
+R   Landolt92-R.tab
+I   Landolt92-I.tab
 #
 u   SDSS_u.tab
 g   SDSS_g.tab
