@@ -1,9 +1,13 @@
 /*
  * the NFW (Navarro,Frank \& White, 1997 ApJ 490, 493) profile rotcurshape
  * since Dehnen's version doesn't use a concentration parameter ??
+ * Note order of parameters a bit odd:
+ *        v0 = peak rotation curve
+ *        a = scale length
+ *        c = concentration parameter (r200/a)
  *
  * this was a quick hack to compare to rotcurshape, and only returns
- * forces, no potentials
+ * forces, no potentials.
  *
  * 24-may-2005   PJT    Hacked Up Q&D
  *
@@ -43,6 +47,7 @@ void potential_##TYPE(int*NDIM, TYPE*X, TYPE*F, TYPE*P, TYPE*T) {	\
   if (r2==0.0) {                \
     F[0] = F[1] = F[2] = 0.0;   \
     *P = 0.0;                   \
+    return;                     \
   }                             \
   r  = sqrt(r2);							\
   ir = 1./r;								\
