@@ -19,13 +19,17 @@ and ignores any units, though filters F(l) are typically between
 in Angstrom. The spectrum S(l) has arbitrary units.
 .PP
 Using \fBxscale=\fP and \fByscale=\fP the input spectrum can be scaled
-to match that of the filter.
+to match that of the filter. 
+.PP 
+Using \fBout=\fP the filtered spectrum can be output to a table,
+the resulting flux is still computed but only output in debug level 0.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBfilter=\fP
-Filter mnemonic (U,B,V,R,I,H,J,K) or full filter file name. 
+Filter mnemonic (e.g. U,B,V,R,I,u,g,r,i,z,H,J,K) or full filter file name. 
+See $NEMODAT/filter for current filters.
 No Default.
 .TP
 \fBspectrum=\fP
@@ -48,7 +52,7 @@ flux scaling. [Default: 1]
 .TP
 \fBxmin=\fP
 (Wavelength) value below which no data are printed or used. 
-This is useful if you input spectrum has a broad range you are
+This is useful if your input spectrum has a broad range you are
 not interested in, but can be dangerous if this cuts into your
 filter.
 Default: not used
@@ -68,6 +72,13 @@ Default: not used.
 .TP
 \fBnormalize=t|f\fP
 Normalize the flux by the integral over the filter shape? [no].
+.TP
+\fBout=\fP
+If specified, the integral (flux calculation) isn't performed, the
+output contains a table of the filtered spectrum. Although the
+flux is still output, it is now redirected to \fIstderr\fP instead
+of \fIstdout\fP.
+Default: none.
 .SH EXAMPLES
 What is the SDSS "g-r" color for a T=5000 star?
 .nf
@@ -98,6 +109,21 @@ BB temperatures:
 8000 -0.151
 9000 -0.2529
 .fi
+.PP
+Here's a neat way to plot a Black Body spectrum. We are using a flat filter spectrum
+(the alias filter=1 is available for this, which is defined as 1 from 1 Angstrom
+to 1e9 Angstrom) and redefining xmin and xmax with out= to produce a spectrum.
+Since the output is an ASCII file, it can be piped into for example 
+\fItabplot(1NEMO)\fP for visual inspection:
+.nf
+  % tabfilter 1 tbb=1000 xmin=10 xmax=80000 step=10 out=- |\\
+	tabplot - xmin=0 xmax=80000
+.fi
+The same could be done to a spectrum and re-interpolate it (simular to 
+\fItabspline(1NEMO)\fP)
+.nf
+  % tabfilter 1 data.tab xmin=4000 xmax=5000 step=1 out=- | tabplot - 
+.fi
 .SH CAVEATS
 Absolute units are not taken into account, though with xscale=,yscale= some
 flexibility is possible.
@@ -105,7 +131,7 @@ flexibility is possible.
 The integration is a simple eulerian one, though 1A should be sufficient 
 for most application. In case of doubt, check with a smaller or bigger value.
 .SH SEE ALSO
-tabmath(1NEMO), tabspline(1NEMO), tabint(1NEMO)
+tabmath(1NEMO), tabspline(1NEMO), tabint(1NEMO), filter(5NEMO)
 .PP
 Filters: http://voservices.net/filter/
 .SH FILES
@@ -113,6 +139,7 @@ Filters: http://voservices.net/filter/
 .nf
 NEMODAT/filter/ 	directory with filters
 NEMODAT/filter/Fnames	translation file between short and full names
+NEMODAT/vega.sed	Vega's SED useful for absolute color calibration
 .fi
 .SH AUTHOR
 Peter Teuben
@@ -121,4 +148,5 @@ Peter Teuben
 .ta +1.0i +4.0i
 11-May-05	V0.1 Created	PJT
 16-may-06	V0.6 added xmin/xmax	PJT
+25-may-06	V0.8 added out=, and Vega info		PJT
 .fi
