@@ -973,7 +973,8 @@ ADIL\footnote{NCSA :: ADIL code number 95.DW.01.01}.
 
 notice we're already converting the m/s in FITS to km/s in the {\tt ccd} file.
 The angular distances are in degrees. In the printout below the output of
-{\tt tsf} and relevant sections of {\tt fitshead} have been merged:
+{\tt tsf} and relevant sections of {\tt fitshead} have been merged to
+show their correspondence:
 
 \small\begin{verbatim}
   set Parameters
@@ -986,7 +987,7 @@ The angular distances are in degrees. In the printout below the output of
     double Dx -0.00111111                 // CDELT1  =     -1.111111138E-03
     double Dy 0.00111111                  // CDELT2  =      1.111111138E-03 
     double Dz 1.00000
-    double Xrefpix 0.00000		  // CRPIX1  =      2.560000000E+02
+    double Xrefpix 0.00000                // CRPIX1  =      2.560000000E+02
     double Yrefpix 0.00000                // CRPIX2  =      2.570000000E+02
     double Zrefpix 0.00000
     double MapMin -102.844                // DATAMIN =     -1.028444453E+05
