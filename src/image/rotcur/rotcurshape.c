@@ -24,6 +24,7 @@
  *                             e  plus many improvement when nsigma given
  *              11-jun-04 : 1.3   write fit directly , with or without masked    pjt
  *              13-jan-05 :    b  rachel mode: inc=0 -> cosi=sini=1.0 to get circles    pjt
+ *              26-may-05 :    d  fixed bad NFW bug (used v^2, not v)                   pjt
  *
  *
  ******************************************************************************/
@@ -91,12 +92,13 @@ string defv[] = {
     "rotcur3=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur4=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur5=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
-    "VERSION=1.3c\n  13-jan-05 PJT",
+    "VERSION=1.3d\n  26-may-05 PJT",
     NULL,
 };
 
 string usage="nonlinear fit of kinematical parameters to the velocity field of a coplanar disk";
 
+string cvsid="$Id$";
 
 
 typedef real (*rcproc)(real, int, real *, real *);
@@ -179,7 +181,8 @@ typedef real (*my_proc1)(real *, real *, int);
 typedef void (*my_proc2)(real *, real *, real *, int);
 typedef void (*my_proc3)(real *, real *, real *, real *);
  
-extern int nllsqfit(real *xdat, int xdim, real *ydat, real *wdat, real *ddat, int ndat, real *fpar, real *epar, int *mpar, int npar, real tol, int its, real lab, my_proc1 f, my_proc2 df);
+extern int nllsqfit(real *xdat, int xdim, real *ydat, real *wdat, real *ddat, int ndat, real *fpar, 
+		    real *epar, int *mpar, int npar, real tol, int its, real lab, my_proc1 f, my_proc2 df);
 
 
 my_proc1 vobs;
@@ -346,13 +349,13 @@ real rotcur_exp(real r, int np, real *p, real *d)
   d[1] = -p[0]*y/p[1]*x;
   return p[0] * d[0];
 }
-
+
 /*
  *  NFW profile:  pars = V_200,R_200,c
  *  V_c^2(x)=V_{200}^2 \frac{\ln(1+cx)-cx(1+cx)^{-1}}
  *           {x[\ln(1+c)-c(1+c)^{-1}]}
  *
- *  In[7]:=D[ (Log[1+c*x]-c*x/(1+c*x))/x ,x]
+ *  In[7]:=D[ Sqrt[(Log[1+c*x]-c*x/(1+c*x))/x] ,x]
  */
 
 real rotcur_nfw(real r, int np, real *p, real *d)
@@ -361,10 +364,12 @@ real rotcur_nfw(real r, int np, real *p, real *d)
   real c = p[2];
   real cx = x*c;
   real lncx = log(1+cx);
-  real v = (lncx - cx/(1+cx))/(log(1+c)-c/(1+c))/x;
+  real a = -cx/(1+cx) + lncx;
+  real v2 = a/(log(1+c)-c/(1+c))/x;
+  real v=sqrt(v2);
   d[0] = v;
-  d[1] = p[0]/p[1]*c*c/((1+cx)*(1+cx))*(lncx-cx/(1+cx))/(x*x);
-  d[2] = 0.0;  /* Note, don't allow derivatives w.r.t. c */
+  d[1] = -p[0]/p[1]*x  * (sqr(c/(1+cx)) - a/x)/2/sqrt(a);
+  d[2] = 0.0;  /* Note, don't allow derivatives w.r.t. c -- otherwise degenerate */
   return p[0] * d[0];
 }
 
