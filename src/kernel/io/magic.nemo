@@ -1,4 +1,5 @@
-# You can cut and past two appropriate lines from this file to /etc/magic
+# You can cut and past two appropriate lines from this file to 
+# /etc/magic or /usr/share/magic (or whereever the magic file lives)
 # See also file(1) or magic(1) 
 
 
