@@ -3,6 +3,7 @@
  *	4-mar-91  added copy_item_cvt		PJT
  *	6-may-92  random data access routines	PJT
  *     12-apr-95  prototypes without ARGS       PJT
+ *      2-jun-05  blocked I/O as a flavor of random I/O     PJT
  */
 #ifndef _filestruct_h
 #define _filestruct_h
@@ -80,14 +81,15 @@ extern int get_dlen ( stream, string);
 
 extern void strclose ( stream);
 
-extern void get_data_set ( stream , string , string , int,  ...);
-extern void get_data_tes ( stream , string  );
-extern void get_data_ran ( stream , string , void *, int , int );
+extern void get_data_set     ( stream , string , string , int,  ...);
+extern void get_data_tes     ( stream , string  );
+extern void get_data_ran     ( stream , string , void *, int , int );
+extern void get_data_blocked ( stream , string , void *, int);
 
-extern void put_data_set ( stream , string , string , int,  ...);
-		
-extern void put_data_tes ( stream , string );
-extern void put_data_ran ( stream , string , void *, int , int  );
+extern void put_data_set     ( stream , string , string , int,  ...);
+extern void put_data_tes     ( stream , string );
+extern void put_data_ran     ( stream , string , void *, int , int  );
+extern void put_data_blocked ( stream , string , void *, int );
 
 extern bool qsf ( stream );
 #endif

@@ -1,4 +1,4 @@
-.TH FILESTRUCT 3NEMO "5 March 1994"
+.TH FILESTRUCT 3NEMO "2 June 2005"
 .SH NAME
 filestruct \- primitives for structured binary file I/O
 .SH SYNOPSIS
@@ -19,9 +19,11 @@ filestruct \- primitives for structured binary file I/O
 .PP
 \fBvoid get_data_set(str, tag, typ, dat, dimN, ..., dim1, 0)\fP
 \fBvoid get_data_ran(str, tag, dat, offset, length)\fP
+\fBvoid get_data_blocked(str, tag, dat, length)\fP
 \fBvoid get_data_tes(str, tag)\fP
 \fBvoid put_data_set(str, tag, typ, dat, dimN, ..., dim1, 0)\fP
 \fBvoid put_data_ran(str, tag, dat, offset, length)\fP
+\fBvoid put_data_blocked(str, tag, dat, length)\fP
 \fBvoid put_data_tes(str, tag)\fP
 .PP
 \fBvoid strclose(str)\fP
@@ -153,7 +155,8 @@ used for input.
 
 \fIget_data_set\fP and \fPget_data_tes\fP bracket random data access,
 which is achieved by \fIget_data_ran\fP. \fIoffset\fP and \fIlength\fP
-are both in units of the item-length.
+are both in units of the item-length. They have a pipe-safe interface
+called \fIget_data_blocked\fP, where the I/O must occur sequentially.
 .SH EXAMPLES
 The following code fragment reads and later writes some data to
 structured binary files.
@@ -235,7 +238,7 @@ one of the get_data() routines.
 .SH BUGS
 Whenever pipes are used, all data is read into memory, as opposed to
 being deferred for input.
-This may lead to large memory consuption.
+This may lead to large memory consuption. 
 .SH AUTHOR
 Joshua E. Barnes, Lyman P. Hurd, Peter Teuben
 .SH SEE ALSO
@@ -248,4 +251,5 @@ filestruct(5NEMO), \fINEMO Users/Programmers Guide\fP
 16-Apr-88	new types, operators, etc	JEB
 16-May-92	random access to data   	PJT
 5-mar-94	documented qsf          	PJT
+2-jun-05	added blocked I/O		PJT
 .fi

@@ -304,6 +304,7 @@ void put_data_set(stream str, string tag, string typ, int dim1, ...)
     puthdr(str,ipt);                           /* write the header right now */
 
     ItemPos(ipt) = ftello(str);                      /* begin of random data */
+    ItemOff(ipt) = 0;                                   /* offset where I/O */
     sspt->ss_pos = ftello(str) + datlen(ipt,0);         /* end of random data */
 }
 
@@ -355,6 +356,36 @@ void put_data_ran(
     if (length != fwrite((char *)dat,sizeof(byte),length,str))
         error("put_data_ran: error writing tag %s",tag);
 }
+
+/*
+ * PUT_DATA_BLOCKED: blocked sequential acces output of data
+ * Synopsis:   put_data_blocked(str, tag, dat, length)
+ */
+
+void put_data_blocked(
+    stream str,
+    string tag,
+    void *dat,
+    int length)
+{
+    itemptr ipt;
+    strstkptr sspt;
+    int offset;
+
+    sspt = findstream(str);
+    ipt = sspt->ss_ran;
+    if (ipt==NULL) error("put_data_ran: tag %s no random item",tag);
+    if (!streq(tag,ItemTag(ipt))) error("put_data_tes: invalid tag name %s",tag);
+    offset = ItemOff(ipt);
+    length *= ItemLen(ipt);     /* in units of itemlen !!! */
+    if (offset+length > datlen(ipt,0))
+        error("put_data_blocked: tag %s cannot write beyond allocated boundary",tag);
+    fseeko(str,offset + ItemPos(ipt),0);
+    if (length != fwrite((char *)dat,sizeof(byte),length,str))
+        error("put_data_ran: error writing tag %s",tag);
+    ItemOff(ipt) += length;
+}
+
 #else
 
     /* Un-implemented parts of random access write */
@@ -585,7 +616,28 @@ void get_data_ran(
         error("get_data_ran: tag %s is not in random access mode",tag);
     copydata(dat,offset,length,ipt,str);
 }
+
+void get_data_blocked(
+    stream str,
+    string tag,
+    void *dat,
+    int length
+) {
+    itemptr ipt;
+    strstkptr sspt;
+    int offset;
+
+    sspt = findstream(str);
+    ipt = sspt->ss_ran;
+    offset = ItemOff(ipt);
+    if (ipt==NULL)
+        error("get_data_blocked: tag %s is not in blocked access mode",tag);
+    copydata(dat,offset,length,ipt,str);
+    ItemOff(ipt) = offset+length;
+}
+
 #endif
+
 
 /*
  * GET_STRING: read a string from a structured file.

@@ -27,12 +27,13 @@
  */
 
 typedef struct {
-    string itemtyp;		/* type string, listed in filestruct.h */
-    long   itemlen;		/* length associated with above type */
-    string itemtag;		/* name given this item by application */
-    int   *itemdim;		/* int-string of dimensions, or NULL */
-    void  *itemdat;		/* the real goodies, if any, or NULL */
-    off_t  itempos;		/* where the item began in stream (i/o) */
+  string itemtyp;		/* type string, listed in filestruct.h */
+  long   itemlen;		/* length associated with above type */
+  string itemtag;		/* name given this item by application */
+  int   *itemdim;		/* int-string of dimensions, or NULL */
+  void  *itemdat;		/* the real goodies, if any, or NULL */
+  off_t  itempos;		/* where the item began in stream (i/o) */
+  off_t  itemoff;               /* RAN/SEQ offset where the current data ptr is */
 } item, *itemptr;    
 
 #define ItemTyp(ip)  ((ip)->itemtyp)
@@ -41,6 +42,8 @@ typedef struct {
 #define ItemDim(ip)  ((ip)->itemdim)
 #define ItemDat(ip)  ((ip)->itemdat)
 #define ItemPos(ip)  ((ip)->itempos)
+#define ItemOff(ip)  ((ip)->itemoff)
+
 
 /*
  * STRSTK: structure used to associate stream with item stack.
@@ -50,13 +53,14 @@ typedef struct {
 #define StrTabLen 64
 
 typedef struct {
-    stream  ss_str;		    /* pointer to stdio stream */
-    itemptr ss_stk[SetStkLen+1];    /* stack of assoc. items (extra dummy) */
-    int     ss_stp;		    /* item stack pointer */
-    bool    ss_seek;		    /* permit seeks on this stream ? */
+  stream  ss_str;                 /* pointer to stdio stream */
+  itemptr ss_stk[SetStkLen+1];    /* stack of assoc. items (extra dummy) */
+  int     ss_stp;		  /* item stack pointer */
+  bool    ss_seek;		  /* permit seeks on this stream ? */
 #if defined(RANDOM)
-    off_t   ss_pos;                 /* tail of file, in case random access */
-    itemptr ss_ran;                 /* pointer to random access item */
+  int     ss_mode;                /* mode: 0=none 1=(still)sequential 2=random */
+  off_t   ss_pos;                 /* tail of file, in case random access */
+  itemptr ss_ran;                 /* pointer to random access item */
 #endif
 } strstk, *strstkptr;
 
