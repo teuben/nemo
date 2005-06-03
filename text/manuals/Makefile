@@ -6,7 +6,7 @@
 F   = nemo
 TEX = nemo.tex latest.tex idx.tex
 STY = nemo.sty troffman.sty html.sty
-INC = ack.inc aiface.inc bench.inc dirs.inc disclaimer.inc examples.inc \
+INC = ack.inc aiface.inc bench.inc coordsys.inc dirs.inc disclaimer.inc examples.inc \
       filestr.inc glossary.inc graphics.inc gsl.inc history.inc iface.inc \
       image.inc \
       install.inc intro.inc miriad.inc mirtool.inc \
