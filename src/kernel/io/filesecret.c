@@ -35,6 +35,8 @@
  *  Although the SWAP test is done on input for every item - for deferred
  *  input it may fail if in the mean time another file was read which was
  *  not in swap mode => Perhaps better to HardCode (#define)???
+ *
+ *  array of strings ??
  *                                  
  */
 
@@ -256,8 +258,8 @@ void put_data(stream str, string tag, string typ, void *dat, int dim1, ...)
  * PUT_DATA_SUB: worker for above manager.
  */
 void put_data_sub(
-    stream str, 		/* stream to write data to */
-    string tag, 		/* tag for output item */
+    stream str, 	/* stream to write data to */
+    string tag, 	/* tag for output item */
     string typ,     	/* data type for output */
     void *dat,	 	/* place to store data */
     int *dim,		/* vector of dimensions */
@@ -297,7 +299,7 @@ void put_data_set(stream str, string tag, string typ, int dim1, ...)
 
     sspt = findstream(str);
     if (sspt->ss_ran)
-        error("put_data_set: %s: can only handle one random access item",tag);
+        error("put_data_set: %s: can currently handle one random access item",tag);
     buf = (int *) copxstr(dim,sizeof(int));
     ipt = makeitem(typ,tag,NULL,buf);            /* make item but no copy */
     sspt->ss_ran = ipt;
@@ -347,7 +349,7 @@ void put_data_ran(
     sspt = findstream(str);
     ipt = sspt->ss_ran;
     if (ipt==NULL) error("put_data_ran: tag %s no random item",tag);
-    if (!streq(tag,ItemTag(ipt))) error("put_data_tes: invalid tag name %s",tag);
+    if (!streq(tag,ItemTag(ipt))) error("put_data_ran: invalid tag name %s",tag);
     offset *= ItemLen(ipt);     /* as input offset and length were  */
     length *= ItemLen(ipt);     /* in units of itemlen !!! */
     if (offset+length > datlen(ipt,0))
@@ -374,15 +376,16 @@ void put_data_blocked(
 
     sspt = findstream(str);
     ipt = sspt->ss_ran;
-    if (ipt==NULL) error("put_data_ran: tag %s no random item",tag);
-    if (!streq(tag,ItemTag(ipt))) error("put_data_tes: invalid tag name %s",tag);
+    if (ipt==NULL) error("put_data_blocked: tag %s no random item",tag);
+    if (!streq(tag,ItemTag(ipt))) error("put_data_blocked: invalid tag name %s",tag);
     offset = ItemOff(ipt);
     length *= ItemLen(ipt);     /* in units of itemlen !!! */
     if (offset+length > datlen(ipt,0))
         error("put_data_blocked: tag %s cannot write beyond allocated boundary",tag);
-    fseeko(str,offset + ItemPos(ipt),0);
+    // no fseek() needed in blocked() !!!!
+    // fseeko(str,offset + ItemPos(ipt),0);
     if (length != fwrite((char *)dat,sizeof(byte),length,str))
-        error("put_data_ran: error writing tag %s",tag);
+        error("put_data_blocked: error writing tag %s",tag);
     ItemOff(ipt) += length;
 }
 
