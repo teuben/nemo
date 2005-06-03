@@ -68,7 +68,7 @@ void put_number(string name, real x, int n, int r)
     stream str;
     real *buf;
     int nout,i;
-    bool Qset = FALSE;
+    bool Qset = TRUE;
 
     str = stropen(name,"w");
     put_history(str);
@@ -79,22 +79,29 @@ void put_number(string name, real x, int n, int r)
     for (i=0; i<nout; i++)
       buf[i] = x+i;
     if (r==1) {
-        put_data(str,"x",RealType,buf,0,n);
-        put_data(str,"y",RealType,buf,0,n);
+        put_data(str,"x",RealType,buf,n,0);
+        put_data(str,"y",RealType,buf,n,0);
     } else {
+#if 0
         put_data_set(str,"x",RealType,nout,0);
         for (i=0;i<r;i++)
             put_data_blocked(str,"x",buf,n);
         put_data_tes(str,"x");
 
         put_data_set(str,"y",RealType,nout,0);
-        for (i=r;i>0;i--) {
-            buf[i] = -1.0 * i;
-            if (n>3) get_nand((double *)&buf[3]);
-	    if (n>4) get_nanf((float  *)&buf[4]);
+        for (i=r;i>0;i--)
             put_data_blocked(str,"y",buf,n);
-        }
         put_data_tes(str,"y");
+#else
+        put_data_set(str,"y",RealType,nout,0);
+        put_data_set(str,"x",RealType,nout,0);
+        for (i=0;i<r;i++) {
+            put_data_ran(str,"x",&buf[i*n],i,n);
+            put_data_ran(str,"y",&buf[i*n],i,n);
+	}
+        put_data_tes(str,"x");
+        put_data_tes(str,"y");
+#endif
     }
     if (Qset) put_tes(str,"Testing");
     strclose(str);
