@@ -46,7 +46,7 @@ Use LSR correction [f]
 .TP
 \fBsolar=u,v,w\fP
 U,V,W space velocities of the SUN w.r.t. LSR in a right-handed
-coordinate system. [Default: 9,12,7]
+coordinate system. [Default:  10.00,5.25,7.17]
 .TP
 \fBcoordsys=\fP
 lon/lat coordinate system: equ=RA/DEC gal=GLON/GLAT [gal]  
@@ -75,10 +75,10 @@ Here's an orbit representing the LSR
 .fi
 and solar motion
 .nf
-   % mkgalorbit orb2    0 0 0   0 0 0
+   % mkgalorbit orb2    0 0 0   0 0 0   lsr=t
    ...
    pos: -8.000000 0.000000 0.000000
-   vel: -9.000000 232.000000 7.000000 
+   vel: 9.000000 232.000000 7.000000 
 .fi
 and the benchmark case, the
 example from the gal_uvw IDL script:
@@ -106,15 +106,19 @@ example from the gal_uvw IDL script:
 
 .fi
 To use a particular galaxy model in an external potential, we first need to compute the phase space coordinates
-of the LSR in that model.
+of the LSR in that model. \fIsnapgalview(1NEMO)\fP can help viewing a
+\fIsnapshot(5NEMO)\fP.
 .nf
    % 
 .fi
 .SH COORDINATE SYSTEMS
-In galactic astronomy you will sometimes find papers that use a right handed or a
+In galactic astronomy you will find papers that use a right handed or a
 left handed coordinate system for the UVW space velocities. It seems more natural to use the
-more right-handed coordinate system (e.g. as argued by Johnson & Soderblom 1987), which
+more common right-handed coordinate system (e.g. as argued by Johnson & Soderblom 1987), which
 we also adopt internally to the program (also UVW match our defintion of vx,vy-V0,vz).
+This is the system where U is positive for inwards radial motions, and  V points along
+the galactic rotation and W points towards the galactic north pole (and this oppostive
+that of the angular moment vector, which is mathematically negative).
 In order for (u,v,w) to be compatible with the (vx,vy,vz) we use in NEMO, the sun must
 be placed at (-R,0,0) and since the galaxy is rotating clock wise, with a velocity
 of (0,V,0). If you want something else, you can always use \fPsnaprotate(1NEMO)\fP
@@ -133,5 +137,6 @@ Peter Teuben
 .nf
 .ta +1.0i +4.0i
 18-Apr-05	V0.1 Created	PJT
-20-apr-05	V0.6 finally got the math right 	PJT
+20-apr-05	V0.6 got the math right 	PJT
+3-jun-05	V0.7a   uses modern Hipparchos for solar motion 	PJT
 .fi
