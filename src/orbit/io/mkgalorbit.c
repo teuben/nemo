@@ -3,6 +3,22 @@
  *  
  *      18-apr-05   created        --   peter teuben
  *
+ * 
+ * In e.g. MIRIAD's subroutine vsub in velocity.for
+ * Velocity of the Sun with respect to the Local Standard of Rest
+ *
+ *  Speed = 20 km/s
+ *  Apex = RA 270 deg, Dec +30deg, 1900.0
+ *       = 18 07 50.3, +30 00 52, J2000.0
+ *
+ *  This is expressed in the form of a J2000.0 x,y,z vector:
+ *
+ *     VA(1) = X = -SPEED*COS(RA)*COS(DEC)
+ *     VA(2) = Y = -SPEED*SIN(RA)*COS(DEC)
+ *     VA(3) = Z = -SPEED*SIN(DEC)
+ *     DATA VA / -0.29000, +17.31726, -10.00141 /
+ *
+ *     Vlsr = 10.00 5.25 7.17  (from Hipparchos)
  */
 
 #include <stdinc.h>
@@ -23,7 +39,7 @@ string defv[] = {
     "R0=8.0\n             LSR distance (in kpc)",
     "V0=220.0\n           LSR velocities (in km/s)",
     "lsr=f\n              Use LSR correction of sun going (-9,12,7)",
-    "solar=9,12,7\n       Solar Motion in a right handed UVW system in km/s",
+    "solar=10,5.25,7.17\n Solar Motion in a right handed UVW system in km/s",
     "coordsys=gal\n       lon/lat coordinate system: equ=RA/DEC gal=GLON/GLAT",
     "tmode=0\n            T matrix mode:  0=idl 1=J&S1987 2=n/a 3=miriad",
 
@@ -32,7 +48,7 @@ string defv[] = {
     "potpars=\n	          .. with optional parameters",
     "potfile=\n		  .. and optional datafile name",
     "headline=\n          random verbiage",
-    "VERSION=0.7\n        21-apr-05 PJT",
+    "VERSION=0.7a\n       3-jun-05 PJT",
     NULL,
 };
 
