@@ -235,10 +235,12 @@ the responsibility of checking for I/O errors other than end-of-file.
 The library will delay reading large data-items in memory and only
 store a pointer to their location until it is really needed via
 one of the get_data() routines.
-.SH BUGS
+.SH CAVEATS
 Whenever pipes are used, all data is read into memory, as opposed to
 being deferred for input.
 This may lead to large memory consuption. 
+.PP
+random access can currently only take place in one item
 .SH AUTHOR
 Joshua E. Barnes, Lyman P. Hurd, Peter Teuben
 .SH SEE ALSO

@@ -158,6 +158,7 @@ loren		y=p1/PI( (x-p0)^2 + p1^2 )
 .SH EXAMPLE
 Here is an example of a linear fit: a straight 
 line, with some added noise and random weights between 1 and 2:
+(ieck, can't reproduce this anymore)
 .nf
 % nemoinp 1:100 |\\
 	tabmath - - "%1+rang(0,10),ranu(1,2)" seed=123 |\\
@@ -192,7 +193,8 @@ a= 4.46714 0.0416026
 b= 1.13036 0.0994723 
 c= 50.2263 0.845469
 d= 8.70728  0.959347
-
+rms2/chi2= 8.92068
+rms/chi = 1
 
 .fi
 Here is a contrived example of plotting the function to be plotted, by fixing all

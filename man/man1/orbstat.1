@@ -35,6 +35,21 @@ Default: \fBf\fP.
 The \fBellipse=t\fP option only makes sense for closed orbits, since
 the maximum extent in position and velocity is used for scaling factors
 to check the ellipsoidability.
+.SH EXAMPLES
+
+.nf
+  % mkorbit orb1 1 0 0 0 0.1 1 potname=plummer 'potpars=0,1/sqrt(2),1/sqrt(2)'
+  % orbint orb1 - 100 1 mode=euler | orbstat -
+# T     E       x_max   y_max   u_max   v_max   j_mean  j_sigma e_mean  e_sigma [abs]
+100 -0.0723503 1 4.04463 0 0.1 0.184855 0.0101289 0.163057 0.0239529
+  % orbint orb1 - 200 0.5 mode=euler | orbstat -
+100 -0.0723503 1 2.34815 0 0.1 0.137628 0.00395845 0.0401559 0.00887043
+  % orbint orb1 - 100 1 mode=rk4 | orbstat -
+100 -0.0723503 1.91846 0.745393 0.872376 0.1 0.0998526 7.33814e-05 -0.0746802 0.000728993
+  % orbint orb1 - 200 1/2 mode=rk4 | orbstat -
+100 -0.0723503 1.93045 0.710908 0.871285 0.1 0.0999952 2.51481e-06 -0.0724567 3.22187e-05
+
+.fi
 .SH "SEE ALSO"
 orblist(1NEMO)
 .SH AUTHOR
