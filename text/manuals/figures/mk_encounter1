@@ -1,0 +1,11 @@
+#! /bin/csh -f
+#
+
+mkommod in=$NEMODAT/k7isot.dat out=tmp1 nbody=100 seed=280158
+snapscale in=tmp1 out=tmp1s rscale=2 "vscale=1/sqrt(2.0)"
+
+mkommod in=$NEMODAT/k7isot.dat out=tmp2 nbody=100 seed=130159
+snapscale in=tmp2 out=tmp2s rscale=2 "vscale=1/sqrt(2.0)"
+
+snapstack in1=tmp1s in2=tmp2s out=i001.dat deltar=4,0,0 deltav=-1,0,0
+snapplot i001.dat xrange=-5:5 yrange=-5:5 yapp=encounter1.ps/vps psize=0.02
