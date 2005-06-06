@@ -1,6 +1,8 @@
 #! /bin/csh -f
 #
 
+rm -f tmp1 tmp1s tmp2 tmp2s i001.dat
+
 mkommod in=$NEMODAT/k7isot.dat out=tmp1 nbody=100 seed=280158
 snapscale in=tmp1 out=tmp1s rscale=2 "vscale=1/sqrt(2.0)"
 
