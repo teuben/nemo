@@ -61,7 +61,7 @@ to be rescaled using {\tt snapscale}:\index{snapscale(1)}
 
 In the case that your user interface was not compiled with the 
 {\bf NEMOINP}\footnote{This can be found out by 
-using the program nemoinp(1NEMO) or \verb+help=\?+.}
+using the program nemoinp(1NEMO) or {\tt help=?}.}
 directive, the {\tt vscale} expression has to be calculated by you,
 {\it i.e.} {\tt vscale=0.707107}. Also note the use of the quotes in
 the expression, to prevent the shell to give special meaning to
