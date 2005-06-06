@@ -12,16 +12,18 @@
 Here we list some of the standard potentials available in {\tt NEMO},
 in a variety of units, so not always $G=1$!
 
-Remember that most {\tt NEMO} program use the keywords {\tt potname=}
-for the identifying name, {\tt potpars=} for a list of parameters as listed
-below and an optional {\tt potfile=} for the few that have an associated 
-datafile for the
-potential. The parameters listed in {\tt potpars=} will always
+Recall that most {\tt NEMO} program use the keywords {\tt potname=}
+for the identifying name, {\tt potpars=} for an optional
+list of parameters 
+and {\tt potfile=} for an optional text string,for example
+for potentials that need some kind of text file.
+The parameters listed in {\tt potpars=} will always
 have as first parameter the pattern speed in cases
 where rotating potentials are used. 
 A Plummer potential with mass 10 and
 core radius 5 would be hence be supplied 
-as: {\tt potname=plummer potpars=0,10,5}. 
+as: {\tt potname=plummer potpars=0,10,5}.  The plummer potential
+ignored the {\tt potfile} keyword.
 
 \bigskip
 {\bf plummer:} Plummer potential (BT, pp.42, eq. 2.47)
