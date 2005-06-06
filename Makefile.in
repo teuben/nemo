@@ -1,4 +1,4 @@
-VERSION = NEMO V3.2 13-apr-04 PJT
+VERSION = NEMO V3.2 6-jun-05 PJT
 ################################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 ################################################################################
@@ -691,6 +691,9 @@ testbins:
 testsuite:
 	@echo ISSUE the following command:
 	@echo 'src/scripts/testsuite -b'
+
+check:
+	src/scripts/testsuite
 
 sure:	libs bins
 
