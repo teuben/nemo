@@ -1,6 +1,6 @@
 % NEMO LaTeX manual - needs a lot of .inc files to input, and .sty file
 %	for a style definition, and makeindex utility
-\nonstopmode			% prevent exiting when errors occur
+%\nonstopmode			% prevent exiting when errors occur
 \newcommand{\manual}{nemo}      % Used in a 'typeout' command at the end...
 
 % use a few TeX tricks to conditionally compile the manual...
@@ -106,7 +106,7 @@
 \usepackage{html}
 \usepackage{nemo}
 \usepackage{makeidx}
-\usepackage[english]{babel}
+% \usepackage[english]{babel}
 % \usepackage{ahpage}
 
 \makeindex
@@ -126,7 +126,7 @@
        }
 
 \date{{\small Version 3.2-MD} \\
-      {\small Spring 2004} \\
+      {\small Summer 2005} \\
       {\small Last document revised: \today\ by PJT} \\ \\
      }
 
@@ -142,7 +142,9 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % First page : title, author and date
-\maketitle
+%
+%BAD?
+%\maketitle
 \begin{htmlonly}
 A \htmladdnormallink{postscript version}{ftp://ftp.astro.umd.edu/pub/nemo/nemo.ps.gz}
 is available. \index{postscript version}
@@ -152,12 +154,13 @@ It is advisable not to use links to any pages other than the first
 page (this page). Small latex2html conversion problems remain.
 \end{htmlonly}
 
-\begin{abstract} 
-NEMO is a Stellar Dynamics Toolbox ...
-
-This document presents the main features of NEMO, and
-describes how to obtain, install, and use it.
-\end{abstract}
+%BAD?
+%\begin{abstract} 
+%NEMO is a Stellar Dynamics Toolbox ...
+%
+%This document presents the main features of NEMO, and
+%describes how to obtain, install, and use it.
+%\end{abstract}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
