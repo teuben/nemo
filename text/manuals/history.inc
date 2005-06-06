@@ -15,9 +15,9 @@ can be found in itemized form in \ref{as:history}
 
 \subsection{Graphics}
 
-Yapp can only be linked in once, there's no dispatcher yet, and
+Yapp can only be linked in once, there's no dispatcher, and
 different versions of the program exist for different graphics output
-(printers also) devices.
+devices.
 
 It would be nice to have more general dispatcher, which fully utilizes the 
 {\tt yapp=} system keyword, may be used such that only one compiled
@@ -88,7 +88,7 @@ on e.g.  an Alliant, Multiflow and SUN are binary compatible because of
 IEEE floating point \index{IEEE, floating} numbers and the proper size
 twos complement integers.  Support exists now for byte-swapping, such
 that files on Sun and Dec can be read and written either way.
-However, machines like the CRAY supercomputer with it's
+However, machines like the CRAY supercomputer with its
 deviating size and floating point format will have to convert their
 data as is exemplified in Section \ref{s:exch-data}.
 
@@ -110,15 +110,15 @@ many analysis programs which become I/O bound:
 \begin{description}
 
 \item{$\bullet$}
-    It's not always necessary to keep information in double
+    It is not always necessary to keep information in double
 precision. Images are also stored in doubles, in good
 faith with old C, where all math is intrinsically done 
-in double anyhow. This would save a factor of 2 in space.
+in double precision. This would save a factor of 2 in space.
 There exist data i/o routines with force float/double
 conversions ({\it get\_data\_coerced()}).
 
 \item{$\bullet$}
-    It's not always needed to keep all 6 phase space
+    It is not always needed to keep all 6 phase space
 coordinates, besides the data structure of snapshots has
 phase coordinates rather well tied in, it's not easy yet
 to separate positions and velocities, and only store
@@ -222,7 +222,8 @@ image display: more support for display facilities, e.g. {\it ds(1L)}.
 loadobj should understand constant expressions
 
 \item{$\bullet$}
-SPH : utilities. Makes Lars happy.
+SPH : utilities. 
+% Makes Lars happy.
 
 \item{$\bullet$}
 The everlasting expansion of the manual: more examples,
@@ -285,6 +286,12 @@ and making small updates to the package will be a lot easier.
 This section is not updated frequently, for more timely information it is probably
 better to consult
 {\tt http://www.astro.umd.edu/nemo/whatsnew.html}.
+
+\subsection{Release 3.3}
+To be released around the 2nd NbodySchool (Amsterdam, July 23-30 2005). Improved
+support to help installing various ancillary packages needed for the summer school
+(dubbed ``manybody'' in {\tt \$NEMO/usr/manybody}). The I/O library was
+updated with the ability to handle blocked I/O.
 
 \subsection{Release 3.2}
 Was released April 11, 2003, just after the Strasbourg N-body school. The multi-CPU
