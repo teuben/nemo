@@ -12,7 +12,8 @@
  */
  
 #define RANDOM  /* allow random access */
-#define CHKSWAP /* allow mixed endian datasets - this can be a bit dangerous */
+#define CHKSWAP /* allow mixed endian datasets - 
+                   this can be dangerous if you are multi-plexing them */
 
 /*
  * New-style magic numbers, for (bigendian) FITS type machines (like SUN)
