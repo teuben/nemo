@@ -26,7 +26,7 @@
  *  {\bf potname=teusan85}
  *
  * This potential is that of a barred galaxy model as 
- * described in Teuben & Sanders (1985)
+ * described in Teuben \& Sanders (1985)
  * This bar is oriented along the X axis.
  * This is the 2D version for forces.  This version should give (near)
  * identical results to {\bf bar83} and very simlar to {\bf athan92}.
