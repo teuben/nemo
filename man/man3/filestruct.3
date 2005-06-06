@@ -26,6 +26,10 @@ filestruct \- primitives for structured binary file I/O
 \fBvoid put_data_blocked(str, tag, dat, length)\fP
 \fBvoid put_data_tes(str, tag)\fP
 .PP
+\fBstring get_type(str, tag)\fP
+\fBint *get_dims(str, tag)\fP
+\fBint get_dlen(str, tag)\fP
+.PP
 \fBvoid strclose(str)\fP
 \fBbool qsf(str)\fP
 .PP
@@ -157,6 +161,12 @@ used for input.
 which is achieved by \fIget_data_ran\fP. \fIoffset\fP and \fIlength\fP
 are both in units of the item-length. They have a pipe-safe interface
 called \fIget_data_blocked\fP, where the I/O must occur sequentially.
+
+\fIget_type\fP, 
+\fIget_dims\fP,  and \fIget_dlen\fP return the type, 
+dimension array (allocated and zero terminated!), 
+and data-length in bytes for the whole item.
+These routines should be rarely needed by programmers though.
 .SH EXAMPLES
 The following code fragment reads and later writes some data to
 structured binary files.
