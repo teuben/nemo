@@ -14,7 +14,7 @@ string defv[] = {
     "in=\n         Input file (if provided)",
     "out=\n        output file (if provided)",
     "real=1.234\n  Real number to write (if out=)",
-    "count=1\n     Number of reals to write (if out=)",
+    "count=1\n     Number of reals/block to write",
     "blocks=1\n    Number of blocks to write",
     "set=t\n       Wrap inside of a set/tes?"
     "VERSION=1.4\n 7-jun-05 PJT",
@@ -29,7 +29,7 @@ string cvsid="$Id$";
 extern void get_nanf(float *);
 extern void get_nand(double *);
 
-static bool Qset = FALSE;
+static bool Qset;
 static string setName = "TestingBlockIO";
 
 
@@ -125,6 +125,7 @@ void nemo_main()
     int count, random;
     string name;
     int work = 0;
+    bool Qset = getbparam("set");
 
     x = getdparam("real");    
     count = getiparam("count");
