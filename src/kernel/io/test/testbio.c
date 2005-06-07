@@ -16,7 +16,8 @@ string defv[] = {
     "real=1.234\n  Real number to write (if out=)",
     "count=1\n     Number of reals to write (if out=)",
     "blocks=1\n    Number of blocks to write",
-    "VERSION=1.3\n 31-may-05 PJT",
+    "set=t\n       Wrap inside of a set/tes?"
+    "VERSION=1.4\n 7-jun-05 PJT",
     NULL,
 };
 
@@ -28,6 +29,10 @@ string cvsid="$Id$";
 extern void get_nanf(float *);
 extern void get_nand(double *);
 
+static bool Qset = FALSE;
+static string setName = "TestingBlockIO";
+
+
 int get_number(string name, real *x, int nb)
 {
     stream str;
@@ -36,6 +41,7 @@ int get_number(string name, real *x, int nb)
 
     str = stropen(name,"r");
     get_history(str);
+    if (Qset)  get_set(str,setName);
 
     if (!get_tag_ok(str,"n"))
         error("%s: missing \"n\", Not a valid TESTIO input file",name);
@@ -53,6 +59,7 @@ int get_number(string name, real *x, int nb)
 	get_data_blocked(str,"x",buf,m);
       get_data_tes(str,"x");
     }
+    if (Qset)  get_tes(str,setName);
     strclose(str);
 
     *x = *buf;
@@ -68,12 +75,11 @@ void put_number(string name, real x, int n, int r)
     stream str;
     real *buf;
     int nout,i;
-    bool Qset = TRUE;
 
     str = stropen(name,"w");
     put_history(str);
     nout = n*r;
-    if (Qset)  put_set(str,"Testing");
+    if (Qset)  put_set(str,setName);
     put_data(str,"n",IntType,&nout,0);
     buf = (real *) allocate(nout*sizeof(real));
     for (i=0; i<nout; i++)
@@ -82,7 +88,8 @@ void put_number(string name, real x, int n, int r)
         put_data(str,"x",RealType,buf,n,0);
         put_data(str,"y",RealType,buf,n,0);
     } else {
-#if 0
+#if 1
+      // the right way
         put_data_set(str,"x",RealType,nout,0);
         for (i=0;i<r;i++)
             put_data_blocked(str,"x",buf,n);
@@ -93,6 +100,7 @@ void put_number(string name, real x, int n, int r)
             put_data_blocked(str,"y",buf,n);
         put_data_tes(str,"y");
 #else
+	// this should fail (for now)
         put_data_set(str,"y",RealType,nout,0);
         put_data_set(str,"x",RealType,nout,0);
         for (i=0;i<r;i++) {
@@ -103,7 +111,7 @@ void put_number(string name, real x, int n, int r)
         put_data_tes(str,"y");
 #endif
     }
-    if (Qset) put_tes(str,"Testing");
+    if (Qset) put_tes(str,setName);
     strclose(str);
     dprintf(1,"Wrote number %f to file %s\n",x,name);
     free( (char *) buf);
