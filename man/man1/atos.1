@@ -1,4 +1,4 @@
-.TH ATOS 1NEMO "10 February 2004"
+.TH ATOS 1NEMO "8 June 2005"
 .SH NAME
 atos, atos_sp atosph, atosph_sp \-
 convert ascii N-body file to structured binary format
@@ -14,6 +14,8 @@ files to binary format.
 .PP
 The NEMO convention is to store the SPH particles first in arrays where
 SPH and pure N-body particles are stored.
+.PP 
+For a more general ASCII conversion program, see \fItabtos(1NEMO)\fP
 .SH PARAMETERS
 The following parameters are recognized.
 .TP 25
@@ -95,7 +97,7 @@ These formats may be repeated until end-of-file.
 For upward compatibility the header elements (NOBJ [NGAS] NDIM and TIME) can 
 now appear in the order, 
 .SH "SEE ALSO"
-stoa(1NEMO), rsf(1NEMO), tsf(1NEMO), filestruct(3NEMO), snapshot(5NEMO).
+stoa(1NEMO), rsf(1NEMO), tsf(1NEMO), tabtos(1NEMO), filestruct(3NEMO), snapshot(5NEMO).
 .SH AUTHOR
 Joshua E. Barnes, Peter Teuben
 .SH "UPDATE HISTORY"
