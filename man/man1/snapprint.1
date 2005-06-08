@@ -1,4 +1,4 @@
-.TH SNAPPRINT 1NEMO "18 March 2003"
+.TH SNAPPRINT 1NEMO "8 June 2005"
 .SH NAME
 snapprint \- print out items of a snapshot in table format
 .SH SYNOPSIS
@@ -70,14 +70,15 @@ something weird here. Code is identical to snapcenter, which uses same
 technique.
 .PP
 The inversion function of snapprint, reading a snapshot from a simple
-table, is not possible yet. A somewhat complicated ascii file, 
-consisting of a number of catenated tables, has to be created with 
+table, could be done with \fItabtos(1NEMO)\fP. Another
+route is the somewhat complicated ascii file, 
+consisting of a number of catenated tables, that has to be created with 
 a little header. See the "205" format in atos(1NEMO) or stoa(1NEMO).
 There are shell scripts which handle some of the cases here.
 .SH BUGS
 A single expression like \fIatan2(y,x)\fP is parsed into two.
 .SH SEE ALSO
-tabhist(1NEMO), mongo users-manual
+tabhist(1NEMO), tabtos(1NEMO), mongo users-manual
 .SH AUTHOR
 Peter Teuben
 .SH FILES
