@@ -4,10 +4,11 @@ gids \- Groningen Image Display Server
 .SH SYNOPSIS
 \fBgids\fP [-option value]...
 .SH DESCRIPTION
-\fBgids\fP is an X-windows display server program 
+\fBgids\fP is an X-windows display server program  
 that can display and manipulate images, in particular store an unlimited
 amount of images from a cube and display them in \fImovie\fP and 
-\fIslice\fP mode.
+\fIslice\fP mode. (see also \fIds9(lNEMO)\fP for a simple standalone
+version now in more common use within NEMO)
 .PP
 Clients talk to this server using the \fIgdi\fP library. The server can
 also send information back to the client, and it is up to the client to
