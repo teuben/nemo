@@ -15,7 +15,10 @@ is also given:
 Input file (snapshot format). No default.
 .TP 
 \fBout=\fP
-Output file (gadget format). No default.
+Output file (gadget format).  Each 
+snapshot is placed in its own file, and "%t"
+is replaced with the time of the snapshot (useful
+for times=all). No default.
 .TP
 \fBN=\fP\fINhalo,Ndisk,Nbulge,Nstars\fP
 Nhalo,Ndisk,Nbulge,Nstars needs to be specified for
