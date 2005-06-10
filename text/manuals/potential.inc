@@ -37,22 +37,22 @@ $$
 \item[$r_c$]    Core radius
 \end{enumerate}
 
-
-\begin{figure}[htp]
- \ifdoplot
-    \begin{center}
-        \leavevmode
-	\epsfxsize=12cm
-        \epsffile{plummer.ps}
-    \end{center}
- \else
-    \vspace{1.0in}
-    \begin{center}
-      {\it To generate this plot run ....}
-    \end{center}
-    \vspace{1.0in}
- \fi
- \caption[Plummer potential]{Plummer potential properties}
- \mylabel{f:plummer}
-\end{figure}
-
+%-----------------------------------------------------------------
+%\begin{figure}[htp]
+% \ifdoplot
+%    \begin{center}
+%        \leavevmode
+%	\epsfxsize=12cm
+%        \epsffile{plummer.ps}
+%    \end{center}
+% \else
+%    \vspace{1.0in}
+%    \begin{center}
+%      {\it To generate this plot run ....}
+%    \end{center}
+%    \vspace{1.0in}
+% \fi
+% \caption[Plummer potential]{Plummer potential properties}
+% \mylabel{f:plummer}
+%\end{figure}
+%-----------------------------------------------------------------
