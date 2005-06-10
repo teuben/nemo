@@ -547,7 +547,7 @@ The resulting contents of {\tt mass.dat} can be viewed with the
     char Headline[20] "All masses are equal"
 \end{verbatim}
 
-Note the octal representation {\tt 010=8} of {\tt Nbody}. 
+Note the octal representation {\tt 010=8} of {\tt Nbody}. **OLD**
 
 % CANNOT DO THIS YET - CONCEPT NOT INTRODUCED HERE
 % Also note
@@ -679,8 +679,28 @@ a {\tt get\_set()} and matching {\tt get\_tes()}, since I/O at deeper
 levels is random w.r.t. items and sets. In other words,
 at the top level I/O is sequential, at lower levels random.
 
-{\it !Some lyrics on new random access features in filestruct will go in here!}
-\index{random access}
+A relative new feature in data access is the ability to
+do random and blocked access to the data. Instead of using
+a single call to {\tt get\_data} and {\tt put\_data}, the
+access can be sequentially blocked using 
+{\tt get\_data\_blocked} and {\tt put\_data\_blocked}, provided
+it is wrapped using {\tt get\_data\_set} and {\tt get\_data\_tes},
+for example:
+
+\begin{verbatim}
+   get_data_set    (instr, "Mass", RealType, nbody, 0);
+   real *mass = (real *) allocate((nbody/2)*sizeof(real));
+   get_data_blocked(instr, "Mass", mass, nbody/2);
+   get_data_blocked(instr, "Mass", mass, nbody/2);
+   get_data_tes    (instr, "Mass");
+\end{verbatim}
+
+would read in the {\tt Mass} data in two pieces into a smaller sized {\tt mass}
+array. A similar mode exists to randomly access data with an item. A current
+limitation of this mode is that such access is only allowed on one item at a
+time. In this mode an item must be closed before the next one can be opened
+in such a mode.\index{blocked I/O}\index{filestruct,blocked I/O}
+\index{filestruct,random I/O}\index{random access}
 
 \subsection{vectmath.h}
 
