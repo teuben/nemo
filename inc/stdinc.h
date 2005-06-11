@@ -188,6 +188,9 @@ typedef struct _mstr {     /* see mstropen(3) */
  *       type, although some routines are compiled in both single
  *       and double. Using this conmpile directive we can keep one
  *       version of the source code.
+ * The "D" language defines a "real" as a floating point with the largest
+ * number of bits the hardware supports (e.g. 80 bit on intel). Don't confuse
+ * that with the real here, which is either float *or* double.
  */
 
 /*   first off, by default, NEMO will be in DOUBLEPREC mode */
