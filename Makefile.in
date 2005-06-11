@@ -2,6 +2,11 @@ VERSION = NEMO V3.2 6-jun-05 PJT
 ################################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 ################################################################################
+
+#  useful for MacOSX since it can't distinguish case (grmpfff)
+.PHONY:  INSTALL install
+
+
 # The following subdirectories (1&2) are needed for installation, although only
 # some may have been part of the tar file that was imported. 
 # The 2nd set of files need to exist, and must have world write permission :-(
