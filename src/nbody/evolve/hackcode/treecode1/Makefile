@@ -5,7 +5,7 @@ include $(NEMOLIB)/makedefs
 #	choose from:  -DQUICKSCAN, -DUSEFREQ, -DBINARYIO -DUSE_NEMO_IO
 TFLAGS = -DUSE_NEMO_IO
 
-L= $(NEMOLIB)/libnemo.a
+L= $(NEMO_LIBS)
 LIBN = $(L)
 
 BINFILES = treecode1 treecode1_q

@@ -17,7 +17,7 @@ NMAX = 2048
 #	Note the absence of the NDIM macro, as NDIM <> 3 is not supported
 #	in nbody0.f (yet). - july 1989 , PJT
 
-L = $(NEMOLIB)/libnemo.a
+L = $(NEMO_LIBS)
 # linking is now done via f77 command, hence no LIBF77 needed anymore
 #LIBF77 = -lF77 -lI77 -lU77 -lF77 -lI77 -lU77
 

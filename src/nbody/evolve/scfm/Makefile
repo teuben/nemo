@@ -69,7 +69,7 @@ scfm.exe: $(OBJ) $(SECOND)
 	$(FC) $(FFLAGS) -o scfm.exe $(OBJ) $(SECOND)
 
 runscfm: runscfm.c
-	$(CC) $(CFLAGS) -o runscfm runscfm.c -L$(NEMOLIB) -lnemo -lm
+	$(CC) $(CFLAGS) -o runscfm runscfm.c $(NEMO_LIBS)
 
 clean:
 	rm -fr $(BINS) core *.o SNAP??? SCFLOG SCFOUT SCFEL??? scfm.tar bench

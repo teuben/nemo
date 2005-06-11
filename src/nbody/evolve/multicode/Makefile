@@ -8,7 +8,7 @@ MBODY=4096
 QFLAGS =  -DMBODY=$(MBODY)
 
 # new lib: (YAPPLIB is imported from NEMORC file)
-L = $(NEMOLIB)/libnemo.a
+L = $(NEMO_LIBS)
 # old lib:
 #LIBN = $(NEMOLIB)/libNbody.a
 #LIBJ = $(NEMOLIB)/libT.a $(NEMOLIB)/libJ.a 
