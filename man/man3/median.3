@@ -1,0 +1,50 @@
+.TH MEDIAN 3NEMO "10 June 2005"
+.SH NAME
+median, init_median, finis_median \- compute the median of a distribution
+.SH SYNOPSIS
+.nf
+.B
+#include <moment.h>
+.PP
+.B real median(int n, real *x);
+.B void init_median(int size);
+.B void finis_median(void);
+.fi
+.SH DESCRIPTION
+\fImedian\fP computes the median value of a set of real values. Is uses
+an internal indexed sorting routine \fIsortptr(real *x, int *ix, int n)\fP
+where the index array is automatically allocated and resized depending
+on the need. Since NEMO does not have automated garbage collection,
+\fIfinis_median()\fP should be called to free up memory associated with
+the sorting procedure (the index array). 
+.PP
+This routine is very efficient if many medians are needed, however depending
+on your array (size), the sorting routine (a shell sort) may not be optimal
+for you.
+.SH EXAMPLES
+The following code computes the median
+.nf
+
+    real med, x[100];
+    int  n=100;
+	
+    init_median(n);
+    med = median(n,x);
+    finis_median();
+    
+.fi
+.SH SEE ALSO
+moment(3NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +1.5i
+~/src/kernel/misc	median.c
+.fi
+.SH UPDATE HISTORY
+.nf
+.ta +1i +4i
+20-jun-01	written 	PJT
+10-jun-05	man page written	PJT
+.fi
