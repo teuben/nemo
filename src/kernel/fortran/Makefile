@@ -51,13 +51,12 @@ test:	test.f getparam_ftoc.o ftoc
 	ftoc test.f > test_main.c
 	$(CC) $(CFLAGS) -c test_main.c
 	$(FC) $(FFLAGS) -c test.f
-	$(FC) $(FFLAGS) -o test test.o getparam_ftoc.o test_main.o -L$(NEMOLIB) -lnemo
+	$(FC) $(FFLAGS) -o test test.o getparam_ftoc.o test_main.o $(NEMO_LIBS)
 	nm test.o | grep -i nemomain
 	./test test.f
 
 ftoc:	ftoc.c
-	$(CC) $(CFLAGS) -o ftoc ftoc.c \
-	  -L$(NEMOLIB) -lnemo -lm
+	$(CC) $(CFLAGS) -o ftoc ftoc.c $(NEMO_LIBS)
 
 # getparam_ftoc.o: getparam_ftoc.c
 
