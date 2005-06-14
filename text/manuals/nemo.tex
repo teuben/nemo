@@ -10,6 +10,7 @@
 \newif\ifindex
 \newif\ifnemo
 \newif\ifdoplot
+\newif\ifPDF
 
 %% Define variables {var} needed in this document: \{var}true or \{var}false
 %% These are TeX tricks...
@@ -24,23 +25,27 @@
 \nemotrue	% some .inc files may be shared with miriad (bima)
 \doplottrue
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%                                                                            %%
-%% To print this LaTex document (name.tex):                                   %%
-%%                                                                            %%
-%%      latex name              (2 or 3 times to get page numbers right)      %%
-%%      makeindex < name.idx > name.ind (convert index file)                  %%
-%%      latex name              (2 or 3 times, includes the .ind file)        %%
-%%      dvipr name              (print it)                                    %%
-%%                                                                            %%
-%%      (If you don't have makeindex, created a zero-length file name.ind)    %%
-%%      (or remove the makeidx,showidx and \printindex at end of document)    %%
-%%                                                                            %%
-%%                              Peter Teuben                                  %%
-%%                                                                            %%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% PDF should be auto-detected
+\ifx\pdfoutput\undefined\PDFfalse
+\else\ifnum\pdfoutput > 0\PDFtrue
+     \else\PDFfalse
+     \fi
+\fi
+
+\newsavebox{\FrameCoverPage}
+\newenvironment{FrameCover}[4]%
+{\begin{lrbox}{\FrameCoverPage}\begin{minipage}[#1][#2][#3]{#4}}%
+{\end{minipage}\end{lrbox}\fbox{\usebox{\FrameCoverPage}}}
+
+\newcommand{\bmp}[2][t]{\begin{minipage}[#1]{#1}}
+\newcommand{\emp}{\end{minipage}}
+
+\newcommand{\FramePix}[3][t]{\fbox{\bmp[#1]{#2} #3 \emp }}
+
 
 % HISTORY - in reverse chronological order -
+%        7-jun-05 : rework for book style
+%	17-may-01 : style->class for latex2e
 %        7-apr-01 : dreaded update of manual for NEMO V3
 %	16-feb-96 : finally, html for latex2html 96.1
 %	25-jan-94 : added html.sty stuff for an online version
@@ -75,7 +80,6 @@
 %       13-jun-88 : back at UIUC again
 %       30-may-88 : repair lost version from UIUC
 %       28-mar-88 : initial shitty document converted to LaTeX
-%	17-may-01 : style->class for latex2e
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \ifindex
    % do nothing, \index definition from latex is used
@@ -100,14 +104,26 @@
 %   \input psinsert.inc                          % Insert plot command definitions
 % \fi
 
-\documentclass[headsepline,normalheadings]{book}
+%                      twoside
+%                      11pt
+\documentclass[headsepline,normalheadings,draft]{book}
 
 \usepackage{epsfig}
 \usepackage{html}
 \usepackage{nemo}
+\usepackage{layout}
 \usepackage{makeidx}
 \usepackage[english]{babel}
 % \usepackage{ahpage}
+
+\usepackage[T1]{fontenc}
+\ifPDF
+%  \usepackage[pdftex]{graphicx,color}
+%  \usepackage[pdftex]{hyperref}
+\else
+%  \usepackage[dvips]{graphicx}
+%  \usepackage[dvips]{hyperref}
+\fi
 
 \makeindex
 
@@ -127,12 +143,73 @@
 
 \date{{\small Version 3.2-MD} \\
       {\small Summer 2005} \\
-      {\small Last document revised: \today\ by PJT} \\ \\
+      {\small Last document revised: \today\ by PJT} 
      }
+
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{document}
-\pagenumbering{roman}
+\frontmatter  
+
+% title from title/author/date
+%\maketitle
+
+
+%-title--------------------------------------------------
+% 
+% \begin{FrameCover}{c}{3in}{s}{2.50in}
+% \vspace*{\stretch{1}}
+% \begin{flushright}
+% \textit{\LARGE NEMO \\[5mm]
+% \LARGE PROGRAMMERS and USERS GUIDE}
+% \rule{\linewidth}{.8mm}
+% \end{flushright}
+% \vspace*{\stretch{2}}
+% \FramePix[b]{.5in}
+% {\bfseries Logo\\ Here}
+% \hspace{.1in}
+% 
+% \bmp[b]{1.2in}
+% \hspace*{.4in}
+% \large\textsc{Peter}
+% 
+% \hspace*{.4in}
+% \large\textsc{ Teuben}
+% \emp
+% 
+% \end{FrameCover}
+
+\newpage
+%-title--------------------------------------------------
+\thispagestyle{empty}
+                                                                                        
+\begin{flushright}
+\vspace*{2.5in}
+{\huge NEMO }
+\vspace{0.5in}
+{\huge USERS and PROGRAMMERS GUIDE}
+\vspace{1in}
+
+
+{\Large
+Peter J. Teuben\\
+Astronomy Department \\
+University of Maryland \\
+College Park, MD 20742
+}
+
+\vspace{1in}
+
+{\small Version 3.2-MD} \\
+{\small Summer 2005} \\
+{\small Last document revised: \today\ by PJT} 
+
+\end{flushright}
+%--------------------------------------------------------
+
+% \pagenumbering{roman}
 %\setlength{\oddsidemargin}{0.0in}
 %\setlength{\evensidemargin}{0.0in}
 %\setlength{\textwidth}{6.5in}
@@ -144,7 +221,6 @@
 % First page : title, author and date
 %
 %BAD?
-%\maketitle
 \begin{htmlonly}
 A \htmladdnormallink{postscript version}{ftp://ftp.astro.umd.edu/pub/nemo/nemo.ps.gz}
 is available. \index{postscript version}
@@ -245,7 +321,10 @@ all rights reserved
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % The real start of the manual
 \cleardoublepage
-\pagenumbering{arabic}
+\mainmatter
+% \pagenumbering{arabic}
+
+
 \part{General Introduction and Concepts}
 \mylabel{p:intro}
 \chapter                {Introduction}
@@ -278,6 +357,8 @@ all rights reserved
  \input refs.inc
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \appendix
+%\renewcommand{\thechapter}{\Alph{chapter}}
+%\setcounter{chapter}{0}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \cleardoublepage
 \part{Appendices}
@@ -333,10 +414,15 @@ all rights reserved
 \cleardoublepage
 \chapter                {Future, Present and Past}
  \input history.inc
+
+% \layout
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % END OF DOCUMENT - The rest if index stuff
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \cleardoublepage
+\backmatter
 
 \ifindex
  \addcontentsline{toc}{chapter}{Index}
