@@ -795,3 +795,44 @@ of course.
 
 
 
+\section{Other Libraries}
+\mylabel{as:otherlibs}
+
+Although NEMO can be installed without any additional libraries, a few
+common ones 
+
+Many libraries use the {\tt configure} scripts, and notably with the 
+{\tt --prefix=} command line to install their include files, libraries
+and other ancillary data in standard locations such as
+{\tt /usr/local}. For this purpose NEMO now supports installing them
+within the NEMO hierarchy, to ensure ease of porting with the same
+compiler and environment:
+
+\begin{verbatim}
+    configure --prefix=$NEMO/opt
+    make
+    make install
+\end{verbatim}
+
+
+\begin{center}
+\begin{table}[h]
+\caption{Optional Libraries NEMO can use}
+\begin{tabular}{||l|l|l||}
+\hline
+library	  &  version       &   comments \\
+\hline
+pgplot      & 5.22 (carma)      &  yapp graphics library \\
+plplot      & 5.x               &  yapp graphics library \\
+hdf         & 4.x               &  data I/O library (e.g. hdfgrid, sdsfits) \\
+gsl         & 1.4               & Gnu Scientific Library - optional \\
+cfitsio     & 5.x               & fits I/O library - optional \\
+
+\hline
+
+
+\end{tabular}
+\label{t:libraries}
+\end{table}
+\end{center}
+
