@@ -23,12 +23,13 @@
  * Versions                                                                    |
  * 0.0   14-aug-2002    created                                           WD   |
  * 0.1   18-nov-2002    converted from C++ to C                           WD   |
+ * 0.2   24-may-2005    bit more dprintf() output                        PJT   |
  *                                                                             |
  *----------------------------------------------------------------------------*/
 
 /*CTEX
  *
- * The NFW (Navarro,Frank \& White) density is given by
+ * The NFW (Navarro,Frank \& White, 1997 ApJ 490, 493) density is given by
  *
  * $$
  *    \rho = {  M_0  \over { r (r+a)^2}}
@@ -40,18 +41,19 @@
  * $$
  */
 #include <stdinc.h>
+
 static double a,ia,fac;
 
-void inipotential(int*npar, double*par, string file) {
+void inipotential(int *npar, double *par, string file) {
   double omega, scale, vcmax;
   omega = (*npar>0)? par[0] : 0.;
   scale = (*npar>1)? par[1] : 1.;
   vcmax = (*npar>2)? par[2] : 1.;
-  if (*npar>3) warning("Skipped potential parameters for tcdm beyond 3");
+  if (*npar>3) warning("Skipped potential parameters for potname=nfw beyond 3");
   a   = scale;
   ia  = 1./a;
   fac = a * vcmax*vcmax / 0.2162165954;
-  dprintf (1,"INI_POTENTIAL NFW potential\n");
+  dprintf (1,"INI_POTENTIAL NFW potential s\n");
 }
 //------------------------------------------------------------------------------
 #define POTENTIAL(TYPE)							\

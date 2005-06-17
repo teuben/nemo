@@ -20,22 +20,24 @@
 
 /*CTEX
  *  {\bf potname=ccd
- *	 potpars={\it $\Omega,Iscale,Xcen,Ycen,Dx,Dy$}
+ *	 potpars={\it $\Omega,I_s,X_c,Y_c,D_x,D_y$}
  *	 potfile={\it image(5NEMO)}}
  *
- *  This potential is defined using a simple cartesian grid on which the potential
- *  values are stored. Using bilinear interpolation the values and derivatives are
+ *  \smallskip
+ *  This potential is defined using potential values stored on a simple cartesian grid.
+ *  Using bilinear interpolation the values and derivatives are
  *  computed at any point inside the grid. Outside the grid (as defined by the
  *  WCS in the header) the potential is not defined and assumed 0.
  *  The lower left pixel of an image in NEMO is defined as (0,0), with WCS values
- *  Xmin,Ymin derived from the header. If the (Xcen,Ycen) parameters are used, 
- *  these are the  0-based pixel coordinates of the center pixel. If (Dx,Dy) are used, 
+ *  $X_{min},Y_{min}$ derived from the header. If the ($X_c,Y_c$) parameters are used, 
+ *  these are the  0-based pixel coordinates of the center pixel. If ($D_x,D_y$) are used, 
  *  these are the pixel separations.
- *  To aid astronomical images where $Dx < 0$, these are interpreted as positive.
+ *  To aid astronomical images where $D_x < 0$, these are interpreted as positive.
  *  Also note that potentials are generally negative, so it is not uncommon to need
- *  $Iscale = -1$. Programs such as {\it potccd} can create such a {\bf ccd} grid 
+ *  $I_s = -1$. Programs such as {\it potccd} can create such a {\bf ccd} grid 
  *  potential from a regular potential.
  *
+ *  \smallskip
  *  Note: Since these forces are defined only in the Z=0 plane, the Z-forces are always
  *  returned as 0.
  */
@@ -45,7 +47,7 @@
 #include <filestruct.h>
 #include <image.h>
 
-#define CCD_VERSION "ccd V3.1 19-sep-04"
+#define CCD_VERSION "ccd V3.1a 17-jun-05"
 
 local double   omega = 0.0;
 local double   iscale = 1.0;

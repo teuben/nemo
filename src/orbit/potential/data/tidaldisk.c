@@ -34,9 +34,10 @@
 * Parameters (to be given by potpars=...) are:                         
 * \begin{verbatim}
 * par[0] = not used (reserved for pattern speed in NEMO)               
-* par[1] = h    scale-height  par[1] = 0 -> thin disk                  
-*                             par[1] > 0 -> vertically exponential disk
-*                             par[1] < 0 -> sech$^2$ disk with h=|par[1]|
+* par[1] = h    scale-height  
+* .                            par[1] = 0 -> thin disk                  
+* .                            par[1] > 0 -> vertically exponential disk
+* .                            par[1] < 0 -> sech$^2$ disk with h=|par[1]|
 * par[2] = Sig  disk surface density                        
 * par[3] = Vz   constant vertical velocity of cluster center
 * par[4] = Z0   cluster center z-position at t=0     
@@ -46,13 +47,17 @@
 * We always assume G=1.
 *
 * If you want to include the acceleration of the disk on the cluster as a      
-* whole, rather than assume a constant velocity, use vertdisk.c                
+* whole, rather than assume a constant velocity, use {\bf vertdisk}
 *
 * Some words on the mechanics                         
 *
 * Assume that the plane-parallel disk potential and force are given by         
 * $$                                                                             
-*     \Phi(Z)  and  F(Z) = -\Phi'(Z).                                         
+*     \Phi(Z)  
+* $$                                                                             
+* and
+* $$                                                                             
+*     F(Z) = -\Phi'(Z).                                         
 * $$                                                                             
 * Then, the tidal force exerted on a star at position z w.r.t. to cluster      
 * center, which in turn is at absolute height Zc = Z0 + t Vz, is simply        

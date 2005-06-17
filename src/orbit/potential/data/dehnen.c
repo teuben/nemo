@@ -10,7 +10,8 @@
  *       potpars={\it $\Omega,M,a,\gamma$}}
  *
  *  Walter Dehnen (1993, MN {\bf 265}, 250-256) introduced a
- *  family of potential-density pairs for spherical systems:
+ *  family of potential-density pairs for spherical systems,
+ *  which he often refers to as the ``gamma'' models.
  *
  * The potential is given by:
  * $$

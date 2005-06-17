@@ -10,6 +10,9 @@
 /*CTEX
  *  {\bf potname=mestel
  *       potpars={\it $\Omega,M,R$}}
+ *
+ *  \smallskip
+ *  See also the description for the Kuzmin disk.
  */
  
 

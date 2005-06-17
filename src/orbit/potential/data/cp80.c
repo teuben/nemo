@@ -20,7 +20,9 @@
  *
  *  Contopoulos \& Papayannopoulos (1980, A\&A, 92,33)
  *  used this potential
- *  in the study of orbits in barred galaxies. Note that their
+ *  in their study of orbits in barred galaxies, and has
+ *  been used in other studies thereafter.
+ *  Note that their
  *  ``bar'' is oriented along the Y-axis, an axis ratio is not
  *  well defined, and for larger values of $\epsilon$ the density
  *  can be negative. The potential used is given by adding an
