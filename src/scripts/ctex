@@ -63,7 +63,7 @@ foreach a ($*)
             endif
 	    if ($header) then
               if ($mode == latex) then
-                echo "\documentstyle{report}"
+	        echo "\documentclass{report}"
                 echo "\begin{document}"
               endif
 	    endif
