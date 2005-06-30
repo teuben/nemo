@@ -1,4 +1,4 @@
-.TH GETPARAM 3NEMO "29 December 2004"
+.TH GETPARAM 3NEMO "30 June 2005"
 .SH NAME
 getXparam, hasvalue, isaparam, initparam, finiparam, stop \- main startup and command line processing.
 .SH SYNOPSIS
@@ -143,7 +143,9 @@ The latter recognizes the digit "1" or any string starting with one of
 All the \fIgetXparam\fP function can do simple parsing of expressions,
 see \fInemoinp(3NEMO)\fP for some extended rules. Also note that 
 \fIgetparam\fP returns a string into private space, that should not
-be modified or freed!
+be modified or freed! An single parameter
+integer that starts with the \fB0x\fP string, can also be parsed
+as a hexdecimal value (see \fIstrtol(3)\fP).
 .PP
 As a special case, the contents of \fIargv\fP[0], which is the name used
 to invoke the process, are associated with the keyword name \fBargv0\fP.
