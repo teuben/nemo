@@ -125,6 +125,7 @@
  * 20-sep-04       j  disabled the version checking by default
  * 18-oct-04       k  support for the CVS ID (cvsid)
  * 28-dec-04       l  help/report CVS ID properly (help=I)
+ * 30-jun-05       o  parse integers with 0x as hex numbers
 
   TODO:
       - what if there is no VERSION=
@@ -168,7 +169,7 @@
 	opag      http://www.zero-based.org/software/opag/
  */
 
-#define GETPARAM_VERSION_ID  "3.4n 28-mar-05 PJT"
+#define GETPARAM_VERSION_ID  "3.4o 30-jun-05 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -1498,6 +1499,8 @@ int getiparam(string par)
 #if !defined(NEMOINP)
     return (atoi(val));                         /* convert to an integer */
 #else
+    if (strncmp("0x",val,2)==0)                 /* parse as single hex # */
+      return strtol(val,0,16);
     nret = nemoinpi(val,&ipar,1);
     if (nret < 0)
         error("getiparam(%s=%s) parsing error %d, assumed %d\n",
@@ -1533,6 +1536,8 @@ long getlparam(string par)
 #if !defined(NEMOINP)
     return atol(val);                           /* convert to an integer */
 #else
+    if (strncmp("0x",val,2)==0)                 /* parse as single hex # */
+      return strtol(val,0,16);
     nret = nemoinpl(val,&lpar,1);
     if (nret < 0)
         error("getlparam(%s=%s) parsing error %d assumed %l\n",
