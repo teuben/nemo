@@ -1,0 +1,65 @@
+.TH CCDMOS 1NEMO "05 Jul 2005"
+.SH NAME
+ccdmos \- mosaic a regular pattern of images
+.SH SYNOPSIS
+\fBccdmos\fP [parameter=value]
+.SH DESCRIPTION
+\fBccdmos\fP started as a quick hack to \fIstich\fP a set of images into
+a single large image, with no overlaps or missing data. 
+A list of identically shaped 2D images will be
+mosaiced row by row (first image in the lower left bottom). The user
+must supply at least the number of rows or columns, in order to establish
+the size of the output image.
+.PP
+There are some extra not-yet-implemented keywords by which a cube
+could be generated.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input filename(s). If a large number of filesa are needed where the
+shell would complain about exhausting the command line space, use
+the \fBin=@list\fP macro style that \fPgetparam(3NEMO)\fP supports.
+No default.
+.TP
+\fBout=\fP
+Output filename [???]     
+.TP
+\fBnx=\fP
+Number of rows []    
+Number of rows of input images in the output image. 
+At least one of nx or ny must be given.
+.TP
+\fBny=\fP
+Number of columns []    
+Number of columns of input images in the output image. 
+At least one of nx or ny must be given.
+.TP
+\fBnz=\fP
+Number of planes. Not implemented yet, but by setting 
+a number > 1 we could support writing cubes out of
+planes, much like what \fIfitsglue(1NEMO)\fP does.
+.TP
+\fBonefile=t|f\fP
+All images in one file? [f]  
+This would be useful if one big 2D image is to be made out of an
+image cube.
+Not supported yet.
+.TP
+\fBrow=t|f\fP
+Should the list of files be processed row-wise (the current default)
+or column-wise. Not implemented yet.
+.SH CAVEAT
+Since it was a quick hack, only very rudimentary error checking exists.
+And of course there are all these not-yet-implemented keywwords....
+.SH EXAMPLES
+.SH SEE ALSO
+.SH FILES
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+1-Jul-05	V1.0 Created	NEMO
+.fi
