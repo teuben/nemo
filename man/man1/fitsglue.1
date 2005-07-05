@@ -8,6 +8,9 @@ fitsglue \- catenate fits images into a fitscube
 together in a fits cube. It only works for FITS primary header
 images. It also had rudimentary options to attempt to fix up the
 WCS of the new fits cube.
+.PP
+If you need to catenate the images in the spatial (1st or 2nd dimension)
+plane, use \fIccdmos(1NEMO)\fP.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -70,7 +73,7 @@ wrong.
 .PP
 Size of resulting data is not filled to multiple 2880 boundary
 .SH SEE ALSO
-fitss(5NEMO), getparam(3NEMO), ccdfits(1NEMO), fitsccd(1NEMO)
+fits(5NEMO), getparam(3NEMO), ccdfits(1NEMO), fitsccd(1NEMO), ccdmos(1NEMO)
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
