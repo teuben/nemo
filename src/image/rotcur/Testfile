@@ -38,6 +38,10 @@ map1.vel:
 	@nemoinp $(R) | $(EXEC) tabmath - - "100*%1/(20+%1)+rang(0,$(SIG))" all seed=123 > map1.v
 	$(EXEC) ccdvel map1.vel radii=@map1.r vrot=@map1.v pa=$(PA) inc=$(INC)
 
+map1.tab: map1.vel
+	ccdprint map1.vel x= y= newline=t label=x,y | awk '{if ($$3 != 0) print $$1-63.5,$$2-63.5,$$3}' > map1.tab
+
+
 map1.den:
 	@echo Creating $@
 	@nemoinp $(R) > map1.r
@@ -55,11 +59,21 @@ velcube: map1.den map1.vel
 ccdvel:	map1.den
 	@echo Running $@
 
-rotcur: map1.vel
+.PHONY: rotcur
+
+rotcur: rotcur1 rotcur2
+
+rotcur1: map1.vel
 	@echo Running $@
 	$(EXEC) rotcur in=map1.vel radii=$(R) vrot=10,100 pa=$(PA) inc=$(INC) vsys=0 reuse=f \
 	   tab=map1.rotcur units=sec,1 > $(NULL) ; nemo.coverage rotcur.c
 	@tail -7 map1.rotcur
+
+rotcur2: map1.tab
+	@echo Running $@
+	$(EXEC) rotcur in=map1.tab radii=$(R) vrot=10,100 pa=$(PA) inc=$(INC) vsys=0 reuse=f imagemode=f \
+	   tab=map2.rotcur units=sec,1 > $(NULL) ; nemo.coverage rotcur.c
+	@tail -7 map2.rotcur
 
 rotcurshape: map1.vel
 	$(EXEC) rotcurshape in=map1.vel radii=0,60 pa=$(PA) inc=$(INC) vsys=0 \
