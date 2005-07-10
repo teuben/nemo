@@ -19,6 +19,7 @@
 # 27-mar-04     force rebuilding some executables upon reload (+typo fix)
 # 28-jun-04     debug option
 # 20-may-05     make script more generic, less dependant on NEMO, and distribute with WIP
+# 10-jul-05     removed the always problematic never used TKDRIV driver
 
 
 # Other places to get pgplot from
@@ -52,7 +53,7 @@ endif
 if ($?NEMOLIB) then
   set lib=$NEMOLIB
 endif
-set drivers=CGDRIV,GIDRIV,NUDRIV,PGDRIV,PPDRIV,PSDRIV,WDDRIV,XWDRIV,TKDRIV
+set drivers=CGDRIV,GIDRIV,NUDRIV,PGDRIV,PPDRIV,PSDRIV,WDDRIV,XWDRIV
 if ($?NEMOHOST) then
   set host=$NEMOHOST
 endif
