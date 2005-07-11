@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004                                       
+// Copyright Jean-Charles LAMBERT - 2004-2005                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -26,6 +26,7 @@ class GLBox;
 class GLHudObject;
 
 #include "gl_hud_object.h"
+#include "global_options.h"
 
 class GLBox : public QGLWidget
 {
@@ -33,9 +34,8 @@ class GLBox : public QGLWidget
 
     public:
 
-  GLBox( QWidget* parent, const char* name, const QGLWidget* shareWidget=0,
-        const bool _blending=TRUE, const bool _dbuffer=TRUE, const bool _grid=FALSE, 
-        const float _psize=1.5);
+  GLBox( QWidget* parent, const char* name,GlobalOptions * _options,
+        const QGLWidget* shareWidget=0);
   ~GLBox();
   float getXtrans() { return xTrans;};
   float getYtrans() { return yTrans;};
@@ -78,7 +78,7 @@ class GLBox : public QGLWidget
   int getWidth() { return width;};
   int getHeight() { return height;};
   void setProjection(int, int);
-  void getData(const int *, const float *, const ParticlesRangeVector*);
+  void getData(const int *, const float *, ParticlesSelectVector*);
   void toggleGrid();
   void toggleBlending() { 
     //cerr << "Blending = " << blending << "\n";
@@ -89,13 +89,26 @@ class GLBox : public QGLWidget
     depth_buffer = ! depth_buffer;
     updateGL();
   }
+  // Grids
   void toggleGridX() { gridx->toggleActivate(); updateGL();};
   void toggleGridY() { gridy->toggleActivate(); updateGL();};
   void toggleGridZ() { gridz->toggleActivate(); updateGL();};
+  void resizeGrid(const float, const int);
+  void changeColorGridX(const QColor color) { gridx->setColor(color); updateGL();};
+  void changeColorGridY(const QColor color) { gridy->setColor(color); updateGL();};
+  void changeColorGridZ(const QColor color) { gridz->setColor(color); updateGL();};
+  // Hud
   void toggleHUD()   { hud->toggleActivate();   updateGL();};
+  void setHudActivate();
+  void changeColorHUD(const QColor color);
+  // divers
   void togglePoly()  { show_poly =! show_poly;  updateGL();};
   void setParticlesSize(int);
   void bestFit();
+  // textures
+  void setTextureSize(const float );
+  void changeTextureAlphaColor(const int alpha);
+  
   public:
   
   bool statusBlending() { return blending;}
@@ -104,9 +117,17 @@ class GLBox : public QGLWidget
   
   const GLfloat  getParticlesSize() { return particles_size;}
 
+  // return gridXYZ status
   bool statusGridX() { return gridx->getActivate();};
   bool statusGridY() { return gridy->getActivate();};
   bool statusGridZ() { return gridz->getActivate();};
+  // set gridXYZ status
+  void setGridXActivate(bool status) { gridx->setActivate(status);};
+  void setGridYActivate(bool status) { gridy->setActivate(status);};
+  void setGridZActivate(bool status) { gridz->setActivate(status);};
+  // rebuild grid
+  void gridReBuild();
+  
   bool statusPoly()  { return show_poly; };
   void toggleLineAliased() { line_aliased =! line_aliased; updateGL();};
   void setHud(const GLHudObject::HudKeys k,const QString text);
@@ -114,9 +135,13 @@ class GLBox : public QGLWidget
   void setHud(const GLHudObject::HudKeys k,const float value);
   void setHudToggle(const GLHudObject::HudKeys k);  
   void setHudActivate(const GLHudObject::HudKeys k, const bool status);  
+  void hudProjection();
   const double * getProjMatrix() { return ((double *) mProj); };
   const double * getModelMatrix() { return ((double *) mModel); };
   const int    * getViewPort() { return ((int *) viewport); };
+  
+  // Orthographic projection
+  void setOrthoProjection(float);
   
   GLfloat MAX_PARTICLES_SIZE;
   
@@ -133,6 +158,8 @@ class GLBox : public QGLWidget
   //
   GLfloat ratio;
   
+  // store options
+  GlobalOptions * store_options;
   // zoom/rotation/translation
   float zoom, zoo_power;
   GLfloat xRot, yRot, zRot, scale;
@@ -175,5 +202,6 @@ class GLBox : public QGLWidget
     glGetIntegerv(GL_VIEWPORT,viewport);
   };
   void loadImage();
+  void computeOrthoFactorRatio();
 };
 #endif // GLBOX_H

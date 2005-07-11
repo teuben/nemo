@@ -9,40 +9,55 @@
 // ============================================================================
 // See the complete license in LICENSE and/or "http://www.cecill.info".        
 // ============================================================================
+#include "global_options.h"
 #include <iostream>
-#include <errno.h>
-#include <netinet/in.h>
-#include "SocketClient.h"
-
-
-using namespace std; // prevent writing statment like 'std::cerr'
+#include <qnamespace.h>
 
 // ============================================================================
-// Constructor                                                                 
-// Create a socket                                                             
-SocketClient::SocketClient(const char * server, 
-		 	   int type,
-			   int listen_port):Socket(type)
+// constructor                                                                 
+GlobalOptions::GlobalOptions()
 {
-  getSocketAddr(server,&serAddr,listen_port);
+  // SET default parameters
+  MAX_PARTICLES_SIZE=5.0;
+  MAX_TEXTURE_SIZE=1.0;
+  // from OpenGL TAB
+  show_part=true;
+  psize=1.5;
+  blending=true;
+  dbuffer=true;
+  perspective=true;
+  orthographic=false;
+  // from Scene Orientation TAB
+  zoom=-1.0;
+  zoomo=1.0;
+  xrot=yrot=xrot=0.0;
+  xtrans=ytrans=ztrans=0.0;
+  // from Grids TAB
+  show_grid=true;
+  mesh_length=1.0;
+  nb_meshs=28;
+  xy_grid=true;
+  yz_grid=xz_grid=false;
+  col_x_grid = QColor(136,141,102);
+  col_y_grid = QColor(136,141,102);
+  col_z_grid = QColor(136,141,102);
+  // from HUD TAB
+  hud=true;
+  hud_title=hud_time=hud_zoom=hud_rot=true;
+  hud_trans=hud_data_type=hud_nbody=hud_projection=true;
+  background_color=QColor(Qt::black);
+  hud_color=QColor(Qt::yellow);
+  // from experimental TAB
+  show_poly=false;  
+  texture_size=0.52;
+  texture_alpha_color=125;
 }
 // ============================================================================
-// Destructor                                                                  
-// close socket                                                                
-SocketClient::~SocketClient()
+// destructor                                                                  
+GlobalOptions::~GlobalOptions()
 {
-  Socket::close();
 }
 // ============================================================================
-// SocketClient::connectServer()                                               
-// Connect socket to the server                                                
-int SocketClient::connectServer()
-{
-  if (connect(sd,(struct sockaddr *) &serAddr, 
-	      sizeof(serAddr)) == -1 ) {
-    perror("connect");
-    sd = -1;
-  }
-  return sd;
-}
-// ============================================================================
+
+
+

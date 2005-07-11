@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004                                       
+// Copyright Jean-Charles LAMBERT - 2004-2005                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -51,30 +51,50 @@
 #include <nemo.h>
 
 #include "globjwin.h"
+
 using namespace std;
-//------------------------------------------------------------------------------
-// NEMO parameters
+// ============================================================================
+// NEMO parameters                                                             
 ::string defv[] = {  // use `::'string because of 'using namespace std'
-  "in=\n             Nemo input snapshot                            ",
-  "server=\n         Running simulation server hostname             ",
-  "select=all\n      Select particles                               ",
+  "in=\n             Nemo input snapshot                                             ",
+  "server=\n         Running simulation server hostname                              ",
+  "select=all\n      Select particles from the : range operator , separeted\n"
+  "                   by a comma. E.g 0:999,1000:1999 would select two sets\n"
+  "                   of 1000 particles and give them a different color              ",
+  "range_visib=t\n   toggle visibility  for the particles selected via \'select=\'\n"
+  "                   options. Can be usefull if you only want to display particles\n"
+  "                   selected via \'select_list\' options(see below). In that case\n"
+  "                   you should set \'f\'                                           ",
+  "select_list=\n    Select particles from list of indexes          ",
   "times=all\n       Select time                                    ",
   "blending=t\n      Activate blending colors                       ",
-  "dbuffer=t\n       Activate OpenGL depth buffer                   ",
+  "dbuffer=f\n       Activate OpenGL depth buffer                   ",
+  "perspective=t\n   false means orthographic                       ",
+  "bestzoom=t\n      automatic zoom                                 ",
+  "ortho_range=6.0\n xy range if orthographic projection            ",
+  "zoom=-14\n        zoom value                                     ",  
+  "xrot=0.0\n        rotation angle on X axis                       ",
+  "yrot=0.0\n        rotation angle on Y axis                       ",
+  "zrot=0.0\n        rotation angle on Z axis                       ",
+  "xtrans=0.0\n      translation on X                               ",
+  "ytrans=0.0\n      translation on Y                               ",
+  "ztrans=0.0\n      translation on Z                               ",
   "grid=f\n          Show grid                                      ",
-  "psize=2.0\n       Set particles size                             ",
+  "gaz=f\n           gaz like particle effect                       ",
+  "texture_s=0.15\n  texture size of gaz particle                   ",
+  "texture_ac=125\n  texture alpha color of gaz particle            ",
+  "psize=1.0\n       Set particles size                             ",
   "port=4444\n       Server's communication port                    ",
   "wsize=925\n       Windows's width size                           ",
   "hsize=685\n       Windows's height size                          ",
   "screenshot=\n     Screenshot name                                ",
-  "VERSION=0.52\n     "__DATE__"  - JCL  compiled at <"__TIME__">   ",
+  "VERSION=0.87\n     "__DATE__"  - JCL  compiled at <"__TIME__">   ",
   NULL
 };
 ::string usage="3D OpenGL Nemo Snapshot rendering";
-/*
-  The main program is here. 
-*/
 
+// ============================================================================
+//  The main program is here                                                   
 int main( int argc, char **argv )
 {
   QApplication::setColorSpec( QApplication::CustomColor );
@@ -91,8 +111,8 @@ int main( int argc, char **argv )
   initparam(argv,defv);
 
   // CAUTION !!! do not call getparam function after **GLObjectWindow** object
-  // instantiation bc nemo engine get corrupted by io_nemo afterwhile the
-  // snapshot has been loaded. 
+  // instantiation bc nemo engine get corrupted by io_nemo afterwhile the     
+  // snapshot has been loaded.                                                
   const int wsize=getiparam("wsize");
   const int hsize=getiparam("hsize");
   ::string screenshot=NULL;
@@ -110,14 +130,8 @@ int main( int argc, char **argv )
                 wsize,hsize);
 
   a.setMainWidget( &w );
-  //w.hide();  
   w.show();  
-  //w.hide();
   w.resize(wsize-1,hsize-1); // trick to update GL buffer with right W & H
-  //w.hide();
-  //w.glbox->screenshot();
-  //w.glbox->ScreenDump();
-  //w.glbox->myResizeGL(320,200);
   w.glbox->enable_s=true;
   if (has_screenshot) {
     w.takeScreenshot(screenshot);
@@ -127,3 +141,4 @@ int main( int argc, char **argv )
     return a.exec();
   }
 }
+// ============================================================================

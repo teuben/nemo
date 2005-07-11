@@ -9,36 +9,48 @@
 // ============================================================================
 // See the complete license in LICENSE and/or "http://www.cecill.info".        
 // ============================================================================
-//                                                                             
-// MovieThread class definition                                                
-//                                                                             
-// Grab GL frame buffer to make movie                                          
-// ============================================================================
-#ifndef MOVIE_THREAD_H
-#define MOVIE_THREAD_H
+#ifndef GLOBAL_OPTIONS_H
+#define GLOBAL_OPTIONS_H
 
-#include <qthread.h>
-#include <qimage.h>
-#include <qobject.h>
-#include "glbox.h"
-class MovieThread : public QThread, QObject {
-  //Q_OBJECT
+#include <qgl.h>
+#include <qcolor.h>
+class GlobalOptions{
 public:
-  MovieThread(int fps, GLBox * _glbox);
-  ~MovieThread();
-  
-  void run();
-  void stop();
+    GlobalOptions();
 
-private:
-  int my_timer, play_timer;
-  GLBox * glbox;
-  vector <QImage> store_image;
-  bool enable;
-  
-  void grabFrameBuffer();
-  void callMe();    
-  void timerEvent( QTimerEvent *e );
+    ~GlobalOptions();
+
+    // from OpenGL TAB
+    bool show_part;
+    float psize;
+    bool blending;
+    bool dbuffer;
+    bool perspective;
+    bool orthographic;
+    // from Scene Orientation TAB
+    float zoom,zoomo;
+    float xrot,yrot,zrot;
+    float xtrans,ytrans,ztrans;
+    // from Grids TAB
+    bool show_grid;
+    float mesh_length;
+    int nb_meshs;
+    bool xy_grid, yz_grid, xz_grid;
+    QColor col_x_grid, col_y_grid, col_z_grid;
+    // from HUD TAB
+    bool hud;
+    bool hud_title, hud_time, hud_zoom, hud_rot,
+      hud_trans, hud_data_type, hud_nbody, hud_projection;
+    QColor background_color, hud_color;
+    // from experimental TAB
+    bool show_poly;
+    float texture_size;
+    int texture_alpha_color;
+    // network;
+    int port;
+    // const
+    float MAX_PARTICLES_SIZE;
+    float MAX_TEXTURE_SIZE;
 };
 #endif
 // ============================================================================

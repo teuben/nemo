@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004                                       
+// Copyright Jean-Charles LAMBERT - 2004-2005                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -20,11 +20,8 @@
 #include <qgl.h>
 #include "gl_object.h"
 #include <iostream>
-//#include "glbox.h"
 class GLBox;
-
 using namespace std;
-
 
 class GLTextObject : public GLObject {
 
@@ -41,7 +38,6 @@ class GLTextObject : public GLObject {
   int getLabelWidth();
   int getTextWidth();
   int getHeight();
-  //void buildDisplayList(const int x,const int y);
   void setPos(const int,const  int, const int);
   void display(GLBox * gg);
   private:
@@ -49,6 +45,7 @@ class GLTextObject : public GLObject {
   QString label,text;
   QFont font;
   int x,y;      // xy label text position
-  int x_text; // x offset text position
+  int x_text;   // x offset text position
 };
 #endif
+// ============================================================================

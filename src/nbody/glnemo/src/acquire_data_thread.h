@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004                                       
+// Copyright Jean-Charles LAMBERT - 2004-2005                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -24,7 +24,7 @@ class AcquireDataThread : public QThread
 {
   //Q_OBJECT
   public:
-  AcquireDataThread(VirtualData *, ParticlesRangeVector * );
+  AcquireDataThread(VirtualData *, ParticlesSelectVector * );
   //AcquireDataThread();
   ~AcquireDataThread();
   
@@ -32,7 +32,7 @@ class AcquireDataThread : public QThread
   bool is_loaded;  
   private:
   VirtualData * virtual_data;
-  ParticlesRangeVector * prv;
+  ParticlesSelectVector * psv;
 
 };  // DO NOT FORGET ';'
 #endif

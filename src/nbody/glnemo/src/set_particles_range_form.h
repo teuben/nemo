@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004                                       
+// Copyright Jean-Charles LAMBERT - 2004-2005                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique de galaxies                                             
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -17,7 +17,7 @@
 #ifndef SET_PARTICLES_RANGE_FORM_H
 #define SET_PARTICLES_RANGE_FORM_H
 
-#include "particles_range.h"
+#include "virtual_particles_select.h"
 #include "glbox.h"
 #include <qdialog.h>
 
@@ -31,13 +31,13 @@ class SetParticlesRangeForm: public QDialog
     Q_OBJECT
       public:
   
-  SetParticlesRangeForm(const GLBox * glbox,ParticlesRangeVector * prv, 
+  SetParticlesRangeForm(const GLBox * glbox,ParticlesSelectVector * , 
   			const int n_body,const float *pos,
 			QWidget *parent = 0, const char *name = "set particles range and color",
 			bool modal = FALSE, WFlags f = 0 );
   ~SetParticlesRangeForm();
 public:
-  void updateData(ParticlesRangeVector * prv, 
+  void updateData(ParticlesSelectVector * , 
   		  const int n_body,const float *pos);
 public slots:
     void setColor();
@@ -45,7 +45,7 @@ public slots:
     void currentChanged( int row, int col );
     void valueChanged( int row, int col );
  signals:
-  void applyData(const int *, const float *, const ParticlesRangeVector*);
+  void applyData(const int *, const float *, ParticlesSelectVector * );
 
 protected slots:
     void accept();
@@ -68,7 +68,7 @@ protected:
     QHBoxLayout *buttonBox;
 
 private:
-    ParticlesRangeVector * my_prv;
+    ParticlesSelectVector * my_psv;
 };
-
 #endif
+// ============================================================================

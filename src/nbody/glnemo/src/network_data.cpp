@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004                                       
+// Copyright Jean-Charles LAMBERT - 2004-2005                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -16,11 +16,12 @@
 // ============================================================================
 
 extern "C" { // Must include NEMO's header before calling [using namespace std]
-            // to avoid confict on 'string' in <stdinc.h>
+             // to avoid confict on 'string' in <stdinc.h>
 #include <stdinc.h>
-//#include <filestruct.h>
 }
 #include "network_data.h"
+#include "virtual_particles_select.h"
+#include "particles_range.h"
 #include <iostream>
 #include <assert.h>
 
@@ -29,20 +30,17 @@ extern "C" { // Must include NEMO's header before calling [using namespace std]
 using namespace std;
 
 // ============================================================================
-// NetworkData constructor
-//
-// Connect a socket to a server
-// create a message buffer for communication
+// NetworkData constructor                                                     
+// Connect a socket to a server                                                
+// create a message buffer for communication                                   
 NetworkData::NetworkData(const char * hostname)
 {
-  int port = 4444; // the communication port
-  
+  int port = 4444; // the communication port  
   // get a new client instance
   client = new SocketClient(hostname,SOCK_STREAM,port);
   // connect to the server
   sock_fd = client->connectServer();
   
-  //
   clientMB = NULL;
   if (sock_fd == -1) {   // unable to connect
     is_connected = FALSE;
@@ -64,20 +62,17 @@ NetworkData::NetworkData(const char * hostname)
   is_loading_thread = FALSE;
   is_new_data_loaded = FALSE;
 }
-
 // ============================================================================
-// Destructor
+// Destructor                                                                  
 NetworkData::~NetworkData()
 {
-  
   if (client) {
-    cerr << "NetworkData killing client\n";
+    PRINT_D std::cerr << "NetworkData killing client\n";
     delete client;
     client = NULL;
-  }
-  
+  } 
   if (clientMB) {
-    cerr << "NetworkData killing clientMB\n";
+    PRINT_D std::cerr << "NetworkData killing clientMB\n";
     delete clientMB;
     clientMB = NULL;
   }
@@ -85,17 +80,17 @@ NetworkData::~NetworkData()
   delete timu;
 }
 // ============================================================================
-// ask to the server new positions data
-//
-int NetworkData::loadPos(ParticlesRangeVector * prv)
+// NetworkData::loadPos()                                                      
+// get from the server new positions data                                      
+int NetworkData::loadPos(ParticlesSelectVector * psv)
 {
-  int n; // happy red hat
+  int n;   // happy red hat
   if (n) ; // remove compiler warning
   
   if (clientMB) {
     try {
       // send selected string to the server
-      clientMB->sendData(MessageBuffer::Select,qselect_part.length()+1,qselect_part);  // send select string
+      clientMB->sendData(MessageBuffer::Select,qselect_part.length()+1,qselect_part);
       
       // receive time from server
       clientMB->recvData();
@@ -114,13 +109,13 @@ int NetworkData::loadPos(ParticlesRangeVector * prv)
       int new_body = (int) ((float) (nbytes) / 3.0 / sizeof(float));
       assert (new_body <= *nbody);
       
-      // allocate memory to store positions
+      // allocate memory to store positions           
       if ( ! pos ||               // not yet allocated
-            new_body > *nbody) {   // new_body bigger
+            new_body > *nbody) {   // new_body bigger 
         if (pos) {
           delete pos;              // delete previous array
         }
-        pos = new float[new_body*3]; // reserve memory
+        pos = new float[new_body*3]; // reserve memory     
       }
       *nbody = new_body;
       memcpy((float *) pos, (char *) clientMB->getDatBuffer(), nbytes);  
@@ -129,22 +124,24 @@ int NetworkData::loadPos(ParticlesRangeVector * prv)
       //computeCooMax();
       if (! is_parsed) {  // selected range string not yet parsed
         is_parsed = TRUE; // parse only one time
-        int nobject=VirtualData::fillParticleRange(prv,full_nbody,
-        qselect_part);
+        int nobject=VirtualData::fillParticleRange(psv,full_nbody,
+                          qselect_part);
+        //VirtualParticlesSelect * vps = new VirtualParticlesSelect();
+        //nobject=vps->storeParticles<ParticlesRange>(psv,full_nbody,qselect_part);
+        //int nobject=vps->A<int>();
         if (nobject); // do nothing (remove compiler warning)
       }
       if (! is_loading_thread) {
-        // a running Thread MUST not emit data to the GLBox
+        // a running Thread MUST not emit data to the GLBox      
         // because it's not possible the share the OpenGl Display
-        // it crashs the aplication
+        // it crashs the aplication                              
         computeCooMax();
-        emit loadedData(nbody,pos,prv);
+        emit loadedData(nbody,pos,psv);
         is_new_data_loaded = FALSE;
       } 
       else {
         is_new_data_loaded = TRUE;
       }
-      
       return 1;
     } // end of try
     catch (int n) {
@@ -168,14 +165,18 @@ int NetworkData::loadPos(ParticlesRangeVector * prv)
   }
 }
 // ============================================================================
-void NetworkData::uploadGlData(ParticlesRangeVector * prv)
+// NetworkData::uploadGlData()                                                 
+// send data to the opengl object                                              
+void NetworkData::uploadGlData(ParticlesSelectVector * psv)
 {
    if (is_new_data_loaded) {
-    emit loadedData(nbody,pos,prv);
+    emit loadedData(nbody,pos,psv);
     is_new_data_loaded = FALSE;
   } 
 }
 // ============================================================================
+// NetworkData::getNbody()                                                     
+// return #bodies from the server                                              
 int NetworkData::getNbody()
 {
   PRINT_D cerr << "get Nbody Adress clienMB=" << clientMB << "\n";
@@ -198,15 +199,18 @@ int NetworkData::getNbody()
     full_nbody = *nbody;
     PRINT_D cerr << "Got Nbody from server : [" << *nbody << "]\n";
   } 
-  
   return *nbody;
 }
 // ============================================================================
+// NetworkData::getTime()                                                      
+// return time                                                                 
 float NetworkData::getTime()
 {
   return *timu;
 }
 // ============================================================================
+// NetworkData::endOfDataMessage()                                             
+// return message in case of lost communication                                
 QString NetworkData::endOfDataMessage()
 {
   QString message="Lost connexion with server";

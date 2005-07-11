@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004                                       
+// Copyright Jean-Charles LAMBERT - 2004-2005                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique de galaxies                                             
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -23,13 +23,13 @@ public:
 
   char * parseBuffer(char *, int &, bool &);
   int getIntValue();         // return the int value of the buffer's 4 first bytes
-  char * getBuffer();        // return the content of the chunk buffer
-  int razVar();              // raz variables
+  char * getBuffer();        // return the content of the chunk buffer            
+  int razVar();              // raz variables                                    
   int getLength() { return l_chunk; };
 
 protected:
   char * chunk;              // buffer to store data
-  int    l_chunk;            // buffer length;
+  int    l_chunk;            // buffer length;      
   int    n_chunk;            // #bytes in the buffer
 
 };

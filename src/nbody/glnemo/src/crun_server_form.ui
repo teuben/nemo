@@ -1,0 +1,209 @@
+<!DOCTYPE UI><UI version="3.3" stdsetdef="1">
+<class>CListRunningServerForm</class>
+<widget class="QDialog">
+    <property name="name">
+        <cstring>CRunServerForm</cstring>
+    </property>
+    <property name="geometry">
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>363</width>
+            <height>265</height>
+        </rect>
+    </property>
+    <property name="caption">
+        <string>Running Simulation Server</string>
+    </property>
+    <vbox>
+        <property name="name">
+            <cstring>unnamed</cstring>
+        </property>
+        <widget class="QListView">
+            <column>
+                <property name="text">
+                    <string>Hostname</string>
+                </property>
+                <property name="clickable">
+                    <bool>true</bool>
+                </property>
+                <property name="resizable">
+                    <bool>true</bool>
+                </property>
+            </column>
+            <column>
+                <property name="text">
+                    <string>Nbody</string>
+                </property>
+                <property name="clickable">
+                    <bool>true</bool>
+                </property>
+                <property name="resizable">
+                    <bool>true</bool>
+                </property>
+            </column>
+            <property name="name">
+                <cstring>listRunServer</cstring>
+            </property>
+        </widget>
+        <spacer>
+            <property name="name">
+                <cstring>spacer24</cstring>
+            </property>
+            <property name="orientation">
+                <enum>Vertical</enum>
+            </property>
+            <property name="sizeType">
+                <enum>Fixed</enum>
+            </property>
+            <property name="sizeHint">
+                <size>
+                    <width>20</width>
+                    <height>16</height>
+                </size>
+            </property>
+        </spacer>
+        <widget class="QLayoutWidget">
+            <property name="name">
+                <cstring>layout24</cstring>
+            </property>
+            <hbox>
+                <property name="name">
+                    <cstring>unnamed</cstring>
+                </property>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>connectButton</cstring>
+                    </property>
+                    <property name="sizePolicy">
+                        <sizepolicy>
+                            <hsizetype>0</hsizetype>
+                            <vsizetype>0</vsizetype>
+                            <horstretch>0</horstretch>
+                            <verstretch>0</verstretch>
+                        </sizepolicy>
+                    </property>
+                    <property name="text">
+                        <string>Connect</string>
+                    </property>
+                </widget>
+                <spacer>
+                    <property name="name">
+                        <cstring>spacer22</cstring>
+                    </property>
+                    <property name="orientation">
+                        <enum>Horizontal</enum>
+                    </property>
+                    <property name="sizeType">
+                        <enum>Fixed</enum>
+                    </property>
+                    <property name="sizeHint">
+                        <size>
+                            <width>21</width>
+                            <height>20</height>
+                        </size>
+                    </property>
+                </spacer>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>cancelButton</cstring>
+                    </property>
+                    <property name="sizePolicy">
+                        <sizepolicy>
+                            <hsizetype>0</hsizetype>
+                            <vsizetype>0</vsizetype>
+                            <horstretch>0</horstretch>
+                            <verstretch>0</verstretch>
+                        </sizepolicy>
+                    </property>
+                    <property name="text">
+                        <string>Cancel</string>
+                    </property>
+                </widget>
+                <spacer>
+                    <property name="name">
+                        <cstring>spacer23</cstring>
+                    </property>
+                    <property name="orientation">
+                        <enum>Horizontal</enum>
+                    </property>
+                    <property name="sizeType">
+                        <enum>Expanding</enum>
+                    </property>
+                    <property name="sizeHint">
+                        <size>
+                            <width>121</width>
+                            <height>20</height>
+                        </size>
+                    </property>
+                </spacer>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>RefreshButton</cstring>
+                    </property>
+                    <property name="sizePolicy">
+                        <sizepolicy>
+                            <hsizetype>0</hsizetype>
+                            <vsizetype>0</vsizetype>
+                            <horstretch>0</horstretch>
+                            <verstretch>0</verstretch>
+                        </sizepolicy>
+                    </property>
+                    <property name="text">
+                        <string>Refresh</string>
+                    </property>
+                </widget>
+            </hbox>
+        </widget>
+    </vbox>
+</widget>
+<connections>
+    <connection>
+        <sender>cancelButton</sender>
+        <signal>clicked()</signal>
+        <receiver>CRunServerForm</receiver>
+        <slot>reject()</slot>
+    </connection>
+    <connection>
+        <sender>connectButton</sender>
+        <signal>clicked()</signal>
+        <receiver>CRunServerForm</receiver>
+        <slot>accept()</slot>
+    </connection>
+    <connection>
+        <sender>listRunServer</sender>
+        <signal>clicked(QListViewItem*)</signal>
+        <receiver>CRunServerForm</receiver>
+        <slot>hostSelected(QListViewItem*)</slot>
+    </connection>
+    <connection>
+        <sender>listRunServer</sender>
+        <signal>doubleClicked(QListViewItem*)</signal>
+        <receiver>CRunServerForm</receiver>
+        <slot>acceptHostSelected(QListViewItem*)</slot>
+    </connection>
+    <connection>
+        <sender>RefreshButton</sender>
+        <signal>clicked()</signal>
+        <receiver>CRunServerForm</receiver>
+        <slot>refreshList()</slot>
+    </connection>
+</connections>
+<includes>
+    <include location="local" impldecl="in implementation">crun_server_form.ui.h</include>
+</includes>
+<variables>
+    <variable access="public">QString hostname;</variable>
+</variables>
+<slots>
+    <slot access="private" returnType="bool">hostSelected( QListViewItem * item )</slot>
+    <slot access="private">acceptHostSelected( QListViewItem * item )</slot>
+    <slot access="private">refreshList()</slot>
+</slots>
+<functions>
+    <function access="private" specifier="non virtual">init()</function>
+    <function access="private" specifier="non virtual">destroy()</function>
+    <function access="private">updateList()</function>
+</functions>
+<layoutdefaults spacing="6" margin="11"/>
+</UI>

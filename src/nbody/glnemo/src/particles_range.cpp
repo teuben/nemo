@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004                                       
+// Copyright Jean-Charles LAMBERT - 2004-2005                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -27,97 +27,44 @@
 #define LOCAL_DEBUG 0
 #include "print_debug.h"
 
-int ParticlesRange::nb_select=0;
+//int ParticlesRange::nb_select=0;
 
 // ============================================================================
-//
-ParticlesRange::ParticlesRange()
+// constructor                                                                 
+ParticlesRange::ParticlesRange():VirtualParticlesSelect()
 {
-  //QColor modulo_col[5] = { Qt::white, Qt::green, Qt::yellow, Qt::red, Qt::blue };
-  int modulo_col[5][3] = { 
-                            { 255, 75, 39 },
-                            { 214,214, 52 },
-                            { 114,214, 32 },
-                            {  58, 61,214 },
-                            { 214, 47,197 }
-                          };
-  nb_select++;
-  PRINT_D cerr << "ParticlesRange Constructor : " << nb_select << "\n";
-  npart=-1;
-  first_part=-1;
-  last_part=-1;
-  step_part=-1;
-  //col = modulo_col[nb_select%5];
-  col = QColor(modulo_col[(nb_select-1)%5][0],
-               modulo_col[(nb_select-1)%5][1],
-               modulo_col[(nb_select-1)%5][2]);
-  is_visible=TRUE;
+  v_type = 1; // record VirtualParticlesSetect type
 }
 // ============================================================================
-//
+// destructor                                                                  
 ParticlesRange::~ParticlesRange()
 {
   //nb_select--;
 }
 // ============================================================================
-//
-void ParticlesRange::printRange()
+// ParticlesRange::getIndex()                                                  
+// return index of the particle                                                
+int ParticlesRange::getIndex(int index)
 {
-  PRINT_D cerr << "Npart       = " << npart      << "\n";
-  PRINT_D cerr << "First_part  = " << first_part << "\n";
-  PRINT_D cerr << "Last_part   = " << last_part  << "\n";
-  PRINT_D cerr << "Step_part   = " << step_part  << "\n";
-  //  cerr << "Color       = " << QString(col) << "\n";
-  PRINT_D cerr << "Is visible? = " << is_visible << "\n";
-}
-// ============================================================================
-// parse 'select_string' according to the 'nemoinpi' rules.                    
-// return the string at the position after the next 'coma' otherwise NULL
-//
-char * ParticlesRange::parseString(const char * select_string, const int nbody, 
-				 ParticlesRangeVector * prv)
-{
-  char * status;
-#if 0
-  cerr << "before PRV size :" << prv->size() << "\n";
-  prv->push_back(*this);
-  cerr << "after PRV size  :" << prv->size() << "\n";
-#endif
-  PRINT_D cerr << "In parseString...["<< select_string << "]\n";
-
-  char * c = strchr(select_string,',');
-  int sup;
-  if ( c) {
-    status = c+1;
-    sup = c-select_string;
-  } else {
-    status = NULL;
-    sup = strlen(select_string)+1;
-  }
-  char tmp[100];
-  strncpy(tmp,select_string,sup);
-  tmp[sup] = '\0';
-  parseSelectedString(tmp,nbody,prv);
-
-  return status;
+  return (first_part+index);
 }
 
 // ============================================================================
-// Use nemoinpi engine to find out how many particles in the
-// selected string, THANKS Peter, A LOT !!!
-//
+// ParticlesRange::parseSelectedString                                         
+// Use nemoinpi engine to find out how many particles in the selected string,  
+// THANKS to Peter Teuben, A LOT !!!                                           
 int ParticlesRange::parseSelectedString(char * select_string, const int nbody, 
-				      ParticlesRangeVector * prv)
+				      ParticlesSelectVector * psv)
 {
   int * int_array = new int[nbody];
   
-  PRINT_D cerr << "In parseSemicolon2...["<< select_string <<
-  "and nbody = " << nbody << "]\n";
+  PRINT_D std::cerr << "In parseSemicolon2...["<< select_string 
+               <<  "and nbody = " << nbody << "]\n";
   if (  strcmp(select_string,"all")) {
     npart = nemoinpi(select_string, int_array, nbody);
     if (npart <=0 ) {
-      cerr << "nemoinpi = [" << select_string << "] npart = "<<npart
-      <<" with nbody=["<<nbody<<"]\n";
+      std::cerr << "nemoinpi = [" << select_string << "] npart = "<<npart
+           <<" with nbody=["<<nbody<<"]\n";
       exit(1);
     }
     // Correct npart value if selected_range is out of nbody
@@ -128,23 +75,23 @@ int ParticlesRange::parseSelectedString(char * select_string, const int nbody,
         nbody_out++;
       }
     }
-    PRINT_D cerr << "NBODY out = " << nbody_out << " and nbody =" <<
-    nbody <<"\n";
+    PRINT_D std::cerr << "NBODY out = " << nbody_out 
+                 << " and nbody =" << nbody <<"\n";
     npart = nbody_out;
-    delete int_array;  // useless anymore
+    delete [] int_array;  // useless anymore
   }
   else {  // select all the particles
     npart=nbody;
   }
-  PRINT_D cerr << "In parseSemicolon2 npart =["<< npart << "]\n";
+  PRINT_D std::cerr << "In parseSemicolon2 npart =["<< npart << "]\n";
   // rescale particle range
-  // 
-  if (nb_select == 1 ) { // first object
+  //if (nb_select == 1 ) { // first object
+  if (psv->size() == 0 ) { // first object
     first_part = 0;
     last_part  = npart-1;
   } else {
-    //cerr << "(*prv)["<<nb_select-2<<"].last_part=" << (*prv)[nb_select-2].last_part <<"\n";
-    first_part = (*prv)[nb_select-2].last_part + 1;
+    //first_part = (*psv)[nb_select-2].vps->last_part + 1;
+    first_part = (*psv)[psv->size()-1].vps->last_part + 1;
     last_part  = first_part + npart - 1;
   }
   step_part = 1;   

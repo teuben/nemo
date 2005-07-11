@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004                                       
+// Copyright Jean-Charles LAMBERT - 2004-2005                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -24,12 +24,14 @@
 #include <qlistbox.h> 
 #include <pthread.h>
 
-#include "particles_range.h"
+#include "virtual_particles_select.h"
 #include "set_particles_range_form.h"
 #include "snapshot_data.h"
 #include "virtual_data.h"
 #include "acquire_data_thread.h"
-#include "runningserverform.h"
+
+#include "global_options.h"
+#include "options_form.h"
 
 class GLBox;
 
@@ -43,9 +45,10 @@ public:
    void connectToHostname( QString );      
    void connectToHostname( QListBoxItem*); 
    void takeScreenshot(QString);
+   void setObjectVisible(bool, int);
 private:
   // particle range vector
-  ParticlesRangeVector prv; // store Particles Range
+  ParticlesSelectVector psv; // store Particles Range
   int nbody, * i_max;
   float * pos,* coo_max, timu;
   VirtualData * virtual_data;
@@ -64,6 +67,8 @@ private slots:
     void optionsToggleTranslation();
     void optionsReset();
     void optionsFitAllPartOnScreen();
+    void optionsFitAllPartOnScreenPersp();
+    void optionsFitAllPartOnScreenOrtho(float);
     void optionsParticlesRange();
     void optionsBlending();
     void optionsTogglePlay();
@@ -71,14 +76,22 @@ private slots:
     void optionsLookForNetworkServer();
     void optionsReloadSnapshot();
     void messageWarning(QString *,int);
+    void infoMessage(std::string );
     void optionsRecord();
-    
+    void optionsToggleGazParticles();
+    void optionsPrintBuffer();
+    void setProjection();
+    void callMe();
 public:
     GLBox  * glbox;     // OpenGL engine        
+    GlobalOptions * store_options; // store global options
 private:
     //GLBox  * glbox;     // OpenGL engine
     QHBox  * glframe;   // OpenGL's widget container
 
+    // OptionsForm Box
+    OptionsForm * options_form;
+    
     // Mouse control variable
     int last_posx,  last_posy,  last_posz,  // save pos for rotation
         last_tposx, last_tposy, last_tposz, // save pos for translation 
@@ -90,7 +103,8 @@ private:
     bool is_translation;
     bool is_mouse_pressed;
     bool is_key_pressed;
-    
+    bool range_visib;
+    ::string select_list;
     bool new_virtual_object; // true when a new virtual data object is instantiate
     // Mutex and conditional variable
     pthread_mutex_t mutex_timer; // used during timer event
@@ -105,10 +119,9 @@ private:
     void keyReleaseEvent  ( QKeyEvent    * );
     void resizeEvent      ( QResizeEvent * );
     void timerEvent       ( QTimerEvent  * );
-    
-    // 
-    SetParticlesRangeForm * setParticlesRangeForm;
-    
+    void setProjection(float);
+    void selectListIndex();
+     
     // menus and toolsbars action
     void fileOpen();
     // loading Thread

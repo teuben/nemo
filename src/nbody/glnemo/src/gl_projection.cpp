@@ -9,36 +9,36 @@
 // ============================================================================
 // See the complete license in LICENSE and/or "http://www.cecill.info".        
 // ============================================================================
-//                                                                             
-// MovieThread class definition                                                
-//                                                                             
-// Grab GL frame buffer to make movie                                          
+#include "gl_projection.h"
+
 // ============================================================================
-#ifndef MOVIE_THREAD_H
-#define MOVIE_THREAD_H
+//
+GLProjection::GLProjection()
+{
+}
 
-#include <qthread.h>
-#include <qimage.h>
-#include <qobject.h>
-#include "glbox.h"
-class MovieThread : public QThread, QObject {
-  //Q_OBJECT
-public:
-  MovieThread(int fps, GLBox * _glbox);
-  ~MovieThread();
-  
-  void run();
-  void stop();
+// ============================================================================
+//
+GLProjection::~GLProjection()
+{
+}
 
-private:
-  int my_timer, play_timer;
-  GLBox * glbox;
-  vector <QImage> store_image;
-  bool enable;
-  
-  void grabFrameBuffer();
-  void callMe();    
-  void timerEvent( QTimerEvent *e );
-};
-#endif
+// ============================================================================
+//
+void GLProjection::update(int _ratio)
+{
+  if (_ratio) ; // remove compiler warning
+}
+
+// ============================================================================
+//
+void GLProjection::setPerspective()
+{
+}
+
+// ============================================================================
+//
+void GLProjection::setOrthographic()
+{
+}
 // ============================================================================

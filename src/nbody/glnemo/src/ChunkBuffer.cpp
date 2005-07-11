@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004                                       
+// Copyright Jean-Charles LAMBERT - 2004-2005                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -14,9 +14,9 @@
 
 #include "ChunkBuffer.h"
 using namespace std;
-// ----------------------------------------------------------------
-// constructor                                                     
-// Allocate a chunk buffer with size_buffer bytes                  
+// ============================================================================
+// constructor                                                                 
+// Allocate a chunk buffer with size_buffer bytes                              
 ChunkBuffer::ChunkBuffer(int size_buffer)
 {
   //
@@ -25,18 +25,18 @@ ChunkBuffer::ChunkBuffer(int size_buffer)
   l_chunk = size_buffer;
   chunk = new char[l_chunk];
 }
-// ----------------------------------------------------------------
-// destructor                                                      
-// deallocate chunk buffer.                                        
+// ============================================================================
+// destructor                                                                  
+// deallocate chunk buffer.                                                    
 ChunkBuffer::~ChunkBuffer()
 {
   delete[] chunk;
 }
-// -----------------------------------------------------------------
-// char * ChunkBuffer::parseBuffer                                  
-// parse the received buffer and return a pointer on the position of
-// the reveived buffer not yet parsed                               
-// fill up chunk buffer according to #bytes received                
+// ============================================================================
+// char * ChunkBuffer::parseBuffer                                             
+// parse the received buffer and return a pointer on the position of           
+// the reveived buffer not yet parsed                                          
+// fill up chunk buffer according to #bytes received                           
 char *  ChunkBuffer::parseBuffer(char * recv_buffer, int & nrecv, bool & is_empty)
 {
   int pop_bytes;
@@ -76,21 +76,23 @@ char *  ChunkBuffer::parseBuffer(char * recv_buffer, int & nrecv, bool & is_empt
   }
   return recv_buffer;
 }
-// ----------------------------------------------------------------
-// char * ChunkBuffer::getIntValue()
+// ============================================================================
+// char * ChunkBuffer::getIntValue()                                           
+// return int value stored in a buffer                                         
 int  ChunkBuffer::getIntValue()
 {
   int * p = (int *) chunk;
   return (*p);
 }
-// ----------------------------------------------------------------
-// char * ChunkBuffer::getBuffer()
+// ============================================================================
+// char * ChunkBuffer::getBuffer()                                             
 char * ChunkBuffer::getBuffer()
 {
   return chunk;
 }
-// ----------------------------------------------------------------
-// ChunkBuffer::razVar()
+// ============================================================================
+// ChunkBuffer::razVar()                                                       
+// reset buffer                                                                
 int  ChunkBuffer::razVar()
 {
   complete = false;
@@ -98,4 +100,4 @@ int  ChunkBuffer::razVar()
 
   return 1;
 }
-// ----------------------------------------------------------------
+// ============================================================================

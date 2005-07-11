@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004                                       
+// Copyright Jean-Charles LAMBERT - 2004-2005                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -18,35 +18,30 @@
 #include "gl_text_object.h"
 #include "glbox.h"
 
-
 // ============================================================================
-// constructor
+// constructor                                                                 
 GLTextObject::GLTextObject(const QString text,const QFont &f,
                            const QColor &c, 
                            bool activated):GLObject()
 {
   if (text);  // do nothing (remove compiler warning)
-  
-  //dplist_index = glGenLists( 1 ); // create a new display List
   setColor(c);
   font = f;
   is_activated = activated;
-  x = y = x_text = 0;
-  
+  x = y = x_text = 0; 
 }
 // ============================================================================
-// constructor
+// constructor                                                                 
 GLTextObject::GLTextObject(const QFont &f,const QColor &c, 
                            bool activated):GLObject()
 {
-  //dplist_index = glGenLists( 1 ); // create a new display List
   setColor(c);
   is_activated = activated;
   font = f;  
   x = y = x_text = 0;
 }
 // ============================================================================
-// constructor
+// constructor                                                                 
 GLTextObject::GLTextObject(bool activated):GLObject()
 {
   //dplist_index = glGenLists( 1 ); // create a new display List
@@ -54,59 +49,52 @@ GLTextObject::GLTextObject(bool activated):GLObject()
   x = y = x_text = 0;
 }
 // ============================================================================
-// destructor                    
+// destructor                                                                  
 GLTextObject::~GLTextObject()
 {
 }    
-
 // ============================================================================
-//  
+// GLTextObject::setText()                                                     
+// set label and text                                                          
 void GLTextObject::setText(const QString &p_label,const QString& p_text)
 {
   label = p_label;
   text  = p_text;
 }
 // ============================================================================
-//  
+// GLTextObject::setFont()                                                     
+// set Font                                                                    
 void GLTextObject::setFont(QFont &f)
 {
   font = f;
 }
 // ============================================================================
-//  
+// GLTextObject::getLabelWidth()                                               
+// return label width in pixels                                                
 int GLTextObject::getLabelWidth()
 {
   QFontMetrics fm(font);
   return (fm.width(label,label.length()));
 }
 // ============================================================================
-//  
+// GLTextObject::getTextWidth()                                                
+// return text width in pixels                                                 
 int GLTextObject::getTextWidth()
 {
   QFontMetrics fm(font);
   return (fm.width(text,text.length()));
 }
 // ============================================================================
-//  
+// GLTextObject::getHeight()                                                   
+// return font height in pixels                                                
 int GLTextObject::getHeight()
 {
   QFontMetrics fm(font);
   return (fm.height());
 }
 // ============================================================================
-//  
-#if 0
-void GLTextObject::buildDisplayList(const int x,const int y)
-{
-  // display list
-  glNewList( dplist_index, GL_COMPILE );
-    renderText(x,y,text,font);
-    cerr << dplist_index << ": [" << text << "]\n";
-  glEndList();
-}
-#endif
-// ============================================================================
-//
+// GLTextObject::setPos()                                                      
+// specify new positions x and y (in pixels) for the given text                
 void GLTextObject::setPos(const int new_x, const int new_y, 
                           const int new_x_text)
 {
@@ -115,7 +103,8 @@ void GLTextObject::setPos(const int new_x, const int new_y,
   x_text = new_x_text;
 }
 // ============================================================================
-//
+// GLTextObject::display()                                                     
+// display text object if activated                                            
 void GLTextObject::display(GLBox * glbox)
 {
   if (is_activated) {   
@@ -127,4 +116,5 @@ void GLTextObject::display(GLBox * glbox)
     glbox->renderText(x_text,y,text,font);
   }
 }
-//
+// ============================================================================
+

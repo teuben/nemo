@@ -1,0 +1,120 @@
+<!DOCTYPE UI><UI version="3.3" stdsetdef="1">
+<class>HostnameSelectForm</class>
+<widget class="QDialog">
+    <property name="name">
+        <cstring>HostnameSelect</cstring>
+    </property>
+    <property name="geometry">
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>339</width>
+            <height>111</height>
+        </rect>
+    </property>
+    <property name="caption">
+        <string>Hostname Selection Form</string>
+    </property>
+    <grid>
+        <property name="name">
+            <cstring>unnamed</cstring>
+        </property>
+        <widget class="QLayoutWidget" row="0" column="0">
+            <property name="name">
+                <cstring>layout64</cstring>
+            </property>
+            <vbox>
+                <property name="name">
+                    <cstring>unnamed</cstring>
+                </property>
+                <widget class="QLabel">
+                    <property name="name">
+                        <cstring>textLabel1</cstring>
+                    </property>
+                    <property name="sizePolicy">
+                        <sizepolicy>
+                            <hsizetype>3</hsizetype>
+                            <vsizetype>0</vsizetype>
+                            <horstretch>0</horstretch>
+                            <verstretch>0</verstretch>
+                        </sizepolicy>
+                    </property>
+                    <property name="text">
+                        <string>Enter hostname or select one from the list</string>
+                    </property>
+                </widget>
+                <widget class="QComboBox">
+                    <property name="name">
+                        <cstring>host_edit_list</cstring>
+                    </property>
+                </widget>
+                <widget class="QLayoutWidget">
+                    <property name="name">
+                        <cstring>layout58</cstring>
+                    </property>
+                    <hbox>
+                        <property name="name">
+                            <cstring>unnamed</cstring>
+                        </property>
+                        <widget class="QPushButton">
+                            <property name="name">
+                                <cstring>ok_button</cstring>
+                            </property>
+                            <property name="text">
+                                <string>Ok</string>
+                            </property>
+                        </widget>
+                        <spacer>
+                            <property name="name">
+                                <cstring>spacer1</cstring>
+                            </property>
+                            <property name="orientation">
+                                <enum>Horizontal</enum>
+                            </property>
+                            <property name="sizeType">
+                                <enum>Expanding</enum>
+                            </property>
+                            <property name="sizeHint">
+                                <size>
+                                    <width>141</width>
+                                    <height>20</height>
+                                </size>
+                            </property>
+                        </spacer>
+                        <widget class="QPushButton">
+                            <property name="name">
+                                <cstring>cancel_button</cstring>
+                            </property>
+                            <property name="text">
+                                <string>Cancel</string>
+                            </property>
+                        </widget>
+                    </hbox>
+                </widget>
+            </vbox>
+        </widget>
+    </grid>
+</widget>
+<connections>
+    <connection>
+        <sender>ok_button</sender>
+        <signal>clicked()</signal>
+        <receiver>HostnameSelect</receiver>
+        <slot>accept()</slot>
+    </connection>
+    <connection>
+        <sender>cancel_button</sender>
+        <signal>clicked()</signal>
+        <receiver>HostnameSelect</receiver>
+        <slot>reject()</slot>
+    </connection>
+</connections>
+<includes>
+    <include location="local" impldecl="in implementation">hostname_select_form.ui.h</include>
+</includes>
+<functions>
+    <function access="private" specifier="non virtual">init()</function>
+    <function access="private" specifier="non virtual">destroy()</function>
+</functions>
+<layoutdefaults spacing="6" margin="11"/>
+</UI>

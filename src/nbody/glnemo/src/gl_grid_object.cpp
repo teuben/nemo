@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004                                       
+// Copyright Jean-Charles LAMBERT - 2004-2005                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -21,31 +21,35 @@
 #define LOCAL_DEBUG 0
 #include "print_debug.h"
 
-int   GLGridObject::nsquare=27;        // default #nsquare
+int   GLGridObject::nsquare=27;        // default #nsquare   
 float GLGridObject::square_size=2.0;   // default square size
 
 using namespace std;
 // ============================================================================
-// Constructor
+// Constructor                                                                 
 GLGridObject::GLGridObject(int axe_parm, const QColor &c, bool activated ):GLObject()
 {
   if (axe_parm < 0 || axe_parm > 2 ) 
     axe_parm=0;
   dplist_index = glGenLists( 1 );
-  PRINT_D cerr << "My dplist_index = " << dplist_index << "\n";
-  buildDisplayList(axe_parm);
+  axe = axe_parm;
+  buildDisplayList();
   setColor(c);
   is_activated=activated;
+  
 }
+
 // ============================================================================
-// Destructor
+// Destructor                                                                  
+// Delete display list                                                         
 GLGridObject::~GLGridObject()
 {
   glDeleteLists( dplist_index, 1 );
 }
 // ============================================================================
-// 
-void GLGridObject::buildDisplayList(int axe)
+// GLGridObject::buildDisplayList()                                            
+// Build Display List                                                          
+void GLGridObject::buildDisplayList()
 {
   float x=0.,y=0.,z=0.,x1=0.,y1=0.,z1=0.;
   GLfloat 
@@ -105,3 +109,4 @@ void GLGridObject::buildDisplayList(int axe)
   glEnd();
   glEndList();
 }
+// ============================================================================

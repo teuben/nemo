@@ -1,0 +1,292 @@
+<!DOCTYPE UI><UI version="3.3" stdsetdef="1">
+<class>ParticlesSelectForm</class>
+<widget class="QDialog">
+    <property name="name">
+        <cstring>part_sel_form</cstring>
+    </property>
+    <property name="geometry">
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>393</width>
+            <height>369</height>
+        </rect>
+    </property>
+    <property name="caption">
+        <string>Particles selecting box</string>
+    </property>
+    <grid>
+        <property name="name">
+            <cstring>unnamed</cstring>
+        </property>
+        <widget class="QTable" row="1" column="0">
+            <column>
+                <property name="text">
+                    <string>Visible</string>
+                </property>
+                <property name="pixmap">
+                    <pixmap></pixmap>
+                </property>
+            </column>
+            <column>
+                <property name="text">
+                    <string>First part</string>
+                </property>
+                <property name="pixmap">
+                    <pixmap></pixmap>
+                </property>
+            </column>
+            <column>
+                <property name="text">
+                    <string>Last part</string>
+                </property>
+                <property name="pixmap">
+                    <pixmap></pixmap>
+                </property>
+            </column>
+            <column>
+                <property name="text">
+                    <string>Step</string>
+                </property>
+                <property name="pixmap">
+                    <pixmap></pixmap>
+                </property>
+            </column>
+            <column>
+                <property name="text">
+                    <string>Color</string>
+                </property>
+                <property name="pixmap">
+                    <pixmap></pixmap>
+                </property>
+            </column>
+            <row>
+                <property name="text">
+                    <string>1</string>
+                </property>
+                <property name="pixmap">
+                    <pixmap></pixmap>
+                </property>
+            </row>
+            <row>
+                <property name="text">
+                    <string>2</string>
+                </property>
+                <property name="pixmap">
+                    <pixmap></pixmap>
+                </property>
+            </row>
+            <row>
+                <property name="text">
+                    <string>3</string>
+                </property>
+                <property name="pixmap">
+                    <pixmap></pixmap>
+                </property>
+            </row>
+            <property name="name">
+                <cstring>table_range</cstring>
+            </property>
+            <property name="numRows">
+                <number>3</number>
+            </property>
+            <property name="numCols">
+                <number>5</number>
+            </property>
+        </widget>
+        <widget class="QLabel" row="2" column="0">
+            <property name="name">
+                <cstring>label_list</cstring>
+            </property>
+            <property name="paletteForegroundColor">
+                <color>
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>255</blue>
+                </color>
+            </property>
+            <property name="text">
+                <string>Select Particles from List of indexes</string>
+            </property>
+        </widget>
+        <widget class="QLabel" row="0" column="0">
+            <property name="name">
+                <cstring>label_range</cstring>
+            </property>
+            <property name="paletteForegroundColor">
+                <color>
+                    <red>255</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                </color>
+            </property>
+            <property name="text">
+                <string>Select particles from Range</string>
+            </property>
+        </widget>
+        <widget class="QTable" row="3" column="0">
+            <column>
+                <property name="text">
+                    <string>Visible</string>
+                </property>
+                <property name="pixmap">
+                    <pixmap></pixmap>
+                </property>
+            </column>
+            <column>
+                <property name="text">
+                    <string>Filename</string>
+                </property>
+                <property name="pixmap">
+                    <pixmap></pixmap>
+                </property>
+            </column>
+            <column>
+                <property name="text">
+                    <string>step</string>
+                </property>
+                <property name="pixmap">
+                    <pixmap></pixmap>
+                </property>
+            </column>
+            <column>
+                <property name="text">
+                    <string>Color</string>
+                </property>
+                <property name="pixmap">
+                    <pixmap></pixmap>
+                </property>
+            </column>
+            <row>
+                <property name="text">
+                    <string>1</string>
+                </property>
+                <property name="pixmap">
+                    <pixmap></pixmap>
+                </property>
+            </row>
+            <row>
+                <property name="text">
+                    <string>2</string>
+                </property>
+                <property name="pixmap">
+                    <pixmap></pixmap>
+                </property>
+            </row>
+            <row>
+                <property name="text">
+                    <string>3</string>
+                </property>
+                <property name="pixmap">
+                    <pixmap></pixmap>
+                </property>
+            </row>
+            <property name="name">
+                <cstring>table_list</cstring>
+            </property>
+            <property name="numRows">
+                <number>3</number>
+            </property>
+            <property name="numCols">
+                <number>4</number>
+            </property>
+        </widget>
+        <widget class="QLayoutWidget" row="4" column="0">
+            <property name="name">
+                <cstring>layout32</cstring>
+            </property>
+            <hbox>
+                <property name="name">
+                    <cstring>unnamed</cstring>
+                </property>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>colorPushButton</cstring>
+                    </property>
+                    <property name="text">
+                        <string>Color...</string>
+                    </property>
+                </widget>
+                <spacer>
+                    <property name="name">
+                        <cstring>spacer33</cstring>
+                    </property>
+                    <property name="orientation">
+                        <enum>Horizontal</enum>
+                    </property>
+                    <property name="sizeType">
+                        <enum>Expanding</enum>
+                    </property>
+                    <property name="sizeHint">
+                        <size>
+                            <width>41</width>
+                            <height>20</height>
+                        </size>
+                    </property>
+                </spacer>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>okPushButton</cstring>
+                    </property>
+                    <property name="text">
+                        <string>Ok</string>
+                    </property>
+                </widget>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>applyPushButton</cstring>
+                    </property>
+                    <property name="text">
+                        <string>Apply</string>
+                    </property>
+                </widget>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>cancelPushButton</cstring>
+                    </property>
+                    <property name="text">
+                        <string>Cancel</string>
+                    </property>
+                </widget>
+            </hbox>
+        </widget>
+    </grid>
+</widget>
+<includes>
+    <include location="local" impldecl="in implementation">virtual_particles_select.h</include>
+    <include location="local" impldecl="in declaration">virtual_particles_select.h</include>
+    <include location="local" impldecl="in declaration">particles_range.h</include>
+    <include location="local" impldecl="in declaration">particles_list.h</include>
+    <include location="local" impldecl="in implementation">particles_select_form.ui.h</include>
+</includes>
+<variables>
+    <variable access="private">ParticlesSelectVector * my_psv;</variable>
+    <variable access="private">int nbody;</variable>
+    <variable access="private">const float * pos;</variable>
+</variables>
+<signals>
+    <signal>applyData(const int *, const float *, ParticlesSelectVector * )</signal>
+</signals>
+<slots>
+    <slot access="protected">accept()</slot>
+    <slot access="protected">apply()</slot>
+    <slot>applyList()</slot>
+    <slot>setColor()</slot>
+    <slot>setColor( int row, int col )</slot>
+    <slot>changeListFile( int row, int col )</slot>
+    <slot>currentChanged( int row, int col, QTable * table, int col_index )</slot>
+    <slot>currentChangedRange( int row, int col )</slot>
+    <slot>currentChangedList( int row, int col )</slot>
+    <slot>valueChanged( int row, int col )</slot>
+    <slot>updateData( ParticlesSelectVector * psv, const int n_body, const float * p_pos )</slot>
+</slots>
+<functions>
+    <function access="private" specifier="non virtual">init()</function>
+    <function access="private" specifier="non virtual">destroy()</function>
+    <function access="private">applyRange()</function>
+    <function access="private">fillForm()</function>
+    <function access="private">fillFormList()</function>
+    <function access="private">fillFormRange()</function>
+</functions>
+<layoutdefaults spacing="6" margin="11"/>
+</UI>

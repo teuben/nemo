@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004                                       
+// Copyright Jean-Charles LAMBERT - 2004-2005                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -20,22 +20,10 @@
 
 #include <qobject.h>
 
-#include "particles_range.h"
 #include "virtual_data.h"
 extern "C" {
-  
   int io_nemo(const char * , const char *, ...);
-  //extern int bswap (void *, int, int);
-  
 };
-
-#if 0
-//>> From $NEMOSRC/kernel/io/filesecret.h
-#define CHKSWAP /* allow mixed endian datasets - this is a bit dangerous */
-#define SingMagic  ((011<<8) + 0222)            /* singular items */
-#define PlurMagic  ((013<<8) + 0222)            /* plural items */
-//<< From $NEMOSRC/kernel/io/filesecret.h
-#endif
 
 class SnapshotData : public VirtualData
 {    
@@ -43,7 +31,7 @@ class SnapshotData : public VirtualData
  public: 
   SnapshotData(const char *, const char *, const char *);
   ~SnapshotData();
-  int loadPos(ParticlesRangeVector * prv);
+  int loadPos(ParticlesSelectVector * );
   int getNbody() { return (*nbody); };
   float * getPos() { return pos; };
   float  getTime() { return (*timu); };
@@ -52,25 +40,24 @@ class SnapshotData : public VirtualData
   char * getDataName() { return nemo_file; };
   char * getDataType() { return "Nemo file"; };
   bool isValidData();  
-  void uploadGlData(ParticlesRangeVector *);
-  int reload(ParticlesRangeVector *);
+  void uploadGlData(ParticlesSelectVector *);
+  int reload(ParticlesSelectVector *);
   QString endOfDataMessage();
  signals:
-  void loadedData(const int *, const float *, const ParticlesRangeVector*);
+  void loadedData(const int *, const float *, ParticlesSelectVector *);
 
  private:
   const  char * select_part, * select_time;
   char  * nemo_file;
   char  * sel2;
+  int   * nemobits;
 
   bool is_open;   // TRUE if file has been open
   bool is_parsed; // TRUE if particle string has been parsed
   bool is_new_data_loaded; 
-  
-  //ParticlesRangeVector prv; // store Particles Range
-
   // method
   
   int close(); // close snapshot
 };
 #endif 
+// ============================================================================

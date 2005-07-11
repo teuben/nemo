@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004                                       
+// Copyright Jean-Charles LAMBERT - 2004-2005                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -16,18 +16,17 @@
 // ============================================================================
 #ifndef PARITCLES_RANGE_H
 #define PARITCLES_RANGE_H
-#include <qcolor.h>
 #include <qnamespace.h>
 #include <iostream>
 #include <vector>
+
+#include "virtual_particles_select.h"
 
 using namespace std;
 
 class ParticlesRange;
 
-typedef vector <ParticlesRange> ParticlesRangeVector;
-
-class ParticlesRange {
+class ParticlesRange: public VirtualParticlesSelect {
  public:
 
   ParticlesRange();
@@ -35,26 +34,13 @@ class ParticlesRange {
   ~ParticlesRange();
 
   // method
-  char * parseString(const char * select_string, const int  
-                     nbody,ParticlesRangeVector * prv );
-  void printRange();
-
-  // particles index variable
-  int npart;            // #particles
-  int first_part;       // index of the first particle
-  int last_part;        // index of the last particle
-  int step_part;        // incremental step between first and last
-  QColor col;           // particles color
-  bool   is_visible;    // TRUE if particles are visible
-
-  static int nb_select; 
+  
+  int getIndex(int);
 
  private:
   // method
   int  parseSelectedString(char * select_sting, const int nbody,
-                         ParticlesRangeVector * prv);
-
-
+                           ParticlesSelectVector * psv);
 };
 #endif
 // ============================================================================

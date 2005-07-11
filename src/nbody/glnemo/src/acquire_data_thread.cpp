@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004                                       
+// Copyright Jean-Charles LAMBERT - 2004-2005                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -19,25 +19,26 @@
 #include "acquire_data_thread.h"
 
 // ============================================================================
-// Constructor
+// Constructor                                                                 
 AcquireDataThread::AcquireDataThread(VirtualData * vd, 
-                                     ParticlesRangeVector * pr_v)
+                                     ParticlesSelectVector * _psv)
 {
   virtual_data = vd;
-  prv          = pr_v;
+  psv         = _psv;
   is_loaded    = false;
 }
 // ============================================================================
-// destructor
+// destructor                                                                  
 AcquireDataThread::~AcquireDataThread()
 {
 }
 // ============================================================================
-// run method
+// run:                                                                        
+// load positions, in a thread, according to the data type                     
 void AcquireDataThread::run()
 {
 #if 1 
-  if (! virtual_data->loadPos(prv) ) {
+  if (! virtual_data->loadPos(psv) ) {
     QString message="End of snapshot Reached !";
     //QMessageBox::information( this,"Warning",message,"Ok");
   }
@@ -52,4 +53,5 @@ void AcquireDataThread::run()
   virtual_data->is_loading_thread = FALSE;
   is_loaded = true;
 }
-//
+// ============================================================================
+

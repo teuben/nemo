@@ -9,36 +9,29 @@
 // ============================================================================
 // See the complete license in LICENSE and/or "http://www.cecill.info".        
 // ============================================================================
-//                                                                             
-// MovieThread class definition                                                
-//                                                                             
-// Grab GL frame buffer to make movie                                          
-// ============================================================================
-#ifndef MOVIE_THREAD_H
-#define MOVIE_THREAD_H
+#ifndef PARTICLES_SELECT_H
+#define PARTICLES_SELECT_H
+#include <vector>
 
-#include <qthread.h>
-#include <qimage.h>
-#include <qobject.h>
-#include "glbox.h"
-class MovieThread : public QThread, QObject {
-  //Q_OBJECT
+//#include "virtual_particles_select.h"
+
+class VirtualParticlesSelect;
+class ParticlesSelect;
+
+typedef std::vector <ParticlesSelect> ParticlesSelectVector;
+
+class ParticlesSelect{
 public:
-  MovieThread(int fps, GLBox * _glbox);
-  ~MovieThread();
-  
-  void run();
-  void stop();
-
-private:
-  int my_timer, play_timer;
-  GLBox * glbox;
-  vector <QImage> store_image;
-  bool enable;
-  
-  void grabFrameBuffer();
-  void callMe();    
-  void timerEvent( QTimerEvent *e );
+    ParticlesSelect();
+    // copy constructors for vectors
+    ParticlesSelect(const ParticlesSelect&);
+    const ParticlesSelect& operator=(const ParticlesSelect&);
+    
+    ~ParticlesSelect();
+    VirtualParticlesSelect * vps; // virtual object of type:
+                                  // ParticlesRange         
+                                  // ParticlesList          
 };
+
 #endif
 // ============================================================================

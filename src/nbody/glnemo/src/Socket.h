@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004                                       
+// Copyright Jean-Charles LAMBERT - 2004-2005                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique de galaxies                                             
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -23,16 +23,17 @@ public:
   Socket(int);
   //~Socket();
       
-  int sockOpt();              // specify socket option
+  int sockOpt();             // specify socket option        
   int sockFd() { return sd;} // return socket file descriptor
 
 
 protected:
-  int sd;                     // socket file descriptor
-  int getSocketAddr(const char *,                 // hostname
-		    struct sockaddr_in *,   // remote Addr
+  int sd;                     // socket file descriptor      
+  int getSocketAddr(const char *,           // hostname      
+		    struct sockaddr_in *,   // remote Addr   
 		    int);                   // listening port
 
   void close() { ::close(sd); };
 };
 #endif
+// ============================================================================

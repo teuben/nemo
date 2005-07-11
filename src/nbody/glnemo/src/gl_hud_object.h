@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004                                       
+// Copyright Jean-Charles LAMBERT - 2004-2005                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -40,6 +40,7 @@ class GLHudObject : public GLObject {
     Rot       , 
     Trans     ,
     Loading   ,
+    Projection,
     n_HudKeys
   };
   
@@ -60,10 +61,11 @@ class GLHudObject : public GLObject {
   void updateDisplay();
   void updateDisplay(const HudKeys k);
   void display(GLBox *);
-  
+  void updateColor(const QColor);
   private:
   static char * HUDText[n_HudKeys];
   QFont font;
 };
 #endif
-//
+// ============================================================================
+

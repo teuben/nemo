@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004                                       
+// Copyright Jean-Charles LAMBERT - 2004-2005                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -20,7 +20,6 @@
 
 #include <qobject.h>
 
-#include "particles_range.h"
 #include "virtual_data.h"
 #include "SocketClient.h"
 #include "MessageBuffer.h"
@@ -32,7 +31,7 @@ class NetworkData : public VirtualData
  public: 
   NetworkData(const char * hostname);
   ~NetworkData();
-  int loadPos(ParticlesRangeVector * prv);
+  int loadPos(ParticlesSelectVector *);
   int getNbody();
   float * getPos() { return pos; };
   float  getTime();
@@ -41,11 +40,11 @@ class NetworkData : public VirtualData
   const char * getDataName() { return data_name.c_str(); };
   const char * getDataType() { return "Server: "; };
   bool isConnected() { return is_connected ; };
-  void uploadGlData(ParticlesRangeVector *);
+  void uploadGlData(ParticlesSelectVector *);
   void setSelectedRange(const QString s) { qselect_part=s; };
   QString endOfDataMessage();
  signals:
-  void loadedData(const int *, const float *, const ParticlesRangeVector*);
+  void loadedData(const int *, const float *,ParticlesSelectVector *);
 
  private:
   const  char * select_part, * select_time;
@@ -68,3 +67,4 @@ class NetworkData : public VirtualData
   int close(); // close snapshot
 };
 #endif 
+// ============================================================================

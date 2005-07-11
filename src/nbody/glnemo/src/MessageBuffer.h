@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004                                       
+// Copyright Jean-Charles LAMBERT - 2004-2005                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique de galaxies                                             
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -14,7 +14,7 @@
 //                                                                             
 // This class allow to send and receive data of any size over                  
 // the network and through socket mechanism                                    
-
+// ============================================================================
 #ifndef MESSAGE_BUFFER_H
 #define MESSAGE_BUFFER_H
 
@@ -83,7 +83,6 @@ private :
   bool isEndOfMessage();
   int sizeOfData(const TAG);
 };
-
-
-
 #endif // MESSAGE_BUFFER_H
+// ============================================================================
+

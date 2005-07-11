@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004                                       
+// Copyright Jean-Charles LAMBERT - 2004-2005                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -18,21 +18,24 @@
 
 #include <qgl.h>
 #include "gl_object.h"
+#include "global_options.h"
 
 class GLGridObject : public GLObject {
  public:
   GLGridObject(int axe_parm=0,const QColor &c=yellow, bool activated=TRUE);
+  
   ~GLGridObject();
 
   // method
-  void setNbSquare(int);
-  void setSquareSize(float);
-
+  void setNbSquare(int _nsquare) { nsquare = _nsquare;};
+  void setSquareSize(float _square_size) { square_size = _square_size;};
+  void rebuild() { buildDisplayList(); };
  private:
-  static int nsquare;        // #square
+  static int nsquare;        // #square       
   static float square_size;  // size of square
+  int axe;
   // method
-  void  buildDisplayList(int );
+  void  buildDisplayList( );
 };
 #endif
 // ============================================================================

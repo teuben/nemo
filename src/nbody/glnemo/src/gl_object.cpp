@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004                                       
+// Copyright Jean-Charles LAMBERT - 2004-2005                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -14,7 +14,7 @@
 //                                                                             
 // Manage OpenGL  Object                                                       
 // ============================================================================
-
+#include <iostream>
 #include "gl_object.h"
 #include <qgl.h>
 
@@ -22,42 +22,45 @@
 #include "print_debug.h"
 
 // ============================================================================
-// Constructor
+// Constructor                                                                 
 GLObject::GLObject()
 {
   is_activated=TRUE;
   this->setColor(yellow);
 }
 // ============================================================================
-// Destructor
+// Destructor                                                                  
 GLObject::~GLObject()
 {
 } 
 // ============================================================================
-// 
+// GLObject::display()                                                         
+// Display object, via display list, if activated                              
 void GLObject::display()
 {
   if (is_activated) {
-    //glColor4ub(255,15,255,255);
     glColor4ub(mycolor.red(), mycolor.green(), mycolor.blue(),255);
-    //qglColor(mycolor);
     glCallList(dplist_index);
   }
 }
 // ============================================================================
-// 
+// GLObject::toggleActivate()                                                  
+// toggle activate                                                             
 void GLObject::toggleActivate()
 {
   is_activated = ! is_activated;
 }
 // ============================================================================
-// 
+// GLObject::setColor()                                                        
+// Set object color                                                            
 void GLObject::setColor(const QColor &c)
 {
   mycolor = c;
 }
 // ============================================================================
-// 
+// GLObject::buildDisplayList()                                                
+// Build display list                                                          
 void GLObject::buildDisplayList()
 {
 }
+// ============================================================================

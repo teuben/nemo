@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004                                       
+// Copyright Jean-Charles LAMBERT - 2004-2005                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -12,7 +12,7 @@
 //                                                                             
 // implementation of the main Widget Class                                     
 //                                                                             
-//                                                                             
+// Draw the API, manage all the events                                         
 // ============================================================================
 
 #include <qpushbutton.h>
@@ -33,9 +33,13 @@
 #include <qstatusbar.h>
 #include <string.h>
 #include <qmessagebox.h>
+#include <qcombobox.h>
 #include <qcursor.h>
 #include <qlineedit.h>
 #include <qlistbox.h>
+#include <qtimer.h>
+#include <qprinter.h>
+#include <qpainter.h>
 
 #include <iomanip>
 #include <assert.h>
@@ -46,36 +50,32 @@
 #include "globjwin.h"
 #include "glbox.h"
 
-// My class
-//#include "dialogform.h"
-//#include "snapshot_data.h"
-#include "particles_range.h"
-#include "set_particles_range_form.h"
-//#include "blending_options_form.h"
-#include "optionsform.h"
-#include "hostname_selection_form.h"
 #include "network_data.h"
-#include "select_particles_form.h"
 #include "movie_thread.h"
-#include "about_form.h"
 
-#define NETWORK_BROWSE 0
-#define RECORD_FRAME 0
+// FORM designed with 'designer'
+#include "about_form.h"
+#include "hostname_select_form.h"
+#include "crun_server_form.h"
+#include "select_nbody_form.h"
+#include "particles_select_form.h"
+
+#define NETWORK_BROWSE 1
+#define RECORD_FRAME 1
 
 // Include XPM images
 #include "images/glnemo35.xpm"
-//#include "images/galaxy1.xpm"
 #include "images/arrowsb.xpm"
 #include "images/target1.xpm"
 #include "images/screen2.xpm"
 #include "images/grid.xpm"
 #include "images/options_particles_range.xpm"
-//#include "images/options_blending.xpm"
 #include "images/tools.xpm"
 #include "images/arw01rt.xpm"
 #include "images/camera5.xpm"
 #include "images/comm.xpm"
 #include "images/allfit.xpm"
+#include "images/file_print.xpm"
 #if NETWORK_BROWSE
   #include "images/broadcast.xpm"
 #endif  
@@ -89,35 +89,57 @@ using namespace std;
 #include "print_debug.h"
 
 
-// ----------------------------------------------------------------------------
-// Constructor
+// ============================================================================
+// Constructor                                                                 
 GLObjectWindow::GLObjectWindow( QWidget* parent, const char* name)
   : QMainWindow( parent, name)
-    //: QMainWindow( 0, 0, WDestructiveClose )
-    // QWidget( parent, name )
 {
+  // instantiate store_options object
+  store_options = new GlobalOptions();
+  
   //                         Initialyze NEMO engine
   //initparam(argv,defv);
-  ::string in       = getparam("in");
-  QString  server   = getparam("server");
-  ::string select   = getparam("select");
-  ::string s_time   = getparam("times");
-  bool     blending = getbparam("blending");
-  bool     dbuffer  = getbparam("dbuffer");
-  bool     show_grid= getbparam("grid");
-  float    psize    = getiparam("psize");
-  int      port     = getiparam("port");
+  ::string in             = getparam("in");
+  QString  server         = getparam("server");
+  ::string select         = getparam("select");
 
+  if ( hasvalue("select_list") )
+    select_list           = getparam("select_list");
+  else
+    select_list = NULL;
+  ::string s_time         = getparam("times");
+  range_visib             = getbparam("range_visib");
+  store_options->blending = getbparam("blending");
+  store_options->dbuffer  = getbparam("dbuffer");
+  store_options->show_grid= getbparam("grid");
+  store_options->perspective=getbparam("perspective");
+  store_options->orthographic = !store_options->perspective;
+
+  bool bestzoom           = getbparam("bestzoom");
+  store_options->xrot     = getdparam("xrot");
+  store_options->yrot     = getdparam("yrot");
+  store_options->zrot     = getdparam("zrot");
+  store_options->xtrans   = getdparam("xtrans");
+  store_options->ytrans   = getdparam("ytrans");
+  store_options->ztrans   = getdparam("ztrans");
+  store_options->zoom     = getdparam("zoom");  
+  store_options->psize    = getiparam("psize");
+  store_options->port     = getiparam("port");
+  store_options->show_poly= getbparam("gaz");
+  store_options->texture_size       =getdparam("texture_s");
+  store_options->texture_alpha_color=getiparam("texture_ac");
+  float range_ortho;
+  if (store_options->orthographic) {
+    range_ortho=getdparam("ortho_range");
+  } 
+  if (store_options->port) ; // do nothing (remove compiler warning)
   
-  if (port) ; // do nothing (remove compiler warning)
-  
-  PRINT_D cerr << ">> select = [" << select << "]\n";
   //                         finish NEMO
 
   // no bodies yet ;)
   nbody = 0;
-  is_mouse_pressed = FALSE;
-  is_key_pressed   = FALSE;
+  is_mouse_pressed   = FALSE;
+  is_key_pressed     = FALSE;
   new_virtual_object = FALSE;
   
   // Initialyse mutex
@@ -131,34 +153,37 @@ GLObjectWindow::GLObjectWindow( QWidget* parent, const char* name)
 
   // icon main window
   setIcon( QPixmap( glnemo35_xpm ) );
-
-  // Create Dialogs
-  //DialogForm * dialogform = new DialogForm(this);
-  setParticlesRangeForm = NULL;
   
-  // create menu fileOpen
+  // create menu-entry fileOpen
   QAction* fileOpenAction;
   fileOpenAction = new QAction( this, "fileOpenAction" );
   fileOpenAction->setText( tr( "Open File" ) );
   connect( fileOpenAction, SIGNAL( activated() ) , this, SLOT( selectFileOpen() ) );
   fileOpenAction->setIconSet( QIconSet( glnemo35_xpm ) );
   
-   // create menu connectionOpen
+  // create menu-entry connectionOpen
   QAction* connexionOpenAction;
   connexionOpenAction = new QAction( this, "connexionOpenAction" );
   connexionOpenAction->setText( tr( "Open Network Connexion" ) );
-  connect( connexionOpenAction, SIGNAL( activated() ) , this, SLOT( selectConnexionOpen() ) );
+  connect( connexionOpenAction, SIGNAL( activated() ) , this, SLOT(selectConnexionOpen()));
   connexionOpenAction->setIconSet( QIconSet( comm ) );
-   
-  // Create a menu
+  
+  // create menu-entry printBuffer
+  QAction* printBufferAction;
+  printBufferAction = new QAction( this, "printBufferAction");
+  printBufferAction->setText( tr( "Print OpenGL buffer"));
+  connect( printBufferAction, SIGNAL( activated() ) , this, SLOT(optionsPrintBuffer()));
+  printBufferAction->setIconSet( QIconSet( file_print));
+  
+  // Create file menu
   QPopupMenu *file = new QPopupMenu( this );
   fileOpenAction->addTo( file );
   connexionOpenAction->addTo( file );
+  printBufferAction->addTo( file );
   file->insertItem( "Exit",  qApp, SLOT(quit()), CTRL+Key_Q );
-  //file->insertItem( "Options",  dialogform, SLOT(show()), CTRL+Key_O );
 
   // Create a Help menu
-  AboutForm * about_form = new AboutForm();
+  AboutForm * about_form = new AboutForm(this);
   QPopupMenu *help_menu = new QPopupMenu( this );
   help_menu->insertItem( "About Glnemo",  about_form, SLOT(show()), QKeySequence());//CTRL+Key_B );
   
@@ -226,7 +251,7 @@ GLObjectWindow::GLObjectWindow( QWidget* parent, const char* name)
 		"P&rc", Key_P,this,"Play");
   connect( optionsTogglePlayingAction, SIGNAL( activated() ),
 	   this, SLOT( optionsTogglePlay() ) );
-           
+  //optionsTogglePlayingAction->setToggleAction( TRUE );        
   // Camera action
   QAction * optionsCameraAction = 
     new QAction("take a screenshot",
@@ -243,7 +268,7 @@ GLObjectWindow::GLObjectWindow( QWidget* parent, const char* name)
 		"P&rc", Key_M,this,"Record a movie");
   connect( optionsRecordAction, SIGNAL( activated() ),
 	   this, SLOT( optionsRecord()) );
-           
+  //optionsRecordAction->setToggleAction( TRUE );         
 #if NETWORK_BROWSE           
   // Look for network server
   QAction * optionsLookForNetworkServerAction = 
@@ -262,7 +287,22 @@ GLObjectWindow::GLObjectWindow( QWidget* parent, const char* name)
   connect( optionsReloadSnapshotAction, SIGNAL( activated() ),
 	   this, SLOT( optionsReloadSnapshot() ) );
             
+  // gaz action
+  QAction * optionsToggleGazParticlesAction = 
+    new QAction("Toggle gaz like particles",
+		QPixmap( glnemo35_xpm ),
+		"P&rc", ALT+Key_G,this,"Toggle gaz like particles");
+  connect( optionsToggleGazParticlesAction, SIGNAL( activated() ),
+	   this, SLOT( optionsToggleGazParticles() ) );
            
+  //optionsToggleGazParticlesAction->setToggleAction( TRUE );    
+  // print action
+  QAction * optionsPrintBufferAction =
+    new QAction("Print OpenGL buffer",
+                QPixmap( file_print),
+                "P&rc", CTRL+Key_P,this,"Print OpenGL buffer");
+  connect( optionsPrintBufferAction, SIGNAL( activated() ),
+	   this, SLOT(  optionsPrintBuffer()));             
   //                     Create Tool bar options
   QToolBar *optionsTools = new QToolBar( this, "options operations" );
   optionsTools->setLabel( "Options Operations" );
@@ -280,11 +320,13 @@ GLObjectWindow::GLObjectWindow( QWidget* parent, const char* name)
   optionsTogglePlayingAction->addTo(optionsTools);
   optionsReloadSnapshotAction->addTo(optionsTools);
   optionsCameraAction->addTo(optionsTools);
+  optionsToggleGazParticlesAction->addTo(optionsTools);
+  optionsPrintBufferAction->addTo(optionsTools);
 #if  RECORD_FRAME
-  optionsRecordAction->addTo(optionsTools);
+//  optionsRecordAction->addTo(optionsTools);
 #endif  
 #if  NETWORK_BROWSE 
-  optionsLookForNetworkServerAction->addTo(optionsTools);
+//  optionsLookForNetworkServerAction->addTo(optionsTools);
 #endif  
   
   // Create a Vertical Box to store the Display
@@ -293,7 +335,40 @@ GLObjectWindow::GLObjectWindow( QWidget* parent, const char* name)
   setCentralWidget( glframe );
 
   // Create an OpenGL widget inside the vertical box
-  glbox = new GLBox( glframe, "glbox",0,blending,dbuffer,show_grid,psize );
+  glbox = new GLBox( glframe, "glbox",store_options,0);
+  
+  // Create an OptionForm box
+  options_form = new OptionsForm(this);
+  // option_form download global options
+  options_form->downloadOptions(store_options);
+
+  // divers options
+  connect(options_form,SIGNAL(updateGL()),glbox,SLOT(updateGL()));      
+  // size Grids
+  connect(options_form,SIGNAL(resizeGrid(const float,const int)),
+          glbox,SLOT(resizeGrid(const float,const int)));   
+  // color Grids
+  connect(options_form,SIGNAL(changeColorGridXY(const QColor)),
+          glbox,SLOT(changeColorGridX(const QColor )));
+  connect(options_form,SIGNAL(changeColorGridYZ(const QColor)),
+          glbox,SLOT(changeColorGridY(const QColor )));   
+  connect(options_form,SIGNAL(changeColorGridXZ(const QColor)),
+          glbox,SLOT(changeColorGridZ(const QColor )));   
+  // toggle Grids
+  connect(options_form,SIGNAL(toggleGridX()),glbox,SLOT(toggleGridX()));
+  connect(options_form,SIGNAL(toggleGridY()),glbox,SLOT(toggleGridY()));
+  connect(options_form,SIGNAL(toggleGridZ()),glbox,SLOT(toggleGridZ()));
+  // gaz like particles
+  connect(options_form,SIGNAL(setTextureSize(const float)),
+          glbox,SLOT(setTextureSize(const float)));
+  connect(options_form,SIGNAL(changeTextureAlphaColor(const int)),
+          glbox,SLOT(changeTextureAlphaColor(const int)));
+  connect(options_form,SIGNAL(setProjection()),this,SLOT(setProjection()));
+  // hud
+  connect(options_form,SIGNAL(setHudActivate()),glbox,SLOT(setHudActivate()));
+  connect(options_form,SIGNAL(changeColorBackground()),glbox,SLOT(updateGL()));
+  connect(options_form,SIGNAL(changeColorHUD(const QColor)),
+          glbox,SLOT(changeColorHUD(const QColor )));
   //resizeEvent(NULL);
   
   // acquire_data_thread
@@ -303,6 +378,8 @@ GLObjectWindow::GLObjectWindow( QWidget* parent, const char* name)
   //
   // TRY TO LOAD A NEMO SNAPSHOT
   //
+  psv.clear();   // clear particles range vectors
+  VirtualParticlesSelect::nb_select = 0;
   if (hasvalue("in")) {
     virtual_data = new SnapshotData(in,select,s_time);
     if (! virtual_data->isValidData()) {
@@ -310,25 +387,27 @@ GLObjectWindow::GLObjectWindow( QWidget* parent, const char* name)
       exit(1);
     }
     connect(virtual_data,SIGNAL(loadedData(const int *, const float *, 
-                                        const ParticlesRangeVector * )),
-            glbox,SLOT(getData(const int *, const float *, const ParticlesRangeVector *)));
-            
-    //connect (virtual_data,SIGNAL(messageLoad(QString* )),
-    //      this,SLOT(messageLoad(QString* )));
-    
-    if ( ! virtual_data->loadPos(&prv)) {
+                                        ParticlesSelectVector * )),
+            glbox,SLOT(getData(const int *, const float *, ParticlesSelectVector *)));
+    connect(virtual_data,SIGNAL(infoMessage(std::string)),
+            this,SLOT(infoMessage(std::string )));
+    if ( ! virtual_data->loadPos(&psv)) {
       std::cerr << "error nemo loading....\n";
     } else {
+      //setObjectVisible(range_visib, 1);
+      selectListIndex();
       nbody   = virtual_data->getNbody();
       timu    = virtual_data->getTime();
       pos     = virtual_data->getPos();
       coo_max = virtual_data->getCooMax();
       i_max   = virtual_data->getCooIndexMax();
+      glbox->getData(&nbody,pos,&psv);
       glbox->setHud(GLHudObject::Nbody,nbody);
       glbox->setHud(GLHudObject::Time,timu);
       glbox->setHud(GLHudObject::Title,virtual_data->getDataName());
       glbox->setHud(GLHudObject::Getdata,virtual_data->getDataType());
-      optionsFitAllPartOnScreen();
+
+      if (bestzoom) optionsFitAllPartOnScreen();
       statusBar()->message("Snapshot loaded.");
       
     }
@@ -356,20 +435,20 @@ GLObjectWindow::GLObjectWindow( QWidget* parent, const char* name)
         nbody   = virtual_data->getNbody();
         PRINT_D std::cerr << "I got nbody : " << nbody << "\n";
                     
-        prv.clear();   // clear particles range vectors
-        ParticlesRange::nb_select = 0;
+        psv.clear();   // clear particles range vectors
+        VirtualParticlesSelect::nb_select = 0;
 
         // Set particle range
         virtual_data->setSelectedRange(select);
         
         // establish Signal connexion
         connect(virtual_data,SIGNAL(loadedData(const int *, const float *,
-        const ParticlesRangeVector * )),
+        ParticlesSelectVector * )),
         glbox,SLOT(getData(const int *, const float *, 
-                    const ParticlesRangeVector *)));
+                    ParticlesSelectVector *)));
               
         // load positions
-        if ( ! virtual_data->loadPos(&prv)) {
+        if ( ! virtual_data->loadPos(&psv)) {
             QString message="error during Gyrfalcon loading";
             QMessageBox::information( this,"Warning",message,"Ok");
             std::cerr << "error during Gyrfalcon loading....\n";
@@ -377,18 +456,19 @@ GLObjectWindow::GLObjectWindow( QWidget* parent, const char* name)
             virtual_data=NULL;
         } 
         else { //>> true loadPos
-                  
+          selectListIndex();                  
           nbody   = virtual_data->getNbody();
           pos     = virtual_data->getPos();
           timu    = virtual_data->getTime();  
           coo_max = virtual_data->getCooMax();
           i_max   = virtual_data->getCooIndexMax();
+          glbox->getData(&nbody,pos,&psv);
           glbox->setHud(GLHudObject::Nbody,nbody);
           glbox->setHud(GLHudObject::Time,timu);
           glbox->setHud(GLHudObject::Title,virtual_data->getDataName());
           glbox->setHud(GLHudObject::Getdata,
                         virtual_data->getDataType()+server);
-          optionsFitAllPartOnScreen();
+          if (bestzoom) optionsFitAllPartOnScreen();
           statusBar()->message("Network data loaded.");
           
         } //<< true load pos
@@ -398,23 +478,61 @@ GLObjectWindow::GLObjectWindow( QWidget* parent, const char* name)
       virtual_data = NULL;
     }
   }
+  setProjection(range_ortho);
   PRINT_D cerr << "End of globwin\n";
- 
-  //finiparam();  // garbage collecting for nemo
-  
-  //glbox->printViewport();  
-  //glbox->ScreenDump();
 }
-
-// ----------------------------------------------------------------------------
-// Destructor
+// ============================================================================
+// Destructor                                                                  
 GLObjectWindow::~GLObjectWindow()
 {
 }
-// ----------------------------------------------------------------------------
-//
+// ============================================================================
+// GLObjectWindow::setObjectVisible(I                                          
+//                                                                             
+void GLObjectWindow::setObjectVisible(bool b, int v_type) {
+  for (unsigned int i=0; i< psv.size(); i++) {
+    if (psv[i].vps->v_type == v_type) {
+      psv[i].vps->is_visible = b;
+    }
+  }
+}
+// ============================================================================
+// GLObjectWindow::selectListIndex()                                           
+// create particles select vector according to list of indexes                 
+void GLObjectWindow::selectListIndex()
+{
+  if (select_list) {
+    VirtualParticlesSelect * vps = new VirtualParticlesSelect();
+    try { // try to load data from particle list
+      vps->storeParticlesList(&psv,virtual_data->getNbody(),select_list);
+    }// try
+    catch (int n) {
+      switch (n) {
+          case -1: 
+              break;
+          case -2:
+              break;	
+          default:
+              assert(1);            
+      } //switch
+      infoMessage(vps->error_message);
+    }// catch
+    delete vps;
+    setObjectVisible(range_visib, 1);
+  }
+}     
+// ============================================================================
+// GLObjectWindow::callMe()                                                    
+// Useless...                                                                  
+void GLObjectWindow::callMe() {
+  std::cerr << "called.....\n";
+}
+// ============================================================================
+// GLObjectWindow::initStuff()                                                 
+// Initialyze variables                                                        
 void GLObjectWindow::initStuff()
 {
+  static bool first=true;
   x_mouse=0;
   y_mouse=0;
   z_mouse=0;
@@ -425,27 +543,30 @@ void GLObjectWindow::initStuff()
   is_pressed_right_button=FALSE;
   is_pressed_middle_button=FALSE;
   is_translation=FALSE;
-  play_animation=FALSE;
+  if (first) {  
+    play_animation=FALSE;
+    first=false;
+  }
 }
-// ----------------------------------------------------------------------------
-//
+// ============================================================================
+// GLObjectWindow::deleteFirstWidget()                                         
 void GLObjectWindow::deleteFirstWidget()
 {
-
 }
-// ----------------------------------------------------------------------------
-//
+// ============================================================================
+// GLObjectWindow::connectToHostname()                                         
+// network connect to the selected item                                        
 void GLObjectWindow::connectToHostname(QListBoxItem * item)
 {
   connectToHostname(item->text());
 }
-// ----------------------------------------------------------------------------
-//
+// ============================================================================
+// GLObjectWindow::connectToHostname()                                         
+// network connect to the selected host                                        
 void GLObjectWindow::connectToHostname(QString  host)
 {
   if (host != "" ) { // a hostname has been entered
-    cerr <<" Host selected : [" << host << "]\n";
-          
+    PRINT_D std::cerr <<" Host selected : [" << host << "]\n";          
     //
     // Instantiate a new NetworkData object
     //
@@ -469,26 +590,25 @@ void GLObjectWindow::connectToHostname(QString  host)
       //
       // Launch select particles dialog box
       //
-      SelectParticlesForm * select_part = 
-      new SelectParticlesForm("Gyrfalcon Network Data",
-      nbody,this);
+      CSelectNbodyForm * select_part = new CSelectNbodyForm(this);
+      select_part->setData("Gyrfalcon Network Data",host,nbody);
       
       if (select_part->exec()) {  // click OK
                   
-        prv.clear();   // clear particles range vectors
-        ParticlesRange::nb_select = 0;
+        psv.clear();   // clear particles range vectors
+        VirtualParticlesSelect::nb_select = 0;
 
         // Set particle range
         new_virtual_data->setSelectedRange(select_part->getSelectedRange());
         
         // establish Signal connexion
         connect(new_virtual_data,SIGNAL(loadedData(const int *, const float *,
-        const ParticlesRangeVector * )),
-        glbox,SLOT(getData(const int *, const float *, 
-                    const ParticlesRangeVector *)));
+                ParticlesSelectVector * )),
+                glbox,SLOT(getData(const int *, const float *, 
+                ParticlesSelectVector *)));
             
         // load positions
-        if ( ! new_virtual_data->loadPos(&prv)) {
+        if ( ! new_virtual_data->loadPos(&psv)) {
             QString message="error during Gyrfalcon loading";
             QMessageBox::information( this,"Warning",message,"Ok");
             std::cerr << "error during Gyrfalcon loading....\n";   
@@ -537,26 +657,30 @@ void GLObjectWindow::connectToHostname(QString  host)
     statusBar()->message( "Connexion aborted", 2000 );        
   }
 }
-// ----------------------------------------------------------------------------
-//
+// ============================================================================
+// GLObjectWindow::selectConnexionOpen()                                       
+// Launch select connexion box, and try to connect to the host selected        
 void GLObjectWindow::selectConnexionOpen()
 {
   static bool first=TRUE;
-  static HostnameSelectionForm *hsl;
+  //static HostnameSelectionForm *hsl;
+  static HostnameSelectForm *hsl;
   int n; // happy Red Hat 9
   
   if (n); // remove compiler warning
   // first time, create Hostname selection box
   if (first) {
     first = FALSE;
-    hsl = new HostnameSelectionForm(this);
+    //hsl = new HostnameSelectionForm(this);
+    hsl = new HostnameSelectForm(this);
   }
   //
   // Launch select host dialog box
   //
   if (hsl->exec()) { // if Ok pressed
     try {
-      connectToHostname(hsl->edit_hostname->text());
+      //connectToHostname(hsl->edit_hostname->text());
+      connectToHostname(hsl->host_edit_list->currentText());
     } 
     catch (int n) {  // catch errors thrown by SEND and RECV
       switch(n) {
@@ -572,8 +696,9 @@ void GLObjectWindow::selectConnexionOpen()
     }
   }
 }
-// ----------------------------------------------------------------------------
-//
+// ============================================================================
+// GLObjectWindow::optionsReloadSnapshot()                                     
+// reload the current snapshot                                                 
 void GLObjectWindow::optionsReloadSnapshot()
 {
   if ( ! virtual_data ) { // no data loaded
@@ -589,14 +714,11 @@ void GLObjectWindow::optionsReloadSnapshot()
     }
   }          
   pthread_mutex_unlock(&mutex_timer);
-    
-  //connect (virtual_data,SIGNAL(messageLoad(QString* )),
-  //this,SLOT(messageLoad(QString* )));
-
-  prv.clear();   // clear particles range vectors
-  ParticlesRange::nb_select = 0;
+  
+  psv.clear();   // clear particles range vectors
+  VirtualParticlesSelect::nb_select = 0;
   // load positions
-  if ( virtual_data->reload(&prv) <= 0) {
+  if ( virtual_data->reload(&psv) <= 0) {
       QString message="Unable to restart snapshot!";
       QMessageBox::information( this,"Warning",message,"Ok");
 
@@ -613,79 +735,76 @@ void GLObjectWindow::optionsReloadSnapshot()
       statusBar()->message("Snapshot reloaded.");
   }  
 }
-// ----------------------------------------------------------------------------
-//
+// ============================================================================
+// GLObjectWindow::selectFileOpen()                                            
+// launch the select file box, and try to load the selected file               
 void GLObjectWindow::selectFileOpen()
 {
-  if (setParticlesRangeForm) {
-    setParticlesRangeForm->close();
-  }
   
-    QString fn = QFileDialog::getOpenFileName( QString::null, QString::null,
-                                              this);
-    if ( !fn.isEmpty() ) {
-      SnapshotData * new_virtual_data=new SnapshotData(fn,"all","all");;
-      
-        if ( ! new_virtual_data->isValidData() ) {
-          QString message="file ["+fn+"] is not a NEMO snapshot";
-          QMessageBox::information( this,"Warning",message,"Ok");
-          if (new_virtual_data) {
-            delete new_virtual_data;
-          }
-        } 
-        else {
-          pthread_mutex_lock(&mutex_timer);
-          if (play_animation) {
-            killTimer( play_timer );
-            glbox->setHudActivate(GLHudObject::Loading, FALSE);
-            play_animation = FALSE;
-            while ( !ad_thread->wait(500)) {
-                  PRINT_D std::cerr << "AD_THREAD still running, waiting....\n";      
-            }
-          }          
-          if (virtual_data) {             // exist previous object?
-            delete virtual_data;          // delete previous object
-          }
-          virtual_data = new_virtual_data;   // main object point to new object
-          
-          pthread_mutex_unlock(&mutex_timer);
-          
-          // establish Signal connexion
-          connect(virtual_data,SIGNAL(loadedData(const int *, const float *,
-          const ParticlesRangeVector * )),
-          glbox,SLOT(getData(const int *, const float *, const ParticlesRangeVector *)));
-      
-          //connect (virtual_data,SIGNAL(messageLoad(QString* )),
-          //this,SLOT(messageLoad(QString* )));
-      
-          prv.clear();   // clear particles range vectors
-          ParticlesRange::nb_select = 0;
-
-          // load positions
-          if ( ! virtual_data->loadPos(&prv)) {
-             QString message="End of snapshot Reached !";
-             QMessageBox::information( this,"Warning",message,"Ok");
-             std::cerr << "error nemo loading....\n";
-
-          } else {
-              nbody   = virtual_data->getNbody();
-              pos     = virtual_data->getPos();
-              timu    = virtual_data->getTime();  
-              coo_max = virtual_data->getCooMax();
-              i_max   = virtual_data->getCooIndexMax();
-              glbox->setHud(GLHudObject::Nbody,nbody);
-              glbox->setHud(GLHudObject::Time,timu);
-              glbox->setHud(GLHudObject::Title,virtual_data->getDataName());
-              glbox->setHud(GLHudObject::Getdata,virtual_data->getDataType());
-              statusBar()->message("Snapshot loaded.");
-          }
+  QString fn = QFileDialog::getOpenFileName( QString::null, QString::null,
+                                            this);
+  if ( !fn.isEmpty() ) {
+    SnapshotData * new_virtual_data=new SnapshotData(fn,"all","all");;
+    
+    if ( ! new_virtual_data->isValidData() ) {
+      QString message="file ["+fn+"] is not a NEMO snapshot";
+      QMessageBox::information( this,"Warning",message,"Ok");
+      if (new_virtual_data) {
+        delete new_virtual_data;
+      }
+    } 
+    else {
+      pthread_mutex_lock(&mutex_timer);
+      if (play_animation) {
+        killTimer( play_timer );
+        glbox->setHudActivate(GLHudObject::Loading, FALSE);
+        play_animation = FALSE;
+        while ( !ad_thread->wait(500)) {
+              PRINT_D std::cerr << "AD_THREAD still running, waiting....\n";      
         }
+      }          
+      if (virtual_data) {             // exist previous object?
+        delete virtual_data;          // delete previous object
+      }
+      virtual_data = new_virtual_data;   // main object point to new object
+      
+      pthread_mutex_unlock(&mutex_timer);
+      
+      // establish Signal connexion
+      connect(virtual_data,SIGNAL(loadedData(const int *, const float *,
+      ParticlesSelectVector * )),
+      glbox,SLOT(getData(const int *, const float *, ParticlesSelectVector *)));
+  
+      psv.clear();   // clear particles range vectors
+      VirtualParticlesSelect::nb_select = 0;
+
+      // load positions
+      if ( ! virtual_data->loadPos(&psv)) {
+          QString message="End of snapshot Reached !";
+          QMessageBox::information( this,"Warning",message,"Ok");
+          std::cerr << "error nemo loading....\n";
+
+      } else {
+          nbody   = virtual_data->getNbody();
+          pos     = virtual_data->getPos();
+          timu    = virtual_data->getTime();  
+          coo_max = virtual_data->getCooMax();
+          i_max   = virtual_data->getCooIndexMax();
+          glbox->setHud(GLHudObject::Nbody,nbody);
+          glbox->setHud(GLHudObject::Time,timu);
+          glbox->setHud(GLHudObject::Title,virtual_data->getDataName());
+          glbox->setHud(GLHudObject::Getdata,virtual_data->getDataType());
+          optionsFitAllPartOnScreen();
+          statusBar()->message("Snapshot loaded.");
+      }
     }
-    else
-        statusBar()->message( "Loading aborted", 2000 );
+  }
+  else
+      statusBar()->message( "Loading aborted", 2000 );
 }
-// ----------------------------------------------------------------------------
-// Toggle translation
+// ============================================================================
+// GLObjectWindow::messageWarning()                                            
+// Display a warning message                                                   
 void GLObjectWindow::messageWarning(QString * message, int status)
 {
   play_animation = FALSE;
@@ -694,8 +813,18 @@ void GLObjectWindow::messageWarning(QString * message, int status)
   if (0) QMessageBox::information( this,"Warning",*message,"Ok");
   if (status); // do nothing (remove compiler warning)
 }
-// ----------------------------------------------------------------------------
-// Toggle translation
+// ============================================================================
+// GLObjectWindow::infoMessage()                                               
+// Display an info message                                                     
+void GLObjectWindow::infoMessage(std::string message)
+{
+  std::cerr << "GOT info message ["
+                    << message << "]\n";
+  QMessageBox::information( this,QString(""),QString(message.c_str()));
+}
+// ============================================================================
+// GLObjectWindow::optionsToggleTranslation()                                  
+// Toggle translation                                                          
 void GLObjectWindow::optionsToggleTranslation()
 {
   is_translation=!is_translation;
@@ -704,8 +833,9 @@ void GLObjectWindow::optionsToggleTranslation()
     glbox->getPixelTranslation(&tx_mouse,&ty_mouse,&tz_mouse);
   }
 }
-// ----------------------------------------------------------------------------
-// Toggle fullscreen mode
+// ============================================================================
+// GLObjectWindow::optionsToggleFullScreen()                                   
+// Toggle fullscreen mode                                                      
 void GLObjectWindow::optionsToggleFullScreen()
 {
   static bool full_screen=TRUE;
@@ -718,16 +848,18 @@ void GLObjectWindow::optionsToggleFullScreen()
     showNormal();
   }
   full_screen=!full_screen;
-
 }
-// ----------------------------------------------------------------------------
-// Toggle grid view
+// ============================================================================
+// GLObjectWindow::optionsToggleGrid()                                         
+// Toggle grid view                                                            
 void GLObjectWindow::optionsToggleGrid()
 {
   glbox->toggleGrid();
+  options_form->downloadOptions(store_options);
 }
-// ----------------------------------------------------------------------------
-// Toggle Animation
+// ============================================================================
+// GLObjectWindow::optionsTogglePlay()                                         
+// Toggle Animation                                                            
 void GLObjectWindow::optionsTogglePlay()
 {
   if (! virtual_data) {
@@ -753,18 +885,17 @@ void GLObjectWindow::optionsTogglePlay()
       killTimer( play_timer );
       glbox->setHudActivate(GLHudObject::Loading, FALSE);
     }
-
   }
 }
 
-// ----------------------------------------------------------------------------
-// Each timer event ( 1/2 second) this routine is called,
-// then a thread is started to load the new data.
-// Once loaded, the data are uploaded to GLBox
+// ============================================================================
+// GLObjectWindow::timerEvent()                                                
+// Each timer event (1/2 second) this routine is called, then a thread is      
+// started to load the new data. Once loaded, positions are  uploaded to GLBox 
 void GLObjectWindow::timerEvent( QTimerEvent *e )
 {
   VirtualData * ptr_vd;
-
+  PRINT_D std::cerr << "Timer event = " << e->timerId() << "\n";
   if ( virtual_data->is_end_of_data ) { // no more data
     killTimer( play_timer );
     play_animation = FALSE;
@@ -840,7 +971,7 @@ void GLObjectWindow::timerEvent( QTimerEvent *e )
       
       // Start the new THREAD to acquiring data 
        
-      ad_thread = new AcquireDataThread(virtual_data,&prv);
+      ad_thread = new AcquireDataThread(virtual_data,&psv);
       ptr_vd = virtual_data;
       
       
@@ -852,11 +983,11 @@ void GLObjectWindow::timerEvent( QTimerEvent *e )
       
       if (ptr_vd == virtual_data) {
       //if (ad_thread->is_loaded) {
-        std::cerr << "I am here THREAD............\n";
+        PRINT_D std::cerr << "I am here THREAD............\n";
         glbox->setHud(GLHudObject::Nbody,virtual_data->getNbody());
         glbox->setHud(GLHudObject::Time,virtual_data->getTime());
         PRINT_D std::cerr << "New TIme = ["<<virtual_data->getTime()<<"]\n";
-        virtual_data->uploadGlData(&prv);        
+        virtual_data->uploadGlData(&psv);        
         //virtual_data->is_loading_thread = FALSE;
       } 
       else {
@@ -868,17 +999,27 @@ void GLObjectWindow::timerEvent( QTimerEvent *e )
    pthread_mutex_unlock(&mutex_timer);
    #endif
 #endif    
-  }   
-     
+  }        
 }
-// ----------------------------------------------------------------------------
-// options Camera
+// ============================================================================
+// GLObjectWindow::optionsCamera()                                             
+// take a screenshot                                                           
 void GLObjectWindow::optionsCamera()
 {
   takeScreenshot("");
 }
-// ----------------------------------------------------------------------------
-// options record
+// ============================================================================
+// GLObjectWindow::optionsToggleGazParticles()                                 
+// toggle gaz particles effect                                                 
+void GLObjectWindow::optionsToggleGazParticles()
+{ 
+  store_options->show_poly = !store_options->show_poly;
+  options_form->downloadOptions(store_options);
+  glbox->updateGL();
+}
+// ============================================================================
+// GLObjectWindow::optionsRecord()                                             
+// toggle movie record                                                         
 void GLObjectWindow::optionsRecord()
 {
   static MovieThread * movie=NULL;
@@ -888,88 +1029,102 @@ void GLObjectWindow::optionsRecord()
   }
   play = !play;
   if (play) {
-    movie->start();
+    movie->start(QThread::LowestPriority);
   } else {
     movie->stop();
     delete movie;
     movie=NULL;
   }
 }
-// ----------------------------------------------------------------------------
-// Take a screenshot
+// ============================================================================
+// GLObjectWindow::takeScreenshot()                                            
+// Take a screenshot                                                           
 void GLObjectWindow::takeScreenshot(QString savefilename)
 {
   glbox->updateGL();
   QImage img=glbox->grabFrameBuffer();
   
   // Open a Save File Dialog Box
-if (savefilename == "" ) {
-   savefilename = QFileDialog::getSaveFileName(QString::null, QString::null,
+  if  (savefilename == "" ) {
+     savefilename = QFileDialog::getSaveFileName(QString::null, QString::null,
                               this, "Save ScreenShot");
-}
-#if 0 
- else {
-  QString savefilename = "test.png";                                        
-}
-#endif
-#if 1
+  }
   if ( !savefilename.isEmpty() )  // valid filename ?
-    if ( !img.save( savefilename, "PNG" ) ) { // save the image
+    if  ( !img.save( savefilename, "PNG" ) ) { // save the image
       QMessageBox::warning( this, "Save failed", "Error saving file" );
-    }
-#endif    
+    }    
 }
-// ----------------------------------------------------------------------------
-//
+// ============================================================================
+// GLObjectWindow::optionsLookForNetworkServer()                               
+// scan local network to find out running simulation server                    
 void GLObjectWindow::optionsLookForNetworkServer()
 {
   static bool first=TRUE;
-  static RunningServerForm * rs_form;
+  //static RunningServerForm * rs_form;
+  static CListRunningServerForm * rs_form;
   if (first) {
-    rs_form = new RunningServerForm(this);
+    //rs_form = new RunningServerForm(this);
+    rs_form = new CListRunningServerForm(this);
     first=FALSE;
   }
-  //rs_form->fillList();
-#if 1  
-  if (rs_form->exec()) {
-    std::cerr << ">>> Host selected = " << rs_form->hostname << "\n";
-    connectToHostname(rs_form->hostname);
-  }
-#endif  
+  if (rs_form->exec()) {  
+     PRINT_D std::cerr << ">>> Host selected = " << rs_form->hostname << "\n";
+     connectToHostname(rs_form->hostname);
+  } 
 }
-// ----------------------------------------------------------------------------
-//
+// ============================================================================
+// GLObjectWindow::optionsParticlesRange()                                     
+// Launch particles range and color box                                        
 void GLObjectWindow::optionsParticlesRange()
 {
-#if 1
-  //static SetParticlesRangeForm * setParticlesRangeForm;
   static bool first=TRUE;
-  
+  static ParticlesSelectForm * psf;
+#if 0  
   if (first) {
-    setParticlesRangeForm = new SetParticlesRangeForm(glbox,&prv,nbody,pos,this);
+    setParticlesRangeForm = new SetParticlesRangeForm(glbox,&psv,nbody,pos,this);
     first = FALSE;
   }
- // if (setParticlesRangeForm->exec()) {
- //   glbox->getData(&nbody, pos, &prv);
- // }
- setParticlesRangeForm->updateData(&prv,nbody,pos);
- setParticlesRangeForm->show();
+ setParticlesRangeForm->updateData(&psv,nbody,pos);
+ setParticlesRangeForm->show(); 
 #else
-  SetParticlesRangeForm * setParticlesRangeForm =
-    new SetParticlesRangeForm(&prv,nbody,this,FALSE);
-  if (setParticlesRangeForm->exec()) {
-
-    glbox->getData(&nbody, pos, &prv);
+  if (first) {
+    psf = new ParticlesSelectForm(this);
+      // connection to update the data
+    connect(psf,
+            SIGNAL(applyData(const int *, const float *, 
+               		     ParticlesSelectVector * )),
+	    glbox,
+            SLOT(getData(const int *, const float *, 
+                     ParticlesSelectVector *)));
+    first = FALSE;
   }
-  delete setParticlesRangeForm;
+ psf->updateData(&psv,nbody,pos);
+ psf->show(); 
 
-
-#endif
-  
+#endif 
 }
-// ----------------------------------------------------------------------------
-// optionsFitAllPartOnScreen                                                   
-// fit all the particles on the screen                                         
+// ============================================================================
+// GLObjectWindow::optionsFitAllPartOnScreen()                                 
+// best fit all particles on screen according to the projection selected       
+void GLObjectWindow::optionsFitAllPartOnScreen()
+{
+  if (store_options->perspective) {
+    optionsFitAllPartOnScreenPersp();
+  } else {
+    optionsFitAllPartOnScreenOrtho(0.0);
+  }
+}
+// ============================================================================
+// GLObjectWindow::optionsFitAllPartOnScreenOrtho()                            
+// best fit all particles on screen from orthographic projection               
+void GLObjectWindow::optionsFitAllPartOnScreenOrtho(float range)
+{
+  store_options->zoomo = -1;
+  glbox->setOrthoProjection(range);
+}
+// ============================================================================
+// GLObjectWindow::optionsFitAllPartOnScreenPers()                             
+// fit all the particles on the screen from perspective view                   
 // For each point v(x,y,z), we have to compute its screen coordinates win(x,y) 
 // according to its Projection and  ModelView matrix                           
 // vp = MProj x MModelView x v                                                 
@@ -978,7 +1133,7 @@ void GLObjectWindow::optionsParticlesRange()
 //                                                                             
 // We have then to resolve the previous equation to figure out the best value  
 // for zoom                                                                    
-void GLObjectWindow::optionsFitAllPartOnScreen()
+void GLObjectWindow::optionsFitAllPartOnScreenPersp()
 {
   const double * mProj    = glbox->getProjMatrix();
         double * mMod     = const_cast<double*> 
@@ -987,48 +1142,34 @@ void GLObjectWindow::optionsFitAllPartOnScreen()
 #define MP(row,col)  mProj[col*4+row]
 #define MM(row,col)  mMod[col*4+row]
 
-// force ZOOM to fit all particles                           
-// Zoom is located in ModelView matrix at coordinates MM(2,3)
-MM(2,3) = -200000.0;
-//MM(0,3) = glbox->getXtrans();
-//MM(1,3) = glbox->getYtrans();
-
-//std::cerr << "Viewport :" << viewport[0] << " "
-//          << viewport[1]  << " "  << viewport[2] << " " << viewport[3] << "\n";
-#if 0
-  std::cerr << "ModelView Matrix:\n";
-  for (int i=0;i<4;i++) {
-    for (int j=0;j<4;j++) {
-       std::cerr << setw(10) << MM(i,j) <<"\t";
-    }
-    std::cerr << "\n";
-  }  
-  std::cerr << "Projection Matrix:\n";
-  for (int i=0;i<4;i++) {
-    for (int j=0;j<4;j++) {
-
-       std::cerr << setw(10) << MP(i,j) <<"\t";
-    }
-    std::cerr << "\n";
+  // force ZOOM to fit all particles                           
+  // Zoom is located in ModelView matrix at coordinates MM(2,3)
+  float best_zoom;
+  if (store_options->perspective) {
+    MM(2,3) = -200000.0;
+    best_zoom=1000;
   } 
-#endif
+  else {
+    MM(2,3) =  200000.0;
+    best_zoom=-1000;
+    return;
+  }
   
-  //
-  float best_zoom=1000;
   float mid_screenx = (viewport[2]-viewport[0])/2.;
   float mid_screeny = (viewport[3]-viewport[1])/2.;
-    
+  float coo[3];  
   // loop on all object
-  for (int i=0; i< (int ) prv.size(); i++ ) {
+  for (int i=0; i< (int ) psv.size(); i++ ) {
     // loop on all visible object selected particles  
-    if (prv[i].is_visible ) {
-      for (int j  = prv[i].first_part; 
-              j  <= prv[i].last_part; 
-              j += prv[i].step_part) {
-        float 
-          x=pos[j*3  ],
-          y=pos[j*3+1],
-          z=pos[j*3+2],
+    if (psv[i].vps->is_visible ) {
+      for (int j  = 0; 
+              j  <  psv[i].vps->npart; 
+              j  += psv[i].vps->step_part) {
+          int jndex= psv[i].vps->getIndex(j);      
+          float 
+          x=pos[jndex*3  ],
+          y=pos[jndex*3+1],
+          z=pos[jndex*3+2],
           w=1.;     
         // do the product Mmodel X point = mxyzw
         float mx = MM(0,0)*x + MM(0,1)*y + MM(0,2)*z + MM(0,3)*w;
@@ -1058,23 +1199,7 @@ MM(2,3) = -200000.0;
         bool guess_out_zoomx=false;
         bool guess_out_zoomy=false;
         float screen_coo;
-#if 0        
-        // proceed left side of the screen
-        if (winx <= viewport[0] && (fabs(winx-viewport[0]) > max_out_winx)) {
-          max_out_winx = fabs(winx-viewport[0]);
-          screen_coo=viewport[0];
-          guess_out_zoomx=true;
-        }        
-        else {
-          // proceed right side of the screen    
-          if (winx >= viewport[2] && (fabs(winx-viewport[2]) > max_out_winx)) {
-            max_out_winx = fabs(winx-viewport[2]);
-            screen_coo=viewport[2];
-            guess_out_zoomx=true;
-          }
-        }
-#endif
-#if 1
+
         // proceed from left to mid-side of the screen
         if (winx >= viewport[0] && winx < mid_screenx) {
           screen_coo=viewport[0];
@@ -1087,33 +1212,18 @@ MM(2,3) = -200000.0;
             guess_out_zoomx=true;
           }
         }
-#endif                   
+
         if (guess_out_zoomx) {
           float A=(2.*(screen_coo-viewport[0])/viewport[2])-1.;
           float new_zoomx=-Mmz + (-Ppx+A*Ppw)/(MP(0,2)-A*MP(3,2));
           //std::cerr << "winx = "<<winx<<" new zoom x = " << new_zoomx << "\n";
           if (new_zoomx < best_zoom) {
             best_zoom = new_zoomx;
+            coo[0] = x; coo[1] = y; coo[2] = z;
             //std::cerr << "best zoom x = " << best_zoom << "\n";
           }  
         }        
-#if 0        
-        // proceed bottom side of the screen
-        if (winy >= viewport[3] && (fabs(winy-viewport[3]) > max_out_winy)) {
-          max_out_winy = fabs(winy-viewport[3]);
-          screen_coo=viewport[3];
-          guess_out_zoomy=true;
-        }        
-        else {
-          // proceed top side of the screen    
-          if (winy <= viewport[1] && (fabs(winy-viewport[1]) > max_out_winy)) {
-            max_out_winy = fabs(winy-viewport[1]);
-            screen_coo=viewport[1];
-            guess_out_zoomy=true;
-          }
-        }
-#endif     
-#if 1
+
         // proceed from bottom to mid-side of the screen           
         if (winy < viewport[3] && winy > mid_screeny) {
           screen_coo=viewport[3];
@@ -1126,7 +1236,7 @@ MM(2,3) = -200000.0;
             guess_out_zoomy=true;
           }
         }
-#endif        
+
         if (guess_out_zoomy) {
           float A=(2*(screen_coo-viewport[1])/viewport[3])-1;
           float new_zoomy=-Mmz + (-Ppy+A*Ppw)/(MP(1,2)-A*MP(3,2));
@@ -1134,6 +1244,7 @@ MM(2,3) = -200000.0;
           //std::cerr << "winy = "<<winy<<" new zoom y = " << new_zoomy << "\n";
           if (new_zoomy < best_zoom) {
             best_zoom = new_zoomy;
+            coo[0] = x; coo[1] = y; coo[2] = z;
             //std::cerr << "best zoom y= " << best_zoom << "\n";
           }  
         }        
@@ -1142,60 +1253,62 @@ MM(2,3) = -200000.0;
     else { // object not visible
     }
   }
+  PRINT_D std::cerr << "[" << best_zoom << "] Cordinates for best zoom = " 
+                    << coo[0] <<" " << coo[1] << " " << coo[2] << "\n";
   glbox->setZoom(best_zoom);
 }
-// ----------------------------------------------------------------------------
-// optionsReset:                                                               
+// ============================================================================
+// GLObjectWindow::optionsReset()                                              
 // reset rotation and translation to 0,0,0 coordinates                         
 void GLObjectWindow::optionsReset()
 {
   initStuff(); // reset Variables
   glbox->setRotation(0,0,0);
   glbox->setTranslation(0,0,0);
+  options_form->downloadOptions(store_options);
 }
-// ----------------------------------------------------------------------------
-//
+// ============================================================================
+// GLObjectWindow::optionsBlending()                                           
+// launch options box                                                          
 void GLObjectWindow::optionsBlending()
 {
-#if 0
-  static BlendingOptionsForm * blending_options;
-  static bool first=TRUE;
-
-  if (first) {
-    blending_options = new BlendingOptionsForm(glbox,this);
-    first = FALSE;
-  }
-
-  blending_options->show();
-#else
-  static OptionsForm * options;
-  static bool first=TRUE;
-
-  if (first) {
-    options = new OptionsForm(glbox,this);
-    first = FALSE;
-  }
-  options->show();
-#endif
-
-
+  options_form->show();
+  options_form->downloadOptions(store_options);
 }
-// ----------------------------------------------------------------------------
-//
+// ============================================================================
+// GLObjectWindow::optionsPrintBuffer()                                        
+// print opengl buffer                                                         
+void GLObjectWindow::optionsPrintBuffer()
+{
+  QPrinter m_printer;
+  if ( m_printer.setup() ) {
+    glbox->updateGL();
+    QImage img=glbox->grabFrameBuffer();
+    QPainter painter( &m_printer );
+    painter.drawImage(0,0,img);
+  }
+}
+// ============================================================================
+// GLObjectWindow::wheelEvent()                                                
+// manage zoom according to wheel event                                        
 void GLObjectWindow::wheelEvent(QWheelEvent * e)
 {
   glbox->setZoom(e->delta());
+  options_form->downloadOptions(store_options);
 }
-// ----------------------------------------------------------------------------
-//
+// ============================================================================
+// GLObjectWindow::resizeEvent()                                               
+// updaet OpenGL display according to resizeEvent                              
 void GLObjectWindow::resizeEvent( QResizeEvent *e )
 {
 
   if ( e ) ; // do nothing...just to remove the warning :p
   glbox->setWH(glframe->width(),glframe->height());
+  options_form->downloadOptions(store_options);
 }
-// ----------------------------------------------------------------------------
-//
+// ============================================================================
+// GLObjectWindow::mousePressEvent()                                           
+// manage rotation/translation according to mousePresssEvent                   
 void GLObjectWindow::mousePressEvent( QMouseEvent *e )
 {
   if ( e->button() == QMouseEvent::LeftButton ) {  // left button pressed
@@ -1217,7 +1330,6 @@ void GLObjectWindow::mousePressEvent( QMouseEvent *e )
     is_pressed_right_button = TRUE;
     setMouseTracking(TRUE);
     last_posz = e->x();
-    //last_posy = e->y();
     if (is_translation){
       statusBar()->message("Translating Z"); 
     }
@@ -1225,9 +1337,11 @@ void GLObjectWindow::mousePressEvent( QMouseEvent *e )
       statusBar()->message("Rotating Z"); 
     }
   }
+  options_form->downloadOptions(store_options);
 }
-// ----------------------------------------------------------------------------
-//
+// ============================================================================
+// GLObjectWindow::mouseReleaseEvent()                                         
+// manage mouseReleaseEvent                                                    
 void GLObjectWindow::mouseReleaseEvent( QMouseEvent *e )
 {
   if (e) ;  // do nothing... just to remove the warning :p
@@ -1236,10 +1350,12 @@ void GLObjectWindow::mouseReleaseEvent( QMouseEvent *e )
   is_mouse_pressed = FALSE;
   setMouseTracking(FALSE);
   statusBar()->message("Ready");
+  options_form->downloadOptions(store_options);
 }
 
-// ----------------------------------------------------------------------------
-//
+// ============================================================================
+// GLObjectWindow::mouseMoveEvent()                                            
+// manage mouseMoveEvent                                                       
 void GLObjectWindow::mouseMoveEvent( QMouseEvent *e )
 {
   int dx=0,dy=0,dz=0;
@@ -1253,14 +1369,10 @@ void GLObjectWindow::mouseMoveEvent( QMouseEvent *e )
     last_posx = e->x();
     last_posy = e->y();
     
-    //cerr << "dx = " << dx << "\n";
-    //cerr << "dy = " << dy << "\n";
     if (is_translation) {
       // total rotation
       tx_mouse+=dx;
       ty_mouse+=dy;
-      //cerr << "tx = " << tx_mouse << "\n";
-      //cerr << "ty = " << ty_mouse << "\n";
     }
     else {
       // total rotation
@@ -1287,9 +1399,11 @@ void GLObjectWindow::mouseMoveEvent( QMouseEvent *e )
   else {
     glbox->setRotation(y_mouse,x_mouse,z_mouse);
   }
+  options_form->downloadOptions(store_options);
 }
-// ----------------------------------------------------------------------------
-//
+// ============================================================================
+// GLObjectWindow::keyPressEvent()                                             
+// manage keyboard press events                                                
 void GLObjectWindow::keyPressEvent(QKeyEvent * k)
 {
   if (k->key() == Qt::Key_Control ) {
@@ -1307,16 +1421,41 @@ void GLObjectWindow::keyPressEvent(QKeyEvent * k)
   if (k->key() == Qt::Key_Minus) {
     glbox->setZoom(+1);
     statusBar()->message("Zoom OUT");
-  } 
+  }
+  options_form->downloadOptions(store_options); 
 }
-// ----------------------------------------------------------------------------
-//
+// ============================================================================
+// GLObjectWindow::keyReleaseEvent()                                           
+// manage keyboard release events                                              
 void GLObjectWindow::keyReleaseEvent(QKeyEvent * k)
 {
   if (k->key() == Qt::Key_Control ) {
     is_key_pressed = FALSE;
     is_translation = FALSE;    
-    //cerr << "control released\n";
   }
+  options_form->downloadOptions(store_options);
 }
-// ----------------------------------------------------------------------------
+// ============================================================================
+// GLObjectWindow::setProjection()                                             
+// set projection                                                              
+void GLObjectWindow::setProjection()
+{
+  setProjection(0.0);
+}
+// ============================================================================
+// GLObjectWindow::setProjection()                                             
+// set projection                                                              
+void GLObjectWindow::setProjection(float range_ortho)
+{
+  glbox->hudProjection();
+  if (store_options->perspective) {
+    PRINT_D std::cerr << "Perspective projection\n"; 
+  } 
+  else {
+    PRINT_D std::cerr << "Orthographic projection\n"; 
+    glbox->setOrthoProjection(range_ortho);
+  }
+ glbox->updateGL();
+}
+// ============================================================================
+

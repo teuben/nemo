@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004                                       
+// Copyright Jean-Charles LAMBERT - 2004-2005                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -29,12 +29,13 @@ char * GLHudObject::HUDText[n_HudKeys] = {
     "Zoom"               , // Zoom
     "Rot"                , // Rotation Angle
     "Trans"              , // Tanslation
-    ""                     // Loading
+    ""                   , // Loading
+    ""                     // Projection type
 };
 
 #define MAX(x,y) ((x) > (y) ? (x) : (y))
 // ============================================================================
-// constructor
+// constructor                                                                 
 GLHudObject::GLHudObject(const int w, const int h,
                          const QFont &f,const QColor &c, 
                          bool activated):GLObject()
@@ -64,12 +65,13 @@ GLHudObject::GLHudObject(const int w, const int h,
   updateDisplay();
 }
 // ============================================================================
-// destructor
+// destructor                                                                  
 GLHudObject::~GLHudObject()
 {
 }
 // ============================================================================
-//
+// GLHudObject::setWH()                                                        
+// set witdh and height window                                                 
 void GLHudObject::setWH(int w, int h)
 {
   width  = w;
@@ -77,26 +79,30 @@ void GLHudObject::setWH(int w, int h)
   updateDisplay();
 }
 // ============================================================================
-//
+// GLHudObject::setText()                                                      
+// set Text to the selected HubObject                                          
 void GLHudObject::setText(const HudKeys k, const QString text)
 {
   hud_text[k].setText(HUDText[k], text);
   updateDisplay((const HudKeys) k);
 }
 // ============================================================================
-//
+// GLHudObject::setText()                                                      
+// set int value to the selected HubObject                                     
 void GLHudObject::setText(const HudKeys k, int value)
 {
   setText(k,QString(": %1").arg(value));  
 }
 // ============================================================================
-//
+// GLHudObject::setText()                                                      
+// set float value to the selected HubObject                                   
 void GLHudObject::setText(const HudKeys k, float value)
 {
   setText(k,QString(": %1").arg(value,0,'f',4));
 }  
 // ============================================================================
-//
+// GLHudObject::setText()                                                      
+// set triple float value to the selected HubObject                            
 void GLHudObject::setText(const HudKeys k,const float x, const float y,
                           const float z)
 {
@@ -106,45 +112,56 @@ QString my_text=QString(": %1 %2 %3").arg(x,0,'f',2)
   setText(k,my_text);
 }  
 // ============================================================================
-//
+// GLHudObject::setTextColor()                                                 
+// set text color to the selected HubObject                                    
 void GLHudObject::setTextColor(const HudKeys k, const QColor c)
 {
   hud_text[k].setColor(c);
 }
 // ============================================================================
-//
+// GLHudObject::keysToggle()                                                   
+// Toggle  the selected HubObject                                              
 void GLHudObject::keysToggle(const HudKeys k)
 {
   hud_text[k].toggleActivate();
 }
 // ============================================================================
-//
+// GLHudObject::keysActivate()                                                 
+// Activate the selected HubObject                                             
 void GLHudObject::keysActivate(const HudKeys k, const bool status)
 {
   hud_text[k].setActivate(status);
 }
 // ============================================================================
-//
+// GLHudObject::setFont()                                                      
+// set global font                                                             
 void GLHudObject::setFont(QFont f)
 {
   font =f;
 }
 // ============================================================================
-//
+// GLHudObject::setFont()                                                      
+// set font to the selected HubObject                                          
 void GLHudObject::setFont(const HudKeys k,QFont f)
 {
   hud_text[k].setFont(f);
 }
 // ============================================================================
-//
+// GLHudObject::updateDisplay()                                                
+// Update display for all HudObject activated                                  
 void GLHudObject::updateDisplay()
 {
-  for (int i=0; i<n_HudKeys; i++) {
-    updateDisplay((const HudKeys) i);
+  if (is_activated) {
+    for (int i=0; i<n_HudKeys; i++) {
+      if (hud_text[i].getActivate()) {
+        updateDisplay((const HudKeys) i);
+      }
+    }
   }
 }
 // ============================================================================
-//
+// GLHudObject::updateDisplay()                                                
+// Update display for HudObject selected                                       
 void GLHudObject::updateDisplay(const HudKeys k)
 {
   int x=0,y=0,x_text=0, max;
@@ -200,6 +217,11 @@ void GLHudObject::updateDisplay(const HudKeys k)
       x_text=width-hud_text[k].getTextWidth()-3;
       y=hud_text[Getdata].getHeight()+2+hud_text[k].getHeight();    
       break;  
+    case Projection:
+      x=0;
+      x_text=(width/2)-hud_text[k].getTextWidth()/2;
+      y=height-5;
+      break;          
     case n_HudKeys:
       break;      
   } 
@@ -208,17 +230,28 @@ void GLHudObject::updateDisplay(const HudKeys k)
   }
 }
 // ============================================================================
-//
+// GLHudObject::display()                                                      
+// render hud text object                                                      
 void GLHudObject::display(GLBox * gg)
 {
-#if 1
   if (is_activated) {
     for (int i=0; i<n_HudKeys; i++) {
-      hud_text[(const HudKeys) i].display(gg);
+      if (hud_text[i].getActivate()) {
+        hud_text[(const HudKeys) i].display(gg);
+      }
     }
-  }
-#endif
-  //hud_text[Nbody].display(gg);
-  
+  }  
 }
-//
+// ============================================================================
+// GLHudObject::updateColor()                                                  
+// render hud text object                                                      
+void GLHudObject::updateColor(const QColor col)
+{
+  if (is_activated) {
+    for (int i=0; i<n_HudKeys; i++) {
+        hud_text[(const HudKeys) i].setColor(col);
+    }
+  }  
+}
+// ============================================================================
+

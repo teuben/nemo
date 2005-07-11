@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004-2005                                  
+// Copyright Jean-Charles LAMBERT - 2004-2005                                       
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique de galaxies                                             
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -9,20 +9,17 @@
 // ============================================================================
 // See the complete license in LICENSE and/or "http://www.cecill.info".        
 // ============================================================================
+#include "hosts_list.h"
 
-#ifndef MY_SOCKET_CLIENT_H
-#define MY_SOCKET_CLIENT_H
-
-#include "Socket.h"
-
-class SocketClient : public Socket {
-public:
-  SocketClient(const char * , int, int); // server's name, sock's type, port
-  ~SocketClient();
-  int connectServer();
-private:
-  struct sockaddr_in serAddr;   // server's specification
-};
-#endif
-
-// ============================================================================
+void HostnameSelectForm ::init()
+{
+    // Form's icon
+    //setIcon( QPixmap( glnemo35_xpm ) );
+    host_edit_list->setEditable(true);
+    host_edit_list->insertStrList( hosts_list);
+    //first = true;
+    clearWState( WState_Polished ); 
+}
+void HostnameSelectForm::destroy()
+{
+}

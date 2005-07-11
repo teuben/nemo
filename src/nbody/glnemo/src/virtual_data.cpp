@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004                                       
+// Copyright Jean-Charles LAMBERT - 2004-2005                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -15,103 +15,113 @@
 // ============================================================================
 #include <math.h> // happy gcc 3.4.x
 #include "virtual_data.h"
+#include "particles_range.h"
 
 #define LOCAL_DEBUG 0
 #include "print_debug.h"
   
 // ============================================================================
-//
-int VirtualData::loadPos(ParticlesRangeVector * prv)
+// VirtualData::loadPos()                                                      
+int VirtualData::loadPos(ParticlesSelectVector * psv)
 {
-  if (prv) ; // to remove compiler warning
+  if (psv) ; // to remove compiler warning
   return 0;
 }
 // ============================================================================
-//
+// VirtualData::getNbody()                                                     
 int VirtualData::getNbody()
 {
   return 0;
 }
 // ============================================================================
-//
+// VirtualData::getPos()                                                       
 float * VirtualData::getPos()
 {
   return NULL;
 }
 // ============================================================================
-//
-float  VirtualData::getTime()
+// VirtualData::getTime()                                                      
+float VirtualData::getTime()
 {
   return 0.;
 }
 // ============================================================================
-//
+// VirtualData::isValidData()                                                  
 bool VirtualData::isValidData()
 {
   return FALSE;
 }
 // ============================================================================
-//
+// VirtualData::getCooIndexMax()                                               
 int * VirtualData::getCooIndexMax()
 {
   return NULL;
 }
 // ============================================================================
-//
+// VirtualData::getCooMax()                                                    
 float * VirtualData::getCooMax()
 {
   return NULL;
 }
 // ============================================================================
-//
-void VirtualData::uploadGlData(ParticlesRangeVector * prv)
+// VirtualData::uploadGlData()                                                 
+void VirtualData::uploadGlData(ParticlesSelectVector * psv)
 {
-  if (prv) ; // to remove compiler warning
+  if (psv) ; // to remove compiler warning
 }
 // ============================================================================
-//
+// VirtualData::endOfDataMessage()                                             
 QString VirtualData::endOfDataMessage()
 {
   return "No message in VirtualData base class";
 }
 // ============================================================================
-//
+// VirtualData::getDataName()                                                  
 const char * VirtualData::getDataName()
 {
   return NULL;
 }
 // ============================================================================
-//
+// VirtualData::getDataType()                                                  
 const char * VirtualData::getDataType()
 {
   return NULL;
 }
 // ============================================================================
-//
-int VirtualData::fillParticleRange(ParticlesRangeVector * prv,
+// VirtualData::fillParticleRange()                                            
+// fill up particles range vector                                              
+int VirtualData::fillParticleRange(ParticlesSelectVector * psv,
                                    const int nbody,const char * sel2)
 {
-  ParticlesRange * pr;
+  VirtualParticlesSelect * vps;
   const char * s = sel2;
 
   while (s) {
-    pr = new ParticlesRange();
-    s=pr->parseString(s,nbody,prv);
-    if (s) 
+    vps = new ParticlesRange();
+    vps->setColor();
+    s=vps->parseString(s,nbody,psv);
+    if (s) {
       PRINT_D cerr << " >>>> s sring = ["<< s << "]\n";
-    prv->push_back(*pr);
-    PRINT_D cerr << "In globwin, prv->size() = " << prv->size() << "\n";	  
-    delete pr;
+    }
+    ParticlesSelect * ps = new ParticlesSelect();
+    ps->vps = vps;
+    psv->push_back(*ps);
+    PRINT_D cerr << "In VirtualData::fillParticleRange, psv->size() = " 
+                 << psv->size() << "\n";	
+     //PRINT_D vps->printRange();              
+    delete ps;
   }
-  for (int i=0; i< (int) prv->size(); i++) {
+  for (int i=0; i< (int) psv->size(); i++) {
     PRINT_D cerr << " - - - - - - - - - - - \n";
     PRINT_D cerr << i << "\n";
-    PRINT_D (*prv)[i].printRange();
+    PRINT_D (*psv)[i].vps->npart;
+    PRINT_D (*psv)[i].vps->printRange();
   }
-  return prv->size();
+  return psv->size();
 }
-// ----------------------------------------------------------------------------
-//  compute extremum coordinates
+// ============================================================================
+// VirtualData::computeCooMax()                                                
+//  compute extremum coordinates                                               
 void VirtualData::computeCooMax()
 {
   coo_max[0]= fabs(pos[0]);
@@ -139,5 +149,4 @@ void VirtualData::computeCooMax()
   PRINT_D cerr << coo_max[0] << " " << coo_max[1] << " " << coo_max[2] << "\n";
   PRINT_D cerr << i_max[0] << " " << i_max[1] << " " << i_max[2] << "\n";
 }
-// 
-//
+// ============================================================================

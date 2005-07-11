@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004                                       
+// Copyright Jean-Charles LAMBERT - 2004-2005                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -19,17 +19,16 @@
 
 using namespace std; // prevent writing statment like 'std::cerr'
 
-// -------------------------------------------------------------
-// Constructor
-// Create a socket 
-Socket :: Socket(int type)
+// ============================================================================
+// Constructor                                                                 
+// Create a socket                                                             
+Socket::Socket(int type)
 {
   PRINT_D cerr << "I am in Socket constructor...\n";
   if ( type != SOCK_DGRAM && type != SOCK_STREAM) {
-    cerr << "Unknown socket type  aborted..\n";
+    std::cerr << "Unknown socket type  aborted..\n";
     exit(1);
   }
-
   /* get a socket descriptor */
   sd = socket(AF_INET, type,0);
   if ( sd == -1 ) {
@@ -37,11 +36,10 @@ Socket :: Socket(int type)
     //exit(1);
   }
 }
-
-// -------------------------------------------------------------
-// set Socket Options
-// 
-int Socket :: sockOpt()
+// ============================================================================
+// Socket::sockOpt()                                                           
+// set Socket Options                                                          
+int Socket::sockOpt()
 {
   int yes=1, status = 1;
   if (setsockopt(sd,SOL_SOCKET, SO_REUSEADDR,&yes,
@@ -50,13 +48,12 @@ int Socket :: sockOpt()
     status = -1;
     //exit(1);
   }
-
   return status;
 }
-// -------------------------------------------------------------
-// get Socket Adress desctiption according to the host
-// 
-int Socket :: getSocketAddr(const char * host_name,                 // hostname      
+// ============================================================================
+// Socket::getSocketAddr()                                                     
+// get Socket Adress desctiption according to the host                         
+int Socket::getSocketAddr(const char * host_name,             // hostname      
 			    struct sockaddr_in *remoteAddr ,  // remote Addr   
 			    int port)                         // listening port
 {
@@ -76,6 +73,4 @@ int Socket :: getSocketAddr(const char * host_name,                 // hostname
   }
   return status;
 }
-
-
-//
+// ============================================================================
