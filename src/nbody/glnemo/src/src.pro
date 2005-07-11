@@ -5,7 +5,6 @@
 
 INSTALLS += target mantarget
 target.path = $(NEMOBIN) 
-target.files = ../bin/glnemo
 mantarget.path = $(NEMO)/man/man1
 mantarget.files = ../DOC/glnemo.1
 LIBS += -L$(NEMOLIB) \
