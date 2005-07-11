@@ -1,0 +1,151 @@
+.TH GLNEMO 1NEMO "22 Jun 2005"
+.SH NAME
+glnemo \- 3D OpenGL Nemo Snapshot rendering
+.SH SYNOPSIS
+\fBglnemo\fP [parameter=value]
+.SH DESCRIPTION
+\fBglnemo\fP is an interactive visualization program for snapshots,
+based on the Qt library from Trolltech. 
+You can zoom in/out, rotate, scale, translate, save a screenshot, 
+select different particles
+and plot them in different blending colors. 
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Nemo input snapshot []    
+.TP 20
+\fBserver=\fP
+Running simulation server hostname (right now works with gyrfalcON) []   
+.TP 20
+\fBselect=\fP
+Select particles. This option can be used to color the particles. Sets of particles
+must be selected using the : range operator, separated by a comma. E.g.
+0:9,10:19 would select two sets of 10 particles and give them a different color.
+[all] 
+.TP 20
+\fBrange_visib=\fP
+Toggle visibility for the particles selected via 'select='
+options. Can be usefull if you only want to display particles selected
+via 'select_list' options(see below). In that case you should set
+'f'.[t]
+.TP 20
+\fBselect_list=\fP
+Select particles from file(s) of list of indexes. You can give several
+files separated with ','. Each files must have the following
+structure:
+.nf
+-------- cut here --------
+#p_index_list <--- MUST be the first line (file header)
+index
+index
+ ...
+ ...
+index
+-------- cut here --------
+.fi
+Each indexes must be lower than the #particles read.
+.TP 20
+\fBtimes=\fP
+Select time [all]     
+.TP 20
+\fBblending=\fP
+Activate blending colors [t]    
+.TP 20
+\fBdbuffer=\fP
+Activate OpenGL depth buffer [f]
+.TP 20
+\fBperspective=\fP
+Perspective projection is activated by default. Select 'f' to toggle to
+orthographic projection.[t]
+.TP 20
+\fBbestzoom=\fP
+If activated, it performs an automatic zoom to fit all particles on the
+display.[t]
+.TP 20
+\fBortho_range=\fP
+[xy] range size in case of orthographic projection.[6.0]
+.TP 20
+\fBzoom=\fP
+Zoom value.[-14.0]
+.TP 20
+\fBxrot=\fP
+Rotation angle on X axis.[0.0]
+.TP 20
+\fByrot=\fP
+Rotation angle on Y axis.[0.0]
+.TP 20
+\fBzrot=\fP
+Rotation angle on Z axis.[0.0]
+.TP 20
+\fBxtrans=\fP
+translation on X.[0.0]
+.TP 20
+\fBytrans=\fP
+translation on Y.[0.0]
+.TP 20
+\fBztrans=\fP
+translation on Z.[0.0]
+.TP 20
+\fBgrid=\fP
+Show grid [f]
+.TP 20
+\fBgaz=\fP
+toggle gaz like particles effect.[f]
+.TP 20
+\fBtexture_s=\fP
+texture size for gaz like particles, 0 < value <= 1.[0.15]
+.TP 20
+\fBtexture_ac=\fP
+texture alpha color for gaz like particles, 0 <= value <= 255.[125]
+.TP 20
+\fBpsize=\fP
+Set particles size [1.0]    
+.TP 20
+\fBport=\fP
+Running simulation server's communication port [4444]    
+.TP 20
+\fBwsize=\fP
+Windows's width size [925]    
+.TP 20
+\fBhsize=\fP
+Windows's height size [685]    
+.TP 20
+\fBscreenshot=\fP
+Screenshot name []
+.SH OPERATION
+All the parameters given to the command line can be interactively
+modified in real time using the graphic user interface composed of menus, icons and
+dialog boxes. Most of the operations can also be activated by
+hitting a key in the display window itself:
+.nf
++                               zoom in
+-                               zoom out
+Wheel Mouse                     zoom in or out
+CTRL + Left-Mouse/Right-Mouse   translate
+g                               toggle the grid
+r                               toggle particle ranges
+CTRL + r                        reset rotation/translation
+CTRL + a                        autoscale to fit the frame
+s                               snapshot
+p                               play all snapshots
+ALT + g                         toogle gaz like particles effect
+f                               toggle fullscreen (might make it slow)
+.fi
+.SH SEE ALSO
+xyzview(1NEMO)
+.PP
+http://www.trolltech.com       Qt library web site
+.SH LICENCE
+CeCILL (see http://www.cecill.info)
+.SH FILES
+src/nbody/glnemo: directory with source code
+.SH AUTHOR
+Jean-Charles Lambert
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+03-dec-04	V0.50 added to NEMO	JCL
+22-jun-05	V0.87 lot of fixes and enhancement	JCL
+.fi
