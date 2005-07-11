@@ -29,16 +29,66 @@ mouse.
 - toggle grid : press g  (or click 'grid' icon)
 
 - toggle options : press o ( or click 'tools' icon)
-     a dialog box appear and you can play with different options:
+     a tabbed dialog box appear and you can play with different options:
+     
+     *) OpenGL TAB
+        ----------
+        [Particles]
+     -> 'enable' check box, turn on/off particles display.
      -> use the slide button to increase/decrease particles size.
+     
+        [Effects]
      -> 'blending' check box, turn on/off blending color.
      -> 'depth buffer' check box, turn on/off opengl depth buffer.
-     -> grids X,Y,Z check box, turn on/off drawing of a grid
+     
+        [Projection]
+     -> Projection radio button allow to toggle between perpspective and
+        orthographic projection.
+        
+     *) Transformations TAB
+        -------------------   
+        [Zoom]
+     -> zoom value field: give a value to modify zooming.
+     
+        [Rotations]
+     -> Rotations fields: give values to rotate display around X,Y or Z axis.
+     
+        [Translations]
+     -> translations fields: give values to translate display along X,Y or Z axis.
+     
+     *) Grids TAB
+        ---------
+        [Dimension]
+     -> Mesh length: give a value to specify the mesh length
+     -> # Meshs: give a value to specify the number of meshs    
+        
+        [Activate Grid Plane]
+     -> grids X,Y,Z check box, turn on/off drawing of the grid
         in X plane, Y plane or Z plane. 
-     -> 'polygones' check box (not yet implemented).
-     -> 'HUD' (head up display) check box, turn on/off text on screen.
-        (might be usefull if you want to take a screenshot).
+     -> for each grids plane, you can click on the color button to change the color
+        of the grid.
+        
+     *) HUD TAB
+        -------
+        [Head Up Display]
+     -> 'enable' check box, toggle on/off Head Up Display
+     
+        [Elements on HUD]
+     -> check box, toggle on/off element display
 
+	[Colors]
+     -> click to the buttons to change the background color or HUD text color.
+
+     *) Experimental TAB
+        -----------------
+     -> 'gaz like particle' check box, toogle on/off particles to gaz like particles
+              if enable it needs a very powerfull OpenGL card and an accelerated driver.
+              Do not use more than 30 000 particles.
+     -> 'texture' slide, modify the size of the "fake" gaz cloud.
+     -> 'texture alpha color' slide, modify the transparency of the "fake" gaz cloud
+
+     
+          
 - toggle particles range : press r  ( or click 'color' icon)
      a dialog box appear which allow you to change the range of selected 
      particles and their colors (click on the color to change it, and a
