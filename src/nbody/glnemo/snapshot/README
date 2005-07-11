@@ -1,0 +1,18 @@
+
+  Here is 2 binaries files for test purpose with glnemo:
+
+1) disk.nemo:
+-------------
+it's a galaxy's disk with a bar.
+You can use "gaz like particle effect" and proceed to a close up to appreciate the effect (see 'Experimental TAB' in Manual).
+exemple:
+glnemo disk.nemo 
+(toggle on/off gaz like effect  'ALT+G' and zoom in '+')
+
+
+2) orb.nemo:
+------------
+it's the tracking of a particle's orbit.
+exemple:
+glnemo orb.nemo
+
