@@ -1,0 +1,50 @@
+glnemo ChangeLog
+
+Version 0.87
+=============
+
+in CVS:
+
+*) general
+
+- all dialog form boxes are now designed with QT designer tool (.ui file) which allow a better development.
+
+- accept snapshot from standard input '-', it allows stuff like:
+  mkplummer - 100000 | glnemo -
+
+- a lot of options from the command line (see glnemo help=h).
+  
+- gaz like particle effect (ALT+G) need a powerfull OpenGL video card with an accelerated driver (NVIDIA recommended) and not too many particles (lower than 30 000) but the effect is VERY nice.
+
+- possibility to select particles from a list of indexes read from a file (option select_list=). It must be an ascii file with the following structure:
+
+#p_index_list   <---------- MUST be the first line (header file)
+index01
+index02
+...
+...
+indexXX
+
+- option to print the OpenGL frame buffer
+	
+- valgrind safe.
+
+- **A LOT** of bugs fixed and new features.
+
+- New licence: CeCILL V 2.0
+	
+*) enhanced option dialog  box
+- added new option dialog box with tab frame.
+- added option frame to enable/disable particles
+- added option frame to enter rotation/translation/zoom value
+- added option frame to modify grid (length, size and color of each planar grid)
+- added option frame to enable/disable gaz like particle rendering (ALT + G)
+- added embeded smoke texture
+- added orthographic projection
+
+Version 0.52
+==============
+
+22 Decembre 2004:
+
+first public release in NEMO package (ver 3.2.2)
