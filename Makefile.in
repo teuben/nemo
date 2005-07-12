@@ -679,6 +679,11 @@ libs:
 	cd src;$(MAKE) -i clean install > ../install.log 2>&1 
 	@echo Done at `date`
 
+slib:
+	(cd $(NEMOLIB); \
+	ld -shared -o libnemo.so --whole-archive libnemo.a)
+
+
 bins:
 	@echo Starting at `date`, tail -f $(NEMO)/install.log	
 	cd src;$(MAKE) -i bins >> ../install.log 2>&1 
