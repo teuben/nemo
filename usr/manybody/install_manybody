@@ -1,7 +1,8 @@
 #! /bin/csh -f
 #
-#  5-mar-2004     for nbody-school            PJT 
-# 20-apr-2004     minor things for fam04      pjt
+#  5-mar-2004     for nbody-school                    PJT 
+# 20-apr-2004     minor things for fam04              pjt
+# 12-jul-2005     for 2nd nbody-school MODEST5c       PJT
 #
 #  Removed any local directory called manybody and installs a new manybody tree
 #  The default should be executed from the home directory, such that
@@ -21,6 +22,8 @@ set gsl=1.4
 set fewbody=0.21
 set glstarview=0.6-devel
 set hnbody=1.0.3-linux-x86
+set acs=lite-1.2.1
+set ruby=1.8.2.
 
 set pkg=/home/manybody_pkg/
 
@@ -36,6 +39,7 @@ set fltk=$pkg/fltk/fltk-1.1.4-source.tar.gz
 
 # remove the old manybody
 rm -rf manybody
+
 
 # get all the new stuff via CVS and/or tarballs
 if ($cvs) then
@@ -56,28 +60,55 @@ else
   echo TAR: 
   mkdir manybody
   cd manybody
-  tar zxf $pkg/nemo/nemo.tar.gz
-  tar zxf $pkg/starlab/starlab.tar.gz
-  tar zxf $pkg/partiview/partiview.tar.gz
-  (cd partiview/src ; tar zxf $fltk)
+  tar zxf $pkg/nemo/nemo_cvs.tar.gz
+  tar zxf $pkg/starlab/starlab_cvs.tar.gz
+  tar zxf $pkg/partiview/partiview_cvs.tar.gz
+  (cd partiview_cvs/src ; tar zxf $fltk)
 endif
+tar zxf $pkg/acs-$acs.tgz
+tar zxf ruby-$ruby.tar.gz
 
+#                             root of $MANYBODY
+set root=`pwd`
+
+#                                                   ruby
+pushd ruby-1.8.2
+  ./configure --prefix=$root/opt
+  make
+  make install
+popd
+
+
+#                                                   acs-lite
+pushd acs
+  setenv ACSROOT `pwd`
+  source $ACSROOT/bin/acsstart.cshrc
+  make acscode
+  if (0) then
+    # the long long path to make documentation
+    # also assumes we have a local ruby
+    cd $ACSROOT/src/rdoc*
+    ruby install.rb
+    cd $ACSROOT
+    make
+  endif
+popd
 
 #                                                   starlab
-pushd starlab
-  source AAA_SOURCE_ME
+pushd starlab_cvs
+  ./install-starlab
   echo STARLAB-COUNT: `ls $STARLAB/bin|wc -l`
 popd
 
 #                                                   fltk (internal build only)
-pushd partiview/src/fltk-1.1.4
+pushd partiview_cvs/src/fltk-1.1.4
   ./configure >& install.log
   make >>& install.log
   if ($status) echo ERRORS compiling fltk, check install.log
 popd
 
 #                                                   partiview
-pushd partiview/src
+pushd partiview_cvs/src
   ./configure --with-fltk=`pwd`/fltk-1.1.4 >& install.log
   make >>& install.log
   if ($status) echo ERRORS compiling partiview, check install.log
@@ -85,7 +116,7 @@ pushd partiview/src
 popd
 
 #                                                   nemo
-pushd nemo
+pushd nemo_cvs
   source AAA_SOURCE_ME
   make bins
   echo NEMOBIN-COUNT: `ls $NEMOBIN|wc -l`
