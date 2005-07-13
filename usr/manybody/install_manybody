@@ -150,7 +150,7 @@ popd
 pushd $NEMO/local
   tar zxf $pkg/gsl/gsl-$gsl.tar.gz
   cd gsl-$gsl
-  ./configure --prefix=$NEMO/host/$NEMOHOST  >& install.log
+  ./configure --prefix=$NEMO/opt  >& install.log
   if ($status) echo ERRORS 1 compiling gsl, check install.log
   make >>& install.log
   if ($status) echo ERRORS 2 compiling gsl, check install.log
@@ -163,8 +163,8 @@ pushd $NEMO/usr/fregeau
   tar zxf $pkg/fregeau/fewbody-$fewbody.tar.gz
   pushd fewbody-$fewbody
     make all  \
-	CFLAGS="-I$NEMO/host/include -Wall -O3" \
-	LIBFLAGS="-L$NEMOLIB -lgsl -lgslcblas -lm" >& install.log
+	CFLAGS="-I$NEMO/opt/include -Wall -O3" \
+	LIBFLAGS="-L$NEMO/opt/lib -lgsl -lgslcblas -lm" >& install.log
     if ($status) echo ERRORS compiling fewbody, check install.log
     cp cluster triplebin binbin binsingle $NEMOBIN
   popd
