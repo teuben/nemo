@@ -23,7 +23,7 @@ set fewbody=0.21
 set glstarview=0.6-devel
 set hnbody=1.0.3-linux-x86
 set acs=lite-1.2.1
-set ruby=1.8.2.
+set ruby=1.8.2
 
 set pkg=/home/manybody_pkg/
 
@@ -65,11 +65,14 @@ else
   tar zxf $pkg/partiview/partiview_cvs.tar.gz
   (cd partiview_cvs/src ; tar zxf $fltk)
 endif
-tar zxf $pkg/acs-$acs.tgz
-tar zxf ruby-$ruby.tar.gz
+tar zxf $pkg/acs/acs-$acs.tgz
+tar zxf $pkg/ruby/ruby-$ruby.tar.gz
 
 #                             root of $MANYBODY
 set root=`pwd`
+
+#PJT
+#goto testing
 
 #                                                   ruby
 pushd ruby-1.8.2
@@ -100,6 +103,7 @@ pushd starlab_cvs
   echo STARLAB-COUNT: `ls $STARLAB/bin|wc -l`
 popd
 
+
 #                                                   fltk (internal build only)
 pushd partiview_cvs/src/fltk-1.1.4
   ./configure >& install.log
@@ -112,9 +116,10 @@ pushd partiview_cvs/src
   ./configure --with-fltk=`pwd`/fltk-1.1.4 >& install.log
   make >>& install.log
   if ($status) echo ERRORS compiling partiview, check install.log
-  cp partiview $STARLAB/bin
+  # cp partiview $STARLAB/bin
 popd
 
+testing:
 #                                                   nemo
 pushd nemo_cvs
   source AAA_SOURCE_ME
