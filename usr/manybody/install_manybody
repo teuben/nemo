@@ -1,15 +1,15 @@
 #! /bin/csh -f
 #
-#  5-mar-2004     for nbody-school                    PJT 
-# 20-apr-2004     minor things for fam04              pjt
-# 12-jul-2005     for 2nd nbody-school MODEST5c       PJT
+#  5-mar-2004     for 1st nbody-school                             PJT 
+# 20-apr-2004     minor things for fam04                           pjt
+# 12-jul-2005     many changed for 2nd nbody-school MODEST5c       PJT
 #
 #  Removed any local directory called manybody and installs a new manybody tree
 #  The default should be executed from the home directory, such that
 #  MANYBODY becomes $HOME/manybody
 #
 #  Example usage:
-#  CHARA:: manybody_pkg/install_manybody cvs=0 pkg=`pwd`/manybody_pkg > & LOG1
+#  manybody_pkg/install_manybody cvs=0 pkg=`pwd`/manybody_pkg > & LOG1
 #  
 
 set pgplot=1
@@ -79,6 +79,17 @@ set path=(. $root/bin $path); rehash
 #PJT
 goto testing
 testing:
+
+#                                                   gcc
+if ($gcc != 0) then
+  echo Installing gcc
+  set log=$root/tmp/gcc.log
+  tar jxf $pkg/gcc/gcc-$gcc.tar.bz2
+  pushd gcc-$gcc
+    (mkdir _build; cd _build; ../configure --prefix=$root/opt; make bootstrap; make; make install) >& $log
+  popd
+  rehash
+endif
 
 #                                                   ruby
 echo Installing ruby
