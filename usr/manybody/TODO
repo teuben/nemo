@@ -1,0 +1,12 @@
+the list of problems:
+
+
+nemo:
+  - FC4: conservative linking (3 tests fail)
+
+starlab:
+  - FC4: problems in harpsims 
+  - MDK10: no configure?
+
+partiview:
+  - OSX10.3: no support via our procedure, need binaries?
