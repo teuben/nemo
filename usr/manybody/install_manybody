@@ -114,7 +114,7 @@ pushd starlab_cvs
   set log=$root/tmp/starlab.log
   ./install-starlab >& $log
   source starlab_start.csh
-  echo STARLAB-COUNT: `ls $STARLAB/bin|wc -l`
+  echo STARLAB-COUNT: `ls $STARLAB_INSTALL_PATH/bin|wc -l`
 popd
 rehash
 
