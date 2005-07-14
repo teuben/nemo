@@ -223,7 +223,11 @@ echo Installing EZ
   set log=$root/tmp/ez.log 
   tar zxf $pkg/EZ.tar.gz
   pushd EZ_3_0_2
-    ./QUICK_INSTALL >& $log
+    if (0) then
+       ./QUICK_INSTALL >& $log
+    else
+       (cd make; make EZ FC="ifort -w -132") >& $log
+    endif
   popd
 
 # Tioga
