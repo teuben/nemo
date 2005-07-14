@@ -24,6 +24,7 @@ set glstarview=0.6-devel
 set hnbody=1.0.3-linux-x86
 set acs=lite-1.2.1
 set ruby=1.8.2
+set fltk=1.1.4
 
 set pkg=/home/manybody_pkg/
 
@@ -70,23 +71,30 @@ tar zxf $pkg/ruby/ruby-$ruby.tar.gz
 
 #                             root of $MANYBODY
 set root=`pwd`
+mkdir $root/tmp
+
+set path=(. $root/bin $path); rehash
 
 #PJT
 #goto testing
 
 #                                                   ruby
+echo Installing ruby
 pushd ruby-1.8.2
-  ./configure --prefix=$root/opt
-  make
-  make install
+  set log=$root/tmp/ruby.log
+  ./configure --prefix=$root/opt   >& $log
+  make                            >>& $log
+  make install                    >>& $log
 popd
 
 
 #                                                   acs-lite
+echo Installing acs
 pushd acs
+  set log=$root/tmp/acs.log
   setenv ACSROOT `pwd`
   source $ACSROOT/bin/acsstart.cshrc
-  make acscode
+  make acscode >& $log
   if (0) then
     # the long long path to make documentation
     # also assumes we have a local ruby
@@ -98,36 +106,46 @@ pushd acs
 popd
 
 #                                                   starlab
+echo Installing starlab
 pushd starlab_cvs
-  ./install-starlab
+  set log=$root/tmp/starlab.log
+  ./install-starlab >& $log
   echo STARLAB-COUNT: `ls $STARLAB/bin|wc -l`
+  source starlab_start.csh
 popd
 
 
 #                                                   fltk (internal build only)
+echo Installing fltk 
 pushd partiview_cvs/src/fltk-1.1.4
-  ./configure >& install.log
-  make >>& install.log
+  set log=$root/tmp/fltk.log
+  ./configure >& $log
+  make >>& $log
   if ($status) echo ERRORS compiling fltk, check install.log
 popd
 
 #                                                   partiview
+echo Installing partiview
 pushd partiview_cvs/src
-  ./configure --with-fltk=`pwd`/fltk-1.1.4 >& install.log
-  make >>& install.log
+  set log=$root/tmp/partiview.log 
+  ./configure --with-fltk=`pwd`/fltk-1.1.4 >& $log
+  make >>& $log
   if ($status) echo ERRORS compiling partiview, check install.log
   # cp partiview $STARLAB/bin
 popd
 
 testing:
 #                                                   nemo
+echo Installing NEMO
 pushd nemo_cvs
-  source AAA_SOURCE_ME
-  make bins
+  set log=$root/tmp/nemo.log 
+  source AAA_SOURCE_ME  >& $log
+  make bins >>& $log
   echo NEMOBIN-COUNT: `ls $NEMOBIN|wc -l`
 popd
 
 # firstn
+echo Installing 
 pushd $NEMO/usr/aarseth/firstn
   make firstn
   cp firstn $NEMOBIN
@@ -148,35 +166,38 @@ popd
 
 #                                                   GSL
 pushd $NEMO/local
+  set log=$root/tmp/gsl.log 
   tar zxf $pkg/gsl/gsl-$gsl.tar.gz
   cd gsl-$gsl
-  ./configure --prefix=$NEMO/opt  >& install.log
-  if ($status) echo ERRORS 1 compiling gsl, check install.log
-  make >>& install.log
-  if ($status) echo ERRORS 2 compiling gsl, check install.log
-  make install >>& install.log
-  if ($status) echo ERRORS 3 compiling gsl, check install.log
+  ./configure --prefix=$NEMO/opt  >& $log
+  if ($status) echo ERRORS 1 compiling gsl, check $log
+  make >>& $log
+  if ($status) echo ERRORS 2 compiling gsl, check $log
+  make install >>& $log
+  if ($status) echo ERRORS 3 compiling gsl, check $log
 popd
 
 #                                                   fewbody, glstarview
 pushd $NEMO/usr/fregeau
+  set log=$root/tmp/fewbody.log 
   tar zxf $pkg/fregeau/fewbody-$fewbody.tar.gz
   pushd fewbody-$fewbody
     make all  \
 	CFLAGS="-I$NEMO/opt/include -Wall -O3" \
-	LIBFLAGS="-L$NEMO/opt/lib -lgsl -lgslcblas -lm" >& install.log
-    if ($status) echo ERRORS compiling fewbody, check install.log
+	LIBFLAGS="-L$NEMO/opt/lib -lgsl -lgslcblas -lm" >& $log
+    if ($status) echo ERRORS compiling fewbody, check $log
     cp cluster triplebin binbin binsingle $NEMOBIN
   popd
   tar zxf $pkg/fregeau/glstarview-$glstarview.tar.gz
   pushd glstarview-$glstarview
-    make -f Makefile.rh9 all
-    if ($status) echo ERRORS compiling glstarview, check install.log
+    make -f Makefile.rh9 all >>& $log
+    if ($status) echo ERRORS compiling glstarview, check $log
     cp glstarview $NEMOBIN
   popd
 popd
 
 #                                                   HNbody (binary only)
+echo "Installing hnbody- for linux only"
 pushd $NEMO/usr
   tar zxf $pkg/hnbody/hnbody-$hnbody.tgz
   ln -s hnbody-$hnbody hnbody
@@ -186,12 +207,51 @@ pushd $NEMO/usr
 popd
 
 #                                                   ds9
+echo "Installing ds9 - for linux only"
 pushd $NEMOBIN
   tar zxf $pkg/ds9/ds9.tar.gz
 popd
 
 #  xyz stuff
-$NEMO/src/scripts/nemo.vogl
-mknemo xyzview snapxyz
+echo Compiling xyz from NEMO
+  set log=$root/tmp/xyz.log 
+  $NEMO/src/scripts/nemo.vogl  >& $log
+  mknemo xyzview snapxyz      >>$ $log
+
+# EZ
+echo Installing EZ
+  set log=$root/tmp/ez.log 
+  tar zxf $pkg/EZ.tar.gz
+  pushd EZ_3_0_2
+    ./QUICK_INSTALL >& $log
+  popd
+
+# Tioga
+  echo Soon here: Tioga
+
+# MMAS
+echo Installing MMAS
+  tar zxf $pkg/mmas/mmas1.6.tar.gz
+  pushd mmas1.6
+    make
+  popd
+
+# FFTW v2, needed for starcrash
+echo Installing FFTW
+  set log=$root/tmp/fftw.log
+  tar zxf $pkg/fftw/fftw-2.1.5.tar.gz
+  pushd fftw-2.1.5
+    ./configure --prefix=--prefix=$root/opt   >& $log
+    make >>& $log
+    make install >>& $log
+  popd
+
+# StarCrash
+echo Instaling StarCrash
+  tar zxf $pkg/StarCrash/starcrash_serial.tar.gz 
+  pushd serial
+    make FFTDIR=$root/fftw-2.1.5  FC=g77 CC=gcc
+  popd
+
 
 # -- end of install --
