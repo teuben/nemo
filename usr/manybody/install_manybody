@@ -264,7 +264,7 @@ echo Installing EZ
   popd
 
 # Tioga
-echo Installing Tioga-RSN
+echo Installing Tioga
   set log=$root/tmp/tioga.log
   tar zxf $pkg/Tioga/Tioga-1.0.A-linux.tar.gz
   pushd Tioga-1.0.A
