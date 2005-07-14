@@ -72,11 +72,13 @@ tar zxf $pkg/ruby/ruby-$ruby.tar.gz
 #                             root of $MANYBODY
 set root=`pwd`
 mkdir $root/tmp
+mkdir $root/opt
 
 set path=(. $root/bin $path); rehash
 
 #PJT
-#goto testing
+goto testing
+testing:
 
 #                                                   ruby
 echo Installing ruby
@@ -86,7 +88,7 @@ pushd ruby-1.8.2
   make                            >>& $log
   make install                    >>& $log
 popd
-
+rehash
 
 #                                                   acs-lite
 echo Installing acs
@@ -104,16 +106,17 @@ pushd acs
     make
   endif
 popd
+rehash
 
 #                                                   starlab
 echo Installing starlab
 pushd starlab_cvs
   set log=$root/tmp/starlab.log
   ./install-starlab >& $log
-  echo STARLAB-COUNT: `ls $STARLAB/bin|wc -l`
   source starlab_start.csh
+  echo STARLAB-COUNT: `ls $STARLAB/bin|wc -l`
 popd
-
+rehash
 
 #                                                   fltk (internal build only)
 echo Installing fltk 
@@ -123,6 +126,7 @@ pushd partiview_cvs/src/fltk-1.1.4
   make >>& $log
   if ($status) echo ERRORS compiling fltk, check install.log
 popd
+rehash
 
 #                                                   partiview
 echo Installing partiview
@@ -130,11 +134,10 @@ pushd partiview_cvs/src
   set log=$root/tmp/partiview.log 
   ./configure --with-fltk=`pwd`/fltk-1.1.4 >& $log
   make >>& $log
-  if ($status) echo ERRORS compiling partiview, check install.log
+  if ($status) echo ERRORS compiling partiview, check $log
   # cp partiview $STARLAB/bin
 popd
 
-testing:
 #                                                   nemo
 echo Installing NEMO
 pushd nemo_cvs
@@ -143,26 +146,35 @@ pushd nemo_cvs
   make bins >>& $log
   echo NEMOBIN-COUNT: `ls $NEMOBIN|wc -l`
 popd
+rehash
 
 # firstn
-echo Installing 
+echo Installing firstn
 pushd $NEMO/usr/aarseth/firstn
-  make firstn
+  set log=$root/tmp/firstn.log 
+  make firstn >& $log
+  if ($status) echo ERRORS compiling firstn, check $log  
   cp firstn $NEMOBIN
 popd
+rehash
 
 # nbody6
 mkdir $NEMO/usr/aarseth/nbody6
 pushd $NEMO/usr/aarseth/nbody6
+  set log=$root/tmp/nbody6.log 
   tar zxf $pkg/aarseth/nbody6/nbody6.tar.Z
-  (cd Ncode ; make nbody6 ; cp nbody6 $NEMOBIN)
+  (cd Ncode ; make nbody6 ; cp nbody6 $NEMOBIN) >& $log
+  if ($status) echo ERRORS compiling nbody6, check $log  
 popd
+rehash
 
 # GalactICS
 pushd $NEMO/usr/kuijken/GalactICS-exp/src
-   make -f Makefile.nemo all install
-   mknemo mkkd95
+   set log=$root/tmp/gal.log
+   make -f Makefile.nemo all install >& $log
+   mknemo mkkd95 >& $log
 popd
+rehash
 
 #                                                   GSL
 pushd $NEMO/local
@@ -176,6 +188,7 @@ pushd $NEMO/local
   make install >>& $log
   if ($status) echo ERRORS 3 compiling gsl, check $log
 popd
+rehash
 
 #                                                   fewbody, glstarview
 pushd $NEMO/usr/fregeau
@@ -195,7 +208,7 @@ pushd $NEMO/usr/fregeau
     cp glstarview $NEMOBIN
   popd
 popd
-
+rehash
 #                                                   HNbody (binary only)
 echo "Installing hnbody- for linux only"
 pushd $NEMO/usr
@@ -205,57 +218,72 @@ pushd $NEMO/usr
     mv hnbody/bin/$bin $NEMOBIN
   end
 popd
+rehash
 
 #                                                   ds9
 echo "Installing ds9 - for linux only"
 pushd $NEMOBIN
   tar zxf $pkg/ds9/ds9.tar.gz
 popd
+rehash
 
 #  xyz stuff
 echo Compiling xyz from NEMO
   set log=$root/tmp/xyz.log 
   $NEMO/src/scripts/nemo.vogl  >& $log
+  if ($status) echo ERRORS compiling vogl, check $log
   mknemo xyzview snapxyz      >>$ $log
+  if ($status) echo ERRORS compiling xyz, check $log
 
 # EZ
 echo Installing EZ
   set log=$root/tmp/ez.log 
-  tar zxf $pkg/EZ.tar.gz
+  tar zxf $pkg/EZ/EZ_3_0_2.tar.gz
   pushd EZ_3_0_2
     if (0) then
        ./QUICK_INSTALL >& $log
     else
        (cd make; make EZ FC="ifort -w -132") >& $log
+       if ($status) echo ERRORS compiling EZ, check $log
     endif
   popd
 
 # Tioga
   echo Soon here: Tioga
 
+
 # MMAS
 echo Installing MMAS
-  tar zxf $pkg/mmas/mmas1.6.tar.gz
+  set log=$root/tmp/mmas.log
+  tar zxf $pkg/mmas/mmas1.6.tar.gz 
   pushd mmas1.6
-    make
+    make >& $log
+    if ($status) echo ERRORS compiling mmas, check $log
   popd
+rehash
 
 # FFTW v2, needed for starcrash
 echo Installing FFTW
   set log=$root/tmp/fftw.log
   tar zxf $pkg/fftw/fftw-2.1.5.tar.gz
   pushd fftw-2.1.5
-    ./configure --prefix=--prefix=$root/opt   >& $log
+    ./configure --prefix=$root/opt   >& $log
     make >>& $log
+    if ($status) echo ERRORS compiling fftw, check $log
     make install >>& $log
+    if ($status) echo ERRORS installing fftw, check $log
   popd
+rehash
 
 # StarCrash
 echo Instaling StarCrash
+  set log=$root/tmp/starcrash.log
   tar zxf $pkg/StarCrash/starcrash_serial.tar.gz 
   pushd serial
-    make FFTDIR=$root/fftw-2.1.5  FC=g77 CC=gcc
+    make testinput b2pos b2pos2 sphagr \
+	FFTDIR=$root/fftw-2.1.5  FC=g77 CC=gcc  >& $log
+    if ($status) echo ERRORS compiling starcrash, check $log
   popd
-
+rehash
 
 # -- end of install --
