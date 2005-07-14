@@ -82,7 +82,7 @@ testing:
 
 #                                                   gcc
 if ($gcc != 0) then
-  echo Installing gcc
+  echo Installing gcc $gcc
   set log=$root/tmp/gcc.log
   tar jxf $pkg/gcc/gcc-$gcc.tar.bz2
   pushd gcc-$gcc
