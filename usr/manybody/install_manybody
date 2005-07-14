@@ -159,6 +159,7 @@ popd
 rehash
 
 # nbody6
+echo Installing nbody6
 mkdir $NEMO/usr/aarseth/nbody6
 pushd $NEMO/usr/aarseth/nbody6
   set log=$root/tmp/nbody6.log 
@@ -169,6 +170,7 @@ popd
 rehash
 
 # GalactICS
+echo Installing galactICS
 pushd $NEMO/usr/kuijken/GalactICS-exp/src
    set log=$root/tmp/gal.log
    make -f Makefile.nemo all install >& $log
@@ -177,6 +179,7 @@ popd
 rehash
 
 #                                                   GSL
+echo Installing gsl
 pushd $NEMO/local
   set log=$root/tmp/gsl.log 
   tar zxf $pkg/gsl/gsl-$gsl.tar.gz
@@ -191,6 +194,7 @@ popd
 rehash
 
 #                                                   fewbody, glstarview
+echo Installing fewbody,glstarview
 pushd $NEMO/usr/fregeau
   set log=$root/tmp/fewbody.log 
   tar zxf $pkg/fregeau/fewbody-$fewbody.tar.gz
@@ -232,7 +236,7 @@ echo Compiling xyz from NEMO
   set log=$root/tmp/xyz.log 
   $NEMO/src/scripts/nemo.vogl  >& $log
   if ($status) echo ERRORS compiling vogl, check $log
-  mknemo xyzview snapxyz      >>$ $log
+  mknemo xyzview snapxyz      >>& $log
   if ($status) echo ERRORS compiling xyz, check $log
 
 # EZ
@@ -249,8 +253,14 @@ echo Installing EZ
   popd
 
 # Tioga
-  echo Soon here: Tioga
-
+echo Installing Tioga-RSN
+  set log=$root/tmp/tioga.log
+  tar zxf $pkg/Tioga/Tioga-1.0.A-linux.tar.gz
+  pushd Tioga-1.0.A
+    (cd make; ruby extconf.rb ; make; make install) >& $log
+    (cd tests; ruby ts_Tioga.rb) >>& $log
+  popd
+rehash
 
 # MMAS
 echo Installing MMAS
