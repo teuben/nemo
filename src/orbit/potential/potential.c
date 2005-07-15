@@ -269,7 +269,7 @@ local proc load_potential(string fname, string parameters, string dataname, char
     	local_omega = local_par[0];
     	dprintf(1,"get_potential: modified omega=%g\n",local_omega);
     }
-    if (pot==NULL) dummy_for_c();    /* should never be called */
+    if (pot==NULL) potential_dummy_for_c();    /* should never be called */
     return pot;
 }
 /* endof: potential.c */
