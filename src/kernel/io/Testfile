@@ -28,6 +28,11 @@ rsf:
 tsf:
 	@echo Running tsf
 	$(EXEC) tsf rsf.out maxprec=t			; nemo.coverage tsf.c
+	@tsf rsf.out > tsf.out
+	@echo Checking size of tsf.out
+	@if [ ! -s tsf.out ]; then \
+	  echo "*** Fatal Error: tsf produces zero length stdout redirected files"; \
+	fi;
 
 csf:
 	@echo Running csf
