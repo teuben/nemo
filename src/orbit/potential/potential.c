@@ -35,7 +35,9 @@
  *      18-sep-01           auto-detecting which type is present
  *      17-may-02     V5.4a fix ambiguity about float/double if generic present WD
  *      25-apr-04         b fool optimizing compilers                           PJT
- *      20-may-04         c add sqr()
+ *      20-may-04         c add sqr() for dummy linker
+ *      14-jul-05         d made dummy functions global, for new (FC4) linker 
+ *       
  *------------------------------------------------------------------------------
  */
 
@@ -55,7 +57,7 @@ local proc l_inipotential=NULL; /* actual storage of pointer to exter inits  */
 local bool Qfortran = FALSE;    /* was a fortran routine used ? -- a hack -- */
 local bool first = TRUE;        /* see if first time called for mysymbols()  */
 
-void local dummy_for_c(void);
+void potential_dummy_for_c(void);
 
 /* forward declarations */
 
@@ -277,7 +279,7 @@ local proc load_potential(string fname, string parameters, string dataname, char
 #include <mathlinker.h>		/* extra math */
 #include <fslinker.h>		/* extra routines from filestruct() */
 
-void local dummy_for_c(void)
+void potential_dummy_for_c(void)
 {
     double a,b,c;
     int spline();
@@ -285,7 +287,7 @@ void local dummy_for_c(void)
     void get_atable();
     void read_image();
 
-    error("Cannot call dummy_for_c - included to fool the linker");
+    error("potential.c: Cannot call dummy_for_c - included to fool linkers");
     (void) spline();
     (void) bessi0();
     (void) bessk0();
@@ -299,14 +301,14 @@ void local dummy_for_c(void)
 }
 
 #if defined(FORTRAN)
-void local dummy_for_fortran()
+void potential_dummy_for_fortran()
 {
   extern void zzzzzz_(void);
   zzzzzz_();			/* force loading of Fortran I/O */
 }
 #endif
 
-void local dummy_for_fortran_math()
+void potential_dummy_for_fortran_math()
 {
   extern void fmath_(void);
   fmath_();
