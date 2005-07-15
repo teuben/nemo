@@ -9,6 +9,8 @@
 #   nov-2004            be more generous if full filenames are used: chop them off
 #   dec-2004            look for mknemo.d scripts first
 #
+# todo:
+#   safeguard if disk is full
 #
 set version="MKNEMO Version 3.1 18-may-05"
 if ($#argv == 0) goto usage
