@@ -1,9 +1,9 @@
 DIR = src/image/fits
-BIN = ccdfits fitsccd scanfits fitsglue fitshead
+BIN = ccdfits fitsccd scanfits fitsglue fitshead tabfits
 NEED = $(BIN) ccdmath ccdstat
 
 DATA = ccd.in ccd.out fits.in map001.fits map002.fits map003.fits cube.fits \
-	map004.fits  map004.ccd map004a.ccd 
+	map004.fits  map004.ccd map004a.ccd  tab.in tab.fits
 
 help:
 	@echo $(DIR)
@@ -67,3 +67,10 @@ fitsglue: map001.fits map002.fits map003.fits
 fitshead: map003.fits
 	@echo Running $@
 	$(EXEC) fitshead map003.fits; nemo.coverage fitshead.c
+
+tab.in:
+	@nemoinp 1:100 > tab.in
+
+tabfits:	tab.in
+	$(EXEC) tabfits tab.in tab.fits nx=10 ny=10 nz=1; nemo.coverage tabfits.c
+	$(EXEC) fitshead tab.fits | grep DATA
