@@ -793,7 +793,7 @@ case $yapp_name in
 	    echo $NEMOLIB
 	  else
    	    YAPP_LIBS="-L$PGPLOT_DIR -lcpgplot -lpgplot $XLIBS $FLIBS"
-	    AC_MSG_WARN(using classic)
+	    AC_MSG_WARN(using, external to NEMO, classic)
 	  fi
 	  YAPP_DEF="/xs"
           ;;
