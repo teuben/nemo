@@ -22,8 +22,8 @@ string defv[] = {
     "max=\n         Maximum overrride",
     "bad=\n         Use this as masking value to ignore data",
     "lut=\n         optional selection of a lut from NEMODAT/lut",
-    "8bit=f\n       24bit or 8bit\n",
-    "VERSION=1.1\n  17-dec-03 PJT",
+    "8bit=f\n       24bit or 8bit",
+    "VERSION=1.1\n  6-jul-04 PJT",
     NULL,
 };
 
