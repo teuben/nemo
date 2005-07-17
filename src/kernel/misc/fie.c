@@ -1,15 +1,14 @@
 /*
- *
  *   FIE.C:  function parser and evalutor - uses a interpreter-code
  *
  *
  *   This code is taken from the Gipsy package, and as such has some
- *   copyleft's attached, which are shamefully not reprinted here.
+ *   copyleft's attached, which are shamefully not all reprinted here.
  *
  *   mods' for unix/NEMO:
  *      modified all short (INTEGER*2) to int (INTEGER*4)
  *
- *	lots of variables and functions are now static (hidden)
+ *	lots of variables and functions are now static here
  *
  *      % can also be used as parameter reference,
  *	  in addition to the exising $ which was used in VMS
@@ -22,6 +21,8 @@
  *      it defines a 'fie' (see savefie, loadfie)
  *
  *	renamed 'const' to 'constnt' (const is a reserved ANSI word)
+ * 
+ *      added an understanding of null's
  *
  *   updates:
  *	       15-dec-88 older version			  KGB
@@ -38,6 +39,7 @@
  *             26-aug-01 added sind/cosd/tand             pjt
  *             27-nov-01 fixed cosd(), it was sind()	  pjt
  *              4-dec-02 use MAXLINE for linelength       pjt
+ *             13-nov-03 make it understand NULL          pjt
  *
  */
 #include <stdinc.h>   /* stdinc is NEMO's stdio =- uses real{float/double} */
@@ -80,6 +82,7 @@ static union { byte opcode[bid];
 static int codeptr = 0;
 static int opcodeptr = 0;
 static int npar = 0;
+static int have_null = 0;
 
 static void fie_gencode(int opc);
 static void fie_genconst(double cst);
@@ -90,6 +93,7 @@ static void fie_term(void);
 static void fie_factor(void);
 static void fie_function(void);
 static void fie_error(void);
+static void fie_null(void);
 static void fie_push(double r);
 static double fie_pi(void);
 static double fie_rad(double arg1);
@@ -127,7 +131,7 @@ static void fie_genconst(double cst)
 
 /*  functions we know  */
 
-#define maxfuncts 47
+#define maxfuncts 48
 #define maxfunlen 10
 #define maxarg    4
 
@@ -138,7 +142,7 @@ static char *functs[] = { "SIN"  , "ASIN" , "SINH" , "COS"  , "ACOS" , "COSH" ,
                    "K"    , "H"    , "P"    , "S"    , "MAX"  , "MIN"  ,
                    "MOD"  , "INT"  , "NINT" , "SIGN" , "UNDEF", "IFGT" ,
                    "IFLT" , "IFGE" , "IFLE" , "IFEQ" , "IFNE" , "RANU" ,
-		  "RANG"  , "RANP" , "SIND" , "COSD" , "TAND"};
+		   "RANG" , "RANP" , "SIND" , "COSD" , "TAND" , "NULL"};
 
 static int nargs[] = {    1   ,    1   ,    1   ,    1   ,    1   ,    1   ,
                       1   ,    1   ,    1   ,    2   ,    1   ,    1   ,
@@ -147,7 +151,7 @@ static int nargs[] = {    1   ,    1   ,    1   ,    1   ,    1   ,    1   ,
                       0   ,    0   ,    0   ,    0   ,    2   ,    2   ,
                       2   ,    1   ,    1   ,    1   ,    0   ,    4   ,
                       4   ,    4   ,    4   ,    4   ,    4   ,    2   ,
-		      2   ,    1   ,    1   ,    1   ,    1 };
+		      2   ,    1   ,    1   ,    1   ,    1   ,    0 };
 
 
 /*  definitions/declarations for the scanner and parser  */
@@ -407,6 +411,12 @@ static double stack[stackmax];
 
 static int sp;
 
+
+static void fie_null(void)
+{
+  have_null = 1;
+  warning("fie_null: i've seen null");
+}
 
 static void fie_push(double r)
 {
@@ -687,6 +697,7 @@ void dofie(real *data, int *nop, real *results, real *errorval)
 			  case 44: fie_push(sin(PI*arg[0]/180.0)); break;
 			  case 45: fie_push(cos(PI*arg[0]/180.0)); break;
 			  case 46: fie_push(tan(PI*arg[0]/180.0)); break;
+		          case 47: fie_null(); break;
 			  default: opc = err; break;
 			  }
 			  break;
