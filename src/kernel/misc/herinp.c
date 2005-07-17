@@ -291,8 +291,15 @@ static union {
 #define MAXINT     2147483647.5  /* cray */
 #define MININT    -2147483648.5
 /* these are usually not defined */
+
+#if 0
+/* single precision */
 #define MAXLOG             38.0
 #define MINLOG            -38.0
+#else
+#define MAXLOG             99.0
+#define MINLOG            -99.0
+#endif
 
 static void dcd_inifblank()
 {
