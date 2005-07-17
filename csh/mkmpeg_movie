@@ -3,6 +3,10 @@
 # make an mpeg movie (see also: ftp://mm-ftp.cs.berkeley.edu/pub/mpeg)
 #     --> this can't be right, given the src rpm's i found via rpmfind.net
 #         but those i got to work, not the ones from this ftp site.
+# more recently, this URL worked better:
+#   http://bmrc.berkeley.edu/frame/research/mpeg/index.html
+# See also a pleyer plugin on
+#   http://www.mplayerhq.hu/DOCS/HTML/en/menc-feat-mpeg.html
 # see also ppm2fli (http://vento.pi.tu-berlin.de/ppm2fli/main.html)
 # or http://www.lcdf.org/~eddietwo/gifsicle/
 
