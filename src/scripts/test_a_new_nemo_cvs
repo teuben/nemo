@@ -15,6 +15,7 @@ set gcc=0		# pick gcc version (version number via astromake)
 set falcon=1		# compile gyrfalcON
 set anonymous=1		# anonymous CVS ?
 set cvsroot=0		# override the official CVSROOT
+set ftp=0               # grab nemo_cvs.tar.gz from NEMO's homepage
 set vogl=1		# compile vogl
 set gsl=1               # add gsl
 set hdf=1               # use HDF if present
@@ -61,6 +62,11 @@ endif
 if ($gcc) then
    source /astromake/astromake_start
    astroload -v $gcc gcc
+endif
+
+# 
+if ($ftp) then
+   set ftp=ftp://ftp.astro.umd.edu/pub/nemo/nemo_cvs.tar.gz
 endif
 
 #		pick intel compiler (ifort means >= 8.0)
