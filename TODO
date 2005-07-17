@@ -14,6 +14,9 @@ Remaining MacOSX problems: (a special macosx.html web page dedicated to this)
     immediate need for vogl.
     (try JCL's new program 'glnemo')
 
+  - one case had gcc in /usr/bin but g77 in /usr/local/bin, and not in
+    the path -> pgplot didn't get build.
+
 problems with gcc4: (as tested on FC3)
   - pgplot: grfont.dat cannot be built, some runtime problem with fortran
   - pgplot: needs a gfortran_gcc4.conf file for now
@@ -49,7 +52,7 @@ general things for 3.2.x
 	3.3.4 fails
         3.3.4 breaks eventually   [macosX also dies here]
         3.4.2 dies very quickly (fc3)
-	3.4.3 
+	3.4.3 dies near the same spot, seems to be language related
     
 
 things for 3.4
@@ -68,7 +71,6 @@ some other help on configure:
 code & line coverage: (gcov, lcov)
   http://ltp.sourceforge.net/coverage/lcov.php
   
-
 - io_nemo library written by JCL in Marseille
 	has problems in -DSINGLEPREC
 
@@ -95,6 +97,8 @@ code & line coverage: (gcov, lcov)
 	- sun's make doesn't work, it need gmake
 
 - compile under cygwin
+
+- fix problems when replacing gnu make with pmake
 
 - fix for pgplot  when libpng is needed, or tcl/tk for that matter....
 
