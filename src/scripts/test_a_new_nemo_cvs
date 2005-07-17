@@ -6,18 +6,17 @@
 #  History:     29-mar-2004   for NEMO V3.2
 #                4-may-2004   various new keywords and cfitsio optional install
 #               30-jul-2004   optional cfitsio install
-
-# todo: nemo needs to use -lcpgplot for pgplot also 
+#               11-jul-2005   various additional packages for NEMO V3.2.3
 
 set pgplot=1		# install PGPLOT via CVS also
 set intel=0		# pick intel compiler (astromake)
 set gcc=0		# pick gcc version (version number via astromake)
 set falcon=1		# compile gyrfalcON
+set glnemo=1            # compile glnemo
 set anonymous=1		# anonymous CVS ?
 set cvsroot=0		# override the official CVSROOT
-set ftp=0               # grab nemo_cvs.tar.gz from NEMO's homepage
 set vogl=1		# compile vogl
-set gsl=1               # add gsl
+set gsl=0               # add gsl
 set hdf=1               # use HDF if present
 set single=0            # singe or double (default) precision
 set all=1		# make all binaries , or just testsuite?
@@ -31,7 +30,7 @@ set debug=1             # compile in debug mode (not implemented)
 set pedantic=0          # compile in pedantic mode
 set make=make          # make, gmake, pmake, bmake, ....
 
-# some variables that affect earlier variables
+# some variables that affect variables set before
 
 set reuse=0             # don't clean and use CVS, just reuse the current nemo tree
 set quick=0             # install with minimal extra packages
@@ -64,16 +63,11 @@ if ($gcc) then
    astroload -v $gcc gcc
 endif
 
-# 
-if ($ftp) then
-   set ftp=ftp://ftp.astro.umd.edu/pub/nemo/nemo_cvs.tar.gz
-endif
-
 #		pick intel compiler (ifort means >= 8.0)
 if ($intel) then
   source /astromake/astromake_start
   astroload intel
-  setenv CC icc
+  setenv CC  icc
   setenv CXX icpc
   setenv F77 ifort
 endif
@@ -172,6 +166,20 @@ endif
 if ($falcon) then
   echo Compile falcon
   ( cd usr/dehnen/falcON; $make nemo_bins)  >& install.falcON.log
+endif
+
+if ($glnemo) then
+  echo Compile glnemo
+  which qmake
+  if ($status == 0) then
+    if ($?QTDIR == 0) then
+       setenv QTDIR /usr/lib/qt-3.3
+    endif
+    ( cd src/nbody/glnemo; qmake; $make ; $make install)  >& install.glnemo.log
+  else
+    echo "### Error: qmake does not exist, assuming Qt not present:"
+    echo "           glnemo not built"
+  endif
 endif
 
 
