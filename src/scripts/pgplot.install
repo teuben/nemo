@@ -106,9 +106,11 @@ else
 endif
 
 cd pgplot
-if ($?f77 && $f77 == gfortran) then
-  echo NOTE: SPECIAL lightweight pgplot for strict gfortran
-  set drivers=$drivers0
+if ($?f77) then
+  if ($f77 == gfortran) then
+    echo NOTE: SPECIAL lightweight pgplot for strict gfortran
+    set drivers=$drivers0
+  endif
 endif
 
 cd $lib
