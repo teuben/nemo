@@ -22,6 +22,7 @@
  *	17-apr-95           c compacted header file 		pjt
  *      14-sep-01	    d using potproc_ types		pjt
  *      11-feb-02       V4.0 start of the new "+/-" notation    pjt
+ *      27-aug-04           a   messing with signs
  *
  * TODO:   allow 'circular' orbit, i.e. the one that locally balances centrifugally
  */
@@ -46,7 +47,7 @@ string defv[] = {
     "potpars=\n		  .. with optional parameters",
     "potfile=\n		  .. and optional datafile name",
     "headline=\n          random verbiage",
-    "VERSION=4.0\n        11-feb-02 PJT",
+    "VERSION=4.0a\n       27-aug-04 PJT",
     NULL,
 };
 
@@ -101,6 +102,7 @@ void setparams()
     double pos[3],acc[3],epot;
     int ndim=3;
     int signcount;
+    int lzsign;
 
     p.name = getparam("potname");
     p.pars = getparam("potpars");
@@ -149,6 +151,11 @@ void setparams()
 		error("potential %s cannot be loaded",p.name);
 	   omega = get_pattern();
 	   dprintf(0,"Using pattern speed = %g\n",omega);
+	   if (hasvalue("lz")) {
+	     lz = getdparam("lz");
+	     lzsign = SGN(lz);
+	   } else
+	     lz = 0;
 
 	   /* allow only u or v missing for now */
 	   /* if x or y not given, 0.0 will be taken */
@@ -168,7 +175,7 @@ void setparams()
 		else
 			u = sqrt(u);
 		lz = x*v-y*u;	
-		if(lz<0) u = -u;     /* force counter clockwise orbit */
+		if(lzsign<0 && lz>0) u = -u;     /* switch rotation */
 	   } else {
                 if(hasvalue("vy"))
 			error("cannot give e=,  vx= and vy= at the same time");
@@ -180,7 +187,7 @@ void setparams()
 		else
 			v = sqrt(v);
 		lz = x*v-y*u;	
-		if(lz<0) v = -v;     /* force counter clockwise orbit */
+		if(lzsign<0 && lz>0) v = -v;     /* switch rotation */
 	   }
 	   w = 0.0;
            lz = x*v-y*u;
