@@ -13,6 +13,7 @@
  *      1-jan-04        c: get_line check return value
  *
  * todo:  read one more line, check if file is done!!
+ *        if header contains NAXIS, NAXIS1,...., nx=,ny=,nz= is still needed
  */
 
 #include <stdinc.h>
