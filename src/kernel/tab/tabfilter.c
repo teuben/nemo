@@ -61,6 +61,7 @@ string cvsid="$Id$";
 extern string *burststring(string, string);
 extern void freestrings(string *);
 
+
 /*
  * Planck curve,  output in ergs/cm2/s/A
  *
@@ -121,7 +122,7 @@ string filtername(string shortname)
   return shortname;
 }
 
-
+
 void nemo_main()
 {
   int colnr[2];
@@ -178,17 +179,15 @@ void nemo_main()
   sdat = (real *) allocate(sizeof(real)*n*3);
   spline(sdat,xdat,ydat,n);
 
-  /* override any min/max rules ? */
-  if (Qmin) {
+  if (Qmin) {                  /* override any min/max rules ? */
     xQmin = getdparam("xmin");
     if (xQmin > xmin) warning("xmin=%g greater than minimum in filter (%g)",xQmin,xmin);
   }
-
   if (Qmax) {
     xQmax = getdparam("xmax");
     if (xQmax < xmax) warning("xmax=%g less than maximum in filter (%g)",xQmax,xmax);
   }
-  
+
   if (hasvalue("tbb")) {                /* using a Planck curve */
     tbb = getdparam("tbb");
     if (Qmin) xmin = xQmin;
@@ -246,7 +245,7 @@ void nemo_main()
     }
     dprintf(1,"Spectrum wavelength range: %g : %g\n",umin,umax);
     dprintf(1,"Spectrum response range: %g : %g\n",vmin,vmax);
-
+
     if (umax < xmin || umin >xmax)
       error("Spectrum and filter do not overlap");
 
