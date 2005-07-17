@@ -20,6 +20,7 @@
 # 28-jun-04     debug option
 # 20-may-05     make script more generic, less dependant on NEMO, and distribute with WIP
 # 10-jul-05     removed the always problematic never used TKDRIV driver
+# 16-jul-05     removed pp,gi,wd from drivers for gfortran
 
 
 # Other places to get pgplot from
@@ -54,6 +55,7 @@ if ($?NEMOLIB) then
   set lib=$NEMOLIB
 endif
 set drivers=CGDRIV,GIDRIV,NUDRIV,PGDRIV,PPDRIV,PSDRIV,WDDRIV,XWDRIV
+set drivers0=CGDRIV,NUDRIV,PGDRIV,PSDRIV,XWDRIV
 if ($?NEMOHOST) then
   set host=$NEMOHOST
 endif
@@ -104,7 +106,10 @@ else
 endif
 
 cd pgplot
-cp drivers.list $lib
+if ($?f77 && $f77 == gfortran) then
+  echo NOTE: SPECIAL lightweight pgplot for strict gfortran
+  set drivers=$drivers0
+endif
 
 cd $lib
 
