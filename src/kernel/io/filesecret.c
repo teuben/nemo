@@ -2,7 +2,11 @@
  * FILESECRET.C: binary file structure package.
  *
  *  Warning: ZENO's version is labeled version 3, our version 3
- *           has nothing to do with their version 3.
+ *           has nothing to do with their version 3.  There are some
+ *           minor differences in the implementation that result in
+ *           a difference in capabilities, e.g. ZENO can handle
+ *           multiple same-named items within a set, whereas NEMO
+ *           cannot
  *
  *  Input is done through:      Output through:
  *      fread()                     fwrite()
@@ -31,6 +35,7 @@
  *        17-mar-03   pjt    fix serious memory usage bug for f2d conversion
  *        18-jun-03   pjt    <docs>
  * V 3.1  15-mar-05   pjt    C++ compilable
+ * V 3.2   2-jun-05   pjt    blocked (sequential) I/O
  *
  *  Although the SWAP test is done on input for every item - for deferred
  *  input it may fail if in the mean time another file was read which was
