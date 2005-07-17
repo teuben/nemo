@@ -46,7 +46,7 @@ extern void kstwo(real *data1, int n1, real *data2, int n2, real *d, real *p);
 
 nemo_main()
 {
-    int npt, npt1, npt2, nmax = getiparam("nmax");
+    int i, npt, npt1, npt2, nmax = getiparam("nmax");
     int col1 = getiparam("col1");
     int col2 = getiparam("col2");
     real *coldat1[2], *coldat2[2];
