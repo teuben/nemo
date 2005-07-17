@@ -45,8 +45,12 @@ nemo_main()
       error("Need at least one of nx= or ny=");
     else if (nx==0) {
       nx = nfiles/ny;
+      dprintf(0,"nx=%d ny=%d nfiles=%d\n",nx,ny,nfiles);
+      if (nfiles % ny) error("nfiles=%d/ny=%d does not divide evenly",nfiles,ny);
     } else if (ny==0) {
       ny = nfiles/nx;
+      dprintf(0,"nx=%d ny=%d nfiles=%d\n",nx,ny,nfiles);
+      if (nfiles % nx) error("nfiles=%d/nx=%d does not divide evenly",nfiles,nx);
     }
 
     for (iy=0, n=0; iy<ny; iy++) {
