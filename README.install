@@ -1,11 +1,14 @@
 Installation overview:
 ----------------------
 
+This document gives some background information in case the 
+more automated scripts to install NEMO have failed you.
+
 Installation of NEMO V3.x roughly follows that of most open source
 packages, except that NEMO does not install its products in an
 external prefix like /usr/local, but keeps them "in-place" and
-bootstraps a special NEMO environment by sourcing a NEMORC file where
-the search path and other NEMOisms are defined for your shell.  Hence
+bootstraps a special NEMO shell environment by sourcing a NEMORC file 
+where things like your search path are modified for your shell.  Hence
 the basic scheme is more one of (except commands are different and
 detailed below!!!):
 
@@ -17,45 +20,45 @@ This installation has recently been slightly modified in VERSION
 3.2, and you will also need to run a conversion script if you upgrade
 from a VERSION 3.1 or below source code tree. There is no support for
 such upgrades from a 2.x version though, since the installation procedure
-between version 2 and 3 is too major.
+between version 2 and 3 is too major, and by now nobody should be running
+2.x versions (before april 2001).
 
 It may be handy to pre-install a few libraries and packages on your
 system, if they do not exist yet, though for a few common ones
-(e.g. pgplot, gsl, hdf) we do have some support to pre-install them
-within the NEMO tree.
+(e.g. pgplot, gsl, hdf) we do have some support to install them
+within the NEMO tree before NEMO is installed.
 
 Preconditions to INSTALLATION
 =============================
 
 a) Installing PGPLOT
 
-   It is highly recommended to install PGPLOT before you install NEMO,
-   though we now also have a simple procedure to install PGPLOT during the 
-   NEMO install that is much simpler than before.  You can also decide to
-   use another plotting (YAPP) device though, e.g. plplot (a pure C plotting
-   library similar to PGPLOT).
+   It is highly recommended to install PGPLOT before you install NEMO.
+   We also have a simple procedure to install PGPLOT during the NEMO
+   install itself.  You can also decide to use another plotting (YAPP) 
+   device though, e.g. plplot (a pure C plotting library similar to PGPLOT) 
+   is gaining in popularity.
 
-   By default NEMO would install itself with a very simple postscript-only
-   graphics library (a.k.a. yapp_ps), unless it finds the PGPLOT library
-   in a reasonably location.
+   Unless it finds the PGPLOT library in a reasonably location, or as dictated
+   by the PGPLOT_DIR environment variable, or via the --with-pgplot-dir= option
+   to configure, as a fallback NEMO would install itself with a very simple 
+   postscript-only graphics library (a.k.a. yapp_ps), 
 
-   If you have an environment variable $PGPLOT_DIR, PGPLOT is assumed to be
-   installed there, and configure will recognize this and make it your default 
-   YAPP device driver.
-
-   If not, you can also try to install it in e.g. the following way
+   If none of these options work, you can also try to install PGPLOT in
+   for example the following way
 
 	cd $NEMO/local
 	$NEMO/src/scripts/pgplot.install
 	(you may need to get the pgplot522.tar.gz, or newer, file from
         Caltech (http://astro.caltech.edu/~tjp/pgplot/) or a local repository)
 
-   On some linux systems may need to create the following symbolic link
+   On some older linux systems may need to create the following symbolic link
 		 ln -s /usr/X11R6 /usr/X11
 
-b) Installing HDF (now often called HDF4)
+b) Installing HDF (now often called HDF4, since there HDF5 is the current version)
     
-   You only need the HDF library if you plan to work with the ZEUS or CMHOG hydrocode.
+   You only need the HDF library if you plan to work with the ZEUS or CMHOG 
+   hydrocodes.
 	
    This requires:
 	libdf.a
