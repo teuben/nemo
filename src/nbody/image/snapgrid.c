@@ -172,8 +172,10 @@ void wcs(real *x, real *y)
   double xpix, ypix;
   double xpos = *x,
          ypos = *y;
-  if (xypix(xpos, ypos, xref, yref, xrefpix, yrefpix, xinc, yinc, rot, proj, &xpix, &ypix))
+  if (xypix(xpos, ypos, xref, yref, xrefpix, yrefpix, xinc, yinc, rot, proj, &xpix, &ypix)) {
+    dprintf(0,"xypix %s %15.10g %15.10g %15.10g %15.10g\n",proj,xpos,ypos,xpix,ypix);
     error("problem-1 with WCS conversion");
+  }
   *x = xpix;
   *y = ypix;
   /* dprintf(0,"xypix %s %15.10g %15.10g %15.10g %15.10g\n",proj,xpos,ypos,xpix,ypix); */
