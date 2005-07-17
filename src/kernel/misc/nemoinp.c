@@ -29,6 +29,7 @@
  *  24-nov-03       b: fixed another prototype for gcc3             pjt
  *  28-jan-04       c: recognize nan or NaN and return same         pjt
  *   6-jan-05   V1.10:  added the repeat nemorinpX routines         pjt
+ *   5-may-05       a: add newline                                  pjt
  */
 
 #include <stdinc.h>
@@ -381,7 +382,7 @@ string defv[] = {
     "seed=0\n		Seed for xrandom",
     "atof=\n            test (n)atof single value expression",
     "dms=f\n            Use D:M:S.SS parsing instead of regular",
-    "VERSION=1.9c\n	15-jul-04 PJT",
+    "VERSION=1.10a\n	5-may-05 PJT",
     NULL,
 };
 
@@ -485,5 +486,7 @@ void nemo_main(void)
         if (Qnl)
             fprintf (outstr,"\n");
     }
+    if (!Qnl) fprintf(outstr,"\n");  /* always make sure to add 1 newline */
+
 }
 #endif
