@@ -115,20 +115,25 @@ void nemo_main()
     real x,y = 0;
     int count, random;
     string name;
+    int work = 0;
 
     x = getdparam("real");    
     count = getiparam("count");
     random = getiparam("random");
     
     name = getparam("in");
-    if (*name)
-        get_number(name,&y);
-    else
+    if (*name) {
+      work++;
+      get_number(name,&y);
+    } else
         dprintf(1,"No input file specified\n");
     
     name = getparam("out");
-    if (*name)
-        put_number(name,y+x,count,random);
-    else
+    if (*name) {
+      work++;
+      put_number(name,y+x,count,random);
+    } else
         dprintf(1,"No output file specified\n");
+
+    if (work==0) warning("No work done, use in=, out=, or both");
 }
