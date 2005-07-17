@@ -30,6 +30,8 @@
  *  28-jan-04       c: recognize nan or NaN and return same         pjt
  *   6-jan-05   V1.10:  added the repeat nemorinpX routines         pjt
  *   5-may-05       a: add newline                                  pjt
+ *
+ * TODO:  how to handle largest and smallest number (old style MIN/MAXLOG 38)
  */
 
 #include <stdinc.h>
