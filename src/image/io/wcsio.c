@@ -26,14 +26,23 @@ void wcs_f2i(int ndim, double *crpix, double *crval, double *cdelt,
   
   Dx(iptr) = cdelt[0];
   Xmin(iptr) = (1.0-crpix[0])*cdelt[0] + crval[0];
+  if (Axis(iptr)==1) {
+    Xref(iptr) = crval[0];
+  }
   if (ndim==1) return;
   
   Dy(iptr) = cdelt[1];
   Ymin(iptr) = (1.0-crpix[1])*cdelt[1] + crval[1];
+  if (Axis(iptr)==1) {
+    Yref(iptr) = crval[1];
+  }
   if (ndim==2) return;
 
   Dz(iptr) = cdelt[2];
   Zmin(iptr) = (1.0-crpix[2])*cdelt[2] + crval[2];
+  if (Axis(iptr)==1) {
+    Zref(iptr) = crval[2];
+  }
 
   dprintf(1,"XYZMin/Dxyz: %g %g %g %g 5g 5g\n",
 	  Xmin(iptr),Ymin(iptr),Zmin(iptr),Dx(iptr),Dy(iptr),Dz(iptr));
