@@ -1577,6 +1577,12 @@ some of the existing codes.
 
 {\tt http://www.llnl.gov/visit/}
 
+\section{ifrit}
+
+{\tt http://casa.colorado.edu/~gnedin/IFRIT/} uses VTK and QT and is
+written in C++. It is a powerful
+tool that can be used to visualize 3-d data sets.
+
 \section{OpenDX}
 
 Open source visualization package, written by IBM. See 
@@ -1914,6 +1920,27 @@ incompatible libraries or tools. Some of this is noted in Appendix I.
 For reference, this install took about 27 minutes on my Pentium 1.6GHz based
 laptop.
 
+\section{Libaries}
+
+A number of ancillary libraries are available that are used by a number
+of packages. It can sometimes be quite a nuisance to get the whole package
+to work with a version update of the compiler, libraries or any of the
+components that make up ``manybody'', so here is a list of what worked
+for us:
+
+\begin{verbatim}
+
+fftw       3.0.1           http://www.fftw.org/ 
+fltk	   1.1.4
+hdf        4.2r0
+plplot     5.x          http://plplot.sourceforge.net/   
+pgplot     5.5.2 (via cvs.astro.umd.edu)
+gsl        1.4
+
+ruby	   1.8.2
+
+\end{verbatim}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %\cleardoublepage
 \chapter                {Using CVS}
@@ -1921,7 +1948,7 @@ laptop.
 If you have never heard of CVS, or just casually, 
 it is worth reading
 this appendix and considering to use it (a few packages
-in manybody are CVS enables, encourage you to use this timesaving mode).
+in manybody are CVS enabled, encourage you to use this timesaving mode).
 CVS is one of the more popular
 source code control systems, which simplifies keeping your source code
 up to date with a master version. 
@@ -2422,6 +2449,10 @@ Update the code, recompile the library and the recompile the program:
 {\tt mkstarlab -l -u program}
 
 \end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\cleardoublepage
+\chapter                {Libaries}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
