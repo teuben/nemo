@@ -31,7 +31,7 @@ string defv[] = {
   "xmax=\n          Ignore points above this value",
   "Av=1\n           Av to apply extinction curve with",
   "extinct=t\n      Extinction law, or simple linear law",
-  "VERSION=0.6\n    18-may-05 PJT",
+  "VERSION=0.6a\n   26-may-05 PJT",
   NULL,
 
 };
@@ -44,8 +44,9 @@ string cvsid="$Id$";
 #define MAXDATA  16384
 
 extern string *burststring(string, string);
-extern void freestrings(string *);
-
+extern void freestrings(string*);
+extern int  minmax(int, real*, real*, real*);
+
 /* we might want to re-use the filter (model) lookup technique used in tabfilter ?? */
 
 string filtername(string shortname)
@@ -81,7 +82,7 @@ string filtername(string shortname)
   return shortname;
 }
 
-
+
 void nemo_main()
 {
   int colnr[2];
@@ -143,39 +144,36 @@ void nemo_main()
   instr = stropen(spectrum,"r");
   ns = get_atable(instr,2,colnr,coldat,nmax);
   strclose(instr);
-
-  for(i=0; i<ns; i++) {
+
+  for(i=0; i<ns; i++) {         /* scale spectrum and check if sorted */
     dprintf(2,"%g %g\n",udat[i],vdat[i]);
+    if (udat[i] <= udat[i-1])
+      error("Spectrum %s must be sorted in wavelength",spectrum);
     udat[i] *= xscale;
     vdat[i] *= yscale;
-    if (i==0) {
-      umin = umax = udat[0];
-      vmin = vmax = vdat[0];
-    } else {
-      if (udat[i] <= udat[i-1])
-	error("Spectrum %s must be sorted in wavelength",spectrum);
-      umax = MAX(umax,udat[i]);
-      vmax = MAX(vmax,vdat[i]);
-      umin = MIN(umin,udat[i]);
-      vmin = MIN(vmin,vdat[i]);
-    }
   }
+  minmax(n,udat,&umin,&umax);
+  minmax(n,vdat,&vmin,&vmax);
   dprintf(1,"Spectrum wavelength range: %g : %g\n",umin,umax);
   dprintf(1,"Spectrum response range: %g : %g\n",vmin,vmax);
 
   if (Qmin) {
     if (xmin > xQmin) 
-      error("xmin Spectrum (%g) below minimum of Extinction curve: try xmin=%g",xQmin,xmin);
+      error("xmin Spectrum (%g) below minimum of Extinction curve: try xmin=%g",
+	    xQmin,xmin);
   } else {
     if (xmin > umin)  
-      error("min Spectrum (%g) below minimum of Extinction curve: try xmin=%g",umin,xmin);
+      error("min Spectrum (%g) below minimum of Extinction curve: try xmin=%g",
+	    umin,xmin);
   }
   if (Qmax) {
     if (xmax < xQmax) 
-      error("xmax Spectrum (%g) above  maximum of Extinction curve: try xmax=%g",xQmax,xmax);
+      error("xmax Spectrum (%g) above  maximum of Extinction curve: try xmax=%g",
+	    xQmax,xmax);
   } else {
     if (xmax < umax)  
-      error("max Spectrum (%g)  above maximum of Extinction curve: try xmax=%g",umax,xmax);
+      error("max Spectrum (%g)  above maximum of Extinction curve: try xmax=%g",
+	    umax,xmax);
   }
   if (Qmin && xQmin < umin) warning("xmin=%g less than minimum (%g)",xQmin,umin);
   if (Qmax && xQmax < umax) warning("xmax=%g greater than maximum (%g)",xQmax,umax);
