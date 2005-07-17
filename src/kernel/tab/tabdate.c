@@ -2,6 +2,7 @@
  * TABDATE: convert a date/time column: wrapping strftime() and strptime()
  *
  *      1-feb-05    0.1 Created
+ *      9-may-05    0.2 added time0= (tcol= still defaulted to 'all')
  */
 
 #include <stdinc.h>
