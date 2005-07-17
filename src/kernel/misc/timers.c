@@ -44,11 +44,11 @@ void init_timers(int n)
   maxtimers = n;
   if (n>1) {
     stamp_timers(0);    stamp_timers(1);
-    dprintf(1,"init_timers: overhead of called stamp_timers=%d ticks\n",diff_timers(0,1));
+    dprintf(1,"init_timers: overhead of called stamp_timers=%ld ticks\n",diff_timers(0,1));
     stamp_timers(0);    stamp_timers(1);
-    dprintf(1,"init_timers: overhead of called stamp_timers=%d ticks\n",diff_timers(0,1));
+    dprintf(1,"init_timers: overhead of called stamp_timers=%ld ticks\n",diff_timers(0,1));
     stamp_timers(0);    stamp_timers(1);
-    dprintf(1,"init_timers: overhead of called stamp_timers=%d ticks\n",diff_timers(0,1));
+    dprintf(1,"init_timers: overhead of called stamp_timers=%ld ticks\n",diff_timers(0,1));
   }
 }
 
