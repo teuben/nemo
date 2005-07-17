@@ -9,6 +9,7 @@
  *   26-nov-03   1.3b   fixed final bugs in sign errors and indexing in binsearch()
  *    3-nov-03   1.3c   implemented uniform=
  *   13-dec-03   1.4 
+ *    1-jan-04   1.5 constant=
  *
  */
 
@@ -42,9 +43,10 @@ string defv[] = {
     "seed=0\n		  random number seed",
     "nmodel=1\n           number of models",
     "sign=1\n             Change sign of Z-angular momentum of the disk",
-    "test=f\n             test shape of spiral",
+    "test=f\n             test shape of spiral (all particles at 0 phase offset)",
+    "constant=f\n         force vt constant in rotating frame ?",
     "headline=\n	  text headline for output ",
-    "VERSION=1.4\n	  13-dec-03 PJT",
+    "VERSION=1.5\n	  1-jan-04 PJT",
     NULL,
 };
 
@@ -61,6 +63,7 @@ local bool Qtest;
 local bool Qlinear;
 local bool Quniform;
 local bool Qkey;
+local bool Qconstant;
 local int  jz_sign;
 
 local Body *disk = NULL;
@@ -81,6 +84,7 @@ void nemo_main()
     if (hasvalue("rref")) rref = getdparam("rref");
     Qkey = hasvalue("key");
     if (Qkey) key = getiparam("key");
+    Qconstant = getbparam("constant");
 
     ndisk = getiparam("nbody");
     jz_sign = getiparam("sign");
@@ -196,7 +200,7 @@ double density(double t)
 testdisk(int n)
 {
     Body *dp;
-    real rmin2, rmax2, r_i, theta_i, mass_i;
+    real rmin2, rmax2, r_i, theta_i, mass_i, rring;
     real cost, sint;
     int i, ndim=NDIM;
     double pos_d[NDIM], vel_d[NDIM], pot_d, time_d = 0.0;
@@ -205,6 +209,7 @@ testdisk(int n)
     if (disk == NULL) disk = (Body *) allocate(ndisk * sizeof(Body));
     rmin2 = rmin * rmin;
     rmax2 = rmax * rmax;
+    rring = 0.5*(rmin+rmax);
     mass_i = 1.0 / (real)ndisk;
 
     for (dp=disk, i = 0; i < ndisk; dp++, i++) {
