@@ -30,8 +30,8 @@ echo -n "nbody0:     "
 time nbody0 in=nbody1.in out=nbody1.out1 >& nbody0.log
 echo -n "hackcode1:  "
 time hackcode1 in=nbody1.in out=nbody1.out2 tstop=10 >& hackcode1.log
-#echo -n "YancNemo:   "
-#time YancNemo  in=nbody1.in out=nbody1.out3 >& YancNemo.log 
+#echo -n "gyrfalcON:   "
+time gyrfalcON in=nbody1.in out=nbody1.out3 >& gyrfalcON.log 
 echo -n "scfm:       "
 time runscfm in=`pwd`/nbody1.in outdir=nbody1.run nsteps=300 >& scfm.log
 
