@@ -20,7 +20,7 @@ SRCFILES = fitsio.c fits.c \
 OBJFILES=  fitsio_nemo.o fits.o
 LOBJFILES= $L(fitsio.o) $L(fits.o)
 BINFILES = ccdfits fitsccd fitssplit scanfits fitstab fitshead \
-	   fitsglue sdsfits fits8to16
+	   fitsglue sdsfits fits8to16 tabfits
 # fitsgrid <-- is broken ?
 TESTFILES=  format
 
