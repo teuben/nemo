@@ -30,13 +30,13 @@ string *burststring(string lst, string sep)
 		*sp = 0;
 		*wp++ = (string) copxstr(strbuf, sizeof(char));
 		if (wp == &wrdbuf[MWRD])		/*       no room? */
-		    error("burststring: too many words\n");
+		    error("burststring: too many words (%d)",MWRD);
 		sp = strbuf;				/*       for next 1 */
 	    }
 	} else {					/*   part of word */
 	    *sp++ = *lp;				/*     so copy it */
 	    if (sp == &strbuf[MSTR])			/*     no room? */
-		error("burststring: word too long\n");
+		error("burststring: word too long (%d)",MSTR);
 	}
     } while (*lp++ != 0);				/* until list ends */
     *wp = NULL;
