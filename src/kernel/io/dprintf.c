@@ -21,7 +21,8 @@
  *  4-mar-96  pjt: format string now a 'const'
  * 20-jun-01  pjt: gcc0, no more non-ansi code
  * 26-sep-01  name now nemo_dprintf(), to avoid conflict with new dprintf(3?)
- *
+ *  8-may-04  return -1 if debug level not high enough
+ *  4-may-05  nemo_set_debug, why was this not needed before?
  */
 
 #include <stdinc.h>
@@ -36,6 +37,11 @@ bool nemo_debug(int debug)
   return debug <= debug_level;
 }
 
+void nemo_set_debug(int debug) 
+{
+  debug_level = debug;
+}
+
 /*
  * DPRINTF: printf-style debugging messages, controlled by debug_level
  *	    as set by the user interface (debug=)
@@ -44,7 +50,7 @@ bool nemo_debug(int debug)
 int nemo_dprintf(int debug, const_string fmt, ...)
 {
     va_list ap;
-    int nret = 0;
+    int nret = -1;
 
     if (debug <= debug_level) {		/* print this debug message? */
         va_start(ap, fmt);	
