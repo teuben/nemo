@@ -19,15 +19,16 @@
 % \usepackage[english]{babel}
 % \usepackage{ahpage}
 
-\title{ {\Huge MANYBODY:} \\
+\title{ 
+{\Huge MANYBODY:} \\
            {\LARGE an accompanying guide to }\\
-	   { \bf School on Numerical N-Body Dynamics }\\
-	   { \bf \'Ecole de Dynamique Numerique Ncorps }\\
-{ Observatoire astronomique de Strasbourg, France, 19-22 March 2004}\\
-	   and\\
 	   {\bf  Summer school on direct N-body simulations} \\
 	   {\bf  Zomer school over direkte N-deeltjes simulaties} \\
-	   { Astronomical Institute {\it 'Anton Pannekoek'}, Amsterdam, 24-30 July 2005}
+	   { Astronomical Institute {\it 'Anton Pannekoek'}, Amsterdam, 24-30 July 2005}\\
+	   {\small and previously} \\
+	   { \bf School on Numerical N-Body Dynamics }\\
+	   { \bf \'Ecole de Dynamique Numerique Ncorps }\\
+           { Observatoire astronomique de Strasbourg, France, 19-22 March 2004}
 }
 
 
@@ -37,7 +38,7 @@
 % Douglas Heggie - Piet Hut - Jun Makino
        }
 
-\date{{\small Version 1.3} \\
+\date{{\small Version 1.4} \\
       {\small Summer 2005} \\
       {\small Last document revised: \today} \\ \\
      }
@@ -123,7 +124,7 @@ page (this page). Small latex2html conversion problems remain.
 \chapter*{Preface}
 
 What lies in front of you is an accompanying guide to some of 
-the ``other'' software you will hopefully also find useful this week.
+the ``other'' software you might also find useful this week.
 Although
 the main material from the book(s) {\it Moving Stars Around}, and now
 {\tt Kali},
@@ -161,8 +162,8 @@ type of open source policy for our codes).
 
 The {\it manybody} guide that lies here in front of you assumes some knowledge
 of Unix. This means Linux and Mac are fine, but although cygwin on MS-Windows
-gets fairly close, your author couldn't 
-stomach its limitation\footnote{YMMV, as they say in this business}.
+gets fairly close, your author couldn't stomach some of 
+its limitations\footnote{YMMV, as they say in this business}.
 Most examples show simple snippets
 of C-shell command lines; their prompt (e.g. \verb+2%+) 
 contains a counter which is normally started at 1 for each section
@@ -197,7 +198,7 @@ in most places where a random seed is used (e.g. the NEMO {\tt seed=0} keyword
 would take a new seed based on the current date and time) 
 a fixed seed is taken (usually {\tt seed=123}) 
 so the example can actually be exactly reproduced sans compiler and optimization
-differences.
+differences. In ``real life'' you may not always want to do this.
 
 % yes, intel vs. gcc ; solaris vs. linux ; -g vs. -O on gnu. etc.
 
@@ -208,7 +209,8 @@ After your account has been setup to use the {\it manybody} environment
 reading this document:
 \begin{itemize}
 \item
-For most programs the {\tt -h} and/or the {\tt --help} flag will give a short
+For most programs the {\tt -h} and/or the {\tt --help} 
+command line argument will give a short
 reminder of the options and their defaults. This is true for NEMO as well
 as Starlab programs.
 For NEMO programs the option {\tt help=h} will give much more extensive help
@@ -225,13 +227,17 @@ For those packages that have html formatted information, they are
 linked in {\tt manybody/index.html}, whereever this may reside on your
 system.
 
+\item
+Buy your friendly teacher a Coffee or Beer
+
 \end{itemize}
 
 \section*{Acknowledgements}
 
 I would like to thank my co-authors in spirit, 
-Douglas Heggie, Piet Hut, and Junichiro Makino for their contributions, and
-Christian Boily and the LOC for organizing this school.
+Douglas Heggie, Piet Hut, and Junichiro Makino for their contributions, 
+Simon Portegies Zwart for organising this school, and
+Christian Boily for the first school in Strasbourg.
 In the true spirit of open source, 
 numerous authors have contributed their software, which you can find on
 the CD. Hopefully we will be able to distill this on the reader too.
@@ -241,7 +247,7 @@ the CD. Hopefully we will be able to distill this on the reader too.
 
 Although we will primarely cover direct N-body integrators in this school,
 we should recall several {\tt types} are commonly in use
-in astrophysics and related fields:
+in astrophysics:
 
 \begin{enumerate}
 \item
@@ -345,7 +351,7 @@ example running the code for two crossing times on a self-generated 16-body
 Plummer sphere configuration
 
 \footnotesize\begin{verbatim}
-   # look at a sample input parameter file
+   # sample input parameter file
 1% cat $NEMO/usr/aarseth/firstn/input
 16 12.0 0.0 1.0 2.0
 1.0 1.0 1.0 0
@@ -365,7 +371,7 @@ Plummer sphere configuration
  ERRORS    RCM VCM DE/E DZ     2.26E-16  8.86E-16  7.73E-07  2.99E-08
 
    # get some online help on this program
-4% man firstn
+3% man firstn
  
 \end{verbatim}\normalsize
 
@@ -385,7 +391,7 @@ Binney \& Tremaine (1987).
 You can find this implementation in Fortran ({\tt nbody0})
 as well as C ({\tt nbody00}) in NEMO, with both a simple ASCII dataformat,
 as well as the better supported binary {\it snapshot} format. Aarseth likes
-to refer to this version as the ``Mickey Mouse'' version, and prefers
+to refer to this version as the ``Mickey Mouse'' version, and really prefers
 you to use the full version, {\tt nbody1} (see below).
 
 
@@ -487,8 +493,8 @@ treats close encounters with the Ahmad-Cohen scheme.
 
 Here you are also witnessing a current quirk of this wrapper: the input file
 must be given with an absolute pathname, hence the back-tick trick. And 
-although the number of bodies is known, it as to be respecified (though
-this is 
+although the number of bodies is known, it as to be re-specified.
+% (though this is 
 
 Notice that at T=0 two binaries were already found, in fact star 92 was
 involved in both binaries.
@@ -692,14 +698,16 @@ Elapsed time since start:   10.686 s (95.5% CPU ave; 0.0% local)
 
 You will find 6 files, {\tt plan0.dat .. plan5.dat} representing
 the sun, and planets Jupiter through Pluto. HNbody comes with a
-set of supermongo macros especially  designed for the
+set of supermongo\footnote{the {\tt sm} program itself 
+is however not publicly
+available} macros especially  designed for the
 otherwise ASCII tables that are produced.
 
 \section{kira}
 
 {\tt kira} is the flagship integrator of the {\it starlab} package. It is also
 one of the few codes that has stellar evolution integrated with stellar
-dynamics. {\tt kira} is can also be compiled with the GRAPE libraries,
+dynamics. {\tt kira} can optionally be compiled with the GRAPE libraries,
 to run on the GRAPE hardware, which of course speeds up the computations 
 substantially.
 
@@ -748,7 +756,7 @@ The code is basically $\mathcal{O}(N \log{N})$, which makes is very fast
 for large N compared to a direct full N-body code.
 The earliest version also
 includes the curious self-gravity bug which can occur for large opening angles
-under peculiar conditions (see Salmon \& Warren 19xx).
+under peculiar conditions (see Salmon \& Warren 1993).
 The original version around which NEMO was built is still available as
 {\tt hackcode1}. In this example we'll set up a head-on collision between
 two Plummer spheres:
@@ -863,6 +871,10 @@ As you can see, Dehnen's code is quite a lot faster. As for accuracy though, we 
 this as an excersize for the interested reader. Notice this code balances all forces
 and thus conserves total linear momentum unlike the BH86 treecode.
 
+\smallskip
+There are some C++
+compiler issues with this code, though  gcc 3.2.2 is known to work well.
+
 \section{superbox}
 
 Fellhauer et al. (2000) wrote a particle-mesh code with high resolution
@@ -887,7 +899,7 @@ An example of an $\mathcal{O}(N)$ code where the potential and forces are derive
 a potential expansion in spherical harmonics  (White 1983, who dubbed it multipole expansion). 
 See also Hernquist \& Barnes, (1990). Fully integrated
 in NEMO, and very fast. Excellent to study the dynamics of a single galaxy,
-check orbit theory etc.
+stability, check orbit theory etc.
 
 \footnotesize\begin{verbatim}
 
@@ -955,7 +967,7 @@ run directory.
 
 \section{galaxy}
 
-Sellwood (1997) contributed this 3-dimensional code to NEMO. Is uses the
+Sellwood (1997) contributed this 3-dimensional cartesian code to NEMO. Is uses the
 Fourier Analysis/Cyclic Redundancy (FACR) method, pioneered by
 Hockney (1965, 1970) and James (1977) for galactic dynamics. Running
 the program has some restrictions, and a NEMO frontend {\tt rungalaxy}
@@ -1075,6 +1087,7 @@ Also:
       Merritt
       Sellwood
       Dehnen
+      Zhan      astro-ph/0507237
 
  - relaxation:
       Hernquist & Barnes (1990) : 
@@ -1479,19 +1492,22 @@ snapadd pp1.in,ps4.in  detonate.in
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter                {Advanced Visualization}
+\chapter                {Visualization}
 
 Some brief but wise words about packages we all have some experience with.
 Obviously its a big ugly world out there, so there is a lot more under the
 sun than this.
 
-\section{snap3dv}
+\section{NEMO}
+
+
+\subsection{snap3dv}
 
 The {\tt snap3dv} program in NEMO converts data to a variety of popular
 3D viewers, but in addition special converters are available 
 for {\tt partiview} ({\tt snapspecks}).
 
-\section{xyzview}
+\subsection{xyzview}
 
 Comes with NEMO, needs the VOGL (Very Ordinary GL) library, which emulates
 GL on classic X with no accelleration. Can only plot colored dots, no finite
@@ -1510,8 +1526,14 @@ the continues orbit for one selected star from the simulation.
 3% snapxyz a0.dat - color='i<8000?1:(i<12000?2:4)' | xyzview - maxpoint=18000 nfast=18000 scale=8
 \end{verbatim}\normalsize
 
+\subsection{glnemo}
 
-\section{xstarplot}
+A recent addition from the Marseille group, {\tt glnemo} is a versatile 
+interactive 3D viewer that can also display SPH/gas particles. Examples
+dataset are in {\tt \$NEMO/src/nbody/glnemo/snapshot}.
+
+\section{Starlab}
+\subsection{xstarplot}
 
 Starlab's visualization program is called {\tt xstarplot}. More to say on this.
 
@@ -1571,6 +1593,8 @@ some of the existing codes.
 
 \section{povray}
 
+Great to create photo-realistic images.
+
 {\tt http://www.povray.org/}
 
 \section{visit}
@@ -1592,7 +1616,8 @@ excellent tools for particle as well as grid data.
 \section{AstroMD}
 
 {\bf cosmolab} distributes an open-source vizualization package 
-called {\tt AstroMD}.
+called {\tt AstroMD}.  Uses the Visualization Tool Kit ``vtk''
+(see {\tt http://public.kitware.com/VTK/}).
 
 \section{xgobi, ggobi}
 
@@ -1617,7 +1642,9 @@ The Berkeley group (Marc Davis?) has some routines on their website.
 You always need image conversion programs. {\tt ImageMagic} is one of 
 the better packages for this. Much like NEMO and Starlab, ImageMagic
 is a collection of image manipulation programs (e.g. convert, montage, mogrify).
-Reads and writes just about any image format, including FITS.
+Reads and writes just about any image format, including FITS. Most linux
+distributions make this package directly available, and place their
+binaries in {\tt /usr/bin}.
 
 \section{Movies}
 
@@ -1630,7 +1657,11 @@ http://www.bergen.org/AAST/ComputerAnimation/Help_FAQs.html
 
 http://the-labs.com/GIFMerge/
 
-\end{verbatim}
+$NEMO/csh/mkmpeg_movie : some example scripts to make movies
+
+\end{verbatim} 
+%$
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter                {References}
 
@@ -1686,7 +1717,7 @@ Hockney \& Eastwood - 1970? {\it Simulations using Particles} - there is now a 2
 
 Holmberg, E. - 1941 - Ap.J. 94, 385.
 
-Hurley - 
+Hurley et al.- astro-ph/0507239
 
 Hut, P. \& Makino, J., 2003  {\it Moving Stars Around} :
 {\bf acs\_v1\_web.pdf}
@@ -1703,13 +1734,16 @@ Merrifield \& Binney
 
 Lecar - {\it The Standard IAU 25-body problem} - 1968, Bull.Astr. 3, 91. 
 
-Rauch, K. \& Hamilton, D. - 2004 - in preparation. See also
+Rauch, K. \& Hamilton, D. - 2005 - in preparation. See also
 {\tt http://janus.astro.umd.edu/HNBody}
 
 
 Romeo, Alessandro B.; Horellou, Cathy; Bergh, Jöran - 2003 - 
 {\it N-body simulations with two-orders-of-magnitude higher performance using wavelets}
 MNRAS, 342, 337 : {\bf 2003MNRAS.342..337R.pdf}
+
+Salmon, J.K. \& Warren, M.S. - 1993 -
+{\it Skeletons from the Treecode Closet} J. of Comp. Phys.: {\bf skeletons.ps}
 
 Sellwood, J.A. - {\it The art of N-body building} - 1987, Ann.Rev A\&A, 25, 151 : 
 {\bf 1987ARA+A..25..151S.pdf}
@@ -1732,12 +1766,14 @@ White,S.D.M. - 1983 - Ap.J. 274, 53 : {\bf 1983ApJ...274...53W.pdf}
 
 White \& Barnes - 1984 - {\bf 1984MNRAS.211..753B.pdf}
 
+Zhan - astro/ph 05
+
 \section*{URLs}
 
 \begin{verbatim}
 
-http://astro.u-strasbg.fr/scyon/School/                   the previous N-body School
-http://modesta.science.uva.nl/modest/modest5c/index.html  this N-body school
+http://modesta.science.uva.nl/modest/modest5c/index.html  this N-body school (2005)
+http://astro.u-strasbg.fr/scyon/School/                   the previous N-body School (2004)
 http://www.artcompsci.org/                                The Art of Computational Science
 http://www.manybody.org/                                  Manybody portal (including MODEST)
 http://www.astro.umd.edu/nemo                             NEMO website
@@ -1773,20 +1809,20 @@ see Appendix B.
 \section{A quick test}
 
 To verify the installation was done correct, here are some quick
-one liners, without a lot of explanation. Some of them will bring up
+one liners, without much of an explanation. Some of them will bring up
 a picture. Most commands, except where noted, take a few seconds. If
 you prefer, you can also execute the {\tt quick\_test} script in
 the {\tt manybody} root directory.
 \begin{enumerate}
 
 \item
-{\tt mozilla /home/blabla/manybody/index.html} : local HTML 
+{\tt firefox /home/blabla/manybody/index.html} : local HTML 
 
 \item
 {\tt mkplummer p1 1000} : NEMO, create a Plummer sphere
 
 \item
-{\tt snapplot p1 color=x} : NEMO, check if pgplot works. check color bands x=0..1
+{\tt snapplot p1 color=x} : NEMO, check if pgplot works. check color bands 
 
 \item
 {\tt gyrfalcON p1 . tstop=0.1} : NEMO, check if an integrator works
@@ -1830,6 +1866,11 @@ Left mouse down rotates. Right mouse down zooms. $>>$ button starts movie.
 
 \item
 {\tt g++ -o forward\_euler1 \$MANYBODY/ACS/chap3/forward\_euler1.C; forward\_euler1} 
+(ACS 1)
+
+\item
+{\tt ...ruby...}
+(ACS 2)
 
 
 \end{enumerate}
@@ -1851,11 +1892,11 @@ Left mouse down rotates. Right mouse down zooms. $>>$ button starts movie.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % \cleardoublepage
 % \part{Appendices}
-\chapter                {N-body Compute Toolbox}
+\chapter                {manybody: N-body Compute Toolbox}
 
-\section{blabla.ncorps.u-strasbg.fr}
+\section{blabla.astro.uva.nl}
 
-The directory {\tt /home/blabla/manybody} on  {\tt blabla.ncorps.u-strasbg.fr} 
+The directory {\tt /home/blabla/manybody} on  {\tt blabla.astro.uva.nl} 
 contains all the {\it manybody} software (and then some)  
 we are discussing at this school. We have
 also made a CD available, from which you should be able to reproduce this
@@ -1920,7 +1961,45 @@ incompatible libraries or tools. Some of this is noted in Appendix I.
 For reference, this install took about 27 minutes on my Pentium 1.6GHz based
 laptop.
 
-\section{Libaries}
+\section{Importing Packages into manybody}
+
+Much of the available open source software we use, and even those who don't, use
+the {\tt autotools} set to {\tt configure}, {\tt make} and {\tt install} their
+software on the users system. Where exactly this software is going to be located,
+is free to the user to decide. On most unix-based system the {\tt \usr},
+and {\tt /usr/local}, {\tt /opt} or {\tt /sw} (e.g. Fink) are used. As long
+as the user then puts the respective {\tt ''bin''} directory in their search
+path, and perhaps the respective {\tt ''lib''}  directory in their 
+shared library search path, all is well.
+
+The drawback of this approach is that the user needs have administrative
+privilages (username {\tt root} in unix parlor). For {\bf manybody} we
+cannot assume that, so we choose a similar approach whereby libraries, programs
+and their ancillary material are placed in a directory under user control.
+
+
+So, for almost all simple packages we can use the kinds of commands
+
+\footnotesize\begin{verbatim}
+
+  1% tar zxf /tmp/package-X.Y.Z.tar.gz
+  2% cd package-X.Y.Z
+  3% ./configure --prefix=$MANYBODY/opt
+  4% make
+  5% make install
+
+\end{verbatim}\normalsize
+
+and for packages that depend on these, 
+
+\footnotesize\begin{verbatim}
+
+  3% ./configure --prefix=$MANYBODY/opt --with-fltk=$MANYBODY/opt
+
+\end{verbatim}\normalsize
+
+
+\section{Random Notes}
 
 A number of ancillary libraries are available that are used by a number
 of packages. It can sometimes be quite a nuisance to get the whole package
@@ -1928,7 +2007,18 @@ to work with a version update of the compiler, libraries or any of the
 components that make up ``manybody'', so here is a list of what worked
 for us:
 
-\begin{verbatim}
+\footnotesize\begin{verbatim}
+
+Libraries:      Needed by:              Location(s): MANYBODY/opt/{lib,include,...}
+
+fltk            partiview
+gsl             nemo (optional)
+pgplot		nemo                    NEMOLIB
+plplot		nemo (optional)
+fftw            
+hdf             nemo (optional)
+cfitsio         nemo (optional)
+
 
 fftw       3.0.1           http://www.fftw.org/ 
 fltk	   1.1.4
@@ -1939,14 +2029,32 @@ gsl        1.4
 
 ruby	   1.8.2
 
-\end{verbatim}
+
+Programs:                               MANYBODY/opt/bin  (some in MANYBODY/<package>/bin)
+partiview
+ruby
+mmas
+EZ
+gadget
+
+Packages:                               MANYBODY/<package>
+
+nemo
+starlab
+tipsy
+hnbody
+gcc
+
+
+\end{verbatim}\normalsize
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %\cleardoublepage
 \chapter                {Using CVS}
 
-If you have never heard of CVS, or just casually, 
-it is worth reading
+If you have never heard of CVS it is worth reading
 this appendix and considering to use it (a few packages
 in manybody are CVS enabled, encourage you to use this timesaving mode).
 CVS is one of the more popular
@@ -1957,7 +2065,8 @@ up to date with a master version.
 
 Most likely you will start by using the so-called ``anonymous CVS''
 method, which works much like anonymous-ftp.  It is  however
-important to enable your CVS account first:
+important to enable your CVS account first, using the {\tt cvs login}
+command:
 
 \footnotesize\begin{verbatim}
   %1 cvs -d :pserver:anonymous@cvs.astro.umd.edu:/home/cvsroot login
@@ -1966,7 +2075,7 @@ important to enable your CVS account first:
 \end{verbatim}\normalsize
 
 simply hit return here, since there is no password. You only need to do
-this once per account, as the account information is added to a file
+this once per CVS account, as the account information is added to a file
 {\tt .cvspass} in your home directory.
 
 
@@ -1976,10 +2085,10 @@ this once per account, as the account information is added to a file
 
 \item The environment variable CVSROOT, or the -d flag to the cvs command,
 is needed to get accesss to a repository. Use the one listed in the
-previous section.  
+previous section after the {\tt -d} flag .
 
 \item You then need to checkout a new sandbox that mirrors a repository
-module:
+module (the {\tt -Q} flag make it much less verbose}:
 \footnotesize\begin{verbatim}
 
      # checkoout nemo, assuming CVSROOT has been set
@@ -2030,11 +2139,12 @@ be added to CVS using the {\tt cvs add} command.
 This means the file is new(er) at the server, and your
 CVS sandbox needs to be updated. A simple command: {\tt cvs update}.
 
+\item[{\tt P}] You might see this when you {\tt cvs update} a file, instead
+of Updating the file, it is patched, taking much less bandwith.
+
 \item[{\tt M}] This means your version of the file is new then the servers, 
 and as long as you have write permission on the server, it can be returned
 with a simple command: {\tt cvs commit}.
-
-
 
 \item[{\tt C}] This is the more complicated case of a conflict. Both your local
 version, as well as the server version, have been modified independantly.
@@ -2067,8 +2177,9 @@ NEMO is a large (250+) collection of programs, each performing a small task
 controlled by a set of parameters.
 
 \item
-the command line user interface (CLI) is a set of program keywords
-(unique to each program) and system keywords (available to each program).
+the command line user interface (CLI) is a set of {\it program keywords}
+(unique to each program) and {\it system keywords}
+(available to each program).
 Most often used system keywords are {\tt yapp=} (plotting device),
 {\tt debug=} (increase debug level) and {\tt error=} (pass over fatal errors
 at your own risk).
@@ -2083,7 +2194,7 @@ the {\tt man} or {\tt gman} command to view or browse manual pages.
 command line parameters do not need to have their keyword name given
 if the parameters are given in the right order. 
 E.g. {\tt mkplummer p10 10} is the same as 
-{\tt mkplummer out=p10 nbody=10}.
+{\tt mkplummer out=p10 nbody=10}. Use {\tt help=} to see that order.
 
 \item
 most programs have a manual page. Use the unix {\tt man} command, or
@@ -2094,7 +2205,7 @@ data is mostly stored in binary files, for speed, accuracy and portability.
 Programs like {\tt tsf} display the contents of these files.
 
 \item
-in unix tradition data is often piped from one program to the next, the
+in  Unix tradition data is often piped from one program to the next, the
 {\tt in=/out=} filename  needs to be designated with a dash 
 (e.g. {\tt in=-, out=-}.   Most programs have in/out as their 1st and 
 2nd parameter.
@@ -2131,10 +2242,10 @@ It actually does this by tracking down the source code
 and displaying the relevant help section of the source code.
 
 \item
-data is mostly stored in ascii files
+data is mostly stored in special ascii files, which a hierarchical structure
 
 \item
-in unix tradition data is piped from one program to the next, and unlike
+in Unix tradition data is piped from one program to the next, and unlike
 in NEMO, unknown data is generally passed onwards unmodified.
 
 \end{enumerate}
@@ -2153,7 +2264,8 @@ for orbits in collisional systems, in fact, almost more appropriate
 for collisionless systems!
 The collisional orbit choosen was drawn from the Pythagoran problem:
 3 stars with masses 3, 4 and 5, on a pythagoran triangle where the
-long sides opposite their mass have a length equal their mass. Initially
+long sides opposite their mass have a length proportional to 
+their mass. Initially
 all three stars are at rest. A file {\tt \$NEMODAT/pyth.dat} contains
 the initial conditions:
 
@@ -2399,7 +2511,7 @@ previous comments on Makefile, Testfile and mknemo.
 Updates to the code can either be done via releases (tar files or
 tagged CVS) or in a ``continuum'' (CVS).
 
-\section{NEMO (version 3.1.2 - now 3.2.3)}
+\section{NEMO (version 3.2.3}
 After installation, it can (and will) occur that it appears 
 as if you have a missing program in NEMO, despite that a 
 manual page exists.
@@ -2425,7 +2537,7 @@ should be recompiled and/or relinked:
 
 \end{enumerate}
 
-\section{STARLAB (version 4.2.1)}
+\section{STARLAB (version 4.2.2)}
 
 {\it be sure to update this: since the last summerschool starlab install
 was overhauled}
