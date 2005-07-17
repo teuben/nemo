@@ -69,7 +69,8 @@ the sky)
     \epsfysize=5cm
     \epsfbox{galaxyrot.eps}
     \end{center}
-\caption{Example galaxy disks:
+\caption[Example galaxy disks]
+{Example galaxy disks:
 clockwise (M33, left) and counter-clockwise (M51, right), assuming trailing
 spiral arms}
 \mylabel{f:galaxyrot}

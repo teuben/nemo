@@ -130,7 +130,7 @@ overviews NEMO's usage.
 introduction with basic survival techniques to get around.
 
 \item[$\bullet$] The NEMO home page, currently at
-\htmladdnormallink{\tt http://www.astro.umd.edu/nemo/}
+\htmladdnormallink{{\tt http://www.astro.umd.edu/nemo/}}
 {http://www.astro.umd.edu/nemo/}, contains many
 pointers to a variety of helpful pages, and sometimes
 contradicts information written down in this manual.
