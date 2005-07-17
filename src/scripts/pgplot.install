@@ -80,12 +80,14 @@ if ($?host == 0) goto usage
 if (! -e $lib) mkdir $lib
 if ($status) goto usage
 
-if ($?f77) then
-  setenv F77 $f77
-endif
-
-if ($?cc) then
-  setenv CC $cc
+if (0) then
+  # do we really want this ?
+  if ($?f77) then
+    setenv F77 $f77
+  endif
+  if ($?cc) then
+    setenv CC $cc
+  endif
 endif
 
 cd $dir
@@ -106,17 +108,20 @@ else
 endif
 
 cd pgplot
-if ($?f77) then
-  if ($f77 == gfortran) then
+cp drivers.list $lib
+cd $lib
+cp drivers.list new.list
+cp drivers.list old.list
+
+
+
+
+if ($?F77) then
+  if ($F77  == gfortran) then
     echo NOTE: SPECIAL lightweight pgplot for strict gfortran
     set drivers=$drivers0
   endif
 endif
-
-cd $lib
-
-cp drivers.list new.list
-cp drivers.list old.list
 
 echo Building drivers for $drivers
 
@@ -198,3 +203,5 @@ usage:
   echo "  debug=0              clean demo example from lib"
   echo "  cc=gcc               changed a (supperted) C compiler for this system"
   echo "  f77=g77              changed a (supperted) Fortran compiler for this system"
+
+
