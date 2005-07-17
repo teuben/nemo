@@ -15,8 +15,8 @@ string defv[] = {
     "in=???\n       Input filename (2d image)",
     "out=???\n      Output filename (2d image)",
     "flux=t\n       Should flux be conserved while duplicating?",
-    "n=2\n          Number of times to replicated pixels"
-    "VERSION=1.0\n  28-may-04 PJT",
+    "n=2\n          Number of times to replicated pixels",
+    "VERSION=1.0\n  30-jul-04 PJT",
     NULL,
 };
 
