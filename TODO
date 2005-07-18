@@ -25,6 +25,9 @@ problems with gcc4: (as tested on FC3)
 	also:  some formatted reading that spans multi lines BAD (pgpack.f)
   - no more -fno-globals for fortran
   - no more -fwritable-strings in C
+  - the linker is now more conservative, removing references to code
+    that is never used. get_atable and sqr come out in some tests
+    as missing...
 -------------------------------------------------------------------------------
 
 general things for 3.2.x
