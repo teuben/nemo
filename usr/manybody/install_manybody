@@ -86,7 +86,9 @@ if ($gcc != 0) then
   set log=$root/tmp/gcc.log
   tar jxf $pkg/gcc/gcc-$gcc.tar.bz2
   pushd gcc-$gcc
-    (mkdir _build; cd _build; ../configure --prefix=$root/opt; make bootstrap; make; make install) >& $log
+    # a simple gcc. note f77 is replaced by g95 starting gcc4
+    set copts=(--prefix=$root/opt  --enable-threads --enable-languages=c,c++,f77)
+    (mkdir _build; cd _build; ../configure $copts; make bootstrap; make; make install) >& $log
   popd
   rehash
 endif
