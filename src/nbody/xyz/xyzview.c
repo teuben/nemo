@@ -75,7 +75,7 @@ string defv[] = {
     "maxframe=500\n             Maximum frames for movie storage",
     "orbit=\n                   Select this point/star always visible",
     "movie=f\n                  If true, start loading all frames",
-    "VERSION=3.0\n		10-dec-03 PJT",
+    "VERSION=3.0a\n		17-jul-05 PJT",
     NULL,
 };
 
@@ -87,7 +87,7 @@ string usage = "Display 3-D velocity data";
 
 /* local routines : */
 
-bool get_xyz(), handle_que(), within();
+bool get_xyz(), handle_que();
 
 extern string *burststring();
 extern int xstrlen();
