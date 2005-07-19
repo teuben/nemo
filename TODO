@@ -17,7 +17,7 @@ Remaining MacOSX problems: (a special macosx.html web page dedicated to this)
   - one case had gcc in /usr/bin but g77 in /usr/local/bin, and not in
     the path -> pgplot didn't get build.
 
-problems with gcc4: (as tested on FC3)
+problems with gcc4: (as tested on FC3/FC4)
   - pgplot: grfont.dat cannot be built, some runtime problem with fortran
   - pgplot: needs a gfortran_gcc4.conf file for now
 	also:  no more -fno-backslash
@@ -25,9 +25,12 @@ problems with gcc4: (as tested on FC3)
 	also:  some formatted reading that spans multi lines BAD (pgpack.f)
   - no more -fno-globals for fortran
   - no more -fwritable-strings in C
+  - -fno-globals
+  - g95 vs. gfortran, use the new m4 macros
   - the linker is now more conservative, removing references to code
     that is never used. get_atable and sqr come out in some tests
     as missing...
+
 -------------------------------------------------------------------------------
 
 general things for 3.2.x
