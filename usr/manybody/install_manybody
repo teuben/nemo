@@ -13,6 +13,7 @@
 #  
 
 
+
 #  things that are 0 or 1
 set pgplot=1
 set falcon=1
@@ -96,11 +97,11 @@ testing:
 if ($gcc != 0) then
   echo `date` Installing gcc $  set log=$root/tmp/gcc.log
   tar jxf $pkg/gcc/gcc-$gcc.tar.bz2
-  pushd gcc-$gcc
+  pushd gcc-$gcc  >& /dev/null
     # a simple gcc. note f77 is replaced by g95 starting gcc4
     set copts=(--prefix=$root/opt  --enable-threads --enable-languages=c,c++,f77)
     (mkdir _build; cd _build; ../configure $copts; make bootstrap; make; make install) >& $log
-  popd
+  popd >& /dev/null
   rehash
 endif
 
@@ -108,8 +109,8 @@ endif
 
 echo  `date` Installing cvsutils
 tar zxf $pkg/tools/cvsutils-0.2.3.tar.gz
-pushd cvsutils-0.2.3
-popd
+pushd cvsutils-0.2.3 >& /dev/null
+popd >& /dev/null
   set log=$root/tmp/cvsutils.log
   ./configure --prefix=$root/opt   >& $log
   make                            >>& $log
@@ -118,17 +119,17 @@ rehash
 
 #                                                   ruby
 echo  `date` Installing ruby
-pushd ruby-1.8.2
+pushd ruby-1.8.2 >& /dev/null
   set log=$root/tmp/ruby.log
   ./configure --prefix=$root/opt   >& $log
   make                            >>& $log
   make install                    >>& $log
-popd
+popd >& /dev/null
 rehash
 
 #                                                   acs-lite
 echo  `date` Installing acs
-pushd acs
+pushd acs >& /dev/null
   set log=$root/tmp/acs.log
   setenv ACSROOT `pwd`
   source $ACSROOT/bin/acsstart.cshrc
@@ -141,82 +142,82 @@ pushd acs
     cd $ACSROOT
     make
   endif
-popd
+popd >& /dev/null
 rehash
 
 #                                                   starlab
 echo  `date` Installing starlab
-pushd starlab_cvs
+pushd starlab_cvs >& /dev/null
   set log=$root/tmp/starlab.log
   ./install-starlab >& $log
   source starlab_start.csh
   echo STARLAB-COUNT: `ls $STARLAB_INSTALL_PATH/bin|wc -l`
-popd
+popd >& /dev/null
 rehash
 
 #                                                   fltk (internal build only)
 echo  `date` Installing fltk 
-pushd partiview_cvs/src/fltk-1.1.4
+pushd partiview_cvs/src/fltk-1.1.4 >& /dev/null
   set log=$root/tmp/fltk.log
   ./configure >& $log
   make >>& $log
   if ($status) echo ERRORS compiling fltk, check install.log
-popd
+popd >& /dev/null
 rehash
 
 #                                                   partiview
 echo  `date` Installing partiview
-pushd partiview_cvs/src
+pushd partiview_cvs/src >& /dev/null
   set log=$root/tmp/partiview.log 
   ./configure --with-fltk=`pwd`/fltk-1.1.4 >& $log
   make >>& $log
   if ($status) echo ERRORS compiling partiview, check $log
   # cp partiview $STARLAB/bin
-popd
+popd >& /dev/null
 
 #                                                   nemo
 echo  `date` Installing NEMO
-pushd nemo_cvs
+pushd nemo_cvs >& /dev/null
   set log=$root/tmp/nemo.log 
   source AAA_SOURCE_ME  >& $log
   make bins >>& $log
   echo NEMOBIN-COUNT: `ls $NEMOBIN|wc -l`
-popd
+popd >& /dev/null
 rehash
 
 # firstn
 echo  `date` Installing firstn
-pushd $NEMO/usr/aarseth/firstn
+pushd $NEMO/usr/aarseth/firstn >& /dev/null
   set log=$root/tmp/firstn.log 
   make firstn >& $log
   if ($status) echo ERRORS compiling firstn, check $log  
   cp firstn $NEMOBIN
-popd
+popd >& /dev/null
 rehash
 
 # nbody6
 echo  `date` Installing nbody6
 mkdir $NEMO/usr/aarseth/nbody6
-pushd $NEMO/usr/aarseth/nbody6
+pushd $NEMO/usr/aarseth/nbody6 >& /dev/null
   set log=$root/tmp/nbody6.log 
   tar zxf $pkg/aarseth/nbody6/nbody6.tar.Z
   (cd Ncode ; make nbody6 ; cp nbody6 $NEMOBIN) >& $log
   if ($status) echo ERRORS compiling nbody6, check $log  
-popd
+popd >& /dev/null
 rehash
 
 # GalactICS
 echo  `date` Installing galactICS
-pushd $NEMO/usr/kuijken/GalactICS-exp/src
+pushd $NEMO/usr/kuijken/GalactICS-exp/src >& /dev/null
    set log=$root/tmp/gal.log
    make -f Makefile.nemo all install >& $log
    mknemo mkkd95 >& $log
-popd
+popd >& /dev/null
 rehash
 
 #                                                   GSL
 echo  `date` Installing gsl
-pushd $NEMO/local
+pushd $NEMO/local >& /dev/null
   set log=$root/tmp/gsl.log 
   tar zxf $pkg/gsl/gsl-$gsl.tar.gz
   cd gsl-$gsl
@@ -226,45 +227,45 @@ pushd $NEMO/local
   if ($status) echo ERRORS 2 compiling gsl, check $log
   make install >>& $log
   if ($status) echo ERRORS 3 compiling gsl, check $log
-popd
+popd >& /dev/null
 rehash
 
 #                                                   fewbody, glstarview
 echo  `date` Installing fewbody,glstarview
-pushd $NEMO/usr/fregeau
+pushd $NEMO/usr/fregeau >& /dev/null
   set log=$root/tmp/fewbody.log 
   tar zxf $pkg/fregeau/fewbody-$fewbody.tar.gz
-  pushd fewbody-$fewbody
+  pushd fewbody-$fewbody >& /dev/null
     make all  \
 	CFLAGS="-I$NEMO/opt/include -Wall -O3" \
 	LIBFLAGS="-L$NEMO/opt/lib -lgsl -lgslcblas -lm" >& $log
     if ($status) echo ERRORS compiling fewbody, check $log
     cp cluster triplebin binbin binsingle $NEMOBIN
-  popd
+  popd >& /dev/null
   tar zxf $pkg/fregeau/glstarview-$glstarview.tar.gz
   pushd glstarview-$glstarview
     make -f Makefile.rh9 all >>& $log
     if ($status) echo ERRORS compiling glstarview, check $log
     cp glstarview $NEMOBIN
-  popd
-popd
+  popd >& /dev/null
+popd >& /dev/null
 rehash
 #                                                   HNbody (binary only)
 echo  `date` Installing hnbody- for linux only
-pushd $NEMO/usr
+pushd $NEMO/usr >& /dev/null
   tar zxf $pkg/hnbody/hnbody-$hnbody.tgz
   ln -s hnbody-$hnbody hnbody
   foreach bin (ems  hnarith  hnbody  hnconvert  hnpaste  hnstats  hntac  lunar)
     mv hnbody/bin/$bin $NEMOBIN
   end
-popd
+popd >& /dev/null
 rehash
 
 #                                                   ds9
 echo  `date` "Installing ds9 - for linux only"
-pushd $NEMOBIN
+pushd $NEMOBIN >& /dev/null
   tar zxf $pkg/ds9/ds9.tar.gz
-popd
+popd >& /dev/null
 rehash
 
 #  xyz stuff
@@ -279,57 +280,57 @@ echo  `date` Compiling xyz from NEMO
 echo  `date` Installing EZ
   set log=$root/tmp/ez.log 
   tar zxf $pkg/EZ/EZ_3_0_2.tar.gz
-  pushd EZ_3_0_2
+  pushd EZ_3_0_2 >& /dev/null
     if (0) then
        ./QUICK_INSTALL >& $log
     else
        (cd make; make EZ FC="ifort -w -132") >& $log
        if ($status) echo ERRORS compiling EZ, check $log
     endif
-  popd
+  popd >& /dev/null
 
 # Tioga
 echo  `date` Installing Tioga
   set log=$root/tmp/tioga.log
   tar zxf $pkg/Tioga/Tioga-1.0.A-linux.tar.gz
-  pushd Tioga-1.0.A
+  pushd Tioga-1.0.A >& /dev/null
     (cd make; ruby extconf.rb ; make; make install) >& $log
     (cd tests; ruby ts_Tioga.rb) >>& $log
-  popd
+  popd >& /dev/null
 rehash
 
 # MMAS
 echo  `date` Installing MMAS
   set log=$root/tmp/mmas.log
   tar zxf $pkg/mmas/mmas1.6.tar.gz 
-  pushd mmas1.6
+  pushd mmas1.6 >& /dev/null
     make >& $log
     if ($status) echo ERRORS compiling mmas, check $log
-  popd
+  popd >& /dev/null
 rehash
 
 # FFTW v2, needed for starcrash
 echo  `date` Installing FFTW
   set log=$root/tmp/fftw.log
   tar zxf $pkg/fftw/fftw-2.1.5.tar.gz
-  pushd fftw-2.1.5
+  pushd fftw-2.1.5 >& /dev/null
     ./configure --prefix=$root/opt   >& $log
     make >>& $log
     if ($status) echo ERRORS compiling fftw, check $log
     make install >>& $log
     if ($status) echo ERRORS installing fftw, check $log
-  popd
+  popd >& /dev/null
 rehash
 
 # StarCrash
 echo  `date` Instaling StarCrash
   set log=$root/tmp/starcrash.log
   tar zxf $pkg/StarCrash/starcrash_serial.tar.gz 
-  pushd serial
+  pushd serial >& /dev/null
     make testinput b2pos b2pos2 sphagr \
 	FFTDIR=$root/fftw-2.1.5  FC=g77 CC=gcc  >& $log
     if ($status) echo ERRORS compiling starcrash, check $log
-  popd
+  popd >& /dev/null
 rehash
 
 # -- end of install --
