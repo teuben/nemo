@@ -33,6 +33,7 @@ set fltk=1.1.4
 
 #  root directory where all the tar ball packages live from which to install
 set pkg=`pwd`/manybody_pkg
+set sys=`uname -s | tr '[A-Z]' '[a-z]'`
 
 #  poor mans command line parser
 foreach _a ($*)
@@ -50,7 +51,6 @@ if ($?ASTROMAKE) then
   source $ASTROMAKE/astromake_start
 endif
 
-set fltk=$pkg/fltk/fltk-1.1.4-source.tar.gz
 
 # remove the old manybody
 rm -rf manybody
@@ -69,15 +69,13 @@ if ($cvs) then
   cvs -Q co nemo
   echo CVS: pgplot
   (cd nemo; mkdir local; cvs -Q co pgplot)
-  echo TAR: $fltk
-  tar -C partiview/src -zxf $fltk
 else 
   mkdir manybody
   cd manybody
   tar zxf $pkg/nemo/nemo_cvs.tar.gz
   tar zxf $pkg/starlab/starlab_cvs.tar.gz
+  tar zxf $pkg/starcluster/starcluster_cvs.tar.gz
   tar zxf $pkg/partiview/partiview_cvs.tar.gz
-  (cd partiview_cvs/src ; tar zxf $fltk)
 endif
 tar zxf $pkg/acs/acs-$acs.tgz
 tar zxf $pkg/ruby/ruby-$ruby.tar.gz
@@ -89,7 +87,7 @@ mkdir $root/opt
 
 set path=(. $root/bin $root/opt/bin $path); rehash
 
-something #PJT
+#PJT
 goto testing
 testing:
 
@@ -155,13 +153,27 @@ pushd starlab_cvs >& /dev/null
 popd >& /dev/null
 rehash
 
+#                                                   starcluster
+echo  `date` Installing starcluster
+pushd starcluster_cvs >& /dev/null
+  set log=$root/tmp/starcluster.log
+  make >& $log
+  if ($status) echo ERRORS compiling starcluster, check $log
+  make install  >& $log
+  if ($status) echo ERRORS installing starcluster, check $log
+popd >& /dev/null
+rehash
+
+
+
 #                                                   fltk (internal build only)
 echo  `date` Installing fltk 
+tar -C partiview_cvs/src -zxf $pkg/fltk/fltk-1.1.4-source.tar.gz
 pushd partiview_cvs/src/fltk-1.1.4 >& /dev/null
   set log=$root/tmp/fltk.log
   ./configure >& $log
   make >>& $log
-  if ($status) echo ERRORS compiling fltk, check install.log
+  if ($status) echo ERRORS compiling fltk, check $log
 popd >& /dev/null
 rehash
 
@@ -251,6 +263,7 @@ pushd $NEMO/usr/fregeau >& /dev/null
 popd >& /dev/null
 rehash
 #                                                   HNbody (binary only)
+if ($sys == linux) then
 echo  `date` Installing hnbody- for linux only
 pushd $NEMO/usr >& /dev/null
   tar zxf $pkg/hnbody/hnbody-$hnbody.tgz
@@ -260,13 +273,16 @@ pushd $NEMO/usr >& /dev/null
   end
 popd >& /dev/null
 rehash
+endif
 
 #                                                   ds9
+if ($sys == linux) then
 echo  `date` "Installing ds9 - for linux only"
 pushd $NEMOBIN >& /dev/null
   tar zxf $pkg/ds9/ds9.tar.gz
 popd >& /dev/null
 rehash
+endif
 
 #  xyz stuff
 echo  `date` Installing xyz from NEMO
