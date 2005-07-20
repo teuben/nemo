@@ -87,7 +87,7 @@ set root=`pwd`
 mkdir $root/tmp
 mkdir $root/opt
 
-set path=(. $root/bin $path); rehash
+set path=(. $root/bin $root/opt/bin $path); rehash
 
 something #PJT
 goto testing
@@ -181,7 +181,7 @@ pushd nemo_cvs >& /dev/null
   set log=$root/tmp/nemo.log 
   source AAA_SOURCE_ME  >& $log
   make bins >>& $log
-  echo NEMOBIN-COUNT: `ls $NEMOBIN|wc -l`
+  echo NEMO-COUNT: `ls $NEMOBIN|wc -l`
 popd >& /dev/null
 rehash
 
@@ -269,7 +269,7 @@ popd >& /dev/null
 rehash
 
 #  xyz stuff
-echo  `date` Compiling xyz from NEMO
+echo  `date` Installing xyz from NEMO
   set log=$root/tmp/xyz.log 
   $NEMO/src/scripts/nemo.vogl  >& $log
   if ($status) echo ERRORS compiling vogl, check $log
