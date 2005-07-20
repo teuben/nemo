@@ -110,11 +110,11 @@ endif
 echo  `date` Installing cvsutils
 tar zxf $pkg/tools/cvsutils-0.2.3.tar.gz
 pushd cvsutils-0.2.3 >& /dev/null
-popd >& /dev/null
   set log=$root/tmp/cvsutils.log
   ./configure --prefix=$root/opt   >& $log
   make                            >>& $log
   make install                    >>& $log
+popd >& /dev/null
 rehash
 
 #                                                   ruby
