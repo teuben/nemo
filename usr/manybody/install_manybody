@@ -12,12 +12,16 @@
 #  manybody_pkg/install_manybody cvs=0 pkg=`pwd`/manybody_pkg > & LOG1
 #  
 
+
+#  things that are 0 or 1
 set pgplot=1
-set gcc=0
 set falcon=1
 set cvs=0
 
-#  things that have versions
+#  things that have versions if non-zero, else won't be installed
+set gcc=0
+
+#  things that have versions and could in theory change
 set gsl=1.4
 set fewbody=0.21
 set glstarview=0.6-devel
@@ -26,14 +30,21 @@ set acs=lite-1.2.1
 set ruby=1.8.2
 set fltk=1.1.4
 
-set pkg=/home/manybody_pkg/
+#  root directory where all the tar ball packages live from which to install
+set pkg=`pwd`/manybody_pkg
 
+#  poor mans command line parser
 foreach _a ($*)
   set $_a
 end
 
-if (-d /astromake) then
-  source /astromake/astromake_start
+if (! -e $pkg/aarseth) then
+  echo pkg=$pkg does not seem to be a manybody_pkg directory
+  exit 1
+endif
+
+if ($?ASTROMAKE) then
+  source $ASTROMAKE/astromake_start
 endif
 
 set fltk=$pkg/fltk/fltk-1.1.4-source.tar.gz
@@ -82,8 +93,7 @@ testing:
 
 #                                                   gcc
 if ($gcc != 0) then
-  echo Installing gcc $gcc
-  set log=$root/tmp/gcc.log
+  echo Installing gcc $  set log=$root/tmp/gcc.log
   tar jxf $pkg/gcc/gcc-$gcc.tar.bz2
   pushd gcc-$gcc
     # a simple gcc. note f77 is replaced by g95 starting gcc4
