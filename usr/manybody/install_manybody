@@ -41,6 +41,8 @@ end
 if (! -e $pkg/aarseth) then
   echo pkg=$pkg does not seem to be a manybody_pkg directory
   exit 1
+else
+  echo `date` Using pkg=$pkg 
 endif
 
 if ($?ASTROMAKE) then
@@ -69,7 +71,6 @@ if ($cvs) then
   echo TAR: $fltk
   tar -C partiview/src -zxf $fltk
 else 
-  echo TAR: 
   mkdir manybody
   cd manybody
   tar zxf $pkg/nemo/nemo_cvs.tar.gz
@@ -87,13 +88,13 @@ mkdir $root/opt
 
 set path=(. $root/bin $path); rehash
 
-#PJT
+something #PJT
 goto testing
 testing:
 
 #                                                   gcc
 if ($gcc != 0) then
-  echo Installing gcc $  set log=$root/tmp/gcc.log
+  echo `date` Installing gcc $  set log=$root/tmp/gcc.log
   tar jxf $pkg/gcc/gcc-$gcc.tar.bz2
   pushd gcc-$gcc
     # a simple gcc. note f77 is replaced by g95 starting gcc4
@@ -103,8 +104,20 @@ if ($gcc != 0) then
   rehash
 endif
 
+#                                                   cvsutils
+
+echo  `date` Installing cvsutils
+tar zxf $pkg/tools/cvsutils-0.2.3.tar.gz
+pushd cvsutils-0.2.3
+popd
+  set log=$root/tmp/cvsutils.log
+  ./configure --prefix=$root/opt   >& $log
+  make                            >>& $log
+  make install                    >>& $log
+rehash
+
 #                                                   ruby
-echo Installing ruby
+echo  `date` Installing ruby
 pushd ruby-1.8.2
   set log=$root/tmp/ruby.log
   ./configure --prefix=$root/opt   >& $log
@@ -114,7 +127,7 @@ popd
 rehash
 
 #                                                   acs-lite
-echo Installing acs
+echo  `date` Installing acs
 pushd acs
   set log=$root/tmp/acs.log
   setenv ACSROOT `pwd`
@@ -132,7 +145,7 @@ popd
 rehash
 
 #                                                   starlab
-echo Installing starlab
+echo  `date` Installing starlab
 pushd starlab_cvs
   set log=$root/tmp/starlab.log
   ./install-starlab >& $log
@@ -142,7 +155,7 @@ popd
 rehash
 
 #                                                   fltk (internal build only)
-echo Installing fltk 
+echo  `date` Installing fltk 
 pushd partiview_cvs/src/fltk-1.1.4
   set log=$root/tmp/fltk.log
   ./configure >& $log
@@ -152,7 +165,7 @@ popd
 rehash
 
 #                                                   partiview
-echo Installing partiview
+echo  `date` Installing partiview
 pushd partiview_cvs/src
   set log=$root/tmp/partiview.log 
   ./configure --with-fltk=`pwd`/fltk-1.1.4 >& $log
@@ -162,7 +175,7 @@ pushd partiview_cvs/src
 popd
 
 #                                                   nemo
-echo Installing NEMO
+echo  `date` Installing NEMO
 pushd nemo_cvs
   set log=$root/tmp/nemo.log 
   source AAA_SOURCE_ME  >& $log
@@ -172,7 +185,7 @@ popd
 rehash
 
 # firstn
-echo Installing firstn
+echo  `date` Installing firstn
 pushd $NEMO/usr/aarseth/firstn
   set log=$root/tmp/firstn.log 
   make firstn >& $log
@@ -182,7 +195,7 @@ popd
 rehash
 
 # nbody6
-echo Installing nbody6
+echo  `date` Installing nbody6
 mkdir $NEMO/usr/aarseth/nbody6
 pushd $NEMO/usr/aarseth/nbody6
   set log=$root/tmp/nbody6.log 
@@ -193,7 +206,7 @@ popd
 rehash
 
 # GalactICS
-echo Installing galactICS
+echo  `date` Installing galactICS
 pushd $NEMO/usr/kuijken/GalactICS-exp/src
    set log=$root/tmp/gal.log
    make -f Makefile.nemo all install >& $log
@@ -202,7 +215,7 @@ popd
 rehash
 
 #                                                   GSL
-echo Installing gsl
+echo  `date` Installing gsl
 pushd $NEMO/local
   set log=$root/tmp/gsl.log 
   tar zxf $pkg/gsl/gsl-$gsl.tar.gz
@@ -217,7 +230,7 @@ popd
 rehash
 
 #                                                   fewbody, glstarview
-echo Installing fewbody,glstarview
+echo  `date` Installing fewbody,glstarview
 pushd $NEMO/usr/fregeau
   set log=$root/tmp/fewbody.log 
   tar zxf $pkg/fregeau/fewbody-$fewbody.tar.gz
@@ -237,7 +250,7 @@ pushd $NEMO/usr/fregeau
 popd
 rehash
 #                                                   HNbody (binary only)
-echo "Installing hnbody- for linux only"
+echo  `date` Installing hnbody- for linux only
 pushd $NEMO/usr
   tar zxf $pkg/hnbody/hnbody-$hnbody.tgz
   ln -s hnbody-$hnbody hnbody
@@ -248,14 +261,14 @@ popd
 rehash
 
 #                                                   ds9
-echo "Installing ds9 - for linux only"
+echo  `date` "Installing ds9 - for linux only"
 pushd $NEMOBIN
   tar zxf $pkg/ds9/ds9.tar.gz
 popd
 rehash
 
 #  xyz stuff
-echo Compiling xyz from NEMO
+echo  `date` Compiling xyz from NEMO
   set log=$root/tmp/xyz.log 
   $NEMO/src/scripts/nemo.vogl  >& $log
   if ($status) echo ERRORS compiling vogl, check $log
@@ -263,7 +276,7 @@ echo Compiling xyz from NEMO
   if ($status) echo ERRORS compiling xyz, check $log
 
 # EZ
-echo Installing EZ
+echo  `date` Installing EZ
   set log=$root/tmp/ez.log 
   tar zxf $pkg/EZ/EZ_3_0_2.tar.gz
   pushd EZ_3_0_2
@@ -276,7 +289,7 @@ echo Installing EZ
   popd
 
 # Tioga
-echo Installing Tioga
+echo  `date` Installing Tioga
   set log=$root/tmp/tioga.log
   tar zxf $pkg/Tioga/Tioga-1.0.A-linux.tar.gz
   pushd Tioga-1.0.A
@@ -286,7 +299,7 @@ echo Installing Tioga
 rehash
 
 # MMAS
-echo Installing MMAS
+echo  `date` Installing MMAS
   set log=$root/tmp/mmas.log
   tar zxf $pkg/mmas/mmas1.6.tar.gz 
   pushd mmas1.6
@@ -296,7 +309,7 @@ echo Installing MMAS
 rehash
 
 # FFTW v2, needed for starcrash
-echo Installing FFTW
+echo  `date` Installing FFTW
   set log=$root/tmp/fftw.log
   tar zxf $pkg/fftw/fftw-2.1.5.tar.gz
   pushd fftw-2.1.5
@@ -309,7 +322,7 @@ echo Installing FFTW
 rehash
 
 # StarCrash
-echo Instaling StarCrash
+echo  `date` Instaling StarCrash
   set log=$root/tmp/starcrash.log
   tar zxf $pkg/StarCrash/starcrash_serial.tar.gz 
   pushd serial
@@ -320,3 +333,4 @@ echo Instaling StarCrash
 rehash
 
 # -- end of install --
+echo  `date` Done.
