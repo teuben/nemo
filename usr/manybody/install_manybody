@@ -12,8 +12,6 @@
 #  manybody_pkg/install_manybody cvs=0 pkg=`pwd`/manybody_pkg > & LOG1
 #  
 
-
-
 #  things that are 0 or 1
 set pgplot=1
 set falcon=1
@@ -39,6 +37,9 @@ set sys=`uname -s | tr '[A-Z]' '[a-z]'`
 foreach _a ($*)
   set $_a
 end
+
+set version='$Id$'
+echo "$0 : version $version"
 
 if (! -e $pkg/aarseth) then
   echo pkg=$pkg does not seem to be a manybody_pkg directory
