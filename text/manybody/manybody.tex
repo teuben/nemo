@@ -12,8 +12,10 @@
 
 % epsfig doesn't support PDFLatex?
 \usepackage{epsfig}
-% goes this?
+% does this work in pdflatex
 % \usepackage{psfig}
+
+
 \usepackage{html}
 \usepackage{nemo}
 % \usepackage[english]{babel}
@@ -38,9 +40,10 @@
 % Douglas Heggie - Piet Hut - Jun Makino
        }
 
-\date{{\small Version 1.4} \\
+\date{{\small Version 1.5} \\
       {\small Summer 2005} \\
-      {\small Last document revised: \today} \\ \\
+      {\small Last document revised: \today} \\ 
+      {\small \tt URL: http://bima.astro.umd.edu/nemo/manybody/index.html} \\
      }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -125,6 +128,8 @@ page (this page). Small latex2html conversion problems remain.
 
 What lies in front of you is an accompanying guide to some of 
 the ``other'' software you might also find useful this week.
+It is still very much work in progress, with many sparse and
+unfinished sections.
 Although
 the main material from the book(s) {\it Moving Stars Around}, and now
 {\tt Kali},
@@ -135,9 +140,9 @@ software packages and programs that deal with the N-body problem have been
 assembled for you on a CD so you can use it on your laptop,
 and also made available on your local 
 cluster for the course of 
-this school\footnote{see {\tt /home/blabla/manybody}}.
+this school\footnote{see {\tt /data/week/sc2005}}.
 
-Most of this programs are within the NEMO  and Starlab packages, 
+Most of the programs are within the NEMO  and Starlab packages, 
 though a number of useful programs and smaller packages
 that are available elsewhere have been assembled here
 and made available via this {\it manybody} environment.
@@ -237,7 +242,8 @@ Buy your friendly teacher a Coffee or Beer
 I would like to thank my co-authors in spirit, 
 Douglas Heggie, Piet Hut, and Junichiro Makino for their contributions, 
 Simon Portegies Zwart for organising this school, and
-Christian Boily for the first school in Strasbourg.
+Christian Boily for the previous school in Strasbourg, where
+much of this material was written.
 In the true spirit of open source, 
 numerous authors have contributed their software, which you can find on
 the CD. Hopefully we will be able to distill this on the reader too.
@@ -351,6 +357,7 @@ example running the code for two crossing times on a self-generated 16-body
 Plummer sphere configuration
 
 \footnotesize\begin{verbatim}
+   examples/ex1
    # sample input parameter file
 1% cat $NEMO/usr/aarseth/firstn/input
 16 12.0 0.0 1.0 2.0
@@ -396,6 +403,7 @@ you to use the full version, {\tt nbody1} (see below).
 
 
 \footnotesize\begin{verbatim}
+   examples/ex2
    # remind myself to the valid command line parameters and defaults
 1% mkplummer help=
 mkplummer out=??? nbody=??? mfrac=0.999 rfrac=22.8042468 seed=0 time=0.0 zerocm=t 
@@ -601,6 +609,7 @@ the motion of particles in self-gravitating systems where the total mass
 is dominated by a single object; it is based on 
 {\it symplectic integration} techniques 
 in which two-body Keplerian motion is integrated exactly. 
+For comparison, 
 Bulirsch-Stoer and Runge-Kutta integrators are also available.
 Options include choices of coordinate system, division of particles into classes 
 based on mass scales, order of accuracy, and others. 
@@ -712,12 +721,14 @@ to run on the GRAPE hardware, which of course speeds up the computations
 substantially.
 
 \footnotesize\begin{verbatim}
+    examples/ex4
     # generate a Plummer sphere with 256 bodies, again with reproducable seed
  1% makeplummer -n 100 -s 123 > k100.in
   rscale = 0.979095
   com_pos = 0  0  0
 
     # integrate to T=100, output steps D=10
+    # notice the csh method of splitting stdout and stderr
  3% (kira -t 100 -D 0.2 < k100.in > k100.out) >& k100.log
 
     # convert to NEMO snapshots
@@ -731,10 +742,14 @@ substantially.
  7% nbody00 k100.indat k100.outdat eta=0.01 deltat=0.2 tcrit=100
  8% snapmradii k100.outdat log=t | tabplot - 1 2:10 0 100 -1 1 line=1,1
 
- 9% hackforce k100.dat - | snapcenter - - "-phi*phi*phi" | 
-    snapmradii - log=t | tabplot - 1 2:10 0 100 -1 1 line=1,1 xlab=Time ylab="log(M(r))"
-10% hackforce k100.outdat - | snapcenter - - "-phi*phi*phi" | 
-    snapmradii - log=t | tabplot - 1 2:10 0 100 -1 1 line=1,1 xlab=Time ylab="log(M(r))"
+ 9% hackforce k100.dat - |\
+      snapcenter - - "-phi*phi*phi" |\ 
+      snapmradii - log=t |\
+      tabplot - 1 2:10 0 100 -1 1 line=1,1 xlab=Time ylab="log(M(r))"
+10% hackforce k100.outdat - |\
+      snapcenter - - "-phi*phi*phi" |\
+      snapmradii - log=t |\
+      tabplot - 1 2:10 0 100 -1 1 line=1,1 xlab=Time ylab="log(M(r))"
 
 
 \end{verbatim}\normalsize
@@ -742,8 +757,8 @@ substantially.
 
 \begin{figure}[htb]
 \plottwo{kira1.ps}{kira2.ps}
-\caption{Lagrangian radii for kira (left, 10\%) and nbody0 (right, 11\%).
-}
+\caption[Lagrangian radii for kira and nbody0]
+{Lagrangian radii for kira (left, 10\%) and nbody0 (right, 11\%).}
 \label{f:kira}
 \end{figure}
 
@@ -756,17 +771,18 @@ The code is basically $\mathcal{O}(N \log{N})$, which makes is very fast
 for large N compared to a direct full N-body code.
 The earliest version also
 includes the curious self-gravity bug which can occur for large opening angles
-under peculiar conditions (see Salmon \& Warren 1993).
+under peculiar conditions (see Salmon \& Warren 1994).
 The original version around which NEMO was built is still available as
 {\tt hackcode1}. In this example we'll set up a head-on collision between
 two Plummer spheres:
 
 \footnotesize\begin{verbatim}
+   examples/ex5
    # create our usual reproducable plummer sphere
 1% mkplummer p1 512 seed=123
 2% mkplummer p2 512 seed=456
 
-   # stack them , but offset such that they are colliding
+   # stack them , but offset them in phase space such that they are colliding
 3% snapstack p1 p2 p3 deltar=5,0,0 deltav=-1.5,0,0 
 
    # integrate it for a little while
@@ -815,7 +831,8 @@ Worst fractional energy loss dE/E = (E_t-E_0)/E_0 = 0.0602005 at T = 3.03125
 
 \begin{figure}[h!]
 \plottwo{coll.ps}{diag.ps}
-\caption{Collision between two Plummer spheres ({\tt hackcode1}) 
+\caption[Collision between two Plummer spheres]
+{Collision between two Plummer spheres ({\tt hackcode1}) 
 and the diagnostics overview ({\tt snapdiagplot})
 }
 \label{f:coll}
@@ -842,6 +859,7 @@ as before, the colliding Plummer spheres:
 
 
 \footnotesize\begin{verbatim}
+    examples/ex6
     # use the data from the previous example in hackcode1
  1% gyrfalcON p3 p3.outg tstop=10 step=0.2 hmin=5
 # ------------------------------------------------------------------------------------
@@ -865,6 +883,28 @@ as before, the colliding Plummer spheres:
  9.9688     -0.1306838    0.80448 0.031267   2.2e-08  0      0.02       0.02   5.17001
  10         -0.1307145    0.80367 0.031267   2.3e-08  0      0.01       0.01   5.18001
 
+# ---------------------------------------------------------------------------------------------------------------------
+# "gyrfalcON p3 p3.outg tstop=10 step=0.2 hmin=5 VERSION=2.1Igcc-3.2"
+#
+# run at  Mon Jul 18 20:42:42
+#     by  "teuben"
+#     on  "nemo"  (on battery)
+#     pid  20971
+#
+#    time       E=T+V        T          V_in        W         -2T/W     |L|      |v_cm|   tree  grav  step  accumulated
+# ---------------------------------------------------------------------------------------------------------------------
+ 0.0000     -0.1317041    1.0572     -1.1889     -1.1855     1.7835  0.031519   4.7e-10   0.00  0.08  0.09   0:00:00.09
+ 0.031250   -0.1316010    1.0586     -1.1902     -1.1867     1.7840  0.031522   1.2e-09   0.00  0.06  0.06   0:00:00.23
+ 0.062500   -0.1315449    1.0600     -1.1916     -1.1883     1.7841  0.031525   9.3e-10   0.00  0.06  0.06   0:00:00.32
+ 0.093750   -0.1314929    1.0618     -1.1933     -1.1893     1.7857  0.031526   1.0e-09   0.00  0.05  0.06   0:00:00.40
+
+...
+ 9.8750     -0.1310892    0.52518    -0.65627    -0.65459    1.6046  0.031256   2.1e-08   0.00  0.06  0.06   0:00:26.14
+ 9.9062     -0.1310819    0.52443    -0.65551    -0.65404    1.6037  0.031249   1.9e-08   0.00  0.06  0.06   0:00:26.22
+ 9.9375     -0.1310787    0.52393    -0.65501    -0.65335    1.6038  0.031241   1.8e-08   0.00  0.06  0.06   0:00:26.31
+ 9.9688     -0.1310600    0.52359    -0.65465    -0.65291    1.6039  0.031233   1.8e-08   0.00  0.06  0.06   0:00:26.39
+ 10.000     -0.1311072    0.52330    -0.65440    -0.65277    1.6033  0.031227   1.8e-08   0.00  0.06  0.06   0:00:26.47
+
 \end{verbatim}\normalsize
 
 As you can see, Dehnen's code is quite a lot faster. As for accuracy though, we leave
@@ -873,7 +913,8 @@ and thus conserves total linear momentum unlike the BH86 treecode.
 
 \smallskip
 There are some C++
-compiler issues with this code, though  gcc 3.2.2 is known to work well.
+compiler issues with this code, though  gcc 3.2.2 is known to work well. You will
+find this compiler version available in the {\it manybody} distribution.
 
 \section{superbox}
 
@@ -903,7 +944,9 @@ stability, check orbit theory etc.
 
 \footnotesize\begin{verbatim}
 
-1% quadcode p1024.in p1024.out4 tstop=10
+1% mkplummer p1024.in 1024
+
+2% quadcode p1024.in p1024.out4 tstop=10
 
        nbody        freq       eps_r       eps_t        mode       tstop
         1024     64.0000      0.0500      0.0700           3       10.00
@@ -926,11 +969,11 @@ stability, check orbit theory etc.
 
 
 
-2% snapdiagplot p1024.out4
+3% snapdiagplot p1024.out4
 321 diagnostic frames read
 Worst fractional energy loss dE/E = (E_t-E_0)/E_0 = -0.000674741 at T = 6.03125
 
-3% snapmradii p1024.out4 | tabplot - 1 2:10 line=1,1
+4% snapmradii p1024.out4 | tabplot - 1 2:10 line=1,1
 
 \end{verbatim}\normalsize
 
@@ -942,6 +985,8 @@ Hernquist \& Ostriker (1992) deviced a code termed the
 Hernquist, with a NEMO wrapper program {\tt runscfm}.
 
 \footnotesize\begin{verbatim}
+  examples/ex8 : appears not to work anymore for FC4:gcc4? gcc3 ok?
+  #
  2% runscfm `pwd`/p1024.in p1024.out2 dtime=1.0/64.0 nsteps=640 noutbod=16
 ### Warning [runscfm]: Resolving partially matched keyword dt= into dtime=
 snapprint /tmp/p1024.in m,x,y,z,vx,vy,vz header=t > SCFBI
@@ -970,7 +1015,7 @@ run directory.
 Sellwood (1997) contributed this 3-dimensional cartesian code to NEMO. Is uses the
 Fourier Analysis/Cyclic Redundancy (FACR) method, pioneered by
 Hockney (1965, 1970) and James (1977) for galactic dynamics. Running
-the program has some restrictions, and a NEMO frontend {\tt rungalaxy}
+the program itself has some restrictions, and a NEMO frontend {\tt rungalaxy}
 is available to simplify running this code:
 
 \footnotesize\begin{verbatim}
@@ -996,7 +1041,8 @@ x y z vx vy vz
 
 \begin{figure}[htb]
 \plotone{nt.ps}
-\caption{Code performance - to be filled in...}
+\caption[Code Performances]
+{Code performances - to be filled in...}
 \end{figure}
 
 
@@ -1088,6 +1134,8 @@ Also:
       Sellwood
       Dehnen
       Zhan      astro-ph/0507237
+
+      Athanassoula?
 
  - relaxation:
       Hernquist & Barnes (1990) : 
@@ -1252,7 +1300,8 @@ the initial virial ratio, so no external scaling is needed.
 
 \begin{figure}[htb]
 \plottwo{s1xy.ps}{s1xz.ps}
-\caption{Positions of an N=1000 cold collapse at T=0, 1.5 (roughly
+\caption[Cold Collapse of an N=1000 system]
+{Positions of an N=1000 cold collapse at T=0, 1.5 (roughly
 the first collapse), 4.0 and 10.0 in an XY projection (left) 
 and an XZ projection (right).}
 \label{f:s1xy}
@@ -1317,7 +1366,8 @@ xlab=Time "ylab=log(M(r))"
 
 \begin{figure}[htb]
 \plottwo{s1a.ps}{s1b.ps}
-\caption{Two Lagrangian Radii calculations: one without centering the
+\caption[Lagrangian Radii for a Cold Collapse]
+{Two Lagrangian Radii calculations: one without centering the
 snapshot (left), and one with (right). Notice that the vertical axis is
 logarithmic.}
 \end{figure}
@@ -1489,13 +1539,31 @@ snapadd pp1.in,ps4.in  detonate.in
 
 \end{verbatim}\normalsize  
 
+\section{Accuracy of a code}
+
+Use the van Albada and van Gorkum technique to integrate a code
+forwards, storing many snapshots. For each snapshot you then integrate
+backwards to t=0 (some code allow dt<0, others needs to be
+rescaled v = -v) and comparing the two snapshots with snapcmp.
+Plot the results as function of T. What kind of bahavior do we see?
+Liapunov?  Which codes are ``good'', which are bad, and can we 
+understand this?
+
+
+\section{Collisionless?}
+
+Athanassoula - papers on importance of resonances, live bars. What is a good N to do
+galactic dynamics. Martin Weinberg now claims $10^7-10^8$. 
+Also check the approach Romeo et al. (2003) took using wavelets.
+
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter                {Visualization}
 
 Some brief but wise words about packages we all have some experience with.
-Obviously its a big ugly world out there, so there is a lot more under the
+Obviously its a big ugly world out there, and there is a lot more under the
 sun than this.
 
 \section{NEMO}
@@ -1555,6 +1623,8 @@ format, dubbed {\tt tdyn}, can be produced by {\tt kira} in order for
 {\tt partiview} to seamlessly zoom in space {\bf and} time. NEMO has
 a conversion program {\tt snapspecks}.
 
+\section{Tioga}
+
 \section{glstarview}
 
 Comes with Fregeau's code. Data from the integration can directly be piped
@@ -1596,6 +1666,13 @@ some of the existing codes.
 Great to create photo-realistic images.
 
 {\tt http://www.povray.org/}
+
+\section{spiegel}
+
+As part of the gravitySimulator project at RIT, visualization software using Java
+and Java3D is being developed.
+
+\verb+http://www.cs.rit.edu/~grapecluster/+
 
 \section{visit}
 
@@ -1722,6 +1799,11 @@ Hurley et al.- astro-ph/0507239
 Hut, P. \& Makino, J., 2003  {\it Moving Stars Around} :
 {\bf acs\_v1\_web.pdf}
 
+Joshi, Kriten J.; Rasio, Frederic A.; Portegies Zwart, Simon - 2000 -
+{\it Monte Carlo Simulations of Globular Cluster Evolution. I. Method and Test Calculations},
+ApJ 540, 969: 
+{\bf 2000ApJ...540..969J.pdf}
+
 Khalisi, E., \& Spurzem, R., 2003 - {\it NBODY6 : Features of the computer code}.
 (last update: 2003, May 02)
 
@@ -1734,6 +1816,10 @@ Merrifield \& Binney
 
 Lecar - {\it The Standard IAU 25-body problem} - 1968, Bull.Astr. 3, 91. 
 
+Portegies Zwart, Simon F.; Baumgardt, Holger; Hut, Piet; Makino, Junichiro; McMillan, Stephen L. W. -
+2004 - {\it Formation of massive black holes through runaway collisions in dense young star clusters}
+Nature 428, 724 (astro-ph/0402622): {\bf 0402622.pdf}
+
 Rauch, K. \& Hamilton, D. - 2005 - in preparation. See also
 {\tt http://janus.astro.umd.edu/HNBody}
 
@@ -1742,8 +1828,9 @@ Romeo, Alessandro B.; Horellou, Cathy; Bergh, Jöran - 2003 -
 {\it N-body simulations with two-orders-of-magnitude higher performance using wavelets}
 MNRAS, 342, 337 : {\bf 2003MNRAS.342..337R.pdf}
 
-Salmon, J.K. \& Warren, M.S. - 1993 -
-{\it Skeletons from the Treecode Closet} J. of Comp. Phys.: {\bf skeletons.ps}
+Salmon, J.K. \& Warren, M.S. - 1994 -
+{\it Skeletons from the Treecode Closet} J. of Comp. Phys, {\bf 111}, 136:
+{\bf skeletons.ps}
 
 Sellwood, J.A. - {\it The art of N-body building} - 1987, Ann.Rev A\&A, 25, 151 : 
 {\bf 1987ARA+A..25..151S.pdf}
@@ -1753,9 +1840,20 @@ Sellwood (1997, in {\it Computational Astrophysics}
 ed Clarke \& West,  ASP  Conf  series  v123, p215) - astro-ph/9612087
 {\bf 9612087.ps}
 
+Spinnato, Piero F.; Fellhauer, Michael; Portegies Zwart, Simon F. - 2003 -
+{\it The efficiency of the spiral-in of a black hole to the Galactic Centre} :
+MNRAS 244, 22S.: {\bf 2003MNRAS.344...22S.pdf}.
+
 Springel V., Yoshida N., White S. D. M., 2001, New Astronomy, 6, 51. 
 {\it GADGET: A code for collisionless and gasdynamical cosmological simulations}:
 {\bf gadget-code-paper.pdf}.
+
+Takahashi, Koji; Portegies Zwart, Simon F. - 2002 -
+{\it The Evolution of Globular Clusters in the Galaxy} - ApJ 535, 759:
+{\bf 2000ApJ...535..759T.pdf}
+
+Theis, C. {it  Two-body relaxation in softened potentials} - 1998, Astron.Astroph. 330, 1180:
+{\bf theis98.pdf}.
 
 von Hoerner, S. - 1960 - Z.f.Astrophys. 50, 184.
 
@@ -1766,7 +1864,7 @@ White,S.D.M. - 1983 - Ap.J. 274, 53 : {\bf 1983ApJ...274...53W.pdf}
 
 White \& Barnes - 1984 - {\bf 1984MNRAS.211..753B.pdf}
 
-Zhan - astro/ph 05
+Zhan - astro-ph/0507237
 
 \section*{URLs}
 
@@ -1787,22 +1885,48 @@ http://www.ids.ias.edu/~starlab/                          Starlab website
 % \part{Appendices}
 \chapter                {Setting Up Your Account}
 
-\section{Setup}
+\section{Linux Lab setup}
+
+For those working on the Linux Lab machines, here is some essential 
+information how to login and setup your account:
+
+A common data directory {\tt /data/week/sc2005} is available on all 16
+linux lab workstation. These machines are 
+named {\tt elel1}, {\tt elel2} ... {\tt elel16}. 
+These are all currently running {\tt CERN Scientific Linux 3.0.5}.
+
+There are two usernames available per workstation, named after the number
+of the workstation, with the letter {\tt a} and {\tt b} appended:
+for {\tt elel1} we have users {\tt sc01a} and {\tt sc01b},
+up to 
+users {\tt sc16a} and {\tt sc16b} for {\tt elel16}. The password is
+the same for all, and by now you should have remembered it
+\footnote{Reminder: ``{\tt echo \$data:t}'' for csh users, ``{\tt basename \$data}''
+for bash}
+
+As of this writing, printing is still a complicated matter, and probably 
+will depend on the type
+of machine you have. For laptop users, be ready to extract your ethernet hardware
+address (perhaps both wired and wireless) in order to get printing done.
+
 
 Here it is assumed that you are using 
-the C-shell ({\tt csh} or {\tt tcsh})\footnote{Bourne shell version not yet available,
-use {\tt chsh} to change your shell if need be}. 
-Easiest is to add the following 
-command to your {\tt .cshrc} file:
+the C-shell ({\tt csh} or {\tt tcsh}) or Bourne Shell  ({\tt bash}).
+Easiest is to add the following  command to your {\tt .cshrc} file
+for csh:
 
 \begin{verbatim}
-    source /home/blabla/manybody/manybody_start
+    source /data/week/sc2005/manybody/manybody_start.csh
+\end{verbatim}
+or {\tt .bashrc} for bash:
+\begin{verbatim}
+    source /data/week/sc2005/manybody/manybody_start.sh
 \end{verbatim}
 
-This will add the NEMO and STARLAB packages to your environment, and
+This will add the NEMO and STARLAB packages to your environment, as well as
 a number of other tools. It will also give you access to
 a modest amount of source code that has not been compiled, and a number
-of papers drawn from ADS and astro-ph and placed in {\tt manybody/papers}.
+of papers drawn from ADS and astro-ph and placed in {\tt \$MANYBODY/papers}.
 If you want to install/copy this onto your laptop or home machine, please
 see Appendix B.
 
@@ -1812,11 +1936,11 @@ To verify the installation was done correct, here are some quick
 one liners, without much of an explanation. Some of them will bring up
 a picture. Most commands, except where noted, take a few seconds. If
 you prefer, you can also execute the {\tt quick\_test} script in
-the {\tt manybody} root directory.
+the {\tt \$MANYBODY} root directory.
 \begin{enumerate}
 
 \item
-{\tt firefox /home/blabla/manybody/index.html} : local HTML 
+{\tt firefox \$MANYBODY/index.html} : local HTML 
 
 \item
 {\tt mkplummer p1 1000} : NEMO, create a Plummer sphere
@@ -1894,23 +2018,28 @@ Left mouse down rotates. Right mouse down zooms. $>>$ button starts movie.
 % \part{Appendices}
 \chapter                {manybody: N-body Compute Toolbox}
 
-\section{blabla.astro.uva.nl}
 
-The directory {\tt /home/blabla/manybody} on  {\tt blabla.astro.uva.nl} 
+
+\section{Linux Cluster}
+
+The directory {\tt /data/week/sc2005} on the 16 Linux Lab machines
 contains all the {\it manybody} software (and then some)  
 we are discussing at this school. We have
 also made a CD available, from which you should be able to reproduce this
-toolbox. Some details on this are described in the next sections.
+toolbox on your own laptop or workstation at home. 
+Some details on the installation of this are described in the next sections.
 
-First a overview of the {\it manybody} hierarchy:
+First a overview of the {\it manybody} hierarchy under {\tt /data/week/sc2005}:
 
 \begin{verbatim}
 manybody/                       root directory
-    ACS/                        code from the "Moving Star Around" book
-    nemo/                       NEMO package
-    starlab/                    Starlab package
-    partiview/                  partiview visualization 
-    starcluster/                starlab interface to web based programs
+    opt/                        contains a {bin,lib,include,...} tree for a private --prefix
+    acs/                        kali code
+    nemo_cvs/                   NEMO package
+    starlab_cvs/                Starlab package
+    partiview_cvs/              partiview visualization 
+    starcluster_cvs/            starlab interface to web based programs
+    fftw-2.1.5/                 fftw library needed 
     papers/                     ADS and astro-ph papers (PDF and PS mostly)
 
 manybody_pkg/                   (mostly) tar balls of codes 
@@ -1924,11 +2053,11 @@ In the root directory of your CD you will find the following files and directori
 
 \begin{verbatim}
     README                a small intro
-    install_rh9           shell script that should install binary "manybody"
+    install_fc4           shell script that should install binary "manybody"
     index.html            top level index to all HTML in this tree
     quick_test            shell script to test MANYBODY (see Appendix A.2)
 
-    manybody_rh9.tar.gz   RH9 binaries of manybody, without the papers
+    manybody_fc4.tar.gz   FC4 binaries of manybody, without the papers
     papers.tar.gz         astro-ph and ADS paper for the manybody material
 
     manybody_pkg/         directory with all sources in case of re-install
@@ -1936,20 +2065,22 @@ In the root directory of your CD you will find the following files and directori
 
 \section{Installation}
 
-If your linux system is not Redhat9.0
+If your linux system is not Fedora Core 4
 or compatible, some recompilation may be needed. The script
 {\tt install\_manybody} should guide you through this. You can find a copy
 of this in either the {\tt manybody} directory, or its original CVS location,
 {\tt \$NEMO/usr/manybody}.
 
 \footnotesize\begin{verbatim}
-  1% tar zxf /mnt/cdrom/manybody_rh9.tar.gz
+  1% tar zxf /mnt/cdrom/manybody_fc4.tar.gz
   2% source manybody/manybody_start
   3% tar zxf -C manybody /mnt/cdrom/papers.tar.gz
 
 \end{verbatim}\normalsize
 
-if you need to do a source install, the following should be your starting point
+if you need to do a source install, the following should be 
+your starting point\footnote{the root name {\tt /mnt/cdrom} may
+very well be different on your machine}
 
 \footnotesize\begin{verbatim}
   4% /mnt/cdrom/install_manybody pkg=/mnt/cdrom/manybody_pkg
@@ -1958,16 +2089,17 @@ if you need to do a source install, the following should be your starting point
 but more than likely some tweaking is needed if you have missing or
 incompatible libraries or tools. Some of this is noted in Appendix I.
 
-For reference, this install took about 27 minutes on my Pentium 1.6GHz based
+For reference, the old install took about 27 minutes on my Pentium 1.6GHz based
 laptop.
 
 \section{Importing Packages into manybody}
 
-Much of the available open source software we use, and even those who don't, use
-the {\tt autotools} set to {\tt configure}, {\tt make} and {\tt install} their
+Much of the available open source software we use, use
+{\it autotools} to {\tt configure}, {\tt make} and {\tt install} their
 software on the users system. Where exactly this software is going to be located,
-is free to the user to decide. On most unix-based system the {\tt \usr},
-and {\tt /usr/local}, {\tt /opt} or {\tt /sw} (e.g. Fink) are used. As long
+is free to the user to decide. On most Unix-based system the {\tt usr},
+{\tt /usr/local}, {\tt /opt} or {\tt /sw} (e.g. Fink on MacOSX) are used for this.
+As long
 as the user then puts the respective {\tt ''bin''} directory in their search
 path, and perhaps the respective {\tt ''lib''}  directory in their 
 shared library search path, all is well.
@@ -1978,7 +2110,7 @@ cannot assume that, so we choose a similar approach whereby libraries, programs
 and their ancillary material are placed in a directory under user control.
 
 
-So, for almost all simple packages we can use the kinds of commands
+So, for almost all such packages we can use these kinds of commands:
 
 \footnotesize\begin{verbatim}
 
@@ -1990,7 +2122,7 @@ So, for almost all simple packages we can use the kinds of commands
 
 \end{verbatim}\normalsize
 
-and for packages that depend on these, 
+and for packages that depend on these, we would use
 
 \footnotesize\begin{verbatim}
 
@@ -2021,10 +2153,11 @@ cfitsio         nemo (optional)
 
 
 fftw       3.0.1           http://www.fftw.org/ 
+           2.1.5           (for Fregeau's code)hih
 fltk	   1.1.4
 hdf        4.2r0
-plplot     5.x          http://plplot.sourceforge.net/   
-pgplot     5.5.2 (via cvs.astro.umd.edu)
+plplot     5.5.3           http://plplot.sourceforge.net/   
+pgplot     5.5.2          (w/ patches via cvs.astro.umd.edu)
 gsl        1.4
 
 ruby	   1.8.2
@@ -2142,28 +2275,46 @@ CVS sandbox needs to be updated. A simple command: {\tt cvs update}.
 \item[{\tt P}] You might see this when you {\tt cvs update} a file, instead
 of Updating the file, it is patched, taking much less bandwith.
 
-\item[{\tt M}] This means your version of the file is new then the servers, 
+\item[{\tt M}] This means your version of the file is newer than on
+the server, 
 and as long as you have write permission on the server, it can be returned
 with a simple command: {\tt cvs commit}.
 
 \item[{\tt C}] This is the more complicated case of a conflict. Both your local
 version, as well as the server version, have been modified independantly.
 Most of the time CVS is actually able to make a version that merges both
-modifications, though the developer should check if the resulting code
-is correct. The correct order to fix this is a three step process: the
+modifications, though the developer should now check if the resulting code
+is correct. The correct CVS order to fix this is a three step process: the
 code is updated, then edited and checked for correctness, and finally
 committed back to the repository:
 
 \footnotesize\begin{verbatim}
   1% cvs update mkplummer.c
-  2% emacs mkplummer.c
+  2% make/edit/check/debug mkplummer.c
   3% cvs commit mkplummer.c
 \end{verbatim}\normalsize
 
 
-
-
 \end{enumerate}
+
+\section{cvsutils}
+
+In your {\it manybody} environment you will find a few perl scripts
+(dubbed {\tt cvsutils})\footnote{See {\tt http://www.red-bean.com/cvsutils/}}
+that help with some tedious CVS interactions, notably some tools when
+you are not online. Another common operation is to change the CVS/Root
+(where your local {\tt \$CVSROOT} lives) from anonymous to somebody with
+write permission, viz.
+
+\footnotesize\begin{verbatim}
+  1% cd $NEMO
+  2% cat CVS/Root
+  :pserver:anonymous@cvs.astro.umd.edu:/home/cvsroot
+  3% cvschroot :pserver:pteuben@cvs.astro.umd.edu:/home/cvsroot
+\end{verbatim}\normalsize
+
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %\cleardoublepage
@@ -2242,7 +2393,7 @@ It actually does this by tracking down the source code
 and displaying the relevant help section of the source code.
 
 \item
-data is mostly stored in special ascii files, which a hierarchical structure
+data is mostly stored in special ascii files, with a hierarchical structure
 
 \item
 in Unix tradition data is piped from one program to the next, and unlike
@@ -2273,7 +2424,8 @@ the initial conditions:
 % ok, this left figure is the wrong one
 \begin{figure}[t]
 \plottwo{pyth0.ps}{pyth1.ps}
-\caption{Initial conditions for the Pythagoran problem (left)
+\caption[Pythagorean problem]
+{Initial conditions for the Pythagorean problem (left)
 and the orbit of the intermediate mass (M=4) particle starting
 at (x,y) = (-2,-1).}
 \end{figure}
@@ -2345,7 +2497,8 @@ Energy conservation: 1.33895e-05
 
 \begin{figure}[t]
 \plottwo{log1.ps}{log2.ps}
-\caption{Orbits in a logarithmic potential:
+\caption[Orbits in a logarithmic potential]
+{Orbits in a logarithmic potential:
 Initial conditions y=0.1 result in a box orbit (left), 
 y=0.2 in a loop orbit (right). See also Figure 3-7 in BT87}
 \label{f:log}
@@ -2353,7 +2506,7 @@ y=0.2 in a loop orbit (right). See also Figure 3-7 in BT87}
 
 \section{Barred Galaxy}
 
-Here is an image of a simulated barred galaxy, overlayed with a contour diagram
+Here we produce an image of a simulated barred galaxy, overlayed with a contour diagram
 of a smoothed distribution. First a barred galaxy is created by
 integrating an unstable exponential disk for a few rotation times.
 
@@ -2407,10 +2560,11 @@ Worst fractional energy loss dE/E = (E_t-E_0)/E_0 = 0.00255499 at T = 5
 % ok, this left figure is the wrong one
 \begin{figure}[t]
 \plottwo{p12.ps}{p23.ps}
-\caption{the making of a Barred Galaxy. On the left the particle distribution
+\caption[A Barred Galaxy]
+{the making of a Barred Galaxy. On the left the particle distribution
 is overlayed with a 0.1 beam smeared density distribution. On the right
 the overlayed contours are that of the Y velocities. Notice the S shaped
-contours in the bar region, due to the elliptical orbits.
+contours in the bar region, due to the elliptical orbits along the bar.
 }
 \end{figure}
 
@@ -2443,6 +2597,7 @@ we typically use one-liners
     stream istr = stropen(getparam("in"),"r");
 \end{verbatim}\normalsize
 which fatal error in the common cases of ``not found'', ``no permission'' etc.etc.
+{\tt stropen} also takes care of special files such as {tt ``-''} and {\tt ``.''}.
 
 \item
 Instead of different types of {\tt printf()} statements, use
@@ -2493,7 +2648,7 @@ Sometimes special rules are needed for binaries.
 If you want the program to be part of the standard distribution, add
 an entry to the {\tt Testfile}, so it gets built when NEMO is installed
 and runs the testsuite.
-Also test if {\tt mknemo}
+Also test, from {\tt \$NEMO}, if {\tt mknemo}
 does not get confused about naming conventions before the program
 is committed to CVS.
 
@@ -2511,8 +2666,8 @@ previous comments on Makefile, Testfile and mknemo.
 Updates to the code can either be done via releases (tar files or
 tagged CVS) or in a ``continuum'' (CVS).
 
-\section{NEMO (version 3.2.3}
-After installation, it can (and will) occur that it appears 
+\section{NEMO (version 3.2.3)}
+After installation, it will occur that it appears 
 as if you have a missing program in NEMO, despite that a 
 manual page exists.
 
@@ -2564,7 +2719,7 @@ Update the code, recompile the library and the recompile the program:
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %\cleardoublepage
-\chapter                {Libaries}
+\chapter                {Libraries}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -2575,8 +2730,8 @@ Compiling {\tt manybody} can be a chore, since it contains many packages
 and modules, each of which can have some dependancies on the system.
 If you are running linux, one of the most common things not installed
 is the development libraries for X windows and perhaps a few other libraries.
-For rh9 this would be {\tt  XFree86-devel}. Mesa is another often missed
-package (needed for partiview).
+For RH9 this would be {\tt  XFree86-devel}, for FC4 {\tt xorg-devel}.
+Mesa is another often missed package (needed for partiview).
 
 \section{Known Problems/ToDo's}
 \begin{enumerate}
@@ -2592,11 +2747,6 @@ nbody4 is actually not available
 
 \item
 The {\tt gman} command could be be missing on your machine. It's very nice to have!
-
-\end{enumerate}
-
-\section{ToDo}
-\begin{enumerate}
 
 \item
 Q=0 for runbody1 when in= is used...   bug in the wrapper interface
@@ -2637,7 +2787,8 @@ python, ruby
 
 \section{Unknown Problems}
 
-This section merely exists to not confuse Piet.
+This section merely exists to not confuse Piet, and is otherwise
+left to your investigation.
 
 \end{document}
 
