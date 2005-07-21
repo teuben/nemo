@@ -145,6 +145,7 @@ rehash
 
 #                                                   starlab
 echo  `date` Installing starlab
+ln -s starlab_cvs starlab
 pushd starlab_cvs >& /dev/null
   set log=$root/tmp/starlab.log
   ./install-starlab >& $log
@@ -155,6 +156,7 @@ rehash
 
 #                                                   starcluster
 echo  `date` Installing starcluster
+ln -s starcluster_cvs starcluster
 pushd starcluster_cvs >& /dev/null
   set log=$root/tmp/starcluster.log
   make >& $log
@@ -168,6 +170,7 @@ rehash
 #                                                   fltk (internal build only)
 echo  `date` Installing fltk 
 tar -C partiview_cvs/src -zxf $pkg/fltk/fltk-1.1.4-source.tar.gz
+ln -s partiview_cvs partiview
 pushd partiview_cvs/src/fltk-1.1.4 >& /dev/null
   set log=$root/tmp/fltk.log
   ./configure >& $log
@@ -188,6 +191,7 @@ popd >& /dev/null
 
 #                                                   nemo
 echo  `date` Installing NEMO
+ln -s nemo_cvs nemo
 pushd nemo_cvs >& /dev/null
   set log=$root/tmp/nemo.log 
   source AAA_SOURCE_ME  >& $log
@@ -301,8 +305,28 @@ echo  `date` Installing EZ
     else
        # use: intel: ifort -w -132
        # or:  gnu:   g95/f95 -ffixed-line-length-132
-       (cd make; make EZ COMP="ifort -w -132") >& $log
-       if ($status) echo ERRORS compiling EZ, check $log
+       which ifort >& status
+       if ($status) then
+         which f95 >& status
+	 if ($status) then
+	    which g95 >& status
+	    if ($status) then
+	      echo "ERROR: no known fortran compiler for EZ available (ifort, f95 g95)"
+	    else
+	       echo EZ: using g95
+	       (cd make; make EZ COMP="g95 -ffixed-line-length-132") >& $log
+	       if ($status) echo ERRORS compiling EZ, check $log
+	    endif
+	 else
+	     echo EZ: using f95
+            (cd make; make EZ COMP="f95 -ffixed-line-length-132") >& $log
+            if ($status) echo ERRORS compiling EZ, check $log
+	 endif
+       else
+	  echo EZ: using ifort
+          (cd make; make EZ COMP="ifort -w -132") >& $log
+          if ($status) echo ERRORS compiling EZ, check $log
+       endif
     endif
   popd >& /dev/null
 
