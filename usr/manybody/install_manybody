@@ -159,7 +159,7 @@ pushd starcluster_cvs >& /dev/null
   set log=$root/tmp/starcluster.log
   make >& $log
   if ($status) echo ERRORS compiling starcluster, check $log
-  make install prefix=$STARLAB_INSTALL_PATH >& $log
+  make install prefix=$STARLAB_INSTALL_PATH >>& $log
   if ($status) echo ERRORS installing starcluster, check $log
   echo STARLAB+CLUSTER-COUNT: `ls $STARLAB_INSTALL_PATH/bin|wc -l`
 popd >& /dev/null
