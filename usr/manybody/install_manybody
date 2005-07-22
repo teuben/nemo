@@ -38,9 +38,11 @@ foreach _a ($*)
   set $_a
 end
 
+# hello world
 set version='$Id$'
 echo "$0 : version $version"
 
+# sanity check
 if (! -e $pkg/aarseth) then
   echo pkg=$pkg does not seem to be a manybody_pkg directory
   exit 1
@@ -53,35 +55,12 @@ if ($?ASTROMAKE) then
 endif
 
 
-# remove the old manybody
+# remove the old manybody, and create a new one
 rm -rf manybody
+mkdir manybody
+cd manybody
 
-
-# get all the new stuff via CVS and/or tarballs
-if ($cvs) then
-  echo CVS: manybody/starcluster
-  cvs -Q co manybody/starcluster
-  echo CVS: manybody/starlab
-  cvs -Q co manybody/starlab
-  cd manybody
-  echo CVS: partiview
-  cvs -Q co partiview
-  echo CVS: nemo
-  cvs -Q co nemo
-  echo CVS: pgplot
-  (cd nemo; mkdir local; cvs -Q co pgplot)
-else 
-  mkdir manybody
-  cd manybody
-  tar zxf $pkg/nemo/nemo_cvs.tar.gz
-  tar zxf $pkg/starlab/starlab_cvs.tar.gz
-  tar zxf $pkg/starcluster/starcluster_cvs.tar.gz
-  tar zxf $pkg/partiview/partiview_cvs.tar.gz
-endif
-tar zxf $pkg/acs/acs-$acs.tgz
-tar zxf $pkg/ruby/ruby-$ruby.tar.gz
-
-#                             root of $MANYBODY
+#                             root = $MANYBODY
 set root=`pwd`
 mkdir $root/tmp
 mkdir $root/opt
@@ -90,11 +69,11 @@ set path=(. $root/bin $root/opt/bin $path); rehash
 
 #PJT
 goto testing
-testing:
 
 #                                                   gcc
 if ($gcc != 0) then
-  echo `date` Installing gcc $  set log=$root/tmp/gcc.log
+  echo `date` Installing gcc 
+  set log=$root/tmp/gcc.log
   tar jxf $pkg/gcc/gcc-$gcc.tar.bz2
   pushd gcc-$gcc  >& /dev/null
     # a simple gcc. note f77 is replaced by g95 starting gcc4
@@ -118,7 +97,8 @@ rehash
 
 #                                                   ruby
 echo  `date` Installing ruby
-pushd ruby-1.8.2 >& /dev/null
+tar zxf $pkg/ruby/ruby-$ruby.tar.gz
+pushd ruby-$ruby >& /dev/null
   set log=$root/tmp/ruby.log
   ./configure --prefix=$root/opt   >& $log
   make                            >>& $log
@@ -128,7 +108,9 @@ rehash
 
 #                                                   acs-lite
 echo  `date` Installing acs
+tar zxf $pkg/acs/acs-$acs.tgz
 pushd acs >& /dev/null
+  tar xf $pkg/acs/acscodes.tar
   set log=$root/tmp/acs.log
   setenv ACSROOT `pwd`
   source $ACSROOT/bin/acsstart.cshrc
@@ -144,8 +126,9 @@ pushd acs >& /dev/null
 popd >& /dev/null
 rehash
 
-#                                                   starlab
+#                                                   starlab (+cvs)
 echo  `date` Installing starlab
+tar zxf $pkg/starlab/starlab_cvs.tar.gz
 ln -s starlab_cvs starlab
 pushd starlab_cvs >& /dev/null
   set log=$root/tmp/starlab.log
@@ -157,6 +140,7 @@ rehash
 
 #                                                   starcluster
 echo  `date` Installing starcluster
+tar zxf $pkg/starcluster/starcluster_cvs.tar.gz
 ln -s starcluster_cvs starcluster
 pushd starcluster_cvs >& /dev/null
   set log=$root/tmp/starcluster.log
@@ -168,23 +152,27 @@ pushd starcluster_cvs >& /dev/null
 popd >& /dev/null
 rehash
 
-#                                                   fltk (internal build only)
+testing:
+
+#                                                   fltk
 echo  `date` Installing fltk 
-tar -C partiview_cvs/src -zxf $pkg/fltk/fltk-1.1.4-source.tar.gz
-ln -s partiview_cvs partiview
-pushd partiview_cvs/src/fltk-1.1.4 >& /dev/null
+tar zxf $pkg/fltk/fltk-$fltk-source.tar.gz
+pushd fltk-$fltk >& /dev/null
   set log=$root/tmp/fltk.log
-  ./configure >& $log
+  ./configure --prefix=$root/opt >& $log
   make >>& $log
   if ($status) echo ERRORS compiling fltk, check $log
+  make install >>& $log
+  if ($status) echo ERRORS installing fltk, check $log
 popd >& /dev/null
 rehash
 
 #                                                   partiview
 echo  `date` Installing partiview
+tar zxf $pkg/partiview/partiview_cvs.tar.gz
 pushd partiview_cvs/src >& /dev/null
   set log=$root/tmp/partiview.log 
-  ./configure --with-fltk=`pwd`/fltk-1.1.4 >& $log
+  ./configure --with-fltk=$root/opt >& $log
   make >>& $log
   if ($status) echo ERRORS compiling partiview, check $log
   # cp partiview $STARLAB/bin
@@ -192,6 +180,7 @@ popd >& /dev/null
 
 #                                                   nemo
 echo  `date` Installing NEMO
+tar zxf $pkg/nemo/nemo_cvs.tar.gz
 ln -s nemo_cvs nemo
 pushd nemo_cvs >& /dev/null
   set log=$root/tmp/nemo.log 
