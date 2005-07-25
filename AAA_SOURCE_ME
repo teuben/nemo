@@ -149,3 +149,7 @@ echo "Found $n1/$n2 problems with the TESTSUITE"
 if ($n1 > 0) then
   grep TESTSUITE: install.log | grep -v OK 
 endif
+
+# kludged sh support for manybody
+ln -s nemo_start nemo_start.csh
+src/scripts/mk_nemo_start.sh >  nemo_start.sh
