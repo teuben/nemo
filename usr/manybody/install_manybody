@@ -46,8 +46,16 @@ echo "$0 : version $version"
 
 # sanity check
 if (! -e $pkg/aarseth) then
-  echo pkg=$pkg does not seem to be a manybody_pkg directory
-  exit 1
+  set pkg0=$0:h
+  echo -n "pkg=$pkg does not seem to be a manybody_pkg directory, trying $pkg0 ... "
+  if (! -e $pkg0/aarseth) then
+    echo " FAILED"b
+    echo "I give up. Try giving the pkg= parameter on the commandline"
+    exit 1
+  else
+    echo "OK"
+    set pkg=$pkg0
+  endif
 else
   echo `date` Using pkg=$pkg 
 endif
@@ -95,7 +103,7 @@ if ($intel != 0) then
   pushd intel  >& /dev/null
     tar zxf $pkg/intel/config81.tar.gz
     pushd config >& /dev/null
-      ./configure
+      ./configure >& $log
     popd >& /dev/null
   popd >& /dev/null
   # need to add the compiler to the path
@@ -152,7 +160,8 @@ ln -s starlab_cvs starlab
 pushd starlab_cvs >& /dev/null
   set log=$root/tmp/starlab.log
   set opts=(`pwd`/usr --without-f77)
-  ./install-starlab $opts >& $log
+  if ($cvs) cvs up >& $log
+  ./install-starlab $opts >>& $log
   source starlab_start.csh
   echo STARLAB-COUNT: `ls $STARLAB_INSTALL_PATH/bin|wc -l`
 popd >& /dev/null
@@ -164,7 +173,8 @@ tar zxf $pkg/starcluster/starcluster_cvs.tar.gz
 ln -s starcluster_cvs starcluster
 pushd starcluster_cvs >& /dev/null
   set log=$root/tmp/starcluster.log
-  make >& $log
+  if ($cvs) cvs up >& $log
+  make >>& $log
   if ($status) echo ERRORS compiling starcluster, check $log
   make install prefix=$STARLAB_INSTALL_PATH >>& $log
   if ($status) echo ERRORS installing starcluster, check $log
@@ -191,7 +201,8 @@ echo  `date` Installing partiview
 tar zxf $pkg/partiview/partiview_cvs.tar.gz
 pushd partiview_cvs/src >& /dev/null
   set log=$root/tmp/partiview.log 
-  ./configure --with-fltk=$root/opt >& $log
+  if ($cvs) cvs up >& $log
+  ./configure --with-fltk=$root/opt >>& $log
   make >>& $log
   if ($status) echo ERRORS compiling partiview, check $log
   # cp partiview $STARLAB/bin
@@ -203,6 +214,7 @@ tar zxf $pkg/nemo/nemo_cvs.tar.gz
 ln -s nemo_cvs nemo
 pushd nemo_cvs >& /dev/null
   set log=$root/tmp/nemo.log 
+  if ($cvs) cvs up >>& $log
   source AAA_SOURCE_ME  >& $log
   make bins >>& $log
   echo NEMO-COUNT: `ls $NEMOBIN|wc -l`
@@ -386,6 +398,10 @@ echo  `date` Instaling StarCrash
     if ($status) echo ERRORS compiling starcrash, check $log
   popd >& /dev/null
 rehash
+
+# copying shell startup files
+
+cp $pkg/manybody_start.*sh $root
 
 # -- end of install --
 echo  `date` Done.
