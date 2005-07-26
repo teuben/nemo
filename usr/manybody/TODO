@@ -1,12 +1,21 @@
 the list of problems:
 
 
+FC4:
+  - starcluster:  may need -lqt-mt instead of -lqt
+  - glstarview: needs packages GL, GLU and freeglut
+  - may need to force gfortran for starlab, but nemo doesn't
+    like it
+
+
 nemo:
   - FC4: conservative linking (3 tests fail)
+  - MDK8: plotting programs hanging during testsuite?
 
 starlab:
-  - FC4: problems in harpsims 
+  - FC4: problems in harpsims for strict ansi?
   - MDK10: no configure?
+  - MDK8: why does it use --without-qt
 
 partiview:
   - OSX10.3: no support via our procedure, need binaries?
