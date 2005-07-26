@@ -78,6 +78,11 @@ mkdir $root/opt
 set path=(. $root/bin $root/opt/bin $path)
 rehash
 
+#                                                  copying shell startup files
+
+cp $pkg/manybody_start.*sh $root
+
+
 #PJT
 goto testing
 testing:
@@ -159,7 +164,7 @@ tar zxf $pkg/starlab/starlab_cvs.tar.gz
 ln -s starlab_cvs starlab
 pushd starlab_cvs >& /dev/null
   set log=$root/tmp/starlab.log
-  set opts=(`pwd`/usr --without-f77)
+  set opts=(`pwd`/usr --without-f77 --enable-sdyn3 --enable-sdyn)
   if ($cvs) cvs up >& $log
   ./install-starlab $opts >>& $log
   source starlab_start.csh
@@ -398,10 +403,6 @@ echo  `date` Instaling StarCrash
     if ($status) echo ERRORS compiling starcrash, check $log
   popd >& /dev/null
 rehash
-
-# copying shell startup files
-
-cp $pkg/manybody_start.*sh $root
 
 # -- end of install --
 echo  `date` Done.
