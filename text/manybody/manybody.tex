@@ -248,7 +248,7 @@ In the true spirit of open source,
 numerous authors have contributed their software, which you can find on
 the CD. Without their generous contributions this guide would not be
 half the size. 
-Hopefully we will be able to distill this on the reader too.
+Hopefully we will be able to instill this on the reader too.
 
 
 
@@ -406,7 +406,7 @@ you to use the full version, {\tt nbody1} (see below).
 
 
 \footnotesize\begin{verbatim}
-   examples/ex2
+   # examples/ex2
    # remind myself to the valid command line parameters and defaults
 1% mkplummer help=
 mkplummer out=??? nbody=??? mfrac=0.999 rfrac=22.8042468 seed=0 time=0.0 zerocm=t 
@@ -462,7 +462,7 @@ code ({\tt nbody1} and {\tt nbody2)}, both directly from Aarseth)
 in its own run directory and 
 optionally produce {\it snapshot} files for further
 analysis. {\tt nbody2}  is much like {\tt nbody1}, except it
-treats close encounters with the Ahmad-Cohen scheme.
+treats forces with the Ahmad-Cohen scheme.
 
 \footnotesize\begin{verbatim}
 
@@ -504,7 +504,7 @@ treats close encounters with the Ahmad-Cohen scheme.
 
 Here you are also witnessing a current quirk of this wrapper: the input file
 must be given with an absolute pathname, hence the back-tick trick. And 
-although the number of bodies is known, it as to be re-specified.
+although the number of bodies is known, it has to be re-specified.
 % (though this is 
 
 Notice that at T=0 two binaries were already found, in fact star 92 was
@@ -531,7 +531,7 @@ has Stellar Evolution enabled (Hurley et al, 200x).
 {\tt nbody6} is available in {\tt \$NEMO/usr/aarseth/nbody6}, 
 {\tt nbody4} is currently not publicly available, but 
 {\tt nbody6} should be preferred in most cases. There is a
-recent manusl (see Aarseth 2004).
+recent manual (see Aarseth 2004).
 
 
 \section{nbody6++}
@@ -593,7 +593,7 @@ FINAL:
   E0=-0.213334  DeltaE/E0=1.5916e-06  DeltaE=-3.39541e-07
   Rmin=0.00092399 (1.98608 RSUN)  Rmin_i=1  Rmin_j=2
 
-\end{verbatim}\normalsize
+
 
    # view the simulation using Fregeau's program
 2% glstarview < try1
@@ -601,6 +601,7 @@ FINAL:
    # and since it uses Starlab 'dyn' format
 3% xstarplot < try1
 
+\end{verbatim}\normalsize
 
 % there is a recent AISRP project by Duncan et al. called SWIFT
 
@@ -770,7 +771,7 @@ substantially.
 
 We keep several of the ``original'' 
 Barnes \& Hut (1986) treecodes in NEMO. 
-The code is basically $\mathcal{O}(N \log{N})$, which makes is very fast 
+The code is basically $\mathcal{O}(N \log{N})$, which makes it very fast 
 for large N compared to a direct full N-body code.
 The earliest version also
 includes the curious self-gravity bug which can occur for large opening angles
@@ -819,7 +820,7 @@ init_xrandom: seed used 456
 321 diagnostic frames read
 Worst fractional energy loss dE/E = (E_t-E_0)/E_0 = 0.0602005 at T = 3.03125
 
-   # show where the center of mass it, notice the out=. (equivalent to /dev/null)
+   # show where the center of mass is, notice the out=. (equivalent to /dev/null)
 7% snapcenter p3.out  . report=t
 -0.000000 0.000000 -0.000000 0.000000 0.000000 -0.000000
 -0.000013 0.000002 -0.000012 -0.000073 0.000032 -0.000070
@@ -928,7 +929,7 @@ based on the second derivatives of the potential.
 \section{gadget}
 
 Springel (2000) made {\tt gadget} publicly available.
-It is primarely a cosmology code, which we probably won't able to discuss in this
+It is primarily a cosmology code, which we probably won't able to discuss in this
 week. The code is based on the treecode, but also incoorporates SPH particles
 and, for cosmological simulations, the Ewald sum technique to create periodic
 boundary conditions.
@@ -1072,7 +1073,7 @@ by M. Lecar (1968).
 This was essentially a cold collapse model, with all equal-mass 
 particles at rest, and
 in fact the positions of the 25th body was left as a (necessary!)
-exersize for the reader!
+exercize for the reader!
 Data are available as {\tt \$NEMODAT/iau25.dat}, though we added the 25th body!
 
 \section{Aarseth, Henon \& Wielen - 1974}
@@ -1148,7 +1149,7 @@ Also:
  - forwards and backwards integration. 
       van Albada  & van Gorkom - (1977)
 
- - various collional codes compared: MC, nbody6, kira, grid codes etc.
+ - various collisional codes compared: MC, nbody6, kira, grid codes etc.
    under various circumstances:   See some SPZ papers by:
 
    Takahashi et al. (2002)
@@ -1202,7 +1203,7 @@ will be different.
 {\it idl}         &    -     &     -      &    snapidl        &   binary IDL format  \\
 {\it 3dv}         &    -     &     -      &    snapidl        &   for a variety of 3D viewers \\
 {\it xyz}         &   NEMO    &     -      &    snapxyz        &  for xyzview \\
-{\it specs}       &  partiview &     -      &    snapspecks      &  for partiview \\
+{\it specks}      &  partiview &     -      &    snapspecks      &  for partiview \\
 
 
 
@@ -1255,13 +1256,13 @@ Can we do some interesting experiments in 2D where $\tau_{relax} \approx \tau_{c
 
 
 Also, for a Plummer sphere: show that 2T/W != 1, and that Clausius must be used to study
-the equilibrium of the system. how much does it 'relax' for given softening?
+the equilibrium of the system. How much does it 'relax' for given softening?
 Does it depend on N ?
 
 
 \section{Plummer Sphere}
 
-explain sampling a DF, use rejection technique, 
+Explain sampling a DF, use rejection technique, and
 using the code show how to make a Plummer sphere. See
 Aarseth, Henon \& Wielen (1974).
 
@@ -1302,7 +1303,9 @@ of tidal tails depend on the extent of the dark matter.
 
 
 Cold Collapse (cf. v Albada 1981, but also Lecar's 25-body problem).
-Also discussed in Hozumi \& Hernquist.
+Discussed in many papers, e.g. Hozumi \& Hernquist ,
+Aarseth, Popaloizou, Lin;  Bertin \& Stiavelli; Boily; Theis. Effects
+of softening on shape.
 
 Cold collapse calculations can be done from any spherical particle
 distribution by setting the velocities to 0. {\tt snapscale vscale=0.0},
@@ -1395,7 +1398,7 @@ Kuijken \& Dubinksi (1995) came up with a novel way to make reasonably
 self-consistent disk-bulge-halo models. You can find
 their code in {\tt \$NEMO/usr/kuijken/GalactICS-exp}, the binaries have
 been placed in {\tt \$NEMOBIN}, as well as a wrapper program
-{\tt mkkd95} is available to simply creating such galaxies in the
+{\tt mkkd95} is available to simplify creating such galaxies in the
 NEMO style. In addition, {\tt mkkd95} is optimized to create
 multiple random realizations.
 
@@ -1557,7 +1560,7 @@ snapadd pp1.in,ps4.in  detonate.in
 
 Use the van Albada and van Gorkum technique to integrate a code
 forwards, storing many snapshots. For each snapshot you then integrate
-backwards to t=0 (some code allow dt<0, others needs to be
+backwards to t=0 (some code allow $dt<0$, others needs to be
 rescaled v = -v) and comparing the two snapshots with snapcmp.
 Plot the results as function of T. What kind of bahavior do we see?
 Liapunov?  Which codes are ``good'', which are bad, and can we 
@@ -1592,7 +1595,7 @@ for {\tt partiview} ({\tt snapspecks}).
 \subsection{xyzview}
 
 Comes with NEMO, needs the VOGL (Very Ordinary GL) library, which emulates
-GL on classic X with no accelleration. Can only plot colored dots, no finite
+GL on classic X with no acceleration. Can only plot colored dots, no finite
 size points. Poor for presentations. (manual) animations, can also show
 the continues orbit for one selected star from the simulation. 
 
@@ -1641,8 +1644,8 @@ a conversion program {\tt snapspecks}.
 
 \section{glstarview}
 
-Comes with Fregeau's code. Data from the integration can directly be piped
-(or tee'd) into this program for visualization. Notice that {\tt xplot}
+Comes with Fregeau's code. Data from the integration can be directly  piped
+(or tee'd) into this program for visualization. Notice that {\tt xstarplot}
 in starlab can also do this.
 
 \footnotesize\begin{verbatim}
@@ -1663,12 +1666,12 @@ intensity image.
 
 See {\tt http://www.psc.edu/Packages/StarSplatter\_Home/}
 
-You can also find tools here to help you setup a scene, choose a pan and
+You can also find tools here to help you set up a scene, choose a pan and
 zoom around.
 
 \section{gravit}
 
-The program has recently been developed, but has various neat visualizaton
+This program has recently been developed, but has various neat visualizaton
 options and animates simulations. It also displays the oct-tree of the
 underlying Barnes \& Hut treecode. There are plans to integrate this with
 some of the existing codes.
@@ -1721,8 +1724,10 @@ and a simple command line interface for interactions.
 
 \section{IDL}
 
-Many people have written display and 
-analysis routines for IDL. Gadget comes with some
+Although this program is not freely available, 
+many people have written display and 
+analysis routines for IDL that are available.
+Gadget comes with some
 routines. See also NEMO's {\tt snapidl} routine to export data for IDL.
 The Berkeley group (Marc Davis?) has some routines on their website.
 
@@ -2332,7 +2337,7 @@ and as long as you have write permission on the server, it can be returned
 with a simple command: {\tt cvs commit}.
 
 \item[{\tt C}] This is the more complicated case of a conflict. Both your local
-version, as well as the server version, have been modified independantly.
+version, as well as the server version, have been modified independently.
 Most of the time CVS is actually able to make a version that merges both
 modifications, though the developer should now check if the resulting code
 is correct. The correct CVS order to fix this is a three step process: the
@@ -2659,7 +2664,8 @@ we typically use one-liners
 
     stream istr = stropen(getparam("in"),"r");
 \end{verbatim}\normalsize
-which fatal error in the common cases of ``not found'', ``no permission'' etc.etc.
+which cause a fatal error 
+in those common cases of ``not found'', ``no permission'' etc.etc.
 {\tt stropen} also takes care of special files such as {tt ``-''} and {\tt ``.''}.
 
 \item
