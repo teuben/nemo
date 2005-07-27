@@ -1,4 +1,4 @@
-.TH SNAPMRADII 1NEMO "15 March 2004"
+.TH SNAPMRADII 1NEMO "27 July 2005"
 .SH NAME
 snapmradii \- print lagrangian mass radii in a snapshot
 .SH SYNOPSIS
@@ -6,7 +6,8 @@ snapmradii \- print lagrangian mass radii in a snapshot
 .SH DESCRIPTION
 \fIsnapmradii\fP prints a table of the fractional lagrangian
 mass-radii of a snapshot. The snapshot will be sorted internally by
-increasing radius, there is no need to use \fIsnapsort(1NEMO)\fP
+increasing radius (which can be changed by using \fBsort=\fP),
+there is no need to use \fIsnapsort(1NEMO)\fP
 preceding this call.
 .SH PARAMETERS
 The following parameters are recognized:
@@ -27,6 +28,11 @@ mass fractions
 \fBlog=t|f\fP
 Output the radii in logarithmic units
 [Default: \fBf\fP]
+.TP
+\fBsort=\fP\fIsort_var\fP
+Sorting variable used to sort the particles. Any
+\fIbodytrans(3NEMO)\fP expression can be used. Default: \fBr\fP.
+Default
 .SH EXAMPLE
 The following example shows the evolution of 10% lagrangian mass radius and
 outputs the result in a graph
@@ -66,6 +72,7 @@ Peter Teuben
 12-May-92	V1.0: created          	PJT
 10-aug-95	V1.2: added tab= 	PJT
 15-aug-96	V1.3: fixed bug which assumed total mass =1 PJT
+27-jul-05	V1.5: add sort=		PJT
 .fi
 
 
