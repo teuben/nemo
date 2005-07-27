@@ -167,6 +167,7 @@ pushd starlab_cvs >& /dev/null
   set opts=(`pwd`/usr --without-f77 --enable-sdyn3 --enable-sdyn)
   if ($cvs) cvs up >& $log
   ./install-starlab $opts >>& $log
+  echo "See also install.log in the starlab_cvs directory" >> $log
   source starlab_start.csh
   echo STARLAB-COUNT: `ls $STARLAB_INSTALL_PATH/bin|wc -l`
 popd >& /dev/null
@@ -222,6 +223,7 @@ pushd nemo_cvs >& /dev/null
   if ($cvs) cvs up >>& $log
   source AAA_SOURCE_ME  >& $log
   make bins >>& $log
+  echo "See also install.log in the nemo_cvs directory" >> $log
   echo NEMO-COUNT: `ls $NEMOBIN|wc -l`
 popd >& /dev/null
 rehash
@@ -363,8 +365,8 @@ echo  `date` Installing EZ
 # Tioga
 echo  `date` Installing Tioga
   set log=$root/tmp/tioga.log
-  tar zxf $pkg/Tioga/Tioga-1.0.A-linux.tar.gz
-  pushd Tioga-1.0.A >& /dev/null
+  tar zxf $pkg/Tioga/Tioga-1.0.B-linux.tar.gz
+  pushd Tioga-1.0.B >& /dev/null
     (cd make; ruby extconf.rb ; make; make install) >& $log
     (cd tests; ruby ts_Tioga.rb) >>& $log
   popd >& /dev/null
