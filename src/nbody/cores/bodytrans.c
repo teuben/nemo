@@ -57,6 +57,7 @@
  *                   redirect output of make to a logfile for pipes to work in NEMO
  *   7=may-04   fixed permission problem
  *  14-jul-04   fix K&R style code which can give problems for -DSINGLE_PREC code
+ *  27-jul-05   add dummy loader for lazy gcc4 type linkers
  *
  *  Used environment variables (normally set through .cshrc/NEMORC files)
  *      NEMO        used in case NEMOOBJ was not available
@@ -84,6 +85,10 @@
 local proc   bodytrans(string,string,string);
 local void   ini_bt(void), end_bt(void), make_bt(string);
 local string get_bt(string), put_bt(string,char,string);
+
+void bodytrans_dummy_for_c(void);
+
+
 
 /*
  * BTRTRANS, BTITRANS: map name or expression to real or integer
@@ -252,8 +257,10 @@ local proc bodytrans(string type, string expr, string fname)
 #endif            
     }
     result = findfn(func);
-    if (result == NULL)
-        error("Cant find %s (from findfn)", func);
+    if (result == NULL) {
+      error("Cant find %s (from findfn)", func);
+      bodytrans_dummy_for_c();
+    }
     return result;
 }
 
@@ -451,6 +458,21 @@ local void make_bt(string btname)
     dprintf(0,"bodytrans: not compiled with -DSAVE_OBJ\n");
 #endif
 }       
+
+void bodytrans_dummy_for_c(void)
+{
+    double a,b,c;
+    int spline();
+    double bessi0(), bessk0(), bessi1(), bessk1();
+
+    error("bodytrans.c: Cannot call dummy_for_c - included to fool linkers");
+    (void) spline();
+    (void) bessi0();
+    (void) bessk0();
+    (void) bessi1();
+    (void) sqr(1.0);
+}
+
 
 #ifdef TOOLBOX
 
