@@ -8,6 +8,7 @@
  *      15-aug-96  V1.3  fixed bug in which total mass=1 was assumed    pjt
  *	25-mar-97     a  fixed for SINGLEPREC				pjt
  *      10-mar-04  V1.4  add log=                                       pjt
+ *      27-jul-05   1.5  added sort=                                    pjt
  *
  *  Bug: if the massfractions are too close such that there
  *       are bins withouth mass, this algorithm fails
@@ -22,22 +23,26 @@
 #include <snapshot/snapshot.h>	
 #include <snapshot/body.h>
 #include <snapshot/get_snap.c>
+#include <bodytransc.h>
 
 string defv[] = {
     "in=???\n                   Input file name (snapshot)",
     "fraction=0.1:0.9:0.1\n     Fractional masses to print radii of",
     "tab=f\n			Full table of r,m(r) ? ",
     "log=f\n                    Print radii in log10() ? ",
-    "VERSION=1.4\n              10-mar-04 PJT",
+    "sort=r\n                   Observerble to sort masses by",
+    "VERSION=1.5\n              27-jul-05 PJT",
     NULL,
 };
 
 string usage="Langrangian mass-fraction radii of a snapshot";
 
+string cvsid="$Id$";
+
 
 #define MFRACT 256
 
-local void snapsort(Body *, int , real);
+local void snapsort(Body *, int , real, rproc_body);
 local int rank_aux(Body *, Body *);
 
 
@@ -49,6 +54,9 @@ void nemo_main()
     bool   Qtab = getbparam("tab");
     bool   Qlog = getbparam("log");
     Body *btab = NULL, *bp;
+    rproc_body sortptr;
+
+    sortptr = btrtrans(getparam("sort"));
     
     nfract = nemoinpr(getparam("fraction"),mf,MFRACT);
     if (nfract<1) error("Illegal or bad parsed fraction=%s",
@@ -69,7 +77,7 @@ void nemo_main()
         if ((bits & PhaseSpaceBit) == 0)
             continue;                       /* if no positions -  skip */
         if (!Qtab) printf("%g",tsnap);
-        snapsort(btab,nbody,tsnap);        /* sort; hide radius in aux */
+        snapsort(btab,nbody,tsnap,sortptr);/* sort; hides radius in aux */
         for (bp=btab, tmass=0.0; bp<btab+nbody; bp++)
             tmass += Mass(bp);
         if (tmass == 0.0) error("No masses available in this snapshot");
@@ -102,13 +110,13 @@ void nemo_main()
     }   /* for(;;) */
 } /* nemo_main() */
 
-void snapsort(Body *btab, int nbody, real tsnap)
+void snapsort(Body *btab, int nbody, real tsnap, rproc_body sortptr) 
 {
     int i;
     Body *b;
 
     for (i = 0, b = btab; i < nbody; i++, b++)
-	Aux(b) = absv(Pos(b));
+      Aux(b) = sortptr(b,tsnap,i);
     qsort(btab, nbody, sizeof(Body), rank_aux);
 }
 
