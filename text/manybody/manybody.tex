@@ -40,7 +40,7 @@
 % Douglas Heggie - Piet Hut - Jun Makino
        }
 
-\date{{\small Version 1.5} \\
+\date{{\small Version 1.7} \\
       {\small Summer 2005} \\
       {\small Last document revised: \today} \\ 
       {\small \tt URL: http://bima.astro.umd.edu/nemo/manybody/index.html} \\
@@ -246,7 +246,10 @@ Christian Boily for the previous school in Strasbourg, where
 much of this material was written.
 In the true spirit of open source, 
 numerous authors have contributed their software, which you can find on
-the CD. Hopefully we will be able to distill this on the reader too.
+the CD. Without their generous contributions this guide would not be
+half the size. 
+Hopefully we will be able to distill this on the reader too.
+
 
 
 \chapter                {Introduction}
@@ -1063,15 +1066,14 @@ accuracy. We mention a few :
 
 \section{Lecar: 25-body problem - 1968}
 
-This is probably the oldest benchmark/testcase in N-body dynamics.
+This is probably the oldest benchmark/in N-body dynamics.
 11 numerical integrations of a 25-body problem were assembled and presented
 by M. Lecar (1968).
 This was essentially a cold collapse model, with all equal-mass 
 particles at rest, and
 in fact the positions of the 25th body was left as a (necessary!)
 exersize for the reader!
-Data are available as {\tt \$NEMODAT/iau25.dat}, though the 25th body has
-been added to this.
+Data are available as {\tt \$NEMODAT/iau25.dat}, though we added the 25th body!
 
 \section{Aarseth, Henon \& Wielen - 1974}
 
@@ -1083,7 +1085,9 @@ an N-body realization of a Plummer sphere. You can find examples
 of this in quite a few places, e.g.\\
 {\tt \$NEMO/src/nbod4y/init/mkplummer.c}\\
 {\tt \$STARLAB/src/node/dyn/init/makeplummer.C}\\
-{\tt \$NEMO/src/nbody/evolve/aarseth/nbody1/source/data.f}
+{\tt \$NEMO/src/nbody/evolve/aarseth/nbody1/source/data.f}\\
+{\tt \$NEMO/usr/aarseth/firstn/data.f}
+
 
 \section{Pythagoran Problem}
 
@@ -1124,7 +1128,7 @@ have been compiled.
 Presented at IAU Symposium 208 (Tokyo) on 11 July, 2001, after which 13 results
 have been compiled to this moment.
 
-\section{OTHER TESTING}
+\section{Notes}
 \begin{verbatim}
 
 Also:
@@ -1143,6 +1147,16 @@ Also:
 
  - forwards and backwards integration. 
       van Albada  & van Gorkom - (1977)
+
+ - various collional codes compared: MC, nbody6, kira, grid codes etc.
+   under various circumstances:   See some SPZ papers by:
+
+   Takahashi et al. (2002)
+   Spinnato et al. (2003)  
+   Joshi et al. (2000)
+   Portegies Zwart et al. (2004)
+   Gualandris et al. (2004)
+   
 
 \end{verbatim}
 
@@ -1754,6 +1768,12 @@ in {\bf boldface} are available electronically on the CD in the {\tt papers/} di
 
 Aarseth, S.J. - 2004.. {\it NBODY6 Users Manual} : {\bf man6.ps}
 
+van Albada, T. S.; van Gorkom, J. H.	- 1977 -
+{\it Experimental Stellar Dynamics for Systems with Axial Symmetry}:
+{\bf 1977A+A....54..121V}
+
+
+
 Barnes \& Hut - 1986 - Nature - 324, 446.
 
 Barnes \& Hut - 1989
@@ -1775,6 +1795,14 @@ NewA, 5, 305. {\bf 2000NewA....5..305F.pdf}
 Fregeau, J.M., Cheung, P., Portegies Zwart, S.F., and Rasio, F.A. (2004)
 {\it Stellar Collisions During Binary-Binary and Binary-Single Star Interactions}
 astro-ph/0401004 : {\bf 0401004.ps}
+
+Goodman, Jeremy; Heggie, Douglas C.; Hut, Piet - 1993 -
+{\it On the Exponential Instability of N-Body Systems} :
+{\bf 1993ApJ...415..715G.pdf}
+
+Gualandris, A., Portegies Zwart, S., and Tirado-Ramos, A. - 2004
+{\it Performance analysis of direct N-body algortithms on highly distributed systems}:
+IEEE - {\bf gualandris2004.pdf}
 
 Heggie, D. \& Hut, P. 2003, 
 {\it The Gravitational Million-Body Problem}, 
@@ -1848,6 +1876,10 @@ Springel V., Yoshida N., White S. D. M., 2001, New Astronomy, 6, 51.
 {\it GADGET: A code for collisionless and gasdynamical cosmological simulations}:
 {\bf gadget-code-paper.pdf}.
 
+Szebehely, Victor; Peters, C. Frederick - 1967 - 
+{\it Complete solution of a general problem of three bodies}:
+{\bf 1967AJ.....72..876S.pdf}
+
 Takahashi, Koji; Portegies Zwart, Simon F. - 2002 -
 {\it The Evolution of Globular Clusters in the Galaxy} - ApJ 535, 759:
 {\bf 2000ApJ...535..759T.pdf}
@@ -1859,12 +1891,20 @@ von Hoerner, S. - 1960 - Z.f.Astrophys. 50, 184.
 
 % von Hoerner, S. - 1963 Z.Astrophys. 57, 47.
 
+Weinberg, M. - 2001a - 
+{\it Noise-driven evolution in stellar systems - I. Theory}:
+{\bf 2001MNRAS.328..311W}
+
+Weinberg, M. - 2001b - 
+{\it Noise-driven evolution in stellar systems - II. A universal halo profile}:
+{\bf 2001MNRAS.328..321W}
+
 
 White,S.D.M. - 1983 - Ap.J. 274, 53 : {\bf 1983ApJ...274...53W.pdf}
 
 White \& Barnes - 1984 - {\bf 1984MNRAS.211..753B.pdf}
 
-Zhan - astro-ph/0507237
+Zhan - astro-ph/0507237 {\bf Zhan-0507237.pdf}
 
 \section*{URLs}
 
@@ -1891,7 +1931,7 @@ For those working on the Linux Lab machines, here is some essential
 information how to login and setup your account:
 
 A common data directory {\tt /data/week/sc2005} is available on all 16
-linux lab workstation. These machines are 
+linux lab workstations. These machines are 
 named {\tt elel1}, {\tt elel2} ... {\tt elel16}. 
 These are all currently running {\tt CERN Scientific Linux 3.0.5}.
 
@@ -1906,19 +1946,19 @@ for bash}
 
 As of this writing, printing is still a complicated matter, and probably 
 will depend on the type
-of machine you have. For laptop users, be ready to extract your ethernet hardware
+of machine you use. For laptop users, be ready to extract your ethernet hardware
 address (perhaps both wired and wireless) in order to get printing done.
-
+Expect an update during the school.
 
 Here it is assumed that you are using 
 the C-shell ({\tt csh} or {\tt tcsh}) or Bourne Shell  ({\tt bash}).
 Easiest is to add the following  command to your {\tt .cshrc} file
-for csh:
+for csh
 
 \begin{verbatim}
     source /data/week/sc2005/manybody/manybody_start.csh
 \end{verbatim}
-or {\tt .bashrc} for bash:
+or {\tt .bashrc} for bash users
 \begin{verbatim}
     source /data/week/sc2005/manybody/manybody_start.sh
 \end{verbatim}
@@ -1989,7 +2029,7 @@ Left mouse down rotates. Right mouse down zooms. $>>$ button starts movie.
 {\tt binsingle -D 1 | glstarview} : fewbody + visualizer
 
 \item
-{\tt g++ -o forward\_euler1 \$MANYBODY/ACS/chap3/forward\_euler1.C; forward\_euler1} 
+{\tt g++ -o forward\_euler1 \$MANYBODY/acs1/chap3/forward\_euler1.C; forward\_euler1} 
 (ACS 1)
 
 \item
@@ -2073,7 +2113,7 @@ of this in either the {\tt manybody} directory, or its original CVS location,
 
 \footnotesize\begin{verbatim}
   1% tar zxf /mnt/cdrom/manybody_fc4.tar.gz
-  2% source manybody/manybody_start
+  2% source manybody/manybody_start.csh
   3% tar zxf -C manybody /mnt/cdrom/papers.tar.gz
 
 \end{verbatim}\normalsize
@@ -2083,11 +2123,22 @@ your starting point\footnote{the root name {\tt /mnt/cdrom} may
 very well be different on your machine}
 
 \footnotesize\begin{verbatim}
-  4% /mnt/cdrom/install_manybody pkg=/mnt/cdrom/manybody_pkg
+ 11% /mnt/cdrom/install_manybody pkg=/mnt/cdrom/manybody_pkg
+ 12% source manybody/manybody_start.csh
 \end{verbatim}\normalsize
 
 but more than likely some tweaking is needed if you have missing or
 incompatible libraries or tools. Some of this is noted in Appendix I.
+
+
+\footnotesize\begin{verbatim}
+   # your compiler suite could be wrong
+   4% setenv CC  gcc32
+   5% setenv CXX g++32
+   6% setenv F77 g77
+   7% /mnt/cdrom/install_manybody pkg=/mnt/cdrom/manybody_pkg
+\end{verbatim}\normalsize
+
 
 For reference, the old install took about 27 minutes on my Pentium 1.6GHz based
 laptop.
@@ -2302,7 +2353,8 @@ committed back to the repository:
 In your {\it manybody} environment you will find a few perl scripts
 (dubbed {\tt cvsutils})\footnote{See {\tt http://www.red-bean.com/cvsutils/}}
 that help with some tedious CVS interactions, notably some tools when
-you are not online. Another common operation is to change the CVS/Root
+you are not online. Another common enough operation is to change the 
+{\tt CVS/Root}
 (where your local {\tt \$CVSROOT} lives) from anonymous to somebody with
 write permission, viz.
 
@@ -2425,7 +2477,9 @@ the initial conditions:
 \begin{figure}[t]
 \plottwo{pyth0.ps}{pyth1.ps}
 \caption[Pythagorean problem]
-{Initial conditions for the Pythagorean problem (left)
+{Initial conditions for the Pythagorean problem (left, but notice
+these are not the official Szebeheley \& Peters configuration we use
+in the example)
 and the orbit of the intermediate mass (M=4) particle starting
 at (x,y) = (-2,-1).}
 \end{figure}
@@ -2441,7 +2495,16 @@ m  x  y  z  vx vy vz
 5  1 -1  0  0  0  0
 
    # integrate for a while
-2% nbody00 $NEMODAT/pyth.dat pyth.out eta=0.01 deltat=0.01 tcrit=100 eps=0
+2% nbody00 $NEMODAT/pyth.dat pyth.out eta=0.01 deltat=0.01 tcrit=100 eps=0 
+time = 0   steps = 0   energy = -12.8167 cpu =          0 min
+time = 0.01   steps = 1   energy = -12.8167 cpu =          0 min
+...
+time = 99.98   steps = 33940   energy = -12.7912 cpu =     0.0115 min
+time = 99.99   steps = 33945   energy = -12.7912 cpu =     0.0115 min
+time = 100   steps = 33949   energy = -12.7912 cpu =     0.0115 min
+Time spent in searching for next advancement: 0.1
+Energy conservation: 0.0254786 / -12.8167 = -0.00199189
+Time resets needed 5977 times / 10001 dumps
 
    # view Red=0 Green=1 Blue=2
    # notice that although initially blue/green pair up, red intervenes
@@ -2497,8 +2560,8 @@ Energy conservation: 1.33895e-05
 
 \begin{figure}[t]
 \plottwo{log1.ps}{log2.ps}
-\caption[Orbits in a logarithmic potential]
-{Orbits in a logarithmic potential:
+\caption[Orbits in a Logarithmic potential]
+{Orbits in a Logarithmic potential:
 Initial conditions y=0.1 result in a box orbit (left), 
 y=0.2 in a loop orbit (right). See also Figure 3-7 in BT87}
 \label{f:log}
@@ -2657,6 +2720,13 @@ Write a whole new program. You can either use {\tt NEMO/src/scripts/template},
 and fill in the blanks, or write it really from scratch. See also 
 previous comments on Makefile, Testfile and mknemo.
 
+\footnotesize\begin{verbatim}
+    %1 $NEMO/src/scripts/template foo a=1 b=2 n=10
+    %2 bake foo
+    %3 foo c=1 
+    ### Fatal error [foo]: Parameter "c" unknown
+\end{verbatim}\normalsize
+
 \end{enumerate}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -2667,7 +2737,7 @@ Updates to the code can either be done via releases (tar files or
 tagged CVS) or in a ``continuum'' (CVS).
 
 \section{NEMO (version 3.2.3)}
-After installation, it will occur that it appears 
+After installation, it can occur that it appears 
 as if you have a missing program in NEMO, despite that a 
 manual page exists.
 
