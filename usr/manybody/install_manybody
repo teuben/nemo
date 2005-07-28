@@ -30,6 +30,7 @@ set hnbody=1.0.3-linux-x86
 set acs=lite-1.2.1
 set ruby=1.8.2
 set fltk=1.1.4
+set ez=3_0_4
 
 #  root directory where all the tar ball packages live from which to install
 set pkg=`pwd`/manybody_pkg
@@ -205,13 +206,14 @@ rehash
 #                                                   partiview
 echo  `date` Installing partiview
 tar zxf $pkg/partiview/partiview_cvs.tar.gz
+ln -s partiview_cvs partiview
 pushd partiview_cvs/src >& /dev/null
   set log=$root/tmp/partiview.log 
   if ($cvs) cvs up >& $log
   ./configure --with-fltk=$root/opt >>& $log
   make >>& $log
   if ($status) echo ERRORS compiling partiview, check $log
-  # cp partiview $STARLAB/bin
+  cp partiview $MANYBODY/opt/bin
 popd >& /dev/null
 
 #                                                   nemo
@@ -238,7 +240,7 @@ pushd $NEMO/usr/aarseth/firstn >& /dev/null
 popd >& /dev/null
 rehash
 
-#                                                    nbody6
+#                                                    nbody6 (source in NEMO)
 echo  `date` Installing nbody6
 mkdir $NEMO/usr/aarseth/nbody6
 pushd $NEMO/usr/aarseth/nbody6 >& /dev/null
@@ -260,11 +262,10 @@ rehash
 
 #                                                   GSL
 echo  `date` Installing gsl
-pushd $NEMO/local >& /dev/null
+tar zxf $pkg/gsl/gsl-$gsl.tar.gz
+pushd gsl-$gsl >& /dev/null
   set log=$root/tmp/gsl.log 
-  tar zxf $pkg/gsl/gsl-$gsl.tar.gz
-  cd gsl-$gsl
-  ./configure --prefix=$NEMO/opt  >& $log
+  ./configure --prefix=$MANYBODY/opt  >& $log
   if ($status) echo ERRORS 1 compiling gsl, check $log
   make >>& $log
   if ($status) echo ERRORS 2 compiling gsl, check $log
@@ -273,15 +274,15 @@ pushd $NEMO/local >& /dev/null
 popd >& /dev/null
 rehash
 
-#                                                   fewbody, glstarview
+#                                                   fewbody, glstarview (source in NEMO)
 echo  `date` Installing fewbody,glstarview
 pushd $NEMO/usr/fregeau >& /dev/null
   set log=$root/tmp/fewbody.log 
   tar zxf $pkg/fregeau/fewbody-$fewbody.tar.gz
   pushd fewbody-$fewbody >& /dev/null
     make all  \
-	CFLAGS="-I$NEMO/opt/include -Wall -O3" \
-	LIBFLAGS="-L$NEMO/opt/lib -lgsl -lgslcblas -lm" >& $log
+	CFLAGS="-I$MANYBODY/opt/include -Wall -O3" \
+	LIBFLAGS="-L$MANYBODY/opt/lib -lgsl -lgslcblas -lm" >& $log
     if ($status) echo ERRORS compiling fewbody, check $log
     cp cluster triplebin binbin binsingle $NEMOBIN
   popd >& /dev/null
@@ -293,6 +294,7 @@ pushd $NEMO/usr/fregeau >& /dev/null
   popd >& /dev/null
 popd >& /dev/null
 rehash
+
 #                                                   HNbody (binary only)
 if ($sys == linux) then
 echo  `date` Installing hnbody- for linux only
@@ -326,8 +328,8 @@ echo  `date` Installing xyz from NEMO
 #                                                       EZ
 echo  `date` Installing EZ
   set log=$root/tmp/ez.log 
-  tar zxf $pkg/EZ/EZ_3_0_4.tar.gz
-  pushd EZ_3_0_4 >& /dev/null
+  tar zxf $pkg/EZ/EZ_$ez.tar.gz
+  pushd EZ_$ez >& /dev/null
     if (0) then
        ./QUICK_INSTALL >& $log
     else
@@ -362,7 +364,7 @@ echo  `date` Installing EZ
     endif
   popd >& /dev/null
 
-# Tioga
+#                                                                      Tioga
 echo  `date` Installing Tioga
   set log=$root/tmp/tioga.log
   tar zxf $pkg/Tioga/Tioga-1.0.B-linux.tar.gz
@@ -372,7 +374,7 @@ echo  `date` Installing Tioga
   popd >& /dev/null
 rehash
 
-# MMAS
+#                                                                      MMAS
 echo  `date` Installing MMAS
   set log=$root/tmp/mmas.log
   tar zxf $pkg/mmas/mmas1.6.tar.gz 
@@ -382,7 +384,7 @@ echo  `date` Installing MMAS
   popd >& /dev/null
 rehash
 
-# FFTW v2, needed for starcrash
+#                                                          FFTW v2, needed for starcrash
 echo  `date` Installing FFTW
   set log=$root/tmp/fftw.log
   tar zxf $pkg/fftw/fftw-2.1.5.tar.gz
@@ -395,7 +397,7 @@ echo  `date` Installing FFTW
   popd >& /dev/null
 rehash
 
-# StarCrash
+#                                                                   StarCrash
 echo  `date` Instaling StarCrash
   set log=$root/tmp/starcrash.log
   tar zxf $pkg/StarCrash/starcrash_serial.tar.gz 

@@ -7,8 +7,20 @@ export NEMO=$MANYBODY/nemo_cvs
 export STARLAB=$MANYBODY/starlab_cvs
 export ACSROOT=$MANYBODY/acs
 
+# check for existence
+if [ -e $NEMO/nemo_start.sh ]
+then
+  source $NEMO/nemo_start.sh
+else
+  echo Warning: no NEMO present
+fi
 
-source $NEMO/nemo_start.sh
-source $STARLAB/starlab_start.sh
+if [ -e $STARLAB/starlab_start.sh ]
+then
+  source $STARLAB/starlab_start.sh
+else
+  echo Warning: no STARLAB present
+fi
 
-PATH=$MANYBODY/bin:$PATH
+PATH=$MANYBODY/opt/bin:$PATH
+LD_LIBRARY_PATH=$MANYBODY/opt/lib:$LD_LIBRARY_PATH

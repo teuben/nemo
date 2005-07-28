@@ -8,11 +8,15 @@ setenv ACSROOT                $MANYBODY/acs
 setenv NEMO                   $MANYBODY/nemo_cvs
 if (-e $NEMO/nemo_start.csh) then
    source $NEMO/nemo_start.csh
+echo
+   echo Warning: no NEMO present
 endif
 
 setenv STARLAB                $MANYBODY/starlab_cvs
 if (-e $STARLAB/starlab_start.csh) then
    source $STARLAB/starlab_start.csh
+echo
+   echo Warning: no STARLAB present
 endif
 
 if (-e $MANYBODY/intel/bin/iccvars.csh) then
@@ -21,4 +25,6 @@ endif
 
 
 set path=(. $MANYBODY/opt/bin $path)
+setenv LD_LIBRARY_PATH $MANYBODY/opt/lib
+
 rehash
