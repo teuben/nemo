@@ -72,11 +72,12 @@ mkdir manybody
 cd manybody
 
 #                             root = $MANYBODY
-set root=`pwd`
+setenv MANYBODY `pwd`
+set root=$MANYBODY
 mkdir $root/tmp
 mkdir $root/opt
 
-set path=(. $root/bin $root/opt/bin $path)
+set path=(. $root/opt/bin $path)
 rehash
 
 #                                                  copying shell startup files
