@@ -8,14 +8,14 @@ setenv ACSROOT                $MANYBODY/acs
 setenv NEMO                   $MANYBODY/nemo_cvs
 if (-e $NEMO/nemo_start.csh) then
    source $NEMO/nemo_start.csh
-echo
+else
    echo Warning: no NEMO present
 endif
 
 setenv STARLAB                $MANYBODY/starlab_cvs
 if (-e $STARLAB/starlab_start.csh) then
    source $STARLAB/starlab_start.csh
-echo
+else
    echo Warning: no STARLAB present
 endif
 
