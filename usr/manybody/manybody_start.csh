@@ -25,6 +25,6 @@ endif
 
 
 set path=(. $MANYBODY/opt/bin $path)
-setenv LD_LIBRARY_PATH $MANYBODY/opt/lib
+setenv LD_LIBRARY_PATH $MANYBODY/opt/lib:$LD_LIBRARY_PATH
 
 rehash
