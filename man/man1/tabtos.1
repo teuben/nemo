@@ -1,4 +1,4 @@
-.TH TABTOS 1NEMO "28 May 2002"
+.TH TABTOS 1NEMO "29 July 2005"
 .SH NAME
 tabtos \- convert structured ASCII tables into snapshot format
 .SH SYNOPSIS
@@ -112,7 +112,7 @@ Number of bodies, if the header doesn't supply it. If none supplied, neither
 through the header, nor using this keyword, it is derived from
 the number of lines in the file, corrected (divided) by
 the number of specified blocks (\fBblock#=\fP)
-and the numbers of specified times
+and the numbers of specified times. 
 (\fBtimes=\fP).
 Default: not used.
 .TP 20
@@ -132,6 +132,8 @@ Implied do loops can be given, for example,
 Specifying times through this keyword not only overrides any
 header values, but also limits the maximum number of snapshot
 that are read (thus avoiding the dreaded fatal EOF error)
+One can also use \fBoptions=time\fP,
+in which case time is auto-incremented (by 1) for each snapshot.
 Default: not used.
 .TP
 \fBoptions=\fP
@@ -148,6 +150,7 @@ one line. The side-effect of this is that the next record in that
 same block starts immediately following the wrapped number. 
 \fBspill\fP discards all numbers read from the last line to fill a record
 within a block, and hence negates the side-effect of the \fPwrap\fP option.
+\fBtime\fP auto-increments time (by 1) as new snapshots are found.
 .TP
 \fBheadline=\fP
 Random mumblage for humans, used to identify the snapshot.
@@ -245,4 +248,5 @@ Peter Teuben
 2-nov-94	V1.2d added wrap/spill, fixed times= bug	PJT
 19-aug-00	V1.3d fixed various TAB related problems	PJT
 24-jan-02	V1.3f block10 now	PJT
+29-jul-05	V1.4 added options=time to auto-inc time	PJT
 .fi

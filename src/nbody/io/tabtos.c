@@ -35,6 +35,7 @@
  *      11-may-02       h   longer lines to deal with DCR's 'ss2bt' files   PJT
  *      28-may-03       i   allow 'm' also for 'mass', also allow - for skip  pjt
  *      21-sep-03       j   fixed bug in calling nemo_file_lines              pjt
+ *      29-jul-05   V1.4    added auto-incrementing time option (Amsterdam, cafe amaricain) pjt
  */
 
 #include <stdinc.h>
@@ -63,10 +64,10 @@ string defv[] = {
     "nbody=\n      Number of bodies, if needed",
     "ndim=\n	   Dimension of pos,vel,acc arrays, if needed",
     "times=\n      Time(s) of snapshot, if needed, or override",
-    "options=\n    Other processing options (scan|comment|wrap|spill)",
+    "options=\n    Other processing options (scan|comment|wrap|spill|time)",
     "nskip=0\n     Number of lines skipped before each (header+block1+...)",
     "headline=\n   Random mumblage for humans",
-    "VERSION=1.3j\n 21-sep-03 PJT",
+    "VERSION=1.4\n 29-jul-05 PJT",
     NULL,
 };
 
@@ -96,7 +97,7 @@ local int ntimes=0;
 local int nskip=0;
 local int linecnt=0;
 local int snapcnt=0;
-local bool scan, comment, wrap, spill;
+local bool scan, comment, wrap, spill, auto_time;
 
 /* extern's */
 extern string *burststring(string, string);
@@ -162,6 +163,8 @@ void nemo_main(void)
             else
                 warning("Too few snapshot times= specified, good luck");
         }
+	if (auto_time)
+	  tsnap += 1.0;
         dprintf(0, "[reading %d bodies at time %f]\n", nbody, tsnap);
         if (btab==NULL) {
             btab = (Body *) allocate(nbody*sizeof(Body));
@@ -205,6 +208,7 @@ void check_options(void)
     comment = scanopt(options,"comment");
     wrap = scanopt(options,"wrap");
     spill = scanopt(options,"spill");
+    auto_time = scanopt(options,"time");
 
     nskip = getiparam("nskip");
 }
