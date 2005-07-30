@@ -22,7 +22,9 @@ SRCDIR = $(NEMO)/src/nbody/io/starlab
 
 LIBNEMO = -L$(NEMOLIB) -lnemo
 #LIBSTAR = -L$(STARLAB_PATH)/lib  -ltdyn -ldyn -lnode -lstd -lsstar
-LIBSTAR = -L$(STARLAB_PATH)/lib  -ltdyn -ldyn -lnode -lstd 
+LIBSTAR = -L$(STARLAB_INSTALL_PATH)/lib/starlab  -ltdyn -ldyn -lnode -lstd 
+
+STARLAB_CCC_FLAGS =  -I$(STARLAB_INSTALL_PATH)/include/starlab
 
 .SUFFIXES: .C
 
@@ -32,22 +34,39 @@ LIBSTAR = -L$(STARLAB_PATH)/lib  -ltdyn -ldyn -lnode -lstd
 
 # 	starlab:
 .C.o:
-	$(STARLAB_CCC) $(STARLAB_CCC_FLAGS) $(CFLAGS) \
-                        -I$(NEMO)/inc  -I$(NEMOLIB) -I$(STARLAB_PATH)/inc -c $*.C
+	$(CXX) $(STARLAB_CCC_FLAGS) $(CFLAGS) \
+		 -c $*.C
+
+nemomain.o: nemomain.C
+	$(CXX) $(CFLAGS) -c $*.C
+
+
+#                 -I$(NEMO)/inc  -I$(NEMOLIB) 
 
 clean:
 	rm -f $(BIN) $(OBJ) *.o core
-	
+
 all:	$(BIN)
-	
-stod:	$(OBJ) stod.o
-	$(STARLAB_CCC) $(STARLAB_CCC_FLAGS) $(CFLAGS) \
+
+stod:	symlink $(OBJ) stod.o
+	$(CXX) $(STARLAB_CCC_FLAGS) $(CFLAGS) \
                -o stod $(OBJ) stod.o \
 		$(LIBNEMO) $(LIBSTAR) -lm
 
-dtos:	$(OBJ) dtos.o
-	$(STARLAB_CCC) -o dtos $(OBJ) dtos.o \
+dtos:	symlink $(OBJ) dtos.o
+	$(CXX) -o dtos $(OBJ) dtos.o \
 		$(LIBNEMO) $(LIBSTAR) -lm
+
+symlink:  $(NEMOINC)/nemo_stdinc.h
+
+$(NEMOINC)/nemo_stdinc.h:
+	@if [ ! -e $(NEMOINC)/nemo_stdinc.h ]; \
+	then \
+	  echo Create symlink for nemo_stdinc.h for starlab+nemo;\
+	  ln -s $(NEMOINC)/stdinc.h $(NEMOINC)/nemo_stdinc.h;\
+	else \
+	  echo OK; \
+	fi
 
 pjt:	.pjt
 

@@ -13,20 +13,15 @@
 #include <stdinc.h>
 #include <getparam.h>
 
-extern string defv[];		/* defv MUST be defined in user program ! */
-extern string usage;		/* One line description of the program    */
+// typedef char *nemo_string;        /* should be in: stdinc.h */
 
-extern void nemo_main(void);	/* this is the programmer's 'main' */
+extern nemo_string defv[];	  /* defv MUST be defined in user program ! */
+extern void nemo_main(void);	  /* this is the programmer's 'main' */
 
 int main(int argc,char *argv[])
 {
-    if(argv[argc] != NULL) {
-        warning("Your C compiler seems to have an old-style (short) argv[] %d",
-                argc);
-    }
-
-    initparam(argv,defv);		/* start  */
-    nemo_main();			/* call his/her main program */
-    finiparam();			/* end */
-    return 0;                           /* return normal status to shell */
+  initparam(argv,defv);		/* start  */
+  nemo_main();			/* call his/her main program */
+  finiparam();			/* end */
+  return 0;                     /* return normal status to shell */
 }

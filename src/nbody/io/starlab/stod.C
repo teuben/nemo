@@ -12,10 +12,11 @@
  *
  *  15-oct-03   1.3    fixed for starlab4             PJT
  *   2-jan-03   1.4    attempt to integrated getting UBVRI for nvodemo2004
+ *  30-jul-05   2.0    adapted for new StarLab V4.x with new dir.str.
  */
 
 
-#include <stdinc.h>                 /* NEMO */
+#include <nemo_stdinc.h>                 /* NEMO */
 #include <getparam.h>
 #include <history.h>
 #include <extstring.h>
@@ -24,13 +25,12 @@
 
 #include "dyn.h"                    /* STARLAB */
 
-typedef char *nemo_string;
 
 nemo_string defv[] = {
     "in=???\n           Input snapshot file (dyn to stdout)",
     "headline=\n        Additional comment line",
     "label=f\n          Add labels to stars?",
-    "VERSION=1.4\n	2-jan-04 PJT",
+    "VERSION=2.0\n	30-jul-05 PJT",
     NULL,
 };
 
