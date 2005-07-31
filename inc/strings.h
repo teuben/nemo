@@ -1,5 +1,6 @@
-/* well, this is for BSD diehards, strings.h is really 
- * supposed to be  strings.h 
+/* 
+ *   strings.h
+ *	for BSD diehards:   strings.h is really supposed to be string.h 
  */
 
 #include <string.h>
