@@ -33,6 +33,8 @@ string defv[] = {
 };
 
 string usage = "patch up holes in an image by linear interpolation";
+
+string cvsid = "$Id$";
 
 
 local void ini_fit(void), accum_fit(int, int, real);
