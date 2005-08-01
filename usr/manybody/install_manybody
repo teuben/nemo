@@ -31,6 +31,7 @@ set acs=lite-1.2.1
 set ruby=1.8.2
 set fltk=1.1.4
 set ez=3_0_4
+set tioga=1.0.C
 
 #  root directory where all the tar ball packages live from which to install
 set pkg=`pwd`/manybody_pkg
@@ -368,8 +369,8 @@ echo  `date` Installing EZ
 #                                                                      Tioga
 echo  `date` Installing Tioga
   set log=$root/tmp/tioga.log
-  tar zxf $pkg/Tioga/Tioga-1.0.B-linux.tar.gz
-  pushd Tioga-1.0.B >& /dev/null
+  tar zxf $pkg/Tioga/Tioga-$tioga-linux.tar.gz
+  pushd Tioga-$tioga >& /dev/null
     (cd make; ruby extconf.rb ; make; make install) >& $log
     (cd tests; ruby ts_Tioga.rb) >>& $log
   popd >& /dev/null
