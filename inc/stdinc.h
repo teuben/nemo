@@ -36,6 +36,7 @@
  * 24-nov-03    include mathfns.h, which includes forced math.h
  * 22-jun-04    added some more useful astr constants
  * 25-jan-05    added powd/powi
+ *  1-aug-05    nemo_string, nemo_stream for starlab interfaces
  */
 
 #ifndef _stdinc_h      /* protect against re-entry */
@@ -157,8 +158,10 @@ typedef unsigned char byte;
  * CONST_STRING:  and read-only strings (useful for C++)
  */
 
-typedef char* string;
-typedef const char* const_string;
+typedef char       *string;
+typedef char       *nemo_string;
+typedef const char *const_string;
+
 
 /*
  * STREAM: a replacement for 'FILE *'.
@@ -166,6 +169,7 @@ typedef const char* const_string;
  */
  
 typedef FILE *stream;
+typedef FILE *nemo_stream;
 
 typedef struct _mstr {     /* see mstropen(3) */
   string tmplate;
