@@ -66,7 +66,7 @@ void lsq_solve(int n, real *mat, real *vec, real *sol)
     if (n<1) error("lsq_solve: n=%d",n);
     matinv(mat,n,n,&det);
     if (det == 0.0) {
-        warning("lsq_solve: singular matrix of order %d",n);
+        dprintf(1,"lsq_solve: singular matrix of order %d",n);
         return;
     }
     for (i=0; i<n; i++) {
