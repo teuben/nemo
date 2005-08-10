@@ -18,6 +18,7 @@
  *				gcc -O2:  0.78   0.69 sec.
  *	16-feb-97	V3.1a   fixed for SINGLEPREC
  *       8-oct-01        3.2    add Dens and Eps
+ *       8-aug-05           a   fix aux normalization 
  */
 
 #include <stdinc.h>
@@ -43,14 +44,31 @@ string defv[] = {
     "dscale=1\n     Dens scale factor",
     "escale=1\n     Eps scale factor",
     "times=all\n    Times to select snapshots from",
-    "VERSION=3.2\n  8-oct-01 PJT",
+    "VERSION=3.2a\n 8-aug-05 PJT",
     NULL,
 };
 
 string usage="rescale a snapshot";
 
+string cvsid="$Id$";
+
 #define TIMEFUZZ	0.000001	/* tolerance in time comparisons */
 
+bool uscalar(real x)
+{
+    return x==1.0;
+}
+
+bool uvector(vector v)
+{
+    register int i;
+
+    for (i=0; i<NDIM; i++)
+        if(v[i] != 1.0) return FALSE;
+    return TRUE;
+}
+
+
 void nemo_main()
 {
     stream instr, outstr;
@@ -60,7 +78,6 @@ void nemo_main()
     int i, nbody, bits, nrscale, nvscale, nascale, kscale;
     Body *btab = NULL, *bp;
     bool Qmass, Qphase, Qacc, Qpot, Qkey, Qaux, Qeps, Qdens;
-    bool uscalar(), uvector();
 
     nrscale = nemoinpr(getparam("rscale"),rscale,NDIM);     /* RSCALE */
     if (nrscale==1) 
@@ -116,7 +133,7 @@ void nemo_main()
         Qphase = PhaseSpaceBit & bits  &&(!uvector(rscale) || !uvector(vscale));
         Qacc   = AccelerationBit & bits&& !uvector(ascale);
         Qpot   = PotentialBit & bits   && !uscalar(pscale);
-        Qaux   = AuxBit & bits         && !uscalar(ascale);
+        Qaux   = AuxBit & bits         && !uscalar(xscale);
         Qkey   = KeyBit & bits         && (kscale!=1);
         Qdens  = DensBit & bits        && !uscalar(dscale);
         Qeps   = EpsBit & bits         && !uscalar(escale);
@@ -152,21 +169,5 @@ void nemo_main()
 
         put_snap(outstr, &btab, &nbody, &tsnap, &bits);
     }
-}
-
-bool uscalar(x)
-real x;
-{
-    return x==1.0;
-}
-
-bool uvector(v)
-vector v;
-{
-    register int i;
-
-    for (i=0; i<NDIM; i++)
-        if(v[i] != 1.0) return FALSE;
-    return TRUE;
 }
 
