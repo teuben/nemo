@@ -5,6 +5,7 @@
 #
 #  17-apr-04    written, for 2490
 #  29-jul-04    checked for 2500
+#  12-aug-05    checked for 2510, commmetns on the new beta
 # 
 # TODO:   needs to add  -D_FILE_OFFSET_BITS=64   on e.g.linux if you want large file support
 
@@ -26,9 +27,11 @@ if (! -e $src) then
   echo CFITSIO source directory src=$src does not exist, try NEMO=
   echo or:
   echo " cd $NEMO/local"
-  echo " wget ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio2500.tar.gz"
-  echo " tar zxf cfitsio2500.tar.gz"
+  echo " wget ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio2510.tar.gz"
+  echo " tar zxf cfitsio2510.tar.gz"
   echo " ../src/scripts/cfitsio.install"
+  echo "Alternatively you can also try the beta version for large files:"
+  echo " curl ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio3003beta.tar.gz | tar zxf -"
   exit 1
 endif
 
