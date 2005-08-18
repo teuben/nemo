@@ -155,13 +155,14 @@ if ($bench) then
    set dir=Gadget-2.0
    pushd $dir
    if (! -e galaxy) mkdir galaxy
-   lamboot
    if ($?LD_LIBRARY_PATH) then
       setenv LD_LIBRARY_PATH $prefix/lib:$LD_LIBRARY_PATH 
    else
       setenv LD_LIBRARY_PATH $prefix/lib
    endif
+   lamboot
    time Gadget2/Gadget2 Gadget2/parameterfiles/galaxy.param >& galaxy.log
+   lamwipe
    # time mpirun -np 1 Gadget2/Gadget2 Gadget2/parameterfiles/galaxy.param >& galaxy.log
    # AMD64/3200:        2126.093u 2.983s 35:29.48 99.9%
    # P4/3300 desktop:   about 1h18m/2 = 78/2 = 2340" ?
