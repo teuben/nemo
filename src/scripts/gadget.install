@@ -15,7 +15,9 @@
 #     gadget.install download=1 prefix=$HOME/opt gsl=gsl-1.6.tar.gz
 #  would download all packages in the current working directory, install
 #  the binaries/libraries at $HOME/opt, but use gsl V1.6 instead of the
-#  default 1.4 version.
+#  default 1.4 version. On an AMD64/3200 (a fairly fast machine in 2005)
+#  this command takes about xx minutes, of which 35 minutes is the galaxy 
+#  benchmark.
 #
 #  The original CVS version of this script can be found in $NEMO/src/scripts
 #  but has been written to be NEMO agnostic. Using link= a MANYBODY install
@@ -62,7 +64,6 @@ if ($download) then
   curl $hdf_base/$hdf       | tar zxf -
   curl $lam_base/$lam       | tar zxf -
   curl $gadget_base/$gadget | tar zxf -
-  exit 0
 endif
 
 #                                               lam
