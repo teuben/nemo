@@ -55,6 +55,7 @@ if ($manybody != 0) then
   ln -s $manybody/gadget/$gadget
 endif
 
+#                                               alternatively download them on-the-fly, no tar files are saved
 if ($download) then
   curl $fftw_base/$fftw     | tar zxf -
   curl $gsl_base/$gsl       | tar zxf -
@@ -64,7 +65,7 @@ if ($download) then
   exit 0
 endif
 
-#                      lam
+#                                               lam
 if (-e $lam) tar zxf $lam
 set dir=`basename $lam .tar.gz`
 if (-e $dir) then
@@ -81,7 +82,7 @@ else
    echo WARNING: No $lam or $dir
 endif
 
-#                       gsl
+#                                               gsl
 if (-e $gsl) tar zxf $gsl
 set dir=`basename $gsl .tar.gz`
 if (-e $dir) then
@@ -95,7 +96,7 @@ else
    echo WARNING: No $gsl or $dir
 endif
 
-#			fftw, still needs V2, V3 doesn't work
+#			                        fftw, still needs V2, V3 doesn't work
 if (-e $fftw) tar zxf $fftw
 set dir=`basename $fftw .tar.gz`
 if (-e $dir) then
@@ -113,7 +114,7 @@ else
    echo WARNING: No $fftw or $dir
 endif
 
-#                        hdf5
+#                                               hdf5
 if (-e $hdf) tar zxf $hdf
 set dir=`basename $hdf .tar.gz`
 if (-e $dir) then
@@ -127,7 +128,7 @@ else
    echo WARNING: No $hdf or $dir
 endif
 
-#                        gadget, for galaxy problem
+#                                               gadget, for galaxy problem
 if (-e $gadget) tar zxf $gadget
 set dir=`basename $gadget .tar.gz`
 # for now gadget tar file base name different from created directory name
@@ -147,7 +148,7 @@ else
    set bench=0
 endif
 
-#                        galaxy: one of the gadget benchmark's
+#                                              galaxy: one of the gadget benchmark's
 if ($bench) then
    set dir=`basename $gadget .tar.gz`
    # for now gadget tar file base name different from created directory name
