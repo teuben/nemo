@@ -1,10 +1,11 @@
 #! /bin/csh -f
 #
 #  example install script for Gadget and all the needed companions
+#  on a single processor machine; 
 #  you probably want to edit this to make it work for you.
 #
-#  For gadget, see also: http://www.mpa-garching.mpg.de/gadget/
-#  For NEMO suport: see  gadgetsnap and snapgadget
+#  For gadget, see       http://www.mpa-garching.mpg.de/gadget/
+#  For NEMO suport, see  gadgetsnap and snapgadget
 #
 #  some of the packages (gsl and lam) take quite a while to compile, so be patient
 #  if your system did not come with it.
@@ -18,16 +19,37 @@ set hdf=hdf5-1.6.4.tar.gz
 set gadget=gadget2.tar.gz
 
 set prefix=/tmp/opt
+set link=0
+
+foreach _arg ($*)
+  set $_arg
+end
+
+#                                                 with MANYBODY and/or force symlinks?
+if ($?MANYBODY) then
+  if ($link == 0) then
+    set n=$MANYBODY
+  else
+    set n=$link
+  endif
+  ln -s $n/lam/$lam
+  ln -s $n/gsl/$gsl
+  ln -s $n/fftw/$fftw
+  ln -s $n/hdf/$hdf5
+  ln -s $n/gadget/$gadget
+endif
 
 
 #   first make sure you have LAM or MPICH installed
-#   for LAM you may also need libaio / libaio-devel 
+#   for LAM you may also need libaio / libaio-devel (as I did on FC4)
 
 if (1) then
    tar zxf $lam
    set dir=`basename $lam .tar.gz`
    pushd $dir
    ./configure --prefix=$prefix
+   make
+   make install
    popd
    # the new mpicc better be in the path now
    set path=($prefix/bin $path)
@@ -44,8 +66,6 @@ if (1) then
    make install
    popd
 endif
-
-#                       gsl
 
 #			fftw, still needs V2, V3 doesn't work
 if (1) then
@@ -73,10 +93,11 @@ if (1) then
    popd
 endif
 
-#                        gadget
+#                        gadget, for galaxy problem
 if (1) then
    tar zxf $gadget
-   set dir=`basename $dadget .tar.gz`
+   # gadget tar file base name different from created directory name
+   set dir=Gadget-2.0
    pushd $dir/Gadget2
    make -f parameterfiles/galaxy.Makefile \
         CC=mpicc OPTIMIZE="-O3 -Wall" \
