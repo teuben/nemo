@@ -4,6 +4,7 @@
 #  you probably want to edit this to make it work for you.
 #
 #  For gadget, see also: http://www.mpa-garching.mpg.de/gadget/
+#  For NEMO suport: see  gadgetsnap and snapgadget
 #
 #  some of the packages (gsl and lam) take quite a while to compile, so be patient
 #  if your system did not come with it.
