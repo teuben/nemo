@@ -11,24 +11,35 @@
 #  some of the packages (gsl and lam) take quite a while to compile, so be patient
 #  if your system did not come with it.
 #
+#  Example usage:
+#     gadget.install download=1 prefix=$HOME/opt gsl=gsl-1.6.tar.gz
+#  would download all packages in the current working directory, install
+#  the binaries/libraries at $HOME/opt, but use gsl V1.6 instead of the
+#  default 1.4 version.
+#
 #  The original CVS version of this script can be found in $NEMO/src/scripts
 #  but has been written to be NEMO agnostic. Using link= a MANYBODY install
 #  can be facilitated (http://www.manybody.org)
 #
 #  $Id$
 
+set fftw_base=http://www.fftw.org/
+set gsl_base=ftp://ftp.gnu.org/gnu/gsl/
+set hdf_base=ftp://ftp.ncsa.uiuc.edu/HDF/HDF5/current/src/
+set lam_base=http://www.lam-mpi.org/download/files/
+set gadget_base=http://www.mpa-garching.mpg.de/gadget/
 
-
-set lam=lam-7.1.1.tar.gz
-set gsl=gsl-1.4.tar.gz
 set fftw=fftw-2.1.5.tar.gz 
+set gsl=gsl-1.4.tar.gz
 set hdf=hdf5-1.6.4.tar.gz
+set lam=lam-7.1.1.tar.gz
 set gadget=gadget2.tar.gz
 
 set prefix=$HOME/opt
 set manybody=0
 set help=0
 set bench=1
+set download=0
 
 foreach _arg ($*)
   set $_arg
@@ -40,14 +51,23 @@ if ($manybody != 0) then
   ln -s $manybody/lam/$lam
   ln -s $manybody/gsl/$gsl
   ln -s $manybody/fftw/$fftw
-  ln -s $manybody/hdf/$hdf5
+  ln -s $manybody/hdf/$hdf
   ln -s $manybody/gadget/$gadget
 endif
 
+if ($download) then
+  curl $fftw_base/$fftw     | tar zxf -
+  curl $gsl_base/$gsl       | tar zxf -
+  curl $hdf_base/$hdf       | tar zxf -
+  curl $lam_base/$lam       | tar zxf -
+  curl $gadget_base/$gadget | tar zxf -
+  exit 0
+endif
+
 #                      lam
-if (-e $lam) then
-   tar zxf $lam
-   set dir=`basename $lam .tar.gz`
+if (-e $lam) tar zxf $lam
+set dir=`basename $lam .tar.gz`
+if (-e $dir) then
    pushd $dir
    ./configure --prefix=$prefix
    make
@@ -58,13 +78,13 @@ if (-e $lam) then
    rehash
    echo "$lam `date`" >> $prefix/installed.log
 else 
-   echo WARNING: No file $lam
+   echo WARNING: No $lam or $dir
 endif
 
 #                       gsl
-if (-e $gsl) then
-   tar zxf $gsl
-   set dir=`basename $gsl .tar.gz`
+if (-e $gsl) tar zxf $gsl
+set dir=`basename $gsl .tar.gz`
+if (-e $dir) then
    pushd $dir
    ./configure --prefix=$prefix
    make
@@ -72,13 +92,13 @@ if (-e $gsl) then
    popd
    echo "$gsl `date`" >> $prefix/installed.log
 else
-   echo WARNING: No file $gsl
+   echo WARNING: No $gsl or $dir
 endif
 
 #			fftw, still needs V2, V3 doesn't work
-if (-e $fftw) then
-   tar zxf $fftw
-   set dir=`basename $fftw .tar.gz`
+if (-e $fftw) tar zxf $fftw
+set dir=`basename $fftw .tar.gz`
+if (-e $dir) then
    pushd $dir
    ./configure --enable-mpi --enable-type-prefix --prefix=$prefix
    make
@@ -90,13 +110,13 @@ if (-e $fftw) then
    popd
    echo "$fftw `date`" >> $prefix/installed.log
 else
-   echo WARNING: No file $fftw
+   echo WARNING: No $fftw or $dir
 endif
 
 #                        hdf5
-if (-e $hdf) then
-   tar zxf $hdf
-   set dir=`basename $hdf .tar.gz`
+if (-e $hdf) tar zxf $hdf
+set dir=`basename $hdf .tar.gz`
+if (-e $dir) then
    pushd $dir
    ./configure --prefix=$prefix
    make 
@@ -104,38 +124,47 @@ if (-e $hdf) then
    popd
    echo "$hdf `date`" >> $prefix/installed.log
 else
-   echo WARNING: No file $hdf
+   echo WARNING: No $hdf or $dir
 endif
 
 #                        gadget, for galaxy problem
-if (-e $gadget) then
-   tar zxf $gadget
-   set dir=`basename $dadget .tar.gz`
-   # for now gadget tar file base name different from created directory name
-   set dir=Gadget-2.0
+if (-e $gadget) tar zxf $gadget
+set dir=`basename $gadget .tar.gz`
+# for now gadget tar file base name different from created directory name
+set dir=Gadget-2.0
+if (-e $dir) then
    pushd $dir/Gadget2
    make -f parameterfiles/galaxy.Makefile \
         CC=mpicc OPTIMIZE="-O3 -Wall" \
 	GSL_INCL= GSL_LIBS=  \
 	FFTW_INCL=-I$prefix/include  FFTW_LIBS=-L$prefix \
         MPICHLIB= \
-        HDF5INCL=-I$prefix HDF5LIB="-lhdf5 -lz" \
+        HDF5INCL=-I$prefix HDF5LIB="-lhdf5 -lz" 
    popd
    echo "$gadget `date`" >> $prefix/installed.log
 else
-   echo WARNING: No file $gadget
+   echo WARNING: No $gadget or $dir
    set bench=0
 endif
 
 #                        galaxy: one of the gadget benchmark's
 if ($bench) then
-   set dir=`basename $dadget .tar.gz`
+   set dir=`basename $gadget .tar.gz`
    # for now gadget tar file base name different from created directory name
    set dir=Gadget-2.0
    pushd $dir
    if (! -e galaxy) mkdir galaxy
    lamboot
-   time mpirun -np 1 Gadget2/Gadget2 Gadget2/parameterfiles/galaxy.param >& galaxy.log
+   if ($?LD_LIBRARY_PATH) then
+      setenv LD_LIBRARY_PATH $prefix/lib:$LD_LIBRARY_PATH 
+   else
+      setenv LD_LIBRARY_PATH $prefix/lib
+   endif
+   time Gadget2/Gadget2 Gadget2/parameterfiles/galaxy.param >& galaxy.log
+   # time mpirun -np 1 Gadget2/Gadget2 Gadget2/parameterfiles/galaxy.param >& galaxy.log
+   # AMD64/3200:        2126.093u 2.983s 35:29.48 99.9%
+   # P4/3300 desktop:   about 1h18m/2 = 78/2 = 2340" ?
+   # P4/1600 laptop:    about 4h35m           16508"
 endif
 
 exit 0
@@ -144,7 +173,7 @@ exit 0
 #   - add LIBDIR to the `LD_LIBRARY_PATH' environment variable
 #     during execution
 #   - add LIBDIR to the `LD_RUN_PATH' environment variable
-#     during linking
+#     during linking/manybody_pkg
 #   - use the `-Wl,--rpath -Wl,LIBDIR' linker flag
 #   - have your system administrator add LIBDIR to `/etc/ld.so.conf'
 #
@@ -161,5 +190,6 @@ help:
   echo ""
   echo "help=0|1        provide this help"
   echo "bench=0|1       also run galaxy benchmark at the end [$bench]"
+  echo "download=0|1    download using curl"
   echo "manybody=       set MANYBODY directory to create symlinks from"
   echo "prefix=         set prefix where to install all ancillary software (e.g. /usr/local)"
