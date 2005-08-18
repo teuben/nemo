@@ -3,6 +3,8 @@
 #  example install script for Gadget and all the needed companions
 #  you probably want to edit this to make it work for you.
 #
+#  For gadget, see also: http://www.mpa-garching.mpg.de/gadget/
+#
 #  some of the packages (gsl and lam) take quite a while to compile, so be patient
 #  if your system did not come with it.
 #
