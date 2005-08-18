@@ -81,7 +81,15 @@ if (1) then
 	FFTW_INCL=-I$prefix/include  FFTW_LIBS=-L$prefix \
         MPICHLIB= \
         HDF5INCL=-I$prefix HDF5LIB="-lhdf5 -lz" \
-	
+   popd
+endif
+
+#                        galaxy: one of the gadget benchmark's
+if (0) then
+   set dir=`basename $dadget .tar.gz`
+   pushd $dir
+   if (! -e galaxy) mkdir galaxy
+   time mpirun -np 1 Gadget2/Gadget2 galaxy.param >& galaxy.log
 endif
 
 #
