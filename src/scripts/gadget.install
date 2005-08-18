@@ -5,12 +5,19 @@
 #  you probably want to edit this to make it work for you.
 #
 #  For gadget, see       http://www.mpa-garching.mpg.de/gadget/
-#  For NEMO suport, see  gadgetsnap and snapgadget
+#  For NEMO suport, see  http://www.astro.umd.edu/nemo/
+#                        notably gadgetsnap and snapgadget
 #
 #  some of the packages (gsl and lam) take quite a while to compile, so be patient
 #  if your system did not come with it.
 #
+#  The original CVS version of this script can be found in $NEMO/src/scripts
+#  but has been written to be NEMO agnostic. Using link= a MANYBODY install
+#  can be facilitated (http://www.manybody.org)
+#
 #  $Id$
+
+
 
 set lam=lam-7.1.1.tar.gz
 set gsl=gsl-1.4.tar.gz
@@ -18,32 +25,27 @@ set fftw=fftw-2.1.5.tar.gz
 set hdf=hdf5-1.6.4.tar.gz
 set gadget=gadget2.tar.gz
 
-set prefix=/tmp/opt
-set link=0
+set prefix=$HOME/opt
+set manybody=0
+set help=0
+set bench=1
 
 foreach _arg ($*)
   set $_arg
 end
 
-#                                                 with MANYBODY and/or force symlinks?
-if ($?MANYBODY) then
-  if ($link == 0) then
-    set n=$MANYBODY
-  else
-    set n=$link
-  endif
-  ln -s $n/lam/$lam
-  ln -s $n/gsl/$gsl
-  ln -s $n/fftw/$fftw
-  ln -s $n/hdf/$hdf5
-  ln -s $n/gadget/$gadget
+if ($help) goto help
+#                                               force symlinks? (useful for MANYBODY)
+if ($manybody != 0) then
+  ln -s $manybody/lam/$lam
+  ln -s $manybody/gsl/$gsl
+  ln -s $manybody/fftw/$fftw
+  ln -s $manybody/hdf/$hdf5
+  ln -s $manybody/gadget/$gadget
 endif
 
-
-#   first make sure you have LAM or MPICH installed
-#   for LAM you may also need libaio / libaio-devel (as I did on FC4)
-
-if (1) then
+#                      lam
+if (-e $lam) then
    tar zxf $lam
    set dir=`basename $lam .tar.gz`
    pushd $dir
@@ -54,10 +56,13 @@ if (1) then
    # the new mpicc better be in the path now
    set path=($prefix/bin $path)
    rehash
+   echo "$lam `date`" >> $prefix/installed.log
+else 
+   echo WARNING: No file $lam
 endif
 
 #                       gsl
-if (1) then
+if (-e $gsl) then
    tar zxf $gsl
    set dir=`basename $gsl .tar.gz`
    pushd $dir
@@ -65,10 +70,13 @@ if (1) then
    make
    make install
    popd
+   echo "$gsl `date`" >> $prefix/installed.log
+else
+   echo WARNING: No file $gsl
 endif
 
 #			fftw, still needs V2, V3 doesn't work
-if (1) then
+if (-e $fftw) then
    tar zxf $fftw
    set dir=`basename $fftw .tar.gz`
    pushd $dir
@@ -80,10 +88,13 @@ if (1) then
    make 
    make install
    popd
+   echo "$fftw `date`" >> $prefix/installed.log
+else
+   echo WARNING: No file $fftw
 endif
 
 #                        hdf5
-if (1) then
+if (-e $hdf) then
    tar zxf $hdf
    set dir=`basename $hdf .tar.gz`
    pushd $dir
@@ -91,12 +102,16 @@ if (1) then
    make 
    make install
    popd
+   echo "$hdf `date`" >> $prefix/installed.log
+else
+   echo WARNING: No file $hdf
 endif
 
 #                        gadget, for galaxy problem
-if (1) then
+if (-e $gadget) then
    tar zxf $gadget
-   # gadget tar file base name different from created directory name
+   set dir=`basename $dadget .tar.gz`
+   # for now gadget tar file base name different from created directory name
    set dir=Gadget-2.0
    pushd $dir/Gadget2
    make -f parameterfiles/galaxy.Makefile \
@@ -106,15 +121,24 @@ if (1) then
         MPICHLIB= \
         HDF5INCL=-I$prefix HDF5LIB="-lhdf5 -lz" \
    popd
+   echo "$gadget `date`" >> $prefix/installed.log
+else
+   echo WARNING: No file $gadget
+   set bench=0
 endif
 
 #                        galaxy: one of the gadget benchmark's
-if (0) then
+if ($bench) then
    set dir=`basename $dadget .tar.gz`
+   # for now gadget tar file base name different from created directory name
+   set dir=Gadget-2.0
    pushd $dir
    if (! -e galaxy) mkdir galaxy
-   time mpirun -np 1 Gadget2/Gadget2 galaxy.param >& galaxy.log
+   lamboot
+   time mpirun -np 1 Gadget2/Gadget2 Gadget2/parameterfiles/galaxy.param >& galaxy.log
 endif
+
+exit 0
 
 #
 #   - add LIBDIR to the `LD_LIBRARY_PATH' environment variable
@@ -124,3 +148,18 @@ endif
 #   - use the `-Wl,--rpath -Wl,LIBDIR' linker flag
 #   - have your system administrator add LIBDIR to `/etc/ld.so.conf'
 #
+
+
+help:
+  echo "Ancillary software:"
+  echo "                URL for downloads                 current version"
+  echo "HDF5:   http://hdf.ncsa.uiuc.edu/HDF5             hdf=$hdf"
+  echo "GSL:    http://www.gnu.org/software/gsl           gsl=$gsl"
+  echo "LAM:    http://www.lam-mpi.org/                   lam=$lam"
+  echo "FFTW:   http://www.fftw.org/                      fftw=$fftw"
+  echo "GADGET  http://www.mpa-garching.mpg.de/gadget/    gadget=$gadget"
+  echo ""
+  echo "help=0|1        provide this help"
+  echo "bench=0|1       also run galaxy benchmark at the end [$bench]"
+  echo "manybody=       set MANYBODY directory to create symlinks from"
+  echo "prefix=         set prefix where to install all ancillary software (e.g. /usr/local)"
