@@ -1,0 +1,91 @@
+#! /bin/csh -f
+#
+#  example install script for Gadget and all the needed companions
+#
+#  some of the packages (gsl and lam) take quite a while to compile, so be patient
+#  if your system did not come with it.
+
+set lam=lam-7.1.1.tar.gz
+set gsl=gsl-1.4.tar.gz
+set fftw=fftw-2.1.5.tar.gz 
+set hdf=hdf5-1.6.4.tar.gz
+set gadget=gadget2.tar.gz
+
+set prefix=/tmp/opt
+
+
+#   first make sure you have LAM or MPICH installed
+#   for LAM you may also need libaio / libaio-devel 
+
+if (1) then
+   tar zxf $lam
+   set dir=`basename $lam .tar.gz`
+   pushd $dir
+   ./configure --prefix=$prefix
+   popd
+   # the new mpicc better be in the path now
+   set path=($prefix/bin $path)
+   rehash
+endif
+
+#                       gsl
+if (1) then
+   tar zxf $gsl
+   set dir=`basename $gsl .tar.gz`
+   pushd $dir
+   ./configure --prefix=$prefix
+   make
+   make install
+   popd
+endif
+
+#                       gsl
+
+#			fftw, still needs V2, V3 doesn't work
+if (1) then
+   tar zxf $fftw
+   set dir=`basename $fftw .tar.gz`
+   pushd $dir
+   ./configure --enable-mpi --enable-type-prefix --prefix=$prefix
+   make
+   make install
+   make clean
+   ./configure --enable-mpi --enable-type-prefix --prefix=$prefix --enable-float
+   make 
+   make install
+   popd
+endif
+
+#                        hdf5
+if (1) then
+   tar zxf $hdf
+   set dir=`basename $hdf .tar.gz`
+   pushd $dir
+   ./configure --prefix=$prefix
+   make 
+   make install
+   popd
+endif
+
+#                        gadget
+if (1) then
+   tar zxf $gadget
+   set dir=`basename $dadget .tar.gz`
+   pushd $dir/Gadget2
+   make -f parameterfiles/galaxy.Makefile \
+        CC=mpicc OPTIMIZE="-O3 -Wall" \
+	GSL_INCL= GSL_LIBS=  \
+	FFTW_INCL=-I$prefix/include  FFTW_LIBS=-L$prefix \
+        MPICHLIB= \
+        HDF5INCL=-I$prefix HDF5LIB="-lhdf5 -lz" \
+	
+endif
+
+#
+#   - add LIBDIR to the `LD_LIBRARY_PATH' environment variable
+#     during execution
+#   - add LIBDIR to the `LD_RUN_PATH' environment variable
+#     during linking
+#   - use the `-Wl,--rpath -Wl,LIBDIR' linker flag
+#   - have your system administrator add LIBDIR to `/etc/ld.so.conf'
+#
