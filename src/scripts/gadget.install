@@ -1,9 +1,12 @@
 #! /bin/csh -f
 #
 #  example install script for Gadget and all the needed companions
+#  you probably want to edit this to make it work for you.
 #
 #  some of the packages (gsl and lam) take quite a while to compile, so be patient
 #  if your system did not come with it.
+#
+#  $Id$
 
 set lam=lam-7.1.1.tar.gz
 set gsl=gsl-1.4.tar.gz
