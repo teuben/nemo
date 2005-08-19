@@ -1,8 +1,9 @@
 #! /bin/csh -f
 #
-#  example install script for Gadget and all the needed companions
-#  on a single processor machine; 
-#  you probably want to edit this to make it work for you.
+#  (somewhat linux centric) example install script for Gadget and all the needed 
+#  companion libraries on a single processor machine; 
+#  you probably want to edit this file, or use the commandline parameters,
+#  to make it work for you. See an example below.
 #
 #  For gadget, see       http://www.mpa-garching.mpg.de/gadget/
 #  For NEMO suport, see  http://www.astro.umd.edu/nemo/
@@ -12,15 +13,18 @@
 #  if your system did not come with it.
 #
 #  Example usage:
+#
 #     gadget.install download=1 prefix=$HOME/opt gsl=gsl-1.6.tar.gz
+#
 #  would download all packages in the current working directory, install
 #  the binaries/libraries at $HOME/opt, but use gsl V1.6 instead of the
 #  default 1.4 version. On an AMD64/3200 (a fairly fast machine in 2005)
 #  this command takes about xx minutes, of which 35 minutes is the galaxy 
-#  benchmark.
+#  benchmark and 1 minute of download time. Total space needed was xxx MB,
+#  which includes xxx MB for the benchmark.
 #
 #  The original CVS version of this script can be found in $NEMO/src/scripts
-#  but has been written to be NEMO agnostic. Using link= a MANYBODY install
+#  but has been written to be NEMO agnostic. Using manybody= a MANYBODY install
 #  can be facilitated (http://www.manybody.org)
 #
 #  $Id$
@@ -165,9 +169,11 @@ if ($bench) then
    time Gadget2/Gadget2 Gadget2/parameterfiles/galaxy.param >& galaxy.log
    lamwipe
    # time mpirun -np 1 Gadget2/Gadget2 Gadget2/parameterfiles/galaxy.param >& galaxy.log
-   # AMD64/3200:        2126.093u 2.983s 35:29.48 99.9%
+   # AMD64/3200:           2126.093u 2.983s 35:29.48 99.9%
+   # AMD Opteron 246/2000  2160.138u 2.687s 36:02.81 100.0%
    # P4/3300 desktop:   about 1h18m/2 = 78/2 = 2340" ?
    # P4/1600 laptop:    about 4h35m           16508"
+   # P4/64/3000            3292.062u 7.109s 55:05.93 99.7%
 endif
 
 exit 0
