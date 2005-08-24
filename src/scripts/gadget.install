@@ -41,11 +41,12 @@ set hdf=hdf5-1.6.4.tar.gz
 set lam=lam-7.1.1.tar.gz
 set gadget=gadget2.tar.gz
 
-set prefix=$HOME/opt
+set prefix=`pwd`/opt
 set manybody=0
 set help=0
 set bench=1
 set download=0
+set curl=1
 
 foreach _arg ($*)
   set $_arg
@@ -63,15 +64,30 @@ endif
 
 #                                               alternatively download them on-the-fly, no tar files are saved
 if ($download) then
-  curl $fftw_base/$fftw     | tar zxf -
-  curl $gsl_base/$gsl       | tar zxf -
-  curl $hdf_base/$hdf       | tar zxf -
-  curl $lam_base/$lam       | tar zxf -
-  curl $gadget_base/$gadget | tar zxf -
+  if ($curl) then
+    curl $fftw_base/$fftw     | tar zxf -
+    curl $gsl_base/$gsl       | tar zxf -
+    curl $hdf_base/$hdf       | tar zxf -
+    curl $lam_base/$lam       | tar zxf -
+    curl $gadget_base/$gadget | tar zxf -
+  else
+    wget $fftw_base/$fftw     
+    wget $gsl_base/$gsl       
+    wget $hdf_base/$hdf       
+    wget $lam_base/$lam       
+    wget $gadget_base/$gadget 
+  endif
 endif
 
+#
+set rc=$prefix/gadget_start.csh
+mkdir -p $prefix
+echo "# automatically created by $0, careful with editing"   > $rc
+echo "# date:  `date`"                                      >> $rc
+echo "# args:  $*"                                          >> $rc
+
 #                                               lam
-if (-e $lam) tar zxf $lam
+if (-e $lam) gtar zxf $lam
 set dir=`basename $lam .tar.gz`
 if (-e $dir) then
    pushd $dir
@@ -80,15 +96,16 @@ if (-e $dir) then
    make install
    popd
    # the new mpicc better be in the path now
-   set path=($prefix/bin $path)
-   rehash
+   echo 'set path=($prefix/bin $path) ' >> $rc
+   echo 'rehash'                        >> $rc
+   source $rc
    echo "$lam `date`" >> $prefix/installed.log
 else 
    echo WARNING: No $lam or $dir
 endif
 
 #                                               gsl
-if (-e $gsl) tar zxf $gsl
+if (-e $gsl) gtar zxf $gsl
 set dir=`basename $gsl .tar.gz`
 if (-e $dir) then
    pushd $dir
@@ -102,7 +119,7 @@ else
 endif
 
 #			                        fftw, still needs V2, V3 doesn't work
-if (-e $fftw) tar zxf $fftw
+if (-e $fftw) gtar zxf $fftw
 set dir=`basename $fftw .tar.gz`
 if (-e $dir) then
    pushd $dir
@@ -120,7 +137,7 @@ else
 endif
 
 #                                               hdf5
-if (-e $hdf) tar zxf $hdf
+if (-e $hdf) gtar zxf $hdf
 set dir=`basename $hdf .tar.gz`
 if (-e $dir) then
    pushd $dir
@@ -134,7 +151,7 @@ else
 endif
 
 #                                               gadget, for galaxy problem
-if (-e $gadget) tar zxf $gadget
+if (-e $gadget) gtar zxf $gadget
 set dir=`basename $gadget .tar.gz`
 # for now gadget tar file base name different from created directory name
 set dir=Gadget-2.0
@@ -146,6 +163,7 @@ if (-e $dir) then
 	FFTW_INCL=-I$prefix/include  FFTW_LIBS=-L$prefix \
         MPICHLIB= \
         HDF5INCL=-I$prefix HDF5LIB="-lhdf5 -lz" 
+   cp Gadget2 $prefix/bin
    popd
    echo "$gadget `date`" >> $prefix/installed.log
 else
@@ -160,20 +178,29 @@ if ($bench) then
    set dir=Gadget-2.0
    pushd $dir
    if (! -e galaxy) mkdir galaxy
-   if ($?LD_LIBRARY_PATH) then
-      setenv LD_LIBRARY_PATH $prefix/lib:$LD_LIBRARY_PATH 
-   else
-      setenv LD_LIBRARY_PATH $prefix/lib
-   endif
-   lamboot
+   echo '   if ($?LD_LIBRARY_PATH) then'                                >> $rc
+   echo '      setenv LD_LIBRARY_PATH $prefix/lib:$LD_LIBRARY_PATH '    >> $rc
+   echo '   else'                                                       >> $rc
+   echo '      setenv LD_LIBRARY_PATH $prefix/lib'                      >> $rc
+   echo '   endif'                                                      >> $rc
+   echo 'lamboot'                                                       >> $rc
+   source $rc
    time Gadget2/Gadget2 Gadget2/parameterfiles/galaxy.param >& galaxy.log
    lamwipe
+   # "standard benchmark on single processor"
+   # ---------------------------------------------------------------------------------------
    # time mpirun -np 1 Gadget2/Gadget2 Gadget2/parameterfiles/galaxy.param >& galaxy.log
    # AMD64/3200:           2126.093u 2.983s 35:29.48 99.9%
+   #                       3294.859u 7.763s 55:10.38 99.7%   ???
+   # np=1 0.000u 0.000s 55:04.35 0.0%     0+0k 0+0io 0pf+0w
+   # np=2 0.000u 0.002s 36:44.69 0.0%     0+0k 0+0io 0pf+0w
+   # np=4 0.000u 0.002s 39:18.13 0.0%     0+0k 0+0io 0pf+0w
    # AMD Opteron 246/2000  2160.138u 2.687s 36:02.81 100.0%
    # P4/3300 desktop:   about 1h18m/2 = 78/2 = 2340" ?
    # P4/1600 laptop:    about 4h35m           16508"
    # P4/64/3000            3292.062u 7.109s 55:05.93 99.7%
+   # G5/1600               4263.6u  51.5s 1:19:07.64 90.8%
+   # ---------------------------------------------------------------------------------------
 endif
 
 exit 0
@@ -199,6 +226,7 @@ help:
   echo ""
   echo "help=0|1        provide this help"
   echo "bench=0|1       also run galaxy benchmark at the end [$bench]"
-  echo "download=0|1    download using curl"
-  echo "manybody=       set MANYBODY directory to create symlinks from"
-  echo "prefix=         set prefix where to install all ancillary software (e.g. /usr/local)"
+  echo "download=0|1    download? [$download]"
+  echo "curl=0|1        download using curl (1) or wget (0) ? [$curl]"
+  echo "manybody=       set MANYBODY directory to create symlinks from if no download"
+  echo "prefix=         set prefix where to install all ancillary software [$prefix]"
