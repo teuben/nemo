@@ -36,7 +36,7 @@ set lam_base=http://www.lam-mpi.org/download/files/
 set gadget_base=http://www.mpa-garching.mpg.de/gadget/
 
 set fftw=fftw-2.1.5.tar.gz 
-set gsl=gsl-1.4.tar.gz
+set gsl=gsl-1.6.tar.gz
 set hdf=hdf5-1.6.4.tar.gz
 set lam=lam-7.1.1.tar.gz
 set gadget=gadget2.tar.gz
@@ -150,20 +150,23 @@ else
    echo WARNING: No $hdf or $dir
 endif
 
-#                                               gadget, for galaxy problem
+#                                               gadget, for all standard problems
 if (-e $gadget) gtar zxf $gadget
 set dir=`basename $gadget .tar.gz`
 # for now gadget tar file base name different from created directory name
 set dir=Gadget-2.0
 if (-e $dir) then
    pushd $dir/Gadget2
-   make -f parameterfiles/galaxy.Makefile \
-        CC=mpicc OPTIMIZE="-O3 -Wall" \
-	GSL_INCL= GSL_LIBS=  \
-	FFTW_INCL=-I$prefix/include  FFTW_LIBS=-L$prefix \
-        MPICHLIB= \
-        HDF5INCL=-I$prefix HDF5LIB="-lhdf5 -lz" 
-   cp Gadget2 $prefix/bin
+   foreach problem (cluster galaxy gassphere lcdm_gas)
+	make -f parameterfiles/$problem.Makefile clean
+	make -f parameterfiles/$problem.Makefile \
+	    CC=mpicc OPTIMIZE="-O3 -Wall" \
+	    GSL_INCL= GSL_LIBS=  \
+	    FFTW_INCL=-I$prefix/include  FFTW_LIBS=-L$prefix \
+	    MPICHLIB= \
+	    HDF5INCL=-I$prefix HDF5LIB="-lhdf5 -lz" 
+	cp Gadget2 $prefix/bin/Gadget2.$problem
+   end
    popd
    echo "$gadget `date`" >> $prefix/installed.log
 else
@@ -185,7 +188,7 @@ if ($bench) then
    echo '   endif'                                                      >> $rc
    echo 'lamboot'                                                       >> $rc
    source $rc
-   time Gadget2/Gadget2 Gadget2/parameterfiles/galaxy.param >& galaxy.log
+   time Gadget2.galaxy Gadget2/parameterfiles/galaxy.param >& galaxy.log
    lamwipe
    # "standard benchmark on single processor"
    # ---------------------------------------------------------------------------------------
