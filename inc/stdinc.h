@@ -411,6 +411,10 @@ extern void   mstr_close(mstr *mp);
 extern int    mstr_count(mstr *mp);
 extern int    mstr_multi(mstr *mp);
 
+/* io/endian.c */
+extern bool BigEndian(void);
+extern bool LittleEndian(void);
+
 /* io/filesecret.c */
 extern void   strclose(stream);
 
