@@ -30,7 +30,7 @@ LOBJFILES= $L(allocate.o)  $L(burststring.o) $L(cputime.o) $L(date_id.o) \
 	   $L(progress.o)
 BINFILES = bswap
 TESTFILES= errortest burstrtest filefntest sizetest cputest cputool \
-	   progresstest
+	   progresstest allocatetest
 
 help:
 	@echo NEMO/src/kernel/core
@@ -99,6 +99,9 @@ nemo_src:
 bin: $(BINFILES)
 obj: $(OBJFILES)
 tests: $(TESTFILES)
+
+allocatetest: allocate.c
+	$(CC) $(CFLAGS) -o allocatetest -DTESTBED allocate.c $(NEMO_LIBS)
 
 errortest: error.c
 	$(CC) $(CFLAGS) -o errortest -DTESTBED error.c $(NEMO_LIBS)

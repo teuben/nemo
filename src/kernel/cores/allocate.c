@@ -12,6 +12,7 @@
  *	 3-may-95	added dprintf() 
  *	 6-apr-01	changed malloc -> calloc		pjt
  *         jan-02       experimenting with exception handling	pjt/nas
+ *       7-sep-05       TOOLBOX benchmark pjt/chapman
  */
 
 #include <stdinc.h>
@@ -74,7 +75,7 @@ void *reallocate(void *bp, int nb)
 #ifdef NEW_EH
 	RaiseException (errno);
 #else
-	error("allocate: not enough memory for %d bytes", nb);
+	error("reallocate: not enough memory for %d bytes", nb);
 #endif
     }
     dprintf(8,"reallocate: %d bytes @ %d \n",nb, mem);
@@ -96,6 +97,62 @@ my_calloc(size_t nmemb, size_t size)
   if (my_counter == 5) return NULL;
   return calloc( nmemb, size);
 }
+
+#if defined(TESTBED)
+
+#include <nemo.h>
+
+string defv[] = {
+  "size=16\n       Size of a single bucket (in kB) to allocate",
+  "nalloc=0\n      Number of extra times to allocate <size>",
+  "incr=16\n       Increment size (in kB) to reallocate the size\n",
+  "nrealloc=0\n    Number of times to increment and reallocate\n",
+  "repeat=1\n      How often to repeat the whole test",
+  "VERSION=1.0\n   7-sep-2005 PJT",
+  NULL,
+};
+
+string usage = "(re)allocate benchmark";
+
+void nemo_main(void) {
+  int size, size0 = getiparam("size")*1024;
+  int nalloc = getiparam("nalloc");
+  int incr = getiparam("incr")*1024;
+  int nrealloc = getiparam("nrealloc");
+  int repeat = getiparam("repeat");
+  int i;
+  char *data;
+
+  dprintf(0,"  Alloc:  %d * %d bytes\n",nalloc,size0);
+  dprintf(0,"ReAlloc:  %d * %d bytes\n",nrealloc,incr);
+
+  while (repeat-- > 0) {              /* repeat loop */
+
+    size = size0;                     /* allocate loop */
+    data = allocate(size);
+    if (nalloc > 1) {
+      for (i=0; i<nalloc; i++) {
+	free(data);
+	size += size0;
+	data = allocate(size);
+      }
+      free(data);
+    }
+    
+    size = size0;                      /* reallocate loop */
+    data = allocate(size);
+    dprintf(1,"%d %d %d\n",repeat,size,incr);
+    if (nrealloc > 1) {
+      for (i=0; i<nrealloc; i++) {
+	size += incr;
+	data = reallocate(data,size);
+      }
+    }
+    free(data);
+  }
+}
+
+#endif
 
 
 
