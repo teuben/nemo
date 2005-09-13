@@ -1,0 +1,41 @@
+.TH POTSF 1NEMO "13 September 2005"
+.SH NAME
+potsf \- find potential parameters in a structured file
+.SH SYNOPSIS
+\fBpotsf\fP [parameter=value]
+.SH DESCRIPTION
+The standard \fBName\fP (potname), \fBPars\fP (potpars=)
+and \fBFile\fP (potfile=) of a \fIpotential(5NEMO)\fP of
+which the description is embedded with a dataset can be
+viewed with this program.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input file name.
+A binary structured file in which a potential is present at any hierarchy.
+No default.
+.TP
+\fBfirst=\fP
+Only print the first one found, then immediately quit. [true]
+.SH EXAMPLES
+.nf
+
+  % mkorbit o1 1 0 0 0 vz=0 etot=-0.1 potname=plummer potpars=0,1,2
+  % potsf o1
+  potname=plummer
+  potpars=0,1,2
+
+.fi
+.SH SEE ALSO
+tsf(1NEMO), csf(1NEMO), potq(1NEMO), potential(5NEMO)
+.SH FILES
+NEMO/src/orbit/potential
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+13-Sep-05	V0.2 Created		PJT
+.fi
