@@ -2,7 +2,8 @@
  * POTSF: extract potential (potname/pars/file) from a dataset
  *        *** cloned from tsf ***
  *
- *   0.1  13-sep-05        Example for Peyaud
+ *   0.1  13-sep-05        Example for Peyaud 
+ *   0.2                   added first=
  */
 
 #include <stdinc.h>
@@ -10,11 +11,10 @@
 #include <filestruct.h>
 
 string defv[] = {
-    "in=???\n                     input file name ",
-    "maxprec=false\n		  print nums with max precision ",
-    "item=\n                      Select specific item",
-    "VERSION=0.1\n		  13-sep-05 PJT ",
-    NULL,
+  "in=???\n                     input file name ",
+  "first=t\n                    Only print the first one found",
+  "VERSION=0.2\n		13-sep-05 PJT ",
+  NULL,
 };
 
 string usage="find potential parameters in a structured file";
@@ -24,10 +24,10 @@ string cvsid="$Id$";
 
 
 
-
 local stream instr;			/* input stream from struct. file   */
 
-local bool in_pot = FALSE;
+local bool Qpot   = FALSE;
+local bool Qfirst = TRUE;
 
 /* local functions */
 void   print_item   (string);
@@ -46,6 +46,7 @@ void nemo_main()
   string *tags;
 
   instr = stropen(getparam("in"), "r");
+  Qfirst = getbparam("first");
   
   while ((tags = list_tags(instr)) != NULL) {
     print_item(*tags);
@@ -63,12 +64,15 @@ void print_item(string tag)
   if (streq(type, SetType)) {
     get_set(instr, tag);
     print_set(tag);
-    if (streq(tag,"Potential")) in_pot = TRUE;
+    if (streq(tag,"Potential")) Qpot = TRUE;
     tags = list_tags(instr);
     for (tp = tags; *tp != NULL; tp++)
       print_item(*tp);
     get_tes(instr, tag);
-    if (streq(tag,"Potential")) in_pot = FALSE;
+    if (streq(tag,"Potential")) {
+      if (Qfirst) stop(0);
+      Qpot = FALSE;
+    }
     print_tes(tag);
     for (tp = tags; *tp != NULL; tp++)
       free(*tp);
@@ -96,7 +100,7 @@ void print_tes(string tag)
 
 void print_header(string tag, string type, int *dims)
 {
-  if (!in_pot) return;
+  if (!Qpot) return;
     
   if (streq(tag,"Name")) printf("potname=");
   if (streq(tag,"Pars")) printf("potpars=");
@@ -117,7 +121,7 @@ void print_data(string tag, string type, int *dims)
     if (streq(type, AnyType)) {		/*   output generic data?   */
       dp += sizeof(byte);
     } else if (streq(type, CharType)) {	/*   output readable chars? */
-      if (in_pot) sprintf(buf, "%c", *((char *) dp));
+      if (Qpot) sprintf(buf, "%c", *((char *) dp));
       dp += sizeof(char);
     } else if (streq(type, ByteType)) {	/*   output bytes of data?  */
       dp += sizeof(byte);
@@ -133,7 +137,7 @@ void print_data(string tag, string type, int *dims)
       dp += sizeof(double);
     } else
       error("print_data: type %s unknown\n", type);
-    if (in_pot)
+    if (Qpot)
       outstr(buf);
   }
   free((char *)dat);
@@ -142,11 +146,11 @@ void print_data(string tag, string type, int *dims)
 
 bool outstr(string str)
 {
-  if (in_pot) printf("%s", str);                          /* output string */
+  if (Qpot) printf("%s", str);                          /* output string */
 }
 
 void end_line()
 {
-  if (in_pot) printf("\n");
+  if (Qpot) printf("\n");
 }
 
