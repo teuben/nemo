@@ -19,10 +19,10 @@ MAN3FILES =
 MAN5FILES = 
 INCFILES = 
 SRCFILES= potential.c potential0.c potlist.c rotcurves.c acceleration.cc \
- 	  $(INCFILES) Makefile
+          $(INCFILES) Makefile
 OBJFILES= potential.o fmath.o acceleration.o
 LOBJFILES= $L(potential.o) $L(fmath.o)
-BINFILES = potlist rotcurves potccd potq potrot
+BINFILES = potlist rotcurves potccd potq potrot potsf
 TESTFILES = potfortest
 
 #	update the library: direct comparison with modules inside L
