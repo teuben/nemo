@@ -34,6 +34,7 @@
  *                     b : fix old semi-autoscaling bug while fixing it for multicol
  *      31-dec-03  V2.6  : option to do layout first
  *      28-apr-04  V2.7  : added xbox, ybox= options as in snapplot
+ *      17-sep-05  V2.8  : added pl_readlines()
  *
  */
 
@@ -90,7 +91,8 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "cursor=\n           Optional output file to retrieve cursor coordinates",
     "layout=\n           Optional input layout file",
     "first=f\n           Layout first or last?",
-    "VERSION=2.6\n	 31-dec-03 PJT",
+    "readline=f\n        Interactively reading commands",
+    "VERSION=2.8\n	 17-sep-05 PJT",
     NULL
 };
 
@@ -136,6 +138,7 @@ local real xbox[3], ybox[3];
 
 local plcommand *layout;
 local bool layout_first;
+local bool Qreadlines;
 
 void setparams(), plot_data();
 
@@ -281,7 +284,7 @@ void setparams()
     else
         layout = NULL;
     layout_first = getbparam("first");
-    
+    Qreadlines = getbparam("readline");
 }
 
 #define MVAL 		 64
@@ -493,6 +496,7 @@ void plot_data()
         if (cstr) strclose(cstr);
     }
     if (layout && !layout_first) pl_exec(layout);
+    if (Qreadlines) pl_readlines();
 
     plstop();
 }
