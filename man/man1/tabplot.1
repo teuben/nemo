@@ -1,4 +1,4 @@
-.TH TABHIST 1NEMO "3 August 2002"
+.TH TABHIST 1NEMO "17 September 2005"
 .SH NAME
 tabplot \- general table plotter
 .SH SYNOPSIS
@@ -124,6 +124,15 @@ than 2.0 fullscale was always on (t), by default it is now off (f).
 .TP
 \fBlayout=\fP
 Optional Layout file that contains draw commands. Default: none.
+.TP
+\fBfirst=t|f\fP
+Should the layout file be called first or last ?  
+[\fBf\fP]
+.TP
+\fBreadline=t|f\fP
+After all batch plotting is done, should an interactive layout annotator
+(see also \fIlayout(5NEMO)\fP) be called. 
+[\fBf\fP]
 .SH BUGS
 tab= doesn't work properly with multiple columns
 .SH EXAMPLES
@@ -166,4 +175,5 @@ Peter Teuben
 28-jul-99	V2.2 added color=
 21-jul-00	V2.3 min & max can be separately set	PJT
 2-aug-02	V2.5 allow number of x columns to be > 1	PJT
+17-sep-05	V2.8 added readline= and documented first=	PJT
 .fi
