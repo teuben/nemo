@@ -8,6 +8,7 @@
  *       7-apr-01       gcc warnings                    pjt
  *      14-apr-01       added color
  *      14-mar-04       skip blank line
+ *      17-sep-05       use MAXL_INELEN, added pl_readlines    PJT
  *
  */
 
@@ -17,6 +18,10 @@
 #include <ctype.h>
 #include <layout.h>
 #include <extstring.h>
+#if HAVE_LIBREADLINE
+#include <readline/readline.h>
+#include <readline/history.h>
+#endif
 
 local struct www {                  /*  List of all basic YAPP commands */
     pl_id id;                       /* YAPP function id; see layout.h */
@@ -40,12 +45,13 @@ local struct www {                  /*  List of all basic YAPP commands */
     { Frame,  "frame",    ""     },
     { Init,   "init",     "srrrr"},
     { Stop,   "stop",     ""     },
+    { Help,   "?",        ""     },
     { NOP,    "#",        ""     },
     { NOP,    NULL,       NULL   },
 };
 
 local string *split(string);
-
+local void layout_help(void);
 
 
 /*
@@ -57,14 +63,14 @@ local string *split(string);
 plcommand *pl_fread(string file)
 {
     stream fp=stropen(file,"r");
-    char line[128];
+    char line[MAX_LINELEN];
     plcommand *p, *start;
 
     start = (plcommand *) allocate(sizeof(plcommand));  /* alloc first */
     start->id = End;
     p = start;
 
-    while (fgets(line,128,fp)) {        /* read all lines in file */
+    while (fgets(line,MAX_LINELEN,fp)) {        /* read all lines in file */
 	dprintf(1,"%s",line);
         if (line[0] == '#') continue;
         if (line[0] == '\n') continue;
@@ -77,6 +83,42 @@ plcommand *pl_fread(string file)
     strclose(fp);
     return start;
 }
+
+/* 
+ * PL_RE: read lines, and execute it
+ */
+
+void pl_readlines(void)
+{
+  plcommand p;
+  char line[MAX_LINELEN], *cmd;
+
+  p.next = NULL;
+#if HAVE_LIBREADLINE 
+  warning("** Experimental readline based READLINE layout **");
+  while(1) {
+    cmd = readline("LAYOUT>");
+    if (cmd == 0) break;
+    if (strlen(cmd) == 0) continue;
+    if (pl_lread(cmd,&p)>0) {
+      pl_exec(&p);
+    }
+  }
+#else
+  printf("LAYOUT> "); fflush(stdout);
+  warning("** Experimental simple stdin READLINE layout **");
+  while (fgets(line,MAX_LINELEN,stdin)) {        /* read all lines from stdin */
+    if (strlen(line) == 0) continue;
+    if (pl_lread(line,&p)>0) {
+      pl_exec(&p);
+    }
+    printf("LAYOUT> "); fflush(stdout);
+  }
+#endif
+  warning(" *** All done with readlines input ***\n");
+}
+
+
 
 /*
  * PL_LREAD:  read one line, parse it into a plcommand
@@ -167,6 +209,8 @@ void pl_exec(plcommand *p)
                          break;
             case Stop:   plstop();
 			 break;
+	    case Help:   layout_help();
+                         break;
             case NOP:    break;
 	    default: 	 warning("pl_exec: unknown id code %d",p->id);
 		 	 break;
@@ -213,6 +257,19 @@ local string *split(string line)
     sp[n] = NULL;
     dprintf(1,"Command %s: argc=%d\n",sp[0],n);
     return sp;
+}
+
+local void layout_help(void)
+{
+  int i;
+
+  printf("One of these days there will be help here, for now , these are the commands\n");
+  for (i=0; www[i].command; i++) {
+    if (strlen(www[i].args) > 0)
+      printf("%-10s %s\n",www[i].command, www[i].args);
+    else
+      printf("%-10s\n",www[i].command);
+  }
 }
 
 

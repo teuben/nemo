@@ -5,15 +5,10 @@ pl_fread, pl_lread, pl_exec \- ASCII interpreter of YAPP commands
 .nf
 \fB#include <layout.h>
 
-plcommand *pl_fread(filename)
-string filename;
-
-int pl_lread(line, p)
-string line;
-plcommand *p;
-
-void pl_exec(p)
-plcommand *p;
+plcommand *pl_fread(string filename)
+int pl_lread(string line, plcommand *p)
+void pl_exec(plcommand *p)
+void pl_readlines(void);
 \fP
 .fi
 .SH DESCRIPTION
@@ -42,6 +37,10 @@ The routine \fIpl_exec\fP executes a previously read
 LAYOUT file, by passing it a pointer to the linked list of
 \fBplcommand\fP. The linked list is traversed until it ends
 or the \fIEnd\fP command is encountered.
+.PP
+The routine \fIpl_readlines\fP keeps reading commands from
+stdin (via the READLINE library if present) and executing them,
+in effect giving a simple mongo/sm/wip type interface.
 .SH EXAMPLES
 The following code reads a layout file entered through a program
 keyword \fBlayout=\fP, parses it and executes it. Because of the
@@ -51,11 +50,12 @@ nested programming style, the linked list of \fBplcommand\fP is lost.
 	pl_exec(pl_fread(getparam("layout")));
 .nf
 .SH SEE ALSO
-yapp(3NEMO), layout(5NEMO)
+tabplot(1NEMO), yapp(3NEMO), layout(5NEMO)
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4i
 20-oct-92 	written          	PJT
+17-sep-05	added pl_readlines	PJT
 .fi
