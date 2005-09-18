@@ -12,7 +12,7 @@
 typedef enum { End, Swap, Xscale, Yscale, Ltype, Line, Move,    /* Valid Yapp */
 	       Color,
                Point, Circle, Cross, Box, Just, Text, Flush,
-               Frame, Init, Stop, NOP} pl_id;
+               Frame, Init, Stop, Help, NOP} pl_id;
 
 
 /*
@@ -44,6 +44,7 @@ typedef struct plcommand {  /* a YAPP command: name and parameters */
 
 plcommand *pl_fread(string file);
 int        pl_lread(string line, plcommand *p);
+void       pl_readlines(void);
 void       pl_exec (plcommand *p);
 
 #endif
