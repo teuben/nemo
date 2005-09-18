@@ -159,6 +159,9 @@ AC_SUBST(XINCS)
 
 dnl ---------------------------------------------------------------------
 dnl 3D Graphics Libraries (see also vis5d's configure.in)
+dnl Or:  AX_CHECK_GL
+dnl      AX_CHECK_GLU
+dnl      AX_CHECK_GLUT
 
 GLLIBS=""
 
@@ -361,6 +364,7 @@ dnl PGPLOT detection: (NEMO allows PGPLOT to be built internally in $NEMO/lib)
 dnl if $PGPLOT_DIR exists, take that as the default
 dnl else, check a few standard places
 dnl if all that fails and --with-pgplot-prefix is also not good, bail out.
+dnl Known problems: if you have a local pgplot that needs odd libaries, e.g. -lpng
 
 AC_SUBST(PGPLOT_DIR)
 AC_MSG_CHECKING(whether we have PGPLOT)
@@ -696,21 +700,28 @@ dnl ---------------------------------------------------------------------
 
 dnl check for terminal library. this is a very cool solution
 dnl from octave's configure.in
+dnl Alternatively, check http://autoconf-archive.cryp.to/vl_lib_readline.html
 
 unset tcap
 for termlib in ncurses curses termcap terminfo termlib; do
     AC_CHECK_LIB(${termlib}, tputs, [tcap="-l$termlib"])
     test -n "$tcap" && break
 done
+
 RDL_LIBS=""
-AC_CHECK_HEADER(readline/history.h,
-    AC_CHECK_LIB(history, append_history,[
-           RDL_LIBS="-lhistory"
-           AC_DEFINE(HAVE_LIBHISTORY)]))
-AC_CHECK_HEADER(readline/readline.h,
-    AC_CHECK_LIB(readline, readline,[
-           RDL_LIBS="-lreadline $RDL_LIBS $tcap"
-           AC_DEFINE(HAVE_LIBREADLINE)], , $tcap))
+AC_ARG_ENABLE(readline, [  --enable-readline       use READLINE], ok=$enableval, ok=yes)
+if test "$ok" = "yes"; then
+   AC_CHECK_HEADER(readline/history.h,
+	AC_CHECK_LIB(history, append_history,[
+                     RDL_LIBS="-lhistory" 
+		     AC_DEFINE(HAVE_LIBHISTORY)]))
+   AC_CHECK_HEADER(readline/readline.h,
+	AC_CHECK_LIB(readline, readline,[
+                     RDL_LIBS="-lreadline $RDL_LIBS $tcap"
+                     AC_DEFINE(HAVE_LIBREADLINE)], , $tcap))
+else
+   AC_MSG_WARN([READLINE disabled])
+fi
 AC_SUBST(RDL_LIBS)
 
 AC_CHECK_LIB(df, DFSDndataset)

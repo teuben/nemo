@@ -890,6 +890,7 @@ Optional Features:
   --disable-gsltest       Do not try to compile and run a test GSL program
   --enable-flogger        use Flogger
   --enable-tcl            use TCL
+  --enable-readline     use READLINE
   --disable-largefile     omit support for large files
 
 Optional Packages:
@@ -10442,7 +10443,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:10445:" \
+echo "$as_me:10446:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -10640,7 +10641,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_verb"
-(eval echo $as_me:10643: \"$ac_link\") >&5
+(eval echo $as_me:10644: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -10718,7 +10719,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_cv_prog_f77_v"
-(eval echo $as_me:10721: \"$ac_link\") >&5
+(eval echo $as_me:10722: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -12234,8 +12235,17 @@ fi
 
     test -n "$tcap" && break
 done
+
 RDL_LIBS=""
-if test "${ac_cv_header_readline_history_h+set}" = set; then
+# Check whether --enable-readline or --disable-readline was given.
+if test "${enable_readline+set}" = set; then
+  enableval="$enable_readline"
+  ok=$enableval
+else
+  ok=yes
+fi;
+if test "$ok" = "yes"; then
+   if test "${ac_cv_header_readline_history_h+set}" = set; then
   echo "$as_me:$LINENO: checking for readline/history.h" >&5
 echo $ECHO_N "checking for readline/history.h... $ECHO_C" >&6
 if test "${ac_cv_header_readline_history_h+set}" = set; then
@@ -12439,8 +12449,8 @@ echo "$as_me:$LINENO: result: $ac_cv_lib_history_append_history" >&5
 echo "${ECHO_T}$ac_cv_lib_history_append_history" >&6
 if test $ac_cv_lib_history_append_history = yes; then
 
-           RDL_LIBS="-lhistory"
-           cat >>confdefs.h <<\_ACEOF
+                     RDL_LIBS="-lhistory"
+		     cat >>confdefs.h <<\_ACEOF
 #define HAVE_LIBHISTORY 1
 _ACEOF
 
@@ -12449,7 +12459,7 @@ fi
 fi
 
 
-if test "${ac_cv_header_readline_readline_h+set}" = set; then
+   if test "${ac_cv_header_readline_readline_h+set}" = set; then
   echo "$as_me:$LINENO: checking for readline/readline.h" >&5
 echo $ECHO_N "checking for readline/readline.h... $ECHO_C" >&6
 if test "${ac_cv_header_readline_readline_h+set}" = set; then
@@ -12653,8 +12663,8 @@ echo "$as_me:$LINENO: result: $ac_cv_lib_readline_readline" >&5
 echo "${ECHO_T}$ac_cv_lib_readline_readline" >&6
 if test $ac_cv_lib_readline_readline = yes; then
 
-           RDL_LIBS="-lreadline $RDL_LIBS $tcap"
-           cat >>confdefs.h <<\_ACEOF
+                     RDL_LIBS="-lreadline $RDL_LIBS $tcap"
+                     cat >>confdefs.h <<\_ACEOF
 #define HAVE_LIBREADLINE 1
 _ACEOF
 
@@ -12663,6 +12673,10 @@ fi
 fi
 
 
+else
+   { echo "$as_me:$LINENO: WARNING: READLINE disabled" >&5
+echo "$as_me: WARNING: READLINE disabled" >&2;}
+fi
 
 
 

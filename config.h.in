@@ -151,6 +151,9 @@
 /* Define if you have the readline library (-lreadline).  */
 #undef HAVE_LIBREADLINE
 
+/* Define if you have the readline library (-lhistory).  */
+#undef HAVE_LIBHISTORY
+
 /* Define if you have the gsl library (-lgsl).  */
 #undef HAVE_LIBGSL
 
