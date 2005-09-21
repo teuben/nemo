@@ -1,4 +1,4 @@
-.TH TABFITS 1NEMO "9 July 2000"
+.TH TABFITS 1NEMO "21 September 2005"
 .SH NAME
 tabfits \- convert tables into FITS images
 .SH SYNOPSIS
@@ -15,9 +15,13 @@ parameters \fBnx=\fP, \fBny=\fP and \fBnz=\fP, on the
 command line, or else obtained from the header from the
 usual FITS-like NAXISn keywords.
 .PP
+For a proper astronomical WCS you will need to make sure that your
+FITS style header (see EXAMPLES below) has the correct
+CTYPE (see e.g. worldpos(3NEMO)). The default is currently
+observer unfriendly.
+.PP
 It is currently not possible to interchange the axes, you have to use 
 \fIccdflip(1NEMO)\fP for this.
-
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -43,6 +47,12 @@ Z-Size of data, or else specify in the ascii header as NAXIS3.
 .TP
 \fBnmax=\fP
 Allocation space for piped I/O.
+.TP
+\fBwcs=t|f\fP
+Enforce a proper FITS style WCS definition. For this the FITS header description
+(see ) will need to have a valid CTYPE1 and CTYPE2 to properly
+handle the sky coordinates. There is no mechanism to handle spectral axes.
+Default: \fBf\fP.
 .SH BUGS
 All non-standard fits header keywords are copied verbosely, so be sure
 to follow the FITS rules in their formatting.
@@ -70,7 +80,7 @@ to follow the FITS rules in their formatting.
 ...
 .fi
 .SH SEE ALSO
-tabfits(1NEMO), tabmath(1NEMO)
+tabfits(1NEMO), tabmath(1NEMO), fits(5NEMO), wcs(1NEMO)
 .SH FILES
 src/image/fits/tabfits.c	source code
 .SH AUTHOR
@@ -82,4 +92,5 @@ Peter Teuben
 17-dec-98	V2.0 nxy= is now nx=,ny=; for Harris' project too	PJT
 5-jan-99	V2.0a fixed header formatting bug	PJT
 9-jul-00	V3.1 allow dcol=0	PJT
+21-sep-05	V4.0 add wcs= to deal with real astronomers	PJT
 .fi
