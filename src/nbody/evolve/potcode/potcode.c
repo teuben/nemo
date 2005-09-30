@@ -17,6 +17,7 @@
  *      5-mar-03 V5.0 analytical epicyclic orbits               pjt
  *      6-may-03     a  missing factor 2 for A ???              pjt
  *      6-jul-03     b  computed the guiding center             PJT/RPO
+ *     29-sep-05     c  variuos gcc4 fixes in other routines    PJT
  *
  * To improve:  use allocate() for number of particles; not static
  */
@@ -42,7 +43,7 @@ string defv[] = {
     "sigma=0\n            diffusion angle (degrees) per timestep",
     "seed=0\n		  random seed",
     "headline=PotCode\n   random mumble for humans",
-    "VERSION=5.0b\n       6-jul-03 PJT",
+    "VERSION=5.0c\n       29-sep-05 PJT",
     NULL,
 };
 
