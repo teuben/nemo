@@ -6,6 +6,7 @@
  *    6-oct-92  repaired the long_changed convention out_mass -> mass 
  *              as was done in hackcode1 ages ago                       PJT
  *   10-apr-01  gcc warnings
+ *   29-sep-05  gcc4 fix for prototypes
  */
 
 #include "defs.h"
@@ -20,6 +21,9 @@
 #include <snapshot/put_snap.c>
 
 local diagnostics(void);
+
+void savestate(string file);
+void restorestate(string file);
 /*
  * INPUTDATA: read initial conditions from input file.
  */
@@ -201,9 +205,7 @@ local diagnostics(void)
  * PUT_SNAP_DIAGNOSTICS: output various N-body diagnostics.
  */
 
-local _put_snap_diagnostics(outstr, ofptr)
-stream outstr;
-int *ofptr;
+local void _put_snap_diagnostics(stream outstr, int *ofptr)
 {
     double cputime();
     real cput;
@@ -224,8 +226,7 @@ int *ofptr;
  * SAVESTATE: write current state to disk file.
  */
 
-savestate(file)
-string file;
+void savestate(string file)
 {
     stream str;
 
@@ -255,8 +256,7 @@ string file;
  * RESTORESTATE: restore state from disk file.
  */
 
-restorestate(file)
-string file;
+void restorestate(string file)
 {
     stream str;
     string program, version;
