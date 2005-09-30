@@ -8,6 +8,8 @@
  *	22-feb-94  ansi header (w/ allocate)	PJT
  *	25-mar-97  removed nested decl fflush() PJT
  *       8-oct-01  add some dens/eps if present PJT (for yanc)
+ *      29-sep-05  fix for gcc4 supplying default prototypes
+ *                 ** only potcode needed this,but we clearly need better solution for this **
  */
 
 /*
@@ -404,20 +406,22 @@ int *ofptr;			/* pointer to output bit flags */
  * PUT_SNAP_DIAGNOSTICS: drone routine does nothing.
  */
 
+
 #ifndef put_snap_diagnostics
 
 #define put_snap_diagnostics  _put_snap_diagnostics
 
 local void 
-_put_snap_diagnostics(outstr, ofptr)
-stream outstr;			/* output stream, of course */
-int *ofptr;			/* pointer to output bit flags */
+_put_snap_diagnostics(
+stream outstr,			/* output stream, of course */
+int *ofptr)			/* pointer to output bit flags */
 {
     if (*ofptr & (EnergyBit | KETensorBit | PETensorBit |
 		    AMTensorBit | CMPhaseSpaceBit))
 	error("put_snap_diagnostics: not implemented");
 }
-
+#else
+local void put_snap_diagnostics(stream outstr, int *ofptr); 
 #endif
 
 /*
