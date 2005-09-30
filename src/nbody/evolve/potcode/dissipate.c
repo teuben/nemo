@@ -6,7 +6,8 @@
  *	   17-jun-92    attempt to conserve energy better	PJT
  *			(what we had so far, was momentum conservation)	PJT
  *         29-sep-92    added 'grid' parameter to set largest possible grid PJT
- *         10-apr-01    gcc warnings
+ *         29-sep-05    gcc4
+ *         
  *
  */
 
@@ -36,7 +37,6 @@ real  grid;
     int   i, k, n, ix, iy, iz, nx, ny, nz, nxyz, ind;
     vector  velsum, veldif;
     real t_before, t_after, kappa;
-    char *calloc();
     
     if (eta==0.0) return 1;          /* no work to do ... */
 
