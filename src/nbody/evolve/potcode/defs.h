@@ -63,7 +63,7 @@ typedef struct {
 #define Key(p)   ((p)->key)
 
 #ifndef MBODY
-#  define MBODY 4096		/* max number of bodies */
+#  define MBODY 65536
 #endif
 
 int nbody;			/* number of bodies simulated */
