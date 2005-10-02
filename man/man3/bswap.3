@@ -1,0 +1,37 @@
+.TH BSWAP 3NEMO "2 February 2005"
+.SH NAME
+bswap, bswap_litend, bswap_bigend - (endian dependant) byte swapping
+.SH SYNOPSIS
+.nf
+.B void bswap(void *data, int len, int cnt)
+.B void bswap_litend(void *data, int len, int cnt)
+.B void bswap_bigend(void *data, int len, int cnt)
+.fi
+.SH DESCRIPTION
+\fIbswap\fP swaps the bytes in a word of length \fBlen\fP, and does
+this \fBcnt\fP times.
+\fIbswap_litend\fP and
+\fIbswap_bigend\fP are specific implementations that swap the
+bytes to the native machine level, assuming \fBdata\fP
+is little resp. big endian.
+
+.SH EXAMPLES
+The following code ...
+.nf
+
+    real x[100], w[100];
+    int  i,n=100;
+
+.fi
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +1.5i
+~/src/kernel/misc	moment.c
+.fi
+.SH UPDATE HISTORY
+.nf
+.ta +1i +4i
+20-sep-05	man written	PJT
+.fi
