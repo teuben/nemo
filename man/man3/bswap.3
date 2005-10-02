@@ -9,11 +9,13 @@ bswap, bswap_litend, bswap_bigend - (endian dependant) byte swapping
 .fi
 .SH DESCRIPTION
 \fIbswap\fP swaps the bytes in a word of length \fBlen\fP, and does
-this \fBcnt\fP times.
+this \fBcnt\fP times. For \fBlen=2,4,8\fP special optimized versions
+are written (see also \fIhtonl(3)\fP and \fIhtons(3)\fP).
 \fIbswap_litend\fP and
 \fIbswap_bigend\fP are specific implementations that swap the
 bytes to the native machine level, assuming \fBdata\fP
-is little resp. big endian.
+is little resp. big endian. These two routines could thus result
+in a no-op.
 
 .SH EXAMPLES
 The following code ...
@@ -21,14 +23,17 @@ The following code ...
 
     real x[100], w[100];
     int  i,n=100;
-
+    ...
 .fi
+
+.SH SEE ALSO
+bswap(1NEMO), htonl(3), htons(3), ntohl(3), ntohs(3)
 .SH AUTHOR
 Peter Teuben
 .SH FILES
 .nf
-.ta +1.5i
-~/src/kernel/misc	moment.c
+.ta +2.5i
+~/src/kernel/cores	bswap.c
 .fi
 .SH UPDATE HISTORY
 .nf
