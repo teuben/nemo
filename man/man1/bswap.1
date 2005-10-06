@@ -1,4 +1,4 @@
-.TH BSWAP 1NEMO "30 September 2003"
+.TH BSWAP 1NEMO "20 September 2005"
 .SH NAME
 bswap \- swap bytes in a file
 .SH SYNOPSIS
@@ -40,6 +40,14 @@ One swap call? Only useful to set false under benchmark circumstances.
 \fBoffset=\fP
 Offset (in bytes) before which no swapping is done.
 [Default: \fB0\fP].
+.TP
+\fBendian=\fP
+If used, the input file will be assumed of this type of endian.
+Options are thus 'big' (e.g. sparc, powerpc) or 'little' (e.g. i385) 
+endian.
+Depending on what kind of machine you are, this could result in a 
+no-operation. 
+By default this option is not used and swapping is always applied.
 .TP
 \fBmemcpy=t|f\fP
 Test swapping data as 8-byte doubles via memcpy. len=8 is required for
@@ -87,7 +95,7 @@ returned nothing, it would need to be swapped with \fBlen=4\fP:
 This above example is a bit contrived, since \fIunfio(1NEMO)\fP also
 has a \fBswap=\fP keyword to read files from the opposite endianism machine.
 .SH SEE ALSO
-filestruct(5NEMO), unfio(1NEMO), dd(1)
+filestruct(5NEMO), unfio(1NEMO), dd(1), bswap(3NEMO)
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
@@ -98,4 +106,5 @@ Peter Teuben
 15-dec-98	V1.4 add streaming mode to I/O    	PJT
 6-jun-01	more verbosities, plus an example	PJT
 30-sep-03	V1.5 added memcpy=, repeat=	PJT
+20-sep-05	V1.6 added endian=	PJT
 .fi
