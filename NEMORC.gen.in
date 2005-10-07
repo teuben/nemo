@@ -26,8 +26,8 @@ endif
 setenv YAPP        @YAPP_DEF@
 setenv PGPLOT_DIR  @PGPLOT_DIR@
 #  not sure if the next two are really needed
-setenv PGPLOT_LIB  @PGPLOT_DIR@
-setenv PGPLOT_FONT @PGPLOT_DIR@/grfont.dat
+setenv PGPLOT_LIB  $PGPLOT_DIR
+setenv PGPLOT_FONT $PGPLOT_DIR/grfont.dat
 
 # you can optionally uncomment and set some of the following PGPLOT variables
 # see also "man 5 yapp" for more info
