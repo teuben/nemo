@@ -25,7 +25,6 @@ if ($?YAPPLIB) then
 endif
 setenv YAPP        @YAPP_DEF@
 setenv PGPLOT_DIR  @PGPLOT_DIR@
-#  not sure if the next two are really needed
 setenv PGPLOT_LIB  $PGPLOT_DIR
 setenv PGPLOT_FONT $PGPLOT_DIR/grfont.dat
 
