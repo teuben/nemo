@@ -8,7 +8,9 @@
  *      20-feb-01   0.4a implemented special mom=3 for a 3point poly fit to peak  PJT
  *                       also fixed ccdmom 
  *      25-mar-01   0.5  added mom=-1 as mean value along an axis, fixed bugs
+ *      18-oct-05   0.6  added mom=-2 as dispersion around mean along an axis
  *                      
+ * TODO : cumulative along an axis, sort of like numarray.accumulate()
  */
 
 
@@ -22,13 +24,15 @@ string defv[] = {
         "in=???\n       Input image file",
 	"out=???\n      Output image file",
 	"axis=1\n       Axis to take moment along (1=x 2=y 3=z)",
-	"mom=0\n	Moment to take [-1=mean value 0=sum,1=mean vel,2=dispersion,3=peak vel]",
+	"mom=0\n	Moment to take [0=sum,1=mean loc,2=disp loc,3=peak loc, -1=mean val, -2=disp val]",
 	"keep=f\n	Keep moment axis in full length, and replace all values",
-	"VERSION=0.5\n  25-mar-01 PJT",
+	"cumulative=f\n Cumulative axis (only valid for mom=0)",
+	"VERSION=0.6\n  18-oct-05 PJT",
 	NULL,
 };
 
 string usage = "moment along an axis of an image";
+string cvsid="$Id$";
 
 local real peak_axis(imageptr iptr, int i, int j, int k, int axis);
 local bool out_of_range(real);
@@ -42,13 +46,17 @@ void nemo_main()
     int     axis, mom;
     int     i,j,k, apeak, cnt;
     imageptr iptr=NULL, iptr1=NULL, iptr2=NULL;      /* pointer to images */
-    real    tmp0, tmp1, tmp2, newvalue, peakvalue, scale, offset;
+    real    tmp0, tmp1, tmp2, tmp00, newvalue, peakvalue, scale, offset;
     bool    Qkeep = getbparam("keep");
 
     instr = stropen(getparam("in"), "r");
     mom = getiparam("mom");
+    if (mom < -2 || mom > 3)  error("Illegal value mom=%d",mom);
     axis = getiparam("axis");
-    if (mom < -1 || mom > 3)  error("Illegal value mom=%d",mom);
+    if (axis < 0 || axis > 3) error("Illegal value axis=%d",axis);
+
+    if (getbparam("cumulative"))
+      axis = -axis;
 
     read_image( instr, &iptr);
 
@@ -64,7 +72,9 @@ void nemo_main()
             nx1 = nx;   ny1 = 1;    nz1 = nz;
         } else if (axis==3) {
             nx1 = nx;   ny1 = ny;   nz1 = 1;
-        } else
+        } else if (axis < 0) {
+	    nx1 = nx;   ny1 = ny;   nz1 = nz;
+	} else
             error("Invalid axis: %d (Valid: 1,2,3)",axis);
         dprintf(0,"Reducing %d*%d*%d to a %d*%d*%d cube\n",
                    nx,ny,nz, nx1,ny1,nz1);
@@ -72,21 +82,26 @@ void nemo_main()
 
     outstr = stropen(getparam("out"), "w");
 
-    create_cube(&iptr1,nx1,ny1,nz1);
-    create_cube(&iptr2,nx1,ny1,nz1);
+    if (axis > 0) {
+      create_cube(&iptr1,nx1,ny1,nz1);
+      create_cube(&iptr2,nx1,ny1,nz1);
+    } else {
+      copy_image(iptr,&iptr1);
+    }
 
     if (axis==1) {
       scale = Dx(iptr);
       offset = Xmin(iptr);
       for (k=0; k<nz; k++)
         for (j=0; j<ny; j++) {
-	    tmp0 = tmp1 = tmp2 = 0.0;
+	    tmp0 = tmp00 = tmp1 = tmp2 = 0.0;
 	    cnt = 0;
 	    peakvalue = CubeValue(iptr,0,j,k);
             for (i=0; i<nx; i++) {
  	        if (out_of_range(CubeValue(iptr,i,j,k))) continue;
 		cnt++;
     	        tmp0 += CubeValue(iptr,i,j,k);
+		tmp00 += sqr(CubeValue(iptr,i,j,k));
     	        tmp1 += i*CubeValue(iptr,i,j,k);
     	        tmp2 += i*i*CubeValue(iptr,i,j,k);
 		if (CubeValue(iptr,i,j,k) > peakvalue) {
@@ -99,6 +114,8 @@ void nemo_main()
 	    } else {
 	      if (mom==-1)
 		newvalue = tmp0/cnt;
+	      else if (mom==-2)
+		newvalue = sqrt(tmp00/cnt - sqr(tmp0/cnt));
 	      else if (mom==0) 
 		newvalue = tmp0;
 	      else if (mom==1)
@@ -130,13 +147,14 @@ void nemo_main()
       offset = Ymin(iptr);
       for (k=0; k<nz; k++)
         for (i=0; i<nx; i++) {
-            tmp0 = tmp1 = tmp2 = 0.0;
+            tmp0 = tmp00 = tmp1 = tmp2 = 0.0;
 	    cnt = 0;
 	    peakvalue = CubeValue(iptr,i,0,k);
             for (j=0; j<ny; j++) {
  	        if (out_of_range(CubeValue(iptr,i,j,k))) continue;
 		cnt++;
     	        tmp0 += CubeValue(iptr,i,j,k);
+		tmp00 += sqr(CubeValue(iptr,i,j,k));
     	        tmp1 += j*CubeValue(iptr,i,j,k);
     	        tmp2 += j*j*CubeValue(iptr,i,j,k);
 		if (CubeValue(iptr,i,j,k) > peakvalue) {
@@ -149,6 +167,8 @@ void nemo_main()
 	    } else {
 	      if (mom==-1)
 		newvalue = tmp0/cnt;
+	      else if (mom==-2)
+		newvalue = sqrt(tmp00/cnt - sqr(tmp0/cnt));
 	      else if (mom==0)
 		newvalue = tmp0;
 	      else if (mom==1)
@@ -180,13 +200,14 @@ void nemo_main()
 	offset = Zmin(iptr);
     	for(j=0; j<ny; j++)
     	for(i=0; i<nx; i++) {
-    	    tmp0 = tmp1 = tmp2 = 0.0;
+    	    tmp0 = tmp00 = tmp1 = tmp2 = 0.0;
 	    cnt = 0;
 	    peakvalue = CubeValue(iptr,i,j,0);
     	    for(k=0; k<nz; k++) {
  	        if (out_of_range(CubeValue(iptr,i,j,k))) continue;
 		cnt++;
     	        tmp0 += CubeValue(iptr,i,j,k);
+		tmp00 += sqr(CubeValue(iptr,i,j,k));
     	        tmp1 += k*CubeValue(iptr,i,j,k);
     	        tmp2 += k*k*CubeValue(iptr,i,j,k);
 		if (CubeValue(iptr,i,j,k) > peakvalue) {
@@ -199,6 +220,8 @@ void nemo_main()
 	    } else {
 	      if (mom==-1)
 		newvalue = tmp0/cnt;
+	      else if (mom==2)
+		newvalue = sqrt(tmp00/cnt - sqr(tmp0/cnt));
 	      else if (mom==0)
 		newvalue = tmp0;
 	      else if (mom==1)
@@ -225,6 +248,33 @@ void nemo_main()
         Namey(iptr1) = Namey(iptr);
         Namez(iptr1) = Namez(iptr);
         
+    } else if (axis == -1) {
+      for (k=0; k<nz; k++)
+        for (j=0; j<ny; j++) {
+	  tmp0 = 0.0;
+	  for (i=0; i<nx; i++) {
+	    tmp0 += CubeValue(iptr,i,j,k);
+	    CubeValue(iptr1,i,j,k) = tmp0;
+	  }
+        }
+    } else if (axis == -2) {                      
+      for (k=0; k<nz; k++)
+        for (i=0; i<nx; i++) {
+	  tmp0 = 0.0;
+	  for (j=0; j<ny; j++) {
+	    tmp0 += CubeValue(iptr,i,j,k);
+	    CubeValue(iptr1,i,j,k) = tmp0;
+	  }
+        }
+    } else if (axis == -3) {               
+    	for(j=0; j<ny; j++)
+	  for(i=0; i<nx; i++) {
+    	    tmp0 = 0.0;
+    	    for(k=0; k<nz; k++) {
+	      tmp0 += CubeValue(iptr,i,j,k);
+	      CubeValue(iptr1,i,j,k) = tmp0;
+	    }
+	  }
     } else
         error("Cannot do axis %d",axis);
 

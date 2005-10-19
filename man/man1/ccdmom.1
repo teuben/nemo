@@ -1,10 +1,12 @@
-.TH CCDMOM 1NEMO "25 March 2001"
+.TH CCDMOM 1NEMO "18 October 2005"
 .SH NAME
-ccdmom \- moment along an axis of an image
+ccdmom \- moment or accumulate along an axis of an image
 .SH SYNOPSIS
 \fBccdmom\fP [parameter=value]
 .SH DESCRIPTION
-\fBccdmom\fP takes special moments along an axis of an image/cube.
+\fBccdmom\fP takes special moments (in position, or image intensity)
+along an axis of an image/cube. 
+It can optionally also accumulate along the selected axis.
 .PP
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
@@ -21,22 +23,33 @@ Axis to take moment along (1=x 2=y 3=z)
 [Default: \fB1\fP]
 .TP
 \fBmom=\fP
-Moment to take [-1,0,1,2,3..]    
+Moment to take [-2,-1,0,1,2,3..]    
 Compute either the sum (0), mean (1), dispersion (2), or peak location (3). Negative
-numbers also have a special meaning. -1 computes the average intensity along the axis.
+numbers also have a special meaning. -1 computes the average intensity along the axis,
+where -2 computes the dispersion around the mean value.
 [Default: \fB0\fP].
 .TP
-\fBkeep=t|f\P
+\fBkeep=t|f\fP
 Boolean value if to keep the moment axis. If you keep the axis (instead
 of compressing it), the values are replaced with the computed moment.
 This can be useful if you want to subtract an cube/image with the
-mean value along a certain axis. 
+mean value along a certain axis. Only in this case (but see also
+\fBcumulative=t\fP below) will the output image have the same
+shape and dimension as the input image.
 [Default: \fBf\fP].
+.TP
+\fBcumulative=t|f\fP
+Boolean value if the values should accumulate instead along the selected axis. 
+The \fBmom=\fP keyword is ignored, and the input and output datasets will
+now have the same shape and dimension. 
+[Default: \fBf\fP]
 .SH SEE ALSO
 pvtrace(1NEMO)
-.SH BUGS
-Cannot compute straight moments, e.g. the 2nd moment along an axis, the 
+.SH CAVEATS
+Cannot compute straight moments, e.g. the 2nd moment along an axis, such
+as e.g. \fIsnapgrid\fP can do. This 
 program only computes user friendly numbers (sum, mean, dispersion)
+and gives special meaning to negative values of mom= and axis=.
 .SH FILES
 src/image/misc/ccdmom.c
 .SH AUTHOR
@@ -50,4 +63,5 @@ Peter Teuben
 31-dec-98	V0.4 added keep=	PJT
 21-feb-01	V0.4a added mom=3, and fixed major bugs in computing moments	PJT
 25-mar-01	V0.5 added mom=-1	PJT
+18-oct-05	V0.6 added mom=-2 and cumulative option 	PJT
 .fi
