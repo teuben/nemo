@@ -1,4 +1,4 @@
-.TH VELFIT 1NEMO "5 October 2003"
+.TH VELFIT 1NEMO "22 October 2005"
 .SH NAME
 velfit \- fit rotation curve to coplanar disk (WWB73 method)
 .SH SYNOPSIS
@@ -10,8 +10,10 @@ geometric factor specified by model input paramaters.
 The default option is to fit a rotation curve to an isovelocity
 image of a rotating disk. The rotation curve and rms for the
 fit are printed out and can be used to find the best fit to the
-other parameters. For more details see paper by 
+other parameters. For more details see 
 Warner, Wright and Baldwin (1973MNRAS.163..163W).
+.PP
+Optionally an output map can be generated with amusing quantities.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -42,6 +44,7 @@ weights are uniform (but see \fBcoswt=\fP below). Default: none.
 \fBfrang=\fP
 free angle around minor axis (2*frang is the total angle around
 the minor axis used).
+[Default: 0]
 .TP 20
 \fBblank=\fP
 Value of the blank pixel to be ignored. Default: 0.0
@@ -52,6 +55,12 @@ power of cos(theta) weighting [1]
 \fBwwb73=\fP
 use the classic WWB73 method. Currently there is no other 
 method. [t]  
+\fBout=\fP
+Optional output file. If selected, it will contain the 
+nominal rotation speed as derived from the local radial
+velocity in the disk, appropriately corrected for the
+geometric factors.
+Default: none.
 .SH SEE ALSO
 rotcur(1NEMO), rotcurshape(1NEMO)
 .SH FILES
@@ -62,4 +71,5 @@ Mel Wright (Fortran version), Peter Teuben (C version)
 .ta +1.0i +4.0i
 30-sep-92	new task in miriad	MCHW
 5-oct-2003	V1.0 : C version in NEMO	PJT
+22-oct-2005	V1.1 : added out=	PJT
 .fi

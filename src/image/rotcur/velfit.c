@@ -14,6 +14,8 @@
  *   29aug02  pjt   Added frang= to prevent large divisions for models
  *   31aug02  pjt   Ieck, rms calculation wrong, arrays not reset to 0
  *    5-oct-2003  Created, embedding in rotcur was too painful    PJT
+ *   22-oct-2005  Optional output map with rotation velocities  SNV/PJT
+ *
  *
  */
 
@@ -32,19 +34,23 @@ string defv[] = {
   "blank=0.0\n    Value of the blank pixel to be ignored",
   "coswt=1\n      power of cos(theta) weighting",
   "wwb73=t\n      use the classic WWB73 method",
-  "VERSION=1.0\n  5-oct-2003 PJT",
+  "out=\n         Optional output map of converted rotation speeds",
+  "VERSION=1.1\n  22-oct-2005 PJT",
   NULL,
 };
 
 string usage="fit rotation curve to coplanar disk (WWB73 method)";
+
+string cvsid="$Id$";
 
 
 #define MAXRING    1000
 
 
 bool Qwwb73;
-bool Qden;
-imageptr denptr = NULL, velptr = NULL;
+bool Qden = FALSE;
+bool Qout = FALSE;
+imageptr denptr = NULL, velptr = NULL, outptr = NULL;
 
 real rad[MAXRING];
 int nrad;
@@ -68,12 +74,14 @@ int ring_index(int n, real *r, real rad)
 
 nemo_main()
 {
-  stream denstr, velstr;
+  stream denstr, velstr, outstr;
   real center[2], cospa, sinpa, cosi, sini, cost, costmin, x, y, xt, yt, r, den;
   real vr, wt, frang, dx, dy, xmin, ymin, rmin, rmax, fsum, ave, tmp, rms;
+  real sincosi, cos2i, tga, dmin, dmax, dval;
   int i, j, k, nx, ny, ir, nring, nundf, nout, nang, nsum, coswt;
 
   velstr = stropen(getparam("in"),"r");
+
   read_image(velstr,&velptr);
   nx = Nx(velptr);
   ny = Ny(velptr);
@@ -82,8 +90,14 @@ nemo_main()
     Qden = TRUE;
     denstr = stropen(getparam("den"),"r");
     read_image(denstr,&denptr);
-  } else
-    Qden = FALSE;
+  } 
+
+  if (hasvalue("out")) {
+    warning("New out= option not well tested yet");
+    Qout = TRUE;
+    outstr = stropen(getparam("out"),"w");
+    copy_image(velptr,&outptr);
+  } 
 
   nrad = nemoinpd(getparam("radii"),rad,MAXRING);
   if (nrad < 2) error("got no rings, use radii=");
@@ -109,11 +123,12 @@ nemo_main()
   sini = sin(inc*PI/180.0);
   cosi = cos(inc*PI/180.0);
   costmin = sin(frang*PI/180.0);
-
+  sincosi = sini*cosi;
+  cos2i = cosi*cosi;
+    
   for (i=0; i<nring; i++)
     pixe[i] = flux[i] = vsum[i] = vsqu[i] = wsum[i] = 0.0;
   nundf = nout = nang = 0;
-
 
   ymin = Ymin(velptr);
   xmin = Xmin(velptr);
@@ -122,6 +137,8 @@ nemo_main()
   rmin = nx*dx*10.0;
   rmax = 0.0;
 
+  dmin = dmax = vsys;
+
   /* loop over the map, accumulating data for fitting process */
 
   for (j=0; j<ny; j++) {
@@ -129,11 +146,26 @@ nemo_main()
     for (i=0; i<nx; i++) {
       if (MapValue(velptr,i,j) == undf) {
 	nundf++;
+	if (Qout) MapValue(outptr,i,j) = undf;
 	continue;
       }
       x = (i-xpos)*dx;
-      yt =  x*sinpa + y*cospa;
-      xt = (x*cospa - y*sinpa)/cosi;
+      yt = x*sinpa + y*cospa;
+      xt = x*cospa - y*sinpa;
+      if (Qout) {
+	if (xt==0.0) {
+	  MapValue(outptr,i,j) = undf;
+	} else {
+	  tga = xt/yt; /* X and Y are reversed  */
+	  dval = MapValue(velptr,i,j)-vsys;
+	  if (dval < 0) dval = -dval;
+	  dval = vsys + dval*sqrt(cos2i+tga*tga)/sincosi;
+	  MapValue(outptr,i,j) = dval;
+	  if (dval > dmax) dmax = dval;
+	  if (dval < dmin) dmin = dval;
+	}
+      }
+      xt /= cosi;
       r  = sqrt(xt*xt+yt*yt);
       rmin = MIN(r,rmin);
       rmax = MAX(r,rmax);
@@ -160,6 +192,15 @@ nemo_main()
 	nang++;
     }
   }
+
+  /* write output map(s), if needed */
+  if (Qout) {
+    dprintf(0,"Data min/max = %g %g\n",dmin,dmax);    
+    MapMin(outptr) = dmin;
+    MapMax(outptr) = dmax;
+    write_image(outstr,outptr);
+  }
+
 
   /* find the rotation curve */
 
