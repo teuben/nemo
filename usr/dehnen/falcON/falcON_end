@@ -1,0 +1,22 @@
+#! /bin/csh
+#
+# de-activates falcON enviroment variables
+#
+if ($?FALCONBIN) then
+  set tmp=()
+  foreach p ($path)
+    if ($p != $FALCONBIN) then
+      set tmp=($tmp $p)
+    endif
+  end
+  set path=($tmp)
+  rehash
+  echo "$FALCONBIN removed from search path"
+endif
+
+# remove all FALCON enviroment variables
+unsetenv FALCONLIB
+unsetenv FALCONBIN
+unsetenv FALCON
+
+# end

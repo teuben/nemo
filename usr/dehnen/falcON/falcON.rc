@@ -1,0 +1,53 @@
+#! /bin/csh
+#
+# this file is normally sourced from falcON_start
+#
+# $falcON must be set.
+#
+if ($?FALCON == 0) then
+  echo "Environment variable FALCON is not set, falcON cannot be set up"
+  echo "add something like:   setenv FALCON /xxx/yyy"
+  echo "to denote the root directory of falcON to your .cshrc file"
+  goto done
+endif
+
+# use FALCONBIN as indicator for falcON to be active
+if($?FALCONBIN) then
+  if(-d "$FALCONBIN") then
+    echo "falcON had already been activated; falcON cannot be re-initilized"
+    goto done
+  endif
+endif
+
+if ($?prompt) then
+  echo "falcON loaded from $FALCON"
+endif
+
+# use nemo if it is not already present
+if($?NEMO == 0) then
+  if ($?prompt) then
+    echo "trying to activate NEMO ..."
+  endif
+  nemo
+endif
+
+# set enviroment variables
+setenv FALCONBIN $FALCON"/"$MACHTYPE"_"$OSTYPE"/"
+setenv FALCONLIB $FALCONBIN"/lib"
+setenv PATH      $PATH":"$FALCONBIN
+
+if($?ACCPATH) then
+    setenv ACCPATH $FALCON"/acc/:"$ACCPATH
+else
+    setenv ACCPATH $FALCON"/acc/"
+endif
+
+# active search path
+rehash
+
+# provide alias 'NOclaf' to de-active falcON
+alias NOclaf 'source $FALCON/falcON_end; unalias NOclaf'
+
+
+done:
+

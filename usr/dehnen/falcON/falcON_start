@@ -1,0 +1,13 @@
+#! /bin/csh
+#
+#   source this file to start falcON.
+#   You can override the root by presetting $falcON
+#
+#  set a reasonable $falcON if it's not present
+#
+if ($?FALCON == 0) setenv FALCON $HOME/code/falcON
+
+source $FALCON/falcON.rc
+
+# end
+
