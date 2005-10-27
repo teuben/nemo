@@ -164,12 +164,17 @@ else
 endif
 
 if ($falcon) then
-  echo Compile falcon
+  echo -n "Compile falcon"
   ( cd usr/dehnen/falcON; $make nemo_bins)  >& install.falcON.log
+  if ($status) then
+     echo " ..Failed"
+  else
+     echo " ..OK"
+  endif
 endif
 
 if ($glnemo) then
-  echo Compile glnemo
+  echo -n "Compile glnemo.... need:"
   which qmake
   if ($status == 0) then
     if ($?QTDIR == 0) then
