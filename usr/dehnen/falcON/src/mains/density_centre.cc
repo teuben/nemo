@@ -3,12 +3,21 @@
 //                                                                             |
 // density_centre.cc                                                           |
 //                                                                             |
-// C++ code                                                                    |
+// Copyright (C) 2002-2005 Walter Dehnen                                       |
 //                                                                             |
-// Copyright Walter Dehnen, 2002-2004                                          |
-// e-mail:   walter.dehnen@astro.le.ac.uk                                      |
-// address:  Department of Physics and Astronomy, University of Leicester      |
-//           University Road, Leicester LE1 7RH, United Kingdom                |
+// This program is free software; you can redistribute it and/or modify        |
+// it under the terms of the GNU General Public License as published by        |
+// the Free Software Foundation; either version 2 of the License, or (at       |
+// your option) any later version.                                             |
+//                                                                             |
+// This program is distributed in the hope that it will be useful, but         |
+// WITHOUT ANY WARRANTY; without even the implied warranty of                  |
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU           |
+// General Public License for more details.                                    |
+//                                                                             |
+// You should have received a copy of the GNU General Public License           |
+// along with this program; if not, write to the Free Software                 |
+// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                   |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 //                                                                             |
@@ -28,9 +37,15 @@
 // v 2.4   19/05/2004  WD change of give: if not given, we write all we got    |
 //                        added option step to reduce snapshot outputs         |
 // v 2.5   20/05/2004  WD improved iterative algorithm (cg)                    |
+// v 2.5.1 26/05/2004  WD slight changes in iterative algorithm                |
+// v 2.5.2 01/06/2004  WD new output; automated stdout control                 |
+// v 2.5.3 02/06/2004  WD create output files with first output, not earlier   |
+// v 2.5.4 20/05/2005  WD several minor updates                                |
+// v 3.0   14/06/2005  WD new falcON                                           |
+// v 3.1   13/06/2005  WD changes in fieldset                                  |
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "2.5"
-#define falcON_VERSION_D "20-may-2004 Walter Dehnen                          "
+#define falcON_VERSION   "3.1"
+#define falcON_VERSION_D "13-jul-2005 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile "density_centre"
@@ -42,9 +57,9 @@
 #include <fstream>                                 // C++ file I/O              
 #include <iomanip>                                 // C++ I/O formatting        
 #include <body.h>                                  // the bodies                
-#include <public/nmio.h>                           // my NEMO I/O               
-#include <public/tool.h>                           // my tools for bodies       
-#include <public/ionl.h>                           // my I/O utilities          
+#include <public/io.h>                             // my NEMO I/O               
+#include <public/tools.h>                          // my tools for bodies       
+#include <public/inline_io.h>                      // my I/O utilities          
 #include <main.h>                                  // main & NEMO stuff         
 //------------------------------------------------------------------------------
 string defv[] = {
@@ -55,100 +70,101 @@ string defv[] = {
   "times=all\n        times to process                                   ",
   "Ncen=200\n         # bodies in center                                 ",
   "centrefile=-\n     file to write center position & velocity to        ",
-  "centerfile=\n      same as centrefile                                 ",
+  "centerfile=\n      superseeds centrefile                              ",
   falcON_DEFV, NULL };
 //------------------------------------------------------------------------------
 string
 usage = "density_centre -- find the global density maximum; center snapshots\n";
 //------------------------------------------------------------------------------
-void nbdy::main()
+void falcON::main() falcON_THROWING
 {
-  // get parameters                                                             
-  const bool     SOUT(hasvalue("out") && strcmp(getparam("out"),"."));
-  const unsigned NCEN(getiparam("Ncen"));
-  const nemo_in  IN  (getparam("in"));
-  const nemo_out OUT (SOUT? getparam("out") : ".");
-  const io       GIVE(hasvalue("give")? getioparam("give") : io::all);
-  const io       WANT(SOUT? GIVE : io::mxv);
-  // open output for center position                                            
-  std::ostream  *COUT(0);
-  std::ofstream  CFILE;
-  int stdout=0;
-  if(hasvalue("out") && 0==strcmp(getparam("out"),"-")) stdout+= 1;
-  if(0 == strcmp(hasvalue("centerfile")? 
-		 getparam("centerfile") : 
-		 getparam("centrefile"), "-")) {
-    COUT   = &(std::cout);
-    stdout+= 1;
-  } else if( 0 != strcmp(hasvalue("centerfile")? 
-			 getparam("centerfile") : 
-			 getparam("centrefile"), ".")) {
-    open_to_append(CFILE,hasvalue("centerfile")?
-		   getparam("centerfile") : getparam("centrefile"));
-    COUT  = &CFILE;
+  // open I/O                                                                   
+  const bool     DO_OUT   (file_for_output("out"));
+  const bool     DO_CENOUT(hasvalue("centerfile")?
+			   file_for_output("centerfile") :
+			   file_for_output("centrefile") );
+  if(!DO_OUT && !DO_CENOUT) {
+    ::warning("no outputs wanted: nothing to be done; I'll finish\n");
+    return;
   }
-  if(stdout > 1) ::error("more than one output to \"-\", ie. stdout\n");
-  if(COUT)
-    (*COUT) << "#\n"
-	    << "# \""<< (*(ask_history())) <<"\"\n"
-	    << "#\n"
-	    << "# t x y z vx vy vz rho"<<std::endl;
+  const nemo_in  IN   (getparam("in"));
+  const fieldset GIVE (DO_OUT   ? getioparam_a("give") : fieldset::o);
+  const fieldset WANT (DO_CENOUT? fieldset(fieldset::basic | GIVE) : GIVE);
+  nemo_out       OUT;
+  output         CENOUT;
   // loop snapshots & process them                                              
-  bodies   BODIES;
-  char     WORD[30];
-  int      NOLD = 0u;
-  oct_tree*TREE = 0;
-  io       READ;
-  real     RHO,RAD(zero);
-  double   TIME;
-  vect     XCEN(zero),VCEN(zero);
-  bool     FIRST = true;
-  double   TOUT, STEP(getdparam("step"));
-  while(IN.is_present(nemo_io::snap)) {
+  snapshot       SHOT;
+  int            NOLD = 0u;
+  OctTree*       TREE = 0;
+  fieldset       READ;
+  real           RHO,RAD(zero);
+  vect           XCEN(zero),VCEN(zero);
+  bool           FIRST = true;
+  double         TOUT, STEP(getdparam("step"));
+  const unsigned NCEN  (getiparam("Ncen"));
+  while(IN.has_snapshot()) {
     // read time, read snapshot if in times                                     
-    bool IN_TIMES = BODIES.read_nemo_snapshot(IN,READ,&TIME,WANT,
-					      getparam("times"),0);
+    const bool IN_TIMES = SHOT.read_nemo(IN,READ,WANT,getparam("times"),0);
     if(FIRST) {
-      TOUT  = TIME - 1.e-10*STEP;
+      TOUT  = SHOT.time() - 1.e-10*STEP;
       FIRST = false;
     }
-    if(! IN_TIMES ) continue;
+    if(!IN_TIMES) continue;
     // build tree & find first estimate for density centre                      
-    if(! READ.contains(io::mx))
-      ::error("insufficient data: need mx, got %s", READ.make_word(WORD));
-    if(TREE==0 || NOLD != BODIES.N_bodies()) {
+    check_sufficient(READ,fieldset(fieldset::m|fieldset::x));
+    if(TREE==0 || NOLD != SHOT.N_bodies()) {
       if(TREE) delete TREE;
-      TREE = new oct_tree(&BODIES,NCEN/4);
+      TREE = new OctTree(&SHOT,NCEN/4);
     } else {
       TREE->build(NCEN/4);
     }
     estimate_density_peak(TREE,0u,NCEN,XCEN,RAD);
     RAD *= 3;
-    // iterator to improve density centre                                       
-    if(READ.contains(io::v))
-      find_centre(&BODIES,NCEN,XCEN,RAD,&VCEN,&RHO);
+    // iterate to improve density centre                                        
+    if(READ.contain(fieldset::v))
+      find_centre(&SHOT,NCEN,XCEN,RAD,&VCEN,&RHO);
     else {
-      find_centre(&BODIES,NCEN,XCEN,RAD,0,&RHO);
+      find_centre(&SHOT,NCEN,XCEN,RAD,0,&RHO);
       VCEN = zero;
     }
     // output of density centre: position & velocity                            
-    if(COUT)
-      (*COUT)<<"  "
-	     <<std::setw(15)<<std::setprecision(8)<<TIME   <<"  "
-	     <<std::setw(15)<<std::setprecision(8)<<XCEN[0]<<" "
-	     <<std::setw(15)<<std::setprecision(8)<<XCEN[1]<<" "
-	     <<std::setw(15)<<std::setprecision(8)<<XCEN[2]<<"  "
-	     <<std::setw(15)<<std::setprecision(8)<<VCEN[0]<<" "
-	     <<std::setw(15)<<std::setprecision(8)<<VCEN[1]<<" "
-	     <<std::setw(15)<<std::setprecision(8)<<VCEN[2]<<"  "
-	     <<std::setw(15)<<std::setprecision(8)<<RHO    <<std::endl;
+    if(DO_CENOUT) {
+      if(!CENOUT.is_open()) {
+	CENOUT.open(hasvalue("centerfile")?
+		    getparam("centerfile") :
+		    getparam("centrefile"),1);
+	if(!CENOUT)
+	  ::error("cannot open %s\n",
+		  hasvalue("centerfile")? "centerfile" : "centrefile");
+	CENOUT << "#\n"
+	       << "# \""<< (*(ask_history())) <<"\"\n"
+	       << "#\n# "
+	       << "           time  "
+	       << "              x               y               z  "
+	       << "             vx              vy              vz  "
+	       << "        density\n";
+      }
+      CENOUT <<"  "
+	     << std::setw(15) << std::setprecision(8) << SHOT.time() << "  "
+	     << std::setw(15) << std::setprecision(8) << XCEN[0]     << ' '
+	     << std::setw(15) << std::setprecision(8) << XCEN[1]     << ' '
+	     << std::setw(15) << std::setprecision(8) << XCEN[2]     << "  "
+	     << std::setw(15) << std::setprecision(8) << VCEN[0]     << ' '
+	     << std::setw(15) << std::setprecision(8) << VCEN[1]     << ' '
+	     << std::setw(15) << std::setprecision(8) << VCEN[2]     << "  "
+	     << std::setw(15) << std::setprecision(8) << RHO     << std::endl;
+    }
     // output of snapshot                                                       
-    if(SOUT && TIME >= TOUT) {
-      LoopBodies(bodies,&BODIES,Bi) {
+    if(DO_OUT && SHOT.time() >= TOUT) {
+      if(!OUT.is_open()) {
+	OUT.open(getparam_z("out"));
+	if(!OUT) ::error("cannot open out\n");
+      }
+      LoopAllBodies(&SHOT,Bi) {
 	Bi.pos() -= XCEN;
 	Bi.vel() -= VCEN;
       }
-      BODIES.write_nemo_snapshot(OUT,&TIME,READ&GIVE);
+      SHOT.write_nemo(OUT,READ&GIVE);
       TOUT += STEP;
     }
   }

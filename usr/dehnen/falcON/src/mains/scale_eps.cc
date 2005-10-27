@@ -3,12 +3,21 @@
 //                                                                             |
 // scale_eps.cc                                                                |
 //                                                                             |
-// C++ code                                                                    |
+// Copyright (C) 2003-2005 Walter Dehnen                                       |
 //                                                                             |
-// Copyright Walter Dehnen, 2003-2004                                          |
-// e-mail:   walter.dehnen@astro.le.ac.uk                                      |
-// address:  Department of Physics and Astronomy, University of Leicester      |
-//           University Road, Leicester LE1 7RH, United Kingdom                |
+// This program is free software; you can redistribute it and/or modify        |
+// it under the terms of the GNU General Public License as published by        |
+// the Free Software Foundation; either version 2 of the License, or (at       |
+// your option) any later version.                                             |
+//                                                                             |
+// This program is distributed in the hope that it will be useful, but         |
+// WITHOUT ANY WARRANTY; without even the implied warranty of                  |
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU           |
+// General Public License for more details.                                    |
+//                                                                             |
+// You should have received a copy of the GNU General Public License           |
+// along with this program; if not, write to the Free Software                 |
+// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                   |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 //                                                                             |
@@ -18,9 +27,11 @@
 // v 1.1    07/22/2003  WD marginal changes due to changes in body.h           |
 // v 1.2    30/04/2004  WD more marginal changes due to changes in body.h      |
 // v 2.0    19/05/2004  WD option give (previously write), no default.         |
+// v 2.1    20/05/2005  WD several minor updates, option give -> write         |
+// v 3.0    14/06/2005  WD new falcON                                          |
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "2.0"
-#define falcON_VERSION_D "19-may-2004 Walter Dehnen                          "
+#define falcON_VERSION   "3.0"
+#define falcON_VERSION_D "14-jun-2005 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #error You need NEMO to compile "scale_eps"
@@ -32,37 +43,37 @@
 #include <fstream>                                 // C++ file I/O              
 #include <cmath>                                   // standard math             
 #include <body.h>                                  // the bodies                
-#include <public/nmio.h>                           // my NEMO I/O               
+#include <public/io.h>                             // my NEMO I/O               
 #include <main.h>                                  // main & NEMO stuff         
 //------------------------------------------------------------------------------
 string defv[] = {
   "in=???\n           input file                                         ",
   "out=???\n          output file                                        ",
   "fac=???\n          scale factor for eps_i                             ",
-  "give=\n            output only these; if not given, output all we got ",
+  "write=\n           output only these; if not given, output all we got ",
   "times=all\n        times of snapshots to scale                        ",
   falcON_DEFV, NULL };
 //------------------------------------------------------------------------------
 string
 usage = "scale_eps -- scales individual softening lengths";
 //------------------------------------------------------------------------------
-void nbdy::main()
+void falcON::main() falcON_THROWING
 {
-  nemo_in   IN (getparam("in"));
-  nemo_out  OUT;
-  io        READ;
-  const io  GIVE (hasvalue("give")? getioparam("give") : io::all);
-  const io  WANT (GIVE & io::e);
-  double    TIME;
-  bodies    BODIES;
-  const real FAC(getdparam("fac"));
-  while(IN.is_present(nbdy::nemo_io::snap)) {
-    if(! BODIES.read_nemo_snapshot(IN,READ,&TIME,WANT,getparam("times"),0))
-      continue;
-    if(!READ.contains(io::e)) error("insufficient input data");
-    if( GIVE.contains(io::e))
-      LoopBodies(bodies,(&BODIES),Bi) Bi.eps() *= FAC;
-    if(!OUT.is_open()) OUT.open(getparam("out"));
-    BODIES.write_nemo_snapshot(OUT,&TIME,READ&GIVE);
+  nemo_in         in (getparam("in"));
+  nemo_out        out;
+  fieldset        read, write;
+  const fieldset  give (getioparam_a("write"));
+  snapshot        shot;
+  const real      fac(getrparam("fac"));
+  while(in.has_snapshot()) {
+    if(! shot.read_nemo(in,read,give,getparam("times"),0)) continue;
+    if(! read.contain(give))
+    warning("cannot write '%s' data (only read '%s')",
+	    word(give & ~read), word(read));
+    write = read & give;
+    if(write.contain(fieldbit::e))
+      LoopAllBodies(&shot,Bi) Bi.eps() *= fac;
+    if(!out.is_open()) out.open(getparam("out"));
+    shot.write_nemo(out,write);
   }
 }

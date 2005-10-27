@@ -3,12 +3,21 @@
 //                                                                             |
 // main.h                                                                      |
 //                                                                             |
-// C++ code                                                                    |
+// Copyright (C) 2002-2005  Walter Dehnen                                      |
 //                                                                             |
-// Copyright Walter Dehnen, 2002-2004                                          |
-// e-mail:   walter.dehnen@astro.le.ac.uk                                      |
-// address:  Department of Physics and Astronomy, University of Leicester      |
-//           University Road, Leicester LE1 7RH, United Kingdom                |
+// This program is free software; you can redistribute it and/or modify        |
+// it under the terms of the GNU General Public License as published by        |
+// the Free Software Foundation; either version 2 of the License, or (at       |
+// your option) any later version.                                             |
+//                                                                             |
+// This program is distributed in the hope that it will be useful, but         |
+// WITHOUT ANY WARRANTY; without even the implied warranty of                  |
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU           |
+// General Public License for more details.                                    |
+//                                                                             |
+// You should have received a copy of the GNU General Public License           |
+// along with this program; if not, write to the Free Software                 |
+// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                   |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 //                                                                             |
@@ -43,7 +52,7 @@
 //                                                                             |
 //-----------------------------------------------------------------------------+
 #ifdef falcON_included_main_h
-# error "main.h must only be included by a nbdy::main"
+# error "main.h must only be included by a falcON::main"
 #else
 #define falcON_included_main_h 1
 
@@ -55,6 +64,11 @@
 #  ifndef falcON_included_unistd_h
 #    include <unistd.h>
 #    define falcON_included_unistd_h
+#  endif
+#else
+#  ifndef falcON_included_fstream
+#    include <fstream>
+#    define falcON_included_fstream
 #  endif
 #endif
 //------------------------------------------------------------------------------
@@ -69,11 +83,14 @@
 #  ifndef falcON_USE_MPI
 #    define falcON_USE_MPI                         //   then use it             
 #  endif
-#  ifndef falcON_included_mpiu_h
-#    include <walter/mpiu.h>
+#  ifndef falcON_included_mpi_falcON_h
+#    include <proper/mpi_falcON.h>
 #  endif
+
 #else                                              // else                      
+
 #  undef falcON_USE_MPI                            //   don't use it            
+
 #endif
 
 //------------------------------------------------------------------------------
@@ -110,37 +127,29 @@
 #define falcON_PSIFLAG falcON_Pflag falcON_Sflag falcON_Iflag falcON_Mflag
 
 //------------------------------------------------------------------------------
-// include other necessary header files                                         
+// include falcON stuff                                                         
 //------------------------------------------------------------------------------
 
-#ifndef falcON_included_auxx_h
-#  include <public/auxx.h>                         // falcON types etc          
-#endif
-
-#ifndef falcON_included_exit_h
-#  include <public/exit.h>                         // falcON exit & error       
-#endif
-
-#ifndef falcON_included_nbio_h
-#  include <public/nbio.h>                         // falcON body I/O support   
+#ifndef falcON_included_body_h
+#  include <body.h>
 #endif
 
 //------------------------------------------------------------------------------
-// implement exit.h: compile_info                                               
+// implement basic.h: compile_info                                              
 //------------------------------------------------------------------------------
-namespace nbdy { namespace compile_info {
+namespace falcON { namespace compile_info {
   bool __set = 0;      bool const&is_set  () { return __set; }
   char __version[100]; const char*version () { return __version; }
   char __origin [100]; const char*origin  () { return __origin; }
   char __time    [30]; const char*time    () { return __time; }
-  char __compiler[10]; const char*compiler() { return __compiler; }
+  char __compiler[30]; const char*compiler() { return __compiler; }
   void init() {
     if(! __set ) {
       snprintf(__compiler,10,
 #if   defined (__INTEL_COMPILER)
 	       "icc-%d",__INTEL_COMPILER
 #elif defined (__GNUC__)
-	       "gcc-%d.%d",__GNUC__,__GNUC_MINOR__
+	       "gcc-%d.%d.%d",__GNUC__,__GNUC_MINOR__,__GNUC_PATCHLEVEL__
 #else
 	       "???"
 #endif
@@ -177,41 +186,57 @@ namespace nbdy { namespace compile_info {
 #  include <stdinc.h>                              // NEMO basic stuff          
 #  include <getparam.h>                            // NEMO parameter handling   
 #  include <history.h>                             // NEMO history              
+#  include <public/io.h>                           // my NEMO I/O & in/output   
 
 extern string defv[];                              // MUST be supplied by user  
 extern string usage;	                           // MUST be supplied by user  
-namespace nbdy { namespace defv_info {
+namespace falcON { namespace defv_info {
   char version [100];                              //   "VERSION=..."           
   char compiled[100];                              //   "COMPILED=..."          
   void init() {
-    compile_info::init();
-    run_info::init();
-    snprintf(version,100,"VERSION=%s%s\n%s",
+    snprintf(version,100,"VERSION=%s\n%s",
 	     compile_info::version (),
-	     compile_info::compiler(),
 	     compile_info::origin  ());
-    snprintf(compiled,100,"COMPILED=\n%s, with %s",
+    snprintf(compiled,100,"COMPILED=\n%s, with %s"
+	     "                                   ",
 	     compile_info::time(),
 	     compile_info::compiler());
+    compiled[61] = 0;
   };
 } }
 #  if defined(falcON_PROPER) && !defined(falcON_NOT_USING_PROPER)
-#    define falcON_DEFV nbdy::defv_info::version, nbdy::defv_info::compiled, "STATUS=\nproprietary version; usage restricted"
+#    define falcON_DEFV							\
+     falcON::defv_info::version,					\
+     falcON::defv_info::compiled,					\
+     "STATUS=\nproprietary version; usage restricted              "
 #  else
-#    define falcON_DEFV nbdy::defv_info::version, nbdy::defv_info::compiled, "STATUS=\npublic version"
+#    define falcON_DEFV							\
+     falcON::defv_info::version,					\
+     falcON::defv_info::compiled,					\
+     "STATUS=\npublic version                                     "
 #  endif
 #endif
 
 //------------------------------------------------------------------------------
-// define main() in namespace nbdy                                              
+// define main() in namespace falcON                                            
 //------------------------------------------------------------------------------
-
-namespace nbdy {
+// MUST be supplied by user in the #including file                              
+namespace falcON {
 #ifdef falcON_USE_NEMO
-  extern void main(void);                          // MUST be supplied by user  
+  extern void main(void) falcON_THROWING;
 #else
-  extern void main(int argc, char *argv[]);        // MUST be supplied by user  
+  extern void main(int argc, char *argv[]) falcON_THROWING;
 #endif
+  //----------------------------------------------------------------------------
+  // define falcON::ERROR() to call nemo::error() if NEMO application           
+  //----------------------------------------------------------------------------
+  inline void ERROR(const char*m) {
+#ifndef falcON_USE_NEMO
+    falcON::error(m);
+#else
+    ::error(const_cast<char*>(m));
+#endif
+  }
 }
 
 //------------------------------------------------------------------------------
@@ -220,45 +245,81 @@ namespace nbdy {
 
 int main(int argc, char *argv[])                   // global main               
 {
+
+  try {                                            // TRY:                      
+
+    falcON::CheckAgainstLibrary(falcON::CurrentStatus());
+                                                   // assert status matches     
+
 #ifdef falcON_USE_MPI
-  nbdy::mpi_init(&argc,&argv);                     // start MPI: spawm processes
+    falcON::MPI::Init(&argc,&argv);                // start MPI: spawm processes
 #endif
 
-  nbdy::set_name(argv[0]);                         // get name of application   
-  nbdy::compile_info::init();                      // initialize compile_info   
-  nbdy::run_info::init();                          // initialize run_info       
+    falcON::set_name(argv[0]);                     // get name of application   
+    falcON::compile_info::init();                  // initialize compile_info   
 
 #ifdef falcON_USE_NEMO
-  nbdy::defv_info::init();                         // initialize defv_info      
-  initparam(argv,defv);                            // start  NEMO               
-#  if defined(falcON_RepAction) && (falcON_RepAction==1)
-  nbdy::report::open_file(argv[0],*(ask_history()));
+    falcON::defv_info::init();                     // initialize defv_info      
+#ifndef falcON_NoHelpDefault
+    if(argc == 1) {                                // IF no command line args   
+      char *argV[3];
+      argV[0] = argv[0];
+      argV[1] = "help=h";
+      argV[2] = 0;
+      initparam(argV,defv);
+    } else
+#endif
+      initparam(argv,defv);
+    {
+      int d = 100;
+      while(!nemo_debug(d--)); 
+      falcON::run_info::init(++d);
+    }
+#  if defined(falcON_PROPER) &&			\
+      defined(falcON_RepAction) && (falcON_RepAction==1)
+
+    falcON::report::open_file(argv[0],*(ask_history()));
+
 #  endif
 
-  nbdy::main();                                    //   call user program       
-  finiparam();                                     // finish NEMO               
+    try {                                          // TRY:                      
+      falcON::main();                              //   call user program       
+    } catch(falcON::exception E) {                 // CATCH falcON errors       
+      falcON::ERROR(text(E));
+    }
+    finiparam();                                   // finish NEMO               
 
 #else // falcON_USE_NEMO
 
-#  if defined(falcON_RepAction) && (falcON_RepAction==1)
-  nbdy::report::open_file(argv[0]);
+    falcON::run_info::init();                      // initialize run_info       
+
+#  if defined(falcON_PROPER) &&			\
+      defined(falcON_RepAction) && (falcON_RepAction==1)
+
+    falcON::report::open_file(argv[0]);
+
 #  endif
 
-  nbdy::main(argc,argv);                           //   call user program       
+    falcON::main(argc,argv);                       //   call user program       
 
 #endif
 
-#if defined(falcON_RepAction) && (falcON_RepAction==1)
-  nbdy::report::close_file();
+#if defined(falcON_PROPER) &&			\
+  defined(falcON_RepAction) &&			\
+  (falcON_RepAction==1)
+    falcON::report::close_file();
 #endif
 
 #ifdef falcON_USE_MPI
-  nbdy::mpi_finalize();                            // finish MPI                
+    falcON::MPI::Finish();                         // finish MPI                
 #endif
+
+  } catch(falcON::exception E) {                   // CATCH falcON errors       
+    falcON::ERROR(text(E));
+  }
 }
-//------------------------------------------------------------------------------
-// define getvparam_z(arg,vect&) for getting a vect                             
-//------------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
+namespace falcON {
 #ifdef falcON_USE_NEMO
 #undef nemoinpr
 #ifdef falcON_REAL_IS_FLOAT
@@ -266,66 +327,159 @@ int main(int argc, char *argv[])                   // global main
 #else
 #  define nemoinpr nemoinpd
 #endif
-namespace nbdy {                                   // define in namespace nbdy  
+  //////////////////////////////////////////////////////////////////////////////
+  //                                                                          //
+  // some utilities for getting NEMO parameters                               //
+  //                                                                          //
+  //////////////////////////////////////////////////////////////////////////////
   //----------------------------------------------------------------------------
   // read vect from nemo parameter                                              
-  vect getvparam(char* option)
-  {
+  vect getvparam(const char* option) falcON_THROWING {
     vect X;
-    int  N = nemoinpr(getparam(option),static_cast<real*>(X),Ndim);
+    int  N = nemoinpr(getparam(const_cast<char*>(option)),
+		      static_cast<real*>(X),Ndim);
     if(N>Ndim)
       warning("option \"%s\" requires %d values, but %d given\n",option,Ndim,N);
-    else if(N<0)  error("processing option \"%s\"\n",option);
+    else if(N<0)  error("parse error: processing option \"%s\"\n",option);
     else if(N==0) error("no data for option \"%s\"\n",option);
     else if(N<Ndim)
-      error  ("option \"%s\" requires %d values, but %d given\n",option,Ndim,N);
+      falcON_THROW("option \"%s\" requires %d values, but %d given\n",
+		   option,Ndim,N);
     return X;
   }
   //----------------------------------------------------------------------------
   // read vect from nemo parameter into 2nd argument, return pointer            
-  vect* getvparam_z(char* option, vect&X)
-  {
-    if(!hasvalue(option)) return 0;
-    int N = nemoinpr(getparam(option),static_cast<real*>(X),Ndim);
+  vect* getvparam_z(const char* option, vect&X) falcON_THROWING {
+    if(!hasvalue(const_cast<char*>(option))) return 0;
+    int N = nemoinpr(getparam(const_cast<char*>(option)),
+		     static_cast<real*>(X),Ndim);
     if(Ndim != N) {
-      if(N<0) error("processing option \"%s\"\n",option);
+      if(N<0) falcON_THROW("parse error: processing option \"%s\"\n",option);
       if(N>0) warning("option \"%s\" requires %d values, but %d given\n",
 		      option,Ndim,N);
       return 0;
     }
     return &X;
   }
-//------------------------------------------------------------------------------
-// define getparam_z(arg), and related, which will return 0 if !hasvalue(arg).  
-//------------------------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  // read float                                                                 
+  inline float getfparam(const char* option) {
+    return float(getdparam(const_cast<char*>(option)));
+  }
+  //----------------------------------------------------------------------------
+  // read real                                                                  
 #ifdef getrparam
 #  undef getrparam
 #endif
-  //----------------------------------------------------------------------------
-  inline float getfparam(const char* option) {
-    return float(getdparam(const_cast<char*>(option)));  }
-  //----------------------------------------------------------------------------
   inline float getrparam(const char* option) { 
-    return real(getdparam(const_cast<char*>(option))); }
+    return real(getdparam(const_cast<char*>(option)));
+  }
   //----------------------------------------------------------------------------
-  inline io getioparam(const char* option) {
-    return io(getparam(const_cast<char*>(option))); }
-//------------------------------------------------------------------------------
-#  define GET_Z(TYPE,NAME,NULL)				\
-  inline TYPE NAME##_z(char* option)			\
-  { return hasvalue(option)? NAME(option) : NULL; }
-  GET_Z(char*,    getparam, 0)
-  GET_Z(int,      getiparam,0)
-  GET_Z(long,     getlparam,0)
-  GET_Z(bool,     getbparam,false)
-  GET_Z(float,    getfparam,0.f)
-  GET_Z(double,   getdparam,0.)
-  GET_Z(real,     getrparam,zero)
-  GET_Z(io,       getioparam, io::o)
-#  undef GET_Z
+  // read unsigned                                                              
+  inline unsigned getuparam(const char* option) {
+    int i = getiparam(const_cast<char*>(option));
+    if(i < 0)
+      error("getuparam(%s): expected a positive integer, got %d\n", option,i);
+    return unsigned(i);
+  }
+  //----------------------------------------------------------------------------
+  // read io                                                                    
+  inline fieldset getioparam(const char* option) {
+    return fieldset(getparam(const_cast<char*>(option)));
+  }
+  //----------------------------------------------------------------------------
+  // define getparam_z(arg), and related, which will return 0 if !hasvalue(arg).
+  //----------------------------------------------------------------------------
+  inline char* getparam_z(const char* option) {
+    return hasvalue(const_cast<char*>(option))?
+      getparam(const_cast<char*>(option)) : 0;
+  }
+  //----------------------------------------------------------------------------
+  inline int getiparam_z(const char* option) {
+    return hasvalue(const_cast<char*>(option))?
+      getiparam(const_cast<char*>(option)) : 0;
+  }
+  //----------------------------------------------------------------------------
+  inline long getlparam_z(const char* option) {
+    return hasvalue(const_cast<char*>(option))?
+      getlparam(const_cast<char*>(option)) : 0;
+  }
+  //----------------------------------------------------------------------------
+  inline bool getbparam_z(const char* option) {
+    return hasvalue(const_cast<char*>(option))?
+      getbparam(const_cast<char*>(option)) : false;
+  }
+  //----------------------------------------------------------------------------
+  inline float getdparam_z(const char* option) {
+    return hasvalue(const_cast<char*>(option))?
+      getdparam(const_cast<char*>(option)) : 0.;
+  }
+  //----------------------------------------------------------------------------
+  inline float getfparam_z(const char* option) {
+    return hasvalue(const_cast<char*>(option))?
+      getfparam(const_cast<char*>(option)) : 0.f;
+  }
+  //----------------------------------------------------------------------------
+  inline real getrparam_z(const char* option) {
+    return hasvalue(const_cast<char*>(option))?
+      getrparam(const_cast<char*>(option)) : zero;
+  }
+  //----------------------------------------------------------------------------
+  inline fieldset getioparam_z(const char* option) {
+    return hasvalue(const_cast<char*>(option))?
+      getioparam(const_cast<char*>(option)) : fieldset::o;
+  }
+  //----------------------------------------------------------------------------
+  // read io, if not given return io::all                                       
+  inline fieldset getioparam_a(const char* option) {
+    return hasvalue(const_cast<char*>(option))?
+      getioparam(const_cast<char*>(option)) : fieldset::all;
+  }
   //////////////////////////////////////////////////////////////////////////////
-}                                                  // END: namespace nbdy       
-#endif                                             // falcON_USE_NEMO           
+  //                                                                          //
+  // check for file name to relate to a real output (is given && != ".")      //
+  //                                                                          //
+  //////////////////////////////////////////////////////////////////////////////
+  inline bool file_for_output(const char* option) {
+    return
+      hasvalue(const_cast<char*>(option)) &&
+      strcmp  (getparam(const_cast<char*>(option)),".");
+  }
+#endif // falcON_USE_NEMO
+  //////////////////////////////////////////////////////////////////////////////
+  //                                                                          //
+  // check io for completeness                                                //
+  //                                                                          //
+  //////////////////////////////////////////////////////////////////////////////
+  inline void check_sufficient(fieldset const&read, fieldset const&need)
+    throw(falcON::exception) {
+    if(! read.contain(need))
+      throw exception("insufficient data: need \'%s\', got \'%s\'",
+		      word(need), word(read));
+  }
+  //////////////////////////////////////////////////////////////////////////////
+  //                                                                          //
+  // check for existence of a file                                            //
+  //                                                                          //
+  //////////////////////////////////////////////////////////////////////////////
+  inline bool file_exists(const char*file) {
+#ifdef unix
+    // simply use the access system call. F_OK asks for existence only.         
+    return 0 == access(file, F_OK);
+#else
+    // in fact, this test is different, as existence and read permission are    
+    // required to open an ifstream.                                            
+    std::ifstream IN;
+    IN.open(file);
+    if(IN.is_open()) {
+      IN.close();
+      return true;
+    } else
+      return false;
+#endif
+  }
+  //////////////////////////////////////////////////////////////////////////////
+} // namespace falcON {
 
 ////////////////////////////////////////////////////////////////////////////////
-#endif                                             // falcON_included_main_h    
+#endif // falcON_included_main_h

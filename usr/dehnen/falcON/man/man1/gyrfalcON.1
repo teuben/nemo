@@ -1,4 +1,4 @@
-.TH gyrfalcON 1falcON "18 May 2004"
+.TH gyrfalcON 1falcON "21 September 2004"
 
 .SH name
 gyrfalcON \- a superberb N-body code (public version)
@@ -7,7 +7,7 @@ gyrfalcON \- a superberb N-body code (public version)
 \fBgyrfalcON\fP [parameter=value]
 
 .SH requirement
-requires NEMO version 3.0.13 or higher, see
+requires NEMO version 3.2.1 or higher, see
 http://www.astro.umd.edu/nemo. It is recommended to configure NEMO
 with \fBconfigure --enable-single --enable-lfs\fP.
 
@@ -194,19 +194,56 @@ validate it first.
 If given, the root cell of the oct-tree used in the \fBfalcON\fP
 algorithm is centred on the position \fIx,y,z\fP. No default.
 .TP
-\fBpotname=\fP\fIname\fP
-If given, an external gravitational potential with that name is
-used. The code searches for a shared object file and loads it
-dynamically. No default.
+\fBaccname=\fP\fIname\fP
+If given, an external acceleration field with that name is used. The
+code searches for a shared object file and loads it dynamically. If
+the shared object file does not contain functionality for an external
+acceleration field, but for an external old-style \fBNEMO\fP
+potential, that is used to construct an acceleration field (fall-back
+mechanism).  Several acceleration fields may be added by the syntax
+\fBaccname=\fP\fIname1\fP\fB+\fP\fIname2\fP\fB+\fP\fIname3\fP.  No
+default.
+
 .TP
-\fBpotpars=\fP\fIparameter list\fP
-If \fBpotname\fP is given, the external potential is using the
-\fIparameter list\fP, a comma-separated list of floating point
-numbers, for initialisation. No default.
+\fBaccpars=\fP\fIparameter list\fP
+If \fBaccname\fP is given, the external acceleration field is using
+the \fIparameter list\fP, a comma-separated list of floating point
+numbers, for initialisation. If more than one \fBaccname\fP is given,
+a parameter list (possibly empty) must be given for each, separated
+by either \fB;\fP or \fB#\fP. No default.
 .TP
-\fBpotfile=\fP\fIfile\fP
-If \fBpotname\fP is given, the external potential is using the
-the \fIfile\fP, if any, for initialisation. No default.
+\fBaccfile=\fP\fIfile\fP If \fBaccname\fP is given, the external
+acceleration field is using the the \fIfile\fP, if any, for
+initialisation. If more than one \fBaccname\fP is given, a file name
+(possibly empty) must be given for each, separated by either \fB;\fP
+or \fB#\fP. No default.
+
+.SH other parameters
+.TP 25
+\fBmanipname=\fP\fIname\fP
+If given, a run-time manipulator with that name is used. The code
+searches for a shared object file and loads it dynamically. Several
+manipulators may be concatinated by the syntax
+\fBmanipname=\fP\fIname1\fP\fB+\fP\fIname2\fP\fB+\fP\fIname3\fP. No
+default.
+.TP
+\fBmanippars=\fP\fIparameter list\fP
+If \fBmanipname\fP is given, the run-time manipulator is using
+the \fIparameter list\fP, a comma-separated list of floating point
+numbers, for initialisation. If more than one \fBmanipname\fP is given,
+a parameter list (possibly empty) must be given for each, separated
+by either \fB;\fP or \fB#\fP. No default.
+.TP
+\fBmanipfile=\fP\fIfile\fP
+If \fBmanipname\fP is given, the run-time manipulator is using the the
+\fIfile\fP, if any, for initialisation. If more than one
+\fBmanipname\fP is given, a file name (possibly empty) must be given
+for each, separated by either \fB;\fP or \fB#\fP. No default.
+.TP
+\fBmanippath=\fP\fIpath\fP
+If \fBmanipname\fP is given, the path \fIpath\fP is searched for a file
+\fBmanipname.so\fP to lead the manipulator. By default, the path searched
+is ".:$FALCON/manip".
 
 .SH example
 
@@ -270,5 +307,7 @@ Walter Dehnen                              walter.dehnen@astro.le.ac.uk
 .SH update history of this man page
 .nf
 .ta +1.0i +2.0i
-18-May-2004	first version of manual  WD
+18-may-2004	first version of manual    WD
+01-jul-2004	version 2.2 of gyrfalcON   WD
+27-sep-2005	version 3.0.4 of gyrfalcON WD
 .fi

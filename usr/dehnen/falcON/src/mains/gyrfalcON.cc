@@ -3,12 +3,21 @@
 //                                                                             |
 // gyrfalcON.cc                                                                |
 //                                                                             |
-// C++ code                                                                    |
+// Copyright (C) 2000-2005 Walter Dehnen                                       |
 //                                                                             |
-// Copyright Walter Dehnen, 2000-2004                                          |
-// e-mail:   walter.dehnen@astro.le.ac.uk                                      |
-// address:  Department of Physics and Astronomy, University of Leicester      |
-//           University Road, Leicester LE1 7RH, United Kingdom                |
+// This program is free software; you can redistribute it and/or modify        |
+// it under the terms of the GNU General Public License as published by        |
+// the Free Software Foundation; either version 2 of the License, or (at       |
+// your option) any later version.                                             |
+//                                                                             |
+// This program is distributed in the hope that it will be useful, but         |
+// WITHOUT ANY WARRANTY; without even the implied warranty of                  |
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU           |
+// General Public License for more details.                                    |
+//                                                                             |
+// You should have received a copy of the GNU General Public License           |
+// along with this program; if not, write to the Free Software                 |
+// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                   |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 //                                                                             |
@@ -81,26 +90,44 @@
 // v 1.7.3  23/10/2003  WD changes in design of gravity, tree, kernel, falcON  |
 // v 1.8    05/11/2003  WD changes in grav; changed io::P to io::q             |
 // v 1.8.1  10/02/2004  WD minor change in this file (logfile)                 |
-// v 1.8.2  11/02/2004  WD allow for Grav=0 (Grav now handled in grav.h)       |
+// v 1.8.2  11/02/2004  WD allow for Grav=0 (Grav now handled in gravity.h)    |
 // v 1.8.3  18/02/2004  WD bug with Grav=0 fixed; avoid tree building if G=0   |
 // v 1.9    19/02/2004  WD added option root_center                            |
 // v 1.9.1  23/02/2004  WD improved diagnose output (new T, V_in, [V_ex,] W)   |
-// v 1.9.2  27/02/2004  WD use nemo::error() instead of nbdy::error()          |
+// v 1.9.2  27/02/2004  WD use nemo::error() instead of falcON::error()        |
 // v 2.0    11/03/2004  WD elimated yanc.h & yanc.cc                           |
 // v 2.0.1  31/03/2004  WD log format changed slightly; change in ext pot      |
 // v 2.1    30/04/2004  WD happy icc 8.0; new body.h;                          |
+// v 2.1.1  02/06/2004  WD falcON::output: moved stdout tests to io.cc         |
+// v 2.1.2  28/06/2004  WD file_exists() in main.h                             |
+// v 2.2    30/06/2004  WD changed options potname, etc to accname, etc        |
+// v 2.2.1  08/07/2004  WD if resume, output ->out if given, else append ->in  |
+// v 2.2.2  15/07/2004  WD if resume, append log output, no logout at t=t_ini  |
+// v 2.2.3  16/07/2004  WD deBUGged (initialization of body flags)             |
+// v 2.2.4  21/07/2004  WD velocity prediction IF external acc needs velocities|
+// v 2.3    13/09/2004  WD new time integrator layout (nbody.h)                |
+// v 2.4    17/09/2004  WD added manipulator                                   |
+// v 2.4.1  15/10/2004  WD minor bug (!never_ending && tstop < t_ini)          |
+// v 2.5    10/11/2004  WD new keyword time                                    |
+// v 2.5.1  10/11/2004  WD new keyword manipinit                               |
+// v 2.6    21/01/2005  WD manip may stop simulation                           |
+// v 2.6.1  01/04/2005  WD adapt for change of scope of soft_type              |
+// v 3.0.0  10/06/2005  WD new falcON: new bodies, new nemo_io ...             |
+// v 3.0.1  23/06/2005  WD changes in warning/error                            |
+// v 3.0.2  25/06/2005  WD option manippath added                              |
+// v 3.0.3  20/07/2005  WD output file name appending with '!' or '@'          |
+// v 3.0.4  20/07/2005  WD omit list of possible output specs                  |
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "2.1"
-#define falcON_VERSION_D "30-apr-2004 Walter Dehnen                          "
+#define falcON_VERSION   "3.0.4"
+#define falcON_VERSION_D "02-sep-2005 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need "NEMO" to compile gyrfalcON
 #endif
-#include <nbdy.h>                                  // the N-body code           
-#include <iostream>                                // C++ I/O                   
-#include <fstream>                                 // C++ file I/O              
+#define falcON_RepAction 1                         // do action reporting       
+#include <public/nbody.h>                          // the N-body code           
+#include <public/manip.h>                          // N-body manipulators       
 #include <main.h>                                  // main & NEMO stuff         
-
 //------------------------------------------------------------------------------
 string defv[] = {
   "in=???\n           input file                                         ",
@@ -124,7 +151,7 @@ string defv[] = {
 #  else
   "eps=0.05\n         >=0: softening length\n"
   "                   < 0: use individual fixed softening lengths        ",
-#  endif
+ #  endif
 #else
   "eps=0.05\n         softening length                                   ",
 #endif
@@ -142,51 +169,29 @@ string defv[] = {
   "fph=\n             tau = fph / pot            |  these is non-zero,   ",
   "fpa=\n             tau = fpa * sqrt(pot)/acc  |  we use the minimum   ",
   "fea=\n             tau = fea * sqrt(eps/acc) /   tau.                 ",
+  "time=\n            time of input snapshot (default: first)            ",
   "resume=f\n         resume old simulation?  that implies:\n"
   "                   - read last snapshot from input file\n"
   "                   - append primary output to input (unless out given)",
-  "give=mxv\n         list of output specifications. Recognizing:\n"
-  "                    m: mass                              (default)\n"
-  "                    x: position                          (default)\n"
-  "                    v: velocity                          (default)\n"
-  "                    a: acceleration\n"
-  "                    p: N-body potential\n"
-  "                    q: add external potential before output\n"
-#ifdef falcON_INDI
-  "                    e: individual eps_i (if they exist)\n"
-#endif
-  "                    l: time-step level (if they exist)\n"
-#if(0)
-  "                    k: body key (if given with input)\n"
-#endif
-#ifdef falcON_ADAP
-  "                    r: density estimate\n"
-#endif
-  "                    f: body flag                                      ",
+  "give=mxv\n         list of output specifications.                     ",
   "give2=mxv\n        list of specifications for secondary output        ",
   "Grav=1\n           Newton's constant of gravity (0-> no self-gravity) ",
   "root_center=\n     if given (3 numbers), forces tree-root centering   ",
-  "potname=\n         name of external potential                         ",
-  "potpars=\n         parameters of external potential                   ",
-  "potfile=\n         file required by external potential                ",
+  "accname=\n         name of external acceleration field                ",
+  "accpars=\n         parameters of external acceleration field          ",
+  "accfile=\n         file required by external acceleration field       ",
+  "manipname=\n       name of run-time manipulator                       ",
+  "manippars=\n       parameters for manipulator                         ",
+  "manipfile=\n       data file required by manipulator                  ",
+  "manippath=\n       path to search for manipulator                     ",
+  "manipinit=f\n      manipulate initial snapshot?                       ",
   "startout=t\n       primary output for t=tstart?                       ",
   "lastout=t\n        primary output for t=tstop?                        ",
   falcON_DEFV, NULL };
 //------------------------------------------------------------------------------
 string usage = "gyrfalcON -- a superberb N-body code";
 //------------------------------------------------------------------------------
-inline bool exists(const char* stop_file)
-{
-  static std::ifstream IN;
-  IN.open(stop_file);
-  if(IN.is_open()) {
-    IN.close();
-    return true;
-  } else
-    return false;
-}
-//------------------------------------------------------------------------------
-void nbdy::main()
+void falcON::main() falcON_THROWING
 {
   // 1. set some parameters                                                     
   const bool
@@ -196,138 +201,127 @@ void nbdy::main()
     lastout      = getbparam("lastout");              // write out last snapshot
   const double
     t_end   = getdparam_z("tstop"),                   // integrate until t=t_end
-    dt_out0 = getdparam("step"),                      // primary output interval
-    dt_out1 = getdparam("step2");                     // secondary  --------    
+    dt_out1 = getdparam("step"),                      // primary output interval
+    dt_out2 = getdparam("step2");                     // secondary  --------    
   const int
     Nlev    = getiparam("Nlev"),                      // # time step levels     
     logstep = getiparam("logstep");                   // # blocksteps/logoutput 
-  const io
-    wr0 = getioparam("give"),                         // what to output 0?      
-    wr1 = getioparam("give2");                        // what to output 1?      
-  const nemo_grav*pex = hasvalue("potname")?          // IF(potname given) THEN 
-    new nemo_grav(getparam  ("potname"),              //   initialize external  
-		  getparam_z("potpars"),              //   gravity              
-		  getparam_z("potfile")) : 0;         // ELSE: no potential     
+  const fieldset
+    write1 = getioparam("give"),                      // what to output 0?      
+    write2 = getioparam("give2");                     // what to output 1?      
+  const nemo_acc*aex = hasvalue("accname")?           // IF(potname given) THEN 
+    new nemo_acc(getparam  ("accname"),               //   initialize external  
+		 getparam_z("accpars"),               //   accelerations        
+		 getparam_z("accfile")) : 0;          // ELSE: no potential     
+  const Manipulator MANIP(getparam_z("manipname"),    // IF(manipname given)    
+			  getparam_z("manippars"),    //   THEN                 
+			  getparam_z("manipfile"),    //   initialize N-body    
+			  getparam_z("manippath"));   //   manipulator          
   if(Nlev>1 &&                                        // IF(more than one level)
      ! (hasvalue("fac") || hasvalue("fph") ||         //   we need fac or fph   
 	hasvalue("fpa") || hasvalue("fea") ))         //        or fpa or fea   
-    ::error("fac, fph, fap, or fea required if Nlev>1"); //error otherwise      
+     falcON_THROW("fac, fph, fap, or fea required if Nlev>1"); //error otherwise
   // 2. initialize N-body integrator                                            
 #ifdef falcON_ADAP
-  if(getdparam  ("eps")   <  0 &&                     // IF(indiv fixed eps_i   
-     getdparam  ("Nsoft") != 0)                       // AND Nsoft != 0         
-    ::error("eps<0 && Nsoft!=0: combination not sensible"); // issue error      
+  if(getrparam  ("eps")   <  0 &&                     // IF(indiv fixed eps_i   
+     getrparam  ("Nsoft") != 0)                       // AND Nsoft != 0         
+    falcON_THROW("eps<0 && Nsoft!=0: combination not sensible"); // issue error 
 #endif
   vect X0;                                            // potential root center  
-  NbodyCode NBDY(getparam   ("in"),                   //   snapshot input       
-		 resume,                              //   resume old simul?    
-		 getiparam  ("hmin"),                 //   -log_2(time step)    
-		 getiparam  ("Nlev"),                 //   # time steps         
-		 getdparam_z("fac"),                  //   fac in adapting steps
-		 getdparam_z("fph"),                  //   fph in adapting steps
-		 getdparam_z("fpa"),                  //   fpa in adapting steps
-		 getdparam_z("fea"),                  //   fea in adapting steps
-		 getiparam  ("Ncrit"),                //   min# bodies/leaf cell
-		 getiparam  ("hgrow"),                //   growing fresh tree   
-		 getvparam_z("root_center",X0),       //   root centering ?     
-		 getdparam  ("eps"),                  //   softening length     
-		 kern(getiparam  ("kernel")),         //   softening kernel     
-		 pex,                                 //   external potential   
-		 getdparam  ("theta"),                //   tolerance parameter  
-		 getdparam  ("Grav")                  //   Newton's constant    
+  FalcONCode NBDY(getparam   ("in"),                  //   snapshot input       
+		  resume,                             //   resume old simul?    
+		  getiparam  ("hmin"),                //   -log_2(time step)    
+		  getiparam  ("Nlev"),                //   # time steps         
+		  getrparam_z("fac"),                 //   fac in adapting steps
+		  getrparam_z("fph"),                 //   fph in adapting steps
+		  getrparam_z("fpa"),                 //   fpa in adapting steps
+		  getrparam_z("fea"),                 //   fea in adapting steps
+		  getiparam  ("Ncrit"),               //   min# bodies/leaf cell
+		  getiparam  ("hgrow"),               //   growing fresh tree   
+		  getvparam_z("root_center",X0),      //   root centering ?     
+		  getrparam  ("eps"),                 //   softening length     
+		  kern(getiparam  ("kernel")),        //   softening kernel     
+		  aex,                                //   external potential   
+		  getrparam  ("theta"),               //   tolerance parameter  
+		  getrparam  ("Grav"),                //   Newton's constant    
 #ifdef falcON_INDI
-		 ,
 #  ifdef falcON_ADAP
-		 getdparam  ("Nsoft"),                //   #in eps sphere       
-		 getiparam  ("Nref"),                 //   #bodies in n-estimate
-		 getiparam  ("emin"),                 //   lower limit for eps_i
+		  getrparam  ("Nsoft"),               //   #in eps sphere       
+		  getiparam  ("Nref"),                //   #bodies in n-estimate
+		  getiparam  ("emin"),                //   lower limit for eps_i
 #  endif
-		 getdparam ("eps")   <zero?
-		 basic_nbody::individual_fixed    :
+		  getrparam ("eps")   <zero?          //   type of softening    
+		  individual_fixed    :
 #ifdef falcON_ADAP
-		 getdparam ("Nsoft") >zero?
-		 basic_nbody::individual_adaptive :
+		  getrparam ("Nsoft") >zero?
+		  individual_adaptive :
 #endif
-		 basic_nbody::global_fixed
+		  global_fixed,
 #endif
-		 );
-  if(!NBDY.okay()) ::error("initialization error");   // Initialization okay?   
-  if(t_end < NBDY.initial_time()) {                   // IF(t_end < t_start)    
-    ::warning("tstop < t_ini: nothing to be done\n"); //   THEN we are done     
+		  getparam_z("time"));                //   initial time         
+  if(!never_ending && t_end < NBDY.initial_time()) {  // IF(t_end < t_start)    
+    warning("tstop < t_ini: nothing to be done\n");   //   THEN we are done     
     return;                                           //   and can stop here    
   }                                                   // ENDIF                  
-  // 3. initialize output streams                                               
-  // 3.0 check that at most one output is to stdout                             
-  int nstdout = 0;                                    // counter for stdout     
-  if(0==strcmp(getparam("logfile"),"-") ) ++nstdout;  // is logfile=- ?         
-  if(0==strcmp(getparam("out")    ,"-") ) ++nstdout;  // is out=- ?             
-  if(0==strcmp(getparam("out2")   ,"-") ) ++nstdout;  // is out2=- ?            
-  if(nstdout > 1)                                     // IF # stdout > 1 ERROR  
-    ::error("more than one of \"logfile\", \"out\", \"out2\" equals \"-\"");
-  // 3.1 primary output                                                         
-  if(hasvalue("out"))                                 // IF(out given) THEN     
-    NBDY.open_nemo(0,getparam("out"),resume);         //   open NEMO output     
-  else if(resume)                                     // ELSE IF(resuming) THEN 
-    NBDY.open_nemo(0,0,resume);                       //   append to NEMO input 
-  else                                                // ELSE(no out, no resume)
-    ::error("out required if resume=f");              //   error out            
-  if(!NBDY.nemo_is_open(0))                           // IF(no nemo output)     
-    ::error("opening for primary output failed");     //   error out            
+  if(MANIP) {                                         // IF manipulating        
+    const_cast<snapshot*>(NBDY.my_snapshot())->       //   supported required   
+      add_fields(MANIP.provide());                    //   data                 
+    if(getbparam("manipinit"))                        //   IF(manipulating 1st) 
+      MANIP(NBDY.my_snapshot());                      //     do it now          
+  }                                                   // ENDIF                  
+  // 3. open output streams & make initial outputs                              
+  output LOGOUT(getparam("logfile"),resume);          // log output stream      
+  if(!resume && !hasvalue("out"))                     // check for out=         
+    falcON_THROW("you must provide an output file");  //   error if not given   
+  nemo_out OUT1(hasvalue("out")?                      // open NEMO output       
+		getparam("out") : getparam("in"),     //   if not out given,    
+		!hasvalue("out"));                    //   append to input      
+  nemo_out OUT2(getparam_z("out2"));                  // open 2nd nemo output   
   bool written=false;                                 // current snapshot wrtten
   if(!resume && getbparam("startout")) {              // IF(not resuming)       
-    NBDY.write_nemo(wr0,0);                           //   write snapshot       
+    NBDY.write(OUT1,write1);                          //   write snapshot       
     written = true;                                   //   record writing       
   }                                                   // ENDIF                  
-  // 3.2 secondary output                                                       
-  if(hasvalue("out2")) {                              // IF(out2 given) THEN    
-    NBDY.open_nemo(1,getparam("out2"));               //   try to open output   
-      if(!NBDY.nemo_is_open(1))                       //   IF(no nemo output)   
-	::error("opening for secondary output failed");
-    NBDY.write_nemo(wr1,1);                           //   write snapshot       
-  }                                                   // ENDIF                  
-  // 3.3 log output                                                             
-  std::ostream *logout = 0;                           // pointer to log ostream 
-  std::ofstream logfile;                              // file for log output    
-  if(0 == strcmp(getparam("logfile"),"."))            // IF no log output       
-    ::warning("option \"logfile=.\" supresses any log output");
-  else if(strcmp(getparam("logfile"),"-")) {          // ELIF desired:          
-    logfile.open(getparam("logfile"));                //   open logfile         
-    logout = &logfile;                                //   log output to file   
-  } else                                              // ELSE                   
-    logout = &std::clog;                              //   log output to stdlog 
-  if(logout) {                                        // IF any log output      
-    NBDY.describe_nemo(*logout,*(ask_history()));     //   put history to logout
-    NBDY.stats_head   (*logout);                      //   header for logout    
-    NBDY.stats        (*logout);                      //   statistics -> logout 
+  if(OUT2)                                            // IF(2nd nemo output)    
+    NBDY.write(OUT2,write2);                          //   write snapshot       
+  if(LOGOUT) {                                        // IF any log output      
+    NBDY.describe  (LOGOUT,*(ask_history()));         //   put history to logout
+    NBDY.stats_head(LOGOUT);                          //   header for logout    
+    if(!LOGOUT.is_appending())                        //   Unless appending     
+      NBDY.stats   (LOGOUT);                          //     statistics ->logout
   }                                                   // ENDIF                  
   // 4. time integration & outputs                                              
   double
-    t_out0 = NBDY.initial_time()+0.999999*dt_out0,    // time for next output 0 
-    t_out1 = NBDY.initial_time()+0.999999*dt_out1;    // time for next output 1 
+    t_out1 = NBDY.initial_time()+0.999999*dt_out1,    // time for next output 0 
+    t_out2 = NBDY.initial_time()+0.999999*dt_out2;    // time for next output 1 
   for(int steps=0;                                    // blockstep counter      
       (never_ending || NBDY.time() < t_end) &&        // WHILE t < t_end        
-      (!stopfile || !exists(getparam("stopfile")));   //   AND no stopfile      
+      (!stopfile ||                                   //   AND                  
+       !file_exists(getparam("stopfile")));           //    no stopfile         
       ++steps) {                                      //   increment counter    
     NBDY.full_step();                                 //   make full block step 
-    if(logout && steps%logstep ==0)                   //   IF(time for logout)  
-      NBDY.stats(*logout);                            //     statistics output  
-    if(NBDY.time() >= t_out0) {                       //   IF(t >= t_out0)      
-      NBDY.write_nemo(wr0,0);                         //     primary output     
-      t_out0 += dt_out0;                              //     increment t_out0   
+    if(LOGOUT && steps%logstep ==0)                   //   IF(time for logout)  
+      NBDY.stats(LOGOUT);                             //     statistics output  
+    if(MANIP)                                         //   IF(manipulating)     
+      if(MANIP(NBDY.my_snapshot()))                   //     IF(manip says so)  
+	break;                                        //       STOP simulation  
+    if(OUT1 && NBDY.time() >= t_out1) {               //   IF(t >= t_out1)      
+      NBDY.write(OUT1,write1);                        //     primary output     
+      t_out1 += dt_out1;                              //     increment t_out1   
       written = true;                                 //     written out        
     } else                                            //   ELSE                 
       written = false;                                //     not written        
-    if(NBDY.nemo_is_open(1) &&                        //   IF(secondary output  
-       NBDY.time() >= t_out1) {                       //   AND t >= t_out1)     
-      NBDY.write_nemo(wr1,1);                         //     secondary output   
-      t_out1 += dt_out1;                              //     increment t_out1   
+    if(OUT2 && NBDY.time() >= t_out2) {               //   IF(t >= t_out2)      
+      NBDY.write(OUT2,write2);                        //     secondary output   
+      t_out2 += dt_out2;                              //     increment t_out2   
     }                                                 //   ENDIF                
   }                                                   // END: WHILE             
-  if(!written && lastout) NBDY.write_nemo(wr0,0);     // write last snapshot    
-  if(logout && stopfile && exists(getparam("stopfile")))
-    (*logout) <<"# simulation STOPPED because file \""
-	      << getparam("stopfile") << "\" found to exist\n";
+  if(OUT1 && !written && lastout)                     // IF not yet done:       
+    NBDY.write(OUT1,write1);                          //   write last snapshot  
+  if(LOGOUT && stopfile && file_exists(getparam("stopfile")))
+    LOGOUT <<"# simulation STOPPED because file \""
+	   << getparam("stopfile") << "\" found to exist\n";
   // 5. cleaning up (including implicit call of destructors)                    
-  if(pex) delete pex;                                 // delete external pot    
+  if(aex) delete aex;                                 // delete external accs   
 }
 //---------------------end-of-gyrfalcON.cc------that's-it-!---------------------

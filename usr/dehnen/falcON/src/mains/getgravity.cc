@@ -3,14 +3,21 @@
 //                                                                             |
 // getgravity.cc                                                               |
 //                                                                             |
-// copyright Walter Dehnen, 2002-2003                                          |
-// e-mail:   walter.dehnen@astro.le.ac.uk                                      |
-// address:  Department of Physics and Astronomy, University of Leicester      |
-//           University Road, Leicester LE1 7RH, United Kingdom                |
+// Copyright (C) 2002, 2003, 2005 Walter Dehnen                                |
 //                                                                             |
-//-----------------------------------------------------------------------------+
+// This program is free software; you can redistribute it and/or modify        |
+// it under the terms of the GNU General Public License as published by        |
+// the Free Software Foundation; either version 2 of the License, or (at       |
+// your option) any later version.                                             |
 //                                                                             |
-// computes gravity (pot & acc) at sink position due to other sources.         |
+// This program is distributed in the hope that it will be useful, but         |
+// WITHOUT ANY WARRANTY; without even the implied warranty of                  |
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU           |
+// General Public License for more details.                                    |
+//                                                                             |
+// You should have received a copy of the GNU General Public License           |
+// along with this program; if not, write to the Free Software                 |
+// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                   |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 //                                                                             |
@@ -20,13 +27,20 @@
 // v 0.1    04/02/2003  WD default falcON parameters automized                 |
 // v 0.2    20/03/2003  WD gravity, action reporting                           |
 // v 0.3    23/05/2003  WD automated NEMO history                              |
+// v 1.0    20/05/2005  WD several minor updates                               |
+// v 2.0    14/06/2005  WD new falcON, new body.h, new nemo I/O                |
+// v 2.1    22/06/2005  WD changes in nemo I/O support                         |
+// v 2.2    13/06/2005  WD changes in fieldset                                 |
+//-----------------------------------------------------------------------------+
+#define falcON_VERSION   "2.2"
+#define falcON_VERSION_D "13-jul-2005 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO
 #error You need NEMO to compile "src/mains/getgravity.cc"
 #endif
 #include <body.h>                                  // bodies etc..              
-#include <falcON.h>                                // fakcIB                    
-#include <public/nmio.h>                           // WDs C++ NEMO I/O          
+#include <FAlCON.h>                                // fakcIB                    
+#include <public/io.h>                             // WDs C++ NEMO I/O          
 #include <main.h>                                  // main & NEMO stuff         
 //------------------------------------------------------------------------------
 string defv[] = {
@@ -45,38 +59,52 @@ string defv[] = {
 //------------------------------------------------------------------------------
 string usage="getgravity -- computes gravity at sink positions; using falcON";
 //------------------------------------------------------------------------------
-void nbdy::main()
+void falcON::main() falcON_THROWING
 {
-  nemo_in  IN[2];
-  IN[0].open(getparam("srce"));
-  nemo_out OUT;
-  unsigned NCRIT(getiparam("Ncrit"));
-  io       READ[2],TOREAD[2] = {io::mx, io::x};
-  const io WRITE = io::x | io::p | io::a;
-  double   TIME;
-  uint     NN[2];
-  bodies   BODIES;
-  falcON   FALCON(&BODIES,getrparam("eps"), getrparam("theta"),
-		  kern_type(getiparam("kernel")));
-  while(IN[0].is_present(nemo_io::snap)) {
-    IN[1].open(getparam("sink"));
-    if(BODIES.read_nemo_snapshots(IN,2,READ,NN,&TIME,TOREAD,getparam("times"))
-       && READ[0] & TOREAD[0]
-       && READ[1] & TOREAD[1]) {
-      register real mass = BODIES.mass(0);
-      for(register uint i=0; i!=NN[0]; ++i) {
-	BODIES.flg(i).un_set(flag::ACTIVE);
-	if(BODIES.mass(i) < mass) mass = BODIES.mass(i);
-      }
-      mass *= 1.e-10/real(NN[1]);
-      for(register uint i=NN[0]; i!=BODIES.N_bodies(); ++i) {
-	BODIES.flg(i).add(flag::ACTIVE);
-	BODIES.mass(i) = mass;
-      }
-      FALCON.grow(NCRIT);
-      FALCON.approximate_gravity();
-      if(!OUT.is_open()) OUT.open(getparam("out"));
-      BODIES.write_nemo_snapshot(OUT,&TIME,WRITE,NN[1],NN[0]);
+  nemo_in        srce(getparam("srce"));
+  nemo_out       out(getparam("out"));
+  const fieldset write(fieldset::x | fieldset::p | fieldset::a);
+  snapshot       ssht(0,fieldset::gravity);
+  FAlCON         falcon(&ssht,getrparam("eps"), getrparam("theta"),
+			kern_type(getiparam("kernel")));
+  const fieldset srcedata(fieldset::m|fieldset::x);
+  while(srce.has_snapshot()) {
+    // open snapshot with sources and check for time in range, if both given
+    snap_in srce_in(srce);
+    if(srce_in.has_time() && !time_in_range(srce_in.time(),getparam("times")))
+      continue;
+    // open snapshot with sinks and ensure we have enough bodies
+    nemo_in sink   (getparam("sink"));
+    snap_in sink_in(sink);
+    ssht.resetN( srce_in.Nbod() + sink_in.Nbod() );
+    // read sources
+    const body sources(ssht.begin_all_bodies());
+    fieldset read = ssht.read_nemo(srce_in, srcedata, sources);
+    if(!read.contain(srcedata))
+      falcON_THROW("sources must have mx data");
+    // read sinks
+    const body sinks(sources, srce_in.Nbod());
+    read = ssht.read_nemo(sink_in, fieldset::x, sinks);
+    if(!read.contain(fieldbit::x))
+      falcON_THROW("sinks must have x data");
+    ssht.set_time(srce_in.time());
+    // loop sources, get their mass and flag them to be inactive
+    real M(zero);
+    for(body b(sources); b!=sinks; ++b) {
+      b.unflag_active();
+      M += mass(b);
     }
+    // loop sinks, set their mass and flag them to be active
+    M *= 1.e-10/real(srce_in.Nbod());
+    for(body b(sinks); b; ++b) {
+      b.flag_as_active();
+      b.mass() = M;
+    }
+    // compute gravity
+    falcon.grow(getiparam("Ncrit"));
+    falcon.approximate_gravity();
+    // write sink data to output
+    if(out)
+      ssht.write_nemo(out,fieldset(fieldset::x|fieldset::a|fieldset::p),sinks);
   }
 }

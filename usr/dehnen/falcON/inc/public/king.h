@@ -3,21 +3,32 @@
 //                                                                             |
 // king.h                                                                      |
 //                                                                             |
-// C++ code                                                                    |
+// Copyright (C) 2000-2003, 2005  Walter Dehnen                                |
 //                                                                             |
-// Copyright Walter Dehnen, 2000-2003                                          |
-// e-mail:   walter.dehnen@astro.le.ac.uk                                      |
-// address:  Department of Physics and Astronomy, University of Leicester      |
-//           University Road, Leicester LE1 7RH, United Kingdom                |
+// This program is free software; you can redistribute it and/or modify        |
+// it under the terms of the GNU General Public License as published by        |
+// the Free Software Foundation; either version 2 of the License, or (at       |
+// your option) any later version.                                             |
+//                                                                             |
+// This program is distributed in the hope that it will be useful, but         |
+// WITHOUT ANY WARRANTY; without even the implied warranty of                  |
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU           |
+// General Public License for more details.                                    |
+//                                                                             |
+// You should have received a copy of the GNU General Public License           |
+// along with this program; if not, write to the Free Software                 |
+// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                   |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 #ifndef falcON_included_king_h
 #define falcON_included_king_h
 
 ////////////////////////////////////////////////////////////////////////////////
-namespace nbdy {
+namespace falcON {
   //////////////////////////////////////////////////////////////////////////////
-  // class nbdy::king_model                                                     
+  //                                                                          //
+  // class falcON::king_model                                                 //
+  //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
   class king_model {
     //--------------------------------------------------------------------------
@@ -111,6 +122,6 @@ namespace nbdy {
 		  const double, const double,     // I: RNs in (0,1)            
 		  double&, double&) const;        // O: r & v                   
   };
-}
+} // namespace falcON {
 ////////////////////////////////////////////////////////////////////////////////
 #endif // falcON_included_king_h

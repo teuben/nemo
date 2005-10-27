@@ -1,154 +1,174 @@
-// -*- C++ -*-                                                                 |
-//-----------------------------------------------------------------------------+
-//                                                                             |
-// tree.h                                                                      |
-//                                                                             |
-// C++ code                                                                    |
-//                                                                             |
-// Copyright Walter Dehnen, 2000-2004                                          |
-// e-mail:   walter.dehnen@astro.le.ac.uk                                      |
-// address:  Department of Physics and Astronomy, University of Leicester      |
-//           University Road, Leicester LE1 7RH, United Kingdom                |
-//                                                                             |
-//-----------------------------------------------------------------------------+
-//                                                                             |
-// defines                                                                     |
-//                                                                             |
-// class basic_leaf                                                            |
-// class basic_cell                                                            |
-// class oct_tree                                                              |
-//                                                                             |
-// macros for access to cells & leafs of a tree                                |
-//                                                                             |
-//-----------------------------------------------------------------------------+
+// -*- C++ -*-                                                                  
+////////////////////////////////////////////////////////////////////////////////
+///                                                                             
+/// \file   inc/public/tree.h                                                   
+///                                                                             
+/// \author Walter Dehnen                                                       
+/// \date   2000-2005                                                           
+///                                                                             
+/// \brief  contains definition of classes \a BasicLeaf, \a BasicCell, and      
+///         \a OctTree as well as macros for access to cells & leafs of a tree  
+///                                                                             
+/// \todo   complete doxygen documentation, support parallel code               
+///                                                                             
+// /////////////////////////////////////////////////////////////////////////////
+//                                                                              
+// Copyright (C) 2000-2005  Walter Dehnen                                       
+//                                                                              
+// This program is free software; you can redistribute it and/or modify         
+// it under the terms of the GNU General Public License as published by         
+// the Free Software Foundation; either version 2 of the License, or (at        
+// your option) any later version.                                              
+//                                                                              
+// This program is distributed in the hope that it will be useful, but          
+// WITHOUT ANY WARRANTY; without even the implied warranty of                   
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
+// General Public License for more details.                                     
+//                                                                              
+// You should have received a copy of the GNU General Public License            
+// along with this program; if not, write to the Free Software                  
+// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                    
+//                                                                              
+// /////////////////////////////////////////////////////////////////////////////
 #ifndef falcON_included_tree_h
 #define falcON_included_tree_h
 
-#ifndef falcON_included_auxx_h
-#  include <public/auxx.h>
+#ifndef falcON_included_body_h
+#  include <body.h>
 #endif
-#ifndef falcON_included_flag_h
-#  include <public/flag.h>
-#endif
-#ifndef falcON_included_deft_h
-#  include <public/deft.h>
+#ifndef falcON_included_default_h
+#  include <public/default.h>
 #endif
 #ifndef falcON_included_iomanip
 #  include <iomanip>
 #  define falcON_included_iomanip
 #endif
-////////////////////////////////////////////////////////////////////////////////
-namespace nbdy {
-  class  bodies;                                   // forward declaration      
-  class ebodies;                                   // forward declaration      
 #ifdef falcON_MPI
-  class pbodies;                                   // forward declaration      
+#  ifndef falcON_included_peano_h
+#    include <proper/peano.h>
+#  endif
+#else
+namespace falcON {
+  typedef uint8 PeanoMap;
+}
 #endif
+////////////////////////////////////////////////////////////////////////////////
+namespace falcON {
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
-  // class nbdy::basic_leaf                                                   //
+  // class falcON::BasicLeaf                                                  //
   //                                                                          //
   // IMPORTANT NOTE                                                           //
   //   Any derived leaf type must NOT define new data members, since the      //
-  //   sizeof(leaf)=32 is supposed to be that of basic_leaf.                  //
+  //   sizeof(Leaf)=32 is supposed to be that of BasicLeaf.                   //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
-  class basic_leaf : public flag {
+  class BasicLeaf {
   private:
-    basic_leaf           (const basic_leaf&);      // not implemented           
-    basic_leaf& operator=(const basic_leaf&);      // not implemented           
+    BasicLeaf           (BasicLeaf const&);        // not implemented           
+    BasicLeaf& operator=(BasicLeaf const&);        // not implemented           
     //--------------------------------------------------------------------------
-    // data of class basic_leaf which will be initialized by oct_tree           
+    // data of class BasicLeaf which will be initialized by OctTree             
     //--------------------------------------------------------------------------
     vect POS;                                      // center of mass = position 
-    uint LNK;                                      // associated body index     
+  protected:
+    union {                                        // only one of these, please:
+      int         AUXI;                            //   auxiliary integer       
+      unsigned    AUXU;                            //   auxiliary unsigned      
+      real        AUXR;                            //   auxiliary real          
+      void       *AUXP;                            //   auxiliary pointer       
+    };
+  private:
+    flag          FLG;                             // body flag                 
+    bodies::index LNK;                             // associated body index     
     //--------------------------------------------------------------------------
-    // data of class basic_leaf which will not be dealt with by oct_tree        
+    // data of class BasicLeaf which will not be dealt with by OctTree          
     // the design is such that for the most common case of                      
     //      sizeof(real) = sizeof(void*) = 4                                    
     // we have                                                                  
-    //      sizeof(basic_leaf) = 32 = 2*16                                      
+    //      sizeof(BasicLeaf) = 32 = 2*16                                       
     //--------------------------------------------------------------------------
   protected:
     real SCAL;                                     // any scalar (eg. mass)     
     void*PROP;                                     // pointer to more data      
-    union {                                        // only of of these, please: 
-      int  AUXI;                                   //   auxiliary integer       
-      uint AUXU;                                   //   auxiliary unsigned      
-      real AUXR;                                   //   auxiliary real          
-      void*AUXP;                                   //   auxiliary pointer       
-    };
     //--------------------------------------------------------------------------
     // constructor                                                              
     //--------------------------------------------------------------------------
-    basic_leaf() {}                                // for optimization, we don't
-                                                   // initialize POS & LNK      
+    BasicLeaf() 
+#ifdef EBUG
+      : SCAL(0), PROP(0), AUXP(0)
+#endif
+    {}
     //--------------------------------------------------------------------------
     // non-const methods                                                        
     //--------------------------------------------------------------------------
-    void  link    (unsigned  const&L) { LNK  = L; }
+    void  link (bodies::index L) { LNK  = L; }
     //--------------------------------------------------------------------------
     // const data access                                                        
     //--------------------------------------------------------------------------
   protected:
-    vect const&pos   () const { return POS; }
-    uint const&mybody() const { return LNK; }
-    real const&scalar() const { return SCAL; }
-    real const&auxr  () const { return AUXR; }
-    uint const&auxu  () const { return AUXU; }
-    int  const&auxi  () const { return AUXI; }
+    vect          const&pos   () const { return POS; }
+    bodies::index const&mybody() const { return LNK; }
+    real          const&scalar() const { return SCAL; }
+    real          const&auxr  () const { return AUXR; }
+    unsigned      const&auxu  () const { return AUXU; }
+    int           const&auxi  () const { return AUXI; }
+    flag          const&flg   () const { return FLG; }
     //--------------------------------------------------------------------------
     // non-const data access via members                                        
     //--------------------------------------------------------------------------
   public:
-    vect&pos   () { return POS; }
-    real&scalar() { return SCAL; }
-    real&auxr  () { return AUXR; }
-    uint&auxu  () { return AUXU; }
-    int &auxi  () { return AUXI; }
+    vect    &pos   () { return POS; }
+    real    &scalar() { return SCAL; }
+    real    &auxr  () { return AUXR; }
+    unsigned&auxu  () { return AUXU; }
+    int     &auxi  () { return AUXI; }
+    flag    &flg   () { return FLG; }
     //--------------------------------------------------------------------------
     // const data access via friends                                            
     //--------------------------------------------------------------------------
-    friend vect const&pos   (const basic_leaf*const&L) { return L->POS; }
-    friend real const&scalar(const basic_leaf*const&L) { return L->SCAL; }
-    friend real const&auxr  (const basic_leaf*const&L) { return L->AUXR; }
-    friend uint const&auxu  (const basic_leaf*const&L) { return L->AUXU; }
-    friend int  const&auxi  (const basic_leaf*const&L) { return L->AUXI; }
-    friend uint const&mybody(const basic_leaf*const&L) { return L->LNK; }
+    friend vect          const&pos   (const BasicLeaf*L) { return L->POS; }
+    friend real          const&scalar(const BasicLeaf*L) { return L->SCAL; }
+    friend real          const&auxr  (const BasicLeaf*L) { return L->AUXR; }
+    friend unsigned      const&auxu  (const BasicLeaf*L) { return L->AUXU; }
+    friend int           const&auxi  (const BasicLeaf*L) { return L->AUXI; }
+    friend bodies::index const&mybody(const BasicLeaf*L) { return L->LNK; }
+    friend flag          const&flg   (const BasicLeaf*L) { return L->FLG; }
     //--------------------------------------------------------------------------
-    void set_prop  (real*            const&P) { PROP = P; }
-    void copy_link (const basic_leaf*const&L) { LNK = L->LNK; }
-    void copy_basic(const basic_leaf*const&L) { POS = L->POS; LNK = L->LNK; }
+    void set_prop  (real*            P) { PROP = P; }
+    void copy_link (const BasicLeaf*L) { LNK = L->LNK; }
+    void copy_basic(const BasicLeaf*L) { POS = L->POS; LNK = L->LNK; }
+    //--------------------------------------------------------------------------
+    // flag information                                                         
+    //--------------------------------------------------------------------------
+    friend bool is_active(const BasicLeaf*L) { return is_active(L->FLG); }
+    friend bool is_sph   (const BasicLeaf*L) { return is_sph(L->FLG); }
+    friend bool is_sticky(const BasicLeaf*L) { return is_sticky(L->FLG); }
+    friend bool is_set   (const BasicLeaf*L, int const&T) {
+      return is_set(L->FLG,T); }
     //--------------------------------------------------------------------------
     // copy data from body to leaf                                              
     //--------------------------------------------------------------------------
-    template<typename bodies_type>
-    void copy_from_bodies_flag(const bodies_type*const&B) {
-      flag::set_to(B->flg(mybody()));
+    void copy_from_bodies_flag(const bodies*B) {
+      FLG.set_to_part(B->flg(mybody()), flag::LEAF_FLAGS);
     }
     //--------------------------------------------------------------------------
-    template<typename bodies_type>
-    void copy_from_bodies_pos(const bodies_type*const&B) {
+    void copy_from_bodies_pos(const bodies*B) {
       pos() = B->pos(mybody());
     }
     //--------------------------------------------------------------------------
     // other non-const methods                                                  
     //--------------------------------------------------------------------------
-    void set_link_and_pos(const uint&i, vect const&x) {
+    void set_link_and_pos(bodies::index i, vect const&x) {
       link(i);
       pos()=x;
     }
     //--------------------------------------------------------------------------
-    void copy(const basic_leaf*const&S)  {
-      copy_basic(S);
-      set_to_part(S,flag::BODY_FLAGS);
+    void copy(const BasicLeaf*L)  {
+      copy_basic(L);
+      FLG.set_to_part(L->FLG,flag::BODY_FLAGS);
     }
     //--------------------------------------------------------------------------
-    void copy_prune(const basic_leaf*const&S) { 
-      POS = S->POS;
-      LNK = S->LNK; 
-      set_to_part(S,flag::BODY_FLAGS);
-    }
     //--------------------------------------------------------------------------
     // dump leaf basic data                                                     
     //--------------------------------------------------------------------------
@@ -157,81 +177,83 @@ namespace nbdy {
     }
     //--------------------------------------------------------------------------
     void dump(std::ostream&o) const {
-      o<<' '<<std::setw(3)<<flag(*this)
+      o<<' '<<std::setw(3)<<FLG
        <<' '<<std::setw(6)<<LNK;
       for(register int d=0; d!=Ndim; ++d)
 	o<<' '<<std::setw(8)<<std::setprecision(4)<<POS[d];
     }
   };
   //////////////////////////////////////////////////////////////////////////////
-  const int PRUNED      = 1<<10;
-  const int PUREREP     = 1<<11;
-  const int PRUNE_FLAGS = PRUNED | PUREREP;
-  //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
-  // nbdy::class basic_cell                                                   //
+  // falcON::class BasicCell                                                  //
   //                                                                          //
   // IMPORTANT NOTE                                                           //
   //   Any derived cell type must NOT define new data members, since the      //
-  //   sizeof(cell)=48 is supposed to be that of basic_cell.                  //
+  //   sizeof(cell)=48 is supposed to be that of BasicCell.                   //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
-  class basic_cell : public flag {
+  class BasicCell : public flag {
     //--------------------------------------------------------------------------
     // friendship                                                               
     //--------------------------------------------------------------------------
-    friend class basic_cell_access;                // allows data access        
+    friend class BasicCellAccess;                  // allows data access        
     //--------------------------------------------------------------------------
-    // data of class basic_cell (write access through class basic_cell_access)  
+    // data of class BasicCell (write access through class BasicCellAccess)     
     //--------------------------------------------------------------------------
   private:                                         // 4b: flag                  
-    indx  LEVEL;                                   // 2b: tree level            
-    indx  OCTANT;                                  // 2b: octant of parent cell 
-    indx  NLEAFS;                                  // 2b: # leaf children       
-    indx  NCELLS;                                  // 2b: # cell children       
-    int   NUMBER;                                  // 4b: # leaf descendants    
-    int   FCLEAF;                                  // 4b: index of fst leaf desc
-    int   FCCELL;                                  // 4b: index of fst cell kid 
-    vect  CENTER;                                  //12b: center of cube        
+    uint8    LEVEL;                                // 1b: level in tree         
+    uint8    OCTANT;                               // 1b: octant of parent cell 
+    PeanoMap PEANO;                                // 1b: Peano-Hilbert map     
+    uint8    KEY;                                  // 1b: local Peano key       
+    indx     NLEAFS;                               // 2b: # leaf children       
+    indx     NCELLS;                               // 2b: # cell children       
+    int      NUMBER;                               // 4b: # leaf descendants    
+    int      FCLEAF;                               // 4b: index of fst leaf desc
+    int      FCCELL;                               // 4b: index of fst cell kid 
+    vect     CENTER;                               //12b: center of cube        
     //--------------------------------------------------------------------------
-    // data of class basic_cell which will not be dealt with by oct_tree        
+    // data of class BasicCell which will not be dealt with by OctTree          
     //--------------------------------------------------------------------------
   protected:
+    vect  POS;                                     //12b: position/cofm         
+    real  RAD;                                     // 4b: radius/size/rcrit     
     union data {                                   // three times either of:    
-      void *PTER;                                  //   generic pointer         
-      real  SCAL;                                  //   real number             
-      uint  NUMB;                                  //   unsigned integer number 
-    } AUX1, AUX2, AUX3;                            //48b in basic_cell          
+      void     *PTER;                              //   generic pointer         
+      real      SCAL;                              //   real number             
+      unsigned  NUMB;                              //   unsigned integer number 
+    } AUX1, AUX2, AUX3;                            //64b in BasicCell           
     //--------------------------------------------------------------------------
     // constructor                                                              
     //--------------------------------------------------------------------------
-    basic_cell() {}
+    BasicCell() {}
     //--------------------------------------------------------------------------
     // leaf type to be superseeded in any derived cell                          
     //--------------------------------------------------------------------------
   public:
-    typedef basic_leaf leaf_type;
+    typedef BasicLeaf leaf_type;
     //--------------------------------------------------------------------------
     // const data access via friends only                                       
     //--------------------------------------------------------------------------
-#define CBCC const basic_cell*const&C
-    friend indx const&level        (CBCC) { return C->LEVEL; }
-    friend indx const&octant       (CBCC) { return C->OCTANT; }
-    friend indx const&nleafs       (CBCC) { return C->NLEAFS; }
-    friend indx const&ncells       (CBCC) { return C->NCELLS; }
-    friend int  const&number       (CBCC) { return C->NUMBER; }
-    friend int  const&fcleaf       (CBCC) { return C->FCLEAF; }
-    friend int  const&fccell       (CBCC) { return C->FCCELL; }
-    friend vect const&center       (CBCC) { return C->CENTER; }
-    friend int        ecleaf       (CBCC) { return C->FCLEAF+C->NLEAFS; }
-    friend int        ncleaf       (CBCC) { return C->FCLEAF+C->NUMBER; }
-    friend int        eccell       (CBCC) { return C->FCCELL+C->NCELLS; }
-    friend bool       has_cell_kids(CBCC) { return C->NCELLS != 0; }
-    friend bool       has_leaf_kids(CBCC) { return C->NLEAFS != 0; }
-    friend bool       is_twig      (CBCC) { return C->NCELLS == 0; }
-    friend bool       is_branch    (CBCC) { return C->NLEAFS == 0; }
-    friend bool       is_pruned    (CBCC) { return C->is_set(PRUNED); }
-    friend bool       is_pure_rep  (CBCC) { return C->is_set(PUREREP); }
+#define CBCC const BasicCell*C
+    friend uint8    const&level        (CBCC) { return C->LEVEL; }
+    friend uint8    const&octant       (CBCC) { return C->OCTANT; }
+#ifdef falcON_MPI
+    friend PeanoMap const&peano        (CBCC) { return C->PEANO; }
+    friend uint8    const&localkey     (CBCC) { return C->KEY; }
+#endif
+    friend indx     const&nleafs       (CBCC) { return C->NLEAFS; }
+    friend indx     const&ncells       (CBCC) { return C->NCELLS; }
+    friend int      const&number       (CBCC) { return C->NUMBER; }
+    friend int      const&fcleaf       (CBCC) { return C->FCLEAF; }
+    friend int      const&fccell       (CBCC) { return C->FCCELL; }
+    friend vect     const&center       (CBCC) { return C->CENTER; }
+    friend int            ecleaf       (CBCC) { return C->FCLEAF+C->NLEAFS; }
+    friend int            ncleaf       (CBCC) { return C->FCLEAF+C->NUMBER; }
+    friend int            eccell       (CBCC) { return C->FCCELL+C->NCELLS; }
+    friend bool           has_cell_kids(CBCC) { return C->NCELLS != 0; }
+    friend bool           has_leaf_kids(CBCC) { return C->NLEAFS != 0; }
+    friend bool           is_twig      (CBCC) { return C->NCELLS == 0; }
+    friend bool           is_branch    (CBCC) { return C->NLEAFS == 0; }
 #undef CBCC
     //--------------------------------------------------------------------------
     // flag manipulations                                                       
@@ -241,7 +263,7 @@ namespace nbdy {
       flag::add(flag::AL_ACTIVE);
     }
     //--------------------------------------------------------------------------
-    void add_flag(int const&f) {
+    void add_flag(int f) {
       flag::add(f);
     }
     //==========================================================================
@@ -250,12 +272,12 @@ namespace nbdy {
       flag::add(flag::AL_ACTIVE);
     }
     //--------------------------------------------------------------------------
-    void add_active_flag(const basic_leaf*const&L) {
-      flag::add_part(L,flag::ACTIVE);
-      if(!is_active(L)) flag::un_set(flag::AL_ACTIVE);
+    void add_active_flag(const BasicLeaf*L) {
+      flag::add_part(flg(L),flag::ACTIVE);
+      if(!is_active(flg(L))) flag::un_set(flag::AL_ACTIVE);
     }
     //--------------------------------------------------------------------------
-    void add_active_flag(const basic_cell*const&C) {
+    void add_active_flag(const BasicCell*C) {
       flag::add_part(C,flag::ACTIVE);
       if(!al_active(C)) flag::un_set(flag::AL_ACTIVE);
     }
@@ -267,9 +289,9 @@ namespace nbdy {
     }
     //--------------------------------------------------------------------------
     void dump(std::ostream&o) const {
-      o<<' '<<std::setw(3)<<flag(*this)
-       <<' '<<std::setw(3)<<LEVEL
-       <<' '<<std::setw(3)<<OCTANT;
+      o<<' '<<std::setw(3)<< flag(*this)
+       <<' '<<std::setw(3)<< falcON::level(this)
+       <<' '<<std::setw(3)<< falcON::octant(this);
       if(NCELLS)
 	o<<' '<<std::setw(5)<<FCCELL;
       else
@@ -285,28 +307,22 @@ namespace nbdy {
     // other non-const methods                                                  
     //--------------------------------------------------------------------------
   protected:
-    void copy_sub(const basic_cell*C) {
+    void copy_sub(const BasicCell*C) {
       LEVEL  = C->LEVEL;
       OCTANT = C->OCTANT;
       CENTER = C->CENTER;
     }
-    //--------------------------------------------------------------------------
-    void copy_prune(const basic_cell*C) {
-      copy_sub(C);
-      NUMBER = C->NUMBER;
-      set_to_part(C,flag::ACTIVE_FLAGS);
-    }
   };
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
-  // class nbdy::oct_tree                                                     //
+  // class falcON::OctTree                                                    //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
-  class oct_tree {
-    friend class basic_cell_access;
+  class OctTree {
+    friend class BasicCellAccess;
     //--------------------------------------------------------------------------
-    oct_tree           (const oct_tree&);          // not implemented           
-    oct_tree& operator=(const oct_tree&);          // not implemented           
+    OctTree           (const OctTree&);            // not implemented           
+    OctTree& operator=(const OctTree&);            // not implemented           
     //--------------------------------------------------------------------------
     // types                                                                    
     //--------------------------------------------------------------------------
@@ -315,43 +331,38 @@ namespace nbdy {
       re_grown = 1,
       re_used  = 2,
       sub_tree = 4,
-      pruned   = 8,
-      origins  = sub_tree | pruned
+      origins  = sub_tree
     };
     //--------------------------------------------------------------------------
     enum usage {                                  // tree is used by whom?     |
       un_used  = 0,                               //   not used currently      |
-      grav_use = 1,                               //   used by grav_estimator  |
+      grav_use = 1,                               //   used by GravEstimator   |
       stsp_use = 2,                               //   used by stsp_estimator  |
-      sph_use  = 3                                //   used by sph_estimator   |
+      sph_use  = 3                                //   used by SphEstimator    |
     };                                            //                           |
     //--------------------------------------------------------------------------
-    // data of class oct_tree                                                   
+    // data of class OctTree                                                    
     //--------------------------------------------------------------------------
   private:
-    const  bodies       *BSRCES;                   // pointer to  bodies        
-    const ebodies       *ESRCES;                   // pointer to ebodies        
-#ifdef falcON_MPI
-    const pbodies       *PSRCES;                   // pointer to pbodies        
-#endif
-    const int            SPFLAG;                   // specific body flag        
-    uint                 Ns,Nc;                    // #leafs/cells              
-    mutable basic_leaf  *LEAFS;                    // memory for leafs          
-    mutable basic_cell  *CELLS;                    // memory for cells          
+    const   bodies      *BSRCES;                   // pointer to  bodies        
+    const   int          SPFLAG;                   // specific body flag        
+    unsigned             Ns,Nc;                    // #leafs/cells              
+    mutable BasicLeaf   *LEAFS;                    // memory for leafs          
+    mutable BasicCell   *CELLS;                    // memory for cells          
     mutable real        *RA;                       // table of cell radii       
     vect                 RCENTER;                  // root center               
     union {
       mutable char      *ALLOC;                    // allocated memory          
       mutable unsigned  *DUINT;                    // easy access to 1st few    
     };
-    uint                 NALLOC;                   // # bytes allocated         
+    unsigned             NALLOC;                   // # bytes allocated         
     state                STATE;                    // tree state                
     mutable  usage       USAGE;                    // tree usage                
     //--------------------------------------------------------------------------
     // private methods                                                          
     //--------------------------------------------------------------------------
-    void allocate (uint const&, uint const&, uint const&, real const&);
-    void set_depth(uint const&);
+    void allocate (unsigned , unsigned , unsigned , real);
+    void set_depth(unsigned);
     //--------------------------------------------------------------------------
     // constructors                                                             
     //                                                                          
@@ -361,93 +372,40 @@ namespace nbdy {
     // construct from bodies                                                    
     //--------------------------------------------------------------------------
   public:
-    oct_tree(const bodies*const&,                  // I: bodies' flags & pos's  
-	     int          const&,                  // I: N_crit                 
-	     const vect*const& = 0,                //[I: pre-determined center] 
-	     int        const& = Default::MaxDepth,//[I: max tree depth]        
-	     int        const& = 0);               //[I: specific flag]         
+    OctTree(const bodies*const&,                   // I: bodies' flags & pos's  
+	    int          const&,                   // I: N_crit                 
+	    const vect*const& = 0,                 //[I: pre-determined center] 
+	    int        const& = Default::MaxDepth, //[I: max tree depth]        
+	    int        const& = 0);                //[I: specific flag]         
     //--------------------------------------------------------------------------
-    oct_tree(const bodies*const&,                  // I: bodies' flags & pos's  
-	     vect         const&,                  // I: x_min                  
-	     vect         const&,                  // I: x_max                  
-	     int          const&,                  // I: N_crit                 
-	     const vect*const& = 0,                //[I: pre-determined center] 
-	     int        const& = Default::MaxDepth,//[I: max tree depth]        
-	     int        const& = 0);               //[I: specific flag]         
-#ifdef falcON_MPI
-    //--------------------------------------------------------------------------
-    // construct from pbodies                                                   
-    //--------------------------------------------------------------------------
-    oct_tree(const pbodies*const&,                 // I: bodies' flags & pos's  
-	     int           const&,                 // I: N_crit                 
-	     const vect*const& = 0,                //[I: pre-determined center] 
-	     int        const& = Default::MaxDepth,//[I: max tree depth]        
-	     int        const& = 0);               //[I: specific flag]         
-    //--------------------------------------------------------------------------
-    oct_tree(const pbodies*const&,                 // I: bodies' flags & pos's  
-	     vect          const&,                 // I: x_min                  
-	     vect          const&,                 // I: x_max                  
-	     int           const&,                 // I: N_crit                 
-	     const vect*const& = 0,                //[I: pre-determined center] 
-	     int        const& = Default::MaxDepth,//[I: max tree depth]        
-	     int        const& = 0);               //[I: specific flag]         
-#endif
-    //--------------------------------------------------------------------------
-    // construct from ebodies                                                   
-    //--------------------------------------------------------------------------
-    oct_tree(const ebodies*const&,                 // I: abodies' flags & pos's 
-	     int           const&,                 // I: N_crit                 
-	     const vect*const& = 0,                //[I: pre-determined center] 
-	     int        const& = Default::MaxDepth,//[I: max tree depth]        
-	     int        const& = 0);               //[I: specific flag]         
-    //--------------------------------------------------------------------------
-    oct_tree(const ebodies*const&,                 // I: abodies' flags & pos's 
-	     vect          const&,                 // I: x_min                  
-	     vect          const&,                 // I: x_max                  
-	     int           const&,                 // I: N_crit                 
-	     const vect*const& = 0,                //[I: pre-determined center] 
-	     int        const& = Default::MaxDepth,//[I: max tree depth]        
-	     int        const& = 0);               //[I: specific flag]         
+    OctTree(const bodies*const&,                   // I: bodies' flags & pos's  
+	    vect         const&,                   // I: x_min                  
+	    vect         const&,                   // I: x_max                  
+	    int          const&,                   // I: N_crit                 
+	    const vect*const& = 0,                 //[I: pre-determined center] 
+	    int        const& = Default::MaxDepth, //[I: max tree depth]        
+	    int        const& = 0);                //[I: specific flag]         
     //--------------------------------------------------------------------------
     // construct as sub-tree                                                    
     //--------------------------------------------------------------------------
-    oct_tree(const oct_tree*const&,                // I: parent tree            
-	     int            const&,                // I: flag specif'ing subtree
-	     int            const&);               // I: N_crit                 
-    //--------------------------------------------------------------------------
-    // construct a pruned tree:                                                 
-    //   a pruned tree gives a coarser representation of the original tree:     
-    //   cells for which the function prune(cell_iter) returns true, will be    
-    //   mapped to "purely representative" cells. Any cell that contains a      
-    //   purely representative cell is called a "pruned" cell.                  
-    //   A purely representative cell has no meaningful entries for sub-nodes   
-    //   but represents them by their properties (N, ...).                      
-    //   On a pruned cell, direct access to ALL leaf descendants is impossible. 
-    //                                                                          
-    // The purpose of a pruned tree is to represent the tree of an external     
-    // domain in the MPI parallel version of the code: only those cells that    
-    // need to be resolved even from outside will not be pruned.                
-    //--------------------------------------------------------------------------
-    oct_tree(                                      // construct as sub-tree     
-	     const oct_tree*const&,                // I: parent tree            
-	     bool(*)(const basic_cell*const&));    // I: prune cell?            
+    OctTree(const OctTree*const&,                  // I: parent tree            
+	    int           const&,                  // I: flag specif'ing subtree
+	    int           const&);                 // I: N_crit                 
     //--------------------------------------------------------------------------
     // public methods                                                           
     //--------------------------------------------------------------------------
-    basic_leaf*const&FstLeaf()                         const { return LEAFS; }
-    basic_cell*const&FstCell()                         const { return CELLS; }
-    basic_leaf*      EndLeaf()                         const { return LEAFS+Ns;}
-    basic_cell*      EndCell()                         const { return CELLS+Nc;}
-    size_t           NoCell (const basic_cell*const&C) const { return C-CELLS; }
-    size_t           NoLeaf (const basic_leaf*const&L) const { return L-LEAFS; }
-    basic_cell*      CellNo (int const&i)              const { return CELLS+i; }
-    basic_leaf*      LeafNo (int const&i)              const { return LEAFS+i; }
+    BasicLeaf*const&FstLeaf()                  const { return LEAFS; }
+    BasicCell*const&FstCell()                  const { return CELLS; }
+    BasicLeaf*      EndLeaf()                  const { return LEAFS+Ns;}
+    BasicCell*      EndCell()                  const { return CELLS+Nc;}
+    size_t          NoCell (const BasicCell*C) const { return C-CELLS; }
+    size_t          NoLeaf (const BasicLeaf*L) const { return L-LEAFS; }
+    BasicCell*      CellNo (int i)             const { return CELLS+i; }
+    BasicLeaf*      LeafNo (int i)             const { return LEAFS+i; }
     //--------------------------------------------------------------------------
     bool is_re_used    () const { return STATE & re_used; }
     bool is_re_grown   () const { return STATE & re_grown; }
     bool is_fresh      () const { return STATE & fresh; }
-    bool is_sub_tree   () const { return STATE & sub_tree; }
-    bool is_pruned_tree() const { return STATE & pruned; }
     //--------------------------------------------------------------------------
     bool is_used_for_grav() const { return USAGE == grav_use; }
     bool is_used_for_stsp() const { return USAGE == stsp_use; }
@@ -468,34 +426,18 @@ namespace nbdy {
 	  const vect*const& = 0,                   //[I: pre-determined center] 
 	  int        const& = Default::MaxDepth);  //[I: max tree depth]        
     //--------------------------------------------------------------------------
-    // use full tree structure                                                  
-    //--------------------------------------------------------------------------
-#if(0) // code currently broken
-    void rebuild(                                  //                           
-		 int const&,                       // I: N_cut                  
-		 int const&,                       // I: N_crit                 
-		 int const& = Default::MaxDepth);  //[I: max tree depth]        
-#endif
-    //--------------------------------------------------------------------------
     // tree-re-use: just update the leafs' positions                            
     //--------------------------------------------------------------------------
     void reuse();                                  //                           
     //--------------------------------------------------------------------------
     // destructor                                                               
     //--------------------------------------------------------------------------
-    ~oct_tree();
+    ~OctTree();
     //--------------------------------------------------------------------------
     // other public methods                                                     
     //--------------------------------------------------------------------------
-    void mark_for_subtree(int const&, int const&, uint&, uint&) const;
-    bool                use_bodies () const { return BSRCES!=0; }
+    void mark_for_subtree(int, int, unsigned&, unsigned&) const;
     const  bodies*const&my_bodies  () const { return BSRCES; }
-    bool                use_ebodies() const { return ESRCES!=0;}
-    const ebodies*const&my_ebodies () const { return ESRCES; }
-#ifdef falcON_MPI
-    bool                use_pbodies() const { return PSRCES!=0; }
-    const pbodies*const&my_pbodies () const { return PSRCES; }
-#endif
     int           const&SP_flag    () const { return SPFLAG; }
     unsigned      const&N_leafs    () const { return Ns; }
     unsigned      const&N_cells    () const { return Nc; }
@@ -523,18 +465,18 @@ namespace nbdy {
       // data members                                                           
       //........................................................................
     private:
-      const oct_tree*T;                            // pointer to oct_tree       
-      CELL          *C;                            // pointer to derived cell   
+      const OctTree*T;                             // pointer to OctTree        
+      CELL         *C;                             // pointer to derived cell   
       //........................................................................
       // construction                                                           
       //........................................................................
     public:
-      CellIter(const oct_tree*const&t,
-	       CELL          *const&c) : T(t),   C(c)   {}
+      CellIter(const OctTree*const&t,
+	       CELL         *const&c) : T(t),   C(c)   {}
       //........................................................................
       template<typename cell_type>
-      CellIter(const oct_tree*const&t,
-	       cell_type     *const&c) : T(t),   C(pC(c)) {}
+      CellIter(const OctTree*const&t,
+	       cell_type    *const&c) : T(t),   C(pC(c)) {}
       //........................................................................
       tI CellIter(Cell_Iter const&I)     : T(I.my_tree()), 
 					   C(static_cast<CELL*>
@@ -591,7 +533,7 @@ namespace nbdy {
       //........................................................................
       // tree and index                                                         
       //........................................................................
-      const oct_tree*const&my_tree() const { return T; }
+      const OctTree*const&my_tree() const { return T; }
       size_t index() const { return T->NoCell(C); }
       friend size_t index  (CellIter const&I) { return I.index(); }
       //........................................................................
@@ -601,7 +543,7 @@ namespace nbdy {
                CELL*const&operator->() const { return C; }
                CELL*const&c_pter()     const { return C; }
       //........................................................................
-      // const access to basic_cell methods via friends                         
+      // const access to BasicCell methods via friends                          
       //........................................................................
       friend real const&radius(CellIter const&I) {return I.T->rad(level(I)); }
       //........................................................................
@@ -631,10 +573,10 @@ namespace nbdy {
     //--------------------------------------------------------------------------
     // public types, to be superseeded by any derived tree                      
     //--------------------------------------------------------------------------
-    typedef basic_cell           cell_type;        // type of tree cell         
-    typedef basic_leaf           leaf_type;        // type of tree leaf         
-    typedef CellIter<basic_cell> cell_iterator;    // oct_tree::cell_iterator   
-    typedef leaf_type*           leaf_iterator;    // oct_tree::leaf_iterator   
+    typedef BasicCell            cell_type;        // type of tree cell         
+    typedef BasicLeaf            leaf_type;        // type of tree leaf         
+    typedef CellIter<BasicCell>  cell_iterator;    // OctTree::cell_iterator    
+    typedef leaf_type*           leaf_iterator;    // OctTree::leaf_iterator    
     //--------------------------------------------------------------------------
     // access to cells via cell_iterators, to be superseeded by derived tree    
     //--------------------------------------------------------------------------
@@ -662,24 +604,45 @@ namespace nbdy {
     // perform some manipulations on the bodies                                 
     //--------------------------------------------------------------------------
     template<typename BodiesManip>
-    uint UseBodies(BodiesManip const&BM) const {
-      if(BSRCES) return BM(BSRCES);
-#ifdef falcON_MPI
-      if(PSRCES) return BM(PSRCES);
-#endif
-      if(ESRCES) return BM(ESRCES);
-      error("tree has neither bodies nor arrays");
-      return 0u;
+    unsigned UseBodies(BodiesManip const&BM) const {
+      return BM(BSRCES);
     }
     //--------------------------------------------------------------------------
   private:
-    uint mark_sub (int const&, int const&, cell_iterator const&, uint &) const;
+    unsigned mark_sub (int, int, cell_iterator const&, unsigned&) const;
   };
-  //============================================================================
+  //////////////////////////////////////////////////////////////////////////////
   static const int SUBTREE = 1<<7;                 // node = node of subtree    
   inline void flag_for_subtree(flag*F) { F->add    (SUBTREE); }
   inline void unflag_subtree  (flag*F) { F->un_set (SUBTREE); }
-}                                                  // END: namespace nbdy       
+  inline void flag_for_subtree(BasicLeaf*F) { F->flg().add    (SUBTREE); }
+  inline void unflag_subtree  (BasicLeaf*F) { F->flg().un_set (SUBTREE); }
+  //////////////////////////////////////////////////////////////////////////////
+  template<typename CELL_TYPE> inline
+  void OctTree::dump_cells(std::ostream &o) const {
+    CELL_TYPE::dump_head(o);
+    o <<'\n';
+    for(register cell_iterator Ci=begin_cells(); Ci!=end_cells(); ++Ci) {
+      o <<' '<< std::setw(5)<<falcON::index(Ci);
+      static_cast<CELL_TYPE*>
+	(static_cast<BasicCell*>(Ci))->dump(o);
+      o <<'\n';
+    }
+    o.flush();
+  }
+  //----------------------------------------------------------------------------
+  template<typename LEAF_TYPE> inline
+  void OctTree::dump_leafs(std::ostream&o) const {
+    LEAF_TYPE::dump_head(o);
+    o <<'\n';
+    for(register leaf_iterator Li=begin_leafs(); Li!=end_leafs(); ++Li) {
+      o <<' '<< std::setw(5)<<index(Li);
+      static_cast<LEAF_TYPE*>(Li)->dump(o);
+      o <<'\n';
+    }
+    o.flush();
+  }
+} // namespace falcON {
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
 // macros for looping all leafs and cells in a tree                           //
@@ -804,31 +767,4 @@ namespace nbdy {
       NAME != CELL.last_leaf_desc();               /* until last             */\
     ++NAME)                                        // get next child            
 ////////////////////////////////////////////////////////////////////////////////
-namespace nbdy {
-  template<typename CELL_TYPE> inline
-  void oct_tree::dump_cells(std::ostream &o) const {
-    CELL_TYPE::dump_head(o);
-    o <<'\n';
-    for(register cell_iterator Ci=begin_cells(); Ci!=end_cells(); ++Ci) {
-      o <<' '<< std::setw(5)<<nbdy::index(Ci);
-      static_cast<CELL_TYPE*>
-	(static_cast<basic_cell*>(Ci))->dump(o);
-      o <<'\n';
-    }
-    o.flush();
-  }
-  //----------------------------------------------------------------------------
-  template<typename LEAF_TYPE> inline
-  void oct_tree::dump_leafs(std::ostream&o) const {
-    LEAF_TYPE::dump_head(o);
-    o <<'\n';
-    for(register leaf_iterator Li=begin_leafs(); Li!=end_leafs(); ++Li) {
-      o <<' '<< std::setw(5)<<index(Li);
-      static_cast<LEAF_TYPE*>(Li)->dump(o);
-      o <<'\n';
-    }
-    o.flush();
-  }
-}                                                  // END: namespace nbdy       
-////////////////////////////////////////////////////////////////////////////////
-#endif                                             // falcON_included_tree_h    
+#endif // falcON_included_tree_h

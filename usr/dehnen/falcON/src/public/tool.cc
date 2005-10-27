@@ -3,12 +3,21 @@
 //                                                                             |
 // tool.cc                                                                     |
 //                                                                             |
-// C++ code                                                                    |
+// Copyright (C) 2002, 2003, 2004, 2005  Walter Dehnen                         |
 //                                                                             |
-// Copyright Walter Dehnen, 2002-2004                                          |
-// e-mail:   walter.dehnen@astro.le.ac.uk                                      |
-// address:  Department of Physics and Astronomy, University of Leicester      |
-//           University Road, Leicester LE1 7RH, United Kingdom                |
+// This program is free software; you can redistribute it and/or modify        |
+// it under the terms of the GNU General Public License as published by        |
+// the Free Software Foundation; either version 2 of the License, or (at       |
+// your option) any later version.                                             |
+//                                                                             |
+// This program is distributed in the hope that it will be useful, but         |
+// WITHOUT ANY WARRANTY; without even the implied warranty of                  |
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU           |
+// General Public License for more details.                                    |
+//                                                                             |
+// You should have received a copy of the GNU General Public License           |
+// along with this program; if not, write to the Free Software                 |
+// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                   |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 #include <public/tool.h>
@@ -81,7 +90,7 @@ void nbdy::find_centre(const bodies*const&B,       // I  : bodies
     Rq = Q/W - norm(X);                            //   R^2 = <(x-<x>)^2>       
 //     // TEST
 //     std::cerr<<" 0:"<<Xc<<"  "<<sqrt(Rq)<<'\n';
-//     // TSET
+//     // tensor_set
   }                                                // ENDIF                     
   // 2. iterate: exclude bodies at |X-X0| >= R, reducing R by fac each iteration
   int  I(0);                                       // counter: iterations       
@@ -104,7 +113,7 @@ void nbdy::find_centre(const bodies*const&B,       // I  : bodies
     if(I && SHRINK && N < Nmin) SHRINK = 0;        //   IF (N < Nmin): adjust   
 //     // TEST
 //     std::cerr<<std::setw(2)<<I<<": X="<<Xc<<" R="<<sqrt(Rq)<<" N="<<N<<'\n';
-//     // TSET
+//     // tensor_set
   }                                                // END DO                    
   xc = Xc;                                         // set output value: position
   rc = sqrt(Rq);                                   // set output value: radius  
@@ -126,15 +135,6 @@ void nbdy::find_centre(const bodies*const&B,       // I  : bodies
 ////////////////////////////////////////////////////////////////////////////////
 namespace { using namespace nbdy;
   template<int N=2> struct ferrers;
-  template<> struct ferrers<2> {
-    static double norm() { return FPi / 13.125; }
-    static void   diff(double const&m, double const&xq, double D[3]) {
-      D[2] = 8. * m;
-      register double tmp = 1 - xq;
-      D[1] =-times<4>(tmp) * m;
-      D[0] = power<2>(tmp) * m;
-    }
-  };
   template<> struct ferrers<3> {
     static double norm() { return FPi / 19.6875; }
     static void   diff(double const&m, double const&xq, double D[3]) {
@@ -148,13 +148,26 @@ namespace { using namespace nbdy;
       D[1] =-6*d2;
       D[0] = d3;
     }
+#if(0)
     static double d1(double const&m, double const&xq) {
       return -6*m*square(1.-xq);
     }
+#endif
   };
 }
 ////////////////////////////////////////////////////////////////////////////////
 #if (0)
+namespace {
+  template<> struct ferrers<2> {
+    static double norm() { return FPi / 13.125; }
+    static void   diff(double const&m, double const&xq, double D[3]) {
+      D[2] = 8. * m;
+      register double tmp = 1 - xq;
+      D[1] =-times<4>(tmp) * m;
+      D[0] = power<2>(tmp) * m;
+    }
+  };
+}
 void nbdy::find_centre(const bodies*const&B,       // I  : bodies               
 		       uint         const&Nmin,    // I  : min #bodies in center
 		       vect              &xc,      // I/O: center position      
@@ -185,7 +198,7 @@ void nbdy::find_centre(const bodies*const&B,       // I  : bodies
 	RH   += D[0];
 	dRH  += R *= D[1];
 	d2RH += times<3>(hq*D[1]) + Rq*D[2];
-	Vc.add_times(vel(Bi),D[0]);
+	Vc   += D[0] * vel(Bi);
 	++N;
       }
     }
@@ -198,7 +211,7 @@ void nbdy::find_centre(const bodies*const&B,       // I  : bodies
     std::cerr<<std::setw(2)<<iter<<": X="<<xc<<" H="<<hc
 	     <<" N="<<N<<" drho="<<dRH<<" d2rho="<<d2RH
 	     <<" rho="<<RH<<" dX="<<dX<<'\n';
-    // TSET
+    // tensor_set
     if(N == 0 || RH < RHO) {
       // new position wasn't better
       Xc  = xc;                         // goto old position
@@ -227,7 +240,10 @@ void nbdy::find_centre(const bodies*const&B,       // I  : bodies
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
   using namespace nbdy;
-  void gr(const bodies*const&B,                    // I: bodies                 
+
+  void gr(const real  *const&M,                    // I: masses                 
+	  const vect  *const&X,                    // I: positions              
+	  const vect  *const&V,                    // I: velocities             
 	  uint         const&b0,                   // I: begin of bodies        
 	  uint         const&bn,                   // I: end   of bodies        
 	  vect_d       const&x,                    // I: trial position         
@@ -235,33 +251,48 @@ namespace {
 	  uint              &n,                    // O: N(|r-x|<h)             
 	  double            &rho,                  // O: rho_h(r)               
 	  vect_d            &g,                    // O: - drho/dr              
-	  vect_d            &v)                    // O: velocity               
+	  vect_d            &v)                    // O: velocity (if V != 0)   
   {
     const double rq = r*r, irq=1./rq;
     n   = 0;
     rho = 0.;
     v   = 0.;
     g   = 0.;
-    LoopBodiesRange(bodies,B,Bi,b0,bn) {
-      register vect_d R(x); R -= pos(Bi);
-      register double Rq = norm(R);
-      if(Rq < rq) {
-	register double D[2];
-	ferrers<3>::diff1(mass(Bi),Rq*irq,D);
-	rho  += D[0];
-	v.add_times(vel(Bi),D[0]);
-	g.add_times(R,D[1]);
-	++n;
+    if(V) {
+      for(int b=b0; b!=bn; ++b) {
+	register vect_d R(x); R -= X[b];
+	register double Rq = norm(R);
+	if(Rq < rq) {
+	  register double D[2];
+	  ferrers<3>::diff1(M[b],Rq*irq,D);
+	  rho+= D[0];
+	  v  += D[0] * V[b];
+	  g  += D[1] * R;
+	  ++n;
+	}
+      }
+      v /= rho;
+    } else {
+      for(int b=b0; b!=bn; ++b) {
+	register vect_d R(x); R -= X[b];
+	register double Rq = norm(R);
+	if(Rq < rq) {
+	  register double D[2];
+	  ferrers<3>::diff1(M[b],Rq*irq,D);
+	  rho+= D[0];
+	  g  += D[1] * R;
+	  ++n;
+	}
       }
     }
     register double tmp = 1. / ( ferrers<3>::norm()*power<3>(r) );
-    v   /= rho;
     rho *= tmp;
     tmp *= irq;
     g   *= tmp;
   }
 
-  void di(const bodies*const&B,                    // I: bodies                 
+  void di(const real  *const&M,                    // I: masses                 
+	  const vect  *const&X,                    // I: positions              
 	  uint         const&b0,                   // I: begin of bodies        
 	  uint         const&bn,                   // I: end   of bodies        
 	  vect_d       const&x,                    // I: trial position         
@@ -274,12 +305,12 @@ namespace {
     const double hqirq = norm(h) * irq;
     register double _d1 = 0.;
     register double _d2 = 0.;
-    LoopBodiesRange(bodies,B,Bi,b0,bn) {
-      register vect_d R(x); R -= pos(Bi);
+    for(int b=b0; b!=bn; ++b) {
+     register vect_d R(x); R -= X[b];
       register double tmp = norm(R);
       if(tmp < rq) {
 	register double D[3];
-	ferrers<3>::diff(mass(Bi),tmp*irq,D);
+	ferrers<3>::diff(M[b],tmp*irq,D);
 	tmp  = h * R * irq;
 	_d1 += tmp * D[1];
 	_d2 += hqirq  * D[1] +  tmp * tmp * D[2];
@@ -289,8 +320,12 @@ namespace {
     d1 = _d1 * tmp;
     d2 = _d2 * tmp;
   }
-}
-void nbdy::find_centre(const bodies*const&B,       // I  : bodies               
+
+} // anonymous namespace
+
+void nbdy::find_centre(const real  *const&M,       // I  : masses               
+		       const vect  *const&X,       // I  : positions            
+		       const vect  *const&V,       // I  : velocities           
 		       uint         const&N,       // I  : #bodies in center    
 		       vect              &xc,      // I/O: center position      
 		       real              &hc,      // I/O: centre radius        
@@ -310,41 +345,52 @@ void nbdy::find_centre(const bodies*const&B,       // I  : bodies
 
 //   // TEST
 //   {
-//     vect_d dX;
-//     std::cerr<<" give offset "<<std::endl;
-//     std::cin >> dX;
-//     xc += dX;
+//     std::cerr<<" initial xc="<<xc<<" hc="<<hc<<'\n'
+// 	     <<" do you want to change the initial xc,hc (1/0)? ";
+//     bool want;
+//     std::cin >> want;
+//     if(want) {
+//       std::cerr<<" give xc"; std::cin>>xc;
+//       std::cerr<<" give hc"; std::cin>>hc;
+//     }
 //   }
-//   // TSET
+//   // tensor_set
   const int max_i = 100;
-  uint              n;
-  double            rh,r(hc),d1,d2;
+  uint              n,no;
+  double            rh,r(hc),ro,dr,d1,d2;
   vect_d            x(xc), g, go, h, v;
   // initialize
-  gr(B,b0,bn,x,r,n,rh,g,v);
+  gr(M,X,V,b0,bn,x,r,n,rh,g,v);
   while(n==0) {
     r += r;
-    gr(B,b0,bn,x,r,n,rh,g,v);
+    gr(M,X,V,b0,bn,x,r,n,rh,g,v);
   }
   h = g;
 //   // TEST
 //   std::cerr<<" i: x="<<x<<" r="<<r<<" rh="<<rh<<" g="<<g<<" n="<<n<<'\n';
-//   // TSET
+//   // tensor_set
   // iterate using cg method
   for(int i=0; i < max_i; ++i) {
-    go = g;
-    di(B,b0,bn,x,r,h,d1,d2);
+    di(M,X,b0,bn,x,r,h,d1,d2);
+    dr = ro-r;
+    ro = r;
+    if(i && (no-N)*(n-N)<=0 && dr!=0)
+      r += dr * double(N-n)/double(no-n);
+    else if(n!=N)
+      r *= 0.7+0.3*cbrt(double(N)/double(n));
     register vect_d dx(h);
     if(d2*r >=-abs(d1))    // 2nd derivate not really negative -> cannot use it
-      dx *= r*sign(d1) / sqrt(norm(h)+square(r*d1));
+      dx /= d1;
     else                   // 2nd derivative < 0 as it should be near maximum  
       dx *= -d1/d2;
+    dx*= r / sqrt(norm(dx)+r*r);   // restrict total size of step to r        
     x += dx;
-    r *= 0.7+0.3*cbrt(double(N)/double(n));
-    gr(B,b0,bn,x,r,n,rh,g,v);
+    no = n;
+    go = g;
+    gr(M,X,V,b0,bn,x,r,n,rh,g,v);
     while(n==0) {
       r += r;
-      gr(B,b0,bn,x,r,n,rh,g,v);
+      gr(M,X,V,b0,bn,x,r,n,rh,g,v);
     }
 //     // TEST
 //     std::cerr<<std::setw(2)<<i
@@ -353,7 +399,7 @@ void nbdy::find_centre(const bodies*const&B,       // I  : bodies
 // 	     <<" d2="<<d2
 // 	     <<" dx="<<dx
 // 	     <<" n="<<n<<'\n';
-//     // TSET
+//     // tensor_set
     if(abs(g)*r<1.e-8*rh && n==N) break;
     h  = g + h * (((g-go)*g)/(go*go));
   }
@@ -365,11 +411,11 @@ void nbdy::find_centre(const bodies*const&B,       // I  : bodies
 ////////////////////////////////////////////////////////////////////////////////
 namespace { using namespace nbdy;
   //----------------------------------------------------------------------------
-  class dens_leaf : public basic_leaf {
+  class DensLeaf : public BasicLeaf {
     real      &wght()       { return SCAL; }
     real const&wght() const { return SCAL; }
   public:
-    friend real const&wght  (const dens_leaf*const&L) { return L->wght(); }
+    friend real const&wght  (const DensLeaf*const&L) { return L->wght(); }
     template<typename bodies_type>
     void set_weight(const bodies_type*const&B, uint const&A) {
       wght() = A ?
@@ -379,44 +425,44 @@ namespace { using namespace nbdy;
   };
   //----------------------------------------------------------------------------
   struct UpdateWeights {
-    const oct_tree*tree;
+    const OctTree*tree;
     const uint     alfa;
-    UpdateWeights(const oct_tree*const&t,
+    UpdateWeights(const OctTree*const&t,
 		  uint           const&a) : tree(t), alfa(a) {}
     template<typename bodies_type>
     uint operator() (const bodies_type*const&B) const {
-      LoopLeafs(dens_leaf,tree,Li)
+      LoopLeafs(DensLeaf,tree,Li)
 	Li->set_weight(B,alfa);
       return 0u;
     }
   };    
   //----------------------------------------------------------------------------
-  class dens_cell : public basic_cell {
+  class DensCell : public BasicCell {
     real const&wght() const { return AUX1.SCAL; }
   public:
-    typedef dens_leaf leaf_type;
+    typedef DensLeaf leaf_type;
     real&wght() { return AUX1.SCAL; }
-    friend real const&wght  (const dens_cell*const&C) {return C->wght(); }
+    friend real const&wght  (const DensCell*const&C) {return C->wght(); }
   };
   //----------------------------------------------------------------------------
-  typedef oct_tree::CellIter<dens_cell> dens_cell_iter;
+  typedef OctTree::CellIter<DensCell> DensCell_iter;
 }
 ////////////////////////////////////////////////////////////////////////////////
-void nbdy::estimate_density_peak(oct_tree*const&TREE,
-				 uint     const&alpha,
-				 uint     const&Nmin,
-				 vect          &X0,
-				 real          &H)
+void nbdy::estimate_density_peak(OctTree*const&TREE,
+				 uint    const&alpha,
+				 uint    const&Nmin,
+				 vect         &X0,
+				 real         &H)
 {
   // 1. set weights in leafs
   TREE->UseBodies(UpdateWeights(TREE,alpha));
   // 2. pass weights up the tree & find cell with maximum weight density
-  dens_cell_iter max_cell;
+  DensCell_iter max_cell;
   real           rho_max = zero;
-  LoopCellsUp(dens_cell_iter,TREE,Ci) {
+  LoopCellsUp(DensCell_iter,TREE,Ci) {
     register real w=0.;
-    LoopLeafKids(dens_cell_iter,Ci,l) w += wght(l);
-    LoopCellKids(dens_cell_iter,Ci,c) w += wght(c);
+    LoopLeafKids(DensCell_iter,Ci,l) w += wght(l);
+    LoopCellKids(DensCell_iter,Ci,c) w += wght(c);
     Ci->wght() = w;
     w /= power<3>(times<2>(radius(Ci)));
     if(w > rho_max) {
@@ -426,7 +472,7 @@ void nbdy::estimate_density_peak(oct_tree*const&TREE,
   }
   // 3. loop leafs in cell with maximum weight density to find center
   vect xw(zero);
-  LoopAllLeafs(dens_cell_iter,max_cell,l) xw += wght(l) * pos(l);
+  LoopAllLeafs(DensCell_iter,max_cell,l) xw += wght(l) * pos(l);
   X0 = xw / wght(max_cell);
   // 4. finally use the number density to estimate H
   H  = times<2>(radius(max_cell)) *
@@ -437,7 +483,7 @@ void nbdy::estimate_density_peak(oct_tree*const&TREE,
 // implementing nbdy::find_lagrange_rad()                                       
 //                                                                              
 ////////////////////////////////////////////////////////////////////////////////
-#include <public/memo.h>
+#include <public/memory.h>
 
 namespace {
 
@@ -478,34 +524,55 @@ namespace {
 
     void split(range*);
 
-    template<typename T> double findQ(T const&X) {
+    template<typename T> range* findrange(T const&X) {
       register range* R = Root;
       while(R->q[1] > R->q[0]) {
 	if(R->is_final()) split(R);
 	R = R->r[0]->contains(X) ? R->r[0] : R->r[1];
       }
-      return R->begin_points()->q;
+      return R;
+    }
+
+    template<typename T> double findQ(T const&X) {
+      return findrange(X)->begin_points()->q;
     }
 
   public:
 
-    RadiusFinder(const bodies*const&, int const& = 1);
     // constructor: allocate PointsA,B; inititialize PointsA & Root
+    RadiusFinder(const vect*    ,        // table: positions
+		 const real*    ,        // table: maases
+		 int            ,        // size of above table
+		 int         = 1,        // # M[r] anticipated
+		 const vect* = 0);       //[centre offset]
 
     double FindLagrangeRadius(double const&M) {
+      // find radius containing the fraction M of the total mass
       if(M > 1.) warning("M/Mtot > 1 -> Lagrange radius = oo");
       return
 	M<=0. ? 0. :
 	M>=1. ? sqrt(Root->q[1]) : sqrt(findQ(M*Mtot));
     }
-
+#if(0)
     double FindRankRadius(int const&R) {
-      if(R > Ntot) warning("rank > N -> rank radius = oo");
+      // find radius of the particle with radial rank R
+      if(R >=Ntot) warning("rank >= N -> rank radius = oo");
       return
-	R<1     ? 0. :
-	R==1    ? sqrt(Root->q[0]) :
-	R>=Ntot ? sqrt(Root->q[1]) : sqrt(findQ(R-1));
+	R<0       ? 0. :
+	R==0      ? sqrt(Root->q[0]) :
+	R>=Ntot-1 ? sqrt(Root->q[1]) : sqrt(findQ(R-1));
     }
+
+    double FindRankRadiusAndMass(int const&Rank,
+				 double   &Mcum) {
+      // find radius of the particle X with radial rank R
+      // also return mass within that radius, counting particle X half
+      if(Rank > Ntot) warning("rank > N -> rank radius = oo");
+      range *R = findrange(Rank);
+      Mcum = 0.5*(R->m[0]+R->m[1]);
+      return sqrt(R->begin_points()->q);
+    }
+#endif
 
     ~RadiusFinder() {
       delete[] PointsA;
@@ -518,7 +585,7 @@ namespace {
     point *P = R->P == PointsA ? PointsB : PointsA;
     const    double s = R->q[0] == 0.? 0.1*R->q[1] : sqrt(R->q[0] * R->q[1]);
     register double m = 0., q[2];
-    register int    l = R->n[0], h=R->n[1];
+    register int    l = R->n[0], h = R->n[1];
     q[0] = R->q[0];
     q[1] = R->q[1];
     for(register point* p=R->begin_points(); p!=R->end_points(); ++p)
@@ -551,23 +618,27 @@ namespace {
 
   }
 
-  RadiusFinder::RadiusFinder(const bodies*const&B,
-			     int          const&N) :
-    PointsA    ( new point[B->N_bodies()] ),
-    PointsB    ( new point[B->N_bodies()] ),
-    RangeAlloc ( int(10+N*log(double(B->N_bodies()))) ),
+  RadiusFinder::RadiusFinder(const vect*x,
+			     const real*m,
+			     int        Nbod,
+			     int        Nrad,
+			     const vect*c) :
+    PointsA    ( falcON_NEW(point,Nbod) ),
+    PointsB    ( falcON_NEW(point,Nbod) ),
+    RangeAlloc ( int(10+Nrad*log(double(Nbod))) ),
     Mtot       ( 0. ),
-    Ntot       ( B->N_bodies() ) {
+    Ntot       ( Nbod ) 
+  {
     Root = RangeAlloc.new_element();
     register double t, q[2];
-    q[1] = q[0] = norm(B->pos(0));
-    for(int b=0; b!=B->N_bodies(); ++b) {
-      t = norm(B->pos(b));
+    q[1] = q[0] = c? dist_sq(x[0],*c) : norm(x[0]);
+    for(int b=0; b!=Ntot; ++b) {
+      t = c? dist_sq(x[b],*c) : norm(x[b]);
       if(std::isnan(t)) error("body position contains nan\n");
       update_min(q[0],t);
       update_max(q[1],t);
       PointsA[b].q = t;
-      t            = B->mass(b);
+      t            = m[b];
       if(std::isnan(t)) error("body mass is nan\n");
       PointsA[b].m = t;
       Mtot        += t;
@@ -580,19 +651,24 @@ namespace {
     Root->n[1] = Ntot;
     Root->P    = PointsA;
   }
-
 }
 ////////////////////////////////////////////////////////////////////////////////
-void nbdy::find_lagrange_rad(const bodies*const&B,
-		                   int    const&N,
-			     const double*const&M,
-		                   double*const&R)
+void nbdy::find_lagrange_rad(const vect  *x,
+			     const real  *m,
+			           int    Nbod,
+			     const double*M,
+			           double*R,
+			           int    Nrad,
+			     const vect  *c)
 {
-  RadiusFinder RF(B,N);
-  for(int n=0; n!=N; ++n)
+  RadiusFinder RF(x,m,Nbod,Nrad,c);
+  for(int n=0; n!=Nrad; ++n)
     R[n] = RF.FindLagrangeRadius(M[n]);
 }
-
+////////////////////////////////////////////////////////////////////////////////
+#ifdef falcON_PROPER
+#  include <proper/tool.cc>
+#endif
 
 
 

@@ -5,10 +5,16 @@
 //                                                                             |
 // C++ code                                                                    |
 //                                                                             |
-// Copyright Walter Dehnen, 2002-2004                                          |
+// Copyright Walter Dehnen, 2002-2005                                          |
 // e-mail:   walter.dehnen@astro.le.ac.uk                                      |
 // address:  Department of Physics and Astronomy, University of Leicester      |
 //           University Road, Leicester LE1 7RH, United Kingdom                |
+//                                                                             |
+//-----------------------------------------------------------------------------+
+//                                                                             |
+// This is a non-public part of the code.                                      |
+// It is property of its author and not to be made public without his written  |
+// consent.                                                                    |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 //                                                                             |
@@ -23,27 +29,33 @@
 // v 1.1.a  30/08/2002  WD adapted this file for usage of MPI otherwise        |
 // v 2.0    24/09/2002  WD enabled MPI                                         |
 // v 2.0.1  13/11/2002  WD typo in tabfile output corrected                    |
-// v 2.1    19/04/2004  WD made it work again using nsam.h                     |
+// v 2.1    19/04/2004  WD made it work again using sample.h                   |
 // v 2.2    04/05/2004  WD happy icc 8.0; new body.h; new make                 |
 // v 2.3    17/05/2004  WD some options renamed                                |
+// v 3.0    23/06/2005  WD new falcON; option giveF                            |
+// v 3.1    13/06/2005  WD changes in fieldset                                 |
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "2.3"
-#define falcON_VERSION_D "17-may-2004 Walter Dehnen                          "
+#define falcON_VERSION   "3.1"
+#define falcON_VERSION_D "13-jul-2005 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile mkcdm
 #endif
+#ifndef falcON_PROPER
+#  error mkcdm can only be compiled with proprietary falcON
+#endif
 #define falcON_RepAction 0                         // no action reporting       
-#include <public/nsam.h>                           // my N-body sampler         
-#include <public/nmio.h>                           // my NEMO file I/O          
-#include <public/ionl.h>                           // my I/O utilities          
-#include <proper/tcdm.h>                           // my truncated CDM models   
+//-----------------------------------------------------------------------------+
+#include <public/sample.h>                         // my N-body sampler         
+#include <public/io.h>                             // my NEMO file I/O          
+#include <public/inline_io.h>                      // my I/O utilities          
+#include <proper/truncatedCDM.h>                   // my truncated CDM models   
 #include <fstream>                                 // C++ file I/O              
 #include <iomanip>                                 // C++ I/O formatting        
 #include <main.h>                                  // main & NEMO stuff         
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
-  using namespace nbdy;
+  using namespace falcON;
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
   // class TruncCDMSampler                                                    //
@@ -89,10 +101,13 @@ string defv[] = {
   "q-ran=f\n          use quasi- instead of pseudo-random numbers        ",
   "time=0\n           simulation time of snapshot                        ",
   "f_pos=0.5\n        fraction of bodies with positive sense of rotation ",
+  "giveF=f\n          give distribution function in aux data?            ",
+#ifdef falcON_PROPER
   "Rp=\n              for mass adaption: list of R in increasing order   ",
   "fac=1.2\n          for mass adaption: factor between mass bins        ",
   "peri=f\n           for mass adaption: R_peri(E,L) rather than R_c(E)  ",
   "epar=\n            if given, set eps_i = epar * sqrt(m_i/M_tot)       ",
+#endif
   "WD_units=f\n       input:  kpc, km/s\n"
   "                   output: kpc, kpc/Gyr, G=1 (-> mass unit)           ",
   "outputs=f\n        give some global quantities to stderr              ",
@@ -100,16 +115,13 @@ string defv[] = {
   falcON_DEFV, NULL };
 //------------------------------------------------------------------------------
 string usage =
-"mkcdm -- construct a truncated CDM model with density\n"
-"\n"
+"mkcdm -- construct a truncated CDM model with density\n\n"
 "                          sech(r/r_t)\n"
 "           rho(r) = C ----------------\n"
-"                       r^g (r+r_s)^(3-g)\n"
-"\n"
-"         and constant anisotropy beta = 1-(sigma_theta/sigma_r)^2\n"
-"\n";
+"                       r^g (r+r_s)^(3-g)\n\n"
+"         and constant anisotropy beta = 1-(sigma_theta/sigma_r)^2\n\n";
 //------------------------------------------------------------------------------
-void nbdy::main()
+void falcON::main() falcON_THROWING
 {
   const double vf = 0.977775320024919;             // km/s  in WD_units         
   const double mf = 2.2228847e5;                   // M_sun in WD_units         
@@ -119,7 +131,13 @@ void nbdy::main()
   if(getdparam("vcmax")<= 0.) error("max v_circ <= 0\n");
   const bool   WD (getbparam("WD_units"));         // using WD_units?           
   const Random Ran(getparam("seed"),6);
-  const io data= hasvalue("epar")? io::mxv | io::e : io::mxv;
+  const fieldset data= 
+#ifdef falcON_PROPER
+    hasvalue("epar")? 
+    fieldset(fieldset::basic | fieldset::e) : 
+#endif
+    fieldset(fieldset::basic);
+#ifdef falcON_PROPER
   const int    nbmax(100);
   double       Rad[nbmax];
   int          nb=0;
@@ -130,6 +148,7 @@ void nbdy::main()
     Rad[nb] = Rad[nb-1] * 1.e20;
     nb++;
   }
+#endif
   //----------------------------------------------------------------------------
   // 2. create initial conditions from a Dehnen model using mass adaption       
   //----------------------------------------------------------------------------
@@ -137,18 +156,25 @@ void nbdy::main()
 		     getdparam("r_s"),
 		     getdparam("r_t"),
 		     WD? getdparam("vcmax")/vf : getdparam("vcmax"),
-		     getdparam("beta"),
+		     getdparam("beta")
+#ifdef falcON_PROPER
+		     ,
 		     Rad,nb,
 		     getdparam("fac"),
-		     getbparam("peri"));
-  bodies BB(getiparam("nbody"), data);
-  TS.sample(BB,getbparam("q-ran"),Ran,getdparam("f_pos"),getdparam("epar"));
+		     getbparam("peri")
+#endif
+		     );
+  snapshot shot(getdparam("time"), getiparam("nbody"), data);
+  TS.sample(shot,getbparam("q-ran"),Ran,getdparam("f_pos"),
+#ifdef falcON_PROPER
+	    getdparam("epar"),
+#endif
+	    getbparam("giveF"));
   //----------------------------------------------------------------------------
   // 3. output of snapshot                                                      
   //----------------------------------------------------------------------------
   nemo_out out(getparam("out"));
-  double time = getdparam("time");
-  BB.write_nemo_snapshot(out,&time,data);
+  shot.write_nemo(out,data);
   //----------------------------------------------------------------------------
   // 4. optional outputs of global quantities                                   
   //----------------------------------------------------------------------------
@@ -209,10 +235,10 @@ void nbdy::main()
   //----------------------------------------------------------------------------
   if(hasvalue("tabfile")) {
     TruncCDMModel const&CDM (TS.TCDM());
-    std::ofstream tab;
-    open_error(tab,getparam("tabfile"));
+    output tab(getparam("tabfile"));
+    if(!tab) return;
     tab<<"#\n"
-       <<"# file created by mkcdm\n"
+       <<"# \""<< (*(ask_history())) <<"\"\n"
        <<"# run at  "  <<run_info::time()<<"\n";
     if(run_info::user_known()) tab<<"#     by  \""<<run_info::user()<<"\"\n";
     if(run_info::host_known()) tab<<"#     on  \""<<run_info::host()<<"\"\n";
@@ -224,10 +250,10 @@ void nbdy::main()
        <<"#           rho(r) = C ----------------\n"
        <<"#                       r^g (r+a)^(3-g)\n"
        <<"#\n"
-       <<"# with g      = "<<getdparam("g")<<"\n"
-       <<"#      a      = "<<getdparam("a")<<"\n"
-       <<"#      b      = "<<getdparam("b")<<"\n"
-       <<"#      vc_max = "<<getdparam("v")<<"\n"
+       <<"# with g      = "<<getdparam("gamma")<<"\n"
+       <<"#      a      = "<<getdparam("r_s")<<"\n"
+       <<"#      b      = "<<getdparam("r_t")<<"\n"
+       <<"#      vc_max = "<<getdparam("vcmax")<<"\n"
        <<"#      beta   = "<<getdparam("beta")<<"\n"
        <<"#\n"
        <<"#          r       rho(r)       M(r)        "

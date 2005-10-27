@@ -3,32 +3,42 @@
 //                                                                             |
 // Pi.h                                                                        |
 //                                                                             |
-// C++ code                                                                    |
+// Copyright (C) 1994-2002   Walter Dehnen                                     |
 //                                                                             |
-// Copyright Walter Dehnen, 1994-2003                                          |
-// e-mail:   walter.dehnen@astro.le.ac.uk                                      |
-// address:  Department of Physics and Astronomy, University of Leicester      |
-//           University Road, Leicester LE1 7RH, United Kingdom                |
+// This program is free software; you can redistribute it and/or modify        |
+// it under the terms of the GNU General Public License as published by        |
+// the Free Software Foundation; either version 2 of the License, or (at       |
+// your option) any later version.                                             |
+//                                                                             |
+// This program is distributed in the hope that it will be useful, but         |
+// WITHOUT ANY WARRANTY; without even the implied warranty of                  |
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU           |
+// General Public License for more details.                                    |
+//                                                                             |
+// You should have received a copy of the GNU General Public License           |
+// along with this program; if not, write to the Free Software                 |
+// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                   |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 #ifndef falcON_included_Pi_h
 #define falcON_included_Pi_h
 ////////////////////////////////////////////////////////////////////////////////
-namespace nbdy {
+namespace falcON {
   const double Pi   = 3.14159265358979323846264338328;  // Pi                   
   const double Pih  = 0.5  * Pi;                        // Pi/2                 
   const double Piq  = 0.25 * Pi;                        // Pi/4                 
   const double Pi3h = 3.   * Pih;                       // 3*Pi/2               
   const double TPi  = 2.   * Pi;                        // 2*Pi                 
   const double FPi  = 4.   * Pi;                        // 4*Pi                 
+  const double iFPi = 0.25 / Pi;                        // 1/(4*Pi)             
   const double FPit = 4.   * Pi/3.;                     // 4*Pi/3               
   const double iFPit= 0.75 / Pi;                        // 3/(4*Pi)             
   const double SPi  = 1.772453850905516027298167483341;	// Sqrt[Pi]             
   const double STPi = 2.506628274631000502415765284811; // Sqrt[2 Pi]           
-#if defined(__COMPLEX__) || defined(_CPP_COMPLEX) || defined(__STD_COMPLEX) \
-|| defined(__PGCC__) && defined(_STLP_template_complex)
-  const std::complex<double> IMAG = std::complex<double>(0,1);	// i            
-  const std::complex<double> ITPi = std::complex<double>(0,TPi);// 2 i Pi       
+#if  defined(falcON_included_complex)		\
+  || defined(falcON_COMPLEX)
+  const std::complex<double> IMAG(0,1);	                // i                    
+  const std::complex<double> ITPi(0,TPi);               // 2 i Pi               
 #endif
 }
 ////////////////////////////////////////////////////////////////////////////////

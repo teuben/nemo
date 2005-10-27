@@ -3,12 +3,21 @@
 //                                                                             |
 // mkking.cc                                                                   |
 //                                                                             |
-// C++ code                                                                    |
+// Copyright (C) 2000-2005 Walter Dehnen                                       |
 //                                                                             |
-// Copyright Walter Dehnen, 2000-2004                                          |
-// e-mail:   walter.dehnen@astro.le.ac.uk                                      |
-// address:  Department of Physics and Astronomy, University of Leicester      |
-//           University Road, Leicester LE1 7RH, United Kingdom                |
+// This program is free software; you can redistribute it and/or modify        |
+// it under the terms of the GNU General Public License as published by        |
+// the Free Software Foundation; either version 2 of the License, or (at       |
+// your option) any later version.                                             |
+//                                                                             |
+// This program is distributed in the hope that it will be useful, but         |
+// WITHOUT ANY WARRANTY; without even the implied warranty of                  |
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU           |
+// General Public License for more details.                                    |
+//                                                                             |
+// You should have received a copy of the GNU General Public License           |
+// along with this program; if not, write to the Free Software                 |
+// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                   |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 //                                                                             |
@@ -21,7 +30,7 @@
 // v 1.0   11/09/2001  WD created for nemo 3.0.4                               |
 // v 1.0.1 17/09/2001  WD changed to init_xrandom (nemo 3.0.8)                 |
 // v 1.0.2 19/09/2001  WD bug fixed; centrate centre of mass (option zerocm)   |
-// v 1.0.3 21/09/2001  WD changes in body & nmio                               |
+// v 1.0.3 21/09/2001  WD changes in body & io                                 |
 // v 1.0.4 26/09/2001  WD option WD_units; more bugs fixed                     |
 // v 1.0.5 27/02/2002  WD changed core_radius -> r_c, tidal_radius -> r_t      |
 // v 1.0.6 02/04/2002  WD improved outputs to log                              |
@@ -36,9 +45,12 @@
 // v 1.4   28/10/2003  WD automatic version; quasi-random numbers              |
 // v 1.4.1 30/04/2004  WD abandoned zerocm; new body.h; happy icc 8.0          |
 // v 1.4.2 18/05/2004  WD rearranged options                                   |
+// v 1.4.3 20/05/2005  WD several minor updates                                |
+// v 2.0   14/06/2005  WD new falcON                                           |
+// v 2.1   13/06/2005  WD changes in fieldset                                  |
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "1.4.2"
-#define falcON_VERSION_D "18-may-2004 Walter Dehnen                          "
+#define falcON_VERSION   "2.1"
+#define falcON_VERSION_D "13-jul-2005 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #error You need NEMO to compile "mkking"
@@ -49,12 +61,12 @@
 #include <public/Pi.h>                             // my Pi                     
 #include <public/king.h>                           // my king model             
 #include <body.h>                                  // my bodies                 
-#include <public/nmio.h>                           // my NEMO file I/O          
-#include <public/rand.h>
+#include <public/io.h>                             // my NEMO file I/O          
+#include <public/random.h>
 #include <iomanip>                                 // C++ I/O manipulators      
 #include <cmath>                                   // C++ math                  
 #include <main.h>                                  // main & NEMO stuff         
-using namespace nbdy;
+using namespace falcON;
 ////////////////////////////////////////////////////////////////////////////////
 string defv[] = {
   "out=???\n          output file                                        ",
@@ -75,7 +87,7 @@ string defv[] = {
 //------------------------------------------------------------------------------
 string usage = "mkking -- initial conditions from a King model";
 //------------------------------------------------------------------------------
-void nbdy::main()
+void falcON::main() falcON_THROWING
 {
   //----------------------------------------------------------------------------
   // 1. create king model, i.e. integrate to get Phi(r) etc.                    
@@ -132,13 +144,14 @@ void nbdy::main()
   // 3. create initial conditions from King model                               
   //----------------------------------------------------------------------------
   const int N = getiparam("nbody");
-  const io data = hasvalue("eps")? io::mxv | io::e : io::mxv;
-  bodies BB(N, data);
+  const fieldset data(hasvalue("eps")? fieldset::basic | fieldset::e :
+		      fieldset::basic);
+  snapshot        shot(getdparam("time"),N,data);
   const    bool   q(getbparam("q-ran"));
   const    Random Ran(getparam("seed"),6);
   const    double m = mass/double(N);
   register double r,v,cth,R,phi;
-  LoopBodies(bodies,&BB,Bi) {
+  LoopAllBodies(&shot,Bi) {
     //                                                                          
     // 3.1 set mass and get r and v                                             
     //                                                                          
@@ -169,12 +182,11 @@ void nbdy::main()
   //                                                                            
   if(hasvalue("eps")) {
     const real eps = getdparam("eps");
-    LoopBodies(bodies,&BB,Bi) Bi.eps() = eps;
+    LoopAllBodies(&shot,Bi) Bi.eps() = eps;
   }
   //----------------------------------------------------------------------------
   // 4. output of snapshot                                                      
   //----------------------------------------------------------------------------
   nemo_out out(getparam("out"));
-  double time = getdparam("time");
-  BB.write_nemo_snapshot(out,&time,data);
+  shot.write_nemo(out,data);
 };

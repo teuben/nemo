@@ -1,34 +1,56 @@
 C--------------------------------------------------------------------------+
+C                                                                          |
+C TestGravC.cc                                                             |
+C                                                                          |
+C Copyright (C) 2000-2005 Walter Dehnen                                    |
+C                                                                          |
+C This program is free software; you can redistribute it and/or modify     |
+C it under the terms of the GNU General Public License as published by     |
+C the Free Software Foundation; either version 2 of the License, or (at    |
+C your option) any later version.                                          |
+C                                                                          |
+C This program is distributed in the hope that it will be useful, but      |
+C WITHOUT ANY WARRANTY; without even the implied warranty of               |
+C MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU        |
+C General Public License for more details.                                 |
+C                                                                          |
+C You should have received a copy of the GNU General Public License        |
+C along with this program; if not, write to the Free Software              |
+C Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                |
+C                                                                          |
+C--------------------------------------------------------------------------+
+C                                                                          |
 C     Here, we use C-style macros to obtain correct input data type.       |
 C     For this to work, we need first to process this file with the        |
 C     C preprocessor cpp, see makefile make.public                         |
+C                                                                          |
 C--------------------------------------------------------------------------+
-#if defined(falcON_SINGLE_DOUBLE) || defined(falcON_DOUBLE_DOUBLE)
-#define INPUT_TYPE DOUBLE PRECISION
+#ifdef falcON_DOUBLE
+#  define INPUT_TYPE DOUBLE PRECISION
 #else
-#define INPUT_TYPE REAL
+#  define INPUT_TYPE REAL
 #endif
 C---------------------------------------------------------------------------
       PROGRAM TESTGRAVF
 
       IMPLICIT NONE
 
-      INCLUDE 'falcON.f'
+      INCLUDE 'FAlCON.f'
 
       INTEGER NMAX
-      INPUT_TYPE RMAX,PI,TPI
+      INPUT_TYPE RMAX,PI,TPI,GRAV
       PARAMETER(NMAX=1000000)
       PARAMETER(RMAX=1.E3, PI=3.14159265358979323846264338328, TPI=2*PI)
+      PARAMETER(GRAV=1)
 
       INTEGER    MODEL,K,N,NCRIT,I,J,S,CPU0,CPU1
       INPUT_TYPE EPS,TH,GAM,TIME,DAMX
       INPUT_TYPE G1,G2,IG2,G3,IG3,TM,RAD,RCY
       INPUT_TYPE PHI,FR,P,CTH,MI,ASE,DACC,SF(3)
       INTEGER    FL(NMAX)
-      INPUT_TYPE M(NMAX),X(NMAX),Y(NMAX),Z(NMAX)
+      INPUT_TYPE M(NMAX),PH(NMAX),RH(NMAX)
+      INPUT_TYPE X(3,NMAX),A(3,NMAX),AT(3,NMAX)
       INPUT_TYPE MSFORCE
-      INPUT_TYPE AX(NMAX),AY(NMAX),AZ(NMAX),PH(NMAX),RH(NMAX)
-      INPUT_TYPE ATX(NMAX),ATY(NMAX),ATZ(NMAX)
 
       CPU0=CLOCK()
 
@@ -102,16 +124,16 @@ C---------------------------------------------------------------------------
          ELSE
             CTH    = 2.*DRAND48()-1
          ENDIF
-         RCY   = RAD*SQRT(1-CTH*CTH)
-         PHI   = TPI*DRAND48()
-         FL(I) = 1
-         X(I)  = RCY * SIN(PHI)
-         Y(I)  = RCY * COS(PHI)
-         Z(I)  = RAD * CTH
-         M(I)  = MI
-         ATX(I)= FR * X(I)
-         ATY(I)= FR * Y(I)
-         ATZ(I)= FR * Z(I)
+         RCY    = RAD*SQRT(1-CTH*CTH)
+         PHI    = TPI*DRAND48()
+         FL(I)  = 1
+         X(1,I) = RCY * SIN(PHI)
+         X(2,I) = RCY * COS(PHI)
+         X(3,I) = RAD * CTH
+         M(I)   = MI
+         AT(1,I)= FR * X(1,I)
+         AT(2,I)= FR * X(2,I)
+         AT(3,I)= FR * X(3,I)
 C TEST
 C         WRITE(*,'("X="3E25.13)') X(I),Y(I),Z(I)
 C TSET
@@ -120,11 +142,11 @@ C TSET
       TIME = (CPU1-CPU0) / 1.E6
       WRITE(*,'(" time needed for set up of X_i:  "F13.6)') TIME
       CPU0 = CPU1
-      CALL FALCON_INITIALIZE(FL,M,X,Y,Z,
+      CALL FALCON_INITIALIZE(FL,M,X,
 #ifdef falcON_INDI
      C%VAL(0),
 #endif
-     CAX,AY,AZ,PH,RH, N,EPS,TH,K)
+     CA,PH,RH, N,0,EPS,TH,K,GRAV)
 
       DO I=1,2
          CALL FALCON_GROW(NCRIT)
@@ -148,20 +170,16 @@ C TSET
       SF(2) = 0
       SF(3) = 0
       DO I=1,N
-         SF(1) = SF(1) + M(I)*AX(I) 
-         TM    = AX(I) - ATX(I)
-         DACC  = TM**2
-         SF(2) = SF(2) + M(I)*AY(I) 
-         TM    = AY(I) - ATY(I)
-         DACC  = DACC + TM**2
-         SF(3) = SF(3) + M(I)*AZ(I) 
-         TM    = AZ(I) - ATZ(I)
-         DACC  = DACC + TM**2
+         DACC = 0
+         DO J=1,3
+            SF(J) = SF(J) + M(I)*A(J,I) 
+            DACC  = DACC + (A(J,I) - AT(J,I))**2
+         ENDDO
          ASE   = ASE + M(I)*DACC
          IF(DACC.GT.DAMX) THEN
             DAMX = DACC
          ENDIF
-C           WRITE(*,'(" "6F13.8)') X(I),Y(I),Z(I),AX(I),AY(I),AZ(I)
+C           WRITE(*,'(" "6F13.8)') X(1,I),X(2,I),X(3,I),A(1,I),A(2,I),A(3,I)
       ENDDO
       IF(MODEL.EQ.1) THEN
          ASE = ASE * 13.125

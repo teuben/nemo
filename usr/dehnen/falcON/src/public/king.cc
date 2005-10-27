@@ -3,26 +3,35 @@
 //                                                                             |
 // king.cc                                                                     |
 //                                                                             |
-// C++ code                                                                    |
+// Copyright (C) 2000, 2001, 2002, 2003  Walter Dehnen                         |
 //                                                                             |
-// Copyright Walter Dehnen, 2000-2003                                          |
-// e-mail:   walter.dehnen@astro.le.ac.uk                                      |
-// address:  Department of Physics and Astronomy, University of Leicester      |
-//           University Road, Leicester LE1 7RH, United Kingdom                |
+// This program is free software; you can redistribute it and/or modify        |
+// it under the terms of the GNU General Public License as published by        |
+// the Free Software Foundation; either version 2 of the License, or (at       |
+// your option) any later version.                                             |
+//                                                                             |
+// This program is distributed in the hope that it will be useful, but         |
+// WITHOUT ANY WARRANTY; without even the implied warranty of                  |
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU           |
+// General Public License for more details.                                    |
+//                                                                             |
+// You should have received a copy of the GNU General Public License           |
+// along with this program; if not, write to the Free Software                 |
+// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                   |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 #include <public/king.h>
 #include <public/Pi.h>
-#include <public/ionl.h>
-#include <public/tupl.h>
-#include <public/nums.h>
+#include <public/inline_io.h>
+#include <public/tupel.h>
+#include <public/numerics.h>
 #include <fstream>
 #include <iomanip>
 #include <cmath>
 
-using namespace nbdy;
+using namespace falcON;
 //==============================================================================
-// nbdy::king_model::set_up() & auxiliary data & routines                       
+// falcON::king_model::set_up() & auxiliary data & routines                     
 //==============================================================================
 namespace {
   double c00;                                           // used by set_up() etc 
@@ -64,10 +73,10 @@ void king_model::setup(const unsigned n)
     if(m)  delete[] m;
     if(rh) delete[] rh;
     N  = n;
-    r  = new double[N];
-    ps = new double[N];
-    m  = new double[N];
-    rh = new double[N];
+    r  = falcON_NEW(double,N);
+    ps = falcON_NEW(double,N);
+    m  = falcON_NEW(double,N);
+    rh = falcON_NEW(double,N);
   }
   r [0] = 0.;
   ps[0] = Psi0;
@@ -103,7 +112,7 @@ void king_model::setup(const unsigned n)
   P0 =-m[N-1]/r[N-1];
 }
 //==============================================================================
-// nbdy::king_model: reset                                                      
+// falcON::king_model: reset                                                    
 //==============================================================================
 void king_model::reset()
 {
@@ -114,7 +123,7 @@ void king_model::reset()
   if(rh) { delete[] rh; rh=0; }
 }
 //==============================================================================
-// nbdy::king_model: re-scaling                                                 
+// falcON::king_model: re-scaling                                               
 //==============================================================================
 void king_model::reset_scales_tidal(const double M, const double Rt)
 {
@@ -138,7 +147,7 @@ void king_model::reset_scales_core(const double M, const double R0)
   sdscl = Pscal/rscal;
 }
 //==============================================================================
-// nbdy::king_model::rms_radius()                                               
+// falcON::king_model::rms_radius()                                             
 //==============================================================================
 double king_model::rms_radius() const
 {
@@ -150,14 +159,14 @@ double king_model::rms_radius() const
   return rscal*sqrt(0.5*y/m[N-1]);
 }
 //==============================================================================
-// nbdy::king_model::half_mass_radius()                                         
+// falcON::king_model::half_mass_radius()                                       
 //==============================================================================
 double king_model::half_mass_radius() const
 {
   return rscal*polev(0.5*m[N-1],m,r,N);
 }
 //==============================================================================
-// nbdy::king_model::Etot()                                                     
+// falcON::king_model::Etot()                                                   
 //==============================================================================
 double king_model::Etot() const
 {
@@ -170,7 +179,7 @@ double king_model::Etot() const
   return -0.25*Pscal*mscal*(square(m[N-1])/r[N-1] + e*0.5);
 }
 //==============================================================================
-// nbdy::king_model::write_table()                                              
+// falcON::king_model::write_table()                                            
 //==============================================================================
 using std::ios;
 using std::setw;
@@ -191,7 +200,7 @@ void king_model::write_table(const char* file) const
   table.close();
 }
 //==============================================================================
-// nbdy::king_model::random() & auxiliary data & methods                        
+// falcON::king_model::random() & auxiliary data & methods                      
 //==============================================================================
 namespace {
   double psi,rhi;
@@ -230,7 +239,7 @@ double king_model::random(const double R1, const double R2,
   return (P0-psi)*Pscal;
 }
 //==============================================================================
-// nbdy::king_model::SurfDens() & auxiliary data & methods                      
+// falcON::king_model::SurfDens() & auxiliary data & methods                    
 //==============================================================================
 namespace {
   double *rad, *rho, Rq, rt;
