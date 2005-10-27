@@ -1,8 +1,11 @@
 #
 #
 
-BINS = addgravity density_centre getgravity gyrfalcON lagrange_radii \
+BINS = addgravity getgravity gyrfalcON lagrange_radii \
 	mkdehnen mkking mkplum scale_eps symmetrize TestGrav
+
+# removed ikn 3.x: density_centre 
+
 
 nemo_bins: $(BINS)
 	make 
