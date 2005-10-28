@@ -35,6 +35,3 @@ $(LIB)libfalcON.so:	$(falcON_objs)
 			$(CXX) $^ -shared -o $@
 
 ################################################################################
-ifdef NEMO
-include Makefile.nemo
-endif

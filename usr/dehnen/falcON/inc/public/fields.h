@@ -534,7 +534,13 @@ namespace falcON {
     /// combination of two sets
     fieldset operator|  (bits     b) const { return fieldset(val | b); }
     /// combination of two sets
-    friend fieldset operator|  (bits b, fieldset d) { return d | b; }
+    friend
+    fieldset operator|  (bits     a,
+			 bits     b)       { return fieldset(int(a)|int(b)); }
+    /// combination of two sets
+    friend
+    fieldset operator|  (bits     b, 
+			 fieldset d)       { return d | b; }
     /// cross section of two sets
     fieldset operator&  (fieldset b) const { return fieldset(val & b.val); }
     /// cross section of two sets
@@ -650,7 +656,7 @@ namespace falcON {
   }
   // ///////////////////////////////////////////////////////////////////////////
   const unsigned BT_NUM = 2;
-  const unsigned BT_DATA[BT_NUM] = { fieldset::STD | fieldset::SPH,
+  const fieldset BT_DATA[BT_NUM] = { fieldset::STD | fieldset::SPH,
 				     fieldset::STD };
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
@@ -723,10 +729,10 @@ namespace falcON {
     /// is bodytype supporting SPH?
     bool is_sph() const { return val == gas; }
     /// return the full set of fields bodies of this type may hold
-    fieldset allows() const { return fieldset(BT_DATA[val]); }
+    fieldset allows() const { return BT_DATA[val]; }
     /// can bodies of this bodytype hold field \c f?
     bool allows(fieldbit f) const {
-      return fieldset(BT_DATA[val]).contain(f);
+      return BT_DATA[val].contain(f);
     }
     /// return a name like "std" or "gas"
     const char* name() const {

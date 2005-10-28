@@ -34,6 +34,8 @@ $(MANIP)EstimateF.so:		$(SMAN)EstimateF.cc $(defman_h)
 				$(MAKEMANIP)
 $(MANIP)TestTime.so:		$(SMAN)TestTime.cc $(defman_h)
 				$(MAKEMANIP)
+$(MANIP)removesph.so:		$(SMAN)removesph.cc $(defman_h)
+				$(MAKEMANIP)
 
 manips		:	$(MANIP)add_plummer.so \
 			$(MANIP)symmetrize_pairs.so \

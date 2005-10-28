@@ -752,9 +752,11 @@ namespace falcON {
     //                                                                          
     //--------------------------------------------------------------------------
     tm<int L1,int M1,int Ky,int M2> struct inp_p {
-      sci L2 = Ky+M2;
-      sci I  = TWO<L1+L2,M1+M2>::I;
-      sci I2 = TWO<L2,M2>::I;
+      enum {
+	L2 = Ky+M2,
+	I  = TWO<L1+L2,M1+M2>::I,
+	I2 = TWO<L2,M2>::I
+      };
       tX sX p(cX*b,cX*c) { return b[I] * c[I2]; }
     };
     //--------------------------------------------------------------------------
@@ -763,7 +765,14 @@ namespace falcON {
     //                                                                          
     //--------------------------------------------------------------------------
     tm<int Kx,int Ky,int Kz> struct inp_a {
-      sci K=Kx+Ky+Kz, L=Ky+Kz, M=Kz, P=TWO<K,L>::B*TWO<L,M>::B;
+      enum { 
+	K  = Kx+Ky+Kz,
+	L  = Ky+Kz,
+	M  = Kz,
+	kl = TWO<K,L>::B,
+	lm = TWO<L,M>::B,
+	P  = kl*lm
+      };
     };
     //--------------------------------------------------------------------------
     //                                                                          
