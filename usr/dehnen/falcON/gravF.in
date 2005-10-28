@@ -1,9 +1,0 @@
-2	gamma model
-1	gamma = 1 -> Hernquist model
-100000	N
-901	seed
-0.01	eps
-0.6 	theta
-1	kernel P1
-6	Ncrit
-
