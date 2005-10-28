@@ -14,7 +14,7 @@
 ///          \li falcON::fieldbit: representing a single body data field        
 ///          \li falcON::fieldset: representing a set of body data fields       
 ///          \li template falcON::field_traits                                  
-///          \li further contants and macros                                    
+///          \li further constants and macros                                   
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
@@ -781,7 +781,7 @@ namespace falcON {
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
   /// \brief Template over body data field
-  /// provides information about data type, and name etc or data field.
+  /// provides information about data type and name etc for data field.
   template<int I> struct field_traits;
 #  define DefFieldTraits(BIT,TYPE)				\
   template<> struct field_traits< BIT > :			\

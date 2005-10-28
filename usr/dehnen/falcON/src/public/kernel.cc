@@ -795,7 +795,7 @@ namespace {
     enum { ND=K+1, F=K+K-1 };
     sv b(real&X, real*D, real const&EQ, real const&HQ, real const&QQ) {
       __block<p0,K-1>::b(X,D,EQ,HQ,QQ);
-      D[K] = F * X * D[K-1];
+      D[K] = int(F) * X * D[K-1];
     } };
   //////////////////////////////////////////////////////////////////////////////
   // kern_type = p1                                                             
@@ -818,7 +818,7 @@ namespace {
     enum { ND=K+2, F=K+K+1 };
     sv b(real&X, real*D, real const&EQ, real const&HQ, real const&QQ) {
       __block<p1,K-1>::b(X,D,EQ,HQ,QQ);
-      D[K+1] = F * X * D[K];
+      D[K+1] = int(F) * X * D[K];
       D[K]  += HQ  * D[K+1];
     } };
   //////////////////////////////////////////////////////////////////////////////
@@ -843,7 +843,7 @@ namespace {
     enum { ND=K+3, F=K+K+3 };
     sv b(real&X, real*D, real const&EQ, real const&HQ, real const&QQ) {
       __block<p2,K-1>::b(X,D,EQ,HQ,QQ);
-      D[K+2] = F * X * D[K+1];
+      D[K+2] = int(F) * X * D[K+1];
       D[K]  += HQ*(D[K+1]+HQ*D[K+2]);
     } };
   //////////////////////////////////////////////////////////////////////////////
@@ -870,7 +870,7 @@ namespace {
     enum { ND=K+4, F=K+K+5 };
     sv b(real&X, real*D, real const&EQ, real const&HQ, real const&QQ) {
       __block<p3,K-1>::b(X,D,EQ,HQ,QQ);
-      D[K+3] = F * X * D[K+2];
+      D[K+3] = int(F) * X * D[K+2];
       D[K]  += HQ*(D[K+1]+QQ*(D[K+2]+HQ*D[K+3]));
     } };
   //////////////////////////////////////////////////////////////////////////////
