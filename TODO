@@ -48,18 +48,15 @@ general things for 3.2.x
   - use some kind of global MAXBODY where we often use different values
 	**mostly done**
 
-  => a NEMO install for gyrfalcON, so we don't have to figure the funky NEMOHOST
-     in Walter's tree  (he is using make's MACHTYPE and OSTYPE internal variables)
-    gyrfalcON:
-        3.2.2 compiles ok on linux
-	3.2.3 ok
-	3.3.1 ok
-	3.3.2 ok
-	3.3.4 fails
-        3.3.4 breaks eventually   [macosX also dies here]
-        3.4.2 dies very quickly (fc3)
-	3.4.3 dies near the same spot, seems to be language related
-    
+  - gyrfalcON: installation is prone to requiring a patch:
+
+     The new version of gyrfalcON (V3.0.4; 28 oct 2005) now compiles fine all the
+     way from gcc 3.2.2 to 4.0.1 
+     (though make/defs needs a patch:  -lg2c has to be -gfortran)
+
+     For MacOSX a bit more work is needed, since isnan() and isinf() are not known?
+	add:	-Wno-long-double
+	remove:	-rdynamic
 
 things for 3.4
 
@@ -103,6 +100,7 @@ code & line coverage: (gcov, lcov)
 	- sun's make doesn't work, it need gmake
 
 - compile under cygwin
+    - macro usage of some math function?  real rlog2(real); 
 
 - fix problems when replacing gnu make with pmake
 
@@ -155,3 +153,46 @@ code & line coverage: (gcov, lcov)
 
 
 - alternative to autoconf?  Pre Make Kit  = http://pmk.sourceforge.net/
+
+
+- solaris10 on intel: (sep 2005)
+
+  choose CC,CXX,F77 =>  /opt/SUNWspro/bin/{cc,CC,f77}	      Sun Studio 10: C 5.7 compiler
+	or:             /opt/sfw/gcc-3/bin/{gcc,g++,g77}      GNU 3.4.0
+
+  Need to patch your env before installing:
+
+	make -> gmake			/usr/ccs/bin/make is the default and not GNU
+				ln -s /opt/sfw/bin/gmake make
+	whoami -> who am i    (e.g. use shell script "
+
+
+setenv CC  /opt/SUNWspro/bin/cc
+setenv CCX /opt/SUNWspro/bin/CC
+setenv F77 /opt/SUNWspro/bin/f77
+
+or
+setenv CC  /opt/sfw/gcc-3/bin/gcc
+setenv CCX /opt/sfw/gcc-3/bin/g++
+setenv F77 /opt/sfw/gcc-3/bin/g77
+
+	
+	Problem:   loadobj doesn't work, testloadobj doesn't find dprintf
+
+
+
+Intel compiler 9.0 (sep 2005):
+------------------------------
+
+- some warnings in the Tk drivers
+
+- a number of these linking problems (e.g. cpgdemo's, but also libpgplot.so)
+  show up when multiple .o files are combined in an executable.
+
+IPO link: can not find "("
+icc: error: problem during multi-file optimization compilation (code 1)
+make[1]: [libpgplot.so] Error 1 (ignored)
+
+
+- Testfile's:    also needs a program to be added to the local Makefile,
+	that's non-intuitive
