@@ -50,6 +50,7 @@ setenv NEMOINC $NEMO/inc
 setenv NEMOSRC $NEMO/src
 setenv BTRPATH .:$NEMO/obj/bodytrans
 setenv POTPATH .:$NEMO/obj/potential
+setenv ACCPATH .:$NEMO/obj/acc
 if (-e $NEMO/VERSION) then
   setenv NEMOVER `cat $NEMO/VERSION`
 else
