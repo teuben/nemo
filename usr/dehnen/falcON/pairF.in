@@ -1,7 +1,0 @@
-100000	total number of bodies
-901	random seed
-10000	number of SPH bodies
-0.04	their size (all equal in this test)
--1	time tau < 0 / tau > 0: SPH/sticky particle support
-24	Ncrit
-0	for SPH only: use |r| < max(h_i,h_j) OR < h_i+h_j ?
