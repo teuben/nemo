@@ -1474,9 +1474,9 @@ namespace falcON {
 ///
 /// \param PTER  valid pointer to falcON::bodies (or falcON::snapshot)
 /// \param NAME  name given to loop variable (of type falcON::body)
-#define LoopAllBodies(PTER,NAME)		\
-  for(body NAME=(PTER)->begin_all_bodies();	\
-           NAME; ++NAME)
+#define LoopAllBodies(PTER,NAME)			\
+  for(falcON::body NAME=(PTER)->begin_all_bodies();	\
+                   NAME; ++NAME)
 #endif
 //------------------------------------------------------------------------------
 #ifndef LoopTypedBodies         /* loop all bodies of a given type           */
@@ -1494,9 +1494,9 @@ namespace falcON {
 /// \param PTER  valid pointer to falcON::bodies (or falcON::snapshot)
 /// \param NAME  name given to loop variable (of type falcON::body)
 /// \param TYPE  the bodytype of the bodies to be looped over
-#define LoopTypedBodies(PTER,NAME,TYPE)			\
-  for(body NAME= (PTER)->begin_typed_bodies(TYPE);	\
-        NAME  != (PTER)->end_typed_bodies(TYPE); ++NAME)
+#define LoopTypedBodies(PTER,NAME,TYPE)					\
+  for(falcON::body NAME= (PTER)->begin_typed_bodies(TYPE);		\
+                   NAME  != (PTER)->end_typed_bodies(TYPE); ++NAME)
 #endif
 //------------------------------------------------------------------------------
 #ifndef LoopSPHBodies           /* loop all SPH bodies                       */
@@ -1544,7 +1544,7 @@ namespace falcON {
 /// \param NAME1  name of the first body in an outer loop
 /// \param NAME2  name given to inner-loop variable (of type falcON::body)
 #define LoopBodyPairs(NAME1,NAME2)		\
-  for(body NAME2(NAME1,1); NAME2; ++NAME2)
+  for(falcON::body NAME2(NAME1,1); NAME2; ++NAME2)
 #endif
 //------------------------------------------------------------------------------
 //@}
