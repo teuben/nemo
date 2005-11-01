@@ -12,13 +12,16 @@
 #include <image.h>
 
 string defv[] = {
-        "in=???\n       Input image file",
-	"out=???\n      Output file",
-	"VERSION=0.1\n  1-nov-05 PJT",
-	NULL,
+  "in=???\n       Input image file",
+  "out=???\n      Output file",
+  "VERSION=0.1\n  1-nov-05 PJT",
+  NULL,
 };
 
 string usage = "merge all input images into one big cube - memory intensive";
+
+string cvsid="$Id$";
+
 
 #define MAXIM   512
 
@@ -35,7 +38,7 @@ void nemo_main()
     instr = stropen(getparam("in"), "r");
     outstr = stropen(getparam("out"), "w");
 
-    for (i=0; i<MAXIM; i++) {
+    for (i=0; i<MAXIM; i++) {               /* loop over all to gather data */
       iptr[i] = 0;
       if (read_image( instr, &iptr[i]) == 0) break;
       nx1 = Nx(iptr[i]);	
@@ -72,9 +75,9 @@ void nemo_main()
     Dy(optr) = Dy(iptr[0]);
     Dz(optr) = Dz(iptr[0]);
 
-    for (i=0, iz=0; i<ni; i++, iz++) {
+    for (i=0, iz=0; i<ni; i++) {       /* grab all data in output cube */
       nz1 = Nz(iptr[i]);
-      for (iz1=0; iz1< nz1; iz1++) {
+      for (iz1=0; iz1< nz1; iz1++, iz++) {
 	for (iy=0; iy<ny; iy++) {
 	  for (ix=0; ix<nx; ix++) {
 	    CubeValue(optr,ix,iy,iz) = CubeValue(iptr[i],ix,iy,iz1);
