@@ -23,8 +23,21 @@ No default.
 to read in all input images, to make it easy to allocate
 the output cube. It is therefore every memory intensive,
 since it needs twice the memory for the cube in total.
+.PP
+The meaning of the 3rd axis cannot always be trusted.
+.SH EXAMPLES
+Although the input may seem to only support a single set of images,
+using Unix pipe one can use multiple. If certain images need to be
+cut out of a cube, \fIcsf(1NEMO)\fP can be used first. Here's an
+example of these two how to re-arrange the first 5 even and odd images
+into a single cube:
+.nf
+     csf ccd1 ccd1e item=Image select=2,4,6,8,10
+     csf ccd1 ccd1o item=Image select=1,3,5,7,9
+     cat ccd1e ccd1o | ccdmerge - ccd2
+.fi
 .SH SEE ALSO
-image(5NEMO)
+csf(1NEMO), image(5NEMO)
 .SH FILES
 src/image/trans/ccdmerge.c - source
 .SH AUTHOR
