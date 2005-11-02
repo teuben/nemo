@@ -38,7 +38,7 @@ string defv[] = {
     "formal=false\n		  produce publication-style plots",
     "xbox=2.0:10.0\n		  extent of x-y frame in x direction",
     "ybox=2.0:10.0\n		  extent of x-y frame in y direction",
-    "ybox=10.0:18.0\n		  extent of zy and xz frame in x resp. y direction",
+    "zbox=10.0:18.0\n		  extent of zy and xz frame in x resp. y direction",
     "nobox=false\n		  draw axis, ticks, labels",
     "nxticks=7\n		  number of ticks on x axis",
     "nyticks=7\n		  number of ticks on y axis",
@@ -57,6 +57,9 @@ string defv[] = {
 
 string usage = "plot particle positions in a 3-panel XY,ZY,XZ from a snapshot file";
 
+string cvsid="$Id$";
+
+
 
 
 #define MAXTICKS  32
@@ -70,13 +73,14 @@ local string xlabel, ylabel, zlabel;
 local string visib, psize, color;
 local btiproc vfunc;
 local btrproc pfunc, cfunc;
-local string frame;
 local bool fillcircle;
 local bool formal;
 local bool nobox;
 local real xbox[3], ybox[3], zbox[3];
 local real xrange[3], yrange[3], zrange[3], crange[3];
 local int  ix, iy, iz;
+local int frameno;
+local string frame;
 
 /*
  * Data read from input file.
@@ -101,7 +105,6 @@ local bool scansnap(void);
 nemo_main()
 {
     permanent bool first=TRUE;
-    int frameno;
 
     setparams();
     instr = stropen(input, "r");
@@ -111,7 +114,6 @@ nemo_main()
 #ifdef COLOR
     setcolors();
 #endif
-    frameno = 0;	/* BUG for nx,ny>1: each window counts as a frame */
     ix = 0;		/* top left corner */
     iy = 0;		/* if nx>1 and/or ny> 1 */
     while (scansnap()) {
@@ -125,16 +127,11 @@ nemo_main()
                 } 
 	    }
 	}
-	if (frameno == 0 || ! trakflag)
+	if (frameno == 0)
 	    plotbox();
 	plltype(1, 0);
 	plotsnap();
-#ifdef HACKTRACK
-	if (frameno == 0)
-	    plottrack();
-#endif
-	if (frame)
-	    scrdump(frameno);
+
 	frameno++;
 
 	/* the remainder is to keep track of the sub-window on the page */
@@ -162,9 +159,7 @@ nemo_main()
 
 setparams()
 {
-    trakflag = (strncmp(tail(getargv0()), "trak", 4) == 0);
-    if (hasvalue("trak"))       /* override name of executable */
-        trakflag = getbparam("trak");
+    trakflag = FALSE;
     input = getparam("in");
     times = getparam("times");
 
@@ -202,10 +197,6 @@ setparams()
     color = getparam("color");
     setrange(crange, getparam("crange"));
 #endif
-    if (hasvalue("frame"))
-        frame = getparam("frame");
-    else
-        frame = NULL;
 }
 
 setrange(real *rval, string rexp)
@@ -559,19 +550,3 @@ real ytrans( real y )
     return ybox[0] + ybox[2] * (y - yrange[0]) / yrange[2];
 }
 
-scrdump(frameno)
-int frameno;
-{
-    char s[64];
-
-#if 1
-    /* new method: let yapp figure it out how to make movie frames */
-    sprintf(s, "%s.%d", frame, frameno);
-    pl_screendump(s);
-#else
-    /* Old method: suntools only */
-    sprintf(s, "screendump %s.%d", frame, frameno);
-    dprintf(0,"%s\n",s);
-    system(s);
-#endif
-}
