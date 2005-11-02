@@ -1,0 +1,36 @@
+.TH CCDMERGE 1NEMO "1 November 2005"
+.SH NAME
+ccdmerge \- merge all input images into one big cube
+.SH SYNOPSIS
+\fBccdmerge\fP [parameter=value]
+.SH DESCRIPTION
+\fBccdmerge\fP merges all the images in an input file into a single large
+image cube.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input image file, 
+Individual images can be cubes also.
+No default. 
+.TP 20
+\fBout=\fP
+Output image cube file. 
+No default.
+.SH CAVEAT
+ It uses a conservative approach by in a single read
+to read in all input images, to make it easy to allocate
+the output cube. It is therefore every memory intensive,
+since it needs twice the memory for the cube in total.
+.SH SEE ALSO
+image(5NEMO)
+.SH FILES
+src/image/trans/ccdmerge.c - source
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+1-nov-2005	V0.1 Created	PJT
+.fi
