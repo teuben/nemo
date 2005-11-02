@@ -86,6 +86,10 @@ snapplot:  snapplot.c
 	$(CC) $(CFLAGS) -o snapplot snapplot.c \
 		$(NEMO_LIBS) $(YAPPLIB) $(EL) -lm
 
+snapplot3:  snapplot3.c
+	$(CC) $(CFLAGS) -o snapplot3 snapplot3.c \
+		$(NEMO_LIBS) $(YAPPLIB) $(EL) -lm
+
 snapplot_cg:  snapplot.c
 	$(CC) -DCOLOR $(CFLAGS) -o snapplot_cg snapplot.c \
 		$(NEMO_LIBS) $(YAPPLIB) $(EL) -lm
