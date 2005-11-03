@@ -1,23 +1,42 @@
 .TH CSG 1NEMO "3 November 2005"
 .SH NAME
-CGS\-  Collisionless Galactic Simulator code
+CGS, runCGS\-  Collisionless Galactic Simulator code
 .SH SYNOPSIS
-\fBgalaxy\fP 
+\fBCGS\fP 
+.PP
+\fBrunCGS\fP  [parameter=value]
 .SH DESCRIPTION
-\fICGS\fP  (Collisionless Galactic Simulator) is an adaption, by Michele Trenti,
-of the van Albada spherical harmonics code as presented in van Albada (1982).
+\fICGS\fP  (Collisionless Galactic Simulator) is an improved version, written
+by Michele Trenti, of a spherical harmonics Particle-Mesh code as presented originally 
+in van Albada (1982). The radial grid is adaptive, and keeps constant mass shells.
+.PP
+The code is highly suitable to evolve quasi-spherical smooth initial condition.
 .PP
 The code consists of an original (fortran based) executable, plus a NEMO style
-wrapper. 
+wrapper, named \fBrunCGS\fP
+.SH PARAMETER
+There are the NEMO command line parameters:
+.TP 24
+\fBin=\fP\fIfile\fP
+Input data is read from \fIfile\fP, which must be a structured binary file.
+If left blank, it is assumed that the (plummer) flag parameter is set to
+1 or 2. Note that masses are ignored.
+.TP
+\fBout=\fP\fIfile\fP
+Output data, in snapshot format.
+
 .SH FILES
 The fortran executable works from files with a fixed name. To run large
 sets of simulations, a simple frontend, such as the NEMO one, can be
 useful.
 .nf
 .ta +2i
-PARAMETER.DAT	basic input parameters
+PARAMETER.DAT	basic input parameters (see below for details)
+
 initPOS.dat	input positions if PLUMMER INIT CONDITION FLAG=3
 initVEL.dat	input velocities if PLUMMER INIT CONDITION FLAG=3
+
+init_virial.dat	input virial ratio if PLUMMER INIT CONDITION FLAG=2
 
 fort.2		van Albada's output
 fort.11		lagrangian radii vs time
@@ -79,6 +98,11 @@ The standard benchmark is 40000 particles for 832 steps:
 P4/1.6	325.856u  0.328s 6:28.73 83.9% (g77 3.2.3)
 P4/1.5	292.722u 8.140s 10:27.79 47.9% (gfortran 4.0.1)
 .fi
+.SH UNITS
+Although all particles are equally massive (by the nature of the code),
+the total mass of the system can be choosen as an input parameter. The
+gravitation constant is 4.4971, which is appropriate for a galactic
+scale system where the units ... (see also \fIunits(5NEMO)\fP).
 .SH SEE ALSO
 quadcode(1NEMO), snapshot(5NEMO)
 .PP
@@ -92,5 +116,6 @@ Michele Trenti & Tjeerd van Albada (NEMO's adaptation: Peter Teuben)
 .SH HISTORY
 .nf
 .ta +1i +4i
+2003		original version		M. Trenti & T.van Albada
 3-nov-05	V0.1  alpha release testing	PJT
 .fi
