@@ -6,12 +6,14 @@ snapplot3 \- display an N-body snapshot file in a 3-panel XY-YZ-XZ display
 \fBsnapplot3 in\*e\fPsnap-file [parameter\*evalue] .\|.\|.
 .SH DESCRIPTION
 \fIsnapplot3\fP plots a sequence of frames from a
-standard N-body snapshot file on a \fIyapp(5NEMO)\fP display device,
-and plots 3 panels per page in the special cube-foldout XY-ZY-XZ.
+N-body snapshot file on a \fIyapp(5NEMO)\fP display device,
+and plots 3 panels per page in the special cube-foldout XY-ZY-XZ:
+the lower left box contains the XY view, to its right the ZY view,
+and to the top the XZ view. It is possible to make the XY box a
+different size, at the cost (or benefit) of the other ZY and XZ views.
 .PP
-Arbitrary (algebraic) transformations from particle coordinates to
-plotting coordinates may be specified; the visibility, point type,
-and color may be controled in the same way.
+This program is derived from \fIsnapplot(1NEMO)\fP and therefore shares
+many of its keywords.
 .SH PARAMETERS
 The following parameters are recognized; they may be given in any order.
 .TP 24
@@ -84,6 +86,15 @@ Range of colors that should be mapped. Below and above these ranges
 the \fIyapp(3NEMO)\fP plotting layer may determine the visibility
 of the points.
 The default range is \fB0:1\fP.
+.SH EXAMPLE
+Although the default is 3 equal size panels, for a detailed look at
+disk galaxies the following example gives more resolution in the Z
+direction, but a larger view of the XY plane:
+.nf
+  % mkexpdisk out=disk1 nbody=10000
+  % gyrfalcON in=disk1 out=disk1.out tstop=1 step=0.1     (takes 8" on a 1.6GHz class pentium4)
+  % snapplot3 disk1.out xbox=1:16 ybox=1:16 zbox=16.5:19.5 zrange=-0.2:0.2 nzticks=3 
+.fi
 .SH SEE ALSO
 snapplot(1NEMO), bodytrans(1NEMO), snapshot(5NEMO).
 .SH AUTHOR
