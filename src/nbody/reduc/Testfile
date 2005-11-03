@@ -1,5 +1,5 @@
 DIR = src/nbody/reduc
-BIN = snapplot snapdiagplot snapplotv snapmradii radprof real snapfit snapprint
+BIN = snapplot snapplot3 snapdiagplot snapplotv snapmradii radprof real snapfit snapprint
 NEED = $(BIN) hackcode1 mkplummer tabplot snapfour snapgrid snaprotate
 
 help:
