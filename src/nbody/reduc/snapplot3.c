@@ -58,7 +58,7 @@ string defv[] = {
     "color_table=\n		  specify new color table to use",
     "crange=0:1\n                 range in colors to map",
 #endif
-    "VERSION=0.1\n		  2-nov-05 PJT",
+    "VERSION=0.2\n		  2-nov-05 PJT",
     NULL,
 };
 
@@ -99,6 +99,16 @@ local real *phaseptr = NULL;
 local real *phiptr = NULL;
 local real *accptr = NULL;
 local real *auxptr = NULL;
+
+/* Layout:
+ *   BOX3  N/A
+ *   BOX1  BOX2
+ *
+ * Variables labeled 1,2,3 belong to box 1,2,3
+ *                   x,y,z belong to the plotted x,y,z variable
+ */
+
+
 
 real xtrans1(real), ytrans1(real), xtrans2(real), ytrans2(real), xtrans3(real), ytrans3(real);
 
@@ -172,6 +182,28 @@ setparams()
     setrange(ybox, getparam("ybox"));
     setrange(zbox, getparam("zbox"));
 
+    if (hasvalue("xticks"))
+      setticks(xticks, &nxticks, getparam("xticks"));
+    else {
+      xticks[0] = xrange[0];
+      xticks[1] = xrange[1];
+      nxticks = - getiparam("nxticks");
+    } 
+    if (hasvalue("yticks"))
+      setticks(yticks, &nyticks, getparam("yticks"));
+    else {
+      yticks[0] = yrange[0];
+      yticks[1] = yrange[1];
+      nyticks = - getiparam("nyticks");
+    } 
+    if (hasvalue("zticks"))
+      setticks(zticks, &nzticks, getparam("zticks"));
+    else {
+      zticks[0] = zrange[0];
+      zticks[1] = zrange[1];
+      nzticks = - getiparam("nzticks");
+    } 
+    
 #ifdef COLOR
     color = getparam("color");
     setrange(crange, getparam("crange"));
@@ -348,8 +380,6 @@ bool scansnap(void)
 plotbox()
 {
     char msg[128];
-    int nticks;
-    real ticks[MAXTICKS];
 
     if (formal) {
 	formalaxis = TRUE;
@@ -360,35 +390,20 @@ plotbox()
 	yaxisvar.szlab = 0.40;
     }
     if (! nobox) {
-        if (hasvalue("xticks"))
-	    setticks(ticks, &nticks, getparam("xticks"));
-        else {
-	    ticks[0] = xrange[0];
-	    ticks[1] = xrange[1];
-	    nticks = - getiparam("nxticks");
-	} 
-        if (hasvalue("yticks"))
-	    setticks(ticks, &nticks, getparam("yticks"));
-	else {
-	    ticks[0] = yrange[0];
-	    ticks[1] = yrange[1];
-	    nticks = - getiparam("nyticks");
-	} 
-	
-        xaxis(xbox[0], ybox[0], xbox[2], ticks, nticks, xtrans1, xlabel);
-	xaxis(xbox[0], ybox[1], xbox[2], ticks, nticks, xtrans1, NULL);
-        yaxis(xbox[0], ybox[0], ybox[2], ticks, nticks, ytrans1, ylabel);
-	yaxis(xbox[1], ybox[0], ybox[2], ticks, nticks, ytrans1, NULL);
+        xaxis(xbox[0], ybox[0], xbox[2], xticks, nxticks, xtrans1, xlabel);
+	xaxis(xbox[0], ybox[1], xbox[2], xticks, nxticks, xtrans1, NULL);
+        yaxis(xbox[0], ybox[0], ybox[2], yticks, nyticks, ytrans1, ylabel);
+	yaxis(xbox[1], ybox[0], ybox[2], yticks, nyticks, ytrans1, NULL);
 
-        xaxis(zbox[0], ybox[0], zbox[2], ticks, nticks, xtrans2, zlabel);
-	xaxis(zbox[0], ybox[1], zbox[2], ticks, nticks, xtrans2, NULL);
-        yaxis(zbox[0], ybox[0], ybox[2], ticks, nticks, ytrans2, NULL);
-	yaxis(zbox[1], ybox[0], ybox[2], ticks, nticks, ytrans2, NULL);
+        xaxis(zbox[0], ybox[0], zbox[2], zticks, nzticks, xtrans2, zlabel);
+	xaxis(zbox[0], ybox[1], zbox[2], zticks, nzticks, xtrans2, NULL);
+        yaxis(zbox[0], ybox[0], ybox[2], yticks, nyticks, ytrans2, "");
+	yaxis(zbox[1], ybox[0], ybox[2], yticks, nyticks, ytrans2, NULL);
 
-        xaxis(xbox[0], zbox[0], xbox[2], ticks, nticks, xtrans3, NULL);
-	xaxis(xbox[0], zbox[1], xbox[2], ticks, nticks, xtrans3, NULL);
-        yaxis(xbox[0], zbox[0], ybox[2], ticks, nticks, ytrans3, zlabel);
-	yaxis(xbox[1], zbox[0], ybox[2], ticks, nticks, ytrans3, NULL);
+        xaxis(xbox[0], zbox[0], xbox[2], xticks, nxticks, xtrans3, "");
+	xaxis(xbox[0], zbox[1], xbox[2], xticks, nxticks, xtrans3, NULL);
+        yaxis(xbox[0], zbox[0], ybox[2], zticks, nzticks, ytrans3, zlabel);
+	yaxis(xbox[1], zbox[0], ybox[2], zticks, nzticks, ytrans3, NULL);
 
 	if (! formal) {
 	    sprintf(msg, "File: %s", input);
@@ -533,11 +548,6 @@ plotsnap()
 }
 
 
-
-/* Layout:
- *   BOX3  N/A
- *   BOX1  BOX2
- */
 
 /* lower left box */
 real xtrans1( real x )
