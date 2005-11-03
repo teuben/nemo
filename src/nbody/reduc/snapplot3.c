@@ -22,30 +22,37 @@
 string defv[] = {
     "in=???\n                     input file name",
     "times=all\n		  range of times to plot",
+
     "xvar=x\n			  x-axis plotting variable",
     "xlabel=\n			  x-axis label; defaults to xvar",
     "xrange=-2.0:2.0\n		  x-axis variable range",
+
     "yvar=y\n			  y-axis plotting variable",
     "ylabel=\n			  y-axis label; defaults to yvar",
     "yrange=-2.0:2.0\n		  y-axis variable range",
-    "zvar=y\n			  y-axis plotting variable",
+
+    "zvar=z\n			  y-axis plotting variable",
     "zlabel=\n			  y-axis label; defaults to yvar",
     "zrange=-2.0:2.0\n		  y-axis variable range",
 
     "visib=1\n			  determine visibility of points",
     "psize=0\n			  point type and size",
     "fill_circle=t\n		  fill points plotted as circles",
-    "formal=false\n		  produce publication-style plots",
+    "formal=false\n		  produce more publication-style plots",
+    "nobox=false\n		  draw axis, ticks, labels",
+
     "xbox=2.0:10.0\n		  extent of x-y frame in x direction",
     "ybox=2.0:10.0\n		  extent of x-y frame in y direction",
-    "zbox=10.0:18.0\n		  extent of zy and xz frame in x resp. y direction",
-    "nobox=false\n		  draw axis, ticks, labels",
+    "zbox=11.0:19.0\n		  extent of zy and xz frame in x resp. y direction",
+
     "nxticks=7\n		  number of ticks on x axis",
     "nyticks=7\n		  number of ticks on y axis",
     "nzticks=7\n		  number of ticks on y axis",
+
     "xticks=\n                    x-tickmark positions, if not default",
     "yticks=\n		          y-",
     "zticks=\n		          z-",
+
 #ifdef COLOR
     "color=0\n			  determine color of points",
     "color_table=\n		  specify new color table to use",
@@ -78,9 +85,8 @@ local bool formal;
 local bool nobox;
 local real xbox[3], ybox[3], zbox[3];
 local real xrange[3], yrange[3], zrange[3], crange[3];
-local int  ix, iy, iz;
-local int frameno;
-local string frame;
+local int nxticks, nyticks, nzticks;
+local real xticks[MAXTICKS], yticks[MAXTICKS], zticks[MAXTICKS];
 
 /*
  * Data read from input file.
@@ -94,7 +100,7 @@ local real *phiptr = NULL;
 local real *accptr = NULL;
 local real *auxptr = NULL;
 
-real xtrans(real), ytrans(real), ztrans(real);
+real xtrans1(real), ytrans1(real), xtrans2(real), ytrans2(real), xtrans3(real), ytrans3(real);
 
 local bool scansnap(void);
 
@@ -114,45 +120,18 @@ nemo_main()
 #ifdef COLOR
     setcolors();
 #endif
-    ix = 0;		/* top left corner */
-    iy = 0;		/* if nx>1 and/or ny> 1 */
     while (scansnap()) {
 	if (! trakflag) {
-            if (ix==0 && iy==0) {
-                if (first) {
-                    first = FALSE;
-                } else {
-    	            sleep(FRAMEDELAY);
-	            plframe();
-                } 
-	    }
+	  if (first) {
+	    first = FALSE;
+	  } else {
+	    sleep(FRAMEDELAY);
+	    plframe();
+	  } 
 	}
-	if (frameno == 0)
-	    plotbox();
+	plotbox();
 	plltype(1, 0);
 	plotsnap();
-
-	frameno++;
-
-	/* the remainder is to keep track of the sub-window on the page */
-#if 0
-	ix++;
-	xbox[0] += xbox[2];
-	xbox[1] += xbox[2];
-	if (ix==nxy[0]) {		/* select a new row: go down */
-	    ix=0;
-	    xbox[0] -= nxy[0]*xbox[2];
-	    xbox[1] -= nxy[0]*xbox[2];
-	    iy++;
-	    ybox[0] -= ybox[2];
-	    ybox[1] -= ybox[2];
-	    if (iy==nxy[1]) {		/* full page, need to flush graphics */
-	        iy=0;
-                ybox[0] += nxy[1]*ybox[2];
-                ybox[1] += nxy[1]*ybox[2];
-	    }
-	}
-#endif
     }
     plstop();
 }
@@ -388,9 +367,6 @@ plotbox()
 	    ticks[1] = xrange[1];
 	    nticks = - getiparam("nxticks");
 	} 
-	
-        xaxis(xbox[0], ybox[0], xbox[2], ticks, nticks, xtrans, NULL);
-	xaxis(xbox[0], ybox[1], xbox[2], ticks, nticks, xtrans, NULL);
         if (hasvalue("yticks"))
 	    setticks(ticks, &nticks, getparam("yticks"));
 	else {
@@ -398,21 +374,36 @@ plotbox()
 	    ticks[1] = yrange[1];
 	    nticks = - getiparam("nyticks");
 	} 
-        yaxis(xbox[0], ybox[0], ybox[2], ticks, nticks, ytrans,
-	      ix==0 ? ylabel : NULL);
-	yaxis(xbox[1], ybox[0], ybox[2], ticks, nticks, ytrans, NULL);
-	if (! formal && ix==0 && iy==0) {
+	
+        xaxis(xbox[0], ybox[0], xbox[2], ticks, nticks, xtrans1, xlabel);
+	xaxis(xbox[0], ybox[1], xbox[2], ticks, nticks, xtrans1, NULL);
+        yaxis(xbox[0], ybox[0], ybox[2], ticks, nticks, ytrans1, ylabel);
+	yaxis(xbox[1], ybox[0], ybox[2], ticks, nticks, ytrans1, NULL);
+
+        xaxis(zbox[0], ybox[0], zbox[2], ticks, nticks, xtrans2, zlabel);
+	xaxis(zbox[0], ybox[1], zbox[2], ticks, nticks, xtrans2, NULL);
+        yaxis(zbox[0], ybox[0], ybox[2], ticks, nticks, ytrans2, NULL);
+	yaxis(zbox[1], ybox[0], ybox[2], ticks, nticks, ytrans2, NULL);
+
+        xaxis(xbox[0], zbox[0], xbox[2], ticks, nticks, xtrans3, NULL);
+	xaxis(xbox[0], zbox[1], xbox[2], ticks, nticks, xtrans3, NULL);
+        yaxis(xbox[0], zbox[0], ybox[2], ticks, nticks, ytrans3, zlabel);
+	yaxis(xbox[1], zbox[0], ybox[2], ticks, nticks, ytrans3, NULL);
+
+	if (! formal) {
 	    sprintf(msg, "File: %s", input);
-	    pltext(msg, xbox[0], ybox[1] + 0.4, 0.32, 0.0);
+	    pltext(msg, xbox[0], zbox[1] + 0.4, 0.32, 0.0);
 	    if (timeptr != NULL) {
 	      sprintf(msg, "Time: %8.3f", *timeptr);
-	      pltext(msg, xbox[0] + 10.0, ybox[1] + 0.4, 0.32, 0.0);
+	      pltext(msg, xbox[0] + 10.0, zbox[1] + 0.4, 0.32, 0.0);
 	    }
 	}
+
+
     } else {
 	if (! formal && timeptr != NULL) {
 	    sprintf(msg, "%.2f", *timeptr);
-	    pltext(msg, xbox[1] - 1.0, ybox[1] - 1.0, 0.24, 0.0);
+	    pltext(msg, xbox[1] - 1.0, zbox[1] - 1.0, 0.24, 0.0);
 	}
     }
 }
@@ -428,6 +419,8 @@ plotsnap()
     real t, *mp, *psp, *pp, *ap, *acp;
     int vismax, visnow, i, vis, icol;
     real psz, col, x, y, z;
+    real x1,x2,x3,y1,y2,y3;
+    bool v1,v2,v3;
     Body b;
 
     t = (timeptr != NULL ? *timeptr : 0.0);	/* get current time value   */
@@ -458,11 +451,25 @@ plotsnap()
 	    vis = (*vfunc)(&b, t, i);		/*     evaluate visibility  */
 	    vismax = MAX(vismax, vis);		/*     remember how hi to go*/
 	    if (vis == visnow) {		/*     if body is visible   */
-		x = xtrans((*xfunc)(&b, t, i));	/*       evaluate x,y coords*/
-		y = ytrans((*yfunc)(&b, t, i));
-		z = ytrans((*zfunc)(&b, t, i));
-		if (xbox[0] < x && x < xbox[1] && ybox[0] < y && y < ybox[1]) {
-		    psz = (*pfunc)(&b, t, i);	/*         eval point size  */
+	        x = (*xfunc)(&b, t, i);	        /*     evaluate x,y,z coords*/
+		y = (*yfunc)(&b, t, i);
+		z = (*zfunc)(&b, t, i);
+
+		x1 = xtrans1(x);
+		y1 = ytrans1(y);
+
+		x2 = xtrans2(z);
+		y2 = ytrans2(y);
+
+		x3 = xtrans3(x);
+		y3 = ytrans3(z);
+		
+		v1 = (xbox[0] < x1 && x1 < xbox[1] && ybox[0] < y1 && y1 < ybox[1]);
+		v2 = (zbox[0] < x2 && x2 < zbox[1] && ybox[0] < y2 && y2 < ybox[1]);
+		v3 = (xbox[0] < x3 && x3 < xbox[1] && zbox[0] < y3 && y3 < zbox[1]);
+
+		if (v1 || v2 || v3) {
+		    psz = (*pfunc)(&b, t, i);
 #ifdef COLOR
 		    col = (*cfunc)(&b, t, i);
                     col = (col - crange[0])/(crange[1] - crange[0]);
@@ -470,19 +477,52 @@ plotsnap()
 			         MAX(0.0, MIN(1.0, col));
 		    plcolor(icol);
 #endif
-		    if (psz == 0.0)
-			plpoint(x, y);
-		    else if (psz < 0.0) {
+		    if (v1) {
+		      if (psz == 0.0)
+			plpoint(x1, y1);
+		      else if (psz < 0.0) {
 			if (fillcircle)
-			    plcross(x, y, - psz);
+			    plcross(x1, y1, - psz);
                         else
-                            plcross(x, y, psz);
-		    } else if (psz > 0.0) {
+                            plcross(x1, y1, psz);
+		      } else if (psz > 0.0) {
 			if (fillcircle)
-			    plcircle(x, y, -psz);
+			    plcircle(x1, y1, -psz);
 			else
-			    plcircle(x, y, psz);
+			    plcircle(x1, y1, psz);
+		      }
 		    }
+		    if (v2) {
+		      if (psz == 0.0)
+			plpoint(x2, y2);
+		      else if (psz < 0.0) {
+			if (fillcircle)
+			    plcross(x2, y2, - psz);
+                        else
+                            plcross(x2, y2, psz);
+		      } else if (psz > 0.0) {
+			if (fillcircle)
+			    plcircle(x2, y2, -psz);
+			else
+			    plcircle(x2, y2, psz);
+		      }
+		    }
+		    if (v3) {
+		      if (psz == 0.0)
+			plpoint(x3, y3);
+		      else if (psz < 0.0) {
+			if (fillcircle)
+			    plcross(x3, y3, - psz);
+                        else
+                            plcross(x3, y3, psz);
+		      } else if (psz > 0.0) {
+			if (fillcircle)
+			    plcircle(x3, y3, -psz);
+			else
+			    plcircle(x3, y3, psz);
+		      }
+		    }
+
 		}
 	    }
 	}
@@ -491,62 +531,44 @@ plotsnap()
     plcolor(32767);				/* reset to white */
 #endif
 }
+
 
-#ifdef HACKTRACK
 
-#define X0  -0.61
-#define X1   1.22
+/* Layout:
+ *   BOX3  N/A
+ *   BOX1  BOX2
+ */
 
-#define Y0   0.1
-#define Y2  -2.5
-
-#define L0   0.05
-
-plottrack()
-{
-    int i;
-    real x, y, dx, dy;
-
-#ifdef COLOR
-    plcolor(32767);				/* reset to white */
-#endif
-    for (i = 0; i <= 128; i++) {
-	x = X0 + X1 * i / 128.0;
-	y = Y0 + Y2 * x*x;
-	if (i == 0)
-	    plmove(xtrans(y), ytrans(- x));
-	else
-	    plline(xtrans(y), ytrans(- x));
-    }
-    dx = - L0 / sqrt(1.0 + 4 * Y2*Y2 * x*x);
-    dy = 2 * Y2 * x * dx;
-    plmove(xtrans(y + 0.94*dy - 0.34*dx), ytrans(- x - 0.94*dx - 0.34*dy));
-    plline(xtrans(y), ytrans(- x));
-    plline(xtrans(y + 0.94*dy + 0.34*dx), ytrans(- x - 0.94*dx + 0.34*dy));
-    for (i = 0; i <= 128; i++) {
-	x = X0 + X1 * i / 128.0;
-	y = Y0 + Y2 * x*x;
-	if (i == 0)
-	    plmove(xtrans(- y), ytrans(x));
-	else
-	    plline(xtrans(- y), ytrans(x));
-    }
-    dx = - L0 / sqrt(1.0 + 4 * Y2*Y2 * x*x);
-    dy = 2 * Y2 * x * dx;
-    plmove(xtrans(- y - 0.94*dy + 0.34*dx), ytrans(x + 0.94*dx + 0.34*dy));
-    plline(xtrans(- y), ytrans(x));
-    plline(xtrans(- y - 0.94*dy - 0.34*dx), ytrans(x + 0.94*dx - 0.34*dy));
-}
-
-#endif
-
-real xtrans( real x )
+/* lower left box */
+real xtrans1( real x )
 {
     return xbox[0] + xbox[2] * (x - xrange[0]) / xrange[2];
 }
 
-real ytrans( real y )
+real ytrans1( real y )
 {
     return ybox[0] + ybox[2] * (y - yrange[0]) / yrange[2];
+}
+
+/* lower right box */
+real xtrans2( real x )
+{
+    return zbox[0] + zbox[2] * (x - zrange[0]) / zrange[2];
+}
+
+real ytrans2( real y )
+{
+    return ybox[0] + ybox[2] * (y - yrange[0]) / yrange[2];
+}
+
+/* uppper left box */
+real xtrans3( real x )
+{
+    return xbox[0] + xbox[2] * (x - xrange[0]) / xrange[2];
+}
+
+real ytrans3( real y )
+{
+    return zbox[0] + zbox[2] * (y - zrange[0]) / zrange[2];
 }
 
