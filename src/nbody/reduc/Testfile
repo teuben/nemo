@@ -36,6 +36,10 @@ snapplot: hack.out
 	@echo Running $@
 	$(EXEC) snapplot hack.out nxy=2,2 nxticks=3 nyticks=3 ; nemo.coverage  snapplot.c
 
+snapplot3: hack.out
+	@echo Running $@
+	$(EXEC) snapplot3 hack.out ; nemo.coverage  snapplot3.c
+
 snapplotv: hack.out
 	@echo Running $@
 	$(EXEC) snapplotv hack.out nxy=2,2 nxticks=3 nyticks=3 ; nemo.coverage snapplotv.c
