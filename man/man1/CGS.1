@@ -1,0 +1,96 @@
+.TH CSG 1NEMO "3 November 2005"
+.SH NAME
+CGS\-  Collisionless Galactic Simulator code
+.SH SYNOPSIS
+\fBgalaxy\fP 
+.SH DESCRIPTION
+\fICGS\fP  (Collisionless Galactic Simulator) is an adaption, by Michele Trenti,
+of the van Albada spherical harmonics code as presented in van Albada (1982).
+.PP
+The code consists of an original (fortran based) executable, plus a NEMO style
+wrapper. 
+.SH FILES
+The fortran executable works from files with a fixed name. To run large
+sets of simulations, a simple frontend, such as the NEMO one, can be
+useful.
+.nf
+.ta +2i
+PARAMETER.DAT	basic input parameters
+initPOS.dat	input positions if PLUMMER INIT CONDITION FLAG=3
+initVEL.dat	input velocities if PLUMMER INIT CONDITION FLAG=3
+
+fort.2		van Albada's output
+fort.11		lagrangian radii vs time
+fort.12		lagrangian radii vs time
+fort.13		radial and tangential velocity dispersions
+fort.14		total radial and tangential kinetic energy
+fort.16		inertia tensor eigenvalues vs. time
+fort.17		ellipticity ratios b/a and c/a vs. time
+fort.18 	density computed over the radial grid vs. time
+fort.19 	time, angular momentum components, and mean shape parameter or orbits
+fort.20 	time, total energy, virial ratio -2K/W, total angular momentum
+fort.28		same as fort.18, but for bound particles
+fort.33		same as fort.13, but for bound particles
+fort.34		same as fort.14, but for bound particles
+
+initconPL.dat
+POS@EOS.DAT
+VEL@EOS.DAT
+
+.fi
+.PP
+Sample \fIPARAMETER.DAT\fP initialization file:
+.nf
+ 80                     !RADIAL GRID NUMBER
+ 40000                  !NUMBER OF PARTICLES
+ 1000                   !NUMBER OF STEPS (MAX)
+ 2000                   !FREQUENCY OF CMSS CALL
+ 50                     !FREQUENCY OF DIAGNOSTIC CALL
+ 0.0025                 !TIME STEP
+ 0.                     !START TIME OF SIMULATION
+ 4.                     !END TIME OF SIMULATION
+ 1.                     !TOTAL MASS OF GALAXY
+ 1                      !PLUMMER INIT CONDITION FLAG (1=true)
+ 0.01                   !MAX ALLOWED DT --> MDT
+ 0.001                  !MIN ALLOWED DT
+.fi
+.PP
+The format of the ASCII \fIgalaxy.ini\fP (and also \fIgalaxy.fin\fP) files
+is:
+.nf
+    Time Mass Nbody
+    X_1 Y_1 Z_1 VX_1 VY_1 VZ_1
+    ....
+    X_n Y_n Z_n VX_n VY_n VZ_n
+.fi
+The \fIgalaxy.fin\fP can also be used for a restart. Note that the timestep
+is one more then the last requested time, to prevent that the 
+\fIgalaxy.res\fP file will contain a datadump on the restart timestep twice.
+.SH COMPILATION
+Note that the maximum grid size and maximum amount of particles are hardcoded
+during compilation. See comments in \fBrjinclude.h\fP how to change the
+maximum grid size and the parameter \fBmbod\fP in
+\fBgalaxy.f\fP for the maximum particle number that can be used.
+
+.SH BENCHMARKS
+The standard benchmark is 40000 particles for 832 steps:
+.nf
+.ta +1i
+P4/1.6	325.856u  0.328s 6:28.73 83.9% (g77 3.2.3)
+P4/1.5	292.722u 8.140s 10:27.79 47.9% (gfortran 4.0.1)
+.fi
+.SH SEE ALSO
+quadcode(1NEMO), snapshot(5NEMO)
+.PP
+.nf
+Trenti, M. (2005), PhD Thesis, Pisa
+van Albada, T.S. (1982), MNRAS, 201, 939. \fIDissipationless galaxy formation and the R to the 1/4-power law\fP 
+van Albada, T.S. & van Gorkum, J.H. (1977) A&A,54,121. \fIExperimental Stellar Dynamics for Systems with Axial Symmetry\fP
+.fi
+.SH AUTHOR
+Michele Trenti & Tjeerd van Albada (NEMO's adaptation: Peter Teuben)
+.SH HISTORY
+.nf
+.ta +1i +4i
+3-nov-05	V0.1  alpha release testing	PJT
+.fi
