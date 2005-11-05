@@ -1,6 +1,6 @@
 .TH CSG 1NEMO "3 November 2005"
 .SH NAME
-CGS, runCGS\-  Collisionless Galactic Simulator code
+CGS, runCGS\-  Collisionless Galactic Simulator N-body code
 .SH SYNOPSIS
 \fBCGS\fP 
 .PP
@@ -9,35 +9,104 @@ CGS, runCGS\-  Collisionless Galactic Simulator code
 \fICGS\fP  (Collisionless Galactic Simulator) is an improved version, written
 by Michele Trenti, of a spherical harmonics Particle-Mesh code as presented originally 
 in van Albada (1982). The radial grid is adaptive, and keeps constant mass shells.
+The angular dependance of the force is expressed in terms of Legendre polynomials.
 The code is highly suitable to evolve quasi-spherical smooth initial condition.
 .PP
+The code computes the potential on an (adaptive) grid, by expanding the density
+in spherical harmonics. Forces are then computed by numerical differentiation,
+and particles are advanced by a fixed (???) time-step using a leap-frog scheme.
+.PP
 The code consists of an original (fortran based) executable, \fBCGS\fP, 
-plus a NEMO style wrapper, named \fBrunCGS\fP
+plus a NEMO style wrapper, named \fBrunCGS\fP. Since the 
+fortran executable assumes files with a fixed name, it is somewhat cumbersome
+to run multiple sets of simulations with different input.
+A simple frontend organizes a directories structure and
+places their output in these run directories.
+
 .SH PARAMETER
-There are the NEMO command line parameters:
+There are the NEMO command line parameters for \fBrunCGS\fP:
 .TP 24
+\fBoutdir=\fP\fIdirectory\fP
+Output directory. Must not exist.
+.TP
+\fBnbody=\fP
+Number of bodies. Only needed if a model from scratch when
+for \fBflag=1\fP (see below). This parameter is limited
+by the compiled NPMAX parameter in the fortran code (see below).
+[Default: 40000]
+.TP
+\fBnrad=\fP
+Number of radial zones. This number is limited by the
+compiled NRGMAX parameter (see below). ??? what about angular, not as parameter ???
+[Default: 80]
+.TP
+\fBmaxstep=\fP
+Maximum number of integration steps.
+[Default: 1000]
+.TP
+\fBdt=\fP
+Initial integration step.
+[Default: 0.025]
+.TP
+\fBtstart=\fP
+Start time of integration.
+[Default: 0.0]
+.TP
+\fBtstop=\fP
+Stop time of integration.
+[Default: 4.0]
+.TP
+\fBdtmin=\fP
+Minimum allowed integration step.
+[Default: 0.001]
+.TP
+\fBdtmax=\fP
+Maximum allowed integration step.
+[Default: 0.01]
+.TP
+\fBflag=\fP
+Input Plummer flag. 1=plummer sphere from scratch.  Needs \fBnbody=\fP.
+2=something else from scratch, also needs \fBvirial=\fP
+3=initial conditions from a POS and VEL file. 
+[Default: 1]
+.TP
+\fBmass=\fP
+Total mass of the system.
+[Default: 1.0]
+.TP
+\fBvirial=\fP
+Initial virial ratio for \fBflag=2\fP.
+[Default: 1.0]
+.TP 
+\fBfreqcmss=\fP
+Frequency of CMSS (center of mass adjustment) call. ** review this name **
+[Default: 2000]
+.TP
+\fBfreqdiag=\fP
+Frequency of diagnostics call.** review this name **
+[Default: 50]
+.TP
 \fBin=\fP\fIfile\fP
 Input data is read from \fIfile\fP, which must be a structured binary file.
 If left blank, it is assumed that the (plummer) flag parameter is set to
-1 or 2. Note that masses are ignored.
+1 or 2. Note that masses are ignored. Files must be given in an absolute
+directory notation, no relative patchs.
 .TP
-\fBout=\fP\fIfile\fP
-Output data, in snapshot format.
-
+\fBexe=\fP\fIexecutable\fP
+Name of the (fortran) executable. Needs to be in your search $PATH, or else
+the full absolute path needs to be supplied here.
+[Default: CGS.exe]
 .SH FILES
-The fortran executable works from files with a fixed name. To run large
-sets of simulations, a simple frontend, such as the NEMO one, can be
-useful.
 .nf
 .ta +2i
 PARAMETER.DAT	basic input parameters (see below for details)
 
-initPOS.dat	input positions if PLUMMER INIT CONDITION FLAG=3
-initVEL.dat	input velocities if PLUMMER INIT CONDITION FLAG=3
+initPOS.dat	input positions if \fBflag=3\fP
+initVEL.dat	input velocities if \fBflag=3\fP
 
-init_virial.dat	input virial ratio if PLUMMER INIT CONDITION FLAG=2
+init_virial.dat	input virial ratio if \fBflag=2\fP
 
-fort.2		van Albada's output
+fort.2		various diagnostics output
 fort.11		lagrangian radii vs time
 fort.12		lagrangian radii vs time
 fort.13		radial and tangential velocity dispersions
@@ -57,52 +126,58 @@ VEL@EOS.DAT
 
 .fi
 .PP
-Sample \fIPARAMETER.DAT\fP initialization file:
+Sample \fIPARAMETER.DAT\fP initialization file (the default benchmark):
 .nf
- 80                     !RADIAL GRID NUMBER
- 40000                  !NUMBER OF PARTICLES
- 1000                   !NUMBER OF STEPS (MAX)
- 2000                   !FREQUENCY OF CMSS CALL
- 50                     !FREQUENCY OF DIAGNOSTIC CALL
- 0.0025                 !TIME STEP
- 0.                     !START TIME OF SIMULATION
- 4.                     !END TIME OF SIMULATION
- 1.                     !TOTAL MASS OF GALAXY
- 1                      !PLUMMER INIT CONDITION FLAG (1=true)
- 0.01                   !MAX ALLOWED DT --> MDT
- 0.001                  !MIN ALLOWED DT
+.ta +1.5i
+ 80				!RADIAL GRID NUMBER
+ 40000				!NUMBER OF PARTICLES
+ 1000				!NUMBER OF STEPS (MAX)
+ 2000				!FREQUENCY OF CMSS CALL
+ 50				!FREQUENCY OF DIAGNOSTIC CALL
+ 0.0025				!TIME STEP
+ 0.				!START TIME OF SIMULATION
+ 4.				!END TIME OF SIMULATION
+ 1.				!TOTAL MASS OF GALAXY
+ 1				!PLUMMER INIT CONDITION FLAG (1=true)
+ 0.01				!MAX ALLOWED DT --> MDT
+ 0.001				!MIN ALLOWED DT
 .fi
 .SH COMPILATION
 Note that various parameters (maximum grid size, maximum number of particles)
 are hardcoded during compilation, though easily changed in the right file:
 .nf
-.ta +1i +1.5i
+.ta +1i +1.5i +2i
 common.blk:	parameter(NPMAX=2000000)	Max number of particles
 common.blk:	parameter(NRGMAX=501)		Max number of radial grids
-common.blk:	parameter(LMAX=7)		Legendre Polynomials
-common.blk:	parameter(NCE=28)		Max number of Spherical Harmonics Coefficients
+common.blk:	parameter(LMAX=7)        	Legendre Polynomials
+common.blk:	parameter(NCE=28)        	Max number of Spherical Harmonics Coefficients
 
-com_DF.blk:	parameter(NBIN=50)		Number of bins for distribution function (E)
-com_DF.blk:	parameter(NBINJ=20)		Number of bins for distribution function (J)
-com_DF.blk:	PARAMETER(EMIN=-35.)		Boundary in E
-com_DF.blk:	PARAMETER(EMAX=1.)		Boundary in E
+com_DF.blk:	parameter(NBIN=50)       	Number of bins for distribution function (E)
+com_DF.blk:	parameter(NBINJ=20)       	Number of bins for distribution function (J)
+com_DF.blk:	PARAMETER(EMIN=-35.)      	Boundary in E
+com_DF.blk:	PARAMETER(EMAX=1.)      	Boundary in E
 
 .fi
 .SH BENCHMARKS
-The standard benchmark is 40000 particles for 832 steps:
+The standard benchmark is 40000 particles and runs for 832 steps. The user CPU is listed (in sec)
+in the 2nd columnx
 .nf
 .ta +1i
-P4/1.6	325.856u  0.328s 6:28.73 83.9% (g77 3.2.3)
-P4/1.6	292.722u 8.140s 10:27.79 47.9% (gfortran 4.0.1)
-P4/1.6	195.908u 0.832s 3:58.91 82.3% (intel 8.1)
+P4/1.6	325.856 (g77 3.2.3)
+P4/1.6	292.722 (gfortran 4.0.1)
+P4/1.6	195.908 (intel 8.1)
+AMD64/	130.252 (g77 3.4.2)
+G5/1.6	218.47u (g77 3.5.0)
 .fi
 .SH UNITS
 Although all particles are equally massive (by the nature of the code),
 the total mass of the system can be choosen as an input parameter. The
 gravitation constant is 4.4971, which is appropriate for a galactic
-scale system where the units ... (see also \fIunits(5NEMO)\fP).
+scale system where the units (see also \fIunits(5NEMO)\fP) are
+10^11 solar mass, 10 kpc and 10^8 years. This gives a unit of velocity
+of about 97.8 km/s
 .SH SEE ALSO
-quadcode(1NEMO), snapshot(5NEMO)
+scfm(1NEMO), quadcode(1NEMO), snapshot(5NEMO)
 .PP
 .nf
 Trenti, M. (2005), PhD Thesis, Pisa
@@ -113,7 +188,7 @@ van Albada, T.S. & van Gorkum, J.H. (1977) A&A,54,121. \fIExperimental Stellar D
 Michele Trenti & Tjeerd van Albada (NEMO's adaptation: Peter Teuben)
 .SH HISTORY
 .nf
-.ta +1i +3i
-2003		original version		M. Trenti & T.van Albada
+.ta +0.5i +3i
+2003	original version		M. Trenti & T.van Albada
 3-nov-05	V0.1  alpha release testing	PJT
 .fi
