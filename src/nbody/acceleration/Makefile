@@ -18,7 +18,9 @@ SRCDIR = $(NEMO)/src/nbody/acceleration
 help:
 	@echo NEMO V2.2 NEMO/src/nbody/acceleration
 
-install:  .install_lib
+#install:  .install_lib
+install:  
+	@echo This directory is deprecated. See src/orbit/potential/acceleration.cc
 
 .install_lib: $(OBJFILES)
 	ar ruv $(L) $?
