@@ -1,0 +1,80 @@
+
+
+Presentation :
+===============
+
+Since September 2004, run-Time Manipulators have been added in Walter
+Dehnen's gyrfalcON  simulation program (see $NEMO/usr/dehnen/falcON). 
+They are functions (in factC++ classes) that operate on the snapshot
+data and are called in gyrfalcON after every complete
+blockstep. Run-Time Manipulators are loaded at run-time.
+ 
+ Glnemo manipulator transform gyrfalcON simulation program in a 
+glnemo server allowing real time 3D rendering of the running gyrfalcON
+simulation via the glnemo program. (see $NEMOSRC/nbody/glnemo). 
+
+ There is almost no speed impact (< 1%) on the running gyrfalcON
+simulation while glnemo is connected and is getting data from it. (True only if
+gyrfalcON and glnemo are started on a different host).
+
+Compilation :
+==============
+
+ to compile the manipulator, you need NEMO version >= 3.2.4. By
+default, we use $NEMO/usr/dehnen/falcON compiling treepath, but it can
+be changed by modifying 'GYRFALCON' variable in the Makefile.
+
+ - to compile enter:
+ make
+
+ - to install:
+ make install
+
+ 
+HOW to use:
+===========
+
+ - from the simulation host:
+   - - - - - - - - - - - - -
+ start gyrfalcON program as usual, and add the following parameter: 
+ manipname=glnemo
+
+
+ - from the glnemo rendering host:
+   - - - - - - - - - - - - - - - - 
+ start glnemo program as usual, and add the following parameter:
+ server=host_running_gyrfalcON
+
+
+EXAMPLE :
+=========
+
+    we assume that the user have 2 Hosts. On the first one, called
+node1, we will run gyrfalcON program, on the other one called node2,
+we will run glnemo program. (in case of you only have one host,
+gyrfalcON and glnemo will be run on the same machine).
+
+  a) create some initial conditions or use your own.
+
+   mkexpdisk out=disk1 nbody=50000
+
+  b) start gyrfalcON (from node1)
+  
+   ( !!! gyrfalcON environment MUST be loaded: source $NEMO/usr/dehnen/falcON/falcON_start)
+
+   gyrfalcON in=disk1 out=disk1.out step=100 manipname=glnemo  
+
+  c) start glnemo (from node2)
+
+   glnemo server=node1
+
+   [if you run both gyrfalcON and glnemo on the same box, start glnemo
+as following:  glnemo server=localhost]
+
+   you whould see in glnemo's windows, the particles of the running
+simulation from node1. In order to get in real time the data of the
+simulation, press key 'p' in the glnemo's windows, or click on the
+arrow button from the glnemo's GUI.
+
+
+
