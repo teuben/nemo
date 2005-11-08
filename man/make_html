@@ -19,10 +19,7 @@ else
   if (X$1 == X-h || X$1 == X--h || X$1 == X-help || X$1 == X--help) then
     echo "Usage $0 [public man_html directory for WWW  site]"
     echo "Examples: (both scp and cp are supported)"
-    echo "  $0 /apus1/teuben/www/nemo/man_html"
-    echo "  $0 /n/apus1/teuben/www/nemo/man_html"
-    echo "  $0 apus:/apus1/teuben/www/nemo/man_html"
-    echo "  $0 apus:/n/phoenix/teuben/www/man_html"
+    echo "  $0 chara:/chara/teuben/nemo-www/man_html/"
     exit 0
   endif
   set html_dir=$1
