@@ -85,7 +85,7 @@ plcommand *pl_fread(string file)
 }
 
 /* 
- * PL_RE: read lines, and execute it
+ * PL_READLINES: read lines interactively, and execute them
  */
 
 void pl_readlines(void)
@@ -100,9 +100,11 @@ void pl_readlines(void)
     cmd = readline("LAYOUT>");
     if (cmd == 0) break;
     if (strlen(cmd) == 0) continue;
+    add_history(cmd);
     if (pl_lread(cmd,&p)>0) {
       pl_exec(&p);
     }
+    free(cmd);
   }
 #else
   printf("LAYOUT> "); fflush(stdout);
