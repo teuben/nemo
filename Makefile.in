@@ -22,7 +22,7 @@ CHECKDIR1 = data inc news tmp csh \
 
 # absolute (derived) directories & files
 CHECKDIR2 = $(NEMOBIN) $(NEMOLIB) $(NEMOOBJ) \
-            $(NEMOOBJ)/bodytrans $(NEMOOBJ)/potential $(NEMOOBJ)/acc \
+            $(NEMOOBJ)/bodytrans $(NEMOOBJ)/potential $(NEMOOBJ)/acc $(NEMOOBJ)/manip \
 	    opt opt/include opt/lib opt/bin
 
 CHECKFIL2 = $(NEMO)/adm/Usage \

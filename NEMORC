@@ -51,13 +51,11 @@ setenv NEMOSRC $NEMO/src
 setenv BTRPATH .:$NEMO/obj/bodytrans
 setenv POTPATH .:$NEMO/obj/potential
 setenv ACCPATH .:$NEMO/obj/acc
-if (-e $NEMO/VERSION) then
-  setenv NEMOVER `cat $NEMO/VERSION`
-else
-  setenv NEMOVER old
-endif
+setenv MANIPPATH .:$NEMO/obj/manip:$NEMO/usr/dehnen/falcON/manip
+setenv NEMOVER `cat $NEMO/VERSION`
 
-#	? Ultrix doesn't handle MANPATH
+#   MANPATH isn't so standard as you may think....
+#	Ultrix doesn't handle MANPATH
 #	IRIX is also particular about MANPATH
 #       Linux needs to have their stuff added back in if none present
 if ($?MANPATH == 0) then
