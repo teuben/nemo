@@ -58,15 +58,15 @@ endif
 #endif
 
 #		pick another GNU compiler (this is rather astromake specific of course)
-if ($gcc) then
+if ($gcc != 0) then
    source /astromake/astromake_start
    astroload -v $gcc gcc
 endif
 
 #		pick intel compiler (ifort means >= 8.0)
 if ($intel) then
-  source /astromake/astromake_start
-  astroload intel
+  # source /astromake/astromake_start
+  # astroload intel
   setenv CC  icc
   setenv CXX icpc
   setenv F77 ifort
@@ -165,8 +165,14 @@ endif
 
 if ($falcon) then
   echo -n "Compile falcon"
-  ( cd usr/dehnen/falcON; $make nemo_bins)  >& install.falcON.log
-  if ($status) then
+  if ($intel) then
+    ( cd usr/dehnen/falcON; $make nemo_bins COMPILER=icc)  >& install.falcON.log
+    set err=$status
+  else
+    ( cd usr/dehnen/falcON; $make nemo_bins COMPILER=gcc)  >& install.falcON.log
+    set err=$status
+  endif
+  if ($err) then
      echo " ..Failed"
   else
      echo " ..OK"
@@ -180,7 +186,7 @@ if ($glnemo) then
     if ($?QTDIR == 0) then
        setenv QTDIR /usr/lib/qt-3.3
     endif
-    ( cd src/nbody/glnemo; qmake; $make ; $make install)  >& install.glnemo.log
+    ( cd src/nbody/glnemo; qmake; $make ; $make install; cd manipulators; make ; make install)  >& install.glnemo.log
   else
     echo "### Error: qmake does not exist, assuming Qt not present:"
     echo "           glnemo not built"
