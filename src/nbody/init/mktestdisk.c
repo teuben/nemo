@@ -26,13 +26,15 @@ string defv[] = {	/* DEFAULT INPUT PARAMETERS */
     "eps=0.0\n		  softening (use w/ central point) ",
     "ndisk=2048\n	  number of disk particles ",
     "ncenter=0\n	  particles used to center disk ",
-    "seed=54321\n	  usual random number seed ",
+    "seed=0\n     	  usual random number seed ",
     "headline=\n	  text headline for output ",
-    "VERSION=1.4a\n	  8-sep-01 PJT",
+    "VERSION=1.4b\n	  8-aug-05 PJT",
     NULL,
 };
 
 string usage="uniform density test-disk inside a spherical N-body";
+
+string cvsid="$Id$";
 
 local real rmin, rmax, eps;
 
@@ -61,8 +63,7 @@ void nemo_main()
  * READSPHEROID: read spheroid model from input.
  */
 
-readspheroid(name)
-string name;
+readspheroid(string name)
 {
     stream instr;
     real tsnap;
@@ -80,9 +81,7 @@ string name;
  * WRITEGALAXY: write galaxy model to output.
  */
 
-writegalaxy(name, headline)
-string name;
-string headline;
+writegalaxy(string name, string headline)
 {
     stream outstr;
     real tsnap = 0.0;
@@ -136,8 +135,7 @@ setsphprof()
     spline(&msph[NTAB], &rsph[0], &msph[0], NTAB);
 }
 
-int rankrad(x, y)
-Body **x, **y;
+int rankrad(Body **x, Body **y)
 {
     real rxsq = dotvp(Pos(*x), Pos(*x));
     real rysq = dotvp(Pos(*y), Pos(*y));
