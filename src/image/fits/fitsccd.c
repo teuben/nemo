@@ -63,11 +63,13 @@ string defv[] = {
     "blank=\n           Blank value re-substitution value?",
     "relcoords=f\n      Use relative (to crpix) coordinates instead abs",
     "axistype=0\n       Force axistype 0 (old, crpix==1) or 1 (new, crpix as is)",
-    "VERSION=4.9\n	23-nov-04 PJT",
+    "VERSION=4.9a\n	8-nov-05 PJT",
     NULL,
 };
 
 string usage = "convert (near)fits files into ccd images";
+
+string cvsid="$Id$";
 
 #define MAXPLANES 512
 
@@ -154,7 +156,7 @@ void nemo_main()
     rmax = -HUGE;
     for (k=0; k<nz; k++) {          /* loop over all/selected planes */
         p = (npl>0) ? planes[k] : k;        /* select plane number */
-        dprintf(1,"Reading plane %d\n",p);
+        dprintf(2,"Reading plane %d\n",p);
         fitsetpl(fitsfile,1,&p);
         for (j=0; j<ny; j++) {      /* loop over all rows */
             fitread(fitsfile,j,buffer);     /* read it from fits file */
@@ -175,7 +177,7 @@ void nemo_main()
 		    nbval++;
 		    *bp = bval_out;
 		  }
-		  dprintf(1,"%g %g %g %g, %d\n",*bp,fdata_min, fdata_max,fnan,nbval); 
+		  dprintf(2,"%g %g %g %g, %d\n",*bp,fdata_min, fdata_max,fnan,nbval); 
 		}
                 tmp = CubeValue(iptr,i,j,k) = *bp;
                 rmin=MIN(rmin,tmp);
