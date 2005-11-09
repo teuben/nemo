@@ -1,4 +1,4 @@
-.TH CCDPRINT 1NEMO "28 July 2002"
+.TH CCDPRINT 1NEMO "8 November 2005"
 .SH NAME
 ccdprint \- print out map values
 .SH SYNOPSIS
@@ -6,14 +6,24 @@ ccdprint \- print out map values
 \fBccdprint in=\fP\fIimage\fP [parameter=value]
 .SH DESCRIPTION
 \fBccdprint\fP prints out map values in an image. The grid is
-are specified in x, y and z independantly, and can be any
+specified in x, y and z independantly, and can be any
 integer array, including implied do loops, e.g.
-\fIix=0,10,40:50:2,90,100\fP will print out values at 
-\fIix=0,10,40,42,44,46,48,50,90,100\fP. Note that the first grid
-point is 0 by convention.
+\fIx=0,10,40:50:2,90,100\fP will print out values at 
+\fIx=0,10,40,42,44,46,48,50,90,100\fP. Note that the first grid
+point is 0 by convention in NEMO, though this program can use
+\fBoffset=1\fP to "think" like a fortran array if that is
+convenient.
+.PP
+By default the matrix is printed such
+that the bottom left corner of the output is the first pixel,
+as in (astronomical) image display. However, by setting
+\fByreverse=f\fP it can be printed with the first pixel on the
+top right. This effect can also be achieved by an appropriate
+choice of \fBy=NY-1:1:-1\fP, but the user is then required
+to know \fBNY\fP!
 .PP
 The physical coordinates can be printed out optionally, where the output
-format is controlled by the \fBnewline\fP parameter.
+format is controlled by the \fBnewline=\fP parameter.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword is also
 given:
@@ -23,8 +33,9 @@ input file, in \fIimage(5NEMO)\fP format [no default].
 .TP
 \fBx=\fIx1,x2,...\fP
 Grid coordinates in X to display. 
-If no coordinates given, all gridpoints along this axis will be selected.
-Note the first gridpoint is 0.
+If no values given, all gridpoints along this axis will be selected.
+Note the first gridpoint is 0. By default this program will thus
+display the first pixel value.
 [Default: \fB0\fP].
 .TP
 \fBy=\fIy1,y2,...\fP
@@ -68,7 +79,12 @@ not easily processed by other programs.
 Should X,Y,Z be 0- or 1- based. NEMO images use 0-based images,
 but to appease fortran users, 1-based input can be given here
 if this parameter is set to 1. Default: 0
-Appease
+.TP
+\fByreverse=t|f\fP
+Reverse printing the Y values. By default this is true, such that the
+printed layout resembles how it is normally displayed in an
+image display (at least astronomically). 
+[Default: \fBt\fP]
 .TP
 \fBpixel=t|f\fP
 Print out X,Y,Z labels in physical or pixel coordinates. By default
@@ -89,4 +105,5 @@ Peter Teuben
 8-jul-93	V1.1: added defaults 'all' for blank x=, y=, z=  	PJT
 9-jul-93	V1.2: added label=	PJT
 28-jul-02	V1.3: documented offset=, added pixel=	PJT
+8-nov-05	V1.4: added yreverse= and better handling of blank lines	PJT
 .fi
