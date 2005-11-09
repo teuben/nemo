@@ -37,6 +37,8 @@ string defv[] = {
 
 string usage = "print values at gridpoints of an image";
 
+string cvsid="$Id$";
+
 int ini_array(string key, int *dat, int ndat, int offset);
 void myprintf(string fmt, real v);
 
