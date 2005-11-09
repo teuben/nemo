@@ -8,6 +8,8 @@
  *	 14-sep-93  V1.2 Added index mode keyword offset=	pjt
  *	 14-oct-99  V1.2b fixed bug printing WCS labels		pjt
  *       28-jul-02  V1.3  allow coordinates printed as pixel (0...N-1) pjt
+ *        8-nov-05  V1.4  cleanup for prototypes, better blank line handling  pjt
+ *                        also added yreverse=
  *
  */
 
@@ -19,7 +21,7 @@
 
 string defv[] = {
 	"in=???\n  Input filename",
-	"x=0\n              Pixels in X to print",
+	"x=0\n              Pixels in X to print (0=1st pixel, leave blank for all)",
 	"y=0\n              Pixels in Y to print",
 	"z=0\n              Pixels in Z to print",
 	"scale=1.0\n        Scale factor for printout",
@@ -27,42 +29,41 @@ string defv[] = {
 	"newline=f\n        Force newline between each number?",
 	"label=\n	    Add x, y and or z labels add appropriate labels",
 	"offset=0\n         Offset (0 or 1) to index coordinates X,Y,Z",
+	"yreverse=t\n       Reverse printing Y values?",
 	"pixel=f\n          Labels in Pixel or Physical coordinates?",
-	"VERSION=1.3\n      28-jul-02 PJT",
+	"VERSION=1.4\n      8-nov-05 PJT",
 	NULL,
 };
 
 string usage = "print values at gridpoints of an image";
 
-void myprintf(string fmt,real v);
+int ini_array(string key, int *dat, int ndat, int offset);
+void myprintf(string fmt, real v);
 
 
 nemo_main()
 {
-    int     *ix, *iy, *iz, i, j, k, nx, ny, nz, nxpos, nypos, nzpos, offset;
-    bool    newline, xlabel, ylabel, zlabel, Qpixel;
-    real    f;
+    int     *ix, *iy, *iz, i, j, k, j1, nx, ny, nz, nxpos, nypos, nzpos, offset, nlcount=0;
+    bool    newline, newline1, newline2, newline3, xlabel, ylabel, zlabel, Qpixel, Qyrev;
     string  infile;			        /* file name */
     stream  instr;				/* file stream */
     imageptr iptr=NULL;			      /* allocated dynamically */
     string   fmt, label;
-    real     scale_factor, x, y, z;
-    
-    int      ini_array();
-    bool     scanopt();
+    real     scale_factor, x, y, z, f;
 
     scale_factor = getdparam("scale");
     fmt = getparam("format");
     instr = stropen (getparam("in"), "r");
     newline = getbparam("newline");
     Qpixel = getbparam("pixel");
+    Qyrev = getbparam("yreverse");
     label = getparam("label");
     xlabel = scanopt(label,"x");
     ylabel = scanopt(label,"y");
     zlabel = scanopt(label,"z");
     offset = getiparam("offset");
     if (read_image (instr,&iptr) == 0)
-    	error("Problem reading image");
+      error("Problem reading image from in=",getparam("in"));
     
     nx = Nx(iptr);	                        /* cube dimensions */
     ny = Ny(iptr);
@@ -74,28 +75,39 @@ nemo_main()
     nypos = ini_array("y",iy,ny,offset);
     nzpos = ini_array("z",iz,nz,offset);
 
-    for (k=0; k<nzpos; k++) {				/* over all planes */
+    newline1 = newline2 = newline3 = newline;
+    if (!hasvalue("x") && !hasvalue("y")){
+      if ((nz>1 && !hasvalue("z")) || nz<=1) {
+	newline1 = TRUE;
+	newline2 = FALSE;
+      }
+    }
+
+    for (k=0; k<nzpos; k++) {				/* loop over all planes */
         z = Zmin(iptr) + iz[k] * Dz(iptr);
         if (!newline && zlabel) {
             printf("plane Z = ");
 	    myprintf(fmt, Qpixel ? (real)k : z);
             printf("\n\n");
+	    nlcount += 2;
         }
-        for (j=nypos-1; j>=0; j--) {			/* over all rows */
+        for (j1=0; j1<nypos; j1++) {			/* loop over all rows */
+	    j = Qyrev ? nypos-1-j1 : j1;
             y = Ymin(iptr) + iy[j] * Dy(iptr);
             if (j==(nypos-1) && !newline && xlabel) {    /* pr. row of X coords */
-	      if (ylabel) printf(" Y\\X "); /* ? how to get correct length ? */
+	      if (ylabel) printf(" Y\\X ");     /* ? how to get correct length ? */
 	      for (i=0; i<nxpos; i++) {
 		x = Xmin(iptr) + ix[i] * Dx(iptr);
 		myprintf(fmt, Qpixel ? (real)i : x);
 	      }
 	      printf("\n\n");
+	      nlcount += 2;
             }
-            if (!newline && ylabel) {   /* print first column of Y coord */
+            if (!newline && ylabel) {            /* print first column of Y coord */
 	      myprintf(fmt, Qpixel ? (real) j : y);
 	      printf(" ");
             }
-            for (i=0; i<nxpos; i++) {			/* over all columns */
+            for (i=0; i<nxpos; i++) {			/* loop over all columns */
                 f = CubeValue(iptr,ix[i],iy[j],iz[k]);
                 if (newline) {
                     x = Xmin(iptr) + ix[i] * Dx(iptr);
@@ -104,15 +116,23 @@ nemo_main()
                     if (zlabel) myprintf(fmt,Qpixel ? (real)k : z);
                 } 
                 printf (fmt,f*scale_factor);
-                if (newline)
-                    printf("\n");
-                else
+                if (newline) {
+                    printf("\n"); nlcount++;
+                } else {
                     printf (" ");
-            }
-            if (!newline) printf("\n");
-        }
-        if (!newline) printf("\n\n");
-    }
+		}
+            } /* i */
+            if (newline1) {
+	      printf("\n");
+	      nlcount++;
+	    }
+        } /* j */
+        if (newline2) {
+	  printf("\n\n");
+	  nlcount += 2;
+	}
+    } /* k */
+    if (nlcount == 0) printf("\n");
     strclose(instr);
 }
 
