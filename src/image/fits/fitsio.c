@@ -55,6 +55,7 @@
 /*    12-oct-01 new standard added FITS reference                       */
 /*    23-jul-02 add fitresize                                           */
 /*    14-nov-02 add dummy DATASUM and CHECKSUM                          */
+/*     8-nov-05 also recognize XTENSION = 'IMAGE'                       */
 /* ToDo:                                                                */
 /*  - BLANK substitution                                                */
 /************************************************************************/
@@ -211,10 +212,15 @@ FITS *fitopen(string name,string status,int naxis,int *nsize)
 /* Check it has SIMPLE and END keywords. Calculate the byte offset to
    the start of the image data. -- ncards is now 1 based ! */
 
-    if(fitsrch(f,"SIMPLE  ",line) != 1 || 
-      (f->ncards = fitsrch(f,"END     ",line)) < 0){
+    if(fitsrch(f,"SIMPLE  ",line) == 1) {
+      dprintf(1,"Detected SIMPLE=\n");
+    } else if (fitsrch(f,"XTENSION",line) == 1) {
+      dprintf(1,"Detected XTENSION=\n");
+    } else
+      error("FITS file with no SIMPLE= or XTENSION=");
+    f->ncards = fitsrch(f,"END     ",line);
+    if (f->ncards < 0)
       error("no END found: File \'%s\' does not appear to be FITS",name);
-    }
     f->offset = blocksize*((80*f->ncards + (blocksize-1))/blocksize); /* round up */
     f->skip = f->offset;		/* offset can change !!! */
     dprintf(1,"END found at card %d, offset=%d\n",f->ncards,f->offset);
@@ -341,7 +347,7 @@ void fitread(FITS *file, int j, FLOAT *data)
   offset = bytes*j*f->axes[0] + f->offset;
   length = bytes * f->axes[0];
   fseek(f->fd,offset,0);
-  		dprintf(1,"fitread: offset(%d)=%d => %d\n",j,f->offset,offset);
+  		dprintf(2,"fitread: offset(%d)=%d => %d\n",j,f->offset,offset);
   if(j > f->axes[1])
     error("Attempt to read beyond image boundaries, in fitread");
   else if(f->status != STATUS_OLD)
@@ -369,13 +375,13 @@ void fitread(FITS *file, int j, FLOAT *data)
     kdat = (int8 *)buf1;
     /* print out raw data, will be in the wrong endian on e.g. i386 */
     /* also note %lld format may not be supported on all versions of printf.. */
-    for(i=0; i < f->axes[0]; i++) dprintf(1,"DEBUG1: %d -> %lld\n",i,kdat[i]);
+    for(i=0; i < f->axes[0]; i++) dprintf(3,"DEBUG1: %d -> %lld\n",i,kdat[i]);
 #endif
     kdat = (int8 *)buf2;
     fitcvt_64i(buf1,kdat,f->axes[0]);
 #ifdef DEBUG
     kdat = (int8 *)buf2;
-    for(i=0; i < f->axes[0]; i++) dprintf(1,"DEBUG2: %d -> %lld\n",i,kdat[i]);
+    for(i=0; i < f->axes[0]; i++) dprintf(3,"DEBUG2: %d -> %lld\n",i,kdat[i]);
 #endif
     for(i=0; i < f->axes[0]; i++) *data++ = bscale * *kdat++ + bzero;
   } else if(f->type == TYPE_DOUBLE){
@@ -529,7 +535,7 @@ void fitsetpl(FITS *file, int n, int *nsize)
   	warning("fitsetpl: f->skip is 0, should be multiple of 2880");
   if (offset < 0)
 	error("fitsetpl: bad offset=%d (%d,...)\n",offset,nsize[0]);
-  dprintf(3,"fitsetpl: offset=%d (%d,...)\n",offset,nsize[0]);
+  dprintf(4,"fitsetpl: offset=%d (%d,...)\n",offset,nsize[0]);
 }
 /**********************************************************************/
 void fit_setbitpix(int bp)
