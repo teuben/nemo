@@ -1,4 +1,4 @@
-.TH SNAPFOUR 1NEMO "10 November 1993"
+.TH SNAPFOUR 1NEMO "10 November 2005"
 .SH NAME
 snapfour \- fourier analyze a snapshot
 .SH SYNOPSIS
@@ -53,7 +53,7 @@ in the fourier decomposition. [Default: \fBy\fP].
 .TP
 \fBfvar=\fIf-variable\fP
 Fourier-variable which is the variable used in
-in the fourier decomposition. [Default: \fBx\fP].
+in the fourier decomposition. [Default: \fBvy\fP].
 .TP
 \fBweight=\fIw-variable\fP
 Weight-variable which is the weight applied to the
@@ -66,8 +66,15 @@ the amplitudes and phases (in degrees). [Default: \fBt\fP]
 \fBtimes=\fP\fIt1,t2,...\fP
 Times to select for analysis. 
 [Default: \fBall\fP].
+.SH EXAMPLES
+.nf
+  % mkexpdisk disk1 10000
+  % snapfour disk1 amode=f > tab1
+  % tabplot tab1 1 4,3,6,8,10 line=1,1 color=2,3,4,5 ycoord=0 
+  % tabplot tab1 1 5:11:2 line=1,1 color=2,3,4,5 ycoord=0
+.fi
 .SH "SEE ALSO"
-bodytyrans(1NEMO), snapshot(5NEMO)
+bodytyrans(1NEMO), orbfour(1NEMO), snapshot(5NEMO)
 .PP
 Binney, J.J. & Spergel, D. (1982) ApJ 253, 308.
 .SH AUTHOR
