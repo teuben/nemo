@@ -57,6 +57,7 @@
  *               1-jul-04       quick fix transform BITPIX8 to 16 images   PJT
  *              30-dec-04       don't shorted blank keyval's to appease VALGRIND and common sense ?     PJT
  *                              also made a3..a5 1 char longer to make room for the terminating 0
+ *              10-nov-05       newline option in fts_pgroup,fts_ptable 
  *
  * Places where this package will call error(), and hence EXIT program:
  *  - invalid BITPIX
@@ -1285,6 +1286,16 @@ int fts_read_img_coord(
 }
 
 
+static nnl = 0;
+static void printnl(int fnl, int reset) {
+  if (fnl==0) return;
+  if (reset) {
+    nnl=0;
+    return;
+  }
+  nnl++;
+  if (nnl%fnl == 0) printf("\n");
+}
 
 /* 
  *  fts_ptable:   print a table extensions:   XTENSION="TABLE   "
@@ -1299,7 +1310,8 @@ int fts_ptable(
 	       stream instr, 	           /* (i)  input stream data is associated with */
 	       string *col,                /* (i)  optional selection of fields to print */
 	       string select,              /* (i)  output mode: header and/or data */
-	       int *row)                   /* (i)  list of rows to display; NULL or 1.. */
+	       int *row,                   /* (i)  list of rows to display; NULL or 1.. */
+	       int fnl)                    /* (i)  frequency of a newline  */
 {
     char *card, *dp, rowfmt[10];
     int ncards, i, j, k, n, w, len, pos, *colsel;
@@ -1308,7 +1320,7 @@ int fts_ptable(
     string *sp;
 
     if (scanopt(select,"group"))
-        return fts_pgroup(fh, instr, col, select, row);
+        return fts_pgroup(fh, instr, col, select, row, fnl);
 
     if (fh->xtension == NULL) {
         fts_sdata(fh,instr);
@@ -1439,35 +1451,48 @@ int fts_ptable(
             }
 
 
-	    //
-	    //  fix this binary table column selection stuff
-	    //
+	    /*
+	     *  fix this binary table column selection stuff
+	     *  NOTE: this also doesn't use the TDIM stuff.
+	     */
 
 
             if (colall) {     /* if printing all columns for this row */
                 if (addrow) printf(rowfmt,j);
                 /* 'BUG': since card could contain NULL's or so: patch it */
                 if (ascii) {
+		  dprintf(0,"printing all columns in ascii\n");
                   for (i=0; i<len; i++) if (card[i]=='\0') card[i]=' ';
                   printf("%s\n",card);
                 } else {
+		  dprintf(0,"printing all %d columns from binary\n",fh->tfields);
                   for (i=0; i<fh->tfields; i++) {
                     dp = &card[fh->tbcoln[i]];
                     if (strrchr(fh->tformn[i],'E')) {
-                      for (k=0; k<fh->tbitems[i]; k++)
+                      for (k=0; k<fh->tbitems[i]; k++) {
                         printf(" %f",show_e((float *)dp,k));
+			printnl(fnl,0);
+		      }
                     } else if (strrchr(fh->tformn[i],'D')) {
-                      for (k=0; k<fh->tbitems[i]; k++)
+                      for (k=0; k<fh->tbitems[i]; k++) {
                         printf(" %lf",show_d((double *)dp,k));
+			printnl(fnl,0);
+		      }
                     } else if (strrchr(fh->tformn[i],'I')) {
-                      for (k=0; k<fh->tbitems[i]; k++)
+                      for (k=0; k<fh->tbitems[i]; k++) {
                         printf(" %d",show_i((short *) dp,k));
+			printnl(fnl,0);
+		      }
                     } else if (strrchr(fh->tformn[i],'J')) {
-                      for (k=0; k<fh->tbitems[i]; k++)
+                      for (k=0; k<fh->tbitems[i]; k++) {
                         printf(" %d",show_j((int *) dp,k));
+			printnl(fnl,0);
+		      }
                     } else if (strrchr(fh->tformn[i],'K')) {
-                      for (k=0; k<fh->tbitems[i]; k++)
+                      for (k=0; k<fh->tbitems[i]; k++) {
                         printf(" %lld",show_k((int8 *) dp,k));     /* portabilty not ok  */
+			printnl(fnl,0);
+		      }
                     } else if (strrchr(fh->tformn[i],'A')) {
                       printf(" ");
                       for (k=0; k<fh->tbitems[i]; k++)
@@ -1479,7 +1504,7 @@ int fts_ptable(
                     } else
                       error ("BINTABLE %s not encoded format yet",fh->tformn[i]);
                   }
-                  printf("\n");
+                  if (fnl==0) printf("\n");
                 }
             } else {
                 if (addrow) printf(rowfmt,j);
@@ -1487,8 +1512,9 @@ int fts_ptable(
                     k = colsel[i]-1;
                     if(k<0) continue;
                     printf("%s ",fmt(&card[fh->tbcoln[k]-1],fh->tformn[k]));
+		    printnl(fnl,0);
                 }
-                printf("\n");
+                if (fnl==0) printf("\n");
             }
         } /* for (j) */
         free(card);
@@ -1519,7 +1545,8 @@ fits_header *fh,            /* (i)  pointer to fits header structure */
 stream instr,		    /* (i)  input stream data is associated with */
 string *col,                /* (i)  optional selection of fields to print */
 string select,              /* (i)  output mode: header and/or data */
-int *row)                   /* (i)  list of rows to display; NULL or 1.. */
+int *row,                   /* (i)  list of rows to display; NULL or 1.. */
+int fnl)                    /* (*)  frequency of a newline  [not implemented] */
 {
     char *card, rowfmt[10];
     int ncards, i, j, k, n, w, len, nitems;

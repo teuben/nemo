@@ -6,11 +6,15 @@
  *     24-apr-92        a fixed bug in row= introduced earlier  PJT
  *     18-jan-92    V1.2  attempt to handle BINTABLE too  (fits.c)     PJT
  *     30-sep-96    V1.3  option to print out random group pars        pjt
+ *
+ *     10-nov-05    V1.5  add newline=
+ * BUT PERHAPS WE SHOULD not boolean it, but with an integer give how often newlines are written
+ *    
  */
 
 #include <stdinc.h>
 #include <getparam.h>
-#include "fits.h"
+#include <fits.h>
 
 string defv[] = {			/* Standard NEMO keyword+help */
     "in=???\n              Input fits table file",
@@ -20,21 +24,27 @@ string defv[] = {			/* Standard NEMO keyword+help */
     "row=\n                Row numbers to select [all]",
     "format=\n             Format for each row to use [TFORMnnn]",
     "maxrow=20000\n        Max row numbers to select",
-    "random=f\n            Force random group\n",
-    "VERSION=1.4\n         15-may-03 PJT",
+    "random=f\n            Force random group?",
+    "fnl=0\n               Frequency of newlines",
+    "VERSION=1.5\n         10-nov-05 PJT",
     NULL,
 };
 
 string usage = "convert fits table or random groups to ascii table";
 
+string cvsid="$Id$";
+
+extern string *burststring(string,string);
+
 void nemo_main()
 {
     stream instr;
     int    i, n, nfile, maxrow, nrow, *row=NULL;
-    string *col, select, *burststring();
+    string *col, select;
     struct fits_header fh;
     bool   scanopt();
     bool   Qrg = getbparam("random");
+    int    fnl = getiparam("fnl");
 
     instr = stropen(getparam("in"),"r");    /* open input */
     
@@ -64,12 +74,12 @@ void nemo_main()
        dprintf(0,"Working on FITS file %d\n",i);
 
        if ((nfile==0 || nfile==i)) {			/* if right file */
-          if (Qrg)
-              fts_pgroup(&fh,instr,col,select,row); 	/* try and print */
-          else
-              fts_ptable(&fh,instr,col,select,row); 	/* try and print */
+	 if (Qrg)
+	   fts_pgroup(&fh,instr,col,select,row,fnl); 	/* try and print */
+	 else
+	   fts_ptable(&fh,instr,col,select,row,fnl); 	/* try and print */
        } else                                            /* Otherwise just */
-          fts_sdata(&fh,instr);		               /* skip the data */
+	 fts_sdata(&fh,instr);		               /* skip the data */
 
        if (i==nfile)
             break;                                        /* done */

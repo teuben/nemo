@@ -1,4 +1,4 @@
-.TH FITSTAB 1NEMO "30 September 1996"
+.TH FITSTAB 1NEMO "10 November 2005"
 .SH NAME
 fitstab \- convert fits table to ascii table
 .SH SYNOPSIS
@@ -49,6 +49,12 @@ followed by a \fB+\fP sign, for example \fBcol=DecSign+DecD\fP will not
 put an extra space between \fBDecSign\fP and \fBDecD\fP. \fI*** this last
 item not implemented yet ***\fP
 [Default: all].
+.TP
+\fBfnl=\fP
+Frequency of newlines in the output, meaning every \fBfnl\fP numbers that
+are written, a newline will be added to the output.  Use 0 if no extra
+newlines are needed.
+[Default: 0]
 .SH BUGS
 Columns are output in the order that they appear in the table, not
 as specified with the \fBcol=\fP keyword.
@@ -86,5 +92,6 @@ Peter Teuben
 8-apr-92	V1.0 Written	PJT
 13-apr-92	V1.0x Renamed file= to hdu=	PJT
 30-sep-96	V1.3 added output of random group parameters	PJT
+10-nov-05	V1.5 added fnl=	PJT
 .fi
 

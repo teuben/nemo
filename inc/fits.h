@@ -212,7 +212,8 @@ int fts_phead    (fits_header *, string *);
 int fts_whead    (fits_header *, stream);
 int fts_xhead    (fits_header *, stream, int, int, int *, int);
 
-int fts_ptable   (fits_header *, stream, string *, string, int *);
+int fts_ptable   (fits_header *, stream, string *, string, int *, int);
+int fts_pgroup   (fits_header *, stream, string *, string, int *, int);
 
 int fts_buf      (int);
 
