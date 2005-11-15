@@ -6,6 +6,7 @@
  *     17-nov-01     V1.1   implemented two options for svar= (in UA 1020 !!)  PJT
  *     19-nov-02     V1.2   process all snapshots in input if requested        PJT
  *     14-nov-05     V2.0   changed svar= to rvar=, no more sort=              PJT
+ *                   V2.1   added mvar= cumulative=                            PJT
  *
  * TODO: use constant number (or mass?) fraction shells as option
  */
@@ -19,23 +20,24 @@
 #include <snapshot/snapshot.h>
 #include <snapshot/body.h>
 #include <snapshot/get_snap.c>
+#include <bodytransc.h>
 
 
 string defv[] = {	
     "in=???\n			 Input file name (snapshot)",
-    "radii=???\n                 (normalized) radii for shell boundaries (see also cumlative)",
+    "radii=???\n                 (normalized) radii for shell boundaries (see also cumulative=)",
     "pvar=vt\n                   Variables to print statistics of in each shell",
     "rvar=r\n                    shell radius variable (snapshot needs sorted in this)",
-    "mvar=m\n                    Mass variable if cumulative= is selected (**not active**)",
+    "mvar=m\n                    Mass variable if cumulative= is selected",
     "weight=1\n			 weighting for particles",
     "axes=1,1,1\n                X,Y,Z axes for spatial spheroidal normalization",
     "stats=mean,disp,npt\n       Statistics to print (mean,disp,skew,kurt,min,max,median,npt)",
     "format=%g\n                 Format used for output columns",
-    "normalized=f\n              Use normalized rvar radii?",
-    "cumulative=f\n              Use mvar= as cumulative in radii=(**not active**)",
+    "normalized=f\n              Use normalized rvar/mvar radii?",
+    "cumulative=f\n              Use mvar= as cumulative in radii=",
     "first=t\n                   Process only first snapshot?",
     "rstat=f\n                   Add stats in 'r' also ?",
-    "VERSION=2.0\n		 14-nov-05 PJT",
+    "VERSION=2.1\n		 14-nov-05 PJT",
     NULL,
 };
 
@@ -43,31 +45,36 @@ string usage="compute statistics of bodyvariables in a set of shells";
 
 string cvsid="$Id$";
 
-
-Body *btab = NULL;		/* pointer to array of bodies		    */
-int nbody;			/* number of bodies in array		    */
-real tsnap;		        /* time associated with data		    */
-
-rproc weight;			/* weighting function for bodies	    */
-rproc pvar;
-rproc rvar;
-
-vector axes;                    /* normalization radii for shells           */
-bool Qaxes;
-bool Qnorm;                     /* rvar in normalized space ? */
-bool Qsort;                     /* presort snapshot in rvar ? */
-bool Qrstat;
-
-#define MAXRAD 10000
-int nrad;
-real radii[MAXRAD];
-
-string p_format;
-
 extern int match(string, string, int *);
+extern string *burststring(string,string);
 
 
-string stat_options = "npt,mean,dispersion,skewness,kurtosis,min,max,median,sigma";
+#ifndef MAXRAD
+#define MAXRAD 10000
+#endif
+
+local int nrad;                        /* number of radii (#shells is nrad-1) */
+local real radii[MAXRAD];              /* radii of shells */
+
+local Body *btab = NULL;		/* pointer to array of bodies		    */
+local int nbody;			/* number of bodies in array		    */
+local real tsnap;		        /* time associated with data		    */
+
+local rproc weight;			/* weighting function for bodies	    */
+local rproc pvar;
+local rproc rvar;
+local rproc mvar;
+
+local vector axes;                    /* normalization radii for shells           */
+local bool Qaxes;
+local bool Qnorm;                     /* rvar in normalized space ? */
+local bool Qrstat;
+local bool Qcumul;
+
+
+local string p_format;
+
+local string stat_options = "npt,mean,dispersion,skewness,kurtosis,min,max,median,sigma";
 
 /*   careful: the order of the following MACRO's need to reflect those in stat_options */
 #define STAT_NPT   (1<<0)
@@ -80,21 +87,20 @@ string stat_options = "npt,mean,dispersion,skewness,kurtosis,min,max,median,sigm
 #define STAT_MED   (1<<7)
 #define STAT_SIG   (1<<8)
 
-string *sel_options;
-int n_sel, *n_mask;
+local string *sel_options;
+local int n_sel, *n_mask;
 
-
-extern string *burststring(string,string);
 
 local void print_stat(Moment *m, bool Qhead, string name);
+local void printvec(string name, vector vec);
 
 nemo_main()
 {
     stream instr;
-    rproc btrtrans();  /* bodytrans.h inclusion bug ?? */
     int i, bits, ndim;
     bool Qfirst = getbparam("first");
-    bool Qrstat = getbparam("rstat");
+    Qrstat = getbparam("rstat");
+    Qcumul = getbparam("cumulative");
 
     instr = stropen(getparam("in"), "r");
     nrad = nemoinpd(getparam("radii"),radii,MAXRAD);
@@ -103,6 +109,7 @@ nemo_main()
     weight = btrtrans(getparam("weight"));
     pvar = btrtrans(getparam("pvar"));
     rvar = btrtrans(getparam("rvar"));
+    mvar = btrtrans(getparam("mvar"));
     Qnorm = getbparam("normalized");
     p_format = getparam("format");
     ndim = nemoinpd(getparam("axes"),axes,3);
@@ -123,14 +130,13 @@ nemo_main()
       dprintf(1,"match %d -> %d\n",i,n_mask[i]);
     }
     dprintf(1,"Masking range %d - %d\n",STAT_NPT,STAT_MED);
-
     dprintf(1,"Axes: %g %g %g\n",axes[0],axes[1],axes[2]);
     while (get_snap(instr, &btab, &nbody, &tsnap, &bits)) {
-        if (bits & PhaseSpaceBit) {
-            reshape(1);
-            shells();
-        }
-        if (Qfirst) break;
+      if (bits & PhaseSpaceBit) {
+	reshape(1);
+	shells();
+      }
+      if (Qfirst) break;
     }
 }
 
@@ -172,6 +178,8 @@ reshape(int dir)
       }
     } else
       error("bad dir=%d",dir);
+
+
 }
 
 
@@ -183,28 +191,47 @@ shells()
   vector tmpv, pos_b, vel_b;
   Moment mq, mr, ms;
   bool Qhead = TRUE;
+  real *cmass, sum, totmas;
 
   ini_moment(&mq,4,0);
   ini_moment(&mr,4,0);
   ini_moment(&ms,4,0);
 
-
-  rmin = (rvar)(btab, tsnap, 0);
-  rmax = (rvar)(btab+nbody-1, tsnap, nbody-1);
-  if (Qnorm) {
-    for (j=0; j<nrad; j++) {  /* rescale to 0..nbody for easy comparisons */
-      if (radii[j] < 0.0 || radii[j] > 1.0)
-	error("Normalized radii need to be in range 0..1: %d->%g",
-	      j+1,radii[j]);
-      radii[j] *= nbody;
+  if (Qcumul) {
+    warning("new option: cumulative=t not well tested");
+    cmass = (real *) allocate(nbody*sizeof(real));
+    for (i=0, b=btab, sum=0.0; i<nbody; i++, b++) {
+      sum += (mvar)(b, tsnap, i);
+      cmass[i] = sum;
     }
-  } else {      
-    dprintf(0,"Range rvar=%s  from %g to %g\n",
-	    getparam("rvar"),rmin,rmax);
-    if (rmin==rmax)
-      error("Cannot normalize, all values for svar=%s are %g",
-	    getparam("rvar"),rmin); 
+    totmas = cmass[nbody-1];
+    if (Qnorm) {                    /* normalize cmass to (0,1] */
+      for (i=0; i<nbody; i++)
+	cmass[i] /= cmass[nbody-1];
+      cmass[nbody-1] = 1.0;         /* ensure it's 1 if rounding error */
+    } else {
+      dprintf(0,"Total for cmas = %g\n",totmas);
+    }
+    dprintf(0,"Cmass range: %g .. %g\n",cmass[0],cmass[nbody-1]);
+  } else {
+    rmin = (rvar)(btab, tsnap, 0);
+    rmax = (rvar)(btab+nbody-1, tsnap, nbody-1);
+    if (Qnorm) {
+      for (j=0; j<nrad; j++) {  /* rescale to 0..nbody for easy comparisons */
+	if (radii[j] < 0.0 || radii[j] > 1.0)
+	  error("Normalized radii need to be in range 0..1: %d->%g",
+		j+1,radii[j]);
+	radii[j] *= nbody;
+      }
+    } else {      
+      dprintf(0,"Range rvar=%s  from %g to %g\n",
+	      getparam("rvar"),rmin,rmax);
+      if (rmin==rmax)
+	error("Cannot normalize, all values for svar=%s are %g",
+	      getparam("rvar"),rmin); 
+    }
   }
+  dprintf(0,"Shell range %g .. %g\n",radii[0],radii[nrad-1]);
 
   /*
    * notice the quircky double i,j loops, looping over the particles
@@ -215,13 +242,27 @@ shells()
    *
    */
 
-
-  for (i = 0, b = btab, irad=0, nviol=0; i < nbody; ) {
+  for (i = 0, b = btab, irad=0, nviol=0, sum=0.0; i < nbody; ) {
     reset_moment(&mq);
     reset_moment(&mr);
     reset_moment(&ms);
 
-    if (Qnorm) {                      /* select in variable normalized */
+    if (Qcumul) {
+      for (j=0; i<nbody; b++, i++, j++) {
+	rad = absv(Pos(b));
+	r = (rvar)(b,tsnap,i);
+	if (cmass[i] >= radii[irad] && cmass[i] < radii[irad+1]) {
+	  accum_moment(&mr, rad, 1.0);
+	  accum_moment(&ms, r, 1.0);
+	  accum_moment(&mq, (pvar)(b, tsnap, i), (weight)(b, tsnap, i));
+	} else if (cmass[i] < radii[irad]) {
+	  dprintf(3,"Skipping %d\n",j);
+	} else {
+	  irad++;
+	  break;
+	}
+      }
+    } else if (Qnorm) {                      /* select if rvar normalized */
       for (j=0; i<nbody; b++, i++, j++) {
 	rad = absv(Pos(b));
 	r = (rvar)(b,tsnap,i);
@@ -240,7 +281,7 @@ shells()
 	  break;
 	}
       }
-    } else {                                /* select in real rvar space */
+    } else {                                /* select if rvar space */
       for (j=0; i<nbody; b++, i++, j++) {
 	rad = absv(Pos(b));
 	r = (rvar)(b,tsnap,i);
@@ -278,7 +319,11 @@ shells()
   if (nviol)
     warning("There were %d/%d particles in the snapshot out of sort order",
 	    nviol,nbody);
+  if (Qcumul) {
+    free(cmass);
+  }
 }
+
 
 local void print_stat(Moment *m, bool Qhead, string name)
 {
@@ -357,9 +402,7 @@ local void print_stat(Moment *m, bool Qhead, string name)
     printf("\n");
 }
 
-printvec(name, vec)
-string name;
-vector vec;
+local void printvec(string name, vector vec)
 {
     printf("%12s  %10.5f  %10.5f  %10.5f  %10.5f\n",
 	   name, absv(vec), vec[0], vec[1], vec[2]);
