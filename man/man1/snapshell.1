@@ -1,4 +1,4 @@
-.TH SNAPSHELL 1NEMO "14 November 2005"
+.TH SNAPSHELL 1NEMO "15 November 2005"
 .SH NAME
 snapshell \- compute statistics of bodyvariables in a set of shells
 .SH SYNOPSIS
@@ -6,23 +6,23 @@ snapshell \- compute statistics of bodyvariables in a set of shells
 .SH DESCRIPTION
 \fIsnapshell\fP computes selected diagnostics and their statistics 
 from an N-body snapshot in a set of shells in an arbitrary body
-variables (normally \fBrvar=r\fP).
+variable (normally \fBrvar=r\fP).
 The snapshot must have been
 properly centered and oriented using 
 other tools (e.g. \fIsnapcenter(1NEMO)\fP and/or
 \fIsnaprect(1NEMO)\fP). 
 .PP
-Although the shell radii are explicitly set (either normalized or
-not) in \fBrvar\fP space, by setting \fBcumulative=t\fP the
+Normally the shell radii are explicitly set (optionally normalized)
+in \fBrvar\fP space, by setting \fBcumulative=t\fP the
 \fBmvar=\fP variable is used to compute a cumulative mass
-in each shell sorted by \fBrvar\fP...
+in each shell, still sorted by \fBrvar\fP of course.
 .PP
 An arbitrary weighting may be specified for each particle.
 .PP
 The output will be an ascii table, in which for each variable it will
 print a
 selected set of statistics (e.g. mean, dispersion, min, max, skewness, kurtosis,
-number of particles). Shells with no particles are not output.
+number of particles). Shells with no particles are not output however.
 .SH PARAMETERS
 The following parameters are recognized.
 .TP 24
@@ -33,19 +33,19 @@ found in this file will be used. No default.
 .TP
 \fBradii=\fP\fIr0,r1,r2,...\fP
 A set of radii in \fInemoinp(3NEMO)\fP format, representing the
-edges of the shell.
-They need to be normalized to 1 when selected via \fBsvar=\fP.
-No default.
+edges of the shell. They are normalized if \fBnormalized=t\fP is
+used, and their units are in \fBrvar\fP space, unless \fBcumulative=t\fP
+is used, when they are in \fBcvar\fP units. No default.
 .TP
 \fBpvar=\fP\fIvariable\fP
 The \fIbodytrans\fP(1NEMO) variable selected for statistics. 
 [Default: \fBvt\fP].
 .TP
-\fBsvar=\fP\fIsort_variable\fP
-If selected, this \fIbodytrans\fP(1NEMO)
-variable will be used to sort the particles by, the
-radii will then be used to define the shells
-within which the diagnostics are computed. Default: not used.
+\fBrvar=\fP\fIshell_variable\fP
+Default: \fBr\fP
+.TP
+\fBmvar=\fP\fImass_variable\fP
+Default: \fPm\fP
 .TP
 \fBweight=\fP\fIbody_weight\fP
 Expression used to compute the weight of each body.
@@ -55,7 +55,9 @@ Default: \fB1.0\fP.
 \fBaxes=\fP\fIx,y,z\fP
 Normalization values in X,Y and Z to compute (re-shape) radii. Only used
 if shells are given in configuration space (i.e. svar= is not used) and
-need to be ellipsoidal in shape. [Default: 1,1,1]
+need to be ellipsoidal in shape. For certain choices of \fBrvar\fP the
+use of this keyword has to be taken with care.
+[Default: 1,1,1]
 .TP
 \fBstats=\fP\fIprint_stats\fP
 Statistics selected to print. Allowed values are
@@ -72,10 +74,21 @@ easily allow equal size bins, or in direct svar space (this requires knowledge
 of the range of the \fBsvar\fP variable.
 [Default: \fBt\fP]
 .TP
-\fBsort=t|f\fP
-Should the snapshot be sorted? Normally true, and a basic shell sort is applied.
-See \fIsnapsort(1NEMO)\fP if more advanced sorting is required.
-[Default: \fBt\fP]
+\fBcumulative=t|f\fP
+Should the shells be defined in the cumulative (and optionally normalized) space
+of the \fBcmas\fP variable. This way the number of particles in each shell can
+be better/differently controlled from selecting them in \fBrvar\fP space.
+[Default: \fBf\fP]
+.TP
+\fBfirst=t|f\fP
+Should only the first snapshot be processed?
+[Default: \fBf\fP]
+.TP
+\fBrstats=t|f\fP
+Should statistics on \fBr\fP also be added as a third set of columns. This can be handy
+if you selected a particular \fBrvar\fP and want to see over what radii they apply.
+[Default: \fBf\fP]
+
 .SH SEE ALSO
 snapkinem(1NEMO), snaprect(1NEMO), snapsort(1NEMO), snapshot(5NEMO)
 .SH EXAMPLES
@@ -83,35 +96,38 @@ To get a mean rotation speed in the disk, and the velocity dispersion, for a set
 rings:
 .nf
     % \fBmkdisk - rmax=10 | snapsort - - r | snapshell - 0.01:10:0.1 pvar=vt\fP
-    0.221025 0 1 : 0.213258 0
-    0.347701 0.035125 2 : 0.318487 0.0270184
-    0.468138 0.0260884 2 : 0.403087 0.0164231
+    #[rvar] mea  dis  npt  #[pvar] mea  dis  npt
+    0.221025 0 1           0.213258 0
+    0.347701 0.035125 2    0.318487 0.0270184
+    0.468138 0.0260884 2   0.403087 0.0164231
     ...
-    9.65953 0.0284596 39 : 0.319191 0.000455262
-    9.7589 0.0288926 40 : 0.317613 0.00045552
-    9.85975 0.0293125 41 : 0.316035 0.000455434
+    9.65953 0.0284596 39   0.319191 0.000455262
+    9.7589 0.0288926 40    0.317613 0.00045552
+    9.85975 0.0293125 41   0.316035 0.000455434
 .fi
 This results in rings with different numbers of particles (3rd column). By using
-a sort variable (svar=), one can also divide the particle in equal numbers, and compute the
-properties of the shells (which now have varying spatial width). The radii are now
-normalized and must not exceed the interval 0-1:
+an appropriate cumulative variable (e.g. mass) one can easily find shells which
+then contain an equal number of particles. The keyword \fBcumulative=t\fP is used
+for this:
+
 .nf
-    % \fBmkdisk - rmax=10 | snapsort - - r | snapshell - 0:1:0.01 svar=r\fP
+    % \fBmkdisk - rmax=10 | snapsort - - r | snapshell - 0:1:0.01 cumulative=t mvar=1 normalized=t\fP
 .fi
+where we also needed to use \fBmvar=1 normalized=t\fP,since \fImkdisk(1NEMO)\fP creates
+a disk of test particles, and does not by default set the mass of the disk.
+.PP
 In case the particles are sorted by potential from an N-body simulation, one can
 select shells by particle number (easy way to make the binsizes the same)
 .nf
-    % \fBsnapsort run01.dat - phi times=4.0 | snapshell - 0:1:0.01 svar=phi\fP
+    % \fBsnapsort run01.dat - phi times=4.0 | snapshell - 0:1:0.01 rvar=phi cumul=t norm=t\fP
 .fi
-or assign the shells directly in \fBsvar\fP space (this requires you to know the
+or assign the shells directly in \fBrvar\fP space (this requires you to know the
 values in svar space):
 .nf
-    % \fBsnapsort run01.dat - phi times=4.0 | snapshell - -400:-200:10 svar=phi normalized=f\fP
+    % \fBsnapsort run01.dat - phi times=4.0 | snapshell - -400:-200:10 rvar=phi cumul=t\fP
 .fi
 .SH CAVEAT
 Ellipsoidal shells may need reshape/sort/reshape?
-.PP
-Sorting should be done inside this program, not in the pipe?
 .SH AUTHOR
 Peter Teuben
 .SH HISTORY
@@ -119,5 +135,5 @@ Peter Teuben
 .ta +1.0i +4.0i
 13-nov-01	V1.0 created    PJT
 14-nov-05	V2.0 some re-write: svar= is now rvar= 	PJT
-14-nov-05	V2.1 added mvar= and cumulative=	PJT
+15-nov-05	V2.1 added mvar= and cumulative=	PJT
 .fi
