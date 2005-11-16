@@ -104,6 +104,8 @@ void falcON::main() falcON_THROWING
       continue;
     if(READ.contain(NEED)) {
       if(!OUT.is_open()) OUT.open(getparam("out"));
+      SHOT.add_fields(fieldset::gravity);
+      SHOT.reset_flags();
       if(FALCON.NewtonsG() != zero) {
 	FALCON.grow(NCRIT, RC);
 	FALCON.approximate_gravity(1,1);

@@ -161,7 +161,7 @@ void falcON::find_centre(const bodies*const&B,     // I  : bodies
 ////////////////////////////////////////////////////////////////////////////////
 namespace { using namespace falcON;
   //----------------------------------------------------------------------------
-  class DensLeaf : public BasicLeaf {
+  class DensLeaf : public OctTree::Leaf {
     real      &wght()       { return SCAL; }
     real const&wght() const { return SCAL; }
   public:
@@ -174,20 +174,7 @@ namespace { using namespace falcON;
     }
   };
   //----------------------------------------------------------------------------
-  struct UpdateWeights {
-    const OctTree*tree;
-    const unsigned alfa;
-    UpdateWeights(const OctTree*const&t,
-		  unsigned      const&a) : tree(t), alfa(a) {}
-    template<typename bodies_type>
-    unsigned operator() (const bodies_type*const&B) const {
-      LoopLeafs(DensLeaf,tree,Li)
-	Li->set_weight(B,alfa);
-      return 0u;
-    }
-  };    
-  //----------------------------------------------------------------------------
-  class DensCell : public BasicCell {
+  class DensCell : public OctTree::Cell {
     real const&wght() const { return AUX1.SCAL; }
   public:
     typedef DensLeaf leaf_type;
@@ -198,8 +185,8 @@ namespace { using namespace falcON;
   typedef OctTree::CellIter<DensCell> DensCell_iter;
 } // namespace {
 namespace falcON { 
-  falcON_TRAITS(DensLeaf,"DensLeaf");
-  falcON_TRAITS(DensCell,"DensCell");
+  falcON_TRAITS(DensLeaf,"DensLeaf","DensLeafs");
+  falcON_TRAITS(DensCell,"DensCell","DensCells");
 }
 ////////////////////////////////////////////////////////////////////////////////
 void falcON::estimate_density_peak(OctTree *const&TREE,
@@ -209,10 +196,11 @@ void falcON::estimate_density_peak(OctTree *const&TREE,
 				   real         &H)
 {
   // 1. set weights in leafs
-  TREE->UseBodies(UpdateWeights(TREE,alpha));
+  LoopLeafs(DensLeaf,TREE,Li)
+    Li->set_weight(TREE->my_bodies(),alpha);
   // 2. pass weights up the tree & find cell with maximum weight density
   DensCell_iter max_cell;
-  real           rho_max = zero;
+  real          rho_max = zero;
   LoopCellsUp(DensCell_iter,TREE,Ci) {
     register real w=0.;
     LoopLeafKids(DensCell_iter,Ci,l) w += wght(l);
@@ -346,8 +334,10 @@ namespace {
   };
 } // namespace {
 namespace falcON {
-  falcON_TRAITS(RadiusFinder::point,"RadiusFinder::point");
-  falcON_TRAITS(RadiusFinder::range,"RadiusFinder::range");
+  falcON_TRAITS(RadiusFinder::point,
+		"RadiusFinder::point","RadiusFinder::points");
+  falcON_TRAITS(RadiusFinder::range,
+		"RadiusFinder::range","RadiusFinder::range");
 }
 namespace {
   void RadiusFinder::split(range*R) {    // split range

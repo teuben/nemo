@@ -127,7 +127,7 @@ namespace falcON {
     int    actual      ()   { return actl; }
   };
 
-  falcON_TRAITS(Sobol,"Sobol");
+  falcON_TRAITS(Sobol,"Sobol","Sobols");
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
   // class falcON::PseudoRandom                                               //

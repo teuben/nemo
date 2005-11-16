@@ -271,12 +271,26 @@ LeapFrogCode::LeapFrogCode(int h, const ForceAndDiagnose *F,
   finish_diagnose();                               // finish diagnosis          
   add_to_cpu_step();                               // record CPU time           
 }
-////////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------
+void LeapFrogCode::account_new() const {
+  if(snap_shot()->N_new()) {
+    LoopAllBodies(snap_shot(),b) 
+      if(is_new(b)) {
+	b.unflag_new();
+	b.flag_as_active();
+      } else
+	b.unflag_active ();
+    set_time_derivs(0,0,0.);
+    snap_shot()->reset_Nnew();
+  }
+}
+//------------------------------------------------------------------------------
 void LeapFrogCode::fullstep() const {
   reset_CPU();                                     // reset cpu timers          
+  account_new();                                   // account for new bodies    
   kick(TAUH);                                      // eg: v+= a*tau/2           
   drift(TAU);                                      // eg: x+= v*tau;  w+= a*tau 
-  set_time_derivs(1, 1, TAU);                      // eg: a = F(x,w)            
+  set_time_derivs(1,1,TAU);                        // eg: a = F(x,w)            
   kick(TAUH);                                      // eg: v+= a*tau/2           
   remember();                                      // eg: w = v                 
   finish_diagnose();                               // finish diagnosis          
@@ -317,8 +331,36 @@ void BlockStepCode::elementary_step(int t) const { // I: number of step
   }                                                // ENDIF                     
 }
 //------------------------------------------------------------------------------
+inline void BlockStepCode::account_del() const {
+  if(snap_shot()->N_del()) {
+    for(int l=0; l!=NSTEPS; ++l)
+      N[l] = 0u;
+    LoopAllBodies(snap_shot(),b)
+      if(!is_new(b)) ++(N[level(b)]);
+    snap_shot()->reset_Ndel();
+  }
+}
+//------------------------------------------------------------------------------
+inline void BlockStepCode::account_new() const {
+  if(snap_shot()->N_new()) {
+    LoopAllBodies(snap_shot(),b) 
+      if(is_new(b)) {
+	b.unflag_new();
+	b.flag_as_active();
+      } else
+	b.unflag_active ();
+    set_time_derivs(0,0,0.);
+    LoopAllBodies(snap_shot(),b) 
+      if(is_active(b))
+	ST->assign_level(b, T, N, HIGHEST);
+    snap_shot()->reset_Nnew();
+  }
+}
+//------------------------------------------------------------------------------
 void BlockStepCode::fullstep() const {
   reset_CPU();                                     // reset cpu timers          
+  account_del();                                   // account for removed bodies
+  account_new();                                   // account for new bodies    
   remember(true);                                  // remember to be predicted  
   kick_i(TAUH,true);                               // kick by half a step       
   for(int t=0; t!=1<<HIGHEST; ++t)                 // LOOP elementary steps     

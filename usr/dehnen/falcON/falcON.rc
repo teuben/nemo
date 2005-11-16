@@ -34,7 +34,7 @@ endif
 # set enviroment variables
 setenv FALCONBIN $FALCON"/"$MACHTYPE"_"$OSTYPE"/"
 setenv FALCONLIB $FALCONBIN"/lib"
-setenv PATH      $PATH":"$FALCONBIN
+setenv PATH      $FALCONBIN":"$PATH
 
 if($?ACCPATH) then
     setenv ACCPATH $FALCON"/acc/:"$ACCPATH

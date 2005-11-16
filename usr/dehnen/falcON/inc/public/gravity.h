@@ -24,8 +24,6 @@
 // defines                                                                     |
 //                                                                             |
 // class GravMAC                                                               |
-// class GravLeaf                                                              |
-// class GravCell                                                              |
 // class GravEstimator                                                         |
 // class GravStats                                                             |
 //                                                                             |
@@ -60,8 +58,8 @@ namespace falcON {
     typedef poles3D <P_ORD,real>      Mset;        // set of multipoles         
     static const int NCOEF = Cset::NDAT;           // # reals in taylor coeffs  
   }
-  falcON_TRAITS(grav::Cset,"grav::Cset");
-  falcON_TRAITS(grav::Mset,"grav::Mset");
+  falcON_TRAITS(grav::Cset,"grav::Cset","grav::Csets");
+  falcON_TRAITS(grav::Mset,"grav::Mset","grav::Msets");
   //////////////////////////////////////////////////////////////////////////////
   class InvertZ;                                   // forward declaration       
   class GravEstimator;                             // forward declaration       
@@ -116,333 +114,6 @@ namespace falcON {
   };
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
-  // class falcON::GravLeaf                                                   //
-  //                                                                          //
-  //////////////////////////////////////////////////////////////////////////////
-  class GravLeaf : public BasicLeaf {
-    GravLeaf           (const GravLeaf&);          // not implemented           
-    GravLeaf& operator=(const GravLeaf&);          // not implemented           
-    //--------------------------------------------------------------------------
-    // data of class GravLeaf (only static)                                     
-    //--------------------------------------------------------------------------
-#if defined(__GNUC__) && (__GNUC__ < 3 || __GNUC__ == 3 && __GNUC_MINOR__ < 4)
-    // patch for fix a bug with gcc version < 3.4
-  public:
-#endif
-    struct sink_data : public symset3D<1,real> {
-      void     reset() {        symset3D<1,real>::operator=(zero); }
-      real    &pot  () { return symset3D<1,real>::tensor<0>(); }
-      vect    &acc  () { return symset3D<1,real>::tensor<1>(); }
-      unsigned&num  () { return *(static_cast<unsigned*>
-				 (static_cast<void*>(&pot()))); }
-    };
-    //--------------------------------------------------------------------------
-    // friends                                                                  
-    //--------------------------------------------------------------------------
-    friend class GravEstimator;
-    friend class falcON::traits<sink_data>;
-    //--------------------------------------------------------------------------
-    // private data access                                                      
-    //--------------------------------------------------------------------------
-#define __sink  static_cast<sink_data*>(PROP)
-    real          &mass ()       { return SCAL; }
-    real     const&mass () const { return SCAL; }
-    vect     const&acc  () const { return __sink->acc(); }
-    vect     const&cofm () const { return pos(); }
-    real     const&sizeq() const { return acc()[0]; }
-    real     const&pot  () const { return __sink->pot(); }
-    real     const&rho  () const { return pot(); }
-    unsigned const&num  () const { return __sink->num(); }
-#ifdef falcON_INDI
-    real     const&eph  () const { return AUXR; }
-#endif
-    //--------------------------------------------------------------------------
-    // non-const data access via members                                        
-    //--------------------------------------------------------------------------
-  public:
-    vect    &acc  () { return __sink->acc(); }
-    vect    &cofm () { return pos(); }
-    real    &sizeq() { return acc()[0]; }
-    real    &pot  () { return __sink->pot(); }
-    real    &rho  () { return pot(); }
-    unsigned&num  () { return __sink->num(); }
-#ifdef falcON_INDI
-    real    &eph  () { return AUXR; }
-#endif
-    void     inc  () { ++num(); }
-    symset3D<1,real>& Coeffs() { return *__sink; }
-    //--------------------------------------------------------------------------
-    // const data access via friends                                            
-    //--------------------------------------------------------------------------
-    friend vect     const&cofm  (const GravLeaf*L) {return L->pos(); }
-    friend vect     const&acc   (const GravLeaf*L) {return L->acc(); }
-    friend real     const&pot   (const GravLeaf*L) {return L->pot(); }
-    friend real     const&rho   (const GravLeaf*L) {return L->rho(); }
-    friend unsigned const&num   (const GravLeaf*L) {return L->num(); }
-#ifdef falcON_INDI
-    friend real     const&eph   (const GravLeaf*L) {return L->eph(); }
-    friend real           size  (const GravLeaf*L) {return twice(L->eph()); }
-    friend real     const&sizeq (const GravLeaf*L) {return L->sizeq(); }
-#endif
-    friend real     const&mass  (const GravLeaf*L) {return L->mass(); }
-    //--------------------------------------------------------------------------
-    // copy data from body to leaf                                              
-    //--------------------------------------------------------------------------
-    template<typename bodies_type>
-    void copy_from_bodies_mass(const bodies_type*const&B) {
-      mass() = B->mass(mybody());
-    }
-    //--------------------------------------------------------------------------
-#ifdef falcON_INDI
-    template<typename bodies_type>
-    void copy_from_bodies_eph(const bodies_type*const&B) {
-      eph() = half*B->eps(mybody());
-    }
-#endif
-    //--------------------------------------------------------------------------
-    // copy data to body from leaf                                              
-    //--------------------------------------------------------------------------
-#ifdef falcON_ADAP
-    template<typename bodies_type>
-    void copy_to_bodies_eps(const bodies_type*const&B) {
-      B->eps(mybody()) = twice(eph());
-    }
-#endif
-    //--------------------------------------------------------------------------
-    template<typename bodies_type>
-    void copy_to_bodies_rho(const bodies_type*const&B) const {
-      B->rho(mybody()) = rho();
-    }
-    //--------------------------------------------------------------------------
-    template<typename bodies_type>
-    void copy_to_bodies_acc(const bodies_type*const&B) const {
-      B->acc(mybody()) = acc();
-    }
-    //--------------------------------------------------------------------------
-    template<typename bodies_type>
-    void copy_to_bodies_pot(const bodies_type*const&B) const {
-      B->pot(mybody()) = pot();
-    }
-    //--------------------------------------------------------------------------
-    template<typename bodies_type>
-    void copy_to_bodies_grav(const bodies_type*const&B) const {
-      copy_to_bodies_pot(B);
-      copy_to_bodies_acc(B);
-    }
-    //--------------------------------------------------------------------------
-    // with non-unity constant G of gravity                                     
-    template<typename bodies_type>
-    void copy_to_bodies_acc(const bodies_type*const&B,
-			    real              const&G) const {
-      B->acc(mybody()) = G * acc();
-    }
-    //--------------------------------------------------------------------------
-    template<typename bodies_type>
-    void copy_to_bodies_pot(const bodies_type*const&B,
-			    real              const&G) const {
-      B->pot(mybody()) = G * pot();
-    }
-    //--------------------------------------------------------------------------
-    template<typename bodies_type>
-    void copy_to_bodies_grav(const bodies_type*const&B,
-			     real              const&G) const {
-      copy_to_bodies_pot(B,G);
-      copy_to_bodies_acc(B,G);
-    }
-    //--------------------------------------------------------------------------
-    // reset body gravity data (needed if G=0)                                  
-    //--------------------------------------------------------------------------
-    template<typename bodies_type>
-    void reset_bodies_acc(const bodies_type*const&B) const {
-      B->acc(mybody()) = zero;
-    }
-    //--------------------------------------------------------------------------
-    template<typename bodies_type>
-    void reset_bodies_pot(const bodies_type*const&B) const {
-      B->pot(mybody()) = zero;
-    }
-    //--------------------------------------------------------------------------
-    template<typename bodies_type>
-    void reset_bodies_grav(const bodies_type*const&B) const {
-      reset_bodies_pot(B);
-      reset_bodies_acc(B);
-    }
-    //--------------------------------------------------------------------------
-    // simple manipulations                                                     
-    //--------------------------------------------------------------------------
-    void set_sink  (sink_data*const&sink) { PROP = static_cast<void*>(sink); }
-    void reset_sink()                     { __sink->reset(); }
-    //--------------------------------------------------------------------------
-    void normalize_grav () {                       // acc,pot     /= mass       
-      if(mass()>zero) {
-	register real im = one/mass();
-	pot() *= im;
-	acc() *= im;
-      }
-    }
-    //--------------------------------------------------------------------------
-    // boolean information                                                      
-    //--------------------------------------------------------------------------
-    friend bool is_source(const GravLeaf*const&S) { return S->mass() != zero; }
-    //--------------------------------------------------------------------------
-    // dump leaf data                                                           
-    //--------------------------------------------------------------------------
-    static void dump_head(std::ostream& o) {
-      BasicLeaf::dump_head(o);
-      o<<"              mass";
-    }
-    //--------------------------------------------------------------------------
-    void dump(std::ostream&o) const {
-      BasicLeaf::dump(o);
-      o<<' '<<setw(8)<<mass();
-    }
-    //--------------------------------------------------------------------------
-  };
-#undef __sink
-  falcON_TRAITS(GravLeaf,"GravLeaf");
-  falcON_TRAITS(GravLeaf::sink_data,"GravLeaf::sink_data");
-  //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // class falcON::GravCell                                                   //
-  //                                                                          //
-  //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // On the data usage for data beyond those used by OctTree etc              //
-  //                                                                          //
-  // variable        |  datum                                                 //
-  // ----------------+-------------------------------------------------       //
-  // BasicCell::POS  |  centre of mass                                        //
-  // BasicCell::RAD  |  rmax, rcrit, size                                     //
-  // BasicCell::AUX1 |  pointer to srce_data                                  //
-  // BasicCell::AUX2 |  pointer to Coeffs (sink data)                         //
-  // BasicCell::AUX3 |  eps/2 (only used with individual softening lengths)   //
-  // srce_data::MASS |  mass                                                  //
-  // srce_data::POLS |  specific multipole moments                            //
-  //                                                                          //
-  //////////////////////////////////////////////////////////////////////////////
-  class GravCell : public BasicCell {
-    GravCell           (const GravCell&);          // not implemented           
-    GravCell& operator=(const GravCell&);          // not implemented           
-    //--------------------------------------------------------------------------
-    // types and static data                                                    
-    //--------------------------------------------------------------------------
-  public:
-    typedef GravLeaf leaf_type;                    // type of associated leafs  
-    typedef grav::Mset Mset;
-    typedef grav::Cset Cset;
-    //--------------------------------------------------------------------------
-    static const int N_SINK = Cset::NDAT;
-    //--------------------------------------------------------------------------
-  private:
-#if defined(__GNUC__) && (__GNUC__ < 3 || __GNUC__ == 3 && __GNUC_MINOR__ < 4)
-    // patch for fix a bug with gcc version < 3.4
-  public:
-#endif
-    struct srce_data {
-      real MASS;
-      Mset POLS;
-      void normalize_poles()         { POLS.normalize(MASS); }
-    };
-    //--------------------------------------------------------------------------
-    // friendships                                                              
-    //--------------------------------------------------------------------------
-    friend class GravEstimator;                    // for alloc of srce_data    
-    friend class falcON::traits<srce_data>;
-    //--------------------------------------------------------------------------
-    // private data access                                                      
-    //--------------------------------------------------------------------------
-#define __srce  static_cast<srce_data*>(AUX1.PTER)
-    real const&mass  () const { return __srce->MASS; }
-    vect const&cofm  () const { return POS; }
-    real const&rmax  () const { return RAD; }
-    real const&size  () const { return RAD; }
-    real const&rcrit () const { return RAD; }
-    real       rcrit2() const { return square(rcrit()); }
-    real const&eph   () const { return AUX3.SCAL; }
-          Cset&Coeffs() const { return *static_cast<Cset*>(AUX2.PTER); }
-    const Mset&poles () const { return __srce->POLS; }
-    //--------------------------------------------------------------------------
-    // simple manipulations                                                     
-    //--------------------------------------------------------------------------
-  public:
-    void set_rcrit   (real const&it) { RAD *= it; }
-    //--------------------------------------------------------------------------
-    void set_srce    (srce_data*const&srce)
-    {
-      AUX1.PTER = static_cast<void*>(srce);
-    }
-    //--------------------------------------------------------------------------
-    void setCoeffs   (Cset     *const&sink)
-    {
-      AUX2.PTER = static_cast<void*>(sink); 
-    }
-    //--------------------------------------------------------------------------
-    void*returnCoeffs()                     { return AUX2.PTER; }
-    void resetCoeffs ()                     { AUX2.PTER=0; }
-    bool hasCoeffs   () const               { return AUX2.PTER != 0; }
-    //--------------------------------------------------------------------------
-    // non-const data access via members                                        
-    //--------------------------------------------------------------------------
-    real &mass  () { return __srce->MASS; }
-    vect &cofm  () { return POS; }
-    real &rmax  () { return RAD; }
-    real &size  () { return RAD; }
-    real &eph   () { return AUX3.SCAL; }
-    Cset &Coeffs() { return *static_cast<Cset*>(AUX2.PTER); }
-    Mset &poles () { return __srce->POLS; }
-#undef __srce
-    //--------------------------------------------------------------------------
-    // const data access via friends                                            
-    //--------------------------------------------------------------------------
-    friend real const&mass  (const GravCell*C) { return C->mass(); }
-    friend vect const&cofm  (const GravCell*C) { return C->cofm(); }
-    friend vect const&pos   (const GravCell*C) { return C->cofm(); }
-    friend real const&rmax  (const GravCell*C) { return C->rmax(); }
-    friend real const&rcrit (const GravCell*C) { return C->rcrit(); }
-    friend real const&size  (const GravCell*C) { return C->size(); }
-    friend real       rcrit2(const GravCell*C) { return C->rcrit2(); }
-    friend real const&eph   (const GravCell*C) { return C->eph(); }
-    friend Cset      &Coeffs(const GravCell*C) { return C->Coeffs(); }
-    friend Mset const&poles (const GravCell*C) { return C->poles();}
-    friend bool hasCoeffs   (const GravCell*C) { return C->hasCoeffs();}
-    //--------------------------------------------------------------------------
-    // boolean information via friends                                          
-    //--------------------------------------------------------------------------
-    friend bool is_source   (const GravCell*const&C) { 
-      return falcON::mass(C)!=zero; }
-    //--------------------------------------------------------------------------
-    // other const methods and friends                                          
-    //--------------------------------------------------------------------------
-    friend real xmin(const GravCell*const&C) {
-      return falcON::cofm(C).min() - falcON::rmax(C); }
-    friend real xmax(const GravCell*const&C) {
-      return falcON::cofm(C).max() + falcON::rmax(C); }
-    //--------------------------------------------------------------------------
-    // dump cell data                                                           
-    //--------------------------------------------------------------------------
-    static void dump_head(std::ostream&o) {
-      BasicCell::dump_head(o);
-      o<<
-	"              mass"
-	"              cofm         "
-	"         rmax"
-	"        rcrit";
-    }
-    //--------------------------------------------------------------------------
-    void dump(std::ostream&o) const {
-      BasicCell::dump(o);
-      o<<' '<<setw(8)<<mass();
-      for(register int i=0; i<Ndim; i++)
-	o<<' '<<setw(8)<<setprecision(4)<<cofm()[i];
-      o<<' '<<setw(12)<<rmax()
-       <<' '<<setw(12)<<rcrit();
-    }
-    //--------------------------------------------------------------------------
-  };
-  falcON_TRAITS(GravCell,"GravCell");
-  falcON_TRAITS(GravCell::srce_data,"GravCell::srce_data");
-  //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
   // class falcON::GravEstimator                                              //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
@@ -451,6 +122,330 @@ namespace falcON {
     //--------------------------------------------------------------------------
     GravEstimator            (GravEstimator const&);
     GravEstimator& operator= (GravEstimator const&);
+    //--------------------------------------------------------------------------
+    //                                                                          
+    // sub-type Leaf                                                            
+    //                                                                          
+    //--------------------------------------------------------------------------
+  public:
+    class Leaf : public OctTree::Leaf {
+      Leaf           (const Leaf&);                // not implemented           
+      Leaf& operator=(const Leaf&);                // not implemented           
+      //------------------------------------------------------------------------
+      // data of class Leaf (only static)                                       
+      //------------------------------------------------------------------------
+#if defined(__GNUC__) && (__GNUC__ < 3 || __GNUC__ == 3 && __GNUC_MINOR__ < 4)
+      // patch to fix a bug with gcc version < 3.4
+    public:
+#endif
+      struct sink_data : public symset3D<1,real> {
+	void     reset() {        symset3D<1,real>::operator=(zero); }
+	real    &pot  () { return symset3D<1,real>::tensor<0>(); }
+	vect    &acc  () { return symset3D<1,real>::tensor<1>(); }
+	unsigned&num  () { return *(static_cast<unsigned*>
+				   (static_cast<void*>(&pot()))); }
+      };
+      //------------------------------------------------------------------------
+      // friends                                                                
+      //------------------------------------------------------------------------
+      friend class GravEstimator;
+      friend class falcON::traits<sink_data>;
+      //------------------------------------------------------------------------
+      // private data access                                                    
+      //------------------------------------------------------------------------
+      sink_data*       sink () const { return static_cast<sink_data*>(PROP); }
+      real            &mass ()       { return SCAL; }
+      real       const&mass () const { return SCAL; }
+      vect       const&acc  () const { return sink()->acc(); }
+      vect       const&cofm () const { return pos(); }
+      real       const&sizeq() const { return acc()[0]; }
+      real       const&pot  () const { return sink()->pot(); }
+      real       const&rho  () const { return pot(); }
+      unsigned   const&num  () const { return sink()->num(); }
+#ifdef falcON_INDI
+      real       const&eph  () const { return AUXR; }
+#endif
+      //------------------------------------------------------------------------
+      // non-const data access via members                                      
+      //------------------------------------------------------------------------
+    public:
+      vect    &acc  () { return sink()->acc(); }
+      vect    &cofm () { return pos(); }
+      real    &sizeq() { return acc()[0]; }
+      real    &pot  () { return sink()->pot(); }
+      real    &rho  () { return pot(); }
+      unsigned&num  () { return sink()->num(); }
+#ifdef falcON_INDI
+      real    &eph  () { return AUXR; }
+#endif
+      void     inc  () { ++num(); }
+      symset3D<1,real>& Coeffs() { return *(sink()); }
+      //------------------------------------------------------------------------
+      // const data access via friends                                          
+      //------------------------------------------------------------------------
+      friend vect     const&cofm  (const Leaf*L) {return L->pos(); }
+      friend vect     const&acc   (const Leaf*L) {return L->acc(); }
+      friend real     const&pot   (const Leaf*L) {return L->pot(); }
+      friend real     const&rho   (const Leaf*L) {return L->rho(); }
+      friend unsigned const&num   (const Leaf*L) {return L->num(); }
+#ifdef falcON_INDI
+      friend real     const&eph   (const Leaf*L) {return L->eph(); }
+      friend real           size  (const Leaf*L) {return twice(L->eph()); }
+      friend real     const&sizeq (const Leaf*L) {return L->sizeq(); }
+#endif
+      friend real     const&mass  (const Leaf*L) {return L->mass(); }
+      //------------------------------------------------------------------------
+      // copy data from body to leaf                                            
+      //------------------------------------------------------------------------
+      template<typename bodies_type>
+      void copy_from_bodies_mass(const bodies_type*const&B) {
+	mass() = B->mass(mybody());
+      }
+      //------------------------------------------------------------------------
+#ifdef falcON_INDI
+      template<typename bodies_type>
+      void copy_from_bodies_eph(const bodies_type*const&B) {
+	eph() = half*B->eps(mybody());
+      }
+#endif
+      //------------------------------------------------------------------------
+      // copy data to body from leaf                                            
+      //------------------------------------------------------------------------
+#ifdef falcON_ADAP
+      template<typename bodies_type>
+      void copy_to_bodies_eps(const bodies_type*const&B) {
+	B->eps(mybody()) = twice(eph());
+      }
+#endif
+      //------------------------------------------------------------------------
+      template<typename bodies_type>
+      void copy_to_bodies_rho(const bodies_type*const&B) const {
+	B->rho(mybody()) = rho();
+      }
+      //------------------------------------------------------------------------
+      template<typename bodies_type>
+      void copy_to_bodies_acc(const bodies_type*const&B) const {
+	B->acc(mybody()) = acc();
+      }
+      //------------------------------------------------------------------------
+      template<typename bodies_type>
+      void copy_to_bodies_pot(const bodies_type*const&B) const {
+	B->pot(mybody()) = pot();
+      }
+      //------------------------------------------------------------------------
+      template<typename bodies_type>
+      void copy_to_bodies_grav(const bodies_type*const&B) const {
+	copy_to_bodies_pot(B);
+	copy_to_bodies_acc(B);
+      }
+      //------------------------------------------------------------------------
+      // with non-unity constant G of gravity                                   
+      template<typename bodies_type>
+      void copy_to_bodies_acc(const bodies_type*const&B,
+			      real              const&G) const {
+	B->acc(mybody()) = G * acc();
+      }
+      //------------------------------------------------------------------------
+      template<typename bodies_type>
+      void copy_to_bodies_pot(const bodies_type*const&B,
+			      real              const&G) const {
+	B->pot(mybody()) = G * pot();
+      }
+      //------------------------------------------------------------------------
+      template<typename bodies_type>
+      void copy_to_bodies_grav(const bodies_type*const&B,
+			       real              const&G) const {
+	copy_to_bodies_pot(B,G);
+	copy_to_bodies_acc(B,G);
+      }
+      //------------------------------------------------------------------------
+      // reset body gravity data (needed if G=0)                                
+      //------------------------------------------------------------------------
+      template<typename bodies_type>
+      void reset_bodies_acc(const bodies_type*const&B) const {
+	B->acc(mybody()) = zero;
+      }
+      //------------------------------------------------------------------------
+      template<typename bodies_type>
+      void reset_bodies_pot(const bodies_type*const&B) const {
+	B->pot(mybody()) = zero;
+      }
+      //------------------------------------------------------------------------
+      template<typename bodies_type>
+      void reset_bodies_grav(const bodies_type*const&B) const {
+	reset_bodies_pot(B);
+	reset_bodies_acc(B);
+      }
+      //------------------------------------------------------------------------
+      // simple manipulations                                                   
+      //------------------------------------------------------------------------
+      void set_sink  (sink_data*const&sink) { PROP = static_cast<void*>(sink); }
+      void reset_sink()                     { sink()->reset(); }
+      //------------------------------------------------------------------------
+      void normalize_grav () {                     // acc,pot     /= mass       
+	if(mass()>zero) {
+	  register real im = one/mass();
+	  pot() *= im;
+	  acc() *= im;
+	}
+      }
+      //------------------------------------------------------------------------
+      // boolean information                                                    
+      //------------------------------------------------------------------------
+      friend bool is_source(const Leaf*const&S) { return S->mass() != zero; }
+      //------------------------------------------------------------------------
+      // dump leaf data                                                         
+      //------------------------------------------------------------------------
+      static void dump_head(std::ostream& o) {
+	OctTree::Leaf::dump_head(o);
+	o<<"              mass";
+      }
+      //------------------------------------------------------------------------
+      void dump(std::ostream&o) const {
+	OctTree::Leaf::dump(o);
+	o<<' '<<setw(8)<<mass();
+      }
+      //------------------------------------------------------------------------
+    };// class Leaf {
+    //--------------------------------------------------------------------------
+    //                                                                          
+    // sub-type Cell                                                            
+    //                                                                          
+    //--------------------------------------------------------------------------
+    //                                                                          
+    // On the data usage for data beyond those used by OctTree etc              
+    //                                                                          
+    // variable            |  datum                                             
+    // --------------------+-------------------------------------------------   
+    // OctTree::Cell::POS  |  centre of mass                                    
+    // OctTree::Cell::RAD  |  rmax, rcrit, size                                 
+    // OctTree::Cell::AUX1 |  pointer to srce_data                              
+    // OctTree::Cell::AUX2 |  pointer to Coeffs (sink data)                     
+    // OctTree::Cell::AUX3 |  eps/2 (only used with indiv softening lengths)    
+    // srce_data::MASS     |  mass                                              
+    // srce_data::POLS     |  specific multipole moments                        
+    //                                                                          
+    //--------------------------------------------------------------------------
+    class Cell : public OctTree::Cell {
+      Cell           (const Cell&);                // not implemented           
+      Cell& operator=(const Cell&);                // not implemented           
+      //------------------------------------------------------------------------
+      // types and static data                                                  
+      //------------------------------------------------------------------------
+    public:
+      typedef Leaf leaf_type;                      // type of associated leafs  
+      typedef grav::Mset Mset;
+      typedef grav::Cset Cset;
+      //------------------------------------------------------------------------
+      static const int N_SINK = Cset::NDAT;
+      //------------------------------------------------------------------------
+    private:
+#if defined(__GNUC__) && (__GNUC__ < 3 || __GNUC__ == 3 && __GNUC_MINOR__ < 4)
+      // patch for fix a bug with gcc version < 3.4
+    public:
+#endif
+      struct srce_data {
+	real MASS;
+	Mset POLS;
+	void normalize_poles()         { POLS.normalize(MASS); }
+      };
+      //------------------------------------------------------------------------
+      // friendships                                                            
+      //------------------------------------------------------------------------
+      friend class GravEstimator;                  // for alloc of srce_data    
+      friend class falcON::traits<srce_data>;
+      //------------------------------------------------------------------------
+      // private data access                                                    
+      //------------------------------------------------------------------------
+#define __srce  static_cast<srce_data*>(AUX1.PTER)
+      real const&mass  () const { return __srce->MASS; }
+      vect const&cofm  () const { return POS; }
+      real const&rmax  () const { return RAD; }
+      real const&size  () const { return RAD; }
+      real const&rcrit () const { return RAD; }
+      real       rcrit2() const { return square(rcrit()); }
+      real const&eph   () const { return AUX3.SCAL; }
+      Cset&Coeffs() const { return *static_cast<Cset*>(AUX2.PTER); }
+      const Mset&poles () const { return __srce->POLS; }
+      //------------------------------------------------------------------------
+      // simple manipulations                                                   
+      //------------------------------------------------------------------------
+    public:
+      void set_rcrit   (real const&it) { RAD *= it; }
+      //------------------------------------------------------------------------
+      void set_srce    (srce_data*const&srce)
+      {
+	AUX1.PTER = static_cast<void*>(srce);
+      }
+      //------------------------------------------------------------------------
+      void setCoeffs   (Cset     *const&sink)
+      {
+	AUX2.PTER = static_cast<void*>(sink); 
+      }
+      //------------------------------------------------------------------------
+      void*returnCoeffs()                     { return AUX2.PTER; }
+      void resetCoeffs ()                     { AUX2.PTER=0; }
+      bool hasCoeffs   () const               { return AUX2.PTER != 0; }
+      //------------------------------------------------------------------------
+      // non-const data access via members                                      
+      //------------------------------------------------------------------------
+      real &mass  () { return __srce->MASS; }
+      vect &cofm  () { return POS; }
+      real &rmax  () { return RAD; }
+      real &size  () { return RAD; }
+      real &eph   () { return AUX3.SCAL; }
+      Cset &Coeffs() { return *static_cast<Cset*>(AUX2.PTER); }
+      Mset &poles () { return __srce->POLS; }
+#undef __srce
+      //------------------------------------------------------------------------
+      // const data access via friends                                          
+      //------------------------------------------------------------------------
+      friend real const&mass  (const Cell*C) { return C->mass(); }
+      friend vect const&cofm  (const Cell*C) { return C->cofm(); }
+      friend vect const&pos   (const Cell*C) { return C->cofm(); }
+      friend real const&rmax  (const Cell*C) { return C->rmax(); }
+      friend real const&rcrit (const Cell*C) { return C->rcrit(); }
+      friend real const&size  (const Cell*C) { return C->size(); }
+      friend real       rcrit2(const Cell*C) { return C->rcrit2(); }
+      friend real const&eph   (const Cell*C) { return C->eph(); }
+      friend Cset      &Coeffs(const Cell*C) { return C->Coeffs(); }
+      friend Mset const&poles (const Cell*C) { return C->poles();}
+      friend bool hasCoeffs   (const Cell*C) { return C->hasCoeffs();}
+      //------------------------------------------------------------------------
+      // boolean information via friends                                        
+      //------------------------------------------------------------------------
+      friend bool is_source   (const Cell*C) { 
+	return falcON::mass(C)!=zero; }
+      //------------------------------------------------------------------------
+      // other const methods and friends                                        
+      //------------------------------------------------------------------------
+      friend real xmin(const Cell*C) {
+	return falcON::cofm(C).min() - falcON::rmax(C); }
+      friend real xmax(const Cell*C) {
+	return falcON::cofm(C).max() + falcON::rmax(C); }
+      //------------------------------------------------------------------------
+      // dump cell data                                                         
+      //------------------------------------------------------------------------
+      static void dump_head(std::ostream&o) {
+	OctTree::Cell::dump_head(o);
+	o<<
+	  "              mass"
+	  "              cofm         "
+	  "         rmax"
+	  "        rcrit";
+      }
+      //------------------------------------------------------------------------
+      void dump(std::ostream&o) const {
+	OctTree::Cell::dump(o);
+	o<<' '<<setw(8)<<mass();
+	for(register int i=0; i<Ndim; i++)
+	  o<<' '<<setw(8)<<setprecision(4)<<cofm()[i];
+	o<<' '<<setw(12)<<rmax()
+	 <<' '<<setw(12)<<rcrit();
+      }
+      //------------------------------------------------------------------------
+    };// class Cell {
+  private:
     //--------------------------------------------------------------------------
     // data:                                                                    
     //--------------------------------------------------------------------------
@@ -466,8 +461,8 @@ namespace falcON {
     real                  EPS;                     // global softening length   
     real                  GRAV;                    // Newton's G (can be 0)     
     unsigned              Ncoeffs,Nchunks,Ncsize;  // # coeffs, chunks, bytes/c 
-    GravCell::srce_data  *CELL_SRCE;               // memory for cell srce      
-    GravLeaf::sink_data  *LEAF_SINK;               // memory for leafs          
+    Cell::srce_data      *CELL_SRCE;               // memory for cell srce      
+    Leaf::sink_data      *LEAF_SINK;               // memory for leafs          
     unsigned              NCT, NCA, NLA;           // # allocation of these     
     unsigned              NLA_needed;              // # active leafs            
     //--------------------------------------------------------------------------
@@ -506,14 +501,14 @@ namespace falcON {
     // tree stuff to be superseeded                                             
     //--------------------------------------------------------------------------
   public:
-    typedef GravCell                        cell_type;
-    typedef GravLeaf                        leaf_type;
-    typedef OctTree::CellIter<GravCell>     cell_iterator;
-    typedef leaf_type*                      leaf_iterator;
+    typedef Cell                         cell_type;
+    typedef Leaf                         leaf_type;
+    typedef OctTree::CellIter<cell_type> cell_iterator;
+    typedef leaf_type*                   leaf_iterator;
     //--------------------------------------------------------------------------
     const OctTree*const&my_tree() const { return TREE; }
     cell_iterator root         () const {
-      return cell_iterator(TREE,static_cast<GravCell*>(TREE->FstCell())); }
+      return cell_iterator(TREE,static_cast<Cell*>(TREE->FstCell())); }
     //--------------------------------------------------------------------------
     // dump cell and leaf data                                                  
     //--------------------------------------------------------------------------
@@ -635,27 +630,32 @@ namespace falcON {
 #ifdef falcON_INDI
     bool           const&use_indiv_eps   () const { return INDI_SOFT; }
 #endif
-  };
+  };// class GravEstimator {
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
   // namespace falcON::grav                                                   //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
   namespace grav {
-    typedef GravCell                      cell_type;
-    typedef GravLeaf                      leaf_type;
-    typedef GravCell                     *cell_pter;
-    typedef GravLeaf                     *leaf_pter;
+    typedef GravEstimator::Cell           cell;
+    typedef GravEstimator::Leaf           leaf;
+    typedef GravEstimator::Cell          *cell_pter;
+    typedef GravEstimator::Leaf          *leaf_pter;
     typedef GravEstimator::cell_iterator  cell_iter;
     typedef GravEstimator::leaf_iterator  leaf_iter;
   }
   //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // traits for grav::leaf_iter and grav::cell_iter                           //
-  //                                                                          //
-  //////////////////////////////////////////////////////////////////////////////
-  falcON_TRAITS(grav::leaf_iter,"GravLeaf*");
-  falcON_TRAITS(grav::cell_iter,"OctTree::CellIter<GravCell>");
+  falcON_TRAITS(GravEstimator,"GravEstimator","GravEstimators");
+  falcON_TRAITS(GravEstimator::Cell,
+		"GravEstimator::Cell","GravEstimator::Cells");
+  falcON_TRAITS(GravEstimator::Leaf,
+		"GravEstimator::Leaf","GravEstimator::Leafs");
+  falcON_TRAITS(GravEstimator::Cell::srce_data,
+		"GravEstimator::Cell::srce_data",
+		"GravEstimator::Cell::srce_data");
+  falcON_TRAITS(GravEstimator::Leaf::sink_data,
+		"GravEstimator::Leaf::sink_data",
+		"GravEstimator::Leaf::sink_data");
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
   // class GravStats                                                          //
@@ -820,3 +820,4 @@ namespace falcON {
 ////////////////////////////////////////////////////////////////////////////////
 #undef  ENHANCED_IACT_STATS
 #endif // falcON_included_gravity_h
+    

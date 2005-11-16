@@ -58,6 +58,7 @@ namespace falcON {
       return
 	message("iaction< %s, %s >", traits<A>::name(), traits<B>::name());
     }
+    static const char  *names() { return name(); }
     static const size_t size = sizeof( iaction<A,B> );
   };
   //----------------------------------------------------------------------------
@@ -111,6 +112,7 @@ namespace falcON {
     static const char  *name() { 
       return message("saction< %s >", traits<A>::name());
     }
+    static const char  *names() { return name(); }
     static const size_t size = sizeof( saction<A> );
   };
   //----------------------------------------------------------------------------

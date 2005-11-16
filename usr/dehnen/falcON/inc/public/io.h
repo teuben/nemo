@@ -338,27 +338,26 @@ namespace falcON {
       pos     = 1 <<  1,
       vel     = 1 <<  2,
       eps     = 1 <<  3,
-      flag    = 1 <<  4,
-      key     = 1 <<  5,
-      tau     = 1 <<  6,
-      pot     = 1 <<  7,
-      acc     = 1 <<  8,
-      jerk    = 1 <<  9,
-      dens    = 1 << 10,
-      aux     = 1 << 11,
-      lev     = 1 << 12,
-      num     = 1 << 13,
-      posvel  = 1 << 14,
-      SPHh    = 1 << 15,
-      SPHnum  = 1 << 16,
-      SPHu    = 1 << 17,
-      SPHudot = 1 << 18,
-      SPHurad = 1 << 19,
-      SPHentr = 1 << 20,
-      SPHdens = 1 << 21,
-      SPHhdot = 1 << 22,
-      SPHfact = 1 << 23,
-      SPHcs   = 1 << 24
+      key     = 1 <<  4,
+      tau     = 1 <<  5,
+      pot     = 1 <<  6,
+      acc     = 1 <<  7,
+      jerk    = 1 <<  8,
+      dens    = 1 <<  9,
+      aux     = 1 << 10,
+      lev     = 1 << 11,
+      num     = 1 << 12,
+      posvel  = 1 << 13,
+      SPHh    = 1 << 14,
+      SPHnum  = 1 << 15,
+      SPHu    = 1 << 16,
+      SPHudot = 1 << 17,
+      SPHurad = 1 << 18,
+      SPHentr = 1 << 19,
+      SPHdens = 1 << 20,
+      SPHhdot = 1 << 21,
+      SPHfact = 1 << 22,
+      SPHcs   = 1 << 23
     };
     //--------------------------------------------------------------------------
     /// get the nemo_io::DataType used for a given Field                        
@@ -368,7 +367,6 @@ namespace falcON {
       case pos    : return Real;
       case vel    : return Real;
       case eps    : return Real;
-      case flag   : return Integer;
       case key    : return Integer;
       case tau    : return Real;
       case pot    : return Real;
@@ -418,7 +416,6 @@ namespace falcON {
       case fieldbit::x: return pos;
       case fieldbit::v: return vel;
       case fieldbit::e: return eps;
-      case fieldbit::f: return flag;
       case fieldbit::k: return key;
       case fieldbit::t: return tau;
       case fieldbit::p: return pot;
@@ -450,7 +447,6 @@ namespace falcON {
       case pos:     return fieldbit::x;
       case vel:     return fieldbit::v;
       case eps:     return fieldbit::e;
-      case flag:    return fieldbit::f;
       case key:     return fieldbit::k;
       case tau:     return fieldbit::t;
       case pot:     return fieldbit::p;

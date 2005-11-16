@@ -1,7 +1,7 @@
 // -*- C++ -*-                                                                 |
 //-----------------------------------------------------------------------------+
 //                                                                             |
-// kernel.h                                                                    |
+/// /file inc/public/kernel.h                                                  |
 //                                                                             |
 // Copyright (C) 2000-2005  Walter Dehnen                                      |
 //                                                                             |
@@ -22,7 +22,7 @@
 //-----------------------------------------------------------------------------+
 //                                                                             |
 // design note: experiments have shown that, strange enough, a code with       |
-//              grav_kern and grav_kern_all being templates with template      |
+//              GravKern and GravKernAll being templates with template         |
 //              parameter being the kern_type, is somewhat slower (with gcc    |
 //              3.2.2: 4% for SSE code). This affects only the approximate     |
 //              part of gravity.                                               |
@@ -59,16 +59,16 @@ namespace falcON {
     friend bool is_empty(TaylorSeries const&T) {
       return T.C == zero; }
     //--------------------------------------------------------------------------
-    inline void shift_and_add(const GravCell*const&);
-    inline void extract_grav (GravLeaf*const&) const;
+    inline void shift_and_add(const grav::cell*const&);
+    inline void extract_grav (grav::leaf*const&) const;
     //--------------------------------------------------------------------------
   };
   //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // class falcON::grav_kern_base                                             //
-  //                                                                          //
+  //                                                                            
+  // class falcON::GravKernBase                                                 
+  //                                                                            
   //////////////////////////////////////////////////////////////////////////////
-  class grav_kern_base {
+  class GravKernBase {
     //--------------------------------------------------------------------------
     // data                                                                     
     //--------------------------------------------------------------------------
@@ -98,7 +98,7 @@ namespace falcON {
       grav::leaf_pter  B[4];
       vect             dX[4];
       fvec4            D0,D1;
-      void load_g(GravCell*a, GravLeaf*b, vect&dR, real Rq)
+      void load_g(grav::cell*a, grav::leaf*b, vect&dR, real Rq)
       {
 	A [NR] = a;
 	B [NR] = b;
@@ -109,7 +109,7 @@ namespace falcON {
       }
 #ifdef falcON_INDI
       fvec4            EQ;
-      void load_i(GravCell*a, GravLeaf*b, vect&dR, real Rq)
+      void load_i(grav::cell*a, grav::leaf*b, vect&dR, real Rq)
       {
 	A [NR] = a;
 	B [NR] = b;
@@ -134,7 +134,7 @@ namespace falcON {
       grav::cell_pter  A[4], B[4];
       vect             dX[4];
       fvec4            D0,D1;
-      void load_g(GravCell*a, GravCell*b, vect&dR, real Rq)
+      void load_g(grav::cell*a, grav::cell*b, vect&dR, real Rq)
       {
 	A [NR] = a;
 	B [NR] = b;
@@ -145,7 +145,7 @@ namespace falcON {
       }
 #ifdef falcON_INDI
       fvec4            EQ;
-      void load_i(GravCell*a, GravCell*b, vect&dR, real Rq)
+      void load_i(grav::cell*a, grav::cell*b, vect&dR, real Rq)
       {
 	A [NR] = a;
 	B [NR] = b;
@@ -167,13 +167,13 @@ namespace falcON {
     // protected methods                                                        
     //--------------------------------------------------------------------------
   protected:
-    grav_kern_base(
-                   kern_type const&k,              // I: type of kernel         
- 		   real      const&e,              // I: softening length       
+    GravKernBase(
+		 kern_type const&k,                // I: type of kernel         
+		 real      const&e,                // I: softening length       
 #ifdef falcON_INDI
-		   bool      const&s,              // I: type of softening      
+		 bool      const&s,                // I: type of softening      
 #endif
-		   unsigned  const&np) :           // I: initial pool size      
+		 unsigned  const&np) :             // I: initial pool size      
       KERN       ( k ),                            // set softening kernel      
 #ifdef falcON_INDI
       INDI_SOFT  ( s ),                            // set softening type        
@@ -191,7 +191,7 @@ namespace falcON {
       NC         ( 0 ),
       MAXNC      ( 0 ) {}
     //--------------------------------------------------------------------------
-    ~grav_kern_base() {
+    ~GravKernBase() {
       if(COEFF_POOL) delete COEFF_POOL;
     }
     //--------------------------------------------------------------------------
@@ -236,14 +236,14 @@ namespace falcON {
     //--------------------------------------------------------------------------
   };
   //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // class falcON::grav_kern                                                  //
-  //                                                                          //
-  // This class implements the direct summation and approximate computation   //
-  // of gravity between tree nodes.                                           //
-  //                                                                          //
+  //                                                                            
+  // class falcON::GravKern                                                     
+  //                                                                            
+  // This class implements the direct summation and approximate computation     
+  // of gravity between tree nodes.                                             
+  //                                                                            
   //////////////////////////////////////////////////////////////////////////////
-  class grav_kern : public grav_kern_base
+  class GravKern : public GravKernBase
   {
 #ifdef falcON_SSE_CODE
     //--------------------------------------------------------------------------
@@ -256,16 +256,16 @@ namespace falcON {
     // main purpose methods                                                     
     //--------------------------------------------------------------------------
   protected:
-    grav_kern(kern_type const&k,                   // I: type of kernel         
-	      real      const&e,                   // I: softening length       
+    GravKern(kern_type const&k,                    // I: type of kernel         
+	     real      const&e,                    // I: softening length       
 #ifdef falcON_INDI
-	      bool      const&s,                   // I: type of softening      
+	     bool      const&s,                    // I: type of softening      
 #endif
-              unsigned  const&np) :                // I: initial pool size      
+	     unsigned  const&np) :                 // I: initial pool size      
 #ifdef falcON_INDI
-      grav_kern_base(k,e,s,np) {}
+      GravKernBase(k,e,s,np) {}
 #else
-      grav_kern_base(k,e,np) {}
+      GravKernBase(k,e,np) {}
 #endif
     //--------------------------------------------------------------------------
     // single leaf-leaf interaction                                             
@@ -303,7 +303,7 @@ namespace falcON {
     //--------------------------------------------------------------------------
     // destruction: flush buffers                                               
     //--------------------------------------------------------------------------
-    ~grav_kern() { flush_buffers(); }
+    ~GravKern() { flush_buffers(); }
     //--------------------------------------------------------------------------
   public:
     const real&current_eps  ()     const { return EPS; }
@@ -311,13 +311,13 @@ namespace falcON {
     //--------------------------------------------------------------------------
   };
   //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // class falcON::grav_kern_all                                              //
-  //                                                                          //
-  // Like grav_kern, except that all cells and leafs are assumed active.      //
-  //                                                                          //
+  //                                                                            
+  // class falcON::GravKernAll                                                  
+  //                                                                            
+  // Like GravKern, except that all cells and leafs are assumed active.         
+  //                                                                            
   //////////////////////////////////////////////////////////////////////////////
-  class grav_kern_all : public grav_kern_base
+  class GravKernAll : public GravKernBase
   {
 #ifdef falcON_SSE_CODE
     //--------------------------------------------------------------------------
@@ -330,16 +330,16 @@ namespace falcON {
     // main purpose methods                                                     
     //--------------------------------------------------------------------------
   protected:
-    grav_kern_all(kern_type const&k,               // I: type of kernel         
-		  real      const&e,               // I: softening length       
+    GravKernAll(kern_type const&k,                 // I: type of kernel         
+		real      const&e,                 // I: softening length       
 #ifdef falcON_INDI
-		  bool      const&s,               // I: type of softening      
+		bool      const&s,                 // I: type of softening      
 #endif
-		  unsigned  const&np) :            // I: initial pool size      
+		unsigned  const&np) :              // I: initial pool size      
 #ifdef falcON_INDI
-      grav_kern_base(k,e,s,np) {}
+      GravKernBase(k,e,s,np) {}
 #else
-      grav_kern_base(k,e,np) {}
+      GravKernBase(k,e,np) {}
 #endif
     //--------------------------------------------------------------------------
     // single leaf-leaf interaction                                             
@@ -377,7 +377,7 @@ namespace falcON {
     //--------------------------------------------------------------------------
     // destruction: flush buffers                                               
     //--------------------------------------------------------------------------
-    ~grav_kern_all() { flush_buffers(); }
+    ~GravKernAll() { flush_buffers(); }
     //--------------------------------------------------------------------------
   public:
     const real&current_eps  ()     const { return EPS; }
@@ -389,8 +389,8 @@ namespace falcON {
   // inline functions                                                         //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
-  inline void grav_kern::direct(grav::cell_iter const&CA,
-				grav::cell_iter const&CB) const
+  inline void GravKern::direct(grav::cell_iter const&CA,
+			       grav::cell_iter const&CB) const
   {
 #define ARGS_A CA.begin_leafs(),NA,CB.begin_leafs(),NB
 #define ARGS_B CB.begin_leafs(),NB,CA.begin_leafs(),NA
@@ -422,8 +422,8 @@ namespace falcON {
     }
   }
   //----------------------------------------------------------------------------
-  inline void grav_kern_all::direct(grav::cell_iter const&CA,
-				    grav::cell_iter const&CB) const
+  inline void GravKernAll::direct(grav::cell_iter const&CA,
+				  grav::cell_iter const&CB) const
   {
     const unsigned  NA=number(CA), NB=number(CB);
     if(NA%4 > NB%4) many_AA(ARGS_A);
@@ -436,10 +436,10 @@ namespace falcON {
   //----------------------------------------------------------------------------
   // blocking of approximate interactions: just fill the blocks                 
   //----------------------------------------------------------------------------
-  inline void grav_kern::approx(grav::cell_iter const&A,
-				grav::leaf_iter const&B,
-				vect                 &dR,
-				real            const&Rq) const
+  inline void GravKern::approx(grav::cell_iter const&A,
+			       grav::leaf_iter const&B,
+			       vect                 &dR,
+			       real            const&Rq) const
   {
 #if falcON_INDI
     if(INDI_SOFT) ACL.load_i(A,B,dR,Rq); else
@@ -448,10 +448,10 @@ namespace falcON {
     if(ACL.is_full()) flush_acl();
   }
   //----------------------------------------------------------------------------
-  inline void grav_kern::approx(grav::cell_iter const&A,
-				grav::cell_iter const&B,
-				vect                 &dR,
-				real            const&Rq) const
+  inline void GravKern::approx(grav::cell_iter const&A,
+			       grav::cell_iter const&B,
+			       vect                 &dR,
+			       real            const&Rq) const
   {
 #if falcON_INDI
     if(INDI_SOFT) ACC.load_i(A,B,dR,Rq); else
@@ -460,10 +460,10 @@ namespace falcON {
     if(ACC.is_full()) flush_acc();
   }
   //----------------------------------------------------------------------------
-  inline void grav_kern_all::approx(grav::cell_iter const&A,
-				    grav::leaf_iter const&B,
-				    vect                 &dR,
-				    real            const&Rq) const
+  inline void GravKernAll::approx(grav::cell_iter const&A,
+				  grav::leaf_iter const&B,
+				  vect                 &dR,
+				  real            const&Rq) const
   {
 #if falcON_INDI
     if(INDI_SOFT) ACL.load_i(A,B,dR,Rq); else
@@ -472,10 +472,10 @@ namespace falcON {
     if(ACL.is_full()) flush_acl();
   }
   //----------------------------------------------------------------------------
-  inline void grav_kern_all::approx(grav::cell_iter const&A,
-				    grav::cell_iter const&B,
-				    vect                 &dR,
-				    real            const&Rq) const
+  inline void GravKernAll::approx(grav::cell_iter const&A,
+				  grav::cell_iter const&B,
+				  vect                 &dR,
+				  real            const&Rq) const
   {
 #if falcON_INDI
     if(INDI_SOFT) ACC.load_i(A,B,dR,Rq); else

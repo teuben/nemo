@@ -1,7 +1,7 @@
 // -*- C++ -*-                                                                 |
 //-----------------------------------------------------------------------------+
 //                                                                             |
-// tree.cc                                                                     |
+/// \file src/public/tree.cc                                                   |
 //                                                                             |
 // Copyright (C) 2000-2005  Walter Dehnen                                      |
 //                                                                             |
@@ -18,70 +18,6 @@
 // You should have received a copy of the GNU General Public License           |
 // along with this program; if not, write to the Free Software                 |
 // Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                   |
-//                                                                             |
-//-----------------------------------------------------------------------------+
-//                                                                             |
-// tree-building  is done in three steps:                                      |
-// - root construction                                                         |
-// - building of a box-dot tree                                                |
-// - linking to a cell-leaf tree                                               |
-//                                                                             |
-// root constructions:                                                         |
-// In each dimension, the mininum and maximum position is found and from them  |
-// the center and size of an appropriate root box computed.                    |
-//                                                                             |
-// building of a box-dot tree                                                  |
-// We first construct a box-dot tree. The dot-adding algorithm is used, ie.    |
-// the dots are added one-by-one to the root box (the alternative would be     |
-// the box-dividing algorithm, which we found to be slightly less efficient).  |
-// The boxes are allocated in blocks, using block_alloc of public/memory.h.    |
-// Boxes with less than Ncrit dots are not divided (ie. we wait until a box    |
-// has Ncrit dots before splitting it).                                        |
-//                                                                             |
-// linking to a cell-leaf tree                                                 |
-// The box-dot tree is mapped to a cell-leaf tree, such that all cells that    |
-// are contained in a given cell are contiguous in memory. The same holds for  |
-// the leafs.                                                                  |
-//                                                                             |
-// Notes                                                                       |
-// There are several reasons that make the two-step process of first building  |
-// a box-dot tree and then mapping it to a cell-leaf tree worth our while:     |
-// - we can arrange sub-cells and sub-leafs to be contiguous in memory;        |
-//   this implies that looping over sub-leafs is very fast (no linked lists    |
-//   spawming randomly through memory are used), the immediate child leafs     |
-//   as well as all the leaf descendants may be addressed easily.              |
-// - we can build the tree with memory-minimal entities (boxes are smaller     |
-//   then cells, dots smaller than leafs), saving CPU time;                    |
-// - we can allocate EXACTLY the correct number of cells;                      |
-//                                                                             |
-// Variants                                                                    |
-// When an old tree is already existent, we may employ the fact that the order |
-// of the new tree may differ only little. There are two ways to exploit that: |
-// - We may just add the dots to the new tree in the same order as they are    |
-//   in the old tree. This ensures that subsequent dots will fall into the     |
-//   same box for the most part, reducing random memory access on the boxes.   |
-//   This simple method reduces the costs for tree-building by 50% or more for |
-//   large N.                                                                  |
-// - We may actually take the sorting of the old tree directly. If we still    |
-//   want to have a cell-leaf tree with contiguous sub-nodes (and we do), then |
-//   we must still go via a box-dot tree. The resulting code is not            |
-//   significantly faster then the much simpler method above and in some cases |
-//   actually much slower. It is NOT RECOMMENDED (retained for reference only).|
-//                                                                             |
-// Naming                                                                      |
-// Throughout this file, we use the following names:                           |
-// body:     iterator through either bodies or ebodies                         |
-// leaf:     body-representative in the cell-leaf tree.                        |
-// dot:      a minimal copy of a body/leaf, defined below. A dot is used       |
-//           only in this file for tree construction                           |
-// cell:     cell of the tree to be built.                                     |
-// box:      tree cell reduced to the tree-building specific needs, defined    |
-//           below; only used in this file for tree construction               |
-// node:     either a dot or a box; actually, node is base of dot and box      |
-// level:    the level of a cell is its 'distance' from root. Usually, root    |
-//           has level zero.                                                   |
-// depth:    the depth of a cell is equal to the maximum level of any of its   |
-//           descendants minus its own level.                                  |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 // #define TEST_TIMING
@@ -104,63 +40,61 @@ using namespace falcON;
 namespace falcON {
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
-  // class falcON::BasicCellAccess                                            //
+  // class falcON::CellAccess                                                 //
   //                                                                          //
   // any class derived from this one has write access to the tree-specific    //
   // entries of tree cells, which are otherwise not writable.                 //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
-  class BasicCellAccess {
+  class CellAccess {
     //--------------------------------------------------------------------------
     // protected types and methods                                              
     //--------------------------------------------------------------------------
   protected:
-    static uint8   &level_ (BasicCell* const&C) { return C->LEVEL; }
-    static uint8   &octant_(BasicCell* const&C) { return C->OCTANT; }
+    static uint8   &level_ (OctTree::Cell* const&C) { return C->LEVEL; }
+    static uint8   &octant_(OctTree::Cell* const&C) { return C->OCTANT; }
 #ifdef falcON_MPI
-    static PeanoMap&peano_ (BasicCell* const&C) { return C->PEANO; }
-    static uint8   &key_   (BasicCell* const&C) { return C->KEY; }
+    static PeanoMap&peano_ (OctTree::Cell* const&C) { return C->PEANO; }
+    static uint8   &key_   (OctTree::Cell* const&C) { return C->KEY; }
 #endif
-    static indx    &nleafs_(BasicCell* const&C) { return C->NLEAFS; }
-    static indx    &ncells_(BasicCell* const&C) { return C->NCELLS; }
-    static int     &number_(BasicCell* const&C) { return C->NUMBER; }
-    static int     &fcleaf_(BasicCell* const&C) { return C->FCLEAF; }
-    static int     &fccell_(BasicCell* const&C) { return C->FCCELL; }
-    static vect    &center_(BasicCell* const&C) { return C->CENTER; }
+    static indx    &nleafs_(OctTree::Cell* const&C) { return C->NLEAFS; }
+    static indx    &ncells_(OctTree::Cell* const&C) { return C->NCELLS; }
+    static int     &number_(OctTree::Cell* const&C) { return C->NUMBER; }
+    static int     &fcleaf_(OctTree::Cell* const&C) { return C->FCLEAF; }
+    static int     &fccell_(OctTree::Cell* const&C) { return C->FCCELL; }
+    static vect    &center_(OctTree::Cell* const&C) { return C->CENTER; }
     //--------------------------------------------------------------------------
-    static void copy_sub  (BasicCell* const&C, const BasicCell* const&P) {
+    static void copy_sub  (OctTree::Cell* const&C, const OctTree::Cell* const&P) {
       C->copy_sub(P);
     }
     //--------------------------------------------------------------------------
     // public methods                                                           
     //--------------------------------------------------------------------------
   public:
-    static size_t   NoLeaf         (const OctTree  *const&T,
-				    const BasicLeaf* const&L) {
+    static size_t   NoLeaf (const OctTree      *T,
+			    const OctTree::Leaf*L) {
       return T->NoLeaf(L);
     }
-    static size_t   NoCell         (const OctTree  *const&T,
-				    const BasicCell*const&C) {
+    static size_t   NoCell (const OctTree      *T,
+			    const OctTree::Cell*C) {
       return T->NoCell(C);
     }
-    static BasicCell* const&FstCell(const OctTree*const&T) {
+    static OctTree::Cell* const&FstCell(const OctTree*T) {
       return T->FstCell();
     }
-    static BasicLeaf* const&FstLeaf(const OctTree*const&T) {
+    static OctTree::Leaf* const&FstLeaf(const OctTree*T) {
       return T->FstLeaf();
     }
-    static BasicCell*       EndCell(const OctTree*const&T) {
+    static OctTree::Cell*       EndCell(const OctTree*T) {
       return T->EndCell();
     }
-    static BasicLeaf*       EndLeaf(const OctTree*const&T) {
+    static OctTree::Leaf*       EndLeaf(const OctTree*T) {
       return T->EndLeaf();
     }
-    static BasicCell*       CellNo (const OctTree*const&T,
-				    int           const&I) {
+    static OctTree::Cell*       CellNo (const OctTree*T, int I) {
       return T->CellNo(I);
     }
-    static BasicLeaf*       LeafNo (const OctTree*const&T,
-				    int           const&I) {
+    static OctTree::Leaf*       LeafNo (const OctTree*T, int I) {
       return T->LeafNo(I);
     }
   };
@@ -173,52 +107,42 @@ namespace {
   // auxiliary macros                                                         //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
-#define LoopDims for(int d=0; d<Ndim; ++d)
+#define LoopDims for(int d=0; d!=Ndim; ++d)
   //----------------------------------------------------------------------------
 #define __LoopLeafKids(TREE,CELL,KID)			\
-    for(BasicLeaf* KID = LeafNo(TREE,fcleaf(CELL));	\
+    for(OctTree::Leaf* KID = LeafNo(TREE,fcleaf(CELL));	\
 	KID != LeafNo(TREE,ecleaf(CELL)); ++KID)
 #define __LoopAllLeafs(TREE,CELL,KID)			\
-    for(BasicLeaf* KID = LeafNo(TREE,fcleaf(CELL));	\
+    for(OctTree::Leaf* KID = LeafNo(TREE,fcleaf(CELL));	\
 	KID != LeafNo(TREE,ncleaf(CELL)); ++KID)
 #define __LoopCellKids(TREE,CELL,KID)			\
-    for(BasicCell* KID = CellNo(TREE,fccell(CELL));	\
+    for(OctTree::Cell* KID = CellNo(TREE,fccell(CELL));	\
 	KID != CellNo(TREE,eccell(CELL)); ++KID)
 #define __LoopLeafs(TREE,LEAF)				\
-    for(BasicLeaf* LEAF = FstLeaf(TREE);		\
+    for(OctTree::Leaf* LEAF = FstLeaf(TREE);		\
         LEAF != EndLeaf(TREE); ++LEAF)
 #define __LoopMyCellsUp(CELL)				\
-    for(BasicCell* CELL=EndCells()-1;			\
+    for(OctTree::Cell* CELL=EndCells()-1;		\
 	CELL != FstCell()-1; --CELL)
 #define __LoopLeafsRange(TREE,FIRST,END,LEAF)		\
-    for(BasicLeaf* LEAF=LeafNo(TREE,FIRST);		\
+    for(OctTree::Leaf* LEAF=LeafNo(TREE,FIRST);		\
 	LEAF != LeafNo(TREE,END); ++LEAF)
-  //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // auxiliarty constants                                                     //
-  //                                                                          //
-  //////////////////////////////////////////////////////////////////////////////
-  const int SUBTREECELL   = 1<<8;                  // cell = cell of subtree    
-  const int SUBTREE_FLAGS = SUBTREE | SUBTREECELL;
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
   // auxiliarty functions                                                     //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
-  inline void flag_as_subtreecell(flag*F) {
-    F->add   (SUBTREECELL);
+  inline void flag_as_subtreecell(flags*F) {
+    F->add   (flags::subtree_cell);
   }
-  inline void unflag_subtree_flags(flag*F) { 
-    F->un_set(SUBTREE_FLAGS);
+  inline void unflag_subtree_flags(flags*F) { 
+    F->un_set(flags::subtree_flags);
   }
-  inline bool in_subtree(const flag*const&F)   {
-    return F->is_set(SUBTREE);
+  inline bool is_subtreecell(const flags*F)   {
+    return F->is_set(flags::subtree_cell);
   }
-  inline bool is_subtreecell(const flag*const&F)   {
-    return F->is_set(SUBTREECELL);
-  }
-  inline bool in_subtree(const BasicLeaf*const&L) {
-    return flg(L).is_set(SUBTREE);
+  inline bool in_subtree(const OctTree::Leaf*L) {
+    return in_subtree(flag(L));
   }
   //----------------------------------------------------------------------------
   // This routines returns, in each dimension, the nearest integer to x         
@@ -249,40 +173,40 @@ namespace {
       ;
   }
   //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // class falcON::sub_tree_builder                                           //
-  //                                                                          //
+  //                                                                            
+  // class falcON::SubTreeBuilder                                               
+  //                                                                            
   //////////////////////////////////////////////////////////////////////////////
-  class sub_tree_builder : private BasicCellAccess {
+  class SubTreeBuilder : private CellAccess {
     //--------------------------------------------------------------------------
     // public static method                                                     
     //--------------------------------------------------------------------------
   public:
-    static int link(const OctTree  *const&,        // I:   parent tree          
-		    const BasicCell*const&,        // I:   current parent cell  
-		    const OctTree  *const&,        // I:   daughter tree        
-		    BasicCell      *const&,        // I:   current cell to link 
-		    BasicCell      *     &,        // I/O: next free cell       
-		    BasicLeaf      *     &);       // I/O: next free leaf       
+    static int link(const OctTree      *,          // I:   parent tree          
+		    const OctTree::Cell*,          // I:   current parent cell  
+		    const OctTree      *,          // I:   daughter tree        
+		    OctTree::Cell      *,          // I:   current cell to link 
+		    OctTree::Cell      *&,         // I/O: next free cell       
+		    OctTree::Leaf      *&);        // I/O: next free leaf       
     //--------------------------------------------------------------------------
     static int link(                               // R:   depth of tree        
 		    const OctTree*const&PT,        // I:   parent tree          
 		    const OctTree*const&DT)        // I:   daughter tree        
     {
-      BasicLeaf* Lf=FstLeaf(DT);
-      BasicCell* Cf=FstCell(DT)+1;
+      OctTree::Leaf* Lf=FstLeaf(DT);
+      OctTree::Cell* Cf=FstCell(DT)+1;
       return link(PT,FstCell(PT), DT, FstCell(DT), Cf, Lf);
     }
   };
   //----------------------------------------------------------------------------
   int 
-  sub_tree_builder::link(                          // R:   depth of tree        
-			 const OctTree  *const&PT, // I:   parent tree          
-			 const BasicCell*const&P,  // I:   current parent cell  
-			 const OctTree  *const&T,  // I:   daughter tree        
-			 BasicCell      *const&C,  // I:   current cell to link 
-			 BasicCell      *     &Cf, // I/O: next free cell       
-			 BasicLeaf      *     &Lf) // I/O: next free leaf       
+  SubTreeBuilder::link(                            // R:   depth of tree        
+		       const OctTree      * PT,    // I:   parent tree          
+		       const OctTree::Cell* P,     // I:   current parent cell  
+		       const OctTree      * T,     // I:   daughter tree        
+		       OctTree::Cell      * C,     // I:   current cell to link 
+		       OctTree::Cell      *&Cf,    // I/O: next free cell       
+		       OctTree::Leaf      *&Lf)    // I/O: next free leaf       
   {
     int dep=0;                                     // depth                     
     copy_sub(C,P);                                 // copy level, octant, center
@@ -306,7 +230,7 @@ namespace {
     number_(C) = nleafs_(C);                       // # leafs >= # leaf kids    
     if(ncells_(C)) {                               // IF(cell has cell kids)    
       int de;                                      //   depth of sub-cell       
-      BasicCell*Ci=Cf;                             //   remember free cells     
+      OctTree::Cell*Ci=Cf;                         //   remember free cells     
       fccell_(C) = NoCell(T,Ci);                   //   set cell children       
       Cf += ncells_(C);                            //   reserve children cells  
       __LoopCellKids(PT,P,pc)                      //   LOOP(c kids of Pcell)   
@@ -333,8 +257,8 @@ namespace {
   public:
     typedef node *node_pter;                       // pointer to node           
     node() {}                                      // default constructor       
-    vect             &pos()             { return POS; }
-    vect        const&pos() const       { return POS; }
+    vect      &pos()       { return POS; }
+    vect const&pos() const { return POS; }
   };
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
@@ -362,7 +286,7 @@ namespace {
       ++COUNTER;
     }
     //--------------------------------------------------------------------------
-    void  set_up  (const BasicLeaf*L) {
+    void  set_up  (const OctTree::Leaf*L) {
       pos() = falcON::pos(L);
       LINK  = falcON::mybody(L);
     }
@@ -377,10 +301,10 @@ namespace {
       pos() = falcON::pos(b);
     }
     //--------------------------------------------------------------------------
-    void  set_leaf(BasicLeaf*L) {
+    void  set_leaf(OctTree::Leaf*L) {
       L->set_link_and_pos(LINK,pos());
     }
-  };
+  }; // class dot {
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
   // class falcON::dot_list                                                   //
@@ -412,7 +336,7 @@ namespace {
       HEAD    = L.HEAD;                            // update head of our list   
       SIZE   += L.SIZE;                            // update size               
     }
-  };
+  }; // class dot_list
   //////////////////////////////////////////////////////////////////////////////
   // this macro requires you to close the curly bracket or use macro EndDotList 
 #define BeginDotList(LIST,NAME)		           /* loop elements of list  */\
@@ -427,16 +351,16 @@ namespace {
       NAME;					   /* loop until current=0   */\
       NAME = NAME->NEXT)                           // set current = next        
   //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // class falcON::box                                                        //
-  //                                                                          //
-  // basic link structure in a box-dot tree.                                  //
-  // a box represents a cube centered on center() with half size ("radius")   //
-  // equal to box_dot_tree::RA[LEVEL].                                        //
-  // if N <= Ncrit, it only contains sub-dots, which are in a linked list     //
-  // pointed to by DOTS.                                                      //
-  // if N >  Ncrit, DOTS=0 and the sub-nodes are in the array OCT of octants  //
-  //                                                                          //
+  //                                                                            
+  // class falcON::box                                                          
+  //                                                                            
+  // basic link structure in a box-dot tree.                                    
+  // a box represents a cube centered on center() with half size ("radius")     
+  // equal to BoxDotTree::RA[LEVEL].                                            
+  // if N <= Ncrit, it only contains sub-dots, which are in a linked list       
+  // pointed to by DOTS.                                                        
+  // if N >  Ncrit, DOTS=0 and the sub-nodes are in the array OCT of octants    
+  //                                                                            
   //////////////////////////////////////////////////////////////////////////////
   struct box : public node {
     //--------------------------------------------------------------------------
@@ -473,7 +397,7 @@ namespace {
     }
     //--------------------------------------------------------------------------
     /// octant of Cell within this box (not checked)
-    int octant(const BasicCell*C) const {
+    int octant(const OctTree::Cell*C) const {
       return ::octant(pos(),falcON::center(C));
     }
     //--------------------------------------------------------------------------
@@ -522,13 +446,13 @@ namespace {
     //--------------------------------------------------------------------------
     friend vect      &center (      box*const&B) {return B->center();  }
     friend vect const&center (const box*const&B) {return B->center();  }
-  };
+  };// struct box {
 } // namespace {
 ////////////////////////////////////////////////////////////////////////////////
 namespace falcON {
-  falcON_TRAITS(dot,"dot");
-  falcON_TRAITS(dot_list,"dot_list");
-  falcON_TRAITS(box,"box");
+  falcON_TRAITS(dot,"dot","dots");
+  falcON_TRAITS(dot_list,"dot_list","dot_lists");
+  falcON_TRAITS(box,"box","boxes");
 } // namespace falcON {
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
@@ -549,19 +473,19 @@ namespace {
     }
   };
   //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // class falcON::box_dot_tree                                               //
-  //                                                                          //
-  // for building of a box-dot tree by adddot()                               //
-  // for linking of the box-dot tree to a cell-leaf tree by link_cells()      //
-  // does not itself allocate the dots.                                       //
-  //                                                                          //
+  //                                                                            
+  // class falcON::BoxDotTree                                                   
+  //                                                                            
+  // for building of a box-dot tree by adddot()                                 
+  // for linking of the box-dot tree to a cell-leaf tree by link_cells()        
+  // does not itself allocate the dots.                                         
+  //                                                                            
   //////////////////////////////////////////////////////////////////////////////
-  class box_dot_tree : protected BasicCellAccess {
-    box_dot_tree           (const box_dot_tree&);  // not implemented           
-    box_dot_tree& operator=(const box_dot_tree&);  // not implemented           
+  class BoxDotTree : protected CellAccess {
+    BoxDotTree           (const BoxDotTree&);      // not implemented           
+    BoxDotTree& operator=(const BoxDotTree&);      // not implemented           
     //--------------------------------------------------------------------------
-    // data of class box_dot_tree                                               
+    // data of class BoxDotTree                                                 
     //--------------------------------------------------------------------------
     int                NCRIT;                      // Ncrit                     
     int                DMAX, DEPTH;                // max/actual tree depth     
@@ -572,8 +496,8 @@ namespace {
     real              *RA;                         // array with radius(level)  
     box               *P0;                         // root of box-dot tree      
 #ifdef falcON_track_bug
-    BasicLeaf         *LEND;                       // beyond leaf pter range    
-    BasicCell         *CEND;                       // beyond cell pter range    
+    OctTree::Leaf     *LEND;                       // beyond leaf pter range    
+    OctTree::Cell     *CEND;                       // beyond cell pter range    
 #endif
     //--------------------------------------------------------------------------
     // protected methods are all inlined                                        
@@ -745,38 +669,38 @@ namespace {
     // such that all the cells that are contained within some cell are conti-   
     // guous in memory, as are the leafs.                                       
     int link_cells_1(                              // R:   tree depth of cell   
-		     const box* ,                  // I:   current box          
-		     int        ,                  // I:   octant of current box
-		     int        ,                  // I:   local peano key      
-		     BasicCell* ,                  // I:   current cell         
-		     BasicCell*&,                  // I/O: index: free cells    
-		     BasicLeaf*&
+		     const box*     ,              // I:   current box          
+		     int            ,              // I:   octant of current box
+		     int            ,              // I:   local peano key      
+		     OctTree::Cell* ,              // I:   current cell         
+		     OctTree::Cell*&,              // I/O: index: free cells    
+		     OctTree::Leaf*&
 #ifdef falcON_track_bug
 		     ,
-		     const dot *,
+		     const dot *    ,
 		     const dot *
 #endif
-		                 ) const;          // I/O: index: free leafs    
+		                     ) const;      // I/O: index: free leafs    
     //--------------------------------------------------------------------------
     // RECURSIVE                                                                
     // This routines transforms the box-dot tree into the cell-leaf tree,       
     // such that all the cells that are contained within some cell are conti-   
     // guous in memory, as are the leafs.                                       
     int link_cells_N(                              // R:   tree depth of cell   
-		     const box* ,                  // I:   current box          
-		     int        ,                  // I:   octant of current box
-		     int        ,                  // I:   local peano key      
-		     BasicCell* ,                  // I:   current cell         
-		     BasicCell*&,                  // I/O: index: free cells    
-		     BasicLeaf*&
+		     const box*     ,              // I:   current box          
+		     int            ,              // I:   octant of current box
+		     int            ,              // I:   local peano key      
+		     OctTree::Cell* ,              // I:   current cell         
+		     OctTree::Cell*&,              // I/O: index: free cells    
+		     OctTree::Leaf*&
 #ifdef falcON_track_bug
 		     ,
-		     const dot *,
+		     const dot *    ,
 		     const dot *
 #endif
-		                 ) const;          // I/O: index: free leafs    
+		                     ) const;      // I/O: index: free leafs    
     //--------------------------------------------------------------------------
-    box_dot_tree()
+    BoxDotTree()
       : BM(0), TREE(0), RA(0), P0(0) {}
     //--------------------------------------------------------------------------
     // to be called before adding any dots.                                     
@@ -808,7 +732,7 @@ namespace {
 #endif
     }
     //--------------------------------------------------------------------------
-    ~box_dot_tree()
+    ~BoxDotTree()
     {
       if(BM) delete   BM;
       if(RA) delete[] RA;
@@ -843,42 +767,42 @@ namespace {
 #endif
 	      )
     {
-      report REPORT("box_dot_tree::link()");
+      report REPORT("BoxDotTree::link()");
 #ifdef falcON_track_bug
       LEND = EndLeaf(TREE);
       if(LEND != LeafNo(TREE,N_dots()))
-	error("box_dot_tree::link(): leaf number mismatch");
+	error("BoxDotTree::link(): leaf number mismatch");
       CEND = EndCell(TREE);
       if(CEND != CellNo(TREE,N_boxes()))
-	error("box_dot_tree::link(): cell number mismatch");
+	error("BoxDotTree::link(): cell number mismatch");
 #endif
-      BasicCell* C0 = FstCell(TREE), *Cf=C0+1;
-      BasicLeaf* Lf = FstLeaf(TREE);
+      OctTree::Cell* C0 = FstCell(TREE), *Cf=C0+1;
+      OctTree::Leaf* Lf = FstLeaf(TREE);
       DEPTH = NCRIT > 1?
 	link_cells_N(P0,0,0,C0,Cf,Lf BUG_LINK_PARS) :
 	link_cells_1(P0,0,0,C0,Cf,Lf BUG_LINK_PARS) ;
     }
-  };
+  };// class BoxDotTree
   //----------------------------------------------------------------------------
-  int box_dot_tree::                               // R:   tree depth of cell   
-  link_cells_1(const box* P,                       // I:   current box          
-	       int        o,                       // I:   octant of current box
-	       int        k,                       // I:   local peano key      
-	       BasicCell* C,                       // I:   current cell         
-	       BasicCell*&Cf,                      // I/O: index: free cells    
-	       BasicLeaf*&Lf                       // I/O: index: free leafs    
+  int BoxDotTree::                                 // R:   tree depth of cell   
+  link_cells_1(const box*     P,                   // I:   current box          
+	       int            o,                   // I:   octant of current box
+	       int            k,                   // I:   local peano key      
+	       OctTree::Cell* C,                   // I:   current cell         
+	       OctTree::Cell*&Cf,                  // I/O: index: free cells    
+	       OctTree::Leaf*&Lf                   // I/O: index: free leafs    
 #ifdef falcON_track_bug
 	       ,
-	       const dot* D0,
-	       const dot* DN
+	       const dot*     D0,
+	       const dot*     DN
 #endif
 	       ) const
   {
 #ifdef falcON_track_bug
     if(C == CEND)
-      report::info("tree_builder::link_cells_1(): >max # cells");
+      report::info("TreeBuilder::link_cells_1(): >max # cells");
     if(!BM->is_element(P))
-      report::info("tree_builder::link_cells_1(): invalid box*");
+      report::info("TreeBuilder::link_cells_1(): invalid box*");
 #endif
     int dep=0;                                     // depth of cell             
     level_ (C) = P->LEVEL;                         // copy level                
@@ -898,15 +822,15 @@ namespace {
       else {                                       //   ELIF sub-dots:          
 #ifdef falcON_track_bug
 	if(Lf == LEND)
-	  report::info("tree_builder::link_cells_1(): >max # leafs");
+	  report::info("TreeBuilder::link_cells_1(): >max # leafs");
 	if(static_cast<dot*>(*N)<D0 || static_cast<dot*>(*N)>=DN)
-	  report::info("tree_builder::link_cells_1(): invalid dot*");
+	  report::info("TreeBuilder::link_cells_1(): invalid dot*");
 #endif
 	static_cast<dot*>(*N)->set_leaf(Lf++);     //     set leaf              
 	nleafs_(C)++;                              //     inc # sub-leafs       
       }                                            // END LOOP                  
     if(nsub) {                                     // IF sub-boxes              
-      BasicCell*Ci=Cf;                             //   remember free cells     
+      OctTree::Cell*Ci=Cf;                         //   remember free cells     
       fccell_(C) = NoCell(TREE,Ci);                //   set cell: 1st sub-cell  
       ncells_(C) = nsub;                           //   set cell: # sub-cells   
       Cf += nsub;                                  //   reserve nsub cells      
@@ -933,25 +857,25 @@ namespace {
   // not reproducible Segmentation fault (possibly that is caused by an error   
   // elsewhere, i.e. the box-dot tree could be faulty).                         
   //----------------------------------------------------------------------------
-  int box_dot_tree::                               // R:   tree depth of cell   
-  link_cells_N(const box* P,                       // I:   current box          
-	       int        o,                       // I:   octant of current box
-	       int        k,                       // I:   local peano key      
-	       BasicCell* C,                       // I:   current cell         
-	       BasicCell*&Cf,                      // I/O: index: free cells    
-	       BasicLeaf*&Lf                       // I/O: index: free leafs    
+  int BoxDotTree::                                 // R:   tree depth of cell   
+  link_cells_N(const box*     P,                   // I:   current box          
+	       int            o,                   // I:   octant of current box
+	       int            k,                   // I:   local peano key      
+	       OctTree::Cell* C,                   // I:   current cell         
+	       OctTree::Cell*&Cf,                  // I/O: index: free cells    
+	       OctTree::Leaf*&Lf                   // I/O: index: free leafs    
 #ifdef falcON_track_bug
 	       ,
-	       const dot *D0,
-	       const dot *DN
+	       const dot     *D0,
+	       const dot     *DN
 #endif
 	       ) const
   {
 #ifdef falcON_track_bug
     if(C == CEND)
-      report::info("tree_builder::link_cells_N(): >max # cells");
+      report::info("TreeBuilder::link_cells_N(): >max # cells");
     if(!BM->is_element(P))
-      report::info("tree_builder::link_cells_N(): invalid box*");
+      report::info("TreeBuilder::link_cells_N(): invalid box*");
 #endif
     int dep=0;                                     // depth of cell             
     level_ (C) = P->LEVEL;                         // copy level                
@@ -971,9 +895,9 @@ namespace {
       for(; Di; Di=Di->NEXT) {                     //   LOOP sub-dots           
 #ifdef falcON_track_bug
 	if(Lf == LEND)
-	  report::info("tree_builder::link_cells_N(): >max # leafs in twig");
+	  report::info("TreeBuilder::link_cells_N(): >max # leafs in twig");
 	if(Di<D0 || Di>=DN)
-	  report::info("tree_builder::link_cells_N(): invalid dot* in twig");
+	  report::info("TreeBuilder::link_cells_N(): invalid dot* in twig");
 #endif
 	Di->set_leaf(Lf++);                        //     set leaf              
       }                                            //   END LOOP                
@@ -986,15 +910,15 @@ namespace {
 	else {                                     //     ELIF sub-dots:        
 #ifdef falcON_track_bug
 	  if(Lf == LEND)
-	    report::info("tree_builder::link_cells_N(): >max # leafs");
+	    report::info("TreeBuilder::link_cells_N(): >max # leafs");
 	  if(static_cast<dot*>(*N)<D0 || static_cast<dot*>(*N)>=DN)
-	    report::info("tree_builder::link_cells_N(): invalid dot*");
+	    report::info("TreeBuilder::link_cells_N(): invalid dot*");
 #endif
 	  static_cast<dot*>(*N)->set_leaf(Lf++);   //       set leaf            
 	  nleafs_(C)++;                            //       inc # sub-leafs     
       }                                            //   END LOOP                
       if(nsub) {                                   //   IF has sub-boxes        
-	BasicCell*Ci=Cf;                           //     remember free cells   
+	OctTree::Cell*Ci=Cf;                       //     remember free cells   
 	fccell_(C) = NoCell(TREE,Ci);              //     set cell: 1st sub-cel 
 	ncells_(C) = nsub;                         //     set cell: # cell kids 
 	Cf += nsub;                                //     reserve nsub cells    
@@ -1018,17 +942,17 @@ namespace {
     return dep;                                    // return cell's depth       
   }
   //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // class falcON::tree_builder                                               //
-  //                                                                          //
-  // for serial tree-building                                                 //
-  //                                                                          //
+  //                                                                            
+  // class falcON::TreeBuilder                                                  
+  //                                                                            
+  // for serial tree-building                                                   
+  //                                                                            
   //////////////////////////////////////////////////////////////////////////////
-  class tree_builder : public box_dot_tree {
-    tree_builder           (const tree_builder&);  // not implemented           
-    tree_builder& operator=(const tree_builder&);  // not implemented           
+  class TreeBuilder : public BoxDotTree {
+    TreeBuilder           (const TreeBuilder&);    // not implemented           
+    TreeBuilder& operator=(const TreeBuilder&);    // not implemented           
     //--------------------------------------------------------------------------
-    // data of class tree_builder                                               
+    // data of class TreeBuilder                                                
     //--------------------------------------------------------------------------
     const vect *ROOTCENTER;                        // pre-determined root center
     vect        XAVE, XMIN, XMAX;                  // extreme positions         
@@ -1050,15 +974,15 @@ namespace {
       return pow(two,int(one+log(D)/M_LN2));       // M_LN2 == log(2) (math.h)  
     }
     //--------------------------------------------------------------------------
-    void setup_from_scratch(const bodies*const&,
-			    int          const& = 0);
+    void setup_from_scratch(const bodies*,
+			    flags       = flags::empty);
     //--------------------------------------------------------------------------
-    void setup_from_scratch(const bodies*const&,
-			    vect         const&,
-			    vect         const&,
-			    int          const& = 0);
+    void setup_from_scratch(const bodies*,
+			    vect   const&,
+			    vect   const&,
+			    flags       = flags::empty);
     //--------------------------------------------------------------------------
-    void setup_leaf_order  (const bodies*const&);
+    void setup_leaf_order  (const bodies*);
     //--------------------------------------------------------------------------
     // non-const public methods (almost all non-inline)                         
     //--------------------------------------------------------------------------
@@ -1068,29 +992,29 @@ namespace {
     //--------------------------------------------------------------------------
 #ifdef falcON_track_bug
     void link() {
-      box_dot_tree::link(D0,DN);
+      BoxDotTree::link(D0,DN);
     }
 #endif
     //--------------------------------------------------------------------------
-    // constructors of class tree_builder                                       
+    // constructors of class TreeBuilder                                        
     //--------------------------------------------------------------------------
     // 1   completely from scratch                                              
     //--------------------------------------------------------------------------
-    tree_builder(const OctTree*const&,             // I: tree to be build       
-		 const vect   *const&,             // I: pre-determined center  
-		 int           const&,             // I: Ncrit                  
-		 int           const&,             // I: Dmax                   
-		 const bodies *const&,             // I: body sources           
-		 int           const& = 0);        //[I: flag specifying bodies]
+    TreeBuilder(const OctTree*,                    // I: tree to be build       
+		const vect   *,                    // I: pre-determined center  
+		int           ,                    // I: Ncrit                  
+		int           ,                    // I: Dmax                   
+		const bodies *,                    // I: body sources           
+		flags        = flags::empty);      //[I: flag specifying bodies]
     //--------------------------------------------------------------------------
-    tree_builder(const OctTree*const&,             // I: tree to be build       
-		 const vect   *const&,             // I: pre-determined center  
-		 int           const&,             // I: Ncrit                  
-		 int           const&,             // I: Dmax                   
-		 const bodies *const&,             // I: body sources           
-		 vect          const&,             // I: x_min                  
-		 vect          const&,             // I: x_max                  
-		 int           const& = 0);        //[I: flag specifying bodies]
+    TreeBuilder(const OctTree*,                    // I: tree to be build       
+		const vect   *,                    // I: pre-determined center  
+		int           ,                    // I: Ncrit                  
+		int           ,                    // I: Dmax                   
+		const bodies *,                    // I: body sources           
+		vect    const&,                    // I: x_min                  
+		vect    const&,                    // I: x_max                  
+		flags        = flags::empty);      //[I: flag specifying bodies]
     //--------------------------------------------------------------------------
     // 2   from scratch, but aided by old tree                                  
     //     we put the dots to be added in the same order as the leafs of the    
@@ -1101,24 +1025,24 @@ namespace {
     //       any potential changes in the tree usage flags (in particular for   
     //       arrays). Thus, if those have changed, don't re-build the tree!     
     //--------------------------------------------------------------------------
-    tree_builder(const OctTree*const&,             // I: old/new tree           
-		 const vect   *const&,             // I: pre-determined center  
-		 int           const&,             // I: Ncrit                  
-		 int           const&);            // I: Dmax                   
+    TreeBuilder(const OctTree*,                    // I: old/new tree           
+		const vect   *,                    // I: pre-determined center  
+		int           ,                    // I: Ncrit                  
+		int           );                   // I: Dmax                   
     //--------------------------------------------------------------------------
     // destructor                                                               
     //--------------------------------------------------------------------------
-    inline ~tree_builder()  {
+    inline ~TreeBuilder()  {
       delete[] D0;                                 // de-allocate dots          
     }
     //--------------------------------------------------------------------------
   };
   //============================================================================
-  // non-inline routines of class tree_builder<>                                
+  // non-inline routines of class TreeBuilder<>                                 
   //============================================================================
-  void tree_builder::build()
+  void TreeBuilder::build()
   {
-    report REPORT("tree_builder::build()");
+    report REPORT("TreeBuilder::build()");
     size_t nl=0;                                   // counter: # dots added     
     dot   *Di;                                     // actual dot loaded         
     if(Ncrit() > 1)                                // IF(N_crit > 1)            
@@ -1129,17 +1053,17 @@ namespace {
 	adddot_1(P0,Di,nl);                        //     add dots              
   }
   //----------------------------------------------------------------------------
-  void tree_builder::setup_from_scratch(const bodies*const&BB,
-					int          const&SP)
+  void TreeBuilder::setup_from_scratch(const bodies*BB,
+				       flags        SP)
   {
     D0 = falcON_NEW(dot,BB->N_bodies());           // allocate dots             
     dot* Di=D0;                                    // current dot               
     XAVE = zero;                                   // reset X_ave               
-    if(SP && BB->have_flg()) {                     // IF take only some bodies  
+    if(SP && BB->have_flag()) {                    // IF take only some bodies  
       body b=BB->begin_all_bodies();               //   first body              
       XMAX = XMIN = pos(b);                        //   reset X_min/max         
       for(; b; ++b)                                //   LOOP bodies             
-	if( is_set(flg(b),SP)) {                   //     IF body to be used    
+	if( flag(b).are_set(SP)) {                 //     IF body to be used    
 	  Di->set_up(b);                           //       initialize dot      
 	  if(isnan(Di->pos()))                     //       test for nan        
 	    error("tree building: body position contains NaN\n");
@@ -1163,19 +1087,19 @@ namespace {
     XAVE /= real(DN-D0);                           // set: X_ave                
   }
   //----------------------------------------------------------------------------
-  void tree_builder::setup_from_scratch(const bodies*const&BB,
-					vect         const&xmin,
-					vect         const&xmax,
-					int          const&SP)
+  void TreeBuilder::setup_from_scratch(const bodies*BB,
+				       vect   const&xmin,
+				       vect   const&xmax,
+				       flags        SP)
   {
     D0 = falcON_NEW(dot,BB->N_bodies());           // allocate dots             
     dot* Di=D0;                                    // current dot               
     XAVE = zero;                                   // reset X_ave               
     XMIN = xmin;                                   // believe delivered x_min   
     XMAX = xmax;                                   // believe delivered x_max   
-    if(SP && BB->have_flg()) {                     // IF take only some bodies  
+    if(SP && BB->have_flag()) {                    // IF take only some bodies  
       LoopAllBodies(BB,b)                          //   LOOP bodies             
-	if( is_set(flg(b),SP)) {                   //     IF body to be used    
+	if( flag(b).are_set(SP)) {                 //     IF body to be used    
 	  Di->set_up(b);                           //       initialize dot      
 	  if(isnan(Di->pos()))                     //       test for nan        
 	    error("tree building: body position contains nan\n");
@@ -1195,7 +1119,7 @@ namespace {
     XAVE /= real(DN-D0);                           // set: X_ave                
   }
   //----------------------------------------------------------------------------
-  void tree_builder::setup_leaf_order(const bodies*const&BB)
+  void TreeBuilder::setup_leaf_order(const bodies*BB)
   {
     D0 = falcON_NEW(dot,TREE->N_leafs());          // allocate dots             
     dot*Di = D0;                                   // current dot               
@@ -1212,49 +1136,49 @@ namespace {
   }
   //----------------------------------------------------------------------------
   // constructor 1.1.1                                                          
-  tree_builder::tree_builder(const OctTree*const&t,
-			     const vect   *const&x0,
-			     int           const&nc,
-			     int           const&dm,
-			     const bodies *const&bb,
-			     int           const&sp) :
+  TreeBuilder::TreeBuilder(const OctTree*t,
+			   const vect   *x0,
+			   int           nc,
+			   int           dm,
+			   const bodies *bb,
+			   flags         sp) :
     ROOTCENTER(x0)
   {
-    report REPORT("tree_builder::tree_builder(): 1.1.1");
+    report REPORT("TreeBuilder::TreeBuilder(): 1.1.1");
     setup_from_scratch(bb,sp);
     vect X0 = root_center();
-    box_dot_tree::reset(t,nc,dm,size_t(DN-D0),X0,root_radius(X0));
+    BoxDotTree::reset(t,nc,dm,size_t(DN-D0),X0,root_radius(X0));
   }
   //----------------------------------------------------------------------------
   // constructor 1.1.2                                                          
-  tree_builder::tree_builder(const OctTree*const&t,
-			     const vect   *const&x0,
-			     int           const&nc,
-			     int           const&dm,
-			     const bodies *const&bb,
-			     vect          const&xmin,
-			     vect          const&xmax,
-			     int           const&sp) :
+  TreeBuilder::TreeBuilder(const OctTree*t,
+			   const vect   *x0,
+			   int           nc,
+			   int           dm,
+			   const bodies *bb,
+			   vect    const&xmin,
+			   vect    const&xmax,
+			   flags         sp) :
     ROOTCENTER(x0)
   {
-    report REPORT("tree_builder::tree_builder(): 1.1.2");
+    report REPORT("TreeBuilder::TreeBuilder(): 1.1.2");
     setup_from_scratch(bb,xmin,xmax,sp);
     vect X0 = root_center();
-    box_dot_tree::reset(t,nc,dm,size_t(DN-D0),X0,root_radius(X0));
+    BoxDotTree::reset(t,nc,dm,size_t(DN-D0),X0,root_radius(X0));
   }
   //----------------------------------------------------------------------------
   // constructor 2                                                              
-  tree_builder::tree_builder(const OctTree*const&t,
-			     const vect   *const&x0,
-			     int           const&nc,
-			     int           const&dm) : 
+  TreeBuilder::TreeBuilder(const OctTree*t,
+			   const vect   *x0,
+			   int           nc,
+			   int           dm) : 
     ROOTCENTER(x0)
   {
     TREE = t;                                      // set tree                  
-    report REPORT("tree_builder::tree_builder(): 2");
+    report REPORT("TreeBuilder::TreeBuilder(): 2");
     setup_leaf_order(TREE->my_bodies());           // use leaf order            
     vect X0 = root_center();
-    box_dot_tree::reset(t,nc,dm,size_t(DN-D0),X0,root_radius(X0));
+    BoxDotTree::reset(t,nc,dm,size_t(DN-D0),X0,root_radius(X0));
   }
   //////////////////////////////////////////////////////////////////////////////
 }                                                  // END: empty namespace      
@@ -1264,7 +1188,7 @@ namespace {
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 inline unsigned                                    // R: # subtree leafs        
-OctTree::mark_sub(int                 F,           // I: subtree flag           
+OctTree::mark_sub(flags               F,           // I: subtree flag           
 		  int                 Ncr,         // I: Ncrit                  
 		  cell_iterator const&C,           // I: cell                   
 		  unsigned           &nc) const    // O: # subtree cells        
@@ -1276,7 +1200,7 @@ OctTree::mark_sub(int                 F,           // I: subtree flag
   unflag_subtree_flags(C);                         // reset subtree flags       
   int ns=0;                                        // counter: subtree dots     
   LoopLeafKids(cell_iterator,C,Li)                 // LOOP leaf kids            
-    if(is_set(Li,F)) {                             //   IF flag F is set        
+    if(are_set(Li,F)) {                            //   IF flag F is set        
       flag_for_subtree(Li);                        //     flag for subtree      
       ++ns;                                        //     count                 
     }                                              // END LOOP                  
@@ -1292,7 +1216,7 @@ OctTree::mark_sub(int                 F,           // I: subtree flag
   return ns;                                       // return: # subtree dots    
 }
 //------------------------------------------------------------------------------
-void OctTree::mark_for_subtree(int        F,       // I: flag for subtree       
+void OctTree::mark_for_subtree(flags      F,       // I: flag for subtree       
 			       int        Ncr,     // I: Ncrit for subtree      
 			       unsigned  &Nsubc,   // O: # subtree cells        
 			       unsigned  &Nsubs)   // O: # subtree leafs        
@@ -1307,7 +1231,7 @@ void OctTree::mark_for_subtree(int        F,       // I: flag for subtree
       unflag_subtree_flags(Ci);                    //     reset subtree flags   
       int ns=0;                                    //     # subt dots in cell   
       LoopLeafKids(cell_iterator,Ci,l)             //     LOOP child leafs      
-	if(is_set(l,F)) {                          //       IF flag F is set    
+	if(are_set(l,F)) {                         //       IF flag F is set    
 	  flag_for_subtree(l);                     //         flag for subtree  
 	  ++ns;                                    //         count             
 	}                                          //     END LOOP              
@@ -1333,8 +1257,8 @@ void OctTree::mark_for_subtree(int        F,       // I: flag for subtree
 //------------------------------------------------------------------------------
 inline void OctTree::allocate (unsigned ns, unsigned nc, unsigned dm, real r0) {
   const unsigned need =   4*sizeof(unsigned)       // Ns, Nc, Dp, Dm            
-		        +ns*sizeof(BasicLeaf)      // leafs                     
-		        +nc*sizeof(BasicCell)      // cells                     
+		        +ns*sizeof(Leaf)           // leafs                     
+		        +nc*sizeof(Cell)           // cells                     
                         +(dm+1)*sizeof(real);      // radii of cells            
   if((need > NALLOC) || (need+need < NALLOC)) {
     if(ALLOC) delete16(ALLOC);
@@ -1344,9 +1268,9 @@ inline void OctTree::allocate (unsigned ns, unsigned nc, unsigned dm, real r0) {
   DUINT[0] = Ns = ns;
   DUINT[1] = Nc = nc;
   DUINT[3] = dm;
-  LEAFS    = static_cast<BasicLeaf*>(
+  LEAFS    = static_cast<Leaf*>(
 	     static_cast<void*>( DUINT+4 ));       // offset of 16bytes         
-  CELLS    = static_cast<BasicCell*>(
+  CELLS    = static_cast<Cell*>(
              static_cast<void*>( LEAFS+Ns ));
   RA       = static_cast<real*>(
              static_cast<void*>( CELLS+Nc ));
@@ -1360,25 +1284,25 @@ inline void OctTree::set_depth(unsigned dp) {
 //------------------------------------------------------------------------------
 // construction from bodies                                                     
 //------------------------------------------------------------------------------
-OctTree::OctTree(const bodies*const&bb,            // I: body sources           
-		 int          const&nc,            // I: N_crit                 
-		 const vect  *const&x0,            // I: pre-determined center  
-		 int          const&dm,            // I: max tree depth         
-		 int          const&sp) :          // I: flag specifying bodies 
+OctTree::OctTree(const bodies*bb,                  // I: body sources           
+		 int          nc,                  // I: N_crit                 
+		 const vect  *x0,                  // I: pre-determined center  
+		 int          dm,                  // I: max tree depth         
+		 flags        sp) :                // I: flag specifying bodies 
   BSRCES(bb), SPFLAG(sp), LEAFS(0), CELLS(0), ALLOC(0), NALLOC(0u),
   STATE(fresh), USAGE(un_used)
 {
   SET_I
-  tree_builder TB(this,x0,nc,dm,bb,sp);            // initialize tree_builder   
-  SET_T(" time for tree_builder::tree_builder(): ");
+  TreeBuilder TB(this,x0,nc,dm,bb,sp);             // initialize TreeBuilder    
+  SET_T(" time for TreeBuilder::TreeBuilder(): ");
   if(TB.N_dots()) {                                // IF(dots in tree)          
     TB.build();                                    //   build box-dot tree      
-    SET_T(" time for tree_builder::build():        ");
+    SET_T(" time for TreeBuilder::build():        ");
     allocate(TB.N_dots(),TB.N_boxes(),             //   allocate leafs & cells  
 	     TB.N_levels(),TB.root_rad());         //   & set up table: radii   
     TB.link();                                     //   box-dot -> cell-leaf    
     set_depth(TB.depth());                         //   set tree depth          
-    SET_T(" time for tree_builder::link():         ");
+    SET_T(" time for TreeBuilder::link():         ");
   } else {                                         // ELSE                      
     warning("nobody in tree");                     //   issue a warning         
     allocate(0,0,0,zero);                          //   reset leafs & cells     
@@ -1389,29 +1313,29 @@ OctTree::OctTree(const bodies*const&bb,            // I: body sources
 //------------------------------------------------------------------------------
 // construction from bodies with X_min/max known already                        
 //------------------------------------------------------------------------------
-OctTree::OctTree(const bodies*const&bb,            // I: body sources           
-		 vect         const&xi,            // I: x_min                  
-		 vect         const&xa,            // I: x_max                  
-		 int          const&nc,            // I: N_crit                 
-		 const vect  *const&x0,            // I: pre-determined center  
-		 int          const&dm,            // I: max tree depth         
-		 int          const&sp) :          // I: flag specifying bodies 
+OctTree::OctTree(const bodies*bb,            // I: body sources           
+		 vect   const&xi,            // I: x_min                  
+		 vect   const&xa,            // I: x_max                  
+		 int          nc,            // I: N_crit                 
+		 const vect  *x0,            // I: pre-determined center  
+		 int          dm,            // I: max tree depth         
+		 flags        sp) :          // I: flag specifying bodies 
   BSRCES(bb), SPFLAG(sp), LEAFS(0), CELLS(0), ALLOC(0), NALLOC(0u),
   STATE(fresh), USAGE(un_used)
 {
   SET_I
   if(dm >= 1<<8)
     error("OctTree: maximum tree depth must not exceed %d",1<<8-1);
-  tree_builder TB(this,x0,nc,dm,bb,xi,xa,sp);      // initialize tree_builder   
-  SET_T(" time for tree_builder::tree_builder(): ");
+  TreeBuilder TB(this,x0,nc,dm,bb,xi,xa,sp);      // initialize TreeBuilder   
+  SET_T(" time for TreeBuilder::TreeBuilder(): ");
   if(TB.N_dots()) {                                // IF(dots in tree)          
     TB.build();                                    //   build box-dot tree      
-    SET_T(" time for tree_builder::build():        ");
+    SET_T(" time for TreeBuilder::build():        ");
     allocate(TB.N_dots(),TB.N_boxes(),             //   allocate leafs & cells  
 	     TB.N_levels(),TB.root_rad());         //   & set up table: radii   
     TB.link();                                     //   box-dot -> cell-leaf    
     set_depth(TB.depth());                         //   set tree depth          
-    SET_T(" time for tree_builder::link():         ");
+    SET_T(" time for TreeBuilder::link():         ");
   } else {                                         // ELSE                      
     warning("nobody in tree");                     //   issue a warning         
     allocate(0,0,0,zero);                          //   reset leafs & cells     
@@ -1422,11 +1346,11 @@ OctTree::OctTree(const bodies*const&bb,            // I: body sources
 //------------------------------------------------------------------------------
 // construction as sub-tree from another tree                                   
 //------------------------------------------------------------------------------
-OctTree::OctTree(const OctTree*const&par,          // I: parent tree            
-		 int           const&F,            // I: flag specif'ing subtree
-		 int           const&Ncrit) :      //[I: N_crit]                
+OctTree::OctTree(const OctTree*par,                // I: parent tree            
+		 flags         F,                  // I: flag specif'ing subtree
+		 int           Ncrit) :            //[I: N_crit]                
   BSRCES(par->my_bodies()),                        // copy parent's  bodies     
-  SPFLAG(par->SP_flag()),                          // copy body specific flag   
+  SPFLAG(par->SP_flag() | F),                      // copy body specific flag   
   LEAFS(0), CELLS(0), ALLOC(0), NALLOC(0u),        // reset some data           
   STATE ( state( par->STATE | sub_tree) ),         // set state                 
   USAGE ( un_used )                                // set usage                 
@@ -1437,9 +1361,10 @@ OctTree::OctTree(const OctTree*const&par,          // I: parent tree
     allocate(0,0,0,zero);                          //   reset leafs & cells     
     set_depth(0);                                  //   set tree depth to zero  
   } else {                                         // ELSE                      
-    allocate(Ns,Nc,par->depth(),par->root_rad());  //   allocate leafs & cells  
+    allocate(Ns,Nc,par->depth(),
+	     par->root_radius());                  //   allocate leafs & cells  
     set_depth(                                     //   set tree depth          
-	      sub_tree_builder::link(par,this));   //   link sub-tree           
+	      SubTreeBuilder::link(par,this));     //   link sub-tree           
   }                                                // ENDIF                     
   RCENTER = center(root());                        // set root center           
 }
@@ -1454,16 +1379,16 @@ void OctTree::build(int        const&nc,           //[I: N_crit]
   SET_I
   if(dm >= 1<<8)
     error("OctTree: maximum tree depth must not exceed %d",1<<8-1);
-  tree_builder TB(this,x0,nc,dm);                  // initialize tree_builder   
-  SET_T(" time for tree_builder::tree_builder(): ");
+  TreeBuilder TB(this,x0,nc,dm);                   // initialize TreeBuilder    
+  SET_T(" time for TreeBuilder::TreeBuilder(): ");
   if(TB.N_dots()) {                                // IF(dots in tree)          
     TB.build();                                    //   build box-dot tree      
-    SET_T(" time for tree_builder::build():        ");
+    SET_T(" time for TreeBuilder::build():        ");
     allocate(TB.N_dots(),TB.N_boxes(),             //   allocate leafs & cells  
 	     TB.N_levels(),TB.root_rad());         //   & set up table: radii   
     TB.link();                                     //   box-dot -> cell-leaf    
     set_depth(TB.depth());                         //   set tree depth          
-    SET_T(" time for tree_builder::link():         ");
+    SET_T(" time for TreeBuilder::link():         ");
   } else {                                         // ELSE                      
     warning("nobody in tree");                     //   issue a warning         
     allocate(0,0,0,zero);                          //   reset leafs & cells     

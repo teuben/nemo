@@ -70,7 +70,7 @@ namespace falcON {
 	     const float*,                         // I: masses                 
 	     const vectf*,                         // I: positions              
 	     const vectf*,                         // I: velocities             
-	     const flag *,                         // I: flags                  
+	     const flags*,                         // I: flags                  
 	     float      *,                         // O: potentials             
 	     vectf      *,                         // O: accelerations          
 	     int         )  const = 0;             // I: see note 2 above       
@@ -81,7 +81,7 @@ namespace falcON {
 	     const double*,                        // I: masses                 
 	     const vectd *,                        // I: positions              
 	     const vectd *,                        // I: velocities             
-	     const flag  *,                        // I: flags                  
+	     const flags *,                        // I: flags                  
 	     double      *,                        // O: potentials             
 	     vectd       *,                        // O: accelerations          
 	     int          )  const = 0;            // I: see note 2 above       
@@ -192,46 +192,44 @@ namespace falcON {
     bool is_empty() const { return ACC == 0; }
     bool need_masses() const { return ACC!=0 && NeedM; }
     bool need_velocities() const { return ACC!=0 && NeedV; }
-    void set(double      time,
-	     int         Nbody,
-	     const float*masses,
-	     const vectf*positions,
-	     const vectf*velocities,
-	     const flag *flags,
-	     float      *potentials,
-	     vectf      *accelerations,
-	     int         indicator) const
+    void set(double      t,
+	     int         N,
+	     const float*m,
+	     const vectf*x,
+	     const vectf*v,
+	     const flags*f,
+	     float      *p,
+	     vectf      *a,
+	     int         i) const
     {
       int ndim = Ndim;
-      ACC(ndim,time,Nbody,
-	  static_cast<const void*>(masses),
-	  static_cast<const void*>(positions),
-	  static_cast<const void*>(velocities),
-	  static_cast<const int*>(static_cast<const void*>(flags)),
-	  static_cast<void*>(potentials),
-	  static_cast<void*>(accelerations),
-	  indicator, 'f');
+      ACC(ndim,t,N,
+	  static_cast<const void*>(m),
+	  static_cast<const void*>(x),
+	  static_cast<const void*>(v),
+	  static_cast<const int*>(static_cast<const void*>(f)),
+	  static_cast<void*>(p),
+	  static_cast<void*>(a), i, 'f');
     }
     //--------------------------------------------------------------------------
-    void set(double       time,
-	     int          Nbody,
-	     const double*masses,
-	     const vectd *positions,
-	     const vectd *velocities,
-	     const flag  *flags,
-	     double      *potentials,
-	     vectd       *accelerations,
-	     int          indicator) const
+    void set(double       t,
+	     int          N,
+	     const double*m,
+	     const vectd *x,
+	     const vectd *v,
+	     const flags *f,
+	     double      *p,
+	     vectd       *a,
+	     int          i) const
     {
       int ndim = Ndim;
-      ACC(ndim,time,Nbody,
-	  static_cast<const void*>(masses),
-	  static_cast<const void*>(positions),
-	  static_cast<const void*>(velocities),
-	  static_cast<const int*>(static_cast<const void*>(flags)),
-	  static_cast<void*>(potentials),
-	  static_cast<void*>(accelerations),
-	  indicator, 'd');
+      ACC(ndim,t,N,
+	  static_cast<const void*>(m),
+	  static_cast<const void*>(x),
+	  static_cast<const void*>(v),
+	  static_cast<const int*>(static_cast<const void*>(f)),
+	  static_cast<void*>(p),
+	  static_cast<void*>(a), i, 'd');
     }
     //--------------------------------------------------------------------------
     nemo_acc(const char*accname,

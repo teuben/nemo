@@ -455,6 +455,8 @@ namespace falcON {
   // ///////////////////////////////////////////////////////////////////////////
   class LeapFrogCode : public Integrator {
     double TAU, TAUH;
+    //--------------------------------------------------------------------------
+    void account_new() const;
   public:
     //--------------------------------------------------------------------------
     /// construction
@@ -538,6 +540,15 @@ namespace falcON {
 	  ST->adjust_level(b, T, N, low, HIGHEST);
     }
     //--------------------------------------------------------------------------
+    void update_Nlev(const bodies*B) {
+      for(int l=0; l!=NSTEPS; ++l)
+	N[l] = 0;
+      LoopAllBodies(B,b)
+	++(N[level(b)]);
+    }
+    //--------------------------------------------------------------------------
+    void account_del() const;
+    void account_new() const;
     void elementary_step(int) const;
     //--------------------------------------------------------------------------
     // public methods                                                           
@@ -657,7 +668,9 @@ namespace falcON {
     //--------------------------------------------------------------------------
     // time integration                                                         
     //--------------------------------------------------------------------------
-    void  full_step    () { CODE->fullstep(); }    // perform one full time step
+    void  full_step    () {
+      CODE->fullstep();
+    }
     //--------------------------------------------------------------------------
     // statistic outputs                                                        
     //--------------------------------------------------------------------------

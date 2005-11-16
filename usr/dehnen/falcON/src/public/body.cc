@@ -37,7 +37,10 @@
 #endif
 
 using namespace falcON;
-
+////////////////////////////////////////////////////////////////////////////////
+namespace falcON {
+  falcON_TRAITS(bodies::block,"bodies::block","bodies::blocks");
+}
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
 // struct falcON::bodies::block                                                 
@@ -48,10 +51,10 @@ void bodies::block::reset_flags() const
   if(0 != DATA[fieldbit::f]) {
     if(TYPE.is_sph()) 
       for(int n=0; n!=NALL; ++n)
-	datum<fieldbit::f>(n).set_to(flag::SPH);
+	datum<fieldbit::f>(n) = flags::sph;
     else
       for(int n=0; n!=NALL; ++n)
-	datum<fieldbit::f>(n).reset();
+	datum<fieldbit::f>(n) = flags::empty;
   }
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -59,7 +62,7 @@ void bodies::block::flag_all_as_active() const falcON_THROWING
 {
   if(0 != DATA[fieldbit::f])
     for(int n=0; n!=NALL; ++n)
-      datum<fieldbit::f>(n).add(flag::ACTIVE);
+      datum<fieldbit::f>(n).add(flags::active);
   else 
     falcON_ExceptF("flags not supported","bodies::flag_all_as_active()");
 }
@@ -68,7 +71,7 @@ void bodies::block::flag_as_sph() const falcON_THROWING
 {
   if(0 != DATA[fieldbit::f]) {
     for(int n=0; n!=NALL; ++n)
-      datum<fieldbit::f>(n).add(flag::SPH);
+      datum<fieldbit::f>(n).add(flags::sph);
   } else
     falcON_ExceptF("flags not supported","bodies::flag_as_sph()");
 }
@@ -222,13 +225,13 @@ fieldset bodies::block::copy_bodies(const block*other,
 }
 ////////////////////////////////////////////////////////////////////////////////
 inline void bodies::block::skip(unsigned&from,
-				int      copyflag) const falcON_THROWING
+				flags    copyflag) const falcON_THROWING
 {
   if(copyflag) {
     if(! has_field(fieldbit::f) )
-      falcON_ExceptF("copyflag!=0 but flag not supported",
+      falcON_ExceptF("copyflag!=0 but flags not supported",
 		     "bodies::block::copy()");
-    for(; from<NBOD && !(flg(from).is_set(copyflag)); ++from );
+    for(; from<NBOD && !(flag(from).are_set(copyflag)); ++from );
   }
 }
 //------------------------------------------------------------------------------
@@ -242,7 +245,7 @@ inline void bodies::block::skip(unsigned&from,
 fieldset bodies::block::copy(const block*&From,
 			     unsigned    &from,
 			     fieldset     copydata,
-			     int          copyflag) falcON_THROWING
+			     flags        copyflag) falcON_THROWING
 {
   if( From == this )
     falcON_ExceptF("cannot copy from self","bodies::block::copy()");
@@ -262,7 +265,7 @@ fieldset bodies::block::copy(const block*&From,
     if(copyflag) {
       copy = 0u;
       for(unsigned to=from;
-	  to < From->NBOD && From->flg(to).is_set(copyflag) && copy<free;
+	  to < From->NBOD && From->flag(to).are_set(copyflag) && copy<free;
 	  ++copy, ++to);
     } else
       copy = min(free, From->NBOD - from);
@@ -288,18 +291,22 @@ fieldset bodies::block::copy(const block*&From,
   return copied;
 }
 ////////////////////////////////////////////////////////////////////////////////
-void bodies::block::remove() falcON_THROWING
+void bodies::block::remove(unsigned &removed) falcON_THROWING
 {
   if(NBOD == 0) return;
   if(0 == DATA[fieldbit::f] )
     falcON_ExceptF("flags needed but not supported","bodies::remove()");
   unsigned lo=0u, hi=NBOD-1;
   while(lo < hi) {
-    while(! const_datum<fieldbit::f>(lo).is_set(flag::REMOVE) && lo < hi) ++lo;
-    while(  const_datum<fieldbit::f>(hi).is_set(flag::REMOVE) && lo < hi) --hi;
+    while(! to_remove(const_datum<fieldbit::f>(lo)) && lo < hi)
+      ++lo;
+    while(  to_remove(const_datum<fieldbit::f>(hi)) && lo < hi) {
+      ++removed;
+      --hi;
+    }
     if(lo < hi) copy_body(hi--,lo++);
   }
-  if(lo == hi && ! const_datum<fieldbit::f>(lo).is_set(flag::REMOVE)) ++lo;
+  if(lo == hi && ! to_remove(const_datum<fieldbit::f>(lo))) ++lo;
   NBOD = lo;
 }
 #ifdef falcON_NEMO
@@ -486,9 +493,9 @@ void bodies::del_data() falcON_THROWING
   }
   NBLK = 0u;
   for(bodytype t; t; ++t) {
-    NALL [int(t)] = 0u;
-    NBOD [int(t)] = 0u;
-    TYPES[int(t)] = 0;
+    NALL [t] = 0u;
+    NBOD [t] = 0u;
+    TYPES[t] = 0;
   }
   FIRST = 0;
 }
@@ -524,18 +531,20 @@ void bodies::set_data(unsigned *N) falcON_THROWING
     block   *last = 0;
     unsigned i    = 0;
     for(bodytype t; t; ++t) {
-      NBOD [int(t)] = NALL[int(t)] = N? N[int(t)] : 0u;
-      NTOT         += NBOD[int(t)];
-      TYPES[int(t)] = 0;
-      for(unsigned a,n=0u; n < NALL[int(t)]; n+=a) {
+      NBOD[t] = NALL[t] = N? N[t] : 0u;
+      NTOT   += NBOD[t];
+      NDEL[t] = 0u;
+      NNEW[t] = 0u;
+      TYPES[t] = 0;
+      for(unsigned a,n=0u; n < NALL[t]; n+=a) {
 	if(NBLK == index::max_blocks)
 	  falcON_ExceptF("# blocks exceeds limit","bodies");
-	a = min(NALL[int(t)]-n, unsigned(index::max_bodies));
+	a = min(NALL[t]-n, unsigned(index::max_bodies));
 	block *b = new block(NBLK,a,a,i,t,BITS,this);
 	i+= a;
 	if(last) last->link(b);
 	last = b;
-	if(n==0u) TYPES[int(t)] = b;
+	if(n==0u) TYPES[t] = b;
 	BLOCK[NBLK++] = b;
       }
     }
@@ -580,10 +589,10 @@ void bodies::reset(unsigned*nall,
 {
   unsigned none[BT_NUM]={0,0}, *n= nall? nall : none;
   bool keepN = true;
-  for(bodytype t; t; ++t) keepN = keepN && NALL[int(t)] == n[int(t)];
+  for(bodytype t; t; ++t) keepN = keepN && NALL[t] == n[t];
   if(keepN) {
     NTOT = 0u;
-    for(bodytype t; t; ++t) NTOT += (NBOD[int(t)] = NALL[int(t)]);
+    for(bodytype t; t; ++t) NTOT += (NBOD[t] = NALL[t]);
     del_fields(BITS - bits);
     add_fields(bits - BITS);
   } else {
@@ -597,28 +606,28 @@ void bodies::reset(unsigned*nall,
 // construction 2:                                                          
 // just make a copy of existing bodies:                                     
 // - only copy data specified by 2nd argument                               
-// - only copy bodies whose flag matches 3rd argument                       
+// - only copy bodies whose flags matches 3rd argument                      
 bodies::bodies(bodies const&Other,
 	       fieldset     copydata,
-	       int          copyflag) falcON_THROWING :
+	       flags        copyflag) falcON_THROWING :
   BITS      ( copydata & Other.BITS ),
   C_FORTRAN ( 0 )
 {
-  if(copyflag && !Other.have_flg() ) 
+  if(copyflag && !Other.have_flag() ) 
     falcON_ExceptF("copyflag !=0, but other bodies not supporting flag",
 		   "bodies::bodies()");
   unsigned n[BT_NUM];
   for(bodytype t; t; ++t) {
     if(copyflag) {
       LoopTypedBodies(&Other,i,t)
-	if( flg(i).is_set(copyflag) ) ++(n[int(t)]);
+	if( flag(i).are_set(copyflag) ) ++(n[t]);
     } else 
-      n[int(t)] = Other.NBOD[int(t)];
+      n[t] = Other.NBOD[t];
   }
   set_data(n);
-  for(bodytype t; t; ++t) if(TYPES[int(t)]) {
-    block      *p =TYPES[int(t)];
-    const block*op=Other.TYPES[int(t)];
+  for(bodytype t; t; ++t) if(TYPES[t]) {
+    block      *p =TYPES[t];
+    const block*op=Other.TYPES[t];
     unsigned    oi=0;
     while(p && op && oi < op->N_bodies()) {
       p->copy(op,oi,copydata,copyflag);
@@ -700,13 +709,13 @@ void bodies::del_fields(fieldset b) falcON_THROWING
 ////////////////////////////////////////////////////////////////////////////////
 void bodies::remove() falcON_THROWING {
   for(bodytype t; t; ++t)
-    NBOD[int(t)] = 0u;
+    NBOD[t] = 0u;
   NTOT = 0u;
-  for(const block *p=FIRST; p; p=p->next()) {
-    const_cast<block*>(p)->remove();
-    const_cast<block*>(p)->set_first(NTOT);
-    NBOD[int(p->type())] += p->N_bodies();
-    NTOT                 += p->N_bodies();
+  for(block *p=FIRST; p; p=p->next()) {
+    p->remove(NDEL[p->type()]);
+    p->set_first(NTOT);
+    NBOD[p->type()] += p->N_bodies();
+    NTOT            += p->N_bodies();
   }
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -714,7 +723,7 @@ void bodies::remove() falcON_THROWING {
 void bodies::link_blocks() {
   block **L = &FIRST, *P;
   for(bodytype t; t; ++t) {
-    P = TYPES[int(t)];
+    P = TYPES[t];
     if(P) {
       *L = P;
       while(P->NEXT && P->NEXT->TYPE == t) P = P->NEXT;
@@ -733,11 +742,11 @@ void bodies::merge(bodies&Other) falcON_THROWING {
     B->set_fields(BITS);
     BLOCK[NBLK] = B;
     B->NO   = NBLK++;
-    B->NEXT = TYPES[int(B->TYPE)];
-    TYPES[int(B->TYPE)]  = B;
-    NALL [int(B->TYPE)] += B->NALL;
-    NBOD [int(B->TYPE)] += B->NBOD;
-    NTOT                += B->NBOD;
+    B->NEXT = TYPES[B->TYPE];
+    TYPES[B->TYPE]  = B;
+    NALL [B->TYPE] += B->NALL;
+    NBOD [B->TYPE] += B->NBOD;
+    NTOT           += B->NBOD;
   }
   // link blocks together and reset FIRST                                       
   link_blocks();
@@ -746,9 +755,9 @@ void bodies::merge(bodies&Other) falcON_THROWING {
   // finally reset all entries of OTHER                                         
   Other.FIRST = 0;
   for(bodytype t; t; ++t) {
-    Other.TYPES[int(t)] = 0;
-    Other.NALL [int(t)] = 0;
-    Other.NBOD [int(t)] = 0;
+    Other.TYPES[t] = 0;
+    Other.NALL [t] = 0;
+    Other.NBOD [t] = 0;
   }
   Other.NTOT = 0;
   Other.NBLK = 0;
@@ -764,9 +773,9 @@ void bodies::create(unsigned N, bodytype t) falcON_THROWING
   // allocate new block and add it to the head of the list TYPES[t]             
   block* p = new block(NBLK,N,0,0,t,BITS,this);
   BLOCK[NBLK++]  = p;
-  p->link(TYPES[int(t)]);
-  TYPES[int(t)]  = p;
-  NALL [int(t)] += N;
+  p->link(TYPES[t]);
+  TYPES[t]  = p;
+  NALL [t] += N;
   // link blocks together and reset FIRST                                       
   link_blocks();
   // set block::FIRST                                                           
@@ -781,13 +790,15 @@ bodies::iterator bodies::new_body(bodytype t) falcON_THROWING
     warning("bodies::new_body(): no body available\n");
     return iterator(0);
   }
-  for(const block* b=TYPES[int(t)]; b; b=b->next_of_same_type())
+  for(const block* b=TYPES[t]; b; b=b->next_of_same_type())
     if(b->NALL > b->NBOD) {
-      unsigned i = const_cast<block*>(b)->NBOD++;
+      iterator i(b,const_cast<block*>(b)->NBOD++);
       set_firsts();
-      NBOD[int(t)]++;
+      NBOD[t]++;
+      NNEW[t]++;
       NTOT++;
-      return iterator(b,i);
+      if(have(fieldbit::f)) i.flag().add(flags::newbody);
+      return i;
     }
   falcON_THROW("bodies::new_body(): cannot find free block\n");
   return iterator(0);
@@ -795,10 +806,10 @@ bodies::iterator bodies::new_body(bodytype t) falcON_THROWING
 ////////////////////////////////////////////////////////////////////////////////
 falcON::real bodies::TotalMass(bodytype t) const
 {
-  if(!t || TYPES[int(t)]==0 || !(TYPES[int(t)]->has_field(fieldbit::m)) )
+  if(!t || TYPES[t]==0 || !(TYPES[t]->has_field(fieldbit::m)) )
     return zero;
   real M(zero);
-  for(const block* b=TYPES[int(t)]; b; b=b->next_of_same_type())
+  for(const block* b=TYPES[t]; b; b=b->next_of_same_type())
     for(unsigned i=0; i!=b->N_bodies(); ++i)
       M += b->const_datum<fieldbit::m>(i);
   return M;

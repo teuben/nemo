@@ -165,11 +165,11 @@ namespace falcON {
   typedef tupel<Ndim,float>  vect_f;             ///< a vector of 3 floats      
   typedef tupel<Ndim,double> vect_d;             ///< a vector of 3 doubles     
   //----------------------------------------------------------------------------
-  falcON_TRAITS(vect,"vect");
+  falcON_TRAITS(vect,"vect","vects");
 #ifdef falcON_REAL_IS_FLOAT
-  falcON_TRAITS(vect_d,"vect_d");
+  falcON_TRAITS(vect_d,"vect_d","vect_d");
 #else
-  falcON_TRAITS(vect_f,"vect_f");
+  falcON_TRAITS(vect_f,"vect_f","vect_f");
 #endif
   //----------------------------------------------------------------------------
 }

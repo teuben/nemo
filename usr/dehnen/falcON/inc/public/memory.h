@@ -35,7 +35,7 @@
 //                                                                             |
 // simple routines for allocating/deallocating 1,2,3D arrays                   |
 //                                                                             |
-// Arrays<T,D>          - arrays of type T and arbitrary dimension D           |
+// Array<T,D>           - arrays of type T and arbitrary dimension D           |
 //                      - operator [] acts as on pointer with D *s             |
 //-----------------------------------------------------------------------------+
 #ifndef falcON_included_memory_h
@@ -707,7 +707,10 @@ namespace falcON {
     }
     //--------------------------------------------------------------------------
     ~Array() falcON_THROWING {
-      if(A) falcON_DEL_A(A);
+      if(A) {
+	falcON_DEL_A(A);
+	A = 0;
+      }
       set(0);
     }
     //--------------------------------------------------------------------------
@@ -757,9 +760,11 @@ namespace falcON {
     Array(const int n[1], T const&x) falcON_THROWING : A(0) { reset(n,x); }
     //--------------------------------------------------------------------------
     ~Array() falcON_THROWING { 
-      if(A) falcON_DEL_A(A);
+      if(A) {
+	falcON_DEL_A(A);
+	A = 0;
+      }
       N = 0;
-      A = 0;
     }
     //--------------------------------------------------------------------------
     T      & operator[] (int i)       THROW_BAD {

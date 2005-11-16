@@ -1,7 +1,7 @@
 // -*- C++ -*-                                                                  
 //------------------------------------------------------------------------------
 //                                                                              
-// inc/public/partner.h                                                         
+/// \file inc/public/partner.h                                                  
 //                                                                              
 // Copyright (C) 2000-2005  Walter Dehnen                                       
 //                                                                              
@@ -33,179 +33,17 @@
 
 namespace falcON {
   //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // class falcON::PartnerLeaf                                                //
-  //                                                                          //
-  //////////////////////////////////////////////////////////////////////////////
-  class PartnerLeaf : public BasicLeaf {
-    PartnerLeaf           (const PartnerLeaf&);    // not implemented           
-    PartnerLeaf& operator=(const PartnerLeaf&);    // not implemented           
-    //--------------------------------------------------------------------------
-    // data of class PartnerLeaf (only static)                                  
-    //--------------------------------------------------------------------------
-  public:
-    struct leaf_data {
-      vect VEL;                                    // velocity / size^2         
-    };
-    //--------------------------------------------------------------------------
-    // private data access                                                      
-    //--------------------------------------------------------------------------
-  private:
-    //--------------------------------------------------------------------------
-    real      &size ()       { return SCAL; }
-    unsigned  &num  ()       { return AUXU; }
-    real      &sizeq()       { return static_cast<leaf_data*>(PROP)->VEL[0]; }
-    vect      &vel  ()       { return static_cast<leaf_data*>(PROP)->VEL; }
-    //--------------------------------------------------------------------------
-    real const&size () const { return SCAL; }
-    unsigned const&num  () const { return AUXU; }
-    real const&sizeq() const { return static_cast<leaf_data*>(PROP)->VEL[0]; }
-    vect const&vel  () const { return static_cast<leaf_data*>(PROP)->VEL; }
-    //--------------------------------------------------------------------------
-    // non-const methods                                                        
-    //--------------------------------------------------------------------------
-  public:
-    void inc() { ++(num()); }
-    void set_data(leaf_data*const&d) { PROP = static_cast<void*>(d); }
-    //--------------------------------------------------------------------------
-    // const data access via friends                                            
-    //--------------------------------------------------------------------------
-    friend bodies::index const&mybody(const PartnerLeaf*L) {
-      return L->mybody(); } 
-    friend unsigned const&num   (const PartnerLeaf*L) { return L->num(); }
-    friend vect     const&pos   (const PartnerLeaf*L) { return L->pos(); } 
-    friend vect     const&vel   (const PartnerLeaf*L) { return L->vel(); } 
-    friend real     const&size  (const PartnerLeaf*L) { return L->size(); } 
-    friend real     const&sizeq (const PartnerLeaf*L) { return L->sizeq(); } 
-    //--------------------------------------------------------------------------
-    // copy data from body to leaf                                              
-    //--------------------------------------------------------------------------
-    void set_sticky(const bodies*const&B) {
-      size() = B->size(mybody());
-      vel () = B->vel (mybody());
-      num () = 0u;
-    }
-    //--------------------------------------------------------------------------
-    void set_sph(const bodies*const&B) {
-      size () = B->size(mybody());
-      sizeq() = square(size());
-      num  () = 0u;
-    }
-    //--------------------------------------------------------------------------
-    // copy data from leaf to body                                              
-    //--------------------------------------------------------------------------
-    void copy_to_bodies_num(const bodies*const&B) const {
-      B->num(mybody()) = num();
-    }
-    //--------------------------------------------------------------------------
-    // dump data                                                                
-    //--------------------------------------------------------------------------
-    static void dump_head(std::ostream& o) {
-      BasicLeaf::dump_head(o);
-      o<<"           size [velocity]";
-    }
-    //--------------------------------------------------------------------------
-    void dump(std::ostream &o) const
-    {
-      BasicLeaf::dump(o);
-      o<<' '<<setw(5)<<setprecision(4)<<size();
-      if(flg().is_set(flag::STICKY))
-	for(register indx d=0; d!=Ndim; ++d)
-	  o<<' '<<setw(7)<<setprecision(4)<<vel()[d];
-    }
-    //--------------------------------------------------------------------------
-  };
-  //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // class falcON::PartnerCell                                                //
-  //                                                                          //
-  //////////////////////////////////////////////////////////////////////////////
-  class PartnerCell : public BasicCell {
-    PartnerCell           (const PartnerCell&);    // not implemented           
-    PartnerCell& operator=(const PartnerCell&);    // not implemented           
-    //--------------------------------------------------------------------------
-    // friendships                                                              
-    //--------------------------------------------------------------------------
-    friend class stsp_lister;                      // for alloc of srce_data    
-    //--------------------------------------------------------------------------
-    // types                                                                    
-    //--------------------------------------------------------------------------
-  public:
-    typedef PartnerLeaf leaf_type;                 // type of associated leafs  
-    //--------------------------------------------------------------------------
-    // data of class cell                                                       
-    //--------------------------------------------------------------------------
-    struct srce_data {
-      vect    VEL;                                 // velocity center           
-    };
-    //--------------------------------------------------------------------------
-    // private data access                                                      
-    //--------------------------------------------------------------------------
-  private:
-    vect     const&pos () const { return POS; }
-    vect     const&vel () const { return 
-	static_cast<srce_data*>(AUX1.PTER)->VEL; }
-    real     const&vrad() const { return RAD; }
-    real     const&rmax() const { return RAD; }
-    real     const&size() const { return AUX3.SCAL; }
-    unsigned const&numb() const { return AUX2.NUMB; }
-  public:
-    //--------------------------------------------------------------------------
-    void set_srce(srce_data*const&srce)
-    {
-      AUX1.PTER = static_cast<void*>(srce);
-    }
-    //--------------------------------------------------------------------------
-    // non-const data access via members                                        
-    //--------------------------------------------------------------------------
-    vect    &vel () { return static_cast<srce_data*>(AUX1.PTER)->VEL; }
-    vect    &pos () { return POS; }
-    real    &vrad() { return RAD; }
-    real    &rmax() { return RAD; }
-    real    &size() { return AUX3.SCAL; }
-    unsigned&numb() { return AUX2.NUMB; }
-    //--------------------------------------------------------------------------
-    // const data access via friends                                            
-    //--------------------------------------------------------------------------
-    friend vect     const&vel   (const PartnerCell*C) { return C->vel(); } 
-    friend vect     const&pos   (const PartnerCell*C) { return C->pos(); } 
-    friend real     const&size  (const PartnerCell*C) { return C->size(); } 
-    friend real     const&vrad  (const PartnerCell*C) { return C->vrad(); } 
-    friend real     const&rmax  (const PartnerCell*C) { return C->rmax(); } 
-    friend unsigned const&numb  (const PartnerCell*C) { return C->numb(); } 
-    //--------------------------------------------------------------------------
-    // dump  data                                                               
-    //--------------------------------------------------------------------------
-    static void dump_head(std::ostream&o) {
-      BasicCell::dump_head(o);
-      o<<"           size         rmax/velocity            vrad]";
-    }
-    //--------------------------------------------------------------------------
-    void dump(std::ostream &o) const
-    {
-      BasicCell::dump(o);
-      o<<' '<<setw(6)<<setprecision(4)<<size();
-      if       (this->is_set(flag::STICKY)) {
-	for(register indx d=0; d!=Ndim; ++d)
-	  o<<' '<<setw(9)<<setprecision(4)<<vel()[d];
-	o<<' '<<setw(5)<<setprecision(4)<<vrad();
-      } else if(this->is_set(flag::SPH))
-	o<<' '<<setw(5)<<setprecision(4)<<rmax();
-    }
-    //--------------------------------------------------------------------------
-  };
-  //////////////////////////////////////////////////////////////////////////////
   //                                                                            
   // class falcON::PartnerEstimator                                             
   //                                                                            
   // NOTE on the meaning of the activity and stsp flags                         
   //                                                                            
-  // Each cell knows both the total number of leafs (BasicCell::number()) and   
-  // the number of SPH/sticky leafs (PartnerCell::numb()).                      
-  // If      numb(PartnerCell*) == 0                                            
-  //   then  is_sph(PartnerCell*)==0                                            
-  // If      numb(PartnerCell*) == number(PartnerCell*)                         
-  //   then  al_sph(PartnerCell*)==1                                            
+  // Each cell knows both the total number of leafs (Cell::number())            
+  // and the number of SPH/sticky leafs (Cell::numb()).                         
+  // If      numb(Cell*) == 0                                                   
+  //   then  is_sph(Cell*)==0                                                   
+  // If      numb(Cell*) == number(Cell*)                                       
+  //   then  al_sph(Cell*)==1                                                   
   //                                                                            
   // The activity flag only refers to the stsp leafs, not all leafs:            
   // If # active stsp leaf descendants == 0      then  is_active()==0           
@@ -216,22 +54,190 @@ namespace falcON {
     PartnerEstimator           (const PartnerEstimator&);
     PartnerEstimator& operator=(const PartnerEstimator&);
     //--------------------------------------------------------------------------
-    // public type                                                              
+    // public types                                                             
     //--------------------------------------------------------------------------
   public:
     typedef bodies::index indx_pair[2];            // element: interaction list 
     //--------------------------------------------------------------------------
+    //                                                                          
+    // sub-type PartnerEstimator::Leaf                                          
+    //                                                                          
+    //--------------------------------------------------------------------------
+    class Leaf : public OctTree::Leaf {
+      Leaf           (const Leaf&);
+      Leaf& operator=(const Leaf&);
+      //------------------------------------------------------------------------
+    public:
+      struct leaf_data {
+	vect VEL;                                  // velocity / size^2         
+      };
+      //------------------------------------------------------------------------
+      // private data access                                                    
+      //------------------------------------------------------------------------
+    private:
+      //------------------------------------------------------------------------
+      real      &size ()       { return SCAL; }
+      unsigned  &num  ()       { return AUXU; }
+      real      &sizeq()       { return static_cast<leaf_data*>(PROP)->VEL[0]; }
+      vect      &vel  ()       { return static_cast<leaf_data*>(PROP)->VEL; }
+      //------------------------------------------------------------------------
+      real     const&size () const { return SCAL; }
+      unsigned const&num  () const { return AUXU; }
+      real     const&sizeq() const {
+	return static_cast<leaf_data*>(PROP)->VEL[0];
+      }
+      vect     const&vel  () const {
+	return static_cast<leaf_data*>(PROP)->VEL;
+      }
+      //------------------------------------------------------------------------
+      // non-const methods                                                      
+      //------------------------------------------------------------------------
+    public:
+      void inc() {
+	++(num());
+      }
+      void set_data(leaf_data*const&d) {
+	PROP = static_cast<void*>(d);
+      }
+      //------------------------------------------------------------------------
+      // const data access via friends                                          
+      //------------------------------------------------------------------------
+      friend bodies::index const&mybody(const Leaf*L) {
+	return L->mybody(); } 
+      friend unsigned const&num   (const Leaf*L) { return L->num(); }
+      friend vect     const&pos   (const Leaf*L) { return L->pos(); } 
+      friend vect     const&vel   (const Leaf*L) { return L->vel(); } 
+      friend real     const&size  (const Leaf*L) { return L->size(); } 
+      friend real     const&sizeq (const Leaf*L) { return L->sizeq(); } 
+      //------------------------------------------------------------------------
+      // copy data from body to leaf                                            
+      //------------------------------------------------------------------------
+      void set_sticky(const bodies*const&B) {
+	size() = B->size(mybody());
+	vel () = B->vel (mybody());
+	num () = 0u;
+      }
+      //------------------------------------------------------------------------
+      void set_sph(const bodies*const&B) {
+	size () = B->size(mybody());
+	sizeq() = square(size());
+	num  () = 0u;
+      }
+      //------------------------------------------------------------------------
+      // copy data from leaf to body                                            
+      //------------------------------------------------------------------------
+      void copy_to_bodies_num(const bodies*const&B) const {
+	B->num(mybody()) = num();
+      }
+      //------------------------------------------------------------------------
+      // dump data                                                              
+      //------------------------------------------------------------------------
+      static void dump_head(std::ostream& o) {
+	OctTree::Leaf::dump_head(o);
+	o<<"           size [velocity]";
+      }
+      //------------------------------------------------------------------------
+      void dump(std::ostream &o) const
+      {
+	OctTree::Leaf::dump(o);
+	o<<' '<<setw(5)<<setprecision(4)<<size();
+	if(flag().is_set(flags::sticky))
+	  for(register indx d=0; d!=Ndim; ++d)
+	    o<<' '<<setw(7)<<setprecision(4)<<vel()[d];
+      }
+      //------------------------------------------------------------------------
+    };// class Leaf {
+    //--------------------------------------------------------------------------
+    //                                                                          
+    // sub-type PartnerEstimator::Cell                                          
+    //                                                                          
+    //--------------------------------------------------------------------------
+    class Cell : public OctTree::Cell {
+      Cell           (const Cell&);
+      Cell& operator=(const Cell&);
+      //------------------------------------------------------------------------
+      // friendships                                                            
+      //------------------------------------------------------------------------
+      friend class stsp_lister;                    // for alloc of srce_data    
+      //------------------------------------------------------------------------
+      // types                                                                  
+      //------------------------------------------------------------------------
+    public:
+      typedef Leaf leaf_type;                      // type of associated leafs  
+      //------------------------------------------------------------------------
+      // data of class cell                                                     
+      //------------------------------------------------------------------------
+      struct srce_data {
+	vect    VEL;                               // velocity center           
+      };
+      //------------------------------------------------------------------------
+      // private data access                                                    
+      //------------------------------------------------------------------------
+    private:
+      vect     const&pos () const { return POS; }
+      vect     const&vel () const {
+	return static_cast<srce_data*>(AUX1.PTER)->VEL;
+      }
+      real     const&vrad() const { return RAD; }
+      real     const&rmax() const { return RAD; }
+      real     const&size() const { return AUX3.SCAL; }
+      unsigned const&numb() const { return AUX2.NUMB; }
+    public:
+      //------------------------------------------------------------------------
+      void set_srce(srce_data*const&srce) {
+	AUX1.PTER = static_cast<void*>(srce);
+      }
+      //------------------------------------------------------------------------
+      // non-const data access via members                                      
+      //------------------------------------------------------------------------
+      vect    &vel () { return static_cast<srce_data*>(AUX1.PTER)->VEL; }
+      vect    &pos () { return POS; }
+      real    &vrad() { return RAD; }
+      real    &rmax() { return RAD; }
+      real    &size() { return AUX3.SCAL; }
+      unsigned&numb() { return AUX2.NUMB; }
+      //------------------------------------------------------------------------
+      // const data access via friends                                          
+      //------------------------------------------------------------------------
+      friend vect     const&vel   (const Cell*C) { return C->vel(); } 
+      friend vect     const&pos   (const Cell*C) { return C->pos(); } 
+      friend real     const&size  (const Cell*C) { return C->size(); } 
+      friend real     const&vrad  (const Cell*C) { return C->vrad(); } 
+      friend real     const&rmax  (const Cell*C) { return C->rmax(); } 
+      friend unsigned const&numb  (const Cell*C) { return C->numb(); } 
+      //------------------------------------------------------------------------
+      // dump  data                                                             
+      //------------------------------------------------------------------------
+      static void dump_head(std::ostream&o) {
+	OctTree::Cell::dump_head(o);
+	o<<"           size         rmax/velocity            vrad]";
+      }
+      //------------------------------------------------------------------------
+      void dump(std::ostream &o) const
+      {
+	OctTree::Cell::dump(o);
+	o<<' '<<setw(6)<<setprecision(4)<<size();
+	if       (this->is_set(flags::sticky)) {
+	  for(register indx d=0; d!=Ndim; ++d)
+	    o<<' '<<setw(9)<<setprecision(4)<<vel()[d];
+	  o<<' '<<setw(5)<<setprecision(4)<<vrad();
+	} else if(this->is_set(flags::sph))
+	  o<<' '<<setw(5)<<setprecision(4)<<rmax();
+      }
+      //------------------------------------------------------------------------
+    };// class Cell {
+    //--------------------------------------------------------------------------
     // data:                                                                    
     //--------------------------------------------------------------------------
   private:
-    const OctTree            *TREE;                // the tree to be used       
-    PartnerLeaf::leaf_data   *LEAF_DATA;           // memory for leafs          
-    PartnerCell::srce_data   *CELL_SRCE;           // memory for cell srce      
-    mutable bool              ALL_STSP;            // all leafs are stsp        
-    mutable bool              ALL_ACTIVE;          // all stsp leafs are active 
-    mutable bool              SPH_UPTODATE;        // tree ready for sph search 
-    mutable bool              STC_UPTODATE;        // tree ready for sticky --  
-    mutable unsigned          NL,NC;               // # stsp leafs & cells      
+    const OctTree     *TREE;                       // the tree to be used       
+    Leaf::leaf_data   *LEAF_DATA;                  // memory for leafs          
+    Cell::srce_data   *CELL_SRCE;                  // memory for cell srce      
+    mutable bool       ALL_STSP;                   // all leafs are stsp        
+    mutable bool       ALL_ACTIVE;                 // all stsp leafs are active 
+    mutable bool       SPH_UPTODATE;               // tree ready for sph search 
+    mutable bool       STC_UPTODATE;               // tree ready for sticky --  
+    mutable unsigned   NL,NC;                      // # stsp leafs & cells      
     //--------------------------------------------------------------------------
     // private methods                                                          
     //--------------------------------------------------------------------------
@@ -249,14 +255,14 @@ namespace falcON {
     // tree stuff to be superseeded                                             
     //--------------------------------------------------------------------------
   public:
-    typedef PartnerCell                         cell_type;
-    typedef PartnerLeaf                         leaf_type;
-    typedef OctTree::CellIter<PartnerCell>      cell_iterator;
-    typedef leaf_type*                          leaf_iterator;
+    typedef Cell                         cell_type;
+    typedef Leaf                         leaf_type;
+    typedef OctTree::CellIter<Cell>      cell_iterator;
+    typedef leaf_type*                   leaf_iterator;
     //--------------------------------------------------------------------------
     const OctTree*const&my_tree() const { return TREE; }
     cell_iterator root         () const {
-      return cell_iterator(TREE,static_cast<PartnerCell*>(TREE->FstCell())); }
+      return cell_iterator(TREE,static_cast<Cell*>(TREE->FstCell())); }
     //--------------------------------------------------------------------------
     // dump cell and leaf data                                                  
     //--------------------------------------------------------------------------

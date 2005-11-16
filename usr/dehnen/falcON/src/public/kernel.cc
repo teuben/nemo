@@ -22,7 +22,6 @@
 //-----------------------------------------------------------------------------+
 #include <public/types.h>
 #include <public/kernel.h>
-#include <public/gravity.h>
 #include <public/tensor_set.h>
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -90,12 +89,12 @@
 using namespace falcON;
 using namespace falcON::grav;
 ////////////////////////////////////////////////////////////////////////////////
-//                                                                            //
-// class falcON::TaylorSeries                                                 //
-//                                                                            //
+//                                                                              
+// class falcON::TaylorSeries                                                   
+//                                                                              
 ////////////////////////////////////////////////////////////////////////////////
 inline void TaylorSeries::
-shift_and_add(const GravCell*const&c) {            // I: cell & its coeffs      
+shift_and_add(const grav::cell*const&c) {          // I: cell & its coeffs      
   if(hasCoeffs(c)) {                               // IF(cell has had iaction)  
     register vect dX = cofm(c) - X;                //   vector to shift by      
     if(dX != zero && C != zero) {                  //   IF(dX != 0 AND C != 0)  
@@ -111,12 +110,12 @@ extract_grav(leaf_iter const&L) const {            // I: leaf to get grav to
   eval_expn(L->Coeffs(),C,cofm(L)-X);              // evaluate expansion        
 }
 ////////////////////////////////////////////////////////////////////////////////
-//                                                                            //
-// class falcON::grav_kern_base                                               //
-//                                                                            //
+//                                                                              
+// class falcON::GravKernBase                                                   
+//                                                                              
 ////////////////////////////////////////////////////////////////////////////////
-void grav_kern_base::eval_grav(cell_iter    const&C,
-			       TaylorSeries const&T) const
+void GravKernBase::eval_grav(cell_iter    const&C,
+			     TaylorSeries const&T) const
 {
   TaylorSeries G(T);                               // G = copy of T             
   G.shift_and_add(C);                              // shift G; G+=T_C           
@@ -129,8 +128,8 @@ void grav_kern_base::eval_grav(cell_iter    const&C,
     eval_grav(c,G);                                //   recursive call          
 }
 //------------------------------------------------------------------------------
-void grav_kern_base::eval_grav_all(cell_iter    const&C,
-				   TaylorSeries const&T) const
+void GravKernBase::eval_grav_all(cell_iter    const&C,
+				 TaylorSeries const&T) const
 {
   TaylorSeries G(T);                               // G = copy of T             
   G.shift_and_add(C);                              // shift G; G+=T_C           
@@ -196,7 +195,7 @@ void grav_kern_base::eval_grav_all(cell_iter    const&C,
   EQ = square(eph(A)+eph(B));			\
   P3(MUM)	
 //==============================================================================
-void grav_kern::single(leaf_iter const &A, leaf_iter const&B) const
+void GravKern::single(leaf_iter const &A, leaf_iter const&B) const
 {
   register vect R  = cofm(A)-cofm(B);
   register real Rq = norm(R),x,D0;
@@ -220,7 +219,7 @@ void grav_kern::single(leaf_iter const &A, leaf_iter const&B) const
   if(is_active(B)) { B->pot()-=D0; B->acc()+=R; }
 }
 //------------------------------------------------------------------------------
-void grav_kern_all::single(leaf_iter const &A, leaf_iter const&B) const
+void GravKernAll::single(leaf_iter const &A, leaf_iter const&B) const
 {
   register vect R  = cofm(A)-cofm(B);
   register real Rq = norm(R),x,D0;
@@ -550,7 +549,7 @@ namespace {
 // we now can define the cell-leaf and cell-self interaction via direct sums    
 //==============================================================================
 #define ARGS KERN,B,A.begin_leafs(),A.end_leaf_desc(),EQ,HQ,QQ
-void grav_kern::direct(cell_iter const&A, leaf_iter const&B) const
+void GravKern::direct(cell_iter const&A, leaf_iter const&B) const
 {
 #ifdef falcON_INDI
   if(INDI_SOFT)
@@ -574,7 +573,7 @@ void grav_kern::direct(cell_iter const&A, leaf_iter const&B) const
     }
 }
 //------------------------------------------------------------------------------
-void grav_kern_all::direct(cell_iter const&A, leaf_iter const&B) const
+void GravKernAll::direct(cell_iter const&A, leaf_iter const&B) const
 {
 #ifdef falcON_INDI
   if(INDI_SOFT)
@@ -586,7 +585,7 @@ void grav_kern_all::direct(cell_iter const&A, leaf_iter const&B) const
 #undef ARGS
 //------------------------------------------------------------------------------
 #define ARGS KERN,A,A+1,A+1+Nk,EQ,HQ,QQ
-void grav_kern::direct(cell_iter const&C) const
+void GravKern::direct(cell_iter const&C) const
 {
   const    unsigned  N1 = number(C)-1;
   register unsigned  k, Nk;
@@ -609,7 +608,7 @@ void grav_kern::direct(cell_iter const&C) const
 	else                                 Direct<0>::many_NS(ARGS);
 }
 //------------------------------------------------------------------------------
-void grav_kern_all::direct(cell_iter const&C) const
+void GravKernAll::direct(cell_iter const&C) const
 {
   const    unsigned  N1 = number(C)-1;
   register unsigned  k, Nk;
@@ -628,11 +627,11 @@ void grav_kern_all::direct(cell_iter const&C) const
 // there are 8 cases, depending on whether all, some, or none of either A or    
 // B are active (case none,none is trivial).                                    
 //                                                                              
-// these functions are called by grav_kern::direct(cell,cell), which is inline  
-// in kernel.h, or by grav_kern::flush_scc() below.                               
+// these functions are called by GravKern::direct(cell,cell), which is inline   
+// in kernel.h, or by GravKern::flush_scc() below.                              
 //==============================================================================
-void grav_kern_base::many_AA(leaf_iter const&A0, unsigned const&NA,
-			     leaf_iter const&B0, unsigned const&NB) const
+void GravKernBase::many_AA(leaf_iter const&A0, unsigned const&NA,
+			   leaf_iter const&B0, unsigned const&NB) const
 {
   const leaf_iter AN=A0+NA, BN=B0+NB;
 #ifdef falcON_INDI
@@ -643,8 +642,8 @@ void grav_kern_base::many_AA(leaf_iter const&A0, unsigned const&NA,
     for(leaf_iter A=A0; A!=AN; ++A) Direct<0>::many_YA(KERN,A,B0,BN,EQ,HQ,QQ);
 }
 //------------------------------------------------------------------------------
-void grav_kern_base::many_AS(leaf_iter const&A0, unsigned const&NA,
-			     leaf_iter const&B0, unsigned const&NB) const
+void GravKernBase::many_AS(leaf_iter const&A0, unsigned const&NA,
+			   leaf_iter const&B0, unsigned const&NB) const
 {
   const    leaf_iter AN=A0+NA, BN=B0+NB;
 #ifdef falcON_INDI
@@ -655,8 +654,8 @@ void grav_kern_base::many_AS(leaf_iter const&A0, unsigned const&NA,
     for(leaf_iter A=A0; A!=AN; ++A) Direct<0>::many_YS(KERN,A,B0,BN,EQ,HQ,QQ);
 }
 //------------------------------------------------------------------------------
-void grav_kern_base::many_AN(leaf_iter const&A0, unsigned const&NA,
-			     leaf_iter const&B0, unsigned const&NB) const
+void GravKernBase::many_AN(leaf_iter const&A0, unsigned const&NA,
+			   leaf_iter const&B0, unsigned const&NB) const
 {
   const leaf_iter AN=A0+NA, BN=B0+NB;
 #ifdef falcON_INDI
@@ -667,8 +666,8 @@ void grav_kern_base::many_AN(leaf_iter const&A0, unsigned const&NA,
     for(leaf_iter A=A0; A!=AN; ++A) Direct<0>::many_YN(KERN,A,B0,BN,EQ,HQ,QQ);
 }
 //------------------------------------------------------------------------------
-void grav_kern_base::many_SA(leaf_iter const&A0, unsigned const&NA,
-			     leaf_iter const&B0, unsigned const&NB) const
+void GravKernBase::many_SA(leaf_iter const&A0, unsigned const&NA,
+			   leaf_iter const&B0, unsigned const&NB) const
 {
   const leaf_iter AN=A0+NA, BN=B0+NB;
 #ifdef falcON_INDI
@@ -683,8 +682,8 @@ void grav_kern_base::many_SA(leaf_iter const&A0, unsigned const&NA,
       else             Direct<0>::many_NA(KERN,A,B0,BN,EQ,HQ,QQ);
 }
 //------------------------------------------------------------------------------
-void grav_kern_base::many_SS(leaf_iter const&A0, unsigned const&NA,
-			     leaf_iter const&B0, unsigned const&NB) const
+void GravKernBase::many_SS(leaf_iter const&A0, unsigned const&NA,
+			   leaf_iter const&B0, unsigned const&NB) const
 {
   const leaf_iter AN=A0+NA, BN=B0+NB;
 #ifdef falcON_INDI
@@ -699,8 +698,8 @@ void grav_kern_base::many_SS(leaf_iter const&A0, unsigned const&NA,
       else             Direct<0>::many_NS(KERN,A,B0,BN,EQ,HQ,QQ);
 }
 //------------------------------------------------------------------------------
-void grav_kern_base::many_SN(leaf_iter const&A0, unsigned const&NA,
-			     leaf_iter const&B0, unsigned const&NB) const
+void GravKernBase::many_SN(leaf_iter const&A0, unsigned const&NA,
+			   leaf_iter const&B0, unsigned const&NB) const
 {
   const leaf_iter AN=A0+NA, BN=B0+NB;
 #ifdef falcON_INDI
@@ -713,8 +712,8 @@ void grav_kern_base::many_SN(leaf_iter const&A0, unsigned const&NA,
       if(is_active(A)) Direct<0>::many_YN(KERN,A,B0,BN,EQ,HQ,QQ);
 }
 //------------------------------------------------------------------------------
-void grav_kern_base::many_NA(leaf_iter const&A0, unsigned const&NA,
-			     leaf_iter const&B0, unsigned const&NB) const
+void GravKernBase::many_NA(leaf_iter const&A0, unsigned const&NA,
+			   leaf_iter const&B0, unsigned const&NB) const
 {
   const leaf_iter AN=A0+NA, BN=B0+NB;
 #ifdef falcON_INDI
@@ -725,8 +724,8 @@ void grav_kern_base::many_NA(leaf_iter const&A0, unsigned const&NA,
     for(leaf_iter A=A0; A!=AN; ++A) Direct<0>::many_NA(KERN,A,B0,BN,EQ,HQ,QQ);
 }
 //------------------------------------------------------------------------------
-void grav_kern_base::many_NS(leaf_iter const&A0, unsigned const&NA,
-			     leaf_iter const&B0, unsigned const&NB) const
+void GravKernBase::many_NS(leaf_iter const&A0, unsigned const&NA,
+			   leaf_iter const&B0, unsigned const&NB) const
 {
   const leaf_iter AN=A0+NA, BN=B0+NB;
 #ifdef falcON_INDI
@@ -905,8 +904,8 @@ namespace {
 }                                                  // END: unnamed namespace    
 ////////////////////////////////////////////////////////////////////////////////
 #define ARGS A,B,R,Rq,EQ,HQ,QQ
-void grav_kern::approx(cell_iter const&A, leaf_iter const&B,
-		       vect           &R, real      const&Rq) const
+void GravKern::approx(cell_iter const&A, leaf_iter const&B,
+		      vect           &R, real      const&Rq) const
 {
   if(is_active(A)) give_coeffs(A);
 #ifdef falcON_INDI
@@ -927,8 +926,8 @@ void grav_kern::approx(cell_iter const&A, leaf_iter const&B,
     }
 }
 //------------------------------------------------------------------------------
-void grav_kern_all::approx(cell_iter const&A, leaf_iter const&B,
-			   vect           &R, real      const&Rq) const
+void GravKernAll::approx(cell_iter const&A, leaf_iter const&B,
+			 vect           &R, real      const&Rq) const
 {
   give_coeffs(A);
 #ifdef falcON_INDI
@@ -949,8 +948,8 @@ void grav_kern_all::approx(cell_iter const&A, leaf_iter const&B,
     }
 }
 //------------------------------------------------------------------------------
-void grav_kern::approx(cell_iter const&A, cell_iter const&B,
-		       vect           &R, real      const&Rq) const
+void GravKern::approx(cell_iter const&A, cell_iter const&B,
+		      vect           &R, real      const&Rq) const
 {
   if(is_active(A)) give_coeffs(A);
   if(is_active(B)) give_coeffs(B);
@@ -972,8 +971,8 @@ void grav_kern::approx(cell_iter const&A, cell_iter const&B,
     }
 }
 //------------------------------------------------------------------------------
-void grav_kern_all::approx(cell_iter const&A, cell_iter const&B,
-			   vect           &R, real      const&Rq) const
+void GravKernAll::approx(cell_iter const&A, cell_iter const&B,
+			 vect           &R, real      const&Rq) const
 {
   give_coeffs(A);
   give_coeffs(B);

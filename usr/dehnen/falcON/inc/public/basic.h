@@ -121,11 +121,11 @@ namespace falcON {
     const char* text() const { return __text; }
   };
   //============================================================================
-  //
-  //  falcON::exception
-  //
-  /// base class for exceptions in falcON; derived from std::string
-  ///
+  //                                                                            
+  //  falcON::exception                                                         
+  //                                                                            
+  /// base class for exceptions in falcON; derived from std::string             
+  ///                                                                           
   //============================================================================
   struct exception : protected std::string {
     /// copy constructor
@@ -271,37 +271,27 @@ namespace falcON {
   /// \param l number of the line in that file
   template<typename T> inline
   T* NewArray(size_t n, const char*f, int l) falcON_THROWING {
-    T* t;
-    if(run_info::debug_level()>=10) {
+    if(debug(10)) {
+      std::cerr<< "falcON Debug Info: "<<f<<':'<<l <<" allocating "<<n <<' ' 
+	       << (n>1? traits<T>::names():traits<T>::name()) <<" = "
+	       << n*sizeof(T)
+	       << (n*sizeof(T)>1? " bytes ... " : "byte ... ") ;
+      T* t;
       try {
 	t = new T[n];
       } catch(std::bad_alloc E) {
-	if(sizeof(T) > 1)
-	  std::cerr<<"falcON Debug Info: "<<f<<':'<<l
-		   <<" trying to allocate "<<n
-		   <<' '<<traits<T>::name()
-		   <<" = "<< n*sizeof(T)<<" bytes\n";
-	else
-	  std::cerr<<"falcON Debug Info: "<<f<<':'<<l
-		   <<" trying to allocate "<<n<<" bytes\n";
+	std::cerr<<'\n';
 	falcON_THROW("[%s:%d]: caught std::bad_alloc\n",f,l);
       }
-      if(sizeof(T) > 1)
-	std::cerr<<"falcON Debug Info: "<<f<<':'<<l
-		 <<" allocate "<<n
-		 <<' '<<traits<T>::name()
-		 <<" = "<< n*sizeof(T)<<" bytes @ " 
-		 << static_cast<void*>(t)<<'\n';
-      else
-	std::cerr<<"falcON Debug Info: "<<f<<':'<<l
-		 <<" allocate "<<n<<" bytes @ " 
-		 << static_cast<void*>(t)<<'\n';
-    } else try {
-      t = new T[n];
+      std::cerr<< "@ " << static_cast<void*>(t) << '\n';
+      return t;
+    }
+    try {
+      return new T[n];
     } catch(std::bad_alloc E) {
       falcON_THROW("[%s:%d]: caught std::bad_alloc\n",f,l);
     }
-    return t;
+    return 0;
   }
   //////////////////////////////////////////////////////////////////////////////
   ///
@@ -333,22 +323,23 @@ namespace falcON {
   template<typename T> inline
   void DelArray(T* a, const char*f, int l) falcON_THROWING {
     if(0==a) falcON_Warning("trying to delete zero pointer to array");
-    if(run_info::debug_level()>=10) {
+    if(debug(10)) {
+      std::cerr<<"falcON Debug Info: "<<f<<':'<<l
+	       <<" de-allocating array of " << traits<T>::names()
+	       <<" @ "<<static_cast<void*>(a)<<" ... ";
       try {
 	delete[] a;
       } catch(...) {
-	std::cerr<<"falcON Debug Info: "<<f<<':'<<l
-		 <<" trying to de-allocate "
-		 <<traits<T>::name()<<"* @ "<<static_cast<void*>(a)<<'\n';
+	std::cerr<<'\n';
 	falcON_THROW("[%s:%d]: 'delete[] %p' failed\n",f,l,a);
       }
-      std::cerr<<"falcON Debug Info: "<<f<<':'<<l
-	       <<" de-allocate "
-	       <<traits<T>::name()<<"* @ "<<static_cast<void*>(a)<<'\n';
-    } else try {
-      delete[] a;
-    } catch(...) {
-      falcON_THROW("[%s:%d]: 'delete[] %p' failed\n",f,l,a);
+      std::cerr<<"done\n";
+    } else {
+      try {
+	delete[] a;
+      } catch(...) {
+	falcON_THROW("[%s:%d]: 'delete[] %p' failed\n",f,l,a);
+      }
     }
   }
   //////////////////////////////////////////////////////////////////////////////
@@ -378,10 +369,23 @@ namespace falcON {
   template<typename T> inline
   void DelObject(T* a, const char*f, int l) falcON_THROWING {
     if(0==a) falcON_Warning("trying to delete zero pointer to object");
-    else try {
-      delete a;
-    } catch(...) {
-      falcON_THROW("[%s:%d]: 'delete %p' failed\n",f,l,a);
+    if(debug(10)) {
+      std::cerr<<"falcON Debug Info: "<<f<<':'<<l
+	       <<" de-allocating " << traits<T>::name()
+	       <<" object @ "<<static_cast<void*>(a)<<" ... ";
+      try {
+	delete a;
+      } catch(...) {
+	std::cerr<<'\n';
+	falcON_THROW("[%s:%d]: 'delete %p' failed\n",f,l,a);
+      }
+      std::cerr<<"done\n";
+    } else {
+      try {
+	delete a;
+      } catch(...) {
+	falcON_THROW("[%s:%d]: 'delete %p' failed\n",f,l,a);
+      }
     }
   }
   //////////////////////////////////////////////////////////////////////////////

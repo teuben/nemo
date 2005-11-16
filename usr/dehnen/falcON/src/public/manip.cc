@@ -1,11 +1,9 @@
 // -*- C++ -*-                                                                 |
 //-----------------------------------------------------------------------------+
 //                                                                             |
-// manip.cc                                                                    |
+/// \file /src/public/manip.cc                                                 |
 //                                                                             |
-// C++ code                                                                    |
-//                                                                             |
-// Copyright (C) 2004  Walter Dehnen                                           |
+// Copyright (C) 2004-2005  Walter Dehnen                                      |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -28,6 +26,7 @@
 // version 1.2  14/06/2005 WD  fixed bug (if empty arguments)                  |
 // version 1.3  22/06/2005 WD  no $FALCON, nemo_dprintf -> debug_info          |
 // version 1.4  12/07/2005 WD  if manippath given, do not search elsewhere     |
+// version 1.5  08/11/2005 WD  if no manippath given, try $MANIPPATH           |
 //-----------------------------------------------------------------------------+
 #include <public/manip.h>              // the header we are implementing
 #include <public/inline_io.h>          // some I/O helpers
@@ -136,17 +135,18 @@ namespace {
       strcat(manpaths,"/");
     } else {
       strcat(manpaths,".");                        // try "."
-      const char*path = falcON::directory();       // try falcON/manip/
+      const char *path;
+      path = getenv("MANIPPATH");                  // try $MANIPPATH
+      if(path) {
+	strcat(manpaths,":");
+      	strcat(manpaths,path);
+      }
+      path = falcON::directory();                  // try falcON/manip/
       if(path) {
 	strcat(manpaths,":");
 	strcat(manpaths,path);
 	strcat(manpaths,"/manip/");
       }
-//       path = getenv("LD_LIBRARY_PATH");            // try $LD_LIBRARY_PATH
-//       if(path) {
-// 	strcat(manpaths,":");
-// 	strcat(manpaths,path);
-//       }
     }
     // 4.2 seek file in path and load it
     char name[256];

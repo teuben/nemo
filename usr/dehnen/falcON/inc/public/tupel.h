@@ -573,6 +573,9 @@ namespace falcON {
     static const char  *name() {
       return message("tupel<%d,%s>", N, traits<T>::name());
     }
+    static const char  *names() {
+      return message("tupel<%d,%s>s", N, traits<T>::name());
+    }
     static const size_t size = sizeof(tupel<N,T>);
   };
 #endif

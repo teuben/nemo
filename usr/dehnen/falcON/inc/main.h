@@ -453,9 +453,13 @@ namespace falcON {
   //////////////////////////////////////////////////////////////////////////////
   inline void check_sufficient(fieldset const&read, fieldset const&need)
     throw(falcON::exception) {
-    if(! read.contain(need))
-      throw exception("insufficient data: need \'%s\', got \'%s\'",
-		      word(need), word(read));
+    if(! read.contain(need)) {
+      fieldset::wlist wneed(&need);
+      fieldset::wlist wread(&read);
+      throw exception("insufficient data: need \'%s\' but got only \'%s\'",
+		      static_cast<const char*>(wneed),
+ 		      static_cast<const char*>(wread) );
+    }
   }
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //

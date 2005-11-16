@@ -1,6 +1,6 @@
 //------------------------------------------------------------------------------
 //                                                                              
-// file src/public/partner.cc                                                   
+/// \file src/public/partner.cc                                                 
 //                                                                              
 // Copyright (C) 2000-2005  Walter Dehnen                                       
 //                                                                              
@@ -31,10 +31,10 @@ namespace {
 #define LoopPartnerLKids(CELLITER,CELL,NAME,STSP)		\
   LoopLeafKids(CELLITER,CELL,NAME) if(is_##STSP(NAME))
   //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // struct take_sph                                                          //
-  // struct take_sticky                                                       //
-  //                                                                          //
+  //                                                                            
+  // struct take_sph                                                            
+  // struct take_sticky                                                         
+  //                                                                            
   //////////////////////////////////////////////////////////////////////////////
   struct take_sph {
     static bool take    (PartnerEstimator::leaf_iterator const&A) 
@@ -54,9 +54,9 @@ namespace {
     { return al_sticky(A); }
   };
   //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // class BasicFinder                                                        //
-  //                                                                          //
+  //                                                                            
+  // class BasicFinder                                                          
+  //                                                                            
   //////////////////////////////////////////////////////////////////////////////
   template<typename taker>
   class BasicFinder : 
@@ -159,13 +159,13 @@ namespace {
       : BasicIactor<PartnerEstimator>(dir) {}
   };
   //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // class BasicLister                                                        //
-  //                                                                          //
-  // for finding leaf pairs in a sticky_tree;                                 //
-  // derived from BasicIactor of interact.h, which satisfies the requirements //
-  // for an INTERACTOR template parameter to class MutualInteractor<>;        //
-  //                                                                          //
+  //                                                                            
+  // class BasicLister                                                          
+  //                                                                            
+  // for finding leaf pairs in a sticky_tree;                                   
+  // derived from BasicIactor of interact.h, which satisfies the requirements   
+  // for an INTERACTOR template parameter to class MutualInteractor<>;          
+  //                                                                            
   //////////////////////////////////////////////////////////////////////////////
   template<typename taker>
   class BasicLister : public BasicFinder<taker> {
@@ -215,9 +215,9 @@ namespace {
       : BasicFinder<taker>(dir), BODIES(b), MAX(n), BL(l), N(0) {}
   };
   //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // struct Counter<bool>                                                     //
-  //                                                                          //
+  //                                                                            
+  // struct Counter<bool>                                                       
+  //                                                                            
   //////////////////////////////////////////////////////////////////////////////
   template<bool> struct Counter;
   template<> struct Counter<true> {
@@ -231,15 +231,15 @@ namespace {
 		      PartnerEstimator::leaf_iterator const&B) {}
   };
   //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // class StickyFinder<>                                                     //
-  //                                                                          //
-  // for finding stsp_leaf pairs which satisfy:                               //
-  // - both are flagged as sticky                                             //
-  // - at least one is flagged as active                                      //
-  // - there is a time t in [0,tau] such that:                                //
-  //   | (x_i+v_i*t) - (x_j+v+j*t) | < size_i+size_j                          //
-  //                                                                          //
+  //                                                                            
+  // class StickyFinder<>                                                       
+  //                                                                            
+  // for finding stsp_leaf pairs which satisfy:                                 
+  // - both are flagged as sticky                                               
+  // - at least one is flagged as active                                        
+  // - there is a time t in [0,tau] such that:                                  
+  //   | (x_i+v_i*t) - (x_j+v+j*t) | < size_i+size_j                            
+  //                                                                            
   //////////////////////////////////////////////////////////////////////////////
   template<bool COUNT>
   class StickyFinder : public BasicLister<take_sticky> {
@@ -329,14 +329,14 @@ namespace {
     }
   };
   //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // class NeighbourCounter                                                   //
-  //                                                                          //
-  // for counting PartnerLeaf pairs which satisfy:                            //
-  // - both are flagged as sph                                                //
-  // - at least one is flagged as active                                      //
-  // - | x_i - x_j | < max(size_i,size_j)                                     //
-  //                                                                          //
+  //                                                                            
+  // class NeighbourCounter                                                     
+  //                                                                            
+  // for counting PartnerEstimator::Leaf pairs which satisfy:                   
+  // - both are flagged as sph                                                  
+  // - at least one is flagged as active                                        
+  // - | x_i - x_j | < max(size_i,size_j)                                       
+  //                                                                            
   //////////////////////////////////////////////////////////////////////////////
   class NeighbourCounter : public BasicFinder<take_sph> {
   protected:
@@ -367,14 +367,14 @@ namespace {
     }
   };
   //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // class NeighbourLister<>                                                  //
-  //                                                                          //
-  // for finding and counting PartnerLeaf pairs which satisfy:                //
-  // - both are flagged as sph                                                //
-  // - at least one is flagged as active                                      //
-  // - | x_i - x_j | < max(size_i,size_j)                                     //
-  //                                                                          //
+  //                                                                            
+  // class NeighbourLister<>                                                    
+  //                                                                            
+  // for finding and counting PartnerEstimator::Leaf pairs which satisfy:       
+  // - both are flagged as sph                                                  
+  // - at least one is flagged as active                                        
+  // - | x_i - x_j | < max(size_i,size_j)                                       
+  //                                                                            
   //////////////////////////////////////////////////////////////////////////////
   template<bool COUNT>
   class NeighbourLister : public BasicLister<take_sph> {
@@ -411,13 +411,13 @@ namespace {
     }
   };
   //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // class PartnerCounter                                                     //
-  //                                                                          //
-  // for counting PartnerLeaf pairs which satisfy:                            //
-  // - both are flagged as sph                                                //
-  // - | x_i - x_j | < size_i + size_j                                        //
-  //                                                                          //
+  //                                                                            
+  // class PartnerCounter                                                       
+  //                                                                            
+  // for counting PartnerEstimator::Leaf pairs which satisfy:                   
+  // - both are flagged as sph                                                  
+  // - | x_i - x_j | < size_i + size_j                                          
+  //                                                                            
   //////////////////////////////////////////////////////////////////////////////
   class PartnerCounter : public BasicFinder<take_sph> {
   protected:
@@ -446,14 +446,14 @@ namespace {
       : BasicFinder<take_sph>(dir) {}
   };
   //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // class PartnerLister<>                                                    //
-  //                                                                          //
-  // for finding and counting PartnerLeaf pairs which satisfy:                //
-  // - both are flagged as sph                                                //
-  // - at least one is flagged as active                                      //
-  // - | x_i - x_j | < size_i + size_j                                        //
-  //                                                                          //
+  //                                                                            
+  // class PartnerLister<>                                                      
+  //                                                                            
+  // for finding and counting PartnerEstimator::Leaf pairs which satisfy:       
+  // - both are flagged as sph                                                  
+  // - at least one is flagged as active                                        
+  // - | x_i - x_j | < size_i + size_j                                          
+  //                                                                            
   //////////////////////////////////////////////////////////////////////////////
   template<bool COUNT>
   class PartnerLister : public BasicLister<take_sph> {
@@ -491,14 +491,14 @@ namespace {
 } // namespace {
 ////////////////////////////////////////////////////////////////////////////////
 namespace falcON {
-  falcON_TRAITS(StickyFinder<0>,"StickyFinder<0>");
-  falcON_TRAITS(StickyFinder<1>,"StickyFinder<1>");
-  falcON_TRAITS(NeighbourCounter,"NeighbourCounter");
-  falcON_TRAITS(NeighbourLister<0>,"NeighbourLister<0>");
-  falcON_TRAITS(NeighbourLister<1>,"NeighbourLister<1>");
-  falcON_TRAITS(PartnerCounter,"PartnerCounter");
-  falcON_TRAITS(PartnerLister<0>,"PartnerLister<0>");
-  falcON_TRAITS(PartnerLister<1>,"PartnerLister<1>");
+  falcON_TRAITS(StickyFinder<0>,"StickyFinder<0>","StickyFinder<0>");
+  falcON_TRAITS(StickyFinder<1>,"StickyFinder<1>","StickyFinder<1>");
+  falcON_TRAITS(NeighbourCounter,"NeighbourCounter","NeighbourCounter");
+  falcON_TRAITS(NeighbourLister<0>,"NeighbourLister<0>","NeighbourLister<0>");
+  falcON_TRAITS(NeighbourLister<1>,"NeighbourLister<1>","NeighbourLister<1>");
+  falcON_TRAITS(PartnerCounter,"PartnerCounter","PartnerCounter");
+  falcON_TRAITS(PartnerLister<0>,"PartnerLister<0>","PartnerLister<0>");
+  falcON_TRAITS(PartnerLister<1>,"PartnerLister<1>","PartnerLister<1>");
 }
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
@@ -515,10 +515,10 @@ void PartnerEstimator::update_leafs_sticky()
     ALL_STSP = NL == TREE->N_leafs();
     if(NL) {
       if(LEAF_DATA) delete[] LEAF_DATA;
-      LEAF_DATA = falcON_NEW(PartnerLeaf::leaf_data,NL);
-      PartnerLeaf::leaf_data* Di = LEAF_DATA;
+      LEAF_DATA = falcON_NEW(Leaf::leaf_data,NL);
+      Leaf::leaf_data* Di = LEAF_DATA;
       unsigned NS=0, NA=0;
-      LoopLeafs(PartnerLeaf,TREE,Li) {
+      LoopLeafs(Leaf,TREE,Li) {
 	Li->copy_from_bodies_flag(TREE->my_bodies());
 	if(is_sticky(Li)) {
 	  ++NS;
@@ -545,10 +545,10 @@ void PartnerEstimator::update_leafs_sph() {
     ALL_STSP = NL == TREE->N_leafs();
     if(NL) {
       if(LEAF_DATA) delete[] LEAF_DATA;
-      LEAF_DATA = falcON_NEW(PartnerLeaf::leaf_data,NL);
-      PartnerLeaf::leaf_data* Di = LEAF_DATA;
+      LEAF_DATA = falcON_NEW(Leaf::leaf_data,NL);
+      Leaf::leaf_data* Di = LEAF_DATA;
       unsigned NS=0, NA=0;
-      LoopLeafs(PartnerLeaf,TREE,Li) {
+      LoopLeafs(Leaf,TREE,Li) {
 	Li->copy_from_bodies_flag(TREE->my_bodies());
 	if(is_sph(Li)) {
 	  ++NS;
@@ -586,19 +586,20 @@ void PartnerEstimator::prepare_sph()
     }                                              //   END LOOP                
     Ci->numb() = ns;                               //   set: # partner leaf desc
     if(ns == 0u)                                   //   IF no partner leaf descs
-      Ci->un_set(flag::SPH);                       //     set flag: no partner  
+      Ci->un_set(flags::sph);                      //     set flag: no partner  
     else {                                         //   ELSE                    
       ++nc;                                        //     count partner cells   
-      Ci->add(flag::SPH);                          //     flag as partner cell  
-      if(ns == number(Ci)) Ci->add(flag::AL_SPH);  //     IF all partner: flag  
+      Ci->add(flags::sph);                         //     flag as partner cell  
+      if(ns == number(Ci))                         //     IF all partner:       
+	Ci->add(flags::all_sph);                   //       flag as such        
     }                                              //   ENDIF                   
   }                                                // END LOOP                  
   NC = nc;                                         // # partner cells           
-  // 3. allocate memory for PartnerCell::srce_data                              
+  // 3. allocate memory for Cell::srce_data                                     
   if(CELL_SRCE) delete[] CELL_SRCE;
-  CELL_SRCE = falcON_NEW(PartnerCell::srce_data,NC);
+  CELL_SRCE = falcON_NEW(Cell::srce_data,NC);
   // 4. loop cells: give memory to PartnerCells, pass up pos, size, rmax        
-  register PartnerCell::srce_data*ci=CELL_SRCE;    // pter to cell's source     
+  register Cell::srce_data*ci=CELL_SRCE;    // pter to cell's source     
   LoopCellsUp(cell_iterator,TREE,Ci)
   if(is_sph(Ci)) {                                 // LOOP sph ells upwards     
     Ci->set_srce(ci++);                            //   give srce memory        
@@ -646,19 +647,20 @@ void PartnerEstimator::prepare_sticky()
     }                                              //   END LOOP                
     Ci->numb() = ns;                               //   set: # partner leaf desc
     if     (ns == 0u)                              //   IF no partner leaf descs
-      Ci->un_set(flag::STICKY);                    //     set flag: no partner  
+      Ci->un_set(flags::sticky);                   //     set flag: no partner  
     else {                                         //   ELSE                    
       ++nc;                                        //     count partner cells   
-      Ci->add(flag::STICKY);                       //     flag as partner cell  
-      if(ns==number(Ci)) Ci->add(flag::AL_STICKY); //     IF all partner: flag  
+      Ci->add(flags::sticky);                      //     flag as partner cell  
+      if(ns == number(Ci))                         //     IF all partner:       
+	Ci->add(flags::all_sticky);                //       flag as such        
     }                                              //   ENDIF                   
   }                                                // END LOOP                  
   NC = nc;                                         // # partner cells           
   // 3. allocate memory for partner cells                                       
   if(CELL_SRCE) delete[] CELL_SRCE;
-  CELL_SRCE = falcON_NEW(PartnerCell::srce_data,NC);
+  CELL_SRCE = falcON_NEW(Cell::srce_data,NC);
   // 4. loop cells: give memory to partner cells, pass up pos, vel, size, vrad  
-  register PartnerCell::srce_data*ci=CELL_SRCE;    // pter to cell's source     
+  register Cell::srce_data*ci=CELL_SRCE;           // pter to cell's source     
   LoopCellsUp(cell_iterator,TREE,Ci)
   if(is_sticky(Ci)) {                              // LOOP sticky ells upwards  
     Ci->set_srce(ci++);                            //   give srce memory        

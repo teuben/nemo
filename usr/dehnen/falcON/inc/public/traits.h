@@ -31,28 +31,30 @@ namespace falcON {
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
   template<typename T> struct traits {
-    static const char  *name() { return "unknown type"; }
+    static const char  *name () { return "unknown type"; }
+    static const char  *names() { return "unknown types"; }
     static const size_t size = sizeof(T);
   };
   //////////////////////////////////////////////////////////////////////////////
-#define falcON_TRAITS(TYPE,NAME)		\
-  template<> struct traits<TYPE> {		\
-    static const char  *name() { return NAME; }	\
-    static const size_t size = sizeof(TYPE);	\
+#define falcON_TRAITS(TYPE,NAME,NAMES)			\
+  template<> struct traits<TYPE> {			\
+    static const char  *name () { return NAME; }	\
+    static const char  *names() { return NAMES; }	\
+    static const size_t size = sizeof(TYPE);		\
   }
-  falcON_TRAITS(char,"char");
-  falcON_TRAITS(unsigned char,"unsigned char");
-  falcON_TRAITS(int,"int");
-  falcON_TRAITS(unsigned,"unsigned");
-  falcON_TRAITS(short,"short");
-  falcON_TRAITS(unsigned short,"unsigned short");
-  falcON_TRAITS(long,"long");
-  falcON_TRAITS(unsigned long,"unsigned long");
-  falcON_TRAITS(long long,"long long");
-  falcON_TRAITS(unsigned long long,"unsigned long long");
-  falcON_TRAITS(float,"float");
-  falcON_TRAITS(double,"double");
-  falcON_TRAITS(long double,"long double");
+  falcON_TRAITS(char,"char","chars");
+  falcON_TRAITS(unsigned char,"unsigned char","unsigned chars");
+  falcON_TRAITS(int,"int","ints");
+  falcON_TRAITS(unsigned,"unsigned","unsigneds");
+  falcON_TRAITS(short,"short","shorts");
+  falcON_TRAITS(unsigned short,"unsigned short","unsigned shorts");
+  falcON_TRAITS(long,"long","longs");
+  falcON_TRAITS(unsigned long,"unsigned long","unsigned longs");
+  falcON_TRAITS(long long,"long long","long longs");
+  falcON_TRAITS(unsigned long long,"unsigned long long","unsigned long longs");
+  falcON_TRAITS(float,"float","floats");
+  falcON_TRAITS(double,"double","doubles");
+  falcON_TRAITS(long double,"long double","long doubles");
   //////////////////////////////////////////////////////////////////////////////
 } // namespace falcON {
 ////////////////////////////////////////////////////////////////////////////////

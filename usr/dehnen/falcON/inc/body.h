@@ -169,22 +169,22 @@ namespace falcON {
 	return const_data<BIT>()[i];
       }
       //------------------------------------------------------------------------
-      flag      &flg(int i)       { return datum<fieldbit::f>(i); }
-      flag const&flg(int i) const { return const_datum<fieldbit::f>(i); }
+      flags      &flag(int i)       { return datum<fieldbit::f>(i); }
+      flags const&flag(int i) const { return const_datum<fieldbit::f>(i); }
       //------------------------------------------------------------------------
       void set_first(unsigned f) { FIRST = f; }
       //------------------------------------------------------------------------
       bool has_field(fieldbit f) const { return DATA[value(f)] != 0; }
       //------------------------------------------------------------------------
-      bool                is_sph   () const { return TYPE.is_sph(); }
-      unsigned     const &N_alloc  () const { return NALL; }
-      unsigned     const &N_bodies () const { return NBOD; }
-      unsigned            N_free   () const { return NALL - NBOD; }
-      unsigned     const &my_No    () const { return NO; }
-      const bodies*const &my_bodies() const { return BODS; }
-      bodytype     const &type     () const { return TYPE; }
-      unsigned     const&first     () const { return FIRST; }
-      unsigned           end       () const { return FIRST+NBOD; }
+      bool               is_sph   () const { return TYPE.is_sph(); }
+      unsigned     const&N_alloc  () const { return NALL; }
+      unsigned     const&N_bodies () const { return NBOD; }
+      unsigned           N_free   () const { return NALL - NBOD; }
+      unsigned     const&my_No    () const { return NO; }
+      const bodies*const&my_bodies() const { return BODS; }
+      bodytype     const&type     () const { return TYPE; }
+      unsigned     const&first    () const { return FIRST; }
+      unsigned           end      () const { return FIRST+NBOD; }
       //------------------------------------------------------------------------
       block       *const&next             () const { return NEXT; }
       block       *      next_of_same_type() const {
@@ -237,16 +237,16 @@ namespace falcON {
 	NEXT = n;
       }
       //------------------------------------------------------------------------
-      void reset_data(fieldset) const falcON_THROWING;
-      void add_field (fieldbit) falcON_THROWING;
-      void del_field (fieldbit) falcON_THROWING;
-      void add_fields(fieldset) falcON_THROWING;
-      void del_fields(fieldset) falcON_THROWING;
-      void set_fields(fieldset) falcON_THROWING;
-      void remove    ()         falcON_THROWING;
+      void reset_data(fieldset ) const falcON_THROWING;
+      void add_field (fieldbit ) falcON_THROWING;
+      void del_field (fieldbit ) falcON_THROWING;
+      void add_fields(fieldset ) falcON_THROWING;
+      void del_fields(fieldset ) falcON_THROWING;
+      void set_fields(fieldset ) falcON_THROWING;
+      void remove    (unsigned&) falcON_THROWING;
       ~block() falcON_THROWING;
       //------------------------------------------------------------------------
-      void skip(unsigned&, int) const falcON_THROWING;
+      void skip(unsigned&, flags) const falcON_THROWING;
       //------------------------------------------------------------------------
       // copy up to NALL bodies                                                 
       // - we copy only bodies of the same type as hold here                    
@@ -259,7 +259,7 @@ namespace falcON {
 		    const block*&,                 // I: block[s] to copy from  
 		    unsigned    &,                 // I: 1st body to copy       
 		    fieldset = fieldset::all,      //[I: which data to copy]    
-		    int      = 0)                  //[I: flag for copying]      
+		    flags    = flags::empty)       //[I: flags for copying]     
 	falcON_THROWING;
 #ifdef falcON_NEMO
       //------------------------------------------------------------------------
@@ -333,6 +333,8 @@ namespace falcON {
   private:
     unsigned         NALL[BT_NUM];                 // # bodies allocated        
     unsigned         NBOD[BT_NUM];                 // # bodies in use           
+    unsigned         NNEW[BT_NUM];                 // # bodies created new      
+    unsigned         NDEL[BT_NUM];                 // # bodies removed          
     unsigned         NTOT;                         // total # bodies in use     
     fieldset         BITS;                         // body data allocated       
     unsigned         NBLK;                         // # blocks in use           
@@ -491,14 +493,6 @@ namespace falcON {
       friend class bodies;
       const block* B;                              // block*: current           
       unsigned     K, N;                           // index : current & end     
-      //------------------------------------------------------------------------
-      // private types                                                          
-      //------------------------------------------------------------------------
-      enum {
-	MARK_BODY   = 1<<9,                        // use  9th bit of flag      
-	NOT_LONGER  = 1<<10,                       // use 10th bit of flag      
-	NOT_SHORTER = 1<<11                        // use 11th bit of flag      
-      };
       //------------------------------------------------------------------------
       // construction                                                           
       //------------------------------------------------------------------------
@@ -706,66 +700,92 @@ namespace falcON {
       //------------------------------------------------------------------------
       /// \name flag manipulations                                              
       //@{
-      /// is flag F set?
-      bool flag_is_set       (int const&F) const {
-	return falcON::flg(*this).is_set(F);
+      /// is the single flag f set?
+      bool flag_is_set(flags::single f) const {
+	return falcON::flag(*this).is_set(f);
       }
-      /// conversion to flag
-      operator const flag&   ()            const {
-	return falcON::flg(*this);
+      /// are all flags in f set?
+      bool flags_are_set(flags const&f) const {
+	return falcON::flag(*this).are_set(f);
+      }
+      /// conversion to flags
+      operator const flags&() const {
+	return falcON::flag(*this);
       }
       /// flag this body as active
-      void flag_as_active    () { flg().add    (flag::ACTIVE); }
+      void flag_as_active    () { flag().add(flags::active); }
       /// flag this body as inactive
-      void unflag_active     () { flg().un_set (flag::ACTIVE); }
-      void flag_as_sticky    () { flg().add    (flag::STICKY); }
-      void unflag_sticky     () { flg().un_set (flag::STICKY); }
+      void unflag_active     () { flag().un_set(flags::active); }
+      /// flag this body as not new
+      void unflag_new        () { flag().un_set(flags::newbody); }
+      void flag_as_sticky    () { flag().add(flags::sticky); }
+      void unflag_sticky     () { flag().un_set(flags::sticky); }
       /// flag this body as SPH particle
-      void flag_as_sph       () { flg().add    (flag::SPH); }
+      void flag_as_sph       () { flag().add(flags::sph); }
       /// flag this body as non-SPH particle
-      void unflag_sph        () { flg().un_set (flag::SPH); }
+      void unflag_sph        () { flag().un_set(flags::sph); }
       /// flag this body for removal by bodies::remove()
-      void flag_for_removal  () { flg().add    (flag::REMOVE); }
+      void flag_for_removal  () { flag().add(flags::remove); }
       /// flag this body for usage with longer time step
-      void allow_longer      () { flg().un_set (NOT_LONGER); }
+      void allow_longer      () { flag().un_set(flags::not_longer); }
       /// flag this body not to use longer time step
-      void forbid_longer     () { flg().add    (NOT_LONGER); }
+      void forbid_longer     () { flag().add(flags::not_longer); }
       /// flag this body for usage with shorter time step
-      void allow_shorter     () { flg().un_set (NOT_SHORTER); }
+      void allow_shorter     () { flag().un_set(flags::not_shorter); }
       /// flag this body not to use shorter time step
-      void forbid_shorter    () { flg().add    (NOT_SHORTER); }
+      void forbid_shorter    () { flag().add(flags::not_shorter); }
       /// flag this body as being marked
-      void mark              () { flg().add    (MARK_BODY); }
+      void mark              () { flag().add(flags::marked); }
       /// flag this body as not being marked
-      void unmark            () { flg().un_set (MARK_BODY); }
+      void unmark            () { flag().un_set(flags::marked); }
       /// flag this body as being specially SPH marked
-      void mark_SPH_special  () { flg().add    (flag::SPH_SPECIAL); }
+      void mark_SPH_special  () { flag().add(flags::sph_special); }
       /// flag this body as not being specially SPH marked
-      void unmark_SPH_special() { flg().un_set (flag::SPH_SPECIAL); }
+      void unmark_SPH_special() { flag().un_set(flags::sph_special); }
       //@}
       //------------------------------------------------------------------------
       /// \name const boolean flag informations via members                     
       //@{
+      /// is body active?
+      bool is_active     () const { return flag_is_set(flags::active); }
+      /// is body to be removed?
+      bool to_remove     () const { return flag_is_set(flags::remove); }
+      /// is body SPH particle?
+      bool is_sph        () const { return flag_is_set(flags::sph); }
+      /// is body sticky particle?
+      bool is_sticky     () const { return flag_is_set(flags::sticky); }
+      /// is body new?
+      bool is_new        () const { return flag_is_set(flags::newbody); }
+      /// is this body flagged as being marked?
+      bool is_marked     () const { return flag_is_set(flags::marked); }
       /// has this body mass?
       bool is_source     () const { return falcON::mass(*this) != zero; }
       /// is this body allowed to use a longer time step?
-      bool may_go_longer () const { return !flag_is_set(NOT_LONGER);}
+      bool may_go_longer () const { return !flag_is_set(flags::not_longer);}
       /// is this body allowed to use a shorter time step?
-      bool may_go_shorter() const { return !flag_is_set(NOT_SHORTER); }
-      /// is this body flagged as being marked?
-      bool is_marked     () const { return  flag_is_set(MARK_BODY); }
+      bool may_go_shorter() const { return !flag_is_set(flags::not_shorter); }
       //@}
       //------------------------------------------------------------------------
       /// \name const boolean flag informations via friends                     
       //@{
+      /// friend: is body active?
+      friend bool is_active     (const iterator&i) { return i.is_active(); }
+      /// is body to be removed?
+      friend bool to_remove     (const iterator&i) { return i.to_remove(); }
+      /// is body SPH particle?
+      friend bool is_sph        (const iterator&i) { return i.is_sph(); }
+      /// is body sticky particle?
+      friend bool is_sticky     (const iterator&i) { return i.is_sticky(); }
+      /// is body new?
+      friend bool is_new        (const iterator&i) { return i.is_new(); }
+      /// friend: is this body flagged as being marked?
+      friend bool is_marked     (const iterator&i) { return i.is_marked(); }
       /// friend: has this body mass?
       friend bool is_source     (const iterator&i) { return i.is_source(); }
       /// friend: is this body allowed to use a longer time step?
       friend bool may_go_longer (const iterator&i) { return i.may_go_longer(); }
       /// friend: is this body allowed to use a shorter time step?
       friend bool may_go_shorter(const iterator&i) { return i.may_go_shorter();}
-      /// friend: is this body flagged as being marked?
-      friend bool is_marked     (const iterator&i) { return i.is_marked(); }
       //@}
       //------------------------------------------------------------------------
       // I/O                                                                    
@@ -859,7 +879,7 @@ namespace falcON {
     /// \param B  (input) bodies to copy
     /// \param Bd (input) body data fields to copy
     /// \param C  (input) if non-zero: copy only bodies which have this flag set
-    bodies(bodies const&B, fieldset Bd=fieldset::all, int C=0)
+    bodies(bodies const&B, fieldset Bd=fieldset::all, flags C=flags::empty)
       falcON_THROWING;
     //--------------------------------------------------------------------------
     /// Destruction: delete all data
@@ -1028,7 +1048,7 @@ namespace falcON {
     ///
     /// This simple routines combines N_free(), create(), and new_body() via
     /// \code
-    ///   if(0 == N_free(t)) create(N,t);
+    ///   if(0 == N_free(t)) create(min(1u,N),t);
     ///   return new_body(t);
     /// \endcode
     /// \return a valid bodies::iterator to a body of type \e t
@@ -1036,8 +1056,45 @@ namespace falcON {
     /// \param N (input) if no body available, allocate this many
     iterator new_body(bodytype t, unsigned N) falcON_THROWING
     {
-      if(0 == N_free(t)) create(N,t);
+      if(0 == N_free(t)) create(min(1u,N),t);
       return new_body(t);
+    }
+    //--------------------------------------------------------------------------
+    /// returns the number of bodies created by \a new_body since last call of
+    /// \a reset_Nnew(), if any.
+    unsigned const&N_new(bodytype t) const {
+      return NNEW[t];
+    }
+    //--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+    /// returns the number of bodies created by \a new_body() since last call of
+    /// \a reset_Nnew(), if any.
+    unsigned N_new() const {
+      return sum<BT_NUM>(NNEW);
+    }
+    //--------------------------------------------------------------------------
+    /// resets the counters of bodies created by \a new_body
+    void reset_Nnew() {
+      for(bodytype t; t; ++t)
+	NNEW[t] = 0u;
+    }
+    //--------------------------------------------------------------------------
+    /// returns the number of bodies removed by \a remove() since last call of
+    /// \a reset_Ndel(), if any.
+    unsigned const&N_del(bodytype t) const {
+      return NDEL[t];
+    }
+    //--------------------------------------------------------------------------
+    /// returns the number of bodies created by \a remove() since last call of
+    /// \a reset_Ndel(), if any.
+    unsigned N_del() const {
+      return sum<BT_NUM>(NDEL);
+    }
+    //--------------------------------------------------------------------------
+    /// resets the counters of bodies created by \a new_body
+    void reset_Ndel() {
+      for(bodytype t; t; ++t)
+	NDEL[t] = 0u;
     }
     //--------------------------------------------------------------------------
     /// Shrink allocation to actual usage (\b not \b yet \b implemented)
@@ -1206,6 +1263,14 @@ namespace falcON {
     }
     //@}
     //--------------------------------------------------------------------------
+    void CheckData(fieldset s, const char*f, int l) const
+    {
+      if(debug(6) && !have_all(s)) {
+	std::cerr<< "falcON Debug Info: "<<f<<':'<<l 
+		 << " bodies data required but not present: \""
+		 << all_bits().missing(s) << "\"\n";
+      }
+    }
   protected:
     //==========================================================================
     //                                                                          
@@ -1233,8 +1298,9 @@ namespace falcON {
     void del_data() falcON_THROWING;
     //==========================================================================
   };
-  falcON_TRAITS(bodies::index,"bodies::index");
-
+  falcON_TRAITS(bodies::index,"bodies::index","bodies::indexs");
+  //----------------------------------------------------------------------------
+#define CheckMissingBodyData(B,F) (B)->CheckData((F),__FILE__,__LINE__);
   // ///////////////////////////////////////////////////////////////////////////
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
@@ -1336,7 +1402,7 @@ namespace falcON {
     snapshot(double       t,
 	     bodies const&B,
 	     fieldset     Bd=fieldset::all,
-	     int          F =0) falcON_THROWING
+	     flags        F =flags::empty) falcON_THROWING
     : bodies ( B,Bd,F ),
       INIT   ( true ),
       TINI   ( t ),
@@ -1352,7 +1418,7 @@ namespace falcON {
     explicit
     snapshot(snapshot const&S,
 	     fieldset       Bd=fieldset::all,
-	     int            F =0 ) falcON_THROWING
+	     flags          F =flags::empty) falcON_THROWING
     : bodies ( S,Bd,F ),
       INIT   ( S.INIT ),
       TINI   ( S.TINI ),
@@ -1369,12 +1435,12 @@ namespace falcON {
     ///
     /// \param S  (input) snapshot to be copied
     /// \param Bd (input, optional) body data to be copied
-    /// \param f  (input, optional) flag for bodies to be copied
+    /// \param F  (input, optional) flag for bodies to be copied
     void copy(snapshot const&S,
 	      fieldset       Bd=fieldset::all,
-	      int            f=0) falcON_THROWING 
+	      flags          F =flags::empty) falcON_THROWING
     {
-      bodies::copy(S,Bd,f);
+      bodies::copy(S,Bd,F);
       TIME = S.TIME;
     }
     //@}

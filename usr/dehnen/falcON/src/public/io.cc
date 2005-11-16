@@ -41,9 +41,6 @@ extern "C" {
 #ifndef TimeStepTag
 #  define TimeStepTag "TimeStep"
 #endif
-#ifndef FlagTag
-#  define FlagTag "Flag"
-#endif
 #ifndef LevelTag
 #  define LevelTag "Level"
 #endif
@@ -121,7 +118,6 @@ namespace {
     case nemo_io::pos    : return PosTag;
     case nemo_io::vel    : return VelTag;
     case nemo_io::eps    : return EpsTag;
-    case nemo_io::flag   : return FlagTag;
     case nemo_io::key    : return KeyTag;
     case nemo_io::tau    : return TimeStepTag;
     case nemo_io::pot    : return PotentialTag;
@@ -175,7 +171,6 @@ namespace {
     switch(f) {
     case nemo_io::mass:
     case nemo_io::eps:
-    case nemo_io::flag:
     case nemo_io::key:
     case nemo_io::tau:
     case nemo_io::pot:

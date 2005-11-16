@@ -1,26 +1,26 @@
 //-----------------------------------------------------------------------------+
-//                                                                             |
-// gravity.cc                                                                  |
-//                                                                             |
-// Copyright (C) 2000-2005  Walter Dehnen                                      |
-//                                                                             |
-// This program is free software; you can redistribute it and/or modify        |
-// it under the terms of the GNU General Public License as published by        |
-// the Free Software Foundation; either version 2 of the License, or (at       |
-// your option) any later version.                                             |
-//                                                                             |
-// This program is distributed in the hope that it will be useful, but         |
-// WITHOUT ANY WARRANTY; without even the implied warranty of                  |
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU           |
-// General Public License for more details.                                    |
-//                                                                             |
-// You should have received a copy of the GNU General Public License           |
-// along with this program; if not, write to the Free Software                 |
-// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                   |
-//                                                                             |
-//-----------------------------------------------------------------------------+
-// last changed: 02-may-2005 WD                                                |
-//-----------------------------------------------------------------------------+
+//                                                                              
+/// \file src/public/gravity.cc                                                 
+//                                                                              
+// Copyright (C) 2000-2005  Walter Dehnen                                       
+//                                                                              
+// This program is free software; you can redistribute it and/or modify         
+// it under the terms of the GNU General Public License as published by         
+// the Free Software Foundation; either version 2 of the License, or (at        
+// your option) any later version.                                              
+//                                                                              
+// This program is distributed in the hope that it will be useful, but          
+// WITHOUT ANY WARRANTY; without even the implied warranty of                   
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
+// General Public License for more details.                                     
+//                                                                              
+// You should have received a copy of the GNU General Public License            
+// along with this program; if not, write to the Free Software                  
+// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                    
+//                                                                              
+//------------------------------------------------------------------------------
+// last changed: 03-nov-2005 WD                                                 
+//------------------------------------------------------------------------------
 #include <public/gravity.h>
 #include <body.h>
 #include <public/interact.h>
@@ -37,6 +37,7 @@ namespace falcON {
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
+  //                                                                          //
   // class falcON::InvertZ                                                    //
   //                                                                          //
   // methods for inverting                                                    //
@@ -166,6 +167,10 @@ void GravMAC::set_rcrit(const GravEstimator*G) const {
   switch(MAC) {
   case const_theta:
     LoopCellsDown(grav::cell_iter,G->my_tree(),Ci)
+//   for(register grav::cell_iter
+//       Ci ((G->my_tree())->begin_cells());
+//       Ci!=(G->my_tree())->end_cells();
+//     ++Ci)
       Ci->set_rcrit(iTH0);
     break;
   case theta_of_M: {
@@ -229,11 +234,11 @@ namespace {
 		 square(radius(C)+abs(com[2]-center(C)[2])) );
   }
   //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // class grav_iact_base                                                     //
-  //                                                                          //
+  //                                                                            
+  // class GravIactBase                                                         
+  //                                                                            
   //////////////////////////////////////////////////////////////////////////////
-  class grav_iact_base {
+  class GravIactBase {
     //--------------------------------------------------------------------------
     // types required in interact.h                                             
     //--------------------------------------------------------------------------
@@ -289,10 +294,10 @@ namespace {
     }
     //--------------------------------------------------------------------------
   protected:
-    grav_iact_base(
-		   GravStats*const&t,                 // I: statistics          
-		   int const nd[4]= Default::direct): //[I: direct sum control] 
-      STAT       ( t )
+    GravIactBase(
+		 GravStats*const&t,                 // I: statistics            
+		 int const nd[4]= Default::direct): //[I: direct sum control]   
+      STAT ( t )
     {
       N_PRE [0] = nd[0];                           // C-B direct before try     
       N_PRE [1] = 0u;                              // C-C direct before try     
@@ -309,48 +314,48 @@ namespace {
     }
   };
   //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // class falcON::grav_iact                                                  //
-  //                                                                          //
-  // This class is at the heart of the algorithm. It serves as INTERACTOR in  //
-  // the template class MutualInteract<>, defined in interact.h, which        //
-  // encodes the interaction phase in a most general way.                     //
-  // class falcON::grav_iact has member functions for leaf-leaf,              //
-  // leaf-cell, cell-leaf, cell-cell, and cell-self interactions (methods     //
-  // interact()), as well as a function for the evaluation phase, method      //
-  // evaluate_grav().                                                         //
-  //                                                                          //
-  // NOTE. We organize the cells' Taylor coefficient: at a cell's first       //
-  // interaction, memory for its coefficients is taken from a pre-allocated   //
-  // pool and returned to the pool when the cell eventually passes through    //
-  // evaluation phase.                                                        //
-  //                                                                          //
+  //                                                                            
+  // class falcON::GravIact                                                     
+  //                                                                            
+  // This class is at the heart of the algorithm. It serves as INTERACTOR in    
+  // the template class MutualInteract<>, defined in interact.h, which          
+  // encodes the interaction phase in a most general way.                       
+  // class falcON::GravIact has member functions for leaf-leaf,                 
+  // leaf-cell, cell-leaf, cell-cell, and cell-self interactions (methods       
+  // interact()), as well as a function for the evaluation phase, method        
+  // evaluate_grav().                                                           
+  //                                                                            
+  // NOTE. We organize the cells' Taylor coefficient: at a cell's first         
+  // interaction, memory for its coefficients is taken from a pre-allocated     
+  // pool and returned to the pool when the cell eventually passes through      
+  // evaluation phase.                                                          
+  //                                                                            
   //////////////////////////////////////////////////////////////////////////////
-  class grav_iact : 
-    public grav_iact_base,
-    public grav_kern
+  class GravIact : 
+    public GravIactBase,
+    public GravKern
   {
-    grav_iact           (grav_iact const&);        // not implemented           
-    grav_iact& operator=(grav_iact const&);        // not implemented           
+    GravIact           (GravIact const&);          // not implemented           
+    GravIact& operator=(GravIact const&);          // not implemented           
     //--------------------------------------------------------------------------
     // public methods                                                           
     //--------------------------------------------------------------------------
   public:
-    grav_iact(kern_type const&k,                      // I: type of kernel      
-	      GravStats*const&t,                      // I: statistics          
-	      real      const&e,                      // I: softening length    
-	      unsigned  const&np,                     // I: initial pool size   
+    GravIact(kern_type const&k,                      // I: type of kernel       
+	     GravStats*const&t,                      // I: statistics           
+	     real      const&e,                      // I: softening length     
+	     unsigned  const&np,                     // I: initial pool size    
 #ifdef falcON_INDI
-	      bool      const&s    = Default::soften, //[I: use individual eps?]
+	     bool      const&s    = Default::soften, //[I: use individual eps?] 
 #endif
-	      int       const nd[4]= Default::direct, //[I: direct sum control] 
-	      bool      const&fp   = false) :         //[I: use Pth pole in pot]
-      grav_iact_base  ( t,nd ),
-      grav_kern       ( k,e,
+	     int       const nd[4]= Default::direct, //[I: direct sum control]  
+	     bool      const&fp   = false) :         //[I: use Pth pole in pot] 
+      GravIactBase  ( t,nd ),
+      GravKern      ( k,e,
 #ifdef falcON_INDI
-			s,
+		      s,
 #endif
-			np ) {}
+		      np ) {}
     //--------------------------------------------------------------------------
     // interaction phase                                                        
     //--------------------------------------------------------------------------
@@ -441,37 +446,37 @@ namespace {
     }
   };
   //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // class falcON::grav_iact_all                                              //
-  //                                                                          //
-  // Like grav_iact, except that all cells and leafs are assumed active.      //
-  //                                                                          //
+  //                                                                            
+  // class falcON::GravIactAll                                                  
+  //                                                                            
+  // Like GravIact, except that all cells and leafs are assumed active.         
+  //                                                                            
   //////////////////////////////////////////////////////////////////////////////
-  class grav_iact_all : 
-    public grav_iact_base,
-    public grav_kern_all
+  class GravIactAll : 
+    public GravIactBase,
+    public GravKernAll
   {
-    grav_iact_all           (grav_iact_all const&);// not implemented           
-    grav_iact_all& operator=(grav_iact_all const&);// not implemented           
+    GravIactAll           (GravIactAll const&);    // not implemented           
+    GravIactAll& operator=(GravIactAll const&);    // not implemented           
     //--------------------------------------------------------------------------
     // public methods                                                           
     //--------------------------------------------------------------------------
   public:
-    grav_iact_all(kern_type const&k,                  // I: type of kernel      
-		  GravStats*const&t,                  // I: statistics          
-		  real      const&e,                  // I: softening length    
-		  unsigned  const&np,                 // I: initial pool size   
+    GravIactAll(kern_type const&k,                  // I: type of kernel        
+		GravStats*const&t,                  // I: statistics            
+		real      const&e,                  // I: softening length      
+		unsigned  const&np,                 // I: initial pool size     
 #ifdef falcON_INDI
-		  bool      const&s =Default::soften, //[I: use individual eps?]
+		bool      const&s =Default::soften, //[I: use individual eps?]  
 #endif
-		  int const    nd[4]=Default::direct  //[I: direct sum control] 
-		  ) :
-      grav_iact_base ( t,nd ),
-      grav_kern_all  ( k, e,
+		int const    nd[4]=Default::direct  //[I: direct sum control]   
+		) :
+      GravIactBase ( t,nd ),
+      GravKernAll  ( k, e,
 #ifdef falcON_INDI
-		       s,
+		     s,
 #endif
-		       np ) {}
+		     np ) {}
     //--------------------------------------------------------------------------
     // interaction phase                                                        
     //--------------------------------------------------------------------------
@@ -571,19 +576,25 @@ namespace {
     unsigned n=0;
 #ifdef falcON_INDI
     if(i_soft) {
-      LoopLeafs(grav::leaf_type,tree,Li) {
+      CheckMissingBodyData(tree->my_bodies(),
+			   fieldset::m|fieldset::e|fieldset::f);
+      LoopLeafs(grav::leaf,tree,Li) {
 	Li->copy_from_bodies_mass(tree->my_bodies());
 	Li->copy_from_bodies_eph (tree->my_bodies());
 	Li->copy_from_bodies_flag(tree->my_bodies());
 	if(is_active(Li)) ++n;
       } 
-    } else
+    } else {
 #endif
-      LoopLeafs(grav::leaf_type,tree,Li) {
+      CheckMissingBodyData(tree->my_bodies(),fieldset::m|fieldset::f);
+      LoopLeafs(grav::leaf,tree,Li) {
 	Li->copy_from_bodies_mass(tree->my_bodies());
 	Li->copy_from_bodies_flag(tree->my_bodies());
 	if(is_active(Li)) ++n;
       }
+#ifdef falcON_INDI
+    }
+#endif
     return n;
   }
   //////////////////////////////////////////////////////////////////////////////
@@ -600,9 +611,9 @@ namespace {
   };
 
   template<bool ALL> inline
-  bool is_act(const GravLeaf*const&L) { return __IsAct<ALL>::is(L); }
+  bool is_act(const grav::leaf*L) { return __IsAct<ALL>::is(L); }
   template<bool ALL> inline
-  bool is_act(flag           const&F) { return __IsAct<ALL>::is(F); }
+  bool is_act(flags F) { return __IsAct<ALL>::is(F); }
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
   // UpdateBodiesGrav<ALL_ACT>()                                              //
@@ -616,32 +627,38 @@ namespace {
   void UpdateBodiesGrav(const OctTree*const&T,
 			real          const&G
 #ifdef falcON_ADAP
-			, bool        const&U
+		      , bool          const&U
 #endif
 			)
   {
 #ifdef falcON_ADAP
     if(U) {
+      CheckMissingBodyData(T->my_bodies(),
+			   fieldset::e|fieldset::a|fieldset::p);
       if(G!=one) {
-	LoopLeafs(GravLeaf,T,Li) if(is_act<ALL_ACT>(Li)) {
+	LoopLeafs(grav::leaf,T,Li) if(is_act<ALL_ACT>(Li)) {
 	  Li->copy_to_bodies_eps (T->my_bodies());
 	  Li->copy_to_bodies_grav(T->my_bodies(),G);
 	}
       } else { 
-	LoopLeafs(GravLeaf,T,Li) if(is_act<ALL_ACT>(Li)) {
+	LoopLeafs(grav::leaf,T,Li) if(is_act<ALL_ACT>(Li)) {
 	  Li->copy_to_bodies_eps (T->my_bodies());
 	  Li->copy_to_bodies_grav(T->my_bodies());
 	}
       }
-    } else
+    } else {
 #endif
+      CheckMissingBodyData(T->my_bodies(),fieldset::a|fieldset::p);
       if(G!=one) {
-	LoopLeafs(GravLeaf,T,Li) if(is_act<ALL_ACT>(Li))
+	LoopLeafs(grav::leaf,T,Li) if(is_act<ALL_ACT>(Li))
 	  Li->copy_to_bodies_grav(T->my_bodies(),G);
       } else {
-	LoopLeafs(GravLeaf,T,Li) if(is_act<ALL_ACT>(Li))
+	LoopLeafs(grav::leaf,T,Li) if(is_act<ALL_ACT>(Li))
 	  Li->copy_to_bodies_grav(T->my_bodies());
       }
+#ifdef falcON_ADAP
+    }
+#endif
   }
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
@@ -652,8 +669,9 @@ namespace {
   //////////////////////////////////////////////////////////////////////////////
   template<bool ALL_ACT> void ResetBodiesGrav(const bodies*B)
   {
+    CheckMissingBodyData(B,fieldset::a|fieldset::p);
     LoopAllBodies(B,b)
-      if(is_act<ALL_ACT>(flg(b))) {
+      if(is_act<ALL_ACT>(flag(b))) {
 	b.pot() = zero;
 	b.acc() = zero;
       }
@@ -685,7 +703,7 @@ void GravEstimator::update_leafs()
 }
 //------------------------------------------------------------------------------
 #ifdef falcON_ADAP
-# include <proper/grav_ind.cc>                 // GravEstimator::adjust_eph()   
+# include <proper/gravity_ind.cc>                 // GravEstimator::adjust_eph()
 #endif
 //------------------------------------------------------------------------------
 unsigned GravEstimator::pass_up(const GravMAC*const&MAC,
@@ -807,17 +825,17 @@ bool GravEstimator::prepare(const GravMAC*const&MAC,
   if(NLA!=NLA_needed) {                            // IF #active leafs changed  
     if(LEAF_SINK) delete[] LEAF_SINK;              //   delete old allocation   
     NLA = NLA_needed;                              //   # new allocation        
-    LEAF_SINK=falcON_NEW(GravLeaf::sink_data,NLA); //   allocate memory         
+    LEAF_SINK=falcON_NEW(Leaf::sink_data,NLA);     //   allocate memory         
   }                                                // ENDIF                     
   const bool all = al || NLA==TREE->N_leafs();     // are all active?           
-  GravLeaf::sink_data*si=LEAF_SINK;                // pter to leafs' sink data  
+  Leaf::sink_data*si=LEAF_SINK;                    // pter to leafs' sink data  
   if(all)                                          // IF all leafs              
-    LoopLeafs(grav::leaf_type,TREE,Li) {           //   LOOP leafs              
+    LoopLeafs(Leaf,TREE,Li) {                      //   LOOP leafs              
       si->reset();                                 //     reset sink data       
       Li->set_sink(si++);                          //     set leaf: sink        
     }                                              //   END LOOP                
   else                                             // ELSE (only active)        
-    LoopLeafs(grav::leaf_type,TREE,Li)             //   LOOP leafs              
+    LoopLeafs(Leaf,TREE,Li)                        //   LOOP leafs              
       if(is_active(Li)) {                          //     IF(leaf is active)    
 	si->reset();                               //       reset sink data     
 	Li->set_sink(si++);                        //       set leaf: sink      
@@ -831,9 +849,9 @@ bool GravEstimator::prepare(const GravMAC*const&MAC,
        NCT+NCT > TREE->N_cells()   ) {             //   OR #cells too small     
       if(CELL_SRCE) delete[] CELL_SRCE;            //     delete old allocation 
       NCT = TREE->N_cells();                       //     # new allocation      
-      CELL_SRCE=falcON_NEW(GravCell::srce_data,NCT); //   allocate memory       
+      CELL_SRCE=falcON_NEW(Cell::srce_data,NCT);   //     allocate memory       
     }                                              //   ENDIF                   
-    GravCell::srce_data*ci=CELL_SRCE;              //   pter to cell's source   
+    Cell::srce_data*ci=CELL_SRCE;                  //   pter to cell's source   
     LoopCellsDown(grav::cell_iter,TREE,Ci) {       //   LOOP cells              
       Ci->set_srce(ci++);                          //     give memory to cell   
       Ci->resetCoeffs();                           //     reset cell: Coeffs    
@@ -842,7 +860,7 @@ bool GravEstimator::prepare(const GravMAC*const&MAC,
     NCA = pass_up(MAC,TREE->is_re_used());         //   pass source data up tree
     CELLS_UPTODATE = 1;                            //   update up-to-date flag  
   } else {                                         // ELSE                      
-    GravCell::srce_data*ci=CELL_SRCE;              //   pter to cell's source   
+    Cell::srce_data*ci=CELL_SRCE;                  //   pter to cell's source   
     LoopCellsDown(grav::cell_iter,TREE,Ci)         //   LOOP cells              
       Ci->set_srce(ci++);                          //     give memory to cell   
   }                                                // ENDIF                     
@@ -878,13 +896,13 @@ void GravEstimator::exact(bool       const&al
 #  define ARGS KERNEL,STATS,EPS,0
 #endif
   if(all) {
-    grav_iact_all K(ARGS);
+    GravIactAll K(ARGS);
     K.direct_summation(root());
-    LoopLeafs(GravLeaf,TREE,Li) Li->normalize_grav();
+    LoopLeafs(Leaf,TREE,Li) Li->normalize_grav();
   } else {
-    grav_iact K(ARGS);
+    GravIact K(ARGS);
     K.direct_summation(root());
-    LoopLeafs(GravLeaf,TREE,Li) if(is_active(Li)) Li->normalize_grav();
+    LoopLeafs(Leaf,TREE,Li) if(is_active(Li)) Li->normalize_grav();
   }
 #undef ARGS
 #ifdef falcON_ADAP
@@ -936,8 +954,8 @@ void GravEstimator::approx(const GravMAC*const&GMAC,
 #endif
   Ncsize = 4+(all? TREE->N_cells() : N_active_cells())/(split? 16:4);
   if(all) {                                        // IF all are active         
-    grav_iact_all GK(ARGS);                        //   init gravity kernel     
-    MutualInteractor<grav_iact_all> MI(&GK,split? TREE->depth()-1 : 
+    GravIactAll GK(ARGS);                          //   init gravity kernel     
+    MutualInteractor<GravIactAll> MI(&GK,split? TREE->depth()-1 : 
 				                  TREE->depth());
                                                    //   init mutual interactor  
     if(split) {                                    //   IF splitting            
@@ -961,9 +979,9 @@ void GravEstimator::approx(const GravMAC*const&GMAC,
     Ncoeffs = GK.coeffs_used();                    //   remember # coeffs used  
     Nchunks = GK.chunks_used();                    //   remember # chunks used  
   } else {                                         // ELSE: not all are active  
-    grav_iact GK(ARGS);                            //   init gravity kernel     
+    GravIact GK(ARGS);                             //   init gravity kernel     
 #undef ARGS
-    MutualInteractor<grav_iact> MI(&GK,split? TREE->depth()-1 :
+    MutualInteractor<GravIact> MI(&GK,split? TREE->depth()-1 :
 					      TREE->depth());
                                                    //   init mutual interactor  
     if(split) {                                    //   IF splitting            
@@ -1055,22 +1073,16 @@ namespace {
     }
   };
   //----------------------------------------------------------------------------
-  class UpdateBodiesRho {
-    const bool    all;
-    const OctTree*T;
-  public:
-    UpdateBodiesRho(const OctTree*const&t,
-		    bool          const&a) : T(t), all(a) {}
-    unsigned operator() (const bodies*const&B) const {
-      if(all)
-	LoopLeafs(GravLeaf,T,Li)
-	  Li->copy_to_bodies_rho(B);
-      else
-	LoopLeafs(GravLeaf,T,Li) if(is_active(Li))
-	  Li->copy_to_bodies_rho(B);
-      return 0;
-    }
-  };
+  void UpdateBodiesRho(const OctTree*const&T,
+		       bool          const&all)
+  {
+    if(all)
+      LoopLeafs(grav::leaf,T,Li)
+	Li->copy_to_bodies_rho(T->my_bodies());
+    else
+      LoopLeafs(grav::leaf,T,Li) if(is_active(Li))
+	Li->copy_to_bodies_rho(T->my_bodies());
+  }
 }                                                  // END: unnamed namespace    
 //------------------------------------------------------------------------------
 void GravEstimator::estimate_nd(bool const&al, unsigned const&Nx) const
@@ -1078,7 +1090,7 @@ void GravEstimator::estimate_nd(bool const&al, unsigned const&Nx) const
   NX = Nx;
   if(al) guess<number_density,1>::do_it(root(),zero);
   else   guess<number_density,0>::do_it(root(),zero);
-  TREE->UseBodies(UpdateBodiesRho(TREE,al));
+  UpdateBodiesRho(TREE,al);
 }
 //------------------------------------------------------------------------------
 void GravEstimator::estimate_sd(bool const&al, unsigned const&Nx)
@@ -1088,7 +1100,7 @@ void GravEstimator::estimate_sd(bool const&al, unsigned const&Nx)
   NX = Nx;
   if(al) guess<surface_density,1>::do_it(root(),zero);
   else   guess<surface_density,0>::do_it(root(),zero);
-  TREE->UseBodies(UpdateBodiesRho(TREE,al));
+  UpdateBodiesRho(TREE,al);
   TREE->mark_grav_usage();
 }
 //------------------------------------------------------------------------------
@@ -1099,18 +1111,18 @@ void GravEstimator::estimate_md(bool const&al, unsigned const&Nx)
   NX = Nx;
   if(al) guess<mass_density,1>::do_it(root(),zero);
   else   guess<mass_density,0>::do_it(root(),zero);
-  TREE->UseBodies(UpdateBodiesRho(TREE,al));
+  UpdateBodiesRho(TREE,al);
   TREE->mark_grav_usage();
 }
 //------------------------------------------------------------------------------
 void GravEstimator::dump_cells(std::ostream&o) const
 {
-  if(CELL_SRCE) TREE->dump_cells<GravCell>(o);
-  else          TREE->dump_cells<BasicCell>(o);
+  if(CELL_SRCE) TREE->dump_cells<Cell>(o);
+  else          TREE->dump_cells<OctTree::Cell>(o);
 }
 //------------------------------------------------------------------------------
 void GravEstimator::dump_leafs(std::ostream&o) const
 {
-  TREE->dump_leafs<GravLeaf>(o);
+  TREE->dump_leafs<Leaf>(o);
 }
 ////////////////////////////////////////////////////////////////////////////////

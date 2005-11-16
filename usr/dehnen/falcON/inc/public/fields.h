@@ -10,7 +10,7 @@
 /// \brief   body flags and support for body data management                    
 ///                                                                             
 ///          Contents:                                                          
-///          \li falcON::flag: holding boolean information about each body      
+///          \li falcON::flags: holding boolean information about each body     
 ///          \li falcON::fieldbit: representing a single body data field        
 ///          \li falcON::fieldset: representing a set of body data fields       
 ///          \li template falcON::field_traits                                  
@@ -45,144 +45,207 @@ namespace falcON {
 
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
-  // class falcON::flag                                                         
+  // class falcON::flags                                                        
   //                                                                            
   /// An integer, the bits of which are used as flags for body properties;      
   /// each body, as well as tree cells and leafs have a flag.                   
+  ///                                                                           
   // ///////////////////////////////////////////////////////////////////////////
-  class flag {
+  class flags {
     //--------------------------------------------------------------------------
-    // type of class flag                                                       
-    //--------------------------------------------------------------------------
+    /// enumeration holding the individual flags
   public:
-    /// enumeration holding some often used flag values.                        
-    enum {
-      ACTIVE        =  1<<0,  ///< a body/tree node is active                   
-      REMOVE        =  1<<1,  ///< body to be removed; see bodies::remove()     
-      SPH           =  1<<2,  ///< a body is SPH, tree node contains SPH bodies 
-      STICKY        =  1<<3,  ///< a body is sticky particle, tree node contains
-      AL_ACTIVE     =  1<<4,  ///< all children of a cell are active            
-      AL_SPH        =  1<<5,  ///< all children of a cell are SPH               
-      AL_STICKY     =  1<<6,  ///< all children of a cell are sticky            
-      SPH_SPECIAL   =  1<<7,  ///< help with time integration for SPH           
-      ADJUST_STEP   =  1<<8,  ///< help with time integration                   
-      // compounds of flags                                                     
-      LEAF_FLAGS    =  ACTIVE|SPH|STICKY,     ///< sum of all leaf flags        
-      BODY_FLAGS    =  LEAF_FLAGS|REMOVE,     ///< sum of all body flags        
-      ACTIVE_FLAGS  =  ACTIVE|AL_ACTIVE,      ///< sum of all active flags      
-      SPH_FLAGS     =  SPH   |AL_SPH,         ///< sum of all sph  flags        
-      STICKY_FLAGS  =  STICKY|AL_STICKY       ///< sum of all sticky flags      
+    enum single {
+      empty         = 0,       ///< no flag set
+      active        = 1 << 0,  ///< a body/tree node is active
+      remove        = 1 << 1,  ///< body to be removed, see bodies::remove()
+      sph           = 1 << 2,  ///< body is SPH particle
+      sticky        = 1 << 3,  ///< body is a sticky particle
+      newbody       = 1 << 4,  ///< body is new
+      adjust_step   = 1 << 5,  ///< help with time integration
+      not_longer    = 1 << 6,  ///< help with time integration
+      not_shorter   = 1 << 7,  ///< help with time integration
+      sph_special   = 1 << 8,  ///< help with time integration for SPH
+      interacting   = 1 << 9,  ///< help with SPH estimation
+      subtree       = 1 <<10,  ///< help with sub-tree building
+      marked        = 1 <<11,  ///< unspecified, not used in N-body code
+      // flags for cells only
+      all_active    = 1 <<20,  ///< all leafs in cell are active
+      all_sph       = 1 <<21,  ///< all leafs in cell are SPH particles
+      all_sticky    = 1 <<22,  ///< all leafs in cell are sticky particles
+      subtree_cell  = 1 <<23
+    };
+    enum combined {
+      leaf_flags    = active|sph|sticky|sph_special|interacting,
+      body_flags    = active|sph|sticky|sph_special|remove,
+      subtree_flags = subtree|subtree_cell,
+      activ_flags   = active|all_active
     };
     //--------------------------------------------------------------------------
-    // data of class flag                                                       
-    //--------------------------------------------------------------------------
-  private:
     /// data: 32 bits -> up to 32 flags can be supported
-    int FLAG;
+  private:
+    int val;
     //--------------------------------------------------------------------------
-    /// \name constructors                                                      
+    /// \name constructors and assignment
     //@{
+    /// construction from integer: set equal
+    explicit flags(int i) : val(i) {}
   public:
-    /// without argument: all bits are unset
-    flag           ()             : FLAG(0) {}
-    /// set equal to integer
-    flag           (int  F)       : FLAG(F) {}
+    /// unitialized construction: all flags are unset
+    flags() : val(empty) {}
     /// copy constructor
-    flag           (flag const&F) : FLAG(F.FLAG) {}
-    /// copy operator
-    flag& operator=(flag const&F) { FLAG = F.FLAG; return *this; }
+    flags(flags const&f) : val(f.val) {}
+    /// construction from single flag
+    flags(single f) : val(f) {}
+    /// construction from combined flag
+    flags(combined f) : val(f) {}
+    /// assign from flags
+    flags& operator=(flags const&f) {
+      val = f.val;
+      return *this;
+    }
+    /// assign from single flag
+    flags& operator=(single f) {
+      val = f;
+      return *this;
+    }
+    /// assign from combined flag
+    flags& operator=(combined f) {
+      val = f;
+      return *this;
+    }
+    //@}
+    //--------------------------------------------------------------------------
+    /// \name operations
+    //@{
+    /// add another set of flags
+    flags& operator|= (flags const&f) {
+      val |= f.val;
+      return *this;
+    }
+    /// add a specific flag
+    flags& operator|= (single b) {
+      val |= b;
+      return *this;
+    }
+    /// add a combined flag
+    flags& operator|= (combined b) {
+      val |= b;
+      return *this;
+    }
+    /// combine sets of flags
+    flags operator| (flags const&f) const {
+      return flags( val | f.val );
+    }
+    /// combine set of flags with a single flag
+    flags operator| (single b) const {
+      return flags( val | b );
+    }
+    /// combine set of flags with a combined flag
+    flags operator| (combined b) const {
+      return flags( val | b );
+    }
+    /// combine single flag with set of flags
+    friend flags operator| (single b, flags const&f) {
+      return flags( f.val | b );
+    }
+    /// combine single flag with set of flags
+    friend flags operator| (combined b, flags const&f) {
+      return flags( f.val | b );
+    }
+    /// combine single flags
+    friend flags operator| (single b, single c) {
+      return flags( b | c );
+    }
+    /// combine combined with single flags
+    friend flags operator| (combined b, single c) {
+      return flags( b | c );
+    }
+    /// combine single with combined flags
+    friend flags operator| (single b, combined c) {
+      return flags( b | c );
+    }
+    /// combine combined flags
+    friend flags operator| (combined b, combined c) {
+      return flags( b | c );
+    }
+    //@}
+    //--------------------------------------------------------------------------
+    /// \name general boolean methods
+    //@{
+    bool operator== (flags const&f) const { return val == f.val; }
+    bool operator!= (flags const&f) const { return val != f.val; }
+    bool are_set    (flags const&f) const { return val & f.val; }
+    bool is_set     (single        b) const { return val & b; }
+    //@}
+    //--------------------------------------------------------------------------
+    /// \name specific boolean methods taking reference to flags
+    //@{
+    friend bool is_active  (flags const&f) { return f.is_set(active); }
+    friend bool to_remove  (flags const&f) { return f.is_set(remove); }
+    friend bool is_sph     (flags const&f) { return f.is_set(sph); }
+    friend bool is_sticky  (flags const&f) { return f.is_set(sticky); }
+    friend bool is_new     (flags const&f) { return f.is_set(newbody); }
+    friend bool in_subtree (flags const&f) { return f.is_set(subtree); }
+    friend bool al_active  (flags const&f) { return f.is_set(all_active); }
+    friend bool al_sph     (flags const&f) { return f.is_set(all_sph); }
+    friend bool al_sticky  (flags const&f) { return f.is_set(all_sticky); }
+    //@}
+    //--------------------------------------------------------------------------
+    /// \name specific boolean methods taking pointer to flags
+    //@{
+    friend bool is_active  (const flags*f) { return f->is_set(active); }
+    friend bool to_remove  (const flags*f) { return f->is_set(remove); }
+    friend bool is_sph     (const flags*f) { return f->is_set(sph); }
+    friend bool is_sticky  (const flags*f) { return f->is_set(sticky); }
+    friend bool is_new     (const flags*f) { return f->is_set(newbody); }
+    friend bool in_subtree (const flags*f) { return f->is_set(subtree); }
+    friend bool al_active  (const flags*f) { return f->is_set(all_active); }
+    friend bool al_sph     (const flags*f) { return f->is_set(all_sph); }
+    friend bool al_sticky  (const flags*f) { return f->is_set(all_sticky); }
     //@}
     //--------------------------------------------------------------------------
     /// \name non-const methods                                                 
     //@{
     /// reset all bits to zero
-    void reset       ()                         { FLAG = 0; }
-    /// set equal to another flag
-    void set_to      (const flag*F)             { FLAG = F->FLAG; }
-    /// set equal to another flag
-    void set_to      (const flag&F)             { FLAG = F.FLAG; }
-    /// set equal to part of another flag
-    void set_to_part (const flag*F,const int&P) { FLAG = F->FLAG&P;}
-    /// set equal to part of another flag
-    void set_to_part (const flag&F,const int&P) { FLAG = F.FLAG&P;}
-    /// add all bits of another flag
-    void add         (const flag*F)             { FLAG|= F->FLAG; }
-    /// add all bits of another flag
-    void add         (const flag&F)             { FLAG|= F.FLAG; }
-    /// add part of bits of another flag
-    void add_part    (const flag*F,const int&P) { FLAG|= F->FLAG&P;}
-    /// add part of bits of another flag
-    void add_part    (const flag&F,const int&P) { FLAG|= F.FLAG&P;}
-    /// set part of us equal to corresponding part of another flag
-    void set_part    (const flag*F,const int&P) { FLAG = FLAG&~P | F->FLAG&P; }
-    /// set part of us equal to corresponding part of another flag
-    void set_part    (const flag&F,const int&P) { FLAG = FLAG&~P | F.FLAG&P; }
-    /// reset all bits which are set in another flag
-    void un_set      (const flag*F)             { FLAG&= ~F->FLAG; }
-    /// reset all bits which are set in another flag
-    void un_set      (const flag&F)             { FLAG&= ~F.FLAG; }
+    void reset() { val = 0; }
+    /// set equal to part of another set of flags
+    void set_to_part(flags const&f, int mask) { val = f.val & mask;}
+    /// add a single flag
+    void add(single f) { (*this) |= f; }
+    /// add another set of flags
+    void add(flags const&f) { (*this) |= f; }
+    /// add part of another set of flags
+    void add_part(flags const&f, int mask) { val |= f.val & mask; }
+    /// add part of another set of flags
+    void add_part(flags const&f, single mask) { val |= f.val & mask; }
+    /// set part equal to corresponding part of another set of flags
+    void set_part(flags const&f, int mask) { 
+      val &= ~mask;
+      val |= f.val & mask;
+    }
+    /// reset a single flag
+    void un_set(single f) { val &= ~ int(f); }
+    /// reset all flags in a given set of flags
+    void un_set(flags const&f) { val &= ~(f.val); }
     //@}
     //--------------------------------------------------------------------------
-    // boolean information via members                                          
-    //--------------------------------------------------------------------------
-    /// is any bit set in the argument set here?
-    bool is_set(int T) const { return FLAG & T; }
-    //--------------------------------------------------------------------------
-    /// \name boolean information via friends                                   
-    //@{
-    /// is bit indicating activity set?
-    friend bool is_active (const flag*F) { return F->is_set(ACTIVE); }
-    /// is bit indicating activity set?
-    friend bool is_active (flag const&F) { return F.is_set(ACTIVE); }
-    /// is bit indicating activity of all children set?
-    friend bool al_active (const flag*F) { return F->is_set(AL_ACTIVE); }
-    /// is bit indicating activity of all children set?
-    friend bool al_active (flag const&F) { return F.is_set(AL_ACTIVE); }
-    /// is bit indicating SPH set?
-    friend bool is_sph    (const flag*F) { return F->is_set(SPH); }
-    /// is bit indicating SPH set?
-    friend bool is_sph    (flag const&F) { return F.is_set(SPH); }
-    /// is bit indicating SPH of all children set?
-    friend bool al_sph    (const flag*F) { return F->is_set(AL_SPH); }
-    /// is bit indicating SPH of all children set?
-    friend bool al_sph    (flag const&F) { return F.is_set(AL_SPH); }
-    /// is bit indicating sticky set?
-    friend bool is_sticky (const flag*F) { return F->is_set(STICKY); }
-    /// is bit indicating sticky set?
-    friend bool is_sticky (flag const&F) { return F.is_set(STICKY); }
-    /// is bit indicating sticky of all children set?
-    friend bool al_sticky (const flag*F) { return F->is_set(AL_STICKY); }
-    /// is bit indicating sticky of all children set?
-    friend bool al_sticky (flag const&F) { return F.is_set(AL_STICKY); }
-    /// is any bit set in argument set here?
-    friend bool is_set    (const flag*F, int const&T) { return F->is_set(T); }
-    /// is any bit set in argument set here?
-    friend bool is_set    (flag const&F, int const&T) { return F.is_set(T); }
-    //--------------------------------------------------------------------------
-    //@}
-    //--------------------------------------------------------------------------
-    // conversion to int                                                        
-    //--------------------------------------------------------------------------
-    /// conversion to const int
-    operator const int& () const { return FLAG; }
-    /// conversion to int
-    operator       int& ()       { return FLAG; }
+    /// type conversion to bool
+    operator bool () const { return val != 0; }
     //--------------------------------------------------------------------------
     /// \name formatted I/O                                                     
     //@{
     /// formatted output: simply write integer value
-    friend std::ostream& operator<< (std::ostream& o, const flag& F) {
-      return o<<F.FLAG;
+    friend std::ostream& operator<< (std::ostream& o, flags const&f) {
+      return o << f.val;
     }
     /// formatted input: read as integer
-    friend std::istream& operator>> (std::istream& i, flag& F) {
-      return i>>F.FLAG;
+    friend std::istream& operator>> (std::istream& i, flags&f) {
+      return i >> f.val;
     }
     //@}
-    //--------------------------------------------------------------------------
-  };
-  falcON_TRAITS(flag,"flag");
-
+  };// class flags
+  falcON_TRAITS(flags,"flags","flags");
   //////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
@@ -218,7 +281,7 @@ namespace falcON {
   // array with human readable names for the N-body data                        
   const char* const BD_QNAME[BD_NQUANT] = 
     { "mass", "position", "velocity", "predicted velocity", "softening length",
-      "body flag", "key", "time step", "potential", "external potential",
+      "body flags", "key", "time step", "potential", "external potential",
       "acceleration", "jerk", "density",  "auxiliary scalar", 
       "auxiliary vector", "time-step level", "number of partners",
       "Peano-Hilbert key", "SPH smoothing length",
@@ -235,7 +298,7 @@ namespace falcON {
     sizeof(vect),      // velocity
     sizeof(vect),      // velocity_predicted
     sizeof(real),      // softening length
-    sizeof(flag),      // flag
+    sizeof(flags),     // flags
     sizeof(int),       // key
     sizeof(real),      // time step
     //            sink properties: 10
@@ -291,7 +354,7 @@ namespace falcON {
       v       = 2,            ///< velocity
       w       = 3,            ///< predicted velocity
       e       = 4,            ///< individual gravitational softening length
-      f       = 5,            ///< falcON::flag
+      f       = 5,            ///< falcON::flags
       k       = 6,            ///< integer key
       t       = 7,            ///< time step (not used in falcON)
       //            sink properties: 10
@@ -376,7 +439,7 @@ namespace falcON {
     /// is the data field supported by NEMO I/O?
     friend bool              is_nemo (fieldbit);
   };
-  falcON_TRAITS(fieldbit,"fieldbit");
+  falcON_TRAITS(fieldbit,"fieldbit","fieldbits");
 
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
@@ -410,7 +473,7 @@ namespace falcON {
       v       = 1 << fieldbit::v,   ///< just velocities
       w       = 1 << fieldbit::w,   ///< just predicted velocities
       e       = 1 << fieldbit::e,   ///< just individual softening lengths
-      f       = 1 << fieldbit::f,   ///< just falcON::flags
+      f       = 1 << fieldbit::f,   ///< just falcON::flagss
       k       = 1 << fieldbit::k,   ///< just integer keys
       t       = 1 << fieldbit::t,   ///< just time steps
       p       = 1 << fieldbit::p,   ///< just N-body gravitational potentials
@@ -463,7 +526,7 @@ namespace falcON {
       /// all vector quantities
       vectors = x|v|a|j|w|z,
       /// all quantities supported by NEMO Input
-      nemoin  = m|x|v|e|f|k|t|p|a|r|y|l|n|sphnemo,
+      nemoin  = m|x|v|e|k|t|p|a|r|y|l|n|sphnemo,
       /// all quantities supported by NEMO Output
       nemo    = nemoin | q,
       /// all quantities at all
@@ -486,6 +549,8 @@ namespace falcON {
     fieldset(fieldset const   &b) : val(b.val) {}
     /// from fieldset::bits
     fieldset(bits              b) : val(b) {}
+    /// from fieldbit::bits
+    fieldset(fieldbit::bits    b) : val(1 << b) {}
     /// from integer: take value
     explicit fieldset(int      i) : val(i) {}
     /// from unsigned: take value
@@ -612,7 +677,9 @@ namespace falcON {
       char W[BD_NQUANT+1];
     public:
       explicit wlist(const fieldset*d) { d->make_word(W); }
+      explicit wlist(fieldset const&d) { d. make_word(W); }
       operator const char* () const { return W; }
+      friend const char*word(wlist const&w) { return w.W; }
     };
     const char* word() const { return wlist(this); }
     /// return a string of the letters corresponding to the fields in the set;
@@ -649,10 +716,10 @@ namespace falcON {
       return s;
     }
   };
-  falcON_TRAITS(fieldset,"fieldset");
+  falcON_TRAITS(fieldset,"fieldset","fieldsets");
   //////////////////////////////////////////////////////////////////////////////
   inline bool is_nemo(fieldbit f) {
-    return fieldset::nemo & 1 << value(f);
+    return fieldset::nemo & (1 << value(f));
   }
   // ///////////////////////////////////////////////////////////////////////////
   const unsigned BT_NUM = 2;
@@ -742,7 +809,7 @@ namespace falcON {
       }
     }
   };
-  falcON_TRAITS(bodytype,"bodytype");
+  falcON_TRAITS(bodytype,"bodytype","bodytypes");
 
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                          //
@@ -751,6 +818,9 @@ namespace falcON {
   // ///////////////////////////////////////////////////////////////////////////
   template<typename T> struct field_zero {
     static void set_zero(T&x) { x = T(0); }
+  };
+  template<> struct field_zero<flags> {
+    static void set_zero(flags&x) { x = flags::empty; }
   };
   template<typename T, int N> struct field_zero< tupel<N,T> > {
     static void set_zero(tupel<N,T>&x) { x = T(0); }
@@ -797,7 +867,7 @@ namespace falcON {
   DefFieldTraits( 2, vect);                        // velocity                  
   DefFieldTraits( 3, vect);                        // predicted velocity        
   DefFieldTraits( 4, real);                        // softening length          
-  DefFieldTraits( 5, flag);                        // body flag                 
+  DefFieldTraits( 5, flags)                        // body flags                
   DefFieldTraits( 6, int );                        // body key                  
   DefFieldTraits( 7, real);                        // time step                 
   DefFieldTraits( 8, real);                        // internal potential        
@@ -837,7 +907,7 @@ namespace falcON {
   MACRO(fieldbit::v,vel);			\
   MACRO(fieldbit::w,vprd);			\
   MACRO(fieldbit::e,eps);			\
-  MACRO(fieldbit::f,flg);			\
+  MACRO(fieldbit::f,flag);			\
   MACRO(fieldbit::k,key);			\
   MACRO(fieldbit::t,tau);			\
   MACRO(fieldbit::p,pot);			\
