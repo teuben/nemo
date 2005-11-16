@@ -1,0 +1,44 @@
+.TH falcON 1falcON "16 November 2005"
+.SH SYNOPSIS
+\fBprogram [key1=]val1 [key2=]val2 .\!.\!.
+.SH DESCRIPTION
+\fBfalcON\fP is a set of programs... can live within the \fInemo(1NEMO)\fP environment.
+.PP
+Unlike those in NEMO, \fBfalcON\fP program are mostly written in C++, with hooks
+into some C functionality of NEMO.
+.SH PROGRAMS
+The following programs in falcON are currently exported to NEMO:
+.nf
+.ta +2i
+addgravity
+getgravity
+gyrfalcON	a superberb N-body code
+lagrange_radii
+manipulate
+mkdehnen
+mkking
+mkplum
+scale_eps
+snapstack
+symmetrize
+TestGrav
+.fi
+.SH PROGRAMMING
+In order to develop programs for/within \fIfalcON\fP, you will need an
+additional environment. The alias \fBfalcON\fP in NEMO will load
+this environment, and prepend falcON specific directories to those
+already present. The alias \fBNOclaf\fP will clean up the environment
+as much as it can.
+.SH FILES
+.nf
+.ta +3i
+NEMO/usr/dehnen/falcON	root directory for falcON
+FALCON			same
+FALCONLIB/libfalcON.so	shared libary
+FALCON/inc		public interfaces to the library
+FALCONBIN		binaries
+.fi
+.SH SEE ALSO
+index(1NEMO), programs(8NEMO), files(8NEMO)
+.SH AUTHOR
+Walter Dehnen
