@@ -12,6 +12,7 @@
 #   30-jun-03   finally some info on darwin's 'bundles'
 #   17-sep-03   using g++ for linux, instead of ld
 #    9-oct-03   using g++ for darwin too
+#   17-nov-05   hpux note; solaris use copy, not move
 
 if ($#argv == 0) then
   echo "Usage: $0 <BASENAME>"
@@ -54,9 +55,12 @@ switch ($NEMOHOST)
     # the man pages claim you should do
     ld -G -o $1.so $1.o >& $log
     if ($status) goto error1
+  case hpux:
+    # some HP-UX versions this is "sl" 
+    goto error1
   default:
     #   e.g. solaris .o files can be shared
-    mv $1.o $1.so
+    cp $1.o $1.so
     breaksw
 endsw
 
@@ -71,3 +75,7 @@ error1:
 error2:
   echo "### Error: $0 problem renaming $1.so to $1.o"
   exit 2
+
+error3:
+  echo "### Error: $0 unimplemented feature to make $1.sl"
+  exit 3
