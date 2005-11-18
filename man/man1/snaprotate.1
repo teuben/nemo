@@ -1,4 +1,4 @@
-.TH SNAPROTATE 1NEMO "21 November 1998"
+.TH SNAPROTATE 1NEMO "18 November 2005"
 .SH NAME
 snaprotate \- rotate N-body snapshot file about principle axes.
 .SH SYNOPSIS
@@ -44,6 +44,11 @@ If used, this is the degrees per time-unit that the \fBtheta\fP angles
 are multiplied with in order to calculate the actual rotation angle.
 This can give interesting effects if used for simulations.
 Default not used.
+.TP
+\fBselect=\fP\fIvec1,vec2,...\fP
+Vector variables in a snapshot that should be rotated. Valid options
+are: \fBpos\fP, \fBvel\fP,  and \fBacc\fP. Exact match required for now.
+[Default:  \fBpos,vel,acc\fP]
 .SH EXAMPLES
 Suppose you have a barred galaxy model, \fIbar.dat\fP, 
 with the galactic plane at z=0
@@ -97,4 +102,5 @@ xx-jan-88	V1.0 original                   	JEB
 1-jun-92	documented the rotation manner bit more precise     	PJT
 11-jun-92	V4.0 rotation now defined in math sense             	PJT
 21-nov-98	V5.0 added tscale= keyword	PJT
+18-nov-05	V5.1 added select=	PJT
 .fi

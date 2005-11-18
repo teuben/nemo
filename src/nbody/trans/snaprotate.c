@@ -14,6 +14,8 @@
  *	 8-jul-98	e fixed copying other input bodyparts		pjt
  *      21-nov-98   V5.0  Added tscale= parameter to scale with time    Pjt
  *      24-dec-04    5.0a fixed problem with uninitialized tscale       pjt
+ *      18-nov-05    5.1  added option to select which vectors to rot   pjt
+ *                        for Rachel's trials
  */
 
 #include <stdinc.h>
@@ -25,14 +27,15 @@
 #include <snapshot/get_snap.c>
 #include <snapshot/put_snap.c>
 
-string defv[] = {		/* DEFAULT INPUT PARAMETERS */
-    "in=???\n	    Input snapshot file",
-    "out=???\n      Output snapshot file",
-    "theta=\n       Angles (degrees) to rotate around axes",
-    "order=\n       Order to do rotations (zyz=eulerian)",
-    "invert=false\n Invert transformation?",
-    "tscale=\n      If used, scalefactor for angles with time of snapshot",
-    "VERSION=5.0a\n 24-dec-04 PJT",
+string defv[] = {	
+    "in=???\n	           Input snapshot file",
+    "out=???\n             Output snapshot file",
+    "theta=\n              Angles (degrees) to rotate around axes",
+    "order=\n              Order to do rotations (zyz=eulerian)",
+    "invert=false\n        Invert transformation?",
+    "tscale=\n             If used, scalefactor for angles with time of snapshot",
+    "select=pos,vel,acc\n  Select the vectors for rotation (acc not implemented)",  
+    "VERSION=5.1\n         18-nov-05 PJT",
     NULL,
 };
 
@@ -44,6 +47,16 @@ string usage = "rotate a snapshot";
 
 #define MAXANG  32
 
+#define M_POS (1<<0)
+#define M_VEL (1<<1)
+#define M_ACC (1<<2)
+
+void rotate(char axis,real angle,Body *btab,int nbody,bool Qscale,real scale, int vecmask);
+void xrotate(Body *btab, int nbody, real theta, int vecmask);
+void yrotate(Body *btab, int nbody, real theta, int vecmask);
+void zrotate(Body *btab, int nbody, real theta, int vecmask);
+void rotatevec(vector vec, matrix mat);
+
 nemo_main()
 {
     stream instr, outstr;
@@ -53,6 +66,15 @@ nemo_main()
     real tsnap, tscale, *ang, theta[MAXANG];
     bool   invert, need_hist = TRUE;
     bool   Qtscale = hasvalue("tscale");
+    string rotvects = getparam("select");
+    bool Qpos, Qvel, Qacc;
+    int vecmask = 0;
+    
+    if (strstr(rotvects,"pos")) vecmask |= M_POS;
+    if (strstr(rotvects,"vel")) vecmask |= M_VEL;
+    if (strstr(rotvects,"acc")) vecmask |= M_ACC;
+
+    dprintf(0,"Warning: new option: select=%s  => mask=%d\n",rotvects,vecmask);
 
     instr = stropen(getparam("in"), "r");           /* open input file */
     nopt = nemoinpr(getparam("theta"),theta,MAXANG);  /* get angles */
@@ -85,14 +107,14 @@ nemo_main()
             	ang = theta;        /* reset angle pointer */
                 for (i=0; i<nop; i++) {
                     dprintf(2,"Rotating %g around %c\n",*ang,*op);
-                    rotate(*op++, *ang++, btab, nbody, Qtscale, tscale*tsnap);  /* VALGRIND error */
+                    rotate(*op++, *ang++, btab, nbody, Qtscale, tscale*tsnap, vecmask);  /* VALGRIND error */
                 }
 	    } else {
                 op = &order[nop-1];	/* reset: start at end */
                 ang = &theta[nop-1];
                 for (i=0; i<nop; i++) {
                     dprintf(2,"Rotating %g around %c\n",-*ang,*op);
-		    rotate(*op--, -1.0*(*ang--), btab, nbody, Qtscale, tscale*tsnap);
+		    rotate(*op--, -1.0*(*ang--), btab, nbody, Qtscale, tscale*tsnap, vecmask);
                 }
 	    }
 	    if (need_hist) {
@@ -106,13 +128,7 @@ nemo_main()
     strclose(outstr);
 }
 
-rotate(axis, angle, btab, nbody, Qscale, scale)
-char axis;
-real angle;
-Body *btab;
-int nbody;
-bool Qscale;
-real scale;
+void rotate(char axis,real angle,Body *btab,int nbody,bool Qscale,real scale, int vecmask)
 {
     if (Qscale) angle *= scale;
 
@@ -121,25 +137,22 @@ real scale;
     switch (axis) {
       case 'x':
       case 'X':
-	xrotate(btab, nbody, angle);
+	xrotate(btab, nbody, angle, vecmask);
 	break;
       case 'y':
       case 'Y':
-	yrotate(btab, nbody, angle);
+	yrotate(btab, nbody, angle, vecmask);
 	break;
       case 'z':
       case 'Z':
-	zrotate(btab, nbody, angle);
+	zrotate(btab, nbody, angle, vecmask);
 	break;
       default:
 	warning("unknown axis %c: no rotation\n", axis);
     }
 }
 
-xrotate(btab, nbody, theta)
-Body *btab;
-int nbody;
-real theta;
+void xrotate(Body *btab, int nbody, real theta, int vecmask)
 {
     matrix rmat;
     int i;
@@ -149,15 +162,12 @@ real theta;
     rmat[1][2] =  -(rmat[2][1] = sin(DEG2RAD * theta));	/* PJT */
 /*    rmat[2][1] =  -(rmat[1][2] = sin(DEG2RAD * theta));	/* JEB */
     for (i = 0; i < nbody; i++) {
-        rotatevec(Pos(&btab[i]), rmat);
-	rotatevec(Vel(&btab[i]), rmat);
+      if (vecmask&M_POS) rotatevec(Pos(&btab[i]), rmat);
+      if (vecmask&M_VEL) rotatevec(Vel(&btab[i]), rmat);
     }
 }
 
-yrotate(btab, nbody, theta)
-Body *btab;
-int nbody;
-real theta;
+void yrotate(Body *btab, int nbody, real theta, int vecmask)
 {
     matrix rmat;
     int i;
@@ -167,15 +177,12 @@ real theta;
     rmat[2][0] =  -(rmat[0][2] = sin(DEG2RAD * theta));	/* PJT */
 /*    rmat[0][2] =  -(rmat[2][0] = sin(DEG2RAD * theta));		/* JEB */
     for (i = 0; i < nbody; i++) {
-        rotatevec(Pos(&btab[i]), rmat);
-	rotatevec(Vel(&btab[i]), rmat);
+        if (vecmask&M_POS) rotatevec(Pos(&btab[i]), rmat);
+	if (vecmask&M_VEL) rotatevec(Vel(&btab[i]), rmat);
     }
 }
 
-zrotate(btab, nbody, theta)
-Body *btab;
-int nbody;
-real theta;
+void zrotate(Body *btab, int nbody, real theta, int vecmask)
 {
     matrix rmat;
     int i;
@@ -185,14 +192,12 @@ real theta;
     rmat[0][1] =  -(rmat[1][0] = sin(DEG2RAD * theta));		/* PJT */
 /*    rmat[1][0] =  -(rmat[0][1] = sin(DEG2RAD * theta));		/* JEB */
     for (i = 0; i < nbody; i++) {
-        rotatevec(Pos(&btab[i]), rmat);
-	rotatevec(Vel(&btab[i]), rmat);
+        if (vecmask&M_POS) rotatevec(Pos(&btab[i]), rmat);
+	if (vecmask&M_VEL) rotatevec(Vel(&btab[i]), rmat);
     }
 }
 
-rotatevec(vec, mat)
-vector vec;
-matrix mat;
+void rotatevec(vector vec, matrix mat)
 {
     vector tmp;
 
