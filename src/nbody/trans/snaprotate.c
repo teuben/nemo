@@ -41,6 +41,8 @@ string defv[] = {
 
 string usage = "rotate a snapshot";
 
+string cvsid="$Id$";
+
 #define DEG2RAD PI/180.0
 
 
