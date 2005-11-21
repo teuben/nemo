@@ -270,7 +270,8 @@ typedef real (*real_proc)(real);
 
 /*
  *  PI, etc.  --  mathematical constants
- *  Note: some <math.h> already define PI
+ *  Note: some <math.h> already define PI, the official name is M_PI and M_PIl
+ *  See also: http://3.141592653589793238462643383279502884197169399375105820974944592.com
  */
 
 #ifndef PI
