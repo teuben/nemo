@@ -160,29 +160,32 @@ static void derv_gauss1d(real *x, real *p, real *e, int np)
   arg = a*a/(2*b*b);
   e[0] = 1.0;
   e[1] = exp(-arg);
-  e[2] = p[1]*e[1] * a / (b*b);
-  e[3] = p[1]*e[1] * a * a / (b*b*b);
+  e[2] = -p[1]*e[1] * a   / (b*b);
+  e[3] =  p[1]*e[1] * a*a / (b*b*b);
 }
 
 static real func_gauss2d(real *x, real *p, int np)
 {
-  real a,b,arg;
+  real a,b,c,arg;
   a = p[2]-x[0];
-  b = p[3];
-  arg = a*a/(2*b*b);
+  b = p[3]-x[1];
+  c = p[4];
+  arg = (a*a+b*c)/(2*b*b);
   return p[0] + p[1] * exp(-arg);
 }
 
 static void derv_gauss2d(real *x, real *p, real *e, int np)
 {
-  real a,b,arg;
+  real a,b,c,arg;
   a = p[2]-x[0];
-  b = p[3];
-  arg = a*a/(2*b*b);
+  b = p[3]-x[1];
+  c = p[4];
+  arg = (a*a+b*b)/(2*c*c);
   e[0] = 1.0;
   e[1] = exp(-arg);
-  e[2] = -p[1]*e[1] * a / (b*b);
-  e[3] = p[1] * e[1] * a * a / (b*b*b);
+  e[2] = -p[1]*e[1] * a / (c*c);
+  e[3] = -p[1]*e[1] * b / (c*c);
+  e[3] =  p[1]*e[1] * (a*a+b*b) / (c*c*c);
 }
 
 
@@ -977,21 +980,19 @@ do_gauss2d()
   real *x1, *x2, *x, *y, *dy, *d;
   int i,j,k, nrt, npt1, iter, mpar[5];
   real fpar[5], epar[5];
-  int lpar = 6;
-  int gorder = 2;
+  int lpar = 5;
 
   if (nxcol != 2) error("bad nxcol=%d",nxcol);
   if (nycol<1) error("Need 1 value for ycol=");
   if (tol < 0) tol = 0.0;
   if (lab < 0) lab = 0.01;
-  sprintf(fmt,"Fitting a+b*exp(-(x-c)^2/(2*d^2)):  \na= %s %s \nb= %s %s \nc= %s %s\nd= %s %s\n",
-	  format,format,format,format,format,format,format,format);
+  sprintf(fmt,"Fitting a+b*exp(-[(x-c)^2+(y-d)^2]/(2*e^2)):  \n"
+	  "a= %s %s \nb= %s %s \nc= %s %s\nd= %s %s\ne= %s %s\n",
+	  format,format,format,format,format,format,format,format,format,format);
 
-  x = xcol[0].dat;
   y = ycol[0].dat;
   dy = (dycolnr>0 ? dycol.dat : NULL);
   d = (real *) allocate(npt * sizeof(real));
-
   x = (real *) allocate(2 * npt * sizeof(real));
   for (i=0, j=0; i<npt; i++) {
     for (k=0; k<2; k++)
@@ -1024,7 +1025,7 @@ do_gauss2d()
   if (outstr)
     for (i=0; i<npt; i++)
       fprintf(outstr,"%g %g %g\n",x[i],y[i],d[i]);
-  printf("rms/chi = %g\n",data_rms(npt,d,dy,4));
+  printf("rms/chi = %g\n",data_rms(npt,d,dy,5));
 }
 
 
