@@ -170,7 +170,7 @@ static real func_gauss2d(real *x, real *p, int np)
   a = p[2]-x[0];
   b = p[3]-x[1];
   c = p[4];
-  arg = (a*a+b*c)/(2*b*b);
+  arg = (a*a+b*b)/(2*c*c);
   return p[0] + p[1] * exp(-arg);
 }
 
@@ -185,7 +185,7 @@ static void derv_gauss2d(real *x, real *p, real *e, int np)
   e[1] = exp(-arg);
   e[2] = -p[1]*e[1] * a / (c*c);
   e[3] = -p[1]*e[1] * b / (c*c);
-  e[3] =  p[1]*e[1] * (a*a+b*b) / (c*c*c);
+  e[4] =  p[1]*e[1] * (a*a+b*b) / (c*c*c);
 }
 
 
