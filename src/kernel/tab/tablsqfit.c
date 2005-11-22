@@ -145,6 +145,8 @@ nemo_main()
         do_imageshift();
     } else if (scanopt(method,"plane")) {
     	do_plane();
+    } else if (scanopt(method,"gauss1d")) {
+    	do_gauss1d();
     } else if (scanopt(method,"gauss2d")) {
     	do_gauss2d();
     } else if (scanopt(method,"poly")) {
@@ -701,6 +703,62 @@ do_poly()
 
 
 /*
+ *   GAUSS2D:   y = A * exp( -[(x-x0)^2]/2b^2 )
+ *        needs min. 3 points for a linear fit
+ *            
+ */
+
+do_gauss1d()
+{
+  real mat[(MAXCOL+1)*(MAXCOL+1)], vec[MAXCOL+1], sol[MAXCOL+1], a[MAXCOL+2], sum;
+  int i, j, gorder=2, neg=0;
+  real A, b, x0, x,y;
+
+  if (nycol<1) error("Need 1 value for ycol=");
+  if (nxcol<1) error("Need 1 values for xcol=");
+  if (npt<3) error("Need at least 3 data points for gauss1d fit");
+
+  lsq_zero(gorder+1, mat, vec);
+  for (i=0; i<npt; i++) {
+    a[0] = 1.0;                     /* ln A - (x0^2+y0^2)/2b^2 */
+    a[1] = xcol[0].dat[i];          /* x0/b^2  */
+    a[2] = sqr(a[1]);               /* -1/2b^2 */
+    if (ycol[0].dat[i] <= 0) {
+      neg++;
+      continue;
+    }
+    a[3] = log(ycol[0].dat[i]);
+    lsq_accum(gorder+1,mat,vec,a,1.0);
+  }
+  if (neg > 0) {
+    warning("Ignored %d negative data",neg);
+    if (npt-neg < 3) error("Too many points rejected for a gauss1d fit");
+  }
+  lsq_solve(gorder+1,mat,vec,sol);
+  printf("gauss1d fit:\n");
+  for (j=0; j<=gorder; j++) printf("%g ",sol[j]);
+  printf("\n\n");
+  printf("  y = A * exp( -[(x-x0)^2]/2b^2 ):\n\n");
+  if (sol[2] > 0) {
+    warning("Bad gauss1d fit: 1/b^2 = %g\n",sol[2]);
+    return;
+  }
+
+  x0 = -sol[1]/(2*sol[2]);
+  b = sqrt(-1/(2*sol[2]));
+  A = exp(sol[0] - sol[2]*(x0*x0));
+  printf("     A  = %g\n",A);
+  printf("     x0 = %g\n",x0);
+  printf("     b  = %g\n",b);
+  for (i=0; i<npt; i++) {
+    x = xcol[0].dat[i];
+    y = sol[0] + sol[1]*x + sol[2]*x*x;
+    if (ycol[0].dat[i] <= 0) continue;
+    dprintf(1,"%g %g %g => %g\n",x,log(ycol[0].dat[i]),y,log(ycol[0].dat[i])-y);
+  }
+}
+
+/*
  *   GAUSS2D:   y = A * exp( -[(x-x0)^2 + (y-y0)^2]/2b^2 )
  *        needs min. 4 points for a linear fit
  *            
@@ -731,7 +789,7 @@ do_gauss2d()
   }
   if (neg > 0) {
     warning("Ignored %d negative data",neg);
-    if (npt-neg < 4) error("Too many points rejected for a gauss3d fit");
+    if (npt-neg < 4) error("Too many points rejected for a gauss2d fit");
   }
   lsq_solve(gorder+1,mat,vec,sol);
   printf("gauss2d fit:\n");
