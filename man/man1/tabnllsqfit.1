@@ -1,4 +1,4 @@
-.TH TABNLLSQFIT 1NEMO "16 May 2004"
+.TH TABNLLSQFIT 1NEMO "21 November 2005"
 .SH NAME
 tabnllsqfit \- general purpose non-linear least squares fitting program
 .SH SYNOPSIS
@@ -149,7 +149,8 @@ Parameters are referred to as p0,p1,p2,p3,.....
 line     	y=p0+p1*x                        (same as poly,order=1)
 plane       	z=p0+p1*x+p2*y                   (example order=2)
 polynomial  	y=p0+p1*x+p2*x^2+p3*x^3...       (example order=3)
-gauss       	y=p0+p1*exp(-(x-p2)^2/(2*p3^2))
+gauss1d       	y=p0+p1*exp(-(x-p2)^2/(2*p3^2))
+gauss2d       	y=p0+p1*exp(-[(x-p2)^2+(x-p3)^2]/(2*p4^2))
 exp		y=p0+p1*exp(-(x-p2)/p3)
 arm		y=p0+p1*cos(x)+p2*sin(x)
 arm3		y=p0+p1*cos(x)+p2*sin(x)+p3*cos(3*x)+p4*sin(3*x) 
@@ -315,5 +316,6 @@ Peter Teuben
 21-mar-03	V1.7 added bootstrap=, seed=	PJT
 4-apr-03	V1.8 fixed error in using dycol=, and introduced dypow=		PJT
 15-mar-04	V1.8b added fit=loren and corrected lab= setting for functions	PJT/RS
+21-nov-05	V2.0 added fit=gauss1d,gauss2d		PJT
 .fi
 
