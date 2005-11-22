@@ -1,4 +1,4 @@
-.TH TABLSQFIT 1NEMO "12 July 2002"
+.TH TABLSQFIT 1NEMO "21 November 2005"
 .SH NAME
 tablsqfit \- general purpose least squares fitting program
 .SH SYNOPSIS
@@ -52,7 +52,8 @@ given, the other one is considered zero.
 .TP
 \fBfit=\fP\fImodel\fP
 Model name what to fit. Currently implemented are \fIline\fP, \fIplane\fP,
-\fIpoly\fP, \fIellipse\fP, \fIpeak\fP, \fIzero\fP, \fIimageshift\fP, and \fIarea\fP.
+\fIpoly\fP, \fIellipse\fP, \fIpeak\fP, \fIzero\fP, \fIimageshift\fP, \fIarea\fP, 
+and \fIgauss2d\fP.
 [default: \fBline\fP].
 .TP
 \fBorder=\fP\fIorder\fP
@@ -129,5 +130,6 @@ Peter Teuben
 14-aug-00	V3.0 added tab=                            	PJT
 8-aug-01	V3.1c added area, using natof, error in ellipse	PJT
 24-feb-03	V3.4: added fit=zero	PJT
+21-nov-05	V3.4b: added fit=gauss2d	PJT
 .fi
 

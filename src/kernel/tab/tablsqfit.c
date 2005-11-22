@@ -41,6 +41,7 @@
  *      24-feb-03  V3.4  add fit=zero
  *       4-oct-03      a fix nsigma>0 for fit=line
  *       3-may-05  V3.4b add x/x0+y/y0=1 variant for a linear fit
+ *      21-nov-05  V3.4c added gauss2d
  *
  * TODO:   check 'r', wip gives slightly different numbers
  */
@@ -76,18 +77,21 @@ string defv[] = {
     "ycol=2\n           column(s) for y",
     "dycol=\n           column for sigma-y, if used",
     "xrange=\n          in case restricted range is used (1D only)",
-    "fit=line\n         fitmode (line, ellipse, imageshift, plane, poly, peak, area, zero)",
+    "fit=line\n         fitmode (line, ellipse, imageshift, plane, poly, peak, area, zero, gauss2d)",
     "order=0\n		Order of plane/poly fit",
     "out=\n             optional output file for some fit modes",
     "nsigma=-1\n        delete points more than nsigma away?",
     "estimate=\n        optional estimates (e.g. for ellipse center)",
     "nmax=10000\n       Default max allocation",
     "tab=f\n            short one-line output?",
-    "VERSION=3.4b\n     3-may-05 PJT",
+    "VERSION=3.4c\n     21-nov-05 PJT",
     NULL
 };
 
 string usage="a linear least square fitting program";
+
+string cvsid="$Id$";
+
 
 /**************** SOME GLOBAL VARIABLES ************************/
 
@@ -95,7 +99,9 @@ string usage="a linear least square fitting program";
 #define HUGE 1e20
 #endif
 
+#ifndef MAXCOL
 #define MAXCOL 16
+#endif
 
 typedef struct column {
     int maxdat;     /* allocated length of data */          /* not used */
@@ -139,6 +145,8 @@ nemo_main()
         do_imageshift();
     } else if (scanopt(method,"plane")) {
     	do_plane();
+    } else if (scanopt(method,"gauss2d")) {
+    	do_gauss2d();
     } else if (scanopt(method,"poly")) {
     	do_poly();
     } else if (scanopt(method,"area")) {
@@ -192,9 +200,7 @@ setparams()
     Qtab = getbparam("tab");
 }
 
-setrange(rval, rexp)
-real rval[];
-string rexp;
+setrange(real *rval, string rexp)
 {
     char *cptr;
 
@@ -637,7 +643,7 @@ do_imageshift()
 
 
 my_poly(bool Qpoly)
-{
+{ 
   real mat[(MAXCOL+1)*(MAXCOL+1)], vec[MAXCOL+1], sol[MAXCOL+1], a[MAXCOL+2], sum;
   int i, j;
 
@@ -692,6 +698,69 @@ do_poly()
 {
     my_poly(TRUE);
 }
+
+
+/*
+ *   GAUSS2D:   y = A * exp( -[(x-x0)^2 + (y-y0)^2]/2b^2 )
+ *        needs min. 4 points for a linear fit
+ *            
+ */
+
+do_gauss2d()
+{
+  real mat[(MAXCOL+1)*(MAXCOL+1)], vec[MAXCOL+1], sol[MAXCOL+1], a[MAXCOL+2], sum;
+  int i, j, gorder=3, neg=0;
+  real A, b, x0, y0, x,y,z;
+
+  if (nycol<1) error("Need 1 value for ycol=");
+  if (nxcol<2) error("Need 2 values for xcol=");
+  if (npt<4) error("Need at least 4 data points for gauss2d fit");
+
+  lsq_zero(gorder+1, mat, vec);
+  for (i=0; i<npt; i++) {
+    a[0] = 1.0;                     /* ln A - (x0^2+y0^2)/2b^2 */
+    a[1] = xcol[0].dat[i];          /* x0/b^2  */
+    a[2] = xcol[1].dat[i];          /* y0/b^2  */
+    a[3] = sqr(a[1]) + sqr(a[2]);   /* -1/2b^2 */
+    if (ycol[0].dat[i] <= 0) {
+      neg++;
+      continue;
+    }
+    a[4] = log(ycol[0].dat[i]);
+    lsq_accum(gorder+1,mat,vec,a,1.0);
+  }
+  if (neg > 0) {
+    warning("Ignored %d negative data",neg);
+    if (npt-neg < 4) error("Too many points rejected for a gauss3d fit");
+  }
+  lsq_solve(gorder+1,mat,vec,sol);
+  printf("gauss2d fit:\n");
+  for (j=0; j<=gorder; j++) printf("%g ",sol[j]);
+  printf("\n\n");
+  printf("  y = A * exp( -[(x-x0)^2 + (y-y0)^2]/2b^2 ):\n\n");
+  if (sol[3] > 0) {
+    warning("Bad gauss2d fit: 1/b^2 = %g\n",sol[3]);
+    return;
+  }
+
+  x0 = -sol[1]/(2*sol[3]);
+  y0 = -sol[2]/(2*sol[3]);
+  b = sqrt(-1/(2*sol[3]));
+  A = exp(sol[0] - sol[3]*(x0*x0+y0*y0));
+  printf("     A  = %g\n",A);
+  printf("     x0 = %g\n",x0);
+  printf("     y0 = %g\n",y0);
+  printf("     b  = %g\n",b);
+  for (i=0; i<npt; i++) {
+    x = xcol[0].dat[i];
+    y = xcol[1].dat[i];
+    z = sol[0] + sol[1]*x + sol[2]*y + sol[3]*(x*x+y*y);
+    if (ycol[0].dat[i] <= 0) continue;
+    dprintf(1,"%g %g %g %g => %g\n",x,y,log(ycol[0].dat[i]),z,log(ycol[0].dat[i])-z);
+  }
+}
+
+
 
 
 do_fourier()
