@@ -16,7 +16,9 @@
  *       4-apr-03  1.8  added dypow= keyword, and fixed bug in handling dycol=
  *      10-mar-04  1.8b added Lorentzian fitting, fixed setting lab= for loadable functions
  *      17-apr-04  1.9a added printing out the chi-squared or RMS or whatever it can do
- *       3-may-05  1.9b add x/x0+y/y0=1 variant for a linear fit
+ *       3-may-05  1.9b add x/x0+y/y0=1 variant for a linear fit 
+ *      25-aug-05  1.10 poly2 for Rahul
+ *      21-nov-05  1.11 gauss2d, fix error in gauss1d
  *
  *  line       a+bx
  *  plane      p0+p1*x1+p2*x2+p3*x3+.....     up to 'order'   (a 2D plane in 3D has order=2)
@@ -26,6 +28,8 @@
  *  arm        p0+p1*cos(x)+p2*sin(x)         special version for rahul 
  *  arm3       p0+p1*cos(x)+p2*sin(x)+p3*cos(3*x)+p4*sin(3*x) 
  *  loren      (p1/PI) / ( (x-p0)^2 + p1^2 )
+ *  gauss2d    C + A exp ( -[(x-x0)^2 + (y-y0)^2]/2b^2 )
+ *  
  */ 
 
 #include <stdinc.h>  
@@ -57,11 +61,13 @@ string defv[] = {
     "bootstrap=0\n      Bootstrapping to estimate errors",
     "seed=0\n           Random seed initializer",
     "numrec=f\n         Try the numrec routine instead?",
-    "VERSION=1.9b\n     3-may-05 PJT",
+    "VERSION=1.11\n     21-nov-05 PJT",
     NULL
 };
 
 string usage="a non-linear least square fitting program for tabular data";
+
+string cvsid="$Id$";
 
 /**************** SOME GLOBAL VARIABLES ************************/
 
@@ -154,6 +160,27 @@ static void derv_gauss1d(real *x, real *p, real *e, int np)
   arg = a*a/(2*b*b);
   e[0] = 1.0;
   e[1] = exp(-arg);
+  e[2] = p[1]*e[1] * a / (b*b);
+  e[3] = p[1]*e[1] * a * a / (b*b*b);
+}
+
+static real func_gauss2d(real *x, real *p, int np)
+{
+  real a,b,arg;
+  a = p[2]-x[0];
+  b = p[3];
+  arg = a*a/(2*b*b);
+  return p[0] + p[1] * exp(-arg);
+}
+
+static void derv_gauss2d(real *x, real *p, real *e, int np)
+{
+  real a,b,arg;
+  a = p[2]-x[0];
+  b = p[3];
+  arg = a*a/(2*b*b);
+  e[0] = 1.0;
+  e[1] = exp(-arg);
   e[2] = -p[1]*e[1] * a / (b*b);
   e[3] = p[1] * e[1] * a * a / (b*b*b);
 }
@@ -231,6 +258,31 @@ static void derv_poly(real *x, real *p, real *e, int np)
     e[i+1] = r;
   }
 }
+
+static real func_poly2(real *x, real *p, int np)
+{
+  real r = x[0] - p[0];
+
+  if (np != 4) error("func_poly2: np=%d ?",np);
+
+  /* hardcoded for order=2 */
+  r = p[1] * (1 + p[2]*r + p[3]*r*r);
+  return r;
+}
+
+static void derv_poly2(real *x, real *p, real *e, int np)
+{
+  real r = x[0] - p[0];
+
+  if (np != 4) error("derv_poly2: np=%d ?",np);
+
+  /* hardcoded for order=2 */
+  e[0] = 0.0;
+  e[1] = (1 + p[2]*r + p[3]*r*r);
+  e[2] = p[1] * r;
+  e[3] = p[1] * r * r;
+}
+
 
 /* testing for Rahul - oct 2002 */
 
@@ -318,8 +370,12 @@ nemo_main()
     	do_plane();
     } else if (scanopt(method,"poly")) {
     	do_poly();
-    } else if (scanopt(method,"gauss")) {
-    	do_gauss();
+    } else if (scanopt(method,"poly2")) {
+    	do_poly2();
+    } else if (scanopt(method,"gauss1d")) {
+    	do_gauss1d();
+    } else if (scanopt(method,"gauss2d")) {
+    	do_gauss2d();
     } else if (scanopt(method,"exp")) {
     	do_exp();
     } else if (scanopt(method,"arm")) {
@@ -823,6 +879,7 @@ do_plane()
   fitderv = derv_plane;
 
   for (iter=0; iter<=msigma; iter++) {
+    /* should the 2 be order ?? */
     nrt = (*my_nllsqfit)(x,2,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
     printf("nrt=%d\n",nrt);
     printf("Fitting p0+p1*x1+p2*x2+.....pN*xN: (N=%d)\n",order);
@@ -844,6 +901,7 @@ do_plane()
 
   if (outstr)
     for (i=0; i<npt; i++)
+      /* bad : x1 and x2 not initialized */
       fprintf(outstr,"%g %g %g %g\n",x1[i],x2[i],y[i],d[i]);
 
 #if 0
@@ -857,11 +915,11 @@ do_plane()
 }
 
 /*
- * GAUSS:       y = a + b * exp( - (x-c)^2/(2*d^2) )
+ * GAUSS1d:       y = a + b * exp( - (x-c)^2/(2*d^2) )
  *
  */
  
-do_gauss()
+do_gauss1d()
 {
   real *x1, *x2, *x, *y, *dy, *d;
   int i,j, nrt, npt1, iter, mpar[4];
@@ -902,6 +960,66 @@ do_gauss()
     npt = npt1;
   }
   bootstrap(nboot, npt,1,x,y,dy,d, lpar,fpar,epar,mpar);    
+
+  if (outstr)
+    for (i=0; i<npt; i++)
+      fprintf(outstr,"%g %g %g\n",x[i],y[i],d[i]);
+  printf("rms/chi = %g\n",data_rms(npt,d,dy,4));
+}
+
+/*
+ * GAUSS2d:       y = a + b * exp( - (x-c)^2/(2*d^2) )
+ *
+ */
+ 
+do_gauss2d()
+{
+  real *x1, *x2, *x, *y, *dy, *d;
+  int i,j,k, nrt, npt1, iter, mpar[5];
+  real fpar[5], epar[5];
+  int lpar = 6;
+  int gorder = 2;
+
+  if (nxcol != 2) error("bad nxcol=%d",nxcol);
+  if (nycol<1) error("Need 1 value for ycol=");
+  if (tol < 0) tol = 0.0;
+  if (lab < 0) lab = 0.01;
+  sprintf(fmt,"Fitting a+b*exp(-(x-c)^2/(2*d^2)):  \na= %s %s \nb= %s %s \nc= %s %s\nd= %s %s\n",
+	  format,format,format,format,format,format,format,format);
+
+  x = xcol[0].dat;
+  y = ycol[0].dat;
+  dy = (dycolnr>0 ? dycol.dat : NULL);
+  d = (real *) allocate(npt * sizeof(real));
+
+  x = (real *) allocate(2 * npt * sizeof(real));
+  for (i=0, j=0; i<npt; i++) {
+    for (k=0; k<2; k++)
+      x[j++] = xcol[k].dat[i];
+  }
+
+  for (i=0; i<lpar; i++) {
+    mpar[i] = mask[i];
+    fpar[i] = par[i];
+  }
+  
+  fitfunc = func_gauss2d;
+  fitderv = derv_gauss2d;
+
+  for (iter=0; iter<=msigma; iter++) {
+    nrt = (*my_nllsqfit)(x,2,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
+    printf("nrt=%d\n",nrt);
+    printf(fmt,fpar[0],epar[0],fpar[1],epar[1],fpar[2],epar[2],fpar[3],epar[3],fpar[4],epar[4]);
+    if (nrt==-2)
+      warning("No free parameters");
+    else if (nrt<0)
+      error("Bad fit, nrt=%d",nrt);
+
+    npt1 = remove_data(x,2,y,dy,d,npt,nsigma[iter]);
+    if (npt1 == npt) iter=msigma+1;       /* signal early bailout */
+    npt = npt1;
+  }
+  bootstrap(nboot, npt,2,x,y,dy,d, lpar,fpar,epar,mpar);    
 
   if (outstr)
     for (i=0; i<npt; i++)
@@ -1000,6 +1118,63 @@ do_poly()
     nrt = (*my_nllsqfit)(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
     printf("nrt=%d\n",nrt);
     printf("Fitting p0+p1*x+p2*x^2+.....pN*x^N: (N=%d)\n",order);
+    for (i=0; i<lpar; i++)
+      printf(fmt,i,fpar[i],epar[i]);
+    if (nrt==-2)
+      warning("No free parameters");
+    else if (nrt<0)
+      error("Bad fit, nrt=%d",nrt);
+    npt1 = remove_data(x,1,y,dy,d,npt,nsigma[iter]);
+    if (npt1 == npt) iter=msigma+1;       /* signal early bailout */
+    npt = npt1;
+  }
+  bootstrap(nboot, npt,1,x,y,dy,d, lpar,fpar,epar,mpar);
+
+  if (outstr)
+    for (i=0; i<npt; i++)
+      fprintf(outstr,"%g %g %g\n",x[i],y[i],d[i]);
+}
+
+
+/*
+ * POLYNOMIAL2:  y = a ( 1 + b*(x-x0) + c*(x-x0)^2)
+ *
+ *   hardcoded polynomial
+ */
+
+do_poly2()
+{
+  real *x, *y, *dy, *d;
+  int i,j, nrt, npt1, iter, mpar[MAXPAR];
+  real fpar[MAXPAR], epar[MAXPAR];
+  int lpar = 4;
+  
+  order = 2;
+  warning("testing a new poly2 mode, order=%d",order);
+    
+  if (nxcol < 1) error("nxcol=%d",nxcol);
+  if (nycol < 1) error("nycol=%d",nycol);
+  if (tol < 0) tol = 0.0;
+  if (lab < 0) lab = 0.0;
+  sprintf(fmt,"p%%d= %s %s\n",format,format);
+
+  x = xcol[0].dat;
+  y = ycol[0].dat;
+  dy = (dycolnr>0 ? dycol.dat : NULL);
+  d = (real *) allocate(npt * sizeof(real));
+  
+  for (i=0; i<lpar; i++) {
+    mpar[i] = mask[i];
+    fpar[i] = par[i];
+  }
+
+  fitfunc = func_poly2;
+  fitderv = derv_poly2;
+
+  for (iter=0; iter<=msigma; iter++) {
+    nrt = (*my_nllsqfit)(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
+    printf("nrt=%d\n",nrt);
+    printf("Fitting p1(1+p2*(x-p0)+p3*(x-p0)^2): (fixed order=%d)\n",order);
     for (i=0; i<lpar; i++)
       printf(fmt,i,fpar[i],epar[i]);
     if (nrt==-2)
