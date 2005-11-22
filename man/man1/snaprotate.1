@@ -16,6 +16,10 @@ The rotation is counter clock-wise (i.e., mathematically positive, unless
 a \fBz\fP rotation will rotate the \fBx\fP axis towards the \fBy\fP axis;
 a \fBy\fP rotation will rotate the \fBz\fP axis towards the \fBx\fP axis;
 a \fBx\fP rotation will rotate the \fBy\fP axis towards the \fBz\fP axis.
+.PP
+Although by default all vectors are rotated by the same matrix, the
+keyword \fBselect=\fP can be used to select any set of Position,
+Velocity or Acceleration.
 .SH PARAMETERS
 The following parameters are recognized; they may be given in any order.
 .TP 24
@@ -52,7 +56,7 @@ are: \fBpos\fP, \fBvel\fP,  and \fBacc\fP. Exact match required for now.
 .SH EXAMPLES
 Suppose you have a barred galaxy model, \fIbar.dat\fP, 
 with the galactic plane at z=0
-and the bar along the y axis (position angle=0), 
+and the bar along the y axis (\fI"position angle=0"\fP), 
 and want to project this (such that z=0 will be the sky plane,
 and the positive z-axis pointed towards the observer) with given final 
 position angle ($pa), inclination ($inc) and angle from line of nodes
@@ -102,5 +106,5 @@ xx-jan-88	V1.0 original                   	JEB
 1-jun-92	documented the rotation manner bit more precise     	PJT
 11-jun-92	V4.0 rotation now defined in math sense             	PJT
 21-nov-98	V5.0 added tscale= keyword	PJT
-18-nov-05	V5.1 added select=	PJT
+18-nov-05	V5.1a added select=, also implemented select=acc	PJT
 .fi
