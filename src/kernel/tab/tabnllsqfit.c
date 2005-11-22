@@ -18,17 +18,17 @@
  *      17-apr-04  1.9a added printing out the chi-squared or RMS or whatever it can do
  *       3-may-05  1.9b add x/x0+y/y0=1 variant for a linear fit 
  *      25-aug-05  1.10 poly2 for Rahul
- *      21-nov-05  1.11 gauss2d, fix error in gauss1d
+ *      21-nov-05  2.0  gauss2d, fix error in gauss1d
  *
  *  line       a+bx
  *  plane      p0+p1*x1+p2*x2+p3*x3+.....     up to 'order'   (a 2D plane in 3D has order=2)
  *  poly       p0+p1*x+p2*x^2+p3*x^3+.....    up to 'order'   (paraboloid has order=2)
- *  gauss      p0+p1*exp(-(x-p2)^2/(2*p3^2))
  *  exp        p0+p1*exp(-(x-p2)/p3)  
  *  arm        p0+p1*cos(x)+p2*sin(x)         special version for rahul 
  *  arm3       p0+p1*cos(x)+p2*sin(x)+p3*cos(3*x)+p4*sin(3*x) 
  *  loren      (p1/PI) / ( (x-p0)^2 + p1^2 )
- *  gauss2d    C + A exp ( -[(x-x0)^2 + (y-y0)^2]/2b^2 )
+ *  gauss1d    p0+p1*exp(-(x-p2)^2/(2*p3^2))
+ *  gauss2d    p0+p1*exp(-[(x-x0)^2 + (y-y0)^2]/2b^2)
  *  
  */ 
 
@@ -61,7 +61,7 @@ string defv[] = {
     "bootstrap=0\n      Bootstrapping to estimate errors",
     "seed=0\n           Random seed initializer",
     "numrec=f\n         Try the numrec routine instead?",
-    "VERSION=1.11\n     21-nov-05 PJT",
+    "VERSION=2.0\n      21-nov-05 PJT",
     NULL
 };
 
