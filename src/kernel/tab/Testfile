@@ -1,6 +1,6 @@
 DIR = src/kernel/tab
 BIN = tabmath tabplot tabhist tabspline tablsqfit tabnllsqfit tabdate \
-      tabfilter tabtrend gauss1d
+      tabfilter tabtrend gauss1d gauss2d
 
 NEED = $(BIN) nemoinp
 
@@ -63,9 +63,9 @@ tabtrend:
 gauss1d:
 	@echo Running $*
 	nemoinp 0:4 | tabmath - - '3*exp(-((%1-2)**2)/2)+rang(0,0.1)' seed=123 > gauss1d.tab
-	tabnllsqfit gauss1d.tab fit=gauss1d par=0,3,2,1 free=1,1,1,1
-	tabnllsqfit gauss1d.tab fit=gauss1d par=0,3,2,1 free=0,1,1,1
 	tablsqfit   gauss1d.tab fit=gauss1d
+	tabnllsqfit gauss1d.tab fit=gauss1d par=0,3,2,1 free=0,1,1,1
+	tabnllsqfit gauss1d.tab fit=gauss1d par=0,3,2,1 free=1,1,1,1
 
 gauss2d:
 	@echo Running $*
