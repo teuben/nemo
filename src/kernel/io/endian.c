@@ -31,7 +31,7 @@ bool LittleEndian(void)
 
 string defv[] = {
     "verbose=f\n    verbose display?",
-    "VERSION=0.2\n  26-nov-2005 PJT",
+    "VERSION=0.3\n  26-nov-2005 PJT",
     NULL,
 };
 
@@ -48,13 +48,13 @@ void nemo_main()
     else
        printf("%d\n", q ? 1 : 0);
 
-    if (v) {
 #ifdef WORDS_BIGENDIAN
-      printf("autoconf ->  big endian\n");
+    if (v) printf("autoconf ->  big endian\n");
+    if (!q) error("conflict-1 determining endianism, try verbose=t");
 #else
-      printf("autoconf ->  little endian\n");
+    if (v) printf("autoconf ->  little endian\n");
+    if (q) error("conflict-2 determining endianism, try verbose=t");
 #endif
-    }
 
 }
 
