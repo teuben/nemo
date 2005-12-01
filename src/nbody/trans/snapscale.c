@@ -19,6 +19,7 @@
  *	16-feb-97	V3.1a   fixed for SINGLEPREC
  *       8-oct-01        3.2    add Dens and Eps
  *       8-aug-05           a   fix aux normalization 
+ *       1-dec-05           b   fix softening and density scaling
  */
 
 #include <stdinc.h>
@@ -44,7 +45,7 @@ string defv[] = {
     "dscale=1\n     Dens scale factor",
     "escale=1\n     Eps scale factor",
     "times=all\n    Times to select snapshots from",
-    "VERSION=3.2a\n 8-aug-05 PJT",
+    "VERSION=3.2b\n 1-dec-05 PJT",
     NULL,
 };
 
@@ -162,6 +163,8 @@ void nemo_main()
                 }
                 if(Qaux) Aux(bp) *= xscale;
                 if(Qkey) Key(bp) *= kscale;
+		if(Qdens) Dens(bp) *= dscale;
+		if(Qeps) Eps(bp) *= escale;
             }
         } else {
             warning("No scaling applied to snapshot");
