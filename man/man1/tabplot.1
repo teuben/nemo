@@ -1,4 +1,4 @@
-.TH TABHIST 1NEMO "17 September 2005"
+.TH TABHIST 1NEMO "2 December 2005"
 .SH NAME
 tabplot \- general table plotter
 .SH SYNOPSIS
@@ -8,6 +8,11 @@ tabplot \- general table plotter
 \fItabplot\fP plots datapoints from an ascii table, and optionally
 connects the datapoints by lines. It can also bin the data, and plot
 error-bars in X and Y derived from the dispersion within those bins.
+.PP
+\fItabplot\fP can also plot one-to-many, many-to-one as well as pair-wise
+plotting. However, it is (not yet) possible to pair-wise plot from
+multiple files with different number of rows. See \fIpaste(1)\fP or
+\fItabmath(1NEMO)\fP how to combine tables.
 .PP
 \fItabplot\fP is intended for quick and dirty display of the data. 
 For more complicated plots, full plotting packages should be used
@@ -139,9 +144,9 @@ tab= doesn't work properly with multiple columns
 Here is an example working with layout files. 
 .nf
 
-  nemoinp 1:20 | tabmath - -  'ranu(0,1),ranu(0,1)' all > ran.tab
-  tabmath ran.tab - '2+%1*16,2+%2*16,0.2' all | awk '{print "circle",$0}' > ran.layout
-  tabplot ran.tab 1 2 0 1 0 1 layout=ran.layout
+  % nemoinp 1:20 | tabmath - -  'ranu(0,1),ranu(0,1)' all > ran.tab
+  % tabmath ran.tab - '2+%1*16,2+%2*16,0.2' all | awk '{print "circle",$0}' > ran.layout
+  % tabplot ran.tab 1 2 0 1 0 1 layout=ran.layout
 
 .fi
 It plots the data points from the file \fBran.tab\fP as dots, and
@@ -151,6 +156,17 @@ currently the user has to convert to \fIyapp\fP (cm) units, and
 actually know that most yapp plots runs from 2 to 18 cm in both X and Y.
 This will likely change in a future version where points can be given
 in a more reasonably WCS.
+.PP
+Here are some examples of plotting multiple columns/rows, assuming each example
+of the tab1 and tab2 table has 2 columns:
+.nf
+
+   % paste tab1 tab2 | tabplot - 1 4                     headline=x1,y2
+   % tabmath tab1,tab2 - %1-%3,%2-%4 all | tabplot - 1 2 headline=dx,dy
+   % paste tab1 tab2 | tabplot - 1,3 2                   headline=x1,x2,y1
+   % paste tab1 tab2 | tabplot - 1   2,4                 headline=x1,y1,y2
+   % paste tab1 tab2 | tabplot - 1,2 3,4                 headline=(x1,y1),(x2,y2)
+
 .SH "SEE ALSO"
 tablsqfit(1NEMO), tabmath(1NEMO)
 .PP
@@ -176,4 +192,5 @@ Peter Teuben
 21-jul-00	V2.3 min & max can be separately set	PJT
 2-aug-02	V2.5 allow number of x columns to be > 1	PJT
 17-sep-05	V2.8 added readline= and documented first=	PJT
+2-dec-05	V2.9 implemented missing many-to-one plotting mode	PJT
 .fi
