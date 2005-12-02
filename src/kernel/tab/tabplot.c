@@ -35,11 +35,13 @@
  *      31-dec-03  V2.6  : option to do layout first
  *      28-apr-04  V2.7  : added xbox, ybox= options as in snapplot
  *      17-sep-05  V2.8  : added pl_readlines()
+ *       2-dec-05  V2.9  : implemented many-to-one column plotting mode
  *
  */
 
 /* TODO:
  *     - simple dycol= to plot error bars
+ *     - also allow nxcol>1 and nycol=1 ??
  */
 
 /**************** INCLUDE FILES ********************************/ 
@@ -92,11 +94,14 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "layout=\n           Optional input layout file",
     "first=f\n           Layout first or last?",
     "readline=f\n        Interactively reading commands",
-    "VERSION=2.8\n	 17-sep-05 PJT",
+    "VERSION=2.9\n	 2-dec-05 PJT",
     NULL
 };
 
 string usage = "general table plotter";
+
+string cvsid="$Id$";
+
 
 /**************** GLOBAL VARIABLES ************************/
 
@@ -105,6 +110,7 @@ local stream instr;				/* input file */
 
 local int xcol[MAXCOL], ycol[MAXCOL], nxcol, nycol;	/* column numbers */
 local real xrange[2], yrange[2];		/* range of values */
+local int npcol;                                /* MAX(nxcol,nycol) */
 
 local real  *x[MAXCOL], *y[MAXCOL]; 			/* data from file */
 local real *xp, *yp, *xps, *yps;              /* rebinned data (if needed) */
@@ -169,8 +175,10 @@ void setparams()
     nycol = nemoinpi(getparam("ycol"),ycol,MAXCOL);
     if (nxcol < 1) error("Error parsing xcol=%s",getparam("xcol"));
     if (nycol < 1) error("Error parsing ycol=%s",getparam("ycol"));
-    if (nxcol > 1 && nycol != nxcol) 
+    if (nxcol > 1 && nycol > 1 && nycol != nxcol) 
       error("nxcol=%d nycol=%d cannot be paired properly",nxcol,nycol);
+    npcol = MAX(nxcol,nycol);
+    
 
     nmax = nemo_file_lines(input,getiparam("nmax"));
     dprintf(1,"Allocated %d lines for table\n",nmax);
@@ -182,6 +190,7 @@ void setparams()
 
     Qsigx = Qsigy = FALSE;
     if (hasvalue("xbin")) {
+      if (nxcol > 1) error("Cannot bin in X, more than 1 column is used");
       smin = getparam("xbin");            /* binning of data */
       Qsigx = Qsigy = TRUE;           /* binning of data */
       xbin = (real *) allocate(nmax*sizeof(real));
@@ -257,11 +266,12 @@ void setparams()
 
 
     Qfull = getbparam("fullscale");
-    parse_pairsi("line", yapp_line, nycol);
-    parse_pairsr("point",yapp_point,nycol);
-    ncolors = nemoinpi(getparam("color"),yapp_color,nycol);
+
+    parse_pairsi("line", yapp_line, npcol);  
+    parse_pairsr("point",yapp_point,npcol);
+    ncolors = nemoinpi(getparam("color"),yapp_color,npcol);
     if (ncolors > 0) {
-    	for (i=ncolors; i<nycol; i++)
+    	for (i=ncolors; i<npcol; i++)
     	   yapp_color[i] = yapp_color[i-1];
     }
        
@@ -470,15 +480,16 @@ void plot_data()
     pltext(headline,xbox[1],ybox[1]+0.2,0.24,0.0);         /* headline */
     pljust(-1);     /* return to left just */
 
-    for (j=0, k=0; j<nycol; j++) {
-        if (np) rebin_data (npt,x[k],y[j], nbin, xbin, np, xp, yp,  xps, yps);
+    for (k=0, i=0, j=0; k<npcol; k++) {
+      if (np && nxcol==1) rebin_data (npt,x[i],y[j], nbin, xbin, np, xp, yp,  xps, yps);
 
-        plot_points( npt, x[k], y[j], xps, yps,
-            yapp_point[2*j], yapp_point[2*j+1],
-            yapp_line[2*j], yapp_line[2*j+1],
-            ncolors > 0 ? yapp_color[j] : -1,
-            Qsigx & (Qsigy << 1) );
-	if (nxcol > 1) k++;
+      plot_points( npt, x[i], y[j], xps, yps,
+		   yapp_point[2*k], yapp_point[2*k+1],
+		   yapp_line[2*k], yapp_line[2*k+1],
+		   ncolors > 0 ? yapp_color[k] : -1,
+		   0);
+      if (nxcol>1) i++;
+      if (nycol>1) j++;
     }
 
     if (hasvalue("cursor")) {
