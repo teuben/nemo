@@ -85,6 +85,8 @@ YAPPLIB = $(NEMOLIB)/yapp_@YAPP_NAME@.o @YAPP_LIBS@
 ## C compiler:
 #set opts="-rdynamic -ansi -fwritable-strings -Wconversion -Wnested-externs"
 #exec gcc -fPIC -Dlinux -DSYSV -I$NEMOINC -I$NEMOLIB -L$NEMOLIB $opts $* $link
+## Fortran compiler
+#  some older gnu compilers may still need -fno-globals
 
 NEMO_CFLAGS = @NEMO_CFLAGS@ -I$(NEMOINC) -I$(NEMOLIB) @XINCS@ $(GSL_CFLAGS) $(MACH)
 NEMO_FFLAGS = @NEMO_FFLAGS@
