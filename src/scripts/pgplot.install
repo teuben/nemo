@@ -190,7 +190,7 @@ switch ($host)
   case *linux-gnu:
     if (-e /usr/X11R6/lib64) then
         echo Warning: found /usr/X11R6/lib64
-        set new4=($new /X11R6/lib=/X11R6/lib64)
+        set new4=($new4 /X11R6/lib=/X11R6/lib64)
     endif
     if ($?CC && $?F77) then
         $dir/pgplot/makemake  $dir/pgplot linux ${F77}_${CC} $new4
