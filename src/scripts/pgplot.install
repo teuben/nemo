@@ -21,6 +21,7 @@
 # 20-may-05     make script more generic, less dependant on NEMO, and distribute with WIP
 # 10-jul-05     removed the always problematic never used TKDRIV driver
 # 16-jul-05     removed pp,gi,wd from drivers for gfortran
+#  5-dec-05     abuse the new 4th (optional) argument to makemake
 
 
 # Other places to get pgplot from
@@ -55,7 +56,8 @@ if ($?NEMOLIB) then
   set lib=$NEMOLIB
 endif
 set drivers=CGDRIV,GIDRIV,NUDRIV,PGDRIV,PPDRIV,PSDRIV,WDDRIV,XWDRIV
-set drivers0=CGDRIV,NUDRIV,PGDRIV,PSDRIV,XWDRIV
+set drivers_gfortran=CGDRIV,NUDRIV,PGDRIV,PSDRIV,XWDRIV
+set drivers_g95=CGDRIV,NUDRIV,PGDRIV,PPDRIV,PSDRIV,XWDRIV
 if ($?NEMOHOST) then
   set host=$NEMOHOST
 endif
@@ -80,14 +82,41 @@ if ($?host == 0) goto usage
 if (! -e $lib) mkdir $lib
 if ($status) goto usage
 
-if (0) then
-  # do we really want this ?
-  if ($?f77) then
-    setenv F77 $f77
-  endif
-  if ($?cc) then
-    setenv CC $cc
-  endif
+
+#  override the compiler default, but both 'f77' and 'cc' need to be set
+if ($?f77 && $?cc) then
+  setenv F77 $f77
+  setenv CC $cc
+endif
+
+#  handle new 4th and up arguments to makemake, quite an ugly hack....
+set new4=()
+if ($?F77) then
+  set base=(ifc ifort g95 gfortran)
+  foreach b  ($base)
+    echo $F77 | grep -q $b
+    if ($status == 0) then
+      set new4=($new4 $b=$F77)
+      setenv F77 $b
+      break
+    endif
+  end
+endif
+
+if ($?CC) then
+  set base=(gcc icc)
+  foreach b  ($base)
+    echo $CC | grep -q $b
+    if ($status == 0) then
+      set new4=($new4 $b=$CC)
+      setenv CC $b
+      break
+    endif
+  end
+endif
+
+if ($?new4) then
+  echo Note: using new4: $new4
 endif
 
 cd $dir
@@ -118,10 +147,15 @@ cp drivers.list old.list
 
 if ($?F77) then
   if ($F77  == gfortran) then
-    echo NOTE: SPECIAL lightweight pgplot for strict gfortran
-    set drivers=$drivers0
+    echo NOTE: SPECIAL lightweight pgplot for stricter gfortran
+    set drivers=$drivers_gfortran
+  endif
+  if ($F77  == g95) then
+    echo NOTE: SPECIAL lightweight pgplot for stricter g95
+    set drivers=$drivers_g95
   endif
 endif
+
 
 echo Building drivers for $drivers
 
@@ -146,18 +180,22 @@ switch ($host)
   case sun5:
     if ($?CC && $?F77) then
       echo ${F77}_${CC}
-      $dir/pgplot/makemake  $dir/pgplot sol2 ${F77}_${CC}
+      $dir/pgplot/makemake  $dir/pgplot sol2 ${F77}_${CC} $new4
     else 
-      $dir/pgplot/makemake  $dir/pgplot sol2 f77_cc
+      $dir/pgplot/makemake  $dir/pgplot sol2 f77_cc $new4
     endif
     breaksw
   case Linux:
   case linux:
   case *linux-gnu:
+    if (-e /usr/X11R6/lib64) then
+        echo Warning: found /usr/X11R6/lib64
+        set new4=($new /X11R6/lib=/X11R6/lib64)
+    endif
     if ($?CC && $?F77) then
-        $dir/pgplot/makemake  $dir/pgplot linux ${F77}_${CC}
+        $dir/pgplot/makemake  $dir/pgplot linux ${F77}_${CC} $new4
     else
-        $dir/pgplot/makemake  $dir/pgplot linux g77_gcc
+        $dir/pgplot/makemake  $dir/pgplot linux g77_gcc $new4
     endif
     if (! -e /usr/X11) then
         echo You may need to patch your Linux distribution:
