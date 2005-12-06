@@ -92,7 +92,7 @@ endif
 #  handle new 4th and up arguments to makemake, quite an ugly hack....
 set new4=()
 if ($?F77) then
-  set base=(ifc ifort g95 gfortran)
+  set base=(ifc ifort g77 g95 gfortran)
   foreach b  ($base)
     echo $F77 | grep -q $b
     if ($status == 0) then
