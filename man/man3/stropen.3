@@ -1,4 +1,4 @@
-.TH STROPEN 3NEMO "22 March 2000"
+.TH STROPEN 3NEMO "9 December 2005"
 .SH NAME
 stropen, strclose, strdelete, strname, strseek \- file-stream enhanced utilities
 .SH SYNOPSIS
@@ -31,6 +31,10 @@ created.
 (5) Output file with the name "\fB.\fP" (dot) are equivalent to
 a bit sink (\fB/dev/null\fP).
 .PP
+(6) Input files that look like a URL (http://.., ftp://.. etc) are
+opened with \fIpopen(3)\fP and data directly passed back to the
+client
+.PP
 Note that \fIfopen(3)\fP itself officially recognizes the following 
 modes:\fBr, w, a, r+, w+, a+\fP.
 .PP
@@ -54,6 +58,16 @@ should not be overwritten. See also \fIscopy(3NEMO)\fP.
 \fIstrseek\fP returns seekability of a stream. This is primarely useful
 for \fIfilestruct\fP, which might need to know if stream i/o
 can be optimized with deferred input.
+.SH CAVEATS
+Files that are given as URLs can easily cause confusion, because a malformed or mistyped
+URL can give either no output or whatever the server  decides to return on non-existing
+names. Since this is often a webpage with an error message, perfectly legal output, 
+the client on the NEMO side will get no error message.
+.PP
+.nf
+       % tsf http://bima.astro.umd.edu/nemo/test/p10-a
+       ### Fatal error [tsf]: gethdr: bad magic: 20474
+.fi
 .SH SEE ALSO
 fopen(3), fclose(3), filestruct(3NEMO), strlib(3NEMO), getparam(3NEMO), mstropen(3NEMO)
 .SH AUTHOR
@@ -72,4 +86,5 @@ Joshua Barnes, Peter Teuben
 19-may-92	added strseek - fixed verbosity in strdelete	PJT
 5-nov-93	added special "." filename mode for /dev/null	pjt
 22-mar-00	scratch files cannot exist, otherwise error	pjt
+9-dec-05	add simple ability to grab URL-based files	PJT
 .fi
