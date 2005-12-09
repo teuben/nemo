@@ -39,6 +39,7 @@
  *      14-feb-02    mktemp -> mkstemp 					pjt
  *       2-aug-03    scratchfile (r+w) access was broken                pjt
  *       2-dec-03    increase MAXFD to 64
+ *       9-dec-05    allow input files to be URLs                       pjt
  */
 #include <stdinc.h>
 #include <getparam.h>
@@ -47,6 +48,9 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+
+#include <limits.h>
+#define MAXPATHLEN      PATH_MAX
 
 extern int unlink (string);		/* POSIX ??? unistd.h */
 extern int dup (int);			/* POSIX ??? unistd.h */
@@ -63,19 +67,29 @@ local struct {	          /*  our internal filetable for stropen/strdelete */
     bool seek;		/* flag to denote if you can seek; it also denotes deletability */
 } ftable[NEMO_MAXFD];
 
+/* possible URL command getters are:
+ *     curl -s <URL>
+ *     wget -q -O -  <URL>    
+ */
+
+#if 1
+static string urlGetCommand = "curl -s";
+#else
+static string urlGetCommand = "wget -q -O -";
+#endif
 
 
 /* stropen:
- *       name:   can also ne "-", or "-num" 
+ *       name:   can also be "-", or "-num" , or "
  *	 mode:   "r"ead, "w"rite, "w!"rite on!, "a"ppend 
  */
 
 
 stream stropen(const_string name, string mode)		
 {
-    bool inflag;
+    bool inflag,canSeek = TRUE;
     int fds;
-    char tempname[128];   /* buffer for temp name in case of scratch file */
+    char tempname[MAXPATHLEN];   /* buffer for temp name in case of scratch file */
     stream res;
     struct stat buf;
 
@@ -102,7 +116,7 @@ stream stropen(const_string name, string mode)
         ftable[fds].scratch = FALSE;
         ftable[fds].seek = FALSE;
     } else {                                    /* regular file */
-        strncpy(tempname,name,128);	/* MAXPATHLEN ??? */
+        strncpy(tempname,name,MAXPATHLEN);
         if (streq(mode,"s")) {          /* scratch mode */
      	    fds = -1;
             if (*name != '/') {     /* ignore name: make a new one */
@@ -126,10 +140,18 @@ stream stropen(const_string name, string mode)
 		!streq(name,".") &&
 		stat(tempname, &buf) == 0)
                 error("stropen: file \"%s\" already exists\n", tempname);
-            if (streq(name,"."))
+            if (streq(name,".")) {
             	res = fopen("/dev/null", "w!");
-            else
+		canSeek = FALSE;
+            } else {
+	      if (inflag && strstr(name,"://")) {
+		sprintf(tempname,"%s %s",urlGetCommand,name);
+		dprintf(1,"urlGetCommand: %s\n",tempname);
+		res = popen(tempname,"r");
+		canSeek = FALSE;
+	      } else
             	res = fopen(tempname, streq(mode, "w!") ? "w" : mode);
+	    }
             if (res == NULL)
                 error("stropen: cannot open file \"%s\" for %s\n",
                      tempname, inflag ? "input" : "output");
@@ -140,7 +162,7 @@ stream stropen(const_string name, string mode)
         ftable[fds].name = scopy(tempname);
         ftable[fds].str = res;
         ftable[fds].scratch = streq(mode,"s");
-        ftable[fds].seek = TRUE;		/* this may not be true ??? */
+        ftable[fds].seek = canSeek;
     }
     return res;
 }
