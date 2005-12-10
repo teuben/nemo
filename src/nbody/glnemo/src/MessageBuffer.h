@@ -73,6 +73,7 @@ private :
   int    buffer_length;  // max buffer size                          
   char * p_buffer;       // pointer to the current byte in the buffer
   int    n_buffer;       // #bytes received in the buffer            
+  int    send_flags;     // flags for send(2)
 
   bool   is_empty;       // true if nothing in the buffer            
   

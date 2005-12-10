@@ -53,6 +53,11 @@ MessageBuffer::MessageBuffer(int sd, int length)
   siz_chunk = new ChunkBuffer(4);
   assert(siz_chunk != NULL);
   dat_chunk = NULL;
+#if defined(MSG_NOSIGNAL)
+  send_flags = MSG_NOSIGNAL;
+#else
+  send_flags = 0;    // MacOS 10.3 didn't seem to have a MSG_NOSIGNAL
+#endif
 }
 // ============================================================================
 // destructor                                                                  
@@ -115,7 +120,7 @@ int MessageBuffer::sendAll(int sd, char * s_buffer, int * len)
 
   while (total < *len) {
     n_send = MIN(b_left,buffer_length);
-    n = send(sd, s_buffer+total, n_send,MSG_NOSIGNAL);
+    n = send(sd, s_buffer+total, n_send, send_flags);
     if ( n == -1) {
       perror("MessageBuffer::sendAll - PERROR send:");
       throw(-1); // throw execption 
@@ -176,7 +181,7 @@ int MessageBuffer::recvData()
     if (is_empty) {                                       // empty buffer         
       buffer = p_buffer;                                  // set to the beginning 
       if ((n_buffer=                                      // store #bytes received
-	   recv(sock_fd,buffer,buffer_length,MSG_NOSIGNAL))==-1) {   // recv data 
+	   recv(sock_fd,buffer,buffer_length,send_flags))==-1) {   // recv data 
 	perror("MessageBuffer::recvData - PERROR recv:");            // failed    
 	close(sock_fd);                                   // close sd             
 	throw(-2);
