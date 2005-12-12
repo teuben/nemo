@@ -1,12 +1,9 @@
 /*
  *  preprocessor to run (a series of) CGS
  *
- *  The first argument must be a (non-existent) directory name, in
- *  which a new 'galaxy.dat' file will be written, and in which
- *  galaxy will be run. The 'galaxy' program is assumed to be in the
- *  PATH
  *
  *	3-nov-2005		written
+ *     12-dec-2005     added writing pos/vel files with freqout=
  */
 
 #include <stdinc.h>
@@ -18,46 +15,80 @@
 
 string defv[] = {
     "out=???\n       directory in which GALAXY will be run",
-    "nbody=40000\n   nbody",
-    "nrad=80\n       nradii",
-    "maxstep=1000\n  max",
-    "dt=0.0025\n     step",
-    "tstart=0.0\n    start",
-    "tstop=4.0\n     stop",
-    "dtmin=0.001\n   min",
-    "dtmax=0.01\n    max",
-    "flag=1\n        flag",
-    "mass=1.0\n      mass",
-    "freqcmss=2000\n freq",
+    "nbody=40000\n   nbody, if needed",
+    "nrad=80\n       nradii in code",
+    "maxstep=1000\n  max number of integration steps",
+    "dt=0.0025\n     initial integration step",
+    "tstart=0.0\n    start time",
+    "tstop=4.0\n     stop time",
+    "dtmin=0.001\n   min integration time",
+    "dtmax=0.01\n    max integration time",
+    "flag=1\n        data creation flag",
+    "mass=1.0\n      total mass of system",
+    "virial=1.0\n    initial virial ratio if flag=2",
+    "freqcmss=2000\n freq of center of mass adjustments",
     "freqdiag=50\n   freq",
+    "freqout=10\n    freq of output of snapshots",
     "exe=CGS.exe\n   name of CGS executable",
     "in=\n           optional input snapshot (nemo format)",
-    "VERSION=0.1\n   3-nov-05 PJT",
+    "nemo=t\n        convert data to NEMO and cleanup ASCII",
+    "VERSION=0.3\n   12-dec-05 PJT",
     NULL,
 };
 
-string usage = "run CGS";
+string usage = "NEMO frontend to run CGS";
 
-#define MAXCARDS 256
-
-static char *database[MAXCARDS];    /* full lines */
-static char *names[MAXCARDS];       /* individual namelist */
-static int ncards = 0;
+string cvsid="$Id$";
 
 int nemo_main()
 {
-  int i, nbody;
-  real scale, dt, dtout, dtlog, tstop;
+  int i, nbody, flag;
+  real scale, dt, dtout, dtlog, tstop; 
+  real virial = getrparam("virial");
+  bool Qnemo = getbparam("nemo");
   string exefile = getparam("exe");
   string rundir = getparam("out");
+  string infile;
   stream datstr;
   char fullname[256];
   char command[256];
+  char line[256];
   
-  nbody = getiparam("nbody");
 
   make_rundir(rundir);
 
+  if (hasvalue("in")) {
+    infile = getparam("in");
+    flag = 3;
+    sprintf(command,"snapprint %s x,y,z    > %s/%s",infile,rundir,"initPOS.dat");
+    dprintf(0,">>> %s\n",command);
+    system(command);
+    sprintf(command,"snapprint %s vx,vy,vz > %s/%s",infile,rundir,"initVEL.dat");
+    dprintf(0,">>> %s\n",command);
+    system(command);
+    sprintf(command,"cat %s/%s | wc -l",rundir,"initVEL.dat");
+    datstr = popen(command,"r");
+    if (fgets(line,256,datstr) == 0) {
+      warning("bad read finding nbody, trying keyword");
+      nbody = getiparam("nbody");
+    } else {
+      line[strlen(line)-1] = 0;
+      nbody = atoi(line);
+    }
+    dprintf(0,"line=%s\n",line);
+    dprintf(0,"Using snapshot in=%s with nbody=%d\n",infile,nbody);
+  } else {
+    infile = 0;
+    flag = getiparam("flag");
+    nbody = getiparam("nbody");
+  }
+
+  if (flag == 2) {
+    sprintf(fullname,"%s/%s",rundir,"initial_virial.dat");    
+    datstr = stropen(fullname,"w");    
+    fprintf(datstr,"%g\n",virial);
+    strclose(datstr);
+  }
 
   sprintf(fullname,"%s/%s",rundir,"PARAMETER.DAT");
   datstr = stropen(fullname,"w");    
@@ -66,31 +97,28 @@ int nemo_main()
   fprintf(datstr,"%d\n",getiparam("maxstep"));
   fprintf(datstr,"%d\n",getiparam("freqcmss"));
   fprintf(datstr,"%d\n",getiparam("freqdiag"));
+  fprintf(datstr,"%d\n",getiparam("freqout"));
   fprintf(datstr,"%g\n",getdparam("dt"));
   fprintf(datstr,"%g\n",getdparam("tstart"));
   fprintf(datstr,"%g\n",getdparam("tstop"));
   fprintf(datstr,"%g\n",getdparam("mass"));
-  fprintf(datstr,"%d\n",getiparam("flag"));
+  fprintf(datstr,"%d\n",flag);
   fprintf(datstr,"%g\n",getdparam("dtmax"));
   fprintf(datstr,"%g\n",getdparam("dtmin"));
-
   strclose(datstr);
 
-#if 0  
-#if 0
-    sprintf(fullname,"%s/%s",rundir,"galaxy.ini");
-    datstr = stropen(fullname,"w");
-    strclose(datstr);
-#else
-    sprintf(command,"snap2ini %s > %s/%s",
-	    getparam("in"),rundir,"galaxy.ini");
-    dprintf(1,"COMMAND: %s\n",command);
-    system(command);
-#endif
-#endif
-    goto_rundir(rundir);
+  goto_rundir(rundir);
 
-    run_program(exefile);
+  sprintf(command,"%s >& CGS.log",exefile);
+  dprintf(0,">>> %s\n",command);
+  system(command);
+
+  if (Qnemo) {
+    sprintf(command,"tabtos fort.90 snap.out nbody,time skip,pos,vel; rm fort.90");
+    dprintf(0,">>> %s\n",command);
+    system(command);
+  }
+  
 }
 
 
@@ -106,31 +134,3 @@ make_rundir(string name)
         error("Run directory %s already exists",name);
 }
 
-write_namelist(char *name)
-{
-    int i;
-    FILE *fp;
-
-    fp = fopen(name,"w");
-    if (fp==NULL) {
-        fprintf(stderr,"File %s could not be written\n",name);
-        exit(1);
-    }
-    for (i=0; i<ncards; i++)
-        fprintf(fp,"%s",database[i]);
-    fclose(fp);
-}
-
-
-
-run_program(string exe)
-{
-#if 1
-    system(exe);
-#else
-    if (execlp(exe,NULL)) {
-        fprintf(stderr,"Problem executing %s\n",exe);
-        exit(1);
-    }
-#endif
-}
