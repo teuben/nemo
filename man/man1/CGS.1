@@ -1,11 +1,13 @@
-.TH CSG 1NEMO "3 November 2005"
+.TH CSG 1NEMO "12 December 2005"
 .SH NAME
-CGS, runCGS\-  Collisionless Galactic Simulator N-body code
+CGS, runCGS\-  Collisionless Galactic Simulator N-body code (** work in progress **)
 .SH SYNOPSIS
 \fBCGS\fP 
 .PP
 \fBrunCGS\fP  [parameter=value]
 .SH DESCRIPTION
+NOTE:: This is \fIwork in progress\fP, the code is not yet available within NEMO.x
+.PP
 \fICGS\fP  (Collisionless Galactic Simulator) is an improved version, written
 by Michele Trenti, of a spherical harmonics Particle-Mesh code as presented originally 
 in van Albada (1982). The radial grid is adaptive, and keeps constant mass shells.
@@ -26,8 +28,11 @@ places their output in these run directories.
 .SH PARAMETER
 There are the NEMO command line parameters for \fBrunCGS\fP:
 .TP 24
-\fBoutdir=\fP\fIdirectory\fP
-Output directory. Must not exist.
+\fBout=\fP\fIdirectory\fP
+Output directory. Must not exist yet. 
+In this directory a number of
+files will be produced by the code. See below. 
+No Default.
 .TP
 \fBnbody=\fP
 Number of bodies. Only needed if a model from scratch when
@@ -65,8 +70,8 @@ Maximum allowed integration step.
 [Default: 0.01]
 .TP
 \fBflag=\fP
-Input Plummer flag. 1=plummer sphere from scratch.  Needs \fBnbody=\fP.
-2=something else from scratch, also needs \fBvirial=\fP
+Input Plummer flag. 1=plummer sphere from scratch (needs \fBnbody=\fP).
+2=\fIsomething else\fP from scratch (needs \fBvirial=\fP)
 3=initial conditions from a POS and VEL file. 
 [Default: 1]
 .TP
@@ -83,8 +88,16 @@ Frequency of CMSS (center of mass adjustment) call. ** review this name **
 [Default: 2000]
 .TP
 \fBfreqdiag=\fP
-Frequency of diagnostics call.** review this name **
+Frequency of diagnostics call. Note that each diagnostics call 
+has some overhead associated with it.
+** review this name **
 [Default: 50]
+.TP
+\fBfreqout=\fP
+Frequency of writing snapshots.
+Note that each call has some overhead associated with it if the potential is selected for output
+** output potentials not implemented **
+[Default: 10]
 .TP
 \fBin=\fP\fIfile\fP
 Input data is read from \fIfile\fP, which must be a structured binary file.
@@ -96,6 +109,10 @@ directory notation, no relative patchs.
 Name of the (fortran) executable. Needs to be in your search $PATH, or else
 the full absolute path needs to be supplied here.
 [Default: CGS.exe]
+.TP
+\fBnemo=t|f\fP
+Should the snapshot data be converted to NEMO format? If so, the ASCII snapshot
+is removed. Default: [\fBt\fP]
 .SH FILES
 .nf
 .ta +2i
@@ -119,10 +136,13 @@ fort.20 	time, total energy, virial ratio -2K/W, total angular momentum
 fort.28		same as fort.18, but for bound particles
 fort.33		same as fort.13, but for bound particles
 fort.34		same as fort.14, but for bound particles
+fort.90		one or more snapshots (one line header plus index,pos,vel data in a table)
 
-initconPL.dat
-POS@EOS.DAT
-VEL@EOS.DAT
+snap.out	Output snapshots, in NEMO's \fIsnapshot(5NEMO)\fP format. Note no masses present!
+
+initconPL.dat	tba
+POS@EOS.DAT	tba
+VEL@EOS.DAT	tba
 
 .fi
 .PP
@@ -134,6 +154,7 @@ Sample \fIPARAMETER.DAT\fP initialization file (the default benchmark):
  1000				!NUMBER OF STEPS (MAX)
  2000				!FREQUENCY OF CMSS CALL
  50				!FREQUENCY OF DIAGNOSTIC CALL
+ 10				!FREQUENCY OF WRITING SNAPSHOTS CALL
  0.0025				!TIME STEP
  0.				!START TIME OF SIMULATION
  4.				!END TIME OF SIMULATION
@@ -146,7 +167,7 @@ Sample \fIPARAMETER.DAT\fP initialization file (the default benchmark):
 Note that various parameters (maximum grid size, maximum number of particles)
 are hardcoded during compilation, though easily changed in the right file:
 .nf
-.ta +1i +1.5i +2i
+.ta +1i +2i
 common.blk:	parameter(NPMAX=2000000)	Max number of particles
 common.blk:	parameter(NRGMAX=501)		Max number of radial grids
 common.blk:	parameter(LMAX=7)        	Legendre Polynomials
@@ -160,7 +181,7 @@ com_DF.blk:	PARAMETER(EMAX=1.)      	Boundary in E
 .fi
 .SH BENCHMARKS
 The standard benchmark is 40000 particles and runs for 832 steps. The user CPU is listed (in sec)
-in the 2nd columnx
+in the 2nd column. 
 .nf
 .ta +1i
 P4/1.6	325.856 (g77 3.2.3)
@@ -169,6 +190,19 @@ P4/1.6	195.908 (intel 8.1)
 AMD64/	130.252 (g77 3.4.2)
 G5/1.6	218.47u (g77 3.5.0)
 .fi
+You can run the command either as:
+.nf
+   % time runCGS out=bench1 nemo=f
+or
+   % time CGS
+.fi
+.SH DATA CONVERSION
+If snapshots are requested, CGS will create a file \fBfort.90\fB, which can be converted
+to NEMO's \fIsnapshot(5NEMO)\fP
+.nf
+tabtos $old/fort.90 snap90 nbody,time skip,pos,vel
+.fi
+
 .SH UNITS
 Although all particles are equally massive (by the nature of the code),
 the total mass of the system can be choosen as an input parameter. The
@@ -180,7 +214,8 @@ of about 97.8 km/s
 scfm(1NEMO), quadcode(1NEMO), snapshot(5NEMO)
 .PP
 .nf
-Trenti, M. (2005), PhD Thesis, Pisa
+Trenti, M. (2005), PhD Thesis, Pisa (see Chapter 3 for many details on the code)
+Trenti, M. Bertin, G. and van Albada, T.S. (2005) A&A 433, 57
 van Albada, T.S. (1982), MNRAS, 201, 939. \fIDissipationless galaxy formation and the R to the 1/4-power law\fP 
 van Albada, T.S. & van Gorkum, J.H. (1977) A&A,54,121. \fIExperimental Stellar Dynamics for Systems with Axial Symmetry\fP
 .fi
@@ -188,7 +223,8 @@ van Albada, T.S. & van Gorkum, J.H. (1977) A&A,54,121. \fIExperimental Stellar D
 Michele Trenti & Tjeerd van Albada (NEMO's adaptation: Peter Teuben)
 .SH HISTORY
 .nf
-.ta +0.5i +3i
-2003	original version		M. Trenti & T.van Albada
-3-nov-05	V0.1  alpha release testing	PJT
+.ta +1i +3i
+2003	original version	M. Trenti & T.van Albada
+3-nov-05	V0.1 alpha release testing	PJT
+12-dec-05	V0.2 writing simple pos/vel snapshots using freqout=	PJT
 .fi
