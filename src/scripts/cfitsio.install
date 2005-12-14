@@ -1,6 +1,8 @@
 #! /bin/csh -f
 #
 #  Install CFITSIO for NEMO
+#  See also:
+#       http://heasarc.gsfc.nasa.gov/docs/software/fitsio/fitsio.html
 #
 #
 #  17-apr-04    written, for 2490
@@ -31,7 +33,7 @@ if (! -e $src) then
   echo " tar zxf cfitsio2510.tar.gz"
   echo " ../src/scripts/cfitsio.install"
   echo "Alternatively you can also try the beta version for large files:"
-  echo " curl ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio3003beta.tar.gz | tar zxf -"
+  echo " curl ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio3004bbeta.tar.gz | tar zxf -"
   exit 1
 endif
 
