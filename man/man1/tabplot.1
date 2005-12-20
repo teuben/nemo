@@ -55,7 +55,7 @@ datapoint or the bin boundaries (in X-world-coordinates) must be given.
 The program can distinguish from both cases by the number of variables
 given to this keyword. One means fixed number of datapoints used in
 averaging, more than one means the numbers are bin boundaries. The output
-it controlled using \fBtab=\fP and contains the
+is controlled using \fBtab=\fP and contains the
 mean X, Y followed by the dispersion in X and Y and the number of
 points in that bin.
 [default: not used, datapoints from file are used].
@@ -112,9 +112,8 @@ Default: \fBf\fP.
 Random verbiage, will be plotted along right top of plot for id. [default: none].
 The left top will contain the filename \fIinfile\fP.
 .TP
-\fBtab=\fP
-If binning is used, this keyword is used to 
-output filename. Default: false;
+\fBtab=t|f\fP
+Output table to stdout if binning is used? Default: false;
 .TP
 \fBcursor=\fP
 This will be the name of an ascii file that will contain coordinates
