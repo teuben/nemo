@@ -36,6 +36,8 @@
  *      28-apr-04  V2.7  : added xbox, ybox= options as in snapplot
  *      17-sep-05  V2.8  : added pl_readlines()
  *       2-dec-05  V2.9  : implemented many-to-one column plotting mode
+ *                 V3.0  : xscale,yscale,dxcol,dycol=
+ *      20-dec-05  V3.0a : fix bug in xbin=min:max:step mode
  *
  */
 
@@ -85,6 +87,10 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "ybox=2.0:18.0\n     extent of frame in y direction",
     "nxticks=7\n         Number of ticks on X axis",
     "nyticks=7\n         Number of ticks on Y axis",
+    "xscale=1\n          Scale all X values by this",
+    "yscale=1\n          Scale all Y values by this",
+    "dxcol=\n            Columns representing error bars in X",
+    "dycol=\n            Columns representing error bars in Y",
     "nmax=100000\n       Hardcoded allocation space, if needed for piped data",
     "median=f\n          Use median in computing binning averages?",
     "headline=\n	 headline in graph on top right",
@@ -94,7 +100,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "layout=\n           Optional input layout file",
     "first=f\n           Layout first or last?",
     "readline=f\n        Interactively reading commands",
-    "VERSION=2.9\n	 2-dec-05 PJT",
+    "VERSION=3.0\n	 20-dec-05 PJT",
     NULL
 };
 
@@ -109,10 +115,12 @@ local string input;				/* filename */
 local stream instr;				/* input file */
 
 local int xcol[MAXCOL], ycol[MAXCOL], nxcol, nycol;	/* column numbers */
+local int dxcol[MAXCOL],dycol[MAXCOL],ndxcol,ndycol;	/* column numbers */
 local real xrange[2], yrange[2];		/* range of values */
 local int npcol;                                /* MAX(nxcol,nycol) */
 
 local real  *x[MAXCOL], *y[MAXCOL]; 			/* data from file */
+local real  *dx[MAXCOL], *dy[MAXCOL]; 			/* data from file */
 local real *xp, *yp, *xps, *yps;              /* rebinned data (if needed) */
 local int    npt;				/* actual number of data points */
 local int    np;                              /* actual number of rebinned data */
@@ -141,6 +149,7 @@ local int nxcoord, nycoord;
 local int nxticks, nyticks;                   /*& number of tickmarks */
 local int ncolors;
 local real xbox[3], ybox[3];
+local real xscale, yscale;
 
 local plcommand *layout;
 local bool layout_first;
@@ -178,15 +187,30 @@ void setparams()
     if (nxcol > 1 && nycol > 1 && nycol != nxcol) 
       error("nxcol=%d nycol=%d cannot be paired properly",nxcol,nycol);
     npcol = MAX(nxcol,nycol);
+    ndxcol = nemoinpi(getparam("dxcol"),dxcol,MAXCOL);
+    ndycol = nemoinpi(getparam("dycol"),dycol,MAXCOL);
+    // TODO: some ndxycol/ndycol checks
     
 
     nmax = nemo_file_lines(input,getiparam("nmax"));
     dprintf(1,"Allocated %d lines for table\n",nmax);
     for (j=0; j<nxcol; j++)
         x[j] = (real *) allocate(sizeof(real) * (nmax+1));   /* X data */
-
     for (j=0; j<nycol; j++)
         y[j] = (real *) allocate(sizeof(real) * (nmax+1));   /* Y data */
+    if (ndxcol)
+      for (j=0; j<ndxcol; j++)
+        dx[j] = (real *) allocate(sizeof(real) * (nmax+1));  /* DX data */
+    else
+      for (j=0; j<ndxcol; j++)
+        dx[j] = 0;
+    if (ndycol)
+      for (j=0; j<ndycol; j++)
+        dy[j] = (real *) allocate(sizeof(real) * (nmax+1));  /* DY data */
+    else
+      for (j=0; j<ndycol; j++)
+        dy[j] = 0;
+
 
     Qsigx = Qsigy = FALSE;
     if (hasvalue("xbin")) {
@@ -264,6 +288,9 @@ void setparams()
     setrange(xbox, getparam("xbox"));
     setrange(ybox, getparam("ybox"));
 
+    xscale = getrparam("xscale");
+    yscale = getrparam("yscale");
+
 
     Qfull = getbparam("fullscale");
 
@@ -310,18 +337,43 @@ read_data()
         colnr[k]  = xcol[j];
         coldat[k] = x[j];
     }
+    for (j=0; j<ndxcol; j++, k++) {
+        colnr[k]  = dxcol[j];
+        coldat[k] = dx[j];
+    }
     for (j=0; j<nycol; j++, k++) {
         colnr[k]  = ycol[j];
         coldat[k] = y[j];
     }
+    for (j=0; j<ndycol; j++, k++) {
+        colnr[k]  = dycol[j];
+        coldat[k] = dy[j];
+    }
+    
 
     /* could also find out if any columns duplicated, and
        replace them with pointers */
 
-    npt = get_atable(instr,nxcol+nycol,colnr,coldat,nmax);    /* get data */
+    npt = get_atable(instr,nxcol+nycol+ndxcol+ndycol,colnr,coldat,nmax);    /* get data */
     if (npt < 0) {
     	npt = -npt;
     	warning("Could only read first set of %d data",npt);
+    }
+    if (xscale != 1.0) {
+      for (j=0; j<nxcol; j++)
+	for (i=0; i<npt; i++)
+	  x[j][i] *= xscale;
+      for (j=0; j<ndxcol; j++)
+	for (i=0; i<npt; i++)
+	  dx[j][i] *= xscale;
+    }
+    if (yscale != 1.0) {
+      for (j=0; j<nycol; j++)
+	for (i=0; i<npt; i++)
+	  y[j][i] *= yscale;
+      for (j=0; j<ndycol; j++)
+	for (i=0; i<npt; i++)
+	  dy[j][i] *= yscale;
     }
 
     xmin = ymin =  HUGE;
@@ -483,7 +535,7 @@ void plot_data()
     for (k=0, i=0, j=0; k<npcol; k++) {
       if (np && nxcol==1) rebin_data (npt,x[i],y[j], nbin, xbin, np, xp, yp,  xps, yps);
 
-      plot_points( npt, x[i], y[j], xps, yps,
+      plot_points( npt, x[i], y[j], dx[i], dy[i], xps, yps,
 		   yapp_point[2*k], yapp_point[2*k+1],
 		   yapp_line[2*k], yapp_line[2*k+1],
 		   ncolors > 0 ? yapp_color[k] : -1,
@@ -536,17 +588,24 @@ real *x, *y, *xbin, *xp, *yp, *xps, *yps;
     for (i=0; i<np; i++)
         xp[i] = xps[i] = yp[i] = yps[i] = NaN;      /* init (again) */
    
-    for (i=0, ip=0; i<n-1; i++)		/* loop over all points */
-        if (x[i] < x[i-1])
-            ip++;              /* count unsorted data in 'ip' */
+    for (i=1, ip=0; i<n; i++)		/* loop over all points */
+      if (x[i] < x[i-1]) {
+	dprintf(1,"Unsorted %g < %g at %d\n",x[i],x[i-1],i);
+	ip++;              /* count unsorted data in 'ip' */
+      }
     if (ip>0)
         warning("%d out of %d datapoints are not sorted\n", ip, n);
 
     i = 0;                     /* point to original data (x,y) to be rebinned */
     iold = 0;
+    if (nbin>0) {
+      while(i<n && x[i] < xbin[0]) i++;
+      if (i>0) warning("%d points left of first bin",i);
+    }
     for (ip=0; ip<nbin-1; ip++) {		/* for each bin, accumulate */
         x0 = x1 = x2 = y1 = y2 = 0.0;       /* reset */
-        while (i<n && x[i] >= xbin[ip] && x[i] < xbin[ip+1]) {
+	dprintf(1,"ip=%d    %g : %g\n",ip,xbin[ip],xbin[ip+1]);
+        while (i<n && xbin[ip] <= x[i] && x[i] < xbin[ip+1]) {    /* in this bin ? */
             x0 += 1.0;
             x1 += x[i];
             x2 += sqr(x[i]);
@@ -554,7 +613,8 @@ real *x, *y, *xbin, *xp, *yp, *xps, *yps;
             y2 += sqr(y[i]);
             i++;
         }
-        if (x0==1.0) {
+	dprintf(1,"i=%d x0=%g\n",i,x0);
+        if (x0 == 1.0) {
             xp[ip] = x1;  xps[ip] = 0.0;
             yp[ip] = y1;  yps[ip] = 0.0;
         } else if (x0 > 1.0) {
@@ -568,13 +628,14 @@ real *x, *y, *xbin, *xp, *yp, *xps, *yps;
             }
         } else
             zbin++;     /* count bins with no data */
-	if(Qtab && x0>0)
+	if(Qtab && x0>0)    /* x0>0 : only print non-zero bins */
             printf("%g %g %g %g %d\n",xp[ip],yp[ip],xps[ip],yps[ip],i-iold);
         iold = i;
     } /* for(ip) */
     if(zbin)warning("There were %d bins with no data",zbin);
+    if(i<n) warning("%d points right of last bin",i);
     if (nbin>0)
-        return(0);      /* done with variable bins */
+        return 0;      /* done with variable bins */
 
     nbin = -nbin;       /* make it positive for fixed binning */
     for (i=0, ip=0; i<n;ip++) {       /* loop over all points */
@@ -604,9 +665,9 @@ real *x, *y, *xbin, *xp, *yp, *xps, *yps;
  *      X,Y Points with value NaN are skipped, as well as their errorbars
  */
  
-plot_points (np, xp, yp, xps, yps, pstyle, psize, lwidth, lstyle, color, errorbars)
+plot_points (np, xp, yp, dx, dy, xps, yps, pstyle, psize, lwidth, lstyle, color, errorbars)
 int np, lwidth, lstyle, color, errorbars;
-real xp[], yp[], xps[], yps[], pstyle, psize;
+real xp[], yp[], dx[], dy[], xps[], yps[], pstyle, psize;
 {
     int i, ipstyle;
     real p1, p2;
@@ -647,6 +708,7 @@ real xp[], yp[], xps[], yps[], pstyle, psize;
             while (++i < np)
                 if (xp[i] != NaN)
                     plline (xtrans(xp[i]), ytrans(yp[i]));  /* draw line */
+
         } else {                /* histogram approach */
             plmove (xtrans(xp[i]), ytrans(yp[i]));      /* move to 1st point */
             while (++i < np) {
