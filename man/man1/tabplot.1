@@ -5,19 +5,22 @@ tabplot \- general table plotter
 .PP
 \fBtabplot in=\fPinfile [parameter=value]
 .SH DESCRIPTION
-\fItabplot\fP plots datapoints from an ascii table, and optionally
-connects the datapoints by lines. It can also bin the data, and plot
+\fItabplot\fP plots datapoints from an ascii table, optionally
+connects the datapoints by lines, plots different styles for the
+points and (if available) uses different colors.
+It can also bin the data in X, and compute/plot
 error-bars in X and Y derived from the dispersion within those bins.
 .PP
 \fItabplot\fP can also plot one-to-many, many-to-one as well as pair-wise
 plotting. However, it is (not yet) possible to pair-wise plot from
-multiple files with different number of rows. See \fIpaste(1)\fP or
+multiple files with different number of rows. See also \fIpaste(1)\fP or
 \fItabmath(1NEMO)\fP how to combine tables.
 .PP
 \fItabplot\fP is intended for quick and dirty display of the data. 
 For more complicated plots, full plotting packages should be used
 (Mongo, SM, WIP, gnuplot, Grace etc.), though moderately sophisticated
-plots can be made using \fBlayout=\fP.
+plots can also be made using \fBlayout=\fP. The \fBreadline=\fP is
+available to give some degree of interactive usage.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword is also
 given:
@@ -99,6 +102,20 @@ Number of tickmarks along the X axis. This divides the X axis in
 \fBnyticks=\fP
 Same for Y.
 .TP
+\fBxscale=\fP
+Scaling factor applied to all X values. Default: 1
+.TP
+\fByscale=\fP
+Scaling factor applied to all Y values. Default: 1
+.TP
+\fBdxcol=\fP
+Columns representing error bars in X. These need to match the \fBxcol=\fP.
+** not implemented yet **
+.TP
+\fBdycol=\fP
+Columns representing error bars in Y. These need to match the \fBycol=\fP.
+** not implemented yet **
+.TP
 \fBnmax=\fP
 Maximum number of lines that are allocated in pipes. [10000]
 .TP
@@ -115,16 +132,16 @@ The left top will contain the filename \fIinfile\fP.
 \fBtab=t|f\fP
 Output table to stdout if binning is used? Default: false;
 .TP
+\fBfullscale=t|f\fP
+Use full scale in one axis if other axis is autoscaled? In versions older
+than 2.0 fullscale was always on (t), by default it is now off (f).
+.TP
 \fBcursor=\fP
 This will be the name of an ascii file that will contain coordinates
 that have been marked with the cursor (currently only implemented for
 PGPLOT). Cursor keys are in the usual definition: A=left mouse will mark,
 D=middle mouse has no function, X=right mouse will exit. 
 Default: not used.
-.TP
-\fBfullscale=t|f\fP
-Use full scale in one axis if other axis is autoscaled? In versions older
-than 2.0 fullscale was always on (t), by default it is now off (f).
 .TP
 \fBlayout=\fP
 Optional Layout file that contains draw commands. Default: none.
@@ -167,7 +184,7 @@ of the tab1 and tab2 table has 2 columns:
    % paste tab1 tab2 | tabplot - 1,2 3,4                 headline=(x1,y1),(x2,y2)
 
 .SH "SEE ALSO"
-tablsqfit(1NEMO), tabmath(1NEMO)
+tablsqfit(1NEMO), tabmath(1NEMO), yapp(5NEMO)
 .PP
 http://vostat.org
 .SH AUTHOR
@@ -179,7 +196,7 @@ Peter Teuben
 .fi
 .SH "UPDATE HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.0i +5.5i
 25-nov-88	V1.0 - created  	PJT
 13-nov-90	V1.1 deleted nmax= by using file_lines()	PJT
 26-jan-95	V1.5a multi-column plotting support, trickmarks, extra coord lines	PJT
@@ -192,4 +209,5 @@ Peter Teuben
 2-aug-02	V2.5 allow number of x columns to be > 1	PJT
 17-sep-05	V2.8 added readline= and documented first=	PJT
 2-dec-05	V2.9 implemented missing many-to-one plotting mode	PJT
+20-dec-05	V3.0 added xscale,yscale and started dxcol,dycol. Fixed xbin= bug	PJT
 .fi
