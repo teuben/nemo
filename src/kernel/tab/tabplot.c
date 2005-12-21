@@ -38,6 +38,7 @@
  *       2-dec-05  V2.9  : implemented many-to-one column plotting mode
  *                 V3.0  : xscale,yscale,dxcol,dycol=
  *      20-dec-05  V3.0a : fix bug in xbin=min:max:step mode
+ *                     b : fix bug in bins with no dispersive data, switch to moment.h
  *
  */
 
@@ -53,7 +54,7 @@
 #include <yapp.h>
 #include <axis.h>
 #include <layout.h>
-
+#include <moment.h>
                     /* undefined values trick !!!  MACHINE DEP  !!! */
 #ifdef SINGLEPREC
 #define NaN 0x7FFF
@@ -100,7 +101,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "layout=\n           Optional input layout file",
     "first=f\n           Layout first or last?",
     "readline=f\n        Interactively reading commands",
-    "VERSION=3.0\n	 20-dec-05 PJT",
+    "VERSION=3.0b\n	 20-dec-05 PJT",
     NULL
 };
 
@@ -564,6 +565,12 @@ void plot_data()
     plstop();
 }
 
+double my_sqrt(double x)
+{
+  if (x <= 0.0) return 0.0;
+  return sqrt(x);
+}
+
 /*
  *  REBIN_DATA:
  *
@@ -581,7 +588,7 @@ int n, nbin, np;
 real *x, *y, *xbin, *xp, *yp, *xps, *yps;
 {
     int    i, j, ip, iold=0, zbin=0;
-    real x0, x1, x2, y1, y2;
+    Moment mx, my;
 
     dprintf(0,"Rebinning...n=%d nbin=%d np=%d\n",n,nbin,np);
     
@@ -603,32 +610,26 @@ real *x, *y, *xbin, *xp, *yp, *xps, *yps;
       if (i>0) warning("%d points left of first bin",i);
     }
     for (ip=0; ip<nbin-1; ip++) {		/* for each bin, accumulate */
-        x0 = x1 = x2 = y1 = y2 = 0.0;       /* reset */
+	ini_moment(&mx, 2, 0);
+	ini_moment(&my, 2, 0);
 	dprintf(1,"ip=%d    %g : %g\n",ip,xbin[ip],xbin[ip+1]);
         while (i<n && xbin[ip] <= x[i] && x[i] < xbin[ip+1]) {    /* in this bin ? */
-            x0 += 1.0;
-            x1 += x[i];
-            x2 += sqr(x[i]);
-            y1 += y[i];
-            y2 += sqr(y[i]);
-            i++;
+	  accum_moment(&mx,x[i],1.0);
+	  accum_moment(&my,y[i],1.0);
+	  i++;
         }
-	dprintf(1,"i=%d x0=%g\n",i,x0);
-        if (x0 == 1.0) {
-            xp[ip] = x1;  xps[ip] = 0.0;
-            yp[ip] = y1;  yps[ip] = 0.0;
-        } else if (x0 > 1.0) {
-            xp[ip] = x1/x0;
-            yp[ip] = y1/x0;
-            xps[ip] = sqrt(x2/x0 - sqr(xp[ip]));
-            yps[ip] = sqrt(y2/x0 - sqr(yp[ip]));
-            if (Qmedian) {
-                xp[ip] = median(i-iold, &x[iold]);
-                yp[ip] = median(i-iold, &y[iold]);
-            }
+        if (n_moment(&mx) > 0) {
+	  xp[ip]  = mean_moment(&mx);
+	  xps[ip] = sigma_moment(&mx);
+	  yp[ip]  = mean_moment(&my);
+	  yps[ip] = sigma_moment(&my);
+	  if (Qmedian) {
+	    xp[ip] = median(i-iold, &x[iold]);
+	    yp[ip] = median(i-iold, &y[iold]);
+	  }
         } else
             zbin++;     /* count bins with no data */
-	if(Qtab && x0>0)    /* x0>0 : only print non-zero bins */
+	if(Qtab && n_moment(&mx))    /* only print non-zero bins */
             printf("%g %g %g %g %d\n",xp[ip],yp[ip],xps[ip],yps[ip],i-iold);
         iold = i;
     } /* for(ip) */
@@ -639,21 +640,19 @@ real *x, *y, *xbin, *xp, *yp, *xps, *yps;
 
     nbin = -nbin;       /* make it positive for fixed binning */
     for (i=0, ip=0; i<n;ip++) {       /* loop over all points */
-        x0 = x1 = x2 = y1 = y2 = 0.0;       /* reset accums */
-        for(j=0; j<nbin && i<n; j++, i++) {   /* accum the new bin */
-            x0 += 1.0;
-            x1 += x[i];
-            x2 += sqr(x[i]);
-            y1 += y[i];
-            y2 += sqr(y[i]);
-        }
-        xp[ip] = x1/x0;
-        yp[ip] = y1/x0;
-        xps[ip] = sqrt(x2/x0 - sqr(xp[ip]));
-        yps[ip] = sqrt(y2/x0 - sqr(yp[ip]));
-	if(Qtab)
-            printf("%g %g %g %g %d\n",xp[ip],yp[ip],xps[ip],yps[ip],i-iold);
-        iold = i;
+      ini_moment(&mx, 2, 0);
+      ini_moment(&my, 2, 0);
+      for(j=0; j<nbin && i<n; j++, i++) {   /* accum the new bin */
+	accum_moment(&mx,x[i],1.0);
+	accum_moment(&my,y[i],1.0);
+      }
+      xp[ip] = mean_moment(&mx);
+      yp[ip] = mean_moment(&my);
+      xps[ip] = sigma_moment(&mx);
+      yps[ip] = sigma_moment(&my);
+      if(Qtab)
+	printf("%g %g %g %g %d\n",xp[ip],yp[ip],xps[ip],yps[ip],i-iold);
+      iold = i;
     }
 }
 
