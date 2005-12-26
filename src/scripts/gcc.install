@@ -59,8 +59,8 @@ echo Building in `pwd`,
 echo reporting the status of 4 steps as we go along.. Be patient.
 echo Be sure to change your path and add $prefix/bin before your other path elements.
 
-if ($a:r:r == 3 && $fc != f77) echo "Warning: gcc3 should use fc=f77, not $fc"
-if ($a:r:r == 4 && $fc != f95) echo "Warning: gcc4 should use fc=f95, not $fc"
+if ($version:r:r == 3 && $fc != f77) echo "Warning: gcc3 should use fc=f77, not $fc"
+if ($version:r:r == 4 && $fc != f95) echo "Warning: gcc4 should use fc=f95, not $fc"
 
 ../configure --prefix=$prefix --enable-threads --enable-languages=c,c++,$fc >& build1.log
 echo status $status on build1.log
