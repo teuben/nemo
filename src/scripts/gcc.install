@@ -2,14 +2,19 @@
 #
 #  Install GCC for NEMO
 #
+#  For astromake, a more typical call would be:
+#  
+#  set version=4.0.2
+#  ..../gcc.install src=gcc-$version  prefix=$ASTROMAKE/opt/gcc/$version version=$version fc=f95
 # 
 
 if ($?NEMO == 0) set NEMO=`pwd`
 
-#			 	.. command line keywords ..
+#			 	.. command line keywords .. fc=f77 or f95
 set src=$NEMO/local/gcc
 set prefix=$NEMO/opt
 set version=3.3.5
+set fc=f77
 
 #				.. parse command line ..
 foreach arg ($*)
@@ -32,12 +37,16 @@ if (! -e $src) then
   echo " cd $NEMO/local"
   echo " wget $url"
   echo " tar jxf $file"
-  echo " ../src/scripts/gcc.install"
+  echo " ../src/scripts/gcc.install version=$version"
   echo ""
   echo "Known keywords to this script (and their current defaults):"
   echo "  set src=$src"
   echo "  set prefix=$prefix"
   echo "  set version=$version"
+  echo ""
+  echo "After this is all installed, the path needs to be changed:"
+  echo '  set path=($NEMO/opt/bin $path)'
+  echo '  rehash'
   exit 1
 endif
 
@@ -48,8 +57,11 @@ cd build
 
 echo Building in `pwd`, 
 echo reporting the status of 4 steps as we go along.. Be patient.
+echo Be sure to change your path and add $prefix/bin before your other path elements.
 
-../configure --prefix=$prefix --enable-threads --enable-languages=c,c++,f77 >& build1.log
+#   f77 -> fortran for gcc4 and up
+
+../configure --prefix=$prefix --enable-threads --enable-languages=c,c++,$fc >& build1.log
 echo status $status on build1.log
 
 make bootstrap   >& build2.log
