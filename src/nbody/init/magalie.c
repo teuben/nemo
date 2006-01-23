@@ -3,6 +3,7 @@
  *  <dark-ages> Original fortran code               Boily et al.
  *  21-mar-04   1.1 interface created in rainy Strasbourg           PJT/CB
  *  24-mar-04   1.2 added most primary keywords, at 37,000ft        PJT
+ *  23-jan-05   1.2a   fixed bulge mass encoding error     - courtesy J.J.Fleck
  *
  */
 
@@ -44,7 +45,7 @@ string defv[] = {
 
   "seed=0\n       Random seed",
   "cleanup=f\n    cleanup run directory after use (not used yet)",
-  "VERSION=1.2\n  24-mar-04 PJT",
+  "VERSION=1.2a\n 23-jan-05 PJT",
   NULL,
 };
 
@@ -105,7 +106,7 @@ void nemo_main(void)
   fprintf(datstr,"n               ! include gas self-gravity (in disc)? [y/n]\n");
   
   fprintf(datstr,"y               ! Add bulge?\n");
-  fprintf(datstr,"%g             !! Mass of bulge\n",getdparam("rbulge"));
+  fprintf(datstr,"%g             !! Mass of bulge\n",getdparam("mbulge"));
   fprintf(datstr,"%g             !! Bulge scale length (hernquist 'a')\n",getdparam("rbulge"));
   fprintf(datstr,"y               ! bulge self-gravity?\n");
   fprintf(datstr,"%d             !! N part in  bulge\n",nbulge);
