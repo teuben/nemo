@@ -51,6 +51,8 @@ string defv[] = {
 
 string usage="Boily et al. composite bulge-disk-halo model";
 
+string cvsid="$Id$";
+
 void goto_rundir(string name);
 void make_rundir(string name);
 void run_program(string cmd);
