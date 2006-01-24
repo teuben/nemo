@@ -1,0 +1,39 @@
+.TH MKGRID 1NEMO "26 January 2006"
+.SH NAME
+mkgr \- create a cube of equal massive stars equally spaced in space
+.SH SYNOPSIS
+\fBmkgrid\fP \fBout=\fP\fIsnapshot\fP [parameter=value]
+.SH DESCRIPTION
+\fBmkgrid\fP generates a distribution of particles in a cube on a
+regular lattice.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBout=\fP
+Output file name, in \fIsnapshot(5NEMO)\fP format. 
+No default.
+.TP
+\fBngrid=\fP
+Number of particles per axis [Default: \fB2\fP].
+.TP
+\fBsize=\fP
+Size of cube. 
+[Default: \fB1\fP].
+.TP
+\fBzerocm=t|f\fP
+Center c.o.m. ? 
+[Default: \fBt\fP].
+.TP
+\fBheadline=\fP
+Text headline for output    
+Default: none.
+.SH SEE ALSO
+mkcube(1NEMO), mkplummer(1NEMO), snapshot(5NEMO)
+.SH AUTHOR
+J.J. Fleck
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+20-dec-05	created		JJF
+.fi
