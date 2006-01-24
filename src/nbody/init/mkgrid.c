@@ -16,15 +16,18 @@
 
 string defv[] = {	/* DEFAULT INPUT PARAMETERS */
     "out=???\n      Output file name",
-    "ngrid=2\n      Number of points on one axe of the grid",
+    "ngrid=2\n      Number of points on one axis of the grid",
     "size=1.0\n     Size of cube",
     "zerocm=f\n     Center c.o.m. ?",
     "headline=\n    Text headline for output",
-    "VERSION=1.0\n  20-dec-05 JJF",
+    "VERSION=1.0a\n 24-jan-06 JJF",
     NULL,
 };
 
 string usage = "create a cube of equal massive stars equally spaced in space";
+
+string cvsid="$Id$";
+
 
 local real rmin, rmax;
 local bool zerocm;
@@ -80,12 +83,12 @@ mkgrid()
 
     btab = (Body *) allocate(nbody * sizeof(Body));
     mass_i = 2.0/nbody;
-	j=0; k=0; l=0; 
+    j = k = l = 0; 
     delta = (rmax-rmin)/(ngrid-1) ;
     for (bp=btab, i = 0; i < nbody; bp++, i++) {
-		Mass(bp) = mass_i;
+                Mass(bp) = mass_i;
 		Phase(bp)[0][0] =  rmin + j* delta;
-		Phase(bp)[0][1] =  rmin + k* delta;
+cvsid		Phase(bp)[0][1] =  rmin + k* delta;
 		Phase(bp)[0][2] =  rmin + l* delta;
 		Phase(bp)[1][0] =  0.0;
 		Phase(bp)[1][1] =  0.0;
