@@ -30,6 +30,7 @@
  *  28-jan-04       c: recognize nan or NaN and return same         pjt
  *   6-jan-05   V1.10:  added the repeat nemorinpX routines         pjt
  *   5-may-05       a: add newline                                  pjt
+ *   5-feb-06       b: also recognize -nan or -NaN ....             pjt
  *
  * TODO:  how to handle largest and smallest number (old style MIN/MAXLOG 38)
  */
@@ -359,7 +360,9 @@ double natof(char *expr)
 {
   double x;
   int n;
-  if (streq(expr,"nan") || streq(expr,"NaN")) return atof("nan");
+  if (streq(expr, "nan") || streq(expr, "NaN") || streq(expr,"-nan") || streq(expr,"-NaN"))
+    return atof("nan");
+
   n = nemoinpd(expr,&x,1);
   return x;
 }
@@ -384,13 +387,14 @@ string defv[] = {
     "seed=0\n		Seed for xrandom",
     "atof=\n            test (n)atof single value expression",
     "dms=f\n            Use D:M:S.SS parsing instead of regular",
-    "VERSION=1.10a\n	5-may-05 PJT",
+    "VERSION=1.10b\n	5-feb-06 PJT",
     NULL,
 };
 
 
 string usage = "expression parser and evaluator; also does lists";
 
+string cvsid="$Id$";
 
 void nemo_main(void)
 {
