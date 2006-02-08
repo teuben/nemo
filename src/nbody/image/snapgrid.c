@@ -72,6 +72,8 @@ string defv[] = {		/* keywords/default values/help */
 };
 
 string usage="grid a snapshot into a 2/3D image-cube";
+
+string cvsid="$Id$";
 
 #define HUGE      1.0e20        /* don't use INF, ccdfits writes bad headers */
 #define TIMEFUZZ  0.000001
@@ -223,7 +225,11 @@ void setparams()
     Qstack = getbparam("stack");
     Qint = getbparam("integrate");
 
-    if (Qint) warning("new version with integrate=t, only for MWP");
+    if (Qint) {
+      warning("new version with integrate=t, only for MWP");
+      warning("only use moment=0 stack=f mean=f etc.");
+    }
+
       
     nx = getiparam("nx");
     ny = getiparam("ny");
