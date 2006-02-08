@@ -1,4 +1,4 @@
-.TH SNAPGRID 1NEMO "8 May 2004"
+.TH SNAPGRID 1NEMO "7 February 2006"
 .SH NAME
 snapgrid \- grid a snapshot into a 2D or 3D image (cube)
 .SH SYNOPSIS
@@ -26,7 +26,7 @@ input file, must be in \fIsnapshot(5NEMO)\fP format. Multiple snapshots can
 be stacked uses the \fBtimes=\fP keyword: see \fBstack\fP below.  [no default].
 .TP
 \fBout=\fIout-file\fP
-output file, will be in \fIImage(5NEMO)\fP format [no default].
+output file, will be in \fIimage(5NEMO)\fP format [no default].
 .TP
 \fBtimes=\fP\fIt1:t2,t3,..\fP
 Selection of the times of snapshots to be selected for gridding.
@@ -55,21 +55,21 @@ The value of \fIy-expression\fP is gridded along the Y axis.
 .TP
 \fBzvar\*e\fP\fIz-expression\fP
 The value of \fIz-expression\fP is gridded along the Z axis (\fBnz\fP>1), 
-or moments taken off (\fBnz=1\fP). [default: \fBz\fP].
+or moments taken off (\fBnz=1\fP). [default: \fB-vz\fP].
 .TP
-\fBevar=\fIemisivity\fP
+\fBevar=\fIemissivity\fP
 Variable to denote emissivity per particle. You can select more than 1
-expressions, in which case different images will be written out
+expression, in which case different images will be written out
 (only in \fBstack=f\fP mode)
 [default: \fBm\fP].
 .TP
-\fBtvar=\fIemisivity\fP
+\fBtvar=\fItau\fP
 Variable to denote the optical depth of a particle. [Default: 0]
 .TP
-\fBdvar=\fIemisivity\fP
+\fBdvar=\fIdepth\fP
 Variable to denote the line of sight. [Default: z]
 .TP
-\fBsvar=\fIemisivity\fP
+\fBsvar=\fIsmoothing\fP
 Variable to denote gaussian smoothing 
 .TP
 \fBnx=\fIx-pixels\fP
@@ -112,6 +112,15 @@ to compare images of different cell sizes.
 \fBstack=t|f\fP
 Should all snapshots from the input file be stacked, or write one
 image per selected (see \fBtimes=\fP) time? [default: \fBf\fP].
+.TP
+\fBintegrate=t|f\fP
+If selected, instead of summing points along the \fIzvar\fP, they
+are sorted and integrated along \fIdvar\fP. This is appropriate
+when emission represents something like a density, instead of a mass,
+and a total column density is needed. 
+** This option can only compute 2D moment=0 maps 
+and also cannot handle stacked snapshots yet **
+[default: \fBf\fP].
 .TP
 \fBproj=\fP
 If a valid projection type (SIN, TAN, ARC, NCP, GLS, MER, AIT)
@@ -201,7 +210,7 @@ snapshot and the image.
 Sky projections do not guarantee flux conservation. 
 .SH "SEE ALSO"
 snaprotate(1NEMO), snapslit(1NEMO), snapsmooth(1NEMO), snapaxsym(1NEMO), wcs(1NEMO),
-tsf(1NEMO), snapccd(1NEMO), ccdintpol(1NEMO)
+tsf(1NEMO), snapccd(1NEMO), ccdintpol(1NEMO), image(5NEMO)
 .PP
 http://www.iinet.com.au/~watson/nngridr.html
 .PP
@@ -225,4 +234,5 @@ src/nbody/image  	snapgrid.c
 30-jul-93	V4.0: allow multiple  evar's - default is now stack=f	PJT
 18-jun-98	V4.4: added xlab/ylab/zlab and allow range[0]>range[1]	PJT
 8-may-04	V5.0: added proj= to optionallaly allow sky projections	PJT
+7-feb-06	V5.1: added integrate=t to deal with 3D density points	PJT
 .fi
