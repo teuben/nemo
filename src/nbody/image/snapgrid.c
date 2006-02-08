@@ -25,6 +25,7 @@
  *      30-jul-98      a  fixed gridding bug introduced in 4.4
  *       7-oct-02      c  atof -> natof
  *       7-may-04   5.0 sky projections using proj= and new Image(5NEMO) format
+ *       7-feb-06   5.1 compact= option to compact the 3rd axis on the fly (ccdmom-like)
  *
  * Todo: - mean=t may not be correct for nz>1 
  */
@@ -64,8 +65,9 @@ string defv[] = {		/* keywords/default values/help */
 	"moment=0\n			  moment in zvar (-2,-1,0,1,2...)",
 	"mean=f\n			  mean (moment=0) or sum per cell",
 	"stack=f\n			  Stack all selected snapshots?",
+	"integrate=f\n                    Sum or Integrate along 'dvar'?",
 	"proj=\n                          Sky projection (SIN, TAN, ARC, NCP, GLS, MER, AIT)",
-	"VERSION=5.0b\n			  11-may-04 PJT",
+	"VERSION=5.1\n			  7-feb-06 PJT",
 	NULL,
 };
 
@@ -105,9 +107,10 @@ local real   zsig;			/* positive if convolution in Z used */
 local real   zmin, zmax;
 
 local bool   Qmean;			/* adding or taking mean for image ?? */
-local bool   Qstack;                  /* stacking snapshots ?? */
-local bool   Qdepth;                  /* need dfunc/tfunc for depth integration */
-local bool   Qsmooth;                 /* (variable) smoothing */
+local bool   Qint;                      /* integrate, instead of sum, along the 3rd dimension */
+local bool   Qstack;                    /* stacking snapshots ?? */
+local bool   Qdepth;                    /* need dfunc/tfunc for depth integration */
+local bool   Qsmooth;                   /* (variable) smoothing */
 
 local bool   Qwcs;                      /* use a real astronomical WCS in "fits" degrees */
 local string proj;         
@@ -140,8 +143,8 @@ nemo_main ()
     compfuncs();                /* get expression functions */
     allocate_image();		/* make space for image(s) */
     if (Qstack) clear_image();	/* clear the images */
-    if (Qstack && Qdepth)
-        warning("memory intensive mode  (stacking and absorbing)");
+    if (Qstack && Qdepth) 
+      error("stack=t and depth analysis cannot be used together, use snapmerge first");
     while (read_snap())	{                   /* read next N-body snapshot */
         for (i=0; i<nvar; i++) {
             if (!Qstack) {
@@ -218,6 +221,9 @@ void setparams()
     times = getparam("times");
     Qmean = getbparam("mean");
     Qstack = getbparam("stack");
+    Qint = getbparam("integrate");
+
+    if (Qint) warning("new version with integrate=t, only for MWP");
       
     nx = getiparam("nx");
     ny = getiparam("ny");
@@ -321,7 +327,7 @@ void compfuncs()
     for (i=0; i<nvar; i++)
         efunc[i] = btrtrans(evar[i]);
     Qdepth = !streq(tvar,"0");
-    if (Qdepth) {
+    if (Qdepth || Qint) {
         dfunc = btrtrans(dvar);
         tfunc = btrtrans(tvar);
     }
@@ -431,19 +437,20 @@ clear_image()
 
 
 typedef struct point {
-    real em, ab, z, depth;          /* emit, absorb, moment var, depth var */
-    struct point *next, *last;      /* pointers to aid */
+  real em, ab, z, depth;          /* emit, absorb, moment var, depth var */
+  int i;                          /* particle id */
+  struct point *next, *last;      /* pointers to aid */
 } Point;
 
 #define AddIndex(i,j,em,ab,z)  /**/
 
 local Point **map =NULL;
 
-local int pcomp(Point *a, Point *b);
+local int pcomp(Point **a, Point **b);
 
 bin_data(int ivar)
 {
-    real brightness, cell_factor, x, y, z, z0, t;
+    real brightness, cell_factor, x, y, z, z0, t,sum;
     real expfac, fac, sfac, flux, b, emtau, depth;
     real e, emax, twosqs;
     int    i, j, k, ix, iy, iz, n, nneg, ioff;
@@ -452,7 +459,8 @@ bin_data(int ivar)
     Point  *pp, *pf,*pl, **ptab;
     bool   done;
     
-    if (Qdepth) {
+    if (Qdepth || Qint) {
+      /* first time around allocate a map[] of pointers to Point's */
         if (map==NULL)
             map = (Point **) allocate(Nx(iptr)*Ny(iptr)*sizeof(Point *));
         if (map==NULL || !Qstack) {
@@ -466,6 +474,10 @@ bin_data(int ivar)
         cell_factor = 1.0;
     else
         cell_factor = 1.0 / ABS(Dx(iptr)*Dy(iptr));
+
+    if (Qint)
+        cell_factor = 1.0;   
+
     nbody += nobj;
     if (Qsmooth) 
         mmax = MAX(Nx(iptr),Ny(iptr));
@@ -473,17 +485,17 @@ bin_data(int ivar)
         mmax = 1;
     emax = 10.0;
 
-		/* walk through all particles and accumulate ccd data */
+		/* big loop: walk through all particles and accumulate ccd data */
     for (i=0, bp=btab; i<nobj; i++, bp++) {
         x = xfunc(bp,tnow,i);            /* transform */
 	y = yfunc(bp,tnow,i);
 	if (Qwcs) wcs(&x,&y);            /* convert to an astronomical WCS, if requested */
         z = zfunc(bp,tnow,i);
         flux = efunc[ivar](bp,tnow,i);
-        if (Qdepth) {
+        if (Qdepth || Qint) {
             emtau = odepth( tfunc(bp,tnow,i) );
             depth = dfunc(bp,tnow,i);
-        }
+	}
         if (Qsmooth) {
             twosqs = sfunc(bp,tnow,i);
             twosqs = 2.0 * sqr(twosqs);
@@ -506,9 +518,8 @@ bin_data(int ivar)
             continue;
         }
 
-      	dprintf(1,"%d @ (%d,%d) from (%g,%g)\n",
+      	dprintf(4,"%d @ (%d,%d) from (%g,%g)\n",
       	        i+1,ix0,iy0,x,y);
-
 
         for (m=0; m<mmax; m++) {        /* loop over smoothing area */
             done = TRUE;
@@ -538,13 +549,15 @@ bin_data(int ivar)
         	for (k=0; k<ABS(moment); k++) brightness *= z;  /* moments in Z */
                 if (brightness == 0.0) continue;
 
-                if (Qdepth) {		/* stack away relevant particle info */
+                if (Qdepth || Qint) {	   /* stack away relevant particle info */
                     pp = (Point *) allocate(sizeof(Point));
                     pp->em = brightness;
                     pp->ab = emtau;
                     pp->z  = z;
+		    pp->i  = i;
+		    pp->depth = depth;
                     pp->next = NULL;
-                    ioff = ix + Nx(iptr)*iy;
+                    ioff = ix + Nx(iptr)*iy; /* location in grid map[] */
                     pf = map[ioff];
                     if (pf==NULL) {
                         map[ioff] = pp;
@@ -582,28 +595,64 @@ bin_data(int ivar)
         } /* m */
     }  /*-- end particles loop --*/
 
-    if (Qdepth) {
-        /* accumulate */
-        for (i=0; i<Nx(iptr)*Ny(iptr); i++) {
+    if (Qdepth || Qint) {
+
+        /* a hack, need to fix checking before we do this */
+        if (iptr0) {
+	  iptr0 = 0; warning("iptr0 not 0, conflicting args");
+	}
+	if (iptr1) {
+	  iptr1 = 0; warning("iptr1 not 0, conflicting args");
+	}
+	if (iptr2) {
+	  iptr2 = 0; warning("iptr2 not 0, conflicting args");
+	}
+
+	/* for (i=0; i<Nx(iptr)*Ny(iptr); i++)  */
+	/* accumulate */
+	for (iy=0, i=0; iy<ny; iy++) 
+	  for (ix=0; ix<nx; ix++,i++) {
 	    if (map[i]==NULL) continue;
+	    dprintf(1,"Id's along z:");
 
 	    n=1;                    /* count number along line of sight */
 	    pp = map[i];
+	    dprintf(1," %d (%g)",pp->i,pp->depth);
 	    while (pp->next) {
 	        n++;
 	        pp = pp->next;
+	        dprintf(1," %d (%g)",pp->i,pp->depth);
 	    }
+	    dprintf(1,"\n");
+	    dprintf(1,"cell %d: %d\n",i,n);
 
+	    
             ptab = (Point **) allocate (n * sizeof(Point *));
             
-            n=0;
+            n=1;
             pp = ptab[0] = map[i];
             while (pp->next) {
                 ptab[n++] = pp->next;
                 pp = pp->next;
             }
+	    dprintf(1,"cell %d: %d\n",i,n);
+
+	    /* sort the particles by decreasing 'depth' */
             qsort(ptab, n, sizeof(Point *), pcomp);
+	    
+
+	    for(j=0; j<n; j++)
+	      dprintf(1,"depth(%d) = %d (%g)\n",j,ptab[j]->i,ptab[j]->depth);
+
+
+	    sum = 0.0;
+	    for (j=1; j<n; j++) {
+	      sum += 0.5*(ptab[j]->em + ptab[j-1]->em)*(ptab[j]->depth - ptab[j-1]->depth);
+	    }
+	    dprintf(1,"sum=%g\n",sum);
+	    CubeValue(iptr,ix,iy,0) = sum;
         }
+#if 1
         if (!Qstack) {          /* free the chain of visible particles */
             for (i=0; i<Nx(iptr)*Ny(iptr); i++) {
                 pf = map[i];
@@ -614,13 +663,14 @@ bin_data(int ivar)
                     pf = pp;
                 }
             }
-        }
+	}
+#endif
     }
 }
 
-int pcomp(Point *a, Point *b)
+int pcomp(Point **a, Point **b)
 {
-    return a->depth < b->depth;
+  return (*a)->depth > (*b)->depth;
 }
 
 free_snap()
@@ -634,6 +684,7 @@ rescale_data(int ivar)
     real m_min, m_max, brightness, total, x, y, z, b;
     int    i, j, k, ix, iy, iz, nneg, ndata;
 
+    dprintf(1,"rescale(%d)\n",ivar);
     m_max = -HUGE;
     m_min = HUGE;
     total = 0.0;
@@ -645,6 +696,7 @@ rescale_data(int ivar)
     
     /* handle special cases when mean=t or moment=-1 or moment=-2 */
     if (iptr2) {                    /* moment = -2 : dispersion output */
+        dprintf(1,"rescale(%d) iptr2\n",ivar);
         nneg=0;
         for (ix=0; ix<nx; ix++)         /* loop over whole cube */
         for (iy=0; iy<ny; iy++)
@@ -659,6 +711,7 @@ rescale_data(int ivar)
         }
         if(nneg>0) warning("%d pixels with sig^2<0",nneg);
     } else if(iptr1) {
+        dprintf(1,"rescale(%d) iptr1\n",ivar);
         for (ix=0; ix<nx; ix++)         /* loop over whole cube */
         for (iy=0; iy<ny; iy++)
         for (iz=0; iz<nz; iz++) {
@@ -666,6 +719,7 @@ rescale_data(int ivar)
             CV(iptr) /= CV(iptr1);
         }
     } else if(iptr0) {
+        dprintf(1,"rescale(%d) iptr0\n",ivar);
         for (ix=0; ix<nx; ix++)         /* loop over whole cube */
         for (iy=0; iy<ny; iy++)
         for (iz=0; iz<nz; iz++) {
