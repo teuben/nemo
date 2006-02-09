@@ -25,7 +25,8 @@
  *      30-jul-98      a  fixed gridding bug introduced in 4.4
  *       7-oct-02      c  atof -> natof
  *       7-may-04   5.0 sky projections using proj= and new Image(5NEMO) format
- *       7-feb-06   5.1 compact= option to compact the 3rd axis on the fly (ccdmom-like)
+ *       7-feb-06   5.1 integrate= option to compact the 3rd axis on the fly (ccdmom-like)
+ *       9-feb-06   5.2 make it work for stack=t
  *
  * Todo: - mean=t may not be correct for nz>1 
  */
@@ -67,7 +68,7 @@ string defv[] = {		/* keywords/default values/help */
 	"stack=f\n			  Stack all selected snapshots?",
 	"integrate=f\n                    Sum or Integrate along 'dvar'?",
 	"proj=\n                          Sky projection (SIN, TAN, ARC, NCP, GLS, MER, AIT)",
-	"VERSION=5.1\n			  7-feb-06 PJT",
+	"VERSION=5.2\n			  9-feb-06 PJT",
 	NULL,
 };
 
@@ -129,6 +130,7 @@ local int allocate_image(void);
 local int clear_image(void);
 local int bin_data(int ivar);
 local int free_snap(void);
+local void los_data(void);
 local int rescale_data(int ivar);
 local int xbox(real x);
 local int ybox(real y);
@@ -155,16 +157,20 @@ nemo_main ()
 	    }
             bin_data(i);	            /* bin and accumulate */
             if (!Qstack) {                  /* if multiple images: */
-                rescale_data(i);            /* rescale */
-                write_image(outstr,iptr);   /* and write them out */
-                if (i==0) reset_history();  /* clean history */
+	      if (Qdepth||Qint)
+		los_data();
+	      rescale_data(i);            /* rescale */
+	      write_image(outstr,iptr);   /* and write them out */
+	      if (i==0) reset_history();  /* clean history */
             }
         }
         free_snap();
     }
     if (Qstack) {
-        rescale_data(0);                    /* and rescale before ... */
-        write_image (outstr,iptr);	    /* write the image */
+      if (Qdepth||Qint)
+	los_data();
+      rescale_data(0);                    /* and rescale before ... */
+      write_image (outstr,iptr);	    /* write the image */
     }
 
     strclose(instr);
@@ -600,78 +606,90 @@ bin_data(int ivar)
             if (done) break;
         } /* m */
     }  /*-- end particles loop --*/
+}
 
-    if (Qdepth || Qint) {
 
-        /* a hack, need to fix checking before we do this */
-        if (iptr0) {
-	  iptr0 = 0; warning("iptr0 not 0, conflicting args");
-	}
-	if (iptr1) {
-	  iptr1 = 0; warning("iptr1 not 0, conflicting args");
-	}
-	if (iptr2) {
-	  iptr2 = 0; warning("iptr2 not 0, conflicting args");
-	}
+void los_data(void)
+{
+  real brightness, cell_factor, x, y, z, z0, t,sum;
+  real expfac, fac, sfac, flux, b, emtau, depth;
+  real e, emax, twosqs;
+  int    i, j, k, ix, iy, iz, n, nneg, ioff;
+  int    ix0, iy0, ix1, iy1, m, mmax;
+  Body   *bp;
+  Point  *pp, *pf,*pl, **ptab;
+  bool   done;
 
-	/* for (i=0; i<Nx(iptr)*Ny(iptr); i++)  */
-	/* accumulate */
-	for (iy=0, i=0; iy<ny; iy++) 
-	  for (ix=0; ix<nx; ix++,i++) {
-	    if (map[i]==NULL) continue;
-	    dprintf(1,"Id's along z:");
-
-	    n=1;                    /* count number along line of sight */
-	    pp = map[i];
-	    dprintf(1," %d (%g)",pp->i,pp->depth);
-	    while (pp->next) {
-	        n++;
-	        pp = pp->next;
-	        dprintf(1," %d (%g)",pp->i,pp->depth);
-	    }
-	    dprintf(1,"\n");
-	    dprintf(1,"cell %d: %d\n",i,n);
-
-	    
-            ptab = (Point **) allocate (n * sizeof(Point *));
-            
-            n=1;
-            pp = ptab[0] = map[i];
-            while (pp->next) {
-                ptab[n++] = pp->next;
-                pp = pp->next;
-            }
-	    dprintf(1,"cell %d: %d\n",i,n);
-
-	    /* sort the particles by decreasing 'depth' */
-            qsort(ptab, n, sizeof(Point *), pcomp);
-	    
-
-	    for(j=0; j<n; j++)
-	      dprintf(1,"depth(%d) = %d (%g)\n",j,ptab[j]->i,ptab[j]->depth);
-
-
-	    sum = 0.0;
-	    for (j=1; j<n; j++) {
-	      sum += 0.5*(ptab[j]->em + ptab[j-1]->em)*(ptab[j]->depth - ptab[j-1]->depth);
-	    }
-	    dprintf(1,"sum=%g\n",sum);
-	    CubeValue(iptr,ix,iy,0) = sum;
-        }
-#if 1
-        if (!Qstack) {          /* free the chain of visible particles */
-            for (i=0; i<Nx(iptr)*Ny(iptr); i++) {
-                pf = map[i];
-                if (pf==NULL) continue;
-                while(pf->next) {
-                    pp = pf->next;
-                    free(pf);
-                    pf = pp;
-                }
-            }
-	}
-#endif
+  if (Qdepth || Qint) {
+    
+    /* a hack, need to fix checking before we do this */
+    if (iptr0) {
+      iptr0 = 0; warning("iptr0 not 0, conflicting args");
     }
+    if (iptr1) {
+      iptr1 = 0; warning("iptr1 not 0, conflicting args");
+    }
+    if (iptr2) {
+      iptr2 = 0; warning("iptr2 not 0, conflicting args");
+    }
+    
+    /* for (i=0; i<Nx(iptr)*Ny(iptr); i++)  */
+    /* accumulate */
+    for (iy=0, i=0; iy<ny; iy++) 
+      for (ix=0; ix<nx; ix++,i++) {
+	if (map[i]==NULL) continue;
+	dprintf(1,"Id's along z:");
+	
+	n=1;                    /* count number along line of sight */
+	pp = map[i];
+	dprintf(1," %d (%g)",pp->i,pp->depth);
+	while (pp->next) {
+	  n++;
+	  pp = pp->next;
+	  dprintf(1," %d (%g)",pp->i,pp->depth);
+	}
+	dprintf(1,"\n");
+	dprintf(1,"cell %d: %d\n",i,n);
+	
+	
+	/* allocate a huge array of pointers that we can mess (sort) with */
+	ptab = (Point **) allocate (n * sizeof(Point *));
+        
+	n=1;
+	pp = ptab[0] = map[i];
+	while (pp->next) {
+	  ptab[n++] = pp->next;
+	  pp = pp->next;
+	}
+	dprintf(1,"cell %d: %d\n",i,n);
+	
+	/* sort the particles by decreasing 'depth' */
+	qsort(ptab, n, sizeof(Point *), pcomp);
+	
+	
+	for(j=0; j<n; j++)
+	  dprintf(1,"depth(%d) = %d (%g)\n",j,ptab[j]->i,ptab[j]->depth);
+	
+	
+	sum = 0.0;
+	for (j=1; j<n; j++) {
+	  sum += 0.5*(ptab[j]->em + ptab[j-1]->em)*(ptab[j]->depth - ptab[j-1]->depth);
+	}
+	dprintf(1,"sum=%g\n",sum);
+	CubeValue(iptr,ix,iy,0) = sum;
+      }
+    if (!Qstack) {          /* free the chain of visible particles */
+      for (i=0; i<Nx(iptr)*Ny(iptr); i++) {
+	pf = map[i];
+	if (pf==NULL) continue;
+	while(pf->next) {
+	  pp = pf->next;
+	  free(pf);
+	  pf = pp;
+	}
+      }
+    }
+  }
 }
 
 int pcomp(Point **a, Point **b)
