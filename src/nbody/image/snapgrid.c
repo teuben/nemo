@@ -68,7 +68,7 @@ string defv[] = {		/* keywords/default values/help */
 	"stack=f\n			  Stack all selected snapshots?",
 	"integrate=f\n                    Sum or Integrate along 'dvar'?",
 	"proj=\n                          Sky projection (SIN, TAN, ARC, NCP, GLS, MER, AIT)",
-	"VERSION=5.2\n			  9-feb-06 PJT",
+	"VERSION=5.2a\n			  9-feb-06 PJT",
 	NULL,
 };
 
@@ -611,7 +611,7 @@ bin_data(int ivar)
 
 void los_data(void)
 {
-  real brightness, cell_factor, x, y, z, z0, t,sum;
+  real brightness, cell_factor, x, y, z, z0, t, dz, sum;
   real expfac, fac, sfac, flux, b, emtau, depth;
   real e, emax, twosqs;
   int    i, j, k, ix, iy, iz, n, nneg, ioff;
@@ -619,6 +619,7 @@ void los_data(void)
   Body   *bp;
   Point  *pp, *pf,*pl, **ptab;
   bool   done;
+  int    nzero = 0, none = 0;
 
   if (Qdepth || Qint) {
     
@@ -635,9 +636,12 @@ void los_data(void)
     
     /* for (i=0; i<Nx(iptr)*Ny(iptr); i++)  */
     /* accumulate */
-    for (iy=0, i=0; iy<ny; iy++) 
+    for (iy=0, i=0; iy<ny; iy++) {
       for (ix=0; ix<nx; ix++,i++) {
-	if (map[i]==NULL) continue;
+	if (map[i]==NULL) {
+	  nzero++;
+	  continue;
+	}
 	dprintf(1,"Id's along z:");
 	
 	n=1;                    /* count number along line of sight */
@@ -650,7 +654,11 @@ void los_data(void)
 	}
 	dprintf(1,"\n");
 	dprintf(1,"cell %d: %d\n",i,n);
-	
+
+	if (n == 1) {
+	  none++;
+	  continue;
+	}
 	
 	/* allocate a huge array of pointers that we can mess (sort) with */
 	ptab = (Point **) allocate (n * sizeof(Point *));
@@ -661,11 +669,9 @@ void los_data(void)
 	  ptab[n++] = pp->next;
 	  pp = pp->next;
 	}
-	dprintf(1,"cell %d: %d\n",i,n);
-	
+
 	/* sort the particles by decreasing 'depth' */
 	qsort(ptab, n, sizeof(Point *), pcomp);
-	
 	
 	for(j=0; j<n; j++)
 	  dprintf(1,"depth(%d) = %d (%g)\n",j,ptab[j]->i,ptab[j]->depth);
@@ -673,11 +679,14 @@ void los_data(void)
 	
 	sum = 0.0;
 	for (j=1; j<n; j++) {
-	  sum += 0.5*(ptab[j]->em + ptab[j-1]->em)*(ptab[j]->depth - ptab[j-1]->depth);
+	  dz = ptab[j]->depth - ptab[j-1]->depth;
+	  if (dz == 0.0) continue;
+	  sum += 0.5*(ptab[j]->em + ptab[j-1]->em) * dz;
 	}
 	dprintf(1,"sum=%g\n",sum);
 	CubeValue(iptr,ix,iy,0) = sum;
-      }
+      } /* ix */
+    } /* iy */
     if (!Qstack) {          /* free the chain of visible particles */
       for (i=0; i<Nx(iptr)*Ny(iptr); i++) {
 	pf = map[i];
@@ -687,9 +696,14 @@ void los_data(void)
 	  free(pf);
 	  pf = pp;
 	}
-      }
+      } /* i */
     }
   }
+  if (nzero)
+    warning("%d pixels with no emission to integrate",nzero);
+  if (none)
+    warning("%d pixels with only 1 sample, set to 0, not enough to integrate",none);
+    
 }
 
 int pcomp(Point **a, Point **b)
