@@ -1,10 +1,11 @@
 
 /*
  * simple multi-dimensional arrays 
- * (real = double or float, depending on the setting in NEMO 
+ * (real = double or float, depending on the setting in NEMO)
  *
  * MDMAXDIM: maximum number of dimensions we support here;
  * it's hardcoded.
+ *
  */
 
 #define MDMAXDIM   7
@@ -16,7 +17,6 @@ typedef mdarray3    *mdarray4;    /* v4[n4][n3][n2][n1]              */
 typedef mdarray4    *mdarray5;    /* v5[n5][n4][n3][n2][n1]          */
 typedef mdarray5    *mdarray6;    /* v6[n6][n5][n4][n3][n2][n1]      */
 typedef mdarray6    *mdarray7;    /* v7[n7][n6][n5][n4][n3][n2][n1]  */
-
 
 mdarray1 allocate_mdarray1(int n1);
 mdarray2 allocate_mdarray2(int n2, int n1);
