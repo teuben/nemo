@@ -8,11 +8,13 @@
  *                        default seed is now 0
  *	29-mar-97   V1.3a usage, SINGLEPREC		pjt
  *       9-sep-01       b gsl/xrandom
+ *      19-feb-06    1.4  mdarray                       pjt
  */
 
 #include <stdinc.h>
 #include <getparam.h>
 #include <filestruct.h>
+#include <mdarray.h>
 
 #include <snapshot/snapshot.h>
 
@@ -23,11 +25,13 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "m=-1\n			  angular momentum exponent ",
     "seed=0\n			  seed for random numbers ",
     "headline=\n		  verbiage for output ",
-    "VERSION=1.3a\n		  29-mar-97 PJT",
+    "VERSION=1.4\n		  19-feb-06 PJT",
     NULL,
 };
 
 string usage="N-body realization of one of Henon's generalized polytropes";
+
+string cvsid="$Id$";
 
 local string headline;		/* random text message */
 
@@ -42,13 +46,9 @@ local real mval;			/* angmom index:  -1 <= mval <= inf. */
  * The generated N-body model is stored in the following:
  */
 
-#ifndef MOBJ
-#  define MOBJ 4096
-#endif
-
 local int nobj;			/* number of particles */
-local real mass[MOBJ];		/* masses of particles generated */
-local real phase[MOBJ][6];		/* phase-space coordinates of particles */
+local real *mass;		/* masses of particles generated */
+local mdarray2 phase;		/* phase-space coordinates of particles */
 
 extern double xrandom(double, double);
 
@@ -59,7 +59,8 @@ nemo_main()
     string oname;		/* files for model, output */
 
     nobj = getiparam("nbody");
-    if (nobj > MOBJ) error("nbody=%d out of range (%d max)", nobj, MOBJ);
+    mass = (real *) allocate(nobj*sizeof(real));
+    phase = allocate_mdarray2(nobj,6);
     init_xrandom(getparam("seed"));
     nval = getdparam("n");
     mval = getdparam("m");
@@ -90,11 +91,10 @@ polymod0()
 	    phase[i][j+3] = vi * phase[i][j] / ri;
 	mass[i] = 1.0 / nobj;			/*   total mass M is unity */
     }
-    zerocms(phase, 6, mass, nobj, nobj);
+    zerocms(phase[0], 6, mass, nobj, nobj);
 }
 
-writesnap(name)
-string name;
+writesnap(string name)
 {
     stream outstr;
     int coord = CSCode(Cartesian, 3, 2);
@@ -106,13 +106,13 @@ string name;
     put_set(outstr, SnapShotTag);
     put_set(outstr, ParametersTag);
     put_data(outstr, NobjTag, IntType, &nobj, 0),
-    put_data(outstr, "nval", FloatType, &nval, 0),
-    put_data(outstr, "mval", FloatType, &mval, 0),
+    put_data(outstr, "nval", RealType, &nval, 0),
+    put_data(outstr, "mval", RealType, &mval, 0),
     put_tes(outstr, ParametersTag);
     put_set(outstr, ParticlesTag);
     put_data(outstr, CoordSystemTag, IntType, &coord, 0);
-    put_data(outstr, MassTag, FloatType, mass, nobj, 0);
-    put_data(outstr, PhaseSpaceTag, FloatType, phase, nobj, 2, 3, 0),
+    put_data(outstr, MassTag, RealType, mass, nobj, 0);
+    put_data(outstr, PhaseSpaceTag, RealType, phase[0], nobj, 2, 3, 0),
     put_tes(outstr, ParticlesTag);
     put_tes(outstr, SnapShotTag);
     strclose(outstr);
