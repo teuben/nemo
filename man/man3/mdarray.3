@@ -1,6 +1,6 @@
-.TH MDARRAY 3NEMO "6 May 2003"
+.TH MDARRAY 3NEMO "19 February 2006"
 .SH NAME
-mdarray - simple multi-dimensional array allocators (C style)
+mdarray - simple multi-dimensional (C style) array allocators with sequential memory 
 .SH SYNOPSIS
 .nf
 .B
@@ -11,7 +11,7 @@ mdarray - simple multi-dimensional array allocators (C style)
 .B typedef real     *mdarray1;   /* vector */
 .B typedef mdarray1 *mdarray2;   /* matrix */
 .B typedef mdarray2 *mdarray3;   /* tensor */
-.B typedef mdarray3 *mdarray4;   /* hyper tensor ?? */
+.B typedef mdarray3 *mdarray4;   /* hyper tensor */
 .B ...
 .PP
 .B mdarray1 allocate_mdarray1(n1)
@@ -28,7 +28,8 @@ mdarray - simple multi-dimensional array allocators (C style)
 .SH DESCRIPTION
 \fImdarray\fP offers a uniform way to allocate and free multi-dimensional
 (real) C-style arrays. Up to MDMAXDIM (defined via the header file) 
-dimensions are available. 
+dimensions are available. Actually data memory is guarenteed to be
+sequentually in memory, as they are with static multidimensional arrays.
 .PP
 Example of use: ( b = A.x)
 .nf
@@ -67,11 +68,27 @@ affects the CPU speed , viz. timings on a P4/1600 laptop:
     30.530u 0.040s 0:31.85 95.9%    0+0k 0+0io 135pf+0w
 .fi
 On grus (P3/930) 5.0 vs. 19.9 sec.  On chand (P4/2500)  1.1 vs. 12.3 sec CPU. 
+.SH CAVEAT
+Although both static and dynamic multi-dimensional arrays 
+.nf
+    real     s3[4][5][6];
+    mdarray3 d3 = allocate_mdarray3(4,5,6);
+.fi
+use sequental memory, the dynamic array uses extra memory to use the 
+\fIarrays of arrays\fP, and therefore the addresses
+.nf
+    d3 !=  d3[0] != d3[0][0]
+.fi
+are not the same, whereas for static arrays they are
+.nf
+    s3 ==  s3[0] == s3[0][0]
+.fi
 .SH SEE ALSO
 .nf
 vectmath(3NEMO)
-.fi
 nrutil.c (Numerical Recipes) for an alternative approach
+http://www.fredosaurus.com/notes-cpp/arrayptr/23two-dim-array-memory-layout.html
+.fi
 .SH AUTHOR
 Peter Teuben
 .SH FILES
@@ -83,4 +100,5 @@ Peter Teuben
 .nf
 .ta +1i +4i
 5-may-03	Created   	PJT
+19-feb-06	Allocate actually memory sequentually	PJT
 .fi
