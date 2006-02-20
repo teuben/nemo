@@ -4,6 +4,7 @@
  *   19-nov-2002	0.1 Created - Q&D
  *    4-dec-2002        0.2 Added mass=, eps= (mode= not implemetned)
  *    5-dec-2002        0.3 add central=, grow=
+ *   19-feb-2006        0.4 dynamic memory using mdarray
  *
  */
 
@@ -11,6 +12,7 @@
 #include <getparam.h>
 #include <vectmath.h>
 #include <filestruct.h>
+#include <mdarray.h>
 
 #include <snapshot/snapshot.h>
 #include <snapshot/body.h>
@@ -24,23 +26,21 @@ string defv[] = {
     "central=f\n        add the central mass also as 1st point?",
     "grow=t\n           grow number of points per ring to keep a constant density",
     "headline=\n	verbiage for output",
-    "VERSION=0.3\n	4-dec-02 PJT",
+    "VERSION=0.4\n	19-feb-06 PJT",
     NULL,
 };
 
 string usage = "Create a Toomre & Toomre 1972 test disk centered around a point mass";
 
+string cvsid="$Id$";
 
-#ifndef MOBJ
-#  define MOBJ 10000
-#endif
 
 #define MAXRAD 1024
 
 
 local int nobj, nobj_max, ntot = 0;
-local real mass[MOBJ];
-local vector phase[MOBJ][2];
+local real *mass;
+local mdarray3 phase;
 local double radius[MAXRAD];
 
 local real eps2;
@@ -59,8 +59,16 @@ void nemo_main()
 
     nrad = nemoinpd(getparam("radius"),radius,MAXRAD);
     nobj = getiparam("nbody");
-    if (nobj > MOBJ)
-	error("Too many particles requested: nbody > MOBJ [%d]", MOBJ);
+
+    Qgrow = getbparam("grow");
+    if (Qgrow) {
+      nobj_max = (int) (nobj * (radius[nrad-1]/radius[0]));
+      dprintf(0,"Grow nbody= %d -> %d\n",nobj,nobj_max);
+    } else
+      nobj_max = nobj;
+
+    mass = (real *) allocate(sizeof(real)*nobj_max);
+    phase = allocate_mdarray3(nobj_max,2,NDIM);
     headline = getparam("headline");
     sqrtm = getdparam("mass");
     if (getbparam("central")) {
@@ -71,12 +79,6 @@ void nemo_main()
     sqrtm = sqrt(sqrtm);
     eps2 = getdparam("eps");
     eps2 = eps2*eps2;
-    Qgrow = getbparam("grow");
-    if (Qgrow) {
-      nobj_max = (int) (nobj * (radius[nrad-1]/radius[0]));
-      if (nobj_max > MOBJ)
-	error("Too many particles (%d/%d) in largest radius for grow=t",nobj_max,MOBJ);
-    }
 
     for (i=0; i<nrad; i++) {
       if (Qgrow)
@@ -136,7 +138,7 @@ writesnap(int n)
      put_set(outstr, ParticlesTag);
       put_data(outstr, CoordSystemTag, IntType, &cs, 0);
       put_data(outstr, MassTag, RealType, mass, n, 0);
-      put_data(outstr, PhaseSpaceTag, RealType, phase, n, 2, NDIM, 0);
+      put_data(outstr, PhaseSpaceTag, RealType, phase[0][0], n, 2, NDIM, 0);
      put_tes(outstr, ParticlesTag);
     put_tes(outstr, SnapShotTag);
     ntot += n;
