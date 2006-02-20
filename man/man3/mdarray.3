@@ -31,6 +31,12 @@ mdarray - simple multi-dimensional (C style) array allocators with sequential me
 dimensions are available. Actually data memory is guarenteed to be
 sequentually in memory, as they are with static multidimensional arrays.
 .PP
+Arrays are stored in row major order, e.g. in
+.nf
+   double matrix a[20][10];
+.fi
+the right-most index (10) varies most rapidly in memory, exactly like static C arrays.
+.PP
 Example of use: ( b = A.x)
 .nf
     mdarray1 x = allocate_mdarray1(10);      /*  x[10]     */
@@ -74,7 +80,7 @@ Although both static and dynamic multi-dimensional arrays
     real     s3[4][5][6];
     mdarray3 d3 = allocate_mdarray3(4,5,6);
 .fi
-use sequental memory, the dynamic array uses extra memory to use the 
+use sequential memory, the dynamic array uses extra memory to use the 
 \fIarrays of arrays\fP, and therefore the addresses
 .nf
     d3 !=  d3[0] != d3[0][0]
@@ -83,6 +89,8 @@ are not the same, whereas for static arrays they are
 .nf
     s3 ==  s3[0] == s3[0][0]
 .fi
+For example, for a double precision \fIa[n3][n2]n1]\fP mdarray3, instead of using 
+2*n1*n2*n3 words, it will use \fI((2*n1+1)*n2+1)*n3\fP words.
 .SH SEE ALSO
 .nf
 vectmath(3NEMO)
