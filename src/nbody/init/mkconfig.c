@@ -6,13 +6,15 @@
  *	20-feb-92  0.2	PJT	usage, nemo_main
  *	23-mar-97  0.2b pjt     fixed protos
  *	27-mar-97  0.3  pjt	moved nbody= as 2nd keyword
- *       9-sep-01       a    gsl/xrandom
+ *       9-sep-01       a       gsl/xrandom
+ *      10-feb-06  0.4  pjt     using mdarray, no more need for MOBJ, but slightly ugly syntax
  */
 
 #include <stdinc.h>
 #include <getparam.h>
 #include <vectmath.h>
 #include <filestruct.h>
+#include <mdarray.h>
 
 #include <snapshot/snapshot.h>
 #include <snapshot/body.h>
@@ -25,21 +27,16 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "seed=123\n		seed for random numbers",
     "zerocm=false\n	if true, zero center of mass",
     "headline=\n	verbiage for output",
-    "VERSION=0.3a\n	9-sep-01 PJT",
+    "VERSION=0.4\n	19-feb-06 PJT",
     NULL,
 };
 
 string usage = "make a static configuration of particles";
 
 
-#ifndef MOBJ
-#  define MOBJ 4096
-#endif
-
-
 local int nobj;
-local real mass[MOBJ];
-local vector phase[MOBJ][2];
+local real *mass;
+local mdarray3 phase;
 local double radius;	                /* must be double !! */
 
 extern double xrandom(double, double);
@@ -48,13 +45,14 @@ extern double xrandom(double, double);
 
 void nemo_main()
 {
-    string shape;
+    string shape = getparam("shape");
 
-    shape = getparam("shape");
     radius = getdparam("radius");
     nobj = getiparam("nbody");
-    if (nobj > MOBJ)
-	error("Too many particles requested: nbody > MOBJ [%d]", MOBJ);
+
+    mass = (real *) allocate(nobj * sizeof(real));
+    phase = allocate_mdarray3(nobj,2,NDIM);
+
     init_xrandom(getparam("seed"));
     if (streq(shape, "shell"))
 	makeshell();
@@ -69,7 +67,7 @@ void nemo_main()
     else
 	error("%s: shape %s unknown\n", getargv0(), shape);
     if (getbparam("zerocm"))
-	zerocms(phase, 2 * NDIM, mass, nobj, nobj);
+	zerocms(phase[0][0], 2 * NDIM, mass, nobj, nobj);
     writesnap();
 }
 
@@ -151,7 +149,7 @@ writesnap()
      put_set(outstr, ParticlesTag);
       put_data(outstr, CoordSystemTag, IntType, &cs, 0);
       put_data(outstr, MassTag, RealType, mass, nobj, 0);
-      put_data(outstr, PhaseSpaceTag, RealType, phase, nobj, 2, NDIM, 0);
+      put_data(outstr, PhaseSpaceTag, RealType, phase[0][0], nobj, 2, NDIM, 0);
      put_tes(outstr, ParticlesTag);
     put_tes(outstr, SnapShotTag);
     strclose(outstr);
