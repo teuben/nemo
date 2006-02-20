@@ -27,11 +27,13 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "seed=123\n		seed for random numbers",
     "zerocm=false\n	if true, zero center of mass",
     "headline=\n	verbiage for output",
-    "VERSION=0.4\n	19-feb-06 PJT",
+    "VERSION=0.4a\n	19-feb-06 PJT",
     NULL,
 };
 
 string usage = "make a static configuration of particles";
+
+string cvsid="$Id$";
 
 
 local int nobj;
