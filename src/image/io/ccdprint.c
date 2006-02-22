@@ -10,6 +10,7 @@
  *       28-jul-02  V1.3  allow coordinates printed as pixel (0...N-1) pjt
  *        8-nov-05  V1.4  cleanup for prototypes, better blank line handling  pjt
  *                        also added yreverse=
+ *       24-jan-06  V1.5  pairing allowed, but crummy
  *
  */
 
@@ -31,7 +32,8 @@ string defv[] = {
 	"offset=0\n         Offset (0 or 1) to index coordinates X,Y,Z",
 	"yreverse=t\n       Reverse printing Y values?",
 	"pixel=f\n          Labels in Pixel or Physical coordinates?",
-	"VERSION=1.4\n      8-nov-05 PJT",
+	"pair=f\n           Should input (x,y,z) be paired up",
+	"VERSION=1.5\n      24-jan-06 PJT",
 	NULL,
 };
 
@@ -45,8 +47,9 @@ void myprintf(string fmt, real v);
 
 nemo_main()
 {
-    int     *ix, *iy, *iz, i, j, k, j1, nx, ny, nz, nxpos, nypos, nzpos, offset, nlcount=0;
-    bool    newline, newline1, newline2, newline3, xlabel, ylabel, zlabel, Qpixel, Qyrev;
+    int     *ix, *iy, *iz, i, j, k, j1, l, nx, ny, nz, nxpos, nypos, nzpos, offset, nlcount=0;
+    int     nmax;
+    bool    newline, newline1, newline2, newline3, xlabel, ylabel, zlabel, Qpixel, Qyrev, Qpair;
     string  infile;			        /* file name */
     stream  instr;				/* file stream */
     imageptr iptr=NULL;			      /* allocated dynamically */
@@ -59,6 +62,7 @@ nemo_main()
     newline = getbparam("newline");
     Qpixel = getbparam("pixel");
     Qyrev = getbparam("yreverse");
+    Qpair = getbparam("pair");
     label = getparam("label");
     xlabel = scanopt(label,"x");
     ylabel = scanopt(label,"y");
@@ -76,6 +80,21 @@ nemo_main()
     nxpos = ini_array("x",ix,nx,offset);
     nypos = ini_array("y",iy,ny,offset);
     nzpos = ini_array("z",iz,nz,offset);
+    if (Qpair) {
+      warning("new pairing mode, not all options allowed");
+      nmax = MAX(nxpos,nypos);
+      nmax = MAX(nmax,nzpos);
+      for (l=0; l<nmax; l++) {
+	i = ix[nxpos>1 ? l : 0];
+	j = iy[nypos>1 ? l : 0];
+	k = iz[nzpos>1 ? l : 0];
+	f = CubeValue(iptr,i,j,k);
+	printf (fmt,f*scale_factor);	  
+	printf(" ");
+	if (newline)
+	  printf("\n");
+      }
+    }
 
     newline1 = newline2 = newline3 = newline;
     if (!hasvalue("x") && !hasvalue("y")){
@@ -86,6 +105,7 @@ nemo_main()
     }
 
     for (k=0; k<nzpos; k++) {				/* loop over all planes */
+        if (Qpair) break;
         z = Zmin(iptr) + iz[k] * Dz(iptr);
         if (!newline && zlabel) {
             printf("plane Z = ");
@@ -94,6 +114,7 @@ nemo_main()
 	    nlcount += 2;
         }
         for (j1=0; j1<nypos; j1++) {			/* loop over all rows */
+	    if (Qpair && nypos > 1) j1 = l;
 	    j = Qyrev ? nypos-1-j1 : j1;
             y = Ymin(iptr) + iy[j] * Dy(iptr);
             if (j==(nypos-1) && !newline && xlabel) {    /* pr. row of X coords */
@@ -110,6 +131,7 @@ nemo_main()
 	      printf(" ");
             }
             for (i=0; i<nxpos; i++) {			/* loop over all columns */
+  	        if (Qpair && nxpos > 1) i = l;
                 f = CubeValue(iptr,ix[i],iy[j],iz[k]);
                 if (newline) {
                     x = Xmin(iptr) + ix[i] * Dx(iptr);
@@ -123,16 +145,22 @@ nemo_main()
                 } else {
                     printf (" ");
 		}
+		if (Qpair) {
+		  i=nxpos; /* make sure it doesn't loop here */
+		  l++;     /* but increase the global loop counter */
+		}
             } /* i */
             if (newline1) {
 	      printf("\n");
 	      nlcount++;
 	    }
-        } /* j */
+	    if (Qpair) j1 = nypos; /* make sure it doesn't loop here */
+        } /* j1 */
         if (newline2) {
 	  printf("\n\n");
 	  nlcount += 2;
 	}
+	if (Qpair) k = nzpos; /* make sure it doesn't loop here */
     } /* k */
     if (nlcount == 0) printf("\n");
     strclose(instr);
@@ -152,14 +180,14 @@ ini_array(
         for (i=0; i<n; i++) {
             dat[i] -= offset;
             if (dat[i] < 0 || dat[i] >= ndat)
-                error("Illegal boundaries in %s",key);
+	      error("Illegal boundary in %s",key);
         }
-    } else if (n==0) {
+    } else if (n==0) {     /* select all axis elements */
         for (i=0; i<ndat; i++)
-            dat[i] = i;
+	  dat[i] = i;
         n = ndat;
     } else
-        error("Error parsing %s=%s",key,getparam(key));
+      error("Error %d parsing %s=%s",n,key,getparam(key));
     return n;
 }
 
