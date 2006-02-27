@@ -1,4 +1,4 @@
-.TH SNAPGRID 1NEMO "7 February 2006"
+.TH SNAPGRID 1NEMO "10 February 2006"
 .SH NAME
 snapgrid \- grid a snapshot into a 2D or 3D image (cube)
 .SH SYNOPSIS
@@ -6,24 +6,25 @@ snapgrid \- grid a snapshot into a 2D or 3D image (cube)
 \fBsnapgrid in=\fPsnapshot \fBout=\fPimage [parameter=value]
 .SH DESCRIPTION
 \fIsnapgrid\fP grids three arbitrary bodytrans expressions 
-(default: \fBx\fP, \fBy\fPand \fB-vz\fP) of a snapshot into a datacube
+(default: \fBx\fP, \fBy\fP and \fB-vz\fP) of a snapshot into a datacube
 (or image plane), with optional astronomical projection for direct
 comparision with astronomical images.
 .PP
 The X and Y coordinates of the datacube can only
-be reularly gridded in histogram fashion 
+be regularly gridded in histogram fashion 
 (for spatial XY-smoothing see \fIccdsmooth(1NEMO)\fP),
 however the Z coordinate has the property that it can take moments in this
 variable, pick a number of planes or planes with smoothing.
 .PP
 The image cube is written as a standard \fIimage(5NEMO)\fP file, and can
 be accessed by various other programs for smoothing, display etc.
+.PP 
 .SH PARAMETERS
 The following parameters ...
 .TP 20
 \fBin=\fIin-file\fP
 input file, must be in \fIsnapshot(5NEMO)\fP format. Multiple snapshots can
-be stacked uses the \fBtimes=\fP keyword: see \fBstack\fP below.  [no default].
+be stacked uses the \fBtimes=\fP keyword: see \fBstack=\fP below.  [no default].
 .TP
 \fBout=\fIout-file\fP
 output file, will be in \fIimage(5NEMO)\fP format [no default].
@@ -45,15 +46,15 @@ Range in \fByvar\fP to bin [default: \fB-2:2\fP].
 Range in \fBzvar\fP to bin, or take moments of
 [default: \fB-infinity:infinity\fP].
 .TP
-\fBxvar\*e\fP\fIx-expression\fP
+\fBxvar=\fP\fIx-expression\fP
 The value of \fIx-expression\fP is gridded along the X axis.
 [default: \fBx\fP].
 .TP
-\fByvar\*e\fP\fIy-expression\fP
+\fByvar=\fP\fIy-expression\fP
 The value of \fIy-expression\fP is gridded along the Y axis.
 [default: \fBy\fP].
 .TP
-\fBzvar\*e\fP\fIz-expression\fP
+\fBzvar=\fP\fIz-expression\fP
 The value of \fIz-expression\fP is gridded along the Z axis (\fBnz\fP>1), 
 or moments taken off (\fBnz=1\fP). [default: \fB-vz\fP].
 .TP
@@ -97,17 +98,19 @@ Same for the Z-axis.
 \fBmoment=\fInumber\fP
 Order of the Z-gridding.
 Most commonly choosen are: \fB0\fP (total intensity), \fB1\fP 
-(velocity weighted intensity) and \fB2\fP (velocity square weighted intensity),
+(velocity zvar weighted intensity) and \fB2\fP (velocity square weighted intensity),
 where 'intensity' should really be read as surface density per 
 square unit length. Special values of \fB-1\fP and \fB-2\fP can be
 used to directly compute the mean and the dispersion from the mean.
 [default: \fB0\fP].
 .TP
 \fBmean=t|f\fP
-This controls the units of the gridding. By selecting \fBt\fP a density
-is computed, otherwise data are added. The latter makes it more difficult
-to compare images of different cell sizes.
- [Default: \fBf\fP].
+Should the \fIemission\fP in a cell be averaged?
+This also controls the units of the gridding. For \fBmean=f\fP (the default) a
+\fIsurface-density\fP is computed (emission per square length),
+ whereas for \fBmean=t\fP the average per
+pixel (or voxel) is computed of the units of emission.
+[Default: \fBf\fP].
 .TP
 \fBstack=t|f\fP
 Should all snapshots from the input file be stacked, or write one
@@ -215,6 +218,8 @@ tsf(1NEMO), snapccd(1NEMO), ccdintpol(1NEMO), image(5NEMO)
 http://www.iinet.com.au/~watson/nngridr.html
 .PP
 http://tdc-www.harvard.edu/software/skypic/
+.PP
+http://dipastro.pd.astro.it/~cosmo/Splotch/
 .SH AUTHOR
 Peter Teuben
 .SH FILES
