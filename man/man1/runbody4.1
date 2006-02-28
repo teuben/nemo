@@ -1,0 +1,207 @@
+.TH RUNBODY4 1NEMO "28 February 2006"
+.SH NAME
+runbody4 \- Hermite N-body code with optional stellar evolution
+.SH SYNOPSIS
+.nf
+\fBrunbody4\fP [parameter=value]
+\fBnbody4  \fP\fI < nbody4.in\fP
+.fi
+.SH DESCRIPTION
+\fBrunbody4\fP is a frontend to the NBODY4 fortran program.
+It  (optionally) creates a run directory, prepares
+a parameter input file, and optionally input snapshot data, and runs
+the NBODY4 program. This is useful if you need to run a lot of
+simulations unattended.
+.PP
+Output snapshots are by default not created, and must be  turned on
+with a options flag (see \fBkz=\fP below). All of the input
+parameter names are the same as their counterpart in
+\fBnbody4\fP.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+input file (optional, see \fBnbody=\fP to generate your own input 
+data on the fly). If input data are given, it forces KZ(4)=2 (see 
+below).  Can also be a directory, in which case the input file for
+a restart run is assumed to be the default (fort.4)  in native 
+format.
+Default: not used.
+.TP
+\fBoutdir=\fP
+Output run directory. This directory should not exist, although
+can be overriden with NEMO's standard \fBerror=\fP system keyword.
+No default.
+.TP
+\fBnbody=\fP
+Total particle number. The maximum value (NMAX) is compiled into
+the NBODY4 program. Note that even if \fIin=\fP is supplied, this
+parameter is needed.
+No default.
+.TP
+\fBnfix=\fP
+Output frequency of data save or binaries; KZ(3 & 6)
+[Default: 1]
+.TP
+\fBnrand=\fP
+Random number sequence skip.
+[Default: 0]
+.TP
+\fBnrun=\fP
+Run identification index.
+[Default: 1]
+.TP
+\fBeta=\fP
+Time-step parameter for force polynomials.
+[Default: 0.02]
+.TP
+\fBdeltat=\fP
+Output time interval in units of the crossing.
+[Default: 0.25]
+.TP
+\fBtcrit=\fP
+Termination time in units of the crossing time.
+[Default: 5]
+.TP
+\fBqe=\fP
+Energy tolerance (restart if DE/E > 5*QE & KZ(2) > 1)
+[Default: 2e-5]
+.TP
+\fBeps=\fP
+Potential softening parameter     
+[Default: 0.01]
+.TP
+\fBkz=\fP
+Non-zero options for alternative paths (see below) 
+[Default: 1,2,0::4,1::2,0::2,1]
+.nf
+.ta +0.5i
+ 1  	COMMON save on unit 1 at end of run (=2: every 100*NMAX steps) [1]
+ 2  	COMMON save on unit 2 at output (=1); restart if DE/E > 5*QE (=2) [2]
+ 3  	Basic data written to unit 3 at output time (frequency NFIX) [0]
+ 4 	Initial conditions on unit 4 (=1: output; =2: input) [0]
+ 5  	Initial conditions (=0: uniform & isotropic; =1: Plummer  model) [0]
+ 6  	Output of significant binaries (=2: frequency NFIX) [0]
+ 7  	Lagrangian radii (=1: unit 6; =2: unit 7; =3: both types) [1]
+ 8  	Core radius & density centre (N > 20 only) [1]
+ 9  	Individual bodies printed at output time (MIN(5**KZ(9),N)) [0]
+ 10  	No unique density centre (skips velocity modification of RS(I)) [0]
+ 11  	Modification of ETAI & ETAR by tolerance QE [1]
+ 12  	Inelastic mergers (>1: diagnostic output) [0]
+ 13  	Escaper removal (R > 2*RTIDE; RTIDE = 10*RSCALE) [0]
+ 14  	Skip full predictor loop if NNB > KZ(14) = <NNB> & KZ(14) > [0]
+ 15  	External potential (=1: Plummer model; =2: logarithmic potential) [0]
+ 16  	No scaling of initial conditions [0]
+ 17  	Generation of two subsystems (merger experiment) [0]
+ 18  	Adjustment of coordinates & velocities to c.m. condition [0]
+ 19  	Not used at present [0]
+ 20  	Not used at present [0]
+ 21  	Not used at present [0]
+ 22  	Not used at present [0]
+ 23  	Not used at present [0]
+ 24  	Not used at present [0]
+ 25  	Not used at present [0]
+ 26  	Not used at present [0]
+ 27  	Not used at present [0]
+ 28  	Not used at present [0]
+ 29  	Not used at present [0]
+ 30  	Not used at present [0]
+ 31  	Not used at present [0]
+ 32  	Not used at present [0]
+ 33  	Not used at present [0]
+ 34  	Not used at present [0]
+ 35  	Not used at present [0]
+ 36  	Not used at present [0]
+ 37  	Not used at present [0]
+ 38  	Not used at present [0]
+ 39  	Not used at present [0]
+ 40  	Not used at present [0]
+.fi
+.TP
+\fBxtpar1=\fP
+Mass of external Plummer model (KZ(15) = 1;
+[Default: 1]
+.TP
+\fBxtpar2=\fP
+Length scale for Plummer model (KZ(15) = 1)
+[Default: 2]
+.TP
+\fBzmgas=\fP
+Mass scale for logarithmic potential (KZ(15) = 2)
+.TP
+\fBrgas=\fP
+Length scale for logarithmic potential (KZ(15) = 2)
+.TP
+\fBalphas=\fP
+Power-law index for initial mass function (routine DATA)
+[Default: 2.3]
+.TP
+\fBbody1=\fP
+Maximum particle mass before scaling   
+[Default: 5.0]
+.TP
+\fBbodyn=\fP
+Minimum particle mass before scaling   
+[Default: 1.0]
+.TP
+\fBq=\fP
+Virial ratio (q=0.5 for virial equilibrium)  
+[Default: 0]
+.TP
+\fBvxrot=\fP
+XY-velocity scaling factor (> 0 for solid-body rotation)
+[Default: 0]
+.TP
+\fBvzrot=\fP
+Z-velocity scaling factor (not used if VXROT =
+[Default: 0]
+.TP
+\fBrbar=\fP
+Virial radius in pc (for scaling to physical
+[Default: 1]
+.TP
+\fBzmbar=\fP
+Mean mass in solar units   
+[Default: 1]
+.TP
+\fBxcm=\fP
+Displacement for subsystem (routine SCALE; KZ(17)) 
+.TP
+\fBecc=\fP
+Eccentricity of relative motion for subsystem (ECC =< 1)
+.SH EXAMPLES
+\fBnbody4\fP can also be used to generate snapshots. Here is an example
+to create a 1024 body homogeneous sphere in the directory
+run1 and a plummer sphere in run2.
+.nf
+    runbody4 "" run1 1024 tcrit=0 kz=0,0,1
+    u3tos run1/OUT3 run1/run1.snap
+    runbody4 "" run2 1024 tcrit=0 kz=0,0,1,0,1
+    u3tos run2/OUT3 run2/run2.snap
+.fi
+.PP
+You can also supply existing NEMO snapshots as initial conditions
+.nf
+    runbody4 run4.snap run4 tcrit=0 kz=0,0,1,2
+        (this option doesn't work yet)
+.fi
+.SH BUGS
+Scaling can cause output to become out of bounds.
+.SH SEE ALSO
+nbody4(1NEMO), nbody2(1NEMO), snapshot(5NEMO), u3tos(1NEMO), stou4(1NEMO)
+.SH FILES
+.nf
+.ta +2i
+$NEMO/src/nbody/evolve/aarseth/tools	code
+$outdir/fort.1                       	restart dump (compile time dep. size)
+$outdir/fort.2                         	restart dump (compile time dep. size)
+$outdir/fort.4                         	restart dump (compile time dep. size)
+$outdir/OUT3                        	particle dump (see \fIu3tos(1NEMO)\fP)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+28-feb-2006	V0.1 Created in Cambridge	PJT
+.fi
