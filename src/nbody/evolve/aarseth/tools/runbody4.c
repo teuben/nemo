@@ -29,8 +29,11 @@ string defv[] = {
     "rbar=1.0\n       ?",
     "zmbar=0.5\n      ?",
 
-
+#if 0
     "kz=0 1 0 0 1 0 1 0 0 0  0 0 0 1 1 1 0 0 3 4  1 0 2 0 0 1 0 0 0 1  0 0 0 0 0 0 1 0 0 0\n"
+#else
+    "kz=0 0 1 0 1 0 5 0 0 0  0 0 0 0 1 0 0 0 3 0  1 0 2 0 1 2 0 0 0 2  0 0 0 0 0 0 1 0 0 0\n",
+#endif
       "    Non-zero options for alternative paths (see below)\n"
       " 1  COMMON save on unit 1 at end of run (=2: every 100*NMAX steps)\n"
       " 2  COMMON save on unit 2 at output (=1); restart if DE/E > 5*QE (=2)\n"
@@ -72,9 +75,9 @@ string defv[] = {
      " 38  Not used at present (same for # 20)\n"
      " 39  Not used at present (same for # 20)\n"
      " 40  Not used at present (same for # 20)",
- 
-    "dtmin=1e-4\n     ",
-    "rmin=1e-3\n      ",
+
+    "dtmin=1e-5\n     ",
+    "rmin=1e-4\n      ",
     "etau=0.2\n       ",
     "eclose=1.0\n     ",
     "gmin=1e-6\n      ",
@@ -88,7 +91,7 @@ string defv[] = {
     "epoch0=0\n       ",
     "dtplot=10.0\n    ",
 
-    "q=0.0\n          Virial ratio (q=0.5 for virial equilibrium)",
+    "q=0.5\n          Virial ratio (q=0.5 for virial equilibrium)",
 
     "apo=6.0\n        kz(5) = 2 or 3",
     "ecc=0.5\n        Eccentricity of relative motion for subsystem (ECC =< 1)",
@@ -105,11 +108,13 @@ string defv[] = {
     "tcomp=10.0\n     Maximum allowed running time (minutes) **ignored **",
     "gpid=0\n         Grape ID",
 
-    "VERSION=0.1\n    28-feb-06 PJT",
+    "VERSION=0.2\n    28-feb-06 PJT",
     NULL,
 };
 
 string usage="Hermite N-body code";
+
+string cvsid="$Id$";
 
 #define KZ_MAX  40
 
@@ -123,7 +128,7 @@ nemo_main()
 {
   int nbody, nfix, ncrit, nrand, nnbmax, nrun, kstart, gpid, nbin0, n2;
   real eta, dtadj, deltat, tcrit, qe, eps, tcomp;
-  int k, nkz, kz[KZ_MAX];
+  int k, nkz, kz[KZ_MAX], KZ[KZ_MAX];
   real dtmin,rmin,etau,eclose,gmin,gmax;
   real alpha, body1, bodyn, zmet, epoch0, dtplot;
   real q, rbar, zmbar;
@@ -175,6 +180,8 @@ nemo_main()
   zmet = getdparam("zmet");
   epoch0 = getiparam("epoch0");
   dtplot = getiparam("dtplot");
+
+  q = getdparam("q");
 
   /* optional things, depending on kz5 */
   apo = getdparam("apo");
