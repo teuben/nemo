@@ -5,6 +5,7 @@ History:
 
   - 01-Jul-1998:    fixed bug reported by Sverre
   - 25-sep-1998:    fixed quitting bug, added sun-earth-jupiter example (sej.in)
+  -  1-mar-2006:    documented the color aggressive window managers
 
 Incompatible things with Sverre's January 1998 version:
 
@@ -42,3 +43,28 @@ Some other things to note:
     The alternative is of course to use ptriple, the pgplot based version,
     which runs just fine independant of what colordepth you are using
     in your X server.
+    If you really MUST use xtriple, here are some tips on e.g. linux
+
+	- start a 2nd X windows sessions, but using twm instead.
+		
+	  On linux you'll need to use ctrl-alt-F2 to open a new console, 
+	  then login and start X in 8bit mode:
+		startx -- :1 -depth 8
+	  the syntax may however vary a bit...  
+	  In order to use twm,instead of e.g. Gnome or KDE you;ll also
+	  need to consult the manuals. One quick hack is to temporarely
+   	  use another .xinitrc file, e.g.
+
+               xrdb -load $HOME/.Xresources
+               xsetroot -solid gray &
+               xclock -g 50x50-0+0 -bw 0 &
+               xload -g 50x50-50+0 -bw 0 &
+               xterm -g 80x24+0+0 &
+               xterm -g 80x24+0-0 &
+               twm
+
+	  and remove it after you're done. Sverre has a nice script called
+	  startx8 for this.
+
+	  twm does not use as many colors, and now xtriple will work.
+
