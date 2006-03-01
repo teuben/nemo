@@ -1,11 +1,11 @@
 #! /bin/csh -f
 #
-#  This is an example C-shell script that launces a series of
+#  This is an example C-shell script that launches a series of
 #  nbodyX to search in a two dimensional parameter space of 
-#  a particular problem.
+#  a particular problem, in this case Q and ALPHA is varied.
 #  Each run is saved in a subdirectory, where the subdirectory
-#  encodes the parameters. It is also handy to save them in a
-#  file in the run directory...
+#  encodes these parameters. It is also handy to save them in a
+#  file in the run directory, which we call nbody1.par here.
 #
 #  This particular example does a 5x5 grid on 25 particles for
 #  10 crossing times, and takes about 20 secs on my current 
@@ -14,6 +14,8 @@
 #  After you have run this example, here are some commands that
 #  illustrate what you can do
 #         grep ok series105/*/nbody1.par
+#  At the end of this script you can also see an example shell
+#  script style analysis
 #
 # History:
 #  1-mar-2006     Created after an excellent Eagle Pub dinner with Sverre        PJT
@@ -59,7 +61,7 @@ foreach q ($q_values)
     mkdir -p $wdir
     pushd $wdir
 
-    # create the input file, for nbody1 in this case
+    # create the input file, for nbody1 in this case
 
 #===========================================    nbodyX input file
 cat > input << END_OF_INPUT
