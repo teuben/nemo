@@ -21,6 +21,6 @@ extern void nb3close_ (void);
 /* C */
 extern void nb3open_c  (string, int, bool);
 extern void nb3header_c(int*, int*, int*, int*);
-extern void nb3data_c  (int*, int*, float*, float*, float*, float*, int*);
+extern void nb3data_c  (int*, int*, int *, float*, float*, float*, float*, float *, float *, int*, int*);
 extern void nb3close_c (void);
 

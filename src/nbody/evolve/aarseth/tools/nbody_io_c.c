@@ -9,6 +9,7 @@
  *
  *  8-aug-95    created             pjt
  * 20-jun-01    gcc3 casting        pjt
+ * 28-feb-06    nbody4 has more arrays, deprecated INTEGER*2    PJT
  */
 
 #include <stdinc.h>
@@ -64,8 +65,8 @@ void nb3header_c(int *n, int *model, int *nrun, int *nk)
     return;
 }
 
-void nb3data_c(int *n, int *nk, float *a, 
-              float *body, float *xs, float *xdot, int *name)
+void nb3data_c(int *n, int *nk, int *mode, float *a, 
+	       float *body, float *xs, float *xdot, float *rho, float *phi, int *name, int *kstar)
 {
     int i, j, k, nread, nbuf, n1, n2, count;
     char *buf;
@@ -73,16 +74,30 @@ void nb3data_c(int *n, int *nk, float *a,
     short *sbuf;
     int   *ibuf;
 
-    /*
+    /* nbody1,2:
      * READ (3)  (a(k),k=1,nk), (body(j),j=1,n),
      *           ((xs(k,j),k=1,NDIM),j=1,n), ((xdot(k,j),k=1,NDIM),j=1,n),
      *           (name(j),j=1,n)
+     * nbody4:
+     *
+      WRITE (3)  NTOT, MODEL, NRUN, NK
+      WRITE (3)  (AS(K),K=1,NK), (BODYS(J),J=1,NTOT),
+     &           ((XS(K,J),K=1,3),J=1,NTOT), ((VS(K,J),K=1,3),J=1,NTOT),
+     &           (RHO1(J),J=1,NTOT),(PHI1(J),J=1,NTOT),
+     &           (NAME(J),J=1,NTOT),(KSTAR(J),J=1,NTOT)
      */
+
+    if (sizeof_name == 2) 
+      error("nbody_io: No more support for INTEGER*2 data");
 
     if (*n <= 0 || *nk <= 0) return;
     unfswap(Qswap);
     n1 = ((*nk) + 7 * (*n));  /* size of all REAL arrays */
     n2 = (*n) ;               /* size of the trailing INTEGER*? array */
+    if (*mode == 4) {         /* nbody4 reads 2 more float and one more int array */
+      n1 += 2*(*n);
+      n2 += (*n);
+    }
     nbuf = n1 * sizeof_data + n2 * sizeof_name ;
     buf = (char *) allocate(nbuf);
     nread = unfread(unit3,buf,nbuf);
@@ -102,15 +117,25 @@ void nb3data_c(int *n, int *nk, float *a,
     for(i=0, j=0; j < (*n); j++)            /* velocities */
         for (k=0; k < 3; k++)
             xdot[i++] = fbuf[count++];
-    if (sizeof_name == 2) {                 /* INTEGER*2 name */
-        sbuf = (short *) &fbuf[count];
-        for(count=0, j=0; j < (*n); j++)
-            name[j] = sbuf[count++];
-    } else {                                /* INTEGER*4 name */
-        ibuf = (int *) &fbuf[count];
-        for(count=0, j=0; j < (*n); j++)
-            name[j] = ibuf[count++];
+    
+    if (*mode == 4) {
+      for(j=0; j < (*n); j++)                 /* rho1 */
+        rho[j] = fbuf[count++];
+      
+      for(j=0; j < (*n); j++)                 /* phi1 */
+        phi[j] = fbuf[count++];
     }
+
+    ibuf = (int *) &fbuf[count];
+    for(count=0, j=0; j < (*n); j++)           /* name */
+      name[j] = ibuf[count++];
+
+    if (*mode == 4) {                             /* kstar */
+      ibuf = (int *) &fbuf[count];
+      for(count=0, j=0; j < (*n); j++)
+	kstar[j] = ibuf[count++];
+    }
+
     free(buf);
 }
 
