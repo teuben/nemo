@@ -1,4 +1,4 @@
-.TH UNFIO 1NEMO "19 March 1999"
+.TH UNFIO 1NEMO "1 March 2006"
 .SH NAME
 unfio \- access fortran unformatted I/O files
 .SH SYNOPSIS
@@ -9,7 +9,8 @@ FORTRAN program with the \fIform='unformatted'\fP OPEN statement.
 .PP
 It is currently only implemented for BSD-type fortran compilers with
 arbitrary endianism of the bytes (i.e. probably excluding 
-VMS and Cray compilers).
+VMS and Cray compilers). Depending on the compiler, the header
+size can be 8 instead of the classic 4. See \fBheader=\P below.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -44,12 +45,16 @@ A logical denoting if to display an element counter too?.
 .TP
 \fBmaxbuf=\fP
 buffersize in bytes, to read a block.
-.TP 20
+.TP 
 \fBswap=\fP
 Swap bytes after low level read? This only applies to the header, not to
 the actual data. Programmers must still do this themselves. If using a
 specific block to display, the data bytes are swapped based on the
 data type given by \fBtype=\fP.
+.TP 
+\fBheader=\fP
+Size of the header uses in unformatted fortran data. This used to be 4,
+but modern compilers (e.g. gfortran) may very well use 8.  [Default: 4]
 .SH EXAMPLES
 Suppose we have a dataset that somebody dumped via fortran, and 
 .nf
@@ -75,4 +80,5 @@ Peter Teuben
 21-jun-97	V1.2 added select=	PJT
 7-feb-98	V2.0 added out=    	PJT
 19-mar-99	V2.1 out= also uses select= now 	PJT
+1-mar-06	V2.2 added header=	PJT
 .fi
