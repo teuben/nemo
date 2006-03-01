@@ -15,7 +15,8 @@ usage, in particular when only endianism is the issue.
 .PP
 It is strongly recommended to 
 use \fIunfio(1NEMO)\fP and check if a dataset looks ok. You may also 
-need to set \fBswap=t\fP in this program.
+need to set \fBswap=t\fP in this program, as well as
+a \fBmode=\fP and \fBheader=\fP choice.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -60,6 +61,9 @@ Older data may have used INTEGER*2, which limits the number of particles
 to 32767, patched programs (and presumably later official versions from Sverre)
 will always write INTEGER*4 (or having the same size as a REAL),
 [Default: \fB4\fP].
+.SH CAVEATS
+At the current time the \fBmode=\fP and \fBheader=\fP must be known in order
+for the conversion to succeed. There is no runtime autodetection of formats yet.
 .SH AUTHOR
 Peter Teuben
 .SH SEE ALSO
