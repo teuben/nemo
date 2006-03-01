@@ -13,6 +13,7 @@
  *    7-feb-98  2.0  added out= to replace the 'cf' utility (src/image/fits/)
  *   19-mar-99  2.1  out= now also listens to select= (albeit slowly)
  *   20-jun-01  gcc3
+ *    1-mar-06  added unfsize; gfortran uses int8 (long long) instead of int4
  *   
  * 
  *   TODO: with a keyword like ssize=4::20,8::10,1::100
@@ -27,6 +28,23 @@ static bool do_swap;    /* (re)set in a call to unfswap() */
 
 extern void bswap(void *vdat, int len, int cnt);
 
+#ifdef USE_GFORTRAN_BIG
+static int hdr_size = 8;   /* g77 uses 4, gfortran uses 8 */
+#else
+static int hdr_size = 4;   /* g77 uses 4, gfortran uses 8 */
+#endif
+
+
+/*
+ * unfsize: overwrite header (and trailer) size, in bytes
+ *          a reasonable default should be present from
+ *
+ */
+int unfsize(int size)
+{
+  hdr_size = size;
+  return 0;
+}
 
 /*
  * unfswap: set swapping mode, by default, no swapping performed
@@ -35,8 +53,8 @@ extern void bswap(void *vdat, int len, int cnt);
 
 int unfswap(bool swap)
 {
-    do_swap = swap;
-    return 0;
+  do_swap = swap;
+  return 0;
 }
 
 /*
@@ -48,22 +66,47 @@ int unfswap(bool swap)
 int unfscan(stream fp)
 {
     int n, size0, size1;
-    
-    n = fread(&size0,sizeof(int),1,fp);
-    if (n!=1) return 0;
-    if (do_swap) bswap(&size0, sizeof(int), 1);
-    dprintf(2,"unfread: header %d\n",size0);
+    long long lsize0, lsize1;
 
-    fseek(fp,size0,1);
+    dprintf(2,"unfscan: header size%d\n",hdr_size);
 
-    n = fread(&size1,sizeof(int),1,fp);
-    if (n!=1) return -1;
-    if (do_swap) bswap(&size1, sizeof(int), 1);
-    dprintf(2,"unfread: trailer %d\n",size1);
-    if (size0 != size1) return -2;
+    if (hdr_size == sizeof(int)) {
+      n = fread(&size0,hdr_size,1,fp);
+      if (n!=1) return 0;
+      if (do_swap) bswap(&size0, hdr_size, 1);
+      dprintf(2,"unfscan4: header %d\n",size0);
+
+      fseek(fp,size0,1);
+
+      n = fread(&size1,hdr_size,1,fp);
+      if (n!=1) return -1;
+      if (do_swap) bswap(&size1, hdr_size, 1);
+      dprintf(2,"unfscan4: trailer %d\n",size1);
+      if (size0 != size1) {
+	warning("unfscan4: head and tail of databuffer not the same: swap or header size error\n");
+	return -2;
+      }
+    } else if (hdr_size == sizeof(long long)) {
+      n = fread(&lsize0,hdr_size,1,fp);
+      if (n!=1) return 0;
+      if (do_swap) bswap(&lsize0, hdr_size, 1);
+      size0 = lsize0;
+      dprintf(2,"unfscan8: header %d\n",lsize0);
+
+      fseek(fp,lsize0,1);
+
+      n = fread(&lsize1,hdr_size,1,fp);
+      if (n!=1) return -1;
+      if (do_swap) bswap(&lsize1, hdr_size, 1);
+      dprintf(2,"unfscan8: trailer %d\n",lsize1);
+      if (lsize0 != lsize1) {
+	warning("unfscan8: head and tail of databuffer not the same: swap or header size error\n");
+	return -2;
+      } 
+    } else
+      error("unfscan: unsupported hdr_size = %d",hdr_size);
 
     return size0;
-
 }
 
 /*
@@ -76,15 +119,24 @@ int unfscan(stream fp)
 int unfread(stream fp, char *buf, int bufsize)
 {
     int n, size, size1;
+    long long lsize, lsize1;
 
-    n = fread(&size,sizeof(int),1,fp);
-    if (n!=1) return 0;
-    if (do_swap) bswap(&size, sizeof(int), 1);
+    if (hdr_size == sizeof(int)) {
+      n = fread(&size,hdr_size,1,fp);
+      if (n!=1) return 0;
+      if (do_swap) bswap(&size, hdr_size, 1);
+    } else if (hdr_size == sizeof(long long)) {
+      n = fread(&lsize,hdr_size,1,fp);
+      if (n!=1) return 0;
+      if (do_swap) bswap(&lsize, hdr_size, 1);
+      size = lsize; /* ieck, need to switch to size_t */
+    } else
+      error("unfread: unsupported hdr_size=%d",hdr_size);
     dprintf(2,"unfread: header %d\n",size);
 
     if (size > bufsize) {
         error("unfread: buffersize %d too small to read all %d data",
-                size,bufsize);
+	      bufsize,size);
 	return 0;
     } else
         dprintf(2,"unfread: header %d\n",size);
@@ -93,10 +145,20 @@ int unfread(stream fp, char *buf, int bufsize)
     dprintf(2,"unfread: data %d\n",n);
     if (n != size) return 0;
 
-    n = fread(&size1, sizeof(int), 1, fp);
-    if (n != 1) return 0;
-    if (do_swap) bswap(&size1, sizeof(int), 1);
+    if (hdr_size == sizeof(int)) {
+      n = fread(&size1, hdr_size, 1, fp);
+      if (n != 1) return 0;
+      if (do_swap) bswap(&size1, hdr_size, 1);
+    } else if  (hdr_size == sizeof(long long)) {
+      n = fread(&lsize1, hdr_size, 1, fp);
+      if (n != 1) return 0;
+      if (do_swap) bswap(&lsize1, hdr_size, 1);
+      size1 = lsize1;
+    } else
+       error("unfread: unsupported hdr_size=%d",hdr_size);
+
     dprintf(2,"unfread: trailer %d\n",size1);
+
     if (size1 != size) 
         warning("Reading block size_s=%d start_e=%d",size,size1);
 
@@ -118,7 +180,8 @@ string defv[] = {
         "count=f\n          display element counter too?",
         "maxbuf=10000\n     buffersize in bytes, to read a block",
 	"swap=f\n           swapped read?",
-        "VERSION=2.1a\n	    21-jun-01 PJT",
+	"header=4\n         header size of fortran unformatted files (4 or 8)",
+        "VERSION=2.2\n	    1-mar-06 PJT",
         NULL,
 };
 
@@ -138,11 +201,13 @@ void nemo_main()
     string type = getparam("type");
     string fmt = getparam("format");
     int maxbuf = getiparam("maxbuf");
+    int hsize = getiparam("header");
     char *buf = (char *) allocate(maxbuf);
     int nidx, *idx = NULL;
 
     if (Qdisp) iblock = getiparam("block");
     if (hasvalue("out")) ostr = stropen(getparam("out"),"w");
+    unfsize(hsize);
     unfswap(Qswap);
     if (Qsel) {
         nidx = maxbuf/sizeof(int);
