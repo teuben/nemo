@@ -52,6 +52,12 @@ is of the format \fIfrom\fP2\fIto\fP, where both the \fIfrom\fP and
 \fIto\fP part are any of: \fBd\fP (double), \fBf\fP (float),
 \fBl\fP (long), \fBi\fP (int) or \fBs\fP (short)
 [Default: -blank-].
+.SH EXAMPLES
+An image with too much data-history can be cut by only copying the \fIImage\fP
+items:
+.nf
+   % csf in=map1.ccd out=map2.ccd select=Image
+.fi
 .SH BUGS
 Items can only be selected (\fBselect=\fP) from the top level.
 .SH SEE ALSO
