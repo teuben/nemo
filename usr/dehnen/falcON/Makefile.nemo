@@ -1,5 +1,8 @@
 #
-#
+#   this Makefile.nemo is normally included by the master Makefile
+#   at the top level and adds the target to merge needed object
+#   code into NEMO.
+#   
 
 BINS = addgravity getgravity gyrfalcON lagrange_radii \
         manipulate mkdehnen mkking mkplum scale_eps snapstack \
