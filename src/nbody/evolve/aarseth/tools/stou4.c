@@ -4,6 +4,7 @@
  *     29-mar-94  ansi
  *     16-jun-97  _ naming portability
  *     11-jul-97  output of nbody 
+ *      2-mar-06  header=                        
  */
 
 #include <stdinc.h>
@@ -19,7 +20,8 @@ string defv[] = {
     "in=???\n                     input file name",
     "out=\n                       output file name [fort.4]",
     "nbody=0\n                    test if this nbody is ok (0=no test)",
-    "VERSION=1.1a\n		  18-sep-01 PJT",
+    "header=4\n                   unfio header size (4 or 8)",
+    "VERSION=1.2\n		  2-mar-06 PJT",
     NULL,
 };
 
@@ -34,9 +36,11 @@ void nemo_main(void)
     int ibody, nbody, maxbody, i, j, k;
     real *mbuf, *cbuf;
     float *mass, *vel, *pos;
+    int hdr_size = getiparam("header");
 
     maxbody = getiparam("nbody");
     instr = stropen(getparam("in"), "r");
+    unfsize(hdr_size);
     get_history(instr);
     if (hasvalue("out")) {
         fname = getparam("out");

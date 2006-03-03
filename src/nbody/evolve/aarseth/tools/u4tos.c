@@ -4,6 +4,7 @@
  *  7-apr-93 	Created for NBODY1		pjt
  * 29-mar-94	ansi				pjt
  * 16-jun-97    fixed _ portability in name	pjt
+ *  2-mar-06    header=                         PJT
  */
 
 #include <stdinc.h>
@@ -17,7 +18,8 @@ string defv[] = {
     "in=\n          Input file (in UNIT 4 format)",
     "out=???\n      Output file (snapshot(5NEMO) format)",
     "nbody=\n       Input Number of particles",
-    "VERSION=1.0c\n 18-sep-01 PJT",
+    "header=4\n     unfio header size (4 or 8)",
+    "VERSION=1.1\n  2-mar-06 PJT",
     NULL,
 };
 
@@ -35,7 +37,9 @@ void nemo_main(void)
     float *mass, *vel, *pos;
     real *rmass, *rphase;
     stream outstr;
+    int hdr_size = getiparam("header");
 
+    unfsize(hdr_size);
     if (hasvalue("in")) {
         fname = getparam("in");
         nb4open_(fname,strlen(fname));
