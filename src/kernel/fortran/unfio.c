@@ -14,6 +14,7 @@
  *   19-mar-99  2.1  out= now also listens to select= (albeit slowly)
  *   20-jun-01  gcc3
  *    1-mar-06  added unfsize; gfortran uses int8 (long long) instead of int4
+ *    4-mar-06  using new autoconf computed value appropriate for this fortran
  *   
  * 
  *   TODO: with a keyword like ssize=4::20,8::10,1::100
@@ -28,10 +29,10 @@ static bool do_swap;    /* (re)set in a call to unfswap() */
 
 extern void bswap(void *vdat, int len, int cnt);
 
-#ifdef USE_GFORTRAN_BIG
-static int hdr_size = 8;   /* g77 uses 4, gfortran uses 8 */
+#ifdef UNFIO_HDR_SIZE
+static int hdr_size = UNFIO_HDR_SIZE;   /* g77 uses 4, gfortran uses 8 */
 #else
-static int hdr_size = 4;   /* g77 uses 4, gfortran uses 8 */
+static int hdr_size = 4;                /* old standard default */
 #endif
 
 
@@ -181,7 +182,7 @@ string defv[] = {
         "maxbuf=10000\n     buffersize in bytes, to read a block",
 	"swap=f\n           swapped read?",
 	"header=4\n         header size of fortran unformatted files (4 or 8)",
-        "VERSION=2.2\n	    1-mar-06 PJT",
+        "VERSION=2.3\n	    1-mar-06 PJT",
         NULL,
 };
 
@@ -205,6 +206,11 @@ void nemo_main()
     char *buf = (char *) allocate(maxbuf);
     int nidx, *idx = NULL;
 
+#ifdef UNFIO_HDR_SIZE
+    dprintf(1,"UNFIO_HDR_SIZE = %d\n",UNFIO_HDR_SIZE);
+#else
+    dprintf(1,"hdr_size = %d\n",hdr_size);
+#endif
     if (Qdisp) iblock = getiparam("block");
     if (hasvalue("out")) ostr = stropen(getparam("out"),"w");
     unfsize(hsize);
