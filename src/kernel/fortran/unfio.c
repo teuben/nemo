@@ -181,8 +181,8 @@ string defv[] = {
         "count=f\n          display element counter too?",
         "maxbuf=10000\n     buffersize in bytes, to read a block",
 	"swap=f\n           swapped read?",
-	"header=4\n         header size of fortran unformatted files (4 or 8)",
-        "VERSION=2.3\n	    1-mar-06 PJT",
+	"header=\n          if needed, force header size of fortran unformatted files (4 or 8)",
+        "VERSION=2.4\n	    4-mar-06 PJT",
         NULL,
 };
 
@@ -202,18 +202,21 @@ void nemo_main()
     string type = getparam("type");
     string fmt = getparam("format");
     int maxbuf = getiparam("maxbuf");
-    int hsize = getiparam("header");
     char *buf = (char *) allocate(maxbuf);
     int nidx, *idx = NULL;
 
+
+
+    if (hasvalue("header"))
+      unfsize(getiparam("header"));
 #ifdef UNFIO_HDR_SIZE
     dprintf(1,"UNFIO_HDR_SIZE = %d\n",UNFIO_HDR_SIZE);
 #else
     dprintf(1,"hdr_size = %d\n",hdr_size);
 #endif
+
     if (Qdisp) iblock = getiparam("block");
     if (hasvalue("out")) ostr = stropen(getparam("out"),"w");
-    unfsize(hsize);
     unfswap(Qswap);
     if (Qsel) {
         nidx = maxbuf/sizeof(int);
