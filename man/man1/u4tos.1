@@ -1,23 +1,31 @@
-.TH U4TOS 1NEMO "7 April 1993"
+.TH U4TOS 1NEMO "4 March 2006"
 .SH NAME
 u4tos \- Convert NBODY unit-4 file to snapshot
 .SH SYNOPSIS
 \fBu4tos\fP [parameter=value]
 .SH DESCRIPTION
-No description available. This manual page was created from
-the inline program help
+\fBu4tos\fP converts a unit-4 snapshot to a NEMO snapshot. These are 
+typically the initial conditions, as 
+created by Aarseth' NBODY series of programs. See e.g. \fInbody1(1NEMO)\fP.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBin=\fP
 Input file (in UNIT 4 format)  
-.TP 20
+.TP
 \fBout=\fP
 Output file (snapshot(5NEMO) format)    
-.TP 20
+.TP
 \fBnbody=\fP
 Input Number of particles    
+.TP
+\fBheader=|4|8\fP
+Fortran header size.
+By default the value determined to be the correct value for your compiler is used.
+ **ignored now, fortran is used to read **
+.SH SEE ALSO
+stou4(1NEMO), nbody1(1NEMO), nbody2(1NEMO), snapshot(5NEMO)
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY

@@ -1,4 +1,4 @@
-.TH UNFIO 1NEMO "1 March 2006"
+.TH UNFIO 1NEMO "4 March 2006"
 .SH NAME
 unfio \- access fortran unformatted I/O files
 .SH SYNOPSIS
@@ -52,9 +52,12 @@ the actual data. Programmers must still do this themselves. If using a
 specific block to display, the data bytes are swapped based on the
 data type given by \fBtype=\fP.
 .TP 
-\fBheader=\fP
+\fBheader=|4|8\fP
 Size of the header uses in unformatted fortran data. This used to be 4,
-but modern compilers (e.g. gfortran) may very well use 8.  [Default: 4]
+but modern compilers (e.g. gfortran) may very well use 8. By default it
+is not specified, and the value determined to be the correct one during
+install (UNFIO_HDR_SIZE) is used. This keyword can be used to force
+another value.
 .SH EXAMPLES
 Suppose we have a dataset that somebody dumped via fortran, and 
 .nf
@@ -80,5 +83,6 @@ Peter Teuben
 21-jun-97	V1.2 added select=	PJT
 7-feb-98	V2.0 added out=    	PJT
 19-mar-99	V2.1 out= also uses select= now 	PJT
-1-mar-06	V2.2 added header=	PJT
+1-mar-06	V2.2 added header=4|8	PJT
+4-mar-06	V2.3 header=now blank value	PJT
 .fi
