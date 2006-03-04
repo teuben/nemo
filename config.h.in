@@ -188,6 +188,9 @@
 #undef SIZEOF_LONG_LONG
 
 
+/* Some variables that were directly computed by configure */
+#define UNFIO_HDR_SIZE  @UNFIO_HDR_SIZE@
+
 /* define to specify how to mangle identifiers for the Fortran linker: */
 #define FORTRANIZE_LOWERCASE 0
 #define FORTRANIZE_UPPERCASE 0
