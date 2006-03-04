@@ -31,15 +31,15 @@ min_moment, max_moment \- various (moving) moment and minmax routines
 .B real x, w;
 .fi
 .SH DESCRIPTION
-\fImoment\fP is a set of routines to compute the moments of 
-a set of real values, and also keep track of the datamin
+\fImoment\fP is a set of functions to compute the moments of 
+a set of real values, but also keep track of the datamin
 and datamax. The routines are written in C but in 
 an object-oriented fashion as to try and keep the use from the internal
 data-structures. The \fBMoment\fP can (and should) be treated as an
-opaque datastructure. All information should be obtained through interface
-routines.
+opaque datastructure. All information should be obtained through the
+interface routines described below.
 .PP
-If only a datamin/max is needed, \fBmom<0\fP can be used to prevent
+If only a datamin/max is needed, setting \fBmom<0\fP can be used to prevent
 the more expensive moment calculations. 
 .PP
 Moving or running averages (or moments) can be done by supplying \fBndat>0\fP
@@ -48,6 +48,9 @@ and the moments now become running moments.
 .PP
 Note that the \fImedian_moment\fP can only be used in \fBx\fP (the weights are
 ignored) and moving moment where \fBndat>0\fP.
+.PP
+\fBmean_moment\fP returns the mean value, where \fBsigma_moment\fP returns
+the variance
 .SH EXAMPLES
 The following code computes a weighted mean and dispersion of a set of points:
 .nf
@@ -89,6 +92,9 @@ Only with \fBndat>0\fP for moving moments can it be recomputed
 correctly.
 .SH SEE ALSO
 grid(3NEMO)
+.nf
+http://apophenia.sourceforge.net/
+.fi
 .SH AUTHOR
 Peter Teuben
 .SH FILES
