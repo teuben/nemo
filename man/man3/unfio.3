@@ -1,6 +1,6 @@
-.TH UNFIO 3NEMO "8 august 1995"
+.TH UNFIO 3NEMO "4 March 2006"
 .SH NAME
-unfscan, unfread, unfswap \- unformatted FORTRAN I/O data access from C
+unfscan, unfread, unfswap, unfsize \- unformatted FORTRAN I/O data access from C
 .SH SYNOPSIS
 .nf
 .B #include <stdinc.h>
@@ -9,6 +9,7 @@ unfscan, unfread, unfswap \- unformatted FORTRAN I/O data access from C
 \fBint unfscan(stream instr)\fP
 \fBint unfread(stream instr, char *buf, int bufsize)\fP
 \fBint unfswap(bool do_swap)\fP
+\fBint unfsize(int size)\fP
 .PP
 .SH DESCRIPTION
 \fIunfio\fP are a set of routines that allow you to (sequentially)
@@ -22,6 +23,10 @@ errors are returned as 0 and some negative number resp.
 \fIunfread\fP can be used in the same way, except you give it a buffer
 in which the data can be stored. In good old fortran tradition you
 must know the largest buffer size this routine can expect to see.
+.PP
+The \fIunfsize\fP routine can be set to change the default UNFIO_HDR_SIZE
+header size (as determined during NEMO configure and install). Most older
+compilers use 4, whereas gfortran use 8.
 .PP
 For example, the file created from the following snippet of code
 .PP
@@ -98,5 +103,7 @@ Peter Teuben
 .ta +1i +4i
 xx-may-94	V1.0 Created for prun       	PJT
 8-aug-95	V1.1 added support for swap for NBODY5 (u3tos)	PJT
+1-mar-06	V1.2 added unfsize for gfortran 	PJT
+4-mar-06	V1.3 use a default UNFIO_HDR_SIZE for hdr_size	PJT
 .fi
 
