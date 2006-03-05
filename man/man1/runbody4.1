@@ -19,7 +19,7 @@ parameter names are the same as their counterpart in
 \fBnbody4\fP.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
-is also given:
+is also given: ***  BIG FAT WARNING :: this is still a clone of the runbody2 manual page ***
 .TP 20
 \fBin=\fP
 input file (optional, see \fBnbody=\fP to generate your own input 
@@ -189,7 +189,7 @@ You can also supply existing NEMO snapshots as initial conditions
 .SH BUGS
 Scaling can cause output to become out of bounds.
 .SH SEE ALSO
-nbody4(1NEMO), nbody2(1NEMO), snapshot(5NEMO), u3tos(1NEMO), stou4(1NEMO)
+nbody4(1NEMO), nbody2(1NEMO), snapshot(5NEMO), u3tos(1NEMO), stou4(1NEMO), nbody4(5NEMO)
 .SH FILES
 .nf
 .ta +2i
@@ -197,6 +197,19 @@ $NEMO/src/nbody/evolve/aarseth/tools	code
 $outdir/fort.1                       	restart dump (compile time dep. size)
 $outdir/fort.2                         	restart dump (compile time dep. size)
 $outdir/fort.4                         	restart dump (compile time dep. size)
+$outdir/fort.7                         	warning on nblist
+$outdir/fort.8                         	T=
+$outdir/fort.12				lagrangian radii?
+$outdir/fort.16				ksrect
+$outdir/fort.26				density
+$outdir/fort.27				velocity
+$outdir/fort.29				hivel
+$outdir/fort.40				?
+$outdir/fort.82				?
+$outdir/fort.83				list of (several) times the N particles with something
+$outdir/fort.88				T,N,...
+$outdir/ESC				List of times and escapers with their properties
+
 $outdir/OUT3                        	particle dump (see \fIu3tos(1NEMO)\fP)
 .SH AUTHOR
 Peter Teuben

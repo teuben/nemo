@@ -1,5 +1,5 @@
 .\" pjt 
-.TH PROGRAMS 8NEMO "18 April 1996" 
+.TH PROGRAMS 8NEMO "4 March 2006"
 .SH NAME
 programs \- list of currently available nemo(1NEMO) commands, ordered thematically
 .SH DESCRIPTION
@@ -50,7 +50,8 @@ units        	units conversion utility
 .nf
 .ta +2.0i
 atos,atos_sph  	convert an ascii snapshot file into \fIsnapshot(5)\fP format
-stoa,stoa_sph  	convert a \fIsnapshot(5)\fP file into an ascii file
+stoa,stoa_sph  	convert a \fIsnapshot(5NEMO)\fP file into an ascii file
+u3tos, u4tos	convert nbodyX datafile to \fIsnapshot(5NEMO)\fP 
 tabtos    	convert ascii table into snapshot format
 snapprint	create table of snapshot variables
 snapfits	Convert snapshot into FITS random group format
@@ -91,20 +92,28 @@ mkhom   	homogeneous sphere
 mkisosph	isothermal sphere
 mkmestel	Mestel disk
 mktestdisk	toy program
+mkkd95		Kuijken-Dubinski-95 composite disk-bulge-halo model
+magalie		Boily et al. composite disk-bulge-halo model
 .fi
 .SH "5. N-BODY INTEGRATORS"
 .nf
 .ta +2.0i
 hackcode1* 	C-version of TREECODE: with optional time slicing
 hackcode3*	C-version, with optional fixed particles/background potential
+directcode	simple direct N-body code
 -treecode      	(Hernquist') fortran version of HACKCODE
-quadcode	Simon White's quad-code
+quadcode	global quadrupole-order N-body code integrator
 potcode    	fixed potential N-body integrator - optional dissipation
 nbody0     	aarseth integrator, variable timestep (toy version)
 nbody1     	aarseth integrator, variable timestep (full version)
 nbody2  	aarseth integrator, with Ahmad-Cohen neighbor scheme
+nbody4		Hermite N-body code with optional stellar evolution
 newton0*    	multi-purpose N-body integrator
 gravsim0	frontend for the GRAVSIM family of integrators
+gyrfalcON	a superberb N-body tree code
+galaxy		3D FFT N-body code
+scfm		N-body integrator using the self-consistent field method
+-mass99		SPH code
 .fi
 .SH "6. PLOTTING, PRINTING and HARD COPIES"
 .nf
@@ -114,6 +123,7 @@ gravsim0	frontend for the GRAVSIM family of integrators
 --gnuplot  	interactive function plotter 
 snapdiagplot*	diagnosis of an N-body run
 snapplot*	display N-body snapshot file
+snapplot3	display N-body snapshot file
 trakplot*	display N-body snapshot file (cumulative)
 snapplotedit	display and edit N-body snapshot file (interactive + mouse)
 xyzview      	Display 3-D position & velocity data
@@ -273,4 +283,5 @@ index(1NEMO), software(8NEMO)
 16-dec-88	..	PJT
 10-feb-90	..	PJT
 4-mar-92	updated	PJT
+
 .fi

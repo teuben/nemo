@@ -1,4 +1,4 @@
-.TH WCS 1NEMO "7 July 2004"
+.TH WCS 1NEMO "21 September 2005"
 .SH NAME
 wcs \- coordinate transforms 
 .SH SYNOPSIS
@@ -50,7 +50,7 @@ to pixel coordinates is done
 \fBhms=t|f\fP
 Determines if the first coordinate, the longitude, should be printed in
 H:M:S (the default) or D:M:S format.
-.SH EXAMPLE
+.SH EXAMPLES
 For a given $ra, $dec and $fitsfile, the corresponding pixel positions are computed.
 .nf
 set crpix1=`fitshead $b | grep -w ^CRPIX1 | awk '{print $3}'`
@@ -61,6 +61,12 @@ set cdelt1=`fitshead $b | grep -w ^CDELT1 | awk '{print $3}'`
 set cdelt2=`fitshead $b | grep -w ^CDELT2 | awk '{print $3}'`
 
 set pix=(`wcs ref=$crval1,$crval2 refpix=$crpix1,$crpix2 inc=$cdelt1,$cdelt2 rot=0 type=TAN pos=$ra,$dec`)
+
+.fi
+.PP
+Here is an example how to find out what the circumscribing "box" is around a curved
+RA-DEC plate in the \fBTAN\fP projection:
+.nf
 
 .fi
 

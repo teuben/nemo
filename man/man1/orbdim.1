@@ -8,6 +8,8 @@ orbdim \- compute dimensionaly of phase space for an orbit
 \fIorbdim\fP computes the dimensionalty of phase space for an orbit.
 It uses the method described by Carnevalli and Santangelo.
 .PP
+Other methods, such as SALI (see Manos & Athanassoula), exist.
+.PP
 \fIorbdim\fP needs a lot of data before the exponent can be reliably
 determined. In practice a 3 dimensional orbit is excluded from
 this analysis. It can be done with 2 dimensional orbits though.
@@ -20,7 +22,10 @@ input file, in \fIorbit(5NEMO)\fP format [no default]
 .SH BUGS
 I need to finish the documentation
 .SH SEE ALSO
+.nf
 Carnevali, P. and Santangelo, P., 1984. \fIApJ\fP \fB281\fP 473-476.
+Manos, T and Athanassoula, E. - Smaller Alignment Index (SALI)
+.fi
 .SH AUTHOR
 Peter Teuben
 .SH FILES
