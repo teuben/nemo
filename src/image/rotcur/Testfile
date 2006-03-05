@@ -40,7 +40,7 @@ map1.vel:
 	$(EXEC) ccdvel map1.vel radii=@map1.r vrot=@map1.v pa=$(PA) inc=$(INC)
 
 map1.tab: map1.vel
-	ccdprint map1.vel x= y= newline=t label=x,y | awk '{if ($$3 != 0) print $$1-63.5,$$2-63.5,$$3}' > map1.tab
+	ccdprint map1.vel x= y= newline=t label=x,y | awk '{if (NF==3 && $$3 != 0) print $$1-63.5,$$2-63.5,$$3}' > map1.tab
 
 
 map1.den:
