@@ -20,12 +20,14 @@ string defv[] = {
     "in=???\n                     input file name",
     "out=\n                       output file name [fort.4]",
     "nbody=0\n                    test if this nbody is ok (0=no test)",
-    "header=4\n                   unfio header size (4 or 8)",
-    "VERSION=1.2\n		  2-mar-06 PJT",
+    "header=\n                    if used, force unfio header size (4 or 8)",
+    "VERSION=1.3\n		  4-mar-06 PJT",
     NULL,
 };
 
 string usage = "convert snapshot to unit-4 for NBODYx";
+
+string cvsid="$Id$";
 
 extern int nemo_file_size(string);
 
@@ -36,11 +38,12 @@ void nemo_main(void)
     int ibody, nbody, maxbody, i, j, k;
     real *mbuf, *cbuf;
     float *mass, *vel, *pos;
-    int hdr_size = getiparam("header");
+
+    if (hasvalue("header"))
+      unfsize(getiparam("header"));
 
     maxbody = getiparam("nbody");
     instr = stropen(getparam("in"), "r");
-    unfsize(hdr_size);
     get_history(instr);
     if (hasvalue("out")) {
         fname = getparam("out");

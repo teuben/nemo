@@ -10,6 +10,7 @@
  *  16-jun-97   1.3a warning swap/FIO
  *  28-feb-06   1.4  with the new nbody4 a mode= is needed      pjt
  *                   and in general header= needs known        
+ *   4-mar-06   1.5  header= now blank default                  pjt
 
 
 nbody1
@@ -48,7 +49,7 @@ string defv[] = {
     "swap=f\n       Swap byte (big vs. little endian only)",
     "mode=1\n       NBODYx mode (valid are 1,2,4)",
     "key=name\n     snapshot Key comes from 'name' or 'key'?",
-    "header=4\n     unfio header size (4 or 8)",
+    "header= \n     if used, force unfio header size (4 or 8)",
     "integer=4\n    Size of integers in dataset (2 or 4) ** 2 is deprecated **",
     "VERSION=1.4\n  1-mar-06 PJT",
     NULL,
@@ -71,13 +72,15 @@ void nemo_main(void)
     string keysel = getparam("key");
     int ilen, alen, saved=0, alen_fix=-1;
     int frame[MAXFRAME], nframe, iframe;
-    int hdr_size = getiparam("header");
     int nbody, model, run, *name, *key, i, j, k, ibody, mode, nwflt, nwint;
     int coordsys = CSCode(Cartesian, 3, 2);
     float *mass, *pos, *vel, *phi, *aux, a[MAXHEADER];
     real *rmass, *rphase, tsnap;
     bool Qswap;
     stream outstr;
+
+    if (hasvalue("header"))
+      unfsize(getiparam("header"));   
 
     nframe = nemoinpi(getparam("frame"),frame,MAXFRAME);
     if(nframe<0) error("Parsing frame=%s",getparam("frame"));
@@ -91,7 +94,6 @@ void nemo_main(void)
     outstr = stropen(getparam("out"),"w");
     put_history(outstr);
 
-    unfsize(hdr_size);
 #ifdef FIO
     nb3open_(fname,strlen(fname));
     if (Qswap) warning("-DFIO compiled cannot swap");

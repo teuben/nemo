@@ -18,12 +18,14 @@ string defv[] = {
     "in=\n          Input file (in UNIT 4 format)",
     "out=???\n      Output file (snapshot(5NEMO) format)",
     "nbody=\n       Input Number of particles",
-    "header=4\n     unfio header size (4 or 8)",
-    "VERSION=1.1\n  2-mar-06 PJT",
+    "header=\n      if used, force unfio header size (4 or 8)",
+    "VERSION=1.2\n  4-mar-06 PJT",
     NULL,
 };
 
 string usage = "Convert NBODY unit-4 file to snapshot";
+
+string cvsid="$Id$";
 
 #define SIZEPP  36      /* 36 bytes per particle on fort.4 */
 
@@ -37,9 +39,10 @@ void nemo_main(void)
     float *mass, *vel, *pos;
     real *rmass, *rphase;
     stream outstr;
-    int hdr_size = getiparam("header");
 
-    unfsize(hdr_size);
+    if (hasvalue("header"))
+      unfsize(getiparam("header"));
+
     if (hasvalue("in")) {
         fname = getparam("in");
         nb4open_(fname,strlen(fname));
