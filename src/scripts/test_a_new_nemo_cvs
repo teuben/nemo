@@ -7,6 +7,7 @@
 #                4-may-2004   various new keywords and cfitsio optional install
 #               30-jul-2004   optional cfitsio install
 #               11-jul-2005   various additional packages for NEMO V3.2.3
+#                5-mar-2006   also create nemo_start.sh
 
 set pgplot=1		# install PGPLOT via CVS also
 set intel=0		# pick intel compiler (astromake)
@@ -150,6 +151,11 @@ endif
 
 rehash
 $make libs
+
+# kludged sh support for manybody
+ln -s nemo_start nemo_start.csh
+src/scripts/mk_nemo_start.sh >  nemo_start.sh
+
 
 if ($vogl) then
   echo "Compiling vogl (logfile: install.vogl.log)"
