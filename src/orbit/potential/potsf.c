@@ -9,6 +9,7 @@
 #include <stdinc.h>
 #include <getparam.h>
 #include <filestruct.h>
+#include <history.h>
 
 string defv[] = {
   "in=???\n                     input file name ",
@@ -28,6 +29,7 @@ local stream instr;			/* input stream from struct. file   */
 
 local bool Qpot   = FALSE;
 local bool Qfirst = TRUE;
+local int npot = 0;
 
 /* local functions */
 void   print_item   (string);
@@ -43,7 +45,7 @@ void   end_line     (void);
 
 void nemo_main()
 {
-  string *tags;
+  string *tags, *hist, *sp;
 
   instr = stropen(getparam("in"), "r");
   Qfirst = getbparam("first");
@@ -52,6 +54,14 @@ void nemo_main()
     print_item(*tags);
     free(*tags);
     free((char *)tags);
+  }
+  if (npot==0) {
+    warning("No potential found, trying history....");
+    warning("eventually the program will parse these....");
+    hist = ask_history();
+    for (sp=hist; *sp; sp++) {
+      dprintf(0,"%s\n",*sp);
+    }
   }
 }
 
@@ -64,7 +74,10 @@ void print_item(string tag)
   if (streq(type, SetType)) {
     get_set(instr, tag);
     print_set(tag);
-    if (streq(tag,"Potential")) Qpot = TRUE;
+    if (streq(tag,"Potential")) {
+      Qpot = TRUE;
+      npot++;
+    }
     tags = list_tags(instr);
     for (tp = tags; *tp != NULL; tp++)
       print_item(*tp);
