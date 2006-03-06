@@ -14,7 +14,7 @@ int file_size(char *name)
   if (stat(name,&buf) == 0)
     return buf.st_size;
   else {
-    dprintf(1,"nemo_file_size: stat returned errno=%d\n",errno);
+    fprintf(stderr,"file_size: stat returned errno=%d for %s\n",errno,name);
     return -1;
   }
 }
