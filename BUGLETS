@@ -1,9 +1,8 @@
 * this file is called BUGLETS, it used to be called BUGS anymore until
   this so-called MacOSX unix clone came around and decided it cannot 
-  handle case senstive file/directory names. Cygwin isn't much better
+  handle case sensitive file/directory names. Cygwin isn't much better
   (they all depend on a weaker FS, vfat and HFS+ which cannot handle
   such names)
-
 
 - intel 8.0 - some linkeage problems left with loadobj based
   routines, e.g. vrtm51.so can't  find get_atable
@@ -12,6 +11,8 @@
 
 - intel 7.1 also has some remaining problems. Linking needs to
   be done with fortran and the -Vaxlib library
+
+- intel 9.0: how the heck do you use multiple .o's on the link line
 
 - install on machines where IRAF's f77 is in the path before the 
   system version: you will need to
@@ -158,6 +159,7 @@ potlist: rld: Fatal Error: attempted access to unresolvable symbol in
      in addition, tools like mknemo won't copy the executable to $NEMOBIN/ since
      it doesn't know about the .exe  extension thatg cygwin is using
 
+- x86_64:  our configure doesn't seem to recognize /usr/X11R6/lib64 should be used
+  instead of /usr/X11R6/lib ....
 
-- falcON:
-     currently contain two (language) bugs, which require you to use gcc 3.2.2
+- cfitsio: currently broken, seems to write huge files in e.g. ccdfits
