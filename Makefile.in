@@ -365,7 +365,7 @@ dist:
 	  echo 'Change: nemo.html'; \
 	  echo 'And run the following commands: '; \
 	  echo "cvs -Q tag `echo nemo_$(NEMOVER) | sed 's/\./_/g'`"; \
-	  echo 'scp $(DIST_DIR).tar.gz apus:/home/ftp/pub/nemo'; \
+	  echo 'scp $(DIST_DIR).tar.gz chara:/local/ftp/pub/nemo'; \
 	  echo 'src/scripts/version inc'; \
 	  echo 'cvs commit VERSION inc/version.h'; \
 	  echo 'DONE: ----------------------------------------------------';\
@@ -412,7 +412,7 @@ cvstar:
 	(mkdir nemo_cvs/local; cd nemo_cvs/local; cvs -Q -d $(ACVSROOT) co pgplot)
 	gtar zcf nemo_cvs.tar.gz nemo_cvs
 	rm -rf nemo_cvs
-	scp nemo_cvs.tar.gz /tmp/VERSION_cvs apus:/home/ftp/pub/nemo
+	scp nemo_cvs.tar.gz /tmp/VERSION_cvs chara:/local/ftp/pub/nemo
 
 # The following 'ftp' targets only supposed to work at the master site
 # Warning:  (COMPRESS) .gz extensions have been hardcoded here
