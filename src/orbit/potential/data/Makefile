@@ -36,9 +36,11 @@ POT_F77 = \
 	athan92.f harmonicf.f pfenniger84.f piner94.f 
 
 POT_CXX = \
-	Dehnen.cc Hernquist.cc NFW.cc GalPot.cc MiyamotoNagai.cc Plummer.cc 
+	Dehnen.cc Hernquist.cc NFW.cc MiyamotoNagai.cc Plummer.cc 
 # c++ bug?
 #	Combined.cc 
+# const bug, 4.0.0 ok, but 4.0.2 and later bad, can't find matching function
+#       GalPot.cc 
 
 SRCFILES= Makefile \
 	$(POT_CC) $(POT_F77) $(POT_CXX)
