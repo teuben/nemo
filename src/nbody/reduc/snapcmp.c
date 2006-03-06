@@ -53,7 +53,7 @@ string defv[] = {			/* DEFAULT INPUT PARAMETERS         */
     "formal=false\n			  if true, make publication plot",
     "headline=\n                          header",
 #endif
-    "VERSION=1.5b\n			  2-feb-05 PJT",
+    "VERSION=1.5c\n			  21-sep-05 PJT",
     NULL,
 };
 
@@ -74,6 +74,7 @@ string headline;
 
 #endif
 
+local real small_dt = 1.0e-14;
 
 
 
@@ -89,7 +90,7 @@ void nemo_main()
     string time1, time2, file1, file2;
     Body *btab1 = NULL, *btab2 = NULL;
     int nbody1, bits1, nbody2, bits2;
-    real tsnap1 = 0.0, tsnap2 = 0.0, *result;
+    real dt, tsnap1 = 0.0, tsnap2 = 0.0, *result;
 
     file1 = getparam("in1");
     file2 = getparam("in2");
@@ -123,10 +124,13 @@ void nemo_main()
     	error("no more snapshots found in %s at t=%g",file1,tsnap2);
       else if (bits2 == 0)
     	error("no more snapshots found in %s at t=%g",file2,tsnap1);
-      if (nbody1 != nbody2)
+      if (nbody1 != nbody2) 
 	error("%s = %d, %d different", NobjTag, nbody1, nbody2);
-      if (tsnap1 != tsnap2)
-	warning("times = %f, %f are different", tsnap1, tsnap2);
+      if (tsnap1 != tsnap2) {
+	dt = ABS(tsnap2-tsnap1);
+	if (dt > small_dt)
+	  warning("times = %f, %f are different (%g)", tsnap1, tsnap2, dt);
+      }
       if (bits1 != bits2)
 	warning("bits = 0x%x, 0x%x are different", bits1, bits2);
       result = snapcmp(btab1, btab2, nbody1, tsnap1);
