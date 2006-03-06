@@ -1,4 +1,5 @@
-Remaining MacOSX problems: (a special macosx.html web page dedicated to this)
+MacOSX problems: (a special macosx.html web page dedicated to this)
+    See:     http://bima.astro.umd.edu/nemo/macosx.html
   - configure leaves -lcrt.o etc. in, so they need manual removal
     from makedefs and NEMORC.gen before continuing on
 
@@ -12,12 +13,12 @@ Remaining MacOSX problems: (a special macosx.html web page dedicated to this)
   - xyzview is too slow to be useful, we should recode it such that
     OpenGL (and thus Mesa) can be linked. This would also remove the
     immediate need for vogl.
-    (try JCL's new program 'glnemo')
+    try JCL's new program 'glnemo' instead
 
   - one case had gcc in /usr/bin but g77 in /usr/local/bin, and not in
     the path -> pgplot didn't get build.
 
-problems with gcc4: (as tested on FC3/FC4)
+GCC4 problems: (as tested on FC3/FC4)
   - pgplot: grfont.dat cannot be built, some runtime problem with fortran
   - pgplot: needs a gfortran_gcc4.conf file for now
 	also:  no more -fno-backslash
@@ -48,15 +49,38 @@ general things for 3.2.x
   - use some kind of global MAXBODY where we often use different values
 	**mostly done**
 
-  - gyrfalcON: installation is prone to requiring a patch:
+  - gyrfalcON: works, but somewhat compiler dependant
 
-     The new version of gyrfalcON (V3.0.4; 28 oct 2005) now compiles fine all the
-     way from gcc 3.2.2 to 4.0.1 
-     (though make/defs needs a patch:  -lg2c has to be -gfortran)
+     The new version of gyrfalcON (V3.0.4; 28 oct 2005) now compiles fine most of the
+     way from gcc 3.2.2 to 4.0.2 , with some minor exceptions in early releases of
+     some series.
+     On intel:
+	
+	3.2.2	ok
+
+	3.3.2	ok
+	3.3.4	ok
+	3.3.6	ok
+
+	3.4.1   fail
+	3.4.2	fail 	non-constant `(Ky + M2)' cannot be used as template argument
+	3.4.3	ok
+	3.4.5	ok
+
+	4.0.0	ok
+	4.0.2	ok
+
+	4.1.0	fail    falcON::fieldset::fieldset(falcON::fieldbit)
 
      For MacOSX a bit more work is needed, since isnan() and isinf() are not known?
 	add:	-Wno-long-double
 	remove:	-rdynamic
+     On my 10.3.9:
+	gcc3    3.1 20021003 (build 1256)                   -- isinf/isnan  problem
+	gcc ->  3.3 20030304 (Apple Computer, build 1495)   -- isinf/isnan  problem
+     On somebody's 10.4.5:
+	gcc -> 4.0.0 (build 4061)			    template problem??
+	gcc-3.3 -> build 1809				    ok
 
 things for 3.4
 
@@ -76,6 +100,8 @@ code & line coverage: (gcov, lcov)
   
 - io_nemo library written by JCL in Marseille
 	has problems in -DSINGLEPREC
+
+- use cfortran?  cfitsio also uses it.
 
 - add the self-exploding problem for treecodes (Salmon ...)
   into NEMODAT
@@ -154,6 +180,12 @@ code & line coverage: (gcov, lcov)
 
 - alternative to autoconf?  Pre Make Kit  = http://pmk.sourceforge.net/
 
+- Testfile's:    also needs a program to be added to the local Makefile,
+	as well as in the list of programs to be installed...
+	that's non-intuitive
+
+- man pages vs. doxygen; especially the introduction of C++ is showing 
+  the aging of man pages. should we switch to doxygen.
 
 - solaris10 on intel: (sep 2005)
 
@@ -194,5 +226,13 @@ icc: error: problem during multi-file optimization compilation (code 1)
 make[1]: [libpgplot.so] Error 1 (ignored)
 
 
-- Testfile's:    also needs a program to be added to the local Makefile,
-	that's non-intuitive
+=
+
+building shared vs. static:
+
+gfortran -shared -O2 *.f -o libfoo.so -fPIC
+
+gfortran -O2 -c *.f; ar cr libfoo.a *.o
+
+optimize with:   -mtune=pentium4 or -ffast-math
+
