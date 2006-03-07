@@ -24,10 +24,13 @@
 \title{ 
 {\Huge MANYBODY:} \\
            {\LARGE an accompanying guide to }\\
+	   {\bf  International School on Galactic and Cosmological N-Body Simulations} \\
+  	   { INAOE, Tonantzintla, Puebla, Mexico, 23 July - 4 August 2006}\\
+	   {\small and previously} \\
 	   {\bf  Summer school on direct N-body simulations} \\
 	   {\bf  Zomer school over direkte N-deeltjes simulaties} \\
 	   { Astronomical Institute {\it 'Anton Pannekoek'}, Amsterdam, 24-30 July 2005}\\
-	   {\small and previously} \\
+	   {\small and} \\
 	   { \bf School on Numerical N-Body Dynamics }\\
 	   { \bf \'Ecole de Dynamique Numerique Ncorps }\\
            { Observatoire astronomique de Strasbourg, France, 19-22 March 2004}
@@ -323,7 +326,7 @@ can be used in the {\it manybody} environment.
 
 {\tt hnbody}  & PP & Rauch \& Hamilton 2004 & \\
 
-{\tt kira} & PP & Starlab & d \\
+{\tt kira} & PP & Starlab et al. & d \\
 
 {\tt treecode} & PP & Barnes \& Hut 1986, Hernquist 1989 & s \\
 
@@ -360,7 +363,7 @@ example running the code for two crossing times on a self-generated 16-body
 Plummer sphere configuration
 
 \footnotesize\begin{verbatim}
-   examples/ex1
+   # File: examples/ex1
    # sample input parameter file
 1% cat $NEMO/usr/aarseth/firstn/input
 16 12.0 0.0 1.0 2.0
@@ -406,7 +409,7 @@ you to use the full version, {\tt nbody1} (see below).
 
 
 \footnotesize\begin{verbatim}
-   # examples/ex2
+   # File: examples/ex2
    # remind myself to the valid command line parameters and defaults
 1% mkplummer help=
 mkplummer out=??? nbody=??? mfrac=0.999 rfrac=22.8042468 seed=0 time=0.0 zerocm=t 
@@ -924,7 +927,11 @@ find this compiler version available in the {\it manybody} distribution.
 
 Fellhauer et al. (2000) wrote a particle-mesh code with high resolution
 sub-grids and an NGP (nearest grid point) force-calculation scheme
-based on the second derivatives of the potential.
+based on the second derivatives of the potential.  It is also an example of 
+a code where initial conditions benefit from knowing the details of the
+potential calculation routines. In particular, if the initial conditions
+are known to be representing a stable configuration (e.g. a Plummer sphere)
+See the program {\tt plummer.f} in the {\tt superbox} code distribution.
 
 \section{gadget}
 
@@ -1697,7 +1704,8 @@ and Java3D is being developed.
 
 \section{ifrit}
 
-{\tt http://casa.colorado.edu/~gnedin/IFRIT/} uses VTK and QT and is
+{\tt http://home.fnal.gov/~gnedin/IFRIT/}
+uses VTK and QT and is
 written in C++. It is a powerful
 tool that can be used to visualize 3-d data sets.
 
@@ -1784,7 +1792,9 @@ Barnes \& Hut - 1986 - Nature - 324, 446.
 Barnes \& Hut - 1989
 {\it Error analysis of a tree code} - {\bf 1989ApJS...70..389B.pdf}.
 
-Binney, J. \& Tremaine, S. - {\it Galactic Dynamics}, Princeton University Press. 1987.
+Binney, J. \& Merrifield, M. {\it Galactic Astronomy}, Princeton University Press. 1998.
+
+Binney, J. \& Tremaine, S. - {\it Galactic Dynamics}, Princeton University Press. 1987. 
 
 Cruz, F.; Aguilar, L. A.; Carpintero, D. D
 {\it A New Method to Find the Potential Center of N-Body Systems} - 2002RMxAA..38..225C
@@ -1826,16 +1836,20 @@ Hernquist \& Ostriker - 1992 - {\it A self-consistent field method for galactic 
 Hockney \& Eastwood - 1970? {\it Simulations using Particles} - there is now a 2nd edition.
 
 Holmberg, E. - 1941 - Ap.J. 94, 385.
+{\bf 1941ApJ....94..385H.pdf}.
 
 Hurley et al.- astro-ph/0507239
 
 Hut, P. \& Makino, J., 2003  {\it Moving Stars Around} :
 {\bf acs\_v1\_web.pdf}
 
+Hut, P. \& McMillan, S.L, 1987  {\it The Use of Supercomputers in Stellar Dynamics} :
+
 Joshi, Kriten J.; Rasio, Frederic A.; Portegies Zwart, Simon - 2000 -
 {\it Monte Carlo Simulations of Globular Cluster Evolution. I. Method and Test Calculations},
 ApJ 540, 969: 
 {\bf 2000ApJ...540..969J.pdf}
+% is this the starlab paper?
 
 Khalisi, E., \& Spurzem, R., 2003 - {\it NBODY6 : Features of the computer code}.
 (last update: 2003, May 02)
@@ -1845,9 +1859,7 @@ MNRAS, 277, 1341 : {\bf 1995MNRAS\_277\_1341K.pdf}.
 
 James, R. - 1977 -  J.Comp. Phys. 25, 71.
 
-Merrifield \& Binney
-
-Lecar - {\it The Standard IAU 25-body problem} - 1968, Bull.Astr. 3, 91. 
+Lecar, M. - {\it The Standard IAU 25-body problem} - 1968, Bull.Astr. 3, 91. 
 
 Portegies Zwart, Simon F.; Baumgardt, Holger; Hut, Piet; Makino, Junichiro; McMillan, Stephen L. W. -
 2004 - {\it Formation of massive black holes through runaway collisions in dense young star clusters}
@@ -1893,6 +1905,7 @@ Theis, C. {it  Two-body relaxation in softened potentials} - 1998, Astron.Astrop
 {\bf theis98.pdf}.
 
 von Hoerner, S. - 1960 - Z.f.Astrophys. 50, 184.
+{\bf 1960ZA.....50..184V.pdf}
 
 % von Hoerner, S. - 1963 Z.Astrophys. 57, 47.
 
@@ -2148,7 +2161,7 @@ incompatible libraries or tools. Some of this is noted in Appendix I.
 For reference, the old install took about 27 minutes on my Pentium 1.6GHz based
 laptop.
 
-\section{Importing Packages into manybody}
+\section{Importing new Packages into manybody}
 
 Much of the available open source software we use, use
 {\it autotools} to {\tt configure}, {\tt make} and {\tt install} their
