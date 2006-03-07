@@ -19,6 +19,7 @@
 // Version 0.2    22. September 1998                                           |
 // Version 0.3    07. June      2001                                           |
 // Version 0.4    22. April     2002                                           |
+// Version 0.4a    6. March     2006   minor template issue with const         |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 #define  GalPot_cc
@@ -529,7 +530,7 @@ inline void find(int& klo, const int n, S *x, const S xi)
 }
 
 template<class C, class S>
-S qbulir(C*o, S(C::*func)(S), const S a, const S b, const S eps_)
+S qbulir(const C*const o, S(C::*func)(S) const, const S a, const S b, const S eps_)
 {
     register S ba=b-a;
     if(ba==0.) return 0.;
