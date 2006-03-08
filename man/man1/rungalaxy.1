@@ -14,7 +14,8 @@ input snapshot (nemo \fIsnapshot(5NEMO)\fP format).
 No Default.
 .TP
 \fBoutdir=\fP
-directory in which GALAXY will be run.
+directory in which GALAXY will be run. Within this directory several output
+files are created.
 No default.
 .TP
 \fBscale=\fP
@@ -40,8 +41,16 @@ A \fIprintf(3)\fP-style format specification used
 to write positions and velocities for the galaxy.ini
 input file. Default: %g
 .TP
+\fBheader=|4|8\fP
+If used, this is the header size for fortran unfromatted data. Normally
+the system should know which value to take. See also \fIunfio(1NEMO)\fP.
+.TP
 \fBexe=\fP
 name of GALAXY executable [galaxy.exe]   
+.SH FILES
+Within the run-directory several files are created. See \fIgalaxy(1NEMO)\fP for a full 
+description, but in addition a nemo \fIsnapshot(5NEMO)\fP, \fIgalaxy.snap\fP is created
+with the positions, velocities, and potential stored in single precision.
 .SH SEE ALSO
 galaxy(1NEMO), snapshot(5NEMO)
 .SH AUTHOR
