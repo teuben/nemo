@@ -20,6 +20,8 @@ SRC = bdpres.f fftsna.f grenfn.f  psnset.f vbdass.f \
 INC = ../admin.h ../rjinclude.h
 
 
+LINKS = admin.h rjinclude.h
+
 OBJ = $(SRC:f=o)
 
 FFLAGS = -O
@@ -32,9 +34,17 @@ help:
 clean:
 	rm -f core *.o *.a 
 
-lib:	$(OBJ)
+lib:	$(LINKS) $(OBJ)
 	ar ruv $(LIB) $?
 	ranlib $(LIB)
+
+links:	$(LINKS)
+
+admin.h: 
+	ln -s ../admin.h
+
+rjinclude.h:
+	ln -s ../rjinclude.h
 
 
 $(OBJ): $(INC)
