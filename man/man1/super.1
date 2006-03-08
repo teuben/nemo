@@ -1,0 +1,98 @@
+.TH SUPER1 1NEMO "24 June 1997"
+.SH NAME
+super, supergp, superst \-  particle-mesh code with high-resolution subgrids (superbox)
+.SH SYNOPSIS
+\fBsuper\fP 
+.SH DESCRIPTION
+\fIsuperbox\fP is an efficient code for collisionless galactic dynamics.
+It is an improved particle-mesh code with high resolution sub-grids focused
+either on the center of mass or center of density of the galaxies. It can
+treat an arbitrary number of galaxies without requiring extra computational
+resources. It is  a fast and low-storage algorithm that can be used even on
+small PCs and workstations.
+.PP
+\fBsuper\fP can contain cosmological.
+\fBsupergp\fP include galactic potential.
+\fBsuperst\fP include sticky particles code.
+.SH FILES
+.nf
+.ta +2i
+$NEMO/usr/superbox
+.fi
+The main files associated with the run are (notice the basename 'galaxy' is fixed by the code):
+.nf
+.ta +2i
+name		small file with the name of the simulation (e.g. modelxy)
+modelxy.CONT	input data
+modelxy.CONT0	??
+modelxy.CONT1	??
+modelxy.HEAD	output summary of runtime-calculated quantities per timestep
+modelxy.DTENS	??
+modelxy.ITENS	??
+modelxy.LOG	logfile
+modelxy.adat	??
+modelxy.edat	??
+modelxy.dens	??
+modelxy.potn	??
+modelxy.star	??
+modelxy.out	??
+
+bla	blabla
+.fi
+.PP
+Initial conditions is a direct-access file. The first header contains
+60 integers (only some are used), followed by 60 reals. After this the data
+for each star is followed, only the phase space coordinates are needed
+(x,y,z,vx,vy,vz), in records of 6 reals..
+.nf
+ ih(1)	number of galaxies (gnum)
+ ih(2)	total number of stars (istno)
+ ....
+
+ fh(1)	size of inner grid (rcore)
+ fh(2)	size of middle grid (rout)
+ fh(3)	size of local universe (rsystem)
+ fh(4)	size of time-step (dt)
+ .....
+
+.fi
+Here are the fortran-style I/O used in the code. Notice the tricky multiple
+OPEN/CLOSE for the different record lengths:
+.nf
+    integer ih(60)
+    real    fh(60), posvel(6)
+
+    open (1,ACCESS='DIRECT',RECL=240,IOSTAT=iso)
+    write (1,rec = 1) ih 
+    write (1,rec = 2) fh 
+    close(1)
+
+    open (1,ACCESS='DIRECT',RECL=24,IOSTAT=iso)
+    do i=1,nstar
+       ...
+       write(1,rec=20+i) posvel
+    end do
+    close(1)
+.fi
+.SH COMPILATION
+Note that the maximum grid size and maximum amount of particles are hardcoded
+during compilation. See comments in \fBrjinclude.h\fP how to change the
+maximum grid size and the parameter \fBmbod\fP in
+\fBgalaxy.f\fP for the maximum particle number that can be used.
+.SH BENCHMARKS
+1000 particles...
+.SH SEE ALSO
+unfio(1NEMO), snapshot(5NEMO)
+.PP
+.nf
+Fellhauer et al (2000)
+.fi
+.SH AUTHOR
+M. Fellhauer, P. Kroupa, H. Baumgardt, R. Bien, C.M. Boily, R. Spurzem, N. Wassmer
+.SH HISTORY
+.nf
+.ta +1i +4i
+??		V2.4 older version, w/ sticky particles, black holes, comoving coords
+1997		V3.0 new improved, but without some previous features
+4-mar-06	NEMO documented	PJT
+.fi
