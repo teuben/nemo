@@ -1,48 +1,54 @@
-.TH RUNGALAXY 1NEMO "18 March 2004"
+.TH RUNGALAXY 1NEMO "7 March 2006"
 .SH NAME
 rungalaxy \- run Sellwood's galaxy program
 .SH SYNOPSIS
 \fBrungalaxy\fP [parameter=value]
 .SH DESCRIPTION
-No description available. This manual page was created by mkman
+\fBrungalaxy\fP is a front-end to Sellwood's \fIgalaxy(1NEMO)\fP program.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBin=\fP
-input snapshot (nemo format).
-No Default. [???]   
-.TP 20
-\fBout=\fP
+input snapshot (nemo \fIsnapshot(5NEMO)\fP format).
+No Default.
+.TP
+\fBoutdir=\fP
 directory in which GALAXY will be run.
-No default [???]
-.TP 20
+No default.
+.TP
 \fBscale=\fP
 number of grid cells per unit length [15.0]
-.TP 20
+.TP
 \fBdt=\fP
 integration time step [0.05]    
-.TP 20
+.TP
 \fBdtout=\fP
 time between particle outputs [0.5]   
-.TP 20
+.TP
 \fBdtlog=\fP
 time between integral checks [0.1]   
-.TP 20
+.TP
 \fBtstop=\fP
 end time [1.0]     
-.TP 20
+.TP
 \fBgrid=\fP
 number of grid cells in (x,y,z,) [33,33,33] 
-.TP 20
+.TP
+\fBformat=%g\fP
+A \fIprintf(3)\fP-style format specification used
+to write positions and velocities for the galaxy.ini
+input file. Default: %g
+.TP
 \fBexe=\fP
 name of GALAXY executable [galaxy.exe]   
 .SH SEE ALSO
-galaxy(1NEMO)
+galaxy(1NEMO), snapshot(5NEMO)
 .SH AUTHOR
 Jerry Sellwood (galaxy), Peter Teuben (rungalaxy)
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
 18-mar-04	man page created
+7-mar-06	remove snap2ini dependancy
 .fi
