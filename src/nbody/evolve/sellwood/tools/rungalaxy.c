@@ -9,7 +9,11 @@
  *	24-jun-1997		written
  *	18-jul-2001		default is galaxy.exe
  *      18-mar-2004             finally made it work
- *       7-mar-2006             no need for snap2ini
+ *       7-mar-2006     V2.0    no need for snap2ini
+ *                      V2.1    also write output snap
+ *
+ * 
+ *  @TODO: this program should run in SinglePrecision, since galaxy does
  *
  */
 
@@ -26,6 +30,7 @@
 #include <snapshot/snapshot.h>
 #include <snapshot/body.h>
 #include <snapshot/get_snap.c>
+#include <snapshot/put_snap.c>
 
 string defv[] = {
     "in=???\n         input snapshot (nemo format)",
@@ -35,10 +40,11 @@ string defv[] = {
     "dtout=0.5\n      time between particle outputs",
     "dtlog=0.1\n      time between integral checks",
     "tstop=1.0\n      end time",
-    "format=%g\n      format for pos,vel for galaxy.ini",
     "grid=33,33,33\n  number of grid cells in (x,y,z,)",
+    "format=%g\n      format for pos,vel for galaxy.ini",
+    "header=\n        If given, use this for unfio header/trailer size",
     "exe=galaxy.exe\n name of GALAXY executable",
-    "VERSION=2.0\n    7-mar-06 PJT",
+    "VERSION=2.1\n    7-mar-06 PJT",
     NULL,
 };
 
@@ -48,16 +54,20 @@ string cvsid="$Id$";
 
 int nemo_main()
 {
-    int i, n, nbody, bits,ngrid[3];
+    int i, n, nbody, bits, ndata, count, ngrid[3];
     real scale, dt, dtout, dtlog, tstop, tsnap, mass;
     string exefile = getparam("exe");
     string rundir = getparam("outdir");
     string fmt = getparam("format");
-    stream datstr, instr;
+    stream datstr, instr, outstr;
     char fullname[256];
     char command[256];
     char fmt6[256];
+    float *gdata, *gd;
     Body *bp, *btab = NULL;
+
+    if (hasvalue("header"))
+      unfsize(getiparam("header"));
 
     n = nemoinpi(getparam("grid"),ngrid,3);
     if (n>0 && n<=3) {
@@ -90,6 +100,8 @@ int nemo_main()
     get_history(instr);
     if (!get_tag_ok(instr, SnapShotTag)) error("no snapshot");
     get_snap(instr, &btab, &nbody, &tsnap, &bits);
+    strclose(instr);
+
     if ( (bits & PhaseSpaceBit) == 0) error("no phasespace");
     for (bp=btab;bp<btab+nbody; bp++)
       mass += Mass(bp);
@@ -105,6 +117,37 @@ int nemo_main()
 
     goto_rundir(rundir);
     run_program(exefile);
+
+    
+    sprintf(fullname,"%s","galaxy.res");
+    instr = stropen(fullname,"r");
+
+    sprintf(fullname,"%s","galaxy.snap");
+    outstr = stropen(fullname,"w");
+    put_history(outstr);
+
+    ndata = 7*sizeof(float)*nbody;
+    gdata = (float *) allocate(ndata);
+
+    bits = (PhaseSpaceBit | PotentialBit);
+    while (1) {
+      count = unfread(instr,gdata,ndata);
+      if (count <= 0) break;
+      printf("Time=%g\n",gdata[0]);
+      tsnap = gdata[0];
+      count = unfread(instr,gdata,ndata);
+      if (count <= 0) error("Problem reading posvelphi from galaxy.res");
+      for (bp=btab, gd=gdata;bp<btab+nbody; bp++) {
+	Pos(bp)[0] = *gd++;
+	Pos(bp)[1] = *gd++;
+	Pos(bp)[2] = *gd++;
+	Vel(bp)[0] = *gd++;
+	Vel(bp)[1] = *gd++;
+	Vel(bp)[2] = *gd++;
+	Phi(bp)    = *gd++;
+      }
+      put_snap(outstr, &btab, &nbody, &tsnap, &bits);
+    }
 }
 
 
