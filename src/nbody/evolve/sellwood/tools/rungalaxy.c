@@ -57,7 +57,7 @@ int nemo_main()
     char fullname[256];
     char command[256];
     char fmt6[256];
-    Body *btab,*bp;
+    Body *bp, *btab = NULL;
 
     n = nemoinpi(getparam("grid"),ngrid,3);
     if (n>0 && n<=3) {
