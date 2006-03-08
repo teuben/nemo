@@ -28,7 +28,7 @@ c
       common / grids / lgrids, grids
 c
       integer mbuff
-      parameter ( mbuff = 1000 )
+      parameter ( mbuff = 100000 )
       integer iflag( mbuff ), iz( mbuff ), loc( mbuff ), ncl( mbuff )
       logical nskip( mbuff )
       real acc( 3, mbuff ), gpot( mbuff ), newc( 6, mbuff )
