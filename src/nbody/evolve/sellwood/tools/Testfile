@@ -1,0 +1,25 @@
+DIR = src/nbody/evolve/sellwood/tools
+BIN = rungalaxy
+NEED = $(BIN) mkplummer galaxy tsf
+
+help:
+	@echo $(DIR)
+
+need:
+	@echo $(NEED)
+
+clean:
+	@echo Cleaning $(DIR)
+	@rm -fr run1.in run1
+
+NBODY = 100
+
+all: $(BIN)
+
+
+run1.in:
+	mkplummer run1.in $(NBODY)
+
+rungalaxy:	 run1.in
+	$(EXEC) rungalaxy in=run1.in outdir=run1
+	tsf run1/galaxy.snap
