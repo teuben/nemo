@@ -52,7 +52,8 @@ $(L):	$(LOBJFILES)
 
 #	install the library: can be (re)done from scratch by removing .o files
 #install:   .install_inc .install_lib 
-install:
+install:	$(BINFILES)
+	mv $(BINFILES) $(NEMOBIN)
 
 .install_lib: $(OBJFILES)
 	ar ruv $(L) $?
