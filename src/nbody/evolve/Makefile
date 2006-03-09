@@ -3,7 +3,7 @@ include $(NEMOLIB)/makedefs
 #
 
 #	Directories to be visited, in this order
-DIRS = hackcode aarseth scfm directcode multicode flowcode potcode 
+DIRS = hackcode aarseth scfm directcode multicode flowcode potcode sellwood
 
 TARNAME = stuff.tar
 CHKFILE = Last_update
