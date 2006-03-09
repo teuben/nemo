@@ -39,7 +39,12 @@ e 'fi'
 
 e 'if [ -z "${MANPATH}" ]'
 e 'then'
-e '    MANPATH="$NEMO/man":$(man -w); export MANPATH'
+  set mp=(`man -w`)
+  if ($#mp == 1) then
+    e '    MANPATH="$NEMO/man":$(man -w); export MANPATH'
+  else
+    e '    MANPATH="$NEMO/man"; export MANPATH'
+  endif
 e 'else'
 e '    MANPATH="$NEMO/man:${MANPATH}"; export MANPATH'
 e 'fi'
