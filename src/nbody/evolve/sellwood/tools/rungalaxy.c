@@ -44,7 +44,7 @@ string defv[] = {
     "format=%g\n      format for pos,vel for galaxy.ini",
     "header=\n        If given, use this for unfio header/trailer size",
     "exe=galaxy.exe\n name of GALAXY executable",
-    "VERSION=2.1\n    7-mar-06 PJT",
+    "VERSION=2.1a\n   8-mar-06 PJT",
     NULL,
 };
 
@@ -86,6 +86,8 @@ int nemo_main()
     make_rundir(rundir);
 
 
+    /* prepare the parameter file for galaxy */
+
     sprintf(fullname,"%s/%s",rundir,"galaxy.dat");
     datstr = stropen(fullname,"w");    
     fprintf(datstr,"%d %d %d\n",ngrid[0],ngrid[1],ngrid[2]);
@@ -95,6 +97,8 @@ int nemo_main()
     fprintf(datstr,"%g\n",dtlog);
     fprintf(datstr,"%g\n",tstop);
     strclose(datstr);
+
+    /* read snapshot and output it in something galaxy understands */
 
     instr = stropen(getparam("in"),"r");
     get_history(instr);
@@ -115,9 +119,12 @@ int nemo_main()
 	      Vel(bp)[0],Vel(bp)[1],Vel(bp)[2]);
     strclose(datstr);
 
+    /* run the fortran program */
+
     goto_rundir(rundir);
     run_program(exefile);
 
+    /* Output data from native galaxy (.res) format to snapshot */
     
     sprintf(fullname,"%s","galaxy.res");
     instr = stropen(fullname,"r");
@@ -129,7 +136,7 @@ int nemo_main()
     ndata = 7*sizeof(float)*nbody;
     gdata = (float *) allocate(ndata);
 
-    bits = (PhaseSpaceBit | PotentialBit);
+    bits = (TimeBit | PhaseSpaceBit | PotentialBit);
     while (1) {
       count = unfread(instr,gdata,ndata);
       if (count <= 0) break;
