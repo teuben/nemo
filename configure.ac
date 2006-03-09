@@ -9,9 +9,7 @@ AC_MSG_CHECKING([NEMO config])
 
 AC_INIT(NEMORC)
 
-dnl  config.h is made in two steps, 
-dnl  AC_CONFIG_FILES is first, AC_CONFIG_HEADER second!
-AC_CONFIG_HEADER([config.h:config.h.tmp])
+AC_CONFIG_HEADER([config.h:config.h.in])
 
 dnl -- checks for programs
 dnl -- checks for libraries
@@ -327,13 +325,14 @@ dnl Fortran/C linkeage : defines F77_CMAIN_FFLAGS
 ACX_F77_CMAIN_FFLAGS([],[AC_MSG_WARN([problems fortran-c interface])])
 
 dnl Fortran binary I/O has a 4 or 8 byte header the unfio library needs to know
-AC_SUBST(UNFIO_HDR_SIZE)
 AC_MSG_CHECKING(size of unformatted fortran I/O header/footer)
 $F77 -o src/kernel/fortran/hdr_size src/kernel/fortran/hdr_size.f
 src/kernel/fortran/hdr_size
 $CC  -o src/kernel/fortran/hdr_size src/kernel/fortran/hdr_size.c
 UNFIO_HDR_SIZE=`src/kernel/fortran/hdr_size one.dat`
 AC_MSG_RESULT([$UNFIO_HDR_SIZE])
+AC_DEFINE_UNQUOTED(UNFIO_HDR_SIZE,$UNFIO_HDR_SIZE,[Fortran unformatted I/O header size])
+
 
 dnl MacOS (darwin) needs -lcc_dynamic, might need /sw stuff from FINK
 dnl Only linux wants -rdynamic, for dlopen()
@@ -830,9 +829,7 @@ if test -d "$NEMODAT"; then
   echo "*** you probably should source $NEMO/nemo_end"
 fi
 
-dnl Note, two step transform: config.h.in -> config.h.tmp -> config.h
 AC_CONFIG_FILES(NEMORC.gen Makefile makedefs nemo_start nemo.pl)
-AC_CONFIG_FILES([config.h.tmp:config.h.in])
 AC_OUTPUT
 
 echo "

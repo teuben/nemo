@@ -188,8 +188,10 @@
 #undef SIZEOF_LONG_LONG
 
 
-/* Some variables that were directly computed by configure */
-#define UNFIO_HDR_SIZE  @UNFIO_HDR_SIZE@
+
+/* Fortran unformatted I/O header size (should be 4 or 8) */
+#undef UNFIO_HDR_SIZE
+
 
 /* define to specify how to mangle identifiers for the Fortran linker: */
 #define FORTRANIZE_LOWERCASE 0
