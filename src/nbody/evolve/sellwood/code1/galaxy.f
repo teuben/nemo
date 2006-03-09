@@ -72,6 +72,10 @@ c
 c local variables
       integer i, ilast, j, l
       real tend
+
+c say hello and remind the user of the max- parameters
+      print *, 'galaxy V1.3 '
+      print *, 'Maximum number of particles (mbuff): ',mbuff
 c
 c store the sizes of the main common arrays
       call dimens
@@ -148,6 +152,10 @@ c (one pair for each acceleration component)
       integer lgrids
       real grids( par2 )
       common / grids / lgrids, grids
+
+c
+c say hello and remind user to the size
+      print *, 'Maximum gridsize: ',rjn1,rjn2,rjn3
 c
 c store sizes in common blocks
       lptcls = par1
