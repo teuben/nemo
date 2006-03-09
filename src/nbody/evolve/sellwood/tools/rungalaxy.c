@@ -43,8 +43,8 @@ string defv[] = {
     "grid=33,33,33\n  number of grid cells in (x,y,z,)",
     "format=%g\n      format for pos,vel for galaxy.ini",
     "header=\n        If given, use this for unfio header/trailer size",
-    "exe=galaxy.exe\n name of GALAXY executable",
-    "VERSION=2.1a\n   8-mar-06 PJT",
+    "exe=galaxy\n     name of GALAXY executable",
+    "VERSION=2.1b\n   9-mar-06 PJT",
     NULL,
 };
 
