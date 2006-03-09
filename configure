@@ -316,7 +316,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS NEMO NEMOHOST NEMO_LIBS NEMO_CFLAGS NEMO_FFLAGS WARNING NEMOVER build build_cpu build_vendor build_os host host_cpu host_vendor host_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP EGREP CXX CXXFLAGS ac_ct_CXX AWK INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA LN_S SET_MAKE RANLIB ac_ct_RANLIB X_CFLAGS X_PRE_LIBS X_LIBS X_EXTRA_LIBS XLIBS XINCS GLLIBS F77 FFLAGS ac_ct_F77 FLIBS F77_CMAIN_FFLAGS UNFIO_HDR_SIZE CCSHARED MACOS_LIBS PGPLOT_DIR LOADOBJ_MACH LOADOBJ_LIBS MATH_LIBS HDF_INC HDF_LIB CFITSIO_INC CFITSIO_LIB PVM_LIB PVM_INC MIRIAD_INC MIRIAD_LIB GSL_CONFIG GSL_CFLAGS GSL_LIBS TCL_CFLAGS TCL_LIBS RDL_LIBS LIBOBJS YAPP_NAME YAPP_LIBS YAPP_DEF LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS NEMO NEMOHOST NEMO_LIBS NEMO_CFLAGS NEMO_FFLAGS WARNING NEMOVER build build_cpu build_vendor build_os host host_cpu host_vendor host_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP EGREP CXX CXXFLAGS ac_ct_CXX AWK INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA LN_S SET_MAKE RANLIB ac_ct_RANLIB X_CFLAGS X_PRE_LIBS X_LIBS X_EXTRA_LIBS XLIBS XINCS GLLIBS F77 FFLAGS ac_ct_F77 FLIBS F77_CMAIN_FFLAGS CCSHARED MACOS_LIBS PGPLOT_DIR LOADOBJ_MACH LOADOBJ_LIBS MATH_LIBS HDF_INC HDF_LIB CFITSIO_INC CFITSIO_LIB PVM_LIB PVM_INC MIRIAD_INC MIRIAD_LIB GSL_CONFIG GSL_CFLAGS GSL_LIBS TCL_CFLAGS TCL_LIBS RDL_LIBS LIBOBJS YAPP_NAME YAPP_LIBS YAPP_DEF LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -1361,7 +1361,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-          ac_config_headers="$ac_config_headers config.h:config.h.tmp"
+          ac_config_headers="$ac_config_headers config.h:config.h.in"
 
 
 
@@ -11387,7 +11387,6 @@ echo "$as_me: WARNING: problems fortran-c interface" >&2;}
 
 
 
-
 echo "$as_me:$LINENO: checking size of unformatted fortran I/O header/footer" >&5
 echo $ECHO_N "checking size of unformatted fortran I/O header/footer... $ECHO_C" >&6
 $F77 -o src/kernel/fortran/hdr_size src/kernel/fortran/hdr_size.f
@@ -11396,6 +11395,12 @@ $CC  -o src/kernel/fortran/hdr_size src/kernel/fortran/hdr_size.c
 UNFIO_HDR_SIZE=`src/kernel/fortran/hdr_size one.dat`
 echo "$as_me:$LINENO: result: $UNFIO_HDR_SIZE" >&5
 echo "${ECHO_T}$UNFIO_HDR_SIZE" >&6
+
+cat >>confdefs.h <<_ACEOF
+#define UNFIO_HDR_SIZE $UNFIO_HDR_SIZE
+_ACEOF
+
+
 
 if test "$GCC" = "yes"; then
   NEMO_CFLAGS="$NEMO_CFLAGS $gcov_flag"
@@ -17070,8 +17075,6 @@ fi
 
                                                   ac_config_files="$ac_config_files NEMORC.gen Makefile makedefs nemo_start nemo.pl"
 
-          ac_config_files="$ac_config_files config.h.tmp:config.h.in"
-
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -17602,8 +17605,7 @@ do
   "makedefs" ) CONFIG_FILES="$CONFIG_FILES makedefs" ;;
   "nemo_start" ) CONFIG_FILES="$CONFIG_FILES nemo_start" ;;
   "nemo.pl" ) CONFIG_FILES="$CONFIG_FILES nemo.pl" ;;
-  "config.h.tmp" ) CONFIG_FILES="$CONFIG_FILES config.h.tmp:config.h.in" ;;
-  "config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS config.h:config.h.tmp" ;;
+  "config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS config.h:config.h.in" ;;
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}
    { (exit 1); exit 1; }; };;
@@ -17735,7 +17737,6 @@ s,@FFLAGS@,$FFLAGS,;t t
 s,@ac_ct_F77@,$ac_ct_F77,;t t
 s,@FLIBS@,$FLIBS,;t t
 s,@F77_CMAIN_FFLAGS@,$F77_CMAIN_FFLAGS,;t t
-s,@UNFIO_HDR_SIZE@,$UNFIO_HDR_SIZE,;t t
 s,@CCSHARED@,$CCSHARED,;t t
 s,@MACOS_LIBS@,$MACOS_LIBS,;t t
 s,@PGPLOT_DIR@,$PGPLOT_DIR,;t t
