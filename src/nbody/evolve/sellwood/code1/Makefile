@@ -23,3 +23,6 @@ galaxy: galaxy.a $(SRC) $(INC)
 
 galaxy.a: $(INC)
 	(cd lib; make lib)
+
+install:	galaxy
+	cp $? $(NEMOBIN)
