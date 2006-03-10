@@ -1,5 +1,5 @@
 DIR = src/nbody/evolve/aarseth/tools
-BIN = nbody1 u3tos
+BIN = nbody1 u3tos runbody4
 NEED = $(BIN) mkplummer snaptrim snapcmp runbody1 nbody1 stou4 u3tos
 
 help:
@@ -10,7 +10,7 @@ need:
 
 clean:
 	@echo Cleaning $(DIR)
-	@rm -fr run1 run1.log  run2 run2.log
+	@rm -fr run1 run1.log  run2 run2.log run4a run4b run4c
 
 NBODY = 10
 
@@ -51,3 +51,12 @@ nbody1_cmp:
 nbody2:
 	@echo OOPS: Running runbody2 testrun for NBODY2 not implemented yet
 
+
+runbody4:
+	runbody4                     outdir=run4a nbody=25 tcrit=0 KZ5=0 KZ22=1 > run4a.log
+	u3tos    in=run4a/OUT3       out=run4a/input.snap  mode=4
+	runbody4                     outdir=run4b nbody=25 tcrit=10 KZ5=0 KZ22=1 deltat=1 > run4b.log
+	runbody4 in=run4a/input.snap outdir=run4c          tcrit=10              deltat=1 > run4c.log
+	u3tos    in=run4b/OUT3 out=run4b/out.snap mode=4
+	u3tos    in=run4c/OUT3 out=run4c/out.snap mode=4
+	snapcmp run4b/out.snap  run4c/out.snap
