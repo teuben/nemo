@@ -5,3 +5,10 @@ November 1997:	imported "as is" from SJA with one important change:
 		Makefile itself is now a symlink to Makefile.nemo
 
 6-mar-98	exported into official NEMO V2.5
+
+
+2-mar-2006  	minor merge with Sverre's webversion:
+		- merge.f becomes coal.f, names "merge" become collision/coal/...
+		- unit 4 from binary to ascii ???  - check with Sverre
+		- chap9.tex is now obsolete, the nbody2.ps from the 2001 article
+		  in New Astronomy is included instead 
