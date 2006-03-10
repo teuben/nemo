@@ -3,7 +3,7 @@ include $(NEMOLIB)/makedefs
 #
 
 #	Directories to be visited, in this order
-DIRS = nbody0 nbody1 nbody2 tools # triple
+DIRS = nbody0 nbody1 nbody2 nbody4 tools # triple
 
 TARNAME = stuff.tar
 CHKFILE = Last_update
