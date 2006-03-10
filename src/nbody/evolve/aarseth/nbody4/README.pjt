@@ -1,0 +1,8 @@
+March 2006:
+  This is the Brut4 (Nbody4 without the GRAPE routines) distribution from Sverre.
+
+
+Minor modifications for NEMO:
+
+- data.f: the input file (unit 10 here) is now binary, as in nbody1 and nbody2
+
