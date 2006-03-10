@@ -2,7 +2,7 @@
 #
 #  This is an example C-shell script that launches a series of
 #  nbodyX to search in a two dimensional parameter space of 
-#  a particular problem, in this case Q and ALPHA is varied.
+#  a particular problem, in this case Q and ALPHA are varied.
 #  Each run is saved in a subdirectory, where the subdirectory
 #  encodes these parameters. It is also handy to save them in a
 #  file in the run directory, which we call nbody1.par here.
@@ -19,8 +19,6 @@
 #
 # History:
 #  1-mar-2006     Created after an excellent Eagle Pub dinner with Sverre        PJT
-#
-#
 
 set master=series105
 set a_values=(1.0 1.5 2.0 2.5 3.0)
