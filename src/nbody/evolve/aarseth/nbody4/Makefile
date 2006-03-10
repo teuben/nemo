@@ -1,8 +1,9 @@
+include $(NEMOLIB)/makedefs
 #
-FC = g77
+#FC = g77
 #FC = pgf77
 #
-FFLAGS = -O3
+#FFLAGS = -O3
 #FFLAGS = -ffortran-bounds-check -O3
 #FFLAGS = -O4 -tp p7 -pc 64
 #
@@ -53,4 +54,4 @@ nbody4:	$(OBJECTS)
 	$(FC) $(FFLAGS) $(OBJECTS) -o nbody4
 
 clean:
-	\rm *.o
+	\rm *.o nbody4
