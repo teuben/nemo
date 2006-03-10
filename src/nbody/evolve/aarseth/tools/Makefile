@@ -9,8 +9,8 @@ MAN = stou4.1 u3tos.1 u4tos.1
 #
 L = $(NEMOLIB)/libnemo.a
 OBJFILES= nbody_io.o nbody_io_c.o
-BINFILES= u3tos u4tos stou4 runbody1 runbody2 
-TESTFILES= runbody1 runbody2 runbody4
+BINFILES= u3tos u4tos stou4 runbody1 runbody2 runbody4
+TESTFILES= runbody1 runbody2 
 #	Define an extra SUFFIX for our .doc file
 .SUFFIXES: .doc
 
