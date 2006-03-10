@@ -55,3 +55,6 @@ nbody4:	$(OBJECTS)
 
 clean:
 	\rm *.o nbody4
+
+install: nbody4
+	cp $? $(NEMOBIN)
