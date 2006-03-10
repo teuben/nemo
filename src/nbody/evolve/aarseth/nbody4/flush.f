@@ -1,0 +1,3 @@
+      SUBROUTINE FLUSH(J)
+      RETURN
+      END
