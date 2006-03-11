@@ -51,6 +51,15 @@ nbody1_cmp:
 nbody2:
 	@echo OOPS: Running runbody2 testrun for NBODY2 not implemented yet
 
+runbody2:
+	runbody2                     outdir=run2a nbody=25 tcrit=0 kz=0,0,1,1 > run2a.log
+	u3tos    in=run2a/OUT3       out=run2a/input.snap
+	runbody2                     outdir=run2b nbody=25 tcrit=10 kz=0,0,1,1 deltat=1 > run2b.log
+	runbody2 in=`pwd`/run4a/input.snap outdir=run2c nbody=25 tcrit=10 kz=0,0,1,1 deltat=1 > run2c.log
+	u3tos    in=run2b/OUT3 out=run2b/out.snap
+	u3tos    in=run2c/OUT3 out=run2c/out.snap
+	snapcmp run2b/out.snap  run2c/out.snap
+
 
 runbody4:
 	runbody4                     outdir=run4a nbody=25 tcrit=0 KZ5=0 KZ22=1 > run4a.log
