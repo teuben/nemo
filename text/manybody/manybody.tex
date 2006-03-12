@@ -23,7 +23,7 @@
 
 \title{ 
 {\Huge MANYBODY:} \\
-           {\LARGE an accompanying guide to }\\
+           {\LARGE an accompanying software guide to }\\
 	   {\bf  International School on Galactic and Cosmological N-Body Simulations} \\
   	   { INAOE, Tonantzintla, Puebla, Mexico, 23 July - 4 August 2006}\\
 	   {\small and previously} \\
@@ -44,7 +44,7 @@
        }
 
 \date{{\small Version 1.7} \\
-      {\small Summer 2005} \\
+      {\small Summer 2006} \\
       {\small Last document revised: \today} \\ 
       {\small \tt URL: http://bima.astro.umd.edu/nemo/manybody/index.html} \\
      }
@@ -177,7 +177,8 @@ of C-shell command lines; their prompt (e.g. \verb+2%+)
 contains a counter which is normally started at 1 for each section
 for easy reference.
 There are only a few minor places where these {\tt csh} and 
-{\tt sh} examples would differ. We just mention the most important ones
+{\tt sh} examples would differ. We just remind you of
+the most important ones:
 
 \begin{enumerate}
 \item 
@@ -244,9 +245,8 @@ Buy your friendly teacher a Coffee or Beer
 
 I would like to thank my co-authors in spirit, 
 Douglas Heggie, Piet Hut, and Junichiro Makino for their contributions, 
-Simon Portegies Zwart for organising this school, and
-Christian Boily for the previous school in Strasbourg, where
-much of this material was written.
+Simon Portegies Zwart and Christian Boily for the previous schools in Amsterdam 
+and Strasbourg respectively, where much of this material was written.
 In the true spirit of open source, 
 numerous authors have contributed their software, which you can find on
 the CD. Without their generous contributions this guide would not be
@@ -318,9 +318,9 @@ can be used in the {\it manybody} environment.
 
 {\tt nbody0} & PP & Aarseth (Binney \& Tremaine) & s \\
 
-{\tt nbody\{1,2\}} & PP & Aarseth (w/ NEMO interface) & b/s\\
+{\tt nbody\{1,2,4\}} & PP & Aarseth (w/ NEMO interface) & b/s\\
 
-{\tt nbody\{4,6\}} & PP &  Aarseth  & b \\
+{\tt nbody\{6\}} & PP &  Aarseth  & b \\
 
 {\tt fewbody} & PP & Fregeau   & d \\
 
@@ -524,11 +524,22 @@ involved in both binaries.
 % nbody2:    5 7    20
 % 
 
-\section{nbody4, nbody6}
+\section{nbody4}
 
-These codes are available as is, and with minor modifications could be made to run
-via clones of {\tt runbody2}. Fairly extensive documentation is available on how
-to modify and run the code. There is also a version of {\tt nbody4} that
+The Aarseth {\tt nbody4} code has been recently made available with a GRAPE
+interface (a.k.a. Nbody4), a standalone version  (a.k.a. Brut4) is available
+as {\tt nbody4} in NEMO. A NEMO frontend, much like the previous ones, is 
+available as {\tt runbody4}. The novel new thing about {\tt nbody4} is the
+capability of running one of several stellar evolution codes
+(e.g. Eggleton, Tout \& Hurley, Chernoff--Weinberg). Currently the only other
+code capable of doing this is the {\tt kira} code in Starlab.
+
+\section{nbody6}
+
+This code is available as is, and with minor modifications could be made to run
+via clones of {\tt runbody4}. Fairly extensive documentation is available on how
+to modify and run the code.
+ There is also a version of {\tt nbody4} that
 has Stellar Evolution enabled (Hurley et al, 200x).
 
 {\tt nbody6} is available in {\tt \$NEMO/usr/aarseth/nbody6}, 
@@ -1031,11 +1042,13 @@ is available to simplify running this code:
 
 \footnotesize\begin{verbatim}
 1% mkplummer p1024.in 1024
-2% rungalaxy run1
-x y z vx vy vz
+2% rungalaxy p1024.in run1
+ galaxy V1.3 
+ Maximum number of particles (mbuff):  100000
+ Maximum gridsize:  33 33 33
  Greens function creation complete
  1024 8 8192 80000
- 290 particles outside the grid at the start
+ 305 particles outside the grid at the start
  Run (re)started at time  0.
    and will stop after the step at time   1.05000007
  Time-centering velocities
@@ -1045,15 +1058,24 @@ x y z vx vy vz
 
  Starting step 20
  Un-centering velocities
+Time=0
+Time=0.5
+Time=1
+3% snapcenter run1/galaxy.snap . report=t
+-0.000846 0.005885 -0.023592 0.003350 -0.004093 0.003552 
+-0.006440 -0.002968 -0.026719 0.003096 -0.005531 0.000260 
+0.009361 -0.004989 -0.012464 0.013971 -0.005660 0.003792 
 
-*** dataconversion back to NEMO isn't working anymore ***
+
 
 \end{verbatim}\normalsize
 
 \begin{figure}[htb]
 \plotone{nt.ps}
 \caption[Code Performances]
-{Code performances - to be filled in...}
+{Code performances - On the horizontal axis log(N), vertially log(CPU-sec/particle/step).
+These are the values for a P4/1.6GHz laptop. Seen in this plot
+are nbody0, galaxy, gyrfalcON, hackcode1 and xxx. what about directcode}
 \end{figure}
 
 
@@ -1100,9 +1122,10 @@ of this in quite a few places, e.g.\\
 \section{Pythagoran Problem}
 
 A really fun setup which has been used by a number of people
+(Burrau in 1913 was the first to report on this)
 is 3 particles on a Pythagoran Triangle with sides 3-4-5 
-and relative masses 3:4:5. See Section~\ref{s:pyth} for more
-details.
+and relative masses 3:4:5 (Szebehely \& Peters, 1967).
+See Section~\ref{s:pyth} for more details. 
 
 
 \section{Kang et al. - Cosmological Hydrodynamics - 1994}
@@ -1580,7 +1603,11 @@ Athanassoula - papers on importance of resonances, live bars. What is a good N t
 galactic dynamics. Martin Weinberg now claims $10^7-10^8$. 
 Also check the approach Romeo et al. (2003) took using wavelets.
 
+\section{Comparing}
 
+Take two Nbody codes and compare their potential. For example, use Sellwood's 
+{\it galaxy} PM/FFT code and Dehnen's {\tt gyrfalcON} TreeCode and compare the
+potential for a homogenous sphere of different degree of flattening.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1765,6 +1792,22 @@ $NEMO/csh/mkmpeg_movie : some example scripts to make movies
 
 \end{verbatim} 
 %$
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter                {Problems}
+
+\begin{enumerate}
+
+\item 
+Find out what time step criterion the first N-body code (vion Hoerner)
+was using. How do {\tt nbody0} and this program compare in their performance
+if you want to reach the same accuracy.
+
+\item
+What is this peculiar ``{\tt time resets}'' quoted in one of the {\tt nbody0}
+examples.
+
+\end{enumerate}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter                {References}
@@ -1774,12 +1817,16 @@ Aarseth, S.J. -
 {\it Gravitational N-Body Simulations : Tools and Algorithms} 
 (Cambridge Univ. Pr., 2003),
 
+Aarseth, S.J. - 2004.. {\it NBODY6 Users Manual} : {\bf man6.ps}
+
+Aarseth, S.J. - 2006.. {\it Introduction to Running Simulations with NBODY4} : 
+{\bf nbody4\_intro\_0602.pdf}
+
+
 Aarseth, S. J.; Henon, M.; Wielen, R. - 1974
 {\it A comparison of numerical methods for the study of star cluster 
 dynamics} : {\bf 1974A+A....37..183A.pdf}~\footnote{papers marked 
 in {\bf boldface} are available electronically on the CD in the {\tt papers/} directory}
-
-Aarseth, S.J. - 2004.. {\it NBODY6 Users Manual} : {\bf man6.ps}
 
 van Albada, T. S.; van Gorkom, J. H.	- 1977 -
 {\it Experimental Stellar Dynamics for Systems with Axial Symmetry}:
@@ -1787,7 +1834,7 @@ van Albada, T. S.; van Gorkom, J. H.	- 1977 -
 
 
 
-Barnes \& Hut - 1986 - Nature - 324, 446.
+Barnes, J. \& Hut, P. - 1986 - Nature - 324, 446.
 
 Barnes \& Hut - 1989
 {\it Error analysis of a tree code} - {\bf 1989ApJS...70..389B.pdf}.
@@ -1881,6 +1928,7 @@ Sellwood, J.A. - {\it The art of N-body building} - 1987, Ann.Rev A\&A, 25, 151 
 {\bf 1987ARA+A..25..151S.pdf}
 
 
+
 Sellwood (1997, in {\it Computational Astrophysics} 
 ed Clarke \& West,  ASP  Conf  series  v123, p215) - astro-ph/9612087
 {\bf 9612087.ps}
@@ -1893,7 +1941,7 @@ Springel V., Yoshida N., White S. D. M., 2001, New Astronomy, 6, 51.
 {\it GADGET: A code for collisionless and gasdynamical cosmological simulations}:
 {\bf gadget-code-paper.pdf}.
 
-Szebehely, Victor; Peters, C. Frederick - 1967 - 
+Szebehely, Victor, Peters, C. Frederick - 1967 - 
 {\it Complete solution of a general problem of three bodies}:
 {\bf 1967AJ.....72..876S.pdf}
 
@@ -1936,6 +1984,8 @@ http://www.astro.umd.edu/nemo                             NEMO website
 http://www.ids.ias.edu/~starlab/                          Starlab website
 
 \end{verbatim}
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \appendix
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -2495,7 +2545,7 @@ the initial conditions:
 \begin{figure}[t]
 \plottwo{pyth0.ps}{pyth1.ps}
 \caption[Pythagorean problem]
-{Initial conditions for the Pythagorean problem (left, but notice
+{Initial conditions for the Pythagorean problem (left, but notice **???**but they are**
 these are not the official Szebeheley \& Peters configuration we use
 in the example)
 and the orbit of the intermediate mass (M=4) particle starting
@@ -2539,6 +2589,12 @@ Time resets needed 5977 times / 10001 dumps
 
 6% stoo pyth.out - 1 100000 | orbplot - xrange=-4:4 yrange=-4:4 
 \end{verbatim}\normalsize
+
+The 3-body problem is a chaotic problem. By perturbing the initial conditions
+even a little bit, you can get drastically different results. This was shown
+in another paper by Shebehely \& Peters (1967AJ.....72.1187S), where the
+positions of the 3 bodies were all perturbed by of order 0.04, and this 
+created a periodic solution.
 
 
 \section{Collisionless Orbit}
@@ -2829,13 +2885,15 @@ Mesa is another often missed package (needed for partiview).
 The default shell must be csh, only limited (ba)sh support. Use {\tt tcsh}.
 
 \item
-nbody4 is actually not available
+nbody4 is now available, though may be called Brute4 (Nbody4 needs the
+GRAPE hardware and Grape libraries)
 
 \item
 {\tt kira --help} sometimes will complain ``source file unavailable''
 
 \item
-The {\tt gman} command could be be missing on your machine. It's very nice to have!
+The {\tt gman} command could be be missing on your machine. 
+It's very nice to have though!
 
 \item
 Q=0 for runbody1 when in= is used...   bug in the wrapper interface
