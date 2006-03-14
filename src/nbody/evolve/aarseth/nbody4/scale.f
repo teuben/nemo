@@ -171,10 +171,10 @@
       END IF
 *
 *       Check option for writing the initial conditions on unit 10.
-      IF (KZ(22).EQ.1) THEN
+      IF (KZ(22).EQ.1.AND.KZ(5).LE.1) THEN
           DO 85 I = 1,N
               WRITE (10,84)  BODY(I), (X(K,I),K=1,3), (XDOT(K,I),K=1,3)
-   84         FORMAT(1P,7E14.6)
+   84         FORMAT (1P,7E14.6)
    85     CONTINUE
       END IF
 *
