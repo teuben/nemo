@@ -133,37 +133,6 @@
 *         IPHASE = -2
       END IF
 *
-*       Initialize the time-step list used to find next body (Hermite only).
-      DTLIST = 100.0
-      DO 70 I = IFIRST,NTOT
-          DTLIST = MIN(DTLIST,STEP(I))
-   70 CONTINUE
-*
-*       Set initial time-step list interval twice the smallest step.
-      IF (N.GT.10) THEN
-          DTLIST = 2.0*DTLIST
-      ELSE
-          DTLIST = TCRIT
-      END IF
-      NNB = 1
-   80 TLIST = TLIST + DTLIST
-*
-*       Select all members due in the interval (0,TLIST).
-      DO 90 J = IFIRST,NTOT
-          IF (T0(J) + STEP(J).LT.TLIST) THEN
-              NNB = NNB + 1
-              NLIST(NNB) = J
-              IF(NNB.GE.LMAX-3) GOTO 92
-          END IF
-   90 CONTINUE
-*
-*       Check whether membership range is acceptable. 
-   92 IF (NNB.EQ.1) GO TO 80
-*
-*       Reduce new DTLIST to prevent early crowding and set membership.
-      DTLIST = 0.2*DTLIST
-      NLIST(1) = NNB - 1
-*
       RETURN
       END
 ***
