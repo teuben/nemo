@@ -8,7 +8,7 @@
       REAL*8 R2,RHO,MRT,RT
       COMMON/WORK1/ R2(NMAX),RHO(NMAX)
       PARAMETER (LX=11)
-      REAL*8 C(3),FLAGR(LX),RLAGR(LX),RM(LX),DENS(LX),VR(LX)
+      REAL*8 C(3),FLAGR(LX),RLAGR(LX),RM(LX),DENS(LX),VR(LX),AVM(LX)
 *     DATA FLAGR/-1.9,-1.7,-1.5,-1.3,-1.1,-.9,-.7,-.5,-.3,-.1/
 *     DATA FLAGR/0.001,0.002,0.005,0.01,0.02,0.05,0.1,0.2,0.3,0.4,0.5,
 *    &           0.75,0.9/
@@ -36,8 +36,10 @@
           VM2 = 0.0
           IF (IL.GT.1) THEN
               R1 = SQRT(R2(I))
+              IPREV = I
           ELSE
               R1 = 0.0
+              IPREV = 0
           END IF
           I = 0
    15     I = I + 1
@@ -60,7 +62,13 @@
           DV = 2.0*TWOPI/3.0*(R2(I)**1.5 - R1**3)
           DENS(IL) = DM/DV
           IF (DENS(IL).LE.0.0D0) DENS(IL) = 1.0
-          RM(IL) = 0.5*(R1 + SQRT(RLAGR(IL)))
+          RM(IL) = 0.5*(R1 + RLAGR(IL))
+*       Obtain the average mass (units of the mean value).
+          IF (I.GT.IPREV) THEN
+              AVM(IL) = DM/(FLOAT(I - IPREV)*BODYM)
+          ELSE
+              AVM(IL) = 0.0
+          END IF
    20 CONTINUE
 *
 *       Obtain half-mass radius separately.
@@ -121,6 +129,9 @@
           WRITE (27,70)  TTOT, (VR(K),K=1,LX)
    70     FORMAT ('  VELOCITY (T =',F6.1,'): ',1P,13E10.2)
           WRITE (27,65)  (RM(K),K=1,LX)
+          WRITE (36,75)  TTOT, (AVM(K),K=1,LX)
+   75     FORMAT ('  AVERAGE MASS (T =',F6.1,'): ',13F7.3)
+          WRITE (36,65)  (RM(K),K=1,LX)
       END IF
 *
       RETURN

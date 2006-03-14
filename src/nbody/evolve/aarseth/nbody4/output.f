@@ -145,7 +145,7 @@
       END IF
 *
 *       Obtain half-mass radii for two groups (NAME <= NZERO/5 & > NZERO/5).
-      IF (KZ(7).EQ.6.AND.TTOT.GE.TCRIT.AND.BODY1.GT.2.0*BODYM.AND.
+      IF (KZ(7).EQ.6.AND.BODY1.GT.2.0*BODYM.AND.
      &    KZ(5).NE.3.AND.KZ(5).NE.4) THEN
           CALL LAGR2(RDENS)
       END IF
@@ -394,7 +394,7 @@
   118         CONTINUE
               BODYS(NP) = BODY(I)*SMU
   120     CONTINUE
-          N1 = NP
+          NP1 = NP
 *       Add tidal tail in the same frame.
           DO 130 I = ITAIL0,NTTOT
               NP = NP + 1
@@ -404,7 +404,7 @@
   125         CONTINUE
               BODYS(NP) = BODY(I)*SMU
   130     CONTINUE
-          WRITE (34,140)  NP, N1, (TIME+TOFF)*TSCALE
+          WRITE (34,140)  NP, NP1, (TIME+TOFF)*TSCALE
   140     FORMAT (' ',2I6,F8.1)
           DO 150 I = 1,NP
               WRITE (34,145) (XS(K,I),K=1,3), (VS(K,I),K=1,3), BODYS(I)

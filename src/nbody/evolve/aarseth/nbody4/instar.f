@@ -71,8 +71,8 @@
       EPOCH1 = EPOCH0
       DO 10 I = 1,N
 *
-*       Obtain stellar parameters at current epoch.
-          IF(KZ(22).GE.3)THEN
+*       Obtain stellar parameters at current epoch (NB! dummy test).
+          IF(KZ(22).LT.0)THEN
              READ(12,*)M1,KW,M0,EPOCH1,OSPIN
              IF(KW.LE.1.AND.(M1.LT.0.99*M0.OR.M1.GT.1.01*M0))THEN
                 WRITE(6,*)' INSTAR ERROR M1 NE M0 FOR MS ',I,M1,M0
@@ -91,7 +91,7 @@
      &                RM,LUM,KW,MC,RCC,MENV,RENV,K2)
 *
 *       Assign initial spin angular momentum. 
-          IF(KZ(22).EQ.3)THEN
+          IF(KZ(22).LT.0)THEN
              JSPIN = (K2*(M1-MC)*RM**2 + K3*MC*RCC**2)*OSPIN
           ELSE
              OSPIN = 45.35d0*VROTF(M1)/RM

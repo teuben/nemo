@@ -167,6 +167,7 @@
 *       6  Output of significant & regularized binaries (=1, 2, 3 & 4).
 *       7  Lagrangian radii (>0: RSCALE; =2, 3, 4: output units 6, 7, 12;
 *                >=5: density & rms velocity at given radii on unit 26 & 27;
+*                >=5: average mass at given radii on unit 36 every DELTAT;
 *                 =6: Lagrangian radii for two mass groups on unit 31 & 32.
 *       8  Primordial binaries (=1 & >=3; >0: BINOUT; >2: BINDAT; >3: HIDAT).
 *       9  Individual bodies printed at output time (MIN(5**KZ9,NTOT)).
