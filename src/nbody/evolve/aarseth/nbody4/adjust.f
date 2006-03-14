@@ -144,6 +144,8 @@
               EDISK = EDISK - 0.5*BODY(I)/SEMI
    28     CONTINUE
           DISP = SQRT(DISP2/FLOAT(N-2))
+          WRITE (35,29)  TTOT, DISP, EDISK
+   29     FORMAT (' ',F8.1,1P,E10.2,E12.4)
       END IF
 *
 *       Check optional sorting of Lagrangian radii & half-mass radius.
