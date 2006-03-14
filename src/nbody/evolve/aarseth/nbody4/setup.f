@@ -89,7 +89,10 @@
               X(K,I) = SX*X(K,I)
               XDOT(K,I) = SV*XDOT(K,I)
    45     CONTINUE
-*          IF(KZ(22).EQ.1) WRITE(10,*)(X(K,I),K=1,3),(XDOT(K,I),K=1,3)
+          IF(KZ(22).EQ.1) THEN
+              WRITE (10,46)  BODY(I), (X(K,I),K=1,3), (XDOT(K,I),K=1,3)
+   46         FORMAT (1P,14E14.6)
+          END IF
    50 CONTINUE
       IF(KZ(22).EQ.1) CALL FLUSH(10)
 *
