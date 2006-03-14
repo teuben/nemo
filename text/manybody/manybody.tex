@@ -23,17 +23,17 @@
 
 \title{ 
 {\Huge MANYBODY:} \\
-           {\LARGE an accompanying software guide to }\\
-	   {\bf  International School on Galactic and Cosmological N-Body Simulations} \\
-  	   { INAOE, Tonantzintla, Puebla, Mexico, 23 July - 4 August 2006}\\
-	   {\small and previously} \\
-	   {\bf  Summer school on direct N-body simulations} \\
-	   {\bf  Zomer school over direkte N-deeltjes simulaties} \\
-	   { Astronomical Institute {\it 'Anton Pannekoek'}, Amsterdam, 24-30 July 2005}\\
-	   {\small and} \\
-	   { \bf School on Numerical N-Body Dynamics }\\
-	   { \bf \'Ecole de Dynamique Numerique Ncorps }\\
-           { Observatoire astronomique de Strasbourg, France, 19-22 March 2004}
+  {\LARGE an accompanying software guide to }\\
+  {\bf  International School on Galactic and Cosmological N-Body Simulations} \\
+  { INAOE, Tonantzintla, Puebla, Mexico, 23 July - 4 August 2006}\\
+  {\small and previously} \\
+  {\bf  Summer school on direct N-body simulations} \\
+  {\bf  Zomer school over direkte N-deeltjes simulaties} \\
+  { Astronomical Institute {\it 'Anton Pannekoek'}, Amsterdam, Netherlands, 24-30 July 2005}\\
+  {\small and} \\
+  { \bf School on Numerical N-Body Dynamics }\\
+  { \bf \'Ecole de Dynamique Numerique Ncorps }\\
+  { Observatoire astronomique de Strasbourg, France, 19-22 March 2004}
 }
 
 
@@ -170,7 +170,7 @@ type of open source policy for our codes).
 
 The {\it manybody} guide that lies here in front of you assumes some knowledge
 of Unix. This means Linux and Mac are fine, but although cygwin on MS-Windows
-gets fairly close, your author couldn't stomach some of 
+gets fairly close, your editor couldn't stomach some of 
 its limitations\footnote{YMMV, as they say in this business}.
 Most examples show simple snippets
 of C-shell command lines; their prompt (e.g. \verb+2%+) 
@@ -202,7 +202,7 @@ Pipe both stdout and stderr into the next program:
 \end{verbatim}\normalsize
 \end{enumerate}
 
-Also noteworthty is that 
+Also noteworthy is that 
 in most places where a random seed is used (e.g. the NEMO {\tt seed=0} keyword
 would take a new seed based on the current date and time) 
 a fixed seed is taken (usually {\tt seed=123}) 
@@ -222,12 +222,12 @@ For most programs the {\tt -h} and/or the {\tt --help}
 command line argument will give a short
 reminder of the options and their defaults. This is true for NEMO as well
 as Starlab programs.
-For NEMO programs the option {\tt help=h} will give much more extensive help
+For NEMO programs the option {\tt help=h} will also give much more extensive help
 on the valid keywords.
 
 \item
-The unix {\tt man} and {\tt gman} commands can be used to view manual pages
-for all NEMO programs. Notably the {\it index(1)} and {\it programs(1)}
+The Unix {\tt man} and {\tt gman} commands can be used to view manual pages
+for all NEMO programs. Notably the {\it index(1)} and {\it programs(8)}
 manual pages given an overview of most commands (except its terribly
 outdated)
 
@@ -237,7 +237,7 @@ linked in {\tt manybody/index.html}, whereever this may reside on your
 system.
 
 \item
-Buy your friendly teacher a Coffee or Beer
+Buy your friendly teachers a Coffee or Beer
 
 \end{itemize}
 
@@ -250,7 +250,7 @@ and Strasbourg respectively, where much of this material was written.
 In the true spirit of open source, 
 numerous authors have contributed their software, which you can find on
 the CD. Without their generous contributions this guide would not be
-half the size. 
+half the size and a quarter of the contents.
 Hopefully we will be able to instill this on the reader too.
 
 
@@ -340,9 +340,12 @@ can be used in the {\it manybody} environment.
 
 {\tt quadcode} & SFP & Barnes \& White 1986 & s \\
 
+{\tt CGI} & SFP &  Trenti et al. 2005 & \\
+
 {\tt galaxy} & PM & Sellwood  & b \\
 
-{\tt superbox} & PM &  Fellhauer et al. & \\
+{\tt superbox} & PM &  Fellhauer et al. 2000 & \\
+
 
 \hline 
 
