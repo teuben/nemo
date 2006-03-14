@@ -1,8 +1,11 @@
 March 2006:
   This is the Brut4 (Nbody4 without the GRAPE routines) distribution from Sverre.
+  For the original version (minus the below mentioned differences for NEMO)
+  URL: ftp://ftp.ast.cam.ac.uk/pub/sverre/nbody4/brut4.tar.gz
 
 
 Minor modifications for NEMO:
 
 - data.f: the input file (unit 10 here) is now binary, as in nbody1 and nbody2
+  ah... no, i keep changing my mind on this issue.....
 
