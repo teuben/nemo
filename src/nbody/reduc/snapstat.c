@@ -14,7 +14,8 @@
  *	16-nov-90   1.5a  (re)allocation bug removed
  *       20-aug-91  correct pi/acc... allocation 
  *      20-jan-94   1.5c sqr() decl for solaris
-  */
+ *      15-mar-06   1.5f use statics to hide names
+ */
 
 /**************** INCLUDE FILES ********************************/ 
 
@@ -44,23 +45,28 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "rms=false\n                Want rms",
     "ecutoff=0.0\n              Cutoff for bound particles",
     "verbose=t\n                verbose mode?",
-    "VERSION=1.5e\n             1-apr-01 PJT",
+    "VERSION=1.5f\n             15-mar-06 PJT",
     NULL
 };
+
 string usage="determine various statistics from an N-body system";
+
+string cvsid="$Id$";
+
+
 /**************** SOME GLOBAL VARIABLES ************************/
 
-real tsnap;             /* current time of snapshot */
-int    nbody;           /* current number of used bodies */
+local real tsnap;             /* current time of snapshot */
+local int    nbody;           /* current number of used bodies */
 
-int mbody=0;            /* declared space for arrays */
-real *mass=NULL;        /* this will to masses array */
-real *phase=NULL;       /* will point to phases block */
-real *phi=NULL;         /* -- to potential (and eventually energies) */
-real *acc=NULL;         /* point to forces block */
-real *ax=NULL;          /* -- forces in x */
-real *ay=NULL;          /* -- forces in y */
-real *az=NULL;          /* -- forces in z */
+local int mbody=0;            /* declared space for arrays */
+local real *mass=NULL;        /* this will to masses array */
+local real *phase=NULL;       /* will point to phases block */
+local real *phi=NULL;         /* -- to potential (and eventually energies) */
+local real *acc=NULL;         /* point to forces block */
+local real *ax=NULL;          /* -- forces in x */
+local real *ay=NULL;          /* -- forces in y */
+local real *az=NULL;          /* -- forces in z */
 /*-------------------------------------------------------*/
 /*              Accessor macros for above vectors        */
 /*-------------------------------------------------------*/
@@ -69,37 +75,37 @@ real *az=NULL;          /* -- forces in z */
 #define Acc(i)          (acc+NDIM*i)
 /*-------------------------------------------------------*/
 /*  The following vectors also have allocated lenght 'mbody' */
-real **xp, **yp, **zp;  /* pointers to positions; for sorting */
-real **up, **vp, **wp;  /* pointers to velocities; for sorting */
+local real **xp, **yp, **zp;  /* pointers to positions; for sorting */
+local real **up, **vp, **wp;  /* pointers to velocities; for sorting */
 
 #define TIMEFUZZ        0.0001  /* tolerance in time comparisons */
 
-string times;                           /* input parameters */
-real minradfrac;
-real eps, sqreps;
-bool   Qpot, Qr_v, Qr_c, Qr_h, Qrms, Qexact;
-bool   verbose;
-real Ecutoff;
-bool   need_phi, need_acc, need_rad, Qacc;
+local string times;                           /* input parameters */
+local real minradfrac;
+local real eps, sqreps;
+local bool   Qpot, Qr_v, Qr_c, Qr_h, Qrms, Qexact;
+local bool   verbose;
+local real Ecutoff;
+local bool   need_phi, need_acc, need_rad, Qacc;
 
-real x1,testy1,z1,x2,y2,z2;               /* buffers used in stat analysis */
-real u1,v1,w1,u2,v2,w2;
-int    n1;
-real r2min = -1;
+local real x1,testy1,z1,x2,y2,z2;               /* buffers used in stat analysis */
+local real u1,v1,w1,u2,v2,w2;
+local int    n1;
+local real r2min = -1;
 
-real ucm, vcm, wcm;                   /* center of mass motion */
-real etot;                                    /* total energy */
-real mtot;                                    /* total mass     */
-real r_v;                                     /* Virial radius    */
-real r_c;                                     /* Core radius      */
-real r_h;                                     /* Half-mass radius */
-real r_hpx, r_hpy, r_hpz;                     /* could be done in one r_hp */
-real mass_fraction[]={0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,-1.0};
-real mass_radius[]  ={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+local real ucm, vcm, wcm;                   /* center of mass motion */
+local real etot;                                    /* total energy */
+local real mtot;                                    /* total mass     */
+local real r_v;                                     /* Virial radius    */
+local real r_c;                                     /* Core radius      */
+local real r_h;                                     /* Half-mass radius */
+local real r_hpx, r_hpy, r_hpz;                     /* could be done in one r_hp */
+local real mass_fraction[]={0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,-1.0};
+local real mass_radius[]  ={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 
-real *epot=NULL;                              /* potential energies */
-real *rad=NULL;                               /* radii */
-int    *idr=NULL;                             /* index array for sorting */
+local real *epot=NULL;                              /* potential energies */
+local real *rad=NULL;                               /* radii */
+local int    *idr=NULL;                             /* index array for sorting */
 
 
 /****************************** START OF PROGRAM **********************/
@@ -150,8 +156,7 @@ void nemo_main()
 
        /* NOTE: coordinate system is assumed to be cartesian */
 
-get_snap(instr) /* returns:   -1: not a snapshot   0: no ParticlesTag */
-stream instr;
+get_snap(stream instr) /* returns:   -1: not a snapshot   0: no ParticlesTag */
 {
     int i, j;
     double sqr(), sqrt();
