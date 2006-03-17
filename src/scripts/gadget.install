@@ -48,9 +48,17 @@ set bench=1
 set download=0
 set curl=1
 
+if ($#argv == 1) then
+  # be nice to those who expect -h or --help
+  if (X$1 == X-h) goto help
+  if (X$1 == X-help) goto help
+  if (X$1 == X--help) goto help
+endif
+
 foreach _arg ($*)
   set $_arg
 end
+
 
 if ($help) goto help
 #                                               force symlinks? (useful for MANYBODY)
@@ -65,18 +73,15 @@ endif
 #                                               alternatively download them on-the-fly, no tar files are saved
 if ($download) then
   if ($curl) then
-    curl $fftw_base/$fftw     | tar zxf -
-    curl $gsl_base/$gsl       | tar zxf -
-    curl $hdf_base/$hdf       | tar zxf -
-    curl $lam_base/$lam       | tar zxf -
-    curl $gadget_base/$gadget | tar zxf -
+    set cmd=(curl)
   else
-    wget $fftw_base/$fftw     
-    wget $gsl_base/$gsl       
-    wget $hdf_base/$hdf       
-    wget $lam_base/$lam       
-    wget $gadget_base/$gadget 
+    set cmd=(wget -O -)
   endif
+  $cmd $fftw_base/$fftw     | tar zxf -
+  $cmd $gsl_base/$gsl       | tar zxf -
+  $cmd $hdf_base/$hdf       | tar zxf -
+  $cmd $lam_base/$lam       | tar zxf -
+  $cmd $gadget_base/$gadget | tar zxf -
 endif
 
 #
