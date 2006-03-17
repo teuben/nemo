@@ -3,6 +3,7 @@
  *	
  *  4-mar-98    cloned off runbody2, added KZ_ parameters     PJT
  *  17-mar-04   using in= didn't enable kz(4) properly        PJT
+ *  17-mar-06   using fullname()                              PJT
  *
  *
  */
@@ -10,6 +11,7 @@
 #include <stdinc.h>
 #include <getparam.h>
 #include <history.h>
+#include <filefn.h>
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -63,7 +65,7 @@ string defv[] = {
     "kstart=1\n       Running mode (1=new 2=restart 3,4,5=restart w/ new par",
     "tcomp=40.0\n     Maximum allowed running time (minutes)",
 
-    "VERSION=1.1a\n   17-mar-04 PJT",
+    "VERSION=1.2\n    17-mar-06 PJT",
     NULL,
 };
 
@@ -89,8 +91,8 @@ void nemo_main(void)
     string exefile = "nbody1";
     string parfile = "nbody1.in";
     string rundir = getparam("outdir");
-    string infile;
-    char fullname[256], runcmd[256];
+    string infile, fname;
+    char dname[256], runcmd[256];
     stream datstr, histr;
 
     kstart = getiparam("kstart");
@@ -125,8 +127,8 @@ void nemo_main(void)
 
     make_rundir(rundir);
 
-    sprintf(fullname,"%s/%s",rundir,parfile);
-    datstr = stropen(fullname,"w");    
+    sprintf(dname,"%s/%s",rundir,parfile);
+    datstr = stropen(dname,"w");    
 
     /*  New Run */
 
@@ -163,12 +165,12 @@ void nemo_main(void)
     if (hasvalue("in")) {
 	infile = getparam("in");
 	if (*infile == '-') {		/* do something special for pipes */
-            sprintf(runcmd,"stou4 %s",infile);
-	} else if (*infile == '/') {	/* regular file */
-            sprintf(runcmd,"stou4 %s nbody=%d",infile,nbody);
-        } else
-            error("in=%s must be an absolute pathname or special file",infile);
-        dprintf(0,"%s\n",runcmd);
+	  sprintf(runcmd,"stou4 %s",infile);
+	} else {
+	  fname = fullname(infile);
+	  sprintf(runcmd,"stou4 %s nbody=%d",fname,nbody);
+	}
+	dprintf(0,"%s\n",runcmd);
         if (system(runcmd)) error("Error converting input data");
     }
 
