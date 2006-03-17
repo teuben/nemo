@@ -125,6 +125,9 @@ void nemo_main(void)
     rbar = getdparam("rbar");
     zmbar = getdparam("zmbar");
 
+    infile = getparam("in");
+    fname = fullname(infile);
+
     make_rundir(rundir);
 
     sprintf(dname,"%s/%s",rundir,parfile);
@@ -163,11 +166,9 @@ void nemo_main(void)
     strclose(histr);
 
     if (hasvalue("in")) {
-	infile = getparam("in");
 	if (*infile == '-') {		/* do something special for pipes */
 	  sprintf(runcmd,"stou4 %s",infile);
 	} else {
-	  fname = fullname(infile);
 	  sprintf(runcmd,"stou4 %s nbody=%d",fname,nbody);
 	}
 	dprintf(0,"%s\n",runcmd);
