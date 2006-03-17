@@ -1,4 +1,4 @@
-.TH CSG 1NEMO "12 December 2005"
+.TH CSG 1NEMO "16 March 2006"
 .SH NAME
 CGS, runCGS\-  Collisionless Galactic Simulator N-body code (** work in progress **)
 .SH SYNOPSIS
@@ -162,6 +162,11 @@ Sample \fIPARAMETER.DAT\fP initialization file (the default benchmark):
  1				!PLUMMER INIT CONDITION FLAG (1=true)
  0.01				!MAX ALLOWED DT --> MDT
  0.001				!MIN ALLOWED DT
+.fi
+.SH EXAMPLES
+The following example uses runCGS to run the standard benchmark:
+.nf
+   % runCGS out=bench1 
 .fi
 .SH COMPILATION
 Note that various parameters (maximum grid size, maximum number of particles)
