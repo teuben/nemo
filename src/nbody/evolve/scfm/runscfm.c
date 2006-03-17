@@ -62,6 +62,9 @@ nemo_main()
     bool zeroeven  = getbparam("zeroeven");
     bool fixacc = getbparam("fixacc");
 
+    infile = getparam("in");
+    fname = fullname(infile);
+
     make_rundir(rundir);
 
     sprintf(dname,"%s/%s",rundir,parfile);
@@ -90,11 +93,9 @@ nemo_main()
     strclose(histr);
 
     if (hasvalue("in")) {
-	infile = getparam("in");
 	if (*infile == '-') {		/* do something special for pipes */
 	  sprintf(runcmd,"snapprint - m,x,y,z,vx,vy,vz header=t > SCFBI");
-	} else if (*infile == '/') {	/* regular file */
-	  fname = fullname(infile);
+	} else {
 	  sprintf(runcmd,"snapprint %s m,x,y,z,vx,vy,vz header=t > SCFBI",fname);
         } 
         dprintf(0,"%s\n",runcmd);
