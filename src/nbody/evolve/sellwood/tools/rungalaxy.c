@@ -44,7 +44,7 @@ string defv[] = {
     "format=%g\n      format for pos,vel for galaxy.ini",
     "header=\n        If given, use this for unfio header/trailer size",
     "exe=galaxy\n     name of GALAXY executable",
-    "VERSION=2.1b\n   9-mar-06 PJT",
+    "VERSION=2.1c\n   17-mar-06 PJT",
     NULL,
 };
 
@@ -60,7 +60,7 @@ int nemo_main()
     string rundir = getparam("outdir");
     string fmt = getparam("format");
     stream datstr, instr, outstr;
-    char fullname[256];
+    char dname[256];
     char command[256];
     char fmt6[256];
     float *gdata, *gd;
@@ -88,8 +88,8 @@ int nemo_main()
 
     /* prepare the parameter file for galaxy */
 
-    sprintf(fullname,"%s/%s",rundir,"galaxy.dat");
-    datstr = stropen(fullname,"w");    
+    sprintf(dname,"%s/%s",rundir,"galaxy.dat");
+    datstr = stropen(dname,"w");    
     fprintf(datstr,"%d %d %d\n",ngrid[0],ngrid[1],ngrid[2]);
     fprintf(datstr,"%g\n",scale);
     fprintf(datstr,"%g\n",dt);
@@ -110,8 +110,8 @@ int nemo_main()
     for (bp=btab;bp<btab+nbody; bp++)
       mass += Mass(bp);
     
-    sprintf(fullname,"%s/%s",rundir,"galaxy.ini");
-    datstr = stropen(fullname,"w");
+    sprintf(dname,"%s/%s",rundir,"galaxy.ini");
+    datstr = stropen(dname,"w");
     fprintf(datstr,"%g %g %d\n",tsnap,mass,nbody);
     for (bp=btab;bp<btab+nbody; bp++)
       fprintf(datstr,fmt6,
@@ -126,11 +126,11 @@ int nemo_main()
 
     /* Output data from native galaxy (.res) format to snapshot */
     
-    sprintf(fullname,"%s","galaxy.res");
-    instr = stropen(fullname,"r");
+    sprintf(dname,"%s","galaxy.res");
+    instr = stropen(dname,"r");
 
-    sprintf(fullname,"%s","galaxy.snap");
-    outstr = stropen(fullname,"w");
+    sprintf(dname,"%s","galaxy.snap");
+    outstr = stropen(dname,"w");
     put_history(outstr);
 
     ndata = 7*sizeof(float)*nbody;
