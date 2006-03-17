@@ -6,11 +6,13 @@
  *	16-dec-99   V1.1    exe is now scfm.exe within NEMO     pjt
  *			    back to non-exe
  *	 3-apr-01   V1.2    back to exe .... why on earth....   pjt
+ *      17-mar-06   V1.3    using fullname()  for in=           pjt
  *
  */
 
 #include <stdinc.h>
 #include <getparam.h>
+#include <filefn.h>
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -31,19 +33,21 @@ string defv[] = {
     "zeroeven=f\n     ",
     "fixacc=f\n       ",
     "headline=\n      run comment",
-    "VERSION=1.2\n    3-apr-01 PJT",
+    "VERSION=1.3\n    17-mar-06 PJT",
     NULL,
 };
 
 string usage="Self Consistent Field Method N-body code";
+
+string cvsid="$Id$";
 
 nemo_main()
 {
     string exefile = "scfm.exe";
     string parfile = "SCFPAR";
     string rundir = getparam("outdir");
-    string infile;
-    char fullname[256], runcmd[256];
+    string infile, fname;
+    char dname[256], runcmd[256];
     string headline = getparam("headline");
     stream datstr, histr;
     int nsteps = getiparam("nsteps");
@@ -60,8 +64,8 @@ nemo_main()
 
     make_rundir(rundir);
 
-    sprintf(fullname,"%s/%s",rundir,parfile);
-    datstr = stropen(fullname,"w");    
+    sprintf(dname,"%s/%s",rundir,parfile);
+    datstr = stropen(dname,"w");    
 
 
     fprintf(datstr,"C Basic input parameters\n");
@@ -88,12 +92,11 @@ nemo_main()
     if (hasvalue("in")) {
 	infile = getparam("in");
 	if (*infile == '-') {		/* do something special for pipes */
-            sprintf(runcmd,"snapprint - m,x,y,z,vx,vy,vz header=t > SCFBI");
+	  sprintf(runcmd,"snapprint - m,x,y,z,vx,vy,vz header=t > SCFBI");
 	} else if (*infile == '/') {	/* regular file */
-            sprintf(runcmd,"snapprint %s m,x,y,z,vx,vy,vz header=t > SCFBI",
-                            infile);
-        } else
-            error("in=%s must be an absolute pathname or special file",infile);
+	  fname = fullname(infile);
+	  sprintf(runcmd,"snapprint %s m,x,y,z,vx,vy,vz header=t > SCFBI",fname);
+        } 
         dprintf(0,"%s\n",runcmd);
         if (system(runcmd)) error("Error converting input data");
     }

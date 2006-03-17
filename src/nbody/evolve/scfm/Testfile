@@ -22,6 +22,6 @@ scfm.in:
 
 runscfm:	scfm.in
 	@echo Running $@
-	$(EXEC) runscfm `pwd`/scfm.in scfm.run > scfm.log
+	$(EXEC) runscfm scfm.in scfm.run > scfm.log
 	$(EXEC) tsf scfm.run/scfm.dat
 
