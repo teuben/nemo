@@ -13,6 +13,7 @@
 /*         extension(filename)                                 */
 /*         head(filename)                                      */
 /*         tail(filename)                                      */
+/*         fullname(filename)                                  */
 /*         defext(filename, ".xxx")                            */
 /*         pathopen(path, filename, mode)                      */
 /*         pathfile(path, filename)                            */
@@ -29,6 +30,7 @@ extern string root      ( string );
 extern string extension ( string );
 extern string head      ( string );
 extern string tail      ( string );
+extern string fullname  ( string );
 extern char *defext     ( string, string );
 extern stream pathopen  ( string, string, string );
 extern string pathfind  ( string, string );

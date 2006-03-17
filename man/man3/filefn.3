@@ -10,6 +10,7 @@ root, extension, head, tail, defext, pathopen, pathfind, _mappath, \- file opera
 .B string extension(filename)
 .B string head(filename)
 .B string tail(filename)
+.B string fullname(filename)
 .PP
 .B string defext(filename,ext)
 .B stream pathopen(path, filename, mode)
@@ -27,6 +28,10 @@ and
 returns a component of a file
 name and are equivalent to the C shell substitution
 characters \fB:r, :e, :h,\fP and \fB:t\fP, respectively. 
+.PP
+\fIfullname()\fP returns the full name of a file, making
+it easier to find the file again if the user used
+\fIchdir(2)\fP during the program.
 .PP
 \fIdefext()\fP adds an extension to a file name
 if none already exists.  Alternatively, if the extension
@@ -88,4 +93,5 @@ Eric Roberts
 11-jan-86	Last modified   	Roberts
 6-dec-86	Fixed some bugs and updated for Nemo	Josh
 6-oct-90	Manual page written	Peter
+17-mar-06	added fullname	Peter
 .fi

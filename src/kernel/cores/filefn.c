@@ -9,6 +9,7 @@
 /*                  20-nov-94 added () to shutup gcc/lint      */
 /*                  12-apr-95 no more ARGS                     */
 /*                  20-jun-01 gcc3 - removed old BORLAND code  */
+/*                  17-mar-06 added fullname                   */
 /***************************************************************/
 
 #include <stdinc.h>
@@ -20,8 +21,14 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include <unistd.h>     /* getuid */
+#include <unistd.h>     
+#include <limits.h>
 
+#ifndef MAXPATHLEN
+#define MAXPATHLEN    PATH_MAX
+#endif
+
+#define DIR_SEP       '/'
 /***************************************************************/
 /* Local forward function declarations                         */
 /***************************************************************/
@@ -29,7 +36,7 @@
 local string expandtilde ( string );
 local string checkexists ( string, string );
 
-#define DIR_SEP  '/'
+
 
 
 /***************************************************************/
@@ -92,6 +99,42 @@ string tail(string filename)
 	return (scopy(filename));
     else
         return (scopy(slashpos + 1));
+}
+
+
+/*
+ * fullname - return the full name of a file
+ * as to make it easier to open it when
+ * a program uses chdir(2)
+ *
+ * TODO:    
+ */
+
+string fullname(string filename)
+{
+  char pathname[MAXPATHLEN];
+  char pathsep[2];
+  int n1,n2;
+  char *outname;
+
+  if (*filename == DIR_SEP)
+    return scopy(filename);
+  if (getcwd(pathname,MAXPATHLEN) == 0)
+    error("Directory name too long (MAXPATHLEN=%d)",MAXPATHLEN);
+  n1 = strlen(pathname) + 1;
+  n2 = strlen(filename) + 1;
+  sprintf(pathsep,"%c",DIR_SEP);
+  if (n1+n2 < MAXPATHLEN) {
+    strcat(pathname,pathsep);
+    strcat(pathname,filename);
+    return scopy(pathname);
+  } else {
+    outname = (char *) allocate(n1+n2+1);
+    sprintf(outname,"%s%c%s",pathname,DIR_SEP,filename);
+    return outname;
+  }
+  /* actually never reaches here */
+  return 0;
 }
 
 
@@ -280,21 +323,29 @@ local string expandtilde(string name)
 #ifdef TESTBED
 #include <getparam.h>
 string defv[] = {
-    "path=???\n		full path to test",
-    "name=???\n		name",
-    "VERSION=1.1\n      20-feb-94 PJT",
+    "path=\n		full path to test",
+    "name=\n		name",
+    "fullname=\n        find fullname",
+    "VERSION=1.2\n      17-mar-06 PJT",
     NULL,
 };
 
 string path, name;
 
-#define MAXLINE 100
+#ifndef MAXLINE
+#define MAXLINE 256
+#endif
 
 char line[MAXLINE];
 
 nemo_main()
 {
     stream infile;
+
+    if (hasvalue("fullname")) {
+      printf("%s\n",fullname(getparam("fullname")));
+      stop(0);
+    }
 
     path = getparam("path");
     name = getparam("name");
