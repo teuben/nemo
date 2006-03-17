@@ -4,6 +4,7 @@
  *
  *	3-nov-2005		written
  *     12-dec-2005     added writing pos/vel files with freqout=
+ *     16-mar-2006     0.4 update version 
  */
 
 #include <stdinc.h>
@@ -29,10 +30,11 @@ string defv[] = {
     "freqcmss=2000\n freq of center of mass adjustments",
     "freqdiag=50\n   freq",
     "freqout=10\n    freq of output of snapshots",
-    "exe=CGS.exe\n   name of CGS executable",
     "in=\n           optional input snapshot (nemo format)",
     "nemo=t\n        convert data to NEMO and cleanup ASCII",
-    "VERSION=0.3\n   12-dec-05 PJT",
+    "options=\n      Optional output:  phi(potential), acc (forces) ** soon to come **",
+    "exe=CGS.exe\n   name of CGS executable",
+    "VERSION=0.4\n   16-mar-06 PJT",
     NULL,
 };
 
@@ -46,20 +48,19 @@ int nemo_main()
   real scale, dt, dtout, dtlog, tstop; 
   real virial = getrparam("virial");
   bool Qnemo = getbparam("nemo");
+  bool Qpot = FALSE;
+  bool Qacc = FALSE;
   string exefile = getparam("exe");
   string rundir = getparam("out");
   string infile;
   stream datstr;
-  char fullname[256];
-  char command[256];
-  char line[256];
+  char fullname[256], command[256], line[256];
   
-
   make_rundir(rundir);
 
   if (hasvalue("in")) {
     infile = getparam("in");
-    flag = 3;
+    flag = 3;       /* discard the flag= parameter, fix it here */
     sprintf(command,"snapprint %s x,y,z    > %s/%s",infile,rundir,"initPOS.dat");
     dprintf(0,">>> %s\n",command);
     system(command);
@@ -114,7 +115,15 @@ int nemo_main()
   system(command);
 
   if (Qnemo) {
-    sprintf(command,"tabtos fort.90 snap.out nbody,time skip,pos,vel; rm fort.90");
+    /* only supporting Qpot and Qacc, pos and vel always written  */
+    if (Qpot && Qacc)
+      sprintf(command,"tabtos fort.90 snap.out nbody,time skip,pos,vel,pot,acc; rm fort.90");
+    else if (Qpot)
+      sprintf(command,"tabtos fort.90 snap.out nbody,time skip,pos,vel,pot; rm fort.90");
+    else if (Qacc)
+      sprintf(command,"tabtos fort.90 snap.out nbody,time skip,pos,vel,acc; rm fort.90");
+    else
+      sprintf(command,"tabtos fort.90 snap.out nbody,time skip,pos,vel; rm fort.90");
     dprintf(0,">>> %s\n",command);
     system(command);
   }
