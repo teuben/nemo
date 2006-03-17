@@ -1,4 +1,4 @@
-.TH GADGETSNAP 1NEMO "2 Jun 2003"
+.TH GADGETSNAP 1NEMO "17 March 2006"
 .SH NAME
 gadgetsnap \- convert gadget files to snapshot format
 .SH SYNOPSIS
@@ -16,12 +16,19 @@ is also given:
 \fBin=\fP
 Input file (gadget format). No default, and currently only one file
 at the time can be processed.
-.TP 20
+.TP 
 \fBout=\fP
 Output file (snapshot format). No default.
-.TP 20
+.TP 
 \fBswap=\fP
 Force swaping bytes for other-endian machines [f] 
+.TP 
+\fBheader=|4|8\fP
+Size of the header uses in unformatted fortran data. This used to be 4,
+but modern compilers (e.g. gfortran) may very well use 8. By default it
+is not specified, and the value determined to be the correct one during
+install (UNFIO_HDR_SIZE) is used. This keyword can thus be used to force
+another value.
 .SH EXAMPLES
 The following example converts a standard sample dataset \fIlcdm_gas.dat\fP
 from the directory \fB$GADGET_DIR/ICs\fP to a NEMO snapshot file,
@@ -108,5 +115,6 @@ Peter Teuben
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
-02-Jun-03	V0.1 Created	PJT
+02-Jun-03	V0.1 Created for Gadget-1	PJT
+17-mar-06	V0.2 various fixes for Gadget-2	PJT
 .fi
