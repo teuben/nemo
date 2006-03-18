@@ -1,0 +1,92 @@
+.TH CSG 1NEMO "17 March 2006"
+.SH NAME
+nam, runam\-  Numerical Action Method integrator
+.SH SYNOPSIS
+\fBnam\fP 
+.PP
+\fBrunam\fP  [parameter=value]
+.SH DESCRIPTION
+NOTE:: This is \fIwork in progress\fP, the code is not yet available within NEMO.x
+.PP
+.SH ABSTRACTS
+Some abstracts  from papers to give an idea what we do here:
+.PP
+2005AAS...207.3001P:
+The Numerical Action Method (NAM) seeks to recreate past orbits of large
+galaxies and galaxy groups by application of the least action principle.
+Recent improvements to NAM include: addition of a smooth, constant
+density background; time-dependent masses for haloes following linear
+perturbation theory; and solving for present distances and redshifts
+simultaneously to optimize fitting observations. We show that this
+improved NAM reconstructs reasonable orbits which agree with a
+large-scale numerical N-body code and with far less multiplicity than
+earlier efforts. We present results on the flow of galaxies, groups and
+clusters within 3000 km/s based on very recent HST TRGB-distance
+measurements. We can therefore expect to place theoretical constraints
+on observations of transverse velocities by future astrometric missions
+such as SIM and GAIA, as well as existing measurements of the proper
+motion of M33 by VLBI. 
+.PP
+2003AAS...202.1904S:
+We will describe a new technique within the category of Numerical Action
+Methods in which one solves for acceptable individual total masses of
+galaxies along with the orbits in an expanding cosmology. We will
+present calculations done on simulated regions of radius 5 Mpc around
+the Milky Way that provide an understanding of the sensitivity of mass
+determinations on errors in distances and redshifts. In preparation for
+proper motion measurements to be provided by Space Interferometry
+Mission (SIM), we examine improvements in mass determinations when
+proper motions further constrain the orbit solutions.
+.PP
+
+
+.SH PARAMETER
+There are the NEMO command line parameters for \fBrunam\fP:
+.TP 20
+\fBin=\fP
+Input catalog of ra,dec,z,D,dz.
+No default.
+.SH FILES
+.nf
+.ta +2i
+PARAMETER.DAT	basic input parameters (see below for details)
+
+.fi
+.SH EXAMPLES
+The following example uses ...
+.nf
+   % runam ....
+.fi
+.SH BENCHMARKS
+The standard benchmark is ....
+.nf
+.ta +1i
+P4/1.6	
+AMD64/	
+G5/1.6
+.fi
+You can run the command either as:
+.nf
+   % time runam ....
+.fi
+.SH DATA CONVERSION
+If snapshots are requested..
+...to NEMO's \fIsnapshot(5NEMO)\fP
+.nf
+tabtos ..
+.fi
+
+.SH UNITS
+The input catalog is 
+.SH SEE ALSO
+snapshot(5NEMO)
+.PP
+.nf
+.fi
+.SH AUTHOR
+Ed Shaya, Jim Peebles, Alan Peel ...
+.SH HISTORY
+.nf
+.ta +1i +3i
+2006	original version + NEMO integration	xxx/PJT
+.fi
