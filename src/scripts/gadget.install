@@ -37,7 +37,7 @@ set gadget_base=http://www.mpa-garching.mpg.de/gadget/
 
 set fftw=fftw-2.1.5.tar.gz 
 set gsl=gsl-1.6.tar.gz
-set hdf=hdf5-1.6.4.tar.gz
+set hdf=hdf5-1.6.5.tar.gz
 set lam=lam-7.1.1.tar.gz
 set gadget=gadget2.tar.gz
 
