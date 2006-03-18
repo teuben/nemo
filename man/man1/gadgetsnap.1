@@ -71,6 +71,46 @@ set SnapShot
   tes
 tes
 
+
+new Gadget-2 example
+
+% gadgetsnap snapshot_000 - header=4 | tsf -
+reading `snapshot_000' ...
+Header:
+npart:  0 40000 20000 0 0 0
+mass:  0 0.00104634 0.00023252 0 0 0
+time: 0
+redshift: 0
+flag_sfr: 0
+flag_feedback: 0
+npartTotal:  0 40000 20000 0 0 0
+flag_cooling: 0
+num_files: 1
+BoxSize: 0
+Omega0: 0
+OmegaLambda: 0
+HubbleParam: 1
+char History[47] "gadgetsnap snapshot_000 - header=4 VERSION=0.2"
+set SnapShot
+  set Parameters
+    int Nobj 60000
+    double Time 0.00000
+  tes
+  set Particles
+    int CoordSystem 66306
+    double Mass[60000] 0.00104634 0.00104634 0.00104634 0.00104634
+      0.00104634 0.00104634 0.00104634 0.00104634 0.00104634
+      0.00104634 0.00104634 0.00104634 0.00104634 0.00104634
+      0.00104634 0.00104634 0.00104634 0.00104634 0.00104634
+      . . .
+    double PhaseSpace[60000][2][3] -94.1339 -10.2409 -7.94287 8.42407
+      -51.3595 -13.0237 -97.9120 -25.4377 0.708142 -75.8381 113.303
+      -16.6230 -59.3715 -23.9488 -33.6642 15.1963 84.9828 11.2808
+      -109.889 -14.8212 -20.2457 47.3136 102.704 106.783 -54.4458
+      . . .
+  tes
+tes
+
 .fi
 .SH HEADER
 The 256 byte GADGET header contains information on how the subsequent data

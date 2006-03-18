@@ -49,7 +49,7 @@ There is no \fBrungadget\fP NEMO front-end for this complex program (yet).
 It is left as an excersize for the writer.
 .SH BENCHMARKS
 The benchmark we use can be found in the before mentioned gadget.install
-script, and runs a galaxy-galaxy N=40,000 
+script, and runs a galaxy-galaxy N=60,000 collision:
 .nf
   % time mpirun -np 1 Gadget2/Gadget2 Gadget2/parameterfiles/galaxy.param >& galaxy.log
 
@@ -69,8 +69,9 @@ snapgadget(1NEMO), gadgetsnap(1NEMO), snapshot(5NEMO)
 .PP
 .nf
 http://www.mpa-garching.mpg.de/gadget/
-Springel V., 2005, MNRAS, submitted, astro-ph/0505010
-Springel V., Yoshida N., White S. D. M., 2001, New Astronomy, 6, 51
+Springel V. (2005MNRAS.364.1105S) - \fI The cosmological simulation code GADGET-2\fP (\fBgadget2-paper.pdf\fP)
+Springel V. May 1, 2005  - \fI User Guide for GADGET-2\fP (\fBusers-guide.pdf\fP).
+Springel V., Yoshida N., White S. D. M., 2001, New Astronomy, 6, 51 
 .fi
 .SH AUTHOR
 Volker Springel
@@ -79,4 +80,5 @@ Volker Springel
 .ta +1i +4i
 15-mar-2000	V1.0 original fortran version released (Y2K compliant!)
 1-may-2005	V2.0 rewritten in C++
+17-mar-2006	a first document in NEMO
 .fi
