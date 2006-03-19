@@ -40,7 +40,8 @@
 \author{
  {Peter Teuben } \\
 % my spiritual co-authors :
-% Douglas Heggie - Piet Hut - Jun Makino
+% Douglas Heggie - Piet Hut - Jun Makino 2004/2005
+% Aguilar/Athanassoula/Dehnen 2006
        }
 
 \date{{\small Version 1.7} \\
@@ -130,22 +131,13 @@ page (this page). Small latex2html conversion problems remain.
 \chapter*{Preface}
 
 What lies in front of you is an accompanying guide to some of 
-the ``other'' software you might also find useful this week.
+the software you might find useful this week.
 It is still very much work in progress, with many sparse and
 unfinished sections.
-Although
-the main material from the book(s) {\it Moving Stars Around}, and now
-{\tt Kali},
-has already been made available via the ACS
-website\footnote{\tt http://www.ArtCompSci.org (ACS)},
-a number of related
-software packages and programs that deal with the N-body problem have been
-assembled for you on a CD so you can use it on your laptop,
-and also made available on your local 
-cluster for the course of 
-this school\footnote{see {\tt /data/week/sc2005}}.
 
-Most of the programs are within the NEMO  and Starlab packages, 
+%% == this is modest specific
+
+A larger number of programs are within the NEMO and Starlab packages, 
 though a number of useful programs and smaller packages
 that are available elsewhere have been assembled here
 and made available via this {\it manybody} environment.
@@ -950,10 +942,11 @@ See the program {\tt plummer.f} in the {\tt superbox} code distribution.
 \section{gadget}
 
 Springel (2000) made {\tt gadget} publicly available.
-It is primarily a cosmology code, which we probably won't able to discuss in this
-week. The code is based on the treecode, but also incoorporates SPH particles
+It is primarily a cosmology code, and based on the treecode, but also incoorporates 
+SPH particles
 and, for cosmological simulations, the Ewald sum technique to create periodic
-boundary conditions.
+boundary conditions. The code was originally written in Fortran, but in 2005 re-released
+in a completely rewritten C version, that also runs in a parallized mode under MPI.
 
 
 \section{quadcode}
@@ -1190,6 +1183,11 @@ Also:
    Joshi et al. (2000)
    Portegies Zwart et al. (2004)
    Gualandris et al. (2004)
+
+- NAM = Numerical Action Method. We'll have code from Shaya. Find solution
+  with NAM and integrate it back using e.g. Aarseth and see where they 
+  come out.
+  e.g.  http://arxiv.org/abs/astro-ph/0512405
    
 
 \end{verbatim}
@@ -1269,6 +1267,8 @@ Not just the Heggie \& Matthieu (1986) virial units, but also how to scale them 
 real objects, like clusters and galaxies. Discuss stellar evolution in kira
 and how this has introduced a hybrid simulation where the scale cannot be
 changed!
+
+Aarseth uses {\it N-Body Units}, i.e.
 
 \section{Initial Conditions}
 
@@ -1739,6 +1739,11 @@ uses VTK and QT and is
 written in C++. It is a powerful
 tool that can be used to visualize 3-d data sets.
 
+\section{xnbody}
+
+an online visualization tool for nbody6++, written by
+Andreas Ernst (heidelberg)
+
 \section{OpenDX}
 
 Open source visualization package, written by IBM. See 
@@ -1911,6 +1916,10 @@ James, R. - 1977 -  J.Comp. Phys. 25, 71.
 
 Lecar, M. - {\it The Standard IAU 25-body problem} - 1968, Bull.Astr. 3, 91. 
 
+Steven Phelps, Vincent Desjacques, Adi Nusser, Edward J. Shaya - 2005
+{\it Numerical action reconstruction of the dynamical history of dark matter haloes in N-body simulations} -
+astro-ph/0512405:   {\bf 0512405.pdf}
+
 Portegies Zwart, Simon F.; Baumgardt, Holger; Hut, Piet; Makino, Junichiro; McMillan, Stephen L. W. -
 2004 - {\it Formation of massive black holes through runaway collisions in dense young star clusters}
 Nature 428, 724 (astro-ph/0402622): {\bf 0402622.pdf}
@@ -1939,6 +1948,10 @@ ed Clarke \& West,  ASP  Conf  series  v123, p215) - astro-ph/9612087
 Spinnato, Piero F.; Fellhauer, Michael; Portegies Zwart, Simon F. - 2003 -
 {\it The efficiency of the spiral-in of a black hole to the Galactic Centre} :
 MNRAS 244, 22S.: {\bf 2003MNRAS.344...22S.pdf}.
+
+Springel V. - 2005 -
+{\it The cosmological simulation code GADGET-2}
+{\bf 2005MNRAS.364.1105S.pdf} {\bf gadget2-paper.pdf}
 
 Springel V., Yoshida N., White S. D. M., 2001, New Astronomy, 6, 51. 
 {\it GADGET: A code for collisionless and gasdynamical cosmological simulations}:
