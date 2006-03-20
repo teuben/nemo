@@ -1127,10 +1127,47 @@ See Section~\ref{s:pyth} for more details.
 \section{Kang et al. - Cosmological Hydrodynamics - 1994}
 
 
-Kang, Hyesung; Ostriker, Jeremiah P.; Cen, Renyue; Ryu, Dongsu;
-Hernquist, Lars; Evrard, August E.; Bryan, Greg L.; Norman, Michael L.
+%Kang, Hyesung; Ostriker, Jeremiah P.; Cen, Renyue; Ryu, Dongsu;
+%Hernquist, Lars; Evrard, August E.; Bryan, Greg L.; Norman, Michael L.
+
+Kang {\it et al. } compared the simulation results of a number
+of cosmological hydrodynamic codes from $z=20$ to $z=0$. 5 codes
+were used: three Eulerian mesh, and two variants of the
+Lagrangian SPH method.
+Codes: 
+TVD (Ryue et al 1993),
+PPM (Bryan et al 1993),
+COJ (Cen 1992),
+TSPH (Hernquist \& Katz, 1989),
+PSPH (Evrard 1988).
 
 {\it A comparison of cosmological hydrodynamic codes}
+
+\section{Frenk  et al. - 1999}
+
+Frenk {\it et al. } took 12 cosmological codes and compared the
+formation of a rich cluster of galaxies.
+Again using a number of SPH and
+Eulerian (various styles) grid simulations were used.
+
+\section{Heitmann et all 2005}
+
+Comparing cosmlogical N-body simulations. Codes:
+MC2 (Habib et al 2004), % not free
+FLASH (Fryxell et al 2000),
+HOT (Warren \& Salmon 1993) % not free
+GADGET (Springel et al 2001),
+HYDRA (Couchman et al 1995),
+TPM (Xu 1995, Bode et al 2000).
+
+Apart from the Frenk et al. {\it Santa Barbara cluster comparison}, they
+also compared a few other datasets.
+
+The initial conditions, as well as some results at z=0, are available
+on their website {\tt http://t8web.lanl.gov/people/heitmann/arxiv/}.
+
+Power et al - 2003 - on errors.
+
 
 \section{Hozumi \& Hernquist - 1995}
 
@@ -1167,6 +1204,10 @@ Also:
       Zhan      astro-ph/0507237
 
       Athanassoula?
+
+ - error stuff
+
+      Power at al 2003
 
  - relaxation:
       Hernquist & Barnes (1990) : 
@@ -1282,6 +1323,13 @@ Also important is the issue of quiet starts, as extensively
 discussed by Sellwood (1987, 1997). Suppression of shot noise.
 See also the new wavelet based code by Romeo et al., where the
 equivalent of a factor of 100 speedup is reported.
+
+White (1996) suggested a novel way to initialize cosmological simulations,
+referred to as ``glass'' initial conditions. There can be obtained when
+a Poisson sample in an expanding period box is evolved with the
+sign of gravity reversed until residual forces have dropped to a negligible
+value. Gadget-2 supports this as an option.
+
 
 \section{Relaxation}
 
@@ -1866,6 +1914,10 @@ Fregeau, J.M., Cheung, P., Portegies Zwart, S.F., and Rasio, F.A. (2004)
 {\it Stellar Collisions During Binary-Binary and Binary-Single Star Interactions}
 astro-ph/0401004 : {\bf 0401004.ps}
 
+Frenk, C. et al - 1999 
+{\it The Santa Barbara Cluster Comparison Project: A Comparison of Cosmological Hydrodynamics Solutions}
+{\bf 1999ApJ...525..554F}
+
 Goodman, Jeremy; Heggie, Douglas C.; Hut, Piet - 1993 -
 {\it On the Exponential Instability of N-Body Systems} :
 {\bf 1993ApJ...415..715G.pdf}
@@ -1877,6 +1929,10 @@ IEEE - {\bf gualandris2004.pdf}
 Heggie, D. \& Hut, P. 2003, 
 {\it The Gravitational Million-Body Problem}, 
 Cambridge University Press.
+
+Heitmann, Katrin; Ricker, Paul M.; Warren, Michael S.; Habib, Salman - 2005
+{\it Robustness of Cosmological Simulations. I. Large-Scale Structure}
+{\bf 2005ApJS..160...28H.pdf} - or {\bf 0411795.pdf} from astro/ph
 
 Hernquist, L. 1989. {\it Performance characteristics of tree codes} Ap J Supp. 64, 715.
 {\bf 1987ApJS...64..715H.pdf}.
@@ -1905,6 +1961,10 @@ Joshi, Kriten J.; Rasio, Frederic A.; Portegies Zwart, Simon - 2000 -
 ApJ 540, 969: 
 {\bf 2000ApJ...540..969J.pdf}
 % is this the starlab paper?
+
+Kang, H. et al - 1994
+{\it A comparison of cosmological hydrodynamic codes}
+{\bf 1994ApJ...430...83K}
 
 Khalisi, E., \& Spurzem, R., 2003 - {\it NBODY6 : Features of the computer code}.
 (last update: 2003, May 02)
@@ -1983,6 +2043,10 @@ Weinberg, M. - 2001b -
 
 
 White,S.D.M. - 1983 - Ap.J. 274, 53 : {\bf 1983ApJ...274...53W.pdf}
+
+White,S.D.M. - 1996 
+{\it Les Houches Lecture Notes}
+{\bf 94100043.ps}
 
 White \& Barnes - 1984 - {\bf 1984MNRAS.211..753B.pdf}
 
