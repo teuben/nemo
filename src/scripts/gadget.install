@@ -1,9 +1,11 @@
 #! /bin/csh -f
 #
-#  (somewhat linux centric) example install script for Gadget and all the needed 
+#  (somewhat linux centric) example self-contained install script for Gadget and all the needed 
 #  companion libraries on a single processor machine; 
 #  you probably want to edit this file, or use the commandline parameters,
 #  to make it work for you. See an example below.
+#  Of course it's quite possible that some, or all, of the needed libraries already
+#  exist on your system. In that case, this script may not be as useful for you.
 #
 #  For gadget, see       http://www.mpa-garching.mpg.de/gadget/
 #  For NEMO suport, see  http://www.astro.umd.edu/nemo/
@@ -39,7 +41,7 @@ set fftw=fftw-2.1.5.tar.gz
 set gsl=gsl-1.6.tar.gz
 set hdf=hdf5-1.6.5.tar.gz
 set lam=lam-7.1.1.tar.gz
-set gadget=gadget2.tar.gz
+set gadget=gadget-2.0.1.tar.gz
 
 set prefix=`pwd`/opt
 set manybody=0
@@ -159,7 +161,7 @@ endif
 if (-e $gadget) gtar zxf $gadget
 set dir=`basename $gadget .tar.gz`
 # for now gadget tar file base name different from created directory name
-set dir=Gadget-2.0
+set dir=Gadget-2.0.1
 if (-e $dir) then
    pushd $dir/Gadget2
    foreach problem (cluster galaxy gassphere lcdm_gas)
@@ -183,7 +185,7 @@ endif
 if ($bench) then
    set dir=`basename $gadget .tar.gz`
    # for now gadget tar file base name different from created directory name
-   set dir=Gadget-2.0
+   set dir=Gadget-2.0.1
    pushd $dir
    if (! -e galaxy) mkdir galaxy
    echo '   if ($?LD_LIBRARY_PATH) then'                                >> $rc
