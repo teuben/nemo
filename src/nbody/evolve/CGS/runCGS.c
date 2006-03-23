@@ -5,6 +5,7 @@
  *	3-nov-2005		written
  *     12-dec-2005     added writing pos/vel files with freqout=
  *     16-mar-2006     0.4 update version 
+ *     22-mar-2006     0.5 also read forces and potentials
  */
 
 #include <stdinc.h>
@@ -34,7 +35,7 @@ string defv[] = {
     "nemo=t\n        convert data to NEMO and cleanup ASCII",
     "options=\n      Optional output:  phi(potential), acc (forces) ** soon to come **",
     "exe=CGS.exe\n   name of CGS executable",
-    "VERSION=0.4\n   16-mar-06 PJT",
+    "VERSION=0.5\n   22-mar-06 PJT",
     NULL,
 };
 
@@ -48,14 +49,18 @@ int nemo_main()
   real scale, dt, dtout, dtlog, tstop; 
   real virial = getrparam("virial");
   bool Qnemo = getbparam("nemo");
-  bool Qpot = FALSE;
-  bool Qacc = FALSE;
+  bool Qpot = TRUE;
+  bool Qacc = TRUE;
   string exefile = getparam("exe");
   string rundir = getparam("out");
   string infile;
   stream datstr;
   char fullname[256], command[256], line[256];
-  
+#if 0
+  string rmcmd = "ls -l";
+#else
+  string rmcmd = "rm";
+#endif  
   make_rundir(rundir);
 
   if (hasvalue("in")) {
@@ -117,13 +122,13 @@ int nemo_main()
   if (Qnemo) {
     /* only supporting Qpot and Qacc, pos and vel always written  */
     if (Qpot && Qacc)
-      sprintf(command,"tabtos fort.90 snap.out nbody,time skip,pos,vel,pot,acc; rm fort.90");
+      sprintf(command,"tabtos fort.90 snap.out nbody,time skip,pos,vel,acc,phi; %s fort.90",rmcmd);
     else if (Qpot)
-      sprintf(command,"tabtos fort.90 snap.out nbody,time skip,pos,vel,pot; rm fort.90");
+      sprintf(command,"tabtos fort.90 snap.out nbody,time skip,pos,vel,skip,skip,skip,phi; %s fort.90",rmcmd);
     else if (Qacc)
-      sprintf(command,"tabtos fort.90 snap.out nbody,time skip,pos,vel,acc; rm fort.90");
+      sprintf(command,"tabtos fort.90 snap.out nbody,time skip,pos,vel,acc; %s fort.90",rmcmd);
     else
-      sprintf(command,"tabtos fort.90 snap.out nbody,time skip,pos,vel; rm fort.90");
+      sprintf(command,"tabtos fort.90 snap.out nbody,time skip,pos,vel; %s fort.90",rmcmd);
     dprintf(0,">>> %s\n",command);
     system(command);
   }
