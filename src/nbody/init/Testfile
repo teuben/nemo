@@ -1,5 +1,5 @@
 DIR = src/nbody/init
-BIN = snapenter mkplummer mkexpdisk real mkommod mkhomsph mkspiral
+BIN = snapenter mkplummer mkexpdisk real mkommod mkhomsph mkspiral magalie
 NEED = $(BIN) tsf snapprint
 
 help:
@@ -70,6 +70,12 @@ mkspiral:
 	@echo Running $@
 	$(EXEC) mkspiral mkspiral.out $(NBODY) seed=123 a=100
 	$(EXEC) tsf mkspiral.out
+
+magalie:
+	@echo Running $@
+	$(EXEC) magalie magalie.out 2000 500 4000
+	$(EXEC) tsf magalie.out
+	
 
 real:
 	@echo f2d conversion:
