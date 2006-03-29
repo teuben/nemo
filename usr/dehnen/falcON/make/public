@@ -5,78 +5,77 @@
 #
 ################################################################################
 
+# ------------
+# from WDutils
+# ------------
+
+Pi_h			:= $(IUTI)Pi.h
+inline_h		:= $(IUTI)inline.h
+inline_io_h		:= $(IUTI)inline_io.h
+traits_h		:= $(IUTI)traits.h
+tupel_h			:= $(IUTI)tupel.h $(IUTI)tupel.cc $(traits_h)
+exception_h		:= $(IUTI)exception.h $(traits_h)
+memory_h		:= $(IUTI)memory.h $(exception_h) $(inline_h)
+numerics_h		:= $(IUTI)numerics.h $(inline_h) $(memory_h) $(tupel_h)
+random_h_util		:= $(IUTI)random.h $(inline_h) $(Pi_h) $(traits_h)
+
 # -----------------------
 # header dependency lists
 # -----------------------
 
-traits_h		:= $(IPUB)traits.h
-basic_h			:= $(IPUB)basic.h $(traits_h)
-Pi_h			:= $(IPUB)Pi.h
-inline_h		:= $(IPUB)inline.h
-tupel_cc		:= $(IPUB)tupel.cc
-inline_io_h		:= $(IPUB)inline_io.h
-memory_h		:= $(IPUB)memory.h $(inline_h)
-tupel_h			:= $(IPUB)tupel.h $(tupel_cc)
-numerics_h		:= $(IPUB)numerics.h $(inline_h) $(tupel_h)
-interact_h		:= $(IPUB)interact.h
+utils_h			:= $(traits_h) $(Pi_h) $(inline.h) $(inline_io.h) \
+			   $(tupel_h) $(exception_h) $(memory_h)
+basic_h			:= $(IPUB)basic.h $(utils_h)
+tensor_h		:= $(IPUB)tensor.h $(utils_h) $(IPUB)tensor.cc
+tensor_set_h		:= $(IPUB)tensor_set.h $(tensor_h) $(simd_h) \
+			   $(IPUB)tensor_set.cc
+types_h			:= $(IPUB)types.h $(basic_h) $(tensor_h)
 default_h		:= $(IPUB)default.h $(types_h)
-tensor_cc		:= $(IPUB)tensor.cc
-tensor2D_h		:= $(IPUB)tensor2D.h
-tensor_h		:= $(IPUB)tensor.h $(tupel_h) $(tensor_cc)
-tensor_set_cc		:= $(IPUB)tensor_set.cc
-tensor_set_h		:= $(IPUB)tensor_set.h $(tensor_h) $(tensor_set_cc)
-types_h			:= $(IPUB)types.h $(basic_h) $(tupel_h) $(tensor_h)
+interact_h		:= $(IPUB)interact.h $(basic_h)
 fields_h		:= $(IPUB)fields.h $(types_h)
 ifdef DPROPER
 peano_h			:= $(IPRO)peano.h $(types_h)
+simd_h			:= $(IPRO)simd.h $(basic_h)
 endif
 io_h			:= $(IPUB)io.h $(fields_h)
 body_h			:= $(INC)body.h $(fields_h)
 externacc_h		:= $(INC)externacc.h $(body_h)
 tree_h			:= $(IPUB)tree.h $(default_h) $(body_h) $(peano_h)
-partner_h		:= $(IPUB)partner.h $(tree_h) $(inline_io_h)
-gravity_h		:= $(IPUB)gravity.h $(tree_h) $(inline_io_h) \
-				$(tensor_set_h)
-kernel_h		:= $(IPUB)kernel.h $(gravity_h)
-FAlCON_cc		:= $(IPUB)FAlCON.cc $(gravity_h) $(tree_h)
+partner_h		:= $(IPUB)partner.h $(tree_h)
+gravity_h		:= $(IPUB)gravity.h $(tree_h) $(tensor_set_h)
+kernel_h		:= $(IPUB)kernel.h $(gravity_h) $(simd_h)
 FAlCON_h		:= $(INC)FAlCON.h $(types_h) $(default_h) $(body_h) \
-				$(FAlCON_cc)
+			   $(IPUB)FAlCON.cc $(gravity_h) $(partner_h) $(sph_h)
 FAlCON_C_h		:= $(INC)FAlCON_C.h
 main_h			:= $(INC)main.h  $(body_h)
 nbody_h			:= $(IPUB)nbody.h $(body_h) $(externacc_h)
 manip_h			:= $(IPUB)manip.h $(body_h)
 defman_h		:= $(IPUB)defman.h
 tools_h			:= $(IPUB)tools.h $(body_h)
-random_h		:= $(IPUB)random.h $(Pi_h) $(traits_h) $(inline_h)
+random_h		:= $(IPUB)random.h $(random_h_util)
 sample_h		:= $(IPUB)sample.h $(body_h) $(random_h)
-gamma_h			:= $(IPUB)gamma.h $(Pi_h) $(inline_h) $(basic_h) \
-				$(sample_h) $(numerics_h)
+gamma_h			:= $(IPUB)gamma.h $(basic_h) $(sample_h)
 king_h			:= $(IPUB)king.h
 
 # -----------------------
 # source dependency lists
 # -----------------------
 
-basic_cc			:= $(SPUB)basic.cc $(basic_h)
-numerics_cc		:= $(SPUB)numerics.cc $(numerics_h) $(Pi_h)
-body_cc			:= $(SPUB)body.cc $(body_h) $(inline_io_h) $(io_h)
+basic_cc		:= $(SPUB)basic.cc $(basic_h)
+body_cc			:= $(SPUB)body.cc $(body_h) $(io_h) $(numerics)
 io_cc			:= $(SPUB)io.cc $(io_h) $(basic_h)
 kernel_cc		 = $(SPUB)kernel.cc $(kernel_h) $(kernel_pro)
 partner_cc		:= $(SPUB)partner.cc $(partner_h) $(interact_h)
 gravity_cc		:= $(SPUB)gravity.cc $(gravity_h) $(kernel_h) \
-				$(interact_h) $(Pi_h) $(numerics_h) \
-				$(gravity_pro)
+			   $(interact_h) $(numerics_h) $(gravity_pro)
 tree_cc			:= $(SPUB)tree.cc $(tree_h) $(body_h) $(memory_h)
 nbody_cc		:= $(SPUB)nbody.cc $(nbody_h) $(io_h)
 manip_cc		:= $(SPUB)manip.cc $(manip_h)
 FAlCONC_cc		:= $(SPUB)FAlCONC.cc $(FAlCON_C_h) $(FAlCON_h)
 tools_cc		:= $(SPUB)tools.cc $(tools_h) $(Pi_h) $(memory_h)
-random_cc		:= $(SPUB)random.cc $(random_h) $(numerics_h)
-sample_cc		:= $(SPUB)sample.cc $(sample_h) $(basic_h) $(Pi_h) \
-				$(numerics_h)
+sample_cc		:= $(SPUB)sample.cc $(sample_h) $(basic_h) $(numerics_h)
 gamma_cc		:= $(SPUB)gamma.cc $(gamma_h) $(numerics_h)
-king_cc			:= $(SPUB)king.cc $(king_h) $(Pi_h) $(inline_io_h) \
-				$(tupel_h) $(numerics_h)
+king_cc			:= $(SPUB)king.cc $(king_h) $(numerics_h)
 
 # ---------------
 # library modules
@@ -85,7 +84,7 @@ king_cc			:= $(SPUB)king.cc $(king_h) $(Pi_h) $(inline_io_h) \
 $(LIB)basic.o:		$(basic_cc) $(makepublic)
 			./make/dir $(BIN) 755
 			./make/dir $(LIB) 755
-			$(MAKE_OBJ) $(DMPI) $(DSPH) $(DNEMO) $(DSOFT)
+			$(MAKE_OBJ) $(NBDYFLAGS)
 $(LIB)body.o:		$(body_cc) $(makepublic)
 			$(MAKE_OBJ) $(NBDYFLAGS)
 $(LIB)tree.o:		$(tree_cc) $(makepublic)
@@ -111,12 +110,8 @@ else
 $(LIB)kernel.o:		$(kernel_cc) $(makepublic)
 			$(MAKE_OBJ) $(NBDYFLAGS)
 endif
-$(LIB)numerics.o:	$(numerics_cc) $(makepublic)
-			$(MAKE_OBJ)
 $(LIB)tools.o:		$(tools_cc) $(makepublic)
 			$(MAKE_OBJ) $(NBDYFLAGS)
-$(LIB)random.o:		$(random_cc) $(makepublic)
-			$(MAKE_OBJ) $(DNEMO)
 $(LIB)sample.o:		$(sample_cc) $(makepublic)
 			$(MAKE_OBJ) $(DNEMO)
 $(LIB)gamma.o:		$(gamma_cc) $(makepublic)
@@ -127,14 +122,14 @@ $(LIB)king.o:		$(king_cc) $(makepublic)
 ifdef NEMO
 public_objs	 :=	$(LIB)basic.o $(LIB)body.o $(LIB)tree.o \
 			$(LIB)gravity.o $(LIB)kernel.o $(LIB)io.o \
-			$(LIB)nbody.o $(LIB)FAlCONC.o $(LIB)numerics.o \
-			$(LIB)tools.o $(LIB)random.o $(LIB)sample.o \
-			$(LIB)manip.o $(LIB)partner.o 
+			$(LIB)partner.o $(LIB)nbody.o $(LIB)FAlCONC.o \
+			$(LIB)tools.o $(LIB)sample.o $(LIB)manip.o
+
 else
 public_objs	 :=	$(LIB)basic.o $(LIB)body.o $(LIB)tree.o \
-			$(LIB)gravity.o $(LIB)kernel.o $(LIB)nbody.o \
-			$(LIB)FAlCONC.o $(LIB)numerics.o $(LIB)random.o \
-			$(LIB)sample.o $(LIB)partner.o
+			$(LIB)gravity.o $(LIB)kernel.o $(LIB)partner.o \
+			$(LIB)nbody.o $(LIB)FAlCONC.o $(LIB)sample.o
+
 endif
 
 ifdef STATIC

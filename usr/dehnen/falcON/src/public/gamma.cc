@@ -21,7 +21,6 @@
 //                                                                             |
 //-----------------------------------------------------------------------------+
 #include <public/gamma.h>
-#include <public/numerics.h>
 using namespace falcON;
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -267,8 +266,8 @@ double DehnenModel::SigCircProj(double R) const
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
 // implementing                                                               //
-//   DehnenModel::f();                                                        //
-//   DehnenModel::g();                                                        //
+//   DehnenModel::F();                                                        //
+//   DehnenModel::G();                                                        //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
@@ -333,11 +332,11 @@ double DehnenModel::F(double Q, double ra) const
   ::e   = Q;
   ::eg2 = e*g2;
   if((g2>0. &&eg2>1.) ||e<0.)
-    error("DehnenModel: Q out of range in DfOssipkovMerritt()");
+    error("DehnenModel::F(): Q out of range");
   if(g2>0. && eg2==1.)
-    error("DehnenModel: DfOssipkovMerritt() diverging at Q=Psi(0)");
+    error("DehnenModel::F(): diverging at Q=Psi(0)");
   if(ra==0.)
-    error("DehnenModel: zero anisotropy radius in DfOssipkovMerritt()");
+    error("DehnenModel::F(): zero anisotropy radius");
   ::uq = 1./(ra*ra);
   ::g  = g;
   ::g1 = g1;
@@ -381,8 +380,8 @@ double DehnenModel::G(double E) const
   ::eg2 = e*g2;
   if(g2>0. && eg2==1.) return 0.;
   if((g2>0. && eg2>1.) || E<0.)
-    error("DehnenModel: E out of range in DensityofStates()");
-  if(E==0.) error("DehnenModel: Density of States diverging at E=0");
+    error("DehnenModel::G() E out of range");
+  if(E==0.) error("DehnenModel::G() diverging at E=0");
   if(g==2.) {
     return 32 * sqrt2 * Pi2 * qbulir(&sub__geC,0.,1.,eps,0,0,50);
   } else if(g<2.) {

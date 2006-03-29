@@ -3,7 +3,7 @@
 //                                                                             |
 // add_plummer.cc                                                              |
 //                                                                             |
-// Copyright (C) 2004, 2005 Walter Dehnen                                      |
+// Copyright (C) 2004-2006 Walter Dehnen                                       |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -21,8 +21,8 @@
 //                                                                             |
 //-----------------------------------------------------------------------------+
 #include <public/defman.h>
-#include <public/random.h>
-#include <public/Pi.h>
+#include <public/utils.h>
+#include <random.h>
 #include <ctime>
 #include <cmath>
 

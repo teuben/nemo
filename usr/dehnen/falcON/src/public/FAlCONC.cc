@@ -44,7 +44,8 @@ namespace {
     case  2: return falcON::p2;
     case  3: return falcON::p3;
     case  9: return falcON::newton;
-    default: warning("unknown kernel, using Newtonian greens function\n");
+    default: falcON::warning("unknown kernel, "
+			     "using Newtonian greens function\n");
       return falcON::newton;
     }
   }
@@ -56,19 +57,19 @@ namespace {
     case falcON::p2:     return 2;
     case falcON::p3:     return 3;
     case falcON::newton: return 9;
-    default: warning(" unknown kernel type, defaulting to newton\n");
+    default: falcON::warning(" unknown kernel type, defaulting to newton\n");
       return 9;
     }
   }
   //----------------------------------------------------------------------------
   inline void __falcON_error(const char* name) {
     if(FALCON==0)
-      error("%s() called before falcON_initialize()\n",name);
+      falcON::error("%s() called before falcON_initialize()\n",name);
   }
   //----------------------------------------------------------------------------
   inline int __falcON_warning(const char* name) {
     if(FALCON==0) {
-      warning("%s() called before falcON_initialize()\n",name);
+      falcON::warning("%s() called before falcON_initialize()\n",name);
       return 1;
     }
     return 0;
@@ -76,8 +77,8 @@ namespace {
   //----------------------------------------------------------------------------
   inline void __falcON_grown(const char* name) {
     if(!BUILT) {
-      warning("%s() called before a tree has been grown\n"
-	      "      I will grow the tree (via falcON_grow()) first\n",
+      falcON::warning("%s() called before a tree has been grown\n"
+		      "      I will grow the tree (via falcON_grow()) first\n",
 	      name);
       FALCON->grow();
       BUILT = true;
@@ -103,7 +104,7 @@ namespace {
     if(BODIES) delete BODIES;
     if(FALCON) delete FALCON;
     if(Nsph > Ntot)
-      error("falcON_initialize(): Ntot (%d) < Nsph (%d)\n", Ntot, Nsph);
+      falcON::error("falcON_initialize(): Ntot (%d) < Nsph (%d)\n", Ntot, Nsph);
     unsigned Nbod[BT_NUM] = {Nsph, Ntot-Nsph};
     BODIES = new ebodies(Nbod);
     BODIES->reset(fieldbit::f,F);
@@ -145,10 +146,10 @@ namespace {
     __falcON_error("falcon_iactionlist");
     __falcON_grown("falcon_iactionlist");
     if(BODIES->N_sph() == 0)
-      error("falcON_iactionlist(): no SPH particles registered with "
-	    "falcON_initialize(): no action taken\n");
+      falcON::error("falcON_iactionlist(): no SPH particles registered with "
+		    "falcON_initialize(): no action taken\n");
     if(tau>=zero && V==0)
-      error("falcON_iactionlist(): tau<0 but no velocities given\n");
+      falcON::error("falcON_iactionlist(): tau<0 but no velocities given\n");
     BODIES->reset(fieldbit::v,const_cast<real*>(V));
     BODIES->reset(fieldbit::H,const_cast<real*>(H));
     BODIES->reset(fieldbit::N,N);
@@ -324,9 +325,9 @@ extern "C" {
   {
     __falcON_error("falcON_reuse");
     if(!BUILT) {
-      std::cerr<<" faclON WARNING: falcON_reuse()"
-	       <<" called before a tree has been grown\n"
-	       <<"        I will grow the tree (via falcON_grow()) instead\n";
+      falcON::warning(" faclON WARNING: falcON_reuse()"
+		      " called before a tree has been grown\n"
+		      "   I will grow the tree (via falcON_grow()) instead\n");
       FALCON->grow();
       BUILT = true;
     } else
@@ -337,9 +338,9 @@ extern "C" {
   {
     __falcON_error("falcon_reuse");
     if(!BUILT) {
-      std::cerr<<" faclON WARNING: falcon_reuse()"
-	       <<" called before a tree has been grown\n"
-	       <<"        I will grow the tree (via falcon_grow()) instead\n";
+      falcON::warning(" faclON WARNING: falcON_reuse()"
+		      " called before a tree has been grown\n"
+		      "   I will grow the tree (via falcON_grow()) instead\n");
       FALCON->grow();
       BUILT = true;
     } else
@@ -350,9 +351,9 @@ extern "C" {
   {
     __falcON_error("falcon_reuse");
     if(!BUILT) {
-      std::cerr<<" faclON WARNING: falcon_reuse()"
-	       <<" called before a tree has been grown\n"
-	       <<"        I will grow the tree (via falcon_grow()) instead\n";
+      falcON::warning(" faclON WARNING: falcON_reuse()"
+		      " called before a tree has been grown\n"
+		      "   I will grow the tree (via falcON_grow()) instead\n");
       FALCON->grow();
       BUILT = true;
     } else
@@ -474,8 +475,8 @@ extern "C" {
     __falcON_error("falcon_sph_count");
     __falcON_grown("falcon_sph_count");
     if(BODIES->N_sph() == 0)
-      error("falcON_sph_count(): no SPH particles registered with "
-	    "falcON_initialize(): no action taken\n");
+      falcON::error("falcON_sph_count(): no SPH particles registered with "
+		    "falcON_initialize(): no action taken\n");
     BODIES->reset(fieldbit::H,const_cast<real*>(H));
     BODIES->reset(fieldbit::N,N);
     FALCON->count_sph_partners(Max != 0);
@@ -486,8 +487,8 @@ extern "C" {
     __falcON_error("falcon_sph_count");
     __falcON_grown("falcon_sph_count");
     if(BODIES->N_sph() == 0)
-      error("falcON_sph_count(): no SPH particles registered with "
-	    "falcON_initialize(): no action taken\n");
+      falcON::error("falcON_sph_count(): no SPH particles registered with "
+		    "falcON_initialize(): no action taken\n");
     BODIES->reset(fieldbit::H,H);
     BODIES->reset(fieldbit::N,N);
     FALCON->count_sph_partners( *Max!=0 );
@@ -498,8 +499,8 @@ extern "C" {
     __falcON_error("falcon_sph_count");
     __falcON_grown("falcon_sph_count");
     if(BODIES->N_sph() == 0)
-      error("falcON_sph_count(): no SPH particles registered with "
-	    "falcON_initialize(): no action taken\n");
+      falcON::error("falcON_sph_count(): no SPH particles registered with "
+		    "falcON_initialize(): no action taken\n");
     BODIES->reset(fieldbit::H,H);
     BODIES->reset(fieldbit::N,N);
     FALCON->count_sph_partners( *Max!=0 );

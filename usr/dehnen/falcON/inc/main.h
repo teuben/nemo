@@ -3,7 +3,7 @@
 //                                                                             |
 // main.h                                                                      |
 //                                                                             |
-// Copyright (C) 2002-2005  Walter Dehnen                                      |
+// Copyright (C) 2002-2006  Walter Dehnen                                      |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -255,7 +255,6 @@ int main(int argc, char *argv[])                   // global main
     falcON::MPI::Init(&argc,&argv);                // start MPI: spawm processes
 #endif
 
-    falcON::set_name(argv[0]);                     // get name of application   
     falcON::compile_info::init();                  // initialize compile_info   
 
 #ifdef falcON_USE_NEMO
@@ -272,8 +271,8 @@ int main(int argc, char *argv[])                   // global main
       initparam(argv,defv);
     {
       int d = 100;
-      while(!nemo_debug(d--)); 
-      falcON::run_info::init(++d);
+      while(!nemo_debug(d--));
+      falcON::RunInfo::set_debug_level(++d);
     }
 #  if defined(falcON_PROPER) &&			\
       defined(falcON_RepAction) && (falcON_RepAction==1)
@@ -290,8 +289,6 @@ int main(int argc, char *argv[])                   // global main
     finiparam();                                   // finish NEMO               
 
 #else // falcON_USE_NEMO
-
-    falcON::run_info::init();                      // initialize run_info       
 
 #  if defined(falcON_PROPER) &&			\
       defined(falcON_RepAction) && (falcON_RepAction==1)
@@ -362,6 +359,48 @@ namespace falcON {
     return &X;
   }
   //----------------------------------------------------------------------------
+  // read array of type T
+  template<typename Type> struct __getA;
+  template<> struct __getA<double> {
+    static int get(const char*o, double*a, int m) falcON_THROWING {
+      return nemoinpd(getparam(const_cast<char*>(o)),a,m);
+    } };
+  template<> struct __getA<float> {
+    static int get(const char*o, float*a, int m) falcON_THROWING {
+      return nemoinpf(getparam(const_cast<char*>(o)),a,m);
+    } };
+  template<> struct __getA<int> {
+    static int get(const char*o, int*a, int m) falcON_THROWING {
+      return nemoinpi(getparam(const_cast<char*>(o)),a,m);
+    } };
+  template<> struct __getA<bool> {
+    static int get(const char*o, bool*a, int m) falcON_THROWING {
+      return nemoinpb(getparam(const_cast<char*>(o)),a,m);
+    } };
+  /// read array of type T
+  /// \param o  name of nemo option
+  /// \param a  array
+  /// \param m  physical size of array
+  /// \return   number of elements actually read.
+  template<typename Type>
+  int getaparam(const char*o, Type*a, int m) falcON_THROWING {
+    return __getA<Type>::get(o,a,m);
+  }
+  /// read array of type T, but allow for non-existence
+  /// \param o  name of nemo option
+  /// \param a  array
+  /// \param m  physical size of array
+  /// \param d  default value, if no elements given
+  /// \return   number of elements actually read.
+  template<typename Type>
+  int getaparam_z(const char*o, Type*a, int m) falcON_THROWING {
+    if(!hasvalue(const_cast<char*>(o))) {
+      for(int i=0; i!=m; ++i) a[i] = Type(0);
+      return 0;
+    } else 
+      return __getA<Type>::get(o,a,m);
+  }
+  //----------------------------------------------------------------------------
   // read float                                                                 
   inline float getfparam(const char* option) {
     return float(getdparam(const_cast<char*>(option)));
@@ -371,7 +410,7 @@ namespace falcON {
 #ifdef getrparam
 #  undef getrparam
 #endif
-  inline float getrparam(const char* option) { 
+  inline real getrparam(const char* option) { 
     return real(getdparam(const_cast<char*>(option)));
   }
   //----------------------------------------------------------------------------

@@ -59,7 +59,6 @@
 #include <body.h>                                  // the bodies                
 #include <public/io.h>                             // my NEMO I/O               
 #include <public/tools.h>                          // my tools for bodies       
-#include <public/inline_io.h>                      // my I/O utilities          
 #include <main.h>                                  // main & NEMO stuff         
 //------------------------------------------------------------------------------
 string defv[] = {

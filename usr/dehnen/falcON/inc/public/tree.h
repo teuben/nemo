@@ -741,10 +741,6 @@ namespace falcON {
     unsigned mark_sub (flags, int, cell_iterator const&, unsigned&) const;
   }; // class OctTree {
   //////////////////////////////////////////////////////////////////////////////
-  falcON_TRAITS(OctTree,"OctTree","OctTrees");
-  falcON_TRAITS(OctTree::Leaf,"OctTree::Leaf","OctTree::Leafs");
-  falcON_TRAITS(OctTree::Cell,"OctTree::Cell","OctTree::Cells");
-  //////////////////////////////////////////////////////////////////////////////
   inline void flag_for_subtree(OctTree::Cell*C) {
     C->add         (flags::subtree); }
   inline void unflag_subtree  (OctTree::Cell*C) {
@@ -778,6 +774,10 @@ namespace falcON {
     o.flush();
   }
 } // namespace falcON {
+////////////////////////////////////////////////////////////////////////////////
+falcON_TRAITS(falcON::OctTree,"OctTree","OctTrees");
+falcON_TRAITS(falcON::OctTree::Leaf,"OctTree::Leaf","OctTree::Leafs");
+falcON_TRAITS(falcON::OctTree::Cell,"OctTree::Cell","OctTree::Cells");
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
 // macros for looping all leafs and cells in a tree                           //

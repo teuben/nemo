@@ -3,7 +3,7 @@
 //                                                                             |
 // body.cc                                                                     |
 //                                                                             |
-// Copyright (C) 2000-2005 Walter Dehnen                                       |
+// Copyright (C) 2000-2006 Walter Dehnen                                       |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -27,8 +27,7 @@
 #include <iomanip>                                 // C++ I/O formating         
 #include <cstring>                                 // C++ strings               
 #include <public/io.h>                             // utilities for NEMO I/O    
-#include <public/inline_io.h>                      // utilities for C++ I/O     
-#include <public/numerics.h>                       // falcON numeric utilities  
+#include <numerics.h>
 
 #ifdef falcON_NEMO                                 // compiler option           
   extern "C" {
@@ -37,10 +36,8 @@
 #endif
 
 using namespace falcON;
-////////////////////////////////////////////////////////////////////////////////
-namespace falcON {
-  falcON_TRAITS(bodies::block,"bodies::block","bodies::blocks");
-}
+
+falcON_TRAITS(falcON::bodies::block,"bodies::block","bodies::blocks");
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
 // struct falcON::bodies::block                                                 
@@ -88,7 +85,8 @@ void bodies::block::reset_data(fieldset b) const falcON_THROWING {
 inline
 void bodies::block::add_field (fieldbit f) falcON_THROWING {
   if(TYPE.allows(f) && 0 == DATA[value(f)] ) {
-    debug_info(4,"allocating data for %d %c (%s)\n",NALL,letter(f),name(f));
+    debug_info(4,"bodies::block::add_field(): allocating data for %d %c (%s)\n",
+	       NALL,letter(f),name(f));
     set_data_void(f, falcON_NEW(char,NALL*falcON::size(f)));
     if(f == fieldbit::f) reset_flags();
   }
@@ -97,7 +95,8 @@ void bodies::block::add_field (fieldbit f) falcON_THROWING {
 inline
 void bodies::block::del_field (fieldbit f) falcON_THROWING {
   if(DATA[value(f)]) {
-    debug_info(4,"de-allocating data for %c (%s)\n",letter(f),name(f));
+    debug_info(4,"bodies::block::del_field(): "
+	       "de-allocating data for %c (%s)\n",letter(f),name(f));
     falcON_DEL_A(static_cast<char*>(DATA[value(f)]));
   }
   set_data_void(f,0);
@@ -503,7 +502,7 @@ void bodies::del_data() falcON_THROWING
 // destruction: delete all data                                             
 bodies::~bodies() falcON_THROWING
 {
-  debug_info(6,"destructing bodies");
+  debug_info(6,"bodies::~bodies(): destructing bodies");
   BITS = fieldset(0);
   if(C_FORTRAN)
     for(fieldbit f; f; ++f)
@@ -523,7 +522,7 @@ void bodies::set_firsts()
 
 ////////////////////////////////////////////////////////////////////////////////
 // set up blocks to hold N[t] bodies of type t                              
-void bodies::set_data(unsigned *N) falcON_THROWING
+void bodies::set_data(const unsigned *N) falcON_THROWING
 {
   NBLK = 0u;
   NTOT = 0u;
@@ -564,30 +563,34 @@ bodies::bodies(unsigned nb,
   BITS      ( bits ),
   C_FORTRAN ( 0 )
 {
-  debug_info(3,"constructing bodies: nb=%d, ns=%d, bits=%s",nb,ns,word(bits));
+  debug_info(3,"bodies::bodies(): constructing bodies: nb=%d, ns=%d, bits=%s",
+	     nb,ns,word(bits));
   unsigned n[BT_NUM] = {ns, nb>ns? nb-ns:0};
   for(unsigned i=0; i!=index::max_blocks; ++i) BLOCK[i] = 0;
   set_data(n);
   set_firsts();
 }
 ////////////////////////////////////////////////////////////////////////////////
-bodies::bodies(unsigned*nall,
-	       fieldset bits) falcON_THROWING : 
+bodies::bodies(const unsigned*nall,
+	       fieldset       bits) falcON_THROWING : 
   BITS      ( bits ),
   C_FORTRAN ( 0 )
 {
-  unsigned none[BT_NUM]={0,0}, *n = nall? nall : none;
-  debug_info(3,"constructing bodies: n=%d,%d, bits=%s",n[0],n[1],word(bits));
+  unsigned none[BT_NUM]={0,0};
+  const unsigned*n = nall? nall : none;
+  debug_info(3,"bodies::bodies(): constructing bodies: n=%d,%d, bits=%s",
+	     n[0],n[1],word(bits));
   for(unsigned i=0; i!=index::max_blocks; ++i) BLOCK[i] = 0;
   set_data(n);
   set_firsts();
 }
 ////////////////////////////////////////////////////////////////////////////////
 // resets N, data; same as destruction followed by constructor 1            
-void bodies::reset(unsigned*nall,
-		   fieldset bits) falcON_THROWING
+void bodies::reset(const unsigned*nall,
+		   fieldset       bits) falcON_THROWING
 {
-  unsigned none[BT_NUM]={0,0}, *n= nall? nall : none;
+  unsigned none[BT_NUM]={0,0};
+  const unsigned*n= nall? nall : none;
   bool keepN = true;
   for(bodytype t; t; ++t) keepN = keepN && NALL[t] == n[t];
   if(keepN) {

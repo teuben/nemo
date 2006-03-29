@@ -26,9 +26,6 @@
 #ifndef falcON_included_tree_h
 #  include <public/tree.h>
 #endif
-#ifndef falcON_included_inline_io_h
-#  include <public/inline_io.h>
-#endif
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace falcON {

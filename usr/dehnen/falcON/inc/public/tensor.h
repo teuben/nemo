@@ -113,8 +113,8 @@
 #ifndef falcON_included_tensor_h
 #define falcON_included_tensor_h
 
-#ifndef falcON_included_tupel_h
-#  include <public/tupel.h>
+#ifndef falcON_included_utils_h
+#  include <public/utils.h>
 #endif
 
 namespace falcON {
@@ -391,20 +391,24 @@ namespace falcON {
     return s;
   }
   //////////////////////////////////////////////////////////////////////////////
+} // namespace falcON {
+namespace WDutils {
+  //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
   // class traits< symt3D<N,T> >                                              //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
-#ifdef falcON_included_traits_h
-  template<int N, typename T> struct traits< symt3D<N,T> > {
+  template<int N, typename T> struct traits< falcON::symt3D<N,T> > {
     static const char  *name() {
       return message("symt3D<%d,%s>", N, traits<T>::name());
     }
-    static const size_t size = sizeof(symt3D<N,T>);
+    static const char  *names() {
+      return message("symt3D<%d,%s>", N, traits<T>::name());
+    }
+    static const size_t size = sizeof(falcON::symt3D<N,T>);
   };
-#endif
   //////////////////////////////////////////////////////////////////////////////
-} // namespace falcON {
+} // namespace WDutils {
 #include <public/tensor.cc>
 ////////////////////////////////////////////////////////////////////////////////
 #endif // falcON_included_tensor_h

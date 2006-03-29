@@ -3,7 +3,7 @@
 //                                                                             |
 // gyrfalcON.cc                                                                |
 //                                                                             |
-// Copyright (C) 2000-2005 Walter Dehnen                                       |
+// Copyright (C) 2000-2006 Walter Dehnen                                       |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -117,9 +117,10 @@
 // v 3.0.2  25/06/2005  WD option manippath added                              |
 // v 3.0.3  20/07/2005  WD output file name appending with '!' or '@'          |
 // v 3.0.4  20/07/2005  WD omit list of possible output specs                  |
+// v 3.0.5  22/03/2006  WD minor bug in this file (logstep) fixed              |
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "3.0.4"
-#define falcON_VERSION_D "02-sep-2005 Walter Dehnen                          "
+#define falcON_VERSION   "3.0.5"
+#define falcON_VERSION_D "22-mar-2006 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need "NEMO" to compile gyrfalcON
@@ -285,7 +286,7 @@ void falcON::main() falcON_THROWING
   if(OUT2)                                            // IF(2nd nemo output)    
     NBDY.write(OUT2,write2);                          //   write snapshot       
   if(LOGOUT) {                                        // IF any log output      
-    NBDY.describe  (LOGOUT,*(ask_history()));         //   put history to logout
+    NBDY.describe  (LOGOUT);                          //   put history to logout
     NBDY.stats_head(LOGOUT);                          //   header for logout    
     if(!LOGOUT.is_appending())                        //   Unless appending     
       NBDY.stats   (LOGOUT);                          //     statistics ->logout
@@ -294,7 +295,7 @@ void falcON::main() falcON_THROWING
   double
     t_out1 = NBDY.initial_time()+0.999999*dt_out1,    // time for next output 0 
     t_out2 = NBDY.initial_time()+0.999999*dt_out2;    // time for next output 1 
-  for(int steps=0;                                    // blockstep counter      
+  for(int steps=1;                                    // blockstep counter      
       (never_ending || NBDY.time() < t_end) &&        // WHILE t < t_end        
       (!stopfile ||                                   //   AND                  
        !file_exists(getparam("stopfile")));           //    no stopfile         

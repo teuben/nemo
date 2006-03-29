@@ -98,14 +98,7 @@ namespace falcON {
 			  ,
     SPHT    ( new SphEstimator(TREE,sd) )
 #endif
-  {
-#ifdef falcON_INDI
-    if( BODIES->have(fieldbit::e) && !i_soft)
-      warning("eps_i given but global softening chosen");
-    if(!BODIES->have(fieldbit::e) &&  i_soft)
-      error("no eps_i given, but individual softening chosen");
-#endif
-  }
+  {}
   //----------------------------------------------------------------------------
   inline FAlCON::~FAlCON()
   {

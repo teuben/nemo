@@ -104,19 +104,25 @@ namespace falcON {
   template<typename X> class poles3D<0,X> {
   public: void normalize(X const&) {} };
   //////////////////////////////////////////////////////////////////////////////
+} // namespace falcON {
+namespace WDutils {
+  //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
   // class traits< poles3D<N,T> >                                             //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
-#ifdef falcON_included_traits_h
-  template<int N, typename T> struct traits< poles3D<N,T> > {
+  template<int N, typename T> struct traits< falcON::poles3D<N,T> > {
     static const char  *name() {
       return message("poles3D<%d,%s>", N, traits<T>::name());
     }
-    static const size_t size = sizeof(poles3D<N,T>);
+    static const char  *names() {
+      return message("poles3D<%d,%s>", N, traits<T>::name());
+    }
+    static const size_t size = sizeof(falcON::poles3D<N,T>);
   };
-#endif
-
+  //////////////////////////////////////////////////////////////////////////////
+} // namespace WDutils {
+namespace falcON {
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
   // class falcON::symset3D<N,X>                                              //
@@ -186,18 +192,25 @@ namespace falcON {
     void ass_inn_prd(V const&, symset3D<N-1,X>&) const;
   };
   //////////////////////////////////////////////////////////////////////////////
+} // namespace falcON {
+namespace WDutils {
+  //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
   // class traits< symset3D<N,T> >                                            //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
-#ifdef falcON_included_traits_h
-  template<int N, typename T> struct traits< symset3D<N,T> > {
+  template<int N, typename T> struct traits< falcON::symset3D<N,T> > {
     static const char  *name() {
       return message("symset3D<%d,%s>", N, traits<T>::name());
     }
-    static const size_t size = sizeof(symset3D<N,T>);
+    static const char  *names() {
+      return message("symset3D<%d,%s>", N, traits<T>::name());
+    }
+    static const size_t size = sizeof(falcON::symset3D<N,T>);
   };
-#endif
+  //////////////////////////////////////////////////////////////////////////////
+} // namespace WDutils {
+namespace falcON {
   //////////////////////////////////////////////////////////////////////////////
   template<typename X> class symset3D<0,X> {};     // use X instead             
   //////////////////////////////////////////////////////////////////////////////

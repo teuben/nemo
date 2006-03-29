@@ -42,7 +42,6 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 namespace falcON {
-
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
   // class falcON::flags                                                        
@@ -245,7 +244,6 @@ namespace falcON {
     }
     //@}
   };// class flags
-  falcON_TRAITS(flags,"flags","flags");
   //////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
@@ -273,18 +271,18 @@ namespace falcON {
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
 
-  const int         BD_NOSPH   = 18;               // # non-sph data            
-  const int         BD_NQUANT  = 30;               // total # data              
-  const char* const BD_SQUANT  ="mxvwefktpqajryzlnhHNUYIESRDJFC";
+  const int         BD_NOSPH   = 19;               // # non-sph data            
+  const int         BD_NQUANT  = 31;               // total # data              
+  const char* const BD_SQUANT  ="mxvwefktpqajryzlndhHNUYIESRDJFC";
                                                    // one-char data tags        
   //----------------------------------------------------------------------------
   // array with human readable names for the N-body data                        
   const char* const BD_QNAME[BD_NQUANT] = 
     { "mass", "position", "velocity", "predicted velocity", "softening length",
-      "body flags", "key", "time step", "potential", "external potential",
-      "acceleration", "jerk", "density",  "auxiliary scalar", 
+      "body flags", "key", "time step", "potential", "external potential", 
+      "acceleration", "jerk", "density", "auxiliary scalar", 
       "auxiliary vector", "time-step level", "number of partners",
-      "Peano-Hilbert key", "SPH smoothing length",
+      "node number", "Peano-Hilbert key", "SPH smoothing length",
       "number of SPH partners", "U_internal", "U_predicted", "(dU/dt)_total",
       "(dU/dt)_external", "entropy", "gas density", "d(gas density)/dt",
       "dlog(h)/dt", "factor", "sound speed"
@@ -293,38 +291,39 @@ namespace falcON {
   // array with the sizeof() the N-body data                                    
   const size_t BD_ZQUANT[BD_NQUANT] = {
     //            source properties: 8
-    sizeof(real),      // mass
-    sizeof(vect),      // position
-    sizeof(vect),      // velocity
-    sizeof(vect),      // velocity_predicted
-    sizeof(real),      // softening length
-    sizeof(flags),     // flags
-    sizeof(int),       // key
-    sizeof(real),      // time step
+    sizeof(real),           // mass
+    sizeof(vect),           // position
+    sizeof(vect),           // velocity
+    sizeof(vect),           // velocity_predicted
+    sizeof(real),           // softening length
+    sizeof(flags),          // flags
+    sizeof(int),            // key
+    sizeof(double),         // time step
     //            sink properties: 10
-    sizeof(real),      // potential
-    sizeof(real),      // external potential
-    sizeof(vect),      // acceleration
-    sizeof(vect),      // jerk
-    sizeof(real),      // density (mass)
-    sizeof(real),      // auxiliary scalar
-    sizeof(vect),      // auxiliary scalar
-    sizeof(indx),      // level
-    sizeof(unsigned),  // number of partners
-    sizeof(peanokey),  // Peano-Hilbert key
+    sizeof(real),           // potential
+    sizeof(real),           // external potential
+    sizeof(vect),           // acceleration
+    sizeof(vect),           // jerk
+    sizeof(real),           // density (mass)
+    sizeof(real),           // auxiliary scalar
+    sizeof(vect),           // auxiliary vector
+    sizeof(indx),           // level
+    sizeof(unsigned),       // number of partners
+    sizeof(indx),           // node number
+    sizeof(peanokey),       // Peano-Hilbert key
     //            SPH properties: 12
-    sizeof(real),      // size
-    sizeof(unsigned),  // number of SPH partners
-    sizeof(real),      // U_internal
-    sizeof(real),      // U_predicted
-    sizeof(real),      // (dU/dt)_total
-    sizeof(real),      // (dU/dt)_external
-    sizeof(real),      // entropy
-    sizeof(real),      // gas-density
-    sizeof(real),      // dgas-density/dt
-    sizeof(real),      // dlogh/dt
-    sizeof(real),      // f_i
-    sizeof(real)       // sound speed
+    sizeof(real),           // size
+    sizeof(unsigned),       // number of SPH partners
+    sizeof(real),           // U_internal
+    sizeof(real),           // U_predicted
+    sizeof(real),           // (dU/dt)_total
+    sizeof(real),           // (dU/dt)_external
+    sizeof(real),           // entropy
+    sizeof(real),           // gas-density
+    sizeof(real),           // dgas-density/dt
+    sizeof(real),           // dlogh/dt
+    sizeof(real),           // f_i
+    sizeof(real)            // sound speed
   };
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
@@ -355,7 +354,7 @@ namespace falcON {
       w       = 3,            ///< predicted velocity
       e       = 4,            ///< individual gravitational softening length
       f       = 5,            ///< falcON::flags
-      k       = 6,            ///< integer key
+      k       = 6,            ///< integer key or identifier
       t       = 7,            ///< time step (not used in falcON)
       //            sink properties: 10
       p       = 8,            ///< N-body gravitational potential
@@ -367,21 +366,22 @@ namespace falcON {
       z       = 14,           ///< auxiliary vector datum
       l       = 15,           ///< time-step level (short)
       n       = 16,           ///< number of neighbours
-      h       = 17,           ///< Peano-Hilbert key
+      d       = 17,           ///< node number (short unsigned)
+      h       = 18,           ///< Peano-Hilbert key
       //            SPH properties: 12
-      H       = 18,           ///< SPH smoothing length
-      N       = 19,           ///< number of SPH interaction partners
-      U       = 20,           ///< internal energy U
-      Y       = 21,           ///< predicted U
-      I       = 22,           ///< (dU/dt)_total
-      E       = 23,           ///< (dU/dt)_external
-      S       = 24,           ///< entropy/entropy function (currently not used)
-      R       = 25,           ///< gas-density rho
-      D       = 26,           ///< drho/dt
+      H       = 19,           ///< SPH smoothing length
+      N       = 20,           ///< number of SPH interaction partners
+      U       = 21,           ///< internal energy U
+      Y       = 22,           ///< predicted U
+      I       = 23,           ///< (dU/dt)_total
+      E       = 24,           ///< (dU/dt)_external
+      S       = 25,           ///< entropy/entropy function (currently not used)
+      R       = 26,           ///< gas-density rho
+      D       = 27,           ///< drho/dt
       V       = w,            ///< predicted velocity (again)
-      J       = 27,           ///< dh/dt or dlnh/dt
-      F       = 28,           ///< factor f_i
-      C       = 29,           ///< sound speed
+      J       = 28,           ///< dh/dt or dlnh/dt
+      F       = 29,           ///< factor f_i
+      C       = 30,           ///< sound speed
       invalid = BD_NQUANT     ///< not corresponding to any field
     };
     //--------------------------------------------------------------------------
@@ -439,7 +439,6 @@ namespace falcON {
     /// is the data field supported by NEMO I/O?
     friend bool              is_nemo (fieldbit);
   };
-  falcON_TRAITS(fieldbit,"fieldbit","fieldbits");
 
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
@@ -485,6 +484,7 @@ namespace falcON {
       z       = 1 << fieldbit::z,   ///< just auxiliary vector data
       l       = 1 << fieldbit::l,   ///< just time-step levels
       n       = 1 << fieldbit::n,   ///< just numbers of neighbours
+      d       = 1 << fieldbit::d,   ///< just node numbers
       h       = 1 << fieldbit::h,   ///< just Peano-Hilbert keys
       H       = 1 << fieldbit::H,   ///< just SPH smoothing lengths
       N       = 1 << fieldbit::N,   ///< just number of SPH interaction partners
@@ -518,9 +518,9 @@ namespace falcON {
       /// non-SPH source properties
       source  = m|x|v|w|e|f|k|t,
       /// non-SPH sink properties
-      sink    = p|q|a|j|r|y|z|l|n|h,
+      sink    = p|q|a|j|r|y|z|l|n|d|h,
       /// all integer-type quantities
-      integers= f|k|l|n|h|N,
+      integers= f|k|d|l|n|h|N,
       /// all floating point scalar quantities
       scalars = m|e|t|p|q|r|y|sphscal,
       /// all vector quantities
@@ -716,7 +716,6 @@ namespace falcON {
       return s;
     }
   };
-  falcON_TRAITS(fieldset,"fieldset","fieldsets");
   //////////////////////////////////////////////////////////////////////////////
   inline bool is_nemo(fieldbit f) {
     return fieldset::nemo & (1 << value(f));
@@ -809,7 +808,6 @@ namespace falcON {
       }
     }
   };
-  falcON_TRAITS(bodytype,"bodytype","bodytypes");
 
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                          //
@@ -869,7 +867,7 @@ namespace falcON {
   DefFieldTraits( 4, real);                        // softening length          
   DefFieldTraits( 5, flags)                        // body flags                
   DefFieldTraits( 6, int );                        // body key                  
-  DefFieldTraits( 7, real);                        // time step                 
+  DefFieldTraits( 7, double);                      // time step                 
   DefFieldTraits( 8, real);                        // internal potential        
   DefFieldTraits( 9, real);                        // external potential        
   DefFieldTraits(10, vect);                        // acceleration              
@@ -879,19 +877,20 @@ namespace falcON {
   DefFieldTraits(14, vect);                        // auxiliary vector          
   DefFieldTraits(15, indx);                        // time-step level           
   DefFieldTraits(16, unsigned);                    // # neighbours              
-  DefFieldTraits(17, peanokey);                    // Peano-Hilbert key         
-  DefFieldTraits(18, real);                        // SPH: smoothing length h   
-  DefFieldTraits(19, unsigned);                    // SPH: # neighbours         
-  DefFieldTraits(20, real);                        // SPH: internal energy U    
-  DefFieldTraits(21, real);                        // SPH: predicted U_in       
-  DefFieldTraits(22, real);                        // SPH: (dU/dt)_total        
-  DefFieldTraits(23, real);                        // SPH: (dU/dt)_external     
-  DefFieldTraits(24, real);                        // SPH: entropy              
-  DefFieldTraits(25, real);                        // SPH: gas density          
-  DefFieldTraits(26, real);                        // SPH: d(gas density)/dt    
-  DefFieldTraits(27, real);                        // SPH: dh/dt                
-  DefFieldTraits(28, real);                        // SPH: f_i                  
-  DefFieldTraits(29, real);                        // SPH: sound speed          
+  DefFieldTraits(17, indx);                        // node number               
+  DefFieldTraits(18, peanokey);                    // Peano-Hilbert key         
+  DefFieldTraits(19, real);                        // SPH: smoothing length h   
+  DefFieldTraits(20, unsigned);                    // SPH: # neighbours         
+  DefFieldTraits(21, real);                        // SPH: internal energy U    
+  DefFieldTraits(22, real);                        // SPH: predicted U_in       
+  DefFieldTraits(23, real);                        // SPH: (dU/dt)_total        
+  DefFieldTraits(24, real);                        // SPH: (dU/dt)_external     
+  DefFieldTraits(25, real);                        // SPH: entropy              
+  DefFieldTraits(26, real);                        // SPH: gas density          
+  DefFieldTraits(27, real);                        // SPH: d(gas density)/dt    
+  DefFieldTraits(28, real);                        // SPH: dh/dt                
+  DefFieldTraits(29, real);                        // SPH: f_i                  
+  DefFieldTraits(30, real);                        // SPH: sound speed          
 #undef DefFieldTraits
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
@@ -919,6 +918,7 @@ namespace falcON {
   MACRO(fieldbit::z,zet);			\
   MACRO(fieldbit::l,level);			\
   MACRO(fieldbit::n,num);			\
+  MACRO(fieldbit::d,node);			\
   MACRO(fieldbit::h,peano);
 #define DEF_NAMED_SPH(MACRO)			\
   MACRO(fieldbit::H,size);			\
@@ -989,5 +989,9 @@ namespace falcON {
   };
   //////////////////////////////////////////////////////////////////////////////
 } // namespace falcON {
+falcON_TRAITS(falcON::flags,"flags","flags");
+falcON_TRAITS(falcON::fieldbit,"fieldbit","fieldbits");
+falcON_TRAITS(falcON::fieldset,"fieldset","fieldsets");
+falcON_TRAITS(falcON::bodytype,"bodytype","bodytypes");
 ////////////////////////////////////////////////////////////////////////////////
 #endif // falcON_included_fields_h

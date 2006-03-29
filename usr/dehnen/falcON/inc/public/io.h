@@ -4,7 +4,7 @@
 /// \file   inc/public/io.h                                                     
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2000-2005                                                           
+/// \date   2000-2006                                                           
 ///                                                                             
 /// \brief  contains declarations of classes falcON::input and falcON::output,  
 ///         as well as NEMO I/O support                                         
@@ -497,7 +497,7 @@ namespace falcON {
   public:
     bool    is_open () const { return STREAM!=0; } ///< ready for output ?      
     operator bool   () const { return is_open(); } ///< ready for output ?      
-  };
+  };// class nemo_io
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
   // class falcON::nemo_in                                                      
@@ -511,8 +511,8 @@ namespace falcON {
     // data are all private                                                     
     //--------------------------------------------------------------------------
   private:
-    mutable bool SNAP_INPUT;                       // is a snapshot set open?   
-    bool IS_PIPE;                                  // are we a pipe?            
+    mutable snap_in *SNAP_IN;                      // if non-zero: open snapshot
+    bool             IS_PIPE;                      // are we a pipe?            
     nemo_in(nemo_in const&);                       // not implemented           
     void*const& stream() const { return STREAM; }  // our nemo I/O stream       
     //--------------------------------------------------------------------------
@@ -557,9 +557,9 @@ namespace falcON {
   /// represents a snapshot on a NEMO input stream, \a nemo_in                  
   ///                                                                           
   /// At any time, only one \a snap_in can exist for any \a nemo_in.            
-  /// Construction of a second \a snap_in from the sane \a nemo_in will cause   
+  /// Construction of a second \a snap_in from the same \a nemo_in will cause   
   /// a fatal error. A \a \snap_in provides information on which data are       
-  /// contained in the input stream and allows to construct \a data_in for      
+  /// contained in the snapshot and allows to construct \a data_in for          
   /// reading them.                                                             
   ///                                                                           
   // ///////////////////////////////////////////////////////////////////////////
@@ -569,12 +569,12 @@ namespace falcON {
     // data are all private                                                     
     //--------------------------------------------------------------------------
   private:
-    nemo_in const &INPUT;                          // our input stream          
-    mutable bool   DATA_INPUT;                     // is any data_in open?      
-    mutable int    FIELDS_READ;                    // fields read already       
-    bool           HAS_NSPH, HAS_TIME;             // do we have these data?    
-    unsigned       NBOD, NSPH;                     // # bodies, # SPH bodies    
-    double         TIME;                           // simulations time          
+    mutable data_in *DATA_IN;                      // if non-zero: open snapshot
+    nemo_in const   &INPUT;                        // our input stream          
+    mutable int      FIELDS_READ;                  // fields read already       
+    bool             HAS_NSPH, HAS_TIME;           // do we have these data?    
+    unsigned         NBOD, NSPH;                   // # bodies, # SPH bodies    
+    double           TIME;                         // simulations time          
     //--------------------------------------------------------------------------
     void*const& stream() const {                   // our nemo stream           
       return INPUT.stream();
@@ -690,8 +690,8 @@ namespace falcON {
     // data are all private                                                     
     //--------------------------------------------------------------------------
   private:
-    mutable bool SNAP_OUTPUT;                      // is a snapshot set open?   
-    bool         IS_PIPE, IS_SINK;                 // are we a pipe or sink?    
+    mutable snap_out *SNAP_OUT;                    // if non-zero open snapshot 
+    bool              IS_PIPE, IS_SINK;            // are we a pipe or sink?    
     nemo_out(nemo_out const&);                     // not implemented           
     void*const& stream() const { return STREAM; }  // our nemo I/O stream       
     //--------------------------------------------------------------------------
@@ -733,7 +733,7 @@ namespace falcON {
     /// \param append (input) append existing file anyway?
     explicit nemo_out(const char*file,
 		      bool       append = false) falcON_THROWING
-    : IS_PIPE(0), IS_SINK(0), SNAP_OUTPUT(0) { open(file,append); }
+    : IS_PIPE(0), IS_SINK(0), SNAP_OUT(0) { open(file,append); }
     //--------------------------------------------------------------------------
     /// close open output stream
     ~nemo_out() falcON_THROWING { close(); }
@@ -765,10 +765,10 @@ namespace falcON {
     // data are all private                                                     
     //--------------------------------------------------------------------------
   private:
-    nemo_out const&OUTPUT;                         // our output stream         
-    mutable bool   DATA_OUTPUT;                    // is any data_out open?     
-    mutable int    FIELDS_WRITTEN;                 // data already written out  
-    unsigned       NBOD, NSPH;                     // # bodies, # SPH bodies    
+    nemo_out const   &OUTPUT;                      // our output stream         
+    mutable data_out *DATA_OUT;                    // if non-zero: open data_out
+    mutable int       FIELDS_WRITTEN;              // data already written out  
+    unsigned          NBOD, NSPH;                  // # bodies, # SPH bodies    
     //--------------------------------------------------------------------------
     void*const& stream() const {                   // our nemo stream           
       return OUTPUT.stream();

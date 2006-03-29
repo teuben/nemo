@@ -3,7 +3,7 @@
 //                                                                             |
 // sample.h                                                                    |
 //                                                                             |
-// Copyright (C) 2004  Walter Dehnen                                           |
+// Copyright (C) 2004-2006  Walter Dehnen                                      |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -22,6 +22,7 @@
 //-----------------------------------------------------------------------------+
 // some history                                                                |
 // 27/10/2004 WD  added support for DF evaluation                              |
+// 16/02/2006 WD  added support for non-monotonic DF                           |
 //-----------------------------------------------------------------------------+
 #ifndef falcON_included_sample_h
 #define falcON_included_sample_h
@@ -29,7 +30,7 @@
 #ifndef falcON_included_body_h
 #  include <body.h>
 #endif
-#ifndef falcON_included_rand_h
+#ifndef falcON_included_random_h
 #  include <public/random.h>
 #endif
 ////////////////////////////////////////////////////////////////////////////////
@@ -69,6 +70,7 @@ namespace falcON {
   private:
     const double Mt;
     const double ibt;
+    const bool   careful;
     typedef tupel<2,double> pair_d;
     //--------------------------------------------------------------------------
 #ifdef falcON_PROPER
@@ -86,26 +88,27 @@ namespace falcON {
     //--------------------------------------------------------------------------
     inline void setis();
 #endif
+    inline double F0(double) const;
   public:
     //--------------------------------------------------------------------------
     // construction & destruction                                               
     //--------------------------------------------------------------------------
     explicit 
-    SphericalSampler(double const& mt              // I: total mass             
+    SphericalSampler(double const& mt,             // I: total mass             
 #ifdef falcON_PROPER
-		    ,double const& =0.,            //[I: a: anisotropy radius]  
+		     double const& =0.,            //[I: a: anisotropy radius]  
 		     double const& =0.,            //[I: b0]                    
 		     const double* =0,             //[I: mass adaption: radii]  
 		     int    const& =0,             //[I: mass adaption: # -- ]  
 		     double const& =1.2,           //[I: mass adaption: factor] 
-		     bool   const& =0              //[I: mass adaption: R_-/Re] 
+		     bool   const& =0,             //[I: mass adaption: R_-/Re] 
 #endif
-		     )
+		     bool   const&c=0)            //[I: allow non-monotonic f] 
 #ifdef falcON_PROPER
       ;
 #else
       : 
-    Mt(mt), ibt(1./3.) {}
+    Mt(mt), ibt(1./3.), careful(c) {}
 #endif
     //--------------------------------------------------------------------------
     ~SphericalSampler() { 
@@ -127,30 +130,20 @@ namespace falcON {
     virtual double Ps(double)         const=0;     // Psi(R)                    
     virtual double rM(double)         const=0;     // r(M), M in [0,M_total]    
     //--------------------------------------------------------------------------
-    // 2. Sampling of phase space: virtual                                      
+    // 2. Sampling of phase space                                               
     //                                                                          
-    // We implement two routines for sampling radius, radial and tangential     
-    // velocity from the model. They differ in the treatment of the random      
-    // numbers. The first accepts any type falcON::PseudoRandom random number   
-    // generator and the second a falcON::Random, of which it uses the first    
-    // two quasi-random number generators.                                      
+    // Sampling radius, radial and tangential velocity from the model. The      
+    // boolean template specifies whether quasi-random number are used (true)   
+    // for getting the radius as well as the angles in velocity space.          
     //                                                                          
-    // NOTE  These methods are virtual but not abstract. That is you may super- 
-    //       seed them if you want to provide your own.                         
     //--------------------------------------------------------------------------
-    double pseudo_random(                          // R: Psi(r)                 
-			 PseudoRandom const&,      // I: pseudo RNG             
-			 double&,                  // O: radius                 
-			 double&,                  // O: radial velocity        
-			 double&,                  // O: tangential velocity    
-			 double&) const;           // O: f(E) or g(Q)           
-    //--------------------------------------------------------------------------
-    double quasi_random (                          // R: Psi(r)                 
-			 Random const&,            // I: pseudo & quasi RNG     
-			 double&,                  // O: radius                 
-			 double&,                  // O: radial velocity        
-			 double&,                  // O: tangential velocity    
-			 double&) const;           // O: f(E) or g(Q)           
+    template<bool QUASI>
+    double set_radvel(                             // R: Psi(r)                 
+		      Random const&,               // I: pseudo & quasi RNG     
+		      double&,                     // O: radius                 
+		      double&,                     // O: radial velocity        
+		      double&,                     // O: tangential velocity    
+		      double&) const;              // O: f(E) or g(Q)           
     //--------------------------------------------------------------------------
     // 3. Sampling of full phase-space: non-virtual                             
     //                                                                          
@@ -161,15 +154,33 @@ namespace falcON {
     // scaled.                                                                  
     //--------------------------------------------------------------------------
   public:
-    void sample(bodies const&,                     // I/O: bodies to sample     
-		bool   const&,                     // I: quasi random?          
+    void sample(body   const&,                     // I: first body to sample   
+		unsigned     ,                     // I: # bodies to sample     
+		bool         ,                     // I: quasi random?          
 		Random const&,                     // I: pseudo & quasi RNG     
-		double const& =0.5,                //[I: fraction with vphi>0]  
+		double       =0.5,                 //[I: fraction with vphi>0]  
 #ifdef falcON_PROPER
-	        double const& =0.0,                //[I: factor: setting eps_i] 
+	        double       =0.0,                 //[I: factor: setting eps_i] 
 #endif
-		bool          =false               //[I: write DF into aux?]    
+		bool         =false                //[I: write DF into aux?]    
 		) const;          
+    //--------------------------------------------------------------------------
+    void sample(bodies const&B,                    // I/O: bodies to sample     
+		bool         q,                    // I: quasi random?          
+		Random const&R,                    // I: pseudo & quasi RNG     
+		double       f =0.5,               //[I: fraction with vphi>0]  
+#ifdef falcON_PROPER
+	        double       e =0.0,               //[I: factor: setting eps_i] 
+#endif
+		bool         g =false              //[I: write DF into aux?]    
+		) const
+    {
+      sample(B.begin_all_bodies(), B.N_bodies(), q,R,f,
+#ifdef falcON_PROPER
+	     e,
+#endif
+	     g);
+    }
     //--------------------------------------------------------------------------
   };
 } // namespace falcON {

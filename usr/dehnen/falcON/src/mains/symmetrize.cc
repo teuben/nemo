@@ -49,7 +49,6 @@
 #include <iomanip>                                 // C++ I/O formatting        
 #include <body.h>                                  // the bodies                
 #include <public/io.h>                             // my NEMO I/O               
-#include <public/inline_io.h>                      // my I/O utilities          
 #include <main.h>                                  // main & NEMO stuff         
 //------------------------------------------------------------------------------
 string defv[] = {

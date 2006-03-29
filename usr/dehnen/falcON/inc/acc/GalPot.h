@@ -25,7 +25,7 @@
 // Version 0.6    05. February  2003                                           |
 // Version 0.7    23. September 2004  fixed "find(): x out of range" error     |
 // Version 0.8    04. February  2005  debugged error in GaussLegendre()        |
-//                                    used falcON::tupel                         |
+//                                    used WDutils::tupel                      |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 //                                                                             |

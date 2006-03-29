@@ -52,15 +52,20 @@ namespace falcON {
       fst=a;  snd=b;
     }
   };
-  //----------------------------------------------------------------------------
-  template<typename A, typename B> struct traits< iaction<A,B> > {
+}
+//------------------------------------------------------------------------------
+namespace WDutils {
+  template<typename A, typename B> struct traits< falcON::iaction<A,B> > {
     static const char  *name() { 
       return
 	message("iaction< %s, %s >", traits<A>::name(), traits<B>::name());
     }
     static const char  *names() { return name(); }
-    static const size_t size = sizeof( iaction<A,B> );
+    static const size_t size = sizeof( falcON::iaction<A,B> );
   };
+}
+//------------------------------------------------------------------------------
+namespace falcON {
   //----------------------------------------------------------------------------
   // struct iastack<>                                                           
   //   a stack of iaction<>s organised in a linked list                         
@@ -107,14 +112,19 @@ namespace falcON {
       obj=a;
     }
   };
-  //----------------------------------------------------------------------------
-  template<typename A> struct traits< saction<A> > {
+} // namespace falcON {
+//------------------------------------------------------------------------------
+namespace WDutils {
+  template<typename A> struct traits< falcON::saction<A> > {
     static const char  *name() { 
       return message("saction< %s >", traits<A>::name());
     }
     static const char  *names() { return name(); }
-    static const size_t size = sizeof( saction<A> );
+    static const size_t size = sizeof( falcON::saction<A> );
   };
+}
+//------------------------------------------------------------------------------
+namespace falcON {
   //----------------------------------------------------------------------------
   // struct sastack<>                                                           
   //   a stack of saction<>s organised in a linked list                         

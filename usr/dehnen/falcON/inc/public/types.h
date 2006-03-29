@@ -146,16 +146,13 @@ namespace falcON {
 // elementary falcON types and constants                                        
 //                                                                              
 ////////////////////////////////////////////////////////////////////////////////
-
+#define falcON_TRAITS(TYPE,NAME,NAMES)		\
+namespace WDutils {				\
+  WDutils_TRAITS(TYPE,NAME,NAMES)		\
+}
 //------------------------------------------------------------------------------
 //  vectors and tensors                                                         
 //------------------------------------------------------------------------------
-#ifndef falcON_included_inline_h
-#  include <public/inline.h>
-#endif
-#ifndef falcON_included_tupel_h
-#  include <public/tupel.h>
-#endif
 #ifndef falcON_included_tensor_h
 #  include <public/tensor.h>
 #endif
@@ -164,15 +161,14 @@ namespace falcON {
   typedef tupel<Ndim,real  > vect;               ///< a vector of 3 reals       
   typedef tupel<Ndim,float>  vect_f;             ///< a vector of 3 floats      
   typedef tupel<Ndim,double> vect_d;             ///< a vector of 3 doubles     
-  //----------------------------------------------------------------------------
-  falcON_TRAITS(vect,"vect","vects");
-#ifdef falcON_REAL_IS_FLOAT
-  falcON_TRAITS(vect_d,"vect_d","vect_d");
-#else
-  falcON_TRAITS(vect_f,"vect_f","vect_f");
-#endif
-  //----------------------------------------------------------------------------
 }
+//------------------------------------------------------------------------------
+falcON_TRAITS(falcON::vect,"vect","vects");
+#ifdef falcON_REAL_IS_FLOAT
+falcON_TRAITS(falcON::vect_d,"vect_d","vect_d");
+#else
+falcON_TRAITS(falcON::vect_f,"vect_f","vect_f");
+#endif
 //------------------------------------------------------------------------------
 // integer types of given size                                                  
 //------------------------------------------------------------------------------

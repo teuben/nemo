@@ -163,7 +163,7 @@ namespace {
   // class BasicLister                                                          
   //                                                                            
   // for finding leaf pairs in a sticky_tree;                                   
-  // derived from BasicIactor of interact.h, which satisfies the requirements   
+  // derived from BasicFinder above, which satisfies the requirements           
   // for an INTERACTOR template parameter to class MutualInteractor<>;          
   //                                                                            
   //////////////////////////////////////////////////////////////////////////////
@@ -490,16 +490,14 @@ namespace {
   //////////////////////////////////////////////////////////////////////////////
 } // namespace {
 ////////////////////////////////////////////////////////////////////////////////
-namespace falcON {
-  falcON_TRAITS(StickyFinder<0>,"StickyFinder<0>","StickyFinder<0>");
-  falcON_TRAITS(StickyFinder<1>,"StickyFinder<1>","StickyFinder<1>");
-  falcON_TRAITS(NeighbourCounter,"NeighbourCounter","NeighbourCounter");
-  falcON_TRAITS(NeighbourLister<0>,"NeighbourLister<0>","NeighbourLister<0>");
-  falcON_TRAITS(NeighbourLister<1>,"NeighbourLister<1>","NeighbourLister<1>");
-  falcON_TRAITS(PartnerCounter,"PartnerCounter","PartnerCounter");
-  falcON_TRAITS(PartnerLister<0>,"PartnerLister<0>","PartnerLister<0>");
-  falcON_TRAITS(PartnerLister<1>,"PartnerLister<1>","PartnerLister<1>");
-}
+falcON_TRAITS(StickyFinder<0>,"StickyFinder<0>","StickyFinder<0>");
+falcON_TRAITS(StickyFinder<1>,"StickyFinder<1>","StickyFinder<1>");
+falcON_TRAITS(NeighbourCounter,"NeighbourCounter","NeighbourCounter");
+falcON_TRAITS(NeighbourLister<0>,"NeighbourLister<0>","NeighbourLister<0>");
+falcON_TRAITS(NeighbourLister<1>,"NeighbourLister<1>","NeighbourLister<1>");
+falcON_TRAITS(PartnerCounter,"PartnerCounter","PartnerCounter");
+falcON_TRAITS(PartnerLister<0>,"PartnerLister<0>","PartnerLister<0>");
+falcON_TRAITS(PartnerLister<1>,"PartnerLister<1>","PartnerLister<1>");
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
 // class falcON::PartnerEstimator                                               

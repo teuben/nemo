@@ -31,6 +31,9 @@ extern "C" {
 ////////////////////////////////////////////////////////////////////////////////
 namespace MyPotExp {
   using falcON::PotExp;
+  using falcON::error;
+  using falcON::warning;
+  using falcON::debug_info;
   typedef falcON::tupel<3,float>  vectf;
   typedef falcON::tupel<3,double> vectd;
   //----------------------------------------------------------------------------
@@ -163,7 +166,7 @@ namespace MyPotExp {
 	      name(),s_def,PotExp::name_of_sym(sym(s_def)));
       s = s_def;
     }
-    if(npar>6) warning("%s: skipped parameters beyond 5",name());
+    if(npar>7) warning("%s: skipped parameters beyond 6",name());
     P = new PwithC(a,r,n,l,sym(s));
     if(P->has_error  ()) error  (const_cast<char*>(P->error_msg()));
     if(P->has_warning()) warning(const_cast<char*>(P->warning_msg()));
@@ -282,8 +285,9 @@ void iniacceleration(
 		     bool        *needv)
 {
   if(MyPotExp::Iexp == MyPotExp::Nexp)
-    error("iniacceleration(): cannot have more than %d instances of '%s'\n",
-	  MyPotExp::Nexp,MyPotExp::PotExpansion::name());
+    falcON::error("iniacceleration(): "
+		  "cannot have more than %d instances of '%s'\n",
+		  MyPotExp::Nexp,MyPotExp::PotExpansion::name());
   if(needm) *needm = 0;
   if(needv) *needv = 0;
   MyPotExp::Pexp[MyPotExp::Iexp].init(pars,npar,file);

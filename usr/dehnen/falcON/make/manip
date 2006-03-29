@@ -9,7 +9,7 @@ ifdef NEMO
 MANIP		:= manip/
 SMAN		:= $(SRC)manips/
 MAKEMANIP	= $(CXX) $< -o $@ $(CXXFLAGS) $(NBDYFLAGS) \
-		-I$(INC) $(INEMO) -shared
+		-I$(INC) $(IUTIL) $(INEMO) -shared
 
 # ------------
 # manipulators
@@ -21,7 +21,10 @@ $(MANIP)add_plummer.so:		$(SMAN)add_plummer.cc $(defman_h)
 $(MANIP)analyse_crash.so:	$(SMAN)analyse_crash.cc $(defman_h) $(Pi_h)
 				$(MAKEMANIP)
 $(MANIP)analyse_bar_halo.so:	$(SMAN)analyse_bar_halo.cc $(defman_h) \
-					$(Pi_h) $(tool_h)
+					$(Pi_h) $(tools_h)
+				$(MAKEMANIP)
+$(MANIP)lagrange.so:		$(SMAN)lagrange.cc $(defman_h) $(tools_h) \
+					$(io_h)
 				$(MAKEMANIP)
 $(MANIP)quench_halo.so:		$(SMAN)quench_halo.cc $(defman_h)
 				$(MAKEMANIP)
@@ -36,8 +39,11 @@ $(MANIP)TestTime.so:		$(SMAN)TestTime.cc $(defman_h)
 				$(MAKEMANIP)
 $(MANIP)removesph.so:		$(SMAN)removesph.cc $(defman_h)
 				$(MAKEMANIP)
+$(MANIP)LMXBkick.so:		$(SMAN)LMXBkick.cc $(defman_h)
+				$(MAKEMANIP)
 
 manips		:	$(MANIP)add_plummer.so \
+			$(MANIP)lagrange.so \
 			$(MANIP)symmetrize_pairs.so \
 			$(MANIP)randomize_azimuth.so
 

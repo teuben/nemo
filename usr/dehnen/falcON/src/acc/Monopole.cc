@@ -28,14 +28,14 @@
 #include <iostream>
 #include <fstream>
 #include <acceleration.h>
-#include <public/Pi.h>
-#include <public/inline.h>
+#include <Pi.h>
+#include <inline.h>
 #include <timer.h>
 #define __NO_AUX_DEFACC
 #include <defacc.h>
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
-  using namespace falcON;
+  using namespace WDutils;
   const int AccMax = 10;
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //

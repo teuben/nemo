@@ -8,7 +8,8 @@
 IACC	:= $(INC)acc/
 SACC	:= $(SRC)acc/
 ACC	:= acc/
-MAKEACC	= $(CXX) $< -o $@ $(CXXFLAGS) -g -fpic -I$(IACC) -I$(INC) $(INEMO) -shared
+MAKEACC	= $(CXX) $< -o $@ $(CXXFLAGS) -g -fpic \
+	  -I$(IACC) -I$(INC) $(IUTIL) $(INEMO) -shared
 
 # ----------------
 # dependency lists
@@ -45,7 +46,9 @@ $(ACC)Monopole.so:		$(SACC)Monopole.cc $(timer_h) make/acc
 				$(MAKEACC)
 $(ACC)NFW.so:			$(SACC)NFW.cc make/acc
 				$(MAKEACC)
-$(ACC)Plummer.so:		$(SACC)Plummer.cc make/acc
+$(ACC)Plummer.so:		$(SACC)Plummer.cc $(defacc_h) make/acc
+				$(MAKEACC)
+$(ACC)Point.so:			$(SACC)Point.cc $(defacc_h) make/acc
 				$(MAKEACC)
 $(ACC)PotExp.so:		$(SACC)PotExp.cc $(PotExp_h) make/acc
 				$(MAKEACC) -I$(SRC)
@@ -58,6 +61,7 @@ acc:				$(ACC)Combined.so \
 				$(ACC)MiyamotoNagai.so \
 				$(ACC)Monopole.so \
 				$(ACC)Plummer.so \
+				$(ACC)Point.so \
 				$(ACC)PotExp.so
 
 cleanacc:

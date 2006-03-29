@@ -1,24 +1,33 @@
-//-----------------------------------------------------------------------------+
-//                                                                             |
-// basic.cc                                                                    |
-//                                                                             |
-// Copyright (C) 2002, 2003, 2005  Walter Dehnen                               |
-//                                                                             |
-// This program is free software; you can redistribute it and/or modify        |
-// it under the terms of the GNU General Public License as published by        |
-// the Free Software Foundation; either version 2 of the License, or (at       |
-// your option) any later version.                                             |
-//                                                                             |
-// This program is distributed in the hope that it will be useful, but         |
-// WITHOUT ANY WARRANTY; without even the implied warranty of                  |
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU           |
-// General Public License for more details.                                    |
-//                                                                             |
-// You should have received a copy of the GNU General Public License           |
-// along with this program; if not, write to the Free Software                 |
-// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                   |
-//                                                                             |
-//-----------------------------------------------------------------------------+
+// -*- C++ -*-                                                                  
+////////////////////////////////////////////////////////////////////////////////
+///                                                                             
+/// \file    src/public/basic.cc                                                
+///                                                                             
+/// \author  Walter Dehnen                                                      
+///                                                                             
+/// \date    2002-2006                                                          
+///                                                                             
+/// \brief   implements methods declared in inc/public/basic.h                  
+///                                                                             
+////////////////////////////////////////////////////////////////////////////////
+//                                                                              
+// Copyright (C) 2002-2006  Walter Dehnen                                       
+//                                                                              
+// This program is free software; you can redistribute it and/or modify         
+// it under the terms of the GNU General Public License as published by         
+// the Free Software Foundation; either version 2 of the License, or (at        
+// your option) any later version.                                              
+//                                                                              
+// This program is distributed in the hope that it will be useful, but          
+// WITHOUT ANY WARRANTY; without even the implied warranty of                   
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
+// General Public License for more details.                                     
+//                                                                              
+// You should have received a copy of the GNU General Public License            
+// along with this program; if not, write to the Free Software                  
+// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                    
+//                                                                              
+////////////////////////////////////////////////////////////////////////////////
 #include <public/basic.h>
 
 #ifdef falcON_MPI
@@ -38,82 +47,8 @@ extern "C" {
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
-//                                                                            //
-// run information                                                            //
-//                                                                            //
-////////////////////////////////////////////////////////////////////////////////
-namespace falcON { namespace run_info {
-  bool __set = 0;
-  bool __host_known=0;
-  bool __user_known=0;
-  bool __pid_known =0;
-  char __time    [20];
-  char __host   [100];
-  char __user   [100];
-  char __pid    [10];
-  int  __debug = 0;
-  inline void __init() {
-    time_t now = ::time(0);
-    snprintf(__time,20,ctime(&now));
-#ifdef unix
-    gethostname(__host,100);
-    snprintf(__user,100,(getpwuid(geteuid())->pw_name));
-    snprintf(__pid,10,"%d",getpid());
-    __host_known = 1;
-    __user_known = 1;
-    __pid_known  = 1;
-#else
-    snprintf(__host,100,"unknown.host");
-    snprintf(__user,100,"unknown.user");
-    __host_known = 0;
-    __user_known = 0;
-    __pid_known  = 0;
-#endif
-    __set = 1;
-  }
-  void       init(int d) {
-    __debug = d;
-    if(!__set) {
-      __init();
-      __set=1;
-    }
-  }
-  void       init() {
-    if(!__set) {
-      __init();
-      __set=1;
-    }
-  }
-  bool const&host_known () { return __host_known; }
-  bool const&user_known () { return __user_known; }
-  bool const&pid_known  () { return __pid_known; }
-  int  const&debug_level() { return __debug; }
-  const char*time() {
-    init();
-    return __time;
-  }
-  const char*host() {
-    init();
-    return __host;
-  }
-  const char*user() {
-    init();
-    return __user;
-  }
-  const char*pid () {
-    init();
-    return __pid;
-  }
-} }
-////////////////////////////////////////////////////////////////////////////////
 namespace {
-  char main_name [200] = {0};
   char lib_name  [300] = {0};
-}
-//------------------------------------------------------------------------------
-void falcON::set_name(const char* name)
-{
-  strncpy(main_name,name,200);
 }
 //------------------------------------------------------------------------------
 const char* falcON::libdir()
@@ -131,88 +66,32 @@ const char* falcON::libdir()
   return lib_name;
 }
 //------------------------------------------------------------------------------
-void falcON::exit(const int signal) {              // I: error signal           
-#ifdef falcON_MPI                                  // IF MPI exists             
-  register int MPI_running;
-  MPI_Initialized(&MPI_running);                   //   does MPI run?           
-  if(MPI_running)                                  //   IF MPI runs             
-    MPI_Abort(MPI_COMM_WORLD,signal);              //     MPI-abort             
-  else                                             //   ELSE(no MPI running)    
-#endif                                             // ELSE no MPI existing      
-    std::exit(signal);                             //   ordinary exit()         
-}
-//------------------------------------------------------------------------------
 void falcON::error(const char* fmt,                // I: error message          
-                 ...             ) {               //[I: parameters]            
-  if(main_name[0]) fprintf(stderr,"### falcON Fatal error [%s]: ",main_name);
-  else             fprintf(stderr,"### falcON Fatal error: ");
+		   ...             ) {             //[I: parameters]            
   va_list  ap;
   va_start(ap,fmt);
-#ifdef falcON_MPI
-  register int MPI_running;
-  MPI_Initialized(&MPI_running);
-  if(MPI_running) {
-    register int rank;
-    MPI_Comm_rank(MPI_COMM_WORLD,&rank);
-    fprintf(stderr,"on node %d",rank);
-  }
-#endif // falcON_MPI
-  vfprintf(stderr,fmt,ap);
-  if (fmt[strlen(fmt)-1] != '\n')
-    fprintf(stderr,"\n");
-  fflush(stderr);
+  WDutils::printerr("### falcON Error: ", fmt, ap);
   va_end(ap);
-#ifdef falcON_MPI
-  if(MPI_running)
-    MPI_Abort(MPI_COMM_WORLD,1);                   //     MPI-abort             
-  else
-#endif // falcON_MPI
-  std::exit(1);
+  WDutils::exit();
 }
 //------------------------------------------------------------------------------
 void falcON::warning(const char* fmt,              // I: warning message        
-                   ...             ) {             //[I: parameters]            
-  if(main_name[0]) fprintf(stderr,"### falcON Warning [%s]: ",main_name);
-  else             fprintf(stderr,"### falcON Warning: ");
+		     ...             ) {           //[I: parameters]            
   va_list  ap;
   va_start(ap,fmt);
-#ifdef falcON_MPI
-  register int MPI_running;
-  MPI_Initialized(&MPI_running);
-  if(MPI_running) {
-    register int rank;
-    MPI_Comm_rank(MPI_COMM_WORLD,&rank);
-    fprintf(stderr,"on node %d",rank);
-  }
-#endif // falcON_MPI
-  vfprintf(stderr,fmt,ap);
-  if (fmt[strlen(fmt)-1] != '\n')
-    fprintf(stderr,"\n");
-  fflush(stderr);
+  WDutils::printerr("### falcON Warning: ", fmt, ap);
   va_end(ap);
 }
 //------------------------------------------------------------------------------
 void falcON::debug_info(int         deb,           // I: level for reporting    
 			const char* fmt,           // I: debugging information  
 			...             ) {        //[I: parameters]            
-  if(run_info::__debug < deb) return;
-  fprintf(stderr,"falcON Debug Info: ");
-  va_list  ap;
-  va_start(ap,fmt);
-#ifdef falcON_MPI
-  register int MPI_running;
-  MPI_Initialized(&MPI_running);
-  if(MPI_running) {
-    register int rank;
-    MPI_Comm_rank(MPI_COMM_WORLD,&rank);
-    fprintf(stderr,"on node %d",rank);
+  if(RunInfo::debug(deb)) {
+    va_list  ap;
+    va_start(ap,fmt);
+    printerr("### falcON Debug Info: ", fmt, ap, false);
+    va_end(ap);
   }
-#endif // falcON_MPI
-  vfprintf(stderr,fmt,ap);
-  if (fmt[strlen(fmt)-1] != '\n')
-    fprintf(stderr,"\n");
-  fflush(stderr);
-  va_end(ap);
 }
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -274,32 +153,6 @@ void falcON::CheckAgainstLibrary(falcON::Status Current) falcON_THROWING
     falcON_THROW("STATUS mismatch "
 		 "between executable and library\n");
   }
-}
-////////////////////////////////////////////////////////////////////////////////
-//                                                                            //
-// falcON::message                                                            //
-//                                                                            //
-////////////////////////////////////////////////////////////////////////////////
-falcON::message::message(const char*fmt, ...)
-{
-  va_list  ap;
-  va_start(ap,fmt);
-  vsnprintf(__text,size,fmt,ap);
-  va_end(ap);
-}
-////////////////////////////////////////////////////////////////////////////////
-//                                                                            //
-// falcON::exception                                                          //
-//                                                                            //
-////////////////////////////////////////////////////////////////////////////////
-falcON::exception::exception(const char*fmt, ...)
-{
-  char __text[1024];
-  va_list  ap;
-  va_start(ap,fmt);
-  vsnprintf(__text,1024,fmt,ap);
-  va_end(ap);
-  std::string::operator= (__text);
 }
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //

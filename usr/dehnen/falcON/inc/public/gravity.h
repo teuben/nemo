@@ -34,9 +34,6 @@
 #ifndef falcON_included_tree_h
 #  include <public/tree.h>
 #endif
-#ifndef falcON_included_inline_io_h
-#  include <public/inline_io.h>
-#endif
 #ifndef falcON_included_tensor_set_h
 #  include <public/tensor_set.h>
 #endif
@@ -58,8 +55,6 @@ namespace falcON {
     typedef poles3D <P_ORD,real>      Mset;        // set of multipoles         
     static const int NCOEF = Cset::NDAT;           // # reals in taylor coeffs  
   }
-  falcON_TRAITS(grav::Cset,"grav::Cset","grav::Csets");
-  falcON_TRAITS(grav::Mset,"grav::Mset","grav::Msets");
   //////////////////////////////////////////////////////////////////////////////
   class InvertZ;                                   // forward declaration       
   class GravEstimator;                             // forward declaration       
@@ -645,18 +640,6 @@ namespace falcON {
     typedef GravEstimator::leaf_iterator  leaf_iter;
   }
   //////////////////////////////////////////////////////////////////////////////
-  falcON_TRAITS(GravEstimator,"GravEstimator","GravEstimators");
-  falcON_TRAITS(GravEstimator::Cell,
-		"GravEstimator::Cell","GravEstimator::Cells");
-  falcON_TRAITS(GravEstimator::Leaf,
-		"GravEstimator::Leaf","GravEstimator::Leafs");
-  falcON_TRAITS(GravEstimator::Cell::srce_data,
-		"GravEstimator::Cell::srce_data",
-		"GravEstimator::Cell::srce_data");
-  falcON_TRAITS(GravEstimator::Leaf::sink_data,
-		"GravEstimator::Leaf::sink_data",
-		"GravEstimator::Leaf::sink_data");
-  //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
   // class GravStats                                                          //
   //                                                                          //
@@ -817,6 +800,20 @@ namespace falcON {
     }
   };
 } // namespace falcON {
+////////////////////////////////////////////////////////////////////////////////
+falcON_TRAITS(falcON::grav::Cset,"grav::Cset","grav::Csets");
+falcON_TRAITS(falcON::grav::Mset,"grav::Mset","grav::Msets");
+falcON_TRAITS(falcON::GravEstimator,"GravEstimator","GravEstimators");
+falcON_TRAITS(falcON::GravEstimator::Cell,
+	      "GravEstimator::Cell","GravEstimator::Cells");
+falcON_TRAITS(falcON::GravEstimator::Leaf,
+	      "GravEstimator::Leaf","GravEstimator::Leafs");
+falcON_TRAITS(falcON::GravEstimator::Cell::srce_data,
+	      "GravEstimator::Cell::srce_data",
+	      "GravEstimator::Cell::srce_data");
+falcON_TRAITS(falcON::GravEstimator::Leaf::sink_data,
+	      "GravEstimator::Leaf::sink_data",
+	      "GravEstimator::Leaf::sink_data");
 ////////////////////////////////////////////////////////////////////////////////
 #undef  ENHANCED_IACT_STATS
 #endif // falcON_included_gravity_h

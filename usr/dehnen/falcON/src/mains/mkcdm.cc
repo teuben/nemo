@@ -48,7 +48,6 @@
 //-----------------------------------------------------------------------------+
 #include <public/sample.h>                         // my N-body sampler         
 #include <public/io.h>                             // my NEMO file I/O          
-#include <public/inline_io.h>                      // my I/O utilities          
 #include <proper/truncatedCDM.h>                   // my truncated CDM models   
 #include <fstream>                                 // C++ file I/O              
 #include <iomanip>                                 // C++ I/O formatting        
@@ -239,10 +238,10 @@ void falcON::main() falcON_THROWING
     if(!tab) return;
     tab<<"#\n"
        <<"# \""<< (*(ask_history())) <<"\"\n"
-       <<"# run at  "  <<run_info::time()<<"\n";
-    if(run_info::user_known()) tab<<"#     by  \""<<run_info::user()<<"\"\n";
-    if(run_info::host_known()) tab<<"#     on  \""<<run_info::host()<<"\"\n";
-    if(run_info::pid_known())  tab<<"#     pid  " <<run_info::pid() <<"\n";
+       <<"# run at  "  <<RunInfo::time()<<"\n";
+    if(RunInfo::user_known()) tab<<"#     by  \""<<RunInfo::user()<<"\"\n";
+    if(RunInfo::host_known()) tab<<"#     on  \""<<RunInfo::host()<<"\"\n";
+    if(RunInfo::pid_known())  tab<<"#     pid  " <<RunInfo::pid() <<"\n";
     tab<<"#\n"
        <<"# table with properties of isotropic spherical model with density\n"
        <<"#\n"

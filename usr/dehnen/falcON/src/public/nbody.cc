@@ -2,7 +2,7 @@
 //                                                                             |
 // nbody.cc                                                                    |
 //                                                                             |
-// Copyright (C) 2000-2005  Walter Dehnen                                      |
+// Copyright (C) 2000-2006  Walter Dehnen                                      |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -20,7 +20,6 @@
 //                                                                             |
 //-----------------------------------------------------------------------------+
 #include <public/nbody.h>
-#include <public/inline.h>
 #include <public/io.h>
 #include <iomanip>
 using namespace falcON;
@@ -230,27 +229,27 @@ void Integrator::cpu_stats_body(std::ostream&to) const
     <<std::setfill(' ');
 } 
 //------------------------------------------------------------------------------
-#ifdef falcON_NEMO
-//------------------------------------------------------------------------------
-void Integrator::describe(std::ostream&out,        // I: output stream          
-			  const char  *com)        // I: command line           
+void Integrator::describe(std::ostream&out)        // I: output stream          
 const {
   out<<"#"; stats_line(out);
-  out<<"# \""<<com<<"\"\n#\n";
-  out<<"# run at  "  <<run_info::time()<<"\n";
-  if(run_info::user_known()) out<<"#     by  \""<<run_info::user()<<"\"\n";
-  if(run_info::host_known()) out<<"#     on  \""<<run_info::host()<<"\"\n";
-  if(run_info::pid_known())  out<<"#     pid  " <<run_info::pid() <<"\n";
+  if(RunInfo::cmd_known())
+    out<<"# \""<<RunInfo::cmd()<<"\"\n#\n";
+  out<<"# run at  "  <<RunInfo::time()<<"\n";
+  if(RunInfo::user_known()) out<<"#     by  \""<<RunInfo::user()<<"\"\n";
+  if(RunInfo::host_known()) out<<"#     on  \""<<RunInfo::host()<<"\"\n";
+  if(RunInfo::pid_known())  out<<"#     pid  " <<RunInfo::pid() <<"\n";
   out<<"#\n";
   out.flush();
 }
+//------------------------------------------------------------------------------
+#ifdef falcON_NEMO
 //------------------------------------------------------------------------------
 void Integrator::write(nemo_out const&o,           // I: nemo output            
 		       fieldset       w) const     //[I: what to write]         
 {
   if( o.is_sink()) return;
   if(!o.is_open()) 
-    falcON_THROW("Integrator::write_nemo(): nemo device not open\n");
+    falcON_THROW("Integrator::write(): nemo device not open\n");
   snap_shot()->write_nemo(o,w);
 } 
 #endif
@@ -303,7 +302,7 @@ void LeapFrogCode::fullstep() const {
 ////////////////////////////////////////////////////////////////////////////////
 void BlockStepCode::elementary_step(int t) const { // I: number of step         
   static int m = 0;                                // # of tiny moves omitted   
-  ++m;                                             // cound shortest steps      
+  ++m;                                             // count shortest steps      
   ++t;                                             // add one to t              
   int l=HIGHEST;                                   // find lowest level moving  
   for(; !(t&1) && l; t>>=1, --l);                  // l: lowest level moving    

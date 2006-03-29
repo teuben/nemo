@@ -29,7 +29,6 @@
 // version 1.5  08/11/2005 WD  if no manippath given, try $MANIPPATH           |
 //-----------------------------------------------------------------------------+
 #include <public/manip.h>              // the header we are implementing
-#include <public/inline_io.h>          // some I/O helpers
 #include <fstream>                     // C++ file I/O
 #include <cstring>                     // C type string manipultions
 extern "C" {

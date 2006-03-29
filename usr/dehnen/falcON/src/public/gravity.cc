@@ -1,6 +1,15 @@
-//-----------------------------------------------------------------------------+
-//                                                                              
-/// \file src/public/gravity.cc                                                 
+// -*- C++ -*-                                                                  
+////////////////////////////////////////////////////////////////////////////////
+///                                                                             
+/// \file    src/public/gravity.cc                                              
+///                                                                             
+/// \author  Walter Dehnen                                                      
+///                                                                             
+/// \date    2000-2005                                                          
+///                                                                             
+/// \brief   includes utilities from WDutils into namespace falcON              
+///                                                                             
+////////////////////////////////////////////////////////////////////////////////
 //                                                                              
 // Copyright (C) 2000-2005  Walter Dehnen                                       
 //                                                                              
@@ -18,15 +27,12 @@
 // along with this program; if not, write to the Free Software                  
 // Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                    
 //                                                                              
-//------------------------------------------------------------------------------
-// last changed: 03-nov-2005 WD                                                 
-//------------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 #include <public/gravity.h>
 #include <body.h>
 #include <public/interact.h>
 #include <public/kernel.h>
-#include <public/Pi.h>
-#include <public/numerics.h>
+#include <numerics.h>
 
 using namespace falcON;
 ////////////////////////////////////////////////////////////////////////////////

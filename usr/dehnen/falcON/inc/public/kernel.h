@@ -34,9 +34,6 @@
 #ifndef falcON_included_gravity_h
 #  include <public/gravity.h>
 #endif
-#ifndef falcON_included_memory_h
-#  include <public/memory.h>
-#endif
 
 #if defined(falcON_SSE_CODE) && !defined(falcON_included_simd_h)
 #  include <proper/simd.h>

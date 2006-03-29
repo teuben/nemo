@@ -4,7 +4,7 @@
 /// \file   inc/body.h                                                          
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2000-2005                                                           
+/// \date   2000-2006                                                           
 ///                                                                             
 /// \brief  contains declarations of class falcON::bodies,                      
 ///	    class falcON::snapshot and some useful macros.                      
@@ -33,9 +33,6 @@
 
 #ifndef falcON_included_fields_h
 #  include <public/fields.h>
-#endif
-#ifndef falcON_included_memory_h
-#  include <public/memory.h>
 #endif
 ////////////////////////////////////////////////////////////////////////////////
 /// All public code for this project is in namespace falcON
@@ -513,20 +510,32 @@ namespace falcON {
     public:
       /// \name access to bodies, block, sub-index, and total index             
       //@{
-      /// return const pointer to my falcON::bodies
-      const bodies*const&my_bodies() const {
-	return B->my_bodies();
-      }
       /// return pointer to my bodies::block
       const block *const&my_block () const {
 	return B;
       }
+      /// return const pointer to my falcON::bodies
+      const bodies*const&my_bodies() const {
+#if defined(DEBUG) || defined(EBUG)
+	if(!is_valid())
+	  falcON_THROW("body::my_bodies() called on invalid body");
+#endif
+	return B->my_bodies();
+      }
       /// return number of my bodies::block
       unsigned const&my_block_No () const {
+#if defined(DEBUG) || defined(EBUG)
+	if(!is_valid())
+	  falcON_THROW("body::my_block_No() called on invalid body");
+#endif
 	return B->my_No();
       }
       /// return running body index (between 0, N-1)
       unsigned my_index() const {
+#if defined(DEBUG) || defined(EBUG)
+	if(!is_valid())
+	  falcON_THROW("body::my_index() called on invalid body");
+#endif
 	return B->first() + K;
       }
       /// friend return const pointer to falcON::bodies of iterator
@@ -561,7 +570,7 @@ namespace falcON {
 	return B != 0;
       }
       //------------------------------------------------------------------------
-      /// conversion to bool: are we refering to a valid body?
+      /// conversion to bool: are we referring to a valid body?
       operator bool () const {
 	return is_valid();
       }
@@ -570,11 +579,11 @@ namespace falcON {
       //@{
       /// are we identical to another iterator?
       bool operator== (iterator const&i) const {
-	return B==i.B && K==i.K;
+	return K==i.K && B==i.B;
       }
       /// are we different from another iterator?
       bool operator!= (iterator const&i) const {
-	return B!=i.B || K!=i.K;
+	return K!=i.K || B!=i.B;
       }
       /// are we before another iterator?
       bool operator<  (iterator const&i) const {
@@ -792,7 +801,7 @@ namespace falcON {
       //------------------------------------------------------------------------
       /// formatted output: write bodyindex
       friend std::ostream& operator<<(std::ostream&o, const iterator&i) {
-	return o << falcON::bodyindex(i);
+	return i? o << i.my_index() : o << "nil";
       }
       //------------------------------------------------------------------------
 #ifdef falcON_NEMO
@@ -871,7 +880,7 @@ namespace falcON {
     /// \param N  (input) array with number of bodies per bodytype
     /// \param Bd (input) body data fields to allocate (default: mxvapfHRVJFC)
     explicit 
-    bodies(unsigned*N=0, fieldset Bd=fieldset(DefBits))
+    bodies(const unsigned*N=0, fieldset Bd=fieldset(DefBits))
       falcON_THROWING;
     //--------------------------------------------------------------------------
     /// Constructor 2: copy constructor
@@ -915,7 +924,7 @@ namespace falcON {
     ///
     /// \param N  (input) array with number of bodies per bodytype
     /// \param Bd (input) body data fields to allocate (default: mxvapfHRVJFC)
-    void reset(unsigned*N =0, fieldset Bd= fieldset(DefBits))
+    void reset(const unsigned*N =0, fieldset Bd= fieldset(DefBits))
       falcON_THROWING;
     //--------------------------------------------------------------------------
     /// Resets N, data: equivalent destructor followed by constructor 1 (old
@@ -934,7 +943,7 @@ namespace falcON {
     /// Resets N, keeps data the same (N[] = bodies per bodytype)
     ///
     /// \param N  (input) array with number of bodies per bodytype
-    void resetN(unsigned* N=0) falcON_THROWING
+    void resetN(const unsigned* N=0) falcON_THROWING
     {
       reset(N,BITS);
     }
@@ -1286,7 +1295,7 @@ namespace falcON {
     //                                                                          
     //==========================================================================
     // set up blocks to hold N[t] bodies of type t                              
-    void set_data(unsigned*) falcON_THROWING;
+    void set_data(const unsigned*) falcON_THROWING;
     //--------------------------------------------------------------------------
     // link the TYPES[] lists together and set FIRST                            
     void link_blocks();
@@ -1298,7 +1307,6 @@ namespace falcON {
     void del_data() falcON_THROWING;
     //==========================================================================
   };
-  falcON_TRAITS(bodies::index,"bodies::index","bodies::indexs");
   //----------------------------------------------------------------------------
 #define CheckMissingBodyData(B,F) (B)->CheckData((F),__FILE__,__LINE__);
   // ///////////////////////////////////////////////////////////////////////////
@@ -1357,7 +1365,7 @@ namespace falcON {
     /// used in NBodyCode::NBodyCode() of file nbody.h
     explicit
     snapshot(fieldset Bd= fieldset(DefBits)) falcON_THROWING
-    : bodies ( static_cast<unsigned*>(0), Bd ),
+    : bodies ( static_cast<const unsigned*>(0), Bd ),
       INIT   ( false ),
       TINI   ( 0. ),
       TIME   ( 0. ) {}
@@ -1383,9 +1391,9 @@ namespace falcON {
     /// \param N  (input, optional) number of bodies per bodytype
     /// \param Bd (input, optional) body data fields to be allocated
     explicit 
-    snapshot(double   t,
-	     unsigned*N = 0 ,
-	     fieldset Bd= fieldset(DefBits)) falcON_THROWING
+    snapshot(double         t,
+	     const unsigned*N = 0 ,
+	     fieldset       Bd= fieldset(DefBits)) falcON_THROWING
     : bodies ( N,Bd ),
       INIT   ( true ),
       TINI   ( t ),
@@ -1523,6 +1531,7 @@ namespace falcON {
   }; // class snapshot
   //////////////////////////////////////////////////////////////////////////////
 } // namespace falcON {
+falcON_TRAITS(falcON::bodies::index,"bodies::index","bodies::indexs");
 // /////////////////////////////////////////////////////////////////////////////
 ///                                                                             
 /// \name macros for looping over bodies                                        

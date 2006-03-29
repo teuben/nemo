@@ -22,7 +22,6 @@
 //-----------------------------------------------------------------------------+
 #include <public/defman.h>
 #include <public/random.h>
-#include <public/Pi.h>
 #include <ctime>
 #include <cmath>
 

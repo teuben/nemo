@@ -21,10 +21,8 @@
 //                                                                             |
 //-----------------------------------------------------------------------------+
 #include <public/king.h>
-#include <public/Pi.h>
-#include <public/inline_io.h>
-#include <public/tupel.h>
-#include <public/numerics.h>
+#include <public/basic.h>
+#include <numerics.h>
 #include <fstream>
 #include <iomanip>
 #include <cmath>
@@ -46,7 +44,7 @@ namespace {
     return exp(Psi)*erf(sPsi) - f1*sPsi*(1+f2*Psi);
   }
   //--------------------------------------------------------------------------
-  inline vec2D integrand1(const double r, const vec2D Y)
+  inline vec2D integrand1(double const&r, vec2D const&Y)
     // takes x=r as independent, Y[0]=Psi, Y[1]=Psi'
   {
     register vec2D F;
@@ -55,7 +53,7 @@ namespace {
     return F;
   }
   //----------------------------------------------------------------------------
-  inline vec2D integrand2(const double Psi, const vec2D Y)
+  inline vec2D integrand2(double const&Psi, vec2D const&Y)
     // takes Psi as independent, Y[0]=r, Y[1]=Psi'
   {
     register vec2D F;

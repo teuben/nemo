@@ -21,7 +21,6 @@
 //                                                                             |
 //-----------------------------------------------------------------------------+
 #include <public/tools.h>
-#include <public/Pi.h>
 
 using namespace falcON;
 ////////////////////////////////////////////////////////////////////////////////
@@ -184,10 +183,9 @@ namespace { using namespace falcON;
   //----------------------------------------------------------------------------
   typedef OctTree::CellIter<DensCell> DensCell_iter;
 } // namespace {
-namespace falcON { 
-  falcON_TRAITS(DensLeaf,"DensLeaf","DensLeafs");
-  falcON_TRAITS(DensCell,"DensCell","DensCells");
-}
+////////////////////////////////////////////////////////////////////////////////
+falcON_TRAITS(DensLeaf,"DensLeaf","DensLeafs");
+falcON_TRAITS(DensCell,"DensCell","DensCells");
 ////////////////////////////////////////////////////////////////////////////////
 void falcON::estimate_density_peak(OctTree *const&TREE,
 				   unsigned const&alpha,
@@ -225,8 +223,6 @@ void falcON::estimate_density_peak(OctTree *const&TREE,
 // implementing falcON::find_lagrange_rad()                                     
 //                                                                              
 ////////////////////////////////////////////////////////////////////////////////
-#include <public/memory.h>
-
 namespace {
 
   class RadiusFinder {
@@ -333,12 +329,12 @@ namespace {
 
   };
 } // namespace {
-namespace falcON {
-  falcON_TRAITS(RadiusFinder::point,
-		"RadiusFinder::point","RadiusFinder::points");
-  falcON_TRAITS(RadiusFinder::range,
-		"RadiusFinder::range","RadiusFinder::range");
-}
+////////////////////////////////////////////////////////////////////////////////
+falcON_TRAITS(RadiusFinder::point,
+	      "RadiusFinder::point","RadiusFinder::points");
+falcON_TRAITS(RadiusFinder::range,
+	      "RadiusFinder::range","RadiusFinder::range");
+////////////////////////////////////////////////////////////////////////////////
 namespace {
   void RadiusFinder::split(range*R) {    // split range
     point *P = R->P == PointsA ? PointsB : PointsA;

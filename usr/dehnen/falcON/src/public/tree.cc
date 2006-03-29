@@ -22,7 +22,7 @@
 //-----------------------------------------------------------------------------+
 // #define TEST_TIMING
 #include <public/tree.h>
-#include <public/memory.h>
+#include <memory.h>
 #include <body.h>
 
 #ifdef  falcON_PROPER
@@ -102,6 +102,7 @@ namespace falcON {
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
   using namespace falcON;
+  using falcON::error;
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
   // auxiliary macros                                                         //
@@ -449,11 +450,9 @@ namespace {
   };// struct box {
 } // namespace {
 ////////////////////////////////////////////////////////////////////////////////
-namespace falcON {
-  falcON_TRAITS(dot,"dot","dots");
-  falcON_TRAITS(dot_list,"dot_list","dot_lists");
-  falcON_TRAITS(box,"box","boxes");
-} // namespace falcON {
+falcON_TRAITS(::dot,"dot","dots");
+falcON_TRAITS(::dot_list,"dot_list","dot_lists");
+falcON_TRAITS(::box,"box","boxes");
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
   //////////////////////////////////////////////////////////////////////////////

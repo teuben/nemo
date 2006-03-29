@@ -3,7 +3,7 @@
 //                                                                             |
 // io.cc                                                                       |
 //                                                                             |
-// Copyright (C) 2000-2005  Walter Dehnen                                      |
+// Copyright (C) 2000-2006  Walter Dehnen                                      |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -239,8 +239,10 @@ void nemo_io::close()
 void nemo_in::close() falcON_THROWING
 {
   if(STREAM == 0) return;
-  if(SNAP_INPUT)
-    falcON_THROW("cannot close nemo_in: still open snap_in");
+  if(SNAP_IN) {
+    debug_info(4,"nemo_in::close(): closing open snap_in first\n");
+    SNAP_IN->~snap_in();
+  }
   if(IS_PIPE) {
     close_stdin();
     IS_PIPE = false;
@@ -255,14 +257,14 @@ nemo_in& nemo_in::open(const char* file) falcON_THROWING
   if(file == 0 || file[0] == 0) return *this;
   IS_PIPE = !std::strcmp(const_cast<char*>(file),"-");
   if(IS_PIPE) open_stdin();
-  SNAP_INPUT = 0;
+  SNAP_IN = 0;
   nemo_io::open(file,"r");
   debug_info(4,"nemo_in: opened file '%s'\n",file);
   return *this;
 }
 //------------------------------------------------------------------------------
 nemo_in::nemo_in(const char* file, const char* mode) :
-  IS_PIPE(0), SNAP_INPUT(0)
+  IS_PIPE(0), SNAP_IN(0)
 {
   if(file == 0 || file[0] == 0) return;
   IS_PIPE = !std::strcmp(const_cast<char*>(file),"-");
@@ -274,8 +276,10 @@ nemo_in::nemo_in(const char* file, const char* mode) :
 nemo_in::~nemo_in() falcON_THROWING
 {
   if(IS_PIPE) close_stdin();
-  if(SNAP_INPUT)
-    falcON_THROW("cannot close nemo_in: still open snap_in");
+  if(SNAP_IN) {
+    debug_info(4,"nemo_in::~nemo_in(): closing open snap_in first\n");
+    SNAP_IN->~snap_in();
+  }
   debug_info(4,"nemo_in: closed stream\n");
 }
 //------------------------------------------------------------------------------
@@ -289,22 +293,22 @@ bool nemo_in::has_snapshot() const
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 snap_in::snap_in(nemo_in const&in) falcON_THROWING : 
-  INPUT(in), DATA_INPUT(0), FIELDS_READ(0),
+  INPUT(in), DATA_IN(0), FIELDS_READ(0),
   HAS_NSPH(0), HAS_TIME(0), NBOD(0), NSPH(0), TIME(0.)
 {
   debug_info(4,"snap_in::snap_in() ...\n");
   if(! INPUT.has_snapshot())
     falcON_THROW("cannot open snapshot from nemo input stream");
-  if(INPUT.SNAP_INPUT)
+  if(INPUT.SNAP_IN)
     falcON_THROW("cannot open 2nd snapshot from nemo input stream");
   // 1 open snapshot set
   get_set(static_cast< ::stream >(INPUT.stream()),SnapShotTag);
-  INPUT.SNAP_INPUT = true;
+  INPUT.SNAP_IN = this;
   debug_info(5,"  snapshot opened\n");
   // 2 open parameter set
   if(!get_tag_ok(static_cast< ::stream >(INPUT.stream()),ParametersTag)) {
     get_tes(static_cast< ::stream >(INPUT.stream()),SnapShotTag);
-    INPUT.SNAP_INPUT = false;
+    INPUT.SNAP_IN = 0;
     falcON_THROW("cannot read parameters from nemo input stream");
   }
   get_set(static_cast< ::stream >(INPUT.stream()),ParametersTag);
@@ -314,7 +318,7 @@ snap_in::snap_in(nemo_in const&in) falcON_THROWING :
   if(!get_tag_ok(static_cast< ::stream >(INPUT.stream()),NobjTag)) {
     get_tes(static_cast< ::stream >(INPUT.stream()),ParametersTag);
     get_tes(static_cast< ::stream >(INPUT.stream()),SnapShotTag);
-    INPUT.SNAP_INPUT = false;
+    INPUT.SNAP_IN = 0;
     falcON_THROW("cannot read # bodies from nemo input stream");
   }
   get_data(static_cast< ::stream >(INPUT.stream()),NobjTag,IntType,&NBOD,0);
@@ -350,7 +354,7 @@ snap_in::snap_in(nemo_in const&in) falcON_THROWING :
   // 5 open particle set
   if(!get_tag_ok(static_cast< ::stream >(INPUT.stream()),ParticlesTag)) {
     get_tes(static_cast< ::stream >(INPUT.stream()),SnapShotTag);
-    INPUT.SNAP_INPUT = false;
+    INPUT.SNAP_IN = 0;
     falcON_THROW("cannot read parameters from nemo input stream");
   }
   get_set(static_cast< ::stream >(INPUT.stream()),ParticlesTag);
@@ -359,13 +363,15 @@ snap_in::snap_in(nemo_in const&in) falcON_THROWING :
 //------------------------------------------------------------------------------
 snap_in::~snap_in() falcON_THROWING
 {
-  if(DATA_INPUT)
-    falcON_THROW("cannot close snap_in with open data_in");
+  if(DATA_IN) {
+    debug_info(4,"snap_in::~snap_in(): closing open data_in first\n");
+    DATA_IN->~data_in();
+  }
   HAS_NSPH = false;
   HAS_TIME = false;
   get_tes(static_cast< ::stream >(INPUT.stream()),ParticlesTag);
   get_tes(static_cast< ::stream >(INPUT.stream()),SnapShotTag);
-  INPUT.SNAP_INPUT = false;
+  INPUT.SNAP_IN = 0;
   debug_info(4,"snap_in closed\n");
 }
 //------------------------------------------------------------------------------
@@ -384,7 +390,7 @@ data_in::data_in(snap_in const&snap, nemo_io::Field f) falcON_THROWING :
   FIELD(f), INPUT(snap), NREAD(0), NTOT(0), TYPE(nemo_io::Null), SUBN(0)
 {
   debug_info(5,"data_in::data_in(%s) ...\n",NemoTag(FIELD));
-  if( INPUT.DATA_INPUT )
+  if( INPUT.DATA_IN )
     falcON_THROW("cannot read %s: nemo input still engaged",NemoTag(FIELD));
   if( !INPUT.has(f) )
     falcON_THROW("cannot read %s: not given with nemo input",NemoTag(FIELD));
@@ -441,13 +447,13 @@ data_in::data_in(snap_in const&snap, nemo_io::Field f) falcON_THROWING :
     // 3.3 array of yet higher rank
     falcON_THROW("nemo input of %s: found high-rank data",NemoTag(FIELD));
   }
-  INPUT.DATA_INPUT = true;
+  INPUT.DATA_IN = this;
 }
 //------------------------------------------------------------------------------
 data_in::~data_in()
 {
   get_data_tes(static_cast< ::stream >(INPUT.stream()),NemoTag(FIELD));
-  INPUT.DATA_INPUT   = false;
+  INPUT.DATA_IN      = 0;
   INPUT.FIELDS_READ |= FIELD;
   debug_info(5,"data_in(%s) closed\n",NemoTag(FIELD));
 }
@@ -459,10 +465,12 @@ void data_in::read(void*data, unsigned n)
 	    NemoTag(FIELD), n, NTOT-NREAD);
     n = NTOT - NREAD;
   }
-  get_data_blocked(static_cast< ::stream >(INPUT.stream()),
-		   NemoTag(FIELD), data, n*SUBN);
-  debug_info(5,"data_in::read(): %d %s read\n",n,NemoTag(FIELD));
-  NREAD += n;
+  if(n) {
+    get_data_blocked(static_cast< ::stream >(INPUT.stream()),
+		     NemoTag(FIELD), data, n*SUBN);
+    debug_info(5,"data_in::read(): %d %s read\n",n,NemoTag(FIELD));
+    NREAD += n;
+  }
 }
 //------------------------------------------------------------------------------
 void data_in::read(void*data)
@@ -483,8 +491,10 @@ void data_in::read(void*data)
 void nemo_out::close() falcON_THROWING
 {
   if(STREAM == 0) return;
-  if(SNAP_OUTPUT)
-    falcON_THROW("cannot close nemo_out: still open snap_out");
+  if(SNAP_OUT) {
+    debug_info(4,"nemo_out::close(): closing open snap_out first\n");
+    SNAP_OUT->~snap_out();
+  }
   if(IS_PIPE) {
     close_stdout();
     IS_PIPE = false;
@@ -520,7 +530,7 @@ nemo_out& nemo_out::open(const char* file,
   IS_PIPE = !std::strcmp(const_cast<char*>(file),"-");
   IS_SINK = !std::strcmp(const_cast<char*>(file),".");
   if(IS_PIPE) open_stdout();
-  SNAP_OUTPUT = 0;
+  SNAP_OUT = 0;
   char copy[1024];
   if(appending) {                         // appending anyway?
     if(is_appended(file,'!',copy)) {        // overwrite & append
@@ -557,14 +567,14 @@ snap_out::snap_out(nemo_out const&out,
 		   unsigned       nb,
 		   unsigned       ns,
 		   double         time) falcON_THROWING :
-  OUTPUT(out), DATA_OUTPUT(0), FIELDS_WRITTEN(0), NBOD(nb), NSPH(ns)
+  OUTPUT(out), DATA_OUT(0), FIELDS_WRITTEN(0), NBOD(nb), NSPH(ns)
 {
   debug_info(4,"snap_out::snap_out() ...\n");
-  if(OUTPUT.SNAP_OUTPUT)
+  if(OUTPUT.SNAP_OUT)
     falcON_THROW("cannot open 2nd snapshot from nemo output stream");
   // 1 open snapshot set
   put_set(static_cast< ::stream >(OUTPUT.stream()),SnapShotTag);
-  OUTPUT.SNAP_OUTPUT = true;
+  OUTPUT.SNAP_OUT = this;
   debug_info(5,"  snapshot opened\n");
   // 2 write parameter set
   put_set(static_cast< ::stream >(OUTPUT.stream()),ParametersTag);
@@ -577,20 +587,22 @@ snap_out::snap_out(nemo_out const&out,
 	     NBOD, NSPH, time);
   // 3 open particle set
   put_set(static_cast< ::stream >(OUTPUT.stream()),ParticlesTag);
-//   int CS = CSCode(tag(X),Ndim,2);
-//   put_data(static_cast< ::stream>(OUTPUT.stream()),
-// 	   CoordSystemTag,IntType,&CS,0);
+  int CS = CSCode(Cartesian,Ndim,2);
+  put_data(static_cast< ::stream>(OUTPUT.stream()),
+	   CoordSystemTag,IntType,&CS,0);
 }
 //------------------------------------------------------------------------------
 snap_out::~snap_out() falcON_THROWING
 {
-  if(DATA_OUTPUT)
-    falcON_THROW("cannot close snap_out with open data_out");
+  if(DATA_OUT) {
+    debug_info(4,"snap_out::~snap_out(): closing open data_out first\n");
+    DATA_OUT->~data_out();
+  }
   NBOD = 0;
   NSPH = 0;
   put_tes(static_cast< ::stream >(OUTPUT.stream()),ParticlesTag);
   put_tes(static_cast< ::stream >(OUTPUT.stream()),SnapShotTag);
-  OUTPUT.SNAP_OUTPUT = false;
+  OUTPUT.SNAP_OUT = 0;
   debug_info(4,"snap_out closed\n");
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -608,7 +620,7 @@ data_out::data_out(snap_out const&snap, nemo_io::Field f) falcON_THROWING
 	  is_vector(FIELD)? NDIM : 2*NDIM)
 {
   debug_info(5,"data_out::data_out(%s) ...\n",NemoTag(FIELD));
-  if( OUTPUT.DATA_OUTPUT )
+  if( OUTPUT.DATA_OUT )
     falcON_THROW("cannot write %s: nemo output still engaged",
 		 NemoTag(FIELD));
   if( OUTPUT.has_been_written(FIELD) )
@@ -627,7 +639,7 @@ data_out::data_out(snap_out const&snap, nemo_io::Field f) falcON_THROWING
 		 NemoTag(FIELD),NemoType(TYPE),NTOT,2,NDIM,0);
     debug_info(6,"  opening data set for %d phases\n",NTOT);
   }
-  OUTPUT.DATA_OUTPUT = true;
+  OUTPUT.DATA_OUT = this;
 }
 //------------------------------------------------------------------------------
 data_out::~data_out()
@@ -636,7 +648,7 @@ data_out::~data_out()
     warning("nemo output of %s: assigned %d, written only %d bodies\n",
 	    NemoTag(FIELD), NTOT, NWRITTEN);
   put_data_tes(static_cast< ::stream >(OUTPUT.stream()),NemoTag(FIELD));
-  OUTPUT.DATA_OUTPUT     = false;
+  OUTPUT.DATA_OUT        = 0;
   OUTPUT.FIELDS_WRITTEN |= FIELD;
   debug_info(5,"data_out(%s) closed\n",NemoTag(FIELD));
 }

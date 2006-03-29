@@ -26,10 +26,10 @@
 #define GalPot_pre 1
 #include <cmath>                                 // v0.4                        
 #include <cstdlib>                               // v0.4                        
-#define falcON_TUPEL_FUNCOP                      // v0.5                        
-#include <public/tupel.h>                         // v0.5                        
+#define WD_TUPEL_FUNCOP                          // v0.5                        
+#include <tupel.h>                               // v0.5                        
 namespace GalPot {                               // v0.4                        
-  using falcON::tupel;                             // v0.5                        
+  using WDutils::tupel;                          // v0.5                        
   typedef tupel<3,double> Frequs;
   typedef tupel<5,double> DiskPar;
   typedef tupel<6,double> SphrPar;

@@ -117,7 +117,7 @@ namespace {
 	      timer::describe(timer::linear),
 	      timer::describe(timer::constant),
 	      NAMAX);
-    if(file == 0) error("GrowAccs: not data file given");
+    if(file == 0) error("GrowAccs: no data file given");
     // initialize timer
     timer::index
       timin = (timer::index)(npar>0? int(pars[0]) : 9);

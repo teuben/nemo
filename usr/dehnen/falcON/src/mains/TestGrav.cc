@@ -33,9 +33,7 @@
 #include <main.h>
 #include <body.h>
 #include <FAlCON.h>
-#include <public/Pi.h>
-#include <public/numerics.h>
-#include <public/basic.h>
+#include <numerics.h>
 
 using std::ofstream;
 using std::setfill;

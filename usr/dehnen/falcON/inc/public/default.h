@@ -26,6 +26,7 @@
 //-----------------------------------------------------------------------------+
 #ifndef falcON_included_default_h
 #define falcON_included_default_h
+
 #ifndef falcON_included_types_h
 #  include <public/types.h>
 #endif

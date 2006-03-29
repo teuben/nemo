@@ -58,7 +58,6 @@
 #define falcON_RepAction 0                         // no action reporting       
 #define falcON_NOT_USING_PROPER                    // not using PROPRIETARY code
 //-----------------------------------------------------------------------------+
-#include <public/Pi.h>                             // my Pi                     
 #include <public/king.h>                           // my king model             
 #include <body.h>                                  // my bodies                 
 #include <public/io.h>                             // my NEMO file I/O          

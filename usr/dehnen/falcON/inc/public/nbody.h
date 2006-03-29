@@ -4,7 +4,7 @@
 /// \file   inc/public/nbody.h                                                  
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2000-2005                                                           
+/// \date   2000-2006                                                           
 ///                                                                             
 /// \brief  provides classes for the efficient implementation of N-body codes   
 ///                                                                             
@@ -175,7 +175,7 @@ namespace falcON {
     ///
     /// \param all (input) compute forces for all bodies or only the active?
     /// \param dia (input) diagnostics will be done (prepare for it)
-    /// \param tay (input) size of elementary time step
+    /// \param tau (input) size of elementary time step
     virtual void setforces  (bool   all,
 			     bool   dia,
 			     double tau) const = 0;
@@ -427,14 +427,11 @@ namespace falcON {
     }
     //@}
     //--------------------------------------------------------------------------
-#ifdef falcON_NEMO
-    //--------------------------------------------------------------------------
     // non-virtual public methods:                                              
     //--------------------------------------------------------------------------
     /// print some details 
-    ///
-    /// \param c (input) command line used to start main
-    void describe(std::ostream&, const char  *c) const;
+    void describe(std::ostream&) const;
+#ifdef falcON_NEMO
     //--------------------------------------------------------------------------
     /// write snapshot to NEMO output
     ///
@@ -656,9 +653,8 @@ namespace falcON {
     //--------------------------------------------------------------------------
   public:
     void  describe(                                // describe simulation       
-		   std::ostream&o,                 // I: output stream          
-		   const char  *c) const {         // I: command line           
-      CODE->describe(o,c);
+		   std::ostream&o) const {         // I: output stream          
+      CODE->describe(o);
     }
     //--------------------------------------------------------------------------
     void  write   (nemo_out&o,                     // I: nemo output stream     
