@@ -4,7 +4,11 @@
 # Makefile for the falcON project
 #
 ################################################################################
-default		: all manips
+default		: utils all manips
+
+utils:
+	ln -s ../utils
+
 ifdef NEMO
 tonemo		: all manips
 			cp $(LIB)/libfalcON.so $(NEMOLIB)
