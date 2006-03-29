@@ -7,6 +7,7 @@
 default		: utils all manips
 utils:
 	ln -s ../utils
+	(cd inc; ln -s ../utils/inc utils)
 ifdef NEMO
 tonemo		: all manips
 			cp $(LIB)/libfalcON.so $(NEMOLIB)
