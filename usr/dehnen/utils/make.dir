@@ -1,0 +1,16 @@
+#! /bin/csh -f
+#
+# make/dir dir
+#          - if not existent, creates the directory dir
+# =============================================================================
+if( ! -d $1 ) then
+    if( -e $1 ) then
+	echo WARNING[make.dir]: deleting file $1
+	rm -f $1
+    endif
+    mkdir $1
+    if( $?2 ) then
+	chmod $2 $1
+    endif
+endif
+
