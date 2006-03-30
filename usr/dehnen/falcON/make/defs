@@ -24,7 +24,7 @@ DNEMO		:= -DfalcON_NEMO
 ifeq ($(COMPILER),icc)
 LNEMO		:= -L$(NEMOLIB) -lnemo -ldl
 else
-LNEMO		:= -L$(NEMOLIB) -lnemo -lg2c -ldl
+LNEMO		:= -L$(NEMOLIB) -lnemo -ldl
 endif
 
 endif
