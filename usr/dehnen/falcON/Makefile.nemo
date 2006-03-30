@@ -13,6 +13,6 @@ nemo_bins: nemo_libs $(BINS)
 	(cd $(HOS); cp $(BINS) $(NEMOBIN))
 	cp $(LIB)/lib*.so $(NEMOLIB)
 
-nemo_libs: links
+nemo_libs: utils
 	(cd utils; make)
 
