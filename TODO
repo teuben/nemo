@@ -2,6 +2,7 @@ MacOSX problems: (a special macosx.html web page dedicated to this)
     See:     http://bima.astro.umd.edu/nemo/macosx.html
   - configure leaves -lcrt.o etc. in, so they need manual removal
     from makedefs and NEMORC.gen before continuing on
+    Also check http://www.astro.gla.ac.uk/users/norman/note/2004/restFP/
 
   - src/nbody/evolve/aarseth/nbody0/Makefile
 	need to activate F77LIBS to include -lcc_dynamic
@@ -54,23 +55,24 @@ general things for 3.2.x
      The new version of gyrfalcON (V3.0.4; 28 oct 2005) now compiles fine most of the
      way from gcc 3.2.2 to 4.0.2 , with some minor exceptions in early releases of
      some series.
-     On intel:
+     The new version (V3.0.5; 22-mar-2006) has the one between []
+     On intel architecture:
 	
-	3.2.2	ok
+	3.2.2	ok   [ok]
 
 	3.3.2	ok
-	3.3.4	ok
+	3.3.4	ok   [ok]
 	3.3.6	ok
 
 	3.4.1   fail
 	3.4.2	fail 	non-constant `(Ky + M2)' cannot be used as template argument
-	3.4.3	ok
+	3.4.3	ok   [ok]
 	3.4.5	ok
 
-	4.0.0	ok
+	4.0.0	ok   [ok]
 	4.0.2	ok
 
-	4.1.0	fail    falcON::fieldset::fieldset(falcON::fieldbit)
+	4.1.0	fail  [fail]  falcON::fieldset::fieldset(falcON::fieldbit)
 
      For MacOSX a bit more work is needed, since isnan() and isinf() are not known?
 	add:	-Wno-long-double
