@@ -652,6 +652,7 @@ namespace WDutils {
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
+  using namespace WDutils;
 #define PLEAF static_cast<leaf*>
 #define PRNGE static_cast<range*>
   template<typename scalar> class sorttree {
@@ -680,7 +681,7 @@ namespace {
       scalar dia() const { return S+S; }
     };
   private:
-    typedef WDutils::block_alloc<range> ranger;    // allocator for new ranges  
+    typedef block_alloc<range> ranger;             // allocator for new ranges  
     //--------------------------------------------------------------------------
     const int Ncrit;                               // split ranges with N>Ncrit 
     ranger    RG;                                  // allocator for new ranges  

@@ -43,7 +43,9 @@ namespace WDutils {
   const double iFPit= 0.75 / Pi;                        // 3/(4*Pi)             
   const double SPi  = 1.772453850905516027298167483341;	// Sqrt[Pi]             
   const double STPi = 2.506628274631000502415765284811; // Sqrt[2 Pi]           
-#if  defined(WDutils_included_complex) || defined(_CPP_COMPLEX)
+#if  defined(WDutils_included_complex) \
+  || defined(_CPP_COMPLEX)             \
+  || defined(WDutils_COMPLEX)
   const std::complex<double> IMAG(0,1);	                // i                    
   const std::complex<double> ITPi(0,TPi);               // 2 i Pi               
 #endif
