@@ -5,7 +5,7 @@
 #
 ################################################################################
 default		: utils all manips
-utils:
+links:
 	ln -s ../utils
 	(cd inc; ln -s ../utils/inc utils)
 ifdef NEMO
