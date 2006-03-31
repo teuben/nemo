@@ -5,7 +5,7 @@
 ///                                                                             
 /// \author  Walter Dehnen                                                      
 ///                                                                             
-/// \date    2002-2005                                                          
+/// \date    2002-2006                                                          
 ///                                                                             
 /// \brief   body flags and support for body data management                    
 ///                                                                             
@@ -17,6 +17,8 @@
 ///          \li further constants and macros                                   
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
+//                                                                              
+// Copyright (C) 2002-2006  Walter Dehnen                                       
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -51,9 +53,8 @@ namespace falcON {
   ///                                                                           
   // ///////////////////////////////////////////////////////////////////////////
   class flags {
-    //--------------------------------------------------------------------------
-    /// enumeration holding the individual flags
   public:
+    /// enumeration holding the individual flags
     enum single {
       empty         = 0,       ///< no flag set
       active        = 1 << 0,  ///< a body/tree node is active
@@ -74,6 +75,7 @@ namespace falcON {
       all_sticky    = 1 <<22,  ///< all leafs in cell are sticky particles
       subtree_cell  = 1 <<23
     };
+    /// enumeration holding some combinations of flags
     enum combined {
       leaf_flags    = active|sph|sticky|sph_special|interacting,
       body_flags    = active|sph|sticky|sph_special|remove,
@@ -145,29 +147,17 @@ namespace falcON {
       return flags( val | b );
     }
     /// combine single flag with set of flags
-    friend flags operator| (single b, flags const&f) {
-      return flags( f.val | b );
-    }
+    friend flags operator| (single b, flags const&f);
     /// combine single flag with set of flags
-    friend flags operator| (combined b, flags const&f) {
-      return flags( f.val | b );
-    }
+    friend flags operator| (combined b, flags const&f);
     /// combine single flags
-    friend flags operator| (single b, single c) {
-      return flags( b | c );
-    }
+    friend flags operator| (single b, single c);
     /// combine combined with single flags
-    friend flags operator| (combined b, single c) {
-      return flags( b | c );
-    }
+    friend flags operator| (combined b, single c);
     /// combine single with combined flags
-    friend flags operator| (single b, combined c) {
-      return flags( b | c );
-    }
+    friend flags operator| (single b, combined c);
     /// combine combined flags
-    friend flags operator| (combined b, combined c) {
-      return flags( b | c );
-    }
+    friend flags operator| (combined b, combined c);
     //@}
     //--------------------------------------------------------------------------
     /// \name general boolean methods
@@ -180,28 +170,28 @@ namespace falcON {
     //--------------------------------------------------------------------------
     /// \name specific boolean methods taking reference to flags
     //@{
-    friend bool is_active  (flags const&f) { return f.is_set(active); }
-    friend bool to_remove  (flags const&f) { return f.is_set(remove); }
-    friend bool is_sph     (flags const&f) { return f.is_set(sph); }
-    friend bool is_sticky  (flags const&f) { return f.is_set(sticky); }
-    friend bool is_new     (flags const&f) { return f.is_set(newbody); }
-    friend bool in_subtree (flags const&f) { return f.is_set(subtree); }
-    friend bool al_active  (flags const&f) { return f.is_set(all_active); }
-    friend bool al_sph     (flags const&f) { return f.is_set(all_sph); }
-    friend bool al_sticky  (flags const&f) { return f.is_set(all_sticky); }
+    friend bool is_active  (flags const&f);
+    friend bool to_remove  (flags const&f);
+    friend bool is_sph     (flags const&f);
+    friend bool is_sticky  (flags const&f);
+    friend bool is_new     (flags const&f);
+    friend bool in_subtree (flags const&f);
+    friend bool al_active  (flags const&f);
+    friend bool al_sph     (flags const&f);
+    friend bool al_sticky  (flags const&f);
     //@}
     //--------------------------------------------------------------------------
     /// \name specific boolean methods taking pointer to flags
     //@{
-    friend bool is_active  (const flags*f) { return f->is_set(active); }
-    friend bool to_remove  (const flags*f) { return f->is_set(remove); }
-    friend bool is_sph     (const flags*f) { return f->is_set(sph); }
-    friend bool is_sticky  (const flags*f) { return f->is_set(sticky); }
-    friend bool is_new     (const flags*f) { return f->is_set(newbody); }
-    friend bool in_subtree (const flags*f) { return f->is_set(subtree); }
-    friend bool al_active  (const flags*f) { return f->is_set(all_active); }
-    friend bool al_sph     (const flags*f) { return f->is_set(all_sph); }
-    friend bool al_sticky  (const flags*f) { return f->is_set(all_sticky); }
+    friend bool is_active  (const flags*f);
+    friend bool to_remove  (const flags*f);
+    friend bool is_sph     (const flags*f);
+    friend bool is_sticky  (const flags*f);
+    friend bool is_new     (const flags*f);
+    friend bool in_subtree (const flags*f);
+    friend bool al_active  (const flags*f);
+    friend bool al_sph     (const flags*f);
+    friend bool al_sticky  (const flags*f);
     //@}
     //--------------------------------------------------------------------------
     /// \name non-const methods                                                 
@@ -235,16 +225,59 @@ namespace falcON {
     /// \name formatted I/O                                                     
     //@{
     /// formatted output: simply write integer value
-    friend std::ostream& operator<< (std::ostream& o, flags const&f) {
-      return o << f.val;
-    }
+    friend std::ostream& operator<< (std::ostream&, flags const&);
     /// formatted input: read as integer
-    friend std::istream& operator>> (std::istream& i, flags&f) {
-      return i >> f.val;
-    }
+    friend std::istream& operator>> (std::istream&, flags&);
     //@}
   };// class flags
-  //////////////////////////////////////////////////////////////////////////////
+  // ///////////////////////////////////////////////////////////////////////////
+  //                                                                          //
+  // inline definitions of friends of class flags                             //
+  // also serve to inject these functions into namespace falcON               //
+  //                                                                          //
+  // ///////////////////////////////////////////////////////////////////////////
+  inline flags operator| (flags::single b, flags const&f) {
+    return flags( f.val | b );
+  }
+  inline flags operator| (flags::combined b, flags const&f) {
+    return flags( f.val | b );
+  }
+  inline flags operator| (flags::single b, flags::single c) {
+    return flags( b | c );
+  }
+  inline flags operator| (flags::combined b, flags::single c) {
+    return flags( b | c );
+  }
+  inline flags operator| (flags::single b, flags::combined c) {
+    return flags( b | c );
+  }
+  inline flags operator| (flags::combined b, flags::combined c) {
+    return flags( b | c );
+  }
+  inline bool is_active (flags const&f) { return f.is_set(flags::active); }
+  inline bool to_remove (flags const&f) { return f.is_set(flags::remove); }
+  inline bool is_sph    (flags const&f) { return f.is_set(flags::sph); }
+  inline bool is_sticky (flags const&f) { return f.is_set(flags::sticky); }
+  inline bool is_new    (flags const&f) { return f.is_set(flags::newbody); }
+  inline bool in_subtree(flags const&f) { return f.is_set(flags::subtree); }
+  inline bool al_active (flags const&f) { return f.is_set(flags::all_active); }
+  inline bool al_sph    (flags const&f) { return f.is_set(flags::all_sph); }
+  inline bool al_sticky (flags const&f) { return f.is_set(flags::all_sticky); }
+  inline bool is_active (const flags*f) { return f->is_set(flags::active); }
+  inline bool to_remove (const flags*f) { return f->is_set(flags::remove); }
+  inline bool is_sph    (const flags*f) { return f->is_set(flags::sph); }
+  inline bool is_sticky (const flags*f) { return f->is_set(flags::sticky); }
+  inline bool is_new    (const flags*f) { return f->is_set(flags::newbody); }
+  inline bool in_subtree(const flags*f) { return f->is_set(flags::subtree); }
+  inline bool al_active (const flags*f) { return f->is_set(flags::all_active); }
+  inline bool al_sph    (const flags*f) { return f->is_set(flags::all_sph); }
+  inline bool al_sticky (const flags*f) { return f->is_set(flags::all_sticky); }
+  inline std::ostream& operator<< (std::ostream& o, flags const&f) {
+    return o << f.val;
+  }
+  inline std::istream& operator>> (std::istream& i, flags&f) {
+    return i >> f.val;
+  }
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
   // N-body data type management                                              //
@@ -267,64 +300,66 @@ namespace falcON {
   //////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
-  // some global constants related to N-body data                             //
+  // some constants related to N-body data                                    //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
-
-  const int         BD_NOSPH   = 19;               // # non-sph data            
-  const int         BD_NQUANT  = 31;               // total # data              
-  const char* const BD_SQUANT  ="mxvwefktpqajryzlndhHNUYIESRDJFC";
+  namespace BodyData {
+    const int         NOSPH   = 19;                // # non-sph data            
+    const int         NQUANT  = 31;                // total # data              
+    const char* const SQUANT  ="mxvwefktpqajryzlndhHNUYIESRDJFC";
                                                    // one-char data tags        
-  //----------------------------------------------------------------------------
-  // array with human readable names for the N-body data                        
-  const char* const BD_QNAME[BD_NQUANT] = 
-    { "mass", "position", "velocity", "predicted velocity", "softening length",
-      "body flags", "key", "time step", "potential", "external potential", 
-      "acceleration", "jerk", "density", "auxiliary scalar", 
-      "auxiliary vector", "time-step level", "number of partners",
-      "node number", "Peano-Hilbert key", "SPH smoothing length",
-      "number of SPH partners", "U_internal", "U_predicted", "(dU/dt)_total",
-      "(dU/dt)_external", "entropy", "gas density", "d(gas density)/dt",
-      "dlog(h)/dt", "factor", "sound speed"
+    //--------------------------------------------------------------------------
+    // array with human readable names for the N-body data                      
+    const char* const QNAME[NQUANT] = 
+      { "mass", "position", "velocity", "predicted velocity",
+	"softening length", "body flags", "key", "time step", "potential",
+	"external potential", "acceleration", "jerk", "density",
+	"auxiliary scalar", "auxiliary vector", "time-step level",
+	"number of partners", "node number", "Peano-Hilbert key",
+	"SPH smoothing length", "number of SPH partners", "U_internal",
+	"U_predicted", "(dU/dt)_total", "(dU/dt)_external", "entropy",
+	"gas density", "d(gas density)/dt", "dlog(h)/dt", "factor",
+	"sound speed"
+      };
+    //--------------------------------------------------------------------------
+    // array with the sizeof() the N-body data                                  
+    const size_t ZQUANT[NQUANT] = {
+      //            source properties: 8
+      sizeof(real),           // mass
+      sizeof(vect),           // position
+      sizeof(vect),           // velocity
+      sizeof(vect),           // velocity_predicted
+      sizeof(real),           // softening length
+      sizeof(flags),          // flags
+      sizeof(int),            // key
+      sizeof(double),         // time step
+      //            sink properties: 10
+      sizeof(real),           // potential
+      sizeof(real),           // external potential
+      sizeof(vect),           // acceleration
+      sizeof(vect),           // jerk
+      sizeof(real),           // density (mass)
+      sizeof(real),           // auxiliary scalar
+      sizeof(vect),           // auxiliary vector
+      sizeof(indx),           // level
+      sizeof(unsigned),       // number of partners
+      sizeof(indx),           // node number
+      sizeof(peanokey),       // Peano-Hilbert key
+      //            SPH properties: 12
+      sizeof(real),           // size
+      sizeof(unsigned),       // number of SPH partners
+      sizeof(real),           // U_internal
+      sizeof(real),           // U_predicted
+      sizeof(real),           // (dU/dt)_total
+      sizeof(real),           // (dU/dt)_external
+      sizeof(real),           // entropy
+      sizeof(real),           // gas-density
+      sizeof(real),           // dgas-density/dt
+      sizeof(real),           // dlogh/dt
+      sizeof(real),           // f_i
+      sizeof(real)            // sound speed
     };
-  //----------------------------------------------------------------------------
-  // array with the sizeof() the N-body data                                    
-  const size_t BD_ZQUANT[BD_NQUANT] = {
-    //            source properties: 8
-    sizeof(real),           // mass
-    sizeof(vect),           // position
-    sizeof(vect),           // velocity
-    sizeof(vect),           // velocity_predicted
-    sizeof(real),           // softening length
-    sizeof(flags),          // flags
-    sizeof(int),            // key
-    sizeof(double),         // time step
-    //            sink properties: 10
-    sizeof(real),           // potential
-    sizeof(real),           // external potential
-    sizeof(vect),           // acceleration
-    sizeof(vect),           // jerk
-    sizeof(real),           // density (mass)
-    sizeof(real),           // auxiliary scalar
-    sizeof(vect),           // auxiliary vector
-    sizeof(indx),           // level
-    sizeof(unsigned),       // number of partners
-    sizeof(indx),           // node number
-    sizeof(peanokey),       // Peano-Hilbert key
-    //            SPH properties: 12
-    sizeof(real),           // size
-    sizeof(unsigned),       // number of SPH partners
-    sizeof(real),           // U_internal
-    sizeof(real),           // U_predicted
-    sizeof(real),           // (dU/dt)_total
-    sizeof(real),           // (dU/dt)_external
-    sizeof(real),           // entropy
-    sizeof(real),           // gas-density
-    sizeof(real),           // dgas-density/dt
-    sizeof(real),           // dlogh/dt
-    sizeof(real),           // f_i
-    sizeof(real)            // sound speed
-  };
+  } // namespace BodyData
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
   // class falcON::fieldbit                                                     
@@ -339,6 +374,21 @@ namespace falcON {
   ///                                                                           
   // ///////////////////////////////////////////////////////////////////////////
   class fieldbit {
+  public:
+    //--------------------------------------------------------------------------
+    /// \name static members
+    //@{
+    static const int   NOSPH = BodyData::NOSPH;  ///< # non-sph data            
+    static const int   NQUANT= BodyData::NQUANT; ///< total # data              
+    /// letter for body datum
+    static char const& SNAME(int i) { return BodyData::SQUANT[i]; }
+    /// full name for body dataum
+    static const char* const& FNAME(int i) { return BodyData::QNAME[i]; }
+    /// size of type for body datum
+    static size_t const& SIZE(int i) { return BodyData::ZQUANT[i]; }
+    //@}
+    //--------------------------------------------------------------------------
+  private:
     int val;
   public:
     //--------------------------------------------------------------------------
@@ -382,7 +432,7 @@ namespace falcON {
       J       = 28,           ///< dh/dt or dlnh/dt
       F       = 29,           ///< factor f_i
       C       = 30,           ///< sound speed
-      invalid = BD_NQUANT     ///< not corresponding to any field
+      invalid = NQUANT        ///< not corresponding to any field
     };
     //--------------------------------------------------------------------------
     /// \name construction and assignment
@@ -400,7 +450,7 @@ namespace falcON {
     /// from char: match against \b name of enum values in fieldbit::bits
     explicit fieldbit(char     l) : val(invalid) {
       for(int v=0; v!=invalid; ++v)
-	if(l == BD_SQUANT[v] ) {
+	if(l == BodyData::SQUANT[v] ) {
 	  val = v;
 	  return;
 	}
@@ -426,20 +476,30 @@ namespace falcON {
     //@}
     //--------------------------------------------------------------------------
     /// the integer value
-    friend int         const&value   (fieldbit f) { return f.val; }
+    friend int const&value(fieldbit f);
     /// the sizeof() the datum corresponding to the data field
-    friend size_t      const&size    (fieldbit f) { return BD_ZQUANT[f.val]; }
+    friend size_t const&size(fieldbit f);
     /// the single character abbreviating the data field, same as
     /// the name of the corresponding enum value in fieldbit::bits
-    friend char        const&letter  (fieldbit f) { return BD_SQUANT[f.val]; }
+    friend char const&letter(fieldbit f);
     /// the name of the data field
-    friend const char* const&name    (fieldbit f) { return BD_QNAME [f.val]; }
+    friend const char* const&name(fieldbit f);
     /// is the data field a SPH quantity?
-    friend bool              is_sph  (fieldbit f) { return f.val >= BD_NOSPH; }
+    friend bool is_sph(fieldbit f);
     /// is the data field supported by NEMO I/O?
-    friend bool              is_nemo (fieldbit);
-  };
-
+    friend bool is_nemo(fieldbit);
+  };// class fieldbit
+  // ///////////////////////////////////////////////////////////////////////////
+  //                                                                          //
+  // inline definitions of some friends of class fieldbit                     //
+  // also serve to inject these functions into namespace falcON               //
+  //                                                                          //
+  // ///////////////////////////////////////////////////////////////////////////
+  inline int        const&value (fieldbit f) { return f.val; }
+  inline size_t     const&size  (fieldbit f) { return BodyData::ZQUANT[f.val]; }
+  inline char       const&letter(fieldbit f) { return BodyData::SQUANT[f.val]; }
+  inline const char*const&name  (fieldbit f) { return BodyData::QNAME [f.val]; }
+  inline bool             is_sph(fieldbit f) { return f.val>= BodyData::NOSPH; }
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
   // class falcON::fieldset                                                     
@@ -560,7 +620,7 @@ namespace falcON {
     /// from char: single-field set, match against \b name of enum values in
     /// fieldset::bits; for example, fieldset('m') gives the single-field set
     /// with just masses
-    explicit fieldset(char     c) : val(0) {
+    explicit fieldset(char c) : val(0) {
       for(fieldbit f; f; ++f)
 	if(c == letter(f) ) {
 	  val |= 1 << falcON::value(f);
@@ -570,12 +630,12 @@ namespace falcON {
     /// from string: match each character against a single-field set's name, 
     /// corresponding to the name of the fieldset::bits value; for example,
     /// fieldset("mxv") yields a fieldset with masses, positions and velocities
-    explicit fieldset(const char    *c) : val(0) {
+    explicit fieldset(const char*c) : val(0) {
       for(fieldbit f; f; ++f)
 	if(std::strchr(c,letter(f))) val |= 1 << falcON::value(f);
     }
     /// copy assignment operator
-    fieldset&operator = (fieldset b) { val  = b.val; return *this; }
+    fieldset&operator= (fieldset b) { val  = b.val; return *this; }
     //@}
     //==========================================================================
     /// \name operations                                                        
@@ -587,76 +647,69 @@ namespace falcON {
     /// subtract: delete fields from other set
     fieldset&operator-= (fieldset b) { val &= ~(b.val); return *this; }
     /// subtract: delete fields from other set
-    fieldset&operator-= (bits     b) { val &= ~b; return *this; }
+    fieldset&operator-= (bits b) { val &= ~b; return *this; }
     /// difference: fields in this set and not in other
-    fieldset operator-  (fieldset b) { return fieldset(val & ~(b.val)); }
+    fieldset operator- (fieldset b) { return fieldset(val & ~(b.val)); }
     /// overlap: fields present in both set
     fieldset&operator&= (fieldset b) { val &= b.val; return *this; }
     /// overlap: fields present in both set
-    fieldset&operator&= (bits     b) { val &= b; return *this; }
+    fieldset&operator&= (bits b) { val &= b; return *this; }
     /// combination of two sets
-    fieldset operator|  (fieldset b) const { return fieldset(val | b.val); }
+    fieldset operator| (fieldset b) const { return fieldset(val | b.val); }
     /// combination of two sets
-    fieldset operator|  (bits     b) const { return fieldset(val | b); }
+    fieldset operator| (bits b) const { return fieldset(val | b); }
     /// combination of two sets
-    friend
-    fieldset operator|  (bits     a,
-			 bits     b)       { return fieldset(int(a)|int(b)); }
+    friend fieldset operator| (bits, bits);
     /// combination of two sets
-    friend
-    fieldset operator|  (bits     b, 
-			 fieldset d)       { return d | b; }
+    friend fieldset operator| (bits, fieldset);
     /// cross section of two sets
-    fieldset operator&  (fieldset b) const { return fieldset(val & b.val); }
+    fieldset operator& (fieldset b) const { return fieldset(val & b.val); }
     /// cross section of two sets
-    fieldset operator&  (bits     b) const { return fieldset(val & b); }
+    fieldset operator& (bits b) const { return fieldset(val & b); }
     /// cross section of two sets
-    friend fieldset operator&  (bits b, fieldset d) { return d & b; }
+    friend fieldset operator& (bits, fieldset);
     /// is set empty?
-    bool     is_empty   ()           const { return val != 0; }
+    bool is_empty() const { return val != 0; }
     /// is set empty?
-    operator bool       ()           const { return val != 0; }
+    operator bool() const { return val != 0; }
     /// are two sets identical?
-    bool     operator== (fieldset b) const { return val == b.val; }
+    bool operator== (fieldset b) const { return val == b.val; }
     /// are two sets identical?
-    bool     operator== (bits     b) const { return val == b; }
+    bool operator== (bits b) const { return val == b; }
     /// are two sets identical?
     friend bool     operator== (bits b, fieldset d) { return d == b; }
     /// are two sets not identical?
-    bool     operator!= (fieldset b) const { return val != b.val; }
+    bool operator!= (fieldset b) const { return val != b.val; }
     /// are two sets not identical?
-    bool     operator!= (bits     b) const { return val != b; }
+    bool operator!= (bits b) const { return val != b; }
     /// are two sets not identical?
-    friend bool     operator!= (bits b, fieldset d) { return d != b; }
+    friend bool operator!= (bits, fieldset);
     /// complementary set
-    fieldset operator~  ()           const { return fieldset(~val); }
+    fieldset operator~ () const { return fieldset(~val); }
     //@}
     //==========================================================================
     // non-operator member methods and friends                                  
     //==========================================================================
     /// do two sets intersect?
-    bool      intersect  (fieldset b) const { return val & b.val; }
+    bool intersect(fieldset b) const { return val & b.val; }
     /// do two sets intersect?
-    bool      intersect  (bits     b) const { return val & b; }
+    bool intersect(bits b) const { return val & b; }
     /// does this set contain \b all of set \c b ?
-    bool      contain    (fieldset b) const { return (val & b.val)==b.val; }
+    bool contain(fieldset b) const { return (val & b.val)==b.val; }
     /// does this set contain \b all of set \c b ?
-    bool      contain    (bits     b) const { return (val & b)==b; }
+    bool contain(bits b) const { return (val & b)==b; }
     /// does this set contain field \c f ?
-    bool      contain    (fieldbit f) const { 
-      return val & (1 << falcON::value(f)); }
+    bool contain(fieldbit f) const { return val & (1 << falcON::value(f)); }
     /// does this set contain field \c f ?
-    bool      contain    (fieldbit::bits f) const {
-      return contain(fieldbit(f)); }
+    bool contain(fieldbit::bits f) const { return contain(fieldbit(f)); }
     /// fields in \c b but not in this set
-    fieldset  missing    (fieldset b) const { return fieldset(b.val^val) & b; }
+    fieldset missing(fieldset b) const { return fieldset(b.val^val) & b; }
     /// fields in \c b but not in this set
-    fieldset  missing    (bits     b) const { return fieldset(b^val) & b; }
+    fieldset missing(bits b) const { return fieldset(b^val) & b; }
     /// return the integer value (combination of all bits)
-    unsigned const&value      ()           const { return val; }
+    unsigned const&value() const { return val; }
     /// return the integer value (combination of all bits)
-    friend 
-    unsigned const&value      (fieldset const&b) { return b.val; }
+    friend unsigned const&value(fieldset const&);
     //==========================================================================
     // description                                                              
     //==========================================================================
@@ -674,52 +727,75 @@ namespace falcON {
     }
     //--------------------------------------------------------------------------
     class wlist {
-      char W[BD_NQUANT+1];
+      char W[BodyData::NQUANT+1];
     public:
       explicit wlist(const fieldset*d) { d->make_word(W); }
       explicit wlist(fieldset const&d) { d. make_word(W); }
       operator const char* () const { return W; }
-      friend const char*word(wlist const&w) { return w.W; }
+      friend const char*word(wlist const&);
     };
     const char* word() const { return wlist(this); }
     /// return a string of the letters corresponding to the fields in the set;
     /// useful for ascii output
-    friend const char* word(      fieldset d) { return d. word(); }
+    friend const char* word(fieldset);
     /// return a string of the letters corresponding to the fields in the set;
     /// useful for ascii output
-    friend const char* word(const fieldset*d) { return d->word(); }
+    friend const char* word(const fieldset*);
     //==========================================================================
     /// the number of bytes required to hold all fields for a single body
-    inline size_t  bytes       ()            const {
+    size_t bytes() const {
       size_t n = 0;
       for(fieldbit f; f; ++f)
 	if(contain(f)) n += size(f);
       return n;
     }
-    //==========================================================================
     /// formatted output: just give string of the letters corresponding to the
     /// fields in the set
-    friend std::ostream& operator<< (std::ostream&s, const fieldset&b) {
-      if(b.value()) {
-	for(fieldbit f; f; ++f)
-	  if(b.contain(f)) s << letter(f);
-      } else
-	s << 'o';
-      return s;
-    }
-    //==========================================================================
+    friend std::ostream& operator<< (std::ostream&, const fieldset&);
     /// formatted input: expect same format as used in output
-    friend std::istream& operator>> (std::istream&s, fieldset&b) {
-      char c[32];
-      s >> c;
-      b = fieldset(c);
-      return s;
-    }
+    friend std::istream& operator>> (std::istream&, fieldset&);
   };
-  //////////////////////////////////////////////////////////////////////////////
-  inline bool is_nemo(fieldbit f) {
-    return fieldset::nemo & (1 << value(f));
+  // ///////////////////////////////////////////////////////////////////////////
+  //                                                                          //
+  // inline definitions of friends of class fieldset and fieldset::wlist      //
+  // also serve to inject these functions into namespace falcON               //
+  //                                                                          //
+  // ///////////////////////////////////////////////////////////////////////////
+  inline fieldset operator| (fieldset::bits a, fieldset::bits b) {
+    return fieldset(a|b);
   }
+  inline fieldset operator| (fieldset::bits b, fieldset d) { return d | b; }
+  inline fieldset operator& (fieldset::bits b, fieldset d) { return d & b; }
+  inline bool operator!= (fieldset::bits b, fieldset d) { return d != b; }
+  inline unsigned const&value(fieldset const&b) { return b.val; }
+  inline const char*word(fieldset::wlist const&w) { return w.W; }
+  inline const char*word(fieldset d) { return d.word(); }
+  inline const char*word(const fieldset*d) { return d->word(); }
+  inline std::ostream& operator<< (std::ostream&s, const fieldset&b) {
+    if(b.value()) {
+      for(fieldbit f; f; ++f)
+	if(b.contain(f)) s << letter(f);
+    } else
+      s << 'o';
+    return s;
+  }
+  inline std::istream& operator>> (std::istream&s, fieldset&b) {
+    char c[32];
+    s >> c;
+    b = fieldset(c);
+    return s;
+  }
+  // ///////////////////////////////////////////////////////////////////////////
+  //                                                                          //
+  // inline definitions of a friend of class fieldbit                         //
+  // also serves to inject this function into namespace falcON                //
+  //                                                                          //
+  // ///////////////////////////////////////////////////////////////////////////
+  inline bool is_nemo(fieldbit f) { return fieldset::nemo & (1 << value(f)); }
+  // ///////////////////////////////////////////////////////////////////////////
+  //                                                                          //
+  // data related to bodytype management                                      //
+  //                                                                          //
   // ///////////////////////////////////////////////////////////////////////////
   const unsigned BT_NUM = 2;
   const fieldset BT_DATA[BT_NUM] = { fieldset::STD | fieldset::SPH,
@@ -851,13 +927,13 @@ namespace falcON {
   /// \brief Template over body data field
   /// provides information about data type and name etc for data field.
   template<int I> struct field_traits;
-#  define DefFieldTraits(BIT,TYPE)				\
-  template<> struct field_traits< BIT > :			\
-  public field_type<TYPE> {					\
-    typedef TYPE type;						\
-    static const bool   is_sph = BIT >= BD_NOSPH;		\
-    static const char   word() { return BD_SQUANT[BIT]; }	\
-    static const char  *name() { return BD_QNAME[BIT]; }	\
+#  define DefFieldTraits(BIT,TYPE)					\
+  template<> struct field_traits< BIT > :				\
+  public field_type<TYPE> {						\
+    typedef TYPE type;							\
+    static const bool   is_sph = BIT >= BodyData::NOSPH;		\
+    static const char   word() { return BodyData::SQUANT[BIT]; }	\
+    static const char  *name() { return BodyData::QNAME[BIT]; }		\
   };
   //----------------------------------------------------------------------------
   DefFieldTraits( 0, real);                        // mass                      
@@ -961,30 +1037,30 @@ namespace falcON {
   template< template<int> class LOOP>
   struct LoopAllFields {
     template< typename T > static void loop(T&x) {
-      LoopFields<LOOP, 0, BD_NQUANT>::loop(x);
+      LoopFields<LOOP, 0, BodyData::NQUANT>::loop(x);
     }
     template< typename T > static void const_loop(T const&x) {
-      LoopFields<LOOP, 0, BD_NQUANT>::const_loop(x);
+      LoopFields<LOOP, 0, BodyData::NQUANT>::const_loop(x);
     }
   };
   //----------------------------------------------------------------------------
   template< template<int> class LOOP>
   struct LoopSPHFields {
     template< typename T > static void loop(T&x) {
-      LoopFields<LOOP, BD_NOSPH, BD_NQUANT>::loop(x);
+      LoopFields<LOOP, BodyData::NOSPH, BodyData::NQUANT>::loop(x);
     }
     template< typename T > static void const_loop(T const&x) {
-      LoopFields<LOOP, BD_NOSPH, BD_NQUANT>::const_loop(x);
+      LoopFields<LOOP, BodyData::NOSPH, BodyData::NQUANT>::const_loop(x);
     }
   };
   //----------------------------------------------------------------------------
   template< template<int> class LOOP>
   struct LoopSTDFields {
     template< typename T > static void loop(T&x) {
-      LoopFields<LOOP, 0, BD_NOSPH>::loop(x);
+      LoopFields<LOOP, 0, BodyData::NOSPH>::loop(x);
     }
     template< typename T > static void const_loop(T const&x) {
-      LoopFields<LOOP, 0, BD_NOSPH>::const_loop(x);
+      LoopFields<LOOP, 0, BodyData::NOSPH>::const_loop(x);
     }
   };
   //////////////////////////////////////////////////////////////////////////////

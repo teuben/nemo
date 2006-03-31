@@ -11,7 +11,7 @@
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2000-2005 Walter Dehnen                                        
+// Copyright (C) 2000-2006 Walter Dehnen                                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -120,7 +120,7 @@ namespace falcON {
       unsigned           NBOD;                     // # bodies hold             
       unsigned           NO;                       // this==bodies::BLOCK[NO]   
       unsigned           FIRST;                    // total index of first body 
-      void              *DATA[BD_NQUANT];          // pointers to body data     
+      void              *DATA[BodyData::NQUANT];   // pointers to body data     
       block             *NEXT;                     // blocks: in linked list    
       const bodies*const BODS;                     // pointer back to bodies    
       //------------------------------------------------------------------------
@@ -145,10 +145,10 @@ namespace falcON {
 #if defined(DEBUG) || defined(EBUG)
 	if(0 == DATA[BIT])
 	  falcON_THROW("trying to access non-allocated data in bodies: %c",
-		       BD_SQUANT[BIT]);
+		       BodyData::SQUANT[BIT]);
 	if(i < 0 || i >= NBOD)
 	  falcON_THROW("index out of range in data access of bodies: %c",
-		       BD_SQUANT[BIT]);
+		       BodyData::SQUANT[BIT]);
 #endif
 	return data<BIT>()[i];
       }
@@ -158,10 +158,10 @@ namespace falcON {
 #if defined(DEBUG) || defined(EBUG)
 	if(0 == DATA[BIT])
 	  falcON_THROW("trying to access non-allocated data in bodies: %c",
-		       BD_SQUANT[BIT]);
+		       BodyData::SQUANT[BIT]);
 	if(i < 0 || i >= NBOD)
 	  falcON_THROW("index out of range in data access of bodies: %c",
-		       BD_SQUANT[BIT]);
+		       BodyData::SQUANT[BIT]);
 #endif
 	return const_data<BIT>()[i];
       }
@@ -318,9 +318,7 @@ namespace falcON {
       index& operator= (index const&i) { I=i.I; return *this; }
       //------------------------------------------------------------------------
       /// output in format "no:index".                                          
-      friend std::ostream& operator<<(std::ostream&o, const index&i) {
-	return o << i.no() << ':' << i.in();
-      }
+      friend std::ostream& operator<<(std::ostream&, const index&);
     };
     //==========================================================================
     //                                                                          
@@ -539,25 +537,15 @@ namespace falcON {
 	return B->first() + K;
       }
       /// friend return const pointer to falcON::bodies of iterator
-      friend const bodies*const&bodies_of(iterator const&i) {
-	return i.my_bodies();
-      }
+      friend const bodies*const&bodies_of(iterator const&);
       /// friend return pointer to bodies::block of iterator
-      friend const block *const&block_of(iterator const&i) {
-	return i.my_block();
-      }
+      friend const block *const&block_of(iterator const&);
       /// friend return number of bodies::block of iterator
-      friend unsigned const&block_No(iterator const&i) {
-	return i.my_block_No();
-      }
+      friend unsigned const&block_No(iterator const&);
       /// friend returning sub-index within block
-      friend unsigned const&subindex(iterator const&i) {
-	return i.K;
-      }
+      friend unsigned const&subindex(iterator const&);
       /// friend returning running body index (between 0, N-1)
-      friend unsigned bodyindex(iterator const&i) {
-	return i.my_index();
-      }
+      friend unsigned bodyindex(iterator const&);
       //@}
       //------------------------------------------------------------------------
       /// conversion to bodies::index                                           
@@ -606,13 +594,8 @@ namespace falcON {
       /// \name information about data hold                                     
       //@{
       /// has our body the datum indicated?
-      friend bool has_field(iterator const&i, fieldbit f) {
-	return i.B && i.B->has_field(f);
-      }
-#define HasDatum(Bit,Name)				\
-      friend bool has_##Name(iterator const&i) {	\
-	return falcON::has_field(i,Bit);		\
-      }
+      friend bool has_field(iterator const&, fieldbit);
+#define HasDatum(Bit,Name) friend bool has_##Name(iterator const&);
       DEF_NAMED(HasDatum)
 #undef HasDatum
       //@}
@@ -667,7 +650,7 @@ namespace falcON {
 #if defined(DEBUG) || defined(EBUG)
 	if(!is_valid())
 	  falcON_THROW("body::datum<%c>() called on invalid body",
-		       BD_SQUANT[BIT]);
+		       BodyData::SQUANT[BIT]);
 #endif
 	return B-> template datum<BIT>(K);
       }
@@ -683,43 +666,38 @@ namespace falcON {
       /// \name const data access                                               
       //@{
       /// return const datum
-      template<int BIT> friend
-      typename field_traits<BIT>::type const&const_datum(iterator const&i) {
+      template<int BIT>
+      typename field_traits<BIT>::type const&const_dat() const {
 #if defined(DEBUG) || defined(EBUG)
-	if(! i.is_valid() )
-	  falcON_THROW("const_datum<%c>(body) called on invalid body",
-		       BD_SQUANT[BIT]);
+	if(! is_valid() )
+	  falcON_THROW("body::const_dat<%c>() called on invalid body",
+		       BodyData::SQUANT[BIT]);
 #endif
-	return i.B-> template const_datum<BIT>(i.K);
+	return B-> template const_datum<BIT>(K);
       }
 #define ConstAccess(Bit,Name)						\
-      friend field_traits<Bit>::type const&Name(iterator const&i) {	\
-        return i.B-> const_datum<Bit>(i.K);				\
-      }
+      friend field_traits<Bit>::type const&Name(iterator const&);
       DEF_NAMED(ConstAccess);
 #undef ConstAccess
       /// return angular momentum
-      friend vect angmom(iterator const&i) {
-	return falcON::pos(i) ^ falcON::vel(i); }
+      friend vect angmom(iterator const&);
       /// return type of body
-      friend bodytype const&type(iterator const&i) {
-	i.B->type();
-      }
+      friend bodytype const&type(iterator const&);
       //@}
       //------------------------------------------------------------------------
       /// \name flag manipulations                                              
       //@{
+      /// conversion to flags
+      operator const flags&() const {
+	return const_dat<fieldbit::f>();
+      }
       /// is the single flag f set?
       bool flag_is_set(flags::single f) const {
-	return falcON::flag(*this).is_set(f);
+	return const_dat<fieldbit::f>().is_set(f);
       }
       /// are all flags in f set?
       bool flags_are_set(flags const&f) const {
-	return falcON::flag(*this).are_set(f);
-      }
-      /// conversion to flags
-      operator const flags&() const {
-	return falcON::flag(*this);
+	return const_dat<fieldbit::f>().are_set(f);
       }
       /// flag this body as active
       void flag_as_active    () { flag().add(flags::active); }
@@ -767,8 +745,8 @@ namespace falcON {
       bool is_new        () const { return flag_is_set(flags::newbody); }
       /// is this body flagged as being marked?
       bool is_marked     () const { return flag_is_set(flags::marked); }
-      /// has this body mass?
-      bool is_source     () const { return falcON::mass(*this) != zero; }
+      /// has this body non-zero mass?
+      bool is_source     () const;
       /// is this body allowed to use a longer time step?
       bool may_go_longer () const { return !flag_is_set(flags::not_longer);}
       /// is this body allowed to use a shorter time step?
@@ -778,31 +756,29 @@ namespace falcON {
       /// \name const boolean flag informations via friends                     
       //@{
       /// friend: is body active?
-      friend bool is_active     (const iterator&i) { return i.is_active(); }
+      friend bool is_active(const iterator&);
       /// is body to be removed?
-      friend bool to_remove     (const iterator&i) { return i.to_remove(); }
+      friend bool to_remove(const iterator&);
       /// is body SPH particle?
-      friend bool is_sph        (const iterator&i) { return i.is_sph(); }
+      friend bool is_sph(const iterator&);
       /// is body sticky particle?
-      friend bool is_sticky     (const iterator&i) { return i.is_sticky(); }
+      friend bool is_sticky(const iterator&);
       /// is body new?
-      friend bool is_new        (const iterator&i) { return i.is_new(); }
+      friend bool is_new(const iterator&);
       /// friend: is this body flagged as being marked?
-      friend bool is_marked     (const iterator&i) { return i.is_marked(); }
+      friend bool is_marked(const iterator&);
       /// friend: has this body mass?
-      friend bool is_source     (const iterator&i) { return i.is_source(); }
+      friend bool is_source(const iterator&);
       /// friend: is this body allowed to use a longer time step?
-      friend bool may_go_longer (const iterator&i) { return i.may_go_longer(); }
+      friend bool may_go_longer(const iterator&);
       /// friend: is this body allowed to use a shorter time step?
-      friend bool may_go_shorter(const iterator&i) { return i.may_go_shorter();}
+      friend bool may_go_shorter(const iterator&);
       //@}
       //------------------------------------------------------------------------
       // I/O                                                                    
       //------------------------------------------------------------------------
       /// formatted output: write bodyindex
-      friend std::ostream& operator<<(std::ostream&o, const iterator&i) {
-	return i? o << i.my_index() : o << "nil";
-      }
+      friend std::ostream& operator<<(std::ostream&, const iterator&);
       //------------------------------------------------------------------------
 #ifdef falcON_NEMO
       iterator& read_data (data_in &, unsigned =0) falcON_THROWING;
@@ -1307,7 +1283,79 @@ namespace falcON {
     void del_data() falcON_THROWING;
     //==========================================================================
   };
-  //----------------------------------------------------------------------------
+  // ///////////////////////////////////////////////////////////////////////////
+  //                                                                          //
+  // inline definitions of friends of class bodies and its sub-types and      //
+  // related functions                                                        //
+  // also serve to inject these functions into namespace falcON               //
+  //                                                                          //
+  // ///////////////////////////////////////////////////////////////////////////
+  /// \relates falcON::bodies::iterator
+  /// return const datum
+  template<int BIT>
+  typename field_traits<BIT>::type const&const_datum(bodies::iterator const&i) {
+    return i. template const_dat<BIT>();
+  }
+  // ///////////////////////////////////////////////////////////////////////////
+  inline std::ostream& operator<<(std::ostream&o, const bodies::index&i) {
+    return o << i.no() << ':' << i.in();
+  }
+  // ///////////////////////////////////////////////////////////////////////////
+  inline const bodies*const&bodies_of(bodies::iterator const&i) {
+    return i.my_bodies();
+  }
+  inline const bodies::block*const&block_of(bodies::iterator const&i) {
+    return i.my_block();
+  }
+  inline unsigned const&block_No(bodies::iterator const&i) {
+    return i.my_block_No();
+  }
+  inline unsigned const&subindex(bodies::iterator const&i) {
+    return i.K;
+  }
+  inline unsigned bodyindex(bodies::iterator const&i) {
+    return i.my_index();
+  }
+  inline bool has_field(bodies::iterator const&i, fieldbit f) {
+    return i.B && i.B->has_field(f);
+  }
+#define HasDatum(Bit,Name)				\
+  inline bool has_##Name(bodies::iterator const&i) {	\
+    return falcON::has_field(i,Bit);			\
+  }
+  DEF_NAMED(HasDatum)
+#undef HasDatum
+#define ConstAccess(Bit,Name)						\
+  inline field_traits<Bit>::type const&Name(bodies::iterator const&i) {	\
+    return i.B-> const_datum<Bit>(i.K);					\
+  }
+  DEF_NAMED(ConstAccess);
+#undef ConstAccess
+  inline vect angmom(bodies::iterator const&i) {
+    return falcON::pos(i) ^ falcON::vel(i);
+  }
+  inline bodytype const&type(bodies::iterator const&i) {
+    i.B->type();
+  }
+  inline bool bodies::iterator::is_source() const {
+    return falcON::mass(*this) != zero;
+  }
+  inline bool is_active     (const bodies::iterator&i) { return i.is_active(); }
+  inline bool to_remove     (const bodies::iterator&i) { return i.to_remove(); }
+  inline bool is_sph        (const bodies::iterator&i) { return i.is_sph(); }
+  inline bool is_sticky     (const bodies::iterator&i) { return i.is_sticky(); }
+  inline bool is_new        (const bodies::iterator&i) { return i.is_new(); }
+  inline bool is_marked     (const bodies::iterator&i) { return i.is_marked(); }
+  inline bool is_source     (const bodies::iterator&i) { return i.is_source(); }
+  inline bool may_go_longer (const bodies::iterator&i) {
+    return i.may_go_longer();
+  }
+  inline bool may_go_shorter(const bodies::iterator&i) {
+    return i.may_go_shorter();
+  }
+  inline std::ostream& operator<<(std::ostream&o, const bodies::iterator&i) {
+    return i? o << i.my_index() : o << "nil";
+  }
 #define CheckMissingBodyData(B,F) (B)->CheckData((F),__FILE__,__LINE__);
   // ///////////////////////////////////////////////////////////////////////////
   // ///////////////////////////////////////////////////////////////////////////
@@ -1319,7 +1367,6 @@ namespace falcON {
   // ///////////////////////////////////////////////////////////////////////////
   // ///////////////////////////////////////////////////////////////////////////
   typedef bodies::iterator body;
-
   // ///////////////////////////////////////////////////////////////////////////
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            

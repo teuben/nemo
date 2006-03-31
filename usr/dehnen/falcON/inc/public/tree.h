@@ -4,7 +4,7 @@
 /// \file   inc/public/tree.h                                                   
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2000-2005                                                           
+/// \date   2000-2006                                                           
 ///                                                                             
 /// \brief  contains definition of class \a OctTree and                         
 ///         macros for access to cells & leafs of a tree                        
@@ -13,7 +13,7 @@
 ///                                                                             
 // /////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2000-2005  Walter Dehnen                                       
+// Copyright (C) 2000-2006  Walter Dehnen                                       
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -74,7 +74,6 @@ namespace falcON {
   public:
     class Leaf {
     private:
-      typedef bodies::index index;              ///< type to assiciate body
       Leaf           (Leaf const&);
       Leaf& operator=(Leaf const&);
       //------------------------------------------------------------------------
@@ -91,7 +90,7 @@ namespace falcON {
       };
     private:
       flags         FLAGS;                      ///< body flags
-      index         LINK;                       ///< index of associated body
+      bodies::index LINK;                       ///< index of associated body
     protected:
       real SCAL;                                ///< any scalar (eg. mass)
       void*PROP;                                ///< pointer to more data
@@ -105,17 +104,17 @@ namespace falcON {
 	{}
       //------------------------------------------------------------------------
       /// set the link to the associated body
-      void link(index L) { LINK  = L; }
+      void link(bodies::index L) { LINK  = L; }
       //------------------------------------------------------------------------
       /// \name const data access via members
       //@{
-      vect     const&pos   () const { return POS; }   ///< position
-      index    const&mybody() const { return LINK; }  ///< index of my body
-      real     const&scalar() const { return SCAL; }  ///< scalar
-      real     const&auxr  () const { return AUXR; }  ///< auxiliary scalar
-      unsigned const&auxu  () const { return AUXU; }  ///< auxiliary unsigned
-      int      const&auxi  () const { return AUXI; }  ///< auxiliary int
-      flags    const&flag  () const { return FLAGS; } ///< body flags
+      vect          const&pos   () const { return POS; }   ///< position
+      bodies::index const&mybody() const { return LINK; }  ///< index of my body
+      real          const&scalar() const { return SCAL; }  ///< scalar
+      real          const&auxr  () const { return AUXR; }  ///< auxiliary scalar
+      unsigned      const&auxu  () const { return AUXU; }  ///< auxi'ry unsigned
+      int           const&auxi  () const { return AUXI; }  ///< auxiliary int
+      flags         const&flag  () const { return FLAGS; } ///< body flags
       //@}
       //------------------------------------------------------------------------
     public:
@@ -132,38 +131,33 @@ namespace falcON {
       /// \name const data access via friends
       //@{
       /// position
-      friend vect     const&pos   (const Leaf*L) { return L->POS; }
+      friend vect const&pos(const Leaf*);
       /// scalar
-      friend real     const&scalar(const Leaf*L) { return L->SCAL; }
+      friend real const&scalar(const Leaf*);
       /// auxiliary scalar
-      friend real     const&auxr  (const Leaf*L) { return L->AUXR; }
+      friend real const&auxr(const Leaf*);
       /// auxiliary unsigned
-      friend unsigned const&auxu  (const Leaf*L) { return L->AUXU; }
+      friend unsigned const&auxu(const Leaf*);
       /// auxiliary int
-      friend int      const&auxi  (const Leaf*L) { return L->AUXI; }
+      friend int const&auxi(const Leaf*);
       /// index of associated body
-      friend index    const&mybody(const Leaf*L) { return L->LINK; }
+      friend bodies::index const&mybody(const Leaf*);
       /// body flag
-      friend flags    const&flag  (const Leaf*L) { return L->FLAGS; }
+      friend flags const&flag(const Leaf*);
       //@}
       //------------------------------------------------------------------------
       /// \name flag information via friends
       //@{
       /// does the body flag indicate activity?
-      friend bool is_active(const Leaf*L) {
-	return is_active(L->FLAGS); }
+      friend bool is_active(const Leaf*);
       /// does the body flag indicate a SPH particle?
-      friend bool is_sph   (const Leaf*L) {
-	return is_sph(L->FLAGS); }
+      friend bool is_sph   (const Leaf*);
       /// does the body flag indicate a sticky particle?
-      friend bool is_sticky(const Leaf*L) {
-	return is_sticky(L->FLAGS); }
+      friend bool is_sticky(const Leaf*);
       /// is the flag \a f set in the body flag?
-      friend bool is_set(const Leaf*L, flags::single f) {
-	return L->FLAGS.is_set(f); }
+      friend bool is_set(const Leaf*, flags::single);
       /// are the flags \a f set in the body flag?
-      friend bool are_set(const Leaf*L, flags const&f) {
-	return L->FLAGS.are_set(f); }
+      friend bool are_set(const Leaf*, flags const&);
       //@}
       //------------------------------------------------------------------------
       /// set data member \a PROP
@@ -190,7 +184,7 @@ namespace falcON {
       }
       //------------------------------------------------------------------------
       /// set link to associated body and position
-      void set_link_and_pos(index i, vect const&x) {
+      void set_link_and_pos(bodies::index i, vect const&x) {
 	link(i);
 	pos()=x;
       }
@@ -255,29 +249,25 @@ namespace falcON {
       //------------------------------------------------------------------------
       /// \name const data access via friends only
       //@{
-      friend uint8    const&level   (const Cell*C) { return C->LEVEL; }
-      friend uint8    const&octant  (const Cell*C) { return C->OCTANT; }
+      friend uint8    const&level   (const Cell*);
+      friend uint8    const&octant  (const Cell*);
+      friend indx     const&nleafs  (const Cell*);
+      friend indx     const&ncells  (const Cell*);
+      friend int      const&number  (const Cell*);
+      friend int      const&fcleaf  (const Cell*);
+      friend int      const&fccell  (const Cell*);
+      friend vect     const&center  (const Cell*);
+      friend int      ecleaf        (const Cell*);
+      friend int      ncleaf        (const Cell*);
+      friend int      eccell        (const Cell*);
+      friend bool     has_cell_kids (const Cell*);
+      friend bool     has_leaf_kids (const Cell*);
+      friend bool     is_twig       (const Cell*);
+      friend bool     is_branch     (const Cell*);
 #ifdef falcON_MPI
-      friend PeanoMap const&peano   (const Cell*C) { return C->PEANO; }
-      friend uint8    const&localkey(const Cell*C) { return C->KEY; }
+      friend PeanoMap const&peano   (const Cell*);
+      friend uint8    const&localkey(const Cell*);
 #endif
-      friend indx     const&nleafs  (const Cell*C) { return C->NLEAFS; }
-      friend indx     const&ncells  (const Cell*C) { return C->NCELLS; }
-      friend int      const&number  (const Cell*C) { return C->NUMBER; }
-      friend int      const&fcleaf  (const Cell*C) { return C->FCLEAF; }
-      friend int      const&fccell  (const Cell*C) { return C->FCCELL; }
-      friend vect     const&center  (const Cell*C) { return C->CENTER; }
-
-      friend int      ecleaf        (const Cell*C) {
-	return C->FCLEAF+C->NLEAFS; }
-      friend int      ncleaf        (const Cell*C) {
-	return C->FCLEAF+C->NUMBER; }
-      friend int      eccell        (const Cell*C) {
-	return C->FCCELL+C->NCELLS; }
-      friend bool     has_cell_kids (const Cell*C) { return C->NCELLS != 0; }
-      friend bool     has_leaf_kids (const Cell*C) { return C->NLEAFS != 0; }
-      friend bool     is_twig       (const Cell*C) { return C->NCELLS == 0; }
-      friend bool     is_branch     (const Cell*C) { return C->NLEAFS == 0; }
       //@}
       //------------------------------------------------------------------------
       /// \name flag manipulations
@@ -320,8 +310,8 @@ namespace falcON {
       //------------------------------------------------------------------------
       void dump(std::ostream&o) const {
 	o<<' '<<std::setw(3)<< flags(*this)
-	 <<' '<<std::setw(3)<< falcON::level(this)
-	 <<' '<<std::setw(3)<< falcON::octant(this);
+	 <<' '<<std::setw(3)<< LEVEL
+	 <<' '<<std::setw(3)<< OCTANT;
 	if(NCELLS)
 	  o<<' '<<std::setw(5)<<FCCELL;
 	else
@@ -526,9 +516,9 @@ namespace falcON {
       CellIter(CellIter<DerivedCell> const&I) 
 	: T( I.my_tree() ),
 	  C( static_cast<CELL*>(I.c_pter()) ) {}
-      /// from another nothing: set pointers to zer
+      /// from nothing: set pointers to zer
       CellIter()                         : T(0),   C(0)   {}
-      /// from another any int: like from nothing
+      /// from any int: like from nothing
       explicit CellIter(int)             : T(0),   C(0)   {}
       //@}
       //------------------------------------------------------------------------
@@ -615,6 +605,14 @@ namespace falcON {
       bool operator>=(CellIter<SomeCell> const&I) const {
 	return C >= static_cast<CELL*>(I.c_pter());
       }
+      /// are we refering to a valid cell?
+      bool is_valid() const {
+	return T != 0;
+      }
+      /// conversion to bool: are we referring to a valid cel?
+      operator bool () const {
+	return is_valid();
+      }
       //@}
       //------------------------------------------------------------------------
       /// \name tree and index of cell in tree
@@ -627,10 +625,6 @@ namespace falcON {
       size_t index() const {
 	return T->NoCell(C);
       }
-      /// return index of cell within its tree
-      friend size_t index  (CellIter const&I) {
-	return I.index();
-      }
       //@}
       //------------------------------------------------------------------------
       /// \name conversion and dereferencing to *cell
@@ -642,9 +636,9 @@ namespace falcON {
       //@}
       //------------------------------------------------------------------------
       /// radius of cell
-      friend real const&radius(CellIter const&I) {return I.T->rad(level(I)); }
+      real const&radius() const {return T->rad(level(C)); }
       //------------------------------------------------------------------------
-      /// \name access to cell kids
+      /// \name access to cell kids and arbitrary cell
       //@{
       /// first cell kid (if any)
       cell_child begin_cell_kids() const { 
@@ -652,6 +646,9 @@ namespace falcON {
       /// end of cell kids
       cell_child end_cell_kids  () const {
 	return cell_child(T, static_cast<CELL*>(T->CellNo(eccell(C)))); }
+      /// cell of given number
+      CellIter CellNo(unsigned i) const {
+	return CellIter(T, static_cast<CELL*>(T->CellNo(i))); }
       //@}
       //------------------------------------------------------------------------
       /// \name access to leaf kids and descendants
@@ -669,10 +666,7 @@ namespace falcON {
       leaf_child last_leaf_desc() const { return end_leaf_desc()-1; }
       //@}
       //------------------------------------------------------------------------
-      friend std::ostream& operator<<(std::ostream&o, const CellIter&I) {
-	return o<<std::setw(5)<<I.index();
-      }
-    }; // class CellIter<CELL>
+    };// class CellIter<CELL>
     //--------------------------------------------------------------------------
     /// \name public types, to be superseeded by any derived tree
     //@{
@@ -740,6 +734,69 @@ namespace falcON {
   private:
     unsigned mark_sub (flags, int, cell_iterator const&, unsigned&) const;
   }; // class OctTree {
+  // ///////////////////////////////////////////////////////////////////////////
+  //                                                                          //
+  // inline definitions of friends of class OctTree::Leaf                     //
+  // also serve to inject these functions into namespace falcON               //
+  //                                                                          //
+  // ///////////////////////////////////////////////////////////////////////////
+  inline vect const&pos(const OctTree::Leaf*L) { return L->POS; }
+  inline real const&scalar(const OctTree::Leaf*L) { return L->SCAL; }
+  inline real const&auxr(const OctTree::Leaf*L) { return L->AUXR; }
+  inline unsigned const&auxu(const OctTree::Leaf*L) { return L->AUXU; }
+  inline int const&auxi(const OctTree::Leaf*L) { return L->AUXI; }
+  inline bodies::index const&mybody(const OctTree::Leaf*L) { return L->LINK; }
+  inline flags const&flag(const OctTree::Leaf*L) { return L->FLAGS; }
+  inline bool is_active(const OctTree::Leaf*L) { return is_active(L->FLAGS); }
+  inline bool is_sph(const OctTree::Leaf*L) { return is_sph(L->FLAGS); }
+  inline bool is_sticky(const OctTree::Leaf*L) { return is_sticky(L->FLAGS); }
+  inline bool is_set(const OctTree::Leaf*L, flags::single f) {
+    return L->FLAGS.is_set(f);
+  }
+  inline bool are_set(const OctTree::Leaf*L, flags const&f) {
+    return L->FLAGS.are_set(f);
+  }
+  // ///////////////////////////////////////////////////////////////////////////
+  //                                                                          //
+  // inline definitions of friends of class OctTree::Cell                     //
+  // also serve to inject these functions into namespace falcON               //
+  //                                                                          //
+  // ///////////////////////////////////////////////////////////////////////////
+#ifdef falcON_MPI
+  inline PeanoMap const&peano(const OctTree::Cell*C) { return C->PEANO; }
+  inline uint8 const&localkey(const OctTree::Cell*C) { return C->KEY; }
+#endif
+  inline uint8 const&level(const OctTree::Cell*C) { return C->LEVEL; }
+  inline uint8 const&octant(const OctTree::Cell*C) { return C->OCTANT; }
+  inline indx const&nleafs(const OctTree::Cell*C) { return C->NLEAFS; }
+  inline indx const&ncells(const OctTree::Cell*C) { return C->NCELLS; }
+  inline int const&number(const OctTree::Cell*C) { return C->NUMBER; }
+  inline int const&fcleaf(const OctTree::Cell*C) { return C->FCLEAF; }
+  inline int const&fccell(const OctTree::Cell*C) { return C->FCCELL; }
+  inline vect const&center(const OctTree::Cell*C) { return C->CENTER; }
+  inline int ecleaf(const OctTree::Cell*C) { return C->FCLEAF+C->NLEAFS; }
+  inline int ncleaf(const OctTree::Cell*C) { return C->FCLEAF+C->NUMBER; }
+  inline int eccell(const OctTree::Cell*C) { return C->FCCELL+C->NCELLS; }
+  inline bool has_cell_kids(const OctTree::Cell*C) { return C->NCELLS != 0; }
+  inline bool has_leaf_kids(const OctTree::Cell*C) { return C->NLEAFS != 0; }
+  inline bool is_twig(const OctTree::Cell*C) { return C->NCELLS == 0; }
+  inline bool is_branch(const OctTree::Cell*C) { return C->NLEAFS == 0; }
+  // ///////////////////////////////////////////////////////////////////////////
+  /// \related falcON::OctTree::CellIter
+  /// \name functions taking OctTree::CellIter arguments
+  //@{
+  /// return index of cell within its tree
+  template<typename CELL> inline
+  size_t index(OctTree::CellIter<CELL> const&I) { return I.index(); }
+  /// radius of cell
+  template<typename CELL> inline
+  real const&radius(OctTree::CellIter<CELL> const&I) { return I.radius(); }
+  /// formatted output: just write index
+  template<typename CELL> inline
+  std::ostream& operator<<(std::ostream&o, const OctTree::CellIter<CELL>&I) {
+    return o<<std::setw(5)<<I.index();
+  }
+  //@}
   //////////////////////////////////////////////////////////////////////////////
   inline void flag_for_subtree(OctTree::Cell*C) {
     C->add         (flags::subtree); }
@@ -892,7 +949,7 @@ falcON_TRAITS(falcON::OctTree::Cell,"OctTree::Cell","OctTree::Cells");
       NAME != CELL.end_leaf_desc();                /* until beyond last      */\
     ++NAME)                                        // get next child            
 //------------------------------------------------------------------------------
-// loop the all, except the last, leafs descendants of a given cell             
+// loop all, except the last, leaf descendants of a given cell                  
 //------------------------------------------------------------------------------
 #define LoopLstLeafs(CELL_TYPE,                    /* type of parent cell    */\
 		     CELL,                         /* parent cell            */\

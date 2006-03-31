@@ -158,7 +158,7 @@ bodies::block::block(unsigned no,                  // I: our No
   }
 }
 ///////////////////////////////////////////////////////////////////////////////
-template<unsigned BIT=0, unsigned END=BD_NQUANT> struct CopyBody {
+template<unsigned BIT=0, unsigned END=BodyData::NQUANT> struct CopyBody {
   static const unsigned BD = 1<<BIT;
   static void copy(void    **data,
 		   unsigned  from,
@@ -166,9 +166,9 @@ template<unsigned BIT=0, unsigned END=BD_NQUANT> struct CopyBody {
 		   fieldset  b,
 		   fieldset &c) {
     if(data[BIT] && b.contain(fieldbit(BIT)) ) {
-      memcpy(static_cast<      char*>(data[BIT])+to  *BD_ZQUANT[BIT],
-	     static_cast<const char*>(data[BIT])+from*BD_ZQUANT[BIT],
-	     BD_ZQUANT[BIT]);
+      memcpy(static_cast<      char*>(data[BIT])+to  *BodyData::ZQUANT[BIT],
+	     static_cast<const char*>(data[BIT])+from*BodyData::ZQUANT[BIT],
+	     BodyData::ZQUANT[BIT]);
       c |= fieldset(1<<BIT);
     }
     CopyBody<BIT+1, END>::copy(data,from,to,b,c);
@@ -186,22 +186,22 @@ fieldset bodies::block::copy_body(unsigned from, unsigned to, fieldset b)
   return copied;
 }
 ////////////////////////////////////////////////////////////////////////////////
-template<unsigned BIT=0, unsigned END=BD_NQUANT> struct CopyBodies {
+template<unsigned BIT=0, unsigned END=BodyData::NQUANT> struct CopyBodies {
   static const unsigned BD = 1<<BIT;
-  static void copy(void*const*data_from,
+  static void copy(void*const*data_fr,
 		   void*const*data_to,
-		   unsigned  from,
+		   unsigned  fr,
 		   unsigned  to,
 		   unsigned  num,
 		   fieldset  b,
 		   fieldset&c) {
-    if(data_from[BIT] && data_to[BIT] && b & fieldset(1<<BIT) ) {
-      memcpy(static_cast<      char*>(data_from[BIT])+to  *BD_ZQUANT[BIT],
-	     static_cast<const char*>(data_to  [BIT])+from*BD_ZQUANT[BIT],
-	     num*BD_ZQUANT[BIT]);
+    if(data_fr[BIT] && data_to[BIT] && b & fieldset(1<<BIT) ) {
+      memcpy(static_cast<      char*>(data_fr[BIT])+to*BodyData::ZQUANT[BIT],
+	     static_cast<const char*>(data_to[BIT])+fr*BodyData::ZQUANT[BIT],
+	     num*BodyData::ZQUANT[BIT]);
       c |= fieldset(1<<BIT);
     }
-    CopyBodies<BIT+1, END>::copy(data_from,data_to,from,to,num,b,c);
+    CopyBodies<BIT+1, END>::copy(data_fr,data_to,fr,to,num,b,c);
   }
 };
 template<unsigned BIT> struct CopyBodies<BIT,BIT> {

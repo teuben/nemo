@@ -498,6 +498,7 @@ namespace falcON {
     bool    is_open () const { return STREAM!=0; } ///< ready for output ?      
     operator bool   () const { return is_open(); } ///< ready for output ?      
   };// class nemo_io
+  class snap_in;
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
   // class falcON::nemo_in                                                      
@@ -550,6 +551,7 @@ namespace falcON {
     /// are we a pipe?
     bool const&is_pipe() const { return IS_PIPE; }
   };
+  class data_in;
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
   // class falcON::snap_in                                                      
@@ -677,6 +679,7 @@ namespace falcON {
     /// \param n (input) number of bodies to read data for
     void read(void*data, unsigned n);
   };
+  class snap_out;
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
   // class falcON::nemo_out                                                     
@@ -747,6 +750,7 @@ namespace falcON {
     /// convertion to bool: true if is_writing()
     operator bool     () const { return is_writing(); }
   };
+  class data_out;
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
   // class falcON::snap_out                                                     

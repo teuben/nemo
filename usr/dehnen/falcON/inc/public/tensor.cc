@@ -765,7 +765,7 @@ namespace falcON {
     //                                                                          
     //--------------------------------------------------------------------------
     tm<int Kx,int Ky,int Kz> struct inp_a {
-      enum { 
+      enum {
 	K  = Kx+Ky+Kz,
 	L  = Ky+Kz,
 	M  = Kz,

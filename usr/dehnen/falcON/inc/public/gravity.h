@@ -3,7 +3,7 @@
 //                                                                             |
 // gravity.h                                                                   |
 //                                                                             |
-// Copyright (C) 2000-2005  Walter Dehnen                                      |
+// Copyright (C) 2000-2006  Walter Dehnen                                      |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -146,7 +146,7 @@ namespace falcON {
       friend class GravEstimator;
       friend class falcON::traits<sink_data>;
       //------------------------------------------------------------------------
-      // private data access                                                    
+      // private const data access                                              
       //------------------------------------------------------------------------
       sink_data*       sink () const { return static_cast<sink_data*>(PROP); }
       real            &mass ()       { return SCAL; }
@@ -178,17 +178,17 @@ namespace falcON {
       //------------------------------------------------------------------------
       // const data access via friends                                          
       //------------------------------------------------------------------------
-      friend vect     const&cofm  (const Leaf*L) {return L->pos(); }
-      friend vect     const&acc   (const Leaf*L) {return L->acc(); }
-      friend real     const&pot   (const Leaf*L) {return L->pot(); }
-      friend real     const&rho   (const Leaf*L) {return L->rho(); }
-      friend unsigned const&num   (const Leaf*L) {return L->num(); }
+      friend vect     const&cofm  (const Leaf*);
+      friend vect     const&acc   (const Leaf*);
+      friend real     const&pot   (const Leaf*);
+      friend real     const&rho   (const Leaf*);
+      friend unsigned const&num   (const Leaf*);
 #ifdef falcON_INDI
-      friend real     const&eph   (const Leaf*L) {return L->eph(); }
-      friend real           size  (const Leaf*L) {return twice(L->eph()); }
-      friend real     const&sizeq (const Leaf*L) {return L->sizeq(); }
+      friend real     const&eph   (const Leaf*);
+      friend real           size  (const Leaf*);
+      friend real     const&sizeq (const Leaf*);
 #endif
-      friend real     const&mass  (const Leaf*L) {return L->mass(); }
+      friend real     const&mass  (const Leaf*);
       //------------------------------------------------------------------------
       // copy data from body to leaf                                            
       //------------------------------------------------------------------------
@@ -285,10 +285,6 @@ namespace falcON {
 	}
       }
       //------------------------------------------------------------------------
-      // boolean information                                                    
-      //------------------------------------------------------------------------
-      friend bool is_source(const Leaf*const&S) { return S->mass() != zero; }
-      //------------------------------------------------------------------------
       // dump leaf data                                                         
       //------------------------------------------------------------------------
       static void dump_head(std::ostream& o) {
@@ -366,21 +362,19 @@ namespace falcON {
       // simple manipulations                                                   
       //------------------------------------------------------------------------
     public:
-      void set_rcrit   (real const&it) { RAD *= it; }
+      void set_rcrit(real const&it) { RAD *= it; }
       //------------------------------------------------------------------------
-      void set_srce    (srce_data*const&srce)
-      {
+      void set_srce(srce_data*const&srce) {
 	AUX1.PTER = static_cast<void*>(srce);
       }
       //------------------------------------------------------------------------
-      void setCoeffs   (Cset     *const&sink)
-      {
+      void setCoeffs(Cset*const&sink) {
 	AUX2.PTER = static_cast<void*>(sink); 
       }
       //------------------------------------------------------------------------
-      void*returnCoeffs()                     { return AUX2.PTER; }
-      void resetCoeffs ()                     { AUX2.PTER=0; }
-      bool hasCoeffs   () const               { return AUX2.PTER != 0; }
+      void*returnCoeffs()       { return AUX2.PTER; }
+      void resetCoeffs ()       { AUX2.PTER=0; }
+      bool hasCoeffs   () const { return AUX2.PTER != 0; }
       //------------------------------------------------------------------------
       // non-const data access via members                                      
       //------------------------------------------------------------------------
@@ -395,29 +389,26 @@ namespace falcON {
       //------------------------------------------------------------------------
       // const data access via friends                                          
       //------------------------------------------------------------------------
-      friend real const&mass  (const Cell*C) { return C->mass(); }
-      friend vect const&cofm  (const Cell*C) { return C->cofm(); }
-      friend vect const&pos   (const Cell*C) { return C->cofm(); }
-      friend real const&rmax  (const Cell*C) { return C->rmax(); }
-      friend real const&rcrit (const Cell*C) { return C->rcrit(); }
-      friend real const&size  (const Cell*C) { return C->size(); }
-      friend real       rcrit2(const Cell*C) { return C->rcrit2(); }
-      friend real const&eph   (const Cell*C) { return C->eph(); }
-      friend Cset      &Coeffs(const Cell*C) { return C->Coeffs(); }
-      friend Mset const&poles (const Cell*C) { return C->poles();}
-      friend bool hasCoeffs   (const Cell*C) { return C->hasCoeffs();}
+      friend real const&mass  (const Cell*);
+      friend vect const&cofm  (const Cell*);
+      friend vect const&pos   (const Cell*);
+      friend real const&rmax  (const Cell*);
+      friend real const&rcrit (const Cell*);
+      friend real const&size  (const Cell*);
+      friend real       rcrit2(const Cell*);
+      friend real const&eph   (const Cell*);
+      friend Cset      &Coeffs(const Cell*);
+      friend Mset const&poles (const Cell*);
+      friend bool hasCoeffs   (const Cell*);
       //------------------------------------------------------------------------
       // boolean information via friends                                        
       //------------------------------------------------------------------------
-      friend bool is_source   (const Cell*C) { 
-	return falcON::mass(C)!=zero; }
+      friend bool is_source (const Cell*C);
       //------------------------------------------------------------------------
       // other const methods and friends                                        
       //------------------------------------------------------------------------
-      friend real xmin(const Cell*C) {
-	return falcON::cofm(C).min() - falcON::rmax(C); }
-      friend real xmax(const Cell*C) {
-	return falcON::cofm(C).max() + falcON::rmax(C); }
+      friend real xmin(const Cell*);
+      friend real xmax(const Cell*);
       //------------------------------------------------------------------------
       // dump cell data                                                         
       //------------------------------------------------------------------------
@@ -626,11 +617,76 @@ namespace falcON {
     bool           const&use_indiv_eps   () const { return INDI_SOFT; }
 #endif
   };// class GravEstimator {
-  //////////////////////////////////////////////////////////////////////////////
+  // ///////////////////////////////////////////////////////////////////////////
+  //                                                                          //
+  // inline definitions of friends of class GravEstimator::Leaf               //
+  // also serve to inject these functions into namespace falcON               //
+  //                                                                          //
+  // ///////////////////////////////////////////////////////////////////////////
+  inline vect const&cofm(const GravEstimator::Leaf*L) { return L->pos(); }
+  inline vect const&acc(const GravEstimator::Leaf*L) { return L->acc(); }
+  inline real const&pot(const GravEstimator::Leaf*L) { return L->pot(); }
+  inline real const&rho(const GravEstimator::Leaf*L) { return L->rho(); }
+  inline unsigned const&num(const GravEstimator::Leaf*L) { return L->num(); }
+#ifdef falcON_INDI
+  inline real const&eph(const GravEstimator::Leaf*L) { return L->eph(); }
+  inline real size(const GravEstimator::Leaf*L) {return twice(L->eph()); }
+  inline real const&sizeq(const GravEstimator::Leaf*L) { return L->sizeq(); }
+#endif
+  inline real const&mass(const GravEstimator::Leaf*L) { return L->mass(); }
+  // ///////////////////////////////////////////////////////////////////////////
+  //                                                                          //
+  // inline definitions of friends of class GravEstimator::Cell               //
+  // also serve to inject these functions into namespace falcON               //
+  //                                                                          //
+  // ///////////////////////////////////////////////////////////////////////////
+  inline real const&mass(const GravEstimator::Cell*C) {
+    return C->mass();
+  }
+  inline vect const&cofm(const GravEstimator::Cell*C) {
+    return C->cofm();
+  }
+  inline vect const&pos(const GravEstimator::Cell*C) {
+    return C->cofm();
+  }
+  inline real const&rmax(const GravEstimator::Cell*C) {
+    return C->rmax();
+  }
+  inline real const&rcrit(const GravEstimator::Cell*C) {
+    return C->rcrit();
+  }
+  inline real const&size(const GravEstimator::Cell*C) {
+    return C->size();
+  }
+  inline real rcrit2(const GravEstimator::Cell*C) {
+    return C->rcrit2();
+  }
+  inline real const&eph(const GravEstimator::Cell*C) {
+    return C->eph();
+  }
+  inline grav::Cset&Coeffs(const GravEstimator::Cell*C) {
+    return C->Coeffs();
+  }
+  inline grav::Mset const&poles(const GravEstimator::Cell*C) {
+    return C->poles();
+  }
+  inline bool hasCoeffs(const GravEstimator::Cell*C) {
+    return C->hasCoeffs();
+  }
+  inline bool is_source(const GravEstimator::Cell*C) { 
+    return mass(C)!=zero;
+  }
+  inline real xmin(const GravEstimator::Cell*C) {
+    return cofm(C).min() - rmax(C);
+  }
+  inline real xmax(const GravEstimator::Cell*C) {
+    return cofm(C).max() + rmax(C);
+  }
+  // ///////////////////////////////////////////////////////////////////////////
   //                                                                          //
   // namespace falcON::grav                                                   //
   //                                                                          //
-  //////////////////////////////////////////////////////////////////////////////
+  // ///////////////////////////////////////////////////////////////////////////
   namespace grav {
     typedef GravEstimator::Cell           cell;
     typedef GravEstimator::Leaf           leaf;

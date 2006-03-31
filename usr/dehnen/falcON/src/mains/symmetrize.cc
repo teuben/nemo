@@ -3,7 +3,7 @@
 //                                                                             |
 // symmetrize.cc                                                               |
 //                                                                             |
-// Copyright (C) 2002-2005 Walter Dehnen                                       |
+// Copyright (C) 2002-2006 Walter Dehnen                                       |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -34,9 +34,10 @@
 // v 1.1   20/05/2005  WD several minor updates                                |
 // v 2.0   14/06/2005  WD new falcON                                           |
 // v 2.1   28/06/2005  WD deBUGged                                             |
+// v 2.1.1 31/03/2006  WD BD_NQUANT -> BodyData::NQUANT                        |
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "2.1"
-#define falcON_VERSION_D "28-jun-2005 Walter Dehnen                          "
+#define falcON_VERSION   "2.1.1"
+#define falcON_VERSION_D "31-mar-2006 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile "symmetrize"
@@ -120,7 +121,7 @@ namespace { using namespace falcON;
       copy_data<COPIES,BIT+1>::c(from,to,copy);
     }
   };
-  template<int COPIES> struct copy_data<COPIES,BD_NQUANT> {
+  template<int COPIES> struct copy_data<COPIES,BodyData::NQUANT> {
     static void c(body const&, body const&, fieldset) {}
   };
 } // namespace {

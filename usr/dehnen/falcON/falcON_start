@@ -5,7 +5,7 @@
 #
 #  set a reasonable $falcON if it's not present
 #
-if ($?FALCON == 0) setenv FALCON $HOME/code/falcON
+if ($?FALCON == 0) setenv FALCON $PWD
 
 source $FALCON/falcON.rc
 
