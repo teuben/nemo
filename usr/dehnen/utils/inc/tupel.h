@@ -5,7 +5,7 @@
 ///                                                                             
 /// \author  Walter Dehnen                                                      
 ///                                                                             
-/// \date    1996-2005                                                          
+/// \date    1996-2006                                                          
 ///                                                                             
 /// \brief   contains the definition of template class falcON::tupel and        
 ///	     all its members.                                                   
@@ -16,10 +16,11 @@
 /// \version may-2005: removed tupel::add_times, ass_times, sub_times           
 /// \version jun-2005: removed pseudo_tupel, const_pseudo_tupel                 
 /// \version jul-2005: added doxygen documentation, added minnorm()             
+/// \version mar-2006: removed reliance on friend namespace injection           
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 1996-2005  Walter Dehnen                                       
+// Copyright (C) 1996-2006  Walter Dehnen                                       
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -464,111 +465,139 @@ namespace WDutils {
       M::v_appl(a,x.a,f);
       return*this;
     }
-    //@}
-    //--------------------------------------------------------------------------
-    /// \name formatted I/O                                                     
-    //@{
-    /// formatted output: space separated; a preceeding std::setw() sets the
-    /// width for the output of \b each element
-    friend std::ostream&operator<<(std::ostream&s, tupel const&x) {
-      M::v_out(s,x.a);
-      return s;
-    }
-    /// formatted input: read element-wise
-    friend std::istream&operator>>(std::istream&s, tupel &x) {
-      M::v_in (s,x.a);
-      return s;
-    }
-    //@}
-    //--------------------------------------------------------------------------
-    /// \name functions taking tupel<> arguments                                
-    //@{                                                                        
-    /// is y[i] == x for all i?
-    friend bool operator==(X const&x,tupel const&y) {
-      return y==x;
-    }
-    /// is y[i] != x for any i?
-    friend bool operator!=(X const&x,tupel const&y) {
-      return y!=x;
-    }
-    /// return maximum element of tupel
-    friend X max(tupel const&x) {
-      return x.max();
-    }
-    /// return maximum |element| of tupel
-    friend X maxnorm(tupel const&x) {
-      return x.maxnorm();
-    }
-    /// return minimum element of tupel
-    friend X min(tupel const&x) {
-      return x.min();
-    }
-    /// return minimum |element| of tupel
-    friend X minnorm(tupel const&x) {
-      return x.minnorm();
-    }
-    /// return norm of tupel: Sum x[i]^2
-    friend X norm(tupel const&x) {
-      return x.norm();
-    }
-    /// return absolute value: sqrt(Sum x[i]^2)
-    friend X abs(tupel const&x) {
-      return x.abs();
-    }
-    /// return Product of elements
-    friend X volume (tupel const&x) {
-      return x.volume();
-    }
-    /// return difference squared: (x-y)^2 := Sum (x[i]-y[i])^2
-    template<typename S> friend X dist_sq(tupel const&x, tupel<N,S> const&y) {
-      return x.dist_sq(y);
-    }
-    /// return distance: (x-y)^2 := Sum (x[i]-y[i])^2
-    template<typename S> friend X dist(tupel const&x, tupel<N,S> const&y) {
-      return x.dist(y);
-    }
-    /// return sum squared: (x-y)^2 := Sum (x[i]+y[i])^2
-    template<typename S> friend X sum_sq(tupel const&x, tupel<N,S> const&y) {
-      return x.sum_sq(y);
-    }
-    /// product with scalar: x[i] = y * v[i]
-    template<typename S> friend tupel operator*(S const&y, tupel const&v) {
-      return v*y;
-    }
     /// is any element nan?
-    friend bool isnan(tupel const&x) {
-      return meta::taux<X,N-1>::v_nan(x.a);
+    bool isnan() const {
+      return M::v_nan(a);
     }
     /// is any element inf?
-    friend bool isinf(tupel const&x) {
-      return meta::taux<X,N-1>::v_inf(x.a);
+    bool isinf() const {
+      return M::v_inf(a);
     }
-    /// update maximum element-wise: x[i] = max(x[i], y[i])
-    friend void update_max(tupel&x, tupel const&y) {
-      return x.up_max(y);
-    }
-    /// update minimum element-wise: x[i] = min(x[i], y[i])
-    friend void update_min(tupel&x, tupel const&y) {
-      return x.up_min(y);
-    }
-    //@}
     //--------------------------------------------------------------------------
   };
-  //////////////////////////////////////////////////////////////////////////////
+  // ///////////////////////////////////////////////////////////////////////////
   /// \relates WDutils::tupel
   /// \name vector cross product in 2D and 3D
   //@{
   /// vector cross product for N=2: returns x[0]*y[1]- x[1]*y[0]
-  template<typename X>
-  inline X operator^ (tupel<2,X> const&x, tupel<2,X> const&y) {
+  template<typename X> inline
+  X operator^ (tupel<2,X> const&x, tupel<2,X> const&y) {
     return x[0]*y[1] - x[1]*y[0];
   }
   /// vector cross product for N=3
-  template<typename X>
-  inline tupel<3,X> operator^ (tupel<3,X> const&x, tupel<3,X> const&y) {
+  template<typename X> inline
+  tupel<3,X> operator^ (tupel<3,X> const&x, tupel<3,X> const&y) {
     return tupel<3,X>(x[1]*y[2] - x[2]*y[1],
 		      x[2]*y[0] - x[0]*y[2],
 		      x[0]*y[1] - x[1]*y[0]);
+  }
+  //@}
+  // ///////////////////////////////////////////////////////////////////////////
+  /// \relates WDutils::tupel
+  /// \name formatted I/O                                                     
+  //@{
+  /// formatted output: space separated; a preceeding std::setw() sets the
+  /// width for the output of \b each element
+  template<int N, typename X> inline
+  std::ostream&operator<<(std::ostream&s, tupel<N,X> const&x) {
+    meta::taux<X,N-1,0>::v_out(s,x);
+    return s;
+  }
+  /// formatted input: read element-wise
+  template<int N, typename X> inline
+  std::istream&operator>>(std::istream&s, tupel<N,X> &x) {
+    meta::taux<X,N-1,0>::v_in(s,x);
+    return s;
+  }
+  //@}
+  // ///////////////////////////////////////////////////////////////////////////
+  /// \relates WDutils::tupel
+  /// \name functions taking tupel<> arguments
+  //@{
+  /// is y[i] == x for all i?
+  template<int N, typename X> inline
+  bool operator==(X const&x,tupel<N,X> const&y) {
+    return y==x;
+  }
+  /// is y[i] != x for any i?
+  template<int N, typename X> inline
+  bool operator!=(X const&x,tupel<N,X> const&y) {
+    return y!=x;
+  }
+  /// return maximum element of tupel
+  template<int N, typename X> inline
+  X max(tupel<N,X> const&x) {
+    return x.max();
+  }
+  /// return maximum |element| of tupel
+  template<int N, typename X> inline
+  X maxnorm(tupel<N,X> const&x) {
+    return x.maxnorm();
+  }
+  /// return minimum element of tupel
+  template<int N, typename X> inline
+  X min(tupel<N,X> const&x) {
+    return x.min();
+  }
+  /// return minimum |element| of tupel
+  template<int N, typename X> inline
+  X minnorm(tupel<N,X> const&x) {
+    return x.minnorm();
+  }
+  /// return norm of tupel: Sum x[i]^2
+  template<int N, typename X> inline
+  X norm(tupel<N,X> const&x) {
+    return x.norm();
+  }
+  /// return absolute value: sqrt(Sum x[i]^2)
+  template<int N, typename X> inline
+  X abs(tupel<N,X> const&x) {
+    return x.abs();
+  }
+  /// return Product of elements
+  template<int N, typename X> inline
+  X volume (tupel<N,X> const&x) {
+    return x.volume();
+  }
+  /// return difference squared: (x-y)^2 := Sum (x[i]-y[i])^2
+  template<int N, typename X, typename S> inline
+  X dist_sq(tupel<N,X> const&x, tupel<N,S> const&y) {
+    return x.dist_sq(y);
+  }
+  /// return distance: (x-y)^2 := Sum (x[i]-y[i])^2
+  template<int N, typename X, typename S> inline
+  X dist(tupel<N,X> const&x, tupel<N,S> const&y) {
+    return x.dist(y);
+  }
+  /// return sum squared: (x-y)^2 := Sum (x[i]+y[i])^2
+  template<int N, typename X, typename S> inline
+  X sum_sq(tupel<N,X> const&x, tupel<N,S> const&y) {
+    return x.sum_sq(y);
+  }
+  /// product with scalar: x[i] = y * v[i]
+  template<int N, typename X, typename S> inline
+  tupel<N,X> operator*(S const&y, tupel<N,X> const&v) {
+    return v*y;
+  }
+  /// is any element nan?
+  template<int N, typename X> inline
+  bool isnan(tupel<N,X> const&x) {
+    return x.isnan();
+  }
+  /// is any element inf?
+  template<int N, typename X> inline
+  bool isinf(tupel<N,X> const&x) {
+    return x.isinf();
+  }
+  /// update maximum element-wise: x[i] = max(x[i], y[i])
+  template<int N, typename X> inline
+  void update_max(tupel<N,X>&x, tupel<N,X> const&y){
+    return x.up_max(y);
+  }
+  /// update minimum element-wise: x[i] = min(x[i], y[i])
+  template<int N, typename X> inline
+  void update_min(tupel<N,X>&x, tupel<N,X> const&y){
+    return x.up_min(y);
   }
   //@}
   // ///////////////////////////////////////////////////////////////////////////
