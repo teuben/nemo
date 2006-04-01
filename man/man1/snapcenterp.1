@@ -1,29 +1,20 @@
-.TH SNAPCENTER 1NEMO "26 February 1997"
+.TH SNAPCENTERP 1NEMO "1 April 2006"
 .SH NAME
-snapcenter - translate snapshot data to coordinates centered on
-subset of bodies
+snapcenterp - find center of a snapshot with potential minimum search
 .SH SYNOPSIS
-\fBsnapcenter in=\fPsnap-file \fBout=\fPsnap-file [parameter=value] .\|.\|.
+\fBsnapcenterp in=\fPsnap-file [parameter=value] .\|.\|.
 .SH DESCRIPTION
-\fIsnapcenter\fP translates the phase-space data in an input snapshot
-file to a coordinate system centered on an arbitrary subset of bodies.
-More precisely, real-valued weights are specified for each body,
-and used to compute a weighted phase-space centroid, which becomes the
-new origin of the coordinate system. 
+\fIsnapcenterp\fP finds the potential center of a snapshot using
+the iterative Cruz method. 
 .PP
-Alternatively a new snapshot with a single particle of total mass and these
-new center-of-mass coordintes can be produced.
+This program is in development, for example, no output file is written.
+See also \fIsnapcenter(1NEMO)\fP and \fIsnapshift(1NEMO)\fP.
 .SH PARAMETERS
 The following parameters are recognized; they may be given in any order.
 .TP 24
 \fBin=\fP\fIsnap-file\fP
 Input data is read from \fIsnap-file\fP, which must be in snapshot format.
 No default.
-.TP
-\fBout=\fP\fIsnap-file\fP
-Output data is written to \fIsnap-file\fP.
-No default.
-.TP
 \fBtimes=\fP\fItime-range\fP
 Only data frames with time values within \fItime-range\fP, which
 is of the form, eg, "1.0:1.5,2.5,3.0", will be translated.
@@ -34,7 +25,7 @@ The value of \fIexpression\fP is used to compute the centroid.
 \fIexpression\fP is a real-valued C language expression over the
 real values \fBx\fP, \fBy\fP, \fBz\fP, \fBvx\fP, \fBvy\fP, \fBvz\fP,
 \fBphi\fP, \fBm\fP, \fBt\fP, and the integer value \fBi\fP.
-[Default \fB1\fP].
+[Default \fBm\fP].
 .TP
 \fPreport=t|f\fP
 Report the center of mass coordinates. These are 2*NDIM numbers,
@@ -44,25 +35,36 @@ If you want to use \fIsnapcenter\fP in a pipe, you need to reset
 \fBreport=f\fP, since both standard output and filestruct output
 will get merged, and become illegable for the next program in the
 pipe.
-[Default: \fBf\fP].
+[Default: \fBt\fP].
 .TP
 \fPone=t|f\fP
 Write output center of mass (COM) as a single body with total mass
-and COM coordinates as computed from \fBweight=\fP.
+and COM coordinates as computed from \fBweight=\fP.**not active**
 [Default: \fBf\fP].
+.TP
+\fBeps=\fP
+Softening length, in length units used in the snapshot. [0.025]
+.TP
+\fBeta=\fP
+Convergence stop criterion. This number is the length of the difference 
+vector of two subsequent iterations of the potential center, and is thus
+in units of those of the snapshot. [0.001]
+.TP
+\fBfn=\fP
+Fraction of particles to consider in the potential finding algorithm [0.5] 
+**currently all particles used**
+.TP
+\fBiter=\fP
+Maximum number of iterations to use. If the \fBeta\fP stop criterion
+did not converge, this criterion will stop the iterations. [10]
 .SH SEE ALSO
-snapcenterp(1NEMO), bodytrans(3NEMO), snapshot(5NEMO)
-.PP
-W.L.Sweatman - (1993) MNRAS 261, 497. 1993MNRAS.261..497S
+snapshift(1NEMO), snapcenter(1NEMO), bodytrans(3NEMO), snapshot(5NEMO)
 .PP
 Cruz., F et al. - (2002) Rev.Mex.de Astr.y Astr. 38, 225
 .SH AUTHOR
-Joshua E. Barnes.
+Peter Teuben
 .SH UPDATE HISTORY
 .ta +1i +4i
 .nf
-3-jul-87	Created ?	Josh
-26-aug-93	1.4 added tab= for displaying center (@Tokyo)	Peter
-29-nov-93	1.4 documented earlier report= (ala tab=) addition	PJT
-26-feb-97	1.6 added one= and changed default of report=	PJT
+1-apr-06	0.1 Created in Rembrandt Hotel		PJT
 .fi
