@@ -126,6 +126,12 @@
 
 #define falcON_PSIFLAG falcON_Pflag falcON_Sflag falcON_Iflag falcON_Mflag
 
+#if  !defined(falcON_PROPER) \
+  && !defined(falcON_SSE) \
+  && !defined(falcON_INDI) \
+  && !defined(falcON_USE_MPI)
+#undef falcON_PSIFLAG
+#endif
 //------------------------------------------------------------------------------
 // include falcON stuff                                                         
 //------------------------------------------------------------------------------
@@ -159,11 +165,16 @@ namespace falcON { namespace compile_info {
 #else
       __origin[0] = 0;
 #endif
+#if defined(falcON_VERSION) || defined(falcON_PSIFLAG)
       snprintf(__version,100,
 #ifdef falcON_VERSION
 	       falcON_VERSION
 #endif
-	       falcON_PSIFLAG);
+#ifdef falcON_PSIFLAG
+	       falcON_PSIFLAG
+#endif
+	       );
+#endif
       snprintf(__time,30,__DATE__ ", " __TIME__);
       __set = 1;
     }

@@ -237,22 +237,22 @@ namespace falcON {
   //                                                                          //
   // ///////////////////////////////////////////////////////////////////////////
   inline flags operator| (flags::single b, flags const&f) {
-    return flags( f.val | b );
+    return flags( f.val | int(b) );
   }
   inline flags operator| (flags::combined b, flags const&f) {
-    return flags( f.val | b );
+    return flags( f.val | int(b) );
   }
   inline flags operator| (flags::single b, flags::single c) {
-    return flags( b | c );
+    return flags( int(b) | int(c) );
   }
   inline flags operator| (flags::combined b, flags::single c) {
-    return flags( b | c );
+    return flags( int(b) | int(c) );
   }
   inline flags operator| (flags::single b, flags::combined c) {
-    return flags( b | c );
+    return flags( int(b) | int(c) );
   }
   inline flags operator| (flags::combined b, flags::combined c) {
-    return flags( b | c );
+    return flags( int(b) | int(c) );
   }
   inline bool is_active (flags const&f) { return f.is_set(flags::active); }
   inline bool to_remove (flags const&f) { return f.is_set(flags::remove); }
@@ -762,7 +762,7 @@ namespace falcON {
   //                                                                          //
   // ///////////////////////////////////////////////////////////////////////////
   inline fieldset operator| (fieldset::bits a, fieldset::bits b) {
-    return fieldset(a|b);
+    return fieldset(int(a)|int(b));
   }
   inline fieldset operator| (fieldset::bits b, fieldset d) { return d | b; }
   inline fieldset operator& (fieldset::bits b, fieldset d) { return d & b; }

@@ -1120,13 +1120,13 @@ namespace falcON {
     fieldset read_snapshot(snap_in  const&Si,
 			   fieldset       Bd,
 			   iterator const&start,
-			   unsigned       Nread= 0,
-			   bool           warn= 1) falcON_THROWING;
+			   unsigned       Nread = 0,
+			   bool           warn  = 1) falcON_THROWING;
     //--------------------------------------------------------------------------
     /// Write a single NEMO snapshot
     ///
     /// We start writing from the body given by the 3rd argument. The snapshot
-    /// output must accomodate the required number of body to write.
+    /// output must accomodate the required number of bodies to write.
     ///
     /// \note this routine is used from snapshot::write_nemo()
     ///
@@ -1523,7 +1523,7 @@ namespace falcON {
     /// \param range  (input, optional) time range in NEMO range format
     ///               (default: read next snapshot in stream)
     /// \param warn   (input, optional) issue falcON::warning()s about missing
-    ///               data? (default: issue warning)
+    ///               data (default: issue warning)
     bool read_nemo(nemo_in const&Is,
 		   fieldset     &Read,
 		   fieldset      Get,
@@ -1544,7 +1544,7 @@ namespace falcON {
     /// \param start (input) first body to be read into
     /// \param Nread (input, optional) read this many (default: all in input)
     /// \param warn  (input, optional) issue falcON::warning()s about missing
-    ///               data? (default: issue warning)
+    ///               data (default: issue warning)
     fieldset read_nemo(snap_in const &Si,
 		       fieldset       Bd,
 		       iterator const&start,
