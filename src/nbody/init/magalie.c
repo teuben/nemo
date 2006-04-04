@@ -45,7 +45,7 @@ string defv[] = {
 
   "seed=0\n       Random seed",
   "cleanup=f\n    cleanup run directory after use (not used yet)",
-  "VERSION=1.2a\n 23-jan-05 PJT",
+  "VERSION=1.2b\n 4-apr-06 PJT",
   NULL,
 };
 
@@ -112,7 +112,7 @@ void nemo_main(void)
   fprintf(datstr,"%g             !! Bulge scale length (hernquist 'a')\n",getdparam("rbulge"));
   fprintf(datstr,"y               ! bulge self-gravity?\n");
   fprintf(datstr,"%d             !! N part in  bulge\n",nbulge);
-  fprintf(datstr,"%g             ! max radius for bulge particles\n",getdparam("cdisk"));
+  fprintf(datstr,"%g             ! max radius for bulge particles\n",getdparam("cbulge"));
   fprintf(datstr,".01             ! softening length for particles\n");
   fprintf(datstr,"%s             *! Non-spherical bulge?\n", getsparamq("qbulge"));
   fprintf(datstr,"%g             *! Value of minor axis ratio ( c/a < 1 )\n",getdparamq("qbulge",1.0));
