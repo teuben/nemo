@@ -15,4 +15,4 @@ nemo_bins: nemo_libs $(BINS)
 
 nemo_libs: utils
 	(cd utils; make)
-
+	cp utils/lib/$(HOS)/lib*.so $(NEMOLIB)
