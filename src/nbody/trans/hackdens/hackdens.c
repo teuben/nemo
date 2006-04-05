@@ -9,6 +9,8 @@
  *	1-apr-01      a  compiler warning
  *     24-may-02  V2.0   fixed for high-N system by using int_hack in load.c
  *     29-may-02  V2.1   add nudge= keyword to nudge overlapping particles
+ *
+ * TODO:  this program seems to assume m_i = 1, so for unequal masses wrong
  */
 
 #include "defs.h"
