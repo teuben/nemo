@@ -15,6 +15,7 @@
  *     23-may-01            c   cleanup code a bit (sleepy in mexico)
  *     12-apr-03        V1.5 add nn= keyword for atlas  PJT
  *     29-dec-04            a   forgotten m2tot=0       PJT
+ *      5-apr-06            c   ndim not set            PJT
  */
 
 #include <stdinc.h>
@@ -38,7 +39,7 @@ string defv[] = {
     "tfactor=-1.0\n               conversion factor v->r [virial=sqrt(2)]",
     "nn=f\n                       add NN index to the Key field?",
     "ndim=3\n                     3dim or 2dim densities?",
-    "VERSION=1.5a\n		  29-dec-04 PJT",
+    "VERSION=1.5c\n		  5-apr-06 PJT",
     NULL,
 };
 
@@ -47,7 +48,7 @@ string usage="density estimator using Kth-nearest neighbor";
 string cvsid="$Id$";
 
 
-#define FAC1   4.188790203	/* 3.pi/4 */
+#define FAC1   4.188790203	/* 4.pi/3 */
 #define FAC2   15.74960994	/* (2.pi)^(3/2) */
 #define FAC3   1.644934067	/* pi^2/6 */
 #define FAC4   3.141592654      /* pi */
@@ -56,7 +57,7 @@ string cvsid="$Id$";
 
 #define MAXK   256
 
-int   iindex[MAXK+1];              /* pointer to nearest neighbours */
+int   iindex[MAXK+1];             /* pointer to nearest neighbours */
 Body  *bindex[MAXK+1];            /* pointer to body */
 real  r[MAXK+1];                  /* radius squared to nearest neighbours */
 
@@ -95,6 +96,7 @@ nemo_main()
     tfactor=getdparam("tfactor");
     if (Qdens && tfactor>0)
         warning("tfactor & Qdens incomplete");
+    ndim = getiparam("ndim");
 
     /* only do one (the first) snapshot */
 
@@ -236,19 +238,24 @@ local void stat_nn(Body *bi)
     for (i=0; i<NDIM; i++) {
         v1[i] = v2[i] = s[i] = 0.0;
     }
-    for (k=0; k<klen; k++) {        /* loop over nearest neighbors */
+    dprintf(2,"NN[%d] list: ",klen);
+    for (k=0; k<klen; k++) {            /* loop over nearest neighbors */
         bp = bindex[k];
+	dprintf(2," %d",iindex[k]);
         if (k<klen-1) dens += Mass(bp); /* eq (II.2) in CH 1985 ApJ 298,80) */
         for (i=0; i<NDIM; i++) {
             v1[i] += Vel(bp)[i];
             v2[i] += Vel(bp)[i] * Vel(bp)[i];
         }
     }
+    dprintf(2," (dens=%g rad=%g)\n",dens,rad);
     rad = sqrt(r[klen-1]);      /* radius of K-th nearest neighbor */
     if (ndim == 3)
       dens /= (rad*rad*rad*FAC1);        /* space density estimate */
     else if (ndim == 2)
       dens /= (rad*rad*FAC4);            /* surface density estimate */
+    else
+      error("ndim=%d must be 2 or 3",ndim);
     if (klen!=kmax) {       /* should never occur */
         error ("DENSITY  %f %f %f %f klen=%d\n",rad,dens,0.0,0.0,klen);
         return;
