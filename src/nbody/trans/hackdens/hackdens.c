@@ -1,6 +1,7 @@
 /*
  * HACKDENS.C: hackcode local density calculation tool.
  *
+ *          1988  V1.0   originally written        Jun Makino
  *	7-jul-89  V1.1   updated with get_history()	PJT
  *     23-oct-90  V1.2   helpvec			PJT
  *     18-jul-92  V1.3   replaced many if(debug)printf(...) by dprintf(1,...)
@@ -29,7 +30,7 @@ string defv[] = {
     "nudge=0\n                    nudge overlapping particles with this dispersion",
     "verbose=f\n		  flag to print # of particles finished ",
     "density=t\n                  write density, or distance of Kth particle",
-    "VERSION=2.2\n		  12-may-04 PJT",
+    "VERSION=2.2a\n		  12-may-04 PJT",
     NULL,
 };
 
