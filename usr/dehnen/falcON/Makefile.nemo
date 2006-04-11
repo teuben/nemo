@@ -16,3 +16,6 @@ nemo_bins: nemo_libs $(BINS)
 nemo_libs: utils
 	(cd utils; make)
 	cp utils/lib/$(HOS)/lib*.so $(NEMOLIB)
+
+nemo_test:
+	mkplummer - 100 | gyrfalcON - . tstop=0.1
