@@ -9,14 +9,17 @@
 #   nov-2004            be more generous if full filenames are used: chop them off
 #   dec-2004            look for mknemo.d scripts first
 #   dec-2005            -u also looks a NEMO/local/pgplot etc.
+#   mar-2006            give help, even if locked
 #
 
 #  todo:    bug not doing cvs update when new mknemo detected ?
 #           safeguard if disk is full
 #
-set version="MKNEMO Version 3.3 5-dec-2005"
+set version="MKNEMO Version 3.4 14-mar-2006"
 if ($#argv == 0) goto usage
 set old_argv=($*)
+
+if (X$1 == X-h) goto usage
 
 onintr error
 
