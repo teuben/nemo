@@ -1,6 +1,7 @@
 #! /bin/csh -f
 #   make a shared object for the dynamic object loader
 #   should work on most system - on some systems (old sun3/4) it's a no-op
+#   See also:  http://fortran-2000.com/ArnaudRecipes/sharedlib.html
 #
 #   13-dec-95   created for dec alpha, and quickly got the SGI working too
 #   29-jun-96   fixed SGI since we sort of use one NEMOHOST now
