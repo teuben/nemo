@@ -43,7 +43,7 @@
 rm -f install.log >& /dev/null
 touch install.log
 
-set nexec=120            
+set nexec=132
 
 set stat = 0
 echo \(Sending output to install.log\)
@@ -126,6 +126,7 @@ endif
 src/scripts/testsuite -b >>& install.log
 
 if (1) then
+  echo Compiling falcON and its tools
   ( cd usr/dehnen/falcON; make clean nemo_bins)  >& install_falcON.log
 endif
 
@@ -150,6 +151,7 @@ if ($n1 > 0) then
   grep TESTSUITE: install.log | grep -v OK 
 endif
 
-# kludged sh support for manybody
-ln -s nemo_start nemo_start.csh
+# kludged sh support 
+
+if (! -e nemo_start.csh) ln -s nemo_start nemo_start.csh
 src/scripts/mk_nemo_start.sh >  nemo_start.sh
