@@ -6,6 +6,7 @@ MacOSX problems: (a special macosx.html web page dedicated to this)
 
   - src/nbody/evolve/aarseth/nbody0/Makefile
 	need to activate F77LIBS to include -lcc_dynamic
+        but sometimes you to take it out again......
 
   - directcode doesn't compile since it was derived from an earlier
     release of hackcode1 with the multiple externs included by the
@@ -18,6 +19,16 @@ MacOSX problems: (a special macosx.html web page dedicated to this)
 
   - one case had gcc in /usr/bin but g77 in /usr/local/bin, and not in
     the path -> pgplot didn't get build.
+
+  - the sitation with compilers can be painful. Always make sure you
+    have the correct Xcode installed, and then choose:
+
+	- /usr/local/bin      from hpc.sourceforge.com
+	- /sw/bin             fink
+	- /opt/local/bin      darwinports
+
+    For most of them you will either need to set your $PATH correctly and/or
+    setenv CC, CXX and F77 to the full path of the compilers.
 
 GCC4 problems: (as tested on FC3/FC4)
   - pgplot: grfont.dat cannot be built, some runtime problem with fortran
