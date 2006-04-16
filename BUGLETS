@@ -159,7 +159,12 @@ potlist: rld: Fatal Error: attempted access to unresolvable symbol in
      in addition, tools like mknemo won't copy the executable to $NEMOBIN/ since
      it doesn't know about the .exe  extension thatg cygwin is using
 
-- x86_64:  our configure doesn't seem to recognize /usr/X11R6/lib64 should be used
+- x86_64:  our configure doesn't always seem to recognize /usr/X11R6/lib64 should be used
   instead of /usr/X11R6/lib ....
+  Examples: gaia fails, diary ok:
 
 - cfitsio: currently broken, seems to write huge files in e.g. ccdfits
+
+- magalie: hangs on gcc 4.1.0 ?? but this is the same gcc 4.1.0 in which
+	falcON mishbehaves, while on the laptop it's both ok.
+- gmake:  not working on FC5 ?
