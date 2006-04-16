@@ -18,7 +18,7 @@ Ldummyf = $(NEMOLIB)/libio_nemo_f.a
 LIBNEMO = -lnemo
 #--------------------------------------------------------
 # compilers options
-FC     = g77
+# FC     = g77		# we inherit this from makedefs
 FFLAGS = -O -fno-second-underscore -Wno-globals
 OPT    = -Wall -g
 #--------------------------------------------------------
