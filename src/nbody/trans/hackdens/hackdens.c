@@ -9,9 +9,12 @@
  *	1-apr-01      a  compiler warning
  *     24-may-02  V2.0   fixed for high-N system by using int_hack in load.c
  *     29-may-02  V2.1   add nudge= keyword to nudge overlapping particles
+ *     25-apr-06  V2.2b  use global to isolate extern's (for Mac linking)
  *
  * TODO:  this program seems to assume m_i = 1, so for unequal masses wrong
  */
+
+#define global
 
 #include "defs.h"
 #include <getparam.h>
@@ -32,7 +35,7 @@ string defv[] = {
     "nudge=0\n                    nudge overlapping particles with this dispersion",
     "verbose=f\n		  flag to print # of particles finished ",
     "density=t\n                  write density, or distance of Kth particle",
-    "VERSION=2.2a\n		  12-may-04 PJT",
+    "VERSION=2.2b\n		  25-apr-06 PJT",
     NULL,
 };
 

@@ -7,6 +7,14 @@
 #include <assert.h>
 
 /*
+ * GLOBAL: pseudo-keyword for storage class.
+ */
+
+#if !defined(global)
+#  define global extern
+#endif
+
+/*
  * BODY and CELL data structures are used to represent the tree:
  *
  *         +-----------------------------------------------+
@@ -109,14 +117,15 @@ typedef int int_hack;
  * ROOT: origin of tree; declared as nodeptr for tree with only 1 body.
  */
 
-nodeptr troot;
+
+global nodeptr troot;
 
 /*
  * Integerized coordinates: used to mantain body-tree.
  */
 
-vector rmin;			/* lower-left corner of coord. box */
-real rsize;			/* side-length of int. coord. box */
+global vector rmin;			/* lower-left corner of coord. box */
+global real rsize;			/* side-length of int. coord. box */
 
 #define IMAX (1 << (8 * sizeof(int) - 2))       /* highest bit */
 
@@ -124,13 +133,13 @@ real rsize;			/* side-length of int. coord. box */
  * Parameters and results for gravitational calculation.
  */
 
-real fcells;			/* ratio of cells/bodies allocated */
+global real fcells;			/* ratio of cells/bodies allocated */
 
-real tol;                       /* accuracy parameter: 0.0 => exact */
-real eps;                       /* potential softening parameter */
+global real tol;                       /* accuracy parameter: 0.0 => exact */
+global real eps;                       /* potential softening parameter */
 
-int n2bterm;                    /* number 2-body of terms evaluated */
-int nbcterm;			/* num of body-cell terms evaluated */
+global int n2bterm;                    /* number 2-body of terms evaluated */
+global int nbcterm;			/* num of body-cell terms evaluated */
 
-bool debug;                     /* control debugging messages */
-bool Qdensity;                  /* output density or kth neighbor distance */
+global bool debug;                     /* control debugging messages */
+global bool Qdensity;                  /* output density or kth neighbor distance */
