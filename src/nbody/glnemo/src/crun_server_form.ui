@@ -1,4 +1,4 @@
-<!DOCTYPE UI><UI version="3.1" stdsetdef="1">
+<!DOCTYPE UI><UI version="3.3" stdsetdef="1">
 <class>CListRunningServerForm</class>
 <widget class="QDialog">
     <property name="name">
@@ -190,6 +190,7 @@
     </connection>
 </connections>
 <includes>
+    <include location="local" impldecl="in declaration">hosts_list.h</include>
     <include location="local" impldecl="in implementation">crun_server_form.ui.h</include>
 </includes>
 <variables>

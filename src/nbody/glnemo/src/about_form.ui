@@ -1,4 +1,4 @@
-<!DOCTYPE UI><UI version="3.1" stdsetdef="1">
+<!DOCTYPE UI><UI version="3.3" stdsetdef="1">
 <class>AboutForm</class>
 <widget class="QDialog">
     <property name="name">
@@ -115,7 +115,7 @@
                             <cursor>13</cursor>
                         </property>
                         <property name="text">
-                            <string>Copyright © Jean-Charles LAMBERT 2004-2005&lt;br&gt;
+                            <string>Copyright © Jean-Charles LAMBERT 2004-2006&lt;br&gt;
                               &lt;br&gt;
                        &lt;a href="mailto:Jean-Charles.Lambert@oamp.fr"&gt;Jean-Charles.Lambert@oamp.fr&lt;/a&gt;&lt;br&gt;
 &lt;br&gt;
@@ -714,7 +714,7 @@ Version 2.0 dated 2005-05-21.
                         </font>
                     </property>
                     <property name="text">
-                        <string>Glnemo version 0.87</string>
+                        <string>Glnemo version 0.90</string>
                     </property>
                 </widget>
                 <spacer>

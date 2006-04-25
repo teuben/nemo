@@ -20,7 +20,7 @@
 #include "gl_object.h"
 #include <vector>
 #include "virtual_particles_select.h"
-
+#include "frustumculling.h"
 class GLParticlesObject;
 
 class GLParticlesObject : public GLObject {
@@ -36,7 +36,8 @@ class GLParticlesObject : public GLObject {
   ~GLParticlesObject();
   // method
   void displayPolygons(const double * mModel,GLuint texture,float u_max, float v_max);
-  void displaySprites(GLuint texture);                              
+  void displaySprites(GLuint texture);
+  void rebuildDisplayList();                              
   void setTextureSize(const float ts) {  texture_size=ts;};
   void setTextureAlphaColor(const int alpha) {  texture_alpha_color=alpha; };
   float coo_max[3];
@@ -53,6 +54,7 @@ class GLParticlesObject : public GLObject {
                          VirtualParticlesSelect *);
 
   void computeCooMax();
+  FrustumCulling frustum;
 };
 #endif
 // ============================================================================

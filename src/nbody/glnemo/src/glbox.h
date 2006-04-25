@@ -27,6 +27,8 @@ class GLHudObject;
 
 #include "gl_hud_object.h"
 #include "global_options.h"
+#include "animation_engine.h"
+#include "gloctree.h"
 
 class GLBox : public QGLWidget
 {
@@ -35,6 +37,7 @@ class GLBox : public QGLWidget
     public:
 
   GLBox( QWidget* parent, const char* name,GlobalOptions * _options,
+        AnimationEngine * ,
         const QGLWidget* shareWidget=0);
   ~GLBox();
   float getXtrans() { return xTrans;};
@@ -100,14 +103,20 @@ class GLBox : public QGLWidget
   // Hud
   void toggleHUD()   { hud->toggleActivate();   updateGL();};
   void setHudActivate();
+  void setHudActivateNoGL();
   void changeColorHUD(const QColor color);
   // divers
   void togglePoly()  { show_poly =! show_poly;  updateGL();};
-  void setParticlesSize(int);
+  void setParticlesSize(int,const  bool ugl=true);
   void bestFit();
   // textures
-  void setTextureSize(const float );
-  void changeTextureAlphaColor(const int alpha);
+  void setTextureSize(const float, bool ugl=true );
+  void changeTextureAlphaColor(const int alpha, const bool ugl=true);
+  // tree
+  void treeUpdate();
+  private slots:
+  void updateOptions(GlobalOptions * , const bool);  
+  void takeScreenshot(QImage &);
   
   public:
   
@@ -155,11 +164,15 @@ class GLBox : public QGLWidget
   
   static int  width,height; // frame size
 
+  // GLOctree
+  GLOctree * tree;
   //
   GLfloat ratio;
   
   // store options
   GlobalOptions * store_options;
+  // Animation stuff
+  AnimationEngine * anim_engine;
   // zoom/rotation/translation
   float zoom, zoo_power;
   GLfloat xRot, yRot, zRot, scale;

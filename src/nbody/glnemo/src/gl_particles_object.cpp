@@ -47,6 +47,7 @@ GLParticlesObject::GLParticlesObject(const int * _nbody, const float * _pos,
   nbody = _nbody;
   texture_size = 0.52;               // default texture size
   texture_alpha_color=255;
+  particles_alpha = 255;
   dplist_index = glGenLists( 1 );    // get a new display list index
   PRINT_D perror("on display list");
   PRINT_D cerr << "gl get error= [" << glGetError() << "]\n";
@@ -55,6 +56,7 @@ GLParticlesObject::GLParticlesObject(const int * _nbody, const float * _pos,
   setColor(vps->col);                // set the color
   is_activated=vps->is_visible;      // Object is visible?
   computeCooMax();                   // compute extrem coordinates
+  
 #if GL_EXT_ENABLE 
   // sprites stuff
   glPointParameterfARB  = (PFNGLPOINTPARAMETERFEXTPROC) glXGetProcAddressARB((const GLubyte *) "glPointParameterfARB");
@@ -90,12 +92,20 @@ int GLParticlesObject::updateObject(const int * _nbody, const float * _pos,
   pos   = _pos;
   vps   = _vps;
   nbody = _nbody;
-
+  
   buildDisplayList(nbody, pos, vps); // build display list
   setColor(vps->col);                // set the color
   is_activated=vps->is_visible;      // Object is visible?
   computeCooMax();                   // compute extrem coordinates
   return 1;
+}
+
+// ============================================================================
+// GLParticlesObject::buildDisplayList()                                       
+// build particles object display list                                         
+void GLParticlesObject::rebuildDisplayList()
+{
+  buildDisplayList(nbody, pos, vps);
 }
 // ============================================================================
 // GLParticlesObject::buildDisplayList()                                       
@@ -110,9 +120,11 @@ void GLParticlesObject::buildDisplayList(const int            * nbody,
   glBegin(GL_POINTS);
   
   // draw all the selected points 
-  for (int i=0; i< _vps->npart; i+=vps->step_part) {
-    int index=_vps->getIndex(i);
-    float 
+  //for (int i=0; i< _vps->npart; i+=vps->step_part) {
+  //  int index=_vps->getIndex(i);
+    for (int i=0; i < _vps->ni_index; i++) {
+      int index=_vps->index_tab[i];    
+      float 
       x=pos[index*3  ],
       y=pos[index*3+1],
       z=pos[index*3+2];
@@ -212,6 +224,7 @@ void GLParticlesObject::displayPolygons(const double * mModel,GLuint texture,flo
 
   glEnable( GL_TEXTURE_2D );
   glDisable(GL_DEPTH_TEST);
+  //glEnable(GL_DEPTH_TEST);	
   setColor(vps->col);    // set the color
   glColor4ub(mycolor.red(), mycolor.green(), mycolor.blue(),texture_alpha_color);
   
@@ -221,12 +234,17 @@ void GLParticlesObject::displayPolygons(const double * mModel,GLuint texture,flo
                    };
   int modulo;
   float rot=0.0;
+  // Get Frustum
+  //frustum.getFC();
+  int visible=0;
   // draw all the selected points           
   // method to shuffle triangles orientation
   // rotate uv map and rotate triangles     
-  for (int i=0; i < vps->npart; i+=vps->step_part) {
-    int index=vps->getIndex(i);
-    float 
+  //for (int i=0; i < vps->npart; i+=vps->step_part) {
+  //  int index=vps->getIndex(i);
+  for (int i=0; i < vps->ni_index; i++) {
+      int index=vps->index_tab[i]; 
+      float 
       x=pos[index*3  ],
       y=pos[index*3+1],
       z=pos[index*3+2];
@@ -236,51 +254,58 @@ void GLParticlesObject::displayPolygons(const double * mModel,GLuint texture,flo
     float mx = MM(0,0)*x + MM(0,1)*y + MM(0,2)*z + MM(0,3);//*w;
     float my = MM(1,0)*x + MM(1,1)*y + MM(1,2)*z + MM(1,3);//*w;
     float mz=  MM(2,0)*x + MM(2,1)*y + MM(2,2)*z + MM(2,3);//*w;
-    
-    glPushMatrix();
-    glTranslatef(mx,my,mz);         // move to the transform particles
-    glRotatef(rot++,0.0,0.0,1.0);   // rotate triangles around z axis
-    glBegin(GL_TRIANGLES);
-     modulo = i%4;
-    // 1st triangle
-    glTexCoord2f(uv[modulo][0],   uv[modulo][1]);
-    modulo = (modulo+1)%4;
-    glVertex3f(-texture_size , texture_size  ,0. );
-    glTexCoord2f(uv[modulo][0],   uv[modulo][1]);
-    modulo = (modulo+1)%4;
-    glVertex3f(-texture_size , -texture_size  ,0. );
-    glTexCoord2f(uv[modulo][0],   uv[modulo][1]);
-    glVertex3f(texture_size , -texture_size  ,0. );
-    // second triangle
-    modulo = (modulo+2)%4;
-    glTexCoord2f(uv[modulo][0],  uv[modulo][1]);
-    glVertex3f(-texture_size , texture_size  ,0. );
-    modulo = (modulo+2)%4;
-    glTexCoord2f(uv[modulo][0],  uv[modulo][1]);
-    glVertex3f(+texture_size , -texture_size  ,0. );
-    modulo = (modulo+1)%4;
-    glTexCoord2f(uv[modulo][0],  uv[modulo][1]);
-    glVertex3f(texture_size , texture_size  ,0. );     
-    glEnd();
-    glPopMatrix();    
+    modulo = i%4;
+    rot++;
+    if (1) { // frustum.isPointInside(mx,my,mz)) {
+	visible++;
+	glPushMatrix();
+	glTranslatef(mx,my,mz);         // move to the transform particles
+	glRotatef(rot,0.0,0.0,1.0);   // rotate triangles around z axis
+	glBegin(GL_TRIANGLES);
+	
+	// 1st triangle
+	glTexCoord2f(uv[modulo][0],   uv[modulo][1]);
+	modulo = (modulo+1)%4;
+	glVertex3f(-texture_size , texture_size  ,0. );
+	glTexCoord2f(uv[modulo][0],   uv[modulo][1]);
+	modulo = (modulo+1)%4;
+	glVertex3f(-texture_size , -texture_size  ,0. );
+	glTexCoord2f(uv[modulo][0],   uv[modulo][1]);
+	glVertex3f(texture_size , -texture_size  ,0. );
+	// second triangle
+	modulo = (modulo+2)%4;
+	glTexCoord2f(uv[modulo][0],  uv[modulo][1]);
+	glVertex3f(-texture_size , texture_size  ,0. );
+	modulo = (modulo+2)%4;
+	glTexCoord2f(uv[modulo][0],  uv[modulo][1]);
+	glVertex3f(+texture_size , -texture_size  ,0. );
+	modulo = (modulo+1)%4;
+	glTexCoord2f(uv[modulo][0],  uv[modulo][1]);
+	glVertex3f(texture_size , texture_size  ,0. );     
+	glEnd();
+	glPopMatrix();    
+    }
   }
    
   glDisable( GL_TEXTURE_2D );
+  //std::cerr << "visible = " << visible << "\n";
 }
 // ============================================================================
 // GLParticlesObject::computeCooMax()                                          
 //  compute extremum coordinates                                               
 void GLParticlesObject::computeCooMax()
 {
-  coo_max[0]= fabs(pos[vps->getIndex(0)]);
+  coo_max[0]= fabs(pos[vps->index_tab[0]]);
   i_max[0]  = 0;
-  coo_max[1]= fabs(pos[vps->getIndex(0)]);
+  coo_max[1]= fabs(pos[vps->index_tab[0]]);
   i_max[1]  = 0;
-  coo_max[2]= fabs(pos[vps->getIndex(0)]);
+  coo_max[2]= fabs(pos[vps->index_tab[0]]);
   i_max[2]  = 0;
   
-  for (int i=0; i < vps->npart; i+=vps->step_part) {
-    int index=vps->getIndex(i);
+  //for (int i=0; i < vps->npart; i+=vps->step_part) {
+  //  int index=vps->getIndex(i);
+  for (int i=0; i < vps->ni_index; i++) {
+    int index=vps->index_tab[i];
     if (fabs(pos[index*3  ]) > coo_max[0]) {
       coo_max[0] = fabs(pos[index*3  ]);
       i_max[0]   = index;

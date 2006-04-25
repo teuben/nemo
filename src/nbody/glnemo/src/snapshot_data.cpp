@@ -169,7 +169,8 @@ int SnapshotData::loadPos(ParticlesSelectVector * psv)
       // a running Thread MUST not emit data to the GLBox     
       // because it's not possible to share the OpenGl Display
       // it crashs the aplication                             
-      emit loadedData(nbody,pos,psv);
+      //emit newTime(*timu);             // send to animation   
+      emit loadedData(nbody,pos,psv);  // send to glbox       
       is_new_data_loaded = FALSE;
     }    
   } else {
@@ -183,7 +184,8 @@ int SnapshotData::loadPos(ParticlesSelectVector * psv)
 void SnapshotData::uploadGlData(ParticlesSelectVector * psv)
 {
   if (is_new_data_loaded) {
-    emit loadedData(nbody,pos,psv);
+    //emit newTime(*timu);               // send to animation   
+    emit loadedData(nbody,pos,psv);    // send to glbox       
     is_new_data_loaded = FALSE;
   }
 }

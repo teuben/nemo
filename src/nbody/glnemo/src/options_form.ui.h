@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004-2005                                       
+// Copyright Jean-Charles LAMBERT - 2004-2006                                       
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique de galaxies                                             
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -36,6 +36,7 @@ void OptionsForm::uploadOptions()
     store_options->psize=1.+(psize->value()*(store_options->MAX_PARTICLES_SIZE-1)/psize->maxValue());    
     store_options->blending=blending->isChecked();
     store_options->dbuffer=dbuffer->isChecked();
+    store_options->particles_alpha=alpha_slider->value();
     store_options->perspective=perspective->isChecked();
     store_options->orthographic=!perspective->isChecked();
     // from Grids TAB
@@ -57,7 +58,12 @@ void OptionsForm::uploadOptions()
     store_options->hud_projection=hud_projection->isChecked();
     // from experimental TAB
     store_options->show_poly=show_poly->isChecked();     
+    //    Octree
+    store_options->octree_enable=enable_tree->isChecked();
+    store_options->octree_display=display_tree->isChecked();
+    store_options->octree_level=level_tree->value();
     // launch signal to glbox
+    emit updateAlphaSignal(store_options->particles_alpha);
     emit updateGL();
 }
 
@@ -77,6 +83,7 @@ void OptionsForm::downloadOptions(GlobalOptions * options)
       (store_options->MAX_PARTICLES_SIZE-1)));
     blending->setChecked(store_options->blending);
     dbuffer->setChecked(store_options->dbuffer);
+    alpha_slider->setValue(store_options->particles_alpha);
     perspective->setChecked(store_options->perspective);
     orthographic->setChecked(store_options->orthographic);
     // from Scene Orientation TAB
@@ -95,9 +102,9 @@ void OptionsForm::downloadOptions(GlobalOptions * options)
     xy_grid->setChecked(store_options->xy_grid);
     yz_grid->setChecked(store_options->yz_grid);
     xz_grid->setChecked(store_options->xz_grid);
-    grid_xy_button->setPaletteBackgroundColor(store_options->col_x_grid);
-    grid_yz_button->setPaletteBackgroundColor(store_options->col_y_grid); 
-    grid_xz_button->setPaletteBackgroundColor(store_options->col_z_grid);
+    grid_xy_button->setPalette(QPalette(store_options->col_x_grid));
+    grid_yz_button->setPalette(QPalette(store_options->col_y_grid)); 
+    grid_xz_button->setPalette(QPalette(store_options->col_z_grid));
     // from HUD TAB
     hud->setChecked(store_options->hud);
     hud_title->setChecked(store_options->hud_title);
@@ -108,12 +115,16 @@ void OptionsForm::downloadOptions(GlobalOptions * options)
     hud_data_type->setChecked(store_options->hud_data_type);
     hud_nbody->setChecked(store_options->hud_nbody);
     hud_projection->setChecked(store_options->hud_projection);
-    bg_col_button->setPaletteBackgroundColor(store_options->background_color); 
-    text_col_button->setPaletteBackgroundColor(store_options->hud_color); 	
+    bg_col_button->setPalette(QPalette(store_options->background_color)); 
+    text_col_button->setPalette(QPalette(store_options->hud_color)); 	
     // from experimental TAB
     show_poly->setChecked(store_options->show_poly);     
     texture_size->setValue((int) (texture_size->maxValue()*(store_options->texture_size)/ (store_options->MAX_TEXTURE_SIZE)));    
     texture_alpha_color->setValue(store_options->texture_alpha_color);
+    //      Octree
+    enable_tree->setChecked(store_options->octree_enable);
+    display_tree->setChecked(store_options->octree_display);
+    level_tree->setValue(store_options->octree_level);
     first = false; 
 }
 
@@ -206,7 +217,7 @@ void OptionsForm::changeTransformations()
 void OptionsForm::setColorGridXY()
 {
   const QColor color=setColor(&(grid_xy_button->paletteBackgroundColor()));
-  grid_xy_button->setPaletteBackgroundColor(color); 
+  grid_xy_button->setPalette(QPalette(color));
   store_options->col_x_grid=color;
   emit changeColorGridXY(color);
 }
@@ -216,7 +227,7 @@ void OptionsForm::setColorGridXY()
 void OptionsForm::setColorGridYZ()
 {
   const QColor color=setColor(&(grid_yz_button->paletteBackgroundColor()));
-  grid_yz_button->setPaletteBackgroundColor(color); 
+  grid_yz_button->setPalette(QPalette(color));
   store_options->col_y_grid=color;
   emit changeColorGridYZ(color);  
 }
@@ -226,7 +237,7 @@ void OptionsForm::setColorGridYZ()
 void OptionsForm::setColorGridXZ()
 {
   const QColor color=setColor(&(grid_xz_button->paletteBackgroundColor()));
-  grid_xz_button->setPaletteBackgroundColor(color);
+  grid_xz_button->setPalette(QPalette(color));
   store_options->col_z_grid=color;
   emit changeColorGridXZ(color); 
 }
@@ -235,7 +246,7 @@ void OptionsForm::setColorGridXZ()
 void OptionsForm::setColorBackground()
 {
   const QColor color=setColor(&(bg_col_button->paletteBackgroundColor()));
-  bg_col_button->setPaletteBackgroundColor(color);
+  bg_col_button->setPalette(QPalette(color));
   store_options->background_color=color;
   emit changeColorBackground();     
 }
@@ -244,7 +255,7 @@ void OptionsForm::setColorBackground()
 void OptionsForm::setColorHUD()
 {
   const QColor color=setColor(&(text_col_button->paletteBackgroundColor()));
-  text_col_button->setPaletteBackgroundColor(color);
+  text_col_button->setPalette(QPalette(color));
   store_options->hud_color=color;
   emit changeColorHUD(color);     
 }
@@ -340,4 +351,15 @@ void OptionsForm::toggleHud( bool)
     uploadOptions();
     // emit signal to glbox
     emit setHudActivate();
+}
+
+//============================================================================
+void OptionsForm::setupOctreeSlot()
+{
+    if (first) return; // do not enter while not downloaded yet
+    // get octree info
+    store_options->octree_enable=enable_tree->isChecked();
+    store_options->octree_display=display_tree->isChecked();
+    store_options->octree_level=level_tree->value();
+    emit sigUpdateTree();
 }

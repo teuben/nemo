@@ -23,6 +23,7 @@ public:
     // from OpenGL TAB
     bool show_part;
     float psize;
+    int particles_alpha;
     bool blending;
     bool dbuffer;
     bool perspective;
@@ -46,11 +47,17 @@ public:
     bool show_poly;
     float texture_size;
     int texture_alpha_color;
+    bool octree_enable;
+    bool octree_display;
+    int octree_level;
     // network;
     int port;
     // const
     float MAX_PARTICLES_SIZE;
     float MAX_TEXTURE_SIZE;
+    
+    // method
+    void copyTransform(const GlobalOptions &m);
 };
 #endif
 // ============================================================================

@@ -33,9 +33,10 @@ using namespace std;
 // NetworkData constructor                                                     
 // Connect a socket to a server                                                
 // create a message buffer for communication                                   
-NetworkData::NetworkData(const char * hostname)
+NetworkData::NetworkData(const char * hostname,const int _port)
 {
-  int port = 4444; // the communication port  
+  int port = _port; // the communication port  
+  
   // get a new client instance
   client = new SocketClient(hostname,SOCK_STREAM,port);
   // connect to the server

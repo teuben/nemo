@@ -33,6 +33,8 @@ VirtualParticlesSelect::VirtualParticlesSelect()
   step_part   = -1;
   is_visible  = TRUE;
   v_type      = 0;
+  index_tab   = NULL;
+  ni_index    = 0;
 }
 // ============================================================================
 // Copy Constructor                                                            
@@ -46,6 +48,9 @@ VirtualParticlesSelect::VirtualParticlesSelect(const VirtualParticlesSelect&m) {
   v_type           = m.v_type;
   list_file        = m.list_file;
   index_list       = m.index_list;
+  ni_index         = m.ni_index;
+  index_tab        = new int[ni_index];
+  memcpy(index_tab,m.index_tab,sizeof(int)*ni_index);
 };
 // ============================================================================
 // Copy Constructor                                                            
@@ -59,7 +64,9 @@ const VirtualParticlesSelect::VirtualParticlesSelect& VirtualParticlesSelect::op
   v_type           = m.v_type;
   list_file        = m.list_file;
   index_list       = m.index_list;
-  
+  ni_index         = m.ni_index;
+  index_tab        = new int[ni_index];
+  memcpy(index_tab,m.index_tab,sizeof(int)*ni_index);  
   return *this;
 };
 // ============================================================================
@@ -83,6 +90,15 @@ void VirtualParticlesSelect::setColor()
   col = QColor(modulo_col[(nb_select-1)%5][0],
                modulo_col[(nb_select-1)%5][1],
                modulo_col[(nb_select-1)%5][2]);
+}
+// ============================================================================
+// VirtualParticlesSelect::defaultIndexTab()                                   
+// fill index_tab with default value.                                          
+int VirtualParticlesSelect::defaultIndexTab()
+{
+  std::cerr << "[VirtualParticlesSelect::defaultIndexTab()], Should not be here "
+            << "\naborted....\n";
+  std::exit(1); 
 }
 // ============================================================================
 // VirtualParticlesSelect::getIndex()                                          
@@ -225,5 +241,20 @@ int VirtualParticlesSelect::npartSelected(ParticlesSelectVector * psv,int v_type
     }
   }
   return npart;
+}
+// ============================================================================
+// VirtualParticlesSelect::resetIndexTab()                                     
+// reset ni_index value                                                        
+inline int VirtualParticlesSelect::resetIndexTab()
+{
+  ni_index = 0;
+}
+// ============================================================================
+// VirtualParticlesSelect::addIndexTab()                                       
+// add a particle in the index_tab array                                       
+inline int VirtualParticlesSelect::addIndexTab(int index)
+{
+  index_tab[ni_index++] = index;
+  assert(ni_index<=npart);
 }
 // ============================================================================

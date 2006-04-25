@@ -34,12 +34,32 @@
 ParticlesRange::ParticlesRange():VirtualParticlesSelect()
 {
   v_type = 1; // record VirtualParticlesSetect type
+  index_tab = NULL;
+  ni_index  = 0;
 }
 // ============================================================================
 // destructor                                                                  
 ParticlesRange::~ParticlesRange()
 {
   //nb_select--;
+  if (index_tab) {
+    delete [] index_tab;
+  }
+}
+
+// ============================================================================
+// ParticlesRange::defaultIndexTab()                                           
+// fill the index tab array with the default number of particles               
+inline int ParticlesRange::defaultIndexTab()
+{
+  if (index_tab) {
+    delete [] index_tab;
+  }
+  index_tab = new int[npart];
+  ni_index = 0;
+  for (int i=0; i<npart; i+=step_part) {
+    index_tab[ni_index++] = first_part+i;
+  }
 }
 // ============================================================================
 // ParticlesRange::getIndex()                                                  
@@ -77,12 +97,12 @@ int ParticlesRange::parseSelectedString(char * select_string, const int nbody,
     }
     PRINT_D std::cerr << "NBODY out = " << nbody_out 
                  << " and nbody =" << nbody <<"\n";
-    npart = nbody_out;
-    delete [] int_array;  // useless anymore
+    npart = nbody_out;   
   }
   else {  // select all the particles
     npart=nbody;
   }
+  delete [] int_array;  // useless anymore
   PRINT_D std::cerr << "In parseSemicolon2 npart =["<< npart << "]\n";
   // rescale particle range
   //if (nb_select == 1 ) { // first object
@@ -95,6 +115,9 @@ int ParticlesRange::parseSelectedString(char * select_string, const int nbody,
     last_part  = first_part + npart - 1;
   }
   step_part = 1;   
+  // allocate memory for index_tree
+
+  defaultIndexTab();
   return npart;
 }
 // ============================================================================

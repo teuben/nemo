@@ -9,7 +9,6 @@
 // ============================================================================
 // See the complete license in LICENSE and/or "http://www.cecill.info".        
 // ============================================================================
-#include "hosts_list.h"
 
 void HostnameSelectForm ::init()
 {

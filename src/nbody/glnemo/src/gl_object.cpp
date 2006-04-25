@@ -27,6 +27,7 @@ GLObject::GLObject()
 {
   is_activated=TRUE;
   this->setColor(yellow);
+  particles_alpha=255;
 }
 // ============================================================================
 // Destructor                                                                  
@@ -39,9 +40,16 @@ GLObject::~GLObject()
 void GLObject::display()
 {
   if (is_activated) {
-    glColor4ub(mycolor.red(), mycolor.green(), mycolor.blue(),255);
+    glColor4ub(mycolor.red(), mycolor.green(), mycolor.blue(),particles_alpha);
     glCallList(dplist_index);
   }
+}
+// ============================================================================
+// GLObject::updateAlphaSlot()                                                 
+// update particle alpha color                                                 
+void GLObject::updateAlphaSlot(int _alpha)
+{ 
+  particles_alpha = _alpha;
 }
 // ============================================================================
 // GLObject::toggleActivate()                                                  

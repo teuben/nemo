@@ -24,6 +24,7 @@ public:
     ~ParticlesList();
     int getIndex(int);
     int loadFile(const char *,ParticlesSelectVector * );  
+    int defaultIndexTab();
  private:
   // variables
   static const std::string header;

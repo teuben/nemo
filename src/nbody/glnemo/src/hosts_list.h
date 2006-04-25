@@ -12,14 +12,15 @@
 #ifndef HOSTS_LIST_H
 #define HOSTS_LIST_H
 static const char* hosts_list[]={ 
-          "node1"  ,"node2"  ,"node3"   , "node4",
-          "node5"  ,"node6"  ,"node7"   , "node8", 
-          "paxi"   ,"ouzo"   ,"beaver"  , "batis",
-          "teddy"  ,"koala"  ,"amos"    , "anixi",
-          "loutre" ,"slinky" ,"pentium" , "dunk" ,
-          "oniro"  ,"panda"  ,"ouki"    , "heron",
-          "meli"   ,"ionio"  ,"kerkira" , "pilos",
-          "pirgos" ,"raccoon","tripa"   , "zeus" ,
-          "apolon" ,"athena" ,"hra"     , 0         };
+          "node1"  ,"node2"  ,"node3"   , "node4"   ,
+          "node5"  ,"node6"  ,"node7"   , "node8"   , 
+          "paxi"   ,"ouzo"   ,"beaver"  , "batis"   ,
+          "teddy"  ,"koala"  ,"amos"    , "anixi"   ,
+          "loutre" ,"slinky" ,"pentium" , "dunk"    ,
+          "oniro"  ,"panda"  ,"ouki"    , "heron"   ,
+          "meli"   ,"ionio"  ,"kerkira" , "pilos"   ,
+          "pirgos" ,"raccoon","tripa"   , "zeus"    ,
+          "apolon" ,"athena" ,"hra"     , "poseidon",
+          "elia"   ,0         };
         
 #endif // HOSTS_LIST_H

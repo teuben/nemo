@@ -88,7 +88,7 @@ using namespace std;
   "wsize=925\n       Windows's width size                           ",
   "hsize=685\n       Windows's height size                          ",
   "screenshot=\n     Screenshot name                                ",
-  "VERSION=0.87\n     "__DATE__"  - JCL  compiled at <"__TIME__">   ",
+  "VERSION=0.88\n     "__DATE__"  - JCL  compiled at <"__TIME__">   ",
   NULL
 };
 ::string usage="3D OpenGL Nemo Snapshot rendering";
@@ -130,10 +130,12 @@ int main( int argc, char **argv )
                 wsize,hsize);
 
   a.setMainWidget( &w );
-  w.show();  
+  w.show();
+  
   w.resize(wsize-1,hsize-1); // trick to update GL buffer with right W & H
   w.glbox->enable_s=true;
   if (has_screenshot) {
+    w.showMinimized();
     w.takeScreenshot(screenshot);
   }
   finiparam();  // garbage collecting for nemo

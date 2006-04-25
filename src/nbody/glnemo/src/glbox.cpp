@@ -35,7 +35,7 @@ float ortho_left,ortho_right,ortho_bottom,ortho_top;
 // ============================================================================
 // constructor                                                                 
 GLBox::GLBox( QWidget* parent, const char* name,
-            GlobalOptions * _options, const QGLWidget* shareWidget)
+            GlobalOptions * _options, AnimationEngine * _anim_engine,const QGLWidget* shareWidget)
   : QGLWidget( parent, name, shareWidget )
 {
   xRot = yRot = zRot = 0.0;       // default object rotation
@@ -46,7 +46,7 @@ GLBox::GLBox( QWidget* parent, const char* name,
 
   // get options
   store_options = _options;
-   
+  anim_engine   = _anim_engine; 
   makeCurrent();   // activate OpenGL context, can build display list by now
 
   nb_object = 0;   // no object so far
@@ -72,6 +72,7 @@ GLBox::GLBox( QWidget* parent, const char* name,
   
   hud = new GLHudObject(width,height,f,yellow);
   hudProjection();
+  tree = new GLOctree(_options);
 }
 
 // ============================================================================
@@ -124,6 +125,9 @@ void GLBox::paintGL()
     std::cerr << t.elapsed() << endl;
   }
 #endif
+  // record frame if activates
+  anim_engine->record->beginFrame();
+  
   qglClearColor( store_options->background_color);
   glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );  
   setProjection(width, height);
@@ -136,17 +140,17 @@ void GLBox::paintGL()
   if (store_options->perspective) {
     glTranslatef( 0.0, 0.0, store_options->zoom);  
   }
-  //glTranslatef( 0.0, 0.0, -5.);  
+
 #else  
   gluLookAt(0.0,  0.0,  store_options->zoom,
-            0.0,  0.0,  0.0 ,
-            0.0,  -1.0,  0.0);
+            0.,0.,0.,
+            0.,  1.0,  0.);
   //glScalef( scale, scale, scale );
 #endif
-
   glRotatef( store_options->xrot, 1.0, 0.0, 0.0 ); 
   glRotatef( store_options->yrot, 0.0, 1.0, 0.0 ); 
   glRotatef( store_options->zrot, 0.0, 0.0, 1.0 );
+
 
 #if 1  
   // Grid Anti aliasing
@@ -181,6 +185,10 @@ void GLBox::paintGL()
   glPointSize(store_options->psize);
   glEnable(GL_POINT_SMOOTH);
 
+  // octree display
+  //treeUpdate();
+  tree->display();
+  
   // control blending on particles
   if (store_options->blending) {
     glBlendFunc( GL_SRC_ALPHA, GL_ONE );  
@@ -201,6 +209,7 @@ void GLBox::paintGL()
   // Display Particles
   if (store_options->show_part) {
     for (int i=0; i<nb_object; i++) {
+      vparticles_object[i]->updateAlphaSlot(store_options->particles_alpha);
       vparticles_object[i]->display();
     }  
   }
@@ -230,6 +239,8 @@ else
   if (enable_s)  
     screenshot();
 #endif  
+  // record end of frame if activated
+  anim_engine->record->endFrame(store_options);
 }
 // ============================================================================
 // GLBox::resizeGL()                                                           
@@ -275,6 +286,12 @@ void GLBox::getData(const int * nbody               ,
   }
   memcpy((float *) pos, (float *) pos_, sizeof(float)* (*nbody) * 3);
   
+  
+  for (int i=0; i< (int ) psv->size(); i++ ) {
+    (*psv)[i].vps->defaultIndexTab();  // reset index, in case of loading
+  }
+  // create octree
+  tree->update(nbody,pos,psv); 
   // delete previous objects
 #if 0
   for (int i=0; i<nb_object; i++) {
@@ -283,7 +300,7 @@ void GLBox::getData(const int * nbody               ,
   nb_object=0;
 #endif
   
-  // loop an all the objects stored in psv
+  // loop on all the objects stored in psv
   for (int i=0; i< (int ) psv->size(); i++ ) {
     (*psv)[i].vps->printRange();
     if (i>=nb_object ) { // create a new object
@@ -296,6 +313,9 @@ void GLBox::getData(const int * nbody               ,
       vparticles_object[i] = pobj;
     }
     else { // update the current object    
+    #if 0
+      (*psv)[i].vps->defaultIndexTab();  // reset index, in case of loading
+    #endif  
       vparticles_object[i]->updateObject( nbody, pos,
 					  ((*psv)[i].vps));        
     }
@@ -304,9 +324,18 @@ void GLBox::getData(const int * nbody               ,
   for (int i=(int ) psv->size(); i< nb_object; i++ ) {
     vparticles_object[i]->setActivate(FALSE);
   }
-  setParticlesSize((int) store_options->psize);
-  setTextureSize(store_options->texture_size);
-  changeTextureAlphaColor(store_options->texture_alpha_color);
+  setParticlesSize((int) store_options->psize,false);
+  setTextureSize(store_options->texture_size,false);
+  changeTextureAlphaColor(store_options->texture_alpha_color,false);
+  // create octree
+  //tree->update(nbody,pos,psv);  
+#if 0  
+  if (store_options->octree_enable) {
+    for (int i=0; i<nb_object; i++) {
+      vparticles_object[i]->rebuildDisplayList();
+    }
+  }
+#endif  
   updateGL();
 }
 // ============================================================================
@@ -465,10 +494,10 @@ void GLBox::resizeGrid(float square_size, int nb_square )
 // ============================================================================
 // GLBox::setParticlesSize()                                                   
 // set particles size                                                          
-void GLBox::setParticlesSize(int value)
+void GLBox::setParticlesSize(int value, const bool ugl)
 {
   particles_size = 1.0 + ((GLfloat) value) * MAX_PARTICLES_SIZE / 100.0;
-  updateGL();
+  if (ugl) updateGL();
 }
 // ============================================================================
 // GLBox::changeColorHUD()                                                     
@@ -519,9 +548,9 @@ void GLBox::setHudActivate(const GLHudObject::HudKeys k, const bool status)
   updateGL();
 }
 // ============================================================================
-// GLBox::setHudActivate()                                                     
+// GLBox::setHudActivateNoGL()                                                 
 // Activate all HUD object according to 'store_options->hud' status            
-void GLBox::setHudActivate()
+void GLBox::setHudActivateNoGL()
 {
   if (store_options->hud) {  // HUD enable
     hud->setActivate(true);       
@@ -536,28 +565,40 @@ void GLBox::setHudActivate()
   hud->keysActivate(GLHudObject::Rot,store_options->hud_rot);      
   hud->keysActivate(GLHudObject::Trans,store_options->hud_trans);      
   hud->keysActivate(GLHudObject::Nbody,store_options->hud_nbody);      
-  hud->keysActivate(GLHudObject::Projection,store_options->hud_projection);
+  hud->keysActivate(GLHudObject::Projection,store_options->hud_projection);  
+  
+  GlobalOptions * so = store_options;
+  hud->setText(GLHudObject::Rot,so->xrot,so->yrot,so->zrot);
+  hud->setText(GLHudObject::Trans,so->xtrans,so->ytrans,so->ztrans);
+  hud->setText(GLHudObject::Zoom,so->zoom);
+}
+// ============================================================================
+// GLBox::setHudActivate()                                                     
+// Activate all HUD object according to 'store_options->hud' status            
+void GLBox::setHudActivate()
+{
+  setHudActivateNoGL(); 
   updateGL();
 }
 // ============================================================================
 // GLBox::setTextureSize()                                                     
 // Change texture size for gaz like particles                                  
-void GLBox::setTextureSize(const float ts)
+void GLBox::setTextureSize(const float ts, const bool ugl)
 {
     for (int i=0; i<nb_object; i++) {
       vparticles_object[i]->setTextureSize(ts);
     }
-    updateGL();
+    if (ugl) updateGL();
 }
 // ============================================================================
 // GLBox::changeTextureAlphaColor()                                            
 // Change Texture Alpha color for gaz like particles                           
-void GLBox::changeTextureAlphaColor(const int alpha)
+void GLBox::changeTextureAlphaColor(const int alpha, const bool ugl)
 {
     for (int i=0; i<nb_object; i++) {
       vparticles_object[i]->setTextureAlphaColor(alpha);
     }
-    updateGL();
+    if (ugl) updateGL();
 }
 // ============================================================================
 // GLBox::setProjection()                                                      
@@ -809,4 +850,31 @@ void GLBox::screenshot() {
   delete[] b;
 }
 // ============================================================================
-
+// GLBox::updateOptions()                                                      
+void GLBox::updateOptions(GlobalOptions * go, const bool only_transform)
+{
+  if (only_transform) {               // only                    
+    store_options->copyTransform(*go); // copy transformation data
+  } else {                            // else                    
+    *store_options = *go;             // copy all                
+  }
+  setHudActivateNoGL(); 
+  updateGL();
+}
+// ============================================================================
+// GLBox::updateOptions()                                                      
+void GLBox::takeScreenshot(QImage & img)
+{
+  img=grabFrameBuffer();
+}
+// ============================================================================
+// GLBox::treeUpdate()                                                         
+void GLBox::treeUpdate() 
+{ 
+  tree->update(); 
+  for (int i=0; i<nb_object; i++) {
+    vparticles_object[i]->rebuildDisplayList();
+  }
+ updateGL();
+}
+// ============================================================================

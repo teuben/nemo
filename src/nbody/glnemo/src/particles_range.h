@@ -36,7 +36,7 @@ class ParticlesRange: public VirtualParticlesSelect {
   // method
   
   int getIndex(int);
-
+  int defaultIndexTab();
  private:
   // method
   int  parseSelectedString(char * select_sting, const int nbody,

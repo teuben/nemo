@@ -23,6 +23,7 @@ GlobalOptions::GlobalOptions()
   // from OpenGL TAB
   show_part=true;
   psize=1.5;
+  particles_alpha=255;
   blending=true;
   dbuffer=true;
   perspective=true;
@@ -51,11 +52,31 @@ GlobalOptions::GlobalOptions()
   show_poly=false;  
   texture_size=0.52;
   texture_alpha_color=125;
+  octree_enable=false;
+  octree_display=false;
+  octree_level=10;
 }
 // ============================================================================
 // destructor                                                                  
 GlobalOptions::~GlobalOptions()
 {
+}
+// ============================================================================
+// copyTransform()                                                             
+// copy transformation data from another object                                
+void GlobalOptions::copyTransform(const GlobalOptions &m)
+{
+  // rot
+  xrot    = m.xrot;
+  yrot    = m.yrot;
+  zrot    = m.zrot;
+  // trans
+  xtrans = m.xtrans;
+  ytrans = m.ytrans;
+  ztrans = m.ztrans;
+  // zoom
+  zoom   = m.zoom;
+  zoomo  = m.zoomo;
 }
 // ============================================================================
 

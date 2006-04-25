@@ -3,15 +3,17 @@
 # Subdir relative project main directory: ./src
 # Target is an application:  ../bin/glnemo
 
-INSTALLS += target mantarget
-target.path = $(NEMOBIN) 
-mantarget.path = $(NEMO)/man/man1
-mantarget.files = ../DOC/glnemo.1
+INSTALLS += mantarget \
+            target
+	    target.path = $(NEMOBIN)
+	    target.files = ../bin/glnemo
+	    mantarget.path = $(NEMO)/man/man1
+	    mantarget.files += ../DOC/glnemo.1
 LIBS += -L$(NEMOLIB) \
         -lnemo 
-INCLUDEPATH = . \
-              $(NEMOINC) \
-              $(NEMOLIB) 
+INCLUDEPATH += . \
+               $(NEMOINC) \
+               $(NEMOLIB) 
 MOC_DIR = .moc/debug-shared-mt 
 UI_DIR = .ui/ 
 OBJECTS_DIR = .obj/debug-shared-mt 
@@ -28,7 +30,8 @@ FORMS += about_form.ui \
          hostname_select_form.ui \
          crun_server_form.ui \
          select_nbody_form.ui \
-         particles_select_form.ui 
+         particles_select_form.ui \
+         animation_form.ui 
 HEADERS += glbox.h \
            globjwin.h \
            snapshot_data.h \
@@ -55,7 +58,11 @@ HEADERS += glbox.h \
            hosts_list.h \
            virtual_particles_select.h \
            particles_select.h \
-           particles_list.h 
+           particles_list.h \
+           frame_data.h \
+           animation_engine.h \
+           frustumculling.h \
+	   gloctree.h 
 SOURCES += glbox.cpp \
            globjwin.cpp \
            glnemo.cpp \
@@ -78,4 +85,8 @@ SOURCES += glbox.cpp \
            gl_projection.cpp \
            virtual_particles_select.cpp \
            particles_select.cpp \
-           particles_list.cpp 
+           particles_list.cpp \
+           frame_data.cpp \
+           animation_engine.cpp \
+           frustumculling.cpp \
+	   gloctree.cpp

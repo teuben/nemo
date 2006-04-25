@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004-2005                                  
+// Copyright Jean-Charles LAMBERT - 2004-2006                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -117,6 +117,7 @@ void ParticlesSelectForm::applyRange()
       pr->last_part  = last;
       pr->npart      = last+1-first;
       pr->step_part  = step;
+      pr->defaultIndexTab();
       pr->col        = QColor( table_range->text( i, 4 ));
       pr->is_visible = ((QCheckBox*)table_range->cellWidget( i,0))->isChecked();
       ParticlesSelect * ps = new ParticlesSelect();
@@ -145,6 +146,7 @@ void ParticlesSelectForm::applyList()
 		int step = table_list->text( i, 2 ).toInt( &ok);
 		if (!ok) step=1;
 		pl->step_part  = step;
+                pl->defaultIndexTab();
 		pl->col        = QColor( table_list->text( i, 3 ));
 		pl->is_visible = ((QCheckBox*)table_list->cellWidget( i,0))->isChecked();
 		ParticlesSelect * ps = new ParticlesSelect();

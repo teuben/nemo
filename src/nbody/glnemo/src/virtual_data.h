@@ -54,6 +54,7 @@ class VirtualData : public QObject
   signals:
   virtual void messageLoad(QString * );
   void infoMessage(std::string);
+  void newTime(const float);
   protected:
   int full_nbody;
   float * pos, * vel, * timu, coo_max[3];

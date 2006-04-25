@@ -1,4 +1,4 @@
-<!DOCTYPE UI><UI version="3.1" stdsetdef="1">
+<!DOCTYPE UI><UI version="3.3" stdsetdef="1">
 <class>HostnameSelectForm</class>
 <widget class="QDialog">
     <property name="name">
@@ -8,8 +8,8 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>339</width>
-            <height>111</height>
+            <width>293</width>
+            <height>134</height>
         </rect>
     </property>
     <property name="caption">
@@ -19,9 +19,52 @@
         <property name="name">
             <cstring>unnamed</cstring>
         </property>
+        <widget class="QLayoutWidget" row="1" column="0">
+            <property name="name">
+                <cstring>layout58</cstring>
+            </property>
+            <hbox>
+                <property name="name">
+                    <cstring>unnamed</cstring>
+                </property>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>ok_button</cstring>
+                    </property>
+                    <property name="text">
+                        <string>Ok</string>
+                    </property>
+                </widget>
+                <spacer>
+                    <property name="name">
+                        <cstring>spacer1</cstring>
+                    </property>
+                    <property name="orientation">
+                        <enum>Horizontal</enum>
+                    </property>
+                    <property name="sizeType">
+                        <enum>Expanding</enum>
+                    </property>
+                    <property name="sizeHint">
+                        <size>
+                            <width>141</width>
+                            <height>20</height>
+                        </size>
+                    </property>
+                </spacer>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>cancel_button</cstring>
+                    </property>
+                    <property name="text">
+                        <string>Cancel</string>
+                    </property>
+                </widget>
+            </hbox>
+        </widget>
         <widget class="QLayoutWidget" row="0" column="0">
             <property name="name">
-                <cstring>layout64</cstring>
+                <cstring>layout7</cstring>
             </property>
             <vbox>
                 <property name="name">
@@ -50,23 +93,41 @@
                 </widget>
                 <widget class="QLayoutWidget">
                     <property name="name">
-                        <cstring>layout58</cstring>
+                        <cstring>layout6</cstring>
                     </property>
                     <hbox>
                         <property name="name">
                             <cstring>unnamed</cstring>
                         </property>
-                        <widget class="QPushButton">
+                        <widget class="QLabel">
                             <property name="name">
-                                <cstring>ok_button</cstring>
+                                <cstring>text_port</cstring>
+                            </property>
+                            <property name="paletteBackgroundColor">
+                                <color>
+                                    <red>255</red>
+                                    <green>170</green>
+                                    <blue>127</blue>
+                                </color>
                             </property>
                             <property name="text">
-                                <string>Ok</string>
+                                <string>Port :</string>
+                            </property>
+                        </widget>
+                        <widget class="QLineEdit">
+                            <property name="name">
+                                <cstring>edit_port</cstring>
+                            </property>
+                            <property name="text">
+                                <string>4444</string>
+                            </property>
+                            <property name="alignment">
+                                <set>AlignRight</set>
                             </property>
                         </widget>
                         <spacer>
                             <property name="name">
-                                <cstring>spacer1</cstring>
+                                <cstring>spacer5</cstring>
                             </property>
                             <property name="orientation">
                                 <enum>Horizontal</enum>
@@ -76,19 +137,11 @@
                             </property>
                             <property name="sizeHint">
                                 <size>
-                                    <width>141</width>
+                                    <width>122</width>
                                     <height>20</height>
                                 </size>
                             </property>
                         </spacer>
-                        <widget class="QPushButton">
-                            <property name="name">
-                                <cstring>cancel_button</cstring>
-                            </property>
-                            <property name="text">
-                                <string>Cancel</string>
-                            </property>
-                        </widget>
                     </hbox>
                 </widget>
             </vbox>
@@ -110,6 +163,7 @@
     </connection>
 </connections>
 <includes>
+    <include location="local" impldecl="in implementation">hosts_list.h</include>
     <include location="local" impldecl="in implementation">hostname_select_form.ui.h</include>
 </includes>
 <functions>

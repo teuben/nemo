@@ -21,7 +21,8 @@
 #include <qvbox.h>
 #include <qframe.h>
 #include <qevent.h>
-#include <qlistbox.h> 
+#include <qlistbox.h>
+#include <qtimer.h>
 #include <pthread.h>
 
 #include "virtual_particles_select.h"
@@ -32,6 +33,7 @@
 
 #include "global_options.h"
 #include "options_form.h"
+#include "animation_engine.h"
 
 class GLBox;
 
@@ -42,10 +44,13 @@ class GLObjectWindow : public QMainWindow
 public:
   GLObjectWindow( QWidget* parent = 0, const char* name = 0 );
   ~GLObjectWindow();
-   void connectToHostname( QString );      
-   void connectToHostname( QListBoxItem*); 
+   void connectToHostname( QString, const int port );      
+   void connectToHostname( QListBoxItem*, QString ); 
    void takeScreenshot(QString);
    void setObjectVisible(bool, int);
+signals:
+  void newTime(const float);
+  void allowRecord();
 private:
   // particle range vector
   ParticlesSelectVector psv; // store Particles Range
@@ -75,6 +80,7 @@ private slots:
     void optionsCamera();
     void optionsLookForNetworkServer();
     void optionsReloadSnapshot();
+    void optionsAnimation();
     void messageWarning(QString *,int);
     void infoMessage(std::string );
     void optionsRecord();
@@ -82,9 +88,16 @@ private slots:
     void optionsPrintBuffer();
     void setProjection();
     void callMe();
+    void loadNextFrame();
+    void optionsRotateAroundX();
+    void optionsRotateAroundY();
+    void optionsRotateAroundZ();
+    //void startRenderAnim();
+    //void stopRenderAnim();
 public:
     GLBox  * glbox;     // OpenGL engine        
     GlobalOptions * store_options; // store global options
+    AnimationEngine * anim_engine;
 private:
     //GLBox  * glbox;     // OpenGL engine
     QHBox  * glframe;   // OpenGL's widget container
@@ -109,6 +122,9 @@ private:
     // Mutex and conditional variable
     pthread_mutex_t mutex_timer; // used during timer event
 
+    // Animations
+    QTimer play_timer_a;      // start play anim  
+    QTimer render_timer_a;    // start render anim
     // methods
     void initStuff();
     void wheelEvent       ( QWheelEvent  * );

@@ -34,13 +34,15 @@ class GLObject : public QGLWidget {
   bool getActivate() { return is_activated; };
   void setActivate(bool status) { is_activated = status ;}; 
   void setWH(int new_w, int new_h) { width=new_w; height=new_h; };
- 
+// protected slots:
+  void updateAlphaSlot(int);
+  
  protected:
   bool is_activated;    // 
   QColor mycolor;
   GLuint dplist_index;
   int width,height;              // Display width and height
-  
+  int particles_alpha;  
   // method
   void  buildDisplayList();
 };

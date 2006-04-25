@@ -29,7 +29,7 @@ class NetworkData : public VirtualData
 {    
   Q_OBJECT
  public: 
-  NetworkData(const char * hostname);
+  NetworkData(const char * hostname,const int _port=4444);
   ~NetworkData();
   int loadPos(ParticlesSelectVector *);
   int getNbody();

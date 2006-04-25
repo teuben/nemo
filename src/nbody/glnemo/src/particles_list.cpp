@@ -24,6 +24,8 @@ ParticlesList::ParticlesList():VirtualParticlesSelect()
   v_type    = 2;         // record VirtualParticlesSetect type
   step_part = 1;
   npart     = 0;         // raz particles number              
+  index_tab = NULL;
+  ni_index  = 0;
 }
 
 // ============================================================================
@@ -31,6 +33,23 @@ ParticlesList::ParticlesList():VirtualParticlesSelect()
 ParticlesList::~ParticlesList()
 {
   //index_list.clear(); // raz index list                    
+  if (index_tab) {
+    delete [] index_tab;
+  }
+}
+// ============================================================================
+// ParticlesList::defaultIndexTab()                                            
+// fill the index tab array with the default number of particles               
+inline int ParticlesList::defaultIndexTab()
+{
+  if (index_tab) {
+    delete [] index_tab;
+  }
+  index_tab = new int[npart];
+  ni_index = 0;
+  for (int i=0; i<npart; i+=step_part) {
+    index_tab[ni_index++] = (int) index_list[i];
+  }
 }
 // ============================================================================
 // ParticlesList::parseSelectedString                                          
@@ -100,6 +119,7 @@ int ParticlesList::loadFile(const char * select_file,ParticlesSelectVector * psv
      error_message = message;
      throw(n); // throw back the exception
   }
+  defaultIndexTab();
   return npart;
 }
 // ============================================================================

@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004-2005                                  
+// Copyright Jean-Charles LAMBERT - 2004-2006                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -49,10 +49,13 @@ public:
                                    const char * );
     void setColor();
     int npartSelected(ParticlesSelectVector *,int);
+    virtual inline int defaultIndexTab();
+    virtual inline int resetIndexTab();
+    virtual inline int addIndexTab(int);
+    int * index_tab, ni_index;    
 private:                               
     virtual int parseSelectedString(char * , const int , 
 				      ParticlesSelectVector * ) { return 0;};
-    
 };
 #endif
 // ============================================================================
