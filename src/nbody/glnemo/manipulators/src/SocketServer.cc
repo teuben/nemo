@@ -32,9 +32,11 @@ using namespace std; // prevent writing statment like 'std::cerr'
 // - Listen socket                                                              
 SocketServer::SocketServer(int type, 
 			   int listen_port,
+			   int max_port,
 			   int backlog):Socket(type)
 {
   port    = listen_port;    
+  max_try_port=max_port;
   sockOpt();             // specify sockets options
   bindSocket();          // bind socket to the listen port
   listenSocket(backlog); // listen socket
@@ -45,19 +47,26 @@ SocketServer::SocketServer(int type,
 int SocketServer::bindSocket()
 {
   struct sockaddr_in my_addr;
-  int status;
-
+  int status=-1;
+  int try_port=1;
   // set host Information 
   my_addr.sin_family = AF_INET;                 // socket family
   my_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-  my_addr.sin_port = htons(port);
-  memset(&(my_addr.sin_zero),'\0',8);
+  while (status < 0 && try_port < max_try_port ) {
+    my_addr.sin_port = htons(port);
+    memset(&(my_addr.sin_zero),'\0',8);
 
-  status = bind (sd, (struct sockaddr *) &my_addr,sizeof(my_addr));
-  if(status<0) {
-    std::cerr << "SocketServer::bindSocket() - WARNING cannot bind port number ["
-	      << port << "]\n";
-    perror("SocketServer::bindSocket() - PERROR bind:");
+    status = bind (sd, (struct sockaddr *) &my_addr,sizeof(my_addr));
+    if(status<0) {
+      std::cerr << "SocketServer::bindSocket() - WARNING cannot bind port number ["
+		<< port << "]\n";
+      perror("SocketServer::bindSocket() - PERROR bind:");
+      try_port++;
+      port++;
+    } else {
+      std::cerr << "SocketServer::bindSocket() - Port number ["<< port 
+		<< "], successfully binded !\n";
+    }
   }
 
   return status;

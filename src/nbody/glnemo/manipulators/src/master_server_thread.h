@@ -37,7 +37,7 @@ class MasterServerThread : public GenericThread {
  public:
   //
   MasterServerThread( const std::string _sim_name,
-		      const int _port, const falcON::snapshot * S);
+		      const int _port, const int _max_port, const falcON::snapshot * S);
 
   ~MasterServerThread();
   
@@ -48,7 +48,7 @@ class MasterServerThread : public GenericThread {
   const falcON::snapshot * my_snapshot;
   pthread_mutex_t   condition_mutex;
   pthread_cond_t    condition_cond;
-  int port;
+  int port, max_port;
   ServerThread * server_t[NB_SERVER];
   bool stoploop;
   //

@@ -35,10 +35,12 @@ using namespace falcON;
 // Constructor                                                                  
 // Initialyze mutex, launch master server thread then return to gyrfalcON       
 MasterServerThread::MasterServerThread(const std::string _sim_name,
-				       int _port, const snapshot * S):GenericThread()
+				       const int _port, const int _max_port, 
+				       const snapshot * S):GenericThread()
 {
   // get data pointers
   port       =  _port;
+  max_port   =  _max_port;
   sim_name   =  _sim_name;
   my_snapshot = S;
 
@@ -103,7 +105,7 @@ void MasterServerThread::run()
 {
   /* share the job */
   //  SocketServer * my_server = new SocketServer(SOCK_STREAM,SERV_PORT,BACKLOG);
-  SocketServer * my_server = new SocketServer(SOCK_STREAM,port,BACKLOG);
+  SocketServer * my_server = new SocketServer(SOCK_STREAM,port,max_port,BACKLOG);
 
   //ServerThread * server_t[NB_SERVER];
 

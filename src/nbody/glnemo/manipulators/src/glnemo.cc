@@ -42,7 +42,8 @@ namespace {
   //////////////////////////////////////////////////////////////////////////////
   class glnemo : public manipulator {
   private:
-    const   int      port;   // communication port  
+    const   int      port;     // communication port      
+    const   int      max_port; // max communication port  
     mutable  MasterServerThread * glnemo_server;
     mutable  int current_step;
     //--------------------------------------------------------------------------
@@ -61,7 +62,8 @@ namespace {
     glnemo(const double *pars,
 		  int          npar,
 		  const char   *file) :
-      port(npar>0?int (pars[0]):4444)    // default port = 4444
+      port(npar>0?int (pars[0]):4444),    // default port = 4444 
+      max_port(npar>1?int (pars[1]):8)    // 8 ports             
     {
       if (nemo_debug(1) || nemo_debug(2)) {
 	std::cerr<<
@@ -85,7 +87,7 @@ namespace {
       if (hasvalue("out")) sim_name = getparam("out");
       else                 sim_name = "noname";
       // instantiate Master GLnemo Server Thread
-      glnemo_server = new MasterServerThread(sim_name,port,S);
+      glnemo_server = new MasterServerThread(sim_name,port,max_port,S);
     }
     else {
       glnemo_server->updateData(S);

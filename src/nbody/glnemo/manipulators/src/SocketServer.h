@@ -21,12 +21,13 @@
 
 class SocketServer : public Socket {
 public:
-  SocketServer(int , int, int);
+  SocketServer(int , int, int, int);
   ~SocketServer();
   int acceptClient();
 
 private:
   int port;               // listening port                 
+  int max_try_port;       // #port to try to bind           
   int sock_accept_client; // socket id returned after accept
   struct sockaddr_in cliAddr;
 
