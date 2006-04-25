@@ -1,4 +1,4 @@
-.TH GLNEMO 1NEMO "22 Jun 2005"
+.TH GLNEMO 1NEMO "25 April 2006"
 .SH NAME
 glnemo \- 3D OpenGL Nemo Snapshot rendering
 .SH SYNOPSIS
@@ -125,13 +125,17 @@ hitting a key in the display window itself:
 Wheel Mouse                     zoom in or out
 CTRL + Left-Mouse/Right-Mouse   translate
 g                               toggle the grid
-r                               toggle particle ranges
+r                               launch particles ranges/color dialog box
+o                               launch option dialog box
 CTRL + r                        reset rotation/translation
 CTRL + a                        autoscale to fit the frame
-s                               snapshot
+s                               take a screenshot
 p                               play all snapshots
 ALT + g                         toogle gaz like particles effect
+CTRL + p                        launch printer dialog box
 f                               toggle fullscreen (might make it slow)
+shift + M                       launch animation box
+
 .fi
 .SH SEE ALSO
 xyzview(1NEMO)
@@ -145,7 +149,8 @@ src/nbody/glnemo: directory with source code
 Jean-Charles Lambert
 .SH UPDATE HISTORY
 .nf
-.ta +1.0i +4.0i
+.ta +1.0i +5.0i
 03-dec-04	V0.50 added to NEMO	JCL
 22-jun-05	V0.87 lot of fixes and enhancement	JCL
+25-Apr-06	V0.90 animation module, octree, bugs fixed	JCL
 .fi
