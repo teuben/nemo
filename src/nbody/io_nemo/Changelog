@@ -1,9 +1,14 @@
 io_nemo ChangeLog
 
-03-Mar-2005 (Version 1.30)
+24-Avr-2006 (Version 1.31)
 ==========================
 
-in CVS:
+- io_get_put/io_get_put_f, memory leak fixed when using selected time "st"
+  feature.
+	
+	
+03-Mar-2005 (Version 1.30)
+==========================
 
 - Changelog file created.
 - a lot of code cleaning.

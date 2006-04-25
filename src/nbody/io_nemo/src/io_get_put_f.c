@@ -408,6 +408,10 @@ int get_data_select_f(char * infile,
 	fprintf(stderr,"Info : skipping time step [%.4f]\n",real_time);
 	get_tes(instr[no_io], ParametersTag);
 	get_tes(instr[no_io], SnapShotTag);
+	if (SP_io) {
+	  free ((int *) SelectedPart);
+	  free ((char *) SelString);
+	}
 	continue; /* go to the next time step */
       }
     }

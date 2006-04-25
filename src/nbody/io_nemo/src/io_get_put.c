@@ -139,7 +139,7 @@ int put_data_select(char * outfile,
       put_data(outstr[no_io], TimeTag, OutType, ion->timu, 0);
     } 
     else {
-      fprintf(stderr,"WARNING ### TimeBit control does not exist.\n");
+      dprintf(1,"WARNING ### TimeBit control does not exist.\n");
     }
   }
   put_data(outstr[no_io], NobjTag, IntType, ion->nbody, 0);
@@ -153,7 +153,7 @@ int put_data_select(char * outfile,
       put_data(outstr[no_io],MassTag,OutType,ion->mass,*ion->nbody,0);
     } 
     else {
-      fprintf(stderr,"WARNING ### MassBit control does not exist.\n");
+      dprintf(1,"WARNING ### MassBit control does not exist.\n");
     }
   }
 
@@ -163,7 +163,7 @@ int put_data_select(char * outfile,
       /* free(phasep); */
     }
     else {
-      fprintf(stderr,"WARNING ### PhaseSpaceBit control does not exist.\n");
+      dprintf(1,"WARNING ### PhaseSpaceBit control does not exist.\n");
     }
   }
 
@@ -172,7 +172,7 @@ int put_data_select(char * outfile,
       put_data(outstr[no_io],PosTag,OutType,ion->pos,*ion->nbody,NDIM,0);
     }
     else {
-      fprintf(stderr,"WARNING ### PosBit control does not exist.\n");
+      dprintf(1,"WARNING ### PosBit control does not exist.\n");
     }
   }
 
@@ -181,7 +181,7 @@ int put_data_select(char * outfile,
       put_data(outstr[no_io],VelTag,OutType,ion->vel,*ion->nbody,NDIM,0);
     }
     else {
-      fprintf(stderr,"WARNING ### VelBit control does not exist.\n");
+      dprintf(1,"WARNING ### VelBit control does not exist.\n");
     }
   }
 
@@ -190,7 +190,7 @@ int put_data_select(char * outfile,
       put_data(outstr[no_io], PotentialTag,OutType,ion->pot,*ion->nbody,0);
     }
     else {
-      fprintf(stderr,"WARNING ### PotentialBit control does not exist.\n");
+      dprintf(1,"WARNING ### PotentialBit control does not exist.\n");
     }
   }
 
@@ -199,7 +199,7 @@ int put_data_select(char * outfile,
       put_data(outstr[no_io], AccelerationTag,OutType,ion->acc,*ion->nbody,NDIM, 0);
     }
     else {
-      fprintf(stderr,"WARNING ### AccelerationBit control does not exist.\n");
+      dprintf(1,"WARNING ### AccelerationBit control does not exist.\n");
     }
   }
 
@@ -208,7 +208,7 @@ int put_data_select(char * outfile,
       put_data(outstr[no_io],KeyTag,IntType,ion->keys,*ion->nbody,0);
     }
     else {
-      fprintf(stderr,"WARNING ### KeyBit control does not exist.\n");
+      dprintf(1,"WARNING ### KeyBit control does not exist.\n");
     }
   }
 
@@ -217,7 +217,7 @@ int put_data_select(char * outfile,
       put_data(outstr[no_io],EpsTag,OutType,ion->eps,*ion->nbody,0);
     }
     else {
-      fprintf(stderr,"WARNING ### EpsBit control does not exist.\n");
+      dprintf(1,"WARNING ### EpsBit control does not exist.\n");
     }
   }
 
@@ -311,7 +311,7 @@ int get_data_select(char * infile,
     get_set(instr[no_io], ParametersTag);
     if (T_io) {  /* time step */
       if (!get_data_time(instr[no_io], OutType, rtype*4, &ion->timu)) {
-	fprintf(stderr,"### Snapshot WARNING ### No Time\n");
+	dprintf(1,"### Snapshot WARNING ### No Time\n");
 	status = -1;
       }
       else {
@@ -351,6 +351,9 @@ int get_data_select(char * infile,
 	dprintf(1,"Info : skipping time step [%.4f]\n",real_time);
 	get_tes(instr[no_io], ParametersTag);
 	get_tes(instr[no_io], SnapShotTag);
+	if (SP_io) {  /* stuff on Selected Particles */
+	  free((int *) SelectedPart);
+	}
 	continue; /* go to the next time step */
       }
     }
@@ -363,7 +366,7 @@ int get_data_select(char * infile,
       /* get masses */
       if (M_io) {
 	if (!get_data_mass(instr[no_io],OutType,*nbodyptr,rtype*4,&ion->mass)) {
-	  fprintf(stderr,"### Snapshot WARNING ### No Mass\n");
+	  dprintf(1,"### Snapshot WARNING ### No Mass\n");
 	  status = -1;
 	  /*exit(1);*/
 	}
@@ -449,7 +452,7 @@ int get_data_select(char * infile,
 	      }
 	    }
 	    else {
-	      fprintf(stderr,"### Snapshot WARNING ### No Positions\n");
+	      dprintf(1,"### Snapshot WARNING ### No Positions\n");
 	      status = -1;
 	      /*exit(1);*/
 	    }
@@ -468,7 +471,7 @@ int get_data_select(char * infile,
 	      }
 	    }
 	    else {
-	      fprintf(stderr,"### Snapshot WARNING ### No Velocities\n");
+	      dprintf(1,"### Snapshot WARNING ### No Velocities\n");
 	      status = -1;
 	      /*exit(1);*/
 	    }
@@ -479,7 +482,7 @@ int get_data_select(char * infile,
       /* get potential array */
       if (P_io) {
 	if (!get_data_pot(instr[no_io],OutType,*nbodyptr, rtype*4,&ion->pot)) {
-	  fprintf(stderr,"### Snapshot WARNING ### No Potential\n");
+	  dprintf(1,"### Snapshot WARNING ### No Potential\n");
 	  status = -1;
 	  /*exit(1);*/
 	}  
@@ -497,7 +500,7 @@ int get_data_select(char * infile,
       /* get acceleration array */
       if (A_io) {
 	if (!get_data_acc(instr[no_io],OutType,*nbodyptr, rtype*4,&ion->acc,NDIM)) {
-	  fprintf(stderr,"### Snapshot WARNING ### No Acceleration\n");
+	  dprintf(1,"### Snapshot WARNING ### No Acceleration\n");
 	  status = -1;
 	  /*exit(1);*/
 	}
@@ -515,7 +518,7 @@ int get_data_select(char * infile,
       /* get keys array */
       if (K_io) {
 	if (!get_data_keys(instr[no_io],IntType,*nbodyptr, rtype*4,&ion->keys)) {
-	  fprintf(stderr,"### Snapshot WARNING ### No Keys\n");
+	  dprintf(1,"### Snapshot WARNING ### No Keys\n");
 	  status = -1;
 	  /*exit(1);*/
 	}  
@@ -533,7 +536,7 @@ int get_data_select(char * infile,
       /* get epses */
       if (EPS_io) {
 	if (!get_data_eps(instr[no_io],OutType,*nbodyptr,rtype*4,&ion->eps)) {
-	  fprintf(stderr,"### Snapshot WARNING ### No Eps\n");
+	  dprintf(1,"### Snapshot WARNING ### No Eps\n");
 	  status = -1;
 	  /*exit(1);*/
 	}
