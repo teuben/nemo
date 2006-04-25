@@ -83,6 +83,10 @@ nemo_src:
 
 tests: $(TESTFILES)
 
-hackdens:density.c load.c util.c hackdens.c defs.h
-	$(CC) $(CFLAGS) -o hackdens density.c load.c util.c hackdens.c \
- 		$(NEMO_LIBS) $(EL)
+
+SRC = density.c load.c util.c hackdens.c
+OBJ = density.o load.o util.o hackdens.o
+
+hackdens: $(OBJ)
+	$(CC) $(CFLAGS) -o hackdens $(OBJ) $(NEMO_LIBS) $(EL)
+
