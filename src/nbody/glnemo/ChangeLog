@@ -1,46 +1,93 @@
 glnemo ChangeLog
 
-Version 0.87
-=============
 
-in CVS:
+in CVS (V 0.90, April 2006)
 
-*) general
+	*) Animation:
+	   ----------
 
-- all dialog form boxes are now designed with QT designer tool (.ui file) which allow a better development.
+	- an animation module has been added (click on Camera Icon, or
+	press M). From this module you can record/play an animation
+	(Record/Play tab). Once recorded, you can render each frames in
+	PNG files. Then you can use mencoder to make a movie.
 
-- accept snapshot from standard input '-', it allows stuff like:
-  mkplummer - 100000 | glnemo -
+	*) Octree: 
+	   -------
+	- an Octree engine has been implemented to locate high density
+	area. The octree can be activated from Options Dialog
+	Box->Experimental Tab. Note that the octree can be itself
+	displayed.
+	
+	*) features : 
+           ----------
+	- Alpha channel slide added for particles (CF OpenGL tab in Option
+	Dialog box)
 
-- a lot of options from the command line (see glnemo help=h).
+	- you can specify communication port
+	(with gyrfalcON) from connexion server box
+
+	*) Bugs fixed: 
+           -----------
+	- in options box, grid's buttons and HUD's buttons have the right
+	color selected
+
+	- CTRL+A (best fit) works fine if there is no particles.
+
+	- port command line parameter works now - many others fixed
+
+Version 0.87 (December 2005)
+============================
+
+	*) general
+	   --------
+
+	- all dialog form boxes are now designed with QT designer tool
+	(.ui file) which allow a better development.
+
+	- accept snapshot from standard input '-', it allows stuff like:
+	mkplummer - 100000 | glnemo -
+
+	- a lot of options from the command line (see glnemo help=h).
   
-- gaz like particle effect (ALT+G) need a powerfull OpenGL video card with an accelerated driver (NVIDIA recommended) and not too many particles (lower than 30 000) but the effect is VERY nice.
+	- gaz like particle effect (ALT+G) need a powerfull OpenGL video
+	card with an accelerated driver (NVIDIA recommended) and not too
+	many particles (lower than 30 000) but the effect is VERY nice.
 
-- possibility to select particles from a list of indexes read from a file (option select_list=). It must be an ascii file with the following structure:
+	- possibility to select particles from a list of indexes read from
+	a file (option select_list=). It must be an ascii file with the
+	following structure:
 
-#p_index_list   <---------- MUST be the first line (header file)
+#p_index_list <---------- MUST be the first line (header file)
 index01
 index02
 ...
 ...
 indexXX
 
-- option to print the OpenGL frame buffer
+	- option to print the OpenGL frame buffer
 	
-- valgrind safe.
+	- valgrind safe.
 
-- **A LOT** of bugs fixed and new features.
+	- **A LOT** of bugs fixed and new features.
 
-- New licence: CeCILL V 2.0
+	- New licence: CeCILL V 2.0
 	
-*) enhanced option dialog  box
-- added new option dialog box with tab frame.
-- added option frame to enable/disable particles
-- added option frame to enter rotation/translation/zoom value
-- added option frame to modify grid (length, size and color of each planar grid)
-- added option frame to enable/disable gaz like particle rendering (ALT + G)
-- added embeded smoke texture
-- added orthographic projection
+	*) enhanced option dialog box 
+	   ---------------------------
+
+	- added new option dialog box with tab frame.
+
+	- added option frame to enable/disable particles
+
+	- added option frame to enter rotation/translation/zoom value
+
+	- added option frame to modify grid (length, size and color of
+	each planar grid)
+
+	- added option frame to enable/disable gaz like particle rendering
+	(ALT + G)
+
+	- added embeded smoke texture - added orthographic projection
 
 Version 0.52
 ==============

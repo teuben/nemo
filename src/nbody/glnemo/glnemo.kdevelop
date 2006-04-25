@@ -90,7 +90,7 @@
   <kdevtrollproject>
     <run>
       <mainprogram>bin/glnemo</mainprogram>
-      <programargs>~/disk.nemo select_list=&quot;/home/jcl/list&quot; range_visib=f</programargs>
+      <programargs>/r5data/csp/csp069/csp069.in</programargs>
       <directoryradio>build</directoryradio>
       <customdirectory>/</customdirectory>
       <terminal>false</terminal>
