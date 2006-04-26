@@ -3,12 +3,13 @@
 # Subdir relative project main directory: ./src
 # Target is an application:  ../bin/glnemo
 
-INSTALLS += mantarget \
-            target
-	    target.path = $(NEMOBIN)
-	    target.files = ../bin/glnemo
-	    mantarget.path = $(NEMO)/man/man1
-	    mantarget.files += ../DOC/glnemo.1
+mantarget.path = $(NEMO)/man/man1
+mantarget.files = ../DOC/glnemo.1
+INSTALLS += mantarget
+
+target.path = $(NEMOBIN)
+INSTALLS +=	target
+
 LIBS += -L$(NEMOLIB) \
         -lnemo 
 INCLUDEPATH += . \

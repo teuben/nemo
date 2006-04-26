@@ -3,12 +3,13 @@
 # Subdir relative project main directory: ./src
 # Target is an application:  ../bin/glnemo
 
-INSTALLS += mantarget \
-            target
-	    target.path = $(NEMOBIN)
-	    target.files = ../bin/glnemo
-	    mantarget.path = $(NEMO)/man/man1
-	    mantarget.files += ../DOC/glnemo.1
+mantarget.path = $(NEMO)/man/man1
+mantarget.files = ../DOC/glnemo.1
+INSTALLS += mantarget
+
+target.path = $(NEMOBIN)
+INSTALLS +=	target
+
 LIBS += -L$(NEMOLIB) \
         -lnemo 
 INCLUDEPATH += . \
@@ -19,7 +20,7 @@ UI_DIR = .ui/
 OBJECTS_DIR = .obj/debug-shared-mt 
 TARGET = ../bin/glnemo 
 DESTDIR = . 
-CONFIG += debug \
+CONFIG += release \
           warn_on \
           qt \
           opengl \
