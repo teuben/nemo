@@ -160,7 +160,7 @@ type of open source policy for our codes).
 
 \section*{Unix Shell}
 
-The {\it manybody} guide that lies here in front of you assumes some knowledge
+The {\it manybody} guide assumes some knowledge
 of Unix. This means Linux and Mac are fine, but although cygwin on MS-Windows
 gets fairly close, your editor couldn't stomach some of 
 its limitations\footnote{YMMV, as they say in this business}.
@@ -215,7 +215,7 @@ command line argument will give a short
 reminder of the options and their defaults. This is true for NEMO as well
 as Starlab programs.
 For NEMO programs the option {\tt help=h} will also give much more extensive help
-on the valid keywords.
+on the keywords.
 
 \item
 The Unix {\tt man} and {\tt gman} commands can be used to view manual pages
@@ -237,7 +237,7 @@ Buy your friendly teachers a Coffee or Beer
 
 I would like to thank my co-authors in spirit, 
 Douglas Heggie, Piet Hut, and Junichiro Makino for their contributions, 
-Simon Portegies Zwart and Christian Boily for the previous schools in Amsterdam 
+Simon Portegies Zwart and Christian Boily for the schools in Amsterdam 
 and Strasbourg respectively, where much of this material was written.
 In the true spirit of open source, 
 numerous authors have contributed their software, which you can find on
@@ -282,11 +282,14 @@ three ways to solve the N-body problem: direct Particle-Particle (PP),
 Particle-Mesh (PM) and Smooth Field Particle (SFP), also sometimes 
 referred to as Self Consistent Field (SCF) method. Various hybrid schemes
 also exist, e.g. P$^3$M.
+\smallskip
+{\it Q: MC? Fluid Dynamics? Numerical Action?}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter                {Integrators}
 
-We have made a few N-body integrators available for this school, as summarized
+We have made a few N-body integrators available for this school, most 
+are summarized
 in Table~\ref{t:codes}. A brief description of all of them will follow, and 
 for some a more detailed example will follow how they
 can be used in the {\it manybody} environment. 
@@ -348,7 +351,7 @@ can be used in the {\it manybody} environment.
 
 \section{firstn}
 
-The first N-body code (ignoring the pioneering analog work by 
+The first N-body code (skipping the pioneering analog experiments by 
 Holmberg (1941)
 %Holmberg, Ap.J. 94, 385, 1941)
 was arguably written by von Hoerner (1960)  % (Z.f.Astrophys. 50, 184, 1960) 
@@ -383,13 +386,15 @@ Plummer sphere configuration
  
 \end{verbatim}\normalsize
 
-It simply prints out the time, the virial ratio (Q=T/W 0.5 means in virial
-equilibrium), number of steps taken, total energy and energy conservation, and another 
+It simply prints out the time, the virial ratio (Q=T/W=0.5 means in virial
+equilibrium), number of steps taken, energy conservation and total energy, and another 
 line on the center of mass motion. No actual snapshots are stored in this 
 simulation, although the code layout is very similar to that of {\tt nbody0},
 and could be adapted quite easily.
 
-As listed, you can find the source code in {\tt \$NEMO/usr/aarseth/firstn/}.
+As listed, you can find the source code in {\tt \$NEMO/usr/aarseth/firstn/}. For 
+an explanation of the input parameter file, see the Unix man page for this program.
+{\it Q: compare with directcode?}
 
 \section{nbody0, nbody00}
 
@@ -398,14 +403,15 @@ to collisional stellar dynamics) was published in Appendix 4B in
 Binney \& Tremaine (1987). 
 You can find this implementation in Fortran ({\tt nbody0})
 as well as C ({\tt nbody00}) in NEMO, with both a simple ASCII dataformat,
-as well as the better supported binary {\it snapshot} format. Aarseth likes
+as well as the better supported NEMO {\it snapshot} format. Aarseth likes
 to refer to this version as the ``Mickey Mouse'' version, and really prefers
-you to use the full version, {\tt nbody1} (see below).
+you to use the full version, {\tt nbody1}, or better yet,
+{\tt nbody4} or {\tt nbody4} (see below).
 
 
 \footnotesize\begin{verbatim}
    # File: examples/ex2
-   # remind myself to the valid command line parameters and defaults
+   # reminder to the valid command line parameters and defaults
 1% mkplummer help=
 mkplummer out=??? nbody=??? mfrac=0.999 rfrac=22.8042468 seed=0 time=0.0 zerocm=t 
   scale=-1 quiet=0 massname= massexpr=pow(m,p) masspars=p,0.0 massrange=1,1 headline= VERSION=2.6a
@@ -448,19 +454,19 @@ Time resets needed 0 times / 9 dumps
 
 \end{verbatim}\normalsize
 
-Notice that when running {\tt mkplummer} the first two parameter
-were not named, because they were given in the order known to the program.
+Notice that when running {\tt mkplummer} the first two parameters ({\tt in=} and {\tt nbody=})
+were not explicitly named, because they were given in the order known to the program.
 
 
 \section{nbody1, nbody2}
 
 These two original Aarseth codes are both available with a NEMO wrapper program
-({\tt runbody1} and {\tt runbody2)}. It will run the compiled fortran 
-code ({\tt nbody1} and {\tt nbody2)}, both directly from Aarseth)
+({\tt runbody1} and {\tt runbody2)}. It will run the compiled Aarseth fortran 
+code ({\tt nbody1} and {\tt nbody2)})
 in its own run directory and 
 optionally produce {\it snapshot} files for further
 analysis. {\tt nbody2}  is much like {\tt nbody1}, except it
-treats forces with the Ahmad-Cohen scheme.
+treats forces with the Ahmad-Cohen neighbor scheme (see Ahmed Cohen 1973).
 
 \footnotesize\begin{verbatim}
 
@@ -500,6 +506,7 @@ treats forces with the Ahmad-Cohen scheme.
 
 \end{verbatim}\normalsize
 
+{\it Q: isn't this gone by now?}
 Here you are also witnessing a current quirk of this wrapper: the input file
 must be given with an absolute pathname, hence the back-tick trick. And 
 although the number of bodies is known, it has to be re-specified.
@@ -522,11 +529,13 @@ involved in both binaries.
 \section{nbody4}
 
 The Aarseth {\tt nbody4} code has been recently made available with a GRAPE
-interface (a.k.a. Nbody4), a standalone version  (a.k.a. Brut4) is available
+interface (a.k.a. Nbody4). A standalone version  (a.k.a. Brut4) is available
 as {\tt nbody4} in NEMO. A NEMO frontend, much like the previous ones, is 
-available as {\tt runbody4}. The novel new thing about {\tt nbody4} is the
+available as {\tt runbody4}. One novel addition to {\tt nbody4} is the
 capability of running one of several stellar evolution codes
-(e.g. Eggleton, Tout \& Hurley, Chernoff--Weinberg). Currently the only other
+(e.g. Eggleton, Tout \& Hurley, Chernoff--Weinberg). An extensive manual
+has recently been made available on how to run it (Aarseth, 2006}.
+Currently the only other
 code capable of doing this is the {\tt kira} code in Starlab.
 
 \section{nbody6}
@@ -534,13 +543,10 @@ code capable of doing this is the {\tt kira} code in Starlab.
 This code is available as is, and with minor modifications could be made to run
 via clones of {\tt runbody4}. Fairly extensive documentation is available on how
 to modify and run the code.
- There is also a version of {\tt nbody4} that
-has Stellar Evolution enabled (Hurley et al, 200x).
 
 {\tt nbody6} is available in {\tt \$NEMO/usr/aarseth/nbody6}, 
-{\tt nbody4} is currently not publicly available, but 
-{\tt nbody6} should be preferred in most cases. There is a
-recent manual (see Aarseth 2004).
+There is also a recent manual (see Aarseth 2004). Running {\tt nbody6}
+is very similar to {\tt nbody4}
 
 
 \section{nbody6++}
@@ -548,7 +554,7 @@ recent manual (see Aarseth 2004).
 Spurzem (see Khalisi \& Spurzem 2003) published an MPI enabled version
 of NBODY6, dubbed {\tt nbody6++}\footnote{and no, it is not rewritten in C++}.
 The input parameter list (including the well known {\tt KZ()} and {\tt BZ()}
-arrays, now counts 83  (nbody1 counted 35 parameters, nbody2 has 42) !
+arrays, now counts 83  ({\tt nbody1} counted 35 parameters, {\tt nbody2} has 42) !
 
 \section{fewbody}
 
@@ -607,7 +613,7 @@ FINAL:
    # view the simulation using Fregeau's program
 2% glstarview < try1
 
-   # and since it uses Starlab 'dyn' format
+   # and since it uses Starlab 'dyn' format, xstarplot can be used
 3% xstarplot < try1
 
 \end{verbatim}\normalsize
@@ -624,8 +630,6 @@ is dominated by a single object; it is based on
 in which two-body Keplerian motion is integrated exactly. 
 For comparison, 
 Bulirsch-Stoer and Runge-Kutta integrators are also available.
-Options include choices of coordinate system, division of particles into classes 
-based on mass scales, order of accuracy, and others. 
 Particles are divided into three basic groups:
 HPWs (Heavy Weight Particles), LWPs (Light Weight Particles), and
 ZWPs (Zero Weight Particles).
@@ -723,14 +727,14 @@ the sun, and planets Jupiter through Pluto. HNbody comes with a
 set of supermongo\footnote{the {\tt sm} program itself 
 is however not publicly
 available} macros especially  designed for the
-otherwise ASCII tables that are produced.
+ASCII tables that are produced.
 
 \section{kira}
 
 {\tt kira} is the flagship integrator of the {\it starlab} package. It is also
 one of the few codes that has stellar evolution integrated with stellar
 dynamics. {\tt kira} can optionally be compiled with the GRAPE libraries,
-to run on the GRAPE hardware, which of course speeds up the computations 
+to run on the GRAPE hardware, which of course speeds up the gravity computations 
 substantially.
 
 \footnotesize\begin{verbatim}
@@ -771,7 +775,9 @@ substantially.
 \begin{figure}[htb]
 \plottwo{kira1.ps}{kira2.ps}
 \caption[Lagrangian radii for kira and nbody0]
-{Lagrangian radii for kira (left, 10\%) and nbody0 (right, 11\%).}
+{Lagrangian radii for kira (left, 10\%) and nbody0 (right, 11\%).
+Both have been recentered using the potential $-\Phi^3$.
+}
 \label{f:kira}
 \end{figure}
 
@@ -785,7 +791,8 @@ for large N compared to a direct full N-body code.
 The earliest version also
 includes the curious self-gravity bug which can occur for large opening angles
 under peculiar conditions (see Salmon \& Warren 1994).
-The original version around which NEMO was built is still available as
+The original version around which NEMO was originally
+developed is still available as
 {\tt hackcode1}. In this example we'll set up a head-on collision between
 two Plummer spheres:
 
@@ -795,7 +802,7 @@ two Plummer spheres:
 1% mkplummer p1 512 seed=123
 2% mkplummer p2 512 seed=456
 
-   # stack them , but offset them in phase space such that they are colliding
+   # stack them , but offset them in phase space on a collision course
 3% snapstack p1 p2 p3 deltar=5,0,0 deltav=-1.5,0,0 
 
    # integrate it for a little while
@@ -872,29 +879,6 @@ as before, the colliding Plummer spheres:
 
 
 \footnotesize\begin{verbatim}
-    examples/ex6
-    # use the data from the previous example in hackcode1
- 1% gyrfalcON p3 p3.outg tstop=10 step=0.2 hmin=5
-# ------------------------------------------------------------------------------------
-# "gyrfalcON p3 . tstop=10 step=0.2 VERSION=1.6.1"
-#
-# run at  Fri Mar 19 09:31:47 2004
-#     by  "teuben"
-#     on  "nemo"
-#     pid  11820
-#
-#    time      energy       -T/U     |L|       |v_cm|  build   force    step     accum
-# ------------------------------------------------------------------------------------
- 0          -0.1317056    0.89176 0.031519   4.7e-10  0      0.01       0.01      0.01
- 0.015625   -0.1317225    0.89172 0.03152    8e-10    0      0.02       0.02      0.04
- 0.03125    -0.1316451    0.89201 0.031522   3.7e-10  0.01   0.01       0.02      0.06
- 0.046875   -0.1316363    0.89193 0.031523   1.3e-09  0      0.02       0.02      0.08
-...
- 9.875      -0.1307104    0.8054  0.031272   2.3e-08  0      0.01       0.01   5.13001
- 9.9062     -0.1307488    0.80515 0.031269   2.2e-08  0      0.01       0.01   5.14001
- 9.9375     -0.1307303    0.80496 0.031268   2.1e-08  0      0.01       0.01   5.15001
- 9.9688     -0.1306838    0.80448 0.031267   2.2e-08  0      0.02       0.02   5.17001
- 10         -0.1307145    0.80367 0.031267   2.3e-08  0      0.01       0.01   5.18001
 
 # ---------------------------------------------------------------------------------------------------------------------
 # "gyrfalcON p3 p3.outg tstop=10 step=0.2 hmin=5 VERSION=2.1Igcc-3.2"
@@ -924,11 +908,6 @@ As you can see, Dehnen's code is quite a lot faster. As for accuracy though, we 
 this as an excersize for the interested reader. Notice this code balances all forces
 and thus conserves total linear momentum unlike the BH86 treecode.
 
-\smallskip
-There are some C++
-compiler issues with this code, though  gcc 3.2.2 is known to work well. You will
-find this compiler version available in the {\it manybody} distribution.
-
 \section{superbox}
 
 Fellhauer et al. (2000) wrote a particle-mesh code with high resolution
@@ -936,7 +915,7 @@ sub-grids and an NGP (nearest grid point) force-calculation scheme
 based on the second derivatives of the potential.  It is also an example of 
 a code where initial conditions benefit from knowing the details of the
 potential calculation routines. In particular, if the initial conditions
-are known to be representing a stable configuration (e.g. a Plummer sphere)
+are known to be representing a stable configuration (e.g. a Plummer sphere).
 See the program {\tt Setup/plummer.f} in the {\tt Superbox} code distribution.
 
 \section{gadget}
@@ -946,7 +925,8 @@ It is primarily a cosmology code, and based on the treecode, but also incoorpora
 SPH particles
 and, for cosmological simulations, the Ewald sum technique to create periodic
 boundary conditions. The code was originally written in Fortran, but in 2005 re-released
-in a completely rewritten C version, that also runs in a parallized mode under MPI.
+and completely rewritten in C. It also runs in a parallized mode under MPI.
+Typically {\tt gadget2} will be compiled for a specific physical situation.
 
 
 \section{quadcode}
@@ -1003,7 +983,7 @@ Hernquist \& Ostriker (1992) deviced a code termed the
 Hernquist, with a NEMO wrapper program {\tt runscfm}.
 
 \footnotesize\begin{verbatim}
-  examples/ex8 : appears not to work anymore for FC4:gcc4? gcc3 ok?
+  examples/ex8 :    ??? `pwd` not needed anymore ???
   #
  2% runscfm `pwd`/p1024.in p1024.out2 dtime=1.0/64.0 nsteps=640 noutbod=16
 ### Warning [runscfm]: Resolving partially matched keyword dt= into dtime=
@@ -1028,12 +1008,16 @@ This will have created a series of {\tt SNAPnnn} files in the {\tt p1024.out2}
 directory, that have been converted to a file {\tt scfm.dat} in the 
 run directory.
 
+Note this program does not use dynamic memory, so the program needs to 
+be recompiled for more than the default number of particles.
+
 \section{galaxy}
 
 Sellwood (1997) contributed this 3-dimensional cartesian code to NEMO. Is uses the
 Fourier Analysis/Cyclic Redundancy (FACR) method, pioneered by
 Hockney (1965, 1970) and James (1977) for galactic dynamics. Running
-the program itself has some restrictions, and a NEMO frontend {\tt rungalaxy}
+the program itself has some of the usual fortran 
+restrictions, and a NEMO frontend {\tt rungalaxy}
 is available to simplify running this code:
 
 \footnotesize\begin{verbatim}
@@ -1069,10 +1053,30 @@ Time=1
 \begin{figure}[htb]
 \plotone{nt.ps}
 \caption[Code Performances]
-{Code performances - On the horizontal axis log(N), vertially log(CPU-sec/particle/step).
+{Code performances - On the horizontal axis log(N), vertically log(CPU-sec/particle/step).
 These are the values for a P4/1.6GHz laptop. Seen in this plot
-are nbody0, galaxy, gyrfalcON, hackcode1 and xxx. what about directcode}
+are nbody0, galaxy, gyrfalcON, hackcode1 and xxx}
+\label{f:performance}
 \end{figure}
+
+\section*{Questions}
+
+\begin{itemize}
+
+\item[Q1]
+Take a raw integrator, one without a NEMO interface, and write a user
+friendly shell script (sh, csh, python, perl, ...) that can take a
+NEMO snapshot input, and produces a NEMO snapshot output file, for
+given timestep dt, output timetep dt\_out and a final integration
+time of tstop.
+
+\item[Q2]
+For a given object (for example a Plummer sphere), define a statistical
+measure for the accurary of the treecode as a function of the critical
+opening angle, and compare the classical BH treecode O(NlogN) with and
+without quadrupole corrections to that of the O(N) Dehnen treecode.
+
+\end{itemize}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1092,37 +1096,41 @@ accuracy. We mention a few :
 
 \section{Lecar: 25-body problem - 1968}
 
-This is probably the oldest benchmark/in N-body dynamics.
-11 numerical integrations of a 25-body problem were assembled and presented
+This is probably the oldest benchmark/in N-body dynamics and also a
+very difficult one.
+11 numerical integrations of a particular
+25-body problem were assembled and presented
 by M. Lecar (1968).
 This was essentially a cold collapse model, with all equal-mass 
 particles at rest, and
-in fact the positions of the 25th body was left as a (necessary!)
+in fact the positions of the 25th body was left as a (necessary)
 exercize for the reader!
 Data are available as {\tt \$NEMODAT/iau25.dat}, though we added the 25th body!
 
+\section{Pythagoran Problem}
+
+A really fun setup which has been used in a number of studies
+(Burrau in 1913 was the first to report on this)
+is 3 particles on a Pythagoran Triangle with sides 3-4-5 
+and relative masses 3:4:5 (Szebehely \& Peters, 1967).
+See Section~\ref{s:pyth} for more details and the
+coverpage for a sample integration.
+
+
 \section{Aarseth, Henon \& Wielen - 1974}
 
-Aarseth, Henon \& Wielen (1974) compared the evolution of a 
+Aarseth, Henon \& Wielen (1974) compared the dynamical evolution of a 
 Plummer sphere as integrated with an N-body integrator,
 the Monte Carlo method and the fluid dynamical approach.
 This paper is also well known for its recipe how to create
 an N-body realization of a Plummer sphere. You can find examples
 of this in quite a few places, e.g.\\
-{\tt \$NEMO/src/nbod4y/init/mkplummer.c}\\
+{\tt \$NEMO/src/nbod4/init/mkplummer.c}\\
 {\tt \$STARLAB/src/node/dyn/init/makeplummer.C}\\
 {\tt \$NEMO/src/nbody/evolve/aarseth/nbody1/source/data.f}\\
 {\tt \$NEMO/usr/aarseth/firstn/data.f}
 {\tt \$NEMO/usr/Superbox/Setup/plummer.f}
 
-
-\section{Pythagoran Problem}
-
-A really fun setup which has been used by a number of people
-(Burrau in 1913 was the first to report on this)
-is 3 particles on a Pythagoran Triangle with sides 3-4-5 
-and relative masses 3:4:5 (Szebehely \& Peters, 1967).
-See Section~\ref{s:pyth} for more details. 
 
 
 \section{Kang et al. - Cosmological Hydrodynamics - 1994}
@@ -1131,7 +1139,7 @@ See Section~\ref{s:pyth} for more details.
 %Kang, Hyesung; Ostriker, Jeremiah P.; Cen, Renyue; Ryu, Dongsu;
 %Hernquist, Lars; Evrard, August E.; Bryan, Greg L.; Norman, Michael L.
 
-Kang {\it et al. } compared the simulation results of a number
+Kang {\it et al. } compared the simulation results of five
 of cosmological hydrodynamic codes from $z=20$ to $z=0$. 5 codes
 were used: three Eulerian mesh, and two variants of the
 Lagrangian SPH method.
@@ -1150,10 +1158,13 @@ Frenk {\it et al. } took 12 cosmological codes and compared the
 formation of a rich cluster of galaxies.
 Again using a number of SPH and
 Eulerian (various styles) grid simulations were used.
+\smallskip
+These simulations became known as the {\tt ``Santa Barbara Cluster''}
+benchmark.
 
-\section{Heitmann et all 2005}
+\section{Heitmann et al. - 2005}
 
-Comparing cosmlogical N-body simulations. Codes:
+Comparing cosmological N-body simulations. Codes:
 MC2 (Habib et al 2004), % not free
 FLASH (Fryxell et al 2000),
 HOT (Warren \& Salmon 1993) % not free
@@ -1161,8 +1172,8 @@ GADGET (Springel et al 2001),
 HYDRA (Couchman et al 1995),
 TPM (Xu 1995, Bode et al 2000).
 
-Apart from the Frenk et al. {\it Santa Barbara cluster comparison}, they
-also compared a few other datasets.
+Apart from the Frenk et al. {\it Santa Barbara cluster} comparison, they
+also compared two other simulations:
 
 The initial conditions, as well as some results at z=0, are available
 on their website {\tt http://t8web.lanl.gov/people/heitmann/arxiv/}.
@@ -1173,7 +1184,8 @@ Power et al - 2003 - on errors.
 \section{Hozumi \& Hernquist - 1995}
 
 Testing SCF method on either homogenous spheres or Plummer models, with
-given initial virial ratio. This also includes the cold collapse.
+given initial virial ratio. This also includes the cold collapse. In
+particular, they studied the resulting shapes.
 
 \section{Sellwood: Galaxy Dynamics - 1997}
 
@@ -1185,12 +1197,14 @@ sphere.
 
 \section{Heggie: Kyoto I - 1997}
 
-Organized by Heggie, presented at the IAU GA in Kyoto in August 1997. 10 results
+This starcluster benchmark was 
+organized by Heggie, and presented at the IAU GA in Kyoto in August 1997. 10 results
 have been compiled.
 
 \section{Heggie: Kyoto II - 2001}
 
-Presented at IAU Symposium 208 (Tokyo) on 11 July, 2001, after which 13 results
+This followup starcluster benchmark was 
+presented at IAU Symposium 208 (Tokyo) on 11 July, 2001. 13 results
 have been compiled to this moment.
 
 \section{Notes}
@@ -1238,7 +1252,8 @@ Also:
 \chapter                {Data Conversion}
 
 With this large number of integrators it is unavoidable that dataformats
-will be different.
+will be different. We list a few. Note that if your format is not listed
+here, one of these is usually close enough to be modified to work quickly.
 
 \begin{center}
 \begin{table}[h!]
@@ -1271,7 +1286,7 @@ will be different.
 {\tt rvc}       &           &  rvcsnap       &         &  Couchman \\
 {\tt xvp}      &           &  xvpsnap       &         &  Quinn/Balcells \\
 
-{\it ascii-tables}   &   -   &  tabtos    &    snapprint     &   very versatile parser\\
+{\it ascii-tables}   &   -   &  tabtos    &    snapprint     &   versatile converter\\
 
 {\it idl}         &    -     &     -      &    snapidl        &   binary IDL format  \\
 {\it 3dv}         &    -     &     -      &    snapidl        &   for a variety of 3D viewers \\
@@ -1314,20 +1329,23 @@ Aarseth uses {\it N-Body Units}, i.e.
 
 \section{Initial Conditions}
 
-Although some initial conditions can be generated from scratch, others need the
+Although some initial conditions can be generated from basic principles,
+others need the
 integrator for force calculations to place the initial conditions in a
-specific state consistent with the chosen integrator. The position of the 25th
-body in the 25-body problem is another example of where an on-the-fly calculation
+specific state consistent with the chosen integrator that uses that force. 
+The position of the 25th
+body in the 25-body problem is a simple 
+example of where an on-the-fly calculation
 is needed.
 
 Also important is the issue of quiet starts, as extensively
 discussed by Sellwood (1987, 1997). Suppression of shot noise.
-See also the new wavelet based code by Romeo et al., where the
+See also the new wavelet based code by Romeo et al. 2003, where the
 equivalent of a factor of 100 speedup is reported.
 
 White (1996) suggested a novel way to initialize cosmological simulations,
-referred to as ``glass'' initial conditions. There can be obtained when
-a Poisson sample in an expanding period box is evolved with the
+referred to as ``glass'' initial conditions. They can be obtained when
+a Poisson sample in an expanding periodic box is evolved with the
 sign of gravity reversed until residual forces have dropped to a negligible
 value. Gadget-2 supports this as an option.
 
@@ -1351,7 +1369,7 @@ Aarseth, Henon \& Wielen (1974).
 \section{Galaxy Collisions}
 
 
-Where is the dark matter in the S+S remnants sometimes called Ellipicals?
+Where is the dark matter in the S+S remnants sometimes called Ellipticals?
 (cf. Baes' papers about dark matter in E's). How does the shape
 of tidal tails depend on the extent of the dark matter.
 
@@ -1377,6 +1395,9 @@ of tidal tails depend on the extent of the dark matter.
        - M31/MW
        - M51
        - Antenna
+
+  Subsampling: how to generate good initial conditions?
+
 \end{verbatim}\normalsize
 
 
@@ -1384,7 +1405,7 @@ of tidal tails depend on the extent of the dark matter.
 \section{Cold Collapse}
 
 
-Cold Collapse (cf. v Albada 1981, but also Lecar's 25-body problem).
+Cold Collapse (cf. v Albada 1981, McGlynn?, but also Lecar's 25-body problem).
 Discussed in many papers, e.g. Hozumi \& Hernquist ,
 Aarseth, Popaloizou, Lin;  Bertin \& Stiavelli; Boily; Theis. Effects
 of softening on shape.
@@ -1658,8 +1679,12 @@ Also check the approach Romeo et al. (2003) took using wavelets.
 \section{Comparing}
 
 Take two Nbody codes and compare their potential. For example, use Sellwood's 
-{\it galaxy} PM/FFT code and Dehnen's {\tt gyrfalcON} TreeCode and compare the
-potential for a homogenous sphere of different degree of flattening.
+{\it galaxy} PM/FFT code and Dehnen's {\tt gyrfalcON} TreeCode and Trenti's
+(GCS) SFP expansion code,
+and compare the
+potential for a homogenous sphere of different degrees of flattening.
+Another interesting parametrization is that of two spheres at
+different separations (collisions of galaxies).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1676,14 +1701,14 @@ sun than this.
 
 The {\tt snap3dv} program in NEMO converts data to a variety of popular
 3D viewers, but in addition special converters are available 
-for {\tt partiview} ({\tt snapspecks}).
+for {\tt partiview} ({\tt snapspecks}) and {\tt xyzview} ({\tt snapxyz}).
 
 \subsection{xyzview}
 
 Comes with NEMO, needs the VOGL (Very Ordinary GL) library, which emulates
 GL on classic X with no acceleration. Can only plot colored dots, no finite
 size points. Poor for presentations. (manual) animations, can also show
-the continues orbit for one selected star from the simulation. 
+the orbit for one selected star from the simulation. 
 
 
 \footnotesize\begin{verbatim}
@@ -1728,6 +1753,8 @@ a conversion program {\tt snapspecks}.
 
 \section{Tioga}
 
+Written in ruby.
+
 \section{glstarview}
 
 Comes with Fregeau's code. Data from the integration can be directly  piped
@@ -1757,7 +1784,7 @@ zoom around.
 
 \section{gravit}
 
-This program has recently been developed, but has various neat visualizaton
+This program has recently been developed, and has various neat visualizaton
 options and animates simulations. It also displays the oct-tree of the
 underlying Barnes \& Hut treecode. There are plans to integrate this with
 some of the existing codes.
@@ -1799,7 +1826,7 @@ Open source visualization package, written by IBM. See
 {\tt http://www.opendx.org/}. Can be quite memory intensive, but has
 excellent tools for particle as well as grid data.
 
-\section{AstroMD}
+\section{AstroMD / VisiVO}
 
 {\bf cosmolab} distributes an open-source vizualization package 
 called {\tt AstroMD}.  Uses the Visualization Tool Kit ``vtk''
@@ -1813,15 +1840,22 @@ this kind of dynamic query technique available in
 NEMO's program {\tt tabzoom}, which uses pgplot for visualization
 and a simple command line interface for interactions.
 
+\section{R}
+
+Although R is a statistic package, it has a very nice integrated
+way for visualization, and allows extending the package by using
+your own compiled code. It could potentially be useful for our
+type of analysis.
 
 \section{IDL}
 
 Although this program is not freely available, 
 many people have written display and 
-analysis routines for IDL that are available.
+analysis routines for IDL that are freely available.
 Gadget comes with some
 routines. See also NEMO's {\tt snapidl} routine to export data for IDL.
-The Berkeley group (Marc Davis?) has some routines on their website.
+The Berkeley group (Marc Davis) has some routines on their website
+and some of your instructors admit to using it.
 
 % give a snapidl example...
 
@@ -1830,13 +1864,19 @@ The Berkeley group (Marc Davis?) has some routines on their website.
 You always need image conversion programs. {\tt ImageMagic} is one of 
 the better packages for this. Much like NEMO and Starlab, ImageMagic
 is a collection of image manipulation programs (e.g. convert, montage, mogrify).
-Reads and writes just about any image format, including FITS. Most linux
+Reads and writes just about any image format, including some flavors
+of FITS. Most linux
 distributions make this package directly available, and place their
 binaries in {\tt /usr/bin}.
 
 \section{Movies}
 
-mpeg, animated gif, avi....
+Animations are still the most popular way to convey your results
+in a presentation. Good tools exist, but the intrusion of closed
+sourced formats (or CODECs within a particular format)
+has scattered the field.
+
+mpeg, animated gif, avi, mpg2avi ....
 
 \begin{verbatim}
 http://bmrc.berkeley.edu/frame/research/mpeg/mpeg2faq.html
@@ -1855,13 +1895,23 @@ $NEMO/csh/mkmpeg_movie : some example scripts to make movies
 \begin{enumerate}
 
 \item 
-Find out what time step criterion the first N-body code (vion Hoerner)
-was using. How do {\tt nbody0} and this program compare in their performance
-if you want to reach the same accuracy.
+Find out what time step criterion the first N-body code (von Hoerner)
+was using. How do {\tt nbody0} and this program scale in their performance
+if you want to reach the same accuracy?
 
 \item
 What is this peculiar ``{\tt time resets}'' quoted in one of the {\tt nbody0}
 examples.
+
+\item
+Take {\tt hackcode1}, There are two ways to get more accurate results:
+add a quadrupole term (as implemented in {\tt hackcode1\_qp} or decrease
+the critical opening angle ({\tt tol=}). Device an experiment to show
+which of the two is the less compute intensive. Does it depend on the 
+number of particles or the configuration?
+
+\item
+Back to kindergarden: connect the dots in Figure~\ref{f:performance}.
 
 \end{enumerate}
 
@@ -1908,7 +1958,7 @@ Dehnen, W. - {\it A Very Fast and Momentum-Conserving Tree Code} - 2000
 astro-ph/0003209 : {\bf 0003209.ps}, {\bf 2002JCP...179...27D.pdf}
 
 Fellhauer et al - 2000 
-{\it SUPERBOX - an efficient code for collisionless galactic dynamics}
+{\it SUPERBOX - An efficient code for collisionless galactic dynamics}
 NewA, 5, 305. {\bf 2000NewA....5..305F.pdf} 
 
 Fregeau, J.M., Cheung, P., Portegies Zwart, S.F., and Rasio, F.A. (2004)
@@ -1945,7 +1995,12 @@ Ap.J. 349,  562. {\bf 1990ApJ...349..562H.pdf}
 Hernquist \& Ostriker - 1992 - {\it A self-consistent field method for galactic dynamics}
 {\bf 1992ApJ...386..375H.pdf}.
 
+Hernquist - 1993 - ApJS - how to create initial conditions (we have the code, but doesn't
+seem to work well)
+
 Hockney \& Eastwood - 1970? {\it Simulations using Particles} - there is now a 2nd edition.
+
+Hozumi \& Hernquist - 1995 - ....
 
 Holmberg, E. - 1941 - Ap.J. 94, 385.
 {\bf 1941ApJ....94..385H.pdf}.
@@ -2045,8 +2100,8 @@ Weinberg, M. - 2001b -
 
 White,S.D.M. - 1983 - Ap.J. 274, 53 : {\bf 1983ApJ...274...53W.pdf}
 
-White,S.D.M. - 1996 
-{\it Les Houches Lecture Notes}
+White,S.D.M. - 1996 {\it ...DaTitle....},
+in: {\it Les Houches Lecture Notes}
 {\bf 94100043.ps}
 
 White \& Barnes - 1984 - {\bf 1984MNRAS.211..753B.pdf}
@@ -2055,6 +2110,7 @@ Zhan - astro-ph/0507237 {\bf Zhan-0507237.pdf}
 
 \section*{URLs}
 
+\footnotesize
 \begin{verbatim}
 
 http://modesta.science.uva.nl/modest/modest5c/index.html  this N-body school (2005)
@@ -2065,6 +2121,7 @@ http://www.astro.umd.edu/nemo                             NEMO website
 http://www.ids.ias.edu/~starlab/                          Starlab website
 
 \end{verbatim}
+\normalsize
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -2152,6 +2209,9 @@ NEMO: parse bodytrans functions?
 NEMO 3D viewer? Hold down key '1', '2' or '2' and move the mouse. Hit ESC to quit.
 
 \item 
+{\tt glnemo a0.dat}
+
+\item 
 {\tt snapgrid a0.dat - xrange=-8:8 yrange=-8:8 nx=128 ny=128 yvar=z | ccdsmooth - - 0.1 | ccdfits - a0.fits} :
 NEMO make a CCD type observation of dark matter
 
@@ -2220,6 +2280,7 @@ Some details on the installation of this are described in the next sections.
 
 First a overview of the {\it manybody} hierarchy under {\tt /data/week/sc2005}:
 
+\footnotesize
 \begin{verbatim}
 manybody/                       root directory
     opt/                        contains a {bin,lib,include,...} tree for a private --prefix
@@ -2234,6 +2295,7 @@ manybody/                       root directory
 manybody_pkg/                   (mostly) tar balls of codes 
     
 \end{verbatim}
+\normalsize
 
 
 
@@ -2297,8 +2359,9 @@ laptop.
 Much of the available open source software we use, use
 {\it autotools} to {\tt configure}, {\tt make} and {\tt install} their
 software on the users system. Where exactly this software is going to be located,
-is free to the user to decide. On most Unix-based system the {\tt usr},
-{\tt /usr/local}, {\tt /opt} or {\tt /sw} (e.g. Fink on MacOSX) are used for this.
+is free to the user to decide. On most Unix-based system the {\tt /usr},
+{\tt /usr/local}, {\tt /opt} {e.g. DarwinTools on MacOSX} 
+or {\tt /sw} (e.g. Fink on MacOSX) are used for this.
 As long
 as the user then puts the respective {\tt ''bin''} directory in their search
 path, and perhaps the respective {\tt ''lib''}  directory in their 
@@ -2322,7 +2385,7 @@ So, for almost all such packages we can use these kinds of commands:
 
 \end{verbatim}\normalsize
 
-and for packages that depend on these, we would use
+and for packages that depend on other packages, we would use something like
 
 \footnotesize\begin{verbatim}
 
@@ -2358,7 +2421,7 @@ fltk	   1.1.4
 hdf        4.2r0
 plplot     5.5.3           http://plplot.sourceforge.net/   
 pgplot     5.5.2          (w/ patches via cvs.astro.umd.edu)
-gsl        1.4
+gsl        1.4 -> 1.7 or 1.8
 
 ruby	   1.8.2
 
@@ -2389,7 +2452,7 @@ gcc
 
 If you have never heard of CVS it is worth reading
 this appendix and considering to use it (a few packages
-in manybody are CVS enabled, encourage you to use this timesaving mode).
+in manybody are CVS enabled, encouraging you to use this timesaving mode).
 CVS is one of the more popular
 source code control systems, which simplifies keeping your source code
 up to date with a master version. 
@@ -2402,7 +2465,7 @@ important to enable your CVS account first, using the {\tt cvs login}
 command:
 
 \footnotesize\begin{verbatim}
-  %1 cvs -d :pserver:anonymous@cvs.astro.umd.edu:/home/cvsroot login
+  1% cvs -d :pserver:anonymous@cvs.astro.umd.edu:/home/cvsroot login
   Logging in to :pserver:anonymous@cvs.astro.umd.edu:2401/home/cvsroot
   CVS password: 
 \end{verbatim}\normalsize
@@ -2514,6 +2577,12 @@ write permission, viz.
   3% cvschroot :pserver:pteuben@cvs.astro.umd.edu:/home/cvsroot
 \end{verbatim}\normalsize
 
+\begin{figure}[htb]
+\plotone{cvs.eps}
+\caption[CVS diagram]
+{CVS flow diagram}
+\label{f:cvs}
+\end{figure}
 
 
 
@@ -2611,7 +2680,7 @@ The figures on the cover page were made in the following way:
 \section{Collisional Orbit}
 \label{s:pyth} 
 
-Although the Figure8 orbit is very artistic, it is not very representative
+Although the Figure8 orbit is perhaps very artistic, it is not very representative
 for orbits in collisional systems, in fact, almost more appropriate
 for collisionless systems!
 The collisional orbit choosen was drawn from the Pythagoran problem:
@@ -2984,10 +3053,6 @@ Q=0 for runbody1 when in= is used...   bug in the wrapper interface
 Aux/Acceleration/Potential are meaningless.
 
 \item
-{\tt (run)galaxy} (Sellwood) has problems with post-run dataconversion. 
-{\tt unfio} has changed interface.
-
-\item
 {\tt GalactICS} has not been properly checked 
 
 \item
@@ -2997,7 +3062,7 @@ Aux/Acceleration/Potential are meaningless.
 fix MANPATH for NEMO under linux
 
 \item
-{\tt tkrun} demos
+{\tt tkrun} demos / python?
 
 \item
 overview diagrams of the hierarchy and layout of NEMO, Starlab, Manybody
@@ -3010,6 +3075,29 @@ units(1) and units(5) unfinished
 
 \item
 python, ruby
+
+\item
+Fink/DarwinPorts
+
+\item
+Trenti's CGS
+
+\item
+superbox
+
+\item
+nam (Shaya/Peel)
+
+\item
+Romeo's wavelet code (has some GPL issues)
+
+\item
+GR Multipole Moment Code (umiacs)
+
+\item
+by nature of the programmers, not all integrators use the same
+method to choose stepsize, data dump interval, end of integration
+time etc. We should have a table for this.
 
 \end{enumerate}
 
