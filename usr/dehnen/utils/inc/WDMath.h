@@ -1,7 +1,7 @@
 // -*- C++ -*-                                                                  
 ////////////////////////////////////////////////////////////////////////////////
 ///                                                                             
-/// \file    inc/Math.h                                                         
+/// \file    inc/WDMath.h                                                         
 ///                                                                             
 /// \author  Walter Dehnen                                                      
 ///                                                                             
@@ -137,7 +137,7 @@ namespace WDutils {
   };
   template<> struct __sincos<float> {
     static void sc(float x, float&s, float&c) {
-#if defined(__GNUC__) || defined (__INTEL_COMPILER) || defined (__PGCC__)
+#if 0
     __asm __volatile__ ("fsincos" : "=t" (s), "=u" (c) : "0" (x) );
 #else
     s = std::sin(x);
@@ -147,7 +147,7 @@ namespace WDutils {
   };
   template<> struct __sincos<double> {
     static void sc(double x, double&s, double&c) {
-#if defined(__GNUC__) || defined (__INTEL_COMPILER) || defined (__PGCC__)
+#if 0
     __asm __volatile__ ("fsincos" : "=t" (s), "=u" (c) : "0" (x) );
 #else
     s = std::sin(x);

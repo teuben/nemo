@@ -28,7 +28,7 @@
 // Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                    
 //                                                                              
 #include <complex>                                  // order important!         
-#include <Math.h>                                   // have __COMPLEX__ defined 
+#include <WDMath.h>                                 // have __COMPLEX__ defined 
 #include <inline.h>
 #include <iostream>
 

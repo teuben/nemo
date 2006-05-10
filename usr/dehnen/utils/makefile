@@ -129,7 +129,7 @@ memory_h		:= $(INC)memory.h $(exception_h) $(inline_h)
 numerics_h		:= $(INC)numerics.h $(inline_h) $(memory_h) $(tupel_h)
 spline_h		:= $(INC)spline.h $(numerics_h) $(memory_h)
 random_h		:= $(INC)random.h $(inline_h) $(Pi_h) $(traits_h)
-Math_h			:= $(INC)Math.h $(Pi_h) $(exception_h)
+Math_h			:= $(INC)WDMath.h $(Pi_h) $(exception_h)
 
 # -----------------------
 # source dependency lists
