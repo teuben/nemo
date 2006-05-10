@@ -8,13 +8,15 @@ BINS = addgravity getgravity gyrfalcON lagrange_radii \
         manipulate mkdehnen mkking mkplum scale_eps snapstack \
  	symmetrize TestGrav
 
+static_libs: $(LIB)libfalcON.a
+
 nemo_bins: nemo_libs $(BINS)
 	make 
 	(cd $(HOS); cp $(BINS) $(NEMOBIN))
 	cp $(LIB)/lib*.so $(NEMOLIB)
 
-nemo_libs: utils
-	(cd utils; make)
+nemo_libs: utils static_libs
+	(cd utils; $(MAKE))
 	cp utils/lib/$(HOS)/lib*.so $(NEMOLIB)
 
 nemo_test:
