@@ -34,7 +34,7 @@ endif
 SRC            := src/
 OBJ            := obj/
 MANIP          := shared-lib/
-INC            := -I./ -I./inc -I$(GYRFALCON)/inc -I$(NEMOINC) -I$(NEMOLIB)
+INC            := -I./ -I./inc -I$(GYRFALCON)/inc -I$(GYRFALCON)/utils/inc -I$(NEMOINC) -I$(NEMOLIB)
 MNAME          := glnemo
 
 #------------------------------------------------------------------------------
