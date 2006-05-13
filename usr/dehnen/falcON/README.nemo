@@ -1,0 +1,17 @@
+Differences from Dehnen's distribution:
+
+
+1) some files needed to be renamed because  MacOSX cannot
+   see upper and lower case differently
+
+
+utils/inc/Math.h      	renamed to WDMath.h
+utils/src/Math.cc     	now includes WDMath.h
+
+src/acc/combined.cc	renamed to combined_a.cc
+src/acc/Combined.cc	no change,  but this was duplicated on MacOSX
+
+
+2) when you build within nemo,use the -i flag to pass over problems,
+   and make sure CXX=$CXX is compatible with the one in $NEMOLIB/makedefs
+
