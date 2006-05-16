@@ -4,7 +4,7 @@
 # Makefile                                                                    |
 #                                                                             |
 #                                                                             |
-# Copyright Jean-Charles LAMBERT - 2005                                       |
+# Copyright Jean-Charles LAMBERT - 2006                                       |
 # e-mail:   Jean-Charles.Lambert@oamp.fr                                      |
 # address:  Dynamique des galaxies                                            |
 #           Laboratoire d'Astrophysique de Marseille                          |
@@ -34,7 +34,7 @@ endif
 SRC            := src/
 OBJ            := obj/
 MANIP          := shared-lib/
-INC            := -I./ -I./inc -I$(GYRFALCON)/inc -I$(GYRFALCON)/utils/inc -I$(NEMOINC) -I$(NEMOLIB)
+INC            := -I./ -I./inc -I$(GYRFALCON)/inc -I$(GYRFALCON)/utils/inc -I$(GYRFALCON)/../utils/inc -I$(NEMOINC) -I$(NEMOLIB)
 MNAME          := glnemo
 
 #------------------------------------------------------------------------------
