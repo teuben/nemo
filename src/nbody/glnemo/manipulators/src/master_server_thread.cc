@@ -85,6 +85,7 @@ void MasterServerThread::updateData(const snapshot * S)
   //my_snapshot = S; // update data from snapshot
   //std::cerr << "Update time [" << my_snapshot->time() << "]\n";
   pthread_cond_broadcast( &condition_cond ); // grant autorization to Thread servers
+  pthread_mutex_unlock(&condition_mutex);
 }
 // -----------------------------------------------------------------------------
 // start:                                                                       
