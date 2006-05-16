@@ -48,12 +48,6 @@ ServerThread::ServerThread(const std::string _sim_name,
   selected_index = NULL;
   sim_name = _sim_name;
 
-  int status = pthread_mutex_init(&condition_mutex,NULL);
-  if (status != 0 ) {
-    std::cerr <<"ServerThread::ServerThread() - ERROR in [pthread_mutex_init], aborted...\n";
-    std::exit(1);
-  }
-
   int nbody = my_snapshot->N_bodies();
   selected_index= new int[nbody];     // keep memory
   selected_pos  = new float[nbody*3]; // keep memory
@@ -142,15 +136,16 @@ void ServerThread::run()
 	parseSelectedString(selected_string);
 
 	// ********** >> Protect this area with conditionnal mutex
-	//pthread_mutex_lock(&condition_mutex );
+	PRINT_D std::cerr <<"["<<getMyid()<<"]"<< "before LOCK A\n\n";
 	pthread_mutex_lock(mut);
+	PRINT_D std::cerr <<"["<<getMyid()<<"]"<< "After LOCK A\n\n";
 	lock_mut = true;
 	if (first_connect) {      // this is the first connexion, we 
 	  first_connect = false;  // can get the data without waiting
 	} 
 	else { // here I am waiting authorization from main thread (updateData())
 	  PRINT_D std::cerr <<"["<<getMyid()<<"]"<< "Waiting authorization...\n";
-	  pthread_cond_wait( ServerThread::cond, &condition_mutex);
+	  pthread_cond_wait( ServerThread::cond, mut);
 	  PRINT_D std::cerr <<"["<<getMyid()<<"]"<< "Got authorization\n";
 	}
 	PRINT_D std::cerr <<"["<<getMyid()<<"]"<< "Sending time => [" << my_snapshot->time() << "]\n";
@@ -162,7 +157,6 @@ void ServerThread::run()
 	serverMB->sendData(MessageBuffer::Pos,selected_nbody*3,(char *) selected_pos);  // send positions
 	t_stop=times(&qq);
 	PRINT_D std::cerr <<"stop = " << t_stop <<"\n";
-	//pthread_mutex_unlock(&condition_mutex );
 	pthread_mutex_unlock(mut);
 	lock_mut = false;  
 	// ********** << Protect this area with conditionnal mutex
@@ -215,7 +209,6 @@ void ServerThread::run()
       if (lock_mut) {   // must release the mut, bc it was caught
 	PRINT_D std::cerr <<"["<<getMyid()<<"]"
 			  << "ServerThread::run() - WARNING: release mutex trapped in a Try and Catch !!!!\n";
-	//pthread_mutex_unlock(&condition_mutex );
 	pthread_mutex_unlock(mut );
       }
     }

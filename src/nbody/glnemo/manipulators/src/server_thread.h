@@ -48,7 +48,6 @@ class ServerThread : public GenericThread
   int   * selected_index; // bodies's indexes selected
   pthread_mutex_t  * mut;
   pthread_cond_t   * cond;
-  pthread_mutex_t  condition_mutex;
   int    newSd;
 
   int parseSelectedString(char * select_string);
