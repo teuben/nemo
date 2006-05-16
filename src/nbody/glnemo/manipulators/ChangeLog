@@ -1,0 +1,14 @@
+glnemo gyrfalcON manipulator ChangeLog
+
+
+(NEMO 3.2.4 CVS) May, 2006 :
+============================
+	fix a race condition on the mutex which is supposed to protect a
+	pthread_cond_wait function. It prevents possible deadlocks when
+	gyrfalcON/glnemo are used with really few particles (few thousands).
+
+
+
+(NEMO 3.2.4 CVS) November, 7 2006 :
+====================================
+	First import into CVS
