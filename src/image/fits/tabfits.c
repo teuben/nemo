@@ -37,6 +37,8 @@ string defv[] = {
 
 string usage = "convert tables into FITS images";
 
+string cvsid="$Id$";
+
 #define MAXCOL 2048
 #define MAXDAT 8192
 
