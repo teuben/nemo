@@ -11,9 +11,11 @@
  *     22-jul-00    V3.2: fix for new style fitsio              pjt
  *     23-oct-03    V3.2b: check for MAXDAT (and made it bigger) pjt
  *      1-jan-04        c: get_line check return value
+ *     18-may-06        d: fix for too long comment lines        pjt
  *
  * todo:  read one more line, check if file is done!!
  *        if header contains NAXIS, NAXIS1,...., nx=,ny=,nz= is still needed
+ *        handle COMMENT and HISTORY "keywords" like keys, not comments
  */
 
 #include <stdinc.h>
@@ -29,7 +31,7 @@ string defv[] = {
     "ny=\n              Y-Size of data, or else specify NAXIS2 in header",
     "nz=\n              Z-Size of data, or else specify NAXIS3 in header",
     "nmax=100000\n      Allocation space for piped I/O",
-    "VERSION=3.2c\n	1-jan-04 PJT",
+    "VERSION=3.2d\n	18-may-06 PJT",
     NULL,
 };
 
@@ -37,6 +39,7 @@ string usage = "convert tables into FITS images";
 
 #define MAXCOL 2048
 #define MAXDAT 8192
+
 #ifndef MAX_LINELEN
 #define MAX_LINELEN  16384
 #endif
@@ -109,9 +112,14 @@ void nemo_main()
         } else if (*key) {
             /* write keyword verbose */
             /* fitwrhda(fitsfile,key,value); */
-            fitwrhd(fitsfile,key,value);
+	  if (strlen(key) > 8) error("can't write key=%s",key);
+	  if (strlen(value) > 60) value[60] = 0;
+	  fitwrhd(fitsfile,key,value);
         } else {
-            fitwra(fitsfile,"        ",line);
+	  if (strlen(line) > 72) line[72]=0;
+	  /*               12345678        */
+	  fitwra(fitsfile,"        ",line);
+      
         }
     }
 
@@ -185,8 +193,9 @@ int get_key(char *line, char *key, char *value)
     else
     	return 0;                           /* if not, return bad line */
     	
-    while (isspace(*cp))                    /* skip leading whitespace */
+    while (isspace(*cp))                    /* skip leading whitespace before key */
         cp++;  
+
     while (!isspace(*cp) && *cp != '=')     /* grab the keyword */
         *lkey++ = *cp++;
     while (isspace(*cp))
