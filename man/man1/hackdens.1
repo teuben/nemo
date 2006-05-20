@@ -8,6 +8,9 @@ hackdens \- local density estimator using tree algorithm
 using the hierarchical
 N-body algorithm (J. Barnes and P. Hut, \fINature\fP \fB324\fP, 446).
 For small N or systems with complex geometry SNAPDENS(1NEMO) may be preferred.
+.PP
+The density can be writtin in the slot normally used for Potentials (the default),
+or if \fBwrite_at_phi=f\fP be written to a tag named \fIDensity\fP.
 .SH PARAMETERS
 The following parameters are recognized; they may be given in any order.
 .TP 24

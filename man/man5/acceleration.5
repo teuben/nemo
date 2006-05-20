@@ -1,0 +1,120 @@
+.TH POTENTIAL 5NEMO "28 October 2005"
+.SH NAME
+acceleration \- format for accelerations description (functors)
+.SH SYNOPSIS
+.nf
+.B #include <acceleration.h>
+.PP
+.B typedef void(*acc_pter)         /* return: void                            */
+.B     (int,                      /* input:  number of dimensions            */
+.B      double,                   /* input:  simulation time                 */
+.B      int,                      /* input:  number bodies = size of arrays  */
+.B      const void*,              /* input:  masses:         m[i]            */
+.B      const void*,              /* input:  positions       (x,y,z)[i]      */
+.B      const void*,              /* input:  velocities      (u,v,w)[i]      */
+.B      const int *,              /* input:  flags           f[i]            */
+.B      void*,                    /* output: potentials      p[i]            */
+.B      void*,                    /* output: accelerations   (ax,ay,az)[i]   */
+.B      int,                      /* input:  indicator                       */
+.B      char);                    /* input:  type: 'f' or 'd'                */
+.PP
+.ta +3i
+.B acc_pter get_acceleration(
+.B	const char*,   /* input:  acc_name               */
+.B	const char*,   /* input:  acc_pars               */
+.B	const char*,   /* input:  acc_file               */
+.B	bool      *,   /* output: need masses?           */
+.B	bool      *);  /* output: need velocities?       */
+.fi
+.SH DESCRIPTION
+\fIacceleration(5NEMO)\fP are implemented as an improvement to the 
+nearly-compatible \fIpotential(5NEMO)\fP format.
+.SH PARAMETERS
+The 4th argument to get_acceleration() is boolean and returns whether
+masses are required as input for acceleration(). If they are not
+required a NULL pointer may be given.
+.PP
+The 5th argument to get_acceleration() is boolean and returns whether
+velocities are required as input for acceleration(). If they are not
+required a NULL pointer may be given.
+Velocities may be used to compute friction forces, such as the drag
+a gaseous disk is generating on stars crossing it.
+.PP
+arrays are passed as pointer to void. They must be either all of type
+float or all of type double as indicated by the last argument being 'f'
+or 'd', respectively.
+.PP
+arrays of vector quantities are in the order x0,y0,z0, x1,y1,z1, ...
+.PP
+if the pointer to flags is NULL, all bodies are supposed to be active,
+otherwise only those for which (f[i] & 1) is true.
+.PP
+the argument "indicator" of acceleration() indicates whether the
+accelerations and potential shall be assigned or added.
+If bit 0 is set, the potential    is added, otherwise assigned,
+If bit 1 is set, the acceleration is added, otherwise assigned.
+So, 0 means both are assigned.
+
+
+
+
+
+.SH EXAMPLES
+The following table lists the non-pattern speed parameters 
+for a few example potentials
+found in \fB$NEMOOBJ/potential\fP. \fINote: the pattern
+speed is not listed here\fP
+.ta +1.5i +1.5i
+.nf
+\fBharmonic\fP	wx,wy,wz	1,1,1
+\fBplummer\fP	m,a      	1,1
+\fBlog\fP  	mc,rc,q  	1,1,1
+\fBbar83\fP	fm,fx,ca	1.334697416,8.485281374,0.2
+\fBhackforce\fP	tol,eps,rsize,fcells	1,0.025,4,0.75
+\fBccd\fP	Iscale,Xcen,Ycen,Dx,Dy	1,0,0,1,1
+.fi
+A full listing, including their mathematical expression can be
+found in the NEMO manual, see also \fI$NEMO/text/manuals/potential.inc,\fP,
+and of course in \fI$NEMO/src/orbit/potential/data\fP.
+.SH BUGS
+Since the later introduction of a third character valued
+parameter in \fIinipotential()\fP
+a Fortran-to-C interface cannot be used in as portable a way as
+before. A small Fortran-to-C interface is however available, but
+is not guaranteed to work on all machines.
+Also keep in mind if you write your potentials in fortran:
+common blocks and other used routines get loaded into the
+executable, with the potential for duplicate symbol names.
+
+Most likely \fIloadobj(3NEMO)\fP will break under such circumstances.
+.PP
+Second: no I/O should be done. In practise this also means that
+this third parameter, \fBpotfile\fP, of \fIinipotential\fP cannot
+be used, as is mostly serves as a filename. The reason is that
+we didn't want the programs to have to link in huge fortran I/O
+libraries, including various portability problems. 
+.PP
+There is one exception: \fIpotlist(1NEMO)\fP is allowed to 
+load \fIpotential(5NEMO)\fP files with FORTRAN WRITE statements.
+After you have made sure the function works as you think, 
+these statements must be Commented out and can then be reloaded
+by most other potential/orbit programs.
+
+.SH "ENVIRONMENT"
+The environment variable \fBACCPATH\fP can be used to search for accelerations
+in other than the local directory. 
+.SH "SEE ALSO"
+acceleration(3NEMO), potential(5NEMO), manipulator(5NEMO),gyrfalcON(1NEMO)
+.SH "AUTHOR"
+Peter Teuben
+.SH "FILES"
+.nf
+.ta +2.5i
+~/src/orbit/potential   potential.c, potential.h potentialf.c
+~/text/manuals      	potential.inc (latex description)
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +2.0i +2.0i
+28-oct-05	man page finally written	PJT
+.fi

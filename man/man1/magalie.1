@@ -43,70 +43,70 @@ No default.
 Number of particles in disk. Set them to 0 to leave out this
 component.
 Notice these are the first set of particles in the final snapshot.
- [8000]  
+ [20000]  
 .TP
 \fBnbulge=\fP
-Number of particles in bulge [4000]  
+Number of particles in bulge [5000]  
 .TP
 \fBnhalo=\fP
 Number of particles in halo. 
 Notice these are the last set of particles in the final snapshot.
-[6000]  
-.TP 20
+[40000]  
+.TP
 \fBhdisk=\fP
 Scaleheight of the disk (in units of scale
-.TP 20
+.TP
 \fBrsolar=\fP
 Solaris radius for calibration of Vsolar=220 [2.43]
-.TP 20
+.TP
 \fBQtoomre=\fP
 Toomre stability parameter [1.5]
-.TP 20
+.TP
 \fBcdisk=\fP
 Cutoff radius of disk [10]
-.TP 20
+.TP
 \fBzdisk=\fP
 Height cutoff of disk [2]
-.TP 20
+.TP
 \fBmbulge=\fP
 Mass of bulge (in units of disk mass)
-.TP 20
+.TP
 \fBrbulge=\fP
 Scalelength of bulge [2]
-.TP 20
+.TP
 \fBcbulge=\fP
 Cutoff radius of bulge [10]
-.TP 20
+.TP
 \fBzbulge=\fP
 Cutoff height of bulge [1]
-.TP 20
+.TP
 \fBqbulge=\fP
 Axis ratio C/A of bulge [1]
-.TP 20
+.TP
 \fBfbulge=\fP
 Streaming fraction of bulge [0]
-.TP 20
+.TP
 \fBmhalo=\fP
 Mass of halo (in units of disk mass)
-.TP 20
+.TP
 \fBrhalo=\fP
 Scalelength of halo [2]
-.TP 20
+.TP
 \fBchalo=\fP
 Cutoff radius of halo [20]
-.TP 20
+.TP
 \fBc2halo=\fP
 Cutoff radius of halo for ISO (for LH
-.TP 20
+.TP
 \fBqhalo=\fP
 Axis ratio C/A of halo [1]
-.TP 20
+.TP
 \fBtype=\fP
 Type of halo: LH or ISO [LH]
-.TP 20
+.TP
 \fBseed=\fP
 Random seed [0]
-.TP 20
+.TP
 \fBcleanup=\fP
 cleanup run directory after use (not used yet)
 .TP
@@ -208,5 +208,7 @@ Peter Teuben (NEMO interface) -
 dark ages	V1.0 See their NewA paper	Boily et al.
 21-Mar-04	V1.1 Created at the Nbody school	PJT
 24-mar-04	V1.2 added most primary keywords, at 37,000ft	PJT
+25-jan-05	V1.2a fixed bulge mass encoding problem
+24-mar-06	V1.2b fixed bulge size encoding problem,updated docs	PJT
 .fi
 
