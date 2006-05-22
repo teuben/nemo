@@ -1,0 +1,24 @@
+C -*- fortran -*-
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C  CGS - Collisionless Galactic Simulator - Source Files  C  
+C                                                         C
+C  Created by M. Trenti & T.van Albada in Fortran77 2003  C
+C                                                         C
+C  Version 1.0 Alpha                                      C
+C                                                         C
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+
+C-----------------------------------------------------------------------   
+C COMMON FOR TIME
+      INTEGER LSTEP,INPR,INCM,INSNAP 
+      DOUBLE PRECISION DT,TIME,TMAX,MDT,MINDT
+      COMMON /TM/ DT,TIME,TMAX,MDT,MINDT,LSTEP,INPR,INCM,INSNAP 
+C  LSTEP      : MAX NUMBER OF STEP PERFORMED IN THE SIMULATION
+C  INPR       : FREQUENCY OF DIAGNOSTIC CALL
+C  INCM       : FREQUENCY OF CENTER OF MASS CALL
+C  TIME       : CURRENT TIME OF THE SIMULATION
+C  DT         : TIMESTEP 
+C  TMAX       : END TIME OF THE SIMULATION
+C  MDT        : MAX ALLOWED TIME STEP 
+C  MINDT      : MINIMUM ALLOWED TIME STEP
+C  INSNAP      : FREQUENCY OF SNAPSHOT WRITING

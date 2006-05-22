@@ -1,0 +1,70 @@
+Hi Peter, 
+
+I am sending you an alpha version the code written by me and Tjeerd. I
+have cleaned the source files from specific diagnostic stuff that I
+used for my research. I left the basic diagnostic quantities,
+e.g. total energy, angular momentum, inertia tensor, density and
+anisotropy profiles, plus the original fort.2 file used in old Tjeerds
+code which summarizes the most important information. 
+
+I was hoping to be able to do more to prepare the code interfaced for
+NEMO, but time is runnng so fast that it is probably better if I send
+you this stand-alone version. Next Wednesday we can thus discuss what
+changes I can make to the source code for the distribution.
+
+To compile simply use: 
+
+make -f Makefile
+
+To test that all is working you may then try to execute "CGS". I have
+set up the init files so that a Plummer model with 40000 particles is
+integrated for a couple of dynamical times using a radial grid with
+N_g = 80 and including spherical harmonics up to l=4. 
+
+The total energy and angular momentum conservation may be checked from
+fort.20 (see below). 
+
+Input: 
+
+* PARAMETER.DAT controls the basic input (the template provided
+  contains explanation of each entry line) With PLUMMER INIT FLAG = 1
+  you generate a plummer model, with FLAG = 2 you start from clumpy
+  init conditions (some more things to be set in this case) while with
+  FLAG = 3 you read the ICs from the files "initPOS.dat" and
+  "initVEL.dat".
+
+Output files: 
+
+* fort.2: van Albada's output (you may be already familiar with it...) 
+
+* fort.11 & fort.12: several lagrangian radii vs time 
+
+* fort.13: radial and tangential velocity dispersions; at each output
+  time it gives for each grid point r, <v_r^2(r)>, <v_t^2(r)>,
+  <v_t^2(r)>/<v_r^2(r)>
+
+* fort.14: total radial and tangential kinetic energy: time, K_r,K_t, 2K_r/K_t
+
+* fort.16: inertia tensor eigenvalues vs. time 
+
+* fort.17: ellipticity ratios b/a and c/a vs. time with a >= b >= c
+
+* fort.18: density computed over the radial grid at each output
+  time. For each line: radius, density (using PIC kernel), Mass(r),
+  density (using simple number count), number of particles in the grid.
+
+* fort.19: time, angular momentum components, and mean shape parameter
+  $e$ of the orbits (for definition of $e$ you may look in the source
+  code). 
+
+* fort.20: time, total energy, virial ratio -2K/W, total angular
+  momentum
+
+* fort.28, fort.33, fort.34 same as fort.18, fort.13 and fort.14 but
+  using only bound particles. 
+
+If you have any question please contact me!
+
+Best regards,
+
+Michele 

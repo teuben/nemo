@@ -1,0 +1,73 @@
+
+
+my notes
+
+- TODO's
+  - Performing step... message not needed (or add a debug option)
+  - need some kind of option to add potentials and/or forces to
+    the output columns (options=pot,acc as in hackcode1??)
+
+
+
+- BENCHMARK  (time ./CGS using the default input PARAMETER.DAT)
+  this  will run 832 steps....
+
+  gcc4 on laptop (1.2GHz P4)   320.728u 0.304s 6:16.28 85.3%
+
+P4/1.6	325.856u  0.328s 6:28.73 83.9% (g77 3.2.3)
+P4/1.6	292.722u 8.140s 10:27.79 47.9% (gfortran 4.0.1)
+P4/1.6	195.908u 0.832s 3:58.91 82.3% (intel 8.1)
+AMD64/	130.252u 0.100s 2:10.51 99.8% (g77 3.4.2)
+P4/3.0  197.602u 0.824s 3:33.66 92.8%  g77 3.4.1 [sys]
+        180.683u 0.776s 3:13.19 93.9%  g77 3.2.2
+	167.018u 0.771s 3:00.01 93.2%  g77 3.4.4
+	159.616u 4.297s 2:51.74 95.4%  gfortran 4.0.0
+
+laptop:
+
+gcc2.95.2
+330.86user 0.83system 6:56.16elapsed 79%CPU 
+0.32318550E+00   0.21647048E+00  -0.79238182E+00  -0.13498578E+01  -0.56035858E+00   0.18289435E+00
+
+gcc3.2.2  
+362.51user 0.24system 7:02.26elapsed 85%CPU 
+0.32318494E+00   0.21647027E+00  -0.79238206E+00  -0.13498584E+01  -0.56035876E+00   0.18289508E+00
+
+gcc 3.3.4
+315.07user 0.10system 5:35.76elapsed 93%CPU 
+0.32318494E+00   0.21647027E+00  -0.79238206E+00  -0.13498584E+01  -0.56035876E+00   0.18289508E+00
+
+gcc 3.4.2
+301.32user 0.16system 5:39.81elapsed 88%CPU
+0.32318518E+00   0.21647021E+00  -0.79238129E+00  -0.13498586E+01  -0.56035882E+00   0.18289433E+00
+
+gcc 4.0.0
+289.00user 7.51system 6:52.03elapsed 71%CPU 
+0.32318723E+00   0.21647111E+00  -0.79238266E+00  -0.13498563E+01  -0.56035715E+00   0.18288969E+00
+
+Intel 8.1
+197.74user 0.94system 4:40.50elapsed 70%CPU 
+0.32318535E+00   0.21647018E+00  -0.79238147E+00  -0.13498588E+01  -0.56035846E+00   0.18289375E+00	
+
+
+g77 3.5.0 on G4/1.6
+242.45 real       218.47 user         1.24 sy
+0.32318464E+00   0.21646972E+00  -0.79238093E+00  -0.13498597E+01  -0.56035924E+00   0.18289569E+00
+
+
+tail -1 POS@EOS.DAT 
+tail -1 VEL@EOS.DAT
+
+PARAMETER.DAT
+80                     !RADIAL GRID NUMBER
+ 40000                  !NUMBER OF PARTICLES
+ 1000                   !NUMBER OF STEPS (MAX)
+ 2000                   !FREQUENCY OF CMSS CALL
+ 50                     !FREQUENCY OF DIAGNOSTIC CALL
+ 0.0025                 !TIME STEP
+ 0.                     !START TIME OF SIMULATION
+ 4.                     !END TIME OF SIMULATION
+ 1.                     !TOTAL MASS OF GALAXY
+ 1                      !PLUMMER INIT CONDITION FLAG (1=true)
+ 0.01                   !MAX ALLOWED DT --> MDT
+ 0.001                  !MIN ALLOWED DT

@@ -1,0 +1,25 @@
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C  CGS - Collisionless Galactic Simulator - Source Files  C  
+C                                                         C
+C  Created by M. Trenti & T.van Albada in Fortran77 2003  C
+C                                                         C
+C  Version 1.0 Alpha                                      C
+C                                                         C
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+
+C____________________________________________________
+C COMMON FOR PARTICLES DATA
+      REAL X,Y,Z,S,TH,PH,VX,VY,VZ,FX0,FY0,FZ0
+      DIMENSION X(NPMAX),Y(NPMAX),Z(NPMAX),S(NPMAX),TH(NPMAX),          
+     1          PH(NPMAX),VX(NPMAX),VY(NPMAX),VZ(NPMAX),                
+     2          FX0(NPMAX),FY0(NPMAX),FZ0(NPMAX)
+      INTEGER   IP(NPMAX),Bflag(NPMAX)
+      COMMON/PCORD/X,Y,Z,S,TH,PH,VX,VY,VZ,FX0,FY0,FZ0,
+     1       Bflag                   
+      COMMON/IJKPAR/IP
+C  X,Y,Z      : CARTESIAN COORDINATES OF THE PARTICLE  
+C  S,TH,PH    : SPHERICAL COORDINATES OF THE PARTICLE (S>0,0<TH<PI,0<PH<2PI) 
+C  VX,VY,VZ   : CARTESIAN VELOCITIES OF THE PARTICLE 
+C  FX0,FY0,FZ0: CARTESIAN FORCES ACTING ON THE PARTICLE 
+C  IP         : RADIAL CELL INDEX OF THE PARTICLE
+C  Bflag      : FLAG FOR BOUNDED PARTICLE 1 = BOUNDED   

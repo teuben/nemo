@@ -1,0 +1,13 @@
+ 80			!RADIAL	GRID NUMBER
+ 20000                  !NUMBER	OF PARTICLES
+ 200			!NUMBER OF STEPS (MAX)
+ 2000			!FREQUENCY OF CMSS CALL 
+ 50                     !FREQUENCY OF DIAGNOSTIC CALL
+ 25			!FREQUENCY OF SNAPSHOT WRITING			
+ 0.0025                 !TIME STEP
+ 0.                     !START TIME OF SIMULATION
+ 4.                     !END TIME OF SIMULATION
+ 1.                     !TOTAL MASS OF GALAXY
+ 1                      !PLUMMER INIT CONDITION FLAG (1=true)
+ 0.01                   !MAX ALLOWED DT --> MDT
+ 0.001                  !MIN ALLOWED DT

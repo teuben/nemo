@@ -1,0 +1,56 @@
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C  CGS - Collisionless Galactic Simulator - Source Files  C  
+C                                                         C
+C  Created by M. Trenti & T.van Albada in Fortran77 2003  C
+C                                                         C
+C  Version 1.0 Alpha                                      C
+C                                                         C
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+
+C COMMON FOR GRID QUANTITIES
+      REAL*8 RR(NRGMAX),DRR(NRGMAX),QQ(7,NRGMAX),FQ(7,NRGMAX)
+     1     ,GQ(7,NRGMAX),R(NRGMAX),DR(NRGMAX),RIR(NRGMAX)
+      COMMON/RADMES/RR,DRR,QQ,FQ,GQ,R,DR,RIR
+      INTEGER IL,IL1,IL2
+      COMMON/INTVAR/IL,IL1,IL2
+
+C  RR        : RADII OF THE GRID POINTS
+C  R         : RADII AT HALF GRID POINTS
+C  DR        : RR(I+1)-RR(I)
+C  DRR       : RR(I)*DR(I)
+C  RIR       : 1./RR   
+C  QQ(N,I)   : (RR(I)/RR(I+1))^(N-1)
+C  FQ(N,I)   : (2*(RR(I)/RR(I+1))/(1+(RR(I)/RR(I+1))))^(N-1)
+C  GQ(N,I)   : ((1+RR(I)/RR(I+1)))/2)^(N-1)
+C  IL        : NUMBER OF RADIAL CELL
+C  IL1       : IL-1
+C  IIL2      : IL-2  
+ 
+
+C__________________________________________________________
+C GRID DENSITY 
+	REAL*8 RHO,RADFM,MASSGRID,rhm
+	INTEGER NPAR
+
+	COMMON /DENSITY/ RHO(NRGMAX),MASSGRID(NRGMAX),RADFM(20),
+     &rhm,NPAR(NRGMAX)
+
+
+C RHO        : GRID DENSITY 
+C MASSGRID   : INTEGRATED MASS UP TO GRID POINT
+C RADFM      : FRACTIONAL MASS RADII (VALUES DEFINED IN SUBROUTINES1.F)
+C NPAR       : NUMBER OF PARTICLES IN THE GRID
+
+
+C_____________________________________________________________
+C    SELF FORCES
+	INTEGER NDIV1,NDIV
+	PARAMETER(NDIV=100)
+	PARAMETER(NDIV1=NDIV+2)
+	REAL*8 SF,SEP
+
+	COMMON /SFO/ SF(NRGMAX,NDIV1),SEP(NRGMAX,NDIV1)
+
+C NDIV      : NUMBER OF RADIAL CELL SUBDIVISION
+C SF(I,J)   : SELF FORCE ACTING IN CELL I AT POSITION J 
+C SEP(I,J)  : SELF POTENTIAL ENERGY IN CELL I AT POSITION J 

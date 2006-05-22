@@ -1,0 +1,22 @@
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C  CGS - Collisionless Galactic Simulator - Source Files  C  
+C                                                         C
+C  Created by M. Trenti & T.van Albada in Fortran77 2003  C
+C                                                         C
+C  Version 1.0 Alpha                                      C
+C                                                         C
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+
+
+C______________________________________________________
+C BINDING ENERGY QUANTITIES (from original TvA code)
+      INTEGER IND               !INDEX FOR BINDING ENERGY ARRAY ASSIGNMENT
+cpjt  why 60 and 61 ??? not NBIN ??
+      INTEGER IEBIN(60)         !COUNTER OF BINDING ENERGY ARRAY
+      REAL*8 TEKST(61)          !BOUNDING VALUES OF CELLS IN BE ARRAY
+      REAL*8 EMIN,EMAX          !BOUNDARY VALUES OF EB
+      PARAMETER(EMIN=-35.)
+      PARAMETER(EMAX=1.)
+	
+      common /ne/ TEKST,IEBIN
+

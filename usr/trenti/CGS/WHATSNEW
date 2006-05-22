@@ -1,0 +1,13 @@
+Michele Trenti: 22 March 2006
+
+* I have modified writesnap() to call diagnostic:
+    -  now the velocities in the snapshot are syncronized with
+       positions by taking a half a timestep with the leapfrog
+    -  in addition the snapshot contains the forces and the
+       potential
+* I have also introduced two arrays xCMstore(3) & vCMstore(3)
+  to keep track of Center of Mass adjustments, so that the snapshot is
+  now written in the initial reference frame (this feature seems OK,
+  but more testing would be nice... guess that it will be easier once
+  we have the snapshots in NEMO format)
+

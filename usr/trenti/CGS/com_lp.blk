@@ -1,0 +1,15 @@
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C  CGS - Collisionless Galactic Simulator - Source Files  C  
+C                                                         C
+C  Created by M. Trenti & T.van Albada in Fortran77 2003  C
+C                                                         C
+C  Version 1.0 Alpha                                      C
+C                                                         C
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C____________________________________________________
+C LEGENDRE POLYNOMIALS
+      double precision plm(lmax,lmax)  !matrix with p_l^m(cos(theta)) 
+      double precision dplm(lmax,lmax) !matrix with d/dx(p_l^m(x))
+      common /pol/ plm,dplm     !please init all to zero
+                                !note that P00 is stored in plm(1,1),
+                                !P10 in plm(2,1)... and so on

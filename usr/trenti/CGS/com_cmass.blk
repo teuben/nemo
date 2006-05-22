@@ -1,0 +1,18 @@
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C  CGS - Collisionless Galactic Simulator - Source Files  C  
+C                                                         C
+C  Created by M. Trenti & T.van Albada in Fortran77 2003  C
+C                                                         C
+C  Version 1.0 Alpha                                      C
+C                                                         C
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+
+
+C__________________________________________________
+	double precision xCMstore,vCMstore
+	common /CMstore/ xCMstore(3),vCMstore(3)
+
+C	in this variables the cumulative CMass adjustment are
+C	collected: the purpose is to be able to print out snapshots in
+C	the initial reference frame
+ 

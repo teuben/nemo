@@ -1,0 +1,49 @@
+C-*- fortran -*-
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C  CGS - Collisionless Galactic Simulator - Source Files  C  
+C                                                         C
+C  Created by M. Trenti & T.van Albada in Fortran77 2003  C
+C                                                         C
+C  Version 1.0 Alpha                                      C
+C                                                         C
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+      
+      integer NPMAX,NRGMAX,NHAR,LMAX,NCE
+      parameter(NPMAX=2000000)
+      parameter(NRGMAX=501)
+      parameter(NHAR=4)
+      parameter(LMAX=7)
+      parameter(NCE=28)
+
+C  NPMAX     : MAX NUMBER OF PARTICLE
+C  NRGMAX    : MAX GRID DIMENSION 
+C  LAMX      : 
+C  NHAR      : CURRENT NUMBER OF USED HARMONICS  
+C  NCE       : MAX NUMBER OF SPHERICAL HARMONICS COEFFICIENTS USED 
+C               
+
+C CONSTANTS
+C___________________________________________________
+      DOUBLE PRECISION PI,GRAVC,PI4G
+      COMMON /CONSTS/ PI,GRAVC,PI4G
+
+C  PI        : PI GREGCO
+C  GRAVC     : GRAVITATION CONSTANT IN CODE UNITIS
+C  PI4G      : 4*PI*G
+
+C NUMBER OF PARTICLES & PHYSICAL INFORMATION ABOUT THE SYSTEM
+C___________________________________________________
+      INTEGER NP,NOUT
+      DOUBLE PRECISION MTOT
+      COMMON /GLOBALVAR/ NP,NOUT,MTOT	
+C  NP        : NUMBER OF PARTICLE
+C  NOUT      : NUMBER OF PARTICLES OUTSIDE GRID  
+C  MTOT      : TOTAL MASS OF THE SYSTEM 
+
+
+C__________________________________________________
+C FLAG FOR INIT CONDITION TYPE
+	integer PLUMMERFLAG
+	common /PF/ PLUMMERFLAG
+C IF PLUMMERFLAG = 1 USES vanAlbada Plummer Model Init
+C ELSE USES f^(v) INIT
