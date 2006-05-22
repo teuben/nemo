@@ -1,22 +1,21 @@
-.TH CSG 1NEMO "22 March 2006"
+.TH CSG 1NEMO "22 May 2006"
 .SH NAME
-CGS, runCGS\-  Collisionless Galactic Simulator N-body code (** work in progress **)
+CGS, runCGS\-  Collisionless Galactic Simulator N-body code
 .SH SYNOPSIS
 \fBCGS\fP 
 .PP
 \fBrunCGS\fP  [parameter=value]
 .SH DESCRIPTION
-NOTE:: This is \fIwork in progress\fP, the code is not yet available within NEMO.x
-.PP
-\fICGS\fP  (Collisionless Galactic Simulator) is an improved version, written
-by Michele Trenti, of a spherical harmonics Particle-Mesh code as presented originally 
-in van Albada (1982). The radial grid is adaptive, and keeps constant mass shells.
+\fICGS\fP  (Collisionless Galactic Simulator) is a spherical harmonics Particle-Mesh code
+originally presented by van Albada (1982), and recently partially rewritten and improved by
+by Michele Trenti.
+The radial grid is adaptive, and keeps constant mass shells.
 The angular dependance of the force is expressed in terms of Legendre polynomials.
 The code is highly suitable to evolve quasi-spherical smooth initial condition.
 .PP
 The code computes the potential on an (adaptive) grid, by expanding the density
 in spherical harmonics. Forces are then computed by numerical differentiation,
-and particles are advanced by a fixed (???) time-step using a leap-frog scheme.
+and particles are advanced by a global but variable time-step using a leap-frog scheme.
 .PP
 The code consists of an original (fortran based) executable, \fBCGS\fP, 
 plus a NEMO style wrapper, named \fBrunCGS\fP. Since the 
@@ -71,32 +70,30 @@ Maximum allowed integration step.
 .TP
 \fBflag=\fP
 Input Plummer flag. 1=plummer sphere from scratch (needs \fBnbody=\fP).
-2=\fIsomething else\fP from scratch (needs \fBvirial=\fP)
+2=\fIclumpy homogeneous\fP from scratch (needs \fBvirial=\fP)
 3=initial conditions from a POS and VEL file. 
 [Default: 1]
 .TP
 \fBmass=\fP
-Total mass of the system.
+Total mass of the system. **todo : wrapper should check and computer if in= used **
 [Default: 1.0]
 .TP
 \fBvirial=\fP
 Initial virial ratio for \fBflag=2\fP.
 [Default: 1.0]
 .TP 
-\fBfreqcmss=\fP
-Frequency of CMSS (center of mass adjustment) call. ** review this name **
+\fBndtcmss=\fP
+Number of timesteps between CMSS (center of mass adjustment) call.
 [Default: 2000]
 .TP
-\fBfreqdiag=\fP
-Frequency of diagnostics call. Note that each diagnostics call 
+\fBndtdiag=\fP
+Number of timesteps between diagnostics call. Note that each diagnostics call 
 has some overhead associated with it.
-** review this name **
 [Default: 50]
 .TP
-\fBfreqout=\fP
-Frequency of writing snapshots.
+\fBndtout=\fP
+Number of time steps between writing snapshots.
 Note that each call has some overhead associated with it if the potential is selected for output
-** output potentials not implemented **
 [Default: 10]
 .TP
 \fBin=\fP\fIfile\fP
@@ -112,7 +109,7 @@ the full absolute path needs to be supplied here.
 .TP
 \fBnemo=t|f\fP
 Should the snapshot data be converted to NEMO format? If so, the ASCII snapshot
-is removed. Default: [\fBt\fP]
+is removed. NOTE: Using this option requires extra diskspace. Default: [\fBt\fP]
 .SH FILES
 .nf
 .ta +2i
@@ -140,10 +137,6 @@ fort.90		one or more snapshots (one line header plus index,pos,vel data in a tab
 
 snap.out	Output snapshots, in NEMO's \fIsnapshot(5NEMO)\fP format. Note no masses present!
 
-initconPL.dat	tba
-POS@EOS.DAT	tba
-VEL@EOS.DAT	tba
-
 .fi
 .PP
 Sample \fIPARAMETER.DAT\fP initialization file (the default benchmark):
@@ -152,13 +145,13 @@ Sample \fIPARAMETER.DAT\fP initialization file (the default benchmark):
  80				!RADIAL GRID NUMBER
  40000				!NUMBER OF PARTICLES
  1000				!NUMBER OF STEPS (MAX)
- 2000				!FREQUENCY OF CMSS CALL
- 50				!FREQUENCY OF DIAGNOSTIC CALL
- 10				!FREQUENCY OF WRITING SNAPSHOTS CALL
- 0.0025				!TIME STEP
+ 2000				!NUMBER OF TIME STEPS FOR CMSS CALL
+ 50				!NUMBER OF TIME STEPS FOR DIAGNOSTIC CALL
+ 10				!NUMBER OF TIME STEPS FOR WRITING SNAPSHOTS 
+ 0.0025				!TIME STEP OF INTEGRATION
  0.				!START TIME OF SIMULATION
  4.				!END TIME OF SIMULATION
- 1.				!TOTAL MASS OF GALAXY
+ 1.				!TOTAL MASS OF SYSTEM
  1				!PLUMMER INIT CONDITION FLAG (1=true)
  0.01				!MAX ALLOWED DT --> MDT
  0.001				!MIN ALLOWED DT
@@ -175,13 +168,9 @@ are hardcoded during compilation, though easily changed in the right file:
 .ta +1i +2i
 common.blk:	parameter(NPMAX=2000000)	Max number of particles
 common.blk:	parameter(NRGMAX=501)		Max number of radial grids
-common.blk:	parameter(LMAX=7)        	Legendre Polynomials
-common.blk:	parameter(NCE=28)        	Max number of Spherical Harmonics Coefficients
-
-com_DF.blk:	parameter(NBIN=50)       	Number of bins for distribution function (E)
-com_DF.blk:	parameter(NBINJ=20)       	Number of bins for distribution function (J)
-com_DF.blk:	PARAMETER(EMIN=-35.)      	Boundary in E
-com_DF.blk:	PARAMETER(EMAX=1.)      	Boundary in E
+common.blk:	parameter(NHAR=4)        	Number of harmonics used [NHAR <= LMAX-1]
+common.blk:	parameter(LMAX=7)        	Legendre Polynomials (do not modify)
+common.blk:	parameter(NCE=28)        	Max number of Spherical Harmonics Coefficients (do not modify)
 
 .fi
 .SH BENCHMARKS
@@ -202,10 +191,10 @@ or
    % time CGS
 .fi
 .SH DATA CONVERSION
-If snapshots are requested, CGS will create a file \fBfort.90\fB, which can be converted
+If snapshots are requested, CGS will create a file \fBfort.90\fP, which can be converted
 to NEMO's \fIsnapshot(5NEMO)\fP
 .nf
-tabtos $old/fort.90 snap90 nbody,time skip,pos,vel
+tabtos $old/fort.90 snap90 nbody,time skip,pos,vel,acc,phi
 .fi
 
 .SH UNITS
@@ -226,6 +215,12 @@ van Albada, T.S. & van Gorkum, J.H. (1977) A&A,54,121. \fIExperimental Stellar D
 .fi
 .SH AUTHOR
 Michele Trenti & Tjeerd van Albada (NEMO's adaptation: Peter Teuben)
+.SH CREDIT
+Any scientific publication or presentation which has benefited from using CGS should quote the paper
+.nf
+   Trenti, M. Bertin, G. and van Albada, T.S. (2005) A&A 433, 57
+.fi
+(please find this paper and the PhDthesis.pdf file in the subdirectory CGS/doc).
 .SH HISTORY
 .nf
 .ta +1i +3i
@@ -233,4 +228,5 @@ Michele Trenti & Tjeerd van Albada (NEMO's adaptation: Peter Teuben)
 3-nov-05	V0.1 alpha release testing	PJT
 12-dec-05	V0.2 writing simple pos/vel snapshots using freqout=	MT/PJT
 22-mar-06	V0.5 writing potential and forces to output	MT
+22-may-06	V1.0 released within NEMO	MT/PJT
 .fi
