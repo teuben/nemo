@@ -5,8 +5,8 @@ MacOSX problems: (a special macosx.html web page dedicated to this)
     Also check http://www.astro.gla.ac.uk/users/norman/note/2004/restFP/
 
   - src/nbody/evolve/aarseth/nbody0/Makefile
-	need to activate F77LIBS to include -lcc_dynamic
-        but sometimes you to take it out again......
+	need to activate F77LIBS to include -lcc_dynamic (10.3 ?)
+        but sometimes you to take it out again...... (10.4 ?)
 
   - directcode doesn't compile since it was derived from an earlier
     release of hackcode1 with the multiple externs included by the
@@ -43,6 +43,9 @@ GCC4 problems: (as tested on FC3/FC4)
   - the linker is now more conservative, removing references to code
     that is never used. get_atable and sqr come out in some tests
     as missing...
+  - see also:
+	http://www.kegel.com/gcc/gcc4.html
+        http://womble.decadentplace.org.uk/c++/syntax-errors.html
 
 -------------------------------------------------------------------------------
 
@@ -55,6 +58,11 @@ general things for 3.2.x
 	(fmath in potential not needed)
 	(some potential/data not needed)
   - intel linker problems (use different technique to force loading?)
+	e.g. intel says to use
+	export GXX_ROOT=/usr/i686-pc-linux-gnu/gcc-bin/3.3/"
+	if compilers are in non-standard locations, and
+	export LC_ALL=C
+	if you're working on a non-english linux OS
   - get a mini-NEMO going (Dehnen, BIMA/CARMA)
   * remove environment variables from NEMORC.local that are needed in Makefiles
     and move them into makedefs
@@ -94,6 +102,9 @@ general things for 3.2.x
      On somebody's 10.4.5:
 	gcc -> 4.0.0 (build 4061)			    template problem??
 	gcc-3.3 -> build 1809				    ok
+
+     then there is the crap with Math.h being confused with math.h on my 10.4.6
+	?  mv Math.h WDMath.h
 
 things for 3.4
 
