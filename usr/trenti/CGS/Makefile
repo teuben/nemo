@@ -1,7 +1,9 @@
+include $(NEMOLIB)/makedefs
+
 .KEEP_STATE:
 
-FFLAGS = -O3
-FC = f77
+#FFLAGS = -O3
+#FC = f77
 
 
 SOURCE = \
