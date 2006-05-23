@@ -1,4 +1,4 @@
-.TH CSG 1NEMO "22 May 2006"
+.TH CSG 1NEMO "23 May 2006"
 .SH NAME
 CGS, runCGS\-  Collisionless Galactic Simulator N-body code
 .SH SYNOPSIS
@@ -7,7 +7,7 @@ CGS, runCGS\-  Collisionless Galactic Simulator N-body code
 \fBrunCGS\fP  [parameter=value]
 .SH DESCRIPTION
 \fICGS\fP  (Collisionless Galactic Simulator) is a spherical harmonics Particle-Mesh code
-originally presented by van Albada (1982), and recently partially rewritten and improved by
+originally presented by van Albada (1982), and recently partially rewritten and improved
 by Michele Trenti.
 The radial grid is adaptive, and keeps constant mass shells.
 The angular dependance of the force is expressed in terms of Legendre polynomials.
@@ -69,13 +69,13 @@ Maximum allowed integration step.
 [Default: 0.01]
 .TP
 \fBflag=\fP
-Input Plummer flag. 1=plummer sphere from scratch (needs \fBnbody=\fP).
+Input Creation flag. 1=Plummer sphere from scratch (needs \fBnbody=\fP).
 2=\fIclumpy homogeneous\fP from scratch (needs \fBvirial=\fP)
 3=initial conditions from a POS and VEL file. 
 [Default: 1]
 .TP
 \fBmass=\fP
-Total mass of the system. **todo : wrapper should check and computer if in= used **
+Total mass of the system. 
 [Default: 1.0]
 .TP
 \fBvirial=\fP
