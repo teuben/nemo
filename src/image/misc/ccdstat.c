@@ -9,6 +9,7 @@
  *      14-nov-04   1.5 provide nppb= correction for chi2 computation   PJT
  *       5-jan-05   1.6 added a total
  *      30-jan-05   1.7 added an optional median
+ *      24-may-06   1.8 add mmcount=
  *
  */
 
@@ -27,8 +28,9 @@ string defv[] = {
     "npar=0\n       Number of fitting parameters assumed for chi2 calc",
     "nppb=1\n       Optional correction 'number of points per beam' for chi2 calc",
     "median=f\n     Optional display of the median value",
+    "mmcount=f\n    Count occurances of min and max",
     "sort=qsort\n   Sorting routine (not activated yet)",
-    "VERSION=1.7a\n 2-feb-05 PJT",
+    "VERSION=1.8\n  24-may-06 PJT",
     NULL,
 };
 
@@ -56,10 +58,11 @@ nemo_main()
     int  i, j, k;
     real x, xmin, xmax, mean, sigma, skew, kurt, median, bad, w, *data;
     Moment m;
-    bool Qmin, Qmax, Qbad, Qw, Qmedian;
+    bool Qmin, Qmax, Qbad, Qw, Qmedian, Qmmcount = getbparam("mmcount");
     real nu, nppb = getdparam("nppb");
     int npar = getiparam("npar");
     int ngood = 0;
+    int min_count, max_count;
 
     instr = stropen (getparam("in"), "r");
     read_image (instr,&iptr);
@@ -123,6 +126,22 @@ nemo_main()
       printf ("Sum                  : %f\n",show_moment(&m,1));
       if (Qmedian)
 	printf ("Median               : %f\n",get_median(ngood,data));
+
+      if (Qmmcount) {
+	min_count = max_count = 0;
+	xmin = min_moment(&m);
+	xmax = max_moment(&m);
+	for (i=0; i<nx; i++) {
+	  for (j=0; j<ny; j++) {
+	    for (k=0; k<nz; k++) {
+	      x =  CubeValue(iptr,i,j,k);
+	      if (x==xmin) min_count++;
+	      if (x==xmax) max_count++;
+	    }
+	  }
+	} /* i */
+	printf("Min_Max_count        : %d %d\n",min_count,max_count);
+      }
       printf ("%d/%d out-of-range points discarded\n",nsize-n_moment(&m), nsize);
     }
 }
