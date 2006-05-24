@@ -1,11 +1,12 @@
-.TH CCDSTAT 1NEMO "15 November 2004"
+.TH CCDSTAT 1NEMO "24 May 2005"
 .SH NAME
 ccdstat \- statistics (1st through 4th moment) and chi2
 .SH SYNOPSIS
 .PP
 \fBccdstat in=\fPimage [parameter=value]
 .SH DESCRIPTION
-This program will calculate all moments (up to fourt order) of the mapvalues,
+\fBccdstat\fP calculates all moments (up to fourth order) of the values
+in an image/cube, 
 and calculate some human understandable numbers (mean, dispersion, skewness,
 curtosis) from them. It can optionally use a weighting map, in case the 
 map needs to weighted per pixel.
@@ -54,6 +55,15 @@ computation of chi2 goodness of fit, instead of the normal statistics.
 \fBnppb=\fP
 Number of (independant) points per beam. Only used in the computation
 for chi2, and 
+.TP
+\fBmedian=t|f\fP
+Optional display of the median value
+.TP
+\fBmmcount=t|f\fP
+Count occurances of min and max 
+.TP
+\fBsort=t|f\fP
+Sorting routine (not activated yet) 
 .SH "EXAMPLE"
 .nf
   % ccdstat image.ccd min=-2
@@ -99,4 +109,5 @@ src/image/misc	ccdstat.c
 9-may-03	V1.3: added bad=	PJT
 5-jun-03	V1.4: added win=	PJT
 14-nov-04	V1.5: added the chi2 trigger with npar= and nppb=	PJT
+24-may-06	V1.8: added mmcount	PJT
 .fi
