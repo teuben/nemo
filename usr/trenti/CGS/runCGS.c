@@ -6,6 +6,7 @@
  *     12-dec-2005     added writing pos/vel files with freqout=
  *     16-mar-2006     0.4 update version 
  *     22-mar-2006     0.5 also read forces and potentials
+ *     22-may-2006     1.0 readied for more formal release within NEMO; no more freq* but ndt*
  */
 
 #include <stdinc.h>
@@ -28,14 +29,14 @@ string defv[] = {
     "flag=1\n        data creation flag",
     "mass=1.0\n      total mass of system",
     "virial=1.0\n    initial virial ratio if flag=2",
-    "freqcmss=2000\n freq of center of mass adjustments",
-    "freqdiag=50\n   freq",
-    "freqout=10\n    freq of output of snapshots",
+    "ndtcmss=2000\n  number of steps between center of mass adjustments",
+    "ndtdiag=50\n    number of steps between diagnostics",
+    "ndtout=10\n     number of steps between snapshot output",
     "in=\n           optional input snapshot (nemo format)",
     "nemo=t\n        convert data to NEMO and cleanup ASCII",
     "options=\n      Optional output:  phi(potential), acc (forces) ** soon to come **",
     "exe=CGS.exe\n   name of CGS executable",
-    "VERSION=0.5\n   22-mar-06 PJT",
+    "VERSION=1.0\n   22-may-06 PJT",
     NULL,
 };
 
@@ -56,11 +57,7 @@ int nemo_main()
   string infile;
   stream datstr;
   char fullname[256], command[256], line[256];
-#if 0
-  string rmcmd = "ls -l";
-#else
-  string rmcmd = "rm";
-#endif  
+  string rmcmd = "rm -f";
   make_rundir(rundir);
 
   if (hasvalue("in")) {
@@ -101,9 +98,9 @@ int nemo_main()
   fprintf(datstr,"%d\n",getiparam("nrad"));
   fprintf(datstr,"%d\n",nbody);
   fprintf(datstr,"%d\n",getiparam("maxstep"));
-  fprintf(datstr,"%d\n",getiparam("freqcmss"));
-  fprintf(datstr,"%d\n",getiparam("freqdiag"));
-  fprintf(datstr,"%d\n",getiparam("freqout"));
+  fprintf(datstr,"%d\n",getiparam("ndtcmss"));
+  fprintf(datstr,"%d\n",getiparam("ndtdiag"));
+  fprintf(datstr,"%d\n",getiparam("ndtout"));
   fprintf(datstr,"%g\n",getdparam("dt"));
   fprintf(datstr,"%g\n",getdparam("tstart"));
   fprintf(datstr,"%g\n",getdparam("tstop"));
