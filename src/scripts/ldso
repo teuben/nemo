@@ -34,7 +34,7 @@ if ($?CXX == 0) then
   echo 'include $(NEMOLIB)/makedefs' > $mk
   echo 'cxx:' >> $mk
   echo '	@echo $(CXX)' >> $mk
-  set CXX=`make -s -f $mk cxx`
+  set CXX=`make -s --no-print-directory -f $mk cxx`
   echo CXX=$CXX
   rm -f $mk
 endif
