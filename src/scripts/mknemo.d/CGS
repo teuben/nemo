@@ -1,0 +1,13 @@
+#! /bin/csh -f
+#
+#  
+
+set dir=$NEMO/usr/trenti/CGS
+
+if (-e $dir) then
+  cd $dir
+  make install
+else
+  echo mknemo.d: $dir does not exist
+endif
+
