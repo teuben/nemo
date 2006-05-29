@@ -13,10 +13,11 @@ timestep.f arbel.f sfEraser.f f02aaf.f writepart.f
 
 OBJECTS = $(SOURCE:.f=.o)
 
-all:	CGS
+all:	CGS runCGS
 
 install: all
 	cp CGS $(NEMOBIN)/CGS.exe
+	cp runCGS $(NEMOBIN)
 
 CGS:	$(OBJECTS)
 	$(FC) $(FFLAGS) $(OBJECTS) -o CGS
@@ -26,5 +27,5 @@ bench:
 	@echo "`tail -1 POS@EOS.DAT` `tail -1 VEL@EOS.DAT`"
 
 clean:
-	rm -f *.o CGS
+	rm -f *.o CGS runCGS
 

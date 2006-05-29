@@ -13,6 +13,7 @@
 #include <getparam.h>
 
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
 
@@ -36,7 +37,7 @@ string defv[] = {
     "nemo=t\n        convert data to NEMO and cleanup ASCII",
     "options=\n      Optional output:  phi(potential), acc (forces) ** soon to come **",
     "exe=CGS.exe\n   name of CGS executable",
-    "VERSION=1.0\n   22-may-06 PJT",
+    "VERSION=1.0a\n  29-may-06 PJT",
     NULL,
 };
 
@@ -44,7 +45,23 @@ string usage = "NEMO frontend to run CGS";
 
 string cvsid="$Id$";
 
-int nemo_main()
+void goto_rundir(string name)
+{
+    if (chdir(name))
+        error("Cannot change directory to %s",name);
+}
+
+void make_rundir(string name)
+{
+    if (mkdir(name, 0755))
+        error("Run directory %s already exists",name);
+}
+
+
+
+
+
+void nemo_main()
 {
   int i, nbody, flag;
   real scale, dt, dtout, dtlog, tstop; 
@@ -130,18 +147,5 @@ int nemo_main()
     system(command);
   }
   
-}
-
-
-goto_rundir(string name)
-{
-    if (chdir(name))
-        error("Cannot change directory to %s",name);
-}
-
-make_rundir(string name)
-{
-    if (mkdir(name, 0755))
-        error("Run directory %s already exists",name);
 }
 
