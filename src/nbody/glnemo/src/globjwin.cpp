@@ -986,7 +986,7 @@ void GLObjectWindow::optionsTogglePlay()
         }
       } 
       else {
-        play_timer = startTimer( 50 );  // 100 ms timer events
+        play_timer = startTimer( 250 );  // 100 ms timer events
         //play_timer = startTimer( 40 ); 
       }
     } 
@@ -1269,11 +1269,11 @@ void GLObjectWindow::optionsFitAllPartOnScreenPersp()
     // Zoom is located in ModelView matrix at coordinates MM(2,3)
     float best_zoom;
     if (store_options->perspective) {
-      MM(2,3) = -200000.0;
+      MM(2,3) = -20000000.0;
       best_zoom=1000;
     } 
     else {
-      MM(2,3) =  200000.0;
+      MM(2,3) =  20000000.0;
       best_zoom=-1000;
       return;
     }
