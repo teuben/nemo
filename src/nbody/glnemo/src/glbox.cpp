@@ -28,6 +28,7 @@
 #define POLY 1
 using namespace std;
 
+#define DOF 4000000
 // Initialize static class variables:
 int GLBox::width=894, GLBox::height=633;
 float ortho_left,ortho_right,ortho_bottom,ortho_top;
@@ -251,7 +252,7 @@ void GLBox::resizeGL( int w, int h )
   ratio =  ((double )w) / ((double )h);
   glMatrixMode( GL_PROJECTION );
   glLoadIdentity();
-  glFrustum(-1.0, 1.0, -1.0, 1.0, 1.0, 1000.0);
+  glFrustum(-1.0, 1.0, -1.0, 1.0, 1.0, (float) DOF);
   hud->setWH(w,h);
   computeOrthoFactorRatio(); // recalculate Ortho projection
 }
@@ -613,7 +614,7 @@ void GLBox::setProjection(int width, int height)
   
   // 
   if (store_options->perspective) {
-    gluPerspective(45.,ratio,0.05,10000.0);
+    gluPerspective(45.,ratio,0.05,(float) DOF);
   } 
   else {
     computeOrthoFactorRatio();
@@ -621,7 +622,8 @@ void GLBox::setProjection(int width, int height)
             ortho_right  * fx  * store_options->zoomo,
             ortho_bottom * fy  * store_options->zoomo,
             ortho_top    * fy  * store_options->zoomo,
-            -10000.,10000.);            
+            -1000,1000);
+            //(float) -DOF/2.,(float) -DOF/2.);            
   }
   setViewPort();
 }
