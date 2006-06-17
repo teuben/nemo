@@ -3,23 +3,19 @@
 # Subdir relative project main directory: ./src
 # Target is an application:  ../bin/glnemo
 
-mantarget.path = $(NEMO)/man/man1
-mantarget.files = ../DOC/glnemo.1
-INSTALLS += mantarget
-
-target.path = $(NEMOBIN)
-INSTALLS +=	target
-
+INSTALLS += mantarget \
+            target 
+target.path = $(NEMOBIN) 
+mantarget.files += ../DOC/glnemo.1 
 LIBS += -L$(NEMOLIB) \
         -lnemo 
-INCLUDEPATH += . \
-               $(NEMOINC) \
-               $(NEMOLIB) 
+INCLUDEPATH = . \
+              $(NEMOINC) \
+              $(NEMOLIB) 
 MOC_DIR = .moc/debug-shared-mt 
 UI_DIR = .ui/ 
 OBJECTS_DIR = .obj/debug-shared-mt 
 TARGET = ../bin/glnemo 
-DESTDIR = . 
 CONFIG += debug \
           warn_on \
           qt \
@@ -63,7 +59,7 @@ HEADERS += glbox.h \
            frame_data.h \
            animation_engine.h \
            frustumculling.h \
-	   gloctree.h 
+           gloctree.h 
 SOURCES += glbox.cpp \
            globjwin.cpp \
            glnemo.cpp \
@@ -90,4 +86,5 @@ SOURCES += glbox.cpp \
            frame_data.cpp \
            animation_engine.cpp \
            frustumculling.cpp \
-	   gloctree.cpp
+           gloctree.cpp 
+target.files = ../bin/glnemo
