@@ -117,6 +117,9 @@ int IO_NEMO_F(char * iofile,
     first = FALSE;
   }
 	
+  param = set_eos(param,'\\');
+  param = set_eos(param,'#');
+
   /* initialize unamed parameters */
   va_start(pa, param);
   p = param;

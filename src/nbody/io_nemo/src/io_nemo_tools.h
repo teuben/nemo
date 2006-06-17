@@ -27,6 +27,7 @@ char *  f_ch_to_c(char * ,int );
 bool ** chk_select(int * ,int ,int ,string select_pts[]);
 
 char *  get_selected(char *);
+  char *  set_eos(char *,char);
 
 #ifdef __cplusplus
 }

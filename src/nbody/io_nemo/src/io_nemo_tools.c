@@ -201,5 +201,33 @@ char * get_selected(char *p)
   return chaine;
 }
 /* ----------------------------------------------------------------
+|  set_eos :                                                  
+|  set End Of String at the Character SEP
++---------------------------------------------------------------- */
+char * set_eos(char *p, char sep)
+{ 
+  char * chaine=NULL, * x;
+  int len;
+  /* find out the '\' character */
+  x = strchr(p,sep);
+  if (!x) {
+    return p;
+  }
+  /* size of the real field */
+  len = x-p+1;
+	
+  /* copy the real field into chaine */
+  if (len) {
+    chaine = (char * ) allocate(sizeof(char) * len + 1);
+    strncpy(chaine,p,len-1);
+    chaine[len-1] = '\0';
+    
+    /*fprintf(stderr,"[%s] selected field : [%s] \n",p,chaine);*/
+  }
+	
+  return chaine;
+}
+
+/* ----------------------------------------------------------------
 |  End of io_nemo_tools.c                                          
 +---------------------------------------------------------------- */

@@ -18,8 +18,15 @@ Ldummyf = $(NEMOLIB)/libio_nemo_f.a
 LIBNEMO = -lnemo
 #--------------------------------------------------------
 # compilers options
-# FC     = g77		# we inherit this from makedefs
+#FC     = gfortran
+
+ifeq ($(FC),gfortran)
+FFLAGS = -O -fno-second-underscore
+DFC    = GFORT
+else
 FFLAGS = -O -fno-second-underscore -Wno-globals
+DFC    = G77
+endif
 OPT    = -Wall -g
 #--------------------------------------------------------
 # Absoft f77's options
@@ -172,7 +179,7 @@ ${IONO}/check_file.o       : ${IONS}/check_file.h ${IONS}/check_file.c
 
 # main program used with g77 compiler
 ${IONO}/nemo_g77.o         : ${IONS}/nemo_g77.c
-	$(CC) $(CFLAGS) $(OPT) $(INC) -c ${IONS}/nemo_g77.c -o ${IONO}/nemo_g77.o 
+	$(CC) $(CFLAGS) -D$(DFC) $(OPT) $(INC) -c ${IONS}/nemo_g77.c -o ${IONO}/nemo_g77.o 
 
 #
 # io_nemo test programs
