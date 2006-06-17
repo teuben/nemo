@@ -28,14 +28,14 @@ using namespace std; // prevent writing statment like 'std::cerr'
 
 class t_select {
  public:
-  t_select::t_select():x(4) {};
-  t_select::t_select(const t_select& m):x(4) {
+  t_select():x(4) {};
+  t_select(const t_select& m):x(4) {
     inemo_name = m.inemo_name;
     onemo_name = m.onemo_name;
     sel_part   = m.sel_part;
     nbody      = m.nbody;
   };
-  const t_select& t_select::operator=(const t_select& m) {
+  const t_select& operator=(const t_select& m) {
     inemo_name = m.inemo_name;
     onemo_name = m.onemo_name;
     sel_part   = m.sel_part;
