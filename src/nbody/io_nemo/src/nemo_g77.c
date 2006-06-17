@@ -17,9 +17,11 @@ void f_init();
 extern int MAIN__();
 int main(int argc, char ** argv)
 {
+#if G77
   f_setarg(argc, argv);
   f_setsig();
   f_init();
+#endif
   MAIN__();
   return 0; /* For compilers that complain of missing return values; */
 }
