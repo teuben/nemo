@@ -34,7 +34,7 @@
 #include <math.h>
 #define LOCAL_DEBUG 0
 #include "print_debug.h"
-
+#include <assert.h>
 #define MAX(A,B) ((A)>(B)?(A):(B))
 // ============================================================================
 // Constructor                                                                 
