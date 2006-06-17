@@ -99,6 +99,7 @@ int nemo_main()
   }
   /* close the output NEMO snapshot */
   io_nemo(out,"close");
+  io_nemo(in,"close");
   
   return 1;
 }
