@@ -56,13 +56,14 @@ foreach my $p ("stress_io_nemo" , "stress_io_nemo_f") {
 sub compareData {
   my $nmodel = shift;
   my $ftype  = shift;
-
+  
+  my $iopath="${NEMOSRC}/nbody/io_nemo/${OSTYPE}/bin";
   my $mask_prog;
   if ( $ftype eq "double" ) {
-    $mask_prog="snapmask_d";
+    $mask_prog="$iopath/snapmask_d";
   }
   else {
-    $mask_prog="snapmask_s"; 
+    $mask_prog="$iopath/snapmask_s"; 
   }
   printf STDERR "Mask program used: [$mask_prog] with datatype [$ftype] \n";
   #
