@@ -20,7 +20,7 @@ class VirtualParticlesSelect {
 public:
     VirtualParticlesSelect();
     VirtualParticlesSelect(const VirtualParticlesSelect&);
-    const VirtualParticlesSelect& VirtualParticlesSelect::operator=(const 
+    const VirtualParticlesSelect& operator=(const 
                                          VirtualParticlesSelect&);
     virtual ~VirtualParticlesSelect();
 
