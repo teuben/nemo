@@ -1,7 +1,17 @@
 glnemo ChangeLog
 
 
-in CVS (V 0.90, April 2006)
+in CVS (V 0.91, Juin 2006)
+===========================
+	*) general:
+	   --------
+	- happy g++ 4.1.x .
+
+	- update OpenGL display to a bigger Depth Of Field (usefull for the 
+	  cosmological simulations).
+
+V 0.90, April 2006
+===================
 
 	*) Animation:
 	   ----------
@@ -33,7 +43,9 @@ in CVS (V 0.90, April 2006)
 
 	- CTRL+A (best fit) works fine if there is no particles.
 
-	- port command line parameter works now - many others fixed
+	- port command line parameter works now 
+
+	- many others fixed
 
 Version 0.87 (December 2005)
 ============================
