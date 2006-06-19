@@ -105,7 +105,7 @@ install:  dirs	.install_lib .install_lib_maing77 .install_lib_dummy test testf m
 	ar ruv $(Ldummyc) $?
 	ar ruv $(Ldummyf) $?
 
-lib: $(LIB_IO_NEMO)
+lib: dirs $(LIB_IO_NEMO)
 bins:
 #	@echo No bins in nemo_io
 

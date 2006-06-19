@@ -53,7 +53,7 @@ void init_io_one(bool * read_one,
 		 char **history_prog,
 		 int    MAXIO)
 { 
-  string defv[] = { "none=none","VERSION=1.30",NULL };
+  string defv[] = { "none=none","VERSION=1.32",NULL };
   string argv[] = { "IO_NEMO",NULL };
   int i;
   string * histo;

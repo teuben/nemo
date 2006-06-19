@@ -1,5 +1,5 @@
 /* =================================================================
-|  Copyright Jean-Charles LAMBERT - 2005                            
+|  Copyright Jean-Charles LAMBERT - 2006                            
 |  e-mail:   Jean-Charles.Lambert@oamp.fr                           
 |  address:  Dynamique des galaxies                                 
 |            Laboratoire d'Astrophysique de Marseille               
@@ -21,6 +21,8 @@
 | 19-Jul-02	 V1.20: io_nemo/io_nemo_f unified                JCL
 | 18-Mar-04	 V1.21: bugs fixed, softening added              JCL
 | 03-Mar-05	 V1.30: code cleaning, valgrind mem/leak safe    JCL
+| 24-Apr-06      V1.31: memory leak fixed                        JCL
+| 19-Jun-06      V1.32: happy gfortran                           JCL
 +----------------------------------------------------------------  */
 
 #ifdef ABSOFT
