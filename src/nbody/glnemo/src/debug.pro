@@ -4,9 +4,15 @@
 # Target is an application:  ../bin/glnemo
 
 INSTALLS += mantarget \
-            target 
+            target target2
 target.path = $(NEMOBIN) 
+
 mantarget.files += ../DOC/glnemo.1 
+mantarget.files += ../DOC/glnemo.1 
+
+target2.path = $(NEMOBIN)
+target2.files += ../script/frame2divx.pl
+
 LIBS += -L$(NEMOLIB) \
         -lnemo 
 INCLUDEPATH = . \
