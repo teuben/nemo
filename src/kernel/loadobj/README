@@ -10,3 +10,8 @@ DLD: GNU library: only V3.2.1 has been tested
 
 http://instantj.sourceforge.net/	A java project doing similar
 http://www.iecc.com/linker/		John Levine's "Linkers and Loaders" book
+
+how to use it in C++??
+
+http://www.isotton.com/howtos/C++-dlopen-mini-HOWTO/C++-dlopen-mini-HOWTO.html
+http://www.linuxjournal.com/article/3687
