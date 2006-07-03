@@ -27,6 +27,7 @@ set yapp=(/null)	# set a YAPP device during the install
                   	# point to the compressed tar file for CFITSIO (e.g. cfitsio2490.tar.gz)
 set cfitsio=ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio2500.tar.gz   
 set cfitsio=/home/carma_pkg/cfitsio2500.tar.gz 
+set cfitsio=0           # disable for formal release since there are some problems
 set debug=1             # compile in debug mode (not implemented)
 set pedantic=0          # compile in pedantic mode
 set make=make          # make, gmake, pmake, bmake, ....
@@ -158,7 +159,7 @@ src/scripts/mk_nemo_start.sh >  nemo_start.sh
 
 
 if ($vogl) then
-  echo "Compiling vogl (logfile: install.vogl.log)"
+  echo "Compiling vogl for xyzview (logfile: install.vogl.log)"
   $make vogl >& install.vogl.log
 endif
 
@@ -192,10 +193,12 @@ if ($glnemo) then
     if ($?QTDIR == 0) then
        setenv QTDIR /usr/lib/qt-3.3
     endif
+    echo "   Compiling with QTDIR=$QTDIR"
     ( cd src/nbody/glnemo; qmake; $make ; $make install; cd manipulators; make ; make install)  >& install.glnemo.log
   else
     echo "### Error: qmake does not exist, assuming Qt not present:"
     echo "           glnemo not built"
+    echo "The Qt development (e.g. qt-devel, qt-designer, qt-config in linux/redhat) needs to be installed"
   endif
 endif
 
