@@ -395,17 +395,22 @@ GLObjectWindow::GLObjectWindow( QWidget* parent, const char* name)
   // size Grids
   connect(options_form,SIGNAL(resizeGrid(const float,const int)),
           glbox,SLOT(resizeGrid(const float,const int)));   
-  // color Grids
+  // color Grids & cube
   connect(options_form,SIGNAL(changeColorGridXY(const QColor)),
           glbox,SLOT(changeColorGridX(const QColor )));
   connect(options_form,SIGNAL(changeColorGridYZ(const QColor)),
           glbox,SLOT(changeColorGridY(const QColor )));   
   connect(options_form,SIGNAL(changeColorGridXZ(const QColor)),
           glbox,SLOT(changeColorGridZ(const QColor )));   
-  // toggle Grids
+  connect(options_form,SIGNAL(changeColorCube(const QColor)),
+          glbox,SLOT(changeColorCube(const QColor )));   
+          
+  // toggle Grids & cube
+  connect(options_form,SIGNAL(toggleGrid()),this,SLOT(optionsToggleGrid()));
   connect(options_form,SIGNAL(toggleGridX()),glbox,SLOT(toggleGridX()));
   connect(options_form,SIGNAL(toggleGridY()),glbox,SLOT(toggleGridY()));
   connect(options_form,SIGNAL(toggleGridZ()),glbox,SLOT(toggleGridZ()));
+  connect(options_form,SIGNAL(toggleCube()),glbox,SLOT(toggleCube()));
   // gaz like particles
   connect(options_form,SIGNAL(setTextureSize(const float)),
           glbox,SLOT(setTextureSize(const float)));
@@ -890,9 +895,12 @@ void GLObjectWindow::loadNextFrame()
 {
   // load positions
   if ( ! virtual_data->loadPos(&psv)) {
-      QString message="End of snapshot Reached !";
-      QMessageBox::information( this,"Warning",message,"Ok");
-      std::cerr << "error nemo loading....\n";
+      if ( 
+           (! anim_engine->render->isActivated()) ) {        
+        QString message="End of snapshot Reached !";
+        QMessageBox::information( this,"Warning",message,"Ok");
+        std::cerr << "error nemo loading....\n";
+      }
 
   } else {
       nbody   = virtual_data->getNbody();
@@ -906,6 +914,8 @@ void GLObjectWindow::loadNextFrame()
       glbox->setHud(GLHudObject::Getdata,virtual_data->getDataType());
       //optionsFitAllPartOnScreen();
       statusBar()->message(QString("Snapshot loaded [%1]").arg(timu));
+      
+
   }
 
 }
@@ -994,7 +1004,8 @@ void GLObjectWindow::optionsTogglePlay()
       killTimer( play_timer );
       if (! anim_engine->record->isActivated()) {
         glbox->setHudActivate(GLHudObject::Loading, FALSE);
-      }
+      }          
+
     }
   }
 }
@@ -1107,7 +1118,15 @@ void GLObjectWindow::timerEvent( QTimerEvent *e )
         emit allowRecord();       // allow recording if activated
         if (anim_engine->record->isActivated()){
           glbox->updateGL();
-        }
+#if 0          
+          // options added for cosmological movies
+          for (int i=0; i<4; i++) {
+            optionsRotateAroundX(1,1);
+            optionsRotateAroundY(1,1);
+            optionsRotateAroundZ(1,1);
+          }
+#endif          
+        } 
         //virtual_data->is_loading_thread = FALSE;
       } 
       else {
@@ -1651,26 +1670,29 @@ void GLObjectWindow::optionsAnimation()
   anim_form->show();
 }
 // ============================================================================
-void GLObjectWindow::optionsRotateAroundY()
+void GLObjectWindow::optionsRotateAroundY(float ang, int step)
 {
-  for (int i=0;i<360;i+=5) {
-          store_options->yrot+=5;
+  for (int i=0;i<ang;i+=step) {
+          store_options->yrot+=step;
           glbox->setRotation((int) store_options->xrot,(int) store_options->yrot,(int) store_options->zrot);
   }
 }
 // ============================================================================
-void GLObjectWindow::optionsRotateAroundX()
+void GLObjectWindow::optionsRotateAroundX(float ang, int step)
 {
-  for (int i=0;i<360;i+=5) {
-          store_options->xrot+=5;
+  step=1;
+  for (int i=0;i<ang;i+=step) {
+          store_options->xrot+=step;
+          store_options->yrot+=step;
+          store_options->zrot+=step;
           glbox->setRotation((int) store_options->xrot,(int) store_options->yrot,(int) store_options->zrot);
   }
 }
 // ============================================================================
-void GLObjectWindow::optionsRotateAroundZ()
+void GLObjectWindow::optionsRotateAroundZ(float ang, int step)
 {
-  for (int i=0;i<360;i+=5) {
-          store_options->zrot+=5;
+  for (int i=0;i<ang;i+=step) {
+          store_options->zrot+=step;
           glbox->setRotation((int) store_options->xrot,(int) store_options->yrot,(int) store_options->zrot);
   }
 }

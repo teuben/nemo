@@ -4,15 +4,14 @@
 # Target is an application:  ../bin/glnemo
 
 INSTALLS += mantarget \
-            target target2
+            target2 \
+            target 
 target.path = $(NEMOBIN) 
-
-mantarget.files += ../DOC/glnemo.1 
-mantarget.files += ../DOC/glnemo.1 
-
-target2.path = $(NEMOBIN)
-target2.files += ../script/frame2divx.pl
-
+target2.files += ../script/frame2divx.pl 
+target2.path = $(NEMOBIN) 
+mantarget.path = $(NEMO)/man/man1
+mantarget.files += ../DOC/glnemo.1 \
+                   ../DOC/glnemo.1 
 LIBS += -L$(NEMOLIB) \
         -lnemo 
 INCLUDEPATH = . \
@@ -65,7 +64,8 @@ HEADERS += glbox.h \
            frame_data.h \
            animation_engine.h \
            frustumculling.h \
-           gloctree.h 
+           gloctree.h \
+           glcube.h 
 SOURCES += glbox.cpp \
            globjwin.cpp \
            glnemo.cpp \
@@ -92,5 +92,6 @@ SOURCES += glbox.cpp \
            frame_data.cpp \
            animation_engine.cpp \
            frustumculling.cpp \
-           gloctree.cpp 
+           gloctree.cpp \
+           glcube.cpp 
 target.files = ../bin/glnemo

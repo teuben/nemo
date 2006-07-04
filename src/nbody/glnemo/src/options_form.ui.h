@@ -46,6 +46,9 @@ void OptionsForm::uploadOptions()
     store_options->xy_grid=xy_grid->isChecked();
     store_options->yz_grid=yz_grid->isChecked();
     store_options->xz_grid=xz_grid->isChecked();
+    store_options->show_grid=display_grid->isChecked();
+    store_options->show_cube=cube_display->isChecked();
+    
     // from HUD TAB
     store_options->hud=hud->isChecked();
     store_options->hud_title=hud_title->isChecked();
@@ -102,9 +105,12 @@ void OptionsForm::downloadOptions(GlobalOptions * options)
     xy_grid->setChecked(store_options->xy_grid);
     yz_grid->setChecked(store_options->yz_grid);
     xz_grid->setChecked(store_options->xz_grid);
+    display_grid->setChecked(store_options->show_grid);
+    cube_display->setChecked(store_options->show_cube);
     grid_xy_button->setPalette(QPalette(store_options->col_x_grid));
     grid_yz_button->setPalette(QPalette(store_options->col_y_grid)); 
     grid_xz_button->setPalette(QPalette(store_options->col_z_grid));
+    cube_button->setPalette(QPalette(store_options->col_cube));
     // from HUD TAB
     hud->setChecked(store_options->hud);
     hud_title->setChecked(store_options->hud_title);
@@ -241,6 +247,14 @@ void OptionsForm::setColorGridXZ()
   store_options->col_z_grid=color;
   emit changeColorGridXZ(color); 
 }
+//===========================================================================
+void OptionsForm::setColorCube()
+{
+  const QColor color=setColor(&(cube_button->paletteBackgroundColor()));
+  cube_button->setPalette(QPalette(color));
+  store_options->col_cube=color;
+  emit changeColorCube(color); 
+}
 //============================================================================
 // set color for background display
 void OptionsForm::setColorBackground()
@@ -268,7 +282,13 @@ QColor OptionsForm::setColor( const QColor * _color)
               this, "color dialog" );
     return color;
 }
-//============================================================================
+//============================================================================// Toggle Grids and cube
+void OptionsForm::selectGrid()
+{
+    //store_options->show_grid = display_grid->isChecked();
+    emit toggleGrid();
+}
+//===========================================================================
 // Toggl XY grid .
 void OptionsForm::selectGridX()
 {
@@ -289,8 +309,13 @@ void OptionsForm::selectGridZ()
     store_options->xz_grid=xz_grid->isChecked(); 
     emit toggleGridZ();
 }
-
-//============================================================================
+//===========================================================================
+void OptionsForm::selectCube()
+{
+    store_options->show_cube=cube_display->isChecked(); 
+    emit toggleCube();
+}
+//===========================================================================
 // Change texture size (gaz like particles)
 void OptionsForm::changeTextureSize(int)
 {

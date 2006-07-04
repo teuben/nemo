@@ -89,9 +89,9 @@ private slots:
     void setProjection();
     void callMe();
     void loadNextFrame();
-    void optionsRotateAroundX();
-    void optionsRotateAroundY();
-    void optionsRotateAroundZ();
+    void optionsRotateAroundX(float ang=360., int step=1);
+    void optionsRotateAroundY(float ang=360., int step=1);
+    void optionsRotateAroundZ(float ang=360., int step=1);
     //void startRenderAnim();
     //void stopRenderAnim();
 public:

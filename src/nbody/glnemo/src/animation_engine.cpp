@@ -584,7 +584,7 @@ void AnimationRender::runTimeout()
     // get Options from currect frame
     GlobalOptions store_options = (*fdv)[current_frame_render].store_options;    
     if (isNewTimeFrame(current_frame_render)) {
-      loadNextFrame();
+      emit loadNextFrame();
     } 
     else {
       emit uploadToGL(&store_options,select_options_gui);           // send to GLBox  

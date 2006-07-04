@@ -29,6 +29,7 @@ class GLHudObject;
 #include "global_options.h"
 #include "animation_engine.h"
 #include "gloctree.h"
+#include "glcube.h"
 
 class GLBox : public QGLWidget
 {
@@ -93,6 +94,7 @@ class GLBox : public QGLWidget
     updateGL();
   }
   // Grids
+  
   void toggleGridX() { gridx->toggleActivate(); updateGL();};
   void toggleGridY() { gridy->toggleActivate(); updateGL();};
   void toggleGridZ() { gridz->toggleActivate(); updateGL();};
@@ -100,6 +102,9 @@ class GLBox : public QGLWidget
   void changeColorGridX(const QColor color) { gridx->setColor(color); updateGL();};
   void changeColorGridY(const QColor color) { gridy->setColor(color); updateGL();};
   void changeColorGridZ(const QColor color) { gridz->setColor(color); updateGL();};
+  // Cube
+  void toggleCube() { cube->toggleActivate(); updateGL();};
+  void changeColorCube(const QColor color) { cube->setColor(color); updateGL();};
   // Hud
   void toggleHUD()   { hud->toggleActivate();   updateGL();};
   void setHudActivate();
@@ -181,6 +186,7 @@ class GLBox : public QGLWidget
   
   // grid variable
   GLGridObject * gridx, * gridy, * gridz;
+  GLCube * cube;
   bool show_grid;
   bool line_aliased;
 

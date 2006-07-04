@@ -38,10 +38,11 @@ GlobalOptions::GlobalOptions()
   mesh_length=1.0;
   nb_meshs=28;
   xy_grid=true;
-  yz_grid=xz_grid=false;
+  yz_grid=xz_grid= show_cube =false;
   col_x_grid = QColor(136,141,102);
   col_y_grid = QColor(136,141,102);
   col_z_grid = QColor(136,141,102);
+  col_cube   = QColor(136,141,102);
   // from HUD TAB
   hud=true;
   hud_title=hud_time=hud_zoom=hud_rot=true;

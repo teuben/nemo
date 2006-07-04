@@ -36,8 +36,8 @@ public:
     bool show_grid;
     float mesh_length;
     int nb_meshs;
-    bool xy_grid, yz_grid, xz_grid;
-    QColor col_x_grid, col_y_grid, col_z_grid;
+    bool xy_grid, yz_grid, xz_grid, show_cube;
+    QColor col_x_grid, col_y_grid, col_z_grid, col_cube;
     // from HUD TAB
     bool hud;
     bool hud_title, hud_time, hud_zoom, hud_rot,

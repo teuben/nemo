@@ -56,6 +56,8 @@ GLBox::GLBox( QWidget* parent, const char* name,
   gridx = new GLGridObject(0,QColor(136,141,102),store_options->xy_grid);  //yellow);
   gridy = new GLGridObject(1,QColor(136,141,102),store_options->yz_grid);
   gridz = new GLGridObject(2,QColor(136,141,102),store_options->xz_grid);
+  cube  = new GLCube(store_options->mesh_length*store_options->nb_meshs,
+                     QColor(136,141,102),store_options->show_cube);
   resizeGrid(store_options->mesh_length,store_options->nb_meshs);
   line_aliased = FALSE;
   MAX_PARTICLES_SIZE=5.0;
@@ -85,6 +87,7 @@ GLBox::~GLBox()
   delete gridx;
   delete gridy;
   delete gridz;
+  delete cube;
 }
 
 // ============================================================================
@@ -165,6 +168,7 @@ void GLBox::paintGL()
     gridx->display();
     gridy->display();
     gridz->display();
+    cube->display();
   }  
 #endif
   // Translate particles
@@ -491,6 +495,8 @@ void GLBox::resizeGrid(float square_size, int nb_square )
   gridx->rebuild();
   gridy->rebuild();
   gridz->rebuild();
+  cube->setSquareSize(square_size * nb_square);
+  cube->rebuild();
 }
 // ============================================================================
 // GLBox::setParticlesSize()                                                   
