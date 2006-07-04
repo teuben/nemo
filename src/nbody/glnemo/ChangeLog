@@ -1,7 +1,7 @@
 glnemo ChangeLog
 
 
-in CVS (V 0.91, Juin 2006)
+in CVS (V 0.92, July 2006)
 ===========================
 	*) general:
 	   --------
@@ -9,6 +9,12 @@ in CVS (V 0.91, Juin 2006)
 
 	- update OpenGL display to a bigger Depth Of Field (usefull for the 
 	  cosmological simulations).
+	  
+	- fix bug with animation rendering engine when a snapshot reach the end of file.
+	
+	*) features:
+	   --------
+	- possibility to display a cube from the grid's options tab
 
 V 0.90, April 2006
 ===================
