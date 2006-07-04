@@ -7,11 +7,11 @@ INSTALLS += mantarget \
             target2 \
             target 
 target.path = $(NEMOBIN) 
-target2.files += ../script/frame2divx.pl 
 target2.path = $(NEMOBIN) 
+target2.files += ../script/frame2divx.pl 
 mantarget.path = $(NEMO)/man/man1
-mantarget.files += ../DOC/glnemo.1 \
-                   ../DOC/glnemo.1 
+mantarget.files += ../DOC/glnemo.1
+
 LIBS += -L$(NEMOLIB) \
         -lnemo 
 INCLUDEPATH = . \
