@@ -88,7 +88,7 @@ using namespace std;
   "wsize=925\n       Windows's width size                           ",
   "hsize=685\n       Windows's height size                          ",
   "screenshot=\n     Screenshot name                                ",
-  "VERSION=0.88\n     "__DATE__"  - JCL  compiled at <"__TIME__">   ",
+  "VERSION=0.92\n    "__DATE__"  - JCL  compiled at <"__TIME__">   ",
   NULL
 };
 ::string usage="3D OpenGL Nemo Snapshot rendering";
