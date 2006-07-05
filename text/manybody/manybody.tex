@@ -24,14 +24,16 @@
 \title{ 
 {\Huge MANYBODY:} \\
   {\LARGE an accompanying software guide to }\\
-  {\bf  International School on Galactic and Cosmological N-Body Simulations} \\
-  { INAOE, Tonantzintla, Puebla, Mexico, 23 July - 4 August 2006}\\
+  {\bf  Escuela Internacional de Simulaciones Galacticos Y Cosmologicos B cuerpos} \\
+  {\bf  International School on Galactic and Cosmological N-body Simulations} \\
+  { INAOE, Tonantzintla, Puebla, Mexico, \\
+  23 July - 4 August 2006}\\
   {\small and previously} \\
   {\bf  Summer school on direct N-body simulations} \\
   {\bf  Zomer school over direkte N-deeltjes simulaties} \\
   { Astronomical Institute {\it 'Anton Pannekoek'}, Amsterdam, Netherlands, 24-30 July 2005}\\
   {\small and} \\
-  { \bf School on Numerical N-Body Dynamics }\\
+  { \bf School on Numerical N-body Dynamics }\\
   { \bf \'Ecole de Dynamique Numerique Ncorps }\\
   { Observatoire astronomique de Strasbourg, France, 19-22 March 2004}
 }
@@ -41,10 +43,11 @@
  {Peter Teuben } \\
 % my spiritual co-authors :
 % Douglas Heggie - Piet Hut - Jun Makino 2004/2005
-% Aguilar/Athanassoula/Dehnen 2006
+% McMillan/Portegies Zwart 2005
+% Aguilar/Athanassoula/Dehnen/ 2006
        }
 
-\date{{\small Version 1.7} \\
+\date{{\small Version 1.8} \\
       {\small Summer 2006} \\
       {\small Last document revised: \today} \\ 
       {\small \tt URL: http://bima.astro.umd.edu/nemo/manybody/index.html} \\
@@ -131,17 +134,18 @@ page (this page). Small latex2html conversion problems remain.
 \chapter*{Preface}
 
 What lies in front of you is an accompanying guide to some of 
-the software you might find useful this week.
+the software you might find useful this school.
 It is still very much work in progress, with many sparse and
 unfinished sections.
 
 %% == this is modest specific
 
-A larger number of programs are within the NEMO and Starlab packages, 
+A large number of programs are within the NEMO and Starlab packages, 
 though a number of useful programs and smaller packages
 that are available elsewhere have been assembled here
-and made available via this {\it manybody} environment.
-See also Appendix B for a more detailed description.
+and made available via the {\it manybody} environment.
+See also Appendix B for a more detailed description of this
+{\it manybody} environment.
 
 One word of caution though: this Guide is {\bf not} a coherent
 story that you should necessarily read front to back, it is more encyclopedic
@@ -299,9 +303,10 @@ can be used in the {\it manybody} environment.
 % there are some notable examples of integrators
 % that are not easily available.% \footnote{gasoline, pkdgrav}
 
+
 \begin{center}
 \begin{table}[h]
-\caption{A few good N-Body codes}
+\caption{A few good N-body codes}
 \begin{tabular}{||l|l|l|l||}
 
 \hline 
@@ -335,7 +340,7 @@ can be used in the {\it manybody} environment.
 
 {\tt quadcode} & SFP & Barnes \& White 1986 & s \\
 
-{\tt CGI} & SFP &  Trenti et al. 2005 & \\
+{\tt CGS} & SFP &  Trenti et al. 2005 & \\
 
 {\tt galaxy} & PM & Sellwood  & b \\
 
@@ -622,7 +627,7 @@ FINAL:
 
 \section{hnbody}
 
-{\bf HNBody} (Hierarchical N-Body, see Rauch \& Hamilton 2004)
+{\bf HNBody} (Hierarchical N-body, see Rauch \& Hamilton 2004)
 is optimized for 
 the motion of particles in self-gravitating systems where the total mass
 is dominated by a single object; it is based on 
@@ -925,8 +930,52 @@ It is primarily a cosmology code, and based on the treecode, but also incoorpora
 SPH particles
 and, for cosmological simulations, the Ewald sum technique to create periodic
 boundary conditions. The code was originally written in Fortran, but in 2005 re-released
-and completely rewritten in C. It also runs in a parallized mode under MPI.
-Typically {\tt gadget2} will be compiled for a specific physical situation.
+and completely rewritten in C. It runs in a parallelized mode under MPI, even if you 
+have a single processor, you will need the infrastructure to use MPI. Also,
+{\tt gadget2} will typicall be compiled for a specific physical situation. In the
+standard distribution you will find 4 different ones: 
+{\it cluster}, {\it galaxy}, {\it gassphere} and 
+{\it lcmd\_gas}.
+
+\footnotesize\begin{verbatim}
+1%  mkdir galaxy
+
+2%  lamboot
+
+3%  ln -s $MANYBODY/gadget/Gadget2/Gadget2/parameterfiles
+
+4%  ln -s $MANYBODY/gadget/Gadget2/ICs
+
+5%  Gadget2.galaxy parameterfiles/galaxy.param
+
+6%  mpirun -n 2 Gadget2.galaxy parameterfiles/galaxy.param
+
+6%  lamwipe
+
+\end{verbatim}\normalsize
+
+WARNING: this benchmark example from the Gadget2  source code takes a little
+over 2000 steps,
+and can easily take an hour on a single CPU 3GHz Pentium-4 class CPU.
+
+To use a dataset from NEMO, the data will have to be transformed using
+{\tt snapgadget}:
+\footnotesize\begin{verbatim}
+1%  mkdir galaxy
+
+2%  lamboot
+
+3%  ln -s $MANYBODY/gadget/Gadget2/Gadget2/parameterfiles
+
+4%  ln -s $MANYBODY/gadget/Gadget2/ICs
+
+5%  Gadget2.galaxy parameterfiles/galaxy.param
+
+6%  mpirun -n 2 Gadget2.galaxy parameterfiles/galaxy.param
+
+6%  lamwipe
+
+\end{verbatim}\normalsize
 
 
 \section{quadcode}
@@ -1011,6 +1060,44 @@ run directory.
 Note this program does not use dynamic memory, so the program needs to 
 be recompiled for more than the default number of particles.
 
+\section{CGS}
+
+The {\it Collisionless Galactic Simulator} (CGS) N-body code is a spherical
+harmonics Particle-Mesh code. The current version is a largely expanded and
+improved version from van Albada by Trenti (Trenti 2005). A convenient
+NEMO wrapper, called {\tt runCGS} is available:
+
+\footnotesize\begin{verbatim}
+  examples/ex9 :  
+  #
+ 1% runCGS in=p1024.in out=run2 
+>>> snapprint p1024.in x,y,z    > run2/initPOS.dat
+x y z
+>>> snapprint p1024.in vx,vy,vz > run2/initVEL.dat
+vx vy vz
+line=1024
+Using snapshot in=p1024.in with nbody=1024
+>>> CGS.exe >& CGS.log
+>>> tabtos fort.90 snap.out nbody,time skip,pos,vel,acc,phi; rm fort.90
+[reading 1024 bodies at time 0.000000]
+[reading 1024 bodies at time 0.100000]
+...
+[reading 1024 bodies at time 3.900000]
+[reading 1024 bodies at time 4.000000]
+
+    # a quick overview of the evolution 
+ 2% snapplot run2/snap.out nxy=4,4
+
+    # lagrangian radii, but note masses were not present and had to be added
+ 4% snapmass run2/snap.out - mass=1 | snapmradii - log=t | tabplot - 1 2:10 line=1,1
+
+
+\end{verbatim}\normalsize
+
+% there is something a little odd with this simulation. explain.
+
+
+
 \section{galaxy}
 
 Sellwood (1997) contributed this 3-dimensional cartesian code to NEMO. Is uses the
@@ -1059,24 +1146,56 @@ are nbody0, galaxy, gyrfalcON, hackcode1 and xxx}
 \label{f:performance}
 \end{figure}
 
-\section*{Questions}
 
-\begin{itemize}
+\begin{center}
+\begin{table}[h]
+\caption[Common integrator keywords]
+{Common keywords to N-body integrators differ}
+\begin{tabular}{||l|l|l|l|l|l||}
 
-\item[Q1]
-Take a raw integrator, one without a NEMO interface, and write a user
-friendly shell script (sh, csh, python, perl, ...) that can take a
-NEMO snapshot input, and produces a NEMO snapshot output file, for
-given timestep dt, output timetep dt\_out and a final integration
-time of tstop.
+\hline 
+{\it code} & {\it time-step}  & {\it output-time-step}  & {\it diag-output} & {\it stop-time} & {it start-time} \\
 
-\item[Q2]
-For a given object (for example a Plummer sphere), define a statistical
-measure for the accurary of the treecode as a function of the critical
-opening angle, and compare the classical BH treecode O(NlogN) with and
-without quadrupole corrections to that of the O(N) Dehnen treecode.
+\hline &&&&& \\
 
-\end{itemize}
+{\tt firstn}         & & & & & \\
+
+{\tt nbody0}         & & & & & \\
+
+{\tt nbodyX}  (SJA)  & [eta] & deltat & - & tcrit & \\
+
+{\tt fewbody}        &  & & & & \\
+
+{\tt hnbody}         &  & & & & \\
+
+{\tt kira}           &  & & & & \\
+
+{\tt treecode} v2.2 LH      & dtime & nout & - & nsteps &  \\
+{\tt treecode1} v1.4 JEB    & dtime & dtout & - & tstop &  \\
+
+{\tt gyrfalcON}      & [hmin] & step & logstep & tstop & - \\
+
+{\tt gadget}         &  & & & & \\
+
+{\tt scfm}           & dtime & noutbod & noutlog & nsteps & - \\
+
+
+{\tt hackcode1}      & freq & freqout & minor\_freqout & tstop & \\
+{\tt quadcode}       & freq & freqout & minor\_freqout & tstop & \\
+
+
+{\tt CGS}            & dt,dtmin,drmax & freqout & freqdiag & tstop & \\
+
+{\tt galaxy}         & dy & dtout & dtlog & tstop & \\
+
+{\tt superbox}       & & & & & \\
+
+\hline 
+
+\end{tabular}
+\label{t:codekeys}
+\end{table}
+\end{center}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1189,7 +1308,7 @@ particular, they studied the resulting shapes.
 
 \section{Sellwood: Galaxy Dynamics - 1997}
 
-Sellwood (1997), in {\it Galaxy Dynamics by N-Body Simulation},
+Sellwood (1997), in {\it Galaxy Dynamics by N-body Simulation},
 compared 5 different codes and argued that certain codes...
 Comparing direct N-body, tree and grid codes. Plummer
 sphere.
@@ -1325,7 +1444,7 @@ real objects, like clusters and galaxies. Discuss stellar evolution in kira
 and how this has introduced a hybrid simulation where the scale cannot be
 changed!
 
-Aarseth uses {\it N-Body Units}, i.e.
+Aarseth uses {\it N-body Units}, i.e.
 
 \section{Initial Conditions}
 
@@ -1890,7 +2009,7 @@ $NEMO/csh/mkmpeg_movie : some example scripts to make movies
 \end{verbatim} 
 %$
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter                {Problems}
+\chapter                {Exercises}
 
 \begin{enumerate}
 
@@ -1913,6 +2032,20 @@ number of particles or the configuration?
 \item
 Back to kindergarden: connect the dots in Figure~\ref{f:performance}.
 
+
+\item
+Take a raw integrator, one without a NEMO interface, and write a user
+friendly shell script (sh, csh, python, perl, ...) that can take a
+NEMO snapshot input, and produces a NEMO snapshot output file, for
+given timestep dt, output timetep dt\_out and a final integration
+time of tstop.
+
+\item
+For a given object (for example a Plummer sphere), define a statistical
+measure for the accurary of the treecode as a function of the critical
+opening angle, and compare the classical BH treecode O(NlogN) with and
+without quadrupole corrections to that of the O(N) Dehnen treecode.
+
 \end{enumerate}
 
 
@@ -1921,7 +2054,7 @@ Back to kindergarden: connect the dots in Figure~\ref{f:performance}.
 
 
 Aarseth, S.J. - 
-{\it Gravitational N-Body Simulations : Tools and Algorithms} 
+{\it Gravitational N-body Simulations : Tools and Algorithms} 
 (Cambridge Univ. Pr., 2003),
 
 Aarseth, S.J. - 2004.. {\it NBODY6 Users Manual} : {\bf man6.ps}
@@ -1951,7 +2084,7 @@ Binney, J. \& Merrifield, M. {\it Galactic Astronomy}, Princeton University Pres
 Binney, J. \& Tremaine, S. - {\it Galactic Dynamics}, Princeton University Press. 1987. 
 
 Cruz, F.; Aguilar, L. A.; Carpintero, D. D
-{\it A New Method to Find the Potential Center of N-Body Systems} - 2002RMxAA..38..225C
+{\it A New Method to Find the Potential Center of N-body Systems} - 2002RMxAA..38..225C
 {\bf RMxAA..38-2\_cruz.pdf}
 
 Dehnen, W. - {\it A Very Fast and Momentum-Conserving Tree Code} - 2000
@@ -1970,7 +2103,7 @@ Frenk, C. et al - 1999
 {\bf 1999ApJ...525..554F}
 
 Goodman, Jeremy; Heggie, Douglas C.; Hut, Piet - 1993 -
-{\it On the Exponential Instability of N-Body Systems} :
+{\it On the Exponential Instability of N-body Systems} :
 {\bf 1993ApJ...415..715G.pdf}
 
 Gualandris, A., Portegies Zwart, S., and Tirado-Ramos, A. - 2004
