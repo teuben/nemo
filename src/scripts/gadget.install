@@ -162,6 +162,7 @@ if (-e $gadget) gtar zxf $gadget
 set dir=`basename $gadget .tar.gz`
 # for now gadget tar file base name different from created directory name
 set dir=Gadget-2.0.3
+ln -s Gadget-2.0.3 Gadget
 if (-e $dir) then
    pushd $dir/Gadget2
    foreach problem (cluster galaxy gassphere lcdm_gas)
