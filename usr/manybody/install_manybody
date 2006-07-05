@@ -3,6 +3,7 @@
 #  5-mar-2004     for 1st nbody-school                             PJT 
 # 20-apr-2004     minor things for fam04                           pjt
 # 24-jul-2005     many changes for 2nd nbody-school MODEST5c       PJT
+#  4-jul-2006     various changes to go with the times (mexico)    pjt
 #
 #  Removed any local directory called manybody and installs a new manybody tree
 #  The default should be executed from the home directory, such that
@@ -22,16 +23,17 @@ set check=1
 set gcc=0
 set intel=0
 
-#  things that have versions and could in theory change
-set gsl=1.4
+#  things that have versions and could in theory change; typically setting
+#  something to 0 will disable it since the version does not exist
+set gsl=1.8
 set fewbody=0.21
 set glstarview=0.6-devel
 set hnbody=1.0.3-linux-x86
 set acs=lite-1.2.1
-set ruby=1.8.2
+set ruby=1.8.4
 set fltk=1.1.4
 set ez=3_0_4
-set tioga=1.0.C
+set tioga=1.1.2
 
 #  root directory where all the tar ball packages live from which to install
 set pkg=`pwd`/manybody_pkg
@@ -88,7 +90,7 @@ cp $pkg/manybody_start.*sh $root
 
 #PJT
 goto testing
-testing:
+#testing:
 
 #                                                   gcc compiler
 if ($gcc != 0) then
@@ -168,7 +170,7 @@ ln -s starlab_cvs starlab
 pushd starlab_cvs >& /dev/null
   set log=$root/tmp/starlab.log
   set opts=(`pwd`/usr --without-f77 --enable-sdyn3 --enable-sdyn)
-  if ($cvs) cvs up >& $log
+  if ($cvs) cvs up >>& $log
   ./install-starlab $opts >>& $log
   echo "See also install.log in the starlab_cvs directory" >> $log
   source starlab_start.csh
@@ -182,7 +184,7 @@ tar zxf $pkg/starcluster/starcluster_cvs.tar.gz
 ln -s starcluster_cvs starcluster
 pushd starcluster_cvs >& /dev/null
   set log=$root/tmp/starcluster.log
-  if ($cvs) cvs up >& $log
+  if ($cvs) cvs up >>& $log
   make >>& $log
   if ($status) echo ERRORS compiling starcluster, check $log
   make install prefix=$STARLAB_INSTALL_PATH >>& $log
@@ -218,6 +220,7 @@ pushd partiview_cvs/src >& /dev/null
   cp partiview $MANYBODY/opt/bin
 popd >& /dev/null
 
+testing:
 #                                                   nemo
 echo  `date` Installing NEMO
 tar zxf $pkg/nemo/nemo_cvs.tar.gz
@@ -232,6 +235,15 @@ pushd nemo_cvs >& /dev/null
 popd >& /dev/null
 rehash
 
+#                                                    gadget
+echo  `date` Installing gadget
+mkdir gadget
+pushd gadget >& /dev/null
+  set log=$root/tmp/gadget.log 
+  (cd $NEMO/src/scripts; cvs up) >& $log
+  $NEMO/src/scripts/gadget.install prefix=$MANYBODY/opt bench=0 manybody=$pkg >>& $log
+popd >& /dev/null
+rehash
 #                                                    firstn
 echo  `date` Installing firstn
 pushd $NEMO/usr/aarseth/firstn >& /dev/null
@@ -369,9 +381,9 @@ echo  `date` Installing EZ
 #                                                                      Tioga
 echo  `date` Installing Tioga
   set log=$root/tmp/tioga.log
-  tar zxf $pkg/Tioga/Tioga-$tioga-linux.tar.gz
-  pushd Tioga-$tioga >& /dev/null
-    (cd make; ruby extconf.rb ; make; make install) >& $log
+  tar zxf $pkg/Tioga/tioga-$tioga.tar.gz
+  pushd tioga-$tioga >& /dev/null
+    (cd split; ruby extconf.rb ; make; make install) >& $log
     (cd tests; ruby ts_Tioga.rb) >>& $log
   popd >& /dev/null
 rehash
