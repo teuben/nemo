@@ -4,6 +4,7 @@
  *
  *  2-jun-2003         based on their read_snapshot.c template example    - Peter Teuben
  * 17-mar-2006  V0.2   using header=
+ *  7-jul-2006  V0.3   using reorder=
  *
  *
  */
@@ -18,8 +19,9 @@ string defv[] = {
     "in=???\n       Input file (gadget format)",
     "out=???\n      Output file (snapshot format)",
     "swap=f\n       Force swaping bytes for non-native machines",
+    "reorder=f\n    Call reorder",
     "header=\n      Header size of unfio (4 or 8 or pre-configured)",
-    "VERSION=0.2\n  17-mar-06 PJT",
+    "VERSION=0.3\n  6-jul-06 PJT",
     NULL,
 };
 
@@ -54,6 +56,7 @@ struct io_header_1
 
 int     NumPart, Ngas;
 bool    Qswap;
+bool    Qreorder;
 int     header;
 
 struct particle_data 
@@ -103,6 +106,7 @@ void nemo_main()
   if (sizeof(double) != 8) error("sizeof(double) = %d (we assumed 8)",sizeof(double));
 
   Qswap = getbparam("swap");
+  Qreorder = getbparam("reorder");
 
 #if 0
   sprintf(path, "/home/vspringe/LCDM");
@@ -116,8 +120,8 @@ void nemo_main()
   files=1;                               /* number of files per snapshot */
   load_snapshot(input_fname, files);
 
-
-  reordering();  /* call this routine only if your ID's are set properly */
+  if (Qreorder)
+    reordering();  /* call this routine only if your ID's are set properly */
 
   unit_conversion();  /* optional stuff */
 
