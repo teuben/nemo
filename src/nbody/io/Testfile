@@ -1,5 +1,5 @@
 DIR = src/nbody/io
-BIN = stoa atos tabtos snaptipsy tipsysnap gadgetsnap snapgadget
+BIN = stoa atos tabtos snaptipsy tipsysnap snapgadget gadgetsnap 
 NEED = $(BIN) mkplummer snapprint snapcmp
 
 help:
