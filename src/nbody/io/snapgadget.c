@@ -45,11 +45,13 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "N=???\n			Nhalo,Ndisk,Nbulge,Nstars (in that order)",
     "times=all\n		Times to select snapshot",
     "swap=f\n                   Swap bytes on output?",
-    "VERSION=0.2\n		8-sep-03 PJT",
+    "VERSION=0.2a\n		7-jul-06 PJT",
     NULL,
 };
 
 string usage="convert snapshot to GADGET format";
+
+string cvsid="$Id$";
 
 #define TIMEFORMAT "%t"
 

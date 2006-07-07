@@ -27,6 +27,8 @@ string defv[] = {
 
 string usage="convert gadget files to snapshot format";
 
+string cvsid="$Id$";
+
 #define HEADER_SIZE  256
 
 struct io_header_1
