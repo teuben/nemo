@@ -3,7 +3,7 @@
 #  5-mar-2004     for 1st nbody-school                             PJT 
 # 20-apr-2004     minor things for fam04                           pjt
 # 24-jul-2005     many changes for 2nd nbody-school MODEST5c       PJT
-#  4-jul-2006     various changes to go with the times (mexico)    pjt
+#  7-jul-2006     various changes to go with the times (mexico)    pjt
 #
 #  Removed any local directory called manybody and installs a new manybody tree
 #  The default should be executed from the home directory, such that
@@ -34,6 +34,7 @@ set ruby=1.8.4
 set fltk=1.1.4
 set ez=3_0_4
 set tioga=1.1.2
+set tipsy=2.2.3
 
 #  root directory where all the tar ball packages live from which to install
 set pkg=`pwd`/manybody_pkg
@@ -234,6 +235,20 @@ pushd nemo_cvs >& /dev/null
   echo NEMO-COUNT: `ls $NEMOBIN|wc -l`
 popd >& /dev/null
 rehash
+
+#                                                    tipsy
+echo  `date` Installing tipsy
+tar zxf $pkg/tipsy/tipsy-$tipsy.tar.gz
+ln -s tipsy-$tipsy tipsy
+pushd tipsy-$tipsy/code >& /dev/null
+  set log=$root/tmp/tipsy.log
+  mkdir -p $root/opt/bin
+  ./configure --prefix=$root/opt >& $log
+  make >>& $log
+  make install prefix=$root/opt >>& $log
+popd >& /dev/null
+rehash
+  
 
 #                                                    gadget
 echo  `date` Installing gadget
