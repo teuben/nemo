@@ -2,9 +2,10 @@
  * gadgetsnap:  convert the Gadget nbody data format in nemo's 
  *              snapshot(5NEMO) format
  *
- *  2-jun-2003  based on their read_snapshot.c template example    - Peter Teuben
+ *  2-jun-2003         based on their read_snapshot.c template example    - Peter Teuben
+ * 17-mar-2006  V0.2   using header=
  *
- * TODO: make sure it works
+ *
  */
 
 #include <nemo.h>
@@ -17,7 +18,8 @@ string defv[] = {
     "in=???\n       Input file (gadget format)",
     "out=???\n      Output file (snapshot format)",
     "swap=f\n       Force swaping bytes for non-native machines",
-    "VERSION=0.1\n  2-jun-03 PJT",
+    "header=\n      Header size of unfio (4 or 8 or pre-configured)",
+    "VERSION=0.2\n  17-mar-06 PJT",
     NULL,
 };
 
@@ -43,6 +45,8 @@ struct io_header_1
   /* 
    *  the remainder is a 256byte space filler, and as the structure above
    *  here changes over time, will need to be adjusted 
+   *  we're also making the usual assumption:
+   *  int=4, double=8 and no padding between them
    */
   char     fill[HEADER_SIZE - 6*4- 6*8- 2*8- 2*4- 6*4- 2*4 - 4*8]; 
 } header1;
@@ -50,6 +54,7 @@ struct io_header_1
 
 int     NumPart, Ngas;
 bool    Qswap;
+int     header;
 
 struct particle_data 
 {
@@ -86,9 +91,16 @@ void nemo_main()
   int  type, snapshot_number, files;
   stream outstr;
 
+  if (hasvalue("header"))
+    header = getiparam("header");
+  else
+    header = UNFIO_HDR_SIZE;
+
   if (sizeof(header1) != HEADER_SIZE)
       error("sizeof(io_header) = %d  != HEADER_SIZE=%d",
 	    sizeof(header1),HEADER_SIZE);
+  if (sizeof(int) != 4)    error("sizeof(int)    = %d (we assumed 4)",sizeof(int));
+  if (sizeof(double) != 8) error("sizeof(double) = %d (we assumed 8)",sizeof(double));
 
   Qswap = getbparam("swap");
 
@@ -214,11 +226,11 @@ local int unit_conversion(void)
 local int load_snapshot(char *fname, int files)
 {
   FILE *fd;
-  char   buf[200];
-  int    i,j,k,l,dummy,ntot_withmasses;
+  char   buf[200], dummy[8];
+  int    i,j,k,l,ntot_withmasses;
   int    t,n,off,pc,pc_new,pc_sph;
 
-#define SKIP fread(&dummy, sizeof(dummy), 1, fd);
+#define SKIP fread(dummy, header, 1, fd);
 
   for(i=0, pc=1; i<files; i++, pc=pc_new) {
     if(files>1)
@@ -234,10 +246,12 @@ local int load_snapshot(char *fname, int files)
     /* this relies on the fact that fortran binary I/O
        dumps the record size before and after the actual
        data, the header in this case
+       We could also use the unfio() routines, to
+       simplify the use of the SKIP macro
     */
-    fread(&dummy, sizeof(dummy), 1, fd);
+    SKIP;
     fread(&header1, sizeof(header1), 1, fd);
-    fread(&dummy, sizeof(dummy), 1, fd);
+    SKIP;
     if (Qswap) {
       bswap(header1.npart,sizeof(int),6);
       bswap(header1.mass,sizeof(double),6);
