@@ -10,7 +10,7 @@ need:
 
 clean:
 	@echo Cleaning $(DIR)
-	@rm -f stoa.out stoa.cmp atos.out st.out ts.out mp.out \
+	@rm -f stoa.out stoa.cmp atos.out st.out ts.out mp.out  sg.out gs.out \
 		tabtos.in tabtos.out tabtos.cmp
 
 NBODY = 10
@@ -30,9 +30,12 @@ atos:
 
 T = dark
 
-snaptipsy:
+mp.out:
+	$(EXEC) mkplummer mp.out $(NBODY)
+
+snaptipsy: mp.out
 	@echo Running snaptipsy:
-	$(EXEC) mkplummer mp.out $(NBODY) ; $(EXEC) snaptipsy mp.out st.out mode=$(T) ; nemo.coverage snaptipsy.c
+	$(EXEC) snaptipsy mp.out st.out mode=$(T) ; nemo.coverage snaptipsy.c
 
 tipsysnap:
 	@echo Running tipsysnap
@@ -41,13 +44,13 @@ tipsysnap:
 #	tsf ts.out; tsf mp.out
 	$(EXEC) snapcmp ts.out mp.out
 
-snapgadget:
+snapgadget: mp.out
 	@echo Running snapgadget
-	$(EXEC) snapgadget mp.out sg.out N=$(NBODY),0,0,0
+	$(EXEC) snapgadget mp.out sg.out N=$(NBODY),0,0,0; nemo.coverage snapgadget.c
 
 gadgetsnap:
 	@echo Running gadgetsnap
-	$(EXEC) gadgetsnap sg.out gs.out 
+	$(EXEC) gadgetsnap sg.out gs.out ; nemo.coverage gadgetsnap.c
 
 
 tabtos:
