@@ -168,3 +168,14 @@ potlist: rld: Fatal Error: attempted access to unresolvable symbol in
 - magalie: hangs on gcc 4.1.0 ?? but this is the same gcc 4.1.0 in which
 	falcON mishbehaves, while on the laptop it's both ok.
 - gmake:  not working on FC5 ?
+
+- if configure fails (exit != 0) should we stop the install ??
+
+- pgplot (or yapp_pgplot): if the sccreen aspect ratio is not the
+  classic 4:3, the plot is not square
+
+
+==
+
+pot and acc:  
+gyralcON wanted sqr in plummer.so
