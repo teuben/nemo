@@ -1,6 +1,7 @@
 #! /bin/csh -f
 #
-#  Install GCC for NEMO
+#  Install GCC for NEMO ; from a source tree compilating and installation
+#  would take about XXX mins on a 2.8 GHz P4.
 #
 #  For astromake, a more typical call would be:
 #  
