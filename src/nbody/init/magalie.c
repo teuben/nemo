@@ -4,7 +4,8 @@
  *  21-mar-04   1.1 interface created in rainy Strasbourg           PJT/CB
  *  24-mar-04   1.2 added most primary keywords, at 37,000ft        PJT
  *  23-jan-05   1.2a   fixed bulge mass encoding error     - courtesy J.J.Fleck
- *
+ *  24-mar-06   1.2b   fixed bulge radius encoding error   PJT
+ *  12-jul-06   1.2c   merged two versions - PJT
  */
 
 #include <stdinc.h>
@@ -45,7 +46,7 @@ string defv[] = {
 
   "seed=0\n       Random seed",
   "cleanup=f\n    cleanup run directory after use (not used yet)",
-  "VERSION=1.2b\n 4-apr-06 PJT",
+  "VERSION=1.2c\n 12-jul-06 PJT",
   NULL,
 };
 
@@ -68,8 +69,6 @@ void nemo_main(void)
   int seed, nbulge, ndisk, nhalo;
   bool Qcleanup = getbparam("cleanup");
 
-  warning("** program is in development **");
-  
   seed =   init_xrandom(getparam("seed")); 
   
   nbulge = getiparam("nbulge");
@@ -159,7 +158,7 @@ void nemo_main(void)
   fprintf(datstr,"unfio in=m.dat block=0 type=f | tabtos - ../%s block1=m,x,y,z,vx,vy,vz options=wrap nbody=%d\n",
 	  out, ndisk+nbulge+nhalo);
   strclose(datstr);
-  run_program("chmod +x make-it; time ./make-it > magalie.log 2>&1");   /* run it ! */
+  run_program("chmod +x make-it; ./make-it > magalie.log 2>&1");   /* run it ! */
   if (Qcleanup) {
     dprintf(0,"Removing the run directory %s.tmpdir\n",out);  
     sprintf(rundir,"cd ..; rm -rf %s.tmpdir",out);  
