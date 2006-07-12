@@ -1,18 +1,18 @@
-.TH bodyfunc 5falcON "07 November 2004"
+.TH bodyfunc 5falcON "12 July 2006"
 
 .SH Name
-bodyfunc expression \- used in generating \fIbodyfunc(3falcON)\fP
+bodyfunc expression \- used in generating \fIbodyfunc(1falcON)\fP
 functions: functions taking body, time and a set of up to 10
 parameters and returning bool, int, real, or vector.
 
 .SH Description
-\fIbodyfunc\fP expression are valid C (in fact C++) expressions that
-evaluate to either a bool, an integer, a real, or a vector. An
-interface for obtaining \fIbodyfunc\fP functions from \fIbodyfunc\fP
-expressions is provided by \fIget_bodyfunc(3falcON)\fP, which employs
-the C++ compiler to generate on the fly (as the user runs the program)
-the function together with type information and information on which body
-data are required.
+\fIbodyfunc expression\fPs are valid C (in fact C++) expressions that
+evaluate to either a bool, an integer, a real, or a vector. On
+construction of a \fIbodyfunc\fP, the C++ compiler is
+employed to to generate on the fly (as the user runs the program) the
+function together with type information and information on which body
+data are required, see \fIbodyfunc(1falcON)\fP.
+
 .SH List of body properties
 The bodyfunc expression may contain the following sub-expressions
 for body properties.
@@ -122,7 +122,7 @@ E<0? L:vector(zero)	vector	bound bodies: angular momentum, unbound: 0
 
 
 .SH See Also
-get_bodyfunc(3falcON), bodyfunc(3falcON), bodytrans(5NEMO)
+bodyfunc(1falcON), bodytrans(5NEMO)
 .SH Author
 Walter Dehnen
 .SH Update History
@@ -130,4 +130,5 @@ Walter Dehnen
 .ta +1.0i +6.0i
 21-jul-2004 Created	WD
 07-nov-2004 parameters added, changed cond#expr to expr@cond	WD
+12-jul-2006 Updated	WD
 .fi

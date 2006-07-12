@@ -69,13 +69,13 @@ namespace falcON {
     typedef T(*const bf_pter)(body   const&,double const&,const real*);
     static T func(void(*const f)(body const&,double const&,const real*),
 		  body   const&b, double const&t, const real*p) {
-      return f? (*(bf_pter)(f))(b,t,p) : default_value();
+      return f? (*(bf_pter)(f))(b,t,p) : bf_type_base<T>::default_value();
     }
     //--------------------------------------------------------------------------
     typedef T(*const Bf_pter)(bodies const&,double const&,const real*);
     static T func(void(*const f)(bodies const&,double const&,const real*),
 		  bodies const&b, double const&t, const real*p) {
-      return f? (*(Bf_pter)(f))(b,t,p) : default_value();
+      return f? (*(Bf_pter)(f))(b,t,p) : bf_type_base<T>::default_value();
     }
   };
   // ///////////////////////////////////////////////////////////////////////////
@@ -226,8 +226,7 @@ namespace falcON {
     /// \params pars comma separated list of parameters
     /// \note the bodyfunc expression must return the type T
     BodyFilter(const char*expr, const char*pars)
-      throw(falcON::exception)
-    : BodyFunc<bool>(expr,pars), TIME(0.) {}
+      throw(falcON::exception);
     /// construction from bodyfunc expression (can be empty)
     /// \params expr body_func (5falcON) expression --- or NULL
     /// \params pars array with parameters 
@@ -235,8 +234,7 @@ namespace falcON {
     /// \note there must be enough parameters given
     /// \note the bodyfunc expression must return the type T
     BodyFilter(const char*expr, const real*pars, int npar)
-      throw(falcON::exception)
-    : BodyFunc<bool>(expr,pars,npar), TIME(0.) {}
+      throw(falcON::exception);
     /// set the time for future function calls
     /// \param t (input) simulation time
     void set_time(double t) { TIME = t; }

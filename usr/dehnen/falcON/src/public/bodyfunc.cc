@@ -55,6 +55,8 @@ namespace {
 
   const int debug_depth = 2;
 
+  const char ParInd = '#';      ///< parameter indicator for bodyfunc expression
+
 #if defined(DEBUG) || defined(EBUG)
   const char *OPTFLAGS = "-p -g";
 #else
@@ -117,13 +119,16 @@ namespace {
     case 24: sprintf(type,"vect"); break;
     default: throw BfErr("cannot resolve type of expression");
     }
+    debug_info(debug_depth,"get_type(): type=%s\n",type);
   }
   //----------------------------------------------------------------------------
   inline fieldset get_need(const char*name) throw(BfErr) {
     // finds function name and returns need                                     
     bd_pter Need = (bd_pter)findfn(const_cast<char*>(name));
     if(Need == 0) throw BfErr("cannot resolve fieldset need");
-    return Need();
+    fieldset need=Need();
+    debug_info(debug_depth,"get_need(): need=%s\n",word(need));
+    return need;
   }
   //----------------------------------------------------------------------------
   void compile(const char*flags, const char*fname) throw(BfErr) {
@@ -197,14 +202,13 @@ namespace {
   inline void simple_parse(const char*&in,         // I:     input              
 			         char*&to,         // O:     output             
 			   const char* toUP,       // I:     end for output     
-			   char const& param,      // I:     parameter indicator
 			   int       & npar)       // I/O: # parameters         
     throw(ParseErr)
   {
-    if(*in==param) {                               // IF parameter indicator    
+    if(*in==ParInd) {                              // IF parameter indicator    
       ++in;                                        //   read indicator          
       int p = digit(*in++);                        //   read index              
-      if(p < 0) throw ParseErr(message("'%c' not followed by digit",param));
+      if(p < 0) throw ParseErr(message("'%c' not followed by digit",ParInd));
       if(p+1 > npar) npar = p+1;                   //   update max #parameters  
       if(to+6 >= toUP) throw ParseErr("expression too long");
       sprintf(to,"__P[%d]",p);                     //   add parameter to output 
@@ -218,13 +222,12 @@ namespace {
   inline void full_parse(const char*&in,           // I:     input              
 			 char*      &to,           // O:     output             
 			 const char* toUP,         // I:     end for output     
-			 char const &param,        // I:     parameter indicator
 			 int        &npar)         // I/O: # parameters         
     throw(ParseErr)
   {
     try {
       while(*in)
-	simple_parse(in,to,toUP,param,npar);
+	simple_parse(in,to,toUP,npar);
     } catch(ParseErr E) { throw E; }
   }
   //////////////////////////////////////////////////////////////////////////////
@@ -430,7 +433,7 @@ namespace {
       "#define BD_TEST\n"
       "#define body_func\n"
       "#include <public/bodyfuncdefs.h>\n\n"
-      "real   __P[10]={zero};\n\n"
+      "real   __P[10]={RNG()};\n\n"
       "extern \"C\" {\n"
       "  fieldset "<<fneed<<"()\n"
       "  {\n"
@@ -692,7 +695,7 @@ namespace {
 // 	  throw ParseErr("expression too long");
 // 	sexpr[we] = sex;                           //     reset subexpr         
       } else                                       //   ELSE                    
-	simple_parse(expr,sex,sexUP,'#',par);      //     parse like bodyfunc   
+	simple_parse(expr,sex,sexUP,par);          //     parse like bodyfunc   
     }                                              // END LOOP                  
     return false;                                  // end of expr               
   } // ParseExpr
@@ -759,7 +762,7 @@ namespace {
 	    <<"\n"
 	    <<"namespace {\n"
 	    <<"  double t=0.;\n"
-	    <<"  real __P[10]={zero};\n"
+	    <<"  real __P[10]={RNG()};\n"
 	    <<"}\n"
 	    <<"\n"
 	    <<"extern \"C\" {\n";
@@ -1009,7 +1012,7 @@ namespace {
       ffunc = _func;
     }
     debug_info(debug_depth,
-	       "get_bodiesfunc(): must make function\n"
+	       "bodiesfunc::bodiesfunc(): must make function\n"
 	       "      base name = %s\n"
 	       "      func name = %s\n",fname,ffunc);
     sprintf(ffile,"/tmp/%s.cc",fname);
@@ -1112,7 +1115,7 @@ bodyfunc::bodyfunc(const char*oexpr) throw(falcON::exception)
       const char*rexpr=nexpr;
       char*pexpr=Pexpr;
       NPAR = 0;
-      full_parse(rexpr,pexpr,Pexpr+MAX_LENGTH_EXPR,'#',NPAR);
+      full_parse(rexpr,pexpr,Pexpr+MAX_LENGTH_EXPR,NPAR);
       *pexpr = 0;
     }
     get_type(ftype,NEED,Pexpr);
@@ -1165,7 +1168,7 @@ namespace {
 }
 //------------------------------------------------------------------------------
 template<typename T>
-falcON::BodyFunc<T>::BodyFunc<T>(const char*expr, const char*pars)
+falcON::BodyFunc<T>::BodyFunc(const char*expr, const char*pars)
   throw(falcON::exception)
   : bodyfunc(expr), PARS(pars)
 {
@@ -1208,7 +1211,7 @@ template falcON::BodyFunc<falcON::vect>::BodyFunc(const char*,const char*)
   throw(falcON::exception);
 //------------------------------------------------------------------------------
 template<typename T>
-falcON::BodyFunc<T>::BodyFunc<T>(const char*expr, const real*pars, int npar)
+falcON::BodyFunc<T>::BodyFunc(const char*expr, const real*pars, int npar)
   throw(falcON::exception)
   : bodyfunc(expr)
 {
@@ -1253,6 +1256,18 @@ falcON::BodyFunc<falcON::real>::BodyFunc(const char*,const falcON::real*,int)
 template
 falcON::BodyFunc<falcON::vect>::BodyFunc(const char*,const falcON::real*,int)
   throw(falcON::exception);
+////////////////////////////////////////////////////////////////////////////////
+//                                                                              
+// implementing falcON::BodyFilter::BodyFilter                                  
+//                                                                              
+////////////////////////////////////////////////////////////////////////////////
+falcON::BodyFilter::BodyFilter(const char*expr, const char*pars)
+  throw(falcON::exception)
+  : BodyFunc<bool>(expr,pars), TIME(0.) {}
+////////////////////////////////////////////////////////////////////////////////
+falcON::BodyFilter::BodyFilter(const char*expr, const real*pars, int npar)
+  throw(falcON::exception)
+  : BodyFunc<bool>(expr,pars,npar), TIME(0.) {}
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
 // implementing falcON::bodiesfunc::bodiesfunc()                              //
@@ -1565,7 +1580,7 @@ falcON::bodiesmethod::bodiesmethod(const char  *oexpr) falcON_THROWING
       const char*rexpr=nexpr;
       char*pexpr=Pexpr;
       NPAR = 0;
-      full_parse(rexpr,pexpr,Pexpr+MAX_LENGTH_EXPR,'#',NPAR);
+      full_parse(rexpr,pexpr,Pexpr+MAX_LENGTH_EXPR,NPAR);
       *pexpr = 0;
     }
     get_type(ftype,NEED,Pexpr);

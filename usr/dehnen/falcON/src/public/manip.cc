@@ -264,15 +264,19 @@ falcON::Manipulator::Manipulator(const char*mannames,
       while(*l &&  isspace(*l)) l++;                    // skip space @ start
       if(*l ==  0 ) continue;                           // skip empty line
       if(*l == '#') continue;                           // skip line if '#'
-      while(*l && *l!='#' && !isspace(*l)) *n++ = *l++; // copy name
+      while(*l && !isspace(*l)) *n++ = *l++;            // copy name
       if(name[N][0]==0) continue;                       // no name? next line!
       *n++ = 0;                                         // close name
+      if(*l && *l=='#') continue;                       // skip line if '#'
       while(*l &&  isspace(*l)) l++;                    // skip space after name
+      if(*l && *l=='#') continue;                       // skip line if '#'
       if(!isalpha(*l) && *l !='/')
-	while(*l && *l!='#' && !isspace(*l)) *p++ = *l++; // copy pars
+	while(*l && !isspace(*l)) *p++ = *l++;          // copy pars
       *p++ = 0;                                         // close pars
+      if(*l && *l=='#') continue;                       // skip line if '#'
       while(*l &&  isspace(*l)) l++;                    // skip space after pars
-      while(*l && *l!='#' && !isspace(*l)) *f++ = *l++; // copy file
+      if(*l && *l=='#') continue;                       // skip line if '#'
+      while(*l && !isspace(*l)) *f++ = *l++;            // copy file
       *f++ = 0;                                         // close file
       N++;                                              // increment N
       name[N] = n;                                      // make ready for next

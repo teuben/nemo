@@ -54,7 +54,7 @@ choosen by the user at run-time. Similar to
 that has been pre-compiled and can be loaded at run-time, based on
 a descriptive name and an optional set of parameters and files.
 .PP
-From a users perspective a name must be given to find the manipulator
+From a user's perspective a name must be given to find the manipulator
 (typically the class name), as well as an optional set of parameters
 and files for that manipulator. As usual these will present them to the
 user as a set of keywords:
@@ -74,15 +74,16 @@ on the \fB manipname= \fP keyword. Here is an example:
 .nf
 
 .B manipname=name1+name2+name3
-.B manippars=#1,2,3#
-.B manipfile=file1##file3a,file3b
+.B manippars=";1,2,3;"
+.B manipfile="file1;;file3a,file3b"
 
 .fi
-where the first manipulator has no parameters, and one file, the 2nd manipulator
-has 3 parameters given, and no file, and the third has no parameters and
-2 files.  Instead of the \fB#\fP symbol to separate parameters or files,
-the \fB;\fP can also be used. For manipulator names the \fB,\fP symbol can
-also be used to separate their names.
+where the first manipulator has no parameters, and one file, the 2nd
+manipulator has 3 parameters given, and no file, and the third has no
+parameters and 2 files.  Instead of the \fB;\fP symbol to separate
+parameters or files, a single space (not a tab) can also be used. For
+manipulator names the \fB,\fP symbol can also be used to separate
+their names.
 
 .SH EXAMPLES
 Examples can be found within the \fIgyrfalcON(1NEMO)\fP source tree. Here is an
@@ -123,5 +124,6 @@ NEMO/obj/manip				repository of manipulator files
 .nf
 .ta +1.0i +4.0i
 7-nov-05	initial man page written	PJT
+12-jul-06	'#' no longer allowed as separator, but space is	WD
 .fi
 

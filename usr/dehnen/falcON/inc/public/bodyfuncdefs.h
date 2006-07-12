@@ -35,6 +35,9 @@
 #error "bodyfuncdefs.h must only be included in a bodyfunc or bodies_func application"
 #endif
 
+#if defined(BD_TEST)
+#  include<utils/random.h>
+#endif
 namespace {
   template<typename T> struct make_bool {
     static bool cond(const T&__x) { return bool(__x); } };
@@ -54,32 +57,33 @@ namespace {
 namespace {
 
   fieldset need(fieldset::o);
+  WDutils::Random3 RNG(1);
 
-  inline int  __index() { return 0; }
-  inline int  __key  () { need |= fieldset::k; return 0; }
-  inline int  __ntot () { return 0; }
+  inline int  __index() { return int(RNG()); }
+  inline int  __key  () { need |= fieldset::k; return int(RNG()); }
+  inline int  __ntot () { return int(RNG()); }
   inline real __vcom () { need |= fieldset::x;
-                          need |= fieldset::v; return zero; }
-  inline real __mass () { need |= fieldset::m; return zero; }
-  inline real __pot  () { need |= fieldset::p; return zero; }
-  inline real __aux  () { need |= fieldset::y; return zero; }
-  inline real __eps  () { need |= fieldset::e; return zero; }
-  inline vect __pos  () { need |= fieldset::x; return vect(zero); }
-  inline vect __vel  () { need |= fieldset::v; return vect(zero); }
-  inline vect __acc  () { need |= fieldset::a; return vect(zero); }
-  inline vect __jrk  () { need |= fieldset::j; return vect(zero); }
+                          need |= fieldset::v; return real(RNG()); }
+  inline real __mass () { need |= fieldset::m; return real(RNG()); }
+  inline real __pot  () { need |= fieldset::p; return real(RNG()); }
+  inline real __aux  () { need |= fieldset::y; return real(RNG()); }
+  inline real __eps  () { need |= fieldset::e; return real(RNG()); }
+  inline vect __pos  () { need |= fieldset::x; return vect(RNG()); }
+  inline vect __vel  () { need |= fieldset::v; return vect(RNG()); }
+  inline vect __acc  () { need |= fieldset::a; return vect(RNG()); }
+  inline vect __jrk  () { need |= fieldset::j; return vect(RNG()); }
 
 #ifdef falcON_SPH
 
-  inline real __size () { need |= fieldset::H; return zero; }
-  inline real __snum () { need |= fieldset::N; return zero; }
-  inline real __uin  () { need |= fieldset::U; return zero; }
-  inline real __udot () { need |= fieldset::I; return zero; }
-  inline real __udex () { need |= fieldset::E; return zero; }
-  inline real __entr () { need |= fieldset::S; return zero; }
-  inline real __srho () { need |= fieldset::R; return zero; }
-  inline real __fact () { need |= fieldset::F; return zero; }
-  inline real __csnd () { need |= fieldset::C; return zero; }
+  inline real __size () { need |= fieldset::H; return real(RNG()); }
+  inline real __snum () { need |= fieldset::N; return real(RNG()); }
+  inline real __uin  () { need |= fieldset::U; return real(RNG()); }
+  inline real __udot () { need |= fieldset::I; return real(RNG()); }
+  inline real __udex () { need |= fieldset::E; return real(RNG()); }
+  inline real __entr () { need |= fieldset::S; return real(RNG()); }
+  inline real __srho () { need |= fieldset::R; return real(RNG()); }
+  inline real __fact () { need |= fieldset::F; return real(RNG()); }
+  inline real __csnd () { need |= fieldset::C; return real(RNG()); }
 
 #endif
 
