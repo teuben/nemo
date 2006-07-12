@@ -3,7 +3,7 @@
 #  5-mar-2004     for 1st nbody-school                             PJT 
 # 20-apr-2004     minor things for fam04                           pjt
 # 24-jul-2005     many changes for 2nd nbody-school MODEST5c       PJT
-#  7-jul-2006     various changes to go with the times (mexico)    pjt
+# 11-jul-2006     various changes to go with the times (mexico)    pjt
 #
 #  Removed any local directory called manybody and installs a new manybody tree
 #  The default should be executed from the home directory, such that
@@ -29,7 +29,7 @@ set gsl=1.8
 set fewbody=0.21
 set glstarview=0.6-devel
 set hnbody=1.0.3-linux-x86
-set acs=lite-1.2.1
+set acs=lite-1.2.3
 set ruby=1.8.4
 set fltk=1.1.4
 set ez=3_0_4
@@ -92,6 +92,7 @@ cp $pkg/manybody_start.*sh $root
 #PJT
 goto testing
 #testing:
+testing:
 
 #                                                   gcc compiler
 if ($gcc != 0) then
@@ -221,7 +222,7 @@ pushd partiview_cvs/src >& /dev/null
   cp partiview $MANYBODY/opt/bin
 popd >& /dev/null
 
-testing:
+
 #                                                   nemo
 echo  `date` Installing NEMO
 tar zxf $pkg/nemo/nemo_cvs.tar.gz
@@ -413,7 +414,8 @@ echo  `date` Installing MMAS
   popd >& /dev/null
 rehash
 
-#                                                          FFTW v2, needed for starcrash
+#                                                          FFTW v2, needed for starcrash (but now installed via gadget)
+if (0) then
 echo  `date` Installing FFTW
   set log=$root/tmp/fftw.log
   tar zxf $pkg/fftw/fftw-2.1.5.tar.gz
@@ -425,6 +427,10 @@ echo  `date` Installing FFTW
     if ($status) echo ERRORS installing fftw, check $log
   popd >& /dev/null
 rehash
+else
+  # StarCrash depends on this version, see FFTDIR= below
+  ln -s gadget/fftw-2.1.5
+endif
 
 #                                                                   StarCrash
 echo  `date` Instaling StarCrash
