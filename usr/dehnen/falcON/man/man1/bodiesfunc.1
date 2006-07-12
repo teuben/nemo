@@ -1,0 +1,52 @@
+.TH bodiesfunc 1falcON "07 November 2004"
+
+.SH Name
+bodiesfunc \- functions taking a set of bodies and time and returning
+bool, int, real, or vector.
+
+.SH Synopsis
+\fBfalcON/inc/public/bodyfunc.h\fP
+.PP
+\fB
+typedef void (*Bf_pter)  (bodies const&, double const&, const real*)
+.br
+typedef bool (*Bf_b_pter)(bodies const&, double const&, const real*)
+.br
+typedef int  (*Bf_i_pter)(bodies const&, double const&, const real*)
+.br
+typedef real (*Bf_r_pter)(bodies const&, double const&, const real*)
+.br
+typedef vect (*Bf_v_pter)(bodies const&, double const&, const real*)
+.PP
+
+.BI "struct bodiesfunc {"
+.br
+.BI "	Bf_pter	" func ";"
+.br
+.BI "	char		" type ";"
+.br
+.BI "	int		" npar ";"
+.br
+.BI "	io		" need ";"
+.br
+.BI "};"
+
+.SH Description
+\fIbodiesfunc\fP functions take a a set of bodies, simulation time,
+and a set of up to ten real-valued parameters and return either an
+integer, a real-valued scalar, or a vector. They are generated on the
+fly (as the user runs a program) from an user-supplied expression
+string (see \fIbodiesfunc(5falcON)\fP) by searching the database in
+$falcON/obj/bodiesfunc or, failing that, envoking the C++
+compiler. For more details see \fIget_bodiesfunc(3falcON)\fP.
+
+.SH See Also
+bodiesfunc(5falcON), get_bodiesfunc(1falcON)
+.SH Author
+Walter Dehnen
+.SH Update History
+.nf
+.ta +1.0i +6.0i
+21-jul-2004 Created	WD
+07-nov-2004 parameters added, changed cond#expr to expr@cond	WD
+.fi

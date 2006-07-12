@@ -1,0 +1,48 @@
+.TH bodyfunc 1falcON "21 July 2004"
+
+.SH Name
+bodyfunc \- functions taking body and time and returning bool, int, real, or
+	vector.
+
+.SH Synopsis
+\fBfalcON/inc/public/bodyfunc.h\fP
+.PP
+\fB
+typedef void (*bf_pter)  (body const&, double const&)
+.br
+typedef bool (*bf_b_pter)(body const&, double const&)
+.br
+typedef int  (*bf_i_pter)(body const&, double const&)
+.br
+typedef real (*bf_r_pter)(body const&, double const&)
+.br
+typedef vect (*bf_v_pter)(body const&, double const&)
+.PP
+
+.BI "struct bodyfunc {"
+.br
+.BI "	bf_pter	" func ";"
+.br
+.BI "	char		" type ";"
+.br
+.BI "	io		" need ";"
+.br
+.BI "};"
+
+.SH Description
+\fIbodyfunc\fP functions take a body and simulation time and return
+either an integer, a real-valued scalar, or a vector. They are
+generated on the fly (as the user runs a program) from an
+user-supplied expression string (see \fIbodyfunc(5falcON)\fP) by
+envoking the C++ compiler. For more details see
+\fIget_bodyfunc(3falcON)\fP.
+
+.SH See Also
+bodyfunc(5falcON), get_bodyfunc(1falcON)
+.SH Author
+Walter Dehnen
+.SH Update History
+.nf
+.ta +1.0i +4.0i
+21-jul-2004 Created	WD
+.fi

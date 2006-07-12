@@ -1,0 +1,79 @@
+.TH snapprop 1falcON "07 November 2004"
+
+.SH Name
+snapprop \- evaluates global properties of N-body snapshots.
+
+.SH Synopsis
+\fBsnapprop\fP [parameter=value]
+
+.SH Requirement
+requires NEMO version 3.0.13 or higher.
+
+.SH description
+\fBsnapprop\fP uses a \fIbodiesfunc(5falcON)\fP expression to obtain a
+\fIbodiesfunc(3falcON)\fP function, which is finally evaluated for 
+N-body snapshots and the return value reported to \fBstdout\fP.
+
+.SH Parameters
+.TP 12
+\fBin=\fP\fIfile\fP
+Input data are read from \fIfile\fP, which must be in NEMO snapshot
+format. If \fIfile\fP=-, input is expected from stdin. Default:
+\fBrequired\fP.
+.TP
+\fBprop=\fP\fIexpr\fP
+\fIexpr\fP must be a \fIbodiesfunc(5falcON)\fP expression. It will be
+used to generate a \fIbodiesfunc(3falcON)\fP function. Default:
+\fBrequired\fP.
+.TP
+\fBpars=\fP\fIparameter list\fP
+If the \fIbodiesfunc(5falcON)\fP expression given with fBprop=\fP
+requires parameters (up to 10), these must be provided (as comma-separated
+list) with \fBpars=\fP. No Default.
+.TP
+\fBtimes=\fP\fItime range(s)\fP
+Range(s) of simulation times, for which snapshots shall be processed. 
+Default: \fBall\fP.
+.TP
+\fBzeromissing=t|f\fP 
+If true, body data missing from the snapshot but required for the
+\fIbodiesfunc(3falcON)\fP function are reset to zero, Otherwise an
+error is issued and no output is made. Default: \fBf\fP.
+
+.SH Examples
+To find the minimum softening length, type
+.br
+\fB	snapprop in=data prop="Min{eps}"\fP.
+.sp
+To evaluate the mass-weighted mean specific angular momentum of all
+bodies which rotate prograde around the z-axis, type
+.br
+\fB	snapprop in=data prop="Mmean{l@lz>0}"\fP.
+.sp
+To evaluate the mass within a radius of 0.1 from the origin, type
+.br
+\fB	snapprop in=data prop="Sum{m@r<#0}" pars=0.1\fP.
+.sp
+To obtain the rms radial velocity of all bound bodies, type
+.br
+\fB	snapprop in=data prop="sqrt(Mean{vr*vr@E<0})"\fP
+.br
+(note that for this example the data must contain the body potentials).
+.sp
+To count the number of bodies within four times minimum softening
+length, type
+.br
+\fB	snapprop in=data prop="Num{r<#0*Min{eps}}" pars=4\fP.
+
+
+.SH See also
+bodiesfunc(1falcON), bodiesfunc(5falcON)
+.SH Author
+Walter Dehnen
+.SH Update History
+.nf
+.ta +1.0i +6.0i
+21-jul-2004 Created	WD
+20-aug-2004 improved bodiesfunc	WD
+07-nov-2004 parameters added, changed cond#expr to expr@cond	WD
+.fi
