@@ -1,4 +1,4 @@
-.TH CSG 1NEMO "23 May 2006"
+.TH CSG 1NEMO "27 May 2006"
 .SH NAME
 CGS, runCGS\-  Collisionless Galactic Simulator N-body code
 .SH SYNOPSIS
@@ -19,10 +19,15 @@ and particles are advanced by a global but variable time-step using a leap-frog 
 .PP
 The code consists of an original (fortran based) executable, \fBCGS\fP, 
 plus a NEMO style wrapper, named \fBrunCGS\fP. Since the 
-fortran executable assumes files with a fixed name, it is somewhat cumbersome
-to run multiple sets of simulations with different input.
+fortran executable assumes files with a fixed name, it can be somewhat cumbersome
+to run multiple sets of simulations with different input parameters.
 A simple frontend organizes a directories structure and
-places their output in these run directories.
+places their output in these run directories, as well as optionally handles I/O
+to/from NEMO \fIsnapshot(5NEMO)\fP files.
+.PP
+A detailed code description can be found in Trenti M. (2005),  
+PhD Thesis, Scuola Normale Superiore Pisa (Italy)
+[mainly Chapter 3]. A copy of the thesis is in $NEMO/usr/trenti/CGS/doc/.
 
 .SH PARAMETER
 There are the NEMO command line parameters for \fBrunCGS\fP:
@@ -83,7 +88,15 @@ Initial virial ratio for \fBflag=2\fP.
 [Default: 1.0]
 .TP 
 \fBndtcmss=\fP
-Number of timesteps between CMSS (center of mass adjustment) call.
+Number of timesteps between CMSS (center of mass of bound particles adjustment) call.
+For simulations where the coordinates of the center of mass of bound
+particles are not expected to change (e.g. for simulations starting from
+quasi-equilibrium configurations) consider setting \fBndtcmss\fP >= \fBmaxstep\fP.
+In this case a frequent recentering of the center of expansion of the
+potential might in fact introduce artificial stochastic heating. If
+starting from out of equilibrium conditions, e.g. for  simulating a cold
+collapse, then it is recommended to set \fBndtcmss\fP to a number sufficiently
+small that several recenterings are performed in a dynamical time.
 [Default: 2000]
 .TP
 \fBndtdiag=\fP
@@ -120,9 +133,9 @@ initVEL.dat	input velocities if \fBflag=3\fP
 
 init_virial.dat	input virial ratio if \fBflag=2\fP
 
-fort.2		various diagnostics output
-fort.11		lagrangian radii vs time
-fort.12		lagrangian radii vs time
+fort.2		various diagnostics output (heritage from the original van Albada 1982 version)
+fort.11		inner lagrangian radii vs time
+fort.12		outer lagrangian radii vs time
 fort.13		radial and tangential velocity dispersions
 fort.14		total radial and tangential kinetic energy
 fort.16		inertia tensor eigenvalues vs. time
@@ -133,7 +146,7 @@ fort.20 	time, total energy, virial ratio -2K/W, total angular momentum
 fort.28		same as fort.18, but for bound particles
 fort.33		same as fort.13, but for bound particles
 fort.34		same as fort.14, but for bound particles
-fort.90		one or more snapshots (one line header plus index,pos,vel data in a table)
+fort.90		one or more snapshots (one line header plus index,pc/os,vel data in a table)
 
 snap.out	Output snapshots, in NEMO's \fIsnapshot(5NEMO)\fP format. Note no masses present!
 
