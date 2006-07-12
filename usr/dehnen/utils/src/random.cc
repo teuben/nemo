@@ -253,8 +253,8 @@ ExpDisk::ExpDisk(RandomNumberGenerator* r, const double H) :
 //------------------------------------------------------------------------------
 ExpDisk::~ExpDisk()
 {
-  delete[] Y;
-  delete[] P;
+  WDutils_DEL_A(Y);
+  WDutils_DEL_A(P);
 }
 //------------------------------------------------------------------------------
 double ExpDisk::ranvar() const

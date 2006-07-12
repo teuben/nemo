@@ -5,7 +5,7 @@
 ///                                                                             
 /// \author  Walter Dehnen                                                      
 ///                                                                             
-/// \date    1994-2005                                                          
+/// \date    1994-2006                                                          
 ///                                                                             
 /// \todo    add doxygen documentation                                          
 ///                                                                             
@@ -29,10 +29,9 @@
 //                                                                              
 ////////////////////////////////////////////////////////////////////////////////
 #include <numerics.h>
-#include <Pi.h>
-#include <cmath>
+#include <WDMath.h>
 
-//------------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 // Burlisch-Stoer integration of 1D real integrals                              
 //------------------------------------------------------------------------------
 // Quadrature program using the Bulirsch sequence and rational extrapolation.   
@@ -48,7 +47,7 @@
 //         eps    desired relativ accuracy;                                     
 // OUTPUT: return approximated value for the integral;                          
 //         err    actual relative error of the return value.                    
-// -----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 double WDutils::qbulir(double(*func)(double),
 		       double  a,
 		       double  b, 
@@ -161,7 +160,7 @@ double WDutils::qbulir(double(*func)(double),
   }
   return c;
 }
-//------------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 // Gauss-Legendre integration: points & weights                                 
 //------------------------------------------------------------------------------
 void WDutils::GaussLegendre(double *x, double *w, const unsigned n)
@@ -193,4 +192,191 @@ void WDutils::GaussLegendre(double *x, double *w, const unsigned n)
     w[n-1-i] = w[i];
   }
 }
+////////////////////////////////////////////////////////////////////////////////
+// Householder reduction of real symmetric matrix                               
 //------------------------------------------------------------------------------
+namespace WDutils {
+  template<bool EIGENVECTORS, typename X>
+  void HouseholderReduction(int n, X**a, X*d, X*e)
+  { 
+    const X zero(0), one(1);
+    for(int i=n-1; i; --i) {
+      X h = zero;
+      if(i>1) {
+	X sc = zero;
+	for(int k=0; k!=i; ++k)
+	  sc += abs(a[i][k]);
+	if(sc == zero)
+	  e[i] = a[i][i-1];
+	else {
+	  X in = one/sc;
+	  for(int k=0; k!=i; ++k) {
+	    a[i][k] *= in;
+	    h += square(a[i][k]);
+	  }
+	  X f = a[i][i-1];
+	  X g = f>=zero? -sqrt(h) : sqrt(h);
+	  e[i] = sc*g;
+	  h -= f*g;
+	  a[i][i-1] = f-g;
+	  f = zero;
+	  in = one/h;
+	  for(int j=0; j!=i; ++j) {
+	    if(EIGENVECTORS)
+	      a[j][i] = a[i][j] * in;
+	    g = zero;
+	    for(int k=0; k<=j; ++k)
+	      g += a[j][k]*a[i][k];
+	    for(int k=j+1; k!=i; ++k)
+	      f += a[k][j]*a[i][k];
+	    e[j] = g*in;
+	    f += e[j]*a[i][j];
+	  }
+	  X hh = f/(h+h);
+	  for(int j=0; j!=i; ++j) {
+	    f = a[i][j];
+	    e[j] = g = e[j]-hh*f;
+	    for(int k=0; k<=j; ++k)
+	      a[j][k] -= f*e[k]+g*a[i][k];
+	  }
+	}
+      } else
+	e[i] = a[i][i];
+      d[i] = h;
+    }
+    if(EIGENVECTORS)
+      d[0] = zero;
+    e[0] = zero;
+    if(EIGENVECTORS)
+      for(int i=0; i!=n; ++i) {
+	if(d[i]) {
+	  for(int j=0; j!=i; ++j) {
+	    X g = zero;
+	    for(int k=0; k!=i; ++k)
+	      g += a[i][k]*a[k][j];
+	    for(int k=0; k!=i; ++k)
+	      a[k][j] -= g*a[k][i];
+	  }
+	}
+	d[i] = a[i][i];
+	a[i][i] = one;
+	for(int j=0; j!=i; ++j)
+	  a[j][i] = a[i][j] = zero;
+      }
+    else
+      for(int i=0; i!=n; ++i)
+	d[i] = a[i][i];
+  }
+  //----------------------------------------------------------------------------
+  template void HouseholderReduction<1,float >(int, float **, float *, float *);
+  template void HouseholderReduction<1,double>(int, double**, double*, double*);
+  template void HouseholderReduction<0,float >(int, float **, float *, float *);
+  template void HouseholderReduction<0,double>(int, double**, double*, double*);
+  //----------------------------------------------------------------------------
+  template<typename X> void EigenSystemTridiagonal(int n, X*d, X*e, X**z)
+  {
+    const X zero(0), one(1);
+    for(int i=1; i!=n; ++i)
+      e[i-1] = e[i];
+    e[n-1] = zero;
+    for(int l=0; l!=n; ++l) {
+      int iter=0, m;
+      do {
+	for(m=l; m!=n-1; ++m) {
+	  X dd = abs(d[m])+abs(d[m+1]);
+	  if(abs(e[m])+dd == dd) break;
+	}
+	if(m != l) {
+	  if(iter++ == 30) WDutils_ErrorF("max number of iterations exceeded",
+					  "EigenSystemTridiagonal()");
+	  X g = (d[l+1]-d[l])/twice(e[l]);
+	  X r = hypot(g,one);
+	  g   = d[m]-d[l]+e[l]/(g+sign(r,g));
+	  X s = one;
+	  X c = one;
+	  X p = zero;
+	  int i=m-2;
+	  for(; i>=0; --i) {
+	    X f = s*e[i];
+	    X b = c*e[i];
+	    r = hypot(f,g);
+	    e[i+1] = r;
+	    if(r==zero) {
+	      d[i+1] -= p;
+	      e[m] = zero;
+	      break;
+	    }
+	    s = f/r;
+	    c = g/r;
+	    g = d[i+1]-p;
+	    r = (d[i]-g)*s+twice(c*b);
+	    p = s*r;
+	    d[i+1] = g+p;
+	    g = c*r-b;
+	    for(int k=0; k!=n; ++k) {
+	      f = z[k][i+1];
+	      z[k][i+1] = s*z[k][i]+c*f;
+	      z[k][i]   = c*z[k][i]-s*f;
+	    }
+	  }
+	  if(r==zero && i>=0) continue;
+	}
+      } while(m!=l);
+    }
+  }
+  //----------------------------------------------------------------------------
+  template void EigenSystemTridiagonal<float >(int, float *, float *, float **);
+  template void EigenSystemTridiagonal<double>(int, double*, double*, double**);
+  //----------------------------------------------------------------------------
+  template<typename X> void EigenValuesTridiagonal(int n, X*d, X*e)
+  {
+    const X zero(0), one(1);
+    for(int i=1; i!=n; ++i)
+      e[i-1] = e[i];
+    e[n-1] = zero;
+    for(int l=0; l!=n; ++l) {
+      int iter=0, m;
+      do {
+	for(m=l; m!=n-1; ++m) {
+	  X dd = abs(d[m])+abs(d[m+1]);
+	  if(abs(e[m])+dd == dd) break;
+	}
+	if(m != l) {
+	  if(iter++ == 30) WDutils_ErrorF("max number of iterations exceeded",
+					  "EigenValuesTridiagonal()");
+	  X g = (d[l+1]-d[l])/twice(e[l]);
+	  X r = hypot(g,one);
+	  g   = d[m]-d[l]+e[l]/(g+sign(r,g));
+	  X s = one;
+	  X c = one;
+	  X p = zero;
+	  int i=m-2;
+	  for(; i>=0; --i) {
+	    X f = s*e[i];
+	    X b = c*e[i];
+	    r = hypot(f,g);
+	    e[i+1] = r;
+	    if(r==zero) {
+	      d[i+1] -= p;
+	      e[m] = zero;
+	      break;
+	    }
+	    s = f/r;
+	    c = g/r;
+	    g = d[i+1]-p;
+	    r = (d[i]-g)*s+twice(c*b);
+	    p = s*r;
+	    d[i+1] = g+p;
+	    g = c*r-b;
+	  }
+	  if(r==zero && i>=0) continue;
+	}
+      } while(m!=l);
+    }
+  }
+  //----------------------------------------------------------------------------
+  template void EigenValuesTridiagonal<float >(int, float *, float *);
+  template void EigenValuesTridiagonal<double>(int, double*, double*);
+} // namespace WDutils {
+////////////////////////////////////////////////////////////////////////////////
+
