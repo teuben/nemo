@@ -57,23 +57,24 @@ namespace falcON {
     /// enumeration holding the individual flags
     enum single {
       empty         = 0,       ///< no flag set
-      active        = 1 << 0,  ///< a body/tree node is active
-      remove        = 1 << 1,  ///< body to be removed, see bodies::remove()
-      sph           = 1 << 2,  ///< body is SPH particle
-      sticky        = 1 << 3,  ///< body is a sticky particle
-      newbody       = 1 << 4,  ///< body is new
-      adjust_step   = 1 << 5,  ///< help with time integration
-      not_longer    = 1 << 6,  ///< help with time integration
-      not_shorter   = 1 << 7,  ///< help with time integration
-      sph_special   = 1 << 8,  ///< help with time integration for SPH
-      interacting   = 1 << 9,  ///< help with SPH estimation
-      subtree       = 1 <<10,  ///< help with sub-tree building
-      marked        = 1 <<11,  ///< unspecified, not used in N-body code
+      active        = 1 <<  0,  ///< a body/tree node is active
+      remove        = 1 <<  1,  ///< body to be removed, see bodies::remove()
+      sph           = 1 <<  2,  ///< body is SPH particle
+      sticky        = 1 <<  3,  ///< body is a sticky particle
+      newbody       = 1 <<  4,  ///< body is new
+      adjust_step   = 1 <<  5,  ///< help with time integration
+      not_longer    = 1 <<  6,  ///< help with time integration
+      not_shorter   = 1 <<  7,  ///< help with time integration
+      sph_special   = 1 <<  8,  ///< help with time integration for SPH
+      interacting   = 1 <<  9,  ///< help with SPH estimation
+      subtree       = 1 << 10,  ///< help with sub-tree building
+      marked        = 1 << 11,  ///< auxiliary for several purposes
+      ignore        = 1 << 15,  ///< flag used to define subsets of bodies
       // flags for cells only
-      all_active    = 1 <<20,  ///< all leafs in cell are active
-      all_sph       = 1 <<21,  ///< all leafs in cell are SPH particles
-      all_sticky    = 1 <<22,  ///< all leafs in cell are sticky particles
-      subtree_cell  = 1 <<23
+      all_active    = 1 << 20,  ///< all leafs in cell are active
+      all_sph       = 1 << 21,  ///< all leafs in cell are SPH particles
+      all_sticky    = 1 << 22,  ///< all leafs in cell are sticky particles
+      subtree_cell  = 1 << 23
     };
     /// enumeration holding some combinations of flags
     enum combined {
@@ -176,9 +177,11 @@ namespace falcON {
     friend bool is_sticky  (flags const&f);
     friend bool is_new     (flags const&f);
     friend bool in_subtree (flags const&f);
+    friend bool is_marked  (flags const&f);
     friend bool al_active  (flags const&f);
     friend bool al_sph     (flags const&f);
     friend bool al_sticky  (flags const&f);
+    friend bool in_subset  (flags const&f);
     //@}
     //--------------------------------------------------------------------------
     /// \name specific boolean methods taking pointer to flags
@@ -189,9 +192,11 @@ namespace falcON {
     friend bool is_sticky  (const flags*f);
     friend bool is_new     (const flags*f);
     friend bool in_subtree (const flags*f);
+    friend bool is_marked  (const flags*f);
     friend bool al_active  (const flags*f);
     friend bool al_sph     (const flags*f);
     friend bool al_sticky  (const flags*f);
+    friend bool in_subset  (const flags*f);
     //@}
     //--------------------------------------------------------------------------
     /// \name non-const methods                                                 
@@ -260,18 +265,24 @@ namespace falcON {
   inline bool is_sticky (flags const&f) { return f.is_set(flags::sticky); }
   inline bool is_new    (flags const&f) { return f.is_set(flags::newbody); }
   inline bool in_subtree(flags const&f) { return f.is_set(flags::subtree); }
+  inline bool is_marked (flags const&f) { return f.is_set(flags::marked); }
   inline bool al_active (flags const&f) { return f.is_set(flags::all_active); }
   inline bool al_sph    (flags const&f) { return f.is_set(flags::all_sph); }
   inline bool al_sticky (flags const&f) { return f.is_set(flags::all_sticky); }
+  inline bool ignore    (flags const&f) { return f.is_set(flags::ignore); }
+  inline bool in_subset (flags const&f) { return !f.is_set(flags::ignore); }
   inline bool is_active (const flags*f) { return f->is_set(flags::active); }
   inline bool to_remove (const flags*f) { return f->is_set(flags::remove); }
   inline bool is_sph    (const flags*f) { return f->is_set(flags::sph); }
   inline bool is_sticky (const flags*f) { return f->is_set(flags::sticky); }
   inline bool is_new    (const flags*f) { return f->is_set(flags::newbody); }
   inline bool in_subtree(const flags*f) { return f->is_set(flags::subtree); }
+  inline bool is_marked (const flags*f) { return f->is_set(flags::marked); }
   inline bool al_active (const flags*f) { return f->is_set(flags::all_active); }
   inline bool al_sph    (const flags*f) { return f->is_set(flags::all_sph); }
   inline bool al_sticky (const flags*f) { return f->is_set(flags::all_sticky); }
+  inline bool ignore    (const flags*f) { return f->is_set(flags::ignore); }
+  inline bool in_subset (const flags*f) { return !f->is_set(flags::ignore); }
   inline std::ostream& operator<< (std::ostream& o, flags const&f) {
     return o << f.val;
   }
@@ -649,7 +660,9 @@ namespace falcON {
     /// subtract: delete fields from other set
     fieldset&operator-= (bits b) { val &= ~b; return *this; }
     /// difference: fields in this set and not in other
-    fieldset operator- (fieldset b) { return fieldset(val & ~(b.val)); }
+    fieldset operator- (fieldset b) const { return fieldset(val & ~(b.val)); }
+    /// difference: fields in this set and not in other
+    fieldset operator- (bits b) const { return fieldset(val & ~b); }
     /// overlap: fields present in both set
     fieldset&operator&= (fieldset b) { val &= b.val; return *this; }
     /// overlap: fields present in both set
@@ -1065,9 +1078,9 @@ namespace falcON {
   };
   //////////////////////////////////////////////////////////////////////////////
 } // namespace falcON {
-falcON_TRAITS(falcON::flags,"flags","flags");
-falcON_TRAITS(falcON::fieldbit,"fieldbit","fieldbits");
-falcON_TRAITS(falcON::fieldset,"fieldset","fieldsets");
-falcON_TRAITS(falcON::bodytype,"bodytype","bodytypes");
+falcON_TRAITS(falcON::flags,"flags");
+falcON_TRAITS(falcON::fieldbit,"fieldbit");
+falcON_TRAITS(falcON::fieldset,"fieldset");
+falcON_TRAITS(falcON::bodytype,"bodytype");
 ////////////////////////////////////////////////////////////////////////////////
 #endif // falcON_included_fields_h

@@ -190,14 +190,14 @@ namespace falcON {
       }
       //------------------------------------------------------------------------
       static void dump_head(std::ostream&o) {
-	o<<"     # flag mybody          position";
+	o<<"     # flag mybody             position";
       }
       //------------------------------------------------------------------------
       void dump(std::ostream&o) const {
-	o<<' '<<std::setw(3)<<FLAGS
-	 <<' '<<std::setw(6)<<LINK;
+	o<<' '<<std::setw(3) << FLAGS
+	 <<' '<<std::setw(2) << LINK.no()<<':'<<std::setw(6)<<LINK.in();
 	for(register int d=0; d!=Ndim; ++d)
-	  o<<' '<<std::setw(8)<<std::setprecision(4)<<POS[d];
+	  o<<' '<<std::setw(9)<<std::setprecision(4)<<POS[d];
       }
     }; // class Leaf
     //==========================================================================
@@ -310,8 +310,8 @@ namespace falcON {
       //------------------------------------------------------------------------
       void dump(std::ostream&o) const {
 	o<<' '<<std::setw(3)<< flags(*this)
-	 <<' '<<std::setw(3)<< LEVEL
-	 <<' '<<std::setw(3)<< OCTANT;
+	 <<' '<<std::setw(3)<< int(LEVEL)
+	 <<' '<<std::setw(3)<< int(OCTANT);
 	if(NCELLS)
 	  o<<' '<<std::setw(5)<<FCCELL;
 	else
@@ -832,9 +832,17 @@ namespace falcON {
   }
 } // namespace falcON {
 ////////////////////////////////////////////////////////////////////////////////
-falcON_TRAITS(falcON::OctTree,"OctTree","OctTrees");
-falcON_TRAITS(falcON::OctTree::Leaf,"OctTree::Leaf","OctTree::Leafs");
-falcON_TRAITS(falcON::OctTree::Cell,"OctTree::Cell","OctTree::Cells");
+falcON_TRAITS(falcON::OctTree,"OctTree");
+falcON_TRAITS(falcON::OctTree::Leaf,"OctTree::Leaf");
+falcON_TRAITS(falcON::OctTree::Cell,"OctTree::Cell");
+namespace WDutils {
+  template<typename CELL>
+  struct traits<typename falcON::OctTree::CellIter<CELL> > {
+    static const char* name() {
+      return message("OctTree::CellIter<%s>",traits<CELL>::name());
+    }
+  };
+}
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
 // macros for looping all leafs and cells in a tree                           //

@@ -561,10 +561,7 @@ namespace falcON {
     //--------------------------------------------------------------------------
     // destruction                                                              
     //--------------------------------------------------------------------------
-    ~GravEstimator() {
-      if(CELL_SRCE) delete[] CELL_SRCE;
-      if(LEAF_SINK) delete[] LEAF_SINK;
-    }
+    ~GravEstimator();
     //--------------------------------------------------------------------------
     // compute gravity by direct summation                                      
     //--------------------------------------------------------------------------
@@ -857,18 +854,14 @@ namespace falcON {
   };
 } // namespace falcON {
 ////////////////////////////////////////////////////////////////////////////////
-falcON_TRAITS(falcON::grav::Cset,"grav::Cset","grav::Csets");
-falcON_TRAITS(falcON::grav::Mset,"grav::Mset","grav::Msets");
-falcON_TRAITS(falcON::GravEstimator,"GravEstimator","GravEstimators");
-falcON_TRAITS(falcON::GravEstimator::Cell,
-	      "GravEstimator::Cell","GravEstimator::Cells");
-falcON_TRAITS(falcON::GravEstimator::Leaf,
-	      "GravEstimator::Leaf","GravEstimator::Leafs");
+falcON_TRAITS(falcON::grav::Cset,"grav::Cset");
+falcON_TRAITS(falcON::grav::Mset,"grav::Mset");
+falcON_TRAITS(falcON::GravEstimator,"GravEstimator");
+falcON_TRAITS(falcON::GravEstimator::Cell,"GravEstimator::Cell");
+falcON_TRAITS(falcON::GravEstimator::Leaf,"GravEstimator::Leaf");
 falcON_TRAITS(falcON::GravEstimator::Cell::srce_data,
-	      "GravEstimator::Cell::srce_data",
 	      "GravEstimator::Cell::srce_data");
 falcON_TRAITS(falcON::GravEstimator::Leaf::sink_data,
-	      "GravEstimator::Leaf::sink_data",
 	      "GravEstimator::Leaf::sink_data");
 ////////////////////////////////////////////////////////////////////////////////
 #undef  ENHANCED_IACT_STATS

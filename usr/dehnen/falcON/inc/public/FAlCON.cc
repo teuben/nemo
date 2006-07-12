@@ -102,13 +102,13 @@ namespace falcON {
   //----------------------------------------------------------------------------
   inline FAlCON::~FAlCON()
   {
-    if(TREE) delete TREE;
-    delete GMAC;
-    delete STATS;
-    delete GRAV;
-    if(PAES) delete PAES;
+    if(TREE) falcON_DEL_O(TREE);
+    falcON_DEL_O(GMAC);
+    falcON_DEL_O(STATS);
+    falcON_DEL_O(GRAV);
+    if(PAES) falcON_DEL_O(PAES);
 #ifdef falcON_SPH
-    delete SPHT;
+    falcON_DEL_O(SPHT);
 #endif
   }
   //----------------------------------------------------------------------------
@@ -479,5 +479,6 @@ namespace falcON {
   }
   //////////////////////////////////////////////////////////////////////////////
 } // namespace falcON {
+falcON_TRAITS(falcON::FAlCON,"FAlCON");
 ////////////////////////////////////////////////////////////////////////////////
 #endif // falcON_included_FAlCON_cc

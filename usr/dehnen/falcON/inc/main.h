@@ -276,6 +276,7 @@ int main(int argc, char *argv[])                   // global main
       argV[0] = argv[0];
       argV[1] = "help=h";
       argV[2] = 0;
+      std::cout << '\n' << usage << "\n\noption summary:\n";
       initparam(argV,defv);
     } else
 #endif
@@ -450,6 +451,11 @@ namespace falcON {
       getiparam(const_cast<char*>(option)) : 0;
   }
   //----------------------------------------------------------------------------
+  inline unsigned getuparam_z(const char* option) {
+    return hasvalue(const_cast<char*>(option))?
+      getuparam(const_cast<char*>(option)) : 0u;
+  }
+  //----------------------------------------------------------------------------
   inline long getlparam_z(const char* option) {
     return hasvalue(const_cast<char*>(option))?
       getlparam(const_cast<char*>(option)) : 0;
@@ -510,6 +516,18 @@ namespace falcON {
 		      static_cast<const char*>(wneed),
  		      static_cast<const char*>(wread) );
     }
+  }
+  //----------------------------------------------------------------------------
+  inline bool warn_insufficient(fieldset const&read, fieldset const&need) {
+    if(! read.contain(need)) {
+      fieldset::wlist wneed(&need);
+      fieldset::wlist wread(&read);
+      warning("insufficient data: need \'%s\' but got only \'%s\'",
+	      static_cast<const char*>(wneed),
+	      static_cast<const char*>(wread) );
+      return true;
+    }
+    return false;
   }
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //

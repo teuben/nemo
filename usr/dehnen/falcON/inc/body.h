@@ -63,7 +63,7 @@ namespace falcON {
   }
 
   class ebodies;                                   // declared in FAlCONC.cc    
-
+  class BodyFileter;                               // declared in bodyfunc.h    
   // ///////////////////////////////////////////////////////////////////////////
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
@@ -75,7 +75,7 @@ namespace falcON {
   /// data in a structure of array (SoA) form. Sub-type bodies::iterator        
   /// provides access to body data (via its members and friends) mimicking an   
   /// array of structure (AoS) layout. Sub-type bodies::index provides an       
-  /// alternative data access via members of bodies class falcON::bodies also   
+  /// alternative data access via members of bodies. class falcON::bodies also  
   /// supports data I/O and adding/removing of data fields and bodies.          
   ///                                                                           
   // ///////////////////////////////////////////////////////////////////////////
@@ -297,13 +297,13 @@ namespace falcON {
       //------------------------------------------------------------------------
       /// data are stored in 32bits.                                            
       unsigned I;
+    public:
       //------------------------------------------------------------------------
       /// return No of block, encoded in highest index::block_bits bits.        
       unsigned no() const { return I >> index_bits; }
       //------------------------------------------------------------------------
       /// return sub-index, encoded in lowest index::index_bits bits.           
       unsigned in() const { return I &  index_mask; }
-    public:
       //------------------------------------------------------------------------
       /// unitialized construction.                                             
       index() {}
@@ -344,11 +344,9 @@ namespace falcON {
     block   *const&first_block()        const { return FIRST; }
     //==========================================================================
     //                                                                          
-    // Functions providing information about the number of bodies               
-    //                                                                          
-    //==========================================================================
     /// \name Functions providing information about the number of bodies        
     //@{                                                                        
+    //==========================================================================
     /// # bodies allocated for a given bodytype.
     unsigned const&N_alloc (bodytype t) const { return NALL[int(t)]; }
     /// total # bodies allocated.
@@ -357,6 +355,8 @@ namespace falcON {
     unsigned const&N_bodies(bodytype t) const { return NBOD[int(t)]; }
     /// total # bodies in use.
     unsigned const&N_bodies()           const { return NTOT; }
+    /// # bodies not flagged to be ignored
+    unsigned       N_subset()           const;
     /// # SPH bodies in use.
     unsigned const&N_sph   ()           const { return NBOD[bodytype::gas]; }
     /// # standard bodies in use.
@@ -371,11 +371,9 @@ namespace falcON {
     bool     const&sph_data_changed()   const { return SPHC; }
     //==========================================================================
     //                                                                          
-    // Functions providing information about body data hold                     
-    //                                                                          
-    //==========================================================================
     /// \name Functions providing information about body data hold              
     //@{                                                                        
+    //==========================================================================
     /// sum of all body data hold.
     fieldset const&all_bits  ()           const { return  BITS; }
     /// do we have none of these data?
@@ -394,11 +392,9 @@ namespace falcON {
 #undef HAVE
     //==========================================================================
     //                                                                          
-    // member methods using index                                               
-    //                                                                          
+    /// \name non-const data access using bodies::index                         
+    //@{                                                                        
     //==========================================================================
-    /// \name non-const data access using bodies::index
-    //@{
     /// return lvalue (can be changed)
     template<int BIT>
     typename field_traits<BIT>::type&datum(index i) const {
@@ -411,9 +407,11 @@ namespace falcON {
     DEF_NAMED(NonConstAcess);
 #undef NonConstAcess
     //@}
-    //--------------------------------------------------------------------------
-    /// \name const data access using bodies::index
-    //@{
+    //==========================================================================
+    //                                                                          
+    /// \name const data access using bodies::index                             
+    //@{                                                                        
+    //==========================================================================
     /// return const datum
     template<int BIT>
     typename field_traits<BIT>::type const&const_datum(index i) const {
@@ -426,9 +424,11 @@ namespace falcON {
     DEF_NAMED(ConstAcess);
 #undef ConstAcess
     //@}
-    //--------------------------------------------------------------------------
-    /// \name further methods using bodies::index
-    //@{
+    //==========================================================================
+    //                                                                          
+    /// \name further methods using bodies::index                               
+    //@{                                                                        
+    //==========================================================================
     /// return true if the named or indicated datum is hold
     bool has_field(index i, fieldbit f) const {
       return BLOCK[i.no()] && BLOCK[i.no()]->has_field(f);
@@ -439,26 +439,21 @@ namespace falcON {
     }
     DEF_NAMED(HasDatum)
 #undef HasDatum
-    //--------------------------------------------------------------------------
     /// is the index a valid one?
     bool is_valid(index i) const {
       return 0 != BLOCK[i.no()]  &&  i.in() < BLOCK[i.no()]->N_bodies();
     }
-    //--------------------------------------------------------------------------
     /// index to the first of all bodies
     index first() const { return index(FIRST->my_No(),0); }
-    //--------------------------------------------------------------------------
     /// running index of body (between 0 and N-1).
     unsigned bodyindex(index i) const {
       return BLOCK[i.no()]->first() + i.in();
     }
-    //--------------------------------------------------------------------------
     /// comparison between indices
     bool is_less(index a, index b) const {
       return  a.no() == b.no() &&  a.in() < b.in()
 	||    BLOCK[a.no()]->FIRST < BLOCK[b.no()]->FIRST;
     }
-    //--------------------------------------------------------------------------
     /// bodytype of body.
     bodytype const&type(index i) const {
       return BLOCK[i.no()]->type();
@@ -500,12 +495,12 @@ namespace falcON {
       // auxiliary                                                              
       //------------------------------------------------------------------------
       void next_block() {
-	B = B->next();                             //   get next block          
+	B = B? B->next() : 0;                      //   get next block          
 	K = 0;                                     //   set index to 0          
 	N = B? B->N_bodies() : 0;                  //   set end of indices      
       }
-      //------------------------------------------------------------------------
     public:
+      //------------------------------------------------------------------------
       /// \name access to bodies, block, sub-index, and total index             
       //@{
       /// return pointer to my bodies::block
@@ -573,21 +568,25 @@ namespace falcON {
       bool operator!= (iterator const&i) const {
 	return K!=i.K || B!=i.B;
       }
-      /// are we before another iterator?
+      /// are we before another iterator? (assuming the same bodies)
       bool operator<  (iterator const&i) const {
-	return my_index()< i.my_index();
+	return B==i.B? K< i.K : B->first()<i.B->first();
+// 	return my_index()< i.my_index();
       }
-      /// are we before or equal to another iterator?
+      /// are we before or equal to another iterator? (assuming the same bodies)
       bool operator<= (iterator const&i) const {
-	return my_index()<=i.my_index();
+	return B==i.B? K<=i.K : B->first()<i.B->first();
+// 	return my_index()<=i.my_index();
       }
-      /// are we after another iterator?
+      /// are we after another iterator? (assuming the same bodies)
       bool operator>  (iterator const&i) const {
-	return my_index()> i.my_index();
+	return B==i.B? K> i.K : B->first()>i.B->first();
+// 	return my_index()> i.my_index();
       }
-      /// are we after or equal to another iterator?
+      /// are we after or equal to another iterator? (assuming the same bodies)
       bool operator>= (iterator const&i) const {
-	return my_index()>=i.my_index();
+	return B==i.B? K>=i.K : B->first()>i.B->first();
+// 	return my_index()>=i.my_index();
       }
       //@}
       //------------------------------------------------------------------------
@@ -725,6 +724,10 @@ namespace falcON {
       void mark              () { flag().add(flags::marked); }
       /// flag this body as not being marked
       void unmark            () { flag().un_set(flags::marked); }
+      /// flag this body as being in subset
+      void into_subset       () { flag().un_set(flags::ignore); }
+      /// flag this body as not being in subset
+      void outof_subset      () { flag().add(flags::ignore); }
       /// flag this body as being specially SPH marked
       void mark_SPH_special  () { flag().add(flags::sph_special); }
       /// flag this body as not being specially SPH marked
@@ -734,23 +737,34 @@ namespace falcON {
       /// \name const boolean flag informations via members                     
       //@{
       /// is body active?
-      bool is_active     () const { return flag_is_set(flags::active); }
+      bool is_active     () const {
+	return falcON::is_active(const_dat<fieldbit::f>()); }
       /// is body to be removed?
-      bool to_remove     () const { return flag_is_set(flags::remove); }
+      bool to_remove     () const {
+	return falcON::to_remove(const_dat<fieldbit::f>()); }
       /// is body SPH particle?
-      bool is_sph        () const { return flag_is_set(flags::sph); }
+      bool is_sph        () const {
+	return falcON::is_sph(const_dat<fieldbit::f>()); }
       /// is body sticky particle?
-      bool is_sticky     () const { return flag_is_set(flags::sticky); }
+      bool is_sticky     () const {
+	return falcON::is_sticky(const_dat<fieldbit::f>()); }
       /// is body new?
-      bool is_new        () const { return flag_is_set(flags::newbody); }
+      bool is_new        () const {
+	return falcON::is_new(const_dat<fieldbit::f>()); }
       /// is this body flagged as being marked?
-      bool is_marked     () const { return flag_is_set(flags::marked); }
+      bool is_marked     () const {
+	return falcON::is_marked(const_dat<fieldbit::f>()); }
+      /// is this body not flagged as being ignored?
+      bool in_subset     () const {
+	return falcON::in_subset(const_dat<fieldbit::f>()); }
       /// has this body non-zero mass?
       bool is_source     () const;
       /// is this body allowed to use a longer time step?
-      bool may_go_longer () const { return !flag_is_set(flags::not_longer);}
+      bool may_go_longer () const {
+	return !flag_is_set(flags::not_longer);}
       /// is this body allowed to use a shorter time step?
-      bool may_go_shorter() const { return !flag_is_set(flags::not_shorter); }
+      bool may_go_shorter() const {
+	return !flag_is_set(flags::not_shorter); }
       //@}
       //------------------------------------------------------------------------
       /// \name const boolean flag informations via friends                     
@@ -767,6 +781,8 @@ namespace falcON {
       friend bool is_new(const iterator&);
       /// friend: is this body flagged as being marked?
       friend bool is_marked(const iterator&);
+      /// is this body not flagged as being ignored?
+      friend bool in_subset(const iterator&);
       /// friend: has this body mass?
       friend bool is_source(const iterator&);
       /// friend: is this body allowed to use a longer time step?
@@ -792,13 +808,15 @@ namespace falcON {
     //==========================================================================
     //                                                                          
     /// \name generate iterators                                                
-    /// use these methods to obtain begin and end iterator when looping over    
+    /// use these methods to obtain begin and end iterators when looping over   
     /// all or a subset of all bodies                                           
     //@{                                                                        
     //==========================================================================
     /// begin of all bodies
+    iterator begin_bodies() const { return iterator(FIRST); }
+    /// begin of all bodies
     iterator begin_all_bodies() const { return iterator(FIRST); }
-    /// end of all bodies
+    /// end of all bodies == invalid iterator
     iterator end_all_bodies  () const { return iterator(0); }
     /// begin of bodies of given bodytype
     iterator begin_typed_bodies(bodytype t) const {
@@ -1020,8 +1038,8 @@ namespace falcON {
     ///
     /// If more bodies of type \e t are currently allocated than used, we will
     /// return a bodies::iterator to one of these and record it as being used.
-    /// Otherwise (no body available), we will issue a warning an return an
-    /// bodies::invalid iterator. To obtain the number of bodies that can be
+    /// Otherwise (no body available), we will issue a warning and return an
+    /// invalid bodies::iterator. To obtain the number of bodies that can be
     /// activated use bodies::N_free().
     ///
     /// \return a bodies::iterator to a new body or an invalid bodies::iterator
@@ -1031,7 +1049,7 @@ namespace falcON {
     /// make a new body of type \e t; if none available, allocate a block of
     /// \e N new bodies first.
     ///
-    /// This simple routines combines N_free(), create(), and new_body() via
+    /// This simple routine combines N_free(), create(), and new_body() via
     /// \code
     ///   if(0 == N_free(t)) create(min(1u,N),t);
     ///   return new_body(t);
@@ -1153,7 +1171,7 @@ namespace falcON {
     /// \param Bd (input) array of body data fields to read in given order
     /// \param Nd (input) number of entries in that array
     /// \param Nb (input) number of lines to read
-    /// \param Ns (input) number of lines with SPH bodies ( <Nb )
+    /// \param Ns (input, optional) number of lines with SPH bodies ( <= Nb )
     void read_simple_ascii(std::istream  &In,
 			   const fieldbit*Bd,			   
 			   unsigned       Nd,
@@ -1167,8 +1185,8 @@ namespace falcON {
     //==========================================================================
     /// set body keys to first+i, i=0...Nbody-1
     void reset_keys(int k=0) {
-      add_fields(fieldset::k);
-      for(iterator b = begin_all_bodies(); b; ++b,++k) b.key() = k;
+      if(BITS.contain(fieldbit::k))
+	for(iterator b = begin_all_bodies(); b; ++b,++k) b.key() = k;
     }
     //--------------------------------------------------------------------------
     /// reset body flags
@@ -1199,53 +1217,24 @@ namespace falcON {
     /// \name creating sorted index tables                                      
     //@{                                                                        
     //==========================================================================
-    /// Create an index table sorted in func(body) for a subset of all bodies
-    ///
-    /// \param T     (output)  table of bodies::index, sorted
-    /// \param func  (input)   function for property to be sorted
-    /// \param start (input)   only consider bodies starting here
-    /// \param Nb    (input)   only consider this many bodies (default: all)
-    void sorted(Array<index>&T,
-		real       (*func)(iterator const&),
-		iterator     start,
-		unsigned     Nb= 0) const falcON_THROWING;
-    //--------------------------------------------------------------------------
-    /// Create an index table sorted in func(body) for a subset of all bodies
-    /// and also generate a sorted table of quantities
-    ///
-    /// \param T     (output)  table of bodies::index, sorted
-    /// \param Q     (output)  table of quantity, sorted
-    /// \param func  (input)   function for property to be sorted
-    /// \param start (input)   only consider bodies starting here
-    /// \param Nb    (input)   only consider this many bodies (default: all)
-    void sorted(Array<index>&T,
-		Array<real> &Q,
-		real       (*func)(iterator const&),
-		iterator     start,
-		unsigned     Nb= 0) const falcON_THROWING;
-    //--------------------------------------------------------------------------
-    /// Create an index table sorted in func(body) for all bodies
+    /// Create an index table sorted in func(body) for all bodies flagged not
+    /// to be ignored (in_subset()).
     ///
     /// \param T     (output)  table of bodies::index, sorted
     /// \param func  (input)   function for property to be sorted
     void sorted(Array<index>&T,
-		real       (*func)(iterator const&)) const falcON_THROWING
-    {
-      sorted(T,func,begin_all_bodies());
-    }
+		real       (*func)(iterator const&)) const falcON_THROWING;
     //--------------------------------------------------------------------------
-    /// Create an index table sorted in func(body) for all bodies
-    /// and also generate a sorted table of quantities
+    /// Create an index table sorted in func(body) for all bodies flagged not
+    /// to be ignored (in_subset()) and also generate a sorted table of 
+    /// quantities
     ///
     /// \param T     (output)  table of bodies::index, sorted
     /// \param Q     (output)  table of quantity, sorted
     /// \param func  (input)   function for property to be sorted
     void sorted(Array<index>&T,
 		Array<real> &Q,
-		real       (*func)(iterator const&)) const falcON_THROWING
-    {
-      sorted(T,Q,func,begin_all_bodies());
-    }
+		real       (*func)(iterator const&)) const falcON_THROWING;
     //@}
     //--------------------------------------------------------------------------
     void CheckData(fieldset s, const char*f, int l) const
@@ -1346,6 +1335,7 @@ namespace falcON {
   inline bool is_sticky     (const bodies::iterator&i) { return i.is_sticky(); }
   inline bool is_new        (const bodies::iterator&i) { return i.is_new(); }
   inline bool is_marked     (const bodies::iterator&i) { return i.is_marked(); }
+  inline bool in_subset     (const bodies::iterator&i) { return i.in_subset(); }
   inline bool is_source     (const bodies::iterator&i) { return i.is_source(); }
   inline bool may_go_longer (const bodies::iterator&i) {
     return i.may_go_longer();
@@ -1370,7 +1360,7 @@ namespace falcON {
   // ///////////////////////////////////////////////////////////////////////////
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
-  //  class falcON:snapshot                                                     
+  //  class falcON::snapshot                                                    
   //                                                                            
   /// Holds and manages snapshot data (= body data + time)                      
   ///                                                                           
@@ -1381,9 +1371,10 @@ namespace falcON {
   // ///////////////////////////////////////////////////////////////////////////
   class snapshot : public bodies
   {
-    bool           INIT;
-    double         TINI;
-    mutable double TIME;
+    bool             INIT;
+    double           TINI;
+    mutable double   TIME;
+    void            *PBNK;
     //--------------------------------------------------------------------------
   public:
     //==========================================================================
@@ -1404,6 +1395,98 @@ namespace falcON {
     void set_time(double t) const { TIME  = t; }          ///< set time
     void reset_time() const { TIME  = 0.; }               ///< set time to zero
     //@}
+  private:
+    void __add_pointer(const void*, const char*, size_t, const char*)
+      const falcON_THROWING;
+    void __set_pointer(const void*, const char*, size_t, const char*)
+      const falcON_THROWING;
+    void __rep_pointer(const void*, const char*, size_t, const char*)
+      const falcON_THROWING;
+    const void*__get_pointer(const char*, size_t, const char*) const
+      falcON_THROWING;
+  public:
+    //==========================================================================
+    /// \name pointer bank: support for communication between manipulators      
+    ///
+    /// The idea is that two or more manipulators may communicate data, for
+    /// instance one manipulator determines the centre with respect to which
+    /// another manipulator analyses the snapshot. For this purpose, the first
+    /// manipulator registers a pointer to the centre position with the pointer
+    /// bank under a key, say \t "xcen", using members \a add_pointer() or
+    /// \a set_pointer(). Any other manipulator may access that pointer with the
+    /// same key using the member \a pointer() or \a get_pointer().
+    //@{
+    /// add a pointer to pointer bank
+    /// (see also set_pointer())
+    ///
+    /// The sizeof(T) and type nameof(T) are also remembered in the pointer
+    /// bank. If the key is already known to the bank, an error is thrown.
+    /// A NULL pointer will not be added to the bank.
+    /// \param T    (template parameter) type of object pointed to
+    /// \param pter (input)  pointer to be stored in bank
+    /// \param key  (input)  handle to be used as key to pointer
+    template<typename T>
+    void add_pointer(const T*pter, const char*key) const falcON_THROWING {
+      __add_pointer(pter, key, sizeof(T), nameof(T));
+    }
+    /// set a pointer to pointer bank
+    /// (see also add_pointer())
+    ///
+    /// If the key is already known to the bank, the old pointer is overridden.
+    /// nameof(T) and sizeof(T) must match with old entry (if present).
+    /// In case of a NULL pointer, any existing pointer will be deleted.
+    /// \param T    (template parameter) type of object pointed to
+    /// \param pter (input)  pointer to be stored in bank
+    /// \param key  (input)  handle to be used as key to pointer
+    template<typename T>
+    void set_pointer(const T*pter, const char*key) const falcON_THROWING {
+      __set_pointer(pter, key, sizeof(T), nameof(T));
+    }
+    /// return pointer to a given key
+    ///
+    /// If the key is unknown in the pointer bank, a zero pointer is returned.
+    /// If the key is known, but either the sizeof(T) or nameof(T) don't match,
+    /// an error is thrown.
+    /// \return          pointer referred to by key (or null)
+    /// \param T (template parameter) type of object pointed to
+    /// \param   (input) key handle used as key for pointer wanted
+    ///
+    /// Example code: \code
+    ///   const snapshot*shot;
+    ///   const vect    *x0 = shot->pointer<vect>("xcen");
+    /// \endcode
+    /// Note that a template specification "<vect>" is required, because the
+    /// compiler cannot determine the return type from the arguments.
+    template<typename T>
+    const T*pointer(const char*key) const falcON_THROWING { 
+      return static_cast<const T*>(__get_pointer(key, sizeof(T), nameof(T)));
+    }
+    /// get a pointer to a given key, routine version of pointer()
+    ///
+    /// If the key is unknown in the pointer bank, a zero pointer is returned.
+    /// If the key is known, but either the sizeof(T) or nameof(T) don't match,
+    /// an error is thrown.
+    /// \param T    (template parameter) type of object pointed to
+    /// \param pter (output) pointer referred to by key (or null)
+    /// \param key  (input)  handle used as key for pointer wanted
+    ///
+    /// Example code: \code
+    ///   const snapshot*shot;
+    ///   const vect    *x0;
+    ///   shot->get_pointer(x0,"xcen");
+    /// \endcode
+    /// Note that, in contrast to pointer(), no template specification
+    /// "<vect>" is required.
+    template<typename T>
+    void get_pointer(const T* &pter, const char*key) const falcON_THROWING {
+      pter = static_cast<const T*>(__get_pointer(key, sizeof(T), nameof(T)));
+    }
+    /// delete an entry from the pointer bank
+    ///
+    /// if key not found in pointer bank, no action is taken
+    /// \param key handle for pointer to be deleted from bank
+    void del_pointer(const char*key) const;
+    //@}
     //==========================================================================
     /// \name construction & related                                            
     //@{
@@ -1411,11 +1494,7 @@ namespace falcON {
     /// Constructor 0: just give the fields to be supported,
     /// used in NBodyCode::NBodyCode() of file nbody.h
     explicit
-    snapshot(fieldset Bd= fieldset(DefBits)) falcON_THROWING
-    : bodies ( static_cast<const unsigned*>(0), Bd ),
-      INIT   ( false ),
-      TINI   ( 0. ),
-      TIME   ( 0. ) {}
+    snapshot(fieldset Bd= fieldset(DefBits)) falcON_THROWING;
     //--------------------------------------------------------------------------
     /// Constructor 1 (old version)
     ///
@@ -1426,11 +1505,7 @@ namespace falcON {
     snapshot(double   t,
 	     unsigned Nb,
 	     fieldset Bd = fieldset(DefBits),
-	     unsigned Ns = 0) falcON_THROWING
-    : bodies ( Nb,Bd,Ns ),
-      INIT   ( true ),
-      TINI   ( t ),
-      TIME   ( t ) {}
+	     unsigned Ns = 0) falcON_THROWING;
     //--------------------------------------------------------------------------
     /// Constructor 1 (new version)
     ///
@@ -1440,11 +1515,7 @@ namespace falcON {
     explicit 
     snapshot(double         t,
 	     const unsigned*N = 0 ,
-	     fieldset       Bd= fieldset(DefBits)) falcON_THROWING
-    : bodies ( N,Bd ),
-      INIT   ( true ),
-      TINI   ( t ),
-      TIME   ( t ) {}
+	     fieldset       Bd= fieldset(DefBits)) falcON_THROWING;
     //--------------------------------------------------------------------------
     /// copy constructor from bodies
     ///
@@ -1457,11 +1528,7 @@ namespace falcON {
     snapshot(double       t,
 	     bodies const&B,
 	     fieldset     Bd=fieldset::all,
-	     flags        F =flags::empty) falcON_THROWING
-    : bodies ( B,Bd,F ),
-      INIT   ( true ),
-      TINI   ( t ),
-      TIME   ( t ) {}
+	     flags        F =flags::empty) falcON_THROWING;
     //--------------------------------------------------------------------------
     /// copy constructor from snapshot
     ///
@@ -1473,11 +1540,7 @@ namespace falcON {
     explicit
     snapshot(snapshot const&S,
 	     fieldset       Bd=fieldset::all,
-	     flags          F =flags::empty) falcON_THROWING
-    : bodies ( S,Bd,F ),
-      INIT   ( S.INIT ),
-      TINI   ( S.TINI ),
-      TIME   ( S.TIME ) {}
+	     flags          F =flags::empty) falcON_THROWING;
     //--------------------------------------------------------------------------
     /// Copy: replace our data (if any) with those of other bodies (\b not 
     /// \b yet \b implemented)
@@ -1493,11 +1556,10 @@ namespace falcON {
     /// \param F  (input, optional) flag for bodies to be copied
     void copy(snapshot const&S,
 	      fieldset       Bd=fieldset::all,
-	      flags          F =flags::empty) falcON_THROWING
-    {
-      bodies::copy(S,Bd,F);
-      TIME = S.TIME;
-    }
+	      flags          F =flags::empty) falcON_THROWING;
+    //--------------------------------------------------------------------------
+    /// destruction
+    ~snapshot();
     //@}
     //==========================================================================
 #ifdef falcON_NEMO
@@ -1576,9 +1638,11 @@ namespace falcON {
     //--------------------------------------------------------------------------
 #endif
   }; // class snapshot
-  //////////////////////////////////////////////////////////////////////////////
 } // namespace falcON {
-falcON_TRAITS(falcON::bodies::index,"bodies::index","bodies::indexs");
+////////////////////////////////////////////////////////////////////////////////
+falcON_TRAITS(falcON::bodies::index,"bodies::index");
+falcON_TRAITS(falcON::bodies,"bodies");
+falcON_TRAITS(falcON::snapshot,"snapshot");
 // /////////////////////////////////////////////////////////////////////////////
 ///                                                                             
 /// \name macros for looping over bodies                                        
@@ -1667,6 +1731,22 @@ falcON_TRAITS(falcON::bodies::index,"bodies::index","bodies::indexs");
 /// \param NAME2  name given to inner-loop variable (of type falcON::body)
 #define LoopBodyPairs(NAME1,NAME2)		\
   for(falcON::body NAME2(NAME1,1); NAME2; ++NAME2)
+#endif
+//------------------------------------------------------------------------------
+#ifndef LoopSubsetBodies        /* loop all bodies which are in_subset() */
+/// This macro provides an easy way to loop over all bodies in a subset
+///
+/// A typical usage would look like this \code
+///   snapshot *S;
+///   LoopSubsetBodies(S,b) {
+///     b.pos() += dt*vel(b);
+///     b.vel() += dt*acc(b);
+///   } \endcode
+///
+/// \param PTER  valid pointer to falcON::bodies (or falcON::snapshot)
+/// \param NAME  name given to loop variable (of type falcON::body)
+#define LoopSubsetBodies(PTER,NAME)			\
+  LoopAllBodies(PTER,NAME) if(!has_flag(b) || in_subset(b))
 #endif
 //------------------------------------------------------------------------------
 //@}

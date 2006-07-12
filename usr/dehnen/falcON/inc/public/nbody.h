@@ -593,10 +593,10 @@ namespace falcON {
 		   int) falcON_THROWING;
     //--------------------------------------------------------------------------
     ~BlockStepCode () { 
-      delete[] N;
-      delete[] T[0];
-      delete[] T[1];
-      delete[] TAUH;
+      falcON_DEL_A(N);
+      falcON_DEL_A(T[0]);
+      falcON_DEL_A(T[1]);
+      falcON_DEL_A(TAUH);
     }
   };// class falcON::BlockStepCode   
 #ifdef falcON_NEMO
@@ -646,7 +646,7 @@ namespace falcON {
     // destruction                                                              
     //--------------------------------------------------------------------------
     ~NBodyCode() {                                 // destructor                
-      delete CODE;
+      falcON_DEL_O(CODE);
     }
     //--------------------------------------------------------------------------
     // nemo outputs                                                             

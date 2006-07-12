@@ -37,10 +37,16 @@
 //                                                                              
 //------------------------------------------------------------------------------
 extern "C" {
+#ifdef MANIP_PARSE_AT_INIMANIP
+  void inimanip(const falcON::manipulator**,       // O: manipulator            
+		const char                *,       // I: parameter set          
+		const char                *);      // I: data file              
+#else
   void inimanip(const falcON::manipulator**,       // O: manipulator            
 		const double              *,       // I: parameter              
 		int                        ,       // I: # parameters           
 		const char                *);      // I: data file              
+#endif
 }
 //------------------------------------------------------------------------------
 //                                                                              
@@ -65,14 +71,38 @@ extern "C" {
 //               const char  *file);      // I: data file                       
 //                                                                              
 //------------------------------------------------------------------------------
+#ifdef MANIP_PARSE_AT_INIMANIP
+
+#define __DEF__MAN(NAME)				\
+void inimanip(const falcON::manipulator**manip,		\
+	      const char                *pars,		\
+	      const char                *file)		\
+{							\
+  const int MAXPAR = 256;				\
+  double p[MAXPAR];					\
+  int    n = falcON::Manipulator::parse(pars,p,MAXPAR);	\
+  *manip = new NAME(p,n,file);				\
+}
+
+#define __DEF__MAN__ALT(NAME)			\
+void inimanip(const falcON::manipulator**manip,	\
+	      const char                *pars,	\
+	      const char                *file)	\
+{						\
+  *manip = new NAME(pars,file);			\
+}
+
+#else  // MANIP_PARSE_AT_INIMANIP
 
 #define __DEF__MAN(NAME)			\
-void inimanip(const manipulator**manip,		\
-	      const double      *pars,		\
-	      int                npar,		\
-	      const char        *file)		\
+void inimanip(const falcON::manipulator**manip,	\
+	      const double              *pars,	\
+	      int                        npar,	\
+	      const char                *file)	\
 {						\
   *manip = new NAME(pars,npar,file);		\
 }
+
+#endif // MANIP_PARSE_AT_INIMANIP
 //------------------------------------------------------------------------------
 #endif // falcON_included_defman_h

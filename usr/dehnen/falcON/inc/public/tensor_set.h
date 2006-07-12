@@ -3,7 +3,7 @@
 //                                                                             |
 // tensor_set.h                                                                |
 //                                                                             |
-// Copyright (C) 2003, 2004  Walter Dehnen                                     |
+// Copyright (C) 2003-2006  Walter Dehnen                                      |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -115,10 +115,6 @@ namespace WDutils {
     static const char  *name() {
       return message("poles3D<%d,%s>", N, traits<T>::name());
     }
-    static const char  *names() {
-      return message("poles3D<%d,%s>", N, traits<T>::name());
-    }
-    static const size_t size = sizeof(falcON::poles3D<N,T>);
   };
   //////////////////////////////////////////////////////////////////////////////
 } // namespace WDutils {
@@ -203,10 +199,6 @@ namespace WDutils {
     static const char  *name() {
       return message("symset3D<%d,%s>", N, traits<T>::name());
     }
-    static const char  *names() {
-      return message("symset3D<%d,%s>", N, traits<T>::name());
-    }
-    static const size_t size = sizeof(falcON::symset3D<N,T>);
   };
   //////////////////////////////////////////////////////////////////////////////
 } // namespace WDutils {

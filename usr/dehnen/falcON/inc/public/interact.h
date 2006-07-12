@@ -4,7 +4,7 @@
 /// \file   inc/public/interact.h                                               
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2000-2005                                                           
+/// \date   2000-2006                                                           
 ///                                                                             
 /// \brief  contains class template falcON::MutualInteractor, which implements  
 ///	    the mutual interaction algorithm used in falcON.                    
@@ -56,12 +56,13 @@ namespace falcON {
 //------------------------------------------------------------------------------
 namespace WDutils {
   template<typename A, typename B> struct traits< falcON::iaction<A,B> > {
-    static const char  *name() { 
-      return
-	message("iaction< %s, %s >", traits<A>::name(), traits<B>::name());
+    static const char  *name() {
+      char __a[1024];
+      strcpy(__a,traits<A>::name());
+      return message("iaction< %s, %s >", __a, traits<B>::name());
+//       return
+// 	message("iaction< %s, %s >", traits<A>::name(), traits<B>::name());
     }
-    static const char  *names() { return name(); }
-    static const size_t size = sizeof( falcON::iaction<A,B> );
   };
 }
 //------------------------------------------------------------------------------
@@ -89,7 +90,7 @@ namespace falcON {
 #endif
     {}
     //--------------------------------------------------------------------------
-    ~iastack () { delete[] IA; }                   // destructor: deallocate    
+    ~iastack () { falcON_DEL_A(IA); }              // destructor: deallocate    
     bool is_empty() const   { return pi<IA;}       // if stack empty?           
     iact pop     ()         { return *(pi--); }    // give last:   pop          
     void push    (A a, B b) {                      // add element: push         
@@ -119,8 +120,6 @@ namespace WDutils {
     static const char  *name() { 
       return message("saction< %s >", traits<A>::name());
     }
-    static const char  *names() { return name(); }
-    static const size_t size = sizeof( falcON::saction<A> );
   };
 }
 //------------------------------------------------------------------------------
@@ -148,7 +147,7 @@ namespace falcON {
 #endif
     {}
     //--------------------------------------------------------------------------
-    ~sastack () { delete[] SA; }                   // destructor: deallocate    
+    ~sastack () { falcON_DEL_A(SA); }              // destructor: deallocate    
     bool is_empty() const   { return pi<SA;}       // if stack empty?           
     sact pop     ()         { return *(pi--); }    // give last:   pop          
     void push    (A a) {                           // add element: push         

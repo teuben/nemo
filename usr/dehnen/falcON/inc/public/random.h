@@ -6,13 +6,13 @@
 /// \author  Walter Dehnen                                                      
 /// \author  Paul McMillan                                                      
 ///                                                                             
-/// \date    1994-2005                                                          
+/// \date    1994-2006                                                          
 ///                                                                             
 /// \todo    add doxygen documentation                                          
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 1994-2005  Walter Dehnen                                       
+// Copyright (C) 1994-2006  Walter Dehnen                                       
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -89,16 +89,14 @@ namespace falcON {
   public:
     Random(seed_type const&s,                      // I: seed for pseudo RNG    
 	   unsigned  const&n) :                    // I: # Sobols               
-//       PseudoRandom(s), N(n), S( new Sobol[n] ) {}
       PseudoRandom(s), N(n), S(falcON_NEW(Sobol,n)) {}
 #ifdef falcON_NEMO
     Random(const     char *s,                      // I: seed for NEMO::xrandom 
 	   unsigned  const&n) :                    // I: # Sobols               
-//       PseudoRandom(s), N(n), S( new Sobol[n] ) {}
       PseudoRandom(s), N(n), S(falcON_NEW(Sobol,n)) {}
 #endif
     //--------------------------------------------------------------------------
-    ~Random() { delete[] S; }
+    ~Random() { falcON_DEL_A(S); }
     //--------------------------------------------------------------------------
     // pseudo random numbers                                                    
     //--------------------------------------------------------------------------

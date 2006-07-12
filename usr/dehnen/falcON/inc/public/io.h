@@ -39,6 +39,10 @@
 #  include <cstring>
 #  define falcON_included_cstring
 #endif
+#ifndef falcON_included_string
+#  include <string>
+#  define falcON_included_string
+#endif
 #ifndef falcON_included_types_h
 #  include <public/fields.h>
 #endif
@@ -105,11 +109,29 @@ namespace falcON {
       FILE = file? FNAME : 0;
       __open(append);
     }
+    /// construction from file and potential option for appending.
+    /// If \e file equals "-", and no other output or nemo_out is opened to 
+    /// \c stdout, we map to \c stdout.  Otherwise, a file of name \e file is
+    /// created for output. An existing file of the same name is deleted unless
+    /// \e append is true, in which case, we append to that existing file.
+    explicit
+    output(std::string const&file, bool append = 0) : APPENDING(false) {
+      strncpy(FNAME,file.c_str(),FNAME_MAX_SIZE);
+      FILE = file.c_str()? FNAME : 0;
+      __open(append);
+    }
     /// close possible old stream, then proceed as in construction         
     void open(const char*file, bool append = 0) {
       __close();
       strncpy(FNAME,file,FNAME_MAX_SIZE);
       FILE = file? FNAME : 0;
+      __open(append);
+    }
+    /// close possible old stream, then proceed as in construction         
+    void open(std::string const&file, bool append = 0) {
+      __close();
+      strncpy(FNAME,file.c_str(),FNAME_MAX_SIZE);
+      FILE = file.c_str()? FNAME : 0;
       __open(append);
     }
     /// open file with name made from \e format string and \e tag.
@@ -184,10 +206,10 @@ namespace falcON {
   //                                                                            
   /// wrapper around std::istream with some additional features                 
   ///                                                                           
-  /// On opening a file, a filename "-" is interpreted as \c stdin, but will be
-  /// opened only if no other input or nemo_in is reading from \c stdin.  The
-  /// operator >> is defined (as template) to map std::istream::operator>>(),
-  /// for other operations on std::istream, use the member method stream().
+  /// On opening a file, a filename "-" is interpreted as \c stdin, but will be 
+  /// opened only if no other input or nemo_in is reading from \c stdin.  The   
+  /// operator >> is defined (as template) to map std::istream::operator>>(),   
+  /// for other operations on std::istream, use the member method stream().     
   ///                                                                           
   // ///////////////////////////////////////////////////////////////////////////
   class input {
@@ -223,12 +245,23 @@ namespace falcON {
     /// for input.
     explicit
     input(const char*file) { __open(file); }
+    /// construction from file name.
+    /// If \e file equals "-", and no other input or nemo_in is opened to \c
+    /// stdin, we map to \c stdin.  Otherwise, a file of name \e file is opened
+    /// for input.
+    explicit
+    input(std::string const&file) { __open(file.c_str()); }
     /// close possible old stream, then proceed as in construction
     void open(const char*file) {
       __close();
       __open(file);
     }
     //@}
+    /// close possible old stream, then proceed as in construction
+    void open(std::string const&file) {
+      __close();
+      __open(file.c_str());
+    }
     //--------------------------------------------------------------------------
     /// \name destruction and closing
     //@{

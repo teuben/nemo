@@ -3,7 +3,7 @@
  *                                                                             *
  * FAlCON_C.h                                                                  *
  *                                                                             *
- * Copyright (C) 2000-2005  Walter Dehnen                                      *
+ * Copyright (C) 2000-2006  Walter Dehnen                                      *
  *                                                                             *
  * This program is free software; you can redistribute it and/or modify        *
  * it under the terms of the GNU General Public License as published by        *
@@ -398,6 +398,8 @@ int  falcON_depth();                         /* max depth of tree             */
 
 void falcON_stats();                         /* writes some statistics        */
 					     /*	to standard output            */
+
+void falcON_set_debug_level(int);   	     /* assigns falcON debug level    */
 /*
  *******************************************************************************
  *                                                                             *

@@ -3,7 +3,7 @@ C------------------------------------------------------------------------------+
 C                                                                              |
 C  FAlCON.f                                                                    |
 C                                                                              |
-C  Copyright (C) 2000-2005  Walter Dehnen                                      |
+C  Copyright (C) 2000-2006  Walter Dehnen                                      |
 C                                                                              |
 C  This program is free software; you can redistribute it and/or modify        |
 C  it under the terms of the GNU General Public License as published by        |
@@ -477,6 +477,11 @@ C                                                                              |
       EXTERNAL FALCON_STATS              !  writes some stats to stdout        |
 C     syntax:                                                                  |
 C     CALL FALCON_STATS()                                                      |
+C                                                                              |
+      EXTERNAL FALCON_SET_DEBUG_LEVEL    !  assigns falcON debug level         |
+C     syntax:                                                                  |
+C     INTEGER D                                                                |
+C     CALL FALCON_SET_DEBUG_LEVEL(D)                                           |
 C                                                                              |
 C------------------------------------------------------------------------------+
 C                                                                              |

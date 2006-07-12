@@ -3,7 +3,7 @@
 //                                                                             |
 // tensor.h                                                                    |
 //                                                                             |
-// Copyright (C) 1999-2004  Walter Dehnen                                      |
+// Copyright (C) 1999-2006  Walter Dehnen                                      |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -402,10 +402,6 @@ namespace WDutils {
     static const char  *name() {
       return message("symt3D<%d,%s>", N, traits<T>::name());
     }
-    static const char  *names() {
-      return message("symt3D<%d,%s>", N, traits<T>::name());
-    }
-    static const size_t size = sizeof(falcON::symt3D<N,T>);
   };
   //////////////////////////////////////////////////////////////////////////////
 } // namespace WDutils {

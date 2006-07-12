@@ -4,7 +4,7 @@
 /// \file   inc/public/types.h                                                  
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2000-2005                                                           
+/// \date   2000-2006                                                           
 ///                                                                             
 /// \brief  contains declaration of some basic types, such as falcON::real      
 ///         and falcON::vect, and constants.                                    
@@ -146,9 +146,9 @@ namespace falcON {
 // elementary falcON types and constants                                        
 //                                                                              
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_TRAITS(TYPE,NAME,NAMES)		\
+#define falcON_TRAITS(TYPE,NAME)		\
 namespace WDutils {				\
-  WDutils_TRAITS(TYPE,NAME,NAMES)		\
+  WDutils_TRAITS(TYPE,NAME)			\
 }
 //------------------------------------------------------------------------------
 //  vectors and tensors                                                         
@@ -163,11 +163,11 @@ namespace falcON {
   typedef tupel<Ndim,double> vect_d;             ///< a vector of 3 doubles     
 }
 //------------------------------------------------------------------------------
-falcON_TRAITS(falcON::vect,"vect","vects");
+falcON_TRAITS(falcON::vect,"vect");
 #ifdef falcON_REAL_IS_FLOAT
-falcON_TRAITS(falcON::vect_d,"vect_d","vect_d");
+falcON_TRAITS(falcON::vect_d,"vect_d");
 #else
-falcON_TRAITS(falcON::vect_f,"vect_f","vect_f");
+falcON_TRAITS(falcON::vect_f,"vect_f");
 #endif
 //------------------------------------------------------------------------------
 // integer types of given size                                                  

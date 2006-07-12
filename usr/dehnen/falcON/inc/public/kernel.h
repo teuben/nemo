@@ -189,7 +189,7 @@ namespace falcON {
       MAXNC      ( 0 ) {}
     //--------------------------------------------------------------------------
     ~GravKernBase() {
-      if(COEFF_POOL) delete COEFF_POOL;
+      if(COEFF_POOL) falcON_DEL_O(COEFF_POOL);
     }
     //--------------------------------------------------------------------------
     void give_coeffs(grav::cell_pter const&C) const {

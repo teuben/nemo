@@ -1026,8 +1026,8 @@ namespace falcON {
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
   inline DehnenModelSampler::~DehnenModelSampler() { 
-    delete[] y;
-    delete[] f;
+    falcON_DEL_A(y);
+    falcON_DEL_A(f);
   } 
   //----------------------------------------------------------------------------
   // provide the abstract functions and more                                    

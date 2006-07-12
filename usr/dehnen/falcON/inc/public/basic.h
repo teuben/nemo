@@ -123,17 +123,14 @@ namespace falcON {
   //----------------------------------------------------------------------------
   inline Status CurrentStatus() {
     int status = public_version;
-#ifdef falcON_DEBUG
-    status |= debugg_version;
-#endif
 #ifdef falcON_PROPER
     status |= proper_version;
 #endif
-#ifdef falcON_NEMO
-    status |= nemo_version;
-#endif
 #ifdef DEBUG
     status |= debug_version;
+#endif
+#ifdef falcON_NEMO
+    status |= nemo_version;
 #endif
 #ifdef falcON_SPH
     status |= sph_version;
@@ -141,7 +138,7 @@ namespace falcON {
 #ifdef falcON_MPI
     status |= mpi_version;
 #endif
-#if defined(falcON_DOUBLE)
+#ifdef falcON_DOUBLE
     status |= real_is_double;
 #endif
     return Status(status);
@@ -176,7 +173,7 @@ namespace falcON {
 #define falcON_ErrorF(MSGS,FUNC)				\
   error("[%s.%d]: in %s: %s",__FILE__,__LINE__,FUNC,MSGS)
   //----------------------------------------------------------------------------
-#define falcON_ExceptF(MSGS,FUNC)					\
+#define falcON_ExceptF(MSGS,FUNC)			        \
   falcON_THROW("[%s.%d]: in %s: %s",__FILE__,__LINE__,FUNC,MSGS)
   //----------------------------------------------------------------------------
 #define falcON_WarningF(MSGS,FUNC)				\

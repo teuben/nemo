@@ -113,9 +113,9 @@ namespace falcON {
     //--------------------------------------------------------------------------
     ~SphericalSampler() { 
 #ifdef falcON_PROPER
-      if(num) delete[] num;
-      if(Xe)  delete[] Xe;
-      if(Is)  delete[] Is;
+      if(num) falcON_DEL_A(num);
+      if(Xe)  falcON_DEL_A(Xe);
+      if(Is)  falcON_DEL_A(Is);
 #endif
     }
     //--------------------------------------------------------------------------

@@ -278,8 +278,8 @@ namespace falcON {
       STC_UPTODATE ( 0 ) {}
     //--------------------------------------------------------------------------
     void reset() {
-      if(CELL_SRCE) { delete[] CELL_SRCE; CELL_SRCE=0; }
-      if(LEAF_DATA) { delete[] LEAF_DATA; LEAF_DATA=0; }
+      if(CELL_SRCE) { falcON_DEL_A(CELL_SRCE); CELL_SRCE=0; }
+      if(LEAF_DATA) { falcON_DEL_A(LEAF_DATA); LEAF_DATA=0; }
       SPH_UPTODATE = 0;
       STC_UPTODATE = 0;
     }
@@ -292,8 +292,8 @@ namespace falcON {
     // destruction                                                              
     //--------------------------------------------------------------------------
     ~PartnerEstimator() {
-      if(CELL_SRCE) delete[] CELL_SRCE;
-      if(LEAF_DATA) delete[] LEAF_DATA;
+      if(CELL_SRCE) falcON_DEL_A(CELL_SRCE);
+      if(LEAF_DATA) falcON_DEL_A(LEAF_DATA);
     }
     //--------------------------------------------------------------------------
     void make_sticky_list (indx_pair*,             // I/O: interaction list     
@@ -315,5 +315,8 @@ namespace falcON {
     //--------------------------------------------------------------------------
   };
 } // namespace falcON {
+////////////////////////////////////////////////////////////////////////////////
+falcON_TRAITS(falcON::PartnerEstimator::Leaf,"PartnerEstimator::Leaf");
+falcON_TRAITS(falcON::PartnerEstimator::Cell,"PartnerEstimator::Cell");
 ////////////////////////////////////////////////////////////////////////////////
 #endif // falcON_included_partner_h  
