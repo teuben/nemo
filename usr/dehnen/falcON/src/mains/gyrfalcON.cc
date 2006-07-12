@@ -152,7 +152,7 @@ string defv[] = {
 #  else
   "eps=0.05\n         >=0: softening length\n"
   "                   < 0: use individual fixed softening lengths        ",
- #  endif
+#  endif
 #else
   "eps=0.05\n         softening length                                   ",
 #endif
@@ -190,7 +190,7 @@ string defv[] = {
   "lastout=t\n        primary output for t=tstop?                        ",
   falcON_DEFV, NULL };
 //------------------------------------------------------------------------------
-string usage = "gyrfalcON -- a superberb N-body code";
+string usage = "gyrfalcON -- a superb N-body code";
 //------------------------------------------------------------------------------
 void falcON::main() falcON_THROWING
 {
@@ -323,6 +323,6 @@ void falcON::main() falcON_THROWING
     LOGOUT <<"# simulation STOPPED because file \""
 	   << getparam("stopfile") << "\" found to exist\n";
   // 5. cleaning up (including implicit call of destructors)                    
-  if(aex) delete aex;                                 // delete external accs   
+  if(aex) falcON_DEL_O(aex);                          // delete external accs   
 }
 //---------------------end-of-gyrfalcON.cc------that's-it-!---------------------

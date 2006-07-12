@@ -2,7 +2,7 @@
 //                                                                             |
 // FAlCONC.cc                                                                  |
 //                                                                             |
-// Copyright (C) 2000-2005 Walter Dehnen                                       |
+// Copyright (C) 2000-2006 Walter Dehnen                                       |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -101,8 +101,8 @@ namespace {
 				  int  K,
 				  real G)
   {
-    if(BODIES) delete BODIES;
-    if(FALCON) delete FALCON;
+    if(BODIES) falcON_DEL_O(BODIES);
+    if(FALCON) falcON_DEL_O(FALCON);
     if(Nsph > Ntot)
       falcON::error("falcON_initialize(): Ntot (%d) < Nsph (%d)\n", Ntot, Nsph);
     unsigned Nbod[BT_NUM] = {Nsph, Ntot-Nsph};
@@ -181,7 +181,7 @@ extern "C" {
   int falcON_default_kernel() {
     return ktype(falcON::Default::kernel);
   }
-  //=========================================================================#
+  //===========================================================================#
   void falcON_initialize(const int *F,
 			 const real*M,
 			 const real*X,
@@ -275,27 +275,27 @@ extern "C" {
   //===========================================================================#
   void falcON_clearup()
   {
-    if(FALCON) delete FALCON;
+    if(FALCON) falcON_DEL_O(FALCON);
     FALCON = 0;
-    if(BODIES) delete BODIES;
+    if(BODIES) falcON_DEL_O(BODIES);
     BODIES = 0;
     BUILT  = 0;
   }
   //----------------------------------------------------------------------------
   void falcon_clearup_()
   {
-    if(FALCON) delete FALCON;
+    if(FALCON) falcON_DEL_O(FALCON);
     FALCON = 0;
-    if(BODIES) delete BODIES;
+    if(BODIES) falcON_DEL_O(BODIES);
     BODIES = 0;
     BUILT  = 0;
   }
   //----------------------------------------------------------------------------
   void falcon_clearup__()
   {
-    if(FALCON) delete FALCON;
+    if(FALCON) falcON_DEL_O(FALCON);
     FALCON = 0;
-    if(BODIES) delete BODIES;
+    if(BODIES) falcON_DEL_O(BODIES);
     BODIES = 0;
     BUILT  = 0;
   }
@@ -660,6 +660,21 @@ extern "C" {
   {
     if(__falcON_warning("falcon_stats")) return;
     FALCON->stats(std::cout);
+  }
+  //===========================================================================#
+  void falcON_set_debug_level(int d)
+  {
+    falcON::RunInfo::set_debug_level(d);
+  }
+  //----------------------------------------------------------------------------
+  void falcon_set_debug_level_(int*d)
+  {
+    falcON::RunInfo::set_debug_level(*d);
+  }
+  //----------------------------------------------------------------------------
+  void falcon_set_debug_level__(int*d)
+  {
+    falcON::RunInfo::set_debug_level(*d);
   }
   //===========================================================================#
 

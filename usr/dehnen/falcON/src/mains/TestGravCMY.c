@@ -75,22 +75,12 @@ inline double RNG()
 
 typedef INPUT_TYPE INPUT_VECT[3];
 
-/* << JCL */
-/* int buggy() */
-/* { */
-/*   int * ion,i; */
-/*   ion=(int * ) malloc(sizeof(int)*100); */
-/*   for (i=0;i<100;++i) ion[i]=666; */
-/*   free ((int *) ion); */
-/*   return 1;   */
-/* } */
-/* >> JCL */
 int main(int argc, char* argv[])
 {
   clock_t     cpu0, cpu1;
   INPUT_TYPE  time_setup, time_grow, time_tree;
   INPUT_TYPE  rmax, GAM;
-  int         MOD, C, kern, N, Ncrit=6, p, *F, ig,Ngrow, D=0;
+  int         MOD, C, kern, N, Ncrit=6, p, *F, ig,Ngrow;
   long        S;
   INPUT_TYPE *M,*PH,*RH,*RHO,EPS,theta;
   INPUT_VECT *X,*A,*AT;
@@ -103,7 +93,7 @@ int main(int argc, char* argv[])
   /* 
    * read parameters
    */
-  if(argc < 6 || argc > 12) {
+  if(argc < 6 || argc > 11) {
     printf("\"TestGravC MOD gamma N S EPS [Ng THE K Nc Rmax] \" with \n");
     printf(" MOD = 0/1/2/3/4: "
 	   "hom. sphere / Plummer / gamma-model / Kuzmin disk / hom. disk\n");
@@ -118,8 +108,7 @@ int main(int argc, char* argv[])
 	   falcON_default_kernel());
     printf(" Nc (default   %2d)   : don't split cells with N <= Nc bodies\n",
 	   falcON_default_Ncrit());
-    printf(" D    (default   0)  : falcON debug level\n");
-    printf(" Rmax (default 1e3)  : max radius\n");
+    printf(" Rmax (default 1e3)   : max radius\n");
     exit(1);
   }
 
@@ -135,10 +124,8 @@ int main(int argc, char* argv[])
   if(argc>p) theta= atof(argv[p++]); else theta=falcON_default_theta();
   if(argc>p) kern = atoi(argv[p++]); else kern =falcON_default_kernel();
   if(argc>p) Ncrit= atoi(argv[p++]); else Ncrit=falcON_default_Ncrit();
-  if(argc>p) D    = atoi(argv[p++]);
-  if(argc>p) rmax = atof(argv[p++]);
+  if(argc>p) rmax = atoi(argv[p++]);
 
-  falcON_set_debug_level(D);
   /*
    * set up positions
    */
@@ -228,9 +215,6 @@ int main(int argc, char* argv[])
 /* 		    0, */
 /* #endif */
 /* 		    (INPUT_TYPE*)A,PH,RHO,N,EPS,theta,kern,1); */
-/* << JCL */
-/*   buggy(); */
-/* >> JCL */
   falcON_initialize(F,M,(INPUT_TYPE*)X,
 #ifdef falcON_INDI
 		    0,
@@ -251,9 +235,7 @@ int main(int argc, char* argv[])
   printf(" time needed by tree forces:    %f\n",time_tree);
   falcON_stats();
   printf("\n");
-  /* << JCL */
-  falcON_clearup();
-  /* << JCL */
+
 
   /*
    * outputs

@@ -1,25 +1,30 @@
-// -*- C++ -*-                                                                 |
-//-----------------------------------------------------------------------------+
-//                                                                             |
-// tools.cc                                                                    |
-//                                                                             |
-// Copyright (C) 2002-2005  Walter Dehnen                                      |
-//                                                                             |
-// This program is free software; you can redistribute it and/or modify        |
-// it under the terms of the GNU General Public License as published by        |
-// the Free Software Foundation; either version 2 of the License, or (at       |
-// your option) any later version.                                             |
-//                                                                             |
-// This program is distributed in the hope that it will be useful, but         |
-// WITHOUT ANY WARRANTY; without even the implied warranty of                  |
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU           |
-// General Public License for more details.                                    |
-//                                                                             |
-// You should have received a copy of the GNU General Public License           |
-// along with this program; if not, write to the Free Software                 |
-// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                   |
-//                                                                             |
-//-----------------------------------------------------------------------------+
+// -*- C++ -*-                                                                  
+////////////////////////////////////////////////////////////////////////////////
+///                                                                             
+/// \file   src/public/tools.cc                                                 
+///                                                                             
+/// \author Walter Dehnen                                                       
+/// \date   2002-2006                                                           
+///                                                                             
+////////////////////////////////////////////////////////////////////////////////
+//                                                                              
+// Copyright (C) 2002-2006 Walter Dehnen                                        
+//                                                                              
+// This program is free software; you can redistribute it and/or modify         
+// it under the terms of the GNU General Public License as published by         
+// the Free Software Foundation; either version 2 of the License, or (at        
+// your option) any later version.                                              
+//                                                                              
+// This program is distributed in the hope that it will be useful, but          
+// WITHOUT ANY WARRANTY; without even the implied warranty of                   
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
+// General Public License for more details.                                     
+//                                                                              
+// You should have received a copy of the GNU General Public License            
+// along with this program; if not, write to the Free Software                  
+// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                    
+//                                                                              
+////////////////////////////////////////////////////////////////////////////////
 #include <public/tools.h>
 
 using namespace falcON;
@@ -28,14 +33,14 @@ using namespace falcON;
 // implementing falcON::centre_of_mass()                                      //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
-vect falcON::centre_of_mass(const bodies*const&B) {
+vect falcON::centre_of_mass(const bodies*B) {
   register vect_d X(0.);
   register double W(0.);
-  LoopAllBodies(B,Bi) {
-    W += mass(Bi);
-    X += mass(Bi) * pos(Bi);
+  LoopSubsetBodies(B,b) {
+    W += mass(b);
+    X += mass(b) * pos(b);
   }
-  return vect(X/W);
+  return W == zero? vect(zero) : vect(X/W);
 }
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -59,33 +64,20 @@ namespace { using namespace falcON;
   }
 }
 ////////////////////////////////////////////////////////////////////////////////
-void falcON::find_centre(const bodies*const&B,     // I  : bodies               
-			 real         const&f,     // I  : reduction factor     
-			 unsigned     const&alpha, // I  : weigth=m*|Phi|^alpha 
-			 unsigned     const&Nmin,  // I  : min #bodies in center
-			 vect              &xc,    // I/O: center position      
-			 real              &rc,    // I/O: centre radius        
-			 bool               ini,   //[I  : use input as initial 
-			 vect              *vc,    //[O  : center velocity]     
-			 real              *rhc,   //[O  : estimate: rho(xc)]   
-			 unsigned           b0,    //[I  : first body]          
-			 unsigned           nb)    //[I  : # bodies]            
-  falcON_THROWING
+void falcON::find_centre_alpha(const bodies*B,
+			       real         f,
+			       unsigned     alpha,
+			       unsigned     Nmin,
+			       vect        &xc,
+			       real        &rc,
+			       bool         ini,
+			       vect        *vc,
+			       real        *rhc) falcON_THROWING
 {
-  if(b0 >= B->N_bodies())
-    falcON_THROW("find_centre(): first body >= N");
-  else if(0 == nb)
-    nb = B->N_bodies() - b0;
-  else if(b0 + nb > B->N_bodies()) {
-    warning("find_centre(): cannot use %d, but only %d bodies",
-	    nb, B->N_bodies()-b0);
-    nb = B->N_bodies() - b0;
-  }
+  unsigned nb = B->N_subset();
   if(nb < Nmin)
     falcON_THROW("find_centre(): # bodies=%d < Nmin=%d",nb,Nmin);
   const real faq = square(f<one? f : 1./f);        // reduction factor squared  
-  const body first(B->bodyNo(b0));                 // first body considered     
-  const body end(B->bodyNo(b0+nb));                // end of bodies             
   vect     Xc;                                     // initial/current position  
   real     Rq;                                     // initial/current radius^2  
   double   W;                                      // Sum w_i                   
@@ -101,11 +93,11 @@ void falcON::find_centre(const bodies*const&B,     // I  : bodies
     X = 0.;                                        //   reset Sum w_i x_i       
     N = 0u;                                        //   reset # bodies          
     register double Q(0.);                         //   reset Sum w_i x^2_i     
-    for(body Bi(first); Bi!=end; ++Bi) {           //   LOOP bodies             
-      register double w = weight(Bi,alpha);        //     w_i = m_i*p_i^alpha   
+    LoopSubsetBodies(B,b) {                        //   LOOP bodies             
+      register double w = weight(b,alpha);         //     w_i = m_i*p_i^alpha   
       W+= w;                                       //     Sum w_i               
-      X+= w * pos(Bi);                             //     Sum w_i x_i           
-      Q+= w * norm(pos(Bi));                       //     Sum w_i x_i^2         
+      X+= w * pos(b);                              //     Sum w_i x_i           
+      Q+= w * norm(pos(b));                        //     Sum w_i x_i^2         
     }                                              //   END LOOP                
     Xc = X/W;                                      //   Xc  = <x>               
     Rq = Q/W - norm(X);                            //   R^2 = <(x-<x>)^2>       
@@ -124,11 +116,11 @@ void falcON::find_centre(const bodies*const&B,     // I  : bodies
     W = 0.;                                        //   reset Sum w_i           
     X = 0.;                                        //   reset Sum w_i x_i       
     N = 0u;                                        //   reset # bodies          
-    for(body Bi(first); Bi!=end; ++Bi)             //   LOOP bodies             
-      if(dist_sq(pos(Bi),Xc) < Rq) {               //     IF |X-Xc| < R         
-	register double w = weight(Bi,alpha);      //       w_i = m_i*p_i^alpha 
+    LoopSubsetBodies(B,b)                          //   LOOP bodies             
+      if(dist_sq(pos(b),Xc) < Rq) {                //     IF |X-Xc| < R         
+	register double w = weight(b,alpha);       //       w_i = m_i*p_i^alpha 
 	W+= w;                                     //       Sum w_i             
-	X+= w * pos(Bi);                           //       Sum w_i x_i         
+	X+= w * pos(b);                            //       Sum w_i x_i         
 	N++;                                       //       count               
       }                                            //   END LOOP                
     if(I && SHRINK && N < Nmin) SHRINK = 0;        //   IF (N < Nmin): adjust   
@@ -142,12 +134,12 @@ void falcON::find_centre(const bodies*const&B,     // I  : bodies
   if(vc || rhc) {                                  // IF V OR rho wanted        
     register double M(0.), W(0.);                  //   Sum m_i, Sum w_i        
     register vect_d V(0.);                         //   Sum w_i v_i             
-    for(body Bi(first); Bi!=end; ++Bi)             //   LOOP bodies             
-      if(dist_sq(pos(Bi),Xc) < Rq) {               //     IF |X-Xc| < R         
-	M+= mass(Bi);                              //       Sum m_i             
-	register double w = weight(Bi,alpha);      //       w_i = m_i*p_i^alpha 
+    LoopSubsetBodies(B,b)                          //   LOOP bodies             
+      if(dist_sq(pos(b),Xc) < Rq) {                //     IF |X-Xc| < R         
+	M+= mass(b);                               //       Sum m_i             
+	register double w = weight(b,alpha);       //       w_i = m_i*p_i^alpha 
 	W+= w;                                     //       Sum w_i             
-	V+= w * vel(Bi);                           //       Sum w_i v_i         
+	V+= w * vel(b);                            //       Sum w_i v_i         
       }                                            //   END LOOP                
     if(vc)  *vc  = V/W;                            //   set velocity            
     if(rhc) *rhc = 3.*M/(FPi*Rq*rc);               //   set density estimate    
@@ -184,14 +176,14 @@ namespace { using namespace falcON;
   typedef OctTree::CellIter<DensCell> DensCell_iter;
 } // namespace {
 ////////////////////////////////////////////////////////////////////////////////
-falcON_TRAITS(DensLeaf,"DensLeaf","DensLeafs");
-falcON_TRAITS(DensCell,"DensCell","DensCells");
+falcON_TRAITS(DensLeaf,"DensLeaf");
+falcON_TRAITS(DensCell,"DensCell");
 ////////////////////////////////////////////////////////////////////////////////
-void falcON::estimate_density_peak(OctTree *const&TREE,
-				   unsigned const&alpha,
-				   unsigned const&Nmin,
-				   vect         &X0,
-				   real         &H)
+void falcON::estimate_density_peak(OctTree *TREE,
+				   unsigned alpha,
+				   unsigned Nmin,
+				   vect    &X0,
+				   real    &H)
 {
   // 1. set weights in leafs
   LoopLeafs(DensLeaf,TREE,Li)
@@ -289,10 +281,9 @@ namespace {
   public:
 
     // constructor: allocate PointsA,B; inititialize PointsA & Root
-    RadiusFinder(body  const &,
-		 unsigned     ,
-		 int           = 1,        // # M[r] anticipated
-		 const vect  * = 0);       //[centre offset]
+    RadiusFinder(const bodies *    ,        // set of bodies
+		 int            = 1,        // # M[r] anticipated
+		 const vect   * = 0);       //[centre offset]
 
     double FindLagrangeRadius(double const&M) {
       // find radius containing the fraction M of the total mass
@@ -323,17 +314,15 @@ namespace {
 #endif
 
     ~RadiusFinder() {
-      delete[] PointsA;
-      delete[] PointsB;
+      falcON_DEL_A(PointsA);
+      falcON_DEL_A(PointsB);
     }
 
   };
 } // namespace {
 ////////////////////////////////////////////////////////////////////////////////
-falcON_TRAITS(RadiusFinder::point,
-	      "RadiusFinder::point","RadiusFinder::points");
-falcON_TRAITS(RadiusFinder::range,
-	      "RadiusFinder::range","RadiusFinder::range");
+falcON_TRAITS(RadiusFinder::point,"RadiusFinder::point");
+falcON_TRAITS(RadiusFinder::range,"RadiusFinder::range");
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
   void RadiusFinder::split(range*R) {    // split range
@@ -373,28 +362,32 @@ namespace {
 
   }
 
-  RadiusFinder::RadiusFinder(body  const &b0,
-			     unsigned     nb,
-			     int          Nrad,
+  RadiusFinder::RadiusFinder(const bodies*B,
+			     int          N,
 			     const vect  *c) :
-    Ntot       ( nb ),
-    PointsA    ( falcON_NEW(point,nb) ),
-    PointsB    ( falcON_NEW(point,nb) ),
-    RangeAlloc ( int(10+Nrad*log(double(nb))) ),
+    Ntot       ( B->N_subset() ),
+    PointsA    ( falcON_NEW(point,Ntot) ),
+    PointsB    ( falcON_NEW(point,Ntot) ),
+    RangeAlloc ( int(10+N*log(double(Ntot))) ),
     Mtot       ( 0. )
   {
     Root = RangeAlloc.new_element();
     register double t, q[2];
-    q[1] = q[0] = c? dist_sq(pos(b0),*c) : norm(pos(b0));
-    const body bn(b0,nb);
-    for(body b(b0); b!=bn; ++b) {
+    q[1] = q[0] = c?
+      dist_sq(pos(B->begin_all_bodies()),*c) :
+      norm   (pos(B->begin_all_bodies()));
+    LoopSubsetBodies(B,b) {
       t = c? dist_sq(pos(b),*c) : norm(pos(b));
+#ifdef DEBUG
       if(std::isnan(t)) error("body position contains nan\n");
+#endif
       update_min(q[0],t);
       update_max(q[1],t);
       PointsA[bodyindex(b)].q = t;
       t    = mass(b);
+#ifdef DEBUG
       if(std::isnan(t)) error("body mass is nan\n");
+#endif
       PointsA[bodyindex(b)].m = t;
       Mtot+= t;
     }
@@ -408,19 +401,212 @@ namespace {
   }
 }
 ////////////////////////////////////////////////////////////////////////////////
-void falcON::find_lagrange_rad(body  const &b,
-			       int          K,
+void falcON::find_lagrange_rad(const bodies*B,
+			       unsigned     K,
 			       const double*M,
 			       double      *R,
-			       const vect  *C,
-			       unsigned     N)
+			       const vect  *C)
 {
-  const bodies*B = b.my_bodies();
-  if(N==0 || bodyindex(b) + N > B->N_bodies())
-    N = B->N_bodies() - bodyindex(b);
-  RadiusFinder RF(b,N,K,C);
+  RadiusFinder RF(B,K,C);
   for(int k=0; k!=K; ++k)
     R[k] = RF.FindLagrangeRadius(M[k]);
+}
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+// implementing falcON::find_density_centre()                                 //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+namespace {
+  using namespace falcON;
+  //////////////////////////////////////////////////////////////////////////////
+  template<int N=2> struct ferrers;
+  template<> struct ferrers<3> {
+    static double norm() { return FPi / 19.6875; }
+    static void   diff(double const&m, double const&xq, double D[3]) {
+      register double t = 1.-xq, d=m*t, d2=d*t, d3=d2*t;
+      D[2] = 24*d;
+      D[1] =-6*d2;
+      D[0] = d3;
+    }
+    static void   diff1(double const&m, double const&xq, double D[2]) {
+      register double t = 1.-xq, d2=m*t*t, d3=d2*t;
+      D[1] =-6*d2;
+      D[0] = d3;
+    }
+#if(0)
+    static double d1(double const&m, double const&xq) {
+      return -6*m*square(1.-xq);
+    }
+#endif
+  };
+}
+////////////////////////////////////////////////////////////////////////////////
+namespace {
+  using namespace falcON;
+
+  void gr(const bodies*B,                          // I: set of bodies          
+	  vect_d const&x,                          // I: trial position         
+	  double const&r,                          // I: trial radius           
+	  unsigned    &n,                          // O: N(|r-x|<h)             
+	  double      &rho,                        // O: rho_h(r)               
+	  vect_d      &g,                          // O: - drho/dr              
+	  vect_d      &v)                          // O: velocity (if v known)  
+  {
+    const double rq = r*r, irq=1./rq;
+    n   = 0;
+    rho = 0.;
+    v   = 0.;
+    g   = 0.;
+    if(B->have_vel()) {
+      LoopSubsetBodies(B,b) {
+	register vect_d R(x); R -= pos(b);
+	register double Rq = norm(R);
+	if(Rq < rq) {
+	  register double D[2];
+	  ferrers<3>::diff1(mass(b),Rq*irq,D);
+	  rho+= D[0];
+	  v  += D[0] * vel(b);
+	  g  += D[1] * R;
+	  ++n;
+	}
+      }
+      v /= rho;
+    } else {
+      LoopSubsetBodies(B,b) {
+	register vect_d R(x); R -= pos(b);
+	register double Rq = norm(R);
+	if(Rq < rq) {
+	  register double D[2];
+	  ferrers<3>::diff1(mass(b),Rq*irq,D);
+	  rho+= D[0];
+	  g  += D[1] * R;
+	  ++n;
+	}
+      }
+    }
+    register double tmp = 1. / ( ferrers<3>::norm()*power<3>(r) );
+    rho *= tmp;
+    tmp *= irq;
+    g   *= tmp;
+  }
+
+  void di(const bodies*B,                          // I: set of bodies          
+	  vect_d const&x,                          // I: trial position         
+	  double const&r,                          // I: trial radius           
+	  vect_d const&h,                          // I: trial direction        
+	  double      &d1,                         // O: directional deriv ->h  
+	  double      &d2)                         // O: 2nd ---                
+  {
+    const double rq = r*r, irq=1./rq;
+    const double hqirq = norm(h) * irq;
+    register double _d1 = 0.;
+    register double _d2 = 0.;
+    LoopSubsetBodies(B,b) {
+      register vect_d R(x); R -= pos(b);
+      register double tmp = norm(R);
+      if(tmp < rq) {
+	register double D[3];
+	ferrers<3>::diff(mass(b),tmp*irq,D);
+	tmp  = h * R * irq;
+	_d1 += tmp * D[1];
+	_d2 += hqirq  * D[1] +  tmp * tmp * D[2];
+      }
+    }
+    register double tmp = 1. / ( ferrers<3>::norm()*power<3>(r) );
+    d1 = _d1 * tmp;
+    d2 = _d2 * tmp;
+  }
+
+} // namespace {
+
+bool falcON::find_density_centre(const bodies*B,
+				 unsigned     N,
+				 vect        &xc,
+				 real        &hc,
+				 vect        *vc,
+				 real        *rhc)
+{
+  // we use a conjugate gradient method, whereby approximating the line
+  // maximisation by the 1st and 2nd directional derivatives.
+  // Near the maximum, the 2nd derivative should be negative.
+  // If it isn't, we cannot use it for line maximisation, but simply go
+  // in the direction of h at most the size of the current radius far.
+  // 
+  // It seems that the algorithm converges, even if initially set off by more
+  // than the initial radius (which already was 3 times the expectation).
+
+//   // TEST
+//   {
+//     std::cerr<<" initial xc="<<xc<<" hc="<<hc<<'\n'
+// 	     <<" do you want to change the initial xc,hc (1/0)? ";
+//     bool want;
+//     std::cin >> want;
+//     if(want) {
+//       std::cerr<<" give xc"; std::cin>>xc;
+//       std::cerr<<" give hc"; std::cin>>hc;
+//     }
+//   }
+//   // TSET
+
+  const unsigned nb = B->N_subset();
+  if(nb < N)
+    falcON_THROW("find_density_centre(): N=% < Ncen = %\n",nb,N);
+
+  const int max_i = 100;
+  unsigned          n,no;
+  double            rh,r(hc),ro,dr,d1,d2;
+  vect_d            x(xc), g, go, h, v;
+  if(r <= 0.) r=0.1;
+  // initialize
+  gr(B,x,r,n,rh,g,v);
+  while(n==0) {
+    r += r;
+    gr(B,x,r,n,rh,g,v);
+  }
+  h = g;
+//   // TEST
+//   std::cerr<<" i: x="<<x<<" r="<<r<<" rh="<<rh<<" g="<<g<<" n="<<n<<'\n';
+//   // TSET
+  // iterate using cg method
+  int i=0;
+  for(; i < max_i; ++i) {
+    di(B,x,r,h,d1,d2);
+    dr = ro-r;
+    ro = r;
+    if(i && (no-N)*(n-N)<=0 && dr!=0)
+      r += dr * double(N-n)/double(no-n);
+    else if(n!=N)
+      r *= 0.7+0.3*cbrt(double(N)/double(n));
+    register vect_d dx(h);
+    if(d2*r >=-abs(d1))    // 2nd derivate not really negative -> cannot use it
+      dx /= d1;
+    else                   // 2nd derivative < 0 as it should be near maximum  
+      dx *= -d1/d2;
+    dx*= r / sqrt(norm(dx)+r*r);   // restrict total size of step to r        
+    x += dx;
+    no = n;
+    go = g;
+    gr(B,x,r,n,rh,g,v);
+    while(n==0) {
+      r += r;
+      gr(B,x,r,n,rh,g,v);
+    }
+//     // TEST
+//     std::cerr<<std::setw(2)<<i
+// 	     <<": x="<<x<<" r="<<r<<" rh="<<rh<<" g="<<g<<" h="<<h
+// 	     <<" d1="<<d1
+// 	     <<" d2="<<d2
+// 	     <<" dx="<<dx
+// 	     <<" n="<<n<<'\n';
+//     // TSET
+    if(abs(g)*r<1.e-8*rh && n==N) break;
+    h  = g + h * (((g-go)*g)/(go*go));
+  }
+  xc = x;
+  hc = r;
+  if(rhc) *rhc = rh;
+  if(vc)  *vc  = v;
+  return i < max_i;
 }
 ////////////////////////////////////////////////////////////////////////////////
 #ifdef falcON_PROPER

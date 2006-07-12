@@ -450,9 +450,9 @@ namespace {
   };// struct box {
 } // namespace {
 ////////////////////////////////////////////////////////////////////////////////
-falcON_TRAITS(::dot,"dot","dots");
-falcON_TRAITS(::dot_list,"dot_list","dot_lists");
-falcON_TRAITS(::box,"box","boxes");
+falcON_TRAITS(::dot,"{tree.cc}::dot");
+falcON_TRAITS(::dot_list,"{tree.cc}::dot_list");
+falcON_TRAITS(::box,"{tree.cc}::box");
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
   //////////////////////////////////////////////////////////////////////////////
@@ -716,10 +716,10 @@ namespace {
       NCRIT    = nc;
       DMAX     = dm;
       NDOTS    = nl;
-      if(BM) delete BM;
+      if(BM) falcON_DEL_O(BM);
       BM       = new block_alloc<box>(nb>0? nb : 1+NDOTS/4);
       TREE     = t;
-      if(RA) delete RA;
+      if(RA) falcON_DEL_A(RA);
       RA       = falcON_NEW(real,DMAX+1);
       P0       = new_box(1);
       RA[0]    = sz;
@@ -733,8 +733,8 @@ namespace {
     //--------------------------------------------------------------------------
     ~BoxDotTree()
     {
-      if(BM) delete   BM;
-      if(RA) delete[] RA;
+      if(BM) falcON_DEL_O(BM);
+      if(RA) falcON_DEL_A(RA);
     }
     //--------------------------------------------------------------------------
     // const public methods (all inlined)                                       
@@ -1032,7 +1032,7 @@ namespace {
     // destructor                                                               
     //--------------------------------------------------------------------------
     inline ~TreeBuilder()  {
-      delete[] D0;                                 // de-allocate dots          
+      falcON_DEL_A(D0);
     }
     //--------------------------------------------------------------------------
   };

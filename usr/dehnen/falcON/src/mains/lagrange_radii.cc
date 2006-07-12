@@ -3,7 +3,7 @@
 //                                                                             |
 // lagrange_radii.cc                                                           |
 //                                                                             |
-// Copyright (C) 2002-2005 Walter Dehnen                                       |
+// Copyright (C) 2002-2006 Walter Dehnen                                       |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -48,9 +48,11 @@
 // v 3.3.3  20/05/2005  WD several minor updates                               |
 // v 4.0    16/06/2005  WD new falcON                                          |
 // v 4.1    13/06/2005  WD changes in fieldset                                 |
+// v 4.1.1  27/06/2006  WD usage of bodyset                                    |
+// v 4.1.2  27/06/2006  WD back to before bodyset                              |
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "4.1"
-#define falcON_VERSION_D "13-jul-2005 Walter Dehnen                          "
+#define falcON_VERSION   "4.1.2"
+#define falcON_VERSION_D "07-jul-2006 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile "lagrange_radii"
@@ -139,7 +141,7 @@ void falcON::main() falcON_THROWING
     if(!IN_TIMES)  continue;
     // find & write Lagrange radii                                              
     check_sufficient(READ,srcedata);
-    find_lagrange_rad(SHOT.begin_all_bodies(),N,M,R);
+    find_lagrange_rad(&SHOT,N,M,R);
     // write table with Lagrange radii                                          
     if(DO_TAB) {
       if(!TAB.is_open()) {

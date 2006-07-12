@@ -107,6 +107,8 @@ void falcON::CheckAgainstLibrary(falcON::Status Current) falcON_THROWING
 {
   Status Library = CurrentStatus();
   if( Current != Library ) {
+    debug_info(5,"CheckAgainstLibrary(): Current=%d Library=%d\n",
+	       Current, Library);
     // check proprietary versus public
     if( Current&proper_version && !(Library&proper_version) )
       falcON_THROW("STATUS mismatch: proprietary executable, "
@@ -177,7 +179,7 @@ const char* falcON::report::file_name()
 //------------------------------------------------------------------------------
 void falcON::report::open_file(const char*prog, const char*com)
 {
-  if(REPORT) delete REPORT;
+  if(REPORT) falcON_DEL_O(REPORT);
   REPORT = new report_data();
   REPORT->LEVEL   = 0;
   REPORT->LAST    = clock();
@@ -208,7 +210,7 @@ void falcON::report::close_file()
     if(REPORT->STREAM) fclose(REPORT->STREAM);
     if(unlink(REPORT->FNAME) != 0)
       warning("cannot delete file %s",REPORT->FNAME);
-    delete REPORT;
+    falcON_DEL_O(REPORT);
     REPORT = 0;
   }
 }

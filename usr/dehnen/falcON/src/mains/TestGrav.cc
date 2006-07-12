@@ -275,10 +275,10 @@ void falcON::main(int argc, char* argv[]) falcON_THROWING
 #endif
   const bool all = Nact >= N;
   if(!all) {
-    int *I = new int[N];
+    int *I = falcON_NEW(int,N);
     HeapIndex(RA,N,I);
     const real RqMax = square(RA[I[Nact-1]]);
-    delete[] I;
+    falcON_DEL_A(I);
     LoopAllBodies(BODIES,Bi)
       if( norm(pos(Bi)) > RqMax )
 	Bi.unflag_active();

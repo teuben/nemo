@@ -89,8 +89,8 @@ namespace falcON {
     }
     //--------------------------------------------------------------------------
     ~InvertZ() {
-      delete[] Z;
-      delete[] Y;
+      falcON_DEL_A(Z);
+      falcON_DEL_A(Y);
     }
     //--------------------------------------------------------------------------
     real invtheta(const real y) const {
@@ -143,7 +143,7 @@ void GravMAC::reset(MAC_type mc,
   TH0  = min(one,abs(t0));
   iTH0 = one/TH0;
   if(MAC != mc || P != p) {
-    if(IZ) delete IZ;
+    if(IZ) falcON_DEL_O(IZ);
     MAC  = mc;
     P    = p;
     switch(MAC) {
@@ -199,7 +199,7 @@ void GravMAC::set_rcrit(const GravEstimator*G) const {
     i = 0;
     LoopCellsDown(grav::cell_iter,G->my_tree(),Ci)
       Ci->set_rcrit(IZ->invtheta(iF*Q[i++]));
-    delete[] Q;
+    falcON_DEL_A(Q);
   } break;
   case theta_of_M_ov_rq: {
     int  i  = 0;
@@ -214,14 +214,14 @@ void GravMAC::set_rcrit(const GravEstimator*G) const {
     i = 0;
     LoopCellsDown(grav::cell_iter,G->my_tree(),Ci)
       Ci->set_rcrit(IZ->invtheta(iF*S[i++]));
-    delete[] S;
+    falcON_DEL_A(S);
   } break;
   }
 }
 //------------------------------------------------------------------------------
 GravMAC::~GravMAC()
 {
-  if(IZ) delete IZ;
+  if(IZ) falcON_DEL_O(IZ);
 }
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
@@ -712,6 +712,11 @@ void GravEstimator::update_leafs()
 # include <proper/gravity_ind.cc>                 // GravEstimator::adjust_eph()
 #endif
 //------------------------------------------------------------------------------
+GravEstimator::~GravEstimator() {
+  if(CELL_SRCE) falcON_DEL_A(CELL_SRCE);
+  if(LEAF_SINK) falcON_DEL_A(LEAF_SINK);
+}
+//------------------------------------------------------------------------------
 unsigned GravEstimator::pass_up(const GravMAC*const&MAC,
 				bool          const&REUSE)
 {
@@ -829,7 +834,7 @@ bool GravEstimator::prepare(const GravMAC*const&MAC,
   }
   //  - allocate memory for leaf sink properties for active leafs               
   if(NLA!=NLA_needed) {                            // IF #active leafs changed  
-    if(LEAF_SINK) delete[] LEAF_SINK;              //   delete old allocation   
+    if(LEAF_SINK) falcON_DEL_A(LEAF_SINK);         //   delete old allocation   
     NLA = NLA_needed;                              //   # new allocation        
     LEAF_SINK=falcON_NEW(Leaf::sink_data,NLA);     //   allocate memory         
   }                                                // ENDIF                     
@@ -853,7 +858,7 @@ bool GravEstimator::prepare(const GravMAC*const&MAC,
     //    - allocate memory for cell source properties & reset their coeff pter 
     if(NCT     < TREE->N_cells() ||                //   IF #cells too large     
        NCT+NCT > TREE->N_cells()   ) {             //   OR #cells too small     
-      if(CELL_SRCE) delete[] CELL_SRCE;            //     delete old allocation 
+      if(CELL_SRCE) falcON_DEL_A(CELL_SRCE);       //     delete old allocation 
       NCT = TREE->N_cells();                       //     # new allocation      
       CELL_SRCE=falcON_NEW(Cell::srce_data,NCT);   //     allocate memory       
     }                                              //   ENDIF                   

@@ -38,11 +38,25 @@ extern "C" {
 #include <filefn.h>                    // finding a function in a loaded file
 }
 ////////////////////////////////////////////////////////////////////////////////
+int falcON::Manipulator::parse(const char*params, double*pars, int maxp)
+{
+  if(params == 0 || *params == 0) return 0;
+  int npar = nemoinpd(const_cast<char*>(params),pars,maxp);
+  if(npar > maxp)
+    falcON_THROW("Manipulator::parse(): too many parameters (%d > %d)",
+		 npar,maxp);
+  if(npar < 0)
+    falcON_THROW("Manipulator::parse(): parsing error in parameters: \"%s\"",
+		 params);
+  return npar;
+}
+////////////////////////////////////////////////////////////////////////////////
 namespace {
   using falcON::NewArray;
   using falcON::exception;
   using falcON::message;
   using falcON::manipulator;
+  using falcON::Manipulator;
   using falcON::debug_info;
   //////////////////////////////////////////////////////////////////////////////
   //                                                                            
@@ -54,13 +68,14 @@ namespace {
   // 2. we try to load the routines inimanip() and, if successful, call it.     
   //                                                                            
   //////////////////////////////////////////////////////////////////////////////
-  // declare type of pointer to inimanip(), see file defman.h
-  typedef void(*iniman_pter)
-    (const manipulator**,
-     const double      *,
-     int                ,
-     const char        *);
-  // boolean indicating whether we have loaded local symbols
+  /// type of pointer to inimanip(), see file defman.h
+#ifdef MANIP_PARSE_AT_INIMANIP
+  typedef void(*iniman_pter) (const manipulator**, const char*, const char*);
+#else
+  typedef void(*iniman_pter) (const manipulator**, const double*, int,
+			      const char*);
+#endif
+  /// boolean indicating whether we have loaded local symbols
   bool first = true;
 
   typedef void(*proc)();
@@ -97,20 +112,12 @@ namespace {
     debug_info(3,"Manipulator: trying to initialize manipulator with\n"
 	       "  name=\"%s\",\n  pars=\"%s\",\n  file=\"%s\"\n",
 	       manname,manpars,manfile);
-    // 1. parse the parameters (if any)
-    const int MAXPAR = 64;
+    // 1. parse the parameters
+#ifndef MANIP_PARSE_AT_INIMANIP
+    const int MAXPAR = 256;
     double pars[MAXPAR];
-    int    npar;
-    if(manpars && *manpars) {
-      npar = nemoinpd(const_cast<char*>(manpars),pars,MAXPAR);
-      if(npar > MAXPAR)
-	falcON_THROW("Manipulator: too many parameters (%d > %d)",npar,MAXPAR);
-      if(npar < 0)
-	falcON_THROW("Manipulator: parsing error in parameters: \"%s\"",
-		     manpars);
-    } else
-      npar = 0;
-
+    int    npar = Manipulator::parse(manpars,pars,MAXPAR);
+#endif
     // 2. load local symbols
     if(first) {
       mysymbols(getparam("argv0"));
@@ -122,7 +129,11 @@ namespace {
       if(0 == strcmp(manname, MnNames[i])) {
 	debug_info(3,"Manipulator: name=\"%s\": known already: "
 		   "no need to load it again\n",manname);
+#ifdef MANIP_PARSE_AT_INIMANIP
+	(*IniMn[i])(&manip,manpars,manfile);
+#else
 	(*IniMn[i])(&manip,pars,npar,manfile);
+#endif
 	return;
       }
 
@@ -168,7 +179,11 @@ namespace {
 	IniMn[IniMnInd] = im;
 	IniMnInd++;
       }
+#ifdef MANIP_PARSE_AT_INIMANIP
+      im (&manip,manpars,manfile);
+#else
       im (&manip,pars,npar,manfile);
+#endif
     } else {
       manip = 0;
       falcON_THROW("Manipulator: cannot find function \"inimanip\" "
@@ -196,8 +211,8 @@ namespace {
   }
   //////////////////////////////////////////////////////////////////////////////
   char NameSeps[3] = {',','+',0};
-  char ParsSeps[3] = {';','#',0};
-  char FileSeps[3] = {';','#',0};
+  char ParsSeps[3] = {';',' ',0};
+  char FileSeps[3] = {';',' ',0};
 
 } // namespace {
 ////////////////////////////////////////////////////////////////////////////////
@@ -301,7 +316,7 @@ falcON::Manipulator::Manipulator(const char*mannames,
       int n = splitstring<NMAX>(parss,pars,ParsSeps);
       if(N != n) {
 	CLEANUP;
-	falcON_THROW("Manipulator: %s names but %d parss",N,n);
+	falcON_THROW("Manipulator: %d names but %d parss",N,n);
       }
     }
     // 1.2.3 split manfiles, allow for empty manfiles -> all file[]=0
@@ -314,7 +329,7 @@ falcON::Manipulator::Manipulator(const char*mannames,
       int n = splitstring<NMAX>(files,file,FileSeps);
       if(N != n) {
 	CLEANUP;
-	falcON_THROW("Manipulator: %s names but %d files",N,n);
+	falcON_THROW("Manipulator: %d names but %d files",N,n);
       }
     }
   }

@@ -74,6 +74,7 @@ void falcON::main() falcON_THROWING
     fieldset read;
     if(!shot.read_nemo(in,read,need,getparam("times"),0)) continue;
     check_sufficient(read, need);
+    shot.add_fields(manip.provide());
     goon = manip(shot) || !stop;
     if(hasvalue("out")) {
       if(!out && !out.open(getparam("out")))

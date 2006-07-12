@@ -209,6 +209,84 @@ namespace {
 } // namespace {
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
+// class falcON::output                                                       //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+void output::__open(bool append)
+{
+  APPENDING = false;
+  if     (0 == FILE    ||
+	  0 == FILE[0] ||
+	  0 == std::strcmp(FILE,".") ) {
+    OUT = 0;
+    debug_info(2,"output: open sink\n");
+  } else if(0 == std::strcmp(FILE,"-") ) {
+    open_stdout();
+    OUT = &std::cout;
+    debug_info(2,"output: open stdout\n");
+  }
+  else {
+    std::ofstream *FOUT = new std::ofstream();
+    if(append) {
+      FOUT->open(FILE,std::ios::out | std::ios::app);
+      if(FOUT->is_open()) {
+	APPENDING = true;
+	debug_info(2,"output: append to file \"%s\"\n",FILE);
+      }
+    }
+    if(!FOUT->is_open() )
+      FOUT->open(FILE,std::ios::out);
+    if( FOUT->is_open() ) {
+      OUT = FOUT;
+      debug_info(2,"output: open file \"%s\"\n",FILE);
+    } else {
+      debug_info(2,"output: could not open file \"%s\"\n",FILE);
+      OUT = 0;
+      falcON_DEL_O(FOUT);
+    }
+  }
+}
+//------------------------------------------------------------------------------
+void output::__close() {
+  debug_info(2,"output: closing\n");
+  if(OUT == &std::cout) close_stdout();
+  else if(OUT) falcON_DEL_O(OUT);
+  APPENDING = false;
+}
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+// class falcON::input                                                        //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+void input::__open(const char*file) {
+  if     (0 == file || file[0] == 0) {
+    IN = 0;
+    debug_info(2,"input: empty file\n");
+  } else if(0 == std::strcmp(file,"-") ) {
+    open_stdin();
+    IN= &std::cin;
+    debug_info(2,"input: stdin\n");
+  }
+  else {
+    std::ifstream *FIN = new std::ifstream(file);
+    if( FIN->is_open() ) {
+      IN = FIN;
+      debug_info(2,"input: open file \"%s\"\n",file);
+    } else {
+      debug_info(2,"input: could not open file \"%s\"\n",file);
+      IN = 0;
+      falcON_DEL_O(FIN);
+    }
+  }
+}
+//------------------------------------------------------------------------------
+void input::__close() {
+  debug_info(2,"input: closing\n");
+  if(IN == &std::cin) close_stdin();
+  else if(IN) falcON_DEL_O(IN);
+}
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
 // class falcON::nemo_io                                                      //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
@@ -675,71 +753,6 @@ void data_out::write(const void*data)
     debug_info(6,"  %d %s written\n",n,NemoTag(FIELD));
     NWRITTEN += n;
   }
-}
-////////////////////////////////////////////////////////////////////////////////
-//                                                                            //
-// class falcON::output                                                       //
-//                                                                            //
-////////////////////////////////////////////////////////////////////////////////
-void output::__open(bool append)
-{
-  APPENDING = false;
-  if     (0 == FILE    ||
-	  0 == FILE[0] ||
-	  0 == std::strcmp(FILE,".") )
-    OUT = 0;
-  else if(0 == std::strcmp(FILE,"-") ) {
-    open_stdout();
-    OUT = &std::cout;
-  }
-  else {
-    std::ofstream *FOUT = new std::ofstream();
-    if(append) {
-      FOUT->open(FILE,std::ios::out | std::ios::app);
-      if(FOUT->is_open()) APPENDING = true;
-    }
-    if(!FOUT->is_open() )
-      FOUT->open(FILE,std::ios::out);
-    if( FOUT->is_open() )
-      OUT = FOUT;
-    else {
-      OUT = 0;
-      delete FOUT;
-    }
-  }
-}
-//------------------------------------------------------------------------------
-void output::__close() {
-  if(OUT == &std::cout) close_stdout();
-  else if(OUT) delete OUT;
-  APPENDING = false;
-}
-////////////////////////////////////////////////////////////////////////////////
-//                                                                            //
-// class falcON::input                                                        //
-//                                                                            //
-////////////////////////////////////////////////////////////////////////////////
-void input::__open(const char*file) {
-  if     (0 == file || file[0] == 0)
-    IN = 0;
-  else if(0 == std::strcmp(file,"-") ) {
-    open_stdin();
-    IN= &std::cin;
-  }
-  else {
-    std::ifstream *FIN = new std::ifstream(file);
-    if( FIN->is_open() )
-      IN = FIN;
-    else {
-      IN = 0;
-      delete FIN;
-    }
-  }
-}
-//------------------------------------------------------------------------------
-void input::__close() {
-  if(IN == &std::cin) close_stdin();
-  else if(IN) delete IN;
 }
 ////////////////////////////////////////////////////////////////////////////////
 namespace falcON {

@@ -2,7 +2,7 @@
 //                                                                              
 /// \file src/public/partner.cc                                                 
 //                                                                              
-// Copyright (C) 2000-2005  Walter Dehnen                                       
+// Copyright (C) 2000-2006  Walter Dehnen                                       
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -490,14 +490,14 @@ namespace {
   //////////////////////////////////////////////////////////////////////////////
 } // namespace {
 ////////////////////////////////////////////////////////////////////////////////
-falcON_TRAITS(StickyFinder<0>,"StickyFinder<0>","StickyFinder<0>");
-falcON_TRAITS(StickyFinder<1>,"StickyFinder<1>","StickyFinder<1>");
-falcON_TRAITS(NeighbourCounter,"NeighbourCounter","NeighbourCounter");
-falcON_TRAITS(NeighbourLister<0>,"NeighbourLister<0>","NeighbourLister<0>");
-falcON_TRAITS(NeighbourLister<1>,"NeighbourLister<1>","NeighbourLister<1>");
-falcON_TRAITS(PartnerCounter,"PartnerCounter","PartnerCounter");
-falcON_TRAITS(PartnerLister<0>,"PartnerLister<0>","PartnerLister<0>");
-falcON_TRAITS(PartnerLister<1>,"PartnerLister<1>","PartnerLister<1>");
+falcON_TRAITS(StickyFinder<0>,"StickyFinder<0>");
+falcON_TRAITS(StickyFinder<1>,"StickyFinder<1>");
+falcON_TRAITS(NeighbourCounter,"NeighbourCounter");
+falcON_TRAITS(NeighbourLister<0>,"NeighbourLister<0>");
+falcON_TRAITS(NeighbourLister<1>,"NeighbourLister<1>");
+falcON_TRAITS(PartnerCounter,"PartnerCounter");
+falcON_TRAITS(PartnerLister<0>,"PartnerLister<0>");
+falcON_TRAITS(PartnerLister<1>,"PartnerLister<1>");
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
 // class falcON::PartnerEstimator                                               
@@ -512,7 +512,7 @@ void PartnerEstimator::update_leafs_sticky()
     NL = TREE->my_bodies()->N_sph();
     ALL_STSP = NL == TREE->N_leafs();
     if(NL) {
-      if(LEAF_DATA) delete[] LEAF_DATA;
+      if(LEAF_DATA) falcON_DEL_A(LEAF_DATA);
       LEAF_DATA = falcON_NEW(Leaf::leaf_data,NL);
       Leaf::leaf_data* Di = LEAF_DATA;
       unsigned NS=0, NA=0;
@@ -542,7 +542,7 @@ void PartnerEstimator::update_leafs_sph() {
     NL = TREE->my_bodies()->N_sph();
     ALL_STSP = NL == TREE->N_leafs();
     if(NL) {
-      if(LEAF_DATA) delete[] LEAF_DATA;
+      if(LEAF_DATA) falcON_DEL_A(LEAF_DATA);
       LEAF_DATA = falcON_NEW(Leaf::leaf_data,NL);
       Leaf::leaf_data* Di = LEAF_DATA;
       unsigned NS=0, NA=0;
@@ -594,7 +594,7 @@ void PartnerEstimator::prepare_sph()
   }                                                // END LOOP                  
   NC = nc;                                         // # partner cells           
   // 3. allocate memory for Cell::srce_data                                     
-  if(CELL_SRCE) delete[] CELL_SRCE;
+  if(CELL_SRCE) falcON_DEL_A(CELL_SRCE);
   CELL_SRCE = falcON_NEW(Cell::srce_data,NC);
   // 4. loop cells: give memory to PartnerCells, pass up pos, size, rmax        
   register Cell::srce_data*ci=CELL_SRCE;    // pter to cell's source     
@@ -655,7 +655,7 @@ void PartnerEstimator::prepare_sticky()
   }                                                // END LOOP                  
   NC = nc;                                         // # partner cells           
   // 3. allocate memory for partner cells                                       
-  if(CELL_SRCE) delete[] CELL_SRCE;
+  if(CELL_SRCE) falcON_DEL_A(CELL_SRCE);
   CELL_SRCE = falcON_NEW(Cell::srce_data,NC);
   // 4. loop cells: give memory to partner cells, pass up pos, vel, size, vrad  
   register Cell::srce_data*ci=CELL_SRCE;           // pter to cell's source     

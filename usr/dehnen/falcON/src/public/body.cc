@@ -37,7 +37,7 @@
 
 using namespace falcON;
 
-falcON_TRAITS(falcON::bodies::block,"bodies::block","bodies::blocks");
+falcON_TRAITS(falcON::bodies::block,"bodies::block");
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
 // struct falcON::bodies::block                                                 
@@ -483,6 +483,14 @@ bodies::iterator& bodies::iterator::read_posvel(data_in& D, fieldset get,
 // class falcON::bodies                                                         
 //                                                                              
 ////////////////////////////////////////////////////////////////////////////////
+// # bodies not flagged to be ignored
+unsigned bodies::N_subset() const
+{
+  if(!have(fieldbit::f)) return N_bodies();
+  unsigned n = 0;
+  LoopAllBodies(this,b) if(in_subset(b)) ++n;
+  return n;
+}
 // delete all blocks and reset related data                                 
 void bodies::del_data() falcON_THROWING
 {
@@ -643,28 +651,16 @@ bodies::bodies(bodies const&Other,
 // construction for C & FORTRAN support                                     
 bodies::bodies(char, const unsigned n[BT_NUM]) falcON_THROWING
 : BITS      ( 0 ),
-  C_FORTRAN ( 1 ),
-  NBLK      ( 0 ),
-  NTOT      ( 0 )
+  C_FORTRAN ( 1 )
 {
-  block **LAST=&FIRST;
+  debug_info(3,"bodies::bodies(): constructing bodies for C & FORTRAN: n=%d,%d",
+	     n[0],n[1]);
   for(bodytype t; t; ++t)
     if(n[t] > index::max_bodies)
       falcON_THROW("too many bodies\n");
-    else if(n[t] > 0) {
-      TYPES[t]      = new block(NBLK,n[t],n[t],NTOT,t,fieldset::o,this);
-      NALL [t]      = n[t];
-      NBOD [t]      = n[t];
-      BLOCK[NBLK++] = TYPES[t];
-      *LAST         = TYPES[t];
-      LAST          = &(TYPES[t]->NEXT);
-      NTOT         += n[t];
-    } else {
-      NALL [t]      = 0;
-      NBOD [t]      = 0;
-      TYPES[t]      = 0;
-    }
-  *LAST = 0;
+  for(unsigned i=0; i!=index::max_blocks; ++i) BLOCK[i] = 0;
+  set_data(n);
+  set_firsts();
 }
 ////////////////////////////////////////////////////////////////////////////////
 void bodies::reset(char, fieldbit f, void*D) falcON_THROWING
@@ -684,16 +680,22 @@ void bodies::reset(char, fieldbit f, void*D) falcON_THROWING
 ////////////////////////////////////////////////////////////////////////////////
 void bodies::add_field(fieldbit f) falcON_THROWING
 {
-  for(const block*p=FIRST; p; p=p->next())
-    const_cast<block*>(p)->add_field(f);
-  BITS |= fieldset(f);
+  if(!BITS.contain(f)) {
+    for(const block*p=FIRST; p; p=p->next())
+      const_cast<block*>(p)->add_field(f);
+    BITS |= fieldset(f);
+    if(f == fieldbit::k) reset_keys();
+  }
 }
 ////////////////////////////////////////////////////////////////////////////////
 void bodies::add_fields(fieldset b) falcON_THROWING
 {
-  for(const block *p=FIRST; p; p=p->next())
-    const_cast<block*>(p)->add_fields(b);
-  BITS |= b;
+  if(!BITS.contain(b)) {
+    for(const block *p=FIRST; p; p=p->next())
+      const_cast<block*>(p)->add_fields(b);
+    if(!BITS.contain(fieldbit::k) && b.contain(fieldbit::k)) reset_keys();
+    BITS |= b;
+  }
 }
 ////////////////////////////////////////////////////////////////////////////////
 void bodies::del_field(fieldbit f) falcON_THROWING
@@ -991,25 +993,27 @@ void bodies::read_simple_ascii(std::istream  &in,
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 void bodies::sorted(Array<index>&table, 
-		    real       (*func)(iterator const&),
-		    iterator     b,
-		    unsigned     n) const falcON_THROWING
+		    real       (*func)(iterator const&)) const falcON_THROWING
 {
-  if(this != b.my_bodies())
-    falcON_THROW("bodies::sorted(): body not from this set of bodies");
-  if(n == 0) n = N_bodies() - bodyindex(b);
-  else if(bodyindex(b) + n > N_bodies()) {
-    warning("bodies::sorted(): can only sort %d instead of %d bodies",
-	    N_bodies()-bodyindex(b),n);
-    n = N_bodies()-bodyindex(b);
-  }
+  const int n = N_subset();
   real *Q = falcON_NEW(real, n);
   index*I = falcON_NEW(index,n);
-  for(int i=0; i!=n; ++b,++i) {
-    I[i] = static_cast<index>(b);
-    Q[i] = func(b);
+  if(have(fieldbit::f)) {
+    int i = 0;
+    LoopSubsetBodies(this,b) {
+      I[i] = static_cast<index>(b);
+      Q[i] = func(b);
+      ++i;
+    }
+  } else {
+    int i = 0;
+    LoopAllBodies(this,b) {
+      I[i] = static_cast<index>(b);
+      Q[i] = func(b);
+      ++i;
+    }
   }
-  int  *R = falcON_NEW(int,n);
+  int*R = falcON_NEW(int,n);
   HeapIndex(Q,n,R);
   table.reset(n);
   for(int i=0; i!=n; ++i)
@@ -1021,25 +1025,27 @@ void bodies::sorted(Array<index>&table,
 ////////////////////////////////////////////////////////////////////////////////
 void bodies::sorted(Array<index>&table, 
 		    Array<real> &quant, 
-		    real       (*func)(iterator const&),
-		    iterator     b,
-		    unsigned     n) const falcON_THROWING
+		    real       (*func)(iterator const&)) const falcON_THROWING
 {
-  if(this != b.my_bodies())
-    falcON_THROW("bodies::sorted(): body not from this set of bodies");
-  if(n == 0) n = N_bodies() - bodyindex(b);
-  else if(bodyindex(b) + n > N_bodies()) {
-    warning("bodies::sorted(): can only sort %d instead of %d bodies",
-	    N_bodies()-bodyindex(b),n);
-    n = N_bodies()-bodyindex(b);
-  }
+  const int n = N_subset();
   real *Q = falcON_NEW(real, n);
   index*I = falcON_NEW(index,n);
-  for(int i=0; i!=n; ++b,++i) {
-    I[i] = static_cast<index>(b);
-    Q[i] = func(b);
+  if(have(fieldbit::f)) {
+    int i = 0;
+    LoopSubsetBodies(this,b) {
+      I[i] = static_cast<index>(b);
+      Q[i] = func(b);
+      ++i;
+    }
+  } else {
+    int i = 0;
+    LoopAllBodies(this,b) {
+      I[i] = static_cast<index>(b);
+      Q[i] = func(b);
+      ++i;
+    }
   }
-  int  *R = falcON_NEW(int,n);
+  int*R = falcON_NEW(int,n);
   HeapIndex(Q,n,R);
   table.reset(n);
   quant.reset(n);
@@ -1057,6 +1063,234 @@ void bodies::sorted(Array<index>&table,
 //                                                                              
 ////////////////////////////////////////////////////////////////////////////////
 #ifdef falcON_NEMO
+namespace {
+  class PointerBank {
+    //--------------------------------------------------------------------------
+    struct PterWithKey {
+      friend class falcON::traits<PterWithKey>;
+      const void  *pter;
+      char        *key,*name;
+      size_t       size;
+      PterWithKey *next;
+      //........................................................................
+      PterWithKey(const void* p, const char*k, size_t s, const char*n,
+		  PterWithKey*x)
+	: pter(p),
+	  size(s),
+	  next(x),
+	  key (falcON_NEW(char, strlen(k)+strlen(n)+2)),
+	  name(key + strlen(k) + 1) {
+	strcpy(key ,k);
+	strcpy(name,n);
+      }
+      //........................................................................
+      ~PterWithKey() {
+	falcON_DEL_A(key);
+      }
+    } *HEAD;
+    //--------------------------------------------------------------------------
+  public:
+    //--------------------------------------------------------------------------
+    /// default constructor
+    PointerBank() : HEAD(0) {}
+    //--------------------------------------------------------------------------
+    /// copy constructor
+    PointerBank(PointerBank const&PB) : HEAD(0) {
+      for(PterWithKey*P=PB.HEAD; P; P=P->next)
+	HEAD = new PterWithKey(P->pter, P->key, P->size, P->name, HEAD);
+    }
+    //--------------------------------------------------------------------------
+    /// destructor
+    ~PointerBank() {
+      PterWithKey*P=HEAD,*N;
+      while(P) {
+	N=P->next;
+	falcON_DEL_O(P);
+	P=N;
+      }
+    }
+    //--------------------------------------------------------------------------
+    /// add a pointer: key must not yet be known in bank
+    void add(const void*p, const char* k, size_t s, const char* n) {
+      for(PterWithKey*P=HEAD; P; P=P->next)
+	if(0==strcmp(P->key, k))
+	  falcON_THROW("snapshot::add_pointer(): "
+		       "key '%s' is already in bank\n",k);
+      HEAD = new PterWithKey(p,k,s,n,HEAD);
+    }
+    //--------------------------------------------------------------------------
+    /// set a pointer: add if new key, else replace (type & size must match)
+    void set(const void*p, const char* k, size_t s, const char* n) {
+      for(PterWithKey*P=HEAD; P; P=P->next)
+	if(0==strcmp(P->key, k)) {
+	  if(strcmp(P->name, n))
+	    falcON_THROW("snapshot::set_pointer(): "
+			 "name mismatch ('%s' : '%s')",P->name,n);
+	  if(P->size != s)
+	    falcON_THROW("snapshot::set_pointer(): "
+			 "size mismatch (%d : %d)",P->size,s);
+	  P->pter = p;
+	  return;
+	}
+      HEAD = new PterWithKey(p,k,s,n,HEAD);
+    }
+    //--------------------------------------------------------------------------
+    /// delete an entry from the bank
+    void del(const char* k, bool warn = 0) {
+      PterWithKey **PP=&HEAD, *P=HEAD;
+      for(; P; PP=&(P->next), P=P->next)
+	if(0==strcmp(P->key, k)) {
+	  (*PP) = P->next;
+	  falcON_DEL_O(P);
+	}
+      if(warn)
+	warning("snapshot::del_pointer()"
+		"key '%s' not found in bank\n",k);
+    }
+    //--------------------------------------------------------------------------
+    /// return a pointer referred to by a given key
+    const void*get(const char*k, size_t s, const char*n, const char*func) const
+      falcON_THROWING {
+      for(PterWithKey*P=HEAD; P; P=P->next)
+	if(0==strcmp(P->key, k)) {
+	  if(s != P->size)
+	    falcON_THROW("snapshot::%s(): "
+			 "size (%d) does not match value in bank (%d)\n",
+			 func,s,P->size);
+	  if(strcmp(n,P->name))
+	    falcON_THROW("snapshot::%s(): "
+			 "name (%s) does not match value in bank (%s)\n",
+			 func,n,P->name);
+	  return P->pter;
+	}
+      return 0;
+    }
+  };// class PointerBank
+} // namespace {
+falcON_TRAITS(::PointerBank,"{body.cc}::PointerBank");
+#if(0) // gcc 3.3.5 doesn't like this
+falcON_TRAITS(::PointerBank::PterWithKey,
+	      "{body.cc}::PointerBank::PterWithKey");
+#endif
+////////////////////////////////////////////////////////////////////////////////
+void snapshot::__add_pointer(const void*p,
+			     const char*k,
+			     size_t     s,
+			     const char*n) const falcON_THROWING
+{
+  debug_info(4,"snapshot::add_pointer() %p to '%s' under \"%s\"\n",p,n,k);
+  if(p) {
+    if(PBNK == 0) const_cast<snapshot*>(this)->PBNK = new PointerBank();
+    static_cast<PointerBank*>(PBNK)->add(p,k,s,n);
+  } else if(PBNK)
+    // NULL pointer: just check match of name & type and non-existence
+    if(static_cast<PointerBank*>(PBNK)->get(k,s,n,"add_pointer"))
+      falcON_THROW("snapshot::add_pointer(): key '%s' is already in bank\n",k);
+}
+////////////////////////////////////////////////////////////////////////////////
+void snapshot::__set_pointer(const void*p,
+			     const char*k,
+			     size_t     s,
+			     const char*n) const falcON_THROWING
+{
+  debug_info(4,"snapshot::set_pointer() %p to '%s' under \"%s\"\n",p,n,k);
+  if(p) {
+    // non-NULL pointer: add or replace (if type & size match)
+    if(PBNK == 0) const_cast<snapshot*>(this)->PBNK = new PointerBank();
+    static_cast<PointerBank*>(PBNK)->set(p,k,s,n);
+  } else if(PBNK)
+    // NULL pointer: delete from bank
+    static_cast<PointerBank*>(PBNK)->del(k);
+}
+////////////////////////////////////////////////////////////////////////////////
+const void* snapshot::__get_pointer(const char*k,
+				    size_t     s,
+				    const char*n) const falcON_THROWING
+{
+  const void*p = PBNK? static_cast<PointerBank*>(PBNK)->get(k,s,n,
+							    "get_pointer") : 0;
+  debug_info(4,"snapshot::get_pointer() %p to '%s' under \"%s\"\n",p,n,k);
+  return p;
+}
+////////////////////////////////////////////////////////////////////////////////
+void snapshot::del_pointer(const char*k) const
+{
+  debug_info(4,"snapshot::del_pointer() under \"%s\"\n",k);
+  if(PBNK) static_cast<PointerBank*>(PBNK)->del(k);
+}
+////////////////////////////////////////////////////////////////////////////////
+snapshot::snapshot(fieldset Bd) falcON_THROWING
+: bodies ( static_cast<const unsigned*>(0), Bd ),
+  INIT   ( false ),
+  TINI   ( 0. ),
+  TIME   ( 0. ),
+  PBNK   ( 0 ) {}
+////////////////////////////////////////////////////////////////////////////////
+snapshot::snapshot(double   t,
+		   unsigned Nb,
+		   fieldset Bd,
+		   unsigned Ns) falcON_THROWING
+: bodies ( Nb,Bd,Ns ),
+  INIT   ( true ),
+  TINI   ( t ),
+  TIME   ( t ),
+  PBNK   ( 0 ) {}
+////////////////////////////////////////////////////////////////////////////////
+snapshot::snapshot(double         t,
+		   const unsigned*N,
+		   fieldset       Bd) falcON_THROWING
+: bodies ( N,Bd ),
+  INIT   ( true ),
+  TINI   ( t ),
+  TIME   ( t ),
+  PBNK   ( 0 ) {}
+////////////////////////////////////////////////////////////////////////////////
+snapshot::snapshot(double       t,
+		   bodies const&B,
+		   fieldset     Bd,
+		   flags        F) falcON_THROWING
+: bodies ( B,Bd,F ),
+  INIT   ( true ),
+  TINI   ( t ),
+  TIME   ( t ),
+  PBNK   ( 0 ) {}
+////////////////////////////////////////////////////////////////////////////////
+snapshot::snapshot(snapshot const&S,
+		   fieldset       Bd,
+		   flags          F) falcON_THROWING
+: bodies ( S,Bd,F ),
+  INIT   ( S.INIT ),
+  TINI   ( S.TINI ),
+  TIME   ( S.TIME ),
+  PBNK   ( 
+#ifdef falcON_PROPER
+	   S.PBNK? new PointerBank(*(static_cast<PointerBank*>(S.PBNK))) :
+#endif
+	   0 ) {}
+////////////////////////////////////////////////////////////////////////////////
+#if(0) // not yet implemented due to bodies::copy() missing
+void snapshot::copy(snapshot const&S,
+		    fieldset       Bd,
+		    flags          F) falcON_THROWING
+{
+  bodies::copy(S,Bd,F);
+  TIME = S.TIME;
+# ifdef falcON_PROPER
+  if(PBNK) falcON_DEL_O(static_cast<PointerBank*>(PBNK));
+  PBNK = S.PBNK? new PointerBank(*(static_cast<PointerBank*>(S.PBNK))) : 0;
+# else
+  PBNK = 0;
+# endif
+}
+#endif
+////////////////////////////////////////////////////////////////////////////////
+snapshot::~snapshot()
+{
+#ifdef falcON_PROPER
+  if(PBNK) { falcON_DEL_O(static_cast<PointerBank*>(PBNK)); PBNK = 0; }
+#endif
+}
+////////////////////////////////////////////////////////////////////////////////
 bool snapshot::read_nemo(                          // R: was time in range?     
 			 nemo_in const&i,          // I: nemo input             
 			 fieldset     &r,          // O: what has been read     

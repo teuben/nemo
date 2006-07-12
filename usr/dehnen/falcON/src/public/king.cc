@@ -66,10 +66,10 @@ namespace {
 void king_model::setup(const unsigned n)
 {
   if(N != n) {
-    if(r)  delete[] r;
-    if(ps) delete[] ps;
-    if(m)  delete[] m;
-    if(rh) delete[] rh;
+    if(r)  falcON_DEL_A(r);
+    if(ps) falcON_DEL_A(ps);
+    if(m)  falcON_DEL_A(m);
+    if(rh) falcON_DEL_A(rh);
     N  = n;
     r  = falcON_NEW(double,N);
     ps = falcON_NEW(double,N);
@@ -115,10 +115,10 @@ void king_model::setup(const unsigned n)
 void king_model::reset()
 {
   N = 0;
-  if(r)  { delete[] r;  r =0; }
-  if(ps) { delete[] ps; ps=0; }
-  if(m)  { delete[] m;  m =0; }
-  if(rh) { delete[] rh; rh=0; }
+  if(r)  { falcON_DEL_A(r);  r =0; }
+  if(ps) { falcON_DEL_A(ps); ps=0; }
+  if(m)  { falcON_DEL_A(m);  m =0; }
+  if(rh) { falcON_DEL_A(rh); rh=0; }
 }
 //==============================================================================
 // falcON::king_model: re-scaling                                               
