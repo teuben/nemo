@@ -64,7 +64,7 @@ namespace WDutils {
   //----------------------------------------------------------------------------
   template<typename scalar_type> inline
   scalar_type sign (const scalar_type&x, const scalar_type&s)
-  { return ( s>0 )?  abs(x) : -abs(x); }
+  { return ( s>=0 )?  abs(x) : -abs(x); }
   //----------------------------------------------------------------------------
   // use min & max from <algorithm>
   using std::min;

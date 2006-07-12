@@ -96,8 +96,8 @@ namespace WDutils {
       y2[n-1]= (un-qn*u[n-2]) / (qn*v[n-2]+one);
       for(register int i=n-2; i>=0; --i)
         y2[i] = v[i]*y2[i+1] + u[i];
-      delete[] u;
-      delete[] v;
+      WDutils_DEL_A(u);
+      WDutils_DEL_A(v);
     }
     //--------------------------------------------------------------------------
     // construct cubic spline                                                   
@@ -241,7 +241,7 @@ namespace WDutils {
     {
       scalar_type p,sig,dx,dx1,dx2;
       table_type  dy=y[1]-y[0], dy1=dy;
-      scalar_type *v = new scalar_type[n-1];
+      scalar_type *v = WDutils_NEW(scalar_type,n-1);
       dx   = x[1]-x[0];
       y3[0]= v[0] = 0;
       for(int i=1; i<n-1; i++) {
@@ -261,7 +261,7 @@ namespace WDutils {
       y3[n-1] = table_type(0);
       for(int i=n-2; i>=0; i--)
 	y3[i] += v[i]*y3[i+1];
-      delete[] v;
+      WDutils_DEL_A(v);
     }
     //--------------------------------------------------------------------------
     // evaluate spline at x=xi with xl <= xi <= xh and yl=y(xl) etc...          
@@ -380,7 +380,7 @@ namespace WDutils {
     //--------------------------------------------------------------------------
     // destructor                                                               
     //--------------------------------------------------------------------------
-    ~Pspline() { delete[] y3; }
+    ~Pspline() { WDutils_DEL_A(y3); }
     //--------------------------------------------------------------------------
     // spline evaluation                                                        
     //--------------------------------------------------------------------------

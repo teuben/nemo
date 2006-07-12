@@ -36,6 +36,9 @@
 #ifndef WDutils_included_exception_h
 #  include <exception.h>
 #endif
+#ifndef WDutils_included_traits_h
+# include <traits.h>
+#endif
 #ifndef WDutils_included_inline_h
 #  include <inline.h>
 #endif
@@ -61,7 +64,7 @@ namespace WDutils {
     if(RunInfo::debug(10)) {
       std::cerr<<"### "<< lib <<" Debug Info: "<<f<<':'<<l 
 	       <<" allocating "<<n <<' ' 
-	       << (n>1? traits<T>::names():traits<T>::name()) <<" = "
+	       << traits<T>::name() <<" = "
 	       << n*sizeof(T)
 	       << (n*sizeof(T)>1? " bytes ... " : "byte ... ") ;
       T* t;
@@ -114,26 +117,55 @@ namespace WDutils {
     WDutils_THROWING {
     if(0==a) {
       warning("[%s:%d]: trying to delete zero pointer to array of '%s'",
-	      f,l,traits<T>::names());
+	      f,l,nameof(T));
       return;
     }
     if(RunInfo::debug(10)) {
       std::cerr<<"### "<< lib << " Debug Info: "<<f<<':'<<l
-	       <<" de-allocating array of " << traits<T>::names()
+	       <<" de-allocating array of " << nameof(T)
 	       <<" @ "<<static_cast<void*>(a) << std::endl;
       try {
 	delete[] a;
       } catch(...) {
 	std::cerr<<'\n';
 	WDutils_THROW("[%s:%d]: deleting array of '%s' @ %p' failed\n",
-		      f,l,traits<T>::names(),a);
+		      f,l,nameof(T),a);
       }
     } else {
       try {
 	delete[] a;
       } catch(...) {
 	WDutils_THROW("[%s:%d]: deleting array of '%s' @ %p' failed\n",
-		      f,l,traits<T>::names(),a);
+		      f,l,nameof(T),a);
+      }
+    }
+  }
+  // ///////////////////////////////////////////////////////////////////////////
+  template<typename T> inline
+  void DelArray(const T* a, const char*f, int l, const char*lib = "WDutils")
+    WDutils_THROWING {
+    if(0==a) {
+      warning("[%s:%d]: trying to delete zero pointer to array of '%s'",
+	      f,l,nameof(T));
+      return;
+    }
+    if(RunInfo::debug(10)) {
+      std::cerr<<"### "<< lib << " Debug Info: "<<f<<':'<<l
+	       <<" de-allocating array of " << nameof(T)
+	       <<" @ "<<static_cast<const void*>(a) << std::endl;
+      try {
+	delete[] a;
+      } catch(...) {
+	std::cerr<<'\n';
+	WDutils_THROW("[%s:%d]: deleting array of '%s' @ %p' failed\n",
+		      f,l,nameof(T),a);
+      }
+    } else {
+      try {
+	delete[] a;
+      } catch(...) {
+	WDutils_THROW("[%s:%d]: deleting array of '%s' @ %p' failed\n",
+		      f,l,nameof(T),a);
       }
     }
   }
@@ -166,26 +198,26 @@ namespace WDutils {
     WDutils_THROWING {
     if(0==a) {
       warning("[%s:%d]: trying to delete zero pointer to object '%s'",
-	      f,l,traits<T>::name());
+	      f,l,nameof(T));
       return;
     }
     if(RunInfo::debug(10)) {
       std::cerr<<"### "<< lib << " Debug Info: "<<f<<':'<<l
-	       <<" de-allocating " << traits<T>::name()
+	       <<" de-allocating " << nameof(T)
 	       <<" object @ "<<static_cast<void*>(a)<< std::endl;
       try {
 	delete a;
       } catch(...) {
 	std::cerr<<'\n';
 	WDutils_THROW("[%s:%d]: deleting object '%s' @ %p failed\n",
-		      f,l,traits<T>::name(),a);
+		      f,l,nameof(T),a);
       }
     } else {
       try {
 	delete a;
       } catch(...) {
 	WDutils_THROW("[%s:%d]: deleting object '%s' @ %p failed\n",
-		      f,l,traits<T>::name(),a);
+		      f,l,nameof(T),a);
       }
     }
   }
@@ -195,19 +227,19 @@ namespace WDutils {
     WDutils_THROWING {
     if(0==a) {
       warning("[%s:%d]: trying to delete zero pointer to object '%s'",
-	      f,l,traits<T>::name());
+	      f,l,nameof(T));
       return;
     }
     if(RunInfo::debug(10)) {
       std::cerr<< lib << " Debug Info: "<<f<<':'<<l
-	       <<" de-allocating " << traits<T>::name()
+	       <<" de-allocating " << nameof(T)
 	       <<" object @ "<<static_cast<const void*>(a)<<" ... ";
       try {
 	delete a;
       } catch(...) {
 	std::cerr<<'\n';
 	WDutils_THROW("[%s:%d]: deleting object '%s' @ %p failed\n",
-		      f,l,traits<T>::name(),a);
+		      f,l,nameof(T),a);
       }
       std::cerr<<"done\n";
     } else {
@@ -215,7 +247,7 @@ namespace WDutils {
 	delete a;
       } catch(...) {
 	WDutils_THROW("[%s:%d]: deleting object '%s' @ %p failed\n",
-		      f,l,traits<T>::name(),a);
+		      f,l,nameof(T),a);
       }
     }
   }
@@ -272,7 +304,7 @@ namespace WDutils {
     //                                                                          
     //  sub-type WDutils::block_alloc::block                                    
     //                                                                          
-    /// allocates and manages contiguous chunk of elements                      
+    /// allocates and manages a contiguous chunk of elements                    
     ///                                                                         
     // /////////////////////////////////////////////////////////////////////////
   private:
@@ -455,14 +487,7 @@ namespace WDutils {
 	NTOT  ( Ns ),
 	NUSED ( 0 )  {}
     /// destructor: delete all blocks
-    ~block_alloc() WDutils_THROWING {
-      register block *A=FIRST, *N;
-      while(A) {
-	N = A->next();
-	WDutils_DEL_O(A);
-	A = N;
-      }
-    }
+    ~block_alloc() WDutils_THROWING;
     /// give out: another element
     /// \return pointer to allocated element
     pointer new_element() {
@@ -575,21 +600,23 @@ namespace WDutils {
     static const char  *name () {
       return message("block_alloc<%s>",traits<T>::name());
     }
-    static const char  *names() {
-      return message("block_alloc<%s>",traits<T>::name());
-    }
-    static const unsigned size = sizeof(block_alloc<T>);
   };
   // ///////////////////////////////////////////////////////////////////////////
   template<typename T> struct traits< typename block_alloc<T>::block > {
     static const char  *name () {
       return message("block_alloc<%s>::block",traits<T>::name());
     }
-    static const char  *names() {
-      return message("block_alloc<%s>::block",traits<T>::name());
-    }
-    static const unsigned size = sizeof(typename block_alloc<T>::block);
   };
+  // ///////////////////////////////////////////////////////////////////////////
+  template<typename T> inline
+  block_alloc<T>::~block_alloc() WDutils_THROWING {
+    register block *A=FIRST, *N;
+    while(A) {
+      N = A->next();
+      WDutils_DEL_O(A);
+      A = N;
+    }
+  }
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
   //  class WDutils::pool                                                       
@@ -722,14 +749,10 @@ namespace WDutils {
   // ///////////////////////////////////////////////////////////////////////////
   template<> struct traits< pool > {
     static const char    *name () { return "pool"; }
-    static const char    *names() { return "pool"; }
-    static const unsigned size = sizeof(pool);
   };
 #if(0) // gcc v 3.3.5 is buggy and doesn't like this
   template<> struct traits< pool::chunk > {
     static const char    *name () { return "pool::chunk"; }
-    static const char    *names() { return "pool::chunk"; }
-    static const unsigned size = sizeof(pool::chunk);
   };
 #endif
   // ///////////////////////////////////////////////////////////////////////////
@@ -764,19 +787,15 @@ namespace WDutils {
     static const char  *name () {
       return message("Pool<%s>",traits<T>::name());
     }
-    static const char  *names () {
-      return message("Pool<%s>",traits<T>::name());
-    }
-    static const unsigned size = sizeof(Pool<T>);
   };
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
   /// \name simple methods for 1, 2 & 3D array allocation/deallocation          
-  //                                                                            
+  ///                                                                           
   /// \note These routines SHOULD NOT BE USED.                                  
   /// The methods are old and require too much memory. However, they are used in
   /// some equally old code (which I eventually have to re-write). Use the      
-  /// class template Array<> below instead!                                     
+  /// template class \b Array below instead!                                    
   //@{                                                                          
   // ///////////////////////////////////////////////////////////////////////////
   /// allocate a 1D array of length \a N
@@ -913,9 +932,9 @@ namespace WDutils {
   /// used as return type for Array<>::operator[]                               
   ///                                                                           
   /// Apart from a function returning the size in the first dimension, the only 
-  /// public member function for D>1 is the operator[], which returns a         
-  /// ConstPseudoArray<T,D-1>.                                                  
-  /// For D=1, the [] operator returns a 'T const&'. Moreover for D=1, there    
+  /// public member functions for D>1 are the operator[] and element(), which   
+  /// both return a ConstPseudoArray<T,D-1>.                                    
+  /// For D=1, the operator[] returns a 'T const&'. Moreover for D=1, there     
   /// is a type conversion to const T*.                                         
   //                                                                            
   // ///////////////////////////////////////////////////////////////////////////
@@ -1381,10 +1400,6 @@ namespace WDutils {
     static const char  *name () {
       return message("Array<%s,%d>",traits<T>::name(),D);
     }
-    static const char  *names() {
-      return message("Array<%s,%d>",traits<T>::name(),D);
-    }
-    static const unsigned size = sizeof(Array<T,D>);
   };
   //////////////////////////////////////////////////////////////////////////////
 } // namespace WDutils {

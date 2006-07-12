@@ -53,11 +53,7 @@ ifeq ($(MACHTYPE),x86_64)
 CPUFLAGS		:= -mcpu=k8 -mpreferred-stack-boundary=4
 endif
 
-OPTFLAGS		:= -O2 -fPIC $(CPUFLAGS) -ffast-math -funroll-loops -fforce-addr -fomit-frame-pointer -rdynamic
-
-ifdef DEBUG
-OPTFLAGS		:= -g -p -fPIC $(CPUFLAGS) -rdynamic
-endif
+OPTFLAGS		:= -ggdb -O2 -fPIC $(CPUFLAGS) -ffast-math -funroll-loops -fforce-addr -fomit-frame-pointer -rdynamic
 
 else
 ifeq ($(COMPILER),pgcc)
@@ -122,24 +118,25 @@ MAKE_OBJ		= $(CXX) -c -o $@ $< -I$(INC) $(CXXFLAGS)
 Pi_h			:= $(INC)Pi.h
 inline_h		:= $(INC)inline.h
 inline_io_h		:= $(INC)inline_io.h
-traits_h		:= $(INC)traits.h
+exception_h		:= $(INC)exception.h
+traits_h		:= $(INC)traits.h $(exception_h)
 tupel_h			:= $(INC)tupel.h $(INC)tupel.cc $(traits_h)
-exception_h		:= $(INC)exception.h $(traits_h)
-memory_h		:= $(INC)memory.h $(exception_h) $(inline_h)
+memory_h		:= $(INC)memory.h $(exception_h) $(traits_h) $(inline_h)
 numerics_h		:= $(INC)numerics.h $(inline_h) $(memory_h) $(tupel_h)
 spline_h		:= $(INC)spline.h $(numerics_h) $(memory_h)
 random_h		:= $(INC)random.h $(inline_h) $(Pi_h) $(traits_h)
-Math_h			:= $(INC)WDMath.h $(Pi_h) $(exception_h)
+WDMath_h		:= $(INC)WDMath.h $(Pi_h) $(exception_h) $(traits_h) \
+				$(inline_h) 
 
 # -----------------------
 # source dependency lists
 # -----------------------
 
 exception_cc		:= $(SRC)exception.cc $(exception_h)
-numerics_cc		:= $(SRC)numerics.cc $(numerics_h) $(Pi_h)
+numerics_cc		:= $(SRC)numerics.cc $(numerics_h) $(WDMath_h)
 random_cc		:= $(SRC)random.cc $(random_h) $(numerics_h) \
-				$(exception)
-Math_cc			:= $(SRC)Math.cc $(Math_h) $(inline_h)
+				$(exception_h)
+WDMath_cc			:= $(SRC)WDMath.cc $(WDMath_h) $(inline_h)
 
 # ---------------
 # library modules
@@ -153,11 +150,11 @@ $(LIB)numerics.o:	$(numerics_cc) makefile
 			$(MAKE_OBJ)
 $(LIB)random.o:		$(random_cc) makefile
 			$(MAKE_OBJ)
-$(LIB)Math.o:		$(Math_cc) makefile
+$(LIB)WDMath.o:		$(WDMath_cc) makefile
 			$(MAKE_OBJ)
 
 WDutils_objs	:=	$(LIB)exception.o $(LIB)numerics.o $(LIB)random.o \
-			$(LIB)Math.o
+			$(LIB)WDMath.o
 
 # -------
 # library

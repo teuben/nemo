@@ -5,13 +5,13 @@
 ///                                                                             
 /// \author  Walter Dehnen                                                      
 ///                                                                             
-/// \date    1994-2005                                                          
+/// \date    1994-2006                                                          
 ///                                                                             
 /// \todo    add doxygen documentation                                          
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 1994-2005  Walter Dehnen                                       
+// Copyright (C) 1994-2006  Walter Dehnen                                       
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -42,6 +42,7 @@
 // Legendre polynomials and their derivatives           v0.1                    
 // cubic spline (#included from walter/spln.h)          v0.1                    
 // Gauss-Legendre integration: points & weights         v0.1                    
+// eigenvalues and vectors of symmetric matrices        v0.4                    
 //                                                                              
 ////////////////////////////////////////////////////////////////////////////////
 #ifndef WDutils_included_numerics_h
@@ -67,20 +68,30 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 namespace WDutils {
+  // ///////////////////////////////////////////////////////////////////////////
+  //                                                                            
+  /// \name finding position in ordered table                                   
+  //@{                                                                          
   //----------------------------------------------------------------------------
-  // find position in ordered table                                             
+  /// find position in ordered table (see NR)                                   
+  ///                                                                           
+  /// \param T (template parameter) type with < and > operators, usually a      
+  ///          scalar                                                           
+  /// \param xarr (input) array of T, must be ordered (ascending or descending) 
+  /// \param n    (input) size of array xarr                                    
+  /// \param x    (input) value to find position for                            
+  /// \param j    (input) initial guess for position                            
+  /// \return     position jlo such that xarr[jlo] <= x < xarr[jlo+1]           
+  ///                                                                           
+  /// The ordered table xarr is hunted for jlo such that                        
+  ///    xarr[jlo] <= x < xarr[jlo+1].                                          
+  /// For an ascendingly ordered array, we return -1 if x < xarr[0], n-1 if     
+  /// x == xarr[n-1], and n if x > xarr[n--1].                                  
+  //                                                                            
   //----------------------------------------------------------------------------
-  template<typename scalar_type>
-  int hunt(const scalar_type*xarr, const int n, const scalar_type x,
-	   const int j) {
-    // hunts the ordered table xarr for jlo such that xarr[jlo]<=x<xarr[jlo+1]  
-    // on input j provides a guess for the final value of jlo.                  
-    // for an ascendingly ordered array, we return                              
-    //  -1 for         x < x[0]                                                 
-    //   i for x[i] <= x < x[i+1]  if  0<=i<n                                   
-    // n-1 for         x == x[n-1]                                              
-    // n   for         x >  x[n-1]                                              
-    int  jm,jlo=j,jhi,l=n-1;
+  template<typename T>
+  int hunt(const T*xarr, const int n, const T x, const int j) {
+    int  jlo=j,jhi,l=n-1;
     bool ascnd=(xarr[l]>xarr[0]);
     if(!ascnd && xarr[l]==xarr[0] ) return -1;	    // x_0 = x_l                
     if( ascnd && x<xarr[0] || !ascnd && x>xarr[0] ) return -1;
@@ -119,28 +130,45 @@ namespace WDutils {
       }
     }
     while (jhi-jlo != 1) {                          // bisection phase          
-      jm=(jhi+jlo) >> 1;
+      int jm=(jhi+jlo) >> 1;
       if(x>=xarr[jm] == ascnd) jlo=jm;
       else jhi=jm;
     }
     return jlo;
   }
   //----------------------------------------------------------------------------
-  template<typename scalar_type>
-  inline void find(int& klo, const int n, scalar_type const *x,
-		   const scalar_type xi)
+  /// find position in ordered table (see NR)                                   
+  ///                                                                           
+  /// \param T (template parameter) type with < and > operators, usually a      
+  ///          scalar                                                           
+  /// \param k    (in/out) jlo such that xarr[jlo] <= x < xarr[jlo+1]           
+  /// \param x    (input) array of T, must be ordered (ascending or descending) 
+  /// \param n    (input) size of array xarr                                    
+  /// \param xi   (input) value to find position for                            
+  /// \param j    (input) initial guess for position                            
+  /// \return     position jlo such that xarr[jlo] <= x < xarr[jlo+1]           
+  ///                                                                           
+  /// If the original value for k already gives the position, we return.        
+  /// Otherwise, we guess k from linear interpolation and then invoke hunt().   
+  /// If x is not in range, we throw an error.                                  
+  //                                                                            
+  template<typename T>
+  inline void find(int& k, const int n, T const *x, const T xi)
   {
-    if(klo<0 || klo>=n-1 || x[klo]>xi || x[klo+1]<xi) {
-      klo = int( (xi-x[0]) / (x[n-1]-x[0]) * (n-1) );
-      klo = hunt(x,n,xi,klo);
-      if(klo<0 || klo>=n) WDutils_ErrorF("x out of range","find()");
+    if(k<0 || k>=n-1 || x[k]>xi || x[k+1]<xi) {
+      k = int( (xi-x[0]) / (x[n-1]-x[0]) * (n-1) );
+      k = hunt(x,n,xi,k);
+      if(k<0 || k>=n) WDutils_ErrorF("x out of range","find()");
     }
   }
-  //----------------------------------------------------------------------------
+  //@}
+  // ///////////////////////////////////////////////////////////////////////////
+  //                                                                            
   // sorting                                                                    
+  //                                                                            
   //----------------------------------------------------------------------------
-  template<typename sortable>
-  void HeapIndex(const sortable*A, const int n, int *indx)
+  template<typename sortable, class sortit>
+  void HeapIndex(const sortit&A, const int n, int *indx)
     // based on a routine given in NR                                           
     // the numbers 0 to n-1 are ordered in ascending order of A[i]              
   {
@@ -176,8 +204,8 @@ namespace WDutils {
     }
   }
   //----------------------------------------------------------------------------
-  template<typename sortable, class sortit>
-  void HeapIndex(const sortit&A, const int n, int *indx)
+  template<typename sortable>
+  void HeapIndex(const sortable*A, const int n, int *indx)
     // based on a routine given in NR                                           
     // the numbers 0 to n-1 are ordered in ascending order of A[i]              
   {
@@ -269,20 +297,19 @@ namespace WDutils {
 	if(xa[i]==xa[i+m]) WDutils_ErrorF("x's not distinct","polev()");
 	P[i]= ( (x-xa[i+m])*P[i] + (xa[i]-x)*P[i+1] ) / (xa[i] - xa[i+m]);
       }
-    y = P[0];    
-    delete[] P;
+    y = P[0];
+    WDutils_DEL_A(P);
     return y;
   }
   //----------------------------------------------------------------------------
-  template<int N, typename scalar_type, typename num_type>
+  template<int n, typename scalar_type, typename num_type>
   inline num_type polint_T(const scalar_type*xa,
 			   const num_type   *ya,
-			   const int         n,
 			   const scalar_type x) 
   {
     // polynom interpolation using n values
     register int i,m;
-    register num_type y, P[N];
+    register num_type y, P[n];
     for(i=0;i!=n;++i) P[i]=ya[i];
     for(m=1;m!=n;++m)
       for(i=0;i<n-m;++i) {
@@ -306,19 +333,19 @@ namespace WDutils {
     switch(m) {
     case 2 : 
       M = find_for_polev_T<2>(j,n,xarr,x);
-      return polint_T<2>(xarr+j, yarr+j, M, x);
+      return polint_T<2>(xarr+j, yarr+j, x);
     case 3 : 
       M = find_for_polev_T<3>(j,n,xarr,x);
-      return polint_T<3>(xarr+j, yarr+j, M, x);
+      return polint_T<3>(xarr+j, yarr+j, x);
     case 4 : 
       M = find_for_polev_T<4>(j,n,xarr,x);
-      return polint_T<4>(xarr+j, yarr+j, M, x);
+      return polint_T<4>(xarr+j, yarr+j, x);
     case 5 : 
       M = find_for_polev_T<5>(j,n,xarr,x);
-      return polint_T<5>(xarr+j, yarr+j, M, x);
+      return polint_T<5>(xarr+j, yarr+j, x);
     case 6 : 
       M = find_for_polev_T<6>(j,n,xarr,x);
-      return polint_T<6>(xarr+j, yarr+j, M, x);
+      return polint_T<6>(xarr+j, yarr+j, x);
     default: 
       M = find_for_polev(j,n,m,xarr,x);
       return polint(xarr+j, yarr+j, M, x);
@@ -334,7 +361,7 @@ namespace WDutils {
   {
     // given the arrays xarr, yarr, polev returns y(x) using 4 of n values.
     int j, M=find_for_polev_T<4>(j,n,xarr,x);
-    return polint_T<4>(xarr+j, yarr+j, M, x);
+    return polint_T<4>(xarr+j, yarr+j, x);
   }
   //----------------------------------------------------------------------------
   template<typename scalar_type, typename num_type>
@@ -543,17 +570,37 @@ namespace WDutils {
     xmin   =x;
     return fx;
   }
-  //----------------------------------------------------------------------------
-  // Burlisch-Stoer integration of 1D real integrals                            
-  //----------------------------------------------------------------------------
-  double qbulir(                              // R: int(f(x),x=a...b)           
-		double(*)(double),            // I: f(x)                        
-		double,                       // I: a                           
-		double,                       // I: b                           
-		double,                       // I: eps = rel. error limit      
-		double* = 0,                  //[O: actual rel. error estimate] 
-                bool = true,                  //[I: abort if exceed iteration]  
-		int  = 25);                   //[I: max # iterations            
+  // ///////////////////////////////////////////////////////////////////////////
+  //                                                                            
+  /// Burlisch-Stoer integration of 1D real integrals                           
+  //                                                                            
+  /// \return approximated value for integral                                   
+  /// \param  func  (input) pointer to function to be integrated                
+  /// \param  a     (input) lower boundary of integration interval              
+  /// \param  b     (input) upper boundary of integration interval              
+  /// \param  eps   (input) desired relative accuracy                           
+  /// \param  err   (output, optional) actual relative error of the return value
+  /// \param  abort (input, optional) abort if exceeding maximum of iterations? 
+  /// \param  miter (input, optional) maximum number of iterations              
+  ///                                                                           
+  /// Quadrature program using the Bulirsch sequence and rational extrapolation.
+  /// The algorithm is puplished in Bulirsch & Stoer, Num. Math. 9, 271-278     
+  /// (1967), where a routine in ALGOL is given. This is a straightforward      
+  /// translation into C++.                                                     
+  ///                                                                           
+  /// \note CAUTION:                                                            
+  /// Do not use this routine for integrating low order polynomials (up to      
+  /// fourth order) or periodic functions with period equal to the interval of  
+  /// integration or linear combinations of both.                               
+  //                                                                            
+  // ///////////////////////////////////////////////////////////////////////////
+  double qbulir(double(*func)(double),
+		double  a,
+		double  b,
+		double  eps,
+		double* err  =0,
+                bool    abort=true,
+		int     miter=25);
   //----------------------------------------------------------------------------
   // Runge-Kutta 4th order integrator for ODEs                                  
   //----------------------------------------------------------------------------
@@ -598,9 +645,9 @@ namespace WDutils {
     p[1] = 1.5*x2-0.5;
     for(n=2; n<N; n++) {
       l    = 2*(n-1);
-      l2   = 2*l;
+      l2   = l+l;
       p[n] = - p[n-2] * l*(l-1)/double((l2+1)*(l2-1))
-	+ p[n-1] * (x2 - (l2*l+l2-1)/double((l2-1)*(l2+3)) );
+	     + p[n-1] * (x2 - (l2*l+l2-1)/double((l2-1)*(l2+3)) );
       p[n]*= (l2+1)*(l2+3) / double((l+1)*(l+2));
     }
   }
@@ -618,16 +665,16 @@ namespace WDutils {
     d[1] = 1.5;
     for(n=2; n<N; n++) {
       l    = 2*(n-1);
-      l2   = 2*l;
+      l2   = l+l;
       p[n] = - p[n-2] * l*(l-1)/double((l2+1)*(l2-1))
-	+ p[n-1] * (x2 - (l2*l+l2-1)/double((l2-1)*(l2+3)) );
+	     + p[n-1] * (x2 - (l2*l+l2-1)/double((l2-1)*(l2+3)) );
       p[n]*= (l2+1)*(l2+3) / double((l+1)*(l+2));
       d[n] = - d[n-2] * l*(l-1)/double((l2+1)*(l2-1))
-	+ d[n-1] * (x2 - (l2*l+l2-1)/double((l2-1)*(l2+3)) )
-	+ p[n-1];
+	     + d[n-1] * (x2 - (l2*l+l2-1)/double((l2-1)*(l2+3)) )
+	     + p[n-1];
       d[n]*= (l2+1)*(l2+3) / double((l+1)*(l+2));
     }
-    x2 = 2*x;
+    x2 = x+x;
     for(n=0; n<N; n++)
       d[n] *= x2;
   }
@@ -645,6 +692,304 @@ namespace WDutils {
   // Gauss-Legendre integration: points & weights                               
   //----------------------------------------------------------------------------
   void GaussLegendre(double*, double*, const unsigned);
+  // ///////////////////////////////////////////////////////////////////////////
+  //                                                                            
+  /// \name eigensystem of symmetric matrix                                     
+  //@{                                                                          
+  //                                                                            
+  /// \name eigensystem of symmetric matrix using Jacobi transformation         
+  //@{                                                                          
+  //                                                                            
+  // ---------------------------------------------------------------------------
+  /// Eigen values and vector for symmetric matrix using Jacobi transformation  
+  ///                                                                           
+  /// \param N (template parameter) size of matrix                              
+  /// \param X (template parameter) scalar type (either float or double)        
+  /// \param M (input)  matrix                                                  
+  /// \param V (output) matrix with Eigenvectors                                
+  /// \param D (output) vector with Eigenvalues                                 
+  /// \param R (output) number of rotations required                            
+  ///                                                                           
+  /// The eigen values and vectors of a symmetric matrix are computed using     
+  /// Jacobi transformations (see NR section 11.1). This is not efficient for   
+  /// efficient for large N, hence we have coded N as template parameter.       
+  // ---------------------------------------------------------------------------
+  template<int N, typename X>
+  void EigenSymJacobi(const X M[N][N], X V[N][N], X D[N], int&R)
+  {
+    const X   zero    = X(0);
+    const X   half    = X(0.5);
+    const X   one     = X(1);
+    const int MaxIter = sizeof(X)*13;
+    // copy M to A, set V to unity, copy diagonal of A to B and D
+    X A[N][N], B[N], Z[N];
+    for(int ip=0; ip!=N; ++ip) {
+      for(int iq=0; iq!=N; ++iq) {
+	A[ip][iq] = M[ip][iq];
+	V[ip][iq] = zero;
+      }
+      V[ip][ip] = one;
+      B[ip]     = A[ip][ip];
+      D[ip]     = A[ip][ip];
+      Z[ip]     = zero;
+    }
+    // perform iteration
+    R = 0;
+    for(int iter=0; iter!=MaxIter; ++iter) {
+      X sm(zero);
+      for(int ip=0; ip!=N-1; ++ip)
+	for(int iq=ip+1; iq!=N; ++iq)
+	  sm += abs(A[ip][iq]);
+      if(sm == zero) return;
+      X tresh = iter<3? sm/X(5*N*N) : zero;
+      for(int ip=0; ip!=N-1; ++ip) {
+	for(int iq=ip+1; iq!=N; ++iq) {
+	  X g = 100 * abs(A[ip][iq]);
+	  if(iter > 3                    &&
+	     abs(D[ip])+g == abs(D[ip])  &&
+	     abs(D[iq])+g == abs(D[iq])     )
+	    A[ip][iq] = zero;
+	  else if(abs(A[ip][iq]) > tresh) {
+	    X h = D[iq]-D[ip], t;
+	    if(abs(h)+g == abs(h))
+	      t = A[ip][iq]/h;
+	    else {
+	      X theta = half*h/A[ip][iq];
+	      t = one/(abs(theta)+sqrt(one+theta*theta));
+	      if(theta < zero) t = -t;
+	    }
+	    X c   = one/sqrt(one+t*t);
+	    X s   = t*c;
+	    X tau = s/(one+c);
+	    h     = t*A[ip][iq];
+	    Z[ip] -= h;
+	    Z[iq] += h;
+	    D[ip] -= h;
+	    D[iq] += h;
+	    A[ip][iq] = zero;
+#define Rotate(M,i,j,k,l)			\
+  {						\
+    g = M[i][j];				\
+    h = M[k][l];				\
+    M[i][j] = g-s*(h+g*tau);			\
+    M[k][l] = h+s*(g-h*tau);			\
+  }
+	    for(int j=0;    j!=ip; ++j) Rotate(A,j,ip,j,iq);
+	    for(int j=ip+1; j!=iq; ++j) Rotate(A,ip,j,j,iq);
+	    for(int j=iq+1; j!=N;  ++j) Rotate(A,ip,j,iq,j);
+	    for(int j=0;    j!=N;  ++j) Rotate(V,j,ip,j,iq);
+#undef Rotate
+	    ++R;
+	  }
+	}
+      }
+      for(int ip=0; ip!=N; ++ip) {
+	B[ip] += Z[ip];
+	D[ip]  = B[ip];
+	Z[ip]  = zero;
+      }
+    }
+    error("EigenSymJacobi(): number iteration exceeds %d\n",MaxIter);
+  }
+  // ---------------------------------------------------------------------------
+  /// function template sorting the eigenvalues & vectors                       
+  ///                                                                           
+  /// \param N (template parameter) size of matrix                              
+  /// \param X (template parameter) scalar type (either float or double)        
+  /// \param V (input/output)  matrix with Eigenvectors                         
+  /// \param D (input/output)  vector with Eigenvalues                          
+  // ---------------------------------------------------------------------------
+  template<int N, typename X>
+  void EigenSort(X V[N][N], X D[N])
+  {
+    for(int k,i=0; i!=N-1; ++i) {
+      X p = D[k=i];
+      for(int j=i+1; j!=N; ++j)
+	if(D[j] >= p) p=D[k=j];
+      if(k!=i) {
+	D[k] = D[i];
+	D[i] = p;
+	for(int j=0; j!=N; ++j) {
+	  p       = V[j][i];
+	  V[j][i] = V[j][k];
+	  V[j][k] = p;
+	}
+      }
+    }
+  }
+  // ---------------------------------------------------------------------------
+  /// Sorted eigen values and vector of symmetric matrix with Jacobi transform  
+  ///                                                                           
+  /// \param N (template parameter) size of matrix                              
+  /// \param X (template parameter) scalar type (either float or double)        
+  /// \param M (input)  matrix                                                  
+  /// \param V (output) matrix with Eigenvectors                                
+  /// \param D (output) vector with Eigenvalues                                 
+  /// \param R (output) number of rotations required                            
+  ///                                                                           
+  /// This combines EigenSymJacobi() and EigenSort() via                        
+  /// \code                                                                     
+  ///   EigenSymJacobi(M,V,D,R);                                                
+  ///   EigenSort(V,D);                                                         
+  /// \endcode                                                                  
+  // ---------------------------------------------------------------------------
+  template<int N, typename X>
+  void EigenSymJacobiSorted(const X M[N][N], X V[N][N], X D[N], int&R)
+  {
+    EigenSymJacobi(M,V,D,R);
+    EigenSort(V,D);
+  }
+  //@}                                                                          
+  //                                                                            
+  /// \name eigensystem of symmetric matrix using Householder transformation    
+  //@{                                                                          
+  //                                                                            
+  // ---------------------------------------------------------------------------
+  /// reduce real symmetric matrix to tridiagonal form                          
+  ///                                                                           
+  /// \param T (template parameter) prepare for eigenvector extraction?         
+  /// \param X (template parameter) only \a X=float and \a X=double are         
+  ///          implemented                                                      
+  /// \param N (input)  size of matrix                                          
+  /// \param A on input: real symmetric matrix,                                 
+  ///          on putput: input required by \a EigenSystemTridiagonal()         
+  /// \param D (output) diagonal elements of tridiagonal form                   
+  /// \param E (output) off-diagonal elements of tridiagonal form               
+  ///                                                                           
+  /// Householder reduction of a real symmetric matrix                          
+  /// \a A[0..\a N -1][0..\a N -1]. On output, \a A is replaced by an orthogonal
+  /// matrix effecting the transformation. \a D[0..\a N -1] returns the diagonal
+  /// elements of the tridiagonal matrix, and \a E[0..\a N -1] the off-diagonal 
+  /// elements, with \a E[0]=0.                                                 
+  /// If \a T is set to false, \a A has no sensible meaning on output. See NR   
+  /// section 11.2 for details.                                                 
+  // ---------------------------------------------------------------------------
+  template<bool T, typename X> void HouseholderReduction(int N, X**A, X*D, X*E);
+  // ---------------------------------------------------------------------------
+  /// compute eigensystem of tridiagonal symmetric matrix                       
+  ///                                                                           
+  /// \param X (template parameter) only X=float and X=double are implemented   
+  /// \param N (input)  size of matrix                                          
+  /// \param D on input: diagonal elements; on output: eigenvalues              
+  /// \param E on input: off-diagonal elements; on output: destroyed            
+  /// \param Z on input: see below; on output: eigenvectors corresponding to D  
+  ///                                                                           
+  /// QL algorithm with implicit shifts to determine the eigenvalues and eigen- 
+  /// vectors of a real symmetric tridiagonal matrix, or of a real symmetric    
+  /// matrix previously reduced by \a HouseholderReduction(). In the first case,
+  /// \a Z on input must be the unit matrix. In the second case, \a Z on input  
+  /// must be the matrix returned by \a HouseholderReduction(). For details,    
+  /// see NR section 11.3.                                                      
+  // ---------------------------------------------------------------------------
+  template<typename X> void EigenSystemTridiagonal(int N, X*D, X*E, X**Z);
+  // ---------------------------------------------------------------------------
+  /// compute eigenvalues of tridiagonal symmetric matrix                       
+  ///                                                                           
+  /// \param X (template parameter) only X=float and X=double are implemented   
+  /// \param N (input) size of matrix                                           
+  /// \param D on input: diagonal elements; on output: eigenvalues              
+  /// \param E on input: off-diagonal elements; on output: destroyed            
+  ///                                                                           
+  /// QL algorithm with implicit shifts to determine the eigenvalues of a real  
+  /// symmetric tridiagonal matrix, or of a real symmetric matrix previously    
+  /// reduced by \a HouseholderReduction(). For details, see NR section 11.3.   
+  // ---------------------------------------------------------------------------
+  template<typename X> void EigenValuesTridiagonal(int N, X*D, X*E);
+  // ---------------------------------------------------------------------------
+  /// eigensystem of symmetric matrix, replaces original matrix                 
+  ///                                                                           
+  /// \param EIGENVECTORS (template parameter) want eigenvectors?               
+  /// \param X (template parameter) scalar type (either float or double)        
+  /// \param N (input)  size of matrix                                          
+  /// \param A on input: symmetric matrix; on output: eigenvectors              
+  /// \param D (output) vector with eigenvalues                                 
+  /// \param V (output, optional) vector with eigenvectors                      
+  ///                                                                           
+  /// This combines HouseholderReduction() and EigenSystemTridiagonal() or      
+  /// EigenValuesTridiagonal() for \a N known at run time. If \a N is known at  
+  /// compile time, use \a EigenSymmetricFixed() below.                         
+  // ---------------------------------------------------------------------------
+  template<bool EIGENVECTORS, typename X>
+  void EigenSymmetricReplace(int N, X**A, X*D)
+  {
+    X*E = WDutils_NEW(X,N);
+    HouseholderReduction<EIGENVECTORS>(N,A,D,E);
+    if(EIGENVECTORS) EigenSystemTridiagonal(N,D,E,A);
+    else             EigenValuesTridiagonal(N,D,E);
+    falcON_DEL_A(E);
+  }
+  // ---------------------------------------------------------------------------
+  /// eigensystem of symmetric matrix, keeps original matrix                    
+  ///                                                                           
+  /// \param X (template parameter) scalar type (either float or double)        
+  /// \param N (input)  size of matrix                                          
+  /// \param M (input)  symmetric matrix                                        
+  /// \param D (output) vector with eigenvalues                                 
+  /// \param V (output, optional) vector with eigenvectors                      
+  ///                                                                           
+  /// This combines HouseholderReduction() and EigenSystemTridiagonal() or      
+  /// EigenValuesTridiagonal() for \a N known at run time. If \a N is known at  
+  /// compile time, use \a EigenSymmetricFixed() below.                         
+  // ---------------------------------------------------------------------------
+  template<typename X>
+  void EigenSymmetricKeep(int N, const X**M, X*D, X**V=0)
+  {
+    X*E = WDutils_NEW(X,N);
+    if(V) {
+      for(int i=0; i!=N; ++i)
+	for(int j=0; j!=N; ++j)
+	  V[i][j] = M[i][j];
+      HouseholderReduction<1>(N,V,D,E);
+      EigenSystemTridiagonal(N,D,E,V);
+    } else {
+      V = WDutils_NEW(X*,N);
+      X* m = WDutils_NEW(X,N*N);
+      for(int i=0; i!=N; ++i, m+=N) {
+	V[i] = m;
+	for(int j=0; j!=N; ++j)
+	  V[i][j] = M[i][j];
+      }
+      HouseholderReduction<0>(N,V,D,E);
+      EigenValuesTridiagonal(N,D,E);
+      falcON_DEL_A(V[0]);
+      falcON_DEL_A(V);
+    }
+    falcON_DEL_A(E);
+  }
+  // ---------------------------------------------------------------------------
+  /// eigensystem of symmetric matrix, keeps original matrix, N template param  
+  ///                                                                           
+  /// \param N (template parameter) size of matrix                              
+  /// \param X (template parameter) scalar type (either float or double)        
+  /// \param M (input)  matrix                                                  
+  /// \param D (output) vector with Eigenvalues                                 
+  /// \param V (output, optional) matrix with Eigenvectors                      
+  ///                                                                           
+  /// This combines HouseholderReduction() and EigenSystemTridiagonal() for     
+  /// fixed \a N (known as template parameter at compile time).                 
+  // ---------------------------------------------------------------------------
+  template<int N, typename X>
+  void EigenSymmetricFixed(const X M[N][N], X D[N], X**V=0)
+  {
+    X E[N];
+    if(V) {
+      for(int i=0; i!=N; ++i)
+	for(int j=0; j!=N; ++j)
+	  V[i][j] = M[i][j];
+      HouseholderReduction<1>(N,V,D,E);
+      EigenSystemTridiagonal (N,D,E,V);
+
+    } else {
+      X Z[N][N];
+      for(int i=0; i!=N; ++i)
+	for(int j=0; j!=N; ++j)
+	  Z[i][j] = M[i][j];
+      HouseholderReduction<0>(N,Z,D,E);
+      EigenValuesTridiagonal (N,D,E);
+    }
+  }
+  //@}
+  //////////////////////////////////////////////////////////////////////////////
 } // namespace WDutils {
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -812,14 +1157,14 @@ namespace {
     //--------------------------------------------------------------------------
     void delete_leafs()
     {
-      if(L0) { delete[] L0; L0=0; }
+      if(L0) { WDutils_DEL_A(L0); L0=0; }
     }
     //--------------------------------------------------------------------------
     // destruction: delete leafs and implicitly call ~ranger                    
     //--------------------------------------------------------------------------
     ~sorttree()
     {
-      if(L0) delete[] L0;
+      if(L0) WDutils_DEL_A(L0);
     }
     //--------------------------------------------------------------------------
     // give const access to our root                                            

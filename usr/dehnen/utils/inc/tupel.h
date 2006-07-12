@@ -465,6 +465,17 @@ namespace WDutils {
       M::v_appl(a,x.a,f);
       return*this;
     }
+    /// normalize: x[i] /= abs(x)
+    tupel&normalize() {
+      X n = norm();
+      if(n) return operator /= (std::sqrt(n));
+      else  return*this;
+    }
+    /// normalizes: return x[i] / abs(x)
+    tupel normalized() const {
+      tupel y(*this);
+      return y.normalize();
+    }
     /// is any element nan?
     bool isnan() const {
       return M::v_nan(a);
@@ -588,6 +599,16 @@ namespace WDutils {
   template<int N, typename X> inline
   bool isinf(tupel<N,X> const&x) {
     return x.isinf();
+  }
+  /// normalize: x[i] /= abs(x)
+  template<int N, typename X> inline
+  tupel<N,X> &normalize(tupel<N,X> &x) {
+    return x.normalize();
+  }
+  /// normalizes: x[i] = abs(x)
+  template<int N, typename X> inline
+  tupel<N,X> normalized(tupel<N,X> const&x) {
+    return x.normalized();
   }
   /// update maximum element-wise: x[i] = max(x[i], y[i])
   template<int N, typename X> inline

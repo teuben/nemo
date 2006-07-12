@@ -1,17 +1,17 @@
 // -*- C++ -*-                                                                  
 ////////////////////////////////////////////////////////////////////////////////
 ///                                                                             
-/// \file    inc/WDMath.h                                                         
+/// \file    inc/WDMath.h                                                       
 ///                                                                             
 /// \author  Walter Dehnen                                                      
 ///                                                                             
-/// \date    1994-2005                                                          
+/// \date    1994-2006                                                          
 ///                                                                             
 /// \todo    complete doxygen documentation                                     
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 1994-2005  Walter Dehnen                                       
+// Copyright (C) 1994-2006  Walter Dehnen                                       
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -45,8 +45,8 @@
 //   Hermite polynomials and their normalisization                              
 //                                                                              
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef WDutils_included_Math_h
-#define WDutils_included_Math_h
+#ifndef WDutils_included_WDMath_h
+#define WDutils_included_WDMath_h
 
 #ifndef WDutils_included_cmath
 # include <cmath>
@@ -71,6 +71,20 @@
 #endif
 #ifndef WDutils_included_basic_h
 # include <exception.h>
+#endif
+#ifndef WDutils_included_traits_h
+# include <traits.h>
+#endif
+#ifndef WDutils_included_inline_h
+# include <inline.h>
+#endif
+
+#ifdef __GNUC__
+extern "C" {
+  // from math.h
+  double hypot(double,double);
+  float  hypotf(float,float);
+}
 #endif
 
 namespace WDutils {
@@ -97,6 +111,18 @@ namespace WDutils {
     if(p1) return std::pow(x,p1)/p1;
     else   return std::log(x);
   }
+  // ///////////////////////////////////////////////////////////////////////////
+  /// hypotenus of x,y                                                          
+#ifdef __GNUC__
+  inline double hypot(double x, double y) { return ::hypot (x,y); }
+  inline float  hypot(float  x, float  y) { return ::hypotf(x,y); }
+#else
+  template<typename X> inline
+  X hypot(X x, X y) {
+    X ax=abs(x), ay=abs(y);
+    return ax>ay? ax*sqrt(1+square(ay/ax)) : ay*sqrt(1+square(ax/ay));
+  }
+#endif
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
   /// \name Log's and Exp's (inlines)                                           
@@ -137,7 +163,7 @@ namespace WDutils {
   };
   template<> struct __sincos<float> {
     static void sc(float x, float&s, float&c) {
-#if 0
+#if defined(__GNUC__) || defined (__INTEL_COMPILER) || defined (__PGCC__)
     __asm __volatile__ ("fsincos" : "=t" (s), "=u" (c) : "0" (x) );
 #else
     s = std::sin(x);
@@ -147,7 +173,7 @@ namespace WDutils {
   };
   template<> struct __sincos<double> {
     static void sc(double x, double&s, double&c) {
-#if 0
+#if defined(__GNUC__) || defined (__INTEL_COMPILER) || defined (__PGCC__)
     __asm __volatile__ ("fsincos" : "=t" (s), "=u" (c) : "0" (x) );
 #else
     s = std::sin(x);
@@ -209,7 +235,7 @@ namespace WDutils {
     /// construction: get a,b
     BetaFunc(double a, double b);
     double const& operator() () const { return B;} ///< Beta(a,b)
-    double operator() (double) const;       ///< Beta_x(a,b)
+    double operator() (double) const;              ///< Beta_x(a,b)
   };
   //@}
   // ///////////////////////////////////////////////////////////////////////////
@@ -259,4 +285,4 @@ namespace WDutils {
   // ///////////////////////////////////////////////////////////////////////////
 } // namespace WDutils {
 ////////////////////////////////////////////////////////////////////////////////
-#endif // WDutils_included_Math_h
+#endif // WDutils_included_WDMath_h

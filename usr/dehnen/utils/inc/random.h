@@ -6,13 +6,13 @@
 /// \author  Walter Dehnen                                                      
 /// \author  Paul McMillan                                                      
 ///                                                                             
-/// \date    1994-2005                                                          
+/// \date    1994-2006                                                          
 ///                                                                             
 /// \todo    add doxygen documentation                                          
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 1994-2005  Walter Dehnen                                       
+// Copyright (C) 1994-2006  Walter Dehnen                                       
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -131,7 +131,7 @@ namespace WDutils {
     int    actual      ()   { return actl; }
   };
 
-  WDutils_TRAITS(Sobol,"Sobol","Sobols");
+  WDutils_TRAITS(Sobol,"Sobol");
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
   // class WDutils::Uniform                                                   //

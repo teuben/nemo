@@ -29,13 +29,17 @@
 #ifndef WDutils_included_exception_h
 #define WDutils_included_exception_h
 
-#ifndef WDutils_included_traits_h
-# include <traits.h>
-#endif
 #ifndef WDutils_included_string
 # define WDutils_included_string
 # include <string>
 #endif
+// /////////////////////////////////////////////////////////////////////////////
+//                                                                              
+//  WDutils                                                                     
+//                                                                              
+/// generally useful code of Walter Dehnen, used in project falcON,             
+/// public under the GNU public licence                                         
+///                                                                             
 // /////////////////////////////////////////////////////////////////////////////
 namespace WDutils {
   // ///////////////////////////////////////////////////////////////////////////
