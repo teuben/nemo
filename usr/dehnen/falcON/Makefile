@@ -4,10 +4,11 @@
 # Makefile for the falcON project
 #
 ################################################################################
-default		: utils all manips
+default		: utils all manips acc
 utils:
 	ln -s ../utils
 	(cd inc; ln -s ../utils/inc utils)
+
 ifdef NEMO
 tonemo		: all manips
 			cp $(LIB)/libfalcON.so $(NEMOLIB)
@@ -28,6 +29,7 @@ makepublic 	:= Makefile make/defs make/public make/manip
 include make/defs
 include make/public
 include make/manip
+include make/acc
 
 falcON_objs	 =	$(public_objs)
 
