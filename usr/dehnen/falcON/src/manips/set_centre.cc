@@ -1,14 +1,14 @@
 // -*- C++ -*-                                                                  
 ////////////////////////////////////////////////////////////////////////////////
 ///                                                                             
-/// \file   src/manip/randomize_azimuth.cc                                      
+/// \file   src/manip/set_centre.cc                                             
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2004-2006                                                           
+/// \date   2006                                                                
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2004-2006 Walter Dehnen                                        
+// Copyright (C) 2006 Walter Dehnen                                             
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -25,97 +25,101 @@
 // Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                    
 //                                                                              
 ////////////////////////////////////////////////////////////////////////////////
+//                                                                              
+// history:                                                                     
+//                                                                              
+// v 0.0    30/05/2006  WD created                                              
+// v 0.1    31/05/2006  WD velocity centre added                                
+// v 1.0    04/07/2006  WD reset (rather than set to origin) if not given       
+////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
-#include <public/random.h>
-#include <ctime>
-#include <cmath>
+#include <public/basic.h>
+#include <public/io.h>
 
 namespace falcON { namespace Manipulate {
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
-  // class randomize_azimuth                                                    
+  // class set_centre                                                           
   //                                                                            
-  /// manipulator: rotates vectors by random azimuth for bodies in_subset()     
+  /// manipulator: sets 'xcen' and 'vcen' to parameters 0-2 and 3-5             
   ///                                                                           
-  /// This manipulator rotates all vector properties (position, velocity,       
-  /// acceleration, jerk, auxiliary vector, predicted velocity) for each body   
-  /// in_subset() (default: all, see set_subset) by a random angle around the   
-  /// z-axis.\n                                                                 
-  /// Useful to suppress the growth of non-axisymmetric modes in disk galaxies. 
+  /// This manipulator simply sets the position and velocity centre pointers    
+  /// 'xcen' and 'vcen' to refer to the vectors given by the parameters 0-2 and 
+  /// 3-5, respectively. If no parameters are given, 'xcen' and 'vcen' are      
+  /// reset to NULL pointers (no centre known, which for most subsquent         
+  /// manipulators implies using the origin). The number of parameters must     
+  /// either be 0 ('xcen' and 'vcen' will be reset), or 3 ('xcen' will be set   
+  /// and 'vcen' reset) or 6 (both 'xcen' and 'vcen' will be set).              
   ///                                                                           
-  /// Meaning of the parameters:\n                                              
-  /// par[0]: seed for RNG (default: seconds since 1st January 1970)            
-  ///                                                                           
-  /// Usage of pointers: none\n                                                 
-  /// Usage of flags:    uses in_subset()\n                                     
+  /// Usage of pointers: sets 'xcen' and 'vcen'.                                
   ///                                                                           
   // ///////////////////////////////////////////////////////////////////////////
-  class randomize_azimuth : public manipulator {
+  //////////////////////////////////////////////////////////////////////////////
+  //                                                                          //
+  // class set_centre                                                         //
+  //                                                                          //
+  //////////////////////////////////////////////////////////////////////////////
+  class set_centre : public manipulator {
   private:
-    const Random3 Ran;
-    //--------------------------------------------------------------------------
-    static void rotate(vect&x, real const&c, real const&s) {
-      register real 
-	t0 = c*x[0] + s*x[1];
-      x[1] = c*x[1] - s*x[0];
-      x[0] = t0;
-    }
-    //--------------------------------------------------------------------------
-    static void rotate(vect&x, vect const&o, real const&c, real const&s) {
-      register real 
-	t0 = o[0] + c*(x[0]-o[0]) + s*(x[1]-o[1]);
-      x[1] = o[1] + c*(x[1]-o[1]) - s*(x[0]-o[0]);
-      x[0] = t0;
-    }
+    vect XC,VC,*X0,*V0;
     //--------------------------------------------------------------------------
   public:
-    const char* name    () const { return "randomize_azimuth"; }
+    const char* name    () const { return "set_centre"; }
     const char* describe() const {
-      return 
-	"randomize azimuth of vectors for bodies in_subset() (default: all)";
+      if(X0)
+	if(V0)
+	  return message("sets 'xcen' to (%f,%f,%f)"
+			 " and 'vcen' to (%f,%f,%f)",
+			 XC[0],XC[1],XC[2], VC[0],VC[1],VC[2]);
+	else
+	  return message("sets 'xcen' to (%f,%f,%f)"
+			 " and resets 'vcen' to null\n",
+			 XC[0],XC[1],XC[2]);
+      else
+	return "resets 'xcen' and 'vcen' to null";
     }
     //--------------------------------------------------------------------------
     fieldset need   () const { return fieldset::o; }
     fieldset provide() const { return fieldset::o; }
-    fieldset change () const { return fieldset::vectors; }
+    fieldset change () const { return fieldset::o; }
     //--------------------------------------------------------------------------
     bool manipulate(const snapshot*) const;
     //--------------------------------------------------------------------------
-    randomize_azimuth(const double*pars,
-		      int          npar,
-		      const char  *file) :
-      Ran (npar>0? long(pars[0]) : long(time(0)) )
+    set_centre(const double*pars,
+	       int          npar,
+	       const char  *file) :
+      X0(0), V0(0)
     {
-      if(npar<1 && debug(1) || debug(2))
+      if(npar == 0 || debug(2)) {
 	std::cerr<<
-	  " Manipulator \""<<name()<<"\":\n"
-	  " randomizes azimuth of vectors for all bodies in"
-	  " 'subset' (default: all)\n"
-	  " parameter: seed for RNG (default: secs since 1970)\n";
-      if(npar>1 && debug(1))
-	warning(" Manipulator \"%s\": skipping parameters beyond 1\n",name());
+	  " Manipulator \"set_centre\":\n"
+	  " provides 'xcen'=(par[0],par[1],par[2]) (default: none)\n"
+	  " and      'vcen'=(par[3],par[4],par[5]) (default: none)\n";
+      }
+      if(npar!=0 && npar!=3 && npar<6)
+	error("Manipulator \"set_centre\": #pars must be 0,3, or 6\n");
+      if(npar >= 3) {
+	XC = vect(pars);
+	X0 = &XC;
+      }
+      if(npar >= 6)  {
+	VC = vect(pars+3);
+	V0 = &VC;
+      }
     }
     //--------------------------------------------------------------------------
-    ~randomize_azimuth() {}
+    ~set_centre() {}
   };
   //////////////////////////////////////////////////////////////////////////////
-  bool randomize_azimuth::manipulate(const snapshot*S) const {
-    if(S->have_some(fieldset::vectors)) 
-      LoopSubsetBodies(S,b) {
-	double phi = TPi * Ran();
-	register real
-	  c = std::cos(phi),
-	  s = std::sin(phi);
-	if(S->have(fieldbit::x)) rotate(b.pos (), c,s);
-	if(S->have(fieldbit::v)) rotate(b.vel (), c,s);
-	if(S->have(fieldbit::a)) rotate(b.acc (), c,s);
-	if(S->have(fieldbit::j)) rotate(b.jerk(), c,s);
-	if(S->have(fieldbit::w)) rotate(b.vprd(), c,s);
-	if(S->have(fieldbit::z)) rotate(b.zet (), c,s);
-      }
+  bool set_centre::manipulate(const snapshot*S) const {
+    S->set_pointer(X0,"xcen");
+    S->set_pointer(V0,"vcen");
     return false;
   }
   //////////////////////////////////////////////////////////////////////////////
 } }
 
-__DEF__MAN(falcON::Manipulate::randomize_azimuth)
+__DEF__MAN(falcON::Manipulate::set_centre)
+
+////////////////////////////////////////////////////////////////////////////////
+    

@@ -1,38 +1,63 @@
-// -*- C++ -*-                                                                 |
-//-----------------------------------------------------------------------------+
-//                                                                             |
-// add_plummer.cc                                                              |
-//                                                                             |
-// Copyright (C) 2004-2006 Walter Dehnen                                       |
-//                                                                             |
-// This program is free software; you can redistribute it and/or modify        |
-// it under the terms of the GNU General Public License as published by        |
-// the Free Software Foundation; either version 2 of the License, or (at       |
-// your option) any later version.                                             |
-//                                                                             |
-// This program is distributed in the hope that it will be useful, but         |
-// WITHOUT ANY WARRANTY; without even the implied warranty of                  |
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU           |
-// General Public License for more details.                                    |
-//                                                                             |
-// You should have received a copy of the GNU General Public License           |
-// along with this program; if not, write to the Free Software                 |
-// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                   |
-//                                                                             |
-//-----------------------------------------------------------------------------+
+// -*- C++ -*-                                                                  
+////////////////////////////////////////////////////////////////////////////////
+///                                                                             
+/// \file   src/manip/add_plummer.cc                                            
+///                                                                             
+/// \author Walter Dehnen                                                       
+/// \date   2004-2006                                                           
+///                                                                             
+////////////////////////////////////////////////////////////////////////////////
+//                                                                              
+// Copyright (C) 2004-2006 Walter Dehnen                                        
+//                                                                              
+// This program is free software; you can redistribute it and/or modify         
+// it under the terms of the GNU General Public License as published by         
+// the Free Software Foundation; either version 2 of the License, or (at        
+// your option) any later version.                                              
+//                                                                              
+// This program is distributed in the hope that it will be useful, but          
+// WITHOUT ANY WARRANTY; without even the implied warranty of                   
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
+// General Public License for more details.                                     
+//                                                                              
+// You should have received a copy of the GNU General Public License            
+// along with this program; if not, write to the Free Software                  
+// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                    
+//                                                                              
+////////////////////////////////////////////////////////////////////////////////
+//                                                                              
+// history:                                                                     
+//                                                                              
+// v 1.0    11/07/2006  WD namespace falcON::Manipulate; doxygen docu added     
+////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
 #include <public/utils.h>
 #include <random.h>
 #include <ctime>
 #include <cmath>
 
-namespace {
-  using namespace falcON;
-  //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // class add_plummer                                                        //
-  //                                                                          //
-  //////////////////////////////////////////////////////////////////////////////
+namespace falcON { namespace Manipulate {
+  // ///////////////////////////////////////////////////////////////////////////
+  //                                                                            
+  // class add_plummer                                                          
+  //                                                                            
+  /// manipulator: adds new bodies drawn from a Plummer sphere                  
+  ///                                                                           
+  /// This manipulator adds N (pars[0]) new bodies drawn from a Plummer sphere, 
+  /// one per manipulation.                                                     
+  ///                                                                           
+  /// Meaning of the parameters:\n                                              
+  /// pars[0] # bodies to be added\n                                            
+  /// pars[1] GM of Plummer sphere (default: 1)\n                               
+  /// pars[2] scale radius of Plummer sphere (default: 1) \n                    
+  /// pars[3] random seed (default: seconds since 1st Jan 1970) \n              
+  /// pars[4] mass per new body (default: GM/N) \n                              
+  /// pars[5] individual softening length, if applicable (default: 0.1) \n      
+  ///                                                                           
+  /// Usage of pointers: none\n                                                 
+  /// Usage of flags:    none\n                                                 
+  //                                                                            
+  // ///////////////////////////////////////////////////////////////////////////
   class add_plummer : public manipulator {
   private:
     const   Random3 Ran;
@@ -155,6 +180,6 @@ namespace {
     return false;
   }
   //////////////////////////////////////////////////////////////////////////////
-} // namespace {
+} }
 
-__DEF__MAN(add_plummer)
+__DEF__MAN(falcON::Manipulate::add_plummer)

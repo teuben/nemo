@@ -1,14 +1,14 @@
 // -*- C++ -*-                                                                  
 ////////////////////////////////////////////////////////////////////////////////
 ///                                                                             
-/// \file   src/manip/lagrange.cc                                               
+/// \file   src/manip/bound_centre.cc                                           
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2004-2006                                                           
+/// \date   2006                                                                
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2004-2006 Walter Dehnen                                        
+// Copyright (C) 2006 Walter Dehnen                                             
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -28,125 +28,121 @@
 //                                                                              
 // history:                                                                     
 //                                                                              
-// v 1.0    27/06/2006  WD using bodyset in 'subset'                            
-// v 1.1    27/06/2006  WD using filter in 'filter' instead of 'subset'         
-// v 1.2    07/07/2006  WD using flags::ignore instead of filter                
+// v 0.0    11/07/2006  WD created                                              
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
-#include <public/basic.h>
-#include <public/tools.h>
 #include <public/io.h>
-#include <ctime>
-#include <cmath>
 
 namespace falcON { namespace Manipulate {
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
-  // class lagrange                                                             
+  // class bound_centre                                                         
   //                                                                            
-  /// manipulator: computes Lagrange radii for subset, writes them to file      
+  /// manipulator: sets the centre position & velocity: that of most bound body 
   ///                                                                           
-  /// This manipulator computes the Lagrange radii w.r.t. centre 'xcen' for     
-  /// all bodies in_subset() (default: all, see set_subset), and writes them    
-  /// to file.                                                                  
+  /// This manipulator finds the most bound body from those in_subset()         
+  /// (default: all) and puts its position and velocity in 'xcen' and 'vcen'    
+  /// to be used by subsequent manipulators, such as sphereprof.                
   ///                                                                           
   /// Meaning of the parameters:\n                                              
-  /// par[0-n]: mass fractions for which Lagrange radii shall be computed     \n
-  /// file:     file name for output of table with Lagrange radii             \n
+  /// file: write centre position to file.                                      
   ///                                                                           
-  /// Usage of pointers: uses 'xcen'\n                                          
+  /// Usage of pointers: sets 'xcen' and 'vcen'\n                               
   /// Usage of flags:    uses in_subset()\n                                     
   ///                                                                           
   // ///////////////////////////////////////////////////////////////////////////
-  class lagrange : public manipulator {
+  class bound_centre : public manipulator {
   private:
-    int                 N;
-    double             *M;
-    mutable double     *R;
-    mutable output      OUT;
-    mutable bool        FST;
+    mutable output OUT;
+    mutable vect   XCEN,VCEN;
+    mutable bool   FIRST;
     //--------------------------------------------------------------------------
   public:
-    const char* name    () const { return "lagrange"; }
-    const char* describe() const {
-      return
-	"computes lagrange radii of bodies passing 'filter' (default: all) "
-	"w.r.t. \"xcen\" (default: origin)";
+    const char*name    () const { return "bound_centre"; }
+    const char*describe() const {
+      return 
+	"provides 'xcen' and 'vcen' as position and velocity of the"
+        "most bound body in_subset() (default: all)";
     }
     //--------------------------------------------------------------------------
-    fieldset need   () const { return fieldset::f | fieldset::m | fieldset::x; }
+    fieldset need   () const { return fieldset::p | fieldset::basic; }
     fieldset provide() const { return fieldset::o; }
     fieldset change () const { return fieldset::o; }
     //--------------------------------------------------------------------------
+    bound_centre(const double*pars,
+		 int          npar,
+		 const char  *file) falcON_THROWING
+    : OUT  ( file ),
+      XCEN ( vect(zero) ),
+      VCEN ( vect(zero) ),
+      FIRST( true )
+    {
+      if(debug(2) || npar)
+	std::cerr<<" Manipulator \"bound_centre\" centre:\n"
+		 <<" find most bound body in_subset() (default: all)\n";
+    }
+    //--------------------------------------------------------------------------
     bool manipulate(const snapshot*) const;
     //--------------------------------------------------------------------------
-    lagrange(const double*pars,
-	     int          npar,
-	     const char  *file) :
-      N   ( npar ),
-      M   ( npar>0? falcON_NEW(double,npar) : 0 ),
-      R   ( npar>0? falcON_NEW(double,npar) : 0 ),
-      OUT ( file? file : "." ),
-      FST ( true )
-    {
-      for(int i=0; i!=N; ++i) M[i] = pars[i];
-      if(file == 0 || npar == 0) {
-	std::cerr<<
-	  " Manipulator \""<<name()<<"\":\n"
-	  " computes lagrange radii w.r.t. 'xcen' (default: origin)\n"
-	  " at given mass fractions (parameters) for bodies passing\n"
-	  " 'filter' (default: all) and writes them given data file.\n";
-      }
-      if(file == 0)
-	error("Manipulator \"%s\": no output file given\n",name());
-      if(!OUT.is_open())
-	error("Manipulator \"%s\": couldn't open output\n",name());
-      if(npar == 0)
-	error("Manipulator \"%s\": no mass fractions given\n",name());
-    }
-    //--------------------------------------------------------------------------
-    ~lagrange() {
-      if(M) falcON_DEL_A(M); 
-      if(R) falcON_DEL_A(R);
-    }
-  };
+    ~bound_centre() {}
+  };// class bound_centre
   //////////////////////////////////////////////////////////////////////////////
-  bool lagrange::manipulate(const snapshot*S) const {
-    if(S->have_not(need())) {
-      warning("Manipulator \"%s\" insufficient data\n",name());
-      return false;
-    }
-    if(FST) {
-      FST = false;
+  bool bound_centre::manipulate(const snapshot*S) const
+  {
+    if(FIRST && OUT) {
+      FIRST = false;
       OUT  << "#\n"
-	   << "# output from Manipulator \"lagrange\"\n";
-      if(RunInfo::cmd_known())
-	OUT<< "#\n# command: \""<<RunInfo::cmd() <<"\"\n";
+	   << "# output from Manipulator \"bound_centre\"\n#\n";
+      if(RunInfo::cmd_known ()) OUT<<"# command: \""<<RunInfo::cmd ()<<"\"\n";
       OUT  << "# run at "<<RunInfo::time()<<'\n';
       if(RunInfo::user_known())
 	OUT<< "#     by \""<<RunInfo::user()<<"\"\n";
       if(RunInfo::host_known())
 	OUT<< "#     on \""<<RunInfo::host()<<"\"\n";
       if(RunInfo::pid_known())
-	OUT<< "#     pid "<<RunInfo::pid()<<'\n';
-      OUT  << "#\n# time      ";
-      for(int i=0; i!=N; ++i)
-	OUT << " r[" << std::setw(4) << 100*M[i] << "%]";
-      OUT  << "\n#-----------";
-      for(int i=0; i!=N; ++i)
-	OUT << "---------";
-      OUT << '\n';
-      OUT.stream().setf(std::ios::left, std::ios::adjustfield);
+	OUT<<"#     pid "<<RunInfo::pid()<<'\n';
+      OUT  << "#\n# "
+	   << "           time  "
+	   << "              x               y               z  "
+	   << "             vx              vy              vz  "
+	   << "\n# ---------------"
+	   << "-------------------------------------------------"
+	   << "-------------------------------------------------\n";
     }
-    const vect*X0= S->pointer<vect>("xcen");
-    find_lagrange_rad(S,N,M,R,X0);
-    OUT  << std::setw(12) << S->time();
-    for(int i=0; i!=N; ++i)
-      OUT<< ' ' << std::setw(8) << R[i];
-    OUT  << std::endl;
+    real Emin = 1.e10;
+    if(S->have(fieldbit::q)) {
+      LoopSubsetBodies(S,b) {
+	real E = half*norm(vel(b)) + pot(b) + pex(b);
+	if(E < Emin) {
+	  XCEN = pos(b);
+	  VCEN = vel(b);
+	}
+      }
+    } else {
+      LoopSubsetBodies(S,b) {
+	real E = half*norm(vel(b)) + pot(b);
+	if(E < Emin) {
+	  XCEN = pos(b);
+	  VCEN = vel(b);
+	}
+      }
+    }
+    if(OUT)
+      OUT <<"  "
+	  << std::setw(15) << std::setprecision(8) << S->time() << "  "
+	  << std::setw(15) << std::setprecision(8) << XCEN[0]   << ' '
+	  << std::setw(15) << std::setprecision(8) << XCEN[1]   << ' '
+	  << std::setw(15) << std::setprecision(8) << XCEN[2]   << "  "
+	  << std::setw(15) << std::setprecision(8) << VCEN[0]   << ' '
+	  << std::setw(15) << std::setprecision(8) << VCEN[1]   << ' '
+	  << std::setw(15) << std::setprecision(8) << VCEN[2]   << std::endl;
+    S->set_pointer(&XCEN,"xcen");
+    S->set_pointer(&VCEN,"vcen");
     return false;
   }
   //////////////////////////////////////////////////////////////////////////////
 } }
 
-__DEF__MAN(falcON::Manipulate::lagrange)
+__DEF__MAN(falcON::Manipulate::bound_centre)
+
+////////////////////////////////////////////////////////////////////////////////
