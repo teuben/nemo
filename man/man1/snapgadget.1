@@ -1,4 +1,4 @@
-.TH SNAPGADGET 1NEMO "8 September 2003"
+.TH SNAPGADGET 1NEMO "5 July 2006"
 .SH NAME
 snapgadget \- convert NEMO snapshot files to gadget files
 .SH SYNOPSIS
@@ -29,6 +29,9 @@ Times of the snapshots to select for output. Default: all
 .TP 
 \fBswap=\fP
 Force swaping bytes for other-endian machines [f] 
+.SH CAVEAT
+There is an option to run gadget in double precision mode, their output files 
+may not be compatible with this version of the program.
 .SH SEE ALSO
 gadgetsnap(1NEMO), snapshot(5NEMO)
 .PP
