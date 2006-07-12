@@ -1,0 +1,105 @@
+# -*- makefile -*-
+################################################################################
+#
+# make/pjm for various bits and bobs
+#
+################################################################################
+IPJM		:= $(INC)pjm/
+SPJM		:= $(SRC)pjm/
+
+pjmCDM_h		:= $(IPJM)pjmCDM.h
+anyhalo_h		:= $(IPJM)anyhalo.h
+WD99disk_h		:= $(IPJM)WD99disk.h
+myprofile_h		:= $(IPJM)myprofile.h $(body_h)
+
+pjmCDM_cc		:= $(SPJM)pjmCDM.cc $(pjmCDM_h) \
+				$(inline_io_h) $(tupel_h) $(numerics_h) \
+				$(WDMath_h) $(spline_h)
+anyhalo_cc		:= $(SPJM)anyhalo.cc $(anyhalo_h) \
+				$(inline_io_h) $(tupel_h) $(numerics_h) \
+				$(WDMath_h) $(spline_h)
+WD99disk_cc		:= $(SPJM)WD99disk.cc $(WD99disk_h) $(Pi_h) \
+				$(inline_io_h) $(tupel_h) $(numerics_h) \
+				$(WDMath_h) $(spline_h) $(random_h)
+myprofile_cc		:= $(SPJM)myprofile.cc $(myprofile_h) $(Pi_h) \
+				$(numerics_h)
+
+$(LIB)pjmCDM.o:		$(pjmCDM_cc) $(makeproper)
+			$(MAKE_OBJ) $(DNEMO)
+$(LIB)anyhalo.o:	$(anyhalo_cc) $(makeproper)
+			$(MAKE_OBJ) $(DNEMO)
+$(LIB)WD99disk.o:	$(WD99disk_cc) $(makeproper)
+			$(MAKE_OBJ) $(DNEMO)
+$(LIB)myprofile.o:	$(myprofile_cc) $(makeproper)
+			$(MAKE_OBJ)
+$(ACC)truncNFW.so:	$(SPJM)acc/truncNFW.cc $(spline_h) \
+			$(numerics_h) $(Pi_h) $(makeproper) make/acc
+			$(MAKEACC)
+
+ifdef NEMO
+$(BIN)mover:		$(SPJM)mover.cc $(main_h) $(inline_io_h) \
+				$(io_h) $(body_h) $(tools_h) $(makepublic)
+			$(MAKE_EXE) $(NEMO_EXE_FLGS)
+$(BIN)Rotcurve:		$(SPJM)Rotcurve.cc $(main_h) $(io_h) $(tupel_h)
+			$(MAKE_EXE) $(NEMO_EXE_FLGS)
+$(BIN)Rotcurve2:	$(SPJM)Rotcurve2.cc $(main_h) $(io_h) $(tupel_h)
+			$(MAKE_EXE) $(NEMO_EXE_FLGS)
+$(BIN)mkpjmcdm:		$(SPJM)mkpjmcdm.cc $(main_h) $(sample_h) $(pjmCDM_h) \
+				$(io_h) $(LIB)pjmCDM.o $(makeproper)
+			$(MAKE_EXE) $(LIB)pjmCDM.o $(NEMO_EXE_FLGS)
+$(BIN)mkanyhalo:	$(SPJM)mkanyhalo.cc $(main_h) $(sample_h) \
+				$(anyhalo_h) $(io_h) \
+				$(LIB)anyhalo.o $(makeproper)
+			$(MAKE_EXE) $(LIB)anyhalo.o $(NEMO_EXE_FLGS)
+$(BIN)mkWD99disk:		$(SPJM)mkWD99disk.cc $(main_h) $(WD99disk_h) $(io_h) \
+				$(LIB)WD99disk.o $(makeproper)
+			$(MAKE_EXE) $(LIB)WD99disk.o $(NEMO_EXE_FLGS)
+$(BIN)myradial_profile:	$(SPJM)myradial_profile.cc $(main_h) $(tool_h) \
+				$(falcON) $(LIB)myprofile.o $(makeproper)
+			$(MAKE_EXE) $(LIB)myprofile.o $(NEMO_EXE_FLGS)
+$(BIN)normalise	:	$(SPJM)normalise.cc
+			$(CXX) -o $(BIN)$@ $<
+$(BIN)scalehalomass:	$(SPJM)scalehalomass.cc
+			$(CXX) -o $(BIN)$@ $<
+$(BIN)comparehalomass:	$(SPJM)comparehalomass.cc
+			$(CXX) -o $(BIN)$@ $<
+$(BIN)massatradius:	$(SPJM)massatradius.cc
+			$(CXX) -o $(BIN)$@ $<
+
+mover			:	$(falcON) $(BIN)mover
+Rotcurve		:	$(falcON) $(BIN)Rotcurve
+Rotcurve2		:	$(falcON) $(BIN)Rotcurve2
+mkpjmcdm		:	$(falcON) $(BIN)mkpjmcdm
+mkanyhalo 		:	$(falcON) $(BIN)mkanyhalo
+mkWD99disk		:	$(falcON) $(BIN)mkWD99disk
+myradial_profile	:	$(falcON) $(BIN)myradial_profile
+normalise		:	$(BIN)normalise
+scalehalomass		:	$(BIN)scalehalomass
+comparehalomass		:	$(BIN)comparehalomass
+massatradius		:	$(BIN)massatradius
+
+all_pjm		:	mover Rotcurve Rotcurve2 mkpjmcdm mkanyhalo \
+			mkWD99disk myradial_profile \
+		 	$(ACC)truncNFW.so massatradius comparehalomass \
+			scalehalomass normalise 
+
+else
+
+all_pjm:
+mover		:
+			@echo "ERROR: you need NEMO to make \"$@\""
+Rotcurve	:
+			@echo "ERROR: you need NEMO to make \"$@\""
+Rotcurve2	:
+			@echo "ERROR: you need NEMO to make \"$@\""
+mkpjmcdm	:
+			@echo "ERROR: you need NEMO to make \"$@\""
+mkanyhalo	:
+			@echo "ERROR: you need NEMO to make \"$@\""
+mkWD99disk	:
+			@echo "ERROR: you need NEMO to make \"$@\""
+myradial_profile:
+			@echo "ERROR: you need NEMO to make \"$@\""
+endif
+
+all:		all_pjm

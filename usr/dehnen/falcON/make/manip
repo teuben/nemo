@@ -23,15 +23,46 @@ $(MANIP)analyse_crash.so:	$(SMAN)analyse_crash.cc $(defman_h) $(Pi_h)
 $(MANIP)analyse_bar_halo.so:	$(SMAN)analyse_bar_halo.cc $(defman_h) \
 					$(Pi_h) $(tools_h)
 				$(MAKEMANIP)
+$(MANIP)bound_centre.so:	$(SMAN)bound_centre.cc $(defman_h) $(io_h)
+				$(MAKEMANIP)
+$(MANIP)density.so:		$(SMAN)density.cc $(defman_h) $(io_h) \
+					$(neighbours_h) $(makeproper)
+				$(MAKEMANIP)
+$(MANIP)diskanalysis.so:	$(SMAN)diskanalysis.cc $(defman_h) \
+					$(diskanalysis_h) $(makeproper)
+				$(MAKEMANIP)
 $(MANIP)lagrange.so:		$(SMAN)lagrange.cc $(defman_h) $(tools_h) \
 					$(io_h)
 				$(MAKEMANIP)
+$(MANIP)dens_centre.so:		$(SMAN)dens_centre.cc $(defman_h) $(tools_h) \
+					$(io_h) $(makeproper)
+				$(MAKEMANIP)
+$(MANIP)densprof.so:		$(SMAN)densprof.cc $(defman_h) $(io_h) \
+					$(makeproper)
+				$(MAKEMANIP)
+$(MANIP)projprof.so:		$(SMAN)projprof.cc $(defman_h) $(io_h) \
+					$(profile_h) $(makeproper)
+				$(MAKEMANIP)
 $(MANIP)quench_halo.so:		$(SMAN)quench_halo.cc $(defman_h)
 				$(MAKEMANIP)
-$(MANIP)symmetrize_pairs.so:	$(SMAN)symmetrize_pairs.cc $(defman_h)
+$(MANIP)sphereprof.so:		$(SMAN)sphereprof.cc $(defman_h) $(io_h) \
+					$(profile_h) $(makeproper)
 				$(MAKEMANIP)
 $(MANIP)randomize_azimuth.so:	$(SMAN)randomize_azimuth.cc $(defman_h) \
 					$(Pi_h) $(random_h)
+				$(MAKEMANIP)
+$(MANIP)set_centre.so:		$(SMAN)set_centre.cc $(defman_h)
+				$(MAKEMANIP)
+$(MANIP)set_filter.so:		$(SMAN)set_filter.cc $(defman_h) \
+					$(bodyfunc_h) $(makeproper)
+				$(MAKEMANIP)
+$(MANIP)set_subset.so:		$(SMAN)set_subset.cc $(defman_h) \
+					$(bodyfunc_h) $(makeproper)
+				$(MAKEMANIP)
+$(MANIP)symmetrize_pairs.so:	$(SMAN)symmetrize_pairs.cc $(defman_h)
+				$(MAKEMANIP)
+$(MANIP)use_filter.so:		$(SMAN)use_filter.cc $(defman_h) \
+					$(bodyfunc_h) $(makeproper)
 				$(MAKEMANIP)
 $(MANIP)EstimateF.so:		$(SMAN)EstimateF.cc $(defman_h)
 				$(MAKEMANIP)
@@ -42,10 +73,40 @@ $(MANIP)removesph.so:		$(SMAN)removesph.cc $(defman_h)
 $(MANIP)LMXBkick.so:		$(SMAN)LMXBkick.cc $(defman_h)
 				$(MAKEMANIP)
 
+ifdef DPROPER
+
 manips		:	$(MANIP)add_plummer.so \
+			$(MANIP)bound_centre.so \
+			$(MANIP)density.so \
+			$(MANIP)diskanalysis.so \
+			$(MANIP)densprof.so \
+			$(MANIP)dens_centre.so \
 			$(MANIP)lagrange.so \
+			$(MANIP)projprof.so \
+			$(MANIP)sphereprof.so \
+			$(MANIP)set_centre.so \
+			$(MANIP)set_filter.so \
+			$(MANIP)set_subset.so \
 			$(MANIP)symmetrize_pairs.so \
-			$(MANIP)randomize_azimuth.so
+			$(MANIP)randomize_azimuth.so \
+			$(MANIP)use_filter.so
+
+else
+
+manips		:	$(MANIP)add_plummer.so \
+			$(MANIP)bound_centre.so \
+			$(MANIP)dens_centre.so \
+			$(MANIP)lagrange.so \
+			$(MANIP)projprof.so \
+			$(MANIP)sphereprof.so \
+			$(MANIP)set_centre.so \
+			$(MANIP)set_filter.so \
+			$(MANIP)set_subset.so \
+			$(MANIP)symmetrize_pairs.so \
+			$(MANIP)randomize_azimuth.so \
+			$(MANIP)use_filter.so
+
+endif
 
 # -----
 # mains

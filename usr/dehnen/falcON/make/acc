@@ -32,6 +32,8 @@ $(ACC)Combined.so:		$(SACC)Combined.cc $(timer_h) make/acc
 				$(MAKEACC)
 $(ACC)Dehnen.so:		$(SACC)Dehnen.cc make/acc
 				$(MAKEACC)
+$(ACC)DehnenMcLaughlin.so:	$(SACC)DehnenMcLaughlin.cc make/acc
+				$(MAKEACC)
 $(ACC)GalPot.so:		$(SACC)GalPot.cc $(GalPot_h) $(defacc_h) \
 					make/acc
 				$(MAKEACC)
@@ -53,8 +55,11 @@ $(ACC)Point.so:			$(SACC)Point.cc $(defacc_h) make/acc
 $(ACC)PotExp.so:		$(SACC)PotExp.cc $(PotExp_h) make/acc
 				$(MAKEACC) -I$(SRC)
 
+ifdef DPROPER
+
 acc:				$(ACC)Combined.so \
 				$(ACC)Dehnen.so \
+				$(ACC)DehnenMcLaughlin.so \
 				$(ACC)GalPot.so \
 				$(ACC)Hernquist.so \
 				$(ACC)NFW.so \
@@ -63,6 +68,21 @@ acc:				$(ACC)Combined.so \
 				$(ACC)Plummer.so \
 				$(ACC)Point.so \
 				$(ACC)PotExp.so
+
+else
+
+acc:				$(ACC)Combined.so \
+				$(ACC)Dehnen.so \
+				$(ACC)DehnenMcLaughlin.so \
+				$(ACC)GalPot.so \
+				$(ACC)Hernquist.so \
+				$(ACC)NFW.so \
+				$(ACC)MiyamotoNagai.so \
+				$(ACC)Monopole.so \
+				$(ACC)Plummer.so \
+				$(ACC)Point.so
+
+endif
 
 cleanacc:
 				rm -f $(ACC)/*.so

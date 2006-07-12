@@ -112,12 +112,12 @@ CPUFLAGS	:= -mcpu=k8 -m32 -mpreferred-stack-boundary=4
 endif
 endif
 
-OPTFLAGS	:= -O2 -fPIC $(CPUFLAGS) -ffast-math -funroll-loops -fforce-addr -fomit-frame-pointer -rdynamic $(STATIC)
-
 ifdef DEBUG
-#OPTFLAGS	:= -g -p $(OPTFLAGS)
-OPTFLAGS	:= -g -p -fPIC $(CPUFLAGS) -rdynamic $(STATIC)
+OPTFLAGS	:= -ggdb -fPIC $(CPUFLAGS) -rdynamic $(STATIC)
+else
+OPTFLAGS	:= -ggdb -O2 -fPIC $(CPUFLAGS) -ffast-math -funroll-loops -fforce-addr -fomit-frame-pointer -rdynamic $(STATIC)
 endif
+
 # this is used for compilation of code with inline assembly SSE instructions
 # it prevents the compiler to mess with SSE and break the code.
 NOSSE		:= -mno-sse -mno-sse2 -mno-sse3 -mfpmath=387
@@ -131,7 +131,7 @@ CC		:= pgcc
 FC		:= pgf77
 #OPTFLAGS	:= -fast -Minline=levels:10 -Mcache_align --no_exceptions -Minform=inform -D__PGCC__
 ifdef DEBUG
-OPTFLAGS	:= -g -inline_debug_info -O2 -fastsse --no_using_std --no_exceptions -Msafeptr -Minform=inform -D__PGCC__  $(STATIC)
+OPTFLAGS	:= -g -inline_debug_info -fastsse --no_using_std --no_exceptions -Msafeptr -Minform=inform -D__PGCC__  $(STATIC)
 else
 OPTFLAGS	:= -O2 -fastsse --no_using_std --no_exceptions -Msafeptr -Minform=inform -D__PGCC__  $(STATIC)
 endif
