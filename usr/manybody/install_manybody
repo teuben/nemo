@@ -286,7 +286,7 @@ echo  `date` Installing galactICS
 pushd $NEMO/usr/kuijken/GalactICS-exp/src >& /dev/null
    set log=$root/tmp/gal.log
    make -f Makefile.nemo all install >& $log
-   mknemo mkkd95 >& $log
+   mknemo mkkd95 >>& $log
 popd >& /dev/null
 rehash
 
