@@ -6,7 +6,7 @@
 INSTALLS += mantarget \
             target2 \
             target 
-target.path = $(NEMOBIN) 
+target.path = $(NEMOBIN)
 target2.path = $(NEMOBIN) 
 target2.files += ../script/frame2divx.pl 
 mantarget.path = $(NEMO)/man/man1
@@ -20,7 +20,8 @@ INCLUDEPATH = . \
 MOC_DIR = .moc/debug-shared-mt 
 UI_DIR = .ui/ 
 OBJECTS_DIR = .obj/debug-shared-mt 
-TARGET = ../bin/glnemo 
+DESTDIR = ../bin
+TARGET = glnemo
 CONFIG += debug \
           warn_on \
           qt \
@@ -94,4 +95,3 @@ SOURCES += glbox.cpp \
            frustumculling.cpp \
            gloctree.cpp \
            glcube.cpp 
-target.files = ../bin/glnemo
