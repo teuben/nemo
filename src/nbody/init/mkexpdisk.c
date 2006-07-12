@@ -37,7 +37,7 @@ string defv[] = {	/* DEFAULT INPUT PARAMETERS */
     "tab=f\n		  table output also? ",
     "zerocm=t\n           center the snapshot?",
     "headline=\n	  text headline for output ",
-    "VERSION=1.2c\n	  9-sep-01 PJT",
+    "VERSION=1.2d\n	  7-nov-05 PJT",
     NULL,
 };
 
@@ -147,12 +147,13 @@ local void makedisk()
 	   sig_r = 3.358 * Qtoomre * mu / kappa;
 	   sig_t = 0.5 * sig_r * kappa / omega;
 	   sig_z = 0.5 * sig_r;
-	} else {
+	} else if (cmode==2) {
 	   sig_z = sqrt(PI * mu * z0);          /* isothermal sech sheet */
            sig_r = 2.0 * sig_z;                 /* with constant scaleheight */
            Qtoomre = sig_r * kappa / (3.358 * mu);  /* See vdKruit/Searle */
 	   sig_t = 0.5 * sig_r * kappa / omega;
-        }
+        } else
+	    error("illegal mode=%d",cmode);
 
 	vrad_i = grandom(0.0, sig_r);
 	if (gammas > 0.0) 			/* Josh' method: averaged */
