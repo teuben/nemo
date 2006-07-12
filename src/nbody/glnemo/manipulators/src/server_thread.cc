@@ -125,6 +125,7 @@ void ServerThread::run()
   // Control variable for select_pos array
   char * selected_string;
   bool lock_mut=false;;
+  float mytime;
   while (!stop) {
     try {
       serverMB->recvData();
@@ -149,7 +150,7 @@ void ServerThread::run()
 	  PRINT_D std::cerr <<"["<<getMyid()<<"]"<< "Got authorization\n";
 	}
 	PRINT_D std::cerr <<"["<<getMyid()<<"]"<< "Sending time => [" << my_snapshot->time() << "]\n";
-	float mytime=my_snapshot->time();
+	mytime=my_snapshot->time();
 	serverMB->sendData(MessageBuffer::Time,1,(char *) &(mytime));                   // send time     
 	t_start=times(&qq);
 	PRINT_D std::cerr <<"start = " << t_start <<"\n";
