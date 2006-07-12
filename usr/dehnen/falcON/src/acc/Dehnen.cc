@@ -26,7 +26,7 @@
 namespace {
   class Dehnen {
     enum { hernquist, jaffe, general } model;
-    double g, g2, Pf, GM, Rs, Eq;;
+    double g, g2, Pf, GM, Rs, Eq;
   public:
     static const char* name() { return "Dehnen"; }
     Dehnen(const double*pars,
