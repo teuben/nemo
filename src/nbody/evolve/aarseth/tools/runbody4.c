@@ -137,7 +137,7 @@ string defv[] = {
     "format=%g\n      Format used for fort.10 input conditions if in= used",
     "KZ#=\n           [indexed] Override some kz= keywords",
 
-    "VERSION=0.4\n    10-mar-06 PJT",
+    "VERSION=0.4a\n   12-jul-06 PJT",
     NULL,
 };
 
@@ -170,7 +170,7 @@ nemo_main()
   string rundir = getparam("outdir");
   string fmt = getparam("format");
   string infile;
-  char fullname[256], runcmd[256], fmt7[256];
+  char dname[256], runcmd[256], fmt7[256];
   stream datstr, histr, instr, outstr;
 
   kstart = getiparam("kstart");
@@ -258,8 +258,8 @@ nemo_main()
 
   make_rundir(rundir);
 
-  sprintf(fullname,"%s/%s",rundir,parfile);
-  datstr = stropen(fullname,"w");    
+  sprintf(dname,"%s/%s",rundir,parfile);
+  datstr = stropen(dname,"w");    
   
     /*  New Run */
   
