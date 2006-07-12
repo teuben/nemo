@@ -167,7 +167,8 @@ type of open source policy for our codes).
 \section*{Unix Shell}
 
 The {\it manybody} guide assumes some knowledge
-of Unix. This means Linux and Mac are fine, but although cygwin on MS-Windows
+of Unix. This means Linux, Solaris and MacOSX should be fine, 
+but although cygwin on MS-Windows
 gets fairly close, your editor couldn't stomach some of 
 its limitations\footnote{YMMV, as they say in this business}.
 Most examples show simple snippets
@@ -205,11 +206,11 @@ in most places where a random seed is used (e.g. the NEMO {\tt seed=0} keyword
 would take a new seed based on the current date and time) 
 a fixed seed is taken (usually {\tt seed=123}) 
 so the example can actually be exactly reproduced sans compiler and optimization
-differences. In ``real life'' you may not always want to do this.
+differences. In ``real life'' you may not always want to do this!
 
 % yes, intel vs. gcc ; solaris vs. linux ; -g vs. -O on gnu. etc.
 
-\section*{Getting more Help}
+\section*{Getting More Help}
 
 After your account has been setup to use the {\it manybody} environment
 (see also Appendix A), there are several ways to get more help besides
@@ -226,8 +227,7 @@ on the keywords.
 \item
 The Unix {\tt man} and {\tt gman} commands can be used to view manual pages
 for all NEMO programs. Notably the {\it index(1)} and {\it programs(8)}
-manual pages given an overview of most commands (except its terribly
-outdated)
+manual pages given an overview of most commands.
 
 \item
 For those packages that have html formatted information, they are
@@ -249,7 +249,7 @@ In the true spirit of open source,
 numerous authors have contributed their software, which you can find on
 the CD. Without their generous contributions this guide would not be
 half the size and a quarter of the contents.
-Hopefully we will be able to instill this on the reader too.
+Hopefully we will be able to instill this spirit on the reader too.
 
 
 
@@ -299,6 +299,7 @@ are summarized
 in Table~\ref{t:codes}. A brief description of all of them will follow, and 
 for some a more detailed example will follow how they
 can be used in the {\it manybody} environment. 
+% For data interchange , see chapter 4.
 
 
 % By nature, these will be ``open source'' products.
@@ -328,7 +329,7 @@ can be used in the {\it manybody} environment.
 
 {\tt hnbody}  & PP & Rauch \& Hamilton 2004 & \\
 
-{\tt kira} & PP & Starlab et al. & d \\
+{\tt kira} & PP & Starlab team & d \\
 
 {\tt treecode} & PP & Barnes \& Hut 1986, Hernquist 1989 & s \\
 
@@ -336,7 +337,7 @@ can be used in the {\it manybody} environment.
 
 % kawaii's code
 
-{\tt gadget} & PP & Springel 2001  & g \\
+{\tt gadget} & PP & Springel 2001, 2005  & g \\
 
 {\tt scfm} & SFP & Hernquist 1992 & 205 \\
 
@@ -361,7 +362,7 @@ can be used in the {\it manybody} environment.
 \section{firstn}
 
 The first N-body code (skipping the pioneering analog experiments by 
-Holmberg (1941)
+Holmberg (1941))
 %Holmberg, Ap.J. 94, 385, 1941)
 was arguably written by von Hoerner (1960)  % (Z.f.Astrophys. 50, 184, 1960) 
 and has recently
@@ -403,19 +404,20 @@ and could be adapted quite easily.
 
 As listed, you can find the source code in {\tt \$NEMO/usr/aarseth/firstn/}. For 
 an explanation of the input parameter file, see the Unix man page for this program.
-{\it Q: compare with directcode?}
+% {\it Q: compare with directcode?}
 
-\section{nbody0, nbody00}
+\section{nbody0}
 
-A simple implementation of the variable timestep (an essential ingredient
+A basic implementation of the variable timestep (an essential ingredient
 to collisional stellar dynamics) was published in Appendix 4B in
 Binney \& Tremaine (1987). 
 You can find this implementation in Fortran ({\tt nbody0})
-as well as C ({\tt nbody00}) in NEMO, with both a simple ASCII dataformat,
+as well as an identical C
+({\tt nbody00}) in NEMO, with both a simple ASCII dataformat,
 as well as the better supported NEMO {\it snapshot} format. Aarseth likes
 to refer to this version as the ``Mickey Mouse'' version, and really prefers
 you to use the full version, {\tt nbody1}, or better yet,
-{\tt nbody4} or {\tt nbody4} (see below).
+{\tt nbody4} or {\tt nbody6} (see below).
 
 
 \footnotesize\begin{verbatim}
@@ -543,9 +545,10 @@ as {\tt nbody4} in NEMO. A NEMO frontend, much like the previous ones, is
 available as {\tt runbody4}. One novel addition to {\tt nbody4} is the
 capability of running one of several stellar evolution codes
 (e.g. Eggleton, Tout \& Hurley, Chernoff--Weinberg). An extensive manual
-has recently been made available on how to run it (Aarseth, 2006}.
+has recently been made available on how to run it (Aarseth, 2006)}.
 Currently the only other
-code capable of doing this is the {\tt kira} code in Starlab.
+code capable of doing combined dynamical and stellar evolution
+is the {\tt kira} code in Starlab.
 
 \section{nbody6}
 
@@ -567,8 +570,8 @@ arrays, now counts 83  ({\tt nbody1} counted 35 parameters, {\tt nbody2} has 42)
 
 \section{fewbody}
 
-Fregeau et al. (2004) recently reported on
-{\it fewbody} a software package for doing
+Fregeau et al. (2004) released 
+{\it fewbody}, a software package for doing
 small-N scattering experiments. It handles an arbitrary number of stars,
 and understands arbitrarily large hierarchies. For example, if the
 outcome of a scattering experiment between two triples is a stable
@@ -784,7 +787,7 @@ substantially.
 \begin{figure}[htb]
 \plottwo{kira1.ps}{kira2.ps}
 \caption[Lagrangian radii for kira and nbody0]
-{Lagrangian radii for kira (left, 10\%) and nbody0 (right, 11\%).
+{Lagrangian radii for {\tt kira} (left, 10\%) and {\tt nbody0} (right, 11\%).
 Both have been recentered using the potential $-\Phi^3$.
 }
 \label{f:kira}
@@ -959,7 +962,7 @@ standard distribution you will find 4 different ones:
 WARNING: this benchmark example (60,000 particles in a galaxy-galaxy collision)
  from the Gadget2  source code takes a little
 over 2000 steps,
-and can easily take an hour on a single CPU 3GHz Pentium-4 class CPU. T
+and can easily take an hour on a single 3 GHz Pentium-4 class CPU. 
 
 To use a dataset from NEMO, the data will have to be transformed using the
 {\tt snapgadget} and {\tt gadgetsnap} pair of programs:
@@ -995,8 +998,8 @@ The versions of Gadget that are pre-compiled are:
 \item Gadget2.cluster  
 \item Gadget2.galaxy   
 \item Gadget2.gassphere
-\item Gadget2.lcdm_gas 
-\begin{itemize}
+\item Gadget2.lcdm\_gas 
+\end{itemize}
 
 \section{quadcode}
 
@@ -1006,7 +1009,7 @@ The versions of Gadget that are pre-compiled are:
 An example of an $\mathcal{O}(N)$ code where the potential and forces are derived from
 a potential expansion in spherical harmonics  (White 1983, who dubbed it multipole expansion). 
 See also Hernquist \& Barnes, (1990). Fully integrated
-in NEMO, and very fast. Excellent to study the dynamics of a single galaxy,
+in NEMO, and very fast. Excellent to study the dynamics of an isolated galaxy,
 stability, check orbit theory etc.
 
 \footnotesize\begin{verbatim}
@@ -1078,7 +1081,8 @@ directory, that have been converted to a file {\tt scfm.dat} in the
 run directory.
 
 Note this program does not use dynamic memory, so the program needs to 
-be recompiled for more than the default number of particles.
+be recompiled for more than the default number of particles (10,000 in
+the current code, see {\tt src/nbody/evolve/scfm/scf.h}
 
 \section{CGS}
 
@@ -1332,7 +1336,7 @@ particular, they studied the resulting shapes.
 Sellwood (1997), in {\it Galaxy Dynamics by N-body Simulation},
 compared 5 different codes and argued that certain codes...
 Comparing direct N-body, tree and grid codes. Plummer
-sphere.
+sphere. {\it do what? stability?}
 
 
 \section{Heggie: Kyoto I - 1997}
@@ -1474,7 +1478,7 @@ others need the
 integrator for force calculations to place the initial conditions in a
 specific state consistent with the chosen integrator that uses that force. 
 The position of the 25th
-body in the 25-body problem is a simple 
+body in the IAU 25-body problem is a simple 
 example of where an on-the-fly calculation
 is needed.
 
@@ -1618,8 +1622,6 @@ xlab=Time "ylab=log(M(r))"
     test this by using a known 2body problem; 
     check with the work of Aladin in the 70s or 80s ?
 
-
-    Other questions: looking
 
 
 \end{verbatim}\normalsize
@@ -1868,7 +1870,8 @@ the orbit for one selected star from the simulation.
 
 A recent addition from the Marseille group, {\tt glnemo} is a versatile 
 interactive 3D viewer that can also display SPH/gas particles. Examples
-dataset are in {\tt \$NEMO/src/nbody/glnemo/snapshot}.
+dataset are in {\tt \$NEMO/src/nbody/glnemo/snapshot}. 
+Recent updates to  {\tt glnemo} included making animations.
 
 \section{Starlab}
 \subsection{xstarplot}
@@ -1918,7 +1921,7 @@ display.\footnote{See comments in {\tt \$NEMO/src/nbody/evolve/aarseth/triple/RE
 
 \section{Tioga}
 
-Written in ruby, in active development.
+Written in ruby, in active development. Good quality PDF output, animations are also possible.
 
 \section{glstarview}
 
@@ -2007,12 +2010,19 @@ this kind of dynamic query technique available in
 NEMO's program {\tt tabzoom}, which uses pgplot for visualization
 and a simple command line interface for interactions.
 
+\section{python}
+
+Excellent language, now very popular. Graphics interface {\tt matplotlib}.
+
+
 \section{R}
 
-Although R is a statistic package, it has a very nice integrated
+Although R is a statistics package, it has a very nice integrated
 way for visualization, and allows extending the package by using
 your own compiled code. It could potentially be useful for our
-type of analysis.
+type of analysis. URL: {\tt http://cran.us.r-project.org/}
+
+% some claim R is not good for large datasets, and of course loops are slow...
 
 \section{IDL}
 
@@ -2022,7 +2032,7 @@ analysis routines for IDL that are freely available.
 Gadget comes with some
 routines. See also NEMO's {\tt snapidl} routine to export data for IDL.
 The Berkeley group (Marc Davis) has some routines on their website
-and some of your instructors admit to using it.
+and some of your instructors admitted having used it (but they never inhaled).
 
 % give a snapidl example...
 
@@ -2033,8 +2043,8 @@ the better packages for this. Much like NEMO and Starlab, ImageMagic
 is a collection of image manipulation programs (e.g. convert, montage, mogrify).
 Reads and writes just about any image format, including some flavors
 of FITS. Most linux
-distributions make this package directly available, and place their
-binaries in {\tt /usr/bin}.
+distributions make this package directly available.
+
 
 \section{Movies}
 
@@ -2063,25 +2073,27 @@ $NEMO/csh/mkmpeg_movie : some example scripts to make movies
 
 \item 
 Find out what time step criterion the first N-body code (von Hoerner)
-was using. How do {\tt nbody0} and this program scale in their performance
-if you want to reach the same accuracy?
+was using. How do {\tt nbody0} and this program ({\tt firstn})
+scale in their performance if you want to reach the same accuracy?
 
 \item
-What is this peculiar ``{\tt time resets}'' quoted in one of the {\tt nbody0}
+What are these peculiar ``{\tt time resets}'' quoted in one of the {\tt nbody0}
 examples.
 
 \item
-Why was the location of the 25th particle not given in the IAU 25-body problem?
+Why was the location of the 25th particle not given in the IAU 25-body problem
+(Lecar 1968)?
 
 \item
 Take {\tt hackcode1}, There are two ways to get more accurate results:
-add a quadrupole term (as implemented in {\tt hackcode1\_qp} or decrease
+add a quadrupole term (as implemented in {\tt hackcode1\_qp}) or decrease
 the critical opening angle ({\tt tol=}). Device an experiment to show
 which of the two is the less compute intensive. Does it depend on the 
 number of particles or the configuration?
 
 \item
-Back to kindergarden: connect the dots in Figure~\ref{f:performance}.
+Back to kindergarden: connect the dots in Figure~\ref{f:performance}
+and label which codes they are.
 
 
 \item
@@ -2097,10 +2109,17 @@ What is better if you want to find the center of a snapshot.
 Using small N and doing a lot of (K) experiments, or 
 
 \item
-For a given object (for example a Plummer sphere), define a statistical
+For a given configuration (for example a Plummer sphere), define a statistical
 measure for the accurary of the treecode as a function of the critical
 opening angle, and compare the classical BH treecode O(NlogN) with and
 without quadrupole corrections to that of the O(N) Dehnen treecode.
+
+\item
+Follow up on the previous exercise and add Gadget2 in the comparison.
+
+\item
+Use CVS (see Appendix C) and study the performance of gyrfalcON on the following
+dates:  now, 1-jul-2006, ..
 
 \end{enumerate}
 
@@ -2142,6 +2161,8 @@ Binney, J. \& Tremaine, S. - {\it Galactic Dynamics}, Princeton University Press
 Cruz, F.; Aguilar, L. A.; Carpintero, D. D
 {\it A New Method to Find the Potential Center of N-body Systems} - 2002RMxAA..38..225C
 {\bf RMxAA..38-2\_cruz.pdf}
+
+Bode - (TPM)
 
 Dehnen, W. - {\it A Very Fast and Momentum-Conserving Tree Code} - 2000
 astro-ph/0003209 : {\bf 0003209.ps}, {\bf 2002JCP...179...27D.pdf}
@@ -2273,6 +2294,8 @@ Takahashi, Koji; Portegies Zwart, Simon F. - 2002 -
 Theis, C. {it  Two-body relaxation in softened potentials} - 1998, Astron.Astroph. 330, 1180:
 {\bf theis98.pdf}.
 
+Trenti 2005.
+
 von Hoerner, S. - 1960 - Z.f.Astrophys. 50, 184.
 {\bf 1960ZA.....50..184V.pdf}
 
@@ -2320,7 +2343,11 @@ http://www.ids.ias.edu/~starlab/                          Starlab website
 % \part{Appendices}
 \chapter                {Setting Up Your Account}
 
-\section{Linux Lab setup}
+\section{Linux Lab setup (GH 2006)}
+
+We will be using 25 Linux workstations, running Suse 10.1 (X86-64) in 64bit mode.
+
+\section{Linux Lab setup (AMS)}
 
 For those working on the Linux Lab machines, here is some essential 
 information how to login and setup your account:
@@ -2407,6 +2434,9 @@ NEMO make a CCD type observation of dark matter
 {\tt ds9 a0.fits} : vizualize it. right mouse down changes contrast. Try zooming in and changing color map to SLS.
 
 \item
+TBA: some Gadget2 test
+
+\item
 {\tt makeplummer -n 32 > p32.dyn} : Starlab : create a Plummer sphere
 
 
@@ -2445,9 +2475,9 @@ Left mouse down rotates. Right mouse down zooms. $>>$ button starts movie.
 
   partiview        4D (space+time) data viewer
   ds9              a FITS image display program
-  GalactICS        tools that mkkd95 (galactic model builder) need
   fewbody          programs that come with Fregeau's ``fewbody''
   nbody6           Aarseth's nbody6 integrator
+  gadget2          SPH-treecode for cosmology
 \end{verbatim}
 
 
@@ -2506,7 +2536,7 @@ In the root directory of your CD you will find the following files and directori
 \section{Installation}
 
 If your linux system is not Fedora Core 5
-or compatible, some recompilation may be needed, since its shared library requests
+or compatible, recompilation may be needed, since its shared library requests
 may be conflicting with the ones your system has.
 The script
 {\tt install\_manybody} should guide you through this. You can find a copy
@@ -2534,7 +2564,6 @@ incompatible libraries or tools. Some of this is noted in Appendix I.
 
 
 \footnotesize\begin{verbatim}
-   # your compiler suite could be wrong
    4% setenv CC  gcc32
    5% setenv CXX g++32
    6% setenv F77 g77
@@ -2589,7 +2618,7 @@ and for packages that depend on other packages, we would use something like
 
 \footnotesize\begin{verbatim}
 % install_manybody
-install_manybody : version $Id$
+install_manybody : version ...
 Wed Jul 5 14:56:00 EDT 2006 Using pkg=/scratch11/teuben/manybody_pkg
 Wed Jul 5 14:56:01 EDT 2006 Installing cvsutils
 Wed Jul 5 14:56:02 EDT 2006 Installing ruby
@@ -2636,6 +2665,10 @@ In this particular example you see some errors occurred, {\tt glstarview} and
 {\tt partiview} did not
 properly build on this machine (a missing library), and there was no fortran-95
 compiler available for EZ to be compiled.
+
+\section{ACS}
+
+Say something about the Hut \& Makino {\it ACS} series. ACS1 (C++) vs. ACS2 (ruby).
 
 \section{Random Notes}
 
@@ -2822,6 +2855,13 @@ write permission, viz.
   3% cvschroot :pserver:pteuben@cvs.astro.umd.edu:/home/cvsroot
 \end{verbatim}\normalsize
 
+\section{svn}
+
+The future of CVS is unclear. A lot of open source packages are  switching
+to SubVersion (command: {\tt svn}). In practice the {\tt cvs} and 
+{\tt svn} commands are nearly interchangeable.
+
+
 \begin{figure}[htb]
 \plotone{cvs.eps}
 \caption[CVS diagram]
@@ -2925,7 +2965,7 @@ The figures on the cover page were made in the following way:
 \section{Collisional Orbit}
 \label{s:pyth} 
 
-Although the Figure8 orbit is perhaps very artistic, it is not very representative
+Although the {\it Figure8} orbit is perhaps very artistic, it is not very representative
 for orbits in collisional systems, in fact, almost more appropriate
 for collisionless systems!
 The collisional orbit choosen was drawn from the Pythagoran problem:
@@ -3165,14 +3205,15 @@ there are controlled with the  {\tt seed=} program keyword.
 \section{Creating a new program}
 
 There are roughly three ways one can decide on how to add functionality
-to NEMO (read: creating a new program):
+to NEMO (i.e. creating a new program):
 
 \begin{enumerate}
 \item  Add a keyword to an existing program with nearly the same functionality.
 Be aware that you should
 then make it backwards compatible, i.e. the default value for the keyword
-should reflect the way it was working before. Don't forget to add
-the new keyword to the manual page (NEMO/man/man1 typically)
+should reflect the way it was working before to prevent surprising the
+old-timers.  Also, don't forget to add
+this new keyword to the manual page (NEMO/man/man1 typically)
 
 \item
 Clone an existing program, and give it a nice new name. This means you'll also 
@@ -3190,13 +3231,13 @@ is committed to CVS.
 
 \item
 Write a whole new program. You can either use {\tt NEMO/src/scripts/template},
-and fill in the blanks, or write it really from scratch. See also 
+and fill in the blanks, or write it from scratch. See also 
 previous comments on Makefile, Testfile and mknemo.
 
 \footnotesize\begin{verbatim}
-    %1 $NEMO/src/scripts/template foo a=1 b=2 n=10
-    %2 bake foo
-    %3 foo c=1 
+    1% $NEMO/src/scripts/template foo a=1 b=2 n=10
+    2% bake foo
+    3% foo c=1 
     ### Fatal error [foo]: Parameter "c" unknown
 \end{verbatim}\normalsize
 
@@ -3260,6 +3301,10 @@ Update the code, recompile the library and the recompile the program:
 
 \end{enumerate}
 
+\section{Other}
+
+...not yet...
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %\cleardoublepage
 \chapter                {Libraries}
@@ -3280,7 +3325,7 @@ Mesa is another often missed package (needed for partiview).
 \begin{enumerate}
 
 \item
-The default shell must be csh, only limited (ba)sh support. Use {\tt tcsh}.
+The default shell should be (t)csh, there is some limited (ba)sh support. 
 
 \item
 nbody4 is now available, though may be called Brute4 (Nbody4 needs the
@@ -3301,9 +3346,6 @@ Q=0 for runbody1 when in= is used...   bug in the wrapper interface
 Aux/Acceleration/Potential are meaningless.
 
 \item
-{\tt GalactICS} has not been properly checked 
-
-\item
 {\tt snapplot} multipanel has odd colors (grey) showing up
 
 \item
@@ -3322,7 +3364,7 @@ add Kawaii's code
 units(1) and units(5) unfinished
 
 \item
-python, ruby
+(i)python, matplotlib and various interfaces for NEMO?
 
 \item
 Fink/DarwinPorts
@@ -3333,6 +3375,14 @@ NAM (Shaya/Peel)
 \item
 Romeo's wavelet code (has some GPL issues)
 
+\item 
+SuperBox
+
+\item
+starlab has some installation
+problems some compilers (e.g. on FC5, but mdk10 ok) - related to their internal
+autoconf version?
+
 \item
 Greengard \& Rochlin's FMM Multipole Moment Code (simple C version via Umiacs)
 
@@ -3341,6 +3391,11 @@ single vs. double precision:  gadget can actually be compiled in double precisio
 mode, but the gadgetsnap/snapgadget programs are likely to break.  gyrfalcON is
 mostly compiled in double mode in NEMO, but Walter will most likely
 prefer float.
+
+\item 
+(gyr)falcON may need to be re-compiled without the  {\tt -ffast-math} option
+(see {\tt OPTFLAGS} in  {\tt make/defs}). Otherwise it has the tendency to crash.
+(e.g. AMD64 with gcc 3.4.5 and intel with gcc 4.1.0)
 
 \item 
 intel compiler can speed up a lot 
