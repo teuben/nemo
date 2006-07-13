@@ -63,7 +63,7 @@ string defv[] = {
   "nmodel=1\n        Number of models to make",
   "cleanup=t\n       Cleanup the temporary rundir?",
 
-  "VERSION=1.4\n     22-mar-04 PJT",
+  "VERSION=1.5\n     12-jul-06 PJT",
   NULL,
 };
 
@@ -198,8 +198,9 @@ void nemo_main(void)
       
       
       datstr = stropen("make-it","w!"); /* create shell script to be run */
-      fprintf(datstr,"#! /bin/sh\n");
+      fprintf(datstr,"#! /bin/csh -f\n");
       fprintf(datstr,"# created by NEMO's mkkd95 program\n");
+      fprintf(datstr,"setenv _POSIX2_VERSION 1\n");
       if (*kd_bindir) {
 	fprintf(datstr,"%c %s/dbh < in.dbh\n",comment,kd_bindir);
 	fprintf(datstr,"%c %s/getfreqs\n",comment,kd_bindir);
