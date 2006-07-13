@@ -7,6 +7,7 @@
  *              added nmodel=
  *
  *  22-mar-04   V1.4  stdout/err from kd95 routines now to logfile     PJT
+ *  12-jul-06   V1.5  fix bug for new tail that doesn't know +2        PJT
  *
  */
 
@@ -68,6 +69,8 @@ string defv[] = {
 };
 
 string usage="Kuijken-Dubinski-95 composite bulge-disk-halo model";
+
+string cvsid="$Id$";
 
 void goto_rundir(string name);
 void make_rundir(string name);
