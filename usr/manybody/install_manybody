@@ -175,12 +175,17 @@ pushd starlab_cvs >& /dev/null
   if ($cvs) cvs up >>& $log
   ./install-starlab $opts >>& $log
   echo "See also install.log in the starlab_cvs directory" >> $log
-  source starlab_start.csh
-  echo STARLAB-COUNT: `ls $STARLAB_INSTALL_PATH/bin|wc -l`
+  if (-e starlab_start.csh) then
+    source starlab_start.csh
+    echo STARLAB-COUNT: `ls $STARLAB_INSTALL_PATH/bin|wc -l`
+  else
+    echo STARLAB: failed to build properly
+  endif
 popd >& /dev/null
 rehash
 
 #                                                   starcluster
+if (0) then
 echo  `date` Installing starcluster
 tar zxf $pkg/starcluster/starcluster_cvs.tar.gz
 ln -s starcluster_cvs starcluster
@@ -194,7 +199,7 @@ pushd starcluster_cvs >& /dev/null
   echo STARLAB+CLUSTER-COUNT: `ls $STARLAB_INSTALL_PATH/bin|wc -l`
 popd >& /dev/null
 rehash
-
+endif
 
 #                                                   fltk
 echo  `date` Installing fltk 
@@ -256,7 +261,6 @@ echo  `date` Installing gadget
 mkdir gadget
 pushd gadget >& /dev/null
   set log=$root/tmp/gadget.log 
-  (cd $NEMO/src/scripts; cvs up) >& $log
   $NEMO/src/scripts/gadget.install prefix=$MANYBODY/opt bench=0 manybody=$pkg >>& $log
 popd >& /dev/null
 rehash
