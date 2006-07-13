@@ -94,7 +94,7 @@ echo "# date:  `date`"                                      >> $rc
 echo "# args:  $*"                                          >> $rc
 
 #                                               lam
-if (-e $lam) gtar zxf $lam
+if (-e $lam) tar zxf $lam
 set dir=`basename $lam .tar.gz`
 if (-e $dir) then
    pushd $dir
@@ -112,7 +112,7 @@ else
 endif
 
 #                                               gsl
-if (-e $gsl) gtar zxf $gsl
+if (-e $gsl) tar zxf $gsl
 set dir=`basename $gsl .tar.gz`
 if (-e $dir) then
    pushd $dir
@@ -126,7 +126,7 @@ else
 endif
 
 #			                        fftw, still needs V2, V3 doesn't work
-if (-e $fftw) gtar zxf $fftw
+if (-e $fftw) tar zxf $fftw
 set dir=`basename $fftw .tar.gz`
 if (-e $dir) then
    pushd $dir
@@ -144,7 +144,7 @@ else
 endif
 
 #                                               hdf5
-if (-e $hdf) gtar zxf $hdf
+if (-e $hdf) tar zxf $hdf
 set dir=`basename $hdf .tar.gz`
 if (-e $dir) then
    pushd $dir
@@ -158,7 +158,7 @@ else
 endif
 
 #                                               gadget, for all standard problems
-if (-e $gadget) gtar zxf $gadget
+if (-e $gadget) tar zxf $gadget
 set dir=`basename $gadget .tar.gz`
 # for now gadget tar file base name different from created directory name
 set dir=Gadget-2.0.3
