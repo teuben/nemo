@@ -110,12 +110,16 @@ ifeq ($(MACHTYPE),x86_64)
 # on opteron (x86-64) use
 CPUFLAGS	:= -mcpu=k8 -m32 -mpreferred-stack-boundary=4
 endif
+
+# 64bit AMD
+# CPUFLAGS        := -mcpu=k8 -mpreferred-stack-boundary=4
 endif
 
+# -ffast-math occasionally will crash gyrfalcON and isn't shown to be faster on some machines even
 ifdef DEBUG
 OPTFLAGS	:= -ggdb -fPIC $(CPUFLAGS) -rdynamic $(STATIC)
 else
-OPTFLAGS	:= -ggdb -O2 -fPIC $(CPUFLAGS) -ffast-math -funroll-loops -fforce-addr -fomit-frame-pointer -rdynamic $(STATIC)
+OPTFLAGS	:= -ggdb -O2 -fPIC $(CPUFLAGS) -funroll-loops -fforce-addr -fomit-frame-pointer -rdynamic $(STATIC)
 endif
 
 # this is used for compilation of code with inline assembly SSE instructions
