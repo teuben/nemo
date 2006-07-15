@@ -73,6 +73,7 @@ mkspiral:
 
 magalie:
 	@echo Running $@
+	@rm -rf magalie.out.tmpdir
 	$(EXEC) magalie magalie.out 2000 500 4000 cleanup=f
 	$(EXEC) tsf magalie.out
 	
