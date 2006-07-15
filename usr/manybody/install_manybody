@@ -3,7 +3,7 @@
 #  5-mar-2004     for 1st nbody-school                             PJT 
 # 20-apr-2004     minor things for fam04                           pjt
 # 24-jul-2005     many changes for 2nd nbody-school MODEST5c       PJT
-# 11-jul-2006     various changes to go with the times (mexico)    pjt
+# 14-jul-2006     various changes to go with the times (mexico)    pjt
 #
 #  Removed any local directory called manybody and installs a new manybody tree
 #  The default should be executed from the home directory, such that
@@ -39,6 +39,7 @@ set tipsy=2.2.3
 #  root directory where all the tar ball packages live from which to install
 set pkg=`pwd`/manybody_pkg
 set sys=`uname -s | tr '[A-Z]' '[a-z]'`
+set manybody=manybody
 
 #  poor mans command line parser
 foreach _a ($*)
@@ -71,9 +72,9 @@ endif
 
 
 # remove the old manybody, and create a new one
-rm -rf manybody
-mkdir manybody
-cd manybody
+rm -rf $manybody
+mkdir $manybody
+cd $manybody
 
 #                             root = $MANYBODY
 setenv MANYBODY `pwd`
@@ -223,8 +224,11 @@ pushd partiview_cvs/src >& /dev/null
   if ($cvs) cvs up >& $log
   ./configure --with-fltk=$root/opt >>& $log
   make >>& $log
-  if ($status) echo ERRORS compiling partiview, check $log
-  cp partiview $MANYBODY/opt/bin
+  if ($status) then
+    echo ERRORS compiling partiview, check $log
+  else
+    cp partiview $MANYBODY/opt/bin
+  endif
 popd >& /dev/null
 
 
@@ -291,6 +295,14 @@ pushd $NEMO/usr/kuijken/GalactICS-exp/src >& /dev/null
    set log=$root/tmp/gal.log
    make -f Makefile.nemo all install >& $log
    mknemo mkkd95 >>& $log
+popd >& /dev/null
+rehash
+
+#                                                   CGS
+echo  `date` Installing CGS
+pushd $NEMO/usr/trenti
+   set log=$root/tmp/cgs.log
+   mknemo CGS >>& $log
 popd >& /dev/null
 rehash
 
