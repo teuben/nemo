@@ -6,6 +6,7 @@
  *  23-jan-05   1.2a   fixed bulge mass encoding error     - courtesy J.J.Fleck
  *  24-mar-06   1.2b   fixed bulge radius encoding error   PJT
  *  12-jul-06   1.2c   merged two versions - PJT
+ *  19-jul-06   1.3    use header=   PJT
  */
 
 #include <stdinc.h>
@@ -46,7 +47,8 @@ string defv[] = {
 
   "seed=0\n       Random seed",
   "cleanup=f\n    cleanup run directory after use (not used yet)",
-  "VERSION=1.2c\n 12-jul-06 PJT",
+  "header=\n      use an explicit unfio header size of 4 or 8",
+  "VERSION=1.3\n  19-jul-06 PJT",
   NULL,
 };
 
@@ -66,10 +68,15 @@ void nemo_main(void)
   char rundir[256];
   stream datstr, histr;
   string out=getparam("out");
+  char hdrkey[32];
   int seed, nbulge, ndisk, nhalo;
   bool Qcleanup = getbparam("cleanup");
 
   seed =   init_xrandom(getparam("seed")); 
+  if (hasvalue("header")) 
+    sprintf(hdrkey,"header=%s", getiparam("header"));
+  else
+    sprintf(hdrkey," ");
   
   nbulge = getiparam("nbulge");
   ndisk  = getiparam("ndisk");
@@ -152,11 +159,11 @@ void nemo_main(void)
   
   datstr = stropen("make-it","w!"); /* create shell script to be run */
   fprintf(datstr,"#! /bin/sh\n");
-  fprintf(datstr,"# created by NEMO's magalie wrapper program\n");
+  fprintf(datstr,"# created by NEMO's magalie wrapper program VERSION=\n",getparam("VERSION"));
   fprintf(datstr,"magalie.exe < magalie.in\n");
   fprintf(datstr,"rm -f ../%s\n",out);
-  fprintf(datstr,"unfio in=m.dat block=0 type=f | tabtos - ../%s block1=m,x,y,z,vx,vy,vz options=wrap nbody=%d\n",
-	  out, ndisk+nbulge+nhalo);
+  fprintf(datstr,"unfio in=m.dat block=0 type=f %s | tabtos - ../%s block1=m,x,y,z,vx,vy,vz options=wrap nbody=%d\n",
+	  hdrkey, out, ndisk+nbulge+nhalo);
   strclose(datstr);
   run_program("chmod +x make-it; ./make-it > magalie.log 2>&1");   /* run it ! */
   if (Qcleanup) {
