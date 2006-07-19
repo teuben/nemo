@@ -211,6 +211,7 @@ To use the function \fIio_nemo_f()\fP from a FORTRAN program you must
 link your program with the library \fIlibnemo.a\fP as described 
 in the Makefile below. Notice that there are specials compilation flags 
 and linking options according to you use \fBg77 compiler\fP or
+\fBgfortran compiler\fP or
 \fBABSOFT fortran compiler\fP.
 .PP
 .nf
@@ -230,6 +231,15 @@ G77FLAGS = -fno-second-underscore -Wno-globals
 
 nemo_fortran_g77 : nemo_fortran.F
 	g77 $(G77FLAGS)  -o $@ nemo_fortran.F $(LIBS) \\
+                  -lnemomaing77 -lnemo -lm
+
+# - - - - - - - - - - - - - - - - - - - -
+# compilation with gfortran compiler
+# - - - - - - - - - - - - - - - - - - - -
+GFORTFLAGS = -fno-second-underscore
+
+nemo_fortran_g77 : nemo_fortran.F
+	gfortran $(GFORTFLAGS)  -o $@ nemo_fortran.F $(LIBS) \\
                   -lnemomaing77 -lnemo -lm
 
 # - - - - - - - - - - - - - - - - - - - -
@@ -268,6 +278,7 @@ Jean-Charles.Lambert@oamp.fr
 18-Mar-04	 V1.21: bugs fixed, softening added  JCL
 03-Mar-05	 V1.30: code cleaning, valgrind safe JCL
 24-Apr-06	 V1.31: memory leak fixed            JCL
+19-Jun-06	 V1.32: happy gfortran               JCL
 .fi
 
 
