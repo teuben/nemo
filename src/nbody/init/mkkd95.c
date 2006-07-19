@@ -23,9 +23,9 @@
 string defv[] = {
   "out=???\n        output snapshot (a rundirectory $out.tmpdir is also created)",
  
-  "ndisk=8000\n     Number of particles in disk  (use 0 to skip this component)",
-  "nbulge=4000\n    Number of particles in bulge (use 0 to skip this component)",
-  "nhalo=6000\n     Number of particles in halo  (use 0 to skip this component)",
+  "ndisk=8000\n     Number of particles in disk  - 1st set (use 0 to skip this component)",
+  "nbulge=4000\n    Number of particles in bulge - 2nd set (use 0 to skip this component)",
+  "nhalo=6000\n     Number of particles in halo  - 3rd set (use 0 to skip this component)",
 
   "psi0=-4.6\n       in.dbh: Psi0    (HALO)",
   "v0=1.42\n         in.dbh: v0",
@@ -64,7 +64,7 @@ string defv[] = {
   "nmodel=1\n        Number of models to make",
   "cleanup=t\n       Cleanup the temporary rundir?",
 
-  "VERSION=1.5a\n    19-jul-06 PJT",
+  "VERSION=1.5b\n    19-jul-06 PJT",
   NULL,
 };
 
