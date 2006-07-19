@@ -46,7 +46,7 @@ string defv[] = {
   "type=LH\n      Type of halo: LH or ISO",
 
   "seed=0\n       Random seed",
-  "cleanup=f\n    cleanup run directory after use (not used yet)",
+  "cleanup=t\n    cleanup run directory after use",
   "header=\n      use an explicit unfio header size of 4 or 8",
   "VERSION=1.3\n  19-jul-06 PJT",
   NULL,
@@ -74,7 +74,7 @@ void nemo_main(void)
 
   seed =   init_xrandom(getparam("seed")); 
   if (hasvalue("header")) 
-    sprintf(hdrkey,"header=%s", getiparam("header"));
+    sprintf(hdrkey,"header=%d", getiparam("header"));
   else
     sprintf(hdrkey," ");
   
@@ -167,9 +167,9 @@ void nemo_main(void)
   strclose(datstr);
   run_program("chmod +x make-it; ./make-it > magalie.log 2>&1");   /* run it ! */
   if (Qcleanup) {
-    dprintf(0,"Removing the run directory %s.tmpdir\n",out);  
+    dprintf(1,"Removing the run directory %s.tmpdir\n",out);  
     sprintf(rundir,"cd ..; rm -rf %s.tmpdir",out);  
-    run_program(rundir);   
+    run_program(rundir);
   }
 }
 
@@ -187,7 +187,8 @@ void make_rundir(string name)
 
 void run_program(string cmd)
 {
-  system(cmd);
+  if (system(cmd))
+    warning("Some error occurred running: %s",cmd);
 }
 
 double getdparamq(string key, double def)
