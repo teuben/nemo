@@ -1,0 +1,8 @@
+#! /bin/csh -f
+#
+
+mkkd95 a0.dat
+snapplot a0.out color='i<8000?2.0/16.0:(i<12000?3.0/16.0:4.0/16.0)' xrange=-8:8 yrange=-8:8 yapp=/gif
+
+echo Now crop and edit in the Gimp, replace black color with white....
+
