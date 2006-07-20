@@ -3,7 +3,7 @@
 #  5-mar-2004     for 1st nbody-school                             PJT 
 # 20-apr-2004     minor things for fam04                           pjt
 # 24-jul-2005     many changes for 2nd nbody-school MODEST5c       PJT
-# 14-jul-2006     various changes to go with the times (mexico)    pjt
+# 20-jul-2006     various changes to go with the times (mexico)    pjt
 #
 #  Removed any local directory called manybody and installs a new manybody tree
 #  The default should be executed from the home directory, such that
@@ -18,10 +18,14 @@ set pgplot=1
 set falcon=1
 set cvs=0
 set check=1
+set clean=0
 
 #  things that already have versions if non-zero, else won't be installed
 set gcc=0
 set intel=0
+
+#  start label
+set start=start
 
 #  things that have versions and could in theory change; typically setting
 #  something to 0 will disable it since the version does not exist
@@ -35,6 +39,7 @@ set fltk=1.1.4
 set ez=3_0_4
 set tioga=1.1.2
 set tipsy=2.2.3
+set cosmics=1.04
 
 #  root directory where all the tar ball packages live from which to install
 set pkg=`pwd`/manybody_pkg
@@ -71,8 +76,14 @@ if ($?ASTROMAKE) then
 endif
 
 
-# remove the old manybody, and create a new one
-rm -rf $manybody
+# remove the old manybody, and create a new one; but be nice
+# don't do it if the old one exists..
+
+if ($clean) rm -rf $manybody
+if (-e $manybody) then
+  echo "$manybody exists, remove it or use clean=1"
+  exit 1  
+endif
 mkdir $manybody
 cd $manybody
 
@@ -91,10 +102,11 @@ cp $pkg/manybody_start.*sh $root
 
 
 #PJT
-goto testing
-#testing:
-testing:
+goto $start
 
+start:
+
+gcc:
 #                                                   gcc compiler
 if ($gcc != 0) then
   echo `date` Installing gcc 
@@ -108,6 +120,7 @@ if ($gcc != 0) then
   rehash
 endif
 
+intel:
 #                                                   intel compiler
 if ($intel != 0) then
   echo `date` Installing intel 8.1
@@ -135,6 +148,7 @@ pushd cvsutils-0.2.3 >& /dev/null
 popd >& /dev/null
 rehash
 
+ruby:
 #                                                   ruby
 echo  `date` Installing ruby
 tar zxf $pkg/ruby/ruby-$ruby.tar.gz
@@ -146,6 +160,7 @@ pushd ruby-$ruby >& /dev/null
 popd >& /dev/null
 rehash
 
+acs:
 #                                                   acs-lite
 echo  `date` Installing acs
 tar zxf $pkg/acs/acs-$acs.tgz
@@ -166,6 +181,7 @@ pushd acs >& /dev/null
 popd >& /dev/null
 rehash
 
+starlab:
 #                                                   starlab (+cvs)
 echo  `date` Installing starlab
 tar zxf $pkg/starlab/starlab_cvs.tar.gz
@@ -202,6 +218,7 @@ popd >& /dev/null
 rehash
 endif
 
+partiview:
 #                                                   fltk
 echo  `date` Installing fltk 
 tar zxf $pkg/fltk/fltk-$fltk-source.tar.gz
@@ -231,7 +248,7 @@ pushd partiview_cvs/src >& /dev/null
   endif
 popd >& /dev/null
 
-
+nemo:
 #                                                   nemo
 echo  `date` Installing NEMO
 tar zxf $pkg/nemo/nemo_cvs.tar.gz
@@ -246,6 +263,7 @@ pushd nemo_cvs >& /dev/null
 popd >& /dev/null
 rehash
 
+tipsy:
 #                                                    tipsy
 echo  `date` Installing tipsy
 tar zxf $pkg/tipsy/tipsy-$tipsy.tar.gz
@@ -258,8 +276,21 @@ pushd tipsy-$tipsy/code >& /dev/null
   make install prefix=$root/opt >>& $log
 popd >& /dev/null
 rehash
+
+#                                                    cosmics
+echo  `date` Installing cosmics
+tar zxf $pkg/grafic/cosmics-$cosmics.tar.gz
+pushd cosmics-$cosmics/code >& /dev/null
+  set log=$root/tmp/cosmics.log
+  mkdir -p $root/opt/bin
+  #  note we're hardcoding g77 here, should check the real name of the compiler!!!
+  make linux F77=g77 >>& $log
+  cp bin/* $root/opt/bin >>& $log
+popd >& /dev/null
+rehash
   
 
+gadget:
 #                                                    gadget
 echo  `date` Installing gadget
 mkdir gadget
@@ -268,6 +299,7 @@ pushd gadget >& /dev/null
   $NEMO/src/scripts/gadget.install prefix=$MANYBODY/opt bench=0 manybody=$pkg >>& $log
 popd >& /dev/null
 rehash
+
 #                                                    firstn
 echo  `date` Installing firstn
 pushd $NEMO/usr/aarseth/firstn >& /dev/null
@@ -300,12 +332,13 @@ rehash
 
 #                                                   CGS
 echo  `date` Installing CGS
-pushd $NEMO/usr/trenti
+pushd $NEMO/usr/trenti >& /dev/null
    set log=$root/tmp/cgs.log
    mknemo CGS >>& $log
 popd >& /dev/null
 rehash
 
+gsl:
 #                                                   GSL
 echo  `date` Installing gsl
 tar zxf $pkg/gsl/gsl-$gsl.tar.gz
@@ -354,6 +387,7 @@ popd >& /dev/null
 rehash
 endif
 
+ds9:
 #                                                   ds9
 if ($sys == linux) then
 echo  `date` "Installing ds9 - for linux only"
@@ -371,6 +405,7 @@ echo  `date` Installing xyz from NEMO
   mknemo xyzview snapxyz      >>& $log
   if ($status) echo ERRORS compiling xyz, check $log
 
+ez:
 #                                                       EZ
 echo  `date` Installing EZ
   set log=$root/tmp/ez.log 
