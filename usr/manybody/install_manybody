@@ -3,7 +3,8 @@
 #  5-mar-2004     for 1st nbody-school                             PJT 
 # 20-apr-2004     minor things for fam04                           pjt
 # 24-jul-2005     many changes for 2nd nbody-school MODEST5c       PJT
-# 20-jul-2006     various changes to go with the times (mexico)    pjt
+# 20-jul-2006     various changes to go with the times (mexico)        pjt
+#                 and switchover to the new configure based install    
 #
 #  Removed any local directory called manybody and installs a new manybody tree
 #  The default should be executed from the home directory, such that
@@ -87,7 +88,7 @@ endif
 mkdir $manybody
 cd $manybody
 
-#                             root = $MANYBODY
+#                             default root = $MANYBODY
 setenv MANYBODY `pwd`
 set root=$MANYBODY
 mkdir $root/tmp
@@ -277,6 +278,7 @@ pushd tipsy-$tipsy/code >& /dev/null
 popd >& /dev/null
 rehash
 
+cosmics:
 #                                                    cosmics
 echo  `date` Installing cosmics
 tar zxf $pkg/grafic/cosmics-$cosmics.tar.gz
