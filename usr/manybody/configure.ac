@@ -6,6 +6,12 @@ AC_INIT([manybody],[0.0],[teuben@astro.umd.edu])
 
 AC_CONFIG_SRCDIR([quick_test])
 
+# root
+MANYBODY="`pwd`"
+AC_SUBST(MANYBODY)
+
+
+# compilers
 AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_F77

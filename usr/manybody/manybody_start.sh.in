@@ -1,7 +1,7 @@
 # setup manybody environment for sh
 
 # you really should hardcode your address in here
-export MANYBODY=`pwd`
+export MANYBODY=@MANYBODY@
 
 export NEMO=$MANYBODY/nemo_cvs
 export STARLAB=$MANYBODY/starlab_cvs
@@ -24,3 +24,9 @@ fi
 
 PATH=$MANYBODY/opt/bin:$PATH
 LD_LIBRARY_PATH=$MANYBODY/opt/lib:$LD_LIBRARY_PATH
+
+# compilers
+
+export CC=@CC@
+export CXX=@CXX@
+export F77=@F77@

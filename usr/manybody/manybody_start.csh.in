@@ -1,7 +1,7 @@
 # setup manybody environment for csh
 
 #   you really should hardcode your absolute address in here
-setenv MANYBODY `pwd`
+setenv MANYBODY  @MANYBODY@
 
 setenv ACSROOT                $MANYBODY/acs
 
@@ -28,3 +28,9 @@ set path=(. $MANYBODY/opt/bin $path)
 setenv LD_LIBRARY_PATH $MANYBODY/opt/lib:$LD_LIBRARY_PATH
 
 rehash
+
+# compilers
+
+setenv CC  @CC@
+setenv CXX @CXX@
+setenv F77 @F77@
