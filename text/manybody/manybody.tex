@@ -261,11 +261,11 @@ Buy your friendly teachers a Coffee or Beer
 
 I would like to thank my co-authors in spirit, 
 Douglas Heggie, Piet Hut, and Junichiro Makino for their contributions, 
-Simon Portegies Zwart and Christian Boily for the schools in Amsterdam 
-and Strasbourg respectively, where much of this material was written.
+Simon Portegies Zwart and Christian Boily for the MODEST schools in Amsterdam 
+and Strasbourg respectively, where much of this material was written. 
 In the true spirit of open source, 
 numerous authors have contributed their software, which you can find on
-the CD. Without their generous contributions this guide would not be
+the DVD. Without their generous contributions this guide would not be
 half the size and a quarter of the contents.
 Hopefully we will be able to instill this spirit on the reader too.
 
@@ -307,7 +307,7 @@ Particle-Mesh (PM) and Smooth Field Particle (SFP), also sometimes
 referred to as Self Consistent Field (SCF) method. Various hybrid schemes
 also exist, e.g. P$^3$M.
 \smallskip
-{\it Q: MC? Fluid Dynamics? Numerical Action?}
+% {\it Q: MC? Fluid Dynamics? Numerical Action?}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter                {Integrators}
@@ -935,7 +935,7 @@ as before, the colliding Plummer spheres:
 \end{verbatim}\normalsize
 
 As you can see, Dehnen's code is quite a lot faster. As for accuracy though, we leave
-this as an excersize for the interested reader. Notice this code balances all forces
+this as an exercise for the interested reader. Notice this code balances all forces
 and thus conserves total linear momentum unlike the BH86 treecode.
 
 \section{superbox}
@@ -986,24 +986,20 @@ To use a dataset from NEMO, the data will have to be transformed using the
 {\tt snapgadget} and {\tt gadgetsnap} pair of programs:
 
 \footnotesize\begin{verbatim}
-1%  mkdir galaxy
-
-
-3%  ln -s $MANYBODY/gadget/Gadget2/Gadget2/parameterfiles
-
-4%  ln -s $MANYBODY/gadget/Gadget2/ICs
+    mkdir galaxy
+    ln -s $MANYBODY/gadget/Gadget2/Gadget2/parameterfiles
+    ln -s $MANYBODY/gadget/Gadget2/ICs
 
     mkplummer p10k 10000
     snapgadget p10k galaxy.dat 10000,0,0,0,0
     snap
 
-2%  lamboot
-5%  Gadget2.galaxy parameterfiles/galaxy.param
-6%  mpirun -np 2 Gadget2.galaxy parameterfiles/galaxy.param
-6%  lamwipe
+    lamboot
+    Gadget2.galaxy parameterfiles/galaxy.param
+    mpirun -np 2 Gadget2.galaxy parameterfiles/galaxy.param
+    lamwipe
 
-    gadgetsnap 
-
+    gadgetsnap ...
 
 \end{verbatim}\normalsize
 
@@ -1272,7 +1268,7 @@ by Myron Lecar (1968).
 This was essentially a cold collapse model, with all equal-mass 
 particles initially at rest, and
 in fact the positions of the 25th body was left as a (necessary)
-exercize for the reader!
+exercise for the reader!
 Data are available as {\tt \$NEMODAT/iau25.dat}, though we 
 cheated and added the 25th (as the last) body!
 
@@ -1347,7 +1343,8 @@ Apart from the Frenk et al. {\it Santa Barbara cluster} comparison, they
 also compared two other simulations:
 
 The initial conditions, as well as some results at z=0, are available
-on their website {\tt http://t8web.lanl.gov/people/heitmann/arxiv/}.
+on their 
+website \footnote{{\tt http://t8web.lanl.gov/people/heitmann/arxiv/}}.
 
 Power et al - 2003 - on errors.
 
@@ -1856,7 +1853,7 @@ and compare the
 potential for a homogenous sphere of different degrees of flattening.
 Another interesting parametrization is that of two spheres at
 different separations (collisions of galaxies). See also
-Figure~\label{f:coll}.
+Figure~\ref{f:coll}.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -2208,7 +2205,9 @@ Cruz, F.; Aguilar, L. A.; Carpintero, D. D
 {\it A New Method to Find the Potential Center of N-body Systems} - 2002RMxAA..38..225C
 {\bf RMxAA..38-2\_cruz.pdf}
 
-Bode - (TPM)
+Bode, Paul, Ostriker, Jeremiah P., Xu, Guohong
+{\it The Tree Particle-Mesh N-Body Gravity Solver} - 
+{\bf  2000ApJS..128..561B.pdf}
 
 Dehnen, W. - {\it A Very Fast and Momentum-Conserving Tree Code} - 2000
 astro-ph/0003209 : {\bf 0003209.ps}, {\bf 2002JCP...179...27D.pdf}
@@ -2391,22 +2390,24 @@ http://www.ids.ias.edu/~starlab/                          Starlab website
 
 \section{Linux Lab setup (GH 2006)}
 
-We will be using 25 Linux workstations, running Suse 10.1 (X86-64) with dual CPU 64bit 
-Intel 3GHz processors. That's a total of 150 GHz !!
+We will be using 25 Linux workstations, running Suse 10.1 (X86-64) with dual 64bit 
+Intel 3 GHz CPU processors (totaling 150 GHz!). Each workstation comes with
+1 GB memory.
 
 For those working on the Linux Lab machines, here is some essential 
 information how to login and setup your account:
 
-A common data directory {\tt /export/soft/gh06} is available on all 25
+A common data directory {\tt /soft/gh06} is available on all 25
 linux lab workstations. These machines are 
 named {\tt c01tgh}, {\tt c02tgh} ... {\tt t24tgh} and the server
+is called 
 {\tt ctgh06}.   Each student has been assigned an account {\tt stud01}, 
-{\tt stud02}, ... {\tt stud50}, the initial passwords are writting
-on the white-board, but please change them.
-{\it should we put all students in a unix group, with default group write
-permission using umask 002??}
+{\tt stud02}, ... {\tt stud50}, the initial passwords are written
+on the white-board, but please change them. 
+% {\it should we put all students in a unix group, with default group write
+% permission using umask 002??}
 
-Printing should be done via the lj4050 in the lab. For those connecting their
+Printing should be done via the HP lj4050 in the lab. For those connecting their
 laptops, use the ``Networked JerDirect'' queue type, with printer at
 192.168.100.176 on port number 
 9100\footnote{in CUPS this shows up as{\tt DeviceURI socket://192.168.100.176:9100}}
@@ -2417,11 +2418,11 @@ Easiest is to add the following  command to your {\tt .cshrc} file
 for csh
 
 \begin{verbatim}
-    source /export/soft/gh06/manybody/manybody_start.csh
+    source /soft/gh06/manybody/manybody_start.csh
 \end{verbatim}
 or {\tt .bashrc} for bash users
 \begin{verbatim}
-    source /export/soft/gh06/manybody/manybody_start.sh
+    source /soft/gh06/manybody/manybody_start.sh
 \end{verbatim}
 
 This will add the NEMO and STARLAB packages to your environment, as well as
@@ -2475,7 +2476,7 @@ NEMO make a CCD type observation of dark matter
 {\tt ds9 a0.fits} : vizualize it. right mouse down changes contrast. Try zooming in and changing color map to SLS.
 
 \item
-TBA: some Gadget2 test
+{\tt nemobench gadget} : a small Gadget2 benchmark (TBA)
 
 \item
 {\tt makeplummer -n 32 > p32.dyn} : Starlab : create a Plummer sphere
@@ -2531,14 +2532,14 @@ Left mouse down rotates. Right mouse down zooms. $>>$ button starts movie.
 
 \section{Linux Cluster}
 
-The directory {\tt /export/soft/gh06} on the 25 Linux Lab machines
+The directory {\tt /soft/gh06} on the 25 Linux Lab machines
 contains all the {\it manybody} software (and then some)  
 we are discussing at this school. We have
 also made a DVD available, from which you should be able to reproduce this
 toolbox on your own laptop or workstation at home. 
 Some details on the installation of this are described in the next sections.
 
-First an overview of the {\it manybody} hierarchy under {\tt /export/soft/gh06}:
+First an overview of the {\it manybody} hierarchy under {\tt /soft/gh06}:
 
 \footnotesize
 \begin{verbatim}
@@ -3072,7 +3073,7 @@ y=0.2 in a loop orbit (right). See also Figure 3-7 in BT87}
 \section{Barred Galaxy}
 
 Here we produce an image of a simulated barred galaxy, overlayed with a contour diagram
-of a smoothed distribution. First a barred galaxy is created by
+of a smoothed distribution of stars. First a barred galaxy is created by
 integrating an unstable exponential disk for a few rotation times.
 
 \footnotesize\begin{verbatim}
@@ -3114,7 +3115,7 @@ Worst fractional energy loss dE/E = (E_t-E_0)/E_0 = 0.00255499 at T = 5
 13% ccdplot ccd3.vel -0.9:0.9:0.3 blankval=0 yapp=p3.ps/vps
 14% catpgps p2.ps p3.ps > p23.ps
 
-   # or if gif is used, left as an excersize to the reader
+   # or if gif is used, left as an exercise to the reader
 
 10% ccdplot ccd2 0.03,0.1,0.3,1,3,10          yapp=p1.gif/gif
 11% snapplot disk.out times=2 color=2.0/16.0  yapp=p2.gif/gif
@@ -3132,6 +3133,30 @@ the overlayed contours are that of the Y velocities. Notice the S shaped
 contours in the bar region, due to the elliptical orbits along the bar.
 }
 \end{figure}
+
+\section{Disk-Bulge-Halo galaxy}
+
+A composite Disk-Bulge-Halo model in near equilibrium can be created using the Kuijken-Dubinski
+prescription. A NEMO frontend to their tools is available via the program {\tt mkkd95}. By
+default it will create a disk with 8000 particles, a bulge with 4000 particles and a halo
+with 6000 particles. {\tt snapplot} can be told to color particles (assuming it has been
+compiled with a graphics driver that knows color, e.g. pgplot)
+
+\footnotesize\begin{verbatim}
+
+ 1% mkkd95 a0.dat
+ 2% snapplot a0.dat color='i<8000?2.0/16.0:(i<12000?3.0/16.0:4.0/16.0)' yvar=z xrange=-8:8 yrange=-8:8 yapp=/gif
+
+\end{verbatim}\normalsize
+
+This particular plot actually has a black background, so after replacing black with white (e.g. using
+Gimp or ImageMagic) and some axis cropping, the cover version is ready.
+
+\section{Millenium Simulation}
+
+Here we had to cheat for moment. This picture was piched from the Millenium simulation, where
+Volker Springel deserves all the credit!   The cover picture is a small section sized
+125 Mpc/h in the horizontal direction.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
