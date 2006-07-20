@@ -282,7 +282,7 @@ cosmics:
 #                                                    cosmics
 echo  `date` Installing cosmics
 tar zxf $pkg/grafic/cosmics-$cosmics.tar.gz
-pushd cosmics-$cosmics/code >& /dev/null
+pushd cosmics-$cosmics  >& /dev/null
   set log=$root/tmp/cosmics.log
   mkdir -p $root/opt/bin
   #  note we're hardcoding g77 here, should check the real name of the compiler!!!
