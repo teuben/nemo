@@ -1,6 +1,7 @@
       subroutine dbhplot(apot,lmax,nr,dr)
       parameter(ipmax=1000)
-      real apot(20,0:20000),rp(1000),pplot(1000),iplot(ipmax)
+      integer nrp,iplot(ipmax)
+      real apot(20,0:20000),rp(1000),pplot(1000)
       data ifirst /0/
       save rp,ifirst,nrp
       character*40 toplbl
