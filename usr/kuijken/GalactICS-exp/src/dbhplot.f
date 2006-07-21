@@ -1,7 +1,8 @@
       subroutine dbhplot(apot,lmax,nr,dr)
       parameter(ipmax=1000)
+      parameter(jpmax=20000)
       integer nrp,iplot(ipmax)
-      real apot(20,0:20000),rp(1000),pplot(1000)
+      real apot(20,0:jpmax),rp(ipmax),pplot(ipmax)
       data ifirst /0/
       save rp,ifirst,nrp
       character*40 toplbl
@@ -21,6 +22,10 @@
                   write(*,*) 'Not able to plot all points in dbhplot.'
                   write(*,*) 'Increase ipmax parameter & recompile!'
                   goto 4
+               endif
+               if (ir.ge.jpmax) then
+                  write(*,*) 'ir=',ir,' too big for ',jpmax
+                  stop
                endif
             endif
          enddo
