@@ -105,6 +105,15 @@ pushd $pkg/manybody >& /dev/null
   set log=$root/tmp/configure.log
   ./configure --with-manybody=$manybody >& $log
   cp manybody_start.*sh $root 
+  if ($?CC) then
+    echo CC=$CC
+  endif
+  if ($?CXX) then
+    echo CXX=$CXX
+  endif
+  if ($?F77) then
+    echo F77=$F77
+  endif
 popd >& /dev/null
 
 
@@ -117,11 +126,19 @@ gcc:
 #                                                   gcc compiler
 if ($gcc != 0) then
   echo `date` Installing gcc 
+  if ($CC) then
+    echo "   Warning: CC=$CC defined, but gcc=$gcc was specified, so some things will be broken"
+  endif
   set log=$root/tmp/gcc.log
   tar jxf $pkg/gcc/gcc-$gcc.tar.bz2
   pushd gcc-$gcc  >& /dev/null
     # a simple gcc. note f77 is replaced by g95 starting gcc4
-    set copts=(--prefix=$root/opt  --enable-threads --enable-languages=c,c++,f77)
+    set gcc4=`echo $gcc | cut -d. -f1`
+    if ($gcc4 == 4) then
+      set copts=(--prefix=$root/opt  --enable-threads --enable-languages=c,c++,f95)
+    else
+      set copts=(--prefix=$root/opt  --enable-threads --enable-languages=c,c++,f77)
+    endif
     (mkdir _build; cd _build; ../configure $copts; make bootstrap; make; make install) >& $log
   popd >& /dev/null
   rehash
