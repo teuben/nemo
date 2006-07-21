@@ -7,17 +7,23 @@
       save rp,ifirst,nrp
       character*40 toplbl
 
+      write(*,*) 'DBHPLOT: ',lmax,nr,dr,ifirst
       if (ifirst.eq.0) then
+         do ir=1,ipmax
+            iplot(ir)=0
+         enddo
          ifirst=1
          nrp=1
          rp(nrp)=log10(dr)
-         iplot(nrp)=1
+         iplot(nrp)=1 
+         write(*,*) 'DBHPLOT=> ',1,rp(nrp),nrp
          do ir=1,nr
             r=log10(ir*dr)
             if (r-rp(nrp).gt.0.01) then
                nrp=nrp+1
                rp(nrp)=r
                iplot(nrp)=ir
+               write(*,*) 'DBHPLOT=> ',ir,r,nrp
                if (nrp.ge.ipmax) then
                   write(*,*) 'Not able to plot all points in dbhplot.'
                   write(*,*) 'Increase ipmax parameter & recompile!'
@@ -29,7 +35,12 @@
                endif
             endif
          enddo
+         write(*,*) '  dbhplot::nrp=',nrp
       endif
+
+c     big cheat, since in the code below on 64-bit computers there
+c     is some array indexing wrong
+      return
 
  4    do l=0,lmax,2
          j=l/2+1
