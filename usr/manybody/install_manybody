@@ -3,7 +3,7 @@
 #  5-mar-2004     for 1st nbody-school                             PJT 
 # 20-apr-2004     minor things for fam04                           pjt
 # 24-jul-2005     many changes for 2nd nbody-school MODEST5c       PJT
-# 20-jul-2006     various changes to go with the times (mexico)        pjt
+# 21-jul-2006     various changes to go with the times (mexico)        pjt
 #                 and switchover to the new configure based install    
 #
 #  Removed any local directory called manybody and installs a new manybody tree
@@ -11,7 +11,7 @@
 #  MANYBODY becomes $HOME/manybody
 #
 #  Example usage:
-#  manybody_pkg/install_manybody cvs=0 pkg=`pwd`/manybody_pkg > & LOG1
+#  manybody_pkg/manybody/install_manybody cvs=0 pkg=`pwd`/manybody_pkg > & LOG1
 #  
 
 #  things that are 0 or 1
@@ -25,7 +25,7 @@ set clean=0
 set gcc=0
 set intel=0
 
-#  start label
+#  start label if only a subset is warrented
 set start=start
 
 #  things that have versions and could in theory change; typically setting
@@ -45,7 +45,7 @@ set cosmics=1.04
 #  root directory where all the tar ball packages live from which to install
 set pkg=`pwd`/manybody_pkg
 set sys=`uname -s | tr '[A-Z]' '[a-z]'`
-set manybody=manybody
+set manybody=`pwd`/manybody
 
 #  poor mans command line parser
 foreach _a ($*)
@@ -72,13 +72,15 @@ else
   echo `date` Using pkg=$pkg 
 endif
 
-if ($?ASTROMAKE) then
-  source $ASTROMAKE/astromake_start
-endif
-
-
 # remove the old manybody, and create a new one; but be nice
 # don't do it if the old one exists..
+# also, $manybody must be an absolute path now!!
+
+set slash=`echo $manybody | cut -c1`
+if (\`$slash\` != \`"/"\`) then
+  set manybody=`pwd`/$manybody
+  echo "Warning: setting absolute path manybody=$manybody"
+endif
 
 if ($clean) rm -rf $manybody
 if (-e $manybody) then
@@ -89,17 +91,21 @@ mkdir $manybody
 cd $manybody
 
 #                             default root = $MANYBODY
-setenv MANYBODY `pwd`
+setenv MANYBODY $manybody
 set root=$MANYBODY
-mkdir $root/tmp
-mkdir $root/opt
+mkdir -p $root/tmp
+mkdir -p $root/opt
 
 set path=(. $root/opt/bin $path)
 rehash
 
 #                                                  copying shell startup files
-
-cp $pkg/manybody_start.*sh $root
+echo  `date` Installing startup shell scripts
+pushd $pkg/manybody >& /dev/null
+  set log=$root/tmp/configure.log
+  ./configure --with-manybody=$manybody >& $log
+  cp manybody_start.*sh $root 
+popd >& /dev/null
 
 
 #PJT
@@ -496,5 +502,6 @@ echo  `date` Instaling StarCrash
   popd >& /dev/null
 rehash
 
+end:
 # -- end of install --
 echo  `date` Done.
