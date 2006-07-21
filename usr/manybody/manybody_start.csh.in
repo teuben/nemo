@@ -1,6 +1,8 @@
 # setup manybody environment for csh
+# $Id$
 
 #   you really should hardcode your absolute address in here
+#setenv MANYBODY `pwd`
 setenv MANYBODY  @MANYBODY@
 
 setenv ACSROOT                $MANYBODY/acs

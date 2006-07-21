@@ -1,6 +1,8 @@
 # setup manybody environment for sh
+# $Id$
 
 # you really should hardcode your address in here
+export MANYBODY=`pwd`
 export MANYBODY=@MANYBODY@
 
 export NEMO=$MANYBODY/nemo_cvs
