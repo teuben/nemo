@@ -3,16 +3,21 @@ include $(NEMOLIB)/makedefs
 #need some modfs for MacOS-X            -lcc_dynamic
 #    for MacOSX 10.4 might also need:   -lSystemStubs
 #
-#.f.o:
-#	$(F77) $(FFLAGS) -c $*.f
+
+#     override default rules
+.f.o:
+	$(F77) $(MYFLAGS) -c $*.f
+
+.c.o:
+	$(CC) $(MYCLAGS) -c $*.c
 
 #F77=g77
 #CC=gcc
-#FFLAGS = -O 
+#CFLAGS = -g
+#FFLAGS = -g
 
-MYFLIBS = $(XLIBS) -L$(NEMOLIB) -lpgplot 
-MYFLAGS = $(CFLAGS) -DRINGASCII -DASCII
-MYLIBS = -lm
+MYFLIBS = $(FFLAGS) $(XLIBS) -L$(NEMOLIB) -lpgplot 
+MYCLAGS = $(CFLAGS) -DRINGASCII -DASCII
 
 ALLFILES= dbh genhalo genbulge gendisk diskdf tobinary \
      getfreqs vcirc plothalo plotforce 
@@ -81,3 +86,10 @@ query.o: query.c
 golden.o: golden.c
 tobinary.o: tobinary.c
 
+#    A nemo benchmark.....
+
+bench:
+	rm -rf a0
+	mkkd95 a0 seed=123
+	-tsf a0 | grep PhaseSpace
+	@echo "Previous line should have ...      0.817873 0.442102 0.0173651"
