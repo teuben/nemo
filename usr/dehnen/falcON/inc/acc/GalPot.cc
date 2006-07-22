@@ -555,25 +555,28 @@ namespace GalPot {                                  // v0.4
       d[n] *= x2;
   }
 
-  template<class C, class S>
-  S qbulir(C*o, S(C::*func)(S), const S a, const S b, const S eps_)
+  template<class FUNC>
+  typename FUNC::ValType qbulir(FUNC const            &func,
+				typename FUNC::ValType a,
+				typename FUNC::ValType b,
+				typename FUNC::ValType eps_)
   {
-    register S ba=b-a;
+    typename FUNC::ValType ba=b-a;
     if(ba==0.) return 0.;
 
-    register int    i,n=2,nn=3,mx=25,m,mr, bo,bu=0,odd=1;
-    S      d[7],dt[7];
-    register S      c,d1,ddt,den,e,eps,err,eta=S(1.e-7),
-      gr,hm,nt,sm,t,t1,t2,t2a,ta,tab=0.,tb,v=0.,w;
+    int                    i,n=2,nn=3,mx=25,m,mr, bo,bu=0,odd=1;
+    typename FUNC::ValType d[7],dt[7];
+    typename FUNC::ValType c,d1,ddt,den,e,eps,err,eta=1.e-7,
+                           gr,hm,nt,sm,t,t1,t2,t2a,ta,tab=0.,tb,v=0.,w;
 
-    while(eta+1. != 1.) eta *=S(0.5);
-    eta  *=S(2.);                    // eta = actual computing accuracy
+    while(eta+1. != 1.) eta *= 0.5;
+    eta  *= 2.;                    // eta = actual computing accuracy
 
     eps   = max(eps_,eta);
     sm    = 0.;
     gr    = 0.;
     t1    = 0.;
-    t2    = S(0.5)*((o->*func)(a)+(o->*func)(b));
+    t2    = 0.5*(func(a)+func(b));
     t2a   = t2;
     tb    = abs(t2a);
     c     = t2*ba;
@@ -583,28 +586,26 @@ namespace GalPot {                                  // v0.4
       bo = (m>=7);
       hm = ba/n;
       if(odd) {
-	for(i=1;i<=n;i+=2)
-	  {
-	    w  = (o->*func)(a+i*hm);
-	    t2+= w;
-	    tb+= abs(w);
-	  }
+	for(i=1;i<=n;i+=2) {
+	  w  = func(a+i*hm);
+	  t2+= w;
+	  tb+= abs(w);
+	}
 	nt   = t2;
 	tab  = tb * abs(hm);
-	d[1] = S(16./9.);
-	d[3] = S(64./9.);
-	d[5] = S(256./9.);
+	d[1] = 16./9.;
+	d[3] = 64./9.;
+	d[5] = 256./9.;
       } else {
-	for(i=1;i<=n;i+=6)
-	  {
-	    w  = i*hm;
-	    t1+= (o->*func)(a+w) + (o->*func)(b-w);
-	  }
+	for(i=1;i<=n;i+=6) {
+	  w  = i*hm;
+	  t1+= func(a+w) + func(b-w);
+	}
 	nt   = t1+t2a;
 	t2a  = t2;
-	d[1] = S(2.25);
-	d[3] = S(9.);
-	d[5] = S(36.);
+	d[1] = 2.25;
+	d[3] = 9.;
+	d[5] = 36.;
       }
       ddt   = dt[0];
       t     = nt*hm;
@@ -612,30 +613,29 @@ namespace GalPot {                                  // v0.4
       nt    = dt[0];
       if(bo) {
 	mr   = 6;
-	d[6] = S(64.);
-	w    = S(144.);
+	d[6] = 64.;
+	w    = 144.;
       } else {
 	mr   = m;
 	d[m] = n*n;
 	w    = d[m];
       }
-      for(i=1;i<=mr;i++)
-	{
-	  d1  = d[i]*ddt;
-	  den = d1-nt;
-	  e   = nt-ddt;
-	  if(den != S(0.)) {
-	    e /= den;
-	    v  = nt*e;
-	    nt = d1*e;
-	    t += v;
-	  } else {
-	    nt = S(0.);
-	    v  = S(0.);
-	  }
-	  ddt   = dt[i];
-	  dt[i] = v;
+      for(i=1;i<=mr;i++) {
+	d1  = d[i]*ddt;
+	den = d1-nt;
+	e   = nt-ddt;
+	if(den != 0) {
+	  e /= den;
+	  v  = nt*e;
+	  nt = d1*e;
+	  t += v;
+	} else {
+	  nt = 0.;
+	  v  = 0.;
 	}
+	ddt   = dt[i];
+	dt[i] = v;
+      }
       ta = c;
       c  = t;
       if(!bo) t -= v;
@@ -656,13 +656,23 @@ namespace GalPot {                                  // v0.4
       n    = nn;
       nn   = i+i;
       bu   = bo;
-      d[2] = S(4.);
-      d[4] = S(16.);
+      d[2] = 4.;
+      d[4] = 16.;
     }
     v = tab*eta;
     if(m==mx) std::cerr << " qbulir exceeding maximum of iterations\n";
     return c;
   }
+
+  template<class C, class S=double> struct Adaptor {
+    typedef S ValType;
+    typedef const C* c_pter_C;
+    typedef S (C::*f_pter_C)(S) const;
+    const c_pter_C o;
+    const f_pter_C f;
+    Adaptor(c_pter_C __o, f_pter_C __f) : o(__o), f(__f) {}
+    S operator() (S x) const { return (o->*f)(x); }
+  };
 
   static void GaussLegendre(double *x, double *w, const int n)
   {
@@ -857,11 +867,14 @@ double DiskAnsatz::mass(const double R) const
 {
   register double F=TPi*S0*Rd2;
   if(R<=0.) {         // give total mass
-    if(eps)    return F*qbulir(this,&DiskAnsatz::mass_integrand,0.,1.,1.e-6);
+    if(eps)
+      return F*qbulir(Adaptor<DiskAnsatz>(this,&DiskAnsatz::mass_integrand),
+		      0.,1.,1.e-6);
     if(hollow) return FPi*S0*R0*Rd*Kn(2,2.*sqrt(R0/Rd));
     return F;
   }                   // give mass inside R (but integrate z from -oo to oo)
-  return F*qbulir(this,&DiskAnsatz::mass_integrand,0.,R/(Rd+R),1.e-6);
+  return F*qbulir(Adaptor<DiskAnsatz>(this,&DiskAnsatz::mass_integrand),
+		  0.,R/(Rd+R),1.e-6);
 }
 
 double DiskAnsatz::Density(const double R, const double z) const
@@ -1208,7 +1221,8 @@ double SpheroidDensity::mass_integrand(const double y) const
 double SpheroidDensity::mass(const double m) const
 {
   return FPi*q*rh0*cube(r0)*
-    qbulir(this,&SpheroidDensity::mass_integrand,0.,m/(m+r0),1.e-6);
+    qbulir(Adaptor<SpheroidDensity>(this,&SpheroidDensity::mass_integrand),
+	   0.,m/(m+r0),1.e-6);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
