@@ -79,12 +79,12 @@ namespace {
 	       int          ) const;         // I: add or assign pot & acc?     
     //--------------------------------------------------------------------------
     template <int, typename scalar, bool, bool>
-    void Monopole::set_monopole(scalar       ,
-				int          ,
-				const scalar*,
-				const int   *,
-				scalar      *,
-				scalar      *) const;
+    void set_monopole(scalar       ,
+		      int          ,
+		      const scalar*,
+		      const int   *,
+		      scalar      *,
+		      scalar      *) const;
     //--------------------------------------------------------------------------
     // destruction                                                              
     //--------------------------------------------------------------------------
