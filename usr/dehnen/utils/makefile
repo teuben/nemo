@@ -58,7 +58,7 @@ ifeq ($(PLATFORM),x86_64)
 CPUFLAGS		:= -mcpu=k8 -mpreferred-stack-boundary=4
 endif
 
-OPTFLAGS		:= -ggdb -O2 -fPIC $(CPUFLAGS) -ffast-math -funroll-loops -fforce-addr -fomit-frame-pointer -rdynamic
+OPTFLAGS		:= -ggdb -O2 -fPIC $(CPUFLAGS) -funroll-loops -fforce-addr -fomit-frame-pointer -rdynamic
 
 else
 ifeq ($(COMPILER),pgcc)
