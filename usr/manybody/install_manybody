@@ -12,7 +12,8 @@
 #
 #  Example usage:
 #  manybody_pkg/manybody/install_manybody cvs=0 pkg=`pwd`/manybody_pkg > & LOG1
-#  
+#
+#  CVS: $Id$
 
 #  things that are 0 or 1
 set pgplot=1
@@ -125,8 +126,8 @@ start:
 gcc:
 #                                                   gcc compiler
 if ($gcc != 0) then
-  echo `date` Installing gcc 
-  if ($CC) then
+  echo `date` Installing gcc $gcc
+  if ($?CC) then
     echo "   Warning: CC=$CC defined, but gcc=$gcc was specified, so some things will be broken"
   endif
   set log=$root/tmp/gcc.log
