@@ -58,13 +58,13 @@ $(BIN)myradial_profile:	$(SPJM)myradial_profile.cc $(main_h) $(tool_h) \
 				$(falcON) $(LIB)myprofile.o $(makeproper)
 			$(MAKE_EXE) $(LIB)myprofile.o $(NEMO_EXE_FLGS)
 $(BIN)normalise	:	$(SPJM)normalise.cc
-			$(CXX) -o $(BIN)$@ $<
+			$(CXX) -o $@ $<
 $(BIN)scalehalomass:	$(SPJM)scalehalomass.cc
-			$(CXX) -o $(BIN)$@ $<
+			$(CXX) -o $@ $<
 $(BIN)comparehalomass:	$(SPJM)comparehalomass.cc
-			$(CXX) -o $(BIN)$@ $<
+			$(CXX) -o $@ $<
 $(BIN)massatradius:	$(SPJM)massatradius.cc
-			$(CXX) -o $(BIN)$@ $<
+			$(CXX) -o $@ $<
 
 mover			:	$(falcON) $(BIN)mover
 Rotcurve		:	$(falcON) $(BIN)Rotcurve

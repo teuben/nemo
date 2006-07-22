@@ -288,7 +288,7 @@ mkplum		:
 s2a		:
 			@echo "ERROR: you need NEMO to make \"$@\""
 scale_eps	:
-			@echo "ERROR: you need NEMO to make \"$@\""
+			@echo "ERROR: you need NEMO to make \"$@\"", parameter indicator changed from # to $
 set_time	:
 			@echo "ERROR: you need NEMO to make \"$@\""
 snapfilter	:
