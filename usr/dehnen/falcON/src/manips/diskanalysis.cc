@@ -66,7 +66,7 @@ namespace falcON { namespace Manipulate {
 		     "for 'subset' (default: all) of bodies", MM,NR);
     }
     //--------------------------------------------------------------------------
-    fieldset need   () const { return fieldset::f | fieldset::basic; }
+    fieldset need   () const { return fieldset::basic; }
     fieldset provide() const { return fieldset::o; }
     fieldset change () const { return fieldset::o; }
     //--------------------------------------------------------------------------

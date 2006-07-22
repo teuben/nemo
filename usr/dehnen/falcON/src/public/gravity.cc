@@ -443,7 +443,7 @@ namespace {
     void interact(leaf_iter const&A, leaf_iter const&B) const {
       if(!(is_active(A) || is_active(B))) return;  // no interaction -> DONE    
       single(A,B);                                 // perform interaction       
-      STAT->record_BB();                           // record statistics         
+      STAT->record_BB(A,B);                        // record statistics         
     }  
     //--------------------------------------------------------------------------
     void evaluate(cell_iter const&C) const {       // evaluation phase          
@@ -560,7 +560,7 @@ namespace {
     //--------------------------------------------------------------------------
     void interact(leaf_iter const&A, leaf_iter const&B) const {
       single(A,B);                                 // perform interaction       
-      STAT->record_BB();                           // record statistics         
+      STAT->record_BB(A,B);                        // record statistics         
     }  
     //--------------------------------------------------------------------------
     void evaluate(cell_iter const&C) const {       // evaluation phase          
@@ -900,7 +900,11 @@ void GravEstimator::exact(bool       const&al
   const bool all = prepare(0,al,0);
   if(N_active_cells()==0)
     return warning("[GravEstimator::exact()]: nobody active");
-  STATS->reset();
+  STATS->reset(
+#ifdef WRITE_IACTION_INFO
+	       TREE
+#endif
+               );
 #ifdef falcON_INDI
 #  define ARGS KERNEL,STATS,EPS,0,INDI_SOFT
 #else
@@ -957,7 +961,11 @@ void GravEstimator::approx(const GravMAC*const&GMAC,
     return warning("[GravEstimator::approx()]: nobody active");
   SET_T(" time: GravEstimator::prepare():       ");
   report REPORT2("interaction & evaluation");
-  STATS->reset();
+  STATS->reset(
+#ifdef WRITE_IACTION_INFO
+	       TREE
+#endif
+               );
 #ifdef falcON_INDI
 #  define ARGS KERNEL,STATS,EPS,Ncsize,INDI_SOFT,DIR
 #else

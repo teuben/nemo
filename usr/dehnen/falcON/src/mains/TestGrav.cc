@@ -244,7 +244,7 @@ void falcON::main(int argc, char* argv[]) falcON_THROWING
 	falcON::exit(1);
       }
     } while(rmax>zero && r>rmax);
-    cth = (MOD==3) ? zero : 2*Rand()-1;
+    cth = (MOD>2) ? zero : 2*Rand()-1;
     R   = r*sqrt(1.-cth*cth);
     Bi.pos()[2]   = r * cth;
     phi           = TPi*Rand();

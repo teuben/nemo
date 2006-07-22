@@ -190,12 +190,12 @@ namespace falcON {
       }
       //------------------------------------------------------------------------
       static void dump_head(std::ostream&o) {
-	o<<"     # flag mybody             position";
+	o<<"#      flag blck in            position";
       }
       //------------------------------------------------------------------------
       void dump(std::ostream&o) const {
 	o<<' '<<std::setw(3) << FLAGS
-	 <<' '<<std::setw(2) << LINK.no()<<':'<<std::setw(6)<<LINK.in();
+	 <<' '<<std::setw(2) << LINK.no()<<' '<<std::setw(6)<<LINK.in();
 	for(register int d=0; d!=Ndim; ++d)
 	  o<<' '<<std::setw(9)<<std::setprecision(4)<<POS[d];
       }
@@ -304,12 +304,12 @@ namespace falcON {
       //@}
       //------------------------------------------------------------------------
       static void dump_head(std::ostream&o) {
-	o<<"     # flag lev oct cells ncell leafs nleaf number"
+	o<<"#      flag    lev oct cells ncell leafs nleaf number"
 	 <<"            center";
       }
       //------------------------------------------------------------------------
       void dump(std::ostream&o) const {
-	o<<' '<<std::setw(3)<< flags(*this)
+	o<<' '<<std::setw(7)<< flags(*this)
 	 <<' '<<std::setw(3)<< int(LEVEL)
 	 <<' '<<std::setw(3)<< int(OCTANT);
 	if(NCELLS)

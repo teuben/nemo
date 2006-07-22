@@ -74,7 +74,7 @@ namespace falcON { namespace Manipulate {
 	"w.r.t. \"xcen\" (default: origin)";
     }
     //--------------------------------------------------------------------------
-    fieldset need   () const { return fieldset::f | fieldset::m | fieldset::x; }
+    fieldset need   () const { return fieldset::m | fieldset::x; }
     fieldset provide() const { return fieldset::o; }
     fieldset change () const { return fieldset::o; }
     //--------------------------------------------------------------------------

@@ -41,6 +41,9 @@
 #define ENHANCED_IACT_STATS
 #undef  ENHANCED_IACT_STATS
 ////////////////////////////////////////////////////////////////////////////////
+#define WRITE_IACTION_INFO
+#undef  WRITE_IACTION_INFO
+////////////////////////////////////////////////////////////////////////////////
 namespace falcON {
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
@@ -699,6 +702,9 @@ namespace falcON {
   //////////////////////////////////////////////////////////////////////////////
   class GravStats {
   private:
+#ifdef WRITE_IACTION_INFO
+    const OctTree*TREE;
+#endif
     typedef grav::cell_iter cell_iter;
     typedef grav::leaf_iter leaf_iter;
     unsigned D_BB, D_CB, D_CC, D_CX;               // # direct interactions     
@@ -733,27 +739,65 @@ namespace falcON {
     }
   public:
     // 1 recording                                                              
-    void reset    () {
+    void reset    (
+#ifdef WRITE_IACTION_INFO
+		   const OctTree*t
+#endif
+                   )
+    {
+#ifdef WRITE_IACTION_INFO
+      TREE = t;
+#endif
       D_BB=0, D_CB=0, D_CC=0, D_CX=0;
       A_CB=0, A_CC=0;
 #ifdef ENHANCED_IACT_STATS
       P_CB=0, P_CC=0, P_CX=0;
 #endif
     }
-    void record_BB() { ++D_BB; }
-    void record_approx_CB(cell_iter const&A, leaf_iter const&B)
-    { ++A_CB; }
+
     void record_approx_CC(cell_iter const&A, cell_iter const&B)
-    { ++A_CC; }
-    void record_direct_CB(cell_iter const&A, leaf_iter const&B)
-    { ++D_CB; ADD_SS(P_CB, number(A)) }
-    void record_direct_CC(cell_iter const&A, cell_iter const&B)
-    { ++D_CC; ADD_SS(P_CC, number(A)*number(B)) }
-    void record_direct_CX(cell_iter const&A)
-    { ++D_CX; ADD_SS(P_CX, (number(A)*(number(A)-1))>>1 ) }
-#ifdef ENHANCED_IACT_STATS
-#  undef ADD_SS
+    { ++A_CC;
+#ifdef WRITE_IACTION_INFO
+      std::cerr<<" 0 "<< A.index() << ' ' << B.index() << '\n';
 #endif
+    }
+
+    void record_approx_CB(cell_iter const&A, leaf_iter const&B)
+    { ++A_CB;
+#ifdef WRITE_IACTION_INFO
+      std::cerr<<" 1 "<< A.index() << ' ' << TREE->index(B) << '\n';
+#endif
+    }
+
+    void record_direct_CX(cell_iter const&A)
+    { ++D_CX; ADD_SS(P_CX, (number(A)*(number(A)-1))>>1 );
+#ifdef WRITE_IACTION_INFO
+      std::cerr<<" 2 "<< A.index() << " 0 \n";
+#endif
+    }
+
+    void record_direct_CC(cell_iter const&A, cell_iter const&B)
+    { ++D_CC; ADD_SS(P_CC, number(A)*number(B));
+#ifdef WRITE_IACTION_INFO
+      std::cerr<<" 3 "<< A.index() << ' ' << B.index() << '\n';
+#endif
+    }
+
+    void record_direct_CB(cell_iter const&A, leaf_iter const&B)
+    { ++D_CB; ADD_SS(P_CB, number(A));
+#ifdef WRITE_IACTION_INFO
+      std::cerr<<" 4 "<< A.index() << ' ' << TREE->index(B) << '\n';
+#endif
+    }
+
+    void record_BB(leaf_iter const&A, leaf_iter const&B) {
+      ++D_BB;
+#ifdef WRITE_IACTION_INFO
+      std::cerr<<" 5 " << TREE->index(A) << ' ' << TREE->index(B) << '\n';
+#endif
+    }
+
+#undef ADD_SS
     // 2 reporting                                                              
     unsigned const&BB_direct_iacts   () const { return D_BB; }
     unsigned const&CB_direct_iacts   () const { return D_CB; }

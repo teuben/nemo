@@ -77,7 +77,7 @@ namespace falcON { namespace Manipulate {
       return message("estimates density using %dth nearest neighbour",K);
     }
     //--------------------------------------------------------------------------
-    fieldset need   () const { return fieldset::f | fieldset::m | fieldset::x; }
+    fieldset need   () const { return fieldset::m | fieldset::x; }
     fieldset provide() const { return fieldset::r; }
     fieldset change () const { return fieldset::o; }
     //--------------------------------------------------------------------------
