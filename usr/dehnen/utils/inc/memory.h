@@ -64,7 +64,7 @@ namespace WDutils {
     if(RunInfo::debug(10)) {
       std::cerr<<"### "<< lib <<" Debug Info: "<<f<<':'<<l 
 	       <<" allocating "<<n <<' ' 
-	       << traits<T>::name() <<" = "
+	       << nameof(T) <<" = "
 	       << n*sizeof(T)
 	       << (n*sizeof(T)>1? " bytes ... " : "byte ... ") ;
       T* t;
