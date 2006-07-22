@@ -191,6 +191,8 @@ makedefs_help:
 	@echo LIBS=@LIBS@
 	@echo RANLIB=$(RANLIB)
 	@echo YAPPLIB=$(YAPPLIB)
+	@echo MACHTYPE=$(MACHTYPE)
+	@echo OSTYPE=$(OSTYPE)
 	@echo ========================================================================
 
 
