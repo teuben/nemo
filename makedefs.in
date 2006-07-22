@@ -168,6 +168,9 @@ RANLIB = @RANLIB@
 # On Solaris you need second.o; Linux can keep it blank (it's in libg2c)
 # SECOND = $(NEMOLIB)/second.o
 
+# xxxTYPE's:   falcON now uses      PLATFORM := $(shell uname -m)
+PLATFORM := $(shell uname -m)
+
 
 makedefs_help:
 	@echo ========================================================================
@@ -191,6 +194,8 @@ makedefs_help:
 	@echo LIBS=@LIBS@
 	@echo RANLIB=$(RANLIB)
 	@echo YAPPLIB=$(YAPPLIB)
+	@echo PLATFORM=$(PLATFORM)
+	@echo HOSTTYPE=$(HOSTTYPE)
 	@echo MACHTYPE=$(MACHTYPE)
 	@echo OSTYPE=$(OSTYPE)
 	@echo ========================================================================
