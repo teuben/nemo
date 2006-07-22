@@ -49,6 +49,11 @@ endif
 
 endif
 
+# ------------------
+# Hardware platform
+# ------------------
+PLATFORM := $(shell uname -m)
+
 # -----------
 # directories
 # -----------
@@ -59,7 +64,7 @@ IPRO		:= $(INC)proper/
 IUTI		:= $(INC)utils/
 ISPH		:= $(INC)sph/
 IWAL		:= $(INC)walter/
-HOS		:= $(MACHTYPE)_$(OSTYPE)/
+HOS		:= $(PLATFORM)/
 BIN		:= $(HOS)
 LIB		:= $(BIN)lib/
 .PHONY		: dirs
@@ -96,17 +101,17 @@ CPUFLAGS	:= -march=athlon-xp -mpreferred-stack-boundary=4
 
 else
 
-ifeq ($(MACHTYPE),i386)
+ifeq ($(PLATFORM),i386)
 # on i386 use
 CPUFLAGS	:= -march=i386 -mpreferred-stack-boundary=4
 endif
 
-ifeq ($(MACHTYPE),i686)
+ifeq ($(PLATFORM),i686)
 # on i686 use
 CPUFLAGS	:= -march=i686 -mpreferred-stack-boundary=4
 endif
 
-ifeq ($(MACHTYPE),x86_64)
+ifeq ($(PLATFORM),x86_64)
 # on opteron (x86-64) use
 #CPUFLAGS	:= -mcpu=k8 -m32 -mpreferred-stack-boundary=4
 CPUFLAGS	:= -mcpu=k8 -mpreferred-stack-boundary=4
@@ -184,10 +189,10 @@ CXXFLAGS	:= $(FILEIO) $(OPTFLAGS) $(DPROPER) $(DMPI) $(DEBUG)
 
 IUTIL		:= -I$(IUTI)
 ifdef STATIC
-LUTIL		:= -Lutils/lib/$(MACHTYPE)_$(OSTYPE) -lWDutils
+LUTIL		:= -Lutils/lib/$(PLATFORM) -lWDutils
 else
-LUTIL		:= -Lutils/lib/$(MACHTYPE)_$(OSTYPE) -lWDutils \
-		-Wl,-rpath,$(PWD)/../utils/lib/$(MACHTYPE)_$(OSTYPE)
+LUTIL		:= -Lutils/lib/$(PLATFORM) -lWDutils \
+		-Wl,-rpath,$(PWD)/../utils/lib/$(PLATFORM)
 endif
 
 

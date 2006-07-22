@@ -8,13 +8,18 @@
 default			: libs
 install			: libs cleanobj
 
+# ------------------
+# Hardware platform
+# ------------------
+PLATFORM := $(shell uname -m)
+
 # -----------
 # directories
 # -----------
 
 INC             	:= inc/
 SRC             	:= src/
-LIB             	:= lib/$(MACHTYPE)_$(OSTYPE)/
+LIB             	:= lib/$(PLATFORM)/
 .PHONY          	: dirs
 dirs            	:
 			./make.dir lib    755
@@ -38,17 +43,17 @@ FC			:= $(CPATH)g77
 # CPU dependent optimization flags
 # EDIT to match your hardware
 
-ifeq ($(MACHTYPE),i386)
+ifeq ($(PLATFORM),i386)
 # on i386 use
 CPUFLAGS		:= -march=i386 -mpreferred-stack-boundary=4
 endif
 
-ifeq ($(MACHTYPE),i686)
+ifeq ($(PLATFORM),i686)
 # on i686 use
 CPUFLAGS		:= -march=athlon-xp -mpreferred-stack-boundary=4
 endif
 
-ifeq ($(MACHTYPE),x86_64)
+ifeq ($(PLATFORM),x86_64)
 # on opteron (x86-64) use
 CPUFLAGS		:= -mcpu=k8 -mpreferred-stack-boundary=4
 endif
