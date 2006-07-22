@@ -4,7 +4,7 @@
 # Makefile for the falcON project
 #
 ################################################################################
-default		: utils all manips acc
+default		: utils all manips doxu acc
 utils:
 	ln -s ../utils
 	(cd inc; ln -s ../utils/inc utils)
