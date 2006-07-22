@@ -143,6 +143,22 @@ if ($gcc != 0) then
     (mkdir _build; cd _build; ../configure $copts; make bootstrap; make; make install) >& $log
   popd >& /dev/null
   rehash
+
+  # now that the compiler has changed.... need to re-encode that in the startup scripts
+
+  pushd $pkg/manybody >& /dev/null
+    setenv CC  `which gcc`
+    setenv CXX `which g++`
+    if ($gcc4 == 4) then
+      setenv F77 `which gfortran`
+    else
+      setenv F77 `which g77`
+    endif
+    set log=$root/tmp/configure.log
+    ./configure --with-manybody=$manybody >>& $log
+    cp manybody_start.*sh $root 
+  popd >& /dev/null
+
 endif
 
 intel:
@@ -521,5 +537,6 @@ echo  `date` Instaling StarCrash
 rehash
 
 end:
+  chmod -R +r $manybody
 # -- end of install --
 echo  `date` Done.
