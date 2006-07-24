@@ -5,6 +5,7 @@
 # 24-jul-2005     many changes for 2nd nbody-school MODEST5c       PJT
 # 21-jul-2006     various changes to go with the times (mexico)        pjt
 #                 and switchover to the new configure based install    
+# 23-jul-2006     make sure the manybody_pkg tree is treated R/O       pjt
 #
 #  Removed any local directory called manybody and installs a new manybody tree
 #  The default should be executed from the home directory, such that
@@ -101,8 +102,9 @@ set path=(. $root/opt/bin $path)
 rehash
 
 #                                                  copying shell startup files
-echo  `date` Installing startup shell scripts
-pushd $pkg/manybody >& /dev/null
+echo " `date` Installing startup shell scripts in local install"
+cp -r $pkg/manybody install
+pushd install >& /dev/null
   set log=$root/tmp/configure.log
   ./configure --with-manybody=$manybody >& $log
   cp manybody_start.*sh $root 
@@ -146,7 +148,7 @@ if ($gcc != 0) then
 
   # now that the compiler has changed.... need to re-encode that in the startup scripts
 
-  pushd $pkg/manybody >& /dev/null
+  pushd $root/install >& /dev/null
     setenv CC  `which gcc`
     setenv CXX `which g++`
     if ($gcc4 == 4) then
