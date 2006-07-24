@@ -207,44 +207,6 @@ pushd nemo_cvs >& /dev/null
 popd >& /dev/null
 rehash
 
-tipsy:
-#                                                    tipsy
-echo  `date` Installing tipsy
-tar zxf $pkg/tipsy/tipsy-$tipsy.tar.gz
-ln -s tipsy-$tipsy tipsy
-pushd tipsy-$tipsy/code >& /dev/null
-  set log=$root/tmp/tipsy.log
-  mkdir -p $root/opt/bin
-  ./configure --prefix=$root/opt >& $log
-  make >>& $log
-  make install prefix=$root/opt >>& $log
-popd >& /dev/null
-rehash
-
-cosmics:
-#                                                    cosmics
-echo  `date` Installing cosmics
-tar zxf $pkg/grafic/cosmics-$cosmics.tar.gz
-pushd cosmics-$cosmics  >& /dev/null
-  set log=$root/tmp/cosmics.log
-  mkdir -p $root/opt/bin
-  #  note we're hardcoding g77 here, should check the real name of the compiler!!!
-  make linux F77=g77 >>& $log
-  cp bin/* $root/opt/bin >>& $log
-popd >& /dev/null
-rehash
-  
-
-gadget:
-#                                                    gadget
-echo  `date` Installing gadget
-mkdir gadget
-pushd gadget >& /dev/null
-  set log=$root/tmp/gadget.log 
-  $NEMO/src/scripts/gadget.install prefix=$MANYBODY/opt bench=0 manybody=$pkg >>& $log
-popd >& /dev/null
-rehash
-
 #                                                    firstn
 echo  `date` Installing firstn
 pushd $NEMO/usr/aarseth/firstn >& /dev/null
@@ -300,6 +262,44 @@ echo  `date` Installing xyz from NEMO
   if ($status) echo ERRORS compiling vogl, check $log
   mknemo xyzview snapxyz      >>& $log
   if ($status) echo ERRORS compiling xyz, check $log
+
+tipsy:
+#                                                    tipsy
+echo  `date` Installing tipsy
+tar zxf $pkg/tipsy/tipsy-$tipsy.tar.gz
+ln -s tipsy-$tipsy tipsy
+pushd tipsy-$tipsy/code >& /dev/null
+  set log=$root/tmp/tipsy.log
+  mkdir -p $root/opt/bin
+  ./configure --prefix=$root/opt >& $log
+  make >>& $log
+  make install prefix=$root/opt >>& $log
+popd >& /dev/null
+rehash
+
+cosmics:
+#                                                    cosmics
+echo  `date` Installing cosmics
+tar zxf $pkg/grafic/cosmics-$cosmics.tar.gz
+pushd cosmics-$cosmics  >& /dev/null
+  set log=$root/tmp/cosmics.log
+  mkdir -p $root/opt/bin
+  #  note we're hardcoding g77 here, should check the real name of the compiler!!!
+  make linux F77=g77 >>& $log
+  cp bin/* $root/opt/bin >>& $log
+popd >& /dev/null
+rehash
+  
+
+gadget:
+#                                                    gadget
+echo  `date` Installing gadget
+mkdir gadget
+pushd gadget >& /dev/null
+  set log=$root/tmp/gadget.log 
+  $NEMO/src/scripts/gadget.install prefix=$MANYBODY/opt bench=0 manybody=$pkg >>& $log
+popd >& /dev/null
+rehash
 
 
 ruby:
