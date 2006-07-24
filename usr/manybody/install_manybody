@@ -6,6 +6,7 @@
 # 21-jul-2006     various changes to go with the times (mexico)        pjt
 #                 and switchover to the new configure based install    
 # 23-jul-2006     make sure the manybody_pkg tree is treated R/O       pjt
+#                 changed order of tools for gh2006 
 #
 #  Removed any local directory called manybody and installs a new manybody tree
 #  The default should be executed from the home directory, such that
@@ -191,106 +192,6 @@ pushd cvsutils-0.2.3 >& /dev/null
 popd >& /dev/null
 rehash
 
-ruby:
-#                                                   ruby
-echo  `date` Installing ruby
-tar zxf $pkg/ruby/ruby-$ruby.tar.gz
-pushd ruby-$ruby >& /dev/null
-  set log=$root/tmp/ruby.log
-  ./configure --prefix=$root/opt   >& $log
-  make                            >>& $log
-  make install                    >>& $log
-popd >& /dev/null
-rehash
-
-acs:
-#                                                   acs-lite
-echo  `date` Installing acs
-tar zxf $pkg/acs/acs-$acs.tgz
-pushd acs >& /dev/null
-  tar xf $pkg/acs/acscodes.tar
-  set log=$root/tmp/acs.log
-  setenv ACSROOT `pwd`
-  source $ACSROOT/bin/acsstart.cshrc
-  make acscode >& $log
-  if (0) then
-    # the long long path to make documentation
-    # also assumes we have a local ruby
-    cd $ACSROOT/src/rdoc*
-    ruby install.rb
-    cd $ACSROOT
-    make
-  endif
-popd >& /dev/null
-rehash
-
-starlab:
-#                                                   starlab (+cvs)
-echo  `date` Installing starlab
-tar zxf $pkg/starlab/starlab_cvs.tar.gz
-ln -s starlab_cvs starlab
-pushd starlab_cvs >& /dev/null
-  set log=$root/tmp/starlab.log
-  set opts=(`pwd`/usr --without-f77 --enable-sdyn3 --enable-sdyn)
-  if ($cvs) cvs up >>& $log
-  ./install-starlab $opts >>& $log
-  echo "See also install.log in the starlab_cvs directory" >> $log
-  if (-e starlab_start.csh) then
-    source starlab_start.csh
-    echo STARLAB-COUNT: `ls $STARLAB_INSTALL_PATH/bin|wc -l`
-  else
-    echo STARLAB: failed to build properly
-  endif
-popd >& /dev/null
-rehash
-
-#                                                   starcluster
-if (0) then
-echo  `date` Installing starcluster
-tar zxf $pkg/starcluster/starcluster_cvs.tar.gz
-ln -s starcluster_cvs starcluster
-pushd starcluster_cvs >& /dev/null
-  set log=$root/tmp/starcluster.log
-  if ($cvs) cvs up >>& $log
-  make >>& $log
-  if ($status) echo ERRORS compiling starcluster, check $log
-  make install prefix=$STARLAB_INSTALL_PATH >>& $log
-  if ($status) echo ERRORS installing starcluster, check $log
-  echo STARLAB+CLUSTER-COUNT: `ls $STARLAB_INSTALL_PATH/bin|wc -l`
-popd >& /dev/null
-rehash
-endif
-
-partiview:
-#                                                   fltk
-echo  `date` Installing fltk 
-tar zxf $pkg/fltk/fltk-$fltk-source.tar.gz
-pushd fltk-$fltk >& /dev/null
-  set log=$root/tmp/fltk.log
-  ./configure --prefix=$root/opt >& $log
-  make >>& $log
-  if ($status) echo ERRORS compiling fltk, check $log
-  make install >>& $log
-  if ($status) echo ERRORS installing fltk, check $log
-popd >& /dev/null
-rehash
-
-#                                                   partiview
-echo  `date` Installing partiview
-tar zxf $pkg/partiview/partiview_cvs.tar.gz
-ln -s partiview_cvs partiview
-pushd partiview_cvs/src >& /dev/null
-  set log=$root/tmp/partiview.log 
-  if ($cvs) cvs up >& $log
-  ./configure --with-fltk=$root/opt >>& $log
-  make >>& $log
-  if ($status) then
-    echo ERRORS compiling partiview, check $log
-  else
-    cp partiview $MANYBODY/opt/bin
-  endif
-popd >& /dev/null
-
 nemo:
 #                                                   nemo
 echo  `date` Installing NEMO
@@ -382,6 +283,133 @@ pushd $NEMO/usr/trenti >& /dev/null
 popd >& /dev/null
 rehash
 
+ds9:
+#                                                   ds9
+if ($sys == linux) then
+echo  `date` "Installing ds9 - for linux only"
+pushd $NEMOBIN >& /dev/null
+  tar zxf $pkg/ds9/ds9.tar.gz
+popd >& /dev/null
+rehash
+endif
+
+#                                                    xyz stuff
+echo  `date` Installing xyz from NEMO
+  set log=$root/tmp/xyz.log 
+  $NEMO/src/scripts/nemo.vogl  >& $log
+  if ($status) echo ERRORS compiling vogl, check $log
+  mknemo xyzview snapxyz      >>& $log
+  if ($status) echo ERRORS compiling xyz, check $log
+
+
+ruby:
+#                                                   ruby
+echo  `date` Installing ruby
+tar zxf $pkg/ruby/ruby-$ruby.tar.gz
+pushd ruby-$ruby >& /dev/null
+  set log=$root/tmp/ruby.log
+  ./configure --prefix=$root/opt   >& $log
+  make                            >>& $log
+  make install                    >>& $log
+popd >& /dev/null
+rehash
+
+acs:
+#                                                   acs-lite
+echo  `date` Installing acs
+tar zxf $pkg/acs/acs-$acs.tgz
+pushd acs >& /dev/null
+  tar xf $pkg/acs/acscodes.tar
+  set log=$root/tmp/acs.log
+  setenv ACSROOT `pwd`
+  source $ACSROOT/bin/acsstart.cshrc
+  make acscode >& $log
+  if (0) then
+    # the long long path to make documentation
+    # also assumes we have a local ruby
+    cd $ACSROOT/src/rdoc*
+    ruby install.rb
+    cd $ACSROOT
+    make
+  endif
+popd >& /dev/null
+rehash
+
+echo "***"
+echo "***"
+echo "***"
+echo "         the GH2006 part of manybody is now complete, you could interrupt with ^C now"
+echo "***"
+echo "***"
+echo "***"
+
+starlab:
+#                                                   starlab (+cvs)
+echo  `date` Installing starlab
+tar zxf $pkg/starlab/starlab_cvs.tar.gz
+ln -s starlab_cvs starlab
+pushd starlab_cvs >& /dev/null
+  set log=$root/tmp/starlab.log
+  set opts=(`pwd`/usr --without-f77 --enable-sdyn3 --enable-sdyn)
+  if ($cvs) cvs up >>& $log
+  ./install-starlab $opts >>& $log
+  echo "See also install.log in the starlab_cvs directory" >> $log
+  if (-e starlab_start.csh) then
+    source starlab_start.csh
+    echo STARLAB-COUNT: `ls $STARLAB_INSTALL_PATH/bin|wc -l`
+  else
+    echo STARLAB: failed to build properly
+  endif
+popd >& /dev/null
+rehash
+
+#                                                   starcluster
+if (0) then
+echo  `date` Installing starcluster
+tar zxf $pkg/starcluster/starcluster_cvs.tar.gz
+ln -s starcluster_cvs starcluster
+pushd starcluster_cvs >& /dev/null
+  set log=$root/tmp/starcluster.log
+  if ($cvs) cvs up >>& $log
+  make >>& $log
+  if ($status) echo ERRORS compiling starcluster, check $log
+  make install prefix=$STARLAB_INSTALL_PATH >>& $log
+  if ($status) echo ERRORS installing starcluster, check $log
+  echo STARLAB+CLUSTER-COUNT: `ls $STARLAB_INSTALL_PATH/bin|wc -l`
+popd >& /dev/null
+rehash
+endif
+
+partiview:
+#                                                   fltk
+echo  `date` Installing fltk 
+tar zxf $pkg/fltk/fltk-$fltk-source.tar.gz
+pushd fltk-$fltk >& /dev/null
+  set log=$root/tmp/fltk.log
+  ./configure --prefix=$root/opt >& $log
+  make >>& $log
+  if ($status) echo ERRORS compiling fltk, check $log
+  make install >>& $log
+  if ($status) echo ERRORS installing fltk, check $log
+popd >& /dev/null
+rehash
+
+#                                                   partiview
+echo  `date` Installing partiview
+tar zxf $pkg/partiview/partiview_cvs.tar.gz
+ln -s partiview_cvs partiview
+pushd partiview_cvs/src >& /dev/null
+  set log=$root/tmp/partiview.log 
+  if ($cvs) cvs up >& $log
+  ./configure --with-fltk=$root/opt >>& $log
+  make >>& $log
+  if ($status) then
+    echo ERRORS compiling partiview, check $log
+  else
+    cp partiview $MANYBODY/opt/bin
+  endif
+popd >& /dev/null
+
 gsl:
 #                                                   GSL
 echo  `date` Installing gsl
@@ -430,24 +458,6 @@ pushd $NEMO/usr >& /dev/null
 popd >& /dev/null
 rehash
 endif
-
-ds9:
-#                                                   ds9
-if ($sys == linux) then
-echo  `date` "Installing ds9 - for linux only"
-pushd $NEMOBIN >& /dev/null
-  tar zxf $pkg/ds9/ds9.tar.gz
-popd >& /dev/null
-rehash
-endif
-
-#                                                       xyz stuff
-echo  `date` Installing xyz from NEMO
-  set log=$root/tmp/xyz.log 
-  $NEMO/src/scripts/nemo.vogl  >& $log
-  if ($status) echo ERRORS compiling vogl, check $log
-  mknemo xyzview snapxyz      >>& $log
-  if ($status) echo ERRORS compiling xyz, check $log
 
 ez:
 #                                                       EZ
