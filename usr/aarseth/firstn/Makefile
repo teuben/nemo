@@ -1,5 +1,6 @@
-FFLAGS = -O2
-FC = f77
+include $(NEMOLIB)/makedefs
+#FFLAGS = -O2
+#FC = f77
 
 SOURCE = \
 firstn.f data.f energy.f force.f \
