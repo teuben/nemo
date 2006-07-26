@@ -48,7 +48,7 @@ string defv[] = {
   "seed=0\n       Random seed",
   "cleanup=t\n    cleanup run directory after use",
   "header=\n      use an explicit unfio header size of 4 or 8",
-  "VERSION=1.3\n  19-jul-06 PJT",
+  "VERSION=1.3a\n 22-jul-06 PJT",
   NULL,
 };
 
@@ -159,7 +159,7 @@ void nemo_main(void)
   
   datstr = stropen("make-it","w!"); /* create shell script to be run */
   fprintf(datstr,"#! /bin/sh\n");
-  fprintf(datstr,"# created by NEMO's magalie wrapper program VERSION=\n",getparam("VERSION"));
+  fprintf(datstr,"# created by NEMO's magalie wrapper program VERSION=%s\n",getparam("VERSION"));
   fprintf(datstr,"magalie.exe < magalie.in\n");
   fprintf(datstr,"rm -f ../%s\n",out);
   fprintf(datstr,"unfio in=m.dat block=0 type=f %s | tabtos - ../%s block1=m,x,y,z,vx,vy,vz options=wrap nbody=%d\n",
