@@ -1317,7 +1317,7 @@ C   -------------------------------
         PARAMETER (maxbin=1000)
         PARAMETER (lutemp=17)
         
-        CHARACTER*40 statfile
+        CHARACTER*(*) statfile
         INTEGER lustat,nbin(maxbin),kk,ilower,iupper,i,j,n
         REAL*8 rbin(maxbin),surfbin(maxbin),vcbin(maxbin),
      &         sigrbin(maxbin),sigzbin(maxbin),vexact(maxbin),
