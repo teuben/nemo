@@ -223,7 +223,7 @@ mkdir $NEMO/usr/aarseth/nbody6
 pushd $NEMO/usr/aarseth/nbody6 >& /dev/null
   set log=$root/tmp/nbody6.log 
   tar zxf $pkg/aarseth/nbody6/nbody6.tar.Z
-  (cd Ncode ; make nbody6 ; cp nbody6 $NEMOBIN) >& $log
+  (cd Ncode ; make nbody6 F77=$F77; cp nbody6 $NEMOBIN) >& $log
   if ($status) echo ERRORS compiling nbody6, check $log  
 popd >& /dev/null
 rehash
