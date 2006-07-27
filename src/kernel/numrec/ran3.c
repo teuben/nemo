@@ -1,7 +1,7 @@
 /*
  * RAN3: based on ran3() from Numerical Recipes,
  *	17-sep-95: addition safeguard against out of bounds
- *		   when initialized with large idum's
+ *		   when initialized with large idum's (idum > MBIG)
  *       9-may-97: option to view long as int for 64bit machines to keep
  *                 it portable
  *      13-may-05: made int the default, which works fine as long
