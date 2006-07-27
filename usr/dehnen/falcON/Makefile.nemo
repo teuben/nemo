@@ -5,7 +5,7 @@
 #   
 
 BINS = addgravity getgravity gyrfalcON lagrange_radii \
-        manipulate mkdehnen mkking mkplum scale_eps snapstack \
+        manipulate mkdehnen mkking mkplum scale_eps \
  	symmetrize TestGrav
 
 static_libs: $(LIB)libfalcON.a

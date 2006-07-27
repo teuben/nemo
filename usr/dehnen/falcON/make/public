@@ -261,7 +261,7 @@ symmetrize	:	$(falcON) $(BIN)symmetrize
 all_pub		:	TestGrav gyrfalcON a2s addgravity getgravity \
 			lagrange_radii manipulate mkdehnen \
 			mkking mkplum s2a scale_eps \
-			snapfilter snapprop snapstack symmetrize
+			snapfilter snapprop symmetrize
 man_pub	:
 			cp man/man1/* $(NEMO)/man/man1/
 
