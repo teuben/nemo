@@ -796,13 +796,15 @@ void GLObjectWindow::optionsReloadSnapshot()
     }
   }          
   pthread_mutex_unlock(&mutex_timer);
-  
+  int nb_select_copy=VirtualParticlesSelect::nb_select;
+  ParticlesSelectVector psv2 = psv; 
   psv.clear();   // clear particles range vectors
   VirtualParticlesSelect::nb_select = 0;
   // load positions
   if ( virtual_data->reload(&psv) <= 0) {
       QString message="Unable to restart snapshot!";
       QMessageBox::information( this,"Warning",message,"Ok");
+      
 
   } else {
       nbody   = virtual_data->getNbody();
@@ -814,6 +816,9 @@ void GLObjectWindow::optionsReloadSnapshot()
       glbox->setHud(GLHudObject::Time,timu);
       glbox->setHud(GLHudObject::Title,virtual_data->getDataName());
       glbox->setHud(GLHudObject::Getdata,virtual_data->getDataType());
+      psv = psv2;
+      VirtualParticlesSelect::nb_select = nb_select_copy;
+      glbox->getData( &nbody,pos,&psv);   // upload the data with the right color
       statusBar()->message("Snapshot reloaded.");
   }  
 }
@@ -895,12 +900,9 @@ void GLObjectWindow::loadNextFrame()
 {
   // load positions
   if ( ! virtual_data->loadPos(&psv)) {
-      if ( 
-           (! anim_engine->render->isActivated()) ) {        
-        QString message="End of snapshot Reached !";
-        QMessageBox::information( this,"Warning",message,"Ok");
-        std::cerr << "error nemo loading....\n";
-      }
+      QString message="End of snapshot Reached !";
+      QMessageBox::information( this,"Warning",message,"Ok");
+      std::cerr << "error nemo loading....\n";
 
   } else {
       nbody   = virtual_data->getNbody();
