@@ -1,0 +1,68 @@
+.TH SNAPSQUASH 1NEMO "28 July 2006"
+.SH NAME
+snapsquash \- squash a snapshot using Bosma's thesis recipe
+.SH SYNOPSIS
+\fBsnapsquash\fP [parameter=value]
+.SH DESCRIPTION
+\fBsnapsquash\fP squashes a snapshot according the the recipe given
+in Bosma's thesis.  It is a toy model meant to operate on thin 
+disks in the XY plane.
+.PP
+As a crude attempt to describe the velocity field of a galaxy with an
+oval distortion we have made a simple kinematical model, based on a
+suggestion by Dr. A. Toomre (note that this model was made in 1974,
+before more elaborate, and physically better founded, models were
+constructed by others. It should not be-taken too seriously; and is
+only meant as a guideline to determine the geometry of the system).
+.PP
+Consider a circular orbit at radius r in the plane of the galaxy. We
+deform this circle into an ellipse by stretching it along the x-axis
+and squeezing it along the y-axis. The Cartesian co-ordinates (x, y)
+of a point P on the circle transform to (x', y') with:
+.nf
+    x' = x*f       ;   y' = y/f
+.fi
+a is the semi-major axis of the ellipse, b is the semi-minor axis. The
+circular velocity vector at P is (u, v) = (- V sin(phi), Vc cos(phi)),
+with phi = arctan y / x and Vc the amplitude of the circular velocity
+at radius r. We can eliminate phi and transform this vector also with
+equations (1). Then we give the resulting ovals a constant pattern
+speed Omegap, but we reduce the angular velocity at each mean radius
+to compensate for this. We then have:
+.nf
+    u' = ....      ;  v' = ....
+.fi
+where r^2 = x^2f^2 + y^2/f^2 and Vc is taken at r.
+
+
+
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input file name, a snapshot. No default.
+.TP
+\fBout=\fP
+Output file name,  a snapshot, no default.
+.TP
+\fBf=\fP
+Factor to squash by [1.0]   
+.TP
+\fBomega=\fP
+Pattern Speed [0.0]     
+.TP
+\fBtimes=\fP
+Times to select snapshots from [all]  
+.SH EXAMPLES
+.SH SEE ALSO
+mkdisk(1NEMO)
+.SH FILES
+NEMO/src/nbody/init	snapsquash.c
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+28-Jul-06	V1.0  Created	PJT/AB
+.fi
