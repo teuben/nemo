@@ -620,7 +620,7 @@ void GLBox::setProjection(int width, int height)
   
   // 
   if (store_options->perspective) {
-    gluPerspective(45.,ratio,0.05,(float) DOF);
+    gluPerspective(45.,ratio,0.0005,(float) DOF);
   } 
   else {
     computeOrthoFactorRatio();
