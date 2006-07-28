@@ -47,16 +47,28 @@ Input file name, a snapshot. No default.
 Output file name,  a snapshot, no default.
 .TP
 \fBf=\fP
-Factor to squash by [1.0]   
+Factor to squash by. A number larger than 1 will stretch along the 
+X axis, and squash the Y axis. [1.0]   
 .TP
 \fBomega=\fP
-Pattern Speed [0.0]     
+Pattern Speed [0.0].
 .TP
 \fBtimes=\fP
 Times to select snapshots from [all]  
 .SH EXAMPLES
+The following example makes a velocity field of a squashed disk,
+and creates a velocity field to view:
+.nf
+    mkdisk disk1 10000 rmax=2 mass=1
+    snapsquash disk1 disk2 1.1 1
+    snaprotate disk2 disk3 30,60 zx
+    snapgrid disk3 ccd3 moment=-1
+    ccdplot ccd3
+.fi
+If you have ds9, the command \fInds9\fP will send this image into the ds9
+display server.
 .SH SEE ALSO
-mkdisk(1NEMO)
+mkdisk(1NEMO), snapshot(5NEMO)
 .SH FILES
 NEMO/src/nbody/init	snapsquash.c
 .SH AUTHOR
