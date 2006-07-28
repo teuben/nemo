@@ -714,7 +714,7 @@ Version 2.0 dated 2005-05-21.
                         </font>
                     </property>
                     <property name="text">
-                        <string>Glnemo version 0.92</string>
+                        <string>Glnemo version 0.92.1</string>
                     </property>
                 </widget>
                 <spacer>
