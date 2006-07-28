@@ -10,6 +10,7 @@
  *     24-may-02  V2.0   fixed for high-N system by using int_hack in load.c
  *     29-may-02  V2.1   add nudge= keyword to nudge overlapping particles
  *     25-apr-06  V2.2b  use global to isolate extern's (for Mac linking)
+ *     28-jul-06  V2.2c  default for tag is now Density
  *
  * TODO:  this program seems to assume m_i = 1, so for unequal masses wrong
  */
@@ -27,7 +28,7 @@ string defv[] = {
     "out=\n			  output file with f.c. results ",
     "neib=6\n			  number of neibours to define local density ",
     "rneib=0.1\n		  initial guess for neighbour sphere radius ",
-    "write_at_phi=t\n		  flag to write density in place of Phi ",
+    "write_at_phi=f\n		  flag to write Density in place of Potential",
     "rsize=4.0\n		  side-length of initial box",
     "rmin=\n			  lower left corner of initial box",
     "options=phase,mass\n	  misc. control options {phase, mass}",
@@ -35,11 +36,14 @@ string defv[] = {
     "nudge=0\n                    nudge overlapping particles with this dispersion",
     "verbose=f\n		  flag to print # of particles finished ",
     "density=t\n                  write density, or distance of Kth particle",
-    "VERSION=2.2b\n		  25-apr-06 PJT",
+    "VERSION=2.2c\n		  28-jul-06 PJT",
     NULL,
 };
 
 string usage = "hackcode local density calculation tool";
+
+string cvsid="$Id$";
+
 
 nemo_main()
 {
