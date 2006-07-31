@@ -32,7 +32,9 @@ if($?NEMO == 0) then
 endif
 
 # set enviroment variables
-setenv FALCONBIN $FALCON"/"$MACHTYPE"_"$OSTYPE"/"
+
+set    PLATFORM = `uname -m`
+setenv FALCONBIN $FALCON"/"$PLATFORM"/"
 setenv FALCONLIB $FALCONBIN"/lib"
 setenv PATH      $FALCONBIN":"$PATH
 
