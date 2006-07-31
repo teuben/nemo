@@ -254,6 +254,43 @@ namespace WDutils {
 		       const sortable* = 0,         //[I: minimum value]        
 		       const sortable* = 0);        //[I: maximum value]        
   //----------------------------------------------------------------------------
+  /// find percentiles of a 1D distribution of values                           
+  /// intantinations for float and double                                       
+  //----------------------------------------------------------------------------
+  template<typename scalar> class FindPercentile {
+    void *DATA;
+  public:
+    /// ctor: setup sort tree
+    /// \param F (input) array with elements
+    /// \param N (input) number of elements
+    /// \param W (optional input) array of weights
+    FindPercentile(const scalar*F, int N, const scalar*W=0);
+    /// dtor: de-allocate sorttree
+    ~FindPercentile();
+    /// \param f percentile note that P in [0,1]
+    /// \return value corresponding to cumulative weight f*W_total
+    scalar Percentile(scalar f) const;
+    /// \param r rank in [0,N]
+    /// \return value corresponding to rank r
+    scalar Percentile(int r) const;
+  };
+  //----------------------------------------------------------------------------
+  /// just find a single percentile                                             
+  //----------------------------------------------------------------------------
+  template<typename scalar>
+  scalar percentile(int r, const scalar*F, int N)
+  {
+    FindPercentile<scalar> FP(F,N);
+    return FP.Percentile(r);
+  }
+  //----------------------------------------------------------------------------
+  template<typename scalar>
+  scalar percentile(scalar f, const scalar*F, int N, const scalar*W)
+  {
+    FindPercentile<scalar> FP(F,N,W);
+    return FP.Percentile(f);
+  }
+  //----------------------------------------------------------------------------
   // polynomial interpolation on grids                                          
   //----------------------------------------------------------------------------
   template<typename scalar_type>

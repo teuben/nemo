@@ -8,7 +8,7 @@
 /// \date    1996-2006                                                          
 ///                                                                             
 /// \brief   contains the definition of template class falcON::tupel and        
-///	     all its members.                                                   
+///	     all its members and friends                                        
 ///                                                                             
 /// \version aug-2003: template metaprogramming to unroll loops automatically   
 /// \version nov-2003: non-standard #include files redundant; pseudo_tupel      
@@ -17,6 +17,7 @@
 /// \version jun-2005: removed pseudo_tupel, const_pseudo_tupel                 
 /// \version jul-2005: added doxygen documentation, added minnorm()             
 /// \version mar-2006: removed reliance on friend namespace injection           
+/// \version jul-2006: added global function applied()                          
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
@@ -465,6 +466,12 @@ namespace WDutils {
       M::v_appl(a,x.a,f);
       return*this;
     }
+    /// replace by element-wise function: tupel::a[i] = f(x[i])
+    tupel connected(tupel const&x, X(*f)(X)) {
+      register tupel y(*this);
+      M::v_appl(y.a,x.a,f);
+      return y;
+    }
     /// normalize: x[i] /= abs(x)
     tupel&normalize() {
       X n = norm();
@@ -589,6 +596,16 @@ namespace WDutils {
   template<int N, typename X, typename S> inline
   tupel<N,X> operator*(S const&y, tupel<N,X> const&v) {
     return v*y;
+  }
+  /// return element-wise function call: return f(tupel::a[i])
+  template<int N, typename X> inline
+  tupel<N,X> applied(tupel<N,X> const&x, X(*f)(X)) {
+    return x.applied(f);
+  }
+  /// replace by element-wise function: tupel::a[i] = f(x[i])
+  template<int N, typename X> inline
+  tupel<N,X> connected(tupel<N,X> const&x, tupel<N,X> const&y, X(*f)(X)) {
+    return x.connected(y,f);
   }
   /// is any element nan?
   template<int N, typename X> inline

@@ -377,6 +377,208 @@ namespace WDutils {
   //----------------------------------------------------------------------------
   template void EigenValuesTridiagonal<float >(int, float *, float *);
   template void EigenValuesTridiagonal<double>(int, double*, double*);
-} // namespace WDutils {
+  //////////////////////////////////////////////////////////////////////////////
+  //
+  // finding percentiles in rank or cumulative weight
+  //
+  //////////////////////////////////////////////////////////////////////////////
+
+  template<typename scalar>
+  class PercentileFinder {
+
+  public:
+
+    struct point {
+      scalar q,w;
+      point() {}
+      point(point const&P) : q(P.q), w(P.w) {}
+      point& operator=(point const&P) { q=P.q; w=P.w; return*this; }
+    }; // struct point
+
+    struct range {
+      range   *r[2]; ///< lower and upper sub-range (if range is split)
+      scalar   q[2]; ///< lower and upper value of q
+      scalar   w[2]; ///< lower and upper cumulative weight
+      int      n[2]; ///< lower and upper cumulative rank-1
+      point   *P;    ///< table of points to be used
+
+      /// default ctor: unsplit range
+      range() { r[0]=0; r[1]=0; }
+
+      point*begin() const { return P+n[0]; }
+      point*end() const { return P+n[1]; }
+      bool is_final() const { return r[0]==0; }
+      bool contains(scalar W) const { return W>w[0] && W<=w[1]; }
+      bool contains(int    R) const { return R>n[0] && R<=n[1]; }
+      void dump() const {
+	std::cerr
+	  << "### WDutils debug info: "
+	  << "PercentileFinder::range has:"
+	  << " q="<<q[0]<<','<<q[1]
+	  << " w="<<w[0]<<','<<w[1]
+	  << " n="<<n[0]<<','<<n[1]<<'\n';
+      }
+    }; // struct range
+
+    friend class WDutils::traits<point>;
+    friend class WDutils::traits<range>;
+
+  private:
+    unsigned           Ntot;
+    point             *PointsA, *PointsB;
+    range             *Root;
+    block_alloc<range> RangeAlloc;
+    scalar             Wtot;
+
+    void split(range*);
+
+    template<typename T> range* findrange(T X) {
+      register range* R = Root;
+      while(R->q[1] > R->q[0]) {
+	if(R->is_final()) split(R);
+	R = R->r[0]->contains(X) ? R->r[0] : R->r[1];
+      }
+      return R;
+    }
+
+    template<typename T> double findQ(T const&X) {
+      return findrange(X)->begin()->q;
+    }
+
+  public:
+    /// ctor
+    /// \param F array with values to be sorted
+    /// \param N number of values
+    /// \param W array with weights
+    PercentileFinder(const scalar*F, int N, const scalar*W=0);
+
+    /// dtor: de-allocate points and destruct RangeAlloc
+    ~PercentileFinder()
+    {
+      WDutils_DEL_A(PointsA);
+      WDutils_DEL_A(PointsB);
+    }
+
+    /// find value containing a given fraction of the total weight
+    /// \param f fraction of the total weight
+    /// \return value so that the cumulative weight equals f*Wtot
+    scalar FindValue(scalar f) {
+      if(f<0. || f>1.) error("error in percentile finding\n");
+      return
+	f==0 ? Root->q[0] :
+	f==1 ? Root->q[1] : findQ(f*Wtot);
+    }
+
+    /// value corresponding to given rank
+    /// \param r rank
+    /// \return value at rank r
+    scalar FindValue(int r) {
+      if(r<0. || r>Ntot) error("error in percentile finding\n");
+      return
+	r==0    ? Root->q[0] :
+	r==Ntot ? Root->q[1] : findQ(r);
+    }
+  };
+  //////////////////////////////////////////////////////////////////////////////
+  template<typename scalar>
+  struct traits<typename PercentileFinder<scalar>::point> {
+    static const char* name() { return "PercentileFinder::point"; }
+  };
+  template<typename scalar>
+  struct traits<typename PercentileFinder<scalar>::range> {
+    static const char* name() { return "PercentileFinder::range"; }
+  };
+  //////////////////////////////////////////////////////////////////////////////
+
+  template<typename scalar>
+  PercentileFinder<scalar>::PercentileFinder(const scalar*F, 
+					     int          N,
+					     const scalar*W) :
+    Ntot       ( N ),
+    PointsA    ( WDutils_NEW(point,Ntot) ),
+    PointsB    ( WDutils_NEW(point,Ntot) ),
+    RangeAlloc ( int(10+log(double(Ntot))) ),
+    Wtot       ( 0. )
+  {
+    Root = RangeAlloc.new_element();
+    scalar t, q[2] = { F[0], F[0] };
+    for(int n=0; n!=N; ++n) {
+      scalar f = F[n];
+      update_min(q[0],f);
+      update_max(q[1],f);
+      PointsA[n].q = f;
+      scalar w = W? W[n] : 1;
+      if(w <= 0) error("PercentileFinder: weight=%f <= 0\n",w);
+      PointsA[n].w = w;
+      Wtot += w;
+    }
+    Root->q[0] = q[0];
+    Root->q[1] = q[1];
+    Root->w[0] = 0.;
+    Root->w[1] = Wtot;
+    Root->n[0] = 0;
+    Root->n[1] = Ntot;
+    Root->P    = PointsA;
+    if(debug(8)) Root->dump();
+  }
+
+  template<typename scalar>
+  void PercentileFinder<scalar>::split(range*R) {
+    point *P = R->P == PointsA ? PointsB : PointsA;
+    scalar s = 0.5 * (R->q[0] + R->q[1]);
+    scalar w = 0, q[2];
+    int    l = R->n[0], h = R->n[1];
+    q[0] = R->q[0];
+    q[1] = R->q[1];
+    for(point*p=R->begin(); p!=R->end(); ++p)
+      if(p->q < s) {
+	w     += p->w;
+	P[l++] = *p;
+	update_max(q[0],p->q);
+      } else {
+	P[--h] = *p;
+	update_min(q[1],p->q);
+      }
+    R->r[0]       = RangeAlloc.new_element();
+    R->r[0]->q[0] = R->q[0];
+    R->r[0]->q[1] = q[0];
+    R->r[0]->w[0] = R->w[0];
+    R->r[0]->w[1] = R->w[0] + w;
+    R->r[0]->n[0] = R->n[0];
+    R->r[0]->n[1] = l;
+    R->r[0]->P    = P;
+    if(debug(8)) R->r[0]->dump();
+      
+    R->r[1]       = RangeAlloc.new_element();
+    R->r[1]->q[0] = q[1];
+    R->r[1]->q[1] = R->q[1];
+    R->r[1]->w[0] = R->w[0] + w;
+    R->r[1]->w[1] = R->w[1];
+    R->r[1]->n[0] = h;
+    R->r[1]->n[1] = R->n[1];
+    R->r[1]->P    = P;
+    if(debug(8)) R->r[1]->dump();
+  }
+  //////////////////////////////////////////////////////////////////////////////
+  template<typename scalar>
+  FindPercentile<scalar>::FindPercentile(const scalar*F, int N, const scalar*W)
+    : DATA ( new PercentileFinder<scalar>(F,N,W) )
+  {}
+  template<typename scalar>
+  FindPercentile<scalar>::~FindPercentile() {
+    WDutils_DEL_O(static_cast<PercentileFinder<scalar>*>(DATA));
+  }
+  template<typename scalar>
+  scalar FindPercentile<scalar>::Percentile(scalar f) const {
+    return static_cast<PercentileFinder<scalar>*>(DATA)->FindValue(f);
+  }
+  template<typename scalar>
+  scalar FindPercentile<scalar>::Percentile(int r) const {
+    return static_cast<PercentileFinder<scalar>*>(DATA)->FindValue(r);
+  }
+
+  template class FindPercentile<double>;
+  template class FindPercentile<float>;
+} // namespace WDutils
 ////////////////////////////////////////////////////////////////////////////////
 
