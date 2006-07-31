@@ -55,7 +55,7 @@ endif
 
 ifeq ($(PLATFORM),x86_64)
 # on opteron (x86-64) use
-CPUFLAGS		:= -mcpu=k8 -mpreferred-stack-boundary=4
+CPUFLAGS		:= -march=k8 -mpreferred-stack-boundary=4
 endif
 
 OPTFLAGS		:= -ggdb -O2 -fPIC $(CPUFLAGS) -funroll-loops -fforce-addr -fomit-frame-pointer -rdynamic
