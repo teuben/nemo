@@ -249,7 +249,7 @@ namespace {
       point*end_points  ()               const { return P + n[1]; }
       bool  is_final    ()               const { return r[0] == 0; }
       bool  contains    (double const&M) const { return M>m[0] && M<=m[1]; }
-      bool  contains    (int    const&R) const { return R>n[1] && R<=n[1]; }
+      bool  contains    (int    const&R) const { return R>n[0] && R<=n[1]; }
 
     };
 
