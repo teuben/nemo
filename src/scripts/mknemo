@@ -10,12 +10,13 @@
 #   dec-2004            look for mknemo.d scripts first
 #   dec-2005            -u also looks a NEMO/local/pgplot etc.
 #   mar-2006            give help, even if locked
+#   aug-2006            some sanity checks if cvs is present if -u is used
 #
 
 #  todo:    bug not doing cvs update when new mknemo detected ?
 #           safeguard if disk is full
 #
-set version="MKNEMO Version 3.4 14-mar-2006"
+set version="MKNEMO Version 3.4a 1-aug-2006"
 if ($#argv == 0) goto usage
 set old_argv=($*)
 
@@ -149,6 +150,19 @@ process:
 if ($go == 0 && $#argv == 0) goto noargs
 
 if ($u) then
+  # 
+  pushd $NEMO >& /dev/null
+  if (! -e CVS/Root) then
+    echo Your $NEMO does not appear to be CVS enabled
+    exit 1
+  endif
+  cvs version >& /dev/null
+  if ($status) then
+    echo You do not seem to have the cvs command installed, cannot use -u
+    exit 1
+  endif
+  popd >& /dev/null
+
   (echo Checking mknemo ... ;cd $NEMO/src/scripts; cvs update mknemo)
   cmp -s $NEMO/src/scripts/mknemo $NEMOBIN/mknemo 
   if ($status) then
