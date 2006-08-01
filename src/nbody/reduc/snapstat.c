@@ -15,6 +15,7 @@
  *       20-aug-91  correct pi/acc... allocation 
  *      20-jan-94   1.5c sqr() decl for solaris
  *      15-mar-06   1.5f use statics to hide names
+ *       1-aug-06   1.5g make it listen to the times= keyword
  */
 
 /**************** INCLUDE FILES ********************************/ 
@@ -23,10 +24,14 @@
 #include <getparam.h>
 #include <vectmath.h>
 #include <filestruct.h>
-
 #include <snapshot/snapshot.h>  
+
 #ifndef HUGE
 # define  HUGE  1e20
+#endif
+
+#ifndef TIMEFUZZ
+# define TIMEFUZZ        0.0001  /* tolerance in time comparisons */
 #endif
 
 /**************** COMMAND LINE PARAMETERS **********************/
@@ -45,7 +50,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "rms=false\n                Want rms",
     "ecutoff=0.0\n              Cutoff for bound particles",
     "verbose=t\n                verbose mode?",
-    "VERSION=1.5f\n             15-mar-06 PJT",
+    "VERSION=1.5g\n             1-aug-06 PJT",
     NULL
 };
 
@@ -77,8 +82,6 @@ local real *az=NULL;          /* -- forces in z */
 /*  The following vectors also have allocated lenght 'mbody' */
 local real **xp, **yp, **zp;  /* pointers to positions; for sorting */
 local real **up, **vp, **wp;  /* pointers to velocities; for sorting */
-
-#define TIMEFUZZ        0.0001  /* tolerance in time comparisons */
 
 local string times;                           /* input parameters */
 local real minradfrac;
@@ -113,7 +116,6 @@ local int    *idr=NULL;                             /* index array for sorting *
 void nemo_main()
 {
     stream instr;
-    string times;
     int    gs;
     
     times = getparam("times");
@@ -138,6 +140,8 @@ void nemo_main()
 
     for(;;) {
         if ( (gs = get_snap(instr)) > 0) {
+	    if (!within(tsnap,times,TIMEFUZZ))
+	      continue;
             analysis( nbody );          /* this scans through all particles */
                                         /* in worst case O(N*N) method */
             radii( nbody );             /* various radii of system */
@@ -159,7 +163,6 @@ void nemo_main()
 get_snap(stream instr) /* returns:   -1: not a snapshot   0: no ParticlesTag */
 {
     int i, j;
-    double sqr(), sqrt();
     real *p;
     
     get_history(instr);         /* just to be safe */
