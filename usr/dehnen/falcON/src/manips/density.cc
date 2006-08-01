@@ -10,9 +10,19 @@
 //                                                                              
 // Copyright (C) 2006 Walter Dehnen                                             
 //                                                                              
-// This is a non-public part of the code.                                       
-// It is property of its author and not to be made public without his written   
-// consent.                                                                     
+// This program is free software; you can redistribute it and/or modify         
+// it under the terms of the GNU General Public License as published by         
+// the Free Software Foundation; either version 2 of the License, or (at        
+// your option) any later version.                                              
+//                                                                              
+// This program is distributed in the hope that it will be useful, but          
+// WITHOUT ANY WARRANTY; without even the implied warranty of                   
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
+// General Public License for more details.                                     
+//                                                                              
+// You should have received a copy of the GNU General Public License            
+// along with this program; if not, write to the Free Software                  
+// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                    
 //                                                                              
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
@@ -20,10 +30,11 @@
 //                                                                              
 // v 0.0    27/04/2006  WD created                                              
 // v 0.1    07/07/2006  WD replacing bodyset with flags::ignore                 
+// v 0.2    27/07/2006  WD made public                                          
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
 #include <public/io.h>
-#include <proper/neighbours.h>
+#include <public/neighbours.h>
 #include <ctime>
 
 namespace falcON { namespace Manipulate {
@@ -50,7 +61,7 @@ namespace falcON { namespace Manipulate {
   //                                                                            
   /// manipulator: estimates density using nearest neighbour count              
   ///                                                                           
-  /// This manipulator finds for each body in_subset (default: all, see         
+  /// This manipulator finds for each body in_subset() (default: all, see       
   /// set_subset) the Kth nearest neighbours (from the same set of bodies) and  
   /// estimates the mass density, which is written into field 'r'.\n            
   /// This procedure is quite expensive (more than computing gravity) and hence 

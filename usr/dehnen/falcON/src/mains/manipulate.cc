@@ -26,6 +26,7 @@
 // v 1.0   28/04/2005  WD created                                              |
 // v 1.1   20/05/2005  WD new manip.cc; added manippath option                 |
 // v 2.0   14/06/2005  WD new falcON                                           |
+// v 2.1   27/07/2006  WD write all data out if write not given                |
 //-----------------------------------------------------------------------------+
 #define falcON_VERSION   "2.0"
 #define falcON_VERSION_D "13-jun-2005 Walter Dehnen                          "
@@ -64,19 +65,17 @@ void falcON::main() falcON_THROWING
 			  getparam_z("manippath"));
   if(!manip)
     falcON_THROW("empty manipulator");
-  const fieldset need ( manip.need() );
-  const fieldset write( hasvalue("write")?
-			fieldset(getparam("write")) :
-			need|manip.provide());
+  const fieldset write( getioparam_a("write") );
+  const fieldset want ( manip.need() | write );
   snapshot shot;
   bool goon (true);
   while(goon && in.has_snapshot()) {
     fieldset read;
-    if(!shot.read_nemo(in,read,need,getparam("times"),0)) continue;
-    check_sufficient(read, need);
+    if(!shot.read_nemo(in,read,want,getparam("times"),0)) continue;
+    check_sufficient(read, manip.need());
     shot.add_fields(manip.provide());
     goon = manip(shot) || !stop;
-    if(hasvalue("out")) {
+    if(hasvalue("out") && strcmp(getparam("out"),".") ) {
       if(!out && !out.open(getparam("out")))
 	falcON_THROW("cannot open file \"%s\" for output",getparam("out"));
       shot.write_nemo(out,write);

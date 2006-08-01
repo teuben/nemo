@@ -61,6 +61,7 @@ gamma_h			:= $(IPUB)gamma.h $(basic_h) $(sample_h)
 king_h			:= $(IPUB)king.h
 bodyfunc_h		:= $(IPUB)bodyfunc.h $(body_h) 
 bodyduncdefs_h		:= $(IPUB)bodyfuncdefs.h $(body_h) 
+neighbours_h		:= $(IPUB)neighbours.h $(tree_h)
 
 # -----------------------
 # source dependency lists
@@ -83,6 +84,7 @@ sample_cc		:= $(SPUB)sample.cc $(sample_h) $(basic_h) $(numerics_h)
 gamma_cc		:= $(SPUB)gamma.cc $(gamma_h) $(numerics_h)
 king_cc			:= $(SPUB)king.cc $(king_h) $(numerics_h)
 bodyfunc_cc		:= $(SPUB)bodyfunc.cc $(bodyfunc_h) $(bodyfuncdefs_h) 
+neighbours_cc		:= $(SPUB)neighbours.cc $(neighbours_h) $(interact_h)
 
 # ---------------
 # library modules
@@ -107,6 +109,8 @@ $(LIB)manip.o:		$(manip_cc) $(makepublic)
 			$(MAKE_OBJ) $(NBDYFLAGS)
 $(LIB)bodyfunc.o:	$(bodyfunc_cc) $(makepublic)
 			$(MAKE_OBJ) $(NBDYFLAGS)
+$(LIB)neighbours.o:	$(neighbours_cc) $(makeproper)
+			$(MAKE_OBJ)
 endif
 $(LIB)nbody.o:		$(nbody_cc) $(makepublic)
 			$(MAKE_OBJ) $(NBDYFLAGS)
@@ -135,12 +139,13 @@ public_objs	 :=	$(LIB)basic.o $(LIB)body.o $(LIB)tree.o \
 			$(LIB)gravity.o $(LIB)kernel.o $(LIB)io.o \
 			$(LIB)partner.o $(LIB)nbody.o $(LIB)FAlCONC.o \
 			$(LIB)tools.o $(LIB)sample.o $(LIB)manip.o \
-			$(LIB)profile.o $(LIB)bodyfunc.o
+			$(LIB)profile.o $(LIB)bodyfunc.o $(LIB)neighbours.o 
 
 else
 public_objs	 :=	$(LIB)basic.o $(LIB)body.o $(LIB)tree.o \
 			$(LIB)gravity.o $(LIB)kernel.o $(LIB)partner.o \
-			$(LIB)nbody.o $(LIB)FAlCONC.o $(LIB)sample.o
+			$(LIB)nbody.o $(LIB)FAlCONC.o $(LIB)sample.o \
+			$(LIB)neighbours.o
 
 endif
 
@@ -185,6 +190,8 @@ $(BIN)a2s:		$(EXE)a2s.cc $(main_h) $(inline_io_h) $(io_h) \
 $(BIN)addgravity:	$(EXE)addgravity.cc $(body_h) $(externacc_h) $(main_h) \
 				$(FAlCON_h) $(io_h) $(makepublic)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
+$(BIN)density:		$(EXE)density.cc $(main_h) $(neighbours_h) $(makeproper)
+			$(MAKE_EXE) $(NEMO_EXE_FLGS)
 $(BIN)getgravity:	$(EXE)getgravity.cc $(main_h) $(FAlCON_h) $(io_h) \
 				$(makepublic)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
@@ -196,6 +203,12 @@ $(BIN)lagrange_radii:	$(EXE)lagrange_radii.cc $(main_h) $(body_h) $(io_h) \
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
 $(BIN)manipulate:	$(EXE)manipulate.cc $(main_h) $(manip_h) \
 				$(io_h) $(makepublic)
+			$(MAKE_EXE) $(NEMO_EXE_FLGS)
+$(BIN)mkbodiesfunc:	$(EXE)mkbodiesfunc.cc $(main_h) $(bodyfunc_h) \
+				$(makepublic)
+			$(MAKE_EXE) $(NEMO_EXE_FLGS)
+$(BIN)mkbodyfunc:	$(EXE)mkbodyfunc.cc $(main_h) $(bodyfunc_h) \
+				$(makepublic)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
 $(BIN)mkdehnen:		$(EXE)mkdehnen.cc $(main_h) $(gamma_h) \
 				$(io_h) $(LIB)gamma.o $(makepublic)
@@ -221,9 +234,6 @@ $(BIN)snapfilter:	$(EXE)snapfilter.cc $(main_h) $(bodyfunc_h) \
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
 $(BIN)snapprop:		$(EXE)snapprop.cc $(main_h) $(bodyfunc_h) $(makepublic)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
-$(BIN)snapstack:	$(EXE)snapstack.cc $(body_h) $(main_h) $(io_h) \
-				$(makepublic)
-			$(MAKE_EXE) $(NEMO_EXE_FLGS)
 $(BIN)symmetrize:	$(EXE)symmetrize.cc $(main_h) $(body_h) $(io_h) \
 				$(inline_io_h) $(makepublic)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
@@ -243,10 +253,13 @@ ifdef NEMO
 
 a2s		:	$(falcON) $(BIN)a2s
 addgravity	:	$(falcON) $(BIN)addgravity
+density		:	$(falcON) $(BIN)density
 getgravity	:	$(falcON) $(BIN)getgravity
 gyrfalcON	:	$(falcON) $(BIN)gyrfalcON
 lagrange_radii	:	$(falcON) $(BIN)lagrange_radii
 manipulate	:	$(falcON) $(BIN)manipulate
+mkbodyfunc	:	$(falcON) $(BIN)mkbodyfunc
+mkbodiesfunc	:	$(falcON) $(BIN)mkbodiesfunc
 mkdehnen	:	$(falcON) $(BIN)mkdehnen
 mkking		:	$(falcON) $(BIN)mkking
 mkplum		:	$(falcON) $(BIN)mkplum
@@ -255,12 +268,11 @@ scale_eps	:	$(falcON) $(BIN)scale_eps
 set_time	:	$(falcON) $(BIN)set_time
 snapfilter	:	$(falcON) $(BIN)snapfilter
 snapprop	:	$(falcON) $(BIN)snapprop
-snapstack	:	$(falcON) $(BIN)snapstack
 symmetrize	:	$(falcON) $(BIN)symmetrize
 
-all_pub		:	TestGrav gyrfalcON a2s addgravity getgravity \
-			lagrange_radii manipulate mkdehnen \
-			mkking mkplum s2a scale_eps \
+all_pub		:	TestGrav gyrfalcON a2s addgravity density \
+			getgravity lagrange_radii manipulate mkbodyfunc \
+			mkdehnen mkking mkplum s2a scale_eps \
 			snapfilter snapprop symmetrize
 man_pub	:
 			cp man/man1/* $(NEMO)/man/man1/
@@ -271,6 +283,8 @@ a2s		:
 			@echo "ERROR: you need NEMO to make \"$@\""
 addgravity	:
 			@echo "ERROR: you need NEMO to make \"$@\""
+density		:
+			@echo "ERROR: you need NEMO to make \"$@\""
 getgravity	:
 			@echo "ERROR: you need NEMO to make \"$@\""
 gyrfalcON	:
@@ -278,6 +292,10 @@ gyrfalcON	:
 lagrange_radii	:
 			@echo "ERROR: you need NEMO to make \"$@\""
 manipulate	:
+			@echo "ERROR: you need NEMO to make \"$@\""
+mkbodyfunc	:
+			@echo "ERROR: you need NEMO to make \"$@\""
+mkbodiesfunc	:
 			@echo "ERROR: you need NEMO to make \"$@\""
 mkdehnen	:
 			@echo "ERROR: you need NEMO to make \"$@\""
@@ -288,14 +306,12 @@ mkplum		:
 s2a		:
 			@echo "ERROR: you need NEMO to make \"$@\""
 scale_eps	:
-			@echo "ERROR: you need NEMO to make \"$@\"", parameter indicator changed from # to $
+			@echo "ERROR: you need NEMO to make \"$@\""
 set_time	:
 			@echo "ERROR: you need NEMO to make \"$@\""
 snapfilter	:
 			@echo "ERROR: you need NEMO to make \"$@\""
 snapprop	:
-			@echo "ERROR: you need NEMO to make \"$@\""
-snapstack	:
 			@echo "ERROR: you need NEMO to make \"$@\""
 symmetrize	:
 			@echo "ERROR: you need NEMO to make \"$@\""
@@ -326,12 +342,20 @@ dox/html/index.html:	inc/utils/exception.h \
 			inc/public/bodyfunc.h \
 			inc/public/interact.h \
 			inc/public/nbody.h \
-			src/manips/set_centre.cc \
 			src/manips/set_subset.cc \
+			src/manips/use_filter.cc \
+			src/manips/set_centre.cc \
+			src/manips/bound_centre.cc \
 			src/manips/dens_centre.cc \
+			src/manips/density.cc \
+			src/manips/densprof.cc \
+			src/manips/set_centre.cc \
 			src/manips/sphereprof.cc \
 			src/manips/projprof.cc \
-			src/manips/lagrange.cc
+			src/manips/lagrange.cc \
+			src/manips/add_plummer.cc \
+			src/manips/symmetrize_pairs.cc \
+			src/manips/randomize_azimuth.cc
 			doxygen dox/falcON.dox
 
 doxu		:	dox/html/index.html

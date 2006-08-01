@@ -281,6 +281,40 @@ namespace {
       return locked;
     }
     //--------------------------------------------------------------------------
+    // print info about bodyfuncs in base to output
+    bool printinfo(std::ostream&out) const {
+      std::ifstream file(fullfile);
+      if(file.is_open()) {
+	char     fexp[512], fold[512], type;
+	int      npar,num=1;
+	fieldset need;
+	out << 
+	  "# contents of bodyfunc database:\n"
+	  "#----+----------------------------------+------+----------+------+\n"
+	  "# No | expression (compact form)        | type | need     | npar |\n"
+	  "#----+----------------------------------+------+----------+------+\n";
+	while(!file.eof()) {
+	  file >> fexp >> type >> npar >> need >> funcname;
+	  if(num==1 || strcmp(fexp,fold)) {
+	    strcpy(fold,fexp);
+	    out  << '#'
+		 << std::setw(3)  << num++ << " | "
+		 << std::setw(32) << fexp  << " | "
+		 << ( type == 'b'? "bool | " :
+		      type == 'i'? "int  | " :
+		      type == 'r'? "real | " : "vect | " )
+		 << std::setw(8) << word(need) << " | "
+		 << std::setw(4) << npar << " |\n";
+	  }
+	}
+	out << 
+	  "#----+----------------------------------+------+----------+------+"
+	    << std::endl;
+	return true;
+      }
+      return false;
+    }
+    //--------------------------------------------------------------------------
     // findfunc():   try to find a bodyfunc from expr                           
     const char*findfunc(                           // R: function name          
 			const char*expr,           // I: expression to search   
@@ -291,7 +325,7 @@ namespace {
       std::ifstream file(fullfile);
       if(file.is_open()) {
 	// read full file and search for matching expression
-	char fexp[512], cneed[32];
+	char fexp[512];
 	while(file) {
 	  file >> fexp >> type >> npar >> need >> funcname;
 	  if(0 == strcmp(expr,fexp)) return funcname;
@@ -1068,9 +1102,11 @@ namespace {
 //                                                                              
 ////////////////////////////////////////////////////////////////////////////////
 bodyfunc::bodyfunc(const char*oexpr) throw(falcON::exception)
-  : FUNC(0), TYPE(0), EXPR(oexpr), NPAR(0), NEED(fieldset::o)
+  : FUNC(0), TYPE(0), EXPR(0), NPAR(0), NEED(fieldset::o)
 {
   if(oexpr == 0 || *oexpr == 0) return;
+  EXPR = falcON_NEW(char,strlen(oexpr)+1);
+  strcpy(EXPR,oexpr);
   // 0 eliminate white space from expression
   shrink(nexpr,oexpr);
   if(*nexpr == 0) return;
@@ -1151,6 +1187,16 @@ bodyfunc::bodyfunc(const char*oexpr) throw(falcON::exception)
   delete_files(fname);
 }
 ////////////////////////////////////////////////////////////////////////////////
+bool bodyfunc::print_db(std::ostream&out)
+{
+  try {
+    BF_database BD("bodyfunc","BFNAMES");
+    return BD.printinfo(out);
+  } catch(DataBaseErr E) {
+    return false;
+  }
+}
+////////////////////////////////////////////////////////////////////////////////
 //                                                                              
 // implementing falcON::BodyFunc<T>::BodyFunc()                                 
 //                                                                              
@@ -1170,9 +1216,13 @@ namespace {
 template<typename T>
 falcON::BodyFunc<T>::BodyFunc(const char*expr, const char*pars)
   throw(falcON::exception)
-  : bodyfunc(expr), PARS(pars)
+  : bodyfunc(expr), PARS(0)
 {
   if(is_empty()) return;
+  if(pars) {
+    PARS = falcON_NEW(char,strlen(pars)+1);
+    strcpy(PARS,pars);
+  }
   if(TYPE != bf_type<T>::type )
     throw exception("BodyFunc<%s>::BodyFunc(): expression \"%s\" is of type %s",
 		    nameof(T),expr,Typeof(TYPE));
@@ -1213,7 +1263,7 @@ template falcON::BodyFunc<falcON::vect>::BodyFunc(const char*,const char*)
 template<typename T>
 falcON::BodyFunc<T>::BodyFunc(const char*expr, const real*pars, int npar)
   throw(falcON::exception)
-  : bodyfunc(expr)
+  : bodyfunc(expr), PARS(0)
 {
   if(is_empty()) return;
   if(TYPE != bf_type<T>::type)
@@ -1235,13 +1285,17 @@ falcON::BodyFunc<T>::BodyFunc(const char*expr, const real*pars, int npar)
 	      "expression \"%s\" requires %d parameters, "
 	      "but %d are given; will ignore last %d",
 	      nameof(T),expr,NPAR,npar,npar-NPAR);
-    std::ostringstream ost;
-    for(int i=0; i!=NPAR; ++i) {
-      P[i] = pars[i];
-      if(i) ost << ',';
-      ost << pars[i];
+    if(npar > 0) {
+      PARS = falcON_NEW(char,npar*16);
+      char par[64], *P=PARS;
+      for(int ipar=0; ipar!=npar; ++ipar) {
+	sprintf(par,"%f",pars[ipar]);
+	strcpy(P,par);
+	strcat(P,",");
+	P += strlen(par) + 1;
+      }
+      P = 0;
     }
-    PARS = ost.str();
   }
 }
 template
@@ -1367,6 +1421,17 @@ bodiesfunc::bodiesfunc(const char*oexpr) throw(falcON::exception)
   // 4 delete temporary files
   delete_files(fname);
 }
+////////////////////////////////////////////////////////////////////////////////
+bool bodiesfunc::print_db(std::ostream&out)
+{
+  try {
+    BF_database BD("bodiesfunc","BFNAMES");
+    return BD.printinfo(out);
+  } catch(DataBaseErr E) {
+    return false;
+  }
+}
+////////////////////////////////////////////////////////////////////////////////
 #ifdef falcON_PROPER
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //

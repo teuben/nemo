@@ -10,9 +10,19 @@
 //                                                                              
 // Copyright (C) 2006 Walter Dehnen                                             
 //                                                                              
-// This is a non-public part of the code.                                       
-// It is property of its author and not to be made public without his written   
-// consent.                                                                     
+// This program is free software; you can redistribute it and/or modify         
+// it under the terms of the GNU General Public License as published by         
+// the Free Software Foundation; either version 2 of the License, or (at        
+// your option) any later version.                                              
+//                                                                              
+// This program is distributed in the hope that it will be useful, but          
+// WITHOUT ANY WARRANTY; without even the implied warranty of                   
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
+// General Public License for more details.                                     
+//                                                                              
+// You should have received a copy of the GNU General Public License            
+// along with this program; if not, write to the Free Software                  
+// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                    
 //                                                                              
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
@@ -20,6 +30,7 @@
 //                                                                              
 // v 0.0    02/05/2006  WD created                                              
 // v 0.1    07/07/2006  WD using bodies in_subset()                             
+// v 0.2    27/07/2006  WD made public                                          
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
 #include <public/io.h>
@@ -90,21 +101,21 @@ namespace falcON { namespace Manipulate {
     p[2][1] = p[1][2];
   }
   //////////////////////////////////////////////////////////////////////////////
-  const int    W_default = 500;
+  const int    W_default = 1000;
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
   // class densprof                                                             
   //                                                                            
   /// manipulator: measures profiles of density bins                            
   ///                                                                           
-  /// This manipulator uses a pre-computed mass-density (see density) to compute
-  /// the centre and profile of shells with a small range in rho. Only bodies   
-  /// in_subset() are used.                                                     
+  /// This manipulator uses a pre-computed mass-density (see class              
+  /// Manipulators::density) to compute the centre and profile of shells with   
+  /// a small range in rho. Only bodies in_subset() are used.                   
   ///                                                                           
   /// Meaning of the parameters:\n                                              
-  /// par[0]: # bodies per density shell (window size, default: 500)\n          
+  /// par[0]: # bodies per density shell (window size, default: 1000)\n         
   /// par[1]: delta time between analyses (default: 0)\n                        
-  /// file  : format string for output table files\n"                           
+  /// file  : format string for output table files\n                            
   ///                                                                           
   /// Usage of pointers: none\n                                                 
   /// Usage of flags:    uses in_subset()\n                                     
@@ -150,7 +161,7 @@ namespace falcON { namespace Manipulate {
     I    ( 0 ),
     FST  ( true ),
     FILE ( (file && file[0])? falcON_NEW(char,strlen(file)+1) : 0 ),
-    PS   ( 3 )
+    PS   ( 2 )
   {
     if(debug(2) || file==0 || file[0]==0 || npar>2)
       std::cerr<<
@@ -171,19 +182,11 @@ namespace falcON { namespace Manipulate {
   inline void densprof::print_line() const
   {
     OUT <<
-      "#-----------------------------------"
+      "#---------------------------------------------------------------"
+      "----------------------------------------------------------------"
       "-------------"
       "-------------"
-      "-------------"
-      "-------------"
-      "-------------"
-      "-------------"
-      "-------------"
-      "-------------"
-      "-------------"
-	<< PS.line_dir() <<' '
-	<< PS.line_dir() <<' '
-	<< PS.line_dir() <<'\n';
+	<< PS.line_dir() << PS.line_dir() << PS.line_dir() <<'\n';
   }
   //////////////////////////////////////////////////////////////////////////////
   bool densprof::manipulate(const snapshot*SHOT) const
@@ -200,7 +203,7 @@ namespace falcON { namespace Manipulate {
     // 0.3 are data sufficient?
     if(!SHOT->have_all(need()))
       error("densprof::manipulate(): need %s, but got %s\n",
-	    word(need()), word(SHOT->all_bits()));
+	    word(need()), word(SHOT->all_data()));
     // 1. sort bodies in descending density
     Array<bodies::index> T;
     SHOT->sorted(T,&neg_density);
@@ -212,7 +215,7 @@ namespace falcON { namespace Manipulate {
     if(OUT.reopen(FILE,I++,1)) {
       print_line();
       OUT << "#\n"
-	  << "# output from Manipulator \"radprof\"\n#\n";
+	  << "# output from Manipulator \""<<name()<<"\"\n#\n";
       if(RunInfo::cmd_known ()) OUT<<"# command: \""<<RunInfo::cmd ()<<"\"\n";
       OUT  <<"# run at "<<RunInfo::time()<<'\n';
       if(RunInfo::user_known())
@@ -226,17 +229,20 @@ namespace falcON { namespace Manipulate {
     OUT <<"# time = "<<SHOT->time()<<": "<<Nb
 	<<" bodies (of "<<SHOT->N_bodies()
         <<")\n#\n"
-	<<"#      xcen             vcen        "
-	<<"         rad "
-	<<"         rho "
-	<<"       <v_r> "
-	<<"     <v_rot> "
-	<<"     sigma_r "
-	<<"   sigma_mer "
-	<<"   sigma_rot "
-	<<"         c/a "
-	<<"         b/a "
-	<<"        major axis        minor axis     rotation axis\n";
+	<<"#              xcen                           vcen            "
+	<<"   radius "
+	<<"      rho "
+	<<"  <v_rad> "
+	<<"  <v_rot> "
+	<<"sigma_rad "
+	<<"sigma_mer "
+	<<"sigma_rot "
+	<<"      c/a "
+	<<"      b/a "
+	<<"    major axis     minor axis  rotation axis\n";
+    print_line();
+    Array<real> Rq(W+W);
+    Array<int>  Ir(W+W);
     // 3. loop windows of W
     for(unsigned ib=0,kb=W+W>Nb? Nb:W; ib!=Nb;
 	ib=kb,kb=kb+W+W > Nb? Nb : kb+W) {
@@ -256,25 +262,33 @@ namespace falcON { namespace Manipulate {
       X0  *= iM;
       V0  *= iM;
       Rho *= iM;
-      // 2nd body loop: measure moment of inertia and rotation
+      // 2nd body loop: measure moment of inertia, rotation and median radius
       vect_d Mvp(0.);
       double Mxx[3][3] = {{0.,0.,0.},{0.,0.,0.},{0.,0.,0.}};
-      for(unsigned i=ib; i!=kb; ++i) {
+      for(unsigned i=ib,j=0; i!=kb; ++i,++j) {
 	double mi = SHOT->mass(T[i]);
 	vect_d ri = SHOT->pos(T[i]) - X0;
 	vect_d vi = SHOT->vel(T[i]) - V0;
 	vect_d er = normalized(ri);
 	Mvp      += mi * (er^vi);
+	Rq[j]     = norm(ri);
 	add_outer_product(Mxx,ri,mi);
       }
       symmetrize(Mxx);
       double IV[3][3], ID[3];
       int    IR;
-      double Rad = sqrt((Mxx[0][0] + Mxx[1][1] + Mxx[2][2])*iM);
       EigenSymJacobiSorted<3,double>(Mxx,IV,ID,IR);
-      double ca = sqrt(ID[2]/ID[0]);
-      double ba = sqrt(ID[1]/ID[0]);
       double vp = abs(Mvp)*iM;
+      HeapIndex(Rq.array(),N,Ir.array());
+      double Mh = 0.5*M, Mc(0.), mR;
+      for(unsigned j=0; j!=N; ++j) {
+	double mi = SHOT->mass(T[ib+Ir[j]]);
+	Mc += mi;
+	if(Mc >= Mh) {
+	  mR = sqrt((Rq[Ir[j-1]]*(Mc-Mh) + Rq[Ir[j]]*(Mh-Mc+mi))/mi);
+	  break;
+	}
+      }
       // 3rd body loop: measure mean velocities and dispersion
       vect_d erot = norm(Mvp)>0.? normalized(Mvp) : vect_d(0.,0.,1.);
       double Mvr(0.), Mvrq(0.), Mvpq(0.), Mvtq(0.);
@@ -297,18 +311,17 @@ namespace falcON { namespace Manipulate {
       double sp = sqrt(M*Mvpq-Mvp*Mvp)*iM;
       // finally print out the data
       OUT << setprecision(3)
-	  << setw(6) << X0  <<' ' // centre position
-	  << setw(6) << V0  <<' ' // centre velocity
-	  << setprecision(6)
-	  << setw(12)<< Rad <<' ' // radius
-	  << setw(12)<< Rho <<' ' // density
-	  << setw(12)<< vr  <<' ' // <v_r>
-	  << setw(12)<< vp  <<' ' // <v_rot>
-	  << setw(12)<< sr  <<' ' // sigma_r
-	  << setw(12)<< st  <<' ' // sigma_mer
-	  << setw(12)<< sp  <<' ' // sigma_rot
-	  << setw(12)<< ca  <<' ' // c/a
-	  << setw(12)<< ba  <<' ';// b/a
+	  << setw(9) << X0                <<' '  // centre position
+	  << setw(9) << V0                <<' '  // centre velocity
+	  << setw(9) << mR                <<' '  // median radius
+	  << setw(9) << Rho               <<' '  // density
+	  << setw(9) << vr                <<' '  // <v_r>
+	  << setw(9) << vp                <<' '  // <v_rot>
+	  << setw(9) << sr                <<' '  // sigma_r
+	  << setw(9) << st                <<' '  // sigma_mer
+	  << setw(9) << sp                <<' '  // sigma_rot
+	  << setw(9) << sqrt(ID[2]/ID[0]) <<' '  // axis ratio c/a
+	  << setw(9) << sqrt(ID[1]/ID[0]) <<' '; // axis ratio b/a
       PS.print_dir(OUT, vect_d(IV[0])) << ' ';
       PS.print_dir(OUT, vect_d(IV[2])) << ' ';
       PS.print_dir(OUT, erot) << std::endl;

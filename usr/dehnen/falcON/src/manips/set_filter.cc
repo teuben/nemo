@@ -68,9 +68,10 @@ namespace falcON { namespace Manipulate {
   public:
     const char*name    () const { return "set_filter"; }
     const char*describe() const {
-      if(BF && *BF) return message("filters bodies according to filter \"%s\" "
-				   "with parameters %s",
-				   BF->expression(0), BF->parameters(0));
+      if(BF && *BF) 
+	return message("filters bodies according to filter \"%s\" "
+		       "with parameters %s",
+		       BF->expression(), BF->parameters());
       else return "open filter: no effect\n";
     }
     //--------------------------------------------------------------------------

@@ -405,6 +405,7 @@ INPUT                  = inc/utils/tupel.h \
 			 inc/public/basic.h \
 			 inc/public/fields.h \
 			 inc/public/io.h \
+			 inc/public/manip.h \
 			 inc/public/profile.h \
 			 inc/body.h \
 			 inc/public/bodyfunc.h \
@@ -415,6 +416,8 @@ INPUT                  = inc/utils/tupel.h \
 			 src/manips/set_centre.cc \
 			 src/manips/bound_centre.cc \
 			 src/manips/dens_centre.cc \
+			 src/manips/density.cc \
+			 src/manips/densprof.cc \
 			 src/manips/set_centre.cc \
 			 src/manips/sphereprof.cc \
 			 src/manips/projprof.cc \

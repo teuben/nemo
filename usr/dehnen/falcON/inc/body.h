@@ -375,7 +375,7 @@ namespace falcON {
     //@{                                                                        
     //==========================================================================
     /// sum of all body data hold.
-    fieldset const&all_bits  ()           const { return  BITS; }
+    fieldset const&all_data  ()           const { return  BITS; }
     /// do we have none of these data?
     bool           have_not  (fieldset b) const { return !BITS.intersect(b); }
     /// do we have all of these data?
@@ -384,12 +384,12 @@ namespace falcON {
     bool           have_some (fieldset b) const { return  BITS.intersect(b); }
     /// do we have this datum?
     bool           have      (fieldbit f) const { return  BITS.contain(f); }
-    //@}
-    //--------------------------------------------------------------------------
+    /// do we hold the body datum indicated?
 #define HAVE(BIT,NAME)						\
     bool have_##NAME() const { return BITS.contain(BIT); }
     DEF_NAMED(HAVE)
 #undef HAVE
+    //@}
     //==========================================================================
     //                                                                          
     /// \name non-const data access using bodies::index                         
@@ -1242,7 +1242,7 @@ namespace falcON {
       if(debug(6) && !have_all(s)) {
 	std::cerr<< "falcON Debug Info: "<<f<<':'<<l 
 		 << " bodies data required but not present: \""
-		 << all_bits().missing(s) << "\"\n";
+		 << all_data().missing(s) << "\"\n";
       }
     }
   protected:

@@ -61,12 +61,16 @@ namespace Manipulate {
   /// in_subset().\n                                                            
   /// Essentially, set_subset is like set_filter followed by use_filter.\n      
   /// A simple usage is to restrict the range of bodies. For instance the       
-  /// bodyfunc expression \n                                                    
-  ///      "#0<=i && i<#1" \n                                                   
+  /// bodyfunc expression                                                       
+  ///      "#0<=i&&i<#1"                                                      
   /// filters bodies with index between parameters #0 and #1 (note that the     
   /// the indices of bodies may not be preserved; in this case use the key      
   /// instead, that is 'k' instead of 'i' in the expression).\n                 
   /// An empty expression makes the open filter: all bodies are accepted.       
+  ///                                                                           
+  /// Meaning of the parameters:\n                                              
+  /// par[] : parameters used in bodyfunc expression (if any)\n                 
+  /// file  : bodyfunc expression\n                                             
   ///                                                                           
   /// Usage of pointers: none\n                                                 
   /// Usage of flags:    sets subset flag (in fact flags::ignore)\n             
@@ -86,7 +90,7 @@ namespace Manipulate {
       if(BF && *BF)
 	return message("chooses subset of bodies according to filter \"%s\" "
 		       "with parameters %s",
-		       BF->expression(0), BF->parameters(0));
+		       BF->expression(), BF->parameters());
       else
 	return "chooses subset of bodies: all bodies";
     }
@@ -129,7 +133,7 @@ namespace Manipulate {
 	if(!S->have_all(BF->need()))
 	  falcON_THROW("set_subset::manipulate(): "
 		       "filter needs '%s' but snapshot has only '%s'\n",
-		       word(BF->need()), word(S->all_bits()));
+		       word(BF->need()), word(S->all_data()));
 	// set time (filter may depend on time)
 	BF->set_time(S->time());
 	// loop bodies and run them through the filter

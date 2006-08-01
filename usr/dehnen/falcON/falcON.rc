@@ -34,7 +34,7 @@ endif
 # set enviroment variables
 
 set    PLATFORM = `uname -m`
-setenv FALCONBIN $FALCON"/"$PLATFORM"/"
+setenv FALCONBIN $FALCON"/"$PLATFORM
 setenv FALCONLIB $FALCONBIN"/lib"
 setenv PATH      $FALCONBIN":"$PATH
 

@@ -4,11 +4,7 @@
 # Makefile for the falcON project
 #
 ################################################################################
-default		: utils all manips doxu acc
-utils:
-	ln -s ../utils
-	(cd inc; ln -s ../utils/inc utils)
-
+default		: all manips acc doxu
 ifdef NEMO
 tonemo		: all manips
 			cp $(LIB)/libfalcON.so $(NEMOLIB)
@@ -40,6 +36,3 @@ $(LIB)libfalcON.so:	$(falcON_objs)
 			$(CXX) $^ -shared -o $@
 
 ################################################################################
-ifdef NEMO
-include Makefile.nemo
-endif

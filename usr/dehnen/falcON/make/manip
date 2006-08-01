@@ -78,9 +78,9 @@ ifdef DPROPER
 manips		:	$(MANIP)add_plummer.so \
 			$(MANIP)bound_centre.so \
 			$(MANIP)density.so \
-			$(MANIP)diskanalysis.so \
 			$(MANIP)densprof.so \
 			$(MANIP)dens_centre.so \
+			$(MANIP)diskanalysis.so \
 			$(MANIP)lagrange.so \
 			$(MANIP)projprof.so \
 			$(MANIP)sphereprof.so \
@@ -95,6 +95,8 @@ else
 
 manips		:	$(MANIP)add_plummer.so \
 			$(MANIP)bound_centre.so \
+			$(MANIP)density.so \
+			$(MANIP)densprof.so \
 			$(MANIP)dens_centre.so \
 			$(MANIP)lagrange.so \
 			$(MANIP)projprof.so \
@@ -105,6 +107,7 @@ manips		:	$(MANIP)add_plummer.so \
 			$(MANIP)symmetrize_pairs.so \
 			$(MANIP)randomize_azimuth.so \
 			$(MANIP)use_filter.so
+
 
 endif
 

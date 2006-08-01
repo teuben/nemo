@@ -68,7 +68,7 @@ namespace falcON { namespace Manipulate {
 	if(!S->have_all(BF->need()))
 	  falcON_THROW("set_subset::manipulate(): "
 		       "filter needs '%s' but snapshot has only '%s'\n",
-		       word(BF->need()), word(S->all_bits()));
+		       word(BF->need()), word(S->all_data()));
 	// loop bodies and run them through the filter
 	unsigned sub(0);
 	LoopAllBodies(S,b)

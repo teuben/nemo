@@ -53,16 +53,8 @@ namespace {
 //------------------------------------------------------------------------------
 const char* falcON::libdir()
 {
-  if(0 == *lib_name) {
-    const char* d = directory();
-    if(d) {
-      strcpy(lib_name, d);
-      strcat(lib_name,"/");
-      strcat(lib_name,getenv("MACHTYPE"));
-      strcat(lib_name,"_");
-      strcat(lib_name,getenv("OSTYPE"));
-    }
-  }
+  if(0 == *lib_name)
+    strcpy(lib_name,getenv("FALCONLIB"));
   return lib_name;
 }
 //------------------------------------------------------------------------------

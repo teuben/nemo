@@ -29,10 +29,6 @@
 #define falcON_included_bodyfunc_h
 
 #ifdef falcON_NEMO
-#ifndef falcON_included_string
-#  include <string>
-#  define falcON_included_string 1
-#endif
 #ifndef falcON_included_body_h
 #  include <body.h>
 #endif
@@ -98,11 +94,17 @@ namespace falcON {
     char        TYPE;
     int         NPAR;
     fieldset    NEED;
-    std::string EXPR;
+    char       *EXPR;
     //--------------------------------------------------------------------------
   public:
-    /// construction from bodyfunc expression (see man pages)
+    /// print info about bodyfuncs in database, if any
+    /// \return true if something was printed out
+    /// \param  ostream to print to
+    static bool print_db(std::ostream&);
+    /// ctor from bodyfunc expression (see man pages)
     explicit bodyfunc(const char*) throw(falcON::exception);
+    /// dtor: delete data
+    ~bodyfunc() { if(EXPR) falcON_DEL_A(EXPR); EXPR=0; }
     /// return type: 'b', 'i', 'r', 'v' for bool, int, real, vect
     char const&type() const { return TYPE; }
     /// check return type
@@ -117,9 +119,7 @@ namespace falcON {
     /// do we need this datum?
     bool need(fieldbit::bits b) const { return NEED.contain(b); }
     /// return original expression
-    std::string const&expression() const { return EXPR; }
-    /// return original expression
-    const char* expression(int) const { return EXPR.c_str(); }
+    const char* expression() const { return EXPR; }
     /// function call, non-operator
     template<typename T>
     T func (body const&b, double const&t, const real*p) const {
@@ -166,8 +166,8 @@ namespace falcON {
   template<typename T> class BodyFunc : private bodyfunc {
     // NOTE: MAXPAR=10 is hardwired into bodyfunc.cc: only one digit is allowed.
     static const int MAXPAR = 10;
-    real        P[MAXPAR];
-    std::string PARS;
+    real P[MAXPAR];
+    char*PARS;
   public:
     /// construction from bodyfunc expression (can be empty)
     /// \params expr body_func (5falcON) expression --- or NULL
@@ -183,6 +183,8 @@ namespace falcON {
     /// \note the bodyfunc expression must return the type T
     BodyFunc(const char*expr, const real*pars, int npar)
       throw(falcON::exception);
+    /// dtor: delete data
+    ~BodyFunc() { if(PARS) falcON_DEL_A(PARS); PARS=0; }
     /// \return number of parameters used
     bodyfunc::npar;
     /// \param  n number of parameter asked
@@ -192,10 +194,8 @@ namespace falcON {
     bodyfunc::need;
     /// \return original expression
     bodyfunc::expression;
-    /// return original expression
-    std::string const&parameters() const { return PARS; }
-    /// return original expression
-    const char* parameters(int) const { return PARS.c_str(); }
+    /// \return parameters
+    const char*parameters() const { return PARS; }
     /// function call
     /// \param b body
     /// \param t time
@@ -247,11 +247,11 @@ namespace falcON {
     BodyFunc<bool>::need;
     /// \return original expression
     BodyFunc<bool>::expression;
-    /// \return original parameters
+    /// \return parameters
     BodyFunc<bool>::parameters;
     /// function call
     /// \param b body
-    /// \return expression evaluated for body \a b at time \a TIME
+    /// \return expression evaluated for body \a b at time set by set_time()
     bool operator()(body const&b) const {
       return BodyFunc<bool>::operator() (b,TIME);
     }
@@ -294,6 +294,10 @@ namespace falcON {
     fieldset NEED;
     //--------------------------------------------------------------------------
   public:
+    /// print info about bodyfuncs in database, if any
+    /// \return true if something was printed out
+    /// \param  ostream to print to
+    static bool print_db(std::ostream&);
     /// construction from bodyfunc expression
     explicit bodiesfunc(const char*) throw(falcON::exception);
     /// return type: 'b', 'i', 'r', 'v' for bool, int, real, vect

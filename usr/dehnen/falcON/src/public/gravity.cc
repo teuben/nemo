@@ -584,20 +584,45 @@ namespace {
     if(i_soft) {
       CheckMissingBodyData(tree->my_bodies(),
 			   fieldset::m|fieldset::e|fieldset::f);
-      LoopLeafs(grav::leaf,tree,Li) {
-	Li->copy_from_bodies_mass(tree->my_bodies());
-	Li->copy_from_bodies_eph (tree->my_bodies());
-	Li->copy_from_bodies_flag(tree->my_bodies());
-	if(is_active(Li)) ++n;
-      } 
+      if(debug(1))
+	LoopLeafs(grav::leaf,tree,Li) {
+	  Li->copy_from_bodies_mass(tree->my_bodies());
+	  Li->copy_from_bodies_eph (tree->my_bodies());
+	  Li->copy_from_bodies_flag(tree->my_bodies());
+	  if(is_active(Li)) ++n;
+	  if(mass(Li) <= zero)
+	    falcON_THROW("GravEstimator: mass of body #%d=%f "
+			 "but falcON requires positive masses\n",
+			 tree->my_bodies()->bodyindex(mybody(Li)),
+			 mass(Li));
+	} 
+      else
+	LoopLeafs(grav::leaf,tree,Li) {
+	  Li->copy_from_bodies_mass(tree->my_bodies());
+	  Li->copy_from_bodies_eph (tree->my_bodies());
+	  Li->copy_from_bodies_flag(tree->my_bodies());
+	  if(is_active(Li)) ++n;
+	} 
     } else {
 #endif
       CheckMissingBodyData(tree->my_bodies(),fieldset::m|fieldset::f);
-      LoopLeafs(grav::leaf,tree,Li) {
-	Li->copy_from_bodies_mass(tree->my_bodies());
-	Li->copy_from_bodies_flag(tree->my_bodies());
-	if(is_active(Li)) ++n;
-      }
+      if(debug(1))
+	LoopLeafs(grav::leaf,tree,Li) {
+	  Li->copy_from_bodies_mass(tree->my_bodies());
+	  Li->copy_from_bodies_flag(tree->my_bodies());
+	  if(is_active(Li)) ++n;
+	  if(mass(Li) <= zero)
+	    falcON_THROW("GravEstimator: mass of body #%d=%f "
+			 "but falcON requires positive masses\n",
+			 tree->my_bodies()->bodyindex(mybody(Li)),
+			 mass(Li));
+	}
+      else
+	LoopLeafs(grav::leaf,tree,Li) {
+	  Li->copy_from_bodies_mass(tree->my_bodies());
+	  Li->copy_from_bodies_flag(tree->my_bodies());
+	  if(is_active(Li)) ++n;
+	}
 #ifdef falcON_INDI
     }
 #endif
@@ -867,8 +892,18 @@ bool GravEstimator::prepare(const GravMAC*const&MAC,
       Ci->set_srce(ci++);                          //     give memory to cell   
       Ci->resetCoeffs();                           //     reset cell: Coeffs    
     }                                              //   END LOOP                
-    //      - pass source properties up the tree, count active cells            
+    //    - pass source properties up the tree, count active cells              
     NCA = pass_up(MAC,TREE->is_re_used());         //   pass source data up tree
+    if(debug(11)) {
+      std::ofstream dump;
+      dump.open("/tmp/leafs");
+      TREE->dump_leafs<Leaf>(dump);
+      dump.open("/tmp/cells");
+      TREE->dump_cells<Cell>(dump);
+      debug_info(11,"GravEstimator::prepare(): "
+		 "leafs dumped to file \"/tmp/leafs\" "
+		 "and cells to file \"/tmp/cells\"\n");
+    }
     CELLS_UPTODATE = 1;                            //   update up-to-date flag  
   } else {                                         // ELSE                      
     Cell::srce_data*ci=CELL_SRCE;                  //   pter to cell's source   
