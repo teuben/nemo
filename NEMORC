@@ -49,8 +49,9 @@ setenv NEMODAT $NEMO/data
 setenv NEMOINC $NEMO/inc
 setenv NEMOSRC $NEMO/src
 setenv BTRPATH .:$NEMO/obj/bodytrans
-setenv POTPATH .:$NEMO/obj/potential
-setenv ACCPATH .:$NEMO/obj/acc
+setenv POTPATH .:$NEMO/obj/potential:$NEMO/obj/acc
+setenv ACCPATH .:$NEMO/obj/potential:$NEMO/obj/acc
+# setenv ACCPATH .:$NEMO/obj/acc
 setenv MANIPPATH .:$NEMO/obj/manip:$NEMO/usr/dehnen/falcON/manip
 setenv NEMOVER `cat $NEMO/VERSION`
 
@@ -77,6 +78,7 @@ else
  if ($status) setenv MANPATH $NEMO/man:$MANPATH
 endif
 
+setenv MANPATH ${MANPATH}:${NEMO}/usr/dehnen/falcON/man
 # Set various 'external' things we sometimes need, but only if not set
 
 if ($?NUMRECLIB == 0)  setenv NUMRECLIB $NEMOLIB/libnumrec.a
