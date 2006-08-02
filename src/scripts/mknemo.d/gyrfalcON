@@ -5,8 +5,9 @@
 set dir=$NEMO/usr/dehnen/falcON
 
 if (-e $dir) then
-  cd $dir
-  make nemo_bins
+  cd $dir/../utils
+  make clean
+  make -f Makefile.nemo clean nemo_bins
 else
   echo mknemo.d: $dir does not exist
 endif
