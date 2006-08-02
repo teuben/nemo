@@ -44,13 +44,17 @@ repository.  It is possible to customize your own transformations and
 collections; see \fB $NEMO/src/nbody/core/bodysub/\fP for model
 routines.
 .PP
-If \fIbodytrans\fP has been compiled with auto-saving, the object
-file will be saved in the standard repository directory
+If \fIbodytrans\fP has been compiled with auto-saving (the default),
+the object file will be saved in the standard repository directory
 \fB$NEMOOBJ/bodytrans\fP, and the corresponding database file-list
 \fBBTNAMES\fP will be updated. When using the same
 expression \fIexpr\fP at a later time not only can the user
 then refer to the expression by it's original expression, but also by
 its pseudo-name \fIfile\fP (see keyword \fIfile\fP and examples below).
+.PP
+For an alternative approach to use dynamic analysis routines, see
+\fImkbodyfunc(1falcON)\fP and 
+\fImkbodiesfunc(1falcON)\fP.
 .SH PARAMETERS
 The following parameters are recognized.
 .TP 24
@@ -152,7 +156,8 @@ created bodytrans variables are compiled with 2D bodies. Obviously
 it is very dangerous to mix 2D and 3D bodies, but the possibility
 exists.
 .SH SEE ALSO
-body(3NEMO), bodytrans(3NEMO), vectmath(3NEMO), snapshot(5NEMO).
+body(3NEMO), bodytrans(3NEMO), vectmath(3NEMO), snapshot(5NEMO),
+mkbodyfunc(1falcON), mkbodiesfunc(1falcON)
 .SH AUTHOR
 Joshua E. Barnes, Peter Teuben
 .SH FILES
