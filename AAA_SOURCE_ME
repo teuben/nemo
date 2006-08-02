@@ -2,6 +2,8 @@
 # Source this file in a csh to install and build NEMO from scratch 
 # (referred to as the "old manybody method")
 #
+# wget ftp://ftp.astro.umd.edu/progs/nemo/nemo_cvs.tar.gz
+#
 # This script also supports building with the PGPLOT and CFITSIO packages that
 # have to be in NEMO/local to be triggered. Here is an example how to do this:
 #
@@ -175,3 +177,4 @@ bad_has_nemo:
 
 end:
    echo "All done."
+
