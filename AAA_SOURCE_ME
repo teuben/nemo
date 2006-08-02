@@ -1,5 +1,6 @@
 #
-# Source this file to install and build NEMO from scratch ("manybody method")
+# Source this file in a csh to install and build NEMO from scratch 
+# (referred to as the "old manybody method")
 #
 # This script also supports building with the PGPLOT and CFITSIO packages that
 # have to be in NEMO/local to be triggered. Here is an example how to do this:
@@ -8,18 +9,18 @@
 #	cd nemo
 #	mkdir local
 #       cd local; cvs -Q co pgplot; cd ..
-#       cd local; wget -q ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio2500.tar.gz
-#       tar zxf cfitsio2500.tar.gz
+#       cd local; wget -q ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio3006.tar.gz
+#       tar zxf cfitsio3006.tar.gz
 #       cd ..
 #
 # after this the install can be done as follows (your shell must be (t)csh !!)
 #
 #       source AAA_SOURCE_ME
 #
-# to clean up the closest approach is:
+# if you see too many problems, clean up, fix your compilers/libraries and restart:
 #
 #	make distclean          # cleans most of the things created
-#	omen                    # remove NEMO* and YAPP* things, cleans the path
+#	omen                    # remove NEMO* and YAPP* things, cleans the path also
 #
 #
 # Within NEMO there are a few other scripts which have been used to automate
@@ -39,10 +40,14 @@
 # 30-jul-04  PJT                make PGPLOT and CFITSIO optional bootstrappable
 # 26-dec-04  PJT       		make HDF optional bootstrappable
 # 29-dec-05  PJT                set absolute paths to compilers in makedefs
+# 30-jul-06  PJT                various for gh2006 at the beach near Veracruz :-)
+
+if ($?NEMO) goto bad_has_nemo
 
 rm -f install.log >& /dev/null
 touch install.log
 
+#   number of executables expected on a full successfull install
 set nexec=132
 
 set stat = 0
@@ -76,7 +81,11 @@ endif
 if (1) then
   touch /tmp/nemo_was_here
   mkdir /tmp/NEMO_WAS_HERE
-  if ($status) echo Your FS does not support multi-case unique filenames
+  if ($status) then
+    echo "Your filesystem does not support multi-case unique filenames (like A and a)"
+    echo "A real Unix depends on it..."
+    echo "You probably have a Mac, or use Windows, so, good luck to you"
+  endif
   rmdir /tmp/NEMO_WAS_HERE
   rm /tmp/nemo_was_here
 endif
@@ -113,7 +122,7 @@ echo '++++++++++++++++++++++++++++++++++++++++' >>& install.log
 
 echo Building some sample executables by running the testsuite with -b:
 echo '   You can later build all executables with "cd $NEMO;make bins"'
-echo '   or using "mknemo <programname>" on a per-case basis'
+echo '   or using "mknemo <program-name>" on a per-case basis'
 if (-d CVS) then
   echo "    Since you also seem to have a CVS structure (very good!)"
   echo "    you can also update code directly via CVS, using the -u flag to mknemo:"
@@ -127,7 +136,7 @@ src/scripts/testsuite -b >>& install.log
 
 if (1) then
   echo Compiling falcON and its tools
-  ( cd usr/dehnen/falcON; make clean nemo_bins)  >& install_falcON.log
+  (cd usr/dehnen/falcON; make -i -f Makefile.nemo nemo_bins)  >& install_falcON.log
 endif
 
 if ($stat == 0) then
@@ -155,3 +164,14 @@ endif
 
 if (! -e nemo_start.csh) ln -s nemo_start nemo_start.csh
 src/scripts/mk_nemo_start.sh >  nemo_start.sh
+
+goto end
+#
+bad_has_nemo:
+  echo "NEMO=$NEMO already exists, AAA_SOURCE_ME should be run from a clean place"
+  echo "use the alias 'omen' to remove the NEMO environment'
+  goto end
+
+
+end:
+   echo "All done."
