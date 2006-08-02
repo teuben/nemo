@@ -198,7 +198,7 @@ if ($bench) then
    source $rc
    time Gadget2.galaxy Gadget2/parameterfiles/galaxy.param >& galaxy.log
    lamwipe
-   # "standard benchmark on single processor"
+   # "standard benchmark on single processor : 60000 particles 2019 steps"
    # ---------------------------------------------------------------------------------------
    # time mpirun -np 1 Gadget2/Gadget2 Gadget2/parameterfiles/galaxy.param >& galaxy.log
    # AMD64/3200:           2126.093u 2.983s 35:29.48 99.9%
@@ -211,6 +211,7 @@ if ($bench) then
    # P4/1600 laptop:    about 4h35m           16508"
    # P4/64/3000            3292.062u 7.109s 55:05.93 99.7%
    # G5/1600               4263.6u  51.5s 1:19:07.64 90.8%
+   # P3/3200 dualEMT64 (gh2006 cluster)     51:12.84 
    # ---------------------------------------------------------------------------------------
 endif
 
