@@ -1,4 +1,4 @@
-.TH MKKD95 1NEMO "23 March 2004"
+.TH MKKD95 1NEMO "27 July 2006"
 .SH NAME
 mkkd95 \- Kuijken-Dubinski-95 composite disk-bulge-halo model
 .SH SYNOPSIS
@@ -214,9 +214,9 @@ The disk is parameterized directly by its mass profile so its effect on the
 rotation curve is predictable ahead of time.
 .PP
 Hit and miss seems to be a good strategy for finding a suitable profile.
-Generate a model to lmax=2 and then view the resulting rotation curve by typing
-\fImake vr.dat\fP.  This uses the program to generate the file \fIvr.dat\fP which
-tells you the contributions to the total rotation curve.  Another useful
+Generate a model to lmax=2 and then view the resulting rotation curve by 
+using the \fIvcirc\fP program, in  which 
+the contributions to the total rotation curve are tabulated.  Another useful
 file is \fImr.dat\fP which tells you the mass and radial extent of the disk
 bulge and halo.
 .PP
@@ -320,5 +320,6 @@ Peter Teuben (NEMO interface) -
 06-Mar-04	V1.0 Created, using kd95's  README file 	PJT
 11-mar-04	V1.2 added nmodel= and warns about using model= 	PJT
 23-mar-04	V1.4 use logfile in tmpdir, added cleanup=, some key reorder	PJT
+27-jul-06	fixed documentation on vcirc usage, disabled pgplot for ia64	PJT
 .fi
 
