@@ -1,4 +1,4 @@
-.TH BODYTRANS 1NEMO "12 August 1992"
+.TH BODYTRANS 1NEMO "2 August 2006"
 .SH NAME
 bodytrans \- test and optionally save body to scalar mapping
 .SH SYNOPSIS
@@ -104,21 +104,25 @@ will hence be \fBbtX_file\fP. [default: not used].
 File containing a database of expression and filenames under which
 they are to be saved. When used, the program (re) creates
 all bodytrans(5) files and exits. [default: no used].
+.TP
+\fBshow=t|f\fP
+Show the currently saved bodytrans functions (from the BTNAMES files).
+[Default: \fBf\fP].
 .SH EXAMPLE
 The following command
 .nf
-    % \fBbodytrans expr=x+y+z file=sum\fP
+    % \fBbodytrans expr=x+y+z alias=sum\fP
 .fi
 saves the mapping in an object file \fIbtr_sum.o\fP, and can be 
 later used as in:
 .nf
     % \fBsnapprint snap-file x+y+z\fP
 .fi
-or
+or using this alias
 .nf
     % \fBsnapprint snap-file sum\fP
 .fi
-It is not necessary to provide a pseudonym using the keyword \fBfile\fP,
+It is not necessary to provide a pseudonym using the keyword \fBalias\fP,
 although recommended if \fIbodytrans\fP is used.
 As an example, the command
 .nf
@@ -154,7 +158,7 @@ Joshua E. Barnes, Peter Teuben
 .SH FILES
 .nf
 .ta +2i
-~/src/nbody/core/bodytrans.c	bodytrans(1,3) merged code
+~/src/nbody/core/bodytrans.c	code
 ~/src/nbody/core/bodysub/*	default standard bodytrans(5) files
 .fi
 .SH HISTORY
@@ -165,4 +169,5 @@ xx-xxx-87	V1.0 Created     	JEB
 19-nov-89	V1.2 BTNAMES database used for saving	PJT
 10-dec-91	some more doc	PJT
 12-aug-92	documented CFLAGS usage 	PJT
+2-aug-06	V3.3 add show=	PJT
 .fi
