@@ -1746,7 +1746,7 @@ falcON_TRAITS(falcON::snapshot,"snapshot");
 /// \param PTER  valid pointer to falcON::bodies (or falcON::snapshot)
 /// \param NAME  name given to loop variable (of type falcON::body)
 #define LoopSubsetBodies(PTER,NAME)			\
-  LoopAllBodies(PTER,NAME) if(!has_flag(b) || in_subset(b))
+  LoopAllBodies(PTER,NAME) if(!has_flag(NAME) || in_subset(NAME))
 #endif
 //------------------------------------------------------------------------------
 //@}
