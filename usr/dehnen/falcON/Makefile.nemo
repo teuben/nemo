@@ -3,21 +3,22 @@
 #   at the top level and adds the target to merge needed object
 #   code into NEMO.
 #   
+include Makefile
 
-BINS = addgravity getgravity gyrfalcON lagrange_radii \
-        manipulate mkdehnen mkking mkplum scale_eps \
- 	symmetrize TestGrav
+utils:
+	ln -s ../utils
+	(cd inc; ln -s ../utils/inc utils)
 
 static_libs: $(LIB)libfalcON.a
 
-nemo_bins: nemo_libs $(BINS)
-	make 
-	(cd $(HOS); cp $(BINS) $(NEMOBIN))
-	cp $(LIB)/lib*.so $(NEMOLIB)
+nemo_bins: nemo_libs install
 
 nemo_libs: utils static_libs
 	(cd utils; $(MAKE))
 	cp utils/lib/$(HOS)/lib*.so $(NEMOLIB)
+
+nemo_libs_clean:
+	(cd utils; $(MAKE) clean)
 
 nemo_test:
 	mkplummer - 100 | gyrfalcON - . tstop=0.1
