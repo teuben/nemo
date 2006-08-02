@@ -58,6 +58,7 @@
  *   7=may-04   fixed permission problem
  *  14-jul-04   fix K&R style code which can give problems for -DSINGLE_PREC code
  *  27-jul-05   add dummy loader for lazy gcc4 type linkers
+ *  28-jul-06   add show= options
  *
  *  Used environment variables (normally set through .cshrc/NEMORC files)
  *      NEMO        used in case NEMOOBJ was not available
@@ -83,7 +84,7 @@
 #define SHORT_FNAMELEN   64
 
 local proc   bodytrans(string,string,string);
-local void   ini_bt(void), end_bt(void), make_bt(string);
+local void   ini_bt(void), end_bt(void), make_bt(string), show_bt(void);
 local string get_bt(string), put_bt(string,char,string);
 
 void bodytrans_dummy_for_c(void);
@@ -459,6 +460,45 @@ local void make_bt(string btname)
 #endif
 }       
 
+local void show_bt(void)
+{
+  FILE *fp;
+  char *ep, *np, *tp, line[NL];
+  int  i=0;
+  
+  ini_bt();    /* just to be sure, initialize where the BTNAMES file is */
+
+  fp = fopen(edb,"r");
+  if (fp==NULL) {
+    dprintf(0,"Could not open file %s\n",edb);
+    return;
+  }
+  dprintf(1,"show_bt: %s",edb);
+
+  while (fgets(line,NL,fp)) {
+    dprintf(1,"MAKE_BT: %s",line);
+    ep= &line[0];
+    np = ep;
+    while (!isspace(*np))       /* skip the expression */
+      np++;
+    *np = '\0';                 /* terminate for 'ep' */
+    np++;                       /* get to next char */
+    while (isspace(*np))        /* skip spaces */
+      np++;
+    np++; np++;                 /* skip 2 ('b' and 't') */
+    tp = np;                    /* 'i' or 'r' */
+    np++;                       /* skip _ */
+    np++;
+
+    if (*np == '_')
+      printf("%c  %s\n",*tp,ep);
+    else {                      /* alias */
+      np[strlen(np)-1] = 0;     /* terminate at newline */
+      printf("%c  %s (alias: %s)\n",*tp,ep,np);
+    }
+  }
+}
+
 void bodytrans_dummy_for_c(void)
 {
     double a,b,c;
@@ -496,12 +536,15 @@ string defv[] = {
     "t=2.5\n		Time",
     "i=1\n		Index",
     "alias=\n		Filename to save expression in (bt<TYPE>_<ALIAS>)",
-    "btnames=\n		BTNAMES filename to regenerate .o files",
-    "VERSION=3.2a\n	4-may-04 PJT",
+    "btnames=\n		BTNAMES filename to regenerate .so files",
+    "show=f\n           show all existing bodytrans in the system",
+    "VERSION=3.3\n	2-aug-06 PJT",
     NULL,
 };
 
 string usage = "bodytrans manipulator";
+
+string cvsid="$Id$";
 
 local void getvparam(vector,string);
 extern string *burststring(string,string);
@@ -520,6 +563,10 @@ nemo_main()
     if (hasvalue("btnames")) {
         make_bt(getparam("btnames"));
         stop(0);
+    }
+    if (getbparam("show")) {
+      show_bt();
+      stop(0);
     }
     expr = getparam("expr");
     type = getparam("type");
