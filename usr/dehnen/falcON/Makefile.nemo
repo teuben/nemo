@@ -5,13 +5,17 @@
 #   
 include Makefile
 
+#       this target is kept for sanity, the distribution should
+#       contain these links... or is CVS not able to maintain them?
 utils:
 	ln -s ../utils
 	(cd inc; ln -s ../utils/inc utils)
 
 static_libs: $(LIB)libfalcON.a
 
-nemo_bins: nemo_libs install
+nemo_bins: nemo_libs default install
+	cp manip/* $(NEMOOBJ)/manip
+	cp acc/* $(NEMOOBJ)/acc
 
 nemo_libs: utils static_libs
 	(cd utils; $(MAKE))

@@ -271,7 +271,8 @@ snapprop	:	$(falcON) $(BIN)snapprop
 symmetrize	:	$(falcON) $(BIN)symmetrize
 
 all_pub		:	TestGrav gyrfalcON a2s addgravity density \
-			getgravity lagrange_radii manipulate mkbodyfunc \
+			getgravity lagrange_radii manipulate mkbodiesfunc \
+			mkbodyfunc \
 			mkdehnen mkking mkplum s2a scale_eps \
 			snapfilter snapprop symmetrize
 man_pub	:

@@ -4,14 +4,16 @@ Differences from Dehnen's distribution:
 1) some files needed to be renamed because  MacOSX cannot
    see upper and lower case differently
 
-
-utils/inc/Math.h      	renamed to WDMath.h
-utils/src/Math.cc     	now includes WDMath.h
-
-src/acc/combined.cc	renamed to combined_a.cc
-src/acc/Combined.cc	no change,  but this was duplicated on MacOSX
-
+   ** as af GH2006 school these are all past issues
 
 2) when you build within nemo,use the -i flag to pass over problems,
    and make sure CXX=$CXX is compatible with the one in $NEMOLIB/makedefs
+
+
+Also check the following files used to aid installing falcON tools:
+	Makefile.nemo
+	$NEMO/src/scripts/mknemo.d/gyrfalcON	
+	$NEMO/src/scripts/test_a_new_nemo_cvs
+	$NEMO/AAA_SOURCE_ME
+	
 
