@@ -1,0 +1,42 @@
+.TH SNAPDISK 1NEMO "3 August 2006"
+.SH NAME
+snapdisk \- assign rotation to a disk
+.SH SYNOPSIS
+\fBsnapdisk\fP [parameter=value]
+.SH DESCRIPTION
+\fBsnapdisk\fP assigns rotation in the XY-plane to an assumes disk
+where forces have been assigned by another program (e.g. hackforce)
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+input file (snapshot) [???]    
+.TP
+\fBout=\fP
+output filename [???]     
+.TP
+\fBomega=\fP
+rotation (counterclock) [0.0]     
+.TP
+\fBrotcur=\fP
+Optional rotation/outflow curve spin (table: r,v) [] 
+.TP
+\fBsign=\fP
+Sign of rotcur [1]    
+.TP
+\fBoutflow=\fP
+Outflow or Rotation/Spin [f]    
+.TP
+\fBtimes=\fP
+times of snapshots to copy [all]  
+.SH EXAMPLES
+.SH SEE ALSO
+.SH FILES
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+03-Aug-06	V0.0 Created by mkman	NEMO
+.fi
