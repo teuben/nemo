@@ -33,8 +33,8 @@ Preconditions to INSTALLATION
 
 a) Installing PGPLOT
 
-   It is highly recommended to install PGPLOT before you install NEMO.
-   We also have a simple procedure to install PGPLOT during the NEMO
+   It is recommended to install PGPLOT before you install NEMO. 
+   We do have a simple procedure to install PGPLOT during the NEMO
    install itself.  You can also decide to use another plotting (YAPP) 
    device though, e.g. plplot (a pure C plotting library similar to PGPLOT) 
    is gaining in popularity.
@@ -132,7 +132,7 @@ Brief overview of a Version 3.x INSTALLATION
 ============================================
 
 1) Obtain the (compressed) tar file, nemo_<VERSION>.tar.gz, from ftp.astro.umd.edu:/progs/nemo
-   and uncompress it anywhere where you have enough (at least 150MB, but more is better):
+   and uncompress it anywhere where you have enough space (at least 150MB, but more is better):
 
         % gzip -cd nemo_VERSION.tar.gz | tar xf -
 
@@ -144,13 +144,13 @@ Brief overview of a Version 3.x INSTALLATION
 
 	% cd nemo_VERSION
 
-   (VERSION could be e.g. "3.1.2" or "cvs")
+   (VERSION could be e.g. "3.2.4" or better yet, "cvs")
 
 2) Run configure and install the basic NEMO libraries:
 
 	% ./configure 
 		(sometimes you may need to set your default compiler, e.g.
-			setenv F77 g77
+			setenv F77 gfortran
 		 or whichever is applicable, if the fortran compiler does not
 		 get detected properly, the run configure again)
 		 Check the file config.log if configure fails
@@ -164,9 +164,7 @@ Brief overview of a Version 3.x INSTALLATION
 
 3) Run the testsuite, which also installs a pretty basic set of NEMO executables:
 
-	%  setenv YAPP /vps		## only needed if you're on a remote link,
-					## otherwise leave it as the default /xs 
-
+	%  setenv YAPP /vps		## the default /xs,  requires you to be in X
 	%  src/scripts/testsuite -b	# run test testsuite
 
 
@@ -200,7 +198,12 @@ Results in /home/teuben/nemo_3.0.4/tmp/test22005/testsuite.log
    impossible. The following sessions assumes you have an official
    tar release from the Caltech site ftp://astro.caltech.edu/pub/pgplot
 
-	% ./configure F77=/opt/f77 CC=/opt/cc     (F77 and CC optional)
+     ** actually this is now the default, and unless you want to work
+	on a system where you have guaranteed access to PGPLOT via 
+	another package,e.g. miriad, you can borrow that version.
+	In practice i've found this to cause confusion.
+
+	% ./configure F77=/opt/f77 CC=/opt/cc     (F77= and CC= optional)
 	% source nemo_start
 	% make dirs 
 	% make config_clean				<==
@@ -288,6 +291,8 @@ Results in /home/teuben/nemo_3.0.4/tmp/test22005/testsuite.log
 		use CCMALLOC to debug malloc usage
 
 	--with-yapp=ps
+		use a PS based yapp, on systems where you cannot get pgplot to work,
+		or really don't have a working fortran compiler
 
 	--with-cfitsio-prefix=PFX
 		--disable-cfitsio		explicitly disable it 
@@ -341,29 +346,38 @@ in some subsequent release these will be automatically taken care of..
 RE-INSTALLING NEMO
 ==================
 
-Sometimes the compiler or operating system has changed under you, and
+Sometimes the compiler or operating system has changed under your feet, and
 due to their use of shared libraries NEMO has stopped working. You can
 re-install it from scratch, or use something like the following set
-of commands:
+of commands on the current source tree:
 
-    cd $NEMO
-    make config_clean
-    ./configure --with-yapp=pgplot --with-pgplot-prefix=$NEMOLIB
-    make postconfig 
-    source NEMORC.local 
-    make libs                   # make new library
-    make pgplot                 # probably need a new pgplot too
-    make vogl                   # GL library for xyz programs
-    mknemo tsf tabhist          # just to test if it's all looking good
-    make bins                   # go for all of them
-    src/scripts/testsuite       # run the testsuite if all was well
+     cd $NEMO
+     make config_clean
+     ./configure --with-yapp=pgplot --with-pgplot-prefix=$NEMOLIB
+     make postconfig 
+     source NEMORC.local 
+     make libs                   # make new library
+     make pgplot                 # probably need a new pgplot too
+     make vogl                   # GL library for xyz programs
+     mknemo tsf tabhist          # just to test if it's all looking good
+     make bins                   # go for all of them
+     src/scripts/testsuite       # run the testsuite if all was well
+
+Possible problems are a changed, compiler, in which case forcing this by
+setting the CC, CXX and F77 environment variables may help and restart
+the sequence.
+  
+     setenv CC   /usr/bin/gcc
+     setenv CXX  /usr/bin/g++
+     setenv CC   /usr/bin/gcc
 
 
 SUPPORTED ARCHITECTURES:
 ========================
 
 linux	gcc/g77 (gnu compiler)		ok
-linux	icc/ifort (intel 8.0 compiler)	-
+linux	gcc/gfortran (gnu compiler V4)	ok
+linux	icc/ifort (intel 8.x and 9.x)	ok
 sol8	gcc/g77				ok
 sol8	cc/f77				some f2c problems
 darwin	gcc/g77				ok, but some casename problems
