@@ -31,12 +31,26 @@ Outflow or Rotation/Spin [f]
 \fBtimes=\fP
 times of snapshots to copy [all]  
 .SH EXAMPLES
+Here is an example of computing the rotation curve of a test disk that could
+live inside a Kuijken-Dubinsky Disk-Bulge-Halo composite model:
+.nf
+% mkkd95 a0
+% mkdisk test1 10000 rmax=8 mass=0.00001
+% hackforce a0 test2 test1
+% snapdisk test2 test3
+% snapprint test3 r,vt > test3.rotcur
+% tabplot test3.rotcur  1 2 0 8 0 1.6  xbin=0:10:0.1 tab=t > test3a.rotcur
+% tabplot test3a.rotcur 1 2 0 8 0 1.6  line=1,1 point=2,0.1
+.fi
+.SH BUGS
+some options in this program are not functioning correctly yet, as it was
+quickly cloned off snapspin
 .SH SEE ALSO
-.SH FILES
+snaprotate(1NEMO), snapspin(1NEMO)
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
-03-Aug-06	V0.0 Created by mkman	NEMO
+03-Aug-06	V1.0 Created at GH2006	PJT
 .fi
