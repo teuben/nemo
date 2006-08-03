@@ -53,6 +53,25 @@ input mean position image (optional)
 .TP
 \fBstep=\fP
 Slit width in pixels [1]
+.SH EXAMPLES
+Here is an example creating a rotating bar at pattern speed 1, inclining it by 30
+degrees,and measuring a pattern speed of 0.5 (omega*sin(inc)):
+.nf
+
+% mkdisk disk1 10000 harmonic mass=1
+% snapscale disk1 disk2 rscale=1,0.5,0 vscale=0
+% snapspin disk2 disk3 omega=1
+% snaprotate disk3 disk4 30 x
+% snapgrid disk4 ccd4-den moment=0
+% snapgrid disk4 ccd4-vel moment=-1
+% twspeed ccd4-vel ccd4-den > ccd4.tab
+% tabnllsqfit ccd4.tab
+..
+Fitting a+bx:
+a= -5.11039e-05 0.000116198
+b= -0.499963 0.00931362
+..
+.fi
 .SH "SEE ALSO"
 snapslit(1NEMO), snaprotate(1NEMO), tabnllsqfit(1NEMO), tablsqfit(1NEMO), snapshot(5NEMO), image(5NEMO)
 .SH AUTHOR
