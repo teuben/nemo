@@ -1,6 +1,9 @@
-Alaf, detailed installation instructions are in the file README.install
+The detailed installation instructions are in the file README.install
+Two scripts, AAA_SOURCE_ME and src/scripts/test_a_new_nemo_cvs, contain
+fully worked out examples how to install NEMO.
 
-Basically, the sequence is that of most autoconf based software:
+Basically, the install is a sequence is that most autoconf based software
+uses:
 
 	./configure
 	make install
