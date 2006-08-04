@@ -2,6 +2,7 @@
  * TWSPEED
  *
  *	30-mar-03  V1.0 resurrected from pspeed as twspeed
+ *       3-aug-06  V1.1 optional h(Y) windowing (following TW84)
  *
 OLD::
 ./apus1/teuben/nemo/usr/pjt/image/pspeed.c
@@ -23,7 +24,8 @@ string defv[] = {
     "inc=0\n         *** Inclination of disk",
     "center=\n       *** Center of galaxy (map-center)",
     "step=1\n        Slit width in pixels",
-    "VERSION=1.1a\n  23-apr-04 PJT",
+    "window=0\n      Window functions (0=none, ..)",
+    "VERSION=1.2\n   3-aug-06 PJT",
     NULL,
 };
 
@@ -44,7 +46,7 @@ double cell;				/* cell or pixel size (square) */
 void nemo_main(void)
 {
   int  i, j, k, dir;
-  real sum0, sum1, sum2, sum11,sum00, xmean;
+  real sum0, sum1, sum2, sum11,sum00, xmean, y;
     
   vinstr = stropen (getparam("vel"), "r");         /* velocity map */
   read_image (vinstr,&viptr);
@@ -64,15 +66,16 @@ void nemo_main(void)
   dx = Dx(iptr);
   dy = Dy(iptr);
 
-  printf("# j sum0 sum1 sum2  sum1/sum0  sum2/sum0\n");
+  dprintf(1,"# j sum0 sum1 sum2  sum1/sum0  sum2/sum0\n");
   for (j=0; j<ny; j++) {     /* loop over all lines parallel to the major axis */
+    y = ymin + j*dy;
     sum0 = sum1 = sum2 = sum11 = sum00 = 0;
     for (i=0; i<nx; i++) {
       sum00 += MapValue(iptr,i,j);
       sum11 += (xmin + i*dx) * MapValue(iptr,i,j);
     }
     xmean = sum11/sum00;
-    for (i=0; i<nx; i++) {          /* integrate TW quantaties */
+    for (i=0; i<nx; i++) {          /* integrate TW quantities */
       sum0 += MapValue(iptr,i,j);                        /* integrate DEN map */
       sum1 += MapValue(viptr,i,j)*MapValue(iptr,i,j);    /* integrate VEL map */
       if (xiptr)
@@ -81,10 +84,10 @@ void nemo_main(void)
 	sum2 += xmean;
     }
     if (sum0 != 0)
-      printf("%g %g   %d %g %g %g     %g %g\n",
-	     xmean, sum1/sum0,
+      printf("%g %g  %g  %d %g %g %g     %g %g\n",
+	     xmean, sum1/sum0, y,
 	     j,sum0,sum1,sum2,sum1/sum0,sum2/sum0);
 
   }
-  printf("# xmean vmean   j sum0 sum1 sum2  sum1/sum0  sum2/sum0\n");
+  printf("# xmean vmean  y  j sum0 sum1 sum2  sum1/sum0  sum2/sum0\n");
 }
