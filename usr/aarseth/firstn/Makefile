@@ -25,4 +25,6 @@ bench: firstn
 	 echo 0.5 0 >> input$$i;\
          time firstn < input$$i > bench$$i.log); done
  
-
+# Example 1 from the manybody guide
+ex1:
+	firstn < input
