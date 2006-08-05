@@ -1,4 +1,4 @@
-.TH MKKD95 1NEMO "24 March 2004"
+.TH MKKD95 1NEMO "5 August 2006"
 .SH NAME
 magalie \- Boily et al. composite disk-bulge-halo model
 .SH SYNOPSIS
@@ -117,6 +117,14 @@ Random seed.
 \fBcleanup=t|f\fP
 Cleanup runtime working directory?
 [Default: t]
+.TP
+\fBheader=|4|8\fP
+Size of the header uses in unformatted fortran data. This used to be 4,
+but modern compilers (e.g. gfortran) may very well use 8. By default it
+is not specified, and the value determined to be the correct one during
+install (UNFIO_HDR_SIZE) is used. This keyword can be used to force
+another value, for example if you have compiled magalie with another 
+than the default compiler.
 .SH INPUTFILE
 \fBmagalie\fP calls the actual \fBmagalie.exe\fP by reading an input file
 of parameters. Here is an annotated example of such a file (the comments
@@ -210,5 +218,7 @@ dark ages	V1.0 See their NewA paper	Boily et al.
 24-mar-04	V1.2 added most primary keywords, at 37,000ft	PJT
 25-jan-05	V1.2a fixed bulge mass encoding problem
 24-mar-06	V1.2b fixed bulge size encoding problem,updated docs	PJT
+19-jul-06	V1.3 add header= for 64 bit compilers	PJT
+5-aug-06	merged CVS doc versions		PJT
 .fi
 
