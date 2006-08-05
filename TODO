@@ -92,6 +92,8 @@ general things for 3.2.x
 	4.0.2	ok
 
 	4.1.0	fail  [fail]  falcON::fieldset::fieldset(falcON::fieldbit)
+                      might need to remove -ffast-math if you get segfaults
+	4.1.1   ok
 
      For MacOSX a bit more work is needed, since isnan() and isinf() are not known?
 	add:	-Wno-long-double
