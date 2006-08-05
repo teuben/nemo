@@ -28,6 +28,7 @@
  *	15-dec-98  TOOLBOX : allow streaming mode
  *      12-sep-01  file_size
  *      30-sep-03  testing memcpy, and improved the testing
+ *      20-sep-05  little and big endian versions
  */
 
 #include <stdinc.h>
@@ -66,6 +67,28 @@ void bswap(void *vdat, int len, int cnt)
         }
     }
 }
+
+/*
+ * bswap_bigend:   bswap only if the source data was big endian
+ */
+
+void bswap_bigend(void *vdat, int len, int cnt)
+{
+#if !defined(WORDS_BIGENDIAN)
+  bswap(vdat,len,cnt);
+#endif
+}
+
+/*
+ * bswap_litend:   bswap only if the source data was little endian
+ */
+
+void bswap_litend(void *vdat, int len, int cnt)
+{
+#if defined(WORDS_BIGENDIAN)
+  bswap(vdat,len,cnt);
+#endif
+}
 
 #if defined(TOOLBOX)
 
@@ -77,9 +100,10 @@ string defv[] = {
     "len=2\n        Itemlength in bytes during swapping",
     "oneswap=t\n    One swap call? (or many) - for testing only", 
     "offset=0\n     Offset (in bytes) before which no swapping done",
+    "endian=\n      assume 'Little' (l) or 'Big' (b) endian input file",
     "memcpy=f\n     Testing swapping double another way with memcpy",
     "repeat=0\n     How many times to repeat the swapping (speed testing)",
-    "VERSION=1.5\n  30-sep-03 PJT",
+    "VERSION=1.6\n  20-sep-05 PJT",
     NULL,
 };
 
@@ -103,23 +127,35 @@ void byteswap_doubles(double *a)
   memcpy(a,c,8);
 }
 
+typedef void  (*bswap_proc)(void *, int, int);
 
 
 void nemo_main(void)
 {
     stream instr, outstr;
-    string fname;
+    string fname, endian;
     char *data, *dp;
     real t0, t1, t2, rspeed=0, wspeed=0;
     int i, len, cnt, offset, repeat, nrepeat;
     bool onetrip;
     bool Qmemcpy = getbparam("memcpy");
+    bswap_proc bptr;
 
     fname = getparam("in");
     len = getiparam("len");
     offset = getiparam("offset");
     nrepeat = repeat = getiparam("repeat");
     onetrip = getbparam("oneswap");
+    if (hasvalue("endian")) {
+      endian = getparam("endian");
+      if (*endian == 'l' || *endian == 'L')
+	bptr = bswap_litend;
+      else if (*endian == 'b' || *endian == 'B')
+	bptr = bswap_bigend;
+      else
+	error("Bad endian=%s; need 'big' or 'little' endian",endian);
+    } else
+      bptr = bswap;
     if (hasvalue("out"))
         outstr = stropen(getparam("out"),"w");
     else {
