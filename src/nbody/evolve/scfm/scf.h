@@ -15,7 +15,7 @@ C=======================================================================
 
         INTEGER nbodsmax,nmax,lmax
  
-        PARAMETER(nbodsmax=10000,nmax=6,lmax=4)
+        PARAMETER(nbodsmax=100000,nmax=6,lmax=4)
 
         CHARACTER*50 headline
         INTEGER nsteps,noutbod,nbodies,noutlog
