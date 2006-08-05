@@ -66,6 +66,8 @@ clean:
 
 $(F): $(F).dvi $(F).ps
 
+#   to do this right, perhaps check rubber, a latex wrapper
+#   http://www.pps.jussieu.fr/~beffara/soft/rubber/
 $(F).dvi: $(TEX) $(INC) $(STY)
 	@echo "Running latex 3x - will take a while [did you run 'make .prog'?]"
 	-latex $(F) 
