@@ -16,6 +16,7 @@
  *      24-dec-04    5.0a fixed problem with uninitialized tscale       pjt
  *      18-nov-05    5.1  added option to select which vectors to rot   pjt
  *                        for Rachel's trials
+ *      19-nov-05    5.1a fixed for missing  Acc , use body.h           pjt
  */
 
 #include <stdinc.h>
@@ -23,7 +24,7 @@
 #include <vectmath.h>
 #include <filestruct.h>
 #include <snapshot/snapshot.h>
-#include <snapshot/barebody.h>
+#include <snapshot/body.h>
 #include <snapshot/get_snap.c>
 #include <snapshot/put_snap.c>
 
@@ -34,8 +35,8 @@ string defv[] = {
     "order=\n              Order to do rotations (zyz=eulerian)",
     "invert=false\n        Invert transformation?",
     "tscale=\n             If used, scalefactor for angles with time of snapshot",
-    "select=pos,vel,acc\n  Select the vectors for rotation (acc not implemented)",  
-    "VERSION=5.1\n         18-nov-05 PJT",
+    "select=pos,vel,acc\n  Select the vectors for rotation",
+    "VERSION=5.1a\n        19-nov-05 PJT",
     NULL,
 };
 
@@ -48,10 +49,6 @@ string cvsid="$Id$";
 
 
 #define MAXANG  32
-
-#define M_POS (1<<0)
-#define M_VEL (1<<1)
-#define M_ACC (1<<2)
 
 void rotate(char axis,real angle,Body *btab,int nbody,bool Qscale,real scale, int vecmask);
 void xrotate(Body *btab, int nbody, real theta, int vecmask);
@@ -72,9 +69,9 @@ nemo_main()
     bool Qpos, Qvel, Qacc;
     int vecmask = 0;
     
-    if (strstr(rotvects,"pos")) vecmask |= M_POS;
-    if (strstr(rotvects,"vel")) vecmask |= M_VEL;
-    if (strstr(rotvects,"acc")) vecmask |= M_ACC;
+    if (strstr(rotvects,"pos")) vecmask |= PosBit;
+    if (strstr(rotvects,"vel")) vecmask |= VelBit;
+    if (strstr(rotvects,"acc")) vecmask |= AccelerationBit;
 
     dprintf(0,"Warning: new option: select=%s  => mask=%d\n",rotvects,vecmask);
 
@@ -102,7 +99,7 @@ nemo_main()
     get_history(instr);
     while (get_tag_ok(instr, SnapShotTag)) {
 	get_snap(instr, &btab, &nbody, &tsnap, &bits);
-        if (bits & PhaseSpaceBit) {
+        if (bits & PhaseSpaceBit || bits & AccelerationBit) {
             dprintf(1,"Processing time %g bits=0x%x\n",tsnap,bits);
 	    if (! invert) {
             	op = order;         /* reset order pointer */
@@ -162,10 +159,11 @@ void xrotate(Body *btab, int nbody, real theta, int vecmask)
     SETMI(rmat);
     rmat[1][1] =    rmat[2][2] = cos(DEG2RAD * theta);
     rmat[1][2] =  -(rmat[2][1] = sin(DEG2RAD * theta));	/* PJT */
-/*    rmat[2][1] =  -(rmat[1][2] = sin(DEG2RAD * theta));	/* JEB */
+/*  rmat[2][1] =  -(rmat[1][2] = sin(DEG2RAD * theta));	/* JEB */
     for (i = 0; i < nbody; i++) {
-      if (vecmask&M_POS) rotatevec(Pos(&btab[i]), rmat);
-      if (vecmask&M_VEL) rotatevec(Vel(&btab[i]), rmat);
+      if (vecmask&PosBit)          rotatevec(Pos(&btab[i]), rmat);
+      if (vecmask&VelBit)          rotatevec(Vel(&btab[i]), rmat);
+      if (vecmask&AccelerationBit) rotatevec(Acc(&btab[i]), rmat);
     }
 }
 
@@ -177,10 +175,11 @@ void yrotate(Body *btab, int nbody, real theta, int vecmask)
     SETMI(rmat);
     rmat[2][2] =    rmat[0][0] = cos(DEG2RAD * theta);
     rmat[2][0] =  -(rmat[0][2] = sin(DEG2RAD * theta));	/* PJT */
-/*    rmat[0][2] =  -(rmat[2][0] = sin(DEG2RAD * theta));		/* JEB */
+/*  rmat[0][2] =  -(rmat[2][0] = sin(DEG2RAD * theta));	/* JEB */
     for (i = 0; i < nbody; i++) {
-        if (vecmask&M_POS) rotatevec(Pos(&btab[i]), rmat);
-	if (vecmask&M_VEL) rotatevec(Vel(&btab[i]), rmat);
+        if (vecmask&PosBit)          rotatevec(Pos(&btab[i]), rmat);
+	if (vecmask&VelBit)          rotatevec(Vel(&btab[i]), rmat);
+	if (vecmask&AccelerationBit) rotatevec(Acc(&btab[i]), rmat);
     }
 }
 
@@ -191,11 +190,12 @@ void zrotate(Body *btab, int nbody, real theta, int vecmask)
 
     SETMI(rmat);
     rmat[0][0] =    rmat[1][1] = cos(DEG2RAD * theta);
-    rmat[0][1] =  -(rmat[1][0] = sin(DEG2RAD * theta));		/* PJT */
-/*    rmat[1][0] =  -(rmat[0][1] = sin(DEG2RAD * theta));		/* JEB */
+    rmat[0][1] =  -(rmat[1][0] = sin(DEG2RAD * theta));	/* PJT */
+/*  rmat[1][0] =  -(rmat[0][1] = sin(DEG2RAD * theta));	/* JEB */
     for (i = 0; i < nbody; i++) {
-        if (vecmask&M_POS) rotatevec(Pos(&btab[i]), rmat);
-	if (vecmask&M_VEL) rotatevec(Vel(&btab[i]), rmat);
+        if (vecmask&PosBit)          rotatevec(Pos(&btab[i]), rmat);
+	if (vecmask&VelBit)          rotatevec(Vel(&btab[i]), rmat);
+	if (vecmask&AccelerationBit) rotatevec(Acc(&btab[i]), rmat);
     }
 }
 
