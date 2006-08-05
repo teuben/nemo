@@ -80,7 +80,8 @@ string defv[] = {
     "xcoord=\n		          Draw additional vertical coordinate lines along these X values",
     "sort=qsort\n                 Sort mode {qsort;...}",
     "dual=f\n                     Dual pass for large number",
-    "VERSION=5.2\n		  7-apr-05 PJT",
+    "scale=1\n                    Scale factor for data",
+    "VERSION=5.3\n		  1-dec-05 PJT",
     NULL
 };
 
@@ -125,9 +126,10 @@ local bool   Qdual;                     /* dual pass ? */
 local int    maxcount;
 local int    Nunder, Nover;             /* number of data under or over min/max */
 local real   dual_mean;                 /* mean value, if dual pass used */
+local real   scale;                     /* scale factor */
 
 local string headline;			/* text string above plot */
-local string xlab, ylab;		/* text string along axes */
+local string xlab, ylab, xlab2;		/* text string along axes */
 local bool   ylog;			/* count axis in logarithmic scale? */
 local real   xplot[2],yplot[2];		/* borders of plot */
 
@@ -196,6 +198,15 @@ local void setparams()
 
     nsigma = getdparam("nsigma");
     mysort = getsort(getparam("sort"));
+    scale = getrparam("scale");
+    if (scale != 1.0) {
+      int n1=strlen(xlab);
+      string s2 = getparam("scale");
+      int n2=strlen(s2);
+      xlab2 = (string) allocate(n1+n2+20);
+      sprintf(xlab2,"%s [scale *%s]",xlab,s2);
+      xlab = xlab2;
+    }
     instr = stropen (input,"r");
 }
 
@@ -214,6 +225,12 @@ local void read_data()
     if (npt == -nmax) {
     	warning("Could only read %d data",nmax);
     	npt = nmax;
+    }
+    if (scale != 1.0) {
+      warning("Scale factor=%g\n",scale);
+      for (i=0, k=0; i<ncol; i++)
+	for (j=0; j<npt; j++)
+	  md2[i][j] *= scale;
     }
     x = (real *) allocate(npt*ncol*sizeof(real));
     if (Qdual) {
