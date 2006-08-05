@@ -669,10 +669,32 @@ per pixel.  Example: \index{ccdsmooth(1)}
     20% ccdsmooth image_in image_out gauss=0.3
 \end{verbatim}\normalsize
 
-smoothes the image to a 
+smooths the image to a 
 circular beam with FWHM (Full Width Half Maximum) of 0.3 physical
 units. In the 
 above gridding example  this amounts to about 2 pixels.
+
+{\tt snapgrid} can use any {\it bodytrans} expression for most of its
+gridding and emission related variables. It
+essentially computes the following two dimensional image:
+$$
+	I_p(x,y) = {{ \sum_{i=1}^{N} e_i z_i^p} \over {\Delta{x}\Delta{y}}}
+$$
+where a sum is taken over all $N$ particles along the line of sight,
+in a pixel of size $\Delta{x}$ and  $\Delta{y}$
+and a {\tt moment=}$p$ is computed in $z$ over
+the emission $e$.
+This is for {\tt mean=f}, typical in the case where
+each particle represents a mass, and an image such as this would
+conserve mass (a surface density is actually computed).
+However, in the case where a particle
+represents a density, it is more appropriate to ignore the cell size,
+and compute a mean per cell
+$$
+	I_p(x,y) = {{ \sum_{i=1}^{N} e_i z_i^p} \over N }
+$$
+instead (the case {\tt mean=t}). For a galactic velocity field
+one normally chooses $z=-v_z$, i.e. {\tt zvar=-vz}.
 
 \subsection{Galactic and Extragalactic objects}
 
