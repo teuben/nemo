@@ -189,7 +189,8 @@ string defv[] = {
   "iter=1\n         Number of times to do the work, for benchmarking",
   "free=t\n         Free-Allocate the array each iter?",
   "layout=f\n       Show memory layout",
-  "VERSION=2.0\n    18-feb-06 PJT",
+  "static=f\n       Benchmark on a static array",
+  "VERSION=2.1\n    19-feb-06 PJT",
   NULL,
 };
 
@@ -266,6 +267,42 @@ init3(int *dim,mdarray3 x, bool flip)
 }
 
 work3(int *dim,mdarray3 x, bool flip)
+{
+  int i,j,k;
+  real sum=0;
+
+  if (flip) {
+    for (i=0; i<dim[0]; i++)
+      for (j=0; j<dim[1]; j++)
+	for (k=0; k<dim[2]; k++)
+	  sum += x[k][j][i];	  
+  } else {
+    for (k=0; k<dim[2]; k++)
+      for (j=0; j<dim[1]; j++)
+	for (i=0; i<dim[0]; i++)
+	  sum += x[k][j][i];	  
+  }
+  dprintf(1,"sum3=%g\n",sum);
+}
+
+sinit3(int *dim, real x[][4][4], bool flip)
+{
+  int i,j,k;
+
+  if (flip) {
+    for (i=0; i<dim[0]; i++)
+      for (j=0; j<dim[1]; j++)
+	for (k=0; k<dim[2]; k++)
+	  x[k][j][i] = (real)i+j+k;
+  } else {
+    for (k=0; k<dim[2]; k++)
+      for (j=0; j<dim[1]; j++)
+	for (i=0; i<dim[0]; i++)
+	  x[k][j][i] = (real)i+j+k;
+  }
+}
+
+swork3(int *dim, real x[][4][4], bool flip)
 {
   int i,j,k;
   real sum=0;
@@ -441,8 +478,10 @@ nemo_main()
   bool flip = getbparam("flip"), free=getbparam("free");
   int iter=getiparam("iter");
   bool layout = getbparam("layout");
+  bool statbench = getbparam("static");
   real a2[2][2];
-  real a3[4][2][3];
+  real a3[4][4][4];
+  real a7[3][3][3][3][3][3][3];
   real *p;
   int i1,i2,i3,i4, nd;
 
@@ -531,12 +570,20 @@ nemo_main()
     }
     if (free) free_mdarray2(x2,dim[1],dim[0]);
   } else if (ndim==3) {
-    x3 = allocate_mdarray3(dim[2],dim[1],dim[0]);
-    while (iter-- > 0) {
-      init3(dim,x3,flip);
-      work3(dim,x3,flip);
+    if (statbench) {
+      warning("dim=4,4,4 is needed for this static test");
+      while(iter-- > 0) {
+	sinit3(dim,a3,flip);
+	swork3(dim,a3,flip);
+      }
+    } else {
+      x3 = allocate_mdarray3(dim[2],dim[1],dim[0]);
+      while (iter-- > 0) {
+	init3(dim,x3,flip);
+	work3(dim,x3,flip);
+      }
+      if (free) free_mdarray3(x3,dim[2],dim[1],dim[0]);
     }
-    if (free) free_mdarray3(x3,dim[2],dim[1],dim[0]);
   } else if (ndim==4) {
     x4 = allocate_mdarray4(dim[3],dim[2],dim[1],dim[0]);
     while (iter-- > 0) {
