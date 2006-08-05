@@ -67,7 +67,7 @@ local struct {	          /*  our internal filetable for stropen/strdelete */
     bool seek;		/* flag to denote if you can seek; it also denotes deletability */
 } ftable[NEMO_MAXFD];
 
-/* possible URL command getters are:
+/* possible URL command getters are:  @todo should make this a 'set' function
  *     curl -s <URL>
  *     wget -q -O -  <URL>    
  */
@@ -77,7 +77,6 @@ static string urlGetCommand = "curl -s";
 #else
 static string urlGetCommand = "wget -q -O -";
 #endif
-
 
 /* stropen:
  *       name:   can also be "-", or "-num" , or "
