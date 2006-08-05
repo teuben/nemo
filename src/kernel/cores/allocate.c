@@ -1,5 +1,5 @@
 /*
- * ALLOCATE: memory (re)allocation with error checking.
+ * ALLOCATE: memory (re)allocation with fatal error checking.
  *
  *	<dark ages>	created			Josh?
  *	 4-oct-90	added realloc		Peter
@@ -18,52 +18,27 @@
 #include <stdinc.h>
 #include <errno.h>
 
-#ifdef  NEW_EH
-#include "exception.h"
-
-// #define calloc my_calloc
-// #define NEW_EH
-#endif
-
 void *allocate(int nb)
 {
     void *mem;
-#ifdef NEW_EH
-    if (BeginBlock() == -1)  {
-	RestoreUserContext();
-	return NULL;
-    }
-#endif
+
     /* how should this kind of error be processed ? */
     if (nb < 0) error("allocate < 0: cannot allocate %d bytes",nb);
     if (nb==0) nb++;       /* never allocate 0 bytes */
     mem = (void *) calloc((size_t)nb, 1);
     if (mem == NULL)  {
-#ifdef NEW_EH
-	errno = ENOMEM;
-	RaiseException (errno);
-#else
-	dprintf(0,"solaris csh: limit datasize unlimited\n");
-        dprintf(0,"solaris ksh: ulimit -d unlimited\n");
+	nemo_dprintf(0,"solaris csh: limit datasize unlimited\n");
+        nemo_dprintf(0,"solaris ksh: ulimit -d unlimited\n");
 	error("allocate: not enough memory for %d bytes", nb);
-#endif
     }
-    dprintf(8,"allocate: %d bytes @ %d \n",nb, mem);
-#ifdef NEW_EH
-    EndBlock();
-#endif
+    nemo_dprintf(8,"allocate: %d bytes @ %d (0x%x)\n",nb, mem, mem);
     return mem;
 }
 
 void *reallocate(void *bp, int nb)
 {
     void *mem;
-#ifdef NEW_EH
-    if (BeginBlock() == -1)  {
-	RestoreUserContext();
-	return NULL;
-    }
-#endif
+
     /* how should this kind of error be processed ? */
     if (nb < 0) error("reallocate: cannot allocate %d bytes",nb);
     if (nb == 0) nb++;
@@ -72,21 +47,11 @@ void *reallocate(void *bp, int nb)
     else
         mem = (void *) realloc((void *)bp,(size_t)nb);
     if (mem == NULL)  {
-#ifdef NEW_EH
-	RaiseException (errno);
-#else
 	error("reallocate: not enough memory for %d bytes", nb);
-#endif
     }
-    dprintf(8,"reallocate: %d bytes @ %d \n",nb, mem);
-#ifdef NEW_EH
-    EndBlock();
-#endif
+    nemo_dprintf(8,"reallocate: %d bytes @ %d \n",nb, mem);
     return mem;
 }
-
-#undef calloc
-
 
 void *
 my_calloc(size_t nmemb, size_t size)
@@ -123,8 +88,8 @@ void nemo_main(void) {
   int i;
   char *data;
 
-  dprintf(0,"  Alloc:  %d * %d bytes\n",nalloc,size0);
-  dprintf(0,"ReAlloc:  %d * %d bytes\n",nrealloc,incr);
+  nemo_dprintf(0,"  Alloc:  %d * %d bytes\n",nalloc,size0);
+  nemo_dprintf(0,"ReAlloc:  %d * %d bytes\n",nrealloc,incr);
 
   while (repeat-- > 0) {              /* repeat loop */
 
@@ -140,8 +105,8 @@ void nemo_main(void) {
     }
     
     size = size0;                      /* reallocate loop */
-    data = allocate(size);
-    dprintf(1,"%d %d %d\n",repeat,size,incr);
+    data = reallocate(0,size);
+    nemo_dprintf(1,"%d %d %d\n",repeat,size,incr);
     if (nrealloc > 1) {
       for (i=0; i<nrealloc; i++) {
 	size += incr;
