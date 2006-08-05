@@ -43,6 +43,10 @@ tablsqfit:
 	@echo Running $*
 	$(EXEC) nemoinp 1:2:0.001 | $(EXEC) tabmath - - '%1+rang(0,0.1)' seed=123 | $(EXEC) tablsqfit - ; nemo.coverage tablsqfit.c
 
+tablsqfit_gsl:
+	@echo Running $*
+	$(EXEC) nemoinp 1:2:0.001 | $(EXEC) tabmath - - '%1+rang(0,0.1)' seed=123 | $(EXEC) tablsqfit_gsl - ; nemo.coverage tablsqfit.c
+
 tabnllsqfit:
 	@echo Running $*
 	$(EXEC) nemoinp 1:100 | $(EXEC) tabmath - - '4+exp(-(%1-50)**2/(200))+rang(0,0.1)' seed=123 |\
@@ -60,16 +64,19 @@ tabtrend:
 	@echo Running $*
 	@nemoinp 0:4 | $(EXEC) tabmath - - '%1*%1' all | $(EXEC) tabtrend -
 
+SIZE=3
+NOISE=0.01
+
 gauss1d:
-	@echo Running $*
-	nemoinp 0:4 | tabmath - - '3*exp(-((%1-2)**2)/2)+rang(0,0.1)' seed=123 > gauss1d.tab
+	@echo "Running $* with gauss1d(B=2 A=3 x0=1 b=1)"
+	nemoinp 0:$(SIZE) | tabmath - - '0+3*exp(-((%1-1)**2)/2)+rang(0,$(NOISE))' seed=123 > gauss1d.tab
 	tablsqfit   gauss1d.tab fit=gauss1d
 	tabnllsqfit gauss1d.tab fit=gauss1d par=0,3,2,1 free=0,1,1,1
 	tabnllsqfit gauss1d.tab fit=gauss1d par=0,3,2,1 free=1,1,1,1
 
 gauss2d:
-	@echo Running $*
-	ccdmath "" - "0+3*exp(-((%x-2)**2+(%y-2)**2)/2)+rang(0,0.01)" seed=123 size=4,4 |\
+	@echo "Running $* with gauss2d(B=0 A=3 x0=1 y0=1 b=1)"
+	ccdmath "" - "0+3*exp(-((%x-1)**2+(%y-1)**2)/2)+rang(0,$(NOISE))" seed=123 size=$(SIZE),$(SIZE) |\
 	    ccdprint - x= y= label=x,y newline=t > gauss2d.tab
 	tablsqfit   gauss2d.tab 1,2 3 fit=gauss2d
 	tabnllsqfit gauss2d.tab 1,2 3 fit=gauss2d par=0,3,2,2,1 free=0,1,1,1,1
