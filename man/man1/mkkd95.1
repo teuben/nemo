@@ -1,4 +1,4 @@
-.TH MKKD95 1NEMO "27 July 2006"
+.TH MKKD95 1NEMO "5 August 2006"
 .SH NAME
 mkkd95 \- Kuijken-Dubinski-95 composite disk-bulge-halo model
 .SH SYNOPSIS
@@ -34,16 +34,17 @@ No default.
 \fBndisk=\fP
 Number of particles in disk. Set them to 0 to leave out this
 component.
-Notice these are the first set of particles in the final snapshot.
+Notice these are the first set (of three) of particles in the snapshot.
  [8000]  
+.TP
+\fBnbulge=\fP
+Number of particles in bulge, the second set of particles in
+the output snapshot. [4000]  
 .TP
 \fBnhalo=\fP
 Number of particles in halo. 
-Notice these are the last set of particles in the final snapshot.
+Notice these are the thirds and last set of particles in the snapshot.
 [6000]  
-.TP
-\fBnbulge=\fP
-Number of particles in bulge [4000]  
 .TP
 \fBpsi0=\fP
 in.dbh: Psi0 (HALO) 
@@ -320,6 +321,8 @@ Peter Teuben (NEMO interface) -
 06-Mar-04	V1.0 Created, using kd95's  README file 	PJT
 11-mar-04	V1.2 added nmodel= and warns about using model= 	PJT
 23-mar-04	V1.4 use logfile in tmpdir, added cleanup=, some key reorder	PJT
+19-jul-06	V1.5 fix POSIX problems and document order of particles better
 27-jul-06	fixed documentation on vcirc usage, disabled pgplot for ia64	PJT
+5-aug-06	merged two previous (CVS) docs	PJT
 .fi
 
