@@ -1,5 +1,6 @@
 /*
- * SNAPSTACK: stack two N-body systems on top of each other.
+ * SNAPSTACK: stack two N-body systems on top of each other, optionally
+ *            shifting them in phase-space w.r.t. each other
  *
  *	22-jan-89  1.1 JEB
  *	 1-jul-90  1.1a added helpvec PJT
@@ -10,6 +11,7 @@
  *	30-dec-97  1.1e ansi 
  *      20-jun-03  1.2  using modern get_snap and put_snap
  *      13-mar-05  1.2a  fix writing the time, free unused
+ *       5-aug-06  2.0  change default of zerocm=, added shift=
  *
  */
 #include <stdinc.h>
@@ -24,14 +26,15 @@
 
 
 string defv[] = {		/* DEFAULT INPUT PARAMETERS */
-    "in1=???\n			  input file name ",
-    "in2=???\n			  input file name ",
-    "out=???\n			  output file name ",
-    "deltar=0.0,0.0,0.0\n	  position of in1 wrt in2 ",
-    "deltav=0.0,0.0,0.0\n	  velocity of in1 wrt in2 ",
-    "zerocm=true\n		  zero center of mass ",
-    "headline=\n		  random verbiage ",
-    "VERSION=1.2a\n		  13-mar-05 PJT",
+    "in1=???\n			  input snapshot 1",
+    "in2=???\n			  input snapshot 2",
+    "out=???\n			  output snapshot",
+    "deltar=0.0,0.0,0.0\n	  position of in1 w.r.t. in2",
+    "deltav=0.0,0.0,0.0\n	  velocity of in1 w.r.t. in2",
+    "zerocm=false\n		  zero the center of mass after stacking?",
+    "headline=\n		  random verbiage for output",
+    "shift=1\n                    Shift over 1st or 2nd one?",
+    "VERSION=2.0\n		  5-aug-06 PJT",
     NULL,
 };
 
@@ -49,20 +52,21 @@ nemo_main()
     freedata();
 }
 
-int nbody, nbody1, nbody2;
-int bits,  bits1,  bits2;
-Body *btab, *btab1, *btab2;
-real tsnap, tsnap1, tsnap2;
+local int nbody, nbody1, nbody2;
+local int bits,  bits1,  bits2, shift;
+local Body *btab, *btab1, *btab2;
+local real tsnap, tsnap1, tsnap2;
 
 readdata()
 {
     stream instr1, instr2;
 
-
     instr1 = stropen(getparam("in1"), "r");
     get_history(instr1);
     instr2 = stropen(getparam("in2"), "r");
     get_history(instr2);
+
+    shift = getiparam("shift");
 
     get_snap(instr1, &btab1, &nbody1, &tsnap1, &bits1);
     get_snap(instr2, &btab2, &nbody2, &tsnap2, &bits2);
@@ -87,20 +91,22 @@ snapstack()
       warning("tsnap2=%g not used, since tsnap1=%g",tsnap2,tsnap1);
     bits = (bits1 & bits2);
     memcpy(&btab[nbody1],btab2,sizeof(Body)*nbody2);
-#if 1
-    /* shift over 1st one */
-    for (bp=btab; bp<btab+nbody1; bp++) {
-      ADDV(Pos(bp),Pos(bp),deltar);
-      ADDV(Vel(bp),Vel(bp),deltav);
+
+    if (shift==1) {      /* shift over 1st one */
+      dprintf(1,"Shifting over 1st one\n");
+      for (bp=btab; bp<btab+nbody1; bp++) {
+	ADDV(Pos(bp),Pos(bp),deltar);
+	ADDV(Vel(bp),Vel(bp),deltav);
+      }
+    } else if (shift==2) {      /* shift over 2nd one */
+      dprintf(1,"Shifting over 2nd one\n");
+      for (bp=&btab[nbody1]; bp<btab+nbody; bp++) {
+	ADDV(Pos(bp),Pos(bp),deltar);
+	ADDV(Vel(bp),Vel(bp),deltav);
+      }
     }
-#else
-    /* shift over 2nd one */
-    for (bp=&btab[nbody1]; bp<btab+nbody; bp++) {
-      ADDV(Pos(bp),Pos(bp),deltar);
-      ADDV(Vel(bp),Vel(bp),deltav);
-    }
-#endif
     if (getbparam("zerocm")) snapcenter();
+    else warning("zerocm=false is now the default!!");
 }
 
 setvect(vector vec, string str)
