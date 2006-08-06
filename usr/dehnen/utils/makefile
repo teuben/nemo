@@ -5,13 +5,13 @@
 #
 ################################################################################
 
-default			: libs
-install			: libs cleanobj
+default			: library
+install			: library cleanobj
 
-# ------------------
+# -----------------
 # Hardware platform
-# ------------------
-PLATFORM := $(shell uname -m)
+# -----------------
+PLATFORM 		:= $(shell uname -m)
 
 # -----------
 # directories
@@ -20,10 +20,10 @@ PLATFORM := $(shell uname -m)
 INC             	:= inc/
 SRC             	:= src/
 LIB             	:= lib/$(PLATFORM)/
-.PHONY          	: dirs
-dirs            	:
-			./make.dir lib    755
-			./make.dir $(LIB) 755
+LIBT			:= $(LIB).dummy
+$(LIBT)			:
+			mkdir --parents --mode=755 $(LIB)
+			touch $(LIBT)
 
 # -----------------------
 # compiler and linker etc
@@ -58,7 +58,7 @@ ifeq ($(PLATFORM),x86_64)
 CPUFLAGS		:= -march=k8 -mpreferred-stack-boundary=4
 endif
 
-OPTFLAGS		:= -ggdb -O2 -fPIC $(CPUFLAGS) -funroll-loops -fforce-addr -fomit-frame-pointer -rdynamic
+OPTFLAGS		:= -ggdb -O2 -fPIC $(CPUFLAGS) -ffast-math -funroll-loops -fforce-addr -fomit-frame-pointer -rdynamic
 
 else
 ifeq ($(COMPILER),pgcc)
@@ -147,15 +147,13 @@ WDMath_cc			:= $(SRC)WDMath.cc $(WDMath_h) $(inline_h)
 # library modules
 # ---------------
 
-$(LIB)exception.o:	$(exception_cc) makefile
-			./make.dir lib    755
-			./make.dir $(LIB) 755
+$(LIB)exception.o:	$(exception_cc) $(LIBT) makefile
 			$(MAKE_OBJ)
-$(LIB)numerics.o:	$(numerics_cc) makefile
+$(LIB)numerics.o:	$(numerics_cc) $(LIBT) makefile
 			$(MAKE_OBJ)
-$(LIB)random.o:		$(random_cc) makefile
+$(LIB)random.o:		$(random_cc) $(LIBT) makefile
 			$(MAKE_OBJ)
-$(LIB)WDMath.o:		$(WDMath_cc) makefile
+$(LIB)WDMath.o:		$(WDMath_cc) $(LIBT) makefile
 			$(MAKE_OBJ)
 
 WDutils_objs	:=	$(LIB)exception.o $(LIB)numerics.o $(LIB)random.o \
@@ -171,17 +169,18 @@ $(LIB)libWDutils.a:	$(WDutils_objs)
 $(LIB)libWDutils.so:	$(WDutils_objs)
 			$(CXX) $^ -shared -o $@ $(CPUFLAGS)
 
-libs			: $(LIB)libWDutils.a $(LIB)libWDutils.so
+library		:	$(LIB)libWDutils.a $(LIB)libWDutils.so
 
 # --------
 # cleaning
 # --------
 
-.PHONY		: 	cleanbackup cleanlib cleanobj clean
-cleanbackup:
-			rm -f *~ $(INC)*~ $(INC)*~ $(SRC)*~
-cleanobj:
-			rm -f $(LIB)*.o
-cleanlib:
-			rm -f $(LIB)*
-clean:			cleanbackup cleanlib
+.PHONY		: 	cleanbackup cleandirs clean cleanall
+cleanbackup	:
+			rm -f *~ $(INC)*~ $(SRC)*~
+cleandirs	:
+			rm -rf $(LIB)
+
+clean		:	cleandirs
+
+cleanall	:	cleandirs cleanbackup
