@@ -43,7 +43,9 @@ potccd: plummer.ccd
 	$(EXEC) nemoinp 0:10 | $(EXEC) tabmath - - '1/(sqrt(4+%1)' > map0.tab
 	$(EXEC) potccd map0.ccd rotcur 0 map0.tab x=-10:10:0.1 y=-10:10:0.1
 	$(EXEC) ccdstat map0.ccd
-	$(EXEC) potlist GalPot potfile=$(NEMODAT)/GalPot/pot.2a x=1
+
+#  put back when falcON has cleaned up the two versions of GalPot we have in NEMO
+#	$(EXEC) potlist GalPot potfile=$(NEMODAT)/GalPot/pot.2a x=1
 
 potq:
 	@echo Running $@
