@@ -138,7 +138,7 @@ src/scripts/testsuite -b >>& install.log
 
 if (1) then
   echo Compiling falcON and its tools
-  (cd usr/dehnen/falcON; make -i -f Makefile.nemo nemo_bins)  >& install_falcON.log
+  (cd usr/dehnen/falcON; make install)  >& install_falcON.log
 endif
 
 if ($stat == 0) then
