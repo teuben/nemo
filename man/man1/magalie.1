@@ -8,7 +8,9 @@ magalie \- Boily et al. composite disk-bulge-halo model
 .SH DESCRIPTION
 \fBmagalie\fP creates a composite Disk-Bulge-Halo galaxy in 
 near equilibrium following the procedure described in
-Boily et al.(2000). This program is merely a NEMO wrapper
+Boily et al.(2000), adapted from Hernquist's (1993) BUILDGAL 
+procedure.
+This program is merely a NEMO wrapper
 to Version 1 of the fortran program \fImagalie.exe\fP.
 It assembles all the correct parameters, runs the fortran
 namesake program in a temporary rundirectory and converts the
@@ -200,6 +202,7 @@ Does not work on the linux/intel compiler yet.
 .nf
 mkkd95(1NEMO), tabtos(1NEMO), unfio(1NEMO)
 Boily, C.M., Kroupa,P., Penarrubia-Garrido, J., 6, 27 (2001)
+Hernquist, L. (1993, ApJS).
 .SH FILES
 .nf
 NEMO/src/nbody/init/magalie.c
