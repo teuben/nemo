@@ -1,6 +1,6 @@
 #! /bin/csh -f
 #
-#  
+#  falcON tools, for the version up to Aug 6, 2006 (nemo 3.2.4)
 
 set dir=$NEMO/usr/dehnen/falcON
 
