@@ -64,7 +64,7 @@ tabtrend:
 	@echo Running $*
 	@nemoinp 0:4 | $(EXEC) tabmath - - '%1*%1' all | $(EXEC) tabtrend -
 
-SIZE=3
+SIZE=4
 NOISE=0.01
 
 gauss1d:
@@ -79,5 +79,5 @@ gauss2d:
 	ccdmath "" - "0+3*exp(-((%x-1)**2+(%y-1)**2)/2)+rang(0,$(NOISE))" seed=123 size=$(SIZE),$(SIZE) |\
 	    ccdprint - x= y= label=x,y newline=t > gauss2d.tab
 	tablsqfit   gauss2d.tab 1,2 3 fit=gauss2d
-	tabnllsqfit gauss2d.tab 1,2 3 fit=gauss2d par=0,3,2,2,1 free=0,1,1,1,1
-	tabnllsqfit gauss2d.tab 1,2 3 fit=gauss2d par=0,3,2,2,1 free=1,1,1,1,1
+	tabnllsqfit gauss2d.tab 1,2 3 fit=gauss2d par=0,3,1,1,1 free=0,1,1,1,1
+	tabnllsqfit gauss2d.tab 1,2 3 fit=gauss2d par=0,3,1,1,1 free=1,1,1,1,1
