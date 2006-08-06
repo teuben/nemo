@@ -18,6 +18,7 @@
 /* 20-jan-94   only works for SUN OS 5.x now 		       */
 /*             but also works for ELF linux                    */ 
 /*  2-may-03   using RTLD_LAZY instead of 1                    */
+/* 23-sep-04   commented dlclose out in mysymbols()  WD        */
 /* 24-sep-04   fix linux bug                                   */
 /* 15-mar-05   g++ friendly                                    */
 /*                                                             */
@@ -72,6 +73,7 @@ void mysymbols(string progname)
 {
     dprintf(1,"MySymbols: NULL code in loadobjDL\n");
 
+#if 0  // WD 23-09-2004
     if (dl_handle) {
         warning("mysymbols: Closing old dlopen");
 #if 0
@@ -82,6 +84,7 @@ void mysymbols(string progname)
 	return;
 #endif
     }
+#endif
     /* at some point I used:
      * #if defined(sgi) || defined(NEED_MAIN_SYMBOLS)
      * here, but it appears to work on SGI now ...
