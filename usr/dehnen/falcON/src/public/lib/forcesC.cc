@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------+
 //                                                                             |
-// FAlCONC.cc                                                                  |
+// forcesC.cc                                                                  |
 //                                                                             |
 // Copyright (C) 2000-2006 Walter Dehnen                                       |
 //                                                                             |
@@ -19,9 +19,9 @@
 // Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                   |
 //                                                                             |
 //-----------------------------------------------------------------------------+
-#define FAlCONC_cc
-#include <FAlCON_C.h>
-#include <FAlCON.h>
+#define forcesC_cc
+#include <forces_C.h>
+#include <forces.h>
 #include <body.h>
 using namespace falcON;
 //=============================================================================#
@@ -32,7 +32,7 @@ namespace {
     ebodies(const unsigned n[BT_NUM]) : bodies('e', n) {}
     void reset(falcON::fieldbit f, void *D) { bodies::reset('e',f,D); }
   }     *BODIES = 0;
-  FAlCON*FALCON = 0;
+  forces*FALCON = 0;
   bool   BUILT  = 0;
   //===========================================================================#
   // auxiliary routines                                                        |
@@ -116,7 +116,7 @@ namespace {
     BODIES->reset(fieldbit::a,A);
     BODIES->reset(fieldbit::p,P);
     BODIES->reset(fieldbit::r,R);
-    FALCON = new FAlCON(BODIES,
+    FALCON = new forces(BODIES,
 			abs(real(EPS)),
 			abs(real(TH)),
 			ktype(K),
@@ -131,7 +131,7 @@ namespace {
   typedef unsigned elem_pair[2];
 
 #define INPAIR(ELPAIR)							\
-  (static_cast<falcON::FAlCON::indx_pair*>(static_cast<void*>(ELPAIR)))
+  (static_cast<falcON::forces::indx_pair*>(static_cast<void*>(ELPAIR)))
 
   inline void __falcON_iactionlist(elem_pair *IL,
 				   int        NL,

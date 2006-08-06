@@ -27,6 +27,7 @@
 // version 1.3  22/06/2005 WD  no $FALCON, nemo_dprintf -> debug_info          |
 // version 1.4  12/07/2005 WD  if manippath given, do not search elsewhere     |
 // version 1.5  08/11/2005 WD  if no manippath given, try $MANIPPATH           |
+// version 1.6  04/08/2006 WD  if manippath given, put it in top of seach path |
 //-----------------------------------------------------------------------------+
 #include <public/manip.h>              // the header we are implementing
 #include <fstream>                     // C++ file I/O
@@ -142,21 +143,20 @@ namespace {
     char manpaths[2048] = {0};
     if(manpath && *manpath) {                      // get input path
       strcpy(manpaths,manpath);
-      strcat(manpaths,"/");
-    } else {
-      strcat(manpaths,".");                        // try "."
-      const char *path;
-      path = getenv("MANIPPATH");                  // try $MANIPPATH
-      if(path) {
-	strcat(manpaths,":");
-      	strcat(manpaths,path);
-      }
-      path = falcON::directory();                  // try falcON/manip/
-      if(path) {
-	strcat(manpaths,":");
-	strcat(manpaths,path);
-	strcat(manpaths,"/manip/");
-      }
+      strcat(manpaths,"/:");
+    }
+    strcat(manpaths,".");                          // try "."
+    const char *path;
+    path = getenv("MANIPPATH");                    // try $MANIPPATH
+    if(path) {
+      strcat(manpaths,":");
+      strcat(manpaths,path);
+    }
+    path = falcON::directory();                    // try falcON/manip/
+    if(path) {
+      strcat(manpaths,":");
+      strcat(manpaths,path);
+      strcat(manpaths,"/manip/");
     }
     // 4.2 seek file in path and load it
     char name[256];
@@ -170,6 +170,7 @@ namespace {
 		   name,manpaths);
     debug_info(3,"             found one: \"%s\"; now loading it\n",fullname);
     loadobj(fullname);
+
     // 5. try to get inimanip()
     //    if found, remember it, call it and return manipulator given by it
     iniman_pter im = (iniman_pter) findfunc("inimanip");

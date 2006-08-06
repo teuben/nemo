@@ -41,6 +41,9 @@ extern "C" {
 #ifndef TimeStepTag
 #  define TimeStepTag "TimeStep"
 #endif
+#ifndef AuxVectorTag
+#  define AuxVectorTag "AuxiliaryVector"
+#endif
 #ifndef LevelTag
 #  define LevelTag "Level"
 #endif
@@ -125,6 +128,7 @@ namespace {
     case nemo_io::jerk   : return JerkTag;
     case nemo_io::dens   : return DensityTag;
     case nemo_io::aux    : return AuxTag;
+    case nemo_io::zet    : return AuxVectorTag;
     case nemo_io::lev    : return LevelTag;
     case nemo_io::num    : return NumberTag;
     case nemo_io::posvel : return PhaseSpaceTag;
@@ -197,6 +201,7 @@ namespace {
     case nemo_io::pos:
     case nemo_io::vel:
     case nemo_io::acc:
+    case nemo_io::zet:
     case nemo_io::jerk: return true;
     default:            return false;
     }
