@@ -8,7 +8,7 @@
 #               30-jul-2004   optional cfitsio install
 #               11-jul-2005   various additional packages for NEMO V3.2.3
 #                5-mar-2006   also create nemo_start.sh
-#                1-aug-2006   falcON install 
+#                6-aug-2006   falcON install 
 
 set pgplot=1		# install PGPLOT via CVS also
 set intel=0		# pick intel compiler (astromake)
@@ -174,10 +174,10 @@ endif
 if ($falcon) then
   echo -n "Compile falcon"
   if ($intel) then
-    ( cd usr/dehnen/falcON; $make -f Makefile.nemo nemo_bins COMPILER=icc)  >& install.falcON.log
+    ( cd usr/dehnen/falcON; $make install COMPILER=icc)  >& install.falcON.log
     set err=$status
   else
-    ( cd usr/dehnen/falcON; $make -f Makefile.nemo nemo_bins COMPILER=gcc)  >& install.falcON.log
+    ( cd usr/dehnen/falcON; $make install COMPILER=gcc)  >& install.falcON.log
     set err=$status
   endif
   if ($err) then
