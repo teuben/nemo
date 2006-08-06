@@ -23,6 +23,8 @@
  * 26-sep-01  name now nemo_dprintf(), to avoid conflict with new dprintf(3?)
  *  8-may-04  return -1 if debug level not high enough
  *  4-may-05  nemo_set_debug, why was this not needed before?
+ * 22-feb-06  WD added blurb ("### nemo Debug info: ") before print out
+ *  5-aug-06  WD print_head: "### ... " printed not more than once in a line
  */
 
 #include <stdinc.h>
@@ -51,8 +53,11 @@ int nemo_dprintf(int debug, const_string fmt, ...)
 {
     va_list ap;
     int nret = -1;
+    static bool print_head = true;
 
     if (debug <= debug_level) {		/* print this debug message? */
+        if(print_head)
+	    fprintf(stderr,"### nemo Debug info: ");
         va_start(ap, fmt);	
 #if defined(NEED_DOPRNT)
 	_doprnt(fmt, ap, stderr);	/*   use low-level interface */
@@ -62,6 +67,7 @@ int nemo_dprintf(int debug, const_string fmt, ...)
 					/*   may become vprintf in ANSI C */
 	fflush(stderr);			/*   drain std error buffer */
         va_end(ap);
+	print_head = fmt && fmt[strlen(fmt)-1] == '\n';
     }
     return nret;
 }
