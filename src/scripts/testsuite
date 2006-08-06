@@ -11,6 +11,7 @@
 #   15-feb-03   nemo.coverage 
 #   29-mar-04   documented -b; email now to teuben@astro.umd.edu
 #   24-dec-04   support to run with EXEC= for e.g. valgrind using -v
+#    6-aug-06   look for Testfile's in usr tree also (-u will disable)
 #
 #
 # BUG:  -b  does not remove executable, so you never know if new binary did
@@ -32,6 +33,7 @@ set bootstrap=0
 set local=0
 set options=()
 set exec=()
+set usr=1
 foreach arg ($*)
     switch ($arg)
     case -b:
@@ -72,6 +74,9 @@ foreach arg ($*)
     case -q:  
               set query=1
               breaksw
+    case -u:  
+              set usr=0
+              breaksw
     case -h:  
               goto help
               breaksw
@@ -93,6 +98,9 @@ endif
 mkdir $testdir
 pushd $testdir >& /dev/null
 
+set tdir=src
+if ($usr) set tdir=src,usr
+
 onintr cleanup
 
 #echo OPTIONS=$options
@@ -102,7 +110,7 @@ echo "NEMO version $NEMOVER `hostname` ($NEMOHOST)"                   >> $log
 
 #   using $NEMO instead of $NEMO/src really makes it run slow on solaris
 
-foreach testfile (`find $NEMO/src -name Testfile -print | sort`)
+foreach testfile (`find $NEMO/{$tdir} -name Testfile -print | sort`)
     if ($norun) then
         echo $testfile
         continue
