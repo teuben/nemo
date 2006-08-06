@@ -51,7 +51,11 @@ e '  /* e.g.   int    i = getiparam("i"); */'  >> $name
 e '  /* e.g.   real   r = getrparam("r"); */'  >> $name
 e '  /* e.g.   double d = getdparam("d"); */'  >> $name
 e '  /* followed by lots of lovely calculations */' >> $name
+e '  warning("New program");'                       >> $name
 e '}'				>> $name
 
 echo "All done, $name created. You can compile it using the command"
-echo "     bake $prog"
+echo "        bake $prog"
+echo "  or:   mknemo $prog"
+echo "When done, don't forget to create a template man page:"
+echo '        $NEMO/src/scripts/mkman' "$prog > $prog.1"
