@@ -644,7 +644,8 @@ config_clean:
 
 CLEAN = host bin lib obj adm/TIMESTAMP etc/motd $(CONFIG_CLEAN)
 
-CONFIG_CLEAN = config.h makedefs config.cache config.log config.status
+CONFIG_CLEAN = config.h makedefs config.cache config.log config.status \
+	nemo_start.sh nemo_start.csh
 
 clean:
 	@echo There is no single clean, there is cleanall, config_clean and distclean:
