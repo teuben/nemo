@@ -1,5 +1,8 @@
 /*
  *  endian:      report endianism of this machine
+ *
+ *  but beware of som techniques:
+ *  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=26069
  */
 
 #include <nemo.h>
