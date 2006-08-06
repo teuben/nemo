@@ -2743,7 +2743,7 @@ C=======================================================================
         write(6,'(/,a40,/)') ' Disc mass routine indmass - results ' 
        
 	write(6,'(A10,f10.4)') 'diskmass = ',diskmass
-	write(6,'(A10,f10.4)') 'ndstars = ',ndstars
+	write(6,'(A10,i10)') 'ndstars = ',ndstars
 	write(6,'(A20,f10.4,/)') 'stellar part mass = ',pmass(1)
 
         DO 20 i=1,ndgas
@@ -4743,8 +4743,8 @@ c++ 07.08.2001 cmb
  90        FORMAT(' Number of disk gas-particles? ',$)
 
            READ(5,*) ndgas
-           if( usegas .eqv. .FALSE. ) ndgas = 0. 
-           write(6,'(a20,f10.3)') ' ... gas parts =  ', ndgas 
+           if( usegas .eqv. .FALSE. ) ndgas = 0
+           write(6,'(a20,i10)') ' ... gas parts =  ', ndgas 
 
            WRITE(6,100)
  100       FORMAT(' Total mass of gas? (Total disk mass = 1 ) ',$)
