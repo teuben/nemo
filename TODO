@@ -31,7 +31,6 @@ MacOSX problems: (a special macosx.html web page dedicated to this)
     setenv CC, CXX and F77 to the full path of the compilers.
 
 GCC4 problems: (as tested on FC3/FC4)
-  - pgplot: grfont.dat cannot be built, some runtime problem with fortran
   - pgplot: needs a gfortran_gcc4.conf file for now
 	also:  no more -fno-backslash
 	also:  %VAL() does not seem to be supported anymore ???
@@ -43,6 +42,9 @@ GCC4 problems: (as tested on FC3/FC4)
   - the linker is now more conservative, removing references to code
     that is never used. get_atable and sqr come out in some tests
     as missing...
+    The flag
+		-fno-unit-at-a-time
+    might work for a little bit.
   - see also:
 	http://www.kegel.com/gcc/gcc4.html
         http://womble.decadentplace.org.uk/c++/syntax-errors.html
@@ -69,11 +71,8 @@ general things for 3.2.x
   - use some kind of global MAXBODY where we often use different values
 	**mostly done**
 
-  - gyrfalcON: works, but somewhat compiler dependant
+  - gyrfalcON: still has some compiler dependant problems
 
-     The new version of gyrfalcON (V3.0.4; 28 oct 2005) now compiles fine most of the
-     way from gcc 3.2.2 to 4.0.2 , with some minor exceptions in early releases of
-     some series.
      The new version (V3.0.5; 22-mar-2006) has the one between []
      On intel architecture:
 	
@@ -105,16 +104,6 @@ general things for 3.2.x
 	gcc -> 4.0.0 (build 4061)			    template problem??
 	gcc-3.3 -> build 1809				    ok
 
-     then there is the crap with Math.h being confused with math.h on my 10.4.6
-	?  mv Math.h WDMath.h
-
-things for 3.4
-
-  - -fwritable-strings is deprecated, from NEMO 3.2.3 this is taken out
-  + linking with unused functions (e.g. to aid loadobj) can now cause
-    failure. we've repaired/kludged most, but the flag
-		-fno-unit-at-a-time
-    is claimed to maybe work 'for some time'
 
 --------------------------------------------------------------------------------
 
@@ -128,16 +117,6 @@ code & line coverage: (gcov, lcov)
 	has problems in -DSINGLEPREC
 
 - use cfortran?  cfitsio also uses it.
-
-- add the self-exploding problem for treecodes (Salmon ...)
-  into NEMODAT
-
-- clean code so it can write > 2GB datafiles		[mostly done]
-  Testing can be done with:
-	mkspiral s000 1000000 nmodel=40
-  which creates a file just over the famous 2GB limits
-  testing reading
-	tsf s000
 
 - gyrfalcON uses potentials in such a way that only potential_float
   is looked for ???
@@ -172,12 +151,10 @@ code & line coverage: (gcov, lcov)
 
 - getparam:  an option to produce an iraf .par file?
 
-- many integrators use conflicting designations for tstop,freq,freqout
-
 - getparam:  finish the outkeys= stuff
 
 - overal design:
-  separation of funtionality and data format. E.g. to compute the 
+  separation of functionality and data format. E.g. to compute the 
   statistics of a variable in either a table, a snapshot or an image
   should have the same set of keywords that control the statistics.
   Yet accessing the data is different. This is done rather sloppy
@@ -204,8 +181,10 @@ code & line coverage: (gcov, lcov)
 		    lib    if it specifies -L DIR
 
 
-- alternative to autoconf?  Pre Make Kit  = http://pmk.sourceforge.net/
-
+- alternatives to autoconf?  
+	Pre Make Kit  = http://pmk.sourceforge.net/
+	Cmake (KDE uses it)
+ 
 - Testfile's:    also needs a program to be added to the local Makefile,
 	as well as in the list of programs to be installed...
 	that's non-intuitive
