@@ -24,16 +24,19 @@
 #  define falcON_included_algorithm
 #endif
 #ifndef falcON_included_tupel_h
-#  include <public/tupel.h>
+#  include <utils/tupel.h>
+#endif
+#ifndef falcON_included_inline_h
+#  include <utils/inline.h>
 #endif
 #ifndef falcON_included_iomanip
 #  include <iomanip>
 #endif
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
-  using falcON::tupel;
-  using falcON::abs;
-  using falcON::norm;
+  using WDutils::tupel;
+  using WDutils::abs;
+  using WDutils::norm;
   using std::abs;
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
@@ -81,7 +84,7 @@ namespace {
 	D[0] = d3;
       }
       static double d1(double const&m, double const&xq) {
-	return -6*m*meta::square(1.-xq);
+	return -6*m*WDutils::square(1.-xq);
       }
     };
     //--------------------------------------------------------------------------
@@ -108,7 +111,7 @@ namespace {
 	  register double D[2];
 	  kernel::diff1(M[b],Rq*irq,D);
 	  rho  += D[0];
-	  g.add_times(R,D[1]);
+	  g    += R * D[1];
 	  ++n;
 	}
       }
@@ -162,8 +165,8 @@ namespace {
       c        = 0.;
       double m = 0.;
       for(int b=0; b!=N; ++b) {
-	c.add_times(X[b],M[b]);
-	r += M[b]*norm(X[b]);
+	c += M[b] * X[b];
+	r += M[b] * norm(X[b]);
 	m += M[b];
       }
 //       // TEST
@@ -193,7 +196,7 @@ namespace {
       double m = 0.;
       for(int b=0; b!=N; ++b)
 	if(rq > x.dist_sq(X[b])) {
-	  c.add_times(X[b],M[b]);
+	  c += M[b] * X[b];
 	  m += M[b];
 	  ++n;
 	}

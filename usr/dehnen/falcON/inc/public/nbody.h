@@ -57,8 +57,8 @@
 #ifndef falcON_included_externacc_h
 #  include <externacc.h>
 #endif
-#ifndef falcON_included_FAlCON_h
-#  include <FAlCON.h>
+#ifndef falcON_included_forces_h
+#  include <forces.h>
 #endif
 #ifndef falcON_included_iomanip
 #  include <iomanip>
@@ -899,7 +899,7 @@ namespace falcON {
   //                                                                          //
   // class falcON::ForceALCON                                                 //
   //                                                                          //
-  // standard force solver based on FAlCON, providing gravity only            //
+  // standard force solver based on forces, providing gravity only            //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
   class ForceALCON : public ForceDiagGrav {
@@ -914,11 +914,11 @@ namespace falcON {
     real              EFAC;                        // max change factor for epsi
 #endif
 #endif
-    const vect* const ROOTCENTRE;
-    const int         NCRIT, REUSE;
-    mutable FAlCON    FALCON;
-    mutable int       REUSED;
-    mutable double    CPU_TREE, CPU_GRAV, CPU_AEX;
+    const   vect* const ROOTCENTRE;
+    const   int         NCRIT, REUSE;
+    mutable forces      FALCON;
+    mutable int         REUSED;
+    mutable double      CPU_TREE, CPU_GRAV, CPU_AEX;
     //--------------------------------------------------------------------------
     void set_tree_and_forces(bool,                 // I: all or only active?    
 			     bool) const;          // I: build tree anyway?     
@@ -969,12 +969,12 @@ namespace falcON {
     //--------------------------------------------------------------------------
     virtual void cpu_stats_head(std::ostream&to) const {
       if(SELF_GRAV) to << " tree  grav ";
-      if(acc_ext()) to <<" pext ";
+      if(acc_ext()) to << " pext ";
     }
     //--------------------------------------------------------------------------
     virtual void cpu_stats_line(std::ostream&to) const {
       if(SELF_GRAV) to << "------------";
-      if(acc_ext()) to <<"------";
+      if(acc_ext()) to << "------";
     }
     //--------------------------------------------------------------------------
     virtual void cpu_stats_body(std::ostream&) const;

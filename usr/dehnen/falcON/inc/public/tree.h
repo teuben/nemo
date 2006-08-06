@@ -45,7 +45,7 @@
 #endif
 #ifdef falcON_MPI
 #  ifndef falcON_included_peano_h
-#    include <proper/peano.h>
+#    include <parallel/peano.h>
 #  endif
 #else
 namespace falcON {

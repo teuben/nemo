@@ -62,7 +62,7 @@ namespace falcON {
     return N? __Sum<0,N-1>::sum(X) : T(0);
   }
 
-  class ebodies;                                   // declared in FAlCONC.cc    
+  class ebodies;                                   // declared in forcesC.cc    
   class BodyFileter;                               // declared in bodyfunc.h    
   // ///////////////////////////////////////////////////////////////////////////
   // ///////////////////////////////////////////////////////////////////////////
@@ -571,22 +571,18 @@ namespace falcON {
       /// are we before another iterator? (assuming the same bodies)
       bool operator<  (iterator const&i) const {
 	return B==i.B? K< i.K : B->first()<i.B->first();
-// 	return my_index()< i.my_index();
       }
       /// are we before or equal to another iterator? (assuming the same bodies)
       bool operator<= (iterator const&i) const {
 	return B==i.B? K<=i.K : B->first()<i.B->first();
-// 	return my_index()<=i.my_index();
       }
       /// are we after another iterator? (assuming the same bodies)
       bool operator>  (iterator const&i) const {
 	return B==i.B? K> i.K : B->first()>i.B->first();
-// 	return my_index()> i.my_index();
       }
       /// are we after or equal to another iterator? (assuming the same bodies)
       bool operator>= (iterator const&i) const {
 	return B==i.B? K>=i.K : B->first()>i.B->first();
-// 	return my_index()>=i.my_index();
       }
       //@}
       //------------------------------------------------------------------------

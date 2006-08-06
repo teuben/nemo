@@ -1,0 +1,396 @@
+# -*- makefile -*-
+################################################################################
+#
+# make/public for the falcON N-body project
+#
+################################################################################
+
+# -----------
+# directories
+# -----------
+
+IPUB			:= $(INC)public/
+IPRO			:= $(INC)proper/
+IPAR			:= $(INC)parallel/
+IACC			:= $(INC)acc/
+SPUB			:= $(SRC)public/lib/
+SEXE			:= $(SRC)public/exe/
+SMAN			:= $(SRC)public/manip/
+SACC			:= $(SRC)public/acc/
+
+makepublic		:= makefile makedefs makepub
+
+# ------------
+# from WDutils
+# ------------
+
+Pi_h			:= $(IUTI)Pi.h
+inline_h		:= $(IUTI)inline.h
+inline_io_h		:= $(IUTI)inline_io.h
+traits_h		:= $(IUTI)traits.h
+tupel_h			:= $(IUTI)tupel.h $(IUTI)tupel.cc $(traits_h)
+exception_h		:= $(IUTI)exception.h $(traits_h)
+WDMath_h		:= $(IUTI)WDMath.h $(Pi_h) $(exception_h)
+memory_h		:= $(IUTI)memory.h $(exception_h) $(inline_h)
+numerics_h		:= $(IUTI)numerics.h $(inline_h) $(memory_h) $(tupel_h)
+spline_h		:= $(IUTI)spline.h $(numerics_h) $(memory_h)
+random_h_util		:= $(IUTI)random.h $(inline_h) $(Pi_h) $(traits_h)
+
+# -----------------------
+# header dependency lists
+# -----------------------
+
+utils_h			:= $(traits_h) $(Pi_h) $(inline.h) $(inline_io.h) $(tupel_h) $(exception_h) $(memory_h)
+basic_h			:= $(IPUB)basic.h $(utils_h)
+tensor_h		:= $(IPUB)tensor.h $(utils_h) $(IPUB)tensor.cc
+tensor_set_h		:= $(IPUB)tensor_set.h $(tensor_h) $(simd_h) $(IPUB)tensor_set.cc
+types_h			:= $(IPUB)types.h $(basic_h) $(tensor_h)
+default_h		:= $(IPUB)default.h $(types_h)
+interact_h		:= $(IPUB)interact.h $(basic_h)
+fields_h		:= $(IPUB)fields.h $(types_h)
+ifdef DMPI
+peano_h			:= $(IPAR)peano.h $(types_h)
+endif
+ifdef DPROPER
+simd_h			:= $(IPRO)simd.h $(basic_h)
+gravity_ind_cc		:= $(IPRO)gravity_ind.cc
+gravity_pro		:= $(gravity_ind_cc)
+kernel_sse_cc		:= $(IPRO)kernel_sse.cc
+endif
+io_h			:= $(IPUB)io.h $(fields_h)
+body_h			:= $(INC)body.h $(fields_h)
+externacc_h		:= $(INC)externacc.h $(body_h)
+tree_h			:= $(IPUB)tree.h $(default_h) $(body_h) $(peano_h)
+partner_h		:= $(IPUB)partner.h $(tree_h)
+gravity_h		:= $(IPUB)gravity.h $(tree_h) $(tensor_set_h)
+kernel_h		:= $(IPUB)kernel.h $(gravity_h) $(simd_h)
+forces_h		:= $(INC)forces.h $(types_h) $(default_h) $(body_h) $(IPUB)forces.cc $(gravity_h) $(partner_h) $(sph_h)
+forces_C_h		:= $(INC)forces_C.h
+forces_f		:= $(INC)forces.f
+main_h			:= $(INC)main.h  $(body_h)
+nbody_h			:= $(IPUB)nbody.h $(body_h) $(externacc_h)
+manip_h			:= $(IPUB)manip.h $(body_h)
+defman_h		:= $(IPUB)defman.h $(manip_h)
+profile_h		:= $(IPUB)profile.h $(body_h)
+tools_h			:= $(IPUB)tools.h $(body_h) $(bodyfunc_h)
+random_h		:= $(IPUB)random.h $(random_h_util)
+sample_h		:= $(IPUB)sample.h $(body_h) $(random_h)
+gamma_h			:= $(IPUB)gamma.h $(basic_h) $(sample_h)
+king_h			:= $(IPUB)king.h
+bodyfunc_h		:= $(IPUB)bodyfunc.h $(body_h) 
+bodyduncdefs_h		:= $(IPUB)bodyfuncdefs.h $(body_h) 
+neighbours_h		:= $(IPUB)neighbours.h $(tree_h)
+
+timer_h			:= $(IACC)timer.h
+center_h		:= $(IACC)center.h
+defacc_h		:= $(IACC)defacc.h
+GalPot_h		:= $(IACC)GalPot.cc $(IACC)GalPot.h $(IACC)GalPot_pre.h $(tupel_h)
+
+# -----------------------
+# source dependency lists
+# -----------------------
+
+basic_cc		:= $(SPUB)basic.cc $(basic_h)
+body_cc			:= $(SPUB)body.cc $(body_h) $(io_h) $(numerics)
+io_cc			:= $(SPUB)io.cc $(io_h) $(basic_h)
+kernel_cc		:= $(SPUB)kernel.cc $(kernel_h) $(kernel_sse_cc)
+partner_cc		:= $(SPUB)partner.cc $(partner_h) $(interact_h)
+gravity_cc		:= $(SPUB)gravity.cc $(gravity_h) $(kernel_h) $(interact_h) $(numerics_h) $(gravity_pro)
+tree_cc			:= $(SPUB)tree.cc $(tree_h) $(body_h) $(memory_h)
+nbody_cc		:= $(SPUB)nbody.cc $(nbody_h) $(io_h)
+manip_cc		:= $(SPUB)manip.cc $(manip_h)
+forcesC_cc		:= $(SPUB)forcesC.cc $(forces_C_h) $(forces_h)
+tools_cc		:= $(SPUB)tools.cc $(tools_h) $(Pi_h) $(memory_h)
+profile_cc		:= $(SPUB)profile.cc $(profile_h) $(Pi_h) $(numerics_h)
+sample_cc		:= $(SPUB)sample.cc $(sample_h) $(basic_h) $(numerics_h)
+gamma_cc		:= $(SPUB)gamma.cc $(gamma_h) $(numerics_h)
+king_cc			:= $(SPUB)king.cc $(king_h) $(numerics_h)
+bodyfunc_cc		:= $(SPUB)bodyfunc.cc $(bodyfunc_h) $(bodyfuncdefs_h) 
+neighbours_cc		:= $(SPUB)neighbours.cc $(neighbours_h) $(interact_h)
+
+# ---------------
+# library modules
+# ---------------
+
+$(LIB)basic.o:		$(basic_cc) $(LIBT) $(makepublic)
+			$(MAKE_OBJ) $(NBDYFLAGS)
+$(LIB)body.o:		$(body_cc) $(LIBT) $(makepublic)
+			$(MAKE_OBJ) $(NBDYFLAGS)
+$(LIB)tree.o:		$(tree_cc) $(LIBT) $(makepublic)
+			$(MAKE_OBJ) $(NBDYFLAGS)
+$(LIB)gravity.o:	$(gravity_cc) $(LIBT) $(makepublic)
+			$(MAKE_OBJ) $(NBDYFLAGS)
+$(LIB)partner.o:	$(partner_cc) $(LIBT) $(makepublic)
+			$(MAKE_OBJ) $(NBDYFLAGS)
+ifdef NEMO
+$(LIB)io.o:		$(io_cc) $(LIBT) $(makepublic)
+			$(MAKE_OBJ) $(NBDYFLAGS)
+$(LIB)manip.o:		$(manip_cc) $(LIBT) $(makepublic)
+			$(MAKE_OBJ) $(NBDYFLAGS)
+$(LIB)bodyfunc.o:	$(bodyfunc_cc) $(LIBT) $(makepublic)
+			$(MAKE_OBJ) $(NBDYFLAGS)
+endif
+$(LIB)neighbours.o:	$(neighbours_cc) $(LIBT) $(makepublic)
+			$(MAKE_OBJ)
+$(LIB)nbody.o:		$(nbody_cc) $(LIBT) $(makepublic)
+			$(MAKE_OBJ) $(NBDYFLAGS)
+$(LIB)forcesC.o:	$(forcesC_cc) $(LIBT) $(makepublic)
+			$(MAKE_OBJ) $(NBDYFLAGS)
+ifdef DSSE
+$(LIB)kernel.o:		$(kernel_cc) $(LIBT) $(makepublic)
+			$(MAKE_OBJ) $(NOSSE) $(NBDYFLAGS)
+else
+$(LIB)kernel.o:		$(kernel_cc) $(LIBT) $(makepublic)
+			$(MAKE_OBJ) $(NBDYFLAGS)
+endif
+$(LIB)profile.o:	$(profile_cc) $(LIBT) $(makepublic)
+			$(MAKE_OBJ) $(NBDYFLAGS)
+$(LIB)tools.o:		$(tools_cc) $(LIBT) $(makepublic)
+			$(MAKE_OBJ) $(NBDYFLAGS)
+$(LIB)sample.o:		$(sample_cc) $(LIBT) $(makepublic)
+			$(MAKE_OBJ) $(DNEMO)
+$(LIB)gamma.o:		$(gamma_cc) $(LIBT) $(makepublic)
+			$(MAKE_OBJ)
+$(LIB)king.o:		$(king_cc) $(LIBT) $(makepublic)
+			$(MAKE_OBJ)
+
+ifdef NEMO
+public_objs	 :=	$(LIB)basic.o $(LIB)body.o $(LIB)tree.o \
+			$(LIB)gravity.o $(LIB)kernel.o $(LIB)io.o \
+			$(LIB)partner.o $(LIB)nbody.o $(LIB)forcesC.o \
+			$(LIB)tools.o $(LIB)sample.o $(LIB)manip.o \
+			$(LIB)profile.o $(LIB)bodyfunc.o $(LIB)neighbours.o 
+
+else
+public_objs	 :=	$(LIB)basic.o $(LIB)body.o $(LIB)tree.o \
+			$(LIB)gravity.o $(LIB)kernel.o $(LIB)partner.o \
+			$(LIB)nbody.o $(LIB)forcesC.o $(LIB)sample.o \
+			$(LIB)neighbours.o
+endif
+
+ifdef NEMO
+
+# ------------
+# manipulators
+# ------------
+
+$(MAN)add_plummer.so:		$(SMAN)add_plummer.cc $(MANT) $(defman_h) $(makepublic)
+				$(MAKE_MANIP)
+$(MAN)bound_centre.so:		$(SMAN)bound_centre.cc $(MANT) $(defman_h) $(io_h) $(makepublic)
+				$(MAKE_MANIP)
+$(MAN)dens_centre.so:		$(SMAN)dens_centre.cc $(MANT) $(defman_h) $(tools_h) $(io_h) $(makepublic)
+				$(MAKE_MANIP)
+$(MAN)density.so:		$(SMAN)density.cc $(MANT) $(defman_h) $(io_h) $(neighbours_h) $(makepublic)
+				$(MAKE_MANIP)
+$(MAN)densprof.so:		$(SMAN)densprof.cc $(MANT) $(defman_h) $(io_h) $(makepublic)
+				$(MAKE_MANIP)
+$(MAN)lagrange.so:		$(SMAN)lagrange.cc $(MANT) $(defman_h) $(tools_h) $(io_h) $(makepublic)
+				$(MAKE_MANIP)
+$(MAN)projprof.so:		$(SMAN)projprof.cc $(MANT) $(defman_h) $(io_h) $(profile_h) $(makepublic)
+				$(MAKE_MANIP)
+$(MAN)randomize_azimuth.so:	$(SMAN)randomize_azimuth.cc $(MANT) $(defman_h) $(Pi_h) $(random_h) $(makepublic)
+				$(MAKE_MANIP)
+$(MAN)set_centre.so:		$(SMAN)set_centre.cc $(MANT) $(defman_h) $(makepublic)
+				$(MAKE_MANIP)
+$(MAN)set_filter.so:		$(SMAN)set_filter.cc $(MANT) $(defman_h) $(bodyfunc_h) $(makepublic)
+				$(MAKE_MANIP)
+$(MAN)set_subset.so:		$(SMAN)set_subset.cc $(MANT) $(defman_h) $(bodyfunc_h) $(makepublic)
+				$(MAKE_MANIP)
+$(MAN)sphereprof.so:		$(SMAN)sphereprof.cc $(MANT) $(defman_h) $(io_h) $(profile_h) $(makepublic)
+				$(MAKE_MANIP)
+$(MAN)symmetrize_pairs.so:	$(SMAN)symmetrize_pairs.cc $(MANT) $(defman_h) $(makepublic)
+				$(MAKE_MANIP)
+$(MAN)use_filter.so:		$(SMAN)use_filter.cc $(MANT) $(defman_h) $(bodyfunc_h) $(makepublic)
+				$(MAKE_MANIP)
+
+manip_pub		:=	$(MAN)add_plummer.so \
+				$(MAN)bound_centre.so \
+				$(MAN)dens_centre.so \
+				$(MAN)density.so \
+				$(MAN)densprof.so \
+				$(MAN)lagrange.so \
+				$(MAN)projprof.so \
+				$(MAN)randomize_azimuth.so \
+				$(MAN)set_centre.so \
+				$(MAN)set_filter.so \
+				$(MAN)set_subset.so \
+				$(MAN)sphereprof.so \
+				$(MAN)symmetrize_pairs.so \
+				$(MAN)use_filter.so
+
+# -------------
+# accelerations
+# -------------
+
+$(ACC)Combined.so:		$(SACC)Combined.cc $(ACCT) $(timer_h) $(makepublic)
+				$(MAKE_ACC)
+$(ACC)Dehnen.so:		$(SACC)Dehnen.cc $(ACCT) $(makepublic)
+				$(MAKE_ACC)
+$(ACC)DehnenMcLaughlin.so:	$(SACC)DehnenMcLaughlin.cc $(ACCT) $(makepublic)
+				$(MAKE_ACC)
+$(ACC)GalPot.so:		$(SACC)GalPot.cc $(ACCT) $(GalPot_h) $(makepublic)
+				$(MAKE_ACC)
+$(ACC)MiyamotoNagai.so:		$(SACC)MiyamotoNagai.cc $(ACCT) $(makepublic)
+				$(MAKE_ACC)
+$(ACC)Monopole.so:		$(SACC)Monopole.cc $(ACCT) $(timer_h) $(makepublic)
+				$(MAKE_ACC)
+$(ACC)NFW.so:			$(SACC)NFW.cc $(ACCT) $(makepublic)
+				$(MAKE_ACC)
+$(ACC)Plummer.so:		$(SACC)Plummer.cc $(ACCT) $(makepublic)
+				$(MAKE_ACC)
+$(ACC)Point.so:			$(SACC)Point.cc $(ACCT) $(makepublic)
+				$(MAKE_ACC)
+
+acc_pub		:=		$(ACC)Combined.so \
+				$(ACC)Dehnen.so \
+				$(ACC)DehnenMcLaughlin.so \
+				$(ACC)GalPot.so \
+				$(ACC)MiyamotoNagai.so \
+				$(ACC)Monopole.so \
+				$(ACC)NFW.so \
+				$(ACC)Plummer.so \
+				$(ACC)Point.so
+endif
+
+# -----
+# mains
+# -----
+
+$(BIN)TestGrav:		$(SEXE)TestGrav.cc $(LIBT) $(main_h) $(body_h) $(forces_h) $(Pi_h) $(numerics_h) $(basic_h) $(makepublic)
+			$(MAKE_EXE) $(NBDYFLAGS) $(LFALCON) -lm
+$(BIN)TestGravC:	$(SEXE)TestGravC.c $(LIBT) $(forces_C_h) $(makepublic)
+			$(MAKE_EXE_C) $(NBDYFLAGS) $(LFALCON) -lstdc++ -lm
+$(BIN)TestGravF:	$(SEXE)TestGravF.F $(LIBT) $(makepublic)
+			$(MAKE_EXE_F) $(NBDYFLAGS) $(LFALCON) -lstdc++ -lm
+$(BIN)TestPair:		$(SEXE)TestPair.cc $(LIBT) $(main_h) $(body_h) $(forces_h) $(makepublic)
+			$(MAKE_EXE) $(NBDYFLAGS) $(LFALCON) -lm
+$(BIN)TestPairC:	$(SEXE)TestPairC.c $(LIBT) $(forces_C_h) $(makepublic)
+			$(MAKE_EXE_C) $(NBDYFLAGS) $(LFALCON) -lstdc++ -lm
+$(BIN)TestPairF:	$(SEXE)TestPairF.F $(LIBT) $(makepublic)
+			$(MAKE_EXE_F) $(NBDYFLAGS) $(LFALCON) -lstdc++ -lm
+
+ifdef NEMO
+
+
+$(BIN)a2s:		$(SEXE)a2s.cc $(LIBT) $(main_h) $(inline_io_h) $(io_h) $(body_h) $(makepublic)
+			$(MAKE_EXE) $(NEMO_EXE_FLGS)
+$(BIN)addgravity:	$(SEXE)addgravity.cc $(LIBT) $(main_h) $(body_h) $(externacc_h) $(forces_h) $(io_h) $(makepublic)
+			$(MAKE_EXE) $(NEMO_EXE_FLGS)
+$(BIN)density:		$(SEXE)density.cc $(LIBT) $(main_h) $(neighbours_h) $(makeppublic)
+			$(MAKE_EXE) $(NEMO_EXE_FLGS)
+$(BIN)getgravity:	$(SEXE)getgravity.cc $(LIBT) $(main_h) $(forces_h) $(io_h) $(makepublic)
+			$(MAKE_EXE) $(NEMO_EXE_FLGS)
+$(BIN)gyrfalcON:	$(SEXE)gyrfalcON.cc $(LIBT) $(main_h) $(nbody_h) $(manip_h) $(makepublic)
+			$(MAKE_EXE) $(NEMO_EXE_FLGS)
+$(BIN)lagrange_radii:	$(SEXE)lagrange_radii.cc $(LIBT) $(main_h) $(body_h) $(io_h) $(inline_io_h) $(makepublic)
+			$(MAKE_EXE) $(NEMO_EXE_FLGS)
+$(BIN)manipulate:	$(SEXE)manipulate.cc $(LIBT) $(main_h) $(manip_h) $(io_h) $(makepublic)
+			$(MAKE_EXE) $(NEMO_EXE_FLGS)
+$(BIN)mkbodiesfunc:	$(SEXE)mkbodiesfunc.cc $(LIBT) $(main_h) $(bodyfunc_h) $(makepublic)
+			$(MAKE_EXE) $(NEMO_EXE_FLGS)
+$(BIN)mkbodyfunc:	$(SEXE)mkbodyfunc.cc $(LIBT) $(main_h) $(bodyfunc_h) $(makepublic)
+			$(MAKE_EXE) $(NEMO_EXE_FLGS)
+$(BIN)mkdehnen:		$(SEXE)mkdehnen.cc $(LIBT) $(main_h) $(gamma_h) $(io_h) $(LIB)gamma.o $(makepublic)
+			$(MAKE_EXE) $(LIB)gamma.o $(NEMO_EXE_FLGS)
+$(BIN)mkking:		$(SEXE)mkking.cc $(LIBT) $(main_h) $(body_h) $(king_h) $(io_h) $(random_h) $(Pi_h) $(LIB)king.o $(makepublic)
+			$(MAKE_EXE) $(LIB)king.o $(NEMO_EXE_FLGS)
+$(BIN)mkplum:		$(SEXE)mkplum.cc $(LIBT) $(main_h) $(sample_h) $(io_h) $(makepublic)
+			$(MAKE_EXE) $(NEMO_EXE_FLGS)
+$(BIN)s2a:		$(SEXE)s2a.cc $(LIBT) $(main_h) $(body_h) $(inline_io_h) $(io_h) $(makepublic)
+			$(MAKE_EXE) $(NEMO_EXE_FLGS)
+$(BIN)scale_eps:	$(SEXE)scale_eps.cc $(LIBT) $(main_h) $(body_h) $(io_h) $(makepublic)
+			$(MAKE_EXE) $(NEMO_EXE_FLGS)
+$(BIN)set_time:		$(SEXE)set_time.cc $(body_h) $(LIBT) $(main_h) $(io_h) $(makepublic)
+			$(MAKE_EXE) $(NEMO_EXE_FLGS)
+$(BIN)snapfilter:	$(SEXE)snapfilter.cc $(LIBT) $(main_h) $(bodyfunc_h) $(makepublic)
+			$(MAKE_EXE) $(NEMO_EXE_FLGS)
+$(BIN)snapprop:		$(SEXE)snapprop.cc $(LIBT) $(main_h) $(bodyfunc_h) $(makepublic)
+			$(MAKE_EXE) $(NEMO_EXE_FLGS)
+$(BIN)symmetrize:	$(SEXE)symmetrize.cc $(LIBT) $(main_h) $(body_h) $(io_h) $(inline_io_h) $(makepublic)
+			$(MAKE_EXE) $(NEMO_EXE_FLGS)
+endif
+# -----------
+# executables
+# -----------
+
+TestGrav	:	$(falcON) $(BIN)TestGrav
+TestGravC	:	$(falcON) $(BIN)TestGravC
+TestGravF	:	$(falcON) $(BIN)TestGravF
+TestPair	:	$(falcON) $(BIN)TestPair
+TestPairC	:	$(falcON) $(BIN)TestPairC
+TestPairF	:	$(falcON) $(BIN)TestPairF
+
+ifdef NEMO
+
+a2s		:	$(falcON) $(BIN)a2s
+addgravity	:	$(falcON) $(BIN)addgravity
+density		:	$(falcON) $(BIN)density
+getgravity	:	$(falcON) $(BIN)getgravity
+gyrfalcON	:	$(falcON) $(BIN)gyrfalcON
+lagrange_radii	:	$(falcON) $(BIN)lagrange_radii
+manipulate	:	$(falcON) $(BIN)manipulate
+mkbodyfunc	:	$(falcON) $(BIN)mkbodyfunc
+mkbodiesfunc	:	$(falcON) $(BIN)mkbodiesfunc
+mkdehnen	:	$(falcON) $(BIN)mkdehnen
+mkking		:	$(falcON) $(BIN)mkking
+mkplum		:	$(falcON) $(BIN)mkplum
+s2a		:	$(falcON) $(BIN)s2a
+scale_eps	:	$(falcON) $(BIN)scale_eps
+set_time	:	$(falcON) $(BIN)set_time
+snapfilter	:	$(falcON) $(BIN)snapfilter
+snapprop	:	$(falcON) $(BIN)snapprop
+symmetrize	:	$(falcON) $(BIN)symmetrize
+
+exe_pub		:=	TestGrav gyrfalcON a2s addgravity density \
+			getgravity lagrange_radii manipulate mkbodiesfunc \
+			mkbodyfunc mkdehnen mkking mkplum s2a scale_eps \
+			snapfilter snapprop symmetrize
+else
+
+exe_pub		:=	TestGrav
+
+endif
+
+# ---------------------
+# doxygen documentation
+# ---------------------
+
+dox/html/index.html:	inc/utils/exception.h \
+			inc/utils/inline.h \
+			inc/utils/inline_io.h \
+			inc/utils/traits.h \
+			inc/utils/random.h \
+			inc/utils/numerics.h \
+			inc/utils/Pi.h \
+			inc/utils/memory.h \
+			inc/utils/WDMath.h \
+			inc/public/types.h \
+			inc/public/basic.h \
+			inc/public/fields.h \
+			inc/public/io.h \
+			inc/public/profile.h \
+			inc/body.h \
+			inc/public/bodyfunc.h \
+			inc/public/interact.h \
+			inc/public/nbody.h \
+			src/public/manip/set_subset.cc \
+			src/public/manip/use_filter.cc \
+			src/public/manip/set_centre.cc \
+			src/public/manip/bound_centre.cc \
+			src/public/manip/dens_centre.cc \
+			src/public/manip/density.cc \
+			src/public/manip/densprof.cc \
+			src/public/manip/set_centre.cc \
+			src/public/manip/sphereprof.cc \
+			src/public/manip/projprof.cc \
+			src/public/manip/lagrange.cc \
+			src/public/manip/add_plummer.cc \
+			src/public/manip/symmetrize_pairs.cc \
+			src/public/manip/randomize_azimuth.cc \
+			dox/falcON.dox
+			doxygen dox/falcON.dox
+
+doxu		:	dox/html/index.html
+
+view_dox	:	doxu
+			firefox dox/html/index.html

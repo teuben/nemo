@@ -405,26 +405,26 @@ INPUT                  = inc/utils/tupel.h \
 			 inc/public/basic.h \
 			 inc/public/fields.h \
 			 inc/public/io.h \
+			 inc/body.h \
 			 inc/public/manip.h \
 			 inc/public/profile.h \
-			 inc/body.h \
 			 inc/public/bodyfunc.h \
 			 inc/public/interact.h \
 			 inc/public/nbody.h \
-			 src/manips/set_subset.cc \
-			 src/manips/use_filter.cc \
-			 src/manips/set_centre.cc \
-			 src/manips/bound_centre.cc \
-			 src/manips/dens_centre.cc \
-			 src/manips/density.cc \
-			 src/manips/densprof.cc \
-			 src/manips/set_centre.cc \
-			 src/manips/sphereprof.cc \
-			 src/manips/projprof.cc \
-			 src/manips/lagrange.cc \
-			 src/manips/add_plummer.cc \
-			 src/manips/symmetrize_pairs.cc \
-			 src/manips/randomize_azimuth.cc
+			 src/public/manip/set_subset.cc \
+			 src/public/manip/use_filter.cc \
+			 src/public/manip/set_centre.cc \
+			 src/public/manip/bound_centre.cc \
+			 src/public/manip/dens_centre.cc \
+			 src/public/manip/density.cc \
+			 src/public/manip/densprof.cc \
+			 src/public/manip/set_centre.cc \
+			 src/public/manip/sphereprof.cc \
+			 src/public/manip/projprof.cc \
+			 src/public/manip/lagrange.cc \
+			 src/public/manip/add_plummer.cc \
+			 src/public/manip/symmetrize_pairs.cc \
+			 src/public/manip/randomize_azimuth.cc
 
 # If the value of the INPUT tag contains directories, you can use the 
 # FILE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp 

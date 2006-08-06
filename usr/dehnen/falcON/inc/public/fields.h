@@ -597,7 +597,7 @@ namespace falcON {
       /// all vector quantities
       vectors = x|v|a|j|w|z,
       /// all quantities supported by NEMO Input
-      nemoin  = m|x|v|e|k|t|p|a|r|y|l|n|sphnemo,
+      nemoin  = m|x|v|e|k|t|p|a|r|y|z|l|n|sphnemo,
       /// all quantities supported by NEMO Output
       nemo    = nemoin | q,
       /// all quantities at all

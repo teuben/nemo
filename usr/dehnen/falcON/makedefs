@@ -1,0 +1,222 @@
+# -*- makefile -*-
+################################################################################
+#
+# makedefs for the falcON project
+#
+################################################################################
+
+# --------------------
+# maximum tensor order
+# --------------------
+
+KMAX		:= 6
+
+# ------------
+# NEMO library
+# ------------
+
+ifdef NEMO
+
+INEMO		:= -I$(NEMOINC) -I$(NEMOLIB)
+DNEMO		:= -DfalcON_NEMO
+
+ifeq ($(COMPILER),icc)
+LNEMO		:= -L$(NEMOLIB) -lnemo -ldl
+else
+LNEMO		:= -L$(NEMOLIB) -lnemo -ldl
+endif
+
+endif
+
+# -----------
+# MPI library
+# -----------
+
+ifdef DMPI
+
+MPIDIR		:= /opt/mpich/ch-p4
+MPIINC		:= $(MPIDIR)/include
+IMPI		:= -I$(MPIINC)
+
+ifdef STATIC
+MPILIB		:= $(MPIDIR)/lib
+LMPI		:= -L$(MPILIB) -lmpich
+else
+MPILIB		:= $(MPIDIR)/lib/shared
+LMPI		:= -L$(MPILIB) -lmpich -Wl,-rpath,$(MPILIB)
+endif
+
+endif
+
+# -----------------
+# Hardware platform
+# -----------------
+PLATFORM	:= $(shell uname -m)
+
+# -----------
+# directories
+# -----------
+
+INC		:= inc/
+IUTI		:= $(INC)utils/
+SRC		:= src/
+ACC		:= acc/
+MAN		:= manip/
+HOS             := $(PLATFORM)/
+BIN		:= $(HOS)
+LIB		:= $(BIN)lib/
+MODE		:= 755
+LIBT		:= $(LIB).dummy
+ACCT		:= $(ACC).dummy
+MANT		:= $(MAN).dummy
+
+$(LIBT)		:
+		mkdir --parents --mode=$(MODE) $(LIB)
+		touch $(LIBT)
+$(MANT)		:
+		mkdir --parents --mode=$(MODE) $(MAN)
+		touch $(MANT)
+$(ACCT)		:
+		mkdir --parents --mode=$(MODE) $(ACC)
+		touch $(ACCT)
+
+# -----------------------
+# compiler and linker etc
+# -----------------------
+
+FILEIO		:= -D_FILE_OFFSET_BITS=64
+
+ifeq ($(COMPILER),gcc)
+# GNU's gcc compiler
+
+CXX		:= $(CPATH)g++
+CC		:= $(CPATH)gcc
+FC		:= $(CPATH)g77
+
+# CPU dependent optimization flags
+# EDIT to match your hardware
+
+ifeq ($(HOSTNAME),virgo)
+# on virgo use
+CPUFLAGS	:= -march=pentium-m -mpreferred-stack-boundary=4
+
+else
+
+ifeq ($(PLATFORM),i386)
+# on i386 use
+CPUFLAGS	:= -march=i386 -mpreferred-stack-boundary=4
+endif
+
+ifeq ($(PLATFORM),i686)
+# on i686 use
+CPUFLAGS	:= -march=i686 -mpreferred-stack-boundary=4
+endif
+
+ifeq ($(PLATFORM),x86_64)
+# on opteron (x86-64) use
+CPUFLAGS	:= -mcpu=k8 -m32 -mpreferred-stack-boundary=4
+endif
+endif
+
+ifdef DEBUG
+OPTFLAGS	:= -ggdb -fPIC $(CPUFLAGS) -rdynamic $(STATIC)
+else
+OPTFLAGS	:= -ggdb -O2 -fPIC $(CPUFLAGS) -funroll-loops -fforce-addr -fomit-frame-pointer -rdynamic $(STATIC)
+endif
+
+# this is used for compilation of code with inline assembly SSE instructions
+# it prevents the compiler to mess with SSE and break the code.
+NOSSE		:= -mno-sse -mno-sse2 -mno-sse3 -mfpmath=387
+
+else
+ifeq ($(COMPILER),pgcc)
+# portland groups compiler
+
+CXX		:= pgCC
+CC		:= pgcc
+FC		:= pgf77
+#OPTFLAGS	:= -fast -Minline=levels:10 -Mcache_align --no_exceptions -Minform=inform -D__PGCC__
+ifdef DEBUG
+OPTFLAGS	:= -g -inline_debug_info -fastsse --no_using_std --no_exceptions -Msafeptr -Minform=inform -D__PGCC__  $(STATIC)
+else
+OPTFLAGS	:= -O2 -fastsse --no_using_std --no_exceptions -Msafeptr -Minform=inform -D__PGCC__  $(STATIC)
+endif
+
+else
+ifeq ($(COMPILER),icc)
+# intel compiler
+
+CXX		:= $(CPATH)icpc
+CC		:= $(CPATH)icc
+FC		:= $(CPATH)ifc
+ifdef DEBUG
+OPTFLAGS	:= -g  $(STATIC)
+else
+#OPTFLAGS	:= -O2 -unroll -tpp7 -xW -i_dynamic -prefetch
+OPTFLAGS	:= -O2 -unroll -tpp7 -wd177,1572 -i_dynamic -prefetch  $(STATIC)
+endif
+
+else
+
+top		:
+		@echo "unknown compiler"
+		@echo "please set COMPILER in makefile"
+
+endif
+endif
+endif
+
+AR		:= ar rc
+RL		:= ranlib
+
+# -------------------------
+# compiler and linker flags
+# -------------------------
+
+NBDYFLAGS	:= $(DMPI) $(DSPH) $(DPRECISION) $(DNEMO) $(DSSE) $(DSOFT) \
+			$(DWALTER)
+
+CFLAGS		:= $(FILEIO) $(OPTFLAGS) $(DPROPER) $(DMPI) $(DEBUG)
+CXXFLAGS	:= $(FILEIO) $(OPTFLAGS) $(DPROPER) $(DMPI) $(DEBUG)
+
+# ---------------
+# WDutils library
+# ---------------
+
+IUTIL		:= -I$(IUTI)
+ifdef STATIC
+LUTIL		:= -Lutils/lib/$(PLATFORM) -lWDutils
+else
+LUTIL		:= -Lutils/lib/$(PLATFORM) -lWDutils \
+		-Wl,-rpath,$(PWD)/../utils/lib/$(PLATFORM)
+endif
+
+# --------------
+# falcON library
+# --------------
+
+ifdef STATIC
+
+LFALCON		:= -L$(LIB) -lfalcON $(LUTIL) $(LNEMO) $(LMPI)
+falcON		:= $(LIB)libfalcON.a
+
+else
+
+LFALCON		:= -L$(LIB) -lfalcON  -Wl,-rpath,$(PWD)/$(LIB) $(LUTIL) $(LNEMO) $(LMPI)
+falcON		:= $(LIB)libfalcON.so
+
+endif
+
+# -------------------------
+# compile and link commands
+# ------------------------- 
+
+MAKE_OBJ	= $(CXX) -c -o $@ $< -I$(INC) $(IUTIL) $(INEMO) $(IMPI) $(CXXFLAGS)
+MAKE_MANIP	= $(CXX) -o $@ $< -I$(INC) $(IUTIL) $(INEMO) $(IMPI) $(CXXFLAGS) $(NBDYFLAGS) -shared
+MAKE_ACC	= $(CXX) -o $@ $< -I$(INC) $(IUTIL) $(INEMO) $(IMPI) $(CXXFLAGS) -shared
+MAKE_EXE	= $(CXX) -o $@ $< -I$(INC) $(IUTIL) $(INEMO) $(IMPI) $(CXXFLAGS)
+MAKE_EXE_C	= $(CC)  -o $@ $< -I$(INC) $(IUTIL) $(IMPI) $(CFLAGS)
+MAKE_EXE_F	= $(FC)  -o $@ $< -I$(INC) $(IUTIL) $(IMPI) $(OPTFLAGS)
+MAKE_EXE_P	= $(MAKE_EXE) -DfalcON_PARALLEL
+NEMO_EXE_FLGS	= $(NBDYFLAGS) $(LFALCON) -lm
+

@@ -110,7 +110,7 @@ void iniacceleration(                 /* return: void                         */
  */
 
 void warning(char *, ...);
-void error  (char *, ...);
+void error(char *, ...);
 bool nemo_debug(int);
 int  nemo_dprintf(int, const char *, ...);
 
@@ -122,8 +122,7 @@ int  nemo_dprintf(int, const char *, ...);
  * here we use the old NEMO style of only one routine per potential type, not   
  * allowing for superpositions of, say, several Miyamoto-Nagai disks.           
  */
-void inipotential    (                /* return: void                         */
-		      const int*,     /* input:  number of parameters         */
+void inipotential    (const int*,     /* input:  number of parameters         */
 		      const double*,  /* input:  array with parameters        */
 		      const char*);   /* input:  data file name (may be NULL) */
 void potential_double(const int*,     /* input:  number of dimensions         */

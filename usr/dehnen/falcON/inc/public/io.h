@@ -378,19 +378,20 @@ namespace falcON {
       jerk    = 1 <<  8,
       dens    = 1 <<  9,
       aux     = 1 << 10,
-      lev     = 1 << 11,
-      num     = 1 << 12,
-      posvel  = 1 << 13,
-      SPHh    = 1 << 14,
-      SPHnum  = 1 << 15,
-      SPHu    = 1 << 16,
-      SPHudot = 1 << 17,
-      SPHurad = 1 << 18,
-      SPHentr = 1 << 19,
-      SPHdens = 1 << 20,
-      SPHhdot = 1 << 21,
-      SPHfact = 1 << 22,
-      SPHcs   = 1 << 23
+      zet     = 1 << 11,
+      lev     = 1 << 12,
+      num     = 1 << 13,
+      posvel  = 1 << 14,
+      SPHh    = 1 << 15,
+      SPHnum  = 1 << 16,
+      SPHu    = 1 << 17,
+      SPHudot = 1 << 18,
+      SPHurad = 1 << 19,
+      SPHentr = 1 << 20,
+      SPHdens = 1 << 21,
+      SPHhdot = 1 << 22,
+      SPHfact = 1 << 23,
+      SPHcs   = 1 << 24
     };
     //--------------------------------------------------------------------------
     /// get the nemo_io::DataType used for a given Field                        
@@ -407,6 +408,7 @@ namespace falcON {
       case jerk   : return Real;
       case dens   : return Real;
       case aux    : return Real;
+      case zet    : return Real;
       case lev    : return Short;
       case num    : return Integer;
       case posvel : return Real;
@@ -456,6 +458,7 @@ namespace falcON {
       case fieldbit::j: return jerk;
       case fieldbit::r: return dens;
       case fieldbit::y: return aux;
+      case fieldbit::z: return zet;
       case fieldbit::l: return lev;
       case fieldbit::n: return num;
       case fieldbit::H: return SPHh;
@@ -487,6 +490,7 @@ namespace falcON {
       case jerk:    return fieldbit::j;
       case dens:    return fieldbit::r;
       case aux:     return fieldbit::y;
+      case zet:     return fieldbit::z;
       case lev:     return fieldbit::l;
       case num:     return fieldbit::n;
       case SPHh:    return fieldbit::H;
