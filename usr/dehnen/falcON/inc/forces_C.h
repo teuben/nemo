@@ -1,7 +1,7 @@
 /* -*- C -*-
  *******************************************************************************
  *                                                                             *
- * FAlCON_C.h                                                                  *
+ * forces_C.h                                                                  *
  *                                                                             *
  * Copyright (C) 2000-2006  Walter Dehnen                                      *
  *                                                                             *
@@ -26,20 +26,20 @@
  *******************************************************************************
  *                                                                             *
  * header file for C users.                                                    *
- * (C++ and FORTRAN users, see files FAlCON.h and FAlCON.f, respectively)      *
+ * (C++ and FORTRAN users, see files forces.h and forces.f, respectively)      *
  *                                                                             *
  * C routines  implementing the code described by Dehnen (2000,2002). These    *
- * routines call the original C++ functions, declared in file FAlCON.h.        *
+ * routines call the original C++ functions, declared in file forces.h.        *
  *                                                                             *
  *******************************************************************************
  */
-#ifndef falcON_included_FAlCON_C_h            /* ensure this file is seen     */
-#define falcON_included_FAlCON_C_h 1          /* once only by the compiler    */
+#ifndef falcON_included_forces_C_h            /* ensure this file is seen     */
+#define falcON_included_forces_C_h 1          /* once only by the compiler    */
 
 #ifdef __cplusplus                            /* C++ users should better use  */
-extern "C" {                                  /* FAlCON.h.                    */
-#  ifndef FAlCONC_cc
-#    warning "FAlCON_C.h is for C. with C++ better use FAlCON.h"
+extern "C" {                                  /* forces.h.                    */
+#  ifndef forcesC_cc
+#    warning "forces_C.h is for C. with C++ better use forces.h"
 #  endif
 #endif                                        /* this is for savety only      */
 
@@ -444,4 +444,4 @@ void falcON_set_debug_level(int);   	     /* assigns falcON debug level    */
 #ifdef __cplusplus
 }
 #endif
-#endif                                        /* falcON_included_FAlCON_C_h   */
+#endif                                        /* falcON_included_forces_C_h   */
