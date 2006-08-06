@@ -1,4 +1,4 @@
-.TH SNAPSTACK 1NEMO "20 June 2003"
+.TH SNAPSTACK 1NEMO "5 August 2006"
 .SH NAME
 snapstack \- superimpose two N-body snapshots
 .SH SYNOPSIS
@@ -33,7 +33,11 @@ Default: \fB0.0,0.0,0.0\fP.
 .TP
 \fBzerocm=\fP\fIzero_cm_flag\fP
 If true, translate to center of mass before output.
-Default: \fBtrue\fP. 
+Default: \fBfalse\fP. 
+.TP
+\fBshift=1|2\fP
+Shift system1 or system2?
+Default: \fB1\fP. 
 .TP
 \fBheadline=\fP\fImessage\fP
 Text message prepended to \fIout_file\fP.  Default: \fInone\fP.
@@ -47,5 +51,6 @@ Joshua E. Barnes
 2-jun-88	
 22-jan-89	V1.1 ???	JEB
 20-jun-03	V1.2 using new get_snap/put_snap	PJT
+5-aug-06	V2.0 added shift= and made zerocm=f default	PJT
 .fi
 
