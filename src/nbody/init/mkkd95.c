@@ -64,11 +64,11 @@ string defv[] = {
   "nmodel=1\n        Number of models to make",
   "cleanup=t\n       Cleanup the temporary rundir?",
 
-  "VERSION=1.5b\n    19-jul-06 PJT",
+  "VERSION=1.5c\n    20-jul-06 PJT",
   NULL,
 };
 
-string usage="Kuijken-Dubinski-95 composite bulge-disk-halo model";
+string usage="Kuijken-Dubinski-95 composite disk-bulge-halo model";
 
 string cvsid="$Id$";
 
@@ -256,7 +256,8 @@ void make_rundir(string name)
 
 void run_program(string cmd)
 {
-    system(cmd);
+  if (system(cmd))
+    warning("Some error occurred running: %s",cmd);
 }
 
 typedef struct _mpar {
