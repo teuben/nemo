@@ -10,13 +10,13 @@
 #   dec-2004            look for mknemo.d scripts first
 #   dec-2005            -u also looks a NEMO/local/pgplot etc.
 #   mar-2006            give help, even if locked
-#   aug-2006            some sanity checks if cvs is present if -u is used
+#   aug-2006            some sanity checks if cvs is present if -u is used; fixed dir search -a
 #
 
 #  todo:    bug not doing cvs update when new mknemo detected ?
 #           safeguard if disk is full
 #
-set version="MKNEMO Version 3.4a 1-aug-2006"
+set version="MKNEMO Version 3.4b 6-aug-2006"
 if ($#argv == 0) goto usage
 set old_argv=($*)
 
@@ -234,7 +234,11 @@ foreach f ($argv)
    echo $l
  else if ($#l == 0) then
    echo " .. trying directories..."
-   set l=(`find $src -name $file -type d -print`)
+   if ($a) then
+     set l=(`find $NEMO/{src,usr} -name $file -type d -print`)
+   else
+     set l=(`find $src -name $file -type d -print`)
+   endif
    if ($#l == 1) then
      if (-e $l/Makefile) then
        set mk=$ft
