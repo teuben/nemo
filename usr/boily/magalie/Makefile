@@ -1,5 +1,7 @@
-FC            = f77
-LDFLAGS       = 
+include $(NEMOLIB)/makedefs
+
+#FC            = f77
+#LDFLAGS       = 
 
 MAKEFILE      = Makefile
 
@@ -24,6 +26,12 @@ DEC77:
 
 g77: 
 	$(MAKE) "FC = g77" "FFLAGS = $(FFLAGS) -O6 -D GNUF77"   $(PROGRAM)
+
+gfortran: 
+	$(MAKE) "FC = gfortran"  $(PROGRAM)
+
+intel:
+	$(MAKE) "FC = ifort"     $(PROGRAM)
 
 all:    $(PROGRAM)        
 
