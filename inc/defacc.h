@@ -27,6 +27,8 @@
  *                              StaticSphericalModel, _NO_AUX_DEFACC            
  * version 3.0  24/08/2004  WD  no re-initialisation but independent acc fields;
  *                              allows superpositions using GrowCombined        
+ * version 3.1  17/09/2004  WD  somewhat improved documentation                 
+ * version 3.2  12/11/2004  WD  catching std::bad_alloc and report error        
  *                                                                              
  *******************************************************************************
  *                                                                              
@@ -34,9 +36,12 @@
  *                                                                              
  * 1 Declaration of C-linkable routines required by implementations of external 
  *   acceleration fields and, optionally, external potential.                   
+ *                                                                              
  * C++ only:                                                                    
+ *                                                                              
  * 2 Definition of helper templates for manipulating arrays or scalar like      
  *   NDIM dimensional vectores.                                                 
+ *                                                                              
  * 3 Definitions of templates and macros that ease the implementation of the    
  *   C-linkable routines in C++.                                                
  *                                                                              
@@ -45,12 +50,9 @@
 #ifndef _defacc_h
 #define _defacc_h
 
-#include <acceleration.h>                   // for definition of acc_pter       
+#include <acceleration.h>                   /* for definition of acc_pter     */
 #ifdef __cplusplus
-# include <cstring>
   extern "C" {
-#else
-# include <string.h>
 #endif
 
 /*
@@ -97,31 +99,10 @@ void iniacceleration(                 /* return: void                         */
 /*
  * NOTE 1
  * the routine pointed to by the pointer returned from iniacceleration() must   
- * also be defined in the same file that defines iniacceleration() so that is   
+ * also be defined in the same file that defines iniacceleration() so that it   
  * is loaded at the same time.
  */
-#if(0) 
-  /*
-   * NOTE 2
-   * This is from the old days when get_acceleration() was looking for the      
-   * following routine rather then having it returned by iniacceleration().     
-   * This had the disadvantage that only one routine could be returned per      
-   * potential type was available, disabling the possibility of superposing,    
-   * say, several Miyamoto-Nagai disks using GrowCombined.                      
-   */
-void acceleration   (                 /* return: void                         */
-		     int,             /* input:  number of dimensions         */
-		     double,          /* input:  simulation time              */
-		     int,             /* input:  # bodies = size of arrays    */
-		     const void*,     /* input:  masses:        m[i]          */
-		     const void*,     /* input:  positions      (x,y,z)[i]    */
-		     const void*,     /* input:  velocities     (vx,vy,vz)[i] */
-		     const int *,     /* input:  flags          f[i]          */
-		     void      *,     /* output: potentials     p[i]          */
-		     void      *,     /* output: accelerations  (ax,ay,az)[i] */
-		     int,             /* input:  indicator (see note 6 above) */
-		     char);           /* input:  type: 'f' or 'd'             */
-#endif
+
 /*
  * Declaration of NEMO functions that may be used in the implementation of the  
  * above. They are resolved in the NEMO library (this way, we avoid #including  
@@ -130,15 +111,16 @@ void acceleration   (                 /* return: void                         */
 
 void warning(char *, ...);
 void error  (char *, ...);
+bool nemo_debug(int);
 int  nemo_dprintf(int, const char *, ...);
 
 #ifdef POT_DEF
 /*
  * functions that may be defined in #including file.                            
  *
- * NOTE 3
+ * NOTE 2
  * here we use the old NEMO style of only one routine per potential type, not   
- * allowing for superpositions (see NOTE 2 above).
+ * allowing for superpositions of, say, several Miyamoto-Nagai disks.           
  */
 void inipotential    (                /* return: void                         */
 		      const int*,     /* input:  number of parameters         */
@@ -159,10 +141,10 @@ void potential_float (const int*,     /* input:  number of dimensions         */
 #ifdef __cplusplus
 }
 ////////////////////////////////////////////////////////////////////////////////
-//                                                                              
-// 2 Definition of helper templates for manipulating arrays or scalar like      
-//   NDIM dimensional vectores.                                                 
-//                                                                              
+//                                                                            //
+// 2 Definition of helper templates for manipulating arrays or scalar like    //
+//   NDIM dimensional vectores.                                               //
+//                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
   //
@@ -284,6 +266,8 @@ namespace {
   //----------------------------------------------------------------------------
 } // namespace {
 #ifndef __NO_AUX_DEFACC
+# include <cstring>
+# include <new>
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
 // 3 Definitions of templates and macros that ease the implementation of the  //
@@ -291,9 +275,7 @@ namespace {
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
-// In order to use them, define a class with the following minimum properties //
-// (in implementing this class, in particular the template over the number of //
-// dimensions, you may use some helper templates further below).              //
+// To use these macros, define a class with the following minimum properties. //
 //                                                                            //
 // class NAME {                                                               //
 // public:                                                                    //
@@ -318,24 +300,42 @@ namespace {
 // 	             scalar      *acc) const;                                 //
 // };                                                                         //
 //                                                                            //
+//                                                                            //
+// NOTES  1. In implementing this class, in particular the template over the  //
+//           number of dimensions, you may use some helper templates above.   //
+//        2. For a static spherical potential, we provide below an implemen-  //
+//           tation employing, as template argument, a simpler class for you  //
+//           to define. It's recommended to use for these type of potentials. //
+//                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
 
   // class AccInstall
-  template<class Acceleration> class AccInstall {
-  private:
+  template<class Acceleration>
+  class AccInstall {
+    //--------------------------------------------------------------------------
+    // data                                                                     
+    //                                                                          
+    // NOTE  we remember the parameters and data file only for the sake of      
+    //       NEMO external potentials (not accelerations) so that we can warn   
+    //       about re-initialisation with different parameters                  
     double            *Pars;    // current parameter
     int                Npar;    // number of current parameter
     char              *File;    // current data file
     const Acceleration Acc;     // our acceleration
     double             Time;    // last/actual simulation time
     bool               First;   // true only after initialization
-
-    void remember(const double*pars, int npar, const char*file)
-    {
+    //--------------------------------------------------------------------------
+    // private methods                                                          
+    void remember(const double*pars, int npar, const char*file) {
+      // remember parameters and data file
       if(Pars) delete[] Pars;
       if(pars && npar>0) {
-	Pars = new double[npar];
+	try {
+	  Pars = new double[npar];
+	} catch(std::bad_alloc E) {
+	  error("[%s:%d]: caught std::bad_alloc\n",__FILE__,__LINE__);
+	}
 	for(int n=0; n!=npar; ++n) Pars[n] = pars[n];
       } else
 	Pars = 0;
@@ -343,12 +343,16 @@ namespace {
       if(File) delete[] File;
       if(file) {
 	size_t n = strlen(file)+1;
-	File = new char[n];
+	try {
+	  File = new char[n];
+	} catch(std::bad_alloc E) {
+	  error("[%s:%d]: caught std::bad_alloc\n",__FILE__,__LINE__);
+	}
 	strncpy(File,file,n);
       } else
 	File = 0;
     }
-
+    //--------------------------------------------------------------------------
     template<typename scalar>
     void set_time(int          ndim,
 		  double       time,
@@ -373,7 +377,7 @@ namespace {
 	}
       }
     }
-
+    //--------------------------------------------------------------------------
     template<int NDIM, typename scalar>
     void acc_T(double       t,
 	       int          nb,
@@ -423,11 +427,14 @@ namespace {
 	}
       }
     }
-
+    //--------------------------------------------------------------------------
+    // public methods                                                           
   public:
-
-    static const char* name() { return Acceleration::name(); }
-
+    static const char* name()
+    {
+      return Acceleration::name();
+    }
+    //--------------------------------------------------------------------------
     AccInstall(const double*pars,
 	       int          npar,
 	       const char  *file,
@@ -436,9 +443,10 @@ namespace {
       Pars  ( 0 ),
       Npar  ( 0 ),
       File  ( 0 ),
-      Acc   ( pars, npar, file), 
+      Acc   ( pars, npar, file ), 
       First ( true)
     {
+      nemo_dprintf(4,"AccInstall() npar=%d, file=%s\n",npar,file);
       remember(pars, npar, file);
       if(need_mass)
 	*need_mass = Acc.NeedMass();
@@ -451,7 +459,7 @@ namespace {
 	error("inipotential: cannot use \"%s\", since velocities are needed",
 	      Acceleration::name());
     }
-
+    //--------------------------------------------------------------------------
     bool differ(const double*pars, int npar, const char*file)
     {
       if(File==0 && file!=0) return true;
@@ -462,7 +470,7 @@ namespace {
 	if(pars[n] != Pars[n]) return true;
       return false;
     }
-
+    //--------------------------------------------------------------------------
     void acc(int        nd,
 	     double     t,
 	     int        nb,
@@ -522,6 +530,7 @@ namespace {
 		     Acceleration::name(),nd);
       }
     }
+    //--------------------------------------------------------------------------
 #ifdef POT_DEF
     template<typename scalar>
     void pot_T(const int   *ndim,
@@ -546,8 +555,9 @@ namespace {
       }
     }
 #endif
-  };
-}
+  }; // class AccInstall<>
+  //////////////////////////////////////////////////////////////////////////////
+} // namespace {
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -562,63 +572,68 @@ namespace {
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-#define __DEF__ACC__NO(NUM)					\
-void acceleration##NUM(int        d,				\
-		       double     t,				\
-		       int        n,				\
-		       const void*m,				\
-		       const void*x,				\
-		       const void*v,				\
-		       const int *f,				\
-		       void      *p,				\
-		       void      *a,				\
-		       int        i,				\
-		       char       y)				\
+#define __DEF__ACC__NO(NUM)						\
+void acceleration##NUM(int        d,					\
+		       double     t,					\
+		       int        n,					\
+		       const void*m,					\
+		       const void*x,					\
+		       const void*v,					\
+		       const int *f,					\
+		       void      *p,					\
+		       void      *a,					\
+		       int        i,					\
+		       char       y)					\
 { (MyAcc[NUM])->acc(d,t,n,m,x,v,f,p,a,i,y); }
 
-#define __DEF__ACC(NAME)					\
-namespace {							\
-  const int                AccMax= 10;				\
-  typedef AccInstall<NAME> MyAccInstall;			\
-  MyAccInstall            *MyAcc[AccMax] = {0};			\
-  int                      AccN  = 0;				\
-__DEF__ACC__NO(0)						\
-__DEF__ACC__NO(1)						\
-__DEF__ACC__NO(2)						\
-__DEF__ACC__NO(3)						\
-__DEF__ACC__NO(4)						\
-__DEF__ACC__NO(5)						\
-__DEF__ACC__NO(6)						\
-__DEF__ACC__NO(7)						\
-__DEF__ACC__NO(8)						\
-__DEF__ACC__NO(9)						\
-  acc_pter Accs[AccMax] = {&acceleration0,			\
-			   &acceleration1,			\
-			   &acceleration2,			\
-			   &acceleration3,			\
-			   &acceleration4,			\
-			   &acceleration5,			\
-			   &acceleration6,			\
-			   &acceleration7,			\
-			   &acceleration8,			\
-			   &acceleration9};			\
-}								\
-void iniacceleration(const double*pars,				\
-		     int          npar,				\
-		     const char  *file,				\
-                     acc_pter    *accel,			\
-		     bool        *need_m,			\
-		     bool        *need_v)			\
-{								\
-  if(AccN == AccMax) {						\
-    warning("iniacceleration(): request to initialize "		\
-	    "more than %d accelerations of type \"%s\"",	\
-	    AccMax, MyAccInstall::name());			\
-    *accel = 0;							\
-    return;							\
-  }								\
-  MyAcc[AccN] = new MyAccInstall(pars,npar,file,need_m,need_v);	\
-  *accel = Accs[AccN++];					\
+#define __DEF__ACC(NAME)						\
+namespace {								\
+  const int                AccMax= 10;					\
+  typedef AccInstall<NAME> MyAccInstall;				\
+  MyAccInstall            *MyAcc[AccMax] = {0};				\
+  int                      AccN  = 0;					\
+__DEF__ACC__NO(0)							\
+__DEF__ACC__NO(1)							\
+__DEF__ACC__NO(2)							\
+__DEF__ACC__NO(3)							\
+__DEF__ACC__NO(4)							\
+__DEF__ACC__NO(5)							\
+__DEF__ACC__NO(6)							\
+__DEF__ACC__NO(7)							\
+__DEF__ACC__NO(8)							\
+__DEF__ACC__NO(9)							\
+  acc_pter Accs[AccMax] = {&acceleration0,				\
+			   &acceleration1,				\
+			   &acceleration2,				\
+			   &acceleration3,				\
+			   &acceleration4,				\
+			   &acceleration5,				\
+			   &acceleration6,				\
+			   &acceleration7,				\
+			   &acceleration8,				\
+			   &acceleration9};				\
+}									\
+void iniacceleration(const double*pars,					\
+		     int          npar,					\
+		     const char  *file,					\
+                     acc_pter    *accel,				\
+		     bool        *need_m,				\
+		     bool        *need_v)				\
+{									\
+  nemo_dprintf(4,"iniacceleration() called\n");				\
+  if(AccN == AccMax) {							\
+    warning("iniacceleration(): request to initialize "			\
+	    "more than %d accelerations of type \"%s\"",		\
+	    AccMax, MyAccInstall::name());				\
+    *accel = 0;								\
+    return;								\
+  }									\
+  try {									\
+    MyAcc[AccN] = new MyAccInstall(pars,npar,file,need_m,need_v);	\
+  } catch(std::bad_alloc E) {						\
+    error("[%s:%d]: caught std::bad_alloc\n",__FILE__,__LINE__);	\
+  }									\
+  *accel = Accs[AccN++];						\
 }
 
 #ifdef POT_DEF
@@ -632,43 +647,47 @@ void iniacceleration(const double*pars,				\
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-# define __DEF__POT(NAME)					\
-namespace {							\
-  typedef AccInstall<NAME> MyPotInstall;			\
-  MyPotInstall            *MyPot;				\
-}								\
-void inipotential(const int   *npar,				\
-		  const double*pars,				\
-		  const char  *file)				\
-{								\
-  if(MyPot) {							\
-    if(MyPot->differ(pars,*npar,file))				\
-      warning("inipotential(): re-initializing \"%s\" "		\
-	      "with different parameters or data file",		\
-	      MyPotInstall::name());				\
-    else							\
-      warning("inipotential(): re-initializing \"%s\" "		\
-	      "with identical parameters and data file",	\
-	      MyPotInstall::name());				\
-    delete MyPot;						\
-  }								\
-  MyPot = new MyPotInstall(pars,*npar,file,0,0);		\
-}								\
-void potential_double(const int   *ndim,			\
-		      const double*pos,				\
-		      double      *acc,				\
-		      double      *pot,				\
-		      const double*time)			\
-{								\
-  MyPot->pot_T(ndim,pos,acc,pot,time);				\
-}								\
-void potential_float(const int  *ndim,				\
-		     const float*pos,				\
-		     float      *acc,				\
-		     float      *pot,				\
-		     const float*time)				\
-{								\
-  MyPot->pot_T(ndim,pos,acc,pot,time);				\
+# define __DEF__POT(NAME)						\
+namespace {								\
+  typedef AccInstall<NAME> MyPotInstall;				\
+  MyPotInstall            *MyPot;					\
+}									\
+void inipotential(const int   *npar,					\
+		  const double*pars,					\
+		  const char  *file)					\
+{									\
+  if(MyPot) {								\
+    if(MyPot->differ(pars,*npar,file))					\
+      warning("inipotential(): re-initializing \"%s\" "			\
+	      "with different parameters or data file",			\
+	      MyPotInstall::name());					\
+    else								\
+      warning("inipotential(): re-initializing \"%s\" "			\
+	      "with identical parameters and data file",		\
+	      MyPotInstall::name());					\
+    delete MyPot;							\
+  }									\
+  try {									\
+    MyPot = new MyPotInstall(pars,*npar,file,0,0);			\
+  } catch(std::bad_alloc E) {						\
+    error("[%s:%d]: caught std::bad_alloc\n",__FILE__,__LINE__);	\
+  }									\
+}									\
+void potential_double(const int   *ndim,				\
+		      const double*pos,					\
+		      double      *acc,					\
+		      double      *pot,					\
+		      const double*time)				\
+{									\
+  MyPot->pot_T(ndim,pos,acc,pot,time);					\
+}									\
+void potential_float(const int  *ndim,					\
+		     const float*pos,					\
+		     float      *acc,					\
+		     float      *pot,					\
+		     const float*time)					\
+{									\
+  MyPot->pot_T(ndim,pos,acc,pot,time);					\
 }
 
 #else  // POT_DEF
@@ -677,21 +696,24 @@ void potential_float(const int  *ndim,				\
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
   //////////////////////////////////////////////////////////////////////////////
-  // class implementing the template argument described above
-  // for a static spherical potential
-  //
-  // template argument class StaticSphericalModel must satisfy the following:
-  // class NAME {
-  // public:
-  //   static const char name();
-  //   NAME(const double*pars,
-  //        int          npar,
-  //        const char  *file);
-  //   template<typename scalar>
-  //   inline void potacc(scalar const&radius_squared,
-  //                      scalar      &potential,
-  //                      scalar      &minus_dpotdr_over_r) const;
-  // };
+  //                                                                          //
+  // class implementing the template argument described above                 //
+  // for a static spherical potential                                         //
+  //                                                                          //
+  // template argument class StaticSphericalModel must satisfy the following: //
+  // class NAME {                                                             //
+  // public:                                                                  //
+  //   static const char name();                                              //
+  //   NAME(const double*pars,                                                //
+  //        int          npar,                                                //
+  //        const char  *file);                                               //
+  //   template<typename scalar>                                              //
+  //   inline void potacc(scalar const&radius_squared,                        //
+  //                      scalar      &potential,                             //
+  //                      scalar      &minus_dpotdr_over_r) const;            //
+  // };                                                                       //
+  //                                                                          //
+  //////////////////////////////////////////////////////////////////////////////
   template<class StaticSphericalModel>
   class SphericalPot : private StaticSphericalModel {
   public:
@@ -723,8 +745,9 @@ namespace {
       v_asstimes<NDIM>(acc, pos, dpdr_over_r);
     }
   };
+  //////////////////////////////////////////////////////////////////////////////
 } // namespace {
 ////////////////////////////////////////////////////////////////////////////////
-#endif // __cplusplus
 #endif // __NO_AUX_DEFACC
+#endif // __cplusplus
 #endif // _defacc_h
