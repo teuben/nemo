@@ -11,7 +11,7 @@
  *	30-dec-97  1.1e ansi 
  *      20-jun-03  1.2  using modern get_snap and put_snap
  *      13-mar-05  1.2a  fix writing the time, free unused
- *       5-aug-06  2.0  change default of zerocm=, added shift=
+ *       5-aug-06  2.0  change default of zerocm=, added shift= (after strong urge from WD) PJT
  *
  */
 #include <stdinc.h>
@@ -104,7 +104,8 @@ snapstack()
 	ADDV(Pos(bp),Pos(bp),deltar);
 	ADDV(Vel(bp),Vel(bp),deltav);
       }
-    }
+    } else
+      error("shift=%d not valid, need 1 or 2\n",shift);
     if (getbparam("zerocm")) snapcenter();
     else warning("zerocm=false is now the default!!");
 }
