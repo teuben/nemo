@@ -53,7 +53,7 @@ int nemo_dprintf(int debug, const_string fmt, ...)
 {
     va_list ap;
     int nret = -1;
-    static bool print_head = true;
+    static bool print_head = TRUE;
 
     if (debug <= debug_level) {		/* print this debug message? */
         if(print_head)
