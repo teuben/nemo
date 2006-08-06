@@ -32,8 +32,8 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "deltar=0.0,0.0,0.0\n	  position of in1 w.r.t. in2",
     "deltav=0.0,0.0,0.0\n	  velocity of in1 w.r.t. in2",
     "zerocm=false\n		  zero the center of mass after stacking?",
-    "headline=\n		  random verbiage for output",
     "shift=1\n                    Shift over 1st or 2nd one?",
+    "headline=\n		  random verbiage for output",
     "VERSION=2.0\n		  5-aug-06 PJT",
     NULL,
 };
