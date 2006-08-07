@@ -8,7 +8,7 @@
 #               30-jul-2004   optional cfitsio install
 #               11-jul-2005   various additional packages for NEMO V3.2.3
 #                5-mar-2006   also create nemo_start.sh
-#                6-aug-2006   falcON install 
+#                1-aug-2006   falcON install 
 
 set pgplot=1		# install PGPLOT via CVS also
 set intel=0		# pick intel compiler (astromake)
@@ -181,6 +181,14 @@ if ($falcon) then
     set err=$status
   endif
   if ($err) then
+     echo -n " ..Failed"
+  else
+     echo -n " ..OK"
+  endif
+  rehash
+  echo -n "   Running: "
+  (mkplum - 100 | gyrfalcON - . tstop=1 ) >>& install.falcON.log
+  if ($status) then
      echo " ..Failed"
   else
      echo " ..OK"
