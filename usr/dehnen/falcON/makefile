@@ -24,11 +24,14 @@ endif
 # this should be set by a configure file
 #
 ifeq ($(USER),wd11)
-#DWALTER			:= -DWalter
+ifeq ($(PWD),/home/wd11/Code/falcON)
+DWALTER			:= -DWalter
+endif
 endif
 
 ifdef DWALTER
 DPROPER 		:= -DfalcON_PROPER
+DSPH			:= -DfalcON_SPH#    comment out to disable SPH code     
 ##DMPI			:= -DfalcON_MPI#    comment out to disable MPI code     
 else
 #DPROPER 		:= -DfalcON_PROPER# comment out to obtain public version
@@ -54,7 +57,6 @@ ifdef DPROPER
 ifeq ($(COMPILER),gcc)
 DSSE 			:= -DfalcON_SSE#    comment out to disable SSE code     
 endif
-#DSPH			:= -DfalcON_SPH#    comment out to disable SPH code     
 endif
 
 ##DEBUG			:= -DEBUG -DDEBUG
@@ -95,8 +97,7 @@ utils			:
 			$(MAKE) -C utils default
 
 # falcON library
-falcON_objs	=	$(public_objs) $(proper_objs) $(sph_objs) \
-			$(parallel_objs)
+falcON_objs	=	$(public_objs) $(proper_objs) $(sph_objs) $(parallel_objs)
 
 $(LIB)libfalcON.a:	$(falcON_objs)
 			$(AR) $@ $?
@@ -108,8 +109,7 @@ $(LIB)libfalcON.so:	$(falcON_objs)
 library		: 	utils $(LIBT) $(falcON)
 
 # falcON executables
-exe		:	library \
-			$(exe_pub) $(exe_pro) $(exe_sph) $(exe_walter)
+exe		:	library $(exe_pub) $(exe_pro) $(exe_sph) $(exe_walter)
 
 ifdef NEMO
 

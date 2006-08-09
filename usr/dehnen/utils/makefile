@@ -43,6 +43,12 @@ FC			:= $(CPATH)g77
 # CPU dependent optimization flags
 # EDIT to match your hardware
 
+ifeq ($(HOSTNAME),virgo)
+# on virgo use
+CPUFLAGS		:= -march=pentium-m -mpreferred-stack-boundary=4
+
+else
+
 ifeq ($(PLATFORM),i386)
 # on i386 use
 CPUFLAGS		:= -march=i386 -mpreferred-stack-boundary=4
@@ -50,12 +56,13 @@ endif
 
 ifeq ($(PLATFORM),i686)
 # on i686 use
-CPUFLAGS		:= -march=pentium-m -mpreferred-stack-boundary=4
+CPUFLAGS		:= -march=i686 -mpreferred-stack-boundary=4
 endif
 
 ifeq ($(PLATFORM),x86_64)
 # on opteron (x86-64) use
-CPUFLAGS		:= -march=k8 -mpreferred-stack-boundary=4
+CPUFLAGS		:= -mcpu=k8 -mpreferred-stack-boundary=4
+endif
 endif
 
 OPTFLAGS		:= -ggdb -O2 -fPIC $(CPUFLAGS) -ffast-math -funroll-loops -fforce-addr -fomit-frame-pointer -rdynamic

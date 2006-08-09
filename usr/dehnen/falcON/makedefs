@@ -114,7 +114,7 @@ endif
 
 ifeq ($(PLATFORM),x86_64)
 # on opteron (x86-64) use
-CPUFLAGS	:= -mcpu=k8 -m32 -mpreferred-stack-boundary=4
+CPUFLAGS	:= -mcpu=k8 -mpreferred-stack-boundary=4
 endif
 endif
 
