@@ -1,7 +1,7 @@
 // -*- C++ -*-                                                                  
 ////////////////////////////////////////////////////////////////////////////////
 ///                                                                             
-/// \file   src/manip/densprof.cc                                               
+/// \file   src/public/manip/densprof.cc                                        
 ///                                                                             
 /// \author Walter Dehnen                                                       
 /// \date   2006                                                                

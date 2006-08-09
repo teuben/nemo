@@ -1,7 +1,7 @@
 // -*- C++ -*-                                                                  
 ////////////////////////////////////////////////////////////////////////////////
 ///                                                                             
-/// \file   src/manip/set_subset.cc                                             
+/// \file   src/public/manip/set_subset.cc                                      
 ///                                                                             
 /// \author Walter Dehnen                                                       
 /// \date   2006                                                                

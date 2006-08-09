@@ -597,7 +597,7 @@ namespace falcON {
   ///                                                                           
   /// At any time, only one \a snap_in can exist for any \a nemo_in.            
   /// Construction of a second \a snap_in from the same \a nemo_in will cause   
-  /// a fatal error. A \a \snap_in provides information on which data are       
+  /// a fatal error. A \a snap_in provides information on which data are        
   /// contained in the snapshot and allows to construct \a data_in for          
   /// reading them.                                                             
   ///                                                                           
@@ -796,7 +796,7 @@ namespace falcON {
   ///                                                                           
   /// At any time, only one \a snap_out can exist for any \a nemo_out.          
   /// Construction of a second \a snap_out from the sane \a nemo_out will cause 
-  /// a fatal error. A \a \snap_out allows to construct \a data_out for         
+  /// a fatal error. A \a snap_out allows to construct \a data_out for          
   /// writing data.                                                             
   ///                                                                           
   // ///////////////////////////////////////////////////////////////////////////

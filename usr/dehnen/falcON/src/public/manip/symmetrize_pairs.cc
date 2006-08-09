@@ -1,7 +1,7 @@
 // -*- C++ -*-                                                                  
 ////////////////////////////////////////////////////////////////////////////////
 ///                                                                             
-/// \file   src/manip/symmetrize_pairs.cc                                       
+/// \file   src/public/manip/symmetrize_pairs.cc                                
 ///                                                                             
 /// \author Walter Dehnen                                                       
 /// \date   2004-2006                                                           

@@ -1,7 +1,7 @@
 // -*- C++ -*-                                                                  
 ////////////////////////////////////////////////////////////////////////////////
 ///                                                                             
-/// \file   src/manip/sphereprof.cc                                             
+/// \file   src/public/manip/sphereprof.cc                                      
 ///                                                                             
 /// \author Walter Dehnen                                                       
 /// \date   2006                                                                
@@ -33,6 +33,7 @@
 // v 1.0.1  03/07/2006  WD renamed: radprof -> sphereprof                       
 // v 1.1    04/07/2006  WD doxygen documented and made public                   
 // v 1.2    07/07/2006  WD using flags::ignore (in_subset()) instead of subset  
+// v 1.3    09/08/2006  WD warn if non-spherical                                
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
 #include <public/profile.h>
@@ -85,8 +86,12 @@ namespace falcON { namespace Manipulate {
   /// This manipulator estimates the radial profiles of density, velocity,      
   /// velocity dispersion, axis ratios, and orientations from spherical binning 
   /// of all bodies in_subset() (default: all, see set_subset) w.r.t. position  
-  /// 'xcen' and velocity 'vcen'. See falcON::spherical_profile for details.\n  
+  /// 'xcen' and velocity 'vcen'.                                             \n
   /// See falcON::spherical_profile for details.                                
+  /// \note                                                                     
+  /// Don't use this manipulator for analysis of non-spherical components as    
+  /// then the shape information will be biased and the density profile may     
+  /// also be affected. A warning will be issued if c/a<0.8 at any radius.      
   ///                                                                           
   /// Meaning of the parameters:\n                                              
   /// par[0]: minimum # bodies in radial bin (def: 500)                       \n
@@ -204,6 +209,7 @@ namespace falcON { namespace Manipulate {
       OUT<<"      rotation axis";
     OUT  <<'\n';
     print_line(SP.has_vels());
+    bool nonspherical = false;
     for(int i=0; i!=SP.N(); ++i) {
       OUT  << std::setw(12) << SP.rad(i) <<' '
 	   << std::setw(12) << SP.rho(i) <<' '
@@ -224,8 +230,12 @@ namespace falcON { namespace Manipulate {
 	PS.print_dir(OUT, SP.drot(i));
       }
       OUT<<'\n';
+      if(SP.cova(i) < 0.8) nonspherical = true;
     }
     OUT.flush();
+    if(nonspherical)
+      warning("Manipulator sphereprof: "
+	      "shape seems significantly non-spherical at t=%f\n",S->time());
     debug_info(2,"sphereprof::manipulate(): finished\n");
     return false;
   }

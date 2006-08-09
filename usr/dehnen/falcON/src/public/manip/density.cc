@@ -1,7 +1,7 @@
 // -*- C++ -*-                                                                  
 ////////////////////////////////////////////////////////////////////////////////
 ///                                                                             
-/// \file   src/manip/density.cc                                                
+/// \file   src/public/manip/density.cc                                         
 ///                                                                             
 /// \author Walter Dehnen                                                       
 /// \date   2006                                                                

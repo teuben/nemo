@@ -10,6 +10,22 @@
 ///                                                                             
 /// \todo   complete doxygen documentation                                      
 ///                                                                             
+/// Here, we disentangle the integration from force computation and diagnostics.
+/// The latter two are so tightly connected that it makes no sense to force them
+/// to divorce.                                                               \n
+/// Any N-body code fitting in our scheme can be put together with class        
+/// NBodyCode. For practical applications see class FalcONCode below or         
+/// class PotExpCode in pexp.h (proprietary only).                              
+///                                                                             
+/// \version 14-01-2005 WD integration of H,R moved Integrator -> ForceSPH      
+/// \version 01-04-2005 WD soft_type -> enum.h as falcON::soft_type             
+///                     WD last 4 args of NbodyCode::init() default: fieldset::o
+/// \version 05-04-2005 WD SELF_GRAV removed from ForceALCON (in ForceDiagGrav) 
+///                     WD added BlockStepCode::StepLevels::always_adjust() to  
+///                        allow for the new schemes in DirectCode.cc           
+///                     WD increase precision of log output if real==double     
+/// \version 13-07-2005 WD  adapt for new falcON                                
+///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
 // Copyright (C) 2000-2005 Walter Dehnen                                        
@@ -28,25 +44,6 @@
 // along with this program; if not, write to the Free Software                  
 // Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                    
 //                                                                              
-////////////////////////////////////////////////////////////////////////////////
-///                                                                             
-/// Here, we disentangle the integration from force computation and diagnostics.
-/// The latter two are so tightly connected that it makes no sense to force them
-/// to divorce.                                                                 
-///                                                                             
-/// Any N-body code fitting in our scheme can be put together with class        
-/// NBodyCode. For practical applications see class FalcONCode below or         
-/// class PotExpCode in pexp.h (proprietary only).                              
-///                                                                             
-/// \version 14-01-2005 WD integration of H,R moved Integrator -> ForceSPH      
-/// \version 01-04-2005 WD soft_type -> enum.h as falcON::soft_type             
-///                     WD last 4 args of NbodyCode::init() default: fieldset::o
-/// \version 05-04-2005 WD SELF_GRAV removed from ForceALCON (in ForceDiagGrav) 
-///                     WD added BlockStepCode::StepLevels::always_adjust() to  
-///                        allow for the new schemes in DirectCode.cc           
-///                     WD increase precision of log output if real==double     
-/// \version 13-07-2005 WD  adapt for new falcON                                
-///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 #ifndef falcON_included_nbody_h
 #define falcON_included_nbody_h
@@ -332,64 +329,51 @@ namespace falcON {
     /// specify which SPH quantities will be required by this scheme
     fieldset const&requiredSPH () const { return requSPH; }
     //--------------------------------------------------------------------------
-    /// drift by \c dt body properties in \a predicted() and \a predictedSPH()
-    ///
-    /// for all bodies: properties \a predicted() are moved by \e dt
-    ///
-    /// for SPH bodies: properties \a predictedSPH() are moved by \e dt
-    ///
-    /// currently we support the following drifts:
-    ///
-    /// <b> x += v * dt  </b>  position; for all bodies
-    ///
-    /// <b> w += a * dt  </b>  predicted velocities; for all bodies
-    ///
-    /// <b> Y += I * dt  </b>  predicted SPH internal energy
-    ///
-    /// \param dt  (input) time step to drift
-    /// \param all (input) drift all or active bodies only?
-    void drift   (double dt, bool = true) const;
+    /// drift by \c dt body properties in \a predicted() and \a predictedSPH()  
+    ///                                                                         
+    /// for all bodies: properties \a predicted() are moved by \e dt          \n
+    /// for SPH bodies: properties \a predictedSPH() are moved by \e dt       \n
+    /// currently we support the following drifts:                            \n
+    /// <b> x += v * dt  </b>  position; for all bodies                       \n
+    /// <b> w += a * dt  </b>  predicted velocities; for all bodies           \n
+    /// <b> Y += I * dt  </b>  predicted SPH internal energy                    
+    /// \param dt  (input) time step to drift                                   
+    /// \param all (input) drift all or active bodies only?                     
+    void drift   (double dt, bool all = true) const;
     //--------------------------------------------------------------------------
-    /// kick by \c dt body properties to in \a kickALL and \a kickSPH
-    ///
-    /// currently we support the following kicks:
-    ///
-    /// <b> v += a * dt  </b>  velocity; for all bodies
-    ///
-    /// <b> U += I * dt  </b>  internal gas energy; for SPH bodies only
-    ///
-    /// \param dt  (input) time step to kick
-    /// \param all (input) kick all or active bodies only?
+    /// kick by \c dt body properties to in \a kickALL and \a kickSPH           
+    ///                                                                         
+    /// currently we support the following kicks:                             \n
+    /// <b> v += a * dt  </b>  velocity; for all bodies                       \n
+    /// <b> U += I * dt  </b>  internal gas energy; for SPH bodies only         
+    /// \param dt  (input) time step to kick                                    
+    /// \param all (input) kick all or active bodies only?                      
     void kick    (double dt, bool all = true) const;
     //--------------------------------------------------------------------------
-    /// similar to \a kick(), except that bodies are kicked by their individual
-    /// time step, given by \e dt[level(B)]
-    ///
-    /// \param dt  (input) table with time step per level
-    /// \param all (input) kick all or active bodies only?
+    /// similar to \a kick(), except that bodies are kicked by their individual 
+    /// time step, given by \e dt[level(B)]                                     
+    /// \param dt  (input) table with time step per level                       
+    /// \param all (input) kick all or active bodies only?                      
     void kick_i  (const double*dt, bool all = true) const;
     //--------------------------------------------------------------------------
-    /// remember properties to be predicted: in \a rembALL and \a rembSPH
-    ///
-    /// currently we support the following remembrances:
-    ///
-    /// <b> w = v  </b>  remember velocity
-    /// <b> Y = U  </b>  remember SPH internal energy
-    ///
-    /// \param all (input) remember for all or active bodies only?
+    /// remember properties to be predicted: in \a rembALL and \a rembSPH       
+    ///                                                                         
+    /// currently we support the following remembrances:                      \n
+    /// <b> w = v  </b>  remember velocity                                    \n
+    /// <b> Y = U  </b>  remember SPH internal energy                           
+    /// \param all (input) remember for all or active bodies only?              
     void remember(bool all = true) const;
     //--------------------------------------------------------------------------
-    /// construction: set properties for \a drift(), \a kick(), \a remember()
-    ///
-    /// we will double check that the input is sensible
-    ///
-    /// \param solver  pointer to solver for time derivatives
-    /// \param p_all   -> \a predALL
-    /// \param k_all   -> \a kickALL
-    /// \param r_all   -> \a rembALL
-    /// \param p_sph   -> \a predSPH
-    /// \param k_sph   -> \a kickSPH
-    /// \param r_sph   -> \a rembSPH
+    /// construction: set properties for \a drift(), \a kick(), \a remember()   
+    ///                                                                         
+    /// we will double check that the input is sensible                         
+    /// \param solver  pointer to solver for time derivatives                   
+    /// \param p_all   -> \a predALL                                            
+    /// \param k_all   -> \a kickALL                                            
+    /// \param r_all   -> \a rembALL                                            
+    /// \param p_sph   -> \a predSPH                                            
+    /// \param k_sph   -> \a kickSPH                                            
+    /// \param r_sph   -> \a rembSPH                                            
     Integrator(const ForceAndDiagnose* solver,
 	       fieldset p_all,
 	       fieldset k_all,

@@ -1,7 +1,7 @@
 // -*- C++ -*-                                                                  
 ////////////////////////////////////////////////////////////////////////////////
 ///                                                                             
-/// \file   src/manip/randomize_azimuth.cc                                      
+/// \file   src/public/manip/randomize_azimuth.cc                               
 ///                                                                             
 /// \author Walter Dehnen                                                       
 /// \date   2004-2006                                                           

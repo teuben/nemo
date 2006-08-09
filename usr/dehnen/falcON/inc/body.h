@@ -1408,7 +1408,7 @@ namespace falcON {
     /// instance one manipulator determines the centre with respect to which
     /// another manipulator analyses the snapshot. For this purpose, the first
     /// manipulator registers a pointer to the centre position with the pointer
-    /// bank under a key, say \t "xcen", using members \a add_pointer() or
+    /// bank under a key, say \c "xcen", using members \a add_pointer() or
     /// \a set_pointer(). Any other manipulator may access that pointer with the
     /// same key using the member \a pointer() or \a get_pointer().
     //@{
@@ -1444,8 +1444,8 @@ namespace falcON {
     /// If the key is known, but either the sizeof(T) or nameof(T) don't match,
     /// an error is thrown.
     /// \return          pointer referred to by key (or null)
-    /// \param T (template parameter) type of object pointed to
-    /// \param   (input) key handle used as key for pointer wanted
+    /// \param T   (template parameter) type of object pointed to
+    /// \param key (input) key handle used as key for pointer wanted
     ///
     /// Example code: \code
     ///   const snapshot*shot;

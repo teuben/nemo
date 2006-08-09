@@ -1,7 +1,7 @@
 // -*- C++ -*-                                                                  
 ////////////////////////////////////////////////////////////////////////////////
 ///                                                                             
-/// \file   src/manip/add_plummer.cc                                            
+/// \file   src/public/manip/add_plummer.cc                                     
 ///                                                                             
 /// \author Walter Dehnen                                                       
 /// \date   2004-2006                                                           

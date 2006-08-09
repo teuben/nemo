@@ -1,7 +1,7 @@
 // -*- C++ -*-                                                                  
 ////////////////////////////////////////////////////////////////////////////////
 ///                                                                             
-/// \file   src/manip/set_centre.cc                                             
+/// \file   src/public/manip/set_centre.cc                                      
 ///                                                                             
 /// \author Walter Dehnen                                                       
 /// \date   2006                                                                

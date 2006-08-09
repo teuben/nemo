@@ -1,7 +1,7 @@
 // -*- C++ -*-                                                                  
 ////////////////////////////////////////////////////////////////////////////////
 ///                                                                             
-/// \file   src/manip/projprof.cc                                               
+/// \file   src/public/manip/projprof.cc                                        
 ///                                                                             
 /// \author Walter Dehnen                                                       
 /// \date   2006                                                                

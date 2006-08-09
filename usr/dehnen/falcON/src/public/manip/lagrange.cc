@@ -1,7 +1,7 @@
 // -*- C++ -*-                                                                  
 ////////////////////////////////////////////////////////////////////////////////
 ///                                                                             
-/// \file   src/manip/lagrange.cc                                               
+/// \file   src/public/manip/lagrange.cc                                        
 ///                                                                             
 /// \author Walter Dehnen                                                       
 /// \date   2004-2006                                                           

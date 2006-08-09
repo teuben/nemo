@@ -1,7 +1,7 @@
 // -*- C++ -*-                                                                  
 ////////////////////////////////////////////////////////////////////////////////
 ///                                                                             
-/// \file   src/manip/set_filter.cc                                             
+/// \file   src/public/manip/set_filter.cc                                      
 ///                                                                             
 /// \author Walter Dehnen                                                       
 /// \date   2006                                                                

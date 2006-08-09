@@ -99,8 +99,8 @@ namespace falcON {
   public:
     /// print info about bodyfuncs in database, if any
     /// \return true if something was printed out
-    /// \param  ostream to print to
-    static bool print_db(std::ostream&);
+    /// \param  out  ostream to print to
+    static bool print_db(std::ostream&out);
     /// ctor from bodyfunc expression (see man pages)
     explicit bodyfunc(const char*) throw(falcON::exception);
     /// dtor: delete data
@@ -170,31 +170,31 @@ namespace falcON {
     char*PARS;
   public:
     /// construction from bodyfunc expression (can be empty)
-    /// \params expr body_func (5falcON) expression --- or NULL
-    /// \params pars comma separated list of parameters
+    /// \param expr body_func (5falcON) expression --- or NULL
+    /// \param pars comma separated list of parameters
     /// \note the bodyfunc expression must return the type T
     BodyFunc(const char*expr, const char*pars)
       throw(falcON::exception);
     /// construction from bodyfunc expression (can be empty)
-    /// \params expr body_func (5falcON) expression --- or NULL
-    /// \params pars array with parameters 
-    /// \params npar number of parameters
+    /// \param expr body_func (5falcON) expression --- or NULL
+    /// \param pars array with parameters 
+    /// \param npar number of parameters
     /// \note there must be enough parameters given
     /// \note the bodyfunc expression must return the type T
     BodyFunc(const char*expr, const real*pars, int npar)
       throw(falcON::exception);
     /// dtor: delete data
     ~BodyFunc() { if(PARS) falcON_DEL_A(PARS); PARS=0; }
-    /// \return number of parameters used
+    /// return number of parameters used
     bodyfunc::npar;
+    /// return nth parameter
     /// \param  n number of parameter asked
-    /// \return nth parameter
     real const&param(int n) const { return P[n]; }
-    /// \return fields required
+    /// return fields required
     bodyfunc::need;
-    /// \return original expression
+    /// return original expression
     bodyfunc::expression;
-    /// \return parameters
+    /// return parameters
     const char*parameters() const { return PARS; }
     /// function call
     /// \param b body
@@ -222,15 +222,15 @@ namespace falcON {
     double TIME;           ///< simulation time at which operator() is evaluated
   public:
     /// construction from bodyfunc expression (can be empty)
-    /// \params expr body_func (5falcON) expression --- or NULL
-    /// \params pars comma separated list of parameters
+    /// \param expr body_func (5falcON) expression --- or NULL
+    /// \param pars comma separated list of parameters
     /// \note the bodyfunc expression must return the type T
     BodyFilter(const char*expr, const char*pars)
       throw(falcON::exception);
     /// construction from bodyfunc expression (can be empty)
-    /// \params expr body_func (5falcON) expression --- or NULL
-    /// \params pars array with parameters 
-    /// \params npar number of parameters
+    /// \param expr body_func (5falcON) expression --- or NULL
+    /// \param pars array with parameters 
+    /// \param npar number of parameters
     /// \note there must be enough parameters given
     /// \note the bodyfunc expression must return the type T
     BodyFilter(const char*expr, const real*pars, int npar)
@@ -238,16 +238,16 @@ namespace falcON {
     /// set the time for future function calls
     /// \param t (input) simulation time
     void set_time(double t) { TIME = t; }
-    /// \return number of parameters used
+    /// return number of parameters used
     BodyFunc<bool>::npar;
+    /// return nth parameter
     /// \param  n number of parameter asked
-    /// \return nth parameter
     BodyFunc<bool>::param;
-    /// \return fields required
+    /// return fields required
     BodyFunc<bool>::need;
-    /// \return original expression
+    /// return original expression
     BodyFunc<bool>::expression;
-    /// \return parameters
+    /// return parameters
     BodyFunc<bool>::parameters;
     /// function call
     /// \param b body
@@ -259,14 +259,14 @@ namespace falcON {
     BodyFunc<bool>::is_empty;
     /// is *this valid (non-empty)?
     operator bool() const { return !is_empty(); }
-    /// \return number of bodies passing the filter
+    /// return number of bodies passing the filter
     /// \param B (input) bodies
     unsigned N_bodies(const bodies*B) const {
       unsigned n = 0;
       LoopAllBodies(B,b) if(operator()(b)) ++n;
       return n;
     }
-    /// \return first filtered body
+    /// return first filtered body
     body first(const bodies*B) const {
       LoopAllBodies(B,b)
 	if(operator()(b)) return b;
@@ -296,8 +296,8 @@ namespace falcON {
   public:
     /// print info about bodyfuncs in database, if any
     /// \return true if something was printed out
-    /// \param  ostream to print to
-    static bool print_db(std::ostream&);
+    /// \param  out  ostream to print to
+    static bool print_db(std::ostream&out);
     /// construction from bodyfunc expression
     explicit bodiesfunc(const char*) throw(falcON::exception);
     /// return type: 'b', 'i', 'r', 'v' for bool, int, real, vect

@@ -121,7 +121,7 @@ namespace falcON {
     /// \param names name(s) of manipulator(s) to be loaded                     
     /// \param parss parameter set(s) for manipulator(s) to be loaded           
     /// \param files data file(s) for the manipulator(s) to be loaded           
-    /// \param search path to search for .so of manipulator(s)                  
+    /// \param path  search path to search for .so of manipulator(s)            
     ///                                                                         
     /// There are two different ways to pass the names, parameter sets and      
     /// file names.                                                             
