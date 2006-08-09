@@ -50,7 +50,7 @@ endif
 
 ifeq ($(PLATFORM),i686)
 # on i686 use
-CPUFLAGS		:= -march=athlon-xp -mpreferred-stack-boundary=4
+CPUFLAGS		:= -march=pentium-m -mpreferred-stack-boundary=4
 endif
 
 ifeq ($(PLATFORM),x86_64)
