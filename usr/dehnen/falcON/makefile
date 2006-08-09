@@ -24,8 +24,12 @@ endif
 # this should be set by a configure file
 #
 ifeq ($(USER),wd11)
-#DPROPER 		:= -DfalcON_PROPER
+DWALTER			:= -DWalter
+endif
 
+ifdef DWALTER
+DPROPER 		:= -DfalcON_PROPER
+##DMPI			:= -DfalcON_MPI#    comment out to disable MPI code     
 else
 #DPROPER 		:= -DfalcON_PROPER# comment out to obtain public version
 endif
@@ -53,20 +57,17 @@ endif
 #DSPH			:= -DfalcON_SPH#    comment out to disable SPH code     
 endif
 
-ifeq ($(USER),wd11)
-DWALTER			:= -DWalter
-##DMPI			:= -DfalcON_MPI#    comment out to disable MPI code     
-endif
-
 ##DEBUG			:= -DEBUG -DDEBUG
 
 ifdef DEBUG
-##STATIC			:= -static
+##STATIC		:= -static
 endif
 
 include makedefs
 include makepub
-#-include proper/make
+ifdef DPROPER
+include proper/make
+endif
 
 ifdef DSPH
 include sph/make
@@ -76,11 +77,9 @@ ifdef DMPI
 include parallel/make
 endif
 
-ifdef DPROPER
-ifeq ($(USER),wd11)
+ifdef DWALTER
 #include walter/make
 #include pjm/make
-endif
 endif
 
 #
@@ -92,9 +91,7 @@ guide			:
 			$(MAKE) -C tex default
 
 # utils
-utils			: 
-			ln -sf ../utils
-			(cd inc; ln -sf ../utils/inc utils)
+utils			:
 			$(MAKE) -C utils default
 
 # falcON library
@@ -131,21 +128,22 @@ endif
 
 # clean editor backup files
 cleanbackup	:
-			rm -f *~ $(INC)*~ $(SRC)*~
+			rm -f *~ $(INC)*~ $(INC)*/*~ $(SRC)*/*~ $(SRC)*/*/*~
 # clean objects (if no longer needed, since either in library or executable)
 cleanobjs	:
 			rm -rf $(LIB)*.o
 
-# cleans everything made
-cleandirs	:
+# cleans everything made in releases
+cleanrelease	:
 			rm -rf $(BIN) $(MAN) $(ACC)
 			rm -rf dox/html
-			rm -f doc/user*.pdf
-# clean == cleandirs
-clean		:	cleandirs
 
-# cleanall == cleandirs and cleanbackup
-cleanall	:	cleandirs cleanbackup
+# clean == cleanrelease
+clean		:	cleanrelease
+
+# cleanall == cleandirs & cleanbackup and remove user guides
+cleanall	:	cleanrelease cleanbackup
+			rm doc/user*.pdf
 
 # everything to be done before we can checkin a public version
 beforecheckin	:	cleanbackup
