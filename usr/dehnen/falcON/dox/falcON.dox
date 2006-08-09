@@ -391,16 +391,16 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories 
 # with spaces.
 
-INPUT                  = inc/utils/tupel.h \
-			 inc/utils/exception.h \
-			 inc/utils/inline.h \
-			 inc/utils/inline_io.h \
-			 inc/utils/traits.h \
-			 inc/utils/random.h \
-			 inc/utils/numerics.h \
-			 inc/utils/Pi.h \
-			 inc/utils/memory.h \
-			 inc/utils/WDMath.h \
+INPUT                  = utils/inc/tupel.h \
+			 utils/inc/exception.h \
+			 utils/inc/inline.h \
+			 utils/inc/inline_io.h \
+			 utils/inc/traits.h \
+			 utils/inc/random.h \
+			 utils/inc/numerics.h \
+			 utils/inc/Pi.h \
+			 utils/inc/memory.h \
+			 utils/inc/WDMath.h \
 			 inc/public/types.h \
 			 inc/public/basic.h \
 			 inc/public/fields.h \
