@@ -24,7 +24,7 @@ endif
 # this should be set by a configure file
 #
 ifeq ($(USER),wd11)
-DWALTER			:= -DWalter
+#DWALTER			:= -DWalter
 endif
 
 ifdef DWALTER
@@ -78,8 +78,8 @@ include parallel/make
 endif
 
 ifdef DWALTER
-#include walter/make
-#include pjm/make
+#-include walter/make
+#-include pjm/make
 endif
 
 #
