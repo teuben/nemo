@@ -5,6 +5,9 @@
 set dir=$NEMO/usr/dehnen/falcON
 
 if (-e $dir) then
+  foreach d ($NEMOOBJ/acc $NEMOOBJ/manip)
+    if (! -e $d) mkdir $d
+  end
   cd $dir
   make clean install
 else
