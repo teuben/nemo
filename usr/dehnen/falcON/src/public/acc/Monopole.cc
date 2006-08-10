@@ -2,7 +2,7 @@
 //                                                                             |
 // Monopole.cc                                                                 |
 //                                                                             |
-// Copyright (C) 2005 Walter Dehnen                                            |
+// Copyright (C) 2005-2006 Walter Dehnen                                       |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -24,6 +24,7 @@
 // 0.0    08/02/2005  WD created                                               |
 // 0.1    18/02/2005  WD compiled & debugged. seems to work ok.                |
 // 0.2    17/05/2005  WD deBUGged (forces were wrong if t0<t<t1)               |
+// 0.3    09/08/2006  WD use $NEMOINC/defacc.h                                 |
 //-----------------------------------------------------------------------------+
 #include <iostream>
 #include <fstream>
@@ -32,7 +33,7 @@
 #include <inline.h>
 #include <acc/timer.h>
 #define __NO_AUX_DEFACC
-#include <acc/defacc.h>
+#include <defacc.h> // $NEMOINC/defacc.h
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
   using namespace WDutils;

@@ -2,7 +2,7 @@
 //                                                                             |
 // Combined.cc                                                                 |
 //                                                                             |
-// Copyright (C) 2004 Walter Dehnen                                            |
+// Copyright (C) 2004-2006 Walter Dehnen                                       |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -23,13 +23,14 @@
 // Versions                                                                    |
 // 0.0    17/08/2004  WD created based on combined.cc                          |
 // 1.0    24/08/2004  WD allow for up to 10 instantinations                    |
+// 1.1    09/08/2006  WD use $NEMOINC/defacc.h                                 |
 //-----------------------------------------------------------------------------+
 #include <iostream>
 #include <fstream>
 #include <acceleration.h>
 #include <acc/timer.h>
 #define  __NO_AUX_DEFACC
-#include <acc/defacc.h>
+#include <defacc.h>      // $NMOINC/defacc.h
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
   //----------------------------------------------------------------------------

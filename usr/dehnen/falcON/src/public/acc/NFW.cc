@@ -2,7 +2,7 @@
 //                                                                             |
 // NFW.cc                                                                      |
 //                                                                             |
-// Copyright (C) 2004 Walter Dehnen                                            |
+// Copyright (C) 2004-2006 Walter Dehnen                                       |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -32,11 +32,11 @@
 // 0.0   14-aug-2002    created                                           WD   |
 // 0.1   18-nov-2002    converted from C++ to C                           WD   |
 // 1.0   23-aug-2004    converted back to C++, implementing acceleration  WD   |
-//                                                                             |
+// 1.1   09-aug-2006    use $NEMOINC/defacc.h                             WD   |
 //-----------------------------------------------------------------------------+
 #define POT_DEF
 #include <cmath>
-#include <acc/defacc.h>
+#include <defacc.h> // $NEMOINC/defacc.h
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
   class NFWPot {

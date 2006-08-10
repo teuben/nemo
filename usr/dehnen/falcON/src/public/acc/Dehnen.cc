@@ -2,7 +2,7 @@
 //                                                                             |
 // Dehnen.cc                                                                   |
 //                                                                             |
-// Copyright (C) 2004 Walter Dehnen                                            |
+// Copyright (C) 2004-2006 Walter Dehnen                                       |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -19,9 +19,13 @@
 // Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                   |
 //                                                                             |
 //-----------------------------------------------------------------------------+
+//                                                                             |
+// Versions                                                                    |
+// 0.1    09/08/2006  WD use $NEMOINC/defacc.h                                 |
+//-----------------------------------------------------------------------------+
 #define POT_DEF
 #include <cmath>
-#include <acc/defacc.h>
+#include <defacc.h> // $NEMOINC/defacc.h
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
   class Dehnen {

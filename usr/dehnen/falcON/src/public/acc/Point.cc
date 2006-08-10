@@ -19,9 +19,13 @@
 // Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                   |
 //                                                                             |
 //-----------------------------------------------------------------------------+
+//                                                                             |
+// Versions                                                                    |
+// 0.1    09/08/2006  WD use $NEMOINC/defacc.h                                 |
+//-----------------------------------------------------------------------------+
 #define POT_DEF
 #include <cmath>
-#include <acc/defacc.h>
+#include <defacc.h> // $NEMOINC/defacc.h
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
   class Point {
