@@ -1,4 +1,4 @@
-VERSION = NEMO V3.2 6-jun-05 PJT
+VERSION = NEMO V3.3 9-aug-06 PJT
 ################################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 ################################################################################
@@ -677,7 +677,8 @@ cleansrc:
 
 libs:
 	@echo Starting at `date`, tail -f $(NEMO)/install.log
-	cd src;$(MAKE) -i clean install > ../install.log 2>&1 
+	-(cd src;$(MAKE) -i clean install) > install.log 2>&1 
+	-(cd usr/dehnen; $(MAKE) -i clean all) >> install.log 2>&1 
 	@echo Done at `date`
 
 slib:
