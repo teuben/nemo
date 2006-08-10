@@ -2,28 +2,24 @@
 #
 # this file is normally sourced from falcON_start
 #
-# $falcON must be set.
+# $FALCON must be set.
 #
 if ($?FALCON == 0) then
   echo "Environment variable FALCON is not set, falcON cannot be set up"
-  echo "add something like:   setenv FALCON /xxx/yyy"
+  echo "add something like: setenv FALCON /xxx/yyy"
   echo "to denote the root directory of falcON to your .cshrc file"
   goto done
 endif
 
-# use FALCONBIN as indicator for falcON to be active
-if($?FALCONBIN) then
-  if(-d "$FALCONBIN") then
+# use FALCONLIB as indicator for falcON to be active
+if($?FALCONLIB) then
+  if(-d "$FALCONLIB") then
     echo "falcON had already been activated; falcON cannot be re-initilized"
     goto done
   endif
 endif
 
-if ($?prompt) then
-  echo "falcON loaded from $FALCON"
-endif
-
-# use nemo if it is not already present
+# start nemo if it is not already present
 if($?NEMO == 0) then
   if ($?prompt) then
     echo "trying to activate NEMO ..."
@@ -31,12 +27,9 @@ if($?NEMO == 0) then
   nemo
 endif
 
-# set enviroment variables
-
+# set enviroment variables FALCONLIB and ACCPATH
 set    PLATFORM = `uname -m`
-setenv FALCONBIN $FALCON"/"$PLATFORM
-setenv FALCONLIB $FALCONBIN"/lib"
-setenv PATH      $FALCONBIN":"$PATH
+setenv FALCONLIB $FALCON"/"$PLATFORM"/lib"
 
 if($?ACCPATH) then
     setenv ACCPATH $FALCON"/acc/:"$ACCPATH
@@ -44,12 +37,12 @@ else
     setenv ACCPATH $FALCON"/acc/"
 endif
 
-# active search path
-rehash
+if ($?prompt) then
+  echo "falcON loaded from $FALCON"
+endif
 
 # provide alias 'NOclaf' to de-active falcON
 alias NOclaf 'source $FALCON/falcON_end; unalias NOclaf'
-
 
 done:
 

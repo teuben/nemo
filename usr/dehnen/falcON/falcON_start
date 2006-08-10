@@ -5,7 +5,10 @@
 #
 #  set a reasonable $falcON if it's not present
 #
-if ($?FALCON == 0) setenv FALCON $HOME/code/falcON/
+if ($?FALCON == 0) then
+    if($?NEMO == 0) error "neither FALCON nor NEMO known, cannot start falcON"
+    setenv FALCON $NEMO/usr/dehnen/falcON
+endif
 
 echo FALCON set to $FALCON
 
