@@ -59,9 +59,21 @@ DSSE 			:= -DfalcON_SSE#    comment out to disable SSE code
 endif
 endif
 
+ifdef DWALTER
+LIBNAME			:= falcON.W
+else
+ifdef PROPER
+LIBNAME			:= falcON.P
+else
+LIBNAME			:= falcON
+endif
+endif
+
+# compile with little optimisation
 ##DEBUG			:= -DEBUG -DDEBUG
 
 ifdef DEBUG
+# use static library (will break make file: executables are no re-made if library is)
 ##STATIC		:= -static
 endif
 
@@ -82,7 +94,6 @@ endif
 ifdef DWALTER
 #-include walter/make
 #-include pjm/make
-endif
 
 #
 # list of pseudo targets to make various things ...
@@ -91,6 +102,7 @@ endif
 # user guides
 guide			:
 			$(MAKE) -C tex default
+endif
 
 # utils
 utils			:
@@ -101,14 +113,14 @@ utils			:
 # falcON library
 falcON_objs	=	$(public_objs) $(proper_objs) $(sph_objs) $(parallel_objs)
 
-$(LIB)libfalcON.a:	$(falcON_objs)
+$(LIB)lib$(LIBNAME).a:	$(falcON_objs)
 			$(AR) $@ $?
 			$(RL) $@
-$(LIB)libfalcON.so:	$(falcON_objs)
+$(LIB)lib$(LIBNAME).so:	$(falcON_objs)
 			$(CXX) $^ -shared -o $@
 
 # NOTE: $(falcON) defined in makedefs, depending on value of STATIC
-library		: 	utils $(LIBT) $(falcON)
+library		: 	utils $(LIBT) $(falcON) $(BFCT)
 
 # falcON executables
 exe		:	library $(exe_pub) $(exe_pro) $(exe_sph) $(exe_walter)

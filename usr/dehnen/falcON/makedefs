@@ -66,13 +66,19 @@ HOS             := $(PLATFORM)/
 BIN		:= $(HOS)
 LIB		:= $(BIN)lib/
 MODE		:= 755
+PUBLICMODE	:= 777
 LIBT		:= $(LIB).dummy
 ACCT		:= $(ACC).dummy
 MANT		:= $(MAN).dummy
+BFCT		:= $(LIB)bodyfunc/.dummy
 
 $(LIBT)		:
 		mkdir --parents --mode=$(MODE) $(LIB)
 		touch $(LIBT)
+$(BFCT)		: $(LIBT)
+		mkdir --mode=$(PUBLICMODE) $(LIB)bodyfunc
+		mkdir --mode=$(PUBLICMODE) $(LIB)bodiesfunc
+		touch $(BFCT)
 $(MANT)		:
 		mkdir --parents --mode=$(MODE) $(MAN)
 		touch $(MANT)
@@ -197,13 +203,13 @@ endif
 
 ifdef STATIC
 
-LFALCON		:= -L$(LIB) -lfalcON $(LUTIL) $(LNEMO) $(LMPI)
-falcON		:= $(LIB)libfalcON.a
+LFALCON		:= -L$(LIB) -l$(LIBNAME) $(LUTIL) $(LNEMO) $(LMPI)
+falcON		:= $(LIB)lib$(LIBNAME).a
 
 else
 
-LFALCON		:= -L$(LIB) -lfalcON  -Wl,-rpath,$(PWD)/$(LIB) $(LUTIL) $(LNEMO) $(LMPI)
-falcON		:= $(LIB)libfalcON.so
+LFALCON		:= -L$(LIB) -l$(LIBNAME) -Wl,-rpath,$(PWD)/$(LIB) $(LUTIL) $(LNEMO) $(LMPI)
+falcON		:= $(LIB)lib$(LIBNAME).so
 
 endif
 
