@@ -94,6 +94,8 @@ guide			:
 
 # utils
 utils			:
+			ln -sf ../utils
+			(cd inc; ln -sf ../utils/inc utils)
 			$(MAKE) -C utils default
 
 # falcON library
