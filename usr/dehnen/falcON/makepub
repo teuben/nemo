@@ -83,7 +83,9 @@ neighbours_h		:= $(IPUB)neighbours.h $(tree_h)
 
 timer_h			:= $(IACC)timer.h
 center_h		:= $(IACC)center.h
-defacc_h		:= $(IACC)defacc.h
+ifdef NEMO
+defacc_h		:= $(NEMOINC)defacc.h
+endif
 GalPot_h		:= $(IACC)GalPot.cc $(IACC)GalPot.h $(IACC)GalPot_pre.h $(tupel_h)
 
 # -----------------------
