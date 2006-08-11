@@ -4,9 +4,11 @@
 // GalPot_in.h                                                                 |
 //                                                                             |
 // C++ code written by Walter Dehnen, 1996-2002,                               |
-// Oxford University, Department of Physics, Theoretical Physics.              |
-// address: 1 Keble Road, Oxford OX1 3NP, United Kingdom                       |
-// e-mail:  w.dehnen1@physics.ox.ac.uk                                         |
+//                                                                             |
+// present address:                                                            |
+// Astrophysikalisches Institut Potsdam                                        |
+// An der Sternwarte 16, D-14482 Potsdam, Germany                              |
+// e@mail: wdehnen@aip.de                                                      |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 //                                                                             |
@@ -35,7 +37,7 @@ namespace GalPot {                                // v0.4
     return Disks::Residual(a,b,c) + Spheroids::Residual(a,b,c);
   }
   //----------------------------------------------------------------------------
-  inline GalaxyPotential::GalaxyPotential(istream &from)
+  inline GalaxyPotential::GalaxyPotential(std::istream &from)
     : Disks(from),
       Spheroids(from),
       M(NRAD,RMIN,RMAX,Spheroids::gamma(),Spheroids::beta(),this)

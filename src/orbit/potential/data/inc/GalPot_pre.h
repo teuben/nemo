@@ -1,12 +1,14 @@
-// *-* C++ *-*                                                                 |
+// -*- C++ -*-                                                                 |
 //-----------------------------------------------------------------------------+
 //                                                                             |
 // GalPot_pre.h                                                                |
 //                                                                             |
 // C++ code written by Walter Dehnen, 1996-2002,                               |
-// Oxford University, Department of Physics, Theoretical Physics.              |
-// address: 1 Keble Road, Oxford OX1 3NP, United Kingdom                       |
-// e-mail:  w.dehnen1@physics.ox.ac.uk                                         |
+//                                                                             |
+// present address:                                                            |
+// Astrophysikalisches Institut Potsdam                                        |
+// An der Sternwarte 16, D-14482 Potsdam, Germany                              |
+// e@mail: wdehnen@aip.de                                                      |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 //                                                                             |
@@ -28,187 +30,196 @@ namespace GalPot {                               // v0.4
 // a reduced version of class template tupel                                    
 ////////////////////////////////////////////////////////////////////////////////
   template<class T, int N>
-  class Tupel {
+  class tupel {
   protected:
     T a[N];
     static void division_by_zero_error();
   public:
-    Tupel() {}
-    Tupel(const T);
-    Tupel(const T*);
-    Tupel(const Tupel&);
-    ~Tupel() {}
+    tupel() {}
+    tupel(const T);
+    tupel(const T*);
+    tupel(const tupel&);
+    ~tupel() {}
 
-    Tupel&  operator=  (const Tupel&);
-    Tupel&  operator+= (const Tupel&);
-    Tupel&  operator-= (const Tupel&);
-    Tupel&  operator=  (const T);
-    Tupel&  operator=  (const T*);
-    Tupel&  operator+= (const T);
-    Tupel&  operator-= (const T);
-    Tupel&  operator*= (const T);
-    Tupel&  operator/= (const T);
-    Tupel&  apply      (T(*)(T));
+    tupel&  operator=  (const tupel&);
+    tupel&  operator+= (const tupel&);
+    tupel&  operator-= (const tupel&);
+    tupel&  operator=  (const T);
+    tupel&  operator=  (const T*);
+    tupel&  operator+= (const T);
+    tupel&  operator-= (const T);
+    tupel&  operator*= (const T);
+    tupel&  operator/= (const T);
+    tupel&  apply      (T(*)(T));
 
-    Tupel   operator-  () const;
-    Tupel   operator+  (const Tupel&) const;
-    Tupel   operator-  (const Tupel&) const;
-    T       operator*  (const Tupel&) const;
-    bool    operator== (const Tupel&) const;
-    bool    operator!= (const Tupel&) const;
-    Tupel   operator+  (const T) const;
-    Tupel   operator-  (const T) const;
-    Tupel   operator*  (const T) const;
-    Tupel   operator/  (const T) const;
+    tupel   operator-  () const;
+    tupel   operator+  (const tupel&) const;
+    tupel   operator-  (const tupel&) const;
+    T       operator*  (const tupel&) const;
+    bool    operator== (const tupel&) const;
+    bool    operator!= (const tupel&) const;
+    tupel   operator+  (const T) const;
+    tupel   operator-  (const T) const;
+    tupel   operator*  (const T) const;
+    tupel   operator/  (const T) const;
 
     T       operator() (const int n) const { return  a[n]; }
     T&      operator[] (const int n)       { return  a[n]; }
     int     NumberofTerms() const { return N; }
+    T       norm      () const;
 
     operator T*       ()	 { return a; }
     operator const T* () const	 { return a; }
   };
 #define TI template<class T, int N> inline 
 
-  TI Tupel<T,N> operator+ (const T x, const Tupel<T,N>& V) {
+  TI tupel<T,N> operator+ (const T x, const tupel<T,N>& V) {
     return V+x;
   }
 
-  TI Tupel<T,N> operator- (const T x, const Tupel<T,N>& V) {
-    Tupel<T,N> P(x);
+  TI tupel<T,N> operator- (const T x, const tupel<T,N>& V) {
+    register tupel<T,N> P(x);
     return P-=V;
   }
 
-  TI Tupel<T,N> operator* (const T x, const Tupel<T,N>& V) {
+  TI tupel<T,N> operator* (const T x, const tupel<T,N>& V) {
     return V*x;
   }
 
-  TI void Tupel<T,N>::division_by_zero_error() {
-    std::cerr << " Tupel: division by zero \n";
+  TI void tupel<T,N>::division_by_zero_error() {
+    std::cerr << " tupel: division by zero \n";
     std::exit(1);
   }
 
-  TI Tupel<T,N>::Tupel(const T fill_value) {
+  TI tupel<T,N>::tupel(const T fill_value) {
     for(register int i=0; i<N; i++) a[i] = fill_value;
   }
 
-  TI Tupel<T,N>::Tupel(const T *array) {
+  TI tupel<T,N>::tupel(const T *array) {
     for(register int i=0; i<N; i++) a[i] = array[i];
   }
 
-  TI Tupel<T,N>::Tupel(const Tupel<T,N>& V) {
+  TI tupel<T,N>::tupel(const tupel<T,N>& V) {
     for(register int i=0; i<N; i++) a[i] = V.a[i];
   }
 
-  TI Tupel<T,N>& Tupel<T,N>::operator= (const Tupel<T,N>& V) {
+  TI tupel<T,N>& tupel<T,N>::operator= (const tupel<T,N>& V) {
     for(register int i=0; i<N; i++) a[i] = V.a[i];
     return *this;
   }
 
-  TI Tupel<T,N>& Tupel<T,N>::operator= (const T fill_value) {
+  TI tupel<T,N>& tupel<T,N>::operator= (const T fill_value) {
     for(register int i=0; i<N; i++) a[i] = fill_value;
     return *this;
   }
 
-  TI Tupel<T,N>& Tupel<T,N>::operator= (const T* array) {
+  TI tupel<T,N>& tupel<T,N>::operator= (const T* array) {
     for(register int i=0; i<N; i++) a[i] = array[i];
     return *this;
   }
 
-  TI Tupel<T,N>& Tupel<T,N>::operator+= (const Tupel<T,N>& V) {
+  TI tupel<T,N>& tupel<T,N>::operator+= (const tupel<T,N>& V) {
     for(register int i=0; i<N; i++) a[i] += V.a[i];
     return *this;
   }
 
-  TI Tupel<T,N>& Tupel<T,N>::operator-= (const Tupel<T,N>& V) {
+  TI tupel<T,N>& tupel<T,N>::operator-= (const tupel<T,N>& V) {
     for(register int i=0; i<N; i++) a[i] -= V.a[i];
     return *this;
   }
 
-  TI Tupel<T,N>& Tupel<T,N>::operator+= (const T m) {
+  TI tupel<T,N>& tupel<T,N>::operator+= (const T m) {
     for(register int i=0; i<N; i++) a[i] += m;
     return *this;
   }
 
-  TI Tupel<T,N>& Tupel<T,N>::operator-= (const T m) {
+  TI tupel<T,N>& tupel<T,N>::operator-= (const T m) {
     for(register int i=0; i<N; i++) a[i] -= m;
     return *this;
   }
 
-  TI Tupel<T,N>& Tupel<T,N>::operator*= (const T m) {
+  TI tupel<T,N>& tupel<T,N>::operator*= (const T m) {
     for(register int i=0; i<N; i++) a[i] *= m;
     return *this;
   }
 
-  TI Tupel<T,N>& Tupel<T,N>::operator/= (const T m) {
+  TI tupel<T,N>& tupel<T,N>::operator/= (const T m) {
     if(m==T(0.)) division_by_zero_error();
     for(register int i=0; i<N; i++) a[i] /= m;
     return *this;
   }
 
-  TI Tupel<T,N>& Tupel<T,N>::apply    ( T(*f)(T) ) {
+  TI tupel<T,N>& tupel<T,N>::apply    ( T(*f)(T) ) {
     for(register int i=0; i<N; i++) a[i] = f(a[i]);
     return *this;
   }
 
-  TI Tupel<T,N> Tupel<T,N>::operator- () const {
-    Tupel<T,N> P(0);
+  TI tupel<T,N> tupel<T,N>::operator- () const {
+    register tupel<T,N> P(0);
     return P-=*this;
   }
 
-  TI Tupel<T,N> Tupel<T,N>::operator+ (const Tupel<T,N>& V) const {
-    Tupel<T,N> P(*this);
+  TI tupel<T,N> tupel<T,N>::operator+ (const tupel<T,N>& V) const {
+    register tupel<T,N> P(*this);
     return P+=V;
   }
 
-  TI Tupel<T,N> Tupel<T,N>::operator- (const Tupel<T,N>& V) const {
-    Tupel<T,N> P(*this);
+  TI tupel<T,N> tupel<T,N>::operator- (const tupel<T,N>& V) const {
+    register tupel<T,N> P(*this);
     return P-=V;
   }
 
-  TI T Tupel<T,N>::operator* (const Tupel<T,N>& V) const {
+  TI T tupel<T,N>::operator* (const tupel<T,N>& V) const {
     register T x=a[0] * V.a[0];
     for(register int i=1; i<N; i++) x += a[i] * V.a[i];
     return x;
   }
 
-  TI bool Tupel<T,N>::operator== (const Tupel<T,N>& V) const {
+  TI bool tupel<T,N>::operator== (const tupel<T,N>& V) const {
     for(register int i=0; i<N; i++) if(a[i] != V.a[i]) return false;
     return true;
   }
 
-  TI bool Tupel<T,N>::operator!= (const Tupel<T,N>& V) const {
+  TI bool tupel<T,N>::operator!= (const tupel<T,N>& V) const {
     for(register int i=0; i<N; i++) if(a[i] != V.a[i]) return true;
     return false;
   }
 
-  TI Tupel<T,N> Tupel<T,N>::operator+ (const T x) const {
-    Tupel<T,N> P(*this);
+  TI tupel<T,N> tupel<T,N>::operator+ (const T x) const {
+    register tupel<T,N> P(*this);
     return P+=x;
   }
 
-  TI Tupel<T,N> Tupel<T,N>::operator- (const T x) const {
-    Tupel<T,N> P(*this);
+  TI tupel<T,N> tupel<T,N>::operator- (const T x) const {
+    register tupel<T,N> P(*this);
     return P-=x;
   }
 
-  TI Tupel<T,N> Tupel<T,N>::operator* (const T x) const {
-    Tupel<T,N> P(*this);
+  TI tupel<T,N> tupel<T,N>::operator* (const T x) const {
+    register tupel<T,N> P(*this);
     return P*=x;
   }
 
-  TI Tupel<T,N> Tupel<T,N>::operator/ (const T x) const {
-    Tupel<T,N> P(*this);
+  TI tupel<T,N> tupel<T,N>::operator/ (const T x) const {
+    register tupel<T,N> P(*this);
     return P/=x;
   }
 
-  TI ostream& operator<< (ostream& s, const Tupel<T,N>& V) {
+  TI T tupel<T,N>::norm() const {
+    register T x = a[0] * a[0];
+    for(register int i=1; i<N; i++) x += a[i] * a[i];
+    return x;
+  }
+
+  TI T norm(tupel<T,N> const&t) { return t.norm(); }
+
+  TI std::ostream& operator<< (std::ostream& s, const tupel<T,N>& V) {
     s << V(0);
     for(register int i=1; i<N; i++) s << ' ' << V(i);
     return s;
   }
 
-  TI istream& operator>> (istream& s, Tupel<T,N>& V) { 
+  TI std::istream& operator>> (std::istream& s, tupel<T,N>& V) { 
     T x[N];
     char c=0;
     register int i;
@@ -216,7 +227,7 @@ namespace GalPot {                               // v0.4
     if(c == '(') {
       for(i=0; i<N; i++) s >> x[i];
       s >> c;
-      if(c != ')') s.clear(ios::badbit);
+      if(c != ')') s.clear(std::ios::badbit);
     } else {
       s.unget();
       for(i=0; i<N; i++) s >> x[i];
@@ -226,16 +237,14 @@ namespace GalPot {                               // v0.4
   }
 #undef TI
   //////////////////////////////////////////////////////////////////////////////
-  typedef Tupel<double,3> Frequs;
-  typedef Tupel<double,5> DiskPar;
-  typedef Tupel<double,6> SphrPar;
+  typedef tupel<double,3> Frequs;
+  typedef tupel<double,5> DiskPar;
+  typedef tupel<double,6> SphrPar;
   //////////////////////////////////////////////////////////////////////////////
   class PotResidual {
   public:
-    virtual double Density  (const double a, const double b)
-                                             const { return 0.; }
-    virtual double Residual (const double a, const double b,
-			     const double c) const { return 0.; }
+    virtual double Density  (const double, const double)                const=0;
+    virtual double Residual (const double, const double, const double)  const=0;
   };
   //////////////////////////////////////////////////////////////////////////////
   class DiskAnsatz : public PotResidual {
@@ -258,7 +267,7 @@ namespace GalPot {                               // v0.4
     double      SurfaceDensity(const double) const;
     double      Density       (const double, const double) const;
     double      Residual      (const double, const double, const double) const;
-    void        DescribePot   (ostream&) const;
+    void        DescribePot   (std::ostream&) const;
     DiskPar     parameter     () const;
   };
   inline DiskPar DiskAnsatz::parameter() const
@@ -274,7 +283,7 @@ namespace GalPot {                               // v0.4
     DiskAnsatz            *D, *Dup;
     void reset            (const int, const DiskPar*);
   public:
-    Disks                 (istream&);
+    Disks                 (std::istream&);
     Disks                 (const Disks&); 
     Disks                 (const int, const DiskPar*);
    ~Disks                 () { delete[] D; }
@@ -390,7 +399,7 @@ namespace GalPot {                               // v0.4
   protected:
     void      reset          (const int, const SphrPar*);
   public:
-    Spheroids                (istream&);
+    Spheroids                (std::istream&);
     Spheroids                (const int, const SphrPar*);
     Spheroids                (const Spheroids&);
     Spheroids& operator=     (const Spheroids&);

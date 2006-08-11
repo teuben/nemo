@@ -1,12 +1,14 @@
-// *-* C++ *-*                                                                 |
+// -*- C++ -*-                                                                 |
 //-----------------------------------------------------------------------------+
 //                                                                             |
 // GalPot.h                                                                    |
 //                                                                             |
-// C++ code written by Walter Dehnen, 1996-2002,                               |
-// Oxford University, Department of Physics, Theoretical Physics.              |
-// address: 1 Keble Road, Oxford OX1 3NP, United Kingdom                       |
-// e-mail:  w.dehnen1@physics.ox.ac.uk                                         |
+// C++ code                                                                    |
+//                                                                             |
+// Copyright Walter Dehnen, 1996-2004                                          |
+// e-mail:   walter.dehnen@astro.le.ac.uk                                      |
+// address:  Department of Physics and Astronomy, University of Leicester      |
+//           University Road, Leicester LE1 7RH, United Kingdom                |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 //                                                                             |
@@ -19,6 +21,9 @@
 // Version 0.2    22. September 1998                                           |
 // Version 0.3    07. June      2001                                           |
 // Version 0.4    22. April     2002                                           |
+// Version 0.5    05. December  2002                                           |
+// Version 0.6    05. February  2003                                           |
+// Version 0.7    23. September 2004  fixed "find(): x out of range" error     |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 //                                                                             |
@@ -32,7 +37,7 @@
 //                                                                             |
 // quantity        dimension / seize                using other units          |
 //-----------------------------------------------------------------------------+
-// angular vel.  1 Myr^-1	                  = 977.775320024919 km/s/kpc  |
+// angular vel.  1 Myr^-1	                   = 977.775320024919 km/s/kpc |
 // velocity      1 kpc/Myr                         = 977.775320024919 km/s     |
 // action/mass   1 kpc^2/Myr                       = 977.775320024919 kpc*km/s |
 // potential     1 kpc^2/Myr^2                     = 956044.576449833 (km/s)^2 |
@@ -117,7 +122,7 @@ namespace GalPot {                                      // v0.4
     //--------------------------------------------------------------------------
     // constructors and related functions                                       
     //--------------------------------------------------------------------------
-    GalaxyPotential(istream&);
+    GalaxyPotential(std::istream&);
     // constructor from input stream. Use this constructor to establish the     
     // potential of one of the models as shown in the following code fragment.  
     //                                                                          
