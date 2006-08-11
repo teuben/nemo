@@ -259,7 +259,9 @@ int main(int argc, char *argv[])                   // global main
 
   try {                                            // TRY:                      
 
-    falcON::CheckAgainstLibrary(falcON::CurrentStatus());
+    falcON::CheckAgainstLibrary(falcON::CurrentStatus(),
+				falcON::RunInfo::name_known() ?
+				falcON::RunInfo::name() : "executable");
                                                    // assert status matches     
 
 #ifdef falcON_USE_MPI

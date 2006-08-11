@@ -93,6 +93,7 @@ $(ACCT)		:
 FILEIO		:= -D_FILE_OFFSET_BITS=64
 
 ifeq ($(COMPILER),gcc)
+# ------------------
 # GNU's gcc compiler
 
 CXX		:= $(CPATH)g++
@@ -136,6 +137,7 @@ NOSSE		:= -mno-sse -mno-sse2 -mno-sse3 -mfpmath=387
 
 else
 ifeq ($(COMPILER),pgcc)
+# ------------------------
 # portland groups compiler
 
 CXX		:= pgCC
@@ -150,6 +152,7 @@ endif
 
 else
 ifeq ($(COMPILER),icc)
+# --------------
 # intel compiler
 
 CXX		:= $(CPATH)icpc
@@ -179,8 +182,7 @@ RL		:= ranlib
 # compiler and linker flags
 # -------------------------
 
-NBDYFLAGS	:= $(DMPI) $(DSPH) $(DPRECISION) $(DNEMO) $(DSSE) $(DSOFT) \
-			$(DWALTER)
+NBDYFLAGS	:= $(DMPI) $(DSPH) $(DPRECISION) $(DNEMO) $(DSSE) $(DSOFT) $(DWALTER)
 
 CFLAGS		:= $(FILEIO) $(OPTFLAGS) $(DPROPER) $(DMPI) $(DEBUG)
 CXXFLAGS	:= $(FILEIO) $(OPTFLAGS) $(DPROPER) $(DMPI) $(DEBUG)
@@ -193,8 +195,7 @@ IUTIL		:= -I$(IUTI)
 ifdef STATIC
 LUTIL		:= -Lutils/lib/$(PLATFORM) -lWDutils
 else
-LUTIL		:= -Lutils/lib/$(PLATFORM) -lWDutils \
-		-Wl,-rpath,$(PWD)/../utils/lib/$(PLATFORM)
+LUTIL		:= -Lutils/lib/$(PLATFORM) -lWDutils -Wl,-rpath,$(PWD)/utils/lib/$(PLATFORM)
 endif
 
 # --------------
@@ -204,12 +205,12 @@ endif
 ifdef STATIC
 
 LFALCON		:= -L$(LIB) -l$(LIBNAME) $(LUTIL) $(LNEMO) $(LMPI)
-falcON		:= $(LIB)lib$(LIBNAME).a
+falcON		:= $(links) $(LIB)lib$(LIBNAME).a
 
 else
 
 LFALCON		:= -L$(LIB) -l$(LIBNAME) -Wl,-rpath,$(PWD)/$(LIB) $(LUTIL) $(LNEMO) $(LMPI)
-falcON		:= $(LIB)lib$(LIBNAME).so
+falcON		:= $(links) $(LIB)lib$(LIBNAME).so
 
 endif
 

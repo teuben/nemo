@@ -118,6 +118,7 @@
 // v 3.0.3  20/07/2005  WD output file name appending with '!' or '@'          |
 // v 3.0.4  20/07/2005  WD omit list of possible output specs                  |
 // v 3.0.5  22/03/2006  WD minor bug in this file (logstep) fixed              |
+// v 3.0.6  11/08/2006  WD made hmin obligatory (no default)                   |
 //-----------------------------------------------------------------------------+
 #define falcON_VERSION   "3.0.5"
 #define falcON_VERSION_D "22-mar-2006 Walter Dehnen                          "
@@ -164,7 +165,7 @@ string defv[] = {
   "Nref=16\n          if using eps_i: size of cell for estimating n      ",
   "emin=0\n           if using eps_i: lower limit for eps_i              ",
 #endif
-  "hmin=6\n           tau_min = (1/2)^hmin                               ",
+  "hmin=???\n         tau_min = (1/2)^hmin                               ",
   "Nlev=1\n           # time-step levels                                 ",
   "fac=\n             tau = fac / acc           \\   If more than one of  ",
   "fph=\n             tau = fph / pot            |  these is non-zero,   ",

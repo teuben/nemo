@@ -71,38 +71,27 @@ extern "C" {
 //               const char  *file);      // I: data file                       
 //                                                                              
 //------------------------------------------------------------------------------
-#ifdef MANIP_PARSE_AT_INIMANIP
-
-#define __DEF__MAN(NAME)				\
-void inimanip(const falcON::manipulator**manip,		\
-	      const char                *pars,		\
-	      const char                *file)		\
-{							\
-  const int MAXPAR = 256;				\
-  double p[MAXPAR];					\
-  int    n = falcON::Manipulator::parse(pars,p,MAXPAR);	\
-  *manip = new NAME(p,n,file);				\
+#define __DEF__MAN(NAME)					\
+void inimanip(const falcON::manipulator**manip,			\
+	      const char                *pars,			\
+	      const char                *file)			\
+{								\
+  const int MAXPAR = 256;					\
+  double p[MAXPAR];						\
+  int    n = falcON::Manipulator::parse(pars,p,MAXPAR);		\
+  *manip = new NAME(p,n,file);					\
+  falcON::CheckAgainstLibrary(falcON::CurrentStatus(),		\
+  falcON::message("Manipulator \"%s\"",(*manip)->name()));	\
 }
 
-#define __DEF__MAN__ALT(NAME)			\
-void inimanip(const falcON::manipulator**manip,	\
-	      const char                *pars,	\
-	      const char                *file)	\
-{						\
-  *manip = new NAME(pars,file);			\
+#define __DEF__MAN__ALT(NAME)					\
+void inimanip(const falcON::manipulator**manip,			\
+	      const char                *pars,			\
+	      const char                *file)			\
+{								\
+  *manip = new NAME(pars,file);					\
+  falcON::CheckAgainstLibrary(falcON::CurrentStatus(),		\
+  falcON::message("Manipulator \"%s\"",(*manip)->name()));	\
 }
-
-#else  // MANIP_PARSE_AT_INIMANIP
-
-#define __DEF__MAN(NAME)			\
-void inimanip(const falcON::manipulator**manip,	\
-	      const double              *pars,	\
-	      int                        npar,	\
-	      const char                *file)	\
-{						\
-  *manip = new NAME(pars,npar,file);		\
-}
-
-#endif // MANIP_PARSE_AT_INIMANIP
 //------------------------------------------------------------------------------
 #endif // falcON_included_defman_h

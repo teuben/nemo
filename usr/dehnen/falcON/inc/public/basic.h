@@ -144,7 +144,7 @@ namespace falcON {
     return Status(status);
   }
   Status LibraryStatus();
-  void CheckAgainstLibrary(falcON::Status) falcON_THROWING;
+  void CheckAgainstLibrary(falcON::Status,const char*) falcON_THROWING;
   //============================================================================
   ///
   /// support for code information; initialized in ::main() at start-up

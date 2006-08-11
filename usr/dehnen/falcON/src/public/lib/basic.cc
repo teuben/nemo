@@ -95,7 +95,8 @@ falcON::Status falcON::LibraryStatus()
   return CurrentStatus();
 }
 //------------------------------------------------------------------------------
-void falcON::CheckAgainstLibrary(falcON::Status Current) falcON_THROWING
+void falcON::CheckAgainstLibrary(falcON::Status Current,
+				 const char    *Program) falcON_THROWING
 {
   Status Library = CurrentStatus();
   if( Current != Library ) {
@@ -103,49 +104,49 @@ void falcON::CheckAgainstLibrary(falcON::Status Current) falcON_THROWING
 	       Current, Library);
     // check proprietary versus public
     if( Current&proper_version && !(Library&proper_version) )
-      falcON_THROW("STATUS mismatch: proprietary executable, "
-		   "but public-version library.\n");
+      falcON_THROW("STATUS mismatch: proprietary %s, "
+		   "but public-version library.\n",Program);
     else if( Library&proper_version && !(Current&proper_version) )
-      falcON_THROW("STATUS mismatch: public-version executable, "
-		   "but proprietary library.\n");
+      falcON_THROW("STATUS mismatch: public-version %s, "
+		   "but proprietary library.\n",Program);
     // check nemo
     if( Library&nemo_version && !(Current&nemo_version) )
       falcON_THROW("STATUS mismatch: "
-		   "executable was not compiled with NEMO, "
-		   "but library was.\n");
+		   "%s was not compiled with NEMO, "
+		   "but library was.\n",Program);
     else if( Current&nemo_version && !(Library&nemo_version) )
       falcON_THROW("STATUS mismatch: "
-		   "executable was compiled with NEMO, "
-		   "but library was not.\n");
+		   "%s was compiled with NEMO, "
+		   "but library was not.\n",Program);
     // check SPH
     if( Current&sph_version && !(Library&sph_version) )
       falcON_THROW("STATUS mismatch: "
-		   "executable was compiled for SPH, "
-		   "but library was not.\n");
+		   "%s was compiled for SPH, "
+		   "but library was not.\n",Program);
     else if( Library&sph_version && !(Current&sph_version) )
       falcON_THROW("STATUS mismatch: "
-		   "executable was not compiled for SPH, "
-		   "but library was.\n");
+		   "%s was not compiled for SPH, "
+		   "but library was.\n",Program);
     // check MPI
     if( Current&mpi_version && !(Library&mpi_version) )
       falcON_THROW("STATUS mismatch: "
-		   "executable was compiled for MPI, "
-		   "but library was not.\n");
+		   "%s was compiled for MPI, "
+		   "but library was not.\n",Program);
     else if( Library&mpi_version && !(Current&mpi_version) )
       falcON_THROW("STATUS mismatch: "
-		   "executable was not compiled for MPI, "
-		   "but library was.\n");
+		   "%s was not compiled for MPI, "
+		   "but library was.\n",Program);
     // check real
     if( Current&real_is_double && !(Library&real_is_double) )
       falcON_THROW("STATUS mismatch: "
-		   "executable was compiled with real=double, "
-		   "but library with real=float.\n");
+		   "%s was compiled with real=double, "
+		   "but library with real=float.\n",Program);
     else if( Library&real_is_double && !(Current&real_is_double) )
       falcON_THROW("STATUS mismatch: "
-		   "executable was compiled with real=float, "
-		   "but library with real=double.\n");
+		   "%s was compiled with real=float, "
+		   "but library with real=double.\n",Program);
     falcON_THROW("STATUS mismatch "
-		 "between executable and library\n");
+		 "between %s and library\n",Program);
   }
 }
 ////////////////////////////////////////////////////////////////////////////////
