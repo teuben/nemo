@@ -3,12 +3,14 @@
  *			to write down in potential/density form:
  *
  *
- *	7-mar-92	happy gcc2.0 - optimized acc[] a bit	pjt
- *	  oct-93        get_pattern				pjt
- *	  feb-94	pretty bad sign error 			pjt
+ *	7-mar-92	happy gcc2.0 - optimized acc[] a bit	    pjt
+ *	  oct-93        get_pattern				    pjt
+ *	  feb-94	pretty bad sign error 			    pjt
  *	  jun-97	documented dehnen
  *	may-2002	provide both a _double and _float 
- *                      version for the new potproc interface    wd
+ *                      version for the new potproc interface       wd
+ *      sep-2004        replaced call to sqr(A) with A*A
+ *                      sqr() is bullshit and should never be used! wd
  */
 
 /*CTEX
@@ -50,26 +52,26 @@ void inipotential (int *npar, double *par, string name)
     par[0] = omega;
 }
 
-#define POT									\
-{										\
-    int    i;									\
-    real   r2,r,f;								\
-        									\
-    for (i=0, r2=0; i<*ndim; i++)            /* radius - squared */		\
-        r2 += sqr(pos[i]);							\
-										\
-    if (r2==0.0) {								\
-        *pot = -hmass/a;							\
-        for (i=0; i<*ndim; i++)							\
-            acc[i] = 0.0;							\
-    } else {									\
-        r = sqrt(r2);                        /* radius */			\
-        f = 1.0/(r+a);                       /* temporary storage */		\
-        *pot = -hmass * f;                   /* returned potential */		\
-        f = (*pot) * f / r;                  /* radial force / r  */		\
-        for (i=0; i<*ndim; i++)							\
-            acc[i] = pos[i] * f;             /* make cartesian forces */	\
-    }										\
+#define POT								\
+{									\
+    int    i;								\
+    real   r2,r,f;							\
+									\
+    for (i=0, r2=0; i<*ndim; i++)            /* radius - squared */	\
+        r2 += pos[i]*pos[i];						\
+									\
+    if (r2==0.0) {							\
+        *pot = -hmass/a;						\
+        for (i=0; i<*ndim; i++)						\
+            acc[i] = 0.0;						\
+    } else {								\
+        r = sqrt(r2);                        /* radius */		\
+        f = 1.0/(r+a);                       /* temporary storage */	\
+        *pot = -hmass * f;                   /* returned potential */	\
+        f = (*pot) * f / r;                  /* radial force / r  */	\
+        for (i=0; i<*ndim; i++)						\
+            acc[i] = pos[i] * f;             /* make cartesian forces*/ \
+    }									\
 }
 
 void potential_double (int *ndim,
