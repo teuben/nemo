@@ -35,11 +35,6 @@ POT_CC = \
 POT_F77 = \
 	athan92.f harmonicf.f pfenniger84.f piner94.f 
 
-POT_CXX = \
-	Dehnen.cc GalPot.cc Hernquist.cc NFW.cc MiyamotoNagai.cc Plummer.cc 
-# c++ bug?
-#	Combined.cc 
-
 SRCFILES= Makefile \
 	$(POT_CC) $(POT_F77) $(POT_CXX)
 
