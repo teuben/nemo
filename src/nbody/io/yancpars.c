@@ -2,11 +2,13 @@
  * yancpars:	add YANC parameters to a snapshot, so YANC has (some
  *		better) values for its integration parameters
  *
- *		now deprecated, ince YancNemo is now the official way
+ *		now deprecated, since YancNemo (now called gyrfalcON) is now the official way
  *		but we keep this code since the method is rather unique
  * 
  *	26-may-2001	Written in Mexico, for Walter Dehnen's YANC code  PJT
  *      30-jun-2001	1.0a now declared it deprecated
+ *      15-aug-2006     1.0b document gyrfalcON and the fact that it does not compile anymore
+ *                           due to missing things like YancEpsTag etc.
  */
 
 #if 0
@@ -29,7 +31,7 @@ string defv[] = {
     "theta=0.5\n        Treecode opening angle",
     "hmin=5\n           Timestep dt=2^-hmin",
     "convert=d2f\n      Conversion options",
-    "VERSION=1.0a\n	30-jun-01 PJT",
+    "VERSION=1.0b\n	30-jun-01 PJT",
     NULL,
 };
 
