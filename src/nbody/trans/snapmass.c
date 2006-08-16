@@ -12,6 +12,7 @@
  *				(code taken from mkplummer)
  *      24-jul-97       2.1 added norm=
  *	 8-sep-01       a   init_xrandom
+ *      15-aug-06       b   prototypes
  */
 #include <stdinc.h>
 #include <getparam.h>
@@ -22,6 +23,8 @@
 #include <snapshot/body.h>
 #include <snapshot/get_snap.c>
 #include <snapshot/put_snap.c>
+
+#include <bodytrans.h>
 
 string defv[] = {
     "in=???\n		      input (snapshot) file",
@@ -34,15 +37,17 @@ string defv[] = {
     "massrange=1,1\n          Range for mass-spectrum (e.g. 1,2)",
     "seed=0\n                 Random seed",
     "norm=\n                  Normalization value for the total mass (if used)",
-    "VERSION=2.1a\n           8-sep-01 PJT",
+    "VERSION=2.1b\n           15-aug-06 PJT",
     NULL,
 };
 
 string usage="(re)assign masses to a snapshot";
 
+string cvsid="$Id$";
+
 #define TIMEFUZZ	0.0001	/* tolerance in time comparisons */
 
-extern double frandom(double, double, rproc);
+extern rproc getrfunc(string , string , string , int *);
 
 nemo_main()
 {
@@ -51,7 +56,8 @@ nemo_main()
     Body  *btab = NULL, *bp;
     Body  *bmasstab = NULL, *bmassp;
     int i, n, nbody, nbodymass, bits, bitsmass, seed;
-    rproc  mfunc, bfunc, btrtrans(), getrfunc();
+    rproc_body  bfunc;
+    rproc       mfunc;
     bool  Qnorm, first = TRUE;
 
     instr = stropen(getparam("in"), "r");
@@ -108,8 +114,7 @@ nemo_main()
        		error("Snapmass (inmass): Need a snapshot");
             get_snap(inmassstr, &bmasstab, &nbodymass, &tsnapmass, &bitsmass);
             if (nbodymass != nbody) {
-                
-                if (nbodymass < nbody)
+	        if (nbodymass < nbody)
                     error("too few bodies (%d < %d)",nbodymass,nbody);
                 else
                     warning("too many bodies (%d > %d)",nbodymass,nbody);
@@ -136,7 +141,7 @@ nemo_main()
                 Mass(bp) = bfunc(bp, tsnap, i);
         } else if (mfunc) {
             for (bp=btab, i=0; i<nbody; bp++,i++)
-                Mass(bp) = frandom(mrange[0], mrange[1], mfunc);
+	        Mass(bp) = frandom(mrange[0], mrange[1], mfunc);
         } else             
             error("bad flow logic");
 
@@ -148,7 +153,7 @@ nemo_main()
             for (bp=btab, i=0; i<nbody; bp++,i++)
                 Mass(bp) *= norm/mtot;
         }
-	bits |= MassBit;    /* turn mass bit on anyhow */
+	bits |= MassBit;    /* turn mass bit on anyways */
         put_snap(outstr, &btab, &nbody, &tsnap, &bits);
     }
 
