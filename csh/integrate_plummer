@@ -1,0 +1,26 @@
+#! /bin/csh -f
+#
+#  Integrate a Plummer sphere, and follow lagrangian mass radii to check stability
+#
+#  p1000.out:     by itself, fully self-consistent (plummer in natural units)
+#  p1001.out:     by itself, but masses scaled by 0.5 (so it expands)
+#  p1002.out:     0.5 in itself, 0.5 in an external potential
+#
+#
+
+set nbody=1000
+
+mkplummer p1000 $nbody scale=1 seed=1000
+hackcode1 p1000 p1000.out tstop=20 > p1000.log
+snapmradii p1000.out 0.01,0.05,0.1:0.9:0.1,0.95,0.99 log=t > p1000.tab
+tabplot p1000.tab 1 2:14 line=1,1
+
+snapscale p1000 p1001 0.5
+hackcode1 p1001 p1001.out tstop=20 > p1001.log
+snapmradii p1001.out 0.01,0.05,0.1:0.9:0.1,0.95,0.99 log=t > p1001.tab
+tabplot p1001.tab 1 2:14 line=1,1
+
+hackcode3 p1001 p1002.out tstop=20 potname=plummer potpars=0,0.5,1 > p1002.log
+snapmradii p1002.out 0.01,0.05,0.1:0.9:0.1,0.95,0.99 log=t > p1002.tab
+tabplot p1002.tab 1 2:14 line=1,1
+
