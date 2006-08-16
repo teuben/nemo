@@ -4,17 +4,24 @@
  *	xx-xxx-xx  0.0 -- JEB
  *	20-feb-92  0.1 removed dex() - which is defined in the NEMO kernel PJT
  *	 7-mar-92  0.2 fixed pathw string bug  & happy gcc2.0	           pjt
+ *      15-aug-06  0.3 
  */
 
 #include <stdinc.h>
 #include <getparam.h>
 #include <vectmath.h>
 #include <filestruct.h>
+#include <history.h>
+#include <filefn.h>
+#include <loadobj.h>
 
 #include <snapshot/snapshot.h>
 #include <snapshot/body.h>
 #include <snapshot/get_snap.c>
 #include <snapshot/put_snap.c>
+
+#include <sys/types.h>
+#include <unistd.h>
 
 string defv[] = {
     "in=???\n			Input file",
@@ -23,30 +30,33 @@ string defv[] = {
     "pathy=cos(TWO_PI*q)\n	Y(q) coordinate of Path",
     "pathw=0.1\n		--never used--",
     "npnts=128\n		Number of points",
-    "VERSION=0.2\n		7-mar-92 PJT",
+    "VERSION=0.3\n		15-aug-06 PJT",
     NULL,
 };
 
-string usage = "convert ASCII N-body file to binary format";
+string usage = "label particles according to position along parametric path";
+
+string cvsid="$Id$";
 
 
-Body *btab = NULL;
-int nbody;
-real tsnap = 0.0;
 
-rproc pathx, pathy;
-real pathw;
-int npnts;
+local Body *btab = NULL;
+local int nbody;
+local real tsnap = 0.0;
+
+local rproc pathx, pathy;
+local real pathw;
+local int npnts;
 
 
-void loadfuns();	/* dummy local math loader */
+local void loadfuns(void);	/* dummy local math loader */
+local void pathlabel(void);
+local rproc compile_func(string expr, string var);
 
-void
-nemo_main()
+void nemo_main(void)
 {
     stream instr, outstr;
     rproc compile_func();
-    void pathlabel();
     int snapbits;
 
     instr = stropen(getparam("in"), "r");
@@ -58,11 +68,14 @@ nemo_main()
     pathw = getdparam("pathw");
     npnts = getiparam("npnts");
     get_snap(instr, &btab, &nbody, &tsnap, &snapbits);
-    if (snapbits & PhaseSpaceBit == 0)
-	error("%s: no phasespace info\n", getargv0());
+    if (snapbits & (PhaseSpaceBit == 0)) {
+      error("no phasespace info");
+      loadfuns();
+    }
     pathlabel();
     snapbits |= AuxBit;
     put_snap(outstr, &btab, &nbody, &tsnap, &snapbits);
+
 }
 
 /*
@@ -70,20 +83,15 @@ nemo_main()
  * a real variable, loads the object module, and returns a pointer.
  */
 
-#include <filefn.h>
-#include <loadobj.h>
 
 bool havesyms = FALSE;		/* TRUE if symbols have been loaded */
 int funcmpld = 0;	       	/* count of functions compiled */
 
-rproc 
-compile_func(expr, var)
-string expr;			/* C expression for function */
-string var;			/* name of argument variable */
+rproc compile_func(string expr, string var)
 {
     char path[64], file[64], func[64], cmmd[128];
     stream cdstr;
-    proc findfn(), result;
+    proc result;
 
     if (! havesyms)
 	mysymbols(getargv0());
@@ -117,14 +125,15 @@ string var;			/* name of argument variable */
  * existence is sufficient to fool ld into loading the math functions.
  */
 
-void
-loadfuns()
+local void loadfuns(void)
 {
+#if 0
     real cbrt(), sqrt(), qbe(), sqr();
     real sin(), cos(), asin(), acos();
     real tan(), atan(), atan2();
     real exp(), dex(), log(), log10(), pow();
     real fabs(), floor(), ceil(), rint();
+#endif
 
     (void) cbrt(1.0);
     (void) sqrt(1.0);
@@ -148,8 +157,7 @@ loadfuns()
     (void) rint(1.0);
 }
 
-void
-pathlabel()
+local void pathlabel(void)
 {
     int j, i;
     real q, px, py, dx, dy, dij;
