@@ -88,7 +88,9 @@ if ($debug) echo "and rehashed it"
 rehash
 
 # provide alias to load falcON, if present
-alias falcON 'setenv FALCON $NEMO/usr/dehnen/falcON; source $FALCON/falcON_start'
+#alias falcON 'setenv FALCON $NEMO/usr/dehnen/falcON; source $FALCON/falcON_start'
+setenv FALCON $NEMO/usr/dehnen/falcON
+source $FALCON/falcON_start
 
 # provide alias to end NEMO
 #alias omen 'source $NEMO/nemo_end; unalias omen; alias nemo source $NEMO/nemo_start'

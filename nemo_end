@@ -18,6 +18,10 @@ if ($?NEMO) then
  alias nemo   "source $NEMO/nemo_start"
 endif
 
+if ($?FALCON) then
+  source $FALCON/falcON_end
+endif
+
 # now remove all NEMO and YAPP env.variables
 foreach evar (`printenv|awk -F= '{print $1}'|egrep '(NEMO|YAPP)'`)
   unsetenv $evar
