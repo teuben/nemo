@@ -6,7 +6,7 @@
 #  p1001.out:     by itself, but masses scaled by 0.5 (so it expands)
 #  p1002.out:     0.5 in itself, 0.5 in an external potential
 #
-#
+#  16-aug-2006	  Created	(PJT)
 
 set nbody=1000
 set tstop=20
