@@ -23,17 +23,18 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS		    */
     "minor_freqout=32.0\n	minor data-output frequency",
     "options=\n			misc options",
     "headline=\n		random mumble for humans",
-    "VERSION=1.3a\n	        20-may-94 PJT",
+    "VERSION=1.3b\n	        15-aug-06 PJT",
     NULL,
 };
 
 string usage = "Global quadrupole N-body integrator";
 
+string cvsid="$Id$";
 
 local void force(Body *, int , real);
 
 
-nemo_main()
+void nemo_main(void)
 {
     setparams();
     inputdata();

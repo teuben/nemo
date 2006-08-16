@@ -8,6 +8,7 @@
  *	12-nov-91	PJT	made options compatible with hackcode1
  *	21-may-92	PJT	sgi needs some forward decl.
  *      20-may-94       pjt     allocate() decl. into header
+ *      15-aug-06       pjt     prototype fixes
  *
  *    'BUG': headline is taken from input file if it was present
  */
@@ -17,12 +18,13 @@
 #include <filestruct.h>
 #include <history.h>
 
-#define put_snap_diagnostics  my_put_snap_diagnostics
-local my_put_snap_diagnostics();
 local diagnostics(), put_quadfield();
 
 #include <snapshot/snapshot.h>
 #include <snapshot/get_snap.c>
+#define put_snap_diagnostics  my_put_snap_diagnostics
+local void put_snap_diagnostics(stream, int*);
+
 #include <snapshot/put_snap.c>
 
 /*
