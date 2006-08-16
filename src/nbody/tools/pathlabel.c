@@ -4,7 +4,7 @@
  *	xx-xxx-xx  0.0 -- JEB
  *	20-feb-92  0.1 removed dex() - which is defined in the NEMO kernel PJT
  *	 7-mar-92  0.2 fixed pathw string bug  & happy gcc2.0	           pjt
- *      15-aug-06  0.3 
+ *      15-aug-06  0.3 prototype fixes
  */
 
 #include <stdinc.h>
@@ -56,8 +56,9 @@ local rproc compile_func(string expr, string var);
 void nemo_main(void)
 {
     stream instr, outstr;
-    rproc compile_func();
     int snapbits;
+
+    warning("this program actually doesn't run correctly");
 
     instr = stropen(getparam("in"), "r");
     get_history(instr);
@@ -108,15 +109,15 @@ rproc compile_func(string expr, string var)
     fclose(cdstr);
     sprintf(cmmd, "cc -o %s.o -c %s.c", path, path);
     if (system(cmmd) != 0)
-	error("compile_func in %s: cant %s\n", getargv0(), cmmd);
+	error("1st in compile_func: can't %s\n", cmmd);
     sprintf(file, "%s.o", path);
     loadobj(file);
     sprintf(cmmd, "rm %s.c %s.o", path, path);
     if (system(cmmd) != 0)
-	error("compile_func in %s: cant %s\n", getargv0(), cmmd);
+	error("2nd in compile_func: can't %s\n", cmmd);
     result = findfn(func);
     if (result == NULL)
-	error("compile_func in %s: cant find %s\n", getargv0(), func);
+	error("in compile_func: can't find %s\n", func);
     return ((rproc) result);
 }
 
