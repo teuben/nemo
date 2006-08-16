@@ -1,6 +1,6 @@
 DIR = src/nbody/trans
 BIN = snapcenter snaprotate snaprect snapinert snapsplit snapcopy snapadd \
-      snapdens snapshift snapstack 
+      snapdens snapshift snapstack snapmass
 NEED = $(BIN) mkplummer snapprint
 
 help:
@@ -65,3 +65,7 @@ snapshift: snap.in
 snapstack: snap.in
 	$(EXEC) snapstack snap.in snap.in2 - deltar=10,0,0 deltav=-1,0,0 | tsf -;\
 	 nemo.coverage snapstack.c
+
+snapmass: snap.in
+	$(EXEC) snapmass snap.in - mass=2.0 norm=4 | tsf -;\
+	 nemo.coverage snapmass.c
