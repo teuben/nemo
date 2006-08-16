@@ -1,28 +1,29 @@
-.TH BODYTRANS 3NEMO "11 September 1990"
+.TH BODYTRANS 3NEMO "15 August 2006"
 .SH NAME
 btrtrans, btitrans \- obtain pointer to body-scalar mapping function
 .SH SYNOPSIS
 .nf
-.B #include <stdinc.h>
+.B #include <bodytrans.h>
 .PP
-.B rproc btrtrans(expr)
-.B string expr;
+.B typedef real (*rproc_body)(Body *, real, int);
+.B typedef int  (*iproc_body)(Body *, real, int);
 .PP
-.B iproc btitrans(expr)
-.B string expr;
+.B rproc_body btrtrans(string expr)
+.PP
+.B iproc_body btitrans(string expr)
 .fi
 .SH DESCRIPTION
 \fIbtrtrans\fP and \fIbtitrans\fP provide a high level interface
-to define an arbitrary body to scaler mapping function. Depending
+to define an arbitrary body to scalar mapping function. Depending
 if the type of the function is real or int, btrtrans or btitrans
 has to be used. The \fIexpr\fP is the body scalar mapping to be used.
 .PP
 Both routines return a function pointer, which can then
-be used to call the wanted function.
+be used to call the desired function.
 For more details on the allowed \fIexpr\fP see \fIbodytrans(1NEMO)\fP.
 .SH EXAMPLE
 .nf
-rproc fsum, btrtrans();
+rproc_body fsum;
 Body  *bp;
 real   t, sum;
 int    i;
@@ -38,5 +39,6 @@ Josh Barnes
 .ta +1.0i +4.0i
 20-nov-89	Doc Created	PJT
 11-sep-90	Manual updated	PJT
+15-aug-06	prototype definitions finally documented	WD/PJT
 .fi
 
