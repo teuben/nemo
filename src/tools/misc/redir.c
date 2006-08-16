@@ -31,6 +31,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/file.h>
 
 #define USAGESTRING ("Usage: %s [-[a][oeOE] file] ... command-words\n")

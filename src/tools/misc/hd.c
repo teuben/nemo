@@ -18,6 +18,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "hd.h"
 
 CHAR *titlep;                       /* pointer to name of current file */
