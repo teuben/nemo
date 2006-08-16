@@ -52,7 +52,7 @@ string defv[] = {		/* DEFAULT PARAMETER VALUES */
     "potfile=\n			Filename for potential(5)",
 
     "hdebug=false\n		Turn on debugging messages",
-    "VERSION=1.3\n		15-aug-06 PJT",
+    "VERSION=1.3a\n		15-aug-06 PJT",
     NULL,
 };
 
@@ -92,9 +92,9 @@ startrun()
     if (debug)
 	dprintf(0,"hdebug is turned on");
     nrigid = getiparam("nrigid");
-    if (*contfile != NULL)			/* resume interrupted run   */
+    if (*contfile)	         		/* resume interrupted run   */
 	restorestate(contfile);
-    else if (*restfile != NULL) {		/* resume w/ new parameters */
+    else if (*restfile) {	        	 /* resume w/ new parameters */
 	restorestate(restfile);
 	/* NOTE: someday, I will have a way to tell which, if any, of these *
 	 * parameters are actually input from the command line, and only    *
@@ -111,7 +111,7 @@ startrun()
 	    minor_tout = tnow + 1 / minor_freqout;
 	}
     } else {					/* start new calculation    */
-	if (*infile != NULL)			/*   was data file given?   */
+	if (*infile)	                 	/*   was data file given?   */
 	    inputdata(infile);			/*     read inital data     */
 	else {					/*   make initial conds?    */
 	    nbody = getiparam("nbody");		/*     get nbody parameter  */
@@ -133,7 +133,7 @@ startrun()
 	rsize = -2.0 * rmin[0];
     }
     contfile = getparam("potname");
-    if (*contfile != NULL) {
+    if (*contfile) {
         extpot = get_potential(contfile, 
                     getparam("potpars"),getparam("potfile"));
     }

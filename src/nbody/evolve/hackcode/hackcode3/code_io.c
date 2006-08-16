@@ -63,14 +63,14 @@ initoutput()
         getparam("potname"), getparam("potpars"), getparam("potfile"));
     if (nrigid != 0)
     	printf(" // the first %d stars were held rigid\n",nrigid);
-    if (*options != NULL)
+    if (*options)
         printf("\toptions: %s\n", options);
-    if (*outfile != NULL) {                     /* output file specified?   */
+    if (*outfile) {                             /* output file specified?   */
         outstr = stropen(outfile, "w");         /*   setup output stream    */
 	put_history(outstr);			/*   write file history     */
     } else
         outstr = NULL;				/*   prevent binary output  */
-    if (*savefile != NULL)			/* state file specified?    */
+    if (*savefile)	          		/* state file specified?    */
 	savestate(savefile);			/*   save inital data       */
 }
 
@@ -142,7 +142,7 @@ output()
 	if (bits & PhaseSpaceBit)
 	    printf("\n\tparticle data written\n");
     }
-    if (*savefile != NULL)			/* state file specified?    */
+    if (*savefile)        			/* state file specified?    */
 	savestate(savefile);			/*   save system data       */
 }
 
@@ -150,9 +150,9 @@ output()
  * DIAGNOSTICS: compute set of dynamical diagnostics.
  */
 
-local diagnostics()
+local void diagnostics()
 {
-    register bodyptr p;
+    bodyptr p;
     real velsq, phi0;
     vector tmpv;
     matrix tmpt;
@@ -199,7 +199,7 @@ local diagnostics()
  * MY_PUT_SNAP_DIAGNOSTICS: output various N-body diagnostics.
  */
 
-local my_put_snap_diagnostics(stream outstr, int *ofptr)
+local void my_put_snap_diagnostics(stream outstr, int *ofptr)
 {
     real cput;
 
