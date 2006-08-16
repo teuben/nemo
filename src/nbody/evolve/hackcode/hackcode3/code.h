@@ -5,32 +5,63 @@
 #include "defs.h"
 #include <getparam.h>
 
-string infile;			/* file name for snapshot input */
-string outfile;			/* file name for snapshot output */
-string savefile;		/* file name for state output */
 
-real freq;			/* fundamental integration frequency */
+/*
+ * ROOT: origin of tree; declared as nodeptr for tree with only 1 body.
+ */
 
-real freqout, minor_freqout;	/* major, minor output frequencies */
+global nodeptr troot;
 
-real tstop;			/* time to stop calculation */
+/*
+ * Integerized coordinates: used to mantain body-tree.
+ */
 
-string options;                 /* various option flags */
+global vector rmin;			/* lower-left corner of coord. box */
+global real rsize;			/* side-length of int. coord. box */
+
+/*
+ * Parameters and results for gravitational calculation.
+ */
+
+global real fcells;			/* ratio of cells/bodies allocated */
+
+global real tol;                       /* accuracy parameter: 0.0 => exact */
+global real eps;                       /* potential softening parameter */
+
+global int n2bterm;                    /* number 2-body of terms evaluated */
+global int nbcterm;			/* num of body-cell terms evaluated */
+
+global bool debug;                     /* control debugging messages */
+
+
+
+
+global string infile;			/* file name for snapshot input */
+global string outfile;			/* file name for snapshot output */
+global string savefile;		/* file name for state output */
+
+global real freq;			/* fundamental integration frequency */
+
+global real freqout, minor_freqout;	/* major, minor output frequencies */
+
+global real tstop;			/* time to stop calculation */
+
+global string options;                 /* various option flags */
 
 extern string headline;		/* message describing calculation */
 
-real tnow;			/* current value of time */
+global real tnow;			/* current value of time */
 
-real tout, minor_tout;		/* time of next major, minor output */
+global real tout, minor_tout;		/* time of next major, minor output */
 
-int nstep;			/* number of micro-steps */
+global int nstep;			/* number of micro-steps */
 
-int nfcalc;			/* number of n-on-1 force calculations */
-int n2bcalc;			/* number of 2-body force calculations */
-int nbccalc;			/* num of body-cell force calculations */
+global int nfcalc;			/* number of n-on-1 force calculations */
+global int n2bcalc;			/* number of 2-body force calculations */
+global int nbccalc;			/* num of body-cell force calculations */
 
-int nbody;			/* number of bodies in system */
-int nrigid;                     /* number of rigid particles */
-bodyptr bodytab;		/* points to array of bodies */
+global int nbody;			/* number of bodies in system */
+global int nrigid;                     /* number of rigid particles */
+global bodyptr bodytab;		/* points to array of bodies */
 
-proc extpot;			/* external potential(5) */
+global proc extpot;			/* external potential(5) */

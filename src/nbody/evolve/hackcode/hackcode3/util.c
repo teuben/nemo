@@ -4,17 +4,14 @@
  *      17-feb-94 fixed bug with -DSINGLEPREC               pjt
  */
 
-#include "defs.h"
+#include "code.h"
 
 /*
  * PICKVEC: generate random coordinates within a unit sphere.
  */
 
-pickvec(x, cf)
-vector x;                               /* coord vector to generate */
-bool cf;                                /* pick from 1/r^2 profile */
+pickvec(vector x, bool cf)
 {
-    double xrandom();
 
     if (debug)
         printf("pickvec: cf = %d\t", cf);

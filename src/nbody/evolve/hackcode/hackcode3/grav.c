@@ -3,7 +3,7 @@
  *	   if an external (static) potential(5NEMO) is defined, it's used
  */
 
-#include "defs.h"
+#include "code.h"
 
 /*
  * HACKGRAV: evaluate grav field at a given particle.
@@ -14,12 +14,13 @@ local vector pos0;			/* point to evaluate field at */
 local real phi0;			/* resulting potential at pos0 */
 local vector acc0;			/* resulting acceleration at pos0 */
 
-hackgrav(p)
-bodyptr p;
+/* forward declarations: */
+local void walksub(nodeptr, real);
+local bool subdivp(nodeptr, real);
+local void gravsub(nodeptr);
+
+hackgrav(bodyptr p)
 {
-    extern gravsub();
-    extern proc extpot;
-    extern real tnow;
     int ndim=NDIM;
 
     pskip = p;					/* exclude p from f.c.      */
@@ -46,10 +47,8 @@ local nodeptr pmem;                     /* for memorized data to be shared */
 local vector dr;			/* between gravsub and subdivp */
 local real drsq;
 
-local gravsub(p)
-register nodeptr p;                     /* body or cell to interact with */
+local void gravsub(nodeptr p)
 {
-    double sqrt();
     static real drabs, phii, mor3;
     static vector ai, quaddr;
     static real dr5inv, phiquad, drquaddr;
@@ -88,8 +87,7 @@ register nodeptr p;                     /* body or cell to interact with */
 local proc hacksub;
 local real tolsq;
 
-hackwalk(sub)
-proc sub;				/* routine to do calculation */
+hackwalk(proc sub)
 {
     hacksub = sub;
     tolsq = tol * tol;
@@ -100,13 +98,10 @@ proc sub;				/* routine to do calculation */
  * WALKSUB: recursive routine to do hackwalk operation.
  */
 
-local walksub(p, dsq)
-register nodeptr p;                     /* pointer into body-tree */
-real dsq;                               /* size of box squared */
+local void walksub(nodeptr p, real dsq)
 {
-    bool subdivp();
-    register nodeptr *pp;
-    register int k;
+    nodeptr *pp;
+    int k;
 
     if (debug)
         printf("walksub: p = %o  dsq = %f\n", p, dsq);
@@ -131,9 +126,7 @@ real dsq;                               /* size of box squared */
  * Side effects: sets pmem, dr, and drsq.
  */
 
-local bool subdivp(p, dsq)
-register nodeptr p;                     /* body/cell to be tested */
-real dsq;                               /* size of cell squared */
+local bool subdivp(nodeptr p, real dsq)
 {
     if (Type(p) == BODY)                        /* at tip of tree?          */
         return (FALSE);                         /*   then cant subdivide    */

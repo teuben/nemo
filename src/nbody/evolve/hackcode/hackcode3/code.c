@@ -12,8 +12,10 @@
  *     24-mar-94  V1.2c ansi + using allocate()
  *	8-sep-01	init_xrandom
  *     11-jan-02      d debug= renamed to hdebug=
+ *     15-aug-06  V1.3  prototype and global/extern as in hackcode1	PJT
  */
 
+#define global
 #include "code.h"
 
 string defv[] = {		/* DEFAULT PARAMETER VALUES */
@@ -50,7 +52,7 @@ string defv[] = {		/* DEFAULT PARAMETER VALUES */
     "potfile=\n			Filename for potential(5)",
 
     "hdebug=false\n		Turn on debugging messages",
-    "VERSION=1.2d\n		11-jan-02 PJT",
+    "VERSION=1.3\n		15-aug-06 PJT",
     NULL,
 };
 
@@ -58,8 +60,11 @@ string headline = "Hack code3";	/* default id for run */
 
 string usage = "hierarchical N-body code, with potential(5NEMO) descriptors";
 
+string cvsid="$Id$";
 
-nemo_main()
+
+
+void nemo_main(void)
 {
     startrun();					/* set params, input data   */
     initoutput();				/* begin system output      */

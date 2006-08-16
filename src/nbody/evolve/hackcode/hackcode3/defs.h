@@ -7,6 +7,15 @@
 #include <assert.h>
 
 /*
+ * GLOBAL: pseudo-keyword for storage class.
+ */
+
+#if !defined(global)
+#  define global extern
+#endif
+
+
+/*
  * BODY and CELL data structures are used to represent the tree:
  *
  *         +-----------------------------------------------+
@@ -99,31 +108,8 @@ typedef struct {
 
 #define Subp(x) (((cellptr) (x))->subp)
 
-/*
- * ROOT: origin of tree; declared as nodeptr for tree with only 1 body.
- */
-
-nodeptr troot;
-
-/*
- * Integerized coordinates: used to mantain body-tree.
- */
-
-vector rmin;			/* lower-left corner of coord. box */
-real rsize;			/* side-length of int. coord. box */
 
 #define IMAX (1 << (8 * sizeof(int) - 2))       /* highest bit */
 
-/*
- * Parameters and results for gravitational calculation.
- */
 
-real fcells;			/* ratio of cells/bodies allocated */
 
-real tol;                       /* accuracy parameter: 0.0 => exact */
-real eps;                       /* potential softening parameter */
-
-int n2bterm;                    /* number 2-body of terms evaluated */
-int nbcterm;			/* num of body-cell terms evaluated */
-
-bool debug;                     /* control debugging messages */

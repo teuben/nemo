@@ -6,26 +6,27 @@
 
 #include "code.h"
 #include <filestruct.h>
+#include <history.h>
 
 #include <snapshot/snapshot.h>
-
 #include <snapshot/get_snap.c>
-
 #define put_snap_diagnostics  my_put_snap_diagnostics
-
+local void put_snap_diagnostics(stream, int *);
 #include <snapshot/put_snap.c>
+
+local void diagnostics(void);
+
+extern double cputime(void);
+extern bool scanopt(string,string);
 
 /*
  * INPUTDATA: read initial conditions from input file.
  */
 
-inputdata(file)
-string file;			/* input file name */
+inputdata(string file)
 {
     stream instr;
-    string ask_headline();
     int bits;
-    bool scanopt();
     bodyptr p;
 
     instr = stropen(file, "r");			/* open input stream        */
@@ -103,7 +104,6 @@ local bool firstmass = TRUE;	/* if true, output mass data */
 output()
 {
     int nttot, nbavg, ncavg, k, bits;
-    double cputime();
 
     diagnostics();				/* compute std diagnostics  */
     nttot = n2bcalc + nbccalc;
@@ -199,11 +199,8 @@ local diagnostics()
  * MY_PUT_SNAP_DIAGNOSTICS: output various N-body diagnostics.
  */
 
-local my_put_snap_diagnostics(outstr, ofptr)
-stream outstr;
-int *ofptr;
+local my_put_snap_diagnostics(stream outstr, int *ofptr)
 {
-    double cputime();
     real cput;
 
     cput = cputime();
@@ -221,8 +218,7 @@ int *ofptr;
  * SAVESTATE: write current state to disk file.
  */
 
-savestate(file)
-string file;
+savestate(string file)
 {
     stream str;
 
@@ -254,8 +250,7 @@ string file;
  * RESTORESTATE: restore state from disk file.
  */
 
-restorestate(file)
-string file;
+restorestate(string file)
 {
     stream str;
     string program, version;
