@@ -5,6 +5,7 @@
  *	 6-sep-95       V1.0 toy, created for NHK video		pjt
  *       9-sep-01       gsl/xrandom
  *      14-sep-03       toy model to test radius selections in power laws    PJT
+ *      15-aug-06       1.1a: prototypes better used
  */
 
 
@@ -12,6 +13,7 @@
 #include  <getparam.h>
 #include  <vectmath.h>
 #include  <filestruct.h>
+#include  <history.h>
 
 #include <snapshot/snapshot.h>  
 #include <snapshot/body.h>
@@ -29,7 +31,7 @@ string  defv[] = {
     "rmin=\n                  minimum radius, if to override from radii",
     "rmax=\n                  maximum radius, if to override from radii",
     "headline=\n	      Verbiage for output",
-    "VERSION=1.1\n            14-sep-03 PJT",
+    "VERSION=1.1a\n           15-aug-06 PJT",
     NULL,
 };
 
@@ -43,20 +45,18 @@ real rad[MAXTAB], den[MAXTAB], mass[MAXTAB], rmin, rmax, mmin, mmax, alpha;
 int ntab;
 
 local double mr(double);
+local void make_mass(void);
 local Body *mkplummer(int , int , bool);
 local Body *mksphere(int , int , bool);
 
-extern double frandom(double, double, rproc);
-extern double xrandom(double, double);
 
-nemo_main()
+void nemo_main(void)
 {
     bool    zerocm;
     int     nbody, seed, bits, i, n;
     real    snap_time = 0.0;
     Body    *btab;
     stream  outstr;
-    string  headline;
     char    hisline[128];
     bool    Qalpha;
 
@@ -109,15 +109,7 @@ local Body *mkplummer(int nbody, int seed, bool zerocm)
     int  i;
     real  mtot;
     real  radius;		/* absolute value of position vector      */
-    real  velocity;		/* absolute value of velocity vector      */
     real  theta, phi;		/* direction angles of above vectors      */
-    real  x, y;		        /* for use in rejection technique         */
-    real  scalefactor;          /* for converting between different units */
-    real  inv_scalefactor;      /* inverse scale factor                   */
-    real  sqrt_scalefactor;     /* sqare root of scale factor             */
-    real  mrfrac;               /* m( rfrac )                             */
-    real  m_min, m_max;         /* mass shell limits for quiet=1          */
-    real   m_med;		/* mass shell value for quiet=2           */
     real   w_sum;               /* temporary storage for c.o.m. calc      */
     vector w_pos, w_vel;        /* temporary storage for c.o.m. calc      */
     Body  *btab;                /* pointer to the snapshot                */
@@ -167,15 +159,7 @@ local Body *mksphere(int nbody, int seed, bool zerocm)
     int  i;
     real  mtot, m;
     real  radius;		/* absolute value of position vector      */
-    real  velocity;		/* absolute value of velocity vector      */
     real  theta, phi;		/* direction angles of above vectors      */
-    real  x, y;		        /* for use in rejection technique         */
-    real  scalefactor;          /* for converting between different units */
-    real  inv_scalefactor;      /* inverse scale factor                   */
-    real  sqrt_scalefactor;     /* sqare root of scale factor             */
-    real  mrfrac;               /* m( rfrac )                             */
-    real  m_min, m_max;         /* mass shell limits for quiet=1          */
-    real   m_med;		/* mass shell value for quiet=2           */
     real   w_sum;               /* temporary storage for c.o.m. calc      */
     vector w_pos, w_vel;        /* temporary storage for c.o.m. calc      */
     Body  *btab;                /* pointer to the snapshot                */
@@ -224,7 +208,7 @@ local Body *mksphere(int nbody, int seed, bool zerocm)
 
 
 
-make_mass()
+local void make_mass(void)
 {
     int i;
 
