@@ -18,14 +18,16 @@
 #include <filestruct.h>
 #include <history.h>
 
-local diagnostics(), put_quadfield();
-
 #include <snapshot/snapshot.h>
 #include <snapshot/get_snap.c>
 #define put_snap_diagnostics  my_put_snap_diagnostics
 local void put_snap_diagnostics(stream, int*);
 
 #include <snapshot/put_snap.c>
+
+local void diagnostics(void), put_quadfield(stream);
+
+
 
 /*
  * INPUTDATA: read initial conditions from input file.
@@ -161,7 +163,7 @@ void output()
  * DIAGNOSTICS: compute set of dynamical diagnostics.
  */
 
-local diagnostics()
+local void diagnostics()
 {
     int i;
     Body *p;
@@ -205,7 +207,7 @@ local diagnostics()
  * MY_PUT_SNAP_DIAGNOSTICS: output various N-body diagnostics.
  */
 
-local my_put_snap_diagnostics(stream outstr, int *ofptr)
+local void my_put_snap_diagnostics(stream outstr, int *ofptr)
 {
     real cput;
 
@@ -224,7 +226,7 @@ local my_put_snap_diagnostics(stream outstr, int *ofptr)
  * PUT_QUADFIELD: output tabulation of quadrupole field.
  */
 
-local put_quadfield(stream quadstr)
+local void put_quadfield(stream quadstr)
 {
     put_set(quadstr, "QuadField");
     put_data(quadstr, TimeTag, RealType, &tnow, 0);
@@ -250,7 +252,7 @@ local put_quadfield(stream quadstr)
  * SAVESTATE: write current state to disk file.
  */
 
-savestate(string file)
+int savestate(string file)
 {
     stream str;
 
@@ -280,7 +282,7 @@ savestate(string file)
  * RESTORESTATE: restore state from disk file.
  */
 
-restorestate(string file)
+int restorestate(string file)
 {
     stream str;
     string program, version;
