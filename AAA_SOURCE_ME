@@ -43,6 +43,7 @@
 # 26-dec-04  PJT       		make HDF optional bootstrappable
 # 29-dec-05  PJT                set absolute paths to compilers in makedefs
 # 30-jul-06  PJT                various for gh2006 at the beach near Veracruz :-)
+# 17-aug-06  PJT                corrected for new falcON procedure
 
 if ($?NEMO) goto bad_has_nemo
 
@@ -136,10 +137,10 @@ endif
 
 src/scripts/testsuite -b >>& install.log
 
-if (0) then
-  # now done in 'make libs'
+if (1) then
+  # also done in 'make libs', should be done earlier so we can add some Testfile's
   echo Compiling falcON and its tools. 
-  (cd usr/dehnen/falcON; make install)  >& install_falcON.log
+  (cd usr/dehnen/; make all)  >& install_falcON.log
 endif
 
 if ($stat == 0) then
