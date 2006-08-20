@@ -44,13 +44,15 @@ string defv[] = {
     "format=%g\n      format for pos,vel for galaxy.ini",
     "header=\n        If given, use this for unfio header/trailer size",
     "exe=galaxy\n     name of GALAXY executable",
-    "VERSION=2.1c\n   17-mar-06 PJT",
+    "VERSION=2.1d\n   20-aug-06 PJT",
     NULL,
 };
 
 string usage = "frontend to run Sellwood's galaxy code";
 
 string cvsid="$Id$";
+
+int run_program(string);
 
 int nemo_main()
 {
@@ -122,7 +124,8 @@ int nemo_main()
     /* run the fortran program */
 
     goto_rundir(rundir);
-    run_program(exefile);
+    if (run_program(exefile))
+      error("Problem executing %s",exefile);
 
     /* Output data from native galaxy (.res) format to snapshot */
     
@@ -162,6 +165,7 @@ goto_rundir(string name)
 {
     if (chdir(name))
         error("Cannot change directory to %s",name);
+    return 0;
 }
 
 make_rundir(string name)
@@ -171,14 +175,10 @@ make_rundir(string name)
 }
 
 
-run_program(string exe)
+int run_program(string exe)
 {
-#if 1
-    system(exe);
-#else
-    if (execlp(exe,NULL)) {
-        fprintf(stderr,"Problem executing %s\n",exe);
-        exit(1);
-    }
-#endif
+  int retval;
+  retval = system(exe);
+  dprintf(1,"%s: returning %d\n",exe,retval);
+  return retval;
 }

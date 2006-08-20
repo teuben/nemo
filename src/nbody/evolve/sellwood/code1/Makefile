@@ -8,7 +8,9 @@ SRC = galaxy.f
 help:
 	@echo GALAXY program, written by Jerry Sellwood
 
-FFLAGS = -O
+#   on 64bit machines, -O will coredump, -O2 is ok, adding -g also
+#   we'll inherit FFLAGS from the makedefs file instead
+#FFLAGS = -O2
 
 all:	galaxy.a galaxy
 

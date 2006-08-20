@@ -24,7 +24,8 @@ LINKS = admin.h rjinclude.h
 
 OBJ = $(SRC:f=o)
 
-FFLAGS = -O
+# see somments in ../Makefile on the FFLAGS issue on 64bit
+# FFLAGS = -O
 
 LIB = ../galaxy.a
 
