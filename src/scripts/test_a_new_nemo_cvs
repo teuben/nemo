@@ -8,7 +8,7 @@
 #               30-jul-2004   optional cfitsio install
 #               11-jul-2005   various additional packages for NEMO V3.2.3
 #                5-mar-2006   also create nemo_start.sh
-#                1-aug-2006   falcON install 
+#               20-aug-2006   falcON install 
 
 set pgplot=1		# install PGPLOT via CVS also
 set intel=0		# pick intel compiler (astromake)
