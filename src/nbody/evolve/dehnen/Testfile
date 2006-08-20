@@ -1,0 +1,28 @@
+DIR = src/nbody/evolve/dehnen
+BIN = gyrfalcON
+NEED = $(BIN)
+
+help:
+	@echo $(DIR)
+
+need:
+	@echo $(NEED)
+
+clean:
+	@echo Cleaning $(DIR)
+	@rm -fr core p1024.*
+
+NBODY = 10
+
+all: gyrfalcON
+
+gyrfalcON:
+	@echo Running $@
+	@rm -f bench.dat bench.log
+	$(EXEC) mkplum p1024.in 1024 seed=1024
+	$(EXEC) gyrfalcON in=p1024.in out=p1024.out hmin=6 tstop=2 > p1024.log
+	@head -12 p1024.log
+	@echo "..."
+	@tail -2 p1024.log
+
+
