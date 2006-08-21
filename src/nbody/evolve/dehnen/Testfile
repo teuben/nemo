@@ -31,6 +31,6 @@ gyrfalcON:
 	@head -12 p1024.log2
 	@echo "..."
 	@tail -2 p1024.log2
-	@(EXEC) snapmradii p1024.out  log=t > p1024.tab
-	@(EXEC) snapmradii p1024.out2 log=t > p1024.tab2
+	$(EXEC) snapmradii p1024.out  log=t > p1024.tab
+	$(EXEC) snapmradii p1024.out2 log=t > p1024.tab2
 
