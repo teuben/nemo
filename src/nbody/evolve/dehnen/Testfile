@@ -1,6 +1,6 @@
 DIR = src/nbody/evolve/dehnen
 BIN = gyrfalcON
-NEED = $(BIN)
+NEED = $(BIN) snapscale snapmradii
 
 help:
 	@echo $(DIR)
@@ -13,6 +13,7 @@ clean:
 	@rm -fr core p1024.*
 
 NBODY = 10
+TSTOP = 2
 
 all: gyrfalcON
 
@@ -20,9 +21,16 @@ gyrfalcON:
 	@echo Running $@
 	@rm -f bench.dat bench.log
 	$(EXEC) mkplum p1024.in 1024 seed=1024
-	$(EXEC) gyrfalcON in=p1024.in out=p1024.out hmin=6 tstop=2 > p1024.log
+	$(EXEC) gyrfalcON in=p1024.in out=p1024.out hmin=6 tstop=$(TSTOP) > p1024.log
 	@head -12 p1024.log
 	@echo "..."
 	@tail -2 p1024.log
-
+	$(EXEC) snapscale p1024.in p1024.in2 mscale=0.5
+	$(EXEC) gyrfalcON in=p1024.in2 out=p1024.out2 hmin=6 tstop=$(TSTOP) \
+		accname=Plummer accpars=0,0.5,1 > p1024.log2
+	@head -12 p1024.log2
+	@echo "..."
+	@tail -2 p1024.log2
+	@(EXEC) snapmradii p1024.out  log=t > p1024.tab
+	@(EXEC) snapmradii p1024.out2 log=t > p1024.tab2
 
