@@ -2,9 +2,12 @@
 #
 #     example benchmark for gadget in 'galaxy' mode
 #
+#          cpu                                  np (number of cpu's)           comments
+#                                                1      2      4
+# 2 dual-Intel(R) Xeon(TM) CPU 2.66GHz:		1:44   1:02   0:58           UMD::mixcoatl 2006
 
 set manybody=0
-
+set np=1
 
 
 
@@ -36,8 +39,8 @@ ln -s $manybody/gadget/Gadget/ICs
 mkdir galaxy
 
 lamboot
-echo time mpirun -np 2 Gadget2.galaxy gadget.galaxy.param 
+echo time mpirun -np $np Gadget2.galaxy gadget.galaxy.param 
 echo check `pwd`/gadget.galaxy.log for progress
-time mpirun -np 2 Gadget2.galaxy gadget.galaxy.param >& gadget.galaxy.log
+time mpirun -np $np Gadget2.galaxy gadget.galaxy.param >& gadget.galaxy.log
 lamwipe
 
