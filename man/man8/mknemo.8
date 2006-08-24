@@ -1,4 +1,4 @@
-.TH MKNEMO 8NEMO "11 June 2004"
+.TH MKNEMO 8NEMO "24 August 2006"
 .SH NAME
 mknemo \- attempt to find NEMO programs and install them
 .SH SYNOPSIS
@@ -30,8 +30,20 @@ to be updated.
   -r        remove lockfile before starting
   -d        also make doc file (only for true NEMO programs)
   -t        cleanup after having made the binaries
+  -T        cleanup before making the binaries
   -u        update your NEMO cvs tree before (re)making
   -l        recompile the library before (re)making 
+  -g        use gmake, instead of make
+  -v        more verbose, it will report version and cvsid of program
+.fi
+.SH EXAMPLES
+Here are some examples of the non-default control files in $NEMO/src/scripts/mknemo.d:
+.nf 
+.ta +2i
+firstn    	nbody code
+glnemo   	glnemo graphics
+gyrfalcON   	falcON tools (gyrfalcON, mkplum, the acc's and manip's)
+rotcur    	rotcur program (there is also a confusing rotcur \fIpotential(5NEMO)\fP)
 .fi
 .SH "SEE ALSO"
 mkbin(8NEMO)
@@ -40,6 +52,7 @@ Peter Teuben
 .SH FILES
 .nf
 .ta +3.0i
+$NEMO/src/scripts/mknemo.d	directory with non-default control files for mknemo
 $NEMOLIB/NEMORC		environment variables
 $NEMOLIB/makedefs	make variables
 $NEMOLIB/libnemo.a	main NEMO library
