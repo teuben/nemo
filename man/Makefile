@@ -58,3 +58,7 @@ new:
 	@catman $(CATMANFLAGS) -p -M $(NEMO)/man -T $(NEMO)/man/tmac.an \
 		$(SECTIONS)
 
+fortune: nemo-fortunes.dat
+
+nemo-fortunes.dat: nemo-fortunes
+	strfile nemo-fortunes nemo-fortunes.dat
