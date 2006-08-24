@@ -1,0 +1,30 @@
+NEMO command line arguments do not need to be given if given in the correct order.
+For example:
+	mkplummer out=p10 nbody=10
+can be 
+	mkplummer p10 10
+
+If you want to find out the order of the keywords, use the "help=" option
+%
+A unix pipe becomes a '-' in NEMO:
+
+	mkplummer - 10 | tsf -
+	
+%
+A nemo file can also be a URL, e.g.
+
+	tsf http://www.astro.umd.edu/nemo/p10k.dat
+%
+There are two kinds on help:
+Online help:		man mkplummer
+Inline help:		mkplummer help=h
+%
+The 'mknemo' command makes a very easy to recompile, or even update your
+NEMO with new programs.
+	mknemo 
+%
+For complicated procedures, the mknemo command uses a control file in
+$NEMO/src/scripts/mknemo.d. E.g.
+	mknemo gyrfalcON
+%
+

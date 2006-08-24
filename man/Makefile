@@ -62,3 +62,4 @@ fortune: nemo-fortunes.dat
 
 nemo-fortunes.dat: nemo-fortunes
 	strfile nemo-fortunes nemo-fortunes.dat
+	fortune nemo-fortunes
