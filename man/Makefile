@@ -59,7 +59,7 @@ new:
 		$(SECTIONS)
 
 fortune: nemo-fortunes.dat
+	fortune nemo-fortunes
 
 nemo-fortunes.dat: nemo-fortunes
 	strfile nemo-fortunes nemo-fortunes.dat
-	fortune nemo-fortunes

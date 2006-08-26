@@ -9,7 +9,19 @@ If you want to find out the order of the keywords, use the "help=" option
 A unix pipe becomes a '-' in NEMO:
 
 	mkplummer - 10 | tsf -
-	
+
+where the first '-' denotes 'stdout', and the secon 'stdin'.
+
+%
+Numbered file descriptors can also be used in NEMO, but only sh shells
+(such as bash) support these, csh do not. Example:
+
+	mkplummer p1 10
+	mkplummer p2 10
+	snapstack -3 -4 junk 3<p1 4<p2
+
+but remember that 0,1, and 2 are reserved for stdin, stdout and stderr.
+This scheme makes it possible to write much more complex
 %
 A nemo file can also be a URL, e.g.
 
