@@ -1,7 +1,6 @@
 #! /bin/csh -f
 #
 
-
 alias e echo
 
 e "# sh script"
@@ -18,37 +17,29 @@ e "NEMOOBJ=$NEMOOBJ;   export NEMOOBJ"
 e "NEMOSITE=$NEMOSITE; export NEMOSITE"
 e "NEMOSRC=$NEMOSRC;   export NEMOSRC"
 e "NEMOVER=$NEMOVER;   export NEMOVER"
-e "BTRPATH=.:$NEMOOBJ/bodytrans;   export BTRPATH"
-e "POTPATH=.:$NEMOOBJ/potential;   export POTPATH"
 
-e "YAPP=$YAPP; export YAPP"
+e "BTRPATH=$BTRPATH;       export BTRPATH"
+e "POTPATH=$POTPATH;       export POTPATH"
 
-e 'if [ -z "${PATH}" ]'
-e 'then'
-e '    PATH="$NEMOBIN"; export PATH'
-e 'else'
-e '    PATH="$NEMOBIN:$PATH"; export PATH'
-e 'fi'
+e "FALCON=$FALCON;         export FALCON"
+e "FALCONLIB=$FALCONLIB;   export FALCONLIB"
+e "ACCPATH=$ACCPATH;       export ACCPATH"
+e "MANIPPATH=$MANIPPATH;   export MANIPPATH"
 
-e 'if [ -z "${LD_LIBRARY_PATH}" ]'
-e 'then'
-e '    LD_LIBRARY_PATH="$NEMOLIB"; export LD_LIBRARY_PATH'
-e 'else'
-e '    LD_LIBRARY_PATH="$NEMOLIB:$LD_LIBRARY_PATH"; export LD_LIBRARY_PATH'
-e 'fi'
+e "YAPP=$YAPP;               export YAPP"
+e "PGPLOT_DIR=$PGPLOT_DIR;   export PGPLOT_DIR"
+e "PGPLOT_FONT=$PGPLOT_FONT; export PGPLOT_DIR"
+e "PGPLOT_LIB=$PGPLOT_LIB;   export PGPLOT_LIB"
 
-e 'if [ -z "${MANPATH}" ]'
-e 'then'
-  set mp=(`man -w`)
-  if ($#mp == 1) then
-    e '    MANPATH="$NEMO/man":$(man -w); export MANPATH'
-  else
-    e '    MANPATH="$NEMO/man"; export MANPATH'
-  endif
-e 'else'
-e '    MANPATH="$NEMO/man:${MANPATH}"; export MANPATH'
-e 'fi'
+e "PLPLOT_LIB=$PLPLOT_LIB;   export PLPLOT_LIB"
 
+e "VDEVICE=$VDEVICE;         export VDEVICE"
+
+
+
+e "PATH=$PATH;                          export PATH"
+e "MANPATH=$MANPATH;                    export MANPATH"
+e "LD_LIBRARY_PATH=$LD_LIBRARY_PATH;    export LD_LIBRARY_PATH"
 
 
 
