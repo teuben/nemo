@@ -1,0 +1,16 @@
+#! /bin/csh -f
+#
+#  falcON tools, for the version after Aug 6, 2006 (nemo 3.2.4)
+
+set dir=$NEMO/usr/dehnen/falcON
+
+if (-e $dir) then
+  foreach d ($NEMOOBJ/acc $NEMOOBJ/manip)
+    if (! -e $d) mkdir $d
+  end
+  cd $dir
+  make clean install
+else
+  echo mknemo.d: $dir does not exist
+endif
+
