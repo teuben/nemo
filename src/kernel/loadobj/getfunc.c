@@ -8,6 +8,9 @@
  *     16-sep-00   changed from TESTBED to TOOLBOX      pjt
  *      1-apr-01   new '.so' based for NEMO V3		pjt
  *     20-jun-01   fix header				pjt
+ *     29-aug-06   use real_proc now                    pjt
+ *
+ *   TODO:     don't use K&R style definition in the produced code,  but ANSI
  */
 
 
@@ -32,7 +35,7 @@ extern string *burststring(string, string);
  *  too. If this is set to -1, no check is made however.
  */
 
-rproc getrfunc(string defin, string expr, string pars, int *nexpvar)
+real_proc getrfunc(string defin, string expr, string pars, int *nexpvar)
 {
     stream fstr;
     char *cp, name[MAXNAMELEN+1];
@@ -115,7 +118,7 @@ rproc getrfunc(string defin, string expr, string pars, int *nexpvar)
 
     if (result==NULL) error("getrfunc: Cannot find %s\n",name);
 
-    return( (rproc) result);
+    return (real_proc) result;
 }
 
 
@@ -132,7 +135,7 @@ string defv[] = {
     "z=0:2:1\n         	Z-Values to test for...",
     "ndim=1\n           Dimensionality of output 1=x 2=x,y 3=x,y,z",
     "format=%g\n        Output format",
-    "VERSION=3.0a\n     20-jun-01 PJT",
+    "VERSION=3.1\n      29-aug-06 PJT",
     NULL,
 };
 
@@ -148,7 +151,7 @@ nemo_main()
     real x[MAXN], y[MAXN], z[MAXN];
     char fmt[80];
     string def, fmt1;
-    rproc func;
+    real_proc func;
 
     mysymbols(getargv0());
 
