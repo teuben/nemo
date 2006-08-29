@@ -6,6 +6,7 @@
  *       9-sep-01       gsl/xrandom
  *      14-sep-03       toy model to test radius selections in power laws    PJT
  *      15-aug-06       1.1a: prototypes better used
+ *      26-aug-06       1.1b: fix for frandom() prototype
  */
 
 
@@ -31,11 +32,13 @@ string  defv[] = {
     "rmin=\n                  minimum radius, if to override from radii",
     "rmax=\n                  maximum radius, if to override from radii",
     "headline=\n	      Verbiage for output",
-    "VERSION=1.1a\n           15-aug-06 PJT",
+    "VERSION=1.1b\n           29-aug-06 PJT",
     NULL,
 };
 
 string usage="construct an arbitrary spherical mass distribution";
+
+string cvsid="$Id$";
 
 #ifndef MAXTAB
 # define MAXTAB  1024
@@ -44,7 +47,7 @@ string usage="construct an arbitrary spherical mass distribution";
 real rad[MAXTAB], den[MAXTAB], mass[MAXTAB], rmin, rmax, mmin, mmax, alpha;
 int ntab;
 
-local double mr(double);
+local real mr(real);
 local void make_mass(void);
 local Body *mkplummer(int , int , bool);
 local Body *mksphere(int , int , bool);
@@ -220,7 +223,7 @@ local void make_mass(void)
     }        
 }
 
-local double mr(double r)
+local real mr(real r)
 {
     int i, j, k;
 
