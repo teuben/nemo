@@ -12,7 +12,8 @@
  *				(code taken from mkplummer)
  *      24-jul-97       2.1 added norm=
  *	 8-sep-01       a   init_xrandom
- *      15-aug-06       b   prototypes
+ *      29-aug-06       c   prototypes for frandom() and getrfunc() properly used
+ *
  */
 #include <stdinc.h>
 #include <getparam.h>
@@ -37,7 +38,7 @@ string defv[] = {
     "massrange=1,1\n          Range for mass-spectrum (e.g. 1,2)",
     "seed=0\n                 Random seed",
     "norm=\n                  Normalization value for the total mass (if used)",
-    "VERSION=2.1b\n           15-aug-06 PJT",
+    "VERSION=2.1c\n           29-aug-06 PJT",
     NULL,
 };
 
@@ -47,7 +48,7 @@ string cvsid="$Id$";
 
 #define TIMEFUZZ	0.0001	/* tolerance in time comparisons */
 
-extern rproc getrfunc(string , string , string , int *);
+extern real_proc getrfunc(string , string , string , int *);
 
 nemo_main()
 {
@@ -57,7 +58,7 @@ nemo_main()
     Body  *bmasstab = NULL, *bmassp;
     int i, n, nbody, nbodymass, bits, bitsmass, seed;
     rproc_body  bfunc;
-    rproc       mfunc;
+    real_proc   mfunc;
     bool  Qnorm, first = TRUE;
 
     instr = stropen(getparam("in"), "r");
