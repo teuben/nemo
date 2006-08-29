@@ -244,6 +244,8 @@ typedef real (*rproc)();
 
 typedef int  (*qsort_proc)(const void *, const void *);
 typedef real (*real_proc)(real);
+typedef real (*double_proc)(double);
+typedef real (*float_proc)(float);
 
 /*
  * LOCAL: declare something to be local to a file.
