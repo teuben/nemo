@@ -17,6 +17,7 @@ libraries.  I find most of them at best fair.
  *       7-sep-95  pjt   prototyping
  *	16-feb-97  pjt   fixed for SINGLEPREC 
  *	 8-sep-01  pjt   init_xrandom
+ *      29-aug-06  pjt   fixing for prototypes in TESTBED
  *
  */
 #include <stdinc.h>
@@ -29,8 +30,6 @@ libraries.  I find most of them at best fair.
 local int n = 0;
 local real_proc lastfun=NULL;
 local real coeff[MAXN*3], t[MAXN], f[MAXN], cf[MAXN];
-
-extern double xrandom(double, double);
 
 double frandom(double a, double b, real_proc fun)
 {
@@ -77,6 +76,7 @@ string defv[] = {
    "n=20\n     Number of experiments",
    "mode=1\n   Function mode:  1=gauss 2=power",
    "seed=0\n   Random seed",
+   "VERSION=2\n 29-aug-06 PJT",
    NULL,
 };
 
@@ -99,17 +99,23 @@ nemo_main()
    double a,b;
    int n;
    int mode=getiparam("mode");
+   real_proc fun;
 
    n = getiparam("n");
    a = getdparam("a");
    b = getdparam("b");
    init_xrandom(getparam("seed"));
+
    if (mode==1)
-     while (n-- > 0)
-       printf("%f\n", frandom(a,b,gauss));
-   else if (mode==2)
-     while (n-- > 0)
-       printf("%f\n", frandom(a,b,power));
+     fun = (real_proc) gauss;
+   else if (mode == 2)
+     fun = (real_proc) power;
+   else
+     error("Bad mode %d",mode);
+
+   while (n-- > 0)
+     printf("%g\n", frandom(a,b,fun));
+
 }
 
 #endif
