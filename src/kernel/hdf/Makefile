@@ -19,8 +19,12 @@ INCFILES =
 SRCFILES = hdf_info.c
 OBJFILES=  hdf_info.o
 LOBJFILES= $L(hdf_info.o) 
-BINFILES = tsd 
+BINFILES = 
 TESTFILES= 
+
+ifneq ($(HDF_LIB),"")
+  BINFILES += tsd 
+endif
 
 help:
 	@echo NEMO/src/kernel/hdf

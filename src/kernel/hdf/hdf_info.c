@@ -1,10 +1,14 @@
 /* 
- * HDF interface for NEMO
+ * HDF4 interface for NEMO
  *
- * Since including <hdf.h> within NEMO programs can cause
+ * Since including <hdf.h> within NEMO programs can cause name
  * collisions, this file needs to be compiled without -I$NEMOINC,
  * or at least not include NEMO include files, just a few pure
  * ANSI headers
+ *
+ * Note this file compiles fine even if you don't have seem to have 
+ * hdf installed!
+ *
  *
  * 12-mar-97   hardcoded the relevant things from hdf.h
  * 24-nov-03   prototypes gcc3
