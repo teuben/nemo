@@ -1,7 +1,7 @@
 // -*- C++ -*-                                                                  
 ////////////////////////////////////////////////////////////////////////////////
 ///                                                                             
-/// \file   src/public/manip/use_fileter.cc                                     
+/// \file   src/public/manip/use_filter.cc                                      
 ///                                                                             
 /// \author Walter Dehnen                                                       
 /// \date   2006                                                                
