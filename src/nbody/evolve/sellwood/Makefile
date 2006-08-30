@@ -19,8 +19,7 @@ install:
 	(cd $$i;echo "### Dir: `pwd`";$(MAKE) install); done
 
 bins:
-	-@for i in $(DIRS); do\
-	(cd $$i;echo "### Dir: `pwd`";$(MAKE) bins); done
+	@echo No bins in sellwood
 
 update:
 	-@for i in $(DIRS); do\
