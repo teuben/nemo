@@ -167,11 +167,12 @@ code & line coverage: (gcov, lcov)
    some linkers want to link with gcc, not g77 or vice versa? This
    may require a configure macro in the makefiles
 
-- problems in -DSINGLEPREC mode:
+- still various problems in -DSINGLEPREC mode:
 
 	- nemo_io
 	- rotcur/rotcurshape: cube1/cube1.sig appears to create some NaN pixels
 	- mkommod has problems with out of bounds intervals
+	- hackdens doesn't compile
 
 - configure should use more consistent use of the
 	--with-xxx-yyy=DIR
