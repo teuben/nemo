@@ -18,8 +18,12 @@ INCFILES =
 SRCFILES = hdfgrid.c
 OBJFILES=  
 LOBJFILES= 
-BINFILES = hdfgrid
+BINFILES = 
 TESTFILES= 
+
+ifneq ($(HDF_LIB),"")
+  BINFILES += hdfgrid
+endif
 
 help:
 	@echo NEMO/src/image/hdf/cmog: Support files for the cmhog hydro project
