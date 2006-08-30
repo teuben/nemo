@@ -39,14 +39,7 @@
 
 
 #define TIMEFUZZ 0.0000001
-#ifdef __cplusplus
-extern "C" {
-#endif
-  bool within();
-	
-#ifdef __cplusplus
-}
-#endif
+
 /* ----------------------------------------------------------------
 |  put_data_select :                                               
 |  Save the snapshot in NEMO format.                               
