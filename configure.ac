@@ -91,7 +91,7 @@ if test "$ok" = "yes"; then
         # should we define DEBUG too?
 fi
 
-AC_ARG_ENABLE(pedantic, [  --enable-pedantic     compile for pedantic gcc], ok=$enableval, ok=no)
+AC_ARG_ENABLE(pedantic, [  --enable-pedantic       compile for pedantic gcc], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then
   flags="ansi -pedantic -Werror -Wall -W -Wmissing-prototypes -Wstrict-prototypes"
   flags="$flags -Wtraditional -Wconversion -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align"
@@ -131,7 +131,7 @@ fi
 AC_MSG_RESULT($ok)
 
 
-AC_ARG_ENABLE(lfs,  [  --enable-lfs            large-file-size], ok=$enableval, ok=yes)
+AC_ARG_ENABLE(lfs,  [  --enable-lfs            large-file-size (files over 2GB)], ok=$enableval, ok=yes)
 if test "$ok" = "yes"; then
   CFLAGS="$CFLAGS -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE"
   echo "LFS selected, note that some filesystems may not support Large File anyways"
@@ -372,6 +372,19 @@ AC_MSG_RESULT([$CCSHARED])
 
 
 
+dnl --
+dnl helper library for PGPLOT
+
+AC_ARG_ENABLE(png, [  --enable-png            force the use of PNG for pgplot], ok=$enableval, ok=no)
+if test "$ok" = "yes"; then
+   PNG_LIB="-lpng -lz"
+else
+   PNG_LIB=""
+fi
+AC_SUBST(PNG_LIB)
+
+
+
 dnl ---------------------------------------------------------------------------
 dnl PGPLOT detection: (NEMO allows PGPLOT to be built internally in $NEMO/lib)
 dnl if $PGPLOT_DIR exists, take that as the default
@@ -406,7 +419,7 @@ if test x$pgplot_config_prefix != x; then
 	PGPLOT_DIR="$pgplot_config_prefix"
         PGPLOT_INCLUDE="-I$pgplot_config_prefix"
         PGPLOT_LIB="-L$pgplot_config_prefix"
-        PGPLOT_LIB="$PGPLOT_LIB -lcpgplot -lpgplot"
+        PGPLOT_LIB="$PGPLOT_LIB -lcpgplot -lpgplot $PNG_LIB"
         AC_DEFINE(HAVE_LIBPGPLOT) 
         AC_MSG_RESULT([yes, $PGPLOT_DIR])
 	yapp_default="pgplot"
@@ -414,6 +427,8 @@ else
 	AC_MSG_WARN([could not find PGPLOT library in 2nd: $pgplot_config_prefix])
 fi
 
+
+dnl PGPLOT_LIB="$PGPLOT_LIB -lcpgplot -lpgplot"
 
 
 dnl ---------------------------------------------------------------------
@@ -509,7 +524,7 @@ dnl   This section also allows --with-cfitsio-prefix to point to the
 dnl   source code tree, since that is where the *.a and *.h files live
 
 
-AC_ARG_ENABLE(cfitsio, [  --enable-cfitsio        do not use CFITSIO], ok=$enableval, ok=no)
+AC_ARG_ENABLE(cfitsio, [  --enable-cfitsio        use CFITSIO, instead of local fits I/O routines], ok=$enableval, ok=no)
 
 if test "$ok" = "yes"; then
 
