@@ -390,7 +390,8 @@ dnl PGPLOT detection: (NEMO allows PGPLOT to be built internally in $NEMO/lib)
 dnl if $PGPLOT_DIR exists, take that as the default
 dnl else, check a few standard places
 dnl if all that fails and --with-pgplot-prefix is also not good, bail out.
-dnl Known problems: if you have a local pgplot that needs odd libaries, e.g. -lpng
+dnl Known problems: if you have a local pgplot that needs odd libaries, e.g. -lpng 
+dnl                 although the -lpng problem is now solved
 
 AC_SUBST(PGPLOT_DIR)
 AC_MSG_CHECKING(whether we have PGPLOT)
@@ -426,10 +427,6 @@ if test x$pgplot_config_prefix != x; then
 else
 	AC_MSG_WARN([could not find PGPLOT library in 2nd: $pgplot_config_prefix])
 fi
-
-
-dnl PGPLOT_LIB="$PGPLOT_LIB -lcpgplot -lpgplot"
-
 
 dnl ---------------------------------------------------------------------
 
@@ -825,13 +822,13 @@ case $yapp_name in
           ;;
 	pgplot)
 	  if test "$PGPLOT_DIR" = "$NEMOLIB" ; then
-	    YAPP_LIBS="-L\$NEMOLIB -lcpgplot -lpgplot $XLIBS $FLIBS"
+	    YAPP_LIBS="-L\$NEMOLIB -lcpgplot -lpgplot $PNG_LIB $XLIBS $FLIBS"
 	    PGPLOT_DIR="\$NEMOLIB"
 	    AC_MSG_WARN(using dollar)
 	    echo $PGPLOT_DIR
 	    echo $NEMOLIB
 	  else
-   	    YAPP_LIBS="-L$PGPLOT_DIR -lcpgplot -lpgplot $XLIBS $FLIBS"
+   	    YAPP_LIBS="-L$PGPLOT_DIR -lcpgplot -lpgplot $PNG_LIB $XLIBS $FLIBS"
 	    AC_MSG_WARN(using, external to NEMO, classic)
 	  fi
 	  YAPP_DEF="/xs"

@@ -11510,9 +11510,6 @@ fi
 
 
 
-
-
-
 LOADOBJ_MACH=""
 LOADOBJ_LIBS=""
 
@@ -17070,14 +17067,14 @@ case $yapp_name in
           ;;
 	pgplot)
 	  if test "$PGPLOT_DIR" = "$NEMOLIB" ; then
-	    YAPP_LIBS="-L\$NEMOLIB -lcpgplot -lpgplot $XLIBS $FLIBS"
+	    YAPP_LIBS="-L\$NEMOLIB -lcpgplot -lpgplot $PNG_LIB $XLIBS $FLIBS"
 	    PGPLOT_DIR="\$NEMOLIB"
 	    { echo "$as_me:$LINENO: WARNING: using dollar" >&5
 echo "$as_me: WARNING: using dollar" >&2;}
 	    echo $PGPLOT_DIR
 	    echo $NEMOLIB
 	  else
-   	    YAPP_LIBS="-L$PGPLOT_DIR -lcpgplot -lpgplot $XLIBS $FLIBS"
+   	    YAPP_LIBS="-L$PGPLOT_DIR -lcpgplot -lpgplot $PNG_LIB $XLIBS $FLIBS"
 	    { echo "$as_me:$LINENO: WARNING: using" >&5
 echo "$as_me: WARNING: using" >&2;}
 	  fi
