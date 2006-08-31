@@ -1,0 +1,11 @@
+#! /bin/csh -f
+#
+
+
+if ($#argv == 0) then
+  echo Usage: $0 macro-name
+  echo Shows the value of a NEMO makedefs macro name, set to 0 if not present or blank
+  exit 0
+endif
+
+make -f $NEMO/src/scripts/showvar.mk var VAR=$1
