@@ -76,8 +76,8 @@ $(LIBT)		:
 		mkdir --parents --mode=$(MODE) $(LIB)
 		touch $(LIBT)
 $(BFCT)		: $(LIBT)
-		mkdir --mode=$(PUBLICMODE) $(LIB)bodyfunc
-		mkdir --mode=$(PUBLICMODE) $(LIB)bodiesfunc
+		mkdir --parents --mode=$(PUBLICMODE) $(LIB)bodyfunc
+		mkdir --parents --mode=$(PUBLICMODE) $(LIB)bodiesfunc
 		touch $(BFCT)
 $(MANT)		:
 		mkdir --parents --mode=$(MODE) $(MAN)

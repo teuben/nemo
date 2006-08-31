@@ -111,7 +111,7 @@ namespace falcON { namespace Manipulate {
       if(K<=0)
 	falcON_THROW("Manipulator \"%s\": "
 		     "# neighbours (%d) must be positive",name(),K);
-      if(file)
+      if(file && file[0])
 	warning("Manipulator \"%s\": file given but not used\n",name());
       if(npar>2)
 	warning("Manipulator \"%s\": skipping parameters beyond 2\n",name());
