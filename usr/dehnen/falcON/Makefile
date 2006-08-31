@@ -11,10 +11,12 @@
 # 1 name of library
 #
 
+ifndef LIBNAME
 ifdef DPROPER
 LIBNAME			:= falcON.P
 else
 LIBNAME			:= falcON
+endif
 endif
 
 #
