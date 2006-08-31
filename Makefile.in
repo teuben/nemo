@@ -577,7 +577,7 @@ makeindex:
 
 #	internal PGPLOT install
 pgplot:
-	src/scripts/pgplot.install
+	src/scripts/pgplot.install png=$(PNG)
 
 cfitsio:
 	src/scripts/cfitsio.install

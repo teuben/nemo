@@ -19,6 +19,7 @@ set cvsroot=0		# override the official CVSROOT
 set vogl=1		# compile vogl
 set gsl=0               # add gsl
 set hdf=1               # use HDF if present
+set png=0               # add png for pgplot
 set single=0            # singe or double (default) precision
 set all=1		# make all binaries , or just testsuite?
 set clean=1		# remove old nemo directory before installing (rm -r nemo)
@@ -131,6 +132,7 @@ set copts=()
 # set copts=($copts --disable-gsl)
 if ($gsl) set copts=($copts --enable-gsl)
 if ($pgplot) set copts=($copts --with-yapp=pgplot --with-pgplot-prefix=`pwd`/lib)
+if ($png) set copts=($copts --enable-png)
 if ($cfitsio) set copts=($copts --enable-cfitsio --with-cfitsio-prefix=`pwd`)
 if ($single) set copts=($copts --enable-single)
 if ($debug) set copts=($copts --enable-debug)
@@ -148,7 +150,7 @@ if ($#yapp > 0) setenv YAPP $yapp
 
 if ($pgplot) then
   echo "Compiling internal pgplot (logfile: install.pgplot.log)"
-  $make pgplot >& install.pgplot.log
+  $make pgplot PNG=$png >& install.pgplot.log
 endif
 
 rehash
