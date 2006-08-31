@@ -21,7 +21,7 @@ LOBJFILES=
 BINFILES = 
 TESTFILES= 
 
-ifneq ($(HDF_LIB),"")
+ifneq ($(strip $(HDF_LIB)),)
   BINFILES += hdfgrid
 endif
 

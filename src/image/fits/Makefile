@@ -24,7 +24,7 @@ BINFILES = ccdfits fitsccd fitssplit scanfits fitstab fitshead \
 # fitsgrid <-- is broken ?
 TESTFILES=  format
 
-ifneq ($(HDF_LIB),"")
+ifneq ($(strip $(HDF_LIB)),)
   BINFILES += sdsfits 
 endif
 

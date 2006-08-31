@@ -22,7 +22,7 @@ LOBJFILES= $L(hdf_info.o)
 BINFILES = 
 TESTFILES= 
 
-ifneq ($(HDF_LIB),"")
+ifneq ($(strip $(HDF_LIB)),)
   BINFILES += tsd 
 endif
 
