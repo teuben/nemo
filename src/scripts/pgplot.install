@@ -22,6 +22,7 @@
 # 10-jul-05     removed the always problematic never used TKDRIV driver
 # 16-jul-05     removed pp,gi,wd from drivers for gfortran
 #  5-dec-05     abuse the new 4th (optional) argument to makemake
+# 31-aug-06     add optional png
 
 
 # Other places to get pgplot from
@@ -62,6 +63,7 @@ if ($?NEMOHOST) then
   set host=$NEMOHOST
 endif
 set debug=0
+set png=0
 
 #  dir:  where the source code will be extracted
 #  lib:  where the library (PGPLOT_DIR) will be placed
@@ -155,6 +157,7 @@ if ($?F77) then
     set drivers=$drivers_g95
   endif
 endif
+if ($png) set drivers=$drivers,PNDRIV
 
 
 echo Building drivers for $drivers
