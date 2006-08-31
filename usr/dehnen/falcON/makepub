@@ -18,7 +18,7 @@ SEXE			:= $(SRC)public/exe/
 SMAN			:= $(SRC)public/manip/
 SACC			:= $(SRC)public/acc/
 
-makefiles		:= makefile makedefs makepub
+makefiles		:= Makefile makedefs makepub
 
 # ------------
 # from WDutils
