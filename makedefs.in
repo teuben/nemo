@@ -43,6 +43,8 @@ HDF_LIB = @HDF_LIB@
 PVM_INC = @PVM_INC@
 PVM_LIB = @PVM_LIB@
 
+#  PNG library
+PNG_LIB = @PNG_LIB@
 
 #  CFITSIO library
 
