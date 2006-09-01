@@ -765,11 +765,7 @@ namespace falcON {
       //------------------------------------------------------------------------
       /// \name miscellaneous                                                   
       //@{
-      iterator& next_in_subset() {
-	do ++(*this);
-	while(is_valid() && falcON::has_flag(*this) && !in_subset());
-	return*this;
-      }
+      iterator& next_in_subset();
       //@}
       //------------------------------------------------------------------------
       /// \name const boolean flag informations via friends                     
@@ -1325,6 +1321,11 @@ namespace falcON {
   }
   DEF_NAMED(ConstAccess);
 #undef ConstAccess
+  inline bodies::iterator& bodies::iterator::next_in_subset() {
+    do ++(*this);
+    while(is_valid() && falcON::has_flag(*this) && !in_subset());
+    return*this;
+  }
   inline vect angmom(bodies::iterator const&i) {
     return falcON::pos(i) ^ falcON::vel(i);
   }
