@@ -1,4 +1,4 @@
-DIR = src/nbody/core
+DIR = src/nbody/cores
 BIN = bodytrans
 NEED = $(BIN)
 

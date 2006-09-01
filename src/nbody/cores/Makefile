@@ -19,7 +19,7 @@ TESTFILES = testunits
 SRCDIR = $(NEMO)/src/nbody/io
 
 help:
-	@echo NEMO V2.2 NEMO/src/nbody/core
+	@echo NEMO V2.2 NEMO/src/nbody/cores
 
 install:  .install_lib
 
