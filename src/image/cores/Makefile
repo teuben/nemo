@@ -1,4 +1,4 @@
-#	Makefile for NEMO/src/kernel/io
+#	Makefile for NEMO/src/image/cores
 include $(NEMOLIB)/makedefs
 
 ## **************** Attempt for template ************************
