@@ -763,6 +763,15 @@ namespace falcON {
 	return !flag_is_set(flags::not_shorter); }
       //@}
       //------------------------------------------------------------------------
+      /// \name miscellaneous                                                   
+      //@{
+      iterator& next_in_subset() {
+	do ++(*this);
+	while(is_valid() && falcON::has_flag(*this) && !in_subset());
+	return*this;
+      }
+      //@}
+      //------------------------------------------------------------------------
       /// \name const boolean flag informations via friends                     
       //@{
       /// friend: is body active?
@@ -1741,8 +1750,9 @@ falcON_TRAITS(falcON::snapshot,"snapshot");
 ///
 /// \param PTER  valid pointer to falcON::bodies (or falcON::snapshot)
 /// \param NAME  name given to loop variable (of type falcON::body)
-#define LoopSubsetBodies(PTER,NAME)			\
-  LoopAllBodies(PTER,NAME) if(!has_flag(NAME) || in_subset(NAME))
+#define LoopSubsetBodies(PTER,NAME)					\
+  for(falcON::body NAME=(PTER)->begin_all_bodies();			\
+      NAME; NAME.next_in_subset())
 #endif
 //------------------------------------------------------------------------------
 //@}
