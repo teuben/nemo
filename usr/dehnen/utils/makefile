@@ -8,18 +8,13 @@
 default			: library
 install			: library cleanobj
 
-# -----------------
-# Hardware platform
-# -----------------
-PLATFORM 		:= $(shell uname -m)
-
 # -----------
 # directories
 # -----------
 
-INC             	:= inc/
-SRC             	:= src/
-LIB             	:= lib/$(PLATFORM)/
+INC			:= inc/
+SRC			:= src/
+LIB			:= lib/
 LIBT			:= $(LIB).dummy
 $(LIBT)			:
 			mkdir --parents --mode=755 $(LIB)

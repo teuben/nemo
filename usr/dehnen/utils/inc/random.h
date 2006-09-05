@@ -1,7 +1,7 @@
 // -*- C++ -*-                                                                  
 ////////////////////////////////////////////////////////////////////////////////
 ///                                                                             
-/// \file    inc/random.h                                                       
+/// \file    utils/inc/random.h                                                 
 ///                                                                             
 /// \author  Walter Dehnen                                                      
 /// \author  Paul McMillan                                                      

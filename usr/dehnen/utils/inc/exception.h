@@ -1,7 +1,7 @@
 // -*- C++ -*-                                                                  
 ////////////////////////////////////////////////////////////////////////////////
 ///                                                                             
-/// \file    inc/exception.h                                                    
+/// \file    utils/inc/exception.h                                              
 ///                                                                             
 /// \author  Walter Dehnen                                                      
 ///                                                                             

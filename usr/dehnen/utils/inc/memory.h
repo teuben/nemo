@@ -1,7 +1,7 @@
 // -*- C++ -*-                                                                  
 ////////////////////////////////////////////////////////////////////////////////
 ///                                                                             
-/// \file    inc/memory.h                                                       
+/// \file    utils/inc/memory.h                                                 
 ///                                                                             
 /// \author  Walter Dehnen                                                      
 ///                                                                             
@@ -58,6 +58,7 @@ namespace WDutils {
   /// \param n number of array elements                                         
   /// \param f name of the source file where this routines is called            
   /// \param l number of the line in that file                                  
+  /// \param lib (optional) name of calling library (default: "WDutils")        
   template<typename T> inline
   T* NewArray(size_t n, const char*f, int l, const char*lib = "WDutils")
     WDutils_THROWING {
@@ -112,6 +113,7 @@ namespace WDutils {
   ///           or ::operator new[].                                            
   /// \param f  name of the source file where this routines is called           
   /// \param l  number of the line in that file                                 
+  /// \param lib (optional) name of calling library (default: "WDutils")        
   template<typename T> inline
   void DelArray(T* a, const char*f, int l, const char*lib = "WDutils")
     WDutils_THROWING {
@@ -193,6 +195,7 @@ namespace WDutils {
   /// \param a  pointer previously allocated with ::operator new().             
   /// \param f  name of the source file where this routines is called           
   /// \param l  number of the line in that file                                 
+  /// \param lib (optional) name of calling library (default: "WDutils")        
   template<typename T> inline
   void DelObject(T* a, const char*f, int l, const char*lib="WDutils")
     WDutils_THROWING {
@@ -1076,12 +1079,12 @@ namespace WDutils {
     operator const T* () const {
       return A;
     }
-    /// acts like the operator[] on a pointer T*...*
+    /// acts like the operator[] on a pointer T*
     T       & operator[](int i)       THROW_BAD {
       CHECK_BAD(N[0],1);
       return A[i];
     }
-    /// acts like the operator[] on a pointer const T*...*
+    /// acts like the operator[] on a pointer const T*
     T const & operator[](int i) const THROW_BAD {
       CHECK_BAD(N[0],1);
       return A[i];
@@ -1107,9 +1110,12 @@ namespace WDutils {
   template<typename T, int D=1> class Array {
     /// \name data
     //@{
-    int N[D];  ///< N[d]: size in dimension d 
-    int K[D];  ///< K[d] = Prod_i>d N[i]      
-    T  *A;     ///< pointer to allocated memory 
+    int N[D];     ///< N[d]: size in dimension d 
+    int K[D];     ///< K[d] = Prod_i>d N[i]      
+    union {
+      T      *A;  ///< pointer to allocated memory 
+      const T*C;  ///< const pointer to allocated memory 
+    };
     //@}
     /// set N[d] and K[d]
     /// \param n (input) size of array in each dimension
@@ -1231,7 +1237,7 @@ namespace WDutils {
     /// type conversion to pointer: return first element
     T      *const&array()       { return A; }
     /// type conversion to const pointer: return first element
-    const T*const&array() const { return A; }
+    const T*const&array() const { return C; }
     /// non-const array sub-scription: return PseudoArray
     PseudoArray<T,D-1> operator[] (int i) THROW_BAD {
       CHECK_BAD(N[0],D);
@@ -1240,7 +1246,7 @@ namespace WDutils {
     /// const array sub-scription: return ConstPseudoArray
     ConstPseudoArray<T,D-1> operator[] (int i) const THROW_BAD {
       CHECK_BAD(N[0],D);
-      return ConstPseudoArray<T,D-1>(A+i*K[0],N+1,K+1);
+      return ConstPseudoArray<T,D-1>(C+i*K[0],N+1,K+1);
     }
     /// same as operator[]
     PseudoArray<T,D-1> element (int i) THROW_BAD {
@@ -1250,7 +1256,7 @@ namespace WDutils {
     /// same as operator[]
     ConstPseudoArray<T,D-1> element (int i) const THROW_BAD {
       CHECK_BAD(N[0],D);
-      return ConstPseudoArray<T,D-1>(A+i*K[0],N+1,K+1);
+      return ConstPseudoArray<T,D-1>(C+i*K[0],N+1,K+1);
     }
   };// class Array<T,D>
   // ///////////////////////////////////////////////////////////////////////////
@@ -1258,8 +1264,11 @@ namespace WDutils {
   template<typename T> class Array<T,1> {
     /// \name data
     //@{
-    int N;     ///< N[d]: size in dimension d 
-    T  *A;     ///< pointer to allocated memory 
+    int N;        ///< N[d]: size in dimension d 
+    union {
+      T      *A;  ///< pointer to allocated memory 
+      const T*C;  ///< const pointer to allocated memory 
+    };
     //@}
   public:
     /// rank: number of dimensions
@@ -1344,7 +1353,7 @@ namespace WDutils {
     /// type conversion to pointer: return first element
     T      *const&array()       { return A; }
     /// type conversion to const pointer: return first element
-    const T*const&array() const { return A; }
+    const T*const&array() const { return C; }
     /// non-const array sub-scription: return reference to element
     T      & operator[] (int i)       THROW_BAD {
       CHECK_BAD(N,1);
@@ -1353,7 +1362,7 @@ namespace WDutils {
     /// const array sub-scription: return const reference to element
     T const& operator[] (int i) const THROW_BAD {
       CHECK_BAD(N,1);
-      return A[i];
+      return C[i];
     }
     /// same as operator[]
     T      & element (int i)       THROW_BAD {
@@ -1363,7 +1372,7 @@ namespace WDutils {
     /// same as operator[]
     T const& element (int i) const THROW_BAD {
       CHECK_BAD(N,1);
-      return A[i];
+      return C[i];
     }
   };// class Array<T,1>
   // ///////////////////////////////////////////////////////////////////////////

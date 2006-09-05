@@ -1,7 +1,7 @@
 // -*- C++ -*-                                                                  
 ////////////////////////////////////////////////////////////////////////////////
 ///                                                                             
-/// \file    inc/numerics.h                                                     
+/// \file    utils/inc/numerics.h                                               
 ///                                                                             
 /// \author  Walter Dehnen                                                      
 ///                                                                             
@@ -399,6 +399,16 @@ namespace WDutils {
     // given the arrays xarr, yarr, polev returns y(x) using 4 of n values.
     int j, M=find_for_polev_T<4>(j,n,xarr,x);
     return polint_T<4>(xarr+j, yarr+j, x);
+  }
+  //----------------------------------------------------------------------------
+  // like polev, but taking Array<T>
+  template<typename scalar_type, typename num_type>
+  inline num_type polev(const scalar_type x,
+			const Array<scalar_type,1> xarr,
+			const Array<num_type   ,1> yarr)
+  {
+    if(xarr.size() != yarr.size()) error("size mismatch in polev()\n");
+    return polev(x,xarr.array(),yarr.array(),xarr.size());
   }
   //----------------------------------------------------------------------------
   template<typename scalar_type, typename num_type>
