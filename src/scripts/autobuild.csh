@@ -15,9 +15,9 @@ tar zxf nemo.tar.gz
 find nemo -type f -newer LastBuild | grep -v CVS/Entries > LastBuild.newfiles
 date > LastBuild.new
 
-if (-z LastBuild.newfiler) then
+if (-z LastBuild.newfiles) then
   echo No new source code in nemo since `cat LastBuild`
-  exit 0
+  goto last_check
 endif
 
 
@@ -42,16 +42,18 @@ foreach file (LastBuild.log autobuild.csh nemo/install.*log)
 end
 
  
-if (0) then
+if (1) then
   #  this will move over the build
   mv nemo.tar.gz.new nemo.tar.gz
   mv LastBuild.new LastBuild  
 endif
-  
-
-  
-  
 
 
+last_check:
 
 
+cmp -s autobuild.csh nemo/src/scripts/autobuild.csh
+if ($status) then
+  echo Warning: local autobuild.csh differs from nemo/src/scripts/autobuild.csh
+  diff autobuild.csh nemo/src/scripts/autobuild.csh
+endif
