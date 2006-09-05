@@ -15,7 +15,7 @@ MacOSX problems: (a special macosx.html web page dedicated to this)
   - xyzview is too slow to be useful, we should recode it such that
     OpenGL (and thus Mesa) can be linked. This would also remove the
     immediate need for vogl.
-    try JCL's new program 'glnemo' instead
+    try JCL's new program 'glnemo' instead, it's far superior.
 
   - one case had gcc in /usr/bin but g77 in /usr/local/bin, and not in
     the path -> pgplot didn't get build.
@@ -104,6 +104,11 @@ general things for 3.2.x
 	gcc -> 4.0.0 (build 4061)			    template problem??
 	gcc-3.3 -> build 1809				    ok
 
+ - need a gyrfalcON testsuite section
+
+ - a few snapshot I/O programs still use the old I/O, hence Position/Velocity data is 
+   now difficult to make global.
+
 
 --------------------------------------------------------------------------------
 
@@ -136,6 +141,7 @@ code & line coverage: (gcov, lcov)
 - fix problems when replacing gnu make with pmake
 
 - fix for pgplot  when libpng is needed, or tcl/tk for that matter....
+	**done; pgn=0 or 1 is now a keyword, --enable-png is allowed and used**
 
 - if the code has to be C++ friendly, i.e. the nemo_main() be compiled
   by c++, but the rest with CC,  all extern's must be wrapped in
