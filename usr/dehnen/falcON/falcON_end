@@ -1,6 +1,6 @@
 #! /bin/csh
 #
-# de-activates falcON enviroment variables
+# remove $FALCONBIN from PATH
 #
 if ($?FALCONBIN) then
   set tmp=()
@@ -14,10 +14,18 @@ if ($?FALCONBIN) then
   echo "$FALCONBIN removed from search path"
 endif
 
-# remove all FALCON enviroment variables
+# remove all FALCON related enviroment variables
 unsetenv FALCONLIB
 unsetenv FALCONBIN
 unsetenv FALCON
+if ($?FALCONACC) then
+  unsetenv ACCPATH
+  unsetenv FALCONACC
+endif
+if ($?FALCONMAN) then
+  unsetenv MANIPPATH
+  unsetenv FALCONMAN
+endif
 
 unalias NOclaf
 

@@ -32,7 +32,7 @@ COMPILER		:= gcc
 #
 ifdef DPROPER
 ifeq ($(COMPILER),gcc)
-# 4.1 use SSE instructions in force computation (proprietary only)
+# 3.1 use SSE instructions in force computation (proprietary only)
 DSSE 			:= -DfalcON_SSE
 endif
 endif
@@ -85,7 +85,7 @@ endif
 .PHONY			: manip acc man utils
 
 ifdef NEMO
-default			: exe manip acc doxu
+default			: $(links) exe manip acc doxu
 ifdef DPROPER
 # proprietary version: don't copy executables and manipulators
 # NOTE: this means we have to set the PATH and MANIPPATH appropriately
@@ -113,33 +113,37 @@ endif
 
 # 6.1 makedefs: defines compiler options etc
 -include makedefs
+
 # 6.2 makepub: all targets for the public version
 -include makepub
-ifdef DPROPER
+
 # 6.3 proper/make: additional targets for proprietary version
+ifdef DPROPER
 -include proper/make
 endif
 
-ifdef DSPH
 # 6.4 sph/make: additional targets for SPH supporting version
+ifdef DSPH
 -include sph/make
 endif
 
-ifdef DMPI
 # 6.5 parallel/make: additional targets for MPI parallel version
+ifdef DMPI
 -include parallel/make
 endif
 
-ifdef DWALTER
 # 6.6 additional targets for any private sandboxes
+ifdef DWALTER
 -include walter/make
 -include pjm/make
+endif
 
 #
 # 7 pseudo targets to make various things ...
 #
 
 # 7.1 user guides
+ifdef DWALTER
 guide			:
 			$(MAKE) -C tex default
 endif
@@ -194,7 +198,7 @@ cleanobjs	:
 
 # 7.7.3 cleans everything made in releases
 cleanrelease	:
-			rm -rf $(BIN) $(MAN) $(ACC)
+			rm -rf $(BIN) $(LIB) $(MAN) $(ACC)
 			rm -rf dox/html
 
 # 7.7.4 clean == cleanrelease

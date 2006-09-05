@@ -28,8 +28,7 @@ if($?NEMO == 0) then
 endif
 
 # set enviroment variables FALCONLIB and ACCPATH
-set    PLATFORM = "`uname -m`"
-setenv FALCONLIB $FALCON/"$PLATFORM"/lib
+setenv FALCONLIB $FALCON/lib
 
 if($?ACCPATH) then
     setenv ACCPATH $FALCON"/acc/:"$ACCPATH

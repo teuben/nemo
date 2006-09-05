@@ -48,11 +48,6 @@ endif
 
 endif
 
-# -----------------
-# Hardware platform
-# -----------------
-PLATFORM	:= $(shell uname -m)
-
 # -----------
 # directories
 # -----------
@@ -62,16 +57,19 @@ IUTI		:= $(INC)utils/
 SRC		:= src/
 ACC		:= acc/
 MAN		:= manip/
-HOS             := $(PLATFORM)/
-BIN		:= $(HOS)
-LIB		:= $(BIN)lib/
+BIN		:= bin/
+LIB		:= lib/
 MODE		:= 755
 PUBLICMODE	:= 777
+BINT		:= $(BIN).dummy
 LIBT		:= $(LIB).dummy
 ACCT		:= $(ACC).dummy
 MANT		:= $(MAN).dummy
 BFCT		:= $(LIB)bodyfunc/.dummy
 
+$(BINT)		:
+		mkdir --parents --mode=$(MODE) $(BIN)
+		touch $(BINT)
 $(LIBT)		:
 		mkdir --parents --mode=$(MODE) $(LIB)
 		touch $(LIBT)
@@ -193,9 +191,9 @@ CXXFLAGS	:= $(FILEIO) $(OPTFLAGS) $(DPROPER) $(DMPI) $(DEBUG)
 
 IUTIL		:= -I$(IUTI)
 ifdef STATIC
-LUTIL		:= -Lutils/lib/$(PLATFORM) -lWDutils
+LUTIL		:= -Lutils/lib -lWDutils
 else
-LUTIL		:= -Lutils/lib/$(PLATFORM) -lWDutils -Wl,-rpath,$(PWD)/utils/lib/$(PLATFORM)
+LUTIL		:= -Lutils/lib -lWDutils -Wl,-rpath,$(PWD)/utils/lib
 endif
 
 # --------------
