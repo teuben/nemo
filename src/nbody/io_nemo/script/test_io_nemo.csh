@@ -20,7 +20,7 @@ if ( ! -d ${RT} ) then
 endif
 
 # Set io_nemo test programs path
-set IONB=${OSTYPE}/bin
+set IONB=compile/bin
 
 #set selt=( "200:300" "100,3000:15000:143,23467:29999:466"  "all" "0:29999" "0:100:2,1000:4000:3,10000,15000:25000"  )
 set selt=( "0:100:2,1000:4000:3,10000,15000:25000"  )

@@ -3,7 +3,7 @@
 use strict;
 
 my $NEMOSRC=$ENV{NEMOSRC}; # get $NEMOSRC environment variable
-my $OSTYPE=$ENV{OSTYPE};   # get $OSTYPE environment variable
+my $DESTDIR="compile";     # compilation directory
 # Check necessary nemo binaries
 my @needprg=( "hackcode1", "snapmask", "snapprint", "mkplummer" );
 my $FD;
@@ -57,7 +57,7 @@ sub compareData {
   my $nmodel = shift;
   my $ftype  = shift;
   
-  my $iopath="${NEMOSRC}/nbody/io_nemo/${OSTYPE}/bin";
+  my $iopath="${NEMOSRC}/nbody/io_nemo/${DESTDIR}/bin";
   my $mask_prog;
   if ( $ftype eq "double" ) {
     $mask_prog="$iopath/snapmask_d";
@@ -103,7 +103,7 @@ sub stressIoNemo {
     my $out="$sim[$n][0]_out";
     `/bin/rm -f $out 2> /dev/null`;
   }  
-  my $iopath="${NEMOSRC}/nbody/io_nemo/${OSTYPE}/bin";
+  my $iopath="${NEMOSRC}/nbody/io_nemo/${DESTDIR}/bin";
   printf STDERR "Running <$program> program [$ftype] datatype.....\n";
   my $cmd="${iopath}/${program} $inlist $ftype 2> /dev/null";
   system($cmd);

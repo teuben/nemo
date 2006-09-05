@@ -3,12 +3,12 @@
 #
 #
 
-set ARCH = ${OSTYPE}
+set DESTDIR = compile
 
-set dirs = ( ${ARCH}/obj ${ARCH}/obj-debug ${ARCH}/bin )
+set dirs = ( ${DESTDIR}/obj ${DESTDIR}/obj-debug ${DESTDIR}/bin )
 
-if ( ! -d $ARCH ) then
-    mkdir $ARCH
+if ( ! -d $DESTDIR ) then
+    mkdir $DESTDIR
 endif
 
 foreach i ( $dirs )

@@ -35,11 +35,12 @@ OPT    = -Wall -g
 
 #--------------------------------------------------------
 # Macros definitions
-
+# DESTDIR
+DESTDIR = compile
 # io_nemo OBJ
-IONO = ${OSTYPE}/obj
+IONO = ${DESTDIR}/obj
 # io_nemo BIN
-IONB = ${OSTYPE}/bin
+IONB = ${DESTDIR}/bin
 # io_nemo Test Src
 IONT = test_src
 # io_nemo src
