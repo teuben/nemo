@@ -6,6 +6,8 @@
 #    - a baseline nemo.tar.gz file, created from CVS
 #    - a timestamp file, created via  "date > LastBuild"
 #    - this script, autobuild.csh
+#
+# $Id$
 
 cd /chara2/teuben/redo_nemo/autobuild
 
