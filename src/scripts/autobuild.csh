@@ -9,7 +9,17 @@
 #
 # $Id$
 
-cd /chara2/teuben/redo_nemo/autobuild
+set sleep=0
+set dir=/chara2/teuben/redo_nemo/autobuild
+
+foreach arg ($*)
+  set $arg
+end
+
+
+start:
+
+cd $dir
 
 rm -rf nemo
 tar zxf nemo.tar.gz
@@ -38,7 +48,7 @@ endif
 ./test_a_new_nemo_cvs reuse=1 >& LastBuild.log
 
 if (! -d logs) mkdir logs
-foreach file (LastBuild.log autobuild.csh nemo/install.*log)
+foreach file (LastBuild.log cat LastBuild.newfiles autobuild.csh nemo/install.*log)
      set dest=$file:t
      cp $file logs/$dest.txt
 end
@@ -57,5 +67,11 @@ last_check:
 cmp -s autobuild.csh nemo/src/scripts/autobuild.csh
 if ($status) then
   echo Warning: local autobuild.csh differs from nemo/src/scripts/autobuild.csh
-  diff autobuild.csh nemo/src/scripts/autobuild.csh
+  echo dir=$dir
+endif
+
+
+if ($sleep) then
+  sleep $sleep
+  goto start
 endif
