@@ -44,6 +44,7 @@
 # 29-dec-05  PJT                set absolute paths to compilers in makedefs
 # 30-jul-06  PJT                various for gh2006 at the beach near Veracruz :-)
 # 17-aug-06  PJT                corrected for new falcON procedure
+# 31-aug-06  PJT                support png for pgplot
 
 if ($?NEMO) goto bad_has_nemo
 
@@ -53,6 +54,9 @@ touch install.log
 #   number of executables expected on a full successfull install
 set nexec=132
 
+#   other options
+set png=0
+
 set stat = 0
 echo \(Sending output to install.log\)
 
@@ -61,6 +65,7 @@ set copts=()
 if (-d local/pgplot) then
   echo "Found a local pgplot, Assuming we're using it"
   set copts=($copts --with-yapp=pgplot --with-pgplot-prefix=`pwd`/lib)
+  if ($png) set copts=($copts --enable-png)
   set pgplot=1
 else 
   set pgplot=0
@@ -103,8 +108,8 @@ echo Postconfig
 make postconfig >>& install.log
 source NEMORC.local
 if ($pgplot) then
-    echo Installing pgplot library
-    make pgplot >>& install.log
+    # other options:   
+    make pgplot PNG=$png >>& install.log
 endif
 
 rehash
