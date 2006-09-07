@@ -1,4 +1,4 @@
-#	Makefile for NEMO/src/kernel/core
+#	Makefile for NEMO/src/kernel/cores
 include $(NEMOLIB)/makedefs
 
 #	Compile flags
@@ -33,7 +33,7 @@ TESTFILES= errortest burstrtest filefntest sizetest cputest cputool \
 	   progresstest allocatetest
 
 help:
-	@echo NEMO/src/kernel/core
+	@echo NEMO/src/kernel/cores
 	@echo bins: BINFILES=$(BINFILES)
 	@echo tests: TESTFILES=$(TESTFILES)
 
