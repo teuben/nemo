@@ -1,4 +1,4 @@
-.TH DATA 5NEMO "31 March 2005"
+.TH DATA 5NEMO "6 September 2006"
 .SH NAME
 bench \- NEMO benchmarks in NemoStones
 .SH DESCRIPTION
@@ -17,7 +17,7 @@ Here are the benchmarks
 .nf
 \fBbench0\fP:	\fItime directcode nbody=10240\fP
 \fBbench1\fP:	\fItime hackcode1 nbody=10240\fP
-\fBbench2\fP:	\fItime mkplummer p1 10240; time gyrfalcON p1 . tstop=2\fB
+\fBbench2\fP:	\fItime mkplummer p1 10240; time gyrfalcON p1 . hmin=6 tstop=2\fB
 \fBbench3\fP:	\fItime mkspiral s000 1000000 nmodel=40\fP
 \fBbench4\fP:	\fIccdmath "" - 'ranu(0,1)' size=128 | ccdpot - . help=c\fB
 .fi
