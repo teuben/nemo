@@ -6,6 +6,8 @@
  *       6-jun-01   V1.1    renamed sigma= to nsigma= as in other programs PJT
  * 	 2-mar-01   V1.2    added sum to the output			   pjt
  *
+ *
+ *  @todo:   xcol=0 should use the first data row to figure out all columns
  */
 
 #include <stdinc.h>	
