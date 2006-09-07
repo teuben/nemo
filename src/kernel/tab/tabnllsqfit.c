@@ -971,7 +971,7 @@ do_gauss1d()
 }
 
 /*
- * GAUSS2d:       y = a + b * exp( - (x-c)^2/(2*d^2) )
+ * GAUSS2d:       y = a + b * exp( -[(x-c)^2+(y-d)^2]/(2*e^2) )
  *
  */
  
