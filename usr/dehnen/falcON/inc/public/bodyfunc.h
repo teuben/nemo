@@ -372,7 +372,7 @@ namespace falcON {
     fieldset NEED;
     //--------------------------------------------------------------------------
     template<typename T>
-    void func (T*, bodies const&b, double const&t, const real*p) const {
+    void func (T*d, bodies const&b, double const&t, const real*p) const {
 #if defined(DEBUG) || defined(EBUG)
       if(bf_type<T>::type != TYPE)
 	falcON_THROW("bodiesmethod::func<%s>() called, but type is %s\n",
