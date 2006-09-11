@@ -37,10 +37,12 @@ DSSE 			:= -DfalcON_SSE
 endif
 endif
 
-ifdef DPROPER
+## ifdef DPROPER
+ifdef DWALTER
 # 3.2 full sph support (development version)
 DSPH			:= -DfalcON_SPH
 endif
+
 ifdef DWALTER
 # 3.3 MPI parallel code (under development)
 #DMPI			:= -DfalcON_MPI
@@ -64,28 +66,12 @@ ifdef DEBUG
 endif
 
 #
-# 4 symbolic links
-#
-
-ifdef DPROPER
-ifdef DWALTER
-ifdef DMPI
-links			:= links_pro links_sph links_walter links_pjm links_mpi
-else
-links			:= links_pro links_sph links_walter links_pjm
-endif
-else
-links			:= links_pro links_sph
-endif
-endif
-
-#
-# 5 global pseudo targets
+# 4 global pseudo targets
 #
 .PHONY			: manip acc man utils
 
 ifdef NEMO
-default			: $(links) exe manip acc doxu
+default			: links exe manip acc doxu
 ifdef DPROPER
 # proprietary version: don't copy executables and manipulators
 # NOTE: this means we have to set the PATH and MANIPPATH appropriately
@@ -107,54 +93,57 @@ install			: default
 endif
 
 #
-# 6 include specific makefiles
+# 5 include specific makefiles
 #
 
 
-# 6.1 makedefs: defines compiler options etc
+# 5.1 makedefs: defines compiler options etc
 -include makedefs
 
-# 6.2 makepub: all targets for the public version
+# 5.2 makepub: all targets for the public version
 -include makepub
 
-# 6.3 proper/make: additional targets for proprietary version
+# 5.3 proper/make: additional targets for proprietary version
 ifdef DPROPER
 -include proper/make
 endif
 
-# 6.4 sph/make: additional targets for SPH supporting version
+# 5.4 sph/make: additional targets for SPH supporting version
 ifdef DSPH
 -include sph/make
 endif
 
-# 6.5 parallel/make: additional targets for MPI parallel version
+# 5.5 parallel/make: additional targets for MPI parallel version
 ifdef DMPI
 -include parallel/make
 endif
 
-# 6.6 additional targets for any private sandboxes
+# 5.6 additional targets for any private sandboxes
 ifdef DWALTER
 -include walter/make
 -include pjm/make
 endif
 
 #
-# 7 pseudo targets to make various things ...
+# 6 pseudo targets to make various things ...
 #
 
-# 7.1 user guides
+# 6.1 user guides
 ifdef DWALTER
 guide			:
 			$(MAKE) -C tex default
 endif
 
-# 7.1 utils library
+# 6.1 utils library
 utils			:
 			ln -sf ../utils
 			(cd inc; ln -sf ../utils/inc utils)
 			$(MAKE) -C utils default
 
-# 7.2 falcON library
+# 6.2 symbolic links
+links		:	$(links_pro) $(links_sph) $(links_walter) $(links_pjm) $(links_mpi)
+
+# 6.3 falcON library
 # NOTE: $(falcON) defined in makedefs, depending on value of STATIC
 falcON_objs	=	$(public_objs) $(proper_objs) $(sph_objs) $(parallel_objs)
 
@@ -166,18 +155,18 @@ $(LIB)lib$(LIBNAME).so:	$(falcON_objs)
 
 library		: 	utils $(LIBT) $(falcON) $(BFCT)
 
-# 7.3 falcON executables
+# 6.4 falcON executables
 exe		:	library $(exe_pub) $(exe_pro) $(exe_sph) $(exe_walter) $(exe_pjm)
 
 ifdef NEMO
 
-# 7.4 falcON manipulators
+# 6.5 falcON manipulators
 manip		:	utils $(MANT) $(manip_pub) $(manip_pro) $(manip_walter)
 
-# 7.5 falcON accelerations
+# 6.6 falcON accelerations
 acc		:	$(ACCT) $(acc_pub) $(acc_pro) $(acc_walter) $(acc_pjm)	
 
-# 7.6 copy falcON man pages to nemo
+# 6.7 copy falcON man pages to nemo
 ifdef DPROPER
 man		:
 else
@@ -188,27 +177,27 @@ man		:
 endif
 endif
 
-# 7.7 several clean options
-# 7.7.1 clean editor backup files
+# 6.8 several clean options
+# 6.8.1 clean editor backup files
 cleanbackup	:
 			rm -f *~ */*~ */*/*~  */*/*/*~
-# 7.7.2 clean objects (if no longer needed, since either in library or executable)
+# 6.8.2 clean objects (if no longer needed, since either in library or executable)
 cleanobjs	:
 			rm -rf $(LIB)*.o
 
-# 7.7.3 cleans everything made in releases
+# 6.8.3 cleans everything made in releases
 cleanrelease	:
 			rm -rf $(BIN) $(LIB) $(MAN) $(ACC)
 			rm -rf dox/html
 
-# 7.7.4 clean == cleanrelease
+# 6.8.4 clean == cleanrelease
 clean		:	cleanrelease
 
-# 7.7.5 cleanall == cleandirs & cleanbackup and remove user guides
+# 6.8.5 cleanall == cleandirs & cleanbackup and remove user guides
 cleanall	:	cleanrelease cleanbackup
 			rm doc/user*.pdf
 
-# 7.7.6 everything to be done before we can checkin a public version
+# 6.8.6 everything to be done before we can checkin a public version
 beforecheckin	:	cleanbackup
 			rm doc/user_guide_proper.pdf
 			$(MAKE) -C tex public
