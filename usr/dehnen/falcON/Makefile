@@ -121,8 +121,8 @@ endif
 # 5.6 additional targets for any private sandboxes
 ifdef DWALTER
 -include walter/make
--include pjm/make
 endif
+-include pjm/make
 
 #
 # 6 pseudo targets to make various things ...
