@@ -16,6 +16,11 @@ foreach arg ($*)
   set $arg
 end
 
+if (! -e $dir) then
+  echo Directory dir=$dir does not exist
+  exit 1
+endif
+
 
 start:
 
@@ -29,6 +34,7 @@ date > LastBuild.new
 
 if (-z LastBuild.newfiles) then
   echo No new source code in nemo since `cat LastBuild`
+# echo But building anyways....
   goto last_check
 endif
 
@@ -48,7 +54,9 @@ endif
 ./test_a_new_nemo_cvs reuse=1 >& LastBuild.log
 
 if (! -d logs) mkdir logs
-foreach file (LastBuild.log cat LastBuild.newfiles autobuild.csh nemo/install.*log)
+
+grep TESTSUITE: LastBuild.log | grep -v OK > LastBuild.fail
+foreach file (LastBuild.log LastBuild.fail LastBuild.newfiles autobuild.csh nemo/install.*log)
      set dest=$file:t
      cp $file logs/$dest.txt
 end
@@ -57,7 +65,7 @@ end
 if (1) then
   #  this will move over the build
   mv nemo.tar.gz.new nemo.tar.gz
-  mv LastBuild.new LastBuild  
+  cp -p LastBuild.new LastBuild  
 endif
 
 
