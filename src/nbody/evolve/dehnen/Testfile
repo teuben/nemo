@@ -33,4 +33,8 @@ gyrfalcON:
 	@tail -2 p1024.log2
 	$(EXEC) snapmradii p1024.out  log=t > p1024.tab
 	$(EXEC) snapmradii p1024.out2 log=t > p1024.tab2
+	@echo To view lagrangian radii, redo test with larger TSTOP=$(TSTOP) and plot:
+	@echo tabplot p1024.tab  1 2:10 line=1,1
+	@echo tabplot p1024.tab2 1 2:10 line=1,1
 
+#   now do some work on manipulators

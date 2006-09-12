@@ -1,4 +1,5 @@
 This directory is merely a placeholder for the falcON tools. You should find them
-in $NEMO/usr/dehnen.  The Testfile in here will automatically exercize two tools
-(mkplum and gyrfalcON) for correct compilation.
+in $NEMO/usr/dehnen.  The Testfile in here will automatically exercize two falcON 
+tools (mkplum and gyrfalcON) for correct compilation, and also exercize the 
+acceleration plugin, as well as the manipulator.
 
