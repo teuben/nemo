@@ -215,7 +215,8 @@ namespace falcON { namespace defv_info {
     compiled[61] = 0;
   };
 } }
-#  if defined(falcON_PROPER) && !defined(falcON_NOT_USING_PROPER)
+#  if (defined(falcON_PROPER) && !defined(falcON_NOT_USING_PROPER))     \
+   ||  defined(falcON_USING_PROPER)
 #    define falcON_DEFV							\
      falcON::defv_info::version,					\
      falcON::defv_info::compiled,					\
