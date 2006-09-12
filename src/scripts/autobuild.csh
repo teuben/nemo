@@ -33,7 +33,7 @@ find nemo -type f -newer LastBuild | grep -v CVS/Entries > LastBuild.newfiles
 date > LastBuild.new
 
 if (-z LastBuild.newfiles) then
-  echo No new source code in nemo since `cat LastBuild`
+# echo No new source code in nemo since `cat LastBuild`
 # echo But building anyways....
   goto last_check
 endif
