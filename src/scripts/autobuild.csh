@@ -61,7 +61,11 @@ foreach file (LastBuild.log LastBuild.fail LastBuild.newfiles autobuild.csh nemo
      cp $file logs/$dest.txt
 end
 
-if (! -z LastBuild.fail) cat LastBuild.fail
+if (! -z LastBuild.fail) then
+  cat LastBuild.fail
+else
+  echo Build seems to have passed all OK.
+endif
 
  
 if (1) then
