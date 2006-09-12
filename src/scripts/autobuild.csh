@@ -61,6 +61,8 @@ foreach file (LastBuild.log LastBuild.fail LastBuild.newfiles autobuild.csh nemo
      cp $file logs/$dest.txt
 end
 
+if (! -z LastBuild.fail) cat LastBuild.fail
+
  
 if (1) then
   #  this will move over the build
