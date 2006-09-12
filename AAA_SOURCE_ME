@@ -44,7 +44,7 @@
 # 29-dec-05  PJT                set absolute paths to compilers in makedefs
 # 30-jul-06  PJT                various for gh2006 at the beach near Veracruz :-)
 # 17-aug-06  PJT                corrected for new falcON procedure
-# 31-aug-06  PJT                support png for pgplot
+# 31-aug-06  PJT                some png support for pgplot
 
 if ($?NEMO) goto bad_has_nemo
 
