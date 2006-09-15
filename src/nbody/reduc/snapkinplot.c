@@ -1,5 +1,8 @@
 /*
  * SNAPKINPLOT.C: plot various diagnostics from snapkinem.
+
+ 15-09-2006   WD  deleted redundant and incorrect declartion of sqrt()
+
  */
 
 #include <stdinc.h>
@@ -98,7 +101,7 @@ real x0, jz0, qx0, qy0, qz0, ba0, ca0;
 
 plot_data()
 {
-    real sqrt(), x, jz, qx, qy, qz, ba, ca;
+    real x, jz, qx, qy, qz, ba, ca;
 
     w_tot = w_tot + w_sum;
     x  = xtrans(w_tot / 2.5);
