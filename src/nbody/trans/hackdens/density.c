@@ -4,6 +4,7 @@
  *
  *      18-jul-92  PJT  replaced many if(debug)printf(...) by dprintf(1,...)
  *	 1-apr-01  PJT  compiler warnings
+ *      15-sep-06  WD   compiler error (in gcc-3.4.5)/warning (otherwise)
  */
 
 #include "defs.h"
@@ -173,7 +174,9 @@ real * ra;			/* array to store distances to */
 				/* particles within sphere */
 int *total;			/* number of particles in the sphere */
 {
-    bool subdivp();
+  /* commented out to avoid compiler error with gcc 3.4.5, 15-09-2006 WD
+    bool subdivp(); 
+  */
     register nodeptr *pp;
     register int i,j;
     register int k;
