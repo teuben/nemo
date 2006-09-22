@@ -68,7 +68,7 @@ endif
 #
 # 4 global pseudo targets
 #
-.PHONY			: manip acc man utils
+.PHONY			: manip acc man
 
 ifdef NEMO
 default			: links exe manip acc doxu
@@ -121,8 +121,8 @@ endif
 # 5.6 additional targets for any private sandboxes
 ifdef DWALTER
 -include walter/make
-endif
 -include pjm/make
+endif
 
 #
 # 6 pseudo targets to make various things ...
@@ -134,14 +134,18 @@ guide			:
 			$(MAKE) -C tex default
 endif
 
-# 6.1 utils library
+# 6.1 symbolic links
 utils			:
 			ln -sf ../utils
+inc/utils		: utils
 			(cd inc; ln -sf ../utils/inc utils)
-			$(MAKE) -C utils default
+links		:=	utils inc/utils $(links_pro) $(links_sph) $(links_walter) $(links_pjm) $(links_mpi)
+links		:	$(links)
 
-# 6.2 symbolic links
-links		:	$(links_pro) $(links_sph) $(links_walter) $(links_pjm) $(links_mpi)
+# 6.1 utils library
+utils/lib/libWDutils.a	: utils
+			$(MAKE) -C utils library
+libutils		: utils utils/lib/libWDutils.a
 
 # 6.3 falcON library
 # NOTE: $(falcON) defined in makedefs, depending on value of STATIC
@@ -153,15 +157,15 @@ $(LIB)lib$(LIBNAME).a:	$(falcON_objs)
 $(LIB)lib$(LIBNAME).so:	$(falcON_objs)
 			$(CXX) $^ -shared -o $@
 
-library		: 	utils $(LIBT) $(falcON) $(BFCT)
+library		: 	links $(LIBT) $(falcON) $(BFCT)
 
 # 6.4 falcON executables
-exe		:	library $(exe_pub) $(exe_pro) $(exe_sph) $(exe_walter) $(exe_pjm)
+exe		:	libutils library $(exe_pub) $(exe_pro) $(exe_sph) $(exe_walter) $(exe_pjm)
 
 ifdef NEMO
 
 # 6.5 falcON manipulators
-manip		:	utils $(MANT) $(manip_pub) $(manip_pro) $(manip_walter)
+manip		:	links $(MANT) $(manip_pub) $(manip_pro) $(manip_walter)
 
 # 6.6 falcON accelerations
 acc		:	$(ACCT) $(acc_pub) $(acc_pro) $(acc_walter) $(acc_pjm)	
@@ -184,6 +188,10 @@ cleanbackup	:
 # 6.8.2 clean objects (if no longer needed, since either in library or executable)
 cleanobjs	:
 			rm -rf $(LIB)*.o
+
+# 6.8.3 cleans symbolic links
+cleanlinks	:
+			rm $(links)
 
 # 6.8.3 cleans everything made in releases
 cleanrelease	:

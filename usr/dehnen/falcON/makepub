@@ -357,21 +357,23 @@ endif
 # doxygen documentation
 # ---------------------
 
-dox/html/index.html:	inc/utils/exception.h \
-			inc/utils/inline.h \
-			inc/utils/inline_io.h \
-			inc/utils/traits.h \
-			inc/utils/random.h \
-			inc/utils/numerics.h \
-			inc/utils/Pi.h \
-			inc/utils/memory.h \
-			inc/utils/WDMath.h \
+dox/html/index.html:	utils/inc/tupel.h \
+			utils/inc/exception.h \
+			utils/inc/inline.h \
+			utils/inc/inline_io.h \
+			utils/inc/traits.h \
+			utils/inc/random.h \
+			utils/inc/numerics.h \
+			utils/inc/Pi.h \
+			utils/inc/memory.h \
+			utils/inc/WDMath.h \
 			inc/public/types.h \
 			inc/public/basic.h \
 			inc/public/fields.h \
 			inc/public/io.h \
-			inc/public/profile.h \
 			inc/body.h \
+			inc/public/manip.h \
+			inc/public/profile.h \
 			inc/public/bodyfunc.h \
 			inc/public/interact.h \
 			inc/public/nbody.h \
