@@ -23,6 +23,7 @@
 # 16-jul-05     removed pp,gi,wd from drivers for gfortran
 #  5-dec-05     abuse the new 4th (optional) argument to makemake
 # 31-aug-06     add optional png
+# 26-sep-06     use fix64bit.csh if on 64 bit (or use int8=1)
 
 
 # Other places to get pgplot from
@@ -64,6 +65,7 @@ if ($?NEMOHOST) then
 endif
 set debug=0
 set png=0
+set int8=0
 
 #  dir:  where the source code will be extracted
 #  lib:  where the library (PGPLOT_DIR) will be placed
@@ -194,6 +196,7 @@ switch ($host)
     if (-e /usr/X11R6/lib64) then
         echo Warning: found /usr/X11R6/lib64
         set new4=($new4 /X11R6/lib=/X11R6/lib64)
+        set int8=1
     endif
     if ($?CC && $?F77) then
         $dir/pgplot/makemake  $dir/pgplot linux ${F77}_${CC} $new4
@@ -217,6 +220,10 @@ switch ($host)
       exit 1
     endif
 endsw
+
+if ($int8) then
+  (cd $dir/pgplot/drivers; ./fix64bit.csh)
+endif
 
 make -i
 make -i cpg
@@ -244,5 +251,6 @@ usage:
   echo "  debug=0              clean demo example from lib"
   echo "  cc=gcc               changed a (supperted) C compiler for this system"
   echo "  f77=g77              changed a (supperted) Fortran compiler for this system"
+  echo "  int8=1               use INTEGER*8 in some drivers (e.g. gif)"
 
 
