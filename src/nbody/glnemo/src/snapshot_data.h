@@ -19,6 +19,7 @@
 #define SNAPSHOT_DATA_H
 
 #include <qobject.h>
+#include <pthread.h>
 
 #include "virtual_data.h"
 extern "C" {
@@ -29,32 +30,33 @@ class SnapshotData : public VirtualData
 {    
   Q_OBJECT
  public: 
-  SnapshotData(const char *, const char *, const char *);
+  SnapshotData(const char *, const char *, const char *, const bool, pthread_mutex_t *);
   ~SnapshotData();
-  int loadPos(ParticlesSelectVector * );
-  int getNbody() { return (*nbody); };
-  float * getPos() { return pos; };
-  float  getTime() { return (*timu); };
-  float * getCooMax() {return coo_max;};
-  int * getCooIndexMax() {return i_max;}; 
-  char * getDataName() { return nemo_file; };
-  char * getDataType() { return "Nemo file"; };
+  int loadPos(ParticlesSelectVector *, const bool );
+  int     getNbody()       { return (*(part_data->nbody)); };
+  float * getPos()         { return part_data->pos;        };
+  float   getTime()        { return (*(part_data->timu));  };
+  float * getCooMax()      { return part_data->coo_max;    };
+  int   * getCooIndexMax() { return part_data->i_max;      };
+  const char  * getDataName()    { return nemo_file;             };
+  const char  * getDataType()    { return "Nemo file";           };
   bool isValidData();  
   void uploadGlData(ParticlesSelectVector *);
-  int reload(ParticlesSelectVector *);
+  int reload(ParticlesSelectVector *, const bool);
   QString endOfDataMessage();
  signals:
-  void loadedData(const int *, const float *, ParticlesSelectVector *);
+  void loadedData(const ParticlesData *, ParticlesSelectVector *);
 
  private:
   const  char * select_part, * select_time;
+  bool load_vel;
   char  * nemo_file;
   char  * sel2;
-  int   * nemobits;
 
   bool is_open;   // TRUE if file has been open
   bool is_parsed; // TRUE if particle string has been parsed
   bool is_new_data_loaded; 
+  pthread_mutex_t * mutex_data;
   // method
   
   int close(); // close snapshot

@@ -60,6 +60,7 @@ inline int ParticlesRange::defaultIndexTab()
   for (int i=0; i<npart; i+=step_part) {
     index_tab[ni_index++] = first_part+i;
   }
+  return 1;
 }
 // ============================================================================
 // ParticlesRange::getIndex()                                                  

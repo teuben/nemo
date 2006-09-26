@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004-2005                                  
+// Copyright Jean-Charles LAMBERT - 2004-2006                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -21,14 +21,18 @@
 #include <qobject.h>
 #include "virtual_particles_select.h"
 #include "particles_select.h"
+#include "particles_data.h"
 
 class VirtualData : public QObject
 { 
   Q_OBJECT
   public:
-  VirtualData() { is_end_of_data=FALSE;};
+  VirtualData() { 
+      part_data = new ParticlesData(); 
+      is_end_of_data=FALSE;
+  };
   ~VirtualData() {};
-  virtual int loadPos(ParticlesSelectVector *); 
+  virtual int loadPos(ParticlesSelectVector *, const bool); 
   virtual int getNbody();
   virtual float * getPos();
   virtual float  getTime();
@@ -42,7 +46,8 @@ class VirtualData : public QObject
   virtual void setSelectedRange(const QString) { };
   virtual int fillParticleRange(ParticlesSelectVector * ,const int nbody, const char * sel2);
   virtual bool isConnected() { return FALSE; };
-  virtual int reload(ParticlesSelectVector *) { std::cerr << "reload not implemented\n"; return 0;};
+  virtual int reload(ParticlesSelectVector *, const bool) { std::cerr << "reload not implemented\n"; return 0;};
+  virtual ParticlesData * getParticlesData() { return part_data;};
   bool is_loading_thread;
   bool is_end_of_data;
   
@@ -57,8 +62,7 @@ class VirtualData : public QObject
   void newTime(const float);
   protected:
   int full_nbody;
-  float * pos, * vel, * timu, coo_max[3];
-  int   * nbody,i_max[3];
+  ParticlesData * part_data;
   virtual void computeCooMax();
   private:
 

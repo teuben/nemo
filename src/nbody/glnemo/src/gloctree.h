@@ -17,6 +17,8 @@
 #include "global_options.h"
 #include "virtual_particles_select.h"
 #include "gl_object.h"
+#include "particles_data.h"
+
 /**
 @author Jean-Charles Lambert
 */
@@ -37,9 +39,8 @@ class GLOctree : public GLObject {
     GLOctree(GlobalOptions * _options);
 
     ~GLOctree();
-    void update(const int * nbody_          ,
-		const float * pos_          ,
-		ParticlesSelectVector  * psv);
+    void update(const ParticlesData   *  ,
+		ParticlesSelectVector * );
     void update();
   public slots:
     void buildDisplayList();
@@ -51,8 +52,7 @@ class GLOctree : public GLObject {
     bool new_data;     // true if new
     int nbody_keeped;  // #bodies keep after tree walk
     float rmid[3];
-    int nbody;
-    const float * pos;
+    const ParticlesData * p_data;
     GlobalOptions * store_options;
     ParticlesSelectVector  * psv;
     bool first;

@@ -20,6 +20,7 @@
 
 #include <qobject.h>
 
+#include "particles_data.h"
 #include "virtual_data.h"
 #include "SocketClient.h"
 #include "MessageBuffer.h"
@@ -31,12 +32,12 @@ class NetworkData : public VirtualData
  public: 
   NetworkData(const char * hostname,const int _port=4444);
   ~NetworkData();
-  int loadPos(ParticlesSelectVector *);
+  int loadPos(ParticlesSelectVector *, const bool);
   int getNbody();
-  float * getPos() { return pos; };
+  float * getPos() { return part_data->pos; };
   float  getTime();
-  float * getCooMax() {return coo_max;};
-  int * getCooIndexMax() {return i_max;}; 
+  float * getCooMax() {return part_data->coo_max;};
+  int * getCooIndexMax() {return part_data->i_max;}; 
   const char * getDataName() { return data_name.c_str(); };
   const char * getDataType() { return "Server: "; };
   bool isConnected() { return is_connected ; };
@@ -44,7 +45,7 @@ class NetworkData : public VirtualData
   void setSelectedRange(const QString s) { qselect_part=s; };
   QString endOfDataMessage();
  signals:
-  void loadedData(const int *, const float *,ParticlesSelectVector *);
+  void loadedData(const ParticlesData *,ParticlesSelectVector *);
 
  private:
   const  char * select_part, * select_time;

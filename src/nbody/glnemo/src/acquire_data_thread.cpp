@@ -21,11 +21,12 @@
 // ============================================================================
 // Constructor                                                                 
 AcquireDataThread::AcquireDataThread(VirtualData * vd, 
-                                     ParticlesSelectVector * _psv)
+                                     ParticlesSelectVector * _psv, const bool _load_vel)
 {
   virtual_data = vd;
-  psv         = _psv;
+  psv          = _psv;
   is_loaded    = false;
+  load_vel     = _load_vel;
 }
 // ============================================================================
 // destructor                                                                  
@@ -38,7 +39,7 @@ AcquireDataThread::~AcquireDataThread()
 void AcquireDataThread::run()
 {
 #if 1 
-  if (! virtual_data->loadPos(psv) ) {
+  if (! virtual_data->loadPos(psv, load_vel) ) {
     QString message="End of snapshot Reached !";
     //QMessageBox::information( this,"Warning",message,"Ok");
   }

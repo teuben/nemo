@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004-2005                                  
+// Copyright Jean-Charles LAMBERT - 2004-2006                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -22,9 +22,9 @@
   
 // ============================================================================
 // VirtualData::loadPos()                                                      
-int VirtualData::loadPos(ParticlesSelectVector * psv)
+int VirtualData::loadPos(ParticlesSelectVector * psv, const bool _vel)
 {
-  if (psv) ; // to remove compiler warning
+  if (psv || _vel) ; // to remove compiler warning
   return 0;
 }
 // ============================================================================
@@ -124,29 +124,29 @@ int VirtualData::fillParticleRange(ParticlesSelectVector * psv,
 //  compute extremum coordinates                                               
 void VirtualData::computeCooMax()
 {
-  coo_max[0]= fabs(pos[0]);
-  i_max[0]  = 0;
-  coo_max[1]= fabs(pos[1]);
-  i_max[1]  = 0;
-  coo_max[2]= fabs(pos[2]);
-  i_max[2]  = 0;
+  part_data->coo_max[0]= fabs(part_data->pos[0]);
+  part_data->i_max[0]  = 0;
+  part_data->coo_max[1]= fabs(part_data->pos[1]);
+  part_data->i_max[1]  = 0;
+  part_data->coo_max[2]= fabs(part_data->pos[2]);
+  part_data->i_max[2]  = 0;
   
-  for (int i=0;i<*nbody;i++) {
-    if (fabs(pos[i*3  ]) > coo_max[0]) {
-      coo_max[0] = fabs(pos[i*3  ]);
-      i_max[0]   = i;
+  for (int i=0;i<*part_data->nbody;i++) {
+    if (fabs(part_data->pos[i*3  ]) > part_data->coo_max[0]) {
+      part_data->coo_max[0] = fabs(part_data->pos[i*3  ]);
+      part_data->i_max[0]   = i;
     }
-    if (fabs(pos[i*3+1]) > coo_max[1]) {
-      coo_max[1] = fabs(pos[i*3+1]);
-      i_max[1]   = i;
+    if (fabs(part_data->pos[i*3+1]) > part_data->coo_max[1]) {
+      part_data->coo_max[1] = fabs(part_data->pos[i*3+1]);
+      part_data->i_max[1]   = i;
     }
-    if (fabs(pos[i*3+2]) > coo_max[2]) {
-      coo_max[2] = fabs(pos[i*3+2]);
-      i_max[2]   = i;
+    if (fabs(part_data->pos[i*3+2]) > part_data->coo_max[2]) {
+      part_data->coo_max[2] = fabs(part_data->pos[i*3+2]);
+      part_data->i_max[2]   = i;
     }
   }
   PRINT_D cerr << "Max coordinates \n";
-  PRINT_D cerr << coo_max[0] << " " << coo_max[1] << " " << coo_max[2] << "\n";
-  PRINT_D cerr << i_max[0] << " " << i_max[1] << " " << i_max[2] << "\n";
+  PRINT_D cerr << part_data->coo_max[0] << " " << part_data->coo_max[1] << " " << part_data->coo_max[2] << "\n";
+  PRINT_D cerr << part_data->i_max[0] << " " << part_data->i_max[1] << " " << part_data->i_max[2] << "\n";
 }
 // ============================================================================

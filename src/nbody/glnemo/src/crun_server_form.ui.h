@@ -29,11 +29,11 @@ void CListRunningServerForm::updateList()
   int i=0;        
   static const char * p = hosts_list[i];  
   
-  p = hosts_list[i];  
+  p = hosts_list[i];
   while (p) {   
     // Instantiate a new NetworkData object
     NetworkData * new_virtual_data=
-    new NetworkData(p);    
+	new NetworkData(p);
     // check connexion
     if (!new_virtual_data->isConnected()) { // not connected ?
     } 

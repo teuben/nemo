@@ -17,12 +17,14 @@
 class GlobalOptions{
 public:
     GlobalOptions();
-
+    const GlobalOptions& operator=(const GlobalOptions& m);
     ~GlobalOptions();
 
     // from OpenGL TAB
     bool show_part;
+    bool show_vel;
     float psize;
+    float vel_vector_size;
     int particles_alpha;
     bool blending;
     bool dbuffer;
@@ -55,7 +57,9 @@ public:
     // const
     float MAX_PARTICLES_SIZE;
     float MAX_TEXTURE_SIZE;
-    
+    float MAX_VEL_VECTOR_SIZE;
+    // velocity
+    bool vel_req;
     // method
     void copyTransform(const GlobalOptions &m);
 };

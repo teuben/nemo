@@ -182,15 +182,19 @@
     <include location="local" impldecl="in declaration">virtual_particles_select.h</include>
     <include location="local" impldecl="in declaration">particles_range.h</include>
     <include location="local" impldecl="in declaration">particles_list.h</include>
+    <include location="local" impldecl="in declaration">particles_data.h</include>
+    <include location="global" impldecl="in declaration">pthread.h</include>
     <include location="local" impldecl="in implementation">particles_select_form.ui.h</include>
 </includes>
 <variables>
-    <variable access="private">ParticlesSelectVector * my_psv;</variable>
-    <variable access="private">int nbody;</variable>
+    <variable access="private">pthread_mutex_t * mutex_data;</variable>
+    <variable access="private">ParticlesData * part_data;</variable>
     <variable access="private">const float * pos;</variable>
+    <variable access="private">int nbody;</variable>
+    <variable access="private">ParticlesSelectVector * my_psv;</variable>
 </variables>
 <signals>
-    <signal>applyData(const int *, const float *, ParticlesSelectVector * )</signal>
+    <signal>applyData(const ParticlesData *, ParticlesSelectVector * )</signal>
 </signals>
 <slots>
     <slot access="protected">accept()</slot>
@@ -203,7 +207,7 @@
     <slot>currentChangedRange( int row, int col )</slot>
     <slot>currentChangedList( int row, int col )</slot>
     <slot>valueChanged( int row, int col )</slot>
-    <slot>updateData( ParticlesSelectVector * psv, const int n_body, const float * p_pos )</slot>
+    <slot>updateData( ParticlesData * part_data_, ParticlesSelectVector * psv, pthread_mutex_t * _mutex_data )</slot>
 </slots>
 <functions>
     <function access="private" specifier="non virtual">init()</function>

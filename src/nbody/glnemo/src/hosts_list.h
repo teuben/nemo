@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004-2005                                  
+// Copyright Jean-Charles LAMBERT - 2004-2008                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -23,4 +23,9 @@ static const char* hosts_list[]={
           "apolon" ,"athena" ,"hra"     , "poseidon",
           "elia"   ,0         };
         
+	  class ServerList {
+	    public:
+	      ServerList():h(hosts_list) {};
+	      const char ** h;
+	  };
 #endif // HOSTS_LIST_H

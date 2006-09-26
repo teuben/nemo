@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004-2005                                  
+// Copyright Jean-Charles LAMBERT - 2004-2006                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -31,6 +31,7 @@ public:
     VirtualParticlesSelect * vps; // virtual object of type:
                                   // ParticlesRange         
                                   // ParticlesList          
+                                  
 };
 
 #endif

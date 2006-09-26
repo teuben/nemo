@@ -60,6 +60,7 @@ HEADERS += glbox.h \
            gl_projection.h \
            hosts_list.h \
            virtual_particles_select.h \
+           particles_data.h \
            particles_select.h \
            particles_list.h \
            frame_data.h \
@@ -88,6 +89,7 @@ SOURCES += glbox.cpp \
            global_options.cpp \
            gl_projection.cpp \
            virtual_particles_select.cpp \
+           particles_data.cpp \
            particles_select.cpp \
            particles_list.cpp \
            frame_data.cpp \

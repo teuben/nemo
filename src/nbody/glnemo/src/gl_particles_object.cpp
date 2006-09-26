@@ -36,23 +36,29 @@ PFNGLPOINTPARAMETERFVARBPROC glPointParameterfvARB = NULL;
 using namespace std;
 // ============================================================================
 // Constructor                                                                 
-GLParticlesObject::GLParticlesObject(const int * _nbody, const float * _pos,
-				     VirtualParticlesSelect * _vps
+GLParticlesObject::GLParticlesObject(const ParticlesData * _p_data,
+				     VirtualParticlesSelect * _vps,
+                                     float _vel_resize_factor
 				    ):GLObject()
 {
 
   // get parameters
-  pos   = _pos;
-  vps   = _vps;
-  nbody = _nbody;
+  p_data = _p_data;
+  vps    = _vps;
+  vel_resize_factor = _vel_resize_factor;
+  
   texture_size = 0.52;               // default texture size
   texture_alpha_color=255;
   particles_alpha = 255;
+  vel_resize_factor = 1;
+  vel_dp_list  = glGenLists( 1 );    // get a new display list index
+                                     // for the velocity vectors    
   dplist_index = glGenLists( 1 );    // get a new display list index
   PRINT_D perror("on display list");
   PRINT_D cerr << "gl get error= [" << glGetError() << "]\n";
   PRINT_D cerr << "GLParticlesObject My dplist_index = " << dplist_index << "\n";
-  buildDisplayList(nbody, pos, vps); // build display list
+  buildDisplayList(p_data, vps); // build display list
+  buildVelDisplayList(p_data, vps);  // build vel vector display list
   setColor(vps->col);                // set the color
   is_activated=vps->is_visible;      // Object is visible?
   computeCooMax();                   // compute extrem coordinates
@@ -84,37 +90,92 @@ GLParticlesObject::~GLParticlesObject()
 // ============================================================================
 // GLParticlesObject::updateObject()                                           
 // update the current object with a new particles range                        
-int GLParticlesObject::updateObject(const int * _nbody, const float * _pos,
-				    VirtualParticlesSelect * _vps
+int GLParticlesObject::updateObject(const ParticlesData * _p_data,
+				    VirtualParticlesSelect * _vps,
+                                    float _vel_resize_factor
 				    )
 {
   // get parameters
-  pos   = _pos;
-  vps   = _vps;
-  nbody = _nbody;
+  p_data            = _p_data;
+  vps               = _vps;
+  vel_resize_factor = _vel_resize_factor;
   
-  buildDisplayList(nbody, pos, vps); // build display list
+  buildDisplayList(p_data, vps);     // build particles display list 
+  buildVelDisplayList(p_data, vps);  // build vel vector display list
   setColor(vps->col);                // set the color
   is_activated=vps->is_visible;      // Object is visible?
   computeCooMax();                   // compute extrem coordinates
   return 1;
 }
 
+
 // ============================================================================
-// GLParticlesObject::buildDisplayList()                                       
-// build particles object display list                                         
-void GLParticlesObject::rebuildDisplayList()
+// GLParticlesObject::displayVelVector()                                       
+// display velocity vector                                                     
+void GLParticlesObject::displayVelVector()
 {
-  buildDisplayList(nbody, pos, vps);
+  if (vps->is_visible && p_data->vel) {
+    
+    display(vel_dp_list);
+  }
+}
+// ============================================================================
+// GLParticlesObject::buildVelDisplayList()                                    
+// build velocity vector display list                                          
+void GLParticlesObject::buildVelDisplayList(const ParticlesData * p_data, 
+					 VirtualParticlesSelect * _vps)
+{
+  if (p_data->vel && _vps->is_visible) { // there are velocity vector to display
+    // display list
+    glNewList( vel_dp_list, GL_COMPILE );
+    //glPushMatrix();
+    //glDisable(GL_BLEND);
+    glBegin(GL_LINES);
+    
+    for (int i=0; i < _vps->ni_index; i++) {
+      int index=_vps->index_tab[i];    
+      float 
+      x=p_data->pos[index*3  ],
+      y=p_data->pos[index*3+1],
+      z=p_data->pos[index*3+2];
+      glVertex3f(x , y  ,z );     // draw starting point
+      
+      float 
+      x1=p_data->vel[index*3  ] * vel_resize_factor,
+      y1=p_data->vel[index*3+1] * vel_resize_factor,
+      z1=p_data->vel[index*3+2] * vel_resize_factor;
+      glVertex3f(x+x1 , y+y1  ,z+z1 );  // draw ending point  
+    }
+    glEnd();
+    //glPopMatrix();
+    glEndList();
+    
+  }
+}
+// ============================================================================
+// GLParticlesObject::rebuildDisplayList()                                     
+// build particles object display list                                         
+void GLParticlesObject::rebuildDisplayList(float _vel_resize_factor)
+{
+  buildDisplayList(p_data, vps);
+  rebuildVelDisplayList(_vel_resize_factor);
+}
+// ============================================================================
+// GLParticlesObject::rebuildVelDisplayList()                                  
+// build velocity vectot object display list                                   
+void GLParticlesObject::rebuildVelDisplayList(float _vel_resize_factor)
+{
+  if ( _vel_resize_factor > 0) {
+    vel_resize_factor = _vel_resize_factor;
+  }
+  buildVelDisplayList(p_data, vps);
 }
 // ============================================================================
 // GLParticlesObject::buildDisplayList()                                       
 // build particles object display list                                         
-void GLParticlesObject::buildDisplayList(const int            * nbody, 
-					 const float          * pos, 
+void GLParticlesObject::buildDisplayList(const ParticlesData * p_data, 
 					 VirtualParticlesSelect * _vps)
 {
-  if (nbody);   // remove compiler warning 
   // display list
   glNewList( dplist_index, GL_COMPILE );
   glBegin(GL_POINTS);
@@ -125,9 +186,9 @@ void GLParticlesObject::buildDisplayList(const int            * nbody,
     for (int i=0; i < _vps->ni_index; i++) {
       int index=_vps->index_tab[i];    
       float 
-      x=pos[index*3  ],
-      y=pos[index*3+1],
-      z=pos[index*3+2];
+      x=p_data->pos[index*3  ],
+      y=p_data->pos[index*3+1],
+      z=p_data->pos[index*3+2];
       //std::cerr << x << " " << y << " " << z << " " << index << "\n";
     // One point
     glVertex3f(x , y  ,z );
@@ -198,7 +259,7 @@ void GLParticlesObject::displaySprites(GLuint texture)
 #endif
 // ============================================================================
 // GLParticlesObject::displayPolygons()                                        
-// displayPolygons to create gaz like particles effect.                        
+// displayPolygons to create gas like particles effect.                        
 // use billboarding technique to display polygons :                            
 // - transforms coordinates points according model view matrix                 
 // - draw quad (2 triangles) around new coordinates and facing camera          
@@ -228,7 +289,7 @@ void GLParticlesObject::displayPolygons(const double * mModel,GLuint texture,flo
   setColor(vps->col);    // set the color
   glColor4ub(mycolor.red(), mycolor.green(), mycolor.blue(),texture_alpha_color);
   
-  glBindTexture(GL_TEXTURE_2D, texture); // Select Our Texture
+  glBindTexture(GL_TEXTURE_2D, texture); // Select texture
   float uv[4][2] = { {0.0,   1.0-v_max}, {0.0,   1.0},{u_max, 1.0},
                      {u_max, 1.0-v_max}
                    };
@@ -245,9 +306,9 @@ void GLParticlesObject::displayPolygons(const double * mModel,GLuint texture,flo
   for (int i=0; i < vps->ni_index; i++) {
       int index=vps->index_tab[i]; 
       float 
-      x=pos[index*3  ],
-      y=pos[index*3+1],
-      z=pos[index*3+2];
+      x=p_data->pos[index*3  ],
+      y=p_data->pos[index*3+1],
+      z=p_data->pos[index*3+2];
       //w=1.0;
       
     // compute point coordinates according to model via matrix  
@@ -295,27 +356,27 @@ void GLParticlesObject::displayPolygons(const double * mModel,GLuint texture,flo
 //  compute extremum coordinates                                               
 void GLParticlesObject::computeCooMax()
 {
-  coo_max[0]= fabs(pos[vps->index_tab[0]]);
+  coo_max[0]= fabs(p_data->pos[vps->index_tab[0]]);
   i_max[0]  = 0;
-  coo_max[1]= fabs(pos[vps->index_tab[0]]);
+  coo_max[1]= fabs(p_data->pos[vps->index_tab[0]]);
   i_max[1]  = 0;
-  coo_max[2]= fabs(pos[vps->index_tab[0]]);
+  coo_max[2]= fabs(p_data->pos[vps->index_tab[0]]);
   i_max[2]  = 0;
   
   //for (int i=0; i < vps->npart; i+=vps->step_part) {
   //  int index=vps->getIndex(i);
   for (int i=0; i < vps->ni_index; i++) {
     int index=vps->index_tab[i];
-    if (fabs(pos[index*3  ]) > coo_max[0]) {
-      coo_max[0] = fabs(pos[index*3  ]);
+    if (fabs(p_data->pos[index*3  ]) > coo_max[0]) {
+      coo_max[0] = fabs(p_data->pos[index*3  ]);
       i_max[0]   = index;
     }
-    if (fabs(pos[index*3+1]) > coo_max[1]) {
-      coo_max[1] = fabs(pos[index*3+1]);
+    if (fabs(p_data->pos[index*3+1]) > coo_max[1]) {
+      coo_max[1] = fabs(p_data->pos[index*3+1]);
       i_max[1]   = index;
     }
-    if (fabs(pos[index*3+2]) > coo_max[2]) {
-      coo_max[2] = fabs(pos[index*3+2]);
+    if (fabs(p_data->pos[index*3+2]) > coo_max[2]) {
+      coo_max[2] = fabs(p_data->pos[index*3+2]);
       i_max[2]   = index;
     }
   }

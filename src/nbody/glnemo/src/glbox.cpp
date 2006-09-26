@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004-2005                                  
+// Copyright Jean-Charles LAMBERT - 2004-2006                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -76,6 +76,8 @@ GLBox::GLBox( QWidget* parent, const char* name,
   hud = new GLHudObject(width,height,f,yellow);
   hudProjection();
   tree = new GLOctree(_options);
+  
+  p_data = new ParticlesData();
 }
 
 // ============================================================================
@@ -218,7 +220,13 @@ void GLBox::paintGL()
       vparticles_object[i]->display();
     }  
   }
-
+  // Display velocity vectors
+  if (store_options->show_vel) {
+    for (int i=0; i<nb_object; i++) {
+      vparticles_object[i]->updateAlphaSlot(store_options->particles_alpha);
+      vparticles_object[i]->displayVelVector();
+    }  
+  }
 // display sprites
 #if GL_EXT_ENABLE
 if (0) {
@@ -273,30 +281,40 @@ void GLBox::hudProjection()
   }
 }
 // ============================================================================
-// GLBox::getData()                                                            
-// collect Data and fill DisplayList                                           
-void GLBox::getData(const int * nbody               ,  
-                    const float * pos_              ,
+// GLBox::getVelMaxNorm()                                                      
+// return the Max velocity vector norm                                         
+float GLBox::getVelMaxNorm(const ParticlesData * _p_data,
                     ParticlesSelectVector  * psv)
 {
-  static int nbody_save=0;
-  static float * pos=NULL;
-  
-  // copy positions into working array to prevent
-  // bad display during "playing" snapshot       
-  if (*nbody > nbody_save) {
-    nbody_save=*nbody;
-    if (pos) delete pos;
-    pos = new float[nbody_save*3];
-  }
-  memcpy((float *) pos, (float *) pos_, sizeof(float)* (*nbody) * 3);
-  
-  
+    float max_norm=0.0;
+    for (int i=0; i< (int ) psv->size(); i++ ) {
+      if ((*psv)[i].vps->is_visible) {
+        float norm=fabs((*psv)[i].vps->computeMaxVelVectorNorm(_p_data));
+        if (norm > max_norm) {
+          max_norm = norm;
+        }
+      }
+    } 
+    return max_norm;
+}                    
+// ============================================================================
+// GLBox::getData()                                                            
+// collect Data and fill DisplayList                                           
+void GLBox::getData(const ParticlesData * _p_data,
+                    ParticlesSelectVector  * psv)
+{
+
+  //static ParticlesData * p_data = new ParticlesData();
+  // copy particles data into working array to prevent
+  // bad display during "playing" snapshot            
+  *p_data = *_p_data;
+    
   for (int i=0; i< (int ) psv->size(); i++ ) {
     (*psv)[i].vps->defaultIndexTab();  // reset index, in case of loading
   }
   // create octree
-  tree->update(nbody,pos,psv); 
+  tree->update(p_data,psv); 
+  
   // delete previous objects
 #if 0
   for (int i=0; i<nb_object; i++) {
@@ -304,6 +322,9 @@ void GLBox::getData(const int * nbody               ,
   }
   nb_object=0;
 #endif
+  // compute velocity resize factor
+  vel_max_norm=getVelMaxNorm(p_data,psv);
+      				
   
   // loop on all the objects stored in psv
   for (int i=0; i< (int ) psv->size(); i++ ) {
@@ -311,8 +332,9 @@ void GLBox::getData(const int * nbody               ,
     if (i>=nb_object ) { // create a new object
       nb_object++;
       GLParticlesObject * pobj;
-      pobj = new GLParticlesObject( nbody, pos,
-      				 ((*psv)[i].vps));
+      pobj = new GLParticlesObject( p_data,
+      				 ((*psv)[i].vps),
+                                 store_options->vel_vector_size/vel_max_norm);
      
       //vparticles_object.push_back(*pobj);
       vparticles_object[i] = pobj;
@@ -321,8 +343,9 @@ void GLBox::getData(const int * nbody               ,
     #if 0
       (*psv)[i].vps->defaultIndexTab();  // reset index, in case of loading
     #endif  
-      vparticles_object[i]->updateObject( nbody, pos,
-					  ((*psv)[i].vps));        
+      vparticles_object[i]->updateObject( p_data,
+					 ((*psv)[i].vps),
+                                         store_options->vel_vector_size/vel_max_norm);
     }
   }
   // desactivate not selected objects
@@ -342,6 +365,17 @@ void GLBox::getData(const int * nbody               ,
   }
 #endif  
   updateGL();
+}
+// ============================================================================
+// GLBox::updateVelVectorFactor()                                              
+//                                                                             
+void GLBox::updateVelVectorFactor()
+{
+    for (int i=0; i<nb_object; i++) {
+      vparticles_object[i]->rebuildVelDisplayList(store_options->vel_vector_size/vel_max_norm);
+    }
+    //if (ugl) updateGL();
+    updateGL();
 }
 // ============================================================================
 // GLBox::setZoom()                                                            
@@ -865,6 +899,7 @@ void GLBox::updateOptions(GlobalOptions * go, const bool only_transform)
     store_options->copyTransform(*go); // copy transformation data
   } else {                            // else                    
     *store_options = *go;             // copy all                
+    treeUpdate(false);
   }
   setHudActivateNoGL(); 
   updateGL();
@@ -877,12 +912,14 @@ void GLBox::takeScreenshot(QImage & img)
 }
 // ============================================================================
 // GLBox::treeUpdate()                                                         
-void GLBox::treeUpdate() 
+void GLBox::treeUpdate(bool ugl) 
 { 
   tree->update(); 
   for (int i=0; i<nb_object; i++) {
-    vparticles_object[i]->rebuildDisplayList();
+    vparticles_object[i]->rebuildDisplayList(store_options->vel_vector_size);
   }
- updateGL();
+  if (ugl) {
+    updateGL();
+  }
 }
 // ============================================================================

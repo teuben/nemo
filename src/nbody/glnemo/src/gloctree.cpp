@@ -99,13 +99,12 @@ void GLOctree::init()
 // ============================================================================
 // GLOctree::update()                                                          
 // update tree with new Particles object                                       
-void GLOctree::update(const int * nbody_, const float * pos_          ,
+void GLOctree::update(const ParticlesData * _p_data ,
 		      ParticlesSelectVector  * psv_)
 {
   first=true;
   // copy pointers
-  nbody = *nbody_;
-  pos   = pos_;
+  p_data = _p_data;
   psv   = psv_;
   new_data = true;
     
@@ -149,7 +148,7 @@ int GLOctree::build()
         //for (int i=0; i < vps->npart; i+=vps->step_part) {
         for (int i=0; i < vps->ni_index; i++) {
           int index=vps->index_tab[i];
-          assert(index<nbody);
+	  assert(index<*p_data->nbody);
           //std::cerr << "Nbody = " << nbody << " Obj = " << obj << " I = " << i << " Index = " << index << "\n";
           insertParticle(index,&root, rmid, 1, obj );
         }
@@ -182,7 +181,7 @@ void GLOctree::insertParticle(int index, Node ** node, float * rmid, int level, 
 
   // look for position in the cube (octant)
   for (int i=0; i<3; i++) {
-    float comp=pos[index*3+i];
+    float comp=p_data->pos[index*3+i];
     if ((comp-rmid[i]) < 0) {
       bit=0;
       new_rmid[i]=((float ) (-size_max)/(float) (1<<level))+rmid[i];
@@ -318,11 +317,11 @@ void GLOctree::computeSizeMax()
     VirtualParticlesSelect * vps = (*psv)[obj].vps;
     if (vps->is_visible) {
       visible = true;
-      coo_max[0]= fabs(pos[vps->index_tab[0]]);
+      coo_max[0]= fabs(p_data->pos[vps->index_tab[0]]);
       i_max[0]  = 0;
-      coo_max[1]= fabs(pos[vps->index_tab[0]]);
+      coo_max[1]= fabs(p_data->pos[vps->index_tab[0]]);
       i_max[1]  = 0;
-      coo_max[2]= fabs(pos[vps->index_tab[0]]);
+      coo_max[2]= fabs(p_data->pos[vps->index_tab[0]]);
       i_max[2]  = 0;
     }
   }
@@ -333,16 +332,16 @@ void GLOctree::computeSizeMax()
       //  int index=vps->getIndex(i);
       for (int i=0; i < vps->ni_index; i++) {
         int index=vps->index_tab[i];
-        if (fabs(pos[index*3  ]) > coo_max[0]) {
-          coo_max[0] = fabs(pos[index*3  ]);
+	if (fabs(p_data->pos[index*3  ]) > coo_max[0]) {
+	  coo_max[0] = fabs(p_data->pos[index*3  ]);
           i_max[0]   = index;
         }
-        if (fabs(pos[index*3+1]) > coo_max[1]) {
-          coo_max[1] = fabs(pos[index*3+1]);
+	if (fabs(p_data->pos[index*3+1]) > coo_max[1]) {
+	  coo_max[1] = fabs(p_data->pos[index*3+1]);
           i_max[1]   = index;
         }
-        if (fabs(pos[index*3+2]) > coo_max[2]) {
-          coo_max[2] = fabs(pos[index*3+2]);
+	if (fabs(p_data->pos[index*3+2]) > coo_max[2]) {
+	  coo_max[2] = fabs(p_data->pos[index*3+2]);
           i_max[2]   = index;
         }
       }

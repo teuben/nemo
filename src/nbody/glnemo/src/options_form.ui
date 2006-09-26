@@ -9,7 +9,7 @@
             <x>0</x>
             <y>0</y>
             <width>301</width>
-            <height>515</height>
+            <height>517</height>
         </rect>
     </property>
     <property name="caption">
@@ -96,9 +96,80 @@
                     <property name="name">
                         <cstring>unnamed</cstring>
                     </property>
-                    <widget class="QButtonGroup" row="2" column="0">
+                    <widget class="QGroupBox" row="2" column="0">
                         <property name="name">
-                            <cstring>buttonGroup3</cstring>
+                            <cstring>effect_box</cstring>
+                        </property>
+                        <property name="title">
+                            <string>Effects</string>
+                        </property>
+                        <grid>
+                            <property name="name">
+                                <cstring>unnamed</cstring>
+                            </property>
+                            <widget class="QLayoutWidget" row="0" column="0">
+                                <property name="name">
+                                    <cstring>layout11</cstring>
+                                </property>
+                                <vbox>
+                                    <property name="name">
+                                        <cstring>unnamed</cstring>
+                                    </property>
+                                    <widget class="QCheckBox">
+                                        <property name="name">
+                                            <cstring>blending</cstring>
+                                        </property>
+                                        <property name="text">
+                                            <string>Blending</string>
+                                        </property>
+                                    </widget>
+                                    <widget class="QCheckBox">
+                                        <property name="name">
+                                            <cstring>dbuffer</cstring>
+                                        </property>
+                                        <property name="text">
+                                            <string>Depth Buffer</string>
+                                        </property>
+                                    </widget>
+                                </vbox>
+                            </widget>
+                            <widget class="QLayoutWidget" row="1" column="0">
+                                <property name="name">
+                                    <cstring>layout25</cstring>
+                                </property>
+                                <hbox>
+                                    <property name="name">
+                                        <cstring>unnamed</cstring>
+                                    </property>
+                                    <widget class="QLabel">
+                                        <property name="name">
+                                            <cstring>textLabel1_3</cstring>
+                                        </property>
+                                        <property name="text">
+                                            <string>Alpha channel</string>
+                                        </property>
+                                    </widget>
+                                    <widget class="QSlider">
+                                        <property name="name">
+                                            <cstring>alpha_slider</cstring>
+                                        </property>
+                                        <property name="maxValue">
+                                            <number>255</number>
+                                        </property>
+                                        <property name="value">
+                                            <number>255</number>
+                                        </property>
+                                        <property name="orientation">
+                                            <enum>Horizontal</enum>
+                                        </property>
+                                    </widget>
+                                </hbox>
+                            </widget>
+                        </grid>
+                    </widget>
+                    <widget class="QButtonGroup" row="3" column="0">
+                        <property name="name">
+                            <cstring>proj_box</cstring>
                         </property>
                         <property name="title">
                             <string>Projection</string>
@@ -170,7 +241,7 @@
                     </widget>
                     <widget class="QGroupBox" row="0" column="0">
                         <property name="name">
-                            <cstring>groupBox1</cstring>
+                            <cstring>part_box</cstring>
                         </property>
                         <property name="title">
                             <string>Particles</string>
@@ -269,44 +340,21 @@
                     </widget>
                     <widget class="QGroupBox" row="1" column="0">
                         <property name="name">
-                            <cstring>groupBox1_2</cstring>
+                            <cstring>vel_box</cstring>
+                        </property>
+                        <property name="enabled">
+                            <bool>true</bool>
                         </property>
                         <property name="title">
-                            <string>Effects</string>
+                            <string>Velocity vectors</string>
                         </property>
                         <grid>
                             <property name="name">
                                 <cstring>unnamed</cstring>
                             </property>
-                            <widget class="QLayoutWidget" row="0" column="0">
-                                <property name="name">
-                                    <cstring>layout11</cstring>
-                                </property>
-                                <vbox>
-                                    <property name="name">
-                                        <cstring>unnamed</cstring>
-                                    </property>
-                                    <widget class="QCheckBox">
-                                        <property name="name">
-                                            <cstring>blending</cstring>
-                                        </property>
-                                        <property name="text">
-                                            <string>Blending</string>
-                                        </property>
-                                    </widget>
-                                    <widget class="QCheckBox">
-                                        <property name="name">
-                                            <cstring>dbuffer</cstring>
-                                        </property>
-                                        <property name="text">
-                                            <string>Depth Buffer</string>
-                                        </property>
-                                    </widget>
-                                </vbox>
-                            </widget>
                             <widget class="QLayoutWidget" row="1" column="0">
                                 <property name="name">
-                                    <cstring>layout25</cstring>
+                                    <cstring>layout31</cstring>
                                 </property>
                                 <hbox>
                                     <property name="name">
@@ -314,24 +362,117 @@
                                     </property>
                                     <widget class="QLabel">
                                         <property name="name">
-                                            <cstring>textLabel1_3</cstring>
+                                            <cstring>textLabel2_4</cstring>
                                         </property>
                                         <property name="text">
-                                            <string>Alpha channel</string>
+                                            <string>Size</string>
                                         </property>
                                     </widget>
-                                    <widget class="QSlider">
+                                    <spacer>
                                         <property name="name">
-                                            <cstring>alpha_slider</cstring>
-                                        </property>
-                                        <property name="maxValue">
-                                            <number>255</number>
-                                        </property>
-                                        <property name="value">
-                                            <number>255</number>
+                                            <cstring>spacer4_2</cstring>
                                         </property>
                                         <property name="orientation">
                                             <enum>Horizontal</enum>
+                                        </property>
+                                        <property name="sizeType">
+                                            <enum>Fixed</enum>
+                                        </property>
+                                        <property name="sizeHint">
+                                            <size>
+                                                <width>20</width>
+                                                <height>20</height>
+                                            </size>
+                                        </property>
+                                    </spacer>
+                                    <widget class="QSlider">
+                                        <property name="name">
+                                            <cstring>vel_size</cstring>
+                                        </property>
+                                        <property name="sizePolicy">
+                                            <sizepolicy>
+                                                <hsizetype>0</hsizetype>
+                                                <vsizetype>0</vsizetype>
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="value">
+                                            <number>50</number>
+                                        </property>
+                                        <property name="orientation">
+                                            <enum>Horizontal</enum>
+                                        </property>
+                                    </widget>
+                                    <spacer>
+                                        <property name="name">
+                                            <cstring>spacer5_3</cstring>
+                                        </property>
+                                        <property name="orientation">
+                                            <enum>Horizontal</enum>
+                                        </property>
+                                        <property name="sizeType">
+                                            <enum>Expanding</enum>
+                                        </property>
+                                        <property name="sizeHint">
+                                            <size>
+                                                <width>77</width>
+                                                <height>20</height>
+                                            </size>
+                                        </property>
+                                    </spacer>
+                                </hbox>
+                            </widget>
+                            <widget class="QLayoutWidget" row="0" column="0">
+                                <property name="name">
+                                    <cstring>layout42</cstring>
+                                </property>
+                                <hbox>
+                                    <property name="name">
+                                        <cstring>unnamed</cstring>
+                                    </property>
+                                    <widget class="QCheckBox">
+                                        <property name="name">
+                                            <cstring>show_vel</cstring>
+                                        </property>
+                                        <property name="text">
+                                            <string>enable</string>
+                                        </property>
+                                    </widget>
+                                    <spacer>
+                                        <property name="name">
+                                            <cstring>spacer5_3_2</cstring>
+                                        </property>
+                                        <property name="orientation">
+                                            <enum>Horizontal</enum>
+                                        </property>
+                                        <property name="sizeType">
+                                            <enum>Expanding</enum>
+                                        </property>
+                                        <property name="sizeHint">
+                                            <size>
+                                                <width>68</width>
+                                                <height>20</height>
+                                            </size>
+                                        </property>
+                                    </spacer>
+                                    <widget class="QLabel">
+                                        <property name="name">
+                                            <cstring>textLabel1_4</cstring>
+                                        </property>
+                                        <property name="text">
+                                            <string>max:</string>
+                                        </property>
+                                    </widget>
+                                    <widget class="QSpinBox">
+                                        <property name="name">
+                                            <cstring>max_vel_vec</cstring>
+                                        </property>
+                                        <property name="maxValue">
+                                            <number>1000</number>
+                                        </property>
+                                        <property name="value">
+                                            <number>2</number>
                                         </property>
                                     </widget>
                                 </hbox>
@@ -1635,7 +1776,7 @@
                             <cstring>groupBox11</cstring>
                         </property>
                         <property name="title">
-                            <string>Gaz like particles</string>
+                            <string>Gas like particles</string>
                         </property>
                         <grid>
                             <property name="name">
@@ -1995,6 +2136,24 @@
         <receiver>OptionsForm</receiver>
         <slot>selectGrid()</slot>
     </connection>
+    <connection>
+        <sender>show_vel</sender>
+        <signal>toggled(bool)</signal>
+        <receiver>OptionsForm</receiver>
+        <slot>uploadOptions()</slot>
+    </connection>
+    <connection>
+        <sender>vel_size</sender>
+        <signal>valueChanged(int)</signal>
+        <receiver>OptionsForm</receiver>
+        <slot>updateVelVectorFactor()</slot>
+    </connection>
+    <connection>
+        <sender>max_vel_vec</sender>
+        <signal>valueChanged(int)</signal>
+        <receiver>OptionsForm</receiver>
+        <slot>updateVelVectorFactor()</slot>
+    </connection>
 </connections>
 <includes>
     <include location="local" impldecl="in declaration">global_options.h</include>
@@ -2025,6 +2184,7 @@
     <signal>changeColorCube(const QColor)</signal>
     <signal>toggleCube()</signal>
     <signal>toggleGrid()</signal>
+    <signal>sigVelVectorFactor()</signal>
 </signals>
 <slots>
     <slot access="private">uploadOptions()</slot>
@@ -2050,6 +2210,8 @@
     <slot access="private">setStyle()</slot>
     <slot access="private">toggleHud( bool )</slot>
     <slot access="private">setupOctreeSlot()</slot>
+    <slot access="private">updateVelVectorFactor()</slot>
+    <slot>setVelBox( bool b )</slot>
 </slots>
 <functions>
     <function access="private" specifier="non virtual">init()</function>

@@ -93,7 +93,11 @@ void ParticlesSelectForm::apply()
   applyRange();
   // proceed on list
   applyList();
-  emit applyData(&nbody,pos,my_psv);  // send signal to GLBox to update the data
+  if (part_data) { // we must have data to display !!!
+      pthread_mutex_lock(mutex_data);
+      emit applyData(part_data,my_psv);  // send signal to GLBox to update the data
+      pthread_mutex_unlock(mutex_data);
+  }     
 }
 // ============================================================================
 // ParticlesSelectForm::applyRange()
@@ -253,7 +257,7 @@ void ParticlesSelectForm::valueChanged( int row, int col )
 	table_range->setText(row, col, QString( "%1" ).arg(value,0)); // keep the value
       }
       else {
-	if ( value > nbody) {
+	if ( (part_data) && (value > *part_data->nbody)) {
 	  table_range->setText(row, col, QString( "%1" ).arg(value,0) + ">nbody!");
 	}
 	else {
@@ -442,14 +446,14 @@ void ParticlesSelectForm::fillFormRange()
 // ============================================================================
 // SetParticlesRangeForm::updateData()                                         
 // fill the form according to the NEW data                                     
-void ParticlesSelectForm::updateData( ParticlesSelectVector * psv, const int n_body, const float *p_pos )
+void ParticlesSelectForm::updateData(ParticlesData * part_data_, ParticlesSelectVector * psv , pthread_mutex_t * _mutex_data)
 {
-  // save nbody for later processing
-  nbody = n_body;
-  // save pos for later processing
-  pos   = p_pos;
+  //  get ParticlesData object
+  part_data = part_data_;
   // save prv for later processing
   my_psv = psv; 
+  // mutex timer
+  mutex_data = _mutex_data;
   
   fillForm();
 }

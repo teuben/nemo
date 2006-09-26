@@ -32,8 +32,10 @@ void OptionsForm::uploadOptions()
     
     // match all the OptionsForm variable with their corresponding
     // from OpenGL TAB
-    store_options->show_part=show_part->isChecked();    
-    store_options->psize=1.+(psize->value()*(store_options->MAX_PARTICLES_SIZE-1)/psize->maxValue());    
+    store_options->show_part=show_part->isChecked();
+    store_options->show_vel=show_vel->isChecked();
+    store_options->psize=1.+(psize->value()*(store_options->MAX_PARTICLES_SIZE-1)/psize->maxValue());
+    store_options->vel_vector_size=(vel_size->value()*(store_options->MAX_VEL_VECTOR_SIZE)/vel_size->maxValue());
     store_options->blending=blending->isChecked();
     store_options->dbuffer=dbuffer->isChecked();
     store_options->particles_alpha=alpha_slider->value();
@@ -82,8 +84,11 @@ void OptionsForm::downloadOptions(GlobalOptions * options)
     // match all the OptionsForm variable with their corresponding
     // from OpenGL TAB
     show_part->setChecked(store_options->show_part);
+    show_vel->setChecked(store_options->show_vel);
     psize->setValue((int) (psize->maxValue()*(store_options->psize-1.)/
       (store_options->MAX_PARTICLES_SIZE-1)));
+    vel_size->setValue((int) (vel_size->maxValue()*(store_options->vel_vector_size)/
+      (store_options->MAX_VEL_VECTOR_SIZE)));
     blending->setChecked(store_options->blending);
     dbuffer->setChecked(store_options->dbuffer);
     alpha_slider->setValue(store_options->particles_alpha);
@@ -347,12 +352,12 @@ void OptionsForm::setTextureAlphaColor( int )
 // set windows stype
 void OptionsForm::setStyle()
 {
-    static int s=0;
- QStringList styles = QStyleFactory::keys();
-
- s = (++s)%styles.count();
- qApp->setStyle( styles[ s] );
- //WidgetView::button1Clicked();
+  static int s=0;
+  QStringList styles = QStyleFactory::keys();
+  s++;
+  s = (s)%styles.count();
+  qApp->setStyle( styles[ s] );
+  //WidgetView::button1Clicked();
 }
 
 //============================================================================
@@ -387,4 +392,18 @@ void OptionsForm::setupOctreeSlot()
     store_options->octree_display=display_tree->isChecked();
     store_options->octree_level=level_tree->value();
     emit sigUpdateTree();
+}
+
+
+void OptionsForm::updateVelVectorFactor()
+{
+  store_options->MAX_VEL_VECTOR_SIZE = max_vel_vec->value(); 
+  store_options->vel_vector_size=(vel_size->value()*(store_options->MAX_VEL_VECTOR_SIZE)/vel_size->maxValue());
+  emit sigVelVectorFactor();
+}
+
+
+void OptionsForm::setVelBox( bool b)
+{
+    vel_box->setEnabled(b);
 }

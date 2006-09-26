@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004-2005                                  
+// Copyright Jean-Charles LAMBERT - 2004-2006                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -36,7 +36,6 @@ using namespace std;
 NetworkData::NetworkData(const char * hostname,const int _port)
 {
   int port = _port; // the communication port  
-  
   // get a new client instance
   client = new SocketClient(hostname,SOCK_STREAM,port);
   // connect to the server
@@ -53,12 +52,12 @@ NetworkData::NetworkData(const char * hostname,const int _port)
   }
   
   // allocate memory for pointers
-  nbody = new int;
-  timu  = new float;
+  //nbody = new int;
+  //timu  = new float;
+  part_data->allocVar(); // allocate nbody, timu
   // Initialize global class data
-  pos = NULL;
-  *nbody = -1;
-  *timu  = -1.0;
+  *part_data->nbody = -1;
+  *part_data->timu  = -1.0;
   is_parsed = FALSE;
   is_loading_thread = FALSE;
   is_new_data_loaded = FALSE;
@@ -77,21 +76,27 @@ NetworkData::~NetworkData()
     delete clientMB;
     clientMB = NULL;
   }
-  delete nbody;
-  delete timu;
+  delete part_data;
+  //delete nbody;
+  //delete timu;
 }
 // ============================================================================
 // NetworkData::loadPos()                                                      
 // get from the server new positions data                                      
-int NetworkData::loadPos(ParticlesSelectVector * psv)
+int NetworkData::loadPos(ParticlesSelectVector * psv, const bool vel)
 {
   int n;   // happy red hat
   if (n) ; // remove compiler warning
   
   if (clientMB) {
     try {
-      // send selected string to the server
-      clientMB->sendData(MessageBuffer::Select,qselect_part.length()+1,qselect_part);
+      if (vel) {
+        // send se lected string to the server
+        clientMB->sendData(MessageBuffer::SelectV,qselect_part.length()+1,qselect_part);
+      } 
+      else {
+        clientMB->sendData(MessageBuffer::Select,qselect_part.length()+1,qselect_part);  
+      }
       
       // receive time from server
       clientMB->recvData();
@@ -99,7 +104,7 @@ int NetworkData::loadPos(ParticlesSelectVector * psv)
         throw (-4); // Bad protocol error
       }
       // convert buffer to TIME value
-      *timu =  *((float *) (clientMB->getDatBuffer()));
+      *part_data->timu =  *((float *) (clientMB->getDatBuffer()));
       
       // receive position (correct nbody according selected range)
       clientMB->recvData();
@@ -108,20 +113,38 @@ int NetworkData::loadPos(ParticlesSelectVector * psv)
       } 
       int nbytes=*((int *) (clientMB->getSizBuffer()));  // #bytes transferred
       int new_body = (int) ((float) (nbytes) / 3.0 / sizeof(float));
-      assert (new_body <= *nbody);
+      assert (new_body <= *part_data->nbody);
       
       // allocate memory to store positions           
-      if ( ! pos ||               // not yet allocated
-            new_body > *nbody) {   // new_body bigger 
-        if (pos) {
-          delete pos;              // delete previous array
-        }
-        pos = new float[new_body*3]; // reserve memory     
+      if ( ! part_data->pos ||               // not yet allocated
+            new_body > *part_data->nbody) {   // new_body bigger 
+        part_data->pos = (float *) part_data->mallocate((char *) part_data->pos, sizeof(int) * new_body * 3, true);
       }
-      *nbody = new_body;
-      memcpy((float *) pos, (char *) clientMB->getDatBuffer(), nbytes);  
-      PRINT_D cerr << "New nbody = " << *nbody << "\n";
+      *part_data->nbody = new_body;
+      memcpy((float *) part_data->pos, (char *) clientMB->getDatBuffer(), nbytes);  
+      PRINT_D cerr << "New nbody = " << *part_data->nbody << "\n";
         
+      if (vel) {
+        // receive velocities (correct nbody according selected range)
+        clientMB->recvData();
+        if (*(clientMB->getTagBuffer()) !=  MessageBuffer::Vel) {
+          throw (-4); // Bad protocol error
+        } 
+        int nbytes=*((int *) (clientMB->getSizBuffer()));  // #bytes transferred
+        int new_body = (int) ((float) (nbytes) / 3.0 / sizeof(float));
+        assert (new_body <= *part_data->nbody);
+        
+        // allocate memory to store velocities           
+        if ( ! part_data->vel ||               // not yet allocated
+              new_body > *part_data->nbody) {   // new_body bigger 
+          part_data->vel = (float *) part_data->mallocate((char *) part_data->vel, sizeof(int) * new_body * 3, true);
+        }
+        *part_data->nbody = new_body;
+        memcpy((float *) part_data->vel, (char *) clientMB->getDatBuffer(), nbytes);
+        
+        // compute velocity vector norm
+        part_data->computeVelNorm();
+      }
       //computeCooMax();
       if (! is_parsed) {  // selected range string not yet parsed
         is_parsed = TRUE; // parse only one time
@@ -137,7 +160,7 @@ int NetworkData::loadPos(ParticlesSelectVector * psv)
         // because it's not possible the share the OpenGl Display
         // it crashs the aplication                              
         computeCooMax();
-        emit loadedData(nbody,pos,psv);
+        emit loadedData(part_data,psv);
         is_new_data_loaded = FALSE;
       } 
       else {
@@ -171,7 +194,7 @@ int NetworkData::loadPos(ParticlesSelectVector * psv)
 void NetworkData::uploadGlData(ParticlesSelectVector * psv)
 {
    if (is_new_data_loaded) {
-    emit loadedData(nbody,pos,psv);
+    emit loadedData(part_data,psv);
     is_new_data_loaded = FALSE;
   } 
 }
@@ -181,7 +204,7 @@ void NetworkData::uploadGlData(ParticlesSelectVector * psv)
 int NetworkData::getNbody()
 {
   PRINT_D cerr << "get Nbody Adress clienMB=" << clientMB << "\n";
-  if ( (*nbody)<0 && is_connected) { // Nbody not got
+  if ( (*part_data->nbody)<0 && is_connected) { // Nbody not got
   
     // Wait hello Data
     clientMB->recvData();   
@@ -196,18 +219,18 @@ int NetworkData::getNbody()
     if (*(clientMB->getTagBuffer()) !=  MessageBuffer::Nbody) {
       throw (-4); // Bad protocol error
     }
-    *nbody = *((int *) (clientMB->getDatBuffer()));
-    full_nbody = *nbody;
-    PRINT_D cerr << "Got Nbody from server : [" << *nbody << "]\n";
+    *part_data->nbody = *((int *) (clientMB->getDatBuffer()));
+    full_nbody = *part_data->nbody;
+    PRINT_D cerr << "Got Nbody from server : [" << *part_data->nbody << "]\n";
   } 
-  return *nbody;
+  return *part_data->nbody;
 }
 // ============================================================================
 // NetworkData::getTime()                                                      
 // return time                                                                 
 float NetworkData::getTime()
 {
-  return *timu;
+  return *part_data->timu;
 }
 // ============================================================================
 // NetworkData::endOfDataMessage()                                             

@@ -22,6 +22,7 @@
 #include <qimage.h>
 #include "gl_grid_object.h"
 #include "gl_particles_object.h"
+#include "particles_data.h"
 class GLBox;
 class GLHudObject;
 
@@ -82,7 +83,7 @@ class GLBox : public QGLWidget
   int getWidth() { return width;};
   int getHeight() { return height;};
   void setProjection(int, int);
-  void getData(const int *, const float *, ParticlesSelectVector*);
+  void getData(const ParticlesData *, ParticlesSelectVector*);
   void toggleGrid();
   void toggleBlending() { 
     //cerr << "Blending = " << blending << "\n";
@@ -118,11 +119,11 @@ class GLBox : public QGLWidget
   void setTextureSize(const float, bool ugl=true );
   void changeTextureAlphaColor(const int alpha, const bool ugl=true);
   // tree
-  void treeUpdate();
+  void treeUpdate(bool ugl=true);
   private slots:
   void updateOptions(GlobalOptions * , const bool);  
   void takeScreenshot(QImage &);
-  
+  void updateVelVectorFactor();
   public:
   
   bool statusBlending() { return blending;}
@@ -195,9 +196,15 @@ class GLBox : public QGLWidget
   int nb_object;
   GLuint texture[1];// Storage For One Texture
   float u_max,v_max,tratio;
+
+  // particles data
+  ParticlesData * p_data;
   
   // polygones
   bool show_poly;
+  
+  // velocity vector
+  float vel_max_norm;
   
   // blending options
   GLfloat particles_size;
@@ -222,5 +229,6 @@ class GLBox : public QGLWidget
   };
   void loadImage();
   void computeOrthoFactorRatio();
+  float getVelMaxNorm(const ParticlesData *, ParticlesSelectVector*);
 };
 #endif // GLBOX_H

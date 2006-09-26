@@ -288,6 +288,7 @@ int MessageBuffer::sizeOfData(const TAG tag)
   switch (tag) {
   case Hello    :
   case Select   :
+  case SelectV  :
     size = sizeof(char);
     break;
   case Nbody    :
@@ -297,6 +298,7 @@ int MessageBuffer::sizeOfData(const TAG tag)
     break;
   case Time     :
   case Pos      :
+  case Vel      :
     size = sizeof(float);
     break;
   default       :

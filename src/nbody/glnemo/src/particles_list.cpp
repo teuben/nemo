@@ -50,6 +50,7 @@ inline int ParticlesList::defaultIndexTab()
   for (int i=0; i<npart; i+=step_part) {
     index_tab[ni_index++] = (int) index_list[i];
   }
+  return 1;
 }
 // ============================================================================
 // ParticlesList::parseSelectedString                                          

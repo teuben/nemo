@@ -26,14 +26,17 @@
 #include <pthread.h>
 
 #include "virtual_particles_select.h"
-#include "set_particles_range_form.h"
+//#include "set_particles_range_form.h"
 #include "snapshot_data.h"
 #include "virtual_data.h"
 #include "acquire_data_thread.h"
+#include "glbox.h"
 
 #include "global_options.h"
 #include "options_form.h"
 #include "animation_engine.h"
+
+#include "particles_data.h"
 
 class GLBox;
 
@@ -44,8 +47,8 @@ class GLObjectWindow : public QMainWindow
 public:
   GLObjectWindow( QWidget* parent = 0, const char* name = 0 );
   ~GLObjectWindow();
-   void connectToHostname( QString, const int port );      
-   void connectToHostname( QListBoxItem*, QString ); 
+   void connectToHostname( QString, const int port, const bool);      
+   void connectToHostname( QListBoxItem*, QString, const bool); 
    void takeScreenshot(QString);
    void setObjectVisible(bool, int);
 signals:
@@ -54,8 +57,9 @@ signals:
 private:
   // particle range vector
   ParticlesSelectVector psv; // store Particles Range
-  int nbody, * i_max;
-  float * pos,* coo_max, timu;
+  ParticlesData * part_data;   // store Particles Data 
+  //int nbody, * i_max;
+  //float * pos,* coo_max, timu;
   VirtualData * virtual_data;
   bool play_animation;  
   int play_timer;
@@ -120,7 +124,8 @@ private:
     ::string select_list;
     bool new_virtual_object; // true when a new virtual data object is instantiate
     // Mutex and conditional variable
-    pthread_mutex_t mutex_timer; // used during timer event
+    pthread_mutex_t mutex_timer, // used during timer event           
+                    mutex_data;  // to protect the filling of the data
 
     // Animations
     QTimer play_timer_a;      // start play anim  

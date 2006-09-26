@@ -15,6 +15,7 @@
 #include <qstring.h>
 #include <iostream>
 #include "particles_select.h"
+#include "particles_data.h"
 
 class VirtualParticlesSelect {
 public:
@@ -30,6 +31,7 @@ public:
     int step_part;        // incremental step between particles
     QColor col;           // particles color                   
     bool   is_visible;    // TRUE if particles are visible     
+    float max_vel_vector_norm;
     static int nb_select; 
     std::vector<int> index_list;  
     std::string list_file;  
@@ -47,11 +49,14 @@ public:
                                    const char * );
     int storeParticlesList(ParticlesSelectVector * ,const int , 
                                    const char * );
+    
+    float computeMaxVelVectorNorm(const ParticlesData * p_data);
+                                  
     void setColor();
     int npartSelected(ParticlesSelectVector *,int);
-    virtual inline int defaultIndexTab();
-    virtual inline int resetIndexTab();
-    virtual inline int addIndexTab(int);
+    virtual int defaultIndexTab();
+    virtual int resetIndexTab();
+    virtual int addIndexTab(int);
     int * index_tab, ni_index;    
 private:                               
     virtual int parseSelectedString(char * , const int , 

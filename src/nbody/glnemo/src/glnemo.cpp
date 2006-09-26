@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004-2005                                  
+// Copyright Jean-Charles LAMBERT - 2004-2006                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -67,10 +67,13 @@ using namespace std;
   "                   you should set \'f\'                                           ",
   "select_list=\n    Select particles from list of indexes          ",
   "times=all\n       Select time                                    ",
+  "vel=t\n           load velocity coordinates                      ",
+  "disp_vel=f\n      display velocity vectors                       ",
   "blending=t\n      Activate blending colors                       ",
   "dbuffer=f\n       Activate OpenGL depth buffer                   ",
   "perspective=t\n   false means orthographic                       ",
   "bestzoom=t\n      automatic zoom                                 ",
+  "play=f\n          automatically load and display next snapshot   ",
   "ortho_range=6.0\n xy range if orthographic projection            ",
   "zoom=-14\n        zoom value                                     ",  
   "xrot=0.0\n        rotation angle on X axis                       ",
@@ -80,7 +83,7 @@ using namespace std;
   "ytrans=0.0\n      translation on Y                               ",
   "ztrans=0.0\n      translation on Z                               ",
   "grid=f\n          Show grid                                      ",
-  "gaz=f\n           gaz like particle effect                       ",
+  "gas=f\n           gas like particle effect                       ",
   "texture_s=0.15\n  texture size of gaz particle                   ",
   "texture_ac=125\n  texture alpha color of gaz particle            ",
   "psize=1.0\n       Set particles size                             ",
@@ -88,7 +91,7 @@ using namespace std;
   "wsize=925\n       Windows's width size                           ",
   "hsize=685\n       Windows's height size                          ",
   "screenshot=\n     Screenshot name                                ",
-  "VERSION=0.92\n    "__DATE__"  - JCL  compiled at <"__TIME__">   ",
+  "VERSION=0.93\n    "__DATE__"  - JCL  compiled at <"__TIME__">   ",
   NULL
 };
 ::string usage="3D OpenGL Nemo Snapshot rendering";

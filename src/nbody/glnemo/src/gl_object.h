@@ -28,7 +28,7 @@ class GLObject : public QGLWidget {
   ~GLObject();
 
   // method
-  void display();
+  void display(int my_list=-1);
   void setColor(const QColor&);
   void toggleActivate();
   bool getActivate() { return is_activated; };

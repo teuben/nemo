@@ -37,11 +37,12 @@ GLObject::~GLObject()
 // ============================================================================
 // GLObject::display()                                                         
 // Display object, via display list, if activated                              
-void GLObject::display()
+void GLObject::display(int my_list)
 {
   if (is_activated) {
+    if (my_list == -1) my_list=dplist_index;
     glColor4ub(mycolor.red(), mycolor.green(), mycolor.blue(),particles_alpha);
-    glCallList(dplist_index);
+    glCallList((GLuint) my_list);
   }
 }
 // ============================================================================

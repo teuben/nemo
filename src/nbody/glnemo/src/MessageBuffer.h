@@ -33,7 +33,9 @@ public :
     Nbody    = -0x0002,
     Time     = -0x0003,
     Pos      = -0x0004,
+    Vel      = -0x0014,
     Select   = -0x0005,
+    SelectV  = -0x0015,
     Stop     = -0x0006,
     ACK      = -0x0007,
     EndOfMes = -0x0666

@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004-2005                                  
+// Copyright Jean-Charles LAMBERT - 2004-2006                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -11,6 +11,7 @@
 // ============================================================================
 #include <iostream>
 #include <assert.h>
+#include <math.h>
 
 #define LOCAL_DEBUG 0
 #include "print_debug.h"
@@ -35,6 +36,7 @@ VirtualParticlesSelect::VirtualParticlesSelect()
   v_type      = 0;
   index_tab   = NULL;
   ni_index    = 0;
+  max_vel_vector_norm = 0.;
 }
 // ============================================================================
 // Copy Constructor                                                            
@@ -50,6 +52,7 @@ VirtualParticlesSelect::VirtualParticlesSelect(const VirtualParticlesSelect&m) {
   index_list       = m.index_list;
   ni_index         = m.ni_index;
   index_tab        = new int[ni_index];
+  max_vel_vector_norm = m.max_vel_vector_norm;
   memcpy(index_tab,m.index_tab,sizeof(int)*ni_index);
 };
 // ============================================================================
@@ -66,6 +69,7 @@ const VirtualParticlesSelect::VirtualParticlesSelect& VirtualParticlesSelect::op
   index_list       = m.index_list;
   ni_index         = m.ni_index;
   index_tab        = new int[ni_index];
+  max_vel_vector_norm = m.max_vel_vector_norm;
   memcpy(index_tab,m.index_tab,sizeof(int)*ni_index);  
   return *this;
 };
@@ -94,7 +98,7 @@ void VirtualParticlesSelect::setColor()
 // ============================================================================
 // VirtualParticlesSelect::defaultIndexTab()                                   
 // fill index_tab with default value.                                          
-int VirtualParticlesSelect::defaultIndexTab()
+inline int VirtualParticlesSelect::defaultIndexTab()
 {
   std::cerr << "[VirtualParticlesSelect::defaultIndexTab()], Should not be here "
             << "\naborted....\n";
@@ -248,6 +252,7 @@ int VirtualParticlesSelect::npartSelected(ParticlesSelectVector * psv,int v_type
 inline int VirtualParticlesSelect::resetIndexTab()
 {
   ni_index = 0;
+  return 1;
 }
 // ============================================================================
 // VirtualParticlesSelect::addIndexTab()                                       
@@ -256,5 +261,24 @@ inline int VirtualParticlesSelect::addIndexTab(int index)
 {
   index_tab[ni_index++] = index;
   assert(ni_index<=npart);
+  return 1;
+}
+// ============================================================================
+// VirtualParticlesSelect::computeMaxVelVectorNorm()                           
+//                                                                             
+float VirtualParticlesSelect::computeMaxVelVectorNorm(const ParticlesData * p_data)
+{
+  if (p_data->vel) {  // there are velocity vectors
+    for (int i=0; i<npart; i+=step_part) {
+      float abs_norm = fabs(p_data->vel_norm[i]);
+      if (abs_norm > max_vel_vector_norm) {
+        max_vel_vector_norm = abs_norm;
+      }
+    }
+    return max_vel_vector_norm;
+  } 
+  else {
+    return 0.;
+  } 
 }
 // ============================================================================

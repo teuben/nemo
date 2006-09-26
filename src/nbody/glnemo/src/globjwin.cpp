@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004-2005                                  
+// Copyright Jean-Charles LAMBERT - 2004-2006                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -37,6 +37,8 @@
 #include <qcursor.h>
 #include <qlineedit.h>
 #include <qlistbox.h>
+#include <qcheckbox.h>
+#include <qgroupbox.h>
 #include <qtimer.h>
 #include <qprinter.h>
 #include <qpainter.h>
@@ -111,13 +113,15 @@ GLObjectWindow::GLObjectWindow( QWidget* parent, const char* name)
   else
     select_list = NULL;
   ::string s_time         = getparam("times");
+  store_options->vel_req  = getbparam("vel");
+  store_options->show_vel = getbparam("disp_vel");
   range_visib             = getbparam("range_visib");
   store_options->blending = getbparam("blending");
   store_options->dbuffer  = getbparam("dbuffer");
   store_options->show_grid= getbparam("grid");
   store_options->perspective=getbparam("perspective");
   store_options->orthographic = !store_options->perspective;
-
+  bool play                   = getbparam("play");
   bool bestzoom           = getbparam("bestzoom");
   store_options->xrot     = getdparam("xrot");
   store_options->yrot     = getdparam("yrot");
@@ -128,7 +132,7 @@ GLObjectWindow::GLObjectWindow( QWidget* parent, const char* name)
   store_options->zoom     = getdparam("zoom");  
   store_options->psize    = getiparam("psize");
   store_options->port     = getiparam("port");
-  store_options->show_poly= getbparam("gaz");
+  store_options->show_poly= getbparam("gas");
   store_options->texture_size       =getdparam("texture_s");
   store_options->texture_alpha_color=getiparam("texture_ac");
   float range_ortho;
@@ -140,13 +144,21 @@ GLObjectWindow::GLObjectWindow( QWidget* parent, const char* name)
   //                         finish NEMO
 
   // no bodies yet ;)
-  nbody = 0;
+  //nbody = 0;
   is_mouse_pressed   = FALSE;
   is_key_pressed     = FALSE;
   new_virtual_object = FALSE;
+  // allocate part_data structure
+  //part_data = new ParticlesData();
+  part_data = NULL;
   
   // Initialyse mutex
   int status = pthread_mutex_init(&mutex_timer,NULL);
+  if (status != 0 ) {
+    std::cerr <<"error during [pthread_mutex_init], aborted...\n";
+    std::exit(1);
+  }
+  status = pthread_mutex_init(&mutex_data,NULL);
   if (status != 0 ) {
     std::cerr <<"error during [pthread_mutex_init], aborted...\n";
     std::exit(1);
@@ -404,7 +416,9 @@ GLObjectWindow::GLObjectWindow( QWidget* parent, const char* name)
           glbox,SLOT(changeColorGridZ(const QColor )));   
   connect(options_form,SIGNAL(changeColorCube(const QColor)),
           glbox,SLOT(changeColorCube(const QColor )));   
-          
+  // velocity vector
+  connect(options_form,SIGNAL(sigVelVectorFactor()),glbox,SLOT(updateVelVectorFactor()));
+         
   // toggle Grids & cube
   connect(options_form,SIGNAL(toggleGrid()),this,SLOT(optionsToggleGrid()));
   connect(options_form,SIGNAL(toggleGridX()),glbox,SLOT(toggleGridX()));
@@ -443,31 +457,29 @@ GLObjectWindow::GLObjectWindow( QWidget* parent, const char* name)
   psv.clear();   // clear particles range vectors
   VirtualParticlesSelect::nb_select = 0;
   if (hasvalue("in")) {
-    virtual_data = new SnapshotData(in,select,s_time);
+    virtual_data = new SnapshotData(in,select,s_time,store_options->vel_req,&mutex_data);
     if (! virtual_data->isValidData()) {
       cerr << "File [" << in << "] is not a NEMO snapshot, aborting...\n";
       exit(1);
     }
-    connect(virtual_data,SIGNAL(loadedData(const int *, const float *, 
+    connect(virtual_data,SIGNAL(loadedData(const ParticlesData *, 
                                         ParticlesSelectVector * )),
-            glbox,SLOT(getData(const int *, const float *, ParticlesSelectVector *)));
+            glbox,SLOT(getData(const ParticlesData*, ParticlesSelectVector *)));
     connect(virtual_data,SIGNAL(infoMessage(std::string)),
             this,SLOT(infoMessage(std::string )));
     // animation_engine 
     //connect(virtual_data,SIGNAL(newTime(const float )),anim_engine->record,SLOT(updateFrameTime(const float )));
-    if ( ! virtual_data->loadPos(&psv)) {
+    if ( ! virtual_data->loadPos(&psv, store_options->vel_req)) {
       std::cerr << "error nemo loading....\n";
     } else {
       //setObjectVisible(range_visib, 1);
       selectListIndex();
-      nbody   = virtual_data->getNbody();
-      timu    = virtual_data->getTime();
-      pos     = virtual_data->getPos();
-      coo_max = virtual_data->getCooMax();
-      i_max   = virtual_data->getCooIndexMax();
-      glbox->getData(&nbody,pos,&psv);
-      glbox->setHud(GLHudObject::Nbody,nbody);
-      glbox->setHud(GLHudObject::Time,timu);
+
+      part_data = virtual_data->getParticlesData();
+      options_form->setVelBox((bool) (part_data->vel));
+      glbox->getData(part_data,&psv);
+      glbox->setHud(GLHudObject::Nbody,*part_data->nbody);
+      glbox->setHud(GLHudObject::Time,*part_data->timu);
       glbox->setHud(GLHudObject::Title,virtual_data->getDataName());
       glbox->setHud(GLHudObject::Getdata,virtual_data->getDataType());
 
@@ -496,8 +508,8 @@ GLObjectWindow::GLObjectWindow( QWidget* parent, const char* name)
       else { //>> successfull connexion
 
         // Get NBODY
-        nbody   = virtual_data->getNbody();
-        PRINT_D std::cerr << "I got nbody : " << nbody << "\n";
+        virtual_data->getNbody();
+        //PRINT_D std::cerr << "I got nbody : " << nbody << "\n";
                     
         psv.clear();   // clear particles range vectors
         VirtualParticlesSelect::nb_select = 0;
@@ -506,14 +518,14 @@ GLObjectWindow::GLObjectWindow( QWidget* parent, const char* name)
         virtual_data->setSelectedRange(select);
         
         // establish Signal connexion
-        connect(virtual_data,SIGNAL(loadedData(const int *, const float *,ParticlesSelectVector * )),
-                glbox,SLOT(getData(const int *, const float *,ParticlesSelectVector *)));
+        connect(virtual_data,SIGNAL(loadedData(const ParticlesData *,ParticlesSelectVector * )),
+                glbox,SLOT(getData(const ParticlesData *,ParticlesSelectVector *)));
         // animation_engine 
         //connect(virtual_data,SIGNAL(newTime(const float )),anim_engine->record,SLOT(updateFrameTime(const float )));
  
               
         // load positions
-        if ( ! virtual_data->loadPos(&psv)) {
+        if ( ! virtual_data->loadPos(&psv, store_options->vel_req)) {
             QString message="error during Gyrfalcon loading";
             QMessageBox::information( this,"Warning",message,"Ok");
             std::cerr << "error during Gyrfalcon loading....\n";
@@ -521,15 +533,12 @@ GLObjectWindow::GLObjectWindow( QWidget* parent, const char* name)
             virtual_data=NULL;
         } 
         else { //>> true loadPos
-          selectListIndex();                  
-          nbody   = virtual_data->getNbody();
-          pos     = virtual_data->getPos();
-          timu    = virtual_data->getTime();  
-          coo_max = virtual_data->getCooMax();
-          i_max   = virtual_data->getCooIndexMax();
-          glbox->getData(&nbody,pos,&psv);
-          glbox->setHud(GLHudObject::Nbody,nbody);
-          glbox->setHud(GLHudObject::Time,timu);
+          selectListIndex();
+          part_data = virtual_data->getParticlesData();
+          options_form->setVelBox((bool) (part_data->vel));
+          glbox->getData(part_data,&psv);
+          glbox->setHud(GLHudObject::Nbody,*part_data->nbody);
+          glbox->setHud(GLHudObject::Time,*part_data->timu);
           glbox->setHud(GLHudObject::Title,virtual_data->getDataName());
           glbox->setHud(GLHudObject::Getdata,
                         virtual_data->getDataType()+server);
@@ -544,12 +553,20 @@ GLObjectWindow::GLObjectWindow( QWidget* parent, const char* name)
     }
   }
   setProjection(range_ortho);
+  // automatically play next snapshot if selected
+  if (play) {
+    optionsTogglePlay();
+  }
   PRINT_D cerr << "End of globwin\n";
 }
 // ============================================================================
 // Destructor                                                                  
 GLObjectWindow::~GLObjectWindow()
 {
+  delete store_options;
+  //delete part_data;
+  delete anim_engine;
+  delete virtual_data;
 }
 // ============================================================================
 // GLObjectWindow::setObjectVisible(I                                          
@@ -569,7 +586,7 @@ void GLObjectWindow::selectListIndex()
   if (select_list) {
     VirtualParticlesSelect * vps = new VirtualParticlesSelect();
     try { // try to load data from particle list
-      vps->storeParticlesList(&psv,virtual_data->getNbody(),select_list);
+      vps->storeParticlesList(&psv,*part_data->nbody,select_list);
     }// try
     catch (int n) {
       switch (n) {
@@ -621,21 +638,21 @@ void GLObjectWindow::deleteFirstWidget()
 // ============================================================================
 // GLObjectWindow::connectToHostname()                                         
 // network connect to the selected item                                        
-void GLObjectWindow::connectToHostname(QListBoxItem * item,QString edit_port)
+void GLObjectWindow::connectToHostname(QListBoxItem * item,QString edit_port, const bool _vel)
 {
   bool ok;
   const int port = edit_port.toInt(&ok,10);
   if (ok) {
-    connectToHostname(item->text(),port);
+    connectToHostname(item->text(),port, _vel);
   }
 }
 // ============================================================================
 // GLObjectWindow::connectToHostname()                                         
 // network connect to the selected host                                        
-void GLObjectWindow::connectToHostname(QString  host,const int _port)
+void GLObjectWindow::connectToHostname(QString  host,const int _port, const bool _vel)
 {
   int port=(_port==-1?store_options->port:_port);
-  
+  store_options->vel_req = _vel;
   if (host != "" ) { // a hostname has been entered
     PRINT_D std::cerr <<" Host selected : [" << host << "]\n";          
     //
@@ -656,8 +673,9 @@ void GLObjectWindow::connectToHostname(QString  host,const int _port)
     else { // successfull connexion
 
       // Get NBODY
-      nbody   = new_virtual_data->getNbody();
+      int nbody   = new_virtual_data->getNbody();
       PRINT_D std::cerr << "I got nbody : " << nbody << "\n";
+      
       //
       // Launch select particles dialog box
       //
@@ -673,15 +691,15 @@ void GLObjectWindow::connectToHostname(QString  host,const int _port)
         new_virtual_data->setSelectedRange(select_part->getSelectedRange());
         
         // establish Signal connexion
-        connect(new_virtual_data,SIGNAL(loadedData(const int *, const float *,
+        connect(new_virtual_data,SIGNAL(loadedData(const ParticlesData *,
                 ParticlesSelectVector * )),
-                glbox,SLOT(getData(const int *, const float *, 
+                glbox,SLOT(getData(const ParticlesData *, 
                 ParticlesSelectVector *)));
              // animation_engine 
        //connect(new_virtual_data,SIGNAL(newTime(const float )),anim_engine->record,SLOT(updateFrameTime(const float )));
    
         // load positions
-        if ( ! new_virtual_data->loadPos(&psv)) {
+        if ( ! new_virtual_data->loadPos(&psv,store_options->vel_req)) {
             QString message="error during Gyrfalcon loading";
             QMessageBox::information( this,"Warning",message,"Ok");
             std::cerr << "error during Gyrfalcon loading....\n";   
@@ -706,13 +724,10 @@ void GLObjectWindow::connectToHostname(QString  host,const int _port)
           virtual_data = new_virtual_data;// main object point to new object
           pthread_mutex_unlock(&mutex_timer);        
           
-          nbody   = virtual_data->getNbody();
-          pos     = virtual_data->getPos();
-          timu    = virtual_data->getTime();  
-          coo_max = virtual_data->getCooMax();
-          i_max   = virtual_data->getCooIndexMax();
-          glbox->setHud(GLHudObject::Nbody,nbody);
-          glbox->setHud(GLHudObject::Time,timu);
+          part_data = virtual_data->getParticlesData();
+          options_form->setVelBox((bool) (part_data->vel));
+          glbox->setHud(GLHudObject::Nbody,*part_data->nbody);
+          glbox->setHud(GLHudObject::Time,*part_data->timu);
           glbox->setHud(GLHudObject::Title,virtual_data->getDataName());
           glbox->setHud(GLHudObject::Getdata,
                         virtual_data->getDataType()+host);
@@ -757,7 +772,7 @@ void GLObjectWindow::selectConnexionOpen()
       bool ok;
       const int port = (QString (hsl->edit_port->text())).toInt(&ok,10);
       if (ok) {
-        connectToHostname(hsl->host_edit_list->currentText(),port);
+        connectToHostname(hsl->host_edit_list->currentText(),port, hsl->vel->isChecked());
       }   
       //connectToHostname(hsl->edit_hostname->text());
       
@@ -801,24 +816,22 @@ void GLObjectWindow::optionsReloadSnapshot()
   psv.clear();   // clear particles range vectors
   VirtualParticlesSelect::nb_select = 0;
   // load positions
-  if ( virtual_data->reload(&psv) <= 0) {
-      QString message="Unable to restart snapshot!";
-      QMessageBox::information( this,"Warning",message,"Ok");
+  if ( virtual_data->reload(&psv, store_options->vel_req) <= 0) {
+      QString message="Unable to reload snapshot!";
+      //QMessageBox::information( this,"Warning",message,"Ok");
       
 
   } else {
-      nbody   = virtual_data->getNbody();
-      pos     = virtual_data->getPos();
-      timu    = virtual_data->getTime();  
-      coo_max = virtual_data->getCooMax();
-      i_max   = virtual_data->getCooIndexMax();
-      glbox->setHud(GLHudObject::Nbody,nbody);
-      glbox->setHud(GLHudObject::Time,timu);
+
+      part_data = virtual_data->getParticlesData();
+      options_form->setVelBox((bool) (part_data->vel));
+      glbox->setHud(GLHudObject::Nbody,*part_data->nbody);
+      glbox->setHud(GLHudObject::Time,*part_data->timu);
       glbox->setHud(GLHudObject::Title,virtual_data->getDataName());
       glbox->setHud(GLHudObject::Getdata,virtual_data->getDataType());
       psv = psv2;
       VirtualParticlesSelect::nb_select = nb_select_copy;
-      glbox->getData( &nbody,pos,&psv);   // upload the data with the right color
+      glbox->getData( part_data,&psv);   // upload the data with the right color
       statusBar()->message("Snapshot reloaded.");
   }  
 }
@@ -831,7 +844,8 @@ void GLObjectWindow::selectFileOpen()
   QString fn = QFileDialog::getOpenFileName( QString::null, QString::null,
                                             this);
   if ( !fn.isEmpty() ) {
-    SnapshotData * new_virtual_data=new SnapshotData(fn,"all","all");;
+    SnapshotData * new_virtual_data=
+        new SnapshotData(fn,"all","all",store_options->vel_req,&mutex_data);;
     
     if ( ! new_virtual_data->isValidData() ) {
       QString message="file ["+fn+"] is not a NEMO snapshot";
@@ -860,9 +874,9 @@ void GLObjectWindow::selectFileOpen()
       pthread_mutex_unlock(&mutex_timer);
       
       // establish Signal connexion
-      connect(virtual_data,SIGNAL(loadedData(const int *, const float *,
+      connect(virtual_data,SIGNAL(loadedData(const ParticlesData *,
       ParticlesSelectVector * )),
-      glbox,SLOT(getData(const int *, const float *, ParticlesSelectVector *)));
+      glbox,SLOT(getData(const ParticlesData *, ParticlesSelectVector *)));
       // animation_engine 
       //connect(virtual_data,SIGNAL(newTime(const float )),anim_engine->record,SLOT(updateFrameTime(const float )));
 
@@ -870,19 +884,16 @@ void GLObjectWindow::selectFileOpen()
       VirtualParticlesSelect::nb_select = 0;
 
       // load positions
-      if ( ! virtual_data->loadPos(&psv)) {
+      if ( ! virtual_data->loadPos(&psv,store_options->vel_req)) {
           QString message="End of snapshot Reached !";
           QMessageBox::information( this,"Warning",message,"Ok");
           std::cerr << "error nemo loading....\n";
 
       } else {
-          nbody   = virtual_data->getNbody();
-          pos     = virtual_data->getPos();
-          timu    = virtual_data->getTime();  
-          coo_max = virtual_data->getCooMax();
-          i_max   = virtual_data->getCooIndexMax();
-          glbox->setHud(GLHudObject::Nbody,nbody);
-          glbox->setHud(GLHudObject::Time,timu);
+          part_data = virtual_data->getParticlesData();
+          options_form->setVelBox((bool) (part_data->vel));
+          glbox->setHud(GLHudObject::Nbody,*part_data->nbody);
+          glbox->setHud(GLHudObject::Time,*part_data->timu);
           glbox->setHud(GLHudObject::Title,virtual_data->getDataName());
           glbox->setHud(GLHudObject::Getdata,virtual_data->getDataType());
           optionsFitAllPartOnScreen();
@@ -899,23 +910,20 @@ void GLObjectWindow::selectFileOpen()
 void GLObjectWindow::loadNextFrame()
 {
   // load positions
-  if ( ! virtual_data->loadPos(&psv)) {
+  if ( ! virtual_data->loadPos(&psv, store_options->vel_req)) {
       QString message="End of snapshot Reached !";
       QMessageBox::information( this,"Warning",message,"Ok");
       std::cerr << "error nemo loading....\n";
 
   } else {
-      nbody   = virtual_data->getNbody();
-      pos     = virtual_data->getPos();
-      timu    = virtual_data->getTime();  
-      coo_max = virtual_data->getCooMax();
-      i_max   = virtual_data->getCooIndexMax();
-      glbox->setHud(GLHudObject::Nbody,nbody);
-      glbox->setHud(GLHudObject::Time,timu);
+      part_data = virtual_data->getParticlesData();
+      options_form->setVelBox((bool) (part_data->vel));
+      glbox->setHud(GLHudObject::Nbody,*part_data->nbody);
+      glbox->setHud(GLHudObject::Time,*part_data->timu);
       glbox->setHud(GLHudObject::Title,virtual_data->getDataName());
       glbox->setHud(GLHudObject::Getdata,virtual_data->getDataType());
       //optionsFitAllPartOnScreen();
-      statusBar()->message(QString("Snapshot loaded [%1]").arg(timu));
+      statusBar()->message(QString("Snapshot loaded [%1]").arg(*part_data->timu));
       
 
   }
@@ -1030,58 +1038,7 @@ void GLObjectWindow::timerEvent( QTimerEvent *e )
     }
   }
   else {
-#if 0  
-    glbox->setHudToggle(GLHudObject::Loading);
-    if (!is_key_pressed            && // no interactive user request 
-        !is_mouse_pressed          && // (mouse, keyboard)    
-        e->timerId() == play_timer && // timer is ok
-        ! virtual_data->is_loading_thread ) {   // no thread running
-        
-      virtual_data->is_loading_thread = TRUE; //
-      if ( ad_thread ) { 
-        delete ad_thread; // delete previous thread
-      }
-      
-      // Start the new THREAD to acquiring data 
-      pthread_mutex_lock(&mutex_timer); 
-      ad_thread = new AcquireDataThread(virtual_data,&prv);
-      ptr_vd = virtual_data;
-      pthread_mutex_unlock(&mutex_timer);
-      
-      //ad_thread->start();  
-      
-      // Upload the new data to GLBox                         
-      // >> Protect this area with mutex in case the user load
-      //    a new snapshot or establish a new connexion          
-      pthread_mutex_lock(&mutex_timer);
-      if (ptr_vd == virtual_data) {
-      //if (ad_thread->is_loaded) {
-        std::cerr << "I am here THREAD............\n";
-        glbox->setHud(GLHudObject::Nbody,virtual_data->getNbody());
-        glbox->setHud(GLHudObject::Time,virtual_data->getTime());
-        PRINT_D std::cerr << "New TIme = ["<<virtual_data->getTime()<<"]\n";
-        virtual_data->uploadGlData(&prv);
-        //virtual_data->is_loading_thread = FALSE;
-      } 
-      else {
-        std::cerr << "PTR_VD != VIRTUAL_DATA\n";
-      }
-      ad_thread->start();
-      pthread_mutex_unlock(&mutex_timer);
-      
-      
-      
-    }
-#else 
-  #if 0  
-  static int no=0;
-  
-  char shot[100];
-  sprintf(shot,"frame.%05d.png",no);
-  takeScreenshot(shot);
-  std::cerr <<  ">> shot = " << shot << "\n";
-  no++;
-  #else  
+
     if (! anim_engine->record->isActivated()) {
       glbox->setHudToggle(GLHudObject::Loading);
     }
@@ -1099,7 +1056,7 @@ void GLObjectWindow::timerEvent( QTimerEvent *e )
       
       // Start the new THREAD to acquiring data 
        
-      ad_thread = new AcquireDataThread(virtual_data,&psv);
+      ad_thread = new AcquireDataThread(virtual_data,&psv, store_options->vel_req);
       ptr_vd = virtual_data;
       
       
@@ -1116,6 +1073,8 @@ void GLObjectWindow::timerEvent( QTimerEvent *e )
         glbox->setHud(GLHudObject::Nbody,virtual_data->getNbody());
         glbox->setHud(GLHudObject::Time,virtual_data->getTime());
         PRINT_D std::cerr << "New TIme = ["<<virtual_data->getTime()<<"]\n";
+        part_data = virtual_data->getParticlesData();
+        options_form->setVelBox((bool) (part_data->vel));
         virtual_data->uploadGlData(&psv);        
         emit allowRecord();       // allow recording if activated
         if (anim_engine->record->isActivated()){
@@ -1138,8 +1097,6 @@ void GLObjectWindow::timerEvent( QTimerEvent *e )
       
    } 
    pthread_mutex_unlock(&mutex_timer);
-   #endif
-#endif    
   }        
 }
 // ============================================================================
@@ -1212,7 +1169,7 @@ void GLObjectWindow::optionsLookForNetworkServer()
   }
   if (rs_form->exec()) {  
      PRINT_D std::cerr << ">>> Host selected = " << rs_form->hostname << "\n";
-     connectToHostname(rs_form->hostname, -1);
+     connectToHostname(rs_form->hostname, -1, false);
   } 
 }
 // ============================================================================
@@ -1234,14 +1191,14 @@ void GLObjectWindow::optionsParticlesRange()
     psf = new ParticlesSelectForm(this);
       // connection to update the data
     connect(psf,
-            SIGNAL(applyData(const int *, const float *, 
+            SIGNAL(applyData(const ParticlesData *, 
                		     ParticlesSelectVector * )),
 	    glbox,
-            SLOT(getData(const int *, const float *, 
+            SLOT(getData(const ParticlesData *, 
                      ParticlesSelectVector *)));
     first = FALSE;
   }
- psf->updateData(&psv,nbody,pos);
+ psf->updateData(part_data,&psv,&mutex_data);
  psf->show(); 
 
 #endif 
@@ -1311,9 +1268,9 @@ void GLObjectWindow::optionsFitAllPartOnScreenPersp()
                 j ++) {
             int jndex= psv[i].vps->index_tab[j];      
             float 
-            x=pos[jndex*3  ],
-            y=pos[jndex*3+1],
-            z=pos[jndex*3+2],
+            x=part_data->pos[jndex*3  ],
+            y=part_data->pos[jndex*3+1],
+            z=part_data->pos[jndex*3+2],
             w=1.;     
           // do the product Mmodel X point = mxyzw
           float mx = MM(0,0)*x + MM(0,1)*y + MM(0,2)*z + MM(0,3)*w;
