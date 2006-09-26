@@ -1,8 +1,31 @@
 glnemo ChangeLog
 
+in CVS V 0.93, September 2006
+=============================
+	*) general:
+	   --------
 
-in NEMO 3.2.4 (V 0.92, July 2006)
-=================================
+	- a lot of compilation warnings have been removed.
+	
+        *) features:
+           ---------
+
+        - velocity vectors display enable for NEMO snapshots and 
+        gyrfalcON simulations. It's possible to control the vectors size
+        from the option dialog box (OpenGL tab).
+	- new command line options (vel, vel_disp, play)
+	
+
+        *) Animation:
+           ---------
+
+        - the option "selected from recording" from the [Options]'s tab
+        from Animation dialog box has been fixed. It's now possible to
+        record all the OpenGL effects during the animation.
+
+
+NEMO 3.2.4 (V 0.92, July 2006)
+==============================
 	*) general:
 	   --------
 	- happy g++ 4.1.x .

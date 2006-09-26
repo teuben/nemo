@@ -1,4 +1,4 @@
-.TH GLNEMO 1NEMO "25 April 2006"
+.TH GLNEMO 1NEMO "26 September 2006"
 .SH NAME
 glnemo \- 3D OpenGL Nemo Snapshot rendering
 .SH SYNOPSIS
@@ -8,7 +8,8 @@ glnemo \- 3D OpenGL Nemo Snapshot rendering
 based on the Qt library from Trolltech. 
 You can zoom in/out, rotate, scale, translate, save a screenshot, 
 select different particles
-and plot them in different blending colors. 
+and plot them in different blending colors, display velocity vectors
+and make animations . 
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -50,6 +51,12 @@ Each indexes must be lower than the #particles read.
 \fBtimes=\fP
 Select time [all]     
 .TP 20
+\fBvel=\fP
+load velocity coordinates [t]
+.TP 20
+\fBdisp_vel=\fP
+display velocity vectors [f]
+.TP 20
 \fBblending=\fP
 Activate blending colors [t]    
 .TP 20
@@ -63,6 +70,9 @@ orthographic projection.[t]
 \fBbestzoom=\fP
 If activated, it performs an automatic zoom to fit all particles on the
 display.[t]
+.TP 20
+\fBplay=\fP          
+automatically load and display next snapshot [f]
 .TP 20
 \fBortho_range=\fP
 [xy] range size in case of orthographic projection.[6.0]
@@ -131,7 +141,7 @@ CTRL + r                        reset rotation/translation
 CTRL + a                        autoscale to fit the frame
 s                               take a screenshot
 p                               play all snapshots
-ALT + g                         toogle gaz like particles effect
+ALT + g                         toogle gas like particles effect
 CTRL + p                        launch printer dialog box
 f                               toggle fullscreen (might make it slow)
 shift + M                       launch animation box
@@ -153,4 +163,6 @@ Jean-Charles Lambert
 03-dec-04	V0.50 added to NEMO	JCL
 22-jun-05	V0.87 lot of fixes and enhancement	JCL
 25-Apr-06	V0.90 animation module, octree, bugs fixed	JCL
+15-Jul-06	V0.92 bigger DOF, cube display, bugs fixed	JCL
+26-Sep-06	V0.93 velocity vectors display, bugs fixed	JCL
 .fi

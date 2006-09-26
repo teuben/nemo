@@ -12,7 +12,7 @@
     <ignoreparts/>
     <projectdirectory>.</projectdirectory>
     <absoluteprojectpath>false</absoluteprojectpath>
-    <description/>
+    <description></description>
     <secondaryLanguages/>
   </general>
   <kdevfileview>
@@ -71,12 +71,12 @@
   </kdevdoctreeview>
   <kdevdebugger>
     <general>
-      <dbgshell/>
-      <programargs/>
-      <gdbpath/>
-      <configGdbScript/>
-      <runShellScript/>
-      <runGdbScript/>
+      <dbgshell></dbgshell>
+      <programargs></programargs>
+      <gdbpath></gdbpath>
+      <configGdbScript></configGdbScript>
+      <runShellScript></runShellScript>
+      <runGdbScript></runGdbScript>
       <breakonloadinglibs>true</breakonloadinglibs>
       <separatetty>false</separatetty>
       <floatingtoolbar>false</floatingtoolbar>
@@ -90,7 +90,7 @@
   <kdevtrollproject>
     <run>
       <mainprogram>bin/glnemo</mainprogram>
-      <programargs>/r5data/csp/csp069/csp069.in</programargs>
+      <programargs>snapshot/disk.nemo</programargs>
       <directoryradio>build</directoryradio>
       <customdirectory>/</customdirectory>
       <terminal>false</terminal>
@@ -98,15 +98,16 @@
       <envvars/>
     </run>
     <general>
-      <activedir></activedir>
+      <activedir>src</activedir>
     </general>
     <make>
       <abortonerror>false</abortonerror>
       <numberofjobs>1</numberofjobs>
       <dontact>false</dontact>
-      <makebin/>
+      <makebin></makebin>
       <prio>0</prio>
       <envvars/>
+      <runmultiplejobs>false</runmultiplejobs>
     </make>
     <subclassing/>
   </kdevtrollproject>
@@ -153,13 +154,18 @@
       <qtdesigner/>
     </designerintegration>
     <creategettersetter>
-      <prefixGet/>
+      <prefixGet></prefixGet>
       <prefixSet>set</prefixSet>
       <prefixVariable>m_,_</prefixVariable>
       <parameterName>theValue</parameterName>
       <inlineGet>true</inlineGet>
       <inlineSet>true</inlineSet>
     </creategettersetter>
+    <qt>
+      <used>false</used>
+      <version>3</version>
+      <root></root>
+    </qt>
   </kdevcppsupport>
   <cppsupportpart>
     <filetemplates>
