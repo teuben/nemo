@@ -1,4 +1,4 @@
-# -*- makefile -*-
+# -*- makefile -*-                                                             
 #-----------------------------------------------------------------------------+
 #                                                                             |
 # Makefile                                                                    |
@@ -17,10 +17,18 @@
 #------------------------------------------------------------------------------
 # gyrfalcon location and options                                               
 
-ifeq ($(USER),jcl1)
-    include make.jcl.defs
+# check if proprietary version of the code exist
+PROP := $(shell if test -d ${NEMO}/usr/dehnen/falcON.P; then echo 1; fi)
+
+# according to Proprietary and Public version of falcON      
+# you must populate GYRFALCON with falcON compiling tree path
+# and the rights compilation flags                           
+ifeq ($(PROP),1) 
+    VERSION        := "PROPRIETARY"
+    GYRFALCON      := $(NEMO)/usr/dehnen/falcON.P
+    FULLPROPER     := -DfalcON_INDI -DfalcON_NEMO -DfalcON_PROPER -DfalcON_SSE -DNEMO
 else
-    # you must populate GYRFALCON with falcON compiling tree path
+    VERSION        := "PUBLIC"
     GYRFALCON      := $(NEMO)/usr/dehnen/falcON
     FULLPROPER     := -DfalcON_INDI -DfalcON_NEMO
 endif
@@ -56,6 +64,9 @@ ommanips: dirs                        \
 # manip compiling rules                                                        
 
 $(MANIP)glnemo.so    :	$(GLNOBJ)
+			@echo "****"
+			@echo "**** Linking " $(VERSION) " version of the manipulator"
+			@echo "****"
 			$(CPP) $(GLNOBJ) -o $@ $(CPPFLAGS)  $(INC) -lpthread -shared
 
 $(OBJ)glnemo.o        :	$(SRC)glnemo.cc $(SRC)master_server_thread.h 
@@ -112,12 +123,13 @@ dirs:
 tar:
 	(cd ..; tar czhvf manipulators/$(MNAME).tar.gz `ls manipulators/*.{cc,h,txt} manipulators/Makefile`)
 
-ifeq ($(USER),jcl1)
-include make.jcl
-else
 # install
 install: ommanips  #$(MANIP)$(MNAME).so
+	@echo "****"
+	@echo "**** Installing " $(VERSION) " version of the manipulator"
+	@echo "**** here [" $(GYRFALCON)/manip "] "
+	@echo "****"
 	mkdir -p $(GYRFALCON)/manip
 	\cp -p $(MANIP)$(MNAME).so $(GYRFALCON)/manip
-endif
+
 #
