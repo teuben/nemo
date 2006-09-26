@@ -1,5 +1,10 @@
 glnemo gyrfalcON manipulator ChangeLog
 
+(NEMO 3.2.5 CVS ) September, 2006 :
+===================================
+        add velocity network transfert.	
+	Makefile modified to compile the manipulator according to the 
+	propriatary or public version of the code.
 
 (NEMO 3.2.4 CVS) May, 2006 :
 ============================

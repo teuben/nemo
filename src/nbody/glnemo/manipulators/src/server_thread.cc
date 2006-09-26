@@ -44,13 +44,13 @@ ServerThread::ServerThread(const std::string _sim_name,
   my_snapshot = S;
   mut   = _mut;             // global mutex
   cond  = _cond;            // condition variable
-  selected_pos = NULL;
+  selected_3d = NULL;
   selected_index = NULL;
   sim_name = _sim_name;
 
   int nbody = my_snapshot->N_bodies();
   selected_index= new int[nbody];     // keep memory
-  selected_pos  = new float[nbody*3]; // keep memory
+  selected_3d   = new float[nbody*3]; // keep memory
 
 
 }
@@ -59,8 +59,8 @@ ServerThread::ServerThread(const std::string _sim_name,
 // deallocate memory                                                            
 ServerThread::~ServerThread()
 {
-  if (selected_pos) {
-    delete[] selected_pos;
+  if (selected_3d) {
+    delete[] selected_3d;
   }
   if (selected_index) {
     delete[] selected_index;
@@ -129,8 +129,9 @@ void ServerThread::run()
   while (!stop) {
     try {
       serverMB->recvData();
-      switch (*(serverMB->getTagBuffer())) {  // Get Tag buffer
-      case MessageBuffer::Select :    // Select string
+      switch (int get_buf=*(serverMB->getTagBuffer())) {  // Get Tag buffer
+      case MessageBuffer::Select :     // Select string
+      case MessageBuffer::SelectV :    // Select string
 	// do something with the selected string
 	selected_string = serverMB->getDatBuffer() ;
 	PRINT_D std::cerr <<"["<<getMyid()<<"]"<< "Got Select from client [" << selected_string << "]\n";
@@ -155,7 +156,13 @@ void ServerThread::run()
 	t_start=times(&qq);
 	PRINT_D std::cerr <<"start = " << t_start <<"\n";
 	PRINT_D std::cerr <<"["<<getMyid()<<"]"<< "Sending selected_nbody [" << selected_nbody << "] and pos\n";
-	serverMB->sendData(MessageBuffer::Pos,selected_nbody*3,(char *) selected_pos);  // send positions
+	fill3DArray(); // put positions in 3D array
+	serverMB->sendData(MessageBuffer::Pos,selected_nbody*3,(char *) selected_3d);    // send positions 
+	if ( get_buf == MessageBuffer::SelectV) {
+	  PRINT_D std::cerr <<"["<<getMyid()<<"]"<< "Sending selected_nbody [" << selected_nbody << "] and vel\n";
+	  fill3DArray(true); // put velocities in 3D array
+	  serverMB->sendData(MessageBuffer::Vel,selected_nbody*3,(char *) selected_3d);  // send velocities
+	}
 	t_stop=times(&qq);
 	PRINT_D std::cerr <<"stop = " << t_stop <<"\n";
 	pthread_mutex_unlock(mut);
@@ -184,6 +191,7 @@ void ServerThread::run()
 	close(newSd);
 	break;
       }
+      //std::exit(1);
     }
     // catch exceptions
     catch (int n) {  // catch errors thrown by SEND and RECV
@@ -214,6 +222,41 @@ void ServerThread::run()
       }
     }
   }
+
+}
+//------------------------------------------------------------------------------
+// fillPosVelArray:                                                             
+// fill Positins and velocities array                                           
+int ServerThread::fill3DArray(bool vel)
+{
+  int nbody=my_snapshot->N_bodies();
+
+  // fill selected_pos array according to selected_index
+  PRINT_D std::cerr << "ServerThread::parseSelectedString, filling select_pos [" 
+		    <<  selected_nbody << "]\n";
+  int nbody_out=0;
+  for (int i=0; i<selected_nbody; i++) {
+    int p_index=selected_index[i];
+    if (p_index < nbody) {
+      body b_current = my_snapshot->bodyNo(p_index);
+      vect x;
+      if ( vel ) {
+	x=b_current.vel();
+      }
+      else {
+	x=b_current.pos();
+      }
+      selected_3d[nbody_out*3  ] = x[0];//my_snapshot->pos(p_index)[0]; // x
+      selected_3d[nbody_out*3+1] = x[1];//my_snapshot->pos(p_index)[1]; // y
+      selected_3d[nbody_out*3+2] = x[2];//my_snapshot->pos(p_index)[2]; // z
+      nbody_out++;
+    }
+  }
+  selected_nbody = nbody_out;
+  //  std::cerr << "In parseSelected npart =["<< npart << "]\n";
+  PRINT_D std::cerr << "End of ServerThread::parseSelectedString\n";
+  return selected_nbody;
+  
 }
 //------------------------------------------------------------------------------
 // parseSelectedString:                                                         
@@ -241,24 +284,6 @@ int ServerThread::parseSelectedString(char * selected_string)
       selected_index[i] = i;
     }
   }
-  // fill selected_pos array according to selected_index
-  PRINT_D std::cerr << "ServerThread::parseSelectedString, filling select_pos [" 
-		    <<  selected_nbody << "]\n";
-  int nbody_out=0;
-  for (int i=0; i<selected_nbody; i++) {
-    int p_index=selected_index[i];
-    if (p_index < nbody) {
-      body b_current = my_snapshot->bodyNo(p_index);
-      vect &x=b_current.pos();
-      selected_pos[nbody_out*3  ] = x[0];//my_snapshot->pos(p_index)[0]; // x
-      selected_pos[nbody_out*3+1] = x[1];//my_snapshot->pos(p_index)[1]; // y
-      selected_pos[nbody_out*3+2] = x[2];//my_snapshot->pos(p_index)[2]; // z
-      nbody_out++;
-    }
-  }
-  selected_nbody = nbody_out;
-  //  std::cerr << "In parseSelected npart =["<< npart << "]\n";
-  PRINT_D std::cerr << "End of ServerThread::parseSelectedString\n";
-  return selected_nbody;
+
 }
 //------------------------------------------------------------------------------

@@ -5,7 +5,7 @@
 //                                                                             |
 // C++ code                                                                    |
 //                                                                             |
-// Copyright Jean-Charles LAMBERT - 2005                                       |
+// Copyright Jean-Charles LAMBERT - 2005-2006                                  |
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      |
 // address:  Dynamique des galaxies                                            |
 //           Laboratoire d'Astrophysique de Marseille                          |
@@ -72,11 +72,9 @@ namespace {
 	  " par[0] = port, int  [ default 4444 - you must give a value]\n";
       }
       current_step=0;
-
     }
     //--------------------------------------------------------------------------
     ~glnemo() {
-      std::cerr << "In glnemo destructor...\n";
       delete glnemo_server;
     }
   };

@@ -43,14 +43,15 @@ class ServerThread : public GenericThread
   std::string sim_name;
   const falcON::snapshot * my_snapshot;
   float * timu;
-  float * selected_pos;   // store x,y,z particles    
-  int     selected_nbody; // #bodies selected         
-  int   * selected_index; // bodies's indexes selected
+  float * selected_3d;    // store x,y,z/vx,vy,vz particles
+  int     selected_nbody; // #bodies selected              
+  int   * selected_index; // bodies's indexes selected     
   pthread_mutex_t  * mut;
   pthread_cond_t   * cond;
   int    newSd;
 
   int parseSelectedString(char * select_string);
+  int fill3DArray(bool=false);
 };
 
 #endif
