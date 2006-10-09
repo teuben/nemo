@@ -48,7 +48,7 @@
  */
 
 /**************** INCLUDE FILES ********************************/ 
-
+ 
 #include <stdinc.h>	
 #include <getparam.h>
 #include <yapp.h>
@@ -79,7 +79,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "point=1,0.1\n       point type and size pairs for each Y column (yapp)",
     "line=0,0\n          line width and style pairs for each Y column (yapp)",
     "color=\n		 colors for the symbols/lines for each Y column",
-    "errors=\n           X-Y error bars ?",
+    "errors=\n           plot wich of X-Y error bars ?",
     "xlab=\n		 Label along X-axis",
     "ylab=\n		 Label along Y-axis",
     "xcoord=\n		 Draw additional vertical coordinate lines along these X values",
@@ -90,8 +90,8 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "nyticks=7\n         Number of ticks on Y axis",
     "xscale=1\n          Scale all X values by this",
     "yscale=1\n          Scale all Y values by this",
-    "dxcol=\n            Columns representing error bars in X",
-    "dycol=\n            Columns representing error bars in Y",
+    "dxcol=\n            Columns representing error bars in X **not implemented yet**",
+    "dycol=\n            Columns representing error bars in Y **not implemented yet**",
     "nmax=100000\n       Hardcoded allocation space, if needed for piped data",
     "median=f\n          Use median in computing binning averages?",
     "headline=\n	 headline in graph on top right",
@@ -101,7 +101,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "layout=\n           Optional input layout file",
     "first=f\n           Layout first or last?",
     "readline=f\n        Interactively reading commands",
-    "VERSION=3.0b\n	 20-dec-05 PJT",
+    "VERSION=3.0d\n	 9-oct-06 PJT",
     NULL
 };
 
@@ -307,7 +307,8 @@ void setparams()
     if (*smin) {
         Qsigx = (strchr(smin,'x') != NULL);	/* error bar in X needed ?*/
         Qsigy = (strchr(smin,'y') != NULL);	/* error bar in Y needed ?*/
-    }
+	if (nxcol>0 || nycol>0) error("Cannot plot errors from binning and normal column errors");
+    } 
     Qtab = getbparam("tab");
     Qmedian = getbparam("median");
     xlab=getparam("xlab");
@@ -720,6 +721,7 @@ real xp[], yp[], dx[], dy[], xps[], yps[], pstyle, psize;
     }
     
     if (errorbars && 0x0001) {
+        dprintf(0,"Trying X binning errors\n");
         for (i=0; i<np; i++) {
             if (xps[i] == NaN || xp[i] == NaN)
                 continue;
@@ -730,11 +732,31 @@ real xp[], yp[], dx[], dy[], xps[], yps[], pstyle, psize;
         }
     }
     if (errorbars && 0x0002) {
+        dprintf(0,"Trying Y binning errors\n");
         for (i=0; i<np; i++) {
             if (yps[i] == NaN || yp[i] == NaN)
                 continue;
             p1 = yp[i] - yps[i];
             p2 = yp[i] + yps[i];
+            plmove (xtrans(xp[i]), ytrans(p1));
+            plline (xtrans(xp[i]), ytrans(p2));
+        }
+    }
+
+    if (dx) {
+        dprintf(0,"Trying X column errors\n");
+        for (i=0; i<np; i++) {
+            p1 = xp[i] - dx[i];
+            p2 = xp[i] + dx[i];
+            plmove (xtrans(p1), ytrans(yp[i]));
+            plline (xtrans(p2), ytrans(yp[i]));
+        }
+    }
+    if (dy) {
+        dprintf(0,"Trying Y column errors\n");
+        for (i=0; i<np; i++) {
+            p1 = yp[i] - dy[i];
+            p2 = yp[i] + dy[i];
             plmove (xtrans(xp[i]), ytrans(p1));
             plline (xtrans(xp[i]), ytrans(p2));
         }
