@@ -1,4 +1,4 @@
-.TH TABHIST 1NEMO "2 December 2005"
+.TH TABHIST 1NEMO "10 October 2006"
 .SH NAME
 tabplot \- general table plotter
 .SH SYNOPSIS
@@ -16,9 +16,10 @@ plotting. However, it is (not yet) possible to pair-wise plot from
 multiple files with different number of rows. See also \fIpaste(1)\fP or
 \fItabmath(1NEMO)\fP how to combine tables.
 .PP
-\fItabplot\fP is intended for quick and dirty display of the data. 
+\fItabplot\fP is really intended for quick and dirty display of the data. 
 For more complicated plots, full plotting packages should be used
-(Mongo, SM, WIP, gnuplot, Grace etc.), though moderately sophisticated
+(Mongo, SM, WIP, gnuplot, Grace, matplotlib etc.), though 
+moderately sophisticated
 plots can also be made using \fBlayout=\fP. The \fBreadline=\fP is
 available to give some degree of interactive usage.
 .SH PARAMETERS
@@ -80,13 +81,15 @@ one entered.
 Default: not used (i.e. default drawing color used)
 .TP
 \fBerrors=x|y|xy\fP
-Specify which error bars to draw in case binning is used. Default: none.
+Specify which error bars to draw in case binning is used. If error bars
+are used in either raw X or Y columns, this option cannot be used.
+Default: none.
 .TP
 \fBxlab=\fIx-label\fP
-Label along the X-axis [default: \fBvalue\fP].
+Label along the X-axis [default: \fBX\fP].
 .TP
 \fBylab=\fIy-label\fP
-Label along the Y-axis [default: \fBN\fP].
+Label along the Y-axis [default: \fBY\fP].
 .TP
 \fBxcoord=\fP\fIx1,x2,...\fP
 A list of numbers (see \fInemoinp(3NEMO)\fP for valid syntax) that will
@@ -94,6 +97,14 @@ cause vertical lines at these X coordinate to be drawn. Default: none
 .TP
 \fBycoord=\fP\fIy1,y2,...\fP
 Y coordinates for the horizontal lines, same as \fBxcoord=\fP.
+.TP
+\fBxbox=\fP
+Extent of the plotting frame in the X direction.
+[Default: 2:18]
+.TP
+\fBybox=\fP
+Extent of the plotting frame in the Y direction.
+[Default: 2:18]
 .TP
 \fBnxticks=\fP
 Number of tickmarks along the X axis. This divides the X axis in
@@ -109,12 +120,12 @@ Scaling factor applied to all X values. Default: 1
 Scaling factor applied to all Y values. Default: 1
 .TP
 \fBdxcol=\fP
-Columns representing error bars in X. These need to match the \fBxcol=\fP.
-** not implemented yet **
+Columns representing error bars in X. These currently need to match the \fBxcol=\fP.
+By default no error column(s) are used.
 .TP
 \fBdycol=\fP
-Columns representing error bars in Y. These need to match the \fBycol=\fP.
-** not implemented yet **
+Columns representing error bars in Y. These currently need to match the \fBycol=\fP.
+By default no error column(s) are used.
 .TP
 \fBnmax=\fP
 Maximum number of lines that are allocated in pipes. [10000]
@@ -138,7 +149,8 @@ than 2.0 fullscale was always on (t), by default it is now off (f).
 .TP
 \fBcursor=\fP
 This will be the name of an ascii file that will contain coordinates
-that have been marked with the cursor (currently only implemented for
+that have been marked with the cursor,
+not the nearest datapoint (currently only implemented for
 PGPLOT). Cursor keys are in the usual definition: A=left mouse will mark,
 D=middle mouse has no function, X=right mouse will exit. 
 Default: not used.
@@ -210,4 +222,5 @@ Peter Teuben
 17-sep-05	V2.8 added readline= and documented first=	PJT
 2-dec-05	V2.9 implemented missing many-to-one plotting mode	PJT
 20-dec-05	V3.0 added xscale,yscale and started dxcol,dycol. Fixed xbin= bug	PJT
+10-oct-06	V3.0e finished dxcol=, dycol=	PJT
 .fi
