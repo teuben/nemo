@@ -1,6 +1,6 @@
 /*
  * TABPLOT: a simple general table plotter
- *			for ascii data in tabular format
+ *	    for ascii data in tabular format which has now grown quite complex
  *
  *	25-nov-88  V1.0 :  created by P.J.Teuben
  *	 5-jul-89      a:  nemoinp to nemoinp(d/i)
@@ -39,11 +39,11 @@
  *                 V3.0  : xscale,yscale,dxcol,dycol=
  *      20-dec-05  V3.0a : fix bug in xbin=min:max:step mode
  *                     b : fix bug in bins with no dispersive data, switch to moment.h
- *
+ *       9-oct-06      d : Implemented the dxcol= and dycol=
  */
 
 /* TODO:
- *     - simple dycol= to plot error bars
+ *     - automatic scaling with dxcol and/or dycol 
  *     - also allow nxcol>1 and nycol=1 ??
  */
 
@@ -90,8 +90,8 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "nyticks=7\n         Number of ticks on Y axis",
     "xscale=1\n          Scale all X values by this",
     "yscale=1\n          Scale all Y values by this",
-    "dxcol=\n            Columns representing error bars in X **not implemented yet**",
-    "dycol=\n            Columns representing error bars in Y **not implemented yet**",
+    "dxcol=\n            Columns representing error bars in X ",
+    "dycol=\n            Columns representing error bars in Y ",
     "nmax=100000\n       Hardcoded allocation space, if needed for piped data",
     "median=f\n          Use median in computing binning averages?",
     "headline=\n	 headline in graph on top right",
@@ -101,7 +101,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "layout=\n           Optional input layout file",
     "first=f\n           Layout first or last?",
     "readline=f\n        Interactively reading commands",
-    "VERSION=3.0d\n	 9-oct-06 PJT",
+    "VERSION=3.0e\n	 10-oct-06 PJT",
     NULL
 };
 
@@ -382,12 +382,24 @@ read_data()
     xmax = ymax = -HUGE;
     for (i=0; i<npt; i++) {     /* find global min and max in X and all Y */
         for (j=0; j<nxcol; j++) {
+	  if (ndxcol > 0) {
+	    if (ndxcol != nxcol) error("Cannot use X errors if number of columns do not match");
+	    xmax=MAX(x[j][i]+dx[j][i],xmax);
+	    xmin=MIN(x[j][i]-dx[j][i],xmin);
+	  } else {
 	    xmax=MAX(x[j][i],xmax);
 	    xmin=MIN(x[j][i],xmin);
+	  }
         }
         for (j=0; j<nycol; j++) {
+	  if (ndycol > 0) {
+	    if (ndycol != nycol) error("Cannot use Y errors if number of columns do not match");
+	    ymax=MAX(y[j][i]+dy[j][i],ymax);
+	    ymin=MIN(y[j][i]-dy[j][i],ymin);
+	  } else {
 	    ymax=MAX(y[j][i],ymax);
 	    ymin=MIN(y[j][i],ymin);
+	  }
         }
     }
 }
