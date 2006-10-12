@@ -15,6 +15,8 @@ c	save array
 c       common array
 c       common /biga/array
 c++
+c	integer NABC
+c	parameter (NABC=NA*NB*NC)
 	integer i,j,k
 
 	do k=1,NC

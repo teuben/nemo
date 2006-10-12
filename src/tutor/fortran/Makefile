@@ -8,7 +8,8 @@ SRC = big.f
 
 #	catch default
 help:
-	@echo Testing fortran array sizes
+	@echo Testing fortran array sizes, example:
+	@echo 'make clean big FC=g77 NA=100 NB=100 NC=1000 ; ./big ; size big'
 
 
 
