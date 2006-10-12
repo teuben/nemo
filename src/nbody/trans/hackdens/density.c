@@ -5,12 +5,14 @@
  *      18-jul-92  PJT  replaced many if(debug)printf(...) by dprintf(1,...)
  *	 1-apr-01  PJT  compiler warnings
  *      15-sep-06  WD   compiler error (in gcc-3.4.5)/warning (otherwise)
+ *      20-oct-06  PJT  removed all old style declarations, all local routines
  */
 
 #include "defs.h"
 
 local void walksub(real, nodeptr, vector, real, real *, int *);
 local bool subdivp(real, vector, real);
+local real distcount(real *, int, int);
 
 real directden(p, nb, dis, ra, base, nbody)
     bodyptr p;
@@ -20,11 +22,9 @@ real directden(p, nb, dis, ra, base, nbody)
     bodyptr base;
     int nbody;
 {
-    double sqrt();
     int total, i;
     bodyptr q;
     real rn, nbr, den;
-    real distcount();
     vector disp;
     for(i=0, q=base; i<nbody; i++, q++){
 	SUBV(disp, Pos(p), Pos(q));
@@ -46,10 +46,8 @@ real hackden(p, nb, dis, newdis, ra)
     real *newdis;
     real *ra;
 {
-    double sqrt(), pow();
     int total;
     real rn, nbr, den;
-    real distcount();
     real dis0, dismax;
 #ifdef DEBUG
     dprintf(0,"Hackden: nb, dis: %d %f\n", nb, dis);
@@ -95,7 +93,7 @@ real hackden(p, nb, dis, newdis, ra)
     return den;
 }
 
-real distcount(ra ,total, nb)
+local real distcount(ra ,total, nb)
     real *ra;
     int total;
     int nb;
@@ -174,9 +172,6 @@ real * ra;			/* array to store distances to */
 				/* particles within sphere */
 int *total;			/* number of particles in the sphere */
 {
-  /* commented out to avoid compiler error with gcc 3.4.5, 15-09-2006 WD
-    bool subdivp(); 
-  */
     register nodeptr *pp;
     register int i,j;
     register int k;
