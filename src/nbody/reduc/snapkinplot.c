@@ -2,6 +2,7 @@
  * SNAPKINPLOT.C: plot various diagnostics from snapkinem.
 
  15-09-2006   WD  deleted redundant and incorrect declartion of sqrt()
+ 12-10-2006  PJT  main -> nemo_main, and some prototyping
 
  */
 
@@ -9,10 +10,14 @@
 #include <getparam.h>
 
 string defv[] = {
-    "in=???",
-    "VERSION=0",
+    "in=???\n       Input file (snapshot)",
+    "VERSION=1.0\n  12-oct-06 PJT",
     NULL,
 };
+
+string usage = "plot various diagnostics from snapkinem";
+
+string cvsid="$Id$";
 
 real xrange[] = {  0.0,  1.0 };
 real jrange[] = { -1.0,  1.0 };
@@ -24,16 +29,19 @@ real jticks[] = { -1.0, -0.5, 0.0, 0.5, 1.0 };
 real qticks[] = { 0.0, 0.5, 1.0 };
 real aticks[] = { 0.0, 0.5, 1.0 };
 
-real xtrans(), jtrans(), qtrans(), atrans();
+bool read_data(stream instr);
+void plot_data(void);
+real xtrans(real x);
+real jtrans(real j);
+real qtrans(real q);
+real atrans(real a);
+int plvect(real x1, real y1, real x2, real y2);
 
-main(argc, argv)
-int argc;
-string argv[];
+nemo_main()
 {
     stream instr;
     bool read_data();
 
-    initparam(argv, defv);
     instr = stropen(getparam("in"), "r");
     plinit("", 0.0, 20.0, 0.0, 20.0);
 /*  pltext(getparam("in"), 2.0, 18.6, 0.32, 0.0);  */
@@ -59,8 +67,7 @@ real jz_norm;
 real q_maj, q_int, q_min;
 real qx_pro, qy_pro, qz_pro;
 
-bool read_data(instr)
-stream instr;
+bool read_data(stream instr)
 {
     real tkin, j_norm;
 
@@ -99,7 +106,7 @@ real w_tot = 0.0;
 
 real x0, jz0, qx0, qy0, qz0, ba0, ca0;
 
-plot_data()
+void plot_data(void)
 {
     real x, jz, qx, qy, qz, ba, ca;
 
@@ -135,32 +142,27 @@ plot_data()
     first_time = FALSE;
 }
 
-real xtrans(x)
-real x;
+real xtrans(real x)
 {
     return ( 2.0 + 16.0 * (x - xrange[0]) / (xrange[1] - xrange[0]));
 }
 
-real jtrans(j)
-real j;
+real jtrans(real j)
 {
     return (14.0 +  4.0 * (j - jrange[0]) / (jrange[1] - jrange[0]));
 }
 
-real qtrans(q)
-real q;
+real qtrans(real q)
 {
     return ( 8.0 +  4.0 * (q - qrange[0]) / (qrange[1] - qrange[0]));
 }
 
-real atrans(a)
-real a;
+real atrans(real a)
 {
     return ( 2.0 +  4.0 * (a - arange[0]) / (arange[1] - arange[0]));
 }
 
-plvect(x1, y1, x2, y2)
-real x1, y1, x2, y2;
+plvect(real x1, real y1, real x2, real y2)
 {
     plmove(x1, y1);
     plline(x2, y2);
