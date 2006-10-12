@@ -7,6 +7,7 @@
 #                 and switchover to the new configure based install    
 # 23-jul-2006     make sure the manybody_pkg tree is treated R/O       pjt
 #                 changed order of tools for gh2006 
+# 17-aug-2006     no more falcON option, fix root if manybody= not used		PJT
 #
 #  Removed any local directory called manybody and installs a new manybody tree
 #  The default should be executed from the home directory, such that
@@ -19,7 +20,6 @@
 
 #  things that are 0 or 1
 set pgplot=1
-set falcon=1
 set cvs=0
 set check=1
 set clean=0
