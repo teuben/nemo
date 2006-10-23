@@ -55,7 +55,7 @@ ifdef DPROPER
 simd_h			:= $(IPRO)simd.h $(basic_h)
 gravity_ind_cc		:= $(IPRO)gravity_ind.cc
 gravity_pro		:= $(gravity_ind_cc)
-kernel_sse_cc		:= $(IPRO)kernel_sse.cc
+kernel_SSE_h		:= $(IPRO)kernel_SSE.h
 endif
 io_h			:= $(IPUB)io.h $(fields_h)
 body_h			:= $(INC)body.h $(fields_h)
@@ -95,7 +95,7 @@ GalPot_h		:= $(IACC)GalPot.cc $(IACC)GalPot.h $(IACC)GalPot_pre.h $(tupel_h)
 basic_cc		:= $(SLIB)basic.cc $(basic_h)
 body_cc			:= $(SLIB)body.cc $(body_h) $(io_h) $(numerics)
 io_cc			:= $(SLIB)io.cc $(io_h) $(basic_h)
-kernel_cc		:= $(SLIB)kernel.cc $(kernel_h) $(kernel_sse_cc)
+kernel_cc		:= $(SLIB)kernel.cc $(kernel_h) $(kernel_SSE_h)
 partner_cc		:= $(SLIB)partner.cc $(partner_h) $(interact_h)
 gravity_cc		:= $(SLIB)gravity.cc $(gravity_h) $(kernel_h) $(interact_h) $(numerics_h) $(gravity_pro)
 tree_cc			:= $(SLIB)tree.cc $(tree_h) $(body_h) $(memory_h)

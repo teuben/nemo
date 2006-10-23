@@ -257,7 +257,7 @@ void GravKernAll::single(leaf_iter const &A, leaf_iter const&B) const
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 #ifdef falcON_SSE_CODE
-#  include <proper/kernel_sse.cc>
+#  include <proper/kernel_SSE.h>
 #else
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
