@@ -18,6 +18,7 @@
 /// \version jul-2005: added doxygen documentation, added minnorm()             
 /// \version mar-2006: removed reliance on friend namespace injection           
 /// \version jul-2006: added global function applied()                          
+/// \version sep-2006: added member method reset()                              
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
@@ -213,6 +214,11 @@ namespace WDutils {
     //--------------------------------------------------------------------------
     /// \name unitary operators and methods                                     
     //@{
+    /// reset all elements to zero
+    tupel&reset() {
+      M::s_ze(a);
+      return*this;
+    }
     /// change sign for each element
     tupel&negate() {
       M::v_neg(a);
@@ -368,10 +374,10 @@ namespace WDutils {
       return*this;
     }
     /// update minimum and maximum element-wise:
-    /// min[i] = min(min[i], tupel::a[i]); and
-    /// max[i] = max(max[i], tupel::a[i]);
-    void up_min_max(tupel &min, tupel&max) const {
-      M::v_umia(min.a,max.a,a);
+    /// Min[i] = min(Min[i], tupel::a[i]); and
+    /// Max[i] = max(Max[i], tupel::a[i]);
+    void up_min_max(tupel &Min, tupel&Max) const {
+      M::v_umia(Min.a,Max.a,a);
     }
     //@}
     //--------------------------------------------------------------------------
