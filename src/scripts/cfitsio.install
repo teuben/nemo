@@ -8,6 +8,7 @@
 #  17-apr-04    written, for 2490
 #  29-jul-04    checked for 2500
 #  12-aug-05    checked for 2510, commmetns on the new beta
+#  26-oct-06    for 3020
 # 
 # TODO:   needs to add  -D_FILE_OFFSET_BITS=64   on e.g.linux if you want large file support
 
@@ -30,10 +31,10 @@ if (! -e $src) then
   echo or:
   echo " cd $NEMO/local"
   echo " wget ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio3006.tar.gz"
-  echo " tar zxf cfitsio3006.tar.gz"
+  echo " tar zxf cfitsio3020.tar.gz"
   echo " ../src/scripts/cfitsio.install"
-  echo "Alternatively you can also try the beta version for large files:"
-  echo " curl ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio3004bbeta.tar.gz | tar zxf -"
+  echo "Alternatively you can also try curl:"
+  echo " curl ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio3020.tar.gz | tar zxf -"
   exit 1
 endif
 
