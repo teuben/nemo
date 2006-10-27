@@ -9,6 +9,7 @@
  *     20-dec-2004    V0.2 patched up too wide edges for non-integral 2pi intervals 
  *     23-dec-2004    V0.3 fixed periodic for np=odd
  *     24-dec-2004    V0.4 fixed for periodic=f
+ *     26-oct-2006    V0.5 attempt to handle 3D cubes by selecting a 'Z' value
  *
  * TODO
  *  - check the interpolation on the 2nd and 3rd quadrant, this this is where
@@ -43,7 +44,9 @@ string defv[] = {
     "yrange=-16:16\n		Range in Y",
     "zvar=\n                    Optional selections: {vr,vt,den,vx,vy}",
     "periodic=t\n               Attempt to fill the plan by cloning the wedge N times",
-    "VERSION=0.3a\n		13-jan-05 PJT",
+    "z=0\n                      Select a z-slice (0=first) from the RPZ cube if NZ > 1",
+    "order=zpr\n                Order of HDF axes",
+    "VERSION=0.5\n		26-oct-06 PJT",
     NULL,
 };
 
@@ -74,6 +77,7 @@ void nemo_main()
   float **image1, **image2;
   int i0, i1, i, j, k, ret, size, type, nsds, isel, nx, ny;
   int ir, ip, jr, jp, nr, np, n1, n2, is, ix, iy, ncopy,nu,nl,n,npf,nzero;
+  int zoff, z = getiparam("z");     /* the slice to be selected */
   int *idx;
   char **output, *cbuff;
   char ntype[32];
@@ -86,9 +90,13 @@ void nemo_main()
   bool mirror, first = TRUE, both = FALSE, flip=FALSE, Qrot;
   bool Qmirror, Qperiodic  = getbparam("periodic");
   Grid gx, gy;
+  string axis = getparam("order");
 
   if (Qperiodic)
     warning("Periodic=f is currently broken");
+
+  if (!streq(axis,"zpr"))
+    error("sorry...cannot handle cubes that are not in ZPR order....");
   
   nsds = DFSDndatasets(infile);
   if (nsds<0) 
@@ -123,17 +131,17 @@ void nemo_main()
     ret = DFSDgetdatastrs(label, unit, fmt, coordsys);
     ret = DFSDgetNT(&type);
     
-    if (sds_time < 0)       /* search for: "AT TIME=" */
+    if (sds_time < 0)       /* search for: "AT TIME=" : not all have them!! */
       sds_time = string_real(label,"AT TIME=");
     
     if (k==0) {				/* first time: allocate */
-      if (rank == 3) {
-	if (shape[0] == 1) 
-	  i0=1;    /* skip this first dummy dimension */
-	else
-	  error("Rank=%d shape[0]=%d does not appear like a 2D map?",rank,shape[0]);
-      } else
+      if (rank == 2) {
 	i0=0;      /* start at the first dimension */
+      } else if (rank == 3) {
+	dprintf(1,"Shape: %c=%d %c=%d %c=%d\n",axis[0],shape[0],axis[1],shape[1],axis[2],shape[2]);
+	i0=1;      /* start at the first dimension */
+      } else
+	error("Cannot handle rank=%d, must be 2 or 3",rank);
       i1=i0+1;     /* radius dim is always one higher than angle (in HDF) */
       coord = (float **) allocate(rank*sizeof(float *));
       for (i=0, size=1; i<rank; i++) {     /*  process all axes */
@@ -146,13 +154,15 @@ void nemo_main()
 	  cmin = MIN(cmin, coord[i][j]);
 	  cmax = MAX(cmax, coord[i][j]);
 	}
-	dprintf(0,"HDF Dimension %d  Size %d CoordinateValue Min %g Max %g %s\n",
-		i+1,shape[i],cmin,cmax,
+	dprintf(0,"HDF Dimension %d Order %c Size %d CoordinateValue Min %g Max %g %s\n",
+		i+1,axis[i],shape[i],cmin,cmax,
 		shape[i] == 1 ? "(** dimension will be skipped **)" : "");
       }
+      dprintf(1,"i0=%d i1=%d\n",i0,i1);
       if (shape[i0] < 2)
 	error("Sorry, don't know how to deal with 1D maps (phi axis has %d pixel)",shape[i0]);
-      nzero = shape[i1];    /* an extra array for just 0's in case periodic=f */
+      nzero = shape[i1];    /* an extra array for just 0's in case periodic=f ?? [i0] ?? */
+      dprintf(1,"DFSDgetdata() will use a buffersize %d+%d\n",size,nzero);
       buffer1 = (float *) allocate((size+nzero) * sizeof(float));
       if (both) buffer2 = (float *) allocate((size+nzero) * sizeof(float));
     }
@@ -176,9 +186,15 @@ void nemo_main()
     }
   } /* k */
 
+  if (rank==3 && axis[0]=='z')
+    zoff = z * shape[1]*shape[2];
+  else 
+    zoff = 0;
+      
+
   image1 = (float **) allocate((shape[i0]+1) *sizeof(float *));
   for (i=0; i<shape[i0]+1; i++)        /* notice extra row of zero also pointed to */
-    image1[i] = &buffer1[i*shape[i1]];
+    image1[i] = &buffer1[zoff+i*shape[i1]];
 
   if (both) {
     error("Cannot combine SDS yet");
@@ -226,7 +242,7 @@ void nemo_main()
 	}
       }
     }
-  }
+  } /* both */
   
   image = image1;
   /* the image can now be referred to as in:  image[i_phi][i_rad]  */
@@ -321,7 +337,7 @@ void nemo_main()
   }
   
   for (i=0; i<npf+2; i++)
-    dprintf(1,"idx[%d] = %d/%d    %g   %d %d\n",i,idx[i],np,phisf[i],nl,nu);
+    dprintf(2,"idx[%d] = %d/%d    %g   %d %d\n",i,idx[i],np,phisf[i],nl,nu);
 
   outstr = stropen(getparam("out"),"w");
   create_image(&iptr, nx, ny);
