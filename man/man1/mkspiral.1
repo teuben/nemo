@@ -1,4 +1,4 @@
-.TH MKSPIRAL 1NEMO "26 May 2002"
+.TH MKSPIRAL 1NEMO "30 October 2006"
 .SH NAME
 mkspiral \- uniform-density test disk plus spiral in spherical potential
 .SH SYNOPSIS
@@ -17,6 +17,10 @@ will be positive for a \fItrailing spiral pattern\fP.
 \fIsnapmass(1NEMO)\fP and \fIsnapcenter(1NEMO)\fP have to be used if
 for some reason the user want finite mass particles and a perfectly
 centered set of particles.
+.PP
+Note this particle distribution is only useful for display, e.g. spiral
+structure in a Longitude-Velocity diagram, and should not be integrated
+with programs like \fIhackcode3(1NEMO)\fP.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword is also
 given:
@@ -116,7 +120,7 @@ tsf: 21.85u 30.73s 2:32.06 34.5%  U440
 
 .fi
 .SH "SEE ALSO"
-mkdisk(1NEMO), snapmass(1NEMO), snapcenter(1NEMO)
+mkdisk(1NEMO), snapmass(1NEMO), snapcenter(1NEMO), hackcode3(1NEM0)
 .SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.5i
