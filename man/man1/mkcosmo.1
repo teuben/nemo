@@ -1,0 +1,39 @@
+.TH MKCOSMO 1NEMO "1 November 2006"
+.SH NAME
+mkcosmo \- create a cosmology cube of equal massive stars
+.SH SYNOPSIS
+\fBmkcosmo\fP [parameter=value]
+.SH DESCRIPTION
+From an input cube with density (or relative densities) on a regular grid,
+initial conditions that correspond to the density variations at a given Z
+(use Z=0 for non-comoving coordinates)
+.PP
+Note that this routine will only work in the linear regime when the fluctuations
+are very small, resulting in small perturbations from the central location in
+a cell.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input density (fluctuation) cube. 
+No default
+.TP
+\fBout=\fP
+Output file name [???]    
+.TP
+\fBz=\fP
+Size of cube [0.0]    
+.TP
+\fBabsrho=\fP
+Is map absolute density or relative d(rho)/rho? [t]
+.SH EXAMPLES
+.SH SEE ALSO
+.SH FILES
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+1-Nov-06	V0.1 Created	Peter Teuben/Ed Shaya
+.fi

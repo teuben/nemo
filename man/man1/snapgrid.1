@@ -19,6 +19,9 @@ variable, pick a number of planes or planes with smoothing.
 The image cube is written as a standard \fIimage(5NEMO)\fP file, and can
 be accessed by various other programs for smoothing, display etc.
 .PP 
+Although \fIsnapgrid(1NEMO)\fP can grid datacubes (e.g. X-Y-Z), 
+\fIsnapgridsmooth(1NEMO)\fP is probably easier to use, since it does not integrate
+along any lines of sight.
 .SH PARAMETERS
 The following parameters ...
 .TP 20
@@ -212,6 +215,7 @@ snapshot and the image.
 .PP
 Sky projections do not guarantee flux conservation. 
 .SH "SEE ALSO"
+snapgridsmooth(1NEMO), 
 snaprotate(1NEMO), snapslit(1NEMO), snapsmooth(1NEMO), snapaxsym(1NEMO), wcs(1NEMO),
 tsf(1NEMO), snapccd(1NEMO), ccdintpol(1NEMO), image(5NEMO)
 .PP

@@ -1,0 +1,95 @@
+.TH SNAPGRIDSMOOTH 1NEMO "1 November 2006"
+.SH NAME
+snapgrid \- grid a snapshot into a 3D image cube with adaptive smoothing
+.SH SYNOPSIS
+.PP
+\fBsnapgridsmooth in=\fPsnapshot \fBout=\fPimage [parameter=value]
+.SH DESCRIPTION
+\fIsnapgridsmooth\fP grids three arbitrary bodytrans expressions 
+(default: \fBx\fP, \fBy\fP and \fBz\fP) of a snapshot into a datacube
+with adaptive smoothing based on another bodytrans variable. Unlike
+\fIsnapgrid(1NEMO)\fP, which handles projections and some amount 
+of line-of-sight processing, this program simply adds the emission
+in a cell, and some optional smoothing.
+.PP 
+.SH PARAMETERS
+The following parameters can be given in any order if the keyword is also passed with it:
+.TP 20
+\fBin=\fIin-file\fP
+input file, must be in \fIsnapshot(5NEMO)\fP format. Multiple snapshots can
+be stacked uses the \fBtimes=\fP keyword: see \fBstack=\fP below.  [no default].
+.TP
+\fBout=\fIout-file\fP
+output file, will be in \fIimage(5NEMO)\fP format [no default].
+.TP
+\fBtimes=\fP\fIt1:t2,t3,..\fP
+Selection of the times of snapshots to be selected for gridding.
+For \fBstack=t\fP all snapshots will be co-added into one image,
+however selecting \fBstack=f\fP or selecting multiple \fBevar\fP's
+one can request multiple output images.
+[Default: \fBall\fP].
+.TP
+\fBxrange=\fIxb:xe\fP
+Range in \fBxvar\fP to bin [default: \fB-2:2\fP].
+.TP
+\fByrange=\fIxb:xe\fP
+Range in \fByvar\fP to bin [default: \fB-2:2\fP].
+.TP
+\fBzrange=\fIxb:xe\fP
+Range in \fBzvar\fP to bin [default: \fB-2:2\fP].
+.TP
+\fBxvar=\fP\fIx-expression\fP
+The value of \fIx-expression\fP is gridded along the X axis.
+[default: \fBx\fP].
+.TP
+\fByvar=\fP\fIy-expression\fP
+The value of \fIy-expression\fP is gridded along the Y axis.
+[default: \fBy\fP].
+.TP
+\fBzvar=\fP\fIz-expression\fP
+The value of \fIz-expression\fP is gridded along the Z axis
+[default: \fB-vz\fP].
+.TP
+\fBevar=\fIemissivity\fP
+Variable to denote emissivity (density if you wish)
+per particle. You can select more than 1
+expression, in which case different images will be written out
+(only in \fBstack=f\fP mode)
+[default: \fBm\fP].
+.TP
+\fBsvar=\fIsmoothing\fP
+Variable to denote gaussian smoothing 
+.TP
+\fBnx=\fIx-pixels\fP
+Number of pixels along the X axis of the cube [default: \fB64\fP].
+.TP
+\fBny=\fIy-pixels\fP
+Number of pixels along the Y axis of the cube [default: \fB64\fP].
+.TP
+\fBnz=\fIz-pixels\fP
+Number of pixels along the Z axis of the cube [default: \fB64\fP].
+.TP
+\fBstack=t|f\fP
+Should all snapshots from the input file be stacked, or write one
+image per selected (see \fBtimes=\fP) time? [default: \fBf\fP].
+.SH EXAMPLES
+The following example ...
+.SH UNITS
+Units are maintained in the same way as in snapshots, they don't have
+a specific name, but carry their normal meaning 'length', 'velocity'
+and 'mass'. Since \fIsnapgridsmooth\fP calculates space densities,
+its units are formally 'mass' per cubic 'length'
+.SH "SEE ALSO"
+snapgrid(1NEMO), tsf(1NEMO), snapshot(5NEMO), image(5NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+src/nbody/image  	snapgridsmooth.c
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+1-nov-06	V0.1: Created	PJT/ES
+.fi
