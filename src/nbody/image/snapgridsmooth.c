@@ -50,17 +50,15 @@ string cvsid="$Id$";
 local stream  instr, outstr;				/* file streams */
 
 		/* SNAPSHOT INTERFACE */
-local int    nobj, bits, nbody=0, noutxy=0, noutz=0, nzero=0;
+local int    nobj, bits, nbody=0, noutxyz=0, nzero=0;
 local real   tnow;
 local Body   *btab = NULL;
 local string times;
 
 		/* IMAGE INTERFACE */
-local imageptr  iptr=NULL, iptr0=NULL, iptr1=NULL, iptr2=NULL;
+local imageptr  iptr=NULL;
 local int    nx,ny,nz;			     /* map-size */
 local real   xrange[3], yrange[3], zrange[3];      /* range of cube */
-local real   xbeam, ybeam, zbeam;                  /* >0 if convolution beams */
-local int    xedge, yedge, zedge;                  /* check if infinite edges */
 
 local string xvar, yvar, zvar;  	/* expression for axes */
 local string xlab, ylab, zlab;          /* labels for output */
@@ -94,7 +92,7 @@ local int rescale_data(int ivar);
 local int xbox(real x);
 local int ybox(real y);
 local int zbox(real z);
-local int setaxis(string rexp, real range[3], int n, int *edge, real *beam);
+local int setaxis(string rexp, real range[2], int n);
 
 
 nemo_main ()
@@ -142,31 +140,12 @@ void setparams()
     nx = getiparam("nx");
     ny = getiparam("ny");
     nz = getiparam("nz");
+    dprintf (1,"size of IMAGE cube = %d * %d * %d\n",nx,ny,nz);
     if (nx<1 || ny<1 || nz<1) error("Bad grid size (%d %d %d)",nx,ny,nz);
 
-    setaxis(getparam("xrange"), xrange, nx, &xedge, &xbeam);
-    if (xbeam > 0.0) error("No convolve in X allowed yet");
-
-    setaxis(getparam("yrange"), yrange, ny, &yedge, &ybeam);
-    if (ybeam > 0.0) error("No convolve in Y allowed yet");
-
-    setaxis(getparam("zrange"), zrange, nz, &zedge, &zbeam);
-    if (zbeam > 0.0) {                          /* with convolve */
-        zsig = zbeam;                           /* beam */
-        zmin = zrange[0] - CUTOFF*zsig;         /* make edges wider */
-        zmax = zrange[1] + CUTOFF*zsig;
-    } else {                                    /* straight gridding */
-        zsig = 0.0;                             /* no beam */
-        zmin = zrange[0];                       /* exact edges */
-        zmax = zrange[1];
-    }
-    if (zedge && zsig>0.0)
-        error("Cannot convolve in Z with an infinite edge");
-    if (zedge && nz>1)
-        error("Cannot use multiple Z planes with an infinite edge");
-
-    zrange[2] = (zrange[1]-zrange[0])/nz;   /* reset grid spacing */
-    dprintf (1,"size of IMAGE cube = %d * %d * %d\n",nx,ny,nz);
+    setaxis(getparam("xrange"), xrange, nx);
+    setaxis(getparam("yrange"), yrange, ny);
+    setaxis(getparam("zrange"), zrange, nz);
 
     xvar = getparam("xvar");
     yvar = getparam("yvar");
@@ -242,7 +221,7 @@ allocate_image()
     
     Beamx(iptr) = 0.0;  /* we don't allow smooth in the image plane for now */
     Beamy(iptr) = 0.0;
-    Beamz(iptr) = (zsig>0.0 ? zsig : 0.0);
+    Beamz(iptr) = 0.0;
 
 
 }
@@ -253,12 +232,8 @@ clear_image()
 
     for (ix=0; ix<nx; ix++)		        /* initialize all cubes to 0 */
     for (iy=0; iy<ny; iy++)
-    for (iz=0; iz<nz; iz++) {
+    for (iz=0; iz<nz; iz++)
     	CV(iptr) = 0.0;
-        if(iptr0) CV(iptr0) = 0.0;        
-        if(iptr1) CV(iptr1) = 0.0;        
-        if(iptr2) CV(iptr2) = 0.0;
-    }
 }
 
 
@@ -278,7 +253,7 @@ bin_data(int ivar)
     real expfac, fac, sfac, flux, b, emtau, depth;
     real e, emax, twosqs;
     int    i, j, k, ix, iy, iz, n, nneg, ioff;
-    int    ix0, iy0, ix1, iy1, m, mmax;
+    int    ix0, iy0, iz0, ix1, iy1, iz1, m, mmax;
     Body   *bp;
     Point  *pp, *pf,*pl, **ptab;
     bool   done;
@@ -303,40 +278,34 @@ bin_data(int ivar)
             twosqs = sfunc(bp,tnow,i);
             twosqs = 2.0 * sqr(twosqs);
         }
-
 	ix0 = xbox(x);                  /* direct gridding in X and Y */
 	iy0 = ybox(y);
+	iz0 = xbox(z);
 
-
-	if (ix0<0 || iy0<0) {           /* outside area (>= nx,ny never occurs */
-	    noutxy++;
+	if (ix0<0 || iy0<0 || iz0<0) {           /* outside area (>= nx,ny never occurs */
+	    noutxyz++;
 	    continue;
 	}
-        if (z<zmin || z>zmax) {         /* initial check in Z */
-            noutz++;
-            continue;
-        }
         if (flux == 0.0) {              /* discard zero flux cases */
             nzero++;
             continue;
         }
 
-      	dprintf(4,"%d @ (%d,%d) from (%g,%g)\n",
-      	        i+1,ix0,iy0,x,y);
-
         for (m=0; m<mmax; m++) {        /* loop over smoothing area */
             done = TRUE;
+            for (iz1=-m; iz1<=m; iz1++)
             for (iy1=-m; iy1<=m; iy1++)
             for (ix1=-m; ix1<=m; ix1++) {       /* current smoothing edge */
                 ix = ix0 + ix1;
                 iy = iy0 + iy1;
-        	if (ix<0 || iy<0 || ix >= Nx(iptr) || iy >= Ny(iptr))
+                iz = iz0 + iz1;
+        	if (ix<0 || iy<0 || iz<0 || ix>=Nx(iptr) || iy>=Ny(iptr) || iz>=Nz(iptr))
         	    continue;
 
-                if (m>0 && ABS(ix1) != m && ABS(iy1) != m) continue;
+                if (m>0 && ABS(ix1) != m && ABS(iy1) != m && ABS(iz1) != m) continue;
                 if (m>0)
                     if (twosqs > 0)
-                        e = (sqr(ix1*Dx(iptr))+sqr(iy1*Dy(iptr)))/twosqs;
+		      e = (sqr(ix1*Dx(iptr))+sqr(iy1*Dy(iptr))+sqr(iz1*Dz(iptr)))/twosqs;
                     else 
                         e = 2 * emax;
                 else 
@@ -350,21 +319,8 @@ bin_data(int ivar)
                 brightness =   sfac * flux * cell_factor;	/* normalize */
                 b = brightness;
                 if (brightness == 0.0) continue;
-
-                if (zsig > 0.0) {           /* with Gaussian convolve in Z */
-                    for (iz=0, z0=Zmin(iptr); iz<nz; iz++, z0 += Dz(iptr)) {
-        	        fac = (z-z0)/zsig;
-	        	if (ABS(fac)>CUTOFF)    /* if too far from gaussian center */
-		            continue;           /* no contribution added */
-        		fac = expfac*exp(-0.5*fac*fac);
-                        CV(iptr) += brightness*fac;     /* moment */
-        	    }
-        	} else {
-                    iz = zbox(z);
-                    CV(iptr) +=   brightness;   /* moment */
-                }
-
-            } /* for (iy1/ix1) */
+		CV(iptr) += brightness; 
+            } /* for (iz1/iy1/ix1) */
             if (done) break;
         } /* m */
     }  /*-- end particles loop --*/
@@ -408,9 +364,8 @@ rescale_data(int ivar)
     MapMax(iptr) = m_max;
     BeamType(iptr) = NONE;              /* no smoothing yet */
 
-    dprintf (1,"Total %d particles within grid\n",nbody-noutxy-noutz);
-    dprintf (1,"     (%d were outside XY range, %d were not in Z range)\n",
-                    noutxy, noutz);
+    dprintf (1,"Total %d particles within grid\n",nbody-noutxyz);
+    dprintf (1,"     (%d were outside XYZ range)\n",noutxyz);
     dprintf (1,"%d cells contain non-zero data,  min and max in map are %f %f\n",
     		ndata, m_min, m_max);
     dprintf (1,"Total mass in map is %f\n",total*Dx(iptr)*Dy(iptr));
@@ -449,56 +404,29 @@ int ybox(real y)
 
 int zbox(real z)
 {
-    if (zedge==0x03)			/* Both edges at infinity */
-        return 0;                       /* always inside */
-    if (zedge==0x01 && z<zrange[1])	/* left edge at infinity */
-        return 0;
-    if (zedge==0x02 && z>zrange[0])	/* right side at infinity */
-        return 0;
-    if (zedge)
-        return -1;                      /* remaining cases outside */
-	
-    return (int)floor((z-zrange[0])/zrange[2]);    /* simple gridding */
+    if (zrange[0] < zrange[1]) {
+        if (zrange[0]<z && z<zrange[1])
+            return (int)floor((z-zrange[0])/zrange[2]);
+    } else if (zrange[1] < zrange[0]) {
+        if (zrange[1]<z && z<zrange[0])
+            return (int)floor((z-zrange[0])/zrange[2]);
+    } 
+    return -1;
 }
 
 
 /*
- * parse an expression of the form beg:end[,sig] into
- * range[2]:   0 = beg
- *	       1 = end
- *	       2 = (end-beg)/n   if sig not present (end>beg)
- * beam:
- *	       sig          if sig (>0) present
- *             -1           if no beam
- * 
+ * parse an expression of the form beg:end into range[2]
  */
-setaxis (string rexp, real range[3], int n, int *edge, real *beam)
+
+setaxis (string rexp, real range[2], int n)
 {
     char *cp;
     
-    *edge = 0;                  /* no infinite edges yet */
     cp = strchr(rexp,':');
-    if (cp==NULL)
-        error("range=%s must be of form beg:end[,sig]",rexp);
-    if (strncmp(rexp,"-inf",4)==0) {
-        range[0] = -HUGE;
-        *edge |= 0x01;              /* set left edge at inifinity */	
-    } else {
-        *cp = 0;
-        range[0] = natof(rexp);
-    }
-    cp++;
-    if (strncmp(cp,"inf",3)==0) {
-        range[1] = HUGE;
-	*edge |= 0x02;              /* set right edge at infinity */
-    } else
-        range[1] = natof(cp);
-    range[2] = (range[1]-range[0])/(real)n;       /* step */
-    if (range[2] < 0)
-      warning("%s: This axis %d has negative step",rexp,n);
-    cp = strchr(cp,',');
-    if (cp)
-        *beam = natof(++cp);                  /* convolution beam */
-    else
-        *beam = -1.0;                        /* any number < 0 */
+    if (cp==NULL) error("range=%s must be of form beg:end",rexp);
+    *cp = 0;
+    range[0] = natof(rexp);
+    range[1] = natof(++cp);
+    range[2] = (range[1]-range[0])/n;
 }
