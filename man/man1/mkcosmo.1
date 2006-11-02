@@ -1,16 +1,18 @@
 .TH MKCOSMO 1NEMO "1 November 2006"
 .SH NAME
-mkcosmo \- create a cosmology cube of equal massive stars
+mkcosmo \- create a cosmology cube of equal massive particles
 .SH SYNOPSIS
 \fBmkcosmo\fP [parameter=value]
 .SH DESCRIPTION
-From an input cube with density (or relative densities) on a regular grid,
-initial conditions that correspond to the density variations at a given Z
-(use Z=0 for non-comoving coordinates)
+From an input cube with given (relative) densities on a regular grid,
+initial conditions that correspond to the density variations at a given 
+redshift \fBz\fP (use \fBz=0\fP for non-comoving coordinates) are set
+based on 3 sweeps of cumulative mass computations along X, Y and Z.
 .PP
 Note that this routine will only work in the linear regime when the fluctuations
 are very small, resulting in small perturbations from the central location in
-a cell.
+a cell. The code will warn when a particle falls outside the cell boundary,
+but otherwise happily allow that.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -27,9 +29,33 @@ Size of cube [0.0]
 .TP
 \fBabsrho=\fP
 Is map absolute density or relative d(rho)/rho? [t]
+.TP
+\fBsigma=\fP
+Also perturb distances by gaussian sigma. This option is normally not
+used for cosmology. Default: 0
+.TP
+\fBseed=\fP
+Initial seed 
+[0]
+.TP
+\fBheadline=\fP
+Random verbiage added to output snapshot.
 .SH EXAMPLES
+Here's an example creating 1000 particles from a truely random gaussian field:
+.nf
+ccdmath "" - 'fie=rang(1,0.01)' size=10,10,10 | mkcosmo - snap1
+  ### nemo Debug info: Generating a map from scratch
+  ### nemo Debug info: MinMax = 0.969161 1.03211
+.fi
+Note this cube is not centered on 0,0,0 but instead one of the corners coincides with it.
+.SH CAVEATS
+The code assumes in a few places that the cube is really a cube with equal sizes in all
+3 dimensions. This is not always checked!
 .SH SEE ALSO
+mkcube(1NEMO), ccdmath(1NEMO), image(5NEMO), snapshot(5NEMO)
+.PP
 .SH FILES
+src/nbody/init/mkcosmo.c	-- source
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
