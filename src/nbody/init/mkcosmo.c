@@ -2,6 +2,11 @@
  * MKCOSMO: set up a cube from a density grid, for cosmology
  *	
  *	 1-nov-06  V0.1  Created     - Peter Teuben / Ed Shaya
+ *
+ * todo:
+ *  - first point is always 0,0,0
+ *  - do rescale_image()
+ *  - implement (1+z) scaling in rescale_image
  */
 
 #include <stdinc.h>
@@ -28,6 +33,8 @@ string defv[] = {	/* DEFAULT INPUT PARAMETERS */
 };
 
 string usage = "create a cosmology cube of equal massive stars";
+
+string cvsid="$Id$";
 
 local Body *btab;
 local int nbody;
@@ -66,9 +73,13 @@ void nemo_main()
   seed = init_xrandom(getparam("seed"));
   
   mkcube();
+#if 0
   fiddle_x();
   fiddle_y();
   fiddle_z();
+#else
+  fiddle_z();
+#endif
   writegalaxy(getparam("out"), getparam("headline"));
   free(btab);
 }
