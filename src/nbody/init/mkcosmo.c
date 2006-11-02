@@ -18,12 +18,12 @@
 string defv[] = {	/* DEFAULT INPUT PARAMETERS */
   "in=???\n       Input density (fluctuation) cube",
   "out=???\n      Output file name",
-  "z=0.0\n        Size of cube",
+  "z=0.0\n        Redshift",
   "absrho=t\n     Is map absolute density or relative d(rho)/rho?",
-  "sigma=0\n      Perturb distances by gaussian sigma",
+  "sigma=0\n      Also perturb distances by gaussian sigma",
   "seed=0\n       Initial seed",
   "headline=\n    Random verbiage",
-  "VERSION=0.1\n  1-nov-06 PJT",
+  "VERSION=0.2\n  1-nov-06 PJT",
   NULL,
 };
 
@@ -34,10 +34,13 @@ local int nbody;
 local real sigma;
 
 local imageptr iptr=NULL;
-local real *mcum;
 
 extern double xrandom(double,double), grandom(double,double);
 
+void rescale_image(bool Qabs, real z);
+void writegalaxy(string name, string headline);
+void mkcube(void);
+void fiddle_x(void),  fiddle_y(void),  fiddle_z(void);
 
 void nemo_main()
 {
@@ -47,18 +50,17 @@ void nemo_main()
   bool Qabs = getbparam("absrho");
 
   instr = stropen (getparam("in"),"r");
-  read_image (instr,&iptr); 
+  read_image(instr,&iptr); 
   strclose(instr);      
+  dprintf(0,"MinMax = %g %g \n",MapMin(iptr),MapMax(iptr));
 
-  /* if z > 0 rescale by 1+z ; if relative, make map absolute
-   *  but after rescaling ?
-   */
-  
+#if 0
+  rescale_image(Qabs,z);
+#endif
   
   if (Nx(iptr) != Ny(iptr) || Nx(iptr) != Nz(iptr))
     warning("Input data is not a cube: %d x %d x %d",Nx(iptr),Ny(iptr),Nz(iptr));
   nbody = Nx(iptr)*Ny(iptr)*Nz(iptr);
-  mcum = (real *) allocate((nbody+1)*sizeof(real));
 
   sigma = getdparam("sigma");
   seed = init_xrandom(getparam("seed"));
@@ -69,14 +71,49 @@ void nemo_main()
   fiddle_z();
   writegalaxy(getparam("out"), getparam("headline"));
   free(btab);
-  free(mcum);
 }
+
+
+void rescale_image(bool Qabs, real z)
+{  
+  int ix,iy,iz;
+  int nx=Nx(iptr), ny=Ny(iptr), nz=Nz(iptr);
+  real sum;
+
+  /* first get the total number in densities (mass) */
+
+  sum = 0.0;
+  for (iz=0; iz<nz; iz++)
+    for (iy=0; iy<ny; iy++)
+      for (ix=0; ix<nx; ix++)
+	sum += CubeValue(iptr,ix,iy,iz);
+
+  if (Qabs) {
+    /* if Absolute densities: */
+    for (iz=0; iz<nz; iz++)
+      for (iy=0; iy<ny; iy++)
+	for (ix=0; ix<nx; ix++)
+	  CubeValue(iptr,ix,iy,iz) /= sum;
+  } else {
+    /* if Relative densities: */
+    if (sum != 0.0) warning("Relative densities, but sum=%g should be 0.0",sum);
+    for (iz=0; iz<nz; iz++)
+      for (iy=0; iy<ny; iy++)
+	for (ix=0; ix<nx; ix++)
+	  CubeValue(iptr,ix,iy,iz) += 1.0;
+  }
+
+
+  /* TODO: do something about that (1+z) scaling */
+
+}
+
 
 /*
  * WRITEGALAXY: write galaxy model to output.
  */
 
-writegalaxy(string name, string headline)
+void writegalaxy(string name, string headline)
 {
   stream outstr;
   real tsnap = 0.0;
@@ -94,7 +131,7 @@ writegalaxy(string name, string headline)
  * MKCUBE: initial homogenous cube based on the input image
  */
 
-mkcube()
+void mkcube(void)
 {
   Body *bp;
   real x,y,z,mass_i;
@@ -122,45 +159,109 @@ mkcube()
 }
 
 
+/* 
+ * fiddle_x: sweep in X and accumulate mass as such, re-adjust
+ *           X position from center of cell as to agree with
+ *           the thus obtained cumulative M(<x)
+ *
+ * fiddle_y: --same, but then in y--
+ * fiddle_z: --same, but then in z--
+ */
 
-fiddle_x()
+
+void fiddle_x(void)
 {
-  int ix,iy,iz,i;
+  int ix,iy,iz,i,nerr=0;
   int nx=Nx(iptr),ny=Ny(iptr),nz=Nz(iptr);
+  real dx, xold, xnew, xhit, mold, mnew, mhit, err;
+  Body *bp;
 
-  mcum[0] = 0.0;
-  i = 1;
-  
-  for (iz=0; iz<nz; iz++)
-    for (iy=0; iy<ny; iy++)
-      for (ix=0; ix<nx; ix++)
-	mcum[i] = mcum[i-1] + CubeValue(iptr,ix,iy,iz);
+  mold = mhit = 0.0;
+  xold = 0.0;
+  dx = Dx(iptr);
+  for (iz=0; iz<nz; iz++) {
+    for (iy=0; iy<ny; iy++) {
+      xold = Xmin(iptr);
+      for (ix=0; ix<nx; ix++) {
+	mnew = mold + CubeValue(iptr,ix,iy,iz);
+	xnew = xold + dx;
+	xhit = xold + dx*(mhit-mold)/(mnew-mold);
+	dprintf(1,"X: %d %d %d -> xold=%g xhit=%g\n",ix,iy,iz,xold,xhit);
+	i = ix + ny*(iy+nz*iz);
+	bp = btab + i;
+	err = (Phase(bp)[0][0]-xhit)/dx;
+	if (-0.5<err && 0.5<err) nerr++;
+	Phase(bp)[0][0] = xhit;
+	mhit += 1.0;
+	mold = mnew;
+	xold = xnew;
+      }
+    }
+  }
+  if (nerr) warning("Found %d non-linear deviations in X",nerr);
 }
 
-fiddle_y()
+void fiddle_y(void)
 {
-  int ix,iy,iz,i;
+  int ix,iy,iz,i,nerr=0;
   int nx=Nx(iptr),ny=Ny(iptr),nz=Nz(iptr);
-
-  mcum[0] = 0.0;
-  i = 1;
+  real dy, yold, ynew, yhit, mold, mnew, mhit, err;
+  Body *bp;
   
-  for (ix=0; ix<nx; ix++)
-    for (iz=0; iz<nz; iz++)
-      for (iy=0; iy<ny; iy++)
-	mcum[i] = mcum[i-1] + CubeValue(iptr,ix,iy,iz);
+  mold = mhit = 0.0;
+  yold = 0.0;
+  dy = Dy(iptr);
+  for (ix=0; ix<nx; ix++) {
+    for (iz=0; iz<nz; iz++) {
+      yold = Ymin(iptr);
+      for (iy=0; iy<ny; iy++) {
+	mnew = mold + CubeValue(iptr,ix,iy,iz);
+	ynew = yold + dy;
+	yhit = yold + dy*(mhit-mold)/(mnew-mold);
+	dprintf(1,"Y: %d %d %d -> yold=%g yhit=%g\n",ix,iy,iz,yold,yhit);
+	i = ix + ny*(iy+nz*iz);
+	bp = btab + i;
+	err = (Phase(bp)[0][1]-yhit)/dy;
+	if (-0.5<err && 0.5<err) nerr++;
+	Phase(bp)[0][1] = yhit;
+	mhit += 1.0;
+	mold = mnew;
+	yold = ynew;
+      }
+    }
+  }
+  if (nerr) warning("Found %d non-linear deviations in Y",nerr);
 }
 
-fiddle_z()
+void fiddle_z(void)
 {
-  int ix,iy,iz,i;
+  int ix,iy,iz,i,nerr=0;
   int nx=Nx(iptr),ny=Ny(iptr),nz=Nz(iptr);
+  real dz, zold, znew, zhit, mold, mnew, mhit, err;
+  Body *bp;
 
-  mcum[0] = 0.0;
-  i = 1;
   
-  for (iy=0; iy<ny; iy++)
-    for (ix=0; ix<nx; ix++)
-      for (iz=0; iz<nz; iz++)
-	mcum[i] = mcum[i-1] + CubeValue(iptr,ix,iy,iz);
+  mold = mhit = 0.0;
+  zold = 0.0;
+  dz = Dz(iptr);
+  for (iy=0; iy<ny; iy++) {
+    for (ix=0; ix<nx; ix++) {
+      zold = Zmin(iptr);
+      for (iz=0; iz<nz; iz++) {
+	mnew = mold + CubeValue(iptr,ix,iy,iz);
+	znew = zold + dz;
+	zhit = zold + dz*(mhit-mold)/(mnew-mold);
+	dprintf(1,"Z: %d %d %d -> zold=%g zhit=%g\n",ix,iy,iz,zold,zhit);
+	i = ix + ny*(iy+nz*iz);
+	bp = btab + i;
+	err = (Phase(bp)[0][2]-zhit)/dz;
+	if (-0.5<err && 0.5<err) nerr++;
+	Phase(bp)[0][2] = zhit;
+	mhit += 1.0;
+	mold = mnew;
+	zold = znew;
+      }
+    }
+  }
+  if (nerr) warning("Found %d non-linear deviations in Z",nerr);
 }
