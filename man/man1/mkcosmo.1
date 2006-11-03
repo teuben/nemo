@@ -1,6 +1,6 @@
 .TH MKCOSMO 1NEMO "1 November 2006"
 .SH NAME
-mkcosmo \- create a cosmology cube of equal massive particles
+mkcosmo \- create a cosmology cube of equal mass particles
 .SH SYNOPSIS
 \fBmkcosmo\fP [parameter=value]
 .SH DESCRIPTION
@@ -22,16 +22,25 @@ Input density (fluctuation) cube.
 No default
 .TP
 \fBout=\fP
-Output file name [???]    
+Output file name. 
+No default.
 .TP
 \fBz=\fP
-Size of cube [0.0]    
+Redshift (for density correction). Only used if given, and if given
+the growth function is hardcoded as 1/(1+z). z=0 means no
+change made to densities. 
+Default: not used.
+.TP
+\fBD=\fP
+Growth function, by which the densities will be multiplied to get
+the density. Only used if given.
+Default: not used.
 .TP
 \fBabsrho=\fP
 Is map absolute density or relative d(rho)/rho? [t]
 .TP
 \fBsigma=\fP
-Also perturb distances by gaussian sigma. This option is normally not
+Also perturb distances by (gaussian) sigma. This option is normally not
 used for cosmology. Default: 0
 .TP
 \fBseed=\fP
