@@ -23,12 +23,13 @@
 string defv[] = {	/* DEFAULT INPUT PARAMETERS */
   "in=???\n       Input density (fluctuation) cube",
   "out=???\n      Output file name",
-  "z=0.0\n        Redshift",
+  "z=\n           Redshift, for growth function 1/(1+x)",
+  "D=\n           Growth function value, given explicitly",
   "absrho=t\n     Is map absolute density or relative d(rho)/rho?",
   "sigma=0\n      Also perturb distances by gaussian sigma",
   "seed=0\n       Initial seed",
   "headline=\n    Random verbiage",
-  "VERSION=0.2\n  1-nov-06 PJT",
+  "VERSION=0.3\n  2-nov-06 PJT",
   NULL,
 };
 
@@ -44,7 +45,8 @@ local imageptr iptr=NULL;
 
 extern double xrandom(double,double), grandom(double,double);
 
-void rescale_image(bool Qabs, real z);
+void rescale_image(bool Qabs);
+void rescale_image_d(real d);
 void writegalaxy(string name, string headline);
 void mkcube(void);
 void fiddle_x(void),  fiddle_y(void),  fiddle_z(void);
@@ -61,8 +63,11 @@ void nemo_main()
   strclose(instr);      
   dprintf(0,"MinMax = %g %g \n",MapMin(iptr),MapMax(iptr));
 
+  if (hasvalue("D"))
+    rescale_image_d(getdparam("D"));
+
 #if 0
-  rescale_image(Qabs,z);
+  rescale_image(Qabs);
 #endif
   
   if (Nx(iptr) != Ny(iptr) || Nx(iptr) != Nz(iptr))
@@ -85,7 +90,7 @@ void nemo_main()
 }
 
 
-void rescale_image(bool Qabs, real z)
+void rescale_image(bool Qabs)
 {  
   int ix,iy,iz;
   int nx=Nx(iptr), ny=Ny(iptr), nz=Nz(iptr);
@@ -113,9 +118,21 @@ void rescale_image(bool Qabs, real z)
 	for (ix=0; ix<nx; ix++)
 	  CubeValue(iptr,ix,iy,iz) += 1.0;
   }
+}
 
+void rescale_image_d(real d)
+{  
+  int ix,iy,iz;
+  int nx=Nx(iptr), ny=Ny(iptr), nz=Nz(iptr);
+  real sum;
 
-  /* TODO: do something about that (1+z) scaling */
+  /* first get the total number in densities (mass) */
+
+  sum = 0.0;
+  for (iz=0; iz<nz; iz++)
+    for (iy=0; iy<ny; iy++)
+      for (ix=0; ix<nx; ix++)
+	CubeValue(iptr,ix,iy,iz) = d*CubeValue(iptr,ix,iy,iz);
 
 }
 
