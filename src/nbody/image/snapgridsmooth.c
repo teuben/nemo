@@ -34,7 +34,8 @@ string defv[] = {
   "ny=64\n			  y size of cube",
   "nz=64\n		  	  z size of cube",
   "stack=f\n			  Stack all selected snapshots?",
-  "VERSION=0.1\n		  1-nov-06 PJT",
+  "periodic=f\n                   Periodic boundary conditions for smoothing?",
+  "VERSION=0.2\n		  1-nov-06 PJT",
   NULL,
 };
 
@@ -74,6 +75,7 @@ local real   zmin, zmax;
 
 local bool   Qstack;                    /* stacking snapshots ?? */
 local bool   Qsmooth;                   /* (variable) smoothing */
+local bool   Qperiodic;                 /* periodic boundaries for smoothing? */
 
 /* local double xref, yref, xrefpix, yrefpix, xinc, yinc, rot; */
 
@@ -136,6 +138,7 @@ void setparams()
 
     times = getparam("times");
     Qstack = getbparam("stack");
+    Qperiodic = getbparam("periodic");
 
     nx = getiparam("nx");
     ny = getiparam("ny");
@@ -262,11 +265,13 @@ bin_data(int ivar)
     cell_factor = 1.0 / ABS(Dx(iptr)*Dy(iptr));
 
     nbody += nobj;
-    if (Qsmooth) 
-        mmax = MAX(Nx(iptr),Ny(iptr));
-    else
-        mmax = 1;
+    if (Qsmooth) {
+      mmax = MAX(Nx(iptr),Ny(iptr));
+      mmax = MAX(mmax,Nz(iptr));
+    } else
+      mmax = 1;
     emax = 10.0;
+    dprintf(1,"Smoothing with mmax=%d\n",mmax);
 
 		/* big loop: walk through all particles and accumulate ccd data */
     for (i=0, bp=btab; i<nobj; i++, bp++) {
@@ -275,20 +280,22 @@ bin_data(int ivar)
         z = zfunc(bp,tnow,i);
         flux = efunc[ivar](bp,tnow,i);
         if (Qsmooth) {
-            twosqs = sfunc(bp,tnow,i);
-            twosqs = 2.0 * sqr(twosqs);
+	  twosqs = sfunc(bp,tnow,i);
+	  twosqs = 2.0 * sqr(twosqs);
         }
 	ix0 = xbox(x);                  /* direct gridding in X and Y */
 	iy0 = ybox(y);
 	iz0 = xbox(z);
 
+	dprintf(2,"%g %g %g -> %d %d %d (%g)\n",x,y,z,ix0,iy0,iz0,flux);
+
 	if (ix0<0 || iy0<0 || iz0<0) {           /* outside area (>= nx,ny never occurs */
-	    noutxyz++;
-	    continue;
+	  noutxyz++;
+	  continue;
 	}
         if (flux == 0.0) {              /* discard zero flux cases */
-            nzero++;
-            continue;
+	  nzero++;
+	  continue;
         }
 
         for (m=0; m<mmax; m++) {        /* loop over smoothing area */
@@ -299,8 +306,17 @@ bin_data(int ivar)
                 ix = ix0 + ix1;
                 iy = iy0 + iy1;
                 iz = iz0 + iz1;
-        	if (ix<0 || iy<0 || iz<0 || ix>=Nx(iptr) || iy>=Ny(iptr) || iz>=Nz(iptr))
+		if (Qperiodic) {
+		  if (ix<0) ix+=nx;
+		  if (iy<0) iy+=ny;
+		  if (iz<0) iz+=nz;
+		  if (ix>=Nx(iptr)) ix-=nx;
+		  if (iy>=Ny(iptr)) iy-=ny;
+		  if (iz>=Nz(iptr)) iz-=nz;
+		} else {
+		  if (ix<0 || iy<0 || iz<0 || ix>=Nx(iptr) || iy>=Ny(iptr) || iz>=Nz(iptr))
         	    continue;
+		}
 
                 if (m>0 && ABS(ix1) != m && ABS(iy1) != m && ABS(iz1) != m) continue;
                 if (m>0)
@@ -376,10 +392,18 @@ rescale_data(int ivar)
 /*	compute integerized coordinates in X Y and Z, return < 0 if
  *	outside the range's - handle Z a little differently, as it
  *	allows edges at infinity
+ *
+ *   @TODO  should we really while() in periodic, or only do it once?
  */
 
 int xbox(real x)
 {
+  int i = -1;
+  if (Qperiodic) {
+    i = (int)floor((x-xrange[0])/xrange[2]);
+    while (i>=nx) i -= nx;
+    while (i<0)   i += nx;
+  } else {
     if (xrange[0] < xrange[1]) {
         if (xrange[0]<x && x<xrange[1])
             return (int)floor((x-xrange[0])/xrange[2]);
@@ -387,11 +411,18 @@ int xbox(real x)
         if (xrange[1]<x && x<xrange[0])
             return (int)floor((x-xrange[0])/xrange[2]);
     } 
-    return -1;
+  }
+  return i;
 }
 
 int ybox(real y)
 {
+  int i = -1;
+  if (Qperiodic) { 
+    i = (int)floor((y-yrange[0])/yrange[2]);
+    while (i>=ny) i -= ny;
+    while (i<0)   i += ny;
+  } else {
     if (yrange[0] < yrange[1]) {
         if (yrange[0]<y && y<yrange[1])
             return (int)floor((y-yrange[0])/yrange[2]);
@@ -399,11 +430,18 @@ int ybox(real y)
         if (yrange[1]<y && y<yrange[0])
             return (int)floor((y-yrange[0])/yrange[2]);
     } 
-    return -1;
+  }
+  return i;
 }
 
 int zbox(real z)
 {
+  int i = -1;
+  if (Qperiodic) { 
+    i = (int)floor((z-zrange[0])/zrange[2]);
+    while (i>=nz) i -= nz;
+    while (i<0)   i += nz;
+  } else {
     if (zrange[0] < zrange[1]) {
         if (zrange[0]<z && z<zrange[1])
             return (int)floor((z-zrange[0])/zrange[2]);
@@ -411,7 +449,8 @@ int zbox(real z)
         if (zrange[1]<z && z<zrange[0])
             return (int)floor((z-zrange[0])/zrange[2]);
     } 
-    return -1;
+  }
+  return i;
 }
 
 
