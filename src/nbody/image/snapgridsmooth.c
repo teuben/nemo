@@ -2,8 +2,12 @@
  *  SNAPGRID:  program grids a snapshot into a 3D image-cube, with adaptive smoothing
  *             simplification of snapgrid
  *
- *	 1-nov-06  V0.1 -- derived from snapgrid	PJT/Ed shaya
+ *	 1-nov-06  V0.1 -- derived from snapgrid	PJT/Ed Shaya/Alan Peel
+ *       6-nov-06  V0.3 -- add normalizat and fixes for that         PJT
  *
+ *
+ * 
+ *  TODO:    stack= and multiple evar= have not been tested
  */
 
 #include <stdinc.h> 
@@ -29,13 +33,14 @@ string defv[] = {
   "yvar=y\n			  y-variable to grid",
   "zvar=z\n			  z-variable to grid",
   "evar=m\n                       emission variable(s)",
-  "svar=\n                        smoothing size variable",
+  "svar=\n                        smoothing size variable [no smoothing if none given]",
   "nx=64\n			  x size of cube",
   "ny=64\n			  y size of cube",
   "nz=64\n		  	  z size of cube",
   "stack=f\n			  Stack all selected snapshots?",
   "periodic=f\n                   Periodic boundary conditions for smoothing?",
-  "VERSION=0.2\n		  1-nov-06 PJT",
+  "normalize=t\n                  Normalize smoothing to conserve mass (evar)",
+  "VERSION=0.3\n		  6-nov-06 PJT",
   NULL,
 };
 
@@ -76,6 +81,7 @@ local real   zmin, zmax;
 local bool   Qstack;                    /* stacking snapshots ?? */
 local bool   Qsmooth;                   /* (variable) smoothing */
 local bool   Qperiodic;                 /* periodic boundaries for smoothing? */
+local bool   Qnormalize;                /* normalize flux */
 
 /* local double xref, yref, xrefpix, yrefpix, xinc, yinc, rot; */
 
@@ -139,6 +145,7 @@ void setparams()
     times = getparam("times");
     Qstack = getbparam("stack");
     Qperiodic = getbparam("periodic");
+    Qnormalize = getbparam("normalize");
 
     nx = getiparam("nx");
     ny = getiparam("ny");
@@ -240,29 +247,17 @@ clear_image()
 }
 
 
-typedef struct point {
-  real em, ab, z, depth;          /* emit, absorb, moment var, depth var */
-  int i;                          /* particle id */
-  struct point *next, *last;      /* pointers to aid */
-} Point;
-
-#define AddIndex(i,j,em,ab,z)  /**/
-
-local Point **map =NULL;
-
 bin_data(int ivar)
 {
     real brightness, cell_factor, x, y, z, z0, t,sum;
-    real expfac, fac, sfac, flux, b, emtau, depth;
-    real e, emax, twosqs;
-    int    i, j, k, ix, iy, iz, n, nneg, ioff;
+    real fac, sfac, flux, b, emtau, depth;
+    real e, emax, twosqs, norm;
+    int    i, j, k, ix, iy, iz, n, nneg, iter;
     int    ix0, iy0, iz0, ix1, iy1, iz1, m, mmax;
     Body   *bp;
-    Point  *pp, *pf,*pl, **ptab;
     bool   done;
     
-    expfac = (zsig > 0.0 ? 1.0/(sqrt(TWO_PI)*zsig) : 0.0);
-    cell_factor = 1.0 / ABS(Dx(iptr)*Dy(iptr));
+    cell_factor = 1.0 / ABS(Dx(iptr)*Dy(iptr)*Dz(iptr));
 
     nbody += nobj;
     if (Qsmooth) {
@@ -270,39 +265,44 @@ bin_data(int ivar)
       mmax = MAX(mmax,Nz(iptr));
     } else
       mmax = 1;
-    emax = 10.0;
     dprintf(1,"Smoothing with mmax=%d\n",mmax);
 
-		/* big loop: walk through all particles and accumulate ccd data */
-    for (i=0, bp=btab; i<nobj; i++, bp++) {
-        x = xfunc(bp,tnow,i);            /* transform */
+    emax = 10.0;     /* sqrt(2*emax) is the number of sigma's we into the gaussian to cutoff*/
+
+    for (i=0, bp=btab; i<nobj; i++, bp++) { /* big loop: walk particles and accumulate */
+        x = xfunc(bp,tnow,i);           /* get X,Y,Z */
 	y = yfunc(bp,tnow,i);
         z = zfunc(bp,tnow,i);
-        flux = efunc[ivar](bp,tnow,i);
-        if (Qsmooth) {
-	  twosqs = sfunc(bp,tnow,i);
-	  twosqs = 2.0 * sqr(twosqs);
-        }
-	ix0 = xbox(x);                  /* direct gridding in X and Y */
-	iy0 = ybox(y);
-	iz0 = xbox(z);
-
-	dprintf(2,"%g %g %g -> %d %d %d (%g)\n",x,y,z,ix0,iy0,iz0,flux);
-
-	if (ix0<0 || iy0<0 || iz0<0) {           /* outside area (>= nx,ny never occurs */
-	  noutxyz++;
-	  continue;
-	}
-        if (flux == 0.0) {              /* discard zero flux cases */
+        flux = efunc[ivar](bp,tnow,i);  /* flux */
+        if (flux == 0.0) {              /* discard zero flux cases, negative is allowed */
 	  nzero++;
 	  continue;
         }
 
-        for (m=0; m<mmax; m++) {        /* loop over smoothing area */
+	ix0 = xbox(x);                  /* direct gridding in X and Y */
+	iy0 = ybox(y);
+	iz0 = xbox(z);
+	if (ix0<0 || iy0<0 || iz0<0) {  /* outside area ?? */
+	  noutxyz++;
+	  continue;
+	}
+	dprintf(3,"%g %g %g -> %d %d %d (%g)\n",x,y,z,ix0,iy0,iz0,flux);
+
+        if (Qsmooth) {
+	  twosqs = sfunc(bp,tnow,i);
+	  twosqs = 2.0 * sqr(twosqs);
+        }
+
+	norm = 0.0;
+	for (iter=0; iter<2; iter++) {
+	  for (m=0; m<mmax; m++) {        /* loop over smoothing area - increasing m */
             done = TRUE;
-            for (iz1=-m; iz1<=m; iz1++)
+            for (iz1=-m; iz1<=m; iz1++) 
             for (iy1=-m; iy1<=m; iy1++)
             for (ix1=-m; ix1<=m; ix1++) {       /* current smoothing edge */
+	        /* make sure we're only adding the new outer boundary here */
+                if (m>0 && ABS(ix1) != m && ABS(iy1) != m && ABS(iz1) != m) continue;
+
                 ix = ix0 + ix1;
                 iy = iy0 + iy1;
                 iz = iz0 + iz1;
@@ -318,27 +318,37 @@ bin_data(int ivar)
         	    continue;
 		}
 
-                if (m>0 && ABS(ix1) != m && ABS(iy1) != m && ABS(iz1) != m) continue;
                 if (m>0)
                     if (twosqs > 0)
 		      e = (sqr(ix1*Dx(iptr))+sqr(iy1*Dy(iptr))+sqr(iz1*Dz(iptr)))/twosqs;
                     else 
-                        e = 2 * emax;
+		      e = 2 * emax;
                 else 
                     e = 0.0;
                 if (e < emax) {
                     sfac = exp(-e);
-                    done = FALSE;
+                    done = FALSE;    /* keep adding new "rings" until ring has no more e<emax */
                 } else
                     sfac = 0.0;
+		if (Qnormalize && iter==0)
+		    norm += sfac;
 
-                brightness =   sfac * flux * cell_factor;	/* normalize */
-                b = brightness;
-                if (brightness == 0.0) continue;
-		CV(iptr) += brightness; 
+		if (iter==1 || !Qnormalize) {
+		  brightness =   sfac * flux * cell_factor / norm;	/* normalize */
+		  b = brightness;
+		  if (brightness == 0.0) continue;
+		  CV(iptr) += brightness; 
+		}
             } /* for (iz1/iy1/ix1) */
             if (done) break;
-        } /* m */
+	  } /* m */
+	  if (Qnormalize) {
+	    if (iter==0) 
+	      dprintf(2,"%d : Normalizing by %g, went out to m=%d for %g sigma\n",i,norm,m,sqrt(2*emax));
+	  } else
+	    break;
+
+	} /* iter */
     }  /*-- end particles loop --*/
 }
 
@@ -368,7 +378,7 @@ rescale_data(int ivar)
     for (ix=0; ix<nx; ix++)         	/* determine maximum in picture */
     for (iy=0; iy<ny; iy++)
     for (iz=0; iz<nz; iz++) {
-       	  brightness = CV(iptr);
+          brightness = CV(iptr);
 	  total += brightness;
 	  m_max =  MAX(m_max,brightness);
 	  m_min =  MIN(m_min,brightness);
@@ -384,7 +394,7 @@ rescale_data(int ivar)
     dprintf (1,"     (%d were outside XYZ range)\n",noutxyz);
     dprintf (1,"%d cells contain non-zero data,  min and max in map are %f %f\n",
     		ndata, m_min, m_max);
-    dprintf (1,"Total mass in map is %f\n",total*Dx(iptr)*Dy(iptr));
+    dprintf (1,"Total mass in map is %f\n",total*Dx(iptr)*Dy(iptr)*Dz(iptr));
     if (nzero)
         warning("There were %d stars with zero emissivity in the grid",nzero);
 }
@@ -398,59 +408,38 @@ rescale_data(int ivar)
 
 int xbox(real x)
 {
-  int i = -1;
-  if (Qperiodic) {
-    i = (int)floor((x-xrange[0])/xrange[2]);
-    while (i>=nx) i -= nx;
-    while (i<0)   i += nx;
-  } else {
-    if (xrange[0] < xrange[1]) {
-        if (xrange[0]<x && x<xrange[1])
-            return (int)floor((x-xrange[0])/xrange[2]);
-    } else if (xrange[1] < xrange[0]) {
-        if (xrange[1]<x && x<xrange[0])
-            return (int)floor((x-xrange[0])/xrange[2]);
-    } 
+  if (xrange[0] < xrange[1]) {
+    if (xrange[0]<x && x<xrange[1])
+      return (int)floor((x-xrange[0])/xrange[2]);
+  } else if (xrange[1] < xrange[0]) {
+    if (xrange[1]<x && x<xrange[0])
+      return (int)floor((x-xrange[0])/xrange[2]);
   }
-  return i;
+  return -1;
 }
 
 int ybox(real y)
 {
-  int i = -1;
-  if (Qperiodic) { 
-    i = (int)floor((y-yrange[0])/yrange[2]);
-    while (i>=ny) i -= ny;
-    while (i<0)   i += ny;
-  } else {
-    if (yrange[0] < yrange[1]) {
-        if (yrange[0]<y && y<yrange[1])
-            return (int)floor((y-yrange[0])/yrange[2]);
-    } else if (yrange[1] < yrange[0]) {
-        if (yrange[1]<y && y<yrange[0])
-            return (int)floor((y-yrange[0])/yrange[2]);
-    } 
-  }
-  return i;
+  if (yrange[0] < yrange[1]) {
+    if (yrange[0]<y && y<yrange[1])
+      return (int)floor((y-yrange[0])/yrange[2]);
+  } else if (yrange[1] < yrange[0]) {
+    if (yrange[1]<y && y<yrange[0])
+      return (int)floor((y-yrange[0])/yrange[2]);
+  } 
+  return -1;
 }
 
 int zbox(real z)
 {
-  int i = -1;
-  if (Qperiodic) { 
-    i = (int)floor((z-zrange[0])/zrange[2]);
-    while (i>=nz) i -= nz;
-    while (i<0)   i += nz;
-  } else {
-    if (zrange[0] < zrange[1]) {
-        if (zrange[0]<z && z<zrange[1])
-            return (int)floor((z-zrange[0])/zrange[2]);
-    } else if (zrange[1] < zrange[0]) {
-        if (zrange[1]<z && z<zrange[0])
-            return (int)floor((z-zrange[0])/zrange[2]);
-    } 
-  }
-  return i;
+  if (zrange[0] < zrange[1]) {
+    if (zrange[0]<z && z<zrange[1])
+      return (int)floor((z-zrange[0])/zrange[2]);
+  } else if (zrange[1] < zrange[0]) {
+    if (zrange[1]<z && z<zrange[0])
+      return (int)floor((z-zrange[0])/zrange[2]);
+  } 
+  return -1;
 }
 
 
