@@ -10,6 +10,7 @@
  *       5-jan-05   1.6 added a total
  *      30-jan-05   1.7 added an optional median
  *      24-may-06   1.8 add mmcount=
+ *       6-nov-06   1.9 output the total mass/luminosity as well as sum of densities
  *
  */
 
@@ -30,7 +31,7 @@ string defv[] = {
     "median=f\n     Optional display of the median value",
     "mmcount=f\n    Count occurances of min and max",
     "sort=qsort\n   Sorting routine (not activated yet)",
-    "VERSION=1.8\n  24-may-06 PJT",
+    "VERSION=1.9\n  6-nov-06 PJT",
     NULL,
 };
 
@@ -57,6 +58,7 @@ nemo_main()
 {
     int  i, j, k;
     real x, xmin, xmax, mean, sigma, skew, kurt, median, bad, w, *data;
+    real sum, sov;
     Moment m;
     bool Qmin, Qmax, Qbad, Qw, Qmedian, Qmmcount = getbparam("mmcount");
     real nu, nppb = getdparam("nppb");
@@ -91,6 +93,8 @@ nemo_main()
     Qmedian = getbparam("median");
     if (Qmedian)
       data = (real *) allocate(nx*ny*nz*sizeof(real));
+
+    sov = Dx(iptr)*Dy(iptr)*Dz(iptr);   /* voxel volume; TODO: should we do 2D vs. 3D ? */
     
     ini_moment(&m,4,0);
     for (i=0; i<nx; i++) {
@@ -118,14 +122,15 @@ nemo_main()
       sigma = sigma_moment(&m);
       skew = skewness_moment(&m);
       kurt = kurtosis_moment(&m);
+      sum = show_moment(&m,1);
       
       printf ("Min=%f  Max=%f\n",min_moment(&m), max_moment(&m));
-      printf ("Number of points     : %d\n",n_moment(&m));
-      printf ("Mean and dispersion  : %f %f\n",mean,sigma);
-      printf ("Skewness and kurtosis: %f %f\n",skew,kurt);
-      printf ("Sum                  : %f\n",show_moment(&m,1));
+      printf ("Number of points      : %d\n",n_moment(&m));
+      printf ("Mean and dispersion   : %f %f\n",mean,sigma);
+      printf ("Skewness and kurtosis : %f %f\n",skew,kurt);
+      printf ("Sum and Sum*Dx*Dy*Dz  : %f %f\n",sum, sum*sov);
       if (Qmedian)
-	printf ("Median               : %f\n",get_median(ngood,data));
+	printf ("Median                : %f\n",get_median(ngood,data));
 
       if (Qmmcount) {
 	min_count = max_count = 0;
@@ -140,7 +145,7 @@ nemo_main()
 	    }
 	  }
 	} /* i */
-	printf("Min_Max_count        : %d %d\n",min_count,max_count);
+	printf("Min_Max_count         : %d %d\n",min_count,max_count);
       }
       printf ("%d/%d out-of-range points discarded\n",nsize-n_moment(&m), nsize);
     }
