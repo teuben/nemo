@@ -154,9 +154,9 @@ namespace falcON {
       return t.normalize();
     }
     /// direction of major axis
-    const vect_d&major(int i) const { return xa[i]; }
+    const vect_d&major_axis(int i) const { return xa[i]; }
     /// direction of minor axis
-    const vect_d&minor(int i) const { return xi[i]; }
+    const vect_d&minor_axis(int i) const { return xi[i]; }
   };
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            

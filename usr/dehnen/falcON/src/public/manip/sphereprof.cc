@@ -34,6 +34,7 @@
 // v 1.1    04/07/2006  WD doxygen documented and made public                   
 // v 1.2    07/07/2006  WD using flags::ignore (in_subset()) instead of subset  
 // v 1.3    09/08/2006  WD warn if non-spherical                                
+// v 1.3.1  06/11/2006  WD change in profile.h                                  
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
 #include <public/profile.h>
@@ -223,8 +224,8 @@ namespace falcON { namespace Manipulate {
 	   << std::setw(12) << SP.sigp(i);
       OUT  << std::setw(12) << SP.cova(i) <<' '
 	   << std::setw(12) << SP.bova(i) <<' ';
-      PS.print_dir(OUT, SP.major(i)) << "  ";
-      PS.print_dir(OUT, SP.minor(i));
+      PS.print_dir(OUT, SP.major_axis(i)) << "  ";
+      PS.print_dir(OUT, SP.minor_axis(i));
       if(SP.has_vels()) {
 	OUT<< "  ";
 	PS.print_dir(OUT, SP.drot(i));
