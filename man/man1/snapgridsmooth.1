@@ -1,4 +1,4 @@
-.TH SNAPGRIDSMOOTH 1NEMO "1 November 2006"
+.TH SNAPGRIDSMOOTH 1NEMO "6 November 2006"
 .SH NAME
 snapgrid \- grid a snapshot into a 3D image cube with adaptive smoothing
 .SH SYNOPSIS
@@ -30,7 +30,9 @@ one can request multiple output images.
 [Default: \fBall\fP].
 .TP
 \fBxrange=\fIxb:xe\fP
-Range in \fBxvar\fP to bin [default: \fB-2:2\fP].
+Range in \fBxvar\fP to bin. Note that all particles outside this grid
+will be discarded, even if \fBperiodic=t\fP  (see below).
+[default: \fB-2:2\fP].
 .TP
 \fByrange=\fIxb:xe\fP
 Range in \fByvar\fP to bin [default: \fB-2:2\fP].
@@ -74,10 +76,21 @@ Should all snapshots from the input file be stacked, or write one
 image per selected (see \fBtimes=\fP) time? [default: \fBf\fP].
 .TP
 \fBperiodic=t|f\fP
-If set true, particles and smoothing results will be applied
-on a periodic grid. [Default: f]
+If set true, smoothing results will be applied
+on a periodic grid.  Particles that fell outside the x,y,z grid,
+however, are discarded and never smoothed/aliased into the visible
+grid.
+[Default: f]
+.TP
+\fBnormalize=t|f\fP
+If smoothing is applied (see svar=), should the smoothing be
+normalized as to conserve mass (evar=)?
+[Default: t]
 .SH EXAMPLES
 The following example ...
+.SH CAVEAT
+This program was cloned from \fIsnapgrid(1NEMO)\fP, and the keywords
+stack= and multiple values for evar= have not been tested out.
 .SH UNITS
 Units are maintained in the same way as in snapshots, they don't have
 a specific name, but carry their normal meaning 'length', 'velocity'
@@ -96,4 +109,5 @@ src/nbody/image  	snapgridsmooth.c
 .nf
 .ta +1.0i +4.0i
 1-nov-06	V0.1: Created	PJT/ES
+6-nov-06	V0.3: added normalize= and fixes for that	PJT
 .fi
