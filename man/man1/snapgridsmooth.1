@@ -1,16 +1,16 @@
-.TH SNAPGRIDSMOOTH 1NEMO "6 November 2006"
+.TH SNAPGRIDSMOOTH 1NEMO "7 November 2006"
 .SH NAME
-snapgrid \- grid a snapshot into a 3D image cube with adaptive smoothing
+snapgridsmooth \- grid a snapshot into a 3D image cube with adaptive smoothing
 .SH SYNOPSIS
 .PP
 \fBsnapgridsmooth in=\fPsnapshot \fBout=\fPimage [parameter=value]
 .SH DESCRIPTION
 \fIsnapgridsmooth\fP grids three arbitrary bodytrans expressions 
 (default: \fBx\fP, \fBy\fP and \fBz\fP) of a snapshot into a datacube
-with adaptive smoothing based on another bodytrans variable. Unlike
-\fIsnapgrid(1NEMO)\fP, which handles projections and some amount 
-of line-of-sight processing, this program simply adds the emission
-in a cell, and some optional smoothing.
+with adaptive smoothing based on a bodytrans variable. Unlike
+\fIsnapgrid(1NEMO)\fP, which handles 2D projections and certain types
+of line-of-sight processing, this program simply accumulates the emission
+in each cell, and optional smoothing, normalization and periodicity.
 .PP 
 .SH PARAMETERS
 The following parameters can be given in any order if the keyword is also passed with it:
@@ -20,7 +20,10 @@ input file, must be in \fIsnapshot(5NEMO)\fP format. Multiple snapshots can
 be stacked uses the \fBtimes=\fP keyword: see \fBstack=\fP below.  [no default].
 .TP
 \fBout=\fIout-file\fP
-output file, will be in \fIimage(5NEMO)\fP format [no default].
+output file, will be in \fIimage(5NEMO)\fP format. Depending on the use
+of \fBtimes=\fP, \fBstack=\fP and \fBevar=\fP (see below) one more multiple
+cubes can be output.
+[no default].
 .TP
 \fBtimes=\fP\fIt1:t2,t3,..\fP
 Selection of the times of snapshots to be selected for gridding.
