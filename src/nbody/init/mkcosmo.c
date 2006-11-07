@@ -2,6 +2,7 @@
  * MKCOSMO: set up a cube from a density grid, for cosmology
  *	
  *	 1-nov-06  V0.1  Created     - Peter Teuben / Ed Shaya
+ *       7-nov-06  V0.4  add rhob=, a=
  *
  * todo:
  *  - first point is always 0,0,0
@@ -24,12 +25,14 @@ string defv[] = {	/* DEFAULT INPUT PARAMETERS */
   "in=???\n       Input density (fluctuation) cube",
   "out=???\n      Output file name",
   "z=\n           Redshift, for growth function 1/(1+x)",
-  "D=\n           Growth function value, given explicitly",
+  "D=\n           Growth function value, given explicitly (D<=1)",
+  "a=1\n          a scaling?",
+  "rhob=\n        Mean density to use",
   "absrho=t\n     Is map absolute density or relative d(rho)/rho?",
   "sigma=0\n      Also perturb distances by gaussian sigma",
   "seed=0\n       Initial seed",
   "headline=\n    Random verbiage",
-  "VERSION=0.3\n  2-nov-06 PJT",
+  "VERSION=0.4\n  7-nov-06 PJT",
   NULL,
 };
 
@@ -40,13 +43,15 @@ string cvsid="$Id$";
 local Body *btab;
 local int nbody;
 local real sigma;
+local real cube_aver;
 
 local imageptr iptr=NULL;
 
 extern double xrandom(double,double), grandom(double,double);
 
+void check_image(void);
 void rescale_image(bool Qabs);
-void rescale_image_d(real d);
+void rescale_image_d(real d, real a, real rb);
 void writegalaxy(string name, string headline);
 void mkcube(void);
 void fiddle_x(void),  fiddle_y(void),  fiddle_z(void);
@@ -63,12 +68,13 @@ void nemo_main()
   strclose(instr);      
   dprintf(0,"MinMax = %g %g \n",MapMin(iptr),MapMax(iptr));
 
-  if (hasvalue("D"))
-    rescale_image_d(getdparam("D"));
+  check_image();
 
-#if 0
-  rescale_image(Qabs);
-#endif
+  if (hasvalue("D") && hasvalue("rhob") && hasvalue("a"))
+    rescale_image_d(getdparam("D"), getdparam("a"), getdparam("rhob"));
+  else {
+    warning("Currently program needs D= a= and rhob=; doing no scaling now");
+  }
   
   if (Nx(iptr) != Ny(iptr) || Nx(iptr) != Nz(iptr))
     warning("Input data is not a cube: %d x %d x %d",Nx(iptr),Ny(iptr),Nz(iptr));
@@ -78,7 +84,7 @@ void nemo_main()
   seed = init_xrandom(getparam("seed"));
   
   mkcube();
-#if 0
+#if 1
   fiddle_x();
   fiddle_y();
   fiddle_z();
@@ -87,6 +93,23 @@ void nemo_main()
 #endif
   writegalaxy(getparam("out"), getparam("headline"));
   free(btab);
+}
+
+void check_image(void)
+{  
+  int ix,iy,iz;
+  int nx=Nx(iptr), ny=Ny(iptr), nz=Nz(iptr);
+  real sum;
+
+  /* first get the total number in densities (mass) */
+
+  sum = 0.0;
+  for (iz=0; iz<nz; iz++)
+    for (iy=0; iy<ny; iy++)
+      for (ix=0; ix<nx; ix++)
+	sum += CubeValue(iptr,ix,iy,iz);
+  cube_aver = sum/(nx*ny*nz);
+  dprintf(0,"Average pixel value in cube: %g\n",cube_aver);
 }
 
 
@@ -120,20 +143,31 @@ void rescale_image(bool Qabs)
   }
 }
 
-void rescale_image_d(real d)
+/*
+ * rescale:  for given growth function D (D=1 if none, and <<1 (typically 1/(1+z))
+ *           rhobar = mean density
+ *
+ */
+
+void rescale_image_d(real d, real a, real rhobar)
 {  
   int ix,iy,iz;
   int nx=Nx(iptr), ny=Ny(iptr), nz=Nz(iptr);
-  real sum;
+  real sum, offset;
 
   /* first get the total number in densities (mass) */
 
   sum = 0.0;
+  offset = (1/(a*a*a)-d)*rhobar;
   for (iz=0; iz<nz; iz++)
     for (iy=0; iy<ny; iy++)
-      for (ix=0; ix<nx; ix++)
-	CubeValue(iptr,ix,iy,iz) = d*CubeValue(iptr,ix,iy,iz);
-
+      for (ix=0; ix<nx; ix++) {
+	sum += 	CubeValue(iptr,ix,iy,iz);
+	CubeValue(iptr,ix,iy,iz) = d*CubeValue(iptr,ix,iy,iz) + offset;
+      }
+  sum /= nx*ny*nz;
+  dprintf(0,"Average density before scaling=%g\n",sum);
+  dprintf(0,"Offset=%g\n",offset);
 }
 
 
@@ -220,7 +254,7 @@ void fiddle_x(void)
 	err = (Phase(bp)[0][0]-xhit)/dx;
 	if (-0.5<err && 0.5<err) nerr++;
 	Phase(bp)[0][0] = xhit;
-	mhit += 1.0;
+	mhit += cube_aver;
 	mold = mnew;
 	xold = xnew;
       }
@@ -252,7 +286,7 @@ void fiddle_y(void)
 	err = (Phase(bp)[0][1]-yhit)/dy;
 	if (-0.5<err && 0.5<err) nerr++;
 	Phase(bp)[0][1] = yhit;
-	mhit += 1.0;
+	mhit += cube_aver;
 	mold = mnew;
 	yold = ynew;
       }
@@ -285,7 +319,7 @@ void fiddle_z(void)
 	err = (Phase(bp)[0][2]-zhit)/dz;
 	if (-0.5<err && 0.5<err) nerr++;
 	Phase(bp)[0][2] = zhit;
-	mhit += 1.0;
+	mhit += cube_aver;
 	mold = mnew;
 	zold = znew;
       }
