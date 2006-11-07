@@ -40,7 +40,7 @@ string defv[] = {
   "stack=f\n			  Stack all selected snapshots?",
   "periodic=f\n                   Periodic boundary conditions for smoothing?",
   "normalize=t\n                  Normalize smoothing to conserve mass (evar)",
-  "VERSION=0.3\n		  6-nov-06 PJT",
+  "VERSION=0.3a\n		  7-nov-06 PJT",
   NULL,
 };
 
@@ -333,8 +333,13 @@ bin_data(int ivar)
 		if (Qnormalize && iter==0)
 		    norm += sfac;
 
-		if (iter==1 || !Qnormalize) {
-		  brightness =   sfac * flux * cell_factor / norm;	/* normalize */
+		if (!Qnormalize) {
+		  brightness =   sfac * flux * cell_factor;      
+		  b = brightness;
+		  if (brightness == 0.0) continue;
+		  CV(iptr) += brightness; 
+		} else if (iter==1) {
+		  brightness =   sfac * flux * cell_factor / norm;
 		  b = brightness;
 		  if (brightness == 0.0) continue;
 		  CV(iptr) += brightness; 
