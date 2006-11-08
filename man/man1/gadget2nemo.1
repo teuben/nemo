@@ -1,0 +1,48 @@
+.TH GADGET2NEMO 1NEMO "8 November 2006"
+.SH NAME
+gadget2nemo \- Convert GADGET snapshot to NEMO snapshot
+.SH SYNOPSIS
+\fBgadget2nemo\fP [parameter=value]
+.SH DESCRIPTION
+No description available. This manual page was created by mkman
+.PP
+This program is currently to be preferred over \fIgadgetsnap(1NEMO)\fP.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+GADGET input [???]     
+.TP 20
+\fBout=\fP
+NEMO output [???]     
+.TP 20
+\fBstep=\fP
+keep one particle over step [1]  
+.TP 20
+\fBcomp=\fP
+component requested to be saved [mxv]  
+.TP 20
+\fBsort=\fP
+sort particles by their Ids [t]  
+.TP 20
+\fBfiles=\fP
+#input gadget files [1]    
+.TP 20
+\fBswap=\fP
+#swap data from/to little/big endian [f]  
+.TP 20
+\fBVERSION=\fP
+22-Jun-2005 - JCL [2.0]    
+.SH EXAMPLES
+.SH SEE ALSO
+nemo2gadget(1NEMO),gadgetsnap(1NEMO)
+.SH FILES
+src/nbody/io/gadget
+.SH AUTHOR
+Jean-Charles Lambert
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+08-Nov-06	V0.0 Created by mkman	NEMO
+.fi
