@@ -31,8 +31,10 @@ string defv[] = {	/* DEFAULT INPUT PARAMETERS */
   "absrho=t\n     Is map absolute density or relative d(rho)/rho?",
   "sigma=0\n      Also perturb distances by gaussian sigma",
   "seed=0\n       Initial seed",
+  "rejection=f\n  Use rejection technique to seed the 'grid'",
+  "nbody=\n       Use this instead of NX*NY*NZ if rejection is used",
   "headline=\n    Random verbiage",
-  "VERSION=0.4\n  7-nov-06 PJT",
+  "VERSION=0.5\n  9-nov-06 PJT",
   NULL,
 };
 
@@ -43,7 +45,7 @@ string cvsid="$Id$";
 local Body *btab;
 local int nbody;
 local real sigma;
-local real cube_aver;
+local real cube_aver, cube_max;
 
 local imageptr iptr=NULL;
 
@@ -52,9 +54,9 @@ extern double xrandom(double,double), grandom(double,double);
 void check_image(void);
 void rescale_image(bool Qabs);
 void rescale_image_d(real d, real a, real rb);
-void writegalaxy(string name, string headline);
-void mkcube(void);
-void fiddle_x(void),  fiddle_y(void),  fiddle_z(void);
+void write_snap(string name, string headline);
+void mkcube(void), mkcube_reject(void);
+void fiddle_x(void),  fiddle_y(void),  fiddle_z(void), drifter(void);
 
 void nemo_main()
 {
@@ -62,19 +64,21 @@ void nemo_main()
   stream instr;
   real z = getdparam("z");
   bool Qabs = getbparam("absrho");
+  bool Qreject = getbparam("rejection");
 
   instr = stropen (getparam("in"),"r");
   read_image(instr,&iptr); 
   strclose(instr);      
   dprintf(0,"MinMax = %g %g \n",MapMin(iptr),MapMax(iptr));
 
-  check_image();
-
   if (hasvalue("D") && hasvalue("rhob") && hasvalue("a"))
     rescale_image_d(getdparam("D"), getdparam("a"), getdparam("rhob"));
   else {
     warning("Currently program needs D= a= and rhob=; doing no scaling now");
   }
+  check_image();
+
+
   
   if (Nx(iptr) != Ny(iptr) || Nx(iptr) != Nz(iptr))
     warning("Input data is not a cube: %d x %d x %d",Nx(iptr),Ny(iptr),Nz(iptr));
@@ -83,15 +87,19 @@ void nemo_main()
   sigma = getdparam("sigma");
   seed = init_xrandom(getparam("seed"));
   
-  mkcube();
-#if 1
-  fiddle_x();
-  fiddle_y();
-  fiddle_z();
-#else
-  fiddle_z();
-#endif
-  writegalaxy(getparam("out"), getparam("headline"));
+  if (Qreject) {
+    if (hasvalue("nbody")) nbody = getiparam("nbody");
+    mkcube_reject();
+  } else {
+    mkcube();
+
+    fiddle_x();
+    fiddle_y();
+    fiddle_z();
+    drifter();
+  }
+
+  write_snap(getparam("out"), getparam("headline"));
   free(btab);
 }
 
@@ -99,17 +107,22 @@ void check_image(void)
 {  
   int ix,iy,iz;
   int nx=Nx(iptr), ny=Ny(iptr), nz=Nz(iptr);
-  real sum;
+  real sum, cmax;
 
   /* first get the total number in densities (mass) */
 
   sum = 0.0;
+  cmax = CubeValue(iptr,0,0,0);
   for (iz=0; iz<nz; iz++)
     for (iy=0; iy<ny; iy++)
-      for (ix=0; ix<nx; ix++)
+      for (ix=0; ix<nx; ix++) {
 	sum += CubeValue(iptr,ix,iy,iz);
+	if (cmax < CubeValue(iptr,ix,iy,iz)) cmax = CubeValue(iptr,ix,iy,iz);
+      }
   cube_aver = sum/(nx*ny*nz);
+  cube_max  = cmax;
   dprintf(0,"Average pixel value in cube: %g\n",cube_aver);
+  dprintf(0,"Max pixel value in cube: %g\n",cube_max);
 }
 
 
@@ -175,7 +188,7 @@ void rescale_image_d(real d, real a, real rhobar)
  * WRITEGALAXY: write galaxy model to output.
  */
 
-void writegalaxy(string name, string headline)
+void write_snap(string name, string headline)
 {
   stream outstr;
   real tsnap = 0.0;
@@ -220,6 +233,53 @@ void mkcube(void)
       }
 }
 
+void mkcube_reject(void)
+{
+  Body *bp;
+  real x,y,z,v,mass_i;
+  int ix,iy,iz, redo=0;
+  real xmin, xmax, ymin, ymax, zmin, zmax;
+
+  warning("using rejection to create a cube"); 
+
+  bp = btab = (Body *) allocate(nbody * sizeof(Body));
+  mass_i = 1.0/nbody;
+
+  xmin = Xmin(iptr) - 0.5*Dx(iptr);
+  xmax = xmin       + Nx(iptr)*Dx(iptr);
+  ymin = Ymin(iptr) - 0.5*Dy(iptr);
+  ymax = ymin       + Ny(iptr)*Dy(iptr);
+  zmin = Zmin(iptr) - 0.5*Dz(iptr);
+  zmax = zmin       + Nz(iptr)*Dz(iptr);
+
+  for (bp=btab; bp<btab+nbody; bp++) {
+    Mass(bp) = mass_i;
+    while(1) {
+      x = xrandom(xmin,xmax);
+      y = xrandom(ymin,ymax);
+      z = xrandom(zmin,zmax);
+      ix = floor((x-xmin)/Dx(iptr));
+      iy = floor((y-ymin)/Dy(iptr));
+      iz = floor((z-zmin)/Dz(iptr));
+      v = xrandom(0,cube_max);
+      if (v<CubeValue(iptr,ix,iy,iz)) break;
+      redo++;
+    }
+    Phase(bp)[0][0] = x;
+    Phase(bp)[0][1] = y;
+    Phase(bp)[0][2] = z;
+    Phase(bp)[1][0] = 0.0;
+    Phase(bp)[1][1] = 0.0;
+    Phase(bp)[1][2] = 0.0;
+    if (sigma > 0) {
+      Phase(bp)[0][0] += grandom(0.0,sigma);
+      Phase(bp)[0][1] += grandom(0.0,sigma);
+      Phase(bp)[0][2] += grandom(0.0,sigma);
+    }
+  }
+  dprintf(0,"Redrawn %d times for %d particles\n",redo,nbody);
+
+}
 
 /* 
  * fiddle_x: sweep in X and accumulate mass as such, re-adjust
@@ -248,11 +308,15 @@ void fiddle_x(void)
 	mnew = mold + CubeValue(iptr,ix,iy,iz);
 	xnew = xold + dx;
 	xhit = xold + dx*(mhit-mold)/(mnew-mold);
-	dprintf(1,"X: %d %d %d -> xold=%g xhit=%g\n",ix,iy,iz,xold,xhit);
 	i = ix + ny*(iy+nz*iz);
 	bp = btab + i;
 	err = (Phase(bp)[0][0]-xhit)/dx;
-	if (-0.5<err && 0.5<err) nerr++;
+	if (err<-0.5 || err>0.5) {
+	  dprintf(1,"X: %d %d %d -> xold=%g xhit=%g   ****\n",ix,iy,iz,xold,xhit);
+	  nerr++;
+	} else {
+	  dprintf(1,"X: %d %d %d -> xold=%g xhit=%g\n",ix,iy,iz,xold,xhit);
+	}
 	Phase(bp)[0][0] = xhit;
 	mhit += cube_aver;
 	mold = mnew;
@@ -284,7 +348,7 @@ void fiddle_y(void)
 	i = ix + ny*(iy+nz*iz);
 	bp = btab + i;
 	err = (Phase(bp)[0][1]-yhit)/dy;
-	if (-0.5<err && 0.5<err) nerr++;
+	if (err<-0.5 || err>0.5) nerr++;
 	Phase(bp)[0][1] = yhit;
 	mhit += cube_aver;
 	mold = mnew;
@@ -317,7 +381,7 @@ void fiddle_z(void)
 	i = ix + ny*(iy+nz*iz);
 	bp = btab + i;
 	err = (Phase(bp)[0][2]-zhit)/dz;
-	if (-0.5<err && 0.5<err) nerr++;
+	if (err<-0.5 || err>0.5) nerr++;
 	Phase(bp)[0][2] = zhit;
 	mhit += cube_aver;
 	mold = mnew;
@@ -326,4 +390,9 @@ void fiddle_z(void)
     }
   }
   if (nerr) warning("Found %d non-linear deviations in Z",nerr);
+}
+
+void drifter(void)
+{
+  warning("no drifting done yet");
 }
