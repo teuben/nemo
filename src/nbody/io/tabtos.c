@@ -36,6 +36,7 @@
  *      28-may-03       i   allow 'm' also for 'mass', also allow - for skip  pjt
  *      21-sep-03       j   fixed bug in calling nemo_file_lines              pjt
  *      29-jul-05   V1.4    added auto-incrementing time option (Amsterdam, cafe amaricain) pjt
+ *      14-nov-06   V1.5    add first # comments to the NEMO output history.
  */
 
 #include <stdinc.h>
@@ -67,7 +68,7 @@ string defv[] = {
     "options=\n    Other processing options (scan|comment|wrap|spill|time)",
     "nskip=0\n     Number of lines skipped before each (header+block1+...)",
     "headline=\n   Random mumblage for humans",
-    "VERSION=1.4\n 29-jul-05 PJT",
+    "VERSION=1.5\n 14-nov-06 PJT",
     NULL,
 };
 
@@ -77,6 +78,7 @@ string usage = "convert ASCII tabular information to snapshot format";
 #define MAXLINE  1024
 #define MAXTIMES 1024
 #define MAXVALS    32
+#define MAXHIST   128
 
 local stream instr, outstr;
 
@@ -97,7 +99,11 @@ local int ntimes=0;
 local int nskip=0;
 local int linecnt=0;
 local int snapcnt=0;
-local bool scan, comment, wrap, spill, auto_time;
+local bool scan, wrap, spill, auto_time, Qhis, Qcom;
+
+
+local int nhist = 0;
+local string shist[MAXHIST];
 
 /* extern's */
 extern string *burststring(string, string);
@@ -149,7 +155,6 @@ void nemo_main(void)
     
     outstr = stropen(getparam("out"), "w");
     if (hasvalue("headline")) set_headline(getparam("headline"));
-    put_history(outstr);
 
     while (get_header()) {	/* loop reading snapshots */
         snapcnt++;
@@ -187,10 +192,16 @@ void nemo_main(void)
 		break;
 	    }
         }
-        if (ok)
-            put_snap(outstr, &btab, &nbody, &tsnap, &bits);	      /* output */
-        else
-            break;
+        if (ok) {
+	  if (nhist > 0) {
+	    for (i=0; i<nhist; i++)
+	      app_history(shist[i]);
+	    nhist = 0;
+	  }
+	  put_history(outstr);
+	  put_snap(outstr, &btab, &nbody, &tsnap, &bits);	      /* output */
+        } else
+	  break;
         if (ntimes > 0 && snapcnt == ntimes) break;
     }
     strclose(outstr);
@@ -205,10 +216,12 @@ void check_options(void)
 
     options=getparam("options");
     scan = scanopt(options,"scan");
-    comment = scanopt(options,"comment");
+    Qcom = scanopt(options,"comment");
     wrap = scanopt(options,"wrap");
     spill = scanopt(options,"spill");
     auto_time = scanopt(options,"time");
+    Qhis = scanopt(options,"history");
+    if (Qhis) Qcom = TRUE;
 
     nskip = getiparam("nskip");
 }
@@ -330,32 +343,46 @@ local bool get_block(int id,string options)
     
     for (j=0, nvals=0, bp=btab; j<nbody; j++, bp++) {
     	while (nvals < need) {
+
+	  do {
             if (fgets(line, MAXLINE, instr) == NULL) {
-                if (j==0 && nvals==0) {
-                	warning("Block %d: line %d nvals=0",id,linecnt);
-			return FALSE;
+	      if (j==0 && nvals==0) {
+		warning("Block %d: line %d nvals=0",id,linecnt);
+		return FALSE;
+	      }
+	      error("process(%s): unexpected EOF for particle %d",options,j+1);
+	      /* in case error is bypassed: reset nbody */
+	      nbody = j;
+	      warning("Resetting nbody=%d",nbody);
+	      return TRUE;
+            } else {
+	      if (Qcom && line[0]=='#') {
+		dprintf(1,"COMMENT1: %s",line);
+		if (Qhis) {
+		  if (line[strlen(line)-1] == '\n') line[strlen(line)-1] = 0;        
+		  shist[nhist++] = strdup(&line[1]);
 		}
-                error("process(%s): unexpected EOF for particle %d",options,j+1);
-                /* in case error is bypassed: reset nbody */
-                nbody = j;
-                warning("Resetting nbody=%d",nbody);
-                return TRUE;
-            }
-            linecnt++;
-            if (line[strlen(line)-1] == '\n') line[strlen(line)-1] = 0;
+		continue;
+	      } else
+		break;
+	    }
+	  } while(line[0]=='#');    /* read until EOF or non-comment lines */
+
+	  linecnt++;
+	  if (line[strlen(line)-1] == '\n') line[strlen(line)-1] = 0;
 #if 0            
-            if (skip) continue;
+	  if (skip) continue;
 #else
-	    if (skip) break;            
+	  if (skip) break;            
 #endif            
-            if (comment) if (line[0] == '#') continue;
-	    tab2space(line);
-	    ngot = nemoinpd(line,&dvals[nvals],MAXVALS-nvals);
-            if (ngot < 0)
-                error("(%d) Line %d Parsing %s",ngot,linecnt,line);
-	    else
-	        nvals += ngot;
-            if (!wrap) break;
+	  if (Qcom) if (line[0] == '#') continue;
+	  tab2space(line);
+	  ngot = nemoinpd(line,&dvals[nvals],MAXVALS-nvals);
+	  if (ngot < 0)
+	    error("(%d) Line %d Parsing %s",ngot,linecnt,line);
+	  else
+	    nvals += ngot;
+	  if (!wrap) break;
         }
         if (skip) continue;
         if (nvals > need) {
@@ -367,7 +394,17 @@ local bool get_block(int id,string options)
                 nvals = 0;
         } else if (nvals < need) {
 	  dprintf(0," bad line:%s\n",line);
-          fgets(line, MAXLINE, instr);
+	  do {
+	    fgets(line, MAXLINE, instr);
+	    if (Qcom && line[0]=='#') {
+	      dprintf(0,"COMMENT2: %s",line);
+	      if (Qhis) {
+		if (line[strlen(line)-1] == '\n') line[strlen(line)-1] = 0;        
+		shist[nhist++] = strdup(&line[1]);
+	      }
+	    }
+	  } while (line[0] == '#');
+	      
 	  dprintf(0,"next line:%s\n",line);
             error("Bad line %d (%d) Not enough values (need %d for %s) - try wrap",
                           linecnt,nvals,need,options);
@@ -417,17 +454,29 @@ local int get_double(int n, double *d)
     int i, k=0;
     char line[MAXLINE];
     while (k<n) {
+      do {
         if (fgets(line, MAXLINE, instr) == NULL) {
-            if (k==0) return 0;
-            warning("Unexpected EOF in header for snapshot %d",snapcnt+1);
-            return k;
-        }
-        if (line[strlen(line)-1] == '\n') line[strlen(line)-1] = 0;        
-        tab2space(line);
-        i = nemoinpd(line,&d[k],n-k);
-        if (i==0) return k;
-        if (i<0) error("(%d) Error parsing %s",i,line);
-        k += i;
+	  if (k==0) return 0;
+	  warning("Unexpected EOF in header for snapshot %d",snapcnt+1);
+	  return k;
+        } else {
+	  if (Qcom && line[0]=='#') {
+	    dprintf(0,"COMMENT3: %s\n",line);
+	    if (Qhis) {
+	      if (line[strlen(line)-1] == '\n') line[strlen(line)-1] = 0;        
+	      shist[nhist++] = strdup(&line[1]);
+	    }
+	    continue;
+	  } else
+	    break;
+	}
+      } while(line[0]=='#');    /* read until EOF or non-comment line */
+      if (line[strlen(line)-1] == '\n') line[strlen(line)-1] = 0;        
+      tab2space(line);
+      i = nemoinpd(line,&d[k],n-k);
+      if (i==0) return k;
+      if (i<0) error("(%d) Error parsing %s",i,line);
+      k += i;
     }
     return k;
 #else
@@ -482,6 +531,7 @@ void do_scan(stream instr)
     string *sp;
     int ncol, ncol_old=-1;
 
+    warning("Scanning....");
     dprintf(0,"Line\t#Columns\n");
     while (fgets(line, MAXLINE, instr) != NULL) {
         linecnt++;
