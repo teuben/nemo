@@ -1,4 +1,4 @@
-.TH NEMOINP 1NEMO "4 March 2003"
+.TH NEMOINP 1NEMO "14 November  2006"
 .SH NAME
 nemoinp \- parse a user supplied number string
 .SH SYNOPSIS
@@ -69,6 +69,7 @@ tabmath(1NEMO), nemoinp(3NEMO), getrange(3NEMO)
    set n=20	            a C-shell variable
    nemoinp 2:${n}:4         as before, now using a shell variable
    nemoinp 2::4             repeat the value 4 times
+   nemoinp 'iflt(1,2,3,4)'  print 3, not 4, because 1 is less than 1
 .SH AUTHOR
 Peter Teuben
 .SH "UPDATE HISTORY"
