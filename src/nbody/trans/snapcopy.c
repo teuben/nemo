@@ -7,6 +7,7 @@
  *	25-mar-97	   c    minor fix SINGLEPREC
  *       1-apr-01          d    compiler warning
  *      13-feb-04       V1.1f    silenced more compiler warnings (shetty bug?)
+ *      15-nov-06        1.2    set time to 0 if it was absent     PJT/AP
  *
  *	BUG: should optionally copy other sets within the snapshot
  *	     set, e.g. diagnostics and story
@@ -32,11 +33,14 @@ string defv[] = {
     "times=all\n        Times to select",
     "precision=double\n Precision of results to store (double/single) [unused]",
     "keep=all\n         Items to copy in snapshot",
-    "VERSION=1.1g\n     20-feb-04 PJT",
+    "VERSION=1.2\n      20-feb-04 PJT",
     NULL,
 };
 
 string usage="copy an N-body snapshot";
+
+string cvsid="$Id$";
+
 
 #define TIMEFUZZ	0.0001	/* tolerance in time comparisons */
 
@@ -93,9 +97,11 @@ void nemo_main(void)
 	    continue;       /* just skip */
         }
         				/* do some initial output */
-        if ((bitsi & TimeBit) == 0)	/* if not time flag */
+        if ((bitsi & TimeBit) == 0) {	/* if not time flag */
         	tsnap = 0.0;		/* set time to zero */
-        else if (!streq(times,"all") && !within(tsnap, times, TIMEFUZZ))
+		bitsi |= TimeBit;
+		warning("time reset to 0");
+        } else if (!streq(times,"all") && !within(tsnap, times, TIMEFUZZ))
         	continue;		/* now skip this snapshot */
         if (bitsi & KeyBit)
             dprintf(0,"Warning: Keyfield reinitialized\n");
