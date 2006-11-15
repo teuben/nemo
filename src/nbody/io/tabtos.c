@@ -68,11 +68,13 @@ string defv[] = {
     "options=\n    Other processing options (scan|comment|wrap|spill|time)",
     "nskip=0\n     Number of lines skipped before each (header+block1+...)",
     "headline=\n   Random mumblage for humans",
-    "VERSION=1.5\n 14-nov-06 PJT",
+    "VERSION=1.5a\n 15-nov-06 PJT",
     NULL,
 };
 
 string usage = "convert ASCII tabular information to snapshot format";
+
+string cvsid = "$Id$";
 
 
 #define MAXLINE  1024
@@ -360,7 +362,7 @@ local bool get_block(int id,string options)
 		dprintf(1,"COMMENT1: %s",line);
 		if (Qhis) {
 		  if (line[strlen(line)-1] == '\n') line[strlen(line)-1] = 0;        
-		  shist[nhist++] = strdup(&line[1]);
+		  shist[nhist++] = strdup(line);
 		}
 		continue;
 	      } else
@@ -400,7 +402,7 @@ local bool get_block(int id,string options)
 	      dprintf(0,"COMMENT2: %s",line);
 	      if (Qhis) {
 		if (line[strlen(line)-1] == '\n') line[strlen(line)-1] = 0;        
-		shist[nhist++] = strdup(&line[1]);
+		shist[nhist++] = strdup(line);
 	      }
 	    }
 	  } while (line[0] == '#');
@@ -464,7 +466,7 @@ local int get_double(int n, double *d)
 	    dprintf(0,"COMMENT3: %s\n",line);
 	    if (Qhis) {
 	      if (line[strlen(line)-1] == '\n') line[strlen(line)-1] = 0;        
-	      shist[nhist++] = strdup(&line[1]);
+	      shist[nhist++] = strdup(line);
 	    }
 	    continue;
 	  } else
