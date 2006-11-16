@@ -40,7 +40,7 @@ string defv[] = {
   "stack=f\n			  Stack all selected snapshots?",
   "periodic=f\n                   Periodic boundary conditions for smoothing?",
   "normalize=t\n                  Normalize smoothing to conserve mass (evar)",
-  "VERSION=0.3a\n		  7-nov-06 PJT",
+  "VERSION=0.4\n		  16-nov-06 PJT",
   NULL,
 };
 
@@ -87,7 +87,6 @@ local bool   Qnormalize;                /* normalize flux */
 
 extern string  *burststring(string,string);
 extern rproc   btrtrans(string);
-
 
 local void setparams(void);
 local void compfuncs(void);
@@ -270,6 +269,7 @@ bin_data(int ivar)
     emax = 10.0;     /* sqrt(2*emax) is the number of sigma's we into the gaussian to cutoff*/
 
     for (i=0, bp=btab; i<nobj; i++, bp++) { /* big loop: walk particles and accumulate */
+        progress(1.0,"Smoothing particle %d/%d", i,nobj);
         x = xfunc(bp,tnow,i);           /* get X,Y,Z */
 	y = yfunc(bp,tnow,i);
         z = zfunc(bp,tnow,i);
@@ -294,7 +294,7 @@ bin_data(int ivar)
         }
 
 	norm = 0.0;
-	for (iter=0; iter<2; iter++) {
+	for (iter=0; iter<2; iter++) {    /* need 2 iters for normalizing */
 	  for (m=0; m<mmax; m++) {        /* loop over smoothing area - increasing m */
             done = TRUE;
             for (iz1=-m; iz1<=m; iz1++) 
