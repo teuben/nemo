@@ -269,6 +269,7 @@ LeapFrogCode::LeapFrogCode(int h, const ForceAndDiagnose *F,
   set_time_derivs(1,1,0.);                         // eg: a = F(x,w)            
   finish_diagnose();                               // finish diagnosis          
   add_to_cpu_step();                               // record CPU time           
+  debug_info(4,"LeapFrogCode constructed\n");
 }
 //------------------------------------------------------------------------------
 void LeapFrogCode::account_new() const {
@@ -402,6 +403,7 @@ BlockStepCode::BlockStepCode(int h0,               // I: h0, tau_max = 2^-h0
   assign_levels();                                 // get bodies into levels    
   finish_diagnose();                               // finish diagnosis          
   add_to_cpu_step();                               // record CPU time           
+  debug_info(4,"BlockStepCode constructed\n");
 }
 ////////////////////////////////////////////////////////////////////////////////
 namespace falcON {
@@ -466,6 +468,7 @@ NBodyCode::NBodyCode(// data input
   if(!got.contain(read))                           // IF some data missing      
     falcON_THROW("NBodyCode: couldn't read body data: %s",
 		 word(got.missing(read)));
+  debug_info(4,"NBodyCode constructed\n");
 }
 //------------------------------------------------------------------------------
 void NBodyCode::init(const ForceAndDiagnose         *FS,
@@ -475,6 +478,7 @@ void NBodyCode::init(const ForceAndDiagnose         *FS,
 		     fieldset p, fieldset k, fieldset r,
 		     fieldset P, fieldset K, fieldset R) falcON_THROWING
 {
+  debug_info(5,"NBodyCode::init(): called ... \n");
   try {
     if(FS->acc_ext()) SHOT.add_fields(fieldset::q);
     if(Nlev <= 1 || St == 0)
@@ -485,7 +489,11 @@ void NBodyCode::init(const ForceAndDiagnose         *FS,
 	( new BlockStepCode(hmin+1-Nlev,Nlev,FS,St,p,k,r,P,K,R,
 			    int(1+std::log10(double(SHOT.N_bodies())))) );
    
-  } catch(falcON::exception E) { falcON_RETHROW(E); }
+  } catch(falcON::exception E) {
+    debug_info(2,"NBodyCode::init(): caught error \"%s\"\n",E.text());
+    falcON_RETHROW(E);
+  }
+  debug_info(4,"NBodyCode::init(): done\n");
 }
 #endif // falcON_NEMO
 ////////////////////////////////////////////////////////////////////////////////
@@ -733,6 +741,7 @@ ForceALCON::ForceALCON(snapshot          *s,       // I: snapshot: time & bodies
 #else
   reset_softening(ke,e);
 #endif
+  debug_info(4,"ForceALCON constructed\n");
 }
 //------------------------------------------------------------------------------
 void ForceALCON::set_tree_and_forces(bool all, bool build_tree) const

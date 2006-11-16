@@ -981,6 +981,7 @@ namespace falcON {
     //--------------------------------------------------------------------------
     virtual void setforces (bool all, bool, double) const {
       set_tree_and_forces(all,false);
+      debug_info(5,"ForceALCON::setforces(): done\n");
     }
     virtual void diagnose  () const { ForceDiagGrav::diagnose_full(); }
     //--------------------------------------------------------------------------
