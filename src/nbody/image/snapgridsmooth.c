@@ -269,7 +269,7 @@ bin_data(int ivar)
     emax = 10.0;     /* sqrt(2*emax) is the number of sigma's we into the gaussian to cutoff*/
 
     for (i=0, bp=btab; i<nobj; i++, bp++) { /* big loop: walk particles and accumulate */
-        progress(1.0,"Smoothing particle %d/%d", i,nobj);
+      progress(1.0,"Smoothing particle %d/%d %2.0f%% done", i,nobj, 100*i/(double)nobj);
         x = xfunc(bp,tnow,i);           /* get X,Y,Z */
 	y = yfunc(bp,tnow,i);
         z = zfunc(bp,tnow,i);
