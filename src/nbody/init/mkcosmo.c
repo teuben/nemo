@@ -3,6 +3,7 @@
  *	
  *	 1-nov-06  V0.1  Created     - Peter Teuben / Ed Shaya
  *       7-nov-06  V0.4  add rhob=, a=
+ *      16-nov-06  V0.6  new fiddling for some good runs!   Alan Peel
  *
  * todo:
  *  - first point is always 0,0,0
@@ -34,7 +35,7 @@ string defv[] = {	/* DEFAULT INPUT PARAMETERS */
   "rejection=f\n  Use rejection technique to seed the 'grid'",
   "nbody=\n       Use this instead of NX*NY*NZ if rejection is used",
   "headline=\n    Random verbiage",
-  "VERSION=0.5\n  9-nov-06 PJT",
+  "VERSION=0.6\n  16-nov-06 PJT",
   NULL,
 };
 
@@ -107,22 +108,27 @@ void check_image(void)
 {  
   int ix,iy,iz;
   int nx=Nx(iptr), ny=Ny(iptr), nz=Nz(iptr);
-  real sum, cmax;
+  real sum, cmax, cmin;
 
   /* first get the total number in densities (mass) */
 
   sum = 0.0;
   cmax = CubeValue(iptr,0,0,0);
+  cmin = CubeValue(iptr,0,0,0);
   for (iz=0; iz<nz; iz++)
     for (iy=0; iy<ny; iy++)
       for (ix=0; ix<nx; ix++) {
 	sum += CubeValue(iptr,ix,iy,iz);
 	if (cmax < CubeValue(iptr,ix,iy,iz)) cmax = CubeValue(iptr,ix,iy,iz);
+	if (cmin > CubeValue(iptr,ix,iy,iz)) cmin = CubeValue(iptr,ix,iy,iz);
       }
-  cube_aver = sum/(nx*ny*nz);
+  dprintf(0,"Min pixel value in cube: %g\n",cmin);
+  dprintf(0,"Max pixel value in cube: %g\n",cmax);
+  dprintf(0,"Sum of pixel values in cube: %g\n",sum);
+
   cube_max  = cmax;
+  cube_aver = sum/(nx*ny*nz);
   dprintf(0,"Average pixel value in cube: %g\n",cube_aver);
-  dprintf(0,"Max pixel value in cube: %g\n",cube_max);
 }
 
 
@@ -290,7 +296,6 @@ void mkcube_reject(void)
  * fiddle_z: --same, but then in z--
  */
 
-
 void fiddle_x(void)
 {
   int ix,iy,iz,i,nerr=0;
@@ -305,22 +310,34 @@ void fiddle_x(void)
     for (iy=0; iy<ny; iy++) {
       xold = Xmin(iptr);
       for (ix=0; ix<nx; ix++) {
-	mnew = mold + CubeValue(iptr,ix,iy,iz);
-	xnew = xold + dx;
-	xhit = xold + dx*(mhit-mold)/(mnew-mold);
+	/*	mnew = mold + CubeValue(iptr,ix,iy,iz);
+		xnew = xold + dx;
+		xhit = xold + dx*(mhit-mold)/(mnew-mold);
+		dprintf(1,"Y: %d %d %d -> yold=%g yhit=%g\n",ix,iy,iz,yold,yhit);*/
 	i = ix + ny*(iy+nz*iz);
 	bp = btab + i;
-	err = (Phase(bp)[0][0]-xhit)/dx;
+	/*	err = (Phase(bp)[0][0]-xhit)/dx;
 	if (err<-0.5 || err>0.5) {
 	  dprintf(1,"X: %d %d %d -> xold=%g xhit=%g   ****\n",ix,iy,iz,xold,xhit);
 	  nerr++;
 	} else {
 	  dprintf(1,"X: %d %d %d -> xold=%g xhit=%g\n",ix,iy,iz,xold,xhit);
+	  }*/
+	dx = Dx(iptr)*cube_aver/CubeValue(iptr,ix,iy,iz);
+	if(ix==0){
+	  xhit = xold + (Dx(iptr)-dx);
+	  xnew = xold;
 	}
+	else {
+	  xhit = xold + dx;
+	  xnew = xnew + Dx(iptr);
+	}
+	//       	printf("X: %d %d %d -> xcrystal=%g xhit=%g dx=%g drho/rho=%g ****\n",ix,iy,iz,xnew,xhit,dx, (CubeValue(iptr,ix,iy,iz)-cube_aver)/cube_aver);
 	Phase(bp)[0][0] = xhit;
-	mhit += cube_aver;
+	xold = xhit;
+	/*	mhit += cube_aver;
 	mold = mnew;
-	xold = xnew;
+	xold = xnew;*/
       }
     }
   }
@@ -341,18 +358,28 @@ void fiddle_y(void)
     for (iz=0; iz<nz; iz++) {
       yold = Ymin(iptr);
       for (iy=0; iy<ny; iy++) {
-	mnew = mold + CubeValue(iptr,ix,iy,iz);
-	ynew = yold + dy;
-	yhit = yold + dy*(mhit-mold)/(mnew-mold);
-	dprintf(1,"Y: %d %d %d -> yold=%g yhit=%g\n",ix,iy,iz,yold,yhit);
+	/*	mnew = mold + CubeValue(iptr,ix,iy,iz);
+		ynew = yold + dy;
+		yhit = yold + dy*(mhit-mold)/(mnew-mold);
+		dprintf(1,"Y: %d %d %d -> yold=%g yhit=%g\n",ix,iy,iz,yold,yhit);*/
 	i = ix + ny*(iy+nz*iz);
 	bp = btab + i;
-	err = (Phase(bp)[0][1]-yhit)/dy;
-	if (err<-0.5 || err>0.5) nerr++;
+	/*	err = (Phase(bp)[0][1]-yhit)/dy;
+		if (err<-0.5 || err>0.5) nerr++;*/
+	dy = Dy(iptr)*cube_aver/CubeValue(iptr,ix,iy,iz);
+	if(iy==0){
+	  yhit = yold + (Dy(iptr)-dy);
+	  ynew = yold;
+	}
+	else {
+	  yhit = yold + dy;
+	  ynew = ynew + Dy(iptr);
+	}
 	Phase(bp)[0][1] = yhit;
-	mhit += cube_aver;
+	yold = yhit;
+	/*	mhit += cube_aver;
 	mold = mnew;
-	yold = ynew;
+	yold = ynew;*/
       }
     }
   }
@@ -374,18 +401,28 @@ void fiddle_z(void)
     for (ix=0; ix<nx; ix++) {
       zold = Zmin(iptr);
       for (iz=0; iz<nz; iz++) {
-	mnew = mold + CubeValue(iptr,ix,iy,iz);
-	znew = zold + dz;
-	zhit = zold + dz*(mhit-mold)/(mnew-mold);
-	dprintf(1,"Z: %d %d %d -> zold=%g zhit=%g\n",ix,iy,iz,zold,zhit);
+	/*	mnew = mold + CubeValue(iptr,ix,iy,iz);
+		znew = zold + dz;
+		zhit = zold + dz*(mhit-mold)/(mnew-mold);
+		dprintf(1,"Z: %d %d %d -> zold=%g zhit=%g\n",ix,iy,iz,zold,zhit);*/
 	i = ix + ny*(iy+nz*iz);
 	bp = btab + i;
-	err = (Phase(bp)[0][2]-zhit)/dz;
-	if (err<-0.5 || err>0.5) nerr++;
+	/*	err = (Phase(bp)[0][2]-zhit)/dz;
+		if (err<-0.5 || err>0.5) nerr++; */
+	dz = Dz(iptr)*cube_aver/CubeValue(iptr,ix,iy,iz);
+	if(iz==0){
+	  zhit = zold + (Dz(iptr)-dz);
+	  znew = zold;
+	}
+	else {
+	  zhit = zold + dz;
+	  znew = znew + Dz(iptr);
+	}
 	Phase(bp)[0][2] = zhit;
-	mhit += cube_aver;
+	zold = zhit;
+	/*	mhit += cube_aver;
 	mold = mnew;
-	zold = znew;
+	zold = znew;*/
       }
     }
   }
