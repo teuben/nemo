@@ -14,6 +14,8 @@
 static int bypass = -1;
 static double cpu0;
 
+extern double cputime(void);
+
 int progress(double dtime, string fmt, ...)
 {
     va_list ap;
@@ -21,6 +23,7 @@ int progress(double dtime, string fmt, ...)
     double cpu1;
 
     if (bypass < 0) {                /* initialize a few things */
+      dprintf(0,"Progress bar initialized; dtime=%g cpu0=%g\n",dtime,cpu0);
       if (isatty(fileno(stderr)))
 	bypass = 0;
       else
@@ -31,8 +34,9 @@ int progress(double dtime, string fmt, ...)
 
     if (dtime > 0) {
       cpu1 = cputime()*60.0;
+      dprintf(1,"check: %g %g\n",cpu0,cpu1);
       if (cpu1-cpu0 < dtime) return 0;
-      cpu1 = cpu0;
+      cpu0 = cpu1;
     }
     if (fmt==0 || *fmt==0) return 1;
 
