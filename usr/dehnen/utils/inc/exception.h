@@ -197,8 +197,9 @@ namespace WDutils {
     /// return C-style string
     const char*text() const { return c_str(); }
     /// return C-style string
-    friend const char*text(exception const&e) { return e.text(); }
+    friend const char*text(exception const&);
   };
+  inline const char*text(exception const&e) { return e.text(); }
 
   // ///////////////////////////////////////////////////////////////////////////
   ///                                                                           
