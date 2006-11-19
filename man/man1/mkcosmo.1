@@ -1,4 +1,4 @@
-.TH MKCOSMO 1NEMO "7 November 2006"
+.TH MKCOSMO 1NEMO "19 November 2006"
 .SH NAME
 mkcosmo \- create a cosmology cube of equal mass particles
 .SH SYNOPSIS
@@ -13,6 +13,9 @@ Note that this routine will only work in the linear regime when the fluctuations
 are very small, resulting in small perturbations from the central location in
 a cell. The code will warn when a particle falls outside the cell boundary,
 but otherwise happily allow that.
+.PP
+This program is currently under development, features change on an almost daily
+basis and the manual page can easily be out of sync with the program itself
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -50,6 +53,16 @@ used for cosmology. Default: 0
 Initial seed 
 [0]
 .TP
+\fBdensity=t|f\fP
+Use density map to make an exact lattice grid (under TEST) 
+.TP
+\fBrejection=t|f\fP
+Use rejection technique to seed the 'grid'. This will generally result 
+in a very noisy distribution, unsuitable for cosmological initial conditions.
+.TP
+\fBnbody=\fP
+Use this number instead of NX*NY*NZ if rejection is used.  
+.TP
 \fBheadline=\fP
 Random verbiage added to output snapshot.
 .SH EXAMPLES
@@ -66,12 +79,16 @@ The code assumes in a few places that the cube is really a cube with equal sizes
 .SH SEE ALSO
 mkcube(1NEMO), ccdmath(1NEMO), image(5NEMO), snapshot(5NEMO)
 .PP
+grafics and cosmics (Ed Bertschinger's programs)
 .SH FILES
 src/nbody/init/mkcosmo.c	-- source
 .SH AUTHOR
-Peter Teuben
+Peter Teuben, Ed Shaya, Alan Peel
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
 1-Nov-06	V0.1 Created	Peter Teuben/Ed Shaya
+9-nov-06	V0.5 added rhob=, a=, rejection=, nbody=	PJT
+16-nov-06	V0.6 merged PJT and AP version			PJT
+17-nov-06	V0.6 added density= to play with		PJT
 .fi
