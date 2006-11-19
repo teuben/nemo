@@ -1,15 +1,34 @@
-// -----------------------------------------------------------------------------
+// ============================================================================
+// Copyright Jean-Charles LAMBERT - 2006
+// e-mail:   Jean-Charles.Lambert@oamp.fr
+// address:  Dynamique des galaxies
+//           Laboratoire d'Astrophysique de Marseille
+//           2, place Le Verrier
+//           13248 Marseille Cedex 4, France
+//           CNRS U.M.R 6110
+// ============================================================================
 // nemo2gadget.cc
-// -----------------------------------------------------------------------------
+// nemo2gadget convert a NEMO snapshot to a GADGET file                       
+// ============================================================================
+// 08-Nov-2006 : v 1.1 (JCL)
+//               - added into NEMO cvs
+// 19-Nov-2006 : v 1.2 (JCL)
+//               - fix a seg fault if input snapshot has no time
+//               - fix a crash if #particles requested to be saved > nbody(input)
+//               - warn if no particles have been selected
+// ============================================================================
 #include <iostream>                                   // C++ I/O
 #include <fstream>                                    // C++ file I/O
 #include <stdio.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <snapshot/snapshot.h>
 
+// Endianness I/O class
 #include "gadget_data_structure.h"
 #include "gadget_endian_tools.h"
 
+// external "C" functions (hey, we are speaking c++ !!!)
 extern "C" {
 #include <nemo.h>                                     // NEMO basics
   int io_nemo(char *, char *,...);
@@ -33,12 +52,13 @@ using namespace std; // prevent writing statment like 'std::cerr'
   "ns=0\n            #stars   particles                           ",
   "files=1\n         #output gadget files                         ",
   "swap=f\n          #swap data from/to little/big endian         ",
-  "VERSION=1.1\n     22-Jan-2004  - JCL                           ",
+  "VERSION=1.2\n     19-Nov-2006  - JCL                           ",
   NULL
 };
 ::string usage="Convert NEMO snapshot to GADGET snapshot";
 
-int    * nbody=NULL;
+// io_nemo data
+int    * nbody=NULL,*iobits=NULL;
 float * mass=NULL,  * tps = NULL, * pos=NULL, * vel=NULL;
 int ng,nh,nd,nb,ns;
 int files;
@@ -378,11 +398,8 @@ size_t my_fwrite(void *ptr, size_t size, size_t nmemb, FILE *stream)
   return nwritten;
 }
 
-
-//-----------------------------------------------------------------------------
-
 //------------------------------------------------------------------------------
-// main
+// main program (NEMO style)
 int main(int argc, char ** argv )
 {
   ::string in,out;
@@ -401,11 +418,30 @@ int main(int argc, char ** argv )
   files= getiparam( "files" );
   endian_swap = getbparam( "swap"  );
   // save nemo spnashot
-  if ( ! io_nemo(in,"read,float,n,t,m,x,v,info",
-		 &nbody,&tps,&mass,&pos,&vel)) {
+  if ( ! io_nemo(in,"read,float,n,t,m,x,v,b,info",
+		 &nbody,&tps,&mass,&pos,&vel,&iobits)) {
     cerr << "Unable to read snapshot [" << in << "]\n";
     cerr << "Aborted\n";
   } else {
+    int npart_requested = ng+nh+nd+nb+ns;
+    if (npart_requested > *nbody) {
+      dprintf(0,
+	      "\nERROR: you are requesting [%d] particles to be saved,\n"
+	      "but there are only [%d] particles in the snapshot <%s> !!!\n"
+	      "please CHECK... program aborted.\n\n",npart_requested,*nbody,in);
+      exit(1);
+    }
+    if (npart_requested == 0 ) {
+      dprintf(0,
+	      "\nERROR: you are requesting **[0]** particles to be saved !!!\n"
+	      "please check your command line input parameters... program aborted.\n\n");
+      exit(1);
+    }
+    if ( ! ( *iobits & TimeBit )) {
+      dprintf(0,"Warning : TimeBit is missing, forcing time to Zero\n");
+      tps = (float *) allocate(sizeof(float));
+      *tps = 0.0;
+    }
     savepositions_ioformat1(out);
   }
   //   finish NEMO
