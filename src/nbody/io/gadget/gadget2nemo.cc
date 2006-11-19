@@ -1,6 +1,19 @@
-// -----------------------------------------------------------------------------
+// ============================================================================
+// Copyright Jean-Charles LAMBERT - 2006
+// e-mail:   Jean-Charles.Lambert@oamp.fr
+// address:  Dynamique des galaxies
+//           Laboratoire d'Astrophysique de Marseille
+//           2, place Le Verrier
+//           13248 Marseille Cedex 4, France
+//           CNRS U.M.R 6110
+// ============================================================================
 // gadget2nemo.cc
-// -----------------------------------------------------------------------------
+// gadget2nemo is a program to convert GADGET file to NEMO snapshot.
+// ============================================================================
+// 08-Nov-2006 : v 2.0 (JCL)
+//               - added into NEMO cvs
+// ============================================================================
+
 #include <iostream>                                   // C++ I/O
 #include <fstream>                                    // C++ file I/O
 #include <stdio.h>
@@ -8,9 +21,11 @@
 #include <snapshot/snapshot.h>
 #include <assert.h>
 
+// Endianness I/O class
 #include "gadget_data_structure.h"
 #include "gadget_endian_tools.h"
 
+// external "C" functions (hey, we are speaking c++ !!!)
 extern "C" {
 #include <nemo.h>                                     // NEMO basics
   int io_nemo(char *, char *,...);
@@ -97,7 +112,7 @@ int load_snapshot(char *fname, int files)
     fprintf(stderr,"reading `%s' ...\n",buf); fflush(stdout);
 
     SKIP;
-    std::cerr << "header adress =" << &header1 <<"\n";
+    //std::cerr << "header adress =" << &header1 <<"\n";
     iog->ioHeader(&header1,GadgetEndianTools::READ);
     SKIP;
 
@@ -154,7 +169,7 @@ int load_snapshot(char *fname, int files)
 	if ( !(n%step) ) pc_new++;
       }
     }
-    std::cerr << "pc_new = " << pc_new << "\n";
+    //std::cerr << "pc_new = " << pc_new << "\n";
     SKIP;
 
     SKIP;
@@ -166,7 +181,7 @@ int load_snapshot(char *fname, int files)
 	if ( !(n%step) ) pc_new++;
       }
     }
-    std::cerr << "pc_new = " << pc_new << "\n";
+    //std::cerr << "pc_new = " << pc_new << "\n";
     SKIP;
     
 
@@ -178,7 +193,7 @@ int load_snapshot(char *fname, int files)
 	if ( !(n%step) ) pc_new++;
       }
     }
-    std::cerr << "pc_new = " << pc_new << "\n";
+    //std::cerr << "pc_new = " << pc_new << "\n";
     SKIP;
 
 
@@ -251,7 +266,7 @@ int load_snapshot(char *fname, int files)
  */
 int allocate_memory()
 {
-  fprintf(stderr,"allocating memory...\n");
+  dprintf(1,"allocating memory...\n");
 
   if(!(P=(t_particle_data *) malloc(ntotstep*sizeof(t_particle_data))))
     {
@@ -270,7 +285,7 @@ int allocate_memory()
   
   Id--;   /* start with offset 1 */
 
-  fprintf(stderr,"allocating memory...done\n");
+  dprintf(1,"allocating memory...done\n");
   return 1;
 }
 
