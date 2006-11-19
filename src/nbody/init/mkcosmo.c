@@ -4,6 +4,7 @@
  *	 1-nov-06  V0.1  Created     - Peter Teuben / Ed Shaya
  *       7-nov-06  V0.4  add rhob=, a=
  *      16-nov-06  V0.6  new fiddling for some good runs!   Alan Peel
+ *      19-nov-06  V0.7  allow unequal masses based on density
  *
  * todo:
  *  - first point is always 0,0,0
@@ -32,10 +33,11 @@ string defv[] = {	/* DEFAULT INPUT PARAMETERS */
   "absrho=t\n     Is map absolute density or relative d(rho)/rho?",
   "sigma=0\n      Also perturb distances by gaussian sigma",
   "seed=0\n       Initial seed",
+  "density=f\n    Use density map to make an exact lattice grid (TEST)",
   "rejection=f\n  Use rejection technique to seed the 'grid'",
   "nbody=\n       Use this instead of NX*NY*NZ if rejection is used",
   "headline=\n    Random verbiage",
-  "VERSION=0.6\n  16-nov-06 PJT",
+  "VERSION=0.7\n  19-nov-06 PJT",
   NULL,
 };
 
@@ -58,6 +60,7 @@ void rescale_image_d(real d, real a, real rb);
 void write_snap(string name, string headline);
 void mkcube(void), mkcube_reject(void);
 void fiddle_x(void),  fiddle_y(void),  fiddle_z(void), drifter(void);
+void fiddle_m(void);
 
 void nemo_main()
 {
@@ -66,6 +69,7 @@ void nemo_main()
   real z = getdparam("z");
   bool Qabs = getbparam("absrho");
   bool Qreject = getbparam("rejection");
+  bool Qdens =  getbparam("density");
 
   instr = stropen (getparam("in"),"r");
   read_image(instr,&iptr); 
@@ -79,8 +83,6 @@ void nemo_main()
   }
   check_image();
 
-
-  
   if (Nx(iptr) != Ny(iptr) || Nx(iptr) != Nz(iptr))
     warning("Input data is not a cube: %d x %d x %d",Nx(iptr),Ny(iptr),Nz(iptr));
   nbody = Nx(iptr)*Ny(iptr)*Nz(iptr);
@@ -93,11 +95,15 @@ void nemo_main()
     mkcube_reject();
   } else {
     mkcube();
-
-    fiddle_x();
-    fiddle_y();
-    fiddle_z();
-    drifter();
+    if (Qdens) {
+      warning("Testing varying masses from density map");
+      fiddle_m();
+    } else {
+      fiddle_x();
+      fiddle_y();
+      fiddle_z();
+      drifter();
+    }
   }
 
   write_snap(getparam("out"), getparam("headline"));
@@ -428,6 +434,34 @@ void fiddle_z(void)
   }
   if (nerr) warning("Found %d non-linear deviations in Z",nerr);
 }
+
+void fiddle_m(void)
+{
+  int ix,iy,iz,i;
+  int  nx=Nx(iptr),ny=Ny(iptr),nz=Nz(iptr);
+  real dx=Dx(iptr),dy=Dy(iptr),dz=Dz(iptr);
+  real dxyz, mmin, mmax;
+  Body *bp;
+
+  dxyz = dx*dy*dz;
+  for (iz=0; iz<nz; iz++) {
+    for (iy=0; iy<ny; iy++) {
+      for (ix=0; ix<nx; ix++) {
+	i = ix + ny*(iy+nz*iz);
+	bp = btab + i;
+	Mass(bp) = CubeValue(iptr,ix,iy,iz) * dxyz;
+	if (i) {
+	  mmin = MIN(mmin, Mass(bp));
+	  mmax = MAX(mmax, Mass(bp));
+	} else
+	  mmin = mmax = Mass(bp);
+      }
+    }
+  }
+  dprintf(0,"Mass range: %g %g \n",mmin,mmax);
+}
+
+
 
 void drifter(void)
 {
