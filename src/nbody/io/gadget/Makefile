@@ -1,20 +1,17 @@
+# -*-makefile-*-
+
 #include $(NEMOLIB)/makedefs
 
 # Compilation otions
 CPP      = g++
-CPPFLAGS =  -I$(NEMOINC) -I$(NEMOLIB) -Wall -O2
-LNEMO    =  -L$(NEMOLIB)  -lio_nemo -lnemo++ -lnemo
-
-ifeq (${MACHTYPE},i386) 
-	LDL=-ldl
-else
-	LDL=
-endif
+CPPFLAGS = -I$(NEMOINC) -I$(NEMOLIB) -Wall -O2
+LNEMO    = -L$(NEMOLIB)  -lio_nemo -lnemo++ -lnemo
+LDL      = -ldl
 
 # Files OBJ
-FOBJ = ${MACHTYPE}_${OSTYPE}/obj
+FOBJ = compile/obj
 # Files BIN
-FBIN = ${MACHTYPE}_${OSTYPE}/bin
+FBIN = compile/bin
 # FILES SOURCES
 FSRC = ./
 
